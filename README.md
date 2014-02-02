@@ -1,4 +1,4 @@
-open-cloud-encryptor
+Open Cloud Encryptor
 ====================
 
 Multiplatform transparent client-side encryption of your files in the cloud.
