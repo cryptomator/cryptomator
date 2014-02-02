@@ -56,7 +56,7 @@
 				<artifactId>javafx-maven-plugin</artifactId>
 				<version>2.0</version>
 				<configuration>
-					<mainClass>de.sebastianstenzel.oce.ui.MainWindow</mainClass>
+					<mainClass>${exec.mainClass}</mainClass>
 				</configuration>
 			</plugin>
 
@@ -68,7 +68,7 @@
 						<manifestEntries>
 							<JavaFX-Version>${javafx.version}</JavaFX-Version>
 							<JavaFX-Application-Class>${exec.mainClass}</JavaFX-Application-Class>
-							<Main-Class>com/javafx/main/Main</Main-Class>
+							<Main-Class>${exec.mainClass}</Main-Class>
 						</manifestEntries>
 					</archive>
 					<descriptorRefs>
