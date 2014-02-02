@@ -1,0 +1,39 @@
+#-------------------------------------------------------------------------------
+# Copyright (c) 2014 Sebastian Stenzel
+# This file is licensed under the terms of the MIT license.
+# See the LICENSE.txt file for more info.
+# 
+# Contributors:
+#     Sebastian Stenzel - initial API and implementation
+#-------------------------------------------------------------------------------
+@CHARSET "US-ASCII";
+
+.root {
+	-fx-background-color: linear-gradient(to bottom, #FFFFFF, #DDDDDD);
+}
+
+.text {
+    -fx-font-smoothing-type: lcd;
+}
+
+.label {
+	-fx-alignment: CENTER;
+	-fx-font-family: "lucida-grande";
+}
+
+.button {
+	-fx-text-fill: #000000;
+	-fx-background-color: linear-gradient(to bottom, #FFFFFF, #DDDDDD);
+	-fx-border-color: #888888;
+    -fx-background-insets: 0.0, 1.0;
+    -fx-background-radius: 4.0, 4.0;
+    -fx-border-radius: 3.0;
+    -fx-border-width: 0.5;
+	-fx-font-family: "lucida-grande";
+	-fx-font-weight: normal;
+}
+
+.button:armed,
+.button:selected {
+	-fx-background-color: linear-gradient(to bottom, #DDDDDD, #CCCCCC 30%, #EEEEEE);
+}

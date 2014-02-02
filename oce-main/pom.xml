@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright (c) 2014 Sebastian Stenzel
+  This file is licensed under the terms of the MIT license.
+  See the LICENSE.txt file for more info.
+  
+  Contributors:
+      Sebastian Stenzel - initial API and implementation
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>de.sebastianstenzel.oce</groupId>
+	<artifactId>oce-main</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<packaging>pom</packaging>
+	<name>Open Cloud Encryptor</name>
+	<organization>
+		<name>sebastianstenzel.de</name>
+	</organization>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.java.version>1.7</project.java.version>
+
+		<!-- dependency versions -->
+		<log4j.version>1.2.16</log4j.version>
+		<slf4j.version>1.7.5</slf4j.version>
+		<junit.version>4.11</junit.version>
+		<commons-io.version>2.4</commons-io.version>
+		<commons-collections.version>4.0</commons-collections.version>
+		<commons-lang.version>3.1</commons-lang.version>
+
+		<!-- Will be included in Java 8. Until then we need this dependency -->
+		<javafx.version>2.2</javafx.version>
+		<jdk.home>/Library/Java/JavaVirtualMachines/jdk1.7.0_45.jdk/Contents/Home</jdk.home>
+		<javafx.runtime.lib.jar>${jdk.home}/jre/lib/jfxrt.jar</javafx.runtime.lib.jar>
+		<javafx.tools.ant.jar>${jdk.home}/lib/ant-javafx.jar</javafx.tools.ant.jar>
+	</properties>
+
+	<developers>
+		<developer>
+			<name>Sebastian Stenzel</name>
+			<email>mail@sebastianstenzel.de</email>
+		</developer>
+	</developers>
+
+	<dependencyManagement>
+		<dependencies>
+			<!-- Logging -->
+			<dependency>
+				<groupId>log4j</groupId>
+				<artifactId>log4j</artifactId>
+				<version>${log4j.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-api</artifactId>
+				<version>${slf4j.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-log4j12</artifactId>
+				<version>${slf4j.version}</version>
+			</dependency>
+
+			<!-- commons -->
+			<dependency>
+				<groupId>commons-io</groupId>
+				<artifactId>commons-io</artifactId>
+				<version>${commons-io.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-collections4</artifactId>
+				<version>${commons-collections.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-lang3</artifactId>
+				<version>${commons-lang.version}</version>
+			</dependency>
+
+			<!-- JSON -->
+			<dependency>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-databind</artifactId>
+				<version>2.3.0</version>
+			</dependency>
+
+			<!-- JavaFX -->
+			<dependency>
+				<groupId>com.oracle</groupId>
+				<artifactId>javafx</artifactId>
+				<version>${javafx.version}</version>
+				<systemPath>${javafx.runtime.lib.jar}</systemPath>
+				<scope>system</scope>
+			</dependency>
+
+			<!-- JUnit -->
+			<dependency>
+				<groupId>junit</groupId>
+				<artifactId>junit</artifactId>
+				<version>4.11</version>
+				<scope>test</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<modules>
+		<module>oce-webdav</module>
+		<module>oce-ui</module>
+		<module>oce-crypto</module>
+	</modules>
+
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>3.0</version>
+					<configuration>
+						<source>${project.java.version}</source>
+						<target>${project.java.version}</target>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
+
+</project>

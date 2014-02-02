@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright (c) 2014 Sebastian Stenzel
+  This file is licensed under the terms of the MIT license.
+  See the LICENSE.txt file for more info.
+  
+  Contributors:
+      Sebastian Stenzel - initial API and implementation
+-->
+<?import java.net.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<VBox fx:id="rootVBox" fx:controller="de.sebastianstenzel.oce.ui.MainController" xmlns:fx="http://javafx.com/fxml">
+	<stylesheets>
+		<URL value="@main.css" />
+	</stylesheets>
+
+	<fx:define>
+		<fx:include fx:id="initializePanel" source="initialize.fxml" />
+		<fx:include fx:id="accessPanel" source="access.fxml" />
+		<fx:include fx:id="advancedPanel" source="advanced.fxml" />
+	</fx:define>
+
+	<children>
+		<ToolBar>
+			<items>
+				<fx:define>
+					<ToggleGroup fx:id="toolbarButtonGroup" />
+				</fx:define>
+				<ToggleButton text="%toolbarbutton.initialize" toggleGroup="$toolbarButtonGroup" onAction="#showInitializePane" />
+				<ToggleButton text="%toolbarbutton.access" toggleGroup="$toolbarButtonGroup" onAction="#showAccessPane" selected="true" />
+				<ToggleButton text="%toolbarbutton.advanced" toggleGroup="$toolbarButtonGroup" onAction="#showAdvancedPane" />
+			</items>
+		</ToolBar>
+		<fx:reference source="accessPanel"/>
+	</children>
+</VBox>
+
+

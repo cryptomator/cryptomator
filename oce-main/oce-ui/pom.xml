@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright (c) 2014 Sebastian Stenzel
+  This file is licensed under the terms of the MIT license.
+  See the LICENSE.txt file for more info.
+  
+  Contributors:
+      Sebastian Stenzel - initial API and implementation
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>de.sebastianstenzel.oce</groupId>
+		<artifactId>oce-main</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+	</parent>
+	<artifactId>oce-ui</artifactId>
+	<name>Open Cloud Encryptor GUI</name>
+
+	<properties>
+		<exec.mainClass>de.sebastianstenzel.oce.ui.MainApplication</exec.mainClass>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>de.sebastianstenzel.oce</groupId>
+			<artifactId>oce-webdav</artifactId>
+			<version>${project.parent.version}</version>
+		</dependency>
+
+		<!-- JSON -->
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+		</dependency>
+
+		<!-- JavaFX 2 -->
+		<dependency>
+			<groupId>com.oracle</groupId>
+			<artifactId>javafx</artifactId>
+		</dependency>
+<!-- 		<dependency> -->
+<!-- 			<groupId>com.aquafx-project</groupId> -->
+<!-- 			<artifactId>aquafx</artifactId> -->
+<!-- 			<version>0.1</version> -->
+<!-- 		</dependency> -->
+	</dependencies>
+
+
+	<build>
+		<plugins>
+			<!-- allows building using the maven goal "com.zenjava:javafx-maven-plugin:jar" -->
+			<!-- Java < 8: invoke this before your first build: http://zenjava.com/javafx/maven/fix-classpath.html -->
+			<plugin>
+				<groupId>com.zenjava</groupId>
+				<artifactId>javafx-maven-plugin</artifactId>
+				<version>2.0</version>
+				<configuration>
+					<mainClass>de.sebastianstenzel.oce.ui.MainWindow</mainClass>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<configuration>
+					<archive>
+						<manifestEntries>
+							<JavaFX-Version>${javafx.version}</JavaFX-Version>
+							<JavaFX-Application-Class>${exec.mainClass}</JavaFX-Application-Class>
+							<Main-Class>com/javafx/main/Main</Main-Class>
+						</manifestEntries>
+					</archive>
+					<descriptorRefs>
+						<descriptorRef>jar-with-dependencies</descriptorRef>
+					</descriptorRefs>
+				</configuration>
+				<executions>
+					<execution>
+						<id>assemble-all</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>

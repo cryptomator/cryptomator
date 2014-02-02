@@ -1,0 +1,40 @@
+#-------------------------------------------------------------------------------
+# Copyright (c) 2014 Sebastian Stenzel
+# This file is licensed under the terms of the MIT license.
+# See the LICENSE.txt file for more info.
+# 
+# Contributors:
+#     Sebastian Stenzel - initial API and implementation
+#-------------------------------------------------------------------------------
+@CHARSET "US-ASCII";
+
+.text {
+    -fx-font-smoothing-type: lcd;
+}
+
+.tool-bar {
+	-fx-background-color: linear-gradient(to bottom, #888888, #222222);
+	-fx-padding: 5.0 10.0 5.0 10.0;
+	-fx-border-color: #888888;
+	-fx-border-width: 1.0 0.0 1.0 0.0;
+	-fx-border-insets: 0.0;
+	-fx-alignment: CENTER;
+}
+
+.tool-bar .toggle-button {
+	-fx-text-fill: #FFFFFF;
+	-fx-background-color: linear-gradient(to bottom, #888888, #222222);
+	-fx-border-color: #888888;
+    -fx-background-insets: 0.0, 1.0;
+    -fx-background-radius: 4.0, 4.0;
+    -fx-border-radius: 3.0;
+    -fx-border-width: 0.5;
+	-fx-font-family: "lucida-grande";
+	-fx-font-weight: bold;
+}
+
+.tool-bar .toggle-button:armed,
+.tool-bar .toggle-button:selected {
+	-fx-background-color: linear-gradient(to bottom, #444444, #555555 30%, #000000);
+	-fx-border-color: #FFFFFF;
+}

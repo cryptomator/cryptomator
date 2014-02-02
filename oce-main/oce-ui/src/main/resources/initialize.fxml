@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright (c) 2014 Sebastian Stenzel
+  This file is licensed under the terms of the MIT license.
+  See the LICENSE.txt file for more info.
+  
+  Contributors:
+      Sebastian Stenzel - initial API and implementation
+-->
+<?import java.net.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import de.sebastianstenzel.oce.ui.controls.*?>
+
+
+<GridPane fx:id="rootGridPane" fx:controller="de.sebastianstenzel.oce.ui.InitializeController" xmlns:fx="http://javafx.com/fxml" styleClass="root" gridLinesVisible="false" vgap="5" hgap="5" prefWidth="480">
+	<stylesheets>
+		<URL value="@panels.css" />
+	</stylesheets>
+
+	<padding>
+		<Insets top="10" right="10" bottom="10" left="10" />
+	</padding>
+
+	<columnConstraints>
+		<ColumnConstraints minWidth="150" maxWidth="150" hgrow="NEVER" />
+		<ColumnConstraints minWidth="200" hgrow="ALWAYS" />
+		<ColumnConstraints minWidth="50" maxWidth="120" hgrow="NEVER" />
+	</columnConstraints>
+
+	<children>
+		<!-- Row 0 -->
+		<Label GridPane.rowIndex="0" GridPane.columnIndex="0" text="%initialize.label.workDir" />
+		<TextField fx:id="workDirTextField" GridPane.rowIndex="0" GridPane.columnIndex="1" editable="true" />
+		<Button fx:id="chooseWorkDirButton" GridPane.rowIndex="0" GridPane.columnIndex="2" text="%initialize.button.chooseWorkDir" onAction="#chooseWorkDir" />
+		
+		<!-- Row 1 -->
+		<Label GridPane.rowIndex="1" GridPane.columnIndex="0" text="%initialize.label.password" />
+		<SecPasswordField fx:id="passwordField" GridPane.rowIndex="1" GridPane.columnIndex="1" disable="true" />
+		
+		<!-- Row 2 -->
+		<Label GridPane.rowIndex="2" GridPane.columnIndex="0" text="%initialize.label.retypePassword" />
+		<SecPasswordField fx:id="retypePasswordField" GridPane.rowIndex="2" GridPane.columnIndex="1" disable="true" />
+		
+		<!-- Row 3 -->
+		<Button fx:id="initWorkDirButton" text="%initialize.button.initWorkDir" GridPane.rowIndex="3" GridPane.columnIndex="1"  onAction="#initWorkDir" disable="true"/>
+		
+		<!-- Row 4 -->
+		<Label fx:id="messageLabel" GridPane.rowIndex="4" GridPane.columnIndex="0" GridPane.columnSpan="3" textAlignment="CENTER" />
+	</children>
+</GridPane>
+
+
