@@ -16,7 +16,7 @@ Multiplatform transparent client-side encryption of your files in the cloud.
 ## Security
 - Default key length is 256 bit (falls back to 128 bit, if JCE isn't installed)
 - PBKDF2 key generation
-- 4096 internal bit masterkey
+- 4096 bit internal masterkey
 - Cryptographically secure random numbers for salts, IVs and the masterkey of course
 - Sensitive data is swiped from the heap asap
 - Lightweight: Complexity kills security
