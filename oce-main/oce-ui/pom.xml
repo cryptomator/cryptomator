@@ -33,32 +33,11 @@
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
 		</dependency>
-
-		<!-- JavaFX 2 -->
-		<dependency>
-			<groupId>com.oracle</groupId>
-			<artifactId>javafx</artifactId>
-		</dependency>
-<!-- 		<dependency> -->
-<!-- 			<groupId>com.aquafx-project</groupId> -->
-<!-- 			<artifactId>aquafx</artifactId> -->
-<!-- 			<version>0.1</version> -->
-<!-- 		</dependency> -->
 	</dependencies>
 
 
 	<build>
 		<plugins>
-			<!-- allows building using the maven goal "com.zenjava:javafx-maven-plugin:jar" -->
-			<!-- Java < 8: invoke this before your first build: http://zenjava.com/javafx/maven/fix-classpath.html -->
-			<plugin>
-				<groupId>com.zenjava</groupId>
-				<artifactId>javafx-maven-plugin</artifactId>
-				<version>2.0</version>
-				<configuration>
-					<mainClass>${exec.mainClass}</mainClass>
-				</configuration>
-			</plugin>
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

@@ -20,7 +20,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.java.version>1.7</project.java.version>
+		<project.java.version>1.8</project.java.version>
 
 		<!-- dependency versions -->
 		<log4j.version>1.2.16</log4j.version>
@@ -29,12 +29,6 @@
 		<commons-io.version>2.4</commons-io.version>
 		<commons-collections.version>4.0</commons-collections.version>
 		<commons-lang.version>3.1</commons-lang.version>
-
-		<!-- Will be included in Java 8. Until then we need this dependency -->
-		<javafx.version>2.2</javafx.version>
-		<jdk.home>/Library/Java/JavaVirtualMachines/jdk1.7.0_45.jdk/Contents/Home</jdk.home>
-		<javafx.runtime.lib.jar>${jdk.home}/jre/lib/jfxrt.jar</javafx.runtime.lib.jar>
-		<javafx.tools.ant.jar>${jdk.home}/lib/ant-javafx.jar</javafx.tools.ant.jar>
 	</properties>
 
 	<developers>
@@ -87,15 +81,6 @@
 				<version>2.3.0</version>
 			</dependency>
 
-			<!-- JavaFX -->
-			<dependency>
-				<groupId>com.oracle</groupId>
-				<artifactId>javafx</artifactId>
-				<version>${javafx.version}</version>
-				<systemPath>${javafx.runtime.lib.jar}</systemPath>
-				<scope>system</scope>
-			</dependency>
-
 			<!-- JUnit -->
 			<dependency>
 				<groupId>junit</groupId>
@@ -118,7 +103,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
-					<version>3.0</version>
+					<version>3.1</version>
 					<configuration>
 						<source>${project.java.version}</source>
 						<target>${project.java.version}</target>
