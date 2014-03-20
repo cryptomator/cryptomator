@@ -26,7 +26,7 @@ Multiplatform transparent client-side encryption of your files in the cloud.
 - Metadata is stored per-folder, so it's not a SPOF
 
 ## Dependencies
-- Java 7 with Java FX 2 enabled or Java 8 beta
+- Java 8
 - Maven
 
 ## TODO
