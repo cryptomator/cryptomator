@@ -1,7 +1,7 @@
 Open Cloud Encryptor
 ====================
 
-Multiplatform transparent client-side encryption of your files in the cloud.
+Multiplatform transparent client-side encryption of your files in the cloud. You need Java 8 in order to run the application. Get the runtime environment here: http://www.oracle.com/technetwork/java/javase/downloads/index.html
 
 ## Features
 - Totally transparent: Just work on the encrypted volume, as if it was an USB drive
