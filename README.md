@@ -5,7 +5,8 @@ Multiplatform transparent client-side encryption of your files in the cloud. You
 
 ## Features
 - Totally transparent: Just work on the encrypted volume, as if it was an USB drive
-- Works with Dropbox, Skydrive, Google Drive and any other cloud storage, that syncs with a local directory
+- Works with Dropbox, OneDrive (Skydrive), Google Drive and any other cloud storage, that syncs with a local directory
+- In fact it works with any directory. You can use it to encrypt as many folders as you like
 - AES encryption with up to 256 bit key length
 - Client-side. No accounts, no data shared with any online service
 - Filenames get encrypted too
@@ -23,17 +24,25 @@ Multiplatform transparent client-side encryption of your files in the cloud. You
 
 ## Consistency
 - I/O operations are transactional and atomic, if the file systems supports it
-- Metadata is stored per-folder, so it's not a SPOF
+- ~~Metadata is stored per-folder, so it's not a SPOF~~
+- *NEW:* No Metadata at all. Encrypted files can be decrypted even on completely shuffled file systems (if their contents are undamaged).
 
 ## Dependencies
-- Java 8
+- Java 8 (for UI only - runs headless on Java 7)
 - Maven
+- Awesome 3rd party open source libraries (Apache Commons, Apache Jackrabbit, Jetty, Jackson, ...)
 
 ## TODO
+
+### Core
+- WebDAV Session handling
+- Java NIO file locking
+- Support for HTTP range requests
+
+### UI
 - Automount of WebDAV volumes for Win/Mac/Tux
 - App icon and drive icons in WebDAV volumes
 - Change password functionality
-- Replace WebDAV implementation by more efficient and robust solution
 - CRC32 checksums for decrypted files
 - Better explanations on UI
 

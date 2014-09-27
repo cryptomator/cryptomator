@@ -10,9 +10,14 @@ package de.sebastianstenzel.oce.ui;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.URL;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.FileSystems;
+import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.ResourceBundle;
 
 import javafx.beans.value.ChangeListener;
@@ -26,35 +31,40 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.stage.DirectoryChooser;
 
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.sebastianstenzel.oce.crypto.Cryptor;
-import de.sebastianstenzel.oce.crypto.StorageCrypting.AlreadyInitializedException;
+import de.sebastianstenzel.oce.crypto.aes256.Aes256Cryptor;
 import de.sebastianstenzel.oce.ui.controls.SecPasswordField;
 
 public class InitializeController implements Initializable {
-	
+
 	private static final Logger LOG = LoggerFactory.getLogger(InitializeController.class);
-	
+
 	private ResourceBundle localization;
-	@FXML private GridPane rootGridPane;
-	@FXML private TextField workDirTextField;
-	@FXML private SecPasswordField passwordField;
-	@FXML private SecPasswordField retypePasswordField;
-	@FXML private Button initWorkDirButton;
-	@FXML private Label messageLabel;
-	
+	@FXML
+	private GridPane rootGridPane;
+	@FXML
+	private TextField workDirTextField;
+	@FXML
+	private SecPasswordField passwordField;
+	@FXML
+	private SecPasswordField retypePasswordField;
+	@FXML
+	private Button initWorkDirButton;
+	@FXML
+	private Label messageLabel;
+
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
 		this.localization = rb;
 		passwordField.textProperty().addListener(new PasswordChangeListener());
 		retypePasswordField.textProperty().addListener(new RetypePasswordChangeListener());
 	}
-	
+
 	/**
-	 * Step 1: Choose a directory, that shall be encrypted.
-	 * On success, step 2 will be enabled.
+	 * Step 1: Choose a directory, that shall be encrypted. On success, step 2 will be enabled.
 	 */
 	@FXML
 	protected void chooseWorkDir(ActionEvent event) {
@@ -71,10 +81,9 @@ public class InitializeController implements Initializable {
 			passwordField.requestFocus();
 		}
 	}
-	
+
 	/**
-	 * Step 2: Defina a password.
-	 * On success, step 3 will be enabled.
+	 * Step 2: Defina a password. On success, step 3 will be enabled.
 	 */
 	private final class PasswordChangeListener implements ChangeListener<String> {
 		@Override
@@ -82,10 +91,9 @@ public class InitializeController implements Initializable {
 			retypePasswordField.setDisable(newValue.isEmpty());
 		}
 	}
-	
+
 	/**
-	 * Step 3: Retype the password.
-	 * On success, step 4 will be enabled.
+	 * Step 3: Retype the password. On success, step 4 will be enabled.
 	 */
 	private final class RetypePasswordChangeListener implements ChangeListener<String> {
 		@Override
@@ -94,31 +102,36 @@ public class InitializeController implements Initializable {
 			initWorkDirButton.setDisable(!passwordsAreEqual);
 		}
 	}
-	
+
 	/**
-	 * Step 4: Generate master password file in working directory.
-	 * On success, print success message.
+	 * Step 4: Generate master password file in working directory. On success, print success message.
 	 */
 	@FXML
 	protected void initWorkDir(ActionEvent event) {
+		final Path storagePath = FileSystems.getDefault().getPath(workDirTextField.getText());
+		final Path masterKeyPath = storagePath.resolve(Aes256Cryptor.MASTERKEY_FILENAME);
+		final Aes256Cryptor cryptor = new Aes256Cryptor();
+		final CharSequence password = passwordField.getCharacters();
+		OutputStream masterKeyOutputStream = null;
 		try {
-			Cryptor.getDefaultCryptor().initializeStorage(FileSystems.getDefault().getPath(workDirTextField.getText()), passwordField.getText());
-			Cryptor.getDefaultCryptor().swipeSensitiveData();
-		} catch (AlreadyInitializedException ex) {
+			masterKeyOutputStream = Files.newOutputStream(masterKeyPath, StandardOpenOption.WRITE, StandardOpenOption.CREATE_NEW);
+			cryptor.initializeStorage(masterKeyOutputStream, password);
+			cryptor.swipeSensitiveData();
+		} catch (FileAlreadyExistsException ex) {
 			messageLabel.setText(localization.getString("initialize.messageLabel.alreadyInitialized"));
-		} catch(InvalidPathException ex) {
+		} catch (InvalidPathException ex) {
 			messageLabel.setText(localization.getString("initialize.messageLabel.invalidPath"));
 		} catch (IOException ex) {
 			LOG.error("I/O Exception", ex);
 		} finally {
 			swipePasswordFields();
+			IOUtils.closeQuietly(masterKeyOutputStream);
 		}
 	}
-	
+
 	private void swipePasswordFields() {
 		passwordField.swipe();
 		retypePasswordField.swipe();
 	}
 
-	
 }

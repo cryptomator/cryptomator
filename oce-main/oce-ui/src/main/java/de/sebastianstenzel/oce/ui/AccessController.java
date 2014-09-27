@@ -10,10 +10,14 @@ package de.sebastianstenzel.oce.ui;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.FileSystems;
+import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.ResourceBundle;
 
 import javafx.event.ActionEvent;
@@ -25,36 +29,42 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.stage.DirectoryChooser;
 
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.sebastianstenzel.oce.crypto.Cryptor;
-import de.sebastianstenzel.oce.crypto.StorageCrypting.DecryptFailedException;
-import de.sebastianstenzel.oce.crypto.StorageCrypting.InvalidStorageLocationException;
-import de.sebastianstenzel.oce.crypto.StorageCrypting.UnsupportedKeyLengthException;
-import de.sebastianstenzel.oce.crypto.StorageCrypting.WrongPasswordException;
+import de.sebastianstenzel.oce.crypto.aes256.Aes256Cryptor;
+import de.sebastianstenzel.oce.crypto.exceptions.DecryptFailedException;
+import de.sebastianstenzel.oce.crypto.exceptions.UnsupportedKeyLengthException;
+import de.sebastianstenzel.oce.crypto.exceptions.WrongPasswordException;
 import de.sebastianstenzel.oce.ui.controls.SecPasswordField;
 import de.sebastianstenzel.oce.ui.settings.Settings;
 import de.sebastianstenzel.oce.webdav.WebDAVServer;
 
 public class AccessController implements Initializable {
-	
+
 	private static final Logger LOG = LoggerFactory.getLogger(AccessController.class);
-	
+
+	private final Aes256Cryptor cryptor = new Aes256Cryptor();
 	private ResourceBundle localization;
-	@FXML private GridPane rootGridPane;
-	@FXML private TextField workDirTextField;
-	@FXML private SecPasswordField passwordField;
-	@FXML private Button startServerButton;
-	@FXML private Label messageLabel;
-	
+	@FXML
+	private GridPane rootGridPane;
+	@FXML
+	private TextField workDirTextField;
+	@FXML
+	private SecPasswordField passwordField;
+	@FXML
+	private Button startServerButton;
+	@FXML
+	private Label messageLabel;
+
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
 		this.localization = rb;
 		workDirTextField.setText(Settings.load().getWebdavWorkDir());
 		determineStorageValidity();
 	}
-	
+
 	@FXML
 	protected void chooseWorkDir(ActionEvent event) {
 		messageLabel.setText(null);
@@ -76,38 +86,42 @@ public class AccessController implements Initializable {
 		}
 		determineStorageValidity();
 	}
-	
+
 	private void determineStorageValidity() {
 		boolean storageLocationValid;
 		try {
 			final Path storagePath = FileSystems.getDefault().getPath(workDirTextField.getText());
-			storageLocationValid = Cryptor.getDefaultCryptor().isStorage(storagePath);
-		} catch(InvalidPathException ex) {
+			final Path masterKeyPath = storagePath.resolve(Aes256Cryptor.MASTERKEY_FILENAME);
+			storageLocationValid = Files.exists(masterKeyPath);
+		} catch (InvalidPathException ex) {
 			LOG.trace("Invalid path: " + workDirTextField.getText(), ex);
 			storageLocationValid = false;
 		}
 		passwordField.setDisable(!storageLocationValid);
 		startServerButton.setDisable(!storageLocationValid);
 	}
-	
+
 	@FXML
 	protected void startStopServer(ActionEvent event) {
 		messageLabel.setText(null);
 		if (WebDAVServer.getInstance().isRunning()) {
 			this.tryStop();
-			Cryptor.getDefaultCryptor().swipeSensitiveData();
+			cryptor.swipeSensitiveData();
 		} else if (this.unlockStorage()) {
 			this.tryStart();
 		}
 	}
-	
+
 	private boolean unlockStorage() {
 		final Path storagePath = FileSystems.getDefault().getPath(workDirTextField.getText());
+		final Path masterKeyPath = storagePath.resolve(Aes256Cryptor.MASTERKEY_FILENAME);
 		final CharSequence password = passwordField.getCharacters();
+		InputStream masterKeyInputStream = null;
 		try {
-			Cryptor.getDefaultCryptor().unlockStorage(storagePath, password);
+			masterKeyInputStream = Files.newInputStream(masterKeyPath, StandardOpenOption.READ);
+			cryptor.unlockStorage(masterKeyInputStream, password);
 			return true;
-		} catch (InvalidStorageLocationException e) {
+		} catch (NoSuchFileException e) {
 			messageLabel.setText(localization.getString("access.messageLabel.invalidStorageLocation"));
 			LOG.warn("Invalid path: " + storagePath.toString());
 		} catch (DecryptFailedException ex) {
@@ -122,14 +136,15 @@ public class AccessController implements Initializable {
 			LOG.error("I/O Exception", ex);
 		} finally {
 			passwordField.swipe();
+			IOUtils.closeQuietly(masterKeyInputStream);
 		}
 		return false;
 	}
-	
+
 	private void tryStart() {
 		try {
 			final Settings settings = Settings.load();
-			if (WebDAVServer.getInstance().start(settings.getWebdavWorkDir(), settings.getPort())) {
+			if (WebDAVServer.getInstance().start(settings.getWebdavWorkDir(), settings.getPort(), cryptor)) {
 				startServerButton.setText(localization.getString("access.button.stopServer"));
 				passwordField.setDisable(true);
 			}
@@ -137,7 +152,7 @@ public class AccessController implements Initializable {
 			LOG.error("Invalid port", ex);
 		}
 	}
-	
+
 	private void tryStop() {
 		if (WebDAVServer.getInstance().stop()) {
 			startServerButton.setText(localization.getString("access.button.startServer"));
