@@ -13,7 +13,6 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.java.version>1.8</project.java.version>
 
 		<!-- dependency versions -->
 		<log4j.version>1.2.16</log4j.version>
@@ -96,21 +95,5 @@
 		<module>oce-core</module>
 		<module>oce-ui</module>
 	</modules>
-
-	<build>
-		<pluginManagement>
-			<plugins>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-compiler-plugin</artifactId>
-					<version>3.1</version>
-					<configuration>
-						<source>${project.java.version}</source>
-						<target>${project.java.version}</target>
-					</configuration>
-				</plugin>
-			</plugins>
-		</pluginManagement>
-	</build>
 
 </project>
