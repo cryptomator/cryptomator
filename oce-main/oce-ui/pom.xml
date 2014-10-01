@@ -94,7 +94,7 @@
 						<configuration>
 							<target xmlns:fx="javafx:com.sun.javafx.tools.ant">
 								<taskdef uri="javafx:com.sun.javafx.tools.ant" resource="com/sun/javafx/tools/ant/antlib.xml" classpath="${javafx.tools.ant.jar}" />
-								<fx:application id="fxApp" name="${project.name}" mainClass="${exec.mainClass}" />
+								<fx:application id="fxApp" version="${project.version}" name="${project.name}" mainClass="${exec.mainClass}" />
 
 								<fx:jar destfile="${project.build.directory}/${project.build.finalName}">
 									<fx:application refid="fxApp" />
@@ -105,7 +105,10 @@
 								</fx:jar>
 
 								<fx:deploy outdir="${project.build.directory}/dist" outfile="${project.build.finalName}" nativeBundles="all">
-									<fx:info title="Cloud Encryptor" vendor="cloudencryptor.org" />
+									<fx:info title="Cloud Encryptor" vendor="cloudencryptor.org">
+										<!-- todo provide .ico and .icns files for osx/win -->
+										<fx:icon href="shortcut.ico" width="32" height="32" depth="8"/>
+									</fx:info>
 									<fx:platform basedir="" javafx="2.2+" j2se="8.0" />
 									<fx:application refid="fxApp" />
 									<fx:resources>
@@ -113,6 +116,7 @@
 										<fx:fileset dir="${project.build.directory}" includes="${project.build.finalName}.jar" />
 										<fx:fileset dir="${project.build.directory}" includes="libs/*.jar" />
 									</fx:resources>
+									<fx:preferences install="false" />
 								</fx:deploy>
 							</target>
 						</configuration>

@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Copyright (c) 2014 Sebastian Stenzel This file is licensed under the terms of the MIT license. See the LICENSE.txt file for more info. Contributors: Sebastian Stenzel - initial API and implementation -->
+<!--
+  Copyright (c) 2014 Sebastian Stenzel
+  This file is licensed under the terms of the MIT license.
+  See the LICENSE.txt file for more info.
+  
+  Contributors:
+      Sebastian Stenzel - initial API and implementation
+-->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.sebastianstenzel.oce</groupId>
@@ -20,7 +27,7 @@
 		<junit.version>4.11</junit.version>
 		<commons-io.version>2.4</commons-io.version>
 		<commons-collections.version>4.0</commons-collections.version>
-		<commons-lang.version>3.1</commons-lang.version>
+		<commons-lang3.version>3.1</commons-lang3.version>
 		<commons-codec.version>1.9</commons-codec.version>
 	</properties>
 
@@ -64,7 +71,7 @@
 			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-lang3</artifactId>
-				<version>${commons-lang.version}</version>
+				<version>${commons-lang3.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-codec</groupId>

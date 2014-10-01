@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Copyright (c) 2014 Sebastian Stenzel This file is licensed under the terms of the MIT license. See the LICENSE.txt file for more info. Contributors: Sebastian Stenzel - initial API and implementation -->
+<!--
+  Copyright (c) 2014 Sebastian Stenzel
+  This file is licensed under the terms of the MIT license.
+  See the LICENSE.txt file for more info.
+  
+  Contributors:
+      Sebastian Stenzel - initial API and implementation
+-->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
@@ -12,7 +19,6 @@
 
 	<properties>
 		<jetty.version>9.1.0.v20131115</jetty.version>
-		<milton.version>2.6.2.4</milton.version>
 		<jackrabbit.version>2.9.0</jackrabbit.version>
 		<commons.transaction.version>1.2</commons.transaction.version>
 		<jta.version>1.1</jta.version>
