@@ -19,20 +19,22 @@ import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.ResourceBundle;
-import java.util.regex.Pattern;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.stage.DirectoryChooser;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.CharUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +47,7 @@ import de.sebastianstenzel.oce.ui.util.MasterKeyFilter;
 public class InitializeController implements Initializable {
 
 	private static final Logger LOG = LoggerFactory.getLogger(InitializeController.class);
-	private static final Pattern USERNAME_PATTERN = Pattern.compile("[a-z0-9_-]*", Pattern.CASE_INSENSITIVE);
+	private static final int MAX_USERNAME_LENGTH = 200;
 
 	private ResourceBundle localization;
 	@FXML
@@ -67,6 +69,7 @@ public class InitializeController implements Initializable {
 	public void initialize(URL url, ResourceBundle rb) {
 		this.localization = rb;
 		workDirTextField.textProperty().addListener(new WorkDirChangeListener());
+		usernameField.addEventFilter(KeyEvent.KEY_TYPED, new AlphaNumericKeyTypeEventFilter());
 		usernameField.textProperty().addListener(new UsernameChangeListener());
 		usernameField.disableProperty().addListener(new ClearOnDisableListener(usernameField));
 		passwordField.textProperty().addListener(new PasswordChangeListener());
@@ -118,12 +121,24 @@ public class InitializeController implements Initializable {
 	/**
 	 * Step 2: Choose a valid username
 	 */
+	private static final class AlphaNumericKeyTypeEventFilter implements EventHandler<KeyEvent> {
+		@Override
+		public void handle(KeyEvent t) {
+			if (t.getCharacter() == null || t.getCharacter().length() == 0) {
+				return;
+			}
+			char c = t.getCharacter().charAt(0);
+			if (!CharUtils.isAsciiAlphanumeric(c)) {
+				t.consume();
+			}
+		}
+	}
+
 	private final class UsernameChangeListener implements ChangeListener<String> {
 		@Override
 		public void changed(ObservableValue<? extends String> property, String oldValue, String newValue) {
-			final boolean isValidUsername = USERNAME_PATTERN.matcher(newValue).matches();
-			if (!isValidUsername) {
-				usernameField.setText(oldValue);
+			if (StringUtils.length(newValue) > MAX_USERNAME_LENGTH) {
+				usernameField.setText(newValue.substring(0, MAX_USERNAME_LENGTH));
 			}
 			passwordField.setDisable(StringUtils.isEmpty(usernameField.getText()));
 		}

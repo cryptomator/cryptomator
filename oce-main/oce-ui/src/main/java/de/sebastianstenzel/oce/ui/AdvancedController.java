@@ -11,9 +11,6 @@ package de.sebastianstenzel.oce.ui;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
@@ -22,10 +19,15 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
+
+import org.apache.commons.lang3.CharUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.sebastianstenzel.oce.ui.settings.Settings;
 
 public class AdvancedController implements Initializable {
-	
+
 	private static final Logger LOG = LoggerFactory.getLogger(AdvancedController.class);
 
 	@FXML
@@ -40,22 +42,23 @@ public class AdvancedController implements Initializable {
 		portTextField.addEventFilter(KeyEvent.KEY_TYPED, new NumericKeyTypeEventFilter());
 		portTextField.focusedProperty().addListener(new PortTextFieldFocusListener());
 	}
-	
+
 	/**
 	 * Consumes key events, if typed key is not 0-9.
 	 */
 	private static final class NumericKeyTypeEventFilter implements EventHandler<KeyEvent> {
+		@Override
 		public void handle(KeyEvent t) {
 			if (t.getCharacter() == null || t.getCharacter().length() == 0) {
 				return;
 			}
 			char c = t.getCharacter().charAt(0);
-			if (!(c >= '0' && c <= '9')) {
+			if (!CharUtils.isAsciiNumeric(c)) {
 				t.consume();
 			}
 		}
 	}
-	
+
 	/**
 	 * Saves port settings, when textfield loses focus.
 	 */
