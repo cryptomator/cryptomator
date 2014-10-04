@@ -19,6 +19,7 @@ import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.ResourceBundle;
+import java.util.regex.Pattern;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -32,21 +33,27 @@ import javafx.scene.layout.GridPane;
 import javafx.stage.DirectoryChooser;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.sebastianstenzel.oce.crypto.aes256.Aes256Cryptor;
+import de.sebastianstenzel.oce.ui.controls.ClearOnDisableListener;
 import de.sebastianstenzel.oce.ui.controls.SecPasswordField;
+import de.sebastianstenzel.oce.ui.util.MasterKeyFilter;
 
 public class InitializeController implements Initializable {
 
 	private static final Logger LOG = LoggerFactory.getLogger(InitializeController.class);
+	private static final Pattern USERNAME_PATTERN = Pattern.compile("[a-z0-9_-]*", Pattern.CASE_INSENSITIVE);
 
 	private ResourceBundle localization;
 	@FXML
 	private GridPane rootGridPane;
 	@FXML
 	private TextField workDirTextField;
+	@FXML
+	private TextField usernameField;
 	@FXML
 	private SecPasswordField passwordField;
 	@FXML
@@ -59,8 +66,13 @@ public class InitializeController implements Initializable {
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
 		this.localization = rb;
+		workDirTextField.textProperty().addListener(new WorkDirChangeListener());
+		usernameField.textProperty().addListener(new UsernameChangeListener());
+		usernameField.disableProperty().addListener(new ClearOnDisableListener(usernameField));
 		passwordField.textProperty().addListener(new PasswordChangeListener());
+		passwordField.disableProperty().addListener(new ClearOnDisableListener(passwordField));
 		retypePasswordField.textProperty().addListener(new RetypePasswordChangeListener());
+		retypePasswordField.disableProperty().addListener(new ClearOnDisableListener(retypePasswordField));
 	}
 
 	/**
@@ -75,15 +87,50 @@ public class InitializeController implements Initializable {
 		}
 		final File file = dirChooser.showDialog(rootGridPane.getScene().getWindow());
 		if (file != null && file.canWrite()) {
-			workDirTextField.setText(file.getPath());
-			passwordField.setDisable(false);
-			passwordField.selectAll();
-			passwordField.requestFocus();
+			workDirTextField.setText(file.toString());
+		}
+	}
+
+	private final class WorkDirChangeListener implements ChangeListener<String> {
+		@Override
+		public void changed(ObservableValue<? extends String> property, String oldValue, String newValue) {
+			if (StringUtils.isEmpty(newValue)) {
+				usernameField.setDisable(true);
+				return;
+			}
+			try {
+				final Path dir = FileSystems.getDefault().getPath(newValue);
+				final boolean containsMasterKeys = MasterKeyFilter.filteredDirectory(dir).iterator().hasNext();
+				if (containsMasterKeys) {
+					usernameField.setDisable(true);
+					messageLabel.setText(localization.getString("initialize.messageLabel.alreadyInitialized"));
+				} else {
+					usernameField.setDisable(false);
+					messageLabel.setText(null);
+				}
+			} catch (InvalidPathException | IOException e) {
+				usernameField.setDisable(true);
+				messageLabel.setText(localization.getString("initialize.messageLabel.invalidPath"));
+			}
 		}
 	}
 
 	/**
-	 * Step 2: Defina a password. On success, step 3 will be enabled.
+	 * Step 2: Choose a valid username
+	 */
+	private final class UsernameChangeListener implements ChangeListener<String> {
+		@Override
+		public void changed(ObservableValue<? extends String> property, String oldValue, String newValue) {
+			final boolean isValidUsername = USERNAME_PATTERN.matcher(newValue).matches();
+			if (!isValidUsername) {
+				usernameField.setText(oldValue);
+			}
+			passwordField.setDisable(StringUtils.isEmpty(usernameField.getText()));
+		}
+	}
+
+	/**
+	 * Step 3: Defina a password. On success, step 3 will be enabled.
 	 */
 	private final class PasswordChangeListener implements ChangeListener<String> {
 		@Override
@@ -93,30 +140,32 @@ public class InitializeController implements Initializable {
 	}
 
 	/**
-	 * Step 3: Retype the password. On success, step 4 will be enabled.
+	 * Step 4: Retype the password. On success, step 4 will be enabled.
 	 */
 	private final class RetypePasswordChangeListener implements ChangeListener<String> {
 		@Override
 		public void changed(ObservableValue<? extends String> property, String oldValue, String newValue) {
-			boolean passwordsAreEqual = passwordField.getText().equals(newValue);
+			boolean passwordsAreEqual = passwordField.getText().equals(retypePasswordField.getText());
 			initWorkDirButton.setDisable(!passwordsAreEqual);
 		}
 	}
 
 	/**
-	 * Step 4: Generate master password file in working directory. On success, print success message.
+	 * Step 5: Generate master password file in working directory. On success, print success message.
 	 */
 	@FXML
 	protected void initWorkDir(ActionEvent event) {
-		final Path storagePath = FileSystems.getDefault().getPath(workDirTextField.getText());
-		final Path masterKeyPath = storagePath.resolve(Aes256Cryptor.MASTERKEY_FILENAME);
 		final Aes256Cryptor cryptor = new Aes256Cryptor();
+		final Path storagePath = FileSystems.getDefault().getPath(workDirTextField.getText());
+		final Path masterKeyPath = storagePath.resolve(usernameField.getText() + Aes256Cryptor.MASTERKEY_FILE_EXT);
+
 		final CharSequence password = passwordField.getCharacters();
 		OutputStream masterKeyOutputStream = null;
 		try {
 			masterKeyOutputStream = Files.newOutputStream(masterKeyPath, StandardOpenOption.WRITE, StandardOpenOption.CREATE_NEW);
-			cryptor.initializeStorage(masterKeyOutputStream, password);
+			cryptor.encryptMasterKey(masterKeyOutputStream, password);
 			cryptor.swipeSensitiveData();
+			workDirTextField.clear();
 		} catch (FileAlreadyExistsException ex) {
 			messageLabel.setText(localization.getString("initialize.messageLabel.alreadyInitialized"));
 		} catch (InvalidPathException ex) {

@@ -37,7 +37,7 @@ public class Aes256CryptorTest {
 		final String tmpDirName = (String) System.getProperties().get("java.io.tmpdir");
 		final Path path = FileSystems.getDefault().getPath(tmpDirName);
 		tmpDir = Files.createTempDirectory(path, "oce-crypto-test");
-		masterKey = tmpDir.resolve(Aes256Cryptor.MASTERKEY_FILENAME);
+		masterKey = tmpDir.resolve("test" + Aes256Cryptor.MASTERKEY_FILE_EXT);
 	}
 
 	@After
@@ -52,12 +52,12 @@ public class Aes256CryptorTest {
 		final String pw = "asd";
 		final Aes256Cryptor cryptor = new Aes256Cryptor();
 		final OutputStream out = Files.newOutputStream(masterKey, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
-		cryptor.initializeStorage(out, pw);
+		cryptor.encryptMasterKey(out, pw);
 		cryptor.swipeSensitiveData();
 
 		final Aes256Cryptor decryptor = new Aes256Cryptor();
 		final InputStream in = Files.newInputStream(masterKey, StandardOpenOption.READ);
-		decryptor.unlockStorage(in, pw);
+		decryptor.decryptMasterKey(in, pw);
 	}
 
 	@Test(expected = WrongPasswordException.class)
@@ -65,13 +65,13 @@ public class Aes256CryptorTest {
 		final String pw = "asd";
 		final Aes256Cryptor cryptor = new Aes256Cryptor();
 		final OutputStream out = Files.newOutputStream(masterKey, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
-		cryptor.initializeStorage(out, pw);
+		cryptor.encryptMasterKey(out, pw);
 		cryptor.swipeSensitiveData();
 
 		final String wrongPw = "foo";
 		final Aes256Cryptor decryptor = new Aes256Cryptor();
 		final InputStream in = Files.newInputStream(masterKey, StandardOpenOption.READ);
-		decryptor.unlockStorage(in, wrongPw);
+		decryptor.decryptMasterKey(in, wrongPw);
 	}
 
 	@Test(expected = NoSuchFileException.class)
@@ -79,13 +79,13 @@ public class Aes256CryptorTest {
 		final String pw = "asd";
 		final Aes256Cryptor cryptor = new Aes256Cryptor();
 		final OutputStream out = Files.newOutputStream(masterKey, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
-		cryptor.initializeStorage(out, pw);
+		cryptor.encryptMasterKey(out, pw);
 		cryptor.swipeSensitiveData();
 
 		final Path wrongMasterKey = tmpDir.resolve("notExistingMasterKey.json");
 		final Aes256Cryptor decryptor = new Aes256Cryptor();
 		final InputStream in = Files.newInputStream(wrongMasterKey, StandardOpenOption.READ);
-		decryptor.unlockStorage(in, pw);
+		decryptor.decryptMasterKey(in, pw);
 	}
 
 	@Test(expected = FileAlreadyExistsException.class)
@@ -93,11 +93,11 @@ public class Aes256CryptorTest {
 		final String pw = "asd";
 		final Aes256Cryptor cryptor = new Aes256Cryptor();
 		final OutputStream out = Files.newOutputStream(masterKey, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
-		cryptor.initializeStorage(out, pw);
+		cryptor.encryptMasterKey(out, pw);
 		cryptor.swipeSensitiveData();
 
 		final OutputStream outAgain = Files.newOutputStream(masterKey, StandardOpenOption.WRITE, StandardOpenOption.CREATE_NEW);
-		cryptor.initializeStorage(outAgain, pw);
+		cryptor.encryptMasterKey(outAgain, pw);
 		cryptor.swipeSensitiveData();
 	}
 

@@ -32,19 +32,23 @@
 
 	<children>
 		<!-- Row 0 -->
-		<Label GridPane.rowIndex="0" GridPane.columnIndex="0" text="%access.label.workDir" />
-		<TextField fx:id="workDirTextField" GridPane.rowIndex="0" GridPane.columnIndex="1" editable="true" />
-		<Button fx:id="chooseWorkDirButton" GridPane.rowIndex="0" GridPane.columnIndex="2" text="%access.button.chooseWorkDir" onAction="#chooseWorkDir" />
+		<Label GridPane.rowIndex="0" GridPane.columnIndex="0" text="%access.label.workDir" GridPane.halignment="RIGHT" />
+		<TextField fx:id="workDirTextField" GridPane.rowIndex="0" GridPane.columnIndex="1" />
+		<Button fx:id="chooseWorkDirButton" GridPane.rowIndex="0" GridPane.columnIndex="2" text="%access.button.chooseWorkDir" onAction="#chooseWorkDir" focusTraversable="false"  />
 		
 		<!-- Row 1 -->
-		<Label GridPane.rowIndex="1" GridPane.columnIndex="0" text="%access.label.password" />
-		<SecPasswordField fx:id="passwordField" GridPane.rowIndex="1" GridPane.columnIndex="1" disable="true" />
+		<Label GridPane.rowIndex="1" GridPane.columnIndex="0" text="%access.label.username" GridPane.halignment="RIGHT" />
+		<ComboBox fx:id="usernameBox" GridPane.rowIndex="1" GridPane.columnIndex="1" promptText="$access.label.username" disable="true" />
 		
 		<!-- Row 2 -->
-		<Button fx:id="startServerButton" text="%access.button.startServer" GridPane.rowIndex="2" GridPane.columnIndex="1" disable="true" onAction="#startStopServer" />
+		<Label GridPane.rowIndex="2" GridPane.columnIndex="0" text="%access.label.password" GridPane.halignment="RIGHT" />
+		<SecPasswordField fx:id="passwordField" GridPane.rowIndex="2" GridPane.columnIndex="1" disable="true" />
 		
 		<!-- Row 3 -->
-		<Label fx:id="messageLabel" GridPane.rowIndex="3" GridPane.columnIndex="0" GridPane.columnSpan="3" textAlignment="CENTER" />
+		<Button fx:id="startServerButton" text="%access.button.startServer" GridPane.rowIndex="3" GridPane.columnIndex="1" disable="true" defaultButton="true" onAction="#startStopServer" focusTraversable="false" />
+		
+		<!-- Row 4 -->
+		<Label fx:id="messageLabel" GridPane.rowIndex="4" GridPane.columnIndex="0" GridPane.columnSpan="3" textAlignment="CENTER" />
 	</children>
 </GridPane>
 

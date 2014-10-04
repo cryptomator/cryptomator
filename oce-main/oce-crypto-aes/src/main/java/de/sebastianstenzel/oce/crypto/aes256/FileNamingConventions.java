@@ -7,19 +7,19 @@
  *     Sebastian Stenzel - initial API and implementation
  ******************************************************************************/
 package de.sebastianstenzel.oce.crypto.aes256;
+
 import java.nio.file.FileSystems;
 import java.nio.file.PathMatcher;
 
 import org.apache.commons.codec.binary.Base32;
 import org.apache.commons.codec.binary.BaseNCodec;
 
-
 interface FileNamingConventions {
 
 	/**
-	 * Name of the masterkey file inside the root directory of the encrypted storage.
+	 * Extension of masterkey files inside the root directory of the encrypted storage.
 	 */
-	String MASTERKEY_FILENAME = "masterkey.json";
+	String MASTERKEY_FILE_EXT = ".masterkey.json";
 
 	/**
 	 * How to encode the encrypted file names safely.

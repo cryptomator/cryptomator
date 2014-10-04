@@ -1,12 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-  Copyright (c) 2014 Sebastian Stenzel
-  This file is licensed under the terms of the MIT license.
-  See the LICENSE.txt file for more info.
-  
-  Contributors:
-      Sebastian Stenzel - initial API and implementation
--->
+<!-- Copyright (c) 2014 Sebastian Stenzel This file is licensed under the terms of the MIT license. See the LICENSE.txt file for more info. Contributors: Sebastian Stenzel - initial API and implementation -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
@@ -39,11 +32,15 @@
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
 		</dependency>
-		
+
 		<!-- apache commons -->
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
 		</dependency>
 	</dependencies>
 
@@ -107,7 +104,7 @@
 								<fx:deploy outdir="${project.build.directory}/dist" outfile="${project.build.finalName}" nativeBundles="all">
 									<fx:info title="Cloud Encryptor" vendor="cloudencryptor.org">
 										<!-- todo provide .ico and .icns files for osx/win -->
-										<fx:icon href="shortcut.ico" width="32" height="32" depth="8"/>
+										<fx:icon href="shortcut.ico" width="32" height="32" depth="8" />
 									</fx:info>
 									<fx:platform basedir="" javafx="2.2+" j2se="8.0" />
 									<fx:application refid="fxApp" />

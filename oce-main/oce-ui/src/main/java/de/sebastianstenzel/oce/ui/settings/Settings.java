@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-@JsonPropertyOrder(value = { "webdavWorkDir" })
+@JsonPropertyOrder(value = {"webdavWorkDir"})
 public class Settings implements Serializable {
 
 	private static final long serialVersionUID = 7609959894417878744L;
@@ -33,7 +33,7 @@ public class Settings implements Serializable {
 	private static final String SETTINGS_FILE = "settings.json";
 	private static final ObjectMapper JSON_OM = new ObjectMapper();
 	private static Settings INSTANCE = null;
-	
+
 	static {
 		final String home = System.getProperty("user.home", ".");
 		final String appdata = System.getenv("APPDATA");
@@ -51,16 +51,15 @@ public class Settings implements Serializable {
 			SETTINGS_DIR = fs.getPath(home, ".opencloudencryptor");
 		}
 	}
-	
-	
+
 	private String webdavWorkDir;
+	private String username;
 	private int port;
-	
-	
+
 	private Settings() {
 		// private constructor
 	}
-	
+
 	public static synchronized Settings load() {
 		if (INSTANCE == null) {
 			try {
@@ -76,7 +75,7 @@ public class Settings implements Serializable {
 		}
 		return INSTANCE;
 	}
-	
+
 	public static synchronized void save() {
 		if (INSTANCE != null) {
 			try {
@@ -89,13 +88,13 @@ public class Settings implements Serializable {
 			}
 		}
 	}
-	
+
 	private static Settings defaultSettings() {
 		final Settings result = new Settings();
 		result.setWebdavWorkDir(System.getProperty("user.home", "."));
 		return result;
 	}
-	
+
 	/* Getter/Setter */
 
 	public String getWebdavWorkDir() {
@@ -104,6 +103,14 @@ public class Settings implements Serializable {
 
 	public void setWebdavWorkDir(String webdavWorkDir) {
 		this.webdavWorkDir = webdavWorkDir;
+	}
+
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
 	}
 
 	public int getPort() {

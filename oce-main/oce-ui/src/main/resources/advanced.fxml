@@ -30,7 +30,7 @@
 
 	<children>
 		<!-- Row 0 -->
-		<Label GridPane.rowIndex="0" GridPane.columnIndex="0" text="%advanced.label.port" />
+		<Label GridPane.rowIndex="0" GridPane.columnIndex="0" text="%advanced.label.port" GridPane.halignment="RIGHT" />
 		<TextField fx:id="portTextField" GridPane.rowIndex="0" GridPane.columnIndex="1" />
 	</children>
 </GridPane>

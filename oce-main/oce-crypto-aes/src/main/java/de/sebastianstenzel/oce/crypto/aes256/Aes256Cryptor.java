@@ -81,8 +81,8 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration, Fi
 	private final ObjectMapper objectMapper = new ObjectMapper();
 
 	/**
-	 * The decrypted master key. Its lifecycle starts with {@link #unlockStorage(Path, CharSequence)} or
-	 * {@link #initializeStorage(Path, CharSequence)}. Its lifecycle ends with {@link #swipeSensitiveData()}.
+	 * The decrypted master key. Its lifecycle starts with {@link #randomData(int)} or {@link #encryptMasterKey(Path, CharSequence)}. Its
+	 * lifecycle ends with {@link #swipeSensitiveData()}.
 	 */
 	private final byte[] masterKey = new byte[MASTER_KEY_LENGTH];
 
@@ -100,11 +100,19 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration, Fi
 		}
 	}
 
-	public void initializeStorage(OutputStream masterkey, CharSequence password) throws IOException {
-		try {
-			// generate new masterkey:
-			randomMasterKey();
+	/**
+	 * Fills the masterkey with new random bytes.
+	 */
+	public void randomizeMasterKey() {
+		SECURE_PRNG.setSeed(SECURE_PRNG.generateSeed(PRNG_SEED_LENGTH));
+		SECURE_PRNG.nextBytes(this.masterKey);
+	}
 
+	/**
+	 * Encrypts the current masterKey with the given password and writes the result to the given output stream.
+	 */
+	public void encryptMasterKey(OutputStream out, CharSequence password) throws IOException {
+		try {
 			// derive key:
 			final byte[] userSalt = randomData(SALT_LENGTH);
 			final SecretKey userKey = pbkdf2(password, userSalt, PBKDF2_PW_ITERATIONS, AES_KEY_LENGTH);
@@ -116,48 +124,53 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration, Fi
 			byte[] encryptedMasterKey = encCipher.doFinal(this.masterKey);
 
 			// save encrypted masterkey:
-			final Keys keys = new Keys();
-			final Keys.Key ownerKey = new Keys.Key();
-			ownerKey.setIterations(PBKDF2_PW_ITERATIONS);
-			ownerKey.setIv(iv);
-			ownerKey.setKeyLength(AES_KEY_LENGTH);
-			ownerKey.setMasterkey(encryptedMasterKey);
-			ownerKey.setSalt(userSalt);
-			ownerKey.setPwVerification(encryptedUserKey);
-			keys.setOwnerKey(ownerKey);
-			objectMapper.writeValue(masterkey, keys);
+			final Key key = new Key();
+			key.setIterations(PBKDF2_PW_ITERATIONS);
+			key.setIv(iv);
+			key.setKeyLength(AES_KEY_LENGTH);
+			key.setMasterkey(encryptedMasterKey);
+			key.setSalt(userSalt);
+			key.setPwVerification(encryptedUserKey);
+			objectMapper.writeValue(out, key);
 		} catch (IllegalBlockSizeException | BadPaddingException ex) {
 			throw new IllegalStateException("Block size hard coded. Padding irrelevant in ENCRYPT_MODE. IV must exist in CBC mode.", ex);
 		}
 	}
 
-	public void unlockStorage(InputStream masterkey, CharSequence password) throws DecryptFailedException, WrongPasswordException, UnsupportedKeyLengthException, IOException {
+	/**
+	 * Reads the encrypted masterkey from the given input stream and decrypts it with the given password.
+	 * 
+	 * @throws DecryptFailedException If the decryption failed for various reasons (including wrong password).
+	 * @throws WrongPasswordException If the provided password was wrong. Note: Sometimes the algorithm itself fails due to a wrong
+	 *             password. In this case a DecryptFailedException will be thrown.
+	 * @throws UnsupportedKeyLengthException If the masterkey has been encrypted with a higher key length than supported by the system. In
+	 *             this case Java JCE needs to be installed.
+	 */
+	public void decryptMasterKey(InputStream in, CharSequence password) throws DecryptFailedException, WrongPasswordException, UnsupportedKeyLengthException, IOException {
 		byte[] decrypted = new byte[0];
 		try {
 			// load encrypted masterkey:
-			final Keys keys = objectMapper.readValue(masterkey, Keys.class);
-			;
-			final Keys.Key ownerKey = keys.getOwnerKey();
+			final Key key = objectMapper.readValue(in, Key.class);
 
 			// check, whether the key length is supported:
 			final int maxKeyLen = Cipher.getMaxAllowedKeyLength(CRYPTO_ALGORITHM);
-			if (ownerKey.getKeyLength() > maxKeyLen) {
-				throw new UnsupportedKeyLengthException(ownerKey.getKeyLength(), maxKeyLen);
+			if (key.getKeyLength() > maxKeyLen) {
+				throw new UnsupportedKeyLengthException(key.getKeyLength(), maxKeyLen);
 			}
 
 			// derive key:
-			final SecretKey userKey = pbkdf2(password, ownerKey.getSalt(), ownerKey.getIterations(), ownerKey.getKeyLength());
+			final SecretKey userKey = pbkdf2(password, key.getSalt(), key.getIterations(), key.getKeyLength());
 
 			// check password:
-			final Cipher encCipher = this.cipher(MASTERKEY_CIPHER, userKey, ownerKey.getIv(), Cipher.ENCRYPT_MODE);
+			final Cipher encCipher = this.cipher(MASTERKEY_CIPHER, userKey, key.getIv(), Cipher.ENCRYPT_MODE);
 			byte[] encryptedUserKey = encCipher.doFinal(userKey.getEncoded());
-			if (!Arrays.equals(ownerKey.getPwVerification(), encryptedUserKey)) {
+			if (!Arrays.equals(key.getPwVerification(), encryptedUserKey)) {
 				throw new WrongPasswordException();
 			}
 
 			// decrypt:
-			final Cipher decCipher = this.cipher(MASTERKEY_CIPHER, userKey, ownerKey.getIv(), Cipher.DECRYPT_MODE);
-			decrypted = decCipher.doFinal(ownerKey.getMasterkey());
+			final Cipher decCipher = this.cipher(MASTERKEY_CIPHER, userKey, key.getIv(), Cipher.DECRYPT_MODE);
+			decrypted = decCipher.doFinal(key.getMasterkey());
 
 			// everything ok, move decrypted data to masterkey:
 			final ByteBuffer masterKeyBuffer = ByteBuffer.wrap(this.masterKey);
@@ -197,11 +210,6 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration, Fi
 		SECURE_PRNG.setSeed(SECURE_PRNG.generateSeed(PRNG_SEED_LENGTH));
 		SECURE_PRNG.nextBytes(result);
 		return result;
-	}
-
-	private void randomMasterKey() {
-		SECURE_PRNG.setSeed(SECURE_PRNG.generateSeed(PRNG_SEED_LENGTH));
-		SECURE_PRNG.nextBytes(this.masterKey);
 	}
 
 	private SecretKey pbkdf2(byte[] password, byte[] salt, int iterations, int keyLength) {

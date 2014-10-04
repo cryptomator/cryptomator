@@ -13,7 +13,8 @@
 	-fx-font-family: "lucida-grande";
 }
 
-.button {
+.button,
+.combo-box {
 	-fx-text-fill: #000000;
 	-fx-background-color: linear-gradient(to bottom, #FFFFFF, #DDDDDD);
 	-fx-border-color: #888888;
@@ -25,7 +26,37 @@
 	-fx-font-weight: normal;
 }
 
+.text-field {
+	-fx-border-radius: 3.0;
+    -fx-border-width: 0.5;
+	-fx-border-color: #888888;
+	-fx-focus-color: #FF0000;
+	-fx-background-color: transparent;
+	-fx-padding: 5 2 5 2;
+}
+
+.text-field:focused {
+	-fx-background-color: #DDDDDD;
+}
+
 .button:armed,
-.button:selected {
+.button:selected,
+.combo-box:armed,
+.combo-box:selected {
 	-fx-background-color: linear-gradient(to bottom, #DDDDDD, #CCCCCC 30%, #EEEEEE);
+}
+
+.combo-box .list-cell  {
+	-fx-background-color: transparent;
+	-fx-text-fill: -fx-text-base-color;
+}
+
+.combo-box .list-cell:hover  {
+	-fx-background-color: #DDDDDD;
+}
+
+.combo-box-popup .list-view  {
+	-fx-padding: 0 0 0 0;
+	-fx-background-insets: 0, 0;
+	-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.6), 8, 0.0, 0, 0);
 }

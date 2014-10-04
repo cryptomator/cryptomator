@@ -20,13 +20,13 @@ import de.sebastianstenzel.oce.ui.settings.Settings;
 import de.sebastianstenzel.oce.webdav.WebDAVServer;
 
 public class MainApplication extends Application {
-	
+
 	public static void main(String[] args) {
 		launch(args);
 	}
 
 	@Override
-	public void start(final Stage primaryStage) throws IOException  {
+	public void start(final Stage primaryStage) throws IOException {
 		final ResourceBundle localizations = ResourceBundle.getBundle("localization");
 		final Parent root = FXMLLoader.load(getClass().getResource("/main.fxml"), localizations);
 		final Scene scene = new Scene(root);
@@ -36,7 +36,7 @@ public class MainApplication extends Application {
 		primaryStage.setResizable(false);
 		primaryStage.show();
 	}
-	
+
 	@Override
 	public void stop() throws Exception {
 		WebDAVServer.getInstance().stop();
