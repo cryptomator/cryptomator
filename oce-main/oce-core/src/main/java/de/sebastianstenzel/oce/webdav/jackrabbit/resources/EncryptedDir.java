@@ -144,7 +144,7 @@ public class EncryptedDir extends AbstractEncryptedNode {
 				properties.add(new DefaultDavProperty<Long>(DavPropertyName.GETLASTMODIFIED, attrs.lastModifiedTime().toMillis()));
 			} catch (IOException e) {
 				LOG.error("Error determining metadata " + path.toString(), e);
-				throw new IORuntimeException(e);
+				// don't add any further properties
 			}
 		}
 	}

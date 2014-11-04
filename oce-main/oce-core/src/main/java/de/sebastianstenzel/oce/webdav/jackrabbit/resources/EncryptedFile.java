@@ -7,6 +7,7 @@
  *     Sebastian Stenzel - initial API and implementation
  ******************************************************************************/
 package de.sebastianstenzel.oce.webdav.jackrabbit.resources;
+
 import java.io.EOFException;
 import java.io.IOException;
 import java.nio.channels.SeekableByteChannel;
@@ -32,7 +33,6 @@ import org.slf4j.LoggerFactory;
 
 import de.sebastianstenzel.oce.crypto.Cryptor;
 import de.sebastianstenzel.oce.webdav.exceptions.IORuntimeException;
-
 
 public class EncryptedFile extends AbstractEncryptedNode {
 
@@ -70,7 +70,7 @@ public class EncryptedFile extends AbstractEncryptedNode {
 			SeekableByteChannel channel = null;
 			try {
 				channel = Files.newByteChannel(path, StandardOpenOption.READ);
-				outputContext.setContentLength(cryptor.decryptedContentLength(channel, null));
+				outputContext.setContentLength(cryptor.decryptedContentLength(channel));
 				if (outputContext.hasStream()) {
 					cryptor.decryptedFile(channel, outputContext.getOutputStream());
 				}
@@ -93,7 +93,7 @@ public class EncryptedFile extends AbstractEncryptedNode {
 			SeekableByteChannel channel = null;
 			try {
 				channel = Files.newByteChannel(path, StandardOpenOption.READ);
-				final Long contentLength = cryptor.decryptedContentLength(channel, null);
+				final Long contentLength = cryptor.decryptedContentLength(channel);
 				properties.add(new DefaultDavProperty<Long>(DavPropertyName.GETCONTENTLENGTH, contentLength));
 
 				final BasicFileAttributes attrs = Files.readAttributes(path, BasicFileAttributes.class);

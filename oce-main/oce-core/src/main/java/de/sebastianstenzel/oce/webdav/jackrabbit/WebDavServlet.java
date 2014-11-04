@@ -50,8 +50,7 @@ public class WebDavServlet extends AbstractWebdavServlet {
 
 	@Override
 	protected boolean isPreconditionValid(WebdavRequest request, DavResource resource) {
-		// TODO Auto-generated method stub
-		return true;
+		return !resource.exists() || request.matchesIfHeader(resource);
 	}
 
 	@Override

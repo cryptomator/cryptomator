@@ -18,7 +18,7 @@ import java.nio.file.Path;
 /**
  * Provides access to cryptographic functions. All methods are threadsafe.
  */
-public interface Cryptor {
+public interface Cryptor extends SensitiveDataSwipeListener {
 
 	/**
 	 * Encrypts each plaintext path component for its own.
@@ -32,7 +32,7 @@ public interface Cryptor {
 	 * @return Encrypted path components concatenated by the given encryptedPathSep. Must not start with encryptedPathSep, unless the
 	 *         encrypted path is explicitly absolute.
 	 */
-	String encryptPath(String cleartextPath, char encryptedPathSep, char cleartextPathSep, MetadataSupport metadataSupport);
+	String encryptPath(String cleartextPath, char encryptedPathSep, char cleartextPathSep);
 
 	/**
 	 * Decrypts each encrypted path component for its own.
@@ -46,13 +46,13 @@ public interface Cryptor {
 	 * @return Decrypted path components concatenated by the given cleartextPathSep. Must not start with cleartextPathSep, unless the
 	 *         cleartext path is explicitly absolute.
 	 */
-	String decryptPath(String encryptedPath, char encryptedPathSep, char cleartextPathSep, MetadataSupport metadataSupport);
+	String decryptPath(String encryptedPath, char encryptedPathSep, char cleartextPathSep);
 
 	/**
 	 * @param metadataSupport Support object allowing the Cryptor to read and write its own metadata to the location of the encrypted file.
 	 * @return Content length of the decrypted file or <code>null</code> if unknown.
 	 */
-	Long decryptedContentLength(SeekableByteChannel encryptedFile, MetadataSupport metadataSupport) throws IOException;
+	Long decryptedContentLength(SeekableByteChannel encryptedFile) throws IOException;
 
 	/**
 	 * @return Number of decrypted bytes. This might not be equal to the encrypted file size due to optional metadata written to it.
@@ -70,6 +70,8 @@ public interface Cryptor {
 	 */
 	Filter<Path> getPayloadFilesFilter();
 
-	void swipeSensitiveData();
+	void addSensitiveDataSwipeListener(SensitiveDataSwipeListener listener);
+
+	void removeSensitiveDataSwipeListener(SensitiveDataSwipeListener listener);
 
 }

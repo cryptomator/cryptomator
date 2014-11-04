@@ -44,15 +44,14 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import de.sebastianstenzel.oce.crypto.Cryptor;
-import de.sebastianstenzel.oce.crypto.MetadataSupport;
+import de.sebastianstenzel.oce.crypto.AbstractCryptor;
 import de.sebastianstenzel.oce.crypto.exceptions.DecryptFailedException;
 import de.sebastianstenzel.oce.crypto.exceptions.UnsupportedKeyLengthException;
 import de.sebastianstenzel.oce.crypto.exceptions.WrongPasswordException;
 import de.sebastianstenzel.oce.crypto.io.SeekableByteChannelInputStream;
 import de.sebastianstenzel.oce.crypto.io.SeekableByteChannelOutputStream;
 
-public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration, FileNamingConventions {
+public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicConfiguration, FileNamingConventions {
 
 	/**
 	 * PRNG for cryptographically secure random numbers. Defaults to SHA1-based number generator.
@@ -189,7 +188,7 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration, Fi
 	 * Otherwise developers could accidentally just assign a new object to the variable.
 	 */
 	@Override
-	public void swipeSensitiveData() {
+	public void swipeSensitiveDataInternal() {
 		Arrays.fill(this.masterKey, (byte) 0);
 	}
 
@@ -248,7 +247,7 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration, Fi
 	}
 
 	@Override
-	public String encryptPath(String cleartextPath, char encryptedPathSep, char cleartextPathSep, MetadataSupport metadataSupport) {
+	public String encryptPath(String cleartextPath, char encryptedPathSep, char cleartextPathSep) {
 		try {
 			final SecretKey key = this.pbkdf2(masterKey, EMPTY_SALT, PBKDF2_MASTERKEY_ITERATIONS, AES_KEY_LENGTH);
 			final String[] cleartextPathComps = StringUtils.split(cleartextPath, cleartextPathSep);
@@ -282,7 +281,7 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration, Fi
 	}
 
 	@Override
-	public String decryptPath(String encryptedPath, char encryptedPathSep, char cleartextPathSep, MetadataSupport metadataSupport) {
+	public String decryptPath(String encryptedPath, char encryptedPathSep, char cleartextPathSep) {
 		try {
 			final SecretKey key = this.pbkdf2(masterKey, EMPTY_SALT, PBKDF2_MASTERKEY_ITERATIONS, AES_KEY_LENGTH);
 			final String[] encryptedPathComps = StringUtils.split(encryptedPath, encryptedPathSep);
@@ -320,7 +319,7 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration, Fi
 	}
 
 	@Override
-	public Long decryptedContentLength(SeekableByteChannel encryptedFile, MetadataSupport metadataSupport) throws IOException {
+	public Long decryptedContentLength(SeekableByteChannel encryptedFile) throws IOException {
 		final ByteBuffer sizeBuffer = ByteBuffer.allocate(SIZE_OF_LONG);
 		final int read = encryptedFile.read(sizeBuffer);
 		if (read == SIZE_OF_LONG) {
@@ -395,4 +394,5 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration, Fi
 			}
 		};
 	}
+
 }

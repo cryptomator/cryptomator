@@ -15,16 +15,21 @@ import org.apache.jackrabbit.webdav.AbstractLocatorFactory;
 import org.apache.jackrabbit.webdav.DavResourceLocator;
 
 import de.sebastianstenzel.oce.crypto.Cryptor;
+import de.sebastianstenzel.oce.crypto.SensitiveDataSwipeListener;
 
-public class WebDavLocatorFactory extends AbstractLocatorFactory {
+public class WebDavLocatorFactory extends AbstractLocatorFactory implements SensitiveDataSwipeListener {
 
+	private static final int MAX_CACHED_PATHS = 10000;
 	private final Path fsRoot;
 	private final Cryptor cryptor;
+	private final BidiLRUMap<String, String> pathCache; // <decryptedPath, encryptedPath>
 
 	public WebDavLocatorFactory(String fsRoot, String httpRoot, Cryptor cryptor) {
 		super(httpRoot);
 		this.fsRoot = FileSystems.getDefault().getPath(fsRoot);
 		this.cryptor = cryptor;
+		this.pathCache = new BidiLRUMap<>(MAX_CACHED_PATHS);
+		cryptor.addSensitiveDataSwipeListener(this);
 	}
 
 	/**
@@ -32,10 +37,19 @@ public class WebDavLocatorFactory extends AbstractLocatorFactory {
 	 */
 	@Override
 	protected String getRepositoryPath(String resourcePath, String wspPath) {
+		String encryptedPath = pathCache.get(resourcePath);
+		if (encryptedPath == null) {
+			encryptedPath = encryptRepositoryPath(resourcePath);
+			pathCache.put(resourcePath, encryptedPath);
+		}
+		return encryptedPath;
+	}
+
+	private String encryptRepositoryPath(String resourcePath) {
 		if (resourcePath == null) {
 			return fsRoot.toString();
 		}
-		final String encryptedRepoPath = cryptor.encryptPath(resourcePath, FileSystems.getDefault().getSeparator().charAt(0), '/', null);
+		final String encryptedRepoPath = cryptor.encryptPath(resourcePath, FileSystems.getDefault().getSeparator().charAt(0), '/');
 		return fsRoot.resolve(encryptedRepoPath).toString();
 	}
 
@@ -44,12 +58,21 @@ public class WebDavLocatorFactory extends AbstractLocatorFactory {
 	 */
 	@Override
 	protected String getResourcePath(String repositoryPath, String wspPath) {
+		String decryptedPath = pathCache.getKey(repositoryPath);
+		if (decryptedPath == null) {
+			decryptedPath = decryptResourcePath(repositoryPath);
+			pathCache.put(decryptedPath, repositoryPath);
+		}
+		return decryptedPath;
+	}
+
+	private String decryptResourcePath(String repositoryPath) {
 		final Path absRepoPath = FileSystems.getDefault().getPath(repositoryPath);
 		if (fsRoot.equals(absRepoPath)) {
 			return null;
 		} else {
 			final Path relativeRepositoryPath = fsRoot.relativize(absRepoPath);
-			final String resourcePath = cryptor.decryptPath(relativeRepositoryPath.toString(), FileSystems.getDefault().getSeparator().charAt(0), '/', null);
+			final String resourcePath = cryptor.decryptPath(relativeRepositoryPath.toString(), FileSystems.getDefault().getSeparator().charAt(0), '/');
 			return resourcePath;
 		}
 	}
@@ -64,6 +87,11 @@ public class WebDavLocatorFactory extends AbstractLocatorFactory {
 	public DavResourceLocator createResourceLocator(String prefix, String workspacePath, String resourcePath) {
 		// we don't support workspaces
 		return super.createResourceLocator(prefix, "", resourcePath);
+	}
+
+	@Override
+	public void swipeSensitiveData() {
+		pathCache.clear();
 	}
 
 }
