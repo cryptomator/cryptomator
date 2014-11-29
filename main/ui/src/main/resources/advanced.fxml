@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright (c) 2014 Sebastian Stenzel
+  This file is licensed under the terms of the MIT license.
+  See the LICENSE.txt file for more info.
+  
+  Contributors:
+      Sebastian Stenzel - initial API and implementation
+-->
+<?import java.net.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+
+<GridPane fx:id="rootGridPane" fx:controller="org.cryptomator.ui.AdvancedController" xmlns:fx="http://javafx.com/fxml" styleClass="root" gridLinesVisible="false" vgap="5" hgap="5" prefWidth="480">
+	<stylesheets>
+		<URL value="@panels.css" />
+	</stylesheets>
+
+	<padding>
+		<Insets top="10" right="10" bottom="10" left="10" />
+	</padding>
+
+	<columnConstraints>
+		<ColumnConstraints minWidth="150" maxWidth="150" hgrow="NEVER" />
+		<ColumnConstraints minWidth="250" hgrow="ALWAYS" />
+	</columnConstraints>
+
+	<children>
+		<!-- Row 0 -->
+		<Label GridPane.rowIndex="0" GridPane.columnIndex="0" text="%advanced.label.port" GridPane.halignment="RIGHT" />
+		<TextField fx:id="portTextField" GridPane.rowIndex="0" GridPane.columnIndex="1" />
+	</children>
+</GridPane>
+
+
