@@ -22,6 +22,7 @@ public final class WebDAVServer {
 
 	private static final Logger LOG = LoggerFactory.getLogger(WebDAVServer.class);
 	private static final WebDAVServer INSTANCE = new WebDAVServer();
+	private static final String LOCALHOST = "127.0.0.1";
 	private final Server server = new Server();
 
 	private WebDAVServer() {
@@ -32,11 +33,14 @@ public final class WebDAVServer {
 		return INSTANCE;
 	}
 
-	public boolean start(final String workDir, final int port, final Cryptor cryptor) {
+	/**
+	 * @param workDir Path of encrypted folder.
+	 * @param cryptor A fully initialized cryptor instance ready to en- or decrypt streams.
+	 * @return port, on which the server did start
+	 */
+	public int start(final String workDir, final Cryptor cryptor) {
 		final ServerConnector connector = new ServerConnector(server);
-		connector.setHost("127.0.0.1");
-		connector.setPort(port);
-		server.setConnectors(new Connector[] {connector});
+		connector.setHost(LOCALHOST);
 
 		final String contextPath = "/";
 
@@ -46,12 +50,13 @@ public final class WebDAVServer {
 		server.setHandler(context);
 
 		try {
+			server.setConnectors(new Connector[] {connector});
 			server.start();
 		} catch (Exception ex) {
 			LOG.error("Server couldn't be started", ex);
 		}
 
-		return server.isStarted();
+		return connector.getLocalPort();
 	}
 
 	public boolean isRunning() {
@@ -68,7 +73,7 @@ public final class WebDAVServer {
 	}
 
 	private ServletHolder getMiltonServletHolder(final String workDir, final String contextPath, final Cryptor cryptor) {
-		final ServletHolder result = new ServletHolder("OCE-WebDAV-Servlet", new WebDavServlet(cryptor));
+		final ServletHolder result = new ServletHolder("Cryptomator-WebDAV-Servlet", new WebDavServlet(cryptor));
 		result.setInitParameter(WebDavServlet.CFG_FS_ROOT, workDir);
 		result.setInitParameter(WebDavServlet.CFG_HTTP_ROOT, contextPath);
 		return result;

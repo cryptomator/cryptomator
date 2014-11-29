@@ -11,12 +11,22 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.cryptomator</groupId>
 	<artifactId>main</artifactId>
-	<version>0.1.0-SNAPSHOT</version>
+	<version>0.1.0</version>
 	<packaging>pom</packaging>
 	<name>Cryptomator</name>
+	
 	<organization>
 		<name>cryptomator.org</name>
+		<url>http://cryptomator.org</url>
 	</organization>
+	
+	<developers>
+		<developer>
+			<name>Sebastian Stenzel</name>
+			<email>sebastian.stenzel@gmail.com</email>
+			<timezone>+1</timezone>
+		</developer>
+	</developers>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -31,15 +41,30 @@
 		<commons-codec.version>1.9</commons-codec.version>
 	</properties>
 
-	<developers>
-		<developer>
-			<name>Sebastian Stenzel</name>
-			<email>sebastian.stenzel@gmail.com</email>
-		</developer>
-	</developers>
-
 	<dependencyManagement>
 		<dependencies>
+			<!-- modules -->
+			<dependency>
+				<groupId>org.cryptomator</groupId>
+				<artifactId>core</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.cryptomator</groupId>
+				<artifactId>crypto-api</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.cryptomator</groupId>
+				<artifactId>crypto-aes</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.cryptomator</groupId>
+				<artifactId>ui</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+		
 			<!-- Logging -->
 			<dependency>
 				<groupId>log4j</groupId>

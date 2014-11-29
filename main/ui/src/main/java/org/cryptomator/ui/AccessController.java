@@ -43,6 +43,8 @@ import org.cryptomator.crypto.exceptions.WrongPasswordException;
 import org.cryptomator.ui.controls.SecPasswordField;
 import org.cryptomator.ui.settings.Settings;
 import org.cryptomator.ui.util.MasterKeyFilter;
+import org.cryptomator.ui.util.WebDavMounter;
+import org.cryptomator.ui.util.WebDavMounter.CommandFailedException;
 import org.cryptomator.webdav.WebDAVServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -197,21 +199,29 @@ public class AccessController implements Initializable {
 	}
 
 	private void tryStart() {
-		try {
-			final Settings settings = Settings.load();
-			if (WebDAVServer.getInstance().start(settings.getWebdavWorkDir(), settings.getPort(), cryptor)) {
-				startServerButton.setText(localization.getString("access.button.stopServer"));
-				passwordField.setDisable(true);
+		final Settings settings = Settings.load();
+		final int webdavPort = WebDAVServer.getInstance().start(settings.getWebdavWorkDir(), cryptor);
+		if (webdavPort > 0) {
+			startServerButton.setText(localization.getString("access.button.stopServer"));
+			passwordField.setDisable(true);
+			try {
+				WebDavMounter.mount(webdavPort);
+			} catch (CommandFailedException e) {
+				messageLabel.setText(String.format(localization.getString("access.messageLabel.mountFailed"), webdavPort));
+				LOG.error("Mounting WebDAV share failed.", e);
 			}
-		} catch (NumberFormatException ex) {
-			LOG.error("Invalid port", ex);
 		}
 	}
 
 	private void tryStop() {
-		if (WebDAVServer.getInstance().stop()) {
-			startServerButton.setText(localization.getString("access.button.startServer"));
-			passwordField.setDisable(false);
+		try {
+			WebDavMounter.unmount(5);
+			if (WebDAVServer.getInstance().stop()) {
+				startServerButton.setText(localization.getString("access.button.startServer"));
+				passwordField.setDisable(false);
+			}
+		} catch (CommandFailedException e) {
+			LOG.warn("Unmounting WebDAV share failed.", e);
 		}
 	}
 

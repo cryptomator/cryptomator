@@ -10,38 +10,42 @@ package org.cryptomator.ui;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 
 public class MainController {
-	
+
+	@FXML
+	private ToggleGroup toolbarButtonGroup;
+
 	@FXML
 	private VBox rootVBox;
-	
+
 	@FXML
 	private Pane initializePanel;
-	
+
 	@FXML
 	private Pane accessPanel;
-	
+
 	@FXML
 	private Pane advancedPanel;
-	
+
 	@FXML
 	protected void showInitializePane(ActionEvent event) {
 		showPanel(initializePanel);
 	}
-	
+
 	@FXML
 	protected void showAccessPane(ActionEvent event) {
 		showPanel(accessPanel);
 	}
-	
+
 	@FXML
 	protected void showAdvancedPane(ActionEvent event) {
 		showPanel(advancedPanel);
 	}
-	
+
 	private void showPanel(Pane panel) {
 		rootVBox.getChildren().remove(1);
 		rootVBox.getChildren().add(panel);

@@ -1,16 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Copyright (c) 2014 Sebastian Stenzel This file is licensed under the terms of the MIT license. See the LICENSE.txt file for more info. Contributors: Sebastian Stenzel - initial API and implementation -->
+<!--
+  Copyright (c) 2014 Sebastian Stenzel
+  This file is licensed under the terms of the MIT license.
+  See the LICENSE.txt file for more info.
+  
+  Contributors:
+      Sebastian Stenzel - initial API and implementation
+-->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.cryptomator</groupId>
 		<artifactId>main</artifactId>
-		<version>0.1.0-SNAPSHOT</version>
+		<version>0.1.0</version>
 	</parent>
 	<artifactId>ui</artifactId>
 	<name>Cryptomator GUI</name>
 
 	<properties>
+		<javafx.application.name>Cryptomator</javafx.application.name>
 		<exec.mainClass>org.cryptomator.ui.MainApplication</exec.mainClass>
 		<javafx.tools.ant.jar>${java.home}/../lib/ant-javafx.jar</javafx.tools.ant.jar>
 	</properties>
@@ -19,12 +27,10 @@
 		<dependency>
 			<groupId>org.cryptomator</groupId>
 			<artifactId>core</artifactId>
-			<version>${project.parent.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.cryptomator</groupId>
 			<artifactId>crypto-aes</artifactId>
-			<version>${project.parent.version}</version>
 		</dependency>
 
 		<!-- JSON -->
@@ -91,7 +97,7 @@
 						<configuration>
 							<target xmlns:fx="javafx:com.sun.javafx.tools.ant">
 								<taskdef uri="javafx:com.sun.javafx.tools.ant" resource="com/sun/javafx/tools/ant/antlib.xml" classpath="${javafx.tools.ant.jar}" />
-								<fx:application id="fxApp" version="${project.version}" name="${project.name}" mainClass="${exec.mainClass}" />
+								<fx:application id="fxApp" version="${project.version}" name="${javafx.application.name}" mainClass="${exec.mainClass}" />
 
 								<fx:jar destfile="${project.build.directory}/${project.build.finalName}">
 									<fx:application refid="fxApp" />
@@ -102,9 +108,9 @@
 								</fx:jar>
 
 								<fx:deploy outdir="${project.build.directory}/dist" outfile="${project.build.finalName}" nativeBundles="all">
-									<fx:info title="Cloud Encryptor" vendor="cloudencryptor.org">
-										<!-- todo provide .ico and .icns files for osx/win -->
-										<fx:icon href="shortcut.ico" width="32" height="32" depth="8" />
+									<fx:info title="Cryptomator" vendor="cryptomator.org" copyright="cryptomator.org" license="MIT">
+										<!-- todo provide .ico files for win -->
+										<fx:icon href="${project.build.outputDirectory}/logo.icns" width="512" height="512" />
 									</fx:info>
 									<fx:platform basedir="" javafx="2.2+" j2se="8.0" />
 									<fx:application refid="fxApp" />

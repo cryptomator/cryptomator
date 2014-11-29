@@ -18,6 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 
+import org.apache.commons.lang3.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,20 +36,18 @@ public class Settings implements Serializable {
 	private static Settings INSTANCE = null;
 
 	static {
-		final String home = System.getProperty("user.home", ".");
 		final String appdata = System.getenv("APPDATA");
-		final String os = System.getProperty("os.name").toLowerCase();
 		final FileSystem fs = FileSystems.getDefault();
 
-		if (os.contains("win") && appdata != null) {
+		if (SystemUtils.IS_OS_WINDOWS && appdata != null) {
 			SETTINGS_DIR = fs.getPath(appdata, "opencloudencryptor");
-		} else if (os.contains("win") && appdata == null) {
-			SETTINGS_DIR = fs.getPath(home, ".opencloudencryptor");
-		} else if (os.contains("mac")) {
-			SETTINGS_DIR = fs.getPath(home, "Library/Application Support/opencloudencryptor");
+		} else if (SystemUtils.IS_OS_WINDOWS && appdata == null) {
+			SETTINGS_DIR = fs.getPath(SystemUtils.USER_HOME, ".opencloudencryptor");
+		} else if (SystemUtils.IS_OS_MAC_OSX) {
+			SETTINGS_DIR = fs.getPath(SystemUtils.USER_HOME, "Library/Application Support/opencloudencryptor");
 		} else {
 			// (os.contains("solaris") || os.contains("sunos") || os.contains("linux") || os.contains("unix"))
-			SETTINGS_DIR = fs.getPath(home, ".opencloudencryptor");
+			SETTINGS_DIR = fs.getPath(SystemUtils.USER_HOME, ".opencloudencryptor");
 		}
 	}
 
@@ -113,10 +112,12 @@ public class Settings implements Serializable {
 		this.username = username;
 	}
 
+	@Deprecated
 	public int getPort() {
 		return port;
 	}
 
+	@Deprecated
 	public void setPort(int port) {
 		this.port = port;
 	}

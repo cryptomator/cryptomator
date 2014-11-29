@@ -18,9 +18,15 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import org.cryptomator.ui.settings.Settings;
+import org.cryptomator.ui.util.WebDavMounter;
+import org.cryptomator.ui.util.WebDavMounter.CommandFailedException;
 import org.cryptomator.webdav.WebDAVServer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MainApplication extends Application {
+
+	private static final Logger LOG = LoggerFactory.getLogger(MainApplication.class);
 
 	public static void main(String[] args) {
 		launch(args);
@@ -40,6 +46,11 @@ public class MainApplication extends Application {
 
 	@Override
 	public void stop() throws Exception {
+		try {
+			WebDavMounter.unmount(5);
+		} catch (CommandFailedException e) {
+			LOG.warn("Unmounting WebDAV share failed.", e);
+		}
 		WebDAVServer.getInstance().stop();
 		Settings.save();
 		super.stop();
