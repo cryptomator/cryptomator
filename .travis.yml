@@ -1,0 +1,4 @@
+language: java
+jdk:
+  - oraclejdk8
+script: mvn -fmain/pom.xml clean package
