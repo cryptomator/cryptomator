@@ -35,17 +35,16 @@ Multiplatform transparent client-side encryption of your files in the cloud. You
 ## TODO
 
 ### Core
-- WebDAV Session handling
-- Java NIO file locking
 - Support for HTTP range requests
 
 ### UI
 - Automount of WebDAV volumes for Win/Mac/Tux
 - App icon and drive icons in WebDAV volumes
 - Change password functionality
-- CRC32 checksums for decrypted files
 - Better explanations on UI
 
 ## License
 
 Distributed under the MIT license. See the LICENSE file for more info.
+
+[![Build Status](https://travis-ci.org/totalvoidness/cryptomator.svg?branch=master)](https://travis-ci.org/totalvoidness/cryptomator)
