@@ -38,8 +38,8 @@ Multiplatform transparent client-side encryption of your files in the cloud. You
 - Support for HTTP range requests
 
 ### UI
-- Automount of WebDAV volumes for Win/Mac/Tux
-- App icon and drive icons in WebDAV volumes
+- Automount of WebDAV volumes for Win/Tux
+- Drive icons in WebDAV volumes
 - Change password functionality
 - Better explanations on UI
 
