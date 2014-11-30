@@ -24,12 +24,6 @@
 			<artifactId>crypto-api</artifactId>
 		</dependency>
 
-		<!-- Logging -->
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
-		</dependency>
-
 		<!-- Commons -->
 		<dependency>
 			<groupId>commons-io</groupId>
@@ -48,17 +42,10 @@
 			<artifactId>commons-codec</artifactId>
 		</dependency>
 
-
 		<!-- JSON -->
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-		</dependency>
-
-		<!-- JUnit -->
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
 		</dependency>
 	</dependencies>
 	
