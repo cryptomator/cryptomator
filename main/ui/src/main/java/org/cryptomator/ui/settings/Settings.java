@@ -53,7 +53,6 @@ public class Settings implements Serializable {
 
 	private String webdavWorkDir;
 	private String username;
-	private int port;
 
 	private Settings() {
 		// private constructor
@@ -110,16 +109,6 @@ public class Settings implements Serializable {
 
 	public void setUsername(String username) {
 		this.username = username;
-	}
-
-	@Deprecated
-	public int getPort() {
-		return port;
-	}
-
-	@Deprecated
-	public void setPort(int port) {
-		this.port = port;
 	}
 
 }

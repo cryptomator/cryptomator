@@ -10,6 +10,7 @@ package org.cryptomator.ui;
 
 import java.io.IOException;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -18,18 +19,16 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import org.cryptomator.ui.settings.Settings;
-import org.cryptomator.ui.util.WebDavMounter;
-import org.cryptomator.ui.util.WebDavMounter.CommandFailedException;
-import org.cryptomator.webdav.WebDAVServer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.eclipse.jetty.util.ConcurrentHashSet;
 
 public class MainApplication extends Application {
 
-	private static final Logger LOG = LoggerFactory.getLogger(MainApplication.class);
+	private static final Set<Runnable> SHUTDOWN_TASKS = new ConcurrentHashSet<>();
+	private static final CleanShutdownPerformer CLEAN_SHUTDOWN_PERFORMER = new CleanShutdownPerformer();
 
 	public static void main(String[] args) {
 		launch(args);
+		Runtime.getRuntime().addShutdownHook(CLEAN_SHUTDOWN_PERFORMER);
 	}
 
 	@Override
@@ -46,14 +45,27 @@ public class MainApplication extends Application {
 
 	@Override
 	public void stop() throws Exception {
-		try {
-			WebDavMounter.unmount(5);
-		} catch (CommandFailedException e) {
-			LOG.warn("Unmounting WebDAV share failed.", e);
-		}
-		WebDAVServer.getInstance().stop();
+		CLEAN_SHUTDOWN_PERFORMER.run();
 		Settings.save();
 		super.stop();
+	}
+
+	static void addShutdownTask(Runnable r) {
+		SHUTDOWN_TASKS.add(r);
+	}
+
+	static void removeShutdownTask(Runnable r) {
+		SHUTDOWN_TASKS.remove(r);
+	}
+
+	private static class CleanShutdownPerformer extends Thread {
+		@Override
+		public void run() {
+			SHUTDOWN_TASKS.forEach(r -> {
+				r.run();
+			});
+			SHUTDOWN_TASKS.clear();
+		}
 	}
 
 }

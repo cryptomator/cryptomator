@@ -21,17 +21,8 @@ import org.slf4j.LoggerFactory;
 public final class WebDAVServer {
 
 	private static final Logger LOG = LoggerFactory.getLogger(WebDAVServer.class);
-	private static final WebDAVServer INSTANCE = new WebDAVServer();
 	private static final String LOCALHOST = "127.0.0.1";
 	private final Server server = new Server();
-
-	private WebDAVServer() {
-		// make constructor private
-	}
-
-	public static WebDAVServer getInstance() {
-		return INSTANCE;
-	}
 
 	/**
 	 * @param workDir Path of encrypted folder.

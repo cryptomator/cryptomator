@@ -25,17 +25,17 @@ public final class WebDavMounter {
 		throw new IllegalStateException("not instantiable.");
 	}
 
-	public static void mount(int localPort) throws CommandFailedException {
+	public static synchronized void mount(int localPort, int uniqueId) throws CommandFailedException {
 		if (SystemUtils.IS_OS_MAC_OSX) {
-			exec("mkdir /Volumes/Cryptomator", CMD_DEFAULT_TIMEOUT);
-			exec("mount_webdav -S -v Cryptomator localhost:" + localPort + " /Volumes/Cryptomator", CMD_DEFAULT_TIMEOUT);
-			exec("open /Volumes/Cryptomator", CMD_DEFAULT_TIMEOUT);
+			exec("mkdir /Volumes/Cryptomator" + uniqueId, CMD_DEFAULT_TIMEOUT);
+			exec("mount_webdav -S -v Cryptomator localhost:" + localPort + " /Volumes/Cryptomator" + uniqueId, CMD_DEFAULT_TIMEOUT);
+			exec("open /Volumes/Cryptomator" + uniqueId, CMD_DEFAULT_TIMEOUT);
 		}
 	}
 
-	public static void unmount(int timeout) throws CommandFailedException {
+	public static synchronized void unmount(int uniqueId, int timeout) throws CommandFailedException {
 		if (SystemUtils.IS_OS_MAC_OSX) {
-			exec("umount /Volumes/Cryptomator", timeout);
+			exec("umount /Volumes/Cryptomator" + uniqueId, timeout);
 		}
 	}
 

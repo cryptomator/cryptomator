@@ -12,29 +12,67 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
+<?import javafx.scene.control.SplitMenuButton?>
+<?import javafx.scene.control.MenuItem?>
+<?import java.lang.String?>
+<?import org.cryptomator.ui.controls.*?>
+<?import javafx.scene.control.Button?>
 
-<VBox fx:id="rootVBox" fx:controller="org.cryptomator.ui.MainController" xmlns:fx="http://javafx.com/fxml">
+<GridPane vgap="6.0" hgap="6.0" fx:id="rootPane" fx:controller="org.cryptomator.ui.MainController" xmlns:fx="http://javafx.com/fxml">
 	<stylesheets>
 		<URL value="@main.css" />
 	</stylesheets>
 
+	<padding>
+		<Insets top="12.0" right="12.0" bottom="12.0" left="12.0" />
+	</padding>
+
 	<fx:define>
-		<fx:include fx:id="initializePanel" source="initialize.fxml" />
-		<fx:include fx:id="accessPanel" source="access.fxml" />
+		<ComboBox fx:id="usernameBox" GridPane.rowIndex="2" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.hgrow="ALWAYS" maxWidth="Infinity" promptText="$access.label.username" disable="true" focusTraversable="false" />
+			
+		<SplitMenuButton fx:id="openButton" GridPane.rowIndex="4" GridPane.columnIndex="0" GridPane.columnSpan="3" prefWidth="120.0" GridPane.halignment="CENTER" text="%main.primaryButton.openVault" onAction="#openVault">
+			<styleClass>
+				<String fx:value="green" />
+			</styleClass>
+			<items>
+				<MenuItem text="Add User" />
+				<MenuItem text="Change Password" />
+			</items>
+		</SplitMenuButton>
 	</fx:define>
 
+	<columnConstraints>
+		<ColumnConstraints minWidth="100" />
+		<ColumnConstraints minWidth="200" />
+		<ColumnConstraints minWidth="25" />
+	</columnConstraints>
+
 	<children>
-		<ToolBar>
-			<items>
-				<fx:define>
-					<ToggleGroup fx:id="toolbarButtonGroup" />
-				</fx:define>
-				<ToggleButton text="%toolbarbutton.initialize" toggleGroup="$toolbarButtonGroup" onAction="#showInitializePane" />
-				<ToggleButton text="%toolbarbutton.access" toggleGroup="$toolbarButtonGroup" onAction="#showAccessPane" selected="true" />
-			</items>
-		</ToolBar>
-		<fx:reference source="accessPanel"/>
+		<!-- Row 0 -->
+		<Label GridPane.rowIndex="0" GridPane.columnIndex="0" text="%main.label.workDir" GridPane.halignment="RIGHT" />
+		<TextField fx:id="workDirTextField" GridPane.rowIndex="0" GridPane.columnIndex="1" editable="true" />
+		<Button GridPane.rowIndex="0" GridPane.columnIndex="2" text="..." GridPane.hgrow="ALWAYS" maxWidth="Infinity" focusTraversable="false" onAction="#chooseWorkDir" />
+
+		<!-- Row 1 -->
+		<Label fx:id="messageLabel" GridPane.rowIndex="1" GridPane.columnIndex="0" GridPane.columnSpan="3" GridPane.hgrow="ALWAYS" maxWidth="Infinity" alignment="CENTER" />
+
+		<!-- Row 2 -->
+		<Label GridPane.rowIndex="2" GridPane.columnIndex="0" text="%main.label.username" GridPane.halignment="RIGHT" />
+		<TextField fx:id="usernameField" GridPane.rowIndex="2" GridPane.columnIndex="1" GridPane.columnSpan="2" disable="true" />
+
+		<!-- Row 3 -->
+		<Label GridPane.rowIndex="3" GridPane.columnIndex="0" text="%main.label.password" GridPane.halignment="RIGHT" />
+		<SecPasswordField fx:id="passwordField" GridPane.rowIndex="3" GridPane.columnIndex="1" GridPane.columnSpan="2" disable="true" />
+
+		<!-- Row 4 -->
+		<Button fx:id="initializeButton" text="%main.primaryButton.initVault" GridPane.rowIndex="4" GridPane.columnIndex="0" GridPane.columnSpan="3" prefWidth="120.0" GridPane.halignment="CENTER" onAction="#showInitializationDialog"
+			disable="true" focusTraversable="false">
+			<styleClass>
+				<String fx:value="green" />
+			</styleClass>
+		</Button>
+
 	</children>
-</VBox>
+</GridPane>
 
 
