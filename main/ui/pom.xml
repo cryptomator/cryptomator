@@ -50,82 +50,73 @@
 		</dependency>
 	</dependencies>
 
-
 	<build>
-		<pluginManagement>
-			<plugins>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-compiler-plugin</artifactId>
-					<version>3.1</version>
-					<configuration>
-						<source>1.8</source>
-						<target>1.8</target>
-					</configuration>
-				</plugin>
-			</plugins>
-		</pluginManagement>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-dependency-plugin</artifactId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.1</version>
+				<configuration>
+					<source>1.8</source>
+					<target>1.8</target>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
 				<executions>
 					<execution>
-						<id>copy</id>
-						<phase>prepare-package</phase>
+						<id>make-assembly</id>
+						<phase>package</phase>
 						<goals>
-							<goal>copy-dependencies</goal>
+							<goal>single</goal>
 						</goals>
-						<configuration>
-							<outputDirectory>${project.build.directory}/libs</outputDirectory>
-							<includeScope>compile</includeScope>
-							<includeScope>runtime</includeScope>
-						</configuration>
 					</execution>
 				</executions>
+				<configuration>
+					<descriptorRefs>
+						<descriptorRef>jar-with-dependencies</descriptorRef>
+					</descriptorRefs>
+					<finalName>${javafx.application.name}</finalName>
+					<appendAssemblyId>false</appendAssemblyId>
+					<archive>
+						<manifestEntries>
+							<Main-Class>${exec.mainClass}</Main-Class>
+						</manifestEntries>
+					</archive>
+				</configuration>
 			</plugin>
+
 			<plugin>
 				<artifactId>maven-antrun-plugin</artifactId>
 				<version>1.7</version>
 				<executions>
 					<execution>
-						<id>native-launcher</id>
-						<phase>package</phase>
+						<id>create-deployment-bundle</id>
+						<phase>install</phase>
 						<goals>
 							<goal>run</goal>
 						</goals>
 						<configuration>
 							<target xmlns:fx="javafx:com.sun.javafx.tools.ant">
-								<taskdef uri="javafx:com.sun.javafx.tools.ant" resource="com/sun/javafx/tools/ant/antlib.xml" classpath="${javafx.tools.ant.jar}" />
-								<fx:application id="fxApp" version="${project.version}" name="${javafx.application.name}" mainClass="${exec.mainClass}" />
+								<taskdef uri="javafx:com.sun.javafx.tools.ant" resource="com/sun/javafx/tools/ant/antlib.xml" classpath="${project.basedir}:${javafx.tools.ant.jar}" />
 
-								<fx:jar destfile="${project.build.directory}/${project.build.finalName}">
-									<fx:application refid="fxApp" />
-									<fx:fileset dir="${project.build.directory}/classes" />
-									<fx:resources>
-										<fx:fileset dir="${project.build.directory}" includes="libs/*.jar" />
-									</fx:resources>
-								</fx:jar>
-
-								<fx:deploy outdir="${project.build.directory}/dist" outfile="${project.build.finalName}" nativeBundles="all">
-									<fx:info title="Cryptomator" vendor="cryptomator.org" copyright="cryptomator.org" license="MIT">
-										<!-- todo provide .ico files for win -->
-										<fx:icon href="${project.build.outputDirectory}/logo.icns" width="512" height="512" />
-									</fx:info>
+								<fx:deploy nativeBundles="all" outdir="${project.build.directory}/dist" outfile="${project.build.finalName}" verbose="false">
+									<fx:application name="${javafx.application.name}" version="${project.version}" mainClass="${exec.mainClass}" />
+									<fx:info title="${javafx.application.name}" vendor="cryptomator.org" copyright="cryptomator.org" license="MIT" category="Utility" />
 									<fx:platform basedir="" javafx="2.2+" j2se="8.0" />
-									<fx:application refid="fxApp" />
 									<fx:resources>
-										<!-- If you changed <fx:jar> above, don't forget to modify the line below -->
-										<fx:fileset dir="${project.build.directory}" includes="${project.build.finalName}.jar" />
-										<fx:fileset dir="${project.build.directory}" includes="libs/*.jar" />
+										<fx:fileset dir="${project.build.directory}" includes="${javafx.application.name}.jar" />
 									</fx:resources>
-									<fx:preferences install="false" />
+									<fx:permissions elevated="true" />
+									<fx:preferences install="true" />
 								</fx:deploy>
 							</target>
 						</configuration>
 					</execution>
 				</executions>
 			</plugin>
+
 		</plugins>
 	</build>
 </project>
