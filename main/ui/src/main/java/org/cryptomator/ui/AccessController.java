@@ -15,7 +15,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.ResourceBundle;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -39,12 +38,11 @@ import org.slf4j.LoggerFactory;
 public class AccessController implements Initializable {
 
 	private static final Logger LOG = LoggerFactory.getLogger(AccessController.class);
-	private static final AtomicInteger ID_GENERATOR = new AtomicInteger();
 
 	private final Aes256Cryptor cryptor = new Aes256Cryptor();
 	private final WebDAVServer server = new WebDAVServer();
-	private final int id = ID_GENERATOR.getAndIncrement();
 	private ResourceBundle rb;
+	private String unmountCmd;
 
 	@FXML
 	private GridPane rootPane;
@@ -91,7 +89,7 @@ public class AccessController implements Initializable {
 		final int webdavPort = server.start(settings.getWebdavWorkDir(), cryptor);
 		if (webdavPort > 0) {
 			try {
-				WebDavMounter.mount(webdavPort, id);
+				unmountCmd = WebDavMounter.mount(webdavPort);
 				MainApplication.addShutdownTask(this::tryStop);
 			} catch (CommandFailedException e) {
 				messageLabel.setText(String.format(rb.getString("access.messageLabel.mountFailed"), webdavPort));
@@ -101,14 +99,13 @@ public class AccessController implements Initializable {
 	}
 
 	public void tryStop() {
-		try {
-			if (server != null && server.isRunning()) {
-				WebDavMounter.unmount(id, 5);
-				server.stop();
+		if (server != null && server.isRunning()) {
+			try {
+				WebDavMounter.unmount(unmountCmd);
+			} catch (CommandFailedException e) {
+				LOG.warn("Unmounting WebDAV share failed.", e);
 			}
-		} catch (CommandFailedException e) {
-			LOG.warn("Unmounting WebDAV share failed.", e);
-		} finally {
+			server.stop();
 			cryptor.swipeSensitiveData();
 		}
 	}

@@ -8,6 +8,9 @@
  ******************************************************************************/
 package org.cryptomator.webdav;
 
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+
 import org.cryptomator.crypto.Cryptor;
 import org.cryptomator.webdav.jackrabbit.WebDavServlet;
 import org.eclipse.jetty.server.Connector;
@@ -15,6 +18,8 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.util.thread.QueuedThreadPool;
+import org.eclipse.jetty.util.thread.ThreadPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,7 +27,17 @@ public final class WebDAVServer {
 
 	private static final Logger LOG = LoggerFactory.getLogger(WebDAVServer.class);
 	private static final String LOCALHOST = "127.0.0.1";
-	private final Server server = new Server();
+	private static final int MAX_PENDING_REQUESTS = 200;
+	private static final int MAX_THREADS = 4;
+	private static final int MIN_THREADS = 2;
+	private static final int THREAD_IDLE_SECONDS = 20;
+	private final Server server;
+	
+	public WebDAVServer() {
+		final BlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(MAX_PENDING_REQUESTS);
+		final ThreadPool tp = new QueuedThreadPool(MAX_THREADS, MIN_THREADS, THREAD_IDLE_SECONDS, queue);
+		server = new Server(tp);
+	}
 
 	/**
 	 * @param workDir Path of encrypted folder.
