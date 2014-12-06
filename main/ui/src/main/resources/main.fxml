@@ -1,12 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-  Copyright (c) 2014 Sebastian Stenzel
-  This file is licensed under the terms of the MIT license.
-  See the LICENSE.txt file for more info.
-  
-  Contributors:
-      Sebastian Stenzel - initial API and implementation
--->
+<!-- Copyright (c) 2014 Sebastian Stenzel This file is licensed under the terms of the MIT license. See the LICENSE.txt file for more info. Contributors: Sebastian Stenzel - initial API and implementation -->
 <?import java.net.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
@@ -27,20 +20,6 @@
 		<Insets top="12.0" right="12.0" bottom="12.0" left="12.0" />
 	</padding>
 
-	<fx:define>
-		<ComboBox fx:id="usernameBox" GridPane.rowIndex="2" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.hgrow="ALWAYS" maxWidth="Infinity" promptText="$access.label.username" disable="true" focusTraversable="false" />
-			
-		<SplitMenuButton fx:id="openButton" GridPane.rowIndex="4" GridPane.columnIndex="0" GridPane.columnSpan="3" prefWidth="120.0" GridPane.halignment="CENTER" text="%main.primaryButton.openVault" onAction="#openVault">
-			<styleClass>
-				<String fx:value="green" />
-			</styleClass>
-			<items>
-				<MenuItem text="Add User" />
-				<MenuItem text="Change Password" />
-			</items>
-		</SplitMenuButton>
-	</fx:define>
-
 	<columnConstraints>
 		<ColumnConstraints minWidth="100" />
 		<ColumnConstraints minWidth="200" />
@@ -59,6 +38,8 @@
 		<!-- Row 2 -->
 		<Label GridPane.rowIndex="2" GridPane.columnIndex="0" text="%main.label.username" GridPane.halignment="RIGHT" />
 		<TextField fx:id="usernameField" GridPane.rowIndex="2" GridPane.columnIndex="1" GridPane.columnSpan="2" disable="true" />
+		<ComboBox fx:id="usernameBox" visible="false" GridPane.rowIndex="2" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.hgrow="ALWAYS" maxWidth="Infinity" promptText="$access.label.username" disable="true" />
+
 
 		<!-- Row 3 -->
 		<Label GridPane.rowIndex="3" GridPane.columnIndex="0" text="%main.label.password" GridPane.halignment="RIGHT" />
@@ -71,6 +52,16 @@
 				<String fx:value="green" />
 			</styleClass>
 		</Button>
+		<SplitMenuButton fx:id="openButton" visible="false" GridPane.rowIndex="4" GridPane.columnIndex="0" GridPane.columnSpan="3" prefWidth="120.0" GridPane.halignment="CENTER" text="%main.primaryButton.openVault"
+			onAction="#openVault" focusTraversable="false">
+			<styleClass>
+				<String fx:value="green" />
+			</styleClass>
+			<items>
+				<MenuItem text="Add User" />
+				<MenuItem text="Change Password" />
+			</items>
+		</SplitMenuButton>
 
 	</children>
 </GridPane>

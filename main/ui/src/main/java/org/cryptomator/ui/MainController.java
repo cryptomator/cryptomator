@@ -154,10 +154,8 @@ public class MainController implements Initializable {
 
 	private void showUsernameField() {
 		messageLabel.setText(rb.getString("main.messageLabel.initVaultMessage"));
-		if (rootPane.getChildren().contains(usernameBox)) {
-			rootPane.getChildren().remove(usernameBox);
-			rootPane.getChildren().add(usernameField);
-		}
+		usernameBox.setVisible(false);
+		usernameField.setVisible(true);
 		Platform.runLater(usernameField::requestFocus);
 	}
 
@@ -184,10 +182,8 @@ public class MainController implements Initializable {
 
 	private void showUsernameBox(Iterator<Path> foundMasterKeys) {
 		messageLabel.setText(rb.getString("main.messageLabel.openVaultMessage"));
-		if (rootPane.getChildren().contains(usernameField)) {
-			rootPane.getChildren().remove(usernameField);
-			rootPane.getChildren().add(usernameBox);
-		}
+		usernameField.setVisible(false);
+		usernameBox.setVisible(true);
 
 		// update usernameBox options:
 		usernameBox.getItems().clear();
@@ -245,10 +241,8 @@ public class MainController implements Initializable {
 	// ****************************************
 
 	private void showInitializeButton() {
-		if (rootPane.getChildren().contains(openButton)) {
-			rootPane.getChildren().remove(openButton);
-			rootPane.getChildren().add(initializeButton);
-		}
+		openButton.setVisible(false);
+		initializeButton.setVisible(true);
 	}
 
 	@FXML
@@ -293,10 +287,8 @@ public class MainController implements Initializable {
 	// ****************************************
 
 	private void showOpenButton() {
-		if (rootPane.getChildren().contains(initializeButton)) {
-			rootPane.getChildren().remove(initializeButton);
-			rootPane.getChildren().add(openButton);
-		}
+		initializeButton.setVisible(false);
+		openButton.setVisible(true);
 	}
 
 	@FXML
