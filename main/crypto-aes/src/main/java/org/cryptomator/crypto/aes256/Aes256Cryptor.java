@@ -273,27 +273,20 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 	}
 
 	private String encryptPathComponent(final String cleartext, final SecretKey key, CryptorIOSupport ioSupport) throws IllegalBlockSizeException, BadPaddingException, IOException {
+		final Cipher cipher = this.cipher(FILE_NAME_CIPHER, key, EMPTY_IV, Cipher.ENCRYPT_MODE);
+		final byte[] cleartextBytes = cleartext.getBytes(Charsets.UTF_8);
+		final byte[] encryptedBytes = cipher.doFinal(cleartextBytes);
+		final String encrypted = ENCRYPTED_FILENAME_CODEC.encodeAsString(encryptedBytes) + BASIC_FILE_EXT;
+
 		if (cleartext.length() > PLAINTEXT_FILENAME_LENGTH_LIMIT) {
-			return encryptLongPathComponent(cleartext, key, ioSupport);
+			final LongFilenameMetadata metadata = new LongFilenameMetadata();
+			metadata.setEncryptedFilename(encrypted);
+			final String alternativeFileName = UUID.randomUUID().toString() + LONG_NAME_FILE_EXT;
+			ioSupport.writePathSpecificMetadata(alternativeFileName + METADATA_FILE_EXT, objectMapper.writeValueAsBytes(metadata));
+			return alternativeFileName;
 		} else {
-			return encryptShortPathComponent(cleartext, key);
+			return encrypted;
 		}
-	}
-
-	private String encryptShortPathComponent(final String cleartext, final SecretKey key) throws IllegalBlockSizeException, BadPaddingException {
-		final Cipher cipher = this.cipher(FILE_NAME_CIPHER, key, EMPTY_IV, Cipher.ENCRYPT_MODE);
-		final byte[] encryptedBytes = cipher.doFinal(cleartext.getBytes(Charsets.UTF_8));
-		return ENCRYPTED_FILENAME_CODEC.encodeAsString(encryptedBytes) + BASIC_FILE_EXT;
-	}
-
-	private String encryptLongPathComponent(final String cleartext, final SecretKey key, CryptorIOSupport ioSupport) throws IllegalBlockSizeException, BadPaddingException, IOException {
-		final Cipher cipher = this.cipher(FILE_NAME_CIPHER, key, EMPTY_IV, Cipher.ENCRYPT_MODE);
-		final byte[] encryptedBytes = cipher.doFinal(cleartext.getBytes(Charsets.UTF_8));
-		final LongFilenameMetadata metadata = new LongFilenameMetadata();
-		metadata.setEncryptedFilename(ENCRYPTED_FILENAME_CODEC.encodeAsString(encryptedBytes));
-		final String alternativeFileName = UUID.randomUUID().toString() + LONG_NAME_FILE_EXT;
-		ioSupport.writePathSpecificMetadata(alternativeFileName + METADATA_FILE_EXT, objectMapper.writeValueAsBytes(metadata));
-		return alternativeFileName;
 	}
 
 	@Override
@@ -313,27 +306,18 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 	}
 
 	private String decryptPathComponent(final String encrypted, final SecretKey key, CryptorIOSupport ioSupport) throws IllegalBlockSizeException, BadPaddingException, IOException {
+		final String ciphertext;
 		if (encrypted.endsWith(LONG_NAME_FILE_EXT)) {
-			return decryptLongPathComponent(encrypted, key, ioSupport);
+			final LongFilenameMetadata metadata = objectMapper.readValue(ioSupport.readPathSpecificMetadata(encrypted + METADATA_FILE_EXT), LongFilenameMetadata.class);
+			ciphertext = metadata.getEncryptedFilename();
 		} else if (encrypted.endsWith(BASIC_FILE_EXT)) {
-			return decryptShortPathComponent(encrypted, key);
+			ciphertext = StringUtils.removeEndIgnoreCase(encrypted, BASIC_FILE_EXT);
 		} else {
 			throw new IllegalArgumentException("Unsupported path component: " + encrypted);
 		}
-	}
 
-	private String decryptShortPathComponent(final String encrypted, final SecretKey key) throws IllegalBlockSizeException, BadPaddingException {
-		final String basename = StringUtils.removeEndIgnoreCase(encrypted, BASIC_FILE_EXT);
 		final Cipher cipher = this.cipher(FILE_NAME_CIPHER, key, EMPTY_IV, Cipher.DECRYPT_MODE);
-		final byte[] encryptedBytes = ENCRYPTED_FILENAME_CODEC.decode(basename);
-		final byte[] cleartextBytes = cipher.doFinal(encryptedBytes);
-		return new String(cleartextBytes, Charsets.UTF_8);
-	}
-
-	private String decryptLongPathComponent(final String encrypted, final SecretKey key, CryptorIOSupport ioSupport) throws IllegalBlockSizeException, BadPaddingException, IOException {
-		final LongFilenameMetadata metadata = objectMapper.readValue(ioSupport.readPathSpecificMetadata(encrypted + METADATA_FILE_EXT), LongFilenameMetadata.class);
-		final Cipher cipher = this.cipher(FILE_NAME_CIPHER, key, EMPTY_IV, Cipher.DECRYPT_MODE);
-		final byte[] encryptedBytes = ENCRYPTED_FILENAME_CODEC.decode(metadata.getEncryptedFilename());
+		final byte[] encryptedBytes = ENCRYPTED_FILENAME_CODEC.decode(ciphertext);
 		final byte[] cleartextBytes = cipher.doFinal(encryptedBytes);
 		return new String(cleartextBytes, Charsets.UTF_8);
 	}
