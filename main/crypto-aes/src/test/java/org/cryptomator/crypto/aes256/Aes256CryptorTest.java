@@ -17,13 +17,16 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
-import org.cryptomator.crypto.aes256.Aes256Cryptor;
+import org.cryptomator.crypto.CryptorIOSupport;
 import org.cryptomator.crypto.exceptions.DecryptFailedException;
 import org.cryptomator.crypto.exceptions.UnsupportedKeyLengthException;
 import org.cryptomator.crypto.exceptions.WrongPasswordException;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -47,11 +50,20 @@ public class Aes256CryptorTest {
 
 	/* ------------------------------------------------------------------------------- */
 
+	@Test(expected = IllegalStateException.class)
+	public void testUninitializedMasterKey() throws IOException {
+		final String pw = "asd";
+		final Aes256Cryptor cryptor = new Aes256Cryptor();
+		final OutputStream out = Files.newOutputStream(masterKey, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+		cryptor.encryptMasterKey(out, pw);
+	}
+
 	@Test
 	public void testCorrectPassword() throws IOException, WrongPasswordException, DecryptFailedException, UnsupportedKeyLengthException {
 		final String pw = "asd";
 		final Aes256Cryptor cryptor = new Aes256Cryptor();
 		final OutputStream out = Files.newOutputStream(masterKey, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+		cryptor.randomizeMasterKey();
 		cryptor.encryptMasterKey(out, pw);
 		cryptor.swipeSensitiveData();
 
@@ -65,6 +77,7 @@ public class Aes256CryptorTest {
 		final String pw = "asd";
 		final Aes256Cryptor cryptor = new Aes256Cryptor();
 		final OutputStream out = Files.newOutputStream(masterKey, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+		cryptor.randomizeMasterKey();
 		cryptor.encryptMasterKey(out, pw);
 		cryptor.swipeSensitiveData();
 
@@ -79,6 +92,7 @@ public class Aes256CryptorTest {
 		final String pw = "asd";
 		final Aes256Cryptor cryptor = new Aes256Cryptor();
 		final OutputStream out = Files.newOutputStream(masterKey, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+		cryptor.randomizeMasterKey();
 		cryptor.encryptMasterKey(out, pw);
 		cryptor.swipeSensitiveData();
 
@@ -93,12 +107,49 @@ public class Aes256CryptorTest {
 		final String pw = "asd";
 		final Aes256Cryptor cryptor = new Aes256Cryptor();
 		final OutputStream out = Files.newOutputStream(masterKey, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+		cryptor.randomizeMasterKey();
 		cryptor.encryptMasterKey(out, pw);
 		cryptor.swipeSensitiveData();
 
 		final OutputStream outAgain = Files.newOutputStream(masterKey, StandardOpenOption.WRITE, StandardOpenOption.CREATE_NEW);
 		cryptor.encryptMasterKey(outAgain, pw);
 		cryptor.swipeSensitiveData();
+	}
+
+	@Test
+	public void testEncryptionOfFilenames() throws IOException {
+		final CryptorIOSupport ioSupportMock = new CryptoIOSupportMock();
+		final Aes256Cryptor cryptor = new Aes256Cryptor();
+		cryptor.randomizeMasterKey();
+
+		// short path components
+		final String originalPath1 = "foo/bar/baz";
+		final String encryptedPath1 = cryptor.encryptPath(originalPath1, '/', '/', ioSupportMock);
+		final String decryptedPath1 = cryptor.decryptPath(encryptedPath1, '/', '/', ioSupportMock);
+		Assert.assertEquals(originalPath1, decryptedPath1);
+
+		// long path components
+		final String str50chars = "aaaaaaaaaabbbbbbbbbbccccccccccddddddddddeeeeeeeeee";
+		final String originalPath2 = "foo/" + str50chars + str50chars + str50chars + str50chars + str50chars + "/baz";
+		final String encryptedPath2 = cryptor.encryptPath(originalPath2, '/', '/', ioSupportMock);
+		final String decryptedPath2 = cryptor.decryptPath(encryptedPath2, '/', '/', ioSupportMock);
+		Assert.assertEquals(originalPath2, decryptedPath2);
+	}
+
+	private static class CryptoIOSupportMock implements CryptorIOSupport {
+
+		private final Map<String, byte[]> map = new HashMap<>();
+
+		@Override
+		public void writePathSpecificMetadata(String encryptedPath, byte[] encryptedMetadata) {
+			map.put(encryptedPath, encryptedMetadata);
+		}
+
+		@Override
+		public byte[] readPathSpecificMetadata(String encryptedPath) {
+			return map.get(encryptedPath);
+		}
+
 	}
 
 }

@@ -67,6 +67,7 @@ public class InitializeController implements Initializable {
 		OutputStream masterKeyOutputStream = null;
 		try {
 			masterKeyOutputStream = Files.newOutputStream(masterKeyPath, StandardOpenOption.WRITE, StandardOpenOption.CREATE_NEW);
+			cryptor.randomizeMasterKey();
 			cryptor.encryptMasterKey(masterKeyOutputStream, password);
 			cryptor.swipeSensitiveData();
 			if (callback != null) {

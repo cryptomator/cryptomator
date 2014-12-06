@@ -26,6 +26,7 @@ import java.security.spec.KeySpec;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -40,8 +41,10 @@ import javax.crypto.spec.SecretKeySpec;
 
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.cryptomator.crypto.AbstractCryptor;
+import org.cryptomator.crypto.CryptorIOSupport;
 import org.cryptomator.crypto.exceptions.DecryptFailedException;
 import org.cryptomator.crypto.exceptions.UnsupportedKeyLengthException;
 import org.cryptomator.crypto.exceptions.WrongPasswordException;
@@ -74,6 +77,11 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 	private static final int AES_KEY_LENGTH;
 
 	/**
+	 * 
+	 */
+	private static final byte[] EMPTY_MASTER_KEY = new byte[MASTER_KEY_LENGTH];
+
+	/**
 	 * Jackson JSON-Mapper.
 	 */
 	private final ObjectMapper objectMapper = new ObjectMapper();
@@ -82,7 +90,7 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 	 * The decrypted master key. Its lifecycle starts with {@link #randomData(int)} or {@link #encryptMasterKey(Path, CharSequence)}. Its
 	 * lifecycle ends with {@link #swipeSensitiveData()}.
 	 */
-	private final byte[] masterKey = new byte[MASTER_KEY_LENGTH];
+	private final byte[] masterKey = Arrays.copyOf(EMPTY_MASTER_KEY, MASTER_KEY_LENGTH);
 
 	private static final int SIZE_OF_LONG = Long.SIZE / Byte.SIZE;
 	private static final int SIZE_OF_INT = Integer.SIZE / Byte.SIZE;
@@ -110,6 +118,9 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 	 * Encrypts the current masterKey with the given password and writes the result to the given output stream.
 	 */
 	public void encryptMasterKey(OutputStream out, CharSequence password) throws IOException {
+		if (ArrayUtils.isEquals(this.masterKey, EMPTY_MASTER_KEY)) {
+			throw new IllegalStateException("Masterkey not yet initialized.");
+		}
 		try {
 			// derive key:
 			final byte[] userSalt = randomData(SALT_LENGTH);
@@ -246,24 +257,24 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 	}
 
 	@Override
-	public String encryptPath(String cleartextPath, char encryptedPathSep, char cleartextPathSep) {
+	public String encryptPath(String cleartextPath, char encryptedPathSep, char cleartextPathSep, CryptorIOSupport ioSupport) {
 		try {
 			final SecretKey key = this.pbkdf2(masterKey, EMPTY_SALT, PBKDF2_MASTERKEY_ITERATIONS, AES_KEY_LENGTH);
 			final String[] cleartextPathComps = StringUtils.split(cleartextPath, cleartextPathSep);
 			final List<String> encryptedPathComps = new ArrayList<>(cleartextPathComps.length);
 			for (final String cleartext : cleartextPathComps) {
-				final String encrypted = encryptPathComponent(cleartext, key);
+				final String encrypted = encryptPathComponent(cleartext, key, ioSupport);
 				encryptedPathComps.add(encrypted);
 			}
 			return StringUtils.join(encryptedPathComps, encryptedPathSep);
-		} catch (IllegalBlockSizeException | BadPaddingException e) {
+		} catch (IllegalBlockSizeException | BadPaddingException | IOException e) {
 			throw new IllegalStateException("Unable to encrypt path: " + cleartextPath, e);
 		}
 	}
 
-	private String encryptPathComponent(final String cleartext, final SecretKey key) throws IllegalBlockSizeException, BadPaddingException {
+	private String encryptPathComponent(final String cleartext, final SecretKey key, CryptorIOSupport ioSupport) throws IllegalBlockSizeException, BadPaddingException, IOException {
 		if (cleartext.length() > PLAINTEXT_FILENAME_LENGTH_LIMIT) {
-			return encryptLongPathComponent(cleartext, key);
+			return encryptLongPathComponent(cleartext, key, ioSupport);
 		} else {
 			return encryptShortPathComponent(cleartext, key);
 		}
@@ -275,29 +286,35 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 		return ENCRYPTED_FILENAME_CODEC.encodeAsString(encryptedBytes) + BASIC_FILE_EXT;
 	}
 
-	private String encryptLongPathComponent(String cleartext, SecretKey key) {
-		throw new UnsupportedOperationException("not yet implemented");
+	private String encryptLongPathComponent(final String cleartext, final SecretKey key, CryptorIOSupport ioSupport) throws IllegalBlockSizeException, BadPaddingException, IOException {
+		final Cipher cipher = this.cipher(FILE_NAME_CIPHER, key, EMPTY_IV, Cipher.ENCRYPT_MODE);
+		final byte[] encryptedBytes = cipher.doFinal(cleartext.getBytes(Charsets.UTF_8));
+		final LongFilenameMetadata metadata = new LongFilenameMetadata();
+		metadata.setEncryptedFilename(ENCRYPTED_FILENAME_CODEC.encodeAsString(encryptedBytes));
+		final String alternativeFileName = UUID.randomUUID().toString() + LONG_NAME_FILE_EXT;
+		ioSupport.writePathSpecificMetadata(alternativeFileName + METADATA_FILE_EXT, objectMapper.writeValueAsBytes(metadata));
+		return alternativeFileName;
 	}
 
 	@Override
-	public String decryptPath(String encryptedPath, char encryptedPathSep, char cleartextPathSep) {
+	public String decryptPath(String encryptedPath, char encryptedPathSep, char cleartextPathSep, CryptorIOSupport ioSupport) {
 		try {
 			final SecretKey key = this.pbkdf2(masterKey, EMPTY_SALT, PBKDF2_MASTERKEY_ITERATIONS, AES_KEY_LENGTH);
 			final String[] encryptedPathComps = StringUtils.split(encryptedPath, encryptedPathSep);
 			final List<String> cleartextPathComps = new ArrayList<>(encryptedPathComps.length);
 			for (final String encrypted : encryptedPathComps) {
-				final String cleartext = decryptPathComponent(encrypted, key);
+				final String cleartext = decryptPathComponent(encrypted, key, ioSupport);
 				cleartextPathComps.add(new String(cleartext));
 			}
 			return StringUtils.join(cleartextPathComps, cleartextPathSep);
-		} catch (IllegalBlockSizeException | BadPaddingException e) {
+		} catch (IllegalBlockSizeException | BadPaddingException | IOException e) {
 			throw new IllegalStateException("Unable to decrypt path: " + encryptedPath, e);
 		}
 	}
 
-	private String decryptPathComponent(final String encrypted, final SecretKey key) throws IllegalBlockSizeException, BadPaddingException {
+	private String decryptPathComponent(final String encrypted, final SecretKey key, CryptorIOSupport ioSupport) throws IllegalBlockSizeException, BadPaddingException, IOException {
 		if (encrypted.endsWith(LONG_NAME_FILE_EXT)) {
-			return decryptLongPathComponent(encrypted, key);
+			return decryptLongPathComponent(encrypted, key, ioSupport);
 		} else if (encrypted.endsWith(BASIC_FILE_EXT)) {
 			return decryptShortPathComponent(encrypted, key);
 		} else {
@@ -313,8 +330,12 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 		return new String(cleartextBytes, Charsets.UTF_8);
 	}
 
-	private String decryptLongPathComponent(final String encrypted, final SecretKey key) {
-		throw new UnsupportedOperationException("not yet implemented");
+	private String decryptLongPathComponent(final String encrypted, final SecretKey key, CryptorIOSupport ioSupport) throws IllegalBlockSizeException, BadPaddingException, IOException {
+		final LongFilenameMetadata metadata = objectMapper.readValue(ioSupport.readPathSpecificMetadata(encrypted + METADATA_FILE_EXT), LongFilenameMetadata.class);
+		final Cipher cipher = this.cipher(FILE_NAME_CIPHER, key, EMPTY_IV, Cipher.DECRYPT_MODE);
+		final byte[] encryptedBytes = ENCRYPTED_FILENAME_CODEC.decode(metadata.getEncryptedFilename());
+		final byte[] cleartextBytes = cipher.doFinal(encryptedBytes);
+		return new String(cleartextBytes, Charsets.UTF_8);
 	}
 
 	@Override

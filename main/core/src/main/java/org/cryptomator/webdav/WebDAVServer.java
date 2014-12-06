@@ -28,11 +28,11 @@ public final class WebDAVServer {
 	private static final Logger LOG = LoggerFactory.getLogger(WebDAVServer.class);
 	private static final String LOCALHOST = "127.0.0.1";
 	private static final int MAX_PENDING_REQUESTS = 200;
-	private static final int MAX_THREADS = 4;
-	private static final int MIN_THREADS = 2;
+	private static final int MAX_THREADS = 200;
+	private static final int MIN_THREADS = 4;
 	private static final int THREAD_IDLE_SECONDS = 20;
 	private final Server server;
-	
+
 	public WebDAVServer() {
 		final BlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(MAX_PENDING_REQUESTS);
 		final ThreadPool tp = new QueuedThreadPool(MAX_THREADS, MIN_THREADS, THREAD_IDLE_SECONDS, queue);

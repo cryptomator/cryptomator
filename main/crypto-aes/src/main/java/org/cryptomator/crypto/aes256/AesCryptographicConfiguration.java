@@ -16,10 +16,9 @@ interface AesCryptographicConfiguration {
 	int PRNG_SEED_LENGTH = 16;
 
 	/**
-	 * Number of bytes of the master key. Should be significantly higher than the {@link #AES_KEY_LENGTH}, as a corrupted masterkey can't be
-	 * changed without decrypting and re-encrypting all files first.
+	 * Number of bytes of the master key. Should be the maximum possible AES key length to provide best security.
 	 */
-	int MASTER_KEY_LENGTH = 512;
+	int MASTER_KEY_LENGTH = 256;
 
 	/**
 	 * Number of bytes used as salt, where needed.

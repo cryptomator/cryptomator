@@ -32,7 +32,7 @@ public interface Cryptor extends SensitiveDataSwipeListener {
 	 * @return Encrypted path components concatenated by the given encryptedPathSep. Must not start with encryptedPathSep, unless the
 	 *         encrypted path is explicitly absolute.
 	 */
-	String encryptPath(String cleartextPath, char encryptedPathSep, char cleartextPathSep);
+	String encryptPath(String cleartextPath, char encryptedPathSep, char cleartextPathSep, CryptorIOSupport ioSupport);
 
 	/**
 	 * Decrypts each encrypted path component for its own.
@@ -46,7 +46,7 @@ public interface Cryptor extends SensitiveDataSwipeListener {
 	 * @return Decrypted path components concatenated by the given cleartextPathSep. Must not start with cleartextPathSep, unless the
 	 *         cleartext path is explicitly absolute.
 	 */
-	String decryptPath(String encryptedPath, char encryptedPathSep, char cleartextPathSep);
+	String decryptPath(String encryptedPath, char encryptedPathSep, char cleartextPathSep, CryptorIOSupport ioSupport);
 
 	/**
 	 * @param metadataSupport Support object allowing the Cryptor to read and write its own metadata to the location of the encrypted file.

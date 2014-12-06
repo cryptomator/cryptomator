@@ -46,6 +46,11 @@ interface FileNamingConventions {
 	String LONG_NAME_FILE_EXT = ".lng.aes";
 
 	/**
+	 * For file-related metadata.
+	 */
+	String METADATA_FILE_EXT = ".meta";
+
+	/**
 	 * Matches both, {@value #BASIC_FILE_EXT} and {@value #LONG_NAME_FILE_EXT} files.
 	 */
 	PathMatcher ENCRYPTED_FILE_GLOB_MATCHER = FileSystems.getDefault().getPathMatcher("glob:**/*{" + BASIC_FILE_EXT + "," + LONG_NAME_FILE_EXT + "}");

@@ -8,26 +8,32 @@
  ******************************************************************************/
 package org.cryptomator.webdav.jackrabbit;
 
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.channels.SeekableByteChannel;
 import java.nio.file.FileSystems;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 
+import org.apache.commons.collections4.BidiMap;
 import org.apache.jackrabbit.webdav.AbstractLocatorFactory;
 import org.apache.jackrabbit.webdav.DavResourceLocator;
 import org.cryptomator.crypto.Cryptor;
+import org.cryptomator.crypto.CryptorIOSupport;
 import org.cryptomator.crypto.SensitiveDataSwipeListener;
 
-public class WebDavLocatorFactory extends AbstractLocatorFactory implements SensitiveDataSwipeListener {
+public class WebDavLocatorFactory extends AbstractLocatorFactory implements SensitiveDataSwipeListener, CryptorIOSupport {
 
 	private static final int MAX_CACHED_PATHS = 10000;
 	private final Path fsRoot;
 	private final Cryptor cryptor;
-	private final BidiLRUMap<String, String> pathCache; // <decryptedPath, encryptedPath>
+	private final BidiMap<String, String> pathCache = new BidiLRUMap<>(MAX_CACHED_PATHS); // <decryptedPath, encryptedPath>
 
 	public WebDavLocatorFactory(String fsRoot, String httpRoot, Cryptor cryptor) {
 		super(httpRoot);
 		this.fsRoot = FileSystems.getDefault().getPath(fsRoot);
 		this.cryptor = cryptor;
-		this.pathCache = new BidiLRUMap<>(MAX_CACHED_PATHS);
 		cryptor.addSensitiveDataSwipeListener(this);
 	}
 
@@ -48,7 +54,7 @@ public class WebDavLocatorFactory extends AbstractLocatorFactory implements Sens
 		if (resourcePath == null) {
 			return fsRoot.toString();
 		}
-		final String encryptedRepoPath = cryptor.encryptPath(resourcePath, FileSystems.getDefault().getSeparator().charAt(0), '/');
+		final String encryptedRepoPath = cryptor.encryptPath(resourcePath, FileSystems.getDefault().getSeparator().charAt(0), '/', this);
 		return fsRoot.resolve(encryptedRepoPath).toString();
 	}
 
@@ -71,7 +77,7 @@ public class WebDavLocatorFactory extends AbstractLocatorFactory implements Sens
 			return null;
 		} else {
 			final Path relativeRepositoryPath = fsRoot.relativize(absRepoPath);
-			final String resourcePath = cryptor.decryptPath(relativeRepositoryPath.toString(), FileSystems.getDefault().getSeparator().charAt(0), '/');
+			final String resourcePath = cryptor.decryptPath(relativeRepositoryPath.toString(), FileSystems.getDefault().getSeparator().charAt(0), '/', this);
 			return resourcePath;
 		}
 	}
@@ -91,6 +97,38 @@ public class WebDavLocatorFactory extends AbstractLocatorFactory implements Sens
 	@Override
 	public void swipeSensitiveData() {
 		pathCache.clear();
+	}
+
+	/* Cryptor I/O Support */
+
+	@Override
+	public void writePathSpecificMetadata(String encryptedPath, byte[] encryptedMetadata) throws IOException {
+		final Path metaDataFile = fsRoot.resolve(encryptedPath);
+		final SeekableByteChannel channel = Files.newByteChannel(metaDataFile, StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.DSYNC);
+		try {
+			final ByteBuffer buffer = ByteBuffer.wrap(encryptedMetadata);
+			while (channel.write(buffer) > 0) {
+				// continue writing.
+			}
+		} finally {
+			channel.close();
+		}
+	}
+
+	@Override
+	public byte[] readPathSpecificMetadata(String encryptedPath) throws IOException {
+		final Path metaDataFile = fsRoot.resolve(encryptedPath);
+		final long metaDataFileSize = Files.size(metaDataFile);
+		final SeekableByteChannel channel = Files.newByteChannel(metaDataFile, StandardOpenOption.READ);
+		try {
+			final ByteBuffer buffer = ByteBuffer.allocate((int) metaDataFileSize);
+			while (channel.read(buffer) > 0) {
+				// continue reading.
+			}
+			return buffer.array();
+		} finally {
+			channel.close();
+		}
 	}
 
 }

@@ -27,7 +27,7 @@ public final class WebDavMounter {
 	private WebDavMounter() {
 		throw new IllegalStateException("not instantiable.");
 	}
-	
+
 	/**
 	 * @return Unmount Command
 	 */
@@ -58,17 +58,18 @@ public final class WebDavMounter {
 		try {
 			final Process proc;
 			if (SystemUtils.IS_OS_WINDOWS) {
-				proc = Runtime.getRuntime().exec(new String[]{"cmd", "/C", cmd});
+				proc = Runtime.getRuntime().exec(new String[] {"cmd", "/C", cmd});
 			} else {
 				proc = Runtime.getRuntime().exec(new String[] {"/bin/sh", "-c", cmd});
 			}
-			if (proc.waitFor(timoutSeconds, TimeUnit.SECONDS)) {
+			if (!proc.waitFor(timoutSeconds, TimeUnit.SECONDS)) {
 				proc.destroy();
+				throw new CommandFailedException("Timeout executing command " + cmd);
 			}
 			if (proc.exitValue() != 0) {
 				throw new CommandFailedException(IOUtils.toString(proc.getErrorStream()));
 			}
-			return  IOUtils.toString(proc.getInputStream());
+			return IOUtils.toString(proc.getInputStream());
 		} catch (IOException | InterruptedException | IllegalThreadStateException e) {
 			LOG.error("Command execution failed.", e);
 			throw new CommandFailedException(e);
