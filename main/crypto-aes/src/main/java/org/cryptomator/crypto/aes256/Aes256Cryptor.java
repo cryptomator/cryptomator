@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.zip.CRC32;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -51,6 +52,7 @@ import org.cryptomator.crypto.exceptions.WrongPasswordException;
 import org.cryptomator.crypto.io.SeekableByteChannelInputStream;
 import org.cryptomator.crypto.io.SeekableByteChannelOutputStream;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicConfiguration, FileNamingConventions {
@@ -256,6 +258,12 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 		}
 	}
 
+	private long crc32Sum(byte[] source) {
+		final CRC32 crc32 = new CRC32();
+		crc32.update(source);
+		return crc32.getValue();
+	}
+
 	@Override
 	public String encryptPath(String cleartextPath, char encryptedPathSep, char cleartextPathSep, CryptorIOSupport ioSupport) {
 		try {
@@ -272,17 +280,33 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 		}
 	}
 
+	/**
+	 * Each path component, i.e. file or directory name separated by path separators, gets encrypted for its own.<br/>
+	 * Encryption will blow up the filename length due to aes block sizes and base32 encoding. The result may be too long for some old file
+	 * systems.<br/>
+	 * This means that we need a workaround for filenames longer than the limit defined in
+	 * {@link FileNamingConventions#ENCRYPTED_FILENAME_LENGTH_LIMIT}.<br/>
+	 * <br/>
+	 * In any case we will create the encrypted filename normally. For those, that are too long, we calculate a checksum. No
+	 * cryptographically secure hash is needed here. We just want an uniform distribution for better load balancing. All encrypted filenames
+	 * with the same checksum will then share a metadata file, in which a lookup map between encrypted filenames and short unique
+	 * alternative names are stored.<br/>
+	 * <br/>
+	 * These alternative names consist of the checksum, a unique id and a special file extension defined in
+	 * {@link FileNamingConventions#LONG_NAME_FILE_EXT}.
+	 */
 	private String encryptPathComponent(final String cleartext, final SecretKey key, CryptorIOSupport ioSupport) throws IllegalBlockSizeException, BadPaddingException, IOException {
 		final Cipher cipher = this.cipher(FILE_NAME_CIPHER, key, EMPTY_IV, Cipher.ENCRYPT_MODE);
 		final byte[] cleartextBytes = cleartext.getBytes(Charsets.UTF_8);
 		final byte[] encryptedBytes = cipher.doFinal(cleartextBytes);
 		final String encrypted = ENCRYPTED_FILENAME_CODEC.encodeAsString(encryptedBytes) + BASIC_FILE_EXT;
 
-		if (cleartext.length() > PLAINTEXT_FILENAME_LENGTH_LIMIT) {
-			final LongFilenameMetadata metadata = new LongFilenameMetadata();
-			metadata.setEncryptedFilename(encrypted);
-			final String alternativeFileName = UUID.randomUUID().toString() + LONG_NAME_FILE_EXT;
-			ioSupport.writePathSpecificMetadata(alternativeFileName + METADATA_FILE_EXT, objectMapper.writeValueAsBytes(metadata));
+		if (encrypted.length() > ENCRYPTED_FILENAME_LENGTH_LIMIT) {
+			final String crc32 = String.valueOf(crc32Sum(encrypted.getBytes()));
+			final String metadataFilename = crc32 + METADATA_FILE_EXT;
+			final LongFilenameMetadata metadata = this.getMetadata(ioSupport, metadataFilename);
+			final String alternativeFileName = crc32 + LONG_NAME_PREFIX_SEPARATOR + metadata.getOrCreateUuidForEncryptedFilename(encrypted).toString() + LONG_NAME_FILE_EXT;
+			this.storeMetadata(ioSupport, metadataFilename, metadata);
 			return alternativeFileName;
 		} else {
 			return encrypted;
@@ -305,11 +329,18 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 		}
 	}
 
+	/**
+	 * @see #encryptPathComponent(String, SecretKey, CryptorIOSupport)
+	 */
 	private String decryptPathComponent(final String encrypted, final SecretKey key, CryptorIOSupport ioSupport) throws IllegalBlockSizeException, BadPaddingException, IOException {
 		final String ciphertext;
 		if (encrypted.endsWith(LONG_NAME_FILE_EXT)) {
-			final LongFilenameMetadata metadata = objectMapper.readValue(ioSupport.readPathSpecificMetadata(encrypted + METADATA_FILE_EXT), LongFilenameMetadata.class);
-			ciphertext = metadata.getEncryptedFilename();
+			final String basename = StringUtils.removeEnd(encrypted, LONG_NAME_FILE_EXT);
+			final String crc32 = StringUtils.substringBefore(basename, LONG_NAME_PREFIX_SEPARATOR);
+			final String uuid = StringUtils.substringAfter(basename, LONG_NAME_PREFIX_SEPARATOR);
+			final String metadataFilename = crc32 + METADATA_FILE_EXT;
+			final LongFilenameMetadata metadata = this.getMetadata(ioSupport, metadataFilename);
+			ciphertext = metadata.getEncryptedFilenameForUUID(UUID.fromString(uuid));
 		} else if (encrypted.endsWith(BASIC_FILE_EXT)) {
 			ciphertext = StringUtils.removeEndIgnoreCase(encrypted, BASIC_FILE_EXT);
 		} else {
@@ -320,6 +351,19 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 		final byte[] encryptedBytes = ENCRYPTED_FILENAME_CODEC.decode(ciphertext);
 		final byte[] cleartextBytes = cipher.doFinal(encryptedBytes);
 		return new String(cleartextBytes, Charsets.UTF_8);
+	}
+
+	private LongFilenameMetadata getMetadata(CryptorIOSupport ioSupport, String metadataFile) throws IOException {
+		final byte[] fileContent = ioSupport.readPathSpecificMetadata(metadataFile);
+		if (fileContent == null) {
+			return new LongFilenameMetadata();
+		} else {
+			return objectMapper.readValue(fileContent, LongFilenameMetadata.class);
+		}
+	}
+
+	private void storeMetadata(CryptorIOSupport ioSupport, String metadataFile, LongFilenameMetadata metadata) throws JsonProcessingException, IOException {
+		ioSupport.writePathSpecificMetadata(metadataFile, objectMapper.writeValueAsBytes(metadata));
 	}
 
 	@Override

@@ -9,20 +9,41 @@
 package org.cryptomator.crypto.aes256;
 
 import java.io.Serializable;
+import java.util.UUID;
+
+import org.apache.commons.collections4.BidiMap;
+import org.apache.commons.collections4.bidimap.DualHashBidiMap;
+
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 class LongFilenameMetadata implements Serializable {
 
 	private static final long serialVersionUID = 6214509403824421320L;
-	private String encryptedFilename;
+
+	@JsonDeserialize(as = DualHashBidiMap.class)
+	private BidiMap<UUID, String> encryptedFilenames = new DualHashBidiMap<>();
 
 	/* Getter/Setter */
 
-	public String getEncryptedFilename() {
-		return encryptedFilename;
+	public synchronized String getEncryptedFilenameForUUID(final UUID uuid) {
+		return encryptedFilenames.get(uuid);
 	}
 
-	public void setEncryptedFilename(String encryptedFilename) {
-		this.encryptedFilename = encryptedFilename;
+	public synchronized UUID getOrCreateUuidForEncryptedFilename(String encryptedFilename) {
+		UUID uuid = encryptedFilenames.getKey(encryptedFilename);
+		if (uuid == null) {
+			uuid = UUID.randomUUID();
+			encryptedFilenames.put(uuid, encryptedFilename);
+		}
+		return uuid;
+	}
+
+	public BidiMap<UUID, String> getEncryptedFilenames() {
+		return encryptedFilenames;
+	}
+
+	public void setEncryptedFilenames(BidiMap<UUID, String> encryptedFilenames) {
+		this.encryptedFilenames = encryptedFilenames;
 	}
 
 }

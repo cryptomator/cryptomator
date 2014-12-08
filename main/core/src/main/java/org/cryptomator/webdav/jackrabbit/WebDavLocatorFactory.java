@@ -118,6 +118,9 @@ public class WebDavLocatorFactory extends AbstractLocatorFactory implements Sens
 	@Override
 	public byte[] readPathSpecificMetadata(String encryptedPath) throws IOException {
 		final Path metaDataFile = fsRoot.resolve(encryptedPath);
+		if (!Files.isReadable(metaDataFile)) {
+			return null;
+		}
 		final long metaDataFileSize = Files.size(metaDataFile);
 		final SeekableByteChannel channel = Files.newByteChannel(metaDataFile, StandardOpenOption.READ);
 		try {

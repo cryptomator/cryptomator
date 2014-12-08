@@ -28,25 +28,28 @@ interface FileNamingConventions {
 
 	/**
 	 * Maximum length possible on file systems with a filename limit of 255 chars.<br/>
-	 * 144 and 160 are multiples of 16 (128bit aes block size).<br/>
-	 * 144 * 8/5 (base32) = 230,..<br/>
-	 * 160 * 8/5 = 256<br/>
-	 * Base 64 isn't supported on case-insensitive file systems.<br/>
+	 * Also we would need a few chars for our file extension, so lets use {@value #ENCRYPTED_FILENAME_LENGTH_LIMIT}.
 	 */
-	int PLAINTEXT_FILENAME_LENGTH_LIMIT = 144;
+	int ENCRYPTED_FILENAME_LENGTH_LIMIT = 250;
 
 	/**
-	 * For plaintext file names <= {@value #PLAINTEXT_FILENAME_LENGTH_LIMIT} chars.
+	 * For plaintext file names <= {@value #ENCRYPTED_FILENAME_LENGTH_LIMIT} chars.
 	 */
 	String BASIC_FILE_EXT = ".aes";
 
 	/**
-	 * For plaintext file names > {@value #PLAINTEXT_FILENAME_LENGTH_LIMIT} chars.
+	 * For plaintext file names > {@value #ENCRYPTED_FILENAME_LENGTH_LIMIT} chars.
 	 */
 	String LONG_NAME_FILE_EXT = ".lng.aes";
 
 	/**
-	 * For file-related metadata.
+	 * Prefix in file names > {@value #ENCRYPTED_FILENAME_LENGTH_LIMIT} chars used to determine the corresponding metadata file.
+	 */
+	String LONG_NAME_PREFIX_SEPARATOR = "_";
+
+	/**
+	 * For metadata files for a certain group of files. The cryptor may decide what files to assign to the same group; hopefully using some
+	 * kind of uniform distribution for better load balancing.
 	 */
 	String METADATA_FILE_EXT = ".meta";
 

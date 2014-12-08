@@ -16,7 +16,7 @@ public interface CryptorIOSupport {
 	void writePathSpecificMetadata(String encryptedPath, byte[] encryptedMetadata) throws IOException;
 
 	/**
-	 * @return Previously written encryptedMetadata stored at the given encryptedPath.
+	 * @return Previously written encryptedMetadata stored at the given encryptedPath or <code>null</code> if no such file exists.
 	 */
 	byte[] readPathSpecificMetadata(String encryptedPath) throws IOException;
 
