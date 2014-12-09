@@ -44,6 +44,11 @@ public final class WebDavMounter {
 				final String driveLetter = matcher.group();
 				return "net use " + driveLetter + " /delete";
 			}
+		} else if (SystemUtils.IS_OS_LINUX) {
+			// TODO check result of "which gvfs-mount" first and choose a good strategy. also refactor this class ;-)
+			exec("gvfs-mount dav://localhost:" + localPort, CMD_DEFAULT_TIMEOUT);
+			exec("xdg-open dav://localhost:" + localPort, CMD_DEFAULT_TIMEOUT);
+			return "gvfs-mount -u dav://localhost:" + localPort;
 		}
 		return null;
 	}
