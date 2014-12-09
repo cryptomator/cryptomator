@@ -9,8 +9,6 @@
 package org.cryptomator.webdav.jackrabbit;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.channels.SeekableByteChannel;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -104,15 +102,7 @@ public class WebDavLocatorFactory extends AbstractLocatorFactory implements Sens
 	@Override
 	public void writePathSpecificMetadata(String encryptedPath, byte[] encryptedMetadata) throws IOException {
 		final Path metaDataFile = fsRoot.resolve(encryptedPath);
-		final SeekableByteChannel channel = Files.newByteChannel(metaDataFile, StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.DSYNC);
-		try {
-			final ByteBuffer buffer = ByteBuffer.wrap(encryptedMetadata);
-			while (channel.write(buffer) > 0) {
-				// continue writing.
-			}
-		} finally {
-			channel.close();
-		}
+		Files.write(metaDataFile, encryptedMetadata, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.DSYNC);
 	}
 
 	@Override
@@ -120,17 +110,8 @@ public class WebDavLocatorFactory extends AbstractLocatorFactory implements Sens
 		final Path metaDataFile = fsRoot.resolve(encryptedPath);
 		if (!Files.isReadable(metaDataFile)) {
 			return null;
-		}
-		final long metaDataFileSize = Files.size(metaDataFile);
-		final SeekableByteChannel channel = Files.newByteChannel(metaDataFile, StandardOpenOption.READ);
-		try {
-			final ByteBuffer buffer = ByteBuffer.allocate((int) metaDataFileSize);
-			while (channel.read(buffer) > 0) {
-				// continue reading.
-			}
-			return buffer.array();
-		} finally {
-			channel.close();
+		} else {
+			return Files.readAllBytes(metaDataFile);
 		}
 	}
 

@@ -21,6 +21,7 @@
 		<javafx.application.name>Cryptomator</javafx.application.name>
 		<exec.mainClass>org.cryptomator.ui.MainApplication</exec.mainClass>
 		<javafx.tools.ant.jar>${java.home}/../lib/ant-javafx.jar</javafx.tools.ant.jar>
+		<controlsfx.version>8.20.8</controlsfx.version>
 	</properties>
 
 	<dependencies>
@@ -47,6 +48,13 @@
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
+		</dependency>
+		
+		<!-- UI -->
+		<dependency>
+		    <groupId>org.controlsfx</groupId>
+		    <artifactId>controlsfx</artifactId>
+		    <version>${controlsfx.version}</version>
 		</dependency>
 	</dependencies>
 

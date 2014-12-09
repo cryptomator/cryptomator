@@ -11,18 +11,24 @@ package org.cryptomator.ui;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URL;
+import java.nio.file.DirectoryStream;
 import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.FileVisitor;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
@@ -34,6 +40,7 @@ import org.cryptomator.crypto.aes256.Aes256Cryptor;
 import org.cryptomator.ui.controls.ClearOnDisableListener;
 import org.cryptomator.ui.controls.SecPasswordField;
 import org.cryptomator.ui.model.Directory;
+import org.cryptomator.ui.util.EncryptingFileVisitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -116,6 +123,9 @@ public class InitializeController implements Initializable {
 
 	@FXML
 	protected void initializeVault(ActionEvent event) {
+		if (!isDirectoryEmpty() && !shouldEncryptExistingFiles()) {
+			return;
+		}
 		final String masterKeyFileName = usernameField.getText() + Aes256Cryptor.MASTERKEY_FILE_EXT;
 		final Path masterKeyPath = directory.getPath().resolve(masterKeyFileName);
 		final CharSequence password = passwordField.getCharacters();
@@ -124,6 +134,7 @@ public class InitializeController implements Initializable {
 			masterKeyOutputStream = Files.newOutputStream(masterKeyPath, StandardOpenOption.WRITE, StandardOpenOption.CREATE_NEW);
 			directory.getCryptor().randomizeMasterKey();
 			directory.getCryptor().encryptMasterKey(masterKeyOutputStream, password);
+			encryptExistingContents();
 			directory.getCryptor().swipeSensitiveData();
 			if (listener != null) {
 				listener.didInitialize(this);
@@ -140,6 +151,36 @@ public class InitializeController implements Initializable {
 			retypePasswordField.swipe();
 			IOUtils.closeQuietly(masterKeyOutputStream);
 		}
+	}
+	
+	private boolean isDirectoryEmpty() {
+		try {
+			final DirectoryStream<Path> dirContents = Files.newDirectoryStream(directory.getPath());
+			return !dirContents.iterator().hasNext();
+		} catch (IOException e) {
+			LOG.error("Failed to analyze directory.", e);
+			throw new IllegalStateException(e);
+		}
+	}
+	
+	private boolean shouldEncryptExistingFiles() {
+		final Alert alert = new Alert(AlertType.CONFIRMATION);
+		alert.setTitle(localization.getString("initialize.alert.directoryIsNotEmpty.title"));
+		alert.setHeaderText(localization.getString("initialize.alert.directoryIsNotEmpty.header"));
+		alert.setContentText(localization.getString("initialize.alert.directoryIsNotEmpty.content"));
+
+		final Optional<ButtonType> result = alert.showAndWait();
+		return ButtonType.OK.equals(result.get());
+	}
+	
+	private void encryptExistingContents() throws IOException {
+		final FileVisitor<Path> visitor = new EncryptingFileVisitor(directory.getPath(), directory.getCryptor(), this::shouldEncryptExistingFile);
+		Files.walkFileTree(directory.getPath(), visitor);
+	}
+	
+	private boolean shouldEncryptExistingFile(Path path) {
+		final String name = path.getFileName().toString();
+		return !directory.getPath().equals(path) && !name.endsWith(Aes256Cryptor.BASIC_FILE_EXT) && !name.endsWith(Aes256Cryptor.METADATA_FILE_EXT) && !name.endsWith(Aes256Cryptor.MASTERKEY_FILE_EXT);
 	}
 
 	/* Getter/Setter */
