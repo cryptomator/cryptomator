@@ -14,38 +14,38 @@
 <?import javafx.scene.text.*?>
 <?import org.cryptomator.ui.controls.*?>
 <?import javafx.scene.layout.HBox?>
+<?import org.cryptomator.ui.controls.SecPasswordField?>
+<?import javafx.scene.control.TextField?>
 
 
-<GridPane vgap="6.0" hgap="6.0" fx:controller="org.cryptomator.ui.InitializeController" xmlns:fx="http://javafx.com/fxml">
-	<stylesheets>
-		<URL value="@main.css" />
-	</stylesheets>
-
+<GridPane vgap="12.0" hgap="12.0" prefWidth="400.0" fx:controller="org.cryptomator.ui.InitializeController" xmlns:fx="http://javafx.com/fxml">
 	<padding>
-		<Insets top="12.0" right="12.0" bottom="12.0" left="12.0" />
+		<Insets top="24.0" right="24.0" bottom="24.0" left="24.0" />
 	</padding>
-
+	
 	<columnConstraints>
-		<ColumnConstraints minWidth="100" />
-		<ColumnConstraints minWidth="200" />
+		<ColumnConstraints percentWidth="38.2"/>
+		<ColumnConstraints percentWidth="61.8"/>
 	</columnConstraints>
 
 	<children>
-		<!-- Row 1 -->
-		<Label GridPane.rowIndex="0" GridPane.columnIndex="0" text="%initialize.label.retypePassword" GridPane.halignment="RIGHT" />
-		<SecPasswordField fx:id="retypePasswordField" GridPane.rowIndex="0" GridPane.columnIndex="1" />
+		<!-- Row 0 -->
+		<Label GridPane.rowIndex="0" GridPane.columnIndex="0" text="%initialize.label.username" />
+		<TextField fx:id="usernameField" GridPane.rowIndex="0" GridPane.columnIndex="1" />
 		
+		<!-- Row 1 -->
+		<Label GridPane.rowIndex="1" GridPane.columnIndex="0" text="%initialize.label.password" />
+		<SecPasswordField fx:id="passwordField" GridPane.rowIndex="1" GridPane.columnIndex="1" disable="true" />
 		
 		<!-- Row 2 -->
-		<Label fx:id="messageLabel" GridPane.rowIndex="1" GridPane.columnIndex="0" GridPane.columnSpan="5" textOverrun="ELLIPSIS" />
+		<Label GridPane.rowIndex="2" GridPane.columnIndex="0" text="%initialize.label.retypePassword" />
+		<SecPasswordField fx:id="retypePasswordField" GridPane.rowIndex="2" GridPane.columnIndex="1" disable="true" />
 		
 		<!-- Row 3 -->
-		<HBox GridPane.rowIndex="2" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.hgrow="ALWAYS" spacing="6.0" alignment="BOTTOM_RIGHT">
-			<children>
-					<Button text="%initialize.button.cancel" prefWidth="80.0" cancelButton="true" onAction="#cancel" focusTraversable="false"/>
-					<Button fx:id="okButton" text="%initialize.button.ok" prefWidth="80.0" defaultButton="true" onAction="#initWorkDir" disable="true" focusTraversable="false"/>
-			</children>
-		</HBox>
+		<Button fx:id="okButton" defaultButton="true" GridPane.rowIndex="3" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.halignment="RIGHT" text="%initialize.button.ok" prefWidth="150.0" onAction="#initializeVault" focusTraversable="false" disable="true" />
+		
+		<!-- Row 5 -->
+		<Label fx:id="messageLabel" GridPane.rowIndex="5" GridPane.columnIndex="0" GridPane.columnSpan="2" />
 	</children>
 </GridPane>
 

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright (c) 2014 Sebastian Stenzel
+  This file is licensed under the terms of the MIT license.
+  See the LICENSE.txt file for more info.
+  
+  Contributors:
+      Sebastian Stenzel - initial API and implementation
+-->
+<?import java.net.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import java.lang.String?>
+<?import javafx.scene.control.Label?>
+
+
+<GridPane vgap="12.0" hgap="12.0" prefWidth="400.0" fx:controller="org.cryptomator.ui.UnlockedController" xmlns:fx="http://javafx.com/fxml">
+	<padding>
+		<Insets top="24.0" right="24.0" bottom="24.0" left="24.0" />
+	</padding>
+	
+	<columnConstraints>
+		<ColumnConstraints percentWidth="38.2"/>
+		<ColumnConstraints percentWidth="61.8"/>
+	</columnConstraints>
+
+	<children>
+		<!-- Row 0 -->
+		<Label fx:id="messageLabel" GridPane.rowIndex="0" GridPane.columnIndex="0" GridPane.columnSpan="2" />
+		
+		<!-- Row 1 -->
+		<Button text="%unlocked.button.lock" defaultButton="true" GridPane.rowIndex="1" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.halignment="RIGHT" prefWidth="150.0" onAction="#closeVault" focusTraversable="false"/>
+	</children>
+</GridPane>
+
+

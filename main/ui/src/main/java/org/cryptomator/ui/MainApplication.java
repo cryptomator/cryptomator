@@ -34,7 +34,10 @@ public class MainApplication extends Application {
 	@Override
 	public void start(final Stage primaryStage) throws IOException {
 		final ResourceBundle localizations = ResourceBundle.getBundle("localization");
-		final Parent root = FXMLLoader.load(getClass().getResource("/main.fxml"), localizations);
+		final FXMLLoader loader = new FXMLLoader(getClass().getResource("/main.fxml"), localizations);
+		final Parent root = loader.load();
+		final MainController ctrl = loader.getController();
+		ctrl.setStage(primaryStage);
 		final Scene scene = new Scene(root);
 		primaryStage.setTitle("Cryptomator");
 		primaryStage.setScene(scene);
@@ -50,11 +53,11 @@ public class MainApplication extends Application {
 		super.stop();
 	}
 
-	static void addShutdownTask(Runnable r) {
+	public static void addShutdownTask(Runnable r) {
 		SHUTDOWN_TASKS.add(r);
 	}
 
-	static void removeShutdownTask(Runnable r) {
+	public static void removeShutdownTask(Runnable r) {
 		SHUTDOWN_TASKS.remove(r);
 	}
 

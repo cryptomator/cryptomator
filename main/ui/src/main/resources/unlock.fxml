@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright (c) 2014 Sebastian Stenzel
+  This file is licensed under the terms of the MIT license.
+  See the LICENSE.txt file for more info.
+  
+  Contributors:
+      Sebastian Stenzel - initial API and implementation
+-->
+<?import java.net.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import java.lang.String?>
+<?import org.cryptomator.ui.controls.SecPasswordField?>
+<?import javafx.scene.control.Label?>
+
+
+<GridPane vgap="12.0" hgap="12.0" prefWidth="400.0" fx:controller="org.cryptomator.ui.UnlockController" xmlns:fx="http://javafx.com/fxml">
+	<padding>
+		<Insets top="24.0" right="24.0" bottom="24.0" left="24.0" />
+	</padding>
+	
+	<columnConstraints>
+		<ColumnConstraints percentWidth="38.2"/>
+		<ColumnConstraints percentWidth="61.8"/>
+	</columnConstraints>
+
+	<children>
+		<!-- Row 0 -->
+		<Label text="%unlock.label.username" GridPane.rowIndex="0" GridPane.columnIndex="0" />
+		<ComboBox fx:id="usernameBox" GridPane.rowIndex="0" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" maxWidth="Infinity" promptText="$access.label.username" />
+
+		<!-- Row 1 -->
+		<Label text="%unlock.label.password" GridPane.rowIndex="1" GridPane.columnIndex="0" />
+		<SecPasswordField fx:id="passwordField" GridPane.rowIndex="1" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" maxWidth="Infinity" />
+		
+		<!-- Row 2 -->
+		<Button text="%unlock.button.unlock" defaultButton="true" GridPane.rowIndex="2" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.halignment="RIGHT" prefWidth="150.0" onAction="#didClickUnlockButton" focusTraversable="false"/>
+		
+		<!-- Row 5 -->
+		<Label fx:id="messageLabel" GridPane.rowIndex="5" GridPane.columnIndex="0" GridPane.columnSpan="2" />
+	</children>
+</GridPane>
+
+

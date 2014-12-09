@@ -17,8 +17,11 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
+import java.util.Collection;
 
 import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.ui.model.Directory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,18 +43,18 @@ public class Settings implements Serializable {
 		final FileSystem fs = FileSystems.getDefault();
 
 		if (SystemUtils.IS_OS_WINDOWS && appdata != null) {
-			SETTINGS_DIR = fs.getPath(appdata, "opencloudencryptor");
+			SETTINGS_DIR = fs.getPath(appdata, "Cryptomator");
 		} else if (SystemUtils.IS_OS_WINDOWS && appdata == null) {
-			SETTINGS_DIR = fs.getPath(SystemUtils.USER_HOME, ".opencloudencryptor");
+			SETTINGS_DIR = fs.getPath(SystemUtils.USER_HOME, ".Cryptomator");
 		} else if (SystemUtils.IS_OS_MAC_OSX) {
-			SETTINGS_DIR = fs.getPath(SystemUtils.USER_HOME, "Library/Application Support/opencloudencryptor");
+			SETTINGS_DIR = fs.getPath(SystemUtils.USER_HOME, "Library/Application Support/Cryptomator");
 		} else {
 			// (os.contains("solaris") || os.contains("sunos") || os.contains("linux") || os.contains("unix"))
-			SETTINGS_DIR = fs.getPath(SystemUtils.USER_HOME, ".opencloudencryptor");
+			SETTINGS_DIR = fs.getPath(SystemUtils.USER_HOME, ".Cryptomator");
 		}
 	}
 
-	private String webdavWorkDir;
+	private Collection<Directory> directories;
 	private String username;
 
 	private Settings() {
@@ -88,19 +91,20 @@ public class Settings implements Serializable {
 	}
 
 	private static Settings defaultSettings() {
-		final Settings result = new Settings();
-		result.setWebdavWorkDir(System.getProperty("user.home", "."));
-		return result;
+		return new Settings();
 	}
 
 	/* Getter/Setter */
 
-	public String getWebdavWorkDir() {
-		return webdavWorkDir;
+	public Collection<Directory> getDirectories() {
+		if (directories == null) {
+			directories = new ArrayList<>();
+		}
+		return directories;
 	}
 
-	public void setWebdavWorkDir(String webdavWorkDir) {
-		this.webdavWorkDir = webdavWorkDir;
+	public void setDirectories(Collection<Directory> directories) {
+		this.directories = directories;
 	}
 
 	public String getUsername() {
