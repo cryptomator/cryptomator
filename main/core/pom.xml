@@ -18,7 +18,7 @@
 	<name>Cryptomator core I/O module</name>
 
 	<properties>
-		<jetty.version>9.1.0.v20131115</jetty.version>
+		<jetty.version>9.2.5.v20141112</jetty.version>
 		<jackrabbit.version>2.9.0</jackrabbit.version>
 		<commons.transaction.version>1.2</commons.transaction.version>
 		<jta.version>1.1</jta.version>
