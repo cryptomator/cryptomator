@@ -113,6 +113,23 @@ public class Directory implements Serializable {
 		return server;
 	}
 
+	/* hashcode/equals */
+
+	@Override
+	public int hashCode() {
+		return path.hashCode();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof Directory) {
+			final Directory other = (Directory) obj;
+			return this.path.equals(other.path);
+		} else {
+			return false;
+		}
+	}
+
 	/* graceful shutdown */
 
 	private class ShutdownTask implements Runnable {

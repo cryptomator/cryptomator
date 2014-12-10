@@ -11,8 +11,11 @@ package org.cryptomator.ui;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Collection;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
+import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -82,7 +85,7 @@ public class MainController implements Initializable, InitializationListener, Un
 		stage.setTitle(selectedDir.getName());
 		showDirectory(selectedDir);
 	}
-	
+
 	private void showDirectory(Directory directory) {
 		try {
 			if (directory.isUnlocked()) {
@@ -133,6 +136,7 @@ public class MainController implements Initializable, InitializationListener, Un
 	@Override
 	public void didUnlock(UnlockController ctrl) {
 		showUnlockedView(ctrl.getDirectory());
+		Platform.setImplicitExit(false);
 	}
 
 	private void showUnlockedView(Directory directory) {
@@ -144,6 +148,19 @@ public class MainController implements Initializable, InitializationListener, Un
 	@Override
 	public void didLock(UnlockedController ctrl) {
 		showUnlockView(ctrl.getDirectory());
+		if (getUnlockedDirectories().isEmpty()) {
+			Platform.setImplicitExit(true);
+		}
+	}
+
+	/* Convenience */
+
+	public Collection<Directory> getDirectories() {
+		return directoryList.getItems();
+	}
+
+	public Collection<Directory> getUnlockedDirectories() {
+		return getDirectories().stream().filter(d -> d.isUnlocked()).collect(Collectors.toSet());
 	}
 
 	/* public Getter/Setter */
