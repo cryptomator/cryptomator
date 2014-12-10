@@ -80,11 +80,17 @@ public class MainController implements Initializable, InitializationListener, Un
 	private void selectedDirectoryDidChange(ListChangeListener.Change<? extends Directory> change) {
 		final Directory selectedDir = directoryList.getSelectionModel().getSelectedItem();
 		stage.setTitle(selectedDir.getName());
+		showDirectory(selectedDir);
+	}
+	
+	private void showDirectory(Directory directory) {
 		try {
-			if (selectedDir.containsMasterKey()) {
-				this.showUnlockView(selectedDir);
+			if (directory.isUnlocked()) {
+				this.showUnlockedView(directory);
+			} else if (directory.containsMasterKey()) {
+				this.showUnlockView(directory);
 			} else {
-				this.showInitializeView(selectedDir);
+				this.showInitializeView(directory);
 			}
 		} catch (IOException e) {
 			LOG.error("Failed to analyze directory.", e);

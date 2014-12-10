@@ -1,4 +1,4 @@
-package org.cryptomator.ui.util;
+package org.cryptomator.files;
 
 import java.io.IOException;
 import java.nio.file.FileVisitResult;

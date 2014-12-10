@@ -21,7 +21,10 @@
 	</Appenders>
 	
 	<Loggers>
-		<Root level="DEBUG">
+		<!-- show our own debug messages: -->
+		<Logger name="org.cryptomator" level="DEBUG"/>
+		<!-- mute dependencies: -->
+		<Root level="INFO">
 			<AppenderRef ref="Console" />
 			<AppenderRef ref="StdErr" />
 		</Root>

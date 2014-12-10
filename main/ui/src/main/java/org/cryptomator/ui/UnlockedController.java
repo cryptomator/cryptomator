@@ -37,6 +37,7 @@ public class UnlockedController implements Initializable {
 	protected void closeVault(ActionEvent event) {
 		directory.unmount();
 		directory.stopServer();
+		directory.setUnlocked(false);
 		if (listener != null) {
 			listener.didLock(this);
 		}

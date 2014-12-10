@@ -87,8 +87,10 @@ public class UnlockController implements Initializable {
 			directory.getCryptor().decryptMasterKey(masterKeyInputStream, password);
 			if (!directory.startServer()) {
 				messageLabel.setText(rb.getString("unlock.messageLabel.startServerFailed"));
+				directory.getCryptor().swipeSensitiveData();
 				return;
 			}
+			directory.setUnlocked(true);
 			directory.mount();
 			if (listener != null) {
 				listener.didUnlock(this);

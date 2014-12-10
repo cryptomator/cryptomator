@@ -37,10 +37,10 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.CharUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.cryptomator.crypto.aes256.Aes256Cryptor;
+import org.cryptomator.files.EncryptingFileVisitor;
 import org.cryptomator.ui.controls.ClearOnDisableListener;
 import org.cryptomator.ui.controls.SecPasswordField;
 import org.cryptomator.ui.model.Directory;
-import org.cryptomator.ui.util.EncryptingFileVisitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
