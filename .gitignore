@@ -10,3 +10,4 @@
 .project
 .classpath
 target/
+test-output/
