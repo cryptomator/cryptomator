@@ -44,8 +44,12 @@ public class Aes256CryptorTest {
 	}
 
 	@After
-	public void dropTmpDir() throws IOException {
-		FileUtils.deleteDirectory(tmpDir.toFile());
+	public void dropTmpDir() {
+		try {
+			FileUtils.deleteDirectory(tmpDir.toFile());
+		} catch (IOException e) {
+			// ignore
+		}
 	}
 
 	/* ------------------------------------------------------------------------------- */
