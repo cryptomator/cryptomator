@@ -3,7 +3,7 @@ Cryptomator
 
 Multiplatform transparent client-side encryption of your files in the cloud. You need Java 8 in order to run the application. Get the runtime environment here: http://www.oracle.com/technetwork/java/javase/downloads/index.html
 
-If you run OS X and want to take a look at the current alpha version, go ahead and [download Cryptomator.dmg](https://github.com/totalvoidness/cryptomator/releases/download/v0.1.0/Cryptomator.dmg).
+If you want to take a look at the current beta version, go ahead and download [Cryptomator.dmg](https://github.com/totalvoidness/cryptomator/releases/download/v0.2.0/Cryptomator.dmg), [Cryptomator.exe](https://github.com/totalvoidness/cryptomator/releases/download/v0.2.0/Cryptomator.exe) or [Cryptomator.jar](https://github.com/totalvoidness/cryptomator/releases/download/v0.2.0/Cryptomator.jar).
 
 ## Features
 - Totally transparent: Just work on the encrypted volume, as if it was an USB drive
