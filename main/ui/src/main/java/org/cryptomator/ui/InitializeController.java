@@ -152,7 +152,7 @@ public class InitializeController implements Initializable {
 			IOUtils.closeQuietly(masterKeyOutputStream);
 		}
 	}
-	
+
 	private boolean isDirectoryEmpty() {
 		try {
 			final DirectoryStream<Path> dirContents = Files.newDirectoryStream(directory.getPath());
@@ -162,22 +162,22 @@ public class InitializeController implements Initializable {
 			throw new IllegalStateException(e);
 		}
 	}
-	
+
 	private boolean shouldEncryptExistingFiles() {
 		final Alert alert = new Alert(AlertType.CONFIRMATION);
 		alert.setTitle(localization.getString("initialize.alert.directoryIsNotEmpty.title"));
-		alert.setHeaderText(localization.getString("initialize.alert.directoryIsNotEmpty.header"));
+		alert.setHeaderText(null);
 		alert.setContentText(localization.getString("initialize.alert.directoryIsNotEmpty.content"));
 
 		final Optional<ButtonType> result = alert.showAndWait();
 		return ButtonType.OK.equals(result.get());
 	}
-	
+
 	private void encryptExistingContents() throws IOException {
 		final FileVisitor<Path> visitor = new EncryptingFileVisitor(directory.getPath(), directory.getCryptor(), this::shouldEncryptExistingFile);
 		Files.walkFileTree(directory.getPath(), visitor);
 	}
-	
+
 	private boolean shouldEncryptExistingFile(Path path) {
 		final String name = path.getFileName().toString();
 		return !directory.getPath().equals(path) && !name.endsWith(Aes256Cryptor.BASIC_FILE_EXT) && !name.endsWith(Aes256Cryptor.METADATA_FILE_EXT) && !name.endsWith(Aes256Cryptor.MASTERKEY_FILE_EXT);

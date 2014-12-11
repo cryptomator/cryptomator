@@ -30,7 +30,7 @@ If you want to take a look at the current beta version, go ahead and download [C
 - *NEW:* No Metadata at all. Encrypted files can be decrypted even on completely shuffled file systems (if their contents are undamaged).
 
 ## Dependencies
-- Java 8 (for UI only - runs headless on Java 7)
+- Java 8
 - Maven
 - Awesome 3rd party open source libraries (Apache Commons, Apache Jackrabbit, Jetty, Jackson, ...)
 

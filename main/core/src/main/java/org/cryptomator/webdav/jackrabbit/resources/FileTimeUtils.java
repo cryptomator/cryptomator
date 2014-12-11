@@ -1,0 +1,28 @@
+/*******************************************************************************
+ * Copyright (c) 2014 Sebastian Stenzel
+ * This file is licensed under the terms of the MIT license.
+ * See the LICENSE.txt file for more info.
+ * 
+ * Contributors:
+ *     Sebastian Stenzel - initial API and implementation
+ ******************************************************************************/
+package org.cryptomator.webdav.jackrabbit.resources;
+
+import java.nio.file.attribute.FileTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.Temporal;
+
+public final class FileTimeUtils {
+
+	private FileTimeUtils() {
+		throw new IllegalStateException("not instantiable");
+	}
+
+	public static String toRfc1123String(FileTime time) {
+		final Temporal date = OffsetDateTime.ofInstant(time.toInstant(), ZoneId.systemDefault());
+		return DateTimeFormatter.RFC_1123_DATE_TIME.format(date);
+	}
+
+}
