@@ -15,10 +15,30 @@ import java.nio.channels.SeekableByteChannel;
 import java.nio.file.DirectoryStream.Filter;
 import java.nio.file.Path;
 
+import org.cryptomator.crypto.exceptions.DecryptFailedException;
+import org.cryptomator.crypto.exceptions.UnsupportedKeyLengthException;
+import org.cryptomator.crypto.exceptions.WrongPasswordException;
+
 /**
  * Provides access to cryptographic functions. All methods are threadsafe.
  */
 public interface Cryptor extends SensitiveDataSwipeListener {
+
+	/**
+	 * Encrypts the current masterKey with the given password and writes the result to the given output stream.
+	 */
+	void encryptMasterKey(OutputStream out, CharSequence password) throws IOException;
+
+	/**
+	 * Reads the encrypted masterkey from the given input stream and decrypts it with the given password.
+	 * 
+	 * @throws DecryptFailedException If the decryption failed for various reasons (including wrong password).
+	 * @throws WrongPasswordException If the provided password was wrong. Note: Sometimes the algorithm itself fails due to a wrong
+	 *             password. In this case a DecryptFailedException will be thrown.
+	 * @throws UnsupportedKeyLengthException If the masterkey has been encrypted with a higher key length than supported by the system. In
+	 *             this case Java JCE needs to be installed.
+	 */
+	void decryptMasterKey(InputStream in, CharSequence password) throws DecryptFailedException, WrongPasswordException, UnsupportedKeyLengthException, IOException;
 
 	/**
 	 * Encrypts each plaintext path component for its own.

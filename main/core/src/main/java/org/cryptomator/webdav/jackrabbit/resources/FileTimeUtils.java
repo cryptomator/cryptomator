@@ -21,7 +21,7 @@ public final class FileTimeUtils {
 	}
 
 	public static String toRfc1123String(FileTime time) {
-		final Temporal date = OffsetDateTime.ofInstant(time.toInstant(), ZoneOffset.UTC.normalized());
+		final Temporal date = OffsetDateTime.ofInstant(time.toInstant(), ZoneOffset.UTC);
 		return DateTimeFormatter.RFC_1123_DATE_TIME.format(date);
 	}
 

@@ -132,7 +132,6 @@ public class InitializeController implements Initializable {
 		OutputStream masterKeyOutputStream = null;
 		try {
 			masterKeyOutputStream = Files.newOutputStream(masterKeyPath, StandardOpenOption.WRITE, StandardOpenOption.CREATE_NEW);
-			directory.getCryptor().randomizeMasterKey();
 			directory.getCryptor().encryptMasterKey(masterKeyOutputStream, password);
 			encryptExistingContents();
 			directory.getCryptor().swipeSensitiveData();

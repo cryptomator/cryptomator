@@ -8,12 +8,19 @@
  ******************************************************************************/
 package org.cryptomator.crypto;
 
-public interface SensitiveDataSwipeListener {
+/**
+ * Optional monitoring interface. If a cryptor implements this interface, it counts bytes de- and encrypted in a thread-safe manner.
+ */
+public interface CryptorIOSampling {
 
 	/**
-	 * Removes sensitive data from memory. Depending on the data (e.g. for passwords) it might be necessary to overwrite the memory before
-	 * freeing the object.
+	 * @return Number of encrypted bytes since the last reset.
 	 */
-	void swipeSensitiveData();
+	Long pollEncryptedBytes(boolean resetCounter);
+
+	/**
+	 * @return Number of decrypted bytes since the last reset.
+	 */
+	Long pollDecryptedBytes(boolean resetCounter);
 
 }

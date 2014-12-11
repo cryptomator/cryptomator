@@ -50,20 +50,11 @@ public class Aes256CryptorTest {
 
 	/* ------------------------------------------------------------------------------- */
 
-	@Test(expected = IllegalStateException.class)
-	public void testUninitializedMasterKey() throws IOException {
-		final String pw = "asd";
-		final Aes256Cryptor cryptor = new Aes256Cryptor();
-		final OutputStream out = Files.newOutputStream(masterKey, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
-		cryptor.encryptMasterKey(out, pw);
-	}
-
 	@Test
 	public void testCorrectPassword() throws IOException, WrongPasswordException, DecryptFailedException, UnsupportedKeyLengthException {
 		final String pw = "asd";
 		final Aes256Cryptor cryptor = new Aes256Cryptor();
 		final OutputStream out = Files.newOutputStream(masterKey, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
-		cryptor.randomizeMasterKey();
 		cryptor.encryptMasterKey(out, pw);
 		cryptor.swipeSensitiveData();
 
@@ -77,7 +68,6 @@ public class Aes256CryptorTest {
 		final String pw = "asd";
 		final Aes256Cryptor cryptor = new Aes256Cryptor();
 		final OutputStream out = Files.newOutputStream(masterKey, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
-		cryptor.randomizeMasterKey();
 		cryptor.encryptMasterKey(out, pw);
 		cryptor.swipeSensitiveData();
 
@@ -92,7 +82,6 @@ public class Aes256CryptorTest {
 		final String pw = "asd";
 		final Aes256Cryptor cryptor = new Aes256Cryptor();
 		final OutputStream out = Files.newOutputStream(masterKey, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
-		cryptor.randomizeMasterKey();
 		cryptor.encryptMasterKey(out, pw);
 		cryptor.swipeSensitiveData();
 
@@ -107,7 +96,6 @@ public class Aes256CryptorTest {
 		final String pw = "asd";
 		final Aes256Cryptor cryptor = new Aes256Cryptor();
 		final OutputStream out = Files.newOutputStream(masterKey, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
-		cryptor.randomizeMasterKey();
 		cryptor.encryptMasterKey(out, pw);
 		cryptor.swipeSensitiveData();
 
@@ -120,7 +108,6 @@ public class Aes256CryptorTest {
 	public void testEncryptionOfFilenames() throws IOException {
 		final CryptorIOSupport ioSupportMock = new CryptoIOSupportMock();
 		final Aes256Cryptor cryptor = new Aes256Cryptor();
-		cryptor.randomizeMasterKey();
 
 		// short path components
 		final String originalPath1 = "foo/bar/baz";

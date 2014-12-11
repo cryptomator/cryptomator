@@ -6,6 +6,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.apache.commons.lang3.StringUtils;
+import org.cryptomator.crypto.Cryptor;
+import org.cryptomator.crypto.SamplingDecorator;
 import org.cryptomator.crypto.aes256.Aes256Cryptor;
 import org.cryptomator.ui.MainApplication;
 import org.cryptomator.ui.util.MasterKeyFilter;
@@ -26,7 +28,7 @@ public class Directory implements Serializable {
 	private static final Logger LOG = LoggerFactory.getLogger(Directory.class);
 
 	private final WebDAVServer server = new WebDAVServer();
-	private final Aes256Cryptor cryptor = new Aes256Cryptor();
+	private final Cryptor cryptor = SamplingDecorator.decorate(new Aes256Cryptor());
 	private final Path path;
 	private boolean unlocked;
 	private String unmountCommand;
@@ -97,7 +99,7 @@ public class Directory implements Serializable {
 		return path.getFileName().toString();
 	}
 
-	public Aes256Cryptor getCryptor() {
+	public Cryptor getCryptor() {
 		return cryptor;
 	}
 

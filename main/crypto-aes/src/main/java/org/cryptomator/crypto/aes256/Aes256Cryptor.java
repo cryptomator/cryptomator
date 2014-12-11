@@ -42,7 +42,6 @@ import javax.crypto.spec.SecretKeySpec;
 
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.cryptomator.crypto.AbstractCryptor;
 import org.cryptomator.crypto.CryptorIOSupport;
@@ -79,11 +78,6 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 	private static final int AES_KEY_LENGTH;
 
 	/**
-	 * 
-	 */
-	private static final byte[] EMPTY_MASTER_KEY = new byte[MASTER_KEY_LENGTH];
-
-	/**
 	 * Jackson JSON-Mapper.
 	 */
 	private final ObjectMapper objectMapper = new ObjectMapper();
@@ -92,7 +86,7 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 	 * The decrypted master key. Its lifecycle starts with {@link #randomData(int)} or {@link #encryptMasterKey(Path, CharSequence)}. Its
 	 * lifecycle ends with {@link #swipeSensitiveData()}.
 	 */
-	private final byte[] masterKey = Arrays.copyOf(EMPTY_MASTER_KEY, MASTER_KEY_LENGTH);
+	private final byte[] masterKey = new byte[MASTER_KEY_LENGTH];
 
 	private static final int SIZE_OF_LONG = Long.SIZE / Byte.SIZE;
 	private static final int SIZE_OF_INT = Integer.SIZE / Byte.SIZE;
@@ -108,10 +102,7 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 		}
 	}
 
-	/**
-	 * Fills the masterkey with new random bytes.
-	 */
-	public void randomizeMasterKey() {
+	public Aes256Cryptor() {
 		SECURE_PRNG.setSeed(SECURE_PRNG.generateSeed(PRNG_SEED_LENGTH));
 		SECURE_PRNG.nextBytes(this.masterKey);
 	}
@@ -119,10 +110,8 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 	/**
 	 * Encrypts the current masterKey with the given password and writes the result to the given output stream.
 	 */
+	@Override
 	public void encryptMasterKey(OutputStream out, CharSequence password) throws IOException {
-		if (ArrayUtils.isEquals(this.masterKey, EMPTY_MASTER_KEY)) {
-			throw new IllegalStateException("Masterkey not yet initialized.");
-		}
 		try {
 			// derive key:
 			final byte[] userSalt = randomData(SALT_LENGTH);
@@ -157,6 +146,7 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 	 * @throws UnsupportedKeyLengthException If the masterkey has been encrypted with a higher key length than supported by the system. In
 	 *             this case Java JCE needs to be installed.
 	 */
+	@Override
 	public void decryptMasterKey(InputStream in, CharSequence password) throws DecryptFailedException, WrongPasswordException, UnsupportedKeyLengthException, IOException {
 		byte[] decrypted = new byte[0];
 		try {
