@@ -96,8 +96,8 @@ public class EncryptedFile extends AbstractEncryptedNode {
 				properties.add(new DefaultDavProperty<Long>(DavPropertyName.GETCONTENTLENGTH, contentLength));
 
 				final BasicFileAttributes attrs = Files.readAttributes(path, BasicFileAttributes.class);
-				properties.add(new DefaultDavProperty<Long>(DavPropertyName.CREATIONDATE, attrs.creationTime().toMillis()));
-				properties.add(new DefaultDavProperty<Long>(DavPropertyName.GETLASTMODIFIED, attrs.lastModifiedTime().toMillis()));
+				properties.add(new DefaultDavProperty<String>(DavPropertyName.CREATIONDATE, FileTimeUtils.toRfc1123String(attrs.creationTime())));
+				properties.add(new DefaultDavProperty<String>(DavPropertyName.GETLASTMODIFIED, FileTimeUtils.toRfc1123String(attrs.lastModifiedTime())));
 			} catch (IOException e) {
 				LOG.error("Error determining metadata " + path.toString(), e);
 				throw new IORuntimeException(e);
