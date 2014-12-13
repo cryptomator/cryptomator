@@ -52,7 +52,7 @@ public class UnlockedController implements Initializable {
 	}
 
 	@FXML
-	protected void closeVault(ActionEvent event) {
+	private void didClickCloseVault(ActionEvent event) {
 		directory.unmount();
 		directory.stopServer();
 		directory.setUnlocked(false);

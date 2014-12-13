@@ -18,7 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.List;
 
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.ui.model.Directory;
@@ -54,7 +54,7 @@ public class Settings implements Serializable {
 		}
 	}
 
-	private Collection<Directory> directories;
+	private List<Directory> directories;
 	private String username;
 
 	private Settings() {
@@ -96,14 +96,14 @@ public class Settings implements Serializable {
 
 	/* Getter/Setter */
 
-	public Collection<Directory> getDirectories() {
+	public List<Directory> getDirectories() {
 		if (directories == null) {
 			directories = new ArrayList<>();
 		}
 		return directories;
 	}
 
-	public void setDirectories(Collection<Directory> directories) {
+	public void setDirectories(List<Directory> directories) {
 		this.directories = directories;
 	}
 

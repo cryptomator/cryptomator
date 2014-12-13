@@ -14,13 +14,23 @@
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.control.ToolBar?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ContextMenu?>
+<?import javafx.scene.control.MenuItem?>
 
 <HBox fx:id="rootPane" prefHeight="400.0" prefWidth="600.0" fx:controller="org.cryptomator.ui.MainController" xmlns:fx="http://javafx.com/fxml">
-	
+
 	<fx:define>
 		<fx:include fx:id="welcomeView" source="welcome.fxml" />
+		<ContextMenu fx:id="directoryContextMenu">
+			<items>
+				<MenuItem text="%main.directoryList.contextMenu.remove" onAction="#didClickRemoveSelectedEntry" />
+				<!-- TODO: -->
+				<MenuItem text="%main.directoryList.contextMenu.addUser" disable="true" />
+				<MenuItem text="%main.directoryList.contextMenu.changePassword" disable="true" />
+			</items>
+		</ContextMenu>
 	</fx:define>
-	
+
 	<children>
 		<VBox prefWidth="200.0">
 			<children>
@@ -34,7 +44,7 @@
 		</VBox>
 		<Pane fx:id="contentPane">
 			<children>
-				<fx:reference source="welcomeView"/>
+				<fx:reference source="welcomeView" />
 			</children>
 		</Pane>
 	</children>
