@@ -70,7 +70,7 @@ public class Directory implements Serializable {
 
 	public boolean mount() {
 		try {
-			URI shareUri = URI.create(String.format("dav://localhost:", server.getPort()));
+			URI shareUri = URI.create(String.format("dav://localhost:%d", server.getPort()));
 			webDavMount = WebDavMounter.mount(shareUri);
 			return true;
 		} catch (CommandFailedException e) {

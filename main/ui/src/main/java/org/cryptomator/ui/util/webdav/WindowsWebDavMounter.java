@@ -10,7 +10,7 @@
 package org.cryptomator.ui.util.webdav;
 
 import static java.lang.String.format;
-import static org.cryptomator.ui.util.CommandUtil.exec;
+import static org.cryptomator.ui.util.command.Script.fromLines;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -18,6 +18,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.ui.util.command.CommandResult;
+import org.cryptomator.ui.util.command.Script;
 
 /**
  * A {@link WebDavMounterStrategy} utilizing the "net use" command.
@@ -28,7 +30,7 @@ import org.apache.commons.lang3.SystemUtils;
  */
 final class WindowsWebDavMounter implements WebDavMounterStrategy {
 
-	private static final Pattern WIN_MOUNT_DRIVELETTER_PATTERN = Pattern.compile("\\s*[A-Z]:\\s*");
+	private static final Pattern WIN_MOUNT_DRIVELETTER_PATTERN = Pattern.compile("Laufwerk\\s*([A-Z]:)\\s*ist");
 	
 	@Override
 	public boolean shouldWork() {
@@ -37,12 +39,21 @@ final class WindowsWebDavMounter implements WebDavMounterStrategy {
 
 	@Override
 	public WebDavMount mount(URI uri) throws CommandFailedException {
-		final String result = exec("net",  "use", "*", toHttpUri(uri), "/persistent:no");
-		final String driveLetter = getDriveLetter(result);
+		final Script mountScript = fromLines(
+				"net use * %URI% /persistent:no",
+				"if %errorLevel% neq 0 exit %errorLevel%")
+				.addEnv("URI", toHttpUri(uri));
+		final CommandResult mountResult = mountScript.execute();
+		mountResult.assertOk();
+		final String driveLetter = getDriveLetter(mountResult.getOutput());
+		final Script unmountScript = fromLines(
+				"net use "+driveLetter+" /delete",
+				"if %errorLevel% neq 0 exit %errorLevel%")
+				.addEnv("DRIVE_LETTER", driveLetter);
 		return new WebDavMount() {
 			@Override
 			public void unmount() throws CommandFailedException {
-				exec("net",  "use", driveLetter, "/delete");
+				unmountScript.execute().assertOk();
 			}
 		};
 	}
@@ -50,7 +61,7 @@ final class WindowsWebDavMounter implements WebDavMounterStrategy {
 	private String getDriveLetter(String result) throws CommandFailedException {
 		final Matcher matcher = WIN_MOUNT_DRIVELETTER_PATTERN.matcher(result);
 		if (matcher.find()) {
-			return matcher.group();
+			return matcher.group(1);
 		} else {
 			throw new CommandFailedException("Failed to get a drive letter from net use output.");
 		}

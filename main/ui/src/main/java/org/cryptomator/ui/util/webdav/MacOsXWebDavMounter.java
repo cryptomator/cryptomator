@@ -9,11 +9,10 @@
  ******************************************************************************/
 package org.cryptomator.ui.util.webdav;
 
-import static org.cryptomator.ui.util.CommandUtil.exec;
-
 import java.net.URI;
 
 import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.ui.util.command.Script;
 
 final class MacOsXWebDavMounter implements WebDavMounterStrategy {
 
@@ -25,13 +24,22 @@ final class MacOsXWebDavMounter implements WebDavMounterStrategy {
 	@Override
 	public WebDavMount mount(URI uri) throws CommandFailedException {
 		final String path = "/Volumes/Cryptomator" + uri.getPort();
-		exec("mkdir", "/Volumes/Cryptomator" + uri.getPort());
-		exec("mount_webdav", "-S", "-v", "Cryptomator", uri.toString(), path);
-		exec("open", path);
+		final Script mountScript = Script.fromLines(
+				"set -x",
+				"mkdir \"$MOUNT_PATH\"",
+				"mount_webdav -S -v Cryptomator \"$URI\" \"$MOUNT_PATH\"",
+				"open \"$MOUNT_PATH\"")
+				.addEnv("URI", uri.toString())
+				.addEnv("MOUNT_PATH", path);
+		final Script unmountScript = Script.fromLines(
+				"set -x",
+				"unmount $MOUNT_PATH")
+				.addEnv("MOUNT_PATH", path);
+		mountScript.execute().assertOk();
 		return new WebDavMount() {
 			@Override
 			public void unmount() throws CommandFailedException {
-				exec("unmount", path);
+				unmountScript.execute().assertOk();
 			}
 		};
 	}
