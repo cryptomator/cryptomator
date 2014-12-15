@@ -5,6 +5,9 @@ import java.io.Serializable;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
+
 import org.apache.commons.lang3.StringUtils;
 import org.cryptomator.crypto.Cryptor;
 import org.cryptomator.crypto.SamplingDecorator;
@@ -29,8 +32,9 @@ public class Directory implements Serializable {
 
 	private final WebDAVServer server = new WebDAVServer();
 	private final Cryptor cryptor = SamplingDecorator.decorate(new Aes256Cryptor());
+	private final ObjectProperty<Boolean> unlocked = new SimpleObjectProperty<Boolean>(this, "unlocked", Boolean.FALSE);
 	private final Path path;
-	private boolean unlocked;
+	// private boolean unlocked;
 	private String unmountCommand;
 	private final Runnable shutdownTask = new ShutdownTask();
 
@@ -103,12 +107,16 @@ public class Directory implements Serializable {
 		return cryptor;
 	}
 
-	public boolean isUnlocked() {
+	public ObjectProperty<Boolean> unlockedProperty() {
 		return unlocked;
 	}
 
+	public boolean isUnlocked() {
+		return unlocked.get();
+	}
+
 	public void setUnlocked(boolean unlocked) {
-		this.unlocked = unlocked;
+		this.unlocked.set(unlocked);
 	}
 
 	public WebDAVServer getServer() {

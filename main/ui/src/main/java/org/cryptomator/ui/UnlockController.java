@@ -77,7 +77,7 @@ public class UnlockController implements Initializable {
 	// ****************************************
 
 	@FXML
-	protected void didClickUnlockButton(ActionEvent event) {
+	private void didClickUnlockButton(ActionEvent event) {
 		final String masterKeyFileName = usernameBox.getValue() + Aes256Cryptor.MASTERKEY_FILE_EXT;
 		final Path masterKeyPath = directory.getPath().resolve(masterKeyFileName);
 		final CharSequence password = passwordField.getCharacters();

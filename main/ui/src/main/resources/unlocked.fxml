@@ -33,7 +33,7 @@
 		<Label fx:id="messageLabel" GridPane.rowIndex="0" GridPane.columnIndex="0" GridPane.columnSpan="2" />
 		
 		<!-- Row 1 -->
-		<Button text="%unlocked.button.lock" defaultButton="true" GridPane.rowIndex="1" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.halignment="RIGHT" prefWidth="150.0" onAction="#closeVault" focusTraversable="false"/>
+		<Button text="%unlocked.button.lock" defaultButton="true" GridPane.rowIndex="1" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.halignment="RIGHT" prefWidth="150.0" onAction="#didClickCloseVault" focusTraversable="false"/>
 		
 		<!-- Row 2 -->
 		<LineChart fx:id="ioGraph" GridPane.rowIndex="2" GridPane.columnIndex="0" GridPane.columnSpan="2" animated="false" createSymbols="false" prefHeight="300.0" legendVisible="true" legendSide="BOTTOM" verticalZeroLineVisible="false" verticalGridLinesVisible="false" horizontalGridLinesVisible="true">

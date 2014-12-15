@@ -52,7 +52,7 @@ public class UnlockedController implements Initializable {
 	}
 
 	@FXML
-	protected void closeVault(ActionEvent event) {
+	private void didClickCloseVault(ActionEvent event) {
 		directory.unmount();
 		directory.stopServer();
 		directory.setUnlocked(false);
@@ -82,7 +82,7 @@ public class UnlockedController implements Initializable {
 
 	private class IoSamplingAnimationHandler implements EventHandler<ActionEvent> {
 
-		private static final double BYTES_TO_MEGABYTES_FACTOR = IO_SAMPLING_INTERVAL / 1024.0 / 1024.0;
+		private static final double BYTES_TO_MEGABYTES_FACTOR = 1.0 / IO_SAMPLING_INTERVAL / 1024.0 / 1024.0;
 		private final CryptorIOSampling sampler;
 		private final Series<Number, Number> decryptedBytes;
 		private final Series<Number, Number> encryptedBytes;

@@ -16,12 +16,15 @@ import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.HBox;
@@ -45,6 +48,9 @@ public class MainController implements Initializable, InitializationListener, Un
 	private Stage stage;
 
 	@FXML
+	private ContextMenu directoryContextMenu;
+
+	@FXML
 	private HBox rootPane;
 
 	@FXML
@@ -58,9 +64,11 @@ public class MainController implements Initializable, InitializationListener, Un
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
 		this.rb = rb;
+
+		final ObservableList<Directory> items = FXCollections.observableList(Settings.load().getDirectories());
+		directoryList.setItems(items);
 		directoryList.setCellFactory(this::createDirecoryListCell);
 		directoryList.getSelectionModel().getSelectedItems().addListener(this::selectedDirectoryDidChange);
-		directoryList.getItems().addAll(Settings.load().getDirectories());
 	}
 
 	@FXML
@@ -70,21 +78,37 @@ public class MainController implements Initializable, InitializationListener, Un
 		if (file != null && file.canWrite()) {
 			final Directory dir = new Directory(file.toPath());
 			directoryList.getItems().add(dir);
-			Settings.load().getDirectories().clear();
-			Settings.load().getDirectories().addAll(directoryList.getItems());
 			directoryList.getSelectionModel().selectLast();
 		}
 	}
 
 	private ListCell<Directory> createDirecoryListCell(ListView<Directory> param) {
-		return new DirectoryListCell();
+		final DirectoryListCell cell = new DirectoryListCell();
+		cell.setContextMenu(directoryContextMenu);
+		return cell;
 	}
 
 	private void selectedDirectoryDidChange(ListChangeListener.Change<? extends Directory> change) {
 		final Directory selectedDir = directoryList.getSelectionModel().getSelectedItem();
-		stage.setTitle(selectedDir.getName());
-		showDirectory(selectedDir);
+		if (selectedDir == null) {
+			stage.setTitle(rb.getString("app.name"));
+			showWelcomeView();
+		} else {
+			stage.setTitle(selectedDir.getName());
+			showDirectory(selectedDir);
+		}
 	}
+
+	@FXML
+	private void didClickRemoveSelectedEntry(ActionEvent e) {
+		final Directory selectedDir = directoryList.getSelectionModel().getSelectedItem();
+		directoryList.getItems().remove(selectedDir);
+		directoryList.getSelectionModel().clearSelection();
+	}
+
+	// ****************************************
+	// Subcontroller for right panel
+	// ****************************************
 
 	private void showDirectory(Directory directory) {
 		try {
@@ -100,10 +124,6 @@ public class MainController implements Initializable, InitializationListener, Un
 		}
 	}
 
-	// ****************************************
-	// Subcontroller for right panel
-	// ****************************************
-
 	private <T> T showView(String fxml) {
 		try {
 			final FXMLLoader loader = new FXMLLoader(getClass().getResource(fxml), rb);
@@ -114,6 +134,10 @@ public class MainController implements Initializable, InitializationListener, Un
 		} catch (IOException e) {
 			throw new IllegalStateException("Failed to load fxml file.", e);
 		}
+	}
+
+	private void showWelcomeView() {
+		this.showView("/welcome.fxml");
 	}
 
 	private void showInitializeView(Directory directory) {
