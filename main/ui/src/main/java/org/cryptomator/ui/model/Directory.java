@@ -2,20 +2,21 @@ package org.cryptomator.ui.model;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
-import org.apache.commons.lang3.StringUtils;
 import org.cryptomator.crypto.Cryptor;
 import org.cryptomator.crypto.SamplingDecorator;
 import org.cryptomator.crypto.aes256.Aes256Cryptor;
 import org.cryptomator.ui.MainApplication;
 import org.cryptomator.ui.util.MasterKeyFilter;
-import org.cryptomator.ui.util.WebDavMounter;
-import org.cryptomator.ui.util.WebDavMounter.CommandFailedException;
+import org.cryptomator.ui.util.webdav.CommandFailedException;
+import org.cryptomator.ui.util.webdav.WebDavMount;
+import org.cryptomator.ui.util.webdav.WebDavMounter;
 import org.cryptomator.webdav.WebDAVServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +36,7 @@ public class Directory implements Serializable {
 	private final ObjectProperty<Boolean> unlocked = new SimpleObjectProperty<Boolean>(this, "unlocked", Boolean.FALSE);
 	private final Path path;
 	// private boolean unlocked;
-	private String unmountCommand;
+	private WebDavMount webDavMount;
 	private final Runnable shutdownTask = new ShutdownTask();
 
 	public Directory(final Path path) {
@@ -69,7 +70,8 @@ public class Directory implements Serializable {
 
 	public boolean mount() {
 		try {
-			unmountCommand = WebDavMounter.mount(server.getPort());
+			URI shareUri = URI.create(String.format("dav://localhost:%d", server.getPort()));
+			webDavMount = WebDavMounter.mount(shareUri);
 			return true;
 		} catch (CommandFailedException e) {
 			LOG.warn("mount failed", e);
@@ -79,9 +81,9 @@ public class Directory implements Serializable {
 
 	public boolean unmount() {
 		try {
-			if (StringUtils.isNotEmpty(unmountCommand)) {
-				WebDavMounter.unmount(unmountCommand);
-				unmountCommand = null;
+			if (webDavMount != null) {
+				webDavMount.unmount();
+				webDavMount = null;
 			}
 			return true;
 		} catch (CommandFailedException e) {
