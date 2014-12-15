@@ -4,16 +4,13 @@
  * See the LICENSE.txt file for more info.
  * 
  * Contributors:
- *     Sebastian Stenzel - initial API and implementation
+ *     Sebastian Stenzel - initial API and implementation, strategy fine tuning
  *     Markus Kreusch - Refactored WebDavMounter to use strategy pattern
  ******************************************************************************/
-package org.cryptomator.ui.util.webdav;
+package org.cryptomator.ui.util.mount;
 
-import static java.lang.String.format;
 import static org.cryptomator.ui.util.command.Script.fromLines;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -30,7 +27,7 @@ import org.cryptomator.ui.util.command.Script;
  */
 final class WindowsWebDavMounter implements WebDavMounterStrategy {
 
-	private static final Pattern WIN_MOUNT_DRIVELETTER_PATTERN = Pattern.compile("Laufwerk\\s*([A-Z]:)\\s*ist");
+	private static final Pattern WIN_MOUNT_DRIVELETTER_PATTERN = Pattern.compile("\\s*([A-Z]:)\\s*");
 	
 	@Override
 	public boolean shouldWork() {
@@ -38,11 +35,11 @@ final class WindowsWebDavMounter implements WebDavMounterStrategy {
 	}
 
 	@Override
-	public WebDavMount mount(URI uri) throws CommandFailedException {
+	public WebDavMount mount(int localPort) throws CommandFailedException {
 		final Script mountScript = fromLines(
-				"net use * %URI% /persistent:no",
+				"net use * http://0--1.ipv6-literal.net:%PORT% /persistent:no",
 				"if %errorLevel% neq 0 exit %errorLevel%")
-				.addEnv("URI", toHttpUri(uri));
+				.addEnv("PORT", String.valueOf(localPort));
 		final CommandResult mountResult = mountScript.execute();
 		mountResult.assertOk();
 		final String driveLetter = getDriveLetter(mountResult.getOutput());
@@ -64,32 +61,6 @@ final class WindowsWebDavMounter implements WebDavMounterStrategy {
 			return matcher.group(1);
 		} else {
 			throw new CommandFailedException("Failed to get a drive letter from net use output.");
-		}
-	}
-
-	private String toHttpUri(URI uri) {
-		if ("http".equals(uri.getScheme()) || "https".equals(uri.getScheme())) {
-			return uri.toString();
-		} else if ("dav".equals(uri.getScheme())) {
-			return replaceScheme(uri, "http").toString();
-		} else if ("davs".equals(uri.getScheme())) {
-			return replaceScheme(uri, "https").toString();
-		} else {
-			throw new IllegalStateException(format("No webdav uri %s", uri));
-		}
-	}
-
-	private URI replaceScheme(URI uri, String scheme) {
-		try {
-			return new URI(scheme,
-					uri.getUserInfo(),
-					uri.getHost(),
-					uri.getPort(),
-					uri.getPath(),
-					uri.getQuery(),
-					uri.getFragment());
-		} catch (URISyntaxException e) {
-			throw new IllegalStateException("Building an URI with replaced scheme failed");
 		}
 	}
 

@@ -6,9 +6,7 @@
  * Contributors:
  *      Markus Kreusch - Refactored WebDavMounter to use strategy pattern
  ******************************************************************************/
-package org.cryptomator.ui.util.webdav;
-
-import java.net.URI;
+package org.cryptomator.ui.util.mount;
 
 /**
  * A WebDavMounter acting as fallback if no other mounter works.
@@ -23,7 +21,7 @@ final class FallbackWebDavMounter implements WebDavMounterStrategy {
 	}
 
 	@Override
-	public WebDavMount mount(URI uri) {
+	public WebDavMount mount(int localPort) {
 		displayMountInstructions();
 		return new WebDavMount() {
 			@Override

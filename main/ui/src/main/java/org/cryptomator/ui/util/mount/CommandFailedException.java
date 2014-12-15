@@ -7,7 +7,7 @@
  *     Sebastian Stenzel - initial API and implementation
  *     Markus Kreusch - Refactored WebDavMounter to use strategy pattern
  ******************************************************************************/
-package org.cryptomator.ui.util.webdav;
+package org.cryptomator.ui.util.mount;
 
 public class CommandFailedException extends Exception {
 

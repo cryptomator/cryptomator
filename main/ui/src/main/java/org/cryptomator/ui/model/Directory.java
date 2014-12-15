@@ -2,7 +2,6 @@ package org.cryptomator.ui.model;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -14,9 +13,9 @@ import org.cryptomator.crypto.SamplingDecorator;
 import org.cryptomator.crypto.aes256.Aes256Cryptor;
 import org.cryptomator.ui.MainApplication;
 import org.cryptomator.ui.util.MasterKeyFilter;
-import org.cryptomator.ui.util.webdav.CommandFailedException;
-import org.cryptomator.ui.util.webdav.WebDavMount;
-import org.cryptomator.ui.util.webdav.WebDavMounter;
+import org.cryptomator.ui.util.mount.CommandFailedException;
+import org.cryptomator.ui.util.mount.WebDavMount;
+import org.cryptomator.ui.util.mount.WebDavMounter;
 import org.cryptomator.webdav.WebDAVServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,8 +69,7 @@ public class Directory implements Serializable {
 
 	public boolean mount() {
 		try {
-			URI shareUri = URI.create(String.format("dav://localhost:%d", server.getPort()));
-			webDavMount = WebDavMounter.mount(shareUri);
+			webDavMount = WebDavMounter.mount(server.getPort());
 			return true;
 		} catch (CommandFailedException e) {
 			LOG.warn("mount failed", e);

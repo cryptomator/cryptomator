@@ -11,7 +11,7 @@ package org.cryptomator.ui.util.command;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.cryptomator.ui.util.webdav.CommandFailedException;
+import org.cryptomator.ui.util.mount.CommandFailedException;
 
 public final class Script {
 	

@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
 public final class WebDAVServer {
 
 	private static final Logger LOG = LoggerFactory.getLogger(WebDAVServer.class);
-	private static final String LOCALHOST = "127.0.0.1";
+	private static final String LOCALHOST = "::1";
 	private static final int MAX_PENDING_REQUESTS = 200;
 	private static final int MAX_THREADS = 200;
 	private static final int MIN_THREADS = 4;

@@ -15,7 +15,7 @@ import static org.apache.commons.lang3.SystemUtils.IS_OS_WINDOWS;
 import java.io.IOException;
 
 import org.apache.commons.lang3.SystemUtils;
-import org.cryptomator.ui.util.webdav.CommandFailedException;
+import org.cryptomator.ui.util.mount.CommandFailedException;
 
 /**
  * <p>

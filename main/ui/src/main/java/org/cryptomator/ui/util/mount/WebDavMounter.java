@@ -7,9 +7,7 @@
  *     Sebastian Stenzel - initial API and implementation
  *     Markus Kreusch - Refactored to use strategy pattern
  ******************************************************************************/
-package org.cryptomator.ui.util.webdav;
-
-import java.net.URI;
+package org.cryptomator.ui.util.mount;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,24 +16,19 @@ public final class WebDavMounter {
 
 	private static final Logger LOG = LoggerFactory.getLogger(WebDavMounter.class);
 
-	private static final WebDavMounterStrategy[] STRATEGIES = {
-		new WindowsWebDavMounter(),
-		new MacOsXWebDavMounter(),
-		new LinuxGvfsWebDavMounter()
-	};
-	
+	private static final WebDavMounterStrategy[] STRATEGIES = {new WindowsWebDavMounter(), new MacOsXWebDavMounter(), new LinuxGvfsWebDavMounter()};
+
 	private static volatile WebDavMounterStrategy choosenStrategy;
 
 	/**
 	 * Tries to mount a given webdav share.
 	 * 
-	 * @param uri
-	 *            the {@link URI} of the webdav share
+	 * @param localPort local TCP port of the webdav share
 	 * @return a {@link WebDavMount} representing the mounted share
 	 * @throws CommandFailedException if the mount operation fails
 	 */
-	public static WebDavMount mount(URI uri) throws CommandFailedException {
-		return chooseStrategy().mount(uri);
+	public static WebDavMount mount(int localPort) throws CommandFailedException {
+		return chooseStrategy().mount(localPort);
 	}
 
 	private static WebDavMounterStrategy chooseStrategy() {

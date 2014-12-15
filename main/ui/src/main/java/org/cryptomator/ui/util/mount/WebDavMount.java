@@ -6,7 +6,7 @@
  * Contributors:
  *     Markus Kreusch - Refactored WebDavMounter to use strategy pattern
  ******************************************************************************/
-package org.cryptomator.ui.util.webdav;
+package org.cryptomator.ui.util.mount;
 
 
 /**

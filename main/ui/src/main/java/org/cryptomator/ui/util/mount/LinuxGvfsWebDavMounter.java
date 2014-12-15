@@ -7,9 +7,7 @@
  *     Sebastian Stenzel - initial API and implementation
  *     Markus Kreusch - Refactored WebDavMounter to use strategy pattern
  ******************************************************************************/
-package org.cryptomator.ui.util.webdav;
-
-import java.net.URI;
+package org.cryptomator.ui.util.mount;
 
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.ui.util.command.Script;
@@ -32,16 +30,16 @@ final class LinuxGvfsWebDavMounter implements WebDavMounterStrategy {
 	}
 
 	@Override
-	public WebDavMount mount(final URI uri) throws CommandFailedException {
+	public WebDavMount mount(int localPort) throws CommandFailedException {
 		final Script mountScript = Script.fromLines(
 				"set -x",
-				"gvfs-mount \"$URI\"",
+				"gvfs-mount \"dav://[::1]:$PORT\"",
 				"xdg-open \"$URI\"")
-				.addEnv("URI", uri.toString());
+				.addEnv("PORT", String.valueOf(localPort));
 		final Script unmountScript = Script.fromLines(
 				"set -x",
-				"gvfs-mount -u \"$URI\"")
-				.addEnv("URI", uri.toString());
+				"gvfs-mount -u \"dav://[::1]:$PORT\"")
+				.addEnv("URI", String.valueOf(localPort));
 		mountScript.execute().assertOk();
 		return new WebDavMount() {
 			@Override
