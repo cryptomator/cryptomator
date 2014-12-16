@@ -106,7 +106,7 @@
 									<fx:resources>
 										<fx:fileset dir="${project.build.directory}" includes="${javafx.application.name}.jar" />
 									</fx:resources>
-									<fx:permissions elevated="true" />
+									<fx:permissions elevated="false" />
 									<fx:preferences install="true" />
 								</fx:deploy>
 							</target>
