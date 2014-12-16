@@ -26,6 +26,7 @@ import java.security.spec.KeySpec;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 import java.util.zip.CRC32;
 
@@ -102,9 +103,22 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 		}
 	}
 
+	/**
+	 * Creates a new Cryptor with a newly initialized PRNG.
+	 */
 	public Aes256Cryptor() {
 		SECURE_PRNG.setSeed(SECURE_PRNG.generateSeed(PRNG_SEED_LENGTH));
 		SECURE_PRNG.nextBytes(this.masterKey);
+	}
+
+	/**
+	 * Creates a new Cryptor with the given PRNG.<br/>
+	 * <strong>DO NOT USE IN PRODUCTION</strong>. This constructor must only be used in in unit tests. Do not change method visibility.
+	 * 
+	 * @param prng Fast, possibly insecure PRNG.
+	 */
+	Aes256Cryptor(Random prng) {
+		prng.nextBytes(this.masterKey);
 	}
 
 	/**

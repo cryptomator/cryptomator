@@ -19,6 +19,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 import org.apache.commons.io.FileUtils;
 import org.cryptomator.crypto.CryptorIOSupport;
@@ -31,6 +32,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class Aes256CryptorTest {
+
+	private static final Random TEST_PRNG = new Random();
 
 	private Path tmpDir;
 	private Path masterKey;
@@ -57,12 +60,12 @@ public class Aes256CryptorTest {
 	@Test
 	public void testCorrectPassword() throws IOException, WrongPasswordException, DecryptFailedException, UnsupportedKeyLengthException {
 		final String pw = "asd";
-		final Aes256Cryptor cryptor = new Aes256Cryptor();
+		final Aes256Cryptor cryptor = new Aes256Cryptor(TEST_PRNG);
 		final OutputStream out = Files.newOutputStream(masterKey, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
 		cryptor.encryptMasterKey(out, pw);
 		cryptor.swipeSensitiveData();
 
-		final Aes256Cryptor decryptor = new Aes256Cryptor();
+		final Aes256Cryptor decryptor = new Aes256Cryptor(TEST_PRNG);
 		final InputStream in = Files.newInputStream(masterKey, StandardOpenOption.READ);
 		decryptor.decryptMasterKey(in, pw);
 	}
@@ -70,13 +73,13 @@ public class Aes256CryptorTest {
 	@Test(expected = WrongPasswordException.class)
 	public void testWrongPassword() throws IOException, DecryptFailedException, WrongPasswordException, UnsupportedKeyLengthException {
 		final String pw = "asd";
-		final Aes256Cryptor cryptor = new Aes256Cryptor();
+		final Aes256Cryptor cryptor = new Aes256Cryptor(TEST_PRNG);
 		final OutputStream out = Files.newOutputStream(masterKey, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
 		cryptor.encryptMasterKey(out, pw);
 		cryptor.swipeSensitiveData();
 
 		final String wrongPw = "foo";
-		final Aes256Cryptor decryptor = new Aes256Cryptor();
+		final Aes256Cryptor decryptor = new Aes256Cryptor(TEST_PRNG);
 		final InputStream in = Files.newInputStream(masterKey, StandardOpenOption.READ);
 		decryptor.decryptMasterKey(in, wrongPw);
 	}
@@ -84,13 +87,13 @@ public class Aes256CryptorTest {
 	@Test(expected = NoSuchFileException.class)
 	public void testWrongLocation() throws IOException, DecryptFailedException, WrongPasswordException, UnsupportedKeyLengthException {
 		final String pw = "asd";
-		final Aes256Cryptor cryptor = new Aes256Cryptor();
+		final Aes256Cryptor cryptor = new Aes256Cryptor(TEST_PRNG);
 		final OutputStream out = Files.newOutputStream(masterKey, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
 		cryptor.encryptMasterKey(out, pw);
 		cryptor.swipeSensitiveData();
 
 		final Path wrongMasterKey = tmpDir.resolve("notExistingMasterKey.json");
-		final Aes256Cryptor decryptor = new Aes256Cryptor();
+		final Aes256Cryptor decryptor = new Aes256Cryptor(TEST_PRNG);
 		final InputStream in = Files.newInputStream(wrongMasterKey, StandardOpenOption.READ);
 		decryptor.decryptMasterKey(in, pw);
 	}
@@ -98,7 +101,7 @@ public class Aes256CryptorTest {
 	@Test(expected = FileAlreadyExistsException.class)
 	public void testReInitialization() throws IOException {
 		final String pw = "asd";
-		final Aes256Cryptor cryptor = new Aes256Cryptor();
+		final Aes256Cryptor cryptor = new Aes256Cryptor(TEST_PRNG);
 		final OutputStream out = Files.newOutputStream(masterKey, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
 		cryptor.encryptMasterKey(out, pw);
 		cryptor.swipeSensitiveData();
@@ -111,7 +114,7 @@ public class Aes256CryptorTest {
 	@Test
 	public void testEncryptionOfFilenames() throws IOException {
 		final CryptorIOSupport ioSupportMock = new CryptoIOSupportMock();
-		final Aes256Cryptor cryptor = new Aes256Cryptor();
+		final Aes256Cryptor cryptor = new Aes256Cryptor(TEST_PRNG);
 
 		// short path components
 		final String originalPath1 = "foo/bar/baz";
