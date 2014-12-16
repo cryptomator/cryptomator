@@ -14,9 +14,11 @@ import static org.apache.commons.lang3.SystemUtils.IS_OS_WINDOWS;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.ArrayUtils;
@@ -62,7 +64,8 @@ final class CommandRunner {
 			for (final String line : script.getLines()) {
 				final String[] cmds = ArrayUtils.add(determineCli(), line);
 				final Process proc = Runtime.getRuntime().exec(cmds, env.toArray(new String[0]));
-				result = run(proc, script.getLines(), timeout, unit);
+				result = run(proc, timeout, unit);
+				result.logDebugInfo();
 				result.assertOk();
 			}
 			return result;
@@ -71,8 +74,14 @@ final class CommandRunner {
 		}
 	}
 
-	private static CommandResult run(Process process, String[] lines, long timeout, TimeUnit unit) {
-		return new CommandResult(process, lines, CMD_EXECUTOR, timeout, unit);
+	private static CommandResult run(Process process, long timeout, TimeUnit unit) throws CommandFailedException {
+		try {
+			final FutureCommandResult futureCommandResult = new FutureCommandResult(process);
+			CMD_EXECUTOR.execute(futureCommandResult);
+			return futureCommandResult.get(timeout, unit);
+		} catch (InterruptedException | ExecutionException | TimeoutException e) {
+			throw new CommandFailedException("Waiting time elapsed before command execution finished");
+		}
 	}
 
 	private static String[] determineCli() {
