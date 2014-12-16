@@ -22,8 +22,10 @@ import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ProgressIndicator;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -50,6 +52,9 @@ public class UnlockController implements Initializable {
 
 	@FXML
 	private SecPasswordField passwordField;
+	
+	@FXML
+	private ProgressIndicator progressIndicator;
 
 	@FXML
 	private Label messageLabel;
@@ -83,6 +88,7 @@ public class UnlockController implements Initializable {
 		final CharSequence password = passwordField.getCharacters();
 		InputStream masterKeyInputStream = null;
 		try {
+			progressIndicator.setVisible(true);
 			masterKeyInputStream = Files.newInputStream(masterKeyPath, StandardOpenOption.READ);
 			directory.getCryptor().decryptMasterKey(masterKeyInputStream, password);
 			if (!directory.startServer()) {
@@ -91,16 +97,16 @@ public class UnlockController implements Initializable {
 				return;
 			}
 			directory.setUnlocked(true);
-			directory.mount();
-			if (listener != null) {
-				listener.didUnlock(this);
-			}
+			directory.mountAsync(this::didUnlockAndMount);
 		} catch (DecryptFailedException | IOException ex) {
+			progressIndicator.setVisible(false);
 			messageLabel.setText(rb.getString("unlock.errorMessage.decryptionFailed"));
 			LOG.error("Decryption failed for technical reasons.", ex);
 		} catch (WrongPasswordException e) {
+			progressIndicator.setVisible(false);
 			messageLabel.setText(rb.getString("unlock.errorMessage.wrongPassword"));
 		} catch (UnsupportedKeyLengthException ex) {
+			progressIndicator.setVisible(false);
 			messageLabel.setText(rb.getString("unlock.errorMessage.unsupportedKeyLengthInstallJCE"));
 			LOG.warn("Unsupported Key-Length. Please install Oracle Java Cryptography Extension (JCE).", ex);
 		} finally {
@@ -126,6 +132,16 @@ public class UnlockController implements Initializable {
 		} catch (IOException e) {
 			LOG.trace("Invalid path: " + directory.getPath(), e);
 		}
+	}
+	
+	private Void didUnlockAndMount(boolean mountSuccess) {
+		Platform.runLater(() -> {
+			progressIndicator.setVisible(false);
+			if (listener != null) {
+				listener.didUnlock(this);
+			}
+		});
+		return null;
 	}
 
 	/* Getter/Setter */

@@ -20,8 +20,6 @@ import org.slf4j.LoggerFactory;
 
 public class CommandResult {
 	
-	private static final int DEFAULT_TIMEOUT_MILLISECONDS = 10000;
-	
 	private static final Logger LOG = LoggerFactory.getLogger(CommandResult.class);
 
 	private final ByteArrayOutputStream output = new ByteArrayOutputStream();
@@ -41,20 +39,16 @@ public class CommandResult {
 	}
 	
 	public String getOutput() throws CommandFailedException {
-		return getOutput(DEFAULT_TIMEOUT_MILLISECONDS, TimeUnit.MICROSECONDS);
-	}
-	
-	public String getError() throws CommandFailedException {
-		return getError(DEFAULT_TIMEOUT_MILLISECONDS, TimeUnit.MICROSECONDS);
-	}
-	
-	public String getOutput(long timeout, TimeUnit unit) throws CommandFailedException {
-		waitAndAssertOk(timeout, unit);
+		if (!finished) {
+			throw new IllegalStateException("Command not yet finished.");
+		}
 		return new String(output.toByteArray());
 	}
 	
-	public String getError(long timeout, TimeUnit unit) throws CommandFailedException {
-		waitAndAssertOk(timeout, unit);
+	public String getError() throws CommandFailedException {
+		if (!finished) {
+			throw new IllegalStateException("Command not yet finished.");
+		}
 		return new String(error.toByteArray());
 	}
 	
@@ -89,10 +83,6 @@ public class CommandResult {
 					new String(output.toByteArray()),
 					new String(error.toByteArray()));
 		}
-	}
-
-	public void assertOk() throws CommandFailedException {
-		assertOk(DEFAULT_TIMEOUT_MILLISECONDS, TimeUnit.MILLISECONDS);
 	}
 	
 	public void assertOk(long timeout, TimeUnit unit) throws CommandFailedException {

@@ -19,7 +19,7 @@ final class LinuxGvfsWebDavMounter implements WebDavMounterStrategy {
 		if (SystemUtils.IS_OS_LINUX) {
 			final Script checkScripts = Script.fromLines("which gvfs-mount xdg-open");
 			try {
-				checkScripts.execute().assertOk();
+				checkScripts.execute();
 				return true;
 			} catch (CommandFailedException e) {
 				return false;
@@ -40,11 +40,11 @@ final class LinuxGvfsWebDavMounter implements WebDavMounterStrategy {
 				"set -x",
 				"gvfs-mount -u \"dav://[::1]:$PORT\"")
 				.addEnv("URI", String.valueOf(localPort));
-		mountScript.execute().assertOk();
+		mountScript.execute();
 		return new WebDavMount() {
 			@Override
 			public void unmount() throws CommandFailedException {
-				unmountScript.execute().assertOk();
+				unmountScript.execute();
 			}
 		};
 	}

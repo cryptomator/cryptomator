@@ -10,10 +10,13 @@ package org.cryptomator.ui.util.command;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.cryptomator.ui.util.mount.CommandFailedException;
 
 public final class Script {
+	
+	private static final int DEFAULT_TIMEOUT_MILLISECONDS = 3000;
 	
 	public static Script fromLines(String ... commands) {
 		return new Script(commands);
@@ -21,6 +24,8 @@ public final class Script {
 	
 	private final String[] lines;
 	private final Map<String,String> environment = new HashMap<>();
+	private long timeout = DEFAULT_TIMEOUT_MILLISECONDS;
+	private TimeUnit timeoutUnit = TimeUnit.MILLISECONDS;
 	
 	private Script(String[] lines) {
 		this.lines = lines;
@@ -53,6 +58,22 @@ public final class Script {
 	public Script addEnv(String name, String value) {
 		environment.put(name, value);
 		return this;
+	}
+
+	public long getTimeout() {
+		return timeout;
+	}
+
+	public void setTimeout(long timeout) {
+		this.timeout = timeout;
+	}
+
+	public TimeUnit getTimeoutUnit() {
+		return timeoutUnit;
+	}
+
+	public void setTimeoutUnit(TimeUnit timeoutUnit) {
+		this.timeoutUnit = timeoutUnit;
 	}
 	
 }

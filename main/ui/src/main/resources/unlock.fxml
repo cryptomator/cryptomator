@@ -15,6 +15,7 @@
 <?import java.lang.String?>
 <?import org.cryptomator.ui.controls.SecPasswordField?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressIndicator?>
 
 
 <GridPane vgap="12.0" hgap="12.0" prefWidth="400.0" fx:controller="org.cryptomator.ui.UnlockController" xmlns:fx="http://javafx.com/fxml">
@@ -38,6 +39,9 @@
 		
 		<!-- Row 2 -->
 		<Button text="%unlock.button.unlock" defaultButton="true" GridPane.rowIndex="2" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.halignment="RIGHT" prefWidth="150.0" onAction="#didClickUnlockButton" focusTraversable="false"/>
+		
+		<!-- Row 3 -->
+		<ProgressIndicator progress="-1" fx:id="progressIndicator" GridPane.rowIndex="3" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.halignment="CENTER" visible="false"/>
 		
 		<!-- Row 5 -->
 		<Label fx:id="messageLabel" GridPane.rowIndex="5" GridPane.columnIndex="0" GridPane.columnSpan="2" />

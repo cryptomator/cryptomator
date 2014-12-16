@@ -11,6 +11,7 @@ package org.cryptomator.ui.util.mount;
 
 import static org.cryptomator.ui.util.command.Script.fromLines;
 
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -36,21 +37,18 @@ final class WindowsWebDavMounter implements WebDavMounterStrategy {
 
 	@Override
 	public WebDavMount mount(int localPort) throws CommandFailedException {
-		final Script mountScript = fromLines(
-				"net use * http://0--1.ipv6-literal.net:%PORT% /persistent:no",
-				"if %errorLevel% neq 0 exit %errorLevel%")
+		final Script mountScript = fromLines("net use * http://0--1.ipv6-literal.net:%PORT% /persistent:no")
 				.addEnv("PORT", String.valueOf(localPort));
+		mountScript.setTimeout(30);
+		mountScript.setTimeoutUnit(TimeUnit.SECONDS);
 		final CommandResult mountResult = mountScript.execute();
-		mountResult.assertOk();
 		final String driveLetter = getDriveLetter(mountResult.getOutput());
-		final Script unmountScript = fromLines(
-				"net use "+driveLetter+" /delete",
-				"if %errorLevel% neq 0 exit %errorLevel%")
+		final Script unmountScript = fromLines("net use "+driveLetter+" /delete")
 				.addEnv("DRIVE_LETTER", driveLetter);
 		return new WebDavMount() {
 			@Override
 			public void unmount() throws CommandFailedException {
-				unmountScript.execute().assertOk();
+				unmountScript.execute();
 			}
 		};
 	}

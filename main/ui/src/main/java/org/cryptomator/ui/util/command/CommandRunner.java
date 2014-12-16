@@ -13,7 +13,10 @@ import static org.apache.commons.lang3.SystemUtils.IS_OS_UNIX;
 import static org.apache.commons.lang3.SystemUtils.IS_OS_WINDOWS;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.ui.util.mount.CommandFailedException;
 
@@ -41,15 +44,26 @@ class CommandRunner {
 
 	public static final String CLI_EXECUTABLE_PROPERTY = "cryptomator.cli";
 	
-	public static final String WINDOWS_DEFAULT_CLI[] = {"cmd"};
-	public static final String UNIX_DEFAULT_CLI[] = {"/bin/sh", "-e"};
-
+	public static final String WINDOWS_DEFAULT_CLI[] = {"cmd", "/C"};
+	public static final String UNIX_DEFAULT_CLI[] = {"/bin/sh", "-c"};
+	
+	/**
+	 * Executes all lines in the given script in the specified order. Stops as soon as the first command fails.
+	 * @param script Script containing command lines and environment variables.
+	 * @return Result of the last command, if it exited successfully.
+	 * @throws CommandFailedException If one of the command lines in the given script fails.
+	 */
 	static CommandResult execute(Script script) throws CommandFailedException {
-		ProcessBuilder builder = new ProcessBuilder(determineCli());
-		builder.environment().clear();
-		builder.environment().putAll(script.environment());
 		try {
-			return run(builder.start(), script.getLines());
+			final List<String> env = script.environment().entrySet().stream().map(e -> e.getKey() + "=" + e.getValue()).collect(Collectors.toList());
+			CommandResult result = null;
+			for (final String line : script.getLines()) {
+				final String[] cmds = ArrayUtils.add(determineCli(), line);
+				final Process proc = Runtime.getRuntime().exec(cmds, env.toArray(new String[0]));
+				result = run(proc, script.getLines());
+				result.assertOk(script.getTimeout(), script.getTimeoutUnit());
+			}
+			return result;
 		} catch (IOException e) {
 			throw new CommandFailedException(e);
 		}

@@ -23,21 +23,19 @@ final class MacOsXWebDavMounter implements WebDavMounterStrategy {
 	public WebDavMount mount(int localPort) throws CommandFailedException {
 		final String path = "/Volumes/Cryptomator" + localPort;
 		final Script mountScript = Script.fromLines(
-				"set -x",
 				"mkdir \"$MOUNT_PATH\"",
 				"mount_webdav -S -v Cryptomator \"[::1]:$PORT\" \"$MOUNT_PATH\"",
 				"open \"$MOUNT_PATH\"")
 				.addEnv("PORT", String.valueOf(localPort))
 				.addEnv("MOUNT_PATH", path);
 		final Script unmountScript = Script.fromLines(
-				"set -x",
 				"umount $MOUNT_PATH")
 				.addEnv("MOUNT_PATH", path);
-		mountScript.execute().assertOk();
+		mountScript.execute();
 		return new WebDavMount() {
 			@Override
 			public void unmount() throws CommandFailedException {
-				unmountScript.execute().assertOk();
+				unmountScript.execute();
 			}
 		};
 	}
