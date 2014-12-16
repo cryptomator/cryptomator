@@ -5,6 +5,7 @@
  * 
  * Contributors:
  *     Markus Kreusch
+ *     Sebastian Stenzel - Refactoring
  ******************************************************************************/
 package org.cryptomator.ui.util.command;
 

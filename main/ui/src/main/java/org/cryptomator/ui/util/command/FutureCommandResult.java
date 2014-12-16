@@ -19,7 +19,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.cryptomator.ui.util.mount.CommandFailedException;
 
-class FutureCommandResult implements Future<CommandResult>, Runnable {
+final class FutureCommandResult implements Future<CommandResult>, Runnable {
 	
 	private final Process process;
 	private final AtomicBoolean canceled = new AtomicBoolean();
@@ -29,7 +29,7 @@ class FutureCommandResult implements Future<CommandResult>, Runnable {
 	
 	private CommandFailedException exception;
 	
-	public FutureCommandResult(Process process) {
+	FutureCommandResult(Process process) {
 		this.process = process;
 	}
 

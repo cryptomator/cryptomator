@@ -20,16 +20,22 @@ import org.cryptomator.ui.util.mount.CommandFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CommandResult {
+public final class CommandResult {
 
 	private static final Logger LOG = LoggerFactory.getLogger(CommandResult.class);
 
 	private final Process process;
 
-	public CommandResult(Process process) {
+	/**
+	 * @param process An <strong>already finished</strong> process.
+	 */
+	CommandResult(Process process) {
 		this.process = process;		
 	}
-
+	
+	/**
+	 * @return Data written to STDOUT
+	 */
 	public String getOutput() throws CommandFailedException {
 		try (InputStream in = process.getInputStream(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
 			copy(in, out);
@@ -39,6 +45,9 @@ public class CommandResult {
 		}
 	}
 
+	/**
+	 * @return Data written to STDERR
+	 */
 	public String getError() throws CommandFailedException {
 		try (InputStream in = process.getErrorStream(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
 			copy(in, out);
@@ -48,11 +57,14 @@ public class CommandResult {
 		}
 	}
 
+	/**
+	 * @return Exit value of the process
+	 */
 	public int getExitValue() throws CommandFailedException {
 		return process.exitValue();
 	}
 
-	public void logDebugInfo() {
+	void logDebugInfo() {
 		if (LOG.isDebugEnabled()) {
 			try {
 				LOG.debug("Command execution finished. Exit code: {}\n" + "Output:\n" + "{}\n" + "Error:\n" + "{}\n", process.exitValue(), getOutput(), getError());
