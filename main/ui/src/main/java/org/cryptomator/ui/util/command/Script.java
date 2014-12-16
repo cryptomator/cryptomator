@@ -15,65 +15,51 @@ import java.util.concurrent.TimeUnit;
 import org.cryptomator.ui.util.mount.CommandFailedException;
 
 public final class Script {
-	
+
 	private static final int DEFAULT_TIMEOUT_MILLISECONDS = 3000;
-	
-	public static Script fromLines(String ... commands) {
+
+	public static Script fromLines(String... commands) {
 		return new Script(commands);
 	}
-	
+
 	private final String[] lines;
-	private final Map<String,String> environment = new HashMap<>();
-	private long timeout = DEFAULT_TIMEOUT_MILLISECONDS;
-	private TimeUnit timeoutUnit = TimeUnit.MILLISECONDS;
-	
+	private final Map<String, String> environment = new HashMap<>();
+
 	private Script(String[] lines) {
 		this.lines = lines;
 		setEnv(System.getenv());
 	}
-	
+
 	public String[] getLines() {
 		return lines;
 	}
-	
+
 	public CommandResult execute() throws CommandFailedException {
-		return CommandRunner.execute(this);
+		return CommandRunner.execute(this, DEFAULT_TIMEOUT_MILLISECONDS, TimeUnit.MILLISECONDS);
 	}
-	
-	Map<String,String> environment() {
+
+	public CommandResult execute(long timeout, TimeUnit unit) throws CommandFailedException {
+		return CommandRunner.execute(this, timeout, unit);
+	}
+
+	Map<String, String> environment() {
 		return environment;
 	}
-	
-	public Script setEnv(Map<String,String> environment) {
+
+	public Script setEnv(Map<String, String> environment) {
 		this.environment.clear();
 		addEnv(environment);
 		return this;
 	}
-	
-	public Script addEnv(Map<String,String> environment) {
+
+	public Script addEnv(Map<String, String> environment) {
 		this.environment.putAll(environment);
 		return this;
 	}
-	
+
 	public Script addEnv(String name, String value) {
 		environment.put(name, value);
 		return this;
 	}
 
-	public long getTimeout() {
-		return timeout;
-	}
-
-	public void setTimeout(long timeout) {
-		this.timeout = timeout;
-	}
-
-	public TimeUnit getTimeoutUnit() {
-		return timeoutUnit;
-	}
-
-	public void setTimeoutUnit(TimeUnit timeoutUnit) {
-		this.timeoutUnit = timeoutUnit;
-	}
-	
 }

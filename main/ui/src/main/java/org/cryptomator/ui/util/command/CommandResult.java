@@ -12,91 +12,113 @@ import static java.lang.String.format;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.cryptomator.ui.util.mount.CommandFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class CommandResult {
-	
+
 	private static final Logger LOG = LoggerFactory.getLogger(CommandResult.class);
 
 	private final ByteArrayOutputStream output = new ByteArrayOutputStream();
 	private final ByteArrayOutputStream error = new ByteArrayOutputStream();
+	private final Lock lock = new ReentrantLock();
+	private final Condition finishedCondition = lock.newCondition();
 	private final Process process;
-	
+
 	private final AsyncStreamCopier processOutputCopier;
 	private final AsyncStreamCopier processErrorCopier;
-	
+
 	private boolean finished;
-	
-	public CommandResult(Process process, String[] lines) {
+	private CommandFailedException exception;
+
+	public CommandResult(Process process, String[] lines, Executor cmdExecutor, long timeout, TimeUnit unit) {
 		this.process = process;
-		new AsyncLineWriter(lines, process.getOutputStream());
 		processOutputCopier = new AsyncStreamCopier(process.getInputStream(), output);
 		processErrorCopier = new AsyncStreamCopier(process.getErrorStream(), error);
+		cmdExecutor.execute(processOutputCopier);
+		cmdExecutor.execute(processErrorCopier);
+		cmdExecutor.execute(new CommandTask(timeout, unit));
 	}
-	
+
 	public String getOutput() throws CommandFailedException {
-		if (!finished) {
-			throw new IllegalStateException("Command not yet finished.");
-		}
+		this.waitUntilFinished();
 		return new String(output.toByteArray());
 	}
-	
+
 	public String getError() throws CommandFailedException {
-		if (!finished) {
-			throw new IllegalStateException("Command not yet finished.");
-		}
+		this.waitUntilFinished();
 		return new String(error.toByteArray());
 	}
-	
-	public int getExitValue(long timeout, TimeUnit unit) throws CommandFailedException {
-		waitAndAssertOk(timeout, unit);
+
+	public int getExitValue() throws CommandFailedException {
+		this.waitUntilFinished();
 		return process.exitValue();
 	}
 
-	private void waitAndAssertOk(long timeout, TimeUnit unit) throws CommandFailedException {
-		if (finished) return;
+	private void waitUntilFinished() throws CommandFailedException {
+		lock.lock();
 		try {
-			if (!process.waitFor(timeout, unit)) {
-				throw new CommandFailedException("Waiting time elapsed before command execution finished");
+			while (!finished) {
+				finishedCondition.await();
 			}
-			processOutputCopier.assertOk();
-			processErrorCopier.assertOk();
-			finished = true;
-			logDebugInfo();
-		} catch (IOException | InterruptedException e) {
-			throw new CommandFailedException(e);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+		} finally {
+			lock.unlock();
+		}
+		if (exception != null) {
+			throw exception;
 		}
 	}
 
 	private void logDebugInfo() {
 		if (LOG.isDebugEnabled()) {
-			LOG.debug("Command execution finished. Exit code: {}\n"
-					+ "Output:\n"
-					+ "{}\n"
-					+ "Error:\n"
-					+ "{}\n",
-					process.exitValue(),
-					new String(output.toByteArray()),
-					new String(error.toByteArray()));
+			LOG.debug("Command execution finished. Exit code: {}\n" + "Output:\n" + "{}\n" + "Error:\n" + "{}\n", process.exitValue(), new String(output.toByteArray()), new String(error.toByteArray()));
 		}
 	}
-	
-	public void assertOk(long timeout, TimeUnit unit) throws CommandFailedException {
-		int exitValue = getExitValue(timeout, unit);
+
+	void assertOk() throws CommandFailedException {
+		int exitValue = getExitValue();
 		if (exitValue != 0) {
-			throw new CommandFailedException(format(
-					"Command execution failed. Exit code: %d\n"
-					+ "# Output:\n"
-					+ "%s\n"
-					+ "# Error:\n"
-					+ "%s",
-					exitValue,
-					new String(output.toByteArray()),
+			throw new CommandFailedException(format("Command execution failed. Exit code: %d\n" + "# Output:\n" + "%s\n" + "# Error:\n" + "%s", exitValue, new String(output.toByteArray()),
 					new String(error.toByteArray())));
+		}
+	}
+
+	private class CommandTask implements Runnable {
+
+		private final long timeout;
+		private final TimeUnit unit;
+
+		private CommandTask(long timeout, TimeUnit unit) {
+			this.timeout = timeout;
+			this.unit = unit;
+		}
+
+		@Override
+		public void run() {
+			try {
+				if (!process.waitFor(timeout, unit)) {
+					exception = new CommandFailedException("Waiting time elapsed before command execution finished");
+				}
+				processOutputCopier.assertOk();
+				processErrorCopier.assertOk();
+				logDebugInfo();
+			} catch (IOException | InterruptedException e) {
+				exception = new CommandFailedException(e);
+			} finally {
+				lock.lock();
+				finished = true;
+				finishedCondition.signal();
+				lock.unlock();
+			}
 		}
 	}
 

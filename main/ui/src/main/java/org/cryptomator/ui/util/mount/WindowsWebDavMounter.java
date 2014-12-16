@@ -29,7 +29,7 @@ import org.cryptomator.ui.util.command.Script;
 final class WindowsWebDavMounter implements WebDavMounterStrategy {
 
 	private static final Pattern WIN_MOUNT_DRIVELETTER_PATTERN = Pattern.compile("\\s*([A-Z]:)\\s*");
-	
+
 	@Override
 	public boolean shouldWork() {
 		return SystemUtils.IS_OS_WINDOWS;
@@ -37,14 +37,10 @@ final class WindowsWebDavMounter implements WebDavMounterStrategy {
 
 	@Override
 	public WebDavMount mount(int localPort) throws CommandFailedException {
-		final Script mountScript = fromLines("net use * http://0--1.ipv6-literal.net:%PORT% /persistent:no")
-				.addEnv("PORT", String.valueOf(localPort));
-		mountScript.setTimeout(30);
-		mountScript.setTimeoutUnit(TimeUnit.SECONDS);
-		final CommandResult mountResult = mountScript.execute();
+		final Script mountScript = fromLines("net use * http://0--1.ipv6-literal.net:%PORT% /persistent:no").addEnv("PORT", String.valueOf(localPort));
+		final CommandResult mountResult = mountScript.execute(30, TimeUnit.SECONDS);
 		final String driveLetter = getDriveLetter(mountResult.getOutput());
-		final Script unmountScript = fromLines("net use "+driveLetter+" /delete")
-				.addEnv("DRIVE_LETTER", driveLetter);
+		final Script unmountScript = fromLines("net use " + driveLetter + " /delete").addEnv("DRIVE_LETTER", driveLetter);
 		return new WebDavMount() {
 			@Override
 			public void unmount() throws CommandFailedException {
