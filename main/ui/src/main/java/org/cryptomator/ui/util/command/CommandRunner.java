@@ -66,7 +66,6 @@ final class CommandRunner {
 				final String[] cmds = ArrayUtils.add(determineCli(), line);
 				final Process proc = Runtime.getRuntime().exec(cmds, env.toArray(new String[0]));
 				result = run(proc, timeout, unit);
-				result.logDebugInfo();
 				result.assertOk();
 			}
 			return result;

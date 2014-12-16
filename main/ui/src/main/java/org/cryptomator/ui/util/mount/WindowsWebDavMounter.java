@@ -39,7 +39,7 @@ final class WindowsWebDavMounter implements WebDavMounterStrategy {
 	public WebDavMount mount(int localPort) throws CommandFailedException {
 		final Script mountScript = fromLines("net use * http://0--1.ipv6-literal.net:%PORT% /persistent:no").addEnv("PORT", String.valueOf(localPort));
 		final CommandResult mountResult = mountScript.execute(30, TimeUnit.SECONDS);
-		final String driveLetter = getDriveLetter(mountResult.getOutput());
+		final String driveLetter = getDriveLetter(mountResult.getStdOut());
 		final Script unmountScript = fromLines("net use " + driveLetter + " /delete").addEnv("DRIVE_LETTER", driveLetter);
 		return new WebDavMount() {
 			@Override

@@ -10,12 +10,10 @@
 package org.cryptomator.ui.util.command;
 
 import static java.lang.String.format;
-import static org.apache.commons.io.IOUtils.copy;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 
+import org.apache.commons.io.IOUtils;
 import org.cryptomator.ui.util.mount.CommandFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,59 +23,75 @@ public final class CommandResult {
 	private static final Logger LOG = LoggerFactory.getLogger(CommandResult.class);
 
 	private final Process process;
+	private final String stdout;
+	private final String stderr;
+	private final CommandFailedException exception;
 
 	/**
+	 * Constructs a CommandResult from a terminated process and closes all its streams.
 	 * @param process An <strong>already finished</strong> process.
 	 */
 	CommandResult(Process process) {
-		this.process = process;		
+		String out = null;
+		String err = null;
+		CommandFailedException ex = null;
+		try {
+			out = IOUtils.toString(process.getInputStream());
+			err = IOUtils.toString(process.getErrorStream());
+		} catch (IOException e) {
+			ex = new CommandFailedException(e);
+		} finally {
+			this.process = process;
+			this.stdout = out;
+			this.stderr = err;
+			this.exception = ex;
+			IOUtils.closeQuietly(process.getInputStream());
+			IOUtils.closeQuietly(process.getOutputStream());
+			IOUtils.closeQuietly(process.getErrorStream());
+			logDebugInfo();
+		}
 	}
 	
 	/**
 	 * @return Data written to STDOUT
 	 */
-	public String getOutput() throws CommandFailedException {
-		try (InputStream in = process.getInputStream(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-			copy(in, out);
-			return new String(out.toByteArray());
-		} catch (IOException e) {
-			throw new CommandFailedException(e);
-		}
+	public String getStdOut() throws CommandFailedException {
+		assertNoException();
+		return stdout;
 	}
 
 	/**
 	 * @return Data written to STDERR
 	 */
-	public String getError() throws CommandFailedException {
-		try (InputStream in = process.getErrorStream(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-			copy(in, out);
-			return new String(out.toByteArray());
-		} catch (IOException e) {
-			throw new CommandFailedException(e);
-		}
+	public String getStdErr() throws CommandFailedException {
+		assertNoException();
+		return stderr;
 	}
 
 	/**
 	 * @return Exit value of the process
 	 */
-	public int getExitValue() throws CommandFailedException {
+	public int getExitValue() {
 		return process.exitValue();
 	}
 
-	void logDebugInfo() {
+	private void logDebugInfo() {
 		if (LOG.isDebugEnabled()) {
-			try {
-				LOG.debug("Command execution finished. Exit code: {}\n" + "Output:\n" + "{}\n" + "Error:\n" + "{}\n", process.exitValue(), getOutput(), getError());
-			} catch (CommandFailedException e) {
-				LOG.debug("Command execution finished. Exit code: {}\n", process.exitValue());
-			}
+			LOG.debug("Command execution finished. Exit code: {}\n" + "Output:\n" + "{}\n" + "Error:\n" + "{}\n", process.exitValue(), stdout, stderr);
 		}
 	}
 
 	void assertOk() throws CommandFailedException {
+		assertNoException();
 		int exitValue = getExitValue();
 		if (exitValue != 0) {
-			throw new CommandFailedException(format("Command execution failed. Exit code: %d\n" + "# Output:\n" + "%s\n" + "# Error:\n" + "%s", exitValue, getOutput(), getError()));
+			throw new CommandFailedException(format("Command execution failed. Exit code: %d\n" + "# Output:\n" + "%s\n" + "# Error:\n" + "%s", exitValue, stdout, stderr));
+		}
+	}
+	
+	private void assertNoException() throws CommandFailedException {
+		if (exception != null) {
+			throw exception;
 		}
 	}
 
