@@ -80,6 +80,13 @@ public interface Cryptor extends SensitiveDataSwipeListener {
 	Long decryptedFile(SeekableByteChannel encryptedFile, OutputStream plaintextFile) throws IOException;
 
 	/**
+	 * @param pos First byte (inclusive)
+	 * @param length Number of requested bytes beginning at pos.
+	 * @return Number of decrypted bytes. This might not be equal to the number of bytes requested due to potential overheads.
+	 */
+	Long decryptRange(SeekableByteChannel encryptedFile, OutputStream plaintextFile, long pos, long length) throws IOException;
+
+	/**
 	 * @return Number of encrypted bytes. This might not be equal to the encrypted file size due to optional metadata written to it.
 	 */
 	Long encryptFile(InputStream plaintextFile, SeekableByteChannel encryptedFile) throws IOException;

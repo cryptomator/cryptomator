@@ -8,9 +8,13 @@
  ******************************************************************************/
 package org.cryptomator.crypto.aes256;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
+import java.nio.channels.SeekableByteChannel;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
@@ -33,10 +37,11 @@ import org.junit.Test;
 
 public class Aes256CryptorTest {
 
-	private static final Random TEST_PRNG = new Random();
+	private static final Random TEST_PRNG = new NotReallyRandom();
 
 	private Path tmpDir;
 	private Path masterKey;
+	private Path encryptedFile;
 
 	@Before
 	public void prepareTmpDir() throws IOException {
@@ -44,6 +49,7 @@ public class Aes256CryptorTest {
 		final Path path = FileSystems.getDefault().getPath(tmpDirName);
 		tmpDir = Files.createTempDirectory(path, "oce-crypto-test");
 		masterKey = tmpDir.resolve("test" + Aes256Cryptor.MASTERKEY_FILE_EXT);
+		encryptedFile = tmpDir.resolve("test" + Aes256Cryptor.BASIC_FILE_EXT);
 	}
 
 	@After
@@ -98,6 +104,39 @@ public class Aes256CryptorTest {
 		decryptor.decryptMasterKey(in, pw);
 	}
 
+	@Test
+	public void testPartialDecryption() throws IOException, DecryptFailedException, WrongPasswordException, UnsupportedKeyLengthException {
+		// our test plaintext data:
+		final byte[] plaintextData = new byte[500 * Integer.BYTES];
+		final ByteBuffer bbIn = ByteBuffer.wrap(plaintextData);
+		for (int i = 0; i < 500; i++) {
+			bbIn.putInt(i);
+		}
+		final InputStream plaintextIn = new ByteArrayInputStream(plaintextData);
+
+		// init cryptor:
+		final Aes256Cryptor cryptor = new Aes256Cryptor(TEST_PRNG);
+
+		// encrypt:
+		final SeekableByteChannel fileOut = Files.newByteChannel(encryptedFile, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+		cryptor.encryptFile(plaintextIn, fileOut);
+		fileOut.close();
+
+		// decrypt:
+		final SeekableByteChannel fileIn = Files.newByteChannel(encryptedFile, StandardOpenOption.READ);
+		final ByteArrayOutputStream plaintextOut = new ByteArrayOutputStream();
+		final Long numDecryptedBytes = cryptor.decryptRange(fileIn, plaintextOut, 313 * Integer.BYTES, 50 * Integer.BYTES);
+		Assert.assertTrue(numDecryptedBytes > 0);
+
+		final byte[] result = plaintextOut.toByteArray();
+		final byte[] expected = new byte[50 * Integer.BYTES];
+		final ByteBuffer bbOut = ByteBuffer.wrap(expected);
+		for (int i = 313; i < 363; i++) {
+			bbOut.putInt(i);
+		}
+		Assert.assertArrayEquals(expected, result);
+	}
+
 	@Test(expected = FileAlreadyExistsException.class)
 	public void testReInitialization() throws IOException {
 		final String pw = "asd";
@@ -144,6 +183,15 @@ public class Aes256CryptorTest {
 			return map.get(encryptedPath);
 		}
 
+	}
+
+	private static class NotReallyRandom extends Random {
+		private static final long serialVersionUID = 6080187127141721369L;
+
+		@Override
+		protected int next(int bits) {
+			return 4; // http://xkcd.com/221/
+		}
 	}
 
 }

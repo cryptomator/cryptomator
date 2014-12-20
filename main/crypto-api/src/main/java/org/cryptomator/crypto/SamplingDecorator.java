@@ -88,6 +88,12 @@ public class SamplingDecorator implements Cryptor, CryptorIOSampling {
 	}
 
 	@Override
+	public Long decryptRange(SeekableByteChannel encryptedFile, OutputStream plaintextFile, long pos, long length) throws IOException {
+		final OutputStream countingInputStream = new CountingOutputStream(decryptedBytes, plaintextFile);
+		return cryptor.decryptRange(encryptedFile, countingInputStream, pos, length);
+	}
+
+	@Override
 	public Long encryptFile(InputStream plaintextFile, SeekableByteChannel encryptedFile) throws IOException {
 		final InputStream countingInputStream = new CountingInputStream(encryptedBytes, plaintextFile);
 		return cryptor.encryptFile(countingInputStream, encryptedFile);

@@ -90,7 +90,6 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 	private final byte[] masterKey = new byte[MASTER_KEY_LENGTH];
 
 	private static final int SIZE_OF_LONG = Long.SIZE / Byte.SIZE;
-	private static final int SIZE_OF_INT = Integer.SIZE / Byte.SIZE;
 
 	static {
 		try {
@@ -404,13 +403,47 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 	}
 
 	@Override
+	public Long decryptRange(SeekableByteChannel encryptedFile, OutputStream plaintextFile, long pos, long length) throws IOException {
+		// skip content size:
+		encryptedFile.position(SIZE_OF_LONG);
+
+		// read iv:
+		final ByteBuffer countingIv = ByteBuffer.allocate(AES_BLOCK_LENGTH);
+		final int read = encryptedFile.read(countingIv);
+		if (read != AES_BLOCK_LENGTH) {
+			throw new IOException("Failed to read encrypted file header.");
+		}
+
+		// seek relevant position and update iv:
+		long firstRelevantBlock = pos / AES_BLOCK_LENGTH; // cut of fraction!
+		long numberOfRelevantBlocks = 1 + length / AES_BLOCK_LENGTH;
+		long numberOfRelevantBytes = numberOfRelevantBlocks * AES_BLOCK_LENGTH;
+		long beginOfFirstRelevantBlock = firstRelevantBlock * AES_BLOCK_LENGTH;
+		long offsetInsideFirstRelevantBlock = pos - beginOfFirstRelevantBlock;
+		countingIv.putLong(AES_BLOCK_LENGTH - SIZE_OF_LONG, firstRelevantBlock);
+
+		// fast forward stream:
+		encryptedFile.position(SIZE_OF_LONG + AES_BLOCK_LENGTH + beginOfFirstRelevantBlock);
+
+		// derive secret key and generate cipher:
+		final SecretKey key = this.pbkdf2(masterKey, EMPTY_SALT, PBKDF2_MASTERKEY_ITERATIONS, AES_KEY_LENGTH);
+		final Cipher cipher = this.cipher(FILE_CONTENT_CIPHER, key, countingIv.array(), Cipher.DECRYPT_MODE);
+
+		// read content
+		final InputStream in = new SeekableByteChannelInputStream(encryptedFile);
+		final OutputStream rangedOut = new RangeFilterOutputStream(plaintextFile, offsetInsideFirstRelevantBlock, length);
+		final OutputStream cipheredOut = new CipherOutputStream(rangedOut, cipher);
+		return IOUtils.copyLarge(in, cipheredOut, 0, numberOfRelevantBytes);
+	}
+
+	@Override
 	public Long encryptFile(InputStream plaintextFile, SeekableByteChannel encryptedFile) throws IOException {
 		// truncate file
 		encryptedFile.truncate(0);
 
-		// use an IV, whose last 4 bytes store an integer used in counter mode and write initial value to file.
+		// use an IV, whose last 8 bytes store a long used in counter mode and write initial value to file.
 		final ByteBuffer countingIv = ByteBuffer.wrap(randomData(AES_BLOCK_LENGTH));
-		countingIv.putInt(AES_BLOCK_LENGTH - SIZE_OF_INT, 0);
+		countingIv.putLong(AES_BLOCK_LENGTH - SIZE_OF_LONG, 0l);
 
 		// derive secret key and generate cipher:
 		final SecretKey key = this.pbkdf2(masterKey, EMPTY_SALT, PBKDF2_MASTERKEY_ITERATIONS, AES_KEY_LENGTH);
