@@ -37,7 +37,7 @@ import org.junit.Test;
 
 public class Aes256CryptorTest {
 
-	private static final Random TEST_PRNG = new NotReallyRandom();
+	private static final Random TEST_PRNG = new Random();
 
 	private Path tmpDir;
 	private Path masterKey;
@@ -183,15 +183,6 @@ public class Aes256CryptorTest {
 			return map.get(encryptedPath);
 		}
 
-	}
-
-	private static class NotReallyRandom extends Random {
-		private static final long serialVersionUID = 6080187127141721369L;
-
-		@Override
-		protected int next(int bits) {
-			return 4; // http://xkcd.com/221/
-		}
 	}
 
 }
