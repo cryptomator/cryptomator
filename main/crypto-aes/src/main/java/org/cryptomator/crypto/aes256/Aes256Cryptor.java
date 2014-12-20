@@ -89,7 +89,7 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 	 */
 	private final byte[] masterKey = new byte[MASTER_KEY_LENGTH];
 
-	private static final int SIZE_OF_LONG = Long.SIZE / Byte.SIZE;
+	private static final int SIZE_OF_LONG = Long.BYTES;
 
 	static {
 		try {
@@ -444,15 +444,19 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 		// use an IV, whose last 8 bytes store a long used in counter mode and write initial value to file.
 		final ByteBuffer countingIv = ByteBuffer.wrap(randomData(AES_BLOCK_LENGTH));
 		countingIv.putLong(AES_BLOCK_LENGTH - SIZE_OF_LONG, 0l);
+		countingIv.position(0);
 
 		// derive secret key and generate cipher:
 		final SecretKey key = this.pbkdf2(masterKey, EMPTY_SALT, PBKDF2_MASTERKEY_ITERATIONS, AES_KEY_LENGTH);
 		final Cipher cipher = this.cipher(FILE_CONTENT_CIPHER, key, countingIv.array(), Cipher.ENCRYPT_MODE);
 
-		// skip 8 bytes (reserved for file size):
-		encryptedFile.position(SIZE_OF_LONG);
+		// 8 bytes (file size: temporarily -1):
+		final ByteBuffer fileSize = ByteBuffer.allocate(SIZE_OF_LONG);
+		fileSize.putLong(-1L);
+		fileSize.position(0);
+		encryptedFile.write(fileSize);
 
-		// write iv:
+		// 16 bytes (iv):
 		encryptedFile.write(countingIv);
 
 		// write content:
@@ -461,11 +465,11 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 		final Long actualSize = IOUtils.copyLarge(plaintextFile, cipheredOut);
 
 		// write filesize
-		final ByteBuffer actualSizeBuffer = ByteBuffer.allocate(SIZE_OF_LONG);
-		actualSizeBuffer.putLong(actualSize);
-		actualSizeBuffer.position(0);
+		fileSize.position(0);
+		fileSize.putLong(actualSize);
+		fileSize.position(0);
 		encryptedFile.position(0);
-		encryptedFile.write(actualSizeBuffer);
+		encryptedFile.write(fileSize);
 
 		return actualSize;
 	}

@@ -12,96 +12,84 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
-import java.nio.file.FileAlreadyExistsException;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
-import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.cryptomator.crypto.CryptorIOSupport;
 import org.cryptomator.crypto.exceptions.DecryptFailedException;
 import org.cryptomator.crypto.exceptions.UnsupportedKeyLengthException;
 import org.cryptomator.crypto.exceptions.WrongPasswordException;
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 public class Aes256CryptorTest {
 
 	private static final Random TEST_PRNG = new Random();
 
-	private Path tmpDir;
-	private Path masterKey;
-	private Path encryptedFile;
-
-	@Before
-	public void prepareTmpDir() throws IOException {
-		final String tmpDirName = (String) System.getProperties().get("java.io.tmpdir");
-		final Path path = FileSystems.getDefault().getPath(tmpDirName);
-		tmpDir = Files.createTempDirectory(path, "oce-crypto-test");
-		masterKey = tmpDir.resolve("test" + Aes256Cryptor.MASTERKEY_FILE_EXT);
-		encryptedFile = tmpDir.resolve("test" + Aes256Cryptor.BASIC_FILE_EXT);
-	}
-
-	@After
-	public void dropTmpDir() {
-		try {
-			FileUtils.deleteDirectory(tmpDir.toFile());
-		} catch (IOException e) {
-			// ignore
-		}
-	}
-
-	/* ------------------------------------------------------------------------------- */
-
 	@Test
 	public void testCorrectPassword() throws IOException, WrongPasswordException, DecryptFailedException, UnsupportedKeyLengthException {
 		final String pw = "asd";
 		final Aes256Cryptor cryptor = new Aes256Cryptor(TEST_PRNG);
-		final OutputStream out = Files.newOutputStream(masterKey, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+		final ByteArrayOutputStream out = new ByteArrayOutputStream();
 		cryptor.encryptMasterKey(out, pw);
 		cryptor.swipeSensitiveData();
 
 		final Aes256Cryptor decryptor = new Aes256Cryptor(TEST_PRNG);
-		final InputStream in = Files.newInputStream(masterKey, StandardOpenOption.READ);
+		final InputStream in = new ByteArrayInputStream(out.toByteArray());
 		decryptor.decryptMasterKey(in, pw);
+
+		IOUtils.closeQuietly(out);
+		IOUtils.closeQuietly(in);
 	}
 
 	@Test(expected = WrongPasswordException.class)
 	public void testWrongPassword() throws IOException, DecryptFailedException, WrongPasswordException, UnsupportedKeyLengthException {
 		final String pw = "asd";
 		final Aes256Cryptor cryptor = new Aes256Cryptor(TEST_PRNG);
-		final OutputStream out = Files.newOutputStream(masterKey, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+		final ByteArrayOutputStream out = new ByteArrayOutputStream();
 		cryptor.encryptMasterKey(out, pw);
 		cryptor.swipeSensitiveData();
 
 		final String wrongPw = "foo";
 		final Aes256Cryptor decryptor = new Aes256Cryptor(TEST_PRNG);
-		final InputStream in = Files.newInputStream(masterKey, StandardOpenOption.READ);
+		final InputStream in = new ByteArrayInputStream(out.toByteArray());
 		decryptor.decryptMasterKey(in, wrongPw);
+
+		IOUtils.closeQuietly(out);
+		IOUtils.closeQuietly(in);
 	}
 
-	@Test(expected = NoSuchFileException.class)
-	public void testWrongLocation() throws IOException, DecryptFailedException, WrongPasswordException, UnsupportedKeyLengthException {
-		final String pw = "asd";
-		final Aes256Cryptor cryptor = new Aes256Cryptor(TEST_PRNG);
-		final OutputStream out = Files.newOutputStream(masterKey, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
-		cryptor.encryptMasterKey(out, pw);
-		cryptor.swipeSensitiveData();
+	@Test
+	public void testEncryptionAndDecryption() throws IOException, DecryptFailedException, WrongPasswordException, UnsupportedKeyLengthException {
+		// our test plaintext data:
+		final byte[] plaintextData = "Hello World".getBytes();
+		final InputStream plaintextIn = new ByteArrayInputStream(plaintextData);
 
-		final Path wrongMasterKey = tmpDir.resolve("notExistingMasterKey.json");
-		final Aes256Cryptor decryptor = new Aes256Cryptor(TEST_PRNG);
-		final InputStream in = Files.newInputStream(wrongMasterKey, StandardOpenOption.READ);
-		decryptor.decryptMasterKey(in, pw);
+		// init cryptor:
+		final Aes256Cryptor cryptor = new Aes256Cryptor(TEST_PRNG);
+
+		// encrypt:
+		final ByteBuffer encryptedData = ByteBuffer.allocate(plaintextData.length + 200);
+		final SeekableByteChannel encryptedOut = new ByteBufferBackedSeekableChannel(encryptedData);
+		cryptor.encryptFile(plaintextIn, encryptedOut);
+		IOUtils.closeQuietly(plaintextIn);
+		IOUtils.closeQuietly(encryptedOut);
+
+		// decrypt:
+		final SeekableByteChannel encryptedIn = new ByteBufferBackedSeekableChannel(encryptedData);
+		final ByteArrayOutputStream plaintextOut = new ByteArrayOutputStream();
+		final Long numDecryptedBytes = cryptor.decryptedFile(encryptedIn, plaintextOut);
+		IOUtils.closeQuietly(encryptedIn);
+		IOUtils.closeQuietly(plaintextOut);
+		Assert.assertTrue(numDecryptedBytes > 0);
+
+		// check decrypted data:
+		final byte[] result = plaintextOut.toByteArray();
+		Assert.assertArrayEquals(plaintextData, result);
 	}
 
 	@Test
@@ -118,16 +106,21 @@ public class Aes256CryptorTest {
 		final Aes256Cryptor cryptor = new Aes256Cryptor(TEST_PRNG);
 
 		// encrypt:
-		final SeekableByteChannel fileOut = Files.newByteChannel(encryptedFile, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
-		cryptor.encryptFile(plaintextIn, fileOut);
-		fileOut.close();
+		final ByteBuffer encryptedData = ByteBuffer.allocate(plaintextData.length + 200);
+		final SeekableByteChannel encryptedOut = new ByteBufferBackedSeekableChannel(encryptedData);
+		cryptor.encryptFile(plaintextIn, encryptedOut);
+		IOUtils.closeQuietly(plaintextIn);
+		IOUtils.closeQuietly(encryptedOut);
 
 		// decrypt:
-		final SeekableByteChannel fileIn = Files.newByteChannel(encryptedFile, StandardOpenOption.READ);
+		final SeekableByteChannel encryptedIn = new ByteBufferBackedSeekableChannel(encryptedData);
 		final ByteArrayOutputStream plaintextOut = new ByteArrayOutputStream();
-		final Long numDecryptedBytes = cryptor.decryptRange(fileIn, plaintextOut, 313 * Integer.BYTES, 50 * Integer.BYTES);
+		final Long numDecryptedBytes = cryptor.decryptRange(encryptedIn, plaintextOut, 313 * Integer.BYTES, 50 * Integer.BYTES);
+		IOUtils.closeQuietly(encryptedIn);
+		IOUtils.closeQuietly(plaintextOut);
 		Assert.assertTrue(numDecryptedBytes > 0);
 
+		// check decrypted data:
 		final byte[] result = plaintextOut.toByteArray();
 		final byte[] expected = new byte[50 * Integer.BYTES];
 		final ByteBuffer bbOut = ByteBuffer.wrap(expected);
@@ -135,19 +128,6 @@ public class Aes256CryptorTest {
 			bbOut.putInt(i);
 		}
 		Assert.assertArrayEquals(expected, result);
-	}
-
-	@Test(expected = FileAlreadyExistsException.class)
-	public void testReInitialization() throws IOException {
-		final String pw = "asd";
-		final Aes256Cryptor cryptor = new Aes256Cryptor(TEST_PRNG);
-		final OutputStream out = Files.newOutputStream(masterKey, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
-		cryptor.encryptMasterKey(out, pw);
-		cryptor.swipeSensitiveData();
-
-		final OutputStream outAgain = Files.newOutputStream(masterKey, StandardOpenOption.WRITE, StandardOpenOption.CREATE_NEW);
-		cryptor.encryptMasterKey(outAgain, pw);
-		cryptor.swipeSensitiveData();
 	}
 
 	@Test
