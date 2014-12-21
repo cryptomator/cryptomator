@@ -306,7 +306,7 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 		final String encrypted = ENCRYPTED_FILENAME_CODEC.encodeAsString(encryptedBytes) + BASIC_FILE_EXT;
 
 		if (encrypted.length() > ENCRYPTED_FILENAME_LENGTH_LIMIT) {
-			final String crc32 = String.valueOf(crc32Sum(encrypted.getBytes()));
+			final String crc32 = Long.toHexString(crc32Sum(encrypted.getBytes()));
 			final String metadataFilename = crc32 + METADATA_FILE_EXT;
 			final LongFilenameMetadata metadata = this.getMetadata(ioSupport, metadataFilename);
 			final String alternativeFileName = crc32 + LONG_NAME_PREFIX_SEPARATOR + metadata.getOrCreateUuidForEncryptedFilename(encrypted).toString() + LONG_NAME_FILE_EXT;
