@@ -38,7 +38,7 @@ import org.cryptomator.webdav.exceptions.IORuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class AbstractEncryptedNode implements DavResource {
+abstract class AbstractEncryptedNode implements DavResource {
 
 	private static final Logger LOG = LoggerFactory.getLogger(AbstractEncryptedNode.class);
 	private static final String DAV_COMPLIANCE_CLASSES = "1, 2";
@@ -72,7 +72,7 @@ public abstract class AbstractEncryptedNode implements DavResource {
 
 	@Override
 	public boolean exists() {
-		final Path path = PathUtils.getPhysicalPath(this);
+		final Path path = ResourcePathUtils.getPhysicalPath(this);
 		return Files.exists(path);
 	}
 
@@ -104,7 +104,7 @@ public abstract class AbstractEncryptedNode implements DavResource {
 
 	@Override
 	public long getModificationTime() {
-		final Path path = PathUtils.getPhysicalPath(this);
+		final Path path = ResourcePathUtils.getPhysicalPath(this);
 		try {
 			return Files.getLastModifiedTime(path).toMillis();
 		} catch (IOException e) {
@@ -173,8 +173,8 @@ public abstract class AbstractEncryptedNode implements DavResource {
 
 	@Override
 	public void move(DavResource dest) throws DavException {
-		final Path src = PathUtils.getPhysicalPath(this);
-		final Path dst = PathUtils.getPhysicalPath(dest);
+		final Path src = ResourcePathUtils.getPhysicalPath(this);
+		final Path dst = ResourcePathUtils.getPhysicalPath(dest);
 		try {
 			// check for conflicts:
 			if (Files.exists(dst) && Files.getLastModifiedTime(dst).toMillis() > Files.getLastModifiedTime(src).toMillis()) {
@@ -195,8 +195,8 @@ public abstract class AbstractEncryptedNode implements DavResource {
 
 	@Override
 	public void copy(DavResource dest, boolean shallow) throws DavException {
-		final Path src = PathUtils.getPhysicalPath(this);
-		final Path dst = PathUtils.getPhysicalPath(dest);
+		final Path src = ResourcePathUtils.getPhysicalPath(this);
+		final Path dst = ResourcePathUtils.getPhysicalPath(dest);
 		try {
 			// check for conflicts:
 			if (Files.exists(dst) && Files.getLastModifiedTime(dst).toMillis() > Files.getLastModifiedTime(src).toMillis()) {

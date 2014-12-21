@@ -8,7 +8,7 @@ import org.apache.commons.collections4.map.LRUMap;
 
 final class BidiLRUMap<K, V> extends AbstractDualBidiMap<K, V> {
 
-	public BidiLRUMap(int maxSize) {
+	BidiLRUMap(int maxSize) {
 		super(new LRUMap<K, V>(maxSize), new LRUMap<V, K>(maxSize));
 	}
 

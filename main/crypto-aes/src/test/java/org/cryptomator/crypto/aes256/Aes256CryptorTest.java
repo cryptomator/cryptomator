@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -95,9 +96,9 @@ public class Aes256CryptorTest {
 	@Test
 	public void testPartialDecryption() throws IOException, DecryptFailedException, WrongPasswordException, UnsupportedKeyLengthException {
 		// our test plaintext data:
-		final byte[] plaintextData = new byte[500 * Integer.BYTES];
+		final byte[] plaintextData = new byte[65536 * Integer.BYTES];
 		final ByteBuffer bbIn = ByteBuffer.wrap(plaintextData);
-		for (int i = 0; i < 500; i++) {
+		for (int i = 0; i < 65536; i++) {
 			bbIn.putInt(i);
 		}
 		final InputStream plaintextIn = new ByteArrayInputStream(plaintextData);
@@ -115,18 +116,14 @@ public class Aes256CryptorTest {
 		// decrypt:
 		final SeekableByteChannel encryptedIn = new ByteBufferBackedSeekableChannel(encryptedData);
 		final ByteArrayOutputStream plaintextOut = new ByteArrayOutputStream();
-		final Long numDecryptedBytes = cryptor.decryptRange(encryptedIn, plaintextOut, 313 * Integer.BYTES, 50 * Integer.BYTES);
+		final Long numDecryptedBytes = cryptor.decryptRange(encryptedIn, plaintextOut, 25000 * Integer.BYTES, 30000 * Integer.BYTES);
 		IOUtils.closeQuietly(encryptedIn);
 		IOUtils.closeQuietly(plaintextOut);
 		Assert.assertTrue(numDecryptedBytes > 0);
 
 		// check decrypted data:
 		final byte[] result = plaintextOut.toByteArray();
-		final byte[] expected = new byte[50 * Integer.BYTES];
-		final ByteBuffer bbOut = ByteBuffer.wrap(expected);
-		for (int i = 313; i < 363; i++) {
-			bbOut.putInt(i);
-		}
+		final byte[] expected = Arrays.copyOfRange(plaintextData, 25000 * Integer.BYTES, 55000 * Integer.BYTES);
 		Assert.assertArrayEquals(expected, result);
 	}
 

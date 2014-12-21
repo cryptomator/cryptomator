@@ -9,8 +9,15 @@
 package org.cryptomator.webdav.jackrabbit;
 
 import org.apache.jackrabbit.webdav.DavSession;
+import org.apache.jackrabbit.webdav.WebdavRequest;
 
-public class WebDavSession implements DavSession {
+class WebDavSession implements DavSession {
+
+	private final WebdavRequest request;
+
+	WebDavSession(WebdavRequest request) {
+		this.request = request;
+	}
 
 	@Override
 	public void addReference(Object reference) {
@@ -40,6 +47,10 @@ public class WebDavSession implements DavSession {
 	public void removeLockToken(String token) {
 		// TODO Auto-generated method stub
 
+	}
+
+	public WebdavRequest getRequest() {
+		return request;
 	}
 
 }

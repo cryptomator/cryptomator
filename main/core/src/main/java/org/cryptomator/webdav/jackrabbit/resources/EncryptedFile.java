@@ -30,6 +30,8 @@ import org.apache.jackrabbit.webdav.property.DavPropertyName;
 import org.apache.jackrabbit.webdav.property.DefaultDavProperty;
 import org.cryptomator.crypto.Cryptor;
 import org.cryptomator.webdav.exceptions.IORuntimeException;
+import org.eclipse.jetty.http.HttpHeader;
+import org.eclipse.jetty.http.HttpHeaderValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,9 +65,10 @@ public class EncryptedFile extends AbstractEncryptedNode {
 
 	@Override
 	public void spool(OutputContext outputContext) throws IOException {
-		final Path path = PathUtils.getPhysicalPath(this);
+		final Path path = ResourcePathUtils.getPhysicalPath(this);
 		if (Files.exists(path)) {
 			outputContext.setModificationTime(Files.getLastModifiedTime(path).toMillis());
+			outputContext.setProperty(HttpHeader.ACCEPT_RANGES.asString(), HttpHeaderValue.BYTES.asString());
 			SeekableByteChannel channel = null;
 			try {
 				channel = Files.newByteChannel(path, StandardOpenOption.READ);
@@ -81,13 +84,12 @@ public class EncryptedFile extends AbstractEncryptedNode {
 			} finally {
 				IOUtils.closeQuietly(channel);
 			}
-
 		}
 	}
 
 	@Override
 	protected void determineProperties() {
-		final Path path = PathUtils.getPhysicalPath(this);
+		final Path path = ResourcePathUtils.getPhysicalPath(this);
 		if (Files.exists(path)) {
 			SeekableByteChannel channel = null;
 			try {
@@ -98,6 +100,7 @@ public class EncryptedFile extends AbstractEncryptedNode {
 				final BasicFileAttributes attrs = Files.readAttributes(path, BasicFileAttributes.class);
 				properties.add(new DefaultDavProperty<String>(DavPropertyName.CREATIONDATE, FileTimeUtils.toRfc1123String(attrs.creationTime())));
 				properties.add(new DefaultDavProperty<String>(DavPropertyName.GETLASTMODIFIED, FileTimeUtils.toRfc1123String(attrs.lastModifiedTime())));
+				properties.add(new HttpHeaderProperty(HttpHeader.ACCEPT_RANGES.asString(), HttpHeaderValue.BYTES.asString()));
 			} catch (IOException e) {
 				LOG.error("Error determining metadata " + path.toString(), e);
 				throw new IORuntimeException(e);

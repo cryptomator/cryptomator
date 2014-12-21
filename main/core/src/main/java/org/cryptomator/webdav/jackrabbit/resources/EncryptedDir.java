@@ -64,7 +64,7 @@ public class EncryptedDir extends AbstractEncryptedNode {
 	}
 
 	private void addMemberDir(DavResource resource, InputContext inputContext) throws DavException {
-		final Path childPath = PathUtils.getPhysicalPath(resource);
+		final Path childPath = ResourcePathUtils.getPhysicalPath(resource);
 		try {
 			Files.createDirectories(childPath);
 		} catch (SecurityException e) {
@@ -76,7 +76,7 @@ public class EncryptedDir extends AbstractEncryptedNode {
 	}
 
 	private void addMemberFile(DavResource resource, InputContext inputContext) throws DavException {
-		final Path childPath = PathUtils.getPhysicalPath(resource);
+		final Path childPath = ResourcePathUtils.getPhysicalPath(resource);
 		SeekableByteChannel channel = null;
 		try {
 			channel = Files.newByteChannel(childPath, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
@@ -94,7 +94,7 @@ public class EncryptedDir extends AbstractEncryptedNode {
 
 	@Override
 	public DavResourceIterator getMembers() {
-		final Path dir = PathUtils.getPhysicalPath(this);
+		final Path dir = ResourcePathUtils.getPhysicalPath(this);
 		try {
 			final DirectoryStream<Path> directoryStream = Files.newDirectoryStream(dir, cryptor.getPayloadFilesFilter());
 			final List<DavResource> result = new ArrayList<>();
@@ -116,7 +116,7 @@ public class EncryptedDir extends AbstractEncryptedNode {
 
 	@Override
 	public void removeMember(DavResource member) throws DavException {
-		final Path memberPath = PathUtils.getPhysicalPath(member);
+		final Path memberPath = ResourcePathUtils.getPhysicalPath(member);
 		try {
 			Files.walkFileTree(memberPath, new DeletingFileVisitor());
 		} catch (SecurityException e) {
@@ -133,7 +133,7 @@ public class EncryptedDir extends AbstractEncryptedNode {
 
 	@Override
 	protected void determineProperties() {
-		final Path path = PathUtils.getPhysicalPath(this);
+		final Path path = ResourcePathUtils.getPhysicalPath(this);
 		properties.add(new ResourceType(ResourceType.COLLECTION));
 		properties.add(new DefaultDavProperty<Integer>(DavPropertyName.ISCOLLECTION, 1));
 		if (Files.exists(path)) {

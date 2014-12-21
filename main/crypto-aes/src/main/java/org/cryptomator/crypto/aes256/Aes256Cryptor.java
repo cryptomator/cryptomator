@@ -32,6 +32,7 @@ import java.util.zip.CRC32;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
+import javax.crypto.CipherInputStream;
 import javax.crypto.CipherOutputStream;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
@@ -398,8 +399,8 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 
 		// read content
 		final InputStream in = new SeekableByteChannelInputStream(encryptedFile);
-		final OutputStream cipheredOut = new CipherOutputStream(plaintextFile, cipher);
-		return IOUtils.copyLarge(in, cipheredOut);
+		final InputStream cipheredIn = new CipherInputStream(in, cipher);
+		return IOUtils.copyLarge(cipheredIn, plaintextFile);
 	}
 
 	@Override
@@ -416,8 +417,6 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 
 		// seek relevant position and update iv:
 		long firstRelevantBlock = pos / AES_BLOCK_LENGTH; // cut of fraction!
-		long numberOfRelevantBlocks = 1 + length / AES_BLOCK_LENGTH;
-		long numberOfRelevantBytes = numberOfRelevantBlocks * AES_BLOCK_LENGTH;
 		long beginOfFirstRelevantBlock = firstRelevantBlock * AES_BLOCK_LENGTH;
 		long offsetInsideFirstRelevantBlock = pos - beginOfFirstRelevantBlock;
 		countingIv.putLong(AES_BLOCK_LENGTH - SIZE_OF_LONG, firstRelevantBlock);
@@ -431,9 +430,8 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 
 		// read content
 		final InputStream in = new SeekableByteChannelInputStream(encryptedFile);
-		final OutputStream rangedOut = new RangeFilterOutputStream(plaintextFile, offsetInsideFirstRelevantBlock, length);
-		final OutputStream cipheredOut = new CipherOutputStream(rangedOut, cipher);
-		return IOUtils.copyLarge(in, cipheredOut, 0, numberOfRelevantBytes);
+		final InputStream cipheredIn = new CipherInputStream(in, cipher);
+		return IOUtils.copyLarge(cipheredIn, plaintextFile, offsetInsideFirstRelevantBlock, length);
 	}
 
 	@Override

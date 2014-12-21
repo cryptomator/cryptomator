@@ -33,6 +33,7 @@ final class FallbackWebDavMounter implements WebDavMounterStrategy {
 
 	private void displayMountInstructions() {
 		// TODO display message to user pointing to cryptomator.org/mounting#mount which describes what to do
+		// Machine-readable mount instructions: http://tools.ietf.org/html/rfc4709#page-5 :-)
 	}
 
 	private void displayUnmountInstructions() {

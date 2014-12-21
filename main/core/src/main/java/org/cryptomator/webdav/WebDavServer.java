@@ -23,9 +23,9 @@ import org.eclipse.jetty.util.thread.ThreadPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class WebDAVServer {
+public final class WebDavServer {
 
-	private static final Logger LOG = LoggerFactory.getLogger(WebDAVServer.class);
+	private static final Logger LOG = LoggerFactory.getLogger(WebDavServer.class);
 	private static final String LOCALHOST = "::1";
 	private static final int MAX_PENDING_REQUESTS = 200;
 	private static final int MAX_THREADS = 200;
@@ -34,7 +34,7 @@ public final class WebDAVServer {
 	private final Server server;
 	private int port;
 
-	public WebDAVServer() {
+	public WebDavServer() {
 		final BlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(MAX_PENDING_REQUESTS);
 		final ThreadPool tp = new QueuedThreadPool(MAX_THREADS, MIN_THREADS, THREAD_IDLE_SECONDS, queue);
 		server = new Server(tp);
@@ -50,9 +50,10 @@ public final class WebDAVServer {
 		connector.setHost(LOCALHOST);
 
 		final String contextPath = "/";
+		final String servletPathSpec = "/*";
 
 		final ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
-		context.addServlet(getMiltonServletHolder(workDir, contextPath, cryptor), "/*");
+		context.addServlet(getWebDavServletHolder(workDir, contextPath, cryptor), servletPathSpec);
 		context.setContextPath(contextPath);
 		server.setHandler(context);
 
@@ -81,7 +82,7 @@ public final class WebDAVServer {
 		return server.isStopped();
 	}
 
-	private ServletHolder getMiltonServletHolder(final String workDir, final String contextPath, final Cryptor cryptor) {
+	private ServletHolder getWebDavServletHolder(final String workDir, final String contextPath, final Cryptor cryptor) {
 		final ServletHolder result = new ServletHolder("Cryptomator-WebDAV-Servlet", new WebDavServlet(cryptor));
 		result.setInitParameter(WebDavServlet.CFG_FS_ROOT, workDir);
 		result.setInitParameter(WebDavServlet.CFG_HTTP_ROOT, contextPath);

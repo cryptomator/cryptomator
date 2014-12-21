@@ -20,7 +20,7 @@ import org.cryptomator.ui.util.MasterKeyFilter;
 import org.cryptomator.ui.util.mount.CommandFailedException;
 import org.cryptomator.ui.util.mount.WebDavMount;
 import org.cryptomator.ui.util.mount.WebDavMounter;
-import org.cryptomator.webdav.WebDAVServer;
+import org.cryptomator.webdav.WebDavServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +34,7 @@ public class Directory implements Serializable {
 	private static final long serialVersionUID = 3754487289683599469L;
 	private static final Logger LOG = LoggerFactory.getLogger(Directory.class);
 
-	private final WebDAVServer server = new WebDAVServer();
+	private final WebDavServer server = new WebDavServer();
 	private final Cryptor cryptor = SamplingDecorator.decorate(new Aes256Cryptor());
 	private final ObjectProperty<Boolean> unlocked = new SimpleObjectProperty<Boolean>(this, "unlocked", Boolean.FALSE);
 	private final Path path;
@@ -137,7 +137,7 @@ public class Directory implements Serializable {
 		this.unlocked.set(unlocked);
 	}
 
-	public WebDAVServer getServer() {
+	public WebDavServer getServer() {
 		return server;
 	}
 

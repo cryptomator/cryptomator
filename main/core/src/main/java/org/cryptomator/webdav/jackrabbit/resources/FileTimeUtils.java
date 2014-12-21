@@ -14,13 +14,13 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.Temporal;
 
-public final class FileTimeUtils {
+final class FileTimeUtils {
 
 	private FileTimeUtils() {
 		throw new IllegalStateException("not instantiable");
 	}
 
-	public static String toRfc1123String(FileTime time) {
+	static String toRfc1123String(FileTime time) {
 		final Temporal date = OffsetDateTime.ofInstant(time.toInstant(), ZoneOffset.UTC);
 		return DateTimeFormatter.RFC_1123_DATE_TIME.format(date);
 	}

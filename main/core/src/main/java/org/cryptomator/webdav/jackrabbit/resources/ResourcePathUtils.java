@@ -14,9 +14,9 @@ import java.nio.file.Path;
 import org.apache.jackrabbit.webdav.DavResource;
 import org.apache.jackrabbit.webdav.DavResourceLocator;
 
-public final class PathUtils {
+public final class ResourcePathUtils {
 
-	private PathUtils() {
+	private ResourcePathUtils() {
 		throw new IllegalStateException("not instantiable");
 	}
 

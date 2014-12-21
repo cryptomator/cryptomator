@@ -19,7 +19,6 @@ If you want to take a look at the current beta version, go ahead and download [C
 ## Security
 - Default key length is 256 bit (falls back to 128 bit, if JCE isn't installed)
 - PBKDF2 key generation
-- 4096 bit internal masterkey
 - Cryptographically secure random numbers for salts, IVs and the masterkey of course
 - Sensitive data is swiped from the heap asap
 - Lightweight: Complexity kills security
@@ -31,16 +30,12 @@ If you want to take a look at the current beta version, go ahead and download [C
 
 ## Dependencies
 - Java 8
-- Maven
-- Awesome 3rd party open source libraries (Apache Commons, Apache Jackrabbit, Jetty, Jackson, ...)
+- see pom.xml ;-)
 
 ## TODO
 
-### Core
-- Support for HTTP range requests
-
 ### UI
-- Automount of WebDAV volumes for Win/Tux
+- Native L&F
 - Drive icons in WebDAV volumes
 - Change password functionality
 - Better explanations on UI
