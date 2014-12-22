@@ -34,7 +34,7 @@
 	<children>
 		<VBox prefWidth="200.0">
 			<children>
-				<ListView fx:id="directoryList" VBox.vgrow="ALWAYS" />
+				<ListView fx:id="directoryList" VBox.vgrow="ALWAYS" focusTraversable="false" />
 				<ToolBar VBox.vgrow="NEVER">
 					<items>
 						<Button text="+" onAction="#didClickAddDirectory" />

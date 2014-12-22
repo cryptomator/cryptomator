@@ -137,11 +137,11 @@ public class MainController implements Initializable, InitializationListener, Un
 	}
 
 	private void showWelcomeView() {
-		this.showView("/welcome.fxml");
+		this.showView("/fxml/welcome.fxml");
 	}
 
 	private void showInitializeView(Directory directory) {
-		final InitializeController ctrl = showView("/initialize.fxml");
+		final InitializeController ctrl = showView("/fxml/initialize.fxml");
 		ctrl.setDirectory(directory);
 		ctrl.setListener(this);
 	}
@@ -152,7 +152,7 @@ public class MainController implements Initializable, InitializationListener, Un
 	}
 
 	private void showUnlockView(Directory directory) {
-		final UnlockController ctrl = showView("/unlock.fxml");
+		final UnlockController ctrl = showView("/fxml/unlock.fxml");
 		ctrl.setDirectory(directory);
 		ctrl.setListener(this);
 	}
@@ -164,7 +164,7 @@ public class MainController implements Initializable, InitializationListener, Un
 	}
 
 	private void showUnlockedView(Directory directory) {
-		final UnlockedController ctrl = showView("/unlocked.fxml");
+		final UnlockedController ctrl = showView("/fxml/unlocked.fxml");
 		ctrl.setDirectory(directory);
 		ctrl.setListener(this);
 	}

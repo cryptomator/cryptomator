@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright (c) 2014 Sebastian Stenzel
+  This file is licensed under the terms of the MIT license.
+  See the LICENSE.txt file for more info.
+  
+  Contributors:
+      Sebastian Stenzel - initial API and implementation
+-->
+<?import java.net.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import java.lang.String?>
+<?import javafx.scene.shape.Arc?>
+<?import javafx.scene.shape.QuadCurve?>
+<?import javafx.scene.shape.Path?>
+<?import javafx.scene.shape.Line?>
+
+
+<AnchorPane xmlns:fx="http://javafx.com/fxml">
+	
+	<children>
+		<Label AnchorPane.leftAnchor="100.0" AnchorPane.topAnchor="50.0" style="-fx-font-size: 1.5em;" text="%welcome.welcomeLabel"/>
+		<Label AnchorPane.leftAnchor="120.0" AnchorPane.topAnchor="280.0" text="%welcome.addButtonInstructionLabel"/>
+		
+		<QuadCurve AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="300.0" startX="200.0" startY="0.0" endX="0.0" endY="80.0" controlX="180.0" controlY="80.0" fill="TRANSPARENT" stroke="BLACK" strokeWidth="2.0"/>
+		<Line AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="370.0" startX="0.0" endX="10.0" startY="10.0" endY="0.0" strokeWidth="2.0"/>
+		<Line AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="380.0" startX="0.0" endX="10.0" startY="0.0" endY="10.0" strokeWidth="2.0"/>
+	</children>
+	
+</AnchorPane>

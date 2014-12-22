@@ -19,6 +19,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.ui.settings.Settings;
 import org.cryptomator.ui.util.TrayIconUtil;
 import org.eclipse.jetty.util.ConcurrentHashSet;
@@ -35,8 +36,9 @@ public class MainApplication extends Application {
 
 	@Override
 	public void start(final Stage primaryStage) throws IOException {
+		chooseNativeStylesheet();
 		final ResourceBundle rb = ResourceBundle.getBundle("localization");
-		final FXMLLoader loader = new FXMLLoader(getClass().getResource("/main.fxml"), rb);
+		final FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/main.fxml"), rb);
 		final Parent root = loader.load();
 		final MainController ctrl = loader.getController();
 		ctrl.setStage(primaryStage);
@@ -49,6 +51,16 @@ public class MainApplication extends Application {
 		TrayIconUtil.init(primaryStage, rb, () -> {
 			quit();
 		});
+	}
+
+	private void chooseNativeStylesheet() {
+		if (SystemUtils.IS_OS_MAC_OSX) {
+			setUserAgentStylesheet(getClass().getResource("/css/mac_theme.css").toString());
+		} else if (SystemUtils.IS_OS_LINUX) {
+			setUserAgentStylesheet(getClass().getResource("/css/linux_theme.css").toString());
+		} else if (SystemUtils.IS_OS_WINDOWS) {
+			setUserAgentStylesheet(getClass().getResource("/css/win_theme.css").toString());
+		}
 	}
 
 	private void quit() {
