@@ -1,12 +1,12 @@
- /*
-  * Copyright (c) 2014 Sebastian Stenzel
-  * This file is licensed under the terms of the MIT license.
-  * See the LICENSE.txt file for more info.
-  * 
-  * Contributors:
-  *     Sebastian Stenzel - initial API and implementation
-  *
-  */
+/*
+ * Copyright (c) 2014 Sebastian Stenzel
+ * This file is licensed under the terms of the MIT license.
+ * See the LICENSE.txt file for more info.
+ * 
+ * Contributors:
+ *     Sebastian Stenzel - initial API and implementation
+ *
+ */
 
 .root {
 	-fx-font-family: 'lucida-grande';
@@ -623,9 +623,7 @@
 }
 .combo-box-popup > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell {
     -fx-background-color: transparent;
-    -fx-background-insets:0.0;
     -fx-padding:0.2em 1em 0.2em 1em;
-    -fx-border-width: 0.0 0.0 0.0 0.0;
     -fx-border-color:transparent;
 }
 
@@ -674,39 +672,23 @@
     -fx-background-color: -fx-focus-color, -fx-cell-focus-inner-border, -fx-control-inner-background;
     -fx-background-insets: 0, 1, 2;
 }
-/* When the list-cell is selected and focused */
-.list-view:focused > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:focused:selected {
+.list-view > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:selected {
     -fx-background-color: -fx-focus-color, -fx-cell-focus-inner-border, -fx-selection-bar;
     -fx-background-insets: 0, 1, 2;
     -fx-background: -fx-accent;
     -fx-text-fill: -fx-selection-bar-text;
 }
-.list-view:focused > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:selected, 
-.list-view:focused > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:selected:hover {
+.list-view > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:selected, 
+.list-view > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:selected:hover {
     -fx-background: -fx-accent;
     -fx-background-color: -fx-selection-bar;
     -fx-text-fill: -fx-selection-bar-text;
 }
-.list-view:focused > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:focused:selected:hover {
+.list-view > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:selected:hover {
     -fx-background: -fx-accent;
     -fx-background-color: -fx-focus-color, -fx-cell-focus-inner-border, -fx-selection-bar;
     -fx-background-insets: 0, 1, 2;
     -fx-text-fill: -fx-selection-bar-text;
-}
-/* When the ListView is _not_ focused, we show alternate selection colors */
-.list-cell:filled:selected:focused,
-.list-cell:filled:selected,
-.list-view:horizontal > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:selected {
-    -fx-background-color: lightgray;
-    -fx-text-fill: -fx-selection-bar-text;
-}
-.list-cell:filled:selected:focused:disabled, 
-.list-cell:filled:selected:disabled {
-    -fx-opacity: -fx-disabled-opacity;
-}
-.list-view:horizontal > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:selected,
-.list-view:horizontal > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:selected:hover {
-    -fx-background-color: -fx-selection-bar;
 }
 
 /*******************************************************************************
