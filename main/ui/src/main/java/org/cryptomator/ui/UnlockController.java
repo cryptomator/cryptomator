@@ -117,7 +117,7 @@ public class UnlockController implements Initializable {
 			setControlsDisabled(false);
 			progressIndicator.setVisible(false);
 			messageLabel.setText(rb.getString("unlock.errorMessage.wrongPassword"));
-			passwordField.requestFocus();
+			Platform.runLater(passwordField::requestFocus);
 		} catch (UnsupportedKeyLengthException ex) {
 			setControlsDisabled(false);
 			progressIndicator.setVisible(false);
