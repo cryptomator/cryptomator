@@ -44,6 +44,9 @@
 		<!-- Row 3 -->
 		<Button fx:id="okButton" defaultButton="true" GridPane.rowIndex="3" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.halignment="RIGHT" text="%initialize.button.ok" prefWidth="150.0" onAction="#initializeVault" focusTraversable="false" disable="true" />
 		
+		<!-- Row 4 -->
+		<ProgressIndicator progress="-1" fx:id="progressIndicator" GridPane.rowIndex="4" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.halignment="CENTER" visible="false"/>
+		
 		<!-- Row 5 -->
 		<Label fx:id="messageLabel" GridPane.rowIndex="5" GridPane.columnIndex="0" GridPane.columnSpan="2" />
 	</children>

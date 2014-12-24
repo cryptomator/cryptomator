@@ -16,12 +16,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.ResourceBundle;
+import java.util.concurrent.Future;
 
 import javafx.application.Platform;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
@@ -34,6 +36,7 @@ import org.cryptomator.crypto.exceptions.UnsupportedKeyLengthException;
 import org.cryptomator.crypto.exceptions.WrongPasswordException;
 import org.cryptomator.ui.controls.SecPasswordField;
 import org.cryptomator.ui.model.Directory;
+import org.cryptomator.ui.util.FXThreads;
 import org.cryptomator.ui.util.MasterKeyFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,7 +54,10 @@ public class UnlockController implements Initializable {
 
 	@FXML
 	private SecPasswordField passwordField;
-	
+
+	@FXML
+	private Button unlockButton;
+
 	@FXML
 	private ProgressIndicator progressIndicator;
 
@@ -82,6 +88,7 @@ public class UnlockController implements Initializable {
 
 	@FXML
 	private void didClickUnlockButton(ActionEvent event) {
+		setControlsDisabled(true);
 		final String masterKeyFileName = usernameBox.getValue() + Aes256Cryptor.MASTERKEY_FILE_EXT;
 		final Path masterKeyPath = directory.getPath().resolve(masterKeyFileName);
 		final CharSequence password = passwordField.getCharacters();
@@ -96,15 +103,23 @@ public class UnlockController implements Initializable {
 				return;
 			}
 			directory.setUnlocked(true);
-			directory.mountAsync(this::didUnlockAndMount);
+			final Future<Boolean> futureMount = FXThreads.runOnBackgroundThread(directory::mount);
+			FXThreads.runOnMainThreadWhenFinished(futureMount, this::didUnlockAndMount);
+			FXThreads.runOnMainThreadWhenFinished(futureMount, (result) -> {
+				setControlsDisabled(false);
+			});
 		} catch (DecryptFailedException | IOException ex) {
+			setControlsDisabled(false);
 			progressIndicator.setVisible(false);
 			messageLabel.setText(rb.getString("unlock.errorMessage.decryptionFailed"));
 			LOG.error("Decryption failed for technical reasons.", ex);
 		} catch (WrongPasswordException e) {
+			setControlsDisabled(false);
 			progressIndicator.setVisible(false);
 			messageLabel.setText(rb.getString("unlock.errorMessage.wrongPassword"));
+			passwordField.requestFocus();
 		} catch (UnsupportedKeyLengthException ex) {
+			setControlsDisabled(false);
 			progressIndicator.setVisible(false);
 			messageLabel.setText(rb.getString("unlock.errorMessage.unsupportedKeyLengthInstallJCE"));
 			LOG.warn("Unsupported Key-Length. Please install Oracle Java Cryptography Extension (JCE).", ex);
@@ -112,6 +127,12 @@ public class UnlockController implements Initializable {
 			passwordField.swipe();
 			IOUtils.closeQuietly(masterKeyInputStream);
 		}
+	}
+
+	private void setControlsDisabled(boolean disable) {
+		usernameBox.setDisable(disable);
+		passwordField.setDisable(disable);
+		unlockButton.setDisable(disable);
 	}
 
 	private void findExistingUsernames() {
@@ -132,15 +153,12 @@ public class UnlockController implements Initializable {
 			LOG.trace("Invalid path: " + directory.getPath(), e);
 		}
 	}
-	
-	private Void didUnlockAndMount(boolean mountSuccess) {
-		Platform.runLater(() -> {
-			progressIndicator.setVisible(false);
-			if (listener != null) {
-				listener.didUnlock(this);
-			}
-		});
-		return null;
+
+	private void didUnlockAndMount(boolean mountSuccess) {
+		progressIndicator.setVisible(false);
+		if (listener != null) {
+			listener.didUnlock(this);
+		}
 	}
 
 	/* Getter/Setter */

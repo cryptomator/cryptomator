@@ -1,6 +1,8 @@
 package org.cryptomator.files;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.channels.SeekableByteChannel;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -24,7 +26,7 @@ public class EncryptingFileVisitor extends SimpleFileVisitor<Path> implements Cr
 		this.cryptor = cryptor;
 		this.encryptionDecider = encryptionDecider;
 	}
-	
+
 	@Override
 	public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
 		if (rootDir.equals(dir) || encryptionDecider.shouldEncrypt(dir)) {
@@ -36,12 +38,15 @@ public class EncryptingFileVisitor extends SimpleFileVisitor<Path> implements Cr
 	}
 
 	@Override
-	public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-		if (encryptionDecider.shouldEncrypt(file)) {
-			final String plaintext = file.getFileName().toString();
-			final String encrypted = cryptor.encryptPath(plaintext, '/', '/', this);
-			final Path newPath = file.resolveSibling(encrypted);
-			Files.move(file, newPath, StandardCopyOption.ATOMIC_MOVE);
+	public FileVisitResult visitFile(Path plaintextFile, BasicFileAttributes attrs) throws IOException {
+		if (encryptionDecider.shouldEncrypt(plaintextFile)) {
+			final String plaintextName = plaintextFile.getFileName().toString();
+			final String encryptedName = cryptor.encryptPath(plaintextName, '/', '/', this);
+			final Path encryptedPath = plaintextFile.resolveSibling(encryptedName);
+			final InputStream plaintextIn = Files.newInputStream(plaintextFile, StandardOpenOption.READ);
+			final SeekableByteChannel ciphertextOut = Files.newByteChannel(encryptedPath, StandardOpenOption.WRITE, StandardOpenOption.CREATE_NEW);
+			cryptor.encryptFile(plaintextIn, ciphertextOut);
+			Files.delete(plaintextFile);
 		}
 		return FileVisitResult.CONTINUE;
 	}
@@ -68,9 +73,9 @@ public class EncryptingFileVisitor extends SimpleFileVisitor<Path> implements Cr
 		final Path path = currentDir.resolve(metadataFile);
 		return Files.readAllBytes(path);
 	}
-	
+
 	/* callback */
-	
+
 	public interface EncryptionDecider {
 		boolean shouldEncrypt(Path path);
 	}

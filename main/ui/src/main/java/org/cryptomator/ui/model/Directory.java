@@ -4,13 +4,9 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
-import java.util.concurrent.FutureTask;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.util.Callback;
 
 import org.cryptomator.crypto.Cryptor;
 import org.cryptomator.crypto.SamplingDecorator;
@@ -71,21 +67,7 @@ public class Directory implements Serializable {
 		}
 	}
 
-	public void mountAsync(Callback<Boolean, Void> callback) {
-		final FutureTask<Boolean> mountTask = new FutureTask<>(this::mount);
-		final Executor exec = Executors.newSingleThreadExecutor();
-		exec.execute(mountTask);
-		exec.execute(() -> {
-			try {
-				final Boolean result = mountTask.get();
-				callback.call(result);
-			} catch (Exception e) {
-				callback.call(false);
-			}
-		});
-	}
-	
-	private boolean mount() {
+	public boolean mount() {
 		try {
 			webDavMount = WebDavMounter.mount(server.getPort());
 			return true;

@@ -38,7 +38,7 @@
 		<SecPasswordField fx:id="passwordField" GridPane.rowIndex="1" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" maxWidth="Infinity" />
 		
 		<!-- Row 2 -->
-		<Button text="%unlock.button.unlock" defaultButton="true" GridPane.rowIndex="2" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.halignment="RIGHT" prefWidth="150.0" onAction="#didClickUnlockButton" focusTraversable="false"/>
+		<Button fx:id="unlockButton" text="%unlock.button.unlock" defaultButton="true" GridPane.rowIndex="2" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.halignment="RIGHT" prefWidth="150.0" onAction="#didClickUnlockButton"/>
 		
 		<!-- Row 3 -->
 		<ProgressIndicator progress="-1" fx:id="progressIndicator" GridPane.rowIndex="3" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.halignment="CENTER" visible="false"/>

@@ -20,6 +20,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.concurrent.Future;
 
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -30,6 +31,7 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
 
@@ -41,6 +43,7 @@ import org.cryptomator.files.EncryptingFileVisitor;
 import org.cryptomator.ui.controls.ClearOnDisableListener;
 import org.cryptomator.ui.controls.SecPasswordField;
 import org.cryptomator.ui.model.Directory;
+import org.cryptomator.ui.util.FXThreads;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,6 +67,9 @@ public class InitializeController implements Initializable {
 
 	@FXML
 	private Button okButton;
+
+	@FXML
+	private ProgressIndicator progressIndicator;
 
 	@FXML
 	private Label messageLabel;
@@ -123,6 +129,7 @@ public class InitializeController implements Initializable {
 
 	@FXML
 	protected void initializeVault(ActionEvent event) {
+		setControlsDisabled(true);
 		if (!isDirectoryEmpty() && !shouldEncryptExistingFiles()) {
 			return;
 		}
@@ -131,18 +138,29 @@ public class InitializeController implements Initializable {
 		final CharSequence password = passwordField.getCharacters();
 		OutputStream masterKeyOutputStream = null;
 		try {
+			progressIndicator.setVisible(true);
 			masterKeyOutputStream = Files.newOutputStream(masterKeyPath, StandardOpenOption.WRITE, StandardOpenOption.CREATE_NEW);
 			directory.getCryptor().encryptMasterKey(masterKeyOutputStream, password);
-			encryptExistingContents();
-			directory.getCryptor().swipeSensitiveData();
-			if (listener != null) {
-				listener.didInitialize(this);
-			}
+			final Future<?> futureDone = FXThreads.runOnBackgroundThread(this::encryptExistingContents);
+			FXThreads.runOnMainThreadWhenFinished(futureDone, (result) -> {
+				progressIndicator.setVisible(false);
+				progressIndicator.setVisible(false);
+				directory.getCryptor().swipeSensitiveData();
+				if (listener != null) {
+					listener.didInitialize(this);
+				}
+			});
 		} catch (FileAlreadyExistsException ex) {
+			setControlsDisabled(false);
+			progressIndicator.setVisible(false);
 			messageLabel.setText(localization.getString("initialize.messageLabel.alreadyInitialized"));
 		} catch (InvalidPathException ex) {
+			setControlsDisabled(false);
+			progressIndicator.setVisible(false);
 			messageLabel.setText(localization.getString("initialize.messageLabel.invalidPath"));
 		} catch (IOException ex) {
+			setControlsDisabled(false);
+			progressIndicator.setVisible(false);
 			LOG.error("I/O Exception", ex);
 		} finally {
 			usernameField.setText(null);
@@ -150,6 +168,13 @@ public class InitializeController implements Initializable {
 			retypePasswordField.swipe();
 			IOUtils.closeQuietly(masterKeyOutputStream);
 		}
+	}
+
+	private void setControlsDisabled(boolean disable) {
+		usernameField.setDisable(disable);
+		passwordField.setDisable(disable);
+		retypePasswordField.setDisable(disable);
+		okButton.setDisable(disable);
 	}
 
 	private boolean isDirectoryEmpty() {
@@ -172,9 +197,13 @@ public class InitializeController implements Initializable {
 		return ButtonType.OK.equals(result.get());
 	}
 
-	private void encryptExistingContents() throws IOException {
-		final FileVisitor<Path> visitor = new EncryptingFileVisitor(directory.getPath(), directory.getCryptor(), this::shouldEncryptExistingFile);
-		Files.walkFileTree(directory.getPath(), visitor);
+	private void encryptExistingContents() {
+		try {
+			final FileVisitor<Path> visitor = new EncryptingFileVisitor(directory.getPath(), directory.getCryptor(), this::shouldEncryptExistingFile);
+			Files.walkFileTree(directory.getPath(), visitor);
+		} catch (IOException ex) {
+			LOG.error("I/O Exception", ex);
+		}
 	}
 
 	private boolean shouldEncryptExistingFile(Path path) {
