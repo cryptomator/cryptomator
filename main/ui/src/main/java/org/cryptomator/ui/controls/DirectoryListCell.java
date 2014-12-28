@@ -3,7 +3,6 @@ package org.cryptomator.ui.controls;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.control.ContentDisplay;
-import javafx.scene.control.ListCell;
 import javafx.scene.control.Tooltip;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
@@ -11,7 +10,7 @@ import javafx.scene.shape.Circle;
 
 import org.cryptomator.ui.model.Directory;
 
-public class DirectoryListCell extends ListCell<Directory> implements ChangeListener<Boolean> {
+public class DirectoryListCell extends DraggableListCell<Directory> implements ChangeListener<Boolean> {
 
 	// fill: #FD4943, stroke: #E1443F
 	private static final Color RED_FILL = Color.rgb(253, 73, 67);
