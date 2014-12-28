@@ -77,8 +77,10 @@ public class MainController implements Initializable, InitializationListener, Un
 		final File file = dirChooser.showDialog(stage);
 		if (file != null && file.canWrite()) {
 			final Directory dir = new Directory(file.toPath());
-			directoryList.getItems().add(dir);
-			directoryList.getSelectionModel().selectLast();
+			if (!directoryList.getItems().contains(dir)) {
+				directoryList.getItems().add(dir);
+			}
+			directoryList.getSelectionModel().select(dir);
 		}
 	}
 
