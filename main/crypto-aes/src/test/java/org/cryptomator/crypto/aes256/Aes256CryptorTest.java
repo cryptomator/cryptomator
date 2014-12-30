@@ -134,15 +134,19 @@ public class Aes256CryptorTest {
 
 		// short path components
 		final String originalPath1 = "foo/bar/baz";
-		final String encryptedPath1 = cryptor.encryptPath(originalPath1, '/', '/', ioSupportMock);
-		final String decryptedPath1 = cryptor.decryptPath(encryptedPath1, '/', '/', ioSupportMock);
+		final String encryptedPath1a = cryptor.encryptPath(originalPath1, '/', '/', ioSupportMock);
+		final String encryptedPath1b = cryptor.encryptPath(originalPath1, '/', '/', ioSupportMock);
+		Assert.assertEquals(encryptedPath1a, encryptedPath1b);
+		final String decryptedPath1 = cryptor.decryptPath(encryptedPath1a, '/', '/', ioSupportMock);
 		Assert.assertEquals(originalPath1, decryptedPath1);
 
 		// long path components
 		final String str50chars = "aaaaaaaaaabbbbbbbbbbccccccccccddddddddddeeeeeeeeee";
 		final String originalPath2 = "foo/" + str50chars + str50chars + str50chars + str50chars + str50chars + "/baz";
-		final String encryptedPath2 = cryptor.encryptPath(originalPath2, '/', '/', ioSupportMock);
-		final String decryptedPath2 = cryptor.decryptPath(encryptedPath2, '/', '/', ioSupportMock);
+		final String encryptedPath2a = cryptor.encryptPath(originalPath2, '/', '/', ioSupportMock);
+		final String encryptedPath2b = cryptor.encryptPath(originalPath2, '/', '/', ioSupportMock);
+		Assert.assertEquals(encryptedPath2a, encryptedPath2b);
+		final String decryptedPath2 = cryptor.decryptPath(encryptedPath2a, '/', '/', ioSupportMock);
 		Assert.assertEquals(originalPath2, decryptedPath2);
 	}
 

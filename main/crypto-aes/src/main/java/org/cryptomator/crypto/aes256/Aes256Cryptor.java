@@ -300,13 +300,13 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 	 * {@link FileNamingConventions#LONG_NAME_FILE_EXT}.
 	 */
 	private String encryptPathComponent(final String cleartext, final SecretKey key, CryptorIOSupport ioSupport) throws IllegalBlockSizeException, BadPaddingException, IOException {
-		final byte[] ivRandomPart = randomData(FILE_NAME_IV_LENGTH);
+		final long cleartextHash = crc32Sum(cleartext.getBytes());
 		final ByteBuffer iv = ByteBuffer.allocate(AES_BLOCK_LENGTH);
-		iv.put(ivRandomPart);
+		iv.putLong(cleartextHash);
 		final Cipher cipher = this.cipher(FILE_NAME_CIPHER, key, iv.array(), Cipher.ENCRYPT_MODE);
 		final byte[] cleartextBytes = cleartext.getBytes(Charsets.UTF_8);
 		final byte[] encryptedBytes = cipher.doFinal(cleartextBytes);
-		final String ivAndCiphertext = ENCRYPTED_FILENAME_CODEC.encodeAsString(ivRandomPart) + IV_PREFIX_SEPARATOR + ENCRYPTED_FILENAME_CODEC.encodeAsString(encryptedBytes);
+		final String ivAndCiphertext = Long.toHexString(cleartextHash) + IV_PREFIX_SEPARATOR + ENCRYPTED_FILENAME_CODEC.encodeAsString(encryptedBytes);
 
 		if (ivAndCiphertext.length() + BASIC_FILE_EXT.length() > ENCRYPTED_FILENAME_LENGTH_LIMIT) {
 			final String crc32 = Long.toHexString(crc32Sum(ivAndCiphertext.getBytes()));
@@ -354,11 +354,10 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 			throw new IllegalArgumentException("Unsupported path component: " + encrypted);
 		}
 
-		final String ivRandomPartStr = StringUtils.substringBefore(ivAndCiphertext, IV_PREFIX_SEPARATOR);
+		final String cleartextHash = StringUtils.substringBefore(ivAndCiphertext, IV_PREFIX_SEPARATOR);
 		final String ciphertext = StringUtils.substringAfter(ivAndCiphertext, IV_PREFIX_SEPARATOR);
-		final byte[] ivRandomPart = ENCRYPTED_FILENAME_CODEC.decode(ivRandomPartStr);
 		final ByteBuffer iv = ByteBuffer.allocate(AES_BLOCK_LENGTH);
-		iv.put(ivRandomPart);
+		iv.putLong(Long.parseLong(cleartextHash, 16));
 
 		final Cipher cipher = this.cipher(FILE_NAME_CIPHER, key, iv.array(), Cipher.DECRYPT_MODE);
 		final byte[] encryptedBytes = ENCRYPTED_FILENAME_CODEC.decode(ciphertext);
