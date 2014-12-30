@@ -78,9 +78,10 @@ interface AesCryptographicConfiguration {
 
 	/**
 	 * Number of non-zero bytes in the IV used for file name encryption. Less means shorter encrypted filenames, more means higher entropy.
-	 * Maximum length is {@value #AES_BLOCK_LENGTH}.
+	 * Maximum length is {@value #AES_BLOCK_LENGTH}. Even the shortest base32 (see {@link FileNamingConventions#ENCRYPTED_FILENAME_CODEC})
+	 * encoded byte array will need 8 chars. The maximum number of bytes that fit in 8 base32 chars is 5. Thus 5 is the ideal length.
 	 */
-	int FILE_NAME_IV_LENGTH = 4;
+	int FILE_NAME_IV_LENGTH = 5;
 
 	/**
 	 * Number of iterations for key derived from user pw. High iteration count for better resistance to bruteforcing.

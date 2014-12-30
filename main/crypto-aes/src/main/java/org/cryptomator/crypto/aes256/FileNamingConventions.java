@@ -22,7 +22,7 @@ interface FileNamingConventions {
 	String MASTERKEY_FILE_EXT = ".masterkey.json";
 
 	/**
-	 * How to encode the encrypted file names safely.
+	 * How to encode the encrypted file names safely. Base32 uses only alphanumeric characters and is case-insensitive.
 	 */
 	BaseNCodec ENCRYPTED_FILENAME_CODEC = new Base32();
 
