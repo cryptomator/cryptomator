@@ -31,7 +31,10 @@ interface AesCryptographicConfiguration {
 	byte[] EMPTY_SALT = new byte[SALT_LENGTH];
 
 	/**
-	 * Algorithm used for key derivation.
+	 * Algorithm used for key derivation as defined in RFC 2898 / PKCS #5.
+	 * 
+	 * SHA1 will deprecate soon, but the main purpose of PBKDF2 is waisting CPU cycles, so cryptographically strong hash algorithms are not
+	 * necessary here. See also http://crypto.stackexchange.com/a/11017
 	 */
 	String KEY_FACTORY_ALGORITHM = "PBKDF2WithHmacSHA1";
 
@@ -52,14 +55,14 @@ interface AesCryptographicConfiguration {
 	 * 
 	 * @see http://docs.oracle.com/javase/7/docs/technotes/guides/security/StandardNames.html#Cipher
 	 */
-	String MASTERKEY_CIPHER = "AES/CBC/PKCS5Padding";
+	String MASTERKEY_CIPHER = "AES/CTR/NoPadding";
 
 	/**
 	 * Cipher specs for file name encryption.
 	 * 
 	 * @see http://docs.oracle.com/javase/7/docs/technotes/guides/security/StandardNames.html#Cipher
 	 */
-	String FILE_NAME_CIPHER = "AES/CBC/PKCS5Padding";
+	String FILE_NAME_CIPHER = "AES/CTR/NoPadding";
 
 	/**
 	 * Cipher specs for content encryption. Using CTR-mode for random access.
@@ -74,9 +77,10 @@ interface AesCryptographicConfiguration {
 	int AES_BLOCK_LENGTH = 16;
 
 	/**
-	 * 0-filled initialization vector.
+	 * Number of non-zero bytes in the IV used for file name encryption. Less means shorter encrypted filenames, more means higher entropy.
+	 * Maximum length is {@value #AES_BLOCK_LENGTH}.
 	 */
-	byte[] EMPTY_IV = new byte[AES_BLOCK_LENGTH];
+	int FILE_NAME_IV_LENGTH = 4;
 
 	/**
 	 * Number of iterations for key derived from user pw. High iteration count for better resistance to bruteforcing.

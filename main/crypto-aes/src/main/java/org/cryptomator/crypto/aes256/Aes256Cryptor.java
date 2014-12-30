@@ -74,8 +74,8 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 	private static final SecretKeyFactory PBKDF2_FACTORY;
 
 	/**
-	 * Defined in static initializer. Defaults to 256, but falls back to maximum value possible, if JCE isn't installed. JCE can be
-	 * installed from here: http://www.oracle.com/technetwork/java/javase/downloads/.
+	 * Defined in static initializer. Defaults to 256, but falls back to maximum value possible, if JCE Unlimited Strength Jurisdiction
+	 * Policy Files isn't installed. Those files can be downloaded here: http://www.oracle.com/technetwork/java/javase/downloads/.
 	 */
 	private static final int AES_KEY_LENGTH;
 
@@ -227,11 +227,11 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 		return result;
 	}
 
-	private SecretKey pbkdf2(byte[] password, byte[] salt, int iterations, int keyLength) {
-		final char[] pw = new char[password.length];
+	private SecretKey deriveSecretKeyFromMasterKey() {
+		final char[] pw = new char[masterKey.length];
 		try {
-			byteToChar(password, pw);
-			return pbkdf2(CharBuffer.wrap(pw), salt, iterations, keyLength);
+			byteToChar(masterKey, pw);
+			return pbkdf2(CharBuffer.wrap(pw), EMPTY_SALT, PBKDF2_MASTERKEY_ITERATIONS, AES_KEY_LENGTH);
 		} finally {
 			Arrays.fill(pw, (char) 0);
 		}
@@ -271,7 +271,7 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 	@Override
 	public String encryptPath(String cleartextPath, char encryptedPathSep, char cleartextPathSep, CryptorIOSupport ioSupport) {
 		try {
-			final SecretKey key = this.pbkdf2(masterKey, EMPTY_SALT, PBKDF2_MASTERKEY_ITERATIONS, AES_KEY_LENGTH);
+			final SecretKey key = this.deriveSecretKeyFromMasterKey();
 			final String[] cleartextPathComps = StringUtils.split(cleartextPath, cleartextPathSep);
 			final List<String> encryptedPathComps = new ArrayList<>(cleartextPathComps.length);
 			for (final String cleartext : cleartextPathComps) {
@@ -300,27 +300,30 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 	 * {@link FileNamingConventions#LONG_NAME_FILE_EXT}.
 	 */
 	private String encryptPathComponent(final String cleartext, final SecretKey key, CryptorIOSupport ioSupport) throws IllegalBlockSizeException, BadPaddingException, IOException {
-		final Cipher cipher = this.cipher(FILE_NAME_CIPHER, key, EMPTY_IV, Cipher.ENCRYPT_MODE);
+		final byte[] ivRandomPart = randomData(FILE_NAME_IV_LENGTH);
+		final ByteBuffer iv = ByteBuffer.allocate(AES_BLOCK_LENGTH);
+		iv.put(ivRandomPart);
+		final Cipher cipher = this.cipher(FILE_NAME_CIPHER, key, iv.array(), Cipher.ENCRYPT_MODE);
 		final byte[] cleartextBytes = cleartext.getBytes(Charsets.UTF_8);
 		final byte[] encryptedBytes = cipher.doFinal(cleartextBytes);
-		final String encrypted = ENCRYPTED_FILENAME_CODEC.encodeAsString(encryptedBytes) + BASIC_FILE_EXT;
+		final String ivAndCiphertext = ENCRYPTED_FILENAME_CODEC.encodeAsString(ivRandomPart) + IV_PREFIX_SEPARATOR + ENCRYPTED_FILENAME_CODEC.encodeAsString(encryptedBytes);
 
-		if (encrypted.length() > ENCRYPTED_FILENAME_LENGTH_LIMIT) {
-			final String crc32 = Long.toHexString(crc32Sum(encrypted.getBytes()));
+		if (ivAndCiphertext.length() + BASIC_FILE_EXT.length() > ENCRYPTED_FILENAME_LENGTH_LIMIT) {
+			final String crc32 = Long.toHexString(crc32Sum(ivAndCiphertext.getBytes()));
 			final String metadataFilename = crc32 + METADATA_FILE_EXT;
 			final LongFilenameMetadata metadata = this.getMetadata(ioSupport, metadataFilename);
-			final String alternativeFileName = crc32 + LONG_NAME_PREFIX_SEPARATOR + metadata.getOrCreateUuidForEncryptedFilename(encrypted).toString() + LONG_NAME_FILE_EXT;
+			final String alternativeFileName = crc32 + LONG_NAME_PREFIX_SEPARATOR + metadata.getOrCreateUuidForEncryptedFilename(ivAndCiphertext).toString() + LONG_NAME_FILE_EXT;
 			this.storeMetadata(ioSupport, metadataFilename, metadata);
 			return alternativeFileName;
 		} else {
-			return encrypted;
+			return ivAndCiphertext + BASIC_FILE_EXT;
 		}
 	}
 
 	@Override
 	public String decryptPath(String encryptedPath, char encryptedPathSep, char cleartextPathSep, CryptorIOSupport ioSupport) {
 		try {
-			final SecretKey key = this.pbkdf2(masterKey, EMPTY_SALT, PBKDF2_MASTERKEY_ITERATIONS, AES_KEY_LENGTH);
+			final SecretKey key = this.deriveSecretKeyFromMasterKey();
 			final String[] encryptedPathComps = StringUtils.split(encryptedPath, encryptedPathSep);
 			final List<String> cleartextPathComps = new ArrayList<>(encryptedPathComps.length);
 			for (final String encrypted : encryptedPathComps) {
@@ -337,21 +340,27 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 	 * @see #encryptPathComponent(String, SecretKey, CryptorIOSupport)
 	 */
 	private String decryptPathComponent(final String encrypted, final SecretKey key, CryptorIOSupport ioSupport) throws IllegalBlockSizeException, BadPaddingException, IOException {
-		final String ciphertext;
+		final String ivAndCiphertext;
 		if (encrypted.endsWith(LONG_NAME_FILE_EXT)) {
 			final String basename = StringUtils.removeEnd(encrypted, LONG_NAME_FILE_EXT);
 			final String crc32 = StringUtils.substringBefore(basename, LONG_NAME_PREFIX_SEPARATOR);
 			final String uuid = StringUtils.substringAfter(basename, LONG_NAME_PREFIX_SEPARATOR);
 			final String metadataFilename = crc32 + METADATA_FILE_EXT;
 			final LongFilenameMetadata metadata = this.getMetadata(ioSupport, metadataFilename);
-			ciphertext = metadata.getEncryptedFilenameForUUID(UUID.fromString(uuid));
+			ivAndCiphertext = metadata.getEncryptedFilenameForUUID(UUID.fromString(uuid));
 		} else if (encrypted.endsWith(BASIC_FILE_EXT)) {
-			ciphertext = StringUtils.removeEndIgnoreCase(encrypted, BASIC_FILE_EXT);
+			ivAndCiphertext = StringUtils.removeEndIgnoreCase(encrypted, BASIC_FILE_EXT);
 		} else {
 			throw new IllegalArgumentException("Unsupported path component: " + encrypted);
 		}
 
-		final Cipher cipher = this.cipher(FILE_NAME_CIPHER, key, EMPTY_IV, Cipher.DECRYPT_MODE);
+		final String ivRandomPartStr = StringUtils.substringBefore(ivAndCiphertext, IV_PREFIX_SEPARATOR);
+		final String ciphertext = StringUtils.substringAfter(ivAndCiphertext, IV_PREFIX_SEPARATOR);
+		final byte[] ivRandomPart = ENCRYPTED_FILENAME_CODEC.decode(ivRandomPartStr);
+		final ByteBuffer iv = ByteBuffer.allocate(AES_BLOCK_LENGTH);
+		iv.put(ivRandomPart);
+
+		final Cipher cipher = this.cipher(FILE_NAME_CIPHER, key, iv.array(), Cipher.DECRYPT_MODE);
 		final byte[] encryptedBytes = ENCRYPTED_FILENAME_CODEC.decode(ciphertext);
 		final byte[] cleartextBytes = cipher.doFinal(encryptedBytes);
 		return new String(cleartextBytes, Charsets.UTF_8);
@@ -394,7 +403,7 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 		}
 
 		// derive secret key and generate cipher:
-		final SecretKey key = this.pbkdf2(masterKey, EMPTY_SALT, PBKDF2_MASTERKEY_ITERATIONS, AES_KEY_LENGTH);
+		final SecretKey key = this.deriveSecretKeyFromMasterKey();
 		final Cipher cipher = this.cipher(FILE_CONTENT_CIPHER, key, countingIv.array(), Cipher.DECRYPT_MODE);
 
 		// read content
@@ -425,7 +434,7 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 		encryptedFile.position(SIZE_OF_LONG + AES_BLOCK_LENGTH + beginOfFirstRelevantBlock);
 
 		// derive secret key and generate cipher:
-		final SecretKey key = this.pbkdf2(masterKey, EMPTY_SALT, PBKDF2_MASTERKEY_ITERATIONS, AES_KEY_LENGTH);
+		final SecretKey key = this.deriveSecretKeyFromMasterKey();
 		final Cipher cipher = this.cipher(FILE_CONTENT_CIPHER, key, countingIv.array(), Cipher.DECRYPT_MODE);
 
 		// read content
@@ -445,7 +454,7 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 		countingIv.position(0);
 
 		// derive secret key and generate cipher:
-		final SecretKey key = this.pbkdf2(masterKey, EMPTY_SALT, PBKDF2_MASTERKEY_ITERATIONS, AES_KEY_LENGTH);
+		final SecretKey key = this.deriveSecretKeyFromMasterKey();
 		final Cipher cipher = this.cipher(FILE_CONTENT_CIPHER, key, countingIv.array(), Cipher.ENCRYPT_MODE);
 
 		// 8 bytes (file size: temporarily -1):

@@ -38,6 +38,11 @@ interface FileNamingConventions {
 	String BASIC_FILE_EXT = ".aes";
 
 	/**
+	 * Prefix in front of the actual encrypted file name used as IV.
+	 */
+	String IV_PREFIX_SEPARATOR = "_";
+
+	/**
 	 * For plaintext file names > {@value #ENCRYPTED_FILENAME_LENGTH_LIMIT} chars.
 	 */
 	String LONG_NAME_FILE_EXT = ".lng.aes";
