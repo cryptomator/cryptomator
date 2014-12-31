@@ -47,21 +47,29 @@ public class Aes256CryptorTest {
 		IOUtils.closeQuietly(in);
 	}
 
-	@Test(expected = WrongPasswordException.class)
+	@Test
 	public void testWrongPassword() throws IOException, DecryptFailedException, WrongPasswordException, UnsupportedKeyLengthException {
 		final String pw = "asd";
 		final Aes256Cryptor cryptor = new Aes256Cryptor(TEST_PRNG);
 		final ByteArrayOutputStream out = new ByteArrayOutputStream();
 		cryptor.encryptMasterKey(out, pw);
 		cryptor.swipeSensitiveData();
-
-		final String wrongPw = "foo";
-		final Aes256Cryptor decryptor = new Aes256Cryptor(TEST_PRNG);
-		final InputStream in = new ByteArrayInputStream(out.toByteArray());
-		decryptor.decryptMasterKey(in, wrongPw);
-
 		IOUtils.closeQuietly(out);
-		IOUtils.closeQuietly(in);
+
+		// all these passwords are expected to fail.
+		final String[] wrongPws = {"a", "as", "asdf", "sdf", "das", "dsa", "foo", "bar", "baz"};
+		final Aes256Cryptor decryptor = new Aes256Cryptor(TEST_PRNG);
+		for (final String wrongPw : wrongPws) {
+			final InputStream in = new ByteArrayInputStream(out.toByteArray());
+			try {
+				decryptor.decryptMasterKey(in, wrongPw);
+				Assert.fail("should not succeed.");
+			} catch (WrongPasswordException e) {
+				continue;
+			} finally {
+				IOUtils.closeQuietly(in);
+			}
+		}
 	}
 
 	@Test

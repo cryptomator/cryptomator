@@ -55,21 +55,19 @@ interface AesCryptographicConfiguration {
 	 * 
 	 * @see http://docs.oracle.com/javase/7/docs/technotes/guides/security/StandardNames.html#Cipher
 	 */
-	String MASTERKEY_CIPHER = "AES/CTR/NoPadding";
+	String AES_GCM_CIPHER = "AES/GCM/NoPadding";
 
 	/**
-	 * Cipher specs for file name encryption.
+	 * Length of authentication tag.
+	 */
+	int AES_GCM_TAG_LENGTH = 128;
+
+	/**
+	 * Cipher specs for file name and file content encryption. Using CTR-mode for random access.
 	 * 
 	 * @see http://docs.oracle.com/javase/7/docs/technotes/guides/security/StandardNames.html#Cipher
 	 */
-	String FILE_NAME_CIPHER = "AES/CTR/NoPadding";
-
-	/**
-	 * Cipher specs for content encryption. Using CTR-mode for random access.
-	 * 
-	 * @see http://docs.oracle.com/javase/7/docs/technotes/guides/security/StandardNames.html#Cipher
-	 */
-	String FILE_CONTENT_CIPHER = "AES/CTR/NoPadding";
+	String AES_CTR_CIPHER = "AES/CTR/NoPadding";
 
 	/**
 	 * AES block size is 128 bit or 16 bytes.

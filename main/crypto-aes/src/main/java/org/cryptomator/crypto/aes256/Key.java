@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-@JsonPropertyOrder(value = { "salt", "iv", "iterations", "keyLength", "masterkey" })
+@JsonPropertyOrder(value = {"salt", "iv", "iterations", "keyLength", "masterkey", "secondaryKey"})
 public class Key implements Serializable {
 
 	private static final long serialVersionUID = 8578363158959619885L;
@@ -12,13 +12,12 @@ public class Key implements Serializable {
 	private byte[] iv;
 	private int iterations;
 	private int keyLength;
-	private byte[] pwVerification;
 	private byte[] masterkey;
-	
+
 	public byte[] getSalt() {
 		return salt;
 	}
-	
+
 	public void setSalt(byte[] salt) {
 		this.salt = salt;
 	}
@@ -47,14 +46,6 @@ public class Key implements Serializable {
 		this.keyLength = keyLength;
 	}
 
-	public byte[] getPwVerification() {
-		return pwVerification;
-	}
-
-	public void setPwVerification(byte[] pwVerification) {
-		this.pwVerification = pwVerification;
-	}
-
 	public byte[] getMasterkey() {
 		return masterkey;
 	}
@@ -63,5 +54,4 @@ public class Key implements Serializable {
 		this.masterkey = masterkey;
 	}
 
-	
 }
