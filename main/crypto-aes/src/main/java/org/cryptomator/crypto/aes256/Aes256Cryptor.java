@@ -19,7 +19,6 @@ import java.nio.file.DirectoryStream.Filter;
 import java.nio.file.Path;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
@@ -37,6 +36,7 @@ import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;
 import javax.crypto.CipherOutputStream;
 import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.Mac;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
@@ -291,12 +291,16 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 		return crc32.getValue();
 	}
 
-	private byte[] sha256(byte[] data) {
+	private byte[] hmacSha256(byte[] key, byte[] data) {
 		try {
-			final MessageDigest md = MessageDigest.getInstance("SHA-256");
-			return md.digest(data);
+			final SecretKeySpec secretKey = new SecretKeySpec(key, "HmacSHA256");
+			final Mac mac = Mac.getInstance("HmacSHA256");
+			mac.init(secretKey);
+			return mac.doFinal(data);
 		} catch (NoSuchAlgorithmException e) {
-			throw new AssertionError("Every implementation of the Java platform is required to support SHA-256.", e);
+			throw new AssertionError("Every implementation of the Java platform is required to support HmacSHA256.", e);
+		} catch (InvalidKeyException e) {
+			throw new IllegalArgumentException("Invalid key", e);
 		}
 	}
 
@@ -332,7 +336,7 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 	 * {@link FileNamingConventions#LONG_NAME_FILE_EXT}.
 	 */
 	private String encryptPathComponent(final String cleartext, final SecretKey key, CryptorIOSupport ioSupport) throws IllegalBlockSizeException, BadPaddingException, IOException {
-		final byte[] mac = sha256(ArrayUtils.addAll(secondaryKey, cleartext.getBytes()));
+		final byte[] mac = hmacSha256(secondaryKey, cleartext.getBytes());
 		final byte[] partialIv = ArrayUtils.subarray(mac, 0, 10);
 		final ByteBuffer iv = ByteBuffer.allocate(AES_BLOCK_LENGTH);
 		iv.put(partialIv);
