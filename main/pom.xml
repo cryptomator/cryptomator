@@ -27,12 +27,13 @@
 		<!-- dependency versions -->
 		<log4j.version>2.1</log4j.version>
 		<slf4j.version>1.7.7</slf4j.version>
-		<junit.version>4.11</junit.version>
+		<junit.version>4.12</junit.version>
 		<commons-io.version>2.4</commons-io.version>
 		<commons-collections.version>4.0</commons-collections.version>
-		<commons-lang3.version>3.1</commons-lang3.version>
-		<commons-codec.version>1.9</commons-codec.version>
-	</properties>
+		<commons-lang3.version>3.3.2</commons-lang3.version>
+		<commons-codec.version>1.10</commons-codec.version>
+        	<jackson-databind.version>2.4.4</jackson-databind.version>
+        </properties>
 
 	<dependencyManagement>
 		<dependencies>
@@ -106,14 +107,14 @@
 			<dependency>
 				<groupId>com.fasterxml.jackson.core</groupId>
 				<artifactId>jackson-databind</artifactId>
-				<version>2.4.2</version>
+				<version>${jackson-databind.version}</version>
 			</dependency>
 
 			<!-- JUnit -->
 			<dependency>
 				<groupId>junit</groupId>
 				<artifactId>junit</artifactId>
-				<version>4.11</version>
+				<version>${junit.version}</version>
 				<scope>test</scope>
 			</dependency>
 		</dependencies>
@@ -150,7 +151,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.1</version>
+				<version>3.2</version>
 				<configuration>
 					<source>1.8</source>
 					<target>1.8</target>
