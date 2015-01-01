@@ -42,6 +42,6 @@ If you want to take a look at the current beta version, go ahead and download [C
 
 ## License
 
-Distributed under the MIT license. See the LICENSE file for more info.
+Distributed under the MIT X Consortium license license. See the LICENSE file for more info.
 
 [![Build Status](https://travis-ci.org/totalvoidness/cryptomator.svg?branch=master)](https://travis-ci.org/totalvoidness/cryptomator)
