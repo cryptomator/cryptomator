@@ -32,8 +32,8 @@
 		<commons-collections.version>4.0</commons-collections.version>
 		<commons-lang3.version>3.3.2</commons-lang3.version>
 		<commons-codec.version>1.10</commons-codec.version>
-        <jackson-databind.version>2.4.4</jackson-databind.version>
-	</properties>
+        	<jackson-databind.version>2.4.4</jackson-databind.version>
+        </properties>
 
 	<dependencyManagement>
 		<dependencies>
