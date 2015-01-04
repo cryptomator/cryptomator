@@ -18,7 +18,7 @@ interface AesCryptographicConfiguration {
 	/**
 	 * Number of bytes of the master key. Should be the maximum possible AES key length to provide best security.
 	 */
-	int MASTER_KEY_LENGTH = 256;
+	int MAX_MASTER_KEY_LENGTH_IN_BITS = 256;
 
 	/**
 	 * Number of bytes used as salt, where needed.
@@ -48,19 +48,19 @@ interface AesCryptographicConfiguration {
 	 * 
 	 * @see http://docs.oracle.com/javase/7/docs/technotes/guides/security/StandardNames.html#AlgorithmParameters
 	 */
-	String CRYPTO_ALGORITHM = "AES";
+	String AES_KEY_ALGORITHM = "AES";
 
 	/**
-	 * Cipher specs for masterkey encryption.
+	 * Key algorithm for keyed MAC.
+	 */
+	String HMAC_KEY_ALGORITHM = "HmacSHA256";
+
+	/**
+	 * Cipher specs for RFC 3394 masterkey encryption.
 	 * 
 	 * @see http://docs.oracle.com/javase/7/docs/technotes/guides/security/StandardNames.html#Cipher
 	 */
-	String AES_GCM_CIPHER = "AES/GCM/NoPadding";
-
-	/**
-	 * Length of authentication tag.
-	 */
-	int AES_GCM_TAG_LENGTH = 128;
+	String AES_KEYWRAP_CIPHER = "AESWrap";
 
 	/**
 	 * Cipher specs for file name and file content encryption. Using CTR-mode for random access.
@@ -85,11 +85,5 @@ interface AesCryptographicConfiguration {
 	 * Number of iterations for key derived from user pw. High iteration count for better resistance to bruteforcing.
 	 */
 	int PBKDF2_PW_ITERATIONS = 1000;
-
-	/**
-	 * Number of iterations for key derived from masterkey. Low iteration count for better performance. No additional security is added by
-	 * high values.
-	 */
-	int PBKDF2_MASTERKEY_ITERATIONS = 1;
 
 }

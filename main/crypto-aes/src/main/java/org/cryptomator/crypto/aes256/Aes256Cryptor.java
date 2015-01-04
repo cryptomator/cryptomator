@@ -11,7 +11,6 @@ package org.cryptomator.crypto.aes256;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.channels.SeekableByteChannel;
@@ -30,7 +29,6 @@ import java.util.Random;
 import java.util.UUID;
 import java.util.zip.CRC32;
 
-import javax.crypto.AEADBadTagException;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;
@@ -40,10 +38,11 @@ import javax.crypto.Mac;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
+import javax.security.auth.DestroyFailedException;
+import javax.security.auth.Destroyable;
 
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.IOUtils;
@@ -81,7 +80,7 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 	 * Defined in static initializer. Defaults to 256, but falls back to maximum value possible, if JCE Unlimited Strength Jurisdiction
 	 * Policy Files isn't installed. Those files can be downloaded here: http://www.oracle.com/technetwork/java/javase/downloads/.
 	 */
-	private static final int AES_KEY_LENGTH;
+	private static final int AES_KEY_LENGTH_IN_BITS;
 
 	/**
 	 * Jackson JSON-Mapper.
@@ -89,15 +88,15 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 	private final ObjectMapper objectMapper = new ObjectMapper();
 
 	/**
-	 * The decrypted master key. Its lifecycle starts with {@link #randomData(int)} or {@link #encryptMasterKey(Path, CharSequence)}. Its
-	 * lifecycle ends with {@link #swipeSensitiveData()}.
+	 * The decrypted master key. Its lifecycle starts with the construction of an Aes256Cryptor instance or
+	 * {@link #decryptMasterKey(InputStream, CharSequence)}. Its lifecycle ends with {@link #swipeSensitiveData()}.
 	 */
-	private final byte[] masterKey = new byte[MASTER_KEY_LENGTH];
+	private SecretKey primaryMasterKey;
 
 	/**
-	 * If certain cryptographic operations need a second key, which is distinct to the masterKey
+	 * Decrypted secondary key used for hmac operations.
 	 */
-	private final byte[] secondaryKey = new byte[MASTER_KEY_LENGTH];
+	private SecretKey hMacMasterKey;
 
 	private static final int SIZE_OF_LONG = Long.BYTES;
 
@@ -105,8 +104,8 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 		try {
 			PBKDF2_FACTORY = SecretKeyFactory.getInstance(KEY_FACTORY_ALGORITHM);
 			SECURE_PRNG = SecureRandom.getInstance(PRNG_ALGORITHM);
-			final int maxKeyLen = Cipher.getMaxAllowedKeyLength(CRYPTO_ALGORITHM);
-			AES_KEY_LENGTH = (maxKeyLen >= 256) ? 256 : maxKeyLen;
+			final int maxKeyLength = Cipher.getMaxAllowedKeyLength(AES_KEY_ALGORITHM);
+			AES_KEY_LENGTH_IN_BITS = (maxKeyLength >= MAX_MASTER_KEY_LENGTH_IN_BITS) ? MAX_MASTER_KEY_LENGTH_IN_BITS : maxKeyLength;
 		} catch (NoSuchAlgorithmException e) {
 			throw new IllegalStateException("Algorithm should exist.", e);
 		}
@@ -117,8 +116,16 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 	 */
 	public Aes256Cryptor() {
 		SECURE_PRNG.setSeed(SECURE_PRNG.generateSeed(PRNG_SEED_LENGTH));
-		SECURE_PRNG.nextBytes(this.masterKey);
-		SECURE_PRNG.nextBytes(this.secondaryKey);
+		byte[] bytes = new byte[AES_KEY_LENGTH_IN_BITS / Byte.SIZE];
+		try {
+			SECURE_PRNG.nextBytes(bytes);
+			this.primaryMasterKey = new SecretKeySpec(bytes, AES_KEY_ALGORITHM);
+
+			SECURE_PRNG.nextBytes(bytes);
+			this.hMacMasterKey = new SecretKeySpec(bytes, HMAC_KEY_ALGORITHM);
+		} finally {
+			Arrays.fill(bytes, (byte) 0);
+		}
 	}
 
 	/**
@@ -128,8 +135,16 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 	 * @param prng Fast, possibly insecure PRNG.
 	 */
 	Aes256Cryptor(Random prng) {
-		prng.nextBytes(this.masterKey);
-		prng.nextBytes(this.secondaryKey);
+		byte[] bytes = new byte[AES_KEY_LENGTH_IN_BITS / Byte.SIZE];
+		try {
+			prng.nextBytes(bytes);
+			this.primaryMasterKey = new SecretKeySpec(bytes, AES_KEY_ALGORITHM);
+
+			prng.nextBytes(bytes);
+			this.hMacMasterKey = new SecretKeySpec(bytes, HMAC_KEY_ALGORITHM);
+		} finally {
+			Arrays.fill(bytes, (byte) 0);
+		}
 	}
 
 	/**
@@ -137,31 +152,26 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 	 */
 	@Override
 	public void encryptMasterKey(OutputStream out, CharSequence password) throws IOException {
-		final ByteBuffer combinedKey = ByteBuffer.allocate(this.masterKey.length + this.secondaryKey.length);
-		combinedKey.put(this.masterKey);
-		combinedKey.put(this.secondaryKey);
 		try {
 			// derive key:
 			final byte[] userSalt = randomData(SALT_LENGTH);
-			final SecretKey userKey = pbkdf2(password, userSalt, PBKDF2_PW_ITERATIONS, AES_KEY_LENGTH);
+			final SecretKey kek = pbkdf2(password, userSalt, PBKDF2_PW_ITERATIONS, AES_KEY_LENGTH_IN_BITS);
 
 			// encrypt:
-			final byte[] iv = randomData(AES_BLOCK_LENGTH);
-			final Cipher encCipher = aesGcmCipher(userKey, iv, Cipher.ENCRYPT_MODE);
-			byte[] encryptedCombinedKey = encCipher.doFinal(combinedKey.array());
+			final Cipher encCipher = aesKeyWrapCipher(kek, Cipher.WRAP_MODE);
+			byte[] wrappedPrimaryKey = encCipher.wrap(primaryMasterKey);
+			byte[] wrappedSecondaryKey = encCipher.wrap(hMacMasterKey);
 
 			// save encrypted masterkey:
-			final Key key = new Key();
+			final KeyFile key = new KeyFile();
 			key.setIterations(PBKDF2_PW_ITERATIONS);
-			key.setIv(iv);
-			key.setKeyLength(AES_KEY_LENGTH);
-			key.setMasterkey(encryptedCombinedKey);
+			key.setKeyLength(AES_KEY_LENGTH_IN_BITS);
+			key.setPrimaryMasterKey(wrappedPrimaryKey);
+			key.setHMacMasterKey(wrappedSecondaryKey);
 			key.setSalt(userSalt);
 			objectMapper.writeValue(out, key);
-		} catch (IllegalBlockSizeException | BadPaddingException ex) {
-			throw new IllegalStateException("Block size hard coded. Padding irrelevant in ENCRYPT_MODE. IV must exist in CTR mode.", ex);
-		} finally {
-			Arrays.fill(combinedKey.array(), (byte) 0);
+		} catch (InvalidKeyException | IllegalBlockSizeException ex) {
+			throw new IllegalStateException("Invalid hard coded configuration.", ex);
 		}
 	}
 
@@ -176,57 +186,56 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 	 */
 	@Override
 	public void decryptMasterKey(InputStream in, CharSequence password) throws DecryptFailedException, WrongPasswordException, UnsupportedKeyLengthException, IOException {
-		byte[] combinedKey = new byte[0];
 		try {
 			// load encrypted masterkey:
-			final Key key = objectMapper.readValue(in, Key.class);
+			final KeyFile key = objectMapper.readValue(in, KeyFile.class);
 
 			// check, whether the key length is supported:
-			final int maxKeyLen = Cipher.getMaxAllowedKeyLength(CRYPTO_ALGORITHM);
+			final int maxKeyLen = Cipher.getMaxAllowedKeyLength(AES_KEY_ALGORITHM);
 			if (key.getKeyLength() > maxKeyLen) {
 				throw new UnsupportedKeyLengthException(key.getKeyLength(), maxKeyLen);
 			}
 
 			// derive key:
-			final SecretKey userKey = pbkdf2(password, key.getSalt(), key.getIterations(), key.getKeyLength());
+			final SecretKey kek = pbkdf2(password, key.getSalt(), key.getIterations(), key.getKeyLength());
 
 			// decrypt and check password by catching AEAD exception
-			final Cipher decCipher = aesGcmCipher(userKey, key.getIv(), Cipher.DECRYPT_MODE);
-			combinedKey = decCipher.doFinal(key.getMasterkey());
+			final Cipher decCipher = aesKeyWrapCipher(kek, Cipher.UNWRAP_MODE);
+			SecretKey primary = (SecretKey) decCipher.unwrap(key.getPrimaryMasterKey(), AES_KEY_ALGORITHM, Cipher.SECRET_KEY);
+			SecretKey secondary = (SecretKey) decCipher.unwrap(key.getPrimaryMasterKey(), HMAC_KEY_ALGORITHM, Cipher.SECRET_KEY);
 
-			// everything ok, split decrypted data to masterkey and secondary key:
-			final ByteBuffer combinedKeyBuffer = ByteBuffer.wrap(combinedKey);
-			combinedKeyBuffer.get(this.masterKey);
-			combinedKeyBuffer.get(this.secondaryKey);
-		} catch (AEADBadTagException e) {
-			throw new WrongPasswordException();
-		} catch (IllegalBlockSizeException | BadPaddingException | BufferOverflowException ex) {
-			throw new DecryptFailedException(ex);
+			// everything ok, assign decrypted keys:
+			this.primaryMasterKey = primary;
+			this.hMacMasterKey = secondary;
 		} catch (NoSuchAlgorithmException ex) {
 			throw new IllegalStateException("Algorithm should exist.", ex);
-		} finally {
-			Arrays.fill(combinedKey, (byte) 0);
+		} catch (InvalidKeyException e) {
+			throw new WrongPasswordException();
 		}
 	}
 
-	/**
-	 * Overwrites the {@link #masterKey} with zeros. As masterKey is a final field, this operation is ensured to work on its actual data.
-	 * Otherwise developers could accidentally just assign a new object to the variable.
-	 */
 	@Override
 	public void swipeSensitiveDataInternal() {
-		Arrays.fill(this.masterKey, (byte) 0);
-		Arrays.fill(this.secondaryKey, (byte) 0);
+		destroyQuietly(primaryMasterKey);
+		destroyQuietly(hMacMasterKey);
 	}
 
-	private Cipher aesGcmCipher(SecretKey key, byte[] iv, int cipherMode) {
+	private void destroyQuietly(Destroyable d) {
 		try {
-			final Cipher cipher = Cipher.getInstance(AES_GCM_CIPHER);
-			cipher.init(cipherMode, key, new GCMParameterSpec(AES_GCM_TAG_LENGTH, iv));
+			d.destroy();
+		} catch (DestroyFailedException e) {
+			// ignore
+		}
+	}
+
+	private Cipher aesKeyWrapCipher(SecretKey key, int cipherMode) {
+		try {
+			final Cipher cipher = Cipher.getInstance(AES_KEYWRAP_CIPHER);
+			cipher.init(cipherMode, key);
 			return cipher;
 		} catch (InvalidKeyException ex) {
 			throw new IllegalArgumentException("Invalid key.", ex);
-		} catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidAlgorithmParameterException ex) {
+		} catch (NoSuchAlgorithmException | NoSuchPaddingException ex) {
 			throw new IllegalStateException("Algorithm/Padding should exist and accept GCM specs.", ex);
 		}
 	}
@@ -250,38 +259,19 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 		return result;
 	}
 
-	private SecretKey deriveSecretKeyFromMasterKey() {
-		final char[] pw = new char[masterKey.length];
-		try {
-			byteToChar(masterKey, pw);
-			return pbkdf2(CharBuffer.wrap(pw), EMPTY_SALT, PBKDF2_MASTERKEY_ITERATIONS, AES_KEY_LENGTH);
-		} finally {
-			Arrays.fill(pw, (char) 0);
-		}
-	}
-
-	private SecretKey pbkdf2(CharSequence password, byte[] salt, int iterations, int keyLength) {
+	private SecretKey pbkdf2(CharSequence password, byte[] salt, int iterations, int keyLengthInBits) {
 		final int pwLen = password.length();
 		final char[] pw = new char[pwLen];
 		CharBuffer.wrap(password).get(pw, 0, pwLen);
 		try {
-			final KeySpec specs = new PBEKeySpec(pw, salt, iterations, keyLength);
+			final KeySpec specs = new PBEKeySpec(pw, salt, iterations, keyLengthInBits);
 			final SecretKey pbkdf2Key = PBKDF2_FACTORY.generateSecret(specs);
-			final SecretKey aesKey = new SecretKeySpec(pbkdf2Key.getEncoded(), CRYPTO_ALGORITHM);
+			final SecretKey aesKey = new SecretKeySpec(pbkdf2Key.getEncoded(), AES_KEY_ALGORITHM);
 			return aesKey;
 		} catch (InvalidKeySpecException ex) {
 			throw new IllegalStateException("Specs are hard-coded.", ex);
 		} finally {
 			Arrays.fill(pw, (char) 0);
-		}
-	}
-
-	private void byteToChar(byte[] source, char[] destination) {
-		if (source.length != destination.length) {
-			throw new IllegalArgumentException("char[] needs to be the same length as byte[]");
-		}
-		for (int i = 0; i < source.length; i++) {
-			destination[i] = (char) (source[i] & 0xFF);
 		}
 	}
 
@@ -291,11 +281,10 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 		return crc32.getValue();
 	}
 
-	private byte[] hmacSha256(byte[] key, byte[] data) {
+	private byte[] hmacSha256(byte[] data) {
 		try {
-			final SecretKeySpec secretKey = new SecretKeySpec(key, "HmacSHA256");
-			final Mac mac = Mac.getInstance("HmacSHA256");
-			mac.init(secretKey);
+			final Mac mac = Mac.getInstance(HMAC_KEY_ALGORITHM);
+			mac.init(hMacMasterKey);
 			return mac.doFinal(data);
 		} catch (NoSuchAlgorithmException e) {
 			throw new AssertionError("Every implementation of the Java platform is required to support HmacSHA256.", e);
@@ -307,11 +296,10 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 	@Override
 	public String encryptPath(String cleartextPath, char encryptedPathSep, char cleartextPathSep, CryptorIOSupport ioSupport) {
 		try {
-			final SecretKey key = this.deriveSecretKeyFromMasterKey();
 			final String[] cleartextPathComps = StringUtils.split(cleartextPath, cleartextPathSep);
 			final List<String> encryptedPathComps = new ArrayList<>(cleartextPathComps.length);
 			for (final String cleartext : cleartextPathComps) {
-				final String encrypted = encryptPathComponent(cleartext, key, ioSupport);
+				final String encrypted = encryptPathComponent(cleartext, primaryMasterKey, ioSupport);
 				encryptedPathComps.add(encrypted);
 			}
 			return StringUtils.join(encryptedPathComps, encryptedPathSep);
@@ -336,7 +324,7 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 	 * {@link FileNamingConventions#LONG_NAME_FILE_EXT}.
 	 */
 	private String encryptPathComponent(final String cleartext, final SecretKey key, CryptorIOSupport ioSupport) throws IllegalBlockSizeException, BadPaddingException, IOException {
-		final byte[] mac = hmacSha256(secondaryKey, cleartext.getBytes());
+		final byte[] mac = hmacSha256(cleartext.getBytes());
 		final byte[] partialIv = ArrayUtils.subarray(mac, 0, 10);
 		final ByteBuffer iv = ByteBuffer.allocate(AES_BLOCK_LENGTH);
 		iv.put(partialIv);
@@ -360,11 +348,10 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 	@Override
 	public String decryptPath(String encryptedPath, char encryptedPathSep, char cleartextPathSep, CryptorIOSupport ioSupport) {
 		try {
-			final SecretKey key = this.deriveSecretKeyFromMasterKey();
 			final String[] encryptedPathComps = StringUtils.split(encryptedPath, encryptedPathSep);
 			final List<String> cleartextPathComps = new ArrayList<>(encryptedPathComps.length);
 			for (final String encrypted : encryptedPathComps) {
-				final String cleartext = decryptPathComponent(encrypted, key, ioSupport);
+				final String cleartext = decryptPathComponent(encrypted, primaryMasterKey, ioSupport);
 				cleartextPathComps.add(new String(cleartext));
 			}
 			return StringUtils.join(cleartextPathComps, cleartextPathSep);
@@ -438,9 +425,8 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 			throw new IOException("Failed to read encrypted file header.");
 		}
 
-		// derive secret key and generate cipher:
-		final SecretKey key = this.deriveSecretKeyFromMasterKey();
-		final Cipher cipher = this.aesCtrCipher(key, countingIv.array(), Cipher.DECRYPT_MODE);
+		// generate cipher:
+		final Cipher cipher = this.aesCtrCipher(primaryMasterKey, countingIv.array(), Cipher.DECRYPT_MODE);
 
 		// read content
 		final InputStream in = new SeekableByteChannelInputStream(encryptedFile);
@@ -469,9 +455,8 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 		// fast forward stream:
 		encryptedFile.position(SIZE_OF_LONG + AES_BLOCK_LENGTH + beginOfFirstRelevantBlock);
 
-		// derive secret key and generate cipher:
-		final SecretKey key = this.deriveSecretKeyFromMasterKey();
-		final Cipher cipher = this.aesCtrCipher(key, countingIv.array(), Cipher.DECRYPT_MODE);
+		// generate cipher:
+		final Cipher cipher = this.aesCtrCipher(primaryMasterKey, countingIv.array(), Cipher.DECRYPT_MODE);
 
 		// read content
 		final InputStream in = new SeekableByteChannelInputStream(encryptedFile);
@@ -489,9 +474,8 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 		countingIv.putLong(AES_BLOCK_LENGTH - SIZE_OF_LONG, 0l);
 		countingIv.position(0);
 
-		// derive secret key and generate cipher:
-		final SecretKey key = this.deriveSecretKeyFromMasterKey();
-		final Cipher cipher = this.aesCtrCipher(key, countingIv.array(), Cipher.ENCRYPT_MODE);
+		// generate cipher:
+		final Cipher cipher = this.aesCtrCipher(primaryMasterKey, countingIv.array(), Cipher.ENCRYPT_MODE);
 
 		// 8 bytes (file size: temporarily -1):
 		final ByteBuffer fileSize = ByteBuffer.allocate(SIZE_OF_LONG);

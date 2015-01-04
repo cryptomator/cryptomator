@@ -4,15 +4,15 @@ import java.io.Serializable;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-@JsonPropertyOrder(value = {"salt", "iv", "iterations", "keyLength", "masterkey", "secondaryKey"})
-public class Key implements Serializable {
+@JsonPropertyOrder(value = {"salt", "iv", "iterations", "keyLength", "primaryMasterKey", "hMacMasterKey"})
+public class KeyFile implements Serializable {
 
 	private static final long serialVersionUID = 8578363158959619885L;
 	private byte[] salt;
-	private byte[] iv;
 	private int iterations;
 	private int keyLength;
-	private byte[] masterkey;
+	private byte[] primaryMasterKey;
+	private byte[] hMacMasterKey;
 
 	public byte[] getSalt() {
 		return salt;
@@ -20,14 +20,6 @@ public class Key implements Serializable {
 
 	public void setSalt(byte[] salt) {
 		this.salt = salt;
-	}
-
-	public byte[] getIv() {
-		return iv;
-	}
-
-	public void setIv(byte[] iv) {
-		this.iv = iv;
 	}
 
 	public int getIterations() {
@@ -46,12 +38,20 @@ public class Key implements Serializable {
 		this.keyLength = keyLength;
 	}
 
-	public byte[] getMasterkey() {
-		return masterkey;
+	public byte[] getPrimaryMasterKey() {
+		return primaryMasterKey;
 	}
 
-	public void setMasterkey(byte[] masterkey) {
-		this.masterkey = masterkey;
+	public void setPrimaryMasterKey(byte[] primaryMasterKey) {
+		this.primaryMasterKey = primaryMasterKey;
+	}
+
+	public byte[] getHMacMasterKey() {
+		return hMacMasterKey;
+	}
+
+	public void setHMacMasterKey(byte[] hMacMasterKey) {
+		this.hMacMasterKey = hMacMasterKey;
 	}
 
 }
