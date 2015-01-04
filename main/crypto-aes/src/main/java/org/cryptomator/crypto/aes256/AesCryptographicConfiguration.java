@@ -11,32 +11,29 @@ package org.cryptomator.crypto.aes256;
 interface AesCryptographicConfiguration {
 
 	/**
-	 * Number of bytes used as seed for the PRNG.
+	 * Number of bytes used as salt, where needed.
 	 */
-	int PRNG_SEED_LENGTH = 16;
+	int SCRYPT_SALT_LENGTH = 8;
+
+	/**
+	 * Scrypt CPU/Memory cost parameter.
+	 */
+	int SCRYPT_COST_PARAM = 1 << 14;
+
+	/**
+	 * Scrypt block size (affects memory consumption)
+	 */
+	int SCRYPT_BLOCK_SIZE = 8;
 
 	/**
 	 * Number of bytes of the master key. Should be the maximum possible AES key length to provide best security.
 	 */
-	int MAX_MASTER_KEY_LENGTH_IN_BITS = 256;
+	int PREF_MASTER_KEY_LENGTH_IN_BITS = 256;
 
 	/**
-	 * Number of bytes used as salt, where needed.
+	 * Number of bytes used as seed for the PRNG.
 	 */
-	int SALT_LENGTH = 8;
-
-	/**
-	 * 0-filled salt.
-	 */
-	byte[] EMPTY_SALT = new byte[SALT_LENGTH];
-
-	/**
-	 * Algorithm used for key derivation as defined in RFC 2898 / PKCS #5.
-	 * 
-	 * SHA1 will deprecate soon, but the main purpose of PBKDF2 is waisting CPU cycles, so cryptographically strong hash algorithms are not
-	 * necessary here. See also http://crypto.stackexchange.com/a/11017
-	 */
-	String KEY_FACTORY_ALGORITHM = "PBKDF2WithHmacSHA1";
+	int PRNG_SEED_LENGTH = 16;
 
 	/**
 	 * Algorithm used for random number generation.
@@ -80,10 +77,5 @@ interface AesCryptographicConfiguration {
 	 * encoded byte array will need 8 chars. The maximum number of bytes that fit in 8 base32 chars is 5. Thus 5 is the ideal length.
 	 */
 	int FILE_NAME_IV_LENGTH = 5;
-
-	/**
-	 * Number of iterations for key derived from user pw. High iteration count for better resistance to bruteforcing.
-	 */
-	int PBKDF2_PW_ITERATIONS = 1000;
 
 }

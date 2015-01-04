@@ -17,11 +17,22 @@
 	<artifactId>crypto-aes</artifactId>
 	<name>Cryptomator cryptographic module (AES)</name>
 	<description>Provides stream ciphers and filename pseudonymization functions.</description>
+	
+	<properties>
+		<bouncycastle.version>1.51</bouncycastle.version>
+	</properties>
 
 	<dependencies>
 		<dependency>
 			<groupId>org.cryptomator</groupId>
 			<artifactId>crypto-api</artifactId>
+		</dependency>
+		
+		<!-- Bouncycastle -->
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcprov-jdk15on</artifactId>
+			<version>${bouncycastle.version}</version>
 		</dependency>
 
 		<!-- Commons -->

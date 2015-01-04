@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.file.DirectoryStream.Filter;
 import java.nio.file.Path;
@@ -20,8 +19,6 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.KeySpec;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -37,9 +34,7 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.Mac;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 import javax.security.auth.DestroyFailedException;
 import javax.security.auth.Destroyable;
@@ -48,6 +43,7 @@ import org.apache.commons.io.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.bouncycastle.crypto.generators.SCrypt;
 import org.cryptomator.crypto.AbstractCryptor;
 import org.cryptomator.crypto.CryptorIOSupport;
 import org.cryptomator.crypto.exceptions.DecryptFailedException;
@@ -67,14 +63,6 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 	 * @see http://docs.oracle.com/javase/7/docs/technotes/guides/security/StandardNames.html#SecureRandom
 	 */
 	private static final SecureRandom SECURE_PRNG;
-
-	/**
-	 * Factory for deriveing keys. Defaults to PBKDF2/HMAC-SHA1.
-	 * 
-	 * @see PKCS #5, defined in RFC 2898
-	 * @see http://docs.oracle.com/javase/7/docs/technotes/guides/security/StandardNames.html#SecretKeyFactory
-	 */
-	private static final SecretKeyFactory PBKDF2_FACTORY;
 
 	/**
 	 * Defined in static initializer. Defaults to 256, but falls back to maximum value possible, if JCE Unlimited Strength Jurisdiction
@@ -102,10 +90,9 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 
 	static {
 		try {
-			PBKDF2_FACTORY = SecretKeyFactory.getInstance(KEY_FACTORY_ALGORITHM);
 			SECURE_PRNG = SecureRandom.getInstance(PRNG_ALGORITHM);
 			final int maxKeyLength = Cipher.getMaxAllowedKeyLength(AES_KEY_ALGORITHM);
-			AES_KEY_LENGTH_IN_BITS = (maxKeyLength >= MAX_MASTER_KEY_LENGTH_IN_BITS) ? MAX_MASTER_KEY_LENGTH_IN_BITS : maxKeyLength;
+			AES_KEY_LENGTH_IN_BITS = (maxKeyLength >= PREF_MASTER_KEY_LENGTH_IN_BITS) ? PREF_MASTER_KEY_LENGTH_IN_BITS : maxKeyLength;
 		} catch (NoSuchAlgorithmException e) {
 			throw new IllegalStateException("Algorithm should exist.", e);
 		}
@@ -154,8 +141,8 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 	public void encryptMasterKey(OutputStream out, CharSequence password) throws IOException {
 		try {
 			// derive key:
-			final byte[] userSalt = randomData(SALT_LENGTH);
-			final SecretKey kek = pbkdf2(password, userSalt, PBKDF2_PW_ITERATIONS, AES_KEY_LENGTH_IN_BITS);
+			final byte[] kekSalt = randomData(SCRYPT_SALT_LENGTH);
+			final SecretKey kek = scrypt(password, kekSalt, SCRYPT_COST_PARAM, SCRYPT_BLOCK_SIZE, AES_KEY_LENGTH_IN_BITS);
 
 			// encrypt:
 			final Cipher encCipher = aesKeyWrapCipher(kek, Cipher.WRAP_MODE);
@@ -163,13 +150,14 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 			byte[] wrappedSecondaryKey = encCipher.wrap(hMacMasterKey);
 
 			// save encrypted masterkey:
-			final KeyFile key = new KeyFile();
-			key.setIterations(PBKDF2_PW_ITERATIONS);
-			key.setKeyLength(AES_KEY_LENGTH_IN_BITS);
-			key.setPrimaryMasterKey(wrappedPrimaryKey);
-			key.setHMacMasterKey(wrappedSecondaryKey);
-			key.setSalt(userSalt);
-			objectMapper.writeValue(out, key);
+			final KeyFile keyfile = new KeyFile();
+			keyfile.setScryptSalt(kekSalt);
+			keyfile.setScryptCostParam(SCRYPT_COST_PARAM);
+			keyfile.setScryptBlockSize(SCRYPT_BLOCK_SIZE);
+			keyfile.setKeyLength(AES_KEY_LENGTH_IN_BITS);
+			keyfile.setPrimaryMasterKey(wrappedPrimaryKey);
+			keyfile.setHMacMasterKey(wrappedSecondaryKey);
+			objectMapper.writeValue(out, keyfile);
 		} catch (InvalidKeyException | IllegalBlockSizeException ex) {
 			throw new IllegalStateException("Invalid hard coded configuration.", ex);
 		}
@@ -188,21 +176,21 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 	public void decryptMasterKey(InputStream in, CharSequence password) throws DecryptFailedException, WrongPasswordException, UnsupportedKeyLengthException, IOException {
 		try {
 			// load encrypted masterkey:
-			final KeyFile key = objectMapper.readValue(in, KeyFile.class);
+			final KeyFile keyfile = objectMapper.readValue(in, KeyFile.class);
 
 			// check, whether the key length is supported:
 			final int maxKeyLen = Cipher.getMaxAllowedKeyLength(AES_KEY_ALGORITHM);
-			if (key.getKeyLength() > maxKeyLen) {
-				throw new UnsupportedKeyLengthException(key.getKeyLength(), maxKeyLen);
+			if (keyfile.getKeyLength() > maxKeyLen) {
+				throw new UnsupportedKeyLengthException(keyfile.getKeyLength(), maxKeyLen);
 			}
 
 			// derive key:
-			final SecretKey kek = pbkdf2(password, key.getSalt(), key.getIterations(), key.getKeyLength());
+			final SecretKey kek = scrypt(password, keyfile.getScryptSalt(), keyfile.getScryptCostParam(), keyfile.getScryptBlockSize(), AES_KEY_LENGTH_IN_BITS);
 
 			// decrypt and check password by catching AEAD exception
 			final Cipher decCipher = aesKeyWrapCipher(kek, Cipher.UNWRAP_MODE);
-			SecretKey primary = (SecretKey) decCipher.unwrap(key.getPrimaryMasterKey(), AES_KEY_ALGORITHM, Cipher.SECRET_KEY);
-			SecretKey secondary = (SecretKey) decCipher.unwrap(key.getPrimaryMasterKey(), HMAC_KEY_ALGORITHM, Cipher.SECRET_KEY);
+			SecretKey primary = (SecretKey) decCipher.unwrap(keyfile.getPrimaryMasterKey(), AES_KEY_ALGORITHM, Cipher.SECRET_KEY);
+			SecretKey secondary = (SecretKey) decCipher.unwrap(keyfile.getPrimaryMasterKey(), HMAC_KEY_ALGORITHM, Cipher.SECRET_KEY);
 
 			// everything ok, assign decrypted keys:
 			this.primaryMasterKey = primary;
@@ -259,19 +247,19 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 		return result;
 	}
 
-	private SecretKey pbkdf2(CharSequence password, byte[] salt, int iterations, int keyLengthInBits) {
-		final int pwLen = password.length();
-		final char[] pw = new char[pwLen];
-		CharBuffer.wrap(password).get(pw, 0, pwLen);
+	private SecretKey scrypt(CharSequence password, byte[] salt, int costParam, int blockSize, int keyLengthInBits) {
+		// use sb, as password.toString's implementation is unknown
+		final StringBuilder sb = new StringBuilder(password);
+		final byte[] pw = sb.toString().getBytes();
 		try {
-			final KeySpec specs = new PBEKeySpec(pw, salt, iterations, keyLengthInBits);
-			final SecretKey pbkdf2Key = PBKDF2_FACTORY.generateSecret(specs);
-			final SecretKey aesKey = new SecretKeySpec(pbkdf2Key.getEncoded(), AES_KEY_ALGORITHM);
-			return aesKey;
-		} catch (InvalidKeySpecException ex) {
-			throw new IllegalStateException("Specs are hard-coded.", ex);
+			final byte[] key = SCrypt.generate(pw, salt, costParam, blockSize, 1, keyLengthInBits / Byte.SIZE);
+			return new SecretKeySpec(key, AES_KEY_ALGORITHM);
 		} finally {
-			Arrays.fill(pw, (char) 0);
+			// destroy copied bytes of the plaintext password:
+			Arrays.fill(pw, (byte) 0);
+			for (int i = 0; i < password.length(); i++) {
+				sb.setCharAt(i, (char) 0);
+			}
 		}
 	}
 

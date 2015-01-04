@@ -4,30 +4,39 @@ import java.io.Serializable;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-@JsonPropertyOrder(value = {"salt", "iv", "iterations", "keyLength", "primaryMasterKey", "hMacMasterKey"})
+@JsonPropertyOrder(value = {"scryptSalt", "scryptCostParam", "scryptBlockSize", "keyLength", "primaryMasterKey", "hMacMasterKey"})
 public class KeyFile implements Serializable {
 
 	private static final long serialVersionUID = 8578363158959619885L;
-	private byte[] salt;
-	private int iterations;
+	private byte[] scryptSalt;
+	private int scryptCostParam;
+	private int scryptBlockSize;
 	private int keyLength;
 	private byte[] primaryMasterKey;
 	private byte[] hMacMasterKey;
 
-	public byte[] getSalt() {
-		return salt;
+	public byte[] getScryptSalt() {
+		return scryptSalt;
 	}
 
-	public void setSalt(byte[] salt) {
-		this.salt = salt;
+	public void setScryptSalt(byte[] scryptSalt) {
+		this.scryptSalt = scryptSalt;
 	}
 
-	public int getIterations() {
-		return iterations;
+	public int getScryptCostParam() {
+		return scryptCostParam;
 	}
 
-	public void setIterations(int iterations) {
-		this.iterations = iterations;
+	public void setScryptCostParam(int scryptCostParam) {
+		this.scryptCostParam = scryptCostParam;
+	}
+
+	public int getScryptBlockSize() {
+		return scryptBlockSize;
+	}
+
+	public void setScryptBlockSize(int scryptBlockSize) {
+		this.scryptBlockSize = scryptBlockSize;
 	}
 
 	public int getKeyLength() {
