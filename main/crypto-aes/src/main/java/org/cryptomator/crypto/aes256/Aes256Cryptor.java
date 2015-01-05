@@ -190,7 +190,7 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 			// decrypt and check password by catching AEAD exception
 			final Cipher decCipher = aesKeyWrapCipher(kek, Cipher.UNWRAP_MODE);
 			SecretKey primary = (SecretKey) decCipher.unwrap(keyfile.getPrimaryMasterKey(), AES_KEY_ALGORITHM, Cipher.SECRET_KEY);
-			SecretKey secondary = (SecretKey) decCipher.unwrap(keyfile.getPrimaryMasterKey(), HMAC_KEY_ALGORITHM, Cipher.SECRET_KEY);
+			SecretKey secondary = (SecretKey) decCipher.unwrap(keyfile.getHMacMasterKey(), HMAC_KEY_ALGORITHM, Cipher.SECRET_KEY);
 
 			// everything ok, assign decrypted keys:
 			this.primaryMasterKey = primary;
