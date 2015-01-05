@@ -3,7 +3,7 @@ Cryptomator
 
 Multiplatform transparent client-side encryption of your files in the cloud. You need Java 8 in order to run the application. Get the runtime environment here: http://www.oracle.com/technetwork/java/javase/downloads/index.html
 
-If you want to take a look at the current beta version, go ahead and download [Cryptomator.dmg](https://github.com/totalvoidness/cryptomator/releases/download/v0.2.0/Cryptomator.dmg), [Cryptomator.exe](https://github.com/totalvoidness/cryptomator/releases/download/v0.2.0/Cryptomator.exe) or [Cryptomator.jar](https://github.com/totalvoidness/cryptomator/releases/download/v0.2.0/Cryptomator.jar).
+If you want to take a look at the current beta version, go ahead and download [Cryptomator.dmg](https://github.com/totalvoidness/cryptomator/releases/download/v0.3.0/Cryptomator.dmg), [Cryptomator.exe](https://github.com/totalvoidness/cryptomator/releases/download/v0.3.0/Cryptomator.exe) or [Cryptomator.jar](https://github.com/totalvoidness/cryptomator/releases/download/v0.3.0/Cryptomator.jar).
 
 ## Features
 - Totally transparent: Just work on the encrypted volume, as if it was an USB drive
@@ -18,7 +18,7 @@ If you want to take a look at the current beta version, go ahead and download [C
 
 ## Security
 - Default key length is 256 bit (falls back to 128 bit, if JCE isn't installed)
-- PBKDF2 key generation
+- Scrypt key generation
 - Cryptographically secure random numbers for salts, IVs and the masterkey of course
 - Sensitive data is swiped from the heap asap
 - Lightweight: Complexity kills security
