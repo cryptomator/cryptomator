@@ -25,7 +25,6 @@ import org.cryptomator.crypto.exceptions.DecryptFailedException;
 import org.cryptomator.crypto.exceptions.UnsupportedKeyLengthException;
 import org.cryptomator.crypto.exceptions.WrongPasswordException;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class Aes256CryptorTest {
@@ -73,7 +72,6 @@ public class Aes256CryptorTest {
 		}
 	}
 
-	@Ignore
 	@Test
 	public void testIntegrityAuthentication() throws IOException {
 		// our test plaintext data:
@@ -93,9 +91,22 @@ public class Aes256CryptorTest {
 		encryptedData.position(0);
 
 		// authenticate unmodified content:
-		final SeekableByteChannel encryptedIn = new ByteBufferBackedSeekableChannel(encryptedData);
-		final boolean unmodifiedContent = cryptor.authenticateContent(encryptedIn);
-		Assert.assertTrue(unmodifiedContent);
+		final SeekableByteChannel encryptedIn1 = new ByteBufferBackedSeekableChannel(encryptedData);
+		final boolean isContentUnmodified1 = cryptor.authenticateContent(encryptedIn1);
+		Assert.assertTrue(isContentUnmodified1);
+
+		// toggle one bit inf first content byte:
+		encryptedData.position(64);
+		final byte fifthByte = encryptedData.get();
+		encryptedData.position(64);
+		encryptedData.put((byte) (fifthByte ^ 0x01));
+
+		encryptedData.position(0);
+
+		// authenticate modified content:
+		final SeekableByteChannel encryptedIn2 = new ByteBufferBackedSeekableChannel(encryptedData);
+		final boolean isContentUnmodified2 = cryptor.authenticateContent(encryptedIn2);
+		Assert.assertFalse(isContentUnmodified2);
 	}
 
 	@Test

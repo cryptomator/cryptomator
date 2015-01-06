@@ -32,7 +32,7 @@ class MacInputStream extends FilterInputStream {
 	@Override
 	public int read(byte[] b, int off, int len) throws IOException {
 		int read = in.read(b, off, len);
-		mac.update(b);
+		mac.update(b, off, len);
 		return read;
 	}
 

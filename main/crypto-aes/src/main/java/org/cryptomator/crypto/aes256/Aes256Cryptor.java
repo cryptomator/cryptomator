@@ -41,6 +41,7 @@ import javax.security.auth.Destroyable;
 
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.output.NullOutputStream;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.crypto.generators.SCrypt;
@@ -403,7 +404,30 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 
 	@Override
 	public boolean authenticateContent(SeekableByteChannel encryptedFile) throws IOException {
-		throw new UnsupportedOperationException("Not yet implemented.");
+		// read file size:
+		final Long fileSize = decryptedContentLength(encryptedFile);
+
+		// init mac:
+		final Mac mac = this.hmacSha256(hMacMasterKey);
+
+		// read stored mac:
+		encryptedFile.position(16);
+		final ByteBuffer macBuffer = ByteBuffer.allocate(mac.getMacLength());
+		final int numMacBytesRead = encryptedFile.read(macBuffer);
+
+		// check validity of header:
+		if (numMacBytesRead != mac.getMacLength() || fileSize == null) {
+			throw new IOException("Failed to read file header.");
+		}
+
+		// read all encrypted data and calculate mac:
+		encryptedFile.position(64);
+		final InputStream in = new SeekableByteChannelInputStream(encryptedFile);
+		final InputStream macIn = new MacInputStream(in, mac);
+		IOUtils.copyLarge(macIn, new NullOutputStream(), 0, fileSize);
+
+		// compare:
+		return Arrays.equals(macBuffer.array(), mac.doFinal());
 	}
 
 	@Override
@@ -517,17 +541,17 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 		final OutputStream cipheredOut = new CipherOutputStream(macOut, cipher);
 		final Long actualSize = IOUtils.copyLarge(plaintextFile, cipheredOut);
 
+		// copy MAC:
+		macBuffer.position(0);
+		macBuffer.put(mac.doFinal());
+
 		// append fake content:
-		final int randomContentLength = (int) Math.ceil(Math.random() * actualSize / 10.0);
+		final int randomContentLength = (int) Math.ceil((Math.random() + 1.0) * actualSize / 20.0);
 		final byte[] emptyBytes = new byte[AES_BLOCK_LENGTH];
 		for (int i = 0; i < randomContentLength; i += AES_BLOCK_LENGTH) {
 			cipheredOut.write(emptyBytes);
 		}
 		cipheredOut.flush();
-
-		// copy MAC:
-		macBuffer.position(0);
-		macBuffer.put(mac.doFinal());
 
 		// encrypt actualSize
 		try {
