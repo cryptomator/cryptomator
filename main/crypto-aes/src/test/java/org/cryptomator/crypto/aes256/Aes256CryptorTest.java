@@ -25,6 +25,7 @@ import org.cryptomator.crypto.exceptions.DecryptFailedException;
 import org.cryptomator.crypto.exceptions.UnsupportedKeyLengthException;
 import org.cryptomator.crypto.exceptions.WrongPasswordException;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class Aes256CryptorTest {
@@ -72,6 +73,31 @@ public class Aes256CryptorTest {
 		}
 	}
 
+	@Ignore
+	@Test
+	public void testIntegrityAuthentication() throws IOException {
+		// our test plaintext data:
+		final byte[] plaintextData = "Hello World".getBytes();
+		final InputStream plaintextIn = new ByteArrayInputStream(plaintextData);
+
+		// init cryptor:
+		final Aes256Cryptor cryptor = new Aes256Cryptor(TEST_PRNG);
+
+		// encrypt:
+		final ByteBuffer encryptedData = ByteBuffer.allocate(64 + plaintextData.length * 4);
+		final SeekableByteChannel encryptedOut = new ByteBufferBackedSeekableChannel(encryptedData);
+		cryptor.encryptFile(plaintextIn, encryptedOut);
+		IOUtils.closeQuietly(plaintextIn);
+		IOUtils.closeQuietly(encryptedOut);
+
+		encryptedData.position(0);
+
+		// authenticate unmodified content:
+		final SeekableByteChannel encryptedIn = new ByteBufferBackedSeekableChannel(encryptedData);
+		final boolean unmodifiedContent = cryptor.authenticateContent(encryptedIn);
+		Assert.assertTrue(unmodifiedContent);
+	}
+
 	@Test
 	public void testEncryptionAndDecryption() throws IOException, DecryptFailedException, WrongPasswordException, UnsupportedKeyLengthException {
 		// our test plaintext data:
@@ -82,19 +108,25 @@ public class Aes256CryptorTest {
 		final Aes256Cryptor cryptor = new Aes256Cryptor(TEST_PRNG);
 
 		// encrypt:
-		final ByteBuffer encryptedData = ByteBuffer.allocate(plaintextData.length + 200);
+		final ByteBuffer encryptedData = ByteBuffer.allocate(64 + plaintextData.length * 4);
 		final SeekableByteChannel encryptedOut = new ByteBufferBackedSeekableChannel(encryptedData);
 		cryptor.encryptFile(plaintextIn, encryptedOut);
 		IOUtils.closeQuietly(plaintextIn);
 		IOUtils.closeQuietly(encryptedOut);
 
-		// decrypt:
+		encryptedData.position(0);
+
+		// decrypt file size:
 		final SeekableByteChannel encryptedIn = new ByteBufferBackedSeekableChannel(encryptedData);
+		final Long filesize = cryptor.decryptedContentLength(encryptedIn);
+		Assert.assertEquals(plaintextData.length, filesize.longValue());
+
+		// decrypt:
 		final ByteArrayOutputStream plaintextOut = new ByteArrayOutputStream();
 		final Long numDecryptedBytes = cryptor.decryptedFile(encryptedIn, plaintextOut);
 		IOUtils.closeQuietly(encryptedIn);
 		IOUtils.closeQuietly(plaintextOut);
-		Assert.assertTrue(numDecryptedBytes > 0);
+		Assert.assertEquals(filesize.longValue(), numDecryptedBytes.longValue());
 
 		// check decrypted data:
 		final byte[] result = plaintextOut.toByteArray();
@@ -115,11 +147,13 @@ public class Aes256CryptorTest {
 		final Aes256Cryptor cryptor = new Aes256Cryptor(TEST_PRNG);
 
 		// encrypt:
-		final ByteBuffer encryptedData = ByteBuffer.allocate(plaintextData.length + 200);
+		final ByteBuffer encryptedData = ByteBuffer.allocate(64 + plaintextData.length * 4);
 		final SeekableByteChannel encryptedOut = new ByteBufferBackedSeekableChannel(encryptedData);
 		cryptor.encryptFile(plaintextIn, encryptedOut);
 		IOUtils.closeQuietly(plaintextIn);
 		IOUtils.closeQuietly(encryptedOut);
+
+		encryptedData.position(0);
 
 		// decrypt:
 		final SeekableByteChannel encryptedIn = new ByteBufferBackedSeekableChannel(encryptedData);

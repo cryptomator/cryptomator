@@ -21,7 +21,7 @@ import org.apache.jackrabbit.webdav.DavSession;
 import org.apache.jackrabbit.webdav.io.OutputContext;
 import org.apache.jackrabbit.webdav.lock.LockManager;
 import org.cryptomator.crypto.Cryptor;
-import org.cryptomator.webdav.exceptions.IORuntimeException;
+import org.cryptomator.crypto.exceptions.DecryptFailedException;
 import org.eclipse.jetty.http.HttpHeader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -128,9 +128,8 @@ public class EncryptedFilePart extends EncryptedFile {
 				if (LOG.isDebugEnabled()) {
 					LOG.debug("Unexpected end of stream during delivery of partial content (client hung up).");
 				}
-			} catch (IOException e) {
-				LOG.error("Error reading file " + path.toString(), e);
-				throw new IORuntimeException(e);
+			} catch (DecryptFailedException e) {
+				throw new IOException("Error decrypting file " + path.toString(), e);
 			} finally {
 				IOUtils.closeQuietly(channel);
 			}

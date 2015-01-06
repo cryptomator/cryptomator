@@ -67,6 +67,13 @@ interface AesCryptographicConfiguration {
 	String AES_CTR_CIPHER = "AES/CTR/NoPadding";
 
 	/**
+	 * Cipher specs for single block encryption (like file size).
+	 * 
+	 * @see http://docs.oracle.com/javase/7/docs/technotes/guides/security/StandardNames.html#impl
+	 */
+	String AES_ECB_CIPHER = "AES/ECB/PKCS5Padding";
+
+	/**
 	 * AES block size is 128 bit or 16 bytes.
 	 */
 	int AES_BLOCK_LENGTH = 16;

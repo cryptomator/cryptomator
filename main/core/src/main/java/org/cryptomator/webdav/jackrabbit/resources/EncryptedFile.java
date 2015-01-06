@@ -29,6 +29,7 @@ import org.apache.jackrabbit.webdav.lock.LockManager;
 import org.apache.jackrabbit.webdav.property.DavPropertyName;
 import org.apache.jackrabbit.webdav.property.DefaultDavProperty;
 import org.cryptomator.crypto.Cryptor;
+import org.cryptomator.crypto.exceptions.DecryptFailedException;
 import org.cryptomator.webdav.exceptions.IORuntimeException;
 import org.eclipse.jetty.http.HttpHeader;
 import org.eclipse.jetty.http.HttpHeaderValue;
@@ -78,9 +79,8 @@ public class EncryptedFile extends AbstractEncryptedNode {
 				}
 			} catch (EOFException e) {
 				LOG.warn("Unexpected end of stream (possibly client hung up).");
-			} catch (IOException e) {
-				LOG.error("Error reading file " + path.toString(), e);
-				throw new IORuntimeException(e);
+			} catch (DecryptFailedException e) {
+				throw new IOException("Error decrypting file " + path.toString(), e);
 			} finally {
 				IOUtils.closeQuietly(channel);
 			}

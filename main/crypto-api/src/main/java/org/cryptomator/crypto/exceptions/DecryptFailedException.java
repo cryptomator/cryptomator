@@ -6,4 +6,8 @@ public class DecryptFailedException extends StorageCryptingException {
 	public DecryptFailedException(Throwable t) {
 		super("Decryption failed.", t);
 	}
+
+	protected DecryptFailedException(String msg) {
+		super(msg);
+	}
 }

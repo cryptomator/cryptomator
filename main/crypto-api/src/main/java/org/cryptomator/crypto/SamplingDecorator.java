@@ -77,18 +77,23 @@ public class SamplingDecorator implements Cryptor, CryptorIOSampling {
 	}
 
 	@Override
+	public boolean authenticateContent(SeekableByteChannel encryptedFile) throws IOException {
+		return cryptor.authenticateContent(encryptedFile);
+	}
+
+	@Override
 	public Long decryptedContentLength(SeekableByteChannel encryptedFile) throws IOException {
 		return cryptor.decryptedContentLength(encryptedFile);
 	}
 
 	@Override
-	public Long decryptedFile(SeekableByteChannel encryptedFile, OutputStream plaintextFile) throws IOException {
+	public Long decryptedFile(SeekableByteChannel encryptedFile, OutputStream plaintextFile) throws IOException, DecryptFailedException {
 		final OutputStream countingInputStream = new CountingOutputStream(decryptedBytes, plaintextFile);
 		return cryptor.decryptedFile(encryptedFile, countingInputStream);
 	}
 
 	@Override
-	public Long decryptRange(SeekableByteChannel encryptedFile, OutputStream plaintextFile, long pos, long length) throws IOException {
+	public Long decryptRange(SeekableByteChannel encryptedFile, OutputStream plaintextFile, long pos, long length) throws IOException, DecryptFailedException {
 		final OutputStream countingInputStream = new CountingOutputStream(decryptedBytes, plaintextFile);
 		return cryptor.decryptRange(encryptedFile, countingInputStream, pos, length);
 	}

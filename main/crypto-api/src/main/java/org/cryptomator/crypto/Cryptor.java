@@ -69,6 +69,11 @@ public interface Cryptor extends SensitiveDataSwipeListener {
 	String decryptPath(String encryptedPath, char encryptedPathSep, char cleartextPathSep, CryptorIOSupport ioSupport);
 
 	/**
+	 * @return <code>true</code> If the integrity of the file can be assured.
+	 */
+	boolean authenticateContent(SeekableByteChannel encryptedFile) throws IOException;
+
+	/**
 	 * @param metadataSupport Support object allowing the Cryptor to read and write its own metadata to the location of the encrypted file.
 	 * @return Content length of the decrypted file or <code>null</code> if unknown.
 	 */
@@ -76,15 +81,17 @@ public interface Cryptor extends SensitiveDataSwipeListener {
 
 	/**
 	 * @return Number of decrypted bytes. This might not be equal to the encrypted file size due to optional metadata written to it.
+	 * @throws DecryptFailedException If decryption failed
 	 */
-	Long decryptedFile(SeekableByteChannel encryptedFile, OutputStream plaintextFile) throws IOException;
+	Long decryptedFile(SeekableByteChannel encryptedFile, OutputStream plaintextFile) throws IOException, DecryptFailedException;
 
 	/**
 	 * @param pos First byte (inclusive)
 	 * @param length Number of requested bytes beginning at pos.
 	 * @return Number of decrypted bytes. This might not be equal to the number of bytes requested due to potential overheads.
+	 * @throws DecryptFailedException If decryption failed
 	 */
-	Long decryptRange(SeekableByteChannel encryptedFile, OutputStream plaintextFile, long pos, long length) throws IOException;
+	Long decryptRange(SeekableByteChannel encryptedFile, OutputStream plaintextFile, long pos, long length) throws IOException, DecryptFailedException;
 
 	/**
 	 * @return Number of encrypted bytes. This might not be equal to the encrypted file size due to optional metadata written to it.
