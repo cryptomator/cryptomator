@@ -82,7 +82,7 @@ public class Settings implements Serializable {
 			try {
 				Files.createDirectories(SETTINGS_DIR);
 				final Path settingsFile = SETTINGS_DIR.resolve(SETTINGS_FILE);
-				final OutputStream out = Files.newOutputStream(settingsFile, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
+				final OutputStream out = Files.newOutputStream(settingsFile, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
 				JSON_OM.writeValue(out, INSTANCE);
 			} catch (IOException e) {
 				LOG.error("Failed to save settings.", e);
