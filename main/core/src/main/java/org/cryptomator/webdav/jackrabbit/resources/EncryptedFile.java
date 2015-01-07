@@ -40,8 +40,11 @@ public class EncryptedFile extends AbstractEncryptedNode {
 
 	private static final Logger LOG = LoggerFactory.getLogger(EncryptedFile.class);
 
-	public EncryptedFile(DavResourceFactory factory, DavResourceLocator locator, DavSession session, LockManager lockManager, Cryptor cryptor) {
+	protected final boolean checkIntegrity;
+
+	public EncryptedFile(DavResourceFactory factory, DavResourceLocator locator, DavSession session, LockManager lockManager, Cryptor cryptor, boolean checkIntegrity) {
 		super(factory, locator, session, lockManager, cryptor);
+		this.checkIntegrity = checkIntegrity;
 	}
 
 	@Override
@@ -73,6 +76,9 @@ public class EncryptedFile extends AbstractEncryptedNode {
 			SeekableByteChannel channel = null;
 			try {
 				channel = Files.newByteChannel(path, StandardOpenOption.READ);
+				if (checkIntegrity && !cryptor.authenticateContent(channel)) {
+					throw new DecryptFailedException("File content compromised: " + path.toString());
+				}
 				outputContext.setContentLength(cryptor.decryptedContentLength(channel));
 				if (outputContext.hasStream()) {
 					cryptor.decryptedFile(channel, outputContext.getOutputStream());

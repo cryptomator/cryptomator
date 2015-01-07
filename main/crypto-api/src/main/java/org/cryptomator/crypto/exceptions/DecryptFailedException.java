@@ -7,7 +7,7 @@ public class DecryptFailedException extends StorageCryptingException {
 		super("Decryption failed.", t);
 	}
 
-	protected DecryptFailedException(String msg) {
+	public DecryptFailedException(String msg) {
 		super(msg);
 	}
 }

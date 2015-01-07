@@ -45,7 +45,7 @@ public final class WebDavServer {
 	 * @param cryptor A fully initialized cryptor instance ready to en- or decrypt streams.
 	 * @return <code>true</code> upon success
 	 */
-	public synchronized boolean start(final String workDir, final Cryptor cryptor) {
+	public synchronized boolean start(final String workDir, final boolean checkFileIntegrity, final Cryptor cryptor) {
 		final ServerConnector connector = new ServerConnector(server);
 		connector.setHost(LOCALHOST);
 
@@ -53,7 +53,7 @@ public final class WebDavServer {
 		final String servletPathSpec = "/*";
 
 		final ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
-		context.addServlet(getWebDavServletHolder(workDir, contextPath, cryptor), servletPathSpec);
+		context.addServlet(getWebDavServletHolder(workDir, contextPath, checkFileIntegrity, cryptor), servletPathSpec);
 		context.setContextPath(contextPath);
 		server.setHandler(context);
 
@@ -82,10 +82,11 @@ public final class WebDavServer {
 		return server.isStopped();
 	}
 
-	private ServletHolder getWebDavServletHolder(final String workDir, final String contextPath, final Cryptor cryptor) {
+	private ServletHolder getWebDavServletHolder(final String workDir, final String contextPath, final boolean checkFileIntegrity, final Cryptor cryptor) {
 		final ServletHolder result = new ServletHolder("Cryptomator-WebDAV-Servlet", new WebDavServlet(cryptor));
 		result.setInitParameter(WebDavServlet.CFG_FS_ROOT, workDir);
 		result.setInitParameter(WebDavServlet.CFG_HTTP_ROOT, contextPath);
+		result.setInitParameter(WebDavServlet.CFG_CHECK_FILE_INTEGRITY, Boolean.toString(checkFileIntegrity));
 		return result;
 	}
 

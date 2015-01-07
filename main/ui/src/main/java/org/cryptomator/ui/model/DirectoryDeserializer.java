@@ -17,7 +17,10 @@ public class DirectoryDeserializer extends JsonDeserializer<Directory> {
 		final JsonNode node = jp.readValueAsTree();
 		final String pathStr = node.get("path").asText();
 		final Path path = FileSystems.getDefault().getPath(pathStr);
-		return new Directory(path);
+		final Directory dir = new Directory(path);
+		final boolean verifyFileIntegrity = node.has("checkIntegrity") ? node.get("checkIntegrity").asBoolean() : false;
+		dir.setVerifyFileIntegrity(verifyFileIntegrity);
+		return dir;
 	}
 
 }

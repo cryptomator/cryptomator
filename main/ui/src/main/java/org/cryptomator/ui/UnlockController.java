@@ -24,6 +24,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
@@ -54,6 +55,9 @@ public class UnlockController implements Initializable {
 
 	@FXML
 	private SecPasswordField passwordField;
+
+	@FXML
+	private CheckBox checkIntegrity;
 
 	@FXML
 	private Button unlockButton;
@@ -96,6 +100,7 @@ public class UnlockController implements Initializable {
 		try {
 			progressIndicator.setVisible(true);
 			masterKeyInputStream = Files.newInputStream(masterKeyPath, StandardOpenOption.READ);
+			directory.setVerifyFileIntegrity(checkIntegrity.isSelected());
 			directory.getCryptor().decryptMasterKey(masterKeyInputStream, password);
 			if (!directory.startServer()) {
 				messageLabel.setText(rb.getString("unlock.messageLabel.startServerFailed"));
@@ -170,6 +175,7 @@ public class UnlockController implements Initializable {
 	public void setDirectory(Directory directory) {
 		this.directory = directory;
 		this.findExistingUsernames();
+		this.checkIntegrity.setSelected(directory.shouldVerifyFileIntegrity());
 	}
 
 	public UnlockListener getListener() {

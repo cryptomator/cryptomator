@@ -22,8 +22,9 @@ import org.cryptomator.crypto.Cryptor;
 public class WebDavServlet extends AbstractWebdavServlet {
 
 	private static final long serialVersionUID = 7965170007048673022L;
-	public static final String CFG_FS_ROOT = "oce.fs.root";
-	public static final String CFG_HTTP_ROOT = "oce.http.root";
+	public static final String CFG_FS_ROOT = "cfg.fs.root";
+	public static final String CFG_HTTP_ROOT = "cfg.http.root";
+	public static final String CFG_CHECK_FILE_INTEGRITY = "cfg.checkFileIntegrity";
 	private DavSessionProvider davSessionProvider;
 	private DavLocatorFactory davLocatorFactory;
 	private DavResourceFactory davResourceFactory;
@@ -42,9 +43,10 @@ public class WebDavServlet extends AbstractWebdavServlet {
 
 		final String fsRoot = config.getInitParameter(CFG_FS_ROOT);
 		final String httpRoot = config.getInitParameter(CFG_HTTP_ROOT);
+		final boolean checkFileIntegrity = Boolean.parseBoolean(config.getInitParameter(CFG_CHECK_FILE_INTEGRITY));
 		this.davLocatorFactory = new WebDavLocatorFactory(fsRoot, httpRoot, cryptor);
 
-		this.davResourceFactory = new WebDavResourceFactory(cryptor);
+		this.davResourceFactory = new WebDavResourceFactory(cryptor, checkFileIntegrity);
 	}
 
 	@Override

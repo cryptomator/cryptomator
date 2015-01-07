@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-@JsonPropertyOrder(value = {"webdavWorkDir"})
+@JsonPropertyOrder(value = {"directories"})
 public class Settings implements Serializable {
 
 	private static final long serialVersionUID = 7609959894417878744L;
@@ -55,7 +55,6 @@ public class Settings implements Serializable {
 	}
 
 	private List<Directory> directories;
-	private String username;
 
 	private Settings() {
 		// private constructor
@@ -105,14 +104,6 @@ public class Settings implements Serializable {
 
 	public void setDirectories(List<Directory> directories) {
 		this.directories = directories;
-	}
-
-	public String getUsername() {
-		return username;
-	}
-
-	public void setUsername(String username) {
-		this.username = username;
 	}
 
 }

@@ -13,6 +13,7 @@ public class DirectorySerializer extends JsonSerializer<Directory> {
 	public void serialize(Directory value, JsonGenerator jgen, SerializerProvider provider) throws IOException, JsonProcessingException {
 		jgen.writeStartObject();
 		jgen.writeStringField("path", value.getPath().toString());
+		jgen.writeBooleanField("checkIntegrity", value.shouldVerifyFileIntegrity());
 		jgen.writeEndObject();
 	}
 

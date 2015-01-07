@@ -34,7 +34,7 @@ public class Directory implements Serializable {
 	private final Cryptor cryptor = SamplingDecorator.decorate(new Aes256Cryptor());
 	private final ObjectProperty<Boolean> unlocked = new SimpleObjectProperty<Boolean>(this, "unlocked", Boolean.FALSE);
 	private final Path path;
-	// private boolean unlocked;
+	private boolean verifyFileIntegrity;
 	private WebDavMount webDavMount;
 	private final Runnable shutdownTask = new ShutdownTask();
 
@@ -50,7 +50,7 @@ public class Directory implements Serializable {
 	}
 
 	public synchronized boolean startServer() {
-		if (server.start(path.toString(), cryptor)) {
+		if (server.start(path.toString(), verifyFileIntegrity, cryptor)) {
 			MainApplication.addShutdownTask(shutdownTask);
 			return true;
 		} else {
@@ -94,6 +94,14 @@ public class Directory implements Serializable {
 
 	public Path getPath() {
 		return path;
+	}
+
+	public boolean shouldVerifyFileIntegrity() {
+		return verifyFileIntegrity;
+	}
+
+	public void setVerifyFileIntegrity(boolean verifyFileIntegrity) {
+		this.verifyFileIntegrity = verifyFileIntegrity;
 	}
 
 	/**

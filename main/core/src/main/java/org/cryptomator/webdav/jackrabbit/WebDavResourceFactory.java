@@ -34,9 +34,11 @@ class WebDavResourceFactory implements DavResourceFactory {
 
 	private final LockManager lockManager = new SimpleLockManager();
 	private final Cryptor cryptor;
+	private final boolean checkFileIntegrity;
 
-	WebDavResourceFactory(Cryptor cryptor) {
+	WebDavResourceFactory(Cryptor cryptor, boolean checkFileIntegrity) {
 		this.cryptor = cryptor;
+		this.checkFileIntegrity = checkFileIntegrity;
 	}
 
 	@Override
@@ -70,11 +72,11 @@ class WebDavResourceFactory implements DavResourceFactory {
 	}
 
 	private EncryptedFile createFilePart(DavResourceLocator locator, DavSession session, DavServletRequest request) {
-		return new EncryptedFilePart(this, locator, session, request, lockManager, cryptor);
+		return new EncryptedFilePart(this, locator, session, request, lockManager, cryptor, checkFileIntegrity);
 	}
 
 	private EncryptedFile createFile(DavResourceLocator locator, DavSession session) {
-		return new EncryptedFile(this, locator, session, lockManager, cryptor);
+		return new EncryptedFile(this, locator, session, lockManager, cryptor, checkFileIntegrity);
 	}
 
 	private EncryptedDir createDirectory(DavResourceLocator locator, DavSession session) {

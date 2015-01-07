@@ -174,8 +174,6 @@
 
 .button,
 .toggle-button,
-.radio-button > .radio,
-.check-box > .box,
 .menu-button,
 .choice-box,
 .color-picker.split-button > .color-picker-label,
@@ -192,8 +190,6 @@
 }
 .button:hover,
 .toggle-button:hover,
-.radio-button:hover > .radio,
-.check-box:hover > .box,
 .menu-button:hover,
 .split-menu-button > .label:hover,
 .split-menu-button > .arrow-button:hover,
@@ -208,8 +204,6 @@
 .button:armed,
 .button:default:armed,
 .toggle-button:armed,
-.radio-button:armed > .radio,
-.check-box:armed .box,
 .menu-button:armed,
 .split-menu-button:armed > .label,
 .split-menu-button > .arrow-button:pressed,
@@ -235,8 +229,6 @@
 
 .button:disabled,
 .toggle-button:disabled,
-.radio-button:disabled,
-.check-box:disabled,
 .hyperlink:disabled,
 .menu-button:disabled,
 .split-menu-button:disabled,
@@ -261,8 +253,6 @@
 
 .button:show-mnemonics .mnemonic-underline,
 .toggle-button:show-mnemonics .mnemonic-underline,
-.radio-button:show-mnemonics .mnemonic-underline,
-.check-box:show-mnemonics .mnemonic-underline,
 .hyperlink:show-mnemonics > .mnemonic-underline,
 .split-menu-button:show-mnemonics > .mnemonic-underline,
 .menu-button:show-mnemonics > .mnemonic-underline {
@@ -321,6 +311,36 @@
 .button:default:disabled {
 	-fx-background-color: linear-gradient(to bottom, #D2D2D2 0%, #C4C4C4 100%), #F2F2F2;
     -fx-text-fill: -fx-mid-text-color;
+}
+
+/*******************************************************************************
+ *                                                                             *
+ * CheckBox                                                                    *
+ *                                                                             *
+ ******************************************************************************/
+
+/* TODO win L&F */
+.check-box {
+    -fx-label-padding: 0 0 0 3px;
+    -fx-text-fill: -fx-text-background-color;
+}
+.check-box > .box {
+    -fx-padding: 3px;
+    -fx-background-color: linear-gradient(to bottom, #A5A5A5 0%, #B8B8B8 100%), #F3F3F3, #FFFFFF;
+    -fx-background-radius: 2.5, 2.5, 2.5;
+	-fx-background-insets: 0, 1, 2 1 1 1;
+}
+.check-box > .box > .mark {
+    -fx-background-color: transparent;
+    -fx-padding: 4px;
+    -fx-shape: "M-1,4, L-1,5.5 L3.5,8.5 L9,0 L9,-1 L7,-1 L3,6 L1,4 Z";
+}
+.check-box:selected > .box {
+	-fx-background-color: #2C90FC, #3B99FC;
+	-fx-background-insets: 0, 1;
+}
+.check-box:selected > .box > .mark {
+    -fx-background-color: white;
 }
 
 /*******************************************************************************
