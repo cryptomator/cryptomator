@@ -215,8 +215,6 @@
 }
 .button:focused,
 .toggle-button:focused,
-.radio-button:focused > .radio,
-.check-box:focused > .box,
 .menu-button:focused,
 .choice-box:focused,
 .color-picker.split-button:focused > .color-picker-label {
@@ -325,22 +323,21 @@
     -fx-text-fill: -fx-text-background-color;
 }
 .check-box > .box {
-    -fx-padding: 3px;
-    -fx-background-color: linear-gradient(to bottom, #A5A5A5 0%, #B8B8B8 100%), #F3F3F3, #FFFFFF;
-    -fx-background-radius: 2.5, 2.5, 2.5;
-	-fx-background-insets: 0, 1, 2 1 1 1;
+    -fx-padding: 1px;
+    -fx-border-color: -fx-box-border;
+    -fx-background-color: -fx-control-inner-background;
+}
+.check-box:hover > .box,
+.check-box:armed > .box {
+	-fx-border-color: -fx-focus-color;
 }
 .check-box > .box > .mark {
     -fx-background-color: transparent;
     -fx-padding: 4px;
     -fx-shape: "M-1,4, L-1,5.5 L3.5,8.5 L9,0 L9,-1 L7,-1 L3,6 L1,4 Z";
 }
-.check-box:selected > .box {
-	-fx-background-color: #2C90FC, #3B99FC;
-	-fx-background-insets: 0, 1;
-}
 .check-box:selected > .box > .mark {
-    -fx-background-color: white;
+    -fx-background-color: black;
 }
 
 /*******************************************************************************
