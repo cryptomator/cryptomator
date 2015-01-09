@@ -9,21 +9,28 @@
 package org.cryptomator.webdav.jackrabbit;
 
 import org.apache.jackrabbit.webdav.DavException;
+import org.apache.jackrabbit.webdav.DavSession;
 import org.apache.jackrabbit.webdav.DavSessionProvider;
 import org.apache.jackrabbit.webdav.WebdavRequest;
 
-class WebDavSessionProvider implements DavSessionProvider {
+class DavSessionProviderImpl implements DavSessionProvider {
 
 	@Override
 	public boolean attachSession(WebdavRequest request) throws DavException {
 		// every request gets a session
-		request.setDavSession(new WebDavSession(request));
+		final DavSession session = new DavSessionImpl();
+		session.addReference(request);
+		request.setDavSession(session);
 		return true;
 	}
 
 	@Override
 	public void releaseSession(WebdavRequest request) {
-		// do nothing
+		final DavSession session = request.getDavSession();
+		if (session != null) {
+			session.removeReference(request);
+			request.setDavSession(null);
+		}
 	}
 
 }

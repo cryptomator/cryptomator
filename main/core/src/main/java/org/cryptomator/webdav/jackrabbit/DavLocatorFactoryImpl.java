@@ -21,14 +21,14 @@ import org.cryptomator.crypto.Cryptor;
 import org.cryptomator.crypto.CryptorIOSupport;
 import org.cryptomator.crypto.SensitiveDataSwipeListener;
 
-class WebDavLocatorFactory extends AbstractLocatorFactory implements SensitiveDataSwipeListener, CryptorIOSupport {
+class DavLocatorFactoryImpl extends AbstractLocatorFactory implements SensitiveDataSwipeListener, CryptorIOSupport {
 
 	private static final int MAX_CACHED_PATHS = 10000;
 	private final Path fsRoot;
 	private final Cryptor cryptor;
 	private final BidiMap<String, String> pathCache = new BidiLRUMap<>(MAX_CACHED_PATHS); // <decryptedPath, encryptedPath>
 
-	WebDavLocatorFactory(String fsRoot, String httpRoot, Cryptor cryptor) {
+	DavLocatorFactoryImpl(String fsRoot, String httpRoot, Cryptor cryptor) {
 		super(httpRoot);
 		this.fsRoot = FileSystems.getDefault().getPath(fsRoot);
 		this.cryptor = cryptor;

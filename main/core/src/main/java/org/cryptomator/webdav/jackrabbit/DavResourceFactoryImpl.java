@@ -30,13 +30,13 @@ import org.cryptomator.webdav.jackrabbit.resources.NonExistingNode;
 import org.cryptomator.webdav.jackrabbit.resources.ResourcePathUtils;
 import org.eclipse.jetty.http.HttpHeader;
 
-class WebDavResourceFactory implements DavResourceFactory {
+class DavResourceFactoryImpl implements DavResourceFactory {
 
 	private final LockManager lockManager = new SimpleLockManager();
 	private final Cryptor cryptor;
 	private final boolean checkFileIntegrity;
 
-	WebDavResourceFactory(Cryptor cryptor, boolean checkFileIntegrity) {
+	DavResourceFactoryImpl(Cryptor cryptor, boolean checkFileIntegrity) {
 		this.cryptor = cryptor;
 		this.checkFileIntegrity = checkFileIntegrity;
 	}

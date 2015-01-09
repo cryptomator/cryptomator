@@ -8,49 +8,38 @@
  ******************************************************************************/
 package org.cryptomator.webdav.jackrabbit;
 
+import java.util.HashSet;
+
 import org.apache.jackrabbit.webdav.DavSession;
-import org.apache.jackrabbit.webdav.WebdavRequest;
 
-class WebDavSession implements DavSession {
-
-	private final WebdavRequest request;
-
-	WebDavSession(WebdavRequest request) {
-		this.request = request;
-	}
+class DavSessionImpl implements DavSession {
+	
+	private final HashSet<String> lockTokens = new HashSet<String>();
+	private final HashSet<Object> references = new HashSet<Object>();
 
 	@Override
 	public void addReference(Object reference) {
-		// TODO Auto-generated method stub
-
+		references.add(reference);
 	}
 
 	@Override
 	public void removeReference(Object reference) {
-		// TODO Auto-generated method stub
-
+		references.remove(reference);
 	}
 
 	@Override
 	public void addLockToken(String token) {
-		// TODO Auto-generated method stub
-
+		lockTokens.add(token);
 	}
 
 	@Override
 	public String[] getLockTokens() {
-		// TODO Auto-generated method stub
-		return null;
+		return lockTokens.toArray(new String[lockTokens.size()]);
 	}
 
 	@Override
 	public void removeLockToken(String token) {
-		// TODO Auto-generated method stub
-
-	}
-
-	public WebdavRequest getRequest() {
-		return request;
+		lockTokens.remove(token);
 	}
 
 }

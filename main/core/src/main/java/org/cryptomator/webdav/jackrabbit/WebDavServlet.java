@@ -39,14 +39,14 @@ public class WebDavServlet extends AbstractWebdavServlet {
 	public void init(ServletConfig config) throws ServletException {
 		super.init(config);
 
-		davSessionProvider = new WebDavSessionProvider();
+		davSessionProvider = new DavSessionProviderImpl();
 
 		final String fsRoot = config.getInitParameter(CFG_FS_ROOT);
 		final String httpRoot = config.getInitParameter(CFG_HTTP_ROOT);
 		final boolean checkFileIntegrity = Boolean.parseBoolean(config.getInitParameter(CFG_CHECK_FILE_INTEGRITY));
-		this.davLocatorFactory = new WebDavLocatorFactory(fsRoot, httpRoot, cryptor);
+		this.davLocatorFactory = new DavLocatorFactoryImpl(fsRoot, httpRoot, cryptor);
 
-		this.davResourceFactory = new WebDavResourceFactory(cryptor, checkFileIntegrity);
+		this.davResourceFactory = new DavResourceFactoryImpl(cryptor, checkFileIntegrity);
 	}
 
 	@Override
