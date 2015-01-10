@@ -137,6 +137,7 @@ public class UnlockController implements Initializable {
 	private void setControlsDisabled(boolean disable) {
 		usernameBox.setDisable(disable);
 		passwordField.setDisable(disable);
+		checkIntegrity.setDisable(disable);
 		unlockButton.setDisable(disable);
 	}
 

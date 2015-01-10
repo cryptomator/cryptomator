@@ -7,7 +7,7 @@ public class UnsupportedKeyLengthException extends StorageCryptingException {
 	private final int supportedLength;
 
 	public UnsupportedKeyLengthException(int length, int maxLength) {
-		super(String.format("Key length (%i) exceeds policy maximum (%i).", length, maxLength));
+		super(String.format("Key length (%d) exceeds policy maximum (%d).", length, maxLength));
 		this.requestedLength = length;
 		this.supportedLength = maxLength;
 	}
