@@ -9,6 +9,7 @@
 package org.cryptomator.webdav.jackrabbit.resources;
 
 import java.nio.file.attribute.FileTime;
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
@@ -23,6 +24,11 @@ final class FileTimeUtils {
 	static String toRfc1123String(FileTime time) {
 		final Temporal date = OffsetDateTime.ofInstant(time.toInstant(), ZoneOffset.UTC);
 		return DateTimeFormatter.RFC_1123_DATE_TIME.format(date);
+	}
+
+	static FileTime fromRfc1123String(String string) {
+		final Instant instant = Instant.from(DateTimeFormatter.RFC_1123_DATE_TIME.parse(string));
+		return FileTime.from(instant);
 	}
 
 }

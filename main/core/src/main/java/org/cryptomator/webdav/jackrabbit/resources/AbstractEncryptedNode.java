@@ -11,8 +11,11 @@ package org.cryptomator.webdav.jackrabbit.resources;
 import java.io.IOException;
 import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.BasicFileAttributeView;
+import java.nio.file.attribute.FileTime;
 import java.util.List;
 
 import org.apache.commons.io.FilenameUtils;
@@ -132,6 +135,27 @@ abstract class AbstractEncryptedNode implements DavResource {
 	@Override
 	public void setProperty(DavProperty<?> property) throws DavException {
 		getProperties().add(property);
+
+		LOG.info("Set property {}", property.getName());
+
+		try {
+			final Path path = ResourcePathUtils.getPhysicalPath(this);
+			if (DavPropertyName.CREATIONDATE.equals(property.getName()) && property.getValue() instanceof String) {
+				final String createDateStr = (String) property.getValue();
+				final FileTime createTime = FileTimeUtils.fromRfc1123String(createDateStr);
+				final BasicFileAttributeView attrView = Files.getFileAttributeView(path, BasicFileAttributeView.class, LinkOption.NOFOLLOW_LINKS);
+				attrView.setTimes(null, null, createTime);
+				LOG.info("Updating Creation Date: {}", createTime.toString());
+			} else if (DavPropertyName.GETLASTMODIFIED.equals(property.getName()) && property.getValue() instanceof String) {
+				final String lastModifiedTimeStr = (String) property.getValue();
+				final FileTime lastModifiedTime = FileTimeUtils.fromRfc1123String(lastModifiedTimeStr);
+				final BasicFileAttributeView attrView = Files.getFileAttributeView(path, BasicFileAttributeView.class, LinkOption.NOFOLLOW_LINKS);
+				attrView.setTimes(lastModifiedTime, null, null);
+				LOG.info("Updating Last Modified Date: {}", lastModifiedTime.toString());
+			}
+		} catch (IOException e) {
+			throw new DavException(DavServletResponse.SC_INTERNAL_SERVER_ERROR);
+		}
 	}
 
 	@Override
