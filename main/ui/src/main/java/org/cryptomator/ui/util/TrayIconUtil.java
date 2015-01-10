@@ -15,6 +15,9 @@ import java.util.ResourceBundle;
 import javafx.application.Platform;
 import javafx.stage.Stage;
 
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
 import javax.swing.SwingUtilities;
 
 import org.apache.commons.lang3.SystemUtils;
@@ -88,8 +91,14 @@ public final class TrayIconUtil {
 			final String notificationCenterAppleScript = String.format("display notification \"%s\" with title \"%s\"", msg, title);
 			notificationCmd = () -> {
 				try {
-					Runtime.getRuntime().exec(new String[] {"/usr/bin/osascript", "-e", notificationCenterAppleScript});
-				} catch (IOException e) {
+					final ScriptEngineManager mgr = new ScriptEngineManager();
+					final ScriptEngine engine = mgr.getEngineByName("AppleScriptEngine");
+					if (engine != null) {
+						engine.eval(notificationCenterAppleScript);
+					} else {
+						Runtime.getRuntime().exec(new String[] {"/usr/bin/osascript", "-e", notificationCenterAppleScript});
+					}
+				} catch (ScriptException | IOException e) {
 					// ignore, user will notice the tray icon anyway.
 				}
 			};
