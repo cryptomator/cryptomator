@@ -21,6 +21,7 @@ import javafx.stage.Stage;
 
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.ui.settings.Settings;
+import org.cryptomator.ui.util.ActiveWindowStyleSupport;
 import org.cryptomator.ui.util.TrayIconUtil;
 import org.eclipse.jetty.util.ConcurrentHashSet;
 
@@ -48,6 +49,7 @@ public class MainApplication extends Application {
 		primaryStage.sizeToScene();
 		primaryStage.setResizable(false);
 		primaryStage.show();
+		ActiveWindowStyleSupport.startObservingFocus(primaryStage);
 		TrayIconUtil.init(primaryStage, rb, () -> {
 			quit();
 		});

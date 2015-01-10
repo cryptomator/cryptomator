@@ -137,7 +137,7 @@
      * remove the setting -fx-background in all the sections that use
      * -fx-selection-bar.
      */
-    -fx-selection-bar: #2283FB;
+    -fx-selection-bar: #0069D9;
 
     /* The color to use as -fx-text-fill when painting text on top of
      * backgrounds filled with -fx-selection-bar.
@@ -152,8 +152,6 @@
     -fx-background-insets: inherit;
     -fx-padding: inherit;
     
-    -fx-cell-focus-inner-border: -fx-selection-bar;
-
     /***************************************************************************
      *                                                                         *
      * Set the default background color for the scene                          *
@@ -267,15 +265,6 @@
     -fx-stroke: -fx-text-base-color;
 } 
 
-/* ====   ARROWS   ========================================================== */
-
-.combo-box-base > .arrow-button > .arrow {
-    -fx-background-color: -fx-light-text-color;
-    -fx-background-insets: 0 0 -1 0, 0;
-    -fx-padding: 9px 6px 0 0;
-    -fx-shape: "M 0 3 l 3 -3 l 3 3 m 0 3 l -3 3 l -3 -3";
-}
-
 /* ====   CHOICE BOX LIKE THINGS   ========================================== */
 
 .combo-box-base {
@@ -313,7 +302,7 @@
 
 /* ====   DEFAULT   ========================================================= */
 
-.button:default {
+.root.active-window .button:default {
 	-fx-background-color: linear-gradient(to bottom, #4AA0F9 0%, #045FFF 100%), linear-gradient(to bottom, #69B2FA 0%, #0D81FF 100%);
     -fx-text-fill: -fx-light-text-color;
 }
@@ -344,12 +333,15 @@
     -fx-padding: 4px;
     -fx-shape: "M-1,4, L-1,5.5 L3.5,8.5 L9,0 L9,-1 L7,-1 L3,6 L1,4 Z";
 }
-.check-box:selected > .box {
+.root.active-window .check-box:selected > .box {
 	-fx-background-color: #2C90FC, #3B99FC;
 	-fx-background-insets: 0, 1;
 }
-.check-box:selected > .box > .mark {
+.root.active-window .check-box:selected > .box > .mark {
     -fx-background-color: white;
+}
+.root.inactive-window .check-box:selected > .box > .mark {
+    -fx-background-color: #444444;
 }
 
 /*******************************************************************************
@@ -587,7 +579,7 @@
 }
 .menu-item:focused {
      -fx-background: -fx-accent;
-     -fx-background-color: -fx-selection-bar;
+     -fx-background-color: #2283FB;
      -fx-text-fill: -fx-selection-bar-text;
 }
 .menu-item:focused > .label {
@@ -614,65 +606,15 @@
 
 /*******************************************************************************
  *                                                                             *
- * ComboBox                                                                    *
- *                                                                             *
- ******************************************************************************/
-
-/* Customie the ListCell that appears in the ComboBox button itself */
-.combo-box > .list-cell {
-    -fx-background: transparent;
-    -fx-background-color: transparent;
-    -fx-text-fill: -fx-text-base-color;
-	-fx-padding: 0.2em 0.5em 0.2em 0.5em;
-}
-.combo-box-base > .arrow-button  {
-	-fx-background-color: linear-gradient(to bottom, #4AA0F9 0%, #045FFF 100%), linear-gradient(to bottom, #69B2FA 0%, #0D81FF 100%);
-    -fx-background-radius: 0 5 5 0, 0 4 4 0;
-	-fx-padding: 0.2em 0.5em 0.2em 0.5em;
-    -fx-background-insets: 0 0 0 1, 1;
-}
-
-.combo-box-popup > .list-view {
-    -fx-background-color: rgba(255.0, 255.0, 255.0, 0.9);
-    -fx-background-insets: 0;
-    -fx-background-radius: 4.0;
-    -fx-padding: 4px 0 4px 0; 
-    -fx-effect: dropshadow(three-pass-box, rgba(0.0,0.0,0.0,0.6), 8.0, 0.0, 0.0, 0.0);
-}
-.combo-box-popup > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell {
-    -fx-background-color: transparent;
-    -fx-padding:0.2em 1em 0.2em 1em;
-    -fx-border-color:transparent;
-}
-
-.combo-box-popup > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:selected, 
-.combo-box-popup  > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:selected:hover {
-	-fx-background: -fx-accent;
-	-fx-background-color: -fx-selection-bar;
-	-fx-text-fill: -fx-selection-bar-text;
-}
-
-/*******************************************************************************
- *                                                                             *
- * SplitPane                                                                   *
- *                                                                             *
- ******************************************************************************/
-
-.split-pane > .split-pane-divider {
-    -fx-padding: 0 0.25em 0 0.25em; /* 0 3 0 3 */
-}
-
-/*******************************************************************************
- *                                                                             *
  * ListView and ListCell                                                       *
  *                                                                             *
  ******************************************************************************/
 
-.list-view > .virtual-flow > .scroll-bar:vertical{
+.list-view > .virtual-flow > .scroll-bar:vertical {
     -fx-background-insets: 0, 0 0 0 1;
     -fx-padding: -1 -1 -1 0;
 }
-.list-view > .virtual-flow > .scroll-bar:horizontal{
+.list-view > .virtual-flow > .scroll-bar:horizontal {
     -fx-background-insets: 0, 1 0 0 0;
     -fx-padding: 0 -1 -1 -1;
 }
@@ -686,27 +628,87 @@
     -fx-text-fill: -fx-text-inner-color;
     -fx-opacity: 1;
 }
-.list-view:focused > .virtual-flow > .clipped-container > .sheet > .list-cell:focused {
-    -fx-background-color: -fx-focus-color, -fx-cell-focus-inner-border, -fx-control-inner-background;
-    -fx-background-insets: 0, 1, 2;
-}
-.list-view > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:selected {
-    -fx-background-color: -fx-focus-color, -fx-cell-focus-inner-border, -fx-selection-bar;
-    -fx-background-insets: 0, 1, 2;
-    -fx-background: -fx-accent;
-    -fx-text-fill: -fx-selection-bar-text;
-}
-.list-view > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:selected, 
-.list-view > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:selected:hover {
-    -fx-background: -fx-accent;
+
+.root.active-window .list-view:focused > .virtual-flow > .clipped-container > .sheet > .list-cell:focused,
+.root.active-window .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:selected, 
+.root.active-window .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:selected:hover {
     -fx-background-color: -fx-selection-bar;
     -fx-text-fill: -fx-selection-bar-text;
 }
-.list-view > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:selected:hover {
-    -fx-background: -fx-accent;
-    -fx-background-color: -fx-focus-color, -fx-cell-focus-inner-border, -fx-selection-bar;
-    -fx-background-insets: 0, 1, 2;
+
+.root.inactive-window .list-view:focused > .virtual-flow > .clipped-container > .sheet > .list-cell:focused,
+.root.inactive-window .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:selected, 
+.root.inactive-window .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:selected:hover {
+    -fx-background-color: #DCDCDC;
     -fx-text-fill: -fx-selection-bar-text;
+}
+
+/*******************************************************************************
+ *                                                                             *
+ * ComboBox                                                                    *
+ *                                                                             *
+ ******************************************************************************/
+
+/* Customie the ListCell that appears in the ComboBox button itself */
+.combo-box > .list-cell {
+    -fx-background: transparent;
+    -fx-background-color: transparent;
+    -fx-text-fill: -fx-text-base-color;
+	-fx-padding: 0.2em 0.5em 0.2em 0.5em;
+}
+.combo-box-popup > .list-view {
+    -fx-background-color: rgba(255.0, 255.0, 255.0, 0.9);
+    -fx-background-insets: 0;
+    -fx-background-radius: 4.0;
+    -fx-padding: 4px 0 4px 0; 
+    -fx-effect: dropshadow(three-pass-box, rgba(0.0,0.0,0.0,0.6), 8.0, 0.0, 0.0, 0.0);
+}
+.combo-box-popup > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell {
+    -fx-background-color: transparent;
+    -fx-padding: 0.2em 1em 0.2em 1em;
+    -fx-border-color: transparent;
+}
+
+.root.active-window .combo-box-popup > .list-view:focused > .virtual-flow > .clipped-container > .sheet > .list-cell:focused:filled:selected, 
+.root.active-window .combo-box-popup > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:selected, 
+.root.active-window .combo-box-popup  > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:selected:hover {
+	-fx-background: -fx-accent;
+	-fx-background-color: #2283FB;
+	-fx-text-fill: -fx-selection-bar-text;
+}
+
+/* Arrow-Button */
+.combo-box-base > .arrow-button  {
+    -fx-background-radius: 0 5 5 0, 0 4 4 0;
+	-fx-padding: 0.2em 0.5em 0.2em 0.5em;
+    -fx-background-insets: 0 0 0 1, 1;
+}
+.combo-box-base > .arrow-button > .arrow {
+    -fx-background-insets: 0 0 -1 0, 0;
+    -fx-padding: 9px 6px 0 0;
+    -fx-shape: "M 0 3 l 3 -3 l 3 3 m 0 3 l -3 3 l -3 -3";
+}
+.root.active-window .combo-box-base > .arrow-button {
+	-fx-background-color: linear-gradient(to bottom, #4AA0F9 0%, #045FFF 100%), linear-gradient(to bottom, #69B2FA 0%, #0D81FF 100%);
+}
+.root.active-window .combo-box-base > .arrow-button > .arrow {
+    -fx-background-color: -fx-light-text-color;
+}
+.root.inactive-window .combo-box-base > .arrow-button {
+	-fx-background-color: transparent;
+}
+.root.inactive-window .combo-box-base > .arrow-button > .arrow {
+    -fx-background-color: #444444;
+}
+
+/*******************************************************************************
+ *                                                                             *
+ * SplitPane                                                                   *
+ *                                                                             *
+ ******************************************************************************/
+
+.split-pane > .split-pane-divider {
+    -fx-padding: 0 0.25em 0 0.25em; /* 0 3 0 3 */
 }
 
 /*******************************************************************************
