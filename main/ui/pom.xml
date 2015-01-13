@@ -12,7 +12,7 @@
 	<parent>
 		<groupId>org.cryptomator</groupId>
 		<artifactId>main</artifactId>
-		<version>0.4.0-SNAPSHOT</version>
+		<version>0.4.0</version>
 	</parent>
 	<artifactId>ui</artifactId>
 	<name>Cryptomator GUI</name>
@@ -102,7 +102,7 @@
 								<fx:deploy nativeBundles="all" outdir="${project.build.directory}/dist" outfile="${project.build.finalName}" verbose="false">
 									<fx:application name="${javafx.application.name}" version="${project.version}" mainClass="${exec.mainClass}" />
 									<fx:info title="${javafx.application.name}" vendor="cryptomator.org" copyright="cryptomator.org" license="MIT" category="Utility" />
-									<fx:platform basedir="" javafx="2.2+" j2se="8.0" />
+									<fx:platform javafx="2.2+" j2se="8.0" />
 									<fx:resources>
 										<fx:fileset dir="${project.build.directory}" includes="${javafx.application.name}.jar" />
 									</fx:resources>
