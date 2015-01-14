@@ -1,9 +1,9 @@
 Cryptomator
 ====================
 
-Multiplatform transparent client-side encryption of your files in the cloud. You need Java 8 in order to run the application. Get the runtime environment here: http://www.oracle.com/technetwork/java/javase/downloads/index.html
+Multiplatform transparent client-side encryption of your files in the cloud.
 
-If you want to take a look at the current beta version, go ahead and download [Cryptomator.dmg](https://github.com/totalvoidness/cryptomator/releases/download/v0.3.0/Cryptomator.dmg), [Cryptomator.exe](https://github.com/totalvoidness/cryptomator/releases/download/v0.3.0/Cryptomator.exe) or [Cryptomator.jar](https://github.com/totalvoidness/cryptomator/releases/download/v0.3.0/Cryptomator.jar).
+If you want to take a look at the current beta version, go ahead and get your copy of cryptomator on  [Cryptomator.org](http://cryptomator.org) or clone and build Cryptomator using Maven (instructions below).
 
 ## Features
 - Totally transparent: Just work on the encrypted volume, as if it was an USB drive
@@ -16,29 +16,34 @@ If you want to take a look at the current beta version, go ahead and download [C
 - Open Source means: No backdoors. Control is better than trust
 - Use as many encrypted folders in your dropbox as you want. Each having individual passwords
 
-## Security
+### Privacy
 - Default key length is 256 bit (falls back to 128 bit, if JCE isn't installed)
 - Scrypt key generation
 - Cryptographically secure random numbers for salts, IVs and the masterkey of course
 - Sensitive data is swiped from the heap asap
 - Lightweight: Complexity kills security
 
-## Consistency
+### Consistency
 - I/O operations are transactional and atomic, if the file systems supports it
 - ~~Metadata is stored per-folder, so it's not a SPOF~~
 - *NEW:* No Metadata at all. Encrypted files can be decrypted even on completely shuffled file systems (if their contents are undamaged).
 
-## Dependencies
-- Java 8
-- see pom.xml ;-)
+## Building
 
-## TODO
+#### Dependencies
+* Java 8
+* Maven 3
+* Optional: OS-dependent build tools for native packaging
+* Optional: JCE unlimited strength policy (needed for 256 bit keys)
 
-### UI
-- Native L&F
-- Drive icons in WebDAV volumes
-- Change password functionality
-- Better explanations on UI
+#### Building on Debian-based OS
+```bash
+apt-get install oracle-java8-installer oracle-java8-unlimited-jce-policy fakeroot maven git
+git clone https://github.com/totalvoidness/cryptomator.git
+cd cryptomator/main
+git checkout v0.4.0
+mvn clean install
+```
 
 ## License
 
