@@ -17,6 +17,7 @@ import java.nio.file.DirectoryStream.Filter;
 import java.nio.file.Path;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -426,8 +427,8 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 		final InputStream macIn = new MacInputStream(in, mac);
 		IOUtils.copyLarge(macIn, new NullOutputStream(), 0, fileSize);
 
-		// compare:
-		return Arrays.equals(macBuffer.array(), mac.doFinal());
+		// compare (in constant time):
+		return MessageDigest.isEqual(macBuffer.array(), mac.doFinal());
 	}
 
 	@Override
