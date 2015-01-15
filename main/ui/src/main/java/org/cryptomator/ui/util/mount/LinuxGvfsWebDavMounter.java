@@ -9,6 +9,8 @@
  ******************************************************************************/
 package org.cryptomator.ui.util.mount;
 
+import java.net.URI;
+
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.ui.util.command.Script;
 
@@ -30,16 +32,16 @@ final class LinuxGvfsWebDavMounter implements WebDavMounterStrategy {
 	}
 
 	@Override
-	public WebDavMount mount(int localPort) throws CommandFailedException {
+	public WebDavMount mount(URI uri) throws CommandFailedException {
 		final Script mountScript = Script.fromLines(
 				"set -x",
-				"gvfs-mount \"dav://[::1]:$PORT\"",
-				"xdg-open \"$URI\"")
-				.addEnv("PORT", String.valueOf(localPort));
+				"gvfs-mount \"dav:$DAV_SSP\"",
+				"xdg-open \"dav:$DAV_SSP\"")
+				.addEnv("DAV_SSP", uri.getRawSchemeSpecificPart());
 		final Script unmountScript = Script.fromLines(
 				"set -x",
-				"gvfs-mount -u \"dav://[::1]:$PORT\"")
-				.addEnv("URI", String.valueOf(localPort));
+				"gvfs-mount -u \"dav:$DAV_SSP\"")
+				.addEnv("$DAV_SSP", uri.getRawSchemeSpecificPart());
 		mountScript.execute();
 		return new WebDavMount() {
 			@Override

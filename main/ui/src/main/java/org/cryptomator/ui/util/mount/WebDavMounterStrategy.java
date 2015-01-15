@@ -9,6 +9,7 @@
  ******************************************************************************/
 package org.cryptomator.ui.util.mount;
 
+import java.net.URI;
 
 /**
  * A strategy able to mount a webdav share and display it to the user.
@@ -25,10 +26,10 @@ interface WebDavMounterStrategy {
 	/**
 	 * Tries to mount a given webdav share.
 	 * 
-	 * @param localPort local TCP port of the webdav share
+	 * @param uri URI of the webdav share
 	 * @return a {@link WebDavMount} representing the mounted share
 	 * @throws CommandFailedException if the mount operation fails
 	 */
-	WebDavMount mount(int localPort) throws CommandFailedException;
+	WebDavMount mount(URI uri) throws CommandFailedException;
 
 }

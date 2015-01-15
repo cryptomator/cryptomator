@@ -27,6 +27,7 @@ import javafx.util.Duration;
 
 import org.cryptomator.crypto.CryptorIOSampling;
 import org.cryptomator.ui.model.Directory;
+import org.cryptomator.webdav.WebDavServer;
 
 public class UnlockedController implements Initializable {
 
@@ -123,7 +124,7 @@ public class UnlockedController implements Initializable {
 
 	public void setDirectory(Directory directory) {
 		this.directory = directory;
-		final String msg = String.format(rb.getString("unlocked.messageLabel.runningOnPort"), directory.getServer().getPort());
+		final String msg = String.format(rb.getString("unlocked.messageLabel.runningOnPort"), WebDavServer.getInstance().getPort());
 		messageLabel.setText(msg);
 
 		if (directory.getCryptor() instanceof CryptorIOSampling) {

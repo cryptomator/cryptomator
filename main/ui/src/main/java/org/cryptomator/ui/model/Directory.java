@@ -17,6 +17,7 @@ import org.cryptomator.ui.util.mount.CommandFailedException;
 import org.cryptomator.ui.util.mount.WebDavMount;
 import org.cryptomator.ui.util.mount.WebDavMounter;
 import org.cryptomator.webdav.WebDavServer;
+import org.cryptomator.webdav.WebDavServer.ServletLifeCycleAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,20 +30,20 @@ public class Directory implements Serializable {
 
 	private static final long serialVersionUID = 3754487289683599469L;
 	private static final Logger LOG = LoggerFactory.getLogger(Directory.class);
-
-	private final WebDavServer server = new WebDavServer();
 	private final Cryptor cryptor = SamplingDecorator.decorate(new Aes256Cryptor());
 	private final ObjectProperty<Boolean> unlocked = new SimpleObjectProperty<Boolean>(this, "unlocked", Boolean.FALSE);
+	private final Runnable shutdownTask = new ShutdownTask();
 	private final Path path;
 	private boolean verifyFileIntegrity;
+	private ServletLifeCycleAdapter webDavServlet;
 	private WebDavMount webDavMount;
-	private final Runnable shutdownTask = new ShutdownTask();
 
 	public Directory(final Path path) {
 		if (!Files.isDirectory(path)) {
 			throw new IllegalArgumentException("Not a directory: " + path);
 		}
 		this.path = path;
+
 	}
 
 	public boolean containsMasterKey() throws IOException {
@@ -50,7 +51,11 @@ public class Directory implements Serializable {
 	}
 
 	public synchronized boolean startServer() {
-		if (server.start(path.toString(), verifyFileIntegrity, cryptor)) {
+		if (webDavServlet != null && webDavServlet.isRunning()) {
+			return false;
+		}
+		webDavServlet = WebDavServer.getInstance().createServlet(path, verifyFileIntegrity, cryptor);
+		if (webDavServlet.start()) {
 			MainApplication.addShutdownTask(shutdownTask);
 			return true;
 		} else {
@@ -58,18 +63,21 @@ public class Directory implements Serializable {
 		}
 	}
 
-	public synchronized void stopServer() {
-		if (server.isRunning()) {
+	public void stopServer() {
+		if (webDavServlet != null && webDavServlet.isRunning()) {
 			MainApplication.removeShutdownTask(shutdownTask);
 			this.unmount();
-			server.stop();
+			webDavServlet.stop();
 			cryptor.swipeSensitiveData();
 		}
 	}
 
 	public boolean mount() {
+		if (webDavServlet == null || !webDavServlet.isRunning()) {
+			return false;
+		}
 		try {
-			webDavMount = WebDavMounter.mount(server.getPort());
+			webDavMount = WebDavMounter.mount(webDavServlet.getServletUri());
 			return true;
 		} catch (CommandFailedException e) {
 			LOG.warn("mount failed", e);
@@ -125,10 +133,6 @@ public class Directory implements Serializable {
 
 	public void setUnlocked(boolean unlocked) {
 		this.unlocked.set(unlocked);
-	}
-
-	public WebDavServer getServer() {
-		return server;
 	}
 
 	/* hashcode/equals */

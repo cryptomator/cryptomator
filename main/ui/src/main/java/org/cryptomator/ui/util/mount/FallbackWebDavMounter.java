@@ -8,6 +8,8 @@
  ******************************************************************************/
 package org.cryptomator.ui.util.mount;
 
+import java.net.URI;
+
 /**
  * A WebDavMounter acting as fallback if no other mounter works.
  *
@@ -21,7 +23,7 @@ final class FallbackWebDavMounter implements WebDavMounterStrategy {
 	}
 
 	@Override
-	public WebDavMount mount(int localPort) {
+	public WebDavMount mount(URI uri) {
 		displayMountInstructions();
 		return new WebDavMount() {
 			@Override

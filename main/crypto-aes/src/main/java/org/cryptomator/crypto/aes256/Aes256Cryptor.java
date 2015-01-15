@@ -13,6 +13,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream.Filter;
 import java.nio.file.Path;
 import java.security.InvalidAlgorithmParameterException;
@@ -40,7 +41,6 @@ import javax.crypto.spec.SecretKeySpec;
 import javax.security.auth.DestroyFailedException;
 import javax.security.auth.Destroyable;
 
-import org.apache.commons.io.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.NullOutputStream;
 import org.apache.commons.lang3.ArrayUtils;
@@ -330,7 +330,7 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 		final ByteBuffer iv = ByteBuffer.allocate(AES_BLOCK_LENGTH);
 		iv.put(partialIv);
 		final Cipher cipher = this.aesCtrCipher(key, iv.array(), Cipher.ENCRYPT_MODE);
-		final byte[] cleartextBytes = cleartext.getBytes(Charsets.UTF_8);
+		final byte[] cleartextBytes = cleartext.getBytes(StandardCharsets.UTF_8);
 		final byte[] encryptedBytes = cipher.doFinal(cleartextBytes);
 		final String ivAndCiphertext = ENCRYPTED_FILENAME_CODEC.encodeAsString(partialIv) + IV_PREFIX_SEPARATOR + ENCRYPTED_FILENAME_CODEC.encodeAsString(encryptedBytes);
 
@@ -387,7 +387,7 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 		final Cipher cipher = this.aesCtrCipher(key, iv.array(), Cipher.DECRYPT_MODE);
 		final byte[] encryptedBytes = ENCRYPTED_FILENAME_CODEC.decode(ciphertext);
 		final byte[] cleartextBytes = cipher.doFinal(encryptedBytes);
-		return new String(cleartextBytes, Charsets.UTF_8);
+		return new String(cleartextBytes, StandardCharsets.UTF_8);
 	}
 
 	private LongFilenameMetadata getMetadata(CryptorIOSupport ioSupport, String metadataFile) throws IOException {

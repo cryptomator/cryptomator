@@ -23,6 +23,7 @@ import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.ui.settings.Settings;
 import org.cryptomator.ui.util.ActiveWindowStyleSupport;
 import org.cryptomator.ui.util.TrayIconUtil;
+import org.cryptomator.webdav.WebDavServer;
 import org.eclipse.jetty.util.ConcurrentHashSet;
 
 public class MainApplication extends Application {
@@ -37,6 +38,7 @@ public class MainApplication extends Application {
 
 	@Override
 	public void start(final Stage primaryStage) throws IOException {
+		WebDavServer.getInstance().start();
 		chooseNativeStylesheet();
 		final ResourceBundle rb = ResourceBundle.getBundle("localization");
 		final FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/main.fxml"), rb);
@@ -67,6 +69,7 @@ public class MainApplication extends Application {
 
 	private void quit() {
 		Platform.runLater(() -> {
+			WebDavServer.getInstance().stop();
 			CLEAN_SHUTDOWN_PERFORMER.run();
 			Settings.save();
 			Platform.exit();

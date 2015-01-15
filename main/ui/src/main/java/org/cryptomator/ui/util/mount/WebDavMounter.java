@@ -9,6 +9,8 @@
  ******************************************************************************/
 package org.cryptomator.ui.util.mount;
 
+import java.net.URI;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,12 +25,12 @@ public final class WebDavMounter {
 	/**
 	 * Tries to mount a given webdav share.
 	 * 
-	 * @param localPort local TCP port of the webdav share
+	 * @param uri URI of the webdav share
 	 * @return a {@link WebDavMount} representing the mounted share
 	 * @throws CommandFailedException if the mount operation fails
 	 */
-	public static WebDavMount mount(int localPort) throws CommandFailedException {
-		return chooseStrategy().mount(localPort);
+	public static WebDavMount mount(URI uri) throws CommandFailedException {
+		return chooseStrategy().mount(uri);
 	}
 
 	private static WebDavMounterStrategy chooseStrategy() {
