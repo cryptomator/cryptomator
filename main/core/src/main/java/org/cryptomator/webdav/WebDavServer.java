@@ -95,7 +95,7 @@ public final class WebDavServer {
 			LOG.info("{} available on http://{}", workDir, uri.getRawSchemeSpecificPart());
 			return new ServletLifeCycleAdapter(servlet, uri);
 		} catch (URISyntaxException e) {
-			throw new IllegalArgumentException("Can't create URI from given workDir", e);
+			throw new IllegalStateException("Invalid hard-coded URI components.", e);
 		}
 	}
 
