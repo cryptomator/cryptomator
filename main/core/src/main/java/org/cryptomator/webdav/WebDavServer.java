@@ -92,7 +92,7 @@ public final class WebDavServer {
 			final ServletHolder servlet = getWebDavServletHolder(workDir.toString(), pathPrefix, checkFileIntegrity, cryptor);
 			servletContext.addServlet(servlet, pathSpec);
 
-			LOG.info("{} available on http://{}", workDir, uri.getRawSchemeSpecificPart());
+			LOG.info("{} available on http:{}", workDir, uri.getRawSchemeSpecificPart());
 			return new ServletLifeCycleAdapter(servlet, uri);
 		} catch (URISyntaxException e) {
 			throw new IllegalStateException("Invalid hard-coded URI components.", e);

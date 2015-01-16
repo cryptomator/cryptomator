@@ -8,6 +8,7 @@
  ******************************************************************************/
 package org.cryptomator.crypto.aes256;
 
+import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -405,30 +406,27 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 
 	@Override
 	public boolean authenticateContent(SeekableByteChannel encryptedFile) throws IOException {
-		// read file size:
-		final Long fileSize = decryptedContentLength(encryptedFile);
-
 		// init mac:
-		final Mac mac = this.hmacSha256(hMacMasterKey);
+		final Mac calculatedMac = this.hmacSha256(hMacMasterKey);
 
 		// read stored mac:
 		encryptedFile.position(16);
-		final ByteBuffer macBuffer = ByteBuffer.allocate(mac.getMacLength());
-		final int numMacBytesRead = encryptedFile.read(macBuffer);
+		final ByteBuffer storedMac = ByteBuffer.allocate(calculatedMac.getMacLength());
+		final int numMacBytesRead = encryptedFile.read(storedMac);
 
 		// check validity of header:
-		if (numMacBytesRead != mac.getMacLength() || fileSize == null) {
+		if (numMacBytesRead != calculatedMac.getMacLength()) {
 			throw new IOException("Failed to read file header.");
 		}
 
 		// read all encrypted data and calculate mac:
 		encryptedFile.position(64);
 		final InputStream in = new SeekableByteChannelInputStream(encryptedFile);
-		final InputStream macIn = new MacInputStream(in, mac);
-		IOUtils.copyLarge(macIn, new NullOutputStream(), 0, fileSize);
+		final InputStream macIn = new MacInputStream(in, calculatedMac);
+		IOUtils.copyLarge(macIn, new NullOutputStream());
 
 		// compare (in constant time):
-		return MessageDigest.isEqual(macBuffer.array(), mac.doFinal());
+		return MessageDigest.isEqual(storedMac.array(), calculatedMac.doFinal());
 	}
 
 	@Override
@@ -540,40 +538,45 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 		final OutputStream out = new SeekableByteChannelOutputStream(encryptedFile);
 		final OutputStream macOut = new MacOutputStream(out, mac);
 		final OutputStream cipheredOut = new CipherOutputStream(macOut, cipher);
-		final Long actualSize = IOUtils.copyLarge(plaintextFile, cipheredOut);
+		final OutputStream blockSizeBufferedOut = new BufferedOutputStream(cipheredOut, AES_BLOCK_LENGTH);
+		final Long plaintextSize = IOUtils.copyLarge(plaintextFile, blockSizeBufferedOut);
 
-		// copy MAC:
+		// ensure total byte count is a multiple of the block size, in CTR mode:
+		final int remainderToFillLastBlock = AES_BLOCK_LENGTH - (int) (plaintextSize % AES_BLOCK_LENGTH);
+		blockSizeBufferedOut.write(new byte[remainderToFillLastBlock]);
+
+		// append a few blocks of fake data:
+		final int numberOfPlaintextBlocks = (int) Math.ceil(plaintextSize / AES_BLOCK_LENGTH);
+		final int upToTenPercentFakeBlocks = (int) Math.ceil(Math.random() * 0.1 * numberOfPlaintextBlocks);
+		final byte[] emptyBytes = new byte[AES_BLOCK_LENGTH];
+		for (int i = 0; i < upToTenPercentFakeBlocks; i += AES_BLOCK_LENGTH) {
+			blockSizeBufferedOut.write(emptyBytes);
+		}
+		blockSizeBufferedOut.flush();
+
+		// write MAC of total ciphertext:
 		macBuffer.position(0);
 		macBuffer.put(mac.doFinal());
+		macBuffer.position(0);
+		encryptedFile.position(16); // right behind the IV
+		encryptedFile.write(macBuffer); // 256 bit MAC
 
-		// append fake content:
-		final int randomContentLength = (int) Math.ceil((Math.random() + 1.0) * actualSize / 20.0);
-		final byte[] emptyBytes = new byte[AES_BLOCK_LENGTH];
-		for (int i = 0; i < randomContentLength; i += AES_BLOCK_LENGTH) {
-			cipheredOut.write(emptyBytes);
-		}
-		cipheredOut.flush();
-
-		// encrypt actualSize
+		// encrypt and write plaintextSize
 		try {
 			final ByteBuffer fileSizeBuffer = ByteBuffer.allocate(Long.BYTES);
-			fileSizeBuffer.putLong(actualSize);
+			fileSizeBuffer.putLong(plaintextSize);
 			final Cipher sizeCipher = aesEcbCipher(primaryMasterKey, Cipher.ENCRYPT_MODE);
 			final byte[] encryptedFileSize = sizeCipher.doFinal(fileSizeBuffer.array());
 			encryptedFileSizeBuffer.position(0);
 			encryptedFileSizeBuffer.put(encryptedFileSize);
+			encryptedFileSizeBuffer.position(0);
+			encryptedFile.position(48); // right behind the IV and MAC
+			encryptedFile.write(encryptedFileSizeBuffer);
 		} catch (IllegalBlockSizeException | BadPaddingException e) {
-			throw new IllegalStateException(e);
+			throw new IllegalStateException("Block size must be valid, as padding is requested. BadPaddingException not possible in encrypt mode.", e);
 		}
 
-		// write file header
-		encryptedFile.position(16); // skip already written 128 bit IV
-		macBuffer.position(0);
-		encryptedFile.write(macBuffer); // 256 bit MAC
-		encryptedFileSizeBuffer.position(0);
-		encryptedFile.write(encryptedFileSizeBuffer); // 128 bit encrypted file size
-
-		return actualSize;
+		return plaintextSize;
 	}
 
 	@Override

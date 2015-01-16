@@ -60,7 +60,8 @@ interface AesCryptographicConfiguration {
 	String AES_KEYWRAP_CIPHER = "AESWrap";
 
 	/**
-	 * Cipher specs for file name and file content encryption. Using CTR-mode for random access.
+	 * Cipher specs for file name and file content encryption. Using CTR-mode for random access.<br/>
+	 * <strong>Important</strong>: As JCE doesn't support a padding, input must be a multiple of the block size.
 	 * 
 	 * @see http://docs.oracle.com/javase/7/docs/technotes/guides/security/StandardNames.html#Cipher
 	 */

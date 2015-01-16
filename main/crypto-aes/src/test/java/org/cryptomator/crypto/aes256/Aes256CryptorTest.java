@@ -14,12 +14,26 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.Security;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
+
 import org.apache.commons.io.IOUtils;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.cryptomator.crypto.CryptorIOSupport;
 import org.cryptomator.crypto.exceptions.DecryptFailedException;
 import org.cryptomator.crypto.exceptions.UnsupportedKeyLengthException;
@@ -82,7 +96,7 @@ public class Aes256CryptorTest {
 		final Aes256Cryptor cryptor = new Aes256Cryptor(TEST_PRNG);
 
 		// encrypt:
-		final ByteBuffer encryptedData = ByteBuffer.allocate(64 + plaintextData.length * 4);
+		final ByteBuffer encryptedData = ByteBuffer.allocate(96);
 		final SeekableByteChannel encryptedOut = new ByteBufferBackedSeekableChannel(encryptedData);
 		cryptor.encryptFile(plaintextIn, encryptedOut);
 		IOUtils.closeQuietly(plaintextIn);
@@ -110,6 +124,26 @@ public class Aes256CryptorTest {
 	}
 
 	@Test
+	public void foo() throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, NoSuchProviderException {
+		Security.addProvider(new BouncyCastleProvider());
+
+		final byte[] iv = new byte[16];
+		final byte[] keyBytes = new byte[16];
+		final SecretKey key = new SecretKeySpec(keyBytes, "AES");
+		final Cipher pkcs5PaddedCipher = Cipher.getInstance("AES/CTR/PKCS5Padding", BouncyCastleProvider.PROVIDER_NAME);
+		pkcs5PaddedCipher.init(Cipher.ENCRYPT_MODE, key, new IvParameterSpec(iv));
+		final Cipher unpaddedCipher = Cipher.getInstance("AES/CTR/NoPadding");
+		unpaddedCipher.init(Cipher.ENCRYPT_MODE, key, new IvParameterSpec(iv));
+
+		// test data:
+		final byte[] plaintextData = "Hello World".getBytes();
+		final byte[] pkcs5PaddedCiphertext = pkcs5PaddedCipher.doFinal(plaintextData);
+		final byte[] unpaddedCiphertext = unpaddedCipher.doFinal(plaintextData);
+
+		Assert.assertFalse(Arrays.equals(pkcs5PaddedCiphertext, unpaddedCiphertext));
+	}
+
+	@Test
 	public void testEncryptionAndDecryption() throws IOException, DecryptFailedException, WrongPasswordException, UnsupportedKeyLengthException {
 		// our test plaintext data:
 		final byte[] plaintextData = "Hello World".getBytes();
@@ -119,7 +153,7 @@ public class Aes256CryptorTest {
 		final Aes256Cryptor cryptor = new Aes256Cryptor(TEST_PRNG);
 
 		// encrypt:
-		final ByteBuffer encryptedData = ByteBuffer.allocate(64 + plaintextData.length * 4);
+		final ByteBuffer encryptedData = ByteBuffer.allocate(96);
 		final SeekableByteChannel encryptedOut = new ByteBufferBackedSeekableChannel(encryptedData);
 		cryptor.encryptFile(plaintextIn, encryptedOut);
 		IOUtils.closeQuietly(plaintextIn);
@@ -158,7 +192,7 @@ public class Aes256CryptorTest {
 		final Aes256Cryptor cryptor = new Aes256Cryptor(TEST_PRNG);
 
 		// encrypt:
-		final ByteBuffer encryptedData = ByteBuffer.allocate(64 + plaintextData.length * 4);
+		final ByteBuffer encryptedData = ByteBuffer.allocate((int) (64 + plaintextData.length * 1.2));
 		final SeekableByteChannel encryptedOut = new ByteBufferBackedSeekableChannel(encryptedData);
 		cryptor.encryptFile(plaintextIn, encryptedOut);
 		IOUtils.closeQuietly(plaintextIn);
