@@ -331,8 +331,11 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 		final ByteBuffer iv = ByteBuffer.allocate(AES_BLOCK_LENGTH);
 		iv.put(partialIv);
 		final Cipher cipher = this.aesCtrCipher(key, iv.array(), Cipher.ENCRYPT_MODE);
+		// add NULL padding to the cleartext to get a multiple of the block size:
 		final byte[] cleartextBytes = cleartext.getBytes(StandardCharsets.UTF_8);
-		final byte[] encryptedBytes = cipher.doFinal(cleartextBytes);
+		final byte[] nullBytePadding = new byte[AES_BLOCK_LENGTH - cleartextBytes.length % AES_BLOCK_LENGTH];
+		final byte[] paddedCleartextBytes = ArrayUtils.addAll(cleartextBytes, nullBytePadding);
+		final byte[] encryptedBytes = cipher.doFinal(paddedCleartextBytes);
 		final String ivAndCiphertext = ENCRYPTED_FILENAME_CODEC.encodeAsString(partialIv) + IV_PREFIX_SEPARATOR + ENCRYPTED_FILENAME_CODEC.encodeAsString(encryptedBytes);
 
 		if (ivAndCiphertext.length() + BASIC_FILE_EXT.length() > ENCRYPTED_FILENAME_LENGTH_LIMIT) {
@@ -387,8 +390,16 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 
 		final Cipher cipher = this.aesCtrCipher(key, iv.array(), Cipher.DECRYPT_MODE);
 		final byte[] encryptedBytes = ENCRYPTED_FILENAME_CODEC.decode(ciphertext);
-		final byte[] cleartextBytes = cipher.doFinal(encryptedBytes);
-		return new String(cleartextBytes, StandardCharsets.UTF_8);
+		final byte[] paddedCleartextBytes = cipher.doFinal(encryptedBytes);
+
+		// remove NULL padding (not valid in file names anyway)
+		final int beginOfPadding = ArrayUtils.indexOf(paddedCleartextBytes, (byte) 0x00);
+		if (beginOfPadding == -1) {
+			return new String(paddedCleartextBytes, StandardCharsets.UTF_8);
+		} else {
+			final byte[] cleartextBytes = Arrays.copyOf(paddedCleartextBytes, beginOfPadding);
+			return new String(cleartextBytes, StandardCharsets.UTF_8);
+		}
 	}
 
 	private LongFilenameMetadata getMetadata(CryptorIOSupport ioSupport, String metadataFile) throws IOException {

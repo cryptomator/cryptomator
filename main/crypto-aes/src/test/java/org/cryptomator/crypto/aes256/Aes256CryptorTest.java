@@ -235,6 +235,14 @@ public class Aes256CryptorTest {
 		Assert.assertEquals(encryptedPath2a, encryptedPath2b);
 		final String decryptedPath2 = cryptor.decryptPath(encryptedPath2a, '/', '/', ioSupportMock);
 		Assert.assertEquals(originalPath2, decryptedPath2);
+
+		// block size length path components
+		final String originalPath3 = "aaaabbbbccccdddd";
+		final String encryptedPath3a = cryptor.encryptPath(originalPath3, '/', '/', ioSupportMock);
+		final String encryptedPath3b = cryptor.encryptPath(originalPath3, '/', '/', ioSupportMock);
+		Assert.assertEquals(encryptedPath3a, encryptedPath3b);
+		final String decryptedPath3 = cryptor.decryptPath(encryptedPath3a, '/', '/', ioSupportMock);
+		Assert.assertEquals(originalPath3, decryptedPath3);
 	}
 
 	private static class CryptoIOSupportMock implements CryptorIOSupport {
