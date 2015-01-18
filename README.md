@@ -9,7 +9,7 @@ If you want to take a look at the current beta version, go ahead and get your co
 - Totally transparent: Just work on the encrypted volume, as if it was an USB drive
 - Works with Dropbox, OneDrive (Skydrive), Google Drive and any other cloud storage, that syncs with a local directory
 - In fact it works with any directory. You can use it to encrypt as many folders as you like
-- AES encryption with up to 256 bit key length
+- AES encryption with 256 bit key length
 - Client-side. No accounts, no data shared with any online service
 - Filenames get encrypted too
 - No need to provide credentials for any 3rd party service
@@ -17,16 +17,16 @@ If you want to take a look at the current beta version, go ahead and get your co
 - Use as many encrypted folders in your dropbox as you want. Each having individual passwords
 
 ### Privacy
-- Default key length is 256 bit (falls back to 128 bit, if JCE isn't installed)
-- Scrypt key generation
+- 256 bit keys (unlimited strength policy bundled with native binaries - 128 bit elsewhere)
+- Scrypt key derivation
 - Cryptographically secure random numbers for salts, IVs and the masterkey of course
 - Sensitive data is swiped from the heap asap
 - Lightweight: Complexity kills security
 
 ### Consistency
+- HMAC over file contents to recognize changed ciphertext before decryption
 - I/O operations are transactional and atomic, if the file systems supports it
-- ~~Metadata is stored per-folder, so it's not a SPOF~~
-- *NEW:* No Metadata at all. Encrypted files can be decrypted even on completely shuffled file systems (if their contents are undamaged).
+- Each file contains all information needed for decryption (except for the key of course). No common metadata means no SPOF
 
 ## Building
 
@@ -47,6 +47,6 @@ mvn clean install
 
 ## License
 
-Distributed under the MIT X Consortium license license. See the LICENSE file for more info.
+Distributed under the MIT X Consortium license. See the LICENSE file for more info.
 
 [![Build Status](https://travis-ci.org/totalvoidness/cryptomator.svg?branch=master)](https://travis-ci.org/totalvoidness/cryptomator)
