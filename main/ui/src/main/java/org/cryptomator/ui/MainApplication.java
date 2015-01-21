@@ -9,8 +9,13 @@
 package org.cryptomator.ui;
 
 import java.io.IOException;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -19,25 +24,39 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.crypto.aes256.Aes256Cryptor;
 import org.cryptomator.ui.settings.Settings;
 import org.cryptomator.ui.util.ActiveWindowStyleSupport;
+import org.cryptomator.ui.util.SingleInstanceManager;
+import org.cryptomator.ui.util.SingleInstanceManager.LocalInstance;
 import org.cryptomator.ui.util.TrayIconUtil;
 import org.cryptomator.webdav.WebDavServer;
 import org.eclipse.jetty.util.ConcurrentHashSet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MainApplication extends Application {
 
 	private static final Set<Runnable> SHUTDOWN_TASKS = new ConcurrentHashSet<>();
 	private static final CleanShutdownPerformer CLEAN_SHUTDOWN_PERFORMER = new CleanShutdownPerformer();
 
-	public static void main(String[] args) {
-		Application.launch(args);
-		Runtime.getRuntime().addShutdownHook(CLEAN_SHUTDOWN_PERFORMER);
-	}
+	public static final String APPLICATION_KEY = "CryptomatorGUI";
+
+	private static final Logger LOG = LoggerFactory.getLogger(MainApplication.class);
+
+	private ExecutorService executorService;
 
 	@Override
 	public void start(final Stage primaryStage) throws IOException {
+		Runtime.getRuntime().addShutdownHook(MainApplication.CLEAN_SHUTDOWN_PERFORMER);
+
+		executorService = Executors.newCachedThreadPool();
+		addShutdownTask(() -> {
+			executorService.shutdown();
+		});
+
 		WebDavServer.getInstance().start();
 		chooseNativeStylesheet();
 		final ResourceBundle rb = ResourceBundle.getBundle("localization");
@@ -54,6 +73,47 @@ public class MainApplication extends Application {
 		ActiveWindowStyleSupport.startObservingFocus(primaryStage);
 		TrayIconUtil.init(primaryStage, rb, () -> {
 			quit();
+		});
+
+		for (String arg : getParameters().getUnnamed()) {
+			handleCommandLineArg(ctrl, arg);
+		}
+
+		if (org.controlsfx.tools.Platform.getCurrent().equals(org.controlsfx.tools.Platform.OSX)) {
+			Main.OPEN_FILE_HANDLER.complete(file -> handleCommandLineArg(ctrl, file.getAbsolutePath()));
+		}
+
+		LocalInstance cryptomatorGuiInstance = SingleInstanceManager.startLocalInstance(APPLICATION_KEY, executorService);
+		addShutdownTask(() -> {
+			cryptomatorGuiInstance.close();
+		});
+
+		cryptomatorGuiInstance.registerListener(arg -> handleCommandLineArg(ctrl, arg));
+	}
+
+	void handleCommandLineArg(final MainController ctrl, String arg) {
+		Path file = FileSystems.getDefault().getPath(arg);
+		if (!Files.exists(file)) {
+			try {
+				if (!Files.isDirectory(Files.createDirectories(file))) {
+					return;
+				}
+			} catch (IOException e) {
+				return;
+			}
+			// directory created.
+		} else if (Files.isRegularFile(file)) {
+			if (StringUtils.endsWithIgnoreCase(file.getFileName().toString(), Aes256Cryptor.MASTERKEY_FILE_EXT)) {
+				file = file.getParent();
+			} else {
+				// is a file, but not a masterkey file
+				return;
+			}
+		}
+		Path f = file;
+		Platform.runLater(() -> {
+			ctrl.addDirectory(f);
+			ctrl.toFront();
 		});
 	}
 
@@ -95,7 +155,11 @@ public class MainApplication extends Application {
 		@Override
 		public void run() {
 			SHUTDOWN_TASKS.forEach(r -> {
-				r.run();
+				try {
+					r.run();
+				} catch (RuntimeException e) {
+					LOG.error("exception while shutting down", e);
+				}
 			});
 			SHUTDOWN_TASKS.clear();
 		}
