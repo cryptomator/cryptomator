@@ -75,6 +75,17 @@ public class MainController implements Initializable, InitializationListener, Un
 	private void didClickAddDirectory(ActionEvent event) {
 		final DirectoryChooser dirChooser = new DirectoryChooser();
 		final File file = dirChooser.showDialog(stage);
+		addDirectory(file);
+	}
+
+	/**
+	 * adds the given directory or selects it if it is already in the list of
+	 * directories.
+	 * 
+	 * @param file
+	 *            non-null, writable, existing directory
+	 */
+	void addDirectory(final File file) {
 		if (file != null && file.canWrite()) {
 			final Directory dir = new Directory(file.toPath());
 			if (!directoryList.getItems().contains(dir)) {
@@ -197,6 +208,15 @@ public class MainController implements Initializable, InitializationListener, Un
 
 	public void setStage(Stage stage) {
 		this.stage = stage;
+	}
+
+	/**
+	 * Attempts to make the application window visible.
+	 */
+	public void toFront() {
+		stage.setIconified(false);
+		stage.show();
+		stage.toFront();
 	}
 
 }

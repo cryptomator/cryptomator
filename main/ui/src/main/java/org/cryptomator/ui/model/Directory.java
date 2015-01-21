@@ -116,7 +116,11 @@ public class Directory implements Serializable {
 	 * @return Directory name without preceeding path components
 	 */
 	public String getName() {
-		return path.getFileName().toString();
+		String name = path.getFileName().toString();
+		if (name.toLowerCase().endsWith(Aes256Cryptor.FOLDER_EXTENSION.toLowerCase())) {
+			name = name.substring(0, name.length() - Aes256Cryptor.FOLDER_EXTENSION.length());
+		}
+		return name;
 	}
 
 	public Cryptor getCryptor() {
