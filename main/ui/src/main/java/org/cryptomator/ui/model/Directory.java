@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
+import org.apache.commons.lang3.StringUtils;
 import org.cryptomator.crypto.Cryptor;
 import org.cryptomator.crypto.SamplingDecorator;
 import org.cryptomator.crypto.aes256.Aes256Cryptor;
@@ -117,7 +118,7 @@ public class Directory implements Serializable {
 	 */
 	public String getName() {
 		String name = path.getFileName().toString();
-		if (name.toLowerCase().endsWith(Aes256Cryptor.FOLDER_EXTENSION.toLowerCase())) {
+		if (StringUtils.endsWithIgnoreCase(name, Aes256Cryptor.FOLDER_EXTENSION)) {
 			name = name.substring(0, name.length() - Aes256Cryptor.FOLDER_EXTENSION.length());
 		}
 		return name;

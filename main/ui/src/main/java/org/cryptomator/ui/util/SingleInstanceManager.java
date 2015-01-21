@@ -29,6 +29,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.prefs.Preferences;
 
+import org.apache.commons.io.IOUtils;
 import org.cryptomator.ui.Main;
 import org.cryptomator.ui.util.ListenerRegistry.ListenerRegistration;
 import org.slf4j.Logger;
@@ -104,7 +105,7 @@ public class SingleInstanceManager {
 	/**
 	 * Represents a socket making this the main instance of the application.
 	 */
-	public static abstract class LocalInstance implements Closeable {
+	public static class LocalInstance implements Closeable {
 		private class ChannelState {
 			ByteBuffer write = ByteBuffer.wrap(applicationKey.getBytes());
 			ByteBuffer readLength = ByteBuffer.allocate(2);
@@ -113,10 +114,15 @@ public class SingleInstanceManager {
 
 		final ListenerRegistry<MessageListener, String> registry = new ListenerRegistry<>(MessageListener::handleMessage);
 		final String applicationKey;
+		final ServerSocketChannel channel;
+		final Selector selector;
+		int port = 0;
 
-		public LocalInstance(String applicationKey) {
+		public LocalInstance(String applicationKey, ServerSocketChannel channel, Selector selector) {
 			Objects.requireNonNull(applicationKey);
 			this.applicationKey = applicationKey;
+			this.channel = channel;
+			this.selector = selector;
 		}
 
 		/**
@@ -130,7 +136,16 @@ public class SingleInstanceManager {
 			return registry.registerListener(listener);
 		}
 
-		void handle(SelectionKey key) throws IOException {
+		void handleSelection(SelectionKey key) throws IOException {
+			if (key.isAcceptable()) {
+				final SocketChannel accepted = channel.accept();
+				if (accepted != null) {
+					LOG.info("accepted incoming connection");
+					accepted.configureBlocking(false);
+					accepted.register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE);
+				}
+			}
+
 			if (key.attachment() == null) {
 				key.attach(new ChannelState());
 			}
@@ -174,7 +189,39 @@ public class SingleInstanceManager {
 			}
 		}
 
-		public abstract void close();
+		public void close() {
+			IOUtils.closeQuietly(selector);
+			IOUtils.closeQuietly(channel);
+			if (getSavedPort(applicationKey).orElse(-1).equals(port)) {
+				Preferences.userNodeForPackage(Main.class).remove(applicationKey);
+			}
+		}
+
+		void selectionLoop() {
+			try {
+				final Set<SelectionKey> keysToRemove = new HashSet<>();
+				while (selector.select() > 0) {
+					final Set<SelectionKey> keys = selector.selectedKeys();
+					for (SelectionKey key : keys) {
+						if (Thread.interrupted()) {
+							return;
+						}
+						try {
+							handleSelection(key);
+						} catch (IOException | IllegalStateException e) {
+							LOG.error("exception in selector", e);
+						} finally {
+							keysToRemove.add(key);
+						}
+					}
+					keys.removeAll(keysToRemove);
+				}
+			} catch (ClosedSelectorException e) {
+				return;
+			} catch (Exception e) {
+				LOG.error("error while selecting", e);
+			}
+		}
 	}
 
 	/**
@@ -230,12 +277,8 @@ public class SingleInstanceManager {
 		} catch (Exception e) {
 			return Optional.empty();
 		} finally {
-			try {
-				if (channel != null && close && channel.isOpen()) {
-					channel.close();
-				}
-			} catch (Exception e) {
-
+			if (close) {
+				IOUtils.closeQuietly(channel);
 			}
 		}
 	}
@@ -263,7 +306,6 @@ public class SingleInstanceManager {
 	 * @return
 	 * @throws IOException
 	 */
-	@SuppressWarnings("resource")
 	public static LocalInstance startLocalInstance(String applicationKey, ExecutorService exec) throws IOException {
 		final ServerSocketChannel channel = ServerSocketChannel.open();
 		channel.configureBlocking(false);
@@ -276,59 +318,15 @@ public class SingleInstanceManager {
 		Selector selector = Selector.open();
 		channel.register(selector, SelectionKey.OP_ACCEPT);
 
-		LocalInstance instance = new LocalInstance(applicationKey) {
-			@Override
-			public void close() {
-				try {
-					selector.close();
-				} catch (IOException e) {
-					LOG.error("error closing socket", e);
-				}
-				try {
-					channel.close();
-				} catch (IOException e) {
-					LOG.error("error closing selector", e);
-				}
-				if (getSavedPort(applicationKey).orElse(-1).equals(port)) {
-					Preferences.userNodeForPackage(Main.class).remove(applicationKey);
-				}
-			}
-		};
+		LocalInstance instance = new LocalInstance(applicationKey, channel, selector);
 
 		exec.submit(() -> {
 			try {
-				final Set<SelectionKey> keysToRemove = new HashSet<>();
-				while (selector.select() > 0) {
-					final Set<SelectionKey> keys = selector.selectedKeys();
-					for (SelectionKey key : keys) {
-						if (Thread.interrupted()) {
-							return;
-						}
-						try {
-							// LOG.debug("selected {} {}", key.channel(),
-							// key.readyOps());
-							if (key.isAcceptable()) {
-								final SocketChannel accepted = channel.accept();
-								if (accepted != null) {
-									LOG.info("accepted incoming connection");
-									accepted.configureBlocking(false);
-									accepted.register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE);
-								}
-							}
-							instance.handle(key);
-						} catch (IOException | IllegalStateException e) {
-							LOG.error("exception in selector", e);
-						} finally {
-							keysToRemove.add(key);
-						}
-					}
-					keys.removeAll(keysToRemove);
-				}
-			} catch (ClosedSelectorException e) {
-				return;
-			} catch (Throwable e) {
-				LOG.error("error while selecting", e);
+				instance.port = ((InetSocketAddress) channel.getLocalAddress()).getPort();
+			} catch (IOException e) {
+
 			}
+			instance.selectionLoop();
 		});
 
 		return instance;

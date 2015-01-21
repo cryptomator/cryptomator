@@ -11,6 +11,8 @@ package org.cryptomator.ui;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
@@ -75,7 +77,7 @@ public class MainController implements Initializable, InitializationListener, Un
 	private void didClickAddDirectory(ActionEvent event) {
 		final DirectoryChooser dirChooser = new DirectoryChooser();
 		final File file = dirChooser.showDialog(stage);
-		addDirectory(file);
+		addDirectory(file.toPath());
 	}
 
 	/**
@@ -85,9 +87,9 @@ public class MainController implements Initializable, InitializationListener, Un
 	 * @param file
 	 *            non-null, writable, existing directory
 	 */
-	void addDirectory(final File file) {
-		if (file != null && file.canWrite()) {
-			final Directory dir = new Directory(file.toPath());
+	void addDirectory(final Path file) {
+		if (file != null && Files.isWritable(file)) {
+			final Directory dir = new Directory(file);
 			if (!directoryList.getItems().contains(dir)) {
 				directoryList.getItems().add(dir);
 			}

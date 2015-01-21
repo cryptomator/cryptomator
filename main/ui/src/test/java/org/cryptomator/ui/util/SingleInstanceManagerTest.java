@@ -1,3 +1,11 @@
+/*******************************************************************************
+ * Copyright (c) 2014 cryptomator.org
+ * This file is licensed under the terms of the MIT license.
+ * See the LICENSE.txt file for more info.
+ * 
+ * Contributors:
+ *     Tillmann Gaida - initial implementation
+ ******************************************************************************/
 package org.cryptomator.ui.util;
 
 import static org.junit.Assert.*;
@@ -10,7 +18,6 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -27,7 +34,7 @@ import org.cryptomator.ui.util.SingleInstanceManager.RemoteInstance;
 import org.junit.Test;
 
 public class SingleInstanceManagerTest {
-	@Test(timeout = 1000)
+	@Test(timeout = 10000)
 	public void testTryFillTimeout() throws Exception {
 		try (final ServerSocket socket = new ServerSocket(0)) {
 			// we need to asynchronously accept the connection
@@ -44,9 +51,9 @@ public class SingleInstanceManagerTest {
 			try (SocketChannel channel = SocketChannel.open()) {
 				channel.configureBlocking(false);
 				channel.connect(new InetSocketAddress(InetAddress.getLoopbackAddress(), socket.getLocalPort()));
-				TimeoutTask.attempt(t -> channel.finishConnect(), 100, 1);
+				TimeoutTask.attempt(t -> channel.finishConnect(), 1000, 1);
 				final ByteBuffer buffer = ByteBuffer.allocate(1);
-				SingleInstanceManager.tryFill(channel, buffer, 100);
+				SingleInstanceManager.tryFill(channel, buffer, 1000);
 				assertTrue(buffer.hasRemaining());
 			}
 
@@ -54,7 +61,7 @@ public class SingleInstanceManagerTest {
 		}
 	}
 
-	@Test(timeout = 1000)
+	@Test(timeout = 10000)
 	public void testTryFill() throws Exception {
 		try (final ServerSocket socket = new ServerSocket(0)) {
 			// we need to asynchronously accept the connection
@@ -71,9 +78,9 @@ public class SingleInstanceManagerTest {
 			try (SocketChannel channel = SocketChannel.open()) {
 				channel.configureBlocking(false);
 				channel.connect(new InetSocketAddress(InetAddress.getLoopbackAddress(), socket.getLocalPort()));
-				TimeoutTask.attempt(t -> channel.finishConnect(), 100, 1);
+				TimeoutTask.attempt(t -> channel.finishConnect(), 1000, 1);
 				final ByteBuffer buffer = ByteBuffer.allocate(1);
-				SingleInstanceManager.tryFill(channel, buffer, 100);
+				SingleInstanceManager.tryFill(channel, buffer, 1000);
 				assertFalse(buffer.hasRemaining());
 			}
 
@@ -104,7 +111,7 @@ public class SingleInstanceManagerTest {
 			assertTrue(r.isPresent());
 
 			String message = "Is this thing on?";
-			assertTrue(r.get().sendMessage(message, 100));
+			assertTrue(r.get().sendMessage(message, 1000));
 			System.out.println("wrote message");
 
 			latch.await(10, TimeUnit.SECONDS);
@@ -153,7 +160,7 @@ public class SingleInstanceManagerTest {
 										if (!sentMessages.add(message)) {
 											continue;
 										}
-										r.get().sendMessage(message, 100);
+										r.get().sendMessage(message, 1000);
 										break;
 									}
 								} catch (Exception e) {

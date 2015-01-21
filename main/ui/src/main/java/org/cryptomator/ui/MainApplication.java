@@ -8,8 +8,10 @@
  ******************************************************************************/
 package org.cryptomator.ui;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -22,6 +24,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.crypto.aes256.Aes256Cryptor;
 import org.cryptomator.ui.settings.Settings;
@@ -43,7 +46,7 @@ public class MainApplication extends Application {
 
 	private static final Logger LOG = LoggerFactory.getLogger(MainApplication.class);
 
-	ExecutorService executorService;
+	private ExecutorService executorService;
 
 	@Override
 	public void start(final Stage primaryStage) throws IOException {
@@ -77,7 +80,7 @@ public class MainApplication extends Application {
 		}
 
 		if (org.controlsfx.tools.Platform.getCurrent().equals(org.controlsfx.tools.Platform.OSX)) {
-			Main.openFileHandler.complete(file -> handleCommandLineArg(ctrl, file.getAbsolutePath()));
+			Main.OPEN_FILE_HANDLER.complete(file -> handleCommandLineArg(ctrl, file.getAbsolutePath()));
 		}
 
 		LocalInstance cryptomatorGuiInstance = SingleInstanceManager.startLocalInstance(APPLICATION_KEY, executorService);
@@ -89,21 +92,25 @@ public class MainApplication extends Application {
 	}
 
 	void handleCommandLineArg(final MainController ctrl, String arg) {
-		File file = new File(arg);
-		if (!file.exists()) {
-			if (!file.mkdirs()) {
+		Path file = FileSystems.getDefault().getPath(arg);
+		if (!Files.exists(file)) {
+			try {
+				if (!Files.isDirectory(Files.createDirectories(file))) {
+					return;
+				}
+			} catch (IOException e) {
 				return;
 			}
 			// directory created.
-		} else if (file.isFile()) {
-			if (file.getName().toLowerCase().endsWith(Aes256Cryptor.MASTERKEY_FILE_EXT.toLowerCase())) {
-				file = file.getParentFile();
+		} else if (Files.isRegularFile(file)) {
+			if (StringUtils.endsWithIgnoreCase(file.getFileName().toString(), Aes256Cryptor.MASTERKEY_FILE_EXT)) {
+				file = file.getParent();
 			} else {
 				// is a file, but not a masterkey file
 				return;
 			}
 		}
-		File f = file;
+		Path f = file;
 		Platform.runLater(() -> {
 			ctrl.addDirectory(f);
 			ctrl.toFront();
@@ -150,7 +157,7 @@ public class MainApplication extends Application {
 			SHUTDOWN_TASKS.forEach(r -> {
 				try {
 					r.run();
-				} catch (Throwable e) {
+				} catch (RuntimeException e) {
 					LOG.error("exception while shutting down", e);
 				}
 			});

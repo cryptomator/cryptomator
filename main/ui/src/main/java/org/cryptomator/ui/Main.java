@@ -1,10 +1,10 @@
 /*******************************************************************************
- * Copyright (c) 2014 Sebastian Stenzel
+ * Copyright (c) 2014 cryptomator.org
  * This file is licensed under the terms of the MIT license.
  * See the LICENSE.txt file for more info.
  * 
  * Contributors:
- *     Sebastian Stenzel - initial API and implementation
+ *     Tillmann Gaida - initial implementation
  ******************************************************************************/
 package org.cryptomator.ui;
 
@@ -15,7 +15,7 @@ import java.util.function.Consumer;
 
 import javafx.application.Application;
 
-import org.controlsfx.tools.Platform;
+import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.ui.util.SingleInstanceManager;
 import org.cryptomator.ui.util.SingleInstanceManager.RemoteInstance;
 import org.slf4j.Logger;
@@ -26,10 +26,10 @@ import com.github.axet.desktop.os.mac.AppleHandlers;
 public class Main {
 	public static final Logger LOG = LoggerFactory.getLogger(MainApplication.class);
 
-	public static final CompletableFuture<Consumer<File>> openFileHandler = new CompletableFuture<>();
+	public static final CompletableFuture<Consumer<File>> OPEN_FILE_HANDLER = new CompletableFuture<>();
 
 	public static void main(String[] args) {
-		if (Platform.getCurrent().equals(org.controlsfx.tools.Platform.OSX)) {
+		if (SystemUtils.IS_OS_MAC_OSX) {
 			/*
 			 * On OSX we're in an awkward position. We need to register a
 			 * handler in the main thread of this application. However, we can't
@@ -38,15 +38,15 @@ public class Main {
 			 * the file in the application.
 			 */
 			try {
-				AppleHandlers.getAppleHandlers().addOpenFileListener(list -> {
+				AppleHandlers.getAppleHandlers().addOpenFileListener(file -> {
 					try {
-						openFileHandler.get().accept(list);
+						OPEN_FILE_HANDLER.get().accept(file);
 					} catch (Exception e) {
 						LOG.error("exception handling file open event", e);
 						throw new RuntimeException(e);
 					}
 				});
-			} catch (Throwable e) {
+			} catch (RuntimeException e) {
 				// Since we're trying to call OS-specific code, we'll just have
 				// to hope for the best.
 				LOG.error("exception adding OSX file open handler", e);
