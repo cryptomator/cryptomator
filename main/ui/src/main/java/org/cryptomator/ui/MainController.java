@@ -77,15 +77,15 @@ public class MainController implements Initializable, InitializationListener, Un
 	private void didClickAddDirectory(ActionEvent event) {
 		final DirectoryChooser dirChooser = new DirectoryChooser();
 		final File file = dirChooser.showDialog(stage);
-		addDirectory(file.toPath());
+		if (file != null) {
+			addDirectory(file.toPath());
+		}
 	}
 
 	/**
-	 * adds the given directory or selects it if it is already in the list of
-	 * directories.
+	 * adds the given directory or selects it if it is already in the list of directories.
 	 * 
-	 * @param file
-	 *            non-null, writable, existing directory
+	 * @param file non-null, writable, existing directory
 	 */
 	void addDirectory(final Path file) {
 		if (file != null && Files.isWritable(file)) {
