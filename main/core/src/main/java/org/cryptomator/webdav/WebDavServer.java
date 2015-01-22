@@ -20,6 +20,7 @@ import org.cryptomator.webdav.jackrabbit.WebDavServlet;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.component.LifeCycle;
@@ -39,7 +40,7 @@ public final class WebDavServer {
 	private static final WebDavServer INSTANCE = new WebDavServer();
 	private final Server server;
 	private final ServerConnector localConnector;
-	private final ServletContextHandler servletContext;
+	private final ContextHandlerCollection servletCollection;
 
 	public static WebDavServer getInstance() {
 		return INSTANCE;
@@ -51,10 +52,9 @@ public final class WebDavServer {
 		server = new Server(tp);
 		localConnector = new ServerConnector(server);
 		localConnector.setHost(LOCALHOST);
-		servletContext = new ServletContextHandler(ServletContextHandler.SESSIONS);
-		servletContext.setContextPath("/");
+		servletCollection = new ContextHandlerCollection();
 		server.setConnectors(new Connector[] {localConnector});
-		server.setHandler(servletContext);
+		server.setHandler(servletCollection);
 	}
 
 	public synchronized void start() {
@@ -87,22 +87,22 @@ public final class WebDavServer {
 		try {
 			final URI uri = new URI(null, null, localConnector.getHost(), localConnector.getLocalPort(), "/" + UUID.randomUUID().toString(), null, null);
 
-			final String pathPrefix = uri.getRawPath() + "/";
-			final String pathSpec = pathPrefix + "*";
-			final ServletHolder servlet = getWebDavServletHolder(workDir.toString(), pathPrefix, checkFileIntegrity, cryptor);
-			servletContext.addServlet(servlet, pathSpec);
+			final ServletContextHandler servletContext = new ServletContextHandler(servletCollection, uri.getRawPath(), ServletContextHandler.SESSIONS);
+			final ServletHolder servlet = getWebDavServletHolder(workDir.toString(), checkFileIntegrity, cryptor);
+			servletContext.addServlet(servlet, "/*");
 
-			LOG.info("{} available on http:{}", workDir, uri.getRawSchemeSpecificPart());
-			return new ServletLifeCycleAdapter(servlet, uri);
+			servletCollection.mapContexts();
+
+			LOG.debug("{} available on http:{}", workDir, uri.getRawSchemeSpecificPart());
+			return new ServletLifeCycleAdapter(servletContext, uri);
 		} catch (URISyntaxException e) {
 			throw new IllegalStateException("Invalid hard-coded URI components.", e);
 		}
 	}
 
-	private ServletHolder getWebDavServletHolder(final String workDir, final String contextPath, final boolean checkFileIntegrity, final Cryptor cryptor) {
+	private ServletHolder getWebDavServletHolder(final String workDir, final boolean checkFileIntegrity, final Cryptor cryptor) {
 		final ServletHolder result = new ServletHolder("Cryptomator-WebDAV-Servlet", new WebDavServlet(cryptor));
 		result.setInitParameter(WebDavServlet.CFG_FS_ROOT, workDir);
-		result.setInitParameter(WebDavServlet.CFG_HTTP_ROOT, contextPath);
 		result.setInitParameter(WebDavServlet.CFG_CHECK_FILE_INTEGRITY, Boolean.toString(checkFileIntegrity));
 		return result;
 	}

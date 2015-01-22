@@ -15,31 +15,59 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 
 import org.apache.commons.collections4.BidiMap;
-import org.apache.jackrabbit.webdav.AbstractLocatorFactory;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.jackrabbit.webdav.DavLocatorFactory;
 import org.apache.jackrabbit.webdav.DavResourceLocator;
+import org.apache.jackrabbit.webdav.util.EncodeUtil;
 import org.cryptomator.crypto.Cryptor;
 import org.cryptomator.crypto.CryptorIOSupport;
 import org.cryptomator.crypto.SensitiveDataSwipeListener;
 
-class DavLocatorFactoryImpl extends AbstractLocatorFactory implements SensitiveDataSwipeListener, CryptorIOSupport {
+class DavLocatorFactoryImpl implements DavLocatorFactory, SensitiveDataSwipeListener, CryptorIOSupport {
 
 	private static final int MAX_CACHED_PATHS = 10000;
 	private final Path fsRoot;
 	private final Cryptor cryptor;
 	private final BidiMap<String, String> pathCache = new BidiLRUMap<>(MAX_CACHED_PATHS); // <decryptedPath, encryptedPath>
 
-	DavLocatorFactoryImpl(String fsRoot, String httpRoot, Cryptor cryptor) {
-		super(httpRoot);
+	DavLocatorFactoryImpl(String fsRoot, Cryptor cryptor) {
 		this.fsRoot = FileSystems.getDefault().getPath(fsRoot);
 		this.cryptor = cryptor;
 		cryptor.addSensitiveDataSwipeListener(this);
 	}
 
+	/* DavLocatorFactory */
+
+	@Override
+	public DavResourceLocator createResourceLocator(String prefix, String href) {
+		final String fullPrefix = prefix.endsWith("/") ? prefix : prefix + "/";
+		final String relativeHref = StringUtils.removeStart(href, fullPrefix);
+
+		final String resourcePath = EncodeUtil.unescape(StringUtils.removeStart(relativeHref, "/"));
+		return new DavResourceLocatorImpl(fullPrefix, resourcePath);
+	}
+
+	@Override
+	public DavResourceLocator createResourceLocator(String prefix, String workspacePath, String path, boolean isResourcePath) {
+		final String fullPrefix = prefix.endsWith("/") ? prefix : prefix + "/";
+
+		final String resourcePath = (isResourcePath) ? path : getResourcePath(path);
+		return new DavResourceLocatorImpl(fullPrefix, resourcePath);
+	}
+
+	@Override
+	public DavResourceLocator createResourceLocator(String prefix, String workspacePath, String resourcePath) {
+		return createResourceLocator(prefix, workspacePath, resourcePath, true);
+	}
+
+	/* Encryption/Decryption */
+
 	/**
 	 * @return Encrypted absolute paths on the file system.
 	 */
-	@Override
-	protected String getRepositoryPath(String resourcePath, String wspPath) {
+	private String getRepositoryPath(String resourcePath) {
 		String encryptedPath = pathCache.get(resourcePath);
 		if (encryptedPath == null) {
 			encryptedPath = encryptRepositoryPath(resourcePath);
@@ -59,8 +87,7 @@ class DavLocatorFactoryImpl extends AbstractLocatorFactory implements SensitiveD
 	/**
 	 * @return Decrypted path for use in URIs.
 	 */
-	@Override
-	protected String getResourcePath(String repositoryPath, String wspPath) {
+	private String getResourcePath(String repositoryPath) {
 		String decryptedPath = pathCache.getKey(repositoryPath);
 		if (decryptedPath == null) {
 			decryptedPath = decryptResourcePath(repositoryPath);
@@ -80,24 +107,7 @@ class DavLocatorFactoryImpl extends AbstractLocatorFactory implements SensitiveD
 		}
 	}
 
-	@Override
-	public DavResourceLocator createResourceLocator(String prefix, String workspacePath, String path, boolean isResourcePath) {
-		// we don't support workspaces
-		return super.createResourceLocator(prefix, "", path, isResourcePath);
-	}
-
-	@Override
-	public DavResourceLocator createResourceLocator(String prefix, String workspacePath, String resourcePath) {
-		// we don't support workspaces
-		return super.createResourceLocator(prefix, "", resourcePath);
-	}
-
-	@Override
-	public void swipeSensitiveData() {
-		pathCache.clear();
-	}
-
-	/* Cryptor I/O Support */
+	/* CryptorIOSupport */
 
 	@Override
 	public void writePathSpecificMetadata(String encryptedPath, byte[] encryptedMetadata) throws IOException {
@@ -113,6 +123,105 @@ class DavLocatorFactoryImpl extends AbstractLocatorFactory implements SensitiveD
 		} else {
 			return Files.readAllBytes(metaDataFile);
 		}
+	}
+
+	/* SensitiveDataSwipeListener */
+
+	@Override
+	public void swipeSensitiveData() {
+		pathCache.clear();
+	}
+
+	/* Locator */
+
+	private class DavResourceLocatorImpl implements DavResourceLocator {
+
+		private final String prefix;
+		private final String resourcePath;
+
+		private DavResourceLocatorImpl(String prefix, String resourcePath) {
+			this.prefix = prefix;
+			this.resourcePath = resourcePath;
+		}
+
+		@Override
+		public String getPrefix() {
+			return prefix;
+		}
+
+		@Override
+		public String getResourcePath() {
+			return resourcePath;
+		}
+
+		@Override
+		public String getWorkspacePath() {
+			return isRootLocation() ? null : "";
+		}
+
+		@Override
+		public String getWorkspaceName() {
+			return getPrefix();
+		}
+
+		@Override
+		public boolean isSameWorkspace(DavResourceLocator locator) {
+			return (locator == null) ? false : isSameWorkspace(locator.getWorkspaceName());
+		}
+
+		@Override
+		public boolean isSameWorkspace(String workspaceName) {
+			return getWorkspaceName().equals(workspaceName);
+		}
+
+		@Override
+		public String getHref(boolean isCollection) {
+			final String href = getPrefix().concat(getResourcePath());
+			if (isCollection && !href.endsWith("/")) {
+				return href.concat("/");
+			} else if (!isCollection && href.endsWith("/")) {
+				return href.substring(0, href.length() - 1);
+			} else {
+				return href;
+			}
+		}
+
+		@Override
+		public boolean isRootLocation() {
+			return getResourcePath() == null;
+		}
+
+		@Override
+		public DavLocatorFactory getFactory() {
+			return DavLocatorFactoryImpl.this;
+		}
+
+		@Override
+		public String getRepositoryPath() {
+			return DavLocatorFactoryImpl.this.getRepositoryPath(getResourcePath());
+		}
+
+		@Override
+		public int hashCode() {
+			final HashCodeBuilder builder = new HashCodeBuilder();
+			builder.append(prefix);
+			builder.append(resourcePath);
+			return builder.toHashCode();
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (obj instanceof DavResourceLocatorImpl) {
+				final DavResourceLocatorImpl other = (DavResourceLocatorImpl) obj;
+				final EqualsBuilder builder = new EqualsBuilder();
+				builder.append(this.prefix, other.prefix);
+				builder.append(this.resourcePath, other.resourcePath);
+				return builder.isEquals();
+			} else {
+				return false;
+			}
+		}
+
 	}
 
 }

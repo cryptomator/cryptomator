@@ -23,7 +23,6 @@ public class WebDavServlet extends AbstractWebdavServlet {
 
 	private static final long serialVersionUID = 7965170007048673022L;
 	public static final String CFG_FS_ROOT = "cfg.fs.root";
-	public static final String CFG_HTTP_ROOT = "cfg.http.root";
 	public static final String CFG_CHECK_FILE_INTEGRITY = "cfg.checkFileIntegrity";
 	private DavSessionProvider davSessionProvider;
 	private DavLocatorFactory davLocatorFactory;
@@ -42,9 +41,8 @@ public class WebDavServlet extends AbstractWebdavServlet {
 		davSessionProvider = new DavSessionProviderImpl();
 
 		final String fsRoot = config.getInitParameter(CFG_FS_ROOT);
-		final String httpRoot = config.getInitParameter(CFG_HTTP_ROOT);
 		final boolean checkFileIntegrity = Boolean.parseBoolean(config.getInitParameter(CFG_CHECK_FILE_INTEGRITY));
-		this.davLocatorFactory = new DavLocatorFactoryImpl(fsRoot, httpRoot, cryptor);
+		this.davLocatorFactory = new DavLocatorFactoryImpl(fsRoot, cryptor);
 
 		this.davResourceFactory = new DavResourceFactoryImpl(cryptor, checkFileIntegrity);
 	}
