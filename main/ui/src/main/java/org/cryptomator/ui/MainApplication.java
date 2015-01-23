@@ -50,6 +50,18 @@ public class MainApplication extends Application {
 
 	@Override
 	public void start(final Stage primaryStage) throws IOException {
+		ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+		Platform.runLater(() -> {
+			/*
+			 * This fixes a bug on OSX where the magic file open handler leads
+			 * to no context class loader being set in the AppKit (event) thread
+			 * if the application is not started opening a file.
+			 */
+			if (Thread.currentThread().getContextClassLoader() == null) {
+				Thread.currentThread().setContextClassLoader(contextClassLoader);
+			}
+		});
+
 		Runtime.getRuntime().addShutdownHook(MainApplication.CLEAN_SHUTDOWN_PERFORMER);
 
 		executorService = Executors.newCachedThreadPool();
