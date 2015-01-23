@@ -32,7 +32,7 @@ final class LinuxGvfsWebDavMounter implements WebDavMounterStrategy {
 	}
 
 	@Override
-	public WebDavMount mount(URI uri) throws CommandFailedException {
+	public WebDavMount mount(URI uri, String name) throws CommandFailedException {
 		final Script mountScript = Script.fromLines(
 				"set -x",
 				"gvfs-mount \"dav:$DAV_SSP\"",

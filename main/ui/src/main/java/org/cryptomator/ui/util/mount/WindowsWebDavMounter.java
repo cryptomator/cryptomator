@@ -37,7 +37,7 @@ final class WindowsWebDavMounter implements WebDavMounterStrategy {
 	}
 
 	@Override
-	public WebDavMount mount(URI uri) throws CommandFailedException {
+	public WebDavMount mount(URI uri, String name) throws CommandFailedException {
 		final Script mountScript = fromLines("net use * http://0--1.ipv6-literal.net:%PORT%%DAV_PATH% /persistent:no")
 				.addEnv("PORT", String.valueOf(uri.getPort()))
 				.addEnv("DAV_PATH", uri.getRawPath());

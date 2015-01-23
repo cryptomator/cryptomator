@@ -86,7 +86,7 @@ public class Directory implements Serializable {
 			return false;
 		}
 		try {
-			webDavMount = WebDavMounter.mount(webDavServlet.getServletUri());
+			webDavMount = WebDavMounter.mount(webDavServlet.getServletUri(), getMountName());
 			return true;
 		} catch (CommandFailedException e) {
 			LOG.warn("mount failed", e);
