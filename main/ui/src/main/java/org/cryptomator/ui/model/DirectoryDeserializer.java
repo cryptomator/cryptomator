@@ -20,6 +20,9 @@ public class DirectoryDeserializer extends JsonDeserializer<Directory> {
 		final Directory dir = new Directory(path);
 		final boolean verifyFileIntegrity = node.has("checkIntegrity") ? node.get("checkIntegrity").asBoolean() : false;
 		dir.setVerifyFileIntegrity(verifyFileIntegrity);
+		if (node.has("mountName")) {
+			dir.setMountName(node.get("mountName").asText());
+		}
 		return dir;
 	}
 

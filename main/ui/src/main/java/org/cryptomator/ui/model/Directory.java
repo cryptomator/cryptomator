@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.text.Normalizer;
+import java.text.Normalizer.Form;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -36,6 +38,7 @@ public class Directory implements Serializable {
 	private final Runnable shutdownTask = new ShutdownTask();
 	private final Path path;
 	private boolean verifyFileIntegrity;
+	private String mountName = "Cryptomator";
 	private ServletLifeCycleAdapter webDavServlet;
 	private WebDavMount webDavMount;
 
@@ -45,6 +48,11 @@ public class Directory implements Serializable {
 		}
 		this.path = path;
 
+		try {
+			setMountName(getName());
+		} catch (IllegalArgumentException e) {
+
+		}
 	}
 
 	public boolean containsMasterKey() throws IOException {
@@ -55,7 +63,7 @@ public class Directory implements Serializable {
 		if (webDavServlet != null && webDavServlet.isRunning()) {
 			return false;
 		}
-		webDavServlet = WebDavServer.getInstance().createServlet(path, verifyFileIntegrity, cryptor);
+		webDavServlet = WebDavServer.getInstance().createServlet(path, verifyFileIntegrity, cryptor, getMountName());
 		if (webDavServlet.start()) {
 			MainApplication.addShutdownTask(shutdownTask);
 			return true;
@@ -138,6 +146,51 @@ public class Directory implements Serializable {
 
 	public void setUnlocked(boolean unlocked) {
 		this.unlocked.set(unlocked);
+	}
+
+	public String getMountName() {
+		return mountName;
+	}
+
+	/**
+	 * Tries to form a similar string using the regular latin alphabet.
+	 * 
+	 * @param string
+	 * @return a string composed of a-z, A-Z, 0-9, and _.
+	 */
+	public static String normalize(String string) {
+		String normalized = Normalizer.normalize(string, Form.NFD);
+		StringBuilder builder = new StringBuilder();
+		for (int i = 0; i < normalized.length(); i++) {
+			char c = normalized.charAt(i);
+			if (Character.isWhitespace(c)) {
+				if (builder.length() == 0 || builder.charAt(builder.length() - 1) != '_') {
+					builder.append('_');
+				}
+			} else if (c < 127 && Character.isLetterOrDigit(c)) {
+				builder.append(c);
+			} else if (c < 127) {
+				if (builder.length() == 0 || builder.charAt(builder.length() - 1) != '_') {
+					builder.append('_');
+				}
+			}
+		}
+		return builder.toString();
+	}
+
+	/**
+	 * sets the mount name while normalizing it
+	 * 
+	 * @param mountName
+	 * @throws IllegalArgumentException
+	 *             if the name is empty after normalization
+	 */
+	public void setMountName(String mountName) throws IllegalArgumentException {
+		mountName = normalize(mountName);
+		if (StringUtils.isEmpty(mountName)) {
+			throw new IllegalArgumentException("mount name is empty");
+		}
+		this.mountName = mountName;
 	}
 
 	/* hashcode/equals */

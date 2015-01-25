@@ -14,6 +14,7 @@ public class DirectorySerializer extends JsonSerializer<Directory> {
 		jgen.writeStartObject();
 		jgen.writeStringField("path", value.getPath().toString());
 		jgen.writeBooleanField("checkIntegrity", value.shouldVerifyFileIntegrity());
+		jgen.writeStringField("mountName", value.getMountName().toString());
 		jgen.writeEndObject();
 	}
 

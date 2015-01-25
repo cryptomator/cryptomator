@@ -28,6 +28,7 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.TextField;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -39,6 +40,7 @@ import org.cryptomator.ui.controls.SecPasswordField;
 import org.cryptomator.ui.model.Directory;
 import org.cryptomator.ui.util.FXThreads;
 import org.cryptomator.ui.util.MasterKeyFilter;
+import org.cryptomator.webdav.WebDavServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,6 +62,9 @@ public class UnlockController implements Initializable {
 	private CheckBox checkIntegrity;
 
 	@FXML
+	private TextField mountName;
+
+	@FXML
 	private Button unlockButton;
 
 	@FXML
@@ -73,6 +78,7 @@ public class UnlockController implements Initializable {
 		this.rb = rb;
 
 		usernameBox.valueProperty().addListener(this::didChooseUsername);
+		mountName.textProperty().addListener(this::didTypeMountName);
 	}
 
 	// ****************************************
@@ -167,6 +173,17 @@ public class UnlockController implements Initializable {
 		}
 	}
 
+	private void didTypeMountName(ObservableValue<? extends String> property, String oldValue, String newValue) {
+		try {
+			directory.setMountName(newValue);
+			if (!newValue.equals(directory.getMountName())) {
+				mountName.setText(directory.getMountName());
+			}
+		} catch (IllegalArgumentException e) {
+			mountName.setText(directory.getMountName());
+		}
+	}
+
 	/* Getter/Setter */
 
 	public Directory getDirectory() {
@@ -177,6 +194,7 @@ public class UnlockController implements Initializable {
 		this.directory = directory;
 		this.findExistingUsernames();
 		this.checkIntegrity.setSelected(directory.shouldVerifyFileIntegrity());
+		this.mountName.setText(directory.getMountName());
 	}
 
 	public UnlockListener getListener() {

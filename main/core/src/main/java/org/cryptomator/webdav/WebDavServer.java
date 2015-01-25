@@ -15,6 +15,7 @@ import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import org.apache.commons.lang3.StringUtils;
 import org.cryptomator.crypto.Cryptor;
 import org.cryptomator.webdav.jackrabbit.WebDavServlet;
 import org.eclipse.jetty.server.Connector;
@@ -81,11 +82,18 @@ public final class WebDavServer {
 	/**
 	 * @param workDir Path of encrypted folder.
 	 * @param cryptor A fully initialized cryptor instance ready to en- or decrypt streams.
+	 * @param name The name of the folder. Must be non-empty and only contain any of _ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789
 	 * @return servlet
 	 */
-	public ServletLifeCycleAdapter createServlet(final Path workDir, final boolean checkFileIntegrity, final Cryptor cryptor) {
+	public ServletLifeCycleAdapter createServlet(final Path workDir, final boolean checkFileIntegrity, final Cryptor cryptor, String name) {
 		try {
-			final URI uri = new URI(null, null, localConnector.getHost(), localConnector.getLocalPort(), "/" + UUID.randomUUID().toString(), null, null);
+			if(StringUtils.isEmpty(name)) {
+				throw new IllegalArgumentException("name empty");
+			}
+			if(!StringUtils.containsOnly(name, "_ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789")) {
+				throw new IllegalArgumentException("name contains illegal characters: " + name);
+			}
+			final URI uri = new URI(null, null, localConnector.getHost(), localConnector.getLocalPort(), "/" + UUID.randomUUID().toString() + "/" + name, null, null);
 
 			final ServletContextHandler servletContext = new ServletContextHandler(servletCollection, uri.getRawPath(), ServletContextHandler.SESSIONS);
 			final ServletHolder servlet = getWebDavServletHolder(workDir.toString(), checkFileIntegrity, cryptor);
