@@ -26,11 +26,12 @@ public final class WebDavMounter {
 	 * Tries to mount a given webdav share.
 	 * 
 	 * @param uri URI of the webdav share
+	 * @param name the name under which the folder is to be mounted. This might be ignored.
 	 * @return a {@link WebDavMount} representing the mounted share
 	 * @throws CommandFailedException if the mount operation fails
 	 */
-	public static WebDavMount mount(URI uri) throws CommandFailedException {
-		return chooseStrategy().mount(uri);
+	public static WebDavMount mount(URI uri, String name) throws CommandFailedException {
+		return chooseStrategy().mount(uri, name);
 	}
 
 	private static WebDavMounterStrategy chooseStrategy() {
