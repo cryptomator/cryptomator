@@ -50,7 +50,7 @@
 			<artifactId>commons-lang3</artifactId>
 		</dependency>
 		
-		<!-- UI -->
+		<!-- UI
 		<dependency>
 			<groupId>org.controlsfx</groupId>
 			<artifactId>controlsfx</artifactId>
@@ -60,7 +60,7 @@
 		<dependency>
 			<groupId>com.github.axet</groupId>
 			<artifactId>desktop</artifactId>
-		</dependency>
+		</dependency> -->
 	</dependencies>
 
 	<build>

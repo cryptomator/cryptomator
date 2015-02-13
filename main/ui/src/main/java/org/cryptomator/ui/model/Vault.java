@@ -14,7 +14,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.cryptomator.crypto.Cryptor;
 import org.cryptomator.crypto.SamplingDecorator;
 import org.cryptomator.crypto.aes256.Aes256Cryptor;
-import org.cryptomator.ui.MainApplication;
+import org.cryptomator.ui.Main;
 import org.cryptomator.ui.util.MasterKeyFilter;
 import org.cryptomator.ui.util.mount.CommandFailedException;
 import org.cryptomator.ui.util.mount.WebDavMount;
@@ -27,31 +27,34 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-@JsonSerialize(using = DirectorySerializer.class)
-@JsonDeserialize(using = DirectoryDeserializer.class)
-public class Directory implements Serializable {
+@JsonSerialize(using = VaultSerializer.class)
+@JsonDeserialize(using = VaultDeserializer.class)
+public class Vault implements Serializable {
 
 	private static final long serialVersionUID = 3754487289683599469L;
-	private static final Logger LOG = LoggerFactory.getLogger(Directory.class);
+	private static final Logger LOG = LoggerFactory.getLogger(Vault.class);
+
+	public static final String VAULT_FILE_EXTENSION = ".cryptomator";
+
 	private final Cryptor cryptor = SamplingDecorator.decorate(new Aes256Cryptor());
 	private final ObjectProperty<Boolean> unlocked = new SimpleObjectProperty<Boolean>(this, "unlocked", Boolean.FALSE);
 	private final Runnable shutdownTask = new ShutdownTask();
 	private final Path path;
 	private boolean verifyFileIntegrity;
-	private String mountName = "Cryptomator";
+	private String mountName;
 	private ServletLifeCycleAdapter webDavServlet;
 	private WebDavMount webDavMount;
 
-	public Directory(final Path path) {
-		if (!Files.isDirectory(path)) {
-			throw new IllegalArgumentException("Not a directory: " + path);
+	public Vault(final Path vaultDirectoryPath) {
+		if (!Files.isDirectory(vaultDirectoryPath) || !vaultDirectoryPath.getFileName().toString().endsWith(VAULT_FILE_EXTENSION)) {
+			throw new IllegalArgumentException("Not a valid vault directory: " + vaultDirectoryPath);
 		}
-		this.path = path;
+		this.path = vaultDirectoryPath;
 
 		try {
 			setMountName(getName());
 		} catch (IllegalArgumentException e) {
-
+			// mount name needs to be set by the user explicitly later
 		}
 	}
 
@@ -65,7 +68,7 @@ public class Directory implements Serializable {
 		}
 		webDavServlet = WebDavServer.getInstance().createServlet(path, verifyFileIntegrity, cryptor, getMountName());
 		if (webDavServlet.start()) {
-			MainApplication.addShutdownTask(shutdownTask);
+			Main.addShutdownTask(shutdownTask);
 			return true;
 		} else {
 			return false;
@@ -74,7 +77,7 @@ public class Directory implements Serializable {
 
 	public void stopServer() {
 		if (webDavServlet != null && webDavServlet.isRunning()) {
-			MainApplication.removeShutdownTask(shutdownTask);
+			Main.removeShutdownTask(shutdownTask);
 			this.unmount();
 			webDavServlet.stop();
 			cryptor.swipeSensitiveData();
@@ -122,14 +125,10 @@ public class Directory implements Serializable {
 	}
 
 	/**
-	 * @return Directory name without preceeding path components
+	 * @return Directory name without preceeding path components and file extension
 	 */
 	public String getName() {
-		String name = path.getFileName().toString();
-		if (StringUtils.endsWithIgnoreCase(name, Aes256Cryptor.FOLDER_EXTENSION)) {
-			name = name.substring(0, name.length() - Aes256Cryptor.FOLDER_EXTENSION.length());
-		}
-		return name;
+		return StringUtils.removeEnd(path.getFileName().toString(), VAULT_FILE_EXTENSION);
 	}
 
 	public Cryptor getCryptor() {
@@ -182,8 +181,7 @@ public class Directory implements Serializable {
 	 * sets the mount name while normalizing it
 	 * 
 	 * @param mountName
-	 * @throws IllegalArgumentException
-	 *             if the name is empty after normalization
+	 * @throws IllegalArgumentException if the name is empty after normalization
 	 */
 	public void setMountName(String mountName) throws IllegalArgumentException {
 		mountName = normalize(mountName);
@@ -202,8 +200,8 @@ public class Directory implements Serializable {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj instanceof Directory) {
-			final Directory other = (Directory) obj;
+		if (obj instanceof Vault) {
+			final Vault other = (Vault) obj;
 			return this.path.equals(other.path);
 		} else {
 			return false;

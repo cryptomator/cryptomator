@@ -775,6 +775,13 @@ is being used to size a border should also be in pixels.
     -fx-orientation: horizontal;    
 }
 
+.tool-bar.list-related-toolbar {
+	-fx-background-color: transparent;
+    -fx-padding: 0.1em 0;
+    -fx-spacing: 0;
+    -fx-alignment: CENTER_LEFT;
+}
+
 /*******************************************************************************
  *                                                                             *
  * Slider                                                                      *

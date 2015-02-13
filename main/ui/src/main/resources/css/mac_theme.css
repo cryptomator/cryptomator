@@ -206,7 +206,6 @@
 }
 .button:armed,
 .button:default:armed,
-.toggle-button:armed,
 .menu-button:armed,
 .split-menu-button:armed > .label,
 .split-menu-button > .arrow-button:pressed,
@@ -361,6 +360,30 @@
 .tool-bar:horizontal > .container > .separator {
     -fx-orientation: vertical;
 }
+
+.tool-bar.list-related-toolbar {
+	-fx-background-color: #B4B4B4, #F7F7F7;
+    -fx-background-insets: 0, 0 1 1 1;
+    -fx-padding: 0;
+    -fx-spacing: 0;
+    -fx-alignment: CENTER_LEFT;
+}
+
+.tool-bar.list-related-toolbar .button,
+.tool-bar.list-related-toolbar .toggle-button {
+	-fx-background-color: transparent;
+	-fx-background-insets: 0;
+	-fx-background-radius: 0;
+	-fx-border-color: transparent #B4B4B4 transparent transparent;
+    -fx-border-width: 1;
+}
+
+.tool-bar.list-related-toolbar .button:armed,
+.tool-bar.list-related-toolbar .toggle-button:armed,
+.tool-bar.list-related-toolbar .toggle-button:selected {
+	-fx-background-color: linear-gradient(to bottom, #C0C0C0 0%, #ADADAD 100%);
+}
+
 
 /*******************************************************************************
  *                                                                             *

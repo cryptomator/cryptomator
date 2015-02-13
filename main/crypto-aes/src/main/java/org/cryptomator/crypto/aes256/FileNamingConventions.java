@@ -63,8 +63,4 @@ interface FileNamingConventions {
 	 */
 	PathMatcher ENCRYPTED_FILE_GLOB_MATCHER = FileSystems.getDefault().getPathMatcher("glob:**/*{" + BASIC_FILE_EXT + "," + LONG_NAME_FILE_EXT + "}");
 
-	/**
-	 * On OSX, folders with this extension are treated as a package.
-	 */
-	String FOLDER_EXTENSION = ".cryptomator";
 }

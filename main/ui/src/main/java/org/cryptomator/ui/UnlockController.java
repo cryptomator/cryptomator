@@ -37,10 +37,9 @@ import org.cryptomator.crypto.exceptions.DecryptFailedException;
 import org.cryptomator.crypto.exceptions.UnsupportedKeyLengthException;
 import org.cryptomator.crypto.exceptions.WrongPasswordException;
 import org.cryptomator.ui.controls.SecPasswordField;
-import org.cryptomator.ui.model.Directory;
+import org.cryptomator.ui.model.Vault;
 import org.cryptomator.ui.util.FXThreads;
 import org.cryptomator.ui.util.MasterKeyFilter;
-import org.cryptomator.webdav.WebDavServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +49,7 @@ public class UnlockController implements Initializable {
 
 	private ResourceBundle rb;
 	private UnlockListener listener;
-	private Directory directory;
+	private Vault directory;
 
 	@FXML
 	private ComboBox<String> usernameBox;
@@ -186,11 +185,11 @@ public class UnlockController implements Initializable {
 
 	/* Getter/Setter */
 
-	public Directory getDirectory() {
+	public Vault getDirectory() {
 		return directory;
 	}
 
-	public void setDirectory(Directory directory) {
+	public void setDirectory(Vault directory) {
 		this.directory = directory;
 		this.findExistingUsernames();
 		this.checkIntegrity.setSelected(directory.shouldVerifyFileIntegrity());

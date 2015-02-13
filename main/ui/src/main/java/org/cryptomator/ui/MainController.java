@@ -14,6 +14,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.List;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
@@ -25,20 +26,23 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.geometry.Side;
 import javafx.scene.Parent;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
-import javafx.stage.DirectoryChooser;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 import org.cryptomator.ui.InitializeController.InitializationListener;
 import org.cryptomator.ui.UnlockController.UnlockListener;
 import org.cryptomator.ui.UnlockedController.LockListener;
 import org.cryptomator.ui.controls.DirectoryListCell;
-import org.cryptomator.ui.model.Directory;
+import org.cryptomator.ui.model.Vault;
 import org.cryptomator.ui.settings.Settings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,10 +57,16 @@ public class MainController implements Initializable, InitializationListener, Un
 	private ContextMenu directoryContextMenu;
 
 	@FXML
+	private ContextMenu addVaultContextMenu;
+
+	@FXML
 	private HBox rootPane;
 
 	@FXML
-	private ListView<Directory> directoryList;
+	private ListView<Vault> directoryList;
+
+	@FXML
+	private ToggleButton addVaultButton;
 
 	@FXML
 	private Pane contentPane;
@@ -67,44 +77,83 @@ public class MainController implements Initializable, InitializationListener, Un
 	public void initialize(URL url, ResourceBundle rb) {
 		this.rb = rb;
 
-		final ObservableList<Directory> items = FXCollections.observableList(Settings.load().getDirectories());
+		final ObservableList<Vault> items = FXCollections.observableList(Settings.load().getDirectories());
 		directoryList.setItems(items);
 		directoryList.setCellFactory(this::createDirecoryListCell);
 		directoryList.getSelectionModel().getSelectedItems().addListener(this::selectedDirectoryDidChange);
 	}
 
 	@FXML
-	private void didClickAddDirectory(ActionEvent event) {
-		final DirectoryChooser dirChooser = new DirectoryChooser();
-		final File file = dirChooser.showDialog(stage);
-		if (file != null) {
-			addDirectory(file.toPath());
+	private void didClickAddVault(ActionEvent event) {
+		if (addVaultContextMenu.isShowing()) {
+			addVaultContextMenu.hide();
+		} else {
+			addVaultContextMenu.show(addVaultButton, Side.RIGHT, 0.0, 0.0);
+		}
+	}
+
+	@FXML
+	private void willShowAddVaultContextMenu(WindowEvent event) {
+		addVaultButton.setSelected(true);
+	}
+
+	@FXML
+	private void didHideAddVaultContextMenu(WindowEvent event) {
+		addVaultButton.setSelected(false);
+	}
+
+	@FXML
+	private void didClickCreateNewVault(ActionEvent event) {
+		final FileChooser fileChooser = new FileChooser();
+		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Cryptomator vault", "*.cryptomator"));
+		final File file = fileChooser.showSaveDialog(stage);
+		try {
+			if (file != null) {
+				final Path vaultDir = Files.createDirectory(file.toPath());
+				final Path vaultShortcutFile = vaultDir.resolve(vaultDir.getFileName());
+				Files.createFile(vaultShortcutFile);
+				addVault(vaultDir, true);
+			}
+		} catch (IOException e) {
+			LOG.error("Unable to create vault", e);
+		}
+	}
+
+	@FXML
+	private void didClickAddExistingVaults(ActionEvent event) {
+		final FileChooser fileChooser = new FileChooser();
+		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Cryptomator vault", "*.cryptomator"));
+		final List<File> files = fileChooser.showOpenMultipleDialog(stage);
+		if (files != null) {
+			for (final File file : files) {
+				addVault(file.toPath(), false);
+			}
 		}
 	}
 
 	/**
 	 * adds the given directory or selects it if it is already in the list of directories.
 	 * 
-	 * @param file non-null, writable, existing directory
+	 * @param dir non-null, writable, existing directory
 	 */
-	void addDirectory(final Path file) {
-		if (file != null && Files.isWritable(file)) {
-			final Directory dir = new Directory(file);
-			if (!directoryList.getItems().contains(dir)) {
-				directoryList.getItems().add(dir);
+	void addVault(final Path dir, boolean select) {
+		if (dir != null && Files.isWritable(dir)) {
+			final Vault vault = new Vault(dir);
+			if (!directoryList.getItems().contains(vault)) {
+				directoryList.getItems().add(vault);
 			}
-			directoryList.getSelectionModel().select(dir);
+			directoryList.getSelectionModel().select(vault);
 		}
 	}
 
-	private ListCell<Directory> createDirecoryListCell(ListView<Directory> param) {
+	private ListCell<Vault> createDirecoryListCell(ListView<Vault> param) {
 		final DirectoryListCell cell = new DirectoryListCell();
 		cell.setContextMenu(directoryContextMenu);
 		return cell;
 	}
 
-	private void selectedDirectoryDidChange(ListChangeListener.Change<? extends Directory> change) {
-		final Directory selectedDir = directoryList.getSelectionModel().getSelectedItem();
+	private void selectedDirectoryDidChange(ListChangeListener.Change<? extends Vault> change) {
+		final Vault selectedDir = directoryList.getSelectionModel().getSelectedItem();
 		if (selectedDir == null) {
 			stage.setTitle(rb.getString("app.name"));
 			showWelcomeView();
@@ -116,7 +165,7 @@ public class MainController implements Initializable, InitializationListener, Un
 
 	@FXML
 	private void didClickRemoveSelectedEntry(ActionEvent e) {
-		final Directory selectedDir = directoryList.getSelectionModel().getSelectedItem();
+		final Vault selectedDir = directoryList.getSelectionModel().getSelectedItem();
 		directoryList.getItems().remove(selectedDir);
 		directoryList.getSelectionModel().clearSelection();
 	}
@@ -125,7 +174,7 @@ public class MainController implements Initializable, InitializationListener, Un
 	// Subcontroller for right panel
 	// ****************************************
 
-	private void showDirectory(Directory directory) {
+	private void showDirectory(Vault directory) {
 		try {
 			if (directory.isUnlocked()) {
 				this.showUnlockedView(directory);
@@ -155,7 +204,7 @@ public class MainController implements Initializable, InitializationListener, Un
 		this.showView("/fxml/welcome.fxml");
 	}
 
-	private void showInitializeView(Directory directory) {
+	private void showInitializeView(Vault directory) {
 		final InitializeController ctrl = showView("/fxml/initialize.fxml");
 		ctrl.setDirectory(directory);
 		ctrl.setListener(this);
@@ -166,7 +215,7 @@ public class MainController implements Initializable, InitializationListener, Un
 		showUnlockView(ctrl.getDirectory());
 	}
 
-	private void showUnlockView(Directory directory) {
+	private void showUnlockView(Vault directory) {
 		final UnlockController ctrl = showView("/fxml/unlock.fxml");
 		ctrl.setDirectory(directory);
 		ctrl.setListener(this);
@@ -178,7 +227,7 @@ public class MainController implements Initializable, InitializationListener, Un
 		Platform.setImplicitExit(false);
 	}
 
-	private void showUnlockedView(Directory directory) {
+	private void showUnlockedView(Vault directory) {
 		final UnlockedController ctrl = showView("/fxml/unlocked.fxml");
 		ctrl.setDirectory(directory);
 		ctrl.setListener(this);
@@ -194,11 +243,11 @@ public class MainController implements Initializable, InitializationListener, Un
 
 	/* Convenience */
 
-	public Collection<Directory> getDirectories() {
+	public Collection<Vault> getDirectories() {
 		return directoryList.getItems();
 	}
 
-	public Collection<Directory> getUnlockedDirectories() {
+	public Collection<Vault> getUnlockedDirectories() {
 		return getDirectories().stream().filter(d -> d.isUnlocked()).collect(Collectors.toSet());
 	}
 

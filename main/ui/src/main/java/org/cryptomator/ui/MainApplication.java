@@ -13,7 +13,6 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ResourceBundle;
-import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -24,23 +23,18 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
-import org.cryptomator.crypto.aes256.Aes256Cryptor;
+import org.cryptomator.ui.model.Vault;
 import org.cryptomator.ui.settings.Settings;
 import org.cryptomator.ui.util.ActiveWindowStyleSupport;
 import org.cryptomator.ui.util.SingleInstanceManager;
 import org.cryptomator.ui.util.SingleInstanceManager.LocalInstance;
 import org.cryptomator.ui.util.TrayIconUtil;
 import org.cryptomator.webdav.WebDavServer;
-import org.eclipse.jetty.util.ConcurrentHashSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class MainApplication extends Application {
-
-	private static final Set<Runnable> SHUTDOWN_TASKS = new ConcurrentHashSet<>();
-	private static final CleanShutdownPerformer CLEAN_SHUTDOWN_PERFORMER = new CleanShutdownPerformer();
 
 	public static final String APPLICATION_KEY = "CryptomatorGUI";
 
@@ -53,21 +47,15 @@ public class MainApplication extends Application {
 		ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
 		Platform.runLater(() -> {
 			/*
-			 * This fixes a bug on OSX where the magic file open handler leads
-			 * to no context class loader being set in the AppKit (event) thread
-			 * if the application is not started opening a file.
+			 * This fixes a bug on OSX where the magic file open handler leads to no context class loader being set in the AppKit (event)
+			 * thread if the application is not started opening a file.
 			 */
 			if (Thread.currentThread().getContextClassLoader() == null) {
 				Thread.currentThread().setContextClassLoader(contextClassLoader);
 			}
 		});
 
-		Runtime.getRuntime().addShutdownHook(MainApplication.CLEAN_SHUTDOWN_PERFORMER);
-
 		executorService = Executors.newCachedThreadPool();
-		addShutdownTask(() -> {
-			executorService.shutdown();
-		});
 
 		WebDavServer.getInstance().start();
 		chooseNativeStylesheet();
@@ -91,40 +79,42 @@ public class MainApplication extends Application {
 			handleCommandLineArg(ctrl, arg);
 		}
 
-		if (org.controlsfx.tools.Platform.getCurrent().equals(org.controlsfx.tools.Platform.OSX)) {
+		if (SystemUtils.IS_OS_MAC_OSX) {
 			Main.OPEN_FILE_HANDLER.complete(file -> handleCommandLineArg(ctrl, file.getAbsolutePath()));
 		}
 
-		LocalInstance cryptomatorGuiInstance = SingleInstanceManager.startLocalInstance(APPLICATION_KEY, executorService);
-		addShutdownTask(() -> {
-			cryptomatorGuiInstance.close();
-		});
-
+		final LocalInstance cryptomatorGuiInstance = SingleInstanceManager.startLocalInstance(APPLICATION_KEY, executorService);
 		cryptomatorGuiInstance.registerListener(arg -> handleCommandLineArg(ctrl, arg));
+
+		Main.addShutdownTask(() -> {
+			cryptomatorGuiInstance.close();
+			Settings.save();
+			executorService.shutdown();
+		});
 	}
 
 	void handleCommandLineArg(final MainController ctrl, String arg) {
-		Path file = FileSystems.getDefault().getPath(arg);
-		if (!Files.exists(file)) {
-			try {
-				if (!Files.isDirectory(Files.createDirectories(file))) {
-					return;
-				}
-			} catch (IOException e) {
-				return;
-			}
-			// directory created.
-		} else if (Files.isRegularFile(file)) {
-			if (StringUtils.endsWithIgnoreCase(file.getFileName().toString(), Aes256Cryptor.MASTERKEY_FILE_EXT)) {
-				file = file.getParent();
-			} else {
-				// is a file, but not a masterkey file
-				return;
-			}
+		// only open files with our file extension:
+		if (!arg.endsWith(Vault.VAULT_FILE_EXTENSION)) {
+			LOG.warn("Invalid vault path %s", arg);
+			return;
 		}
-		Path f = file;
+
+		// find correct location:
+		final Path path = FileSystems.getDefault().getPath(arg);
+		final Path vaultPath;
+		if (Files.isDirectory(path)) {
+			vaultPath = path;
+		} else if (Files.isRegularFile(path) && path.getParent().getFileName().toString().endsWith(Vault.VAULT_FILE_EXTENSION)) {
+			vaultPath = path.getParent();
+		} else {
+			LOG.warn("Invalid vault path %s", arg);
+			return;
+		}
+
+		// add vault to ctrl:
 		Platform.runLater(() -> {
-			ctrl.addDirectory(f);
+			ctrl.addVault(vaultPath, true);
 			ctrl.toFront();
 		});
 	}
@@ -142,39 +132,10 @@ public class MainApplication extends Application {
 	private void quit() {
 		Platform.runLater(() -> {
 			WebDavServer.getInstance().stop();
-			CLEAN_SHUTDOWN_PERFORMER.run();
 			Settings.save();
 			Platform.exit();
 			System.exit(0);
 		});
-	}
-
-	@Override
-	public void stop() {
-		CLEAN_SHUTDOWN_PERFORMER.run();
-		Settings.save();
-	}
-
-	public static void addShutdownTask(Runnable r) {
-		SHUTDOWN_TASKS.add(r);
-	}
-
-	public static void removeShutdownTask(Runnable r) {
-		SHUTDOWN_TASKS.remove(r);
-	}
-
-	private static class CleanShutdownPerformer extends Thread {
-		@Override
-		public void run() {
-			SHUTDOWN_TASKS.forEach(r -> {
-				try {
-					r.run();
-				} catch (RuntimeException e) {
-					LOG.error("exception while shutting down", e);
-				}
-			});
-			SHUTDOWN_TASKS.clear();
-		}
 	}
 
 }

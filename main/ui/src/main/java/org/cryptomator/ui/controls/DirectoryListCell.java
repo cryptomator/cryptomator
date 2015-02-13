@@ -8,9 +8,9 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
 
-import org.cryptomator.ui.model.Directory;
+import org.cryptomator.ui.model.Vault;
 
-public class DirectoryListCell extends DraggableListCell<Directory> implements ChangeListener<Boolean> {
+public class DirectoryListCell extends DraggableListCell<Vault> implements ChangeListener<Boolean> {
 
 	// fill: #FD4943, stroke: #E1443F
 	private static final Color RED_FILL = Color.rgb(253, 73, 67);
@@ -29,8 +29,8 @@ public class DirectoryListCell extends DraggableListCell<Directory> implements C
 	}
 
 	@Override
-	protected void updateItem(Directory item, boolean empty) {
-		final Directory oldItem = super.getItem();
+	protected void updateItem(Vault item, boolean empty) {
+		final Vault oldItem = super.getItem();
 		if (oldItem != null) {
 			oldItem.unlockedProperty().removeListener(this);
 		}

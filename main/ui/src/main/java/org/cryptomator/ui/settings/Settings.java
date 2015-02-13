@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.SystemUtils;
-import org.cryptomator.ui.model.Directory;
+import org.cryptomator.ui.model.Vault;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,7 +54,7 @@ public class Settings implements Serializable {
 		}
 	}
 
-	private List<Directory> directories;
+	private List<Vault> directories;
 
 	private Settings() {
 		// private constructor
@@ -95,14 +95,14 @@ public class Settings implements Serializable {
 
 	/* Getter/Setter */
 
-	public List<Directory> getDirectories() {
+	public List<Vault> getDirectories() {
 		if (directories == null) {
 			directories = new ArrayList<>();
 		}
 		return directories;
 	}
 
-	public void setDirectories(List<Directory> directories) {
+	public void setDirectories(List<Vault> directories) {
 		this.directories = directories;
 	}
 

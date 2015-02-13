@@ -26,7 +26,7 @@ import javafx.scene.control.Label;
 import javafx.util.Duration;
 
 import org.cryptomator.crypto.CryptorIOSampling;
-import org.cryptomator.ui.model.Directory;
+import org.cryptomator.ui.model.Vault;
 import org.cryptomator.webdav.WebDavServer;
 
 public class UnlockedController implements Initializable {
@@ -35,7 +35,7 @@ public class UnlockedController implements Initializable {
 	private static final double IO_SAMPLING_INTERVAL = 0.25;
 	private ResourceBundle rb;
 	private LockListener listener;
-	private Directory directory;
+	private Vault directory;
 	private Timeline ioAnimation;
 
 	@FXML
@@ -118,11 +118,11 @@ public class UnlockedController implements Initializable {
 
 	/* Getter/Setter */
 
-	public Directory getDirectory() {
+	public Vault getDirectory() {
 		return directory;
 	}
 
-	public void setDirectory(Directory directory) {
+	public void setDirectory(Vault directory) {
 		this.directory = directory;
 		final String msg = String.format(rb.getString("unlocked.messageLabel.runningOnPort"), WebDavServer.getInstance().getPort());
 		messageLabel.setText(msg);

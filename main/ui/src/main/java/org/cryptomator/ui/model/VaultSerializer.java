@@ -7,10 +7,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 
-public class DirectorySerializer extends JsonSerializer<Directory> {
+public class VaultSerializer extends JsonSerializer<Vault> {
 
 	@Override
-	public void serialize(Directory value, JsonGenerator jgen, SerializerProvider provider) throws IOException, JsonProcessingException {
+	public void serialize(Vault value, JsonGenerator jgen, SerializerProvider provider) throws IOException, JsonProcessingException {
 		jgen.writeStartObject();
 		jgen.writeStringField("path", value.getPath().toString());
 		jgen.writeBooleanField("checkIntegrity", value.shouldVerifyFileIntegrity());
