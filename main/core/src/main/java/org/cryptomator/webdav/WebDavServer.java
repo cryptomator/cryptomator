@@ -54,6 +54,11 @@ public final class WebDavServer {
 		localConnector = new ServerConnector(server);
 		localConnector.setHost(LOCALHOST);
 		servletCollection = new ContextHandlerCollection();
+
+		final ServletContextHandler servletContext = new ServletContextHandler(servletCollection, "/", ServletContextHandler.NO_SESSIONS);
+		final ServletHolder servlet = new ServletHolder(WindowsSucksServlet.class);
+		servletContext.addServlet(servlet, "/");
+
 		server.setConnectors(new Connector[] {localConnector});
 		server.setHandler(servletCollection);
 	}
@@ -82,15 +87,16 @@ public final class WebDavServer {
 	/**
 	 * @param workDir Path of encrypted folder.
 	 * @param cryptor A fully initialized cryptor instance ready to en- or decrypt streams.
-	 * @param name The name of the folder. Must be non-empty and only contain any of _ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789
+	 * @param name The name of the folder. Must be non-empty and only contain any of
+	 *            _ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789
 	 * @return servlet
 	 */
 	public ServletLifeCycleAdapter createServlet(final Path workDir, final boolean checkFileIntegrity, final Cryptor cryptor, String name) {
 		try {
-			if(StringUtils.isEmpty(name)) {
+			if (StringUtils.isEmpty(name)) {
 				throw new IllegalArgumentException("name empty");
 			}
-			if(!StringUtils.containsOnly(name, "_ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789")) {
+			if (!StringUtils.containsOnly(name, "_ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789")) {
 				throw new IllegalArgumentException("name contains illegal characters: " + name);
 			}
 			final URI uri = new URI(null, null, localConnector.getHost(), localConnector.getLocalPort(), "/" + UUID.randomUUID().toString() + "/" + name, null, null);
