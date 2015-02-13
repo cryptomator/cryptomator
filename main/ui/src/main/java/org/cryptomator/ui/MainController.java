@@ -134,16 +134,27 @@ public class MainController implements Initializable, InitializationListener, Un
 	/**
 	 * adds the given directory or selects it if it is already in the list of directories.
 	 * 
-	 * @param dir non-null, writable, existing directory
+	 * @param path non-null, writable, existing directory
 	 */
-	void addVault(final Path dir, boolean select) {
-		if (dir != null && Files.isWritable(dir)) {
-			final Vault vault = new Vault(dir);
-			if (!directoryList.getItems().contains(vault)) {
-				directoryList.getItems().add(vault);
-			}
-			directoryList.getSelectionModel().select(vault);
+	void addVault(final Path path, boolean select) {
+		if (path == null || !Files.isWritable(path)) {
+			return;
 		}
+
+		final Path vaultPath;
+		if (path != null && Files.isDirectory(path)) {
+			vaultPath = path;
+		} else if (Files.isRegularFile(path) && path.getParent().getFileName().toString().endsWith(Vault.VAULT_FILE_EXTENSION)) {
+			vaultPath = path.getParent();
+		} else {
+			return;
+		}
+
+		final Vault vault = new Vault(vaultPath);
+		if (!directoryList.getItems().contains(vault)) {
+			directoryList.getItems().add(vault);
+		}
+		directoryList.getSelectionModel().select(vault);
 	}
 
 	private ListCell<Vault> createDirecoryListCell(ListView<Vault> param) {
