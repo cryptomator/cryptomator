@@ -29,6 +29,8 @@ import org.cryptomator.crypto.CryptorIOSampling;
 import org.cryptomator.ui.model.Vault;
 import org.cryptomator.webdav.WebDavServer;
 
+import com.google.inject.Inject;
+
 public class UnlockedController implements Initializable {
 
 	private static final int IO_SAMPLING_STEPS = 100;
@@ -46,6 +48,14 @@ public class UnlockedController implements Initializable {
 
 	@FXML
 	private NumberAxis xAxis;
+
+	private final WebDavServer server;
+
+	@Inject
+	public UnlockedController(WebDavServer server) {
+		super();
+		this.server = server;
+	}
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
@@ -124,7 +134,7 @@ public class UnlockedController implements Initializable {
 
 	public void setDirectory(Vault directory) {
 		this.directory = directory;
-		final String msg = String.format(rb.getString("unlocked.messageLabel.runningOnPort"), WebDavServer.getInstance().getPort());
+		final String msg = String.format(rb.getString("unlocked.messageLabel.runningOnPort"), server.getPort());
 		messageLabel.setText(msg);
 
 		if (directory.getCryptor() instanceof CryptorIOSampling) {

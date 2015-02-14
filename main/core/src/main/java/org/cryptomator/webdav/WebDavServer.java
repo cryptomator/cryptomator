@@ -38,16 +38,11 @@ public final class WebDavServer {
 	private static final int MAX_THREADS = 200;
 	private static final int MIN_THREADS = 4;
 	private static final int THREAD_IDLE_SECONDS = 20;
-	private static final WebDavServer INSTANCE = new WebDavServer();
 	private final Server server;
 	private final ServerConnector localConnector;
 	private final ContextHandlerCollection servletCollection;
 
-	public static WebDavServer getInstance() {
-		return INSTANCE;
-	}
-
-	private WebDavServer() {
+	public WebDavServer() {
 		final BlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(MAX_PENDING_REQUESTS);
 		final ThreadPool tp = new QueuedThreadPool(MAX_THREADS, MIN_THREADS, THREAD_IDLE_SECONDS, queue);
 		server = new Server(tp);

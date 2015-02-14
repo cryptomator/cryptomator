@@ -39,6 +39,7 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
 import org.cryptomator.ui.InitializeController.InitializationListener;
+import org.cryptomator.ui.MainModule.ControllerFactory;
 import org.cryptomator.ui.UnlockController.UnlockListener;
 import org.cryptomator.ui.UnlockedController.LockListener;
 import org.cryptomator.ui.controls.DirectoryListCell;
@@ -46,6 +47,8 @@ import org.cryptomator.ui.model.Vault;
 import org.cryptomator.ui.settings.Settings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.inject.Inject;
 
 public class MainController implements Initializable, InitializationListener, UnlockListener, LockListener {
 
@@ -73,11 +76,22 @@ public class MainController implements Initializable, InitializationListener, Un
 
 	private ResourceBundle rb;
 
+	private final ControllerFactory controllerFactory;
+
+	private final Settings settings;
+
+	@Inject
+	public MainController(ControllerFactory controllerFactory, Settings settings) {
+		super();
+		this.controllerFactory = controllerFactory;
+		this.settings = settings;
+	}
+
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
 		this.rb = rb;
 
-		final ObservableList<Vault> items = FXCollections.observableList(Settings.load().getDirectories());
+		final ObservableList<Vault> items = FXCollections.observableList(settings.getDirectories());
 		directoryList.setItems(items);
 		directoryList.setCellFactory(this::createDirecoryListCell);
 		directoryList.getSelectionModel().getSelectedItems().addListener(this::selectedDirectoryDidChange);
@@ -202,6 +216,7 @@ public class MainController implements Initializable, InitializationListener, Un
 	private <T> T showView(String fxml) {
 		try {
 			final FXMLLoader loader = new FXMLLoader(getClass().getResource(fxml), rb);
+			loader.setControllerFactory(controllerFactory);
 			final Parent root = loader.load();
 			contentPane.getChildren().clear();
 			contentPane.getChildren().add(root);

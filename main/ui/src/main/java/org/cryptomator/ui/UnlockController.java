@@ -16,6 +16,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.ResourceBundle;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
 import javafx.application.Platform;
@@ -40,8 +41,12 @@ import org.cryptomator.ui.controls.SecPasswordField;
 import org.cryptomator.ui.model.Vault;
 import org.cryptomator.ui.util.FXThreads;
 import org.cryptomator.ui.util.MasterKeyFilter;
+import org.cryptomator.ui.util.DeferredCloser;
+import org.cryptomator.webdav.WebDavServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.inject.Inject;
 
 public class UnlockController implements Initializable {
 
@@ -71,6 +76,20 @@ public class UnlockController implements Initializable {
 
 	@FXML
 	private Label messageLabel;
+
+	private final WebDavServer server;
+
+	private final ExecutorService exec;
+
+	private final DeferredCloser closer;
+
+	@Inject
+	public UnlockController(WebDavServer server, ExecutorService exec, DeferredCloser closer) {
+		super();
+		this.server = server;
+		this.exec = exec;
+		this.closer = closer;
+	}
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
@@ -107,15 +126,15 @@ public class UnlockController implements Initializable {
 			masterKeyInputStream = Files.newInputStream(masterKeyPath, StandardOpenOption.READ);
 			directory.setVerifyFileIntegrity(checkIntegrity.isSelected());
 			directory.getCryptor().decryptMasterKey(masterKeyInputStream, password);
-			if (!directory.startServer()) {
+			if (!directory.startServer(server, closer)) {
 				messageLabel.setText(rb.getString("unlock.messageLabel.startServerFailed"));
 				directory.getCryptor().swipeSensitiveData();
 				return;
 			}
 			directory.setUnlocked(true);
-			final Future<Boolean> futureMount = FXThreads.runOnBackgroundThread(directory::mount);
-			FXThreads.runOnMainThreadWhenFinished(futureMount, this::didUnlockAndMount);
-			FXThreads.runOnMainThreadWhenFinished(futureMount, (result) -> {
+			final Future<Boolean> futureMount = exec.submit(() -> directory.mount(closer));
+			FXThreads.runOnMainThreadWhenFinished(exec, futureMount, this::didUnlockAndMount);
+			FXThreads.runOnMainThreadWhenFinished(exec, futureMount, (result) -> {
 				setControlsDisabled(false);
 			});
 		} catch (DecryptFailedException | IOException ex) {

@@ -34,7 +34,6 @@
 		<commons-codec.version>1.10</commons-codec.version>
 		<jackson-databind.version>2.4.4</jackson-databind.version>
 		<mockito.version>1.10.19</mockito.version>
-		<axetDesktop.version>2.2.3</axetDesktop.version>
 	</properties>
 
 	<dependencyManagement>
@@ -125,12 +124,6 @@
 				<artifactId>mockito-core</artifactId>
 				<version>${mockito.version}</version>
 				<scope>test</scope>
-			</dependency>
-
-			<dependency>
-				<groupId>com.github.axet</groupId>
-				<artifactId>desktop</artifactId>
-				<version>${axetDesktop.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

@@ -60,7 +60,14 @@
 		<dependency>
 			<groupId>com.github.axet</groupId>
 			<artifactId>desktop</artifactId>
+			<version>2.2.3</version>
 		</dependency> -->
+
+		<dependency>
+			<groupId>com.google.inject</groupId>
+			<artifactId>guice</artifactId>
+			<version>3.0</version>
+		</dependency>
 	</dependencies>
 
 	<build>

@@ -10,9 +10,8 @@
  ******************************************************************************/
 package org.cryptomator.ui.util;
 
-import java.util.concurrent.Callable;
+import java.util.Objects;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import javafx.application.Platform;
@@ -48,61 +47,14 @@ import javafx.application.Platform;
  */
 public final class FXThreads {
 
-	private static final ExecutorService EXECUTOR = Executors.newCachedThreadPool();
 	private static final CallbackWhenTaskFailed DUMMY_EXCEPTION_CALLBACK = (e) -> {
 		// ignore.
 	};
 
-	private FXThreads() {
-		throw new AssertionError("Not instantiable.");
-	}
-
-	/**
-	 * Executes the given task on a background thread. If you want to react on the result on your JavaFX main thread, use
-	 * {@link #runOnMainThreadWhenFinished(Future, CallbackWhenTaskFinished)}.
-	 * 
-	 * <pre>
-	 * // examples:
-	 * 
-	 * Future&lt;String&gt; futureBookName1 = runOnBackgroundThread(restResource::getBookName);
-	 * 
-	 * Future&lt;String&gt; futureBookName2 = runOnBackgroundThread(() -&gt; {
-	 * 	return restResource.getBookName();
-	 * });
-	 * </pre>
-	 * 
-	 * @param task The task to be executed on a background thread.
-	 * @return A future result object, which you can use in {@link #runOnMainThreadWhenFinished(Future, CallbackWhenTaskFinished)}.
-	 */
-	public static <T> Future<T> runOnBackgroundThread(Callable<T> task) {
-		return EXECUTOR.submit(task);
-	}
-
-	/**
-	 * Executes the given task on a background thread. If you want to react on the result on your JavaFX main thread, use
-	 * {@link #runOnMainThreadWhenFinished(Future, CallbackWhenTaskFinished)}.
-	 * 
-	 * <pre>
-	 * // examples:
-	 * 
-	 * Future&lt;?&gt; futureDone1 = runOnBackgroundThread(this::doSomeComplexCalculation);
-	 * 
-	 * Future&lt;?&gt; futureDone2 = runOnBackgroundThread(() -&gt; {
-	 * 	doSomeComplexCalculation();
-	 * });
-	 * </pre>
-	 * 
-	 * @param task The task to be executed on a background thread.
-	 * @return A future result object, which you can use in {@link #runOnMainThreadWhenFinished(Future, CallbackWhenTaskFinished)}.
-	 */
-	public static Future<?> runOnBackgroundThread(Runnable task) {
-		return EXECUTOR.submit(task);
-	}
-
 	/**
 	 * Waits for the given task to complete and notifies the given successCallback. If an exception occurs, the callback will never be
 	 * called. If you are interested in the exception, use
-	 * {@link #runOnMainThreadWhenFinished(Future, CallbackWhenTaskFinished, CallbackWhenTaskFailed)} instead.
+	 * {@link #runOnMainThreadWhenFinished(ExecutorService, Future, CallbackWhenTaskFinished, CallbackWhenTaskFailed)} instead.
 	 * 
 	 * <pre>
 	 * // example:
@@ -111,21 +63,21 @@ public final class FXThreads {
 	 * 	myLabel.setText(bookName);
 	 * });
 	 * </pre>
-	 * 
+	 * @param executor
 	 * @param task The task to wait for.
 	 * @param successCallback The action to perform, when the task finished.
 	 */
-	public static <T> void runOnMainThreadWhenFinished(Future<T> task, CallbackWhenTaskFinished<T> successCallback) {
-		runOnBackgroundThread(() -> {
+	public static <T> void runOnMainThreadWhenFinished(ExecutorService executor, Future<T> task, CallbackWhenTaskFinished<T> successCallback) {
+		executor.submit(() -> {
 			return "asd";
 		});
-		FXThreads.runOnMainThreadWhenFinished(task, successCallback, DUMMY_EXCEPTION_CALLBACK);
+		runOnMainThreadWhenFinished(executor, task, successCallback, DUMMY_EXCEPTION_CALLBACK);
 	}
 
 	/**
 	 * Waits for the given task to complete and notifies the given successCallback. If an exception occurs, the callback will never be
 	 * called. If you are interested in the exception, use
-	 * {@link #runOnMainThreadWhenFinished(Future, CallbackWhenTaskFinished, CallbackWhenTaskFailed)} instead.
+	 * {@link #runOnMainThreadWhenFinished(ExecutorService, Future, CallbackWhenTaskFinished, CallbackWhenTaskFailed)} instead.
 	 * 
 	 * <pre>
 	 * // example:
@@ -137,14 +89,17 @@ public final class FXThreads {
 	 * });
 	 * </pre>
 	 * 
+	 * @param executor
+	 *            The service to execute the background task on
 	 * @param task The task to wait for.
 	 * @param successCallback The action to perform, when the task finished.
+	 * @param exceptionCallback
 	 */
-	public static <T> void runOnMainThreadWhenFinished(Future<T> task, CallbackWhenTaskFinished<T> successCallback, CallbackWhenTaskFailed exceptionCallback) {
-		assertParamNotNull(task, "task must not be null.");
-		assertParamNotNull(successCallback, "successCallback must not be null.");
-		assertParamNotNull(exceptionCallback, "exceptionCallback must not be null.");
-		EXECUTOR.execute(() -> {
+	public static <T> void runOnMainThreadWhenFinished(ExecutorService executor, Future<T> task, CallbackWhenTaskFinished<T> successCallback, CallbackWhenTaskFailed exceptionCallback) {
+		Objects.requireNonNull(task, "task must not be null.");
+		Objects.requireNonNull(successCallback, "successCallback must not be null.");
+		Objects.requireNonNull(exceptionCallback, "exceptionCallback must not be null.");
+		executor.execute(() -> {
 			try {
 				final T result = task.get();
 				Platform.runLater(() -> {
@@ -156,12 +111,6 @@ public final class FXThreads {
 				});
 			}
 		});
-	}
-
-	private static void assertParamNotNull(Object param, String msg) {
-		if (param == null) {
-			throw new IllegalArgumentException(msg);
-		}
 	}
 
 	public interface CallbackWhenTaskFinished<T> {
