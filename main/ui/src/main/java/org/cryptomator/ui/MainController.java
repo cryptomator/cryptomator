@@ -182,6 +182,13 @@ public class MainController implements Initializable, InitializationListener, Un
 		if (selectedDir == null) {
 			stage.setTitle(rb.getString("app.name"));
 			showWelcomeView();
+		} else if (!Files.isDirectory(selectedDir.getPath())) {
+			Platform.runLater(() -> {
+				directoryList.getItems().remove(selectedDir);
+				directoryList.getSelectionModel().clearSelection();
+			});
+			stage.setTitle(rb.getString("app.name"));
+			showWelcomeView();
 		} else {
 			stage.setTitle(selectedDir.getName());
 			showDirectory(selectedDir);

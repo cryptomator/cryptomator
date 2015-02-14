@@ -189,7 +189,8 @@ class DavLocatorFactoryImpl implements DavLocatorFactory, SensitiveDataSwipeList
 
 		@Override
 		public String getHref(boolean isCollection) {
-			final String href = getPrefix().concat(getResourcePath());
+			final String encodedResourcePath = EncodeUtil.escapePath(getResourcePath());
+			final String href = getPrefix().concat(encodedResourcePath);
 			if (isCollection && !href.endsWith("/")) {
 				return href.concat("/");
 			} else if (!isCollection && href.endsWith("/")) {

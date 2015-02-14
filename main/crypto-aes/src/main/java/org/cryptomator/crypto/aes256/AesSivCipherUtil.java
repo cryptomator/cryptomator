@@ -192,7 +192,7 @@ final class AesSivCipherUtil {
 
 		final byte[] result = new byte[in2.length];
 		final int diff = in1.length - in2.length;
-		for (int i = in2.length - 1; i >= diff; i--) {
+		for (int i = 0; i < in2.length; i++) {
 			result[i] = (byte) (in1[i + diff] ^ in2[i]);
 		}
 		return result;
