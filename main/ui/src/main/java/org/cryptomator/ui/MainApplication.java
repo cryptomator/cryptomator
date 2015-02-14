@@ -14,7 +14,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -25,14 +24,16 @@ import javafx.stage.Stage;
 
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.ui.model.Vault;
-import org.cryptomator.ui.settings.Settings;
+import org.cryptomator.ui.MainModule.ControllerFactory;
 import org.cryptomator.ui.util.ActiveWindowStyleSupport;
+import org.cryptomator.ui.util.DeferredCloser;
 import org.cryptomator.ui.util.SingleInstanceManager;
 import org.cryptomator.ui.util.SingleInstanceManager.LocalInstance;
 import org.cryptomator.ui.util.TrayIconUtil;
-import org.cryptomator.webdav.WebDavServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 
 public class MainApplication extends Application {
 
@@ -40,7 +41,38 @@ public class MainApplication extends Application {
 
 	private static final Logger LOG = LoggerFactory.getLogger(MainApplication.class);
 
-	private ExecutorService executorService;
+	private final CleanShutdownPerformer cleanShutdownPerformer = new CleanShutdownPerformer();
+
+	private final ExecutorService executorService;
+
+	private final ControllerFactory controllerFactory;
+
+	private final DeferredCloser closer;
+
+	public MainApplication() {
+		this(getInjector());
+	}
+
+	private static Injector getInjector() {
+		try {
+			return Guice.createInjector(new MainModule());
+		} catch (Exception e) {
+			throw e;
+		}
+	}
+
+	public MainApplication(Injector injector) {
+		this(injector.getInstance(ExecutorService.class),
+				injector.getInstance(ControllerFactory.class),
+				injector.getInstance(DeferredCloser.class));
+	}
+
+	public MainApplication(ExecutorService executorService, ControllerFactory controllerFactory, DeferredCloser closer) {
+		super();
+		this.executorService = executorService;
+		this.controllerFactory = controllerFactory;
+		this.closer = closer;
+	}
 
 	@Override
 	public void start(final Stage primaryStage) throws IOException {
@@ -55,12 +87,12 @@ public class MainApplication extends Application {
 			}
 		});
 
-		executorService = Executors.newCachedThreadPool();
+		Runtime.getRuntime().addShutdownHook(cleanShutdownPerformer);
 
-		WebDavServer.getInstance().start();
 		chooseNativeStylesheet();
 		final ResourceBundle rb = ResourceBundle.getBundle("localization");
 		final FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/main.fxml"), rb);
+		loader.setControllerFactory(controllerFactory);
 		final Parent root = loader.load();
 		final MainController ctrl = loader.getController();
 		ctrl.setStage(primaryStage);
@@ -83,14 +115,10 @@ public class MainApplication extends Application {
 			Main.OPEN_FILE_HANDLER.complete(file -> handleCommandLineArg(ctrl, file.getAbsolutePath()));
 		}
 
-		final LocalInstance cryptomatorGuiInstance = SingleInstanceManager.startLocalInstance(APPLICATION_KEY, executorService);
-		cryptomatorGuiInstance.registerListener(arg -> handleCommandLineArg(ctrl, arg));
+		LocalInstance cryptomatorGuiInstance = closer.closeLater(
+				SingleInstanceManager.startLocalInstance(APPLICATION_KEY, executorService), LocalInstance::close).get().get();
 
-		Main.addShutdownTask(() -> {
-			cryptomatorGuiInstance.close();
-			Settings.save();
-			executorService.shutdown();
-		});
+		cryptomatorGuiInstance.registerListener(arg -> handleCommandLineArg(ctrl, arg));
 	}
 
 	void handleCommandLineArg(final MainController ctrl, String arg) {
@@ -131,11 +159,27 @@ public class MainApplication extends Application {
 
 	private void quit() {
 		Platform.runLater(() -> {
-			WebDavServer.getInstance().stop();
-			Settings.save();
+			stop();
 			Platform.exit();
 			System.exit(0);
 		});
+	}
+
+	@Override
+	public void stop() {
+		closer.close();
+		try {
+			Runtime.getRuntime().removeShutdownHook(cleanShutdownPerformer);
+		} catch (Exception e) {
+
+		}
+	}
+
+	private class CleanShutdownPerformer extends Thread {
+		@Override
+		public void run() {
+			closer.close();
+		}
 	}
 
 }

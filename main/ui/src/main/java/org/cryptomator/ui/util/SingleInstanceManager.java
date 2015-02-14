@@ -1,10 +1,10 @@
 /*******************************************************************************
- * Copyright (c) 2014 Sebastian Stenzel
+ * Copyright (c) 2014 cryptomator.org
  * This file is licensed under the terms of the MIT license.
  * See the LICENSE.txt file for more info.
  * 
  * Contributors:
- *     Sebastian Stenzel - initial API and implementation
+ *     Tillmann Gaida - initial implementation
  ******************************************************************************/
 package org.cryptomator.ui.util;
 

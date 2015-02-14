@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.Normalizer;
 import java.text.Normalizer.Form;
+import java.util.Optional;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -14,8 +15,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.cryptomator.crypto.Cryptor;
 import org.cryptomator.crypto.SamplingDecorator;
 import org.cryptomator.crypto.aes256.Aes256Cryptor;
-import org.cryptomator.ui.Main;
 import org.cryptomator.ui.util.MasterKeyFilter;
+import org.cryptomator.ui.util.DeferredClosable;
+import org.cryptomator.ui.util.DeferredCloser;
 import org.cryptomator.ui.util.mount.CommandFailedException;
 import org.cryptomator.ui.util.mount.WebDavMount;
 import org.cryptomator.ui.util.mount.WebDavMounter;
@@ -38,12 +40,11 @@ public class Vault implements Serializable {
 
 	private final Cryptor cryptor = SamplingDecorator.decorate(new Aes256Cryptor());
 	private final ObjectProperty<Boolean> unlocked = new SimpleObjectProperty<Boolean>(this, "unlocked", Boolean.FALSE);
-	private final Runnable shutdownTask = new ShutdownTask();
 	private final Path path;
 	private boolean verifyFileIntegrity;
 	private String mountName;
-	private ServletLifeCycleAdapter webDavServlet;
-	private WebDavMount webDavMount;
+	private DeferredClosable<ServletLifeCycleAdapter> webDavServlet = DeferredClosable.empty();
+	private DeferredClosable<WebDavMount> webDavMount = DeferredClosable.empty();
 
 	public Vault(final Path vaultDirectoryPath) {
 		if (!Files.isDirectory(vaultDirectoryPath) || !vaultDirectoryPath.getFileName().toString().endsWith(VAULT_FILE_EXTENSION)) {
@@ -62,34 +63,32 @@ public class Vault implements Serializable {
 		return MasterKeyFilter.filteredDirectory(path).iterator().hasNext();
 	}
 
-	public synchronized boolean startServer() {
-		if (webDavServlet != null && webDavServlet.isRunning()) {
+	public synchronized boolean startServer(WebDavServer server, DeferredCloser closer) {
+		Optional<ServletLifeCycleAdapter> o = webDavServlet.get();
+		if (o.isPresent() && o.get().isRunning()) {
 			return false;
 		}
-		webDavServlet = WebDavServer.getInstance().createServlet(path, verifyFileIntegrity, cryptor, getMountName());
-		if (webDavServlet.start()) {
-			Main.addShutdownTask(shutdownTask);
+		ServletLifeCycleAdapter servlet = server.createServlet(path, verifyFileIntegrity, cryptor, getMountName());
+		if (servlet.start()) {
+			webDavServlet = closer.closeLater(servlet, ServletLifeCycleAdapter::stop);
 			return true;
-		} else {
-			return false;
 		}
+		return false;
 	}
 
 	public void stopServer() {
-		if (webDavServlet != null && webDavServlet.isRunning()) {
-			Main.removeShutdownTask(shutdownTask);
-			this.unmount();
-			webDavServlet.stop();
-			cryptor.swipeSensitiveData();
-		}
+		unmount();
+		webDavServlet.close();
+		cryptor.swipeSensitiveData();
 	}
 
-	public boolean mount() {
-		if (webDavServlet == null || !webDavServlet.isRunning()) {
+	public boolean mount(DeferredCloser closer) {
+		Optional<ServletLifeCycleAdapter> o = webDavServlet.get();
+		if (!o.isPresent() || !o.get().isRunning()) {
 			return false;
 		}
 		try {
-			webDavMount = WebDavMounter.mount(webDavServlet.getServletUri(), getMountName());
+			webDavMount = closer.closeLater(WebDavMounter.mount(o.get().getServletUri(), getMountName()), WebDavMount::unmount);
 			return true;
 		} catch (CommandFailedException e) {
 			LOG.warn("mount failed", e);
@@ -97,17 +96,8 @@ public class Vault implements Serializable {
 		}
 	}
 
-	public boolean unmount() {
-		try {
-			if (webDavMount != null) {
-				webDavMount.unmount();
-				webDavMount = null;
-			}
-			return true;
-		} catch (CommandFailedException e) {
-			LOG.warn("unmount failed", e);
-			return false;
-		}
+	public void unmount() {
+		webDavMount.close();
 	}
 
 	/* Getter/Setter */
@@ -206,17 +196,6 @@ public class Vault implements Serializable {
 		} else {
 			return false;
 		}
-	}
-
-	/* graceful shutdown */
-
-	private class ShutdownTask implements Runnable {
-
-		@Override
-		public void run() {
-			stopServer();
-		}
-
 	}
 
 }

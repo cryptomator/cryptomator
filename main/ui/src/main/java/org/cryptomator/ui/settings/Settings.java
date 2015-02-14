@@ -36,7 +36,6 @@ public class Settings implements Serializable {
 	private static final Path SETTINGS_DIR;
 	private static final String SETTINGS_FILE = "settings.json";
 	private static final ObjectMapper JSON_OM = new ObjectMapper();
-	private static Settings INSTANCE = null;
 
 	static {
 		final String appdata = System.getenv("APPDATA");
@@ -61,31 +60,25 @@ public class Settings implements Serializable {
 	}
 
 	public static synchronized Settings load() {
-		if (INSTANCE == null) {
-			try {
-				Files.createDirectories(SETTINGS_DIR);
-				final Path settingsFile = SETTINGS_DIR.resolve(SETTINGS_FILE);
-				final InputStream in = Files.newInputStream(settingsFile, StandardOpenOption.READ);
-				INSTANCE = JSON_OM.readValue(in, Settings.class);
-				return INSTANCE;
-			} catch (IOException e) {
-				LOG.warn("Failed to load settings, creating new one.");
-				INSTANCE = Settings.defaultSettings();
-			}
+		try {
+			Files.createDirectories(SETTINGS_DIR);
+			final Path settingsFile = SETTINGS_DIR.resolve(SETTINGS_FILE);
+			final InputStream in = Files.newInputStream(settingsFile, StandardOpenOption.READ);
+			return JSON_OM.readValue(in, Settings.class);
+		} catch (IOException e) {
+			LOG.warn("Failed to load settings, creating new one.");
+			return Settings.defaultSettings();
 		}
-		return INSTANCE;
 	}
 
-	public static synchronized void save() {
-		if (INSTANCE != null) {
-			try {
-				Files.createDirectories(SETTINGS_DIR);
-				final Path settingsFile = SETTINGS_DIR.resolve(SETTINGS_FILE);
-				final OutputStream out = Files.newOutputStream(settingsFile, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
-				JSON_OM.writeValue(out, INSTANCE);
-			} catch (IOException e) {
-				LOG.error("Failed to save settings.", e);
-			}
+	public synchronized void save() {
+		try {
+			Files.createDirectories(SETTINGS_DIR);
+			final Path settingsFile = SETTINGS_DIR.resolve(SETTINGS_FILE);
+			final OutputStream out = Files.newOutputStream(settingsFile, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
+			JSON_OM.writeValue(out, this);
+		} catch (IOException e) {
+			LOG.error("Failed to save settings.", e);
 		}
 	}
 
