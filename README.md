@@ -1,6 +1,8 @@
 Cryptomator
 ====================
 
+[![Join the chat at https://gitter.im/totalvoidness/cryptomator](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/totalvoidness/cryptomator?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 Multiplatform transparent client-side encryption of your files in the cloud.
 
 If you want to take a look at the current beta version, go ahead and get your copy of cryptomator on  [Cryptomator.org](http://cryptomator.org) or clone and build Cryptomator using Maven (instructions below).
