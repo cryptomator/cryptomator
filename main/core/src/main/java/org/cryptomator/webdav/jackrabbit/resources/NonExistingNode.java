@@ -34,7 +34,7 @@ public class NonExistingNode extends AbstractEncryptedNode {
 
 	@Override
 	public boolean isCollection() {
-		throw new UnsupportedOperationException("Resource doesn't exist.");
+		return false;
 	}
 
 	@Override

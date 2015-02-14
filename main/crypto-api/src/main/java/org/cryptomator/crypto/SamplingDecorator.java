@@ -71,7 +71,7 @@ public class SamplingDecorator implements Cryptor, CryptorIOSampling {
 	}
 
 	@Override
-	public String decryptPath(String encryptedPath, char encryptedPathSep, char cleartextPathSep, CryptorIOSupport ioSupport) {
+	public String decryptPath(String encryptedPath, char encryptedPathSep, char cleartextPathSep, CryptorIOSupport ioSupport) throws DecryptFailedException {
 		decryptedBytes.addAndGet(StringUtils.length(encryptedPath));
 		return cryptor.decryptPath(encryptedPath, encryptedPathSep, cleartextPathSep, ioSupport);
 	}

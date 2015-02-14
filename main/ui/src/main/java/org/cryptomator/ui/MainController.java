@@ -158,7 +158,7 @@ public class MainController implements Initializable, InitializationListener, Un
 		final Path vaultPath;
 		if (path != null && Files.isDirectory(path)) {
 			vaultPath = path;
-		} else if (Files.isRegularFile(path) && path.getParent().getFileName().toString().endsWith(Vault.VAULT_FILE_EXTENSION)) {
+		} else if (path != null && Files.isRegularFile(path) && path.getParent().getFileName().toString().endsWith(Vault.VAULT_FILE_EXTENSION)) {
 			vaultPath = path.getParent();
 		} else {
 			return;

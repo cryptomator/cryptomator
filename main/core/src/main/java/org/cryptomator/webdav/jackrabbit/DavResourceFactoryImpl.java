@@ -62,9 +62,9 @@ class DavResourceFactoryImpl implements DavResourceFactory {
 	public DavResource createResource(DavResourceLocator locator, DavSession session) throws DavException {
 		final Path path = ResourcePathUtils.getPhysicalPath(locator);
 
-		if (Files.isRegularFile(path)) {
+		if (path != null && Files.isRegularFile(path)) {
 			return createFile(locator, session);
-		} else if (Files.isDirectory(path)) {
+		} else if (path != null && Files.isDirectory(path)) {
 			return createDirectory(locator, session);
 		} else {
 			return createNonExisting(locator, session);

@@ -37,6 +37,7 @@ import org.apache.jackrabbit.webdav.property.DefaultDavProperty;
 import org.apache.jackrabbit.webdav.property.ResourceType;
 import org.cryptomator.crypto.Cryptor;
 import org.cryptomator.webdav.exceptions.DavRuntimeException;
+import org.cryptomator.webdav.exceptions.DecryptFailedRuntimeException;
 import org.cryptomator.webdav.exceptions.IORuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -100,9 +101,14 @@ public class EncryptedDir extends AbstractEncryptedNode {
 			final List<DavResource> result = new ArrayList<>();
 
 			for (final Path childPath : directoryStream) {
-				final DavResourceLocator childLocator = locator.getFactory().createResourceLocator(locator.getPrefix(), locator.getWorkspacePath(), childPath.toString(), false);
-				final DavResource resource = factory.createResource(childLocator, session);
-				result.add(resource);
+				try {
+					final DavResourceLocator childLocator = locator.getFactory().createResourceLocator(locator.getPrefix(), locator.getWorkspacePath(), childPath.toString(), false);
+					final DavResource resource = factory.createResource(childLocator, session);
+					result.add(resource);
+				} catch (DecryptFailedRuntimeException e) {
+					LOG.warn("Decryption of resource failed: " + childPath);
+					continue;
+				}
 			}
 			return new DavResourceIteratorImpl(result);
 		} catch (IOException e) {

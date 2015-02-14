@@ -215,7 +215,7 @@ public class Aes256CryptorTest {
 	}
 
 	@Test
-	public void testEncryptionOfFilenames() throws IOException {
+	public void testEncryptionOfFilenames() throws IOException, DecryptFailedException {
 		final CryptorIOSupport ioSupportMock = new CryptoIOSupportMock();
 		final Aes256Cryptor cryptor = new Aes256Cryptor(TEST_PRNG);
 

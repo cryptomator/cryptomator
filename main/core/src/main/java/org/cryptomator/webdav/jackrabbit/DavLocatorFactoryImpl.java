@@ -24,6 +24,8 @@ import org.apache.jackrabbit.webdav.util.EncodeUtil;
 import org.cryptomator.crypto.Cryptor;
 import org.cryptomator.crypto.CryptorIOSupport;
 import org.cryptomator.crypto.SensitiveDataSwipeListener;
+import org.cryptomator.crypto.exceptions.DecryptFailedException;
+import org.cryptomator.webdav.exceptions.DecryptFailedRuntimeException;
 
 class DavLocatorFactoryImpl implements DavLocatorFactory, SensitiveDataSwipeListener, CryptorIOSupport {
 
@@ -49,17 +51,28 @@ class DavLocatorFactoryImpl implements DavLocatorFactory, SensitiveDataSwipeList
 		return new DavResourceLocatorImpl(fullPrefix, resourcePath);
 	}
 
+	/**
+	 * @throws DecryptFailedRuntimeException, which should a checked exception, but Jackrabbit doesn't allow that.
+	 */
 	@Override
 	public DavResourceLocator createResourceLocator(String prefix, String workspacePath, String path, boolean isResourcePath) {
 		final String fullPrefix = prefix.endsWith("/") ? prefix : prefix + "/";
 
-		final String resourcePath = (isResourcePath) ? path : getResourcePath(path);
-		return new DavResourceLocatorImpl(fullPrefix, resourcePath);
+		try {
+			final String resourcePath = (isResourcePath) ? path : getResourcePath(path);
+			return new DavResourceLocatorImpl(fullPrefix, resourcePath);
+		} catch (DecryptFailedException e) {
+			throw new DecryptFailedRuntimeException(e);
+		}
 	}
 
 	@Override
 	public DavResourceLocator createResourceLocator(String prefix, String workspacePath, String resourcePath) {
-		return createResourceLocator(prefix, workspacePath, resourcePath, true);
+		try {
+			return createResourceLocator(prefix, workspacePath, resourcePath, true);
+		} catch (DecryptFailedRuntimeException e) {
+			throw new IllegalStateException("Tried to decrypt resourcePath. Only repositoryPaths can be encrypted.", e);
+		}
 	}
 
 	/* Encryption/Decryption */
@@ -87,7 +100,7 @@ class DavLocatorFactoryImpl implements DavLocatorFactory, SensitiveDataSwipeList
 	/**
 	 * @return Decrypted path for use in URIs.
 	 */
-	private String getResourcePath(String repositoryPath) {
+	private String getResourcePath(String repositoryPath) throws DecryptFailedException {
 		String decryptedPath = pathCache.getKey(repositoryPath);
 		if (decryptedPath == null) {
 			decryptedPath = decryptResourcePath(repositoryPath);
@@ -96,7 +109,7 @@ class DavLocatorFactoryImpl implements DavLocatorFactory, SensitiveDataSwipeList
 		return decryptedPath;
 	}
 
-	private String decryptResourcePath(String repositoryPath) {
+	private String decryptResourcePath(String repositoryPath) throws DecryptFailedException {
 		final Path absRepoPath = FileSystems.getDefault().getPath(repositoryPath);
 		if (fsRoot.equals(absRepoPath)) {
 			return null;

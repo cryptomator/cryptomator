@@ -305,7 +305,7 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 				encryptedPathComps.add(encrypted);
 			}
 			return StringUtils.join(encryptedPathComps, encryptedPathSep);
-		} catch (IllegalBlockSizeException | BadPaddingException | IOException e) {
+		} catch (InvalidKeyException | IOException e) {
 			throw new IllegalStateException("Unable to encrypt path: " + cleartextPath, e);
 		}
 	}
@@ -325,18 +325,15 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 	 * These alternative names consist of the checksum, a unique id and a special file extension defined in
 	 * {@link FileNamingConventions#LONG_NAME_FILE_EXT}.
 	 */
-	private String encryptPathComponent(final String cleartext, final SecretKey key, CryptorIOSupport ioSupport) throws IllegalBlockSizeException, BadPaddingException, IOException {
-		final byte[] mac = hmacSha256(hMacMasterKey).doFinal(cleartext.getBytes());
-		final byte[] partialIv = ArrayUtils.subarray(mac, 0, 10);
-		final ByteBuffer iv = ByteBuffer.allocate(AES_BLOCK_LENGTH);
-		iv.put(partialIv);
-		final Cipher cipher = this.aesCtrCipher(key, iv.array(), Cipher.ENCRYPT_MODE);
+	private String encryptPathComponent(final String cleartext, final SecretKey key, CryptorIOSupport ioSupport) throws IOException, InvalidKeyException {
 		// add NULL padding to the cleartext to get a multiple of the block size:
 		final byte[] cleartextBytes = cleartext.getBytes(StandardCharsets.UTF_8);
 		final byte[] nullBytePadding = new byte[AES_BLOCK_LENGTH - cleartextBytes.length % AES_BLOCK_LENGTH];
 		final byte[] paddedCleartextBytes = ArrayUtils.addAll(cleartextBytes, nullBytePadding);
-		final byte[] encryptedBytes = cipher.doFinal(paddedCleartextBytes);
-		final String ivAndCiphertext = ENCRYPTED_FILENAME_CODEC.encodeAsString(partialIv) + IV_PREFIX_SEPARATOR + ENCRYPTED_FILENAME_CODEC.encodeAsString(encryptedBytes);
+
+		// encrypt:
+		final byte[] encryptedBytes = AesSivCipherUtil.sivEncrypt(key.getEncoded(), paddedCleartextBytes);
+		final String ivAndCiphertext = ENCRYPTED_FILENAME_CODEC.encodeAsString(encryptedBytes);
 
 		if (ivAndCiphertext.length() + BASIC_FILE_EXT.length() > ENCRYPTED_FILENAME_LENGTH_LIMIT) {
 			final String crc32 = Long.toHexString(crc32Sum(ivAndCiphertext.getBytes()));
@@ -351,7 +348,7 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 	}
 
 	@Override
-	public String decryptPath(String encryptedPath, char encryptedPathSep, char cleartextPathSep, CryptorIOSupport ioSupport) {
+	public String decryptPath(String encryptedPath, char encryptedPathSep, char cleartextPathSep, CryptorIOSupport ioSupport) throws DecryptFailedException {
 		try {
 			final String[] encryptedPathComps = StringUtils.split(encryptedPath, encryptedPathSep);
 			final List<String> cleartextPathComps = new ArrayList<>(encryptedPathComps.length);
@@ -360,7 +357,7 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 				cleartextPathComps.add(new String(cleartext));
 			}
 			return StringUtils.join(cleartextPathComps, cleartextPathSep);
-		} catch (IllegalBlockSizeException | BadPaddingException | IOException e) {
+		} catch (InvalidKeyException | IOException e) {
 			throw new IllegalStateException("Unable to decrypt path: " + encryptedPath, e);
 		}
 	}
@@ -368,29 +365,24 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 	/**
 	 * @see #encryptPathComponent(String, SecretKey, CryptorIOSupport)
 	 */
-	private String decryptPathComponent(final String encrypted, final SecretKey key, CryptorIOSupport ioSupport) throws IllegalBlockSizeException, BadPaddingException, IOException {
-		final String ivAndCiphertext;
+	private String decryptPathComponent(final String encrypted, final SecretKey key, CryptorIOSupport ioSupport) throws IOException, InvalidKeyException, DecryptFailedException {
+		final String ciphertext;
 		if (encrypted.endsWith(LONG_NAME_FILE_EXT)) {
 			final String basename = StringUtils.removeEnd(encrypted, LONG_NAME_FILE_EXT);
 			final String crc32 = StringUtils.substringBefore(basename, LONG_NAME_PREFIX_SEPARATOR);
 			final String uuid = StringUtils.substringAfter(basename, LONG_NAME_PREFIX_SEPARATOR);
 			final String metadataFilename = crc32 + METADATA_FILE_EXT;
 			final LongFilenameMetadata metadata = this.getMetadata(ioSupport, metadataFilename);
-			ivAndCiphertext = metadata.getEncryptedFilenameForUUID(UUID.fromString(uuid));
+			ciphertext = metadata.getEncryptedFilenameForUUID(UUID.fromString(uuid));
 		} else if (encrypted.endsWith(BASIC_FILE_EXT)) {
-			ivAndCiphertext = StringUtils.removeEndIgnoreCase(encrypted, BASIC_FILE_EXT);
+			ciphertext = StringUtils.removeEndIgnoreCase(encrypted, BASIC_FILE_EXT);
 		} else {
 			throw new IllegalArgumentException("Unsupported path component: " + encrypted);
 		}
 
-		final String partialIvStr = StringUtils.substringBefore(ivAndCiphertext, IV_PREFIX_SEPARATOR);
-		final String ciphertext = StringUtils.substringAfter(ivAndCiphertext, IV_PREFIX_SEPARATOR);
-		final ByteBuffer iv = ByteBuffer.allocate(AES_BLOCK_LENGTH);
-		iv.put(ENCRYPTED_FILENAME_CODEC.decode(partialIvStr));
-
-		final Cipher cipher = this.aesCtrCipher(key, iv.array(), Cipher.DECRYPT_MODE);
+		// decrypt:
 		final byte[] encryptedBytes = ENCRYPTED_FILENAME_CODEC.decode(ciphertext);
-		final byte[] paddedCleartextBytes = cipher.doFinal(encryptedBytes);
+		final byte[] paddedCleartextBytes = AesSivCipherUtil.sivDecrypt(key.getEncoded(), encryptedBytes);
 
 		// remove NULL padding (not valid in file names anyway)
 		final int beginOfPadding = ArrayUtils.indexOf(paddedCleartextBytes, (byte) 0x00);

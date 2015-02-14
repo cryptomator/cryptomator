@@ -65,8 +65,9 @@ public interface Cryptor extends SensitiveDataSwipeListener {
 	 * @param metadataSupport Support object allowing the Cryptor to read and write its own metadata to the location of the encrypted file.
 	 * @return Decrypted path components concatenated by the given cleartextPathSep. Must not start with cleartextPathSep, unless the
 	 *         cleartext path is explicitly absolute.
+	 * @throws DecryptFailedException If the decryption failed for various reasons (including wrong password).
 	 */
-	String decryptPath(String encryptedPath, char encryptedPathSep, char cleartextPathSep, CryptorIOSupport ioSupport);
+	String decryptPath(String encryptedPath, char encryptedPathSep, char cleartextPathSep, CryptorIOSupport ioSupport) throws DecryptFailedException;
 
 	/**
 	 * @return <code>true</code> If the integrity of the file can be assured.
