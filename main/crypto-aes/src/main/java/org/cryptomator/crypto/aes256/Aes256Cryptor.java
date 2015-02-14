@@ -44,7 +44,6 @@ import javax.security.auth.Destroyable;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.NullOutputStream;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.crypto.generators.SCrypt;
 import org.cryptomator.crypto.AbstractCryptor;
@@ -326,13 +325,10 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 	 * {@link FileNamingConventions#LONG_NAME_FILE_EXT}.
 	 */
 	private String encryptPathComponent(final String cleartext, final SecretKey key, CryptorIOSupport ioSupport) throws IOException, InvalidKeyException {
-		// add NULL padding to the cleartext to get a multiple of the block size:
 		final byte[] cleartextBytes = cleartext.getBytes(StandardCharsets.UTF_8);
-		final byte[] nullBytePadding = new byte[AES_BLOCK_LENGTH - cleartextBytes.length % AES_BLOCK_LENGTH];
-		final byte[] paddedCleartextBytes = ArrayUtils.addAll(cleartextBytes, nullBytePadding);
 
 		// encrypt:
-		final byte[] encryptedBytes = AesSivCipherUtil.sivEncrypt(key.getEncoded(), paddedCleartextBytes);
+		final byte[] encryptedBytes = AesSivCipherUtil.sivEncrypt(key.getEncoded(), cleartextBytes);
 		final String ivAndCiphertext = ENCRYPTED_FILENAME_CODEC.encodeAsString(encryptedBytes);
 
 		if (ivAndCiphertext.length() + BASIC_FILE_EXT.length() > ENCRYPTED_FILENAME_LENGTH_LIMIT) {
@@ -382,16 +378,9 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 
 		// decrypt:
 		final byte[] encryptedBytes = ENCRYPTED_FILENAME_CODEC.decode(ciphertext);
-		final byte[] paddedCleartextBytes = AesSivCipherUtil.sivDecrypt(key.getEncoded(), encryptedBytes);
+		final byte[] cleartextBytes = AesSivCipherUtil.sivDecrypt(key.getEncoded(), encryptedBytes);
 
-		// remove NULL padding (not valid in file names anyway)
-		final int beginOfPadding = ArrayUtils.indexOf(paddedCleartextBytes, (byte) 0x00);
-		if (beginOfPadding == -1) {
-			return new String(paddedCleartextBytes, StandardCharsets.UTF_8);
-		} else {
-			final byte[] cleartextBytes = Arrays.copyOf(paddedCleartextBytes, beginOfPadding);
-			return new String(cleartextBytes, StandardCharsets.UTF_8);
-		}
+		return new String(cleartextBytes, StandardCharsets.UTF_8);
 	}
 
 	private LongFilenameMetadata getMetadata(CryptorIOSupport ioSupport, String metadataFile) throws IOException {
