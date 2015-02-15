@@ -13,7 +13,6 @@ import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.util.Arrays;
 
-import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang3.ArrayUtils;
 import org.bouncycastle.crypto.BlockCipher;
 import org.bouncycastle.crypto.CipherParameters;
@@ -61,7 +60,7 @@ final class AesSivCipherUtil {
 			aes.reset();
 		}
 
-		final byte[] ciphertext = xorbegin(plaintext, x);
+		final byte[] ciphertext = xor(plaintext, x);
 
 		return ArrayUtils.addAll(iv, ciphertext);
 	}
@@ -96,9 +95,7 @@ final class AesSivCipherUtil {
 			aes.reset();
 		}
 
-		final byte[] plaintext = xorbegin(actualCiphertext, x);
-
-		Hex.encodeHexString(actualCiphertext);
+		final byte[] plaintext = xor(actualCiphertext, x);
 
 		final byte[] control = s2v(k1, plaintext, additionalData);
 
@@ -178,27 +175,6 @@ final class AesSivCipherUtil {
 	}
 
 	private static byte[] xor(byte[] in1, byte[] in2) {
-		if (in1 == null || in2 == null || in1.length != in2.length) {
-			throw new IllegalArgumentException("Inputs must equal in length.");
-		}
-
-		return xorbegin(in1, in2);
-	}
-
-	private static byte[] xorend(byte[] in1, byte[] in2) {
-		if (in1 == null || in2 == null || in1.length < in2.length) {
-			throw new IllegalArgumentException("Length of first input must be >= length of second input.");
-		}
-
-		final byte[] result = new byte[in2.length];
-		final int diff = in1.length - in2.length;
-		for (int i = 0; i < in2.length; i++) {
-			result[i] = (byte) (in1[i + diff] ^ in2[i]);
-		}
-		return result;
-	}
-
-	private static byte[] xorbegin(byte[] in1, byte[] in2) {
 		if (in1 == null || in2 == null || in1.length > in2.length) {
 			throw new IllegalArgumentException("Length of first input must be <= length of second input.");
 		}
@@ -206,6 +182,19 @@ final class AesSivCipherUtil {
 		final byte[] result = new byte[in1.length];
 		for (int i = 0; i < result.length; i++) {
 			result[i] = (byte) (in1[i] ^ in2[i]);
+		}
+		return result;
+	}
+
+	private static byte[] xorend(byte[] in1, byte[] in2) {
+		if (in1 == null || in2 == null || in1.length < in2.length) {
+			throw new IllegalArgumentException("Length of first input must be >= length of second input.");
+		}
+
+		final byte[] result = Arrays.copyOf(in1, in1.length);
+		final int diff = in1.length - in2.length;
+		for (int i = 0; i < in2.length; i++) {
+			result[i + diff] = (byte) (result[i + diff] ^ in2[i]);
 		}
 		return result;
 	}
