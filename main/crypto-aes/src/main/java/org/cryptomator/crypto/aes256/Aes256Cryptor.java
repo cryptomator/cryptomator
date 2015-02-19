@@ -27,7 +27,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
-import java.util.zip.CRC32;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -288,12 +287,6 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 		}
 	}
 
-	private long crc32Sum(byte[] source) {
-		final CRC32 crc32 = new CRC32();
-		crc32.update(source);
-		return crc32.getValue();
-	}
-
 	@Override
 	public String encryptPath(String cleartextPath, char encryptedPathSep, char cleartextPathSep, CryptorIOSupport ioSupport) {
 		try {
@@ -332,10 +325,10 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 		final String ivAndCiphertext = ENCRYPTED_FILENAME_CODEC.encodeAsString(encryptedBytes);
 
 		if (ivAndCiphertext.length() + BASIC_FILE_EXT.length() > ENCRYPTED_FILENAME_LENGTH_LIMIT) {
-			final String crc32 = Long.toHexString(crc32Sum(ivAndCiphertext.getBytes()));
-			final String metadataFilename = crc32 + METADATA_FILE_EXT;
+			final String groupPrefix = ivAndCiphertext.substring(0, LONG_NAME_PREFIX_LENGTH);
+			final String metadataFilename = groupPrefix + METADATA_FILE_EXT;
 			final LongFilenameMetadata metadata = this.getMetadata(ioSupport, metadataFilename);
-			final String alternativeFileName = crc32 + LONG_NAME_PREFIX_SEPARATOR + metadata.getOrCreateUuidForEncryptedFilename(ivAndCiphertext).toString() + LONG_NAME_FILE_EXT;
+			final String alternativeFileName = groupPrefix + metadata.getOrCreateUuidForEncryptedFilename(ivAndCiphertext).toString() + LONG_NAME_FILE_EXT;
 			this.storeMetadata(ioSupport, metadataFilename, metadata);
 			return alternativeFileName;
 		} else {
@@ -365,9 +358,9 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 		final String ciphertext;
 		if (encrypted.endsWith(LONG_NAME_FILE_EXT)) {
 			final String basename = StringUtils.removeEnd(encrypted, LONG_NAME_FILE_EXT);
-			final String crc32 = StringUtils.substringBefore(basename, LONG_NAME_PREFIX_SEPARATOR);
-			final String uuid = StringUtils.substringAfter(basename, LONG_NAME_PREFIX_SEPARATOR);
-			final String metadataFilename = crc32 + METADATA_FILE_EXT;
+			final String groupPrefix = basename.substring(0, LONG_NAME_PREFIX_LENGTH);
+			final String uuid = basename.substring(LONG_NAME_PREFIX_LENGTH);
+			final String metadataFilename = groupPrefix + METADATA_FILE_EXT;
 			final LongFilenameMetadata metadata = this.getMetadata(ioSupport, metadataFilename);
 			ciphertext = metadata.getEncryptedFilenameForUUID(UUID.fromString(uuid));
 		} else if (encrypted.endsWith(BASIC_FILE_EXT)) {
