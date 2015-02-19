@@ -14,6 +14,7 @@ import java.net.URL;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
@@ -39,9 +40,9 @@ import org.cryptomator.crypto.exceptions.UnsupportedKeyLengthException;
 import org.cryptomator.crypto.exceptions.WrongPasswordException;
 import org.cryptomator.ui.controls.SecPasswordField;
 import org.cryptomator.ui.model.Vault;
+import org.cryptomator.ui.util.DeferredCloser;
 import org.cryptomator.ui.util.FXThreads;
 import org.cryptomator.ui.util.MasterKeyFilter;
-import org.cryptomator.ui.util.DeferredCloser;
 import org.cryptomator.webdav.WebDavServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -118,7 +119,9 @@ public class UnlockController implements Initializable {
 	private void didClickUnlockButton(ActionEvent event) {
 		setControlsDisabled(true);
 		final String masterKeyFileName = usernameBox.getValue() + Aes256Cryptor.MASTERKEY_FILE_EXT;
+		final String masterKeyBackupFileName = masterKeyFileName + Aes256Cryptor.MASTERKEY_BACKUP_FILE_EXT;
 		final Path masterKeyPath = directory.getPath().resolve(masterKeyFileName);
+		final Path masterKeyBackupPath = directory.getPath().resolve(masterKeyBackupFileName);
 		final CharSequence password = passwordField.getCharacters();
 		InputStream masterKeyInputStream = null;
 		try {
@@ -131,6 +134,8 @@ public class UnlockController implements Initializable {
 				directory.getCryptor().swipeSensitiveData();
 				return;
 			}
+			// at this point we know for sure, that the masterkey can be decrypted, so lets make a backup:
+			Files.copy(masterKeyPath, masterKeyBackupPath, StandardCopyOption.REPLACE_EXISTING);
 			directory.setUnlocked(true);
 			final Future<Boolean> futureMount = exec.submit(() -> directory.mount(closer));
 			FXThreads.runOnMainThreadWhenFinished(exec, futureMount, this::didUnlockAndMount);
