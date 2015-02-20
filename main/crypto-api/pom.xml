@@ -18,6 +18,7 @@
 	<name>Cryptomator cryptographic module API</name>
 
 	<dependencies>
+		<!-- commons -->
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>

@@ -26,6 +26,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.fxml.JavaFXBuilderFactory;
 import javafx.geometry.Side;
 import javafx.scene.Parent;
 import javafx.scene.control.ContextMenu;
@@ -37,7 +38,9 @@ import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import javafx.util.BuilderFactory;
 
+import org.cryptomator.crypto.Cryptor;
 import org.cryptomator.ui.InitializeController.InitializationListener;
 import org.cryptomator.ui.MainModule.ControllerFactory;
 import org.cryptomator.ui.UnlockController.UnlockListener;
@@ -49,6 +52,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 public class MainController implements Initializable, InitializationListener, UnlockListener, LockListener {
 
@@ -74,17 +78,19 @@ public class MainController implements Initializable, InitializationListener, Un
 	@FXML
 	private Pane contentPane;
 
+	private final ControllerFactory controllerFactory;
+	private final Settings settings;
+	private final Provider<Cryptor> cryptorProvider;
+	private final BuilderFactory builderFactory = new JavaFXBuilderFactory(MainController.class.getClassLoader());
+
 	private ResourceBundle rb;
 
-	private final ControllerFactory controllerFactory;
-
-	private final Settings settings;
-
 	@Inject
-	public MainController(ControllerFactory controllerFactory, Settings settings) {
+	public MainController(ControllerFactory controllerFactory, Settings settings, Provider<Cryptor> cryptorProvider) {
 		super();
 		this.controllerFactory = controllerFactory;
 		this.settings = settings;
+		this.cryptorProvider = cryptorProvider;
 	}
 
 	@Override
@@ -164,7 +170,7 @@ public class MainController implements Initializable, InitializationListener, Un
 			return;
 		}
 
-		final Vault vault = new Vault(vaultPath);
+		final Vault vault = new Vault(vaultPath, cryptorProvider.get());
 		if (!directoryList.getItems().contains(vault)) {
 			directoryList.getItems().add(vault);
 		}
@@ -222,7 +228,7 @@ public class MainController implements Initializable, InitializationListener, Un
 
 	private <T> T showView(String fxml) {
 		try {
-			final FXMLLoader loader = new FXMLLoader(getClass().getResource(fxml), rb);
+			final FXMLLoader loader = new FXMLLoader(getClass().getResource(fxml), rb, builderFactory);
 			loader.setControllerFactory(controllerFactory);
 			final Parent root = loader.load();
 			contentPane.getChildren().clear();

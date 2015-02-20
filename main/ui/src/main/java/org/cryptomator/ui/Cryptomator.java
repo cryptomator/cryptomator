@@ -28,7 +28,7 @@ import org.eclipse.jetty.util.ConcurrentHashSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Main {
+public class Cryptomator {
 	public static final Logger LOG = LoggerFactory.getLogger(MainApplication.class);
 
 	public static final CompletableFuture<Consumer<File>> OPEN_FILE_HANDLER = new CompletableFuture<>();

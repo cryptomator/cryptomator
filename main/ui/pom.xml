@@ -19,9 +19,8 @@
 
 	<properties>
 		<javafx.application.name>Cryptomator</javafx.application.name>
-		<exec.mainClass>org.cryptomator.ui.Main</exec.mainClass>
+		<exec.mainClass>org.cryptomator.ui.Cryptomator</exec.mainClass>
 		<javafx.tools.ant.jar>${java.home}/../lib/ant-javafx.jar</javafx.tools.ant.jar>
-		<controlsfx.version>8.20.8</controlsfx.version>
 	</properties>
 
 	<dependencies>
@@ -50,23 +49,10 @@
 			<artifactId>commons-lang3</artifactId>
 		</dependency>
 		
-		<!-- UI
-		<dependency>
-			<groupId>org.controlsfx</groupId>
-			<artifactId>controlsfx</artifactId>
-			<version>${controlsfx.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>com.github.axet</groupId>
-			<artifactId>desktop</artifactId>
-			<version>2.2.3</version>
-		</dependency> -->
-
+		<!-- DI -->
 		<dependency>
 			<groupId>com.google.inject</groupId>
 			<artifactId>guice</artifactId>
-			<version>3.0</version>
 		</dependency>
 	</dependencies>
 

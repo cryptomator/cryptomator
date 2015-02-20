@@ -30,7 +30,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.prefs.Preferences;
 
 import org.apache.commons.io.IOUtils;
-import org.cryptomator.ui.Main;
+import org.cryptomator.ui.Cryptomator;
 import org.cryptomator.ui.util.ListenerRegistry.ListenerRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -193,7 +193,7 @@ public class SingleInstanceManager {
 			IOUtils.closeQuietly(selector);
 			IOUtils.closeQuietly(channel);
 			if (getSavedPort(applicationKey).orElse(-1).equals(port)) {
-				Preferences.userNodeForPackage(Main.class).remove(applicationKey);
+				Preferences.userNodeForPackage(Cryptomator.class).remove(applicationKey);
 			}
 		}
 
@@ -226,7 +226,7 @@ public class SingleInstanceManager {
 
 	/**
 	 * Checks if there is a valid port at
-	 * {@link Preferences#userNodeForPackage(Class)} for {@link Main} under the
+	 * {@link Preferences#userNodeForPackage(Class)} for {@link Cryptomator} under the
 	 * given applicationKey, tries to connect to the port at the loopback
 	 * address and checks if the port identifies with the applicationKey.
 	 * 
@@ -284,7 +284,7 @@ public class SingleInstanceManager {
 	}
 
 	static Optional<Integer> getSavedPort(String applicationKey) {
-		int port = Preferences.userNodeForPackage(Main.class).getInt(applicationKey, -1);
+		int port = Preferences.userNodeForPackage(Cryptomator.class).getInt(applicationKey, -1);
 
 		if (port == -1) {
 			LOG.info("no running instance found");
@@ -296,7 +296,7 @@ public class SingleInstanceManager {
 
 	/**
 	 * Creates a server socket on a free port and saves the port in
-	 * {@link Preferences#userNodeForPackage(Class)} for {@link Main} under the
+	 * {@link Preferences#userNodeForPackage(Class)} for {@link Cryptomator} under the
 	 * given applicationKey.
 	 * 
 	 * @param applicationKey
@@ -312,7 +312,7 @@ public class SingleInstanceManager {
 		channel.bind(new InetSocketAddress(InetAddress.getLoopbackAddress(), 0));
 
 		final int port = ((InetSocketAddress) channel.getLocalAddress()).getPort();
-		Preferences.userNodeForPackage(Main.class).putInt(applicationKey, port);
+		Preferences.userNodeForPackage(Cryptomator.class).putInt(applicationKey, port);
 		LOG.info("InstanceManager bound to port {}", port);
 
 		Selector selector = Selector.open();

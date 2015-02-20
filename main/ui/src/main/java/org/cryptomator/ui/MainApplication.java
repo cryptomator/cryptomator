@@ -18,13 +18,14 @@ import java.util.concurrent.ExecutorService;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
+import javafx.fxml.JavaFXBuilderFactory;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import org.apache.commons.lang3.SystemUtils;
-import org.cryptomator.ui.model.Vault;
 import org.cryptomator.ui.MainModule.ControllerFactory;
+import org.cryptomator.ui.model.Vault;
 import org.cryptomator.ui.util.ActiveWindowStyleSupport;
 import org.cryptomator.ui.util.DeferredCloser;
 import org.cryptomator.ui.util.SingleInstanceManager;
@@ -32,6 +33,7 @@ import org.cryptomator.ui.util.SingleInstanceManager.LocalInstance;
 import org.cryptomator.ui.util.TrayIconUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
@@ -42,11 +44,8 @@ public class MainApplication extends Application {
 	private static final Logger LOG = LoggerFactory.getLogger(MainApplication.class);
 
 	private final CleanShutdownPerformer cleanShutdownPerformer = new CleanShutdownPerformer();
-
 	private final ExecutorService executorService;
-
 	private final ControllerFactory controllerFactory;
-
 	private final DeferredCloser closer;
 
 	public MainApplication() {
@@ -62,9 +61,7 @@ public class MainApplication extends Application {
 	}
 
 	public MainApplication(Injector injector) {
-		this(injector.getInstance(ExecutorService.class),
-				injector.getInstance(ControllerFactory.class),
-				injector.getInstance(DeferredCloser.class));
+		this(injector.getInstance(ExecutorService.class), injector.getInstance(ControllerFactory.class), injector.getInstance(DeferredCloser.class));
 	}
 
 	public MainApplication(ExecutorService executorService, ControllerFactory controllerFactory, DeferredCloser closer) {
@@ -91,7 +88,7 @@ public class MainApplication extends Application {
 
 		chooseNativeStylesheet();
 		final ResourceBundle rb = ResourceBundle.getBundle("localization");
-		final FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/main.fxml"), rb);
+		final FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/main.fxml"), rb, new JavaFXBuilderFactory(MainApplication.class.getClassLoader()));
 		loader.setControllerFactory(controllerFactory);
 		final Parent root = loader.load();
 		final MainController ctrl = loader.getController();
@@ -112,11 +109,10 @@ public class MainApplication extends Application {
 		}
 
 		if (SystemUtils.IS_OS_MAC_OSX) {
-			Main.OPEN_FILE_HANDLER.complete(file -> handleCommandLineArg(ctrl, file.getAbsolutePath()));
+			Cryptomator.OPEN_FILE_HANDLER.complete(file -> handleCommandLineArg(ctrl, file.getAbsolutePath()));
 		}
 
-		LocalInstance cryptomatorGuiInstance = closer.closeLater(
-				SingleInstanceManager.startLocalInstance(APPLICATION_KEY, executorService), LocalInstance::close).get().get();
+		LocalInstance cryptomatorGuiInstance = closer.closeLater(SingleInstanceManager.startLocalInstance(APPLICATION_KEY, executorService), LocalInstance::close).get().get();
 
 		cryptomatorGuiInstance.registerListener(arg -> handleCommandLineArg(ctrl, arg));
 	}

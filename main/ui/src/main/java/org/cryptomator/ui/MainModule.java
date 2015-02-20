@@ -11,21 +11,29 @@ package org.cryptomator.ui;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import javafx.util.Callback;
+
 import javax.inject.Singleton;
 
+import org.cryptomator.crypto.Cryptor;
+import org.cryptomator.crypto.SamplingDecorator;
+import org.cryptomator.crypto.aes256.Aes256Cryptor;
+import org.cryptomator.ui.model.VaultObjectMapperProvider;
 import org.cryptomator.ui.settings.Settings;
+import org.cryptomator.ui.settings.SettingsProvider;
 import org.cryptomator.ui.util.DeferredCloser;
 import org.cryptomator.ui.util.DeferredCloser.Closer;
 import org.cryptomator.webdav.WebDavServer;
 
-import javafx.util.Callback;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Provides;
+import com.google.inject.name.Names;
 
 public class MainModule extends AbstractModule {
-	DeferredCloser deferredCloser = new DeferredCloser();
+
+	private final DeferredCloser deferredCloser = new DeferredCloser();
 
 	public static interface ControllerFactory extends Callback<Class<?>, Object> {
 
@@ -34,6 +42,8 @@ public class MainModule extends AbstractModule {
 	@Override
 	protected void configure() {
 		bind(DeferredCloser.class).toInstance(deferredCloser);
+		bind(ObjectMapper.class).annotatedWith(Names.named("VaultJsonMapper")).toProvider(VaultObjectMapperProvider.class);
+		bind(Settings.class).toProvider(SettingsProvider.class);
 	}
 
 	@Provides
@@ -49,9 +59,8 @@ public class MainModule extends AbstractModule {
 	}
 
 	@Provides
-	@Singleton
-	Settings getSettings() {
-		return closeLater(Settings.load(), Settings::save);
+	Cryptor getCryptor() {
+		return SamplingDecorator.decorate(new Aes256Cryptor());
 	}
 
 	@Provides

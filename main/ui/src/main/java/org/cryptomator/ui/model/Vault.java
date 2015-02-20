@@ -13,8 +13,6 @@ import javafx.beans.property.SimpleObjectProperty;
 
 import org.apache.commons.lang3.StringUtils;
 import org.cryptomator.crypto.Cryptor;
-import org.cryptomator.crypto.SamplingDecorator;
-import org.cryptomator.crypto.aes256.Aes256Cryptor;
 import org.cryptomator.ui.util.DeferredClosable;
 import org.cryptomator.ui.util.DeferredCloser;
 import org.cryptomator.ui.util.MasterKeyFilter;
@@ -26,11 +24,6 @@ import org.cryptomator.webdav.WebDavServer.ServletLifeCycleAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-
-@JsonSerialize(using = VaultSerializer.class)
-@JsonDeserialize(using = VaultDeserializer.class)
 public class Vault implements Serializable {
 
 	private static final long serialVersionUID = 3754487289683599469L;
@@ -38,18 +31,19 @@ public class Vault implements Serializable {
 
 	public static final String VAULT_FILE_EXTENSION = ".cryptomator";
 
-	private final Cryptor cryptor = SamplingDecorator.decorate(new Aes256Cryptor());
+	private final Cryptor cryptor;
 	private final ObjectProperty<Boolean> unlocked = new SimpleObjectProperty<Boolean>(this, "unlocked", Boolean.FALSE);
 	private final Path path;
 	private String mountName;
 	private DeferredClosable<ServletLifeCycleAdapter> webDavServlet = DeferredClosable.empty();
 	private DeferredClosable<WebDavMount> webDavMount = DeferredClosable.empty();
 
-	public Vault(final Path vaultDirectoryPath) {
+	public Vault(final Path vaultDirectoryPath, final Cryptor cryptor) {
 		if (!Files.isDirectory(vaultDirectoryPath) || !vaultDirectoryPath.getFileName().toString().endsWith(VAULT_FILE_EXTENSION)) {
 			throw new IllegalArgumentException("Not a valid vault directory: " + vaultDirectoryPath);
 		}
 		this.path = vaultDirectoryPath;
+		this.cryptor = cryptor;
 
 		try {
 			setMountName(getName());
