@@ -34,11 +34,9 @@ class DavResourceFactoryImpl implements DavResourceFactory {
 
 	private final LockManager lockManager = new SimpleLockManager();
 	private final Cryptor cryptor;
-	private final boolean checkFileIntegrity;
 
-	DavResourceFactoryImpl(Cryptor cryptor, boolean checkFileIntegrity) {
+	DavResourceFactoryImpl(Cryptor cryptor) {
 		this.cryptor = cryptor;
-		this.checkFileIntegrity = checkFileIntegrity;
 	}
 
 	@Override
@@ -72,11 +70,11 @@ class DavResourceFactoryImpl implements DavResourceFactory {
 	}
 
 	private EncryptedFile createFilePart(DavResourceLocator locator, DavSession session, DavServletRequest request) {
-		return new EncryptedFilePart(this, locator, session, request, lockManager, cryptor, checkFileIntegrity);
+		return new EncryptedFilePart(this, locator, session, request, lockManager, cryptor);
 	}
 
 	private EncryptedFile createFile(DavResourceLocator locator, DavSession session) {
-		return new EncryptedFile(this, locator, session, lockManager, cryptor, checkFileIntegrity);
+		return new EncryptedFile(this, locator, session, lockManager, cryptor);
 	}
 
 	private EncryptedDir createDirectory(DavResourceLocator locator, DavSession session) {

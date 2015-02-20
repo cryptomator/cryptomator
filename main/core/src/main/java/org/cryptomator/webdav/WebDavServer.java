@@ -86,7 +86,7 @@ public final class WebDavServer {
 	 *            _ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789
 	 * @return servlet
 	 */
-	public ServletLifeCycleAdapter createServlet(final Path workDir, final boolean checkFileIntegrity, final Cryptor cryptor, String name) {
+	public ServletLifeCycleAdapter createServlet(final Path workDir, final Cryptor cryptor, String name) {
 		try {
 			if (StringUtils.isEmpty(name)) {
 				throw new IllegalArgumentException("name empty");
@@ -97,7 +97,7 @@ public final class WebDavServer {
 			final URI uri = new URI(null, null, localConnector.getHost(), localConnector.getLocalPort(), "/" + UUID.randomUUID().toString() + "/" + name, null, null);
 
 			final ServletContextHandler servletContext = new ServletContextHandler(servletCollection, uri.getRawPath(), ServletContextHandler.SESSIONS);
-			final ServletHolder servlet = getWebDavServletHolder(workDir.toString(), checkFileIntegrity, cryptor);
+			final ServletHolder servlet = getWebDavServletHolder(workDir.toString(), cryptor);
 			servletContext.addServlet(servlet, "/*");
 
 			servletCollection.mapContexts();
@@ -109,10 +109,9 @@ public final class WebDavServer {
 		}
 	}
 
-	private ServletHolder getWebDavServletHolder(final String workDir, final boolean checkFileIntegrity, final Cryptor cryptor) {
+	private ServletHolder getWebDavServletHolder(final String workDir, final Cryptor cryptor) {
 		final ServletHolder result = new ServletHolder("Cryptomator-WebDAV-Servlet", new WebDavServlet(cryptor));
 		result.setInitParameter(WebDavServlet.CFG_FS_ROOT, workDir);
-		result.setInitParameter(WebDavServlet.CFG_CHECK_FILE_INTEGRITY, Boolean.toString(checkFileIntegrity));
 		return result;
 	}
 

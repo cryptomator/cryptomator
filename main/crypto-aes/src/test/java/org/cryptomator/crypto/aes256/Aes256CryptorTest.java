@@ -14,26 +14,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.Security;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
-
 import org.apache.commons.io.IOUtils;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.cryptomator.crypto.CryptorIOSupport;
 import org.cryptomator.crypto.exceptions.DecryptFailedException;
 import org.cryptomator.crypto.exceptions.UnsupportedKeyLengthException;
@@ -86,8 +72,8 @@ public class Aes256CryptorTest {
 		}
 	}
 
-	@Test
-	public void testIntegrityAuthentication() throws IOException {
+	@Test(expected = DecryptFailedException.class)
+	public void testIntegrityAuthentication() throws IOException, DecryptFailedException {
 		// our test plaintext data:
 		final byte[] plaintextData = "Hello World".getBytes();
 		final InputStream plaintextIn = new ByteArrayInputStream(plaintextData);
@@ -104,11 +90,6 @@ public class Aes256CryptorTest {
 
 		encryptedData.position(0);
 
-		// authenticate unmodified content:
-		final SeekableByteChannel encryptedIn1 = new ByteBufferBackedSeekableChannel(encryptedData);
-		final boolean isContentUnmodified1 = cryptor.authenticateContent(encryptedIn1);
-		Assert.assertTrue(isContentUnmodified1);
-
 		// toggle one bit inf first content byte:
 		encryptedData.position(64);
 		final byte fifthByte = encryptedData.get();
@@ -117,30 +98,10 @@ public class Aes256CryptorTest {
 
 		encryptedData.position(0);
 
-		// authenticate modified content:
-		final SeekableByteChannel encryptedIn2 = new ByteBufferBackedSeekableChannel(encryptedData);
-		final boolean isContentUnmodified2 = cryptor.authenticateContent(encryptedIn2);
-		Assert.assertFalse(isContentUnmodified2);
-	}
-
-	@Test
-	public void foo() throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, NoSuchProviderException {
-		Security.addProvider(new BouncyCastleProvider());
-
-		final byte[] iv = new byte[16];
-		final byte[] keyBytes = new byte[16];
-		final SecretKey key = new SecretKeySpec(keyBytes, "AES");
-		final Cipher pkcs5PaddedCipher = Cipher.getInstance("AES/CTR/PKCS5Padding", BouncyCastleProvider.PROVIDER_NAME);
-		pkcs5PaddedCipher.init(Cipher.ENCRYPT_MODE, key, new IvParameterSpec(iv));
-		final Cipher unpaddedCipher = Cipher.getInstance("AES/CTR/NoPadding");
-		unpaddedCipher.init(Cipher.ENCRYPT_MODE, key, new IvParameterSpec(iv));
-
-		// test data:
-		final byte[] plaintextData = "Hello World".getBytes();
-		final byte[] pkcs5PaddedCiphertext = pkcs5PaddedCipher.doFinal(plaintextData);
-		final byte[] unpaddedCiphertext = unpaddedCipher.doFinal(plaintextData);
-
-		Assert.assertFalse(Arrays.equals(pkcs5PaddedCiphertext, unpaddedCiphertext));
+		// decrypt modified content (should fail with DecryptFailedException):
+		final SeekableByteChannel encryptedIn = new ByteBufferBackedSeekableChannel(encryptedData);
+		final ByteArrayOutputStream plaintextOut = new ByteArrayOutputStream();
+		cryptor.decryptedFile(encryptedIn, plaintextOut);
 	}
 
 	@Test

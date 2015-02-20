@@ -77,11 +77,6 @@ public class SamplingDecorator implements Cryptor, CryptorIOSampling {
 	}
 
 	@Override
-	public boolean authenticateContent(SeekableByteChannel encryptedFile) throws IOException {
-		return cryptor.authenticateContent(encryptedFile);
-	}
-
-	@Override
 	public Long decryptedContentLength(SeekableByteChannel encryptedFile) throws IOException {
 		return cryptor.decryptedContentLength(encryptedFile);
 	}

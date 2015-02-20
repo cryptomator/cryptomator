@@ -293,7 +293,7 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 			final String[] cleartextPathComps = StringUtils.split(cleartextPath, cleartextPathSep);
 			final List<String> encryptedPathComps = new ArrayList<>(cleartextPathComps.length);
 			for (final String cleartext : cleartextPathComps) {
-				final String encrypted = encryptPathComponent(cleartext, primaryMasterKey, ioSupport);
+				final String encrypted = encryptPathComponent(cleartext, primaryMasterKey, hMacMasterKey, ioSupport);
 				encryptedPathComps.add(encrypted);
 			}
 			return StringUtils.join(encryptedPathComps, encryptedPathSep);
@@ -317,11 +317,11 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 	 * These alternative names consist of the checksum, a unique id and a special file extension defined in
 	 * {@link FileNamingConventions#LONG_NAME_FILE_EXT}.
 	 */
-	private String encryptPathComponent(final String cleartext, final SecretKey key, CryptorIOSupport ioSupport) throws IOException, InvalidKeyException {
+	private String encryptPathComponent(final String cleartext, final SecretKey aesKey, final SecretKey macKey, CryptorIOSupport ioSupport) throws IOException, InvalidKeyException {
 		final byte[] cleartextBytes = cleartext.getBytes(StandardCharsets.UTF_8);
 
 		// encrypt:
-		final byte[] encryptedBytes = AesSivCipherUtil.sivEncrypt(key.getEncoded(), cleartextBytes);
+		final byte[] encryptedBytes = AesSivCipherUtil.sivEncrypt(aesKey, macKey, cleartextBytes);
 		final String ivAndCiphertext = ENCRYPTED_FILENAME_CODEC.encodeAsString(encryptedBytes);
 
 		if (ivAndCiphertext.length() + BASIC_FILE_EXT.length() > ENCRYPTED_FILENAME_LENGTH_LIMIT) {
@@ -342,7 +342,7 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 			final String[] encryptedPathComps = StringUtils.split(encryptedPath, encryptedPathSep);
 			final List<String> cleartextPathComps = new ArrayList<>(encryptedPathComps.length);
 			for (final String encrypted : encryptedPathComps) {
-				final String cleartext = decryptPathComponent(encrypted, primaryMasterKey, ioSupport);
+				final String cleartext = decryptPathComponent(encrypted, primaryMasterKey, hMacMasterKey, ioSupport);
 				cleartextPathComps.add(new String(cleartext));
 			}
 			return StringUtils.join(cleartextPathComps, cleartextPathSep);
@@ -354,7 +354,7 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 	/**
 	 * @see #encryptPathComponent(String, SecretKey, CryptorIOSupport)
 	 */
-	private String decryptPathComponent(final String encrypted, final SecretKey key, CryptorIOSupport ioSupport) throws IOException, InvalidKeyException, DecryptFailedException {
+	private String decryptPathComponent(final String encrypted, final SecretKey aesKey, final SecretKey macKey, CryptorIOSupport ioSupport) throws IOException, InvalidKeyException, DecryptFailedException {
 		final String ciphertext;
 		if (encrypted.endsWith(LONG_NAME_FILE_EXT)) {
 			final String basename = StringUtils.removeEnd(encrypted, LONG_NAME_FILE_EXT);
@@ -371,7 +371,7 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 
 		// decrypt:
 		final byte[] encryptedBytes = ENCRYPTED_FILENAME_CODEC.decode(ciphertext);
-		final byte[] cleartextBytes = AesSivCipherUtil.sivDecrypt(key.getEncoded(), encryptedBytes);
+		final byte[] cleartextBytes = AesSivCipherUtil.sivDecrypt(aesKey, macKey, encryptedBytes);
 
 		return new String(cleartextBytes, StandardCharsets.UTF_8);
 	}
@@ -389,8 +389,7 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 		ioSupport.writePathSpecificMetadata(metadataFile, objectMapper.writeValueAsBytes(metadata));
 	}
 
-	@Override
-	public boolean authenticateContent(SeekableByteChannel encryptedFile) throws IOException {
+	private void authenticateContent(SeekableByteChannel encryptedFile) throws IOException, DecryptFailedException {
 		// init mac:
 		final Mac calculatedMac = this.hmacSha256(hMacMasterKey);
 
@@ -411,7 +410,11 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 		IOUtils.copyLarge(macIn, new NullOutputStream());
 
 		// compare (in constant time):
-		return MessageDigest.isEqual(storedMac.array(), calculatedMac.doFinal());
+		boolean macMatches = MessageDigest.isEqual(storedMac.array(), calculatedMac.doFinal());
+
+		if (!macMatches) {
+			throw new DecryptFailedException("MAC authentication failed.");
+		}
 	}
 
 	@Override
@@ -440,7 +443,7 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 	}
 
 	@Override
-	public Long decryptedFile(SeekableByteChannel encryptedFile, OutputStream plaintextFile) throws IOException {
+	public Long decryptedFile(SeekableByteChannel encryptedFile, OutputStream plaintextFile) throws IOException, DecryptFailedException {
 		// read iv:
 		encryptedFile.position(0);
 		final ByteBuffer countingIv = ByteBuffer.allocate(AES_BLOCK_LENGTH);
@@ -453,6 +456,9 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 		if (numIvBytesRead != AES_BLOCK_LENGTH || fileSize == null) {
 			throw new IOException("Failed to read file header.");
 		}
+
+		// check MAC:
+		this.authenticateContent(encryptedFile);
 
 		// go to begin of content:
 		encryptedFile.position(64);
@@ -467,7 +473,7 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 	}
 
 	@Override
-	public Long decryptRange(SeekableByteChannel encryptedFile, OutputStream plaintextFile, long pos, long length) throws IOException {
+	public Long decryptRange(SeekableByteChannel encryptedFile, OutputStream plaintextFile, long pos, long length) throws IOException, DecryptFailedException {
 		// read iv:
 		encryptedFile.position(0);
 		final ByteBuffer countingIv = ByteBuffer.allocate(AES_BLOCK_LENGTH);
@@ -477,6 +483,9 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 		if (numIvBytesRead != AES_BLOCK_LENGTH) {
 			throw new IOException("Failed to read file header.");
 		}
+
+		// check MAC:
+		this.authenticateContent(encryptedFile);
 
 		// seek relevant position and update iv:
 		long firstRelevantBlock = pos / AES_BLOCK_LENGTH; // cut of fraction!

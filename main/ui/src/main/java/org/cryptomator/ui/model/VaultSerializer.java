@@ -13,7 +13,6 @@ public class VaultSerializer extends JsonSerializer<Vault> {
 	public void serialize(Vault value, JsonGenerator jgen, SerializerProvider provider) throws IOException, JsonProcessingException {
 		jgen.writeStartObject();
 		jgen.writeStringField("path", value.getPath().toString());
-		jgen.writeBooleanField("checkIntegrity", value.shouldVerifyFileIntegrity());
 		jgen.writeStringField("mountName", value.getMountName().toString());
 		jgen.writeEndObject();
 	}

@@ -70,11 +70,6 @@ public interface Cryptor extends SensitiveDataSwipeListener {
 	String decryptPath(String encryptedPath, char encryptedPathSep, char cleartextPathSep, CryptorIOSupport ioSupport) throws DecryptFailedException;
 
 	/**
-	 * @return <code>true</code> If the integrity of the file can be assured.
-	 */
-	boolean authenticateContent(SeekableByteChannel encryptedFile) throws IOException;
-
-	/**
 	 * @param metadataSupport Support object allowing the Cryptor to read and write its own metadata to the location of the encrypted file.
 	 * @return Content length of the decrypted file or <code>null</code> if unknown.
 	 */

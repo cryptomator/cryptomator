@@ -18,8 +18,6 @@ public class VaultDeserializer extends JsonDeserializer<Vault> {
 		final String pathStr = node.get("path").asText();
 		final Path path = FileSystems.getDefault().getPath(pathStr);
 		final Vault dir = new Vault(path);
-		final boolean verifyFileIntegrity = node.has("checkIntegrity") ? node.get("checkIntegrity").asBoolean() : false;
-		dir.setVerifyFileIntegrity(verifyFileIntegrity);
 		if (node.has("mountName")) {
 			dir.setMountName(node.get("mountName").asText());
 		}

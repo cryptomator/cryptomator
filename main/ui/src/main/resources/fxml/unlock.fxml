@@ -39,21 +39,17 @@
 		<SecPasswordField fx:id="passwordField" GridPane.rowIndex="1" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" maxWidth="Infinity" />
 		
 		<!-- Row 2 -->
-		<Label text="%unlock.label.checkIntegrity" GridPane.rowIndex="2" GridPane.columnIndex="0" />
-		<CheckBox fx:id="checkIntegrity" wrapText="true" text="%unlock.checkbox.checkIntegrity" GridPane.rowIndex="2" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" maxWidth="Infinity" />
+		<Label text="%unlock.label.mountName" GridPane.rowIndex="2" GridPane.columnIndex="0" />
+		<TextField fx:id="mountName" GridPane.rowIndex="2" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" maxWidth="Infinity" />
 		
 		<!-- Row 3 -->
-		<Label text="%unlock.label.mountName" GridPane.rowIndex="3" GridPane.columnIndex="0" />
-		<TextField fx:id="mountName" GridPane.rowIndex="3" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" maxWidth="Infinity" />
+		<Button fx:id="unlockButton" text="%unlock.button.unlock" defaultButton="true" GridPane.rowIndex="3" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.halignment="RIGHT" prefWidth="150.0" onAction="#didClickUnlockButton"/>
 		
-		<!-- Row 4 -->
-		<Button fx:id="unlockButton" text="%unlock.button.unlock" defaultButton="true" GridPane.rowIndex="4" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.halignment="RIGHT" prefWidth="150.0" onAction="#didClickUnlockButton"/>
+		<!-- Row 4-->
+		<ProgressIndicator progress="-1" fx:id="progressIndicator" GridPane.rowIndex="4" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.halignment="CENTER" visible="false"/>
 		
-		<!-- Row 5-->
-		<ProgressIndicator progress="-1" fx:id="progressIndicator" GridPane.rowIndex="5" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.halignment="CENTER" visible="false"/>
-		
-		<!-- Row 6 -->
-		<Label fx:id="messageLabel" GridPane.rowIndex="6" GridPane.columnIndex="0" GridPane.columnSpan="2" />
+		<!-- Row 5 -->
+		<Label fx:id="messageLabel" GridPane.rowIndex="5" GridPane.columnIndex="0" GridPane.columnSpan="2" />
 	</children>
 </GridPane>
 

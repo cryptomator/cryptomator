@@ -13,6 +13,8 @@ import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.util.Arrays;
 
+import javax.crypto.SecretKey;
+
 import org.apache.commons.lang3.ArrayUtils;
 import org.bouncycastle.crypto.BlockCipher;
 import org.bouncycastle.crypto.CipherParameters;
@@ -31,15 +33,26 @@ final class AesSivCipherUtil {
 	private static final byte[] BYTES_ZERO = new byte[16];
 	private static final byte DOUBLING_CONST = (byte) 0x87;
 
-	static byte[] sivEncrypt(byte[] key, byte[] plaintext, byte[]... additionalData) throws InvalidKeyException {
-		if (key.length != 32 && key.length != 48 && key.length != 64) {
-			throw new InvalidKeyException("Invalid key length " + key.length);
+	static byte[] sivEncrypt(SecretKey aesKey, SecretKey macKey, byte[] plaintext, byte[]... additionalData) throws InvalidKeyException {
+		final byte[] aesKeyBytes = aesKey.getEncoded();
+		final byte[] macKeyBytes = macKey.getEncoded();
+		if (aesKeyBytes == null || macKeyBytes == null) {
+			throw new IllegalArgumentException("Can't get bytes of given key.");
+		}
+		try {
+			return sivEncrypt(aesKeyBytes, macKeyBytes, plaintext, additionalData);
+		} finally {
+			Arrays.fill(aesKeyBytes, (byte) 0);
+			Arrays.fill(macKeyBytes, (byte) 0);
+		}
+	}
+
+	static byte[] sivEncrypt(byte[] aesKey, byte[] macKey, byte[] plaintext, byte[]... additionalData) throws InvalidKeyException {
+		if (aesKey.length != 16 && aesKey.length != 24 && aesKey.length != 32) {
+			throw new InvalidKeyException("Invalid aesKey length " + aesKey.length);
 		}
 
-		final byte[] k1 = Arrays.copyOf(key, key.length / 2);
-		final byte[] k2 = Arrays.copyOfRange(key, k1.length, key.length);
-
-		final byte[] iv = s2v(k1, plaintext, additionalData);
+		final byte[] iv = s2v(macKey, plaintext, additionalData);
 
 		final int numBlocks = (plaintext.length + 15) / 16;
 
@@ -52,7 +65,7 @@ final class AesSivCipherUtil {
 
 		final byte[] x = new byte[numBlocks * 16];
 		final BlockCipher aes = new AESFastEngine();
-		aes.init(true, new KeyParameter(k2));
+		aes.init(true, new KeyParameter(aesKey));
 		for (int i = 0; i < numBlocks; i++) {
 			final long ctrVal = initialCtrVal + i;
 			ctrBuf.putLong(8, ctrVal);
@@ -65,13 +78,24 @@ final class AesSivCipherUtil {
 		return ArrayUtils.addAll(iv, ciphertext);
 	}
 
-	static byte[] sivDecrypt(byte[] key, byte[] ciphertext, byte[]... additionalData) throws DecryptFailedException, InvalidKeyException {
-		if (key.length != 32 && key.length != 48 && key.length != 64) {
-			throw new InvalidKeyException("Invalid key length " + key.length);
+	static byte[] sivDecrypt(SecretKey aesKey, SecretKey macKey, byte[] plaintext, byte[]... additionalData) throws InvalidKeyException, DecryptFailedException {
+		final byte[] aesKeyBytes = aesKey.getEncoded();
+		final byte[] macKeyBytes = macKey.getEncoded();
+		if (aesKeyBytes == null || macKeyBytes == null) {
+			throw new IllegalArgumentException("Can't get bytes of given key.");
 		}
+		try {
+			return sivDecrypt(aesKeyBytes, macKeyBytes, plaintext, additionalData);
+		} finally {
+			Arrays.fill(aesKeyBytes, (byte) 0);
+			Arrays.fill(macKeyBytes, (byte) 0);
+		}
+	}
 
-		final byte[] k1 = Arrays.copyOf(key, key.length / 2);
-		final byte[] k2 = Arrays.copyOfRange(key, k1.length, key.length);
+	static byte[] sivDecrypt(byte[] aesKey, byte[] macKey, byte[] ciphertext, byte[]... additionalData) throws DecryptFailedException, InvalidKeyException {
+		if (aesKey.length != 16 && aesKey.length != 24 && aesKey.length != 32) {
+			throw new InvalidKeyException("Invalid aesKey length " + aesKey.length);
+		}
 
 		final byte[] iv = Arrays.copyOf(ciphertext, 16);
 
@@ -87,7 +111,7 @@ final class AesSivCipherUtil {
 
 		final byte[] x = new byte[numBlocks * 16];
 		final BlockCipher aes = new AESFastEngine();
-		aes.init(true, new KeyParameter(k2));
+		aes.init(true, new KeyParameter(aesKey));
 		for (int i = 0; i < numBlocks; i++) {
 			final long ctrVal = initialCtrVal + i;
 			ctrBuf.putLong(8, ctrVal);
@@ -97,7 +121,7 @@ final class AesSivCipherUtil {
 
 		final byte[] plaintext = xor(actualCiphertext, x);
 
-		final byte[] control = s2v(k1, plaintext, additionalData);
+		final byte[] control = s2v(macKey, plaintext, additionalData);
 
 		if (MessageDigest.isEqual(control, iv)) {
 			return plaintext;
@@ -106,8 +130,8 @@ final class AesSivCipherUtil {
 		}
 	}
 
-	static byte[] s2v(byte[] key, byte[] plaintext, byte[]... additionalData) {
-		final CipherParameters params = new KeyParameter(key);
+	static byte[] s2v(byte[] macKey, byte[] plaintext, byte[]... additionalData) {
+		final CipherParameters params = new KeyParameter(macKey);
 		final BlockCipher aes = new AESFastEngine();
 		final CMac mac = new CMac(aes);
 		mac.init(params);

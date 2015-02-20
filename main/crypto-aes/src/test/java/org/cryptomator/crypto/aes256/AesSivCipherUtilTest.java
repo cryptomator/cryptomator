@@ -14,7 +14,7 @@ public class AesSivCipherUtilTest {
 
 	@Test
 	public void testS2v() throws DecoderException {
-		final byte[] key = {(byte) 0xff, (byte) 0xfe, (byte) 0xfd, (byte) 0xfc, //
+		final byte[] macKey = {(byte) 0xff, (byte) 0xfe, (byte) 0xfd, (byte) 0xfc, //
 				(byte) 0xfb, (byte) 0xfa, (byte) 0xf9, (byte) 0xf8, //
 				(byte) 0xf7, (byte) 0xf6, (byte) 0xf5, (byte) 0xf4, //
 				(byte) 0xf3, (byte) 0xf2, (byte) 0xf1, (byte) 0xf0};
@@ -36,17 +36,18 @@ public class AesSivCipherUtilTest {
 				(byte) 0x95, (byte) 0x0a, (byte) 0xcd, (byte) 0x32, //
 				(byte) 0x0a, (byte) 0x2e, (byte) 0xcc, (byte) 0x93};
 
-		final byte[] result = AesSivCipherUtil.s2v(key, plaintext, ad);
+		final byte[] result = AesSivCipherUtil.s2v(macKey, plaintext, ad);
 		Assert.assertArrayEquals(expected, result);
 	}
 
 	@Test
 	public void testSivEncrypt() throws InvalidKeyException {
-		final byte[] key = {(byte) 0xff, (byte) 0xfe, (byte) 0xfd, (byte) 0xfc, //
+		final byte[] macKey = {(byte) 0xff, (byte) 0xfe, (byte) 0xfd, (byte) 0xfc, //
 				(byte) 0xfb, (byte) 0xfa, (byte) 0xf9, (byte) 0xf8, //
 				(byte) 0xf7, (byte) 0xf6, (byte) 0xf5, (byte) 0xf4, //
-				(byte) 0xf3, (byte) 0xf2, (byte) 0xf1, (byte) 0xf0, //
-				(byte) 0xf0, (byte) 0xf1, (byte) 0xf2, (byte) 0xf3, //
+				(byte) 0xf3, (byte) 0xf2, (byte) 0xf1, (byte) 0xf0};
+
+		final byte[] aesKey = {(byte) 0xf0, (byte) 0xf1, (byte) 0xf2, (byte) 0xf3, //
 				(byte) 0xf4, (byte) 0xf5, (byte) 0xf6, (byte) 0xf7, //
 				(byte) 0xf8, (byte) 0xf9, (byte) 0xfa, (byte) 0xfb, //
 				(byte) 0xfc, (byte) 0xfd, (byte) 0xfe, (byte) 0xff};
@@ -72,17 +73,18 @@ public class AesSivCipherUtilTest {
 				(byte) 0xda, (byte) 0xef, (byte) 0x7f, (byte) 0x6a, //
 				(byte) 0xfe, (byte) 0x5c};
 
-		final byte[] result = AesSivCipherUtil.sivEncrypt(key, plaintext, ad);
+		final byte[] result = AesSivCipherUtil.sivEncrypt(aesKey, macKey, plaintext, ad);
 		Assert.assertArrayEquals(expected, result);
 	}
 
 	@Test
 	public void testSivDecrypt() throws DecryptFailedException, InvalidKeyException {
-		final byte[] key = {(byte) 0xff, (byte) 0xfe, (byte) 0xfd, (byte) 0xfc, //
+		final byte[] macKey = {(byte) 0xff, (byte) 0xfe, (byte) 0xfd, (byte) 0xfc, //
 				(byte) 0xfb, (byte) 0xfa, (byte) 0xf9, (byte) 0xf8, //
 				(byte) 0xf7, (byte) 0xf6, (byte) 0xf5, (byte) 0xf4, //
-				(byte) 0xf3, (byte) 0xf2, (byte) 0xf1, (byte) 0xf0, //
-				(byte) 0xf0, (byte) 0xf1, (byte) 0xf2, (byte) 0xf3, //
+				(byte) 0xf3, (byte) 0xf2, (byte) 0xf1, (byte) 0xf0};
+
+		final byte[] aesKey = {(byte) 0xf0, (byte) 0xf1, (byte) 0xf2, (byte) 0xf3, //
 				(byte) 0xf4, (byte) 0xf5, (byte) 0xf6, (byte) 0xf7, //
 				(byte) 0xf8, (byte) 0xf9, (byte) 0xfa, (byte) 0xfb, //
 				(byte) 0xfc, (byte) 0xfd, (byte) 0xfe, (byte) 0xff};
@@ -108,17 +110,18 @@ public class AesSivCipherUtilTest {
 				(byte) 0x99, (byte) 0xaa, (byte) 0xbb, (byte) 0xcc, //
 				(byte) 0xdd, (byte) 0xee};
 
-		final byte[] result = AesSivCipherUtil.sivDecrypt(key, ciphertext, ad);
+		final byte[] result = AesSivCipherUtil.sivDecrypt(aesKey, macKey, ciphertext, ad);
 		Assert.assertArrayEquals(expected, result);
 	}
 
 	@Test(expected = DecryptFailedException.class)
 	public void testSivDecryptWithInvalidKey() throws DecryptFailedException, InvalidKeyException {
-		final byte[] key = {(byte) 0xff, (byte) 0xfe, (byte) 0xfd, (byte) 0xfc, //
+		final byte[] macKey = {(byte) 0xff, (byte) 0xfe, (byte) 0xfd, (byte) 0xfc, //
 				(byte) 0xfb, (byte) 0xfa, (byte) 0xf9, (byte) 0xf8, //
 				(byte) 0xf7, (byte) 0xf6, (byte) 0xf5, (byte) 0xf4, //
-				(byte) 0xf3, (byte) 0xf2, (byte) 0xf1, (byte) 0xf0, //
-				(byte) 0xf0, (byte) 0xf1, (byte) 0xf2, (byte) 0xf3, //
+				(byte) 0xf3, (byte) 0xf2, (byte) 0xf1, (byte) 0xf0};
+
+		final byte[] aesKey = {(byte) 0xf0, (byte) 0xf1, (byte) 0xf2, (byte) 0xf3, //
 				(byte) 0xf4, (byte) 0xf5, (byte) 0xf6, (byte) 0xf7, //
 				(byte) 0xf8, (byte) 0xf9, (byte) 0xfa, (byte) 0xfb, //
 				(byte) 0xfc, (byte) 0xfd, (byte) 0xfe, (byte) 0x00};
@@ -144,7 +147,7 @@ public class AesSivCipherUtilTest {
 				(byte) 0x99, (byte) 0xaa, (byte) 0xbb, (byte) 0xcc, //
 				(byte) 0xdd, (byte) 0xee};
 
-		final byte[] result = AesSivCipherUtil.sivDecrypt(key, ciphertext, ad);
+		final byte[] result = AesSivCipherUtil.sivDecrypt(aesKey, macKey, ciphertext, ad);
 		Assert.assertArrayEquals(expected, result);
 	}
 
@@ -153,12 +156,12 @@ public class AesSivCipherUtilTest {
 	 */
 	@Test
 	public void testNonceBasedAuthenticatedEncryption() throws InvalidKeyException {
-
-		final byte[] key = {(byte) 0x7f, (byte) 0x7e, (byte) 0x7d, (byte) 0x7c, //
+		final byte[] macKey = {(byte) 0x7f, (byte) 0x7e, (byte) 0x7d, (byte) 0x7c, //
 				(byte) 0x7b, (byte) 0x7a, (byte) 0x79, (byte) 0x78, //
 				(byte) 0x77, (byte) 0x76, (byte) 0x75, (byte) 0x74, //
-				(byte) 0x73, (byte) 0x72, (byte) 0x71, (byte) 0x70, //
-				(byte) 0x40, (byte) 0x41, (byte) 0x42, (byte) 0x43, //
+				(byte) 0x73, (byte) 0x72, (byte) 0x71, (byte) 0x70};
+
+		final byte[] aesKey = {(byte) 0x40, (byte) 0x41, (byte) 0x42, (byte) 0x43, //
 				(byte) 0x44, (byte) 0x45, (byte) 0x46, (byte) 0x47, //
 				(byte) 0x48, (byte) 0x49, (byte) 0x4a, (byte) 0x4b, //
 				(byte) 0x4c, (byte) 0x4d, (byte) 0x4e, (byte) 0x4f};
@@ -196,7 +199,7 @@ public class AesSivCipherUtilTest {
 				(byte) 0x53, (byte) 0x49, (byte) 0x56, (byte) 0x2d, //
 				(byte) 0x41, (byte) 0x45, (byte) 0x53};
 
-		final byte[] result = AesSivCipherUtil.sivEncrypt(key, plaintext, ad1, ad2, nonce);
+		final byte[] result = AesSivCipherUtil.sivEncrypt(aesKey, macKey, plaintext, ad1, ad2, nonce);
 
 		final byte[] expected = {(byte) 0x7b, (byte) 0xdb, (byte) 0x6e, (byte) 0x3b, //
 				(byte) 0x43, (byte) 0x26, (byte) 0x67, (byte) 0xeb, //

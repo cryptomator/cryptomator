@@ -26,7 +26,6 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
@@ -62,9 +61,6 @@ public class UnlockController implements Initializable {
 
 	@FXML
 	private SecPasswordField passwordField;
-
-	@FXML
-	private CheckBox checkIntegrity;
 
 	@FXML
 	private TextField mountName;
@@ -127,7 +123,6 @@ public class UnlockController implements Initializable {
 		try {
 			progressIndicator.setVisible(true);
 			masterKeyInputStream = Files.newInputStream(masterKeyPath, StandardOpenOption.READ);
-			directory.setVerifyFileIntegrity(checkIntegrity.isSelected());
 			directory.getCryptor().decryptMasterKey(masterKeyInputStream, password);
 			if (!directory.startServer(server, closer)) {
 				messageLabel.setText(rb.getString("unlock.messageLabel.startServerFailed"));
@@ -166,7 +161,6 @@ public class UnlockController implements Initializable {
 	private void setControlsDisabled(boolean disable) {
 		usernameBox.setDisable(disable);
 		passwordField.setDisable(disable);
-		checkIntegrity.setDisable(disable);
 		unlockButton.setDisable(disable);
 	}
 
@@ -216,7 +210,6 @@ public class UnlockController implements Initializable {
 	public void setDirectory(Vault directory) {
 		this.directory = directory;
 		this.findExistingUsernames();
-		this.checkIntegrity.setSelected(directory.shouldVerifyFileIntegrity());
 		this.mountName.setText(directory.getMountName());
 	}
 

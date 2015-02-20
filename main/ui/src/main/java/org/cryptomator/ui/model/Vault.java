@@ -41,7 +41,6 @@ public class Vault implements Serializable {
 	private final Cryptor cryptor = SamplingDecorator.decorate(new Aes256Cryptor());
 	private final ObjectProperty<Boolean> unlocked = new SimpleObjectProperty<Boolean>(this, "unlocked", Boolean.FALSE);
 	private final Path path;
-	private boolean verifyFileIntegrity;
 	private String mountName;
 	private DeferredClosable<ServletLifeCycleAdapter> webDavServlet = DeferredClosable.empty();
 	private DeferredClosable<WebDavMount> webDavMount = DeferredClosable.empty();
@@ -68,7 +67,7 @@ public class Vault implements Serializable {
 		if (o.isPresent() && o.get().isRunning()) {
 			return false;
 		}
-		ServletLifeCycleAdapter servlet = server.createServlet(path, verifyFileIntegrity, cryptor, getMountName());
+		ServletLifeCycleAdapter servlet = server.createServlet(path, cryptor, getMountName());
 		if (servlet.start()) {
 			webDavServlet = closer.closeLater(servlet, ServletLifeCycleAdapter::stop);
 			return true;
@@ -104,14 +103,6 @@ public class Vault implements Serializable {
 
 	public Path getPath() {
 		return path;
-	}
-
-	public boolean shouldVerifyFileIntegrity() {
-		return verifyFileIntegrity;
-	}
-
-	public void setVerifyFileIntegrity(boolean verifyFileIntegrity) {
-		this.verifyFileIntegrity = verifyFileIntegrity;
 	}
 
 	/**

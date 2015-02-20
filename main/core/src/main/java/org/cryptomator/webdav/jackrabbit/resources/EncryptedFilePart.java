@@ -50,8 +50,8 @@ public class EncryptedFilePart extends EncryptedFile {
 
 	private final Set<Pair<Long, Long>> requestedContentRanges = new HashSet<Pair<Long, Long>>();
 
-	public EncryptedFilePart(DavResourceFactory factory, DavResourceLocator locator, DavSession session, DavServletRequest request, LockManager lockManager, Cryptor cryptor, boolean checkIntegrity) {
-		super(factory, locator, session, lockManager, cryptor, checkIntegrity);
+	public EncryptedFilePart(DavResourceFactory factory, DavResourceLocator locator, DavSession session, DavServletRequest request, LockManager lockManager, Cryptor cryptor) {
+		super(factory, locator, session, lockManager, cryptor);
 		final String rangeHeader = request.getHeader(HttpHeader.RANGE.asString());
 		if (rangeHeader == null) {
 			throw new IllegalArgumentException("HTTP request doesn't contain a range header");
@@ -116,9 +116,6 @@ public class EncryptedFilePart extends EncryptedFile {
 			SeekableByteChannel channel = null;
 			try {
 				channel = Files.newByteChannel(path, StandardOpenOption.READ);
-				if (checkIntegrity && !cryptor.authenticateContent(channel)) {
-					throw new DecryptFailedException("File content compromised: " + path.toString());
-				}
 				final Long fileSize = cryptor.decryptedContentLength(channel);
 				final Pair<Long, Long> range = getUnionRange(fileSize);
 				final Long rangeLength = range.getRight() - range.getLeft() + 1;
