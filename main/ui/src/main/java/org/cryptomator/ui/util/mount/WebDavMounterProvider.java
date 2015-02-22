@@ -9,6 +9,8 @@
  ******************************************************************************/
 package org.cryptomator.ui.util.mount;
 
+import java.util.concurrent.ExecutorService;
+
 import javax.inject.Inject;
 
 import org.cryptomator.webdav.WebDavServer;
@@ -24,9 +26,11 @@ public class WebDavMounterProvider implements Provider<WebDavMounter> {
 	private final WebDavMounterStrategy choosenStrategy;
 
 	@Inject
-	public WebDavMounterProvider(WebDavServer server) {
+	public WebDavMounterProvider(WebDavServer server, ExecutorService executorService) {
 		this.choosenStrategy = getStrategyWhichShouldWork();
-		this.choosenStrategy.warmUp(server.getPort());
+		executorService.execute(() -> {
+			this.choosenStrategy.warmUp(server.getPort());
+		});
 	}
 
 	@Override

@@ -63,14 +63,12 @@ public final class FXThreads {
 	 * 	myLabel.setText(bookName);
 	 * });
 	 * </pre>
+	 * 
 	 * @param executor
 	 * @param task The task to wait for.
 	 * @param successCallback The action to perform, when the task finished.
 	 */
 	public static <T> void runOnMainThreadWhenFinished(ExecutorService executor, Future<T> task, CallbackWhenTaskFinished<T> successCallback) {
-		executor.submit(() -> {
-			return "asd";
-		});
 		runOnMainThreadWhenFinished(executor, task, successCallback, DUMMY_EXCEPTION_CALLBACK);
 	}
 
@@ -89,8 +87,7 @@ public final class FXThreads {
 	 * });
 	 * </pre>
 	 * 
-	 * @param executor
-	 *            The service to execute the background task on
+	 * @param executor The service to execute the background task on
 	 * @param task The task to wait for.
 	 * @param successCallback The action to perform, when the task finished.
 	 * @param exceptionCallback
