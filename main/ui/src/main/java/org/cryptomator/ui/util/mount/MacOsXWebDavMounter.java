@@ -22,6 +22,11 @@ final class MacOsXWebDavMounter implements WebDavMounterStrategy {
 	}
 
 	@Override
+	public void warmUp(int serverPort) {
+		// no-op
+	}
+
+	@Override
 	public WebDavMount mount(URI uri, String name) throws CommandFailedException {
 		final String path = "/Volumes/Cryptomator" + uri.getRawPath().replace('/', '_');
 		final Script mountScript = Script.fromLines(

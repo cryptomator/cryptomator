@@ -30,6 +30,11 @@ final class LinuxGvfsWebDavMounter implements WebDavMounterStrategy {
 			return false;
 		}
 	}
+	
+	@Override
+	public void warmUp(int serverPort) {
+		// no-op
+	}
 
 	@Override
 	public WebDavMount mount(URI uri, String name) throws CommandFailedException {

@@ -31,19 +31,24 @@ public class Vault implements Serializable {
 
 	public static final String VAULT_FILE_EXTENSION = ".cryptomator";
 
-	private final Cryptor cryptor;
-	private final ObjectProperty<Boolean> unlocked = new SimpleObjectProperty<Boolean>(this, "unlocked", Boolean.FALSE);
 	private final Path path;
+	private final Cryptor cryptor;
+	private final WebDavMounter mounter;
+	private final ObjectProperty<Boolean> unlocked = new SimpleObjectProperty<Boolean>(this, "unlocked", Boolean.FALSE);
 	private String mountName;
 	private DeferredClosable<ServletLifeCycleAdapter> webDavServlet = DeferredClosable.empty();
 	private DeferredClosable<WebDavMount> webDavMount = DeferredClosable.empty();
 
-	public Vault(final Path vaultDirectoryPath, final Cryptor cryptor) {
+	/**
+	 * Package private constructor, use {@link VaultFactory}.
+	 */
+	Vault(final Path vaultDirectoryPath, final Cryptor cryptor, final WebDavMounter mounter) {
 		if (!Files.isDirectory(vaultDirectoryPath) || !vaultDirectoryPath.getFileName().toString().endsWith(VAULT_FILE_EXTENSION)) {
 			throw new IllegalArgumentException("Not a valid vault directory: " + vaultDirectoryPath);
 		}
 		this.path = vaultDirectoryPath;
 		this.cryptor = cryptor;
+		this.mounter = mounter;
 
 		try {
 			setMountName(getName());
@@ -81,7 +86,7 @@ public class Vault implements Serializable {
 			return false;
 		}
 		try {
-			webDavMount = closer.closeLater(WebDavMounter.mount(o.get().getServletUri(), getMountName()), WebDavMount::unmount);
+			webDavMount = closer.closeLater(mounter.mount(o.get().getServletUri(), getMountName()), WebDavMount::unmount);
 			return true;
 		} catch (CommandFailedException e) {
 			LOG.warn("mount failed", e);

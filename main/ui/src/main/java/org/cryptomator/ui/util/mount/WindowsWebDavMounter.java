@@ -37,6 +37,16 @@ final class WindowsWebDavMounter implements WebDavMounterStrategy {
 	}
 
 	@Override
+	public void warmUp(int serverPort) {
+		final URI warmUpUri = URI.create("http://0--1.ipv6-literal.net:" + serverPort + "/bill-gates-mom-uses-goto");
+		try {
+			this.mount(warmUpUri, "WarmUpMount");
+		} catch (CommandFailedException e) {
+			// will most certainly throw an exception, because this is a fake WebDav path. But now windows has some DNS things cached :)
+		}
+	}
+
+	@Override
 	public WebDavMount mount(URI uri, String name) throws CommandFailedException {
 		final Script mountScript = fromLines("net use * http://0--1.ipv6-literal.net:%PORT%%DAV_PATH% /persistent:no")
 				.addEnv("PORT", String.valueOf(uri.getPort()))

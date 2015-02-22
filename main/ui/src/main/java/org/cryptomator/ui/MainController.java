@@ -38,19 +38,18 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
-import org.cryptomator.crypto.Cryptor;
 import org.cryptomator.ui.InitializeController.InitializationListener;
 import org.cryptomator.ui.MainModule.ControllerFactory;
 import org.cryptomator.ui.UnlockController.UnlockListener;
 import org.cryptomator.ui.UnlockedController.LockListener;
 import org.cryptomator.ui.controls.DirectoryListCell;
 import org.cryptomator.ui.model.Vault;
+import org.cryptomator.ui.model.VaultFactory;
 import org.cryptomator.ui.settings.Settings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 
 public class MainController implements Initializable, InitializationListener, UnlockListener, LockListener {
 
@@ -78,16 +77,16 @@ public class MainController implements Initializable, InitializationListener, Un
 
 	private final ControllerFactory controllerFactory;
 	private final Settings settings;
-	private final Provider<Cryptor> cryptorProvider;
+	private final VaultFactory vaultFactoy;
 
 	private ResourceBundle rb;
 
 	@Inject
-	public MainController(ControllerFactory controllerFactory, Settings settings, Provider<Cryptor> cryptorProvider) {
+	public MainController(ControllerFactory controllerFactory, Settings settings, VaultFactory vaultFactoy) {
 		super();
 		this.controllerFactory = controllerFactory;
 		this.settings = settings;
-		this.cryptorProvider = cryptorProvider;
+		this.vaultFactoy = vaultFactoy;
 	}
 
 	@Override
@@ -167,7 +166,7 @@ public class MainController implements Initializable, InitializationListener, Un
 			return;
 		}
 
-		final Vault vault = new Vault(vaultPath, cryptorProvider.get());
+		final Vault vault = vaultFactoy.createVault(vaultPath);
 		if (!directoryList.getItems().contains(vault)) {
 			directoryList.getItems().add(vault);
 		}

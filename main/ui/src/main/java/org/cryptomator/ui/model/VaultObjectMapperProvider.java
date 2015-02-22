@@ -6,8 +6,6 @@ import java.nio.file.Path;
 
 import javax.inject.Inject;
 
-import org.cryptomator.crypto.Cryptor;
-
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -22,11 +20,11 @@ import com.google.inject.Provider;
 
 public class VaultObjectMapperProvider implements Provider<ObjectMapper> {
 
-	private final Provider<Cryptor> cryptorProvider;
+	private final VaultFactory vaultFactoy;
 
 	@Inject
-	public VaultObjectMapperProvider(final Provider<Cryptor> cryptorProvider) {
-		this.cryptorProvider = cryptorProvider;
+	public VaultObjectMapperProvider(final VaultFactory vaultFactoy) {
+		this.vaultFactoy = vaultFactoy;
 	}
 
 	@Override
@@ -58,11 +56,11 @@ public class VaultObjectMapperProvider implements Provider<ObjectMapper> {
 			final JsonNode node = jp.readValueAsTree();
 			final String pathStr = node.get("path").asText();
 			final Path path = FileSystems.getDefault().getPath(pathStr);
-			final Vault dir = new Vault(path, cryptorProvider.get());
+			final Vault vault = vaultFactoy.createVault(path);
 			if (node.has("mountName")) {
-				dir.setMountName(node.get("mountName").asText());
+				vault.setMountName(node.get("mountName").asText());
 			}
-			return dir;
+			return vault;
 		}
 
 	}

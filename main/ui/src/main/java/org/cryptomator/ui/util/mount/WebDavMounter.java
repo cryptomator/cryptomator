@@ -11,16 +11,7 @@ package org.cryptomator.ui.util.mount;
 
 import java.net.URI;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-public final class WebDavMounter {
-
-	private static final Logger LOG = LoggerFactory.getLogger(WebDavMounter.class);
-
-	private static final WebDavMounterStrategy[] STRATEGIES = {new WindowsWebDavMounter(), new MacOsXWebDavMounter(), new LinuxGvfsWebDavMounter()};
-
-	private static volatile WebDavMounterStrategy choosenStrategy;
+public interface WebDavMounter {
 
 	/**
 	 * Tries to mount a given webdav share.
@@ -30,29 +21,6 @@ public final class WebDavMounter {
 	 * @return a {@link WebDavMount} representing the mounted share
 	 * @throws CommandFailedException if the mount operation fails
 	 */
-	public static WebDavMount mount(URI uri, String name) throws CommandFailedException {
-		return chooseStrategy().mount(uri, name);
-	}
-
-	private static WebDavMounterStrategy chooseStrategy() {
-		if (choosenStrategy == null) {
-			choosenStrategy = getStrategyWhichShouldWork();
-		}
-		return choosenStrategy;
-	}
-
-	private static WebDavMounterStrategy getStrategyWhichShouldWork() {
-		for (WebDavMounterStrategy strategy : STRATEGIES) {
-			if (strategy.shouldWork()) {
-				LOG.info("Using {}", strategy.getClass().getSimpleName());
-				return strategy;
-			}
-		}
-		return new FallbackWebDavMounter();
-	}
-
-	private WebDavMounter() {
-		throw new IllegalStateException("Class is not instantiable.");
-	}
+	WebDavMount mount(URI uri, String name) throws CommandFailedException;
 
 }

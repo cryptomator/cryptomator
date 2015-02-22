@@ -18,11 +18,14 @@ import javax.inject.Singleton;
 import org.cryptomator.crypto.Cryptor;
 import org.cryptomator.crypto.SamplingDecorator;
 import org.cryptomator.crypto.aes256.Aes256Cryptor;
+import org.cryptomator.ui.model.VaultFactory;
 import org.cryptomator.ui.model.VaultObjectMapperProvider;
 import org.cryptomator.ui.settings.Settings;
 import org.cryptomator.ui.settings.SettingsProvider;
 import org.cryptomator.ui.util.DeferredCloser;
 import org.cryptomator.ui.util.DeferredCloser.Closer;
+import org.cryptomator.ui.util.mount.WebDavMounter;
+import org.cryptomator.ui.util.mount.WebDavMounterProvider;
 import org.cryptomator.webdav.WebDavServer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -44,6 +47,7 @@ public class MainModule extends AbstractModule {
 		bind(DeferredCloser.class).toInstance(deferredCloser);
 		bind(ObjectMapper.class).annotatedWith(Names.named("VaultJsonMapper")).toProvider(VaultObjectMapperProvider.class);
 		bind(Settings.class).toProvider(SettingsProvider.class);
+		bind(WebDavMounter.class).toProvider(WebDavMounterProvider.class).asEagerSingleton();
 	}
 
 	@Provides
@@ -61,6 +65,11 @@ public class MainModule extends AbstractModule {
 	@Provides
 	Cryptor getCryptor() {
 		return SamplingDecorator.decorate(new Aes256Cryptor());
+	}
+
+	@Provides
+	VaultFactory getVaultFactory(Cryptor cryptor, WebDavMounter mounter) {
+		return new VaultFactory(cryptor, mounter);
 	}
 
 	@Provides
