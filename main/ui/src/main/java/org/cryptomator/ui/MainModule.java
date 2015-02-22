@@ -31,6 +31,7 @@ import org.cryptomator.webdav.WebDavServer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
+import com.google.inject.Provider;
 import com.google.inject.Provides;
 import com.google.inject.name.Names;
 
@@ -68,8 +69,9 @@ public class MainModule extends AbstractModule {
 	}
 
 	@Provides
-	VaultFactory getVaultFactory(WebDavServer server, Cryptor cryptor, WebDavMounter mounter, DeferredCloser closer) {
-		return new VaultFactory(server, cryptor, mounter, closer);
+	@Singleton
+	VaultFactory getVaultFactory(WebDavServer server, Provider<Cryptor> cryptorProvider, WebDavMounter mounter, DeferredCloser closer) {
+		return new VaultFactory(server, cryptorProvider, mounter, closer);
 	}
 
 	@Provides

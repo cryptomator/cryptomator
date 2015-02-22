@@ -25,7 +25,7 @@
 
 	<fx:define>
 		<fx:include fx:id="welcomeView" source="welcome.fxml" />
-		<ContextMenu fx:id="directoryContextMenu">
+		<ContextMenu fx:id="vaultListCellContextMenu">
 			<items>
 				<MenuItem text="%main.directoryList.contextMenu.remove" onAction="#didClickRemoveSelectedEntry" />
 				<!-- TODO: -->
@@ -44,7 +44,7 @@
 	<children>
 		<VBox prefWidth="200.0">
 			<children>
-				<ListView fx:id="directoryList" VBox.vgrow="ALWAYS" focusTraversable="false" />
+				<ListView fx:id="vaultList" VBox.vgrow="ALWAYS" focusTraversable="false" />
 				<ToolBar VBox.vgrow="NEVER" styleClass="list-related-toolbar">
 					<items>
 						<ToggleButton text="+" fx:id="addVaultButton" onAction="#didClickAddVault" focusTraversable="false"/>

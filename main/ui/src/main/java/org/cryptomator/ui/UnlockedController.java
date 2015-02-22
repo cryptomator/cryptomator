@@ -27,7 +27,6 @@ import javafx.util.Duration;
 
 import org.cryptomator.crypto.CryptorIOSampling;
 import org.cryptomator.ui.model.Vault;
-import org.cryptomator.webdav.WebDavServer;
 
 import com.google.inject.Inject;
 
@@ -35,9 +34,8 @@ public class UnlockedController implements Initializable {
 
 	private static final int IO_SAMPLING_STEPS = 100;
 	private static final double IO_SAMPLING_INTERVAL = 0.25;
-	private ResourceBundle rb;
 	private LockListener listener;
-	private Vault directory;
+	private Vault vault;
 	private Timeline ioAnimation;
 
 	@FXML
@@ -49,24 +47,20 @@ public class UnlockedController implements Initializable {
 	@FXML
 	private NumberAxis xAxis;
 
-	private final WebDavServer server;
-
 	@Inject
-	public UnlockedController(WebDavServer server) {
+	public UnlockedController() {
 		super();
-		this.server = server;
 	}
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
-		this.rb = rb;
 	}
 
 	@FXML
 	private void didClickCloseVault(ActionEvent event) {
-		directory.unmount();
-		directory.stopServer();
-		directory.setUnlocked(false);
+		vault.unmount();
+		vault.stopServer();
+		vault.setUnlocked(false);
 		if (listener != null) {
 			listener.didLock(this);
 		}
@@ -128,14 +122,12 @@ public class UnlockedController implements Initializable {
 
 	/* Getter/Setter */
 
-	public Vault getDirectory() {
-		return directory;
+	public Vault getVault() {
+		return vault;
 	}
 
-	public void setDirectory(Vault directory) {
-		this.directory = directory;
-		final String msg = String.format(rb.getString("unlocked.messageLabel.runningOnPort"), server.getPort());
-		messageLabel.setText(msg);
+	public void setVault(Vault directory) {
+		this.vault = directory;
 
 		if (directory.getCryptor() instanceof CryptorIOSampling) {
 			startIoSampling((CryptorIOSampling) directory.getCryptor());

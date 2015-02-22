@@ -58,7 +58,7 @@ public class MainController implements Initializable, InitializationListener, Un
 	private Stage stage;
 
 	@FXML
-	private ContextMenu directoryContextMenu;
+	private ContextMenu vaultListCellContextMenu;
 
 	@FXML
 	private ContextMenu addVaultContextMenu;
@@ -67,7 +67,7 @@ public class MainController implements Initializable, InitializationListener, Un
 	private HBox rootPane;
 
 	@FXML
-	private ListView<Vault> directoryList;
+	private ListView<Vault> vaultList;
 
 	@FXML
 	private ToggleButton addVaultButton;
@@ -94,9 +94,9 @@ public class MainController implements Initializable, InitializationListener, Un
 		this.rb = rb;
 
 		final ObservableList<Vault> items = FXCollections.observableList(settings.getDirectories());
-		directoryList.setItems(items);
-		directoryList.setCellFactory(this::createDirecoryListCell);
-		directoryList.getSelectionModel().getSelectedItems().addListener(this::selectedDirectoryDidChange);
+		vaultList.setItems(items);
+		vaultList.setCellFactory(this::createDirecoryListCell);
+		vaultList.getSelectionModel().getSelectedItems().addListener(this::selectedVaultDidChange);
 	}
 
 	@FXML
@@ -167,55 +167,55 @@ public class MainController implements Initializable, InitializationListener, Un
 		}
 
 		final Vault vault = vaultFactoy.createVault(vaultPath);
-		if (!directoryList.getItems().contains(vault)) {
-			directoryList.getItems().add(vault);
+		if (!vaultList.getItems().contains(vault)) {
+			vaultList.getItems().add(vault);
 		}
-		directoryList.getSelectionModel().select(vault);
+		vaultList.getSelectionModel().select(vault);
 	}
 
 	private ListCell<Vault> createDirecoryListCell(ListView<Vault> param) {
 		final DirectoryListCell cell = new DirectoryListCell();
-		cell.setContextMenu(directoryContextMenu);
+		cell.setContextMenu(vaultListCellContextMenu);
 		return cell;
 	}
 
-	private void selectedDirectoryDidChange(ListChangeListener.Change<? extends Vault> change) {
-		final Vault selectedDir = directoryList.getSelectionModel().getSelectedItem();
-		if (selectedDir == null) {
+	private void selectedVaultDidChange(ListChangeListener.Change<? extends Vault> change) {
+		final Vault selectedVault = vaultList.getSelectionModel().getSelectedItem();
+		if (selectedVault == null) {
 			stage.setTitle(rb.getString("app.name"));
 			showWelcomeView();
-		} else if (!Files.isDirectory(selectedDir.getPath())) {
+		} else if (!Files.isDirectory(selectedVault.getPath())) {
 			Platform.runLater(() -> {
-				directoryList.getItems().remove(selectedDir);
-				directoryList.getSelectionModel().clearSelection();
+				vaultList.getItems().remove(selectedVault);
+				vaultList.getSelectionModel().clearSelection();
 			});
 			stage.setTitle(rb.getString("app.name"));
 			showWelcomeView();
 		} else {
-			stage.setTitle(selectedDir.getName());
-			showDirectory(selectedDir);
+			stage.setTitle(selectedVault.getName());
+			showVault(selectedVault);
 		}
 	}
 
 	@FXML
 	private void didClickRemoveSelectedEntry(ActionEvent e) {
-		final Vault selectedDir = directoryList.getSelectionModel().getSelectedItem();
-		directoryList.getItems().remove(selectedDir);
-		directoryList.getSelectionModel().clearSelection();
+		final Vault selectedDir = vaultList.getSelectionModel().getSelectedItem();
+		vaultList.getItems().remove(selectedDir);
+		vaultList.getSelectionModel().clearSelection();
 	}
 
 	// ****************************************
 	// Subcontroller for right panel
 	// ****************************************
 
-	private void showDirectory(Vault directory) {
+	private void showVault(Vault vault) {
 		try {
-			if (directory.isUnlocked()) {
-				this.showUnlockedView(directory);
-			} else if (directory.containsMasterKey()) {
-				this.showUnlockView(directory);
+			if (vault.isUnlocked()) {
+				this.showUnlockedView(vault);
+			} else if (vault.containsMasterKey()) {
+				this.showUnlockView(vault);
 			} else {
-				this.showInitializeView(directory);
+				this.showInitializeView(vault);
 			}
 		} catch (IOException e) {
 			LOG.error("Failed to analyze directory.", e);
@@ -252,25 +252,25 @@ public class MainController implements Initializable, InitializationListener, Un
 
 	private void showUnlockView(Vault directory) {
 		final UnlockController ctrl = showView("/fxml/unlock.fxml");
-		ctrl.setDirectory(directory);
+		ctrl.setVault(directory);
 		ctrl.setListener(this);
 	}
 
 	@Override
 	public void didUnlock(UnlockController ctrl) {
-		showUnlockedView(ctrl.getDirectory());
+		showUnlockedView(ctrl.getVault());
 		Platform.setImplicitExit(false);
 	}
 
-	private void showUnlockedView(Vault directory) {
+	private void showUnlockedView(Vault vault) {
 		final UnlockedController ctrl = showView("/fxml/unlocked.fxml");
-		ctrl.setDirectory(directory);
+		ctrl.setVault(vault);
 		ctrl.setListener(this);
 	}
 
 	@Override
 	public void didLock(UnlockedController ctrl) {
-		showUnlockView(ctrl.getDirectory());
+		showUnlockView(ctrl.getVault());
 		if (getUnlockedDirectories().isEmpty()) {
 			Platform.setImplicitExit(true);
 		}
@@ -279,7 +279,7 @@ public class MainController implements Initializable, InitializationListener, Un
 	/* Convenience */
 
 	public Collection<Vault> getDirectories() {
-		return directoryList.getItems();
+		return vaultList.getItems();
 	}
 
 	public Collection<Vault> getUnlockedDirectories() {

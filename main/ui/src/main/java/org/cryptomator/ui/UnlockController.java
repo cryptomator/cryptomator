@@ -52,7 +52,7 @@ public class UnlockController implements Initializable {
 
 	private ResourceBundle rb;
 	private UnlockListener listener;
-	private Vault directory;
+	private Vault vault;
 
 	@FXML
 	private ComboBox<String> usernameBox;
@@ -108,23 +108,23 @@ public class UnlockController implements Initializable {
 		setControlsDisabled(true);
 		final String masterKeyFileName = usernameBox.getValue() + Aes256Cryptor.MASTERKEY_FILE_EXT;
 		final String masterKeyBackupFileName = masterKeyFileName + Aes256Cryptor.MASTERKEY_BACKUP_FILE_EXT;
-		final Path masterKeyPath = directory.getPath().resolve(masterKeyFileName);
-		final Path masterKeyBackupPath = directory.getPath().resolve(masterKeyBackupFileName);
+		final Path masterKeyPath = vault.getPath().resolve(masterKeyFileName);
+		final Path masterKeyBackupPath = vault.getPath().resolve(masterKeyBackupFileName);
 		final CharSequence password = passwordField.getCharacters();
 		InputStream masterKeyInputStream = null;
 		try {
 			progressIndicator.setVisible(true);
 			masterKeyInputStream = Files.newInputStream(masterKeyPath, StandardOpenOption.READ);
-			directory.getCryptor().decryptMasterKey(masterKeyInputStream, password);
-			if (!directory.startServer()) {
+			vault.getCryptor().decryptMasterKey(masterKeyInputStream, password);
+			if (!vault.startServer()) {
 				messageLabel.setText(rb.getString("unlock.messageLabel.startServerFailed"));
-				directory.getCryptor().swipeSensitiveData();
+				vault.getCryptor().swipeSensitiveData();
 				return;
 			}
 			// at this point we know for sure, that the masterkey can be decrypted, so lets make a backup:
 			Files.copy(masterKeyPath, masterKeyBackupPath, StandardCopyOption.REPLACE_EXISTING);
-			directory.setUnlocked(true);
-			final Future<Boolean> futureMount = exec.submit(() -> directory.mount());
+			vault.setUnlocked(true);
+			final Future<Boolean> futureMount = exec.submit(() -> vault.mount());
 			FXThreads.runOnMainThreadWhenFinished(exec, futureMount, this::didUnlockAndMount);
 			FXThreads.runOnMainThreadWhenFinished(exec, futureMount, (result) -> {
 				setControlsDisabled(false);
@@ -158,7 +158,7 @@ public class UnlockController implements Initializable {
 
 	private void findExistingUsernames() {
 		try {
-			DirectoryStream<Path> ds = MasterKeyFilter.filteredDirectory(directory.getPath());
+			DirectoryStream<Path> ds = MasterKeyFilter.filteredDirectory(vault.getPath());
 			final String masterKeyExt = Aes256Cryptor.MASTERKEY_FILE_EXT.toLowerCase();
 			usernameBox.getItems().clear();
 			for (final Path path : ds) {
@@ -171,7 +171,7 @@ public class UnlockController implements Initializable {
 				usernameBox.getSelectionModel().selectFirst();
 			}
 		} catch (IOException e) {
-			LOG.trace("Invalid path: " + directory.getPath(), e);
+			LOG.trace("Invalid path: " + vault.getPath(), e);
 		}
 	}
 
@@ -184,25 +184,25 @@ public class UnlockController implements Initializable {
 
 	private void didTypeMountName(ObservableValue<? extends String> property, String oldValue, String newValue) {
 		try {
-			directory.setMountName(newValue);
-			if (!newValue.equals(directory.getMountName())) {
-				mountName.setText(directory.getMountName());
+			vault.setMountName(newValue);
+			if (!newValue.equals(vault.getMountName())) {
+				mountName.setText(vault.getMountName());
 			}
 		} catch (IllegalArgumentException e) {
-			mountName.setText(directory.getMountName());
+			mountName.setText(vault.getMountName());
 		}
 	}
 
 	/* Getter/Setter */
 
-	public Vault getDirectory() {
-		return directory;
+	public Vault getVault() {
+		return vault;
 	}
 
-	public void setDirectory(Vault directory) {
-		this.directory = directory;
+	public void setVault(Vault vault) {
+		this.vault = vault;
 		this.findExistingUsernames();
-		this.mountName.setText(directory.getMountName());
+		this.mountName.setText(vault.getMountName());
 	}
 
 	public UnlockListener getListener() {
