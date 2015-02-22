@@ -122,13 +122,18 @@ public class MainController implements Initializable, InitializationListener, Un
 	@FXML
 	private void didClickCreateNewVault(ActionEvent event) {
 		final FileChooser fileChooser = new FileChooser();
-		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Cryptomator vault", "*.cryptomator"));
+		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Cryptomator vault", "*" + Vault.VAULT_FILE_EXTENSION));
 		final File file = fileChooser.showSaveDialog(stage);
 		try {
 			if (file != null) {
-				final Path vaultDir = Files.createDirectory(file.toPath());
-				final Path vaultShortcutFile = vaultDir.resolve(vaultDir.getFileName());
-				Files.createFile(vaultShortcutFile);
+				final Path vaultDir;
+				// enforce .cryptomator file extension:
+				if (!file.getName().endsWith(Vault.VAULT_FILE_EXTENSION)) {
+					final Path correctedPath = file.toPath().resolveSibling(file.getName() + Vault.VAULT_FILE_EXTENSION);
+					vaultDir = Files.createDirectory(correctedPath);
+				} else {
+					vaultDir = Files.createDirectory(file.toPath());
+				}
 				addVault(vaultDir, true);
 			}
 		} catch (IOException e) {
@@ -139,7 +144,7 @@ public class MainController implements Initializable, InitializationListener, Un
 	@FXML
 	private void didClickAddExistingVaults(ActionEvent event) {
 		final FileChooser fileChooser = new FileChooser();
-		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Cryptomator vault", "*.cryptomator"));
+		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Cryptomator vault", "*" + Vault.VAULT_FILE_EXTENSION));
 		final List<File> files = fileChooser.showOpenMultipleDialog(stage);
 		if (files != null) {
 			for (final File file : files) {
