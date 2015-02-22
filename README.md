@@ -5,7 +5,7 @@ Cryptomator
 
 Multiplatform transparent client-side encryption of your files in the cloud.
 
-If you want to take a look at the current beta version, go ahead and get your copy of cryptomator on  [Cryptomator.org](http://cryptomator.org) or clone and build Cryptomator using Maven (instructions below).
+If you want to take a look at the current beta version, go ahead and get your copy of cryptomator on  [Cryptomator.org](https://cryptomator.org) or clone and build Cryptomator using Maven (instructions below).
 
 ## Features
 - Totally transparent: Just work on the encrypted volume, as if it was an USB drive
