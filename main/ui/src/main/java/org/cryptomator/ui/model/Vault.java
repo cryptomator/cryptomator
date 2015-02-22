@@ -47,9 +47,6 @@ public class Vault implements Serializable {
 	 * Package private constructor, use {@link VaultFactory}.
 	 */
 	Vault(final Path vaultDirectoryPath, final WebDavServer server, final Cryptor cryptor, final WebDavMounter mounter, final DeferredCloser closer) {
-		if (!Files.isDirectory(vaultDirectoryPath) || !vaultDirectoryPath.getFileName().toString().endsWith(VAULT_FILE_EXTENSION)) {
-			throw new IllegalArgumentException("Not a valid vault directory: " + vaultDirectoryPath);
-		}
 		this.path = vaultDirectoryPath;
 		this.server = server;
 		this.cryptor = cryptor;
@@ -61,6 +58,10 @@ public class Vault implements Serializable {
 		} catch (IllegalArgumentException e) {
 			// mount name needs to be set by the user explicitly later
 		}
+	}
+
+	public boolean isValidVaultDirectory() {
+		return Files.isDirectory(path) && path.getFileName().toString().endsWith(VAULT_FILE_EXTENSION);
 	}
 
 	public boolean containsMasterKey() throws IOException {

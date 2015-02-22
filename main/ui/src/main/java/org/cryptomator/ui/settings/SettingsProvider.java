@@ -59,6 +59,7 @@ public class SettingsProvider implements Provider<Settings> {
 			final Path settingsFile = SETTINGS_DIR.resolve(SETTINGS_FILE);
 			final InputStream in = Files.newInputStream(settingsFile, StandardOpenOption.READ);
 			settings = objectMapper.readValue(in, Settings.class);
+			settings.getDirectories().removeIf(v -> !v.isValidVaultDirectory());
 		} catch (IOException e) {
 			LOG.warn("Failed to load settings, creating new one.");
 			settings = new Settings();
