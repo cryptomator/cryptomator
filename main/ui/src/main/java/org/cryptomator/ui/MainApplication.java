@@ -18,7 +18,6 @@ import java.util.concurrent.ExecutorService;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
-import javafx.fxml.JavaFXBuilderFactory;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
@@ -74,6 +73,7 @@ public class MainApplication extends Application {
 	@Override
 	public void start(final Stage primaryStage) throws IOException {
 		ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+		FXMLLoader.setDefaultClassLoader(contextClassLoader);
 		Platform.runLater(() -> {
 			/*
 			 * This fixes a bug on OSX where the magic file open handler leads to no context class loader being set in the AppKit (event)
@@ -88,7 +88,7 @@ public class MainApplication extends Application {
 
 		chooseNativeStylesheet();
 		final ResourceBundle rb = ResourceBundle.getBundle("localization");
-		final FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/main.fxml"), rb, new JavaFXBuilderFactory(MainApplication.class.getClassLoader()));
+		final FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/main.fxml"), rb);
 		loader.setControllerFactory(controllerFactory);
 		final Parent root = loader.load();
 		final MainController ctrl = loader.getController();

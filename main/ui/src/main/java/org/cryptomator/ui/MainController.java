@@ -26,7 +26,6 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.fxml.JavaFXBuilderFactory;
 import javafx.geometry.Side;
 import javafx.scene.Parent;
 import javafx.scene.control.ContextMenu;
@@ -38,7 +37,6 @@ import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-import javafx.util.BuilderFactory;
 
 import org.cryptomator.crypto.Cryptor;
 import org.cryptomator.ui.InitializeController.InitializationListener;
@@ -81,7 +79,6 @@ public class MainController implements Initializable, InitializationListener, Un
 	private final ControllerFactory controllerFactory;
 	private final Settings settings;
 	private final Provider<Cryptor> cryptorProvider;
-	private final BuilderFactory builderFactory = new JavaFXBuilderFactory(MainController.class.getClassLoader());
 
 	private ResourceBundle rb;
 
@@ -228,7 +225,7 @@ public class MainController implements Initializable, InitializationListener, Un
 
 	private <T> T showView(String fxml) {
 		try {
-			final FXMLLoader loader = new FXMLLoader(getClass().getResource(fxml), rb, builderFactory);
+			final FXMLLoader loader = new FXMLLoader(getClass().getResource(fxml), rb);
 			loader.setControllerFactory(controllerFactory);
 			final Parent root = loader.load();
 			contentPane.getChildren().clear();
