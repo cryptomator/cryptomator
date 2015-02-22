@@ -39,10 +39,8 @@ import org.cryptomator.crypto.exceptions.UnsupportedKeyLengthException;
 import org.cryptomator.crypto.exceptions.WrongPasswordException;
 import org.cryptomator.ui.controls.SecPasswordField;
 import org.cryptomator.ui.model.Vault;
-import org.cryptomator.ui.util.DeferredCloser;
 import org.cryptomator.ui.util.FXThreads;
 import org.cryptomator.ui.util.MasterKeyFilter;
-import org.cryptomator.webdav.WebDavServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,18 +72,12 @@ public class UnlockController implements Initializable {
 	@FXML
 	private Label messageLabel;
 
-	private final WebDavServer server;
-
 	private final ExecutorService exec;
 
-	private final DeferredCloser closer;
-
 	@Inject
-	public UnlockController(WebDavServer server, ExecutorService exec, DeferredCloser closer) {
+	public UnlockController(ExecutorService exec) {
 		super();
-		this.server = server;
 		this.exec = exec;
-		this.closer = closer;
 	}
 
 	@Override
@@ -124,7 +116,7 @@ public class UnlockController implements Initializable {
 			progressIndicator.setVisible(true);
 			masterKeyInputStream = Files.newInputStream(masterKeyPath, StandardOpenOption.READ);
 			directory.getCryptor().decryptMasterKey(masterKeyInputStream, password);
-			if (!directory.startServer(server, closer)) {
+			if (!directory.startServer()) {
 				messageLabel.setText(rb.getString("unlock.messageLabel.startServerFailed"));
 				directory.getCryptor().swipeSensitiveData();
 				return;
@@ -132,7 +124,7 @@ public class UnlockController implements Initializable {
 			// at this point we know for sure, that the masterkey can be decrypted, so lets make a backup:
 			Files.copy(masterKeyPath, masterKeyBackupPath, StandardCopyOption.REPLACE_EXISTING);
 			directory.setUnlocked(true);
-			final Future<Boolean> futureMount = exec.submit(() -> directory.mount(closer));
+			final Future<Boolean> futureMount = exec.submit(() -> directory.mount());
 			FXThreads.runOnMainThreadWhenFinished(exec, futureMount, this::didUnlockAndMount);
 			FXThreads.runOnMainThreadWhenFinished(exec, futureMount, (result) -> {
 				setControlsDisabled(false);

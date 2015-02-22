@@ -32,9 +32,12 @@ public class Vault implements Serializable {
 	public static final String VAULT_FILE_EXTENSION = ".cryptomator";
 
 	private final Path path;
+	private final WebDavServer server;
 	private final Cryptor cryptor;
 	private final WebDavMounter mounter;
+	private final DeferredCloser closer;
 	private final ObjectProperty<Boolean> unlocked = new SimpleObjectProperty<Boolean>(this, "unlocked", Boolean.FALSE);
+
 	private String mountName;
 	private DeferredClosable<ServletLifeCycleAdapter> webDavServlet = DeferredClosable.empty();
 	private DeferredClosable<WebDavMount> webDavMount = DeferredClosable.empty();
@@ -42,13 +45,15 @@ public class Vault implements Serializable {
 	/**
 	 * Package private constructor, use {@link VaultFactory}.
 	 */
-	Vault(final Path vaultDirectoryPath, final Cryptor cryptor, final WebDavMounter mounter) {
+	Vault(final Path vaultDirectoryPath, final WebDavServer server, final Cryptor cryptor, final WebDavMounter mounter, final DeferredCloser closer) {
 		if (!Files.isDirectory(vaultDirectoryPath) || !vaultDirectoryPath.getFileName().toString().endsWith(VAULT_FILE_EXTENSION)) {
 			throw new IllegalArgumentException("Not a valid vault directory: " + vaultDirectoryPath);
 		}
 		this.path = vaultDirectoryPath;
+		this.server = server;
 		this.cryptor = cryptor;
 		this.mounter = mounter;
+		this.closer = closer;
 
 		try {
 			setMountName(getName());
@@ -61,7 +66,7 @@ public class Vault implements Serializable {
 		return MasterKeyFilter.filteredDirectory(path).iterator().hasNext();
 	}
 
-	public synchronized boolean startServer(WebDavServer server, DeferredCloser closer) {
+	public synchronized boolean startServer() {
 		Optional<ServletLifeCycleAdapter> o = webDavServlet.get();
 		if (o.isPresent() && o.get().isRunning()) {
 			return false;
@@ -80,7 +85,7 @@ public class Vault implements Serializable {
 		cryptor.swipeSensitiveData();
 	}
 
-	public boolean mount(DeferredCloser closer) {
+	public boolean mount() {
 		Optional<ServletLifeCycleAdapter> o = webDavServlet.get();
 		if (!o.isPresent() || !o.get().isRunning()) {
 			return false;

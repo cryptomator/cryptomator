@@ -68,8 +68,8 @@ public class MainModule extends AbstractModule {
 	}
 
 	@Provides
-	VaultFactory getVaultFactory(Cryptor cryptor, WebDavMounter mounter) {
-		return new VaultFactory(cryptor, mounter);
+	VaultFactory getVaultFactory(WebDavServer server, Cryptor cryptor, WebDavMounter mounter, DeferredCloser closer) {
+		return new VaultFactory(server, cryptor, mounter, closer);
 	}
 
 	@Provides
