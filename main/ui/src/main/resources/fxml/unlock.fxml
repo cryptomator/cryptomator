@@ -19,7 +19,7 @@
 <?import javafx.scene.control.CheckBox?>
 
 
-<GridPane vgap="12.0" hgap="12.0" prefWidth="400.0" fx:controller="org.cryptomator.ui.UnlockController" xmlns:fx="http://javafx.com/fxml">
+<GridPane vgap="12.0" hgap="12.0" prefWidth="400.0" fx:controller="org.cryptomator.ui.controllers.UnlockController" xmlns:fx="http://javafx.com/fxml">
 	<padding>
 		<Insets top="24.0" right="24.0" bottom="24.0" left="24.0" />
 	</padding>
@@ -39,7 +39,7 @@
 		<TextField fx:id="mountName" GridPane.rowIndex="1" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" maxWidth="Infinity" />
 		
 		<!-- Row 2 -->
-		<Button fx:id="unlockButton" text="%unlock.button.unlock" defaultButton="true" GridPane.rowIndex="2" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.halignment="RIGHT" prefWidth="150.0" onAction="#didClickUnlockButton"/>
+		<Button fx:id="unlockButton" text="%unlock.button.unlock" defaultButton="true" GridPane.rowIndex="2" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.halignment="RIGHT" prefWidth="150.0" onAction="#didClickUnlockButton" disable="true"/>
 		
 		<!-- Row 3-->
 		<ProgressIndicator progress="-1" fx:id="progressIndicator" GridPane.rowIndex="3" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.halignment="CENTER" visible="false"/>

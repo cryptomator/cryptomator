@@ -305,7 +305,8 @@
 	-fx-background-color: linear-gradient(to bottom, #4AA0F9 0%, #045FFF 100%), linear-gradient(to bottom, #69B2FA 0%, #0D81FF 100%);
     -fx-text-fill: -fx-light-text-color;
 }
-.button:default:disabled {
+.button:default:disabled,
+.root.active-window .button:default:disabled {
 	-fx-background-color: linear-gradient(to bottom, #D2D2D2 0%, #C4C4C4 100%), #F2F2F2;
 	-fx-background-insets: 0, 1;
     -fx-text-fill: -fx-mid-text-color;

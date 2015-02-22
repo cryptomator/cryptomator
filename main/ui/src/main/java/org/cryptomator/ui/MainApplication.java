@@ -24,6 +24,7 @@ import javafx.stage.Stage;
 
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.ui.MainModule.ControllerFactory;
+import org.cryptomator.ui.controllers.MainController;
 import org.cryptomator.ui.model.Vault;
 import org.cryptomator.ui.util.ActiveWindowStyleSupport;
 import org.cryptomator.ui.util.DeferredCloser;

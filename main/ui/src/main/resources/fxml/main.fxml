@@ -19,7 +19,7 @@
 <?import javafx.scene.control.Separator?>
 <?import javafx.geometry.Insets?>
 
-<HBox fx:id="rootPane" prefHeight="440.0" prefWidth="640.0" fx:controller="org.cryptomator.ui.MainController" xmlns:fx="http://javafx.com/fxml">
+<HBox fx:id="rootPane" prefHeight="440.0" prefWidth="640.0" fx:controller="org.cryptomator.ui.controllers.MainController" xmlns:fx="http://javafx.com/fxml">
 
 	<padding><Insets top="20" right="20" bottom="20" left="20.0"/></padding>
 
@@ -28,8 +28,7 @@
 		<ContextMenu fx:id="vaultListCellContextMenu">
 			<items>
 				<MenuItem text="%main.directoryList.contextMenu.remove" onAction="#didClickRemoveSelectedEntry" />
-				<!-- TODO: -->
-				<MenuItem text="%main.directoryList.contextMenu.changePassword" disable="true" />
+				<MenuItem text="%main.directoryList.contextMenu.changePassword" onAction="#didClickChangePassword" />
 			</items>
 		</ContextMenu>
 		<ContextMenu fx:id="addVaultContextMenu" onShowing="#willShowAddVaultContextMenu" onHidden="#didHideAddVaultContextMenu">

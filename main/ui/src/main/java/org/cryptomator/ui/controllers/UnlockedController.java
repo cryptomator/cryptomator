@@ -6,7 +6,7 @@
  * Contributors:
  *     Sebastian Stenzel - initial API and implementation
  ******************************************************************************/
-package org.cryptomator.ui;
+package org.cryptomator.ui.controllers;
 
 import java.net.URL;
 import java.util.ResourceBundle;

@@ -15,7 +15,7 @@ import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.cryptomator.ui.MainController;
+import org.cryptomator.ui.controllers.MainController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

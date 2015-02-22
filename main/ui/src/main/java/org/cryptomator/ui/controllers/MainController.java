@@ -6,7 +6,7 @@
  * Contributors:
  *     Sebastian Stenzel - initial API and implementation
  ******************************************************************************/
-package org.cryptomator.ui;
+package org.cryptomator.ui.controllers;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,10 +38,11 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
-import org.cryptomator.ui.InitializeController.InitializationListener;
 import org.cryptomator.ui.MainModule.ControllerFactory;
-import org.cryptomator.ui.UnlockController.UnlockListener;
-import org.cryptomator.ui.UnlockedController.LockListener;
+import org.cryptomator.ui.controllers.ChangePasswordController.ChangePasswordListener;
+import org.cryptomator.ui.controllers.InitializeController.InitializationListener;
+import org.cryptomator.ui.controllers.UnlockController.UnlockListener;
+import org.cryptomator.ui.controllers.UnlockedController.LockListener;
 import org.cryptomator.ui.controls.DirectoryListCell;
 import org.cryptomator.ui.model.Vault;
 import org.cryptomator.ui.model.VaultFactory;
@@ -51,7 +52,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
 
-public class MainController implements Initializable, InitializationListener, UnlockListener, LockListener {
+public class MainController implements Initializable, InitializationListener, UnlockListener, LockListener, ChangePasswordListener {
 
 	private static final Logger LOG = LoggerFactory.getLogger(MainController.class);
 
@@ -152,7 +153,7 @@ public class MainController implements Initializable, InitializationListener, Un
 	 * 
 	 * @param path non-null, writable, existing directory
 	 */
-	void addVault(final Path path, boolean select) {
+	public void addVault(final Path path, boolean select) {
 		if (path == null || !Files.isWritable(path)) {
 			return;
 		}
@@ -199,9 +200,15 @@ public class MainController implements Initializable, InitializationListener, Un
 
 	@FXML
 	private void didClickRemoveSelectedEntry(ActionEvent e) {
-		final Vault selectedDir = vaultList.getSelectionModel().getSelectedItem();
-		vaultList.getItems().remove(selectedDir);
+		final Vault selectedVault = vaultList.getSelectionModel().getSelectedItem();
+		vaultList.getItems().remove(selectedVault);
 		vaultList.getSelectionModel().clearSelection();
+	}
+
+	@FXML
+	private void didClickChangePassword(ActionEvent e) {
+		final Vault selectedVault = vaultList.getSelectionModel().getSelectedItem();
+		showChangePasswordView(selectedVault);
 	}
 
 	// ****************************************
@@ -239,20 +246,20 @@ public class MainController implements Initializable, InitializationListener, Un
 		this.showView("/fxml/welcome.fxml");
 	}
 
-	private void showInitializeView(Vault directory) {
+	private void showInitializeView(Vault vault) {
 		final InitializeController ctrl = showView("/fxml/initialize.fxml");
-		ctrl.setDirectory(directory);
+		ctrl.setVault(vault);
 		ctrl.setListener(this);
 	}
 
 	@Override
 	public void didInitialize(InitializeController ctrl) {
-		showUnlockView(ctrl.getDirectory());
+		showUnlockView(ctrl.getVault());
 	}
 
-	private void showUnlockView(Vault directory) {
+	private void showUnlockView(Vault vault) {
 		final UnlockController ctrl = showView("/fxml/unlock.fxml");
-		ctrl.setVault(directory);
+		ctrl.setVault(vault);
 		ctrl.setListener(this);
 	}
 
@@ -274,6 +281,17 @@ public class MainController implements Initializable, InitializationListener, Un
 		if (getUnlockedDirectories().isEmpty()) {
 			Platform.setImplicitExit(true);
 		}
+	}
+
+	private void showChangePasswordView(Vault vault) {
+		final ChangePasswordController ctrl = showView("/fxml/change_password.fxml");
+		ctrl.setVault(vault);
+		ctrl.setListener(this);
+	}
+
+	@Override
+	public void didChangePassword(ChangePasswordController ctrl) {
+		showUnlockView(ctrl.getVault());
 	}
 
 	/* Convenience */

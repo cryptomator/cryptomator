@@ -6,7 +6,7 @@
  * Contributors:
  *     Sebastian Stenzel - initial API and implementation
  ******************************************************************************/
-package org.cryptomator.ui;
+package org.cryptomator.ui.controllers;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -35,7 +35,7 @@ public class InitializeController implements Initializable {
 	private static final Logger LOG = LoggerFactory.getLogger(InitializeController.class);
 
 	private ResourceBundle localization;
-	private Vault directory;
+	private Vault vault;
 	private InitializationListener listener;
 
 	@FXML
@@ -74,10 +74,10 @@ public class InitializeController implements Initializable {
 	@FXML
 	protected void initializeVault(ActionEvent event) {
 		setControlsDisabled(true);
-		final Path masterKeyPath = directory.getPath().resolve(Vault.VAULT_MASTERKEY_FILE);
+		final Path masterKeyPath = vault.getPath().resolve(Vault.VAULT_MASTERKEY_FILE);
 		final CharSequence password = passwordField.getCharacters();
 		try (OutputStream masterKeyOutputStream = Files.newOutputStream(masterKeyPath, StandardOpenOption.WRITE, StandardOpenOption.CREATE_NEW)) {
-			directory.getCryptor().encryptMasterKey(masterKeyOutputStream, password);
+			vault.getCryptor().encryptMasterKey(masterKeyOutputStream, password);
 			if (listener != null) {
 				listener.didInitialize(this);
 			}
@@ -102,12 +102,12 @@ public class InitializeController implements Initializable {
 
 	/* Getter/Setter */
 
-	public Vault getDirectory() {
-		return directory;
+	public Vault getVault() {
+		return vault;
 	}
 
-	public void setDirectory(Vault directory) {
-		this.directory = directory;
+	public void setVault(Vault vault) {
+		this.vault = vault;
 	}
 
 	public InitializationListener getListener() {

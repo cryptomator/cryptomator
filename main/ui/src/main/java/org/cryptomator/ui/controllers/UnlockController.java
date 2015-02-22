@@ -6,7 +6,7 @@
  * Contributors:
  *     Sebastian Stenzel - initial API and implementation
  ******************************************************************************/
-package org.cryptomator.ui;
+package org.cryptomator.ui.controllers;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,7 +30,6 @@ import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.CharUtils;
 import org.cryptomator.crypto.exceptions.DecryptFailedException;
 import org.cryptomator.crypto.exceptions.UnsupportedKeyLengthException;
@@ -78,8 +77,18 @@ public class UnlockController implements Initializable {
 	public void initialize(URL url, ResourceBundle rb) {
 		this.rb = rb;
 
+		passwordField.textProperty().addListener(this::passwordFieldsDidChange);
 		mountName.addEventFilter(KeyEvent.KEY_TYPED, this::filterAlphanumericKeyEvents);
 		mountName.textProperty().addListener(this::mountNameDidChange);
+	}
+
+	// ****************************************
+	// Password field
+	// ****************************************
+
+	private void passwordFieldsDidChange(ObservableValue<? extends String> property, String oldValue, String newValue) {
+		boolean passwordIsEmpty = passwordField.getText().isEmpty();
+		unlockButton.setDisable(passwordIsEmpty);
 	}
 
 	// ****************************************
@@ -89,13 +98,11 @@ public class UnlockController implements Initializable {
 	@FXML
 	private void didClickUnlockButton(ActionEvent event) {
 		setControlsDisabled(true);
+		progressIndicator.setVisible(true);
 		final Path masterKeyPath = vault.getPath().resolve(Vault.VAULT_MASTERKEY_FILE);
 		final Path masterKeyBackupPath = vault.getPath().resolve(Vault.VAULT_MASTERKEY_BACKUP_FILE);
 		final CharSequence password = passwordField.getCharacters();
-		InputStream masterKeyInputStream = null;
-		try {
-			progressIndicator.setVisible(true);
-			masterKeyInputStream = Files.newInputStream(masterKeyPath, StandardOpenOption.READ);
+		try (final InputStream masterKeyInputStream = Files.newInputStream(masterKeyPath, StandardOpenOption.READ)) {
 			vault.getCryptor().decryptMasterKey(masterKeyInputStream, password);
 			if (!vault.startServer()) {
 				messageLabel.setText(rb.getString("unlock.messageLabel.startServerFailed"));
@@ -127,12 +134,12 @@ public class UnlockController implements Initializable {
 			LOG.warn("Unsupported Key-Length. Please install Oracle Java Cryptography Extension (JCE).", ex);
 		} finally {
 			passwordField.swipe();
-			IOUtils.closeQuietly(masterKeyInputStream);
 		}
 	}
 
 	private void setControlsDisabled(boolean disable) {
 		passwordField.setDisable(disable);
+		mountName.setDisable(disable);
 		unlockButton.setDisable(disable);
 	}
 
