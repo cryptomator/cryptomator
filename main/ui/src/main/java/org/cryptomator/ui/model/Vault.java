@@ -15,7 +15,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.cryptomator.crypto.Cryptor;
 import org.cryptomator.ui.util.DeferredClosable;
 import org.cryptomator.ui.util.DeferredCloser;
-import org.cryptomator.ui.util.MasterKeyFilter;
 import org.cryptomator.ui.util.mount.CommandFailedException;
 import org.cryptomator.ui.util.mount.WebDavMount;
 import org.cryptomator.ui.util.mount.WebDavMounter;
@@ -30,6 +29,8 @@ public class Vault implements Serializable {
 	private static final Logger LOG = LoggerFactory.getLogger(Vault.class);
 
 	public static final String VAULT_FILE_EXTENSION = ".cryptomator";
+	public static final String VAULT_MASTERKEY_FILE = "masterkey.cryptomator";
+	public static final String VAULT_MASTERKEY_BACKUP_FILE = "masterkey.cryptomator.bkup";
 
 	private final Path path;
 	private final WebDavServer server;
@@ -63,7 +64,8 @@ public class Vault implements Serializable {
 	}
 
 	public boolean containsMasterKey() throws IOException {
-		return MasterKeyFilter.filteredDirectory(path).iterator().hasNext();
+		final Path masterKeyPath = path.resolve(VAULT_MASTERKEY_FILE);
+		return Files.isRegularFile(masterKeyPath);
 	}
 
 	public synchronized boolean startServer() {

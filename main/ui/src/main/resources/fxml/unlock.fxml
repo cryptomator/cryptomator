@@ -31,25 +31,21 @@
 
 	<children>
 		<!-- Row 0 -->
-		<Label text="%unlock.label.username" GridPane.rowIndex="0" GridPane.columnIndex="0" />
-		<ComboBox fx:id="usernameBox" GridPane.rowIndex="0" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" maxWidth="Infinity" promptText="$access.label.username" />
-
+		<Label text="%unlock.label.password" GridPane.rowIndex="0" GridPane.columnIndex="0" />
+		<SecPasswordField fx:id="passwordField" GridPane.rowIndex="0" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" maxWidth="Infinity" />
+		
 		<!-- Row 1 -->
-		<Label text="%unlock.label.password" GridPane.rowIndex="1" GridPane.columnIndex="0" />
-		<SecPasswordField fx:id="passwordField" GridPane.rowIndex="1" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" maxWidth="Infinity" />
+		<Label text="%unlock.label.mountName" GridPane.rowIndex="1" GridPane.columnIndex="0" />
+		<TextField fx:id="mountName" GridPane.rowIndex="1" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" maxWidth="Infinity" />
 		
 		<!-- Row 2 -->
-		<Label text="%unlock.label.mountName" GridPane.rowIndex="2" GridPane.columnIndex="0" />
-		<TextField fx:id="mountName" GridPane.rowIndex="2" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" maxWidth="Infinity" />
+		<Button fx:id="unlockButton" text="%unlock.button.unlock" defaultButton="true" GridPane.rowIndex="2" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.halignment="RIGHT" prefWidth="150.0" onAction="#didClickUnlockButton"/>
 		
-		<!-- Row 3 -->
-		<Button fx:id="unlockButton" text="%unlock.button.unlock" defaultButton="true" GridPane.rowIndex="3" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.halignment="RIGHT" prefWidth="150.0" onAction="#didClickUnlockButton"/>
+		<!-- Row 3-->
+		<ProgressIndicator progress="-1" fx:id="progressIndicator" GridPane.rowIndex="3" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.halignment="CENTER" visible="false"/>
 		
-		<!-- Row 4-->
-		<ProgressIndicator progress="-1" fx:id="progressIndicator" GridPane.rowIndex="4" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.halignment="CENTER" visible="false"/>
-		
-		<!-- Row 5 -->
-		<Label fx:id="messageLabel" GridPane.rowIndex="5" GridPane.columnIndex="0" GridPane.columnSpan="2" />
+		<!-- Row 4 -->
+		<Label fx:id="messageLabel" GridPane.rowIndex="4" GridPane.columnIndex="0" GridPane.columnSpan="2" />
 	</children>
 </GridPane>
 

@@ -17,16 +17,6 @@ import org.apache.commons.codec.binary.BaseNCodec;
 interface FileNamingConventions {
 
 	/**
-	 * Extension of masterkey files inside the root directory of the encrypted storage.
-	 */
-	String MASTERKEY_FILE_EXT = ".masterkey.json";
-
-	/**
-	 * Additional extension for masterkey backup files.
-	 */
-	String MASTERKEY_BACKUP_FILE_EXT = ".bkup";
-
-	/**
 	 * How to encode the encrypted file names safely. Base32 uses only alphanumeric characters and is case-insensitive.
 	 */
 	BaseNCodec ENCRYPTED_FILENAME_CODEC = new Base32();

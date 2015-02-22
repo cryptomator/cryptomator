@@ -30,22 +30,18 @@
 
 	<children>
 		<!-- Row 0 -->
-		<Label GridPane.rowIndex="0" GridPane.columnIndex="0" text="%initialize.label.username" />
-		<TextField fx:id="usernameField" GridPane.rowIndex="0" GridPane.columnIndex="1" />
+		<Label GridPane.rowIndex="0" GridPane.columnIndex="0" text="%initialize.label.password" />
+		<SecPasswordField fx:id="passwordField" GridPane.rowIndex="0" GridPane.columnIndex="1" />
 		
 		<!-- Row 1 -->
-		<Label GridPane.rowIndex="1" GridPane.columnIndex="0" text="%initialize.label.password" />
-		<SecPasswordField fx:id="passwordField" GridPane.rowIndex="1" GridPane.columnIndex="1" disable="true" />
+		<Label GridPane.rowIndex="1" GridPane.columnIndex="0" text="%initialize.label.retypePassword" />
+		<SecPasswordField fx:id="retypePasswordField" GridPane.rowIndex="1" GridPane.columnIndex="1" />
 		
 		<!-- Row 2 -->
-		<Label GridPane.rowIndex="2" GridPane.columnIndex="0" text="%initialize.label.retypePassword" />
-		<SecPasswordField fx:id="retypePasswordField" GridPane.rowIndex="2" GridPane.columnIndex="1" disable="true" />
-		
-		<!-- Row 3 -->
-		<Button fx:id="okButton" defaultButton="true" GridPane.rowIndex="3" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.halignment="RIGHT" text="%initialize.button.ok" prefWidth="150.0" onAction="#initializeVault" focusTraversable="false" disable="true" />
+		<Button fx:id="okButton" defaultButton="true" GridPane.rowIndex="2" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.halignment="RIGHT" text="%initialize.button.ok" prefWidth="150.0" onAction="#initializeVault" focusTraversable="false" disable="true" />
 				
-		<!-- Row 5 -->
-		<Label fx:id="messageLabel" GridPane.rowIndex="5" GridPane.columnIndex="0" GridPane.columnSpan="2" />
+		<!-- Row 3 -->
+		<Label fx:id="messageLabel" GridPane.rowIndex="3" GridPane.columnIndex="0" GridPane.columnSpan="2" />
 	</children>
 </GridPane>
 

@@ -11,7 +11,6 @@ package org.cryptomator.ui;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -26,21 +25,19 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextField;
+import javafx.scene.input.KeyEvent;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.cryptomator.crypto.aes256.Aes256Cryptor;
+import org.apache.commons.lang3.CharUtils;
 import org.cryptomator.crypto.exceptions.DecryptFailedException;
 import org.cryptomator.crypto.exceptions.UnsupportedKeyLengthException;
 import org.cryptomator.crypto.exceptions.WrongPasswordException;
 import org.cryptomator.ui.controls.SecPasswordField;
 import org.cryptomator.ui.model.Vault;
 import org.cryptomator.ui.util.FXThreads;
-import org.cryptomator.ui.util.MasterKeyFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,9 +50,6 @@ public class UnlockController implements Initializable {
 	private ResourceBundle rb;
 	private UnlockListener listener;
 	private Vault vault;
-
-	@FXML
-	private ComboBox<String> usernameBox;
 
 	@FXML
 	private SecPasswordField passwordField;
@@ -84,19 +78,8 @@ public class UnlockController implements Initializable {
 	public void initialize(URL url, ResourceBundle rb) {
 		this.rb = rb;
 
-		usernameBox.valueProperty().addListener(this::didChooseUsername);
-		mountName.textProperty().addListener(this::didTypeMountName);
-	}
-
-	// ****************************************
-	// Username box
-	// ****************************************
-
-	public void didChooseUsername(ObservableValue<? extends String> property, String oldValue, String newValue) {
-		if (newValue != null) {
-			Platform.runLater(passwordField::requestFocus);
-		}
-		passwordField.setDisable(StringUtils.isEmpty(newValue));
+		mountName.addEventFilter(KeyEvent.KEY_TYPED, this::filterAlphanumericKeyEvents);
+		mountName.textProperty().addListener(this::mountNameDidChange);
 	}
 
 	// ****************************************
@@ -106,10 +89,8 @@ public class UnlockController implements Initializable {
 	@FXML
 	private void didClickUnlockButton(ActionEvent event) {
 		setControlsDisabled(true);
-		final String masterKeyFileName = usernameBox.getValue() + Aes256Cryptor.MASTERKEY_FILE_EXT;
-		final String masterKeyBackupFileName = masterKeyFileName + Aes256Cryptor.MASTERKEY_BACKUP_FILE_EXT;
-		final Path masterKeyPath = vault.getPath().resolve(masterKeyFileName);
-		final Path masterKeyBackupPath = vault.getPath().resolve(masterKeyBackupFileName);
+		final Path masterKeyPath = vault.getPath().resolve(Vault.VAULT_MASTERKEY_FILE);
+		final Path masterKeyBackupPath = vault.getPath().resolve(Vault.VAULT_MASTERKEY_BACKUP_FILE);
 		final CharSequence password = passwordField.getCharacters();
 		InputStream masterKeyInputStream = null;
 		try {
@@ -151,28 +132,8 @@ public class UnlockController implements Initializable {
 	}
 
 	private void setControlsDisabled(boolean disable) {
-		usernameBox.setDisable(disable);
 		passwordField.setDisable(disable);
 		unlockButton.setDisable(disable);
-	}
-
-	private void findExistingUsernames() {
-		try {
-			DirectoryStream<Path> ds = MasterKeyFilter.filteredDirectory(vault.getPath());
-			final String masterKeyExt = Aes256Cryptor.MASTERKEY_FILE_EXT.toLowerCase();
-			usernameBox.getItems().clear();
-			for (final Path path : ds) {
-				final String fileName = path.getFileName().toString();
-				final int beginOfExt = fileName.toLowerCase().lastIndexOf(masterKeyExt);
-				final String baseName = fileName.substring(0, beginOfExt);
-				usernameBox.getItems().add(baseName);
-			}
-			if (usernameBox.getItems().size() == 1) {
-				usernameBox.getSelectionModel().selectFirst();
-			}
-		} catch (IOException e) {
-			LOG.trace("Invalid path: " + vault.getPath(), e);
-		}
 	}
 
 	private void didUnlockAndMount(boolean mountSuccess) {
@@ -182,13 +143,19 @@ public class UnlockController implements Initializable {
 		}
 	}
 
-	private void didTypeMountName(ObservableValue<? extends String> property, String oldValue, String newValue) {
-		try {
-			vault.setMountName(newValue);
-			if (!newValue.equals(vault.getMountName())) {
-				mountName.setText(vault.getMountName());
-			}
-		} catch (IllegalArgumentException e) {
+	public void filterAlphanumericKeyEvents(KeyEvent t) {
+		if (t.getCharacter() == null || t.getCharacter().length() == 0) {
+			return;
+		}
+		char c = t.getCharacter().charAt(0);
+		if (!CharUtils.isAsciiAlphanumeric(c)) {
+			t.consume();
+		}
+	}
+
+	private void mountNameDidChange(ObservableValue<? extends String> property, String oldValue, String newValue) {
+		// newValue is guaranteed to be a-z0-9, see #filterAlphanumericKeyEvents
+		if (newValue.isEmpty()) {
 			mountName.setText(vault.getMountName());
 		}
 	}
@@ -201,7 +168,6 @@ public class UnlockController implements Initializable {
 
 	public void setVault(Vault vault) {
 		this.vault = vault;
-		this.findExistingUsernames();
 		this.mountName.setText(vault.getMountName());
 	}
 

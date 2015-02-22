@@ -29,7 +29,6 @@
 			<items>
 				<MenuItem text="%main.directoryList.contextMenu.remove" onAction="#didClickRemoveSelectedEntry" />
 				<!-- TODO: -->
-				<MenuItem text="%main.directoryList.contextMenu.addUser" disable="true" />
 				<MenuItem text="%main.directoryList.contextMenu.changePassword" disable="true" />
 			</items>
 		</ContextMenu>
