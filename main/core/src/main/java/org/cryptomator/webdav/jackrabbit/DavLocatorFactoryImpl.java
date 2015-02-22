@@ -15,6 +15,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 
 import org.apache.commons.collections4.BidiMap;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -154,7 +155,7 @@ class DavLocatorFactoryImpl implements DavLocatorFactory, SensitiveDataSwipeList
 
 		private DavResourceLocatorImpl(String prefix, String resourcePath) {
 			this.prefix = prefix;
-			this.resourcePath = resourcePath;
+			this.resourcePath = FilenameUtils.normalizeNoEndSeparator(resourcePath, true);
 		}
 
 		@Override

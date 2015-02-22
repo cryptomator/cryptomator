@@ -31,9 +31,9 @@ final class MacOsXWebDavMounter implements WebDavMounterStrategy {
 		final String path = "/Volumes/Cryptomator" + uri.getRawPath().replace('/', '_');
 		final Script mountScript = Script.fromLines(
 				"mkdir \"$MOUNT_PATH\"",
-				"mount_webdav -S -v $MOUNT_NAME \"[::1]:$PORT$DAV_PATH\" \"$MOUNT_PATH\"",
+				"mount_webdav -S -v $MOUNT_NAME \"$DAV_AUTHORITY$DAV_PATH\" \"$MOUNT_PATH\"",
 				"open \"$MOUNT_PATH\"")
-				.addEnv("PORT", String.valueOf(uri.getPort()))
+				.addEnv("DAV_AUTHORITY", uri.getRawAuthority())
 				.addEnv("DAV_PATH", uri.getRawPath())
 				.addEnv("MOUNT_PATH", path)
 				.addEnv("MOUNT_NAME", name);

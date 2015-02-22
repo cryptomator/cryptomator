@@ -40,15 +40,13 @@ final class LinuxGvfsWebDavMounter implements WebDavMounterStrategy {
 	public WebDavMount mount(URI uri, String name) throws CommandFailedException {
 		final Script mountScript = Script.fromLines(
 				"set -x",
-				"gvfs-mount \"dav://localhost:$DAV_PORT$DAV_PATH\"",
-				"xdg-open \"dav://localhost:$DAV_PORT$DAV_PATH\"")
-				.addEnv("DAV_PORT", String.valueOf(uri.getPort()))
-				.addEnv("DAV_PATH", uri.getRawPath());
+				"gvfs-mount \"dav:$DAV_SSP\"",
+				"xdg-open \"dav:$DAV_SSP\"")
+				.addEnv("DAV_SSP", uri.getRawSchemeSpecificPart());
 		final Script unmountScript = Script.fromLines(
 				"set -x",
-				"gvfs-mount -u \"dav://localhost:$DAV_PORT$DAV_PATH\"")
-				.addEnv("DAV_PORT", String.valueOf(uri.getPort()))
-				.addEnv("DAV_PATH", uri.getRawPath());
+				"gvfs-mount -u \"dav:$DAV_SSP\"")
+				.addEnv("DAV_SSP", uri.getRawSchemeSpecificPart());
 		mountScript.execute();
 		return new WebDavMount() {
 			@Override

@@ -16,6 +16,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.crypto.Cryptor;
 import org.cryptomator.webdav.jackrabbit.WebDavServlet;
 import org.eclipse.jetty.server.Connector;
@@ -33,7 +34,7 @@ import org.slf4j.LoggerFactory;
 public final class WebDavServer {
 
 	private static final Logger LOG = LoggerFactory.getLogger(WebDavServer.class);
-	private static final String LOCALHOST = "::1";
+	private static final String LOCALHOST = SystemUtils.IS_OS_WINDOWS ? "::1" : "localhost";
 	private static final int MAX_PENDING_REQUESTS = 200;
 	private static final int MAX_THREADS = 200;
 	private static final int MIN_THREADS = 4;
