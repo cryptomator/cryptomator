@@ -25,7 +25,6 @@ import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 import java.util.UUID;
 
 import javax.crypto.BadPaddingException;
@@ -59,17 +58,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicConfiguration, FileNamingConventions {
 
 	/**
-	 * PRNG for cryptographically secure random numbers. Defaults to SHA1-based number generator.
-	 * 
-	 * @see http://docs.oracle.com/javase/7/docs/technotes/guides/security/StandardNames.html#SecureRandom
-	 */
-	private static final SecureRandom SECURE_PRNG;
-
-	/**
 	 * Defined in static initializer. Defaults to 256, but falls back to maximum value possible, if JCE Unlimited Strength Jurisdiction
 	 * Policy Files isn't installed. Those files can be downloaded here: http://www.oracle.com/technetwork/java/javase/downloads/.
 	 */
 	private static final int AES_KEY_LENGTH_IN_BITS;
+
+	/**
+	 * PRNG for cryptographically secure random numbers. Defaults to SHA1-based number generator.
+	 * 
+	 * @see http://docs.oracle.com/javase/7/docs/technotes/guides/security/StandardNames.html#SecureRandom
+	 */
+	private final SecureRandom securePrng;
 
 	/**
 	 * Jackson JSON-Mapper.
@@ -89,7 +88,6 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 
 	static {
 		try {
-			SECURE_PRNG = SecureRandom.getInstance(PRNG_ALGORITHM);
 			final int maxKeyLength = Cipher.getMaxAllowedKeyLength(AES_KEY_ALGORITHM);
 			AES_KEY_LENGTH_IN_BITS = (maxKeyLength >= PREF_MASTER_KEY_LENGTH_IN_BITS) ? PREF_MASTER_KEY_LENGTH_IN_BITS : maxKeyLength;
 		} catch (NoSuchAlgorithmException e) {
@@ -101,33 +99,16 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 	 * Creates a new Cryptor with a newly initialized PRNG.
 	 */
 	public Aes256Cryptor() {
-		SECURE_PRNG.setSeed(SECURE_PRNG.generateSeed(PRNG_SEED_LENGTH));
 		byte[] bytes = new byte[AES_KEY_LENGTH_IN_BITS / Byte.SIZE];
 		try {
-			SECURE_PRNG.nextBytes(bytes);
+			securePrng = SecureRandom.getInstance(PRNG_ALGORITHM);
+			securePrng.setSeed(securePrng.generateSeed(PRNG_SEED_LENGTH));
+			securePrng.nextBytes(bytes);
 			this.primaryMasterKey = new SecretKeySpec(bytes, AES_KEY_ALGORITHM);
-
-			SECURE_PRNG.nextBytes(bytes);
+			securePrng.nextBytes(bytes);
 			this.hMacMasterKey = new SecretKeySpec(bytes, HMAC_KEY_ALGORITHM);
-		} finally {
-			Arrays.fill(bytes, (byte) 0);
-		}
-	}
-
-	/**
-	 * Creates a new Cryptor with the given PRNG.<br/>
-	 * <strong>DO NOT USE IN PRODUCTION</strong>. This constructor must only be used in in unit tests. Do not change method visibility.
-	 * 
-	 * @param prng Fast, possibly insecure PRNG.
-	 */
-	Aes256Cryptor(Random prng) {
-		byte[] bytes = new byte[AES_KEY_LENGTH_IN_BITS / Byte.SIZE];
-		try {
-			prng.nextBytes(bytes);
-			this.primaryMasterKey = new SecretKeySpec(bytes, AES_KEY_ALGORITHM);
-
-			prng.nextBytes(bytes);
-			this.hMacMasterKey = new SecretKeySpec(bytes, HMAC_KEY_ALGORITHM);
+		} catch (NoSuchAlgorithmException e) {
+			throw new IllegalStateException("PRNG algorithm should exist.", e);
 		} finally {
 			Arrays.fill(bytes, (byte) 0);
 		}
@@ -266,8 +247,7 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 
 	private byte[] randomData(int length) {
 		final byte[] result = new byte[length];
-		SECURE_PRNG.setSeed(SECURE_PRNG.generateSeed(PRNG_SEED_LENGTH));
-		SECURE_PRNG.nextBytes(result);
+		securePrng.nextBytes(result);
 		return result;
 	}
 

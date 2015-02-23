@@ -17,7 +17,6 @@ import java.nio.channels.SeekableByteChannel;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 
 import org.apache.commons.io.IOUtils;
 import org.cryptomator.crypto.CryptorIOSupport;
@@ -29,17 +28,15 @@ import org.junit.Test;
 
 public class Aes256CryptorTest {
 
-	private static final Random TEST_PRNG = new Random();
-
 	@Test
 	public void testCorrectPassword() throws IOException, WrongPasswordException, DecryptFailedException, UnsupportedKeyLengthException {
 		final String pw = "asd";
-		final Aes256Cryptor cryptor = new Aes256Cryptor(TEST_PRNG);
+		final Aes256Cryptor cryptor = new Aes256Cryptor();
 		final ByteArrayOutputStream out = new ByteArrayOutputStream();
 		cryptor.encryptMasterKey(out, pw);
 		cryptor.swipeSensitiveData();
 
-		final Aes256Cryptor decryptor = new Aes256Cryptor(TEST_PRNG);
+		final Aes256Cryptor decryptor = new Aes256Cryptor();
 		final InputStream in = new ByteArrayInputStream(out.toByteArray());
 		decryptor.decryptMasterKey(in, pw);
 
@@ -50,7 +47,7 @@ public class Aes256CryptorTest {
 	@Test
 	public void testWrongPassword() throws IOException, DecryptFailedException, WrongPasswordException, UnsupportedKeyLengthException {
 		final String pw = "asd";
-		final Aes256Cryptor cryptor = new Aes256Cryptor(TEST_PRNG);
+		final Aes256Cryptor cryptor = new Aes256Cryptor();
 		final ByteArrayOutputStream out = new ByteArrayOutputStream();
 		cryptor.encryptMasterKey(out, pw);
 		cryptor.swipeSensitiveData();
@@ -58,7 +55,7 @@ public class Aes256CryptorTest {
 
 		// all these passwords are expected to fail.
 		final String[] wrongPws = {"a", "as", "asdf", "sdf", "das", "dsa", "foo", "bar", "baz"};
-		final Aes256Cryptor decryptor = new Aes256Cryptor(TEST_PRNG);
+		final Aes256Cryptor decryptor = new Aes256Cryptor();
 		for (final String wrongPw : wrongPws) {
 			final InputStream in = new ByteArrayInputStream(out.toByteArray());
 			try {
@@ -79,7 +76,7 @@ public class Aes256CryptorTest {
 		final InputStream plaintextIn = new ByteArrayInputStream(plaintextData);
 
 		// init cryptor:
-		final Aes256Cryptor cryptor = new Aes256Cryptor(TEST_PRNG);
+		final Aes256Cryptor cryptor = new Aes256Cryptor();
 
 		// encrypt:
 		final ByteBuffer encryptedData = ByteBuffer.allocate(96);
@@ -111,7 +108,7 @@ public class Aes256CryptorTest {
 		final InputStream plaintextIn = new ByteArrayInputStream(plaintextData);
 
 		// init cryptor:
-		final Aes256Cryptor cryptor = new Aes256Cryptor(TEST_PRNG);
+		final Aes256Cryptor cryptor = new Aes256Cryptor();
 
 		// encrypt:
 		final ByteBuffer encryptedData = ByteBuffer.allocate(96);
@@ -150,7 +147,7 @@ public class Aes256CryptorTest {
 		final InputStream plaintextIn = new ByteArrayInputStream(plaintextData);
 
 		// init cryptor:
-		final Aes256Cryptor cryptor = new Aes256Cryptor(TEST_PRNG);
+		final Aes256Cryptor cryptor = new Aes256Cryptor();
 
 		// encrypt:
 		final ByteBuffer encryptedData = ByteBuffer.allocate((int) (64 + plaintextData.length * 1.2));
@@ -178,7 +175,7 @@ public class Aes256CryptorTest {
 	@Test
 	public void testEncryptionOfFilenames() throws IOException, DecryptFailedException {
 		final CryptorIOSupport ioSupportMock = new CryptoIOSupportMock();
-		final Aes256Cryptor cryptor = new Aes256Cryptor(TEST_PRNG);
+		final Aes256Cryptor cryptor = new Aes256Cryptor();
 
 		// short path components
 		final String originalPath1 = "foo/bar/baz";

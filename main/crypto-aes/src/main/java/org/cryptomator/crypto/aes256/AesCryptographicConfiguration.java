@@ -33,7 +33,7 @@ interface AesCryptographicConfiguration {
 	/**
 	 * Number of bytes used as seed for the PRNG.
 	 */
-	int PRNG_SEED_LENGTH = 16;
+	int PRNG_SEED_LENGTH = 32;
 
 	/**
 	 * Algorithm used for random number generation.
