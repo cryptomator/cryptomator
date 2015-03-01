@@ -29,6 +29,7 @@ import org.apache.jackrabbit.webdav.property.DavPropertyName;
 import org.apache.jackrabbit.webdav.property.DefaultDavProperty;
 import org.cryptomator.crypto.Cryptor;
 import org.cryptomator.crypto.exceptions.DecryptFailedException;
+import org.cryptomator.crypto.exceptions.MacAuthenticationFailedException;
 import org.cryptomator.webdav.exceptions.IORuntimeException;
 import org.eclipse.jetty.http.HttpHeader;
 import org.eclipse.jetty.http.HttpHeaderValue;
@@ -70,12 +71,17 @@ public class EncryptedFile extends AbstractEncryptedNode {
 			outputContext.setModificationTime(Files.getLastModifiedTime(path).toMillis());
 			outputContext.setProperty(HttpHeader.ACCEPT_RANGES.asString(), HttpHeaderValue.BYTES.asString());
 			try (final SeekableByteChannel channel = Files.newByteChannel(path, StandardOpenOption.READ)) {
-				outputContext.setContentLength(cryptor.decryptedContentLength(channel));
+				final Long contentLength = cryptor.decryptedContentLength(channel);
+				if (contentLength != null) {
+					outputContext.setContentLength(contentLength);
+				}
 				if (outputContext.hasStream()) {
-					cryptor.decryptedFile(channel, outputContext.getOutputStream());
+					cryptor.decryptFile(channel, outputContext.getOutputStream());
 				}
 			} catch (EOFException e) {
 				LOG.warn("Unexpected end of stream (possibly client hung up).");
+			} catch (MacAuthenticationFailedException e) {
+				LOG.warn("MAC authentication failed, file content {} might be compromised.", getLocator().getResourcePath());
 			} catch (DecryptFailedException e) {
 				throw new IOException("Error decrypting file " + path.toString(), e);
 			}

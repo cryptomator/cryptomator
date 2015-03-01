@@ -79,7 +79,7 @@ public interface Cryptor extends SensitiveDataSwipeListener {
 	 * @return Number of decrypted bytes. This might not be equal to the encrypted file size due to optional metadata written to it.
 	 * @throws DecryptFailedException If decryption failed
 	 */
-	Long decryptedFile(SeekableByteChannel encryptedFile, OutputStream plaintextFile) throws IOException, DecryptFailedException;
+	Long decryptFile(SeekableByteChannel encryptedFile, OutputStream plaintextFile) throws IOException, DecryptFailedException;
 
 	/**
 	 * @param pos First byte (inclusive)

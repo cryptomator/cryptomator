@@ -47,6 +47,7 @@ import org.bouncycastle.crypto.generators.SCrypt;
 import org.cryptomator.crypto.AbstractCryptor;
 import org.cryptomator.crypto.CryptorIOSupport;
 import org.cryptomator.crypto.exceptions.DecryptFailedException;
+import org.cryptomator.crypto.exceptions.MacAuthenticationFailedException;
 import org.cryptomator.crypto.exceptions.UnsupportedKeyLengthException;
 import org.cryptomator.crypto.exceptions.WrongPasswordException;
 import org.cryptomator.crypto.io.SeekableByteChannelInputStream;
@@ -369,34 +370,6 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 		ioSupport.writePathSpecificMetadata(metadataFile, objectMapper.writeValueAsBytes(metadata));
 	}
 
-	private void authenticateContent(SeekableByteChannel encryptedFile) throws IOException, DecryptFailedException {
-		// init mac:
-		final Mac calculatedMac = this.hmacSha256(hMacMasterKey);
-
-		// read stored mac:
-		encryptedFile.position(16);
-		final ByteBuffer storedMac = ByteBuffer.allocate(calculatedMac.getMacLength());
-		final int numMacBytesRead = encryptedFile.read(storedMac);
-
-		// check validity of header:
-		if (numMacBytesRead != calculatedMac.getMacLength()) {
-			throw new IOException("Failed to read file header.");
-		}
-
-		// read all encrypted data and calculate mac:
-		encryptedFile.position(64);
-		final InputStream in = new SeekableByteChannelInputStream(encryptedFile);
-		final InputStream macIn = new MacInputStream(in, calculatedMac);
-		IOUtils.copyLarge(macIn, new NullOutputStream());
-
-		// compare (in constant time):
-		boolean macMatches = MessageDigest.isEqual(storedMac.array(), calculatedMac.doFinal());
-
-		if (!macMatches) {
-			throw new DecryptFailedException("MAC authentication failed.");
-		}
-	}
-
 	@Override
 	public Long decryptedContentLength(SeekableByteChannel encryptedFile) throws IOException {
 		// skip 128bit IV + 256 bit MAC:
@@ -422,23 +395,48 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 		}
 	}
 
+	private void encryptedContentLength(SeekableByteChannel encryptedFile, Long contentLength) throws IOException {
+		final ByteBuffer encryptedFileSizeBuffer;
+
+		// encrypt content length in ECB mode (content length is less than one block):
+		try {
+			final ByteBuffer fileSizeBuffer = ByteBuffer.allocate(Long.BYTES);
+			fileSizeBuffer.putLong(contentLength);
+			final Cipher sizeCipher = aesEcbCipher(primaryMasterKey, Cipher.ENCRYPT_MODE);
+			final byte[] encryptedFileSize = sizeCipher.doFinal(fileSizeBuffer.array());
+			encryptedFileSizeBuffer = ByteBuffer.wrap(encryptedFileSize);
+		} catch (IllegalBlockSizeException | BadPaddingException e) {
+			throw new IllegalStateException("Block size must be valid, as padding is requested. BadPaddingException not possible in encrypt mode.", e);
+		}
+
+		// skip 128bit IV + 256 bit MAC:
+		encryptedFile.position(48);
+
+		// write result:
+		encryptedFile.write(encryptedFileSizeBuffer);
+	}
+
 	@Override
-	public Long decryptedFile(SeekableByteChannel encryptedFile, OutputStream plaintextFile) throws IOException, DecryptFailedException {
+	public Long decryptFile(SeekableByteChannel encryptedFile, OutputStream plaintextFile) throws IOException, DecryptFailedException {
 		// read iv:
 		encryptedFile.position(0);
 		final ByteBuffer countingIv = ByteBuffer.allocate(AES_BLOCK_LENGTH);
 		final int numIvBytesRead = encryptedFile.read(countingIv);
 
+		// init mac:
+		final Mac calculatedMac = this.hmacSha256(hMacMasterKey);
+
+		// read stored mac:
+		final ByteBuffer storedMac = ByteBuffer.allocate(calculatedMac.getMacLength());
+		final int numMacBytesRead = encryptedFile.read(storedMac);
+
 		// read file size:
 		final Long fileSize = decryptedContentLength(encryptedFile);
 
 		// check validity of header:
-		if (numIvBytesRead != AES_BLOCK_LENGTH || fileSize == null) {
+		if (numIvBytesRead != AES_BLOCK_LENGTH || numMacBytesRead != calculatedMac.getMacLength() || fileSize == null) {
 			throw new IOException("Failed to read file header.");
 		}
-
-		// check MAC:
-		this.authenticateContent(encryptedFile);
 
 		// go to begin of content:
 		encryptedFile.position(64);
@@ -448,8 +446,25 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 
 		// read content
 		final InputStream in = new SeekableByteChannelInputStream(encryptedFile);
-		final InputStream cipheredIn = new CipherInputStream(in, cipher);
-		return IOUtils.copyLarge(cipheredIn, plaintextFile, 0, fileSize);
+		final InputStream macIn = new MacInputStream(in, calculatedMac);
+		final InputStream cipheredIn = new CipherInputStream(macIn, cipher);
+		final long bytesDecrypted = IOUtils.copyLarge(cipheredIn, plaintextFile, 0, fileSize);
+
+		// drain remaining bytes to /dev/null to complete MAC calculation:
+		IOUtils.copyLarge(macIn, new NullOutputStream());
+
+		// compare (in constant time):
+		final boolean macMatches = MessageDigest.isEqual(storedMac.array(), calculatedMac.doFinal());
+		if (!macMatches) {
+			// This exception will be thrown AFTER we sent the decrypted content to the user.
+			// This has two advantages:
+			// - we don't need to read files twice
+			// - we can still restore files suffering from non-malicious bit rotting
+			// Anyway me MUST make sure to warn the user. This will be done by the UI when catching this exception.
+			throw new MacAuthenticationFailedException("MAC authentication failed.");
+		}
+
+		return bytesDecrypted;
 	}
 
 	@Override
@@ -463,9 +478,6 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 		if (numIvBytesRead != AES_BLOCK_LENGTH) {
 			throw new IOException("Failed to read file header.");
 		}
-
-		// check MAC:
-		this.authenticateContent(encryptedFile);
 
 		// seek relevant position and update iv:
 		long firstRelevantBlock = pos / AES_BLOCK_LENGTH; // cut of fraction!
@@ -493,7 +505,6 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 		// use an IV, whose last 8 bytes store a long used in counter mode and write initial value to file.
 		final ByteBuffer countingIv = ByteBuffer.wrap(randomData(AES_BLOCK_LENGTH));
 		countingIv.putLong(AES_BLOCK_LENGTH - Long.BYTES, 0l);
-		countingIv.position(0);
 		encryptedFile.write(countingIv);
 
 		// init crypto stuff:
@@ -504,20 +515,8 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 		final ByteBuffer macBuffer = ByteBuffer.allocate(mac.getMacLength());
 		encryptedFile.write(macBuffer);
 
-		// write initial file size = 0 into the next 16 bytes
-		final ByteBuffer encryptedFileSizeBuffer = ByteBuffer.allocate(AES_BLOCK_LENGTH);
-		try {
-			final ByteBuffer fileSizeBuffer = ByteBuffer.allocate(Long.BYTES);
-			fileSizeBuffer.putLong(0l);
-			final Cipher sizeCipher = aesEcbCipher(primaryMasterKey, Cipher.ENCRYPT_MODE);
-			final byte[] encryptedFileSize = sizeCipher.doFinal(fileSizeBuffer.array());
-			encryptedFileSizeBuffer.position(0);
-			encryptedFileSizeBuffer.put(encryptedFileSize);
-			encryptedFileSizeBuffer.position(0);
-			encryptedFile.write(encryptedFileSizeBuffer);
-		} catch (IllegalBlockSizeException | BadPaddingException e) {
-			throw new IllegalStateException("Block size must be valid, as padding is requested. BadPaddingException not possible in encrypt mode.", e);
-		}
+		// encrypt and write "zero length" as a placeholder, which will be read by concurrent requests, as long as encryption didn't finish:
+		encryptedContentLength(encryptedFile, 0l);
 
 		// write content:
 		final OutputStream out = new SeekableByteChannelOutputStream(encryptedFile);
@@ -540,26 +539,14 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 		blockSizeBufferedOut.flush();
 
 		// write MAC of total ciphertext:
-		macBuffer.position(0);
+		macBuffer.clear();
 		macBuffer.put(mac.doFinal());
-		macBuffer.position(0);
+		macBuffer.flip();
 		encryptedFile.position(16); // right behind the IV
 		encryptedFile.write(macBuffer); // 256 bit MAC
 
-		// encrypt and write plaintextSize
-		try {
-			final ByteBuffer fileSizeBuffer = ByteBuffer.allocate(Long.BYTES);
-			fileSizeBuffer.putLong(plaintextSize);
-			final Cipher sizeCipher = aesEcbCipher(primaryMasterKey, Cipher.ENCRYPT_MODE);
-			final byte[] encryptedFileSize = sizeCipher.doFinal(fileSizeBuffer.array());
-			encryptedFileSizeBuffer.position(0);
-			encryptedFileSizeBuffer.put(encryptedFileSize);
-			encryptedFileSizeBuffer.position(0);
-			encryptedFile.position(48); // right behind the IV and MAC
-			encryptedFile.write(encryptedFileSizeBuffer);
-		} catch (IllegalBlockSizeException | BadPaddingException e) {
-			throw new IllegalStateException("Block size must be valid, as padding is requested. BadPaddingException not possible in encrypt mode.", e);
-		}
+		// encrypt and write plaintextSize:
+		encryptedContentLength(encryptedFile, plaintextSize);
 
 		return plaintextSize;
 	}
