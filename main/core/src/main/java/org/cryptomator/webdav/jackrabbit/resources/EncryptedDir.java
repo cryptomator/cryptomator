@@ -11,6 +11,7 @@ package org.cryptomator.webdav.jackrabbit.resources;
 import java.io.IOException;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.file.DirectoryStream;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -78,17 +79,16 @@ public class EncryptedDir extends AbstractEncryptedNode {
 
 	private void addMemberFile(DavResource resource, InputContext inputContext) throws DavException {
 		final Path childPath = ResourcePathUtils.getPhysicalPath(resource);
-		SeekableByteChannel channel = null;
-		try {
-			channel = Files.newByteChannel(childPath, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
+		try (final SeekableByteChannel channel = Files.newByteChannel(childPath, StandardOpenOption.WRITE, StandardOpenOption.CREATE_NEW)) {
 			cryptor.encryptFile(inputContext.getInputStream(), channel);
 		} catch (SecurityException e) {
 			throw new DavException(DavServletResponse.SC_FORBIDDEN, e);
+		} catch (FileAlreadyExistsException e) {
+			throw new DavException(DavServletResponse.SC_CONFLICT, e);
 		} catch (IOException e) {
 			LOG.error("Failed to create file.", e);
 			throw new IORuntimeException(e);
 		} finally {
-			IOUtils.closeQuietly(channel);
 			IOUtils.closeQuietly(inputContext.getInputStream());
 		}
 	}

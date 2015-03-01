@@ -504,9 +504,20 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 		final ByteBuffer macBuffer = ByteBuffer.allocate(mac.getMacLength());
 		encryptedFile.write(macBuffer);
 
-		// init filesize buffer and skip 16 bytes
+		// write initial file size = 0 into the next 16 bytes
 		final ByteBuffer encryptedFileSizeBuffer = ByteBuffer.allocate(AES_BLOCK_LENGTH);
-		encryptedFile.write(encryptedFileSizeBuffer);
+		try {
+			final ByteBuffer fileSizeBuffer = ByteBuffer.allocate(Long.BYTES);
+			fileSizeBuffer.putLong(0l);
+			final Cipher sizeCipher = aesEcbCipher(primaryMasterKey, Cipher.ENCRYPT_MODE);
+			final byte[] encryptedFileSize = sizeCipher.doFinal(fileSizeBuffer.array());
+			encryptedFileSizeBuffer.position(0);
+			encryptedFileSizeBuffer.put(encryptedFileSize);
+			encryptedFileSizeBuffer.position(0);
+			encryptedFile.write(encryptedFileSizeBuffer);
+		} catch (IllegalBlockSizeException | BadPaddingException e) {
+			throw new IllegalStateException("Block size must be valid, as padding is requested. BadPaddingException not possible in encrypt mode.", e);
+		}
 
 		// write content:
 		final OutputStream out = new SeekableByteChannelOutputStream(encryptedFile);

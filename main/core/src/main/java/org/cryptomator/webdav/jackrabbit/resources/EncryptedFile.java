@@ -16,7 +16,6 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.BasicFileAttributes;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.jackrabbit.webdav.DavException;
 import org.apache.jackrabbit.webdav.DavResource;
 import org.apache.jackrabbit.webdav.DavResourceFactory;
@@ -70,9 +69,7 @@ public class EncryptedFile extends AbstractEncryptedNode {
 		if (Files.exists(path)) {
 			outputContext.setModificationTime(Files.getLastModifiedTime(path).toMillis());
 			outputContext.setProperty(HttpHeader.ACCEPT_RANGES.asString(), HttpHeaderValue.BYTES.asString());
-			SeekableByteChannel channel = null;
-			try {
-				channel = Files.newByteChannel(path, StandardOpenOption.READ);
+			try (final SeekableByteChannel channel = Files.newByteChannel(path, StandardOpenOption.READ)) {
 				outputContext.setContentLength(cryptor.decryptedContentLength(channel));
 				if (outputContext.hasStream()) {
 					cryptor.decryptedFile(channel, outputContext.getOutputStream());
@@ -81,8 +78,6 @@ public class EncryptedFile extends AbstractEncryptedNode {
 				LOG.warn("Unexpected end of stream (possibly client hung up).");
 			} catch (DecryptFailedException e) {
 				throw new IOException("Error decrypting file " + path.toString(), e);
-			} finally {
-				IOUtils.closeQuietly(channel);
 			}
 		}
 	}
@@ -91,12 +86,15 @@ public class EncryptedFile extends AbstractEncryptedNode {
 	protected void determineProperties() {
 		final Path path = ResourcePathUtils.getPhysicalPath(this);
 		if (Files.exists(path)) {
-			SeekableByteChannel channel = null;
-			try {
-				channel = Files.newByteChannel(path, StandardOpenOption.READ);
+			try (final SeekableByteChannel channel = Files.newByteChannel(path, StandardOpenOption.READ)) {
 				final Long contentLength = cryptor.decryptedContentLength(channel);
 				properties.add(new DefaultDavProperty<Long>(DavPropertyName.GETCONTENTLENGTH, contentLength));
+			} catch (IOException e) {
+				LOG.error("Error reading filesize " + path.toString(), e);
+				throw new IORuntimeException(e);
+			}
 
+			try {
 				final BasicFileAttributes attrs = Files.readAttributes(path, BasicFileAttributes.class);
 				properties.add(new DefaultDavProperty<String>(DavPropertyName.CREATIONDATE, FileTimeUtils.toRfc1123String(attrs.creationTime())));
 				properties.add(new DefaultDavProperty<String>(DavPropertyName.GETLASTMODIFIED, FileTimeUtils.toRfc1123String(attrs.lastModifiedTime())));
@@ -104,8 +102,6 @@ public class EncryptedFile extends AbstractEncryptedNode {
 			} catch (IOException e) {
 				LOG.error("Error determining metadata " + path.toString(), e);
 				throw new IORuntimeException(e);
-			} finally {
-				IOUtils.closeQuietly(channel);
 			}
 		}
 	}
