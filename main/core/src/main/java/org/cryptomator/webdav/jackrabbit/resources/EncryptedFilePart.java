@@ -9,7 +9,6 @@ import java.nio.file.StandardOpenOption;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.MutablePair;
@@ -113,9 +112,7 @@ public class EncryptedFilePart extends EncryptedFile {
 		final Path path = ResourcePathUtils.getPhysicalPath(this);
 		if (Files.exists(path)) {
 			outputContext.setModificationTime(Files.getLastModifiedTime(path).toMillis());
-			SeekableByteChannel channel = null;
-			try {
-				channel = Files.newByteChannel(path, StandardOpenOption.READ);
+			try (final SeekableByteChannel channel = Files.newByteChannel(path, StandardOpenOption.READ)) {
 				final Long fileSize = cryptor.decryptedContentLength(channel);
 				final Pair<Long, Long> range = getUnionRange(fileSize);
 				final Long rangeLength = range.getRight() - range.getLeft() + 1;
@@ -130,8 +127,6 @@ public class EncryptedFilePart extends EncryptedFile {
 				}
 			} catch (DecryptFailedException e) {
 				throw new IOException("Error decrypting file " + path.toString(), e);
-			} finally {
-				IOUtils.closeQuietly(channel);
 			}
 		}
 	}

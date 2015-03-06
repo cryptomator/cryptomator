@@ -82,9 +82,9 @@ public class SamplingDecorator implements Cryptor, CryptorIOSampling {
 	}
 
 	@Override
-	public Long decryptedFile(SeekableByteChannel encryptedFile, OutputStream plaintextFile) throws IOException, DecryptFailedException {
+	public Long decryptFile(SeekableByteChannel encryptedFile, OutputStream plaintextFile) throws IOException, DecryptFailedException {
 		final OutputStream countingInputStream = new CountingOutputStream(decryptedBytes, plaintextFile);
-		return cryptor.decryptedFile(encryptedFile, countingInputStream);
+		return cryptor.decryptFile(encryptedFile, countingInputStream);
 	}
 
 	@Override
