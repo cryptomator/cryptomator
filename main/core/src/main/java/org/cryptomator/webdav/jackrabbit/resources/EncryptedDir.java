@@ -78,9 +78,7 @@ public class EncryptedDir extends AbstractEncryptedNode {
 
 	private void addMemberFile(DavResource resource, InputContext inputContext) throws DavException {
 		final Path childPath = ResourcePathUtils.getPhysicalPath(resource);
-		SeekableByteChannel channel = null;
-		try {
-			channel = Files.newByteChannel(childPath, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
+		try (final SeekableByteChannel channel = Files.newByteChannel(childPath, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
 			cryptor.encryptFile(inputContext.getInputStream(), channel);
 		} catch (SecurityException e) {
 			throw new DavException(DavServletResponse.SC_FORBIDDEN, e);
@@ -88,7 +86,6 @@ public class EncryptedDir extends AbstractEncryptedNode {
 			LOG.error("Failed to create file.", e);
 			throw new IORuntimeException(e);
 		} finally {
-			IOUtils.closeQuietly(channel);
 			IOUtils.closeQuietly(inputContext.getInputStream());
 		}
 	}
@@ -124,7 +121,9 @@ public class EncryptedDir extends AbstractEncryptedNode {
 	public void removeMember(DavResource member) throws DavException {
 		final Path memberPath = ResourcePathUtils.getPhysicalPath(member);
 		try {
-			Files.walkFileTree(memberPath, new DeletingFileVisitor());
+			if (Files.exists(memberPath)) {
+				Files.walkFileTree(memberPath, new DeletingFileVisitor());
+			}
 		} catch (SecurityException e) {
 			throw new DavException(DavServletResponse.SC_FORBIDDEN, e);
 		} catch (IOException e) {
