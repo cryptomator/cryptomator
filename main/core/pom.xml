@@ -48,7 +48,13 @@
 			<artifactId>jackrabbit-webdav</artifactId>
 			<version>${jackrabbit.version}</version>
 		</dependency>
-
+	
+		<!-- Guava -->
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+		</dependency>
+	
 		<!-- I/O -->
 		<dependency>
 			<groupId>commons-io</groupId>

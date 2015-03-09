@@ -82,6 +82,11 @@ public class SamplingDecorator implements Cryptor, CryptorIOSampling {
 	}
 
 	@Override
+	public boolean isAuthentic(SeekableByteChannel encryptedFile) throws IOException {
+		return cryptor.isAuthentic(encryptedFile);
+	}
+
+	@Override
 	public Long decryptFile(SeekableByteChannel encryptedFile, OutputStream plaintextFile) throws IOException, DecryptFailedException {
 		final OutputStream countingInputStream = new CountingOutputStream(decryptedBytes, plaintextFile);
 		return cryptor.decryptFile(encryptedFile, countingInputStream);

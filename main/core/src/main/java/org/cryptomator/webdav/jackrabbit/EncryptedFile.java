@@ -40,7 +40,7 @@ class EncryptedFile extends AbstractEncryptedNode {
 
 	private static final Logger LOG = LoggerFactory.getLogger(EncryptedFile.class);
 
-	private final CryptoWarningHandler cryptoWarningHandler;
+	protected final CryptoWarningHandler cryptoWarningHandler;
 
 	public EncryptedFile(DavResourceFactory factory, DavResourceLocator locator, DavSession session, LockManager lockManager, Cryptor cryptor, CryptoWarningHandler cryptoWarningHandler) {
 		super(factory, locator, session, lockManager, cryptor);
@@ -70,7 +70,7 @@ class EncryptedFile extends AbstractEncryptedNode {
 	@Override
 	public void spool(OutputContext outputContext) throws IOException {
 		final Path path = ResourcePathUtils.getPhysicalPath(this);
-		if (Files.exists(path)) {
+		if (Files.isRegularFile(path)) {
 			outputContext.setModificationTime(Files.getLastModifiedTime(path).toMillis());
 			outputContext.setProperty(HttpHeader.ACCEPT_RANGES.asString(), HttpHeaderValue.BYTES.asString());
 			try (final SeekableByteChannel channel = Files.newByteChannel(path, StandardOpenOption.READ)) {

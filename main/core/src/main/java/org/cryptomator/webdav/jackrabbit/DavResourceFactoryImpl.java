@@ -10,6 +10,7 @@ package org.cryptomator.webdav.jackrabbit;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.concurrent.ExecutorService;
 
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.jackrabbit.webdav.DavException;
@@ -30,10 +31,12 @@ class DavResourceFactoryImpl implements DavResourceFactory {
 	private final LockManager lockManager = new SimpleLockManager();
 	private final Cryptor cryptor;
 	private final CryptoWarningHandler cryptoWarningHandler;
+	private final ExecutorService backgroundTaskExecutor;
 
-	DavResourceFactoryImpl(Cryptor cryptor, CryptoWarningHandler cryptoWarningHandler) {
+	DavResourceFactoryImpl(Cryptor cryptor, CryptoWarningHandler cryptoWarningHandler, ExecutorService backgroundTaskExecutor) {
 		this.cryptor = cryptor;
 		this.cryptoWarningHandler = cryptoWarningHandler;
+		this.backgroundTaskExecutor = backgroundTaskExecutor;
 	}
 
 	@Override
@@ -67,7 +70,7 @@ class DavResourceFactoryImpl implements DavResourceFactory {
 	}
 
 	private EncryptedFile createFilePart(DavResourceLocator locator, DavSession session, DavServletRequest request) {
-		return new EncryptedFilePart(this, locator, session, request, lockManager, cryptor, cryptoWarningHandler);
+		return new EncryptedFilePart(this, locator, session, request, lockManager, cryptor, cryptoWarningHandler, backgroundTaskExecutor);
 	}
 
 	private EncryptedFile createFile(DavResourceLocator locator, DavSession session) {

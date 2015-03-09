@@ -8,6 +8,8 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -25,6 +27,9 @@ import org.eclipse.jetty.http.HttpHeader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+
 /**
  * Delivers only the requested range of bytes from a file.
  * 
@@ -36,6 +41,7 @@ class EncryptedFilePart extends EncryptedFile {
 	private static final String BYTE_UNIT_PREFIX = "bytes=";
 	private static final char RANGE_SET_SEP = ',';
 	private static final char RANGE_SEP = '-';
+	private static final Cache<DavResourceLocator, MacAuthenticationJob> cachedMacAuthenticationJobs = CacheBuilder.newBuilder().expireAfterWrite(10, TimeUnit.MINUTES).build();
 
 	/**
 	 * e.g. range -500 (gets the last 500 bytes) -> (-1, 500)
@@ -49,13 +55,23 @@ class EncryptedFilePart extends EncryptedFile {
 
 	private final Set<Pair<Long, Long>> requestedContentRanges = new HashSet<Pair<Long, Long>>();
 
-	public EncryptedFilePart(DavResourceFactory factory, DavResourceLocator locator, DavSession session, DavServletRequest request, LockManager lockManager, Cryptor cryptor, CryptoWarningHandler cryptoWarningHandler) {
+	public EncryptedFilePart(DavResourceFactory factory, DavResourceLocator locator, DavSession session, DavServletRequest request, LockManager lockManager, Cryptor cryptor, CryptoWarningHandler cryptoWarningHandler,
+			ExecutorService backgroundTaskExecutor) {
 		super(factory, locator, session, lockManager, cryptor, cryptoWarningHandler);
 		final String rangeHeader = request.getHeader(HttpHeader.RANGE.asString());
 		if (rangeHeader == null) {
 			throw new IllegalArgumentException("HTTP request doesn't contain a range header");
 		}
 		determineByteRanges(rangeHeader);
+
+		synchronized (cachedMacAuthenticationJobs) {
+			if (cachedMacAuthenticationJobs.getIfPresent(locator) == null) {
+				final MacAuthenticationJob macAuthJob = new MacAuthenticationJob(locator);
+				cachedMacAuthenticationJobs.put(locator, macAuthJob);
+				backgroundTaskExecutor.submit(macAuthJob);
+			}
+		}
+
 	}
 
 	private void determineByteRanges(String rangeHeader) {
@@ -110,7 +126,7 @@ class EncryptedFilePart extends EncryptedFile {
 	@Override
 	public void spool(OutputContext outputContext) throws IOException {
 		final Path path = ResourcePathUtils.getPhysicalPath(this);
-		if (Files.exists(path)) {
+		if (Files.isRegularFile(path)) {
 			outputContext.setModificationTime(Files.getLastModifiedTime(path).toMillis());
 			try (final SeekableByteChannel channel = Files.newByteChannel(path, StandardOpenOption.READ)) {
 				final Long fileSize = cryptor.decryptedContentLength(channel);
@@ -133,6 +149,48 @@ class EncryptedFilePart extends EncryptedFile {
 
 	private String getContentRangeHeader(long firstByte, long lastByte, long completeLength) {
 		return String.format("%d-%d/%d", firstByte, lastByte, completeLength);
+	}
+
+	private class MacAuthenticationJob implements Runnable {
+
+		private final DavResourceLocator locator;
+
+		public MacAuthenticationJob(final DavResourceLocator locator) {
+			if (locator == null) {
+				throw new IllegalArgumentException("locator must not be null.");
+			}
+			this.locator = locator;
+		}
+
+		@Override
+		public void run() {
+			final Path path = ResourcePathUtils.getPhysicalPath(locator);
+			if (Files.isRegularFile(path) && Files.isReadable(path)) {
+				try (final SeekableByteChannel channel = Files.newByteChannel(path, StandardOpenOption.READ)) {
+					final boolean authentic = cryptor.isAuthentic(channel);
+					if (!authentic) {
+						cryptoWarningHandler.macAuthFailed(locator.getResourcePath());
+					}
+				} catch (IOException e) {
+					LOG.error("IOException during MAC verification of " + path.toString(), e);
+				}
+			}
+		}
+
+		@Override
+		public int hashCode() {
+			return locator.hashCode();
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (obj instanceof MacAuthenticationJob) {
+				final MacAuthenticationJob other = (MacAuthenticationJob) obj;
+				return this.locator.equals(other.locator);
+			} else {
+				return false;
+			}
+		}
 	}
 
 }

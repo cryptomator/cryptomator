@@ -417,6 +417,33 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 	}
 
 	@Override
+	public boolean isAuthentic(SeekableByteChannel encryptedFile) throws IOException {
+		// init mac:
+		final Mac calculatedMac = this.hmacSha256(hMacMasterKey);
+
+		// read stored mac:
+		encryptedFile.position(16);
+		final ByteBuffer storedMac = ByteBuffer.allocate(calculatedMac.getMacLength());
+		final int numMacBytesRead = encryptedFile.read(storedMac);
+
+		// check validity of header:
+		if (numMacBytesRead != calculatedMac.getMacLength()) {
+			throw new IOException("Failed to read file header.");
+		}
+
+		// go to begin of content:
+		encryptedFile.position(64);
+
+		// calculated MAC
+		final InputStream in = new SeekableByteChannelInputStream(encryptedFile);
+		final InputStream macIn = new MacInputStream(in, calculatedMac);
+		IOUtils.copyLarge(macIn, new NullOutputStream());
+
+		// compare (in constant time):
+		return MessageDigest.isEqual(storedMac.array(), calculatedMac.doFinal());
+	}
+
+	@Override
 	public Long decryptFile(SeekableByteChannel encryptedFile, OutputStream plaintextFile) throws IOException, DecryptFailedException {
 		// read iv:
 		encryptedFile.position(0);

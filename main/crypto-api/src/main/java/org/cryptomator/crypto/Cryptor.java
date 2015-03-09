@@ -76,6 +76,11 @@ public interface Cryptor extends SensitiveDataSwipeListener {
 	Long decryptedContentLength(SeekableByteChannel encryptedFile) throws IOException;
 
 	/**
+	 * @return true, if the stored MAC matches the calculated one.
+	 */
+	boolean isAuthentic(SeekableByteChannel encryptedFile) throws IOException;
+
+	/**
 	 * @return Number of decrypted bytes. This might not be equal to the encrypted file size due to optional metadata written to it.
 	 * @throws DecryptFailedException If decryption failed
 	 */
