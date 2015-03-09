@@ -6,7 +6,7 @@
  * Contributors:
  *     Sebastian Stenzel - initial API and implementation
  ******************************************************************************/
-package org.cryptomator.webdav.jackrabbit.resources;
+package org.cryptomator.webdav.jackrabbit;
 
 import java.io.IOException;
 import java.nio.channels.SeekableByteChannel;
@@ -42,7 +42,7 @@ import org.cryptomator.webdav.exceptions.IORuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class EncryptedDir extends AbstractEncryptedNode {
+class EncryptedDir extends AbstractEncryptedNode {
 
 	private static final Logger LOG = LoggerFactory.getLogger(EncryptedDir.class);
 

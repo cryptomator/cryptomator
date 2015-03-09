@@ -10,11 +10,14 @@ import java.util.Optional;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableSet;
 
 import org.apache.commons.lang3.StringUtils;
 import org.cryptomator.crypto.Cryptor;
 import org.cryptomator.ui.util.DeferredClosable;
 import org.cryptomator.ui.util.DeferredCloser;
+import org.cryptomator.ui.util.FXThreads;
 import org.cryptomator.ui.util.mount.CommandFailedException;
 import org.cryptomator.ui.util.mount.WebDavMount;
 import org.cryptomator.ui.util.mount.WebDavMounter;
@@ -38,6 +41,7 @@ public class Vault implements Serializable {
 	private final WebDavMounter mounter;
 	private final DeferredCloser closer;
 	private final ObjectProperty<Boolean> unlocked = new SimpleObjectProperty<Boolean>(this, "unlocked", Boolean.FALSE);
+	private final ObservableSet<String> namesOfResourcesWithInvalidMac = FXThreads.observableSetOnMainThread(FXCollections.observableSet());
 
 	private String mountName;
 	private DeferredClosable<ServletLifeCycleAdapter> webDavServlet = DeferredClosable.empty();
@@ -70,13 +74,14 @@ public class Vault implements Serializable {
 	}
 
 	public synchronized boolean startServer() {
+		namesOfResourcesWithInvalidMac.clear();
 		Optional<ServletLifeCycleAdapter> o = webDavServlet.get();
 		if (o.isPresent() && o.get().isRunning()) {
 			return false;
 		}
-		ServletLifeCycleAdapter servlet = server.createServlet(path, cryptor, getMountName());
+		ServletLifeCycleAdapter servlet = server.createServlet(path, cryptor, namesOfResourcesWithInvalidMac, mountName);
 		if (servlet.start()) {
-			webDavServlet = closer.closeLater(servlet, ServletLifeCycleAdapter::stop);
+			webDavServlet = closer.closeLater(servlet);
 			return true;
 		}
 		return false;
@@ -86,6 +91,7 @@ public class Vault implements Serializable {
 		unmount();
 		webDavServlet.close();
 		cryptor.swipeSensitiveData();
+		namesOfResourcesWithInvalidMac.clear();
 	}
 
 	public boolean mount() {
@@ -94,7 +100,7 @@ public class Vault implements Serializable {
 			return false;
 		}
 		try {
-			webDavMount = closer.closeLater(mounter.mount(o.get().getServletUri(), getMountName()), WebDavMount::unmount);
+			webDavMount = closer.closeLater(mounter.mount(o.get().getServletUri(), mountName));
 			return true;
 		} catch (CommandFailedException e) {
 			LOG.warn("mount failed", e);
@@ -137,6 +143,10 @@ public class Vault implements Serializable {
 
 	public String getMountName() {
 		return mountName;
+	}
+
+	public ObservableSet<String> getNamesOfResourcesWithInvalidMac() {
+		return namesOfResourcesWithInvalidMac;
 	}
 
 	/**

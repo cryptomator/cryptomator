@@ -7,16 +7,14 @@
   Contributors:
       Sebastian Stenzel - initial API and implementation
 -->
-<?import java.net.*?>
-<?import javafx.geometry.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.text.*?>
+<?import java.net.URL?>
 <?import java.lang.String?>
 <?import javafx.scene.shape.Arc?>
 <?import javafx.scene.shape.QuadCurve?>
 <?import javafx.scene.shape.Path?>
 <?import javafx.scene.shape.Line?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.control.Label?>
 
 
 <AnchorPane xmlns:fx="http://javafx.com/fxml">

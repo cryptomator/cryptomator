@@ -13,21 +13,25 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.collections.SetChangeListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Side;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
@@ -47,6 +51,7 @@ import org.cryptomator.ui.controls.DirectoryListCell;
 import org.cryptomator.ui.model.Vault;
 import org.cryptomator.ui.model.VaultFactory;
 import org.cryptomator.ui.settings.Settings;
+import org.cryptomator.ui.util.ObservableSetAggregator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -79,6 +84,9 @@ public class MainController implements Initializable, InitializationListener, Un
 	private final ControllerFactory controllerFactory;
 	private final Settings settings;
 	private final VaultFactory vaultFactoy;
+	private final ObservableList<String> aggregatedMacWarnings;
+	private final SetChangeListener<String> macWarningsAggregator;
+	private final AtomicBoolean macWarningsWindowVisible;
 
 	private ResourceBundle rb;
 
@@ -88,6 +96,9 @@ public class MainController implements Initializable, InitializationListener, Un
 		this.controllerFactory = controllerFactory;
 		this.settings = settings;
 		this.vaultFactoy = vaultFactoy;
+		this.aggregatedMacWarnings = FXCollections.observableList(new ArrayList<>());
+		this.macWarningsAggregator = new ObservableSetAggregator<>(this.aggregatedMacWarnings);
+		this.macWarningsWindowVisible = new AtomicBoolean();
 	}
 
 	@Override
@@ -98,6 +109,8 @@ public class MainController implements Initializable, InitializationListener, Un
 		vaultList.setItems(items);
 		vaultList.setCellFactory(this::createDirecoryListCell);
 		vaultList.getSelectionModel().getSelectedItems().addListener(this::selectedVaultDidChange);
+
+		aggregatedMacWarnings.addListener(this::macWarningsDidChange);
 	}
 
 	@FXML
@@ -216,6 +229,12 @@ public class MainController implements Initializable, InitializationListener, Un
 		showChangePasswordView(selectedVault);
 	}
 
+	private void macWarningsDidChange(ListChangeListener.Change<? extends String> change) {
+		if (aggregatedMacWarnings.size() > 0) {
+			Platform.runLater(this::showMacWarningsWindow);
+		}
+	}
+
 	// ****************************************
 	// Subcontroller for right panel
 	// ****************************************
@@ -270,6 +289,7 @@ public class MainController implements Initializable, InitializationListener, Un
 
 	@Override
 	public void didUnlock(UnlockController ctrl) {
+		ctrl.getVault().getNamesOfResourcesWithInvalidMac().addListener(this.macWarningsAggregator);
 		showUnlockedView(ctrl.getVault());
 		Platform.setImplicitExit(false);
 	}
@@ -282,6 +302,7 @@ public class MainController implements Initializable, InitializationListener, Un
 
 	@Override
 	public void didLock(UnlockedController ctrl) {
+		ctrl.getVault().getNamesOfResourcesWithInvalidMac().removeListener(this.macWarningsAggregator);
 		showUnlockView(ctrl.getVault());
 		if (getUnlockedDirectories().isEmpty()) {
 			Platform.setImplicitExit(true);
@@ -297,6 +318,36 @@ public class MainController implements Initializable, InitializationListener, Un
 	@Override
 	public void didChangePassword(ChangePasswordController ctrl) {
 		showUnlockView(ctrl.getVault());
+	}
+
+	private void showMacWarningsWindow() {
+		if (macWarningsWindowVisible.getAndSet(true) == false) {
+			try {
+				final FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/mac_warnings.fxml"), rb);
+				loader.setControllerFactory(controllerFactory);
+
+				final Parent root = loader.load();
+				final Stage stage = new Stage();
+				stage.setTitle(rb.getString("macWarnings.windowTitle"));
+				stage.setScene(new Scene(root));
+				stage.sizeToScene();
+				stage.setResizable(false);
+				stage.setOnHidden(this::onHideMacWarningsWindow);
+
+				final MacWarningsController ctrl = loader.getController();
+				ctrl.setMacWarnings(this.aggregatedMacWarnings);
+				ctrl.setStage(stage);
+
+				stage.show();
+			} catch (IOException e) {
+				throw new IllegalStateException("Failed to load fxml file.", e);
+			}
+		}
+	}
+
+	private void onHideMacWarningsWindow(WindowEvent event) {
+		macWarningsWindowVisible.set(false);
+		aggregatedMacWarnings.clear();
 	}
 
 	/* Convenience */

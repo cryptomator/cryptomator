@@ -53,11 +53,7 @@ public class MainApplication extends Application {
 	}
 
 	private static Injector getInjector() {
-		try {
-			return Guice.createInjector(new MainModule());
-		} catch (Exception e) {
-			throw e;
-		}
+		return Guice.createInjector(new MainModule());
 	}
 
 	public MainApplication(Injector injector) {

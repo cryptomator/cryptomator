@@ -6,7 +6,7 @@
  * Contributors:
  *     Sebastian Stenzel - initial API and implementation
  ******************************************************************************/
-package org.cryptomator.webdav.jackrabbit.resources;
+package org.cryptomator.webdav.jackrabbit;
 
 import java.io.IOException;
 
@@ -21,7 +21,7 @@ import org.apache.jackrabbit.webdav.io.OutputContext;
 import org.apache.jackrabbit.webdav.lock.LockManager;
 import org.cryptomator.crypto.Cryptor;
 
-public class NonExistingNode extends AbstractEncryptedNode {
+class NonExistingNode extends AbstractEncryptedNode {
 
 	public NonExistingNode(DavResourceFactory factory, DavResourceLocator locator, DavSession session, LockManager lockManager, Cryptor cryptor) {
 		super(factory, locator, session, lockManager, cryptor);

@@ -6,7 +6,7 @@
  * Contributors:
  *     Sebastian Stenzel - initial API and implementation
  ******************************************************************************/
-package org.cryptomator.webdav.jackrabbit.resources;
+package org.cryptomator.webdav.jackrabbit;
 
 import java.io.IOException;
 import java.nio.file.AtomicMoveNotSupportedException;

@@ -30,7 +30,7 @@ final class FallbackWebDavMounter implements WebDavMounterStrategy {
 	@Override
 	public WebDavMount mount(URI uri, String name) {
 		displayMountInstructions();
-		return new WebDavMount() {
+		return new AbstractWebDavMount() {
 			@Override
 			public void unmount() {
 				displayUnmountInstructions();

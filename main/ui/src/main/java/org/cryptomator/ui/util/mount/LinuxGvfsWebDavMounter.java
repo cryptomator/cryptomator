@@ -48,7 +48,7 @@ final class LinuxGvfsWebDavMounter implements WebDavMounterStrategy {
 				"gvfs-mount -u \"dav:$DAV_SSP\"")
 				.addEnv("DAV_SSP", uri.getRawSchemeSpecificPart());
 		mountScript.execute();
-		return new WebDavMount() {
+		return new AbstractWebDavMount() {
 			@Override
 			public void unmount() throws CommandFailedException {
 				unmountScript.execute();

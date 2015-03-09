@@ -15,6 +15,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
 import javafx.application.Platform;
+import javafx.collections.ObservableSet;
 
 /**
  * Use this utility class to spawn background tasks and wait for them to finish. <br/>
@@ -116,6 +117,10 @@ public final class FXThreads {
 
 	public interface CallbackWhenTaskFailed {
 		void taskFailed(Throwable t);
+	}
+
+	public static <E> ObservableSet<E> observableSetOnMainThread(ObservableSet<E> set) {
+		return new ObservableSetOnMainThread<E>(set);
 	}
 
 }

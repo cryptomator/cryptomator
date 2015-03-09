@@ -8,13 +8,12 @@
  ******************************************************************************/
 package org.cryptomator.ui.util.mount;
 
-
 /**
  * A mounted webdav share.
  * 
  * @author Markus Kreusch
  */
-public interface WebDavMount {
+public interface WebDavMount extends AutoCloseable {
 
 	/**
 	 * Unmounts this {@code WebDavMount}.
@@ -22,5 +21,5 @@ public interface WebDavMount {
 	 * @throws CommandFailedException if the unmount operation fails
 	 */
 	void unmount() throws CommandFailedException;
-	
+
 }

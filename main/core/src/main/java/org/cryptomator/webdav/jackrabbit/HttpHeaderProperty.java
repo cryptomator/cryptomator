@@ -1,4 +1,4 @@
-package org.cryptomator.webdav.jackrabbit.resources;
+package org.cryptomator.webdav.jackrabbit;
 
 import org.apache.jackrabbit.webdav.property.AbstractDavProperty;
 import org.apache.jackrabbit.webdav.property.DavPropertyName;

@@ -6,7 +6,7 @@
  * Contributors:
  *     Sebastian Stenzel - initial API and implementation
  ******************************************************************************/
-package org.cryptomator.webdav.jackrabbit.resources;
+package org.cryptomator.webdav.jackrabbit;
 
 import java.nio.file.attribute.FileTime;
 import java.time.Instant;

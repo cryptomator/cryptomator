@@ -1,4 +1,4 @@
-package org.cryptomator.webdav.jackrabbit.resources;
+package org.cryptomator.webdav.jackrabbit;
 
 import java.io.EOFException;
 import java.io.IOException;
@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @see {@link https://tools.ietf.org/html/rfc7233#section-4}
  */
-public class EncryptedFilePart extends EncryptedFile {
+class EncryptedFilePart extends EncryptedFile {
 
 	private static final Logger LOG = LoggerFactory.getLogger(EncryptedFilePart.class);
 	private static final String BYTE_UNIT_PREFIX = "bytes=";
@@ -49,8 +49,8 @@ public class EncryptedFilePart extends EncryptedFile {
 
 	private final Set<Pair<Long, Long>> requestedContentRanges = new HashSet<Pair<Long, Long>>();
 
-	public EncryptedFilePart(DavResourceFactory factory, DavResourceLocator locator, DavSession session, DavServletRequest request, LockManager lockManager, Cryptor cryptor) {
-		super(factory, locator, session, lockManager, cryptor);
+	public EncryptedFilePart(DavResourceFactory factory, DavResourceLocator locator, DavSession session, DavServletRequest request, LockManager lockManager, Cryptor cryptor, CryptoWarningHandler cryptoWarningHandler) {
+		super(factory, locator, session, lockManager, cryptor, cryptoWarningHandler);
 		final String rangeHeader = request.getHeader(HttpHeader.RANGE.asString());
 		if (rangeHeader == null) {
 			throw new IllegalArgumentException("HTTP request doesn't contain a range header");

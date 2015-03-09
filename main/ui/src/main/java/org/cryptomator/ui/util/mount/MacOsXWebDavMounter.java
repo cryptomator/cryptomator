@@ -41,7 +41,7 @@ final class MacOsXWebDavMounter implements WebDavMounterStrategy {
 				"umount $MOUNT_PATH")
 				.addEnv("MOUNT_PATH", path);
 		mountScript.execute();
-		return new WebDavMount() {
+		return new AbstractWebDavMount() {
 			@Override
 			public void unmount() throws CommandFailedException {
 				unmountScript.execute();

@@ -23,20 +23,17 @@ import org.apache.jackrabbit.webdav.DavSession;
 import org.apache.jackrabbit.webdav.lock.LockManager;
 import org.apache.jackrabbit.webdav.lock.SimpleLockManager;
 import org.cryptomator.crypto.Cryptor;
-import org.cryptomator.webdav.jackrabbit.resources.EncryptedDir;
-import org.cryptomator.webdav.jackrabbit.resources.EncryptedFile;
-import org.cryptomator.webdav.jackrabbit.resources.EncryptedFilePart;
-import org.cryptomator.webdav.jackrabbit.resources.NonExistingNode;
-import org.cryptomator.webdav.jackrabbit.resources.ResourcePathUtils;
 import org.eclipse.jetty.http.HttpHeader;
 
 class DavResourceFactoryImpl implements DavResourceFactory {
 
 	private final LockManager lockManager = new SimpleLockManager();
 	private final Cryptor cryptor;
+	private final CryptoWarningHandler cryptoWarningHandler;
 
-	DavResourceFactoryImpl(Cryptor cryptor) {
+	DavResourceFactoryImpl(Cryptor cryptor, CryptoWarningHandler cryptoWarningHandler) {
 		this.cryptor = cryptor;
+		this.cryptoWarningHandler = cryptoWarningHandler;
 	}
 
 	@Override
@@ -70,11 +67,11 @@ class DavResourceFactoryImpl implements DavResourceFactory {
 	}
 
 	private EncryptedFile createFilePart(DavResourceLocator locator, DavSession session, DavServletRequest request) {
-		return new EncryptedFilePart(this, locator, session, request, lockManager, cryptor);
+		return new EncryptedFilePart(this, locator, session, request, lockManager, cryptor, cryptoWarningHandler);
 	}
 
 	private EncryptedFile createFile(DavResourceLocator locator, DavSession session) {
-		return new EncryptedFile(this, locator, session, lockManager, cryptor);
+		return new EncryptedFile(this, locator, session, lockManager, cryptor, cryptoWarningHandler);
 	}
 
 	private EncryptedDir createDirectory(DavResourceLocator locator, DavSession session) {

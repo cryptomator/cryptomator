@@ -54,7 +54,7 @@ final class WindowsWebDavMounter implements WebDavMounterStrategy {
 		final CommandResult mountResult = mountScript.execute(30, TimeUnit.SECONDS);
 		final String driveLetter = getDriveLetter(mountResult.getStdOut());
 		final Script unmountScript = fromLines("net use " + driveLetter + " /delete").addEnv("DRIVE_LETTER", driveLetter);
-		return new WebDavMount() {
+		return new AbstractWebDavMount() {
 			@Override
 			public void unmount() throws CommandFailedException {
 				unmountScript.execute();

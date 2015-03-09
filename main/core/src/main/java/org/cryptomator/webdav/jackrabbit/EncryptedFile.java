@@ -6,7 +6,7 @@
  * Contributors:
  *     Sebastian Stenzel - initial API and implementation
  ******************************************************************************/
-package org.cryptomator.webdav.jackrabbit.resources;
+package org.cryptomator.webdav.jackrabbit;
 
 import java.io.EOFException;
 import java.io.IOException;
@@ -36,12 +36,15 @@ import org.eclipse.jetty.http.HttpHeaderValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class EncryptedFile extends AbstractEncryptedNode {
+class EncryptedFile extends AbstractEncryptedNode {
 
 	private static final Logger LOG = LoggerFactory.getLogger(EncryptedFile.class);
 
-	public EncryptedFile(DavResourceFactory factory, DavResourceLocator locator, DavSession session, LockManager lockManager, Cryptor cryptor) {
+	private final CryptoWarningHandler cryptoWarningHandler;
+
+	public EncryptedFile(DavResourceFactory factory, DavResourceLocator locator, DavSession session, LockManager lockManager, Cryptor cryptor, CryptoWarningHandler cryptoWarningHandler) {
 		super(factory, locator, session, lockManager, cryptor);
+		this.cryptoWarningHandler = cryptoWarningHandler;
 	}
 
 	@Override
@@ -81,7 +84,7 @@ public class EncryptedFile extends AbstractEncryptedNode {
 			} catch (EOFException e) {
 				LOG.warn("Unexpected end of stream (possibly client hung up).");
 			} catch (MacAuthenticationFailedException e) {
-				LOG.warn("MAC authentication failed, file content {} might be compromised.", getLocator().getResourcePath());
+				cryptoWarningHandler.macAuthFailed(getLocator().getResourcePath());
 			} catch (DecryptFailedException e) {
 				throw new IOException("Error decrypting file " + path.toString(), e);
 			}

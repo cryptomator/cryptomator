@@ -11,6 +11,7 @@ package org.cryptomator.webdav;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -83,11 +84,13 @@ public final class WebDavServer {
 	/**
 	 * @param workDir Path of encrypted folder.
 	 * @param cryptor A fully initialized cryptor instance ready to en- or decrypt streams.
+	 * @param failingMacCollection A (observable, thread-safe) collection, to which the names of resources are written, whose MAC
+	 *            authentication fails.
 	 * @param name The name of the folder. Must be non-empty and only contain any of
 	 *            _ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789
 	 * @return servlet
 	 */
-	public ServletLifeCycleAdapter createServlet(final Path workDir, final Cryptor cryptor, String name) {
+	public ServletLifeCycleAdapter createServlet(final Path workDir, final Cryptor cryptor, final Collection<String> failingMacCollection, final String name) {
 		try {
 			if (StringUtils.isEmpty(name)) {
 				throw new IllegalArgumentException("name empty");
@@ -98,7 +101,7 @@ public final class WebDavServer {
 			final URI uri = new URI(null, null, localConnector.getHost(), localConnector.getLocalPort(), "/" + UUID.randomUUID().toString() + "/" + name, null, null);
 
 			final ServletContextHandler servletContext = new ServletContextHandler(servletCollection, uri.getRawPath(), ServletContextHandler.SESSIONS);
-			final ServletHolder servlet = getWebDavServletHolder(workDir.toString(), cryptor);
+			final ServletHolder servlet = getWebDavServletHolder(workDir.toString(), cryptor, failingMacCollection);
 			servletContext.addServlet(servlet, "/*");
 
 			servletCollection.mapContexts();
@@ -110,8 +113,8 @@ public final class WebDavServer {
 		}
 	}
 
-	private ServletHolder getWebDavServletHolder(final String workDir, final Cryptor cryptor) {
-		final ServletHolder result = new ServletHolder("Cryptomator-WebDAV-Servlet", new WebDavServlet(cryptor));
+	private ServletHolder getWebDavServletHolder(final String workDir, final Cryptor cryptor, final Collection<String> failingMacCollection) {
+		final ServletHolder result = new ServletHolder("Cryptomator-WebDAV-Servlet", new WebDavServlet(cryptor, failingMacCollection));
 		result.setInitParameter(WebDavServlet.CFG_FS_ROOT, workDir);
 		return result;
 	}
@@ -123,7 +126,7 @@ public final class WebDavServer {
 	/**
 	 * Exposes implementation-specific methods to other modules.
 	 */
-	public class ServletLifeCycleAdapter {
+	public class ServletLifeCycleAdapter implements AutoCloseable {
 
 		private final LifeCycle lifecycle;
 		private final URI servletUri;
@@ -159,6 +162,11 @@ public final class WebDavServer {
 
 		public URI getServletUri() {
 			return servletUri;
+		}
+
+		@Override
+		public void close() throws Exception {
+			this.stop();
 		}
 
 	}

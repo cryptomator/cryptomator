@@ -16,7 +16,6 @@
 <?import javafx.scene.control.ToggleButton?>
 <?import javafx.scene.control.ContextMenu?>
 <?import javafx.scene.control.MenuItem?>
-<?import javafx.scene.control.Separator?>
 <?import javafx.geometry.Insets?>
 
 <HBox fx:id="rootPane" prefHeight="440.0" prefWidth="640.0" fx:controller="org.cryptomator.ui.controllers.MainController" xmlns:fx="http://javafx.com/fxml">

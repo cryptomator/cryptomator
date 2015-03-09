@@ -8,6 +8,8 @@
  ******************************************************************************/
 package org.cryptomator.webdav.jackrabbit;
 
+import java.util.Collection;
+
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 
@@ -27,10 +29,12 @@ public class WebDavServlet extends AbstractWebdavServlet {
 	private DavLocatorFactory davLocatorFactory;
 	private DavResourceFactory davResourceFactory;
 	private final Cryptor cryptor;
+	private final CryptoWarningHandler cryptoWarningHandler;
 
-	public WebDavServlet(final Cryptor cryptor) {
+	public WebDavServlet(final Cryptor cryptor, final Collection<String> failingMacCollection) {
 		super();
 		this.cryptor = cryptor;
+		this.cryptoWarningHandler = new CryptoWarningHandler(failingMacCollection);
 	}
 
 	@Override
@@ -42,7 +46,7 @@ public class WebDavServlet extends AbstractWebdavServlet {
 		final String fsRoot = config.getInitParameter(CFG_FS_ROOT);
 		this.davLocatorFactory = new DavLocatorFactoryImpl(fsRoot, cryptor);
 
-		this.davResourceFactory = new DavResourceFactoryImpl(cryptor);
+		this.davResourceFactory = new DavResourceFactoryImpl(cryptor, cryptoWarningHandler);
 	}
 
 	@Override

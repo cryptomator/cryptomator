@@ -6,7 +6,7 @@
  * Contributors:
  *     Sebastian Stenzel - initial API and implementation
  ******************************************************************************/
-package org.cryptomator.webdav.jackrabbit.resources;
+package org.cryptomator.webdav.jackrabbit;
 
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
@@ -14,7 +14,7 @@ import java.nio.file.Path;
 import org.apache.jackrabbit.webdav.DavResource;
 import org.apache.jackrabbit.webdav.DavResourceLocator;
 
-public final class ResourcePathUtils {
+final class ResourcePathUtils {
 
 	private ResourcePathUtils() {
 		throw new IllegalStateException("not instantiable");
