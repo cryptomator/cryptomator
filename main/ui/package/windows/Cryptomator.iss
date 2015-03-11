@@ -12,12 +12,12 @@ AppPublisherURL=https://cryptomator.org/
 ;AppSupportURL=http://java.com/
 ;AppUpdatesURL=http://java.com/
 DefaultDirName=APPLICATION_INSTALL_ROOT\APPLICATION_NAME
-DisableStartupPrompt=No
+DisableStartupPrompt=Yes
 DisableDirPage=No
 DisableProgramGroupPage=Yes
 DisableReadyPage=Yes
 DisableFinishedPage=No
-DisableWelcomePage=No
+DisableWelcomePage=Yes
 DefaultGroupName=APPLICATION_GROUP
 ;Optional License
 LicenseFile=APPLICATION_LICENSE_FILE
@@ -31,8 +31,8 @@ SetupIconFile=APPLICATION_NAME\APPLICATION_NAME.ico
 UninstallDisplayIcon={app}\APPLICATION_NAME.ico
 UninstallDisplayName=APPLICATION_NAME
 WizardImageStretch=No
-WizardSmallImageFile=APPLICATION_NAME-setup-icon.bmp
-WizardImageBackColor=ffffff
+WizardSmallImageFile=Cryptomator-setup-icon.bmp
+WizardImageBackColor=$ffffff
 ArchitecturesInstallIn64BitMode=ARCHITECTURE_BIT_MODE
 
 [Languages]
@@ -40,7 +40,7 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Registry]
 ;Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Internet Settings"; ValueType: dword; ValueName: "AutoDetect"; ValueData: "0"
-Root: HKLM; Subkey: "SYSTEM\CurrentControlSet\Services\WebClient\Parameters"; ValueType: dword; ValueName: "FileSizeLimitInBytes"; ValueData: "4294967295"
+Root: HKLM; Subkey: "SYSTEM\CurrentControlSet\Services\WebClient\Parameters"; ValueType: dword; ValueName: "FileSizeLimitInBytes"; ValueData: "$ffffffff"
 
 [Files]
 Source: "APPLICATION_NAME\APPLICATION_NAME.exe"; DestDir: "{app}"; Flags: ignoreversion
@@ -53,8 +53,8 @@ Name: "{commondesktop}\APPLICATION_NAME"; Filename: "{app}\APPLICATION_NAME.exe"
 [Run]
 Filename: "{app}\RUN_FILENAME.exe"; Description: "{cm:LaunchProgram,APPLICATION_NAME}"; Flags: nowait postinstall skipifsilent; Check: APPLICATION_NOT_SERVICE()
 Filename: "{app}\RUN_FILENAME.exe"; Parameters: "-install -svcName ""APPLICATION_NAME"" -svcDesc ""APPLICATION_DESCRIPTION"" -mainExe ""APPLICATION_LAUNCHER_FILENAME"" START_ON_INSTALL RUN_AT_STARTUP"; Check: APPLICATION_SERVICE()
-Filename: "net"; Parameters: "stop webclient"; Description "Stopping WebClient.."; Flags: waituntilterminated postinstall runascurrentuser
-Filename: "net"; Parameters: "start webclient"; Description "Restarting WebClient.."; Flags: postinstall runascurrentuser
+Filename: "net"; Parameters: "stop webclient"; Description: "Stopping WebClient..."; Flags: waituntilterminated runhidden
+Filename: "net"; Parameters: "start webclient"; Description: "Restarting WebClient..."; Flags: waituntilterminated runhidden
 
 [UninstallRun]
 Filename: "{app}\RUN_FILENAME.exe "; Parameters: "-uninstall -svcName APPLICATION_NAME STOP_ON_UNINSTALL"; Check: APPLICATION_SERVICE()
