@@ -38,9 +38,11 @@ final class WindowsWebDavMounter implements WebDavMounterStrategy {
 
 	@Override
 	public void warmUp(int serverPort) {
-		final URI warmUpUri = URI.create("http://0--1.ipv6-literal.net:" + serverPort + "/bill-gates-mom-uses-goto");
 		try {
-			this.mount(warmUpUri, "WarmUpMount");
+			final Script proxyBypassCmd = fromLines("reg add \"HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings\" /v \"ProxyOverride\" /d \"<local>;0--1.ipv6-literal.net\" /f");
+			proxyBypassCmd.execute();
+			final Script mountCmd = fromLines("net use * http://0--1.ipv6-literal.net:" + serverPort + "/bill-gates-mom-uses-goto /persistent:no");
+			mountCmd.execute();
 		} catch (CommandFailedException e) {
 			// will most certainly throw an exception, because this is a fake WebDav path. But now windows has some DNS things cached :)
 		}
@@ -53,6 +55,8 @@ final class WindowsWebDavMounter implements WebDavMounterStrategy {
 				.addEnv("DAV_PATH", uri.getRawPath());
 		final CommandResult mountResult = mountScript.execute(30, TimeUnit.SECONDS);
 		final String driveLetter = getDriveLetter(mountResult.getStdOut());
+		final Script openExplorerScript = fromLines("start explorer.exe " + driveLetter);
+		openExplorerScript.execute();
 		final Script unmountScript = fromLines("net use " + driveLetter + " /delete").addEnv("DRIVE_LETTER", driveLetter);
 		return new AbstractWebDavMount() {
 			@Override
