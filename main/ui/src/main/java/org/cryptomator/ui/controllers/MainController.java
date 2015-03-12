@@ -197,7 +197,7 @@ public class MainController implements Initializable, InitializationListener, Un
 
 	private ListCell<Vault> createDirecoryListCell(ListView<Vault> param) {
 		final DirectoryListCell cell = new DirectoryListCell();
-		cell.setContextMenu(vaultListCellContextMenu);
+		cell.setVaultContextMenu(vaultListCellContextMenu);
 		return cell;
 	}
 

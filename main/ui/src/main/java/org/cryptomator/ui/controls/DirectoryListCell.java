@@ -3,6 +3,7 @@ package org.cryptomator.ui.controls;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.control.ContentDisplay;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Tooltip;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
@@ -21,6 +22,7 @@ public class DirectoryListCell extends DraggableListCell<Vault> implements Chang
 	private static final Color GREEN_STROKE = Color.rgb(48, 183, 64);
 
 	private final Circle statusIndicator = new Circle(4.5);
+	private ContextMenu vaultContextMenu;
 
 	public DirectoryListCell() {
 		setGraphic(statusIndicator);
@@ -38,6 +40,7 @@ public class DirectoryListCell extends DraggableListCell<Vault> implements Chang
 		if (item == null) {
 			setText(null);
 			setTooltip(null);
+			setContextMenu(null);
 			statusIndicator.setVisible(false);
 		} else {
 			setText(item.getName());
@@ -45,12 +48,14 @@ public class DirectoryListCell extends DraggableListCell<Vault> implements Chang
 			statusIndicator.setVisible(true);
 			item.unlockedProperty().addListener(this);
 			updateStatusIndicator();
+			updateContextMenu();
 		}
 	}
 
 	@Override
 	public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
 		updateStatusIndicator();
+		updateContextMenu();
 	}
 
 	private void updateStatusIndicator() {
@@ -58,6 +63,18 @@ public class DirectoryListCell extends DraggableListCell<Vault> implements Chang
 		final Paint strokeColor = getItem().isUnlocked() ? GREEN_STROKE : RED_STROKE;
 		statusIndicator.setFill(fillColor);
 		statusIndicator.setStroke(strokeColor);
+	}
+
+	private void updateContextMenu() {
+		if (getItem().isUnlocked()) {
+			this.setContextMenu(null);
+		} else {
+			this.setContextMenu(vaultContextMenu);
+		}
+	}
+
+	public void setVaultContextMenu(ContextMenu contextMenu) {
+		this.vaultContextMenu = contextMenu;
 	}
 
 }
