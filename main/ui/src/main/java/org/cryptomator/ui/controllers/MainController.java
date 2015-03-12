@@ -137,18 +137,21 @@ public class MainController implements Initializable, InitializationListener, Un
 		final FileChooser fileChooser = new FileChooser();
 		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Cryptomator vault", "*" + Vault.VAULT_FILE_EXTENSION));
 		final File file = fileChooser.showSaveDialog(stage);
+		if (file == null) {
+			return;
+		}
 		try {
-			if (file != null) {
-				final Path vaultDir;
-				// enforce .cryptomator file extension:
-				if (!file.getName().endsWith(Vault.VAULT_FILE_EXTENSION)) {
-					final Path correctedPath = file.toPath().resolveSibling(file.getName() + Vault.VAULT_FILE_EXTENSION);
-					vaultDir = Files.createDirectory(correctedPath);
-				} else {
-					vaultDir = Files.createDirectory(file.toPath());
-				}
-				addVault(vaultDir, true);
+			final Path vaultDir;
+			// enforce .cryptomator file extension:
+			if (!file.getName().endsWith(Vault.VAULT_FILE_EXTENSION)) {
+				vaultDir = file.toPath().resolveSibling(file.getName() + Vault.VAULT_FILE_EXTENSION);
+			} else {
+				vaultDir = file.toPath();
 			}
+			if (!Files.exists(vaultDir)) {
+				Files.createDirectory(vaultDir);
+			}
+			addVault(vaultDir, true);
 		} catch (IOException e) {
 			LOG.error("Unable to create vault", e);
 		}
