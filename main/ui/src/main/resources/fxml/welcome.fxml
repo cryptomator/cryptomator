@@ -15,17 +15,20 @@
 <?import javafx.scene.shape.Line?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.image.ImageView?>
 
-
-<AnchorPane xmlns:fx="http://javafx.com/fxml">
+<AnchorPane xmlns:fx="http://javafx.com/fxml" fx:controller="org.cryptomator.ui.controllers.WelcomeController">
 	
 	<children>
-		<Label AnchorPane.leftAnchor="100.0" AnchorPane.topAnchor="50.0" style="-fx-font-size: 1.5em;" text="%welcome.welcomeLabel"/>
-		<Label AnchorPane.leftAnchor="120.0" AnchorPane.topAnchor="280.0" text="%welcome.addButtonInstructionLabel"/>
+		<Label AnchorPane.leftAnchor="100.0" AnchorPane.topAnchor="20.0" style="-fx-font-size: 1.5em;" text="%welcome.welcomeLabel"/>
 		
-		<QuadCurve AnchorPane.leftAnchor="4.0" AnchorPane.topAnchor="300.0" startX="200.0" startY="0.0" endX="0.0" endY="80.0" controlX="180.0" controlY="80.0" fill="TRANSPARENT" stroke="BLACK" strokeWidth="2.0"/>
-		<Line AnchorPane.leftAnchor="4.0" AnchorPane.topAnchor="370.0" startX="0.0" endX="10.0" startY="10.0" endY="0.0" strokeWidth="2.0"/>
-		<Line AnchorPane.leftAnchor="4.0" AnchorPane.topAnchor="380.0" startX="0.0" endX="10.0" startY="0.0" endY="10.0" strokeWidth="2.0"/>
+		<ImageView fx:id="botImageView" AnchorPane.leftAnchor="100.0" AnchorPane.topAnchor="200.0" fitHeight="200.0" preserveRatio="true" smooth="false"/>
+		
+		<Line AnchorPane.leftAnchor="4.0" AnchorPane.topAnchor="380.0" startX="0.0" endX="6.0" startY="5.0" endY="0.0" strokeWidth="1.0"/>
+		<Line AnchorPane.leftAnchor="6.0" AnchorPane.topAnchor="385.0" startX="0.0" endX="15.0" startY="0.0" endY="0.0" strokeWidth="1.0"/>
+		<Line AnchorPane.leftAnchor="4.0" AnchorPane.topAnchor="385.0" startX="0.0" endX="6.0" startY="0.0" endY="5.0" strokeWidth="1.0"/>
+		
+		<Label AnchorPane.leftAnchor="25.0" AnchorPane.topAnchor="377.0" text="%welcome.addButtonInstructionLabel"/>
 	</children>
 	
 </AnchorPane>
