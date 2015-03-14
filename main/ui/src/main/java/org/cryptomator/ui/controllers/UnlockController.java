@@ -164,6 +164,8 @@ public class UnlockController implements Initializable {
 		// newValue is guaranteed to be a-z0-9, see #filterAlphanumericKeyEvents
 		if (newValue.isEmpty()) {
 			mountName.setText(vault.getMountName());
+		} else {
+			vault.setMountName(newValue);
 		}
 	}
 
