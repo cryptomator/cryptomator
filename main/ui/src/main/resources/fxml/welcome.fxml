@@ -16,11 +16,13 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.image.ImageView?>
+<?import javafx.scene.control.Hyperlink?>
 
 <AnchorPane xmlns:fx="http://javafx.com/fxml" fx:controller="org.cryptomator.ui.controllers.WelcomeController">
 	
 	<children>
-		<Label AnchorPane.leftAnchor="100.0" AnchorPane.topAnchor="20.0" style="-fx-font-size: 1.5em;" text="%welcome.welcomeLabel"/>
+		<Label AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="20.0" prefWidth="400.0" alignment="CENTER" style="-fx-font-size: 1.5em;" text="%welcome.welcomeLabel"/>
+		<Hyperlink AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="50.0" prefWidth="400.0" alignment="CENTER" fx:id="updateLink" onAction="#didClickUpdateLink" visible="false"/>
 		
 		<ImageView fx:id="botImageView" AnchorPane.leftAnchor="100.0" AnchorPane.topAnchor="200.0" fitHeight="200.0" preserveRatio="true" smooth="false"/>
 		

@@ -39,6 +39,7 @@
 		<commons-collections.version>4.0</commons-collections.version>
 		<commons-lang3.version>3.3.2</commons-lang3.version>
 		<commons-codec.version>1.10</commons-codec.version>
+		<commons-httpclient.version>3.1</commons-httpclient.version>
 		<jackson-databind.version>2.4.4</jackson-databind.version>
 		<mockito.version>1.10.19</mockito.version>
 	</properties>
@@ -109,6 +110,12 @@
 				<groupId>commons-codec</groupId>
 				<artifactId>commons-codec</artifactId>
 				<version>${commons-codec.version}</version>
+			</dependency>
+			<dependency>
+				<!-- org.apache.httpcomponents:httpclient is newer, but jackrabbit uses this version. We don't have a reason to upgrade --> 
+				<groupId>commons-httpclient</groupId>
+				<artifactId>commons-httpclient</artifactId>
+				<version>${commons-httpclient.version}</version>
 			</dependency>
 
 			<!-- Guava -->

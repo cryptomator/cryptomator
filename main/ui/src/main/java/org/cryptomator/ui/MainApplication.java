@@ -57,14 +57,15 @@ public class MainApplication extends Application {
 	}
 
 	public MainApplication(Injector injector) {
-		this(injector.getInstance(ExecutorService.class), injector.getInstance(ControllerFactory.class), injector.getInstance(DeferredCloser.class));
+		this(injector.getInstance(ExecutorService.class), injector.getInstance(ControllerFactory.class), injector.getInstance(DeferredCloser.class), injector.getInstance(MainApplicationReference.class));
 	}
 
-	public MainApplication(ExecutorService executorService, ControllerFactory controllerFactory, DeferredCloser closer) {
+	public MainApplication(ExecutorService executorService, ControllerFactory controllerFactory, DeferredCloser closer, MainApplicationReference appRef) {
 		super();
 		this.executorService = executorService;
 		this.controllerFactory = controllerFactory;
 		this.closer = closer;
+		appRef.set(this);
 	}
 
 	@Override
@@ -173,6 +174,27 @@ public class MainApplication extends Application {
 		public void run() {
 			closer.close();
 		}
+	}
+
+	/**
+	 * Needed to inject MainApplication. Problem: Application needs to be set asap after injector creation.
+	 */
+	static class MainApplicationReference {
+
+		private Application application;
+
+		private void set(Application application) {
+			this.application = application;
+		}
+
+		public Application get() {
+			if (application == null) {
+				throw new IllegalStateException("not yet ready.");
+			} else {
+				return application;
+			}
+		}
+
 	}
 
 }
