@@ -38,7 +38,7 @@ final class MacOsXWebDavMounter implements WebDavMounterStrategy {
 				.addEnv("MOUNT_PATH", path)
 				.addEnv("MOUNT_NAME", name);
 		final Script unmountScript = Script.fromLines(
-				"umount $MOUNT_PATH")
+				"diskutil umount $MOUNT_PATH")
 				.addEnv("MOUNT_PATH", path);
 		mountScript.execute();
 		return new AbstractWebDavMount() {

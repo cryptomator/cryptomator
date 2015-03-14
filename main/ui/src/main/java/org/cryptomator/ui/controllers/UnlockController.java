@@ -113,10 +113,7 @@ public class UnlockController implements Initializable {
 			Files.copy(masterKeyPath, masterKeyBackupPath, StandardCopyOption.REPLACE_EXISTING);
 			vault.setUnlocked(true);
 			final Future<Boolean> futureMount = exec.submit(() -> vault.mount());
-			FXThreads.runOnMainThreadWhenFinished(exec, futureMount, this::didUnlockAndMount);
-			FXThreads.runOnMainThreadWhenFinished(exec, futureMount, (result) -> {
-				setControlsDisabled(false);
-			});
+			FXThreads.runOnMainThreadWhenFinished(exec, futureMount, this::unlockAndMountFinished);
 		} catch (DecryptFailedException | IOException ex) {
 			setControlsDisabled(false);
 			progressIndicator.setVisible(false);
@@ -143,9 +140,15 @@ public class UnlockController implements Initializable {
 		unlockButton.setDisable(disable);
 	}
 
-	private void didUnlockAndMount(boolean mountSuccess) {
+	private void unlockAndMountFinished(boolean mountSuccess) {
 		progressIndicator.setVisible(false);
-		if (listener != null) {
+		setControlsDisabled(false);
+		if (vault.isUnlocked() && !mountSuccess) {
+			vault.getCryptor().swipeSensitiveData();
+			vault.stopServer();
+			vault.setUnlocked(false);
+		}
+		if (mountSuccess && listener != null) {
 			listener.didUnlock(this);
 		}
 	}

@@ -13,15 +13,21 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.layout.HBox?>
 
-<VBox alignment="CENTER" prefHeight="225.0" prefWidth="525.0" spacing="12.0" fx:controller="org.cryptomator.ui.controllers.MacWarningsController" xmlns:fx="http://javafx.com/fxml">
+<VBox styleClass="root" alignment="CENTER" prefHeight="225.0" prefWidth="525.0" spacing="12.0" fx:controller="org.cryptomator.ui.controllers.MacWarningsController" xmlns:fx="http://javafx.com/fxml">
 
 	<padding><Insets top="12.0" right="12.0" bottom="12.0" left="12.0"/></padding>
 
 	<children>
 		<Label textAlignment="CENTER" text="%macWarnings.message"/>
 		<ListView fx:id="warningsList" VBox.vgrow="ALWAYS" focusTraversable="false" />
-		<Button text="%macWarnings.okButton" defaultButton="true" prefWidth="150.0" onAction="#hideWindow" />
+		<HBox alignment="CENTER_RIGHT" spacing="12.0">
+			<children>
+				<Button text="%macWarnings.dismissButton" prefWidth="200.0" onAction="#didClickDismissButton" focusTraversable="false"/>
+				<Button text="%macWarnings.moreInformationButton" defaultButton="true" prefWidth="200.0" onAction="#didClickMoreInformationButton" focusTraversable="false"/>
+			</children>
+		</HBox>
 	</children>
 
 </VBox>

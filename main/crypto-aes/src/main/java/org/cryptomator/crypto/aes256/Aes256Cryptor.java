@@ -559,7 +559,7 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 		// append a few blocks of fake data:
 		final int numberOfPlaintextBlocks = (int) Math.ceil(plaintextSize / AES_BLOCK_LENGTH);
 		final int upToTenPercentFakeBlocks = (int) Math.ceil(Math.random() * 0.1 * numberOfPlaintextBlocks);
-		final byte[] emptyBytes = new byte[AES_BLOCK_LENGTH];
+		final byte[] emptyBytes = this.randomData(AES_BLOCK_LENGTH);
 		for (int i = 0; i < upToTenPercentFakeBlocks; i += AES_BLOCK_LENGTH) {
 			blockSizeBufferedOut.write(emptyBytes);
 		}

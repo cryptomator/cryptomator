@@ -51,6 +51,7 @@ import org.cryptomator.ui.controls.DirectoryListCell;
 import org.cryptomator.ui.model.Vault;
 import org.cryptomator.ui.model.VaultFactory;
 import org.cryptomator.ui.settings.Settings;
+import org.cryptomator.ui.util.ActiveWindowStyleSupport;
 import org.cryptomator.ui.util.ObservableSetAggregator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -336,6 +337,7 @@ public class MainController implements Initializable, InitializationListener, Un
 				stage.sizeToScene();
 				stage.setResizable(false);
 				stage.setOnHidden(this::onHideMacWarningsWindow);
+				ActiveWindowStyleSupport.startObservingFocus(stage);
 
 				final MacWarningsController ctrl = loader.getController();
 				ctrl.setMacWarnings(this.aggregatedMacWarnings);

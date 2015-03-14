@@ -31,6 +31,7 @@ import javax.inject.Named;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.HttpStatus;
+import org.apache.commons.httpclient.cookie.CookiePolicy;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.lang3.SystemUtils;
 
@@ -67,6 +68,7 @@ public class WelcomeController implements Initializable {
 	private void checkForUpdates() {
 		final HttpClient client = new HttpClient();
 		final HttpMethod method = new GetMethod("https://cryptomator.org/downloads/latestVersion.json");
+		client.getParams().setCookiePolicy(CookiePolicy.IGNORE_COOKIES);
 		client.getParams().setConnectionManagerTimeout(5000);
 		try {
 			client.executeMethod(method);
