@@ -16,6 +16,7 @@ import java.nio.file.DirectoryStream.Filter;
 import java.nio.file.Path;
 
 import org.cryptomator.crypto.exceptions.DecryptFailedException;
+import org.cryptomator.crypto.exceptions.EncryptFailedException;
 import org.cryptomator.crypto.exceptions.UnsupportedKeyLengthException;
 import org.cryptomator.crypto.exceptions.WrongPasswordException;
 
@@ -97,7 +98,7 @@ public interface Cryptor extends SensitiveDataSwipeListener {
 	/**
 	 * @return Number of encrypted bytes. This might not be equal to the encrypted file size due to optional metadata written to it.
 	 */
-	Long encryptFile(InputStream plaintextFile, SeekableByteChannel encryptedFile) throws IOException;
+	Long encryptFile(InputStream plaintextFile, SeekableByteChannel encryptedFile) throws IOException, EncryptFailedException;
 
 	/**
 	 * @return A filter, that returns <code>true</code> for encrypted files, i.e. if the file is an actual user payload and not a supporting

@@ -21,6 +21,7 @@ import java.util.Map;
 import org.apache.commons.io.IOUtils;
 import org.cryptomator.crypto.CryptorIOSupport;
 import org.cryptomator.crypto.exceptions.DecryptFailedException;
+import org.cryptomator.crypto.exceptions.EncryptFailedException;
 import org.cryptomator.crypto.exceptions.UnsupportedKeyLengthException;
 import org.cryptomator.crypto.exceptions.WrongPasswordException;
 import org.junit.Assert;
@@ -70,7 +71,7 @@ public class Aes256CryptorTest {
 	}
 
 	@Test
-	public void testIntegrityAuthentication() throws IOException, DecryptFailedException {
+	public void testIntegrityAuthentication() throws IOException, DecryptFailedException, EncryptFailedException {
 		// our test plaintext data:
 		final byte[] plaintextData = "Hello World".getBytes();
 		final InputStream plaintextIn = new ByteArrayInputStream(plaintextData);
@@ -102,7 +103,7 @@ public class Aes256CryptorTest {
 	}
 
 	@Test(expected = DecryptFailedException.class)
-	public void testIntegrityViolationDuringDecryption() throws IOException, DecryptFailedException {
+	public void testIntegrityViolationDuringDecryption() throws IOException, DecryptFailedException, EncryptFailedException {
 		// our test plaintext data:
 		final byte[] plaintextData = "Hello World".getBytes();
 		final InputStream plaintextIn = new ByteArrayInputStream(plaintextData);
@@ -134,7 +135,7 @@ public class Aes256CryptorTest {
 	}
 
 	@Test
-	public void testEncryptionAndDecryption() throws IOException, DecryptFailedException, WrongPasswordException, UnsupportedKeyLengthException {
+	public void testEncryptionAndDecryption() throws IOException, DecryptFailedException, WrongPasswordException, UnsupportedKeyLengthException, EncryptFailedException {
 		// our test plaintext data:
 		final byte[] plaintextData = "Hello World".getBytes();
 		final InputStream plaintextIn = new ByteArrayInputStream(plaintextData);
@@ -169,7 +170,7 @@ public class Aes256CryptorTest {
 	}
 
 	@Test
-	public void testPartialDecryption() throws IOException, DecryptFailedException, WrongPasswordException, UnsupportedKeyLengthException {
+	public void testPartialDecryption() throws IOException, DecryptFailedException, WrongPasswordException, UnsupportedKeyLengthException, EncryptFailedException {
 		// our test plaintext data:
 		final byte[] plaintextData = new byte[65536 * Integer.BYTES];
 		final ByteBuffer bbIn = ByteBuffer.wrap(plaintextData);

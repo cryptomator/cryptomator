@@ -10,6 +10,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.lang3.StringUtils;
 import org.cryptomator.crypto.exceptions.DecryptFailedException;
+import org.cryptomator.crypto.exceptions.EncryptFailedException;
 import org.cryptomator.crypto.exceptions.UnsupportedKeyLengthException;
 import org.cryptomator.crypto.exceptions.WrongPasswordException;
 
@@ -99,7 +100,7 @@ public class SamplingDecorator implements Cryptor, CryptorIOSampling {
 	}
 
 	@Override
-	public Long encryptFile(InputStream plaintextFile, SeekableByteChannel encryptedFile) throws IOException {
+	public Long encryptFile(InputStream plaintextFile, SeekableByteChannel encryptedFile) throws IOException, EncryptFailedException {
 		final InputStream countingInputStream = new CountingInputStream(encryptedBytes, plaintextFile);
 		return cryptor.encryptFile(countingInputStream, encryptedFile);
 	}

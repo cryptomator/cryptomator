@@ -36,6 +36,8 @@ import org.apache.jackrabbit.webdav.property.DavPropertyName;
 import org.apache.jackrabbit.webdav.property.DefaultDavProperty;
 import org.apache.jackrabbit.webdav.property.ResourceType;
 import org.cryptomator.crypto.Cryptor;
+import org.cryptomator.crypto.exceptions.CounterOverflowException;
+import org.cryptomator.crypto.exceptions.EncryptFailedException;
 import org.cryptomator.webdav.exceptions.DavRuntimeException;
 import org.cryptomator.webdav.exceptions.DecryptFailedRuntimeException;
 import org.cryptomator.webdav.exceptions.IORuntimeException;
@@ -85,6 +87,12 @@ class EncryptedDir extends AbstractEncryptedNode {
 		} catch (IOException e) {
 			LOG.error("Failed to create file.", e);
 			throw new IORuntimeException(e);
+		} catch (CounterOverflowException e) {
+			// lets indicate this to the client as a "file too big" error
+			throw new DavException(DavServletResponse.SC_INSUFFICIENT_SPACE_ON_RESOURCE, e);
+		} catch (EncryptFailedException e) {
+			LOG.error("Encryption failed for unknown reasons.", e);
+			throw new IllegalStateException("Encryption failed for unknown reasons.", e);
 		} finally {
 			IOUtils.closeQuietly(inputContext.getInputStream());
 		}

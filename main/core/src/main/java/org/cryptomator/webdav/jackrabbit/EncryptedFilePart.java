@@ -2,6 +2,7 @@ package org.cryptomator.webdav.jackrabbit;
 
 import java.io.EOFException;
 import java.io.IOException;
+import java.nio.channels.ClosedByInterruptException;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -171,6 +172,8 @@ class EncryptedFilePart extends EncryptedFile {
 					if (!authentic) {
 						cryptoWarningHandler.macAuthFailed(locator.getResourcePath());
 					}
+				} catch (ClosedByInterruptException ex) {
+					LOG.debug("Couldn't finish MAC verification due to interruption of worker thread.");
 				} catch (IOException e) {
 					LOG.error("IOException during MAC verification of " + path.toString(), e);
 				}

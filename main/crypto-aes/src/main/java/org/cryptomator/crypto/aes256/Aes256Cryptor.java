@@ -46,7 +46,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.crypto.generators.SCrypt;
 import org.cryptomator.crypto.AbstractCryptor;
 import org.cryptomator.crypto.CryptorIOSupport;
+import org.cryptomator.crypto.aes256.CounterAwareInputStream.CounterAwareInputLimitReachedException;
+import org.cryptomator.crypto.exceptions.CounterOverflowException;
 import org.cryptomator.crypto.exceptions.DecryptFailedException;
+import org.cryptomator.crypto.exceptions.EncryptFailedException;
 import org.cryptomator.crypto.exceptions.MacAuthenticationFailedException;
 import org.cryptomator.crypto.exceptions.UnsupportedKeyLengthException;
 import org.cryptomator.crypto.exceptions.WrongPasswordException;
@@ -510,10 +513,10 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 		long firstRelevantBlock = pos / AES_BLOCK_LENGTH; // cut of fraction!
 		long beginOfFirstRelevantBlock = firstRelevantBlock * AES_BLOCK_LENGTH;
 		long offsetInsideFirstRelevantBlock = pos - beginOfFirstRelevantBlock;
-		countingIv.putLong(AES_BLOCK_LENGTH - Long.BYTES, firstRelevantBlock);
+		countingIv.putInt(AES_BLOCK_LENGTH - Integer.BYTES, (int) firstRelevantBlock); // int-cast is possible, as max file size is 64GiB
 
 		// fast forward stream:
-		encryptedFile.position(64 + beginOfFirstRelevantBlock);
+		encryptedFile.position(64l + beginOfFirstRelevantBlock);
 
 		// generate cipher:
 		final Cipher cipher = this.aesCtrCipher(primaryMasterKey, countingIv.array(), Cipher.DECRYPT_MODE);
@@ -525,13 +528,13 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 	}
 
 	@Override
-	public Long encryptFile(InputStream plaintextFile, SeekableByteChannel encryptedFile) throws IOException {
+	public Long encryptFile(InputStream plaintextFile, SeekableByteChannel encryptedFile) throws IOException, EncryptFailedException {
 		// truncate file
 		encryptedFile.truncate(0);
 
 		// use an IV, whose last 8 bytes store a long used in counter mode and write initial value to file.
 		final ByteBuffer countingIv = ByteBuffer.wrap(randomData(AES_BLOCK_LENGTH));
-		countingIv.putLong(AES_BLOCK_LENGTH - Long.BYTES, 0l);
+		countingIv.putInt(AES_BLOCK_LENGTH - Integer.BYTES, 0);
 		encryptedFile.write(countingIv);
 
 		// init crypto stuff:
@@ -550,18 +553,29 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 		final OutputStream macOut = new MacOutputStream(out, mac);
 		final OutputStream cipheredOut = new CipherOutputStream(macOut, cipher);
 		final OutputStream blockSizeBufferedOut = new BufferedOutputStream(cipheredOut, AES_BLOCK_LENGTH);
-		final Long plaintextSize = IOUtils.copyLarge(plaintextFile, blockSizeBufferedOut);
+		final InputStream lengthLimitingIn = new CounterAwareInputStream(plaintextFile);
+		final Long plaintextSize;
+		try {
+			plaintextSize = IOUtils.copyLarge(lengthLimitingIn, blockSizeBufferedOut);
+		} catch (CounterAwareInputLimitReachedException ex) {
+			encryptedFile.truncate(64l + CounterAwareInputStream.SIXTY_FOUR_GIGABYE);
+			encryptedContentLength(encryptedFile, CounterAwareInputStream.SIXTY_FOUR_GIGABYE);
+			// no additional padding needed here, as 64GiB is a multiple of 128bit
+			throw new CounterOverflowException("File size exceeds limit (64Gib). Aborting to prevent counter overflow.");
+		}
 
 		// ensure total byte count is a multiple of the block size, in CTR mode:
 		final int remainderToFillLastBlock = AES_BLOCK_LENGTH - (int) (plaintextSize % AES_BLOCK_LENGTH);
 		blockSizeBufferedOut.write(new byte[remainderToFillLastBlock]);
 
-		// append a few blocks of fake data:
-		final int numberOfPlaintextBlocks = (int) Math.ceil(plaintextSize / AES_BLOCK_LENGTH);
-		final int upToTenPercentFakeBlocks = (int) Math.ceil(Math.random() * 0.1 * numberOfPlaintextBlocks);
-		final byte[] emptyBytes = this.randomData(AES_BLOCK_LENGTH);
-		for (int i = 0; i < upToTenPercentFakeBlocks; i += AES_BLOCK_LENGTH) {
-			blockSizeBufferedOut.write(emptyBytes);
+		// for filesizes of up to 16GiB: append a few blocks of fake data:
+		if (plaintextSize < (long) (Integer.MAX_VALUE / 4) * AES_BLOCK_LENGTH) {
+			final int numberOfPlaintextBlocks = (int) Math.ceil(plaintextSize / AES_BLOCK_LENGTH);
+			final int upToTenPercentFakeBlocks = (int) Math.ceil(Math.random() * 0.1 * numberOfPlaintextBlocks);
+			final byte[] emptyBytes = this.randomData(AES_BLOCK_LENGTH);
+			for (int i = 0; i < upToTenPercentFakeBlocks; i += AES_BLOCK_LENGTH) {
+				blockSizeBufferedOut.write(emptyBytes);
+			}
 		}
 		blockSizeBufferedOut.flush();
 
