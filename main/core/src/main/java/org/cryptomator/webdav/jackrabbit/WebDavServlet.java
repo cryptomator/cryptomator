@@ -55,15 +55,16 @@ public class WebDavServlet extends AbstractWebdavServlet {
 	public void destroy() {
 		backgroundTaskExecutor.shutdown();
 		try {
-			final boolean tasksFinished = backgroundTaskExecutor.awaitTermination(10, TimeUnit.SECONDS);
+			final boolean tasksFinished = backgroundTaskExecutor.awaitTermination(2, TimeUnit.SECONDS);
 			if (!tasksFinished) {
 				backgroundTaskExecutor.shutdownNow();
 			}
 		} catch (InterruptedException e) {
 			backgroundTaskExecutor.shutdownNow();
 			Thread.currentThread().interrupt();
+		} finally {
+			super.destroy();
 		}
-		super.destroy();
 	}
 
 	@Override

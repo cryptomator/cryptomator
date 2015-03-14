@@ -10,6 +10,7 @@
 package org.cryptomator.ui.util.mount;
 
 import java.net.URI;
+import java.util.UUID;
 
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.ui.util.command.Script;
@@ -28,7 +29,8 @@ final class MacOsXWebDavMounter implements WebDavMounterStrategy {
 
 	@Override
 	public WebDavMount mount(URI uri, String name) throws CommandFailedException {
-		final String path = "/Volumes/Cryptomator" + uri.getRawPath().replace('/', '_');
+		// we don't use the uri to derive a path, as it *could* be longer than 255 chars.
+		final String path = "/Volumes/Cryptomator_" + UUID.randomUUID().toString();
 		final Script mountScript = Script.fromLines(
 				"mkdir \"$MOUNT_PATH\"",
 				"mount_webdav -S -v $MOUNT_NAME \"$DAV_AUTHORITY$DAV_PATH\" \"$MOUNT_PATH\"",

@@ -144,9 +144,7 @@ public class UnlockController implements Initializable {
 		progressIndicator.setVisible(false);
 		setControlsDisabled(false);
 		if (vault.isUnlocked() && !mountSuccess) {
-			vault.getCryptor().swipeSensitiveData();
 			vault.stopServer();
-			vault.setUnlocked(false);
 		}
 		if (mountSuccess && listener != null) {
 			listener.didUnlock(this);

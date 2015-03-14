@@ -27,8 +27,7 @@ import javafx.util.Duration;
 
 import org.cryptomator.crypto.CryptorIOSampling;
 import org.cryptomator.ui.model.Vault;
-
-import com.google.inject.Inject;
+import org.cryptomator.ui.util.mount.CommandFailedException;
 
 public class UnlockedController implements Initializable {
 
@@ -47,18 +46,21 @@ public class UnlockedController implements Initializable {
 	@FXML
 	private NumberAxis xAxis;
 
-	@Inject
-	public UnlockedController() {
-		super();
-	}
+	private ResourceBundle rb;
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
+		this.rb = rb;
 	}
 
 	@FXML
 	private void didClickCloseVault(ActionEvent event) {
-		vault.unmount();
+		try {
+			vault.unmount();
+		} catch (CommandFailedException e) {
+			messageLabel.setText(rb.getString("unlocked.label.unmountFailed"));
+			return;
+		}
 		vault.stopServer();
 		vault.setUnlocked(false);
 		if (listener != null) {

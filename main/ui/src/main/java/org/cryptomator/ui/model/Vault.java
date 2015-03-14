@@ -88,9 +88,14 @@ public class Vault implements Serializable {
 	}
 
 	public void stopServer() {
-		unmount();
+		try {
+			unmount();
+		} catch (CommandFailedException e) {
+			LOG.warn("Unmounting failed. Locking anyway...", e);
+		}
 		webDavServlet.close();
 		cryptor.swipeSensitiveData();
+		setUnlocked(false);
 		namesOfResourcesWithInvalidMac.clear();
 	}
 
@@ -108,8 +113,12 @@ public class Vault implements Serializable {
 		}
 	}
 
-	public void unmount() {
-		webDavMount.close();
+	public void unmount() throws CommandFailedException {
+		final WebDavMount mnt = webDavMount.get().orElse(null);
+		if (mnt != null) {
+			mnt.unmount();
+		}
+		webDavMount = DeferredClosable.empty();
 	}
 
 	/* Getter/Setter */
