@@ -43,6 +43,10 @@ final class LinuxGvfsWebDavMounter implements WebDavMounterStrategy {
 				"gvfs-mount \"dav:$DAV_SSP\"",
 				"xdg-open \"dav:$DAV_SSP\"")
 				.addEnv("DAV_SSP", uri.getRawSchemeSpecificPart());
+		final Script testMountStillExistsScript = Script.fromLines(
+				"set -x",
+				"test `gvfs-mount --list | grep \"$DAV_SSP\" | wc -l` -eq 1")
+				.addEnv("DAV_SSP", uri.getRawSchemeSpecificPart());
 		final Script unmountScript = Script.fromLines(
 				"set -x",
 				"gvfs-mount -u \"dav:$DAV_SSP\"")
@@ -51,7 +55,17 @@ final class LinuxGvfsWebDavMounter implements WebDavMounterStrategy {
 		return new AbstractWebDavMount() {
 			@Override
 			public void unmount() throws CommandFailedException {
-				unmountScript.execute();
+				boolean mountStillExists;
+				try {
+					testMountStillExistsScript.execute();
+					mountStillExists = true;
+				} catch(CommandFailedException e) {
+					mountStillExists = false;
+				}
+				// only attempt unmount if user didn't unmount manually:
+				if (mountStillExists) {
+					unmountScript.execute();
+				}
 			}
 		};
 	}

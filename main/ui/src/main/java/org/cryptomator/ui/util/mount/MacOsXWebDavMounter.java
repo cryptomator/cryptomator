@@ -10,6 +10,8 @@
 package org.cryptomator.ui.util.mount;
 
 import java.net.URI;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
 import java.util.UUID;
 
 import org.apache.commons.lang3.SystemUtils;
@@ -46,7 +48,10 @@ final class MacOsXWebDavMounter implements WebDavMounterStrategy {
 		return new AbstractWebDavMount() {
 			@Override
 			public void unmount() throws CommandFailedException {
-				unmountScript.execute();
+				// only attempt unmount if user didn't unmount manually:
+				if (Files.exists(FileSystems.getDefault().getPath(path))) {
+					unmountScript.execute();
+				}
 			}
 		};
 	}

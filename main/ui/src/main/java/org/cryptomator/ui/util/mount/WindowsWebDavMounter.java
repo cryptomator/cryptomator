@@ -12,6 +12,8 @@ package org.cryptomator.ui.util.mount;
 import static org.cryptomator.ui.util.command.Script.fromLines;
 
 import java.net.URI;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -65,8 +67,8 @@ final class WindowsWebDavMounter implements WebDavMounterStrategy {
 					throw ex;
 				} else {
 					try {
-						// retry after 500ms
-						Thread.sleep(500);
+						// retry after 2s
+						Thread.sleep(2000);
 					} catch (InterruptedException e) {
 						Thread.currentThread().interrupt();
 					}
@@ -76,10 +78,14 @@ final class WindowsWebDavMounter implements WebDavMounterStrategy {
 		final Script openExplorerScript = fromLines("start explorer.exe " + driveLetter);
 		openExplorerScript.execute();
 		final Script unmountScript = fromLines("net use " + driveLetter + " /delete").addEnv("DRIVE_LETTER", driveLetter);
+		final String finalDriveLetter = driveLetter;
 		return new AbstractWebDavMount() {
 			@Override
 			public void unmount() throws CommandFailedException {
-				unmountScript.execute();
+				// only attempt unmount if user didn't unmount manually:
+				if (Files.exists(FileSystems.getDefault().getPath(finalDriveLetter))) {
+					unmountScript.execute();
+				}
 			}
 		};
 	}
