@@ -1,8 +1,8 @@
 Cryptomator
 ====================
 
-[![Build Status](https://travis-ci.org/totalvoidness/cryptomator.svg?branch=master)](https://travis-ci.org/totalvoidness/cryptomator)
-[![Join the chat at https://gitter.im/totalvoidness/cryptomator](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/totalvoidness/cryptomator?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Build Status](https://travis-ci.org/cryptomator/cryptomator.svg?branch=master)](https://travis-ci.org/cryptomator/cryptomator)
+[![Join the chat at https://gitter.im/totalvoidness/cryptomator](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/cryptomator/cryptomator?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 Multiplatform transparent client-side encryption of your files in the cloud.
 
@@ -43,13 +43,12 @@ If you want to take a look at the current beta version, go ahead and get your co
 #### Building on Debian-based OS
 ```bash
 apt-get install oracle-java8-installer oracle-java8-unlimited-jce-policy fakeroot maven git
-git clone https://github.com/totalvoidness/cryptomator.git
+git clone https://github.com/cryptomator/cryptomator.git
 cd cryptomator/main
-git checkout v0.5.1
+git checkout v0.6.0
 mvn clean install
 ```
 
 ## License
 
 Distributed under the MIT X Consortium license. See the LICENSE file for more info.
-
