@@ -14,5 +14,7 @@ deploy:
   api_key:
     secure: ZjE1j93v3qbPIe2YbmhS319aCbMdLQw0HuymmluTurxXsZtn9D4t2+eTr99vBVxGRuB5lzzGezPR5zjk5W7iHF7xhwrawXrFzr2rPJWzWFt0aM+Ry2njU1ROTGGXGTbv4anWeBlgMxLEInTAy/9ytOGNJlec83yc0THpOY2wxnk=
   file: main/ui/target/dist/Cryptomator.jar
+  skip_cleanup: true
   on:
     repo: cryptomator/cryptomator
+    tags: true
