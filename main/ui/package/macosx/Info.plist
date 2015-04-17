@@ -1,7 +1,7 @@
-<?xml version="1.0" ?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
- <dict>
+<dict>
   <key>LSMinimumSystemVersion</key>
   <string>10.7.4</string>
   <key>CFBundleDevelopmentRegion</key>
@@ -24,8 +24,7 @@
   <string>DEPLOY_BUNDLE_SHORT_VERSION</string>
   <key>CFBundleSignature</key>
   <string>????</string>
-  <!-- See http://developer.apple.com/library/mac/#releasenotes/General/SubmittingToMacAppStore/_index.html
-       for list of AppStore categories -->
+  <!-- See http://developer.apple.com/library/mac/#releasenotes/General/SubmittingToMacAppStore/_index.html for list of AppStore categories -->
   <key>LSApplicationCategoryType</key>
   <string>DEPLOY_BUNDLE_CATEGORY</string>
   <key>CFBundleVersion</key>
@@ -47,30 +46,54 @@
 DEPLOY_JVM_OPTIONS
   </array>
   <key>JVMUserOptions</key>
-    <dict>
+  <dict>
 DEPLOY_JVM_USER_OPTIONS
-    </dict>
+  </dict>
   <key>NSHighResolutionCapable</key>
   <string>true</string>
   <!-- register .cryptomator bundle extension -->
   <key>CFBundleDocumentTypes</key>
   <array>
-  <dict>
-   <key>CFBundleTypeRole</key>
-   <string>Editor</string>
-   <key>LSTypeIsPackage</key>
-   <true/>
-   <key>CFBundleTypeIconFile</key>
-   <string>Cryptomator.icns</string>
-   <key>CFBundleTypeExtensions</key>
-   <array>
-    <string>cryptomator</string>
-   </array>
-   <key>CFBundleTypeName</key>
-   <string>org.cryptomator.folder</string>
-   <key>LSHandlerRank</key>
-   <string>Owner</string>
-  </dict>
+    <dict>
+      <key>CFBundleTypeExtensions</key>
+      <array>
+        <string>cryptomator</string>
+      </array>
+      <key>CFBundleTypeIconFile</key>
+      <string>Cryptomator.icns</string>
+      <key>CFBundleTypeName</key>
+      <string>Cryptomator Vault</string>
+      <key>CFBundleTypeRole</key>
+      <string>Editor</string>
+      <key>LSItemContentTypes</key>
+      <array>
+        <string>org.cryptomator.folder</string>
+      </array>
+      <key>LSTypeIsPackage</key>
+      <true/>
+    </dict>
   </array>
- </dict>
+  <key>UTExportedTypeDeclarations</key>
+  <array>
+    <dict>
+      <key>UTTypeConformsTo</key>
+      <array>
+        <string>com.apple.package</string>
+      </array>
+      <key>UTTypeDescription</key>
+      <string>Cryptomator Vault</string>
+      <key>UTTypeIconFile</key>
+      <string>Cryptomator.icns</string>
+      <key>UTTypeIdentifier</key>
+      <string>org.cryptomator.folder</string>
+      <key>UTTypeTagSpecification</key>
+      <dict>
+        <key>public.filename-extension</key>
+        <array>
+          <string>cryptomator</string>
+        </array>
+      </dict>
+    </dict>
+  </array>
+</dict>
 </plist>
