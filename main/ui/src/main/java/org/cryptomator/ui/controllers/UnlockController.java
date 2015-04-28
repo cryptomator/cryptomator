@@ -30,6 +30,8 @@ import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
 
+import javax.security.auth.DestroyFailedException;
+
 import org.apache.commons.lang3.CharUtils;
 import org.cryptomator.crypto.exceptions.DecryptFailedException;
 import org.cryptomator.crypto.exceptions.UnsupportedKeyLengthException;
@@ -106,7 +108,7 @@ public class UnlockController implements Initializable {
 			vault.getCryptor().decryptMasterKey(masterKeyInputStream, password);
 			if (!vault.startServer()) {
 				messageLabel.setText(rb.getString("unlock.messageLabel.startServerFailed"));
-				vault.getCryptor().swipeSensitiveData();
+				vault.getCryptor().destroy();
 				return;
 			}
 			// at this point we know for sure, that the masterkey can be decrypted, so lets make a backup:
@@ -129,6 +131,10 @@ public class UnlockController implements Initializable {
 			progressIndicator.setVisible(false);
 			messageLabel.setText(rb.getString("unlock.errorMessage.unsupportedKeyLengthInstallJCE"));
 			LOG.warn("Unsupported Key-Length. Please install Oracle Java Cryptography Extension (JCE).", ex);
+		} catch (DestroyFailedException e) {
+			setControlsDisabled(false);
+			progressIndicator.setVisible(false);
+			LOG.error("Destruction of cryptor throw an exception.", e);
 		} finally {
 			passwordField.swipe();
 		}

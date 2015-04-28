@@ -33,11 +33,6 @@ interface FileNamingConventions {
 	String BASIC_FILE_EXT = ".aes";
 
 	/**
-	 * Prefix in front of the actual encrypted file name used as IV.
-	 */
-	String IV_PREFIX_SEPARATOR = "_";
-
-	/**
 	 * For plaintext file names > {@value #ENCRYPTED_FILENAME_LENGTH_LIMIT} chars.
 	 */
 	String LONG_NAME_FILE_EXT = ".lng.aes";
@@ -46,12 +41,6 @@ interface FileNamingConventions {
 	 * Length of prefix in file names > {@value #ENCRYPTED_FILENAME_LENGTH_LIMIT} chars used to determine the corresponding metadata file.
 	 */
 	int LONG_NAME_PREFIX_LENGTH = 8;
-
-	/**
-	 * For metadata files for a certain group of files. The cryptor may decide what files to assign to the same group; hopefully using some
-	 * kind of uniform distribution for better load balancing.
-	 */
-	String METADATA_FILE_EXT = ".meta";
 
 	/**
 	 * Matches both, {@value #BASIC_FILE_EXT} and {@value #LONG_NAME_FILE_EXT} files.

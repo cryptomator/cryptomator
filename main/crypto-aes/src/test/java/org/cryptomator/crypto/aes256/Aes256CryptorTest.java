@@ -18,8 +18,10 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.security.auth.DestroyFailedException;
+
 import org.apache.commons.io.IOUtils;
-import org.cryptomator.crypto.CryptorIOSupport;
+import org.cryptomator.crypto.CryptorMetadataSupport;
 import org.cryptomator.crypto.exceptions.DecryptFailedException;
 import org.cryptomator.crypto.exceptions.EncryptFailedException;
 import org.cryptomator.crypto.exceptions.UnsupportedKeyLengthException;
@@ -30,12 +32,12 @@ import org.junit.Test;
 public class Aes256CryptorTest {
 
 	@Test
-	public void testCorrectPassword() throws IOException, WrongPasswordException, DecryptFailedException, UnsupportedKeyLengthException {
+	public void testCorrectPassword() throws IOException, WrongPasswordException, DecryptFailedException, UnsupportedKeyLengthException, DestroyFailedException {
 		final String pw = "asd";
 		final Aes256Cryptor cryptor = new Aes256Cryptor();
 		final ByteArrayOutputStream out = new ByteArrayOutputStream();
 		cryptor.encryptMasterKey(out, pw);
-		cryptor.swipeSensitiveData();
+		cryptor.destroy();
 
 		final Aes256Cryptor decryptor = new Aes256Cryptor();
 		final InputStream in = new ByteArrayInputStream(out.toByteArray());
@@ -46,12 +48,12 @@ public class Aes256CryptorTest {
 	}
 
 	@Test
-	public void testWrongPassword() throws IOException, DecryptFailedException, WrongPasswordException, UnsupportedKeyLengthException {
+	public void testWrongPassword() throws IOException, DecryptFailedException, WrongPasswordException, UnsupportedKeyLengthException, DestroyFailedException {
 		final String pw = "asd";
 		final Aes256Cryptor cryptor = new Aes256Cryptor();
 		final ByteArrayOutputStream out = new ByteArrayOutputStream();
 		cryptor.encryptMasterKey(out, pw);
-		cryptor.swipeSensitiveData();
+		cryptor.destroy();
 		IOUtils.closeQuietly(out);
 
 		// all these passwords are expected to fail.
@@ -207,46 +209,44 @@ public class Aes256CryptorTest {
 
 	@Test
 	public void testEncryptionOfFilenames() throws IOException, DecryptFailedException {
-		final CryptorIOSupport ioSupportMock = new CryptoIOSupportMock();
+		final CryptorMetadataSupport ioSupportMock = new CryptoIOSupportMock();
 		final Aes256Cryptor cryptor = new Aes256Cryptor();
 
-		// short path components
+		// directory paths
 		final String originalPath1 = "foo/bar/baz";
-		final String encryptedPath1a = cryptor.encryptPath(originalPath1, '/', '/', ioSupportMock);
-		final String encryptedPath1b = cryptor.encryptPath(originalPath1, '/', '/', ioSupportMock);
+		final String encryptedPath1a = cryptor.encryptDirectoryPath(originalPath1, "/");
+		final String encryptedPath1b = cryptor.encryptDirectoryPath(originalPath1, "/");
 		Assert.assertEquals(encryptedPath1a, encryptedPath1b);
-		final String decryptedPath1 = cryptor.decryptPath(encryptedPath1a, '/', '/', ioSupportMock);
-		Assert.assertEquals(originalPath1, decryptedPath1);
 
-		// long path components
+		// long file names
 		final String str50chars = "aaaaaaaaaabbbbbbbbbbccccccccccddddddddddeeeeeeeeee";
-		final String originalPath2 = "foo/" + str50chars + str50chars + str50chars + str50chars + str50chars + "/baz";
-		final String encryptedPath2a = cryptor.encryptPath(originalPath2, '/', '/', ioSupportMock);
-		final String encryptedPath2b = cryptor.encryptPath(originalPath2, '/', '/', ioSupportMock);
+		final String originalPath2 = str50chars + str50chars + str50chars + str50chars + str50chars + "_isLongerThan255Chars.txt";
+		final String encryptedPath2a = cryptor.encryptFilename(originalPath2, ioSupportMock);
+		final String encryptedPath2b = cryptor.encryptFilename(originalPath2, ioSupportMock);
 		Assert.assertEquals(encryptedPath2a, encryptedPath2b);
-		final String decryptedPath2 = cryptor.decryptPath(encryptedPath2a, '/', '/', ioSupportMock);
+		final String decryptedPath2 = cryptor.decryptFilename(encryptedPath2a, ioSupportMock);
 		Assert.assertEquals(originalPath2, decryptedPath2);
 
-		// block size length path components
+		// block size length file names
 		final String originalPath3 = "aaaabbbbccccdddd";
-		final String encryptedPath3a = cryptor.encryptPath(originalPath3, '/', '/', ioSupportMock);
-		final String encryptedPath3b = cryptor.encryptPath(originalPath3, '/', '/', ioSupportMock);
+		final String encryptedPath3a = cryptor.encryptFilename(originalPath3, ioSupportMock);
+		final String encryptedPath3b = cryptor.encryptFilename(originalPath3, ioSupportMock);
 		Assert.assertEquals(encryptedPath3a, encryptedPath3b);
-		final String decryptedPath3 = cryptor.decryptPath(encryptedPath3a, '/', '/', ioSupportMock);
+		final String decryptedPath3 = cryptor.decryptFilename(encryptedPath3a, ioSupportMock);
 		Assert.assertEquals(originalPath3, decryptedPath3);
 	}
 
-	private static class CryptoIOSupportMock implements CryptorIOSupport {
+	private static class CryptoIOSupportMock implements CryptorMetadataSupport {
 
 		private final Map<String, byte[]> map = new HashMap<>();
 
 		@Override
-		public void writePathSpecificMetadata(String encryptedPath, byte[] encryptedMetadata) {
+		public void writeMetadata(String encryptedPath, byte[] encryptedMetadata) {
 			map.put(encryptedPath, encryptedMetadata);
 		}
 
 		@Override
-		public byte[] readPathSpecificMetadata(String encryptedPath) {
+		public byte[] readMetadata(String encryptedPath) {
 			return map.get(encryptedPath);
 		}
 

@@ -11,16 +11,17 @@ package org.cryptomator.webdav.jackrabbit;
 import java.io.EOFException;
 import java.io.IOException;
 import java.nio.channels.SeekableByteChannel;
+import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.BasicFileAttributes;
 
 import org.apache.jackrabbit.webdav.DavException;
 import org.apache.jackrabbit.webdav.DavResource;
-import org.apache.jackrabbit.webdav.DavResourceFactory;
 import org.apache.jackrabbit.webdav.DavResourceIterator;
-import org.apache.jackrabbit.webdav.DavResourceLocator;
+import org.apache.jackrabbit.webdav.DavServletResponse;
 import org.apache.jackrabbit.webdav.DavSession;
 import org.apache.jackrabbit.webdav.io.InputContext;
 import org.apache.jackrabbit.webdav.io.OutputContext;
@@ -42,9 +43,14 @@ class EncryptedFile extends AbstractEncryptedNode {
 
 	protected final CryptoWarningHandler cryptoWarningHandler;
 
-	public EncryptedFile(DavResourceFactory factory, DavResourceLocator locator, DavSession session, LockManager lockManager, Cryptor cryptor, CryptoWarningHandler cryptoWarningHandler) {
+	public EncryptedFile(CryptoResourceFactory factory, CryptoLocator locator, DavSession session, LockManager lockManager, Cryptor cryptor, CryptoWarningHandler cryptoWarningHandler) {
 		super(factory, locator, session, lockManager, cryptor);
 		this.cryptoWarningHandler = cryptoWarningHandler;
+	}
+
+	@Override
+	protected Path getPhysicalPath() {
+		return locator.getEncryptedFilePath();
 	}
 
 	@Override
@@ -69,7 +75,7 @@ class EncryptedFile extends AbstractEncryptedNode {
 
 	@Override
 	public void spool(OutputContext outputContext) throws IOException {
-		final Path path = ResourcePathUtils.getPhysicalPath(this);
+		final Path path = locator.getEncryptedFilePath();
 		if (Files.isRegularFile(path)) {
 			outputContext.setModificationTime(Files.getLastModifiedTime(path).toMillis());
 			outputContext.setProperty(HttpHeader.ACCEPT_RANGES.asString(), HttpHeaderValue.BYTES.asString());
@@ -93,7 +99,7 @@ class EncryptedFile extends AbstractEncryptedNode {
 
 	@Override
 	protected void determineProperties() {
-		final Path path = ResourcePathUtils.getPhysicalPath(this);
+		final Path path = locator.getEncryptedFilePath();
 		if (Files.exists(path)) {
 			try (final SeekableByteChannel channel = Files.newByteChannel(path, StandardOpenOption.READ)) {
 				final Long contentLength = cryptor.decryptedContentLength(channel);
@@ -112,6 +118,42 @@ class EncryptedFile extends AbstractEncryptedNode {
 				LOG.error("Error determining metadata " + path.toString(), e);
 				throw new IORuntimeException(e);
 			}
+		}
+	}
+
+	@Override
+	public void move(AbstractEncryptedNode dest) throws DavException, IOException {
+		final Path src = this.locator.getEncryptedFilePath();
+		final Path dst = dest.locator.getEncryptedFilePath();
+
+		// check for conflicts:
+		if (Files.exists(dst) && Files.getLastModifiedTime(dst).toMillis() > Files.getLastModifiedTime(src).toMillis()) {
+			throw new DavException(DavServletResponse.SC_CONFLICT, "File at destination already exists: " + dst.toString());
+		}
+
+		// move:
+		try {
+			Files.move(src, dst, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+		} catch (AtomicMoveNotSupportedException e) {
+			Files.move(src, dst, StandardCopyOption.REPLACE_EXISTING);
+		}
+	}
+
+	@Override
+	public void copy(AbstractEncryptedNode dest, boolean shallow) throws DavException, IOException {
+		final Path src = this.locator.getEncryptedFilePath();
+		final Path dst = dest.locator.getEncryptedFilePath();
+
+		// check for conflicts:
+		if (Files.exists(dst) && Files.getLastModifiedTime(dst).toMillis() > Files.getLastModifiedTime(src).toMillis()) {
+			throw new DavException(DavServletResponse.SC_CONFLICT, "File at destination already exists: " + dst.toString());
+		}
+
+		// copy:
+		try {
+			Files.copy(src, dst, StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+		} catch (AtomicMoveNotSupportedException e) {
+			Files.copy(src, dst, StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING);
 		}
 	}
 

@@ -33,7 +33,7 @@ final class AesSivCipherUtil {
 	private static final byte[] BYTES_ZERO = new byte[16];
 	private static final byte DOUBLING_CONST = (byte) 0x87;
 
-	static byte[] sivEncrypt(SecretKey aesKey, SecretKey macKey, byte[] plaintext, byte[]... additionalData) throws InvalidKeyException {
+	static byte[] sivEncrypt(SecretKey aesKey, SecretKey macKey, byte[] plaintext, byte[]... additionalData) {
 		final byte[] aesKeyBytes = aesKey.getEncoded();
 		final byte[] macKeyBytes = macKey.getEncoded();
 		if (aesKeyBytes == null || macKeyBytes == null) {
@@ -41,6 +41,8 @@ final class AesSivCipherUtil {
 		}
 		try {
 			return sivEncrypt(aesKeyBytes, macKeyBytes, plaintext, additionalData);
+		} catch (InvalidKeyException ex) {
+			throw new IllegalArgumentException(ex);
 		} finally {
 			Arrays.fill(aesKeyBytes, (byte) 0);
 			Arrays.fill(macKeyBytes, (byte) 0);
@@ -78,7 +80,7 @@ final class AesSivCipherUtil {
 		return ArrayUtils.addAll(iv, ciphertext);
 	}
 
-	static byte[] sivDecrypt(SecretKey aesKey, SecretKey macKey, byte[] plaintext, byte[]... additionalData) throws InvalidKeyException, DecryptFailedException {
+	static byte[] sivDecrypt(SecretKey aesKey, SecretKey macKey, byte[] plaintext, byte[]... additionalData) throws DecryptFailedException {
 		final byte[] aesKeyBytes = aesKey.getEncoded();
 		final byte[] macKeyBytes = macKey.getEncoded();
 		if (aesKeyBytes == null || macKeyBytes == null) {
@@ -86,6 +88,8 @@ final class AesSivCipherUtil {
 		}
 		try {
 			return sivDecrypt(aesKeyBytes, macKeyBytes, plaintext, additionalData);
+		} catch (InvalidKeyException ex) {
+			throw new IllegalArgumentException(ex);
 		} finally {
 			Arrays.fill(aesKeyBytes, (byte) 0);
 			Arrays.fill(macKeyBytes, (byte) 0);

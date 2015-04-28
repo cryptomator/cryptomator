@@ -22,9 +22,7 @@ import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.UUID;
 
 import javax.crypto.BadPaddingException;
@@ -44,8 +42,8 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.NullOutputStream;
 import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.crypto.generators.SCrypt;
-import org.cryptomator.crypto.AbstractCryptor;
-import org.cryptomator.crypto.CryptorIOSupport;
+import org.cryptomator.crypto.Cryptor;
+import org.cryptomator.crypto.CryptorMetadataSupport;
 import org.cryptomator.crypto.aes256.CounterAwareInputStream.CounterAwareInputLimitReachedException;
 import org.cryptomator.crypto.exceptions.CounterOverflowException;
 import org.cryptomator.crypto.exceptions.DecryptFailedException;
@@ -59,7 +57,7 @@ import org.cryptomator.crypto.io.SeekableByteChannelOutputStream;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicConfiguration, FileNamingConventions {
+public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration, FileNamingConventions {
 
 	/**
 	 * Defined in static initializer. Defaults to 256, but falls back to maximum value possible, if JCE Unlimited Strength Jurisdiction
@@ -187,7 +185,12 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 	}
 
 	@Override
-	public void swipeSensitiveDataInternal() {
+	public boolean isDestroyed() {
+		return primaryMasterKey.isDestroyed() && hMacMasterKey.isDestroyed();
+	}
+
+	@Override
+	public void destroy() {
 		destroyQuietly(primaryMasterKey);
 		destroyQuietly(hMacMasterKey);
 	}
@@ -249,6 +252,14 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 		}
 	}
 
+	private MessageDigest sha256() {
+		try {
+			return MessageDigest.getInstance("SHA-256");
+		} catch (NoSuchAlgorithmException e) {
+			throw new AssertionError("Every implementation of the Java platform is required to support Sha-256");
+		}
+	}
+
 	private byte[] randomData(int length) {
 		final byte[] result = new byte[length];
 		securePrng.nextBytes(result);
@@ -272,18 +283,12 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 	}
 
 	@Override
-	public String encryptPath(String cleartextPath, char encryptedPathSep, char cleartextPathSep, CryptorIOSupport ioSupport) {
-		try {
-			final String[] cleartextPathComps = StringUtils.split(cleartextPath, cleartextPathSep);
-			final List<String> encryptedPathComps = new ArrayList<>(cleartextPathComps.length);
-			for (final String cleartext : cleartextPathComps) {
-				final String encrypted = encryptPathComponent(cleartext, primaryMasterKey, hMacMasterKey, ioSupport);
-				encryptedPathComps.add(encrypted);
-			}
-			return StringUtils.join(encryptedPathComps, encryptedPathSep);
-		} catch (InvalidKeyException | IOException e) {
-			throw new IllegalStateException("Unable to encrypt path: " + cleartextPath, e);
-		}
+	public String encryptDirectoryPath(String cleartextPath, String nativePathSep) {
+		final byte[] cleartextBytes = cleartextPath.getBytes(StandardCharsets.UTF_8);
+		byte[] encryptedBytes = AesSivCipherUtil.sivEncrypt(primaryMasterKey, hMacMasterKey, cleartextBytes);
+		final byte[] hashed = sha256().digest(encryptedBytes);
+		final String encryptedThenHashedPath = ENCRYPTED_FILENAME_CODEC.encodeAsString(hashed);
+		return encryptedThenHashedPath.substring(0, 2) + nativePathSep + encryptedThenHashedPath.substring(2);
 	}
 
 	/**
@@ -301,19 +306,19 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 	 * These alternative names consist of the checksum, a unique id and a special file extension defined in
 	 * {@link FileNamingConventions#LONG_NAME_FILE_EXT}.
 	 */
-	private String encryptPathComponent(final String cleartext, final SecretKey aesKey, final SecretKey macKey, CryptorIOSupport ioSupport) throws IOException, InvalidKeyException {
-		final byte[] cleartextBytes = cleartext.getBytes(StandardCharsets.UTF_8);
+	@Override
+	public String encryptFilename(String cleartextName, CryptorMetadataSupport ioSupport) throws IOException {
+		final byte[] cleartextBytes = cleartextName.getBytes(StandardCharsets.UTF_8);
 
 		// encrypt:
-		final byte[] encryptedBytes = AesSivCipherUtil.sivEncrypt(aesKey, macKey, cleartextBytes);
+		final byte[] encryptedBytes = AesSivCipherUtil.sivEncrypt(primaryMasterKey, hMacMasterKey, cleartextBytes);
 		final String ivAndCiphertext = ENCRYPTED_FILENAME_CODEC.encodeAsString(encryptedBytes);
 
 		if (ivAndCiphertext.length() + BASIC_FILE_EXT.length() > ENCRYPTED_FILENAME_LENGTH_LIMIT) {
-			final String groupPrefix = ivAndCiphertext.substring(0, LONG_NAME_PREFIX_LENGTH);
-			final String metadataFilename = groupPrefix + METADATA_FILE_EXT;
-			final LongFilenameMetadata metadata = this.getMetadata(ioSupport, metadataFilename);
-			final String alternativeFileName = groupPrefix + metadata.getOrCreateUuidForEncryptedFilename(ivAndCiphertext).toString() + LONG_NAME_FILE_EXT;
-			this.storeMetadata(ioSupport, metadataFilename, metadata);
+			final String metadataGroup = ivAndCiphertext.substring(0, LONG_NAME_PREFIX_LENGTH);
+			final LongFilenameMetadata metadata = this.getMetadata(ioSupport, metadataGroup);
+			final String alternativeFileName = metadataGroup + metadata.getOrCreateUuidForEncryptedFilename(ivAndCiphertext).toString() + LONG_NAME_FILE_EXT;
+			this.storeMetadata(ioSupport, metadataGroup, metadata);
 			return alternativeFileName;
 		} else {
 			return ivAndCiphertext + BASIC_FILE_EXT;
@@ -321,47 +326,29 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 	}
 
 	@Override
-	public String decryptPath(String encryptedPath, char encryptedPathSep, char cleartextPathSep, CryptorIOSupport ioSupport) throws DecryptFailedException {
-		try {
-			final String[] encryptedPathComps = StringUtils.split(encryptedPath, encryptedPathSep);
-			final List<String> cleartextPathComps = new ArrayList<>(encryptedPathComps.length);
-			for (final String encrypted : encryptedPathComps) {
-				final String cleartext = decryptPathComponent(encrypted, primaryMasterKey, hMacMasterKey, ioSupport);
-				cleartextPathComps.add(new String(cleartext));
-			}
-			return StringUtils.join(cleartextPathComps, cleartextPathSep);
-		} catch (InvalidKeyException | IOException e) {
-			throw new IllegalStateException("Unable to decrypt path: " + encryptedPath, e);
-		}
-	}
-
-	/**
-	 * @see #encryptPathComponent(String, SecretKey, CryptorIOSupport)
-	 */
-	private String decryptPathComponent(final String encrypted, final SecretKey aesKey, final SecretKey macKey, CryptorIOSupport ioSupport) throws IOException, InvalidKeyException, DecryptFailedException {
+	public String decryptFilename(String ciphertextName, CryptorMetadataSupport ioSupport) throws DecryptFailedException, IOException {
 		final String ciphertext;
-		if (encrypted.endsWith(LONG_NAME_FILE_EXT)) {
-			final String basename = StringUtils.removeEnd(encrypted, LONG_NAME_FILE_EXT);
-			final String groupPrefix = basename.substring(0, LONG_NAME_PREFIX_LENGTH);
+		if (ciphertextName.endsWith(LONG_NAME_FILE_EXT)) {
+			final String basename = StringUtils.removeEnd(ciphertextName, LONG_NAME_FILE_EXT);
+			final String metadataGroup = basename.substring(0, LONG_NAME_PREFIX_LENGTH);
 			final String uuid = basename.substring(LONG_NAME_PREFIX_LENGTH);
-			final String metadataFilename = groupPrefix + METADATA_FILE_EXT;
-			final LongFilenameMetadata metadata = this.getMetadata(ioSupport, metadataFilename);
+			final LongFilenameMetadata metadata = this.getMetadata(ioSupport, metadataGroup);
 			ciphertext = metadata.getEncryptedFilenameForUUID(UUID.fromString(uuid));
-		} else if (encrypted.endsWith(BASIC_FILE_EXT)) {
-			ciphertext = StringUtils.removeEndIgnoreCase(encrypted, BASIC_FILE_EXT);
+		} else if (ciphertextName.endsWith(BASIC_FILE_EXT)) {
+			ciphertext = StringUtils.removeEndIgnoreCase(ciphertextName, BASIC_FILE_EXT);
 		} else {
-			throw new IllegalArgumentException("Unsupported path component: " + encrypted);
+			throw new IllegalArgumentException("Unsupported path component: " + ciphertextName);
 		}
 
 		// decrypt:
 		final byte[] encryptedBytes = ENCRYPTED_FILENAME_CODEC.decode(ciphertext);
-		final byte[] cleartextBytes = AesSivCipherUtil.sivDecrypt(aesKey, macKey, encryptedBytes);
+		final byte[] cleartextBytes = AesSivCipherUtil.sivDecrypt(primaryMasterKey, hMacMasterKey, encryptedBytes);
 
 		return new String(cleartextBytes, StandardCharsets.UTF_8);
 	}
 
-	private LongFilenameMetadata getMetadata(CryptorIOSupport ioSupport, String metadataFile) throws IOException {
-		final byte[] fileContent = ioSupport.readPathSpecificMetadata(metadataFile);
+	private LongFilenameMetadata getMetadata(CryptorMetadataSupport ioSupport, String metadataGroup) throws IOException {
+		final byte[] fileContent = ioSupport.readMetadata(metadataGroup);
 		if (fileContent == null) {
 			return new LongFilenameMetadata();
 		} else {
@@ -369,8 +356,8 @@ public class Aes256Cryptor extends AbstractCryptor implements AesCryptographicCo
 		}
 	}
 
-	private void storeMetadata(CryptorIOSupport ioSupport, String metadataFile, LongFilenameMetadata metadata) throws JsonProcessingException, IOException {
-		ioSupport.writePathSpecificMetadata(metadataFile, objectMapper.writeValueAsBytes(metadata));
+	private void storeMetadata(CryptorMetadataSupport ioSupport, String metadataGroup, LongFilenameMetadata metadata) throws JsonProcessingException, IOException {
+		ioSupport.writeMetadata(metadataGroup, objectMapper.writeValueAsBytes(metadata));
 	}
 
 	@Override

@@ -4,35 +4,24 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.channels.SeekableByteChannel;
-import java.nio.file.DirectoryStream.Filter;
-import java.nio.file.Path;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.apache.commons.lang3.StringUtils;
 import org.cryptomator.crypto.exceptions.DecryptFailedException;
 import org.cryptomator.crypto.exceptions.EncryptFailedException;
-import org.cryptomator.crypto.exceptions.UnsupportedKeyLengthException;
-import org.cryptomator.crypto.exceptions.WrongPasswordException;
 
-public class SamplingDecorator implements Cryptor, CryptorIOSampling {
+public class SamplingCryptorDecorator extends AbstractCryptorDecorator implements CryptorIOSampling {
 
-	private final Cryptor cryptor;
 	private final AtomicLong encryptedBytes;
 	private final AtomicLong decryptedBytes;
 
-	private SamplingDecorator(Cryptor cryptor) {
-		this.cryptor = cryptor;
+	private SamplingCryptorDecorator(Cryptor cryptor) {
+		super(cryptor);
 		encryptedBytes = new AtomicLong();
 		decryptedBytes = new AtomicLong();
 	}
 
 	public static Cryptor decorate(Cryptor cryptor) {
-		return new SamplingDecorator(cryptor);
-	}
-
-	@Override
-	public void swipeSensitiveData() {
-		cryptor.swipeSensitiveData();
+		return new SamplingCryptorDecorator(cryptor);
 	}
 
 	@Override
@@ -56,38 +45,6 @@ public class SamplingDecorator implements Cryptor, CryptorIOSampling {
 	/* Cryptor */
 
 	@Override
-	public void encryptMasterKey(OutputStream out, CharSequence password) throws IOException {
-		cryptor.encryptMasterKey(out, password);
-	}
-
-	@Override
-	public void decryptMasterKey(InputStream in, CharSequence password) throws DecryptFailedException, WrongPasswordException, UnsupportedKeyLengthException, IOException {
-		cryptor.decryptMasterKey(in, password);
-	}
-
-	@Override
-	public String encryptPath(String cleartextPath, char encryptedPathSep, char cleartextPathSep, CryptorIOSupport ioSupport) {
-		encryptedBytes.addAndGet(StringUtils.length(cleartextPath));
-		return cryptor.encryptPath(cleartextPath, encryptedPathSep, cleartextPathSep, ioSupport);
-	}
-
-	@Override
-	public String decryptPath(String encryptedPath, char encryptedPathSep, char cleartextPathSep, CryptorIOSupport ioSupport) throws DecryptFailedException {
-		decryptedBytes.addAndGet(StringUtils.length(encryptedPath));
-		return cryptor.decryptPath(encryptedPath, encryptedPathSep, cleartextPathSep, ioSupport);
-	}
-
-	@Override
-	public Long decryptedContentLength(SeekableByteChannel encryptedFile) throws IOException {
-		return cryptor.decryptedContentLength(encryptedFile);
-	}
-
-	@Override
-	public boolean isAuthentic(SeekableByteChannel encryptedFile) throws IOException {
-		return cryptor.isAuthentic(encryptedFile);
-	}
-
-	@Override
 	public Long decryptFile(SeekableByteChannel encryptedFile, OutputStream plaintextFile) throws IOException, DecryptFailedException {
 		final OutputStream countingInputStream = new CountingOutputStream(decryptedBytes, plaintextFile);
 		return cryptor.decryptFile(encryptedFile, countingInputStream);
@@ -103,21 +60,6 @@ public class SamplingDecorator implements Cryptor, CryptorIOSampling {
 	public Long encryptFile(InputStream plaintextFile, SeekableByteChannel encryptedFile) throws IOException, EncryptFailedException {
 		final InputStream countingInputStream = new CountingInputStream(encryptedBytes, plaintextFile);
 		return cryptor.encryptFile(countingInputStream, encryptedFile);
-	}
-
-	@Override
-	public Filter<Path> getPayloadFilesFilter() {
-		return cryptor.getPayloadFilesFilter();
-	}
-
-	@Override
-	public void addSensitiveDataSwipeListener(SensitiveDataSwipeListener listener) {
-		cryptor.addSensitiveDataSwipeListener(listener);
-	}
-
-	@Override
-	public void removeSensitiveDataSwipeListener(SensitiveDataSwipeListener listener) {
-		cryptor.removeSensitiveDataSwipeListener(listener);
 	}
 
 	private class CountingInputStream extends InputStream {

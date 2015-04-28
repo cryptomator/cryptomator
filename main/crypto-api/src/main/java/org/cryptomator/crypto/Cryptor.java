@@ -15,6 +15,8 @@ import java.nio.channels.SeekableByteChannel;
 import java.nio.file.DirectoryStream.Filter;
 import java.nio.file.Path;
 
+import javax.security.auth.Destroyable;
+
 import org.cryptomator.crypto.exceptions.DecryptFailedException;
 import org.cryptomator.crypto.exceptions.EncryptFailedException;
 import org.cryptomator.crypto.exceptions.UnsupportedKeyLengthException;
@@ -23,7 +25,7 @@ import org.cryptomator.crypto.exceptions.WrongPasswordException;
 /**
  * Provides access to cryptographic functions. All methods are threadsafe.
  */
-public interface Cryptor extends SensitiveDataSwipeListener {
+public interface Cryptor extends Destroyable {
 
 	/**
 	 * Encrypts the current masterKey with the given password and writes the result to the given output stream.
@@ -42,33 +44,38 @@ public interface Cryptor extends SensitiveDataSwipeListener {
 	void decryptMasterKey(InputStream in, CharSequence password) throws DecryptFailedException, WrongPasswordException, UnsupportedKeyLengthException, IOException;
 
 	/**
-	 * Encrypts each plaintext path component for its own.
+	 * Encrypts a given plaintext path representing a directory structure. See {@link #encryptFilename(String, CryptorMetadataSupport)} for
+	 * contents inside directories.
 	 * 
-	 * @param cleartextPath A relative path (UTF-8 encoded)
-	 * @param encryptedPathSep Path separator char like '/' used on local file system. Must not be null, even if cleartextPath is a sole
-	 *            file name without any path separators.
-	 * @param cleartextPathSep Path separator char like '/' used in webdav URIs. Must not be null, even if cleartextPath is a sole file name
+	 * @param cleartextPath A relative path (UTF-8 encoded), whose path components are separated by '/'
+	 * @param nativePathSep Path separator like "/" used on local file system. Must not be null, even if cleartextPath is a sole file name
 	 *            without any path separators.
-	 * @param metadataSupport Support object allowing the Cryptor to read and write its own metadata to the location of the encrypted file.
-	 * @return Encrypted path components concatenated by the given encryptedPathSep. Must not start with encryptedPathSep, unless the
-	 *         encrypted path is explicitly absolute.
+	 * @return Encrypted path.
 	 */
-	String encryptPath(String cleartextPath, char encryptedPathSep, char cleartextPathSep, CryptorIOSupport ioSupport);
+	String encryptDirectoryPath(String cleartextPath, String nativePathSep);
 
 	/**
-	 * Decrypts each encrypted path component for its own.
+	 * Encrypts the name of a file. See {@link #encryptDirectoryPath(String, char)} for parent dir.
 	 * 
-	 * @param encryptedPath A relative path (UTF-8 encoded)
-	 * @param encryptedPathSep Path separator char like '/' used on local file system. Must not be null, even if encryptedPath is a sole
-	 *            file name without any path separators.
-	 * @param cleartextPathSep Path separator char like '/' used in webdav URIs. Must not be null, even if encryptedPath is a sole file name
-	 *            without any path separators.
-	 * @param metadataSupport Support object allowing the Cryptor to read and write its own metadata to the location of the encrypted file.
-	 * @return Decrypted path components concatenated by the given cleartextPathSep. Must not start with cleartextPathSep, unless the
-	 *         cleartext path is explicitly absolute.
-	 * @throws DecryptFailedException If the decryption failed for various reasons (including wrong password).
+	 * @param cleartextName A plaintext filename without any preceeding directory paths.
+	 * @param ioSupport Support object allowing the Cryptor to read and write its own metadata to a storage space associated with this
+	 *            support object.
+	 * @return Encrypted filename.
+	 * @throws IOException If ioSupport throws an IOException
 	 */
-	String decryptPath(String encryptedPath, char encryptedPathSep, char cleartextPathSep, CryptorIOSupport ioSupport) throws DecryptFailedException;
+	String encryptFilename(String cleartextName, CryptorMetadataSupport ioSupport) throws IOException;
+
+	/**
+	 * Decrypts the name of a file.
+	 * 
+	 * @param ciphertextName A ciphertext filename without any preceeding directory paths.
+	 * @param ioSupport Support object allowing the Cryptor to read and write its own metadata to a storage space associated with this
+	 *            support object.
+	 * @return Decrypted filename.
+	 * @throws DecryptFailedException If the decryption failed for various reasons (including wrong password).
+	 * @throws IOException If ioSupport throws an IOException
+	 */
+	String decryptFilename(String ciphertextName, CryptorMetadataSupport ioSupport) throws IOException, DecryptFailedException;
 
 	/**
 	 * @param metadataSupport Support object allowing the Cryptor to read and write its own metadata to the location of the encrypted file.
@@ -105,9 +112,5 @@ public interface Cryptor extends SensitiveDataSwipeListener {
 	 *         metadata file of the {@link Cryptor}.
 	 */
 	Filter<Path> getPayloadFilesFilter();
-
-	void addSensitiveDataSwipeListener(SensitiveDataSwipeListener listener);
-
-	void removeSensitiveDataSwipeListener(SensitiveDataSwipeListener listener);
 
 }
