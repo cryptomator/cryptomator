@@ -5,20 +5,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.atomic.AtomicLong;
 
-import javax.crypto.Mac;
-
 /**
- * Updates a {@link Mac} with the bytes read from this stream.
+ * Throws an exception, if more than (2^32)-1 16 byte blocks will be encrypted (would result in an counter overflow).<br/>
+ * From https://tools.ietf.org/html/rfc3686: <cite> Using the encryption process described in section 2.1, this construction permits each packet to consist of up to: (2^32)-1 blocks</cite>
  */
 class CounterAwareInputStream extends FilterInputStream {
 
-	static final long SIXTY_FOUR_GIGABYE = 1024l * 1024l * 1024l * 64l;
+	static final long SIXTY_FOUR_GIGABYE = ((1l << 32) - 1) * 16;
 
 	private final AtomicLong counter;
 
 	/**
 	 * @param in Stream from which to read contents, which will update the Mac.
-	 * @param mac Mac to be updated during writes.
 	 */
 	public CounterAwareInputStream(InputStream in) {
 		super(in);

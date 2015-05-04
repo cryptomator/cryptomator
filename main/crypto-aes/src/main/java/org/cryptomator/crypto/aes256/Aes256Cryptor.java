@@ -389,27 +389,6 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration, Fi
 		return fileSize;
 	}
 
-	// private void encryptedContentLength(SeekableByteChannel encryptedFile, Long contentLength) throws IOException {
-	// final ByteBuffer encryptedFileSizeBuffer;
-	//
-	// // encrypt content length in ECB mode (content length is less than one block):
-	// try {
-	// final ByteBuffer fileSizeBuffer = ByteBuffer.allocate(Long.BYTES);
-	// fileSizeBuffer.putLong(contentLength);
-	// final Cipher sizeCipher = aesEcbCipher(primaryMasterKey, Cipher.ENCRYPT_MODE);
-	// final byte[] encryptedFileSize = sizeCipher.doFinal(fileSizeBuffer.array());
-	// encryptedFileSizeBuffer = ByteBuffer.wrap(encryptedFileSize);
-	// } catch (IllegalBlockSizeException | BadPaddingException e) {
-	// throw new IllegalStateException("Block size must be valid, as padding is requested. BadPaddingException not possible in encrypt mode.", e);
-	// }
-	//
-	// // skip 128bit IV:
-	// encryptedFile.position(16l);
-	//
-	// // write result:
-	// encryptedFile.write(encryptedFileSizeBuffer);
-	// }
-
 	private long decryptContentLength(byte[] encryptedContentLengthBytes) {
 		try {
 			final Cipher sizeCipher = aesEcbCipher(primaryMasterKey, Cipher.DECRYPT_MODE);
@@ -563,16 +542,18 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration, Fi
 		// truncate file
 		encryptedFile.truncate(0);
 
-		// 96 byte header buffer (16 IV, 16 size, 32 headerMac, 32 contentMac):
-		final ByteBuffer headerBuf = ByteBuffer.allocate(96);
-		encryptedFile.write(headerBuf);
-
 		// use an IV, whose last 8 bytes store a long used in counter mode and write initial value to file.
 		final ByteBuffer iv = ByteBuffer.wrap(randomData(AES_BLOCK_LENGTH));
 		iv.putInt(AES_BLOCK_LENGTH - Integer.BYTES, 0);
 
-		// encrypt and write "zero length" as a placeholder, which will be read by concurrent requests, as long as encryption didn't finish:
-		// encryptedContentLength(encryptedFile, 0l);
+		// 96 byte header buffer (16 IV, 16 size, 32 headerMac, 32 contentMac)
+		// prefilled with "zero" content length for impatient processes, which want to know the size, before file has been completely written:
+		final ByteBuffer headerBuf = ByteBuffer.allocate(96);
+		headerBuf.position(16);
+		headerBuf.put(encryptContentLength(0l));
+		headerBuf.flip();
+		headerBuf.limit(96);
+		encryptedFile.write(headerBuf);
 
 		// content encryption:
 		final Cipher cipher = this.aesCtrCipher(primaryMasterKey, iv.array(), Cipher.ENCRYPT_MODE);
@@ -586,25 +567,19 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration, Fi
 		try {
 			plaintextSize = IOUtils.copyLarge(lengthLimitingIn, blockSizeBufferedOut);
 		} catch (CounterAwareInputLimitReachedException ex) {
-			encryptedFile.truncate(64l + CounterAwareInputStream.SIXTY_FOUR_GIGABYE);
-			// TODO
-			// encryptedContentLength(encryptedFile, CounterAwareInputStream.SIXTY_FOUR_GIGABYE);
-			// no additional padding needed here, as 64GiB is a multiple of 128bit
+			encryptedFile.truncate(0l);
 			throw new CounterOverflowException("File size exceeds limit (64Gib). Aborting to prevent counter overflow.");
 		}
 
-		// ensure total byte count is a multiple of the block size, in CTR mode:
-		// final int remainderToFillLastBlock = AES_BLOCK_LENGTH - (int) (plaintextSize % AES_BLOCK_LENGTH);
-		// blockSizeBufferedOut.write(new byte[remainderToFillLastBlock]);
-
-		// for filesizes of up to 16GiB: append a few blocks of fake data:
-		if (plaintextSize < (long) (Integer.MAX_VALUE / 4) * AES_BLOCK_LENGTH) {
-			final int numberOfPlaintextBlocks = (int) Math.ceil(plaintextSize / AES_BLOCK_LENGTH);
-			final int upToTenPercentFakeBlocks = (int) Math.ceil(Math.random() * 0.1 * numberOfPlaintextBlocks);
-			final byte[] emptyBytes = this.randomData(AES_BLOCK_LENGTH);
-			for (int i = 0; i < upToTenPercentFakeBlocks; i += AES_BLOCK_LENGTH) {
-				blockSizeBufferedOut.write(emptyBytes);
-			}
+		// add random length padding to obfuscate file length:
+		final long numberOfPlaintextBlocks = (int) Math.ceil(plaintextSize / AES_BLOCK_LENGTH);
+		final long minAdditionalBlocks = 4;
+		final long maxAdditionalBlocks = Math.min(numberOfPlaintextBlocks >> 3, 1024 * 1024); // 12,5% of original blocks, but not more than 1M blocks (16MiBs)
+		final long availableBlocks = (1l << 32) - numberOfPlaintextBlocks; // before reaching limit of 2^32 blocks
+		final long additionalBlocks = (long) Math.min(Math.random() * Math.max(minAdditionalBlocks, maxAdditionalBlocks), availableBlocks);
+		final byte[] randomPadding = this.randomData(AES_BLOCK_LENGTH);
+		for (int i = 0; i < additionalBlocks; i += AES_BLOCK_LENGTH) {
+			blockSizeBufferedOut.write(randomPadding);
 		}
 		blockSizeBufferedOut.flush();
 
