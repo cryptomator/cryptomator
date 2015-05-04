@@ -19,6 +19,7 @@ import javax.security.auth.Destroyable;
 
 import org.cryptomator.crypto.exceptions.DecryptFailedException;
 import org.cryptomator.crypto.exceptions.EncryptFailedException;
+import org.cryptomator.crypto.exceptions.MacAuthenticationFailedException;
 import org.cryptomator.crypto.exceptions.UnsupportedKeyLengthException;
 import org.cryptomator.crypto.exceptions.WrongPasswordException;
 
@@ -36,20 +37,16 @@ public interface Cryptor extends Destroyable {
 	 * Reads the encrypted masterkey from the given input stream and decrypts it with the given password.
 	 * 
 	 * @throws DecryptFailedException If the decryption failed for various reasons (including wrong password).
-	 * @throws WrongPasswordException If the provided password was wrong. Note: Sometimes the algorithm itself fails due to a wrong
-	 *             password. In this case a DecryptFailedException will be thrown.
-	 * @throws UnsupportedKeyLengthException If the masterkey has been encrypted with a higher key length than supported by the system. In
-	 *             this case Java JCE needs to be installed.
+	 * @throws WrongPasswordException If the provided password was wrong. Note: Sometimes the algorithm itself fails due to a wrong password. In this case a DecryptFailedException will be thrown.
+	 * @throws UnsupportedKeyLengthException If the masterkey has been encrypted with a higher key length than supported by the system. In this case Java JCE needs to be installed.
 	 */
 	void decryptMasterKey(InputStream in, CharSequence password) throws DecryptFailedException, WrongPasswordException, UnsupportedKeyLengthException, IOException;
 
 	/**
-	 * Encrypts a given plaintext path representing a directory structure. See {@link #encryptFilename(String, CryptorMetadataSupport)} for
-	 * contents inside directories.
+	 * Encrypts a given plaintext path representing a directory structure. See {@link #encryptFilename(String, CryptorMetadataSupport)} for contents inside directories.
 	 * 
 	 * @param cleartextPath A relative path (UTF-8 encoded), whose path components are separated by '/'
-	 * @param nativePathSep Path separator like "/" used on local file system. Must not be null, even if cleartextPath is a sole file name
-	 *            without any path separators.
+	 * @param nativePathSep Path separator like "/" used on local file system. Must not be null, even if cleartextPath is a sole file name without any path separators.
 	 * @return Encrypted path.
 	 */
 	String encryptDirectoryPath(String cleartextPath, String nativePathSep);
@@ -58,8 +55,7 @@ public interface Cryptor extends Destroyable {
 	 * Encrypts the name of a file. See {@link #encryptDirectoryPath(String, char)} for parent dir.
 	 * 
 	 * @param cleartextName A plaintext filename without any preceeding directory paths.
-	 * @param ioSupport Support object allowing the Cryptor to read and write its own metadata to a storage space associated with this
-	 *            support object.
+	 * @param ioSupport Support object allowing the Cryptor to read and write its own metadata to a storage space associated with this support object.
 	 * @return Encrypted filename.
 	 * @throws IOException If ioSupport throws an IOException
 	 */
@@ -69,8 +65,7 @@ public interface Cryptor extends Destroyable {
 	 * Decrypts the name of a file.
 	 * 
 	 * @param ciphertextName A ciphertext filename without any preceeding directory paths.
-	 * @param ioSupport Support object allowing the Cryptor to read and write its own metadata to a storage space associated with this
-	 *            support object.
+	 * @param ioSupport Support object allowing the Cryptor to read and write its own metadata to a storage space associated with this support object.
 	 * @return Decrypted filename.
 	 * @throws DecryptFailedException If the decryption failed for various reasons (including wrong password).
 	 * @throws IOException If ioSupport throws an IOException
@@ -80,8 +75,9 @@ public interface Cryptor extends Destroyable {
 	/**
 	 * @param metadataSupport Support object allowing the Cryptor to read and write its own metadata to the location of the encrypted file.
 	 * @return Content length of the decrypted file or <code>null</code> if unknown.
+	 * @throws MacAuthenticationFailedException If the MAC auth failed.
 	 */
-	Long decryptedContentLength(SeekableByteChannel encryptedFile) throws IOException;
+	Long decryptedContentLength(SeekableByteChannel encryptedFile) throws IOException, MacAuthenticationFailedException;
 
 	/**
 	 * @return true, if the stored MAC matches the calculated one.
@@ -108,8 +104,7 @@ public interface Cryptor extends Destroyable {
 	Long encryptFile(InputStream plaintextFile, SeekableByteChannel encryptedFile) throws IOException, EncryptFailedException;
 
 	/**
-	 * @return A filter, that returns <code>true</code> for encrypted files, i.e. if the file is an actual user payload and not a supporting
-	 *         metadata file of the {@link Cryptor}.
+	 * @return A filter, that returns <code>true</code> for encrypted files, i.e. if the file is an actual user payload and not a supporting metadata file of the {@link Cryptor}.
 	 */
 	Filter<Path> getPayloadFilesFilter();
 

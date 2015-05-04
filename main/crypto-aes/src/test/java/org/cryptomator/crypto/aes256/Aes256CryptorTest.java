@@ -82,7 +82,7 @@ public class Aes256CryptorTest {
 		final Aes256Cryptor cryptor = new Aes256Cryptor();
 
 		// encrypt:
-		final ByteBuffer encryptedData = ByteBuffer.allocate(96);
+		final ByteBuffer encryptedData = ByteBuffer.allocate(256);
 		final SeekableByteChannel encryptedOut = new ByteBufferBackedSeekableChannel(encryptedData);
 		cryptor.encryptFile(plaintextIn, encryptedOut);
 		IOUtils.closeQuietly(plaintextIn);
@@ -114,7 +114,7 @@ public class Aes256CryptorTest {
 		final Aes256Cryptor cryptor = new Aes256Cryptor();
 
 		// encrypt:
-		final ByteBuffer encryptedData = ByteBuffer.allocate(96);
+		final ByteBuffer encryptedData = ByteBuffer.allocate(256);
 		final SeekableByteChannel encryptedOut = new ByteBufferBackedSeekableChannel(encryptedData);
 		cryptor.encryptFile(plaintextIn, encryptedOut);
 		IOUtils.closeQuietly(plaintextIn);
@@ -146,7 +146,7 @@ public class Aes256CryptorTest {
 		final Aes256Cryptor cryptor = new Aes256Cryptor();
 
 		// encrypt:
-		final ByteBuffer encryptedData = ByteBuffer.allocate(96);
+		final ByteBuffer encryptedData = ByteBuffer.allocate(256);
 		final SeekableByteChannel encryptedOut = new ByteBufferBackedSeekableChannel(encryptedData);
 		cryptor.encryptFile(plaintextIn, encryptedOut);
 		IOUtils.closeQuietly(plaintextIn);
@@ -185,7 +185,7 @@ public class Aes256CryptorTest {
 		final Aes256Cryptor cryptor = new Aes256Cryptor();
 
 		// encrypt:
-		final ByteBuffer encryptedData = ByteBuffer.allocate((int) (64 + plaintextData.length * 1.2));
+		final ByteBuffer encryptedData = ByteBuffer.allocate((int) (96 + plaintextData.length * 1.2));
 		final SeekableByteChannel encryptedOut = new ByteBufferBackedSeekableChannel(encryptedData);
 		cryptor.encryptFile(plaintextIn, encryptedOut);
 		IOUtils.closeQuietly(plaintextIn);

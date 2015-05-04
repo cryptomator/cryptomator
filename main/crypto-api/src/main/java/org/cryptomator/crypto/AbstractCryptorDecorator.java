@@ -11,6 +11,7 @@ import javax.security.auth.DestroyFailedException;
 
 import org.cryptomator.crypto.exceptions.DecryptFailedException;
 import org.cryptomator.crypto.exceptions.EncryptFailedException;
+import org.cryptomator.crypto.exceptions.MacAuthenticationFailedException;
 import org.cryptomator.crypto.exceptions.UnsupportedKeyLengthException;
 import org.cryptomator.crypto.exceptions.WrongPasswordException;
 
@@ -48,7 +49,7 @@ public class AbstractCryptorDecorator implements Cryptor {
 	}
 
 	@Override
-	public Long decryptedContentLength(SeekableByteChannel encryptedFile) throws IOException {
+	public Long decryptedContentLength(SeekableByteChannel encryptedFile) throws IOException, MacAuthenticationFailedException {
 		return cryptor.decryptedContentLength(encryptedFile);
 	}
 

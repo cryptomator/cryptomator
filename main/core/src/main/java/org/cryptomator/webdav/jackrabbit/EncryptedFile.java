@@ -107,6 +107,9 @@ class EncryptedFile extends AbstractEncryptedNode {
 			} catch (IOException e) {
 				LOG.error("Error reading filesize " + path.toString(), e);
 				throw new IORuntimeException(e);
+			} catch (MacAuthenticationFailedException e) {
+				LOG.warn("Content length couldn't be determined due to MAC authentication violation.");
+				// don't add content length DAV property
 			}
 
 			try {
