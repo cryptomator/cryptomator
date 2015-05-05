@@ -13,6 +13,7 @@ import org.cryptomator.crypto.exceptions.DecryptFailedException;
 import org.cryptomator.crypto.exceptions.EncryptFailedException;
 import org.cryptomator.crypto.exceptions.MacAuthenticationFailedException;
 import org.cryptomator.crypto.exceptions.UnsupportedKeyLengthException;
+import org.cryptomator.crypto.exceptions.UnsupportedVaultException;
 import org.cryptomator.crypto.exceptions.WrongPasswordException;
 
 public class AbstractCryptorDecorator implements Cryptor {
@@ -29,7 +30,7 @@ public class AbstractCryptorDecorator implements Cryptor {
 	}
 
 	@Override
-	public void decryptMasterKey(InputStream in, CharSequence password) throws DecryptFailedException, WrongPasswordException, UnsupportedKeyLengthException, IOException {
+	public void decryptMasterKey(InputStream in, CharSequence password) throws DecryptFailedException, WrongPasswordException, UnsupportedKeyLengthException, IOException, UnsupportedVaultException {
 		cryptor.decryptMasterKey(in, password);
 	}
 

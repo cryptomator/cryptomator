@@ -20,6 +20,7 @@ import javafx.scene.control.Label;
 
 import org.cryptomator.crypto.exceptions.DecryptFailedException;
 import org.cryptomator.crypto.exceptions.UnsupportedKeyLengthException;
+import org.cryptomator.crypto.exceptions.UnsupportedVaultException;
 import org.cryptomator.crypto.exceptions.WrongPasswordException;
 import org.cryptomator.ui.controls.SecPasswordField;
 import org.cryptomator.ui.model.Vault;
@@ -108,6 +109,14 @@ public class ChangePasswordController implements Initializable {
 			newPasswordField.swipe();
 			retypePasswordField.swipe();
 			return;
+		} catch (UnsupportedVaultException e) {
+			if (e.isVaultOlderThanSoftware()) {
+				messageLabel.setText(rb.getString("changePassword.errorMessage.unsupportedVersion.vaultOlderThanSoftware"));
+			} else if (e.isSoftwareOlderThanVault()) {
+				messageLabel.setText(rb.getString("changePassword.errorMessage.unsupportedVersion.softwareOlderThanVault"));
+			}
+			newPasswordField.swipe();
+			retypePasswordField.swipe();
 		} finally {
 			oldPasswordField.swipe();
 		}

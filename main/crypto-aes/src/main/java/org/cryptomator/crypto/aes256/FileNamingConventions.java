@@ -22,7 +22,7 @@ interface FileNamingConventions {
 	BaseNCodec ENCRYPTED_FILENAME_CODEC = new Base32();
 
 	/**
-	 * Maximum length possible on file systems with a filename limit of 255 chars.<br/>
+	 * Maximum length possible on file systems with a filename or even path length limit of 255 chars.<br/>
 	 * Also we would need a few chars for our file extension, so lets use {@value #ENCRYPTED_FILENAME_LENGTH_LIMIT}.
 	 */
 	int ENCRYPTED_FILENAME_LENGTH_LIMIT = 128;

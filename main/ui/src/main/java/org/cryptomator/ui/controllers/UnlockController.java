@@ -35,6 +35,7 @@ import javax.security.auth.DestroyFailedException;
 import org.apache.commons.lang3.CharUtils;
 import org.cryptomator.crypto.exceptions.DecryptFailedException;
 import org.cryptomator.crypto.exceptions.UnsupportedKeyLengthException;
+import org.cryptomator.crypto.exceptions.UnsupportedVaultException;
 import org.cryptomator.crypto.exceptions.WrongPasswordException;
 import org.cryptomator.ui.controls.SecPasswordField;
 import org.cryptomator.ui.model.Vault;
@@ -131,6 +132,14 @@ public class UnlockController implements Initializable {
 			progressIndicator.setVisible(false);
 			messageLabel.setText(rb.getString("unlock.errorMessage.unsupportedKeyLengthInstallJCE"));
 			LOG.warn("Unsupported Key-Length. Please install Oracle Java Cryptography Extension (JCE).", ex);
+		} catch (UnsupportedVaultException e) {
+			setControlsDisabled(false);
+			progressIndicator.setVisible(false);
+			if (e.isVaultOlderThanSoftware()) {
+				messageLabel.setText(rb.getString("unlock.errorMessage.unsupportedVersion.vaultOlderThanSoftware"));
+			} else if (e.isSoftwareOlderThanVault()) {
+				messageLabel.setText(rb.getString("unlock.errorMessage.unsupportedVersion.softwareOlderThanVault"));
+			}
 		} catch (DestroyFailedException e) {
 			setControlsDisabled(false);
 			progressIndicator.setVisible(false);

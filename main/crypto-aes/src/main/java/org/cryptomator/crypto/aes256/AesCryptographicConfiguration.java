@@ -26,14 +26,14 @@ interface AesCryptographicConfiguration {
 	int SCRYPT_BLOCK_SIZE = 8;
 
 	/**
-	 * Number of bytes of the master key. Should be the maximum possible AES key length to provide best security.
+	 * Preferred number of bytes of the master key.
 	 */
 	int PREF_MASTER_KEY_LENGTH_IN_BITS = 256;
 
 	/**
 	 * Number of bytes used as seed for the PRNG.
 	 */
-	int PRNG_SEED_LENGTH = 32;
+	int PRNG_SEED_LENGTH = 16;
 
 	/**
 	 * Algorithm used for random number generation.
@@ -60,30 +60,22 @@ interface AesCryptographicConfiguration {
 	String AES_KEYWRAP_CIPHER = "AESWrap";
 
 	/**
-	 * Cipher specs for file name and file content encryption. Using CTR-mode for random access.<br/>
-	 * <strong>Important</strong>: As JCE doesn't support a padding, input must be a multiple of the block size.
+	 * Cipher specs for file content encryption. Using CTR-mode for random access.<br/>
 	 * 
 	 * @see http://docs.oracle.com/javase/7/docs/technotes/guides/security/StandardNames.html#Cipher
 	 */
 	String AES_CTR_CIPHER = "AES/CTR/NoPadding";
 
 	/**
-	 * Cipher specs for single block encryption (like file size).
+	 * Cipher specs for file header encryption (fixed-length block cipher).<br/>
 	 * 
 	 * @see http://docs.oracle.com/javase/7/docs/technotes/guides/security/StandardNames.html#impl
 	 */
-	String AES_ECB_CIPHER = "AES/ECB/PKCS5Padding";
+	String AES_CBC_CIPHER = "AES/CBC/PKCS5Padding";
 
 	/**
 	 * AES block size is 128 bit or 16 bytes.
 	 */
 	int AES_BLOCK_LENGTH = 16;
-
-	/**
-	 * Number of non-zero bytes in the IV used for file name encryption. Less means shorter encrypted filenames, more means higher entropy.
-	 * Maximum length is {@value #AES_BLOCK_LENGTH}. Even the shortest base32 (see {@link FileNamingConventions#ENCRYPTED_FILENAME_CODEC})
-	 * encoded byte array will need 8 chars. The maximum number of bytes that fit in 8 base32 chars is 5. Thus 5 is the ideal length.
-	 */
-	int FILE_NAME_IV_LENGTH = 5;
 
 }

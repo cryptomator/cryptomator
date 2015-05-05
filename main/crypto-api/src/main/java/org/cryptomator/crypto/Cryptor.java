@@ -21,6 +21,7 @@ import org.cryptomator.crypto.exceptions.DecryptFailedException;
 import org.cryptomator.crypto.exceptions.EncryptFailedException;
 import org.cryptomator.crypto.exceptions.MacAuthenticationFailedException;
 import org.cryptomator.crypto.exceptions.UnsupportedKeyLengthException;
+import org.cryptomator.crypto.exceptions.UnsupportedVaultException;
 import org.cryptomator.crypto.exceptions.WrongPasswordException;
 
 /**
@@ -39,8 +40,9 @@ public interface Cryptor extends Destroyable {
 	 * @throws DecryptFailedException If the decryption failed for various reasons (including wrong password).
 	 * @throws WrongPasswordException If the provided password was wrong. Note: Sometimes the algorithm itself fails due to a wrong password. In this case a DecryptFailedException will be thrown.
 	 * @throws UnsupportedKeyLengthException If the masterkey has been encrypted with a higher key length than supported by the system. In this case Java JCE needs to be installed.
+	 * @throws UnsupportedVaultException If the masterkey file is too old or too modern.
 	 */
-	void decryptMasterKey(InputStream in, CharSequence password) throws DecryptFailedException, WrongPasswordException, UnsupportedKeyLengthException, IOException;
+	void decryptMasterKey(InputStream in, CharSequence password) throws DecryptFailedException, WrongPasswordException, UnsupportedKeyLengthException, IOException, UnsupportedVaultException;
 
 	/**
 	 * Encrypts a given plaintext path representing a directory structure. See {@link #encryptFilename(String, CryptorMetadataSupport)} for contents inside directories.

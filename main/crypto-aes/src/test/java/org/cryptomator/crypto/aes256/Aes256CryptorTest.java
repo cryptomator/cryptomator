@@ -25,6 +25,7 @@ import org.cryptomator.crypto.CryptorMetadataSupport;
 import org.cryptomator.crypto.exceptions.DecryptFailedException;
 import org.cryptomator.crypto.exceptions.EncryptFailedException;
 import org.cryptomator.crypto.exceptions.UnsupportedKeyLengthException;
+import org.cryptomator.crypto.exceptions.UnsupportedVaultException;
 import org.cryptomator.crypto.exceptions.WrongPasswordException;
 import org.junit.Assert;
 import org.junit.Test;
@@ -32,7 +33,7 @@ import org.junit.Test;
 public class Aes256CryptorTest {
 
 	@Test
-	public void testCorrectPassword() throws IOException, WrongPasswordException, DecryptFailedException, UnsupportedKeyLengthException, DestroyFailedException {
+	public void testCorrectPassword() throws IOException, WrongPasswordException, DecryptFailedException, UnsupportedKeyLengthException, DestroyFailedException, UnsupportedVaultException {
 		final String pw = "asd";
 		final Aes256Cryptor cryptor = new Aes256Cryptor();
 		final ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -48,7 +49,7 @@ public class Aes256CryptorTest {
 	}
 
 	@Test
-	public void testWrongPassword() throws IOException, DecryptFailedException, WrongPasswordException, UnsupportedKeyLengthException, DestroyFailedException {
+	public void testWrongPassword() throws IOException, DecryptFailedException, WrongPasswordException, UnsupportedKeyLengthException, DestroyFailedException, UnsupportedVaultException {
 		final String pw = "asd";
 		final Aes256Cryptor cryptor = new Aes256Cryptor();
 		final ByteArrayOutputStream out = new ByteArrayOutputStream();

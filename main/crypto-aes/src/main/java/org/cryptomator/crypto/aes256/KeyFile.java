@@ -4,16 +4,27 @@ import java.io.Serializable;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-@JsonPropertyOrder(value = {"scryptSalt", "scryptCostParam", "scryptBlockSize", "keyLength", "primaryMasterKey", "hMacMasterKey"})
+@JsonPropertyOrder(value = {"version", "scryptSalt", "scryptCostParam", "scryptBlockSize", "keyLength", "primaryMasterKey", "hMacMasterKey"})
 public class KeyFile implements Serializable {
 
+	static final Integer CURRENT_VERSION = 1;
 	private static final long serialVersionUID = 8578363158959619885L;
+
+	private Integer version;
 	private byte[] scryptSalt;
 	private int scryptCostParam;
 	private int scryptBlockSize;
 	private int keyLength;
 	private byte[] primaryMasterKey;
 	private byte[] hMacMasterKey;
+
+	public Integer getVersion() {
+		return version;
+	}
+
+	public void setVersion(Integer version) {
+		this.version = version;
+	}
 
 	public byte[] getScryptSalt() {
 		return scryptSalt;

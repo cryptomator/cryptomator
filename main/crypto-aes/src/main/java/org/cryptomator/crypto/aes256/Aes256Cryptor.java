@@ -50,6 +50,7 @@ import org.cryptomator.crypto.exceptions.DecryptFailedException;
 import org.cryptomator.crypto.exceptions.EncryptFailedException;
 import org.cryptomator.crypto.exceptions.MacAuthenticationFailedException;
 import org.cryptomator.crypto.exceptions.UnsupportedKeyLengthException;
+import org.cryptomator.crypto.exceptions.UnsupportedVaultException;
 import org.cryptomator.crypto.exceptions.WrongPasswordException;
 import org.cryptomator.crypto.io.SeekableByteChannelInputStream;
 import org.cryptomator.crypto.io.SeekableByteChannelOutputStream;
@@ -133,6 +134,7 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration, Fi
 
 			// save encrypted masterkey:
 			final KeyFile keyfile = new KeyFile();
+			keyfile.setVersion(KeyFile.CURRENT_VERSION);
 			keyfile.setScryptSalt(kekSalt);
 			keyfile.setScryptCostParam(SCRYPT_COST_PARAM);
 			keyfile.setScryptBlockSize(SCRYPT_BLOCK_SIZE);
@@ -151,12 +153,18 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration, Fi
 	 * @throws DecryptFailedException If the decryption failed for various reasons (including wrong password).
 	 * @throws WrongPasswordException If the provided password was wrong. Note: Sometimes the algorithm itself fails due to a wrong password. In this case a DecryptFailedException will be thrown.
 	 * @throws UnsupportedKeyLengthException If the masterkey has been encrypted with a higher key length than supported by the system. In this case Java JCE needs to be installed.
+	 * @throws UnsupportedVaultException If the masterkey file is too old or too modern.
 	 */
 	@Override
-	public void decryptMasterKey(InputStream in, CharSequence password) throws DecryptFailedException, WrongPasswordException, UnsupportedKeyLengthException, IOException {
+	public void decryptMasterKey(InputStream in, CharSequence password) throws DecryptFailedException, WrongPasswordException, UnsupportedKeyLengthException, IOException, UnsupportedVaultException {
 		try {
 			// load encrypted masterkey:
 			final KeyFile keyfile = objectMapper.readValue(in, KeyFile.class);
+
+			// check version
+			if (keyfile.getVersion() != KeyFile.CURRENT_VERSION) {
+				throw new UnsupportedVaultException(keyfile.getVersion(), KeyFile.CURRENT_VERSION);
+			}
 
 			// check, whether the key length is supported:
 			final int maxKeyLen = Cipher.getMaxAllowedKeyLength(AES_KEY_ALGORITHM);
@@ -225,17 +233,16 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration, Fi
 		}
 	}
 
-	private Cipher aesEcbCipher(SecretKey key, int cipherMode) {
+	private Cipher aesCbcCipher(SecretKey key, byte[] iv, int cipherMode) {
 		try {
-			final Cipher cipher = Cipher.getInstance(AES_ECB_CIPHER);
-			cipher.init(cipherMode, key);
+			final Cipher cipher = Cipher.getInstance(AES_CBC_CIPHER);
+			cipher.init(cipherMode, key, new IvParameterSpec(iv));
 			return cipher;
 		} catch (InvalidKeyException ex) {
 			throw new IllegalArgumentException("Invalid key.", ex);
-		} catch (NoSuchAlgorithmException | NoSuchPaddingException ex) {
-			throw new AssertionError("Every implementation of the Java platform is required to support AES/ECB/PKCS5Padding.", ex);
+		} catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidAlgorithmParameterException ex) {
+			throw new AssertionError("Every implementation of the Java platform is required to support AES/CBC/PKCS5Padding, which accepts an IV", ex);
 		}
-
 	}
 
 	private Mac hmacSha256(SecretKey key) {
@@ -291,7 +298,7 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration, Fi
 
 	/**
 	 * Each path component, i.e. file or directory name separated by path separators, gets encrypted for its own.<br/>
-	 * Encryption will blow up the filename length due to aes block sizes and base32 encoding. The result may be too long for some old file systems.<br/>
+	 * Encryption will blow up the filename length due to aes block sizes, IVs and base32 encoding. The result may be too long for some old file systems.<br/>
 	 * This means that we need a workaround for filenames longer than the limit defined in {@link FileNamingConventions#ENCRYPTED_FILENAME_LENGTH_LIMIT}.<br/>
 	 * <br/>
 	 * In any case we will create the encrypted filename normally. For those, that are too long, we calculate a checksum. No cryptographically secure hash is needed here. We just want an uniform
@@ -364,15 +371,20 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration, Fi
 			return null;
 		}
 
+		// read iv:
+		final byte[] iv = new byte[AES_BLOCK_LENGTH];
+		headerBuf.position(0);
+		headerBuf.get(iv);
+
 		// read content length:
-		headerBuf.position(16);
 		final byte[] encryptedContentLengthBytes = new byte[AES_BLOCK_LENGTH];
+		headerBuf.position(16);
 		headerBuf.get(encryptedContentLengthBytes);
-		final Long fileSize = decryptContentLength(encryptedContentLengthBytes);
+		final Long fileSize = decryptContentLength(encryptedContentLengthBytes, iv);
 
 		// read stored header mac:
-		headerBuf.position(32);
 		final byte[] storedHeaderMac = new byte[32];
+		headerBuf.position(32);
 		headerBuf.get(storedHeaderMac);
 
 		// calculate mac over first 32 bytes of header:
@@ -389,9 +401,9 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration, Fi
 		return fileSize;
 	}
 
-	private long decryptContentLength(byte[] encryptedContentLengthBytes) {
+	private long decryptContentLength(byte[] encryptedContentLengthBytes, byte[] iv) {
 		try {
-			final Cipher sizeCipher = aesEcbCipher(primaryMasterKey, Cipher.DECRYPT_MODE);
+			final Cipher sizeCipher = aesCbcCipher(primaryMasterKey, iv, Cipher.DECRYPT_MODE);
 			final byte[] decryptedFileSize = sizeCipher.doFinal(encryptedContentLengthBytes);
 			final ByteBuffer fileSizeBuffer = ByteBuffer.wrap(decryptedFileSize);
 			return fileSizeBuffer.getLong();
@@ -400,11 +412,11 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration, Fi
 		}
 	}
 
-	private byte[] encryptContentLength(long contentLength) {
+	private byte[] encryptContentLength(long contentLength, byte[] iv) {
 		try {
 			final ByteBuffer fileSizeBuffer = ByteBuffer.allocate(Long.BYTES);
 			fileSizeBuffer.putLong(contentLength);
-			final Cipher sizeCipher = aesEcbCipher(primaryMasterKey, Cipher.ENCRYPT_MODE);
+			final Cipher sizeCipher = aesCbcCipher(primaryMasterKey, iv, Cipher.ENCRYPT_MODE);
 			return sizeCipher.doFinal(fileSizeBuffer.array());
 		} catch (IllegalBlockSizeException | BadPaddingException e) {
 			throw new IllegalStateException("Block size must be valid, as padding is requested. BadPaddingException not possible in encrypt mode.", e);
@@ -414,7 +426,7 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration, Fi
 	@Override
 	public boolean isAuthentic(SeekableByteChannel encryptedFile) throws IOException {
 		// read header:
-		encryptedFile.position(0);
+		encryptedFile.position(0l);
 		final ByteBuffer headerBuf = ByteBuffer.allocate(96);
 		final int headerBytesRead = encryptedFile.read(headerBuf);
 		if (headerBytesRead != headerBuf.capacity()) {
@@ -422,23 +434,23 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration, Fi
 		}
 
 		// read header mac:
-		headerBuf.position(32);
 		final byte[] storedHeaderMac = new byte[32];
+		headerBuf.position(32);
 		headerBuf.get(storedHeaderMac);
 
 		// read content mac:
-		headerBuf.position(64);
 		final byte[] storedContentMac = new byte[32];
+		headerBuf.position(64);
 		headerBuf.get(storedContentMac);
 
 		// calculate mac over first 32 bytes of header:
 		final Mac headerMac = this.hmacSha256(hMacMasterKey);
-		headerBuf.rewind();
+		headerBuf.position(0);
 		headerBuf.limit(32);
 		headerMac.update(headerBuf);
 
 		// calculate mac over content:
-		encryptedFile.position(96);
+		encryptedFile.position(96l);
 		final Mac contentMac = this.hmacSha256(hMacMasterKey);
 		final InputStream in = new SeekableByteChannelInputStream(encryptedFile);
 		final InputStream macIn = new MacInputStream(in, contentMac);
@@ -453,29 +465,32 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration, Fi
 	@Override
 	public Long decryptFile(SeekableByteChannel encryptedFile, OutputStream plaintextFile) throws IOException, DecryptFailedException {
 		// read header:
-		encryptedFile.position(0);
+		encryptedFile.position(0l);
 		final ByteBuffer headerBuf = ByteBuffer.allocate(96);
 		final int headerBytesRead = encryptedFile.read(headerBuf);
 		if (headerBytesRead != headerBuf.capacity()) {
 			throw new IOException("Failed to read file header.");
 		}
-		headerBuf.rewind();
 
 		// read iv:
 		final byte[] iv = new byte[AES_BLOCK_LENGTH];
+		headerBuf.position(0);
 		headerBuf.get(iv);
 
 		// read content length:
 		final byte[] encryptedContentLengthBytes = new byte[AES_BLOCK_LENGTH];
+		headerBuf.position(16);
 		headerBuf.get(encryptedContentLengthBytes);
-		final Long fileSize = decryptContentLength(encryptedContentLengthBytes);
+		final Long fileSize = decryptContentLength(encryptedContentLengthBytes, iv);
 
 		// read header mac:
 		final byte[] headerMac = new byte[32];
+		headerBuf.position(32);
 		headerBuf.get(headerMac);
 
 		// read content mac:
 		final byte[] contentMac = new byte[32];
+		headerBuf.position(64);
 		headerBuf.get(contentMac);
 
 		// decrypt content
@@ -507,7 +522,7 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration, Fi
 	@Override
 	public Long decryptRange(SeekableByteChannel encryptedFile, OutputStream plaintextFile, long pos, long length) throws IOException, DecryptFailedException {
 		// read iv:
-		encryptedFile.position(0);
+		encryptedFile.position(0l);
 		final ByteBuffer countingIv = ByteBuffer.allocate(AES_BLOCK_LENGTH);
 		final int numIvBytesRead = encryptedFile.read(countingIv);
 
@@ -540,23 +555,24 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration, Fi
 	@Override
 	public Long encryptFile(InputStream plaintextFile, SeekableByteChannel encryptedFile) throws IOException, EncryptFailedException {
 		// truncate file
-		encryptedFile.truncate(0);
+		encryptedFile.truncate(0l);
 
 		// use an IV, whose last 8 bytes store a long used in counter mode and write initial value to file.
-		final ByteBuffer iv = ByteBuffer.wrap(randomData(AES_BLOCK_LENGTH));
-		iv.putInt(AES_BLOCK_LENGTH - Integer.BYTES, 0);
+		final ByteBuffer ivBuf = ByteBuffer.wrap(randomData(AES_BLOCK_LENGTH));
+		ivBuf.putInt(AES_BLOCK_LENGTH - Integer.BYTES, 0);
+		final byte[] iv = ivBuf.array();
 
 		// 96 byte header buffer (16 IV, 16 size, 32 headerMac, 32 contentMac)
 		// prefilled with "zero" content length for impatient processes, which want to know the size, before file has been completely written:
 		final ByteBuffer headerBuf = ByteBuffer.allocate(96);
 		headerBuf.position(16);
-		headerBuf.put(encryptContentLength(0l));
+		headerBuf.put(encryptContentLength(0l, iv));
 		headerBuf.flip();
 		headerBuf.limit(96);
 		encryptedFile.write(headerBuf);
 
 		// content encryption:
-		final Cipher cipher = this.aesCtrCipher(primaryMasterKey, iv.array(), Cipher.ENCRYPT_MODE);
+		final Cipher cipher = this.aesCtrCipher(primaryMasterKey, iv, Cipher.ENCRYPT_MODE);
 		final Mac contentMac = this.hmacSha256(hMacMasterKey);
 		final OutputStream out = new SeekableByteChannelOutputStream(encryptedFile);
 		final OutputStream macOut = new MacOutputStream(out, contentMac);
@@ -586,7 +602,7 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration, Fi
 		// create and write header:
 		headerBuf.clear();
 		headerBuf.put(iv);
-		headerBuf.put(encryptContentLength(plaintextSize));
+		headerBuf.put(encryptContentLength(plaintextSize, iv));
 		headerBuf.flip();
 		final Mac headerMac = this.hmacSha256(hMacMasterKey);
 		headerMac.update(headerBuf);
