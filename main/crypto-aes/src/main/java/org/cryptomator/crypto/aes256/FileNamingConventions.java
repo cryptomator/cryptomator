@@ -25,7 +25,7 @@ interface FileNamingConventions {
 	 * Maximum length possible on file systems with a filename limit of 255 chars.<br/>
 	 * Also we would need a few chars for our file extension, so lets use {@value #ENCRYPTED_FILENAME_LENGTH_LIMIT}.
 	 */
-	int ENCRYPTED_FILENAME_LENGTH_LIMIT = 250;
+	int ENCRYPTED_FILENAME_LENGTH_LIMIT = 128;
 
 	/**
 	 * For plaintext file names <= {@value #ENCRYPTED_FILENAME_LENGTH_LIMIT} chars.

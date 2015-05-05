@@ -1,6 +1,9 @@
 package org.cryptomator.webdav.jackrabbit;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -75,18 +78,25 @@ class CryptoLocatorFactory implements DavLocatorFactory, CryptorMetadataSupport 
 
 	@Override
 	public void writeMetadata(String metadataGroup, byte[] encryptedMetadata) throws IOException {
-		final Path metaDataFile = metadataRoot.resolve(metadataGroup);
-		Files.write(metaDataFile, encryptedMetadata, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.DSYNC);
-
+		final Path metadataDir = metadataRoot.resolve(metadataGroup.substring(0, 2));
+		Files.createDirectories(metadataDir);
+		final Path metadataFile = metadataDir.resolve(metadataGroup.substring(2));
+		try (final FileChannel c = FileChannel.open(metadataFile, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.DSYNC); final FileLock lock = c.lock()) {
+			c.write(ByteBuffer.wrap(encryptedMetadata));
+		}
 	}
 
 	@Override
 	public byte[] readMetadata(String metadataGroup) throws IOException {
-		final Path metaDataFile = metadataRoot.resolve(metadataGroup);
-		if (!Files.isReadable(metaDataFile)) {
+		final Path metadataDir = metadataRoot.resolve(metadataGroup.substring(0, 2));
+		final Path metadataFile = metadataDir.resolve(metadataGroup.substring(2));
+		if (!Files.isReadable(metadataFile)) {
 			return null;
-		} else {
-			return Files.readAllBytes(metaDataFile);
+		}
+		try (final FileChannel c = FileChannel.open(metadataFile, StandardOpenOption.READ, StandardOpenOption.DSYNC); final FileLock lock = c.lock(0L, Long.MAX_VALUE, true)) {
+			final ByteBuffer buffer = ByteBuffer.allocate((int) c.size());
+			c.read(buffer);
+			return buffer.array();
 		}
 	}
 }

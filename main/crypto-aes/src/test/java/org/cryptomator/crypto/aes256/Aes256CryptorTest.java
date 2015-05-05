@@ -241,13 +241,13 @@ public class Aes256CryptorTest {
 		private final Map<String, byte[]> map = new HashMap<>();
 
 		@Override
-		public void writeMetadata(String encryptedPath, byte[] encryptedMetadata) {
-			map.put(encryptedPath, encryptedMetadata);
+		public void writeMetadata(String metadataGroup, byte[] encryptedMetadata) {
+			map.put(metadataGroup, encryptedMetadata);
 		}
 
 		@Override
-		public byte[] readMetadata(String encryptedPath) {
-			return map.get(encryptedPath);
+		public byte[] readMetadata(String metadataGroup) {
+			return map.get(metadataGroup);
 		}
 
 	}
