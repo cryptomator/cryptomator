@@ -186,6 +186,33 @@
 		<module>ui</module>
 	</modules>
 
+	<profiles>
+		<profile>
+			<id>debian</id>
+			<modules>
+				<module>installer-debian</module>
+			</modules>
+		</profile>
+		<profile>
+			<id>osx</id>
+			<modules>
+				<module>installer-osx</module>
+			</modules>
+		</profile>
+		<profile>
+			<id>win</id>
+			<modules>
+				<module>installer-win</module>
+			</modules>
+		</profile>
+		<profile>
+			<id>win-portable</id>
+			<modules>
+				<module>installer-win-portable</module>
+			</modules>
+		</profile>
+	</profiles>
+
 	<build>
 		<plugins>
 			<plugin>

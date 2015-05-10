@@ -46,7 +46,7 @@ apt-get install oracle-java8-installer oracle-java8-unlimited-jce-policy fakeroo
 git clone https://github.com/cryptomator/cryptomator.git
 cd cryptomator/main
 git checkout v0.6.0
-mvn clean install
+mvn clean install -Pdebian
 ```
 
 ## License
