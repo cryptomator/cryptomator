@@ -50,14 +50,22 @@ public class SettingsProvider implements Provider<Settings> {
 		this.deferredCloser = deferredCloser;
 		this.objectMapper = objectMapper;
 	}
+	
+	private Path getSettingsPath() throws IOException {
+		String settingsPathProperty = System.getProperty("settingsPath");
+		if (settingsPathProperty == null) {
+			return SETTINGS_DIR.resolve(SETTINGS_FILE);
+		} else {
+			return FileSystems.getDefault().getPath(settingsPathProperty);
+		}
+	}
 
 	@Override
 	public Settings get() {
 		Settings settings = null;
 		try {
-			Files.createDirectories(SETTINGS_DIR);
-			final Path settingsFile = SETTINGS_DIR.resolve(SETTINGS_FILE);
-			final InputStream in = Files.newInputStream(settingsFile, StandardOpenOption.READ);
+			final Path settingsPath = getSettingsPath();
+			final InputStream in = Files.newInputStream(settingsPath, StandardOpenOption.READ);
 			settings = objectMapper.readValue(in, Settings.class);
 			settings.getDirectories().removeIf(v -> !v.isValidVaultDirectory());
 		} catch (IOException e) {
@@ -73,9 +81,9 @@ public class SettingsProvider implements Provider<Settings> {
 			return;
 		}
 		try {
-			Files.createDirectories(SETTINGS_DIR);
-			final Path settingsFile = SETTINGS_DIR.resolve(SETTINGS_FILE);
-			final OutputStream out = Files.newOutputStream(settingsFile, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
+			final Path settingsPath = getSettingsPath();
+			Files.createDirectories(settingsPath.getParent());
+			final OutputStream out = Files.newOutputStream(settingsPath, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
 			objectMapper.writeValue(out, settings);
 		} catch (IOException e) {
 			LOG.error("Failed to save settings.", e);

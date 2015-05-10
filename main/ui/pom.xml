@@ -120,4 +120,50 @@
 
 		</plugins>
 	</build>
+
+	<profiles>
+		<profile>
+			<id>portable-win</id>
+			<activation>
+				<os>
+					<family>Windows</family>
+				</os>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<version>1.7</version>
+						<executions>
+							<execution>
+								<id>create-portable-deployment-bundle</id>
+								<phase>install</phase>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<configuration>
+									<target xmlns:fx="javafx:com.sun.javafx.tools.ant">
+										<taskdef uri="javafx:com.sun.javafx.tools.ant" resource="com/sun/javafx/tools/ant/antlib.xml" classpath="${project.basedir}:${javafx.tools.ant.jar}" />
+		
+										<fx:deploy nativeBundles="exe" outdir="${project.build.directory}/dist" outfile="${project.build.finalName}" verbose="true">
+											<fx:application name="${javafx.application.name}-Portable" version="${project.version}" mainClass="${exec.mainClass}" />
+											<fx:info title="${javafx.application.name}" vendor="cryptomator.org" copyright="cryptomator.org" license="MIT" category="Utility" />
+											<fx:platform javafx="2.2+" j2se="8.0">
+												<fx:property name="settingsPath" value="./settings.json" />
+											</fx:platform>
+											<fx:resources>
+												<fx:fileset dir="${project.build.directory}" includes="${javafx.application.name}.jar" />
+											</fx:resources>
+											<fx:permissions elevated="false" />
+											<fx:preferences install="false" menu="false" shortcut="false" />
+										</fx:deploy>
+									</target>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 </project>
