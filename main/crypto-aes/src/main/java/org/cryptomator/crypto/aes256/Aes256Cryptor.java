@@ -621,7 +621,7 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration, Fi
 		return new Filter<Path>() {
 			@Override
 			public boolean accept(Path entry) throws IOException {
-				return ENCRYPTED_FILE_GLOB_MATCHER.matches(entry);
+				return ENCRYPTED_FILE_MATCHER.matches(entry);
 			}
 		};
 	}
