@@ -18,6 +18,9 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.text.TextFlow?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.text.Text?>
 
 <GridPane vgap="12.0" hgap="12.0" prefWidth="400.0" fx:controller="org.cryptomator.ui.controllers.UnlockController" xmlns:fx="http://javafx.com/fxml">
 	<padding>
@@ -45,7 +48,12 @@
 		<ProgressIndicator progress="-1" fx:id="progressIndicator" GridPane.rowIndex="3" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.halignment="CENTER" visible="false"/>
 		
 		<!-- Row 4 -->
-		<Label fx:id="messageLabel" GridPane.rowIndex="4" GridPane.columnIndex="0" GridPane.columnSpan="2" />
+		<TextFlow GridPane.rowIndex="4" GridPane.columnIndex="0" GridPane.columnSpan="2" >
+			<children>
+				<Text fx:id="messageText" />
+				<Hyperlink fx:id="downloadsPageLink" text="%unlock.label.downloadsPageLink" visible="false" onAction="#didClickDownloadsLink" />
+			</children>
+		</TextFlow>
 	</children>
 </GridPane>
 
