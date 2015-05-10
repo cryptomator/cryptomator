@@ -19,7 +19,7 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 
 import org.cryptomator.crypto.Cryptor;
-import org.cryptomator.crypto.SamplingDecorator;
+import org.cryptomator.crypto.SamplingCryptorDecorator;
 import org.cryptomator.crypto.aes256.Aes256Cryptor;
 import org.cryptomator.ui.MainApplication.MainApplicationReference;
 import org.cryptomator.ui.model.VaultFactory;
@@ -88,7 +88,7 @@ public class MainModule extends AbstractModule {
 
 	@Provides
 	Cryptor getCryptor() {
-		return SamplingDecorator.decorate(new Aes256Cryptor());
+		return SamplingCryptorDecorator.decorate(new Aes256Cryptor());
 	}
 
 	@Provides

@@ -13,19 +13,19 @@ import java.io.IOException;
 /**
  * Methods that may be called by the Cryptor when accessing a path.
  */
-public interface CryptorIOSupport {
+public interface CryptorMetadataSupport {
 
 	/**
-	 * Persists encryptedMetadata to the given encryptedPath.
+	 * Persists encryptedMetadata in a metadata group.
 	 * 
-	 * @param encryptedPath A relative path
+	 * @param metadataFilename File relative to
 	 * @throws IOException
 	 */
-	void writePathSpecificMetadata(String encryptedPath, byte[] encryptedMetadata) throws IOException;
+	void writeMetadata(String metadataGroup, byte[] encryptedMetadata) throws IOException;
 
 	/**
-	 * @return Previously written encryptedMetadata stored at the given encryptedPath or <code>null</code> if no such file exists.
+	 * @return Previously written metadata stored in the given metadata group or <code>null</code> if no such group exists.
 	 */
-	byte[] readPathSpecificMetadata(String encryptedPath) throws IOException;
+	byte[] readMetadata(String metadataGroup) throws IOException;
 
 }

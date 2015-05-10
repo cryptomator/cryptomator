@@ -19,20 +19,25 @@ import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
+import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
+import javafx.scene.control.Hyperlink;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.text.Text;
+
+import javax.security.auth.DestroyFailedException;
 
 import org.apache.commons.lang3.CharUtils;
 import org.cryptomator.crypto.exceptions.DecryptFailedException;
 import org.cryptomator.crypto.exceptions.UnsupportedKeyLengthException;
+import org.cryptomator.crypto.exceptions.UnsupportedVaultException;
 import org.cryptomator.crypto.exceptions.WrongPasswordException;
 import org.cryptomator.ui.controls.SecPasswordField;
 import org.cryptomator.ui.model.Vault;
@@ -63,13 +68,18 @@ public class UnlockController implements Initializable {
 	private ProgressIndicator progressIndicator;
 
 	@FXML
-	private Label messageLabel;
+	private Text messageText;
+
+	@FXML
+	private Hyperlink downloadsPageLink;
 
 	private final ExecutorService exec;
+	private final Application app;
 
 	@Inject
-	public UnlockController(ExecutorService exec) {
+	public UnlockController(Application app, ExecutorService exec) {
 		super();
+		this.app = app;
 		this.exec = exec;
 	}
 
@@ -92,6 +102,15 @@ public class UnlockController implements Initializable {
 	}
 
 	// ****************************************
+	// Downloads link
+	// ****************************************
+
+	@FXML
+	public void didClickDownloadsLink(ActionEvent event) {
+		app.getHostServices().showDocument("https://cryptomator.org/downloads/");
+	}
+
+	// ****************************************
 	// Unlock button
 	// ****************************************
 
@@ -99,14 +118,15 @@ public class UnlockController implements Initializable {
 	private void didClickUnlockButton(ActionEvent event) {
 		setControlsDisabled(true);
 		progressIndicator.setVisible(true);
+		downloadsPageLink.setVisible(false);
 		final Path masterKeyPath = vault.getPath().resolve(Vault.VAULT_MASTERKEY_FILE);
 		final Path masterKeyBackupPath = vault.getPath().resolve(Vault.VAULT_MASTERKEY_BACKUP_FILE);
 		final CharSequence password = passwordField.getCharacters();
 		try (final InputStream masterKeyInputStream = Files.newInputStream(masterKeyPath, StandardOpenOption.READ)) {
 			vault.getCryptor().decryptMasterKey(masterKeyInputStream, password);
 			if (!vault.startServer()) {
-				messageLabel.setText(rb.getString("unlock.messageLabel.startServerFailed"));
-				vault.getCryptor().swipeSensitiveData();
+				messageText.setText(rb.getString("unlock.messageLabel.startServerFailed"));
+				vault.getCryptor().destroy();
 				return;
 			}
 			// at this point we know for sure, that the masterkey can be decrypted, so lets make a backup:
@@ -117,18 +137,31 @@ public class UnlockController implements Initializable {
 		} catch (DecryptFailedException | IOException ex) {
 			setControlsDisabled(false);
 			progressIndicator.setVisible(false);
-			messageLabel.setText(rb.getString("unlock.errorMessage.decryptionFailed"));
+			messageText.setText(rb.getString("unlock.errorMessage.decryptionFailed"));
 			LOG.error("Decryption failed for technical reasons.", ex);
 		} catch (WrongPasswordException e) {
 			setControlsDisabled(false);
 			progressIndicator.setVisible(false);
-			messageLabel.setText(rb.getString("unlock.errorMessage.wrongPassword"));
+			messageText.setText(rb.getString("unlock.errorMessage.wrongPassword"));
 			Platform.runLater(passwordField::requestFocus);
 		} catch (UnsupportedKeyLengthException ex) {
 			setControlsDisabled(false);
 			progressIndicator.setVisible(false);
-			messageLabel.setText(rb.getString("unlock.errorMessage.unsupportedKeyLengthInstallJCE"));
+			messageText.setText(rb.getString("unlock.errorMessage.unsupportedKeyLengthInstallJCE"));
 			LOG.warn("Unsupported Key-Length. Please install Oracle Java Cryptography Extension (JCE).", ex);
+		} catch (UnsupportedVaultException e) {
+			setControlsDisabled(false);
+			progressIndicator.setVisible(false);
+			downloadsPageLink.setVisible(true);
+			if (e.isVaultOlderThanSoftware()) {
+				messageText.setText(rb.getString("unlock.errorMessage.unsupportedVersion.vaultOlderThanSoftware") + " ");
+			} else if (e.isSoftwareOlderThanVault()) {
+				messageText.setText(rb.getString("unlock.errorMessage.unsupportedVersion.softwareOlderThanVault") + " ");
+			}
+		} catch (DestroyFailedException e) {
+			setControlsDisabled(false);
+			progressIndicator.setVisible(false);
+			LOG.error("Destruction of cryptor threw an exception.", e);
 		} finally {
 			passwordField.swipe();
 		}

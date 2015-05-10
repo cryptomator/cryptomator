@@ -16,7 +16,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.jackrabbit.webdav.DavResourceFactory;
 import org.apache.jackrabbit.webdav.DavResourceLocator;
 import org.apache.jackrabbit.webdav.DavServletRequest;
 import org.apache.jackrabbit.webdav.DavSession;
@@ -56,7 +55,7 @@ class EncryptedFilePart extends EncryptedFile {
 
 	private final Set<Pair<Long, Long>> requestedContentRanges = new HashSet<Pair<Long, Long>>();
 
-	public EncryptedFilePart(DavResourceFactory factory, DavResourceLocator locator, DavSession session, DavServletRequest request, LockManager lockManager, Cryptor cryptor, CryptoWarningHandler cryptoWarningHandler,
+	public EncryptedFilePart(CryptoResourceFactory factory, CryptoLocator locator, DavSession session, DavServletRequest request, LockManager lockManager, Cryptor cryptor, CryptoWarningHandler cryptoWarningHandler,
 			ExecutorService backgroundTaskExecutor) {
 		super(factory, locator, session, lockManager, cryptor, cryptoWarningHandler);
 		final String rangeHeader = request.getHeader(HttpHeader.RANGE.asString());
@@ -126,7 +125,7 @@ class EncryptedFilePart extends EncryptedFile {
 
 	@Override
 	public void spool(OutputContext outputContext) throws IOException {
-		final Path path = ResourcePathUtils.getPhysicalPath(this);
+		final Path path = locator.getEncryptedFilePath();
 		if (Files.isRegularFile(path)) {
 			outputContext.setModificationTime(Files.getLastModifiedTime(path).toMillis());
 			try (final SeekableByteChannel channel = Files.newByteChannel(path, StandardOpenOption.READ)) {
@@ -154,9 +153,9 @@ class EncryptedFilePart extends EncryptedFile {
 
 	private class MacAuthenticationJob implements Runnable {
 
-		private final DavResourceLocator locator;
+		private final CryptoLocator locator;
 
-		public MacAuthenticationJob(final DavResourceLocator locator) {
+		public MacAuthenticationJob(final CryptoLocator locator) {
 			if (locator == null) {
 				throw new IllegalArgumentException("locator must not be null.");
 			}
@@ -165,7 +164,7 @@ class EncryptedFilePart extends EncryptedFile {
 
 		@Override
 		public void run() {
-			final Path path = ResourcePathUtils.getPhysicalPath(locator);
+			final Path path = locator.getEncryptedFilePath();
 			if (Files.isRegularFile(path) && Files.isReadable(path)) {
 				try (final SeekableByteChannel channel = Files.newByteChannel(path, StandardOpenOption.READ)) {
 					final boolean authentic = cryptor.isAuthentic(channel);

@@ -10,16 +10,19 @@ import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.util.ResourceBundle;
 
+import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
+import javafx.scene.control.Hyperlink;
+import javafx.scene.text.Text;
 
 import org.cryptomator.crypto.exceptions.DecryptFailedException;
 import org.cryptomator.crypto.exceptions.UnsupportedKeyLengthException;
+import org.cryptomator.crypto.exceptions.UnsupportedVaultException;
 import org.cryptomator.crypto.exceptions.WrongPasswordException;
 import org.cryptomator.ui.controls.SecPasswordField;
 import org.cryptomator.ui.model.Vault;
@@ -49,11 +52,17 @@ public class ChangePasswordController implements Initializable {
 	private Button changePasswordButton;
 
 	@FXML
-	private Label messageLabel;
+	private Text messageText;
+
+	@FXML
+	private Hyperlink downloadsPageLink;
+
+	private final Application app;
 
 	@Inject
-	public ChangePasswordController() {
+	public ChangePasswordController(Application app) {
 		super();
+		this.app = app;
 	}
 
 	@Override
@@ -77,11 +86,21 @@ public class ChangePasswordController implements Initializable {
 	}
 
 	// ****************************************
+	// Downloads link
+	// ****************************************
+
+	@FXML
+	public void didClickDownloadsLink(ActionEvent event) {
+		app.getHostServices().showDocument("https://cryptomator.org/downloads/");
+	}
+
+	// ****************************************
 	// Change password button
 	// ****************************************
 
 	@FXML
 	private void didClickChangePasswordButton(ActionEvent event) {
+		downloadsPageLink.setVisible(false);
 		final Path masterKeyPath = vault.getPath().resolve(Vault.VAULT_MASTERKEY_FILE);
 		final Path masterKeyBackupPath = vault.getPath().resolve(Vault.VAULT_MASTERKEY_BACKUP_FILE);
 
@@ -91,20 +110,30 @@ public class ChangePasswordController implements Initializable {
 			vault.getCryptor().decryptMasterKey(masterKeyInputStream, oldPassword);
 			Files.copy(masterKeyPath, masterKeyBackupPath, StandardCopyOption.REPLACE_EXISTING);
 		} catch (DecryptFailedException | IOException ex) {
-			messageLabel.setText(rb.getString("changePassword.errorMessage.decryptionFailed"));
+			messageText.setText(rb.getString("changePassword.errorMessage.decryptionFailed"));
 			LOG.error("Decryption failed for technical reasons.", ex);
 			newPasswordField.swipe();
 			retypePasswordField.swipe();
 			return;
 		} catch (WrongPasswordException e) {
-			messageLabel.setText(rb.getString("changePassword.errorMessage.wrongPassword"));
+			messageText.setText(rb.getString("changePassword.errorMessage.wrongPassword"));
 			newPasswordField.swipe();
 			retypePasswordField.swipe();
 			Platform.runLater(oldPasswordField::requestFocus);
 			return;
 		} catch (UnsupportedKeyLengthException ex) {
-			messageLabel.setText(rb.getString("changePassword.errorMessage.unsupportedKeyLengthInstallJCE"));
+			messageText.setText(rb.getString("changePassword.errorMessage.unsupportedKeyLengthInstallJCE"));
 			LOG.warn("Unsupported Key-Length. Please install Oracle Java Cryptography Extension (JCE).", ex);
+			newPasswordField.swipe();
+			retypePasswordField.swipe();
+			return;
+		} catch (UnsupportedVaultException e) {
+			downloadsPageLink.setVisible(true);
+			if (e.isVaultOlderThanSoftware()) {
+				messageText.setText(rb.getString("changePassword.errorMessage.unsupportedVersion.vaultOlderThanSoftware") + " ");
+			} else if (e.isSoftwareOlderThanVault()) {
+				messageText.setText(rb.getString("changePassword.errorMessage.unsupportedVersion.softwareOlderThanVault") + " ");
+			}
 			newPasswordField.swipe();
 			retypePasswordField.swipe();
 			return;
@@ -118,7 +147,7 @@ public class ChangePasswordController implements Initializable {
 		final CharSequence newPassword = newPasswordField.getCharacters();
 		try (final OutputStream masterKeyOutputStream = Files.newOutputStream(masterKeyPath, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.SYNC)) {
 			vault.getCryptor().encryptMasterKey(masterKeyOutputStream, newPassword);
-			messageLabel.setText(rb.getString("changePassword.infoMessage.success"));
+			messageText.setText(rb.getString("changePassword.infoMessage.success"));
 			Platform.runLater(this::didChangePassword);
 			// At this point the backup is still using the old password.
 			// It will be changed as soon as the user unlocks the vault the next time.

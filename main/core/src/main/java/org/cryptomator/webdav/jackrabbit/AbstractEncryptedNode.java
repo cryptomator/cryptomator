@@ -9,11 +9,9 @@
 package org.cryptomator.webdav.jackrabbit;
 
 import java.io.IOException;
-import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributeView;
 import java.nio.file.attribute.FileTime;
 import java.util.List;
@@ -21,7 +19,6 @@ import java.util.List;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.jackrabbit.webdav.DavException;
 import org.apache.jackrabbit.webdav.DavResource;
-import org.apache.jackrabbit.webdav.DavResourceFactory;
 import org.apache.jackrabbit.webdav.DavResourceLocator;
 import org.apache.jackrabbit.webdav.DavServletResponse;
 import org.apache.jackrabbit.webdav.DavSession;
@@ -46,14 +43,14 @@ abstract class AbstractEncryptedNode implements DavResource {
 	private static final Logger LOG = LoggerFactory.getLogger(AbstractEncryptedNode.class);
 	private static final String DAV_COMPLIANCE_CLASSES = "1, 2";
 
-	protected final DavResourceFactory factory;
-	protected final DavResourceLocator locator;
+	protected final CryptoResourceFactory factory;
+	protected final CryptoLocator locator;
 	protected final DavSession session;
 	protected final LockManager lockManager;
 	protected final Cryptor cryptor;
 	protected final DavPropertySet properties;
 
-	protected AbstractEncryptedNode(DavResourceFactory factory, DavResourceLocator locator, DavSession session, LockManager lockManager, Cryptor cryptor) {
+	protected AbstractEncryptedNode(CryptoResourceFactory factory, CryptoLocator locator, DavSession session, LockManager lockManager, Cryptor cryptor) {
 		this.factory = factory;
 		this.locator = locator;
 		this.session = session;
@@ -62,6 +59,8 @@ abstract class AbstractEncryptedNode implements DavResource {
 		this.properties = new DavPropertySet();
 		this.determineProperties();
 	}
+
+	protected abstract Path getPhysicalPath();
 
 	@Override
 	public String getComplianceClass() {
@@ -75,8 +74,7 @@ abstract class AbstractEncryptedNode implements DavResource {
 
 	@Override
 	public boolean exists() {
-		final Path path = ResourcePathUtils.getPhysicalPath(this);
-		return Files.exists(path);
+		return Files.exists(getPhysicalPath());
 	}
 
 	@Override
@@ -91,7 +89,7 @@ abstract class AbstractEncryptedNode implements DavResource {
 	}
 
 	@Override
-	public DavResourceLocator getLocator() {
+	public CryptoLocator getLocator() {
 		return locator;
 	}
 
@@ -107,9 +105,8 @@ abstract class AbstractEncryptedNode implements DavResource {
 
 	@Override
 	public long getModificationTime() {
-		final Path path = ResourcePathUtils.getPhysicalPath(this);
 		try {
-			return Files.getLastModifiedTime(path).toMillis();
+			return Files.getLastModifiedTime(getPhysicalPath()).toMillis();
 		} catch (IOException e) {
 			return -1;
 		}
@@ -139,7 +136,7 @@ abstract class AbstractEncryptedNode implements DavResource {
 		LOG.info("Set property {}", property.getName());
 
 		try {
-			final Path path = ResourcePathUtils.getPhysicalPath(this);
+			final Path path = getPhysicalPath();
 			if (DavPropertyName.CREATIONDATE.equals(property.getName()) && property.getValue() instanceof String) {
 				final String createDateStr = (String) property.getValue();
 				final FileTime createTime = FileTimeUtils.fromRfc1123String(createDateStr);
@@ -196,48 +193,36 @@ abstract class AbstractEncryptedNode implements DavResource {
 	}
 
 	@Override
-	public void move(DavResource dest) throws DavException {
-		final Path src = ResourcePathUtils.getPhysicalPath(this);
-		final Path dst = ResourcePathUtils.getPhysicalPath(dest);
-		try {
-			// check for conflicts:
-			if (Files.exists(dst) && Files.getLastModifiedTime(dst).toMillis() > Files.getLastModifiedTime(src).toMillis()) {
-				throw new DavException(DavServletResponse.SC_CONFLICT, "File at destination already exists: " + dst.toString());
-			}
-
-			// move:
+	public final void move(DavResource dest) throws DavException {
+		if (dest instanceof AbstractEncryptedNode) {
 			try {
-				Files.move(src, dst, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
-			} catch (AtomicMoveNotSupportedException e) {
-				Files.move(src, dst, StandardCopyOption.REPLACE_EXISTING);
+				this.move((AbstractEncryptedNode) dest);
+			} catch (IOException e) {
+				LOG.error("Error moving file from " + this.getResourcePath() + " to " + dest.getResourcePath());
+				throw new IORuntimeException(e);
 			}
-		} catch (IOException e) {
-			LOG.error("Error moving file from " + src.toString() + " to " + dst.toString());
-			throw new IORuntimeException(e);
+		} else {
+			throw new IllegalArgumentException("Unsupported resource type: " + dest.getClass().getName());
 		}
 	}
+
+	public abstract void move(AbstractEncryptedNode dest) throws DavException, IOException;
 
 	@Override
-	public void copy(DavResource dest, boolean shallow) throws DavException {
-		final Path src = ResourcePathUtils.getPhysicalPath(this);
-		final Path dst = ResourcePathUtils.getPhysicalPath(dest);
-		try {
-			// check for conflicts:
-			if (Files.exists(dst) && Files.getLastModifiedTime(dst).toMillis() > Files.getLastModifiedTime(src).toMillis()) {
-				throw new DavException(DavServletResponse.SC_CONFLICT, "File at destination already exists: " + dst.toString());
-			}
-
-			// copy:
+	public final void copy(DavResource dest, boolean shallow) throws DavException {
+		if (dest instanceof AbstractEncryptedNode) {
 			try {
-				Files.copy(src, dst, StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
-			} catch (AtomicMoveNotSupportedException e) {
-				Files.copy(src, dst, StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING);
+				this.copy((AbstractEncryptedNode) dest, shallow);
+			} catch (IOException e) {
+				LOG.error("Error copying file from " + this.getResourcePath() + " to " + dest.getResourcePath());
+				throw new IORuntimeException(e);
 			}
-		} catch (IOException e) {
-			LOG.error("Error copying file from " + src.toString() + " to " + dst.toString());
-			throw new IORuntimeException(e);
+		} else {
+			throw new IllegalArgumentException("Unsupported resource type: " + dest.getClass().getName());
 		}
 	}
+
+	public abstract void copy(AbstractEncryptedNode dest, boolean shallow) throws DavException, IOException;
 
 	@Override
 	public boolean isLockable(Type type, Scope scope) {
@@ -281,7 +266,7 @@ abstract class AbstractEncryptedNode implements DavResource {
 	}
 
 	@Override
-	public DavResourceFactory getFactory() {
+	public CryptoResourceFactory getFactory() {
 		return factory;
 	}
 

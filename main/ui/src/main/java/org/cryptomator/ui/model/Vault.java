@@ -13,6 +13,8 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableSet;
 
+import javax.security.auth.DestroyFailedException;
+
 import org.apache.commons.lang3.StringUtils;
 import org.cryptomator.crypto.Cryptor;
 import org.cryptomator.ui.util.DeferredClosable;
@@ -94,7 +96,11 @@ public class Vault implements Serializable {
 			LOG.warn("Unmounting failed. Locking anyway...", e);
 		}
 		webDavServlet.close();
-		cryptor.swipeSensitiveData();
+		try {
+			cryptor.destroy();
+		} catch (DestroyFailedException e) {
+			LOG.error("Destruction of cryptor throw an exception.", e);
+		}
 		setUnlocked(false);
 		namesOfResourcesWithInvalidMac.clear();
 	}

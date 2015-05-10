@@ -14,8 +14,8 @@ public class IORuntimeException extends RuntimeException {
 
 	private static final long serialVersionUID = -4713080133052143303L;
 
-	public IORuntimeException(IOException ioException) {
-		super(ioException);
+	public IORuntimeException(IOException cause) {
+		super(cause);
 	}
 
 	@Override

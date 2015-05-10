@@ -34,11 +34,15 @@ import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.cookie.CookiePolicy;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.lang3.SystemUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class WelcomeController implements Initializable {
+
+	private static final Logger LOG = LoggerFactory.getLogger(WelcomeController.class);
 
 	@FXML
 	private ImageView botImageView;
@@ -97,6 +101,7 @@ public class WelcomeController implements Initializable {
 			return;
 		}
 		final String currentVersion = WelcomeController.class.getPackage().getImplementationVersion();
+		LOG.debug("Current version: {}, lastest version: {}", currentVersion, latestVersion);
 		if (currentVersion != null && semVerComparator.compare(currentVersion, latestVersion) < 0) {
 			final String msg = String.format(rb.getString("welcome.newVersionMessage"), latestVersion, currentVersion);
 			Platform.runLater(() -> {

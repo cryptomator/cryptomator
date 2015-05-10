@@ -9,12 +9,11 @@
 package org.cryptomator.webdav.jackrabbit;
 
 import java.io.IOException;
+import java.nio.file.Path;
 
 import org.apache.jackrabbit.webdav.DavException;
 import org.apache.jackrabbit.webdav.DavResource;
-import org.apache.jackrabbit.webdav.DavResourceFactory;
 import org.apache.jackrabbit.webdav.DavResourceIterator;
-import org.apache.jackrabbit.webdav.DavResourceLocator;
 import org.apache.jackrabbit.webdav.DavSession;
 import org.apache.jackrabbit.webdav.io.InputContext;
 import org.apache.jackrabbit.webdav.io.OutputContext;
@@ -23,8 +22,13 @@ import org.cryptomator.crypto.Cryptor;
 
 class NonExistingNode extends AbstractEncryptedNode {
 
-	public NonExistingNode(DavResourceFactory factory, DavResourceLocator locator, DavSession session, LockManager lockManager, Cryptor cryptor) {
+	public NonExistingNode(CryptoResourceFactory factory, CryptoLocator locator, DavSession session, LockManager lockManager, Cryptor cryptor) {
 		super(factory, locator, session, lockManager, cryptor);
+	}
+
+	@Override
+	protected Path getPhysicalPath() {
+		throw new UnsupportedOperationException("Resource doesn't exist.");
 	}
 
 	@Override
@@ -35,6 +39,11 @@ class NonExistingNode extends AbstractEncryptedNode {
 	@Override
 	public boolean isCollection() {
 		return false;
+	}
+
+	@Override
+	public long getModificationTime() {
+		return -1;
 	}
 
 	@Override
@@ -60,6 +69,16 @@ class NonExistingNode extends AbstractEncryptedNode {
 	@Override
 	protected void determineProperties() {
 		// do nothing.
+	}
+
+	@Override
+	public void move(AbstractEncryptedNode destination) throws DavException {
+		throw new UnsupportedOperationException("Resource doesn't exist.");
+	}
+
+	@Override
+	public void copy(AbstractEncryptedNode destination, boolean shallow) throws DavException {
+		throw new UnsupportedOperationException("Resource doesn't exist.");
 	}
 
 }
