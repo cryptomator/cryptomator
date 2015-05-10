@@ -51,6 +51,9 @@ DEPLOY_JVM_USER_OPTIONS
   </dict>
   <key>NSHighResolutionCapable</key>
   <string>true</string>
+  <!-- hide from dock -->
+  <key>LSUIElement</key>
+  <string>1</string>
   <!-- register .cryptomator bundle extension -->
   <key>CFBundleDocumentTypes</key>
   <array>
