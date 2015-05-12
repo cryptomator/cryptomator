@@ -3,6 +3,7 @@ Cryptomator
 
 [![Build Status](https://travis-ci.org/cryptomator/cryptomator.svg?branch=master)](https://travis-ci.org/cryptomator/cryptomator)
 [![Join the chat at https://gitter.im/totalvoidness/cryptomator](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/cryptomator/cryptomator?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Flattr Cryptomator](https://api.flattr.com/button/flattr-badge-large.png)](https://flattr.com/submit/auto?user_id=totalvoidness&url=https%3A%2F%2Fgithub.com%2Ftotalvoidness%2Fcryptomator&title=Cryptomator&language=en_GB&tags=github&category=software)
 
 Multiplatform transparent client-side encryption of your files in the cloud.
 
