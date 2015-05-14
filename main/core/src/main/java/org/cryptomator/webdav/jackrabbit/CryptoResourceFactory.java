@@ -1,5 +1,7 @@
 package org.cryptomator.webdav.jackrabbit;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -17,6 +19,7 @@ import org.apache.jackrabbit.webdav.DavSession;
 import org.apache.jackrabbit.webdav.lock.LockManager;
 import org.apache.jackrabbit.webdav.lock.SimpleLockManager;
 import org.cryptomator.crypto.Cryptor;
+import org.cryptomator.webdav.exceptions.IORuntimeException;
 import org.eclipse.jetty.http.HttpHeader;
 
 public class CryptoResourceFactory implements DavResourceFactory {
@@ -52,10 +55,17 @@ public class CryptoResourceFactory implements DavResourceFactory {
 
 	private DavResource createResource(CryptoLocator locator, DavServletRequest request, DavServletResponse response) throws DavException {
 		final Path filepath = FileSystems.getDefault().getPath(locator.getRepositoryPath());
-		final Path dirpath = FileSystems.getDefault().getPath(locator.getDirectoryPath());
+		Path dirpath = null;
+		try {
+			dirpath = FileSystems.getDefault().getPath(locator.getDirectoryPath(DavMethods.METHOD_MKCOL.equals(request.getMethod())));
+		} catch (FileNotFoundException e) {
+			// no-op
+		} catch (IOException e) {
+			throw new IORuntimeException(e);
+		}
 		final String rangeHeader = request.getHeader(HttpHeader.RANGE.asString());
 
-		if (Files.isDirectory(dirpath) || DavMethods.METHOD_MKCOL.equals(request.getMethod())) {
+		if (Files.isDirectory(dirpath)) {
 			return createDirectory(locator, request.getDavSession());
 		} else if (Files.isRegularFile(filepath) && DavMethods.METHOD_GET.equals(request.getMethod()) && rangeHeader != null) {
 			response.setStatus(HttpStatus.SC_PARTIAL_CONTENT);
@@ -69,7 +79,14 @@ public class CryptoResourceFactory implements DavResourceFactory {
 
 	private DavResource createResource(CryptoLocator locator, DavSession session) throws DavException {
 		final Path filepath = FileSystems.getDefault().getPath(locator.getRepositoryPath());
-		final Path dirpath = FileSystems.getDefault().getPath(locator.getDirectoryPath());
+		Path dirpath = null;
+		try {
+			dirpath = FileSystems.getDefault().getPath(locator.getDirectoryPath(false));
+		} catch (FileNotFoundException e) {
+			// no-op
+		} catch (IOException e) {
+			throw new IORuntimeException(e);
+		}
 
 		if (Files.isDirectory(dirpath)) {
 			return createDirectory(locator, session);

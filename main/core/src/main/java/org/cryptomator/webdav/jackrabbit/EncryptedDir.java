@@ -8,6 +8,7 @@
  ******************************************************************************/
 package org.cryptomator.webdav.jackrabbit;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.file.AtomicMoveNotSupportedException;
@@ -53,7 +54,11 @@ class EncryptedDir extends AbstractEncryptedNode {
 
 	@Override
 	protected Path getPhysicalPath() {
-		return locator.getEncryptedDirectoryPath();
+		try {
+			return locator.getEncryptedDirectoryPath(false);
+		} catch (IOException e) {
+			throw new IORuntimeException(e);
+		}
 	}
 
 	@Override
@@ -63,13 +68,17 @@ class EncryptedDir extends AbstractEncryptedNode {
 
 	@Override
 	public boolean exists() {
-		return Files.isDirectory(locator.getEncryptedDirectoryPath());
+		try {
+			return Files.isDirectory(locator.getEncryptedDirectoryPath(false));
+		} catch (IOException e) {
+			return false;
+		}
 	}
 
 	@Override
 	public long getModificationTime() {
 		try {
-			return Files.getLastModifiedTime(locator.getEncryptedDirectoryPath()).toMillis();
+			return Files.getLastModifiedTime(locator.getEncryptedDirectoryPath(false)).toMillis();
 		} catch (IOException e) {
 			return -1;
 		}
@@ -94,8 +103,7 @@ class EncryptedDir extends AbstractEncryptedNode {
 
 	private void addMemberDir(CryptoLocator childLocator, InputContext inputContext) throws DavException {
 		try {
-			Files.createDirectories(childLocator.getEncryptedFilePath());
-			Files.createDirectories(childLocator.getEncryptedDirectoryPath());
+			Files.createDirectories(childLocator.getEncryptedDirectoryPath(true));
 		} catch (SecurityException e) {
 			throw new DavException(DavServletResponse.SC_FORBIDDEN, e);
 		} catch (IOException e) {
@@ -126,7 +134,7 @@ class EncryptedDir extends AbstractEncryptedNode {
 	@Override
 	public DavResourceIterator getMembers() {
 		try {
-			final DirectoryStream<Path> directoryStream = Files.newDirectoryStream(locator.getEncryptedDirectoryPath(), cryptor.getPayloadFilesFilter());
+			final DirectoryStream<Path> directoryStream = Files.newDirectoryStream(locator.getEncryptedDirectoryPath(false), cryptor.getPayloadFilesFilter());
 			final List<DavResource> result = new ArrayList<>();
 
 			for (final Path childPath : directoryStream) {
@@ -162,11 +170,13 @@ class EncryptedDir extends AbstractEncryptedNode {
 
 	private void removeMember(AbstractEncryptedNode member) {
 		try {
+			Files.deleteIfExists(member.getLocator().getEncryptedFilePath());
 			if (member.isCollection()) {
 				member.getMembers().forEachRemaining(m -> securelyRemoveMemberOfCollection(member, m));
-				Files.deleteIfExists(member.getLocator().getEncryptedDirectoryPath());
+				Files.deleteIfExists(member.getLocator().getEncryptedDirectoryPath(false));
 			}
-			Files.deleteIfExists(member.getLocator().getEncryptedFilePath());
+		} catch (FileNotFoundException e) {
+			// no-op
 		} catch (IOException e) {
 			throw new IORuntimeException(e);
 		}
@@ -182,8 +192,8 @@ class EncryptedDir extends AbstractEncryptedNode {
 
 	@Override
 	public void move(AbstractEncryptedNode dest) throws DavException, IOException {
-		final Path srcDir = this.locator.getEncryptedDirectoryPath();
-		final Path dstDir = dest.locator.getEncryptedDirectoryPath();
+		final Path srcDir = this.locator.getEncryptedDirectoryPath(false);
+		final Path dstDir = dest.locator.getEncryptedDirectoryPath(true);
 		final Path srcFile = this.locator.getEncryptedFilePath();
 		final Path dstFile = dest.locator.getEncryptedFilePath();
 
@@ -205,8 +215,8 @@ class EncryptedDir extends AbstractEncryptedNode {
 
 	@Override
 	public void copy(AbstractEncryptedNode dest, boolean shallow) throws DavException, IOException {
-		final Path srcDir = this.locator.getEncryptedDirectoryPath();
-		final Path dstDir = dest.locator.getEncryptedDirectoryPath();
+		final Path srcDir = this.locator.getEncryptedDirectoryPath(false);
+		final Path dstDir = dest.locator.getEncryptedDirectoryPath(true);
 		final Path srcFile = this.locator.getEncryptedFilePath();
 		final Path dstFile = dest.locator.getEncryptedFilePath();
 
@@ -233,7 +243,12 @@ class EncryptedDir extends AbstractEncryptedNode {
 
 	@Override
 	protected void determineProperties() {
-		final Path path = locator.getEncryptedDirectoryPath();
+		Path path;
+		try {
+			path = locator.getEncryptedDirectoryPath(false);
+		} catch (IOException e) {
+			throw new IORuntimeException(e);
+		}
 		properties.add(new ResourceType(ResourceType.COLLECTION));
 		properties.add(new DefaultDavProperty<Integer>(DavPropertyName.ISCOLLECTION, 1));
 		if (Files.exists(path)) {
