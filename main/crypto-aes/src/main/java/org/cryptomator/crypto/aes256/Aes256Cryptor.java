@@ -288,8 +288,8 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration, Fi
 	}
 
 	@Override
-	public String encryptDirectoryPath(String cleartextPath, String nativePathSep) {
-		final byte[] cleartextBytes = cleartextPath.getBytes(StandardCharsets.UTF_8);
+	public String encryptDirectoryPath(String cleartextDirectoryId, String nativePathSep) {
+		final byte[] cleartextBytes = cleartextDirectoryId.getBytes(StandardCharsets.UTF_8);
 		byte[] encryptedBytes = AesSivCipherUtil.sivEncrypt(primaryMasterKey, hMacMasterKey, cleartextBytes);
 		final byte[] hashed = sha256().digest(encryptedBytes);
 		final String encryptedThenHashedPath = ENCRYPTED_FILENAME_CODEC.encodeAsString(hashed);

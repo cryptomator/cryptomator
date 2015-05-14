@@ -11,16 +11,16 @@ package org.cryptomator.webdav.jackrabbit;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.channels.SeekableByteChannel;
-import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.jackrabbit.webdav.DavException;
 import org.apache.jackrabbit.webdav.DavResource;
@@ -37,9 +37,9 @@ import org.apache.jackrabbit.webdav.property.DefaultDavProperty;
 import org.apache.jackrabbit.webdav.property.ResourceType;
 import org.cryptomator.crypto.Cryptor;
 import org.cryptomator.crypto.exceptions.CounterOverflowException;
+import org.cryptomator.crypto.exceptions.DecryptFailedException;
 import org.cryptomator.crypto.exceptions.EncryptFailedException;
 import org.cryptomator.webdav.exceptions.DavRuntimeException;
-import org.cryptomator.webdav.exceptions.DecryptFailedRuntimeException;
 import org.cryptomator.webdav.exceptions.IORuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,18 +47,20 @@ import org.slf4j.LoggerFactory;
 class EncryptedDir extends AbstractEncryptedNode {
 
 	private static final Logger LOG = LoggerFactory.getLogger(EncryptedDir.class);
+	private final Path directoryPath;
 
-	public EncryptedDir(CryptoResourceFactory factory, CryptoLocator locator, DavSession session, LockManager lockManager, Cryptor cryptor) {
+	public EncryptedDir(CryptoResourceFactory factory, DavResourceLocator locator, DavSession session, LockManager lockManager, Cryptor cryptor, Path directoryPath) {
 		super(factory, locator, session, lockManager, cryptor);
+		if (directoryPath == null || !Files.isDirectory(directoryPath)) {
+			throw new IllegalArgumentException("directoryPath must be an existing directory, but was " + directoryPath);
+		}
+		this.directoryPath = directoryPath;
+		determineProperties();
 	}
 
 	@Override
 	protected Path getPhysicalPath() {
-		try {
-			return locator.getEncryptedDirectoryPath(false);
-		} catch (IOException e) {
-			throw new IORuntimeException(e);
-		}
+		return directoryPath;
 	}
 
 	@Override
@@ -68,17 +70,14 @@ class EncryptedDir extends AbstractEncryptedNode {
 
 	@Override
 	public boolean exists() {
-		try {
-			return Files.isDirectory(locator.getEncryptedDirectoryPath(false));
-		} catch (IOException e) {
-			return false;
-		}
+		assert Files.isDirectory(directoryPath);
+		return true;
 	}
 
 	@Override
 	public long getModificationTime() {
 		try {
-			return Files.getLastModifiedTime(locator.getEncryptedDirectoryPath(false)).toMillis();
+			return Files.getLastModifiedTime(directoryPath).toMillis();
 		} catch (IOException e) {
 			return -1;
 		}
@@ -101,19 +100,18 @@ class EncryptedDir extends AbstractEncryptedNode {
 		}
 	}
 
-	private void addMemberDir(CryptoLocator childLocator, InputContext inputContext) throws DavException {
+	private void addMemberDir(DavResourceLocator childLocator, InputContext inputContext) throws DavException {
 		try {
-			Files.createDirectories(childLocator.getEncryptedDirectoryPath(true));
+			// the following invokation will create nonexisting directories:
+			factory.getEncryptedDirectoryPath(childLocator.getResourcePath());
 		} catch (SecurityException e) {
 			throw new DavException(DavServletResponse.SC_FORBIDDEN, e);
-		} catch (IOException e) {
-			LOG.error("Failed to create subdirectory.", e);
-			throw new IORuntimeException(e);
 		}
 	}
 
-	private void addMemberFile(CryptoLocator childLocator, InputContext inputContext) throws DavException {
-		try (final SeekableByteChannel channel = Files.newByteChannel(childLocator.getEncryptedFilePath(), StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
+	private void addMemberFile(DavResourceLocator childLocator, InputContext inputContext) throws DavException {
+		final Path filePath = factory.getEncryptedFilePath(childLocator.getResourcePath());
+		try (final SeekableByteChannel channel = Files.newByteChannel(filePath, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
 			cryptor.encryptFile(inputContext.getInputStream(), channel);
 		} catch (SecurityException e) {
 			throw new DavException(DavServletResponse.SC_FORBIDDEN, e);
@@ -134,17 +132,17 @@ class EncryptedDir extends AbstractEncryptedNode {
 	@Override
 	public DavResourceIterator getMembers() {
 		try {
-			final DirectoryStream<Path> directoryStream = Files.newDirectoryStream(locator.getEncryptedDirectoryPath(false), cryptor.getPayloadFilesFilter());
+			final DirectoryStream<Path> directoryStream = Files.newDirectoryStream(directoryPath, cryptor.getPayloadFilesFilter());
 			final List<DavResource> result = new ArrayList<>();
 
 			for (final Path childPath : directoryStream) {
 				try {
-					final DavResourceLocator childLocator = locator.getFactory().createSubresourceLocator(locator, childPath.getFileName().toString());
-					// final DavResourceLocator childLocator = locator.getFactory().createResourceLocator(locator.getPrefix(),
-					// locator.getWorkspacePath(), childPath.toString(), false);
+					final String cleartextFilename = cryptor.decryptFilename(childPath.getFileName().toString(), factory);
+					final String cleartextFilepath = FilenameUtils.concat(getResourcePath(), cleartextFilename);
+					final DavResourceLocator childLocator = locator.getFactory().createResourceLocator(locator.getPrefix(), locator.getWorkspacePath(), cleartextFilepath);
 					final DavResource resource = factory.createResource(childLocator, session);
 					result.add(resource);
-				} catch (DecryptFailedRuntimeException e) {
+				} catch (DecryptFailedException e) {
 					LOG.warn("Decryption of resource failed: " + childPath);
 					continue;
 				}
@@ -160,7 +158,7 @@ class EncryptedDir extends AbstractEncryptedNode {
 	}
 
 	@Override
-	public void removeMember(DavResource member) {
+	public void removeMember(DavResource member) throws DavException {
 		if (member instanceof AbstractEncryptedNode) {
 			removeMember((AbstractEncryptedNode) member);
 		} else {
@@ -168,13 +166,19 @@ class EncryptedDir extends AbstractEncryptedNode {
 		}
 	}
 
-	private void removeMember(AbstractEncryptedNode member) {
+	private void removeMember(AbstractEncryptedNode member) throws DavException {
 		try {
-			Files.deleteIfExists(member.getLocator().getEncryptedFilePath());
 			if (member.isCollection()) {
-				member.getMembers().forEachRemaining(m -> securelyRemoveMemberOfCollection(member, m));
-				Files.deleteIfExists(member.getLocator().getEncryptedDirectoryPath(false));
+				// remove sub-members recursively before deleting own directory
+				for (Iterator<DavResource> iterator = member.getMembers(); iterator.hasNext();) {
+					DavResource m = iterator.next();
+					member.removeMember(m);
+				}
+				final Path memberDirectoryPath = factory.getEncryptedDirectoryPath(member.getResourcePath());
+				Files.deleteIfExists(memberDirectoryPath);
 			}
+			final Path memberPath = factory.getEncryptedFilePath(member.getResourcePath());
+			Files.deleteIfExists(memberPath);
 		} catch (FileNotFoundException e) {
 			// no-op
 		} catch (IOException e) {
@@ -182,58 +186,52 @@ class EncryptedDir extends AbstractEncryptedNode {
 		}
 	}
 
-	private void securelyRemoveMemberOfCollection(DavResource collection, DavResource member) {
-		try {
-			collection.removeMember(member);
-		} catch (DavException e) {
-			throw new IllegalStateException("DavException should not be thrown by collections of type EncryptedDir. Collections is of type " + collection.getClass().getName());
-		}
-	}
-
 	@Override
 	public void move(AbstractEncryptedNode dest) throws DavException, IOException {
-		final Path srcDir = this.locator.getEncryptedDirectoryPath(false);
-		final Path dstDir = dest.locator.getEncryptedDirectoryPath(true);
-		final Path srcFile = this.locator.getEncryptedFilePath();
-		final Path dstFile = dest.locator.getEncryptedFilePath();
-
-		// check for conflicts:
-		if (Files.exists(dstDir) && Files.getLastModifiedTime(dstDir).toMillis() > Files.getLastModifiedTime(dstDir).toMillis()) {
-			throw new DavException(DavServletResponse.SC_CONFLICT, "Directory at destination already exists: " + dstDir.toString());
-		}
-
-		// move:
-		Files.createDirectories(dstDir);
-		try {
-			Files.move(srcDir, dstDir, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
-			Files.move(srcFile, dstFile, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
-		} catch (AtomicMoveNotSupportedException e) {
-			Files.move(srcDir, dstDir, StandardCopyOption.REPLACE_EXISTING);
-			Files.move(srcFile, dstFile, StandardCopyOption.REPLACE_EXISTING);
-		}
+		throw new UnsupportedOperationException("not yet implemented");
+		// final Path srcDir = this.locator.getEncryptedDirectoryPath(false);
+		// final Path dstDir = dest.locator.getEncryptedDirectoryPath(true);
+		// final Path srcFile = this.locator.getEncryptedFilePath();
+		// final Path dstFile = dest.locator.getEncryptedFilePath();
+		//
+		// // check for conflicts:
+		// if (Files.exists(dstDir) && Files.getLastModifiedTime(dstDir).toMillis() > Files.getLastModifiedTime(dstDir).toMillis()) {
+		// throw new DavException(DavServletResponse.SC_CONFLICT, "Directory at destination already exists: " + dstDir.toString());
+		// }
+		//
+		// // move:
+		// Files.createDirectories(dstDir);
+		// try {
+		// Files.move(srcDir, dstDir, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+		// Files.move(srcFile, dstFile, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+		// } catch (AtomicMoveNotSupportedException e) {
+		// Files.move(srcDir, dstDir, StandardCopyOption.REPLACE_EXISTING);
+		// Files.move(srcFile, dstFile, StandardCopyOption.REPLACE_EXISTING);
+		// }
 	}
 
 	@Override
 	public void copy(AbstractEncryptedNode dest, boolean shallow) throws DavException, IOException {
-		final Path srcDir = this.locator.getEncryptedDirectoryPath(false);
-		final Path dstDir = dest.locator.getEncryptedDirectoryPath(true);
-		final Path srcFile = this.locator.getEncryptedFilePath();
-		final Path dstFile = dest.locator.getEncryptedFilePath();
-
-		// check for conflicts:
-		if (Files.exists(dstDir) && Files.getLastModifiedTime(dstDir).toMillis() > Files.getLastModifiedTime(dstDir).toMillis()) {
-			throw new DavException(DavServletResponse.SC_CONFLICT, "Directory at destination already exists: " + dstDir.toString());
-		}
-
-		// copy:
-		Files.createDirectories(dstDir);
-		try {
-			Files.copy(srcDir, dstDir, StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
-			Files.copy(srcFile, dstFile, StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
-		} catch (AtomicMoveNotSupportedException e) {
-			Files.copy(srcDir, dstDir, StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING);
-			Files.copy(srcFile, dstFile, StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING);
-		}
+		throw new UnsupportedOperationException("not yet implemented");
+		// final Path srcDir = this.locator.getEncryptedDirectoryPath(false);
+		// final Path dstDir = dest.locator.getEncryptedDirectoryPath(true);
+		// final Path srcFile = this.locator.getEncryptedFilePath();
+		// final Path dstFile = dest.locator.getEncryptedFilePath();
+		//
+		// // check for conflicts:
+		// if (Files.exists(dstDir) && Files.getLastModifiedTime(dstDir).toMillis() > Files.getLastModifiedTime(dstDir).toMillis()) {
+		// throw new DavException(DavServletResponse.SC_CONFLICT, "Directory at destination already exists: " + dstDir.toString());
+		// }
+		//
+		// // copy:
+		// Files.createDirectories(dstDir);
+		// try {
+		// Files.copy(srcDir, dstDir, StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+		// Files.copy(srcFile, dstFile, StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+		// } catch (AtomicMoveNotSupportedException e) {
+		// Files.copy(srcDir, dstDir, StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING);
+		// Files.copy(srcFile, dstFile, StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING);
+		// }
 	}
 
 	@Override
@@ -243,23 +241,15 @@ class EncryptedDir extends AbstractEncryptedNode {
 
 	@Override
 	protected void determineProperties() {
-		Path path;
-		try {
-			path = locator.getEncryptedDirectoryPath(false);
-		} catch (IOException e) {
-			throw new IORuntimeException(e);
-		}
 		properties.add(new ResourceType(ResourceType.COLLECTION));
 		properties.add(new DefaultDavProperty<Integer>(DavPropertyName.ISCOLLECTION, 1));
-		if (Files.exists(path)) {
-			try {
-				final BasicFileAttributes attrs = Files.readAttributes(path, BasicFileAttributes.class);
-				properties.add(new DefaultDavProperty<String>(DavPropertyName.CREATIONDATE, FileTimeUtils.toRfc1123String(attrs.creationTime())));
-				properties.add(new DefaultDavProperty<String>(DavPropertyName.GETLASTMODIFIED, FileTimeUtils.toRfc1123String(attrs.lastModifiedTime())));
-			} catch (IOException e) {
-				LOG.error("Error determining metadata " + path.toString(), e);
-				// don't add any further properties
-			}
+		try {
+			final BasicFileAttributes attrs = Files.readAttributes(directoryPath, BasicFileAttributes.class);
+			properties.add(new DefaultDavProperty<String>(DavPropertyName.CREATIONDATE, FileTimeUtils.toRfc1123String(attrs.creationTime())));
+			properties.add(new DefaultDavProperty<String>(DavPropertyName.GETLASTMODIFIED, FileTimeUtils.toRfc1123String(attrs.lastModifiedTime())));
+		} catch (IOException e) {
+			LOG.error("Error determining metadata " + directoryPath.toString(), e);
+			// don't add any further properties
 		}
 	}
 

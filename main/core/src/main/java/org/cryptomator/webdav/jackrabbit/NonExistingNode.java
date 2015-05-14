@@ -14,6 +14,7 @@ import java.nio.file.Path;
 import org.apache.jackrabbit.webdav.DavException;
 import org.apache.jackrabbit.webdav.DavResource;
 import org.apache.jackrabbit.webdav.DavResourceIterator;
+import org.apache.jackrabbit.webdav.DavResourceLocator;
 import org.apache.jackrabbit.webdav.DavSession;
 import org.apache.jackrabbit.webdav.io.InputContext;
 import org.apache.jackrabbit.webdav.io.OutputContext;
@@ -22,7 +23,7 @@ import org.cryptomator.crypto.Cryptor;
 
 class NonExistingNode extends AbstractEncryptedNode {
 
-	public NonExistingNode(CryptoResourceFactory factory, CryptoLocator locator, DavSession session, LockManager lockManager, Cryptor cryptor) {
+	public NonExistingNode(CryptoResourceFactory factory, DavResourceLocator locator, DavSession session, LockManager lockManager, Cryptor cryptor) {
 		super(factory, locator, session, lockManager, cryptor);
 	}
 

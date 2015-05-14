@@ -44,20 +44,19 @@ abstract class AbstractEncryptedNode implements DavResource {
 	private static final String DAV_COMPLIANCE_CLASSES = "1, 2";
 
 	protected final CryptoResourceFactory factory;
-	protected final CryptoLocator locator;
+	protected final DavResourceLocator locator;
 	protected final DavSession session;
 	protected final LockManager lockManager;
 	protected final Cryptor cryptor;
 	protected final DavPropertySet properties;
 
-	protected AbstractEncryptedNode(CryptoResourceFactory factory, CryptoLocator locator, DavSession session, LockManager lockManager, Cryptor cryptor) {
+	protected AbstractEncryptedNode(CryptoResourceFactory factory, DavResourceLocator locator, DavSession session, LockManager lockManager, Cryptor cryptor) {
 		this.factory = factory;
 		this.locator = locator;
 		this.session = session;
 		this.lockManager = lockManager;
 		this.cryptor = cryptor;
 		this.properties = new DavPropertySet();
-		this.determineProperties();
 	}
 
 	protected abstract Path getPhysicalPath();
@@ -89,7 +88,7 @@ abstract class AbstractEncryptedNode implements DavResource {
 	}
 
 	@Override
-	public CryptoLocator getLocator() {
+	public DavResourceLocator getLocator() {
 		return locator;
 	}
 

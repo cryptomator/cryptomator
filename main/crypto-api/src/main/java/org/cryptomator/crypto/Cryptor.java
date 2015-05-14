@@ -47,11 +47,11 @@ public interface Cryptor extends Destroyable {
 	/**
 	 * Encrypts a given plaintext path representing a directory structure. See {@link #encryptFilename(String, CryptorMetadataSupport)} for contents inside directories.
 	 * 
-	 * @param cleartextPath A relative path (UTF-8 encoded), whose path components are separated by '/'
+	 * @param cleartextDirectoryId A relative path (UTF-8 encoded), whose path components are separated by '/'
 	 * @param nativePathSep Path separator like "/" used on local file system. Must not be null, even if cleartextPath is a sole file name without any path separators.
 	 * @return Encrypted path.
 	 */
-	String encryptDirectoryPath(String cleartextPath, String nativePathSep);
+	String encryptDirectoryPath(String cleartextDirectoryId, String nativePathSep);
 
 	/**
 	 * Encrypts the name of a file. See {@link #encryptDirectoryPath(String, char)} for parent dir.

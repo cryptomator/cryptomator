@@ -55,9 +55,9 @@ class EncryptedFilePart extends EncryptedFile {
 
 	private final Set<Pair<Long, Long>> requestedContentRanges = new HashSet<Pair<Long, Long>>();
 
-	public EncryptedFilePart(CryptoResourceFactory factory, CryptoLocator locator, DavSession session, DavServletRequest request, LockManager lockManager, Cryptor cryptor, CryptoWarningHandler cryptoWarningHandler,
-			ExecutorService backgroundTaskExecutor) {
-		super(factory, locator, session, lockManager, cryptor, cryptoWarningHandler);
+	public EncryptedFilePart(CryptoResourceFactory factory, DavResourceLocator locator, DavSession session, DavServletRequest request, LockManager lockManager, Cryptor cryptor, CryptoWarningHandler cryptoWarningHandler,
+			ExecutorService backgroundTaskExecutor, Path filePath) {
+		super(factory, locator, session, lockManager, cryptor, cryptoWarningHandler, filePath);
 		final String rangeHeader = request.getHeader(HttpHeader.RANGE.asString());
 		if (rangeHeader == null) {
 			throw new IllegalArgumentException("HTTP request doesn't contain a range header");
@@ -125,25 +125,23 @@ class EncryptedFilePart extends EncryptedFile {
 
 	@Override
 	public void spool(OutputContext outputContext) throws IOException {
-		final Path path = locator.getEncryptedFilePath();
-		if (Files.isRegularFile(path)) {
-			outputContext.setModificationTime(Files.getLastModifiedTime(path).toMillis());
-			try (final SeekableByteChannel channel = Files.newByteChannel(path, StandardOpenOption.READ)) {
-				final Long fileSize = cryptor.decryptedContentLength(channel);
-				final Pair<Long, Long> range = getUnionRange(fileSize);
-				final Long rangeLength = range.getRight() - range.getLeft() + 1;
-				outputContext.setContentLength(rangeLength);
-				outputContext.setProperty(HttpHeader.CONTENT_RANGE.asString(), getContentRangeHeader(range.getLeft(), range.getRight(), fileSize));
-				if (outputContext.hasStream()) {
-					cryptor.decryptRange(channel, outputContext.getOutputStream(), range.getLeft(), rangeLength);
-				}
-			} catch (EOFException e) {
-				if (LOG.isDebugEnabled()) {
-					LOG.debug("Unexpected end of stream during delivery of partial content (client hung up).");
-				}
-			} catch (DecryptFailedException e) {
-				throw new IOException("Error decrypting file " + path.toString(), e);
+		assert Files.isRegularFile(filePath);
+		outputContext.setModificationTime(Files.getLastModifiedTime(filePath).toMillis());
+		try (final SeekableByteChannel channel = Files.newByteChannel(filePath, StandardOpenOption.READ)) {
+			final Long fileSize = cryptor.decryptedContentLength(channel);
+			final Pair<Long, Long> range = getUnionRange(fileSize);
+			final Long rangeLength = range.getRight() - range.getLeft() + 1;
+			outputContext.setContentLength(rangeLength);
+			outputContext.setProperty(HttpHeader.CONTENT_RANGE.asString(), getContentRangeHeader(range.getLeft(), range.getRight(), fileSize));
+			if (outputContext.hasStream()) {
+				cryptor.decryptRange(channel, outputContext.getOutputStream(), range.getLeft(), rangeLength);
 			}
+		} catch (EOFException e) {
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("Unexpected end of stream during delivery of partial content (client hung up).");
+			}
+		} catch (DecryptFailedException e) {
+			throw new IOException("Error decrypting file " + filePath.toString(), e);
 		}
 	}
 
@@ -153,9 +151,9 @@ class EncryptedFilePart extends EncryptedFile {
 
 	private class MacAuthenticationJob implements Runnable {
 
-		private final CryptoLocator locator;
+		private final DavResourceLocator locator;
 
-		public MacAuthenticationJob(final CryptoLocator locator) {
+		public MacAuthenticationJob(final DavResourceLocator locator) {
 			if (locator == null) {
 				throw new IllegalArgumentException("locator must not be null.");
 			}
@@ -164,18 +162,16 @@ class EncryptedFilePart extends EncryptedFile {
 
 		@Override
 		public void run() {
-			final Path path = locator.getEncryptedFilePath();
-			if (Files.isRegularFile(path) && Files.isReadable(path)) {
-				try (final SeekableByteChannel channel = Files.newByteChannel(path, StandardOpenOption.READ)) {
-					final boolean authentic = cryptor.isAuthentic(channel);
-					if (!authentic) {
-						cryptoWarningHandler.macAuthFailed(locator.getResourcePath());
-					}
-				} catch (ClosedByInterruptException ex) {
-					LOG.debug("Couldn't finish MAC verification due to interruption of worker thread.");
-				} catch (IOException e) {
-					LOG.error("IOException during MAC verification of " + path.toString(), e);
+			assert Files.isRegularFile(filePath);
+			try (final SeekableByteChannel channel = Files.newByteChannel(filePath, StandardOpenOption.READ)) {
+				final boolean authentic = cryptor.isAuthentic(channel);
+				if (!authentic) {
+					cryptoWarningHandler.macAuthFailed(locator.getResourcePath());
 				}
+			} catch (ClosedByInterruptException ex) {
+				LOG.debug("Couldn't finish MAC verification due to interruption of worker thread.");
+			} catch (IOException e) {
+				LOG.error("IOException during MAC verification of " + filePath.toString(), e);
 			}
 		}
 

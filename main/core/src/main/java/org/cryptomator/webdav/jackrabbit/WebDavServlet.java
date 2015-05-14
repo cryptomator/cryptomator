@@ -47,8 +47,8 @@ public class WebDavServlet extends AbstractWebdavServlet {
 		final String fsRoot = config.getInitParameter(CFG_FS_ROOT);
 		backgroundTaskExecutor = Executors.newCachedThreadPool();
 		davSessionProvider = new DavSessionProviderImpl();
-		davLocatorFactory = new CryptoLocatorFactory(fsRoot, cryptor);
-		davResourceFactory = new CryptoResourceFactory(cryptor, cryptoWarningHandler, backgroundTaskExecutor);
+		davLocatorFactory = new CleartextLocatorFactory(config.getServletContext().getContextPath()); // CryptoLocatorFactory(fsRoot, cryptor);
+		davResourceFactory = new CryptoResourceFactory(cryptor, cryptoWarningHandler, backgroundTaskExecutor, fsRoot);
 	}
 
 	@Override
