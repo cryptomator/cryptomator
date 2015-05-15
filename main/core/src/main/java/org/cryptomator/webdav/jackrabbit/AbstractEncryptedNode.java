@@ -111,8 +111,6 @@ abstract class AbstractEncryptedNode implements DavResource {
 		}
 	}
 
-	protected abstract void determineProperties();
-
 	@Override
 	public DavPropertyName[] getPropertyNames() {
 		return getProperties().getPropertyNames();
@@ -182,7 +180,7 @@ abstract class AbstractEncryptedNode implements DavResource {
 			return null;
 		}
 
-		final String parentResource = FilenameUtils.getPath(locator.getResourcePath());
+		final String parentResource = FilenameUtils.getPathNoEndSeparator(locator.getResourcePath());
 		final DavResourceLocator parentLocator = locator.getFactory().createResourceLocator(locator.getPrefix(), locator.getWorkspacePath(), parentResource);
 		try {
 			return getFactory().createResource(parentLocator, session);

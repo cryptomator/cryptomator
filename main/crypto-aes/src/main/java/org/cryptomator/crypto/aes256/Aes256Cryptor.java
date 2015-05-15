@@ -15,15 +15,12 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.DirectoryStream.Filter;
-import java.nio.file.Path;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Arrays;
-import java.util.UUID;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -40,10 +37,8 @@ import javax.security.auth.Destroyable;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.NullOutputStream;
-import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.crypto.generators.SCrypt;
 import org.cryptomator.crypto.Cryptor;
-import org.cryptomator.crypto.CryptorMetadataSupport;
 import org.cryptomator.crypto.aes256.CounterAwareInputStream.CounterAwareInputLimitReachedException;
 import org.cryptomator.crypto.exceptions.CounterOverflowException;
 import org.cryptomator.crypto.exceptions.DecryptFailedException;
@@ -55,10 +50,9 @@ import org.cryptomator.crypto.exceptions.WrongPasswordException;
 import org.cryptomator.crypto.io.SeekableByteChannelInputStream;
 import org.cryptomator.crypto.io.SeekableByteChannelOutputStream;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration, FileNamingConventions {
+public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 
 	/**
 	 * Defined in static initializer. Defaults to 256, but falls back to maximum value possible, if JCE Unlimited Strength Jurisdiction Policy Files isn't installed. Those files can be downloaded
@@ -296,69 +290,18 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration, Fi
 		return encryptedThenHashedPath.substring(0, 2) + nativePathSep + encryptedThenHashedPath.substring(2);
 	}
 
-	/**
-	 * Each path component, i.e. file or directory name separated by path separators, gets encrypted for its own.<br/>
-	 * Encryption will blow up the filename length due to aes block sizes, IVs and base32 encoding. The result may be too long for some old file systems.<br/>
-	 * This means that we need a workaround for filenames longer than the limit defined in {@link FileNamingConventions#ENCRYPTED_FILENAME_LENGTH_LIMIT}.<br/>
-	 * <br/>
-	 * In any case we will create the encrypted filename normally. For those, that are too long, we calculate a checksum. No cryptographically secure hash is needed here. We just want an uniform
-	 * distribution for better load balancing. All encrypted filenames with the same checksum will then share a metadata file, in which a lookup map between encrypted filenames and short unique
-	 * alternative names are stored.<br/>
-	 * <br/>
-	 * These alternative names consist of the checksum, a unique id and a special file extension defined in {@link FileNamingConventions#LONG_NAME_FILE_EXT}.
-	 */
 	@Override
-	public String encryptFilename(String cleartextName, CryptorMetadataSupport ioSupport) throws IOException {
+	public String encryptFilename(String cleartextName) {
 		final byte[] cleartextBytes = cleartextName.getBytes(StandardCharsets.UTF_8);
-
-		// encrypt:
 		final byte[] encryptedBytes = AesSivCipherUtil.sivEncrypt(primaryMasterKey, hMacMasterKey, cleartextBytes);
-		final String ivAndCiphertext = ENCRYPTED_FILENAME_CODEC.encodeAsString(encryptedBytes);
-
-		if (ivAndCiphertext.length() + BASIC_FILE_EXT.length() > ENCRYPTED_FILENAME_LENGTH_LIMIT) {
-			final String metadataGroup = ivAndCiphertext.substring(0, LONG_NAME_PREFIX_LENGTH);
-			final LongFilenameMetadata metadata = this.getMetadata(ioSupport, metadataGroup);
-			final String alternativeFileName = metadataGroup + metadata.getOrCreateUuidForEncryptedFilename(ivAndCiphertext).toString() + LONG_NAME_FILE_EXT;
-			this.storeMetadata(ioSupport, metadataGroup, metadata);
-			return alternativeFileName;
-		} else {
-			return ivAndCiphertext + BASIC_FILE_EXT;
-		}
+		return ENCRYPTED_FILENAME_CODEC.encodeAsString(encryptedBytes);
 	}
 
 	@Override
-	public String decryptFilename(String ciphertextName, CryptorMetadataSupport ioSupport) throws DecryptFailedException, IOException {
-		final String ciphertext;
-		if (ciphertextName.endsWith(LONG_NAME_FILE_EXT)) {
-			final String basename = StringUtils.removeEnd(ciphertextName, LONG_NAME_FILE_EXT);
-			final String metadataGroup = basename.substring(0, LONG_NAME_PREFIX_LENGTH);
-			final String uuid = basename.substring(LONG_NAME_PREFIX_LENGTH);
-			final LongFilenameMetadata metadata = this.getMetadata(ioSupport, metadataGroup);
-			ciphertext = metadata.getEncryptedFilenameForUUID(UUID.fromString(uuid));
-		} else if (ciphertextName.endsWith(BASIC_FILE_EXT)) {
-			ciphertext = StringUtils.removeEndIgnoreCase(ciphertextName, BASIC_FILE_EXT);
-		} else {
-			throw new IllegalArgumentException("Unsupported path component: " + ciphertextName);
-		}
-
-		// decrypt:
-		final byte[] encryptedBytes = ENCRYPTED_FILENAME_CODEC.decode(ciphertext);
+	public String decryptFilename(String ciphertextName) throws DecryptFailedException {
+		final byte[] encryptedBytes = ENCRYPTED_FILENAME_CODEC.decode(ciphertextName);
 		final byte[] cleartextBytes = AesSivCipherUtil.sivDecrypt(primaryMasterKey, hMacMasterKey, encryptedBytes);
-
 		return new String(cleartextBytes, StandardCharsets.UTF_8);
-	}
-
-	private LongFilenameMetadata getMetadata(CryptorMetadataSupport ioSupport, String metadataGroup) throws IOException {
-		final byte[] fileContent = ioSupport.readMetadata(metadataGroup);
-		if (fileContent == null) {
-			return new LongFilenameMetadata();
-		} else {
-			return objectMapper.readValue(fileContent, LongFilenameMetadata.class);
-		}
-	}
-
-	private void storeMetadata(CryptorMetadataSupport ioSupport, String metadataGroup, LongFilenameMetadata metadata) throws JsonProcessingException, IOException {
-		ioSupport.writeMetadata(metadataGroup, objectMapper.writeValueAsBytes(metadata));
 	}
 
 	@Override
@@ -614,16 +557,6 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration, Fi
 		encryptedFile.write(headerBuf);
 
 		return plaintextSize;
-	}
-
-	@Override
-	public Filter<Path> getPayloadFilesFilter() {
-		return new Filter<Path>() {
-			@Override
-			public boolean accept(Path entry) throws IOException {
-				return ENCRYPTED_FILE_MATCHER.matches(entry);
-			}
-		};
 	}
 
 }

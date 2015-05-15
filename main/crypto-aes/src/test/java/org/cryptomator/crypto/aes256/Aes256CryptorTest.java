@@ -15,13 +15,10 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.security.auth.DestroyFailedException;
 
 import org.apache.commons.io.IOUtils;
-import org.cryptomator.crypto.CryptorMetadataSupport;
 import org.cryptomator.crypto.exceptions.DecryptFailedException;
 import org.cryptomator.crypto.exceptions.EncryptFailedException;
 import org.cryptomator.crypto.exceptions.UnsupportedKeyLengthException;
@@ -210,7 +207,6 @@ public class Aes256CryptorTest {
 
 	@Test
 	public void testEncryptionOfFilenames() throws IOException, DecryptFailedException {
-		final CryptorMetadataSupport ioSupportMock = new CryptoIOSupportMock();
 		final Aes256Cryptor cryptor = new Aes256Cryptor();
 
 		// directory paths
@@ -222,35 +218,19 @@ public class Aes256CryptorTest {
 		// long file names
 		final String str50chars = "aaaaaaaaaabbbbbbbbbbccccccccccddddddddddeeeeeeeeee";
 		final String originalPath2 = str50chars + str50chars + str50chars + str50chars + str50chars + "_isLongerThan255Chars.txt";
-		final String encryptedPath2a = cryptor.encryptFilename(originalPath2, ioSupportMock);
-		final String encryptedPath2b = cryptor.encryptFilename(originalPath2, ioSupportMock);
+		final String encryptedPath2a = cryptor.encryptFilename(originalPath2);
+		final String encryptedPath2b = cryptor.encryptFilename(originalPath2);
 		Assert.assertEquals(encryptedPath2a, encryptedPath2b);
-		final String decryptedPath2 = cryptor.decryptFilename(encryptedPath2a, ioSupportMock);
+		final String decryptedPath2 = cryptor.decryptFilename(encryptedPath2a);
 		Assert.assertEquals(originalPath2, decryptedPath2);
 
 		// block size length file names
 		final String originalPath3 = "aaaabbbbccccdddd";
-		final String encryptedPath3a = cryptor.encryptFilename(originalPath3, ioSupportMock);
-		final String encryptedPath3b = cryptor.encryptFilename(originalPath3, ioSupportMock);
+		final String encryptedPath3a = cryptor.encryptFilename(originalPath3);
+		final String encryptedPath3b = cryptor.encryptFilename(originalPath3);
 		Assert.assertEquals(encryptedPath3a, encryptedPath3b);
-		final String decryptedPath3 = cryptor.decryptFilename(encryptedPath3a, ioSupportMock);
+		final String decryptedPath3 = cryptor.decryptFilename(encryptedPath3a);
 		Assert.assertEquals(originalPath3, decryptedPath3);
-	}
-
-	private static class CryptoIOSupportMock implements CryptorMetadataSupport {
-
-		private final Map<String, byte[]> map = new HashMap<>();
-
-		@Override
-		public void writeMetadata(String metadataGroup, byte[] encryptedMetadata) {
-			map.put(metadataGroup, encryptedMetadata);
-		}
-
-		@Override
-		public byte[] readMetadata(String metadataGroup) {
-			return map.get(metadataGroup);
-		}
-
 	}
 
 }

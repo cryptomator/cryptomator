@@ -8,6 +8,9 @@
  ******************************************************************************/
 package org.cryptomator.crypto.aes256;
 
+import org.apache.commons.codec.binary.Base32;
+import org.apache.commons.codec.binary.BaseNCodec;
+
 interface AesCryptographicConfiguration {
 
 	/**
@@ -77,5 +80,10 @@ interface AesCryptographicConfiguration {
 	 * AES block size is 128 bit or 16 bytes.
 	 */
 	int AES_BLOCK_LENGTH = 16;
+
+	/**
+	 * How to encode the encrypted file names safely. Base32 uses only alphanumeric characters and is case-insensitive.
+	 */
+	BaseNCodec ENCRYPTED_FILENAME_CODEC = new Base32();
 
 }

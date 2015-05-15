@@ -26,42 +26,49 @@ import org.apache.jackrabbit.webdav.lock.LockManager;
 import org.apache.jackrabbit.webdav.lock.SimpleLockManager;
 import org.apache.logging.log4j.util.Strings;
 import org.cryptomator.crypto.Cryptor;
-import org.cryptomator.crypto.CryptorMetadataSupport;
 import org.eclipse.jetty.http.HttpHeader;
 
-public class CryptoResourceFactory implements DavResourceFactory, CryptorMetadataSupport {
+public class CryptoResourceFactory implements DavResourceFactory, FileNamingConventions {
 
 	private final LockManager lockManager = new SimpleLockManager();
 	private final Cryptor cryptor;
 	private final CryptoWarningHandler cryptoWarningHandler;
 	private final ExecutorService backgroundTaskExecutor;
 	private final Path dataRoot;
-	private final Path metadataRoot;
+	private final FilenameTranslator filenameTranslator;
 
-	CryptoResourceFactory(Cryptor cryptor, CryptoWarningHandler cryptoWarningHandler, ExecutorService backgroundTaskExecutor, String fsRoot) {
+	CryptoResourceFactory(Cryptor cryptor, CryptoWarningHandler cryptoWarningHandler, ExecutorService backgroundTaskExecutor, String vaultRoot) {
+		Path vaultRootPath = FileSystems.getDefault().getPath(vaultRoot);
 		this.cryptor = cryptor;
 		this.cryptoWarningHandler = cryptoWarningHandler;
 		this.backgroundTaskExecutor = backgroundTaskExecutor;
-		this.dataRoot = FileSystems.getDefault().getPath(fsRoot).resolve("d");
-		this.metadataRoot = FileSystems.getDefault().getPath(fsRoot).resolve("m");
+		this.dataRoot = vaultRootPath.resolve("d");
+		this.filenameTranslator = new FilenameTranslator(cryptor, vaultRootPath);
 	}
 
 	@Override
 	public final DavResource createResource(DavResourceLocator locator, DavServletRequest request, DavServletResponse response) throws DavException {
-		if (DavMethods.METHOD_MKCOL.equals(request.getMethod()) || locator.isRootLocation()) {
-			final Path dirpath = getEncryptedDirectoryPath(locator.getResourcePath());
+		if (DavMethods.METHOD_MKCOL.equals(request.getMethod())) {
+			final String parentResourcePath = FilenameUtils.getFullPathNoEndSeparator(locator.getResourcePath());
+			final Path parentDirectoryPath = createEncryptedDirectoryPath(parentResourcePath);
+			return new EncryptedDirDuringCreation(this, locator, request.getDavSession(), lockManager, cryptor, filenameTranslator, parentDirectoryPath);
+		}
+
+		if (locator.isRootLocation()) {
+			final Path dirpath = createEncryptedDirectoryPath("");
 			return createDirectory(locator, request.getDavSession(), dirpath);
 		}
 
 		final Path filepath = getEncryptedFilePath(locator.getResourcePath());
+		final Path dirFilePath = getEncryptedDirectoryFilePath(locator.getResourcePath());
 		final String rangeHeader = request.getHeader(HttpHeader.RANGE.asString());
-		if (filepath.getFileName().toString().endsWith(".dir")) {
-			final Path dirpath = getEncryptedDirectoryPath(locator.getResourcePath());
-			return createDirectory(locator, request.getDavSession(), dirpath);
-		} else if (Files.isRegularFile(filepath) && DavMethods.METHOD_GET.equals(request.getMethod()) && rangeHeader != null) {
+		if (Files.exists(dirFilePath)) {
+			final Path dirPath = createEncryptedDirectoryPath(locator.getResourcePath());
+			return createDirectory(locator, request.getDavSession(), dirPath);
+		} else if (Files.exists(filepath) && DavMethods.METHOD_GET.equals(request.getMethod()) && rangeHeader != null) {
 			response.setStatus(HttpStatus.SC_PARTIAL_CONTENT);
 			return createFilePart(locator, request.getDavSession(), request, filepath);
-		} else if (Files.isRegularFile(filepath) || DavMethods.METHOD_PUT.equals(request.getMethod())) {
+		} else if (Files.exists(filepath) || DavMethods.METHOD_PUT.equals(request.getMethod())) {
 			return createFile(locator, request.getDavSession(), filepath);
 		} else {
 			return createNonExisting(locator, request.getDavSession());
@@ -71,18 +78,50 @@ public class CryptoResourceFactory implements DavResourceFactory, CryptorMetadat
 	@Override
 	public final DavResource createResource(DavResourceLocator locator, DavSession session) throws DavException {
 		if (locator.isRootLocation()) {
-			final Path dirpath = getEncryptedDirectoryPath(locator.getResourcePath());
+			final Path dirpath = createEncryptedDirectoryPath("");
 			return createDirectory(locator, session, dirpath);
 		}
 
 		final Path filepath = getEncryptedFilePath(locator.getResourcePath());
-		if (filepath.getFileName().toString().endsWith(".dir")) {
-			final Path dirpath = getEncryptedDirectoryPath(locator.getResourcePath());
-			return createDirectory(locator, session, dirpath);
-		} else if (Files.isRegularFile(filepath)) {
+		final Path dirFilePath = getEncryptedDirectoryFilePath(locator.getResourcePath());
+		if (Files.exists(dirFilePath)) {
+			final Path dirPath = createEncryptedDirectoryPath(locator.getResourcePath());
+			return createDirectory(locator, session, dirPath);
+		} else if (Files.exists(filepath)) {
 			return createFile(locator, session, filepath);
 		} else {
 			return createNonExisting(locator, session);
+		}
+	}
+
+	DavResource createChildDirectoryResource(DavResourceLocator locator, DavSession session, Path existingDirectoryFile) throws DavException {
+		try {
+			final String directoryId = new String(readAllBytesAtomically(existingDirectoryFile), StandardCharsets.UTF_8);
+			final String directory = cryptor.encryptDirectoryPath(directoryId, FileSystems.getDefault().getSeparator());
+			final Path dirpath = dataRoot.resolve(directory);
+			return createDirectory(locator, session, dirpath);
+		} catch (IOException e) {
+			throw new DavException(DavServletResponse.SC_INTERNAL_SERVER_ERROR, e);
+		}
+	}
+
+	DavResource createChildFileResource(DavResourceLocator locator, DavSession session, Path existingFile) throws DavException {
+		return createFile(locator, session, existingFile);
+	}
+
+	/**
+	 * @return Absolute file path for a given cleartext file resourcePath.
+	 * @throws IOException
+	 */
+	private Path getEncryptedFilePath(String relativeCleartextPath) throws DavException {
+		final String parentCleartextPath = FilenameUtils.getPathNoEndSeparator(relativeCleartextPath);
+		final Path parent = createEncryptedDirectoryPath(parentCleartextPath);
+		final String cleartextFilename = FilenameUtils.getName(relativeCleartextPath);
+		try {
+			final String encryptedFilename = filenameTranslator.getEncryptedFilename(cleartextFilename);
+			return parent.resolve(encryptedFilename);
+		} catch (IOException e) {
+			throw new DavException(DavServletResponse.SC_INTERNAL_SERVER_ERROR, e);
 		}
 	}
 
@@ -90,12 +129,12 @@ public class CryptoResourceFactory implements DavResourceFactory, CryptorMetadat
 	 * @return Absolute file path for a given cleartext file resourcePath.
 	 * @throws IOException
 	 */
-	Path getEncryptedFilePath(String relativeCleartextPath) throws DavException {
+	private Path getEncryptedDirectoryFilePath(String relativeCleartextPath) throws DavException {
 		final String parentCleartextPath = FilenameUtils.getPathNoEndSeparator(relativeCleartextPath);
-		final Path parent = getEncryptedDirectoryPath(parentCleartextPath);
+		final Path parent = createEncryptedDirectoryPath(parentCleartextPath);
 		final String cleartextFilename = FilenameUtils.getName(relativeCleartextPath);
 		try {
-			final String encryptedFilename = cryptor.encryptFilename(cleartextFilename, this);
+			final String encryptedFilename = filenameTranslator.getEncryptedDirName(cleartextFilename);
 			return parent.resolve(encryptedFilename);
 		} catch (IOException e) {
 			throw new DavException(DavServletResponse.SC_INTERNAL_SERVER_ERROR, e);
@@ -106,7 +145,7 @@ public class CryptoResourceFactory implements DavResourceFactory, CryptorMetadat
 	 * @return Absolute directory path for a given cleartext directory resourcePath.
 	 * @throws IOException
 	 */
-	Path getEncryptedDirectoryPath(String relativeCleartextPath) throws DavException {
+	private Path createEncryptedDirectoryPath(String relativeCleartextPath) throws DavException {
 		assert Strings.isEmpty(relativeCleartextPath) || !relativeCleartextPath.endsWith("/");
 		try {
 			final Path result;
@@ -116,9 +155,9 @@ public class CryptoResourceFactory implements DavResourceFactory, CryptorMetadat
 				result = dataRoot.resolve(fixedRootDirectory);
 			} else {
 				final String parentCleartextPath = FilenameUtils.getPathNoEndSeparator(relativeCleartextPath);
-				final Path parent = getEncryptedDirectoryPath(parentCleartextPath);
+				final Path parent = createEncryptedDirectoryPath(parentCleartextPath);
 				final String cleartextFilename = FilenameUtils.getName(relativeCleartextPath);
-				final String encryptedFilename = cryptor.encryptFilename(cleartextFilename, CryptoResourceFactory.this);
+				final String encryptedFilename = filenameTranslator.getEncryptedDirName(cleartextFilename);
 				final Path directoryFile = parent.resolve(encryptedFilename);
 				final String directoryId;
 				if (Files.exists(directoryFile)) {
@@ -146,7 +185,7 @@ public class CryptoResourceFactory implements DavResourceFactory, CryptorMetadat
 	}
 
 	private EncryptedDir createDirectory(DavResourceLocator locator, DavSession session, Path dirPath) {
-		return new EncryptedDir(this, locator, session, lockManager, cryptor, dirPath);
+		return new EncryptedDir(this, locator, session, lockManager, cryptor, filenameTranslator, dirPath);
 	}
 
 	private NonExistingNode createNonExisting(DavResourceLocator locator, DavSession session) {
@@ -166,25 +205,6 @@ public class CryptoResourceFactory implements DavResourceFactory, CryptorMetadat
 			final ByteBuffer buffer = ByteBuffer.allocate((int) c.size());
 			c.read(buffer);
 			return buffer.array();
-		}
-	}
-
-	@Override
-	public void writeMetadata(String metadataGroup, byte[] encryptedMetadata) throws IOException {
-		final Path metadataDir = metadataRoot.resolve(metadataGroup.substring(0, 2));
-		Files.createDirectories(metadataDir);
-		final Path metadataFile = metadataDir.resolve(metadataGroup.substring(2));
-		writeAllBytesAtomically(metadataFile, encryptedMetadata);
-	}
-
-	@Override
-	public byte[] readMetadata(String metadataGroup) throws IOException {
-		final Path metadataDir = metadataRoot.resolve(metadataGroup.substring(0, 2));
-		final Path metadataFile = metadataDir.resolve(metadataGroup.substring(2));
-		if (!Files.isReadable(metadataFile)) {
-			return null;
-		} else {
-			return readAllBytesAtomically(metadataFile);
 		}
 	}
 

@@ -8,6 +8,7 @@
  ******************************************************************************/
 package org.cryptomator.webdav.jackrabbit;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -16,11 +17,14 @@ import java.util.concurrent.TimeUnit;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 
+import org.apache.jackrabbit.webdav.DavException;
 import org.apache.jackrabbit.webdav.DavLocatorFactory;
 import org.apache.jackrabbit.webdav.DavResource;
 import org.apache.jackrabbit.webdav.DavResourceFactory;
+import org.apache.jackrabbit.webdav.DavServletResponse;
 import org.apache.jackrabbit.webdav.DavSessionProvider;
 import org.apache.jackrabbit.webdav.WebdavRequest;
+import org.apache.jackrabbit.webdav.WebdavResponse;
 import org.apache.jackrabbit.webdav.server.AbstractWebdavServlet;
 import org.cryptomator.crypto.Cryptor;
 
@@ -64,6 +68,17 @@ public class WebDavServlet extends AbstractWebdavServlet {
 			Thread.currentThread().interrupt();
 		} finally {
 			super.destroy();
+		}
+	}
+
+	@Override
+	protected void doMkCol(WebdavRequest request, WebdavResponse response, DavResource resource) throws IOException, DavException {
+		if (resource instanceof EncryptedDirDuringCreation) {
+			EncryptedDirDuringCreation dir = (EncryptedDirDuringCreation) resource;
+			dir.doCreate();
+			response.setStatus(DavServletResponse.SC_CREATED);
+		} else {
+
 		}
 	}
 

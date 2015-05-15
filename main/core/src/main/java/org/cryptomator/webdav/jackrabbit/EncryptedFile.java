@@ -100,7 +100,7 @@ class EncryptedFile extends AbstractEncryptedNode {
 		}
 	}
 
-	@Override
+	@Deprecated
 	protected void determineProperties() {
 		if (Files.isRegularFile(filePath)) {
 			try (final SeekableByteChannel channel = Files.newByteChannel(filePath, StandardOpenOption.READ)) {

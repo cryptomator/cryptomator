@@ -12,8 +12,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.channels.SeekableByteChannel;
-import java.nio.file.DirectoryStream.Filter;
-import java.nio.file.Path;
 
 import javax.security.auth.Destroyable;
 
@@ -57,22 +55,18 @@ public interface Cryptor extends Destroyable {
 	 * Encrypts the name of a file. See {@link #encryptDirectoryPath(String, char)} for parent dir.
 	 * 
 	 * @param cleartextName A plaintext filename without any preceeding directory paths.
-	 * @param ioSupport Support object allowing the Cryptor to read and write its own metadata to a storage space associated with this support object.
 	 * @return Encrypted filename.
-	 * @throws IOException If ioSupport throws an IOException
 	 */
-	String encryptFilename(String cleartextName, CryptorMetadataSupport ioSupport) throws IOException;
+	String encryptFilename(String cleartextName);
 
 	/**
 	 * Decrypts the name of a file.
 	 * 
 	 * @param ciphertextName A ciphertext filename without any preceeding directory paths.
-	 * @param ioSupport Support object allowing the Cryptor to read and write its own metadata to a storage space associated with this support object.
 	 * @return Decrypted filename.
 	 * @throws DecryptFailedException If the decryption failed for various reasons (including wrong password).
-	 * @throws IOException If ioSupport throws an IOException
 	 */
-	String decryptFilename(String ciphertextName, CryptorMetadataSupport ioSupport) throws IOException, DecryptFailedException;
+	String decryptFilename(String ciphertextName) throws DecryptFailedException;
 
 	/**
 	 * @param metadataSupport Support object allowing the Cryptor to read and write its own metadata to the location of the encrypted file.
@@ -104,10 +98,5 @@ public interface Cryptor extends Destroyable {
 	 * @return Number of encrypted bytes. This might not be equal to the encrypted file size due to optional metadata written to it.
 	 */
 	Long encryptFile(InputStream plaintextFile, SeekableByteChannel encryptedFile) throws IOException, EncryptFailedException;
-
-	/**
-	 * @return A filter, that returns <code>true</code> for encrypted files, i.e. if the file is an actual user payload and not a supporting metadata file of the {@link Cryptor}.
-	 */
-	Filter<Path> getPayloadFilesFilter();
 
 }

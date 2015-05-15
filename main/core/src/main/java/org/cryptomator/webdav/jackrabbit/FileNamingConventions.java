@@ -6,22 +6,17 @@
  * Contributors:
  *     Sebastian Stenzel - initial API and implementation
  ******************************************************************************/
-package org.cryptomator.crypto.aes256;
+package org.cryptomator.webdav.jackrabbit;
 
+import java.io.IOException;
+import java.nio.file.DirectoryStream.Filter;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.codec.binary.Base32;
-import org.apache.commons.codec.binary.BaseNCodec;
 import org.apache.commons.lang3.StringUtils;
 
 interface FileNamingConventions {
-
-	/**
-	 * How to encode the encrypted file names safely. Base32 uses only alphanumeric characters and is case-insensitive.
-	 */
-	BaseNCodec ENCRYPTED_FILENAME_CODEC = new Base32();
 
 	/**
 	 * Maximum path length on some file systems or cloud storage providers is restricted.<br/>
@@ -31,14 +26,24 @@ interface FileNamingConventions {
 	int ENCRYPTED_FILENAME_LENGTH_LIMIT = 136;
 
 	/**
-	 * For plaintext file names <= {@value #ENCRYPTED_FILENAME_LENGTH_LIMIT} chars.
+	 * For encrypted directory names <= {@value #ENCRYPTED_FILENAME_LENGTH_LIMIT} chars.
 	 */
-	String BASIC_FILE_EXT = ".aes";
+	String DIR_EXT = ".dir";
 
 	/**
-	 * For plaintext file names > {@value #ENCRYPTED_FILENAME_LENGTH_LIMIT} chars.
+	 * For encrypted direcotry names > {@value #ENCRYPTED_FILENAME_LENGTH_LIMIT} chars.
 	 */
-	String LONG_NAME_FILE_EXT = ".lng.aes";
+	String LONG_DIR_EXT = ".lng.dir";
+
+	/**
+	 * For encrypted file names <= {@value #ENCRYPTED_FILENAME_LENGTH_LIMIT} chars.
+	 */
+	String FILE_EXT = ".file";
+
+	/**
+	 * For encrypted file names > {@value #ENCRYPTED_FILENAME_LENGTH_LIMIT} chars.
+	 */
+	String LONG_FILE_EXT = ".lng.file";
 
 	/**
 	 * Length of prefix in file names > {@value #ENCRYPTED_FILENAME_LENGTH_LIMIT} chars used to determine the corresponding metadata file.
@@ -56,17 +61,33 @@ interface FileNamingConventions {
 		@Override
 		public boolean matches(Path path) {
 			final String filename = path.getFileName().toString();
-			if (StringUtils.endsWithIgnoreCase(filename, LONG_NAME_FILE_EXT)) {
-				final String basename = StringUtils.removeEndIgnoreCase(filename, LONG_NAME_FILE_EXT);
+			if (StringUtils.endsWithIgnoreCase(filename, LONG_FILE_EXT)) {
+				final String basename = StringUtils.removeEndIgnoreCase(filename, LONG_FILE_EXT);
 				return LONG_NAME_PATTERN.matcher(basename).matches();
-			} else if (StringUtils.endsWithIgnoreCase(filename, BASIC_FILE_EXT)) {
-				final String basename = StringUtils.removeEndIgnoreCase(filename, BASIC_FILE_EXT);
+			} else if (StringUtils.endsWithIgnoreCase(filename, FILE_EXT)) {
+				final String basename = StringUtils.removeEndIgnoreCase(filename, FILE_EXT);
+				return BASIC_NAME_PATTERN.matcher(basename).matches();
+			} else if (StringUtils.endsWithIgnoreCase(filename, LONG_DIR_EXT)) {
+				final String basename = StringUtils.removeEndIgnoreCase(filename, LONG_DIR_EXT);
+				return LONG_NAME_PATTERN.matcher(basename).matches();
+			} else if (StringUtils.endsWithIgnoreCase(filename, DIR_EXT)) {
+				final String basename = StringUtils.removeEndIgnoreCase(filename, DIR_EXT);
 				return BASIC_NAME_PATTERN.matcher(basename).matches();
 			} else {
 				return false;
 			}
 		}
 
+	};
+
+	/**
+	 * Filter to determine files of interest in encrypted directory. Based on {@link #ENCRYPTED_FILE_MATCHER}.
+	 */
+	Filter<Path> DIRECTORY_CONTENT_FILTER = new Filter<Path>() {
+		@Override
+		public boolean accept(Path entry) throws IOException {
+			return ENCRYPTED_FILE_MATCHER.matches(entry);
+		}
 	};
 
 }
