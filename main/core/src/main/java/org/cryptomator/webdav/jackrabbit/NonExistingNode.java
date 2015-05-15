@@ -19,17 +19,18 @@ import org.apache.jackrabbit.webdav.DavSession;
 import org.apache.jackrabbit.webdav.io.InputContext;
 import org.apache.jackrabbit.webdav.io.OutputContext;
 import org.apache.jackrabbit.webdav.lock.LockManager;
+import org.apache.jackrabbit.webdav.property.DavProperty;
 import org.cryptomator.crypto.Cryptor;
 
 class NonExistingNode extends AbstractEncryptedNode {
 
-	public NonExistingNode(CryptoResourceFactory factory, DavResourceLocator locator, DavSession session, LockManager lockManager, Cryptor cryptor) {
-		super(factory, locator, session, lockManager, cryptor);
-	}
+	private final Path filePath;
+	private final Path dirFilePath;
 
-	@Override
-	protected Path getPhysicalPath() {
-		throw new UnsupportedOperationException("Resource doesn't exist.");
+	public NonExistingNode(CryptoResourceFactory factory, DavResourceLocator locator, DavSession session, LockManager lockManager, Cryptor cryptor, Path filePath, Path dirFilePath) {
+		super(factory, locator, session, lockManager, cryptor, null);
+		this.filePath = filePath;
+		this.dirFilePath = dirFilePath;
 	}
 
 	@Override
@@ -75,6 +76,19 @@ class NonExistingNode extends AbstractEncryptedNode {
 	@Override
 	public void copy(AbstractEncryptedNode destination, boolean shallow) throws DavException {
 		throw new UnsupportedOperationException("Resource doesn't exist.");
+	}
+
+	@Override
+	public void setProperty(DavProperty<?> property) throws DavException {
+		throw new UnsupportedOperationException("Resource doesn't exist.");
+	}
+
+	public Path getFilePath() {
+		return filePath;
+	}
+
+	public Path getDirFilePath() {
+		return dirFilePath;
 	}
 
 }

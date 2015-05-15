@@ -11,8 +11,10 @@ package org.cryptomator.webdav.jackrabbit;
 import java.io.EOFException;
 import java.io.IOException;
 import java.nio.channels.SeekableByteChannel;
+import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.BasicFileAttributes;
 
@@ -40,21 +42,14 @@ class EncryptedFile extends AbstractEncryptedNode {
 	private static final Logger LOG = LoggerFactory.getLogger(EncryptedFile.class);
 
 	protected final CryptoWarningHandler cryptoWarningHandler;
-	protected final Path filePath;
 
 	public EncryptedFile(CryptoResourceFactory factory, DavResourceLocator locator, DavSession session, LockManager lockManager, Cryptor cryptor, CryptoWarningHandler cryptoWarningHandler, Path filePath) {
-		super(factory, locator, session, lockManager, cryptor);
+		super(factory, locator, session, lockManager, cryptor, filePath);
 		if (filePath == null) {
 			throw new IllegalArgumentException("filePath must not be null");
 		}
 		this.cryptoWarningHandler = cryptoWarningHandler;
-		this.filePath = filePath;
 		this.determineProperties();
-	}
-
-	@Override
-	protected Path getPhysicalPath() {
-		return filePath;
 	}
 
 	@Override
@@ -128,40 +123,36 @@ class EncryptedFile extends AbstractEncryptedNode {
 
 	@Override
 	public void move(AbstractEncryptedNode dest) throws DavException, IOException {
-		throw new UnsupportedOperationException("not yet implemented");
-		// final Path src = this.locator.getEncryptedFilePath();
-		// final Path dst = dest.locator.getEncryptedFilePath();
-		//
-		// // check for conflicts:
-		// if (Files.exists(dst) && Files.getLastModifiedTime(dst).toMillis() > Files.getLastModifiedTime(src).toMillis()) {
-		// throw new DavException(DavServletResponse.SC_CONFLICT, "File at destination already exists: " + dst.toString());
-		// }
-		//
-		// // move:
-		// try {
-		// Files.move(src, dst, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
-		// } catch (AtomicMoveNotSupportedException e) {
-		// Files.move(src, dst, StandardCopyOption.REPLACE_EXISTING);
-		// }
+		final Path srcPath = filePath;
+		final Path dstPath;
+		if (dest instanceof NonExistingNode) {
+			dstPath = ((NonExistingNode) dest).getFilePath();
+		} else {
+			dstPath = dest.filePath;
+		}
+
+		try {
+			Files.move(srcPath, dstPath, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+		} catch (AtomicMoveNotSupportedException e) {
+			Files.move(srcPath, dstPath, StandardCopyOption.REPLACE_EXISTING);
+		}
 	}
 
 	@Override
 	public void copy(AbstractEncryptedNode dest, boolean shallow) throws DavException, IOException {
-		throw new UnsupportedOperationException("not yet implemented");
-		// final Path src = this.locator.getEncryptedFilePath();
-		// final Path dst = dest.locator.getEncryptedFilePath();
-		//
-		// // check for conflicts:
-		// if (Files.exists(dst) && Files.getLastModifiedTime(dst).toMillis() > Files.getLastModifiedTime(src).toMillis()) {
-		// throw new DavException(DavServletResponse.SC_CONFLICT, "File at destination already exists: " + dst.toString());
-		// }
-		//
-		// // copy:
-		// try {
-		// Files.copy(src, dst, StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
-		// } catch (AtomicMoveNotSupportedException e) {
-		// Files.copy(src, dst, StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING);
-		// }
+		final Path srcPath = filePath;
+		final Path dstPath;
+		if (dest instanceof NonExistingNode) {
+			dstPath = ((NonExistingNode) dest).getFilePath();
+		} else {
+			dstPath = dest.filePath;
+		}
+
+		try {
+			Files.copy(srcPath, dstPath, StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+		} catch (AtomicMoveNotSupportedException e) {
+			Files.copy(srcPath, dstPath, StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING);
+		}
 	}
 
 }

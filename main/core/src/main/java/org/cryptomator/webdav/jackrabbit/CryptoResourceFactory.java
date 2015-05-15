@@ -5,6 +5,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -48,61 +49,46 @@ public class CryptoResourceFactory implements DavResourceFactory, FileNamingConv
 
 	@Override
 	public final DavResource createResource(DavResourceLocator locator, DavServletRequest request, DavServletResponse response) throws DavException {
-		if (DavMethods.METHOD_MKCOL.equals(request.getMethod())) {
-			final String parentResourcePath = FilenameUtils.getFullPathNoEndSeparator(locator.getResourcePath());
-			final Path parentDirectoryPath = createEncryptedDirectoryPath(parentResourcePath);
-			return new EncryptedDirDuringCreation(this, locator, request.getDavSession(), lockManager, cryptor, filenameTranslator, parentDirectoryPath);
-		}
-
 		if (locator.isRootLocation()) {
-			final Path dirpath = createEncryptedDirectoryPath("");
-			return createDirectory(locator, request.getDavSession(), dirpath);
+			return createRootDirectory(locator, request.getDavSession());
 		}
 
-		final Path filepath = getEncryptedFilePath(locator.getResourcePath());
+		final Path filePath = getEncryptedFilePath(locator.getResourcePath());
 		final Path dirFilePath = getEncryptedDirectoryFilePath(locator.getResourcePath());
 		final String rangeHeader = request.getHeader(HttpHeader.RANGE.asString());
-		if (Files.exists(dirFilePath)) {
-			final Path dirPath = createEncryptedDirectoryPath(locator.getResourcePath());
-			return createDirectory(locator, request.getDavSession(), dirPath);
-		} else if (Files.exists(filepath) && DavMethods.METHOD_GET.equals(request.getMethod()) && rangeHeader != null) {
+		if (Files.exists(dirFilePath) || DavMethods.METHOD_MKCOL.equals(request.getMethod())) {
+			return createDirectory(locator, request.getDavSession(), dirFilePath);
+		} else if (Files.exists(filePath) && DavMethods.METHOD_GET.equals(request.getMethod()) && rangeHeader != null) {
 			response.setStatus(HttpStatus.SC_PARTIAL_CONTENT);
-			return createFilePart(locator, request.getDavSession(), request, filepath);
-		} else if (Files.exists(filepath) || DavMethods.METHOD_PUT.equals(request.getMethod())) {
-			return createFile(locator, request.getDavSession(), filepath);
+			return createFilePart(locator, request.getDavSession(), request, filePath);
+		} else if (Files.exists(filePath) || DavMethods.METHOD_PUT.equals(request.getMethod())) {
+			return createFile(locator, request.getDavSession(), filePath);
 		} else {
-			return createNonExisting(locator, request.getDavSession());
+			// e.g. for MOVE operations:
+			return createNonExisting(locator, request.getDavSession(), filePath, dirFilePath);
 		}
 	}
 
 	@Override
 	public final DavResource createResource(DavResourceLocator locator, DavSession session) throws DavException {
 		if (locator.isRootLocation()) {
-			final Path dirpath = createEncryptedDirectoryPath("");
-			return createDirectory(locator, session, dirpath);
+			return createRootDirectory(locator, session);
 		}
 
-		final Path filepath = getEncryptedFilePath(locator.getResourcePath());
+		final Path filePath = getEncryptedFilePath(locator.getResourcePath());
 		final Path dirFilePath = getEncryptedDirectoryFilePath(locator.getResourcePath());
 		if (Files.exists(dirFilePath)) {
-			final Path dirPath = createEncryptedDirectoryPath(locator.getResourcePath());
-			return createDirectory(locator, session, dirPath);
-		} else if (Files.exists(filepath)) {
-			return createFile(locator, session, filepath);
+			return createDirectory(locator, session, dirFilePath);
+		} else if (Files.exists(filePath)) {
+			return createFile(locator, session, filePath);
 		} else {
-			return createNonExisting(locator, session);
+			// e.g. for MOVE operations:
+			return createNonExisting(locator, session, filePath, dirFilePath);
 		}
 	}
 
 	DavResource createChildDirectoryResource(DavResourceLocator locator, DavSession session, Path existingDirectoryFile) throws DavException {
-		try {
-			final String directoryId = new String(readAllBytesAtomically(existingDirectoryFile), StandardCharsets.UTF_8);
-			final String directory = cryptor.encryptDirectoryPath(directoryId, FileSystems.getDefault().getSeparator());
-			final Path dirpath = dataRoot.resolve(directory);
-			return createDirectory(locator, session, dirpath);
-		} catch (IOException e) {
-			throw new DavException(DavServletResponse.SC_INTERNAL_SERVER_ERROR, e);
-		}
+		return createDirectory(locator, session, existingDirectoryFile);
 	}
 
 	DavResource createChildFileResource(DavResourceLocator locator, DavSession session, Path existingFile) throws DavException {
@@ -184,12 +170,28 @@ public class CryptoResourceFactory implements DavResourceFactory, FileNamingConv
 		return new EncryptedFile(this, locator, session, lockManager, cryptor, cryptoWarningHandler, filePath);
 	}
 
-	private EncryptedDir createDirectory(DavResourceLocator locator, DavSession session, Path dirPath) {
-		return new EncryptedDir(this, locator, session, lockManager, cryptor, filenameTranslator, dirPath);
+	private EncryptedDir createRootDirectory(DavResourceLocator locator, DavSession session) throws DavException {
+		final Path rootFile = dataRoot.resolve(ROOT_FILE);
+		final Path rootDir = filenameTranslator.getEncryptedDirectoryPath("");
+		try {
+			// make sure, root dir always exists.
+			// create dir first (because it fails silently, if alreay existing)
+			Files.createDirectories(rootDir);
+			Files.createFile(rootFile);
+		} catch (FileAlreadyExistsException e) {
+			// no-op
+		} catch (IOException e) {
+			throw new DavException(DavServletResponse.SC_INTERNAL_SERVER_ERROR);
+		}
+		return createDirectory(locator, session, dataRoot.resolve(ROOT_FILE));
 	}
 
-	private NonExistingNode createNonExisting(DavResourceLocator locator, DavSession session) {
-		return new NonExistingNode(this, locator, session, lockManager, cryptor);
+	private EncryptedDir createDirectory(DavResourceLocator locator, DavSession session, Path filePath) {
+		return new EncryptedDir(this, locator, session, lockManager, cryptor, filenameTranslator, filePath);
+	}
+
+	private NonExistingNode createNonExisting(DavResourceLocator locator, DavSession session, Path filePath, Path dirFilePath) {
+		return new NonExistingNode(this, locator, session, lockManager, cryptor, filePath, dirFilePath);
 	}
 
 	/* IO support */

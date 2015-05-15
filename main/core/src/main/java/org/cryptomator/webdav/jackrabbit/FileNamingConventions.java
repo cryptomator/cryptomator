@@ -21,9 +21,14 @@ interface FileNamingConventions {
 	/**
 	 * Maximum path length on some file systems or cloud storage providers is restricted.<br/>
 	 * Parent folder path uses up to 58 chars (sha256 -&gt; 32 bytes base32 encoded to 56 bytes + two slashes). That in mind we don't want the total path to be longer than 255 chars.<br/>
-	 * 128 chars would be enought for up to 80 plaintext chars. Also we need up to 8 chars for our file extension. So lets use {@value #ENCRYPTED_FILENAME_LENGTH_LIMIT}.
+	 * 128 chars would be enought for up to 80 plaintext chars. Also we need up to 9 chars for our file extension. So lets use {@value #ENCRYPTED_FILENAME_LENGTH_LIMIT}.
 	 */
-	int ENCRYPTED_FILENAME_LENGTH_LIMIT = 136;
+	int ENCRYPTED_FILENAME_LENGTH_LIMIT = 137;
+
+	/**
+	 * Dummy file, on which file attributes can be stored for the root directory.
+	 */
+	String ROOT_FILE = "root";
 
 	/**
 	 * For encrypted directory names <= {@value #ENCRYPTED_FILENAME_LENGTH_LIMIT} chars.
