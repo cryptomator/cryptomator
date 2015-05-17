@@ -12,10 +12,14 @@ package org.cryptomator.ui.util.mount;
 import java.net.URI;
 
 import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.ui.util.command.CommandResult;
 import org.cryptomator.ui.util.command.Script;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 final class LinuxGvfsWebDavMounter implements WebDavMounterStrategy {
 
+	public static final Logger LOG = LoggerFactory.getLogger(LinuxGvfsWebDavMounter.class);
 	@Override
 	public boolean shouldWork() {
 		if (SystemUtils.IS_OS_LINUX) {
@@ -40,8 +44,7 @@ final class LinuxGvfsWebDavMounter implements WebDavMounterStrategy {
 	public WebDavMount mount(URI uri, String name) throws CommandFailedException {
 		final Script mountScript = Script.fromLines(
 				"set -x",
-				"gvfs-mount \"dav:$DAV_SSP\"",
-				"xdg-open \"dav:$DAV_SSP\"")
+				"gvfs-mount \"dav:$DAV_SSP\"")
 				.addEnv("DAV_SSP", uri.getRawSchemeSpecificPart());
 		final Script testMountStillExistsScript = Script.fromLines(
 				"set -x",
@@ -52,6 +55,12 @@ final class LinuxGvfsWebDavMounter implements WebDavMounterStrategy {
 				"gvfs-mount -u \"dav:$DAV_SSP\"")
 				.addEnv("DAV_SSP", uri.getRawSchemeSpecificPart());
 		mountScript.execute();
+		try{
+			openFMWithWebdavSchema("dav", uri).execute();
+		}catch(CommandFailedException exception){
+			LOG.debug("Openinig webdav with dav schema name failed, trying webdav schema name");
+			openFMWithWebdavSchema("webdav", uri).execute();
+		}
 		return new AbstractWebDavMount() {
 			@Override
 			public void unmount() throws CommandFailedException {
@@ -68,6 +77,13 @@ final class LinuxGvfsWebDavMounter implements WebDavMounterStrategy {
 				}
 			}
 		};
+	}
+
+	private Script openFMWithWebdavSchema(String schemaName, URI uri){
+		return Script.fromLines(
+				"set -x",
+				"xdg-open \""+schemaName+":$DAV_SSP\"")
+				.addEnv("DAV_SSP", uri.getRawSchemeSpecificPart());
 	}
 
 }
