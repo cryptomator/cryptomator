@@ -6,6 +6,7 @@
  * Contributors:
  *     Sebastian Stenzel - initial API and implementation
  *     Markus Kreusch - Refactored WebDavMounter to use strategy pattern
+ *     Mohit Raju - Added fallback schema-name "webdav" when opening file managers
  ******************************************************************************/
 package org.cryptomator.ui.util.mount;
 
