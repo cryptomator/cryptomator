@@ -12,14 +12,10 @@ package org.cryptomator.ui.util.mount;
 import java.net.URI;
 
 import org.apache.commons.lang3.SystemUtils;
-import org.cryptomator.ui.util.command.CommandResult;
 import org.cryptomator.ui.util.command.Script;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 final class LinuxGvfsWebDavMounter implements WebDavMounterStrategy {
 
-	public static final Logger LOG = LoggerFactory.getLogger(LinuxGvfsWebDavMounter.class);
 	@Override
 	public boolean shouldWork() {
 		if (SystemUtils.IS_OS_LINUX) {
@@ -58,7 +54,6 @@ final class LinuxGvfsWebDavMounter implements WebDavMounterStrategy {
 		try{
 			openFMWithWebdavSchema("dav", uri).execute();
 		}catch(CommandFailedException exception){
-			LOG.debug("Openinig webdav with dav schema name failed, trying webdav schema name");
 			openFMWithWebdavSchema("webdav", uri).execute();
 		}
 		return new AbstractWebDavMount() {
