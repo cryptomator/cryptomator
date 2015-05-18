@@ -53,9 +53,9 @@ final class LinuxGvfsWebDavMounter implements WebDavMounterStrategy {
 				.addEnv("DAV_SSP", uri.getRawSchemeSpecificPart());
 		mountScript.execute();
 		try{
-			openFMWithWebdavSchema("dav:"+uri.getRawSchemeSpecificPart()).execute();
+			openMountWithWebdavUri("dav:"+uri.getRawSchemeSpecificPart()).execute();
 		}catch(CommandFailedException exception){
-			openFMWithWebdavSchema("webdav:"+uri.getRawSchemeSpecificPart()).execute();
+			openMountWithWebdavUri("webdav:"+uri.getRawSchemeSpecificPart()).execute();
 		}
 		return new AbstractWebDavMount() {
 			@Override
@@ -75,11 +75,11 @@ final class LinuxGvfsWebDavMounter implements WebDavMounterStrategy {
 		};
 	}
 
-	private Script openFMWithWebdavSchema(String schemaName){
+	private Script openMountWithWebdavUri(String webdavUri){
 		return Script.fromLines(
 				"set -x",
-				"xdg-open \"$DAV_SCHEME\"")
-				.addEnv("DAV_SCHEME", schemaName);
+				"xdg-open \"$DAV_URI\"")
+				.addEnv("DAV_URI", webdavUri);
 	}
 
 }
