@@ -6,6 +6,7 @@
  * Contributors:
  *     Sebastian Stenzel - initial API and implementation
  *     Markus Kreusch - Refactored WebDavMounter to use strategy pattern
+ *     Mohit Raju - Added fallback schema-name "webdav" when opening file managers
  ******************************************************************************/
 package org.cryptomator.ui.util.mount;
 
@@ -40,8 +41,7 @@ final class LinuxGvfsWebDavMounter implements WebDavMounterStrategy {
 	public WebDavMount mount(URI uri, String name) throws CommandFailedException {
 		final Script mountScript = Script.fromLines(
 				"set -x",
-				"gvfs-mount \"dav:$DAV_SSP\"",
-				"xdg-open \"dav:$DAV_SSP\"")
+				"gvfs-mount \"dav:$DAV_SSP\"")
 				.addEnv("DAV_SSP", uri.getRawSchemeSpecificPart());
 		final Script testMountStillExistsScript = Script.fromLines(
 				"set -x",
@@ -52,6 +52,11 @@ final class LinuxGvfsWebDavMounter implements WebDavMounterStrategy {
 				"gvfs-mount -u \"dav:$DAV_SSP\"")
 				.addEnv("DAV_SSP", uri.getRawSchemeSpecificPart());
 		mountScript.execute();
+		try{
+			openMountWithWebdavUri("dav:"+uri.getRawSchemeSpecificPart()).execute();
+		}catch(CommandFailedException exception){
+			openMountWithWebdavUri("webdav:"+uri.getRawSchemeSpecificPart()).execute();
+		}
 		return new AbstractWebDavMount() {
 			@Override
 			public void unmount() throws CommandFailedException {
@@ -68,6 +73,13 @@ final class LinuxGvfsWebDavMounter implements WebDavMounterStrategy {
 				}
 			}
 		};
+	}
+
+	private Script openMountWithWebdavUri(String webdavUri){
+		return Script.fromLines(
+				"set -x",
+				"xdg-open \"$DAV_URI\"")
+				.addEnv("DAV_URI", webdavUri);
 	}
 
 }
