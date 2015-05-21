@@ -47,8 +47,8 @@ public class WebDavServlet extends AbstractWebdavServlet {
 		final String fsRoot = config.getInitParameter(CFG_FS_ROOT);
 		backgroundTaskExecutor = Executors.newCachedThreadPool();
 		davSessionProvider = new DavSessionProviderImpl();
-		davLocatorFactory = new CryptoLocatorFactory(fsRoot, cryptor);
-		davResourceFactory = new CryptoResourceFactory(cryptor, cryptoWarningHandler, backgroundTaskExecutor);
+		davLocatorFactory = new CleartextLocatorFactory(config.getServletContext().getContextPath()); // CryptoLocatorFactory(fsRoot, cryptor);
+		davResourceFactory = new CryptoResourceFactory(cryptor, cryptoWarningHandler, backgroundTaskExecutor, fsRoot);
 	}
 
 	@Override
@@ -66,6 +66,17 @@ public class WebDavServlet extends AbstractWebdavServlet {
 			super.destroy();
 		}
 	}
+
+	// @Override
+	// protected void doMkCol(WebdavRequest request, WebdavResponse response, DavResource resource) throws IOException, DavException {
+	// if (resource instanceof EncryptedDirDuringCreation) {
+	// EncryptedDirDuringCreation dir = (EncryptedDirDuringCreation) resource;
+	// dir.doCreate();
+	// response.setStatus(DavServletResponse.SC_CREATED);
+	// } else {
+	//
+	// }
+	// }
 
 	@Override
 	protected boolean isPreconditionValid(WebdavRequest request, DavResource resource) {

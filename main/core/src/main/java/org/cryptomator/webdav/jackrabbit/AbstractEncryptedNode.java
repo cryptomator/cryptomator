@@ -44,23 +44,22 @@ abstract class AbstractEncryptedNode implements DavResource {
 	private static final String DAV_COMPLIANCE_CLASSES = "1, 2";
 
 	protected final CryptoResourceFactory factory;
-	protected final CryptoLocator locator;
+	protected final DavResourceLocator locator;
 	protected final DavSession session;
 	protected final LockManager lockManager;
 	protected final Cryptor cryptor;
+	protected final Path filePath;
 	protected final DavPropertySet properties;
 
-	protected AbstractEncryptedNode(CryptoResourceFactory factory, CryptoLocator locator, DavSession session, LockManager lockManager, Cryptor cryptor) {
+	protected AbstractEncryptedNode(CryptoResourceFactory factory, DavResourceLocator locator, DavSession session, LockManager lockManager, Cryptor cryptor, Path filePath) {
 		this.factory = factory;
 		this.locator = locator;
 		this.session = session;
 		this.lockManager = lockManager;
 		this.cryptor = cryptor;
+		this.filePath = filePath;
 		this.properties = new DavPropertySet();
-		this.determineProperties();
 	}
-
-	protected abstract Path getPhysicalPath();
 
 	@Override
 	public String getComplianceClass() {
@@ -74,7 +73,7 @@ abstract class AbstractEncryptedNode implements DavResource {
 
 	@Override
 	public boolean exists() {
-		return Files.exists(getPhysicalPath());
+		return Files.exists(filePath);
 	}
 
 	@Override
@@ -89,7 +88,7 @@ abstract class AbstractEncryptedNode implements DavResource {
 	}
 
 	@Override
-	public CryptoLocator getLocator() {
+	public DavResourceLocator getLocator() {
 		return locator;
 	}
 
@@ -106,13 +105,11 @@ abstract class AbstractEncryptedNode implements DavResource {
 	@Override
 	public long getModificationTime() {
 		try {
-			return Files.getLastModifiedTime(getPhysicalPath()).toMillis();
+			return Files.getLastModifiedTime(filePath).toMillis();
 		} catch (IOException e) {
 			return -1;
 		}
 	}
-
-	protected abstract void determineProperties();
 
 	@Override
 	public DavPropertyName[] getPropertyNames() {
@@ -136,17 +133,16 @@ abstract class AbstractEncryptedNode implements DavResource {
 		LOG.info("Set property {}", property.getName());
 
 		try {
-			final Path path = getPhysicalPath();
 			if (DavPropertyName.CREATIONDATE.equals(property.getName()) && property.getValue() instanceof String) {
 				final String createDateStr = (String) property.getValue();
 				final FileTime createTime = FileTimeUtils.fromRfc1123String(createDateStr);
-				final BasicFileAttributeView attrView = Files.getFileAttributeView(path, BasicFileAttributeView.class, LinkOption.NOFOLLOW_LINKS);
+				final BasicFileAttributeView attrView = Files.getFileAttributeView(filePath, BasicFileAttributeView.class, LinkOption.NOFOLLOW_LINKS);
 				attrView.setTimes(null, null, createTime);
 				LOG.info("Updating Creation Date: {}", createTime.toString());
 			} else if (DavPropertyName.GETLASTMODIFIED.equals(property.getName()) && property.getValue() instanceof String) {
 				final String lastModifiedTimeStr = (String) property.getValue();
 				final FileTime lastModifiedTime = FileTimeUtils.fromRfc1123String(lastModifiedTimeStr);
-				final BasicFileAttributeView attrView = Files.getFileAttributeView(path, BasicFileAttributeView.class, LinkOption.NOFOLLOW_LINKS);
+				final BasicFileAttributeView attrView = Files.getFileAttributeView(filePath, BasicFileAttributeView.class, LinkOption.NOFOLLOW_LINKS);
 				attrView.setTimes(lastModifiedTime, null, null);
 				LOG.info("Updating Last Modified Date: {}", lastModifiedTime.toString());
 			}
@@ -183,7 +179,7 @@ abstract class AbstractEncryptedNode implements DavResource {
 			return null;
 		}
 
-		final String parentResource = FilenameUtils.getPath(locator.getResourcePath());
+		final String parentResource = FilenameUtils.getPathNoEndSeparator(locator.getResourcePath());
 		final DavResourceLocator parentLocator = locator.getFactory().createResourceLocator(locator.getPrefix(), locator.getWorkspacePath(), parentResource);
 		try {
 			return getFactory().createResource(parentLocator, session);

@@ -21,7 +21,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import org.apache.jackrabbit.webdav.DavException;
 import org.apache.jackrabbit.webdav.DavResource;
 import org.apache.jackrabbit.webdav.DavResourceIterator;
-import org.apache.jackrabbit.webdav.DavServletResponse;
+import org.apache.jackrabbit.webdav.DavResourceLocator;
 import org.apache.jackrabbit.webdav.DavSession;
 import org.apache.jackrabbit.webdav.io.InputContext;
 import org.apache.jackrabbit.webdav.io.OutputContext;
@@ -43,14 +43,13 @@ class EncryptedFile extends AbstractEncryptedNode {
 
 	protected final CryptoWarningHandler cryptoWarningHandler;
 
-	public EncryptedFile(CryptoResourceFactory factory, CryptoLocator locator, DavSession session, LockManager lockManager, Cryptor cryptor, CryptoWarningHandler cryptoWarningHandler) {
-		super(factory, locator, session, lockManager, cryptor);
+	public EncryptedFile(CryptoResourceFactory factory, DavResourceLocator locator, DavSession session, LockManager lockManager, Cryptor cryptor, CryptoWarningHandler cryptoWarningHandler, Path filePath) {
+		super(factory, locator, session, lockManager, cryptor, filePath);
+		if (filePath == null) {
+			throw new IllegalArgumentException("filePath must not be null");
+		}
 		this.cryptoWarningHandler = cryptoWarningHandler;
-	}
-
-	@Override
-	protected Path getPhysicalPath() {
-		return locator.getEncryptedFilePath();
+		this.determineProperties();
 	}
 
 	@Override
@@ -75,11 +74,10 @@ class EncryptedFile extends AbstractEncryptedNode {
 
 	@Override
 	public void spool(OutputContext outputContext) throws IOException {
-		final Path path = locator.getEncryptedFilePath();
-		if (Files.isRegularFile(path)) {
-			outputContext.setModificationTime(Files.getLastModifiedTime(path).toMillis());
+		if (Files.isRegularFile(filePath)) {
+			outputContext.setModificationTime(Files.getLastModifiedTime(filePath).toMillis());
 			outputContext.setProperty(HttpHeader.ACCEPT_RANGES.asString(), HttpHeaderValue.BYTES.asString());
-			try (final SeekableByteChannel channel = Files.newByteChannel(path, StandardOpenOption.READ)) {
+			try (final SeekableByteChannel channel = Files.newByteChannel(filePath, StandardOpenOption.READ)) {
 				final Long contentLength = cryptor.decryptedContentLength(channel);
 				if (contentLength != null) {
 					outputContext.setContentLength(contentLength);
@@ -92,20 +90,19 @@ class EncryptedFile extends AbstractEncryptedNode {
 			} catch (MacAuthenticationFailedException e) {
 				cryptoWarningHandler.macAuthFailed(getLocator().getResourcePath());
 			} catch (DecryptFailedException e) {
-				throw new IOException("Error decrypting file " + path.toString(), e);
+				throw new IOException("Error decrypting file " + filePath.toString(), e);
 			}
 		}
 	}
 
-	@Override
+	@Deprecated
 	protected void determineProperties() {
-		final Path path = locator.getEncryptedFilePath();
-		if (Files.exists(path)) {
-			try (final SeekableByteChannel channel = Files.newByteChannel(path, StandardOpenOption.READ)) {
+		if (Files.isRegularFile(filePath)) {
+			try (final SeekableByteChannel channel = Files.newByteChannel(filePath, StandardOpenOption.READ)) {
 				final Long contentLength = cryptor.decryptedContentLength(channel);
 				properties.add(new DefaultDavProperty<Long>(DavPropertyName.GETCONTENTLENGTH, contentLength));
 			} catch (IOException e) {
-				LOG.error("Error reading filesize " + path.toString(), e);
+				LOG.error("Error reading filesize " + filePath.toString(), e);
 				throw new IORuntimeException(e);
 			} catch (MacAuthenticationFailedException e) {
 				LOG.warn("Content length couldn't be determined due to MAC authentication violation.");
@@ -113,12 +110,12 @@ class EncryptedFile extends AbstractEncryptedNode {
 			}
 
 			try {
-				final BasicFileAttributes attrs = Files.readAttributes(path, BasicFileAttributes.class);
+				final BasicFileAttributes attrs = Files.readAttributes(filePath, BasicFileAttributes.class);
 				properties.add(new DefaultDavProperty<String>(DavPropertyName.CREATIONDATE, FileTimeUtils.toRfc1123String(attrs.creationTime())));
 				properties.add(new DefaultDavProperty<String>(DavPropertyName.GETLASTMODIFIED, FileTimeUtils.toRfc1123String(attrs.lastModifiedTime())));
 				properties.add(new HttpHeaderProperty(HttpHeader.ACCEPT_RANGES.asString(), HttpHeaderValue.BYTES.asString()));
 			} catch (IOException e) {
-				LOG.error("Error determining metadata " + path.toString(), e);
+				LOG.error("Error determining metadata " + filePath.toString(), e);
 				throw new IORuntimeException(e);
 			}
 		}
@@ -126,37 +123,35 @@ class EncryptedFile extends AbstractEncryptedNode {
 
 	@Override
 	public void move(AbstractEncryptedNode dest) throws DavException, IOException {
-		final Path src = this.locator.getEncryptedFilePath();
-		final Path dst = dest.locator.getEncryptedFilePath();
-
-		// check for conflicts:
-		if (Files.exists(dst) && Files.getLastModifiedTime(dst).toMillis() > Files.getLastModifiedTime(src).toMillis()) {
-			throw new DavException(DavServletResponse.SC_CONFLICT, "File at destination already exists: " + dst.toString());
+		final Path srcPath = filePath;
+		final Path dstPath;
+		if (dest instanceof NonExistingNode) {
+			dstPath = ((NonExistingNode) dest).getFilePath();
+		} else {
+			dstPath = dest.filePath;
 		}
 
-		// move:
 		try {
-			Files.move(src, dst, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+			Files.move(srcPath, dstPath, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
 		} catch (AtomicMoveNotSupportedException e) {
-			Files.move(src, dst, StandardCopyOption.REPLACE_EXISTING);
+			Files.move(srcPath, dstPath, StandardCopyOption.REPLACE_EXISTING);
 		}
 	}
 
 	@Override
 	public void copy(AbstractEncryptedNode dest, boolean shallow) throws DavException, IOException {
-		final Path src = this.locator.getEncryptedFilePath();
-		final Path dst = dest.locator.getEncryptedFilePath();
-
-		// check for conflicts:
-		if (Files.exists(dst) && Files.getLastModifiedTime(dst).toMillis() > Files.getLastModifiedTime(src).toMillis()) {
-			throw new DavException(DavServletResponse.SC_CONFLICT, "File at destination already exists: " + dst.toString());
+		final Path srcPath = filePath;
+		final Path dstPath;
+		if (dest instanceof NonExistingNode) {
+			dstPath = ((NonExistingNode) dest).getFilePath();
+		} else {
+			dstPath = dest.filePath;
 		}
 
-		// copy:
 		try {
-			Files.copy(src, dst, StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+			Files.copy(srcPath, dstPath, StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
 		} catch (AtomicMoveNotSupportedException e) {
-			Files.copy(src, dst, StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING);
+			Files.copy(srcPath, dstPath, StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING);
 		}
 	}
 

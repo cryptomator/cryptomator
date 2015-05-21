@@ -1,6 +1,5 @@
 package org.cryptomator.crypto;
 
-import java.io.IOException;
 import java.util.Map;
 
 import org.apache.commons.collections4.BidiMap;
@@ -38,22 +37,22 @@ public class PathCachingCryptorDecorator extends AbstractCryptorDecorator {
 	}
 
 	@Override
-	public String encryptFilename(String cleartextName, CryptorMetadataSupport ioSupport) throws IOException {
+	public String encryptFilename(String cleartextName) {
 		if (nameCache.containsKey(cleartextName)) {
 			return nameCache.get(cleartextName);
 		} else {
-			final String ciphertextName = cryptor.encryptFilename(cleartextName, ioSupport);
+			final String ciphertextName = cryptor.encryptFilename(cleartextName);
 			nameCache.put(cleartextName, ciphertextName);
 			return ciphertextName;
 		}
 	}
 
 	@Override
-	public String decryptFilename(String ciphertextName, CryptorMetadataSupport ioSupport) throws IOException, DecryptFailedException {
+	public String decryptFilename(String ciphertextName) throws DecryptFailedException {
 		if (nameCache.containsValue(ciphertextName)) {
 			return nameCache.getKey(ciphertextName);
 		} else {
-			final String cleartextName = cryptor.decryptFilename(ciphertextName, ioSupport);
+			final String cleartextName = cryptor.decryptFilename(ciphertextName);
 			nameCache.put(cleartextName, ciphertextName);
 			return ciphertextName;
 		}

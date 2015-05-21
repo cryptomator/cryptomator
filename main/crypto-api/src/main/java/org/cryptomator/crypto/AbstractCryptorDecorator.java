@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.channels.SeekableByteChannel;
-import java.nio.file.DirectoryStream.Filter;
-import java.nio.file.Path;
 
 import javax.security.auth.DestroyFailedException;
 
@@ -40,13 +38,13 @@ public class AbstractCryptorDecorator implements Cryptor {
 	}
 
 	@Override
-	public String encryptFilename(String cleartextName, CryptorMetadataSupport ioSupport) throws IOException {
-		return cryptor.encryptFilename(cleartextName, ioSupport);
+	public String encryptFilename(String cleartextName) {
+		return cryptor.encryptFilename(cleartextName);
 	}
 
 	@Override
-	public String decryptFilename(String ciphertextName, CryptorMetadataSupport ioSupport) throws IOException, DecryptFailedException {
-		return cryptor.decryptFilename(ciphertextName, ioSupport);
+	public String decryptFilename(String ciphertextName) throws DecryptFailedException {
+		return cryptor.decryptFilename(ciphertextName);
 	}
 
 	@Override
@@ -72,11 +70,6 @@ public class AbstractCryptorDecorator implements Cryptor {
 	@Override
 	public Long encryptFile(InputStream plaintextFile, SeekableByteChannel encryptedFile) throws IOException, EncryptFailedException {
 		return cryptor.encryptFile(plaintextFile, encryptedFile);
-	}
-
-	@Override
-	public Filter<Path> getPayloadFilesFilter() {
-		return cryptor.getPayloadFilesFilter();
 	}
 
 	@Override
