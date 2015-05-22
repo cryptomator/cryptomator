@@ -107,6 +107,20 @@ public class CleartextLocatorFactory implements DavLocatorFactory {
 			return "Locator: " + relativeCleartextPath + " (Prefix: " + pathPrefix + ")";
 		}
 
+		@Override
+		public int hashCode() {
+			return relativeCleartextPath.hashCode();
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (obj instanceof CleartextLocator) {
+				final CleartextLocator other = (CleartextLocator) obj;
+				return relativeCleartextPath == null && other.relativeCleartextPath == null || relativeCleartextPath.equals(other.relativeCleartextPath);
+			} else {
+				return false;
+			}
+		}
 	}
 
 }
