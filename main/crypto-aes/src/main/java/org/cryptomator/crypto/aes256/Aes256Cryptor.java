@@ -323,7 +323,6 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 		final byte[] encryptedContentLengthBytes = new byte[AES_BLOCK_LENGTH];
 		headerBuf.position(16);
 		headerBuf.get(encryptedContentLengthBytes);
-		final Long fileSize = decryptContentLength(encryptedContentLengthBytes, iv);
 
 		// read stored header mac:
 		final byte[] storedHeaderMac = new byte[32];
@@ -341,7 +340,7 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 			throw new MacAuthenticationFailedException("MAC authentication failed.");
 		}
 
-		return fileSize;
+		return decryptContentLength(encryptedContentLengthBytes, iv);
 	}
 
 	private long decryptContentLength(byte[] encryptedContentLengthBytes, byte[] iv) {
@@ -505,12 +504,8 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 		ivBuf.putInt(AES_BLOCK_LENGTH - Integer.BYTES, 0);
 		final byte[] iv = ivBuf.array();
 
-		// 96 byte header buffer (16 IV, 16 size, 32 headerMac, 32 contentMac)
-		// prefilled with "zero" content length for impatient processes, which want to know the size, before file has been completely written:
+		// 96 byte header buffer (16 IV, 16 size, 32 headerMac, 32 contentMac), filled after writing the content
 		final ByteBuffer headerBuf = ByteBuffer.allocate(96);
-		headerBuf.position(16);
-		headerBuf.put(encryptContentLength(0l, iv));
-		headerBuf.flip();
 		headerBuf.limit(96);
 		encryptedFile.write(headerBuf);
 

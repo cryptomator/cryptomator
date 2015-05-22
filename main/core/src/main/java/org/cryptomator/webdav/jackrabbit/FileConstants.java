@@ -16,7 +16,17 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 
-interface FileNamingConventions {
+interface FileConstants {
+
+	/**
+	 * Number of bytes in the file header.
+	 */
+	long FILE_HEADER_LENGTH = 96;
+
+	/**
+	 * Allow range requests for files > 32MiB.
+	 */
+	long RANGE_REQUEST_LOWER_LIMIT = 32 * 1024 * 1024;
 
 	/**
 	 * Maximum path length on some file systems or cloud storage providers is restricted.<br/>

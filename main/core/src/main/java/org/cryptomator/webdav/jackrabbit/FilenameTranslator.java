@@ -16,7 +16,7 @@ import org.cryptomator.crypto.exceptions.DecryptFailedException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-class FilenameTranslator implements FileNamingConventions {
+class FilenameTranslator implements FileConstants {
 
 	private final Cryptor cryptor;
 	private final Path dataRoot;
@@ -46,7 +46,7 @@ class FilenameTranslator implements FileNamingConventions {
 
 	/**
 	 * Encryption will blow up the filename length due to aes block sizes, IVs and base32 encoding. The result may be too long for some old file systems.<br/>
-	 * This means that we need a workaround for filenames longer than the limit defined in {@link FileNamingConventions#ENCRYPTED_FILENAME_LENGTH_LIMIT}.<br/>
+	 * This means that we need a workaround for filenames longer than the limit defined in {@link FileConstants#ENCRYPTED_FILENAME_LENGTH_LIMIT}.<br/>
 	 * <br/>
 	 * For filenames longer than this limit we use a metadata file containing the full encrypted paths. For the actual filename a unique alternative is created by concatenating the metadata filename
 	 * and a unique id.

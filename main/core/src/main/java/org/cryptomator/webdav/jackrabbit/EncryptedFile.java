@@ -10,13 +10,15 @@ package org.cryptomator.webdav.jackrabbit;
 
 import java.io.EOFException;
 import java.io.IOException;
+import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
+import java.nio.channels.OverlappingFileLockException;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
-import java.nio.file.attribute.BasicFileAttributes;
 
 import org.apache.jackrabbit.webdav.DavException;
 import org.apache.jackrabbit.webdav.DavResource;
@@ -37,7 +39,7 @@ import org.eclipse.jetty.http.HttpHeaderValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class EncryptedFile extends AbstractEncryptedNode {
+class EncryptedFile extends AbstractEncryptedNode implements FileConstants {
 
 	private static final Logger LOG = LoggerFactory.getLogger(EncryptedFile.class);
 
@@ -49,7 +51,24 @@ class EncryptedFile extends AbstractEncryptedNode {
 			throw new IllegalArgumentException("filePath must not be null");
 		}
 		this.cryptoWarningHandler = cryptoWarningHandler;
-		this.determineProperties();
+		if (Files.isRegularFile(filePath)) {
+			try (final FileChannel c = FileChannel.open(filePath, StandardOpenOption.READ, StandardOpenOption.DSYNC); final FileLock lock = c.tryLock(0L, FILE_HEADER_LENGTH, true)) {
+				final Long contentLength = cryptor.decryptedContentLength(c);
+				properties.add(new DefaultDavProperty<Long>(DavPropertyName.GETCONTENTLENGTH, contentLength));
+				if (contentLength > RANGE_REQUEST_LOWER_LIMIT) {
+					properties.add(new HttpHeaderProperty(HttpHeader.ACCEPT_RANGES.asString(), HttpHeaderValue.BYTES.asString()));
+				}
+			} catch (OverlappingFileLockException e) {
+				// file header currently locked, report -1 for unknown size.
+				properties.add(new DefaultDavProperty<Long>(DavPropertyName.GETCONTENTLENGTH, -1l));
+			} catch (IOException e) {
+				LOG.error("Error reading filesize " + filePath.toString(), e);
+				throw new IORuntimeException(e);
+			} catch (MacAuthenticationFailedException e) {
+				LOG.warn("Content length couldn't be determined due to MAC authentication violation.");
+				// don't add content length DAV property
+			}
+		}
 	}
 
 	@Override
@@ -91,32 +110,6 @@ class EncryptedFile extends AbstractEncryptedNode {
 				cryptoWarningHandler.macAuthFailed(getLocator().getResourcePath());
 			} catch (DecryptFailedException e) {
 				throw new IOException("Error decrypting file " + filePath.toString(), e);
-			}
-		}
-	}
-
-	@Deprecated
-	protected void determineProperties() {
-		if (Files.isRegularFile(filePath)) {
-			try (final SeekableByteChannel channel = Files.newByteChannel(filePath, StandardOpenOption.READ)) {
-				final Long contentLength = cryptor.decryptedContentLength(channel);
-				properties.add(new DefaultDavProperty<Long>(DavPropertyName.GETCONTENTLENGTH, contentLength));
-			} catch (IOException e) {
-				LOG.error("Error reading filesize " + filePath.toString(), e);
-				throw new IORuntimeException(e);
-			} catch (MacAuthenticationFailedException e) {
-				LOG.warn("Content length couldn't be determined due to MAC authentication violation.");
-				// don't add content length DAV property
-			}
-
-			try {
-				final BasicFileAttributes attrs = Files.readAttributes(filePath, BasicFileAttributes.class);
-				properties.add(new DefaultDavProperty<String>(DavPropertyName.CREATIONDATE, FileTimeUtils.toRfc1123String(attrs.creationTime())));
-				properties.add(new DefaultDavProperty<String>(DavPropertyName.GETLASTMODIFIED, FileTimeUtils.toRfc1123String(attrs.lastModifiedTime())));
-				properties.add(new HttpHeaderProperty(HttpHeader.ACCEPT_RANGES.asString(), HttpHeaderValue.BYTES.asString()));
-			} catch (IOException e) {
-				LOG.error("Error determining metadata " + filePath.toString(), e);
-				throw new IORuntimeException(e);
 			}
 		}
 	}

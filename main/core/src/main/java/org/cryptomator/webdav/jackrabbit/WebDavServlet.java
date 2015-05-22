@@ -67,17 +67,6 @@ public class WebDavServlet extends AbstractWebdavServlet {
 		}
 	}
 
-	// @Override
-	// protected void doMkCol(WebdavRequest request, WebdavResponse response, DavResource resource) throws IOException, DavException {
-	// if (resource instanceof EncryptedDirDuringCreation) {
-	// EncryptedDirDuringCreation dir = (EncryptedDirDuringCreation) resource;
-	// dir.doCreate();
-	// response.setStatus(DavServletResponse.SC_CREATED);
-	// } else {
-	//
-	// }
-	// }
-
 	@Override
 	protected boolean isPreconditionValid(WebdavRequest request, DavResource resource) {
 		return !resource.exists() || request.matchesIfHeader(resource);

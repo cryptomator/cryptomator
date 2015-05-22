@@ -29,7 +29,7 @@ import org.apache.logging.log4j.util.Strings;
 import org.cryptomator.crypto.Cryptor;
 import org.eclipse.jetty.http.HttpHeader;
 
-public class CryptoResourceFactory implements DavResourceFactory, FileNamingConventions {
+public class CryptoResourceFactory implements DavResourceFactory, FileConstants {
 
 	private final LockManager lockManager = new SimpleLockManager();
 	private final Cryptor cryptor;

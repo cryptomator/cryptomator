@@ -13,6 +13,7 @@ import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributeView;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
 import java.util.List;
 
@@ -32,6 +33,7 @@ import org.apache.jackrabbit.webdav.property.DavProperty;
 import org.apache.jackrabbit.webdav.property.DavPropertyName;
 import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
 import org.apache.jackrabbit.webdav.property.DavPropertySet;
+import org.apache.jackrabbit.webdav.property.DefaultDavProperty;
 import org.apache.jackrabbit.webdav.property.PropEntry;
 import org.cryptomator.crypto.Cryptor;
 import org.cryptomator.webdav.exceptions.IORuntimeException;
@@ -59,6 +61,15 @@ abstract class AbstractEncryptedNode implements DavResource {
 		this.cryptor = cryptor;
 		this.filePath = filePath;
 		this.properties = new DavPropertySet();
+		if (filePath != null && Files.exists(filePath)) {
+			try {
+				final BasicFileAttributes attrs = Files.readAttributes(filePath, BasicFileAttributes.class);
+				properties.add(new DefaultDavProperty<String>(DavPropertyName.CREATIONDATE, FileTimeUtils.toRfc1123String(attrs.creationTime())));
+				properties.add(new DefaultDavProperty<String>(DavPropertyName.GETLASTMODIFIED, FileTimeUtils.toRfc1123String(attrs.lastModifiedTime())));
+			} catch (IOException e) {
+				LOG.error("Error determining metadata " + filePath.toString(), e);
+			}
+		}
 	}
 
 	@Override
@@ -132,22 +143,24 @@ abstract class AbstractEncryptedNode implements DavResource {
 
 		LOG.info("Set property {}", property.getName());
 
-		try {
-			if (DavPropertyName.CREATIONDATE.equals(property.getName()) && property.getValue() instanceof String) {
-				final String createDateStr = (String) property.getValue();
-				final FileTime createTime = FileTimeUtils.fromRfc1123String(createDateStr);
-				final BasicFileAttributeView attrView = Files.getFileAttributeView(filePath, BasicFileAttributeView.class, LinkOption.NOFOLLOW_LINKS);
-				attrView.setTimes(null, null, createTime);
-				LOG.info("Updating Creation Date: {}", createTime.toString());
-			} else if (DavPropertyName.GETLASTMODIFIED.equals(property.getName()) && property.getValue() instanceof String) {
-				final String lastModifiedTimeStr = (String) property.getValue();
-				final FileTime lastModifiedTime = FileTimeUtils.fromRfc1123String(lastModifiedTimeStr);
-				final BasicFileAttributeView attrView = Files.getFileAttributeView(filePath, BasicFileAttributeView.class, LinkOption.NOFOLLOW_LINKS);
-				attrView.setTimes(lastModifiedTime, null, null);
-				LOG.info("Updating Last Modified Date: {}", lastModifiedTime.toString());
+		if (Files.exists(filePath)) {
+			try {
+				if (DavPropertyName.CREATIONDATE.equals(property.getName()) && property.getValue() instanceof String) {
+					final String createDateStr = (String) property.getValue();
+					final FileTime createTime = FileTimeUtils.fromRfc1123String(createDateStr);
+					final BasicFileAttributeView attrView = Files.getFileAttributeView(filePath, BasicFileAttributeView.class, LinkOption.NOFOLLOW_LINKS);
+					attrView.setTimes(null, null, createTime);
+					LOG.info("Updating Creation Date: {}", createTime.toString());
+				} else if (DavPropertyName.GETLASTMODIFIED.equals(property.getName()) && property.getValue() instanceof String) {
+					final String lastModifiedTimeStr = (String) property.getValue();
+					final FileTime lastModifiedTime = FileTimeUtils.fromRfc1123String(lastModifiedTimeStr);
+					final BasicFileAttributeView attrView = Files.getFileAttributeView(filePath, BasicFileAttributeView.class, LinkOption.NOFOLLOW_LINKS);
+					attrView.setTimes(lastModifiedTime, null, null);
+					LOG.info("Updating Last Modified Date: {}", lastModifiedTime.toString());
+				}
+			} catch (IOException e) {
+				throw new DavException(DavServletResponse.SC_INTERNAL_SERVER_ERROR);
 			}
-		} catch (IOException e) {
-			throw new DavException(DavServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 	}
 

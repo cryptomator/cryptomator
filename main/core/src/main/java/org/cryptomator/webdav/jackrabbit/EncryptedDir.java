@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
-import java.nio.channels.SeekableByteChannel;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.DirectoryStream;
@@ -21,7 +20,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -53,7 +51,7 @@ import org.eclipse.jetty.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class EncryptedDir extends AbstractEncryptedNode implements FileNamingConventions {
+class EncryptedDir extends AbstractEncryptedNode implements FileConstants {
 
 	private static final Logger LOG = LoggerFactory.getLogger(EncryptedDir.class);
 	private final FilenameTranslator filenameTranslator;
@@ -63,7 +61,8 @@ class EncryptedDir extends AbstractEncryptedNode implements FileNamingConvention
 	public EncryptedDir(CryptoResourceFactory factory, DavResourceLocator locator, DavSession session, LockManager lockManager, Cryptor cryptor, FilenameTranslator filenameTranslator, Path filePath) {
 		super(factory, locator, session, lockManager, cryptor, filePath);
 		this.filenameTranslator = filenameTranslator;
-		determineProperties();
+		properties.add(new ResourceType(ResourceType.COLLECTION));
+		properties.add(new DefaultDavProperty<Integer>(DavPropertyName.ISCOLLECTION, 1));
 	}
 
 	/**
@@ -173,8 +172,8 @@ class EncryptedDir extends AbstractEncryptedNode implements FileNamingConvention
 			final String cleartextFilename = FilenameUtils.getName(childLocator.getResourcePath());
 			final String ciphertextFilename = filenameTranslator.getEncryptedFilename(cleartextFilename);
 			final Path filePath = dirPath.resolve(ciphertextFilename);
-			try (final SeekableByteChannel channel = Files.newByteChannel(filePath, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
-				cryptor.encryptFile(inputContext.getInputStream(), channel);
+			try (final FileChannel c = FileChannel.open(filePath, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING); final FileLock lock = c.lock(0L, FILE_HEADER_LENGTH, false)) {
+				cryptor.encryptFile(inputContext.getInputStream(), c);
 			} catch (SecurityException e) {
 				throw new DavException(DavServletResponse.SC_FORBIDDEN, e);
 			} catch (CounterOverflowException e) {
@@ -353,22 +352,6 @@ class EncryptedDir extends AbstractEncryptedNode implements FileNamingConvention
 	@Override
 	public void spool(OutputContext outputContext) throws IOException {
 		// do nothing
-	}
-
-	@Deprecated
-	protected void determineProperties() {
-		properties.add(new ResourceType(ResourceType.COLLECTION));
-		properties.add(new DefaultDavProperty<Integer>(DavPropertyName.ISCOLLECTION, 1));
-		try {
-			if (Files.exists(filePath)) {
-				final BasicFileAttributes attrs = Files.readAttributes(filePath, BasicFileAttributes.class);
-				properties.add(new DefaultDavProperty<String>(DavPropertyName.CREATIONDATE, FileTimeUtils.toRfc1123String(attrs.creationTime())));
-				properties.add(new DefaultDavProperty<String>(DavPropertyName.GETLASTMODIFIED, FileTimeUtils.toRfc1123String(attrs.lastModifiedTime())));
-			}
-		} catch (IOException e) {
-			LOG.error("Error determining metadata " + filePath, e);
-			// don't add any further properties
-		}
 	}
 
 }
