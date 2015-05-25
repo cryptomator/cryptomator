@@ -15,6 +15,7 @@ import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributeView;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.io.FilenameUtils;
@@ -44,6 +45,8 @@ abstract class AbstractEncryptedNode implements DavResource {
 
 	private static final Logger LOG = LoggerFactory.getLogger(AbstractEncryptedNode.class);
 	private static final String DAV_COMPLIANCE_CLASSES = "1, 2";
+	private static final String[] DAV_CREATIONDATE_PROPNAMES = {DavPropertyName.CREATIONDATE.getName(), "Win32CreationTime"};
+	private static final String[] DAV_MODIFIEDDATE_PROPNAMES = {DavPropertyName.GETLASTMODIFIED.getName(), "Win32LastModifiedTime"};
 
 	protected final CryptoResourceFactory factory;
 	protected final DavResourceLocator locator;
@@ -141,22 +144,23 @@ abstract class AbstractEncryptedNode implements DavResource {
 	public void setProperty(DavProperty<?> property) throws DavException {
 		getProperties().add(property);
 
-		LOG.info("Set property {}", property.getName());
-
+		LOG.trace("Set property {}", property.getName());
+		
+		final String namespacelessPropertyName = property.getName().getName();
 		if (Files.exists(filePath)) {
 			try {
-				if (DavPropertyName.CREATIONDATE.equals(property.getName()) && property.getValue() instanceof String) {
+				if (Arrays.asList(DAV_CREATIONDATE_PROPNAMES).contains(namespacelessPropertyName) && property.getValue() instanceof String) {
 					final String createDateStr = (String) property.getValue();
 					final FileTime createTime = FileTimeUtils.fromRfc1123String(createDateStr);
 					final BasicFileAttributeView attrView = Files.getFileAttributeView(filePath, BasicFileAttributeView.class, LinkOption.NOFOLLOW_LINKS);
 					attrView.setTimes(null, null, createTime);
-					LOG.info("Updating Creation Date: {}", createTime.toString());
-				} else if (DavPropertyName.GETLASTMODIFIED.equals(property.getName()) && property.getValue() instanceof String) {
+					LOG.debug("Updating Creation Date: {}", createTime.toString());
+				} else if (Arrays.asList(DAV_MODIFIEDDATE_PROPNAMES).contains(namespacelessPropertyName) && property.getValue() instanceof String) {
 					final String lastModifiedTimeStr = (String) property.getValue();
 					final FileTime lastModifiedTime = FileTimeUtils.fromRfc1123String(lastModifiedTimeStr);
 					final BasicFileAttributeView attrView = Files.getFileAttributeView(filePath, BasicFileAttributeView.class, LinkOption.NOFOLLOW_LINKS);
 					attrView.setTimes(lastModifiedTime, null, null);
-					LOG.info("Updating Last Modified Date: {}", lastModifiedTime.toString());
+					LOG.debug("Updating Last Modified Date: {}", lastModifiedTime.toString());
 				}
 			} catch (IOException e) {
 				throw new DavException(DavServletResponse.SC_INTERNAL_SERVER_ERROR);
