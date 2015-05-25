@@ -46,14 +46,16 @@ final class WindowsWebDavMounter implements WebDavMounterStrategy {
 
 	@Override
 	public WebDavMount mount(URI uri, String name) throws CommandFailedException {
-		final Script mountScript = fromLines("net use * \\\\localhost@%DAV_PORT%\\DavWWWRoot%DAV_UNC_PATH% /persistent:no");
+        final Script proxyBypassCmd = fromLines("reg add \"HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings\" /v \"ProxyOverride\" /d \"<local>;0--1.ipv6-literal.net;0--1.ipv6-literal.net:%PORT%\" /f");
+        proxyBypassCmd.addEnv("PORT", String.valueOf(uri.getPort()));
+		final Script mountScript = fromLines("net use * \\\\0--1.ipv6-literal.net@%DAV_PORT%\\DavWWWRoot%DAV_UNC_PATH% /persistent:no");
 		System.err.println(mountScript.getLines()[0]);
 		mountScript.addEnv("DAV_PORT", String.valueOf(uri.getPort())).addEnv("DAV_UNC_PATH", uri.getRawPath().replace('/', '\\'));
 		String driveLetter = null;
 		// The ugliness of the following 20 lines is solely windows' fault. Deal with it.
 		for (int i = 0; i < MAX_MOUNT_ATTEMPTS; i++) {
 			try {
-				//proxyBypassCmd.execute();
+				proxyBypassCmd.execute();
 				final CommandResult mountResult = mountScript.execute(5, TimeUnit.SECONDS);
 				driveLetter = getDriveLetter(mountResult.getStdOut());
 				break;
