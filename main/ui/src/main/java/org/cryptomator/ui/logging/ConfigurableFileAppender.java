@@ -2,11 +2,11 @@ package org.cryptomator.ui.logging;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.logging.log4j.core.Filter;
@@ -30,6 +30,7 @@ public class ConfigurableFileAppender extends AbstractOutputStreamAppender<FileM
 	private static final long serialVersionUID = -6548221568069606389L;
 	private static final int DEFAULT_BUFFER_SIZE = 8192;
 	private static final String DEFAULT_FILE_NAME = "cryptomator.log";
+	private static final Pattern DRIVE_LETTER_WITH_PRECEEDING_SLASH = Pattern.compile("^/[A-Z]:", Pattern.CASE_INSENSITIVE);
 
 	protected ConfigurableFileAppender(String name, Layout<? extends Serializable> layout, Filter filter, FileManager manager) {
 		super(name, layout, filter, true, true, manager);
@@ -66,8 +67,12 @@ public class ConfigurableFileAppender extends AbstractOutputStreamAppender<FileM
 		} else {
 			// relative Path:
 			try {
-				final URI jarFileLocation = ConfigurableFileAppender.class.getProtectionDomain().getCodeSource().getLocation().toURI();
-				final Path workingDir = FileSystems.getDefault().getPath(jarFileLocation.getPath()).getParent();
+				String jarFileLocation = ConfigurableFileAppender.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
+				if (SystemUtils.IS_OS_WINDOWS && DRIVE_LETTER_WITH_PRECEEDING_SLASH.matcher(jarFileLocation).find()) {
+					// on windows we need to remove a preceeding slash from "/C:/foo/bar":
+					jarFileLocation = jarFileLocation.substring(1);
+				}
+				final Path workingDir = FileSystems.getDefault().getPath(jarFileLocation).getParent();
 				filePath = workingDir.resolve(fileName);
 			} catch (URISyntaxException e) {
 				LOGGER.error("Unable to resolve working directory ", e);

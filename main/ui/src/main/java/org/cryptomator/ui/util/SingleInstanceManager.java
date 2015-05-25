@@ -140,7 +140,7 @@ public class SingleInstanceManager {
 			if (key.isAcceptable()) {
 				final SocketChannel accepted = channel.accept();
 				if (accepted != null) {
-					LOG.info("accepted incoming connection");
+					LOG.debug("accepted incoming connection");
 					accepted.configureBlocking(false);
 					accepted.register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE);
 				}
@@ -157,7 +157,7 @@ public class SingleInstanceManager {
 				if (!state.write.hasRemaining()) {
 					state.write = null;
 				}
-				LOG.debug("wrote welcome. switching to read only.");
+				LOG.trace("wrote welcome. switching to read only.");
 				key.interestOps(SelectionKey.OP_READ);
 			}
 
@@ -247,7 +247,7 @@ public class SingleInstanceManager {
 		try {
 			channel = SocketChannel.open();
 			channel.configureBlocking(false);
-			LOG.info("connecting to instance {}", port.get());
+			LOG.debug("connecting to instance {}", port.get());
 			channel.connect(new InetSocketAddress(InetAddress.getLoopbackAddress(), port.get()));
 
 			SocketChannel fChannel = channel;
@@ -255,7 +255,7 @@ public class SingleInstanceManager {
 				return Optional.empty();
 			}
 
-			LOG.info("connected to instance {}", port.get());
+			LOG.debug("connected to instance {}", port.get());
 
 			final byte[] bytes = applicationKey.getBytes();
 			ByteBuffer buf = ByteBuffer.allocate(bytes.length);
@@ -313,7 +313,7 @@ public class SingleInstanceManager {
 
 		final int port = ((InetSocketAddress) channel.getLocalAddress()).getPort();
 		Preferences.userNodeForPackage(Cryptomator.class).putInt(applicationKey, port);
-		LOG.info("InstanceManager bound to port {}", port);
+		LOG.debug("InstanceManager bound to port {}", port);
 
 		Selector selector = Selector.open();
 		channel.register(selector, SelectionKey.OP_ACCEPT);

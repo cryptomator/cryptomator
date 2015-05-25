@@ -32,7 +32,7 @@ import org.cryptomator.ui.util.command.Script;
 final class WindowsWebDavMounter implements WebDavMounterStrategy {
 
 	private static final Pattern WIN_MOUNT_DRIVELETTER_PATTERN = Pattern.compile("\\s*([A-Z]:)\\s*");
-	private static final int MAX_MOUNT_ATTEMPTS = 10;
+	private static final int MAX_MOUNT_ATTEMPTS = 12;
 
 	@Override
 	public boolean shouldWork() {
@@ -42,9 +42,11 @@ final class WindowsWebDavMounter implements WebDavMounterStrategy {
 	@Override
 	public void warmUp(int serverPort) {
 		try {
-			final Script proxyBypassCmd = fromLines("reg add \"HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings\" /v \"ProxyOverride\" /d \"<local>;0--1.ipv6-literal.net\" /f");
+			final Script proxyBypassCmd = fromLines("reg add \"HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings\" /v \"ProxyOverride\" /d \"<local>;0--1.ipv6-literal.net;0--1.ipv6-literal.net:%PORT%\" /f");
+			proxyBypassCmd.addEnv("PORT", String.valueOf(serverPort));
 			proxyBypassCmd.execute();
-			final Script mountCmd = fromLines("net use * http://0--1.ipv6-literal.net:" + serverPort + "/bill-gates-mom-uses-goto /persistent:no");
+			final Script mountCmd = fromLines("net use * http://0--1.ipv6-literal.net:%PORT%/bill-gates-mom-uses-goto /persistent:no");
+			mountCmd.addEnv("PORT", String.valueOf(serverPort));
 			mountCmd.execute();
 		} catch (CommandFailedException e) {
 			// will most certainly throw an exception, because this is a fake WebDav path. But now windows has some DNS things cached :)
@@ -53,13 +55,16 @@ final class WindowsWebDavMounter implements WebDavMounterStrategy {
 
 	@Override
 	public WebDavMount mount(URI uri, String name) throws CommandFailedException {
+		final Script proxyBypassCmd = fromLines("reg add \"HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings\" /v \"ProxyOverride\" /d \"<local>;0--1.ipv6-literal.net;0--1.ipv6-literal.net:%PORT%\" /f");
+		proxyBypassCmd.addEnv("PORT", String.valueOf(uri.getPort()));
 		final Script mountScript = fromLines("net use * http://0--1.ipv6-literal.net:%PORT%%DAV_PATH% /persistent:no");
 		mountScript.addEnv("PORT", String.valueOf(uri.getPort())).addEnv("DAV_PATH", uri.getRawPath());
 		String driveLetter = null;
 		// The ugliness of the following 20 lines is solely windows' fault. Deal with it.
 		for (int i = 0; i < MAX_MOUNT_ATTEMPTS; i++) {
 			try {
-				final CommandResult mountResult = mountScript.execute(10, TimeUnit.SECONDS);
+				proxyBypassCmd.execute();
+				final CommandResult mountResult = mountScript.execute(5, TimeUnit.SECONDS);
 				driveLetter = getDriveLetter(mountResult.getStdOut());
 				break;
 			} catch (CommandFailedException ex) {
@@ -67,8 +72,8 @@ final class WindowsWebDavMounter implements WebDavMounterStrategy {
 					throw ex;
 				} else {
 					try {
-						// retry after 2s
-						Thread.sleep(2000);
+						// retry after 2.5s
+						Thread.sleep(2500);
 					} catch (InterruptedException e) {
 						Thread.currentThread().interrupt();
 					}
