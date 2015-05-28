@@ -14,6 +14,7 @@ import static java.lang.String.format;
 import java.io.IOException;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.logging.log4j.util.Strings;
 import org.cryptomator.ui.util.mount.CommandFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,7 +78,15 @@ public final class CommandResult {
 
 	private void logDebugInfo() {
 		if (LOG.isDebugEnabled()) {
-			LOG.debug("Command execution finished. Exit code: {}\n" + "Output:\n" + "{}\n" + "Error:\n" + "{}\n", process.exitValue(), stdout, stderr);
+			if (Strings.isEmpty(stderr) && Strings.isEmpty(stdout)) {
+				LOG.debug("Command execution finished. Exit code: {}", process.exitValue());
+			} else if (Strings.isEmpty(stderr)) {
+				LOG.debug("Command execution finished. Exit code: {}\nOutput: {}", process.exitValue(), stdout);
+			} else if (Strings.isEmpty(stdout)) {
+				LOG.debug("Command execution finished. Exit code: {}\nError: {}", process.exitValue(), stderr);
+			} else {
+				LOG.debug("Command execution finished. Exit code: {}\n Output: {}\nError: {}", process.exitValue(), stdout, stderr);
+			}
 		}
 	}
 

@@ -43,7 +43,6 @@ public class MainApplication extends Application {
 
 	private static final Logger LOG = LoggerFactory.getLogger(MainApplication.class);
 
-	private final CleanShutdownPerformer cleanShutdownPerformer = new CleanShutdownPerformer();
 	private final ExecutorService executorService;
 	private final ControllerFactory controllerFactory;
 	private final DeferredCloser closer;
@@ -65,6 +64,7 @@ public class MainApplication extends Application {
 		this.executorService = executorService;
 		this.controllerFactory = controllerFactory;
 		this.closer = closer;
+		Cryptomator.addShutdownTask(closer::close);
 		appRef.set(this);
 	}
 
@@ -81,8 +81,6 @@ public class MainApplication extends Application {
 				Thread.currentThread().setContextClassLoader(contextClassLoader);
 			}
 		});
-
-		Runtime.getRuntime().addShutdownHook(cleanShutdownPerformer);
 
 		chooseNativeStylesheet();
 		final ResourceBundle rb = ResourceBundle.getBundle("localization");
@@ -162,18 +160,6 @@ public class MainApplication extends Application {
 	@Override
 	public void stop() {
 		closer.close();
-		try {
-			Runtime.getRuntime().removeShutdownHook(cleanShutdownPerformer);
-		} catch (Exception e) {
-
-		}
-	}
-
-	private class CleanShutdownPerformer extends Thread {
-		@Override
-		public void run() {
-			closer.close();
-		}
 	}
 
 	/**
