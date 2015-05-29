@@ -2,6 +2,7 @@ package org.cryptomator.webdav.jackrabbit;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
@@ -15,6 +16,8 @@ import java.nio.file.attribute.FileTime;
 import java.util.Map;
 import java.util.UUID;
 
+import org.apache.commons.collections4.BidiMap;
+import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 import org.apache.commons.collections4.map.LRUMap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -23,16 +26,19 @@ import org.cryptomator.crypto.Cryptor;
 import org.cryptomator.crypto.exceptions.DecryptFailedException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 class FilenameTranslator implements FileConstants {
 
 	private static final int MAX_CACHED_DIRECTORY_IDS = 5000;
+	private static final int MAX_CACHED_METADATA_FILES = 1000;
 
 	private final Cryptor cryptor;
 	private final Path dataRoot;
 	private final Path metadataRoot;
 	private final ObjectMapper objectMapper = new ObjectMapper();
 	private final Map<Pair<Path, FileTime>, String> directoryIdCache = new LRUMap<>(MAX_CACHED_DIRECTORY_IDS); // <directoryFile, directoryId>
+	private final Map<Pair<Path, FileTime>, LongFilenameMetadata> metadataCache = new LRUMap<>(MAX_CACHED_METADATA_FILES); // <metadataFile, metadata>
 
 	public FilenameTranslator(Cryptor cryptor, Path vaultRoot) {
 		this.cryptor = cryptor;
@@ -121,26 +127,7 @@ class FilenameTranslator implements FileConstants {
 		return cryptor.decryptFilename(ciphertext);
 	}
 
-	/* Long name metadata files */
-
-	private void writeMetadata(String metadataGroup, LongFilenameMetadata metadata) throws IOException {
-		final Path metadataDir = metadataRoot.resolve(metadataGroup.substring(0, 2));
-		Files.createDirectories(metadataDir);
-		final Path metadataFile = metadataDir.resolve(metadataGroup.substring(2));
-		final byte[] metadataContent = objectMapper.writeValueAsBytes(metadata);
-		writeAllBytesAtomically(metadataFile, metadataContent);
-	}
-
-	private LongFilenameMetadata readMetadata(String metadataGroup) throws IOException {
-		final Path metadataDir = metadataRoot.resolve(metadataGroup.substring(0, 2));
-		final Path metadataFile = metadataDir.resolve(metadataGroup.substring(2));
-		if (!Files.isReadable(metadataFile)) {
-			return new LongFilenameMetadata();
-		} else {
-			final byte[] metadataContent = readAllBytesAtomically(metadataFile);
-			return objectMapper.readValue(metadataContent, LongFilenameMetadata.class);
-		}
-	}
+	/* Locked I/O */
 
 	private void writeAllBytesAtomically(Path path, byte[] bytes) throws IOException {
 		try (final FileChannel c = FileChannel.open(path, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.DSYNC); final FileLock lock = c.lock()) {
@@ -154,6 +141,86 @@ class FilenameTranslator implements FileConstants {
 			c.read(buffer);
 			return buffer.array();
 		}
+	}
+
+	/* Long name metadata files */
+
+	private void writeMetadata(String metadataGroup, LongFilenameMetadata metadata) throws IOException {
+		final Path metadataDir = metadataRoot.resolve(metadataGroup.substring(0, 2));
+		Files.createDirectories(metadataDir);
+		final Path metadataFile = metadataDir.resolve(metadataGroup.substring(2));
+
+		// evict previously cached entries:
+		try {
+			final Pair<Path, FileTime> key = ImmutablePair.of(metadataFile, Files.getLastModifiedTime(metadataFile));
+			metadataCache.remove(key);
+		} catch (FileNotFoundException | NoSuchFileException e) {
+			// didn't exist yet? then we don't need to do anything anyway.
+		}
+
+		// write:
+		final byte[] metadataContent = objectMapper.writeValueAsBytes(metadata);
+		writeAllBytesAtomically(metadataFile, metadataContent);
+
+		// add to cache:
+		final Pair<Path, FileTime> key = ImmutablePair.of(metadataFile, Files.getLastModifiedTime(metadataFile));
+		metadataCache.put(key, metadata);
+	}
+
+	private LongFilenameMetadata readMetadata(String metadataGroup) throws IOException {
+		final Path metadataDir = metadataRoot.resolve(metadataGroup.substring(0, 2));
+		final Path metadataFile = metadataDir.resolve(metadataGroup.substring(2));
+		try {
+			// use cached metadata, if possible:
+			final Pair<Path, FileTime> key = ImmutablePair.of(metadataFile, Files.getLastModifiedTime(metadataFile));
+			LongFilenameMetadata metadata = metadataCache.get(key);
+			// else read from filesystem:
+			if (metadata == null) {
+				final byte[] metadataContent = readAllBytesAtomically(metadataFile);
+				metadata = objectMapper.readValue(metadataContent, LongFilenameMetadata.class);
+				metadataCache.put(key, metadata);
+			}
+			return metadata;
+		} catch (FileNotFoundException | NoSuchFileException e) {
+			// not yet existing:
+			return new LongFilenameMetadata();
+		}
+	}
+
+	private static class LongFilenameMetadata implements Serializable {
+
+		private static final long serialVersionUID = 6214509403824421320L;
+
+		@JsonDeserialize(as = DualHashBidiMap.class)
+		private BidiMap<UUID, String> encryptedFilenames = new DualHashBidiMap<>();
+
+		/* Getter/Setter */
+
+		public synchronized String getEncryptedFilenameForUUID(final UUID uuid) {
+			return encryptedFilenames.get(uuid);
+		}
+
+		public synchronized UUID getOrCreateUuidForEncryptedFilename(String encryptedFilename) {
+			UUID uuid = encryptedFilenames.getKey(encryptedFilename);
+			if (uuid == null) {
+				uuid = UUID.randomUUID();
+				encryptedFilenames.put(uuid, encryptedFilename);
+			}
+			return uuid;
+		}
+
+		// used by jackson
+		@SuppressWarnings("unused")
+		public BidiMap<UUID, String> getEncryptedFilenames() {
+			return encryptedFilenames;
+		}
+
+		// used by jackson
+		@SuppressWarnings("unused")
+		public void setEncryptedFilenames(BidiMap<UUID, String> encryptedFilenames) {
+			this.encryptedFilenames = encryptedFilenames;
+		}
+
 	}
 
 }
