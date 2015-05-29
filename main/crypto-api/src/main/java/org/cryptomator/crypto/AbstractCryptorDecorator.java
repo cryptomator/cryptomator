@@ -33,8 +33,8 @@ public class AbstractCryptorDecorator implements Cryptor {
 	}
 
 	@Override
-	public String encryptDirectoryPath(String cleartextPath, String nativePathSep) {
-		return cryptor.encryptDirectoryPath(cleartextPath, nativePathSep);
+	public String encryptDirectoryPath(String cleartextDirectoryId, String nativePathSep) {
+		return cryptor.encryptDirectoryPath(cleartextDirectoryId, nativePathSep);
 	}
 
 	@Override

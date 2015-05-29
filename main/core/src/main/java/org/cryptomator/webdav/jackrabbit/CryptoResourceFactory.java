@@ -1,16 +1,10 @@
 package org.cryptomator.webdav.jackrabbit;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
-import java.nio.channels.FileLock;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
-import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 
 import org.apache.commons.httpclient.HttpStatus;
@@ -120,7 +114,7 @@ public class CryptoResourceFactory implements DavResourceFactory, FileConstants 
 		final Path parent = createEncryptedDirectoryPath(parentCleartextPath);
 		final String cleartextFilename = FilenameUtils.getName(relativeCleartextPath);
 		try {
-			final String encryptedFilename = filenameTranslator.getEncryptedDirName(cleartextFilename);
+			final String encryptedFilename = filenameTranslator.getEncryptedDirFileName(cleartextFilename);
 			return parent.resolve(encryptedFilename);
 		} catch (IOException e) {
 			throw new DavException(DavServletResponse.SC_INTERNAL_SERVER_ERROR, e);
@@ -143,15 +137,9 @@ public class CryptoResourceFactory implements DavResourceFactory, FileConstants 
 				final String parentCleartextPath = FilenameUtils.getPathNoEndSeparator(relativeCleartextPath);
 				final Path parent = createEncryptedDirectoryPath(parentCleartextPath);
 				final String cleartextFilename = FilenameUtils.getName(relativeCleartextPath);
-				final String encryptedFilename = filenameTranslator.getEncryptedDirName(cleartextFilename);
+				final String encryptedFilename = filenameTranslator.getEncryptedDirFileName(cleartextFilename);
 				final Path directoryFile = parent.resolve(encryptedFilename);
-				final String directoryId;
-				if (Files.exists(directoryFile)) {
-					directoryId = new String(readAllBytesAtomically(directoryFile), StandardCharsets.UTF_8);
-				} else {
-					directoryId = UUID.randomUUID().toString();
-					writeAllBytesAtomically(directoryFile, directoryId.getBytes(StandardCharsets.UTF_8));
-				}
+				final String directoryId = filenameTranslator.getDirectoryId(directoryFile, true);
 				final String directory = cryptor.encryptDirectoryPath(directoryId, FileSystems.getDefault().getSeparator());
 				result = dataRoot.resolve(directory);
 			}
@@ -192,22 +180,6 @@ public class CryptoResourceFactory implements DavResourceFactory, FileConstants 
 
 	private NonExistingNode createNonExisting(DavResourceLocator locator, DavSession session, Path filePath, Path dirFilePath) {
 		return new NonExistingNode(this, locator, session, lockManager, cryptor, filePath, dirFilePath);
-	}
-
-	/* IO support */
-
-	private void writeAllBytesAtomically(Path path, byte[] bytes) throws IOException {
-		try (final FileChannel c = FileChannel.open(path, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.DSYNC); final FileLock lock = c.lock()) {
-			c.write(ByteBuffer.wrap(bytes));
-		}
-	}
-
-	private byte[] readAllBytesAtomically(Path path) throws IOException {
-		try (final FileChannel c = FileChannel.open(path, StandardOpenOption.READ, StandardOpenOption.DSYNC); final FileLock lock = c.lock(0L, Long.MAX_VALUE, true)) {
-			final ByteBuffer buffer = ByteBuffer.allocate((int) c.size());
-			c.read(buffer);
-			return buffer.array();
-		}
 	}
 
 }

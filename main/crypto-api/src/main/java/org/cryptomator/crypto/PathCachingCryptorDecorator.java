@@ -12,7 +12,7 @@ public class PathCachingCryptorDecorator extends AbstractCryptorDecorator {
 	private static final int MAX_CACHED_PATHS = 5000;
 	private static final int MAX_CACHED_NAMES = 5000;
 
-	private final Map<String, String> pathCache = new LRUMap<>(MAX_CACHED_PATHS); // <cleartextPath, ciphertextPath>
+	private final Map<String, String> pathCache = new LRUMap<>(MAX_CACHED_PATHS); // <cleartextDirectoryId, ciphertextPath>
 	private final BidiMap<String, String> nameCache = new BidiLRUMap<>(MAX_CACHED_NAMES); // <cleartextName, ciphertextName>
 
 	private PathCachingCryptorDecorator(Cryptor cryptor) {
@@ -26,36 +26,23 @@ public class PathCachingCryptorDecorator extends AbstractCryptorDecorator {
 	/* Cryptor */
 
 	@Override
-	public String encryptDirectoryPath(String cleartextPath, String nativePathSep) {
-		if (pathCache.containsKey(cleartextPath)) {
-			return pathCache.get(cleartextPath);
-		} else {
-			final String ciphertextPath = cryptor.encryptDirectoryPath(cleartextPath, nativePathSep);
-			pathCache.put(cleartextPath, ciphertextPath);
-			return ciphertextPath;
-		}
+	public String encryptDirectoryPath(String cleartextDirectoryId, String nativePathSep) {
+		return pathCache.computeIfAbsent(cleartextDirectoryId, id -> cryptor.encryptDirectoryPath(id, nativePathSep));
 	}
 
 	@Override
 	public String encryptFilename(String cleartextName) {
-		if (nameCache.containsKey(cleartextName)) {
-			return nameCache.get(cleartextName);
-		} else {
-			final String ciphertextName = cryptor.encryptFilename(cleartextName);
-			nameCache.put(cleartextName, ciphertextName);
-			return ciphertextName;
-		}
+		return nameCache.computeIfAbsent(cleartextName, name -> cryptor.encryptFilename(name));
 	}
 
 	@Override
 	public String decryptFilename(String ciphertextName) throws DecryptFailedException {
-		if (nameCache.containsValue(ciphertextName)) {
-			return nameCache.getKey(ciphertextName);
-		} else {
-			final String cleartextName = cryptor.decryptFilename(ciphertextName);
+		String cleartextName = nameCache.getKey(ciphertextName);
+		if (cleartextName == null) {
+			cleartextName = cryptor.decryptFilename(ciphertextName);
 			nameCache.put(cleartextName, ciphertextName);
-			return ciphertextName;
 		}
+		return cleartextName;
 	}
 
 	private static class BidiLRUMap<K, V> extends AbstractDualBidiMap<K, V> {

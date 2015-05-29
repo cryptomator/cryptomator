@@ -1,16 +1,24 @@
 package org.cryptomator.webdav.jackrabbit;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.nio.file.attribute.FileTime;
+import java.util.Map;
 import java.util.UUID;
 
+import org.apache.commons.collections4.map.LRUMap;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.cryptomator.crypto.Cryptor;
 import org.cryptomator.crypto.exceptions.DecryptFailedException;
 
@@ -18,10 +26,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 class FilenameTranslator implements FileConstants {
 
+	private static final int MAX_CACHED_DIRECTORY_IDS = 5000;
+
 	private final Cryptor cryptor;
 	private final Path dataRoot;
 	private final Path metadataRoot;
 	private final ObjectMapper objectMapper = new ObjectMapper();
+	private final Map<Pair<Path, FileTime>, String> directoryIdCache = new LRUMap<>(MAX_CACHED_DIRECTORY_IDS); // <directoryFile, directoryId>
 
 	public FilenameTranslator(Cryptor cryptor, Path vaultRoot) {
 		this.cryptor = cryptor;
@@ -30,6 +41,28 @@ class FilenameTranslator implements FileConstants {
 	}
 
 	/* file and directory name en/decryption */
+
+	public String getDirectoryId(Path directoryFile, boolean createIfNonexisting) throws IOException {
+		try {
+			final Pair<Path, FileTime> key = ImmutablePair.of(directoryFile, Files.getLastModifiedTime(directoryFile));
+			String directoryId = directoryIdCache.get(key);
+			if (directoryId == null) {
+				directoryId = new String(readAllBytesAtomically(directoryFile), StandardCharsets.UTF_8);
+				directoryIdCache.put(key, directoryId);
+			}
+			return directoryId;
+		} catch (FileNotFoundException | NoSuchFileException e) {
+			if (createIfNonexisting) {
+				final String directoryId = UUID.randomUUID().toString();
+				writeAllBytesAtomically(directoryFile, directoryId.getBytes(StandardCharsets.UTF_8));
+				final Pair<Path, FileTime> key = ImmutablePair.of(directoryFile, Files.getLastModifiedTime(directoryFile));
+				directoryIdCache.put(key, directoryId);
+				return directoryId;
+			} else {
+				return null;
+			}
+		}
+	}
 
 	public Path getEncryptedDirectoryPath(String directoryId) {
 		final String encrypted = cryptor.encryptDirectoryPath(directoryId, FileSystems.getDefault().getSeparator());
@@ -40,7 +73,7 @@ class FilenameTranslator implements FileConstants {
 		return getEncryptedFilename(cleartextFilename, FILE_EXT, LONG_FILE_EXT);
 	}
 
-	public String getEncryptedDirName(String cleartextDirName) throws IOException {
+	public String getEncryptedDirFileName(String cleartextDirName) throws IOException {
 		return getEncryptedFilename(cleartextDirName, DIR_EXT, LONG_DIR_EXT);
 	}
 
@@ -94,10 +127,8 @@ class FilenameTranslator implements FileConstants {
 		final Path metadataDir = metadataRoot.resolve(metadataGroup.substring(0, 2));
 		Files.createDirectories(metadataDir);
 		final Path metadataFile = metadataDir.resolve(metadataGroup.substring(2));
-		try (final FileChannel c = FileChannel.open(metadataFile, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.DSYNC); final FileLock lock = c.lock()) {
-			byte[] bytes = objectMapper.writeValueAsBytes(metadata);
-			c.write(ByteBuffer.wrap(bytes));
-		}
+		final byte[] metadataContent = objectMapper.writeValueAsBytes(metadata);
+		writeAllBytesAtomically(metadataFile, metadataContent);
 	}
 
 	private LongFilenameMetadata readMetadata(String metadataGroup) throws IOException {
@@ -106,11 +137,22 @@ class FilenameTranslator implements FileConstants {
 		if (!Files.isReadable(metadataFile)) {
 			return new LongFilenameMetadata();
 		} else {
-			try (final FileChannel c = FileChannel.open(metadataFile, StandardOpenOption.READ, StandardOpenOption.DSYNC); final FileLock lock = c.lock(0L, Long.MAX_VALUE, true)) {
-				final ByteBuffer buffer = ByteBuffer.allocate((int) c.size());
-				c.read(buffer);
-				return objectMapper.readValue(buffer.array(), LongFilenameMetadata.class);
-			}
+			final byte[] metadataContent = readAllBytesAtomically(metadataFile);
+			return objectMapper.readValue(metadataContent, LongFilenameMetadata.class);
+		}
+	}
+
+	private void writeAllBytesAtomically(Path path, byte[] bytes) throws IOException {
+		try (final FileChannel c = FileChannel.open(path, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.DSYNC); final FileLock lock = c.lock()) {
+			c.write(ByteBuffer.wrap(bytes));
+		}
+	}
+
+	private byte[] readAllBytesAtomically(Path path) throws IOException {
+		try (final FileChannel c = FileChannel.open(path, StandardOpenOption.READ, StandardOpenOption.DSYNC); final FileLock lock = c.lock(0L, Long.MAX_VALUE, true)) {
+			final ByteBuffer buffer = ByteBuffer.allocate((int) c.size());
+			c.read(buffer);
+			return buffer.array();
 		}
 	}
 

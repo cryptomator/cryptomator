@@ -70,12 +70,8 @@ class EncryptedDir extends AbstractEncryptedNode implements FileConstants {
 	 */
 	protected synchronized String getDirectoryId() {
 		if (directoryId == null) {
-			try (final FileChannel c = FileChannel.open(filePath, StandardOpenOption.READ, StandardOpenOption.DSYNC); final FileLock lock = c.lock(0L, Long.MAX_VALUE, true)) {
-				final ByteBuffer buffer = ByteBuffer.allocate((int) c.size());
-				c.read(buffer);
-				directoryId = new String(buffer.array(), StandardCharsets.UTF_8);
-			} catch (FileNotFoundException e) {
-				directoryId = null;
+			try {
+				directoryId = filenameTranslator.getDirectoryId(filePath, false);
 			} catch (IOException e) {
 				throw new IORuntimeException(e);
 			}
@@ -139,21 +135,9 @@ class EncryptedDir extends AbstractEncryptedNode implements FileConstants {
 		}
 		try {
 			final String cleartextDirName = FilenameUtils.getName(childLocator.getResourcePath());
-			final String ciphertextDirName = filenameTranslator.getEncryptedDirName(cleartextDirName);
+			final String ciphertextDirName = filenameTranslator.getEncryptedDirFileName(cleartextDirName);
 			final Path dirFilePath = dirPath.resolve(ciphertextDirName);
-			final String directoryId;
-			if (Files.exists(dirFilePath)) {
-				try (final FileChannel c = FileChannel.open(dirFilePath, StandardOpenOption.READ, StandardOpenOption.DSYNC); final FileLock lock = c.lock(0L, Long.MAX_VALUE, true)) {
-					final ByteBuffer buffer = ByteBuffer.allocate((int) c.size());
-					c.read(buffer);
-					directoryId = new String(buffer.array(), StandardCharsets.UTF_8);
-				}
-			} else {
-				directoryId = UUID.randomUUID().toString();
-				try (final FileChannel c = FileChannel.open(dirFilePath, StandardOpenOption.WRITE, StandardOpenOption.CREATE_NEW, StandardOpenOption.DSYNC); final FileLock lock = c.lock()) {
-					c.write(ByteBuffer.wrap(directoryId.getBytes(StandardCharsets.UTF_8)));
-				}
-			}
+			final String directoryId = filenameTranslator.getDirectoryId(dirFilePath, true);
 			final Path directoryPath = filenameTranslator.getEncryptedDirectoryPath(directoryId);
 			Files.createDirectories(directoryPath);
 		} catch (SecurityException e) {
@@ -257,7 +241,7 @@ class EncryptedDir extends AbstractEncryptedNode implements FileConstants {
 				if (subDirPath != null) {
 					Files.deleteIfExists(subDirPath);
 				}
-				ciphertextFilename = filenameTranslator.getEncryptedDirName(cleartextFilename);
+				ciphertextFilename = filenameTranslator.getEncryptedDirFileName(cleartextFilename);
 			} else {
 				ciphertextFilename = filenameTranslator.getEncryptedFilename(cleartextFilename);
 			}
@@ -333,17 +317,8 @@ class EncryptedDir extends AbstractEncryptedNode implements FileConstants {
 					Files.copy(srcChildPath, dstChildPath, StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING);
 				}
 			} else if (StringUtils.endsWithIgnoreCase(childName, DIR_EXT)) {
-				final String srcSubdirId;
-				try (final FileChannel c = FileChannel.open(srcChildPath, StandardOpenOption.READ, StandardOpenOption.DSYNC); final FileLock lock = c.lock(0L, Long.MAX_VALUE, true)) {
-					final ByteBuffer buffer = ByteBuffer.allocate((int) c.size());
-					c.read(buffer);
-					srcSubdirId = new String(buffer.array(), StandardCharsets.UTF_8);
-				}
-				final String dstSubdirId = UUID.randomUUID().toString();
-				try (final FileChannel c = FileChannel.open(dstChildPath, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.DSYNC);
-						final FileLock lock = c.lock()) {
-					c.write(ByteBuffer.wrap(dstSubdirId.getBytes(StandardCharsets.UTF_8)));
-				}
+				final String srcSubdirId = filenameTranslator.getDirectoryId(srcChildPath, false);
+				final String dstSubdirId = filenameTranslator.getDirectoryId(dstChildPath, true);
 				copyDirectoryContents(srcSubdirId, dstSubdirId);
 			}
 		}

@@ -138,7 +138,7 @@ class EncryptedFilePart extends EncryptedFile {
 			}
 		} catch (EOFException e) {
 			if (LOG.isDebugEnabled()) {
-				LOG.debug("Unexpected end of stream during delivery of partial content (client hung up).");
+				LOG.trace("Unexpected end of stream during delivery of partial content (client hung up).");
 			}
 		} catch (DecryptFailedException e) {
 			throw new IOException("Error decrypting file " + filePath.toString(), e);
