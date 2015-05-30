@@ -167,7 +167,7 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 			}
 
 			// derive key:
-			final SecretKey kek = scrypt(password, keyfile.getScryptSalt(), keyfile.getScryptCostParam(), keyfile.getScryptBlockSize(), AES_KEY_LENGTH_IN_BITS);
+			final SecretKey kek = scrypt(password, keyfile.getScryptSalt(), keyfile.getScryptCostParam(), keyfile.getScryptBlockSize(), keyfile.getKeyLength());
 
 			// decrypt and check password by catching AEAD exception
 			final Cipher decCipher = aesKeyWrapCipher(kek, Cipher.UNWRAP_MODE);
