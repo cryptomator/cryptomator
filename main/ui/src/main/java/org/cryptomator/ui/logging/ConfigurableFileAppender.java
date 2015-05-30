@@ -64,6 +64,10 @@ public class ConfigurableFileAppender extends AbstractOutputStreamAppender<FileM
 		} else if (fileName.startsWith("/")) {
 			// absolute Path:
 			filePath = FileSystems.getDefault().getPath(fileName);
+		} else if (SystemUtils.IS_OS_WINDOWS && fileName.startsWith("%appdata%/")) {
+			final String appdata = System.getenv("APPDATA");
+			final Path appdataPath = appdata != null ? FileSystems.getDefault().getPath(appdata) : FileSystems.getDefault().getPath(SystemUtils.USER_HOME);
+			filePath = appdataPath.resolve(fileName.substring(10));
 		} else {
 			// relative Path:
 			try {

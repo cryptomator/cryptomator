@@ -42,7 +42,7 @@
 									<fx:application name="${javafx.application.name}" version="${project.version}" mainClass="${exec.mainClass}" />
 									<fx:info title="${javafx.application.name}" vendor="cryptomator.org" copyright="cryptomator.org" license="MIT" category="Utility" />
 									<fx:platform javafx="2.2+" j2se="8.0" >
-										<fx:property name="logPath" value="cryptomator.log" />
+										<fx:property name="logPath" value="%appdata%/Cryptomator/cryptomator.log" />
 									</fx:platform>
 									<fx:resources>
 										<fx:fileset dir="../target/" includes="Cryptomator-${project.parent.version}.jar" />
