@@ -13,7 +13,7 @@ import static org.cryptomator.ui.util.command.Script.fromLines;
 
 import java.net.URI;
 import java.nio.file.FileSystems;
-import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -26,13 +26,11 @@ import org.cryptomator.ui.util.command.Script;
  * A {@link WebDavMounterStrategy} utilizing the "net use" command.
  * <p>
  * Tested on Windows 7 but should also work on Windows 8.
- *
- * @author Markus Kreusch
  */
 final class WindowsWebDavMounter implements WebDavMounterStrategy {
 
 	private static final Pattern WIN_MOUNT_DRIVELETTER_PATTERN = Pattern.compile("\\s*([A-Z]:)\\s*");
-	private static final int MAX_MOUNT_ATTEMPTS = 12;
+	private static final int MAX_MOUNT_ATTEMPTS = 5;
 
 	@Override
 	public boolean shouldWork() {
@@ -41,58 +39,70 @@ final class WindowsWebDavMounter implements WebDavMounterStrategy {
 
 	@Override
 	public void warmUp(int serverPort) {
-		try {
-			final Script proxyBypassCmd = fromLines("reg add \"HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings\" /v \"ProxyOverride\" /d \"<local>;0--1.ipv6-literal.net;0--1.ipv6-literal.net:%PORT%\" /f");
-			proxyBypassCmd.addEnv("PORT", String.valueOf(serverPort));
-			proxyBypassCmd.execute();
-			final Script mountCmd = fromLines("net use * http://0--1.ipv6-literal.net:%PORT%/bill-gates-mom-uses-goto /persistent:no");
-			mountCmd.addEnv("PORT", String.valueOf(serverPort));
-			mountCmd.execute();
-		} catch (CommandFailedException e) {
-			// will most certainly throw an exception, because this is a fake WebDav path. But now windows has some DNS things cached :)
-		}
+//		try {
+//			final Script mountScript = fromLines("net use * \\\\localhost@%DAV_PORT%\\DavWWWRoot\\bill-gates-mom-uses-goto /persistent:no");
+//			mountScript.addEnv("DAV_PORT", String.valueOf(serverPort));
+//			mountScript.execute(1, TimeUnit.SECONDS);
+//		} catch (CommandFailedException e) {
+//            // will most certainly throw an exception, because this is a fake WebDav path. But now windows has some DNS things cached :)
+//		}
 	}
 
 	@Override
 	public WebDavMount mount(URI uri, String name) throws CommandFailedException {
-		final Script proxyBypassCmd = fromLines("reg add \"HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings\" /v \"ProxyOverride\" /d \"<local>;0--1.ipv6-literal.net;0--1.ipv6-literal.net:%PORT%\" /f");
-		proxyBypassCmd.addEnv("PORT", String.valueOf(uri.getPort()));
-		final Script mountScript = fromLines("net use * http://0--1.ipv6-literal.net:%PORT%%DAV_PATH% /persistent:no");
-		mountScript.addEnv("PORT", String.valueOf(uri.getPort())).addEnv("DAV_PATH", uri.getRawPath());
-		String driveLetter = null;
-		// The ugliness of the following 20 lines is solely windows' fault. Deal with it.
-		for (int i = 0; i < MAX_MOUNT_ATTEMPTS; i++) {
-			try {
-				proxyBypassCmd.execute();
-				final CommandResult mountResult = mountScript.execute(5, TimeUnit.SECONDS);
-				driveLetter = getDriveLetter(mountResult.getStdOut());
-				break;
-			} catch (CommandFailedException ex) {
-				if (i == MAX_MOUNT_ATTEMPTS - 1) {
-					throw ex;
-				} else {
-					try {
-						// retry after 2.5s
-						Thread.sleep(2500);
-					} catch (InterruptedException e) {
-						Thread.currentThread().interrupt();
-					}
-				}
-			}
+		CommandResult mountResult;
+		try {
+			final Script mountScript = fromLines("net use * \\\\0--1.ipv6-literal.net@%DAV_PORT%\\DavWWWRoot%DAV_UNC_PATH% /persistent:no");
+			mountScript.addEnv("DAV_PORT", String.valueOf(uri.getPort())).addEnv("DAV_UNC_PATH", uri.getRawPath().replace('/', '\\'));
+			mountResult = mountScript.execute(5, TimeUnit.SECONDS);
+		} catch (CommandFailedException ex) {
+			final Script mountScript = fromLines("net use * \\\\0--1.ipv6-literal.net@%DAV_PORT%\\DavWWWRoot%DAV_UNC_PATH% /persistent:no");
+			mountScript.addEnv("DAV_PORT", String.valueOf(uri.getPort())).addEnv("DAV_UNC_PATH", uri.getRawPath().replace('/', '\\'));
+			final Script proxyBypassScript = fromLines("reg add \"HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings\" /v \"ProxyOverride\" /d \"<local>;0--1.ipv6-literal.net;0--1.ipv6-literal.net:%DAV_PORT%\" /f");
+	        proxyBypassScript.addEnv("DAV_PORT", String.valueOf(uri.getPort()));
+			mountResult = bypassProxyAndRetryMount(mountScript, proxyBypassScript);
 		}
+		
+		final String driveLetter = getDriveLetter(mountResult.getStdOut());
 		final Script openExplorerScript = fromLines("start explorer.exe " + driveLetter);
 		openExplorerScript.execute();
 		final Script unmountScript = fromLines("net use " + driveLetter + " /delete").addEnv("DRIVE_LETTER", driveLetter);
-		final String finalDriveLetter = driveLetter;
 		return new AbstractWebDavMount() {
 			@Override
 			public void unmount() throws CommandFailedException {
 				// only attempt unmount if user didn't unmount manually:
-				if (Files.exists(FileSystems.getDefault().getPath(finalDriveLetter))) {
+				if (isVolumeMounted(driveLetter)) {
 					unmountScript.execute();
 				}
 			}
 		};
+	}
+	
+	private boolean isVolumeMounted(String driveLetter) {
+		for (Path path : FileSystems.getDefault().getRootDirectories()) {
+			if (path.toString().startsWith(driveLetter)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	private CommandResult bypassProxyAndRetryMount(Script mountScript, Script proxyBypassScript) throws CommandFailedException {
+		CommandFailedException latestException = null;
+		for (int i = 0; i < MAX_MOUNT_ATTEMPTS; i++) {
+			try {
+				// wait a moment before next attempt
+				Thread.sleep(5000);
+				proxyBypassScript.execute();
+				return mountScript.execute(5, TimeUnit.SECONDS);
+			} catch (CommandFailedException ex) {
+				latestException = ex;
+			} catch (InterruptedException ex) {
+				Thread.currentThread().interrupt();
+				throw new CommandFailedException(ex);
+			}
+		}
+		throw latestException;
 	}
 
 	private String getDriveLetter(String result) throws CommandFailedException {

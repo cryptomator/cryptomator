@@ -8,6 +8,7 @@
  ******************************************************************************/
 package org.cryptomator.ui.util;
 
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -91,11 +92,13 @@ public class DeferredCloser implements AutoCloseable {
 	}
 
 	/**
-	 * Closes all added objects which have not been closed before.
+	 * Closes all added objects which have not been closed before and releases references.
 	 */
 	public void close() {
-		for (ManagedResource<?> closableProvider : cleanups.values()) {
+		for (Iterator<ManagedResource<?>> iterator = cleanups.values().iterator(); iterator.hasNext();) {
+			final ManagedResource<?> closableProvider = iterator.next();
 			closableProvider.close();
+			iterator.remove();
 		}
 	}
 
