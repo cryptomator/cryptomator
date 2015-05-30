@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>org.cryptomator</groupId>
 		<artifactId>main</artifactId>
-		<version>0.7.0</version>
+		<version>0.7.1</version>
 	</parent>
 	<artifactId>installer-osx</artifactId>
 	<packaging>pom</packaging>
