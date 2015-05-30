@@ -46,7 +46,7 @@ If you want to take a look at the current beta version, go ahead and get your co
 apt-get install oracle-java8-installer oracle-java8-unlimited-jce-policy fakeroot maven git
 git clone https://github.com/cryptomator/cryptomator.git
 cd cryptomator/main
-git checkout v0.6.0
+git checkout 0.7.1
 mvn clean install -Pdebian
 ```
 
