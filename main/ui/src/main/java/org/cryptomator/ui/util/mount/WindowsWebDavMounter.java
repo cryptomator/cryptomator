@@ -30,7 +30,7 @@ import org.cryptomator.ui.util.command.Script;
 final class WindowsWebDavMounter implements WebDavMounterStrategy {
 
 	private static final Pattern WIN_MOUNT_DRIVELETTER_PATTERN = Pattern.compile("\\s*([A-Z]:)\\s*");
-	private static final int MAX_MOUNT_ATTEMPTS = 5;
+	private static final int MAX_MOUNT_ATTEMPTS = 8;
 
 	@Override
 	public boolean shouldWork() {
@@ -39,30 +39,26 @@ final class WindowsWebDavMounter implements WebDavMounterStrategy {
 
 	@Override
 	public void warmUp(int serverPort) {
-//		try {
-//			final Script mountScript = fromLines("net use * \\\\localhost@%DAV_PORT%\\DavWWWRoot\\bill-gates-mom-uses-goto /persistent:no");
-//			mountScript.addEnv("DAV_PORT", String.valueOf(serverPort));
-//			mountScript.execute(1, TimeUnit.SECONDS);
-//		} catch (CommandFailedException e) {
-//            // will most certainly throw an exception, because this is a fake WebDav path. But now windows has some DNS things cached :)
-//		}
+		// no-op
 	}
 
 	@Override
 	public WebDavMount mount(URI uri, String name) throws CommandFailedException {
 		CommandResult mountResult;
 		try {
-			final Script mountScript = fromLines("net use * \\\\0--1.ipv6-literal.net@%DAV_PORT%\\DavWWWRoot%DAV_UNC_PATH% /persistent:no");
+			final Script mountScript = fromLines("net use * \\\\localhost@%DAV_PORT%\\DavWWWRoot%DAV_UNC_PATH% /persistent:no");
 			mountScript.addEnv("DAV_PORT", String.valueOf(uri.getPort())).addEnv("DAV_UNC_PATH", uri.getRawPath().replace('/', '\\'));
 			mountResult = mountScript.execute(5, TimeUnit.SECONDS);
 		} catch (CommandFailedException ex) {
-			final Script mountScript = fromLines("net use * \\\\0--1.ipv6-literal.net@%DAV_PORT%\\DavWWWRoot%DAV_UNC_PATH% /persistent:no");
-			mountScript.addEnv("DAV_PORT", String.valueOf(uri.getPort())).addEnv("DAV_UNC_PATH", uri.getRawPath().replace('/', '\\'));
+			final Script localhostMountScript = fromLines("net use * \\\\localhost@%DAV_PORT%\\DavWWWRoot%DAV_UNC_PATH% /persistent:no");
+			localhostMountScript.addEnv("DAV_PORT", String.valueOf(uri.getPort())).addEnv("DAV_UNC_PATH", uri.getRawPath().replace('/', '\\'));
+			final Script ipv6literaltMountScript = fromLines("net use * \\\\0--1.ipv6-literal.net@%DAV_PORT%\\DavWWWRoot%DAV_UNC_PATH% /persistent:no");
+			ipv6literaltMountScript.addEnv("DAV_PORT", String.valueOf(uri.getPort())).addEnv("DAV_UNC_PATH", uri.getRawPath().replace('/', '\\'));
 			final Script proxyBypassScript = fromLines("reg add \"HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings\" /v \"ProxyOverride\" /d \"<local>;0--1.ipv6-literal.net;0--1.ipv6-literal.net:%DAV_PORT%\" /f");
-	        proxyBypassScript.addEnv("DAV_PORT", String.valueOf(uri.getPort()));
-			mountResult = bypassProxyAndRetryMount(mountScript, proxyBypassScript);
+			proxyBypassScript.addEnv("DAV_PORT", String.valueOf(uri.getPort()));
+			mountResult = bypassProxyAndRetryMount(localhostMountScript, ipv6literaltMountScript, proxyBypassScript);
 		}
-		
+
 		final String driveLetter = getDriveLetter(mountResult.getStdOut());
 		final Script openExplorerScript = fromLines("start explorer.exe " + driveLetter);
 		openExplorerScript.execute();
@@ -77,7 +73,7 @@ final class WindowsWebDavMounter implements WebDavMounterStrategy {
 			}
 		};
 	}
-	
+
 	private boolean isVolumeMounted(String driveLetter) {
 		for (Path path : FileSystems.getDefault().getRootDirectories()) {
 			if (path.toString().startsWith(driveLetter)) {
@@ -86,15 +82,17 @@ final class WindowsWebDavMounter implements WebDavMounterStrategy {
 		}
 		return false;
 	}
-	
-	private CommandResult bypassProxyAndRetryMount(Script mountScript, Script proxyBypassScript) throws CommandFailedException {
+
+	private CommandResult bypassProxyAndRetryMount(Script localhostMountScript, Script ipv6literalMountScript, Script proxyBypassScript) throws CommandFailedException {
 		CommandFailedException latestException = null;
 		for (int i = 0; i < MAX_MOUNT_ATTEMPTS; i++) {
 			try {
 				// wait a moment before next attempt
 				Thread.sleep(5000);
 				proxyBypassScript.execute();
-				return mountScript.execute(5, TimeUnit.SECONDS);
+				// alternate localhost and 0--1.ipv6literal.net
+				final Script mountScript = (i % 2 == 0) ? localhostMountScript : ipv6literalMountScript;
+				return mountScript.execute(3, TimeUnit.SECONDS);
 			} catch (CommandFailedException ex) {
 				latestException = ex;
 			} catch (InterruptedException ex) {
