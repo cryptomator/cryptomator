@@ -4,6 +4,8 @@ import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.apache.commons.io.IOUtils;
+
 /**
  * Not thread-safe!
  */
@@ -25,7 +27,7 @@ public class LengthObfuscationInputStream extends FilterInputStream {
 
 	private void choosePaddingLengthOnce() {
 		if (paddingLength == -1) {
-			long upperBound = Math.min(inputBytesRead / 10, 16 * 1024 * 1024); // 10% of original bytes, but not more than 16MiBs
+			long upperBound = Math.min(Math.max(inputBytesRead / 10, 4096), 16 * 1024 * 1024); // 10% of original bytes (at least 4KiB), but not more than 16MiBs
 			paddingLength = (int) (Math.random() * upperBound);
 		}
 	}
@@ -59,8 +61,7 @@ public class LengthObfuscationInputStream extends FilterInputStream {
 
 	@Override
 	public int read(byte[] b, int off, int len) throws IOException {
-		final int n = in.read(b, 0, len);
-		final int bytesRead = Math.max(0, n); // EOF -> 0
+		final int bytesRead = IOUtils.read(in, b, off, len); // 0 on EOF
 		inputBytesRead += bytesRead;
 
 		if (bytesRead == len) {
@@ -68,16 +69,21 @@ public class LengthObfuscationInputStream extends FilterInputStream {
 		} else if (bytesRead < len) {
 			choosePaddingLengthOnce();
 			final int additionalBytesNeeded = len - bytesRead;
-			final int m = readFromPadding(b, bytesRead, additionalBytesNeeded);
-			final int additionalBytesRead = Math.max(0, m); // EOF -> 0
-			return (n == -1 && m == -1) ? -1 : bytesRead + additionalBytesRead;
+			final int additionalBytesRead = readFromPadding(b, off + bytesRead, additionalBytesNeeded);
+			return (bytesRead == 0 && additionalBytesRead == 0) ? -1 : bytesRead + additionalBytesRead;
 		} else {
 			// bytesRead > len:
-			throw new IllegalStateException("read more bytes than requested.");
+			throw new IllegalStateException("Read more bytes than requested.");
 		}
 	}
 
+	/**
+	 * @return bytes read from padding (0, if fully read)
+	 */
 	private int readFromPadding(byte[] b, int off, int len) {
+		if (len < 0) {
+			throw new IllegalArgumentException("Length must not be negative");
+		}
 		if (paddingLength == -1) {
 			throw new IllegalStateException("No padding length chosen yet.");
 		}
@@ -86,20 +92,15 @@ public class LengthObfuscationInputStream extends FilterInputStream {
 		if (remainingPadding > len) {
 			// padding available:
 			for (int i = 0; i < len; i++) {
-				b[off + i] = padding[paddingBytesRead + i % padding.length];
+				b[off + i] = padding[paddingBytesRead++ % padding.length];
 			}
-			paddingBytesRead += len;
 			return len;
-		} else if (remainingPadding > 0) {
+		} else {
 			// partly available:
 			for (int i = 0; i < remainingPadding; i++) {
-				b[off + i] = padding[paddingBytesRead + i % padding.length];
+				b[off + i] = padding[paddingBytesRead++ % padding.length];
 			}
-			paddingBytesRead += remainingPadding;
 			return remainingPadding;
-		} else {
-			// end of stream AND padding
-			return -1;
 		}
 	}
 

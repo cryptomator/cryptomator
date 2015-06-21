@@ -23,8 +23,6 @@ import java.util.Arrays;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
-import javax.crypto.CipherInputStream;
-import javax.crypto.CipherOutputStream;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.Mac;
 import javax.crypto.NoSuchPaddingException;
@@ -418,7 +416,7 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 		// reading ciphered input and MACs interleaved:
 		long bytesDecrypted = 0;
 		final InputStream in = new SeekableByteChannelInputStream(encryptedFile);
-		byte[] buffer = new byte[1024 * 1024 + 32];
+		byte[] buffer = new byte[CONTENT_MAC_BLOCK + 32];
 		int n = 0;
 		while ((n = IOUtils.read(in, buffer)) > 0) {
 			if (n < 32) {
@@ -447,32 +445,93 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 
 	@Override
 	public Long decryptRange(SeekableByteChannel encryptedFile, OutputStream plaintextFile, long pos, long length) throws IOException, DecryptFailedException {
-		// read iv:
+		// read header:
 		encryptedFile.position(0l);
-		final ByteBuffer countingIv = ByteBuffer.allocate(AES_BLOCK_LENGTH);
-		final int numIvBytesRead = encryptedFile.read(countingIv);
-
-		// check validity of header:
-		if (numIvBytesRead != AES_BLOCK_LENGTH) {
+		final ByteBuffer headerBuf = ByteBuffer.allocate(96);
+		final int headerBytesRead = encryptedFile.read(headerBuf);
+		if (headerBytesRead != headerBuf.capacity()) {
 			throw new IOException("Failed to read file header.");
 		}
 
-		// seek relevant position and update iv:
-		long firstRelevantBlock = pos / AES_BLOCK_LENGTH; // cut of fraction!
-		long beginOfFirstRelevantBlock = firstRelevantBlock * AES_BLOCK_LENGTH;
-		long offsetInsideFirstRelevantBlock = pos - beginOfFirstRelevantBlock;
-		countingIv.putInt(AES_BLOCK_LENGTH - Integer.BYTES, (int) firstRelevantBlock); // int-cast is possible, as max file size is 64GiB
+		// read iv:
+		final byte[] iv = new byte[AES_BLOCK_LENGTH];
+		headerBuf.position(0);
+		headerBuf.get(iv);
 
-		// fast forward stream:
-		encryptedFile.position(96l + beginOfFirstRelevantBlock);
+		// read content key:
+		final byte[] encryptedContentKeyBytes = new byte[32];
+		headerBuf.position(32);
+		headerBuf.get(encryptedContentKeyBytes);
+		final byte[] contentKeyBytes = decryptHeaderData(encryptedContentKeyBytes, iv);
 
-		// generate cipher:
-		final Cipher cipher = this.aesCtrCipher(primaryMasterKey, countingIv.array(), Cipher.DECRYPT_MODE);
+		// read header mac:
+		final byte[] storedHeaderMac = new byte[32];
+		headerBuf.position(64);
+		headerBuf.get(storedHeaderMac);
 
-		// read content
-		final InputStream in = new SeekableByteChannelInputStream(encryptedFile);
-		final InputStream cipheredIn = new CipherInputStream(in, cipher);
-		return IOUtils.copyLarge(cipheredIn, plaintextFile, offsetInsideFirstRelevantBlock, length);
+		// calculate mac over first 64 bytes of header:
+		final Mac headerMac = this.hmacSha256(hMacMasterKey);
+		headerBuf.position(0);
+		headerBuf.limit(64);
+		headerMac.update(headerBuf);
+
+		// check header integrity:
+		if (!MessageDigest.isEqual(storedHeaderMac, headerMac.doFinal())) {
+			throw new MacAuthenticationFailedException("Header MAC authentication failed.");
+		}
+
+		// find first relevant block:
+		final long startBlock = pos / CONTENT_MAC_BLOCK; // floor
+		final long startByte = startBlock * (CONTENT_MAC_BLOCK + 32) + 96l;
+		final long offsetFromFirstBlock = pos - startBlock * CONTENT_MAC_BLOCK;
+
+		// derive nonce used in counter mode from IV by setting last 64bit to 0:
+		final ByteBuffer nonceBuf = ByteBuffer.wrap(iv.clone());
+		nonceBuf.putLong(AES_BLOCK_LENGTH - Long.BYTES, startBlock * CONTENT_MAC_BLOCK / AES_BLOCK_LENGTH);
+		final byte[] nonce = nonceBuf.array();
+
+		// content decryption:
+		encryptedFile.position(startByte);
+		final SecretKey contentKey = new SecretKeySpec(contentKeyBytes, AES_KEY_ALGORITHM);
+		final Cipher cipher = this.aesCtrCipher(contentKey, nonce, Cipher.DECRYPT_MODE);
+		final Mac contentMac = this.hmacSha256(hMacMasterKey);
+
+		try {
+
+			// reading ciphered input and MACs interleaved:
+			long bytesWritten = 0;
+			final InputStream in = new SeekableByteChannelInputStream(encryptedFile);
+			byte[] buffer = new byte[CONTENT_MAC_BLOCK + 32];
+			int n = 0;
+			while ((n = IOUtils.read(in, buffer)) > 0 && bytesWritten < length) {
+				if (n < 32) {
+					throw new DecryptFailedException("Invalid file content, missing MAC.");
+				}
+
+				// check MAC of current block:
+				contentMac.update(buffer, 0, n - 32);
+				final byte[] calculatedMac = contentMac.doFinal();
+				final byte[] storedMac = new byte[32];
+				System.arraycopy(buffer, n - 32, storedMac, 0, 32);
+				if (!MessageDigest.isEqual(calculatedMac, storedMac)) {
+					throw new MacAuthenticationFailedException("Content MAC authentication failed.");
+				}
+
+				// decrypt block:
+				final byte[] plaintext = cipher.update(buffer, 0, n - 32);
+				final int offset = (bytesWritten == 0) ? (int) offsetFromFirstBlock : 0;
+				final long pending = length - bytesWritten;
+				final int available = plaintext.length - offset;
+				final int currentBatch = (int) Math.min(pending, available);
+
+				plaintextFile.write(plaintext, offset, currentBatch);
+				bytesWritten += currentBatch;
+			}
+
+			return bytesWritten;
+		} finally {
+			destroyQuietly(contentKey);
+		}
 	}
 
 	/**
@@ -507,16 +566,16 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 		final SecretKey contentKey = new SecretKeySpec(contentKeyBytes, AES_KEY_ALGORITHM);
 		final Cipher cipher = this.aesCtrCipher(contentKey, nonce, Cipher.ENCRYPT_MODE);
 		final Mac contentMac = this.hmacSha256(hMacMasterKey);
-		final OutputStream out = new SeekableByteChannelOutputStream(encryptedFile);
-		final OutputStream macOut = new MacOutputStream(out, contentMac);
 		@SuppressWarnings("resource")
-		final OutputStream cipheredOut = new CipherOutputStream(macOut, cipher);
+		final OutputStream out = new SeekableByteChannelOutputStream(encryptedFile);
 
 		// writing ciphered output and MACs interleaved:
-		byte[] buffer = new byte[1024 * 1024];
+		final byte[] buffer = new byte[CONTENT_MAC_BLOCK];
 		int n = 0;
 		while ((n = IOUtils.read(in, buffer)) > 0) {
-			cipheredOut.write(buffer, 0, n);
+			final byte[] ciphertext = cipher.update(buffer, 0, n);
+			out.write(ciphertext);
+			contentMac.update(ciphertext);
 			final byte[] mac = contentMac.doFinal();
 			out.write(mac);
 		}

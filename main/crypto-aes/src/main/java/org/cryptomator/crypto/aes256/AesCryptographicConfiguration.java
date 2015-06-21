@@ -82,6 +82,11 @@ interface AesCryptographicConfiguration {
 	int AES_BLOCK_LENGTH = 16;
 
 	/**
+	 * Number of bytes, a content block over which a MAC is calculated consists of.
+	 */
+	int CONTENT_MAC_BLOCK = 5 * 1024 * 1024;
+
+	/**
 	 * How to encode the encrypted file names safely. Base32 uses only alphanumeric characters and is case-insensitive.
 	 */
 	BaseNCodec ENCRYPTED_FILENAME_CODEC = new Base32();

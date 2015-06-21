@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.channels.OverlappingFileLockException;
-import java.nio.channels.SeekableByteChannel;
 import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -96,13 +95,13 @@ class EncryptedFile extends AbstractEncryptedNode implements FileConstants {
 		if (Files.isRegularFile(filePath)) {
 			outputContext.setModificationTime(Files.getLastModifiedTime(filePath).toMillis());
 			outputContext.setProperty(HttpHeader.ACCEPT_RANGES.asString(), HttpHeaderValue.BYTES.asString());
-			try (final SeekableByteChannel channel = Files.newByteChannel(filePath, StandardOpenOption.READ)) {
-				final Long contentLength = cryptor.decryptedContentLength(channel);
+			try (final FileChannel c = FileChannel.open(filePath, StandardOpenOption.READ); final FileLock lock = c.lock(0L, Long.MAX_VALUE, true)) {
+				final Long contentLength = cryptor.decryptedContentLength(c);
 				if (contentLength != null) {
 					outputContext.setContentLength(contentLength);
 				}
 				if (outputContext.hasStream()) {
-					cryptor.decryptFile(channel, outputContext.getOutputStream());
+					cryptor.decryptFile(c, outputContext.getOutputStream());
 				}
 			} catch (EOFException e) {
 				LOG.warn("Unexpected end of stream (possibly client hung up).");
