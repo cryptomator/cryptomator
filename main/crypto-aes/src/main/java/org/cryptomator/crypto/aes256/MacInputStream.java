@@ -9,6 +9,7 @@ import javax.crypto.Mac;
 /**
  * Updates a {@link Mac} with the bytes read from this stream.
  */
+@Deprecated
 class MacInputStream extends FilterInputStream {
 
 	private final Mac mac;

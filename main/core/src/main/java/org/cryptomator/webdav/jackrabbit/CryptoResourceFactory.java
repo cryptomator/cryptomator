@@ -5,7 +5,6 @@ import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.concurrent.ExecutorService;
 
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.io.FilenameUtils;
@@ -28,15 +27,13 @@ public class CryptoResourceFactory implements DavResourceFactory, FileConstants 
 	private final LockManager lockManager = new SimpleLockManager();
 	private final Cryptor cryptor;
 	private final CryptoWarningHandler cryptoWarningHandler;
-	private final ExecutorService backgroundTaskExecutor;
 	private final Path dataRoot;
 	private final FilenameTranslator filenameTranslator;
 
-	CryptoResourceFactory(Cryptor cryptor, CryptoWarningHandler cryptoWarningHandler, ExecutorService backgroundTaskExecutor, String vaultRoot) {
+	CryptoResourceFactory(Cryptor cryptor, CryptoWarningHandler cryptoWarningHandler, String vaultRoot) {
 		Path vaultRootPath = FileSystems.getDefault().getPath(vaultRoot);
 		this.cryptor = cryptor;
 		this.cryptoWarningHandler = cryptoWarningHandler;
-		this.backgroundTaskExecutor = backgroundTaskExecutor;
 		this.dataRoot = vaultRootPath.resolve("d");
 		this.filenameTranslator = new FilenameTranslator(cryptor, vaultRootPath);
 	}
@@ -151,7 +148,7 @@ public class CryptoResourceFactory implements DavResourceFactory, FileConstants 
 	}
 
 	private EncryptedFile createFilePart(DavResourceLocator locator, DavSession session, DavServletRequest request, Path filePath) {
-		return new EncryptedFilePart(this, locator, session, request, lockManager, cryptor, cryptoWarningHandler, backgroundTaskExecutor, filePath);
+		return new EncryptedFilePart(this, locator, session, request, lockManager, cryptor, cryptoWarningHandler, filePath);
 	}
 
 	private EncryptedFile createFile(DavResourceLocator locator, DavSession session, Path filePath) {

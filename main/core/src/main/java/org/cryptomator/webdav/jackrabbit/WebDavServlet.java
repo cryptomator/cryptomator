@@ -9,9 +9,6 @@
 package org.cryptomator.webdav.jackrabbit;
 
 import java.util.Collection;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -33,7 +30,6 @@ public class WebDavServlet extends AbstractWebdavServlet {
 	private DavResourceFactory davResourceFactory;
 	private final Cryptor cryptor;
 	private final CryptoWarningHandler cryptoWarningHandler;
-	private ExecutorService backgroundTaskExecutor;
 
 	public WebDavServlet(final Cryptor cryptor, final Collection<String> failingMacCollection) {
 		super();
@@ -45,26 +41,9 @@ public class WebDavServlet extends AbstractWebdavServlet {
 	public void init(ServletConfig config) throws ServletException {
 		super.init(config);
 		final String fsRoot = config.getInitParameter(CFG_FS_ROOT);
-		backgroundTaskExecutor = Executors.newCachedThreadPool();
 		davSessionProvider = new DavSessionProviderImpl();
 		davLocatorFactory = new CleartextLocatorFactory(config.getServletContext().getContextPath());
-		davResourceFactory = new CryptoResourceFactory(cryptor, cryptoWarningHandler, backgroundTaskExecutor, fsRoot);
-	}
-
-	@Override
-	public void destroy() {
-		backgroundTaskExecutor.shutdown();
-		try {
-			final boolean tasksFinished = backgroundTaskExecutor.awaitTermination(2, TimeUnit.SECONDS);
-			if (!tasksFinished) {
-				backgroundTaskExecutor.shutdownNow();
-			}
-		} catch (InterruptedException e) {
-			backgroundTaskExecutor.shutdownNow();
-			Thread.currentThread().interrupt();
-		} finally {
-			super.destroy();
-		}
+		davResourceFactory = new CryptoResourceFactory(cryptor, cryptoWarningHandler, fsRoot);
 	}
 
 	@Override

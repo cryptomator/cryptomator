@@ -2,15 +2,12 @@ package org.cryptomator.webdav.jackrabbit;
 
 import java.io.EOFException;
 import java.io.IOException;
-import java.nio.channels.ClosedByInterruptException;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -27,9 +24,6 @@ import org.eclipse.jetty.http.HttpHeader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-
 /**
  * Delivers only the requested range of bytes from a file.
  * 
@@ -41,7 +35,6 @@ class EncryptedFilePart extends EncryptedFile {
 	private static final String BYTE_UNIT_PREFIX = "bytes=";
 	private static final char RANGE_SET_SEP = ',';
 	private static final char RANGE_SEP = '-';
-	private static final Cache<DavResourceLocator, MacAuthenticationJob> cachedMacAuthenticationJobs = CacheBuilder.newBuilder().expireAfterWrite(10, TimeUnit.MINUTES).build();
 
 	/**
 	 * e.g. range -500 (gets the last 500 bytes) -> (-1, 500)
@@ -56,22 +49,13 @@ class EncryptedFilePart extends EncryptedFile {
 	private final Set<Pair<Long, Long>> requestedContentRanges = new HashSet<Pair<Long, Long>>();
 
 	public EncryptedFilePart(CryptoResourceFactory factory, DavResourceLocator locator, DavSession session, DavServletRequest request, LockManager lockManager, Cryptor cryptor, CryptoWarningHandler cryptoWarningHandler,
-			ExecutorService backgroundTaskExecutor, Path filePath) {
+			Path filePath) {
 		super(factory, locator, session, lockManager, cryptor, cryptoWarningHandler, filePath);
 		final String rangeHeader = request.getHeader(HttpHeader.RANGE.asString());
 		if (rangeHeader == null) {
 			throw new IllegalArgumentException("HTTP request doesn't contain a range header");
 		}
 		determineByteRanges(rangeHeader);
-
-		synchronized (cachedMacAuthenticationJobs) {
-			if (cachedMacAuthenticationJobs.getIfPresent(locator) == null) {
-				final MacAuthenticationJob macAuthJob = new MacAuthenticationJob(locator);
-				cachedMacAuthenticationJobs.put(locator, macAuthJob);
-				backgroundTaskExecutor.submit(macAuthJob);
-			}
-		}
-
 	}
 
 	private void determineByteRanges(String rangeHeader) {
@@ -147,48 +131,6 @@ class EncryptedFilePart extends EncryptedFile {
 
 	private String getContentRangeHeader(long firstByte, long lastByte, long completeLength) {
 		return String.format("%d-%d/%d", firstByte, lastByte, completeLength);
-	}
-
-	private class MacAuthenticationJob implements Runnable {
-
-		private final DavResourceLocator locator;
-
-		public MacAuthenticationJob(final DavResourceLocator locator) {
-			if (locator == null) {
-				throw new IllegalArgumentException("locator must not be null.");
-			}
-			this.locator = locator;
-		}
-
-		@Override
-		public void run() {
-			assert Files.isRegularFile(filePath);
-			try (final SeekableByteChannel channel = Files.newByteChannel(filePath, StandardOpenOption.READ)) {
-				final boolean authentic = cryptor.isAuthentic(channel);
-				if (!authentic) {
-					cryptoWarningHandler.macAuthFailed(locator.getResourcePath());
-				}
-			} catch (ClosedByInterruptException ex) {
-				LOG.debug("Couldn't finish MAC verification due to interruption of worker thread.");
-			} catch (IOException e) {
-				LOG.error("IOException during MAC verification of " + filePath.toString(), e);
-			}
-		}
-
-		@Override
-		public int hashCode() {
-			return locator.hashCode();
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if (obj instanceof MacAuthenticationJob) {
-				final MacAuthenticationJob other = (MacAuthenticationJob) obj;
-				return this.locator.equals(other.locator);
-			} else {
-				return false;
-			}
-		}
 	}
 
 }

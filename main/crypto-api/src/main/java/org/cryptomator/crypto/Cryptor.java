@@ -76,11 +76,6 @@ public interface Cryptor extends Destroyable {
 	Long decryptedContentLength(SeekableByteChannel encryptedFile) throws IOException, MacAuthenticationFailedException;
 
 	/**
-	 * @return true, if the stored MAC matches the calculated one.
-	 */
-	boolean isAuthentic(SeekableByteChannel encryptedFile) throws IOException;
-
-	/**
 	 * @return Number of decrypted bytes. This might not be equal to the encrypted file size due to optional metadata written to it.
 	 * @throws DecryptFailedException If decryption failed
 	 */

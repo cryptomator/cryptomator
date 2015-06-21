@@ -53,11 +53,6 @@ public class AbstractCryptorDecorator implements Cryptor {
 	}
 
 	@Override
-	public boolean isAuthentic(SeekableByteChannel encryptedFile) throws IOException {
-		return cryptor.isAuthentic(encryptedFile);
-	}
-
-	@Override
 	public Long decryptFile(SeekableByteChannel encryptedFile, OutputStream plaintextFile) throws IOException, DecryptFailedException {
 		return cryptor.decryptFile(encryptedFile, plaintextFile);
 	}

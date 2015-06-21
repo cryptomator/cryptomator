@@ -70,38 +70,6 @@ public class Aes256CryptorTest {
 		}
 	}
 
-	@Test
-	public void testIntegrityAuthentication() throws IOException, DecryptFailedException, EncryptFailedException {
-		// our test plaintext data:
-		final byte[] plaintextData = "Hello World".getBytes();
-		final InputStream plaintextIn = new ByteArrayInputStream(plaintextData);
-
-		// init cryptor:
-		final Aes256Cryptor cryptor = new Aes256Cryptor();
-
-		// encrypt:
-		final ByteBuffer encryptedData = ByteBuffer.allocate(256);
-		final SeekableByteChannel encryptedOut = new ByteBufferBackedSeekableChannel(encryptedData);
-		cryptor.encryptFile(plaintextIn, encryptedOut);
-		IOUtils.closeQuietly(plaintextIn);
-		IOUtils.closeQuietly(encryptedOut);
-
-		encryptedData.position(0);
-
-		// toggle one bit inf first content byte:
-		encryptedData.position(64);
-		final byte fifthByte = encryptedData.get();
-		encryptedData.position(64);
-		encryptedData.put((byte) (fifthByte ^ 0x01));
-
-		encryptedData.position(0);
-
-		// check mac (should return false)
-		final SeekableByteChannel encryptedIn = new ByteBufferBackedSeekableChannel(encryptedData);
-		final boolean authentic = cryptor.isAuthentic(encryptedIn);
-		Assert.assertFalse(authentic);
-	}
-
 	@Test(expected = DecryptFailedException.class)
 	public void testIntegrityViolationDuringDecryption() throws IOException, DecryptFailedException, EncryptFailedException {
 		// our test plaintext data:
