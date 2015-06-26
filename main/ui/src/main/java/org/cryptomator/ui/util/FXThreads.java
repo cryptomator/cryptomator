@@ -15,6 +15,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
 import javafx.application.Platform;
+import javafx.collections.ObservableList;
 import javafx.collections.ObservableSet;
 
 /**
@@ -53,8 +54,7 @@ public final class FXThreads {
 	};
 
 	/**
-	 * Waits for the given task to complete and notifies the given successCallback. If an exception occurs, the callback will never be
-	 * called. If you are interested in the exception, use
+	 * Waits for the given task to complete and notifies the given successCallback. If an exception occurs, the callback will never be called. If you are interested in the exception, use
 	 * {@link #runOnMainThreadWhenFinished(ExecutorService, Future, CallbackWhenTaskFinished, CallbackWhenTaskFailed)} instead.
 	 * 
 	 * <pre>
@@ -74,8 +74,7 @@ public final class FXThreads {
 	}
 
 	/**
-	 * Waits for the given task to complete and notifies the given successCallback. If an exception occurs, the callback will never be
-	 * called. If you are interested in the exception, use
+	 * Waits for the given task to complete and notifies the given successCallback. If an exception occurs, the callback will never be called. If you are interested in the exception, use
 	 * {@link #runOnMainThreadWhenFinished(ExecutorService, Future, CallbackWhenTaskFinished, CallbackWhenTaskFailed)} instead.
 	 * 
 	 * <pre>
@@ -121,6 +120,10 @@ public final class FXThreads {
 
 	public static <E> ObservableSet<E> observableSetOnMainThread(ObservableSet<E> set) {
 		return new ObservableSetOnMainThread<E>(set);
+	}
+
+	public static <E> ObservableList<E> observableListOnMainThread(ObservableList<E> list) {
+		return new ObservableListOnMainThread<E>(list);
 	}
 
 }

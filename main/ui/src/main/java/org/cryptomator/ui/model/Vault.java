@@ -6,12 +6,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.Normalizer;
 import java.text.Normalizer.Form;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableSet;
+import javafx.collections.ObservableList;
 
 import javax.security.auth.DestroyFailedException;
 
@@ -43,7 +45,8 @@ public class Vault implements Serializable {
 	private final WebDavMounter mounter;
 	private final DeferredCloser closer;
 	private final ObjectProperty<Boolean> unlocked = new SimpleObjectProperty<Boolean>(this, "unlocked", Boolean.FALSE);
-	private final ObservableSet<String> namesOfResourcesWithInvalidMac = FXThreads.observableSetOnMainThread(FXCollections.observableSet());
+	private final ObservableList<String> namesOfResourcesWithInvalidMac = FXThreads.observableListOnMainThread(FXCollections.observableArrayList());
+	private final Set<String> whitelistedResourcesWithInvalidMac = new HashSet<>();
 
 	private String mountName;
 	private DeferredClosable<ServletLifeCycleAdapter> webDavServlet = DeferredClosable.empty();
@@ -77,11 +80,12 @@ public class Vault implements Serializable {
 
 	public synchronized boolean startServer() {
 		namesOfResourcesWithInvalidMac.clear();
+		whitelistedResourcesWithInvalidMac.clear();
 		Optional<ServletLifeCycleAdapter> o = webDavServlet.get();
 		if (o.isPresent() && o.get().isRunning()) {
 			return false;
 		}
-		ServletLifeCycleAdapter servlet = server.createServlet(path, cryptor, namesOfResourcesWithInvalidMac, mountName);
+		ServletLifeCycleAdapter servlet = server.createServlet(path, cryptor, namesOfResourcesWithInvalidMac, whitelistedResourcesWithInvalidMac, mountName);
 		if (servlet.start()) {
 			webDavServlet = closer.closeLater(servlet);
 			return true;
@@ -102,6 +106,7 @@ public class Vault implements Serializable {
 			LOG.error("Destruction of cryptor throw an exception.", e);
 		}
 		setUnlocked(false);
+		whitelistedResourcesWithInvalidMac.clear();
 		namesOfResourcesWithInvalidMac.clear();
 	}
 
@@ -160,8 +165,12 @@ public class Vault implements Serializable {
 		return mountName;
 	}
 
-	public ObservableSet<String> getNamesOfResourcesWithInvalidMac() {
+	public ObservableList<String> getNamesOfResourcesWithInvalidMac() {
 		return namesOfResourcesWithInvalidMac;
+	}
+
+	public Set<String> getWhitelistedResourcesWithInvalidMac() {
+		return whitelistedResourcesWithInvalidMac;
 	}
 
 	/**

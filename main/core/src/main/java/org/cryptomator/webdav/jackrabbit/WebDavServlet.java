@@ -31,10 +31,10 @@ public class WebDavServlet extends AbstractWebdavServlet {
 	private final Cryptor cryptor;
 	private final CryptoWarningHandler cryptoWarningHandler;
 
-	public WebDavServlet(final Cryptor cryptor, final Collection<String> failingMacCollection) {
+	public WebDavServlet(final Cryptor cryptor, final Collection<String> failingMacCollection, final Collection<String> whitelistedResourceCollection) {
 		super();
 		this.cryptor = cryptor;
-		this.cryptoWarningHandler = new CryptoWarningHandler(failingMacCollection);
+		this.cryptoWarningHandler = new CryptoWarningHandler(failingMacCollection, whitelistedResourceCollection);
 	}
 
 	@Override

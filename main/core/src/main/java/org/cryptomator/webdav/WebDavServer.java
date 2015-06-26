@@ -84,13 +84,11 @@ public final class WebDavServer {
 	/**
 	 * @param workDir Path of encrypted folder.
 	 * @param cryptor A fully initialized cryptor instance ready to en- or decrypt streams.
-	 * @param failingMacCollection A (observable, thread-safe) collection, to which the names of resources are written, whose MAC
-	 *            authentication fails.
-	 * @param name The name of the folder. Must be non-empty and only contain any of
-	 *            _ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789
+	 * @param failingMacCollection A (observable, thread-safe) collection, to which the names of resources are written, whose MAC authentication fails.
+	 * @param name The name of the folder. Must be non-empty and only contain any of _ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789
 	 * @return servlet
 	 */
-	public ServletLifeCycleAdapter createServlet(final Path workDir, final Cryptor cryptor, final Collection<String> failingMacCollection, final String name) {
+	public ServletLifeCycleAdapter createServlet(final Path workDir, final Cryptor cryptor, final Collection<String> failingMacCollection, final Collection<String> whitelistedResourceCollection, final String name) {
 		try {
 			if (StringUtils.isEmpty(name)) {
 				throw new IllegalArgumentException("name empty");
@@ -101,7 +99,7 @@ public final class WebDavServer {
 			final URI uri = new URI(null, null, localConnector.getHost(), localConnector.getLocalPort(), "/" + UUID.randomUUID().toString() + "/" + name, null, null);
 
 			final ServletContextHandler servletContext = new ServletContextHandler(servletCollection, uri.getRawPath(), ServletContextHandler.SESSIONS);
-			final ServletHolder servlet = getWebDavServletHolder(workDir.toString(), cryptor, failingMacCollection);
+			final ServletHolder servlet = getWebDavServletHolder(workDir.toString(), cryptor, failingMacCollection, whitelistedResourceCollection);
 			servletContext.addServlet(servlet, "/*");
 
 			servletCollection.mapContexts();
@@ -113,8 +111,8 @@ public final class WebDavServer {
 		}
 	}
 
-	private ServletHolder getWebDavServletHolder(final String workDir, final Cryptor cryptor, final Collection<String> failingMacCollection) {
-		final ServletHolder result = new ServletHolder("Cryptomator-WebDAV-Servlet", new WebDavServlet(cryptor, failingMacCollection));
+	private ServletHolder getWebDavServletHolder(final String workDir, final Cryptor cryptor, final Collection<String> failingMacCollection, final Collection<String> whitelistedResourceCollection) {
+		final ServletHolder result = new ServletHolder("Cryptomator-WebDAV-Servlet", new WebDavServlet(cryptor, failingMacCollection, whitelistedResourceCollection));
 		result.setInitParameter(WebDavServlet.CFG_FS_ROOT, workDir);
 		return result;
 	}

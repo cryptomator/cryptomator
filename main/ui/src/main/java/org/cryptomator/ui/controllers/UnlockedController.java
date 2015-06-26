@@ -8,31 +8,49 @@
  ******************************************************************************/
 package org.cryptomator.ui.controllers;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.application.Platform;
+import javafx.collections.ListChangeListener;
+import javafx.collections.WeakListChangeListener;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart.Data;
 import javafx.scene.chart.XYChart.Series;
 import javafx.scene.control.Label;
+import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import javafx.util.Duration;
 
 import org.cryptomator.crypto.CryptorIOSampling;
+import org.cryptomator.ui.MainModule.ControllerFactory;
 import org.cryptomator.ui.model.Vault;
+import org.cryptomator.ui.util.ActiveWindowStyleSupport;
 import org.cryptomator.ui.util.mount.CommandFailedException;
+
+import com.google.inject.Inject;
 
 public class UnlockedController implements Initializable {
 
 	private static final int IO_SAMPLING_STEPS = 100;
 	private static final double IO_SAMPLING_INTERVAL = 0.25;
+	private final ControllerFactory controllerFactory;
+	private final ListChangeListener<String> macWarningsListener = this::macWarningsDidChange;
+	private final ListChangeListener<String> weakMacWarningsListener = new WeakListChangeListener<>(macWarningsListener);
+	private final AtomicBoolean macWarningsWindowVisible = new AtomicBoolean();
 	private LockListener listener;
 	private Vault vault;
 	private Timeline ioAnimation;
@@ -48,6 +66,11 @@ public class UnlockedController implements Initializable {
 
 	private ResourceBundle rb;
 
+	@Inject
+	public UnlockedController(ControllerFactory controllerFactory) {
+		this.controllerFactory = controllerFactory;
+	}
+
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
 		this.rb = rb;
@@ -61,11 +84,52 @@ public class UnlockedController implements Initializable {
 			messageLabel.setText(rb.getString("unlocked.label.unmountFailed"));
 			return;
 		}
+		vault.getNamesOfResourcesWithInvalidMac().removeListener(weakMacWarningsListener);
 		vault.stopServer();
 		vault.setUnlocked(false);
 		if (listener != null) {
 			listener.didLock(this);
 		}
+	}
+
+	// ****************************************
+	// MAC Auth Warnings
+	// ****************************************
+
+	private void macWarningsDidChange(ListChangeListener.Change<? extends String> change) {
+		if (change.getList().size() > 0) {
+			Platform.runLater(this::showMacWarningsWindow);
+		}
+	}
+
+	private void showMacWarningsWindow() {
+		if (macWarningsWindowVisible.getAndSet(true) == false) {
+			try {
+				final FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/mac_warnings.fxml"), rb);
+				loader.setControllerFactory(controllerFactory);
+
+				final Parent root = loader.load();
+				final Stage stage = new Stage();
+				stage.setTitle(String.format(rb.getString("macWarnings.windowTitle"), vault.getName()));
+				stage.setScene(new Scene(root));
+				stage.sizeToScene();
+				stage.setResizable(false);
+				stage.setOnHidden(this::onHideMacWarningsWindow);
+				ActiveWindowStyleSupport.startObservingFocus(stage);
+
+				final MacWarningsController ctrl = loader.getController();
+				ctrl.setVault(vault);
+				ctrl.setStage(stage);
+
+				stage.show();
+			} catch (IOException e) {
+				throw new IllegalStateException("Failed to load fxml file.", e);
+			}
+		}
+	}
+
+	private void onHideMacWarningsWindow(WindowEvent event) {
+		macWarningsWindowVisible.set(false);
 	}
 
 	// ****************************************
@@ -128,11 +192,12 @@ public class UnlockedController implements Initializable {
 		return vault;
 	}
 
-	public void setVault(Vault directory) {
-		this.vault = directory;
+	public void setVault(Vault vault) {
+		this.vault = vault;
+		vault.getNamesOfResourcesWithInvalidMac().addListener(weakMacWarningsListener);
 
-		if (directory.getCryptor() instanceof CryptorIOSampling) {
-			startIoSampling((CryptorIOSampling) directory.getCryptor());
+		if (vault.getCryptor() instanceof CryptorIOSampling) {
+			startIoSampling((CryptorIOSampling) vault.getCryptor());
 		} else {
 			ioGraph.setVisible(false);
 		}

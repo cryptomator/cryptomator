@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @JsonPropertyOrder(value = {"version", "scryptSalt", "scryptCostParam", "scryptBlockSize", "keyLength", "primaryMasterKey", "hMacMasterKey"})
 public class KeyFile implements Serializable {
 
-	static final Integer CURRENT_VERSION = 1;
+	static final Integer CURRENT_VERSION = 2;
 	private static final long serialVersionUID = 8578363158959619885L;
 
 	private Integer version;

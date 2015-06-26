@@ -20,6 +20,7 @@ import org.apache.jackrabbit.webdav.io.OutputContext;
 import org.apache.jackrabbit.webdav.lock.LockManager;
 import org.cryptomator.crypto.Cryptor;
 import org.cryptomator.crypto.exceptions.DecryptFailedException;
+import org.cryptomator.crypto.exceptions.MacAuthenticationFailedException;
 import org.eclipse.jetty.http.HttpHeader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -111,19 +112,23 @@ class EncryptedFilePart extends EncryptedFile {
 	public void spool(OutputContext outputContext) throws IOException {
 		assert Files.isRegularFile(filePath);
 		outputContext.setModificationTime(Files.getLastModifiedTime(filePath).toMillis());
-		try (final SeekableByteChannel channel = Files.newByteChannel(filePath, StandardOpenOption.READ)) {
-			final Long fileSize = cryptor.decryptedContentLength(channel);
+		try (final SeekableByteChannel c = Files.newByteChannel(filePath, StandardOpenOption.READ)) {
+			final Long fileSize = cryptor.decryptedContentLength(c);
 			final Pair<Long, Long> range = getUnionRange(fileSize);
 			final Long rangeLength = range.getRight() - range.getLeft() + 1;
 			outputContext.setContentLength(rangeLength);
 			outputContext.setProperty(HttpHeader.CONTENT_RANGE.asString(), getContentRangeHeader(range.getLeft(), range.getRight(), fileSize));
 			if (outputContext.hasStream()) {
-				cryptor.decryptRange(channel, outputContext.getOutputStream(), range.getLeft(), rangeLength);
+				cryptor.decryptRange(c, outputContext.getOutputStream(), range.getLeft(), rangeLength);
 			}
 		} catch (EOFException e) {
 			if (LOG.isDebugEnabled()) {
 				LOG.trace("Unexpected end of stream during delivery of partial content (client hung up).");
 			}
+		} catch (MacAuthenticationFailedException e) {
+			LOG.warn("File integrity violation for " + getLocator().getResourcePath());
+			cryptoWarningHandler.macAuthFailed(getLocator().getResourcePath());
+			throw new IOException("Error decrypting file " + filePath.toString(), e);
 		} catch (DecryptFailedException e) {
 			throw new IOException("Error decrypting file " + filePath.toString(), e);
 		}

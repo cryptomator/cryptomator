@@ -107,8 +107,8 @@ class EncryptedFile extends AbstractEncryptedNode implements FileConstants {
 				LOG.warn("Unexpected end of stream (possibly client hung up).");
 			} catch (MacAuthenticationFailedException e) {
 				LOG.warn("File integrity violation for " + getLocator().getResourcePath());
+				cryptoWarningHandler.macAuthFailed(getLocator().getResourcePath());
 				throw new IOException("Error decrypting file " + filePath.toString(), e);
-				// cryptoWarningHandler.macAuthFailed(getLocator().getResourcePath());
 			} catch (DecryptFailedException e) {
 				throw new IOException("Error decrypting file " + filePath.toString(), e);
 			}
