@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.channels.FileLock;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
@@ -130,13 +129,14 @@ class FilenameTranslator implements FileConstants {
 	/* Locked I/O */
 
 	private void writeAllBytesAtomically(Path path, byte[] bytes) throws IOException {
-		try (final FileChannel c = FileChannel.open(path, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.DSYNC); final FileLock lock = c.lock()) {
+		try (final FileChannel c = FileChannel.open(path, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.DSYNC);
+				final SilentlyFailingFileLock lock = new SilentlyFailingFileLock(c, false)) {
 			c.write(ByteBuffer.wrap(bytes));
 		}
 	}
 
 	private byte[] readAllBytesAtomically(Path path) throws IOException {
-		try (final FileChannel c = FileChannel.open(path, StandardOpenOption.READ, StandardOpenOption.DSYNC); final FileLock lock = c.lock(0L, Long.MAX_VALUE, true)) {
+		try (final FileChannel c = FileChannel.open(path, StandardOpenOption.READ, StandardOpenOption.DSYNC); final SilentlyFailingFileLock lock = new SilentlyFailingFileLock(c, true)) {
 			final ByteBuffer buffer = ByteBuffer.allocate((int) c.size());
 			c.read(buffer);
 			return buffer.array();

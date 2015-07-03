@@ -2,7 +2,7 @@ package org.cryptomator.webdav.jackrabbit;
 
 import java.io.EOFException;
 import java.io.IOException;
-import java.nio.channels.SeekableByteChannel;
+import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
@@ -111,13 +111,15 @@ class EncryptedFilePart extends EncryptedFile {
 	@Override
 	public void spool(OutputContext outputContext) throws IOException {
 		assert Files.isRegularFile(filePath);
+		assert this.contentLength != null;
+
+		final Pair<Long, Long> range = getUnionRange(this.contentLength);
+		final Long rangeLength = Math.min(this.contentLength, range.getRight()) - range.getLeft() + 1;
+		outputContext.setContentLength(rangeLength);
+		outputContext.setProperty(HttpHeader.CONTENT_RANGE.asString(), getContentRangeHeader(range.getLeft(), range.getRight(), this.contentLength));
 		outputContext.setModificationTime(Files.getLastModifiedTime(filePath).toMillis());
-		try (final SeekableByteChannel c = Files.newByteChannel(filePath, StandardOpenOption.READ)) {
-			final Long fileSize = cryptor.decryptedContentLength(c);
-			final Pair<Long, Long> range = getUnionRange(fileSize);
-			final Long rangeLength = range.getRight() - range.getLeft() + 1;
-			outputContext.setContentLength(rangeLength);
-			outputContext.setProperty(HttpHeader.CONTENT_RANGE.asString(), getContentRangeHeader(range.getLeft(), range.getRight(), fileSize));
+
+		try (final FileChannel c = FileChannel.open(filePath, StandardOpenOption.READ)) {
 			if (outputContext.hasStream()) {
 				cryptor.decryptRange(c, outputContext.getOutputStream(), range.getLeft(), rangeLength);
 			}

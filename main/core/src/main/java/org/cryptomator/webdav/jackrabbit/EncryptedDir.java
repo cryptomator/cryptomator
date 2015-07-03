@@ -12,7 +12,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.channels.FileLock;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.DirectoryStream;
@@ -156,7 +155,8 @@ class EncryptedDir extends AbstractEncryptedNode implements FileConstants {
 			final String cleartextFilename = FilenameUtils.getName(childLocator.getResourcePath());
 			final String ciphertextFilename = filenameTranslator.getEncryptedFilename(cleartextFilename);
 			final Path filePath = dirPath.resolve(ciphertextFilename);
-			try (final FileChannel c = FileChannel.open(filePath, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING); final FileLock lock = c.lock(0L, FILE_HEADER_LENGTH, false)) {
+			try (final FileChannel c = FileChannel.open(filePath, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+					final SilentlyFailingFileLock lock = new SilentlyFailingFileLock(c, 0L, FILE_HEADER_LENGTH, false)) {
 				cryptor.encryptFile(inputContext.getInputStream(), c);
 			} catch (SecurityException e) {
 				throw new DavException(DavServletResponse.SC_FORBIDDEN, e);
@@ -289,7 +289,8 @@ class EncryptedDir extends AbstractEncryptedNode implements FileConstants {
 			throw new DavException(DavServletResponse.SC_NOT_FOUND);
 		}
 		final String dstDirId = UUID.randomUUID().toString();
-		try (final FileChannel c = FileChannel.open(dstDirFilePath, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.DSYNC); final FileLock lock = c.lock()) {
+		try (final FileChannel c = FileChannel.open(dstDirFilePath, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.DSYNC);
+				SilentlyFailingFileLock lock = new SilentlyFailingFileLock(c, false)) {
 			c.write(ByteBuffer.wrap(dstDirId.getBytes(StandardCharsets.UTF_8)));
 		}
 

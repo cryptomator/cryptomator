@@ -11,7 +11,6 @@ package org.cryptomator.webdav.jackrabbit;
 import java.io.EOFException;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
-import java.nio.channels.FileLock;
 import java.nio.channels.OverlappingFileLockException;
 import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
@@ -43,6 +42,7 @@ class EncryptedFile extends AbstractEncryptedNode implements FileConstants {
 	private static final Logger LOG = LoggerFactory.getLogger(EncryptedFile.class);
 
 	protected final CryptoWarningHandler cryptoWarningHandler;
+	protected final Long contentLength;
 
 	public EncryptedFile(CryptoResourceFactory factory, DavResourceLocator locator, DavSession session, LockManager lockManager, Cryptor cryptor, CryptoWarningHandler cryptoWarningHandler, Path filePath) {
 		super(factory, locator, session, lockManager, cryptor, filePath);
@@ -50,9 +50,10 @@ class EncryptedFile extends AbstractEncryptedNode implements FileConstants {
 			throw new IllegalArgumentException("filePath must not be null");
 		}
 		this.cryptoWarningHandler = cryptoWarningHandler;
+		Long contentLength = null;
 		if (Files.isRegularFile(filePath)) {
-			try (final FileChannel c = FileChannel.open(filePath, StandardOpenOption.READ, StandardOpenOption.DSYNC); final FileLock lock = c.tryLock(0L, FILE_HEADER_LENGTH, true)) {
-				final Long contentLength = cryptor.decryptedContentLength(c);
+			try (final FileChannel c = FileChannel.open(filePath, StandardOpenOption.READ, StandardOpenOption.DSYNC); SilentlyFailingFileLock lock = new SilentlyFailingFileLock(c, true)) {
+				contentLength = cryptor.decryptedContentLength(c);
 				properties.add(new DefaultDavProperty<Long>(DavPropertyName.GETCONTENTLENGTH, contentLength));
 				if (contentLength > RANGE_REQUEST_LOWER_LIMIT) {
 					properties.add(new HttpHeaderProperty(HttpHeader.ACCEPT_RANGES.asString(), HttpHeaderValue.BYTES.asString()));
@@ -68,6 +69,7 @@ class EncryptedFile extends AbstractEncryptedNode implements FileConstants {
 				// don't add content length DAV property
 			}
 		}
+		this.contentLength = contentLength;
 	}
 
 	@Override
@@ -95,7 +97,7 @@ class EncryptedFile extends AbstractEncryptedNode implements FileConstants {
 		if (Files.isRegularFile(filePath)) {
 			outputContext.setModificationTime(Files.getLastModifiedTime(filePath).toMillis());
 			outputContext.setProperty(HttpHeader.ACCEPT_RANGES.asString(), HttpHeaderValue.BYTES.asString());
-			try (final FileChannel c = FileChannel.open(filePath, StandardOpenOption.READ); final FileLock lock = c.lock(0L, Long.MAX_VALUE, true)) {
+			try (final FileChannel c = FileChannel.open(filePath, StandardOpenOption.READ); SilentlyFailingFileLock lock = new SilentlyFailingFileLock(c, true)) {
 				final Long contentLength = cryptor.decryptedContentLength(c);
 				if (contentLength != null) {
 					outputContext.setContentLength(contentLength);

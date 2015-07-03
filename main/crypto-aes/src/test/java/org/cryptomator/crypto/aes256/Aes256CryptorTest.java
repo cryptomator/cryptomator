@@ -139,10 +139,10 @@ public class Aes256CryptorTest {
 
 	@Test
 	public void testPartialDecryption() throws IOException, DecryptFailedException, WrongPasswordException, UnsupportedKeyLengthException, EncryptFailedException {
-		// our test plaintext data:
-		final byte[] plaintextData = new byte[524288 * Integer.BYTES];
+		// 8MiB test plaintext data:
+		final byte[] plaintextData = new byte[2097152 * Integer.BYTES];
 		final ByteBuffer bbIn = ByteBuffer.wrap(plaintextData);
-		for (int i = 0; i < 524288; i++) {
+		for (int i = 0; i < 2097152; i++) {
 			bbIn.putInt(i);
 		}
 		final InputStream plaintextIn = new ByteArrayInputStream(plaintextData);
