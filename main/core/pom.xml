@@ -46,6 +46,11 @@
 			<artifactId>jetty-webapp</artifactId>
 			<version>${jetty.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>commons-httpclient</groupId>
+			<artifactId>commons-httpclient</artifactId>
+			<scope>test</scope>
+		</dependency>
 
 		<!-- Jackrabbit -->
 		<dependency>

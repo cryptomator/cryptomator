@@ -6,15 +6,10 @@ import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.HashSet;
-import java.util.Set;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.jackrabbit.webdav.DavResourceLocator;
-import org.apache.jackrabbit.webdav.DavServletRequest;
 import org.apache.jackrabbit.webdav.DavSession;
 import org.apache.jackrabbit.webdav.io.OutputContext;
 import org.apache.jackrabbit.webdav.lock.LockManager;
@@ -33,79 +28,26 @@ import org.slf4j.LoggerFactory;
 class EncryptedFilePart extends EncryptedFile {
 
 	private static final Logger LOG = LoggerFactory.getLogger(EncryptedFilePart.class);
-	private static final String BYTE_UNIT_PREFIX = "bytes=";
-	private static final char RANGE_SET_SEP = ',';
-	private static final char RANGE_SEP = '-';
 
-	/**
-	 * e.g. range -500 (gets the last 500 bytes) -> (-1, 500)
-	 */
-	private static final Long SUFFIX_BYTE_RANGE_LOWER = -1L;
+	private final Pair<Long, Long> range;
 
-	/**
-	 * e.g. range 500- (gets all bytes from 500) -> (500, MAX_LONG)
-	 */
-	private static final Long SUFFIX_BYTE_RANGE_UPPER = Long.MAX_VALUE;
-
-	private final Set<Pair<Long, Long>> requestedContentRanges = new HashSet<Pair<Long, Long>>();
-
-	public EncryptedFilePart(CryptoResourceFactory factory, DavResourceLocator locator, DavSession session, DavServletRequest request, LockManager lockManager, Cryptor cryptor, CryptoWarningHandler cryptoWarningHandler,
-			Path filePath) {
+	public EncryptedFilePart(CryptoResourceFactory factory, DavResourceLocator locator, DavSession session, Pair<String, String> requestRange, LockManager lockManager, Cryptor cryptor,
+			CryptoWarningHandler cryptoWarningHandler, Path filePath) {
 		super(factory, locator, session, lockManager, cryptor, cryptoWarningHandler, filePath);
-		final String rangeHeader = request.getHeader(HttpHeader.RANGE.asString());
-		if (rangeHeader == null) {
-			throw new IllegalArgumentException("HTTP request doesn't contain a range header");
-		}
-		determineByteRanges(rangeHeader);
-	}
 
-	private void determineByteRanges(String rangeHeader) {
-		final String byteRangeSet = StringUtils.removeStartIgnoreCase(rangeHeader, BYTE_UNIT_PREFIX);
-		final String[] byteRanges = StringUtils.split(byteRangeSet, RANGE_SET_SEP);
-		if (byteRanges.length == 0) {
-			throw new IllegalArgumentException("Invalid range: " + rangeHeader);
-		}
-		for (final String byteRange : byteRanges) {
-			final String[] bytePos = StringUtils.splitPreserveAllTokens(byteRange, RANGE_SEP);
-			if (bytePos.length != 2 || bytePos[0].isEmpty() && bytePos[1].isEmpty()) {
-				throw new IllegalArgumentException("Invalid range: " + rangeHeader);
-			}
-			final Long lower = bytePos[0].isEmpty() ? SUFFIX_BYTE_RANGE_LOWER : Long.valueOf(bytePos[0]);
-			final Long upper = bytePos[1].isEmpty() ? SUFFIX_BYTE_RANGE_UPPER : Long.valueOf(bytePos[1]);
-			if (lower > upper) {
-				throw new IllegalArgumentException("Invalid range: " + rangeHeader);
-			}
-			requestedContentRanges.add(new ImmutablePair<Long, Long>(lower, upper));
-		}
-	}
-
-	/**
-	 * @return One range, that spans all requested ranges.
-	 */
-	private Pair<Long, Long> getUnionRange(Long fileSize) {
-		final long lastByte = fileSize - 1;
-		final MutablePair<Long, Long> result = new MutablePair<Long, Long>();
-		for (Pair<Long, Long> range : requestedContentRanges) {
-			final long left;
-			final long right;
-			if (SUFFIX_BYTE_RANGE_LOWER.equals(range.getLeft())) {
-				left = lastByte - range.getRight();
-				right = lastByte;
-			} else if (SUFFIX_BYTE_RANGE_UPPER.equals(range.getRight())) {
-				left = range.getLeft();
-				right = lastByte;
+		try {
+			final Long lower = requestRange.getLeft().isEmpty() ? null : Long.valueOf(requestRange.getLeft());
+			final Long upper = requestRange.getRight().isEmpty() ? null : Long.valueOf(requestRange.getRight());
+			if (lower == null) {
+				range = new ImmutablePair<Long, Long>(contentLength - upper, contentLength - 1);
+			} else if (upper == null) {
+				range = new ImmutablePair<Long, Long>(lower, contentLength - 1);
 			} else {
-				left = range.getLeft();
-				right = range.getRight();
+				range = new ImmutablePair<Long, Long>(lower, upper);
 			}
-			if (result.getLeft() == null || left < result.getLeft()) {
-				result.setLeft(left);
-			}
-			if (result.getRight() == null || right > result.getRight()) {
-				result.setRight(right);
-			}
+		} catch (NumberFormatException e) {
+			throw new IllegalArgumentException("Invalid byte range: " + requestRange, e);
 		}
-		return result;
 	}
 
 	@Override
@@ -113,10 +55,9 @@ class EncryptedFilePart extends EncryptedFile {
 		assert Files.isRegularFile(filePath);
 		assert this.contentLength != null;
 
-		final Pair<Long, Long> range = getUnionRange(this.contentLength);
-		final Long rangeLength = Math.min(this.contentLength, range.getRight()) - range.getLeft() + 1;
+		final Long rangeLength = range.getRight() - range.getLeft() + 1;
 		outputContext.setContentLength(rangeLength);
-		outputContext.setProperty(HttpHeader.CONTENT_RANGE.asString(), getContentRangeHeader(range.getLeft(), range.getRight(), this.contentLength));
+		outputContext.setProperty(HttpHeader.CONTENT_RANGE.asString(), getContentRangeHeader(range.getLeft(), range.getRight(), contentLength));
 		outputContext.setModificationTime(Files.getLastModifiedTime(filePath).toMillis());
 
 		try (final FileChannel c = FileChannel.open(filePath, StandardOpenOption.READ)) {
@@ -137,7 +78,7 @@ class EncryptedFilePart extends EncryptedFile {
 	}
 
 	private String getContentRangeHeader(long firstByte, long lastByte, long completeLength) {
-		return String.format("%d-%d/%d", firstByte, lastByte, completeLength);
+		return String.format("bytes %d-%d/%d", firstByte, lastByte, completeLength);
 	}
 
 }

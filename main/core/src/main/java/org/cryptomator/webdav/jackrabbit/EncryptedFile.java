@@ -72,6 +72,10 @@ class EncryptedFile extends AbstractEncryptedNode implements FileConstants {
 		this.contentLength = contentLength;
 	}
 
+	public Long getContentLength() {
+		return contentLength;
+	}
+
 	@Override
 	public boolean isCollection() {
 		return false;
