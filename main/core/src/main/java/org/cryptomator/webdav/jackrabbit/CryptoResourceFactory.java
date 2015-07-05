@@ -6,7 +6,6 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -60,11 +59,11 @@ public class CryptoResourceFactory implements DavResourceFactory, FileConstants 
 		} else if (Files.exists(filePath) && DavMethods.METHOD_GET.equals(request.getMethod()) && rangeHeader != null && isRangeSatisfiable(rangeHeader)) {
 			// FILE RANGE
 			final Pair<String, String> requestRange = getRequestRange(rangeHeader);
-			response.setStatus(HttpStatus.SC_PARTIAL_CONTENT);
+			response.setStatus(DavServletResponse.SC_PARTIAL_CONTENT);
 			return createFilePart(locator, request.getDavSession(), requestRange, filePath);
 		} else if (Files.exists(filePath) && DavMethods.METHOD_GET.equals(request.getMethod()) && rangeHeader != null && !isRangeSatisfiable(rangeHeader)) {
 			// FULL FILE (unsatisfiable range)
-			response.setStatus(HttpStatus.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
+			response.setStatus(DavServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
 			final EncryptedFile file = createFile(locator, request.getDavSession(), filePath);
 			response.addHeader(HttpHeader.CONTENT_RANGE.asString(), "bytes */" + file.getContentLength());
 			return file;
