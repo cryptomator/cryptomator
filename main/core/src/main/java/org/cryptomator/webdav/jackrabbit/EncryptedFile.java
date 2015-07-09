@@ -29,7 +29,6 @@ import org.apache.jackrabbit.webdav.lock.LockManager;
 import org.apache.jackrabbit.webdav.property.DavPropertyName;
 import org.apache.jackrabbit.webdav.property.DefaultDavProperty;
 import org.cryptomator.crypto.Cryptor;
-import org.cryptomator.crypto.exceptions.DecryptFailedException;
 import org.cryptomator.crypto.exceptions.MacAuthenticationFailedException;
 import org.cryptomator.webdav.exceptions.IORuntimeException;
 import org.eclipse.jetty.http.HttpHeader;
@@ -61,12 +60,12 @@ class EncryptedFile extends AbstractEncryptedNode implements FileConstants {
 			} catch (OverlappingFileLockException e) {
 				// file header currently locked, report -1 for unknown size.
 				properties.add(new DefaultDavProperty<Long>(DavPropertyName.GETCONTENTLENGTH, -1l));
-			} catch (IOException e) {
-				LOG.error("Error reading filesize " + filePath.toString(), e);
-				throw new IORuntimeException(e);
 			} catch (MacAuthenticationFailedException e) {
 				LOG.warn("Content length couldn't be determined due to MAC authentication violation.");
 				// don't add content length DAV property
+			} catch (IOException e) {
+				LOG.error("Error reading filesize " + filePath.toString(), e);
+				throw new IORuntimeException(e);
 			}
 		}
 		this.contentLength = contentLength;
@@ -107,16 +106,11 @@ class EncryptedFile extends AbstractEncryptedNode implements FileConstants {
 					outputContext.setContentLength(contentLength);
 				}
 				if (outputContext.hasStream()) {
-					cryptor.decryptFile(c, outputContext.getOutputStream());
+					final boolean authenticate = !cryptoWarningHandler.ignoreMac(getLocator().getResourcePath());
+					cryptor.decryptFile(c, outputContext.getOutputStream(), authenticate);
 				}
 			} catch (EOFException e) {
 				LOG.warn("Unexpected end of stream (possibly client hung up).");
-			} catch (MacAuthenticationFailedException e) {
-				LOG.warn("File integrity violation for " + getLocator().getResourcePath());
-				cryptoWarningHandler.macAuthFailed(getLocator().getResourcePath());
-				throw new IOException("Error decrypting file " + filePath.toString(), e);
-			} catch (DecryptFailedException e) {
-				throw new IOException("Error decrypting file " + filePath.toString(), e);
 			}
 		}
 	}

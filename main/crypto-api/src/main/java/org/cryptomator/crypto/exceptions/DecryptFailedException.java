@@ -1,6 +1,6 @@
 package org.cryptomator.crypto.exceptions;
 
-public class DecryptFailedException extends StorageCryptingException {
+public class DecryptFailedException extends CryptingException {
 	private static final long serialVersionUID = -3855673600374897828L;
 
 	public DecryptFailedException(Throwable t) {

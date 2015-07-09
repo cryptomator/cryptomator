@@ -2,7 +2,6 @@ package org.cryptomator.ui.util;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.beans.value.WeakChangeListener;
 import javafx.stage.Window;
 
 public class ActiveWindowStyleSupport implements ChangeListener<Boolean> {
@@ -18,9 +17,8 @@ public class ActiveWindowStyleSupport implements ChangeListener<Boolean> {
 	}
 
 	/**
-	 * Creates and registers a listener on the given window, that will add the class {@value #ACTIVE_WINDOW_STYLE_CLASS} to the scenes root
-	 * element, if the window is active. Otherwise {@value #INACTIVE_WINDOW_STYLE_CLASS} will be added. Allows CSS rules to be defined
-	 * depending on the window's focus.<br/>
+	 * Creates and registers a listener on the given window, that will add the class {@value #ACTIVE_WINDOW_STYLE_CLASS} to the scenes root element, if the window is active. Otherwise
+	 * {@value #INACTIVE_WINDOW_STYLE_CLASS} will be added. Allows CSS rules to be defined depending on the window's focus.<br/>
 	 * <br/>
 	 * Example:<br/>
 	 * <code>
@@ -32,7 +30,7 @@ public class ActiveWindowStyleSupport implements ChangeListener<Boolean> {
 	 * @return The observer
 	 */
 	public static ChangeListener<Boolean> startObservingFocus(final Window window) {
-		final ChangeListener<Boolean> observer = new WeakChangeListener<Boolean>(new ActiveWindowStyleSupport(window));
+		final ChangeListener<Boolean> observer = new ActiveWindowStyleSupport(window);
 		window.focusedProperty().addListener(observer);
 		return observer;
 	}

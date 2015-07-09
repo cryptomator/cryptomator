@@ -20,7 +20,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.text.Text;
 
-import org.cryptomator.crypto.exceptions.DecryptFailedException;
 import org.cryptomator.crypto.exceptions.UnsupportedKeyLengthException;
 import org.cryptomator.crypto.exceptions.UnsupportedVaultException;
 import org.cryptomator.crypto.exceptions.WrongPasswordException;
@@ -109,7 +108,7 @@ public class ChangePasswordController implements Initializable {
 		try (final InputStream masterKeyInputStream = Files.newInputStream(masterKeyPath, StandardOpenOption.READ)) {
 			vault.getCryptor().decryptMasterKey(masterKeyInputStream, oldPassword);
 			Files.copy(masterKeyPath, masterKeyBackupPath, StandardCopyOption.REPLACE_EXISTING);
-		} catch (DecryptFailedException | IOException ex) {
+		} catch (IOException ex) {
 			messageText.setText(rb.getString("changePassword.errorMessage.decryptionFailed"));
 			LOG.error("Decryption failed for technical reasons.", ex);
 			newPasswordField.swipe();

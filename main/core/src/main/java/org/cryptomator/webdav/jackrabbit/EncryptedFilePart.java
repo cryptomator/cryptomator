@@ -14,8 +14,6 @@ import org.apache.jackrabbit.webdav.DavSession;
 import org.apache.jackrabbit.webdav.io.OutputContext;
 import org.apache.jackrabbit.webdav.lock.LockManager;
 import org.cryptomator.crypto.Cryptor;
-import org.cryptomator.crypto.exceptions.DecryptFailedException;
-import org.cryptomator.crypto.exceptions.MacAuthenticationFailedException;
 import org.eclipse.jetty.http.HttpHeader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,18 +60,13 @@ class EncryptedFilePart extends EncryptedFile {
 
 		try (final FileChannel c = FileChannel.open(filePath, StandardOpenOption.READ)) {
 			if (outputContext.hasStream()) {
-				cryptor.decryptRange(c, outputContext.getOutputStream(), range.getLeft(), rangeLength);
+				final boolean authenticate = !cryptoWarningHandler.ignoreMac(getLocator().getResourcePath());
+				cryptor.decryptRange(c, outputContext.getOutputStream(), range.getLeft(), rangeLength, authenticate);
 			}
 		} catch (EOFException e) {
 			if (LOG.isDebugEnabled()) {
 				LOG.trace("Unexpected end of stream during delivery of partial content (client hung up).");
 			}
-		} catch (MacAuthenticationFailedException e) {
-			LOG.warn("File integrity violation for " + getLocator().getResourcePath());
-			cryptoWarningHandler.macAuthFailed(getLocator().getResourcePath());
-			throw new IOException("Error decrypting file " + filePath.toString(), e);
-		} catch (DecryptFailedException e) {
-			throw new IOException("Error decrypting file " + filePath.toString(), e);
 		}
 	}
 

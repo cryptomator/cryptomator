@@ -13,6 +13,8 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ListChangeListener.Change;
 import javafx.collections.ObservableList;
 
+import com.google.common.collect.ImmutableList;
+
 class ObservableListOnMainThread<E> implements ObservableList<E> {
 
 	private final ObservableList<E> list;
@@ -173,8 +175,9 @@ class ObservableListOnMainThread<E> implements ObservableList<E> {
 	}
 
 	private void invalidated(Observable observable) {
+		final Collection<InvalidationListener> listeners = ImmutableList.copyOf(invalidationListeners);
 		Platform.runLater(() -> {
-			for (InvalidationListener listener : invalidationListeners) {
+			for (InvalidationListener listener : listeners) {
 				listener.invalidated(this);
 			}
 		});
@@ -192,8 +195,9 @@ class ObservableListOnMainThread<E> implements ObservableList<E> {
 
 	private void onChanged(Change<? extends E> change) {
 		final Change<? extends E> c = new ListChange(change);
+		final Collection<ListChangeListener<? super E>> listeners = ImmutableList.copyOf(listChangeListeners);
 		Platform.runLater(() -> {
-			for (ListChangeListener<? super E> listener : listChangeListeners) {
+			for (ListChangeListener<? super E> listener : listeners) {
 				listener.onChanged(c);
 			}
 		});
@@ -206,7 +210,7 @@ class ObservableListOnMainThread<E> implements ObservableList<E> {
 
 	@Override
 	public void removeListener(ListChangeListener<? super E> listener) {
-		listChangeListeners.add(listener);
+		listChangeListeners.remove(listener);
 	}
 
 	private class ListChange extends ListChangeListener.Change<E> {

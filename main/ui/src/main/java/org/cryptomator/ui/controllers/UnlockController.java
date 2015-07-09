@@ -35,7 +35,6 @@ import javafx.scene.text.Text;
 import javax.security.auth.DestroyFailedException;
 
 import org.apache.commons.lang3.CharUtils;
-import org.cryptomator.crypto.exceptions.DecryptFailedException;
 import org.cryptomator.crypto.exceptions.UnsupportedKeyLengthException;
 import org.cryptomator.crypto.exceptions.UnsupportedVaultException;
 import org.cryptomator.crypto.exceptions.WrongPasswordException;
@@ -134,7 +133,7 @@ public class UnlockController implements Initializable {
 			vault.setUnlocked(true);
 			final Future<Boolean> futureMount = exec.submit(() -> vault.mount());
 			FXThreads.runOnMainThreadWhenFinished(exec, futureMount, this::unlockAndMountFinished);
-		} catch (DecryptFailedException | IOException ex) {
+		} catch (IOException ex) {
 			setControlsDisabled(false);
 			progressIndicator.setVisible(false);
 			messageText.setText(rb.getString("unlock.errorMessage.decryptionFailed"));
@@ -178,6 +177,7 @@ public class UnlockController implements Initializable {
 		setControlsDisabled(false);
 		if (vault.isUnlocked() && !mountSuccess) {
 			vault.stopServer();
+			vault.setUnlocked(false);
 		}
 		if (mountSuccess && listener != null) {
 			listener.didUnlock(this);

@@ -45,15 +45,15 @@ public class SamplingCryptorDecorator extends AbstractCryptorDecorator implement
 	/* Cryptor */
 
 	@Override
-	public Long decryptFile(SeekableByteChannel encryptedFile, OutputStream plaintextFile) throws IOException, DecryptFailedException {
+	public Long decryptFile(SeekableByteChannel encryptedFile, OutputStream plaintextFile, boolean authenticate) throws IOException, DecryptFailedException {
 		final OutputStream countingInputStream = new CountingOutputStream(decryptedBytes, plaintextFile);
-		return cryptor.decryptFile(encryptedFile, countingInputStream);
+		return cryptor.decryptFile(encryptedFile, countingInputStream, authenticate);
 	}
 
 	@Override
-	public Long decryptRange(SeekableByteChannel encryptedFile, OutputStream plaintextFile, long pos, long length) throws IOException, DecryptFailedException {
+	public Long decryptRange(SeekableByteChannel encryptedFile, OutputStream plaintextFile, long pos, long length, boolean authenticate) throws IOException, DecryptFailedException {
 		final OutputStream countingInputStream = new CountingOutputStream(decryptedBytes, plaintextFile);
-		return cryptor.decryptRange(encryptedFile, countingInputStream, pos, length);
+		return cryptor.decryptRange(encryptedFile, countingInputStream, pos, length, authenticate);
 	}
 
 	@Override

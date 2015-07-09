@@ -8,21 +8,29 @@
  ******************************************************************************/
 package org.cryptomator.webdav.jackrabbit;
 
+import java.io.IOException;
 import java.util.Collection;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletResponse;
 
+import org.apache.jackrabbit.webdav.DavException;
 import org.apache.jackrabbit.webdav.DavLocatorFactory;
 import org.apache.jackrabbit.webdav.DavResource;
 import org.apache.jackrabbit.webdav.DavResourceFactory;
 import org.apache.jackrabbit.webdav.DavSessionProvider;
 import org.apache.jackrabbit.webdav.WebdavRequest;
+import org.apache.jackrabbit.webdav.WebdavResponse;
 import org.apache.jackrabbit.webdav.server.AbstractWebdavServlet;
 import org.cryptomator.crypto.Cryptor;
+import org.cryptomator.crypto.exceptions.MacAuthenticationFailedException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class WebDavServlet extends AbstractWebdavServlet {
 
+	private static final Logger LOG = LoggerFactory.getLogger(WebDavServlet.class);
 	private static final long serialVersionUID = 7965170007048673022L;
 	public static final String CFG_FS_ROOT = "cfg.fs.root";
 	private DavSessionProvider davSessionProvider;
@@ -79,6 +87,17 @@ public class WebDavServlet extends AbstractWebdavServlet {
 	@Override
 	public void setResourceFactory(DavResourceFactory resourceFactory) {
 		this.davResourceFactory = resourceFactory;
+	}
+
+	@Override
+	protected void doGet(WebdavRequest request, WebdavResponse response, DavResource resource) throws IOException, DavException {
+		try {
+			super.doGet(request, response, resource);
+		} catch (MacAuthenticationFailedException e) {
+			LOG.warn("File integrity violation for " + resource.getLocator().getResourcePath());
+			cryptoWarningHandler.macAuthFailed(resource.getLocator().getResourcePath());
+			response.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+		}
 	}
 
 }

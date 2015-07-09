@@ -79,7 +79,7 @@ public interface Cryptor extends Destroyable {
 	 * @return Number of decrypted bytes. This might not be equal to the encrypted file size due to optional metadata written to it.
 	 * @throws DecryptFailedException If decryption failed
 	 */
-	Long decryptFile(SeekableByteChannel encryptedFile, OutputStream plaintextFile) throws IOException, DecryptFailedException;
+	Long decryptFile(SeekableByteChannel encryptedFile, OutputStream plaintextFile, boolean authenticate) throws IOException, DecryptFailedException;
 
 	/**
 	 * @param pos First byte (inclusive)
@@ -87,7 +87,7 @@ public interface Cryptor extends Destroyable {
 	 * @return Number of decrypted bytes. This might not be equal to the number of bytes requested due to potential overheads.
 	 * @throws DecryptFailedException If decryption failed
 	 */
-	Long decryptRange(SeekableByteChannel encryptedFile, OutputStream plaintextFile, long pos, long length) throws IOException, DecryptFailedException;
+	Long decryptRange(SeekableByteChannel encryptedFile, OutputStream plaintextFile, long pos, long length, boolean authenticate) throws IOException, DecryptFailedException;
 
 	/**
 	 * @return Number of encrypted bytes. This might not be equal to the encrypted file size due to optional metadata written to it.

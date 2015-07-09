@@ -99,7 +99,7 @@ public class Aes256CryptorTest {
 		// decrypt modified content (should fail with DecryptFailedException):
 		final SeekableByteChannel encryptedIn = new ByteBufferBackedSeekableChannel(encryptedData);
 		final ByteArrayOutputStream plaintextOut = new ByteArrayOutputStream();
-		cryptor.decryptFile(encryptedIn, plaintextOut);
+		cryptor.decryptFile(encryptedIn, plaintextOut, true);
 	}
 
 	@Test
@@ -127,7 +127,7 @@ public class Aes256CryptorTest {
 
 		// decrypt:
 		final ByteArrayOutputStream plaintextOut = new ByteArrayOutputStream();
-		final Long numDecryptedBytes = cryptor.decryptFile(encryptedIn, plaintextOut);
+		final Long numDecryptedBytes = cryptor.decryptFile(encryptedIn, plaintextOut, true);
 		IOUtils.closeQuietly(encryptedIn);
 		IOUtils.closeQuietly(plaintextOut);
 		Assert.assertEquals(filesize.longValue(), numDecryptedBytes.longValue());
@@ -162,7 +162,7 @@ public class Aes256CryptorTest {
 		// decrypt:
 		final SeekableByteChannel encryptedIn = new ByteBufferBackedSeekableChannel(encryptedData);
 		final ByteArrayOutputStream plaintextOut = new ByteArrayOutputStream();
-		final Long numDecryptedBytes = cryptor.decryptRange(encryptedIn, plaintextOut, 260000 * Integer.BYTES, 4000 * Integer.BYTES);
+		final Long numDecryptedBytes = cryptor.decryptRange(encryptedIn, plaintextOut, 260000 * Integer.BYTES, 4000 * Integer.BYTES, true);
 		IOUtils.closeQuietly(encryptedIn);
 		IOUtils.closeQuietly(plaintextOut);
 		Assert.assertTrue(numDecryptedBytes > 0);

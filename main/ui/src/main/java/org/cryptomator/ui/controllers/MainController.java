@@ -286,7 +286,7 @@ public class MainController implements Initializable, InitializationListener, Un
 	@Override
 	public void didLock(UnlockedController ctrl) {
 		showUnlockView(ctrl.getVault());
-		if (getUnlockedDirectories().isEmpty()) {
+		if (getUnlockedVaults().isEmpty()) {
 			Platform.setImplicitExit(true);
 		}
 	}
@@ -304,12 +304,12 @@ public class MainController implements Initializable, InitializationListener, Un
 
 	/* Convenience */
 
-	public Collection<Vault> getDirectories() {
+	public Collection<Vault> getVaults() {
 		return vaultList.getItems();
 	}
 
-	public Collection<Vault> getUnlockedDirectories() {
-		return getDirectories().stream().filter(d -> d.isUnlocked()).collect(Collectors.toSet());
+	public Collection<Vault> getUnlockedVaults() {
+		return getVaults().stream().filter(d -> d.isUnlocked()).collect(Collectors.toSet());
 	}
 
 	/* public Getter/Setter */

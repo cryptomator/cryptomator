@@ -24,7 +24,7 @@
 		<ListView fx:id="warningsList" VBox.vgrow="ALWAYS" focusTraversable="false" />
 		<HBox alignment="CENTER_RIGHT" spacing="12.0">
 			<children>
-				<Button text="%macWarnings.dismissButton" prefWidth="200.0" onAction="#didClickDismissButton" focusTraversable="false"/>
+				<Button fx:id="whitelistButton" text="%macWarnings.whitelistButton" prefWidth="200.0" onAction="#didClickWhitelistButton" focusTraversable="false"/>
 				<Button text="%macWarnings.moreInformationButton" defaultButton="true" prefWidth="200.0" onAction="#didClickMoreInformationButton" focusTraversable="false"/>
 			</children>
 		</HBox>

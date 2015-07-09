@@ -11,6 +11,8 @@ import javafx.collections.ObservableSet;
 import javafx.collections.SetChangeListener;
 import javafx.collections.SetChangeListener.Change;
 
+import com.google.common.collect.ImmutableList;
+
 class ObservableSetOnMainThread<E> implements ObservableSet<E> {
 
 	private final ObservableSet<E> set;
@@ -91,8 +93,9 @@ class ObservableSetOnMainThread<E> implements ObservableSet<E> {
 	}
 
 	private void invalidated(Observable observable) {
+		final Collection<InvalidationListener> listeners = ImmutableList.copyOf(invalidationListeners);
 		Platform.runLater(() -> {
-			for (InvalidationListener listener : invalidationListeners) {
+			for (InvalidationListener listener : listeners) {
 				listener.invalidated(this);
 			}
 		});
@@ -110,8 +113,9 @@ class ObservableSetOnMainThread<E> implements ObservableSet<E> {
 
 	private void onChanged(Change<? extends E> change) {
 		final Change<? extends E> c = new SetChange(this, change.getElementAdded(), change.getElementRemoved());
+		final Collection<SetChangeListener<? super E>> listeners = ImmutableList.copyOf(setChangeListeners);
 		Platform.runLater(() -> {
-			for (SetChangeListener<? super E> listener : setChangeListeners) {
+			for (SetChangeListener<? super E> listener : listeners) {
 				listener.onChanged(c);
 			}
 		});

@@ -1,6 +1,6 @@
 package org.cryptomator.crypto.exceptions;
 
-public class UnsupportedKeyLengthException extends StorageCryptingException {
+public class UnsupportedKeyLengthException extends MasterkeyDecryptionException {
 	private static final long serialVersionUID = 8114147446419390179L;
 
 	private final int requestedLength;

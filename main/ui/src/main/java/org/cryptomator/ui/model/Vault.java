@@ -105,7 +105,6 @@ public class Vault implements Serializable {
 		} catch (DestroyFailedException e) {
 			LOG.error("Destruction of cryptor throw an exception.", e);
 		}
-		setUnlocked(false);
 		whitelistedResourcesWithInvalidMac.clear();
 		namesOfResourcesWithInvalidMac.clear();
 	}

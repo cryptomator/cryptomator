@@ -11,14 +11,12 @@ package org.cryptomator.ui.controllers;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
-import javafx.collections.WeakListChangeListener;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -32,7 +30,6 @@ import javafx.scene.chart.XYChart.Data;
 import javafx.scene.chart.XYChart.Series;
 import javafx.scene.control.Label;
 import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
 import javafx.util.Duration;
 
 import org.cryptomator.crypto.CryptorIOSampling;
@@ -48,9 +45,8 @@ public class UnlockedController implements Initializable {
 	private static final int IO_SAMPLING_STEPS = 100;
 	private static final double IO_SAMPLING_INTERVAL = 0.25;
 	private final ControllerFactory controllerFactory;
-	private final ListChangeListener<String> macWarningsListener = this::macWarningsDidChange;
-	private final ListChangeListener<String> weakMacWarningsListener = new WeakListChangeListener<>(macWarningsListener);
-	private final AtomicBoolean macWarningsWindowVisible = new AtomicBoolean();
+	private final Stage macWarningWindow = new Stage();
+	private MacWarningsController macWarningCtrl;
 	private LockListener listener;
 	private Vault vault;
 	private Timeline ioAnimation;
@@ -74,6 +70,22 @@ public class UnlockedController implements Initializable {
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
 		this.rb = rb;
+
+		try {
+			final FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/mac_warnings.fxml"), rb);
+			loader.setControllerFactory(controllerFactory);
+
+			final Parent root = loader.load();
+			macWarningWindow.setScene(new Scene(root));
+			macWarningWindow.sizeToScene();
+			macWarningWindow.setResizable(false);
+			ActiveWindowStyleSupport.startObservingFocus(macWarningWindow);
+
+			macWarningCtrl = loader.getController();
+			macWarningCtrl.setStage(macWarningWindow);
+		} catch (IOException e) {
+			throw new IllegalStateException("Failed to load fxml file.", e);
+		}
 	}
 
 	@FXML
@@ -84,7 +96,6 @@ public class UnlockedController implements Initializable {
 			messageLabel.setText(rb.getString("unlocked.label.unmountFailed"));
 			return;
 		}
-		vault.getNamesOfResourcesWithInvalidMac().removeListener(weakMacWarningsListener);
 		vault.stopServer();
 		vault.setUnlocked(false);
 		if (listener != null) {
@@ -98,38 +109,14 @@ public class UnlockedController implements Initializable {
 
 	private void macWarningsDidChange(ListChangeListener.Change<? extends String> change) {
 		if (change.getList().size() > 0) {
-			Platform.runLater(this::showMacWarningsWindow);
+			Platform.runLater(() -> {
+				macWarningWindow.show();
+			});
+		} else {
+			Platform.runLater(() -> {
+				macWarningWindow.hide();
+			});
 		}
-	}
-
-	private void showMacWarningsWindow() {
-		if (macWarningsWindowVisible.getAndSet(true) == false) {
-			try {
-				final FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/mac_warnings.fxml"), rb);
-				loader.setControllerFactory(controllerFactory);
-
-				final Parent root = loader.load();
-				final Stage stage = new Stage();
-				stage.setTitle(String.format(rb.getString("macWarnings.windowTitle"), vault.getName()));
-				stage.setScene(new Scene(root));
-				stage.sizeToScene();
-				stage.setResizable(false);
-				stage.setOnHidden(this::onHideMacWarningsWindow);
-				ActiveWindowStyleSupport.startObservingFocus(stage);
-
-				final MacWarningsController ctrl = loader.getController();
-				ctrl.setVault(vault);
-				ctrl.setStage(stage);
-
-				stage.show();
-			} catch (IOException e) {
-				throw new IllegalStateException("Failed to load fxml file.", e);
-			}
-		}
-	}
-
-	private void onHideMacWarningsWindow(WindowEvent event) {
-		macWarningsWindowVisible.set(false);
 	}
 
 	// ****************************************
@@ -194,8 +181,18 @@ public class UnlockedController implements Initializable {
 
 	public void setVault(Vault vault) {
 		this.vault = vault;
-		vault.getNamesOfResourcesWithInvalidMac().addListener(weakMacWarningsListener);
+		macWarningCtrl.setVault(vault);
 
+		// listen to MAC warnings as long as this vault is unlocked:
+		final ListChangeListener<String> macWarningsListener = this::macWarningsDidChange;
+		vault.getNamesOfResourcesWithInvalidMac().addListener(macWarningsListener);
+		vault.unlockedProperty().addListener((observable, oldValue, newValue) -> {
+			if (Boolean.FALSE.equals(newValue)) {
+				vault.getNamesOfResourcesWithInvalidMac().removeListener(macWarningsListener);
+			}
+		});
+
+		// sample crypto-throughput:
 		if (vault.getCryptor() instanceof CryptorIOSampling) {
 			startIoSampling((CryptorIOSampling) vault.getCryptor());
 		} else {

@@ -358,7 +358,7 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 	}
 
 	@Override
-	public Long decryptFile(SeekableByteChannel encryptedFile, OutputStream plaintextFile) throws IOException, DecryptFailedException {
+	public Long decryptFile(SeekableByteChannel encryptedFile, OutputStream plaintextFile, boolean authenticate) throws IOException, DecryptFailedException {
 		// read header:
 		encryptedFile.position(0l);
 		final ByteBuffer headerBuf = ByteBuffer.allocate(96);
@@ -397,14 +397,14 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 		headerBuf.get(storedHeaderMac);
 
 		// calculate mac over first 64 bytes of header:
-		final Mac headerMac = this.hmacSha256(hMacMasterKey);
-		headerBuf.position(0);
-		headerBuf.limit(64);
-		headerMac.update(headerBuf);
-
-		// check header integrity:
-		if (!MessageDigest.isEqual(storedHeaderMac, headerMac.doFinal())) {
-			throw new MacAuthenticationFailedException("Header MAC authentication failed.");
+		if (authenticate) {
+			final Mac headerMac = this.hmacSha256(hMacMasterKey);
+			headerBuf.position(0);
+			headerBuf.limit(64);
+			headerMac.update(headerBuf);
+			if (!MessageDigest.isEqual(storedHeaderMac, headerMac.doFinal())) {
+				throw new MacAuthenticationFailedException("Header MAC authentication failed.");
+			}
 		}
 
 		// content decryption:
@@ -424,12 +424,14 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 			}
 
 			// check MAC of current block:
-			contentMac.update(buffer, 0, n - 32);
-			final byte[] calculatedMac = contentMac.doFinal();
-			final byte[] storedMac = new byte[32];
-			System.arraycopy(buffer, n - 32, storedMac, 0, 32);
-			if (!MessageDigest.isEqual(calculatedMac, storedMac)) {
-				throw new MacAuthenticationFailedException("Content MAC authentication failed.");
+			if (authenticate) {
+				contentMac.update(buffer, 0, n - 32);
+				final byte[] calculatedMac = contentMac.doFinal();
+				final byte[] storedMac = new byte[32];
+				System.arraycopy(buffer, n - 32, storedMac, 0, 32);
+				if (!MessageDigest.isEqual(calculatedMac, storedMac)) {
+					throw new MacAuthenticationFailedException("Content MAC authentication failed.");
+				}
 			}
 
 			// decrypt block:
@@ -444,7 +446,7 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 	}
 
 	@Override
-	public Long decryptRange(SeekableByteChannel encryptedFile, OutputStream plaintextFile, long pos, long length) throws IOException, DecryptFailedException {
+	public Long decryptRange(SeekableByteChannel encryptedFile, OutputStream plaintextFile, long pos, long length, boolean authenticate) throws IOException, DecryptFailedException {
 		// read header:
 		encryptedFile.position(0l);
 		final ByteBuffer headerBuf = ByteBuffer.allocate(96);
@@ -470,14 +472,14 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 		headerBuf.get(storedHeaderMac);
 
 		// calculate mac over first 64 bytes of header:
-		final Mac headerMac = this.hmacSha256(hMacMasterKey);
-		headerBuf.position(0);
-		headerBuf.limit(64);
-		headerMac.update(headerBuf);
-
-		// check header integrity:
-		if (!MessageDigest.isEqual(storedHeaderMac, headerMac.doFinal())) {
-			throw new MacAuthenticationFailedException("Header MAC authentication failed.");
+		if (authenticate) {
+			final Mac headerMac = this.hmacSha256(hMacMasterKey);
+			headerBuf.position(0);
+			headerBuf.limit(64);
+			headerMac.update(headerBuf);
+			if (!MessageDigest.isEqual(storedHeaderMac, headerMac.doFinal())) {
+				throw new MacAuthenticationFailedException("Header MAC authentication failed.");
+			}
 		}
 
 		// find first relevant block:
@@ -509,12 +511,14 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 				}
 
 				// check MAC of current block:
-				contentMac.update(buffer, 0, n - 32);
-				final byte[] calculatedMac = contentMac.doFinal();
-				final byte[] storedMac = new byte[32];
-				System.arraycopy(buffer, n - 32, storedMac, 0, 32);
-				if (!MessageDigest.isEqual(calculatedMac, storedMac)) {
-					throw new MacAuthenticationFailedException("Content MAC authentication failed.");
+				if (authenticate) {
+					contentMac.update(buffer, 0, n - 32);
+					final byte[] calculatedMac = contentMac.doFinal();
+					final byte[] storedMac = new byte[32];
+					System.arraycopy(buffer, n - 32, storedMac, 0, 32);
+					if (!MessageDigest.isEqual(calculatedMac, storedMac)) {
+						throw new MacAuthenticationFailedException("Content MAC authentication failed.");
+					}
 				}
 
 				// decrypt block:

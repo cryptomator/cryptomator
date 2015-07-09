@@ -53,13 +53,13 @@ public class AbstractCryptorDecorator implements Cryptor {
 	}
 
 	@Override
-	public Long decryptFile(SeekableByteChannel encryptedFile, OutputStream plaintextFile) throws IOException, DecryptFailedException {
-		return cryptor.decryptFile(encryptedFile, plaintextFile);
+	public Long decryptFile(SeekableByteChannel encryptedFile, OutputStream plaintextFile, boolean authenticate) throws IOException, DecryptFailedException {
+		return cryptor.decryptFile(encryptedFile, plaintextFile, authenticate);
 	}
 
 	@Override
-	public Long decryptRange(SeekableByteChannel encryptedFile, OutputStream plaintextFile, long pos, long length) throws IOException, DecryptFailedException {
-		return cryptor.decryptRange(encryptedFile, plaintextFile, pos, length);
+	public Long decryptRange(SeekableByteChannel encryptedFile, OutputStream plaintextFile, long pos, long length, boolean authenticate) throws IOException, DecryptFailedException {
+		return cryptor.decryptRange(encryptedFile, plaintextFile, pos, length, authenticate);
 	}
 
 	@Override
