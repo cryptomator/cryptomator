@@ -21,7 +21,7 @@ interface FileConstants {
 	/**
 	 * Number of bytes in the file header.
 	 */
-	long FILE_HEADER_LENGTH = 96;
+	long FILE_HEADER_LENGTH = 104;
 
 	/**
 	 * Allow range requests for files > 32MiB.
