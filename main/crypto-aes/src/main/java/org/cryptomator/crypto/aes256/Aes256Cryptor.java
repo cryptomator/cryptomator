@@ -423,6 +423,7 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 		final InputStream in = new SeekableByteChannelInputStream(encryptedFile);
 		byte[] buffer = new byte[CONTENT_MAC_BLOCK + 32];
 		int n = 0;
+		long blockNum = 0;
 		while ((n = IOUtils.read(in, buffer)) > 0) {
 			if (n < 32) {
 				throw new DecryptFailedException("Invalid file content, missing MAC.");
@@ -430,6 +431,8 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 
 			// check MAC of current block:
 			if (authenticate) {
+				contentMac.update(iv);
+				contentMac.update(longToByteArray(blockNum));
 				contentMac.update(buffer, 0, n - 32);
 				final byte[] calculatedMac = contentMac.doFinal();
 				final byte[] storedMac = new byte[32];
@@ -444,6 +447,7 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 			final int plaintextLengthWithoutPadding = (int) Math.min(plaintext.length, fileSize - bytesDecrypted); // plaintext.length is known to be a 32 bit int
 			plaintextFile.write(plaintext, 0, plaintextLengthWithoutPadding);
 			bytesDecrypted += plaintextLengthWithoutPadding;
+			blockNum++;
 		}
 		destroyQuietly(fileKey);
 
@@ -521,6 +525,7 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 			final InputStream in = new SeekableByteChannelInputStream(encryptedFile);
 			byte[] buffer = new byte[CONTENT_MAC_BLOCK + 32];
 			int n = 0;
+			long blockNum = startBlock;
 			while ((n = IOUtils.read(in, buffer)) > 0 && bytesWritten < length) {
 				if (n < 32) {
 					throw new DecryptFailedException("Invalid file content, missing MAC.");
@@ -528,6 +533,8 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 
 				// check MAC of current block:
 				if (authenticate) {
+					contentMac.update(iv);
+					contentMac.update(longToByteArray(blockNum));
 					contentMac.update(buffer, 0, n - 32);
 					final byte[] calculatedMac = contentMac.doFinal();
 					final byte[] storedMac = new byte[32];
@@ -546,6 +553,7 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 
 				plaintextFile.write(plaintext, offset, currentBatch);
 				bytesWritten += currentBatch;
+				blockNum++;
 			}
 			return bytesWritten;
 		} finally {
@@ -593,12 +601,16 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 		// writing ciphered output and MACs interleaved:
 		final byte[] buffer = new byte[CONTENT_MAC_BLOCK];
 		int n = 0;
+		long blockNum = 0;
 		while ((n = IOUtils.read(in, buffer)) > 0) {
 			final byte[] ciphertext = cipher.update(buffer, 0, n);
 			out.write(ciphertext);
+			contentMac.update(iv);
+			contentMac.update(longToByteArray(blockNum));
 			contentMac.update(ciphertext);
 			final byte[] mac = contentMac.doFinal();
 			out.write(mac);
+			blockNum++;
 		}
 		destroyQuietly(fileKey);
 
@@ -621,6 +633,10 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 		encryptedFile.write(headerBuf);
 
 		return plaintextSize;
+	}
+
+	private byte[] longToByteArray(long lng) {
+		return ByteBuffer.allocate(Long.SIZE).putLong(lng).array();
 	}
 
 }
