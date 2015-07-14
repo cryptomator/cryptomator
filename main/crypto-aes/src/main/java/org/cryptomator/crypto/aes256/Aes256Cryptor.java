@@ -636,7 +636,7 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 	}
 
 	private byte[] longToByteArray(long lng) {
-		return ByteBuffer.allocate(Long.SIZE).putLong(lng).array();
+		return ByteBuffer.allocate(Long.SIZE / Byte.SIZE).putLong(lng).array();
 	}
 
 }
