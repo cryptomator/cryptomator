@@ -84,7 +84,7 @@ interface AesCryptographicConfiguration {
 	/**
 	 * Number of bytes, a content block over which a MAC is calculated consists of.
 	 */
-	int CONTENT_MAC_BLOCK = 128 * 1024;
+	int CONTENT_MAC_BLOCK = 32 * 1024;
 
 	/**
 	 * How to encode the encrypted file names safely. Base32 uses only alphanumeric characters and is case-insensitive.

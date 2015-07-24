@@ -5,6 +5,8 @@ import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.FileTime;
+import java.time.format.DateTimeParseException;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -53,14 +55,18 @@ public class CryptoResourceFactory implements DavResourceFactory, FileConstants 
 		final Path filePath = getEncryptedFilePath(locator.getResourcePath());
 		final Path dirFilePath = getEncryptedDirectoryFilePath(locator.getResourcePath());
 		final String rangeHeader = request.getHeader(HttpHeader.RANGE.asString());
+		final String ifRangeHeader = request.getHeader(HttpHeader.IF_RANGE.asString());
 		if (Files.exists(dirFilePath) || DavMethods.METHOD_MKCOL.equals(request.getMethod())) {
 			// DIRECTORY
 			return createDirectory(locator, request.getDavSession(), dirFilePath);
-		} else if (Files.exists(filePath) && DavMethods.METHOD_GET.equals(request.getMethod()) && rangeHeader != null && isRangeSatisfiable(rangeHeader)) {
+		} else if (Files.exists(filePath) && DavMethods.METHOD_GET.equals(request.getMethod()) && rangeHeader != null && isRangeSatisfiable(rangeHeader) && isIfRangePreconditionFulfilled(ifRangeHeader, filePath)) {
 			// FILE RANGE
 			final Pair<String, String> requestRange = getRequestRange(rangeHeader);
 			response.setStatus(DavServletResponse.SC_PARTIAL_CONTENT);
 			return createFilePart(locator, request.getDavSession(), requestRange, filePath);
+		} else if (Files.exists(filePath) && DavMethods.METHOD_GET.equals(request.getMethod()) && rangeHeader != null && isRangeSatisfiable(rangeHeader) && !isIfRangePreconditionFulfilled(ifRangeHeader, filePath)) {
+			// FULL FILE (if-range not fulfilled)
+			return createFile(locator, request.getDavSession(), filePath);
 		} else if (Files.exists(filePath) && DavMethods.METHOD_GET.equals(request.getMethod()) && rangeHeader != null && !isRangeSatisfiable(rangeHeader)) {
 			// FULL FILE (unsatisfiable range)
 			response.setStatus(DavServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
@@ -100,6 +106,26 @@ public class CryptoResourceFactory implements DavResourceFactory, FileConstants 
 
 	DavResource createChildFileResource(DavResourceLocator locator, DavSession session, Path existingFile) throws DavException {
 		return createFile(locator, session, existingFile);
+	}
+
+	/**
+	 * @return <code>true</code> if a partial response should be generated according to an If-Range precondition.
+	 */
+	private boolean isIfRangePreconditionFulfilled(String ifRangeHeader, Path filePath) throws DavException {
+		if (ifRangeHeader == null) {
+			// no header set -> fulfilled implicitly
+			return true;
+		} else {
+			try {
+				final FileTime expectedTime = FileTimeUtils.fromRfc1123String(ifRangeHeader);
+				final FileTime actualTime = Files.getLastModifiedTime(filePath);
+				return expectedTime.compareTo(actualTime) == 0;
+			} catch (DateTimeParseException e) {
+				throw new DavException(DavServletResponse.SC_BAD_REQUEST, "Unsupported If-Range header: " + ifRangeHeader);
+			} catch (IOException e) {
+				throw new DavException(DavServletResponse.SC_INTERNAL_SERVER_ERROR, e);
+			}
+		}
 	}
 
 	/**

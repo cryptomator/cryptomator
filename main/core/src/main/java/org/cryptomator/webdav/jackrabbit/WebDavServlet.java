@@ -30,8 +30,8 @@ import org.slf4j.LoggerFactory;
 
 public class WebDavServlet extends AbstractWebdavServlet {
 
-	private static final Logger LOG = LoggerFactory.getLogger(WebDavServlet.class);
 	private static final long serialVersionUID = 7965170007048673022L;
+	private static final Logger LOG = LoggerFactory.getLogger(WebDavServlet.class);
 	public static final String CFG_FS_ROOT = "cfg.fs.root";
 	private DavSessionProvider davSessionProvider;
 	private DavLocatorFactory davLocatorFactory;
@@ -91,12 +91,17 @@ public class WebDavServlet extends AbstractWebdavServlet {
 
 	@Override
 	protected void doGet(WebdavRequest request, WebdavResponse response, DavResource resource) throws IOException, DavException {
+		long t0 = System.nanoTime();
 		try {
 			super.doGet(request, response, resource);
 		} catch (MacAuthenticationFailedException e) {
 			LOG.warn("File integrity violation for " + resource.getLocator().getResourcePath());
 			cryptoWarningHandler.macAuthFailed(resource.getLocator().getResourcePath());
 			response.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+		}
+		if (LOG.isDebugEnabled()) {
+			long t1 = System.nanoTime();
+			LOG.debug("REQUEST TIME: " + (t1 - t0) / 1000 / 1000.0 + " ms");
 		}
 	}
 

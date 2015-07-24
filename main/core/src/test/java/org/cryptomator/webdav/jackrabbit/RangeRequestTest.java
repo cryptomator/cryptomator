@@ -8,9 +8,12 @@ import java.net.URL;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinTask;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
@@ -28,11 +31,14 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.io.Files;
 
 public class RangeRequestTest {
 
+	private static final Logger LOG = LoggerFactory.getLogger(RangeRequestTest.class);
 	private static final Aes256Cryptor CRYPTOR = new Aes256Cryptor();
 	private static final WebDavServer SERVER = new WebDavServer();
 	private static final File TMP_VAULT = Files.createTempDir();
@@ -57,7 +63,7 @@ public class RangeRequestTest {
 	}
 
 	@Test
-	public void testAsyncRangeRequests() throws IOException, URISyntaxException {
+	public void testAsyncRangeRequests() throws IOException, URISyntaxException, InterruptedException {
 		final URL testResourceUrl = new URL(VAULT_BASE_URI.toURL(), "asyncRangeRequestTestFile.txt");
 
 		final MultiThreadedHttpConnectionManager cm = new MultiThreadedHttpConnectionManager();
@@ -79,11 +85,87 @@ public class RangeRequestTest {
 		Assert.assertEquals(201, putResponse);
 
 		// multiple async range requests:
-		final Collection<ForkJoinTask<?>> tasks = new ArrayList<>();
+		final List<ForkJoinTask<?>> tasks = new ArrayList<>();
 		final Random generator = new Random(System.currentTimeMillis());
+
+		final AtomicBoolean success = new AtomicBoolean(true);
+
+		// 10 full interrupted requests:
+		for (int i = 0; i < 10; i++) {
+			final ForkJoinTask<?> task = ForkJoinTask.adapt(() -> {
+				try {
+					final HttpMethod getMethod = new GetMethod(testResourceUrl.toString());
+					final int statusCode = client.executeMethod(getMethod);
+					if (statusCode != 200) {
+						LOG.error("Invalid status code for interrupted full request");
+						success.set(false);
+					}
+					getMethod.getResponseBodyAsStream().read();
+					getMethod.getResponseBodyAsStream().close();
+					getMethod.releaseConnection();
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+			});
+			tasks.add(task);
+		}
+
+		// 50 crappy interrupted range requests:
+		for (int i = 0; i < 50; i++) {
+			final int lower = generator.nextInt(plaintextData.length);
+			final ForkJoinTask<?> task = ForkJoinTask.adapt(() -> {
+				try {
+					final HttpMethod getMethod = new GetMethod(testResourceUrl.toString());
+					getMethod.addRequestHeader("Range", "bytes=" + lower + "-");
+					final int statusCode = client.executeMethod(getMethod);
+					if (statusCode != 206) {
+						LOG.error("Invalid status code for interrupted range request");
+						success.set(false);
+					}
+					getMethod.getResponseBodyAsStream().read();
+					getMethod.getResponseBodyAsStream().close();
+					getMethod.releaseConnection();
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+			});
+			tasks.add(task);
+		}
+
+		// 50 normal open range requests:
+		for (int i = 0; i < 50; i++) {
+			final int lower = generator.nextInt(plaintextData.length - 512);
+			final int upper = plaintextData.length - 1;
+			final ForkJoinTask<?> task = ForkJoinTask.adapt(() -> {
+				try {
+					final HttpMethod getMethod = new GetMethod(testResourceUrl.toString());
+					getMethod.addRequestHeader("Range", "bytes=" + lower + "-");
+					final byte[] expected = Arrays.copyOfRange(plaintextData, lower, upper + 1);
+					final int statusCode = client.executeMethod(getMethod);
+					final byte[] responseBody = new byte[upper - lower + 10];
+					final int bytesRead = IOUtils.read(getMethod.getResponseBodyAsStream(), responseBody);
+					getMethod.releaseConnection();
+					if (statusCode != 206) {
+						LOG.error("Invalid status code for open range request");
+						success.set(false);
+					} else if (upper - lower + 1 != bytesRead) {
+						LOG.error("Invalid response length for open range request");
+						success.set(false);
+					} else if (!Arrays.equals(expected, Arrays.copyOfRange(responseBody, 0, bytesRead))) {
+						LOG.error("Invalid response body for open range request");
+						success.set(false);
+					}
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+			});
+			tasks.add(task);
+		}
+
+		// 200 normal closed range requests:
 		for (int i = 0; i < 200; i++) {
-			final int pos1 = generator.nextInt(plaintextData.length);
-			final int pos2 = generator.nextInt(plaintextData.length);
+			final int pos1 = generator.nextInt(plaintextData.length - 512);
+			final int pos2 = pos1 + 512;
 			final ForkJoinTask<?> task = ForkJoinTask.adapt(() -> {
 				try {
 					final int lower = Math.min(pos1, pos2);
@@ -94,20 +176,30 @@ public class RangeRequestTest {
 					final byte[] responseBody = new byte[upper - lower + 1];
 					IOUtils.read(getMethod.getResponseBodyAsStream(), responseBody);
 					getMethod.releaseConnection();
-					Assert.assertEquals(206, statusCode);
-					Assert.assertArrayEquals(Arrays.copyOfRange(plaintextData, lower, upper + 1), responseBody);
+					if (statusCode != 206 || !Arrays.equals(Arrays.copyOfRange(plaintextData, lower, upper + 1), responseBody)) {
+						LOG.error("Invalid content for closed range request");
+						success.set(false);
+					}
 				} catch (IOException e) {
 					throw new RuntimeException(e);
 				}
-			}).fork();
+			});
 			tasks.add(task);
 		}
 
+		Collections.shuffle(tasks, generator);
+
+		final ForkJoinPool pool = new ForkJoinPool(4);
+		for (ForkJoinTask<?> task : tasks) {
+			pool.execute(task);
+		}
 		for (ForkJoinTask<?> task : tasks) {
 			task.join();
 		}
-
+		pool.shutdown();
 		cm.shutdown();
+
+		Assert.assertTrue(success.get());
 	}
 
 	@Test

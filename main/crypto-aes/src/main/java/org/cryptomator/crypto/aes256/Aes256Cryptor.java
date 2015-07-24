@@ -379,10 +379,6 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 		final byte[] nonce = new byte[8];
 		headerBuf.position(16);
 		headerBuf.get(nonce);
-		final ByteBuffer nonceAndCounterBuf = ByteBuffer.allocate(AES_BLOCK_LENGTH);
-		nonceAndCounterBuf.put(nonce);
-		nonceAndCounterBuf.putLong(0L);
-		final byte[] nonceAndCounter = nonceAndCounterBuf.array();
 
 		// read sensitive header data:
 		final byte[] encryptedSensitiveHeaderContentBytes = new byte[48];
@@ -411,6 +407,12 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 		final ByteBuffer sensitiveHeaderContentBuf = ByteBuffer.wrap(decryptedSensitiveHeaderContentBytes);
 		final Long fileSize = sensitiveHeaderContentBuf.getLong();
 		sensitiveHeaderContentBuf.get(fileKeyBytes);
+
+		// append counter to nonce:
+		final ByteBuffer nonceAndCounterBuf = ByteBuffer.allocate(AES_BLOCK_LENGTH);
+		nonceAndCounterBuf.put(nonce);
+		nonceAndCounterBuf.putLong(0L);
+		final byte[] nonceAndCounter = nonceAndCounterBuf.array();
 
 		// content decryption:
 		encryptedFile.position(104l);
