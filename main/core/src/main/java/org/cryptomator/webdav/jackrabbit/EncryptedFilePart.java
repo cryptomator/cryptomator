@@ -54,9 +54,17 @@ class EncryptedFilePart extends EncryptedFile {
 		assert this.contentLength != null;
 
 		final Long rangeLength = range.getRight() - range.getLeft() + 1;
-		outputContext.setContentLength(rangeLength);
-		outputContext.setProperty(HttpHeader.CONTENT_RANGE.asString(), getContentRangeHeader(range.getLeft(), range.getRight(), contentLength));
 		outputContext.setModificationTime(Files.getLastModifiedTime(filePath).toMillis());
+		if (rangeLength <= 0) {
+			// unsatisfiable content range:
+			outputContext.setContentLength(0);
+			outputContext.setProperty(HttpHeader.CONTENT_RANGE.asString(), getContentRangeHeader(range.getRight(), range.getRight(), contentLength));
+			LOG.debug("Unsatisfiable content range: " + getContentRangeHeader(range.getLeft(), range.getRight(), contentLength));
+			return;
+		} else {
+			outputContext.setContentLength(rangeLength);
+			outputContext.setProperty(HttpHeader.CONTENT_RANGE.asString(), getContentRangeHeader(range.getLeft(), range.getRight(), contentLength));
+		}
 
 		try (final FileChannel c = FileChannel.open(filePath, StandardOpenOption.READ)) {
 			if (outputContext.hasStream()) {
