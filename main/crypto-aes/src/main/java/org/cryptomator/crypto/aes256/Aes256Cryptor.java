@@ -426,7 +426,7 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 		byte[] buffer = new byte[CONTENT_MAC_BLOCK + 32];
 		int n = 0;
 		long blockNum = 0;
-		while ((n = IOUtils.read(in, buffer)) > 0) {
+		while ((n = IOUtils.read(in, buffer)) > 0 && bytesDecrypted < fileSize) {
 			if (n < 32) {
 				throw new DecryptFailedException("Invalid file content, missing MAC.");
 			}
