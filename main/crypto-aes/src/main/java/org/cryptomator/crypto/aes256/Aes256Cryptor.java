@@ -19,7 +19,17 @@ import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -362,6 +372,8 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 
 	@Override
 	public Long decryptFile(SeekableByteChannel encryptedFile, OutputStream plaintextFile, boolean authenticate) throws IOException, DecryptFailedException {
+		long t0 = System.nanoTime();
+
 		// read header:
 		encryptedFile.position(0l);
 		final ByteBuffer headerBuf = ByteBuffer.allocate(104);
@@ -369,26 +381,36 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 		if (headerBytesRead != headerBuf.capacity()) {
 			throw new IOException("Failed to read file header.");
 		}
+		System.err.println("read header: " + (System.nanoTime() - t0) / 1000 / 1000.0 + "ms");
+		t0 = System.nanoTime();
 
 		// read iv:
 		final byte[] iv = new byte[AES_BLOCK_LENGTH];
 		headerBuf.position(0);
 		headerBuf.get(iv);
+		System.err.println("read iv: " + (System.nanoTime() - t0) / 1000 / 1000.0 + "ms");
+		t0 = System.nanoTime();
 
 		// read nonce:
 		final byte[] nonce = new byte[8];
 		headerBuf.position(16);
 		headerBuf.get(nonce);
+		System.err.println("read nonce: " + (System.nanoTime() - t0) / 1000 / 1000.0 + "ms");
+		t0 = System.nanoTime();
 
 		// read sensitive header data:
 		final byte[] encryptedSensitiveHeaderContentBytes = new byte[48];
 		headerBuf.position(24);
 		headerBuf.get(encryptedSensitiveHeaderContentBytes);
+		System.err.println("read sensitive header data: " + (System.nanoTime() - t0) / 1000 / 1000.0 + "ms");
+		t0 = System.nanoTime();
 
 		// read header mac:
 		final byte[] storedHeaderMac = new byte[32];
 		headerBuf.position(72);
 		headerBuf.get(storedHeaderMac);
+		System.err.println("read header mac: " + (System.nanoTime() - t0) / 1000 / 1000.0 + "ms");
+		t0 = System.nanoTime();
 
 		// calculate mac over first 72 bytes of header:
 		if (authenticate) {
@@ -400,6 +422,8 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 				throw new MacAuthenticationFailedException("Header MAC authentication failed.");
 			}
 		}
+		System.err.println("calculate mac over first 72 bytes of header: " + (System.nanoTime() - t0) / 1000 / 1000.0 + "ms");
+		t0 = System.nanoTime();
 
 		// decrypt sensitive header data:
 		final byte[] fileKeyBytes = new byte[32];
@@ -407,53 +431,112 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 		final ByteBuffer sensitiveHeaderContentBuf = ByteBuffer.wrap(decryptedSensitiveHeaderContentBytes);
 		final Long fileSize = sensitiveHeaderContentBuf.getLong();
 		sensitiveHeaderContentBuf.get(fileKeyBytes);
-
-		// append counter to nonce:
-		final ByteBuffer nonceAndCounterBuf = ByteBuffer.allocate(AES_BLOCK_LENGTH);
-		nonceAndCounterBuf.put(nonce);
-		nonceAndCounterBuf.putLong(0L);
-		final byte[] nonceAndCounter = nonceAndCounterBuf.array();
+		System.err.println("decrypt sensitive header data: " + (System.nanoTime() - t0) / 1000 / 1000.0 + "ms");
+		t0 = System.nanoTime();
 
 		// content decryption:
 		encryptedFile.position(104l);
 		final SecretKey fileKey = new SecretKeySpec(fileKeyBytes, AES_KEY_ALGORITHM);
-		final Cipher cipher = this.aesCtrCipher(fileKey, nonceAndCounter, Cipher.DECRYPT_MODE);
-		final Mac contentMac = this.hmacSha256(hMacMasterKey);
+		System.err.println("init DEC: " + (System.nanoTime() - t0) / 1000 / 1000.0 + "ms");
+
+		final int numWorkers = 1;
+		final ExecutorService executorService = Executors.newFixedThreadPool(numWorkers);
+		final Lock lock = new ReentrantLock();
+		final Condition blockCondition = lock.newCondition();
 
 		// reading ciphered input and MACs interleaved:
-		long bytesDecrypted = 0;
+		final AtomicLong bytesDecrypted = new AtomicLong();
 		final InputStream in = new SeekableByteChannelInputStream(encryptedFile);
-		byte[] buffer = new byte[CONTENT_MAC_BLOCK + 32];
+		final byte[] buffer = new byte[(CONTENT_MAC_BLOCK + 32) * numWorkers];
 		int n = 0;
-		long blockNum = 0;
-		while ((n = IOUtils.read(in, buffer)) > 0 && bytesDecrypted < fileSize) {
-			if (n < 32) {
-				throw new DecryptFailedException("Invalid file content, missing MAC.");
+		final AtomicLong blockNum = new AtomicLong();
+		final AtomicLong numBlocksWritten = new AtomicLong();
+		while ((n = IOUtils.read(in, buffer)) > 0 && bytesDecrypted.get() < fileSize) {
+			t0 = System.nanoTime();
+
+			final int finalN = n;
+			final List<Future<Boolean>> tasks = new ArrayList<>();
+			for (int i = 0; i < numWorkers; i++) {
+				final Future<Boolean> task = executorService.submit(() -> {
+					final long myBlockNum = blockNum.getAndIncrement();
+					final int myBufferOffset = (int) ((myBlockNum % numWorkers) * (CONTENT_MAC_BLOCK + 32));
+					final int myN = Math.min(finalN - myBufferOffset, CONTENT_MAC_BLOCK + 32);
+
+					if (myN <= 0) {
+						// EOF
+					} else if (myN < 32) {
+						throw new DecryptFailedException("Invalid file content, missing MAC.");
+					}
+
+					// check MAC of current block:
+					if (authenticate) {
+						final Mac contentMac = this.hmacSha256(hMacMasterKey);
+						contentMac.update(iv);
+						contentMac.update(longToByteArray(myBlockNum));
+						contentMac.update(buffer, myBufferOffset, myN - 32);
+						final byte[] calculatedMac = contentMac.doFinal();
+						final byte[] storedMac = new byte[32];
+						System.arraycopy(buffer, myBufferOffset + myN - 32, storedMac, 0, 32);
+						if (!MessageDigest.isEqual(calculatedMac, storedMac)) {
+							throw new MacAuthenticationFailedException("Content MAC authentication failed.");
+						}
+					}
+
+					// decrypt block:
+					final ByteBuffer nonceAndCounterBuf = ByteBuffer.allocate(AES_BLOCK_LENGTH);
+					nonceAndCounterBuf.put(nonce);
+					nonceAndCounterBuf.putLong(myBlockNum * CONTENT_MAC_BLOCK / AES_BLOCK_LENGTH);
+					final byte[] nonceAndCounter = nonceAndCounterBuf.array();
+					final Cipher cipher = this.aesCtrCipher(fileKey, nonceAndCounter, Cipher.DECRYPT_MODE);
+					final byte[] plaintext = cipher.update(buffer, myBufferOffset, myN - 32);
+
+					// wait for our turn to write the plaintext:
+					lock.lock();
+					try {
+						while (numBlocksWritten.get() != myBlockNum) {
+							blockCondition.await();
+						}
+						final int plaintextLengthWithoutPadding = (int) Math.min(plaintext.length, fileSize - bytesDecrypted.get()); // plaintext.length is known to be a 32 bit int
+						plaintextFile.write(plaintext, 0, plaintextLengthWithoutPadding);
+						bytesDecrypted.addAndGet(plaintextLengthWithoutPadding);
+						numBlocksWritten.incrementAndGet();
+						blockCondition.signalAll();
+					} catch (InterruptedException e) {
+
+					} finally {
+						lock.unlock();
+					}
+					return true;
+				});
+				tasks.add(task);
 			}
 
-			// check MAC of current block:
-			if (authenticate) {
-				contentMac.update(iv);
-				contentMac.update(longToByteArray(blockNum));
-				contentMac.update(buffer, 0, n - 32);
-				final byte[] calculatedMac = contentMac.doFinal();
-				final byte[] storedMac = new byte[32];
-				System.arraycopy(buffer, n - 32, storedMac, 0, 32);
-				if (!MessageDigest.isEqual(calculatedMac, storedMac)) {
-					throw new MacAuthenticationFailedException("Content MAC authentication failed.");
+			for (Future<Boolean> task : tasks) {
+				try {
+					task.get();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+				} catch (ExecutionException e) {
+					final Throwable cause = e.getCause();
+					if (cause instanceof DecryptFailedException) {
+						throw (DecryptFailedException) cause;
+					} else if (cause instanceof MacAuthenticationFailedException) {
+						throw (MacAuthenticationFailedException) cause;
+					} else if (cause instanceof IOException) {
+						throw (IOException) cause;
+					} else {
+						// TODO loggingpower
+					}
 				}
 			}
 
-			// decrypt block:
-			final byte[] plaintext = cipher.update(buffer, 0, n - 32);
-			final int plaintextLengthWithoutPadding = (int) Math.min(plaintext.length, fileSize - bytesDecrypted); // plaintext.length is known to be a 32 bit int
-			plaintextFile.write(plaintext, 0, plaintextLengthWithoutPadding);
-			bytesDecrypted += plaintextLengthWithoutPadding;
-			blockNum++;
+			// System.err.println("dec " + numWorkers + " blocks: " + (System.nanoTime() - t0) / 1000 / 1000.0 + "ms");
 		}
 		destroyQuietly(fileKey);
 
-		return bytesDecrypted;
+		System.err.println("cleanup: " + (System.nanoTime() - t0) / 1000 / 1000.0 + "ms");
+
+		return bytesDecrypted.get();
 	}
 
 	@Override

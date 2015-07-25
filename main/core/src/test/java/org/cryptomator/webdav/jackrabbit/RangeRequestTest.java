@@ -1,7 +1,9 @@
 package org.cryptomator.webdav.jackrabbit;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -60,6 +62,36 @@ public class RangeRequestTest {
 		SERVLET.stop();
 		SERVER.stop();
 		FileUtils.deleteQuietly(TMP_VAULT);
+	}
+
+	@Test
+	public void testFullFileDecryption() throws IOException, URISyntaxException {
+		final URL testResourceUrl = new URL(VAULT_BASE_URI.toURL(), "fullFileDecryptionTestFile.txt");
+		final HttpClient client = new HttpClient();
+
+		// prepare 64MiB test data:
+		final byte[] plaintextData = new byte[6777216 * Integer.BYTES];
+		final ByteBuffer bbIn = ByteBuffer.wrap(plaintextData);
+		for (int i = 0; i < 6777216; i++) {
+			bbIn.putInt(i);
+		}
+		final InputStream plaintextDataInputStream = new ByteArrayInputStream(plaintextData);
+
+		// put request:
+		final EntityEnclosingMethod putMethod = new PutMethod(testResourceUrl.toString());
+		putMethod.setRequestEntity(new ByteArrayRequestEntity(plaintextData));
+		final int putResponse = client.executeMethod(putMethod);
+		putMethod.releaseConnection();
+		Assert.assertEquals(201, putResponse);
+
+		// get request:
+		final HttpMethod getMethod = new GetMethod(testResourceUrl.toString());
+		final int statusCode = client.executeMethod(getMethod);
+		Assert.assertEquals(200, statusCode);
+		Assert.assertTrue(IOUtils.contentEquals(plaintextDataInputStream, getMethod.getResponseBodyAsStream()));
+		getMethod.releaseConnection();
+
+		System.out.println("hello world");
 	}
 
 	@Test
