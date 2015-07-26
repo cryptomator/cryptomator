@@ -9,14 +9,14 @@ import org.apache.commons.io.IOUtils;
 /**
  * Not thread-safe!
  */
-public class LengthObfuscationInputStream extends FilterInputStream {
+public class LengthObfuscatingInputStream extends FilterInputStream {
 
 	private final byte[] padding;
 	private int paddingLength = -1;
 	private long inputBytesRead = 0;
 	private int paddingBytesRead = 0;
 
-	LengthObfuscationInputStream(InputStream in, byte[] padding) {
+	LengthObfuscatingInputStream(InputStream in, byte[] padding) {
 		super(in);
 		this.padding = padding;
 	}

@@ -22,10 +22,14 @@ import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -439,104 +443,94 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 		final SecretKey fileKey = new SecretKeySpec(fileKeyBytes, AES_KEY_ALGORITHM);
 		System.err.println("init DEC: " + (System.nanoTime() - t0) / 1000 / 1000.0 + "ms");
 
-		final int numWorkers = 1;
-		final ExecutorService executorService = Executors.newFixedThreadPool(numWorkers);
+		// prepare some crypto workers:
+		final int numWorkers = Runtime.getRuntime().availableProcessors();
 		final Lock lock = new ReentrantLock();
-		final Condition blockCondition = lock.newCondition();
+		final Condition blockDone = lock.newCondition();
+		final AtomicLong currentBlock = new AtomicLong();
+		final BlockingQueue<Block> inputQueue = new LinkedBlockingQueue<>(numWorkers);
+		final LengthLimitingOutputStream paddingRemovingOutputStream = new LengthLimitingOutputStream(plaintextFile, fileSize);
+		final List<DecryptWorker> workers = new ArrayList<>();
+		final ExecutorService executorService = Executors.newFixedThreadPool(numWorkers);
+		final CompletionService<Void> completionService = new ExecutorCompletionService<>(executorService);
+		for (int i = 0; i < numWorkers; i++) {
+			final DecryptWorker worker = new DecryptWorker(lock, blockDone, currentBlock, inputQueue, authenticate, paddingRemovingOutputStream) {
+				private final Mac mac = hmacSha256(hMacMasterKey);
 
-		// reading ciphered input and MACs interleaved:
-		final AtomicLong bytesDecrypted = new AtomicLong();
-		final InputStream in = new SeekableByteChannelInputStream(encryptedFile);
-		final byte[] buffer = new byte[(CONTENT_MAC_BLOCK + 32) * numWorkers];
-		int n = 0;
-		final AtomicLong blockNum = new AtomicLong();
-		final AtomicLong numBlocksWritten = new AtomicLong();
-		while ((n = IOUtils.read(in, buffer)) > 0 && bytesDecrypted.get() < fileSize) {
-			t0 = System.nanoTime();
-
-			final int finalN = n;
-			final List<Future<Boolean>> tasks = new ArrayList<>();
-			for (int i = 0; i < numWorkers; i++) {
-				final Future<Boolean> task = executorService.submit(() -> {
-					final long myBlockNum = blockNum.getAndIncrement();
-					final int myBufferOffset = (int) ((myBlockNum % numWorkers) * (CONTENT_MAC_BLOCK + 32));
-					final int myN = Math.min(finalN - myBufferOffset, CONTENT_MAC_BLOCK + 32);
-
-					if (myN <= 0) {
-						// EOF
-					} else if (myN < 32) {
-						throw new DecryptFailedException("Invalid file content, missing MAC.");
-					}
-
-					// check MAC of current block:
-					if (authenticate) {
-						final Mac contentMac = this.hmacSha256(hMacMasterKey);
-						contentMac.update(iv);
-						contentMac.update(longToByteArray(myBlockNum));
-						contentMac.update(buffer, myBufferOffset, myN - 32);
-						final byte[] calculatedMac = contentMac.doFinal();
-						final byte[] storedMac = new byte[32];
-						System.arraycopy(buffer, myBufferOffset + myN - 32, storedMac, 0, 32);
-						if (!MessageDigest.isEqual(calculatedMac, storedMac)) {
-							throw new MacAuthenticationFailedException("Content MAC authentication failed.");
-						}
-					}
-
-					// decrypt block:
+				@Override
+				protected byte[] decrypt(Block block) {
 					final ByteBuffer nonceAndCounterBuf = ByteBuffer.allocate(AES_BLOCK_LENGTH);
 					nonceAndCounterBuf.put(nonce);
-					nonceAndCounterBuf.putLong(myBlockNum * CONTENT_MAC_BLOCK / AES_BLOCK_LENGTH);
+					nonceAndCounterBuf.putLong(block.blockNumber * CONTENT_MAC_BLOCK / AES_BLOCK_LENGTH);
 					final byte[] nonceAndCounter = nonceAndCounterBuf.array();
-					final Cipher cipher = this.aesCtrCipher(fileKey, nonceAndCounter, Cipher.DECRYPT_MODE);
-					final byte[] plaintext = cipher.update(buffer, myBufferOffset, myN - 32);
+					final Cipher cipher = aesCtrCipher(fileKey, nonceAndCounter, Cipher.DECRYPT_MODE);
+					return cipher.update(block.buffer, 0, block.numBytes - mac.getMacLength());
+				}
 
-					// wait for our turn to write the plaintext:
-					lock.lock();
-					try {
-						while (numBlocksWritten.get() != myBlockNum) {
-							blockCondition.await();
-						}
-						final int plaintextLengthWithoutPadding = (int) Math.min(plaintext.length, fileSize - bytesDecrypted.get()); // plaintext.length is known to be a 32 bit int
-						plaintextFile.write(plaintext, 0, plaintextLengthWithoutPadding);
-						bytesDecrypted.addAndGet(plaintextLengthWithoutPadding);
-						numBlocksWritten.incrementAndGet();
-						blockCondition.signalAll();
-					} catch (InterruptedException e) {
-
-					} finally {
-						lock.unlock();
-					}
-					return true;
-				});
-				tasks.add(task);
-			}
-
-			for (Future<Boolean> task : tasks) {
-				try {
-					task.get();
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-				} catch (ExecutionException e) {
-					final Throwable cause = e.getCause();
-					if (cause instanceof DecryptFailedException) {
-						throw (DecryptFailedException) cause;
-					} else if (cause instanceof MacAuthenticationFailedException) {
-						throw (MacAuthenticationFailedException) cause;
-					} else if (cause instanceof IOException) {
-						throw (IOException) cause;
-					} else {
-						// TODO loggingpower
+				@Override
+				protected void checkMac(Block block) throws MacAuthenticationFailedException {
+					mac.update(iv);
+					mac.update(longToByteArray(block.blockNumber));
+					mac.update(block.buffer, 0, block.numBytes - mac.getMacLength());
+					final byte[] calculatedMac = mac.doFinal();
+					final byte[] storedMac = Arrays.copyOfRange(block.buffer, block.numBytes - mac.getMacLength(), block.numBytes);
+					if (!MessageDigest.isEqual(calculatedMac, storedMac)) {
+						throw new MacAuthenticationFailedException("Content MAC authentication failed.");
 					}
 				}
-			}
-
-			// System.err.println("dec " + numWorkers + " blocks: " + (System.nanoTime() - t0) / 1000 / 1000.0 + "ms");
+			};
+			workers.add(worker);
+			completionService.submit(worker);
 		}
+
+		System.err.println("initialization of decrypt workers: " + (System.nanoTime() - t0) / 1000 / 1000.0 + "ms");
+		t0 = System.nanoTime();
+
+		// reading ciphered input and MACs interleaved:
+		final InputStream in = new SeekableByteChannelInputStream(encryptedFile);
+		final byte[] buffer = new byte[CONTENT_MAC_BLOCK + 32];
+		int n = 0;
+		int blockNumber = 0;
+		try {
+			// read as many blocks from file as possible, but wait if queue is full:
+			while ((n = IOUtils.read(in, buffer)) > 0) {
+				final boolean consumedInTime = inputQueue.offer(new Block(n, Arrays.copyOf(buffer, n), blockNumber++), 1, TimeUnit.SECONDS);
+				if (!consumedInTime) {
+					// interrupt read loop and make room for some poisons:
+					inputQueue.clear();
+					break;
+				}
+			}
+			// each worker has to swallow some poison:
+			for (int i = 0; i < numWorkers; i++) {
+				inputQueue.put(CryptoWorker.POISON);
+			}
+		} catch (InterruptedException e) {
+			// TODO
+			e.printStackTrace();
+		}
+
+		// wait for decryption workers to finish:
+		try {
+			for (int i = 0; i < numWorkers; i++) {
+				completionService.take().get();
+			}
+		} catch (ExecutionException e) {
+			final Throwable cause = e.getCause();
+			if (cause instanceof IOException) {
+				throw (IOException) cause;
+			}
+		} catch (InterruptedException e) {
+			// TODO
+			e.printStackTrace();
+		} finally {
+			// shutdown either after normal decryption or if ANY worker threw an exception:
+			executorService.shutdownNow();
+		}
+
 		destroyQuietly(fileKey);
-
-		System.err.println("cleanup: " + (System.nanoTime() - t0) / 1000 / 1000.0 + "ms");
-
-		return bytesDecrypted.get();
+		System.err.println("decrypted " + paddingRemovingOutputStream.getBytesWritten() + " bytes in: " + (System.nanoTime() - t0) / 1000 / 1000.0 + "ms");
+		return paddingRemovingOutputStream.getBytesWritten();
 	}
 
 	@Override
@@ -674,7 +668,7 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 
 		// add random length padding to obfuscate file length:
 		final byte[] randomPadding = this.randomData(AES_BLOCK_LENGTH);
-		final LengthObfuscationInputStream in = new LengthObfuscationInputStream(plaintextFile, randomPadding);
+		final LengthObfuscatingInputStream in = new LengthObfuscatingInputStream(plaintextFile, randomPadding);
 
 		// content encryption:
 		final SecretKey fileKey = new SecretKeySpec(fileKeyBytes, AES_KEY_ALGORITHM);

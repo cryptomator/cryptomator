@@ -70,9 +70,9 @@ public class RangeRequestTest {
 		final HttpClient client = new HttpClient();
 
 		// prepare 64MiB test data:
-		final byte[] plaintextData = new byte[6777216 * Integer.BYTES];
+		final byte[] plaintextData = new byte[16777216 * Integer.BYTES];
 		final ByteBuffer bbIn = ByteBuffer.wrap(plaintextData);
-		for (int i = 0; i < 6777216; i++) {
+		for (int i = 0; i < 16777216; i++) {
 			bbIn.putInt(i);
 		}
 		final InputStream plaintextDataInputStream = new ByteArrayInputStream(plaintextData);
