@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
@@ -41,6 +42,7 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.Mac;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
+import javax.crypto.ShortBufferException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import javax.security.auth.DestroyFailedException;
@@ -56,11 +58,14 @@ import org.cryptomator.crypto.exceptions.UnsupportedKeyLengthException;
 import org.cryptomator.crypto.exceptions.UnsupportedVaultException;
 import org.cryptomator.crypto.exceptions.WrongPasswordException;
 import org.cryptomator.crypto.io.SeekableByteChannelInputStream;
-import org.cryptomator.crypto.io.SeekableByteChannelOutputStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
+
+	private static final Logger LOG = LoggerFactory.getLogger(Aes256Cryptor.class);
 
 	/**
 	 * Defined in static initializer. Defaults to 256, but falls back to maximum value possible, if JCE Unlimited Strength Jurisdiction Policy Files isn't installed. Those files can be downloaded
@@ -454,26 +459,35 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 		final ExecutorService executorService = Executors.newFixedThreadPool(numWorkers);
 		final CompletionService<Void> completionService = new ExecutorCompletionService<>(executorService);
 		for (int i = 0; i < numWorkers; i++) {
-			final DecryptWorker worker = new DecryptWorker(lock, blockDone, currentBlock, inputQueue, authenticate, paddingRemovingOutputStream) {
+			final DecryptWorker worker = new DecryptWorker(lock, blockDone, currentBlock, inputQueue, authenticate, Channels.newChannel(paddingRemovingOutputStream)) {
 				private final Mac mac = hmacSha256(hMacMasterKey);
 
 				@Override
-				protected byte[] decrypt(Block block) {
+				protected ByteBuffer decrypt(Block block) {
 					final ByteBuffer nonceAndCounterBuf = ByteBuffer.allocate(AES_BLOCK_LENGTH);
 					nonceAndCounterBuf.put(nonce);
 					nonceAndCounterBuf.putLong(block.blockNumber * CONTENT_MAC_BLOCK / AES_BLOCK_LENGTH);
 					final byte[] nonceAndCounter = nonceAndCounterBuf.array();
+					final ByteBuffer input = ByteBuffer.wrap(block.buffer);
+					input.limit(block.buffer.length - mac.getMacLength());
 					final Cipher cipher = aesCtrCipher(fileKey, nonceAndCounter, Cipher.DECRYPT_MODE);
-					return cipher.update(block.buffer, 0, block.numBytes - mac.getMacLength());
+					try {
+						assert cipher.getOutputSize(block.buffer.length) == block.buffer.length;
+						final ByteBuffer output = ByteBuffer.allocate(input.limit());
+						cipher.update(input, output);
+						return output;
+					} catch (ShortBufferException e) {
+						throw new IllegalStateException("Output buffer size too short, even though outlen = inlen in CTR mode.", e);
+					}
 				}
 
 				@Override
 				protected void checkMac(Block block) throws MacAuthenticationFailedException {
 					mac.update(iv);
 					mac.update(longToByteArray(block.blockNumber));
-					mac.update(block.buffer, 0, block.numBytes - mac.getMacLength());
+					mac.update(block.buffer, 0, block.buffer.length - mac.getMacLength());
 					final byte[] calculatedMac = mac.doFinal();
-					final byte[] storedMac = Arrays.copyOfRange(block.buffer, block.numBytes - mac.getMacLength(), block.numBytes);
+					final byte[] storedMac = Arrays.copyOfRange(block.buffer, block.buffer.length - mac.getMacLength(), block.buffer.length);
 					if (!MessageDigest.isEqual(calculatedMac, storedMac)) {
 						throw new MacAuthenticationFailedException("Content MAC authentication failed.");
 					}
@@ -490,11 +504,11 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 		final InputStream in = new SeekableByteChannelInputStream(encryptedFile);
 		final byte[] buffer = new byte[CONTENT_MAC_BLOCK + 32];
 		int n = 0;
-		int blockNumber = 0;
+		long blockNumber = 0;
 		try {
 			// read as many blocks from file as possible, but wait if queue is full:
 			while ((n = IOUtils.read(in, buffer)) > 0) {
-				final boolean consumedInTime = inputQueue.offer(new Block(n, Arrays.copyOf(buffer, n), blockNumber++), 1, TimeUnit.SECONDS);
+				final boolean consumedInTime = inputQueue.offer(new Block(Arrays.copyOf(buffer, n), blockNumber++), 1, TimeUnit.SECONDS);
 				if (!consumedInTime) {
 					// interrupt read loop and make room for some poisons:
 					inputQueue.clear();
@@ -506,8 +520,7 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 				inputQueue.put(CryptoWorker.POISON);
 			}
 		} catch (InterruptedException e) {
-			// TODO
-			e.printStackTrace();
+			LOG.error("Thread interrupted", e);
 		}
 
 		// wait for decryption workers to finish:
@@ -519,10 +532,13 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 			final Throwable cause = e.getCause();
 			if (cause instanceof IOException) {
 				throw (IOException) cause;
+			} else if (cause instanceof RuntimeException) {
+				throw (RuntimeException) cause;
+			} else {
+				LOG.error("Unexpected exception", e);
 			}
 		} catch (InterruptedException e) {
-			// TODO
-			e.printStackTrace();
+			LOG.error("Thread interrupted", e);
 		} finally {
 			// shutdown either after normal decryption or if ANY worker threw an exception:
 			executorService.shutdownNow();
@@ -653,10 +669,6 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 
 		// chosse 8 byte random nonce and 8 byte counter set to zero:
 		final byte[] nonce = randomData(8);
-		final ByteBuffer nonceAndCounterBuf = ByteBuffer.allocate(AES_BLOCK_LENGTH);
-		nonceAndCounterBuf.put(nonce);
-		nonceAndCounterBuf.putLong(0L);
-		final byte[] nonceAndCounter = nonceAndCounterBuf.array();
 
 		// choose a random content key:
 		final byte[] fileKeyBytes = randomData(32);
@@ -672,24 +684,88 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 
 		// content encryption:
 		final SecretKey fileKey = new SecretKeySpec(fileKeyBytes, AES_KEY_ALGORITHM);
-		final Cipher cipher = this.aesCtrCipher(fileKey, nonceAndCounter, Cipher.ENCRYPT_MODE);
-		final Mac contentMac = this.hmacSha256(hMacMasterKey);
-		@SuppressWarnings("resource")
-		final OutputStream out = new SeekableByteChannelOutputStream(encryptedFile);
+
+		// prepare some crypto workers:
+		final int numWorkers = Runtime.getRuntime().availableProcessors();
+		final Lock lock = new ReentrantLock();
+		final Condition blockDone = lock.newCondition();
+		final AtomicLong currentBlock = new AtomicLong();
+		final BlockingQueue<Block> inputQueue = new LinkedBlockingQueue<>(numWorkers);
+		final List<EncryptWorker> workers = new ArrayList<>();
+		final ExecutorService executorService = Executors.newFixedThreadPool(numWorkers);
+		final CompletionService<Void> completionService = new ExecutorCompletionService<>(executorService);
+		for (int i = 0; i < numWorkers; i++) {
+			final EncryptWorker worker = new EncryptWorker(lock, blockDone, currentBlock, inputQueue, encryptedFile) {
+				private final Mac mac = hmacSha256(hMacMasterKey);
+
+				@Override
+				protected void encrypt(Block block, ByteBuffer output) {
+					final ByteBuffer nonceAndCounterBuf = ByteBuffer.allocate(AES_BLOCK_LENGTH);
+					nonceAndCounterBuf.put(nonce);
+					nonceAndCounterBuf.putLong(block.blockNumber * CONTENT_MAC_BLOCK / AES_BLOCK_LENGTH);
+					final byte[] nonceAndCounter = nonceAndCounterBuf.array();
+					final Cipher cipher = aesCtrCipher(fileKey, nonceAndCounter, Cipher.ENCRYPT_MODE);
+					try {
+						assert cipher.getOutputSize(block.buffer.length) == block.buffer.length;
+						cipher.update(ByteBuffer.wrap(block.buffer), output);
+					} catch (ShortBufferException e) {
+						throw new IllegalStateException("Output buffer size too short, even though outlen = inlen in CTR mode.", e);
+					}
+				}
+
+				@Override
+				protected byte[] mac(long blockNumber, ByteBuffer ciphertext) {
+					mac.update(iv);
+					mac.update(longToByteArray(blockNumber));
+					mac.update(ciphertext);
+					return mac.doFinal();
+				}
+			};
+			workers.add(worker);
+			completionService.submit(worker);
+		}
 
 		// writing ciphered output and MACs interleaved:
 		final byte[] buffer = new byte[CONTENT_MAC_BLOCK];
 		int n = 0;
-		long blockNum = 0;
-		while ((n = IOUtils.read(in, buffer)) > 0) {
-			final byte[] ciphertext = cipher.update(buffer, 0, n);
-			out.write(ciphertext);
-			contentMac.update(iv);
-			contentMac.update(longToByteArray(blockNum));
-			contentMac.update(ciphertext);
-			final byte[] mac = contentMac.doFinal();
-			out.write(mac);
-			blockNum++;
+		long blockNumber = 0;
+		try {
+			// read as many blocks from file as possible, but wait if queue is full:
+			while ((n = IOUtils.read(in, buffer)) > 0) {
+				final boolean consumedInTime = inputQueue.offer(new Block(Arrays.copyOf(buffer, n), blockNumber++), 1, TimeUnit.SECONDS);
+				if (!consumedInTime) {
+					// interrupt read loop and make room for some poisons:
+					inputQueue.clear();
+					break;
+				}
+			}
+			// each worker has to swallow some poison:
+			for (int i = 0; i < numWorkers; i++) {
+				inputQueue.put(CryptoWorker.POISON);
+			}
+		} catch (InterruptedException e) {
+			LOG.error("Thread interrupted", e);
+		}
+
+		// wait for encryption workers to finish:
+		try {
+			for (int i = 0; i < numWorkers; i++) {
+				completionService.take().get();
+			}
+		} catch (ExecutionException e) {
+			final Throwable cause = e.getCause();
+			if (cause instanceof IOException) {
+				throw (IOException) cause;
+			} else if (cause instanceof RuntimeException) {
+				throw (RuntimeException) cause;
+			} else {
+				LOG.error("Unexpected exception", e);
+			}
+		} catch (InterruptedException e) {
+			LOG.error("Thread interrupted", e);
+		} finally {
+			// shutdown either after normal encryption or if ANY worker threw an exception:
+			executorService.shutdownNow();
 		}
 		destroyQuietly(fileKey);
 

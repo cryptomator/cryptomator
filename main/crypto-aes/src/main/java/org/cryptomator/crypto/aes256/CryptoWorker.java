@@ -1,6 +1,7 @@
 package org.cryptomator.crypto.aes256;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicLong;
@@ -11,7 +12,7 @@ import org.cryptomator.crypto.exceptions.CryptingException;
 
 abstract class CryptoWorker implements Callable<Void> {
 
-	static final Block POISON = new Block(0, new byte[0], -1L);
+	static final Block POISON = new Block(new byte[0], -1L);
 
 	final Lock lock;
 	final Condition blockDone;
@@ -34,7 +35,7 @@ abstract class CryptoWorker implements Callable<Void> {
 					// put poison back in for other threads:
 					break;
 				}
-				final byte[] processedBytes = this.process(block);
+				final ByteBuffer processedBytes = this.process(block);
 				lock.lock();
 				try {
 					while (currentBlock.get() != block.blockNumber) {
@@ -56,8 +57,8 @@ abstract class CryptoWorker implements Callable<Void> {
 		return null;
 	}
 
-	protected abstract byte[] process(Block block) throws CryptingException;
+	protected abstract ByteBuffer process(Block block) throws CryptingException;
 
-	protected abstract void write(byte[] processedBytes) throws IOException;
+	protected abstract void write(ByteBuffer processedBytes) throws IOException;
 
 }

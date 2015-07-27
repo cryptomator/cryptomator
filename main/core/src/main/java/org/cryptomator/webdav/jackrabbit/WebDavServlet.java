@@ -90,6 +90,16 @@ public class WebDavServlet extends AbstractWebdavServlet {
 	}
 
 	@Override
+	protected void doPut(WebdavRequest request, WebdavResponse response, DavResource resource) throws IOException, DavException {
+		long t0 = System.nanoTime();
+		super.doPut(request, response, resource);
+		if (LOG.isDebugEnabled()) {
+			long t1 = System.nanoTime();
+			LOG.debug("PUT TIME: " + (t1 - t0) / 1000 / 1000.0 + " ms");
+		}
+	}
+
+	@Override
 	protected void doGet(WebdavRequest request, WebdavResponse response, DavResource resource) throws IOException, DavException {
 		long t0 = System.nanoTime();
 		try {
@@ -101,7 +111,7 @@ public class WebDavServlet extends AbstractWebdavServlet {
 		}
 		if (LOG.isDebugEnabled()) {
 			long t1 = System.nanoTime();
-			LOG.debug("REQUEST TIME: " + (t1 - t0) / 1000 / 1000.0 + " ms");
+			LOG.debug("GET TIME: " + (t1 - t0) / 1000 / 1000.0 + " ms");
 		}
 	}
 
