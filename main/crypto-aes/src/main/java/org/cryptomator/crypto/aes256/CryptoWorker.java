@@ -12,7 +12,7 @@ import org.cryptomator.crypto.exceptions.CryptingException;
 
 abstract class CryptoWorker implements Callable<Void> {
 
-	static final Block POISON = new Block(new byte[0], -1L);
+	static final Block POISON = new Block(ByteBuffer.allocate(0), -1L);
 
 	final Lock lock;
 	final Condition blockDone;

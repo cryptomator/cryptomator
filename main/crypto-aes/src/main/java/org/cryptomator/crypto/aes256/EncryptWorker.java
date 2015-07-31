@@ -21,7 +21,7 @@ abstract class EncryptWorker extends CryptoWorker implements AesCryptographicCon
 
 	@Override
 	protected ByteBuffer process(Block block) throws CryptingException {
-		final ByteBuffer buf = ByteBuffer.allocateDirect(block.buffer.length + 32);
+		final ByteBuffer buf = ByteBuffer.allocateDirect(block.buffer.limit() + 32);
 		encrypt(block, buf);
 		final ByteBuffer ciphertextBuffer = buf.duplicate();
 		ciphertextBuffer.flip();

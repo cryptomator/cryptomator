@@ -1,11 +1,13 @@
 package org.cryptomator.crypto.aes256;
 
+import java.nio.ByteBuffer;
+
 class Block {
 
-	final byte[] buffer;
+	final ByteBuffer buffer;
 	final long blockNumber;
 
-	Block(byte[] buffer, long blockNumber) {
+	Block(ByteBuffer buffer, long blockNumber) {
 		this.buffer = buffer;
 		this.blockNumber = blockNumber;
 	}

@@ -13,6 +13,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
@@ -381,8 +382,6 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 
 	@Override
 	public Long decryptFile(SeekableByteChannel encryptedFile, OutputStream plaintextFile, boolean authenticate) throws IOException, DecryptFailedException {
-		long t0 = System.nanoTime();
-
 		// read header:
 		encryptedFile.position(0l);
 		final ByteBuffer headerBuf = ByteBuffer.allocate(104);
@@ -390,36 +389,26 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 		if (headerBytesRead != headerBuf.capacity()) {
 			throw new IOException("Failed to read file header.");
 		}
-		System.err.println("read header: " + (System.nanoTime() - t0) / 1000 / 1000.0 + "ms");
-		t0 = System.nanoTime();
 
 		// read iv:
 		final byte[] iv = new byte[AES_BLOCK_LENGTH];
 		headerBuf.position(0);
 		headerBuf.get(iv);
-		System.err.println("read iv: " + (System.nanoTime() - t0) / 1000 / 1000.0 + "ms");
-		t0 = System.nanoTime();
 
 		// read nonce:
 		final byte[] nonce = new byte[8];
 		headerBuf.position(16);
 		headerBuf.get(nonce);
-		System.err.println("read nonce: " + (System.nanoTime() - t0) / 1000 / 1000.0 + "ms");
-		t0 = System.nanoTime();
 
 		// read sensitive header data:
 		final byte[] encryptedSensitiveHeaderContentBytes = new byte[48];
 		headerBuf.position(24);
 		headerBuf.get(encryptedSensitiveHeaderContentBytes);
-		System.err.println("read sensitive header data: " + (System.nanoTime() - t0) / 1000 / 1000.0 + "ms");
-		t0 = System.nanoTime();
 
 		// read header mac:
 		final byte[] storedHeaderMac = new byte[32];
 		headerBuf.position(72);
 		headerBuf.get(storedHeaderMac);
-		System.err.println("read header mac: " + (System.nanoTime() - t0) / 1000 / 1000.0 + "ms");
-		t0 = System.nanoTime();
 
 		// calculate mac over first 72 bytes of header:
 		if (authenticate) {
@@ -431,8 +420,6 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 				throw new MacAuthenticationFailedException("Header MAC authentication failed.");
 			}
 		}
-		System.err.println("calculate mac over first 72 bytes of header: " + (System.nanoTime() - t0) / 1000 / 1000.0 + "ms");
-		t0 = System.nanoTime();
 
 		// decrypt sensitive header data:
 		final byte[] fileKeyBytes = new byte[32];
@@ -440,20 +427,17 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 		final ByteBuffer sensitiveHeaderContentBuf = ByteBuffer.wrap(decryptedSensitiveHeaderContentBytes);
 		final Long fileSize = sensitiveHeaderContentBuf.getLong();
 		sensitiveHeaderContentBuf.get(fileKeyBytes);
-		System.err.println("decrypt sensitive header data: " + (System.nanoTime() - t0) / 1000 / 1000.0 + "ms");
-		t0 = System.nanoTime();
 
 		// content decryption:
 		encryptedFile.position(104l);
 		final SecretKey fileKey = new SecretKeySpec(fileKeyBytes, AES_KEY_ALGORITHM);
-		System.err.println("init DEC: " + (System.nanoTime() - t0) / 1000 / 1000.0 + "ms");
 
 		// prepare some crypto workers:
 		final int numWorkers = Runtime.getRuntime().availableProcessors();
 		final Lock lock = new ReentrantLock();
 		final Condition blockDone = lock.newCondition();
 		final AtomicLong currentBlock = new AtomicLong();
-		final BlockingQueue<Block> inputQueue = new LinkedBlockingQueue<>(numWorkers);
+		final BlockingQueue<Block> inputQueue = new LinkedBlockingQueue<>(numWorkers * 2); // one cycle read-ahead
 		final LengthLimitingOutputStream paddingRemovingOutputStream = new LengthLimitingOutputStream(plaintextFile, fileSize);
 		final List<DecryptWorker> workers = new ArrayList<>();
 		final ExecutorService executorService = Executors.newFixedThreadPool(numWorkers);
@@ -468,13 +452,14 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 					nonceAndCounterBuf.put(nonce);
 					nonceAndCounterBuf.putLong(block.blockNumber * CONTENT_MAC_BLOCK / AES_BLOCK_LENGTH);
 					final byte[] nonceAndCounter = nonceAndCounterBuf.array();
-					final ByteBuffer input = ByteBuffer.wrap(block.buffer);
-					input.limit(block.buffer.length - mac.getMacLength());
+					final ByteBuffer ciphertext = block.buffer.duplicate();
+					ciphertext.rewind();
+					ciphertext.limit(block.buffer.limit() - mac.getMacLength());
 					final Cipher cipher = aesCtrCipher(fileKey, nonceAndCounter, Cipher.DECRYPT_MODE);
 					try {
-						assert cipher.getOutputSize(block.buffer.length) == block.buffer.length;
-						final ByteBuffer output = ByteBuffer.allocate(input.limit());
-						cipher.update(input, output);
+						assert cipher.getOutputSize(ciphertext.limit()) == ciphertext.limit();
+						final ByteBuffer output = ByteBuffer.allocate(ciphertext.limit());
+						cipher.update(ciphertext, output);
 						return output;
 					} catch (ShortBufferException e) {
 						throw new IllegalStateException("Output buffer size too short, even though outlen = inlen in CTR mode.", e);
@@ -483,11 +468,16 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 
 				@Override
 				protected void checkMac(Block block) throws MacAuthenticationFailedException {
+					final ByteBuffer ciphertext = block.buffer.duplicate();
+					ciphertext.rewind();
+					ciphertext.limit(block.buffer.limit() - mac.getMacLength());
 					mac.update(iv);
 					mac.update(longToByteArray(block.blockNumber));
-					mac.update(block.buffer, 0, block.buffer.length - mac.getMacLength());
+					mac.update(ciphertext);
 					final byte[] calculatedMac = mac.doFinal();
-					final byte[] storedMac = Arrays.copyOfRange(block.buffer, block.buffer.length - mac.getMacLength(), block.buffer.length);
+					final byte[] storedMac = new byte[mac.getMacLength()];
+					block.buffer.position(ciphertext.limit());
+					block.buffer.get(storedMac);
 					if (!MessageDigest.isEqual(calculatedMac, storedMac)) {
 						throw new MacAuthenticationFailedException("Content MAC authentication failed.");
 					}
@@ -497,24 +487,23 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 			completionService.submit(worker);
 		}
 
-		System.err.println("initialization of decrypt workers: " + (System.nanoTime() - t0) / 1000 / 1000.0 + "ms");
-		t0 = System.nanoTime();
-
 		// reading ciphered input and MACs interleaved:
-		final InputStream in = new SeekableByteChannelInputStream(encryptedFile);
-		final byte[] buffer = new byte[CONTENT_MAC_BLOCK + 32];
 		int n = 0;
 		long blockNumber = 0;
 		try {
 			// read as many blocks from file as possible, but wait if queue is full:
-			while ((n = IOUtils.read(in, buffer)) > 0) {
-				final boolean consumedInTime = inputQueue.offer(new Block(Arrays.copyOf(buffer, n), blockNumber++), 1, TimeUnit.SECONDS);
+			do {
+				final ByteBuffer buf = ByteBuffer.allocate(CONTENT_MAC_BLOCK + 32);
+				n = encryptedFile.read(buf); // IOUtils.read(fileIn, buffer);
+				buf.flip();
+				final boolean consumedInTime = inputQueue.offer(new Block(buf.asReadOnlyBuffer(), blockNumber++), 1, TimeUnit.SECONDS);
 				if (!consumedInTime) {
 					// interrupt read loop and make room for some poisons:
 					inputQueue.clear();
 					break;
 				}
-			}
+			} while (n == CONTENT_MAC_BLOCK + 32);
+
 			// each worker has to swallow some poison:
 			for (int i = 0; i < numWorkers; i++) {
 				inputQueue.put(CryptoWorker.POISON);
@@ -545,7 +534,6 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 		}
 
 		destroyQuietly(fileKey);
-		System.err.println("decrypted " + paddingRemovingOutputStream.getBytesWritten() + " bytes in: " + (System.nanoTime() - t0) / 1000 / 1000.0 + "ms");
 		return paddingRemovingOutputStream.getBytesWritten();
 	}
 
@@ -690,7 +678,7 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 		final Lock lock = new ReentrantLock();
 		final Condition blockDone = lock.newCondition();
 		final AtomicLong currentBlock = new AtomicLong();
-		final BlockingQueue<Block> inputQueue = new LinkedBlockingQueue<>(numWorkers);
+		final BlockingQueue<Block> inputQueue = new LinkedBlockingQueue<>(numWorkers * 2); // one cycle read-ahead
 		final List<EncryptWorker> workers = new ArrayList<>();
 		final ExecutorService executorService = Executors.newFixedThreadPool(numWorkers);
 		final CompletionService<Void> completionService = new ExecutorCompletionService<>(executorService);
@@ -706,8 +694,8 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 					final byte[] nonceAndCounter = nonceAndCounterBuf.array();
 					final Cipher cipher = aesCtrCipher(fileKey, nonceAndCounter, Cipher.ENCRYPT_MODE);
 					try {
-						assert cipher.getOutputSize(block.buffer.length) == block.buffer.length;
-						cipher.update(ByteBuffer.wrap(block.buffer), output);
+						assert cipher.getOutputSize(block.buffer.limit()) == block.buffer.limit();
+						cipher.update(block.buffer, output);
 					} catch (ShortBufferException e) {
 						throw new IllegalStateException("Output buffer size too short, even though outlen = inlen in CTR mode.", e);
 					}
@@ -726,19 +714,23 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 		}
 
 		// writing ciphered output and MACs interleaved:
-		final byte[] buffer = new byte[CONTENT_MAC_BLOCK];
 		int n = 0;
 		long blockNumber = 0;
 		try {
+			final ReadableByteChannel channel = Channels.newChannel(in);
 			// read as many blocks from file as possible, but wait if queue is full:
-			while ((n = IOUtils.read(in, buffer)) > 0) {
-				final boolean consumedInTime = inputQueue.offer(new Block(Arrays.copyOf(buffer, n), blockNumber++), 1, TimeUnit.SECONDS);
+			do {
+				final ByteBuffer buf = ByteBuffer.allocate(CONTENT_MAC_BLOCK);
+				n = channel.read(buf); // IOUtils.read(fileIn, buffer);
+				buf.flip();
+				final boolean consumedInTime = inputQueue.offer(new Block(buf.asReadOnlyBuffer(), blockNumber++), 1, TimeUnit.SECONDS);
 				if (!consumedInTime) {
 					// interrupt read loop and make room for some poisons:
 					inputQueue.clear();
 					break;
 				}
-			}
+			} while (n == CONTENT_MAC_BLOCK);
+
 			// each worker has to swallow some poison:
 			for (int i = 0; i < numWorkers; i++) {
 				inputQueue.put(CryptoWorker.POISON);

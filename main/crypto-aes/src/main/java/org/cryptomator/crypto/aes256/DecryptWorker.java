@@ -25,7 +25,7 @@ abstract class DecryptWorker extends CryptoWorker implements AesCryptographicCon
 
 	@Override
 	protected ByteBuffer process(Block block) throws CryptingException {
-		if (block.buffer.length < 32) {
+		if (block.buffer.limit() < 32) {
 			throw new DecryptFailedException("Invalid file content, missing MAC.");
 		}
 
