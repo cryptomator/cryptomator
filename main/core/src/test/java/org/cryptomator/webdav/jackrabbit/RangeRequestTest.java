@@ -261,7 +261,8 @@ public class RangeRequestTest {
 		final HttpMethod getMethod = new GetMethod(testResourceUrl.toString());
 		getMethod.addRequestHeader("Range", "chunks=1-2");
 		final int getResponse = client.executeMethod(getMethod);
-		final byte[] response = getMethod.getResponseBody();
+		final byte[] response = new byte[fileContent.length];
+		IOUtils.read(getMethod.getResponseBodyAsStream(), response);
 		getMethod.releaseConnection();
 		Assert.assertEquals(416, getResponse);
 		Assert.assertArrayEquals(fileContent, response);

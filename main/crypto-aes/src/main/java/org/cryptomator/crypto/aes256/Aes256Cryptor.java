@@ -437,72 +437,80 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 		final Lock lock = new ReentrantLock();
 		final Condition blockDone = lock.newCondition();
 		final AtomicLong currentBlock = new AtomicLong();
-		final BlockingQueue<Block> inputQueue = new LinkedBlockingQueue<>(numWorkers * 2); // one cycle read-ahead
+		final BlockingQueue<BlocksData> inputQueue = new LinkedBlockingQueue<>(numWorkers * 2); // one cycle read-ahead
 		final LengthLimitingOutputStream paddingRemovingOutputStream = new LengthLimitingOutputStream(plaintextFile, fileSize);
 		final List<DecryptWorker> workers = new ArrayList<>();
 		final ExecutorService executorService = Executors.newFixedThreadPool(numWorkers);
 		final CompletionService<Void> completionService = new ExecutorCompletionService<>(executorService);
 		for (int i = 0; i < numWorkers; i++) {
 			final DecryptWorker worker = new DecryptWorker(lock, blockDone, currentBlock, inputQueue, authenticate, Channels.newChannel(paddingRemovingOutputStream)) {
-				private final Mac mac = hmacSha256(hMacMasterKey);
 
 				@Override
-				protected ByteBuffer decrypt(Block block) {
+				protected Cipher initCipher(long startBlockNum) {
 					final ByteBuffer nonceAndCounterBuf = ByteBuffer.allocate(AES_BLOCK_LENGTH);
 					nonceAndCounterBuf.put(nonce);
-					nonceAndCounterBuf.putLong(block.blockNumber * CONTENT_MAC_BLOCK / AES_BLOCK_LENGTH);
+					nonceAndCounterBuf.putLong(startBlockNum * CONTENT_MAC_BLOCK / AES_BLOCK_LENGTH);
 					final byte[] nonceAndCounter = nonceAndCounterBuf.array();
-					final ByteBuffer ciphertext = block.buffer.duplicate();
-					ciphertext.rewind();
-					ciphertext.limit(block.buffer.limit() - mac.getMacLength());
-					final Cipher cipher = aesCtrCipher(fileKey, nonceAndCounter, Cipher.DECRYPT_MODE);
-					try {
-						assert cipher.getOutputSize(ciphertext.limit()) == ciphertext.limit();
-						final ByteBuffer output = ByteBuffer.allocate(ciphertext.limit());
-						cipher.update(ciphertext, output);
-						return output;
-					} catch (ShortBufferException e) {
-						throw new IllegalStateException("Output buffer size too short, even though outlen = inlen in CTR mode.", e);
-					}
+					return aesCtrCipher(fileKey, nonceAndCounter, Cipher.DECRYPT_MODE);
 				}
 
 				@Override
-				protected void checkMac(Block block) throws MacAuthenticationFailedException {
-					final ByteBuffer ciphertext = block.buffer.duplicate();
-					ciphertext.rewind();
-					ciphertext.limit(block.buffer.limit() - mac.getMacLength());
+				protected Mac initMac() {
+					return hmacSha256(hMacMasterKey);
+				}
+
+				@Override
+				protected void checkMac(Mac mac, long blockNum, ByteBuffer ciphertextBuf, ByteBuffer macBuf) throws MacAuthenticationFailedException {
 					mac.update(iv);
-					mac.update(longToByteArray(block.blockNumber));
-					mac.update(ciphertext);
+					mac.update(longToByteArray(blockNum));
+					mac.update(ciphertextBuf);
 					final byte[] calculatedMac = mac.doFinal();
 					final byte[] storedMac = new byte[mac.getMacLength()];
-					block.buffer.position(ciphertext.limit());
-					block.buffer.get(storedMac);
+					macBuf.get(storedMac);
 					if (!MessageDigest.isEqual(calculatedMac, storedMac)) {
 						throw new MacAuthenticationFailedException("Content MAC authentication failed.");
 					}
 				}
+
+				@Override
+				protected void decrypt(Cipher cipher, ByteBuffer ciphertextBuf, ByteBuffer plaintextBuf) throws DecryptFailedException {
+					assert plaintextBuf.remaining() >= cipher.getOutputSize(ciphertextBuf.remaining());
+					try {
+						cipher.update(ciphertextBuf, plaintextBuf);
+					} catch (ShortBufferException e) {
+						throw new DecryptFailedException(e);
+					}
+				}
+
 			};
 			workers.add(worker);
 			completionService.submit(worker);
 		}
 
 		// reading ciphered input and MACs interleaved:
-		int n = 0;
+		int bytesRead = 0;
 		long blockNumber = 0;
 		try {
 			// read as many blocks from file as possible, but wait if queue is full:
+			final int maxNumBlocks = 128;
+			int numBlocks = 0;
 			do {
-				final ByteBuffer buf = ByteBuffer.allocate(CONTENT_MAC_BLOCK + 32);
-				n = encryptedFile.read(buf); // IOUtils.read(fileIn, buffer);
+				if (numBlocks < maxNumBlocks) {
+					numBlocks++;
+				}
+				final int inBufSize = numBlocks * (CONTENT_MAC_BLOCK + 32);
+				final ByteBuffer buf = ByteBuffer.allocate(inBufSize);
+				bytesRead = encryptedFile.read(buf);
 				buf.flip();
-				final boolean consumedInTime = inputQueue.offer(new Block(buf.asReadOnlyBuffer(), blockNumber++), 1, TimeUnit.SECONDS);
+				final int blocksRead = (int) Math.ceil(bytesRead / (double) (CONTENT_MAC_BLOCK + 32));
+				final boolean consumedInTime = inputQueue.offer(new BlocksData(buf.asReadOnlyBuffer(), blockNumber, blocksRead), 1, TimeUnit.SECONDS);
 				if (!consumedInTime) {
 					// interrupt read loop and make room for some poisons:
 					inputQueue.clear();
 					break;
 				}
-			} while (n == CONTENT_MAC_BLOCK + 32);
+				blockNumber += numBlocks;
+			} while (bytesRead == numBlocks * (CONTENT_MAC_BLOCK + 32));
 
 			// each worker has to swallow some poison:
 			for (int i = 0; i < numWorkers; i++) {
@@ -678,35 +686,43 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 		final Lock lock = new ReentrantLock();
 		final Condition blockDone = lock.newCondition();
 		final AtomicLong currentBlock = new AtomicLong();
-		final BlockingQueue<Block> inputQueue = new LinkedBlockingQueue<>(numWorkers * 2); // one cycle read-ahead
+		final BlockingQueue<BlocksData> inputQueue = new LinkedBlockingQueue<>(numWorkers * 2); // one cycle read-ahead
 		final List<EncryptWorker> workers = new ArrayList<>();
 		final ExecutorService executorService = Executors.newFixedThreadPool(numWorkers);
 		final CompletionService<Void> completionService = new ExecutorCompletionService<>(executorService);
 		for (int i = 0; i < numWorkers; i++) {
 			final EncryptWorker worker = new EncryptWorker(lock, blockDone, currentBlock, inputQueue, encryptedFile) {
-				private final Mac mac = hmacSha256(hMacMasterKey);
 
 				@Override
-				protected void encrypt(Block block, ByteBuffer output) {
+				protected Cipher initCipher(long startBlockNum) {
 					final ByteBuffer nonceAndCounterBuf = ByteBuffer.allocate(AES_BLOCK_LENGTH);
 					nonceAndCounterBuf.put(nonce);
-					nonceAndCounterBuf.putLong(block.blockNumber * CONTENT_MAC_BLOCK / AES_BLOCK_LENGTH);
+					nonceAndCounterBuf.putLong(startBlockNum * CONTENT_MAC_BLOCK / AES_BLOCK_LENGTH);
 					final byte[] nonceAndCounter = nonceAndCounterBuf.array();
-					final Cipher cipher = aesCtrCipher(fileKey, nonceAndCounter, Cipher.ENCRYPT_MODE);
-					try {
-						assert cipher.getOutputSize(block.buffer.limit()) == block.buffer.limit();
-						cipher.update(block.buffer, output);
-					} catch (ShortBufferException e) {
-						throw new IllegalStateException("Output buffer size too short, even though outlen = inlen in CTR mode.", e);
-					}
+					return aesCtrCipher(fileKey, nonceAndCounter, Cipher.ENCRYPT_MODE);
 				}
 
 				@Override
-				protected byte[] mac(long blockNumber, ByteBuffer ciphertext) {
+				protected Mac initMac() {
+					return hmacSha256(hMacMasterKey);
+				}
+
+				@Override
+				protected byte[] calcMac(Mac mac, long blockNum, ByteBuffer ciphertextBuf) {
 					mac.update(iv);
-					mac.update(longToByteArray(blockNumber));
-					mac.update(ciphertext);
+					mac.update(longToByteArray(blockNum));
+					mac.update(ciphertextBuf);
 					return mac.doFinal();
+				}
+
+				@Override
+				protected void encrypt(Cipher cipher, ByteBuffer plaintextBuf, ByteBuffer ciphertextBuf) throws EncryptFailedException {
+					try {
+						assert ciphertextBuf.remaining() >= cipher.getOutputSize(plaintextBuf.remaining());
+						cipher.update(plaintextBuf, ciphertextBuf);
+					} catch (ShortBufferException e) {
+						throw new EncryptFailedException(e);
+					}
 				}
 			};
 			workers.add(worker);
@@ -714,22 +730,30 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 		}
 
 		// writing ciphered output and MACs interleaved:
-		int n = 0;
+		int bytesRead = 0;
 		long blockNumber = 0;
 		try {
 			final ReadableByteChannel channel = Channels.newChannel(in);
 			// read as many blocks from file as possible, but wait if queue is full:
+			final int maxNumBlocks = 128;
+			int numBlocks = 0;
 			do {
-				final ByteBuffer buf = ByteBuffer.allocate(CONTENT_MAC_BLOCK);
-				n = channel.read(buf); // IOUtils.read(fileIn, buffer);
-				buf.flip();
-				final boolean consumedInTime = inputQueue.offer(new Block(buf.asReadOnlyBuffer(), blockNumber++), 1, TimeUnit.SECONDS);
+				if (numBlocks < maxNumBlocks) {
+					numBlocks++;
+				}
+				final int inBufSize = numBlocks * CONTENT_MAC_BLOCK;
+				final ByteBuffer inBuf = ByteBuffer.allocate(inBufSize);
+				bytesRead = channel.read(inBuf);
+				inBuf.flip();
+				final int blocksRead = (int) Math.ceil(bytesRead / (double) CONTENT_MAC_BLOCK);
+				final boolean consumedInTime = inputQueue.offer(new BlocksData(inBuf.asReadOnlyBuffer(), blockNumber, blocksRead), 1, TimeUnit.SECONDS);
 				if (!consumedInTime) {
 					// interrupt read loop and make room for some poisons:
 					inputQueue.clear();
 					break;
 				}
-			} while (n == CONTENT_MAC_BLOCK);
+				blockNumber += numBlocks;
+			} while (bytesRead == numBlocks * CONTENT_MAC_BLOCK);
 
 			// each worker has to swallow some poison:
 			for (int i = 0; i < numWorkers; i++) {
