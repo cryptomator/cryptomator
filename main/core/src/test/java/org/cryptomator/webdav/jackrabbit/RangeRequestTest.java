@@ -88,10 +88,11 @@ public class RangeRequestTest {
 		final HttpMethod getMethod = new GetMethod(testResourceUrl.toString());
 		final int statusCode = client.executeMethod(getMethod);
 		Assert.assertEquals(200, statusCode);
+		// final byte[] received = new byte[plaintextData.length];
+		// IOUtils.read(getMethod.getResponseBodyAsStream(), received);
+		// Assert.assertArrayEquals(plaintextData, received);
 		Assert.assertTrue(IOUtils.contentEquals(plaintextDataInputStream, getMethod.getResponseBodyAsStream()));
 		getMethod.releaseConnection();
-
-		System.out.println("hello world");
 	}
 
 	@Test
@@ -204,12 +205,19 @@ public class RangeRequestTest {
 					final int upper = Math.max(pos1, pos2);
 					final HttpMethod getMethod = new GetMethod(testResourceUrl.toString());
 					getMethod.addRequestHeader("Range", "bytes=" + lower + "-" + upper);
+					final byte[] expected = Arrays.copyOfRange(plaintextData, lower, upper + 1);
 					final int statusCode = client.executeMethod(getMethod);
 					final byte[] responseBody = new byte[upper - lower + 1];
-					IOUtils.read(getMethod.getResponseBodyAsStream(), responseBody);
+					final int bytesRead = IOUtils.read(getMethod.getResponseBodyAsStream(), responseBody);
 					getMethod.releaseConnection();
-					if (statusCode != 206 || !Arrays.equals(Arrays.copyOfRange(plaintextData, lower, upper + 1), responseBody)) {
-						LOG.error("Invalid content for closed range request");
+					if (statusCode != 206) {
+						LOG.error("Invalid status code for closed range request");
+						success.set(false);
+					} else if (upper - lower + 1 != bytesRead) {
+						LOG.error("Invalid response length for closed range request");
+						success.set(false);
+					} else if (!Arrays.equals(expected, Arrays.copyOfRange(responseBody, 0, bytesRead))) {
+						LOG.error("Invalid response body for closed range request");
 						success.set(false);
 					}
 				} catch (IOException e) {

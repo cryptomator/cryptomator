@@ -79,7 +79,7 @@ public class CleartextLocatorFactory implements DavLocatorFactory {
 			final String encodedResourcePath = EncodeUtil.escapePath(getResourcePath());
 			final String fullPrefix = pathPrefix.endsWith("/") ? pathPrefix : pathPrefix + "/";
 			final String href = fullPrefix.concat(encodedResourcePath);
-			assert !href.endsWith("/");
+			assert href.equals(fullPrefix) || !href.endsWith("/");
 			if (isCollection) {
 				return href.concat("/");
 			} else {
