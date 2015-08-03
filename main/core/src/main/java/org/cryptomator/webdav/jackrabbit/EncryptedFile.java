@@ -120,7 +120,7 @@ class EncryptedFile extends AbstractEncryptedNode implements FileConstants {
 		final Path srcPath = filePath;
 		final Path dstPath;
 		if (dest instanceof NonExistingNode) {
-			dstPath = ((NonExistingNode) dest).getFilePath();
+			dstPath = ((NonExistingNode) dest).materializeFilePath();
 		} else {
 			dstPath = dest.filePath;
 		}
@@ -137,7 +137,7 @@ class EncryptedFile extends AbstractEncryptedNode implements FileConstants {
 		final Path srcPath = filePath;
 		final Path dstPath;
 		if (dest instanceof NonExistingNode) {
-			dstPath = ((NonExistingNode) dest).getFilePath();
+			dstPath = ((NonExistingNode) dest).materializeFilePath();
 		} else {
 			dstPath = dest.filePath;
 		}

@@ -24,6 +24,7 @@ import org.apache.jackrabbit.webdav.lock.LockManager;
 import org.apache.jackrabbit.webdav.lock.SimpleLockManager;
 import org.apache.logging.log4j.util.Strings;
 import org.cryptomator.crypto.Cryptor;
+import org.cryptomator.webdav.exceptions.IORuntimeException;
 import org.eclipse.jetty.http.HttpHeader;
 
 public class CryptoResourceFactory implements DavResourceFactory, FileConstants {
@@ -52,34 +53,36 @@ public class CryptoResourceFactory implements DavResourceFactory, FileConstants 
 			return createRootDirectory(locator, request.getDavSession());
 		}
 
-		final Path filePath = getEncryptedFilePath(locator.getResourcePath());
-		final Path dirFilePath = getEncryptedDirectoryFilePath(locator.getResourcePath());
-		final String rangeHeader = request.getHeader(HttpHeader.RANGE.asString());
-		final String ifRangeHeader = request.getHeader(HttpHeader.IF_RANGE.asString());
-		if (Files.exists(dirFilePath) || DavMethods.METHOD_MKCOL.equals(request.getMethod())) {
-			// DIRECTORY
-			return createDirectory(locator, request.getDavSession(), dirFilePath);
-		} else if (Files.exists(filePath) && DavMethods.METHOD_GET.equals(request.getMethod()) && rangeHeader != null && isRangeSatisfiable(rangeHeader) && isIfRangePreconditionFulfilled(ifRangeHeader, filePath)) {
-			// FILE RANGE
-			final Pair<String, String> requestRange = getRequestRange(rangeHeader);
-			response.setStatus(DavServletResponse.SC_PARTIAL_CONTENT);
-			return createFilePart(locator, request.getDavSession(), requestRange, filePath);
-		} else if (Files.exists(filePath) && DavMethods.METHOD_GET.equals(request.getMethod()) && rangeHeader != null && isRangeSatisfiable(rangeHeader) && !isIfRangePreconditionFulfilled(ifRangeHeader, filePath)) {
-			// FULL FILE (if-range not fulfilled)
-			return createFile(locator, request.getDavSession(), filePath);
-		} else if (Files.exists(filePath) && DavMethods.METHOD_GET.equals(request.getMethod()) && rangeHeader != null && !isRangeSatisfiable(rangeHeader)) {
-			// FULL FILE (unsatisfiable range)
-			response.setStatus(DavServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
-			final EncryptedFile file = createFile(locator, request.getDavSession(), filePath);
-			response.addHeader(HttpHeader.CONTENT_RANGE.asString(), "bytes */" + file.getContentLength());
-			return file;
-		} else if (Files.exists(filePath) || DavMethods.METHOD_PUT.equals(request.getMethod())) {
-			// FULL FILE (as requested)
-			return createFile(locator, request.getDavSession(), filePath);
-		} else {
-			// NO FILE OR FOLDER (e.g. for MOVE operations):
-			return createNonExisting(locator, request.getDavSession(), filePath, dirFilePath);
+		try {
+			final Path filePath = getEncryptedFilePath(locator.getResourcePath(), false);
+			final Path dirFilePath = getEncryptedDirectoryFilePath(locator.getResourcePath(), false);
+			final String rangeHeader = request.getHeader(HttpHeader.RANGE.asString());
+			final String ifRangeHeader = request.getHeader(HttpHeader.IF_RANGE.asString());
+			if (Files.exists(dirFilePath) || DavMethods.METHOD_MKCOL.equals(request.getMethod())) {
+				// DIRECTORY
+				return createDirectory(locator, request.getDavSession(), dirFilePath);
+			} else if (Files.exists(filePath) && DavMethods.METHOD_GET.equals(request.getMethod()) && rangeHeader != null && isRangeSatisfiable(rangeHeader) && isIfRangePreconditionFulfilled(ifRangeHeader, filePath)) {
+				// FILE RANGE
+				final Pair<String, String> requestRange = getRequestRange(rangeHeader);
+				response.setStatus(DavServletResponse.SC_PARTIAL_CONTENT);
+				return createFilePart(locator, request.getDavSession(), requestRange, filePath);
+			} else if (Files.exists(filePath) && DavMethods.METHOD_GET.equals(request.getMethod()) && rangeHeader != null && isRangeSatisfiable(rangeHeader) && !isIfRangePreconditionFulfilled(ifRangeHeader, filePath)) {
+				// FULL FILE (if-range not fulfilled)
+				return createFile(locator, request.getDavSession(), filePath);
+			} else if (Files.exists(filePath) && DavMethods.METHOD_GET.equals(request.getMethod()) && rangeHeader != null && !isRangeSatisfiable(rangeHeader)) {
+				// FULL FILE (unsatisfiable range)
+				response.setStatus(DavServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
+				final EncryptedFile file = createFile(locator, request.getDavSession(), filePath);
+				response.addHeader(HttpHeader.CONTENT_RANGE.asString(), "bytes */" + file.getContentLength());
+				return file;
+			} else if (Files.exists(filePath) || DavMethods.METHOD_PUT.equals(request.getMethod())) {
+				// FULL FILE (as requested)
+				return createFile(locator, request.getDavSession(), filePath);
+			}
+		} catch (NonExistingParentException e) {
+			// return non-existing
 		}
+		return createNonExisting(locator, request.getDavSession());
 	}
 
 	@Override
@@ -88,16 +91,18 @@ public class CryptoResourceFactory implements DavResourceFactory, FileConstants 
 			return createRootDirectory(locator, session);
 		}
 
-		final Path filePath = getEncryptedFilePath(locator.getResourcePath());
-		final Path dirFilePath = getEncryptedDirectoryFilePath(locator.getResourcePath());
-		if (Files.exists(dirFilePath)) {
-			return createDirectory(locator, session, dirFilePath);
-		} else if (Files.exists(filePath)) {
-			return createFile(locator, session, filePath);
-		} else {
-			// e.g. for MOVE operations:
-			return createNonExisting(locator, session, filePath, dirFilePath);
+		try {
+			final Path filePath = getEncryptedFilePath(locator.getResourcePath(), false);
+			final Path dirFilePath = getEncryptedDirectoryFilePath(locator.getResourcePath(), false);
+			if (Files.exists(dirFilePath)) {
+				return createDirectory(locator, session, dirFilePath);
+			} else if (Files.exists(filePath)) {
+				return createFile(locator, session, filePath);
+			}
+		} catch (NonExistingParentException e) {
+			// return non-existing
 		}
+		return createNonExisting(locator, session);
 	}
 
 	DavResource createChildDirectoryResource(DavResourceLocator locator, DavSession session, Path existingDirectoryFile) throws DavException {
@@ -176,41 +181,42 @@ public class CryptoResourceFactory implements DavResourceFactory, FileConstants 
 
 	/**
 	 * @return Absolute file path for a given cleartext file resourcePath.
-	 * @throws IOException
+	 * @throws NonExistingParentException If one ancestor of the enrypted path is missing
 	 */
-	private Path getEncryptedFilePath(String relativeCleartextPath) throws DavException {
+	Path getEncryptedFilePath(String relativeCleartextPath, boolean createNonExisting) throws NonExistingParentException {
 		final String parentCleartextPath = FilenameUtils.getPathNoEndSeparator(relativeCleartextPath);
-		final Path parent = createEncryptedDirectoryPath(parentCleartextPath);
+		final Path parent = getEncryptedDirectoryPath(parentCleartextPath, createNonExisting);
 		final String cleartextFilename = FilenameUtils.getName(relativeCleartextPath);
 		try {
 			final String encryptedFilename = filenameTranslator.getEncryptedFilename(cleartextFilename);
 			return parent.resolve(encryptedFilename);
 		} catch (IOException e) {
-			throw new DavException(DavServletResponse.SC_INTERNAL_SERVER_ERROR, e);
+			throw new IORuntimeException(e);
 		}
 	}
 
 	/**
 	 * @return Absolute file path for a given cleartext file resourcePath.
-	 * @throws IOException
+	 * @throws NonExistingParentException If one ancestor of the enrypted path is missing
 	 */
-	private Path getEncryptedDirectoryFilePath(String relativeCleartextPath) throws DavException {
+	Path getEncryptedDirectoryFilePath(String relativeCleartextPath, boolean createNonExisting) throws NonExistingParentException {
 		final String parentCleartextPath = FilenameUtils.getPathNoEndSeparator(relativeCleartextPath);
-		final Path parent = createEncryptedDirectoryPath(parentCleartextPath);
+		final Path parent = getEncryptedDirectoryPath(parentCleartextPath, createNonExisting);
 		final String cleartextFilename = FilenameUtils.getName(relativeCleartextPath);
 		try {
 			final String encryptedFilename = filenameTranslator.getEncryptedDirFileName(cleartextFilename);
 			return parent.resolve(encryptedFilename);
 		} catch (IOException e) {
-			throw new DavException(DavServletResponse.SC_INTERNAL_SERVER_ERROR, e);
+			throw new IORuntimeException(e);
 		}
 	}
-
+	
 	/**
+	 * @param createNonExisting if <code>false</code>, a {@link NonExistingParentException} will be thrown for missing ancestors.
 	 * @return Absolute directory path for a given cleartext directory resourcePath.
-	 * @throws IOException
+	 * @throws NonExistingParentException if one ancestor directory is missing.
 	 */
-	private Path createEncryptedDirectoryPath(String relativeCleartextPath) throws DavException {
+	private Path getEncryptedDirectoryPath(String relativeCleartextPath, boolean createNonExisting) throws NonExistingParentException {
 		assert Strings.isEmpty(relativeCleartextPath) || !relativeCleartextPath.endsWith("/");
 		try {
 			final Path result;
@@ -220,10 +226,13 @@ public class CryptoResourceFactory implements DavResourceFactory, FileConstants 
 				result = dataRoot.resolve(fixedRootDirectory);
 			} else {
 				final String parentCleartextPath = FilenameUtils.getPathNoEndSeparator(relativeCleartextPath);
-				final Path parent = createEncryptedDirectoryPath(parentCleartextPath);
+				final Path parent = getEncryptedDirectoryPath(parentCleartextPath, createNonExisting);
 				final String cleartextFilename = FilenameUtils.getName(relativeCleartextPath);
 				final String encryptedFilename = filenameTranslator.getEncryptedDirFileName(cleartextFilename);
 				final Path directoryFile = parent.resolve(encryptedFilename);
+				if (!createNonExisting && !Files.exists(directoryFile)) {
+					throw new NonExistingParentException();
+				}
 				final String directoryId = filenameTranslator.getDirectoryId(directoryFile, true);
 				final String directory = cryptor.encryptDirectoryPath(directoryId, FileSystems.getDefault().getSeparator());
 				result = dataRoot.resolve(directory);
@@ -231,7 +240,7 @@ public class CryptoResourceFactory implements DavResourceFactory, FileConstants 
 			Files.createDirectories(result);
 			return result;
 		} catch (IOException e) {
-			throw new DavException(DavServletResponse.SC_INTERNAL_SERVER_ERROR, e);
+			throw new IORuntimeException(e);
 		}
 	}
 
@@ -263,8 +272,14 @@ public class CryptoResourceFactory implements DavResourceFactory, FileConstants 
 		return new EncryptedDir(this, locator, session, lockManager, cryptor, filenameTranslator, filePath);
 	}
 
-	private NonExistingNode createNonExisting(DavResourceLocator locator, DavSession session, Path filePath, Path dirFilePath) {
-		return new NonExistingNode(this, locator, session, lockManager, cryptor, filePath, dirFilePath);
+	private NonExistingNode createNonExisting(DavResourceLocator locator, DavSession session) {
+		return new NonExistingNode(this, locator, session, lockManager, cryptor);
+	}
+	
+	static class NonExistingParentException extends Exception {
+		
+		private static final long serialVersionUID = 4421121746624627094L;
+		
 	}
 
 }

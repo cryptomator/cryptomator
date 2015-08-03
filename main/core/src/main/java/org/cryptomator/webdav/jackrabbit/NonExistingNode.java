@@ -21,16 +21,12 @@ import org.apache.jackrabbit.webdav.io.OutputContext;
 import org.apache.jackrabbit.webdav.lock.LockManager;
 import org.apache.jackrabbit.webdav.property.DavProperty;
 import org.cryptomator.crypto.Cryptor;
+import org.cryptomator.webdav.jackrabbit.CryptoResourceFactory.NonExistingParentException;
 
 class NonExistingNode extends AbstractEncryptedNode {
 
-	private final Path filePath;
-	private final Path dirFilePath;
-
-	public NonExistingNode(CryptoResourceFactory factory, DavResourceLocator locator, DavSession session, LockManager lockManager, Cryptor cryptor, Path filePath, Path dirFilePath) {
+	public NonExistingNode(CryptoResourceFactory factory, DavResourceLocator locator, DavSession session, LockManager lockManager, Cryptor cryptor) {
 		super(factory, locator, session, lockManager, cryptor, null);
-		this.filePath = filePath;
-		this.dirFilePath = dirFilePath;
 	}
 
 	@Override
@@ -83,12 +79,26 @@ class NonExistingNode extends AbstractEncryptedNode {
 		throw new UnsupportedOperationException("Resource doesn't exist.");
 	}
 
-	public Path getFilePath() {
-		return filePath;
+	/**
+	 * @return lazily resolved file path, e.g. needed during MOVE operations.
+	 */
+	public Path materializeFilePath() {
+		try {
+			return factory.getEncryptedFilePath(locator.getResourcePath(), true);
+		} catch (NonExistingParentException e) {
+			throw new IllegalStateException(e);
+		}
 	}
 
-	public Path getDirFilePath() {
-		return dirFilePath;
+	/**
+	 * @return lazily resolved directory file path, e.g. needed during MOVE operations.
+	 */
+	public Path materializeDirFilePath() {
+		try {
+			return factory.getEncryptedDirectoryFilePath(locator.getResourcePath(), true);
+		} catch (NonExistingParentException e) {
+			throw new IllegalStateException(e);
+		}
 	}
 
 }

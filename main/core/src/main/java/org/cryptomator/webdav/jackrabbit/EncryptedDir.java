@@ -260,7 +260,7 @@ class EncryptedDir extends AbstractEncryptedNode implements FileConstants {
 		final Path srcPath = filePath;
 		final Path dstPath;
 		if (dest instanceof NonExistingNode) {
-			dstPath = ((NonExistingNode) dest).getDirFilePath();
+			dstPath = ((NonExistingNode) dest).materializeDirFilePath();
 		} else {
 			dstPath = dest.filePath;
 		}
@@ -278,7 +278,7 @@ class EncryptedDir extends AbstractEncryptedNode implements FileConstants {
 	public void copy(AbstractEncryptedNode dest, boolean shallow) throws DavException, IOException {
 		final Path dstDirFilePath;
 		if (dest instanceof NonExistingNode) {
-			dstDirFilePath = ((NonExistingNode) dest).getDirFilePath();
+			dstDirFilePath = ((NonExistingNode) dest).materializeDirFilePath();
 		} else {
 			dstDirFilePath = dest.filePath;
 		}
