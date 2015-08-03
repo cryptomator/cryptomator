@@ -25,6 +25,15 @@
 	<build>
 		<plugins>
 			<plugin>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>copy-libs</id>
+						<phase>prepare-package</phase>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
 				<artifactId>maven-antrun-plugin</artifactId>
 				<version>1.7</version>
 				<executions>
@@ -37,16 +46,35 @@
 						<configuration>
 							<target xmlns:fx="javafx:com.sun.javafx.tools.ant">
 								<taskdef uri="javafx:com.sun.javafx.tools.ant" resource="com/sun/javafx/tools/ant/antlib.xml" classpath="${project.basedir}:${javafx.tools.ant.jar}" />
+								
+								<!-- Define application to build -->
+								<fx:application id="fxApp" name="${javafx.application.name}" version="${project.version}" mainClass="${exec.mainClass}" />
+								
+								<!-- Create main application jar -->
+								<fx:jar destfile="${project.build.directory}/Cryptomator-${project.parent.version}.jar">
+									<fx:application refid="fxApp" />
+									<fx:fileset dir="${project.build.directory}" includes="libs/ui-${project.version}.jar"/>
+									<fx:resources>
+										<fx:fileset dir="${project.build.directory}" type="jar" includes="libs/*.jar" excludes="libs/ui-${project.version}.jar" />
+									</fx:resources>
+									<fx:manifest>
+										<fx:attribute name="Implementation-Vendor" value="cryptomator.org" />
+										<fx:attribute name="Implementation-Version" value="${project.version}" />
+									</fx:manifest>
+								</fx:jar>
 
+								<!-- Create native package -->
 								<fx:deploy nativeBundles="exe" outdir="${project.build.directory}" outfile="Cryptomator-${project.parent.version}" verbose="true">
-									<fx:application name="${javafx.application.name}" version="${project.version}" mainClass="${exec.mainClass}" />
+									<fx:application refid="fxApp"/>
 									<fx:info title="${javafx.application.name}" vendor="cryptomator.org" copyright="cryptomator.org" license="MIT" category="Utility" />
 									<fx:platform javafx="2.2+" j2se="8.0">
 										<fx:property name="settingsPath" value="./settings.json" />
 										<fx:property name="logPath" value="cryptomator.log" />
+										<fx:jvmarg value="-Xmx2048m"/>
 									</fx:platform>
 									<fx:resources>
-										<fx:fileset dir="../target/" includes="Cryptomator-${project.parent.version}.jar" />
+										<fx:fileset dir="${project.build.directory}" type="jar" includes="Cryptomator-${project.parent.version}.jar"/>
+                                    	<fx:fileset dir="${project.build.directory}" type="jar" includes="libs/*.jar" excludes="libs/ui-${project.version}.jar"/>
 									</fx:resources>
 									<fx:permissions elevated="false" />
 									<fx:preferences install="false" menu="false" shortcut="false" />
