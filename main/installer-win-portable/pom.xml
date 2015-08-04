@@ -70,7 +70,7 @@
 									<fx:platform javafx="2.2+" j2se="8.0">
 										<fx:property name="settingsPath" value="./settings.json" />
 										<fx:property name="logPath" value="cryptomator.log" />
-										<fx:jvmarg value="-Xmx2048m"/>
+										<fx:jvmarg value="-Xmx1024m"/>
 									</fx:platform>
 									<fx:resources>
 										<fx:fileset dir="${project.build.directory}" type="jar" includes="Cryptomator-${project.parent.version}.jar"/>
