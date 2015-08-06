@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>org.cryptomator</groupId>
 		<artifactId>main</artifactId>
-		<version>0.8.0</version>
+		<version>0.8.1</version>
 	</parent>
 	<artifactId>installer-win</artifactId>
 	<packaging>pom</packaging>
@@ -69,7 +69,6 @@
 									<fx:info title="${javafx.application.name}" vendor="cryptomator.org" copyright="cryptomator.org" license="MIT" category="Utility" />
 									<fx:platform javafx="2.2+" j2se="8.0" >
 										<fx:property name="logPath" value="%appdata%/Cryptomator/cryptomator.log" />
-										<fx:jvmarg value="-Xmx1024m"/>
 									</fx:platform>
 									<fx:resources>
 										<fx:fileset dir="${project.build.directory}" type="jar" includes="Cryptomator-${project.parent.version}.jar"/>
