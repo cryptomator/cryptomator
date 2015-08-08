@@ -131,7 +131,7 @@ public class UnlockController implements Initializable {
 			// at this point we know for sure, that the masterkey can be decrypted, so lets make a backup:
 			Files.copy(masterKeyPath, masterKeyBackupPath, StandardCopyOption.REPLACE_EXISTING);
 			vault.setUnlocked(true);
-			final Future<Boolean> futureMount = exec.submit(() -> vault.mount());
+			final Future<Boolean> futureMount = exec.submit(() -> (boolean) vault.mount());
 			FXThreads.runOnMainThreadWhenFinished(exec, futureMount, this::unlockAndMountFinished);
 		} catch (IOException ex) {
 			setControlsDisabled(false);
