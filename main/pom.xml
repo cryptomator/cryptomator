@@ -131,6 +131,12 @@
 				<artifactId>dagger</artifactId>
 				<version>2.0</version>
 			</dependency>
+			<dependency>
+				<groupId>com.google.dagger</groupId>
+				<artifactId>dagger-compiler</artifactId>
+				<version>2.0</version>
+				<scope>provided</scope>
+			</dependency>
 
 			<!-- JSON -->
 			<dependency>
@@ -139,14 +145,13 @@
 				<version>${jackson-databind.version}</version>
 			</dependency>
 
-			<!-- JUnit -->
+			<!-- JUnit / Mockito -->
 			<dependency>
 				<groupId>junit</groupId>
 				<artifactId>junit</artifactId>
 				<version>${junit.version}</version>
 				<scope>test</scope>
 			</dependency>
-
 			<dependency>
 				<groupId>org.mockito</groupId>
 				<artifactId>mockito-core</artifactId>

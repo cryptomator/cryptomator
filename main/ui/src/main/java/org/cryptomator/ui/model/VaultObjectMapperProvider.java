@@ -6,6 +6,7 @@ import java.nio.file.Path;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
+import javax.inject.Singleton;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
@@ -18,6 +19,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
+@Singleton
 public class VaultObjectMapperProvider implements Provider<ObjectMapper> {
 
 	private final VaultFactory vaultFactoy;

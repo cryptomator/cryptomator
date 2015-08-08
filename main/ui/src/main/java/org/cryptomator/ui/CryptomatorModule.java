@@ -5,13 +5,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import javax.inject.Named;
-import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import org.cryptomator.crypto.Cryptor;
 import org.cryptomator.crypto.SamplingCryptorDecorator;
 import org.cryptomator.crypto.aes256.Aes256Cryptor;
-import org.cryptomator.ui.model.VaultFactory;
 import org.cryptomator.ui.model.VaultObjectMapperProvider;
 import org.cryptomator.ui.settings.Settings;
 import org.cryptomator.ui.settings.SettingsProvider;
@@ -60,21 +58,9 @@ class CryptomatorModule {
 
 	@Provides
 	@Singleton
-	VaultObjectMapperProvider provideVaultObjectMapperProvider(VaultFactory vaultFactory) {
-		return new VaultObjectMapperProvider(vaultFactory);
-	}
-
-	@Provides
-	@Singleton
 	@Named("VaultJsonMapper")
 	ObjectMapper provideVaultObjectMapper(VaultObjectMapperProvider vaultObjectMapperProvider) {
 		return vaultObjectMapperProvider.get();
-	}
-
-	@Provides
-	@Singleton
-	SettingsProvider provideSettingsProvider(DeferredCloser closer, @Named("VaultJsonMapper") Provider<ObjectMapper> objectMapper) {
-		return new SettingsProvider(closer, objectMapper.get());
 	}
 
 	@Provides
@@ -86,12 +72,6 @@ class CryptomatorModule {
 	@Singleton
 	ExecutorService provideExecutorService() {
 		return closeLater(Executors.newCachedThreadPool(), ExecutorService::shutdown);
-	}
-
-	@Provides
-	@Singleton
-	VaultFactory provideVaultFactory(WebDavServer server, Provider<Cryptor> cryptorProvider, WebDavMounter mounter, DeferredCloser closer) {
-		return new VaultFactory(server, cryptorProvider, mounter, closer);
 	}
 
 	@Provides

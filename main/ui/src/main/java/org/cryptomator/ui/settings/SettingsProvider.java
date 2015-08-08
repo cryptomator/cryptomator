@@ -12,6 +12,7 @@ import java.nio.file.StandardOpenOption;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
+import javax.inject.Singleton;
 
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.ui.util.DeferredCloser;
@@ -20,6 +21,7 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+@Singleton
 public class SettingsProvider implements Provider<Settings> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(Settings.class);

@@ -4,12 +4,14 @@ import java.nio.file.Path;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
+import javax.inject.Singleton;
 
 import org.cryptomator.crypto.Cryptor;
 import org.cryptomator.ui.util.DeferredCloser;
 import org.cryptomator.ui.util.mount.WebDavMounter;
 import org.cryptomator.webdav.WebDavServer;
 
+@Singleton
 public class VaultFactory {
 
 	private final WebDavServer server;
