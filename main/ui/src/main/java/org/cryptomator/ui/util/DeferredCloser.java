@@ -20,6 +20,8 @@ import org.cryptomator.ui.controllers.MainController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.annotations.VisibleForTesting;
+
 /**
  * <p>
  * Tries to bring open-close symmetry in contexts where the resource outlives
@@ -57,8 +59,10 @@ public class DeferredCloser implements AutoCloseable {
 
 	private static final Logger LOG = LoggerFactory.getLogger(MainController.class);
 
+	@VisibleForTesting
 	final Map<Long, ManagedResource<?>> cleanups = new ConcurrentSkipListMap<>();
 
+	@VisibleForTesting
 	final AtomicLong counter = new AtomicLong();
 
 	public class ManagedResource<T> implements DeferredClosable<T> {
@@ -73,6 +77,7 @@ public class DeferredCloser implements AutoCloseable {
 			this.closer = closer;
 		}
 
+		@Override
 		public void close() {
 			final T oldObject = object.getAndSet(null);
 			if (oldObject != null) {
@@ -86,6 +91,7 @@ public class DeferredCloser implements AutoCloseable {
 			}
 		}
 
+		@Override
 		public Optional<T> get() throws IllegalStateException {
 			return Optional.ofNullable(object.get());
 		}
@@ -94,6 +100,7 @@ public class DeferredCloser implements AutoCloseable {
 	/**
 	 * Closes all added objects which have not been closed before and releases references.
 	 */
+	@Override
 	public void close() {
 		for (Iterator<ManagedResource<?>> iterator = cleanups.values().iterator(); iterator.hasNext();) {
 			final ManagedResource<?> closableProvider = iterator.next();

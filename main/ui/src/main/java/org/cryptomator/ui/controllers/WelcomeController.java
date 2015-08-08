@@ -16,17 +16,9 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
 
-import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.event.ActionEvent;
-import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
-import javafx.scene.control.Hyperlink;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.inject.Singleton;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
@@ -40,7 +32,16 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class WelcomeController implements Initializable {
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.scene.control.Hyperlink;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+
+@Singleton
+public class WelcomeController extends AbstractFXMLViewController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(WelcomeController.class);
 
@@ -53,7 +54,6 @@ public class WelcomeController implements Initializable {
 	private final Application app;
 	private final Comparator<String> semVerComparator;
 	private final ExecutorService executor;
-	private ResourceBundle rb;
 
 	@Inject
 	public WelcomeController(Application app, @Named("SemVer") Comparator<String> semVerComparator, ExecutorService executor) {
@@ -63,8 +63,17 @@ public class WelcomeController implements Initializable {
 	}
 
 	@Override
-	public void initialize(URL url, ResourceBundle rb) {
-		this.rb = rb;
+	protected URL getFxmlResourceUrl() {
+		return getClass().getResource("/fxml/welcome.fxml");
+	}
+
+	@Override
+	protected ResourceBundle getFxmlResourceBundle() {
+		return ResourceBundle.getBundle("localization");
+	}
+
+	@Override
+	public void initialize() {
 		this.botImageView.setImage(new Image(WelcomeController.class.getResource("/bot_welcome.png").toString()));
 		executor.execute(this::checkForUpdates);
 	}
@@ -103,7 +112,7 @@ public class WelcomeController implements Initializable {
 		final String currentVersion = WelcomeController.class.getPackage().getImplementationVersion();
 		LOG.debug("Current version: {}, lastest version: {}", currentVersion, latestVersion);
 		if (currentVersion != null && semVerComparator.compare(currentVersion, latestVersion) < 0) {
-			final String msg = String.format(rb.getString("welcome.newVersionMessage"), latestVersion, currentVersion);
+			final String msg = String.format(resourceBundle.getString("welcome.newVersionMessage"), latestVersion, currentVersion);
 			Platform.runLater(() -> {
 				this.updateLink.setText(msg);
 				this.updateLink.setVisible(true);

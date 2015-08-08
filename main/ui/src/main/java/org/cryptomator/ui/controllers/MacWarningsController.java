@@ -4,6 +4,10 @@ import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
+import org.cryptomator.ui.model.Vault;
+
 import javafx.application.Application;
 import javafx.beans.Observable;
 import javafx.beans.property.BooleanProperty;
@@ -18,18 +22,13 @@ import javafx.collections.ListChangeListener.Change;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import javafx.scene.control.cell.CheckBoxListCell;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
 
-import javax.inject.Inject;
-
-import org.cryptomator.ui.model.Vault;
-
-public class MacWarningsController implements Initializable {
+public class MacWarningsController extends AbstractFXMLViewController {
 
 	@FXML
 	private ListView<Warning> warningsList;
@@ -43,7 +42,6 @@ public class MacWarningsController implements Initializable {
 	private final ChangeListener<Boolean> stageVisibilityChangeListener = this::windowVisibilityDidChange;
 	private Stage stage;
 	private Vault vault;
-	private ResourceBundle rb;
 
 	@Inject
 	public MacWarningsController(Application application) {
@@ -51,8 +49,17 @@ public class MacWarningsController implements Initializable {
 	}
 
 	@Override
-	public void initialize(URL location, ResourceBundle rb) {
-		this.rb = rb;
+	protected URL getFxmlResourceUrl() {
+		return getClass().getResource("/fxml/mac_warnings.fxml");
+	}
+
+	@Override
+	protected ResourceBundle getFxmlResourceBundle() {
+		return ResourceBundle.getBundle("localization");
+	}
+
+	@Override
+	public void initialize() {
 		warnings.addListener(this::warningsDidInvalidate);
 		warningsList.setItems(warnings);
 		warningsList.setCellFactory(CheckBoxListCell.forListView(Warning::selectedProperty, new StringConverter<Warning>() {
@@ -68,6 +75,13 @@ public class MacWarningsController implements Initializable {
 			}
 
 		}));
+	}
+
+	@Override
+	public void initStage(Stage stage) {
+		super.initStage(stage);
+		this.stage = stage;
+		stage.showingProperty().addListener(new WeakChangeListener<>(stageVisibilityChangeListener));
 	}
 
 	@FXML
@@ -103,7 +117,7 @@ public class MacWarningsController implements Initializable {
 
 	private void windowVisibilityDidChange(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
 		if (Boolean.TRUE.equals(newValue)) {
-			stage.setTitle(String.format(rb.getString("macWarnings.windowTitle"), vault.getName()));
+			stage.setTitle(String.format(resourceBundle.getString("macWarnings.windowTitle"), vault.getName()));
 			warnings.addAll(vault.getNamesOfResourcesWithInvalidMac().stream().map(Warning::new).collect(Collectors.toList()));
 			vault.getNamesOfResourcesWithInvalidMac().addListener(this.unauthenticatedResourcesChangeListener);
 		} else {
@@ -114,11 +128,6 @@ public class MacWarningsController implements Initializable {
 
 	private void disableWhitelistButtonIfNothingSelected() {
 		whitelistButton.setDisable(warnings.filtered(w -> w.isSelected()).isEmpty());
-	}
-
-	public void setStage(Stage stage) {
-		this.stage = stage;
-		stage.showingProperty().addListener(new WeakChangeListener<>(stageVisibilityChangeListener));
 	}
 
 	public void setVault(Vault vault) {

@@ -18,7 +18,7 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.control.Hyperlink?>
 
-<AnchorPane xmlns:fx="http://javafx.com/fxml" fx:controller="org.cryptomator.ui.controllers.WelcomeController">
+<AnchorPane xmlns:fx="http://javafx.com/fxml">
 	
 	<children>
 		<Label AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="20.0" prefWidth="400.0" alignment="CENTER" style="-fx-font-size: 1.5em;" text="%welcome.welcomeLabel"/>

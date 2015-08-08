@@ -19,23 +19,25 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.ResourceBundle;
 
-import javafx.beans.value.ObservableValue;
-import javafx.event.ActionEvent;
-import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import org.cryptomator.ui.controls.SecPasswordField;
 import org.cryptomator.ui.model.Vault;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class InitializeController implements Initializable {
+import javafx.beans.value.ObservableValue;
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+
+@Singleton
+public class InitializeController extends AbstractFXMLViewController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(InitializeController.class);
 
-	private ResourceBundle localization;
 	private Vault vault;
 	private InitializationListener listener;
 
@@ -51,9 +53,22 @@ public class InitializeController implements Initializable {
 	@FXML
 	private Label messageLabel;
 
+	@Inject
+	public InitializeController() {
+	}
+
 	@Override
-	public void initialize(URL url, ResourceBundle rb) {
-		this.localization = rb;
+	protected URL getFxmlResourceUrl() {
+		return getClass().getResource("/fxml/initialize.fxml");
+	}
+
+	@Override
+	protected ResourceBundle getFxmlResourceBundle() {
+		return ResourceBundle.getBundle("localization");
+	}
+
+	@Override
+	public void initialize() {
 		passwordField.textProperty().addListener(this::passwordFieldsDidChange);
 		retypePasswordField.textProperty().addListener(this::passwordFieldsDidChange);
 	}
@@ -88,9 +103,9 @@ public class InitializeController implements Initializable {
 				listener.didInitialize(this);
 			}
 		} catch (FileAlreadyExistsException ex) {
-			messageLabel.setText(localization.getString("initialize.messageLabel.alreadyInitialized"));
+			messageLabel.setText(resourceBundle.getString("initialize.messageLabel.alreadyInitialized"));
 		} catch (InvalidPathException ex) {
-			messageLabel.setText(localization.getString("initialize.messageLabel.invalidPath"));
+			messageLabel.setText(resourceBundle.getString("initialize.messageLabel.invalidPath"));
 		} catch (IOException ex) {
 			LOG.error("I/O Exception", ex);
 		} finally {

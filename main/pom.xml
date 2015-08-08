@@ -112,7 +112,7 @@
 				<version>${commons-codec.version}</version>
 			</dependency>
 			<dependency>
-				<!-- org.apache.httpcomponents:httpclient is newer, but jackrabbit uses this version. We don't have a reason to upgrade --> 
+				<!-- org.apache.httpcomponents:httpclient is newer, but jackrabbit uses this version. We don't have a reason to upgrade -->
 				<groupId>commons-httpclient</groupId>
 				<artifactId>commons-httpclient</artifactId>
 				<version>${commons-httpclient.version}</version>
@@ -127,9 +127,9 @@
 
 			<!-- DI -->
 			<dependency>
-				<groupId>com.google.inject</groupId>
-				<artifactId>guice</artifactId>
-				<version>3.0</version>
+				<groupId>com.google.dagger</groupId>
+				<artifactId>dagger</artifactId>
+				<version>2.0</version>
 			</dependency>
 
 			<!-- JSON -->

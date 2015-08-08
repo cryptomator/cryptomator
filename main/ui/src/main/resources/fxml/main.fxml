@@ -18,12 +18,11 @@
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.geometry.Insets?>
 
-<HBox fx:id="rootPane" prefHeight="440.0" prefWidth="640.0" fx:controller="org.cryptomator.ui.controllers.MainController" xmlns:fx="http://javafx.com/fxml">
+<HBox fx:id="rootPane" prefHeight="440.0" prefWidth="640.0" xmlns:fx="http://javafx.com/fxml">
 
 	<padding><Insets top="20" right="20" bottom="20" left="20.0"/></padding>
 
 	<fx:define>
-		<fx:include fx:id="welcomeView" source="welcome.fxml" />
 		<ContextMenu fx:id="vaultListCellContextMenu">
 			<items>
 				<MenuItem text="%main.directoryList.contextMenu.remove" onAction="#didClickRemoveSelectedEntry" />
@@ -49,11 +48,7 @@
 				</ToolBar>
 			</children>
 		</VBox>
-		<Pane fx:id="contentPane">
-			<children>
-				<fx:reference source="welcomeView" />
-			</children>
-		</Pane>
+		<Pane fx:id="contentPane"/>
 	</children>
 
 </HBox>

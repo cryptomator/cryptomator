@@ -2,13 +2,13 @@ package org.cryptomator.ui.model;
 
 import java.nio.file.Path;
 
+import javax.inject.Inject;
+import javax.inject.Provider;
+
 import org.cryptomator.crypto.Cryptor;
 import org.cryptomator.ui.util.DeferredCloser;
 import org.cryptomator.ui.util.mount.WebDavMounter;
 import org.cryptomator.webdav.WebDavServer;
-
-import com.google.inject.Inject;
-import com.google.inject.Provider;
 
 public class VaultFactory {
 

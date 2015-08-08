@@ -10,15 +10,8 @@ import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.util.ResourceBundle;
 
-import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.beans.value.ObservableValue;
-import javafx.event.ActionEvent;
-import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
-import javafx.scene.control.Button;
-import javafx.scene.control.Hyperlink;
-import javafx.scene.text.Text;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import org.cryptomator.crypto.exceptions.UnsupportedKeyLengthException;
 import org.cryptomator.crypto.exceptions.UnsupportedVaultException;
@@ -28,13 +21,20 @@ import org.cryptomator.ui.model.Vault;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.inject.Inject;
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.beans.value.ObservableValue;
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.scene.control.Button;
+import javafx.scene.control.Hyperlink;
+import javafx.scene.text.Text;
 
-public class ChangePasswordController implements Initializable {
+@Singleton
+public class ChangePasswordController extends AbstractFXMLViewController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ChangePasswordController.class);
 
-	private ResourceBundle rb;
 	private ChangePasswordListener listener;
 	private Vault vault;
 
@@ -65,9 +65,17 @@ public class ChangePasswordController implements Initializable {
 	}
 
 	@Override
-	public void initialize(URL location, ResourceBundle rb) {
-		this.rb = rb;
+	protected URL getFxmlResourceUrl() {
+		return getClass().getResource("/fxml/change_password.fxml");
+	}
 
+	@Override
+	protected ResourceBundle getFxmlResourceBundle() {
+		return ResourceBundle.getBundle("localization");
+	}
+
+	@Override
+	public void initialize() {
 		oldPasswordField.textProperty().addListener(this::passwordFieldsDidChange);
 		newPasswordField.textProperty().addListener(this::passwordFieldsDidChange);
 		retypePasswordField.textProperty().addListener(this::passwordFieldsDidChange);
@@ -109,19 +117,19 @@ public class ChangePasswordController implements Initializable {
 			vault.getCryptor().decryptMasterKey(masterKeyInputStream, oldPassword);
 			Files.copy(masterKeyPath, masterKeyBackupPath, StandardCopyOption.REPLACE_EXISTING);
 		} catch (IOException ex) {
-			messageText.setText(rb.getString("changePassword.errorMessage.decryptionFailed"));
+			messageText.setText(resourceBundle.getString("changePassword.errorMessage.decryptionFailed"));
 			LOG.error("Decryption failed for technical reasons.", ex);
 			newPasswordField.swipe();
 			retypePasswordField.swipe();
 			return;
 		} catch (WrongPasswordException e) {
-			messageText.setText(rb.getString("changePassword.errorMessage.wrongPassword"));
+			messageText.setText(resourceBundle.getString("changePassword.errorMessage.wrongPassword"));
 			newPasswordField.swipe();
 			retypePasswordField.swipe();
 			Platform.runLater(oldPasswordField::requestFocus);
 			return;
 		} catch (UnsupportedKeyLengthException ex) {
-			messageText.setText(rb.getString("changePassword.errorMessage.unsupportedKeyLengthInstallJCE"));
+			messageText.setText(resourceBundle.getString("changePassword.errorMessage.unsupportedKeyLengthInstallJCE"));
 			LOG.warn("Unsupported Key-Length. Please install Oracle Java Cryptography Extension (JCE).", ex);
 			newPasswordField.swipe();
 			retypePasswordField.swipe();
@@ -129,9 +137,9 @@ public class ChangePasswordController implements Initializable {
 		} catch (UnsupportedVaultException e) {
 			downloadsPageLink.setVisible(true);
 			if (e.isVaultOlderThanSoftware()) {
-				messageText.setText(rb.getString("changePassword.errorMessage.unsupportedVersion.vaultOlderThanSoftware") + " ");
+				messageText.setText(resourceBundle.getString("changePassword.errorMessage.unsupportedVersion.vaultOlderThanSoftware") + " ");
 			} else if (e.isSoftwareOlderThanVault()) {
-				messageText.setText(rb.getString("changePassword.errorMessage.unsupportedVersion.softwareOlderThanVault") + " ");
+				messageText.setText(resourceBundle.getString("changePassword.errorMessage.unsupportedVersion.softwareOlderThanVault") + " ");
 			}
 			newPasswordField.swipe();
 			retypePasswordField.swipe();
@@ -146,7 +154,7 @@ public class ChangePasswordController implements Initializable {
 		final CharSequence newPassword = newPasswordField.getCharacters();
 		try (final OutputStream masterKeyOutputStream = Files.newOutputStream(masterKeyPath, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.SYNC)) {
 			vault.getCryptor().encryptMasterKey(masterKeyOutputStream, newPassword);
-			messageText.setText(rb.getString("changePassword.infoMessage.success"));
+			messageText.setText(resourceBundle.getString("changePassword.infoMessage.success"));
 			Platform.runLater(this::didChangePassword);
 			// At this point the backup is still using the old password.
 			// It will be changed as soon as the user unlocks the vault the next time.

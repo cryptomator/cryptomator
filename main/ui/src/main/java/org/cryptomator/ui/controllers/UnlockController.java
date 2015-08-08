@@ -19,19 +19,7 @@ import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
-import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.beans.value.ObservableValue;
-import javafx.event.ActionEvent;
-import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
-import javafx.scene.control.Button;
-import javafx.scene.control.Hyperlink;
-import javafx.scene.control.ProgressIndicator;
-import javafx.scene.control.TextField;
-import javafx.scene.input.KeyEvent;
-import javafx.scene.text.Text;
-
+import javax.inject.Inject;
 import javax.security.auth.DestroyFailedException;
 
 import org.apache.commons.lang3.CharUtils;
@@ -44,13 +32,22 @@ import org.cryptomator.ui.util.FXThreads;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.inject.Inject;
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.beans.value.ObservableValue;
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.scene.control.Button;
+import javafx.scene.control.Hyperlink;
+import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.TextField;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.text.Text;
 
-public class UnlockController implements Initializable {
+public class UnlockController extends AbstractFXMLViewController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(UnlockController.class);
 
-	private ResourceBundle rb;
 	private UnlockListener listener;
 	private Vault vault;
 
@@ -77,15 +74,22 @@ public class UnlockController implements Initializable {
 
 	@Inject
 	public UnlockController(Application app, ExecutorService exec) {
-		super();
 		this.app = app;
 		this.exec = exec;
 	}
 
 	@Override
-	public void initialize(URL url, ResourceBundle rb) {
-		this.rb = rb;
+	protected URL getFxmlResourceUrl() {
+		return getClass().getResource("/fxml/unlock.fxml");
+	}
 
+	@Override
+	protected ResourceBundle getFxmlResourceBundle() {
+		return ResourceBundle.getBundle("localization");
+	}
+
+	@Override
+	public void initialize() {
 		passwordField.textProperty().addListener(this::passwordFieldsDidChange);
 		mountName.addEventFilter(KeyEvent.KEY_TYPED, this::filterAlphanumericKeyEvents);
 		mountName.textProperty().addListener(this::mountNameDidChange);
@@ -124,7 +128,7 @@ public class UnlockController implements Initializable {
 		try (final InputStream masterKeyInputStream = Files.newInputStream(masterKeyPath, StandardOpenOption.READ)) {
 			vault.getCryptor().decryptMasterKey(masterKeyInputStream, password);
 			if (!vault.startServer()) {
-				messageText.setText(rb.getString("unlock.messageLabel.startServerFailed"));
+				messageText.setText(resourceBundle.getString("unlock.messageLabel.startServerFailed"));
 				vault.getCryptor().destroy();
 				return;
 			}
@@ -136,26 +140,26 @@ public class UnlockController implements Initializable {
 		} catch (IOException ex) {
 			setControlsDisabled(false);
 			progressIndicator.setVisible(false);
-			messageText.setText(rb.getString("unlock.errorMessage.decryptionFailed"));
+			messageText.setText(resourceBundle.getString("unlock.errorMessage.decryptionFailed"));
 			LOG.error("Decryption failed for technical reasons.", ex);
 		} catch (WrongPasswordException e) {
 			setControlsDisabled(false);
 			progressIndicator.setVisible(false);
-			messageText.setText(rb.getString("unlock.errorMessage.wrongPassword"));
+			messageText.setText(resourceBundle.getString("unlock.errorMessage.wrongPassword"));
 			Platform.runLater(passwordField::requestFocus);
 		} catch (UnsupportedKeyLengthException ex) {
 			setControlsDisabled(false);
 			progressIndicator.setVisible(false);
-			messageText.setText(rb.getString("unlock.errorMessage.unsupportedKeyLengthInstallJCE"));
+			messageText.setText(resourceBundle.getString("unlock.errorMessage.unsupportedKeyLengthInstallJCE"));
 			LOG.warn("Unsupported Key-Length. Please install Oracle Java Cryptography Extension (JCE).", ex);
 		} catch (UnsupportedVaultException e) {
 			setControlsDisabled(false);
 			progressIndicator.setVisible(false);
 			downloadsPageLink.setVisible(true);
 			if (e.isVaultOlderThanSoftware()) {
-				messageText.setText(rb.getString("unlock.errorMessage.unsupportedVersion.vaultOlderThanSoftware") + " ");
+				messageText.setText(resourceBundle.getString("unlock.errorMessage.unsupportedVersion.vaultOlderThanSoftware") + " ");
 			} else if (e.isSoftwareOlderThanVault()) {
-				messageText.setText(rb.getString("unlock.errorMessage.unsupportedVersion.softwareOlderThanVault") + " ");
+				messageText.setText(resourceBundle.getString("unlock.errorMessage.unsupportedVersion.softwareOlderThanVault") + " ");
 			}
 		} catch (DestroyFailedException e) {
 			setControlsDisabled(false);

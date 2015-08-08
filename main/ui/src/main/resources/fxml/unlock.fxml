@@ -22,7 +22,7 @@
 <?import javafx.scene.control.Hyperlink?>
 <?import javafx.scene.text.Text?>
 
-<GridPane vgap="12.0" hgap="12.0" prefWidth="400.0" fx:controller="org.cryptomator.ui.controllers.UnlockController" xmlns:fx="http://javafx.com/fxml">
+<GridPane vgap="12.0" hgap="12.0" prefWidth="400.0" xmlns:fx="http://javafx.com/fxml">
 	<padding>
 		<Insets top="24.0" right="24.0" bottom="24.0" left="24.0" />
 	</padding>

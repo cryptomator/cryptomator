@@ -15,15 +15,7 @@ import java.nio.file.Path;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
 
-import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
-
 import org.apache.commons.lang3.SystemUtils;
-import org.cryptomator.ui.MainModule.ControllerFactory;
 import org.cryptomator.ui.controllers.MainController;
 import org.cryptomator.ui.model.Vault;
 import org.cryptomator.ui.util.ActiveWindowStyleSupport;
@@ -34,8 +26,10 @@ import org.cryptomator.ui.util.TrayIconUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.inject.Guice;
-import com.google.inject.Injector;
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.fxml.FXMLLoader;
+import javafx.stage.Stage;
 
 public class MainApplication extends Application {
 
@@ -44,28 +38,15 @@ public class MainApplication extends Application {
 	private static final Logger LOG = LoggerFactory.getLogger(MainApplication.class);
 
 	private final ExecutorService executorService;
-	private final ControllerFactory controllerFactory;
 	private final DeferredCloser closer;
+	private final MainController mainCtrl;
 
 	public MainApplication() {
-		this(getInjector());
-	}
-
-	private static Injector getInjector() {
-		return Guice.createInjector(new MainModule());
-	}
-
-	public MainApplication(Injector injector) {
-		this(injector.getInstance(ExecutorService.class), injector.getInstance(ControllerFactory.class), injector.getInstance(DeferredCloser.class), injector.getInstance(MainApplicationReference.class));
-	}
-
-	public MainApplication(ExecutorService executorService, ControllerFactory controllerFactory, DeferredCloser closer, MainApplicationReference appRef) {
-		super();
-		this.executorService = executorService;
-		this.controllerFactory = controllerFactory;
-		this.closer = closer;
+		final CryptomatorComponent comp = DaggerCryptomatorComponent.builder().cryptomatorModule(new CryptomatorModule(this)).build();
+		this.executorService = comp.executorService();
+		this.closer = comp.deferredCloser();
+		this.mainCtrl = comp.mainController();
 		Cryptomator.addShutdownTask(closer::close);
-		appRef.set(this);
 	}
 
 	@Override
@@ -83,34 +64,29 @@ public class MainApplication extends Application {
 		});
 
 		chooseNativeStylesheet();
+
+		mainCtrl.initStage(primaryStage);
+
 		final ResourceBundle rb = ResourceBundle.getBundle("localization");
-		final FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/main.fxml"), rb);
-		loader.setControllerFactory(controllerFactory);
-		final Parent root = loader.load();
-		final MainController ctrl = loader.getController();
-		ctrl.setStage(primaryStage);
-		final Scene scene = new Scene(root);
 		primaryStage.setTitle(rb.getString("app.name"));
-		primaryStage.setScene(scene);
-		primaryStage.sizeToScene();
 		primaryStage.setResizable(false);
 		primaryStage.show();
+
 		ActiveWindowStyleSupport.startObservingFocus(primaryStage);
 		TrayIconUtil.init(primaryStage, rb, () -> {
 			quit();
 		});
 
 		for (String arg : getParameters().getUnnamed()) {
-			handleCommandLineArg(ctrl, arg);
+			handleCommandLineArg(mainCtrl, arg);
 		}
 
 		if (SystemUtils.IS_OS_MAC_OSX) {
-			Cryptomator.OPEN_FILE_HANDLER.complete(file -> handleCommandLineArg(ctrl, file.getAbsolutePath()));
+			Cryptomator.OPEN_FILE_HANDLER.complete(file -> handleCommandLineArg(mainCtrl, file.getAbsolutePath()));
 		}
 
 		LocalInstance cryptomatorGuiInstance = closer.closeLater(SingleInstanceManager.startLocalInstance(APPLICATION_KEY, executorService), LocalInstance::close).get().get();
-
-		cryptomatorGuiInstance.registerListener(arg -> handleCommandLineArg(ctrl, arg));
+		cryptomatorGuiInstance.registerListener(arg -> handleCommandLineArg(mainCtrl, arg));
 	}
 
 	void handleCommandLineArg(final MainController ctrl, String arg) {
@@ -160,27 +136,6 @@ public class MainApplication extends Application {
 	@Override
 	public void stop() {
 		closer.close();
-	}
-
-	/**
-	 * Needed to inject MainApplication. Problem: Application needs to be set asap after injector creation.
-	 */
-	static class MainApplicationReference {
-
-		private Application application;
-
-		private void set(Application application) {
-			this.application = application;
-		}
-
-		public Application get() {
-			if (application == null) {
-				throw new IllegalStateException("not yet ready.");
-			} else {
-				return application;
-			}
-		}
-
 	}
 
 }

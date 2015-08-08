@@ -2,23 +2,12 @@ package org.cryptomator.ui.util;
 
 import java.util.Comparator;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-
-import org.cryptomator.ui.MainModule;
-import org.cryptomator.ui.test.GuiceJUnitRunner;
-import org.cryptomator.ui.test.GuiceJUnitRunner.GuiceModules;
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
-@RunWith(GuiceJUnitRunner.class)
-@GuiceModules(MainModule.class)
 public class SemVerComparatorTest {
 
-	@Inject
-	@Named("SemVer")
-	private Comparator<String> semVerComparator;
+	private final Comparator<String> semVerComparator = new SemVerComparator();
 
 	// equal versions
 

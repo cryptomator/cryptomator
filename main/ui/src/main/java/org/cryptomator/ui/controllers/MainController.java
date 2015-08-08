@@ -18,14 +18,28 @@ import java.util.List;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+import javax.inject.Provider;
+import javax.inject.Singleton;
+
+import org.cryptomator.ui.controllers.ChangePasswordController.ChangePasswordListener;
+import org.cryptomator.ui.controllers.InitializeController.InitializationListener;
+import org.cryptomator.ui.controllers.UnlockController.UnlockListener;
+import org.cryptomator.ui.controllers.UnlockedController.LockListener;
+import org.cryptomator.ui.controls.DirectoryListCell;
+import org.cryptomator.ui.model.Vault;
+import org.cryptomator.ui.model.VaultFactory;
+import org.cryptomator.ui.settings.Settings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import dagger.Lazy;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.fxml.Initializable;
 import javafx.geometry.Side;
 import javafx.scene.Parent;
 import javafx.scene.control.ContextMenu;
@@ -38,21 +52,8 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
-import org.cryptomator.ui.MainModule.ControllerFactory;
-import org.cryptomator.ui.controllers.ChangePasswordController.ChangePasswordListener;
-import org.cryptomator.ui.controllers.InitializeController.InitializationListener;
-import org.cryptomator.ui.controllers.UnlockController.UnlockListener;
-import org.cryptomator.ui.controllers.UnlockedController.LockListener;
-import org.cryptomator.ui.controls.DirectoryListCell;
-import org.cryptomator.ui.model.Vault;
-import org.cryptomator.ui.model.VaultFactory;
-import org.cryptomator.ui.settings.Settings;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.inject.Inject;
-
-public class MainController implements Initializable, InitializationListener, UnlockListener, LockListener, ChangePasswordListener {
+@Singleton
+public class MainController extends AbstractFXMLViewController implements InitializationListener, UnlockListener, LockListener, ChangePasswordListener {
 
 	private static final Logger LOG = LoggerFactory.getLogger(MainController.class);
 
@@ -76,28 +77,50 @@ public class MainController implements Initializable, InitializationListener, Un
 	@FXML
 	private Pane contentPane;
 
-	private final ControllerFactory controllerFactory;
 	private final Settings settings;
 	private final VaultFactory vaultFactoy;
-
-	private ResourceBundle rb;
+	private final Lazy<WelcomeController> welcomeController;
+	private final Lazy<InitializeController> initializeController;
+	private final Lazy<UnlockController> unlockController;
+	private final Provider<UnlockedController> unlockedController;
+	private final Lazy<ChangePasswordController> changePasswordController;
 
 	@Inject
-	public MainController(ControllerFactory controllerFactory, Settings settings, VaultFactory vaultFactoy) {
+	public MainController(Settings settings, VaultFactory vaultFactoy, Lazy<WelcomeController> welcomeController, Lazy<InitializeController> initializeController, Lazy<UnlockController> unlockController,
+			Provider<UnlockedController> unlockedController, Lazy<ChangePasswordController> changePasswordController) {
 		super();
-		this.controllerFactory = controllerFactory;
 		this.settings = settings;
 		this.vaultFactoy = vaultFactoy;
+		this.welcomeController = welcomeController;
+		this.initializeController = initializeController;
+		this.unlockController = unlockController;
+		this.unlockedController = unlockedController;
+		this.changePasswordController = changePasswordController;
 	}
 
 	@Override
-	public void initialize(URL url, ResourceBundle rb) {
-		this.rb = rb;
+	protected URL getFxmlResourceUrl() {
+		return getClass().getResource("/fxml/main.fxml");
+	}
 
+	@Override
+	protected ResourceBundle getFxmlResourceBundle() {
+		return ResourceBundle.getBundle("localization");
+	}
+
+	@Override
+	public void initialize() {
 		final ObservableList<Vault> items = FXCollections.observableList(settings.getDirectories());
 		vaultList.setItems(items);
 		vaultList.setCellFactory(this::createDirecoryListCell);
 		vaultList.getSelectionModel().getSelectedItems().addListener(this::selectedVaultDidChange);
+		this.showWelcomeView();
+	}
+
+	@Override
+	public void initStage(Stage stage) {
+		super.initStage(stage);
+		this.stage = stage;
 	}
 
 	@FXML
@@ -191,14 +214,14 @@ public class MainController implements Initializable, InitializationListener, Un
 	private void selectedVaultDidChange(ListChangeListener.Change<? extends Vault> change) {
 		final Vault selectedVault = vaultList.getSelectionModel().getSelectedItem();
 		if (selectedVault == null) {
-			stage.setTitle(rb.getString("app.name"));
+			stage.setTitle(resourceBundle.getString("app.name"));
 			showWelcomeView();
 		} else if (!Files.isDirectory(selectedVault.getPath())) {
 			Platform.runLater(() -> {
 				vaultList.getItems().remove(selectedVault);
 				vaultList.getSelectionModel().clearSelection();
 			});
-			stage.setTitle(rb.getString("app.name"));
+			stage.setTitle(resourceBundle.getString("app.name"));
 			showWelcomeView();
 		} else {
 			stage.setTitle(selectedVault.getName());
@@ -237,25 +260,17 @@ public class MainController implements Initializable, InitializationListener, Un
 		}
 	}
 
-	private <T> T showView(String fxml) {
-		try {
-			final FXMLLoader loader = new FXMLLoader(getClass().getResource(fxml), rb);
-			loader.setControllerFactory(controllerFactory);
-			final Parent root = loader.load();
-			contentPane.getChildren().clear();
-			contentPane.getChildren().add(root);
-			return loader.getController();
-		} catch (IOException e) {
-			throw new IllegalStateException("Failed to load fxml file.", e);
-		}
-	}
-
 	private void showWelcomeView() {
-		this.showView("/fxml/welcome.fxml");
+		final Parent root = welcomeController.get().loadFxml();
+		contentPane.getChildren().clear();
+		contentPane.getChildren().add(root);
 	}
 
 	private void showInitializeView(Vault vault) {
-		final InitializeController ctrl = showView("/fxml/initialize.fxml");
+		final InitializeController ctrl = initializeController.get();
+		final Parent root = ctrl.loadFxml();
+		contentPane.getChildren().clear();
+		contentPane.getChildren().add(root);
 		ctrl.setVault(vault);
 		ctrl.setListener(this);
 	}
@@ -266,7 +281,10 @@ public class MainController implements Initializable, InitializationListener, Un
 	}
 
 	private void showUnlockView(Vault vault) {
-		final UnlockController ctrl = showView("/fxml/unlock.fxml");
+		final UnlockController ctrl = unlockController.get();
+		final Parent root = ctrl.loadFxml();
+		contentPane.getChildren().clear();
+		contentPane.getChildren().add(root);
 		ctrl.setVault(vault);
 		ctrl.setListener(this);
 	}
@@ -278,7 +296,10 @@ public class MainController implements Initializable, InitializationListener, Un
 	}
 
 	private void showUnlockedView(Vault vault) {
-		final UnlockedController ctrl = showView("/fxml/unlocked.fxml");
+		final UnlockedController ctrl = unlockedController.get();
+		final Parent root = ctrl.loadFxml();
+		contentPane.getChildren().clear();
+		contentPane.getChildren().add(root);
 		ctrl.setVault(vault);
 		ctrl.setListener(this);
 	}
@@ -292,7 +313,10 @@ public class MainController implements Initializable, InitializationListener, Un
 	}
 
 	private void showChangePasswordView(Vault vault) {
-		final ChangePasswordController ctrl = showView("/fxml/change_password.fxml");
+		final ChangePasswordController ctrl = changePasswordController.get();
+		final Parent root = ctrl.loadFxml();
+		contentPane.getChildren().clear();
+		contentPane.getChildren().add(root);
 		ctrl.setVault(vault);
 		ctrl.setListener(this);
 	}

@@ -7,7 +7,6 @@ Cryptomator is licensed under the MIT license. The details can be found in the a
 
 Cryptomator uses third party softwares that may be licensed under different licenses.
 
-
 ### Jackson
 Jackson is a high-performance, Free/Open Source JSON processing library.
 It was originally written by Tatu Saloranta (tatu.saloranta@iki.fi), and has
@@ -24,7 +23,6 @@ FasterXML.com (http://fasterxml.com).
 in some artifacts (usually source distributions); but is always available
 from the source code management (SCM) system project uses.
 
-
 ### Jetty
 Copyright (c) 1995-2014 Mort Bay Consulting Pty. Ltd.
 
@@ -38,7 +36,6 @@ modified April 2001  by Iris Van den Broeke, Daniel Deville.
 Permission to use, copy, modify and distribute UnixCrypt
 for non-commercial or commercial purposes and without fee is
 granted provided that the copyright notice appears in all copies.
-
 
 ### Jackrabbit WebDAV Library
 Copyright 2004-2014 The Apache Software Foundation
@@ -82,6 +79,12 @@ under the Apache License 2.0 (see: StringUtils.containsWhitespace())
 Copyright (c) 2013, ControlsFX
 
 Licensed under the accompanying BSD license file.
+
+### Dagger 2
+Copyright 2014 Google, Inc.
+Copyright 2012 Square, Inc.
+
+Licensed under the Apache License, Version 2.0
 
 ### Apache Log4j
 Copyright 1999-2012 Apache Software Foundation
