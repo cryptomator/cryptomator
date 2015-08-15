@@ -1,20 +1,63 @@
-.root {
+/*
+ * Copyright (c) 2015 Sebastian Stenzel
+ * This file is licensed under the terms of the MIT license.
+ * See the LICENSE.txt file for more info.
+ * 
+ * Contributors:
+ *     Sebastian Stenzel - initial API and implementation
+ *
+ */
+ 
+ .root {
 	-fx-font-family: 'Cantarell';
 	-fx-font-smoothing-type: lcd;
-	-fx-font-size: 12.0px;
+	-fx-font-size: 12px;
 	
-	-fx-background-color: #F0F0F0;
-	-fx-text-fill: #444;
+	COLOR_TEXT: #444;
+	COLOR_TEXT_DISABLED: #BBB;
+	COLOR_HYPERLINK: #0069D9;
+	COLOR_BORDER: #D3D3D3;
+	COLOR_BORDER_DARK: #AAA;
+	COLOR_BACKGROUND: #F0F0F0;
+	
+	COLOR_VGRAD_LIGHT: linear-gradient(to bottom, #FEFEFE 0%, #F5F5F5 100%);
+	COLOR_VGRAD_MEDIUM: linear-gradient(to bottom, #F5F5F5 0%, #F1F1F1 100%);
+	COLOR_VGRAD_DARK: linear-gradient(to bottom, #F1F1F1 0%, #E9E9E9 100%);
+	COLOR_HGRAD_LIGHT: linear-gradient(to right, #FEFEFE 0%, #F5F5F5 100%);
+	COLOR_HGRAD_MEDIUM: linear-gradient(to right, #F5F5F5 0%, #FEFEFE 100%);
+	COLOR_HGRAD_DARK: linear-gradient(to right, #F1F1F1 0%, #E9E9E9 100%);
+	
+	COLOR_CHART_GREEN: #28CA40;
+	COLOR_CHART_RED: #FD4943;
+
+	
+	-fx-background-color: COLOR_BACKGROUND;
+	-fx-text-fill: COLOR_TEXT;
 }
 
 /****************************************************************************
  *																			*
- * Label																	*
+ * Labels																	*
  *																			*
  ****************************************************************************/
 
 .label {
-	-fx-text-fill: #444;
+	-fx-text-fill: COLOR_TEXT;
+}
+
+/****************************************************************************
+ *																			*
+ * Hyperlinks																*
+ *																			*
+ ****************************************************************************/
+
+.hyperlink {
+    -fx-cursor: hand;
+    -fx-text-fill: COLOR_HYPERLINK;
+}
+
+.hyperlink:hover {
+    -fx-underline: true;
 }
 
 /****************************************************************************
@@ -24,27 +67,44 @@
  ****************************************************************************/
 
 .button {
-	-fx-background-color: #D3D3D3, linear-gradient(to bottom, #FEFEFE 0%, #F5F5F5 100%);
+	-fx-background-color: COLOR_BORDER, COLOR_VGRAD_LIGHT;
 	-fx-background-insets: 0, 1;
 	-fx-padding: 0.4em 0.8em 0.4em 0.8em;
-	-fx-text-fill: #444;
+	-fx-text-fill: COLOR_TEXT;
 	-fx-alignment: CENTER;
 }
 
 .button:hover,
 .button:default:hover {
-	-fx-background-color: #D3D3D3, linear-gradient(to bottom, #F5F5F5 0%, #F1F1F1 100%);
+	-fx-background-color: COLOR_BORDER, COLOR_VGRAD_MEDIUM;
 } 
 
 .button:armed,
 .button:default:armed {
-	-fx-background-color: #AAA, linear-gradient(to bottom, #F1F1F1 0%, #E9E9E9 100%);	
+	-fx-background-color: COLOR_BORDER_DARK, COLOR_VGRAD_DARK;	
 }
 
 .button:disabled,
 .button:default:disabled {
-	-fx-background-color: #D3D3D3, linear-gradient(to bottom, #FEFEFE 0%, #F5F5F5 100%);
-	-fx-text-fill: #BBB;
+	-fx-background-color: COLOR_BORDER, COLOR_VGRAD_LIGHT;
+	-fx-text-fill: COLOR_TEXT_DISABLED;
+}
+
+/****************************************************************************
+ *																			*
+ * Text Fields																*
+ *																			*
+ ****************************************************************************/
+
+.text-input {
+	-fx-background-color: COLOR_BORDER, #FFF;
+	-fx-background-insets: 0, 1;
+	-fx-text-fill: COLOR_TEXT;
+	-fx-padding: 0.4em;
+	-fx-cursor: text;
+}
+.text-input:focused {
+	-fx-background-color: COLOR_BORDER_DARK, #FFF;
 }
 
 /****************************************************************************
@@ -54,18 +114,18 @@
  ****************************************************************************/
  
 .list-view {
-	-fx-background-color: #D3D3D3, #FFF;
+	-fx-background-color: COLOR_BORDER, #FFF;
 	-fx-background-insets: 0, 1;
 	-fx-padding: 1;
 }
 
 .list-cell {
 	-fx-padding: 0.8em 0.5em 0.8em 0.5em;
-	-fx-text-fill: #444;
+	-fx-text-fill: COLOR_TEXT;
 }
 
 .list-cell:selected {
-	-fx-background-color: linear-gradient(to bottom, #F1F1F1 0%, #E9E9E9 100%);
+	-fx-background-color: COLOR_VGRAD_DARK;
 }
 
 /*******************************************************************************
@@ -74,18 +134,18 @@
  *                                                                             *
  ******************************************************************************/
 .scroll-bar:vertical {
-    -fx-background-color: linear-gradient(to right, #F5F5F5 0%, #FEFEFE 100%);
-    -fx-border-color: transparent transparent transparent #D3D3D3;
+    -fx-background-color: COLOR_HGRAD_MEDIUM;
+    -fx-border-color: transparent transparent transparent COLOR_BORDER;
     -fx-padding: 2px;
 }
 .scroll-bar > .thumb {
-    -fx-background-color: #D3D3D3, linear-gradient(to right, #FEFEFE 0%, #F5F5F5 100%);
+    -fx-background-color: COLOR_BORDER, COLOR_HGRAD_LIGHT;
     -fx-background-insets: 0, 1; 
     -fx-background-radius: 5;
 }
 .scroll-bar > .thumb:hover,
 .scroll-bar > .thumb:pressed {
-	-fx-background-color: #D3D3D3, linear-gradient(to right, #F1F1F1 0%, #E9E9E9 100%); 
+	-fx-background-color: COLOR_BORDER, COLOR_HGRAD_DARK; 
 }
 .scroll-bar:vertical > .increment-button, 
 .scroll-bar:vertical > .decrement-button {
@@ -99,7 +159,7 @@
  ****************************************************************************/
 
 .tool-bar.list-related-toolbar {
-	-fx-background-color: #D3D3D3, linear-gradient(to bottom, #FEFEFE 0%, #F5F5F5 100%);
+	-fx-background-color: COLOR_BORDER, COLOR_VGRAD_LIGHT;
 	-fx-background-insets: 0, 0 1 1 1;
 	-fx-padding: 0;
 	-fx-spacing: 0;
@@ -110,17 +170,17 @@
 	-fx-padding: 0.4em 0.8em 0.4em 0.8em;
 	-fx-background-color: transparent;
 	-fx-background-insets: 1;
-	-fx-border-color: transparent #D3D3D3 transparent transparent;
+	-fx-border-color: transparent COLOR_BORDER transparent transparent;
 	-fx-border-width: 1;
 }
 
 .tool-bar.list-related-toolbar .toggle-button:hover {
-	-fx-background-color: linear-gradient(to bottom, #F5F5F5 0%, #F1F1F1 100%);
+	-fx-background-color: COLOR_VGRAD_MEDIUM;
 }
 
 .tool-bar.list-related-toolbar .toggle-button:armed,
 .tool-bar.list-related-toolbar .toggle-button:selected {
-	-fx-background-color: linear-gradient(to bottom, #F1F1F1 0%, #E9E9E9 100%);
+	-fx-background-color: COLOR_VGRAD_DARK;
 }
 
 /*******************************************************************************
@@ -130,10 +190,10 @@
  ******************************************************************************/
 
 .context-menu {
-	-fx-background-color: #D3D3D3, #F7F7F7;
+	-fx-background-color: COLOR_BORDER, COLOR_BACKGROUND;
 	-fx-background-insets: 0, 1;
 	-fx-padding: 1;
-	-fx-effect: dropshadow(three-pass-box, rgba(0.0,0.0,0.0,0.2), 3, 0, 0, 2);
+	-fx-effect: dropshadow(three-pass-box, rgba(0.0, 0.0, 0.0, 0.2), 3, 0, 0, 2);
 }
 .context-menu > .separator {
 	-fx-padding: 0.0em 0.333333em 0.0em 0.333333em; /* 0 4 0 4 */
@@ -143,31 +203,13 @@
 	-fx-padding: 0.4em;
 }
 .menu-item:focused {
-	-fx-background-color: linear-gradient(to bottom, #F1F1F1 0%, #E9E9E9 100%);
+	-fx-background-color: COLOR_VGRAD_DARK;
 }
 .menu-item > .label {
-	-fx-text-fill: #444;
+	-fx-text-fill: COLOR_TEXT;
 }
 .menu-item:disabled > .label {
-	-fx-text-fill: #BBB;
-}
-
-
-/****************************************************************************
- *																			*
- * Text Fields																*
- *																			*
- ****************************************************************************/
-
-.text-input {
-	-fx-background-color: #D3D3D3, #FFF;
-	-fx-background-insets: 0, 1;
-	-fx-text-fill: #444;
-	-fx-padding: 0.4em;
-	-fx-cursor: text;
-}
-.text-input:focused {
-	-fx-background-color: #AAA, #FFF;
+	-fx-text-fill: COLOR_TEXT_DISABLED;
 }
 
 /****************************************************************************
@@ -177,7 +219,7 @@
  ****************************************************************************/
 
 .tooltip {
-	-fx-background-color: #AAA, #FE9;
+	-fx-background-color: COLOR_BORDER_DARK, #FE9;
 	-fx-background-insets: 0, 1;
 	-fx-padding: 0.4em 0.3em 0.4em 0.3em;
 	-fx-font-size: 0.8em;
@@ -191,11 +233,11 @@
 
 .check-box {
 	-fx-label-padding: 0 0 0 3;
-	-fx-text-fill: #444;
+	-fx-text-fill: COLOR_TEXT;
 }
 .check-box > .box {
 	-fx-padding: 3;
-	-fx-background-color: #AAA, #FFF;
+	-fx-background-color: COLOR_BORDER_DARK, #FFF;
 	-fx-background-insets: 0, 1;
 }
 .check-box > .box > .mark {
@@ -204,10 +246,10 @@
 	-fx-shape: "M-1,4, L-1,5.5 L3.5,8.5 L9,0 L9,-1 L7,-1 L3,6 L1,4 Z";
 }
 .check-box:selected > .box {
-	-fx-background-color: #AAA, #EEE;
+	-fx-background-color: COLOR_BORDER_DARK, COLOR_BACKGROUND;
 }
 .check-box:selected > .box > .mark {
-	-fx-background-color: #444;
+	-fx-background-color: COLOR_TEXT;
 }
 
 /****************************************************************************
@@ -217,41 +259,8 @@
  ****************************************************************************/
 
 .progress-indicator {
-	-fx-indeterminate-segment-count: 12.0;
-}
-
-.progress-indicator > .determinate-indicator > .indicator {
-	-fx-background-color:
-		rgb(208.0, 208.0, 208.0),
-		linear-gradient(rgb(176.0, 176.0, 176.0), rgb(207.0, 207.0, 207.0)),
-		linear-gradient(rgb(190.0, 190.0, 190.0) 0.0%, rgb(213.0, 213.0, 213.0) 15.0%, rgb(230.0, 230.0, 230.0) 50.0%, rgb(235.0, 235.0, 235.0) 100.0%),
-		linear-gradient(to left, rgb(196.0, 196.0, 196.0, 0.5) 0.0%, rgb(220.0, 220.0, 220.0, 0.2) 2.0% , transparent);
-	-fx-background-insets: 0.5 0.0 -0.5 0.0, 0.0, 0.5, 1.0;
-	-fx-padding: 0.083333em;
-}
-
-.progress-indicator > .determinate-indicator > .progress {
-	-fx-background-color:
-	   rgb(208.0, 208.0, 208.0),
-	   radial-gradient(center 50.0% 50.0%, radius 50.0%, rgb(84.0, 170.0, 240.0), rgb(90.0, 192.0, 246.0));
-	-fx-background-insets: 0.0, 0.5;
-	-fx-padding: 0.166667em; 
-}
-
-.progress-indicator > .determinate-indicator > .tick {
-	-fx-background-color: rgb(208.0, 208.0, 208.0), white;
-	-fx-background-insets: 1.0 0.0 -1.0 0.0, 0.0;
-	-fx-padding: 0.416667em;
-	-fx-shape: "m 18.174523,1027.137 c -0.18077,-0.4575 -0.184364,-0.8913 0.115901,-1.1721 0.300265,-0.2809 0.836622,-0.3601 1.288422,-0.041 0.4518,0.3191 2.020453,2.9316 2.020453,2.9316 l 5.41194,-8.0232 c -4e-6,0 0.516257,-0.6671 1.248682,-0.3099 0.648831,0.3165 0.559153,1.0373 0.559153,1.0373 0,0 -5.940433,9.3556 -6.15501,9.6287 -0.214577,0.273 -1.595078,0.2481 -1.817995,-0.027 -0.222917,-0.2751 -2.490777,-3.567 -2.671546,-4.0244 z";
-	-fx-scale-shape: false;
-}
-
-.progress-indicator > .percentage {
-	-fx-font-size: 0.916667em;
-}
-
-.progress-indicator:disabled {
-	-fx-opacity: -fx-disabled-opacity;
+	-fx-indeterminate-segment-count: 12;
+	-fx-spin-enabled: true;
 }
 
 .progress-indicator:indeterminate > .spinner {
@@ -312,7 +321,7 @@
 /* legend */
 
 .chart-legend {
-	-fx-text-fill: #444;
+	-fx-text-fill: COLOR_TEXT;
 	-fx-background-color: transparent;
 	-fx-padding: 0.4em;
 }
@@ -320,21 +329,21 @@
 	-fx-background-radius: 5px;
 	-fx-padding: 5px;
 }
-.default-color0.chart-line-symbol { -fx-background-color: #28CA40; }
-.default-color1.chart-line-symbol { -fx-background-color: #FD4943; }
+.default-color0.chart-line-symbol { -fx-background-color: COLOR_CHART_GREEN; }
+.default-color1.chart-line-symbol { -fx-background-color: COLOR_CHART_RED; }
 
 /* axis */
 
 .axis {
 	-fx-tick-label-font-size: 0.8em;
-	-fx-tick-label-fill: #444;
+	-fx-tick-label-fill: COLOR_TEXT;
 }
 .axis-label {
-	-fx-text-fill: #444;
+	-fx-text-fill: COLOR_TEXT;
 	-fx-padding: 0 0 0.8em 0;
 }
 .axis:left {
-	-fx-border-color: transparent #CCC transparent transparent;
+	-fx-border-color: transparent COLOR_BORDER transparent transparent;
 }
 .axis-tick-mark,
 .axis-minor-tick-mark {
@@ -348,7 +357,7 @@
 	-fx-padding: 10px;
 }
 .chart-horizontal-grid-lines {
-	-fx-stroke: #CCC;
+	-fx-stroke: COLOR_BORDER;
 }
 .chart-alternative-column-fill {
 	-fx-fill: null;
@@ -360,10 +369,10 @@
 }
 .chart-vertical-zero-line,
 .chart-horizontal-zero-line {
-	-fx-stroke: #CCC;
+	-fx-stroke: COLOR_BORDER;
 }
 .chart-series-line {
 	-fx-stroke-width: 2px;
 }
-.default-color0.chart-series-line { -fx-stroke: #28CA40; }
-.default-color1.chart-series-line { -fx-stroke: #FD4943; }
+.default-color0.chart-series-line { -fx-stroke: COLOR_CHART_GREEN; }
+.default-color1.chart-series-line { -fx-stroke: COLOR_CHART_RED; }
