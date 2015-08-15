@@ -216,6 +216,7 @@ public class UnlockController extends AbstractFXMLViewController {
 	public void setVault(Vault vault) {
 		this.vault = vault;
 		this.mountName.setText(vault.getMountName());
+		this.passwordField.clear();
 	}
 
 	public UnlockListener getListener() {
