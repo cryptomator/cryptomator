@@ -78,18 +78,18 @@ public class MainApplication extends Application {
 		});
 
 		for (String arg : getParameters().getUnnamed()) {
-			handleCommandLineArg(mainCtrl, arg);
+			handleCommandLineArg(arg);
 		}
 
 		if (SystemUtils.IS_OS_MAC_OSX) {
-			Cryptomator.OPEN_FILE_HANDLER.complete(file -> handleCommandLineArg(mainCtrl, file.getAbsolutePath()));
+			Cryptomator.OPEN_FILE_HANDLER.complete(file -> handleCommandLineArg(file.getAbsolutePath()));
 		}
 
 		LocalInstance cryptomatorGuiInstance = closer.closeLater(SingleInstanceManager.startLocalInstance(APPLICATION_KEY, executorService), LocalInstance::close).get().get();
-		cryptomatorGuiInstance.registerListener(arg -> handleCommandLineArg(mainCtrl, arg));
+		cryptomatorGuiInstance.registerListener(arg -> handleCommandLineArg(arg));
 	}
 
-	void handleCommandLineArg(final MainController ctrl, String arg) {
+	private void handleCommandLineArg(String arg) {
 		// only open files with our file extension:
 		if (!arg.endsWith(Vault.VAULT_FILE_EXTENSION)) {
 			LOG.warn("Invalid vault path %s", arg);
@@ -110,8 +110,8 @@ public class MainApplication extends Application {
 
 		// add vault to ctrl:
 		Platform.runLater(() -> {
-			ctrl.addVault(vaultPath, true);
-			ctrl.toFront();
+			mainCtrl.addVault(vaultPath, true);
+			mainCtrl.toFront();
 		});
 	}
 
