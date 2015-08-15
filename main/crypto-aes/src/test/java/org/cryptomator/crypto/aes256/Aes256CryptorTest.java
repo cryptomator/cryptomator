@@ -112,7 +112,7 @@ public class Aes256CryptorTest {
 		final Aes256Cryptor cryptor = new Aes256Cryptor();
 
 		// encrypt:
-		final ByteBuffer encryptedData = ByteBuffer.allocate(104 + plaintextData.length + 4096);
+		final ByteBuffer encryptedData = ByteBuffer.allocate(104 + plaintextData.length + 4096 + 32); // header + content + maximum possible size obfuscation padding + 32 bytes mac (per each 32k)
 		final SeekableByteChannel encryptedOut = new ByteBufferBackedSeekableChannel(encryptedData);
 		cryptor.encryptFile(plaintextIn, encryptedOut);
 		IOUtils.closeQuietly(plaintextIn);
