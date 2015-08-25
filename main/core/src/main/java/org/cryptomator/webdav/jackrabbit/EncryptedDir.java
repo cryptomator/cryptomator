@@ -19,6 +19,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
+import java.nio.file.attribute.FileTime;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -155,8 +157,10 @@ class EncryptedDir extends AbstractEncryptedNode implements FileConstants {
 			final String cleartextFilename = FilenameUtils.getName(childLocator.getResourcePath());
 			final String ciphertextFilename = filenameTranslator.getEncryptedFilename(cleartextFilename);
 			final Path filePath = dirPath.resolve(ciphertextFilename);
-			try (final FileChannel c = FileChannel.open(filePath, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
-					final SilentlyFailingFileLock lock = new SilentlyFailingFileLock(c, 0L, FILE_HEADER_LENGTH, false)) {
+			final Path tmpFilePath = Files.createTempFile(dirPath, null, null);
+			// encrypt to tmp file:
+			try (final FileChannel c = FileChannel.open(tmpFilePath, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+					final SilentlyFailingFileLock lock = new SilentlyFailingFileLock(c, false)) {
 				cryptor.encryptFile(inputContext.getInputStream(), c);
 			} catch (SecurityException e) {
 				throw new DavException(DavServletResponse.SC_FORBIDDEN, e);
@@ -169,6 +173,13 @@ class EncryptedDir extends AbstractEncryptedNode implements FileConstants {
 			} finally {
 				IOUtils.closeQuietly(inputContext.getInputStream());
 			}
+			// mv tmp to target file:
+			try {
+				Files.move(tmpFilePath, filePath, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+			} catch (AtomicMoveNotSupportedException e) {
+				Files.move(tmpFilePath, filePath, StandardCopyOption.REPLACE_EXISTING);
+			}
+			Files.setLastModifiedTime(filePath, FileTime.from(Instant.now()));
 		} catch (IOException e) {
 			LOG.error("Failed to create file.", e);
 			throw new IORuntimeException(e);

@@ -109,6 +109,7 @@ class EncryptedFile extends AbstractEncryptedNode implements FileConstants {
 					final boolean authenticate = !cryptoWarningHandler.ignoreMac(getLocator().getResourcePath());
 					cryptor.decryptFile(c, outputContext.getOutputStream(), authenticate);
 				}
+				outputContext.getOutputStream().flush();
 			} catch (EOFException e) {
 				LOG.warn("Unexpected end of stream (possibly client hung up).");
 			}

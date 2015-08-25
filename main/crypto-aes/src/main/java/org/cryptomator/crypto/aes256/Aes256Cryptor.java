@@ -311,7 +311,7 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 		// read header:
 		encryptedFile.position(0);
 		final ByteBuffer headerBuf = ByteBuffer.allocate(104);
-		final int headerBytesRead = encryptedFile.read(headerBuf);
+		final int headerBytesRead = readFromChannel(encryptedFile, headerBuf);
 		if (headerBytesRead != headerBuf.capacity()) {
 			return null;
 		}
@@ -373,7 +373,7 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 		// read header:
 		encryptedFile.position(0l);
 		final ByteBuffer headerBuf = ByteBuffer.allocate(104);
-		final int headerBytesRead = encryptedFile.read(headerBuf);
+		final int headerBytesRead = readFromChannel(encryptedFile, headerBuf);
 		if (headerBytesRead != headerBuf.capacity()) {
 			throw new IOException("Failed to read file header.");
 		}
@@ -474,7 +474,7 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 			}
 			final int inBufSize = numBlocks * (CONTENT_MAC_BLOCK + 32);
 			final ByteBuffer buf = ByteBuffer.allocate(inBufSize);
-			bytesRead = encryptedFile.read(buf);
+			bytesRead = readFromChannel(encryptedFile, buf);
 			buf.flip();
 			final int blocksRead = (int) Math.ceil(bytesRead / (double) (CONTENT_MAC_BLOCK + 32));
 			final boolean consumedInTime = executor.offer(new BlocksData(buf.asReadOnlyBuffer(), blockNumber, blocksRead), 1, TimeUnit.SECONDS);
@@ -508,7 +508,7 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 		// read header:
 		encryptedFile.position(0l);
 		final ByteBuffer headerBuf = ByteBuffer.allocate(104);
-		final int headerBytesRead = encryptedFile.read(headerBuf);
+		final int headerBytesRead = readFromChannel(encryptedFile, headerBuf);
 		if (headerBytesRead != headerBuf.capacity()) {
 			throw new IOException("Failed to read file header.");
 		}
@@ -685,7 +685,7 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 			}
 			final int inBufSize = numBlocks * CONTENT_MAC_BLOCK;
 			final ByteBuffer inBuf = ByteBuffer.allocate(inBufSize);
-			bytesRead = channel.read(inBuf);
+			bytesRead = readFromChannel(channel, inBuf);
 			inBuf.flip();
 			final int blocksRead = (int) Math.ceil(bytesRead / (double) CONTENT_MAC_BLOCK);
 			final boolean consumedInTime = executor.offer(new BlocksData(inBuf.asReadOnlyBuffer(), blockNumber, blocksRead), 1, TimeUnit.SECONDS);
@@ -734,6 +734,31 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 
 	private byte[] longToByteArray(long lng) {
 		return ByteBuffer.allocate(Long.SIZE / Byte.SIZE).putLong(lng).array();
+	}
+
+	/**
+	 * Reads bytes from a ReadableByteChannel.
+	 * <p>
+	 * This implementation guarantees that it will read as many bytes
+	 * as possible before giving up; this may not always be the case for
+	 * subclasses of {@link ReadableByteChannel}.
+	 *
+	 * @param input the byte channel to read
+	 * @param buffer byte buffer destination
+	 * @return the actual length read; may be less than requested if EOF was reached
+	 * @throws IOException if a read error occurs
+	 * @see
+	 * 		<a href="http://commons.apache.org/proper/commons-io/apidocs/src-html/org/apache/commons/io/IOUtils.html">Apache Commons IOUtils 2.5</a>
+	 */
+	public static int readFromChannel(final ReadableByteChannel input, final ByteBuffer buffer) throws IOException {
+		final int length = buffer.remaining();
+		while (buffer.remaining() > 0) {
+			final int count = input.read(buffer);
+			if (count == -1) { // EOF
+				break;
+			}
+		}
+		return length - buffer.remaining();
 	}
 
 }

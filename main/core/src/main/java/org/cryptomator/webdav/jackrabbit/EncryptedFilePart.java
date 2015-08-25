@@ -71,6 +71,7 @@ class EncryptedFilePart extends EncryptedFile {
 				final boolean authenticate = !cryptoWarningHandler.ignoreMac(getLocator().getResourcePath());
 				cryptor.decryptRange(c, outputContext.getOutputStream(), range.getLeft(), rangeLength, authenticate);
 			}
+			outputContext.getOutputStream().flush();
 		} catch (EOFException e) {
 			if (LOG.isDebugEnabled()) {
 				LOG.trace("Unexpected end of stream during delivery of partial content (client hung up).");
