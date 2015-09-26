@@ -16,12 +16,14 @@ import org.cryptomator.ui.model.Vault;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-@JsonPropertyOrder(value = {"directories"})
+@JsonPropertyOrder(value = {"directories", "checkForUpdatesEnabled"})
 public class Settings implements Serializable {
 
 	private static final long serialVersionUID = 7609959894417878744L;
 
 	private List<Vault> directories;
+
+	private Boolean checkForUpdatesEnabled;
 
 	/**
 	 * Package-private constructor; use {@link SettingsProvider}.
@@ -41,6 +43,15 @@ public class Settings implements Serializable {
 
 	public void setDirectories(List<Vault> directories) {
 		this.directories = directories;
+	}
+
+	public boolean isCheckForUpdatesEnabled() {
+		// not false meaning "null or true", so that true is the default value, if not setting exists yet.
+		return !Boolean.FALSE.equals(checkForUpdatesEnabled);
+	}
+
+	public void setCheckForUpdatesEnabled(boolean checkForUpdatesEnabled) {
+		this.checkForUpdatesEnabled = checkForUpdatesEnabled;
 	}
 
 }

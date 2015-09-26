@@ -26,6 +26,7 @@ import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.cookie.CookiePolicy;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.ui.settings.Settings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,9 +35,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Hyperlink;
+import javafx.scene.control.Label;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
@@ -49,15 +54,26 @@ public class WelcomeController extends AbstractFXMLViewController {
 	private ImageView botImageView;
 
 	@FXML
+	private CheckBox checkForUpdatesCheckbox;
+
+	@FXML
+	private Label checkForUpdatesStatus;
+
+	@FXML
+	private ProgressIndicator checkForUpdatesIndicator;
+
+	@FXML
 	private Hyperlink updateLink;
 
 	private final Application app;
+	private final Settings settings;
 	private final Comparator<String> semVerComparator;
 	private final ExecutorService executor;
 
 	@Inject
-	public WelcomeController(Application app, @Named("SemVer") Comparator<String> semVerComparator, ExecutorService executor) {
+	public WelcomeController(Application app, Settings settings, @Named("SemVer") Comparator<String> semVerComparator, ExecutorService executor) {
 		this.app = app;
+		this.settings = settings;
 		this.semVerComparator = semVerComparator;
 		this.executor = executor;
 	}
@@ -74,11 +90,32 @@ public class WelcomeController extends AbstractFXMLViewController {
 
 	@Override
 	public void initialize() {
-		this.botImageView.setImage(new Image(WelcomeController.class.getResource("/bot_welcome.png").toString()));
-		executor.execute(this::checkForUpdates);
+		botImageView.setImage(new Image(getClass().getResource("/bot_welcome.png").toString()));
+		checkForUpdatesCheckbox.setSelected(settings.isCheckForUpdatesEnabled());
+		checkForUpdatesCheckbox.selectedProperty().addListener(this::checkForUpdatesChanged);
+		if (settings.isCheckForUpdatesEnabled()) {
+			executor.execute(this::checkForUpdates);
+		}
+	}
+
+	// ****************************************
+	// Check for updates
+	// ****************************************
+
+	private void checkForUpdatesChanged(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+		assert newValue != null;
+		settings.setCheckForUpdatesEnabled(newValue);
+		if (newValue) {
+			executor.execute(this::checkForUpdates);
+		}
 	}
 
 	private void checkForUpdates() {
+		Platform.runLater(() -> {
+			checkForUpdatesCheckbox.setVisible(false);
+			checkForUpdatesStatus.setText(resourceBundle.getString("welcome.checkForUpdates.label.currentlyChecking"));
+			checkForUpdatesIndicator.setVisible(true);
+		});
 		final HttpClient client = new HttpClient();
 		final HttpMethod method = new GetMethod("https://cryptomator.org/downloads/latestVersion.json");
 		client.getParams().setCookiePolicy(CookiePolicy.IGNORE_COOKIES);
@@ -94,6 +131,12 @@ public class WelcomeController extends AbstractFXMLViewController {
 			}
 		} catch (IOException e) {
 			// no error handling required. Maybe next time the version check is successful.
+		} finally {
+			Platform.runLater(() -> {
+				checkForUpdatesCheckbox.setVisible(true);
+				checkForUpdatesStatus.setText(resourceBundle.getString("welcome.checkForUpdates.label.checkboxLabel"));
+				checkForUpdatesIndicator.setVisible(false);
+			});
 		}
 	}
 

@@ -299,7 +299,7 @@
 
 .check-box {
     -fx-label-padding: 0 0 0 3px;
-    -fx-text-fill: -fx-text-background-color;
+    -fx-text-fill: COLOR_TEXT;
 }
 .check-box > .box {
     -fx-padding: 3px;

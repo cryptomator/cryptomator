@@ -17,12 +17,24 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.ProgressIndicator?>
 
 <AnchorPane xmlns:fx="http://javafx.com/fxml">
 	
 	<children>
-		<Label AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="20.0" prefWidth="400.0" alignment="CENTER" style="-fx-font-size: 1.5em;" text="%welcome.welcomeLabel"/>
-		<Hyperlink AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="50.0" prefWidth="400.0" alignment="CENTER" fx:id="updateLink" onAction="#didClickUpdateLink" visible="false"/>
+		<VBox AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="20.0" prefWidth="400.0" alignment="CENTER" spacing="10.0">
+			<Label alignment="CENTER" style="-fx-font-size: 1.5em;" text="%welcome.welcomeLabel"/>
+			<HBox alignment="CENTER" spacing="5.0">
+				<CheckBox fx:id="checkForUpdatesCheckbox" />
+				<Label fx:id="checkForUpdatesStatus" text="%welcome.checkForUpdates.label.checkboxLabel"/>
+				<ProgressIndicator fx:id="checkForUpdatesIndicator" progress="-1" prefWidth="15.0" prefHeight="15.0" visible="false"/>
+			</HBox>
+			<Hyperlink alignment="CENTER" fx:id="updateLink" onAction="#didClickUpdateLink" visible="false" />
+		</VBox>
+		
 		
 		<ImageView fx:id="botImageView" AnchorPane.leftAnchor="100.0" AnchorPane.topAnchor="200.0" fitHeight="200.0" preserveRatio="true" smooth="false"/>
 		
