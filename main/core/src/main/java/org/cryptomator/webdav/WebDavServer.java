@@ -40,6 +40,7 @@ public final class WebDavServer {
 	private static final int MAX_THREADS = 200;
 	private static final int MIN_THREADS = 4;
 	private static final int THREAD_IDLE_SECONDS = 20;
+	private static final int CONNECTION_IDLE_MILLIS = 100; // idle connection slow down random access on WebDAVFS for some reason. reconnect overhead can be tolerated
 	private final Server server;
 	private final ServerConnector localConnector;
 	private final ContextHandlerCollection servletCollection;
@@ -50,11 +51,14 @@ public final class WebDavServer {
 		server = new Server(tp);
 		localConnector = new ServerConnector(server);
 		localConnector.setHost(LOCALHOST);
+		localConnector.setIdleTimeout(CONNECTION_IDLE_MILLIS);
 		servletCollection = new ContextHandlerCollection();
 
-		final ServletContextHandler servletContext = new ServletContextHandler(servletCollection, "/", ServletContextHandler.NO_SESSIONS);
-		final ServletHolder servlet = new ServletHolder(WindowsSucksServlet.class);
-		servletContext.addServlet(servlet, "/");
+		if (SystemUtils.IS_OS_WINDOWS) {
+			final ServletContextHandler servletContext = new ServletContextHandler(servletCollection, "/", ServletContextHandler.NO_SESSIONS);
+			final ServletHolder servlet = new ServletHolder(WindowsSucksServlet.class);
+			servletContext.addServlet(servlet, "/");
+		}
 
 		server.setConnectors(new Connector[] {localConnector});
 		server.setHandler(servletCollection);

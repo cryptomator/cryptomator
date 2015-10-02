@@ -18,8 +18,8 @@
 	<name>Cryptomator WebDAV and I/O module</name>
 
 	<properties>
-		<jetty.version>9.3.1.v20150714</jetty.version>
-		<jackrabbit.version>2.10.1</jackrabbit.version>
+		<jetty.version>9.3.3.v20150827</jetty.version>
+		<jackrabbit.version>2.11.0</jackrabbit.version>
 	</properties>
 
 	<dependencies>
