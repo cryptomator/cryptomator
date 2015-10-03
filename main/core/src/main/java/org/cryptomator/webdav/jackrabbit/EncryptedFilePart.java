@@ -53,7 +53,7 @@ class EncryptedFilePart extends EncryptedFile {
 		assert Files.isRegularFile(filePath);
 		assert contentLength != null;
 
-		final Long rangeLength = range.getRight() - range.getLeft();
+		final Long rangeLength = range.getRight() - range.getLeft() + 1;
 		outputContext.setModificationTime(Files.getLastModifiedTime(filePath).toMillis());
 		if (rangeLength <= 0 || range.getLeft() > contentLength - 1) {
 			// unsatisfiable content range:

@@ -549,7 +549,7 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 		final Long fileSize = sensitiveHeaderContentBuf.getLong();
 		sensitiveHeaderContentBuf.get(fileKeyBytes);
 
-		assert pos + length < fileSize;
+		assert pos + length - 1 < fileSize;
 
 		// find first relevant block:
 		final long startBlock = pos / CONTENT_MAC_BLOCK; // floor
