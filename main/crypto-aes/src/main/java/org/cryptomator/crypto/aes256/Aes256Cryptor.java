@@ -37,7 +37,6 @@ import javax.crypto.spec.SecretKeySpec;
 import javax.security.auth.DestroyFailedException;
 import javax.security.auth.Destroyable;
 
-import org.apache.commons.io.IOUtils;
 import org.bouncycastle.crypto.generators.SCrypt;
 import org.cryptomator.crypto.Cryptor;
 import org.cryptomator.crypto.exceptions.DecryptFailedException;
@@ -46,7 +45,6 @@ import org.cryptomator.crypto.exceptions.MacAuthenticationFailedException;
 import org.cryptomator.crypto.exceptions.UnsupportedKeyLengthException;
 import org.cryptomator.crypto.exceptions.UnsupportedVaultException;
 import org.cryptomator.crypto.exceptions.WrongPasswordException;
-import org.cryptomator.crypto.io.SeekableByteChannelInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -548,8 +546,10 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 		final byte[] fileKeyBytes = new byte[32];
 		final byte[] decryptedSensitiveHeaderContentBytes = decryptHeaderData(encryptedSensitiveHeaderContentBytes, iv);
 		final ByteBuffer sensitiveHeaderContentBuf = ByteBuffer.wrap(decryptedSensitiveHeaderContentBytes);
-		sensitiveHeaderContentBuf.position(Long.BYTES); // skip file size
+		final Long fileSize = sensitiveHeaderContentBuf.getLong();
 		sensitiveHeaderContentBuf.get(fileKeyBytes);
+
+		assert pos + length < fileSize;
 
 		// find first relevant block:
 		final long startBlock = pos / CONTENT_MAC_BLOCK; // floor
@@ -571,40 +571,51 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 		try {
 			// reading ciphered input and MACs interleaved:
 			long bytesWritten = 0;
-			final InputStream in = new SeekableByteChannelInputStream(encryptedFile);
-			byte[] buffer = new byte[CONTENT_MAC_BLOCK + 32];
+			final ByteBuffer buf = ByteBuffer.allocate(CONTENT_MAC_BLOCK + 32);
 			int n = 0;
 			long blockNum = startBlock;
-			while ((n = IOUtils.read(in, buffer)) > 0 && bytesWritten < length) {
+			while ((n = readFromChannel(encryptedFile, buf)) > 0 && bytesWritten < length) {
 				if (n < 32) {
 					throw new DecryptFailedException("Invalid file content, missing MAC.");
 				}
 
+				buf.flip();
+				final ByteBuffer ciphertextBuf = buf.asReadOnlyBuffer();
+				ciphertextBuf.limit(n - 32);
+
 				// check MAC of current block:
 				if (authenticate) {
+					final byte[] storedMac = new byte[contentMac.getMacLength()];
+					final ByteBuffer storedMacBuf = buf.asReadOnlyBuffer();
+					storedMacBuf.position(n - 32);
+					storedMacBuf.get(storedMac);
 					contentMac.update(iv);
 					contentMac.update(longToByteArray(blockNum));
-					contentMac.update(buffer, 0, n - 32);
+					contentMac.update(ciphertextBuf);
+					ciphertextBuf.rewind();
 					final byte[] calculatedMac = contentMac.doFinal();
-					final byte[] storedMac = new byte[32];
-					System.arraycopy(buffer, n - 32, storedMac, 0, 32);
 					if (!MessageDigest.isEqual(calculatedMac, storedMac)) {
 						throw new MacAuthenticationFailedException("Content MAC authentication failed.");
 					}
 				}
 
 				// decrypt block:
-				final byte[] plaintext = cipher.update(buffer, 0, n - 32);
+				final ByteBuffer plaintextBuf = ByteBuffer.allocate(cipher.getOutputSize(ciphertextBuf.remaining()));
+				cipher.update(ciphertextBuf, plaintextBuf);
+				plaintextBuf.flip();
 				final int offset = (bytesWritten == 0) ? (int) offsetFromFirstBlock : 0;
 				final long pending = length - bytesWritten;
-				final int available = plaintext.length - offset;
+				final int available = plaintextBuf.remaining() - offset;
 				final int currentBatch = (int) Math.min(pending, available);
 
-				plaintextFile.write(plaintext, offset, currentBatch);
+				plaintextFile.write(plaintextBuf.array(), offset, currentBatch);
 				bytesWritten += currentBatch;
 				blockNum++;
+				buf.rewind();
 			}
 			return bytesWritten;
+		} catch (ShortBufferException e) {
+			throw new IllegalStateException("Output buffer size known to fit.", e);
 		} finally {
 			destroyQuietly(fileKey);
 		}

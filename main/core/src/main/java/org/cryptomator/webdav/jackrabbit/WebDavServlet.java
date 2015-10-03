@@ -95,7 +95,7 @@ public class WebDavServlet extends AbstractWebdavServlet {
 		super.doPut(request, response, resource);
 		if (LOG.isDebugEnabled()) {
 			long t1 = System.nanoTime();
-			LOG.debug("PUT TIME: " + (t1 - t0) / 1000 / 1000.0 + " ms");
+			LOG.trace("PUT TIME: " + (t1 - t0) / 1000 / 1000.0 + " ms");
 		}
 	}
 
@@ -111,7 +111,7 @@ public class WebDavServlet extends AbstractWebdavServlet {
 		}
 		if (LOG.isDebugEnabled()) {
 			long t1 = System.nanoTime();
-			LOG.debug("GET TIME: " + (t1 - t0) / 1000 / 1000.0 + " ms");
+			LOG.trace("GET TIME: " + (t1 - t0) / 1000 / 1000.0 + " ms");
 		}
 	}
 

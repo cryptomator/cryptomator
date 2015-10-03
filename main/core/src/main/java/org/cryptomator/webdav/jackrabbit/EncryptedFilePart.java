@@ -41,7 +41,7 @@ class EncryptedFilePart extends EncryptedFile {
 			} else if (upper == null) {
 				range = new ImmutablePair<Long, Long>(lower, contentLength - 1);
 			} else {
-				range = new ImmutablePair<Long, Long>(lower, upper);
+				range = new ImmutablePair<Long, Long>(lower, Math.min(upper, contentLength - 1));
 			}
 		} catch (NumberFormatException e) {
 			throw new IllegalArgumentException("Invalid byte range: " + requestRange, e);
@@ -51,27 +51,31 @@ class EncryptedFilePart extends EncryptedFile {
 	@Override
 	public void spool(OutputContext outputContext) throws IOException {
 		assert Files.isRegularFile(filePath);
-		assert this.contentLength != null;
+		assert contentLength != null;
 
-		final Long rangeLength = range.getRight() - range.getLeft() + 1;
+		final Long rangeLength = range.getRight() - range.getLeft();
 		outputContext.setModificationTime(Files.getLastModifiedTime(filePath).toMillis());
-		if (rangeLength <= 0) {
+		if (rangeLength <= 0 || range.getLeft() > contentLength - 1) {
 			// unsatisfiable content range:
 			outputContext.setContentLength(0);
-			outputContext.setProperty(HttpHeader.CONTENT_RANGE.asString(), getContentRangeHeader(range.getRight(), range.getRight(), contentLength));
-			LOG.debug("Unsatisfiable content range: " + getContentRangeHeader(range.getLeft(), range.getRight(), contentLength));
+			outputContext.setProperty(HttpHeader.CONTENT_RANGE.asString(), "bytes */" + contentLength);
+			LOG.debug("Requested content range unsatisfiable: " + getContentRangeHeader(range.getLeft(), range.getRight(), contentLength));
 			return;
 		} else {
 			outputContext.setContentLength(rangeLength);
 			outputContext.setProperty(HttpHeader.CONTENT_RANGE.asString(), getContentRangeHeader(range.getLeft(), range.getRight(), contentLength));
 		}
 
+		assert range.getLeft() > 0;
+		assert range.getLeft() < contentLength;
+		assert range.getRight() < contentLength;
+
 		try (final FileChannel c = FileChannel.open(filePath, StandardOpenOption.READ)) {
 			if (outputContext.hasStream()) {
 				final boolean authenticate = !cryptoWarningHandler.ignoreMac(getLocator().getResourcePath());
 				cryptor.decryptRange(c, outputContext.getOutputStream(), range.getLeft(), rangeLength, authenticate);
+				outputContext.getOutputStream().flush();
 			}
-			outputContext.getOutputStream().flush();
 		} catch (EOFException e) {
 			if (LOG.isDebugEnabled()) {
 				LOG.trace("Unexpected end of stream during delivery of partial content (client hung up).");

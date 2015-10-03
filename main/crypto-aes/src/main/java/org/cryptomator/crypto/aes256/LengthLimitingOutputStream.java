@@ -19,7 +19,7 @@ public class LengthLimitingOutputStream extends FilterOutputStream {
 	public void write(int b) throws IOException {
 		if (bytesWritten < limit) {
 			out.write(b);
-			bytesWritten++;
+			increaseNumberOfWrittenBytes(1);
 		}
 	}
 
@@ -29,12 +29,19 @@ public class LengthLimitingOutputStream extends FilterOutputStream {
 		final int adjustedLen = (int) Math.min(len, bytesAvailable);
 		if (adjustedLen > 0) {
 			out.write(b, off, adjustedLen);
-			bytesWritten += adjustedLen;
+			increaseNumberOfWrittenBytes(adjustedLen);
 		}
 	}
 
 	public long getBytesWritten() {
 		return bytesWritten;
+	}
+
+	private void increaseNumberOfWrittenBytes(int amount) throws IOException {
+		bytesWritten += amount;
+		if (bytesWritten >= limit) {
+			out.flush();
+		}
 	}
 
 }

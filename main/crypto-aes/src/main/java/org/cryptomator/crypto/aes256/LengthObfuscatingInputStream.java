@@ -110,18 +110,6 @@ public class LengthObfuscatingInputStream extends FilterInputStream {
 	}
 
 	@Override
-	public int available() throws IOException {
-		final int inputAvailable = in.available();
-		if (inputAvailable > 0) {
-			return inputAvailable;
-		} else {
-			// remaining padding
-			choosePaddingLengthOnce();
-			return paddingLength - paddingBytesRead;
-		}
-	}
-
-	@Override
 	public boolean markSupported() {
 		return false;
 	}

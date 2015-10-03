@@ -39,7 +39,7 @@ class SilentlyFailingFileLock implements AutoCloseable {
 			lock = channel.tryLock(position, size, shared);
 		} catch (IOException | OverlappingFileLockException e) {
 			if (LOG.isDebugEnabled()) {
-				LOG.warn("Unable to lock file.");
+				LOG.trace("Unable to lock file.");
 			}
 		} finally {
 			this.lock = lock;
