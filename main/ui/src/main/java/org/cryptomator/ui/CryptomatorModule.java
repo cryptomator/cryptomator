@@ -64,6 +64,7 @@ class CryptomatorModule {
 	}
 
 	@Provides
+	@Singleton
 	Settings provideSettings(SettingsProvider settingsProvider) {
 		return settingsProvider.get();
 	}
