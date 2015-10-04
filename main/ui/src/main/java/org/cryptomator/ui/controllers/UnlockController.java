@@ -42,6 +42,7 @@ import javafx.scene.control.Hyperlink;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.GridPane;
 import javafx.scene.text.Text;
 
 public class UnlockController extends AbstractFXMLViewController {
@@ -58,6 +59,9 @@ public class UnlockController extends AbstractFXMLViewController {
 	private TextField mountName;
 
 	@FXML
+	private Button advancedOptionsButton;
+
+	@FXML
 	private Button unlockButton;
 
 	@FXML
@@ -68,6 +72,9 @@ public class UnlockController extends AbstractFXMLViewController {
 
 	@FXML
 	private Hyperlink downloadsPageLink;
+
+	@FXML
+	private GridPane advancedOptions;
 
 	private final ExecutorService exec;
 	private final Application app;
@@ -93,6 +100,17 @@ public class UnlockController extends AbstractFXMLViewController {
 		passwordField.textProperty().addListener(this::passwordFieldsDidChange);
 		mountName.addEventFilter(KeyEvent.KEY_TYPED, this::filterAlphanumericKeyEvents);
 		mountName.textProperty().addListener(this::mountNameDidChange);
+		advancedOptions.managedProperty().bind(advancedOptions.visibleProperty());
+	}
+
+	private void resetView() {
+		unlockButton.setDisable(true);
+		advancedOptions.setVisible(false);
+		advancedOptionsButton.setText(resourceBundle.getString("unlock.button.advancedOptions.show"));
+		progressIndicator.setVisible(false);
+		passwordField.clear();
+		downloadsPageLink.setVisible(false);
+		messageText.setText(null);
 	}
 
 	// ****************************************
@@ -111,6 +129,20 @@ public class UnlockController extends AbstractFXMLViewController {
 	@FXML
 	public void didClickDownloadsLink(ActionEvent event) {
 		app.getHostServices().showDocument("https://cryptomator.org/downloads/");
+	}
+
+	// ****************************************
+	// Advanced options button
+	// ****************************************
+
+	@FXML
+	private void didClickAdvancedOptionsButton(ActionEvent event) {
+		advancedOptions.setVisible(!advancedOptions.isVisible());
+		if (advancedOptions.isVisible()) {
+			advancedOptionsButton.setText(resourceBundle.getString("unlock.button.advancedOptions.hide"));
+		} else {
+			advancedOptionsButton.setText(resourceBundle.getString("unlock.button.advancedOptions.show"));
+		}
 	}
 
 	// ****************************************
@@ -138,23 +170,14 @@ public class UnlockController extends AbstractFXMLViewController {
 			final Future<Boolean> futureMount = exec.submit(() -> (boolean) vault.mount());
 			FXThreads.runOnMainThreadWhenFinished(exec, futureMount, this::unlockAndMountFinished);
 		} catch (IOException ex) {
-			setControlsDisabled(false);
-			progressIndicator.setVisible(false);
 			messageText.setText(resourceBundle.getString("unlock.errorMessage.decryptionFailed"));
 			LOG.error("Decryption failed for technical reasons.", ex);
 		} catch (WrongPasswordException e) {
-			setControlsDisabled(false);
-			progressIndicator.setVisible(false);
 			messageText.setText(resourceBundle.getString("unlock.errorMessage.wrongPassword"));
-			Platform.runLater(passwordField::requestFocus);
 		} catch (UnsupportedKeyLengthException ex) {
-			setControlsDisabled(false);
-			progressIndicator.setVisible(false);
 			messageText.setText(resourceBundle.getString("unlock.errorMessage.unsupportedKeyLengthInstallJCE"));
 			LOG.warn("Unsupported Key-Length. Please install Oracle Java Cryptography Extension (JCE).", ex);
 		} catch (UnsupportedVaultException e) {
-			setControlsDisabled(false);
-			progressIndicator.setVisible(false);
 			downloadsPageLink.setVisible(true);
 			if (e.isVaultOlderThanSoftware()) {
 				messageText.setText(resourceBundle.getString("unlock.errorMessage.unsupportedVersion.vaultOlderThanSoftware") + " ");
@@ -162,11 +185,12 @@ public class UnlockController extends AbstractFXMLViewController {
 				messageText.setText(resourceBundle.getString("unlock.errorMessage.unsupportedVersion.softwareOlderThanVault") + " ");
 			}
 		} catch (DestroyFailedException e) {
-			setControlsDisabled(false);
-			progressIndicator.setVisible(false);
 			LOG.error("Destruction of cryptor threw an exception.", e);
 		} finally {
+			setControlsDisabled(false);
+			progressIndicator.setVisible(false);
 			passwordField.swipe();
+			Platform.runLater(passwordField::requestFocus);
 		}
 	}
 
@@ -174,6 +198,7 @@ public class UnlockController extends AbstractFXMLViewController {
 		passwordField.setDisable(disable);
 		mountName.setDisable(disable);
 		unlockButton.setDisable(disable);
+		advancedOptionsButton.setDisable(disable);
 	}
 
 	private void unlockAndMountFinished(boolean mountSuccess) {
@@ -214,9 +239,9 @@ public class UnlockController extends AbstractFXMLViewController {
 	}
 
 	public void setVault(Vault vault) {
+		this.resetView();
 		this.vault = vault;
 		this.mountName.setText(vault.getMountName());
-		this.passwordField.clear();
 	}
 
 	public UnlockListener getListener() {

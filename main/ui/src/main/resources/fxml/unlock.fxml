@@ -21,6 +21,8 @@
 <?import javafx.scene.text.TextFlow?>
 <?import javafx.scene.control.Hyperlink?>
 <?import javafx.scene.text.Text?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.Separator?>
 
 <GridPane vgap="12.0" hgap="12.0" prefWidth="400.0" xmlns:fx="http://javafx.com/fxml">
 	<padding>
@@ -36,24 +38,52 @@
 		<!-- Row 0 -->
 		<Label text="%unlock.label.password" GridPane.rowIndex="0" GridPane.columnIndex="0" />
 		<SecPasswordField fx:id="passwordField" GridPane.rowIndex="0" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" maxWidth="Infinity" />
-		
+
 		<!-- Row 1 -->
-		<Label text="%unlock.label.mountName" GridPane.rowIndex="1" GridPane.columnIndex="0" />
-		<TextField fx:id="mountName" GridPane.rowIndex="1" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" maxWidth="Infinity" />
+		<HBox GridPane.rowIndex="2" GridPane.columnIndex="0" GridPane.columnSpan="2" spacing="12.0" alignment="CENTER_RIGHT">
+			<Button fx:id="advancedOptionsButton" text="%unlock.button.advancedOptions.show" prefWidth="150.0" onAction="#didClickAdvancedOptionsButton"/>
+			<Button fx:id="unlockButton" text="%unlock.button.unlock" defaultButton="true" prefWidth="150.0" onAction="#didClickUnlockButton" disable="true"/>
+		</HBox>
 		
-		<!-- Row 2 -->
-		<Button fx:id="unlockButton" text="%unlock.button.unlock" defaultButton="true" GridPane.rowIndex="2" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.halignment="RIGHT" prefWidth="150.0" onAction="#didClickUnlockButton" disable="true"/>
-		
-		<!-- Row 3-->
-		<ProgressIndicator progress="-1" fx:id="progressIndicator" GridPane.rowIndex="3" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.halignment="CENTER" visible="false"/>
+		<!-- Row 3 -->
+		<GridPane fx:id="advancedOptions" vgap="12.0" hgap="12.0" prefWidth="400.0" GridPane.rowIndex="3" GridPane.columnIndex="0" GridPane.columnSpan="2" visible="false">
+			<padding>
+				<Insets top="24.0" />
+			</padding>
+			
+			<columnConstraints>
+				<ColumnConstraints percentWidth="38.2"/>
+				<ColumnConstraints percentWidth="61.8"/>
+			</columnConstraints>
+			
+			<!-- Row 3.0 -->
+			<Separator GridPane.rowIndex="0" GridPane.columnIndex="0" GridPane.columnSpan="2" />
+			<HBox alignment="CENTER" prefWidth="400.0" GridPane.rowIndex="0" GridPane.columnIndex="0" GridPane.columnSpan="2">
+				<Label text="%unlock.label.advancedHeading" style="-fx-background-color: COLOR_BACKGROUND;">
+					<padding>
+						<Insets left="6.0" right="6.0"/>
+					</padding>
+				</Label>
+			</HBox>
+			
+			<!-- Row 3.1 -->
+			<Label text="%unlock.label.mountName" GridPane.rowIndex="1" GridPane.columnIndex="0" />
+			<TextField fx:id="mountName" GridPane.rowIndex="1" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" maxWidth="Infinity" />
+		</GridPane>
 		
 		<!-- Row 4 -->
-		<TextFlow GridPane.rowIndex="4" GridPane.columnIndex="0" GridPane.columnSpan="2" >
+		<TextFlow GridPane.rowIndex="4" GridPane.columnIndex="0" GridPane.columnSpan="2">
+			<GridPane.margin>
+				<Insets top="24.0"/>
+			</GridPane.margin>
 			<children>
-				<Text fx:id="messageText" />
+				<Text fx:id="messageText" text="asd"/>
 				<Hyperlink fx:id="downloadsPageLink" text="%unlock.label.downloadsPageLink" visible="false" onAction="#didClickDownloadsLink" />
 			</children>
 		</TextFlow>
+		
+		<!-- Row 5-->
+		<ProgressIndicator progress="-1" fx:id="progressIndicator" GridPane.rowIndex="5" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.halignment="CENTER" />
 	</children>
 </GridPane>
 

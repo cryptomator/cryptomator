@@ -36,7 +36,7 @@
 		
 		<!-- Row 1 -->
 		<Label fx:id="messageLabel" GridPane.rowIndex="1" GridPane.columnIndex="0" />
-		<Button text="%unlocked.button.lock" defaultButton="true" GridPane.rowIndex="1" GridPane.columnIndex="1" GridPane.halignment="RIGHT" prefWidth="150.0" onAction="#didClickCloseVault" focusTraversable="false"/>
+		<Button text="%unlocked.button.lock" GridPane.rowIndex="1" GridPane.columnIndex="1" GridPane.halignment="RIGHT" prefWidth="150.0" onAction="#didClickCloseVault" focusTraversable="false"/>
 	</children>
 </GridPane>
 

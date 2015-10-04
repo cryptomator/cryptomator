@@ -281,6 +281,22 @@
     -fx-font-size: 0.9em;
 }
 
+/****************************************************************************
+ *																			*
+ * Separator																*
+ *																			*
+ ****************************************************************************/
+
+.separator .line {
+    -fx-border-style: solid;
+    -fx-border-width: 1px;
+    -fx-background-color: null;
+}
+
+.separator:horizontal .line {
+    -fx-border-color: COLOR_BORDER transparent transparent transparent;
+}
+
 /*******************************************************************************
  *                                                                             *
  * CheckBox                                                                    *
