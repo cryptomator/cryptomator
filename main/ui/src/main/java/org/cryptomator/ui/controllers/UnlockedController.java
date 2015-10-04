@@ -77,6 +77,16 @@ public class UnlockedController extends AbstractFXMLViewController {
 	}
 
 	@FXML
+	private void didClickRevealVault(ActionEvent event) {
+		try {
+			vault.reveal();
+		} catch (CommandFailedException e) {
+			messageLabel.setText(resourceBundle.getString("unlocked.label.revealFailed"));
+			return;
+		}
+	}
+
+	@FXML
 	private void didClickCloseVault(ActionEvent event) {
 		try {
 			vault.unmount();

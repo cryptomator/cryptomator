@@ -35,6 +35,11 @@ final class FallbackWebDavMounter implements WebDavMounterStrategy {
 			public void unmount() {
 				displayUnmountInstructions();
 			}
+
+			@Override
+			public void reveal() throws CommandFailedException {
+				displayRevealInstructions();
+			}
 		};
 	}
 
@@ -45,6 +50,10 @@ final class FallbackWebDavMounter implements WebDavMounterStrategy {
 
 	private void displayUnmountInstructions() {
 		// TODO display message to user pointing to cryptomator.org/mounting#unmount which describes what to do
+	}
+
+	private void displayRevealInstructions() {
+		// TODO display message to user pointing to cryptomator.org/mounting#reveal which describes what to do
 	}
 
 }

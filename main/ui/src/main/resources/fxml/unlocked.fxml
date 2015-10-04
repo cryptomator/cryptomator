@@ -16,6 +16,7 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.HBox?>
 
 <GridPane vgap="12.0" hgap="12.0" prefWidth="400.0" xmlns:fx="http://javafx.com/fxml">
 	<padding>
@@ -36,7 +37,11 @@
 		
 		<!-- Row 1 -->
 		<Label fx:id="messageLabel" GridPane.rowIndex="1" GridPane.columnIndex="0" />
-		<Button text="%unlocked.button.lock" GridPane.rowIndex="1" GridPane.columnIndex="1" GridPane.halignment="RIGHT" prefWidth="150.0" onAction="#didClickCloseVault" focusTraversable="false"/>
+		<HBox GridPane.rowIndex="1" GridPane.columnIndex="1" spacing="6.0" alignment="CENTER_RIGHT">
+			<Button text="%unlocked.button.reveal" prefWidth="100.0" onAction="#didClickRevealVault" focusTraversable="false"/>
+			<Button text="%unlocked.button.lock" prefWidth="100.0" onAction="#didClickCloseVault" focusTraversable="false"/>
+		</HBox>
+		
 	</children>
 </GridPane>
 

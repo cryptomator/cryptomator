@@ -61,7 +61,6 @@ final class WindowsWebDavMounter implements WebDavMounterStrategy {
 
 		final String driveLetter = getDriveLetter(mountResult.getStdOut());
 		final Script openExplorerScript = fromLines("start explorer.exe " + driveLetter);
-		openExplorerScript.execute();
 		final Script unmountScript = fromLines("net use " + driveLetter + " /delete").addEnv("DRIVE_LETTER", driveLetter);
 		return new AbstractWebDavMount() {
 			@Override
@@ -70,6 +69,11 @@ final class WindowsWebDavMounter implements WebDavMounterStrategy {
 				if (isVolumeMounted(driveLetter)) {
 					unmountScript.execute();
 				}
+			}
+
+			@Override
+			public void reveal() throws CommandFailedException {
+				openExplorerScript.execute();
 			}
 		};
 	}

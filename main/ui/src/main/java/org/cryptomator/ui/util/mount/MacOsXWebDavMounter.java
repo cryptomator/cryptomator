@@ -35,12 +35,14 @@ final class MacOsXWebDavMounter implements WebDavMounterStrategy {
 		final String path = "/Volumes/Cryptomator_" + UUID.randomUUID().toString();
 		final Script mountScript = Script.fromLines(
 				"mkdir \"$MOUNT_PATH\"",
-				"mount_webdav -S -v $MOUNT_NAME \"$DAV_AUTHORITY$DAV_PATH\" \"$MOUNT_PATH\"",
-				"open \"$MOUNT_PATH\"")
+				"mount_webdav -S -v $MOUNT_NAME \"$DAV_AUTHORITY$DAV_PATH\" \"$MOUNT_PATH\"")
 				.addEnv("DAV_AUTHORITY", uri.getRawAuthority())
 				.addEnv("DAV_PATH", uri.getRawPath())
 				.addEnv("MOUNT_PATH", path)
 				.addEnv("MOUNT_NAME", name);
+		final Script revealScript = Script.fromLines(
+				"open \"$MOUNT_PATH\"")
+				.addEnv("MOUNT_PATH", path);
 		final Script unmountScript = Script.fromLines(
 				"diskutil umount $MOUNT_PATH")
 				.addEnv("MOUNT_PATH", path);
@@ -52,6 +54,11 @@ final class MacOsXWebDavMounter implements WebDavMounterStrategy {
 				if (Files.exists(FileSystems.getDefault().getPath(path))) {
 					unmountScript.execute();
 				}
+			}
+
+			@Override
+			public void reveal() throws CommandFailedException {
+				revealScript.execute();
 			}
 		};
 	}

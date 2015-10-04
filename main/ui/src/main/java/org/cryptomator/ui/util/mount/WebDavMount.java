@@ -22,4 +22,11 @@ public interface WebDavMount extends AutoCloseable {
 	 */
 	void unmount() throws CommandFailedException;
 
+	/**
+	 * Reveals the mounted drive in the operating systems default file browser.
+	 * 
+	 * @throws CommandFailedException if the reveal operation fails
+	 */
+	void reveal() throws CommandFailedException;
+
 }

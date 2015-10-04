@@ -52,11 +52,6 @@ final class LinuxGvfsWebDavMounter implements WebDavMounterStrategy {
 				"gvfs-mount -u \"dav:$DAV_SSP\"")
 				.addEnv("DAV_SSP", uri.getRawSchemeSpecificPart());
 		mountScript.execute();
-		try{
-			openMountWithWebdavUri("dav:"+uri.getRawSchemeSpecificPart()).execute();
-		}catch(CommandFailedException exception){
-			openMountWithWebdavUri("webdav:"+uri.getRawSchemeSpecificPart()).execute();
-		}
 		return new AbstractWebDavMount() {
 			@Override
 			public void unmount() throws CommandFailedException {
@@ -70,6 +65,15 @@ final class LinuxGvfsWebDavMounter implements WebDavMounterStrategy {
 				// only attempt unmount if user didn't unmount manually:
 				if (mountStillExists) {
 					unmountScript.execute();
+				}
+			}
+
+			@Override
+			public void reveal() throws CommandFailedException {
+				try {
+					openMountWithWebdavUri("dav:"+uri.getRawSchemeSpecificPart()).execute();
+				} catch (CommandFailedException exception) {
+					openMountWithWebdavUri("webdav:"+uri.getRawSchemeSpecificPart()).execute();
 				}
 			}
 		};

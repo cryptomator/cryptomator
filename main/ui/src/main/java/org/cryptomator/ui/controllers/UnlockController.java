@@ -29,6 +29,7 @@ import org.cryptomator.crypto.exceptions.WrongPasswordException;
 import org.cryptomator.ui.controls.SecPasswordField;
 import org.cryptomator.ui.model.Vault;
 import org.cryptomator.ui.util.FXThreads;
+import org.cryptomator.ui.util.mount.CommandFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -170,14 +171,23 @@ public class UnlockController extends AbstractFXMLViewController {
 			final Future<Boolean> futureMount = exec.submit(() -> (boolean) vault.mount());
 			FXThreads.runOnMainThreadWhenFinished(exec, futureMount, this::unlockAndMountFinished);
 		} catch (IOException ex) {
+			setControlsDisabled(false);
+			progressIndicator.setVisible(false);
 			messageText.setText(resourceBundle.getString("unlock.errorMessage.decryptionFailed"));
 			LOG.error("Decryption failed for technical reasons.", ex);
 		} catch (WrongPasswordException e) {
+			setControlsDisabled(false);
+			progressIndicator.setVisible(false);
 			messageText.setText(resourceBundle.getString("unlock.errorMessage.wrongPassword"));
+			Platform.runLater(passwordField::requestFocus);
 		} catch (UnsupportedKeyLengthException ex) {
+			setControlsDisabled(false);
+			progressIndicator.setVisible(false);
 			messageText.setText(resourceBundle.getString("unlock.errorMessage.unsupportedKeyLengthInstallJCE"));
 			LOG.warn("Unsupported Key-Length. Please install Oracle Java Cryptography Extension (JCE).", ex);
 		} catch (UnsupportedVaultException e) {
+			setControlsDisabled(false);
+			progressIndicator.setVisible(false);
 			downloadsPageLink.setVisible(true);
 			if (e.isVaultOlderThanSoftware()) {
 				messageText.setText(resourceBundle.getString("unlock.errorMessage.unsupportedVersion.vaultOlderThanSoftware") + " ");
@@ -185,12 +195,11 @@ public class UnlockController extends AbstractFXMLViewController {
 				messageText.setText(resourceBundle.getString("unlock.errorMessage.unsupportedVersion.softwareOlderThanVault") + " ");
 			}
 		} catch (DestroyFailedException e) {
-			LOG.error("Destruction of cryptor threw an exception.", e);
-		} finally {
 			setControlsDisabled(false);
 			progressIndicator.setVisible(false);
+			LOG.error("Destruction of cryptor threw an exception.", e);
+		} finally {
 			passwordField.swipe();
-			Platform.runLater(passwordField::requestFocus);
 		}
 	}
 
@@ -207,6 +216,12 @@ public class UnlockController extends AbstractFXMLViewController {
 		if (vault.isUnlocked() && !mountSuccess) {
 			vault.stopServer();
 			vault.setUnlocked(false);
+		} else if (vault.isUnlocked() && mountSuccess) {
+			try {
+				vault.reveal();
+			} catch (CommandFailedException e) {
+				LOG.error("Failed to reveal mounted vault", e);
+			}
 		}
 		if (mountSuccess && listener != null) {
 			listener.didUnlock(this);

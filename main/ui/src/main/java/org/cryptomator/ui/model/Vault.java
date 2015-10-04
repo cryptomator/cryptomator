@@ -10,11 +10,6 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-
 import javax.security.auth.DestroyFailedException;
 
 import org.apache.commons.lang3.StringUtils;
@@ -29,6 +24,11 @@ import org.cryptomator.webdav.WebDavServer;
 import org.cryptomator.webdav.WebDavServer.ServletLifeCycleAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 public class Vault implements Serializable {
 
@@ -120,6 +120,13 @@ public class Vault implements Serializable {
 		} catch (CommandFailedException e) {
 			LOG.warn("mount failed", e);
 			return false;
+		}
+	}
+
+	public void reveal() throws CommandFailedException {
+		final WebDavMount mnt = webDavMount.get().orElse(null);
+		if (mnt != null) {
+			mnt.reveal();
 		}
 	}
 
