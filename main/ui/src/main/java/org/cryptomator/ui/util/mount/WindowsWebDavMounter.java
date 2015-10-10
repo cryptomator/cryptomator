@@ -18,6 +18,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.ui.util.command.CommandResult;
 import org.cryptomator.ui.util.command.Script;
@@ -27,10 +30,17 @@ import org.cryptomator.ui.util.command.Script;
  * <p>
  * Tested on Windows 7 but should also work on Windows 8.
  */
-final class WindowsWebDavMounter implements WebDavMounterStrategy {
+@Singleton
+public final class WindowsWebDavMounter implements WebDavMounterStrategy {
 
 	private static final Pattern WIN_MOUNT_DRIVELETTER_PATTERN = Pattern.compile("\\s*([A-Z]:)\\s*");
 	private static final int MAX_MOUNT_ATTEMPTS = 8;
+	private final WindowsDriveLetters driveLetters;
+	
+	@Inject
+	WindowsWebDavMounter(WindowsDriveLetters driveLetters) {
+		this.driveLetters = driveLetters;
+	}
 
 	@Override
 	public boolean shouldWork() {

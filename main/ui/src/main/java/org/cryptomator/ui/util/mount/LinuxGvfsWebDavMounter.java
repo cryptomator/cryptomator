@@ -12,10 +12,19 @@ package org.cryptomator.ui.util.mount;
 
 import java.net.URI;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.ui.util.command.Script;
 
+@Singleton
 final class LinuxGvfsWebDavMounter implements WebDavMounterStrategy {
+	
+	@Inject
+	LinuxGvfsWebDavMounter() {
+		
+	}
 
 	@Override
 	public boolean shouldWork() {

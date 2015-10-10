@@ -14,10 +14,19 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.util.UUID;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.ui.util.command.Script;
 
+@Singleton
 final class MacOsXWebDavMounter implements WebDavMounterStrategy {
+	
+	@Inject
+	MacOsXWebDavMounter() {
+		
+	}
 
 	@Override
 	public boolean shouldWork() {

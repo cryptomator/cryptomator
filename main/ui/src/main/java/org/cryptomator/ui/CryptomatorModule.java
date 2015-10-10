@@ -77,8 +77,8 @@ class CryptomatorModule {
 
 	@Provides
 	@Singleton
-	WebDavMounter provideWebDavMounterProvider(WebDavServer server, ExecutorService executorService) {
-		return new WebDavMounterProvider(server, executorService).get();
+	WebDavMounter provideWebDavMounterProvider(WebDavMounterProvider webDavMounterProvider) {
+		return webDavMounterProvider.get();
 	}
 
 	@Provides
