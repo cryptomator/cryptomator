@@ -8,6 +8,8 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 
+import org.apache.commons.lang3.CharUtils;
+
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -45,7 +47,11 @@ public class VaultObjectMapperProvider implements Provider<ObjectMapper> {
 		public void serialize(Vault value, JsonGenerator jgen, SerializerProvider provider) throws IOException, JsonProcessingException {
 			jgen.writeStartObject();
 			jgen.writeStringField("path", value.getPath().toString());
-			jgen.writeStringField("mountName", value.getMountName().toString());
+			jgen.writeStringField("mountName", value.getMountName());
+			final Character winDriveLetter = value.getWinDriveLetter();
+			if (winDriveLetter != null) {
+				jgen.writeStringField("winDriveLetter", Character.toString(winDriveLetter));
+			}
 			jgen.writeEndObject();
 		}
 
@@ -61,6 +67,9 @@ public class VaultObjectMapperProvider implements Provider<ObjectMapper> {
 			final Vault vault = vaultFactoy.createVault(path);
 			if (node.has("mountName")) {
 				vault.setMountName(node.get("mountName").asText());
+			}
+			if (node.has("winDriveLetter")) {
+				vault.setWinDriveLetter(CharUtils.toCharacterObject(node.get("winDriveLetter").asText()));
 			}
 			return vault;
 		}

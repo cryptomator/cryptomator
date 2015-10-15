@@ -15,14 +15,32 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
+import java.util.Comparator;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Hyperlink;
+import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.TextField;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.GridPane;
+import javafx.scene.text.Text;
+import javafx.util.StringConverter;
 
 import javax.inject.Inject;
 import javax.security.auth.DestroyFailedException;
 
 import org.apache.commons.lang3.CharUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.crypto.exceptions.UnsupportedKeyLengthException;
 import org.cryptomator.crypto.exceptions.UnsupportedVaultException;
 import org.cryptomator.crypto.exceptions.WrongPasswordException;
@@ -30,21 +48,9 @@ import org.cryptomator.ui.controls.SecPasswordField;
 import org.cryptomator.ui.model.Vault;
 import org.cryptomator.ui.util.FXThreads;
 import org.cryptomator.ui.util.mount.CommandFailedException;
+import org.cryptomator.ui.util.mount.WindowsDriveLetters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.beans.value.ObservableValue;
-import javafx.event.ActionEvent;
-import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.Hyperlink;
-import javafx.scene.control.ProgressIndicator;
-import javafx.scene.control.TextField;
-import javafx.scene.input.KeyEvent;
-import javafx.scene.layout.GridPane;
-import javafx.scene.text.Text;
 
 public class UnlockController extends AbstractFXMLViewController {
 
@@ -58,6 +64,9 @@ public class UnlockController extends AbstractFXMLViewController {
 
 	@FXML
 	private TextField mountName;
+	
+	@FXML
+	private ChoiceBox<Character> winDriveLetter;
 
 	@FXML
 	private Button advancedOptionsButton;
@@ -79,11 +88,14 @@ public class UnlockController extends AbstractFXMLViewController {
 
 	private final ExecutorService exec;
 	private final Application app;
+	private final WindowsDriveLetters driveLetters;
+	private final ChangeListener<Character> driveLetterChangeListener = this::winDriveLetterDidChange;
 
 	@Inject
-	public UnlockController(Application app, ExecutorService exec) {
+	public UnlockController(Application app, ExecutorService exec, WindowsDriveLetters driveLetters) {
 		this.app = app;
 		this.exec = exec;
+		this.driveLetters = driveLetters;
 	}
 
 	@Override
@@ -99,17 +111,31 @@ public class UnlockController extends AbstractFXMLViewController {
 	@Override
 	public void initialize() {
 		passwordField.textProperty().addListener(this::passwordFieldsDidChange);
+		advancedOptions.managedProperty().bind(advancedOptions.visibleProperty());
 		mountName.addEventFilter(KeyEvent.KEY_TYPED, this::filterAlphanumericKeyEvents);
 		mountName.textProperty().addListener(this::mountNameDidChange);
-		advancedOptions.managedProperty().bind(advancedOptions.visibleProperty());
+		if (SystemUtils.IS_OS_WINDOWS) {
+			winDriveLetter.setConverter(new WinDriveLetterLabelConverter());
+		} else {
+			winDriveLetter.setVisible(false);
+			winDriveLetter.setManaged(false);
+		}
 	}
 
 	private void resetView() {
+		passwordField.clear();
 		unlockButton.setDisable(true);
 		advancedOptions.setVisible(false);
 		advancedOptionsButton.setText(resourceBundle.getString("unlock.button.advancedOptions.show"));
 		progressIndicator.setVisible(false);
-		passwordField.clear();
+		if (SystemUtils.IS_OS_WINDOWS) {
+			winDriveLetter.valueProperty().removeListener(driveLetterChangeListener);
+			winDriveLetter.getItems().clear();
+			winDriveLetter.getItems().add(null);
+			winDriveLetter.getItems().addAll(driveLetters.getAvailableDriveLetters());
+			winDriveLetter.getItems().sort(new WinDriveLetterComparator());
+			winDriveLetter.valueProperty().addListener(driveLetterChangeListener);
+		}
 		downloadsPageLink.setVisible(false);
 		messageText.setText(null);
 	}
@@ -145,6 +171,77 @@ public class UnlockController extends AbstractFXMLViewController {
 			advancedOptionsButton.setText(resourceBundle.getString("unlock.button.advancedOptions.show"));
 		}
 	}
+	
+	private void filterAlphanumericKeyEvents(KeyEvent t) {
+		if (t.getCharacter() == null || t.getCharacter().length() == 0) {
+			return;
+		}
+		char c = CharUtils.toChar(t.getCharacter());
+		if (!(CharUtils.isAsciiAlphanumeric(c) || c == '_')) {
+			t.consume();
+		}
+	}
+
+	private void mountNameDidChange(ObservableValue<? extends String> property, String oldValue, String newValue) {
+		if (vault == null) {
+			return;
+		}
+		// newValue is guaranteed to be a-z0-9_, see #filterAlphanumericKeyEvents
+		if (newValue.isEmpty()) {
+			mountName.setText(vault.getMountName());
+		} else {
+			vault.setMountName(newValue);
+		}
+	}
+	
+	/**
+	 *  Converts 'C' to "C:" to translate between model and GUI.
+	 */
+	private class WinDriveLetterLabelConverter extends StringConverter<Character> {
+
+		@Override
+		public String toString(Character letter) {
+			if (letter == null) {
+				return resourceBundle.getString("unlock.choicebox.winDriveLetter.auto");
+			} else {
+				return Character.toString(letter) + ":";
+			}
+		}
+
+		@Override
+		public Character fromString(String string) {
+			if (resourceBundle.getString("unlock.choicebox.winDriveLetter.auto").equals(string)) {
+				return null;
+			} else {
+				return CharUtils.toCharacterObject(string);
+			}
+		}
+		
+	}
+	
+	/**
+	 * Natural sorting of ASCII letters, but <code>null</code> always on first, as this is "auto-assign".
+	 */
+	private static class WinDriveLetterComparator implements Comparator<Character> {
+
+		@Override
+		public int compare(Character c1, Character c2) {
+			if (c1 == null) {
+				return -1;
+			} else if (c2 == null) {
+				return 1;
+			} else {
+				return (char) c1 - (char) c2;
+			}
+		}
+	}
+	
+	private void winDriveLetterDidChange(ObservableValue<? extends Character> property, Character oldValue, Character newValue) {
+		if (vault == null) {
+			return;
+		}
+		vault.setWinDriveLetter(newValue);
+	}
 
 	// ****************************************
 	// Unlock button
@@ -168,7 +265,7 @@ public class UnlockController extends AbstractFXMLViewController {
 			// at this point we know for sure, that the masterkey can be decrypted, so lets make a backup:
 			Files.copy(masterKeyPath, masterKeyBackupPath, StandardCopyOption.REPLACE_EXISTING);
 			vault.setUnlocked(true);
-			final Future<Boolean> futureMount = exec.submit(() -> (boolean) vault.mount());
+			final Future<Boolean> futureMount = exec.submit(vault::mount);
 			FXThreads.runOnMainThreadWhenFinished(exec, futureMount, this::unlockAndMountFinished);
 		} catch (IOException ex) {
 			setControlsDisabled(false);
@@ -228,25 +325,6 @@ public class UnlockController extends AbstractFXMLViewController {
 		}
 	}
 
-	public void filterAlphanumericKeyEvents(KeyEvent t) {
-		if (t.getCharacter() == null || t.getCharacter().length() == 0) {
-			return;
-		}
-		char c = t.getCharacter().charAt(0);
-		if (!CharUtils.isAsciiAlphanumeric(c)) {
-			t.consume();
-		}
-	}
-
-	private void mountNameDidChange(ObservableValue<? extends String> property, String oldValue, String newValue) {
-		// newValue is guaranteed to be a-z0-9, see #filterAlphanumericKeyEvents
-		if (newValue.isEmpty()) {
-			mountName.setText(vault.getMountName());
-		} else {
-			vault.setMountName(newValue);
-		}
-	}
-
 	/* Getter/Setter */
 
 	public Vault getVault() {
@@ -257,6 +335,24 @@ public class UnlockController extends AbstractFXMLViewController {
 		this.resetView();
 		this.vault = vault;
 		this.mountName.setText(vault.getMountName());
+		if (SystemUtils.IS_OS_WINDOWS) {
+			chooseSelectedDriveLetter();
+		}
+	}
+	
+	private void chooseSelectedDriveLetter() {
+		assert SystemUtils.IS_OS_WINDOWS;
+		// if the vault prefers a drive letter, that is currently occupied, this is our last chance to reset this:
+		if (driveLetters.getOccupiedDriveLetters().contains(vault.getWinDriveLetter())) {
+			vault.setWinDriveLetter(null);
+		}
+		final Character letter = vault.getWinDriveLetter();
+		if (letter == null) {
+			// first option is known to be 'auto-assign' due to #WinDriveLetterComparator.
+			this.winDriveLetter.getSelectionModel().selectFirst();
+		} else {
+			this.winDriveLetter.getSelectionModel().select(letter);
+		}
 	}
 
 	public UnlockListener getListener() {

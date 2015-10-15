@@ -12,6 +12,8 @@ package org.cryptomator.ui.util.mount;
 import java.net.URI;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
+import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import javax.inject.Inject;
@@ -24,9 +26,7 @@ import org.cryptomator.ui.util.command.Script;
 final class MacOsXWebDavMounter implements WebDavMounterStrategy {
 	
 	@Inject
-	MacOsXWebDavMounter() {
-		
-	}
+	MacOsXWebDavMounter() {}
 
 	@Override
 	public boolean shouldWork() {
@@ -39,7 +39,11 @@ final class MacOsXWebDavMounter implements WebDavMounterStrategy {
 	}
 
 	@Override
-	public WebDavMount mount(URI uri, String name) throws CommandFailedException {
+	public WebDavMount mount(URI uri, Map<MountParam, Optional<String>> mountParams) throws CommandFailedException {
+		final String mountName = mountParams.get(MountParam.MOUNT_NAME).orElseThrow(() -> {
+			return new IllegalArgumentException("Missing mount parameter MOUNT_NAME.");
+		});
+		
 		// we don't use the uri to derive a path, as it *could* be longer than 255 chars.
 		final String path = "/Volumes/Cryptomator_" + UUID.randomUUID().toString();
 		final Script mountScript = Script.fromLines(
@@ -48,28 +52,35 @@ final class MacOsXWebDavMounter implements WebDavMounterStrategy {
 				.addEnv("DAV_AUTHORITY", uri.getRawAuthority())
 				.addEnv("DAV_PATH", uri.getRawPath())
 				.addEnv("MOUNT_PATH", path)
-				.addEnv("MOUNT_NAME", name);
-		final Script revealScript = Script.fromLines(
-				"open \"$MOUNT_PATH\"")
-				.addEnv("MOUNT_PATH", path);
-		final Script unmountScript = Script.fromLines(
-				"diskutil umount $MOUNT_PATH")
-				.addEnv("MOUNT_PATH", path);
+				.addEnv("MOUNT_NAME", mountName);
 		mountScript.execute();
-		return new AbstractWebDavMount() {
-			@Override
-			public void unmount() throws CommandFailedException {
-				// only attempt unmount if user didn't unmount manually:
-				if (Files.exists(FileSystems.getDefault().getPath(path))) {
-					unmountScript.execute();
-				}
+		return new MacWebDavMount(path);
+	}
+	
+	private static class MacWebDavMount extends AbstractWebDavMount {
+		private final String mountPath;
+		private final Script revealScript;
+		private final Script unmountScript;
+		
+		private MacWebDavMount(String mountPath) {
+			this.mountPath = mountPath;
+			this.revealScript = Script.fromLines("open \"$MOUNT_PATH\"").addEnv("MOUNT_PATH", mountPath);
+			this.unmountScript = Script.fromLines("diskutil umount $MOUNT_PATH").addEnv("MOUNT_PATH", mountPath);
+		}
+		
+		@Override
+		public void unmount() throws CommandFailedException {
+			// only attempt unmount if user didn't unmount manually:
+			if (Files.exists(FileSystems.getDefault().getPath(mountPath))) {
+				unmountScript.execute();
 			}
+		}
 
-			@Override
-			public void reveal() throws CommandFailedException {
-				revealScript.execute();
-			}
-		};
+		@Override
+		public void reveal() throws CommandFailedException {
+			revealScript.execute();
+		}
+		
 	}
 
 }

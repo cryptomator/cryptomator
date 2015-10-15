@@ -10,17 +10,22 @@
 package org.cryptomator.ui.util.mount;
 
 import java.net.URI;
+import java.util.Map;
+import java.util.Optional;
 
 public interface WebDavMounter {
+	
+	public static enum MountParam {MOUNT_NAME, WIN_DRIVE_LETTER}
 
 	/**
 	 * Tries to mount a given webdav share.
 	 * 
 	 * @param uri URI of the webdav share
-	 * @param name the name under which the folder is to be mounted. This might be ignored.
+	 * @param mountParams additional mount parameters, that might not get ignored by some OS-specific mounters.
 	 * @return a {@link WebDavMount} representing the mounted share
 	 * @throws CommandFailedException if the mount operation fails
+	 * @throws IllegalArgumentException if mountParams is missing expected options
 	 */
-	WebDavMount mount(URI uri, String name) throws CommandFailedException;
+	WebDavMount mount(URI uri, Map<MountParam, Optional<String>> mountParams) throws CommandFailedException;
 
 }

@@ -7,11 +7,18 @@ import java.nio.file.Path;
 import java.text.Normalizer;
 import java.text.Normalizer.Form;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+
 import javax.security.auth.DestroyFailedException;
 
+import org.apache.commons.lang3.CharUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.cryptomator.crypto.Cryptor;
 import org.cryptomator.ui.util.DeferredClosable;
@@ -20,15 +27,13 @@ import org.cryptomator.ui.util.FXThreads;
 import org.cryptomator.ui.util.mount.CommandFailedException;
 import org.cryptomator.ui.util.mount.WebDavMount;
 import org.cryptomator.ui.util.mount.WebDavMounter;
+import org.cryptomator.ui.util.mount.WebDavMounter.MountParam;
 import org.cryptomator.webdav.WebDavServer;
 import org.cryptomator.webdav.WebDavServer.ServletLifeCycleAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+import com.google.common.collect.ImmutableMap;
 
 public class Vault implements Serializable {
 
@@ -49,6 +54,7 @@ public class Vault implements Serializable {
 	private final Set<String> whitelistedResourcesWithInvalidMac = new HashSet<>();
 
 	private String mountName;
+	private Character winDriveLetter;
 	private DeferredClosable<ServletLifeCycleAdapter> webDavServlet = DeferredClosable.empty();
 	private DeferredClosable<WebDavMount> webDavMount = DeferredClosable.empty();
 
@@ -108,14 +114,21 @@ public class Vault implements Serializable {
 		whitelistedResourcesWithInvalidMac.clear();
 		namesOfResourcesWithInvalidMac.clear();
 	}
+	
+	private Map<MountParam, Optional<String>> getMountParams() {
+		return ImmutableMap.of( //
+				MountParam.MOUNT_NAME, Optional.ofNullable(mountName), //
+				MountParam.WIN_DRIVE_LETTER, Optional.ofNullable(CharUtils.toString(winDriveLetter)) //
+				);
+	}
 
 	public boolean mount() {
-		Optional<ServletLifeCycleAdapter> o = webDavServlet.get();
-		if (!o.isPresent() || !o.get().isRunning()) {
+		final ServletLifeCycleAdapter servlet = webDavServlet.get().orElse(null);
+		if (servlet == null || !servlet.isRunning()) {
 			return false;
 		}
 		try {
-			webDavMount = closer.closeLater(mounter.mount(o.get().getServletUri(), mountName));
+			webDavMount = closer.closeLater(mounter.mount(servlet.getServletUri(), getMountParams()));
 			return true;
 		} catch (CommandFailedException e) {
 			LOG.warn("mount failed", e);
@@ -167,9 +180,7 @@ public class Vault implements Serializable {
 		this.unlocked.set(unlocked);
 	}
 
-	public String getMountName() {
-		return mountName;
-	}
+	
 
 	public ObservableList<String> getNamesOfResourcesWithInvalidMac() {
 		return namesOfResourcesWithInvalidMac;
@@ -204,6 +215,10 @@ public class Vault implements Serializable {
 		}
 		return builder.toString();
 	}
+	
+	public String getMountName() {
+		return mountName;
+	}
 
 	/**
 	 * sets the mount name while normalizing it
@@ -217,6 +232,14 @@ public class Vault implements Serializable {
 			throw new IllegalArgumentException("mount name is empty");
 		}
 		this.mountName = mountName;
+	}
+	
+	public Character getWinDriveLetter() {
+		return winDriveLetter;
+	}
+
+	public void setWinDriveLetter(Character winDriveLetter) {
+		this.winDriveLetter = winDriveLetter;
 	}
 
 	/* hashcode/equals */

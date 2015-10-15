@@ -11,6 +11,8 @@
 package org.cryptomator.ui.util.mount;
 
 import java.net.URI;
+import java.util.Map;
+import java.util.Optional;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -22,9 +24,7 @@ import org.cryptomator.ui.util.command.Script;
 final class LinuxGvfsWebDavMounter implements WebDavMounterStrategy {
 	
 	@Inject
-	LinuxGvfsWebDavMounter() {
-		
-	}
+	LinuxGvfsWebDavMounter() {}
 
 	@Override
 	public boolean shouldWork() {
@@ -47,52 +47,54 @@ final class LinuxGvfsWebDavMounter implements WebDavMounterStrategy {
 	}
 
 	@Override
-	public WebDavMount mount(URI uri, String name) throws CommandFailedException {
+	public WebDavMount mount(URI uri, Map<MountParam, Optional<String>> mountParams) throws CommandFailedException {
 		final Script mountScript = Script.fromLines(
 				"set -x",
 				"gvfs-mount \"dav:$DAV_SSP\"")
 				.addEnv("DAV_SSP", uri.getRawSchemeSpecificPart());
-		final Script testMountStillExistsScript = Script.fromLines(
-				"set -x",
-				"test `gvfs-mount --list | grep \"$DAV_SSP\" | wc -l` -eq 1")
-				.addEnv("DAV_SSP", uri.getRawSchemeSpecificPart());
-		final Script unmountScript = Script.fromLines(
-				"set -x",
-				"gvfs-mount -u \"dav:$DAV_SSP\"")
-				.addEnv("DAV_SSP", uri.getRawSchemeSpecificPart());
 		mountScript.execute();
-		return new AbstractWebDavMount() {
-			@Override
-			public void unmount() throws CommandFailedException {
-				boolean mountStillExists;
-				try {
-					testMountStillExistsScript.execute();
-					mountStillExists = true;
-				} catch(CommandFailedException e) {
-					mountStillExists = false;
-				}
-				// only attempt unmount if user didn't unmount manually:
-				if (mountStillExists) {
-					unmountScript.execute();
-				}
-			}
-
-			@Override
-			public void reveal() throws CommandFailedException {
-				try {
-					openMountWithWebdavUri("dav:"+uri.getRawSchemeSpecificPart()).execute();
-				} catch (CommandFailedException exception) {
-					openMountWithWebdavUri("webdav:"+uri.getRawSchemeSpecificPart()).execute();
-				}
-			}
-		};
+		return new LinuxGvfsWebDavMount(uri);
 	}
+	
+	private static class LinuxGvfsWebDavMount extends AbstractWebDavMount {
+		private final URI webDavUri;
+		private final Script testMountStillExistsScript;
+		private final Script unmountScript;
+		
+		private LinuxGvfsWebDavMount(URI webDavUri) {
+			this.webDavUri = webDavUri;
+			this.testMountStillExistsScript = Script.fromLines("set -x", "test `gvfs-mount --list | grep \"$DAV_SSP\" | wc -l` -eq 1").addEnv("DAV_SSP", webDavUri.getRawSchemeSpecificPart());
+			this.unmountScript = Script.fromLines("set -x", "gvfs-mount -u \"dav:$DAV_SSP\"").addEnv("DAV_SSP", webDavUri.getRawSchemeSpecificPart());
+		}
+		
+		@Override
+		public void unmount() throws CommandFailedException {
+			boolean mountStillExists;
+			try {
+				testMountStillExistsScript.execute();
+				mountStillExists = true;
+			} catch(CommandFailedException e) {
+				mountStillExists = false;
+			}
+			// only attempt unmount if user didn't unmount manually:
+			if (mountStillExists) {
+				unmountScript.execute();
+			}
+		}
 
-	private Script openMountWithWebdavUri(String webdavUri){
-		return Script.fromLines(
-				"set -x",
-				"xdg-open \"$DAV_URI\"")
-				.addEnv("DAV_URI", webdavUri);
+		@Override
+		public void reveal() throws CommandFailedException {
+			try {
+				openMountWithWebdavUri("dav:"+webDavUri.getRawSchemeSpecificPart()).execute();
+			} catch (CommandFailedException exception) {
+				openMountWithWebdavUri("webdav:"+webDavUri.getRawSchemeSpecificPart()).execute();
+			}
+		}
+		
+		private Script openMountWithWebdavUri(String webdavUri){
+			return Script.fromLines("set -x", "xdg-open \"$DAV_URI\"").addEnv("DAV_URI", webdavUri);
+		}
+		
 	}
 
 }

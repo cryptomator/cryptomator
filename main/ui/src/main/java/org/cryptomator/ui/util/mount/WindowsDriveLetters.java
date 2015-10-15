@@ -11,6 +11,9 @@ import java.util.stream.StreamSupport;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.apache.commons.lang3.CharUtils;
+import org.apache.commons.lang3.SystemUtils;
+
 import com.google.common.collect.Sets;
 
 
@@ -24,8 +27,11 @@ public final class WindowsDriveLetters {
 	}
 	
 	public Set<Character> getOccupiedDriveLetters() {
+		if (!SystemUtils.IS_OS_WINDOWS) {
+			throw new UnsupportedOperationException("This method is only defined for Windows file systems");
+		}
 		Iterable<Path> rootDirs = FileSystems.getDefault().getRootDirectories();
-		return StreamSupport.stream(rootDirs.spliterator(), false).map(path -> path.toString().toUpperCase().charAt(0)).collect(toSet());
+		return StreamSupport.stream(rootDirs.spliterator(), false).map(Path::toString).map(CharUtils::toChar).map(Character::toUpperCase).collect(toSet());
 	}
 	
 	public Set<Character> getAvailableDriveLetters() {
