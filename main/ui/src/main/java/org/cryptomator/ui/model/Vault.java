@@ -11,11 +11,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-
 import javax.security.auth.DestroyFailedException;
 
 import org.apache.commons.lang3.CharUtils;
@@ -34,6 +29,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableMap;
+
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 public class Vault implements Serializable {
 
@@ -114,15 +114,15 @@ public class Vault implements Serializable {
 		whitelistedResourcesWithInvalidMac.clear();
 		namesOfResourcesWithInvalidMac.clear();
 	}
-	
+
 	private Map<MountParam, Optional<String>> getMountParams() {
 		return ImmutableMap.of( //
 				MountParam.MOUNT_NAME, Optional.ofNullable(mountName), //
 				MountParam.WIN_DRIVE_LETTER, Optional.ofNullable(CharUtils.toString(winDriveLetter)) //
-				);
+		);
 	}
 
-	public boolean mount() {
+	public Boolean mount() {
 		final ServletLifeCycleAdapter servlet = webDavServlet.get().orElse(null);
 		if (servlet == null || !servlet.isRunning()) {
 			return false;
@@ -180,8 +180,6 @@ public class Vault implements Serializable {
 		this.unlocked.set(unlocked);
 	}
 
-	
-
 	public ObservableList<String> getNamesOfResourcesWithInvalidMac() {
 		return namesOfResourcesWithInvalidMac;
 	}
@@ -215,7 +213,7 @@ public class Vault implements Serializable {
 		}
 		return builder.toString();
 	}
-	
+
 	public String getMountName() {
 		return mountName;
 	}
@@ -233,7 +231,7 @@ public class Vault implements Serializable {
 		}
 		this.mountName = mountName;
 	}
-	
+
 	public Character getWinDriveLetter() {
 		return winDriveLetter;
 	}
