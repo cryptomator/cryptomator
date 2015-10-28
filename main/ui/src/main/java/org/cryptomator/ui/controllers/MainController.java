@@ -185,7 +185,8 @@ public class MainController extends AbstractFXMLViewController implements Initia
 	 * @param path non-null, writable, existing directory
 	 */
 	public void addVault(final Path path, boolean select) {
-		if (path == null || !Files.isWritable(path)) {
+		// TODO: Files.isWritable is broken on windows. Fix in Java 8u72, see https://bugs.openjdk.java.net/browse/JDK-8034057
+		if (path == null) {
 			return;
 		}
 

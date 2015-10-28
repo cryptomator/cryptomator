@@ -19,6 +19,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.jackrabbit.webdav.DavException;
 import org.apache.jackrabbit.webdav.DavResource;
 import org.apache.jackrabbit.webdav.DavResourceLocator;
@@ -196,7 +197,7 @@ abstract class AbstractEncryptedNode implements DavResource {
 			return null;
 		}
 
-		final String parentResource = FilenameUtils.getPathNoEndSeparator(locator.getResourcePath());
+		final String parentResource = StringUtils.prependIfMissing(FilenameUtils.getPathNoEndSeparator(locator.getResourcePath()), "/");
 		final DavResourceLocator parentLocator = locator.getFactory().createResourceLocator(locator.getPrefix(), locator.getWorkspacePath(), parentResource);
 		try {
 			return getFactory().createResource(parentLocator, session);
@@ -255,7 +256,11 @@ abstract class AbstractEncryptedNode implements DavResource {
 	@Override
 	public ActiveLock[] getLocks() {
 		final ActiveLock exclusiveWriteLock = getLock(Type.WRITE, Scope.EXCLUSIVE);
-		return new ActiveLock[] {exclusiveWriteLock};
+		if (exclusiveWriteLock != null) {
+			return new ActiveLock[] {exclusiveWriteLock};
+		} else {
+			return new ActiveLock[0];
+		}
 	}
 
 	@Override

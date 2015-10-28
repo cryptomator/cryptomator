@@ -181,10 +181,11 @@ public class CryptoResourceFactory implements DavResourceFactory, FileConstants 
 
 	/**
 	 * @return Absolute file path for a given cleartext file resourcePath.
-	 * @throws NonExistingParentException If one ancestor of the enrypted path is missing
+	 * @throws NonExistingParentException If one ancestor of the encrypted path is missing
 	 */
 	Path getEncryptedFilePath(String relativeCleartextPath, boolean createNonExisting) throws NonExistingParentException {
-		final String parentCleartextPath = FilenameUtils.getPathNoEndSeparator(relativeCleartextPath);
+		assert relativeCleartextPath.startsWith("/");
+		final String parentCleartextPath = StringUtils.prependIfMissing(FilenameUtils.getPathNoEndSeparator(relativeCleartextPath), "/");
 		final Path parent = getEncryptedDirectoryPath(parentCleartextPath, createNonExisting);
 		final String cleartextFilename = FilenameUtils.getName(relativeCleartextPath);
 		try {
@@ -197,10 +198,11 @@ public class CryptoResourceFactory implements DavResourceFactory, FileConstants 
 
 	/**
 	 * @return Absolute file path for a given cleartext file resourcePath.
-	 * @throws NonExistingParentException If one ancestor of the enrypted path is missing
+	 * @throws NonExistingParentException If one ancestor of the encrypted path is missing
 	 */
 	Path getEncryptedDirectoryFilePath(String relativeCleartextPath, boolean createNonExisting) throws NonExistingParentException {
-		final String parentCleartextPath = FilenameUtils.getPathNoEndSeparator(relativeCleartextPath);
+		assert relativeCleartextPath.startsWith("/");
+		final String parentCleartextPath = StringUtils.prependIfMissing(FilenameUtils.getPathNoEndSeparator(relativeCleartextPath), "/");
 		final Path parent = getEncryptedDirectoryPath(parentCleartextPath, createNonExisting);
 		final String cleartextFilename = FilenameUtils.getName(relativeCleartextPath);
 		try {
@@ -217,15 +219,16 @@ public class CryptoResourceFactory implements DavResourceFactory, FileConstants 
 	 * @throws NonExistingParentException if one ancestor directory is missing.
 	 */
 	private Path getEncryptedDirectoryPath(String relativeCleartextPath, boolean createNonExisting) throws NonExistingParentException {
-		assert Strings.isEmpty(relativeCleartextPath) || !relativeCleartextPath.endsWith("/");
+		assert relativeCleartextPath.startsWith("/");
+		assert "/".equals(relativeCleartextPath) || !relativeCleartextPath.endsWith("/");
 		try {
 			final Path result;
-			if (Strings.isEmpty(relativeCleartextPath)) {
+			if ("/".equals(relativeCleartextPath)) {
 				// root level
 				final String fixedRootDirectory = cryptor.encryptDirectoryPath("", FileSystems.getDefault().getSeparator());
 				result = dataRoot.resolve(fixedRootDirectory);
 			} else {
-				final String parentCleartextPath = FilenameUtils.getPathNoEndSeparator(relativeCleartextPath);
+				final String parentCleartextPath = StringUtils.prependIfMissing(FilenameUtils.getPathNoEndSeparator(relativeCleartextPath), "/");
 				final Path parent = getEncryptedDirectoryPath(parentCleartextPath, createNonExisting);
 				final String cleartextFilename = FilenameUtils.getName(relativeCleartextPath);
 				final String encryptedFilename = filenameTranslator.getEncryptedDirFileName(cleartextFilename);

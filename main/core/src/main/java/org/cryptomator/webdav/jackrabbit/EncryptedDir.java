@@ -15,10 +15,14 @@ import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.DirectoryStream;
+import java.nio.file.FileVisitResult;
+import java.nio.file.FileVisitor;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -38,12 +42,12 @@ import org.apache.jackrabbit.webdav.DavServletResponse;
 import org.apache.jackrabbit.webdav.DavSession;
 import org.apache.jackrabbit.webdav.io.InputContext;
 import org.apache.jackrabbit.webdav.io.OutputContext;
+import org.apache.jackrabbit.webdav.lock.ActiveLock;
 import org.apache.jackrabbit.webdav.lock.LockManager;
 import org.apache.jackrabbit.webdav.property.DavPropertyName;
 import org.apache.jackrabbit.webdav.property.DefaultDavProperty;
 import org.apache.jackrabbit.webdav.property.ResourceType;
 import org.cryptomator.crypto.Cryptor;
-import org.cryptomator.crypto.exceptions.CounterOverflowException;
 import org.cryptomator.crypto.exceptions.DecryptFailedException;
 import org.cryptomator.crypto.exceptions.EncryptFailedException;
 import org.cryptomator.webdav.exceptions.DavRuntimeException;
@@ -91,6 +95,11 @@ class EncryptedDir extends AbstractEncryptedNode implements FileConstants {
 			}
 		}
 		return directoryPath;
+	}
+	
+	@Override
+	public boolean exists() {
+		return Files.exists(filePath) && Files.exists(getDirectoryPath());
 	}
 
 	@Override
@@ -159,14 +168,10 @@ class EncryptedDir extends AbstractEncryptedNode implements FileConstants {
 			final Path filePath = dirPath.resolve(ciphertextFilename);
 			final Path tmpFilePath = Files.createTempFile(dirPath, null, null);
 			// encrypt to tmp file:
-			try (final FileChannel c = FileChannel.open(tmpFilePath, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
-					final SilentlyFailingFileLock lock = new SilentlyFailingFileLock(c, false)) {
-				cryptor.encryptFile(inputContext.getInputStream(), c);
+			try (final FileChannel c = FileChannel.open(tmpFilePath, StandardOpenOption.WRITE, StandardOpenOption.DSYNC)) {
+				long asd = cryptor.encryptFile(inputContext.getInputStream(), c);
 			} catch (SecurityException e) {
 				throw new DavException(DavServletResponse.SC_FORBIDDEN, e);
-			} catch (CounterOverflowException e) {
-				// lets indicate this to the client as a "file too big" error
-				throw new DavException(DavServletResponse.SC_INSUFFICIENT_SPACE_ON_RESOURCE, e);
 			} catch (EncryptFailedException e) {
 				LOG.error("Encryption failed for unknown reasons.", e);
 				throw new IllegalStateException("Encryption failed for unknown reasons.", e);
@@ -188,18 +193,17 @@ class EncryptedDir extends AbstractEncryptedNode implements FileConstants {
 
 	@Override
 	public DavResourceIterator getMembers() {
-		try {
-			final Path dirPath = getDirectoryPath();
-			if (dirPath == null) {
-				throw new DavException(DavServletResponse.SC_NOT_FOUND);
-			}
-			final DirectoryStream<Path> directoryStream = Files.newDirectoryStream(dirPath, DIRECTORY_CONTENT_FILTER);
+		final Path dirPath = getDirectoryPath();
+		if (dirPath == null) {
+			throw new DavRuntimeException(new DavException(DavServletResponse.SC_NOT_FOUND));
+		}
+		
+		try (final DirectoryStream<Path> directoryStream = Files.newDirectoryStream(dirPath, DIRECTORY_CONTENT_FILTER)) {	
 			final List<DavResource> result = new ArrayList<>();
-
 			for (final Path childPath : directoryStream) {
 				try {
 					final String cleartextFilename = filenameTranslator.getCleartextFilename(childPath.getFileName().toString());
-					final String cleartextFilepath = FilenameUtils.concat(getResourcePath(), cleartextFilename);
+					final String cleartextFilepath = locator.isRootLocation() ? '/' + cleartextFilename : locator.getResourcePath() + '/' + cleartextFilename;
 					final DavResourceLocator childLocator = locator.getFactory().createResourceLocator(locator.getPrefix(), locator.getWorkspacePath(), cleartextFilepath);
 					final DavResource resource;
 					if (StringUtil.endsWithIgnoreCase(childPath.getFileName().toString(), DIR_EXT)) {
@@ -208,7 +212,9 @@ class EncryptedDir extends AbstractEncryptedNode implements FileConstants {
 						assert StringUtil.endsWithIgnoreCase(childPath.getFileName().toString(), FILE_EXT);
 						resource = factory.createChildFileResource(childLocator, session, childPath);
 					}
-					result.add(resource);
+					if (resource.exists()) {
+						result.add(resource);
+					}
 				} catch (DecryptFailedException e) {
 					LOG.warn("Decryption of resource failed: " + childPath);
 					continue;
@@ -238,6 +244,11 @@ class EncryptedDir extends AbstractEncryptedNode implements FileConstants {
 		if (dirPath == null) {
 			throw new DavException(DavServletResponse.SC_NOT_FOUND);
 		}
+		// https://tools.ietf.org/html/rfc4918#section-9.6
+		// we must unlock anything we want to delete
+		for (ActiveLock lock : member.getLocks()) {
+			member.unlock(lock.getToken());
+		}
 		try {
 			final String cleartextFilename = FilenameUtils.getName(member.getResourcePath());
 			final String ciphertextFilename;
@@ -250,7 +261,7 @@ class EncryptedDir extends AbstractEncryptedNode implements FileConstants {
 				}
 				final Path subDirPath = subDir.getDirectoryPath();
 				if (subDirPath != null) {
-					Files.deleteIfExists(subDirPath);
+					Files.walkFileTree(subDirPath, new DeletingFileVisitor());
 				}
 				ciphertextFilename = filenameTranslator.getEncryptedDirFileName(cleartextFilename);
 			} else {
@@ -340,5 +351,33 @@ class EncryptedDir extends AbstractEncryptedNode implements FileConstants {
 	public void spool(OutputContext outputContext) throws IOException {
 		// do nothing
 	}
+	
+	/**
+	 * Deletes all files and folders, it visits.
+	 */
+	private static class DeletingFileVisitor extends SimpleFileVisitor<Path> {
+
+		@Override
+		public FileVisitResult visitFile(Path file, BasicFileAttributes attributes) throws IOException {
+			if (attributes.isRegularFile()) {
+				Files.delete(file);
+			}
+			return FileVisitResult.CONTINUE;
+		}
+
+		@Override
+		public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+			Files.delete(dir);
+			return FileVisitResult.CONTINUE;
+		}
+
+		@Override
+		public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
+			LOG.error("Failed to delete file " + file.toString(), exc);
+			return FileVisitResult.TERMINATE;
+		}
+
+	}
+
 
 }

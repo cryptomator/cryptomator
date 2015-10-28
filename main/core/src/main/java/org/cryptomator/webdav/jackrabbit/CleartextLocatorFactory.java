@@ -12,27 +12,30 @@ public class CleartextLocatorFactory implements DavLocatorFactory {
 	private final String pathPrefix;
 
 	public CleartextLocatorFactory(String pathPrefix) {
-		this.pathPrefix = pathPrefix;
+		this.pathPrefix = StringUtils.removeEnd(pathPrefix, "/");
 	}
 
 	// resourcePath == repositoryPath. No encryption here.
 
 	@Override
 	public DavResourceLocator createResourceLocator(String prefix, String href) {
-		final String fullPrefix = prefix.endsWith("/") ? prefix : prefix + "/";
+		final String fullPrefix = StringUtils.removeEnd(prefix, "/");
 		final String relativeHref = StringUtils.removeStart(href, fullPrefix);
 
-		final String relativeCleartextPath = EncodeUtil.unescape(StringUtils.removeStart(relativeHref, "/"));
+		final String relativeCleartextPath = EncodeUtil.unescape(relativeHref);
+		assert relativeCleartextPath.startsWith("/");
 		return new CleartextLocator(relativeCleartextPath);
 	}
 
 	@Override
 	public DavResourceLocator createResourceLocator(String prefix, String workspacePath, String resourcePath) {
+		assert resourcePath.startsWith("/");
 		return new CleartextLocator(resourcePath);
 	}
 
 	@Override
 	public DavResourceLocator createResourceLocator(String prefix, String workspacePath, String path, boolean isResourcePath) {
+		assert path.startsWith("/");
 		return new CleartextLocator(path);
 	}
 
@@ -41,7 +44,7 @@ public class CleartextLocatorFactory implements DavLocatorFactory {
 		private final String relativeCleartextPath;
 
 		private CleartextLocator(String relativeCleartextPath) {
-			this.relativeCleartextPath = FilenameUtils.normalizeNoEndSeparator(relativeCleartextPath, true);
+			this.relativeCleartextPath = StringUtils.prependIfMissing(FilenameUtils.normalizeNoEndSeparator(relativeCleartextPath, true), "/");
 		}
 
 		@Override
@@ -76,20 +79,19 @@ public class CleartextLocatorFactory implements DavLocatorFactory {
 
 		@Override
 		public String getHref(boolean isCollection) {
-			final String encodedResourcePath = EncodeUtil.escapePath(getResourcePath());
-			final String fullPrefix = pathPrefix.endsWith("/") ? pathPrefix : pathPrefix + "/";
-			final String href = fullPrefix.concat(encodedResourcePath);
-			assert href.equals(fullPrefix) || !href.endsWith("/");
-			if (isCollection) {
-				return href.concat("/");
+			final String encodedResourcePath = EncodeUtil.escapePath(relativeCleartextPath);
+			if (isRootLocation()) {
+				return pathPrefix + "/";
+			} else if (isCollection) {
+				return pathPrefix + encodedResourcePath + "/";
 			} else {
-				return href;
+				return pathPrefix + encodedResourcePath;
 			}
 		}
 
 		@Override
 		public boolean isRootLocation() {
-			return Strings.isEmpty(relativeCleartextPath);
+			return "/".equals(relativeCleartextPath);
 		}
 
 		@Override
