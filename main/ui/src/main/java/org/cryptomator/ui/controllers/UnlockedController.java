@@ -146,10 +146,13 @@ public class UnlockedController extends AbstractFXMLViewController {
 	private class IoSamplingAnimationHandler implements EventHandler<ActionEvent> {
 
 		private static final double BYTES_TO_MEGABYTES_FACTOR = 1.0 / IO_SAMPLING_INTERVAL / 1024.0 / 1024.0;
+		private static final double SMOOTHING_FACTOR = 0.3;
 		private final CryptorIOSampling sampler;
 		private final Series<Number, Number> decryptedBytes;
 		private final Series<Number, Number> encryptedBytes;
 		private int step = 0;
+		private double oldDecBytes = 0;
+		private double oldEncBytes = 0;
 
 		public IoSamplingAnimationHandler(CryptorIOSampling sampler, Series<Number, Number> decryptedBytes, Series<Number, Number> encryptedBytes) {
 			this.sampler = sampler;
@@ -161,14 +164,20 @@ public class UnlockedController extends AbstractFXMLViewController {
 		public void handle(ActionEvent event) {
 			step++;
 
-			final double decryptedMb = sampler.pollDecryptedBytes(true) * BYTES_TO_MEGABYTES_FACTOR;
-			decryptedBytes.getData().add(new Data<Number, Number>(step, decryptedMb));
+			final double decBytes = sampler.pollDecryptedBytes(true);
+			final double smoothedDecBytes = oldDecBytes + SMOOTHING_FACTOR * (decBytes - oldDecBytes);
+			final double smoothedDecMb = smoothedDecBytes * BYTES_TO_MEGABYTES_FACTOR;
+			oldDecBytes = smoothedDecBytes;
+			decryptedBytes.getData().add(new Data<Number, Number>(step, smoothedDecMb));
 			if (decryptedBytes.getData().size() > IO_SAMPLING_STEPS) {
 				decryptedBytes.getData().remove(0);
 			}
 
-			final double encrypteddMb = sampler.pollEncryptedBytes(true) * BYTES_TO_MEGABYTES_FACTOR;
-			encryptedBytes.getData().add(new Data<Number, Number>(step, encrypteddMb));
+			final double encBytes = sampler.pollEncryptedBytes(true);
+			final double smoothedEncBytes = oldEncBytes + SMOOTHING_FACTOR * (encBytes - oldEncBytes);
+			final double smoothedEncMb = smoothedEncBytes * BYTES_TO_MEGABYTES_FACTOR;
+			oldEncBytes = smoothedEncBytes;
+			encryptedBytes.getData().add(new Data<Number, Number>(step, smoothedEncMb));
 			if (encryptedBytes.getData().size() > IO_SAMPLING_STEPS) {
 				encryptedBytes.getData().remove(0);
 			}
