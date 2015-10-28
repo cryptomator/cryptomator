@@ -110,6 +110,17 @@ public class LengthObfuscatingInputStream extends FilterInputStream {
 	}
 
 	@Override
+	public int available() throws IOException {
+		if (paddingLength == -1) {
+			// EOF not yet reached; delegate original stream to answer this rather complicated question:
+			return in.available();
+		} else {
+			// EOF already reached, read from remaining padding:
+			return paddingLength - paddingBytesRead;
+		}
+	}
+
+	@Override
 	public boolean markSupported() {
 		return false;
 	}
