@@ -4,20 +4,23 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.channels.SeekableByteChannel;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.LongAdder;
 
 import org.cryptomator.crypto.exceptions.DecryptFailedException;
 import org.cryptomator.crypto.exceptions.EncryptFailedException;
 
+/**
+ * Decorates the Cryptor by decorating the In- and OutputStreams used during de-/encryption.
+ */
 public class SamplingCryptorDecorator extends AbstractCryptorDecorator implements CryptorIOSampling {
 
-	private final AtomicLong encryptedBytes;
-	private final AtomicLong decryptedBytes;
+	private final LongAdder encryptedBytes;
+	private final LongAdder decryptedBytes;
 
 	private SamplingCryptorDecorator(Cryptor cryptor) {
 		super(cryptor);
-		encryptedBytes = new AtomicLong();
-		decryptedBytes = new AtomicLong();
+		encryptedBytes = new LongAdder();
+		decryptedBytes = new LongAdder();
 	}
 
 	public static Cryptor decorate(Cryptor cryptor) {
@@ -25,20 +28,20 @@ public class SamplingCryptorDecorator extends AbstractCryptorDecorator implement
 	}
 
 	@Override
-	public Long pollEncryptedBytes(boolean resetCounter) {
+	public long pollEncryptedBytes(boolean resetCounter) {
 		if (resetCounter) {
-			return encryptedBytes.getAndSet(0);
+			return encryptedBytes.sumThenReset();
 		} else {
-			return encryptedBytes.get();
+			return encryptedBytes.sum();
 		}
 	}
 
 	@Override
-	public Long pollDecryptedBytes(boolean resetCounter) {
+	public long pollDecryptedBytes(boolean resetCounter) {
 		if (resetCounter) {
-			return decryptedBytes.getAndSet(0);
+			return decryptedBytes.sumThenReset();
 		} else {
-			return decryptedBytes.get();
+			return decryptedBytes.sum();
 		}
 	}
 
@@ -65,9 +68,9 @@ public class SamplingCryptorDecorator extends AbstractCryptorDecorator implement
 	private class CountingInputStream extends InputStream {
 
 		private final InputStream in;
-		private final AtomicLong counter;
+		private final LongAdder counter;
 
-		private CountingInputStream(AtomicLong counter, InputStream in) {
+		private CountingInputStream(LongAdder counter, InputStream in) {
 			this.in = in;
 			this.counter = counter;
 		}
@@ -75,14 +78,14 @@ public class SamplingCryptorDecorator extends AbstractCryptorDecorator implement
 		@Override
 		public int read() throws IOException {
 			int count = in.read();
-			counter.addAndGet(count);
+			counter.add(count);
 			return count;
 		}
 
 		@Override
 		public int read(byte[] b, int off, int len) throws IOException {
 			int count = in.read(b, off, len);
-			counter.addAndGet(count);
+			counter.add(count);
 			return count;
 		}
 
@@ -91,22 +94,22 @@ public class SamplingCryptorDecorator extends AbstractCryptorDecorator implement
 	private class CountingOutputStream extends OutputStream {
 
 		private final OutputStream out;
-		private final AtomicLong counter;
+		private final LongAdder counter;
 
-		private CountingOutputStream(AtomicLong counter, OutputStream out) {
+		private CountingOutputStream(LongAdder counter, OutputStream out) {
 			this.out = out;
 			this.counter = counter;
 		}
 
 		@Override
 		public void write(int b) throws IOException {
-			counter.incrementAndGet();
+			counter.increment();
 			out.write(b);
 		}
 
 		@Override
 		public void write(byte[] b, int off, int len) throws IOException {
-			counter.addAndGet(len);
+			counter.add(len);
 			out.write(b, off, len);
 		}
 

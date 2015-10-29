@@ -16,11 +16,11 @@ public interface CryptorIOSampling {
 	/**
 	 * @return Number of encrypted bytes since the last reset.
 	 */
-	Long pollEncryptedBytes(boolean resetCounter);
+	long pollEncryptedBytes(boolean resetCounter);
 
 	/**
 	 * @return Number of decrypted bytes since the last reset.
 	 */
-	Long pollDecryptedBytes(boolean resetCounter);
+	long pollDecryptedBytes(boolean resetCounter);
 
 }
