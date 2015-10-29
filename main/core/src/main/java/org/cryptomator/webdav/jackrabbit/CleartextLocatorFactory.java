@@ -5,7 +5,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.jackrabbit.webdav.DavLocatorFactory;
 import org.apache.jackrabbit.webdav.DavResourceLocator;
 import org.apache.jackrabbit.webdav.util.EncodeUtil;
-import org.apache.logging.log4j.util.Strings;
 
 public class CleartextLocatorFactory implements DavLocatorFactory {
 

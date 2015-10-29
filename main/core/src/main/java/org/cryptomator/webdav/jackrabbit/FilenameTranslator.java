@@ -68,6 +68,14 @@ class FilenameTranslator implements FileConstants {
 			}
 		}
 	}
+	
+	/**
+	 * to be called when a directory gets deleted, so the corresponding directory id is not longer cached.
+	 */
+	public void uncacheDirectoryId(Path directoryFile) throws IOException {
+		final Pair<Path, FileTime> key = ImmutablePair.of(directoryFile, Files.getLastModifiedTime(directoryFile));
+		directoryIdCache.remove(key);
+	}
 
 	public Path getEncryptedDirectoryPath(String directoryId) {
 		final String encrypted = cryptor.encryptDirectoryPath(directoryId, FileSystems.getDefault().getSeparator());

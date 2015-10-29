@@ -16,7 +16,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.FileVisitResult;
-import java.nio.file.FileVisitor;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
@@ -26,9 +25,10 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
+import java.util.Queue;
 import java.util.UUID;
+import java.util.concurrent.LinkedTransferQueue;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
@@ -169,7 +169,7 @@ class EncryptedDir extends AbstractEncryptedNode implements FileConstants {
 			final Path tmpFilePath = Files.createTempFile(dirPath, null, null);
 			// encrypt to tmp file:
 			try (final FileChannel c = FileChannel.open(tmpFilePath, StandardOpenOption.WRITE, StandardOpenOption.DSYNC)) {
-				long asd = cryptor.encryptFile(inputContext.getInputStream(), c);
+				cryptor.encryptFile(inputContext.getInputStream(), c);
 			} catch (SecurityException e) {
 				throw new DavException(DavServletResponse.SC_FORBIDDEN, e);
 			} catch (EncryptFailedException e) {
@@ -245,30 +245,21 @@ class EncryptedDir extends AbstractEncryptedNode implements FileConstants {
 			throw new DavException(DavServletResponse.SC_NOT_FOUND);
 		}
 		// https://tools.ietf.org/html/rfc4918#section-9.6
-		// we must unlock anything we want to delete
+		// we must unlock anything we want to delete:
 		for (ActiveLock lock : member.getLocks()) {
 			member.unlock(lock.getToken());
 		}
+		// now we can delete the file or directory:
 		try {
 			final String cleartextFilename = FilenameUtils.getName(member.getResourcePath());
-			final String ciphertextFilename;
 			if (member instanceof EncryptedDir) {
 				final EncryptedDir subDir = (EncryptedDir) member;
-				// remove sub-members recursively before deleting own directory
-				for (Iterator<DavResource> iterator = member.getMembers(); iterator.hasNext();) {
-					DavResource m = iterator.next();
-					member.removeMember(m);
-				}
-				final Path subDirPath = subDir.getDirectoryPath();
-				if (subDirPath != null) {
-					Files.walkFileTree(subDirPath, new DeletingFileVisitor());
-				}
-				ciphertextFilename = filenameTranslator.getEncryptedDirFileName(cleartextFilename);
+				deleteSubDirectory(subDir);
 			} else {
-				ciphertextFilename = filenameTranslator.getEncryptedFilename(cleartextFilename);
+				final String ciphertextFilename = filenameTranslator.getEncryptedFilename(cleartextFilename);
+				final Path memberPath = dirPath.resolve(ciphertextFilename);
+				Files.deleteIfExists(memberPath);
 			}
-			final Path memberPath = dirPath.resolve(ciphertextFilename);
-			Files.deleteIfExists(memberPath);
 		} catch (FileNotFoundException e) {
 			// no-op
 		} catch (IOException e) {
@@ -353,21 +344,65 @@ class EncryptedDir extends AbstractEncryptedNode implements FileConstants {
 	}
 	
 	/**
-	 * Deletes all files and folders, it visits.
+	 * Deletes a given directory recursively by resolving subdirectories using their directory files.
 	 */
-	private static class DeletingFileVisitor extends SimpleFileVisitor<Path> {
+	private void deleteSubDirectory(final EncryptedDir subDir) throws IOException {
+		final Path subDirPath = subDir.getDirectoryPath();
+		filenameTranslator.uncacheDirectoryId(subDir.filePath);
+		Files.delete(subDir.filePath);
+		final LinkedTransferQueue<Path> queue = new LinkedTransferQueue<>();
+		queue.put(subDirPath);
+		Path dir;
+		while ((dir = queue.poll()) != null) {
+			if (Files.exists(dir)) {
+				Files.walkFileTree(dir, new RecursiveDirectoryDeletingVisitor(queue));
+			}
+		}
+	}
+	
+	/**
+	 * Deletes all files it visits and enqueues subdirectories into a given {@link Queue} for deletion, too.
+	 * 
+	 * If its parent directory is empty after deleting, it will get deleted, too.
+	 */
+	private class RecursiveDirectoryDeletingVisitor extends SimpleFileVisitor<Path> {
+		
+		private final Queue<Path> directories;
+		
+		private RecursiveDirectoryDeletingVisitor(Queue<Path> directories) {
+			this.directories = directories;
+		}
 
 		@Override
 		public FileVisitResult visitFile(Path file, BasicFileAttributes attributes) throws IOException {
-			if (attributes.isRegularFile()) {
-				Files.delete(file);
+			if (file.toString().endsWith(DIR_EXT)) {
+				final String directoryId = filenameTranslator.getDirectoryId(file, false);
+				final Path directoryPath = filenameTranslator.getEncryptedDirectoryPath(directoryId);
+				directories.add(directoryPath);
+				filenameTranslator.uncacheDirectoryId(file);
 			}
+			Files.delete(file);
 			return FileVisitResult.CONTINUE;
 		}
 
 		@Override
 		public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+			// first check, if we're the only remaining child:
+			boolean hasSiblings = false;
+			try (final DirectoryStream<Path> siblings = Files.newDirectoryStream(dir.getParent())) {
+				for (Path sibling : siblings) {
+					if (!dir.getFileName().equals(sibling.getFileName())) {
+						hasSiblings = true;
+						break;
+					}
+				}
+			}
+			// delete our current directory:
 			Files.delete(dir);
+			// if we have siblings, we still need our parent. Otherwise delete it, too:
+			if (!hasSiblings) {
+				Files.delete(dir.getParent());
+			}
 			return FileVisitResult.CONTINUE;
 		}
 
