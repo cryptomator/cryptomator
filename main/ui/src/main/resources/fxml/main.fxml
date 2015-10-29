@@ -18,7 +18,7 @@
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.geometry.Insets?>
 
-<HBox fx:id="rootPane" prefHeight="440.0" prefWidth="640.0" xmlns:fx="http://javafx.com/fxml">
+<HBox fx:id="rootPane" prefHeight="440.0" prefWidth="640.0" xmlns:fx="http://javafx.com/fxml" cacheShape="true" cache="true">
 
 	<padding><Insets top="20" right="20" bottom="20" left="20.0"/></padding>
 
@@ -38,17 +38,17 @@
 	</fx:define>
 
 	<children>
-		<VBox prefWidth="200.0">
+		<VBox prefWidth="200.0" cacheShape="true" cache="true">
 			<children>
-				<ListView fx:id="vaultList" VBox.vgrow="ALWAYS" focusTraversable="false" />
-				<ToolBar VBox.vgrow="NEVER" styleClass="list-related-toolbar">
+				<ListView fx:id="vaultList" VBox.vgrow="ALWAYS" focusTraversable="false" cacheShape="true" cache="true"/>
+				<ToolBar VBox.vgrow="NEVER" styleClass="list-related-toolbar" cacheShape="true" cache="true">
 					<items>
-						<ToggleButton text="+" fx:id="addVaultButton" onAction="#didClickAddVault" focusTraversable="false"/>
+						<ToggleButton text="+" fx:id="addVaultButton" onAction="#didClickAddVault" focusTraversable="false" cacheShape="true" cache="true"/>
 					</items>
 				</ToolBar>
 			</children>
 		</VBox>
-		<Pane fx:id="contentPane"/>
+		<Pane fx:id="contentPane" cacheShape="true" cache="true"/>
 	</children>
 
 </HBox>

@@ -18,7 +18,7 @@
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.HBox?>
 
-<GridPane vgap="12.0" hgap="12.0" prefWidth="400.0" xmlns:fx="http://javafx.com/fxml">
+<GridPane vgap="12.0" hgap="12.0" prefWidth="400.0" xmlns:fx="http://javafx.com/fxml" cacheShape="true" cache="true">
 	<padding>
 		<Insets top="24.0" right="24.0" bottom="24.0" left="24.0" />
 	</padding>
@@ -30,16 +30,16 @@
 
 	<children>
 		<!-- Row 0 -->
-		<LineChart fx:id="ioGraph" GridPane.rowIndex="0" GridPane.columnIndex="0" GridPane.columnSpan="2" animated="false" createSymbols="false" prefHeight="340.0" legendVisible="true" legendSide="BOTTOM" verticalZeroLineVisible="false" verticalGridLinesVisible="false" horizontalGridLinesVisible="true">
-			<xAxis><NumberAxis fx:id="xAxis" forceZeroInRange="false" tickMarkVisible="false" minorTickVisible="false" tickLabelsVisible="false" autoRanging="false"/></xAxis>
-        	<yAxis><NumberAxis label="%unlocked.ioGraph.yAxis.label" autoRanging="true" forceZeroInRange="true" /></yAxis>
+		<LineChart fx:id="ioGraph" GridPane.rowIndex="0" GridPane.columnIndex="0" GridPane.columnSpan="2" animated="false" createSymbols="false" prefHeight="340.0" legendVisible="true" legendSide="BOTTOM" verticalZeroLineVisible="false" verticalGridLinesVisible="false" horizontalGridLinesVisible="true"  cacheShape="true" cache="true" cacheHint="SPEED">
+			<xAxis><NumberAxis fx:id="xAxis" forceZeroInRange="false" tickMarkVisible="false" minorTickVisible="false" tickLabelsVisible="false" autoRanging="false" cacheShape="true" cache="true" /></xAxis>
+        	<yAxis><NumberAxis label="%unlocked.ioGraph.yAxis.label" autoRanging="true" forceZeroInRange="true" cacheShape="true" cache="true" /></yAxis>
 		</LineChart>
 		
 		<!-- Row 1 -->
-		<Label fx:id="messageLabel" GridPane.rowIndex="1" GridPane.columnIndex="0" />
-		<HBox GridPane.rowIndex="1" GridPane.columnIndex="1" spacing="6.0" alignment="CENTER_RIGHT">
-			<Button text="%unlocked.button.reveal" prefWidth="100.0" onAction="#didClickRevealVault" focusTraversable="false"/>
-			<Button text="%unlocked.button.lock" prefWidth="100.0" onAction="#didClickCloseVault" focusTraversable="false"/>
+		<Label fx:id="messageLabel" GridPane.rowIndex="1" GridPane.columnIndex="0" cacheShape="true" cache="true" />
+		<HBox GridPane.rowIndex="1" GridPane.columnIndex="1" spacing="6.0" alignment="CENTER_RIGHT" cacheShape="true" cache="true">
+			<Button text="%unlocked.button.reveal" prefWidth="100.0" onAction="#didClickRevealVault" focusTraversable="false" cacheShape="true" cache="true"/>
+			<Button text="%unlocked.button.lock" prefWidth="100.0" onAction="#didClickCloseVault" focusTraversable="false" cacheShape="true" cache="true"/>
 		</HBox>
 		
 	</children>

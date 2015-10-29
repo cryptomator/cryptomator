@@ -25,7 +25,7 @@
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.ChoiceBox?>
 
-<GridPane vgap="12.0" hgap="12.0" prefWidth="400.0" xmlns:fx="http://javafx.com/fxml">
+<GridPane vgap="12.0" hgap="12.0" prefWidth="400.0" xmlns:fx="http://javafx.com/fxml" cacheShape="true" cache="true">
 	<padding>
 		<Insets top="24.0" right="24.0" bottom="24.0" left="24.0" />
 	</padding>
@@ -37,17 +37,17 @@
 
 	<children>
 		<!-- Row 0 -->
-		<Label text="%unlock.label.password" GridPane.rowIndex="0" GridPane.columnIndex="0" />
-		<SecPasswordField fx:id="passwordField" GridPane.rowIndex="0" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" maxWidth="Infinity" />
+		<Label text="%unlock.label.password" GridPane.rowIndex="0" GridPane.columnIndex="0" cacheShape="true" cache="true" />
+		<SecPasswordField fx:id="passwordField" GridPane.rowIndex="0" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" maxWidth="Infinity" cacheShape="true" cache="true" />
 
 		<!-- Row 1 -->
-		<HBox GridPane.rowIndex="2" GridPane.columnIndex="0" GridPane.columnSpan="2" spacing="12.0" alignment="CENTER_RIGHT">
-			<Button fx:id="advancedOptionsButton" text="%unlock.button.advancedOptions.show" prefWidth="150.0" onAction="#didClickAdvancedOptionsButton"/>
-			<Button fx:id="unlockButton" text="%unlock.button.unlock" defaultButton="true" prefWidth="150.0" onAction="#didClickUnlockButton" disable="true"/>
+		<HBox GridPane.rowIndex="2" GridPane.columnIndex="0" GridPane.columnSpan="2" spacing="12.0" alignment="CENTER_RIGHT" cacheShape="true" cache="true">
+			<Button fx:id="advancedOptionsButton" text="%unlock.button.advancedOptions.show" prefWidth="150.0" onAction="#didClickAdvancedOptionsButton" cacheShape="true" cache="true" />
+			<Button fx:id="unlockButton" text="%unlock.button.unlock" defaultButton="true" prefWidth="150.0" onAction="#didClickUnlockButton" disable="true" cacheShape="true" cache="true" />
 		</HBox>
 		
 		<!-- Row 3 -->
-		<GridPane fx:id="advancedOptions" vgap="12.0" hgap="12.0" prefWidth="400.0" GridPane.rowIndex="3" GridPane.columnIndex="0" GridPane.columnSpan="2" visible="false">
+		<GridPane fx:id="advancedOptions" vgap="12.0" hgap="12.0" prefWidth="400.0" GridPane.rowIndex="3" GridPane.columnIndex="0" GridPane.columnSpan="2" visible="false" cacheShape="true" cache="true">
 			<padding>
 				<Insets top="24.0" />
 			</padding>
@@ -58,9 +58,9 @@
 			</columnConstraints>
 			
 			<!-- Row 3.0 -->
-			<Separator GridPane.rowIndex="0" GridPane.columnIndex="0" GridPane.columnSpan="2" />
-			<HBox alignment="CENTER" prefWidth="400.0" GridPane.rowIndex="0" GridPane.columnIndex="0" GridPane.columnSpan="2">
-				<Label text="%unlock.label.advancedHeading" style="-fx-background-color: COLOR_BACKGROUND;">
+			<Separator GridPane.rowIndex="0" GridPane.columnIndex="0" GridPane.columnSpan="2" cacheShape="true" cache="true"/>
+			<HBox alignment="CENTER" prefWidth="400.0" GridPane.rowIndex="0" GridPane.columnIndex="0" GridPane.columnSpan="2" cacheShape="true" cache="true">
+				<Label text="%unlock.label.advancedHeading" style="-fx-background-color: COLOR_BACKGROUND;" cacheShape="true" cache="true">
 					<padding>
 						<Insets left="6.0" right="6.0"/>
 					</padding>
@@ -68,27 +68,27 @@
 			</HBox>
 			
 			<!-- Row 3.1 -->
-			<Label text="%unlock.label.mountName" GridPane.rowIndex="1" GridPane.columnIndex="0" />
-			<TextField fx:id="mountName" GridPane.rowIndex="1" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" maxWidth="Infinity" />
+			<Label text="%unlock.label.mountName" GridPane.rowIndex="1" GridPane.columnIndex="0" cacheShape="true" cache="true" />
+			<TextField fx:id="mountName" GridPane.rowIndex="1" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" maxWidth="Infinity" cacheShape="true" cache="true" />
 			
 			<!-- Row 3.2 -->
-			<Label text="%unlock.label.winDriveLetter" GridPane.rowIndex="2" GridPane.columnIndex="0" />
-			<ChoiceBox fx:id="winDriveLetter" GridPane.rowIndex="2" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" maxWidth="Infinity" />
+			<Label text="%unlock.label.winDriveLetter" GridPane.rowIndex="2" GridPane.columnIndex="0" cacheShape="true" cache="true" />
+			<ChoiceBox fx:id="winDriveLetter" GridPane.rowIndex="2" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" maxWidth="Infinity" cacheShape="true" cache="true" />
 		</GridPane>
 		
 		<!-- Row 4 -->
-		<TextFlow GridPane.rowIndex="4" GridPane.columnIndex="0" GridPane.columnSpan="2">
+		<TextFlow GridPane.rowIndex="4" GridPane.columnIndex="0" GridPane.columnSpan="2" cacheShape="true" cache="true">
 			<GridPane.margin>
 				<Insets top="24.0"/>
 			</GridPane.margin>
 			<children>
-				<Text fx:id="messageText" text="asd"/>
-				<Hyperlink fx:id="downloadsPageLink" text="%unlock.label.downloadsPageLink" visible="false" onAction="#didClickDownloadsLink" />
+				<Text fx:id="messageText" cache="true" />
+				<Hyperlink fx:id="downloadsPageLink" text="%unlock.label.downloadsPageLink" visible="false" onAction="#didClickDownloadsLink" cacheShape="true" cache="true" />
 			</children>
 		</TextFlow>
 		
 		<!-- Row 5-->
-		<ProgressIndicator progress="-1" fx:id="progressIndicator" GridPane.rowIndex="5" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.halignment="CENTER" />
+		<ProgressIndicator progress="-1" fx:id="progressIndicator" GridPane.rowIndex="5" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.halignment="CENTER" cacheShape="true" cache="true" cacheHint="SPEED" />
 	</children>
 </GridPane>
 
