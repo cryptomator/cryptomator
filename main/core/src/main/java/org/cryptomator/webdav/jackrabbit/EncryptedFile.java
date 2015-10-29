@@ -10,6 +10,7 @@ package org.cryptomator.webdav.jackrabbit;
 
 import java.io.EOFException;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.channels.FileChannel;
 import java.nio.channels.OverlappingFileLockException;
 import java.nio.file.AtomicMoveNotSupportedException;
@@ -30,7 +31,6 @@ import org.apache.jackrabbit.webdav.property.DavPropertyName;
 import org.apache.jackrabbit.webdav.property.DefaultDavProperty;
 import org.cryptomator.crypto.Cryptor;
 import org.cryptomator.crypto.exceptions.MacAuthenticationFailedException;
-import org.cryptomator.webdav.exceptions.IORuntimeException;
 import org.eclipse.jetty.http.HttpHeader;
 import org.eclipse.jetty.http.HttpHeaderValue;
 import org.slf4j.Logger;
@@ -65,7 +65,7 @@ class EncryptedFile extends AbstractEncryptedNode implements FileConstants {
 				// don't add content length DAV property
 			} catch (IOException e) {
 				LOG.error("Error reading filesize " + filePath.toString(), e);
-				throw new IORuntimeException(e);
+				throw new UncheckedIOException(e);
 			}
 		}
 		this.contentLength = contentLength;

@@ -9,6 +9,7 @@
 package org.cryptomator.webdav.jackrabbit;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
@@ -38,7 +39,6 @@ import org.apache.jackrabbit.webdav.property.DavPropertySet;
 import org.apache.jackrabbit.webdav.property.DefaultDavProperty;
 import org.apache.jackrabbit.webdav.property.PropEntry;
 import org.cryptomator.crypto.Cryptor;
-import org.cryptomator.webdav.exceptions.IORuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -213,7 +213,7 @@ abstract class AbstractEncryptedNode implements DavResource {
 				this.move((AbstractEncryptedNode) dest);
 			} catch (IOException e) {
 				LOG.error("Error moving file from " + this.getResourcePath() + " to " + dest.getResourcePath());
-				throw new IORuntimeException(e);
+				throw new UncheckedIOException(e);
 			}
 		} else {
 			throw new IllegalArgumentException("Unsupported resource type: " + dest.getClass().getName());
@@ -229,7 +229,7 @@ abstract class AbstractEncryptedNode implements DavResource {
 				this.copy((AbstractEncryptedNode) dest, shallow);
 			} catch (IOException e) {
 				LOG.error("Error copying file from " + this.getResourcePath() + " to " + dest.getResourcePath());
-				throw new IORuntimeException(e);
+				throw new UncheckedIOException(e);
 			}
 		} else {
 			throw new IllegalArgumentException("Unsupported resource type: " + dest.getClass().getName());

@@ -1,6 +1,7 @@
 package org.cryptomator.webdav.jackrabbit;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
@@ -23,7 +24,6 @@ import org.apache.jackrabbit.webdav.DavSession;
 import org.apache.jackrabbit.webdav.lock.LockManager;
 import org.apache.jackrabbit.webdav.lock.SimpleLockManager;
 import org.cryptomator.crypto.Cryptor;
-import org.cryptomator.webdav.exceptions.IORuntimeException;
 import org.eclipse.jetty.http.HttpHeader;
 
 public class CryptoResourceFactory implements DavResourceFactory, FileConstants {
@@ -191,7 +191,7 @@ public class CryptoResourceFactory implements DavResourceFactory, FileConstants 
 			final String encryptedFilename = filenameTranslator.getEncryptedFilename(cleartextFilename);
 			return parent.resolve(encryptedFilename);
 		} catch (IOException e) {
-			throw new IORuntimeException(e);
+			throw new UncheckedIOException(e);
 		}
 	}
 
@@ -208,7 +208,7 @@ public class CryptoResourceFactory implements DavResourceFactory, FileConstants 
 			final String encryptedFilename = filenameTranslator.getEncryptedDirFileName(cleartextFilename);
 			return parent.resolve(encryptedFilename);
 		} catch (IOException e) {
-			throw new IORuntimeException(e);
+			throw new UncheckedIOException(e);
 		}
 	}
 	
@@ -242,7 +242,7 @@ public class CryptoResourceFactory implements DavResourceFactory, FileConstants 
 			Files.createDirectories(result);
 			return result;
 		} catch (IOException e) {
-			throw new IORuntimeException(e);
+			throw new UncheckedIOException(e);
 		}
 	}
 

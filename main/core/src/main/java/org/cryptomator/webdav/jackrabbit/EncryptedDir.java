@@ -10,6 +10,7 @@ package org.cryptomator.webdav.jackrabbit;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
@@ -51,7 +52,6 @@ import org.cryptomator.crypto.Cryptor;
 import org.cryptomator.crypto.exceptions.DecryptFailedException;
 import org.cryptomator.crypto.exceptions.EncryptFailedException;
 import org.cryptomator.webdav.exceptions.DavRuntimeException;
-import org.cryptomator.webdav.exceptions.IORuntimeException;
 import org.eclipse.jetty.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,7 +78,7 @@ class EncryptedDir extends AbstractEncryptedNode implements FileConstants {
 			try {
 				directoryId = filenameTranslator.getDirectoryId(filePath, false);
 			} catch (IOException e) {
-				throw new IORuntimeException(e);
+				throw new UncheckedIOException(e);
 			}
 		}
 		return directoryId;
@@ -187,7 +187,7 @@ class EncryptedDir extends AbstractEncryptedNode implements FileConstants {
 			Files.setLastModifiedTime(filePath, FileTime.from(Instant.now()));
 		} catch (IOException e) {
 			LOG.error("Failed to create file.", e);
-			throw new IORuntimeException(e);
+			throw new UncheckedIOException(e);
 		}
 	}
 
@@ -223,7 +223,7 @@ class EncryptedDir extends AbstractEncryptedNode implements FileConstants {
 			return new DavResourceIteratorImpl(result);
 		} catch (IOException e) {
 			LOG.error("Exception during getMembers.", e);
-			throw new IORuntimeException(e);
+			throw new UncheckedIOException(e);
 		} catch (DavException e) {
 			LOG.error("Exception during getMembers.", e);
 			throw new DavRuntimeException(e);
@@ -263,7 +263,7 @@ class EncryptedDir extends AbstractEncryptedNode implements FileConstants {
 		} catch (FileNotFoundException e) {
 			// no-op
 		} catch (IOException e) {
-			throw new IORuntimeException(e);
+			throw new UncheckedIOException(e);
 		}
 	}
 
