@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>org.cryptomator</groupId>
 		<artifactId>main</artifactId>
-		<version>0.10.0-SNAPSHOT</version>
+		<version>0.10.0</version>
 	</parent>
 	<artifactId>installer-win-portable</artifactId>
 	<packaging>pom</packaging>

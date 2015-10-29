@@ -29,6 +29,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Hyperlink;
+import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
@@ -64,6 +65,9 @@ public class UnlockController extends AbstractFXMLViewController {
 
 	@FXML
 	private TextField mountName;
+	
+	@FXML
+	private Label winDriveLetterLabel;
 	
 	@FXML
 	private ChoiceBox<Character> winDriveLetter;
@@ -117,6 +121,8 @@ public class UnlockController extends AbstractFXMLViewController {
 		if (SystemUtils.IS_OS_WINDOWS) {
 			winDriveLetter.setConverter(new WinDriveLetterLabelConverter());
 		} else {
+			winDriveLetterLabel.setVisible(false);
+			winDriveLetterLabel.setManaged(false);
 			winDriveLetter.setVisible(false);
 			winDriveLetter.setManaged(false);
 		}

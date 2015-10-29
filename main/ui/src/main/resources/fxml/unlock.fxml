@@ -72,7 +72,7 @@
 			<TextField fx:id="mountName" GridPane.rowIndex="1" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" maxWidth="Infinity" cacheShape="true" cache="true" />
 			
 			<!-- Row 3.2 -->
-			<Label text="%unlock.label.winDriveLetter" GridPane.rowIndex="2" GridPane.columnIndex="0" cacheShape="true" cache="true" />
+			<Label fx:id="winDriveLetterLabel" text="%unlock.label.winDriveLetter" GridPane.rowIndex="2" GridPane.columnIndex="0" cacheShape="true" cache="true" />
 			<ChoiceBox fx:id="winDriveLetter" GridPane.rowIndex="2" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" maxWidth="Infinity" cacheShape="true" cache="true" />
 		</GridPane>
 		
