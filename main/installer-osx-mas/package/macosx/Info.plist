@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>LSMinimumSystemVersion</key>
+  <string>10.7.4</string>
+  <key>CFBundleDevelopmentRegion</key>
+  <string>English</string>
+  <key>CFBundleAllowMixedLocalizations</key>
+  <true/>
+  <key>CFBundleExecutable</key>
+  <string>DEPLOY_LAUNCHER_NAME</string>
+  <key>CFBundleIconFile</key>
+  <string>DEPLOY_ICON_FILE</string>
+  <key>CFBundleIdentifier</key>
+  <string>DEPLOY_BUNDLE_IDENTIFIER</string>
+  <key>CFBundleInfoDictionaryVersion</key>
+  <string>6.0</string>
+  <key>CFBundleName</key>
+  <string>DEPLOY_BUNDLE_NAME</string>
+  <key>CFBundlePackageType</key>
+  <string>APPL</string>
+  <key>CFBundleShortVersionString</key>
+  <string>DEPLOY_BUNDLE_SHORT_VERSION</string>
+  <key>CFBundleSignature</key>
+  <string>????</string>
+  <!-- See http://developer.apple.com/library/mac/#releasenotes/General/SubmittingToMacAppStore/_index.html for list of AppStore categories -->
+  <key>LSApplicationCategoryType</key>
+  <string>DEPLOY_BUNDLE_CATEGORY</string>
+  <key>CFBundleVersion</key>
+  <string>100</string>
+  <key>NSHumanReadableCopyright</key>
+  <string>DEPLOY_BUNDLE_COPYRIGHT</string>
+  <key>JVMRuntime</key>
+  <string>DEPLOY_JAVA_RUNTIME_NAME</string>
+  <key>JVMMainClassName</key>
+  <string>DEPLOY_LAUNCHER_CLASS</string>
+  <key>JVMAppClasspath</key>
+  <string>DEPLOY_APP_CLASSPATH</string>
+  <key>JVMMainJarName</key>
+  <string>DEPLOY_MAIN_JAR_NAME</string>
+  <key>JVMPreferencesID</key>
+  <string>DEPLOY_PREFERENCES_ID</string>
+  <key>JVMOptions</key>
+  <array>
+DEPLOY_JVM_OPTIONS
+  </array>
+  <key>JVMUserOptions</key>
+  <dict>
+DEPLOY_JVM_USER_OPTIONS
+  </dict>
+  <key>NSHighResolutionCapable</key>
+  <string>true</string>
+  <!-- hide from dock -->
+  <key>LSUIElement</key>
+  <string>1</string>
+  <!-- register .cryptomator bundle extension -->
+  <key>CFBundleDocumentTypes</key>
+  <array>
+    <dict>
+      <key>CFBundleTypeExtensions</key>
+      <array>
+        <string>cryptomator</string>
+      </array>
+      <key>CFBundleTypeIconFile</key>
+      <string>Cryptomator.icns</string>
+      <key>CFBundleTypeName</key>
+      <string>Cryptomator Vault</string>
+      <key>CFBundleTypeRole</key>
+      <string>Editor</string>
+      <key>LSItemContentTypes</key>
+      <array>
+        <string>org.cryptomator.folder</string>
+      </array>
+      <key>LSTypeIsPackage</key>
+      <true/>
+    </dict>
+  </array>
+  <key>UTExportedTypeDeclarations</key>
+  <array>
+    <dict>
+      <key>UTTypeConformsTo</key>
+      <array>
+        <string>com.apple.package</string>
+      </array>
+      <key>UTTypeDescription</key>
+      <string>Cryptomator Vault</string>
+      <key>UTTypeIconFile</key>
+      <string>Cryptomator.icns</string>
+      <key>UTTypeIdentifier</key>
+      <string>org.cryptomator.folder</string>
+      <key>UTTypeTagSpecification</key>
+      <dict>
+        <key>public.filename-extension</key>
+        <array>
+          <string>cryptomator</string>
+        </array>
+      </dict>
+    </dict>
+  </array>
+</dict>
+</plist>

@@ -38,6 +38,7 @@ import javafx.application.Platform;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
@@ -52,6 +53,9 @@ public class WelcomeController extends AbstractFXMLViewController {
 
 	@FXML
 	private ImageView botImageView;
+
+	@FXML
+	private Node checkForUpdatesContainer;
 
 	@FXML
 	private CheckBox checkForUpdatesCheckbox;
@@ -93,8 +97,15 @@ public class WelcomeController extends AbstractFXMLViewController {
 		botImageView.setImage(new Image(getClass().getResource("/bot_welcome.png").toString()));
 		checkForUpdatesCheckbox.setSelected(settings.isCheckForUpdatesEnabled());
 		checkForUpdatesCheckbox.selectedProperty().addListener(this::checkForUpdatesChanged);
-		if (settings.isCheckForUpdatesEnabled()) {
-			executor.execute(this::checkForUpdates);
+		if (areUpdatesManagedExternally()) {
+			checkForUpdatesContainer.setVisible(false);
+			checkForUpdatesContainer.setManaged(false);
+		} else {
+			checkForUpdatesCheckbox.setSelected(settings.isCheckForUpdatesEnabled());
+			checkForUpdatesCheckbox.selectedProperty().addListener(this::checkForUpdatesChanged);
+			if (settings.isCheckForUpdatesEnabled()) {
+				executor.execute(this::checkForUpdates);
+			}
 		}
 	}
 
@@ -110,7 +121,14 @@ public class WelcomeController extends AbstractFXMLViewController {
 		}
 	}
 
+	private boolean areUpdatesManagedExternally() {
+		return Boolean.parseBoolean(System.getProperty("cryptomator.updatesManagedExternally", "false"));
+	}
+
 	private void checkForUpdates() {
+		if (areUpdatesManagedExternally()) {
+			return;
+		}
 		Platform.runLater(() -> {
 			checkForUpdatesCheckbox.setVisible(false);
 			checkForUpdatesStatus.setText(resourceBundle.getString("welcome.checkForUpdates.label.currentlyChecking"));
