@@ -205,6 +205,12 @@
 			</modules>
 		</profile>
 		<profile>
+			<id>osx-mas</id>
+			<modules>
+				<module>installer-osx-mas</module>
+			</modules>
+		</profile>
+		<profile>
 			<id>win</id>
 			<modules>
 				<module>installer-win</module>
