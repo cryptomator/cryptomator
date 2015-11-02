@@ -10,6 +10,7 @@ package org.cryptomator.ui.controllers;
 
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.concurrent.ExecutorService;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -54,10 +55,12 @@ public class UnlockedController extends AbstractFXMLViewController {
 
 	private final Stage macWarningsWindow = new Stage();
 	private final MacWarningsController macWarningsController;
+	private final ExecutorService exec;
 
 	@Inject
-	public UnlockedController(Provider<MacWarningsController> macWarningsControllerProvider) {
+	public UnlockedController(Provider<MacWarningsController> macWarningsControllerProvider, ExecutorService exec) {
 		this.macWarningsController = macWarningsControllerProvider.get();
+		this.exec = exec;
 	}
 
 	@Override
@@ -78,27 +81,36 @@ public class UnlockedController extends AbstractFXMLViewController {
 
 	@FXML
 	private void didClickRevealVault(ActionEvent event) {
-		try {
-			vault.reveal();
-		} catch (CommandFailedException e) {
-			messageLabel.setText(resourceBundle.getString("unlocked.label.revealFailed"));
-			return;
-		}
+		exec.submit(() -> {
+			try {
+				vault.reveal();
+			} catch (CommandFailedException e) {
+				Platform.runLater(() -> {
+					messageLabel.setText(resourceBundle.getString("unlocked.label.revealFailed"));
+				});
+			}
+		});
 	}
 
 	@FXML
 	private void didClickCloseVault(ActionEvent event) {
-		try {
-			vault.unmount();
-		} catch (CommandFailedException e) {
-			messageLabel.setText(resourceBundle.getString("unlocked.label.unmountFailed"));
-			return;
-		}
-		vault.stopServer();
-		vault.setUnlocked(false);
-		if (listener != null) {
-			listener.didLock(this);
-		}
+		exec.submit(() -> {
+			try {
+				vault.unmount();
+			} catch (CommandFailedException e) {
+				Platform.runLater(() -> {
+					messageLabel.setText(resourceBundle.getString("unlocked.label.unmountFailed"));
+				});
+				return;
+			}
+			vault.stopServer();
+			vault.setUnlocked(false);
+			if (listener != null) {
+				Platform.runLater(() -> {
+					listener.didLock(this);
+				});
+			}
+		});
 	}
 
 	// ****************************************
@@ -107,13 +119,9 @@ public class UnlockedController extends AbstractFXMLViewController {
 
 	private void macWarningsDidChange(ListChangeListener.Change<? extends String> change) {
 		if (change.getList().size() > 0) {
-			Platform.runLater(() -> {
-				macWarningsWindow.show();
-			});
+			Platform.runLater(macWarningsWindow::show);
 		} else {
-			Platform.runLater(() -> {
-				macWarningsWindow.hide();
-			});
+			Platform.runLater(macWarningsWindow::hide);
 		}
 	}
 

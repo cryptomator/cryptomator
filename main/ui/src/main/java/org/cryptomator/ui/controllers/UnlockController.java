@@ -20,6 +20,22 @@ import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
+import javax.inject.Inject;
+import javax.security.auth.DestroyFailedException;
+
+import org.apache.commons.lang3.CharUtils;
+import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.crypto.exceptions.UnsupportedKeyLengthException;
+import org.cryptomator.crypto.exceptions.UnsupportedVaultException;
+import org.cryptomator.crypto.exceptions.WrongPasswordException;
+import org.cryptomator.ui.controls.SecPasswordField;
+import org.cryptomator.ui.model.Vault;
+import org.cryptomator.ui.util.FXThreads;
+import org.cryptomator.ui.util.mount.CommandFailedException;
+import org.cryptomator.ui.util.mount.WindowsDriveLetters;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -37,22 +53,6 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.text.Text;
 import javafx.util.StringConverter;
 
-import javax.inject.Inject;
-import javax.security.auth.DestroyFailedException;
-
-import org.apache.commons.lang3.CharUtils;
-import org.apache.commons.lang3.SystemUtils;
-import org.cryptomator.crypto.exceptions.UnsupportedKeyLengthException;
-import org.cryptomator.crypto.exceptions.UnsupportedVaultException;
-import org.cryptomator.crypto.exceptions.WrongPasswordException;
-import org.cryptomator.ui.controls.SecPasswordField;
-import org.cryptomator.ui.model.Vault;
-import org.cryptomator.ui.util.FXThreads;
-import org.cryptomator.ui.util.mount.CommandFailedException;
-import org.cryptomator.ui.util.mount.WindowsDriveLetters;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public class UnlockController extends AbstractFXMLViewController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(UnlockController.class);
@@ -65,10 +65,10 @@ public class UnlockController extends AbstractFXMLViewController {
 
 	@FXML
 	private TextField mountName;
-	
+
 	@FXML
 	private Label winDriveLetterLabel;
-	
+
 	@FXML
 	private ChoiceBox<Character> winDriveLetter;
 
@@ -177,7 +177,7 @@ public class UnlockController extends AbstractFXMLViewController {
 			advancedOptionsButton.setText(resourceBundle.getString("unlock.button.advancedOptions.show"));
 		}
 	}
-	
+
 	private void filterAlphanumericKeyEvents(KeyEvent t) {
 		if (t.getCharacter() == null || t.getCharacter().length() == 0) {
 			return;
@@ -199,9 +199,9 @@ public class UnlockController extends AbstractFXMLViewController {
 			vault.setMountName(newValue);
 		}
 	}
-	
+
 	/**
-	 *  Converts 'C' to "C:" to translate between model and GUI.
+	 * Converts 'C' to "C:" to translate between model and GUI.
 	 */
 	private class WinDriveLetterLabelConverter extends StringConverter<Character> {
 
@@ -222,9 +222,9 @@ public class UnlockController extends AbstractFXMLViewController {
 				return CharUtils.toCharacterObject(string);
 			}
 		}
-		
+
 	}
-	
+
 	/**
 	 * Natural sorting of ASCII letters, but <code>null</code> always on first, as this is "auto-assign".
 	 */
@@ -237,11 +237,11 @@ public class UnlockController extends AbstractFXMLViewController {
 			} else if (c2 == null) {
 				return 1;
 			} else {
-				return (char) c1 - (char) c2;
+				return c1 - c2;
 			}
 		}
 	}
-	
+
 	private void winDriveLetterDidChange(ObservableValue<? extends Character> property, Character oldValue, Character newValue) {
 		if (vault == null) {
 			return;
@@ -317,14 +317,18 @@ public class UnlockController extends AbstractFXMLViewController {
 		progressIndicator.setVisible(false);
 		setControlsDisabled(false);
 		if (vault.isUnlocked() && !mountSuccess) {
-			vault.stopServer();
-			vault.setUnlocked(false);
+			exec.submit(() -> {
+				vault.stopServer();
+				vault.setUnlocked(false);
+			});
 		} else if (vault.isUnlocked() && mountSuccess) {
-			try {
-				vault.reveal();
-			} catch (CommandFailedException e) {
-				LOG.error("Failed to reveal mounted vault", e);
-			}
+			exec.submit(() -> {
+				try {
+					vault.reveal();
+				} catch (CommandFailedException e) {
+					LOG.error("Failed to reveal mounted vault", e);
+				}
+			});
 		}
 		if (mountSuccess && listener != null) {
 			listener.didUnlock(this);
@@ -345,7 +349,7 @@ public class UnlockController extends AbstractFXMLViewController {
 			chooseSelectedDriveLetter();
 		}
 	}
-	
+
 	private void chooseSelectedDriveLetter() {
 		assert SystemUtils.IS_OS_WINDOWS;
 		// if the vault prefers a drive letter, that is currently occupied, this is our last chance to reset this:
