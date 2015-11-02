@@ -11,9 +11,7 @@ import java.awt.TrayIcon.MessageType;
 import java.awt.event.ActionEvent;
 import java.io.IOException;
 import java.util.ResourceBundle;
-
-import javafx.application.Platform;
-import javafx.stage.Stage;
+import java.util.concurrent.TimeUnit;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
@@ -21,10 +19,16 @@ import javax.script.ScriptException;
 import javax.swing.SwingUtilities;
 
 import org.apache.commons.lang3.SystemUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javafx.application.Platform;
+import javafx.stage.Stage;
 
 public final class TrayIconUtil {
 
 	private static TrayIconUtil INSTANCE;
+	private static final Logger LOG = LoggerFactory.getLogger(TrayIconUtil.class);
 
 	private final Stage mainApplicationWindow;
 	private final ResourceBundle rb;
@@ -79,8 +83,30 @@ public final class TrayIconUtil {
 		exitItem.addActionListener(this::quitFromTray);
 		popup.add(exitItem);
 
-		final Image image = Toolkit.getDefaultToolkit().getImage(TrayIconUtil.class.getResource("/tray_icon.png"));
+		final Image image;
+		if (SystemUtils.IS_OS_MAC_OSX && isMacMenuBarDarkMode()) {
+			image = Toolkit.getDefaultToolkit().getImage(TrayIconUtil.class.getResource("/tray_icon_white.png"));
+		} else {
+			image = Toolkit.getDefaultToolkit().getImage(TrayIconUtil.class.getResource("/tray_icon.png"));
+		}
+
 		return new TrayIcon(image, rb.getString("app.name"), popup);
+	}
+
+	/**
+	 * @return true if <code>defaults read -g AppleInterfaceStyle</code> has an exit status of <code>0</code> (i.e. _not_ returning "key not found").
+	 */
+	private boolean isMacMenuBarDarkMode() {
+		try {
+			// check for exit status only. Once there are more modes than "dark" and "default", we might need to analyze string contents..
+			final Process proc = Runtime.getRuntime().exec(new String[] {"defaults", "read", "-g", "AppleInterfaceStyle"});
+			proc.waitFor(100, TimeUnit.MILLISECONDS);
+			return proc.exitValue() == 0;
+		} catch (IOException | InterruptedException | IllegalThreadStateException ex) {
+			// IllegalThreadStateException thrown by proc.exitValue(), if process didn't terminate
+			LOG.warn("Determining MAC OS X dark mode settings failed. Assuming default (light) mode.");
+			return false;
+		}
 	}
 
 	private void showTrayNotification(TrayIcon trayIcon) {
