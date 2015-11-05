@@ -98,8 +98,9 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 	public Aes256Cryptor() {
 		byte[] bytes = new byte[AES_KEY_LENGTH_IN_BITS / Byte.SIZE];
 		try {
-			securePrng = SecureRandom.getInstance(PRNG_ALGORITHM);
-			securePrng.setSeed(securePrng.generateSeed(PRNG_SEED_LENGTH));
+			securePrng = SecureRandom.getInstanceStrong();
+			// No setSeed needed. See SecureRandom.getInstance(String):
+			// The first call to nextBytes will force the SecureRandom object to seed itself
 			securePrng.nextBytes(bytes);
 			this.primaryMasterKey = new SecretKeySpec(bytes, AES_KEY_ALGORITHM);
 			securePrng.nextBytes(bytes);

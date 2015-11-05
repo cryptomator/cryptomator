@@ -39,11 +39,6 @@ interface AesCryptographicConfiguration {
 	int PRNG_SEED_LENGTH = 16;
 
 	/**
-	 * Algorithm used for random number generation.
-	 */
-	String PRNG_ALGORITHM = "SHA1PRNG";
-
-	/**
 	 * Algorithm used for en/decryption.
 	 * 
 	 * @see http://docs.oracle.com/javase/7/docs/technotes/guides/security/StandardNames.html#AlgorithmParameters
