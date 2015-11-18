@@ -34,6 +34,13 @@
 			<artifactId>bcprov-jdk15on</artifactId>
 			<version>${bouncycastle.version}</version>
 		</dependency>
+		
+		<!-- AES-SIV -->
+		<dependency>
+			<groupId>org.cryptomator</groupId>
+			<artifactId>siv-mode</artifactId>
+			<version>1.0.1</version>
+		</dependency>
 
 		<!-- Commons -->
 		<dependency>

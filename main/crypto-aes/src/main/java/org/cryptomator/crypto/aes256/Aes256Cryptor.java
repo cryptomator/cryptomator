@@ -25,6 +25,7 @@ import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
+import javax.crypto.AEADBadTagException;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
@@ -45,6 +46,7 @@ import org.cryptomator.crypto.exceptions.MacAuthenticationFailedException;
 import org.cryptomator.crypto.exceptions.UnsupportedKeyLengthException;
 import org.cryptomator.crypto.exceptions.UnsupportedVaultException;
 import org.cryptomator.crypto.exceptions.WrongPasswordException;
+import org.cryptomator.siv.SivMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,6 +61,11 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 	 * here: http://www.oracle.com/technetwork/java/javase/downloads/.
 	 */
 	private static final int AES_KEY_LENGTH_IN_BITS;
+
+	/**
+	 * SIV mode for deterministic filename encryption.
+	 */
+	private static final SivMode AES_SIV = new SivMode();
 
 	/**
 	 * PRNG for cryptographically secure random numbers. Defaults to SHA1-based number generator.
@@ -285,7 +292,7 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 	@Override
 	public String encryptDirectoryPath(String cleartextDirectoryId, String nativePathSep) {
 		final byte[] cleartextBytes = cleartextDirectoryId.getBytes(StandardCharsets.UTF_8);
-		byte[] encryptedBytes = AesSivCipherUtil.sivEncrypt(primaryMasterKey, hMacMasterKey, cleartextBytes);
+		byte[] encryptedBytes = AES_SIV.encrypt(primaryMasterKey, hMacMasterKey, cleartextBytes);
 		final byte[] hashed = sha256().digest(encryptedBytes);
 		final String encryptedThenHashedPath = ENCRYPTED_FILENAME_CODEC.encodeAsString(hashed);
 		return encryptedThenHashedPath.substring(0, 2) + nativePathSep + encryptedThenHashedPath.substring(2);
@@ -294,15 +301,19 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 	@Override
 	public String encryptFilename(String cleartextName) {
 		final byte[] cleartextBytes = cleartextName.getBytes(StandardCharsets.UTF_8);
-		final byte[] encryptedBytes = AesSivCipherUtil.sivEncrypt(primaryMasterKey, hMacMasterKey, cleartextBytes);
+		final byte[] encryptedBytes = AES_SIV.encrypt(primaryMasterKey, hMacMasterKey, cleartextBytes);
 		return ENCRYPTED_FILENAME_CODEC.encodeAsString(encryptedBytes);
 	}
 
 	@Override
 	public String decryptFilename(String ciphertextName) throws DecryptFailedException {
 		final byte[] encryptedBytes = ENCRYPTED_FILENAME_CODEC.decode(ciphertextName);
-		final byte[] cleartextBytes = AesSivCipherUtil.sivDecrypt(primaryMasterKey, hMacMasterKey, encryptedBytes);
-		return new String(cleartextBytes, StandardCharsets.UTF_8);
+		try {
+			final byte[] cleartextBytes = AES_SIV.decrypt(primaryMasterKey, hMacMasterKey, encryptedBytes);
+			return new String(cleartextBytes, StandardCharsets.UTF_8);
+		} catch (AEADBadTagException e) {
+			throw new DecryptFailedException(e);
+		}
 	}
 
 	@Override
