@@ -33,6 +33,8 @@ public class Aes256CryptorTest {
 	public void testCorrectPassword() throws IOException, WrongPasswordException, DecryptFailedException, UnsupportedKeyLengthException, DestroyFailedException, UnsupportedVaultException {
 		final String pw = "asd";
 		final Aes256Cryptor cryptor = new Aes256Cryptor();
+		cryptor.randomizeMasterKey();
+
 		final ByteArrayOutputStream out = new ByteArrayOutputStream();
 		cryptor.encryptMasterKey(out, pw);
 		cryptor.destroy();
@@ -49,6 +51,8 @@ public class Aes256CryptorTest {
 	public void testWrongPassword() throws IOException, DecryptFailedException, WrongPasswordException, UnsupportedKeyLengthException, DestroyFailedException, UnsupportedVaultException {
 		final String pw = "asd";
 		final Aes256Cryptor cryptor = new Aes256Cryptor();
+		cryptor.randomizeMasterKey();
+
 		final ByteArrayOutputStream out = new ByteArrayOutputStream();
 		cryptor.encryptMasterKey(out, pw);
 		cryptor.destroy();
@@ -78,6 +82,7 @@ public class Aes256CryptorTest {
 
 		// init cryptor:
 		final Aes256Cryptor cryptor = new Aes256Cryptor();
+		cryptor.randomizeMasterKey();
 
 		// encrypt:
 		final ByteBuffer encryptedData = ByteBuffer.allocate(104 + plaintextData.length + 4096);
@@ -110,6 +115,7 @@ public class Aes256CryptorTest {
 
 		// init cryptor:
 		final Aes256Cryptor cryptor = new Aes256Cryptor();
+		cryptor.randomizeMasterKey();
 
 		// encrypt:
 		final ByteBuffer encryptedData = ByteBuffer.allocate(104 + plaintextData.length + 4096 + 32); // header + content + maximum possible size obfuscation padding + 32 bytes mac (per each 32k)
@@ -149,6 +155,7 @@ public class Aes256CryptorTest {
 
 		// init cryptor:
 		final Aes256Cryptor cryptor = new Aes256Cryptor();
+		cryptor.randomizeMasterKey();
 
 		// encrypt:
 		final ByteBuffer encryptedData = ByteBuffer.allocate((int) (104 + plaintextData.length * 1.2));
@@ -176,6 +183,7 @@ public class Aes256CryptorTest {
 	@Test
 	public void testEncryptionOfFilenames() throws IOException, DecryptFailedException {
 		final Aes256Cryptor cryptor = new Aes256Cryptor();
+		cryptor.randomizeMasterKey();
 
 		// directory paths
 		final String originalPath1 = "foo/bar/baz";

@@ -23,6 +23,11 @@ public class AbstractCryptorDecorator implements Cryptor {
 	}
 
 	@Override
+	public void randomizeMasterKey() {
+		cryptor.randomizeMasterKey();
+	}
+
+	@Override
 	public void encryptMasterKey(OutputStream out, CharSequence password) throws IOException {
 		cryptor.encryptMasterKey(out, password);
 	}

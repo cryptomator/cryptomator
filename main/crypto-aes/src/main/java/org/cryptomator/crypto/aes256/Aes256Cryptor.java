@@ -103,25 +103,30 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 	 * Creates a new Cryptor with a newly initialized PRNG.
 	 */
 	public Aes256Cryptor() {
-		byte[] bytes = new byte[AES_KEY_LENGTH_IN_BITS / Byte.SIZE];
 		try {
 			securePrng = SecureRandom.getInstanceStrong();
+			// No setSeed needed. See SecureRandom.getInstance(String):
+			// The first call to nextBytes will force the SecureRandom object to seed itself
+		} catch (NoSuchAlgorithmException e) {
+			throw new IllegalStateException("PRNG algorithm should exist.", e);
+		}
+	}
+
+	@Override
+	public void randomizeMasterKey() {
+		byte[] bytes = new byte[AES_KEY_LENGTH_IN_BITS / Byte.SIZE];
+		try {
 			// No setSeed needed. See SecureRandom.getInstance(String):
 			// The first call to nextBytes will force the SecureRandom object to seed itself
 			securePrng.nextBytes(bytes);
 			this.primaryMasterKey = new SecretKeySpec(bytes, AES_KEY_ALGORITHM);
 			securePrng.nextBytes(bytes);
 			this.hMacMasterKey = new SecretKeySpec(bytes, HMAC_KEY_ALGORITHM);
-		} catch (NoSuchAlgorithmException e) {
-			throw new IllegalStateException("PRNG algorithm should exist.", e);
 		} finally {
 			Arrays.fill(bytes, (byte) 0);
 		}
 	}
 
-	/**
-	 * Encrypts the current masterKey with the given password and writes the result to the given output stream.
-	 */
 	@Override
 	public void encryptMasterKey(OutputStream out, CharSequence password) throws IOException {
 		try {
@@ -149,14 +154,6 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 		}
 	}
 
-	/**
-	 * Reads the encrypted masterkey from the given input stream and decrypts it with the given password.
-	 * 
-	 * @throws DecryptFailedException If the decryption failed for various reasons (including wrong password).
-	 * @throws WrongPasswordException If the provided password was wrong. Note: Sometimes the algorithm itself fails due to a wrong password. In this case a DecryptFailedException will be thrown.
-	 * @throws UnsupportedKeyLengthException If the masterkey has been encrypted with a higher key length than supported by the system. In this case Java JCE needs to be installed.
-	 * @throws UnsupportedVaultException If the masterkey file is too old or too modern.
-	 */
 	@Override
 	public void decryptMasterKey(InputStream in, CharSequence password) throws DecryptFailedException, WrongPasswordException, UnsupportedKeyLengthException, IOException, UnsupportedVaultException {
 		try {
@@ -194,6 +191,10 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 
 	@Override
 	public boolean isDestroyed() {
+		if (primaryMasterKey == null || hMacMasterKey == null) {
+			// master keys have not been set yet, so there is nothing sensitive
+			return true;
+		}
 		return primaryMasterKey.isDestroyed() && hMacMasterKey.isDestroyed();
 	}
 

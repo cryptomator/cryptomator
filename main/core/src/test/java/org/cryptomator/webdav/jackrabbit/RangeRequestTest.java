@@ -49,6 +49,7 @@ public class RangeRequestTest {
 
 	@BeforeClass
 	public static void startServer() throws URISyntaxException {
+		CRYPTOR.randomizeMasterKey();
 		SERVER.start();
 		SERVLET = SERVER.createServlet(TMP_VAULT.toPath(), CRYPTOR, new ArrayList<String>(), new ArrayList<String>(), "JUnitTestVault");
 		SERVLET.start();

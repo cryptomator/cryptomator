@@ -28,6 +28,11 @@ import org.cryptomator.crypto.exceptions.WrongPasswordException;
 public interface Cryptor extends Destroyable {
 
 	/**
+	 * Assigns new random bytes to the keys in this Cryptor instance.
+	 */
+	void randomizeMasterKey();
+
+	/**
 	 * Encrypts the current masterKey with the given password and writes the result to the given output stream.
 	 */
 	void encryptMasterKey(OutputStream out, CharSequence password) throws IOException;

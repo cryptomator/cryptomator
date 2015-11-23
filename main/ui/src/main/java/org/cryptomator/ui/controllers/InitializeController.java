@@ -93,6 +93,7 @@ public class InitializeController extends AbstractFXMLViewController {
 		final Path masterKeyPath = vault.getPath().resolve(Vault.VAULT_MASTERKEY_FILE);
 		final CharSequence password = passwordField.getCharacters();
 		try (OutputStream masterKeyOutputStream = Files.newOutputStream(masterKeyPath, StandardOpenOption.WRITE, StandardOpenOption.CREATE_NEW)) {
+			vault.getCryptor().randomizeMasterKey();
 			vault.getCryptor().encryptMasterKey(masterKeyOutputStream, password);
 			final String dataRootDir = vault.getCryptor().encryptDirectoryPath("", FileSystems.getDefault().getSeparator());
 			final Path dataRootPath = vault.getPath().resolve("d").resolve(dataRootDir);
