@@ -32,7 +32,6 @@ abstract class CryptoWorker implements Callable<Void> {
 			while (!Thread.currentThread().isInterrupted()) {
 				final BlocksData blocksData = queue.take();
 				if (blocksData == POISON) {
-					// put poison back in for other threads:
 					break;
 				}
 				final ByteBuffer processedBytes = this.process(blocksData);
@@ -52,6 +51,7 @@ abstract class CryptoWorker implements Callable<Void> {
 				}
 			}
 		} catch (InterruptedException e) {
+			// will happen for executorService.shutdownNow()
 			Thread.currentThread().interrupt();
 		}
 		return null;

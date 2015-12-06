@@ -497,7 +497,7 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 
 		// wait for decryption workers to finish:
 		try {
-			executor.waitUntilDone();
+			executor.waitUntilDone(1, TimeUnit.SECONDS);
 		} catch (ExecutionException e) {
 			final Throwable cause = e.getCause();
 			if (cause instanceof IOException) {
@@ -721,7 +721,7 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 
 		// wait for encryption workers to finish:
 		try {
-			executor.waitUntilDone();
+			executor.waitUntilDone(1, TimeUnit.SECONDS);
 		} catch (ExecutionException e) {
 			final Throwable cause = e.getCause();
 			if (cause instanceof IOException) {
