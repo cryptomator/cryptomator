@@ -506,6 +506,7 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 				throw (RuntimeException) cause;
 			} else {
 				LOG.error("Unexpected exception", e);
+				throw new RuntimeException(cause);
 			}
 		} finally {
 			destroyQuietly(fileKey);
@@ -730,6 +731,7 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 				throw (RuntimeException) cause;
 			} else {
 				LOG.error("Unexpected exception", e);
+				throw new RuntimeException(cause);
 			}
 		} finally {
 			destroyQuietly(fileKey);
