@@ -68,8 +68,7 @@ class CryptoWorkerExecutor {
 		try {
 			final boolean success = inputQueue.offer(data, timeout, unit);
 			if (!success) {
-				LOG.error("inputQueue is full.");
-				inputQueue.clear();
+				LOG.warn("Cancelling crypto workers due to timeout. Apparently the work queue not being drained by the workers any longer.");
 				allWork.cancel(true);
 			}
 			return success;

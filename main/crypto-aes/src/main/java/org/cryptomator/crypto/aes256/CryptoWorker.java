@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -14,10 +16,10 @@ abstract class CryptoWorker implements Callable<Void> {
 
 	static final BlocksData POISON = new BlocksData(ByteBuffer.allocate(0), -1L, 0);
 
-	final Lock lock;
-	final Condition blockDone;
-	final AtomicLong currentBlock;
-	final BlockingQueue<BlocksData> queue;
+	private final Lock lock;
+	private final Condition blockDone;
+	private final AtomicLong currentBlock;
+	private final BlockingQueue<BlocksData> queue;
 
 	public CryptoWorker(Lock lock, Condition blockDone, AtomicLong currentBlock, BlockingQueue<BlocksData> queue) {
 		this.lock = lock;
@@ -27,7 +29,7 @@ abstract class CryptoWorker implements Callable<Void> {
 	}
 
 	@Override
-	public final Void call() throws IOException {
+	public final Void call() throws IOException, TimeoutException {
 		try {
 			while (!Thread.currentThread().isInterrupted()) {
 				final BlocksData blocksData = queue.take();
@@ -38,7 +40,9 @@ abstract class CryptoWorker implements Callable<Void> {
 				lock.lock();
 				try {
 					while (currentBlock.get() != blocksData.startBlockNum) {
-						blockDone.await();
+						if (!blockDone.await(1, TimeUnit.SECONDS)) {
+							throw new TimeoutException("Waited too long to write block " + blocksData.startBlockNum + "; Current block " + currentBlock.get());
+						}
 					}
 					assert currentBlock.get() == blocksData.startBlockNum;
 					// yay, its my turn!
@@ -51,7 +55,7 @@ abstract class CryptoWorker implements Callable<Void> {
 				}
 			}
 		} catch (InterruptedException e) {
-			// will happen for executorService.shutdownNow()
+			// will happen for executorService.shutdownNow() or future.cancel()
 			Thread.currentThread().interrupt();
 		}
 		return null;

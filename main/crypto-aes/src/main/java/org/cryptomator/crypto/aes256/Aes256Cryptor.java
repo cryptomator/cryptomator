@@ -24,6 +24,7 @@ import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import javax.crypto.AEADBadTagException;
 import javax.crypto.BadPaddingException;
@@ -499,9 +500,14 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 		try {
 			executor.waitUntilDone(1, TimeUnit.SECONDS);
 		} catch (ExecutionException e) {
-			final Throwable cause = e.getCause();
+			Throwable cause = e;
+			while (cause instanceof ExecutionException) {
+				cause = cause.getCause();
+			}
 			if (cause instanceof IOException) {
 				throw (IOException) cause;
+			} else if (cause instanceof TimeoutException) {
+				throw new DecryptFailedException(cause);
 			} else if (cause instanceof RuntimeException) {
 				throw (RuntimeException) cause;
 			} else {
@@ -724,9 +730,14 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 		try {
 			executor.waitUntilDone(1, TimeUnit.SECONDS);
 		} catch (ExecutionException e) {
-			final Throwable cause = e.getCause();
+			Throwable cause = e;
+			while (cause instanceof ExecutionException) {
+				cause = cause.getCause();
+			}
 			if (cause instanceof IOException) {
 				throw (IOException) cause;
+			} else if (cause instanceof TimeoutException) {
+				throw new EncryptFailedException(cause);
 			} else if (cause instanceof RuntimeException) {
 				throw (RuntimeException) cause;
 			} else {
