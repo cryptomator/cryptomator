@@ -29,11 +29,16 @@ import org.junit.Test;
 
 public class Aes256CryptorTest {
 
-	@Test
+	private final Aes256Cryptor cryptor;
+
+	public Aes256CryptorTest() {
+		cryptor = new Aes256Cryptor();
+		cryptor.randomizeMasterKey();
+	}
+
+	@Test(timeout = 10000)
 	public void testCorrectPassword() throws IOException, WrongPasswordException, DecryptFailedException, UnsupportedKeyLengthException, DestroyFailedException, UnsupportedVaultException {
 		final String pw = "asd";
-		final Aes256Cryptor cryptor = new Aes256Cryptor();
-		cryptor.randomizeMasterKey();
 
 		final ByteArrayOutputStream out = new ByteArrayOutputStream();
 		cryptor.encryptMasterKey(out, pw);
@@ -47,11 +52,9 @@ public class Aes256CryptorTest {
 		IOUtils.closeQuietly(in);
 	}
 
-	@Test
+	@Test(timeout = 10000)
 	public void testWrongPassword() throws IOException, DecryptFailedException, WrongPasswordException, UnsupportedKeyLengthException, DestroyFailedException, UnsupportedVaultException {
 		final String pw = "asd";
-		final Aes256Cryptor cryptor = new Aes256Cryptor();
-		cryptor.randomizeMasterKey();
 
 		final ByteArrayOutputStream out = new ByteArrayOutputStream();
 		cryptor.encryptMasterKey(out, pw);
@@ -74,18 +77,14 @@ public class Aes256CryptorTest {
 		}
 	}
 
-	@Test(expected = DecryptFailedException.class)
+	@Test(expected = DecryptFailedException.class, timeout = 10000)
 	public void testIntegrityViolationDuringDecryption() throws IOException, DecryptFailedException, EncryptFailedException {
 		// our test plaintext data:
 		final byte[] plaintextData = "Hello World".getBytes();
 		final InputStream plaintextIn = new ByteArrayInputStream(plaintextData);
 
-		// init cryptor:
-		final Aes256Cryptor cryptor = new Aes256Cryptor();
-		cryptor.randomizeMasterKey();
-
 		// encrypt:
-		final ByteBuffer encryptedData = ByteBuffer.allocate(104 + plaintextData.length + 4096);
+		final ByteBuffer encryptedData = ByteBuffer.allocate(104 + plaintextData.length + 4096 + 32); // header + content + maximum possible size obfuscation padding + 32 bytes mac (per each 32k)
 		final SeekableByteChannel encryptedOut = new ByteBufferBackedSeekableChannel(encryptedData);
 		cryptor.encryptFile(plaintextIn, encryptedOut);
 		IOUtils.closeQuietly(plaintextIn);
@@ -107,15 +106,11 @@ public class Aes256CryptorTest {
 		cryptor.decryptFile(encryptedIn, plaintextOut, true);
 	}
 
-	@Test
+	@Test(timeout = 10000)
 	public void testEncryptionAndDecryption() throws IOException, DecryptFailedException, WrongPasswordException, UnsupportedKeyLengthException, EncryptFailedException {
 		// our test plaintext data:
 		final byte[] plaintextData = "Hello World".getBytes();
 		final InputStream plaintextIn = new ByteArrayInputStream(plaintextData);
-
-		// init cryptor:
-		final Aes256Cryptor cryptor = new Aes256Cryptor();
-		cryptor.randomizeMasterKey();
 
 		// encrypt:
 		final ByteBuffer encryptedData = ByteBuffer.allocate(104 + plaintextData.length + 4096 + 32); // header + content + maximum possible size obfuscation padding + 32 bytes mac (per each 32k)
@@ -143,7 +138,7 @@ public class Aes256CryptorTest {
 		Assert.assertArrayEquals(plaintextData, result);
 	}
 
-	@Test
+	@Test(timeout = 10000)
 	public void testPartialDecryption() throws IOException, DecryptFailedException, WrongPasswordException, UnsupportedKeyLengthException, EncryptFailedException {
 		// 8MiB test plaintext data:
 		final byte[] plaintextData = new byte[2097152 * Integer.BYTES];
@@ -152,10 +147,6 @@ public class Aes256CryptorTest {
 			bbIn.putInt(i);
 		}
 		final InputStream plaintextIn = new ByteArrayInputStream(plaintextData);
-
-		// init cryptor:
-		final Aes256Cryptor cryptor = new Aes256Cryptor();
-		cryptor.randomizeMasterKey();
 
 		// encrypt:
 		final ByteBuffer encryptedData = ByteBuffer.allocate((int) (104 + plaintextData.length * 1.2));
@@ -180,10 +171,8 @@ public class Aes256CryptorTest {
 		Assert.assertArrayEquals(expected, result);
 	}
 
-	@Test
+	@Test(timeout = 10000)
 	public void testEncryptionOfFilenames() throws IOException, DecryptFailedException {
-		final Aes256Cryptor cryptor = new Aes256Cryptor();
-		cryptor.randomizeMasterKey();
 
 		// directory paths
 		final String originalPath1 = "foo/bar/baz";
