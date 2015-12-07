@@ -8,7 +8,7 @@ import dagger.Component;
 
 @Singleton
 @Component(modules = CryptoTestModule.class)
-public interface CryptoTestComponent {
+interface CryptoTestComponent {
 
 	Cryptor cryptor();
 
