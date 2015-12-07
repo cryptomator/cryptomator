@@ -27,11 +27,6 @@
 			<groupId>org.cryptomator</groupId>
 			<artifactId>crypto-api</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.cryptomator</groupId>
-			<artifactId>crypto-aes</artifactId>
-			<scope>test</scope>
-		</dependency>
 
 		<!-- Jetty (Servlet Container) -->
 		<dependency>

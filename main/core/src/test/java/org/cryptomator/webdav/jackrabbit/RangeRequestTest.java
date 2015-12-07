@@ -26,7 +26,7 @@ import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PutMethod;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.cryptomator.crypto.aes256.Aes256Cryptor;
+import org.cryptomator.crypto.Cryptor;
 import org.cryptomator.webdav.WebDavServer;
 import org.cryptomator.webdav.WebDavServer.ServletLifeCycleAdapter;
 import org.junit.AfterClass;
@@ -41,7 +41,7 @@ import com.google.common.io.Files;
 public class RangeRequestTest {
 
 	private static final Logger LOG = LoggerFactory.getLogger(RangeRequestTest.class);
-	private static final Aes256Cryptor CRYPTOR = new Aes256Cryptor();
+	private static final Cryptor CRYPTOR = new CryptorMock();
 	private static final WebDavServer SERVER = new WebDavServer();
 	private static final File TMP_VAULT = Files.createTempDir();
 	private static ServletLifeCycleAdapter SERVLET;

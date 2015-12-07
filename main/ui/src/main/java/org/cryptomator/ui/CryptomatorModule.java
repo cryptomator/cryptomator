@@ -9,7 +9,7 @@ import javax.inject.Singleton;
 
 import org.cryptomator.crypto.Cryptor;
 import org.cryptomator.crypto.SamplingCryptorDecorator;
-import org.cryptomator.crypto.aes256.Aes256Cryptor;
+import org.cryptomator.crypto.aes256.CryptoModule;
 import org.cryptomator.ui.model.VaultObjectMapperProvider;
 import org.cryptomator.ui.settings.Settings;
 import org.cryptomator.ui.settings.SettingsProvider;
@@ -26,7 +26,7 @@ import dagger.Module;
 import dagger.Provides;
 import javafx.application.Application;
 
-@Module
+@Module(includes = CryptoModule.class)
 class CryptomatorModule {
 
 	private final Application application;
@@ -90,8 +90,9 @@ class CryptomatorModule {
 	}
 
 	@Provides
-	Cryptor provideCryptor() {
-		return SamplingCryptorDecorator.decorate(new Aes256Cryptor());
+	@Named("SamplingCryptor")
+	Cryptor provideCryptor(Cryptor cryptor) {
+		return SamplingCryptorDecorator.decorate(cryptor);
 	}
 
 	private <T> T closeLater(T object, Closer<T> closer) {

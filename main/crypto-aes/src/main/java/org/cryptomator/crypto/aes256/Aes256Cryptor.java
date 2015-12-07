@@ -103,14 +103,11 @@ public class Aes256Cryptor implements Cryptor, AesCryptographicConfiguration {
 	/**
 	 * Creates a new Cryptor with a newly initialized PRNG.
 	 */
-	public Aes256Cryptor() {
-		try {
-			securePrng = SecureRandom.getInstanceStrong();
-			// No setSeed needed. See SecureRandom.getInstance(String):
-			// The first call to nextBytes will force the SecureRandom object to seed itself
-		} catch (NoSuchAlgorithmException e) {
-			throw new IllegalStateException("PRNG algorithm should exist.", e);
-		}
+
+	Aes256Cryptor(SecureRandom securePrng) {
+		this.securePrng = securePrng;
+		// No setSeed needed. See SecureRandom.getInstance(String):
+		// The first call to nextBytes will force the SecureRandom object to seed itself
 	}
 
 	@Override

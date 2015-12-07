@@ -19,6 +19,7 @@ import java.util.Arrays;
 import javax.security.auth.DestroyFailedException;
 
 import org.apache.commons.io.IOUtils;
+import org.cryptomator.crypto.Cryptor;
 import org.cryptomator.crypto.exceptions.DecryptFailedException;
 import org.cryptomator.crypto.exceptions.EncryptFailedException;
 import org.cryptomator.crypto.exceptions.UnsupportedKeyLengthException;
@@ -29,11 +30,16 @@ import org.junit.Test;
 
 public class Aes256CryptorTest {
 
-	private final Aes256Cryptor cryptor;
+	private final Cryptor cryptor;
 
 	public Aes256CryptorTest() {
-		cryptor = new Aes256Cryptor();
+		cryptor = DaggerCryptoTestComponent.create().cryptor();
 		cryptor.randomizeMasterKey();
+	}
+
+	@Test
+	public void testMultipleCryptorInstances() {
+		Assert.assertNotSame(DaggerCryptoTestComponent.create().cryptor(), DaggerCryptoTestComponent.create().cryptor());
 	}
 
 	@Test(timeout = 10000)
@@ -44,7 +50,7 @@ public class Aes256CryptorTest {
 		cryptor.encryptMasterKey(out, pw);
 		cryptor.destroy();
 
-		final Aes256Cryptor decryptor = new Aes256Cryptor();
+		final Cryptor decryptor = DaggerCryptoTestComponent.create().cryptor();
 		final InputStream in = new ByteArrayInputStream(out.toByteArray());
 		decryptor.decryptMasterKey(in, pw);
 
@@ -63,7 +69,7 @@ public class Aes256CryptorTest {
 
 		// all these passwords are expected to fail.
 		final String[] wrongPws = {"a", "as", "asdf", "sdf", "das", "dsa", "foo", "bar", "baz"};
-		final Aes256Cryptor decryptor = new Aes256Cryptor();
+		final Cryptor decryptor = DaggerCryptoTestComponent.create().cryptor();
 		for (final String wrongPw : wrongPws) {
 			final InputStream in = new ByteArrayInputStream(out.toByteArray());
 			try {

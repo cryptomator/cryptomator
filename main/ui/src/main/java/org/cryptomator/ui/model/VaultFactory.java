@@ -3,6 +3,7 @@ package org.cryptomator.ui.model;
 import java.nio.file.Path;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 
@@ -20,7 +21,7 @@ public class VaultFactory {
 	private final DeferredCloser closer;
 
 	@Inject
-	public VaultFactory(WebDavServer server, Provider<Cryptor> cryptorProvider, WebDavMounter mounter, DeferredCloser closer) {
+	public VaultFactory(WebDavServer server, @Named("SamplingCryptor") Provider<Cryptor> cryptorProvider, WebDavMounter mounter, DeferredCloser closer) {
 		this.server = server;
 		this.cryptorProvider = cryptorProvider;
 		this.mounter = mounter;

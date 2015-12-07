@@ -9,6 +9,7 @@
 package org.cryptomator.ui.controllers;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -25,6 +26,7 @@ import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.cookie.CookiePolicy;
 import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.ui.settings.Settings;
 import org.slf4j.Logger;
@@ -140,8 +142,9 @@ public class WelcomeController extends AbstractFXMLViewController {
 		client.getParams().setConnectionManagerTimeout(5000);
 		try {
 			client.executeMethod(method);
-			if (method.getStatusCode() == HttpStatus.SC_OK) {
-				final byte[] responseData = method.getResponseBody();
+			final InputStream responseBodyStream = method.getResponseBodyAsStream();
+			if (method.getStatusCode() == HttpStatus.SC_OK && responseBodyStream != null) {
+				final byte[] responseData = IOUtils.toByteArray(responseBodyStream);
 				final ObjectMapper mapper = new ObjectMapper();
 				final Map<String, String> map = mapper.readValue(responseData, new TypeReference<HashMap<String, String>>() {
 				});
