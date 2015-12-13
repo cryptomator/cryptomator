@@ -61,6 +61,11 @@
 			</dependency>
 			<dependency>
 				<groupId>org.cryptomator</groupId>
+				<artifactId>filesystem-api</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.cryptomator</groupId>
 				<artifactId>crypto-api</artifactId>
 				<version>${project.version}</version>
 			</dependency>
@@ -192,6 +197,7 @@
 	</dependencies>
 
 	<modules>
+		<module>filesystem-api</module>
 		<module>crypto-api</module>
 		<module>crypto-aes</module>
 		<module>core</module>
