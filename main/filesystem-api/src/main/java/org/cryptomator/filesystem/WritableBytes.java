@@ -6,12 +6,33 @@
 package org.cryptomator.filesystem;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 
 public interface WritableBytes {
 
-	void write(ByteBuffer source) throws IOException;
+	/**
+	 * Writes the data in the given byte buffer to this readable bytes at the
+	 * current position.
+	 * 
+	 * @param target
+	 *            the byte buffer to use
+	 * @throws UncheckedIOException
+	 *             if an {@link IOException} occurs while writing
+	 */
+	void write(ByteBuffer source) throws UncheckedIOException;
 
-	void write(ByteBuffer source, int position) throws IOException;
+	/**
+	 * Writes the data in the given byte buffer to this readable bytes at the
+	 * given position.
+	 * 
+	 * @param target
+	 *            the byte buffer to use
+	 * @param position
+	 *            the position to write the data to
+	 * @throws UncheckedIOException
+	 *             if an {@link IOException} occurs while writing
+	 */
+	void write(ByteBuffer source, int position) throws UncheckedIOException;
 
 }

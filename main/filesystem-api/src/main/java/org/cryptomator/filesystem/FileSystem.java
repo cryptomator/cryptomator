@@ -14,6 +14,10 @@ import java.util.Optional;
  */
 public interface FileSystem extends Folder {
 
+	/**
+	 * @return an empty {@link Optional} because a {@link FileSystem} represents
+	 *         the root {@link Folder} and thus does not have a parent
+	 */
 	@Override
 	default Optional<? extends Folder> parent() {
 		return Optional.empty();

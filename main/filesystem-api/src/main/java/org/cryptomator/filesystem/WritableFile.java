@@ -5,20 +5,20 @@
  ******************************************************************************/
 package org.cryptomator.filesystem;
 
-import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.time.Instant;
 
 public interface WritableFile extends File, WritableBytes, AutoCloseable {
 
-	WritableFile moveTo(WritableFile other) throws IOException;
+	void moveTo(WritableFile other) throws UncheckedIOException;
 
-	void setLastModified(Instant instant) throws IOException;
+	void setLastModified(Instant instant) throws UncheckedIOException;
 
-	void delete() throws IOException;
+	void delete() throws UncheckedIOException;
 
-	void truncate() throws IOException;
+	void truncate() throws UncheckedIOException;
 
 	@Override
-	void close() throws IOException;
+	void close() throws UncheckedIOException;
 
 }

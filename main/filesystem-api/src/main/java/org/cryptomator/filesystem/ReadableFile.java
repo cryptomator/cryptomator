@@ -5,13 +5,13 @@
  ******************************************************************************/
 package org.cryptomator.filesystem;
 
-import java.io.IOException;
+import java.io.UncheckedIOException;
 
 public interface ReadableFile extends File, ReadableBytes, AutoCloseable {
 
-	WritableFile copyTo(WritableFile other) throws IOException;
+	void copyTo(WritableFile other) throws UncheckedIOException;
 
 	@Override
-	void close() throws IOException;
+	void close() throws UncheckedIOException;
 
 }
