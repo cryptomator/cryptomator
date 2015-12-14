@@ -15,7 +15,7 @@ import java.util.Optional;
 public interface FileSystem extends Folder {
 
 	@Override
-	default Optional<Folder> parent() {
+	default Optional<? extends Folder> parent() {
 		return Optional.empty();
 	}
 

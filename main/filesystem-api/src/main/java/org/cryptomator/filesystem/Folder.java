@@ -32,11 +32,11 @@ public interface Folder extends Node {
 	 *             if an {@link IOException} occurs while initializing the
 	 *             stream
 	 */
-	Stream<Node> children() throws IOException;
+	Stream<? extends Node> children() throws IOException;
 
-	File file(String name) throws IOException;
+	File file(String name) throws UncheckedIOException;
 
-	Folder folder(String name) throws IOException;
+	Folder folder(String name) throws UncheckedIOException;
 
 	void create(FolderCreateMode mode) throws IOException;
 
@@ -46,7 +46,7 @@ public interface Folder extends Node {
 	 * @return the result of {@link #children()} filtered to contain only
 	 *         {@link File Files}
 	 */
-	default Stream<File> files() throws IOException {
+	default Stream<? extends File> files() throws IOException {
 		return children() //
 				.filter(File.class::isInstance) //
 				.map(File.class::cast);
@@ -56,7 +56,7 @@ public interface Folder extends Node {
 	 * @return the result of {@link #children()} filtered to contain only
 	 *         {@link Folder Folders}
 	 */
-	default Stream<Folder> folders() throws IOException {
+	default Stream<? extends Folder> folders() throws IOException {
 		return children() //
 				.filter(Folder.class::isInstance) //
 				.map(Folder.class::cast);

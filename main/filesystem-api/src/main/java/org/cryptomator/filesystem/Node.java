@@ -5,7 +5,7 @@
  ******************************************************************************/
 package org.cryptomator.filesystem;
 
-import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.time.Instant;
 import java.util.Optional;
 
@@ -19,12 +19,12 @@ import java.util.Optional;
  */
 public interface Node {
 
-	String name() throws IOException;
+	String name() throws UncheckedIOException;
 
-	Optional<Folder> parent() throws IOException;
+	Optional<? extends Folder> parent() throws UncheckedIOException;
 
-	boolean exists() throws IOException;
+	boolean exists() throws UncheckedIOException;
 
-	Instant lastModified() throws IOException;
+	Instant lastModified() throws UncheckedIOException;
 
 }

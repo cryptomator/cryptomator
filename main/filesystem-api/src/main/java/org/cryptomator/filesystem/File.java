@@ -7,11 +7,12 @@ package org.cryptomator.filesystem;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 public interface File extends Node {
 
-	ReadableFile openReadable(long timeout, TimeUnit unit) throws IOException;
+	ReadableFile openReadable(long timeout, TimeUnit unit) throws IOException, TimeoutException;
 
-	WritableFile openWritable(long timeout, TimeUnit unit) throws IOException;
+	WritableFile openWritable(long timeout, TimeUnit unit) throws IOException, TimeoutException;
 
 }
