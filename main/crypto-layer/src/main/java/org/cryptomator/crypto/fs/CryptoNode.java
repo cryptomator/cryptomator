@@ -1,9 +1,18 @@
-package org.cryptomator.crypto;
+/*******************************************************************************
+ * Copyright (c) 2015 Sebastian Stenzel and others.
+ * This file is licensed under the terms of the MIT license.
+ * See the LICENSE.txt file for more info.
+ *
+ * Contributors:
+ *     Sebastian Stenzel - initial API and implementation
+ *******************************************************************************/
+package org.cryptomator.crypto.fs;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.Optional;
 
+import org.cryptomator.crypto.engine.Cryptor;
 import org.cryptomator.filesystem.Folder;
 import org.cryptomator.filesystem.Node;
 
@@ -11,10 +20,12 @@ abstract class CryptoNode implements Node {
 
 	protected final CryptoFolder parent;
 	protected final String name;
+	protected final Cryptor cryptor;
 
-	public CryptoNode(CryptoFolder parent, String name) {
+	public CryptoNode(CryptoFolder parent, String name, Cryptor cryptor) {
 		this.parent = parent;
 		this.name = name;
+		this.cryptor = cryptor;
 	}
 
 	Folder physicalDataRoot() {

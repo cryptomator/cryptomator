@@ -1,3 +1,11 @@
+/*******************************************************************************
+ * Copyright (c) 2015 Sebastian Stenzel and others.
+ * This file is licensed under the terms of the MIT license.
+ * See the LICENSE.txt file for more info.
+ *
+ * Contributors:
+ *     Sebastian Stenzel - initial API and implementation
+ *******************************************************************************/
 package org.cryptomator.filesystem.inmem;
 
 import java.io.FileNotFoundException;
@@ -14,12 +22,12 @@ import org.apache.commons.io.FileExistsException;
 import org.cryptomator.filesystem.Folder;
 import org.cryptomator.filesystem.FolderCreateMode;
 
-public class InMemoryFolder extends InMemoryNode implements Folder {
+class InMemoryFolder extends InMemoryNode implements Folder {
 
 	final Map<String, InMemoryNode> children = new TreeMap<>();
 	final Map<String, InMemoryNode> volatileChildren = new HashMap<>();
 
-	InMemoryFolder(InMemoryFolder parent, String name, Instant lastModified) {
+	public InMemoryFolder(InMemoryFolder parent, String name, Instant lastModified) {
 		super(parent, name, lastModified);
 	}
 

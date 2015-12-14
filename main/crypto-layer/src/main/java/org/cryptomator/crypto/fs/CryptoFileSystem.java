@@ -1,12 +1,25 @@
-package org.cryptomator.crypto;
+/*******************************************************************************
+ * Copyright (c) 2015 Sebastian Stenzel and others.
+ * This file is licensed under the terms of the MIT license.
+ * See the LICENSE.txt file for more info.
+ *
+ * Contributors:
+ *     Sebastian Stenzel - initial API and implementation
+ *******************************************************************************/
+package org.cryptomator.crypto.fs;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
+import org.cryptomator.crypto.engine.Cryptor;
 import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.FileSystem;
 import org.cryptomator.filesystem.Folder;
 import org.cryptomator.filesystem.FolderCreateMode;
+import org.cryptomator.filesystem.WritableFile;
 
 public class CryptoFileSystem extends CryptoFolder implements FileSystem {
 
@@ -18,20 +31,14 @@ public class CryptoFileSystem extends CryptoFolder implements FileSystem {
 
 	private final Folder physicalRoot;
 
-	public CryptoFileSystem(Folder physicalRoot) {
-		super(null, "");
+	public CryptoFileSystem(Folder physicalRoot, Cryptor cryptor) {
+		super(null, "", cryptor);
 		this.physicalRoot = physicalRoot;
 	}
 
 	@Override
 	File physicalFile() throws IOException {
 		return physicalDataRoot().file(ROOT_DIR_FILE);
-	}
-
-	@Override
-	Folder physicalFolder() throws IOException {
-		// TODO Auto-generated method stub
-		return super.physicalFolder();
 	}
 
 	@Override
@@ -68,7 +75,15 @@ public class CryptoFileSystem extends CryptoFolder implements FileSystem {
 	public void create(FolderCreateMode mode) throws IOException {
 		physicalDataRoot().create(mode);
 		physicalMetadataRoot().create(mode);
-		super.create(mode);
+		final File dirFile = physicalFile();
+		final String directoryId = getDirectoryId();
+		try (WritableFile writable = dirFile.openWritable(1, TimeUnit.SECONDS)) {
+			final ByteBuffer buf = ByteBuffer.wrap(directoryId.getBytes());
+			writable.write(buf);
+		} catch (TimeoutException e) {
+			throw new IOException("Failed to lock directory file in time." + dirFile, e);
+		}
+		physicalFolder().create(FolderCreateMode.INCLUDING_PARENTS);
 	}
 
 }

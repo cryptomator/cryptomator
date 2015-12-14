@@ -1,3 +1,11 @@
+/*******************************************************************************
+ * Copyright (c) 2015 Sebastian Stenzel and others.
+ * This file is licensed under the terms of the MIT license.
+ * See the LICENSE.txt file for more info.
+ *
+ * Contributors:
+ *     Sebastian Stenzel - initial API and implementation
+ *******************************************************************************/
 package org.cryptomator.filesystem.inmem;
 
 import java.time.Instant;
@@ -5,13 +13,13 @@ import java.util.Optional;
 
 import org.cryptomator.filesystem.Node;
 
-public class InMemoryNode implements Node {
+class InMemoryNode implements Node {
 
 	protected final InMemoryFolder parent;
 	protected final String name;
 	protected Instant lastModified;
 
-	InMemoryNode(InMemoryFolder parent, String name, Instant lastModified) {
+	public InMemoryNode(InMemoryFolder parent, String name, Instant lastModified) {
 		this.parent = parent;
 		this.name = name;
 		this.lastModified = lastModified;

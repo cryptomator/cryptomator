@@ -1,3 +1,11 @@
+/*******************************************************************************
+ * Copyright (c) 2015 Sebastian Stenzel and others.
+ * This file is licensed under the terms of the MIT license.
+ * See the LICENSE.txt file for more info.
+ *
+ * Contributors:
+ *     Sebastian Stenzel - initial API and implementation
+ *******************************************************************************/
 package org.cryptomator.filesystem.inmem;
 
 import java.io.FileNotFoundException;
@@ -12,12 +20,12 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.cryptomator.filesystem.ReadableFile;
 import org.cryptomator.filesystem.WritableFile;
 
-public class InMemoryFile extends InMemoryNode implements ReadableFile, WritableFile {
+class InMemoryFile extends InMemoryNode implements ReadableFile, WritableFile {
 
 	private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 	private ByteBuffer content = ByteBuffer.wrap(new byte[0]);
 
-	InMemoryFile(InMemoryFolder parent, String name, Instant lastModified) {
+	public InMemoryFile(InMemoryFolder parent, String name, Instant lastModified) {
 		super(parent, name, lastModified);
 	}
 

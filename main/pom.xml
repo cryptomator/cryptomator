@@ -56,12 +56,23 @@
 			<!-- modules -->
 			<dependency>
 				<groupId>org.cryptomator</groupId>
-				<artifactId>core</artifactId>
+				<artifactId>filesystem-api</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.cryptomator</groupId>
-				<artifactId>filesystem-api</artifactId>
+				<artifactId>filesystem-inmemory</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.cryptomator</groupId>
+				<artifactId>crypto-layer</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			
+			<dependency>
+				<groupId>org.cryptomator</groupId>
+				<artifactId>core</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
@@ -198,11 +209,12 @@
 
 	<modules>
 		<module>filesystem-api</module>
+		<module>filesystem-inmemory</module>
+		<module>crypto-layer</module>
 		<module>crypto-api</module>
 		<module>crypto-aes</module>
 		<module>core</module>
 		<module>ui</module>
-		<module>crypto-layer</module>
 	</modules>
 
 	<profiles>

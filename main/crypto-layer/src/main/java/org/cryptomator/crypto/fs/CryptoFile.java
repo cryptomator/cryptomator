@@ -1,4 +1,12 @@
-package org.cryptomator.crypto;
+/*******************************************************************************
+ * Copyright (c) 2015 Sebastian Stenzel and others.
+ * This file is licensed under the terms of the MIT license.
+ * See the LICENSE.txt file for more info.
+ *
+ * Contributors:
+ *     Sebastian Stenzel - initial API and implementation
+ *******************************************************************************/
+package org.cryptomator.crypto.fs;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -6,21 +14,22 @@ import java.time.Instant;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import org.cryptomator.crypto.engine.Cryptor;
 import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.ReadableFile;
 import org.cryptomator.filesystem.WritableFile;
 
 public class CryptoFile extends CryptoNode implements File {
 
-	private static final String ENCRYPTED_FILE_EXT = ".file";
+	static final String FILE_EXT = ".file";
 
-	public CryptoFile(CryptoFolder parent, String name) {
-		super(parent, name);
+	public CryptoFile(CryptoFolder parent, String name, Cryptor cryptor) {
+		super(parent, name, cryptor);
 	}
 
 	@Override
 	String encryptedName() {
-		return name() + ENCRYPTED_FILE_EXT;
+		return name() + FILE_EXT;
 	}
 
 	@Override

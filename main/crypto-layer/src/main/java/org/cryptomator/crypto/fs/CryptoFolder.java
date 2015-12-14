@@ -1,5 +1,14 @@
-package org.cryptomator.crypto;
+/*******************************************************************************
+ * Copyright (c) 2015 Sebastian Stenzel and others.
+ * This file is licensed under the terms of the MIT license.
+ * See the LICENSE.txt file for more info.
+ *
+ * Contributors:
+ *     Sebastian Stenzel - initial API and implementation
+ *******************************************************************************/
+package org.cryptomator.crypto.fs;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
@@ -14,6 +23,7 @@ import java.util.stream.Stream;
 
 import org.apache.commons.codec.binary.Base32;
 import org.apache.commons.lang3.StringUtils;
+import org.cryptomator.crypto.engine.Cryptor;
 import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.Folder;
 import org.cryptomator.filesystem.FolderCreateMode;
@@ -23,18 +33,17 @@ import org.cryptomator.filesystem.WritableFile;
 
 class CryptoFolder extends CryptoNode implements Folder {
 
-	private static final String ENCRYPTED_FILE_EXT = ".file";
-	private static final String ENCRYPTED_DIR_EXT = ".dir";
+	static final String FILE_EXT = ".dir";
 
 	private final AtomicReference<String> directoryId = new AtomicReference<>();
 
-	public CryptoFolder(CryptoFolder parent, String name) {
-		super(parent, name);
+	public CryptoFolder(CryptoFolder parent, String name, Cryptor cryptor) {
+		super(parent, name, cryptor);
 	}
 
 	@Override
 	String encryptedName() {
-		return name() + ENCRYPTED_DIR_EXT;
+		return name() + FILE_EXT;
 	}
 
 	protected String getDirectoryId() throws IOException {
@@ -92,32 +101,32 @@ class CryptoFolder extends CryptoNode implements Folder {
 
 	@Override
 	public Stream<CryptoFile> files() throws IOException {
-		return physicalFolder().files().map(File::name).filter(s -> s.endsWith(ENCRYPTED_FILE_EXT)).map(this::decryptFileName).map(this::file);
+		return physicalFolder().files().map(File::name).filter(s -> s.endsWith(CryptoFile.FILE_EXT)).map(this::decryptFileName).map(this::file);
 	}
 
 	private String decryptFileName(String encryptedFileName) {
-		// TODO Auto-generated method stub
-		return StringUtils.removeEnd(encryptedFileName, ENCRYPTED_FILE_EXT);
+		final String ciphertext = StringUtils.removeEnd(encryptedFileName, CryptoFile.FILE_EXT);
+		return cryptor.getFilenameCryptor().decryptFilename(ciphertext);
 	}
 
 	@Override
 	public CryptoFile file(String name) {
-		return new CryptoFile(this, name);
+		return new CryptoFile(this, name, cryptor);
 	}
 
 	@Override
 	public Stream<CryptoFolder> folders() throws IOException {
-		return physicalFolder().files().map(File::name).filter(s -> s.endsWith(ENCRYPTED_DIR_EXT)).map(this::decryptFolderName).map(this::folder);
+		return physicalFolder().files().map(File::name).filter(s -> s.endsWith(CryptoFolder.FILE_EXT)).map(this::decryptFolderName).map(this::folder);
 	}
 
 	private String decryptFolderName(String encryptedFolderName) {
-		// TODO Auto-generated method stub
-		return StringUtils.removeEnd(encryptedFolderName, ENCRYPTED_DIR_EXT);
+		final String ciphertext = StringUtils.removeEnd(encryptedFolderName, CryptoFolder.FILE_EXT);
+		return cryptor.getFilenameCryptor().decryptFilename(ciphertext);
 	}
 
 	@Override
 	public CryptoFolder folder(String name) {
-		return new CryptoFolder(this, name);
+		return new CryptoFolder(this, name, cryptor);
 	}
 
 	@Override
@@ -125,16 +134,21 @@ class CryptoFolder extends CryptoNode implements Folder {
 		final File dirFile = physicalFile();
 		if (dirFile.exists()) {
 			return;
-		} else {
-			final String directoryId = getDirectoryId();
-			try (WritableFile writable = dirFile.openWritable(1, TimeUnit.SECONDS)) {
-				final ByteBuffer buf = ByteBuffer.wrap(directoryId.getBytes());
-				writable.write(buf);
-			} catch (TimeoutException e) {
-				throw new IOException("Failed to lock directory file in time." + dirFile, e);
-			}
-			physicalFolder().create(FolderCreateMode.INCLUDING_PARENTS);
 		}
+		if (!parent.exists() && FolderCreateMode.FAIL_IF_PARENT_IS_MISSING.equals(mode)) {
+			throw new FileNotFoundException(parent.name);
+		} else if (!parent.exists() && FolderCreateMode.INCLUDING_PARENTS.equals(mode)) {
+			parent.create(mode);
+		}
+		assert parent.exists();
+		final String directoryId = getDirectoryId();
+		try (WritableFile writable = dirFile.openWritable(1, TimeUnit.SECONDS)) {
+			final ByteBuffer buf = ByteBuffer.wrap(directoryId.getBytes());
+			writable.write(buf);
+		} catch (TimeoutException e) {
+			throw new IOException("Failed to lock directory file in time." + dirFile, e);
+		}
+		physicalFolder().create(FolderCreateMode.INCLUDING_PARENTS);
 	}
 
 	@Override
