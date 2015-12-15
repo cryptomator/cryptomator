@@ -20,7 +20,7 @@ import org.junit.Test;
 
 public class FilenameCryptorImplTest {
 
-	@Test(timeout = 1000)
+	@Test
 	public void testDeterministicEncryptionOfFilenames() throws IOException {
 		final byte[] keyBytes = new byte[32];
 		final SecretKey encryptionKey = new SecretKeySpec(keyBytes, "AES");
@@ -46,7 +46,7 @@ public class FilenameCryptorImplTest {
 		Assert.assertEquals(originalPath3, decryptedPath3);
 	}
 
-	@Test(timeout = 1000)
+	@Test
 	public void testDeterministicHashingOfDirectoryIds() throws IOException {
 		final byte[] keyBytes = new byte[32];
 		final SecretKey encryptionKey = new SecretKeySpec(keyBytes, "AES");

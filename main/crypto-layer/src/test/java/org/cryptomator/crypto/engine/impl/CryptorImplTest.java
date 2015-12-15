@@ -29,7 +29,7 @@ public class CryptorImplTest {
 
 	};
 
-	@Test(timeout = 1000)
+	@Test
 	public void testMasterkeyDecryption() throws IOException {
 		final String testMasterKey = "{\"version\":3,\"scryptSalt\":\"AAAAAAAAAAA=\",\"scryptCostParam\":2,\"scryptBlockSize\":8," //
 				+ "\"primaryMasterKey\":\"mM+qoQ+o0qvPTiDAZYt+flaC3WbpNAx1sTXaUzxwpy0M9Ctj6Tih/Q==\"," //
@@ -39,7 +39,7 @@ public class CryptorImplTest {
 		Assert.assertTrue(cryptor.readKeysFromMasterkeyFile(testMasterKey.getBytes(), "asd"));
 	}
 
-	@Test(timeout = 5000)
+	@Test
 	public void testMasterkeyEncryption() throws IOException {
 		final String expectedMasterKey = "{\"version\":3,\"scryptSalt\":\"AAAAAAAAAAA=\",\"scryptCostParam\":16384,\"scryptBlockSize\":8," //
 				+ "\"primaryMasterKey\":\"BJPIq5pvhN24iDtPJLMFPLaVJWdGog9k4n0P03j4ru+ivbWY9OaRGQ==\"," //
