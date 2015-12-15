@@ -129,6 +129,7 @@ class InMemoryFile extends InMemoryNode implements ReadableFile, WritableFile {
 	@Override
 	public void close() {
 		if (lock.isWriteLockedByCurrentThread()) {
+			this.setLastModified(Instant.now());
 			lock.writeLock().unlock();
 		} else if (lock.getReadHoldCount() > 0) {
 			lock.readLock().unlock();

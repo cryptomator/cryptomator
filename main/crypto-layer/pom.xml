@@ -50,6 +50,12 @@
 			<artifactId>commons-codec</artifactId>
 		</dependency>
 		
+		<!-- JSON -->
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+		</dependency>
+		
 		<!-- Test dependencies -->
 		<dependency>
 			<groupId>org.cryptomator</groupId>

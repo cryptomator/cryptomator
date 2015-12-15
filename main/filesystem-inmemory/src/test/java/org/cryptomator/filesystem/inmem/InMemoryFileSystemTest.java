@@ -8,7 +8,9 @@
  *******************************************************************************/
 package org.cryptomator.filesystem.inmem;
 
+import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
+import java.time.Instant;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -50,6 +52,40 @@ public class InMemoryFileSystemTest {
 		Assert.assertTrue(fooBarFolder.exists());
 		Assert.assertEquals(1, fs.folders().count());
 		Assert.assertEquals(1, fooFolder.folders().count());
+	}
+
+	@Test
+	public void testImplicitUpdateOfModifiedDateAfterWrite() throws UncheckedIOException, TimeoutException, InterruptedException {
+		final FileSystem fs = new InMemoryFileSystem();
+		File fooFile = fs.file("foo.txt");
+
+		final Instant beforeFirstModification = Instant.now();
+
+		Thread.sleep(1);
+
+		// write "hello world" to foo
+		try (WritableFile writable = fooFile.openWritable(1, TimeUnit.SECONDS)) {
+			writable.write(ByteBuffer.wrap("hello world".getBytes()));
+		}
+		Assert.assertTrue(fooFile.exists());
+		final Instant firstModification = fooFile.lastModified();
+
+		Thread.sleep(1);
+
+		final Instant afterFirstModification = Instant.now();
+		Assert.assertTrue(beforeFirstModification.isBefore(firstModification));
+		Assert.assertTrue(afterFirstModification.isAfter(firstModification));
+
+		Thread.sleep(1);
+
+		// write "dlrow olleh" to foo
+		try (WritableFile writable = fooFile.openWritable(1, TimeUnit.SECONDS)) {
+			writable.write(ByteBuffer.wrap("dlrow olleh".getBytes()));
+		}
+		Assert.assertTrue(fooFile.exists());
+		final Instant secondModification = fooFile.lastModified();
+
+		Assert.assertTrue(firstModification.isBefore(secondModification));
 	}
 
 	@Test

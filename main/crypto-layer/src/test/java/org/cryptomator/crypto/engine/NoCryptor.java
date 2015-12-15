@@ -17,4 +17,21 @@ public class NoCryptor implements Cryptor {
 		return filenameCryptor;
 	}
 
+	@Override
+	public void randomizeMasterkey() {
+		// like this? https://xkcd.com/221/
+	}
+
+	@Override
+	public boolean readKeysFromMasterkeyFile(byte[] masterkeyFileContents, CharSequence passphrase) {
+		// thanks, but I don't need a key, if I'm not encryption anything...
+		return true;
+	}
+
+	@Override
+	public byte[] writeKeysToMasterkeyFile(CharSequence passphrase) {
+		// ok, if you insist to get my non-existing key data... here you go:
+		return new byte[0];
+	}
+
 }

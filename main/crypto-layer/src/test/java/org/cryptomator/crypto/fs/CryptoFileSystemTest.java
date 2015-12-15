@@ -10,10 +10,12 @@ package org.cryptomator.crypto.fs;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.time.Instant;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.cryptomator.crypto.engine.Cryptor;
 import org.cryptomator.crypto.engine.NoCryptor;
+import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.FileSystem;
 import org.cryptomator.filesystem.Folder;
 import org.cryptomator.filesystem.FolderCreateMode;
@@ -34,18 +36,50 @@ public class CryptoFileSystemTest {
 
 		// some mock fs:
 		final FileSystem physicalFs = new InMemoryFileSystem();
+		final File masterkeyFile = physicalFs.file("masterkey.cryptomator");
+		final File masterkeyBkupFile = physicalFs.file("masterkey.cryptomator.bkup");
 		final Folder physicalDataRoot = physicalFs.folder("d");
+		Assert.assertFalse(masterkeyFile.exists());
+		Assert.assertFalse(masterkeyBkupFile.exists());
 		Assert.assertFalse(physicalDataRoot.exists());
 
 		// init crypto fs:
-		final FileSystem fs = new CryptoFileSystem(physicalFs, cryptor);
+		final FileSystem fs = new CryptoFileSystem(physicalFs, cryptor, "foo");
+		Assert.assertTrue(masterkeyFile.exists());
+		Assert.assertTrue(masterkeyBkupFile.exists());
 		fs.create(FolderCreateMode.INCLUDING_PARENTS);
 		Assert.assertTrue(physicalDataRoot.exists());
-		Assert.assertEquals(physicalFs.children().count(), 2);
+		Assert.assertEquals(4, physicalFs.children().count()); // d + m + masterkey.cryptomator + masterkey.cryptomator.bkup
 		Assert.assertEquals(1, physicalDataRoot.files().count()); // ROOT file
 		Assert.assertEquals(1, physicalDataRoot.folders().count()); // ROOT directory
 
 		LOG.debug(DirectoryPrinter.print(physicalFs));
+	}
+
+	@Test
+	public void testMasterkeyBackupBehaviour() throws InterruptedException {
+		// mock cryptor:
+		final Cryptor cryptor = new NoCryptor();
+
+		// some mock fs:
+		final FileSystem physicalFs = new InMemoryFileSystem();
+		final File masterkeyBkupFile = physicalFs.file("masterkey.cryptomator.bkup");
+		Assert.assertFalse(masterkeyBkupFile.exists());
+
+		// first initialization:
+		new CryptoFileSystem(physicalFs, cryptor, "foo");
+		Assert.assertTrue(masterkeyBkupFile.exists());
+		final Instant bkupDateT0 = masterkeyBkupFile.lastModified();
+
+		// make sure some time passes, as the resolution of last modified date is not in nanos:
+		Thread.sleep(1);
+
+		// second initialization:
+		new CryptoFileSystem(physicalFs, cryptor, "foo");
+		Assert.assertTrue(masterkeyBkupFile.exists());
+		final Instant bkupDateT1 = masterkeyBkupFile.lastModified();
+
+		Assert.assertTrue(bkupDateT1.isAfter(bkupDateT0));
 	}
 
 	@Test
@@ -54,7 +88,7 @@ public class CryptoFileSystemTest {
 		final Cryptor cryptor = new NoCryptor();
 		final FileSystem physicalFs = new InMemoryFileSystem();
 		final Folder physicalDataRoot = physicalFs.folder("d");
-		final FileSystem fs = new CryptoFileSystem(physicalFs, cryptor);
+		final FileSystem fs = new CryptoFileSystem(physicalFs, cryptor, "foo");
 		fs.create(FolderCreateMode.INCLUDING_PARENTS);
 
 		// add another encrypted folder:
@@ -75,7 +109,7 @@ public class CryptoFileSystemTest {
 		// mock stuff and prepare crypto FS:
 		final Cryptor cryptor = new NoCryptor();
 		final FileSystem physicalFs = new InMemoryFileSystem();
-		final FileSystem fs = new CryptoFileSystem(physicalFs, cryptor);
+		final FileSystem fs = new CryptoFileSystem(physicalFs, cryptor, "foo");
 		fs.create(FolderCreateMode.INCLUDING_PARENTS);
 
 		// create foo/bar/ and then move foo/ to baz/:
@@ -98,7 +132,7 @@ public class CryptoFileSystemTest {
 		// mock stuff and prepare crypto FS:
 		final Cryptor cryptor = new NoCryptor();
 		final FileSystem physicalFs = new InMemoryFileSystem();
-		final FileSystem fs = new CryptoFileSystem(physicalFs, cryptor);
+		final FileSystem fs = new CryptoFileSystem(physicalFs, cryptor, "foo");
 		fs.create(FolderCreateMode.INCLUDING_PARENTS);
 
 		// create foo/bar/ and then try to move foo/bar/ to foo/
