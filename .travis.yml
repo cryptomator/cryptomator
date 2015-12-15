@@ -11,7 +11,7 @@ before_install: "curl -L --cookie 'oraclelicense=accept-securebackup-cookie;'  h
 
 script: mvn -fmain/pom.xml -Puber-jar clean package
 
-after_success: mvn clean test jacoco:report coveralls:report
+after_success: mvn -fmain/pom.xml clean test jacoco:report coveralls:report
 
 notifications:
   webhooks:
