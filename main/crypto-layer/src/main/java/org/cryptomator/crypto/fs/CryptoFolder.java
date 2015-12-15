@@ -15,7 +15,6 @@ import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -147,15 +146,6 @@ class CryptoFolder extends CryptoNode implements Folder {
 	}
 
 	@Override
-	public void copyTo(Folder target) {
-		if (this.contains(target)) {
-			throw new IllegalArgumentException("Can not copy parent to child directory (src: " + this + ", dst: " + target + ")");
-		}
-
-		Folder.super.copyTo(target);
-	}
-
-	@Override
 	public void moveTo(Folder target) {
 		if (target instanceof CryptoFolder) {
 			moveToInternal((CryptoFolder) target);
@@ -165,7 +155,7 @@ class CryptoFolder extends CryptoNode implements Folder {
 	}
 
 	private void moveToInternal(CryptoFolder target) {
-		if (this.contains(target) || target.contains(this)) {
+		if (this.isAncestorOf(target) || target.isAncestorOf(this)) {
 			throw new IllegalArgumentException("Can not move directories containing one another (src: " + this + ", dst: " + target + ")");
 		}
 
@@ -178,17 +168,6 @@ class CryptoFolder extends CryptoNode implements Folder {
 		}
 		// directoryId is now used by target, we must no longer use the same id (we'll generate a new one when needed)
 		directoryId.set(null);
-	}
-
-	private boolean contains(Node node) {
-		Optional<? extends Folder> nodeParent = node.parent();
-		while (nodeParent.isPresent()) {
-			if (this.equals(nodeParent.get())) {
-				return true;
-			}
-			nodeParent = nodeParent.get().parent();
-		}
-		return false;
 	}
 
 	@Override

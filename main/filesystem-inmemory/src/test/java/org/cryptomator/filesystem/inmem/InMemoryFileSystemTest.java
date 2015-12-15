@@ -102,7 +102,6 @@ public class InMemoryFileSystemTest {
 		final FileSystem fs = new InMemoryFileSystem();
 		final Folder fooBarFolder = fs.folder("foo").folder("bar");
 		final Folder qweAsdFolder = fs.folder("qwe").folder("asd");
-		final Folder qweAsdBarFolder = qweAsdFolder.folder("bar");
 		final File test1File = fooBarFolder.file("test1.txt");
 		final File test2File = fooBarFolder.file("test2.txt");
 		fooBarFolder.create(FolderCreateMode.INCLUDING_PARENTS);
@@ -116,11 +115,10 @@ public class InMemoryFileSystemTest {
 		Assert.assertTrue(test1File.exists());
 		Assert.assertTrue(test2File.exists());
 
-		// copy foo/bar/ to qwe/asd/ (result is qwe/asd/bar/file1.txt & qwe/asd/bar/file2.txt)
+		// copy foo/bar/ to qwe/asd/ (result is qwe/asd/file1.txt & qwe/asd/file2.txt)
 		fooBarFolder.copyTo(qweAsdFolder);
-		Assert.assertTrue(qweAsdBarFolder.exists());
-		Assert.assertEquals(1, qweAsdFolder.folders().count());
-		Assert.assertEquals(2, qweAsdBarFolder.files().count());
+		Assert.assertTrue(qweAsdFolder.exists());
+		Assert.assertEquals(2, qweAsdFolder.files().count());
 
 		// make sure original files still exist:
 		Assert.assertTrue(test1File.exists());

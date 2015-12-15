@@ -58,7 +58,7 @@ public interface Folder extends Node {
 	Folder folder(String name) throws UncheckedIOException;
 
 	/**
-	 * Creates the directory, if it doesn't exist yet. After successful invocation {@link #exists()} will return <code>true</code>
+	 * Creates the directory, if it doesn't exist yet. No effect, if folder already exists. After successful invocation {@link #exists()} will return <code>true</code>.
 	 * 
 	 * @param mode Depending on this option either the attempt is made to recursively create all parent directories or an exception is thrown if the parent doesn't exist yet.
 	 * @throws UncheckedIOException wrapping an {@link FileNotFoundException}, if mode is {@link FolderCreateMode#FAIL_IF_PARENT_IS_MISSING FAIL_IF_PARENT_IS_MISSING} and parent doesn't exist.
@@ -66,20 +66,41 @@ public interface Folder extends Node {
 	void create(FolderCreateMode mode) throws UncheckedIOException;
 
 	/**
-	 * Copies this directory and its contents to the given destination.
+	 * Recusively copies this directory and all its contents to (not into) the given destination, creating nonexisting parent directories.
+	 * If the target exists it is deleted before performing the copy.
+	 * 
+	 * @param target Destination folder. Must not be a descendant of this folder.
 	 */
 	default void copyTo(Folder target) throws UncheckedIOException {
-		final Folder copy = target.folder(this.name());
-		copy.create(FolderCreateMode.INCLUDING_PARENTS);
-		folders().forEach(folder -> folder.copyTo(copy));
+		if (this.isAncestorOf(target)) {
+			throw new IllegalArgumentException("Can not copy parent to child directory (src: " + this + ", dst: " + target + ")");
+		}
+
+		// remove previous contents:
+		if (target.exists()) {
+			target.delete();
+		}
+
+		// make sure target directory exists:
+		target.create(FolderCreateMode.INCLUDING_PARENTS);
+		assert target.exists();
+
+		// copy files:
 		files().forEach(srcFile -> {
-			final File dstFile = copy.file(srcFile.name());
-			try (ReadableFile src = srcFile.openReadable(1, TimeUnit.SECONDS); WritableFile dst = dstFile.openWritable(1, TimeUnit.SECONDS)) {
-				src.copyTo(dst);
+			try (ReadableFile src = srcFile.openReadable(1, TimeUnit.SECONDS)) {
+				final File dstFile = target.file(srcFile.name());
+				try (WritableFile dst = dstFile.openWritable(1, TimeUnit.MILLISECONDS)) {
+					src.copyTo(dst);
+				} catch (TimeoutException e) {
+					throw new IllegalStateException("Destination file (" + dstFile + ") must not exist yet, thus can't be locked.");
+				}
 			} catch (TimeoutException e) {
-				throw new UncheckedIOException(new IOException("Failed to lock file in time.", e));
+				throw new UncheckedIOException(new IOException("Failed to lock source file (" + srcFile + ") in time.", e));
 			}
 		});
+
+		// copy subdirectories:
+		folders().forEach(folder -> folder.copyTo(target.folder(folder.name())));
 	}
 
 	/**
@@ -111,6 +132,22 @@ public interface Folder extends Node {
 		return children() //
 				.filter(Folder.class::isInstance) //
 				.map(Folder.class::cast);
+	}
+
+	/**
+	 * Recursively checks whether this folder or any subfolder contains the given node.
+	 * 
+	 * @param node Potential child, grandchild, ...
+	 * @return <code>true</code> if this folder is an ancestor of the node.
+	 */
+	default boolean isAncestorOf(Node node) {
+		if (!node.parent().isPresent()) {
+			return false;
+		} else if (node.parent().get().equals(this)) {
+			return true;
+		} else {
+			return this.isAncestorOf(node.parent().get());
+		}
 	}
 
 }
