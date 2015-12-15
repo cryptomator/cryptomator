@@ -28,35 +28,84 @@ public class CryptoFileSystemTest {
 	private static final Logger LOG = LoggerFactory.getLogger(CryptoFileSystemTest.class);
 
 	@Test
-	public void testFilenameEncryption() throws UncheckedIOException, IOException {
+	public void testVaultStructureInitialization() throws UncheckedIOException, IOException {
 		// mock cryptor:
-		Cryptor cryptor = new NoCryptor();
+		final Cryptor cryptor = new NoCryptor();
 
 		// some mock fs:
-		FileSystem physicalFs = new InMemoryFileSystem();
-		Folder physicalDataRoot = physicalFs.folder("d");
+		final FileSystem physicalFs = new InMemoryFileSystem();
+		final Folder physicalDataRoot = physicalFs.folder("d");
 		Assert.assertFalse(physicalDataRoot.exists());
 
 		// init crypto fs:
-		FileSystem fs = new CryptoFileSystem(physicalFs, cryptor);
+		final FileSystem fs = new CryptoFileSystem(physicalFs, cryptor);
 		fs.create(FolderCreateMode.INCLUDING_PARENTS);
 		Assert.assertTrue(physicalDataRoot.exists());
 		Assert.assertEquals(physicalFs.children().count(), 2);
 		Assert.assertEquals(1, physicalDataRoot.files().count()); // ROOT file
 		Assert.assertEquals(1, physicalDataRoot.folders().count()); // ROOT directory
 
+		LOG.debug(DirectoryPrinter.print(physicalFs));
+	}
+
+	@Test
+	public void testDirectoryCreation() throws UncheckedIOException, IOException {
+		// mock stuff and prepare crypto FS:
+		final Cryptor cryptor = new NoCryptor();
+		final FileSystem physicalFs = new InMemoryFileSystem();
+		final Folder physicalDataRoot = physicalFs.folder("d");
+		final FileSystem fs = new CryptoFileSystem(physicalFs, cryptor);
+		fs.create(FolderCreateMode.INCLUDING_PARENTS);
+
 		// add another encrypted folder:
-		Folder fooFolder = fs.folder("foo");
-		Folder barFolder = fooFolder.folder("bar");
+		final Folder fooFolder = fs.folder("foo");
+		final Folder fooBarFolder = fooFolder.folder("bar");
 		Assert.assertFalse(fooFolder.exists());
-		Assert.assertFalse(barFolder.exists());
-		barFolder.create(FolderCreateMode.INCLUDING_PARENTS);
+		Assert.assertFalse(fooBarFolder.exists());
+		fooBarFolder.create(FolderCreateMode.INCLUDING_PARENTS);
 		Assert.assertTrue(fooFolder.exists());
-		Assert.assertTrue(barFolder.exists());
+		Assert.assertTrue(fooBarFolder.exists());
 		Assert.assertEquals(3, countDataFolders(physicalDataRoot)); // parent + foo + bar
 
-		LOG.info(DirectoryPrinter.print(fs));
-		LOG.info(DirectoryPrinter.print(physicalFs));
+		LOG.debug(DirectoryPrinter.print(fs));
+	}
+
+	@Test
+	public void testDirectoryMoving() throws UncheckedIOException, IOException {
+		// mock stuff and prepare crypto FS:
+		final Cryptor cryptor = new NoCryptor();
+		final FileSystem physicalFs = new InMemoryFileSystem();
+		final FileSystem fs = new CryptoFileSystem(physicalFs, cryptor);
+		fs.create(FolderCreateMode.INCLUDING_PARENTS);
+
+		// create foo/bar/ and then move foo/ to baz/:
+		final Folder fooFolder = fs.folder("foo");
+		final Folder fooBarFolder = fooFolder.folder("bar");
+		final Folder bazFolder = fs.folder("baz");
+		final Folder bazBarFolder = bazFolder.folder("bar");
+		fooBarFolder.create(FolderCreateMode.INCLUDING_PARENTS);
+		Assert.assertTrue(fooBarFolder.exists());
+		Assert.assertFalse(bazFolder.exists());
+		fooFolder.moveTo(bazFolder);
+		// foo/bar/ should no longer exist, but baz/bar/ should:
+		Assert.assertFalse(fooBarFolder.exists());
+		Assert.assertTrue(bazFolder.exists());
+		Assert.assertTrue(bazBarFolder.exists());
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testDirectoryMovingWithinBloodline() throws UncheckedIOException, IOException {
+		// mock stuff and prepare crypto FS:
+		final Cryptor cryptor = new NoCryptor();
+		final FileSystem physicalFs = new InMemoryFileSystem();
+		final FileSystem fs = new CryptoFileSystem(physicalFs, cryptor);
+		fs.create(FolderCreateMode.INCLUDING_PARENTS);
+
+		// create foo/bar/ and then try to move foo/bar/ to foo/
+		final Folder fooFolder = fs.folder("foo");
+		final Folder fooBarFolder = fooFolder.folder("bar");
+		fooBarFolder.create(FolderCreateMode.INCLUDING_PARENTS);
+		fooBarFolder.moveTo(fooFolder);
 	}
 
 	/**

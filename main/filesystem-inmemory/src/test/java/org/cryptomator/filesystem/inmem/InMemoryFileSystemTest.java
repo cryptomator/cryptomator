@@ -8,7 +8,6 @@
  *******************************************************************************/
 package org.cryptomator.filesystem.inmem;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -25,7 +24,7 @@ import org.junit.Test;
 public class InMemoryFileSystemTest {
 
 	@Test
-	public void testFolderCreation() throws IOException {
+	public void testFolderCreation() {
 		final FileSystem fs = new InMemoryFileSystem();
 		Folder fooFolder = fs.folder("foo");
 
@@ -54,7 +53,7 @@ public class InMemoryFileSystemTest {
 	}
 
 	@Test
-	public void testFileReadCopyMoveWrite() throws IOException, TimeoutException {
+	public void testFileReadCopyMoveWrite() throws TimeoutException {
 		final FileSystem fs = new InMemoryFileSystem();
 		File fooFile = fs.file("foo.txt");
 
@@ -96,7 +95,36 @@ public class InMemoryFileSystemTest {
 			readable.read(readBuf, 6);
 		}
 		Assert.assertEquals("world", new String(readBuf.array()));
+	}
 
+	@Test
+	public void testFolderCopy() throws TimeoutException {
+		final FileSystem fs = new InMemoryFileSystem();
+		final Folder fooBarFolder = fs.folder("foo").folder("bar");
+		final Folder qweAsdFolder = fs.folder("qwe").folder("asd");
+		final Folder qweAsdBarFolder = qweAsdFolder.folder("bar");
+		final File test1File = fooBarFolder.file("test1.txt");
+		final File test2File = fooBarFolder.file("test2.txt");
+		fooBarFolder.create(FolderCreateMode.INCLUDING_PARENTS);
+
+		// create some files inside foo/bar/
+		try (WritableFile writable1 = test1File.openWritable(1, TimeUnit.SECONDS); //
+				WritableFile writable2 = test2File.openWritable(1, TimeUnit.SECONDS)) {
+			writable1.write(ByteBuffer.wrap("hello".getBytes()));
+			writable2.write(ByteBuffer.wrap("world".getBytes()));
+		}
+		Assert.assertTrue(test1File.exists());
+		Assert.assertTrue(test2File.exists());
+
+		// copy foo/bar/ to qwe/asd/ (result is qwe/asd/bar/file1.txt & qwe/asd/bar/file2.txt)
+		fooBarFolder.copyTo(qweAsdFolder);
+		Assert.assertTrue(qweAsdBarFolder.exists());
+		Assert.assertEquals(1, qweAsdFolder.folders().count());
+		Assert.assertEquals(2, qweAsdBarFolder.files().count());
+
+		// make sure original files still exist:
+		Assert.assertTrue(test1File.exists());
+		Assert.assertTrue(test2File.exists());
 	}
 
 }

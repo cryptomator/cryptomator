@@ -9,7 +9,6 @@
 package org.cryptomator.filesystem.inmem;
 
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 import java.time.Instant;
@@ -30,9 +29,9 @@ class InMemoryFile extends InMemoryNode implements ReadableFile, WritableFile {
 	}
 
 	@Override
-	public ReadableFile openReadable(long timeout, TimeUnit unit) throws IOException, TimeoutException {
+	public ReadableFile openReadable(long timeout, TimeUnit unit) throws TimeoutException {
 		if (!exists()) {
-			throw new FileNotFoundException(this.name() + " does not exist");
+			throw new UncheckedIOException(new FileNotFoundException(this.name() + " does not exist"));
 		}
 		try {
 			if (!lock.readLock().tryLock(timeout, unit)) {
@@ -45,7 +44,7 @@ class InMemoryFile extends InMemoryNode implements ReadableFile, WritableFile {
 	}
 
 	@Override
-	public WritableFile openWritable(long timeout, TimeUnit unit) throws IOException, TimeoutException {
+	public WritableFile openWritable(long timeout, TimeUnit unit) throws TimeoutException {
 		try {
 			if (!lock.writeLock().tryLock(timeout, unit)) {
 				throw new TimeoutException("Failed to open " + name() + " for writing within time limit.");
@@ -54,38 +53,34 @@ class InMemoryFile extends InMemoryNode implements ReadableFile, WritableFile {
 			Thread.currentThread().interrupt();
 		}
 		final InMemoryFolder parent = parent().get();
-		try {
-			parent.children.compute(this.name(), (k, v) -> {
-				if (v != null && v != this) {
-					throw new IllegalStateException("More than one representation of same file");
-				}
-				return this;
-			});
-		} catch (UncheckedIOException e) {
-			throw e.getCause();
-		}
+		parent.children.compute(this.name(), (k, v) -> {
+			if (v != null && v != this) {
+				throw new IllegalStateException("More than one representation of same file");
+			}
+			return this;
+		});
 		return this;
 	}
 
 	@Override
-	public void read(ByteBuffer target) throws IOException {
+	public void read(ByteBuffer target) {
 		this.read(target, 0);
 	}
 
 	@Override
-	public void read(ByteBuffer target, int position) throws IOException {
+	public void read(ByteBuffer target, int position) {
 		content.rewind();
 		content.position(position);
 		target.put(content);
 	}
 
 	@Override
-	public void write(ByteBuffer source) throws IOException {
+	public void write(ByteBuffer source) {
 		this.write(source, content.position());
 	}
 
 	@Override
-	public void write(ByteBuffer source, int position) throws IOException {
+	public void write(ByteBuffer source, int position) {
 		assert content != null;
 		if (position + source.remaining() > content.remaining()) {
 			// create bigger buffer
@@ -98,15 +93,26 @@ class InMemoryFile extends InMemoryNode implements ReadableFile, WritableFile {
 	}
 
 	@Override
-	public WritableFile moveTo(WritableFile other) throws IOException {
-		this.copyTo(other);
-		this.delete();
-		return other;
+	public void setLastModified(Instant instant) {
+		this.lastModified = instant;
 	}
 
 	@Override
-	public void setLastModified(Instant instant) {
-		this.lastModified = instant;
+	public void truncate() {
+		content = ByteBuffer.wrap(new byte[0]);
+	}
+
+	@Override
+	public void copyTo(WritableFile other) {
+		content.rewind();
+		other.truncate();
+		other.write(content);
+	}
+
+	@Override
+	public void moveTo(WritableFile other) {
+		this.copyTo(other);
+		this.delete();
 	}
 
 	@Override
@@ -117,23 +123,11 @@ class InMemoryFile extends InMemoryNode implements ReadableFile, WritableFile {
 			// returning null removes the entry.
 			return null;
 		});
+		assert!this.exists();
 	}
 
 	@Override
-	public void truncate() {
-		content = ByteBuffer.wrap(new byte[0]);
-	}
-
-	@Override
-	public WritableFile copyTo(WritableFile other) throws IOException {
-		content.rewind();
-		other.truncate();
-		other.write(content);
-		return other;
-	}
-
-	@Override
-	public void close() throws IOException {
+	public void close() {
 		if (lock.isWriteLockedByCurrentThread()) {
 			lock.writeLock().unlock();
 		} else if (lock.getReadHoldCount() > 0) {

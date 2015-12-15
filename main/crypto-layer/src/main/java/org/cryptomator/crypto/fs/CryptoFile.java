@@ -8,7 +8,6 @@
  *******************************************************************************/
 package org.cryptomator.crypto.fs;
 
-import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.time.Instant;
 import java.util.concurrent.TimeUnit;
@@ -39,15 +38,20 @@ public class CryptoFile extends CryptoNode implements File {
 	}
 
 	@Override
-	public ReadableFile openReadable(long timeout, TimeUnit unit) throws IOException, TimeoutException {
+	public ReadableFile openReadable(long timeout, TimeUnit unit) throws TimeoutException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public WritableFile openWritable(long timeout, TimeUnit unit) throws IOException, TimeoutException {
+	public WritableFile openWritable(long timeout, TimeUnit unit) throws TimeoutException {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public String toString() {
+		return parent.toString() + name;
 	}
 
 }

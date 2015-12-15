@@ -8,8 +8,6 @@
  *******************************************************************************/
 package org.cryptomator.crypto.fs;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.util.Optional;
 
 import org.cryptomator.crypto.engine.Cryptor;
@@ -52,11 +50,7 @@ abstract class CryptoNode implements Node {
 
 	@Override
 	public boolean exists() {
-		try {
-			return parent.children().anyMatch(node -> node.equals(this));
-		} catch (IOException e) {
-			throw new UncheckedIOException(e);
-		}
+		return parent.children().anyMatch(node -> node.equals(this));
 	}
 
 	@Override

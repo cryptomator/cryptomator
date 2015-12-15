@@ -5,8 +5,11 @@
  ******************************************************************************/
 package org.cryptomator.filesystem;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Stream;
 
 /**
@@ -55,14 +58,38 @@ public interface Folder extends Node {
 	Folder folder(String name) throws UncheckedIOException;
 
 	/**
-	 * Copies this directory and its contents to the given destination. If the
-	 * target exists it is deleted before performing the copy.
+	 * Creates the directory, if it doesn't exist yet. After successful invocation {@link #exists()} will return <code>true</code>
+	 * 
+	 * @param mode Depending on this option either the attempt is made to recursively create all parent directories or an exception is thrown if the parent doesn't exist yet.
+	 * @throws UncheckedIOException wrapping an {@link FileNotFoundException}, if mode is {@link FolderCreateMode#FAIL_IF_PARENT_IS_MISSING FAIL_IF_PARENT_IS_MISSING} and parent doesn't exist.
 	 */
-	void copyTo(Folder target);
+	void create(FolderCreateMode mode) throws UncheckedIOException;
 
 	/**
-	 * Moves this directory and its contents to the given destination. If the
-	 * target exists it is deleted before performing the move.
+	 * Copies this directory and its contents to the given destination.
+	 */
+	default void copyTo(Folder target) throws UncheckedIOException {
+		final Folder copy = target.folder(this.name());
+		copy.create(FolderCreateMode.INCLUDING_PARENTS);
+		folders().forEach(folder -> folder.copyTo(copy));
+		files().forEach(srcFile -> {
+			final File dstFile = copy.file(srcFile.name());
+			try (ReadableFile src = srcFile.openReadable(1, TimeUnit.SECONDS); WritableFile dst = dstFile.openWritable(1, TimeUnit.SECONDS)) {
+				src.copyTo(dst);
+			} catch (TimeoutException e) {
+				throw new UncheckedIOException(new IOException("Failed to lock file in time.", e));
+			}
+		});
+	}
+
+	/**
+	 * Deletes the directory including all child elements. Afterwards {@link #exists()} will return <code>false</code>.
+	 */
+	void delete() throws UncheckedIOException;
+
+	/**
+	 * Moves this directory and its contents to the given destination. If the target exists it is deleted before performing the move.
+	 * Afterwards {@link #exists()} will return <code>false</code> for this folder and any child nodes.
 	 */
 	void moveTo(Folder target);
 

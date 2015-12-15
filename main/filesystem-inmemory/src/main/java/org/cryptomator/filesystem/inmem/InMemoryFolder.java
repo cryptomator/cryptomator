@@ -9,7 +9,6 @@
 package org.cryptomator.filesystem.inmem;
 
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.FileAlreadyExistsException;
 import java.time.Instant;
@@ -67,36 +66,51 @@ class InMemoryFolder extends InMemoryNode implements Folder {
 	}
 
 	@Override
-	public void create(FolderCreateMode mode) throws IOException {
+	public void create(FolderCreateMode mode) {
 		if (exists()) {
 			return;
 		}
 		if (!parent.exists() && FolderCreateMode.FAIL_IF_PARENT_IS_MISSING.equals(mode)) {
-			throw new FileNotFoundException(parent.name);
+			throw new UncheckedIOException(new FileNotFoundException(parent.name));
 		} else if (!parent.exists() && FolderCreateMode.INCLUDING_PARENTS.equals(mode)) {
 			parent.create(mode);
 		}
 		assert parent.exists();
-		try {
-			parent.children.compute(this.name(), (k, v) -> {
-				if (v == null) {
-					this.lastModified = Instant.now();
-					return this;
-				} else {
-					throw new UncheckedIOException(new FileExistsException(k));
-				}
-			});
-		} catch (UncheckedIOException e) {
-			throw e.getCause();
+		parent.children.compute(this.name(), (k, v) -> {
+			if (v == null) {
+				this.lastModified = Instant.now();
+				return this;
+			} else {
+				throw new UncheckedIOException(new FileExistsException(k));
+			}
+		});
+		assert this.exists();
+	}
+
+	@Override
+	public void moveTo(Folder target) {
+		if (target.exists()) {
+			target.delete();
 		}
+		assert!target.exists();
+		target.create(FolderCreateMode.INCLUDING_PARENTS);
+		this.copyTo(target);
+		this.delete();
+		assert!this.exists();
 	}
 
 	@Override
 	public void delete() {
+		// delete subfolder recursively:
+		folders().forEach(Folder::delete);
+		// delete direct children (this deletes files):
+		this.children.clear();
+		// remove ourself from parent:
 		parent.children.computeIfPresent(name, (k, v) -> {
 			// returning null removes the entry.
 			return null;
 		});
+		assert!this.exists();
 	}
 
 	@Override

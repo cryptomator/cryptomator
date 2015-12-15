@@ -9,6 +9,7 @@
 package org.cryptomator.crypto.fs;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -37,7 +38,7 @@ public class CryptoFileSystem extends CryptoFolder implements FileSystem {
 	}
 
 	@Override
-	File physicalFile() throws IOException {
+	File physicalFile() {
 		return physicalDataRoot().file(ROOT_DIR_FILE);
 	}
 
@@ -67,12 +68,7 @@ public class CryptoFileSystem extends CryptoFolder implements FileSystem {
 	}
 
 	@Override
-	public String toString() {
-		return "/";
-	}
-
-	@Override
-	public void create(FolderCreateMode mode) throws IOException {
+	public void create(FolderCreateMode mode) {
 		physicalDataRoot().create(mode);
 		physicalMetadataRoot().create(mode);
 		final File dirFile = physicalFile();
@@ -81,9 +77,14 @@ public class CryptoFileSystem extends CryptoFolder implements FileSystem {
 			final ByteBuffer buf = ByteBuffer.wrap(directoryId.getBytes());
 			writable.write(buf);
 		} catch (TimeoutException e) {
-			throw new IOException("Failed to lock directory file in time." + dirFile, e);
+			throw new UncheckedIOException(new IOException("Failed to lock directory file in time." + dirFile, e));
 		}
 		physicalFolder().create(FolderCreateMode.INCLUDING_PARENTS);
+	}
+
+	@Override
+	public String toString() {
+		return physicalRoot + ":::/";
 	}
 
 }

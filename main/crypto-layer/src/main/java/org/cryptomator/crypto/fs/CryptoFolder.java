@@ -15,6 +15,7 @@ import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -46,7 +47,7 @@ class CryptoFolder extends CryptoNode implements Folder {
 		return name() + FILE_EXT;
 	}
 
-	protected String getDirectoryId() throws IOException {
+	protected String getDirectoryId() {
 		if (directoryId.get() == null) {
 			File dirFile = physicalFile();
 			if (dirFile.exists()) {
@@ -58,9 +59,7 @@ class CryptoFolder extends CryptoNode implements Folder {
 					buf.get(bytes);
 					directoryId.set(new String(bytes));
 				} catch (TimeoutException e) {
-					throw new IOException("Failed to lock directory file in time." + dirFile, e);
-				} catch (IOException e) {
-					throw new UncheckedIOException(e);
+					throw new UncheckedIOException(new IOException("Failed to lock directory file in time." + dirFile, e));
 				}
 			} else {
 				directoryId.compareAndSet(null, UUID.randomUUID().toString());
@@ -69,11 +68,11 @@ class CryptoFolder extends CryptoNode implements Folder {
 		return directoryId.get();
 	}
 
-	File physicalFile() throws IOException {
+	File physicalFile() {
 		return parent.physicalFolder().file(encryptedName());
 	}
 
-	Folder physicalFolder() throws IOException {
+	Folder physicalFolder() {
 		final String encryptedThenHashedDirId;
 		try {
 			final byte[] hash = MessageDigest.getInstance("SHA-1").digest(getDirectoryId().getBytes());
@@ -87,20 +86,16 @@ class CryptoFolder extends CryptoNode implements Folder {
 
 	@Override
 	public Instant lastModified() {
-		try {
-			return physicalFile().lastModified();
-		} catch (IOException e) {
-			throw new UncheckedIOException(e);
-		}
+		return physicalFile().lastModified();
 	}
 
 	@Override
-	public Stream<? extends Node> children() throws IOException {
+	public Stream<? extends Node> children() {
 		return Stream.concat(files(), folders());
 	}
 
 	@Override
-	public Stream<CryptoFile> files() throws IOException {
+	public Stream<CryptoFile> files() {
 		return physicalFolder().files().map(File::name).filter(s -> s.endsWith(CryptoFile.FILE_EXT)).map(this::decryptFileName).map(this::file);
 	}
 
@@ -115,7 +110,7 @@ class CryptoFolder extends CryptoNode implements Folder {
 	}
 
 	@Override
-	public Stream<CryptoFolder> folders() throws IOException {
+	public Stream<CryptoFolder> folders() {
 		return physicalFolder().files().map(File::name).filter(s -> s.endsWith(CryptoFolder.FILE_EXT)).map(this::decryptFolderName).map(this::folder);
 	}
 
@@ -130,13 +125,13 @@ class CryptoFolder extends CryptoNode implements Folder {
 	}
 
 	@Override
-	public void create(FolderCreateMode mode) throws IOException {
+	public void create(FolderCreateMode mode) {
 		final File dirFile = physicalFile();
 		if (dirFile.exists()) {
 			return;
 		}
 		if (!parent.exists() && FolderCreateMode.FAIL_IF_PARENT_IS_MISSING.equals(mode)) {
-			throw new FileNotFoundException(parent.name);
+			throw new UncheckedIOException(new FileNotFoundException(parent.name));
 		} else if (!parent.exists() && FolderCreateMode.INCLUDING_PARENTS.equals(mode)) {
 			parent.create(mode);
 		}
@@ -146,15 +141,65 @@ class CryptoFolder extends CryptoNode implements Folder {
 			final ByteBuffer buf = ByteBuffer.wrap(directoryId.getBytes());
 			writable.write(buf);
 		} catch (TimeoutException e) {
-			throw new IOException("Failed to lock directory file in time." + dirFile, e);
+			throw new UncheckedIOException(new IOException("Failed to lock directory file in time." + dirFile, e));
 		}
 		physicalFolder().create(FolderCreateMode.INCLUDING_PARENTS);
 	}
 
 	@Override
-	public void delete() throws IOException {
+	public void copyTo(Folder target) {
+		if (this.contains(target)) {
+			throw new IllegalArgumentException("Can not copy parent to child directory (src: " + this + ", dst: " + target + ")");
+		}
+
+		Folder.super.copyTo(target);
+	}
+
+	@Override
+	public void moveTo(Folder target) {
+		if (target instanceof CryptoFolder) {
+			moveToInternal((CryptoFolder) target);
+		} else {
+			throw new UnsupportedOperationException("Can not move CryptoFolder to conventional folder.");
+		}
+	}
+
+	private void moveToInternal(CryptoFolder target) {
+		if (this.contains(target) || target.contains(this)) {
+			throw new IllegalArgumentException("Can not move directories containing one another (src: " + this + ", dst: " + target + ")");
+		}
+
+		target.physicalFile().parent().get().create(FolderCreateMode.INCLUDING_PARENTS);
+		assert target.physicalFile().parent().get().exists();
+		try (WritableFile src = this.physicalFile().openWritable(1, TimeUnit.SECONDS); WritableFile dst = target.physicalFile().openWritable(1, TimeUnit.SECONDS)) {
+			src.moveTo(dst);
+		} catch (TimeoutException e) {
+			throw new UncheckedIOException(new IOException("Failed to lock file for moving (src: " + this + ", dst: " + target + ")", e));
+		}
+		// directoryId is now used by target, we must no longer use the same id (we'll generate a new one when needed)
+		directoryId.set(null);
+	}
+
+	private boolean contains(Node node) {
+		Optional<? extends Folder> nodeParent = node.parent();
+		while (nodeParent.isPresent()) {
+			if (this.equals(nodeParent.get())) {
+				return true;
+			}
+			nodeParent = nodeParent.get().parent();
+		}
+		return false;
+	}
+
+	@Override
+	public void delete() {
 		// TODO Auto-generated method stub
 
+	}
+
+	@Override
+	public String toString() {
+		return parent.toString() + name + "/";
 	}
 
 }
