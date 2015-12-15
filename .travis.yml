@@ -1,8 +1,18 @@
 language: java
+
 jdk:
 - oraclejdk8
+
+env:
+  global:
+    - secure: "Lgj042RD0X3rB8VZVZLWP1GetLhjd3PqI5JbJMlzgHJpDI6RkFIBLN9SWAGmkLPCehIp2zA5tu9+UVy0NNMxm9xz6SyjMCaxS28/fnYEXaNmwwDSF6O6gLUbdxyzoYIFPYOPmFxpzhebqnNIsxaM29oZpgRgUGqosCczQxiB+Ng="
+
 before_install: "curl -L --cookie 'oraclelicense=accept-securebackup-cookie;'  http://download.oracle.com/otn-pub/java/jce/8/jce_policy-8.zip -o /tmp/policy.zip && sudo unzip -j -o /tmp/policy.zip *.jar -d `jdk_switcher home oraclejdk8`/jre/lib/security && rm /tmp/policy.zip"
+
 script: mvn -fmain/pom.xml -Puber-jar clean package
+
+after_success: mvn clean test jacoco:report coveralls:report
+
 notifications:
   webhooks:
     urls:
@@ -10,11 +20,12 @@ notifications:
     on_success: change
     on_failure: always
     on_start: false
+
 deploy:
   provider: releases
   prerelease: true
   api_key:
-    secure: ZjE1j93v3qbPIe2YbmhS319aCbMdLQw0HuymmluTurxXsZtn9D4t2+eTr99vBVxGRuB5lzzGezPR5zjk5W7iHF7xhwrawXrFzr2rPJWzWFt0aM+Ry2njU1ROTGGXGTbv4anWeBlgMxLEInTAy/9ytOGNJlec83yc0THpOY2wxnk=
+    secure: "ZjE1j93v3qbPIe2YbmhS319aCbMdLQw0HuymmluTurxXsZtn9D4t2+eTr99vBVxGRuB5lzzGezPR5zjk5W7iHF7xhwrawXrFzr2rPJWzWFt0aM+Ry2njU1ROTGGXGTbv4anWeBlgMxLEInTAy/9ytOGNJlec83yc0THpOY2wxnk="
   file: main/uber-jar/target/Cryptomator-$TRAVIS_TAG.jar
   skip_cleanup: true
   on:
