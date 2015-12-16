@@ -2,6 +2,7 @@ package org.cryptomator.shortening;
 
 import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
+import java.time.Instant;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -48,6 +49,41 @@ public class ShorteningFileSystemTest {
 	}
 
 	@Test
+	public void testMoveLongFolders() {
+		final FileSystem underlyingFs = new InMemoryFileSystem();
+		final Folder metadataRoot = underlyingFs.folder("m");
+		final FileSystem fs = new ShorteningFileSystem(underlyingFs, metadataRoot, 10);
+
+		final Folder shortNamedFolder = fs.folder("test");
+		shortNamedFolder.create(FolderCreateMode.FAIL_IF_PARENT_IS_MISSING);
+		Assert.assertFalse(metadataRoot.children().findAny().isPresent());
+
+		final Folder longNamedFolder = fs.folder("morethantenchars");
+		shortNamedFolder.moveTo(longNamedFolder);
+		Assert.assertTrue(metadataRoot.children().findAny().isPresent());
+	}
+
+	@Test
+	public void testMoveLongFiles() throws UncheckedIOException, TimeoutException {
+		final FileSystem underlyingFs = new InMemoryFileSystem();
+		final Folder metadataRoot = underlyingFs.folder("m");
+		final FileSystem fs = new ShorteningFileSystem(underlyingFs, metadataRoot, 10);
+
+		final File shortNamedFolder = fs.file("test");
+		try (WritableFile file = shortNamedFolder.openWritable(1, TimeUnit.MILLISECONDS)) {
+			file.write(ByteBuffer.wrap("hello world".getBytes()));
+		}
+		Assert.assertFalse(metadataRoot.children().findAny().isPresent());
+
+		final File longNamedFolder = fs.file("morethantenchars");
+		try (WritableFile src = shortNamedFolder.openWritable(1, TimeUnit.MILLISECONDS); //
+				WritableFile dst = longNamedFolder.openWritable(1, TimeUnit.MILLISECONDS)) {
+			src.moveTo(dst);
+		}
+		Assert.assertTrue(metadataRoot.children().findAny().isPresent());
+	}
+
+	@Test
 	public void testDeflateAndInflateFolder() {
 		final FileSystem underlyingFs = new InMemoryFileSystem();
 		final Folder metadataRoot = underlyingFs.folder("m");
@@ -82,10 +118,14 @@ public class ShorteningFileSystemTest {
 	}
 
 	@Test
-	public void testPassthroughShortNamedFiles() throws UncheckedIOException, TimeoutException {
+	public void testPassthroughShortNamedFiles() throws UncheckedIOException, TimeoutException, InterruptedException {
 		final FileSystem underlyingFs = new InMemoryFileSystem();
 		final Folder metadataRoot = underlyingFs.folder("m");
 		final FileSystem fs = new ShorteningFileSystem(underlyingFs, metadataRoot, 10);
+
+		final Instant testStart = Instant.now();
+
+		Thread.sleep(1);
 
 		// of folders:
 		underlyingFs.folder("foo").folder("bar").create(FolderCreateMode.INCLUDING_PARENTS);
@@ -100,6 +140,7 @@ public class ShorteningFileSystemTest {
 			file.read(buf);
 			Assert.assertEquals("hello world", new String(buf.array()));
 		}
+		Assert.assertTrue(fs.folder("foo").file("test1.txt").lastModified().isAfter(testStart));
 
 		// to underlying:
 		try (WritableFile file = fs.folder("foo").file("test2.txt").openWritable(1, TimeUnit.MILLISECONDS)) {
@@ -110,6 +151,7 @@ public class ShorteningFileSystemTest {
 			file.read(buf);
 			Assert.assertEquals("hello world", new String(buf.array()));
 		}
+		Assert.assertTrue(fs.folder("foo").file("test2.txt").lastModified().isAfter(testStart));
 	}
 
 }
