@@ -66,6 +66,11 @@
 			</dependency>
 			<dependency>
 				<groupId>org.cryptomator</groupId>
+				<artifactId>shortening-layer</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.cryptomator</groupId>
 				<artifactId>crypto-layer</artifactId>
 				<version>${project.version}</version>
 			</dependency>
@@ -215,6 +220,7 @@
 		<module>crypto-aes</module>
 		<module>core</module>
 		<module>ui</module>
+		<module>shortening-layer</module>
 	</modules>
 
 	<profiles>

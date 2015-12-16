@@ -15,7 +15,6 @@ import java.security.NoSuchAlgorithmException;
 
 import javax.crypto.AEADBadTagException;
 import javax.crypto.SecretKey;
-import javax.security.auth.DestroyFailedException;
 
 import org.apache.commons.codec.binary.Base32;
 import org.apache.commons.codec.binary.BaseNCodec;
@@ -26,7 +25,7 @@ import org.cryptomator.siv.SivMode;
 class FilenameCryptorImpl implements FilenameCryptor {
 
 	private static final BaseNCodec BASE32 = new Base32();
-	private static final ThreadLocal<MessageDigest> SHA256 = new ThreadLocalSha256();
+	private static final ThreadLocal<MessageDigest> SHA1 = new ThreadLocalSha1();
 	private static final SivMode AES_SIV = new SivMode();
 
 	private final SecretKey encryptionKey;
@@ -44,7 +43,7 @@ class FilenameCryptorImpl implements FilenameCryptor {
 	public String hashDirectoryId(String cleartextDirectoryId) {
 		final byte[] cleartextBytes = cleartextDirectoryId.getBytes(StandardCharsets.UTF_8);
 		byte[] encryptedBytes = AES_SIV.encrypt(encryptionKey, macKey, cleartextBytes);
-		final byte[] hashedBytes = SHA256.get().digest(encryptedBytes);
+		final byte[] hashedBytes = SHA1.get().digest(encryptedBytes);
 		return BASE32.encodeAsString(hashedBytes);
 	}
 
@@ -66,14 +65,14 @@ class FilenameCryptorImpl implements FilenameCryptor {
 		}
 	}
 
-	private static class ThreadLocalSha256 extends ThreadLocal<MessageDigest> {
+	private static class ThreadLocalSha1 extends ThreadLocal<MessageDigest> {
 
 		@Override
 		protected MessageDigest initialValue() {
 			try {
-				return MessageDigest.getInstance("SHA-256");
+				return MessageDigest.getInstance("SHA-1");
 			} catch (NoSuchAlgorithmException e) {
-				throw new AssertionError("SHA-256 exists in every JVM");
+				throw new AssertionError("SHA-1 exists in every JVM");
 			}
 		}
 
@@ -88,7 +87,7 @@ class FilenameCryptorImpl implements FilenameCryptor {
 	/* ======================= destruction ======================= */
 
 	@Override
-	public void destroy() throws DestroyFailedException {
+	public void destroy() {
 		TheDestroyer.destroyQuietly(encryptionKey);
 		TheDestroyer.destroyQuietly(macKey);
 	}

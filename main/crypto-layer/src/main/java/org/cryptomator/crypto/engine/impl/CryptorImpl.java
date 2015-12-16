@@ -46,17 +46,18 @@ public class CryptorImpl implements Cryptor {
 	@Override
 	public FilenameCryptor getFilenameCryptor() {
 		// lazy initialization pattern as proposed here http://stackoverflow.com/a/30247202/4014509
-		FilenameCryptor cryptor = filenameCryptor.get();
-		if (cryptor == null) {
-			cryptor = new FilenameCryptorImpl(encryptionKey, macKey);
-			if (filenameCryptor.compareAndSet(null, cryptor)) {
-				return cryptor;
+		final FilenameCryptor existingCryptor = filenameCryptor.get();
+		if (existingCryptor != null) {
+			return existingCryptor;
+		} else {
+			final FilenameCryptorImpl newCryptor = new FilenameCryptorImpl(encryptionKey, macKey);
+			if (filenameCryptor.compareAndSet(null, newCryptor)) {
+				return newCryptor;
 			} else {
 				// CAS failed: other thread set an object
+				newCryptor.destroy();
 				return filenameCryptor.get();
 			}
-		} else {
-			return cryptor;
 		}
 	}
 

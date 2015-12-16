@@ -12,8 +12,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -21,7 +19,6 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
-import org.apache.commons.codec.binary.Base32;
 import org.apache.commons.lang3.StringUtils;
 import org.cryptomator.crypto.engine.Cryptor;
 import org.cryptomator.filesystem.File;
@@ -41,9 +38,8 @@ class CryptoFolder extends CryptoNode implements Folder {
 		super(parent, name, cryptor);
 	}
 
-	@Override
 	String encryptedName() {
-		return name() + FILE_EXT;
+		return cryptor.getFilenameCryptor().encryptFilename(name()) + FILE_EXT;
 	}
 
 	protected String getDirectoryId() {
@@ -72,14 +68,7 @@ class CryptoFolder extends CryptoNode implements Folder {
 	}
 
 	Folder physicalFolder() {
-		final String encryptedThenHashedDirId;
-		try {
-			final byte[] hash = MessageDigest.getInstance("SHA-1").digest(getDirectoryId().getBytes());
-			encryptedThenHashedDirId = new Base32().encodeAsString(hash);
-		} catch (NoSuchAlgorithmException e) {
-			throw new AssertionError("SHA-1 exists in every JVM");
-		}
-		// TODO actual encryption
+		final String encryptedThenHashedDirId = cryptor.getFilenameCryptor().hashDirectoryId(getDirectoryId());
 		return physicalDataRoot().folder(encryptedThenHashedDirId.substring(0, 2)).folder(encryptedThenHashedDirId.substring(2));
 	}
 

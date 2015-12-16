@@ -30,10 +30,6 @@ abstract class CryptoNode implements Node {
 		return parent.physicalDataRoot();
 	}
 
-	Folder physicalMetadataRoot() {
-		return parent.physicalMetadataRoot();
-	}
-
 	@Override
 	public Optional<CryptoFolder> parent() {
 		return Optional.of(parent);
@@ -42,10 +38,6 @@ abstract class CryptoNode implements Node {
 	@Override
 	public String name() {
 		return name;
-	}
-
-	String encryptedName() {
-		return name();
 	}
 
 	@Override

@@ -29,7 +29,6 @@ public class CryptoFileSystem extends CryptoFolder implements FileSystem {
 
 	private static final Logger LOG = LoggerFactory.getLogger(CryptoFileSystem.class);
 	private static final String DATA_ROOT_DIR = "d";
-	private static final String METADATA_ROOT_DIR = "m";
 	private static final String ROOT_DIR_FILE = "root";
 	private static final String MASTERKEY_FILENAME = "masterkey.cryptomator";
 	private static final String MASTERKEY_BACKUP_FILENAME = "masterkey.cryptomator.bkup";
@@ -97,11 +96,6 @@ public class CryptoFileSystem extends CryptoFolder implements FileSystem {
 	}
 
 	@Override
-	Folder physicalMetadataRoot() {
-		return physicalRoot.folder(METADATA_ROOT_DIR);
-	}
-
-	@Override
 	public Optional<CryptoFolder> parent() {
 		return Optional.empty();
 	}
@@ -119,7 +113,6 @@ public class CryptoFileSystem extends CryptoFolder implements FileSystem {
 	@Override
 	public void create(FolderCreateMode mode) {
 		physicalDataRoot().create(mode);
-		physicalMetadataRoot().create(mode);
 		final File dirFile = physicalFile();
 		final String directoryId = getDirectoryId();
 		try (WritableFile writable = dirFile.openWritable(1, TimeUnit.SECONDS)) {

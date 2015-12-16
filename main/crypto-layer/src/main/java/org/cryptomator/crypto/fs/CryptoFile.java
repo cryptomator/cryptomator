@@ -26,9 +26,8 @@ public class CryptoFile extends CryptoNode implements File {
 		super(parent, name, cryptor);
 	}
 
-	@Override
 	String encryptedName() {
-		return name() + FILE_EXT;
+		return cryptor.getFilenameCryptor().encryptFilename(name()) + FILE_EXT;
 	}
 
 	@Override
