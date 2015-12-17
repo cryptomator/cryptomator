@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Configuration status="WARN">
+
+	<Appenders>
+		<Console name="Console" target="SYSTEM_OUT">
+			<PatternLayout pattern="%16d %-5p [%c{1}:%L] %m%n" />
+			<ThresholdFilter level="WARN" onMatch="DENY" onMismatch="ACCEPT" />
+		</Console>
+		<Console name="StdErr" target="SYSTEM_ERR">
+			<PatternLayout pattern="%16d %-5p [%c{1}:%L] %m%n" />
+			<ThresholdFilter level="WARN" onMatch="ACCEPT" onMismatch="DENY" />
+		</Console>
+	</Appenders>
+
+	<Loggers>
+		<Root level="DEBUG">
+			<AppenderRef ref="Console" />
+			<AppenderRef ref="StdErr" />
+		</Root>
+	</Loggers>
+
+</Configuration>

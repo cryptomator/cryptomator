@@ -66,12 +66,12 @@
 			</dependency>
 			<dependency>
 				<groupId>org.cryptomator</groupId>
-				<artifactId>shortening-layer</artifactId>
+				<artifactId>filesystem-nameshortening</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.cryptomator</groupId>
-				<artifactId>crypto-layer</artifactId>
+				<artifactId>filesystem-crypto</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			
@@ -216,12 +216,12 @@
 		<module>filesystem-api</module>
 		<module>filesystem-inmemory</module>
 		<module>filesystem-nio</module>
-		<module>crypto-layer</module>
+		<module>filesystem-nameshortening</module>
+		<module>filesystem-crypto</module>
 		<module>crypto-api</module>
 		<module>crypto-aes</module>
 		<module>core</module>
 		<module>ui</module>
-		<module>shortening-layer</module>
 	</modules>
 
 	<profiles>

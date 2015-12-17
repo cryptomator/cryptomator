@@ -14,13 +14,34 @@
 		<artifactId>main</artifactId>
 		<version>0.11.0-SNAPSHOT</version>
 	</parent>
-	<artifactId>shortening-layer</artifactId>
-	<name>Cryptomator name shortening filesystem layer</name>
+	<artifactId>filesystem-crypto</artifactId>
+	<name>Cryptomator filesystem: Encryption layer</name>
+	
+	<properties>
+		<bouncycastle.version>1.51</bouncycastle.version>
+		<sivmode.version>1.0.2</sivmode.version>
+	</properties>
 
 	<dependencies>
 		<dependency>
 			<groupId>org.cryptomator</groupId>
 			<artifactId>filesystem-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.cryptomator</groupId>
+			<artifactId>filesystem-nameshortening</artifactId>
+		</dependency>
+		
+		<!-- Crypto -->
+		<dependency>
+			<groupId>org.cryptomator</groupId>
+			<artifactId>siv-mode</artifactId>
+			<version>${sivmode.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcprov-jdk15on</artifactId>
+			<version>${bouncycastle.version}</version>
 		</dependency>
 		
 		<!-- Commons -->
@@ -32,13 +53,13 @@
 			<groupId>commons-codec</groupId>
 			<artifactId>commons-codec</artifactId>
 		</dependency>
-
+		
 		<!-- JSON -->
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
 		</dependency>
-
+		
 		<!-- Test dependencies -->
 		<dependency>
 			<groupId>org.cryptomator</groupId>
@@ -46,7 +67,7 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
-
+	
 	<build>
 		<plugins>
 			<plugin>
