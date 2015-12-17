@@ -18,12 +18,9 @@ import org.cryptomator.filesystem.Folder;
 import org.cryptomator.filesystem.FolderCreateMode;
 import org.cryptomator.filesystem.ReadableFile;
 import org.cryptomator.filesystem.WritableFile;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class CryptoFileSystem extends CryptoFolder implements FileSystem {
 
-	private static final Logger LOG = LoggerFactory.getLogger(CryptoFileSystem.class);
 	private static final String DATA_ROOT_DIR = "d";
 	private static final String ROOT_DIR_FILE = "root";
 	private static final String MASTERKEY_FILENAME = "masterkey.cryptomator";
