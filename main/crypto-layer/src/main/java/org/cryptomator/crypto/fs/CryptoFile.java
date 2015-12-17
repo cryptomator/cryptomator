@@ -10,8 +10,6 @@ package org.cryptomator.crypto.fs;
 
 import java.io.UncheckedIOException;
 import java.time.Instant;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import org.cryptomator.crypto.engine.Cryptor;
 import org.cryptomator.filesystem.File;
@@ -37,13 +35,13 @@ public class CryptoFile extends CryptoNode implements File {
 	}
 
 	@Override
-	public ReadableFile openReadable(long timeout, TimeUnit unit) throws TimeoutException {
+	public ReadableFile openReadable() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public WritableFile openWritable(long timeout, TimeUnit unit) throws TimeoutException {
+	public WritableFile openWritable() {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -51,6 +49,11 @@ public class CryptoFile extends CryptoNode implements File {
 	@Override
 	public String toString() {
 		return parent.toString() + name;
+	}
+
+	@Override
+	public int compareTo(File o) {
+		return toString().compareTo(o.toString());
 	}
 
 }

@@ -11,7 +11,7 @@ import org.cryptomator.filesystem.Folder;
 import org.cryptomator.filesystem.FolderCreateMode;
 import org.cryptomator.filesystem.Node;
 
-class ShorteningFolder extends ShorteningNode<Folder>implements Folder {
+class ShorteningFolder extends ShorteningNode<Folder> implements Folder {
 
 	private final Folder metadataRoot;
 	private final FilenameShortener shortener;
@@ -35,7 +35,10 @@ class ShorteningFolder extends ShorteningNode<Folder>implements Folder {
 	@Override
 	public File file(String name) {
 		final File original = delegate.file(shortener.deflate(name));
-		if (metadataRoot.equals(original)) { // comparing apples and oranges, but we don't know if the underlying fs distinguishes files and folders...
+		if (metadataRoot.equals(original)) { // comparing apples and oranges,
+												// but we don't know if the
+												// underlying fs distinguishes
+												// files and folders...
 			throw new UncheckedIOException("'" + name + "' is a reserved name.", new FileAlreadyExistsException(name));
 		}
 		return new ShorteningFile(this, original, name, shortener);
@@ -109,7 +112,7 @@ class ShorteningFolder extends ShorteningNode<Folder>implements Folder {
 
 	@Override
 	public String toString() {
-		return name() + "/";
+		return parent + name() + "/";
 	}
 
 }

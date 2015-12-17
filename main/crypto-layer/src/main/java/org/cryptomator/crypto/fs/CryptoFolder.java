@@ -9,13 +9,10 @@
 package org.cryptomator.crypto.fs;
 
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 import java.time.Instant;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
@@ -46,15 +43,13 @@ class CryptoFolder extends CryptoNode implements Folder {
 		if (directoryId.get() == null) {
 			File dirFile = physicalFile();
 			if (dirFile.exists()) {
-				try (ReadableFile readable = dirFile.openReadable(1, TimeUnit.SECONDS)) {
+				try (ReadableFile readable = dirFile.openReadable()) {
 					final ByteBuffer buf = ByteBuffer.allocate(64);
 					readable.read(buf);
 					buf.flip();
 					byte[] bytes = new byte[buf.remaining()];
 					buf.get(bytes);
 					directoryId.set(new String(bytes));
-				} catch (TimeoutException e) {
-					throw new UncheckedIOException(new IOException("Failed to lock directory file in time." + dirFile, e));
 				}
 			} else {
 				directoryId.compareAndSet(null, UUID.randomUUID().toString());
@@ -125,11 +120,9 @@ class CryptoFolder extends CryptoNode implements Folder {
 		}
 		assert parent.exists();
 		final String directoryId = getDirectoryId();
-		try (WritableFile writable = dirFile.openWritable(1, TimeUnit.SECONDS)) {
+		try (WritableFile writable = dirFile.openWritable()) {
 			final ByteBuffer buf = ByteBuffer.wrap(directoryId.getBytes());
 			writable.write(buf);
-		} catch (TimeoutException e) {
-			throw new UncheckedIOException(new IOException("Failed to lock directory file in time." + dirFile, e));
 		}
 		physicalFolder().create(FolderCreateMode.INCLUDING_PARENTS);
 	}
@@ -150,12 +143,11 @@ class CryptoFolder extends CryptoNode implements Folder {
 
 		target.physicalFile().parent().get().create(FolderCreateMode.INCLUDING_PARENTS);
 		assert target.physicalFile().parent().get().exists();
-		try (WritableFile src = this.physicalFile().openWritable(1, TimeUnit.SECONDS); WritableFile dst = target.physicalFile().openWritable(1, TimeUnit.SECONDS)) {
+		try (WritableFile src = this.physicalFile().openWritable(); WritableFile dst = target.physicalFile().openWritable()) {
 			src.moveTo(dst);
-		} catch (TimeoutException e) {
-			throw new UncheckedIOException(new IOException("Failed to lock file for moving (src: " + this + ", dst: " + target + ")", e));
 		}
-		// directoryId is now used by target, we must no longer use the same id (we'll generate a new one when needed)
+		// directoryId is now used by target, we must no longer use the same id
+		// (we'll generate a new one when needed)
 		directoryId.set(null);
 	}
 

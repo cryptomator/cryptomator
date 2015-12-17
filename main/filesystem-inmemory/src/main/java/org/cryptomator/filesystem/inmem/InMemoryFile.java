@@ -12,14 +12,13 @@ import java.io.FileNotFoundException;
 import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 import java.time.Instant;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.ReadableFile;
 import org.cryptomator.filesystem.WritableFile;
 
-class InMemoryFile extends InMemoryNode implements ReadableFile, WritableFile {
+class InMemoryFile extends InMemoryNode implements File, ReadableFile, WritableFile {
 
 	private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 	private ByteBuffer content = ByteBuffer.wrap(new byte[0]);
@@ -29,29 +28,17 @@ class InMemoryFile extends InMemoryNode implements ReadableFile, WritableFile {
 	}
 
 	@Override
-	public ReadableFile openReadable(long timeout, TimeUnit unit) throws TimeoutException {
+	public ReadableFile openReadable() {
 		if (!exists()) {
 			throw new UncheckedIOException(new FileNotFoundException(this.name() + " does not exist"));
 		}
-		try {
-			if (!lock.readLock().tryLock(timeout, unit)) {
-				throw new TimeoutException("Failed to open " + name() + " for reading within time limit.");
-			}
-		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
-		}
+		lock.readLock().lock();
 		return this;
 	}
 
 	@Override
-	public WritableFile openWritable(long timeout, TimeUnit unit) throws TimeoutException {
-		try {
-			if (!lock.writeLock().tryLock(timeout, unit)) {
-				throw new TimeoutException("Failed to open " + name() + " for writing within time limit.");
-			}
-		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
-		}
+	public WritableFile openWritable() {
+		lock.writeLock().lock();
 		final InMemoryFolder parent = parent().get();
 		parent.children.compute(this.name(), (k, v) -> {
 			if (v != null && v != this) {
@@ -123,7 +110,7 @@ class InMemoryFile extends InMemoryNode implements ReadableFile, WritableFile {
 			// returning null removes the entry.
 			return null;
 		});
-		assert!this.exists();
+		assert !this.exists();
 	}
 
 	@Override
@@ -139,6 +126,11 @@ class InMemoryFile extends InMemoryNode implements ReadableFile, WritableFile {
 	@Override
 	public String toString() {
 		return parent.toString() + name;
+	}
+
+	@Override
+	public int compareTo(File o) {
+		return toString().compareTo(o.toString());
 	}
 
 }

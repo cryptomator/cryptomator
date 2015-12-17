@@ -215,6 +215,7 @@
 	<modules>
 		<module>filesystem-api</module>
 		<module>filesystem-inmemory</module>
+		<module>filesystem-nio</module>
 		<module>crypto-layer</module>
 		<module>crypto-api</module>
 		<module>crypto-aes</module>

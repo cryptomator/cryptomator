@@ -8,12 +8,8 @@
  *******************************************************************************/
 package org.cryptomator.crypto.fs;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import org.cryptomator.crypto.engine.Cryptor;
 import org.cryptomator.filesystem.File;
@@ -50,12 +46,13 @@ public class CryptoFileSystem extends CryptoFolder implements FileSystem {
 		}
 		assert masterkeyFile.exists() : "A CryptoFileSystem can not exist without a masterkey file.";
 		final File backupFile = physicalRoot.file(MASTERKEY_BACKUP_FILENAME);
-		backupMasterKeyFileSilently(masterkeyFile, backupFile);
+		masterkeyFile.copyTo(backupFile);
 	}
 
 	private static boolean decryptMasterKeyFile(Cryptor cryptor, File masterkeyFile, CharSequence passphrase) {
-		try (ReadableFile file = masterkeyFile.openReadable(1, TimeUnit.SECONDS)) {
-			// TODO we need to read the whole file but can not be sure about the buffer size:
+		try (ReadableFile file = masterkeyFile.openReadable()) {
+			// TODO we need to read the whole file but can not be sure about the
+			// buffer size:
 			final ByteBuffer bigEnoughBuffer = ByteBuffer.allocate(500);
 			file.read(bigEnoughBuffer);
 			bigEnoughBuffer.flip();
@@ -63,25 +60,13 @@ public class CryptoFileSystem extends CryptoFolder implements FileSystem {
 			final byte[] fileContents = new byte[bigEnoughBuffer.remaining()];
 			bigEnoughBuffer.get(fileContents);
 			return cryptor.readKeysFromMasterkeyFile(fileContents, passphrase);
-		} catch (TimeoutException e) {
-			throw new UncheckedIOException(new IOException("Failed to lock masterkey file in time. " + masterkeyFile, e));
 		}
 	}
 
 	private static void encryptMasterKeyFile(Cryptor cryptor, File masterkeyFile, CharSequence passphrase) {
-		try (WritableFile file = masterkeyFile.openWritable(1, TimeUnit.SECONDS)) {
+		try (WritableFile file = masterkeyFile.openWritable()) {
 			final byte[] fileContents = cryptor.writeKeysToMasterkeyFile(passphrase);
 			file.write(ByteBuffer.wrap(fileContents));
-		} catch (TimeoutException e) {
-			throw new UncheckedIOException(new IOException("Failed to lock masterkey file in time. " + masterkeyFile, e));
-		}
-	}
-
-	private static void backupMasterKeyFileSilently(File masterkeyFile, File backupFile) {
-		try (ReadableFile src = masterkeyFile.openReadable(1, TimeUnit.SECONDS); WritableFile dst = backupFile.openWritable(1, TimeUnit.SECONDS)) {
-			src.copyTo(dst);
-		} catch (TimeoutException e) {
-			LOG.warn("Failed to lock masterkey file (" + masterkeyFile + ") or backup file (" + backupFile + ") in time. Skipping backup.");
 		}
 	}
 
@@ -115,11 +100,9 @@ public class CryptoFileSystem extends CryptoFolder implements FileSystem {
 		physicalDataRoot().create(mode);
 		final File dirFile = physicalFile();
 		final String directoryId = getDirectoryId();
-		try (WritableFile writable = dirFile.openWritable(1, TimeUnit.SECONDS)) {
+		try (WritableFile writable = dirFile.openWritable()) {
 			final ByteBuffer buf = ByteBuffer.wrap(directoryId.getBytes());
 			writable.write(buf);
-		} catch (TimeoutException e) {
-			throw new UncheckedIOException(new IOException("Failed to lock directory file in time. " + dirFile, e));
 		}
 		physicalFolder().create(FolderCreateMode.INCLUDING_PARENTS);
 	}

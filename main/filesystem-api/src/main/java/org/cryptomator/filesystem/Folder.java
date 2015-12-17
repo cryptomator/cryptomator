@@ -8,8 +8,6 @@ package org.cryptomator.filesystem;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.stream.Stream;
 
 /**
@@ -58,59 +56,53 @@ public interface Folder extends Node {
 	Folder folder(String name) throws UncheckedIOException;
 
 	/**
-	 * Creates the directory, if it doesn't exist yet. No effect, if folder already exists. After successful invocation {@link #exists()} will return <code>true</code>.
+	 * Creates the directory, if it doesn't exist yet. No effect, if folder
+	 * already exists.
 	 * 
-	 * @param mode Depending on this option either the attempt is made to recursively create all parent directories or an exception is thrown if the parent doesn't exist yet.
-	 * @throws UncheckedIOException wrapping an {@link FileNotFoundException}, if mode is {@link FolderCreateMode#FAIL_IF_PARENT_IS_MISSING FAIL_IF_PARENT_IS_MISSING} and parent doesn't exist.
+	 * @param mode
+	 *            Depending on this option either the attempt is made to
+	 *            recursively create all parent directories or an exception is
+	 *            thrown if the parent doesn't exist yet.
+	 * @throws UncheckedIOException
+	 *             wrapping an {@link FileNotFoundException}, if mode is
+	 *             {@link FolderCreateMode#FAIL_IF_PARENT_IS_MISSING
+	 *             FAIL_IF_PARENT_IS_MISSING} and parent doesn't exist.
 	 */
 	void create(FolderCreateMode mode) throws UncheckedIOException;
 
 	/**
-	 * Recusively copies this directory and all its contents to (not into) the given destination, creating nonexisting parent directories.
-	 * If the target exists it is deleted before performing the copy.
+	 * Recusively copies this directory and all its contents to (not into) the
+	 * given destination, creating nonexisting parent directories. If the target
+	 * exists it is deleted before performing the copy.
 	 * 
-	 * @param target Destination folder. Must not be a descendant of this folder.
+	 * @param target
+	 *            Destination folder. Must not be a descendant of this folder.
 	 */
 	default void copyTo(Folder target) throws UncheckedIOException {
-		if (this.isAncestorOf(target)) {
-			throw new IllegalArgumentException("Can not copy parent to child directory (src: " + this + ", dst: " + target + ")");
-		}
-
-		// remove previous contents:
-		if (target.exists()) {
-			target.delete();
-		}
-
-		// make sure target directory exists:
-		target.create(FolderCreateMode.INCLUDING_PARENTS);
-		assert target.exists();
-
-		// copy files:
-		files().forEach(srcFile -> {
-			try (ReadableFile src = srcFile.openReadable(1, TimeUnit.SECONDS)) {
-				final File dstFile = target.file(srcFile.name());
-				try (WritableFile dst = dstFile.openWritable(1, TimeUnit.MILLISECONDS)) {
-					src.copyTo(dst);
-				} catch (TimeoutException e) {
-					throw new IllegalStateException("Destination file (" + dstFile + ") must not exist yet, thus can't be locked.");
-				}
-			} catch (TimeoutException e) {
-				throw new UncheckedIOException(new IOException("Failed to lock source file (" + srcFile + ") in time.", e));
-			}
-		});
-
-		// copy subdirectories:
-		folders().forEach(folder -> folder.copyTo(target.folder(folder.name())));
+		Copier.copy(this, target);
 	}
 
 	/**
-	 * Deletes the directory including all child elements. Afterwards {@link #exists()} will return <code>false</code>.
+	 * <p>
+	 * Deletes the directory including all child elements.
+	 * <p>
+	 * If the directory does not exist this method does nothing.
 	 */
-	void delete() throws UncheckedIOException;
+	default void delete() throws UncheckedIOException {
+		if (!exists()) {
+			return;
+		}
+		folders().forEach(Folder::delete);
+		files().forEach(file -> {
+			try (WritableFile writableFile = file.openWritable()) {
+				writableFile.delete();
+			}
+		});
+	}
 
 	/**
-	 * Moves this directory and its contents to the given destination. If the target exists it is deleted before performing the move.
-	 * Afterwards {@link #exists()} will return <code>false</code> for this folder and any child nodes.
+	 * Moves this directory and its contents to the given destination. If the
+	 * target exists it is deleted before performing the move.
 	 */
 	void moveTo(Folder target);
 
@@ -135,9 +127,11 @@ public interface Folder extends Node {
 	}
 
 	/**
-	 * Recursively checks whether this folder or any subfolder contains the given node.
+	 * Recursively checks whether this folder or any subfolder contains the
+	 * given node.
 	 * 
-	 * @param node Potential child, grandchild, ...
+	 * @param node
+	 *            Potential child, grandchild, ...
 	 * @return <code>true</code> if this folder is an ancestor of the node.
 	 */
 	default boolean isAncestorOf(Node node) {

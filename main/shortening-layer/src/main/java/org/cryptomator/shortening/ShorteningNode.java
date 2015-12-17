@@ -9,7 +9,7 @@ import org.cryptomator.filesystem.Node;
 class ShorteningNode<E extends Node> implements Node {
 
 	protected final E delegate;
-	private final ShorteningFolder parent;
+	protected final ShorteningFolder parent;
 	private final String longName;
 	private final String shortName;
 

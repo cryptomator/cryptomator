@@ -1,14 +1,11 @@
 package org.cryptomator.shortening;
 
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.codec.binary.Base32;
 import org.apache.commons.codec.binary.BaseNCodec;
@@ -57,10 +54,8 @@ class FilenameShortener {
 		final File mappingFile = mappingFile(shortName);
 		if (!mappingFile.exists()) {
 			mappingFile.parent().get().create(FolderCreateMode.INCLUDING_PARENTS);
-			try (WritableFile writable = mappingFile.openWritable(1, TimeUnit.SECONDS)) {
+			try (WritableFile writable = mappingFile.openWritable()) {
 				writable.write(ByteBuffer.wrap(longName.getBytes(StandardCharsets.UTF_8)));
-			} catch (TimeoutException e) {
-				throw new UncheckedIOException(new IOException("Failed to lock mapping file in time. " + mappingFile, e));
 			}
 		}
 	}
@@ -75,7 +70,7 @@ class FilenameShortener {
 		if (!mappingFile.exists()) {
 			throw new UncheckedIOException(new FileNotFoundException("Mapping file not found " + mappingFile));
 		} else {
-			try (ReadableFile readable = mappingFile.openReadable(1, TimeUnit.SECONDS)) {
+			try (ReadableFile readable = mappingFile.openReadable()) {
 				// TODO buffer might be to small
 				final ByteBuffer buf = ByteBuffer.allocate(1024);
 				readable.read(buf);
@@ -83,8 +78,6 @@ class FilenameShortener {
 				final byte[] bytes = new byte[buf.remaining()];
 				buf.get(bytes);
 				return new String(bytes, StandardCharsets.UTF_8);
-			} catch (TimeoutException e) {
-				throw new UncheckedIOException(new IOException("Failed to lock mapping file in time. " + mappingFile, e));
 			}
 		}
 	}

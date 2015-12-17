@@ -7,7 +7,7 @@ package org.cryptomator.filesystem;
 
 import java.io.UncheckedIOException;
 
-public interface ReadableFile extends File, ReadableBytes, AutoCloseable {
+public interface ReadableFile extends ReadableBytes, AutoCloseable {
 
 	void copyTo(WritableFile other) throws UncheckedIOException;
 

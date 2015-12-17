@@ -64,7 +64,7 @@ public class InMemoryFileSystemTest {
 		Thread.sleep(1);
 
 		// write "hello world" to foo
-		try (WritableFile writable = fooFile.openWritable(1, TimeUnit.SECONDS)) {
+		try (WritableFile writable = fooFile.openWritable()) {
 			writable.write(ByteBuffer.wrap("hello world".getBytes()));
 		}
 		Assert.assertTrue(fooFile.exists());
@@ -79,7 +79,7 @@ public class InMemoryFileSystemTest {
 		Thread.sleep(1);
 
 		// write "dlrow olleh" to foo
-		try (WritableFile writable = fooFile.openWritable(1, TimeUnit.SECONDS)) {
+		try (WritableFile writable = fooFile.openWritable()) {
 			writable.write(ByteBuffer.wrap("dlrow olleh".getBytes()));
 		}
 		Assert.assertTrue(fooFile.exists());
@@ -98,7 +98,7 @@ public class InMemoryFileSystemTest {
 		Assert.assertEquals(0, fs.files().count());
 
 		// write "hello world" to foo
-		try (WritableFile writable = fooFile.openWritable(1, TimeUnit.SECONDS)) {
+		try (WritableFile writable = fooFile.openWritable()) {
 			writable.write(ByteBuffer.wrap("hello".getBytes()));
 			writable.write(ByteBuffer.wrap(" ".getBytes()));
 			writable.write(ByteBuffer.wrap("world".getBytes()));
@@ -107,8 +107,8 @@ public class InMemoryFileSystemTest {
 
 		// copy foo to bar
 		File barFile = fs.file("bar.txt");
-		try (WritableFile writable = barFile.openWritable(1, TimeUnit.SECONDS)) {
-			try (ReadableFile readable = fooFile.openReadable(1, TimeUnit.SECONDS)) {
+		try (WritableFile writable = barFile.openWritable()) {
+			try (ReadableFile readable = fooFile.openReadable()) {
 				readable.copyTo(writable);
 			}
 		}
@@ -117,8 +117,8 @@ public class InMemoryFileSystemTest {
 
 		// move bar to baz
 		File bazFile = fs.file("baz.txt");
-		try (WritableFile src = barFile.openWritable(1, TimeUnit.SECONDS)) {
-			try (WritableFile dst = bazFile.openWritable(1, TimeUnit.SECONDS)) {
+		try (WritableFile src = barFile.openWritable()) {
+			try (WritableFile dst = bazFile.openWritable()) {
 				src.moveTo(dst);
 			}
 		}
@@ -127,7 +127,7 @@ public class InMemoryFileSystemTest {
 
 		// read "hello world" from baz
 		final ByteBuffer readBuf = ByteBuffer.allocate(5);
-		try (ReadableFile readable = bazFile.openReadable(1, TimeUnit.SECONDS)) {
+		try (ReadableFile readable = bazFile.openReadable()) {
 			readable.read(readBuf, 6);
 		}
 		Assert.assertEquals("world", new String(readBuf.array()));
@@ -143,8 +143,8 @@ public class InMemoryFileSystemTest {
 		fooBarFolder.create(FolderCreateMode.INCLUDING_PARENTS);
 
 		// create some files inside foo/bar/
-		try (WritableFile writable1 = test1File.openWritable(1, TimeUnit.SECONDS); //
-				WritableFile writable2 = test2File.openWritable(1, TimeUnit.SECONDS)) {
+		try (WritableFile writable1 = test1File.openWritable(); //
+				WritableFile writable2 = test2File.openWritable()) {
 			writable1.write(ByteBuffer.wrap("hello".getBytes()));
 			writable2.write(ByteBuffer.wrap("world".getBytes()));
 		}

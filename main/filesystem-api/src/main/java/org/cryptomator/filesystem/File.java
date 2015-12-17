@@ -7,15 +7,13 @@ package org.cryptomator.filesystem;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 /**
  * A {@link File} in a {@link FileSystem}.
  * 
  * @author Markus Kreusch
  */
-public interface File extends Node {
+public interface File extends Node, Comparable<File> {
 
 	/**
 	 * <p>
@@ -34,17 +32,13 @@ public interface File extends Node {
 	 * In addition implementations may block to lock the required IO resources
 	 * to read the file.
 	 * 
-	 * @param timeout
-	 *            the timeout to wait until failing with a
-	 *            {@link TimeoutException}
-	 * @param unit
-	 *            the {@link TimeUnit} of the timeout value
 	 * @return a {@link ReadableFile} to work with
 	 * @throws UncheckedIOException
 	 *             if an {@link IOException} occurs while opening the file, the
 	 *             file does not exist or is a directory
 	 */
-	ReadableFile openReadable(long timeout, TimeUnit unit) throws UncheckedIOException, TimeoutException;
+
+	ReadableFile openReadable() throws UncheckedIOException;
 
 	/**
 	 * <p>
@@ -54,8 +48,9 @@ public interface File extends Node {
 	 * <p>
 	 * An implementation guarantees, that per {@link FileSystem} and
 	 * {@code File} only one {@link WritableFile} is open at a time. A
-	 * {@link WritableFile} is open when returned from this method and not yet
-	 * closed using {@link WritableFile#close()}.<br>
+	 * {@code WritableFile} is open when returned from this method and not yet
+	 * closed using {@link WritableFile#close()} or
+	 * {@link WritableFile#delete()}.<br>
 	 * In addition while a {@code WritableFile} is open no {@link ReadableFile}
 	 * can be open and vice versa.
 	 * <p>
@@ -65,16 +60,15 @@ public interface File extends Node {
 	 * In addition implementations may block to lock the required IO resources
 	 * to read the file.
 	 * 
-	 * @param timeout
-	 *            the timeout to wait until failing with a
-	 *            {@link TimeoutException}
-	 * @param unit
-	 *            the {@link TimeUnit} of the timeout value
 	 * @return a {@link WritableFile} to work with
 	 * @throws UncheckedIOException
 	 *             if an {@link IOException} occurs while opening the file or
 	 *             the file is a directory
 	 */
-	WritableFile openWritable(long timeout, TimeUnit unit) throws UncheckedIOException, TimeoutException;
+	WritableFile openWritable() throws UncheckedIOException;
+
+	default void copyTo(File destination) {
+		Copier.copy(this, destination);
+	}
 
 }

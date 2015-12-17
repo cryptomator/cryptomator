@@ -70,14 +70,14 @@ public class ShorteningFileSystemTest {
 		final FileSystem fs = new ShorteningFileSystem(underlyingFs, metadataRoot, 10);
 
 		final File shortNamedFolder = fs.file("test");
-		try (WritableFile file = shortNamedFolder.openWritable(1, TimeUnit.MILLISECONDS)) {
+		try (WritableFile file = shortNamedFolder.openWritable()) {
 			file.write(ByteBuffer.wrap("hello world".getBytes()));
 		}
 		Assert.assertFalse(metadataRoot.children().findAny().isPresent());
 
 		final File longNamedFolder = fs.file("morethantenchars");
-		try (WritableFile src = shortNamedFolder.openWritable(1, TimeUnit.MILLISECONDS); //
-				WritableFile dst = longNamedFolder.openWritable(1, TimeUnit.MILLISECONDS)) {
+		try (WritableFile src = shortNamedFolder.openWritable(); //
+				WritableFile dst = longNamedFolder.openWritable()) {
 			src.moveTo(dst);
 		}
 		Assert.assertTrue(metadataRoot.children().findAny().isPresent());
@@ -104,13 +104,13 @@ public class ShorteningFileSystemTest {
 		// write:
 		final FileSystem fs1 = new ShorteningFileSystem(underlyingFs, metadataRoot, 10);
 		fs1.folder("morethantenchars").create(FolderCreateMode.INCLUDING_PARENTS);
-		try (WritableFile file = fs1.folder("morethantenchars").file("morethanelevenchars.txt").openWritable(1, TimeUnit.MILLISECONDS)) {
+		try (WritableFile file = fs1.folder("morethantenchars").file("morethanelevenchars.txt").openWritable()) {
 			file.write(ByteBuffer.wrap("hello world".getBytes()));
 		}
 
 		// read
 		final FileSystem fs2 = new ShorteningFileSystem(underlyingFs, metadataRoot, 10);
-		try (ReadableFile file = fs2.folder("morethantenchars").file("morethanelevenchars.txt").openReadable(1, TimeUnit.MILLISECONDS)) {
+		try (ReadableFile file = fs2.folder("morethantenchars").file("morethanelevenchars.txt").openReadable()) {
 			ByteBuffer buf = ByteBuffer.allocate(11);
 			file.read(buf);
 			Assert.assertEquals("hello world", new String(buf.array()));
@@ -132,10 +132,10 @@ public class ShorteningFileSystemTest {
 		Assert.assertTrue(fs.folder("foo").folder("bar").exists());
 
 		// from underlying:
-		try (WritableFile file = underlyingFs.folder("foo").file("test1.txt").openWritable(1, TimeUnit.MILLISECONDS)) {
+		try (WritableFile file = underlyingFs.folder("foo").file("test1.txt").openWritable()) {
 			file.write(ByteBuffer.wrap("hello world".getBytes()));
 		}
-		try (ReadableFile file = fs.folder("foo").file("test1.txt").openReadable(1, TimeUnit.MILLISECONDS)) {
+		try (ReadableFile file = fs.folder("foo").file("test1.txt").openReadable()) {
 			ByteBuffer buf = ByteBuffer.allocate(11);
 			file.read(buf);
 			Assert.assertEquals("hello world", new String(buf.array()));
@@ -143,10 +143,10 @@ public class ShorteningFileSystemTest {
 		Assert.assertTrue(fs.folder("foo").file("test1.txt").lastModified().isAfter(testStart));
 
 		// to underlying:
-		try (WritableFile file = fs.folder("foo").file("test2.txt").openWritable(1, TimeUnit.MILLISECONDS)) {
+		try (WritableFile file = fs.folder("foo").file("test2.txt").openWritable()) {
 			file.write(ByteBuffer.wrap("hello world".getBytes()));
 		}
-		try (ReadableFile file = underlyingFs.folder("foo").file("test2.txt").openReadable(1, TimeUnit.MILLISECONDS)) {
+		try (ReadableFile file = underlyingFs.folder("foo").file("test2.txt").openReadable()) {
 			ByteBuffer buf = ByteBuffer.allocate(11);
 			file.read(buf);
 			Assert.assertEquals("hello world", new String(buf.array()));

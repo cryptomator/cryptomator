@@ -1,14 +1,12 @@
 package org.cryptomator.shortening;
 
 import java.io.UncheckedIOException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.ReadableFile;
 import org.cryptomator.filesystem.WritableFile;
 
-class ShorteningFile extends ShorteningNode<File>implements File {
+class ShorteningFile extends ShorteningNode<File> implements File {
 
 	private final FilenameShortener shortener;
 
@@ -18,21 +16,26 @@ class ShorteningFile extends ShorteningNode<File>implements File {
 	}
 
 	@Override
-	public ReadableFile openReadable(long timeout, TimeUnit unit) throws UncheckedIOException, TimeoutException {
-		return delegate.openReadable(timeout, unit);
+	public ReadableFile openReadable() throws UncheckedIOException {
+		return delegate.openReadable();
 	}
 
 	@Override
-	public WritableFile openWritable(long timeout, TimeUnit unit) throws UncheckedIOException, TimeoutException {
+	public WritableFile openWritable() throws UncheckedIOException {
 		if (shortener.isShortened(shortName())) {
 			shortener.saveMapping(name(), shortName());
 		}
-		return delegate.openWritable(timeout, unit);
+		return delegate.openWritable();
 	}
 
 	@Override
 	public String toString() {
-		return name();
+		return parent + name();
+	}
+
+	@Override
+	public int compareTo(File o) {
+		return toString().compareTo(o.toString());
 	}
 
 }
