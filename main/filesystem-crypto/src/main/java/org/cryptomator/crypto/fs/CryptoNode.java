@@ -11,6 +11,7 @@ package org.cryptomator.crypto.fs;
 import java.util.Optional;
 
 import org.cryptomator.crypto.engine.Cryptor;
+import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.Folder;
 import org.cryptomator.filesystem.Node;
 
@@ -26,8 +27,14 @@ abstract class CryptoNode implements Node {
 		this.cryptor = cryptor;
 	}
 
-	Folder physicalDataRoot() {
+	protected Folder physicalDataRoot() {
 		return parent.physicalDataRoot();
+	}
+
+	protected abstract String encryptedName();
+
+	protected File physicalFile() {
+		return parent.physicalFolder().file(encryptedName());
 	}
 
 	@Override

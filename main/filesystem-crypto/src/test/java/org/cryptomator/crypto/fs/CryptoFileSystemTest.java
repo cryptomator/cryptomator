@@ -10,7 +10,9 @@ package org.cryptomator.crypto.fs;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.nio.ByteBuffer;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.cryptomator.crypto.engine.Cryptor;
@@ -19,6 +21,8 @@ import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.FileSystem;
 import org.cryptomator.filesystem.Folder;
 import org.cryptomator.filesystem.FolderCreateMode;
+import org.cryptomator.filesystem.ReadableFile;
+import org.cryptomator.filesystem.WritableFile;
 import org.cryptomator.filesystem.inmem.InMemoryFileSystem;
 import org.junit.Assert;
 import org.junit.Test;
@@ -140,6 +144,32 @@ public class CryptoFileSystemTest {
 		final Folder fooBarFolder = fooFolder.folder("bar");
 		fooBarFolder.create(FolderCreateMode.INCLUDING_PARENTS);
 		fooBarFolder.moveTo(fooFolder);
+	}
+
+	@Test
+	public void testWriteAndReadEncryptedFile() {
+		// mock stuff and prepare crypto FS:
+		final Cryptor cryptor = new NoCryptor();
+		final FileSystem physicalFs = new InMemoryFileSystem();
+		final FileSystem fs = new CryptoFileSystem(physicalFs, cryptor, "foo");
+		fs.create(FolderCreateMode.INCLUDING_PARENTS);
+
+		// write test content to physical file
+		try (WritableFile writable = fs.file("test1.txt").openWritable()) {
+			writable.write(ByteBuffer.wrap("Hello World".getBytes()));
+		}
+
+		// read test content from encrypted file
+		try (ReadableFile readable = fs.file("test1.txt").openReadable()) {
+			ByteBuffer buf1 = ByteBuffer.allocate(5);
+			readable.read(buf1);
+			buf1.flip();
+			Assert.assertEquals("Hello", new String(buf1.array(), 0, buf1.remaining()));
+			ByteBuffer buf2 = ByteBuffer.allocate(10);
+			readable.read(buf2);
+			buf2.flip();
+			Assert.assertArrayEquals(" World".getBytes(), Arrays.copyOfRange(buf2.array(), 0, buf2.remaining()));
+		}
 	}
 
 	/**

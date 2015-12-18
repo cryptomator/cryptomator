@@ -137,6 +137,7 @@ public class ShorteningFileSystemTest {
 		try (ReadableFile file = fs.folder("foo").file("test1.txt").openReadable()) {
 			ByteBuffer buf = ByteBuffer.allocate(11);
 			file.read(buf);
+			buf.flip();
 			Assert.assertEquals("hello world", new String(buf.array()));
 		}
 		Assert.assertTrue(fs.folder("foo").file("test1.txt").lastModified().isAfter(testStart));

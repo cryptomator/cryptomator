@@ -17,6 +17,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.ReadableFile;
 import org.cryptomator.filesystem.WritableFile;
+import org.cryptomator.io.ByteBuffers;
 
 class InMemoryFile extends InMemoryNode implements File, ReadableFile, WritableFile {
 
@@ -33,6 +34,7 @@ class InMemoryFile extends InMemoryNode implements File, ReadableFile, WritableF
 			throw new UncheckedIOException(new FileNotFoundException(this.name() + " does not exist"));
 		}
 		lock.readLock().lock();
+		content.rewind();
 		return this;
 	}
 
@@ -51,14 +53,13 @@ class InMemoryFile extends InMemoryNode implements File, ReadableFile, WritableF
 
 	@Override
 	public void read(ByteBuffer target) {
-		this.read(target, 0);
+		ByteBuffers.copy(content, target);
 	}
 
 	@Override
 	public void read(ByteBuffer target, int position) {
-		content.rewind();
 		content.position(position);
-		target.put(content);
+		ByteBuffers.copy(content, target);
 	}
 
 	@Override
@@ -69,14 +70,21 @@ class InMemoryFile extends InMemoryNode implements File, ReadableFile, WritableF
 	@Override
 	public void write(ByteBuffer source, int position) {
 		assert content != null;
-		if (position + source.remaining() > content.remaining()) {
-			// create bigger buffer
-			ByteBuffer tmp = ByteBuffer.allocate(Math.max(position, content.capacity()) + source.remaining());
-			tmp.put(content);
-			content = tmp;
-		}
+		expandContentCapacityIfRequired(position + source.remaining());
 		content.position(position);
+		assert content.remaining() >= source.remaining();
 		content.put(source);
+	}
+
+	private void expandContentCapacityIfRequired(int requiredCapacity) {
+		if (requiredCapacity > content.capacity()) {
+			final int currentPos = content.position();
+			final ByteBuffer tmp = ByteBuffer.allocate(requiredCapacity);
+			content.rewind();
+			ByteBuffers.copy(content, tmp);
+			content = tmp;
+			content.position(currentPos);
+		}
 	}
 
 	@Override
@@ -110,7 +118,7 @@ class InMemoryFile extends InMemoryNode implements File, ReadableFile, WritableF
 			// returning null removes the entry.
 			return null;
 		});
-		assert !this.exists();
+		assert!this.exists();
 	}
 
 	@Override

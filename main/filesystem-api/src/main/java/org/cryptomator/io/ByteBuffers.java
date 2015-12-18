@@ -1,0 +1,30 @@
+package org.cryptomator.io;
+
+import java.nio.ByteBuffer;
+
+/**
+ * TODO this probably doesn't belong into this maven module, but it is used by various filesystem layers.
+ */
+public final class ByteBuffers {
+
+	private ByteBuffers() {
+	}
+
+	/**
+	 * Copies as many bytes as possible from the given source to the destination buffer.
+	 * The position of both buffers will be incremented by as many bytes as have been copied.
+	 * 
+	 * @param source ByteBuffer from which bytes are read
+	 * @param destination ByteBuffer into which bytes are written
+	 * @return number of bytes copied, i.e. {@link ByteBuffer#remaining() source.remaining()} or {@link ByteBuffer#remaining() destination.remaining()}, whatever is less.
+	 */
+	public static int copy(ByteBuffer source, ByteBuffer destination) {
+		final int numBytes = Math.min(source.remaining(), destination.remaining());
+		final ByteBuffer tmp = source.asReadOnlyBuffer();
+		tmp.limit(tmp.position() + numBytes);
+		destination.put(tmp);
+		source.position(tmp.position());
+		return numBytes;
+	}
+
+}

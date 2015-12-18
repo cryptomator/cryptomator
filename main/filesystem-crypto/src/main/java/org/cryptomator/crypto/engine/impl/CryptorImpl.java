@@ -20,6 +20,7 @@ import javax.crypto.spec.SecretKeySpec;
 import javax.security.auth.DestroyFailedException;
 
 import org.cryptomator.crypto.engine.Cryptor;
+import org.cryptomator.crypto.engine.FileContentCryptor;
 import org.cryptomator.crypto.engine.FilenameCryptor;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -37,6 +38,7 @@ public class CryptorImpl implements Cryptor {
 	private SecretKey encryptionKey;
 	private SecretKey macKey;
 	private final AtomicReference<FilenameCryptor> filenameCryptor = new AtomicReference<>();
+	private final AtomicReference<FileContentCryptor> fileContentCryptor = new AtomicReference<>();
 	private final SecureRandom randomSource;
 
 	public CryptorImpl(SecureRandom randomSource) {
@@ -57,6 +59,24 @@ public class CryptorImpl implements Cryptor {
 				// CAS failed: other thread set an object
 				newCryptor.destroy();
 				return filenameCryptor.get();
+			}
+		}
+	}
+
+	@Override
+	public FileContentCryptor getFileContentCryptor() {
+		// lazy initialization pattern as proposed here http://stackoverflow.com/a/30247202/4014509
+		final FileContentCryptor existingCryptor = fileContentCryptor.get();
+		if (existingCryptor != null) {
+			return existingCryptor;
+		} else {
+			final FileContentCryptorImpl newCryptor = new FileContentCryptorImpl(encryptionKey, macKey);
+			if (fileContentCryptor.compareAndSet(null, newCryptor)) {
+				return newCryptor;
+			} else {
+				// CAS failed: other thread set an object
+				newCryptor.destroy();
+				return fileContentCryptor.get();
 			}
 		}
 	}
@@ -147,11 +167,17 @@ public class CryptorImpl implements Cryptor {
 		if (filenameCryptor.get() != null) {
 			TheDestroyer.destroyQuietly(getFilenameCryptor());
 		}
+		if (fileContentCryptor.get() != null) {
+			TheDestroyer.destroyQuietly(getFileContentCryptor());
+		}
 	}
 
 	@Override
 	public boolean isDestroyed() {
-		return encryptionKey.isDestroyed() && macKey.isDestroyed() && (filenameCryptor.get() == null || filenameCryptor.get().isDestroyed());
+		return encryptionKey.isDestroyed() //
+				&& macKey.isDestroyed() //
+				&& (filenameCryptor.get() == null || filenameCryptor.get().isDestroyed()) //
+				&& (fileContentCryptor.get() == null || fileContentCryptor.get().isDestroyed());
 	}
 
 }

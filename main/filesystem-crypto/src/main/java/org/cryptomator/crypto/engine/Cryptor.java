@@ -17,6 +17,8 @@ public interface Cryptor extends Destroyable {
 
 	FilenameCryptor getFilenameCryptor();
 
+	FileContentCryptor getFileContentCryptor();
+
 	void randomizeMasterkey();
 
 	boolean readKeysFromMasterkeyFile(byte[] masterkeyFileContents, CharSequence passphrase);

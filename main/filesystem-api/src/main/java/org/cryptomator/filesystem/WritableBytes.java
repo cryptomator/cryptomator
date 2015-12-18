@@ -24,7 +24,7 @@ public interface WritableBytes {
 
 	/**
 	 * Writes the data in the given byte buffer to this readable bytes at the
-	 * given position.
+	 * given position, overwriting existing content (not inserting).
 	 * 
 	 * @param target
 	 *            the byte buffer to use

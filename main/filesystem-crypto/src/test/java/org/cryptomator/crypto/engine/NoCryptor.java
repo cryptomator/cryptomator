@@ -11,10 +11,16 @@ package org.cryptomator.crypto.engine;
 public class NoCryptor implements Cryptor {
 
 	private final FilenameCryptor filenameCryptor = new NoFilenameCryptor();
+	private final FileContentCryptor fileContentCryptor = new NoFileContentCryptor();
 
 	@Override
 	public FilenameCryptor getFilenameCryptor() {
 		return filenameCryptor;
+	}
+
+	@Override
+	public FileContentCryptor getFileContentCryptor() {
+		return fileContentCryptor;
 	}
 
 	@Override

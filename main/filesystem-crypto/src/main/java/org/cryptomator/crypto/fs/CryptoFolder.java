@@ -35,8 +35,14 @@ class CryptoFolder extends CryptoNode implements Folder {
 		super(parent, name, cryptor);
 	}
 
-	String encryptedName() {
+	@Override
+	protected String encryptedName() {
 		return cryptor.getFilenameCryptor().encryptFilename(name()) + FILE_EXT;
+	}
+
+	Folder physicalFolder() {
+		final String encryptedThenHashedDirId = cryptor.getFilenameCryptor().hashDirectoryId(getDirectoryId());
+		return physicalDataRoot().folder(encryptedThenHashedDirId.substring(0, 2)).folder(encryptedThenHashedDirId.substring(2));
 	}
 
 	protected String getDirectoryId() {
@@ -56,15 +62,6 @@ class CryptoFolder extends CryptoNode implements Folder {
 			}
 		}
 		return directoryId.get();
-	}
-
-	File physicalFile() {
-		return parent.physicalFolder().file(encryptedName());
-	}
-
-	Folder physicalFolder() {
-		final String encryptedThenHashedDirId = cryptor.getFilenameCryptor().hashDirectoryId(getDirectoryId());
-		return physicalDataRoot().folder(encryptedThenHashedDirId.substring(0, 2)).folder(encryptedThenHashedDirId.substring(2));
 	}
 
 	@Override

@@ -24,26 +24,24 @@ public class CryptoFile extends CryptoNode implements File {
 		super(parent, name, cryptor);
 	}
 
-	String encryptedName() {
+	@Override
+	protected String encryptedName() {
 		return cryptor.getFilenameCryptor().encryptFilename(name()) + FILE_EXT;
 	}
 
 	@Override
 	public Instant lastModified() throws UncheckedIOException {
-		// TODO Auto-generated method stub
-		return null;
+		return physicalFile().lastModified();
 	}
 
 	@Override
 	public ReadableFile openReadable() {
-		// TODO Auto-generated method stub
-		return null;
+		return new CryptoReadableFile(cryptor.getFileContentCryptor(), physicalFile().openReadable());
 	}
 
 	@Override
 	public WritableFile openWritable() {
-		// TODO Auto-generated method stub
-		return null;
+		return new CryptoWritableFile(cryptor.getFileContentCryptor(), physicalFile().openWritable());
 	}
 
 	@Override

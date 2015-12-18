@@ -125,6 +125,15 @@ public class InMemoryFileSystemTest {
 		Assert.assertTrue(bazFile.exists());
 
 		// read "hello world" from baz
+		final ByteBuffer readBuf1 = ByteBuffer.allocate(6);
+		try (ReadableFile readable = bazFile.openReadable()) {
+			readable.read(readBuf1);
+			readBuf1.flip();
+			Assert.assertEquals("hello ", new String(readBuf1.array(), 0, readBuf1.remaining()));
+			readable.read(readBuf1);
+			readBuf1.flip();
+			Assert.assertEquals("world", new String(readBuf1.array(), 0, readBuf1.remaining()));
+		}
 		final ByteBuffer readBuf = ByteBuffer.allocate(5);
 		try (ReadableFile readable = bazFile.openReadable()) {
 			readable.read(readBuf, 6);

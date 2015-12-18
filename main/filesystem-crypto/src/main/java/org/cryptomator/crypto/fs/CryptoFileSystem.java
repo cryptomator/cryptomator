@@ -68,12 +68,12 @@ public class CryptoFileSystem extends CryptoFolder implements FileSystem {
 	}
 
 	@Override
-	File physicalFile() {
+	protected File physicalFile() {
 		return physicalDataRoot().file(ROOT_DIR_FILE);
 	}
 
 	@Override
-	Folder physicalDataRoot() {
+	protected Folder physicalDataRoot() {
 		return physicalRoot.folder(DATA_ROOT_DIR);
 	}
 
