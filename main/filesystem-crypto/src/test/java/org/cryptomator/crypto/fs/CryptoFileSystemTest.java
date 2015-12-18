@@ -33,7 +33,7 @@ public class CryptoFileSystemTest {
 
 	private static final Logger LOG = LoggerFactory.getLogger(CryptoFileSystemTest.class);
 
-	@Test
+	@Test(timeout = 1000)
 	public void testVaultStructureInitialization() throws UncheckedIOException, IOException {
 		// mock cryptor:
 		final Cryptor cryptor = new NoCryptor();
@@ -60,7 +60,7 @@ public class CryptoFileSystemTest {
 		LOG.debug(DirectoryPrinter.print(physicalFs));
 	}
 
-	@Test
+	@Test(timeout = 1000)
 	public void testMasterkeyBackupBehaviour() throws InterruptedException {
 		// mock cryptor:
 		final Cryptor cryptor = new NoCryptor();
@@ -86,7 +86,7 @@ public class CryptoFileSystemTest {
 		Assert.assertTrue(bkupDateT1.isAfter(bkupDateT0));
 	}
 
-	@Test
+	@Test(timeout = 1000)
 	public void testDirectoryCreation() throws UncheckedIOException, IOException {
 		// mock stuff and prepare crypto FS:
 		final Cryptor cryptor = new NoCryptor();
@@ -108,7 +108,7 @@ public class CryptoFileSystemTest {
 		LOG.debug(DirectoryPrinter.print(fs));
 	}
 
-	@Test
+	@Test(timeout = 1000)
 	public void testDirectoryMoving() throws UncheckedIOException, IOException {
 		// mock stuff and prepare crypto FS:
 		final Cryptor cryptor = new NoCryptor();
@@ -131,7 +131,7 @@ public class CryptoFileSystemTest {
 		Assert.assertTrue(bazBarFolder.exists());
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test(timeout = 1000, expected = IllegalArgumentException.class)
 	public void testDirectoryMovingWithinBloodline() throws UncheckedIOException, IOException {
 		// mock stuff and prepare crypto FS:
 		final Cryptor cryptor = new NoCryptor();
@@ -146,7 +146,7 @@ public class CryptoFileSystemTest {
 		fooBarFolder.moveTo(fooFolder);
 	}
 
-	@Test
+	@Test(timeout = 1000)
 	public void testWriteAndReadEncryptedFile() {
 		// mock stuff and prepare crypto FS:
 		final Cryptor cryptor = new NoCryptor();
