@@ -23,19 +23,21 @@ class CryptoReadableFile implements ReadableFile {
 	private ByteBuffer bufferedCleartext;
 
 	public CryptoReadableFile(FileContentCryptor cryptor, ReadableFile file) {
-		final ByteBuffer header = ByteBuffer.allocate(cryptor.getHeaderSize());
+		final int headerSize = cryptor.getHeaderSize();
+		final ByteBuffer header = ByteBuffer.allocate(headerSize);
 		file.read(header, 0);
 		header.flip();
 		this.decryptor = cryptor.getFileContentDecryptor(header);
 		this.file = file;
-		this.prepareReadAtPosition(0);
+		this.prepareReadAtPhysicalPosition(headerSize + 0);
 	}
 
-	private void prepareReadAtPosition(long pos) {
+	private void prepareReadAtPhysicalPosition(long pos) {
 		if (readAheadTask != null) {
 			readAheadTask.cancel(true);
+			decryptor.cleartext().clear();
 		}
-		readAheadTask = executorService.submit(new Reader());
+		readAheadTask = executorService.submit(new Reader(pos));
 	}
 
 	@Override
@@ -47,8 +49,6 @@ class CryptoReadableFile implements ReadableFile {
 			}
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
-		} finally {
-			executorService.shutdownNow();
 		}
 	}
 
@@ -75,13 +75,22 @@ class CryptoReadableFile implements ReadableFile {
 
 	@Override
 	public void close() {
+		executorService.shutdownNow();
 		file.close();
 	}
 
 	private class Reader implements Callable<Void> {
 
+		private final long startpos;
+
+		public Reader(long startpos) {
+			this.startpos = startpos;
+		}
+
 		@Override
 		public Void call() {
+			// TODO change to file.read(ByteBuffer, long)
+			file.read(ByteBuffer.allocate(0), (int) startpos);
 			int bytesRead = -1;
 			do {
 				ByteBuffer ciphertext = ByteBuffer.allocate(READ_BUFFER_SIZE);

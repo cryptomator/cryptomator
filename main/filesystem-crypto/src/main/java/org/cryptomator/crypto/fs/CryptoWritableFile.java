@@ -74,7 +74,6 @@ class CryptoWritableFile implements WritableFile {
 		try {
 			encryptor.append(FileContentEncryptor.EOF);
 			writeTask.get();
-			executorService.shutdown();
 			writeHeader();
 		} catch (ExecutionException e) {
 			if (e.getCause() instanceof UncheckedIOException) {
@@ -85,6 +84,7 @@ class CryptoWritableFile implements WritableFile {
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 		} finally {
+			executorService.shutdownNow();
 			file.close();
 		}
 	}
