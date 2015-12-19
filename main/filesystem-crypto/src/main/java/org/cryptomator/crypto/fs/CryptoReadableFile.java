@@ -15,19 +15,20 @@ import org.cryptomator.io.ByteBuffers;
 class CryptoReadableFile implements ReadableFile {
 
 	private static final int READ_BUFFER_SIZE = 32 * 1024 + 32; // aligned with encrypted chunk size + MAC size
+	private static final ByteBuffer EMPTY_BUFFER = ByteBuffer.allocate(0);
 
 	private final ExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
 	private final FileContentDecryptor decryptor;
 	private final ReadableFile file;
 	private Future<Void> readAheadTask;
-	private ByteBuffer bufferedCleartext;
+	private ByteBuffer bufferedCleartext = EMPTY_BUFFER;
 
 	public CryptoReadableFile(FileContentCryptor cryptor, ReadableFile file) {
 		final int headerSize = cryptor.getHeaderSize();
 		final ByteBuffer header = ByteBuffer.allocate(headerSize);
 		file.read(header, 0);
 		header.flip();
-		this.decryptor = cryptor.getFileContentDecryptor(header);
+		this.decryptor = cryptor.createFileContentDecryptor(header);
 		this.file = file;
 		this.prepareReadAtPhysicalPosition(headerSize + 0);
 	}
@@ -35,6 +36,7 @@ class CryptoReadableFile implements ReadableFile {
 	private void prepareReadAtPhysicalPosition(long pos) {
 		if (readAheadTask != null) {
 			readAheadTask.cancel(true);
+			bufferedCleartext = EMPTY_BUFFER;
 			decryptor.cleartext().clear();
 		}
 		readAheadTask = executorService.submit(new Reader(pos));
@@ -53,7 +55,7 @@ class CryptoReadableFile implements ReadableFile {
 	}
 
 	private void bufferCleartext() throws InterruptedException {
-		if (bufferedCleartext == null || !bufferedCleartext.hasRemaining()) {
+		if (!bufferedCleartext.hasRemaining()) {
 			bufferedCleartext = decryptor.cleartext().take();
 		}
 	}
@@ -64,7 +66,7 @@ class CryptoReadableFile implements ReadableFile {
 	}
 
 	@Override
-	public void read(ByteBuffer target, int position) {
+	public void read(ByteBuffer target, long position) {
 		throw new UnsupportedOperationException("Partial read not implemented yet.");
 	}
 
@@ -89,8 +91,7 @@ class CryptoReadableFile implements ReadableFile {
 
 		@Override
 		public Void call() {
-			// TODO change to file.read(ByteBuffer, long)
-			file.read(ByteBuffer.allocate(0), (int) startpos);
+			file.read(EMPTY_BUFFER, startpos);
 			int bytesRead = -1;
 			do {
 				ByteBuffer ciphertext = ByteBuffer.allocate(READ_BUFFER_SIZE);

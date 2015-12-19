@@ -84,17 +84,4 @@ class FilenameCryptorImpl implements FilenameCryptor {
 		}
 	}
 
-	/* ======================= destruction ======================= */
-
-	@Override
-	public void destroy() {
-		TheDestroyer.destroyQuietly(encryptionKey);
-		TheDestroyer.destroyQuietly(macKey);
-	}
-
-	@Override
-	public boolean isDestroyed() {
-		return encryptionKey.isDestroyed() && macKey.isDestroyed();
-	}
-
 }

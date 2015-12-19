@@ -4,7 +4,7 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.BlockingQueue;
 
 /**
- * Not necessarily thread-safe.
+ * Stateful, thus not thread-safe.
  */
 public interface FileContentDecryptor {
 

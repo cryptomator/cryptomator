@@ -23,7 +23,7 @@ class CryptoWritableFile implements WritableFile {
 	private final Future<Void> writeTask;
 
 	public CryptoWritableFile(FileContentCryptor cryptor, WritableFile file) {
-		this.encryptor = cryptor.getFileContentEncryptor(Optional.empty());
+		this.encryptor = cryptor.createFileContentEncryptor(Optional.empty());
 		this.file = file;
 		writeHeader();
 		this.writeTask = executorService.submit(new Writer());

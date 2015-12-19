@@ -57,8 +57,11 @@ class InMemoryFile extends InMemoryNode implements File, ReadableFile, WritableF
 	}
 
 	@Override
-	public void read(ByteBuffer target, int position) {
-		content.position(position);
+	public void read(ByteBuffer target, long position) {
+		if (position > Integer.MAX_VALUE) {
+			throw new IllegalArgumentException("Can not keep files of virtually unlimited size in memory.");
+		}
+		content.position((int) position);
 		ByteBuffers.copy(content, target);
 	}
 

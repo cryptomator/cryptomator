@@ -28,26 +28,13 @@ class FileContentCryptorImpl implements FileContentCryptor {
 	}
 
 	@Override
-	public FileContentDecryptor getFileContentDecryptor(ByteBuffer header) {
+	public FileContentDecryptor createFileContentDecryptor(ByteBuffer header) {
 		throw new UnsupportedOperationException("Method not implemented");
 	}
 
 	@Override
-	public FileContentEncryptor getFileContentEncryptor(Optional<ByteBuffer> header) {
+	public FileContentEncryptor createFileContentEncryptor(Optional<ByteBuffer> header) {
 		throw new UnsupportedOperationException("Method not implemented");
-	}
-
-	/* ======================= destruction ======================= */
-
-	@Override
-	public void destroy() {
-		TheDestroyer.destroyQuietly(encryptionKey);
-		TheDestroyer.destroyQuietly(macKey);
-	}
-
-	@Override
-	public boolean isDestroyed() {
-		return encryptionKey.isDestroyed() && macKey.isDestroyed();
 	}
 
 }

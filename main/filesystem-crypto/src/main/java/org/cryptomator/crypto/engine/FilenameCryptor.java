@@ -8,15 +8,13 @@
  *******************************************************************************/
 package org.cryptomator.crypto.engine;
 
-import javax.security.auth.Destroyable;
-
 /**
  * Provides deterministic encryption capabilities as filenames must not change on subsequent encryption attempts,
  * otherwise each change results in major directory structure changes which would be a terrible idea for cloud storage encryption.
  * 
  * @see <a href="https://en.wikipedia.org/wiki/Deterministic_encryption">Wikipedia on deterministic encryption</a>
  */
-public interface FilenameCryptor extends Destroyable {
+public interface FilenameCryptor {
 
 	/**
 	 * @return constant length string, that is unlikely to collide with any other name.

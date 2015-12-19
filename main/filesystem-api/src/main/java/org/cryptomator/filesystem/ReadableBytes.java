@@ -41,6 +41,6 @@ public interface ReadableBytes {
 	 *             if an {@link IOException} occurs while reading from this
 	 *             {@code ReadableBytes}
 	 */
-	void read(ByteBuffer target, int position) throws UncheckedIOException;
+	void read(ByteBuffer target, long position) throws UncheckedIOException;
 
 }

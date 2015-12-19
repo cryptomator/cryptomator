@@ -44,7 +44,7 @@ class NioFile extends NioNode implements File {
 		}
 
 		@Override
-		public void read(ByteBuffer target, int position) throws UncheckedIOException {
+		public void read(ByteBuffer target, long position) throws UncheckedIOException {
 		}
 
 		@Override

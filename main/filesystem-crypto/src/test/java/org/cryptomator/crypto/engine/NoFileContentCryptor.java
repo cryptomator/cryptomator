@@ -13,7 +13,7 @@ class NoFileContentCryptor implements FileContentCryptor {
 	}
 
 	@Override
-	public FileContentDecryptor getFileContentDecryptor(ByteBuffer header) {
+	public FileContentDecryptor createFileContentDecryptor(ByteBuffer header) {
 		if (header.remaining() != getHeaderSize()) {
 			throw new IllegalArgumentException("Invalid header size.");
 		}
@@ -21,7 +21,7 @@ class NoFileContentCryptor implements FileContentCryptor {
 	}
 
 	@Override
-	public FileContentEncryptor getFileContentEncryptor(Optional<ByteBuffer> header) {
+	public FileContentEncryptor createFileContentEncryptor(Optional<ByteBuffer> header) {
 		return new Encryptor();
 	}
 
