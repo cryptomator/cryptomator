@@ -154,12 +154,12 @@ public class CryptoFileSystemTest {
 		final FileSystem fs = new CryptoFileSystem(physicalFs, cryptor, "foo");
 		fs.create(FolderCreateMode.INCLUDING_PARENTS);
 
-		// write test content to physical file
+		// write test content to file
 		try (WritableFile writable = fs.file("test1.txt").openWritable()) {
 			writable.write(ByteBuffer.wrap("Hello World".getBytes()));
 		}
 
-		// read test content from encrypted file
+		// read test content from file
 		try (ReadableFile readable = fs.file("test1.txt").openReadable()) {
 			ByteBuffer buf1 = ByteBuffer.allocate(5);
 			readable.read(buf1);

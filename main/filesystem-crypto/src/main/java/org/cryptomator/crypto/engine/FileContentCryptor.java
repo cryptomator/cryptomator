@@ -8,6 +8,8 @@ import java.util.Optional;
  */
 public interface FileContentCryptor {
 
+	public static final ByteBuffer EOF = ByteBuffer.allocate(0);
+
 	/**
 	 * @return The fixed number of bytes of the file header. The header length is implementation-specific.
 	 */

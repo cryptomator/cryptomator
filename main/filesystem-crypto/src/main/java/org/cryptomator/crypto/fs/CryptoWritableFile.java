@@ -72,7 +72,7 @@ class CryptoWritableFile implements WritableFile {
 	@Override
 	public void close() {
 		try {
-			encryptor.append(FileContentEncryptor.EOF);
+			encryptor.append(FileContentCryptor.EOF);
 			writeTask.get();
 			writeHeader();
 		} catch (ExecutionException e) {
@@ -95,7 +95,7 @@ class CryptoWritableFile implements WritableFile {
 		public Void call() {
 			try {
 				ByteBuffer ciphertext;
-				while ((ciphertext = encryptor.ciphertext()) != FileContentEncryptor.EOF) {
+				while ((ciphertext = encryptor.ciphertext()) != FileContentCryptor.EOF) {
 					file.write(ciphertext);
 				}
 			} catch (InterruptedException e) {

@@ -43,8 +43,8 @@ class NoFileContentCryptor implements FileContentCryptor {
 		@Override
 		public void append(ByteBuffer ciphertext) {
 			try {
-				if (ciphertext == FileContentDecryptor.EOF) {
-					cleartextQueue.put(FileContentDecryptor.EOF);
+				if (ciphertext == FileContentCryptor.EOF) {
+					cleartextQueue.put(FileContentCryptor.EOF);
 				} else {
 					cleartextQueue.put(ciphertext.asReadOnlyBuffer());
 				}
@@ -90,8 +90,8 @@ class NoFileContentCryptor implements FileContentCryptor {
 		@Override
 		public void append(ByteBuffer cleartext) {
 			try {
-				if (cleartext == FileContentEncryptor.EOF) {
-					ciphertextQueue.put(FileContentEncryptor.EOF);
+				if (cleartext == FileContentCryptor.EOF) {
+					ciphertextQueue.put(FileContentCryptor.EOF);
 				} else {
 					int cleartextLen = cleartext.remaining();
 					ciphertextQueue.put(cleartext.asReadOnlyBuffer());

@@ -32,11 +32,17 @@ class FileContentCryptorImpl implements FileContentCryptor {
 
 	@Override
 	public FileContentDecryptor createFileContentDecryptor(ByteBuffer header) {
-		throw new UnsupportedOperationException("Method not implemented");
+		if (header.remaining() != getHeaderSize()) {
+			throw new IllegalArgumentException("Invalid header.");
+		}
+		return new FileContentDecryptorImpl(encryptionKey, macKey, header);
 	}
 
 	@Override
 	public FileContentEncryptor createFileContentEncryptor(Optional<ByteBuffer> header) {
+		if (header.isPresent() && header.get().remaining() != getHeaderSize()) {
+			throw new IllegalArgumentException("Invalid header.");
+		}
 		return new FileContentEncryptorImpl(encryptionKey, macKey, randomSource);
 	}
 

@@ -44,7 +44,7 @@ class CryptoReadableFile implements ReadableFile {
 	@Override
 	public void read(ByteBuffer target) {
 		try {
-			while (target.remaining() > 0 && bufferedCleartext != FileContentDecryptor.EOF) {
+			while (target.remaining() > 0 && bufferedCleartext != FileContentCryptor.EOF) {
 				bufferCleartext();
 				readFromBufferedCleartext(target);
 			}
@@ -101,7 +101,7 @@ class CryptoReadableFile implements ReadableFile {
 					decryptor.append(ciphertext);
 				}
 			} while (bytesRead > 0);
-			decryptor.append(FileContentDecryptor.EOF);
+			decryptor.append(FileContentCryptor.EOF);
 			return null;
 		}
 

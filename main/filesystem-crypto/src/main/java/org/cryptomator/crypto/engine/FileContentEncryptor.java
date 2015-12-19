@@ -1,5 +1,6 @@
 package org.cryptomator.crypto.engine;
 
+import java.io.Closeable;
 import java.nio.ByteBuffer;
 
 import javax.security.auth.Destroyable;
@@ -7,9 +8,7 @@ import javax.security.auth.Destroyable;
 /**
  * Stateful, thus not thread-safe.
  */
-public interface FileContentEncryptor extends Destroyable {
-
-	public static final ByteBuffer EOF = ByteBuffer.allocate(0);
+public interface FileContentEncryptor extends Destroyable, Closeable {
 
 	/**
 	 * Creates the encrypted file header. This header might depend on the already encrypted data,
@@ -22,7 +21,7 @@ public interface FileContentEncryptor extends Destroyable {
 	/**
 	 * Appends further cleartext to this encryptor. This method might block until space becomes available.
 	 * 
-	 * @param cleartext Cleartext data or {@link #EOF} to indicate the end of a cleartext.
+	 * @param cleartext Cleartext data or {@link FileContentCryptor#EOF} to indicate the end of a cleartext.
 	 */
 	void append(ByteBuffer cleartext);
 
@@ -32,7 +31,7 @@ public interface FileContentEncryptor extends Destroyable {
 	 * 
 	 * This method might block if no ciphertext is available yet.
 	 * 
-	 * @return Encrypted ciphertext of {@link #EOF}.
+	 * @return Encrypted ciphertext of {@link FileContentCryptor#EOF}.
 	 */
 	ByteBuffer ciphertext() throws InterruptedException;
 
@@ -58,5 +57,10 @@ public interface FileContentEncryptor extends Destroyable {
 	 */
 	@Override
 	void destroy();
+
+	@Override
+	default void close() {
+		this.destroy();
+	}
 
 }
