@@ -95,7 +95,7 @@ class CryptoWritableFile implements WritableFile {
 		public Void call() {
 			try {
 				ByteBuffer ciphertext;
-				while ((ciphertext = encryptor.ciphertext().take()) != FileContentEncryptor.EOF) {
+				while ((ciphertext = encryptor.ciphertext()) != FileContentEncryptor.EOF) {
 					file.write(ciphertext);
 				}
 			} catch (InterruptedException e) {

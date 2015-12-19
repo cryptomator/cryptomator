@@ -16,7 +16,7 @@ public class ByteRange {
 		this.length = length;
 	}
 
-	static ByteRange of(long start, long length) {
+	public static ByteRange of(long start, long length) {
 		return new ByteRange(start, length);
 	}
 

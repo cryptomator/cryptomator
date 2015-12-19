@@ -37,7 +37,6 @@ class CryptoReadableFile implements ReadableFile {
 		if (readAheadTask != null) {
 			readAheadTask.cancel(true);
 			bufferedCleartext = EMPTY_BUFFER;
-			decryptor.cleartext().clear();
 		}
 		readAheadTask = executorService.submit(new Reader(pos));
 	}
@@ -56,7 +55,7 @@ class CryptoReadableFile implements ReadableFile {
 
 	private void bufferCleartext() throws InterruptedException {
 		if (!bufferedCleartext.hasRemaining()) {
-			bufferedCleartext = decryptor.cleartext().take();
+			bufferedCleartext = decryptor.cleartext();
 		}
 	}
 

@@ -1,12 +1,13 @@
 package org.cryptomator.crypto.engine;
 
 import java.nio.ByteBuffer;
-import java.util.concurrent.BlockingQueue;
+
+import javax.security.auth.Destroyable;
 
 /**
  * Stateful, thus not thread-safe.
  */
-public interface FileContentEncryptor {
+public interface FileContentEncryptor extends Destroyable {
 
 	public static final ByteBuffer EOF = ByteBuffer.allocate(0);
 
@@ -26,14 +27,14 @@ public interface FileContentEncryptor {
 	void append(ByteBuffer cleartext);
 
 	/**
-	 * Returns a queue containing ciphertext in byte-by-byte FIFO order, meaning in the order cleartext has been appended to this encryptor.
+	 * Returns the next ciphertext in byte-by-byte FIFO order, meaning in the order cleartext has been appended to this encryptor.
 	 * However the number and size of the ciphertext byte buffers doesn't need to resemble the cleartext buffers.
 	 * 
-	 * The queue returns {@link #EOF}, when all cleartext has been processed.
+	 * This method might block if no ciphertext is available yet.
 	 * 
-	 * @return A queue from which encrypted data can be {@link BlockingQueue#take() taken}.
+	 * @return Encrypted ciphertext of {@link #EOF}.
 	 */
-	BlockingQueue<ByteBuffer> ciphertext();
+	ByteBuffer ciphertext() throws InterruptedException;
 
 	/**
 	 * Calculates the cleartext bytes required to perform a partial encryption of a specific cleartext byte range.
@@ -51,5 +52,11 @@ public interface FileContentEncryptor {
 	 * @throws IllegalArgumentException If nextCleartextByte is an invalid starting point. Only start bytes determined by {@link #cleartextRequiredToEncryptRange(ByteRange)} are supported.
 	 */
 	void skipToPosition(long nextCleartextByte) throws IllegalArgumentException;
+
+	/**
+	 * Clears file-specific sensitive information.
+	 */
+	@Override
+	void destroy();
 
 }

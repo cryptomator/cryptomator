@@ -32,9 +32,6 @@ class FilenameCryptorImpl implements FilenameCryptor {
 	private final SecretKey macKey;
 
 	FilenameCryptorImpl(SecretKey encryptionKey, SecretKey macKey) {
-		if (encryptionKey == null || macKey == null) {
-			throw new IllegalArgumentException("Key must not be null");
-		}
 		this.encryptionKey = encryptionKey;
 		this.macKey = macKey;
 	}

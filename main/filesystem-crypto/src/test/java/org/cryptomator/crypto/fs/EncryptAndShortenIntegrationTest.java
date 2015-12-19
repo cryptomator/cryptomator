@@ -1,10 +1,7 @@
 package org.cryptomator.crypto.fs;
 
-import java.security.SecureRandom;
-import java.util.Arrays;
-
 import org.cryptomator.crypto.engine.Cryptor;
-import org.cryptomator.crypto.engine.impl.CryptorImpl;
+import org.cryptomator.crypto.engine.impl.TestCryptorImplFactory;
 import org.cryptomator.filesystem.FileSystem;
 import org.cryptomator.filesystem.Folder;
 import org.cryptomator.filesystem.FolderCreateMode;
@@ -20,22 +17,11 @@ public class EncryptAndShortenIntegrationTest {
 
 	private static final Logger LOG = LoggerFactory.getLogger(EncryptAndShortenIntegrationTest.class);
 
-	private static final SecureRandom RANDOM_MOCK = new SecureRandom() {
-
-		private static final long serialVersionUID = 1505563778398085504L;
-
-		@Override
-		public void nextBytes(byte[] bytes) {
-			Arrays.fill(bytes, (byte) 0x00);
-		}
-
-	};
-
 	@Test
 	public void testEncryptionOfLongFolderNames() {
 		final FileSystem physicalFs = new InMemoryFileSystem();
 		final FileSystem shorteningFs = new ShorteningFileSystem(physicalFs, physicalFs.folder("m"), 70);
-		final Cryptor cryptor = new CryptorImpl(RANDOM_MOCK);
+		final Cryptor cryptor = TestCryptorImplFactory.insecureCryptorImpl();
 		cryptor.randomizeMasterkey();
 		final FileSystem fs = new CryptoFileSystem(shorteningFs, cryptor, "foo");
 		fs.create(FolderCreateMode.FAIL_IF_PARENT_IS_MISSING);

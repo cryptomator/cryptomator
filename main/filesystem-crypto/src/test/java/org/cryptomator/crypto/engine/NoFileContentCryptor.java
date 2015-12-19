@@ -54,8 +54,8 @@ class NoFileContentCryptor implements FileContentCryptor {
 		}
 
 		@Override
-		public BlockingQueue<ByteBuffer> cleartext() {
-			return cleartextQueue;
+		public ByteBuffer cleartext() throws InterruptedException {
+			return cleartextQueue.take();
 		}
 
 		@Override
@@ -65,6 +65,11 @@ class NoFileContentCryptor implements FileContentCryptor {
 
 		@Override
 		public void skipToPosition(long nextCiphertextByte) throws IllegalArgumentException {
+			// no-op
+		}
+
+		@Override
+		public void destroy() {
 			// no-op
 		}
 
@@ -98,8 +103,8 @@ class NoFileContentCryptor implements FileContentCryptor {
 		}
 
 		@Override
-		public BlockingQueue<ByteBuffer> ciphertext() {
-			return ciphertextQueue;
+		public ByteBuffer ciphertext() throws InterruptedException {
+			return ciphertextQueue.take();
 		}
 
 		@Override
@@ -109,6 +114,11 @@ class NoFileContentCryptor implements FileContentCryptor {
 
 		@Override
 		public void skipToPosition(long nextCleartextByte) throws IllegalArgumentException {
+			// no-op
+		}
+
+		@Override
+		public void destroy() {
 			// no-op
 		}
 

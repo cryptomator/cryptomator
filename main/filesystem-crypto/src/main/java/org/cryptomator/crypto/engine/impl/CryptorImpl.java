@@ -14,6 +14,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -42,41 +43,66 @@ public class CryptorImpl implements Cryptor {
 	private final AtomicReference<FileContentCryptor> fileContentCryptor = new AtomicReference<>();
 	private final SecureRandom randomSource;
 
-	public CryptorImpl(SecureRandom randomSource) {
+	/**
+	 * Designated constructor.
+	 * 
+	 * Package-visible for testing only, use secondary constructors otherwise to ensure a proper PRNG.
+	 */
+	CryptorImpl(SecureRandom randomSource) {
 		this.randomSource = randomSource;
 	}
 
-	@Override
-	public FilenameCryptor getFilenameCryptor() {
-		// lazy initialization pattern as proposed here http://stackoverflow.com/a/30247202/4014509
-		final FilenameCryptor existingCryptor = filenameCryptor.get();
-		if (existingCryptor != null) {
-			return existingCryptor;
-		} else {
-			final FilenameCryptor newCryptor = new FilenameCryptorImpl(encryptionKey, macKey);
-			if (filenameCryptor.compareAndSet(null, newCryptor)) {
-				return newCryptor;
-			} else {
-				// CAS failed: other thread set an object
-				return filenameCryptor.get();
-			}
+	public CryptorImpl() {
+		this(getStrongSecureRandom());
+	}
+
+	private static SecureRandom getStrongSecureRandom() {
+		try {
+			return SecureRandom.getInstanceStrong();
+		} catch (NoSuchAlgorithmException e) {
+			throw new IllegalStateException("No strong PRNGs available.", e);
 		}
 	}
 
 	@Override
+	public FilenameCryptor getFilenameCryptor() {
+		assertKeysExist();
+		return initializeLazily(filenameCryptor, () -> {
+			return new FilenameCryptorImpl(encryptionKey, macKey);
+		});
+	}
+
+	@Override
 	public FileContentCryptor getFileContentCryptor() {
-		// lazy initialization pattern as proposed here http://stackoverflow.com/a/30247202/4014509
-		final FileContentCryptor existingCryptor = fileContentCryptor.get();
-		if (existingCryptor != null) {
-			return existingCryptor;
+		assertKeysExist();
+		return initializeLazily(fileContentCryptor, () -> {
+			return new FileContentCryptorImpl(encryptionKey, macKey, randomSource);
+		});
+	}
+
+	/**
+	 * threadsafe lazy initialization pattern as proposed on http://stackoverflow.com/a/30247202/4014509
+	 */
+	private <T> T initializeLazily(AtomicReference<T> reference, Supplier<T> factory) {
+		final T existingInstance = reference.get();
+		if (existingInstance != null) {
+			return existingInstance;
 		} else {
-			final FileContentCryptor newCryptor = new FileContentCryptorImpl(encryptionKey, macKey);
-			if (fileContentCryptor.compareAndSet(null, newCryptor)) {
-				return newCryptor;
+			final T newInstance = factory.get();
+			if (reference.compareAndSet(null, newInstance)) {
+				return newInstance;
 			} else {
-				// CAS failed: other thread set an object
-				return fileContentCryptor.get();
+				return reference.get();
 			}
+		}
+	}
+
+	private void assertKeysExist() {
+		if (encryptionKey == null || encryptionKey.isDestroyed()) {
+			throw new IllegalStateException("No or invalid encryptionKey.");
+		}
+		if (macKey == null || macKey.isDestroyed()) {
+			throw new IllegalStateException("No or invalid MAC key.");
 		}
 	}
 
