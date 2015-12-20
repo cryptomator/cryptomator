@@ -20,12 +20,12 @@ public class FileContentDecryptorImplTest {
 		final byte[] keyBytes = new byte[32];
 		final SecretKey headerKey = new SecretKeySpec(keyBytes, "AES");
 		final SecretKey macKey = new SecretKeySpec(keyBytes, "AES");
-		final byte[] header = Base64.decode("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAbQMxxKDDeVNbWcxRPUp3zSKaIl9RDlCco7Aa975ufw/3rL27hDTQEnd3FZNlWh1VHmi5hGO9Cn5n4hrsZARZQ8mJeLxjNKI4DZL72lGQKN4=");
-		final byte[] content = Base64.decode("tPCsFM1g/ubfJMY0O2wdWwEHrRZG0HQPfeaAJxtXs7Xkq3g0idoVCp2BbUc=");
+		final byte[] header = Base64.decode("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAwN74OFIGKQKgsI7bakfCYm1VXJZiKFLyhZkQCz0Ye/il0PmdZOYsSYEH9h6S00RsdHL3wLtB1FJsb9QLTtP00H8M2theZaZdlKTmjhXsmbc=");
+		final byte[] content = Base64.decode("tPCsFM1g/ubfJMa+AocdPh/WPHfXMFRJdIz6PkLuRijSIIXvxn7IUwVzHQ==");
 
 		try (FileContentDecryptor decryptor = new FileContentDecryptorImpl(headerKey, macKey, ByteBuffer.wrap(header))) {
-			decryptor.append(ByteBuffer.wrap(Arrays.copyOfRange(content, 0, 10)));
-			decryptor.append(ByteBuffer.wrap(Arrays.copyOfRange(content, 10, 44)));
+			decryptor.append(ByteBuffer.wrap(Arrays.copyOfRange(content, 0, 15)));
+			decryptor.append(ByteBuffer.wrap(Arrays.copyOfRange(content, 15, 43)));
 			decryptor.append(FileContentCryptor.EOF);
 
 			ByteBuffer result = ByteBuffer.allocate(11); // we just care about the first 11 bytes, as this is the ciphertext.

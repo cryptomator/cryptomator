@@ -35,17 +35,19 @@ public class FileContentEncryptorImplTest {
 
 		try (FileContentEncryptor encryptor = new FileContentEncryptorImpl(headerKey, macKey, RANDOM_MOCK)) {
 			encryptor.append(ByteBuffer.wrap("hello ".getBytes()));
-			encryptor.append(ByteBuffer.wrap("world ".getBytes()));
+			encryptor.append(ByteBuffer.wrap("world".getBytes()));
 			encryptor.append(FileContentCryptor.EOF);
 
-			ByteBuffer result = ByteBuffer.allocate(11); // we just care about the first 11 bytes, as this is the ciphertext.
+			ByteBuffer result = ByteBuffer.allocate(43); // 11 bytes ciphertext + 32 bytes mac.
 			ByteBuffer buf;
 			while ((buf = encryptor.ciphertext()) != FileContentCryptor.EOF) {
 				ByteBuffers.copy(buf, result);
 			}
 
-			// echo -n "hello world" | openssl enc -aes-256-ctr -K 0000000000000000000000000000000000000000000000000000000000000000 -iv 00000000000000000000000000000000 | base64
-			Assert.assertArrayEquals(Base64.decode("tPCsFM1g/ubfJMY="), result.array());
+			// Ciphertext: echo -n "hello world" | openssl enc -aes-256-ctr -K 0000000000000000000000000000000000000000000000000000000000000000 -iv 00000000000000000000000000000000 | base64
+			// MAC: echo -n "tPCsFM1g/ubfJMY=" | base64 --decode | openssl dgst -sha256 -mac HMAC -macopt hexkey:0000000000000000000000000000000000000000000000000000000000000000 -binary | base64
+			// echo -n "tPCsFM1g/ubfJMY=" | base64 --decode > A; echo -n "vgKHHT4f1jx31zBUSXSM+j5C7kYo0iCF78Z+yFMFcx0=" | base64 --decode >> A; cat A | base64
+			Assert.assertArrayEquals(Base64.decode("tPCsFM1g/ubfJMa+AocdPh/WPHfXMFRJdIz6PkLuRijSIIXvxn7IUwVzHQ=="), result.array());
 		}
 	}
 
