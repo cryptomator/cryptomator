@@ -21,7 +21,7 @@ public interface FileContentDecryptor extends Destroyable, Closeable {
 	 * @param cleartext Cleartext data or {@link FileContentCryptor#EOF} to indicate the end of a ciphertext.
 	 * @see #skipToPosition(long)
 	 */
-	void append(ByteBuffer ciphertext);
+	void append(ByteBuffer ciphertext) throws InterruptedException;
 
 	/**
 	 * Returns the next decrypted cleartext in byte-by-byte FIFO order, meaning in the order ciphertext has been appended to this encryptor.

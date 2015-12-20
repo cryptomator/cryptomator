@@ -23,7 +23,7 @@ import org.cryptomator.crypto.engine.FileContentCryptor;
 import org.cryptomator.crypto.engine.FileContentDecryptor;
 import org.cryptomator.io.ByteBuffers;
 
-class FileContentDecryptorImpl extends AbstractFileContentProcessor implements FileContentDecryptor {
+class FileContentDecryptorImpl implements FileContentDecryptor {
 
 	private static final String AES = "AES";
 	private static final int AES_BLOCK_LENGTH_IN_BYTES = 16;
@@ -31,7 +31,10 @@ class FileContentDecryptorImpl extends AbstractFileContentProcessor implements F
 	private static final String HMAC_SHA256 = "HmacSHA256";
 	private static final int CHUNK_SIZE = 32 * 1024;
 	private static final int MAC_SIZE = 32;
+	private static final int NUM_THREADS = Runtime.getRuntime().availableProcessors();
+	private static final int READ_AHEAD = 2;
 
+	private final FifoParallelDataProcessor<ByteBuffer> dataProcessor = new FifoParallelDataProcessor<>(NUM_THREADS, NUM_THREADS + READ_AHEAD);
 	private final ThreadLocal<Mac> hmacSha256;
 	private final SecretKey contentKey;
 	private final byte[] nonce;
@@ -101,7 +104,7 @@ class FileContentDecryptorImpl extends AbstractFileContentProcessor implements F
 	}
 
 	@Override
-	public void append(ByteBuffer ciphertext) {
+	public void append(ByteBuffer ciphertext) throws InterruptedException {
 		if (ciphertext == FileContentCryptor.EOF) {
 			submitCiphertextBuffer();
 			submitEof();
@@ -113,26 +116,26 @@ class FileContentDecryptorImpl extends AbstractFileContentProcessor implements F
 		}
 	}
 
-	private void submitCiphertextBufferIfFull() {
+	private void submitCiphertextBufferIfFull() throws InterruptedException {
 		if (!ciphertextBuffer.hasRemaining()) {
 			submitCiphertextBuffer();
 			ciphertextBuffer = ByteBuffer.allocate(CHUNK_SIZE + MAC_SIZE);
 		}
 	}
 
-	private void submitCiphertextBuffer() {
+	private void submitCiphertextBuffer() throws InterruptedException {
 		ciphertextBuffer.flip();
 		Callable<ByteBuffer> encryptionJob = new DecryptionJob(ciphertextBuffer, chunkNumber++);
-		submit(encryptionJob);
+		dataProcessor.submit(encryptionJob);
 	}
 
-	private void submitEof() {
-		submitPreprocessed(FileContentCryptor.EOF);
+	private void submitEof() throws InterruptedException {
+		dataProcessor.submitPreprocessed(FileContentCryptor.EOF);
 	}
 
 	@Override
 	public ByteBuffer cleartext() throws InterruptedException {
-		return processedData();
+		return dataProcessor.processedData();
 	}
 
 	@Override
@@ -152,12 +155,6 @@ class FileContentDecryptorImpl extends AbstractFileContentProcessor implements F
 		} catch (DestroyFailedException e) {
 			// ignore
 		}
-	}
-
-	@Override
-	public void close() {
-		this.destroy();
-		super.close();
 	}
 
 	private class DecryptionJob implements Callable<ByteBuffer> {

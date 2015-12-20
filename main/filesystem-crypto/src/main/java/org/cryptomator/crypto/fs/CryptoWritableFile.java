@@ -40,8 +40,12 @@ class CryptoWritableFile implements WritableFile {
 		final ByteBuffer cleartextCopy = ByteBuffer.allocate(source.remaining());
 		ByteBuffers.copy(source, cleartextCopy);
 		cleartextCopy.flip();
-		encryptor.append(cleartextCopy);
-		file.write(source);
+		try {
+			encryptor.append(cleartextCopy);
+			file.write(source);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+		}
 	}
 
 	@Override

@@ -92,16 +92,20 @@ class CryptoReadableFile implements ReadableFile {
 		public Void call() {
 			file.read(EMPTY_BUFFER, startpos);
 			int bytesRead = -1;
-			do {
-				ByteBuffer ciphertext = ByteBuffer.allocate(READ_BUFFER_SIZE);
-				file.read(ciphertext);
-				ciphertext.flip();
-				bytesRead = ciphertext.remaining();
-				if (bytesRead > 0) {
-					decryptor.append(ciphertext);
-				}
-			} while (bytesRead > 0);
-			decryptor.append(FileContentCryptor.EOF);
+			try {
+				do {
+					ByteBuffer ciphertext = ByteBuffer.allocate(READ_BUFFER_SIZE);
+					file.read(ciphertext);
+					ciphertext.flip();
+					bytesRead = ciphertext.remaining();
+					if (bytesRead > 0) {
+						decryptor.append(ciphertext);
+					}
+				} while (bytesRead > 0);
+				decryptor.append(FileContentCryptor.EOF);
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+			}
 			return null;
 		}
 
