@@ -12,9 +12,6 @@ import org.cryptomator.crypto.engine.FileContentEncryptor;
 
 class FileContentCryptorImpl implements FileContentCryptor {
 
-	// 16 header IV, 8 content nonce, 48 sensitive header data, 32 headerMac
-	static final int HEADER_SIZE = 104;
-
 	private final SecretKey encryptionKey;
 	private final SecretKey macKey;
 	private final SecureRandom randomSource;
@@ -27,7 +24,7 @@ class FileContentCryptorImpl implements FileContentCryptor {
 
 	@Override
 	public int getHeaderSize() {
-		return HEADER_SIZE;
+		return FileHeader.HEADER_SIZE;
 	}
 
 	@Override

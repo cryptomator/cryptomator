@@ -19,7 +19,7 @@ public class FileContentDecryptorImplTest {
 	public void testDecryption() throws InterruptedException {
 		final byte[] keyBytes = new byte[32];
 		final SecretKey headerKey = new SecretKeySpec(keyBytes, "AES");
-		final SecretKey macKey = new SecretKeySpec(keyBytes, "AES");
+		final SecretKey macKey = new SecretKeySpec(keyBytes, "HmacSHA256");
 		final byte[] header = Base64.decode("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAwN74OFIGKQKgsI7bakfCYm1VXJZiKFLyhZkQCz0Ye/il0PmdZOYsSYEH9h6S00RsdHL3wLtB1FJsb9QLTtP00H8M2theZaZdlKTmjhXsmbc=");
 		final byte[] content = Base64.decode("tPCsFM1g/ubfJMa+AocdPh/WPHfXMFRJdIz6PkLuRijSIIXvxn7IUwVzHQ==");
 

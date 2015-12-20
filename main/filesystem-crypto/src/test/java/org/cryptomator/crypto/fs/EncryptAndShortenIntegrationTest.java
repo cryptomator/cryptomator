@@ -16,12 +16,10 @@ import org.cryptomator.filesystem.inmem.InMemoryFileSystem;
 import org.cryptomator.shortening.ShorteningFileSystem;
 import org.junit.Assert;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class EncryptAndShortenIntegrationTest {
 
-	private static final Logger LOG = LoggerFactory.getLogger(EncryptAndShortenIntegrationTest.class);
+	// private static final Logger LOG = LoggerFactory.getLogger(EncryptAndShortenIntegrationTest.class);
 
 	@Test
 	public void testEncryptionOfLongFolderNames() {
@@ -37,17 +35,17 @@ public class EncryptAndShortenIntegrationTest {
 		longFolder.create(FolderCreateMode.FAIL_IF_PARENT_IS_MISSING);
 
 		// the long name will produce a metadata file on the physical layer:
-		LOG.debug("Physical file system:\n" + DirectoryPrinter.print(physicalFs));
+		// LOG.debug("Physical file system:\n" + DirectoryPrinter.print(physicalFs));
 		Assert.assertEquals(1, physicalFs.folder("m").folders().count());
 
 		// on the second layer all .lng files are resolved to their actual names:
-		LOG.debug("Unlimited filename length:\n" + DirectoryPrinter.print(shorteningFs));
+		// LOG.debug("Unlimited filename length:\n" + DirectoryPrinter.print(shorteningFs));
 		DirectoryWalker.walk(shorteningFs, node -> {
 			Assert.assertFalse(node.name().endsWith(".lng"));
 		});
 
 		// on the third (cleartext layer) we have cleartext names on the root level:
-		LOG.debug("Cleartext files:\n" + DirectoryPrinter.print(fs));
+		// LOG.debug("Cleartext files:\n" + DirectoryPrinter.print(fs));
 		Assert.assertArrayEquals(new String[] {"normal folder name", "this will be a long filename after encryption"}, fs.folders().map(Node::name).sorted().toArray());
 	}
 

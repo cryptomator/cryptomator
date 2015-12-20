@@ -32,7 +32,7 @@ public class FileContentCryptorTest {
 	public void testShortHeaderInDecryptor() throws InterruptedException {
 		final byte[] keyBytes = new byte[32];
 		final SecretKey encryptionKey = new SecretKeySpec(keyBytes, "AES");
-		final SecretKey macKey = new SecretKeySpec(keyBytes, "AES");
+		final SecretKey macKey = new SecretKeySpec(keyBytes, "HmacSHA256");
 		FileContentCryptor cryptor = new FileContentCryptorImpl(encryptionKey, macKey, RANDOM_MOCK);
 
 		ByteBuffer tooShortHeader = ByteBuffer.allocate(63);
@@ -43,7 +43,7 @@ public class FileContentCryptorTest {
 	public void testShortHeaderInEncryptor() throws InterruptedException {
 		final byte[] keyBytes = new byte[32];
 		final SecretKey encryptionKey = new SecretKeySpec(keyBytes, "AES");
-		final SecretKey macKey = new SecretKeySpec(keyBytes, "AES");
+		final SecretKey macKey = new SecretKeySpec(keyBytes, "HmacSHA256");
 		FileContentCryptor cryptor = new FileContentCryptorImpl(encryptionKey, macKey, RANDOM_MOCK);
 
 		ByteBuffer tooShortHeader = ByteBuffer.allocate(63);
@@ -54,7 +54,7 @@ public class FileContentCryptorTest {
 	public void testEncryptionAndDecryption() throws InterruptedException {
 		final byte[] keyBytes = new byte[32];
 		final SecretKey encryptionKey = new SecretKeySpec(keyBytes, "AES");
-		final SecretKey macKey = new SecretKeySpec(keyBytes, "AES");
+		final SecretKey macKey = new SecretKeySpec(keyBytes, "HmacSHA256");
 		FileContentCryptor cryptor = new FileContentCryptorImpl(encryptionKey, macKey, RANDOM_MOCK);
 
 		ByteBuffer header = ByteBuffer.allocate(cryptor.getHeaderSize());

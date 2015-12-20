@@ -2,11 +2,12 @@ package org.cryptomator.crypto.engine.impl;
 
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.function.Supplier;
 
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 
-class ThreadLocalMac extends ThreadLocal<Mac> {
+class ThreadLocalMac extends ThreadLocal<Mac>implements Supplier<Mac> {
 
 	private final SecretKey macKey;
 	private final String macAlgorithm;

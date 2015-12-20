@@ -26,12 +26,8 @@ import org.cryptomator.filesystem.WritableFile;
 import org.cryptomator.filesystem.inmem.InMemoryFileSystem;
 import org.junit.Assert;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class CryptoFileSystemTest {
-
-	private static final Logger LOG = LoggerFactory.getLogger(CryptoFileSystemTest.class);
 
 	@Test(timeout = 1000)
 	public void testVaultStructureInitialization() throws UncheckedIOException, IOException {
@@ -56,8 +52,6 @@ public class CryptoFileSystemTest {
 		Assert.assertEquals(3, physicalFs.children().count()); // d + masterkey.cryptomator + masterkey.cryptomator.bkup
 		Assert.assertEquals(1, physicalDataRoot.files().count()); // ROOT file
 		Assert.assertEquals(1, physicalDataRoot.folders().count()); // ROOT directory
-
-		LOG.debug(DirectoryPrinter.print(physicalFs));
 	}
 
 	@Test(timeout = 1000)
@@ -104,8 +98,6 @@ public class CryptoFileSystemTest {
 		Assert.assertTrue(fooFolder.exists());
 		Assert.assertTrue(fooBarFolder.exists());
 		Assert.assertEquals(3, countDataFolders(physicalDataRoot)); // parent + foo + bar
-
-		LOG.debug(DirectoryPrinter.print(fs));
 	}
 
 	@Test(timeout = 1000)
