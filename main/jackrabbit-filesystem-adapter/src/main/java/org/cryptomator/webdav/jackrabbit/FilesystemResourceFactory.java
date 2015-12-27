@@ -26,6 +26,7 @@ import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.FileSystem;
 import org.cryptomator.filesystem.Folder;
 import org.cryptomator.filesystem.Node;
+import org.cryptomator.webdav.jackrabbit.DavPathFactory.DavPath;
 
 class FilesystemResourceFactory implements DavResourceFactory {
 
@@ -47,22 +48,29 @@ class FilesystemResourceFactory implements DavResourceFactory {
 
 	@Override
 	public DavResource createResource(DavResourceLocator locator, DavSession session) throws DavException {
-		final String path = locator.getResourcePath();
-		if (path.endsWith("/")) {
-			Folder folder = this.resolve(path, FOLDER);
-			return createFolder(folder, locator, session);
+		if (locator instanceof DavPath) {
+			return createResource((DavPath) locator, session);
 		} else {
-			File file = this.resolve(path, FILE);
-			return createFile(file, locator, session);
+			throw new IllegalArgumentException("Unsupported locator type " + locator.getClass().getName());
 		}
 	}
 
-	DavFolder createFolder(Folder folder, DavResourceLocator locator, DavSession session) {
-		return new DavFolder(this, lockManager, session, locator, folder);
+	private DavResource createResource(DavPath path, DavSession session) throws DavException {
+		if (path.isDirectory()) {
+			Folder folder = this.resolve(path.getResourcePath(), FOLDER);
+			return createFolder(folder, path, session);
+		} else {
+			File file = this.resolve(path.getResourcePath(), FILE);
+			return createFile(file, path, session);
+		}
 	}
 
-	public DavFile createFile(File file, DavResourceLocator locator, DavSession session) {
-		return new DavFile(this, lockManager, session, locator, file);
+	DavFolder createFolder(Folder folder, DavPath path, DavSession session) {
+		return new DavFolder(this, lockManager, session, path, folder);
+	}
+
+	DavFile createFile(File file, DavPath path, DavSession session) {
+		return new DavFile(this, lockManager, session, path, file);
 	}
 
 	private <T extends Node> T resolve(String path, Class<T> expectedNodeType) {

@@ -11,13 +11,18 @@ package org.cryptomator.webdav.jackrabbit;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
+import java.util.EnumSet;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+
+import javax.servlet.DispatcherType;
 
 import org.cryptomator.filesystem.FileSystem;
 import org.cryptomator.filesystem.FolderCreateMode;
 import org.cryptomator.filesystem.WritableFile;
 import org.cryptomator.filesystem.inmem.InMemoryFileSystem;
+import org.cryptomator.webdav.filters.AcceptRangeFilter;
+import org.cryptomator.webdav.filters.UriNormalizationFilter;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
@@ -52,6 +57,8 @@ public class InMemoryWebDavServer {
 		final ServletContextHandler servletContext = new ServletContextHandler(servletCollection, "/", ServletContextHandler.SESSIONS);
 		final ServletHolder servletHolder = new ServletHolder("InMemory-WebDAV-Servlet", new WebDavServlet(servletContextRootUri, inMemoryFileSystem));
 		servletContext.addServlet(servletHolder, "/*");
+		servletContext.addFilter(AcceptRangeFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
+		servletContext.addFilter(UriNormalizationFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
 		servletCollection.mapContexts();
 
 		server.setConnectors(new Connector[] {localConnector});

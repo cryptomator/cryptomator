@@ -14,7 +14,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.commons.io.FilenameUtils;
 import org.apache.jackrabbit.webdav.DavException;
 import org.apache.jackrabbit.webdav.DavResource;
 import org.apache.jackrabbit.webdav.DavResourceLocator;
@@ -31,6 +30,7 @@ import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
 import org.apache.jackrabbit.webdav.property.DavPropertySet;
 import org.apache.jackrabbit.webdav.property.PropEntry;
 import org.cryptomator.filesystem.Node;
+import org.cryptomator.webdav.jackrabbit.DavPathFactory.DavPath;
 
 abstract class DavNode<T extends Node> implements DavResource {
 
@@ -41,15 +41,15 @@ abstract class DavNode<T extends Node> implements DavResource {
 	protected final FilesystemResourceFactory factory;
 	protected final LockManager lockManager;
 	protected final DavSession session;
-	protected final DavResourceLocator locator;
+	protected final DavPath path;
 	protected final T node;
 	protected final DavPropertySet properties;
 
-	public DavNode(FilesystemResourceFactory factory, LockManager lockManager, DavSession session, DavResourceLocator locator, T node) {
+	public DavNode(FilesystemResourceFactory factory, LockManager lockManager, DavSession session, DavPath path, T node) {
 		this.factory = factory;
 		this.lockManager = lockManager;
 		this.session = session;
-		this.locator = locator;
+		this.path = path;
 		this.node = node;
 		this.properties = new DavPropertySet();
 	}
@@ -76,17 +76,17 @@ abstract class DavNode<T extends Node> implements DavResource {
 
 	@Override
 	public DavResourceLocator getLocator() {
-		return locator;
+		return path;
 	}
 
 	@Override
 	public String getResourcePath() {
-		return locator.getResourcePath();
+		return path.getResourcePath();
 	}
 
 	@Override
 	public String getHref() {
-		return locator.getHref(this.isCollection());
+		return path.getHref();
 	}
 
 	@Override
@@ -157,16 +157,15 @@ abstract class DavNode<T extends Node> implements DavResource {
 
 	@Override
 	public DavResource getCollection() {
-		if (locator.isRootLocation()) {
+		if (path.isRootLocation()) {
 			return null;
 		}
 
-		final String parentResource = FilenameUtils.getPathNoEndSeparator(locator.getResourcePath());
-		final DavResourceLocator parentLocator = locator.getFactory().createResourceLocator(locator.getPrefix(), locator.getWorkspacePath(), parentResource);
+		final DavPath parentPath = path.getParent();
 		try {
-			return factory.createResource(parentLocator, session);
+			return factory.createResource(parentPath, session);
 		} catch (DavException e) {
-			throw new IllegalStateException("Unable to get parent resource with path " + parentLocator.getResourcePath(), e);
+			throw new IllegalStateException("Unable to get parent resource with path " + parentPath, e);
 		}
 	}
 

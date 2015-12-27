@@ -17,7 +17,6 @@ import java.time.Instant;
 import org.apache.jackrabbit.webdav.DavException;
 import org.apache.jackrabbit.webdav.DavResource;
 import org.apache.jackrabbit.webdav.DavResourceIterator;
-import org.apache.jackrabbit.webdav.DavResourceLocator;
 import org.apache.jackrabbit.webdav.DavSession;
 import org.apache.jackrabbit.webdav.io.InputContext;
 import org.apache.jackrabbit.webdav.io.OutputContext;
@@ -25,11 +24,12 @@ import org.apache.jackrabbit.webdav.lock.LockManager;
 import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.ReadableFile;
 import org.cryptomator.filesystem.WritableFile;
+import org.cryptomator.webdav.jackrabbit.DavPathFactory.DavPath;
 
 class DavFile extends DavNode<File> {
 
-	public DavFile(FilesystemResourceFactory factory, LockManager lockManager, DavSession session, DavResourceLocator locator, File node) {
-		super(factory, lockManager, session, locator, node);
+	public DavFile(FilesystemResourceFactory factory, LockManager lockManager, DavSession session, DavPath path, File node) {
+		super(factory, lockManager, session, path, node);
 	}
 
 	@Override

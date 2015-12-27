@@ -19,43 +19,76 @@ import org.apache.jackrabbit.webdav.util.EncodeUtil;
 /**
  * A LocatorFactory constructing Locators, whose {@link DavResourceLocator#getResourcePath() resourcePath} and {@link DavResourceLocator#getRepositoryPath() repositoryPath} are equal.
  * These paths will be plain, case-sensitive, absolute, unencoded Strings with Unix-style path separators.
+ * 
+ * Paths ending on "/" are treated as directory paths and all others as file paths.
  */
-class IdentityLocatorFactory implements DavLocatorFactory {
+class DavPathFactory implements DavLocatorFactory {
 
 	private final String pathPrefix;
 
-	public IdentityLocatorFactory(URI contextRootUri) {
+	public DavPathFactory(URI contextRootUri) {
 		this.pathPrefix = StringUtils.removeEnd(contextRootUri.toString(), "/");
 	}
 
 	@Override
-	public DavResourceLocator createResourceLocator(String prefix, String href) {
+	public DavPath createResourceLocator(String prefix, String href) {
 		final String fullPrefix = StringUtils.removeEnd(prefix, "/");
 		final String remainingHref = StringUtils.removeStart(href, fullPrefix);
 		final String unencodedRemaingingHref = EncodeUtil.unescape(remainingHref);
-		assert unencodedRemaingingHref.startsWith("/");
-		return new IdentityLocator(unencodedRemaingingHref);
+		return new DavPath(unencodedRemaingingHref);
 	}
 
 	@Override
-	public DavResourceLocator createResourceLocator(String prefix, String workspacePath, String resourcePath) {
-		assert resourcePath.startsWith("/");
-		return new IdentityLocator(resourcePath);
+	public DavPath createResourceLocator(String prefix, String workspacePath, String resourcePath) {
+		return createResourceLocator(prefix, workspacePath, resourcePath, true);
 	}
 
 	@Override
-	public DavResourceLocator createResourceLocator(String prefix, String workspacePath, String path, boolean isResourcePath) {
-		assert path.startsWith("/");
-		return new IdentityLocator(path);
+	public DavPath createResourceLocator(String prefix, String workspacePath, String path, boolean isResourcePath) {
+		return new DavPath(path);
 	}
 
-	private class IdentityLocator implements DavResourceLocator {
+	public class DavPath implements DavResourceLocator {
 
 		private final String absPath;
 
-		private IdentityLocator(String absPath) {
+		private DavPath(String absPath) {
 			assert absPath.startsWith("/");
 			this.absPath = FilenameUtils.normalize(absPath, true);
+		}
+
+		/**
+		 * @return <code>true</code> if the path ends on "/".
+		 */
+		public boolean isDirectory() {
+			return absPath.endsWith("/");
+		}
+
+		/**
+		 * @return Parent DavPath or <code>null</code> if this is the root node.
+		 */
+		public DavPath getParent() {
+			if (isRootLocation()) {
+				return null;
+			} else {
+				final String parentPath = FilenameUtils.getFullPath(FilenameUtils.normalizeNoEndSeparator(absPath, true));
+				return createResourceLocator(getPrefix(), getWorkspacePath(), parentPath);
+			}
+		}
+
+		/**
+		 * Get the path of a child resource, consisting of curren path + child path.
+		 * If the child path ends on "/", the returned DavPath will be a directory path.
+		 * 
+		 * @return Child path
+		 */
+		public DavPath getChild(String relativeChildPath) {
+			if (isDirectory()) {
+				final String absChildPath = absPath + StringUtils.removeStart(relativeChildPath, "/");
+				return createResourceLocator(getPrefix(), getWorkspacePath(), absChildPath);
+			} else {
+				throw new UnsupportedOperationException("Can only resolve subpaths of a path representing a directory");
+			}
 		}
 
 		@Override
@@ -88,13 +121,20 @@ class IdentityLocatorFactory implements DavLocatorFactory {
 			return false;
 		}
 
+		/**
+		 * @see #getHref(boolean)
+		 */
+		public String getHref() {
+			return getHref(isDirectory());
+		}
+
 		@Override
 		public String getHref(boolean isCollection) {
 			final String encodedResourcePath = EncodeUtil.escapePath(absPath);
 			if (isRootLocation()) {
 				return pathPrefix + "/";
 			} else {
-				assert isCollection ? encodedResourcePath.endsWith("/") : true;
+				assert isCollection ? isDirectory() : true;
 				return pathPrefix + encodedResourcePath;
 			}
 		}
@@ -105,8 +145,8 @@ class IdentityLocatorFactory implements DavLocatorFactory {
 		}
 
 		@Override
-		public DavLocatorFactory getFactory() {
-			return IdentityLocatorFactory.this;
+		public DavPathFactory getFactory() {
+			return DavPathFactory.this;
 		}
 
 		@Override
@@ -116,7 +156,7 @@ class IdentityLocatorFactory implements DavLocatorFactory {
 
 		@Override
 		public String toString() {
-			return "Locator: " + absPath + " (Prefix: " + pathPrefix + ")";
+			return "[" + pathPrefix + "]" + absPath;
 		}
 
 		@Override
@@ -126,8 +166,8 @@ class IdentityLocatorFactory implements DavLocatorFactory {
 
 		@Override
 		public boolean equals(Object obj) {
-			if (obj instanceof IdentityLocator) {
-				final IdentityLocator other = (IdentityLocator) obj;
+			if (obj instanceof DavPath) {
+				final DavPath other = (DavPath) obj;
 				final boolean samePrefix = this.getPrefix() == null && other.getPrefix() == null || this.getPrefix().equals(other.getPrefix());
 				final boolean sameRelativeCleartextPath = this.absPath == null && other.absPath == null || this.absPath.equals(other.absPath);
 				return samePrefix && sameRelativeCleartextPath;

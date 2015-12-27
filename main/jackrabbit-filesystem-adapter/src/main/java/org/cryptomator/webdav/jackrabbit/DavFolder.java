@@ -9,6 +9,11 @@
 package org.cryptomator.webdav.jackrabbit;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.UncheckedIOException;
+import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
 import java.time.Instant;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -17,7 +22,6 @@ import org.apache.jackrabbit.webdav.DavException;
 import org.apache.jackrabbit.webdav.DavResource;
 import org.apache.jackrabbit.webdav.DavResourceIterator;
 import org.apache.jackrabbit.webdav.DavResourceIteratorImpl;
-import org.apache.jackrabbit.webdav.DavResourceLocator;
 import org.apache.jackrabbit.webdav.DavSession;
 import org.apache.jackrabbit.webdav.io.InputContext;
 import org.apache.jackrabbit.webdav.io.OutputContext;
@@ -27,11 +31,14 @@ import org.apache.jackrabbit.webdav.property.DefaultDavProperty;
 import org.apache.jackrabbit.webdav.property.ResourceType;
 import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.Folder;
+import org.cryptomator.filesystem.FolderCreateMode;
+import org.cryptomator.filesystem.WritableFile;
+import org.cryptomator.webdav.jackrabbit.DavPathFactory.DavPath;
 
 class DavFolder extends DavNode<Folder> {
 
-	public DavFolder(FilesystemResourceFactory factory, LockManager lockManager, DavSession session, DavResourceLocator locator, Folder folder) {
-		super(factory, lockManager, session, locator, folder);
+	public DavFolder(FilesystemResourceFactory factory, LockManager lockManager, DavSession session, DavPath path, Folder folder) {
+		super(factory, lockManager, session, path, folder);
 		properties.add(new ResourceType(ResourceType.COLLECTION));
 		properties.add(new DefaultDavProperty<Integer>(DavPropertyName.ISCOLLECTION, 1));
 	}
@@ -48,8 +55,30 @@ class DavFolder extends DavNode<Folder> {
 
 	@Override
 	public void addMember(DavResource resource, InputContext inputContext) throws DavException {
-		// TODO Auto-generated method stub
+		if (resource instanceof DavFolder) {
+			addMemberFolder((DavFolder) resource);
+		} else if (resource instanceof DavFile) {
+			addMemberFile((DavFile) resource, inputContext.getInputStream());
+		} else {
+			throw new IllegalArgumentException("Unsupported resource type: " + resource.getClass().getName());
+		}
+	}
 
+	private void addMemberFolder(DavFolder memberFolder) {
+		node.folder(memberFolder.getDisplayName()).create(FolderCreateMode.FAIL_IF_PARENT_IS_MISSING);
+	}
+
+	private void addMemberFile(DavFile memberFile, InputStream inputStream) {
+		try (ReadableByteChannel src = Channels.newChannel(inputStream); WritableFile dst = node.file(memberFile.getDisplayName()).openWritable()) {
+			ByteBuffer buf = ByteBuffer.allocate(1337);
+			while (src.read(buf) != -1) {
+				buf.flip();
+				dst.write(buf);
+				buf.clear();
+			}
+		} catch (IOException e) {
+			throw new UncheckedIOException(e);
+		}
 	}
 
 	@Override
@@ -60,14 +89,12 @@ class DavFolder extends DavNode<Folder> {
 	}
 
 	private DavFolder getMemberFolder(Folder memberFolder) {
-		final String subFolderResourcePath = locator.getResourcePath() + memberFolder.name() + '/';
-		final DavResourceLocator subFolderLocator = locator.getFactory().createResourceLocator(locator.getPrefix(), locator.getWorkspacePath(), subFolderResourcePath);
+		final DavPath subFolderLocator = path.getChild(memberFolder.name() + '/');
 		return factory.createFolder(memberFolder, subFolderLocator, session);
 	}
 
 	private DavFile getMemberFile(File memberFile) {
-		final String subFolderResourcePath = locator.getResourcePath() + memberFile.name();
-		final DavResourceLocator subFolderLocator = locator.getFactory().createResourceLocator(locator.getPrefix(), locator.getWorkspacePath(), subFolderResourcePath);
+		final DavPath subFolderLocator = path.getChild(memberFile.name());
 		return factory.createFile(memberFile, subFolderLocator, session);
 	}
 

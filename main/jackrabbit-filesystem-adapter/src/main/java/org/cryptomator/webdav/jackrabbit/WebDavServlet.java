@@ -28,7 +28,7 @@ public class WebDavServlet extends AbstractWebdavServlet {
 
 	public WebDavServlet(URI contextRootUri, FileSystem filesystem) {
 		davSessionProvider = new DavSessionProviderImpl();
-		davLocatorFactory = new IdentityLocatorFactory(contextRootUri);
+		davLocatorFactory = new DavPathFactory(contextRootUri);
 		davResourceFactory = new FilesystemResourceFactory(filesystem);
 	}
 
