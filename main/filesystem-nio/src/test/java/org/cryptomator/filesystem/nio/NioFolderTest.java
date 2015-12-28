@@ -2,8 +2,6 @@ package org.cryptomator.filesystem.nio;
 
 import static java.util.stream.Collectors.toList;
 import static org.cryptomator.common.test.matcher.ContainsMatcher.containsInAnyOrder;
-import static org.cryptomator.filesystem.FolderCreateMode.FAIL_IF_PARENT_IS_MISSING;
-import static org.cryptomator.filesystem.FolderCreateMode.INCLUDING_PARENTS;
 import static org.cryptomator.filesystem.nio.FilesystemSetupUtils.emptyFilesystem;
 import static org.cryptomator.filesystem.nio.FilesystemSetupUtils.file;
 import static org.cryptomator.filesystem.nio.FilesystemSetupUtils.folder;
@@ -38,36 +36,14 @@ public class NioFolderTest {
 	}
 
 	@Test
-	public void testCreateWithOptionFailIfParentIsMissingFailsIfParentIsMissing() throws IOException {
-		NioFileSystem fileSystem = NioFileSystem.rootedAt(emptyFilesystem());
-		Folder folderWithNonExistingParent = fileSystem.folder("a").folder("b");
-
-		thrown.expect(UncheckedIOException.class);
-		thrown.expectMessage(fileSystem.path.resolve("a/b").toString());
-
-		folderWithNonExistingParent.create(FAIL_IF_PARENT_IS_MISSING);
-	}
-
-	@Test
-	public void testCreateWithOptionIncludingParentsSucceedsIfParentIsMissing() throws IOException {
+	public void testCreateSucceedsIfParentIsMissing() throws IOException {
 		Path emptyFilesystemPath = emptyFilesystem();
 		NioFileSystem fileSystem = NioFileSystem.rootedAt(emptyFilesystemPath);
 		Folder folderWithNonExistingParent = fileSystem.folder("a").folder("b");
 
-		folderWithNonExistingParent.create(INCLUDING_PARENTS);
+		folderWithNonExistingParent.create();
 
 		assertThat(Files.isDirectory(emptyFilesystemPath.resolve("a/b")), is(true));
-	}
-
-	@Test
-	public void testCreateWithOptionFailIfParentIsMissingSucceedsIfParentIsPresent() throws IOException {
-		Path emptyFilesystemPath = emptyFilesystem();
-		NioFileSystem fileSystem = NioFileSystem.rootedAt(emptyFilesystemPath);
-		Folder nonExistingFolder = fileSystem.folder("a");
-
-		nonExistingFolder.create(FAIL_IF_PARENT_IS_MISSING);
-
-		assertThat(Files.isDirectory(emptyFilesystemPath.resolve("a")), is(true));
 	}
 
 	@Test

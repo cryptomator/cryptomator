@@ -8,7 +8,6 @@ import org.cryptomator.crypto.engine.impl.TestCryptorImplFactory;
 import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.FileSystem;
 import org.cryptomator.filesystem.Folder;
-import org.cryptomator.filesystem.FolderCreateMode;
 import org.cryptomator.filesystem.Node;
 import org.cryptomator.filesystem.ReadableFile;
 import org.cryptomator.filesystem.WritableFile;
@@ -19,7 +18,8 @@ import org.junit.Test;
 
 public class EncryptAndShortenIntegrationTest {
 
-	// private static final Logger LOG = LoggerFactory.getLogger(EncryptAndShortenIntegrationTest.class);
+	// private static final Logger LOG =
+	// LoggerFactory.getLogger(EncryptAndShortenIntegrationTest.class);
 
 	@Test
 	public void testEncryptionOfLongFolderNames() {
@@ -28,25 +28,29 @@ public class EncryptAndShortenIntegrationTest {
 		final Cryptor cryptor = TestCryptorImplFactory.insecureCryptorImpl();
 		cryptor.randomizeMasterkey();
 		final FileSystem fs = new CryptoFileSystem(shorteningFs, cryptor, "foo");
-		fs.create(FolderCreateMode.FAIL_IF_PARENT_IS_MISSING);
+		fs.create();
 		final Folder shortFolder = fs.folder("normal folder name");
-		shortFolder.create(FolderCreateMode.FAIL_IF_PARENT_IS_MISSING);
+		shortFolder.create();
 		final Folder longFolder = fs.folder("this will be a long filename after encryption");
-		longFolder.create(FolderCreateMode.FAIL_IF_PARENT_IS_MISSING);
+		longFolder.create();
 
 		// the long name will produce a metadata file on the physical layer:
-		// LOG.debug("Physical file system:\n" + DirectoryPrinter.print(physicalFs));
+		// LOG.debug("Physical file system:\n" +
+		// DirectoryPrinter.print(physicalFs));
 		Assert.assertEquals(1, physicalFs.folder("m").folders().count());
 
-		// on the second layer all .lng files are resolved to their actual names:
-		// LOG.debug("Unlimited filename length:\n" + DirectoryPrinter.print(shorteningFs));
+		// on the second layer all .lng files are resolved to their actual
+		// names:
+		// LOG.debug("Unlimited filename length:\n" +
+		// DirectoryPrinter.print(shorteningFs));
 		DirectoryWalker.walk(shorteningFs, node -> {
 			Assert.assertFalse(node.name().endsWith(".lng"));
 		});
 
-		// on the third (cleartext layer) we have cleartext names on the root level:
+		// on the third (cleartext layer) we have cleartext names on the root
+		// level:
 		// LOG.debug("Cleartext files:\n" + DirectoryPrinter.print(fs));
-		Assert.assertArrayEquals(new String[] {"normal folder name", "this will be a long filename after encryption"}, fs.folders().map(Node::name).sorted().toArray());
+		Assert.assertArrayEquals(new String[] { "normal folder name", "this will be a long filename after encryption" }, fs.folders().map(Node::name).sorted().toArray());
 	}
 
 	@Test
@@ -56,7 +60,7 @@ public class EncryptAndShortenIntegrationTest {
 		final Cryptor cryptor = TestCryptorImplFactory.insecureCryptorImpl();
 		cryptor.randomizeMasterkey();
 		final FileSystem fs = new CryptoFileSystem(shorteningFs, cryptor, "foo");
-		fs.create(FolderCreateMode.FAIL_IF_PARENT_IS_MISSING);
+		fs.create();
 
 		// write test content to encrypted file
 		try (WritableFile writable = fs.file("test1.txt").openWritable()) {

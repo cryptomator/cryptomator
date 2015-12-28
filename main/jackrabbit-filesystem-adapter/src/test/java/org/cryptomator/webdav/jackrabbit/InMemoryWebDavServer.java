@@ -18,7 +18,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import javax.servlet.DispatcherType;
 
 import org.cryptomator.filesystem.FileSystem;
-import org.cryptomator.filesystem.FolderCreateMode;
 import org.cryptomator.filesystem.WritableFile;
 import org.cryptomator.filesystem.inmem.InMemoryFileSystem;
 import org.cryptomator.webdav.filters.AcceptRangeFilter;
@@ -61,7 +60,7 @@ public class InMemoryWebDavServer {
 		servletContext.addFilter(UriNormalizationFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
 		servletCollection.mapContexts();
 
-		server.setConnectors(new Connector[] {localConnector});
+		server.setConnectors(new Connector[] { localConnector });
 		server.setHandler(servletCollection);
 	}
 
@@ -76,8 +75,8 @@ public class InMemoryWebDavServer {
 	public static void main(String[] args) throws Exception {
 		final InMemoryWebDavServer server = new InMemoryWebDavServer();
 
-		server.inMemoryFileSystem.folder("mamals").folder("cats").create(FolderCreateMode.INCLUDING_PARENTS);
-		server.inMemoryFileSystem.folder("mamals").folder("dogs").create(FolderCreateMode.INCLUDING_PARENTS);
+		server.inMemoryFileSystem.folder("mamals").folder("cats").create();
+		server.inMemoryFileSystem.folder("mamals").folder("dogs").create();
 		try (WritableFile writable = server.inMemoryFileSystem.folder("mamals").folder("cats").file("Garfield.txt").openWritable()) {
 			writable.write(ByteBuffer.wrap("meow".getBytes()));
 		}

@@ -32,7 +32,6 @@ import org.apache.jackrabbit.webdav.property.DefaultDavProperty;
 import org.apache.jackrabbit.webdav.property.ResourceType;
 import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.Folder;
-import org.cryptomator.filesystem.FolderCreateMode;
 import org.cryptomator.filesystem.Node;
 import org.cryptomator.filesystem.WritableFile;
 import org.cryptomator.webdav.jackrabbit.DavPathFactory.DavPath;
@@ -67,7 +66,7 @@ class DavFolder extends DavNode<Folder> {
 	}
 
 	private void addMemberFolder(DavFolder memberFolder) {
-		node.folder(memberFolder.getDisplayName()).create(FolderCreateMode.FAIL_IF_PARENT_IS_MISSING);
+		node.folder(memberFolder.getDisplayName()).create();
 	}
 
 	private void addMemberFile(DavFile memberFile, InputStream inputStream) {
@@ -117,7 +116,8 @@ class DavFolder extends DavNode<Folder> {
 	}
 
 	/**
-	 * @throws DavException Error 404 if no child with the given name exists
+	 * @throws DavException
+	 *             Error 404 if no child with the given name exists
 	 */
 	private Node getMemberNode(String name) throws DavException {
 		return node.children().filter(c -> c.name().equals(name)).findAny().orElseThrow(() -> {

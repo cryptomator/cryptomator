@@ -20,7 +20,6 @@ import org.cryptomator.crypto.engine.NoCryptor;
 import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.FileSystem;
 import org.cryptomator.filesystem.Folder;
-import org.cryptomator.filesystem.FolderCreateMode;
 import org.cryptomator.filesystem.ReadableFile;
 import org.cryptomator.filesystem.WritableFile;
 import org.cryptomator.filesystem.inmem.InMemoryFileSystem;
@@ -47,11 +46,15 @@ public class CryptoFileSystemTest {
 		final FileSystem fs = new CryptoFileSystem(physicalFs, cryptor, "foo");
 		Assert.assertTrue(masterkeyFile.exists());
 		Assert.assertTrue(masterkeyBkupFile.exists());
-		fs.create(FolderCreateMode.INCLUDING_PARENTS);
+		fs.create();
 		Assert.assertTrue(physicalDataRoot.exists());
-		Assert.assertEquals(3, physicalFs.children().count()); // d + masterkey.cryptomator + masterkey.cryptomator.bkup
+		Assert.assertEquals(3, physicalFs.children().count()); // d +
+																// masterkey.cryptomator
+																// +
+																// masterkey.cryptomator.bkup
 		Assert.assertEquals(1, physicalDataRoot.files().count()); // ROOT file
-		Assert.assertEquals(1, physicalDataRoot.folders().count()); // ROOT directory
+		Assert.assertEquals(1, physicalDataRoot.folders().count()); // ROOT
+																	// directory
 	}
 
 	@Test(timeout = 1000)
@@ -69,7 +72,8 @@ public class CryptoFileSystemTest {
 		Assert.assertTrue(masterkeyBkupFile.exists());
 		final Instant bkupDateT0 = masterkeyBkupFile.lastModified();
 
-		// make sure some time passes, as the resolution of last modified date is not in nanos:
+		// make sure some time passes, as the resolution of last modified date
+		// is not in nanos:
 		Thread.sleep(1);
 
 		// second initialization:
@@ -87,17 +91,18 @@ public class CryptoFileSystemTest {
 		final FileSystem physicalFs = new InMemoryFileSystem();
 		final Folder physicalDataRoot = physicalFs.folder("d");
 		final FileSystem fs = new CryptoFileSystem(physicalFs, cryptor, "foo");
-		fs.create(FolderCreateMode.INCLUDING_PARENTS);
+		fs.create();
 
 		// add another encrypted folder:
 		final Folder fooFolder = fs.folder("foo");
 		final Folder fooBarFolder = fooFolder.folder("bar");
 		Assert.assertFalse(fooFolder.exists());
 		Assert.assertFalse(fooBarFolder.exists());
-		fooBarFolder.create(FolderCreateMode.INCLUDING_PARENTS);
+		fooBarFolder.create();
 		Assert.assertTrue(fooFolder.exists());
 		Assert.assertTrue(fooBarFolder.exists());
-		Assert.assertEquals(3, countDataFolders(physicalDataRoot)); // parent + foo + bar
+		Assert.assertEquals(3, countDataFolders(physicalDataRoot)); // parent +
+																	// foo + bar
 	}
 
 	@Test(timeout = 1000)
@@ -106,14 +111,14 @@ public class CryptoFileSystemTest {
 		final Cryptor cryptor = new NoCryptor();
 		final FileSystem physicalFs = new InMemoryFileSystem();
 		final FileSystem fs = new CryptoFileSystem(physicalFs, cryptor, "foo");
-		fs.create(FolderCreateMode.INCLUDING_PARENTS);
+		fs.create();
 
 		// create foo/bar/ and then move foo/ to baz/:
 		final Folder fooFolder = fs.folder("foo");
 		final Folder fooBarFolder = fooFolder.folder("bar");
 		final Folder bazFolder = fs.folder("baz");
 		final Folder bazBarFolder = bazFolder.folder("bar");
-		fooBarFolder.create(FolderCreateMode.INCLUDING_PARENTS);
+		fooBarFolder.create();
 		Assert.assertTrue(fooBarFolder.exists());
 		Assert.assertFalse(bazFolder.exists());
 		fooFolder.moveTo(bazFolder);
@@ -129,12 +134,12 @@ public class CryptoFileSystemTest {
 		final Cryptor cryptor = new NoCryptor();
 		final FileSystem physicalFs = new InMemoryFileSystem();
 		final FileSystem fs = new CryptoFileSystem(physicalFs, cryptor, "foo");
-		fs.create(FolderCreateMode.INCLUDING_PARENTS);
+		fs.create();
 
 		// create foo/bar/ and then try to move foo/bar/ to foo/
 		final Folder fooFolder = fs.folder("foo");
 		final Folder fooBarFolder = fooFolder.folder("bar");
-		fooBarFolder.create(FolderCreateMode.INCLUDING_PARENTS);
+		fooBarFolder.create();
 		fooBarFolder.moveTo(fooFolder);
 	}
 
@@ -144,7 +149,7 @@ public class CryptoFileSystemTest {
 		final Cryptor cryptor = new NoCryptor();
 		final FileSystem physicalFs = new InMemoryFileSystem();
 		final FileSystem fs = new CryptoFileSystem(physicalFs, cryptor, "foo");
-		fs.create(FolderCreateMode.INCLUDING_PARENTS);
+		fs.create();
 
 		// write test content to file
 		try (WritableFile writable = fs.file("test1.txt").openWritable()) {
@@ -165,7 +170,8 @@ public class CryptoFileSystemTest {
 	}
 
 	/**
-	 * @return number of folders on second level inside the given dataRoot folder.
+	 * @return number of folders on second level inside the given dataRoot
+	 *         folder.
 	 */
 	private static int countDataFolders(Folder dataRoot) {
 		final AtomicInteger num = new AtomicInteger();

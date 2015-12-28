@@ -5,7 +5,6 @@
  ******************************************************************************/
 package org.cryptomator.filesystem;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.stream.Stream;
@@ -56,19 +55,14 @@ public interface Folder extends Node {
 	Folder folder(String name) throws UncheckedIOException;
 
 	/**
-	 * Creates the directory, if it doesn't exist yet. No effect, if folder
-	 * already exists.
+	 * Creates the directory including all parent directories, if it doesn't
+	 * exist yet. No effect, if folder already exists.
 	 * 
-	 * @param mode
-	 *            Depending on this option either the attempt is made to
-	 *            recursively create all parent directories or an exception is
-	 *            thrown if the parent doesn't exist yet.
 	 * @throws UncheckedIOException
-	 *             wrapping an {@link FileNotFoundException}, if mode is
-	 *             {@link FolderCreateMode#FAIL_IF_PARENT_IS_MISSING
-	 *             FAIL_IF_PARENT_IS_MISSING} and parent doesn't exist.
+	 *             if an {@link IOException} occurs while creating the folder or
+	 *             one of its parents
 	 */
-	void create(FolderCreateMode mode) throws UncheckedIOException;
+	void create() throws UncheckedIOException;
 
 	/**
 	 * Recusively copies this directory and all its contents to (not into) the

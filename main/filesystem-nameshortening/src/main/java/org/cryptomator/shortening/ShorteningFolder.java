@@ -1,6 +1,5 @@
 package org.cryptomator.shortening;
 
-import java.io.FileNotFoundException;
 import java.io.UncheckedIOException;
 import java.nio.file.FileAlreadyExistsException;
 import java.util.function.Predicate;
@@ -8,7 +7,6 @@ import java.util.stream.Stream;
 
 import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.Folder;
-import org.cryptomator.filesystem.FolderCreateMode;
 import org.cryptomator.filesystem.Node;
 
 class ShorteningFolder extends ShorteningNode<Folder> implements Folder {
@@ -71,17 +69,15 @@ class ShorteningFolder extends ShorteningNode<Folder> implements Folder {
 	}
 
 	@Override
-	public void create(FolderCreateMode mode) {
-		if (!parent().get().exists() && FolderCreateMode.FAIL_IF_PARENT_IS_MISSING.equals(mode)) {
-			throw new UncheckedIOException(new FileNotFoundException(parent().get().name()));
-		} else if (!parent().get().exists() && FolderCreateMode.INCLUDING_PARENTS.equals(mode)) {
-			parent().get().create(mode);
+	public void create() {
+		if (exists()) {
+			return;
 		}
-		assert parent().get().exists();
+		parent().get().create();
 		if (shortener.isShortened(shortName())) {
 			shortener.saveMapping(name(), shortName());
 		}
-		delegate.create(mode);
+		delegate.create();
 	}
 
 	@Override
@@ -103,9 +99,7 @@ class ShorteningFolder extends ShorteningNode<Folder> implements Folder {
 			throw new IllegalArgumentException("Can not move directories containing one another (src: " + this + ", dst: " + target + ")");
 		}
 
-		if (!target.exists()) {
-			target.create(FolderCreateMode.INCLUDING_PARENTS);
-		}
+		target.create();
 
 		delegate.moveTo(target.delegate);
 	}

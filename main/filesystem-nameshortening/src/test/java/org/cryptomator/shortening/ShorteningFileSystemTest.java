@@ -8,7 +8,6 @@ import java.util.concurrent.TimeoutException;
 import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.FileSystem;
 import org.cryptomator.filesystem.Folder;
-import org.cryptomator.filesystem.FolderCreateMode;
 import org.cryptomator.filesystem.ReadableFile;
 import org.cryptomator.filesystem.WritableFile;
 import org.cryptomator.filesystem.inmem.InMemoryFileSystem;
@@ -22,7 +21,7 @@ public class ShorteningFileSystemTest {
 		final FileSystem underlyingFs = new InMemoryFileSystem();
 		final Folder metadataRoot = underlyingFs.folder("m");
 		final FileSystem fs = new ShorteningFileSystem(underlyingFs, metadataRoot, 10);
-		fs.folder("morethantenchars").create(FolderCreateMode.FAIL_IF_PARENT_IS_MISSING);
+		fs.folder("morethantenchars").create();
 		Assert.assertTrue(metadataRoot.exists());
 		Assert.assertEquals(1, fs.folders().count());
 	}
@@ -40,9 +39,11 @@ public class ShorteningFileSystemTest {
 		final FileSystem underlyingFs = new InMemoryFileSystem();
 		final Folder metadataRoot = underlyingFs.folder("m");
 		final FileSystem fs = new ShorteningFileSystem(underlyingFs, metadataRoot, 10);
-		final Folder longNamedFolder = fs.folder("morethantenchars"); // base32(sha1(morethantenchars)) = QMJL5GQUETRX2YRV6XDTJQ6NNM7IEUHP
+		final Folder longNamedFolder = fs.folder("morethantenchars"); // base32(sha1(morethantenchars))
+																		// =
+																		// QMJL5GQUETRX2YRV6XDTJQ6NNM7IEUHP
 		final File correspondingMetadataFile = metadataRoot.folder("QM").folder("JL").file("QMJL5GQUETRX2YRV6XDTJQ6NNM7IEUHP.lng");
-		longNamedFolder.create(FolderCreateMode.FAIL_IF_PARENT_IS_MISSING);
+		longNamedFolder.create();
 		Assert.assertTrue(longNamedFolder.exists());
 		Assert.assertTrue(correspondingMetadataFile.exists());
 	}
@@ -54,7 +55,7 @@ public class ShorteningFileSystemTest {
 		final FileSystem fs = new ShorteningFileSystem(underlyingFs, metadataRoot, 10);
 
 		final Folder shortNamedFolder = fs.folder("test");
-		shortNamedFolder.create(FolderCreateMode.FAIL_IF_PARENT_IS_MISSING);
+		shortNamedFolder.create();
 		Assert.assertFalse(metadataRoot.children().findAny().isPresent());
 
 		final Folder longNamedFolder = fs.folder("morethantenchars");
@@ -88,7 +89,7 @@ public class ShorteningFileSystemTest {
 		final Folder metadataRoot = underlyingFs.folder("m");
 		final FileSystem fs1 = new ShorteningFileSystem(underlyingFs, metadataRoot, 10);
 		final Folder longNamedFolder1 = fs1.folder("morethantenchars");
-		longNamedFolder1.create(FolderCreateMode.FAIL_IF_PARENT_IS_MISSING);
+		longNamedFolder1.create();
 
 		final FileSystem fs2 = new ShorteningFileSystem(underlyingFs, metadataRoot, 10);
 		final Folder longNamedFolder2 = fs2.folder("morethantenchars");
@@ -102,7 +103,7 @@ public class ShorteningFileSystemTest {
 
 		// write:
 		final FileSystem fs1 = new ShorteningFileSystem(underlyingFs, metadataRoot, 10);
-		fs1.folder("morethantenchars").create(FolderCreateMode.INCLUDING_PARENTS);
+		fs1.folder("morethantenchars").create();
 		try (WritableFile file = fs1.folder("morethantenchars").file("morethanelevenchars.txt").openWritable()) {
 			file.write(ByteBuffer.wrap("hello world".getBytes()));
 		}
@@ -127,7 +128,7 @@ public class ShorteningFileSystemTest {
 		Thread.sleep(1);
 
 		// of folders:
-		underlyingFs.folder("foo").folder("bar").create(FolderCreateMode.INCLUDING_PARENTS);
+		underlyingFs.folder("foo").folder("bar").create();
 		Assert.assertTrue(fs.folder("foo").folder("bar").exists());
 
 		// from underlying:

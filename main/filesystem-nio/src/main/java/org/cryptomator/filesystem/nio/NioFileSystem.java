@@ -1,7 +1,5 @@
 package org.cryptomator.filesystem.nio;
 
-import static org.cryptomator.filesystem.FolderCreateMode.INCLUDING_PARENTS;
-
 import java.nio.file.Path;
 import java.util.Optional;
 
@@ -15,7 +13,7 @@ public class NioFileSystem extends NioFolder implements FileSystem {
 
 	private NioFileSystem(Path root) {
 		super(Optional.empty(), root);
-		create(INCLUDING_PARENTS);
+		create();
 	}
 
 }

@@ -6,7 +6,7 @@ class Copier {
 		assertFoldersAreNotNested(source, destination);
 
 		destination.delete();
-		destination.create(FolderCreateMode.INCLUDING_PARENTS);
+		destination.create();
 
 		source.files().forEach(sourceFile -> {
 			File destinationFile = destination.file(sourceFile.name());

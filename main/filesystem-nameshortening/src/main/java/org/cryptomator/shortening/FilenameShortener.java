@@ -11,7 +11,6 @@ import org.apache.commons.codec.binary.Base32;
 import org.apache.commons.codec.binary.BaseNCodec;
 import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.Folder;
-import org.cryptomator.filesystem.FolderCreateMode;
 import org.cryptomator.filesystem.ReadableFile;
 import org.cryptomator.filesystem.WritableFile;
 
@@ -53,7 +52,7 @@ class FilenameShortener {
 	public void saveMapping(String longName, String shortName) {
 		final File mappingFile = mappingFile(shortName);
 		if (!mappingFile.exists()) {
-			mappingFile.parent().get().create(FolderCreateMode.INCLUDING_PARENTS);
+			mappingFile.parent().get().create();
 			try (WritableFile writable = mappingFile.openWritable()) {
 				writable.write(ByteBuffer.wrap(longName.getBytes(StandardCharsets.UTF_8)));
 			}

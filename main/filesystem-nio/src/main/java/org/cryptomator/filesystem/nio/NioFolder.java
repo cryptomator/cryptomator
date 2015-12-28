@@ -2,7 +2,6 @@ package org.cryptomator.filesystem.nio;
 
 import static java.lang.String.format;
 import static org.cryptomator.filesystem.FileSystemVisitor.fileSystemVisitor;
-import static org.cryptomator.filesystem.FolderCreateMode.INCLUDING_PARENTS;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -13,7 +12,6 @@ import java.util.stream.Stream;
 
 import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.Folder;
-import org.cryptomator.filesystem.FolderCreateMode;
 import org.cryptomator.filesystem.Node;
 import org.cryptomator.filesystem.WritableFile;
 
@@ -62,8 +60,12 @@ class NioFolder extends NioNode implements Folder {
 	}
 
 	@Override
-	public void create(FolderCreateMode mode) throws UncheckedIOException {
-		NioFolderCreateMode.valueOf(mode).create(path);
+	public void create() throws UncheckedIOException {
+		try {
+			Files.createDirectories(path);
+		} catch (IOException e) {
+			throw new UncheckedIOException(e);
+		}
 	}
 
 	@Override
@@ -78,7 +80,7 @@ class NioFolder extends NioNode implements Folder {
 	private void internalMoveTo(NioFolder target) {
 		try {
 			target.delete();
-			target.parent().ifPresent(folder -> folder.create(INCLUDING_PARENTS));
+			target.parent().ifPresent(folder -> folder.create());
 			Files.move(path, target.path);
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);

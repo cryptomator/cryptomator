@@ -8,7 +8,6 @@
  *******************************************************************************/
 package org.cryptomator.filesystem.inmem;
 
-import java.io.FileNotFoundException;
 import java.io.UncheckedIOException;
 import java.nio.file.FileAlreadyExistsException;
 import java.time.Instant;
@@ -20,7 +19,6 @@ import java.util.stream.Stream;
 
 import org.apache.commons.io.FileExistsException;
 import org.cryptomator.filesystem.Folder;
-import org.cryptomator.filesystem.FolderCreateMode;
 
 class InMemoryFolder extends InMemoryNode implements Folder {
 
@@ -67,16 +65,11 @@ class InMemoryFolder extends InMemoryNode implements Folder {
 	}
 
 	@Override
-	public void create(FolderCreateMode mode) {
+	public void create() {
 		if (exists()) {
 			return;
 		}
-		if (!parent.exists() && FolderCreateMode.FAIL_IF_PARENT_IS_MISSING.equals(mode)) {
-			throw new UncheckedIOException(new FileNotFoundException(parent.name));
-		} else if (!parent.exists() && FolderCreateMode.INCLUDING_PARENTS.equals(mode)) {
-			parent.create(mode);
-		}
-		assert parent.exists();
+		parent.create();
 		parent.children.compute(this.name(), (k, v) -> {
 			if (v == null) {
 				this.lastModified = Instant.now();
@@ -93,11 +86,11 @@ class InMemoryFolder extends InMemoryNode implements Folder {
 		if (target.exists()) {
 			target.delete();
 		}
-		assert!target.exists();
-		target.create(FolderCreateMode.INCLUDING_PARENTS);
+		assert !target.exists();
+		target.create();
 		this.copyTo(target);
 		this.delete();
-		assert!this.exists();
+		assert !this.exists();
 	}
 
 	@Override
@@ -114,11 +107,12 @@ class InMemoryFolder extends InMemoryNode implements Folder {
 			// recursively on folders:
 			if (entry.getValue() instanceof InMemoryFolder) {
 				InMemoryFolder subFolder = (InMemoryFolder) entry.getValue();
-				// this will try to itself from our children, which is ok as we're using an iterator here.
+				// this will try to itself from our children, which is ok as
+				// we're using an iterator here.
 				subFolder.delete();
 			}
 		}
-		assert!this.exists();
+		assert !this.exists();
 	}
 
 	@Override

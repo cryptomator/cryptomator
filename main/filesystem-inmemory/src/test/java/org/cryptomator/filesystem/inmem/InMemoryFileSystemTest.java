@@ -16,7 +16,6 @@ import java.util.concurrent.TimeoutException;
 import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.FileSystem;
 import org.cryptomator.filesystem.Folder;
-import org.cryptomator.filesystem.FolderCreateMode;
 import org.cryptomator.filesystem.ReadableFile;
 import org.cryptomator.filesystem.WritableFile;
 import org.junit.Assert;
@@ -34,7 +33,7 @@ public class InMemoryFileSystemTest {
 		Assert.assertEquals(0, fs.folders().count());
 
 		// create /foo
-		fooFolder.create(FolderCreateMode.FAIL_IF_PARENT_IS_MISSING);
+		fooFolder.create();
 		Assert.assertTrue(fooFolder.exists());
 		Assert.assertEquals(1, fs.folders().count());
 
@@ -46,7 +45,7 @@ public class InMemoryFileSystemTest {
 		// create /foo/bar
 		Folder fooBarFolder = fooFolder.folder("bar");
 		Assert.assertFalse(fooBarFolder.exists());
-		fooBarFolder.create(FolderCreateMode.INCLUDING_PARENTS);
+		fooBarFolder.create();
 		Assert.assertTrue(fooFolder.exists());
 		Assert.assertTrue(fooBarFolder.exists());
 		Assert.assertEquals(1, fs.folders().count());
@@ -149,7 +148,7 @@ public class InMemoryFileSystemTest {
 		final Folder qweAsdFolder = fs.folder("qwe").folder("asd");
 		final File test1File = fooBarFolder.file("test1.txt");
 		final File test2File = fooBarFolder.file("test2.txt");
-		fooBarFolder.create(FolderCreateMode.INCLUDING_PARENTS);
+		fooBarFolder.create();
 
 		// create some files inside foo/bar/
 		try (WritableFile writable1 = test1File.openWritable(); //

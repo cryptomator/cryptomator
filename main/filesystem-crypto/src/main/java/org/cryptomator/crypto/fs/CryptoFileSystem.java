@@ -15,7 +15,6 @@ import org.cryptomator.crypto.engine.Cryptor;
 import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.FileSystem;
 import org.cryptomator.filesystem.Folder;
-import org.cryptomator.filesystem.FolderCreateMode;
 import org.cryptomator.filesystem.ReadableFile;
 import org.cryptomator.filesystem.WritableFile;
 
@@ -93,15 +92,15 @@ public class CryptoFileSystem extends CryptoFolder implements FileSystem {
 	}
 
 	@Override
-	public void create(FolderCreateMode mode) {
-		physicalDataRoot().create(mode);
+	public void create() {
+		physicalDataRoot().create();
 		final File dirFile = physicalFile();
 		final String directoryId = getDirectoryId();
 		try (WritableFile writable = dirFile.openWritable()) {
 			final ByteBuffer buf = ByteBuffer.wrap(directoryId.getBytes());
 			writable.write(buf);
 		}
-		physicalFolder().create(FolderCreateMode.INCLUDING_PARENTS);
+		physicalFolder().create();
 	}
 
 	@Override

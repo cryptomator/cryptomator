@@ -8,8 +8,6 @@
  *******************************************************************************/
 package org.cryptomator.crypto.fs;
 
-import java.io.FileNotFoundException;
-import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 import java.time.Instant;
 import java.util.UUID;
@@ -20,7 +18,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.cryptomator.crypto.engine.Cryptor;
 import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.Folder;
-import org.cryptomator.filesystem.FolderCreateMode;
 import org.cryptomator.filesystem.Node;
 import org.cryptomator.filesystem.ReadableFile;
 import org.cryptomator.filesystem.WritableFile;
@@ -105,23 +102,18 @@ class CryptoFolder extends CryptoNode implements Folder {
 	}
 
 	@Override
-	public void create(FolderCreateMode mode) {
+	public void create() {
 		final File dirFile = physicalFile();
 		if (dirFile.exists()) {
 			return;
 		}
-		if (!parent.exists() && FolderCreateMode.FAIL_IF_PARENT_IS_MISSING.equals(mode)) {
-			throw new UncheckedIOException(new FileNotFoundException(parent.name));
-		} else if (!parent.exists() && FolderCreateMode.INCLUDING_PARENTS.equals(mode)) {
-			parent.create(mode);
-		}
-		assert parent.exists();
+		parent.create();
 		final String directoryId = getDirectoryId();
 		try (WritableFile writable = dirFile.openWritable()) {
 			final ByteBuffer buf = ByteBuffer.wrap(directoryId.getBytes());
 			writable.write(buf);
 		}
-		physicalFolder().create(FolderCreateMode.INCLUDING_PARENTS);
+		physicalFolder().create();
 	}
 
 	@Override
@@ -138,8 +130,7 @@ class CryptoFolder extends CryptoNode implements Folder {
 			throw new IllegalArgumentException("Can not move directories containing one another (src: " + this + ", dst: " + target + ")");
 		}
 
-		target.physicalFile().parent().get().create(FolderCreateMode.INCLUDING_PARENTS);
-		assert target.physicalFile().parent().get().exists();
+		target.physicalFile().parent().get().create();
 		this.physicalFile().moveTo(target.physicalFile());
 
 		// directoryId is now used by target, we must no longer use the same id
