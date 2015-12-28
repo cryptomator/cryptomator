@@ -22,6 +22,12 @@
 			<groupId>org.cryptomator</groupId>
 			<artifactId>filesystem-api</artifactId>
 		</dependency>
+		
+		<!-- Tests -->
+		<dependency>
+			<groupId>org.cryptomator</groupId>
+			<artifactId>commons-test</artifactId>
+		</dependency>
 	</dependencies>
 	
 	<build>

@@ -60,11 +60,14 @@
 			<artifactId>jackson-databind</artifactId>
 		</dependency>
 		
-		<!-- Test dependencies -->
+		<!-- Tests -->
+		<dependency>
+			<groupId>org.cryptomator</groupId>
+			<artifactId>commons-test</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>org.cryptomator</groupId>
 			<artifactId>filesystem-inmemory</artifactId>
-			<scope>test</scope>
 		</dependency>
 	</dependencies>
 	

@@ -63,5 +63,11 @@
 			<artifactId>dagger-compiler</artifactId>
 			<scope>provided</scope>
 		</dependency>
+		
+		<!-- Tests -->
+		<dependency>
+			<groupId>org.cryptomator</groupId>
+			<artifactId>commons-test</artifactId>
+		</dependency>
 	</dependencies>
 </project>
