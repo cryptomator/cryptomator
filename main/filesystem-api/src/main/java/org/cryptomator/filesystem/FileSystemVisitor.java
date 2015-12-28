@@ -1,5 +1,7 @@
 package org.cryptomator.filesystem;
 
+import static java.lang.String.format;
+
 import java.util.function.Consumer;
 
 public class FileSystemVisitor {
@@ -7,11 +9,15 @@ public class FileSystemVisitor {
 	private final Consumer<Folder> beforeFolderVisitor;
 	private final Consumer<Folder> afterFolderVisitor;
 	private final Consumer<File> fileVisitor;
+	private final Consumer<Node> nodeVisitor;
+	private final int maxDepth;
 
-	private FileSystemVisitor(Consumer<Folder> beforeFolderVisitor, Consumer<Folder> afterFolderVisitor, Consumer<File> fileVisitor) {
-		this.beforeFolderVisitor = beforeFolderVisitor;
-		this.afterFolderVisitor = afterFolderVisitor;
-		this.fileVisitor = fileVisitor;
+	public FileSystemVisitor(FileSystemVisitorBuilder builder) {
+		this.beforeFolderVisitor = builder.beforeFolderVisitor;
+		this.afterFolderVisitor = builder.afterFolderVisitor;
+		this.fileVisitor = builder.fileVisitor;
+		this.nodeVisitor = builder.nodeVisitor;
+		this.maxDepth = builder.maxDepth;
 	}
 
 	public static FileSystemVisitorBuilder fileSystemVisitor() {
@@ -19,14 +25,27 @@ public class FileSystemVisitor {
 	}
 
 	public FileSystemVisitor visit(Folder folder) {
+		return visit(folder, 0);
+	}
+
+	public FileSystemVisitor visit(File file) {
+		return visit(file, 0);
+	}
+
+	private FileSystemVisitor visit(Folder folder, int depth) {
 		beforeFolderVisitor.accept(folder);
-		folder.folders().forEach(this::visit);
-		folder.files().forEach(this::visit);
+		nodeVisitor.accept(folder);
+		final int childDepth = depth + 1;
+		if (childDepth <= maxDepth) {
+			folder.folders().forEach(childFolder -> visit(childFolder, childDepth));
+			folder.files().forEach(childFile -> visit(childFile, childDepth));
+		}
 		afterFolderVisitor.accept(folder);
 		return this;
 	}
 
-	public FileSystemVisitor visit(File file) {
+	private FileSystemVisitor visit(File file, int depth) {
+		nodeVisitor.accept(file);
 		fileVisitor.accept(file);
 		return this;
 	}
@@ -36,6 +55,8 @@ public class FileSystemVisitor {
 		private Consumer<Folder> beforeFolderVisitor = noOp();
 		private Consumer<Folder> afterFolderVisitor = noOp();
 		private Consumer<File> fileVisitor = noOp();
+		private Consumer<Node> nodeVisitor = noOp();
+		private int maxDepth = Integer.MAX_VALUE;
 
 		private FileSystemVisitorBuilder() {
 		}
@@ -64,6 +85,22 @@ public class FileSystemVisitor {
 			return this;
 		}
 
+		public FileSystemVisitorBuilder forEachNode(Consumer<Node> nodeVisitor) {
+			if (nodeVisitor == null) {
+				throw new IllegalArgumentException("Vistior may not be null");
+			}
+			this.nodeVisitor = nodeVisitor;
+			return this;
+		}
+
+		public FileSystemVisitorBuilder withMaxDepth(int maxDepth) {
+			if (maxDepth < 0) {
+				throw new IllegalArgumentException(format("maxDepth must not be smaller 0 but was %d", maxDepth));
+			}
+			this.maxDepth = maxDepth;
+			return this;
+		}
+
 		public FileSystemVisitor visit(Folder folder) {
 			return build().visit(folder);
 		}
@@ -73,7 +110,7 @@ public class FileSystemVisitor {
 		}
 
 		public FileSystemVisitor build() {
-			return new FileSystemVisitor(beforeFolderVisitor, afterFolderVisitor, fileVisitor);
+			return new FileSystemVisitor(this);
 		}
 
 		private static <T> Consumer<T> noOp() {

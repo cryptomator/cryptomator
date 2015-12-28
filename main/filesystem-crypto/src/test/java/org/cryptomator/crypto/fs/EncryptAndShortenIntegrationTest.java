@@ -1,5 +1,7 @@
 package org.cryptomator.crypto.fs;
 
+import static org.cryptomator.filesystem.FileSystemVisitor.fileSystemVisitor;
+
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
@@ -43,10 +45,11 @@ public class EncryptAndShortenIntegrationTest {
 		// names:
 		// LOG.debug("Unlimited filename length:\n" +
 		// DirectoryPrinter.print(shorteningFs));
-		DirectoryWalker.walk(shorteningFs, node -> {
-			Assert.assertFalse(node.name().endsWith(".lng"));
-		});
-
+		fileSystemVisitor() //
+				.forEachNode(node -> {
+					Assert.assertFalse(node.name().endsWith(".lng"));
+				}) //
+				.visit(shorteningFs);
 		// on the third (cleartext layer) we have cleartext names on the root
 		// level:
 		// LOG.debug("Cleartext files:\n" + DirectoryPrinter.print(fs));

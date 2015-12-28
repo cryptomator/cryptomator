@@ -8,9 +8,8 @@
  *******************************************************************************/
 package org.cryptomator.crypto.fs;
 
-import java.util.Optional;
+import static org.cryptomator.filesystem.FileSystemVisitor.fileSystemVisitor;
 
-import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.Folder;
 
 public final class DirectoryPrinter {
@@ -18,23 +17,21 @@ public final class DirectoryPrinter {
 	private DirectoryPrinter() {
 	}
 
-	public static String print(Folder folder) {
-		StringBuilder sb = new StringBuilder(folder.name()).append('\n');
-
-		DirectoryWalker.walk(folder, (node) -> {
-			Optional<? extends Folder> parent = node.parent();
-			while (parent.isPresent()) {
-				sb.append("  ");
-				parent = parent.get().parent();
-			}
-			if (node instanceof Folder) {
-				sb.append(node.name()).append('/').append('\n');
-			} else if (node instanceof File) {
-				sb.append(node.name()).append('\n');
-			}
-		});
-
-		return sb.toString();
+	public static String print(Folder rootFolder) {
+		StringBuilder result = new StringBuilder();
+		StringBuilder identation = new StringBuilder();
+		fileSystemVisitor() //
+				.beforeFolder(folder -> {
+					result.append(identation).append(folder.name()).append("/\n");
+					identation.append("  ");
+				}) //
+				.afterFolder(folder -> {
+					identation.delete(identation.length() - 2, identation.length());
+				}).forEachFile(file -> {
+					result.append(identation).append(file.name()).append('\n');
+				}) //
+				.visit(rootFolder);
+		return result.toString();
 	}
 
 }

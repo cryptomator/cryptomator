@@ -8,6 +8,8 @@
  *******************************************************************************/
 package org.cryptomator.crypto.fs;
 
+import static org.cryptomator.filesystem.FileSystemVisitor.fileSystemVisitor;
+
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
@@ -175,15 +177,16 @@ public class CryptoFileSystemTest {
 	 */
 	private static int countDataFolders(Folder dataRoot) {
 		final AtomicInteger num = new AtomicInteger();
-		DirectoryWalker.walk(dataRoot, 0, 2, (node) -> {
-			if (node instanceof Folder) {
-				final Folder nodeParent = node.parent().get();
-				final Folder nodeParentParent = nodeParent.parent().orElse(null);
-				if (nodeParentParent != null && nodeParentParent.equals(dataRoot)) {
-					num.incrementAndGet();
-				}
-			}
-		});
+		fileSystemVisitor() //
+				.afterFolder(folder -> {
+					final Folder parent = folder.parent().get();
+					final Folder parentOfParent = parent.parent().orElse(null);
+					if (parentOfParent != null && parentOfParent.equals(dataRoot)) {
+						num.incrementAndGet();
+					}
+				}) //
+				.withMaxDepth(2) //
+				.visit(dataRoot);
 		return num.get();
 	}
 
