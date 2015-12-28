@@ -1,5 +1,7 @@
 package org.cryptomator.filesystem.nio;
 
+import static java.lang.String.format;
+
 import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 import java.nio.file.Path;
@@ -15,8 +17,8 @@ class NioFile extends NioNode implements File {
 
 	private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock(true);
 
-	public NioFile(Optional<NioFolder> parent, Path path, NioNodeFactory nodeFactory) {
-		super(parent, path, nodeFactory);
+	public NioFile(Optional<NioFolder> parent, Path path) {
+		super(parent, path);
 	}
 
 	@Override
@@ -97,6 +99,11 @@ class NioFile extends NioNode implements File {
 		} else {
 			throw new IllegalArgumentException("Can not mix File objects from different file systems");
 		}
+	}
+
+	@Override
+	public String toString() {
+		return format("NioFile(%s)", path);
 	}
 
 }

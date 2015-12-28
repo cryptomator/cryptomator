@@ -88,17 +88,7 @@ public interface Folder extends Node {
 	 * <p>
 	 * If the directory does not exist this method does nothing.
 	 */
-	default void delete() throws UncheckedIOException {
-		if (!exists()) {
-			return;
-		}
-		folders().forEach(Folder::delete);
-		files().forEach(file -> {
-			try (WritableFile writableFile = file.openWritable()) {
-				writableFile.delete();
-			}
-		});
-	}
+	void delete();
 
 	/**
 	 * Moves this directory and its contents to the given destination. If the

@@ -1,5 +1,7 @@
 package org.cryptomator.filesystem.nio;
 
+import static java.lang.String.format;
+import static org.cryptomator.filesystem.FileSystemVisitor.fileSystemVisitor;
 import static org.cryptomator.filesystem.FolderCreateMode.INCLUDING_PARENTS;
 
 import java.io.IOException;
@@ -13,14 +15,15 @@ import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.Folder;
 import org.cryptomator.filesystem.FolderCreateMode;
 import org.cryptomator.filesystem.Node;
+import org.cryptomator.filesystem.WritableFile;
 
 class NioFolder extends NioNode implements Folder {
 
 	private final WeakValuedCache<Path, NioFolder> folders = WeakValuedCache.usingLoader(this::folderFromPath);
 	private final WeakValuedCache<Path, NioFile> files = WeakValuedCache.usingLoader(this::fileFromPath);
 
-	public NioFolder(Optional<NioFolder> parent, Path path, NioNodeFactory nodeFactory) {
-		super(parent, path, nodeFactory);
+	public NioFolder(Optional<NioFolder> parent, Path path) {
+		super(parent, path);
 	}
 
 	@Override
@@ -41,11 +44,11 @@ class NioFolder extends NioNode implements Folder {
 	}
 
 	private NioFile fileFromPath(Path path) {
-		return nodeFactory.file(Optional.of(this), path);
+		return new NioFile(Optional.of(this), path);
 	}
 
 	private NioFolder folderFromPath(Path path) {
-		return nodeFactory.folder(Optional.of(this), path);
+		return new NioFolder(Optional.of(this), path);
 	}
 
 	@Override
@@ -77,6 +80,33 @@ class NioFolder extends NioNode implements Folder {
 			target.delete();
 			target.parent().ifPresent(folder -> folder.create(INCLUDING_PARENTS));
 			Files.move(path, target.path);
+		} catch (IOException e) {
+			throw new UncheckedIOException(e);
+		}
+	}
+
+	@Override
+	public String toString() {
+		return format("NioFolder(%s)", path);
+	}
+
+	@Override
+	public void delete() {
+		fileSystemVisitor() //
+				.forEachFile(NioFolder::deleteFile) //
+				.afterFolder(NioFolder::deleteEmptyFolder) //
+				.visit(this);
+	}
+
+	private static final void deleteFile(File file) {
+		try (WritableFile writableFile = file.openWritable()) {
+			writableFile.delete();
+		}
+	}
+
+	private static final void deleteEmptyFolder(Folder folder) {
+		try {
+			Files.delete(((NioFolder) folder).path);
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
 		}

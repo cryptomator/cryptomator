@@ -6,6 +6,8 @@ import java.util.function.Function;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.util.concurrent.ExecutionError;
+import com.google.common.util.concurrent.UncheckedExecutionException;
 
 class WeakValuedCache<Key, Value> {
 
@@ -30,7 +32,11 @@ class WeakValuedCache<Key, Value> {
 		try {
 			return delegate.get(key);
 		} catch (ExecutionException e) {
-			throw new RuntimeException(e);
+			throw new IllegalStateException("No checked exception can be thrown by loader", e);
+		} catch (UncheckedExecutionException e) {
+			throw (RuntimeException) e.getCause();
+		} catch (ExecutionError e) {
+			throw (Error) e.getCause();
 		}
 	}
 

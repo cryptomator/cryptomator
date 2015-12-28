@@ -14,17 +14,26 @@ class NioNode implements Node {
 
 	protected final Optional<NioFolder> parent;
 	protected final Path path;
-	protected final NioNodeFactory nodeFactory;
 
-	public NioNode(Optional<NioFolder> parent, Path path, NioNodeFactory nodeFactory) {
+	private NioFileSystem fileSystem;
+
+	public NioNode(Optional<NioFolder> parent, Path path) {
 		this.path = path.toAbsolutePath();
-		this.nodeFactory = nodeFactory;
 		this.parent = parent;
+	}
+
+	NioFileSystem fileSystem() {
+		if (fileSystem == null) {
+			fileSystem = parent //
+					.map(NioNode::fileSystem) //
+					.orElseGet(() -> (NioFileSystem) this);
+		}
+		return fileSystem;
 	}
 
 	boolean belongsToSameFilesystem(Node other) {
 		return other instanceof NioNode //
-				&& ((NioNode) other).nodeFactory == nodeFactory;
+				&& ((NioNode) other).fileSystem() == fileSystem();
 	}
 
 	@Override
