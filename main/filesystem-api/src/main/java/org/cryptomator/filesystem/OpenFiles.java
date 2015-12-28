@@ -39,7 +39,7 @@ public class OpenFiles implements AutoCloseable {
 	}
 
 	static void cleanup(Collection<ReadableFile> readableFiles, Collection<WritableFile> writableFiles) {
-		Iterator<AutoCloseable> iterator = Stream.concat(readableFiles.stream(), writableFiles.stream()).iterator();
+		Iterator<? extends AutoCloseable> iterator = Stream.concat(readableFiles.stream(), writableFiles.stream()).iterator();
 		UncheckedIOException firstException = null;
 		while (iterator.hasNext()) {
 			AutoCloseable openFile = iterator.next();

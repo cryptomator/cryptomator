@@ -3,7 +3,7 @@
  * This file is licensed under the terms of the MIT license.
  * See the LICENSE.txt file for more info.
  ******************************************************************************/
-package org.cryptomator.commons.test.matcher;
+package org.cryptomator.common.test.matcher;
 
 import java.util.function.Function;
 

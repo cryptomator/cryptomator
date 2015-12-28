@@ -2,7 +2,7 @@ package org.cryptomator.filesystem.nio;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 
-import org.cryptomator.commons.test.matcher.PropertyMatcher;
+import org.cryptomator.common.test.matcher.PropertyMatcher;
 import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.Folder;
 import org.hamcrest.Matcher;

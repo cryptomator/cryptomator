@@ -42,11 +42,17 @@ class NioFile extends NioNode implements File {
 	private class ReadableView implements ReadableFile {
 
 		@Override
-		public void read(ByteBuffer target) throws UncheckedIOException {
+		public int read(ByteBuffer target) throws UncheckedIOException {
+			return -1;
 		}
 
 		@Override
-		public void read(ByteBuffer target, long position) throws UncheckedIOException {
+		public boolean isOpen() {
+			return false;
+		}
+
+		@Override
+		public void position(long position) throws UncheckedIOException {
 		}
 
 		@Override
@@ -62,11 +68,17 @@ class NioFile extends NioNode implements File {
 	private class WritableView implements WritableFile {
 
 		@Override
-		public void write(ByteBuffer source) throws UncheckedIOException {
+		public int write(ByteBuffer source) throws UncheckedIOException {
+			return -1;
 		}
 
 		@Override
-		public void write(ByteBuffer source, int position) throws UncheckedIOException {
+		public boolean isOpen() {
+			return false;
+		}
+
+		@Override
+		public void position(long position) throws UncheckedIOException {
 		}
 
 		@Override

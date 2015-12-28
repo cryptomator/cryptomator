@@ -5,11 +5,45 @@
  ******************************************************************************/
 package org.cryptomator.filesystem;
 
+import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.nio.ByteBuffer;
+import java.nio.channels.ReadableByteChannel;
 
-public interface ReadableFile extends ReadableBytes, AutoCloseable {
+public interface ReadableFile extends ReadableByteChannel {
 
 	void copyTo(WritableFile other) throws UncheckedIOException;
+
+	/**
+	 * <p>
+	 * Tries to fill the remaining space in the given byte buffer with data from
+	 * this readable bytes from the current position.
+	 * <p>
+	 * May read less bytes if the end of this readable bytes has been reached.
+	 * 
+	 * @param target
+	 *            the byte buffer to fill
+	 * @return the number of bytes actually read, or {@code -1} if the end of
+	 *         file has been reached
+	 * @throws UncheckedIOException
+	 *             if an {@link IOException} occurs while reading from this
+	 *             {@code ReadableBytes}
+	 */
+	int read(ByteBuffer target) throws UncheckedIOException;
+
+	/**
+	 * <p>
+	 * Fast-forwards or rewinds the file to the specified position.
+	 * <p>
+	 * Consecutive reads on the file will begin at the new position.
+	 * 
+	 * @param position
+	 *            the position to set the file to
+	 * @throws UncheckedIOException
+	 *             if an {@link IOException} occurs
+	 * 
+	 */
+	void position(long position) throws UncheckedIOException;
 
 	@Override
 	void close() throws UncheckedIOException;

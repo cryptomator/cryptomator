@@ -1,5 +1,6 @@
 package org.cryptomator.crypto.fs;
 
+import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -14,7 +15,10 @@ import org.cryptomator.io.ByteBuffers;
 
 class CryptoReadableFile implements ReadableFile {
 
-	private static final int READ_BUFFER_SIZE = 32 * 1024 + 32; // aligned with encrypted chunk size + MAC size
+	private static final int READ_BUFFER_SIZE = 32 * 1024 + 32; // aligned with
+																// encrypted
+																// chunk size +
+																// MAC size
 	private static final ByteBuffer EMPTY_BUFFER = ByteBuffer.allocate(0);
 
 	private final ExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
@@ -26,7 +30,8 @@ class CryptoReadableFile implements ReadableFile {
 	public CryptoReadableFile(FileContentCryptor cryptor, ReadableFile file) {
 		final int headerSize = cryptor.getHeaderSize();
 		final ByteBuffer header = ByteBuffer.allocate(headerSize);
-		file.read(header, 0);
+		file.position(0);
+		file.read(header);
 		header.flip();
 		this.decryptor = cryptor.createFileContentDecryptor(header);
 		this.file = file;
@@ -42,15 +47,26 @@ class CryptoReadableFile implements ReadableFile {
 	}
 
 	@Override
-	public void read(ByteBuffer target) {
+	public int read(ByteBuffer target) {
 		try {
+			if (bufferedCleartext == FileContentCryptor.EOF) {
+				return -1;
+			}
+			int bytesRead = 0;
 			while (target.remaining() > 0 && bufferedCleartext != FileContentCryptor.EOF) {
 				bufferCleartext();
-				readFromBufferedCleartext(target);
+				bytesRead += readFromBufferedCleartext(target);
 			}
+			return bytesRead;
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
+			throw new RuntimeException(e);
 		}
+	}
+
+	@Override
+	public void position(long position) throws UncheckedIOException {
+		throw new UnsupportedOperationException("Partial read unsupported");
 	}
 
 	private void bufferCleartext() throws InterruptedException {
@@ -59,14 +75,9 @@ class CryptoReadableFile implements ReadableFile {
 		}
 	}
 
-	private void readFromBufferedCleartext(ByteBuffer target) {
+	private int readFromBufferedCleartext(ByteBuffer target) {
 		assert bufferedCleartext != null;
-		ByteBuffers.copy(bufferedCleartext, target);
-	}
-
-	@Override
-	public void read(ByteBuffer target, long position) {
-		throw new UnsupportedOperationException("Partial read not implemented yet.");
+		return ByteBuffers.copy(bufferedCleartext, target);
 	}
 
 	@Override
@@ -77,6 +88,11 @@ class CryptoReadableFile implements ReadableFile {
 		} else {
 			throw new IllegalArgumentException("Can not move CryptoFile to conventional File.");
 		}
+	}
+
+	@Override
+	public boolean isOpen() {
+		return file.isOpen();
 	}
 
 	@Override
@@ -95,7 +111,7 @@ class CryptoReadableFile implements ReadableFile {
 
 		@Override
 		public Void call() {
-			file.read(EMPTY_BUFFER, startpos);
+			file.position(startpos);
 			int bytesRead = -1;
 			try {
 				do {

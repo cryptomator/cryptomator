@@ -136,7 +136,8 @@ public class InMemoryFileSystemTest {
 		}
 		final ByteBuffer readBuf = ByteBuffer.allocate(5);
 		try (ReadableFile readable = bazFile.openReadable()) {
-			readable.read(readBuf, 6);
+			readable.position(6);
+			readable.read(readBuf);
 		}
 		Assert.assertEquals("world", new String(readBuf.array()));
 	}
@@ -159,7 +160,8 @@ public class InMemoryFileSystemTest {
 		Assert.assertTrue(test1File.exists());
 		Assert.assertTrue(test2File.exists());
 
-		// copy foo/bar/ to qwe/asd/ (result is qwe/asd/file1.txt & qwe/asd/file2.txt)
+		// copy foo/bar/ to qwe/asd/ (result is qwe/asd/file1.txt &
+		// qwe/asd/file2.txt)
 		fooBarFolder.copyTo(qweAsdFolder);
 		Assert.assertTrue(qweAsdFolder.exists());
 		Assert.assertEquals(2, qweAsdFolder.files().count());

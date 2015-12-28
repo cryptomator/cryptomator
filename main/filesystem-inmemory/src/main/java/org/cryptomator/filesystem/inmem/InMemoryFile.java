@@ -52,31 +52,24 @@ class InMemoryFile extends InMemoryNode implements File, ReadableFile, WritableF
 	}
 
 	@Override
-	public void read(ByteBuffer target) {
-		ByteBuffers.copy(content, target);
-	}
-
-	@Override
-	public void read(ByteBuffer target, long position) {
-		if (position > Integer.MAX_VALUE) {
-			throw new IllegalArgumentException("Can not keep files of virtually unlimited size in memory.");
-		}
+	public void position(long position) throws UncheckedIOException {
 		content.position((int) position);
-		ByteBuffers.copy(content, target);
 	}
 
 	@Override
-	public void write(ByteBuffer source) {
-		this.write(source, content.position());
+	public int read(ByteBuffer target) {
+		return ByteBuffers.copy(content, target);
 	}
 
 	@Override
-	public void write(ByteBuffer source, int position) {
+	public int write(ByteBuffer source) {
 		assert content != null;
-		expandContentCapacityIfRequired(position + source.remaining());
-		content.position(position);
+		final int initialContentPosition = content.position();
+		expandContentCapacityIfRequired(initialContentPosition + source.remaining());
+		content.position(initialContentPosition);
 		assert content.remaining() >= source.remaining();
 		content.put(source);
+		return content.position() - initialContentPosition;
 	}
 
 	private void expandContentCapacityIfRequired(int requiredCapacity) {
@@ -121,7 +114,12 @@ class InMemoryFile extends InMemoryNode implements File, ReadableFile, WritableF
 			// returning null removes the entry.
 			return null;
 		});
-		assert!this.exists();
+		assert !this.exists();
+	}
+
+	@Override
+	public boolean isOpen() {
+		return lock.isWriteLockedByCurrentThread() || lock.getReadHoldCount() > 0;
 	}
 
 	@Override

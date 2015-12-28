@@ -1,7 +1,7 @@
 package org.cryptomator.filesystem.nio;
 
 import static java.util.stream.Collectors.toList;
-import static org.cryptomator.commons.test.matcher.ContainsMatcher.containsInAnyOrder;
+import static org.cryptomator.common.test.matcher.ContainsMatcher.containsInAnyOrder;
 import static org.cryptomator.filesystem.FolderCreateMode.FAIL_IF_PARENT_IS_MISSING;
 import static org.cryptomator.filesystem.FolderCreateMode.INCLUDING_PARENTS;
 import static org.cryptomator.filesystem.nio.FilesystemSetupUtils.emptyFilesystem;

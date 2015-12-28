@@ -1,4 +1,4 @@
-package org.cryptomator.commons.test.matcher;
+package org.cryptomator.common.test.matcher;
 
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;

@@ -32,24 +32,27 @@ class CryptoWritableFile implements WritableFile {
 	private void writeHeader() {
 		ByteBuffer header = encryptor.getHeader();
 		header.rewind();
-		file.write(header, 0);
+		file.position(0);
+		file.write(header);
 	}
 
 	@Override
-	public void write(ByteBuffer source) {
-		final ByteBuffer cleartextCopy = ByteBuffer.allocate(source.remaining());
+	public int write(ByteBuffer source) {
+		final int size = source.remaining();
+		final ByteBuffer cleartextCopy = ByteBuffer.allocate(size);
 		ByteBuffers.copy(source, cleartextCopy);
 		cleartextCopy.flip();
 		try {
 			encryptor.append(cleartextCopy);
-			file.write(source);
+			return size;
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
+			throw new RuntimeException(e);
 		}
 	}
 
 	@Override
-	public void write(ByteBuffer source, int position) {
+	public void position(long position) {
 		throw new UnsupportedOperationException("Partial write not implemented yet.");
 	}
 
@@ -75,7 +78,16 @@ class CryptoWritableFile implements WritableFile {
 
 	@Override
 	public void truncate() {
-		this.write(ByteBuffer.allocate(0), 0);
+		/*
+		 * TODO kill writer thread (EOF) and reinitialize CryptoWritableFile
+		 * after truncating the file
+		 */
+		throw new UnsupportedOperationException("Truncate not supported yet");
+	}
+
+	@Override
+	public boolean isOpen() {
+		return file.isOpen();
 	}
 
 	@Override
