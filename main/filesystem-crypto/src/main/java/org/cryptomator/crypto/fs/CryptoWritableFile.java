@@ -10,6 +10,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import org.cryptomator.common.UncheckedInterruptedException;
 import org.cryptomator.crypto.engine.FileContentCryptor;
 import org.cryptomator.crypto.engine.FileContentEncryptor;
 import org.cryptomator.filesystem.WritableFile;
@@ -47,7 +48,7 @@ class CryptoWritableFile implements WritableFile {
 			return size;
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
-			throw new RuntimeException(e);
+			throw new UncheckedInterruptedException(e);
 		}
 	}
 

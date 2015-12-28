@@ -7,6 +7,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import org.cryptomator.common.UncheckedInterruptedException;
 import org.cryptomator.crypto.engine.FileContentCryptor;
 import org.cryptomator.crypto.engine.FileContentDecryptor;
 import org.cryptomator.filesystem.ReadableFile;
@@ -60,7 +61,7 @@ class CryptoReadableFile implements ReadableFile {
 			return bytesRead;
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
-			throw new RuntimeException(e);
+			throw new UncheckedInterruptedException(e);
 		}
 	}
 
