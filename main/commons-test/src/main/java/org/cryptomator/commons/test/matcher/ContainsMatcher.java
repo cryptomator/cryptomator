@@ -4,8 +4,8 @@ import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
 
 /**
- * Wraps hamcrest contains and containsInAny order matcher factory methods to
- * avoid problems due to incorrect / inconsistent handling of generics by the
+ * Wraps hamcrest contains and containsInAnyOrder matcher factory methods to
+ * avoid problems due to incorrect / inconsistent handling of generics by
  * several java compilers.
  * 
  * @author Markus Kreusch
