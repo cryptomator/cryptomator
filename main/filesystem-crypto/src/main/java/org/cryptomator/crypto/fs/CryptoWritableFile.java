@@ -17,14 +17,14 @@ import org.cryptomator.io.ByteBuffers;
 
 class CryptoWritableFile implements WritableFile {
 
+	final WritableFile file;
 	private final ExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
 	private final FileContentEncryptor encryptor;
-	private final WritableFile file;
 	private final Future<Void> writeTask;
 
 	public CryptoWritableFile(FileContentCryptor cryptor, WritableFile file) {
-		this.encryptor = cryptor.createFileContentEncryptor(Optional.empty());
 		this.file = file;
+		this.encryptor = cryptor.createFileContentEncryptor(Optional.empty());
 		writeHeader();
 		this.writeTask = executorService.submit(new Writer());
 	}
@@ -55,7 +55,12 @@ class CryptoWritableFile implements WritableFile {
 
 	@Override
 	public void moveTo(WritableFile other) {
-		file.moveTo(other);
+		if (other instanceof CryptoWritableFile) {
+			CryptoWritableFile dst = (CryptoWritableFile) other;
+			file.moveTo(dst.file);
+		} else {
+			throw new IllegalArgumentException("Can not move CryptoFile to conventional File.");
+		}
 	}
 
 	@Override

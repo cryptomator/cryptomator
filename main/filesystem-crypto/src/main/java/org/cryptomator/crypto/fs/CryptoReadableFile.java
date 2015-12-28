@@ -71,7 +71,12 @@ class CryptoReadableFile implements ReadableFile {
 
 	@Override
 	public void copyTo(WritableFile other) {
-		file.copyTo(other);
+		if (other instanceof CryptoWritableFile) {
+			CryptoWritableFile dst = (CryptoWritableFile) other;
+			file.copyTo(dst.file);
+		} else {
+			throw new IllegalArgumentException("Can not move CryptoFile to conventional File.");
+		}
 	}
 
 	@Override

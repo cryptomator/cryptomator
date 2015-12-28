@@ -140,9 +140,8 @@ class CryptoFolder extends CryptoNode implements Folder {
 
 		target.physicalFile().parent().get().create(FolderCreateMode.INCLUDING_PARENTS);
 		assert target.physicalFile().parent().get().exists();
-		try (WritableFile src = this.physicalFile().openWritable(); WritableFile dst = target.physicalFile().openWritable()) {
-			src.moveTo(dst);
-		}
+		this.physicalFile().moveTo(target.physicalFile());
+
 		// directoryId is now used by target, we must no longer use the same id
 		// (we'll generate a new one when needed)
 		directoryId.set(null);

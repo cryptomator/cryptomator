@@ -71,4 +71,8 @@ public interface File extends Node, Comparable<File> {
 		Copier.copy(this, destination);
 	}
 
+	default void moveTo(File destination) {
+		Mover.move(this, destination);
+	}
+
 }

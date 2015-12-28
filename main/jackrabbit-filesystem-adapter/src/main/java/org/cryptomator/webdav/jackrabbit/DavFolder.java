@@ -22,6 +22,7 @@ import org.apache.jackrabbit.webdav.DavException;
 import org.apache.jackrabbit.webdav.DavResource;
 import org.apache.jackrabbit.webdav.DavResourceIterator;
 import org.apache.jackrabbit.webdav.DavResourceIteratorImpl;
+import org.apache.jackrabbit.webdav.DavServletResponse;
 import org.apache.jackrabbit.webdav.DavSession;
 import org.apache.jackrabbit.webdav.io.InputContext;
 import org.apache.jackrabbit.webdav.io.OutputContext;
@@ -32,6 +33,7 @@ import org.apache.jackrabbit.webdav.property.ResourceType;
 import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.Folder;
 import org.cryptomator.filesystem.FolderCreateMode;
+import org.cryptomator.filesystem.Node;
 import org.cryptomator.filesystem.WritableFile;
 import org.cryptomator.webdav.jackrabbit.DavPathFactory.DavPath;
 
@@ -83,37 +85,66 @@ class DavFolder extends DavNode<Folder> {
 
 	@Override
 	public DavResourceIterator getMembers() {
-		final Stream<DavFolder> folders = node.folders().map(this::getMemberFolder);
-		final Stream<DavFile> files = node.files().map(this::getMemberFile);
+		final Stream<DavFolder> folders = node.folders().map(this::folderToDavFolder);
+		final Stream<DavFile> files = node.files().map(this::fileToDavFile);
 		return new DavResourceIteratorImpl(Stream.concat(folders, files).collect(Collectors.toList()));
 	}
 
-	private DavFolder getMemberFolder(Folder memberFolder) {
+	private DavFolder folderToDavFolder(Folder memberFolder) {
 		final DavPath subFolderLocator = path.getChild(memberFolder.name() + '/');
 		return factory.createFolder(memberFolder, subFolderLocator, session);
 	}
 
-	private DavFile getMemberFile(File memberFile) {
+	private DavFile fileToDavFile(File memberFile) {
 		final DavPath subFolderLocator = path.getChild(memberFile.name());
 		return factory.createFile(memberFile, subFolderLocator, session);
 	}
 
 	@Override
 	public void removeMember(DavResource member) throws DavException {
-		// TODO Auto-generated method stub
+		final Node child = getMemberNode(member.getDisplayName());
+		if (child instanceof Folder) {
+			Folder folder = (Folder) child;
+			folder.delete();
+		} else if (child instanceof File) {
+			File file = (File) child;
+			try (WritableFile writable = file.openWritable()) {
+				writable.delete();
+			}
+		} else {
+			throw new IllegalStateException("Unexpected node type: " + child.getClass().getName());
+		}
+	}
 
+	/**
+	 * @throws DavException Error 404 if no child with the given name exists
+	 */
+	private Node getMemberNode(String name) throws DavException {
+		return node.children().filter(c -> c.name().equals(name)).findAny().orElseThrow(() -> {
+			return new DavException(DavServletResponse.SC_NOT_FOUND, "No such file or directory: " + path + name);
+		});
 	}
 
 	@Override
 	public void move(DavResource destination) throws DavException {
-		// TODO Auto-generated method stub
-
+		if (destination instanceof DavFolder) {
+			DavFolder dst = (DavFolder) destination;
+			node.moveTo(dst.node);
+		} else {
+			throw new IllegalArgumentException("Destination not a DavFolder: " + destination.getClass().getName());
+		}
 	}
 
 	@Override
 	public void copy(DavResource destination, boolean shallow) throws DavException {
-		// TODO Auto-generated method stub
-
+		if (shallow) {
+			throw new UnsupportedOperationException("Shallow copy of directories not supported.");
+		} else if (destination instanceof DavFolder) {
+			DavFolder dst = (DavFolder) destination;
+			node.copyTo(dst.node);
+		} else {
+			throw new IllegalArgumentException("Destination not a DavFolder: " + destination.getClass().getName());
+		}
 	}
 
 	@Override

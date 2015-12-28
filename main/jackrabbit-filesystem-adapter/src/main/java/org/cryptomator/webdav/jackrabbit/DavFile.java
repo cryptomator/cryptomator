@@ -72,14 +72,22 @@ class DavFile extends DavNode<File> {
 
 	@Override
 	public void move(DavResource destination) throws DavException {
-		// TODO Auto-generated method stub
-
+		if (destination instanceof DavFile) {
+			DavFile dst = (DavFile) destination;
+			node.moveTo(dst.node);
+		} else {
+			throw new IllegalArgumentException("Destination not a DavFolder: " + destination.getClass().getName());
+		}
 	}
 
 	@Override
 	public void copy(DavResource destination, boolean shallow) throws DavException {
-		// TODO Auto-generated method stub
-
+		if (destination instanceof DavFile) {
+			DavFile dst = (DavFile) destination;
+			node.copyTo(dst.node);
+		} else {
+			throw new IllegalArgumentException("Destination not a DavFolder: " + destination.getClass().getName());
+		}
 	}
 
 	@Override

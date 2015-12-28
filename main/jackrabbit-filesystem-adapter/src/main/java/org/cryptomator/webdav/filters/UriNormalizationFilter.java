@@ -20,6 +20,7 @@ public class UriNormalizationFilter implements HttpFilter {
 
 	private static final String[] FILE_METHODS = {"PUT"};
 	private static final String[] DIRECTORY_METHODS = {"MKCOL"};
+	private static final String MOVE = "MOVE";
 
 	@Override
 	public void init(FilterConfig filterConfig) throws ServletException {
@@ -32,6 +33,8 @@ public class UriNormalizationFilter implements HttpFilter {
 			chain.doFilter(new FileUriRequest(request), response);
 		} else if (ArrayUtils.contains(DIRECTORY_METHODS, request.getMethod().toUpperCase())) {
 			chain.doFilter(new DirectoryUriRequest(request), response);
+		} else if (MOVE.equalsIgnoreCase(request.getMethod())) {
+			chain.doFilter(new CanonicalMoveRequest(request), response);
 		} else {
 			chain.doFilter(request, response);
 		}
@@ -40,6 +43,37 @@ public class UriNormalizationFilter implements HttpFilter {
 	@Override
 	public void destroy() {
 		// no-op
+	}
+
+	/**
+	 * Makes the destination header end on "/" if moving a directory and remove additional "/" if moving a file.
+	 */
+	private static class CanonicalMoveRequest extends HttpServletRequestWrapper {
+
+		private static String DESTINATION_HEADER = "Destination";
+
+		public CanonicalMoveRequest(HttpServletRequest request) {
+			super(request);
+		}
+
+		@Override
+		public String getHeader(String name) {
+			if (name.equalsIgnoreCase(DESTINATION_HEADER)) {
+				return sameSuffixAsUri(super.getHeader(name));
+			} else {
+				return super.getHeader(name);
+			}
+		}
+
+		private String sameSuffixAsUri(String str) {
+			final String uri = this.getRequestURI();
+			if (uri.endsWith("/")) {
+				return StringUtils.appendIfMissing(str, "/");
+			} else {
+				return StringUtils.removeEnd(str, "/");
+			}
+		}
+
 	}
 
 	/**

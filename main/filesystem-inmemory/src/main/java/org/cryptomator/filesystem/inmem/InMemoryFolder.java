@@ -13,6 +13,7 @@ import java.io.UncheckedIOException;
 import java.nio.file.FileAlreadyExistsException;
 import java.time.Instant;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Stream;
@@ -101,15 +102,22 @@ class InMemoryFolder extends InMemoryNode implements Folder {
 
 	@Override
 	public void delete() {
-		// delete subfolder recursively:
-		folders().forEach(Folder::delete);
-		// delete direct children (this deletes files):
-		this.children.clear();
 		// remove ourself from parent:
 		parent.children.computeIfPresent(name, (k, v) -> {
 			// returning null removes the entry.
 			return null;
 		});
+		// delete all children:
+		for (Iterator<Map.Entry<String, InMemoryNode>> iterator = children.entrySet().iterator(); iterator.hasNext();) {
+			Map.Entry<String, InMemoryNode> entry = iterator.next();
+			iterator.remove();
+			// recursively on folders:
+			if (entry.getValue() instanceof InMemoryFolder) {
+				InMemoryFolder subFolder = (InMemoryFolder) entry.getValue();
+				// this will try to itself from our children, which is ok as we're using an iterator here.
+				subFolder.delete();
+			}
+		}
 		assert!this.exists();
 	}
 
