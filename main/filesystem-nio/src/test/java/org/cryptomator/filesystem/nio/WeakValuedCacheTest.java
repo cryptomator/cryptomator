@@ -1,5 +1,6 @@
 package org.cryptomator.filesystem.nio;
 
+import static java.lang.String.format;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.junit.Assert.assertThat;
@@ -9,7 +10,6 @@ import static org.mockito.Mockito.when;
 import java.util.function.Function;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
@@ -83,7 +83,6 @@ public class WeakValuedCacheTest {
 	}
 
 	@Test
-	@Ignore
 	public void testCacheDoesNotPreventGarbageCollectionOfValues() {
 		when(loader.apply(A_KEY)).thenAnswer(this::createValueUsingMoreThanHalfTheJvmMemory);
 
@@ -91,7 +90,7 @@ public class WeakValuedCacheTest {
 
 		// force garbage collection of previously created value by creating an
 		// object so large it can not coexist with the value
-		createByteArrayUsingMoreThanHalfTheJvmMemory();
+		createObjectUsingMoreThanHalfTheJvmMemory();
 	}
 
 	@Test(expected = RuntimeExceptionThrownInLoader.class)
@@ -109,16 +108,31 @@ public class WeakValuedCacheTest {
 	}
 
 	private Value createValueUsingMoreThanHalfTheJvmMemory(InvocationOnMock invocation) {
-		byte[] data = createByteArrayUsingMoreThanHalfTheJvmMemory();
+		Object data = createObjectUsingMoreThanHalfTheJvmMemory();
 		Value value = new Value();
 		value.setPayload(data);
 		return value;
 	}
 
-	private byte[] createByteArrayUsingMoreThanHalfTheJvmMemory() {
-		int max = (int) Runtime.getRuntime().maxMemory();
-		byte[] data = new byte[max / 2 + 1];
-		return data;
+	private Object createObjectUsingMoreThanHalfTheJvmMemory() {
+		long maxMemory = Runtime.getRuntime().maxMemory();
+		long moreThanHalfTheJvmMemory = maxMemory / 2 + 1;
+		return createObjectUsingAtLeast(moreThanHalfTheJvmMemory);
+	}
+
+	private Object createObjectUsingAtLeast(long minMemory) {
+		if (minMemory <= Integer.MAX_VALUE) {
+			return new byte[(int) minMemory];
+		} else if ((minMemory / Integer.MAX_VALUE) <= Integer.MAX_VALUE) {
+			int numberOfArraysWithMaxIntSize = (int) (minMemory / Integer.MAX_VALUE);
+			int numberOfRemainingBytes = (int) (minMemory - Integer.MAX_VALUE * numberOfArraysWithMaxIntSize);
+			return new byte[][][] { //
+					new byte[numberOfArraysWithMaxIntSize][Integer.MAX_VALUE], //
+					new byte[1][numberOfRemainingBytes] //
+			};
+		} else {
+			throw new IllegalArgumentException(format("Can not create object with more than 3.999999996 Exabyte"));
+		}
 	}
 
 	private static class RuntimeExceptionThrownInLoader extends RuntimeException {
