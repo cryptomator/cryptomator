@@ -9,37 +9,34 @@
 package org.cryptomator.filesystem.delegating;
 
 import java.io.UncheckedIOException;
-import java.util.function.Function;
+import java.util.Optional;
 
 import org.cryptomator.filesystem.File;
-import org.cryptomator.filesystem.ReadableFile;
-import org.cryptomator.filesystem.WritableFile;
 
-public class DelegatingFile extends DelegatingNode<File>implements File {
+public abstract class DelegatingFile<R extends DelegatingReadableFile, W extends DelegatingWritableFile, D extends DelegatingFolder<R, W, D, ?>> extends DelegatingNode<File>implements File {
 
-	private final Function<ReadableFile, DelegatingReadableFile> readableFileFactory;
-	private final Function<WritableFile, DelegatingWritableFile> writableFileFactory;
+	private final D parent;
 
-	public DelegatingFile(DelegatingFolder parent, File delegate, Function<ReadableFile, DelegatingReadableFile> readableFileFactory, Function<WritableFile, DelegatingWritableFile> writableFileFactory) {
-		super(parent, delegate);
-		this.readableFileFactory = readableFileFactory;
-		this.writableFileFactory = writableFileFactory;
+	public DelegatingFile(D parent, File delegate) {
+		super(delegate);
+		this.parent = parent;
 	}
 
 	@Override
-	public DelegatingReadableFile openReadable() throws UncheckedIOException {
-		return readableFileFactory.apply(delegate.openReadable());
+	public Optional<D> parent() throws UncheckedIOException {
+		return Optional.of(parent);
 	}
 
 	@Override
-	public DelegatingWritableFile openWritable() throws UncheckedIOException {
-		return writableFileFactory.apply(delegate.openWritable());
-	}
+	public abstract R openReadable() throws UncheckedIOException;
+
+	@Override
+	public abstract W openWritable() throws UncheckedIOException;
 
 	@Override
 	public void copyTo(File destination) {
 		if (getClass().equals(destination.getClass())) {
-			final File delegateDest = ((DelegatingFile) destination).delegate;
+			final File delegateDest = ((DelegatingFile<?, ?, ?>) destination).delegate;
 			delegate.copyTo(delegateDest);
 		} else {
 			delegate.copyTo(destination);
@@ -49,7 +46,7 @@ public class DelegatingFile extends DelegatingNode<File>implements File {
 	@Override
 	public void moveTo(File destination) {
 		if (getClass().equals(destination.getClass())) {
-			final File delegateDest = ((DelegatingFile) destination).delegate;
+			final File delegateDest = ((DelegatingFile<?, ?, ?>) destination).delegate;
 			delegate.moveTo(delegateDest);
 		} else {
 			throw new IllegalArgumentException("Can only move DelegatingFile to other DelegatingFile.");
@@ -59,7 +56,7 @@ public class DelegatingFile extends DelegatingNode<File>implements File {
 	@Override
 	public int compareTo(File o) {
 		if (getClass().equals(o.getClass())) {
-			final File delegateOther = ((DelegatingFile) o).delegate;
+			final File delegateOther = ((DelegatingFile<?, ?, ?>) o).delegate;
 			return delegate.compareTo(delegateOther);
 		} else {
 			return delegate.compareTo(o);

@@ -9,55 +9,56 @@
 package org.cryptomator.filesystem.delegating;
 
 import java.io.UncheckedIOException;
-import java.util.function.BiFunction;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.Folder;
+import org.cryptomator.filesystem.Node;
 
-public class DelegatingFolder extends DelegatingNode<Folder>implements Folder {
+public abstract class DelegatingFolder<R extends DelegatingReadableFile, W extends DelegatingWritableFile, D extends DelegatingFolder<R, W, D, F>, F extends DelegatingFile<R, W, D>> extends DelegatingNode<Folder>
+		implements Folder {
 
-	private final BiFunction<DelegatingFolder, Folder, DelegatingFolder> folderFactory;
-	private final BiFunction<DelegatingFolder, File, DelegatingFile> fileFactory;
+	private final D parent;
 
-	public DelegatingFolder(DelegatingFolder parent, Folder delegate, BiFunction<DelegatingFolder, Folder, DelegatingFolder> folderFactory, BiFunction<DelegatingFolder, File, DelegatingFile> fileFactory) {
-		super(parent, delegate);
-		this.folderFactory = folderFactory;
-		this.fileFactory = fileFactory;
+	public DelegatingFolder(D parent, Folder delegate) {
+		super(delegate);
+		this.parent = parent;
 	}
 
 	@Override
-	public Stream<? extends DelegatingNode<?>> children() throws UncheckedIOException {
+	public Optional<D> parent() throws UncheckedIOException {
+		return Optional.ofNullable(parent);
+	}
+
+	@Override
+	public Stream<? extends Node> children() throws UncheckedIOException {
 		return Stream.concat(folders(), files());
 	}
 
 	@Override
-	public Stream<DelegatingFolder> folders() {
+	public Stream<D> folders() {
 		return delegate.folders().map(this::folder);
 	}
 
 	@Override
-	public Stream<DelegatingFile> files() throws UncheckedIOException {
+	public Stream<F> files() throws UncheckedIOException {
 		return delegate.files().map(this::file);
 	}
 
 	@Override
-	public DelegatingFile file(String name) throws UncheckedIOException {
+	public F file(String name) throws UncheckedIOException {
 		return file(delegate.file(name));
 	}
 
-	private DelegatingFile file(File delegate) {
-		return fileFactory.apply(this, delegate);
-	}
+	protected abstract F file(File delegate);
 
 	@Override
-	public DelegatingFolder folder(String name) throws UncheckedIOException {
+	public D folder(String name) throws UncheckedIOException {
 		return folder(delegate.folder(name));
 	}
 
-	private DelegatingFolder folder(Folder delegate) {
-		return folderFactory.apply(this, delegate);
-	}
+	protected abstract D folder(Folder delegate);
 
 	@Override
 	public void create() throws UncheckedIOException {
@@ -72,7 +73,7 @@ public class DelegatingFolder extends DelegatingNode<Folder>implements Folder {
 	@Override
 	public void copyTo(Folder destination) throws UncheckedIOException {
 		if (destination instanceof DelegatingFolder) {
-			final Folder delegateDest = ((DelegatingFolder) destination).delegate;
+			final Folder delegateDest = ((DelegatingFolder<?, ?, ?, ?>) destination).delegate;
 			delegate.copyTo(delegateDest);
 		} else {
 			delegate.copyTo(destination);
@@ -82,7 +83,7 @@ public class DelegatingFolder extends DelegatingNode<Folder>implements Folder {
 	@Override
 	public void moveTo(Folder destination) {
 		if (getClass().equals(destination.getClass())) {
-			final Folder delegateDest = ((DelegatingFolder) destination).delegate;
+			final Folder delegateDest = ((DelegatingFolder<?, ?, ?, ?>) destination).delegate;
 			delegate.moveTo(delegateDest);
 		} else {
 			throw new IllegalArgumentException("Can only move DelegatingFolder to other DelegatingFolder.");

@@ -10,26 +10,18 @@ package org.cryptomator.filesystem.delegating;
 
 import java.io.UncheckedIOException;
 import java.time.Instant;
-import java.util.Optional;
 
 import org.cryptomator.filesystem.Node;
 
 abstract class DelegatingNode<T extends Node> implements Node {
 
-	private final DelegatingFolder parent;
 	protected final T delegate;
 
-	public DelegatingNode(DelegatingFolder parent, T delegate) {
+	public DelegatingNode(T delegate) {
 		if (delegate == null) {
 			throw new IllegalArgumentException("Delegate must not be null");
 		}
-		this.parent = parent;
 		this.delegate = delegate;
-	}
-
-	@Override
-	public Optional<DelegatingFolder> parent() throws UncheckedIOException {
-		return Optional.ofNullable(parent);
 	}
 
 	@Override

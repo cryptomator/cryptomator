@@ -23,7 +23,7 @@ public class DelegatingFileTest {
 	@Test
 	public void testName() {
 		File mockFile = Mockito.mock(File.class);
-		DelegatingFile delegatingFile = new DelegatingFile(null, mockFile, null, null);
+		DelegatingFile<?, ?, ?> delegatingFile = new TestDelegatingFile(null, mockFile);
 
 		Mockito.when(mockFile.name()).thenReturn("Test");
 		Assert.assertEquals(mockFile.name(), delegatingFile.name());
@@ -34,15 +34,15 @@ public class DelegatingFileTest {
 		Folder mockFolder = Mockito.mock(Folder.class);
 		File mockFile = Mockito.mock(File.class);
 
-		DelegatingFolder delegatingParent = DelegatingFileSystem.withDelegate(mockFolder);
-		DelegatingFile delegatingFile = new DelegatingFile(delegatingParent, mockFile, null, null);
+		TestDelegatingFileSystem delegatingParent = TestDelegatingFileSystem.withRoot(mockFolder);
+		DelegatingFile<?, ?, ?> delegatingFile = new TestDelegatingFile(delegatingParent, mockFile);
 		Assert.assertEquals(delegatingParent, delegatingFile.parent().get());
 	}
 
 	@Test
 	public void testExists() {
 		File mockFile = Mockito.mock(File.class);
-		DelegatingFile delegatingFile = new DelegatingFile(null, mockFile, null, null);
+		DelegatingFile<?, ?, ?> delegatingFile = new TestDelegatingFile(null, mockFile);
 
 		Mockito.when(mockFile.exists()).thenReturn(true);
 		Assert.assertTrue(delegatingFile.exists());
@@ -57,7 +57,7 @@ public class DelegatingFileTest {
 		Instant now = Instant.now();
 
 		Mockito.when(mockFile.lastModified()).thenReturn(now);
-		DelegatingFile delegatingFile = new DelegatingFile(null, mockFile, null, null);
+		DelegatingFile<?, ?, ?> delegatingFile = new TestDelegatingFile(null, mockFile);
 		Assert.assertEquals(now, delegatingFile.lastModified());
 	}
 
@@ -67,7 +67,7 @@ public class DelegatingFileTest {
 		ReadableFile mockReadableFile = Mockito.mock(ReadableFile.class);
 
 		Mockito.when(mockFile.openReadable()).thenReturn(mockReadableFile);
-		DelegatingFile delegatingFile = new DelegatingFile(null, mockFile, DelegatingReadableFile::new, null);
+		DelegatingFile<?, ?, ?> delegatingFile = new TestDelegatingFile(null, mockFile);
 		Assert.assertNotNull(delegatingFile.openReadable());
 	}
 
@@ -77,7 +77,7 @@ public class DelegatingFileTest {
 		WritableFile mockWritableFile = Mockito.mock(WritableFile.class);
 
 		Mockito.when(mockFile.openWritable()).thenReturn(mockWritableFile);
-		DelegatingFile delegatingFile = new DelegatingFile(null, mockFile, null, DelegatingWritableFile::new);
+		DelegatingFile<?, ?, ?> delegatingFile = new TestDelegatingFile(null, mockFile);
 		Assert.assertNotNull(delegatingFile.openWritable());
 	}
 
@@ -85,8 +85,8 @@ public class DelegatingFileTest {
 	public void testMoveTo() {
 		File mockFile1 = Mockito.mock(File.class);
 		File mockFile2 = Mockito.mock(File.class);
-		DelegatingFile delegatingFile1 = new DelegatingFile(null, mockFile1, null, null);
-		DelegatingFile delegatingFile2 = new DelegatingFile(null, mockFile2, null, null);
+		DelegatingFile<?, ?, ?> delegatingFile1 = new TestDelegatingFile(null, mockFile1);
+		DelegatingFile<?, ?, ?> delegatingFile2 = new TestDelegatingFile(null, mockFile2);
 
 		delegatingFile1.moveTo(delegatingFile2);
 		Mockito.verify(mockFile1).moveTo(mockFile2);
@@ -96,7 +96,7 @@ public class DelegatingFileTest {
 	public void testMoveToDestinationFromDifferentLayer() {
 		File mockFile1 = Mockito.mock(File.class);
 		File mockFile2 = Mockito.mock(File.class);
-		DelegatingFile delegatingFile1 = new DelegatingFile(null, mockFile1, null, null);
+		DelegatingFile<?, ?, ?> delegatingFile1 = new TestDelegatingFile(null, mockFile1);
 
 		delegatingFile1.moveTo(mockFile2);
 	}
@@ -105,8 +105,8 @@ public class DelegatingFileTest {
 	public void testCopyTo() {
 		File mockFile1 = Mockito.mock(File.class);
 		File mockFile2 = Mockito.mock(File.class);
-		DelegatingFile delegatingFile1 = new DelegatingFile(null, mockFile1, null, null);
-		DelegatingFile delegatingFile2 = new DelegatingFile(null, mockFile2, null, null);
+		DelegatingFile<?, ?, ?> delegatingFile1 = new TestDelegatingFile(null, mockFile1);
+		DelegatingFile<?, ?, ?> delegatingFile2 = new TestDelegatingFile(null, mockFile2);
 
 		delegatingFile1.copyTo(delegatingFile2);
 		Mockito.verify(mockFile1).copyTo(mockFile2);
@@ -116,7 +116,7 @@ public class DelegatingFileTest {
 	public void testCopyToDestinationFromDifferentLayer() {
 		File mockFile1 = Mockito.mock(File.class);
 		File mockFile2 = Mockito.mock(File.class);
-		DelegatingFile delegatingFile1 = new DelegatingFile(null, mockFile1, null, null);
+		DelegatingFile<?, ?, ?> delegatingFile1 = new TestDelegatingFile(null, mockFile1);
 
 		delegatingFile1.copyTo(mockFile2);
 		Mockito.verify(mockFile1).copyTo(mockFile2);
@@ -128,8 +128,8 @@ public class DelegatingFileTest {
 		File mockFile2 = Mockito.mock(File.class);
 
 		Mockito.when(mockFile1.compareTo(mockFile2)).thenReturn(-1);
-		DelegatingFile delegatingFile1 = new DelegatingFile(null, mockFile1, null, null);
-		DelegatingFile delegatingFile2 = new DelegatingFile(null, mockFile2, null, null);
+		DelegatingFile<?, ?, ?> delegatingFile1 = new TestDelegatingFile(null, mockFile1);
+		DelegatingFile<?, ?, ?> delegatingFile2 = new TestDelegatingFile(null, mockFile2);
 		Assert.assertEquals(-1, delegatingFile1.compareTo(delegatingFile2));
 	}
 
