@@ -2,8 +2,10 @@ package org.cryptomator.filesystem.nio;
 
 import static java.lang.String.format;
 
+import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.Optional;
@@ -91,6 +93,11 @@ class NioFile extends NioNode implements File {
 
 		@Override
 		public void delete() throws UncheckedIOException {
+			try {
+				Files.delete(path);
+			} catch (IOException e) {
+				throw new UncheckedIOException(e);
+			}
 		}
 
 		@Override

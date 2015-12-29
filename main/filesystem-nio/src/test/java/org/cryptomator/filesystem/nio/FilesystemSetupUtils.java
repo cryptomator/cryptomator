@@ -6,6 +6,8 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.FileTime;
+import java.time.Instant;
 
 import org.apache.commons.io.IOUtils;
 
@@ -75,14 +77,24 @@ class FilesystemSetupUtils {
 
 	public static class FolderEntry implements Entry {
 		private Path relativePath;
+		private Instant lastModified;
 
 		public FolderEntry(Path relativePath) {
 			this.relativePath = relativePath;
 		}
 
+		public FolderEntry withLastModified(Instant lastModified) {
+			this.lastModified = lastModified;
+			return this;
+		}
+
 		@Override
 		public void create(Path root) throws IOException {
-			Files.createDirectories(root.resolve(relativePath));
+			Path path = root.resolve(relativePath);
+			Files.createDirectories(path);
+			if (lastModified != null) {
+				Files.setLastModifiedTime(path, FileTime.from(lastModified));
+			}
 		}
 	}
 

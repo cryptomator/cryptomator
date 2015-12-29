@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -69,6 +70,19 @@ class NioFolder extends NioNode implements Folder {
 	}
 
 	@Override
+	public Instant lastModified() throws UncheckedIOException {
+		if (Files.exists(path) && !Files.isDirectory(path)) {
+			throw new UncheckedIOException(new IOException(format("%s is a file", path)));
+		}
+		return super.lastModified();
+	}
+
+	@Override
+	public boolean exists() throws UncheckedIOException {
+		return Files.isDirectory(path);
+	}
+
+	@Override
 	public void moveTo(Folder target) {
 		if (belongsToSameFilesystem(target)) {
 			internalMoveTo((NioFolder) target);
@@ -94,6 +108,9 @@ class NioFolder extends NioNode implements Folder {
 
 	@Override
 	public void delete() {
+		if (!exists()) {
+			return;
+		}
 		fileSystemVisitor() //
 				.forEachFile(NioFolder::deleteFile) //
 				.afterFolder(NioFolder::deleteEmptyFolder) //
