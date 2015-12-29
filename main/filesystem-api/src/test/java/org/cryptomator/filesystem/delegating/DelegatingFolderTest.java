@@ -26,7 +26,7 @@ public class DelegatingFolderTest {
 	@Test
 	public void testName() {
 		Folder mockFolder = Mockito.mock(Folder.class);
-		DelegatingFolder delegatingFolder = new DelegatingFolder(null, mockFolder);
+		DelegatingFolder delegatingFolder = new DelegatingFolder(null, mockFolder, null, null);
 
 		Mockito.when(mockFolder.name()).thenReturn("Test");
 		Assert.assertEquals(mockFolder.name(), delegatingFolder.name());
@@ -37,15 +37,15 @@ public class DelegatingFolderTest {
 		Folder mockFolder1 = Mockito.mock(Folder.class);
 		Folder mockFolder2 = Mockito.mock(Folder.class);
 
-		DelegatingFolder delegatingParent = new DelegatingFileSystem(mockFolder1);
-		DelegatingFolder delegatingFolder = new DelegatingFolder(delegatingParent, mockFolder2);
+		DelegatingFolder delegatingParent = DelegatingFileSystem.withDelegate(mockFolder1);
+		DelegatingFolder delegatingFolder = new DelegatingFolder(delegatingParent, mockFolder2, null, null);
 		Assert.assertEquals(delegatingParent, delegatingFolder.parent().get());
 	}
 
 	@Test
 	public void testExists() {
 		Folder mockFolder = Mockito.mock(Folder.class);
-		DelegatingFolder delegatingFolder = new DelegatingFolder(null, mockFolder);
+		DelegatingFolder delegatingFolder = new DelegatingFolder(null, mockFolder, null, null);
 
 		Mockito.when(mockFolder.exists()).thenReturn(true);
 		Assert.assertTrue(delegatingFolder.exists());
@@ -60,19 +60,19 @@ public class DelegatingFolderTest {
 		Instant now = Instant.now();
 
 		Mockito.when(mockFolder.lastModified()).thenReturn(now);
-		DelegatingFolder delegatingFolder = new DelegatingFolder(null, mockFolder);
+		DelegatingFolder delegatingFolder = new DelegatingFolder(null, mockFolder, null, null);
 		Assert.assertEquals(now, delegatingFolder.lastModified());
 	}
 
 	@Test
 	public void testChildren() {
 		Folder mockFolder = Mockito.mock(Folder.class);
-		DelegatingFolder delegatingFolder = new DelegatingFolder(null, mockFolder);
+		DelegatingFolder delegatingFolder = DelegatingFileSystem.withDelegate(mockFolder);
 
 		Folder subFolder1 = Mockito.mock(Folder.class);
-		DelegatingFolder delegatingSubFolder1 = new DelegatingFolder(delegatingFolder, subFolder1);
+		DelegatingFolder delegatingSubFolder1 = new DelegatingFolder(delegatingFolder, subFolder1, null, null);
 		File subFile1 = Mockito.mock(File.class);
-		DelegatingFile delegatingSubFile1 = new DelegatingFile(delegatingFolder, subFile1);
+		DelegatingFile delegatingSubFile1 = new DelegatingFile(delegatingFolder, subFile1, null, null);
 
 		/* folders */
 		Mockito.when(mockFolder.folder("subFolder1")).thenReturn(subFolder1);
@@ -105,8 +105,8 @@ public class DelegatingFolderTest {
 	public void testMoveTo() {
 		Folder mockFolder1 = Mockito.mock(Folder.class);
 		Folder mockFolder2 = Mockito.mock(Folder.class);
-		DelegatingFolder delegatingFolder1 = new DelegatingFolder(null, mockFolder1);
-		DelegatingFolder delegatingFolder2 = new DelegatingFolder(null, mockFolder2);
+		DelegatingFolder delegatingFolder1 = new DelegatingFolder(null, mockFolder1, null, null);
+		DelegatingFolder delegatingFolder2 = new DelegatingFolder(null, mockFolder2, null, null);
 
 		delegatingFolder1.moveTo(delegatingFolder2);
 		Mockito.verify(mockFolder1).moveTo(mockFolder2);
@@ -116,7 +116,7 @@ public class DelegatingFolderTest {
 	public void testMoveToDestinationFromDifferentLayer() {
 		Folder mockFolder1 = Mockito.mock(Folder.class);
 		Folder mockFolder2 = Mockito.mock(Folder.class);
-		DelegatingFolder delegatingFolder1 = new DelegatingFolder(null, mockFolder1);
+		DelegatingFolder delegatingFolder1 = new DelegatingFolder(null, mockFolder1, null, null);
 
 		delegatingFolder1.moveTo(mockFolder2);
 	}
@@ -125,8 +125,8 @@ public class DelegatingFolderTest {
 	public void testCopyTo() {
 		Folder mockFolder1 = Mockito.mock(Folder.class);
 		Folder mockFolder2 = Mockito.mock(Folder.class);
-		DelegatingFolder delegatingFolder1 = new DelegatingFolder(null, mockFolder1);
-		DelegatingFolder delegatingFolder2 = new DelegatingFolder(null, mockFolder2);
+		DelegatingFolder delegatingFolder1 = new DelegatingFolder(null, mockFolder1, null, null);
+		DelegatingFolder delegatingFolder2 = new DelegatingFolder(null, mockFolder2, null, null);
 
 		delegatingFolder1.copyTo(delegatingFolder2);
 		Mockito.verify(mockFolder1).copyTo(mockFolder2);
@@ -136,7 +136,7 @@ public class DelegatingFolderTest {
 	public void testCopyToDestinationFromDifferentLayer() {
 		Folder mockFolder1 = Mockito.mock(Folder.class);
 		Folder mockFolder2 = Mockito.mock(Folder.class);
-		DelegatingFolder delegatingFolder1 = new DelegatingFolder(null, mockFolder1);
+		DelegatingFolder delegatingFolder1 = new DelegatingFolder(null, mockFolder1, null, null);
 
 		delegatingFolder1.copyTo(mockFolder2);
 		Mockito.verify(mockFolder1).copyTo(mockFolder2);
@@ -145,7 +145,7 @@ public class DelegatingFolderTest {
 	@Test
 	public void testCreate() {
 		Folder mockFolder = Mockito.mock(Folder.class);
-		DelegatingFolder delegatingFolder = new DelegatingFolder(null, mockFolder);
+		DelegatingFolder delegatingFolder = new DelegatingFolder(null, mockFolder, null, null);
 
 		delegatingFolder.create();
 		Mockito.verify(mockFolder).create();
@@ -154,7 +154,7 @@ public class DelegatingFolderTest {
 	@Test
 	public void testDelete() {
 		Folder mockFolder = Mockito.mock(Folder.class);
-		DelegatingFolder delegatingFolder = new DelegatingFolder(null, mockFolder);
+		DelegatingFolder delegatingFolder = new DelegatingFolder(null, mockFolder, null, null);
 
 		delegatingFolder.delete();
 		Mockito.verify(mockFolder).delete();

@@ -9,23 +9,31 @@
 package org.cryptomator.filesystem.delegating;
 
 import java.io.UncheckedIOException;
+import java.util.function.Function;
 
 import org.cryptomator.filesystem.File;
+import org.cryptomator.filesystem.ReadableFile;
+import org.cryptomator.filesystem.WritableFile;
 
 public class DelegatingFile extends DelegatingNode<File>implements File {
 
-	public DelegatingFile(DelegatingFolder parent, File delegate) {
+	private final Function<ReadableFile, DelegatingReadableFile> readableFileFactory;
+	private final Function<WritableFile, DelegatingWritableFile> writableFileFactory;
+
+	public DelegatingFile(DelegatingFolder parent, File delegate, Function<ReadableFile, DelegatingReadableFile> readableFileFactory, Function<WritableFile, DelegatingWritableFile> writableFileFactory) {
 		super(parent, delegate);
+		this.readableFileFactory = readableFileFactory;
+		this.writableFileFactory = writableFileFactory;
 	}
 
 	@Override
 	public DelegatingReadableFile openReadable() throws UncheckedIOException {
-		return new DelegatingReadableFile(delegate.openReadable());
+		return readableFileFactory.apply(delegate.openReadable());
 	}
 
 	@Override
 	public DelegatingWritableFile openWritable() throws UncheckedIOException {
-		return new DelegatingWritableFile(delegate.openWritable());
+		return writableFileFactory.apply(delegate.openWritable());
 	}
 
 	@Override

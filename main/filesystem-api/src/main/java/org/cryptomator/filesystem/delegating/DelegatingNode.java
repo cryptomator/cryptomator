@@ -14,9 +14,9 @@ import java.util.Optional;
 
 import org.cryptomator.filesystem.Node;
 
-class DelegatingNode<T extends Node> implements Node {
+abstract class DelegatingNode<T extends Node> implements Node {
 
-	protected final DelegatingFolder parent;
+	private final DelegatingFolder parent;
 	protected final T delegate;
 
 	public DelegatingNode(DelegatingFolder parent, T delegate) {
@@ -28,13 +28,13 @@ class DelegatingNode<T extends Node> implements Node {
 	}
 
 	@Override
-	public String name() throws UncheckedIOException {
-		return delegate.name();
+	public Optional<DelegatingFolder> parent() throws UncheckedIOException {
+		return Optional.ofNullable(parent);
 	}
 
 	@Override
-	public Optional<DelegatingFolder> parent() throws UncheckedIOException {
-		return Optional.ofNullable(parent);
+	public String name() throws UncheckedIOException {
+		return delegate.name();
 	}
 
 	@Override

@@ -9,6 +9,7 @@
 package org.cryptomator.filesystem.delegating;
 
 import java.io.UncheckedIOException;
+import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
 import org.cryptomator.filesystem.File;
@@ -16,8 +17,13 @@ import org.cryptomator.filesystem.Folder;
 
 public class DelegatingFolder extends DelegatingNode<Folder>implements Folder {
 
-	public DelegatingFolder(DelegatingFolder parent, Folder delegate) {
+	private final BiFunction<DelegatingFolder, Folder, DelegatingFolder> folderFactory;
+	private final BiFunction<DelegatingFolder, File, DelegatingFile> fileFactory;
+
+	public DelegatingFolder(DelegatingFolder parent, Folder delegate, BiFunction<DelegatingFolder, Folder, DelegatingFolder> folderFactory, BiFunction<DelegatingFolder, File, DelegatingFile> fileFactory) {
 		super(parent, delegate);
+		this.folderFactory = folderFactory;
+		this.fileFactory = fileFactory;
 	}
 
 	@Override
@@ -41,7 +47,7 @@ public class DelegatingFolder extends DelegatingNode<Folder>implements Folder {
 	}
 
 	private DelegatingFile file(File delegate) {
-		return new DelegatingFile(this, delegate);
+		return fileFactory.apply(this, delegate);
 	}
 
 	@Override
@@ -50,7 +56,7 @@ public class DelegatingFolder extends DelegatingNode<Folder>implements Folder {
 	}
 
 	private DelegatingFolder folder(Folder delegate) {
-		return new DelegatingFolder(this, delegate);
+		return folderFactory.apply(this, delegate);
 	}
 
 	@Override
