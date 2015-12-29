@@ -19,16 +19,16 @@ public final class DirectoryPrinter {
 
 	public static String print(Folder rootFolder) {
 		StringBuilder result = new StringBuilder();
-		StringBuilder identation = new StringBuilder();
+		StringBuilder indentation = new StringBuilder();
 		fileSystemVisitor() //
 				.beforeFolder(folder -> {
-					result.append(identation).append(folder.name()).append("/\n");
-					identation.append("  ");
+					result.append(indentation).append(folder.name()).append("/\n");
+					indentation.append("  ");
 				}) //
 				.afterFolder(folder -> {
-					identation.delete(identation.length() - 2, identation.length());
+					indentation.delete(indentation.length() - 2, indentation.length());
 				}).forEachFile(file -> {
-					result.append(identation).append(file.name()).append('\n');
+					result.append(indentation).append(file.name()).append('\n');
 				}) //
 				.visit(rootFolder);
 		return result.toString();
