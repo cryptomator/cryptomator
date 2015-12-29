@@ -31,7 +31,7 @@ public final class ByteBuffers {
 		final ByteBuffer tmp = source.asReadOnlyBuffer();
 		tmp.limit(tmp.position() + numBytes);
 		destination.put(tmp);
-		source.position(tmp.position());
+		source.position(tmp.position()); // until now only tmp pos has been incremented, so we need to adjust the position
 		return numBytes;
 	}
 

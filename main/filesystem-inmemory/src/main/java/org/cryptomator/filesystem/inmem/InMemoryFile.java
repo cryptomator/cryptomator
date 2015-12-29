@@ -13,16 +13,17 @@ import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 import java.time.Instant;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 
 import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.ReadableFile;
 import org.cryptomator.filesystem.WritableFile;
-import org.cryptomator.io.ByteBuffers;
 
-class InMemoryFile extends InMemoryNode implements File, ReadableFile, WritableFile {
+class InMemoryFile extends InMemoryNode implements File {
 
 	private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
-	private ByteBuffer content = ByteBuffer.wrap(new byte[0]);
+	private ByteBuffer content = ByteBuffer.allocate(0);
 
 	public InMemoryFile(InMemoryFolder parent, String name, Instant lastModified) {
 		super(parent, name, lastModified);
@@ -33,14 +34,15 @@ class InMemoryFile extends InMemoryNode implements File, ReadableFile, WritableF
 		if (!exists()) {
 			throw new UncheckedIOException(new FileNotFoundException(this.name() + " does not exist"));
 		}
-		lock.readLock().lock();
-		content.rewind();
-		return this;
+		final ReadLock readLock = lock.readLock();
+		readLock.lock();
+		return new InMemoryReadableFile(this::getContent, readLock);
 	}
 
 	@Override
 	public WritableFile openWritable() {
-		lock.writeLock().lock();
+		final WriteLock writeLock = lock.writeLock();
+		writeLock.lock();
 		final InMemoryFolder parent = parent().get();
 		parent.children.compute(this.name(), (k, v) -> {
 			if (v != null && v != this) {
@@ -48,92 +50,28 @@ class InMemoryFile extends InMemoryNode implements File, ReadableFile, WritableF
 			}
 			return this;
 		});
-		return this;
+		return new InMemoryWritableFile(this::setLastModified, this::getContent, this::setContent, this::delete, writeLock);
 	}
 
-	@Override
-	public void position(long position) throws UncheckedIOException {
-		content.position((int) position);
+	private void setLastModified(Instant lastModified) {
+		this.lastModified = lastModified;
 	}
 
-	@Override
-	public int read(ByteBuffer target) {
-		if (content.hasRemaining()) {
-			return ByteBuffers.copy(content, target);
-		} else {
-			return -1;
-		}
+	private ByteBuffer getContent() {
+		return content;
 	}
 
-	@Override
-	public int write(ByteBuffer source) {
-		assert content != null;
-		final int initialContentPosition = content.position();
-		expandContentCapacityIfRequired(initialContentPosition + source.remaining());
-		content.position(initialContentPosition);
-		assert content.remaining() >= source.remaining();
-		content.put(source);
-		return content.position() - initialContentPosition;
+	private void setContent(ByteBuffer content) {
+		this.content = content;
 	}
 
-	private void expandContentCapacityIfRequired(int requiredCapacity) {
-		if (requiredCapacity > content.capacity()) {
-			final int currentPos = content.position();
-			final ByteBuffer tmp = ByteBuffer.allocate(requiredCapacity);
-			content.rewind();
-			ByteBuffers.copy(content, tmp);
-			content = tmp;
-			content.position(currentPos);
-		}
-	}
-
-	@Override
-	public void setLastModified(Instant instant) {
-		this.lastModified = instant;
-	}
-
-	@Override
-	public void truncate() {
-		content = ByteBuffer.wrap(new byte[0]);
-	}
-
-	@Override
-	public void copyTo(WritableFile other) {
-		content.rewind();
-		other.truncate();
-		other.write(content);
-	}
-
-	@Override
-	public void moveTo(WritableFile other) {
-		this.copyTo(other);
-		this.delete();
-	}
-
-	@Override
-	public void delete() {
+	private void delete(Void param) {
 		final InMemoryFolder parent = parent().get();
 		parent.children.computeIfPresent(this.name(), (k, v) -> {
-			truncate();
 			// returning null removes the entry.
 			return null;
 		});
 		assert!this.exists();
-	}
-
-	@Override
-	public boolean isOpen() {
-		return lock.isWriteLockedByCurrentThread() || lock.getReadHoldCount() > 0;
-	}
-
-	@Override
-	public void close() {
-		if (lock.isWriteLockedByCurrentThread()) {
-			this.setLastModified(Instant.now());
-			lock.writeLock().unlock();
-		} else if (lock.getReadHoldCount() > 0) {
-			lock.readLock().unlock();
-		}
 	}
 
 	@Override
