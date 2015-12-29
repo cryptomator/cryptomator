@@ -14,13 +14,13 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Supplier;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import javax.security.auth.DestroyFailedException;
 import javax.security.auth.Destroyable;
 
+import org.cryptomator.common.LazyInitializer;
 import org.cryptomator.crypto.engine.Cryptor;
 import org.cryptomator.crypto.engine.FileContentCryptor;
 import org.cryptomator.crypto.engine.FilenameCryptor;
@@ -67,7 +67,7 @@ public class CryptorImpl implements Cryptor {
 	@Override
 	public FilenameCryptor getFilenameCryptor() {
 		assertKeysExist();
-		return initializeLazily(filenameCryptor, () -> {
+		return LazyInitializer.initializeLazily(filenameCryptor, () -> {
 			return new FilenameCryptorImpl(encryptionKey, macKey);
 		});
 	}
@@ -75,26 +75,9 @@ public class CryptorImpl implements Cryptor {
 	@Override
 	public FileContentCryptor getFileContentCryptor() {
 		assertKeysExist();
-		return initializeLazily(fileContentCryptor, () -> {
+		return LazyInitializer.initializeLazily(fileContentCryptor, () -> {
 			return new FileContentCryptorImpl(encryptionKey, macKey, randomSource);
 		});
-	}
-
-	/**
-	 * threadsafe lazy initialization pattern as proposed on http://stackoverflow.com/a/30247202/4014509
-	 */
-	private <T> T initializeLazily(AtomicReference<T> reference, Supplier<T> factory) {
-		final T existingInstance = reference.get();
-		if (existingInstance != null) {
-			return existingInstance;
-		} else {
-			final T newInstance = factory.get();
-			if (reference.compareAndSet(null, newInstance)) {
-				return newInstance;
-			} else {
-				return reference.get();
-			}
-		}
 	}
 
 	private void assertKeysExist() {

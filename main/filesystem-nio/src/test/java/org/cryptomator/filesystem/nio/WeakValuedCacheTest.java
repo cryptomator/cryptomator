@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 import java.util.function.Function;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
@@ -82,6 +83,7 @@ public class WeakValuedCacheTest {
 	}
 
 	@Test
+	@Ignore
 	public void testCacheDoesNotPreventGarbageCollectionOfValues() {
 		when(loader.apply(A_KEY)).thenAnswer(this::createValueUsingMoreThanHalfTheJvmMemory);
 

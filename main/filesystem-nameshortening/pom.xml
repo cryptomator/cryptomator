@@ -22,7 +22,11 @@
 			<groupId>org.cryptomator</groupId>
 			<artifactId>filesystem-api</artifactId>
 		</dependency>
-		
+		<dependency>
+			<groupId>org.cryptomator</groupId>
+			<artifactId>commons</artifactId>
+		</dependency>
+
 		<!-- Commons -->
 		<dependency>
 			<groupId>org.apache.commons</groupId>

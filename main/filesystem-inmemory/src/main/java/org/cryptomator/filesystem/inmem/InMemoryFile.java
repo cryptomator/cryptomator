@@ -58,7 +58,11 @@ class InMemoryFile extends InMemoryNode implements File, ReadableFile, WritableF
 
 	@Override
 	public int read(ByteBuffer target) {
-		return ByteBuffers.copy(content, target);
+		if (content.hasRemaining()) {
+			return ByteBuffers.copy(content, target);
+		} else {
+			return -1;
+		}
 	}
 
 	@Override
@@ -114,7 +118,7 @@ class InMemoryFile extends InMemoryNode implements File, ReadableFile, WritableF
 			// returning null removes the entry.
 			return null;
 		});
-		assert !this.exists();
+		assert!this.exists();
 	}
 
 	@Override

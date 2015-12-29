@@ -4,6 +4,7 @@ import static org.cryptomator.filesystem.FileSystemVisitor.fileSystemVisitor;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.function.Predicate;
 
 import org.cryptomator.crypto.engine.Cryptor;
 import org.cryptomator.crypto.engine.impl.TestCryptorImplFactory;
@@ -13,20 +14,23 @@ import org.cryptomator.filesystem.Folder;
 import org.cryptomator.filesystem.Node;
 import org.cryptomator.filesystem.ReadableFile;
 import org.cryptomator.filesystem.WritableFile;
+import org.cryptomator.filesystem.blacklisting.BlacklistingFileSystem;
 import org.cryptomator.filesystem.inmem.InMemoryFileSystem;
-import org.cryptomator.shortening.ShorteningFileSystem;
+import org.cryptomator.filesystem.shortening.ShorteningFileSystem;
 import org.junit.Assert;
 import org.junit.Test;
 
 public class EncryptAndShortenIntegrationTest {
 
-	// private static final Logger LOG =
-	// LoggerFactory.getLogger(EncryptAndShortenIntegrationTest.class);
+	// private static final Logger LOG = LoggerFactory.getLogger(EncryptAndShortenIntegrationTest.class);
 
 	@Test
 	public void testEncryptionOfLongFolderNames() {
 		final FileSystem physicalFs = new InMemoryFileSystem();
-		final FileSystem shorteningFs = new ShorteningFileSystem(physicalFs, physicalFs.folder("m"), 70);
+		final Predicate<Node> isMetadataFolder = (Node node) -> node.equals(physicalFs.folder("m"));
+		final FileSystem metadataHidingFs = new BlacklistingFileSystem(physicalFs, isMetadataFolder);
+		final FileSystem shorteningFs = new ShorteningFileSystem(metadataHidingFs, physicalFs.folder("m"), 70);
+
 		final Cryptor cryptor = TestCryptorImplFactory.insecureCryptorImpl();
 		cryptor.randomizeMasterkey();
 		final FileSystem fs = new CryptoFileSystem(shorteningFs, cryptor, "foo");
@@ -36,24 +40,27 @@ public class EncryptAndShortenIntegrationTest {
 		final Folder longFolder = fs.folder("this will be a long filename after encryption");
 		longFolder.create();
 
+		// on the first (physical) layer all files including metadata files are visible:
 		// the long name will produce a metadata file on the physical layer:
-		// LOG.debug("Physical file system:\n" +
-		// DirectoryPrinter.print(physicalFs));
+		// LOG.debug("Physical file system:\n" + DirectoryPrinter.print(physicalFs));
 		Assert.assertEquals(1, physicalFs.folder("m").folders().count());
+		Assert.assertTrue(physicalFs.folder("m").exists());
 
-		// on the second layer all .lng files are resolved to their actual
-		// names:
-		// LOG.debug("Unlimited filename length:\n" +
-		// DirectoryPrinter.print(shorteningFs));
+		// on the second (blacklisting) layer we hide the metadata folder:
+		// LOG.debug("Filtered files:\n" + DirectoryPrinter.print(metadataHidingFs));
+		Assert.assertEquals(1, metadataHidingFs.folders().count()); // only "d", no "m".
+
+		// on the third layer all .lng files are resolved to their actual names:
+		// LOG.debug("Unlimited filename length:\n" + DirectoryPrinter.print(shorteningFs));
 		fileSystemVisitor() //
 				.forEachNode(node -> {
 					Assert.assertFalse(node.name().endsWith(".lng"));
 				}) //
 				.visit(shorteningFs);
-		// on the third (cleartext layer) we have cleartext names on the root
-		// level:
+
+		// on the fourth (cleartext) layer we have cleartext names on the root level:
 		// LOG.debug("Cleartext files:\n" + DirectoryPrinter.print(fs));
-		Assert.assertArrayEquals(new String[] { "normal folder name", "this will be a long filename after encryption" }, fs.folders().map(Node::name).sorted().toArray());
+		Assert.assertArrayEquals(new String[] {"normal folder name", "this will be a long filename after encryption"}, fs.folders().map(Node::name).sorted().toArray());
 	}
 
 	@Test

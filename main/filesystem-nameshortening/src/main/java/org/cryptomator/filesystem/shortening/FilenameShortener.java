@@ -1,18 +1,20 @@
-package org.cryptomator.shortening;
+package org.cryptomator.filesystem.shortening;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.Reader;
 import java.io.UncheckedIOException;
-import java.nio.ByteBuffer;
+import java.io.Writer;
+import java.nio.channels.Channels;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 import org.apache.commons.codec.binary.Base32;
 import org.apache.commons.codec.binary.BaseNCodec;
+import org.apache.commons.io.IOUtils;
 import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.Folder;
-import org.cryptomator.filesystem.ReadableFile;
-import org.cryptomator.filesystem.WritableFile;
 
 class FilenameShortener {
 
@@ -53,8 +55,10 @@ class FilenameShortener {
 		final File mappingFile = mappingFile(shortName);
 		if (!mappingFile.exists()) {
 			mappingFile.parent().get().create();
-			try (WritableFile writable = mappingFile.openWritable()) {
-				writable.write(ByteBuffer.wrap(longName.getBytes(StandardCharsets.UTF_8)));
+			try (Writer writer = Channels.newWriter(mappingFile.openWritable(), StandardCharsets.UTF_8.newEncoder(), -1)) {
+				writer.write(longName);
+			} catch (IOException e) {
+				throw new UncheckedIOException(e);
 			}
 		}
 	}
@@ -69,14 +73,10 @@ class FilenameShortener {
 		if (!mappingFile.exists()) {
 			throw new UncheckedIOException(new FileNotFoundException("Mapping file not found " + mappingFile));
 		} else {
-			try (ReadableFile readable = mappingFile.openReadable()) {
-				// TODO buffer might be to small
-				final ByteBuffer buf = ByteBuffer.allocate(1024);
-				readable.read(buf);
-				buf.flip();
-				final byte[] bytes = new byte[buf.remaining()];
-				buf.get(bytes);
-				return new String(bytes, StandardCharsets.UTF_8);
+			try (Reader reader = Channels.newReader(mappingFile.openReadable(), StandardCharsets.UTF_8.newDecoder(), -1)) {
+				return IOUtils.toString(reader);
+			} catch (IOException e) {
+				throw new UncheckedIOException(e);
 			}
 		}
 	}

@@ -1,4 +1,4 @@
-package org.cryptomator.shortening;
+package org.cryptomator.filesystem.shortening;
 
 import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
@@ -17,21 +17,12 @@ import org.junit.Test;
 public class ShorteningFileSystemTest {
 
 	@Test
-	public void testCreationOfInvisibleMetadataFolder() {
+	public void testImplicitCreationOfMetadataFolder() {
 		final FileSystem underlyingFs = new InMemoryFileSystem();
 		final Folder metadataRoot = underlyingFs.folder("m");
 		final FileSystem fs = new ShorteningFileSystem(underlyingFs, metadataRoot, 10);
 		fs.folder("morethantenchars").create();
 		Assert.assertTrue(metadataRoot.exists());
-		Assert.assertEquals(1, fs.folders().count());
-	}
-
-	@Test(expected = UncheckedIOException.class)
-	public void testPreventCreationOfMetadataFolder() {
-		final FileSystem underlyingFs = new InMemoryFileSystem();
-		final Folder metadataRoot = underlyingFs.folder("m");
-		final FileSystem fs = new ShorteningFileSystem(underlyingFs, metadataRoot, 10);
-		fs.folder("m");
 	}
 
 	@Test
