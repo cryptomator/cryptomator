@@ -1,4 +1,4 @@
-package org.cryptomator.crypto.fs;
+package org.cryptomator.filesystem.crypto;
 
 import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;

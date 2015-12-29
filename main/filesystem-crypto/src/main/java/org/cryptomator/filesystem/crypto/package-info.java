@@ -11,4 +11,4 @@
  * While the implementation in this package dictates the Vault directory layout, no encryption code can be found here.
  * All cryptographic operations are delegated to the {@link org.cryptomator.crypto.engine CryptoEngine}.
  */
-package org.cryptomator.crypto.fs;
+package org.cryptomator.filesystem.crypto;

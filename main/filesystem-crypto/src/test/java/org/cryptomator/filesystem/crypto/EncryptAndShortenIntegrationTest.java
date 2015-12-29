@@ -1,4 +1,4 @@
-package org.cryptomator.crypto.fs;
+package org.cryptomator.filesystem.crypto;
 
 import static org.cryptomator.filesystem.FileSystemVisitor.fileSystemVisitor;
 

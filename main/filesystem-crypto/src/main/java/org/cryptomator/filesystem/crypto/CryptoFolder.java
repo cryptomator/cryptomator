@@ -6,7 +6,7 @@
  * Contributors:
  *     Sebastian Stenzel - initial API and implementation
  *******************************************************************************/
-package org.cryptomator.crypto.fs;
+package org.cryptomator.filesystem.crypto;
 
 import java.nio.ByteBuffer;
 import java.time.Instant;
