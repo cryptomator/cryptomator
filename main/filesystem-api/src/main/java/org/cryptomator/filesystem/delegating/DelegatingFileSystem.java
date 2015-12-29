@@ -6,14 +6,15 @@
  * Contributors:
  *     Sebastian Stenzel - initial API and implementation
  *******************************************************************************/
-package org.cryptomator.filesystem;
+package org.cryptomator.filesystem.delegating;
 
-class Mover {
+import org.cryptomator.filesystem.FileSystem;
+import org.cryptomator.filesystem.Folder;
 
-	public static void move(File source, File destination) {
-		try (OpenFiles openFiles = DeadlockSafeFileOpener.withWritable(source).andWritable(destination).open()) {
-			openFiles.writable(source).moveTo(openFiles.writable(destination));
-		}
+public class DelegatingFileSystem extends DelegatingFolder implements FileSystem {
+
+	public DelegatingFileSystem(Folder delegate) {
+		super(null, delegate);
 	}
 
 }
