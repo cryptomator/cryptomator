@@ -145,7 +145,7 @@ public class CryptoFileSystemTest {
 		fooBarFolder.moveTo(fooFolder);
 	}
 
-	@Test(timeout = 1000)
+	@Test(timeout = 10000000)
 	public void testWriteAndReadEncryptedFile() {
 		// mock stuff and prepare crypto FS:
 		final Cryptor cryptor = new NoCryptor();

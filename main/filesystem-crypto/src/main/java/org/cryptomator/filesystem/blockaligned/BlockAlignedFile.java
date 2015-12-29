@@ -21,7 +21,7 @@ class BlockAlignedFile extends DelegatingFile<BlockAlignedReadableFile, BlockAli
 
 	@Override
 	public BlockAlignedWritableFile openWritable() throws UncheckedIOException {
-		return new BlockAlignedWritableFile(delegate.openWritable(), blockSize);
+		return new BlockAlignedWritableFile(delegate.openWritable(), delegate.openReadable(), blockSize);
 	}
 
 }
