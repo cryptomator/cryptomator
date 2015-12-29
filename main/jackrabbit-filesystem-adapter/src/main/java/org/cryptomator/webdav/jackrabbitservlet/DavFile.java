@@ -6,7 +6,7 @@
  * Contributors:
  *     Sebastian Stenzel - initial API and implementation
  *******************************************************************************/
-package org.cryptomator.webdav.jackrabbit;
+package org.cryptomator.webdav.jackrabbitservlet;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -24,7 +24,7 @@ import org.apache.jackrabbit.webdav.lock.LockManager;
 import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.ReadableFile;
 import org.cryptomator.filesystem.WritableFile;
-import org.cryptomator.webdav.jackrabbit.DavPathFactory.DavPath;
+import org.cryptomator.webdav.jackrabbitservlet.DavPathFactory.DavPath;
 
 class DavFile extends DavNode<File> {
 

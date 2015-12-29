@@ -6,7 +6,7 @@
  * Contributors:
  *     Sebastian Stenzel - initial API and implementation
  *******************************************************************************/
-package org.cryptomator.webdav.jackrabbit;
+package org.cryptomator.webdav.jackrabbitservlet;
 
 import java.io.UncheckedIOException;
 import java.time.Instant;
@@ -30,7 +30,7 @@ import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
 import org.apache.jackrabbit.webdav.property.DavPropertySet;
 import org.apache.jackrabbit.webdav.property.PropEntry;
 import org.cryptomator.filesystem.Node;
-import org.cryptomator.webdav.jackrabbit.DavPathFactory.DavPath;
+import org.cryptomator.webdav.jackrabbitservlet.DavPathFactory.DavPath;
 
 abstract class DavNode<T extends Node> implements DavResource {
 
