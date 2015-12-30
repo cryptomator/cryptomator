@@ -1,5 +1,6 @@
 package org.cryptomator.filesystem.nio;
 
+import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 import static org.cryptomator.common.test.matcher.ContainsMatcher.containsInAnyOrder;
 import static org.cryptomator.common.test.matcher.OptionalMatcher.presentOptionalWithValueThat;
@@ -397,9 +398,9 @@ public class NioFolderTest {
 				folder("folderToMove"), //
 				folder("folderToMove/subfolder1"), //
 				folder("folderToMove/subfolder2"), //
-				file("folderToMove/subfolder1/file1"), //
-				file("folderToMove/file2"), //
-				file("folderToMove/file3"));
+				file("folderToMove/subfolder1/file1").withData("dataOfFile1"), //
+				file("folderToMove/file2").withData("dataOfFile2"), //
+				file("folderToMove/file3").withData("dataOfFile3"));
 		NioFileSystem fileSystem = NioFileSystem.rootedAt(filesystemPath);
 		Folder folderToMove = fileSystem.folder("folderToMove");
 		Folder folderToMoveTo = fileSystem.folder("folderToMoveTo");
@@ -410,19 +411,69 @@ public class NioFolderTest {
 		assertThat(filesystemPath.resolve("folderToMoveTo"), isDirectory());
 		assertThat(filesystemPath.resolve("folderToMoveTo/subfolder1"), isDirectory());
 		assertThat(filesystemPath.resolve("folderToMoveTo/subfolder2"), isDirectory());
-		assertThat(filesystemPath.resolve("folderToMoveTo/subfolder1/file1"), isFile());
-		assertThat(filesystemPath.resolve("folderToMoveTo/file2"), isFile());
-		assertThat(filesystemPath.resolve("folderToMoveTo/file3"), isFile());
+		assertThat(filesystemPath.resolve("folderToMoveTo/subfolder1/file1"), isFile().withContent("dataOfFile1"));
+		assertThat(filesystemPath.resolve("folderToMoveTo/file2"), isFile().withContent("dataOfFile2"));
+		assertThat(filesystemPath.resolve("folderToMoveTo/file3"), isFile().withContent("dataOfFile3"));
 	}
 
 	@Test
 	public void testMoveToOfFolderToExistingFolderReplacesTargetFolder() throws IOException {
-		// TODO Markus Kreusch implement test
+		Path filesystemPath = testFilesystem( //
+				folder("folderToMove"), //
+				file("folderToMove/file1").withData("dataOfFile1"), //
+				file("folderToMove/file2").withData("dataOfFile2"), //
+				folder("folderToMoveTo"), //
+				file("folderToMoveTo/file1").withData("wrongDataOfFile1"), //
+				file("folderToMoveTo/fileWhichShouldNotExistAfterMove"));
+		NioFileSystem fileSystem = NioFileSystem.rootedAt(filesystemPath);
+		Folder folderToMove = fileSystem.folder("folderToMove");
+		Folder folderToMoveTo = fileSystem.folder("folderToMoveTo");
+
+		folderToMove.moveTo(folderToMoveTo);
+
+		assertThat(filesystemPath.resolve("folderToMove"), doesNotExist());
+		assertThat(filesystemPath.resolve("folderToMoveTo"), isDirectory());
+		assertThat(filesystemPath.resolve("folderToMoveTo/file1"), isFile().withContent("dataOfFile1"));
+		assertThat(filesystemPath.resolve("folderToMoveTo/file2"), isFile().withContent("dataOfFile2"));
+		assertThat(filesystemPath.resolve("folderToMoveTo/fileWhichShouldNotExistAfterMove"), doesNotExist());
 	}
 
 	@Test
 	public void testMoveToOfFolderToExistingFileThrowsUncheckedIOExceptionWithAbsolutePathOfTarget() throws IOException {
-		// TODO Markus Kreusch implement test
+		Path filesystemPath = testFilesystem( //
+				folder("folderToMove"), //
+				file("folderToMoveTo"));
+		FileSystem fileSystem = NioFileSystem.rootedAt(filesystemPath);
+		Folder folderToMove = fileSystem.folder("folderToMove");
+		Folder folderToMoveTo = fileSystem.folder("folderToMoveTo");
+
+		thrown.expect(UncheckedIOException.class);
+		thrown.expectMessage(filesystemPath.resolve("folderToMoveTo").toString());
+
+		folderToMove.moveTo(folderToMoveTo);
+	}
+
+	@Test
+	public void testMoveToOfFolderToFolderOfAnotherFileSystemDoesNothingAndhrowsIllegalArgumentException() throws IOException {
+		Path filesystemPath = testFilesystem(folder("folderToMove"));
+		Folder folderToMove = NioFileSystem.rootedAt(filesystemPath).folder("folderToMove");
+		Folder folderToMoveTo = NioFileSystem.rootedAt(filesystemPath).folder("folderToMoveTo");
+
+		thrown.expect(IllegalArgumentException.class);
+
+		folderToMove.moveTo(folderToMoveTo);
+
+		assertThat(filesystemPath.resolve("folderToMove"), isDirectory());
+		assertThat(filesystemPath.resolve("folderToMoveTo"), doesNotExist());
+	}
+
+	@Test
+	public void testToString() {
+		Path filesystemPath = emptyFilesystem();
+		Path pathOfFolder = filesystemPath.resolve("aFolder").toAbsolutePath();
+		Folder folder = NioFileSystem.rootedAt(filesystemPath).folder("aFolder");
+
+		assertThat(folder.toString(), is(format("NioFolder(%s)", pathOfFolder)));
 	}
 
 }

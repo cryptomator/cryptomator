@@ -41,6 +41,11 @@ class NioFile extends NioNode implements File {
 		return new WritableView();
 	}
 
+	@Override
+	public boolean exists() throws UncheckedIOException {
+		return false;
+	}
+
 	private class ReadableView implements ReadableFile {
 
 		@Override

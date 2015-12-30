@@ -10,7 +10,7 @@ import java.util.Optional;
 import org.cryptomator.filesystem.Folder;
 import org.cryptomator.filesystem.Node;
 
-class NioNode implements Node {
+abstract class NioNode implements Node {
 
 	protected final Optional<NioFolder> parent;
 	protected final Path path;
@@ -44,11 +44,6 @@ class NioNode implements Node {
 	@Override
 	public Optional<? extends Folder> parent() throws UncheckedIOException {
 		return parent;
-	}
-
-	@Override
-	public boolean exists() throws UncheckedIOException {
-		return Files.exists(path);
 	}
 
 	@Override
