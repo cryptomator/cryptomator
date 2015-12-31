@@ -72,6 +72,11 @@
 			</dependency>
 			<dependency>
 				<groupId>org.cryptomator</groupId>
+				<artifactId>filesystem-nio</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.cryptomator</groupId>
 				<artifactId>filesystem-inmemory</artifactId>
 				<version>${project.version}</version>
 				<scope>test</scope>

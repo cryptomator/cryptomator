@@ -70,6 +70,11 @@
 			<artifactId>filesystem-inmemory</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.cryptomator</groupId>
+			<artifactId>filesystem-nio</artifactId>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<build>

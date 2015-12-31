@@ -8,13 +8,18 @@
  *******************************************************************************/
 package org.cryptomator.webdav.jackrabbitservlet;
 
-import java.nio.ByteBuffer;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import org.cryptomator.filesystem.FileSystem;
-import org.cryptomator.filesystem.WritableFile;
-import org.cryptomator.filesystem.inmem.InMemoryFileSystem;
+import org.cryptomator.filesystem.nio.NioFileSystem;
 
-public class InMemoryWebDavServer {
+public class NioWebDavServer {
 
 	public static void main(String[] args) throws Exception {
 		FileSystem fileSystem = setupFilesystem();
@@ -26,14 +31,14 @@ public class InMemoryWebDavServer {
 		server.stop();
 	}
 
-	private static FileSystem setupFilesystem() {
-		FileSystem fileSystem = new InMemoryFileSystem();
-		fileSystem.folder("mamals").folder("cats").create();
-		fileSystem.folder("mamals").folder("dogs").create();
-		try (WritableFile writable = fileSystem.folder("mamals").folder("cats").file("Garfield.txt").openWritable()) {
-			writable.write(ByteBuffer.wrap("meow".getBytes()));
+	private static FileSystem setupFilesystem() throws IOException {
+		BufferedReader in = new BufferedReader(new InputStreamReader(System.in, Charset.defaultCharset()));
+		System.out.print("Enter absolute path to serve (must be an existing directory): ");
+		Path path = Paths.get(in.readLine());
+		if (!Files.isDirectory(path)) {
+			throw new RuntimeException("Path is not a directory");
 		}
-		return fileSystem;
+		return NioFileSystem.rootedAt(path);
 	}
 
 }
