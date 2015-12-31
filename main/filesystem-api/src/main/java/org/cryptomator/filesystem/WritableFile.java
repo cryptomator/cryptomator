@@ -13,6 +13,13 @@ import java.time.Instant;
 
 public interface WritableFile extends WritableByteChannel {
 
+	/**
+	 * <p>
+	 * Moves this file including content to another.
+	 * <p>
+	 * Moving a file causes itself and the target to be
+	 * {@link WritableFile#close() closed}.
+	 */
 	void moveTo(WritableFile other) throws UncheckedIOException;
 
 	void setLastModified(Instant instant) throws UncheckedIOException;

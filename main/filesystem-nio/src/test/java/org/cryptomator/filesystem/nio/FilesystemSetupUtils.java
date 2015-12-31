@@ -51,6 +51,7 @@ class FilesystemSetupUtils {
 	public static class FileEntry implements Entry {
 		private Path relativePath;
 		private byte[] data = new byte[0];
+		private Instant lastModified;
 
 		public FileEntry(Path relativePath) {
 			this.relativePath = relativePath;
@@ -65,12 +66,20 @@ class FilesystemSetupUtils {
 			return withData(data.getBytes());
 		}
 
+		public FileEntry withLastModified(Instant lastModified) {
+			this.lastModified = lastModified;
+			return this;
+		}
+
 		@Override
 		public void create(Path root) throws IOException {
 			Path filePath = root.resolve(relativePath);
 			Files.createDirectories(filePath.getParent());
 			try (OutputStream out = Files.newOutputStream(filePath)) {
 				IOUtils.write(data, out);
+			}
+			if (lastModified != null) {
+				Files.setLastModifiedTime(filePath, FileTime.from(lastModified));
 			}
 		}
 	}
