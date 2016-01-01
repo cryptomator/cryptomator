@@ -105,7 +105,7 @@ class WritableNioFile implements WritableFile {
 		assertOpen();
 		try {
 			closeChannelIfOpened();
-			Files.delete(nioFile.path);
+			Files.delete(nioFile.path());
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
 		} finally {
@@ -155,11 +155,11 @@ class WritableNioFile implements WritableFile {
 		return nioFile.path;
 	}
 
-	public NioFile nioFile() {
+	NioFile nioFile() {
 		return nioFile;
 	}
 
-	private void assertOpen() {
+	void assertOpen() {
 		if (!open) {
 			throw new UncheckedIOException(format("%s already closed.", this), new ClosedChannelException());
 		}

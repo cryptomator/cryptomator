@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.Optional;
+import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.cryptomator.filesystem.File;
@@ -28,7 +29,7 @@ class NioFile extends NioNode implements File {
 		return sharedChannel;
 	}
 
-	public ReentrantReadWriteLock lock() {
+	public ReadWriteLock lock() {
 		return lock;
 	}
 
@@ -82,6 +83,10 @@ class NioFile extends NioNode implements File {
 	@Override
 	public String toString() {
 		return format("NioFile(%s)", path);
+	}
+
+	Path path() {
+		return path;
 	}
 
 }

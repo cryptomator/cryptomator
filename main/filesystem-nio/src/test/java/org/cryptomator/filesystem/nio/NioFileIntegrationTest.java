@@ -28,7 +28,7 @@ import org.junit.runner.RunWith;
 import de.bechte.junit.runners.context.HierarchicalContextRunner;
 
 @RunWith(HierarchicalContextRunner.class)
-public class NioFileTest {
+public class NioFileIntegrationTest {
 
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();

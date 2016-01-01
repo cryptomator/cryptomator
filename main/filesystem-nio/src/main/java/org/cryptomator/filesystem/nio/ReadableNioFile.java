@@ -40,6 +40,9 @@ class ReadableNioFile implements ReadableFile {
 	@Override
 	public void position(long position) throws UncheckedIOException {
 		assertOpen();
+		if (position < 0) {
+			throw new IllegalArgumentException();
+		}
 		this.position = position;
 	}
 
@@ -58,6 +61,7 @@ class ReadableNioFile implements ReadableFile {
 	}
 
 	private void internalCopyTo(WritableNioFile target) {
+		target.assertOpen();
 		target.ensureChannelIsOpened();
 		SharedFileChannel targetChannel = target.channel();
 		targetChannel.truncate(0);

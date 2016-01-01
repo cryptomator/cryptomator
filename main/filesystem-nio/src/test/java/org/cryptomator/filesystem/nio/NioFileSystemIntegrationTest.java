@@ -16,7 +16,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-public class NioFileSystemTest {
+public class NioFileSystemIntegrationTest {
 
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
