@@ -16,6 +16,19 @@ import org.junit.Test;
 
 public class FifoParallelDataProcessorTest {
 
+	@Test(expected = IllegalStateException.class)
+	public void testRethrowsException() throws InterruptedException {
+		FifoParallelDataProcessor<Object> processor = new FifoParallelDataProcessor<>(1, 1);
+		try {
+			processor.submit(() -> {
+				throw new IllegalStateException("will be rethrown during 'processedData()'");
+			});
+		} catch (Exception e) {
+			Assert.fail("Exception must not yet be thrown.");
+		}
+		processor.processedData();
+	}
+
 	@Test
 	public void testStrictFifoOrder() throws InterruptedException {
 		FifoParallelDataProcessor<Integer> processor = new FifoParallelDataProcessor<>(4, 10);
