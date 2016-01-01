@@ -29,10 +29,9 @@ import org.apache.jackrabbit.webdav.property.DavPropertyName;
 import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
 import org.apache.jackrabbit.webdav.property.DavPropertySet;
 import org.apache.jackrabbit.webdav.property.PropEntry;
-import org.cryptomator.filesystem.Node;
-import org.cryptomator.webdav.jackrabbitservlet.DavPathFactory.DavPath;
+import org.cryptomator.filesystem.jackrabbit.FileSystemResourceLocator;
 
-abstract class DavNode<T extends Node> implements DavResource {
+abstract class DavNode<T extends FileSystemResourceLocator> implements DavResource {
 
 	private static final String DAV_COMPLIANCE_CLASSES = "1, 2";
 	private static final String[] DAV_CREATIONDATE_PROPNAMES = {DavPropertyName.CREATIONDATE.getName(), "Win32CreationTime"};
@@ -41,15 +40,13 @@ abstract class DavNode<T extends Node> implements DavResource {
 	protected final FilesystemResourceFactory factory;
 	protected final LockManager lockManager;
 	protected final DavSession session;
-	protected final DavPath path;
 	protected final T node;
 	protected final DavPropertySet properties;
 
-	public DavNode(FilesystemResourceFactory factory, LockManager lockManager, DavSession session, DavPath path, T node) {
+	public DavNode(FilesystemResourceFactory factory, LockManager lockManager, DavSession session, T node) {
 		this.factory = factory;
 		this.lockManager = lockManager;
 		this.session = session;
-		this.path = path;
 		this.node = node;
 		this.properties = new DavPropertySet();
 	}
@@ -76,17 +73,17 @@ abstract class DavNode<T extends Node> implements DavResource {
 
 	@Override
 	public DavResourceLocator getLocator() {
-		return path;
+		return node;
 	}
 
 	@Override
 	public String getResourcePath() {
-		return path.getResourcePath();
+		return node.getResourcePath();
 	}
 
 	@Override
 	public String getHref() {
-		return path.getHref();
+		return node.getHref();
 	}
 
 	@Override
@@ -157,11 +154,12 @@ abstract class DavNode<T extends Node> implements DavResource {
 
 	@Override
 	public DavResource getCollection() {
-		if (path.isRootLocation()) {
+		if (node.isRootLocation()) {
 			return null;
 		}
 
-		final DavPath parentPath = path.getParent();
+		assert node.parent().isPresent() : "as my mom always sais: if it's not root, it has a parent";
+		final FileSystemResourceLocator parentPath = node.parent().get();
 		try {
 			return factory.createResource(parentPath, session);
 		} catch (DavException e) {

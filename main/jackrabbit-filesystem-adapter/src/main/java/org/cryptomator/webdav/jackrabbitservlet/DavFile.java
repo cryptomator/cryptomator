@@ -21,15 +21,14 @@ import org.apache.jackrabbit.webdav.DavSession;
 import org.apache.jackrabbit.webdav.io.InputContext;
 import org.apache.jackrabbit.webdav.io.OutputContext;
 import org.apache.jackrabbit.webdav.lock.LockManager;
-import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.ReadableFile;
 import org.cryptomator.filesystem.WritableFile;
-import org.cryptomator.webdav.jackrabbitservlet.DavPathFactory.DavPath;
+import org.cryptomator.filesystem.jackrabbit.FileLocator;
 
-class DavFile extends DavNode<File> {
+class DavFile extends DavNode<FileLocator> {
 
-	public DavFile(FilesystemResourceFactory factory, LockManager lockManager, DavSession session, DavPath path, File node) {
-		super(factory, lockManager, session, path, node);
+	public DavFile(FilesystemResourceFactory factory, LockManager lockManager, DavSession session, FileLocator node) {
+		super(factory, lockManager, session, node);
 	}
 
 	@Override

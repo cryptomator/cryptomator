@@ -23,10 +23,13 @@
 	</properties>
 
 	<dependencies>
-		<!-- Filesystem -->
 		<dependency>
 			<groupId>org.cryptomator</groupId>
 			<artifactId>filesystem-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.cryptomator</groupId>
+			<artifactId>commons</artifactId>
 		</dependency>
 
 		<!-- Jackrabbit -->
@@ -48,6 +51,10 @@
 		</dependency>
 		
 		<!-- Test -->
+		<dependency>
+			<groupId>org.cryptomator</groupId>
+			<artifactId>commons-test</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-server</artifactId>

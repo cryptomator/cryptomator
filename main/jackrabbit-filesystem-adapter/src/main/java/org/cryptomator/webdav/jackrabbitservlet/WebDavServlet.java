@@ -17,6 +17,7 @@ import org.apache.jackrabbit.webdav.DavSessionProvider;
 import org.apache.jackrabbit.webdav.WebdavRequest;
 import org.apache.jackrabbit.webdav.server.AbstractWebdavServlet;
 import org.cryptomator.filesystem.FileSystem;
+import org.cryptomator.filesystem.jackrabbit.FileSystemResourceLocatorFactory;
 
 public class WebDavServlet extends AbstractWebdavServlet {
 
@@ -28,8 +29,8 @@ public class WebDavServlet extends AbstractWebdavServlet {
 
 	public WebDavServlet(URI contextRootUri, FileSystem filesystem) {
 		davSessionProvider = new DavSessionProviderImpl();
-		davLocatorFactory = new DavPathFactory(contextRootUri);
-		davResourceFactory = new FilesystemResourceFactory(filesystem);
+		davLocatorFactory = new FileSystemResourceLocatorFactory(contextRootUri, filesystem);
+		davResourceFactory = new FilesystemResourceFactory();
 	}
 
 	@Override

@@ -34,12 +34,13 @@ import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.Folder;
 import org.cryptomator.filesystem.Node;
 import org.cryptomator.filesystem.WritableFile;
-import org.cryptomator.webdav.jackrabbitservlet.DavPathFactory.DavPath;
+import org.cryptomator.filesystem.jackrabbit.FileLocator;
+import org.cryptomator.filesystem.jackrabbit.FolderLocator;
 
-class DavFolder extends DavNode<Folder> {
+class DavFolder extends DavNode<FolderLocator> {
 
-	public DavFolder(FilesystemResourceFactory factory, LockManager lockManager, DavSession session, DavPath path, Folder folder) {
-		super(factory, lockManager, session, path, folder);
+	public DavFolder(FilesystemResourceFactory factory, LockManager lockManager, DavSession session, FolderLocator folder) {
+		super(factory, lockManager, session, folder);
 		properties.add(new ResourceType(ResourceType.COLLECTION));
 		properties.add(new DefaultDavProperty<Integer>(DavPropertyName.ISCOLLECTION, 1));
 	}
@@ -89,14 +90,12 @@ class DavFolder extends DavNode<Folder> {
 		return new DavResourceIteratorImpl(Stream.concat(folders, files).collect(Collectors.toList()));
 	}
 
-	private DavFolder folderToDavFolder(Folder memberFolder) {
-		final DavPath subFolderLocator = path.getChild(memberFolder.name() + '/');
-		return factory.createFolder(memberFolder, subFolderLocator, session);
+	private DavFolder folderToDavFolder(FolderLocator memberFolder) {
+		return factory.createFolder(memberFolder, session);
 	}
 
-	private DavFile fileToDavFile(File memberFile) {
-		final DavPath subFolderLocator = path.getChild(memberFile.name());
-		return factory.createFile(memberFile, subFolderLocator, session);
+	private DavFile fileToDavFile(FileLocator memberFile) {
+		return factory.createFile(memberFile, session);
 	}
 
 	@Override
@@ -121,7 +120,7 @@ class DavFolder extends DavNode<Folder> {
 	 */
 	private Node getMemberNode(String name) throws DavException {
 		return node.children().filter(c -> c.name().equals(name)).findAny().orElseThrow(() -> {
-			return new DavException(DavServletResponse.SC_NOT_FOUND, "No such file or directory: " + path + name);
+			return new DavException(DavServletResponse.SC_NOT_FOUND, "No such file or directory: " + node.getResourcePath() + name);
 		});
 	}
 
