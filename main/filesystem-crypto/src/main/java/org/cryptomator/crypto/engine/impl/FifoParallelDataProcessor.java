@@ -17,8 +17,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
 
-import org.cryptomator.common.UncheckedInterruptedException;
-
 /**
  * Executes long-running computations and returns the result strictly in order of the job submissions, no matter how long each job takes.
  * 
@@ -45,12 +43,8 @@ class FifoParallelDataProcessor<T> {
 	 * @throws InterruptedException
 	 */
 	void submit(Callable<T> processingJob) throws InterruptedException {
-		try {
-			Future<T> future = executorService.submit(processingJob);
-			processedData.put(future);
-		} catch (UncheckedInterruptedException e) {
-			throw e.getCause();
-		}
+		Future<T> future = executorService.submit(processingJob);
+		processedData.put(future);
 	}
 
 	/**

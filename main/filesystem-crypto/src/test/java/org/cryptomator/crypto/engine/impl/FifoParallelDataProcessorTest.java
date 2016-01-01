@@ -32,6 +32,19 @@ public class FifoParallelDataProcessorTest {
 		processor.processedData();
 	}
 
+	@Test(expected = RuntimeException.class)
+	public void testRethrowsCheckedExceptionAsRuntimeExceptions() throws InterruptedException {
+		FifoParallelDataProcessor<Object> processor = new FifoParallelDataProcessor<>(1, 1);
+		try {
+			processor.submit(() -> {
+				throw new Exception("will be wrapped in a RuntimeException during 'processedData()'");
+			});
+		} catch (Exception e) {
+			Assert.fail("Exception must not yet be thrown.");
+		}
+		processor.processedData();
+	}
+
 	@Test(expected = RejectedExecutionException.class)
 	public void testRejectExecutionAfterShutdown() throws InterruptedException, ReflectiveOperationException, SecurityException {
 		FifoParallelDataProcessor<Integer> processor = new FifoParallelDataProcessor<>(1, 1);
