@@ -13,13 +13,9 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.PriorityBlockingQueue;
-import java.util.concurrent.RejectedExecutionException;
-import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
 
 import org.cryptomator.common.UncheckedInterruptedException;
 
@@ -30,35 +26,16 @@ import org.cryptomator.common.UncheckedInterruptedException;
  */
 class FifoParallelDataProcessor<T> {
 
-	private final BlockingQueue<SequencedFutureResult> processedData = new PriorityBlockingQueue<>();
-	private final AtomicLong jobSequence = new AtomicLong();
-	private final BlockingQueue<Runnable> workQueue;
+	private final BlockingQueue<Future<T>> processedData;
 	private final ExecutorService executorService;
 
 	/**
 	 * @param numThreads How many jobs can run in parallel.
-	 * @param workQueueSize Maximum number of jobs accepted without blocking, when no results are polled from {@link #processedData()}.
+	 * @param workAhead Maximum number of jobs accepted in {@link #submit(Callable)} without blocking until results are polled from {@link #processedData()}.
 	 */
-	public FifoParallelDataProcessor(int numThreads, int workQueueSize) {
-		this.workQueue = new ArrayBlockingQueue<>(workQueueSize);
-		this.executorService = new ThreadPoolExecutor(numThreads, numThreads, 1, TimeUnit.SECONDS, workQueue, this::rejectedExecution);
-	}
-
-	/**
-	 * Enqueues tasks into the blocking queue, if they can not be executed immediately.
-	 * 
-	 * @see ThreadPoolExecutor#execute(Runnable)
-	 * @see RejectedExecutionHandler#rejectedExecution(Runnable, ThreadPoolExecutor)
-	 */
-	private void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
-		if (executor.isShutdown()) {
-			throw new RejectedExecutionException("Executor has been shut down.");
-		}
-		try {
-			this.workQueue.put(r);
-		} catch (InterruptedException e) {
-			throw new UncheckedInterruptedException(e);
-		}
+	public FifoParallelDataProcessor(int numThreads, int workAhead) {
+		this.processedData = new ArrayBlockingQueue<>(workAhead);
+		this.executorService = Executors.newFixedThreadPool(numThreads);
 	}
 
 	/**
@@ -70,7 +47,7 @@ class FifoParallelDataProcessor<T> {
 	void submit(Callable<T> processingJob) throws InterruptedException {
 		try {
 			Future<T> future = executorService.submit(processingJob);
-			processedData.offer(new SequencedFutureResult(future, jobSequence.getAndIncrement()));
+			processedData.put(future);
 		} catch (UncheckedInterruptedException e) {
 			throw e.getCause();
 		}
@@ -94,36 +71,15 @@ class FifoParallelDataProcessor<T> {
 	 * @throws InterruptedException If the calling thread was interrupted while waiting for the next result.
 	 */
 	T processedData() throws InterruptedException {
-		return processedData.take().get();
-	}
-
-	private class SequencedFutureResult implements Comparable<SequencedFutureResult> {
-
-		private final Future<T> result;
-		private final long sequenceNumber;
-
-		public SequencedFutureResult(Future<T> result, long sequenceNumber) {
-			this.result = result;
-			this.sequenceNumber = sequenceNumber;
-		}
-
-		public T get() throws InterruptedException {
-			try {
-				return result.get();
-			} catch (ExecutionException e) {
-				if (e.getCause() instanceof RuntimeException) {
-					throw (RuntimeException) e.getCause();
-				} else {
-					throw new RuntimeException(e);
-				}
+		try {
+			return processedData.take().get();
+		} catch (ExecutionException e) {
+			if (e.getCause() instanceof RuntimeException) {
+				throw (RuntimeException) e.getCause();
+			} else {
+				throw new RuntimeException(e);
 			}
 		}
-
-		@Override
-		public int compareTo(SequencedFutureResult other) {
-			return Long.compare(this.sequenceNumber, other.sequenceNumber);
-		}
-
 	}
 
 }

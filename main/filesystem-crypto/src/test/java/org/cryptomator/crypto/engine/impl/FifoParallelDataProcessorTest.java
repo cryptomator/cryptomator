@@ -63,36 +63,33 @@ public class FifoParallelDataProcessorTest {
 	@Test
 	public void testBlockingBehaviour() throws InterruptedException {
 		FifoParallelDataProcessor<Integer> processor = new FifoParallelDataProcessor<>(1, 1);
-		processor.submit(new IntegerJob(100, 1)); // runs immediatley
-		processor.submit(new IntegerJob(100, 2)); // #1 in queue
+		processor.submitPreprocessed(1); // #1 in queue
 
 		Thread t1 = new Thread(() -> {
 			try {
-				processor.submit(new IntegerJob(10, 3)); // #2 in queue
+				processor.submitPreprocessed(2); // #2 in queue
 			} catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
 			}
 		});
 		t1.start();
 		t1.join(10);
-		// job 3 should not have been submitted by now, thus t1 is still alive
+		// job 2 should not have been submitted by now, thus t1 is still alive
 		Assert.assertTrue(t1.isAlive());
 		Assert.assertEquals(1, (int) processor.processedData());
 		Assert.assertEquals(2, (int) processor.processedData());
-		Assert.assertEquals(3, (int) processor.processedData());
-		Assert.assertFalse(t1.isAlive());
+		t1.join();
 	}
 
 	@Test
 	public void testInterruptionDuringSubmission() throws InterruptedException {
 		FifoParallelDataProcessor<Integer> processor = new FifoParallelDataProcessor<>(1, 1);
-		processor.submit(new IntegerJob(100, 1)); // runs immediatley
-		processor.submit(new IntegerJob(100, 2)); // #1 in queue
+		processor.submitPreprocessed(1); // #1 in queue
 
 		final AtomicBoolean interruptedExceptionThrown = new AtomicBoolean(false);
 		Thread t1 = new Thread(() -> {
 			try {
-				processor.submit(new IntegerJob(10, 3)); // #2 in queue
+				processor.submitPreprocessed(2); // #2 in queue
 			} catch (InterruptedException e) {
 				interruptedExceptionThrown.set(true);
 				Thread.currentThread().interrupt();
@@ -102,11 +99,10 @@ public class FifoParallelDataProcessorTest {
 		t1.join(10);
 		t1.interrupt();
 		t1.join(10);
-		// job 3 should not have been submitted by now, thus t1 is still alive
+		// job 2 should not have been submitted by now, thus t1 is still alive
 		Assert.assertFalse(t1.isAlive());
 		Assert.assertTrue(interruptedExceptionThrown.get());
 		Assert.assertEquals(1, (int) processor.processedData());
-		Assert.assertEquals(2, (int) processor.processedData());
 	}
 
 	private static class IntegerJob implements Callable<Integer> {

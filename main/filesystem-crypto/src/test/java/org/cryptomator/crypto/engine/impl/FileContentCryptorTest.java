@@ -104,7 +104,7 @@ public class FileContentCryptorTest {
 		Assert.assertArrayEquals("cleartext message".getBytes(), result);
 	}
 
-	@Test
+	@Test(timeout = 20000) // assuming a minimum speed of 10mb/s during encryption and decryption 20s should be enough
 	public void testEncryptionAndDecryptionSpeed() throws InterruptedException, IOException {
 		final byte[] keyBytes = new byte[32];
 		final SecretKey encryptionKey = new SecretKeySpec(keyBytes, "AES");
@@ -112,49 +112,59 @@ public class FileContentCryptorTest {
 		final FileContentCryptor cryptor = new FileContentCryptorImpl(encryptionKey, macKey, RANDOM_MOCK);
 		final Path tmpFile = Files.createTempFile("encrypted", ".tmp");
 
+		final Thread fileWriter;
 		final ByteBuffer header;
 		final long encStart = System.nanoTime();
-		try (FileContentEncryptor encryptor = cryptor.createFileContentEncryptor(Optional.empty()); FileChannel fc = FileChannel.open(tmpFile, StandardOpenOption.WRITE)) {
-			final ByteBuffer cleartext = ByteBuffer.allocate(32768); // 32k
-			ByteBuffer ciphertext;
-			for (int i = 0; i < 4096; i++) { // 128M total
+		try (FileContentEncryptor encryptor = cryptor.createFileContentEncryptor(Optional.empty())) {
+			fileWriter = new Thread(() -> {
+				try (FileChannel fc = FileChannel.open(tmpFile, StandardOpenOption.WRITE)) {
+					ByteBuffer ciphertext;
+					while ((ciphertext = encryptor.ciphertext()) != FileContentCryptor.EOF) {
+						fc.write(ciphertext);
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			});
+			fileWriter.start();
+
+			final ByteBuffer cleartext = ByteBuffer.allocate(100000); // 100k
+			for (int i = 0; i < 1000; i++) { // 100M total
 				cleartext.rewind();
 				encryptor.append(cleartext);
-				if (i > Runtime.getRuntime().availableProcessors()) {
-					ciphertext = encryptor.ciphertext();
-					Assert.assertEquals(32 * 1024 + 32, ciphertext.remaining());
-					fc.write(ciphertext);
-				}
 			}
 			encryptor.append(FileContentCryptor.EOF);
-			while ((ciphertext = encryptor.ciphertext()) != FileContentCryptor.EOF) {
-				fc.write(ciphertext);
-			}
 			header = encryptor.getHeader();
 		}
+		fileWriter.join();
 		final long encEnd = System.nanoTime();
-		LOG.debug("Encryption of 128M took {}ms", (encEnd - encStart) / 1000 / 1000);
+		LOG.debug("Encryption of 100M took {}ms", (encEnd - encStart) / 1000 / 1000);
 
+		final Thread fileReader;
 		final long decStart = System.nanoTime();
-		try (FileContentDecryptor decryptor = cryptor.createFileContentDecryptor(header); FileChannel fc = FileChannel.open(tmpFile, StandardOpenOption.READ)) {
-			final ByteBuffer ciphertext = ByteBuffer.allocate(654321);
-			ByteBuffer cleartext;
-			for (int i = 0; fc.read(ciphertext) != -1; i++) {
-				ciphertext.flip();
-				decryptor.append(ciphertext);
-				ciphertext.clear();
-				if (i > Runtime.getRuntime().availableProcessors()) {
-					cleartext = decryptor.cleartext();
-					Assert.assertTrue(cleartext.hasRemaining());
+		try (FileContentDecryptor decryptor = cryptor.createFileContentDecryptor(header)) {
+			fileReader = new Thread(() -> {
+				try (FileChannel fc = FileChannel.open(tmpFile, StandardOpenOption.READ)) {
+					ByteBuffer ciphertext = ByteBuffer.allocate(654321);
+					while (fc.read(ciphertext) != -1) {
+						ciphertext.flip();
+						decryptor.append(ciphertext);
+						ciphertext.clear();
+					}
+					decryptor.append(FileContentCryptor.EOF);
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
-			}
-			decryptor.append(FileContentCryptor.EOF);
+			});
+			fileReader.start();
+
 			while (decryptor.cleartext() != FileContentCryptor.EOF) {
 				// no-op
 			}
 		}
+		fileReader.join();
 		final long decEnd = System.nanoTime();
-		LOG.debug("Decryption of 128M took {}ms", (decEnd - decStart) / 1000 / 1000);
+		LOG.debug("Decryption of 100M took {}ms", (decEnd - decStart) / 1000 / 1000);
 		Files.delete(tmpFile);
 	}
 }
