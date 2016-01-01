@@ -8,7 +8,12 @@
  *******************************************************************************/
 package org.cryptomator.crypto.engine.impl;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Optional;
@@ -22,8 +27,12 @@ import org.cryptomator.crypto.engine.FileContentEncryptor;
 import org.cryptomator.io.ByteBuffers;
 import org.junit.Assert;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FileContentCryptorTest {
+
+	private static final Logger LOG = LoggerFactory.getLogger(FileContentCryptorTest.class);
 
 	private static final SecureRandom RANDOM_MOCK = new SecureRandom() {
 
@@ -93,5 +102,59 @@ public class FileContentCryptorTest {
 		byte[] result = new byte[plaintext.remaining()];
 		plaintext.get(result);
 		Assert.assertArrayEquals("cleartext message".getBytes(), result);
+	}
+
+	@Test
+	public void testEncryptionAndDecryptionSpeed() throws InterruptedException, IOException {
+		final byte[] keyBytes = new byte[32];
+		final SecretKey encryptionKey = new SecretKeySpec(keyBytes, "AES");
+		final SecretKey macKey = new SecretKeySpec(keyBytes, "HmacSHA256");
+		final FileContentCryptor cryptor = new FileContentCryptorImpl(encryptionKey, macKey, RANDOM_MOCK);
+		final Path tmpFile = Files.createTempFile("encrypted", ".tmp");
+
+		final ByteBuffer header;
+		final long encStart = System.nanoTime();
+		try (FileContentEncryptor encryptor = cryptor.createFileContentEncryptor(Optional.empty()); FileChannel fc = FileChannel.open(tmpFile, StandardOpenOption.WRITE)) {
+			final ByteBuffer cleartext = ByteBuffer.allocate(32768); // 32k
+			ByteBuffer ciphertext;
+			for (int i = 0; i < 4096; i++) { // 128M total
+				cleartext.rewind();
+				encryptor.append(cleartext);
+				if (i > Runtime.getRuntime().availableProcessors()) {
+					ciphertext = encryptor.ciphertext();
+					Assert.assertEquals(32 * 1024 + 32, ciphertext.remaining());
+					fc.write(ciphertext);
+				}
+			}
+			encryptor.append(FileContentCryptor.EOF);
+			while ((ciphertext = encryptor.ciphertext()) != FileContentCryptor.EOF) {
+				fc.write(ciphertext);
+			}
+			header = encryptor.getHeader();
+		}
+		final long encEnd = System.nanoTime();
+		LOG.debug("Encryption of 128M took {}ms", (encEnd - encStart) / 1000 / 1000);
+
+		final long decStart = System.nanoTime();
+		try (FileContentDecryptor decryptor = cryptor.createFileContentDecryptor(header); FileChannel fc = FileChannel.open(tmpFile, StandardOpenOption.READ)) {
+			final ByteBuffer ciphertext = ByteBuffer.allocate(654321);
+			ByteBuffer cleartext;
+			for (int i = 0; fc.read(ciphertext) != -1; i++) {
+				ciphertext.flip();
+				decryptor.append(ciphertext);
+				ciphertext.clear();
+				if (i > Runtime.getRuntime().availableProcessors()) {
+					cleartext = decryptor.cleartext();
+					Assert.assertTrue(cleartext.hasRemaining());
+				}
+			}
+			decryptor.append(FileContentCryptor.EOF);
+			while (decryptor.cleartext() != FileContentCryptor.EOF) {
+				// no-op
+			}
+		}
+		final long decEnd = System.nanoTime();
+		LOG.debug("Decryption of 128M took {}ms", (decEnd - decStart) / 1000 / 1000);
+		Files.delete(tmpFile);
 	}
 }
