@@ -8,7 +8,10 @@
  *******************************************************************************/
 package org.cryptomator.crypto.engine.impl;
 
+import java.lang.reflect.Field;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.Assert;
@@ -27,6 +30,16 @@ public class FifoParallelDataProcessorTest {
 			Assert.fail("Exception must not yet be thrown.");
 		}
 		processor.processedData();
+	}
+
+	@Test(expected = RejectedExecutionException.class)
+	public void testRejectExecutionAfterShutdown() throws InterruptedException, ReflectiveOperationException, SecurityException {
+		FifoParallelDataProcessor<Integer> processor = new FifoParallelDataProcessor<>(1, 1);
+		Field field = FifoParallelDataProcessor.class.getDeclaredField("executorService");
+		field.setAccessible(true);
+		ExecutorService executorService = (ExecutorService) field.get(processor);
+		executorService.shutdownNow();
+		processor.submit(new IntegerJob(0, 1));
 	}
 
 	@Test

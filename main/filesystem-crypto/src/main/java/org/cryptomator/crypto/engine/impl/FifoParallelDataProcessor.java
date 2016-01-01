@@ -15,6 +15,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
@@ -22,12 +24,9 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.cryptomator.common.UncheckedInterruptedException;
 
 /**
- * Executes long-running computations and returns the result strictly in order
- * of the job submissions, no matter how long each job takes.
+ * Executes long-running computations and returns the result strictly in order of the job submissions, no matter how long each job takes.
  * 
- * The internally used thread pool is shut down automatically as soon as this
- * FifiParallelDataProcessor is no longer referenced (see Finalization behaviour
- * of {@link ThreadPoolExecutor}).
+ * The internally used thread pool is shut down automatically as soon as this FifiParallelDataProcessor is no longer referenced (see Finalization behaviour of {@link ThreadPoolExecutor}).
  */
 class FifoParallelDataProcessor<T> {
 
@@ -37,11 +36,8 @@ class FifoParallelDataProcessor<T> {
 	private final ExecutorService executorService;
 
 	/**
-	 * @param numThreads
-	 *            How many jobs can run in parallel.
-	 * @param workQueueSize
-	 *            Maximum number of jobs accepted without blocking, when no
-	 *            results are polled from {@link #processedData()}.
+	 * @param numThreads How many jobs can run in parallel.
+	 * @param workQueueSize Maximum number of jobs accepted without blocking, when no results are polled from {@link #processedData()}.
 	 */
 	public FifoParallelDataProcessor(int numThreads, int workQueueSize) {
 		this.workQueue = new ArrayBlockingQueue<>(workQueueSize);
@@ -49,12 +45,15 @@ class FifoParallelDataProcessor<T> {
 	}
 
 	/**
-	 * Enqueues tasks into the blocking queue, if they can not be executed
-	 * immediately.
+	 * Enqueues tasks into the blocking queue, if they can not be executed immediately.
 	 * 
 	 * @see ThreadPoolExecutor#execute(Runnable)
+	 * @see RejectedExecutionHandler#rejectedExecution(Runnable, ThreadPoolExecutor)
 	 */
 	private void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
+		if (executor.isShutdown()) {
+			throw new RejectedExecutionException("Executor has been shut down.");
+		}
 		try {
 			this.workQueue.put(r);
 		} catch (InterruptedException e) {
@@ -63,11 +62,9 @@ class FifoParallelDataProcessor<T> {
 	}
 
 	/**
-	 * Enqueues a job for execution. The results of multiple submissions can be
-	 * polled in FIFO order using {@link #processedData()}.
+	 * Enqueues a job for execution. The results of multiple submissions can be polled in FIFO order using {@link #processedData()}.
 	 * 
-	 * @param processingJob
-	 *            A task, that will compute a result.
+	 * @param processingJob A task, that will compute a result.
 	 * @throws InterruptedException
 	 */
 	void submit(Callable<T> processingJob) throws InterruptedException {
@@ -80,8 +77,7 @@ class FifoParallelDataProcessor<T> {
 	}
 
 	/**
-	 * Submits already pre-processed data, that can be polled in FIFO order from
-	 * {@link #processedData()}.
+	 * Submits already pre-processed data, that can be polled in FIFO order from {@link #processedData()}.
 	 * 
 	 * @throws InterruptedException
 	 */
@@ -92,13 +88,10 @@ class FifoParallelDataProcessor<T> {
 	}
 
 	/**
-	 * Result of previously {@link #submit(Callable) submitted} jobs in the same
-	 * order as they have been submitted. Blocks if the job didn't finish yet.
+	 * Result of previously {@link #submit(Callable) submitted} jobs in the same order as they have been submitted. Blocks if the job didn't finish yet.
 	 * 
 	 * @return Next job result
-	 * @throws InterruptedException
-	 *             If the calling thread was interrupted while waiting for the
-	 *             next result.
+	 * @throws InterruptedException If the calling thread was interrupted while waiting for the next result.
 	 */
 	T processedData() throws InterruptedException {
 		return processedData.take().get();
