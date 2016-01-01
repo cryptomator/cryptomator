@@ -9,7 +9,6 @@
 package org.cryptomator.filesystem.inmem;
 
 import java.io.UncheckedIOException;
-import java.nio.file.FileAlreadyExistsException;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -36,31 +35,21 @@ class InMemoryFolder extends InMemoryNode implements Folder {
 
 	@Override
 	public InMemoryFile file(String name) {
-		InMemoryNode node = children.get(name);
-		if (node == null) {
-			node = volatileChildren.computeIfAbsent(name, (k) -> {
-				return new InMemoryFile(this, name, Instant.MIN);
-			});
-		}
+		final InMemoryNode node = children.get(name);
 		if (node instanceof InMemoryFile) {
 			return (InMemoryFile) node;
 		} else {
-			throw new UncheckedIOException(new FileAlreadyExistsException(name + " exists, but is not a file."));
+			return new InMemoryFile(this, name, Instant.MIN);
 		}
 	}
 
 	@Override
 	public InMemoryFolder folder(String name) {
-		InMemoryNode node = children.get(name);
-		if (node == null) {
-			node = volatileChildren.computeIfAbsent(name, (k) -> {
-				return new InMemoryFolder(this, name, Instant.MIN);
-			});
-		}
+		final InMemoryNode node = children.get(name);
 		if (node instanceof InMemoryFolder) {
 			return (InMemoryFolder) node;
 		} else {
-			throw new UncheckedIOException(new FileAlreadyExistsException(name + " exists, but is not a folder."));
+			return new InMemoryFolder(this, name, Instant.MIN);
 		}
 	}
 
@@ -86,11 +75,11 @@ class InMemoryFolder extends InMemoryNode implements Folder {
 		if (target.exists()) {
 			target.delete();
 		}
-		assert !target.exists();
+		assert!target.exists();
 		target.create();
 		this.copyTo(target);
 		this.delete();
-		assert !this.exists();
+		assert!this.exists();
 	}
 
 	@Override
@@ -112,7 +101,7 @@ class InMemoryFolder extends InMemoryNode implements Folder {
 				subFolder.delete();
 			}
 		}
-		assert !this.exists();
+		assert!this.exists();
 	}
 
 	@Override

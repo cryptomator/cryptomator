@@ -45,6 +45,16 @@ public interface Folder extends Node {
 	File file(String name) throws UncheckedIOException;
 
 	/**
+	 * Returns a file by resolving a path relative to this folder.
+	 * 
+	 * @param path A unix-style path, which is always relative to this folder, no matter if it starts with a slash or not
+	 * @return File with the given path relative to this folder
+	 */
+	default File resolveFile(String relativePath) throws UncheckedIOException {
+		return PathResolver.resolveFile(this, relativePath);
+	}
+
+	/**
 	 * <p>
 	 * Returns the child {@link Node} in this directory of type {@link Folder}
 	 * with the specified name.
@@ -53,6 +63,16 @@ public interface Folder extends Node {
 	 * folder exists or is a {@link File} instead.
 	 */
 	Folder folder(String name) throws UncheckedIOException;
+
+	/**
+	 * Returns a folder by resolving a path relative to this folder.
+	 * 
+	 * @param path A unix-style path, which is always relative to this folder, no matter if it starts with a slash or not
+	 * @return Folder with the given path relative to this folder
+	 */
+	default Folder resolveFolder(String relativePath) throws UncheckedIOException {
+		return PathResolver.resolveFolder(this, relativePath);
+	}
 
 	/**
 	 * Creates the directory including all parent directories, if it doesn't

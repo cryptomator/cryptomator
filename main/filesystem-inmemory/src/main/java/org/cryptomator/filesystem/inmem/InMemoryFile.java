@@ -16,6 +16,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 
+import org.apache.commons.io.FileExistsException;
 import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.ReadableFile;
 import org.cryptomator.filesystem.WritableFile;
@@ -45,10 +46,12 @@ class InMemoryFile extends InMemoryNode implements File {
 		writeLock.lock();
 		final InMemoryFolder parent = parent().get();
 		parent.children.compute(this.name(), (k, v) -> {
-			if (v != null && v != this) {
-				throw new IllegalStateException("More than one representation of same file");
+			if (v == null || v == this) {
+				this.lastModified = Instant.now();
+				return this;
+			} else {
+				throw new UncheckedIOException(new FileExistsException(k));
 			}
-			return this;
 		});
 		return new InMemoryWritableFile(this::setLastModified, this::getContent, this::setContent, this::delete, writeLock);
 	}
