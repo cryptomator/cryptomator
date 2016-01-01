@@ -22,7 +22,8 @@ import org.cryptomator.filesystem.Folder;
 class InMemoryFolder extends InMemoryNode implements Folder {
 
 	final Map<String, InMemoryNode> children = new TreeMap<>();
-	final Map<String, InMemoryNode> volatileChildren = new HashMap<>();
+	final Map<String, InMemoryFile> volatileFiles = new HashMap<>();
+	final Map<String, InMemoryFolder> volatileFolders = new HashMap<>();
 
 	public InMemoryFolder(InMemoryFolder parent, String name, Instant lastModified) {
 		super(parent, name, lastModified);
@@ -39,7 +40,9 @@ class InMemoryFolder extends InMemoryNode implements Folder {
 		if (node instanceof InMemoryFile) {
 			return (InMemoryFile) node;
 		} else {
-			return new InMemoryFile(this, name, Instant.MIN);
+			return volatileFiles.computeIfAbsent(name, (n) -> {
+				return new InMemoryFile(this, n, Instant.MIN);
+			});
 		}
 	}
 
@@ -49,7 +52,9 @@ class InMemoryFolder extends InMemoryNode implements Folder {
 		if (node instanceof InMemoryFolder) {
 			return (InMemoryFolder) node;
 		} else {
-			return new InMemoryFolder(this, name, Instant.MIN);
+			return volatileFolders.computeIfAbsent(name, (n) -> {
+				return new InMemoryFolder(this, n, Instant.MIN);
+			});
 		}
 	}
 
@@ -59,7 +64,7 @@ class InMemoryFolder extends InMemoryNode implements Folder {
 			return;
 		}
 		parent.create();
-		parent.children.compute(this.name(), (k, v) -> {
+		parent.children.compute(name, (k, v) -> {
 			if (v == null) {
 				this.lastModified = Instant.now();
 				return this;
@@ -67,6 +72,7 @@ class InMemoryFolder extends InMemoryNode implements Folder {
 				throw new UncheckedIOException(new FileExistsException(k));
 			}
 		});
+		parent.volatileFolders.remove(name);
 		assert this.exists();
 	}
 

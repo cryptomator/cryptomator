@@ -30,9 +30,7 @@ public class ShorteningFileSystemTest {
 		final FileSystem underlyingFs = new InMemoryFileSystem();
 		final Folder metadataRoot = underlyingFs.folder("m");
 		final FileSystem fs = new ShorteningFileSystem(underlyingFs, metadataRoot, 10);
-		final Folder longNamedFolder = fs.folder("morethantenchars"); // base32(sha1(morethantenchars))
-																		// =
-																		// QMJL5GQUETRX2YRV6XDTJQ6NNM7IEUHP
+		final Folder longNamedFolder = fs.folder("morethantenchars"); // base32(sha1(morethantenchars)) = QMJL5GQUETRX2YRV6XDTJQ6NNM7IEUHP
 		final File correspondingMetadataFile = metadataRoot.folder("QM").folder("JL").file("QMJL5GQUETRX2YRV6XDTJQ6NNM7IEUHP.lng");
 		longNamedFolder.create();
 		Assert.assertTrue(longNamedFolder.exists());

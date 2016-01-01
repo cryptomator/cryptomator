@@ -53,6 +53,7 @@ class InMemoryFile extends InMemoryNode implements File {
 				throw new UncheckedIOException(new FileExistsException(k));
 			}
 		});
+		parent.volatileFiles.remove(name);
 		return new InMemoryWritableFile(this::setLastModified, this::getContent, this::setContent, this::delete, writeLock);
 	}
 
