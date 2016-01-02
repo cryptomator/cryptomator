@@ -42,10 +42,24 @@ class SharedFileChannel {
 		assertOpenedByCurrentThread();
 		doLocked(() -> {
 			openedBy.remove(Thread.currentThread());
-			if (openedBy.isEmpty()) {
-				closeChannel();
+			try {
+				delegate.force(true);
+			} catch (IOException e) {
+				throw new UncheckedIOException(e);
+			} finally {
+				if (openedBy.isEmpty()) {
+					closeChannel();
+				}
 			}
 		});
+	}
+
+	/**
+	 * @deprecated only intended to be used in tests
+	 */
+	@Deprecated
+	void forceClose() {
+		closeSilently(delegate);
 	}
 
 	private void assertOpenedByCurrentThread() {
@@ -61,11 +75,19 @@ class SharedFileChannel {
 				readChannel = FileChannel.open(path, StandardOpenOption.READ);
 			}
 			delegate = FileChannel.open(path, StandardOpenOption.CREATE, StandardOpenOption.READ, StandardOpenOption.WRITE);
-			if (readChannel != null) {
-				readChannel.close();
-			}
+			closeSilently(readChannel);
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
+		}
+	}
+
+	private void closeSilently(FileChannel channel) {
+		if (channel != null) {
+			try {
+				channel.close();
+			} catch (IOException e) {
+				// ignore
+			}
 		}
 	}
 
@@ -121,13 +143,14 @@ class SharedFileChannel {
 		}
 	}
 
-	public long transferTo(long position, long count, SharedFileChannel targetChannel) {
+	public long transferTo(long position, long count, SharedFileChannel targetChannel, long targetPosition) {
 		assertOpenedByCurrentThread();
 		targetChannel.assertOpenedByCurrentThread();
 		try {
 			long maxPosition = delegate.size();
 			long maxCount = Math.min(count, maxPosition - position);
 			long remaining = maxCount;
+			targetChannel.delegate.position(targetPosition);
 			while (remaining > 0) {
 				remaining -= delegate.transferTo(maxPosition - remaining, remaining, targetChannel.delegate);
 			}

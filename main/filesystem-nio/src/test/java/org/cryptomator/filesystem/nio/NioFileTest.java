@@ -8,6 +8,8 @@ import static org.cryptomator.filesystem.nio.FilesystemSetupUtils.folder;
 import static org.cryptomator.filesystem.nio.FilesystemSetupUtils.testFilesystem;
 import static org.cryptomator.filesystem.nio.PathMatcher.doesNotExist;
 import static org.cryptomator.filesystem.nio.PathMatcher.isFile;
+import static org.cryptomator.filesystem.nio.ThreadStackMatcher.stackContains;
+import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.sameInstance;
@@ -16,19 +18,25 @@ import static org.junit.Assert.assertThat;
 import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.time.Instant;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.function.Supplier;
 
 import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.FileSystem;
 import org.cryptomator.filesystem.Folder;
+import org.cryptomator.filesystem.ReadableFile;
+import org.cryptomator.filesystem.WritableFile;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.junit.rules.Timeout;
 import org.junit.runner.RunWith;
 
 import de.bechte.junit.runners.context.HierarchicalContextRunner;
 
 @RunWith(HierarchicalContextRunner.class)
-public class NioFileIntegrationTest {
+public class NioFileTest {
 
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
@@ -337,6 +345,250 @@ public class NioFileIntegrationTest {
 		thrown.expectMessage(filePath.toString());
 
 		fileWhichIsAFolder.moveTo(target);
+	}
+
+	public class OpenReadable {
+
+		@Test
+		public void testOpenReadableReturnsAReadableNioFileForAnExistingFile() {
+			File file = NioFileSystem.rootedAt(testFilesystem(file("fileName"))).file("fileName");
+
+			ReadableFile result = file.openReadable();
+
+			assertThat(result, is(instanceOf(ReadableNioFile.class)));
+		}
+
+		@Test
+		public void testOpenReadableThrowsAnUncheckedIOExceptionIfTheFileDoesNotExists() {
+			Path filesystemPath = emptyFilesystem();
+			Path nonExistingFilePath = filesystemPath.resolve("nonExistingFile");
+			File nonExistingFile = NioFileSystem.rootedAt(filesystemPath).file("nonExistingFile");
+
+			thrown.expect(UncheckedIOException.class);
+			thrown.expectMessage(nonExistingFilePath.toString());
+
+			nonExistingFile.openReadable();
+		}
+
+		@Test
+		public void testOpenReadableThrowsIllegalStateExceptionIfInvokedTwiceFromWithingTheSameThread() {
+			File file = NioFileSystem.rootedAt(testFilesystem(file("fileName"))).file("fileName");
+			file.openReadable();
+
+			thrown.expect(IllegalStateException.class);
+			thrown.expectMessage("Current thread is already reading this file");
+
+			file.openReadable();
+		}
+
+		@Test
+		public void testOpenReadableDoesNotThrowIllegalStateExceptionIfInvokedTwiceFromWithingTheSameThreadButTheFirstReadableFileHasBeenClosed() {
+			File file = NioFileSystem.rootedAt(testFilesystem(file("fileName"))).file("fileName");
+			file.openReadable().close();
+
+			ReadableFile result = file.openReadable();
+
+			assertThat(result, is(instanceOf(ReadableNioFile.class)));
+		}
+
+		@Test
+		public void testOpenReadableThrowsIllegalStateExceptionIfInvokedAfterOpenWritable() {
+			File file = NioFileSystem.rootedAt(testFilesystem(file("fileName"))).file("fileName");
+			file.openWritable();
+
+			thrown.expect(IllegalStateException.class);
+			thrown.expectMessage("Current thread is currently writing this file");
+
+			file.openReadable();
+		}
+
+		@Test
+		public void testOpenReadableDoesNotThrowIllegalStateExceptionIfInvokedAfterOpenWritableButTheWritableFileHasBeenClosed() {
+			File file = NioFileSystem.rootedAt(testFilesystem(file("fileName"))).file("fileName");
+			file.openWritable().close();
+
+			ReadableFile result = file.openReadable();
+
+			assertThat(result, is(instanceOf(ReadableNioFile.class)));
+		}
+
+	}
+
+	public class OpenWritable {
+
+		@Test
+		public void testOpenWritableReturnsAWritableNioFileForAnExistingFile() {
+			File file = NioFileSystem.rootedAt(testFilesystem(file("fileName"))).file("fileName");
+
+			WritableFile result = file.openWritable();
+
+			assertThat(result, is(instanceOf(WritableNioFile.class)));
+		}
+
+		@Test
+		public void testOpenWritableReturnsAWritableNioFileForANonExisitingFile() {
+			File file = NioFileSystem.rootedAt(emptyFilesystem()).file("nonExistingFile");
+
+			WritableFile result = file.openWritable();
+
+			assertThat(result, is(instanceOf(WritableNioFile.class)));
+		}
+
+		@Test
+		public void testOpenWritableDoesNotCreateANonExisitingFile() {
+			Path filesystemPath = emptyFilesystem();
+			Path filePath = filesystemPath.resolve("nonExistingFile");
+			File file = NioFileSystem.rootedAt(filesystemPath).file("nonExistingFile");
+
+			file.openWritable();
+
+			assertThat(filePath, doesNotExist());
+		}
+
+		@Test
+		public void testOpenWritableThrowsIllegalStateExceptionIfInvokedTwiceFromWithingTheSameThread() {
+			File file = NioFileSystem.rootedAt(testFilesystem(file("fileName"))).file("fileName");
+			file.openWritable();
+
+			thrown.expect(IllegalStateException.class);
+			thrown.expectMessage("Current thread is already writing this file");
+
+			file.openWritable();
+		}
+
+		@Test
+		public void testOpenWritableDoesNotThrowIllegalStateExceptionIfInvokedTwiceFromWithingTheSameThreadButTheFirstWritableFileHasBeenClosed() {
+			File file = NioFileSystem.rootedAt(testFilesystem(file("fileName"))).file("fileName");
+			file.openWritable().close();
+
+			WritableFile result = file.openWritable();
+
+			assertThat(result, is(instanceOf(WritableNioFile.class)));
+		}
+
+		@Test
+		public void testOpenWritableThrowsIllegalStateExceptionIfInvokedAfterOpenReadable() {
+			File file = NioFileSystem.rootedAt(testFilesystem(file("fileName"))).file("fileName");
+			file.openReadable();
+
+			thrown.expect(IllegalStateException.class);
+			thrown.expectMessage("Current thread is currently reading this file");
+
+			file.openWritable();
+		}
+
+		@Test
+		public void testOpenWritableDoesNotThrowIllegalStateExceptionIfInvokedAfterOpenReadableButTheReadableFileHasBeenClosed() {
+			File file = NioFileSystem.rootedAt(testFilesystem(file("fileName"))).file("fileName");
+			file.openReadable().close();
+
+			WritableFile result = file.openWritable();
+
+			assertThat(result, is(instanceOf(WritableNioFile.class)));
+		}
+
+	}
+
+	public class OpenWithMultipleThreads {
+
+		@Rule
+		public Timeout timeout = Timeout.seconds(5);
+
+		@Test
+		public void testOpenReadableInvokedInTwoThreadsCompletes() {
+			File file = NioFileSystem.rootedAt(testFilesystem(file("fileName"))).file("fileName");
+
+			ReadableFile readableFileFromThread1 = computeInThread(file::openReadable);
+			ReadableFile readableFileFromThread2 = computeInThread(file::openReadable);
+
+			assertThat(readableFileFromThread1, is(instanceOf(ReadableNioFile.class)));
+			assertThat(readableFileFromThread2, is(instanceOf(ReadableNioFile.class)));
+			assertThat(readableFileFromThread1, is(not(sameInstance(readableFileFromThread2))));
+		}
+
+		@Test
+		public void testOpenReadableInvokedWhileWritableFileIsOpenBlocks() {
+			File file = NioFileSystem.rootedAt(testFilesystem(file("fileName"))).file("fileName");
+			file.openWritable();
+
+			Thread thread = inThread(file::openReadable);
+
+			assertThat(thread, is(stackContains(NioFile.class, "openReadable")));
+		}
+
+		@Test
+		public void testOpenWritableInvokedWhileReadableFileIsOpenBlocks() {
+			File file = NioFileSystem.rootedAt(testFilesystem(file("fileName"))).file("fileName");
+			file.openReadable();
+
+			Thread thread = inThread(file::openWritable);
+
+			assertThat(thread, is(stackContains(NioFile.class, "openWritable")));
+		}
+
+		@Test
+		public void testOpenWritableInvokedWhileWritableFileIsOpenBlocks() {
+			File file = NioFileSystem.rootedAt(testFilesystem(file("fileName"))).file("fileName");
+			file.openWritable();
+
+			Thread thread = inThread(file::openWritable);
+
+			assertThat(thread, is(stackContains(NioFile.class, "openWritable")));
+		}
+
+		@Test
+		public void testOpenReadableInvokedWhileWritableFileIsOpenCompletesAfterClosingIt() throws InterruptedException {
+			File file = NioFileSystem.rootedAt(testFilesystem(file("fileName"))).file("fileName");
+			WritableFile writableFile = file.openWritable();
+			Thread thread = inThread(file::openReadable);
+			writableFile.close();
+
+			thread.join();
+		}
+
+		@Test
+		public void testOpenWritableInvokedWhileReadableFileIsOpenCompletesAfterClosingIt() throws InterruptedException {
+			File file = NioFileSystem.rootedAt(testFilesystem(file("fileName"))).file("fileName");
+			ReadableFile readableFile = file.openReadable();
+			Thread thread = inThread(file::openWritable);
+			readableFile.close();
+
+			thread.join();
+		}
+
+		@Test
+		public void testOpenWritableInvokedWhileWritableFileIsOpenCompletesAfterClosingIt() throws InterruptedException {
+			File file = NioFileSystem.rootedAt(testFilesystem(file("fileName"))).file("fileName");
+			WritableFile writableFile = file.openWritable();
+			Thread thread = inThread(file::openWritable);
+			writableFile.close();
+
+			thread.join();
+		}
+
+		private Thread inThread(Runnable task) {
+			Thread thread = new Thread(task);
+			thread.start();
+			try {
+				// give thread time to execute work
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+			}
+			return thread;
+		}
+
+		private <T> T computeInThread(Supplier<T> computation) {
+			CompletableFuture<T> future = new CompletableFuture<>();
+			inThread(() -> {
+				future.complete(computation.get());
+			});
+			try {
+				return future.get();
+			} catch (InterruptedException | ExecutionException e) {
+				throw new RuntimeException(e);
+			}
+		}
+
 	}
 
 	private int signum(int value) {

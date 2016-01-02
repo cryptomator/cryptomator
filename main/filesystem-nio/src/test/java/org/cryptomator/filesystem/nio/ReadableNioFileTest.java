@@ -213,7 +213,7 @@ public class ReadableNioFileTest {
 			when(otherFile.belongsToSameFilesystem(file)).thenReturn(true);
 			long sizeOfSourceChannel = 3283;
 			when(channel.size()).thenReturn(sizeOfSourceChannel);
-			when(channel.transferTo(0, sizeOfSourceChannel, otherChannel)).thenReturn(sizeOfSourceChannel);
+			when(channel.transferTo(0, sizeOfSourceChannel, otherChannel, 0)).thenReturn(sizeOfSourceChannel);
 
 			inTest.copyTo(writableOtherFile);
 
@@ -221,7 +221,7 @@ public class ReadableNioFileTest {
 			inOrder.verify(writableOtherFile).assertOpen();
 			inOrder.verify(writableOtherFile).ensureChannelIsOpened();
 			inOrder.verify(otherChannel).truncate(0);
-			inOrder.verify(channel).transferTo(0, sizeOfSourceChannel, otherChannel);
+			inOrder.verify(channel).transferTo(0, sizeOfSourceChannel, otherChannel, 0);
 		}
 
 		@Test
@@ -235,16 +235,16 @@ public class ReadableNioFileTest {
 			long sizeRemainingAfterFirstTransfer = sizeRemainingAfterSecondTransfer + secondTransferAmount;
 			long size = sizeRemainingAfterFirstTransfer + firstTransferAmount;
 			when(channel.size()).thenReturn(size);
-			when(channel.transferTo(0, size, otherChannel)).thenReturn(firstTransferAmount);
-			when(channel.transferTo(firstTransferAmount, sizeRemainingAfterFirstTransfer, otherChannel)).thenReturn(secondTransferAmount);
-			when(channel.transferTo(firstTransferAmount + secondTransferAmount, sizeRemainingAfterSecondTransfer, otherChannel)).thenReturn(thirdTransferAmount);
+			when(channel.transferTo(0, size, otherChannel, 0)).thenReturn(firstTransferAmount);
+			when(channel.transferTo(firstTransferAmount, sizeRemainingAfterFirstTransfer, otherChannel, firstTransferAmount)).thenReturn(secondTransferAmount);
+			when(channel.transferTo(firstTransferAmount + secondTransferAmount, sizeRemainingAfterSecondTransfer, otherChannel, firstTransferAmount + secondTransferAmount)).thenReturn(thirdTransferAmount);
 
 			inTest.copyTo(writableOtherFile);
 
 			InOrder inOrder = inOrder(channel);
-			inOrder.verify(channel).transferTo(0, size, otherChannel);
-			inOrder.verify(channel).transferTo(firstTransferAmount, sizeRemainingAfterFirstTransfer, otherChannel);
-			inOrder.verify(channel).transferTo(firstTransferAmount + secondTransferAmount, sizeRemainingAfterSecondTransfer, otherChannel);
+			inOrder.verify(channel).transferTo(0, size, otherChannel, 0);
+			inOrder.verify(channel).transferTo(firstTransferAmount, sizeRemainingAfterFirstTransfer, otherChannel, firstTransferAmount);
+			inOrder.verify(channel).transferTo(firstTransferAmount + secondTransferAmount, sizeRemainingAfterSecondTransfer, otherChannel, firstTransferAmount + secondTransferAmount);
 		}
 
 	}

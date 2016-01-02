@@ -67,6 +67,10 @@ class PathMatcher {
 			return new IsFileWithContentMatcher(value);
 		}
 
+		public Matcher<Path> thatIsEmpty() {
+			return withContent(new byte[0]);
+		}
+
 	}
 
 	public static class IsFileWithContentMatcher extends TypeSafeDiagnosingMatcher<Path> {

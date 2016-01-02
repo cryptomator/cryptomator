@@ -68,7 +68,7 @@ class ReadableNioFile implements ReadableFile {
 		long size = nioFile.channel().size();
 		long transferred = 0;
 		while (transferred < size) {
-			transferred += nioFile.channel().transferTo(transferred, size - transferred, targetChannel);
+			transferred += nioFile.channel().transferTo(transferred, size - transferred, targetChannel, transferred);
 		}
 	}
 

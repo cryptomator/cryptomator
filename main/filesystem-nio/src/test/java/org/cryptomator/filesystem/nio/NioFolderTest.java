@@ -31,7 +31,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-public class NioFolderIntegrationTest {
+public class NioFolderTest {
 
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();

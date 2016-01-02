@@ -3,6 +3,8 @@ package org.cryptomator.filesystem.nio;
 import static org.cryptomator.filesystem.nio.OpenMode.WRITE;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -156,6 +158,88 @@ public class WritableNioFileTest {
 		int result = inTest.write(buffer);
 
 		assertThat(result, is(resultOfWriteFully));
+	}
+
+	@Test
+	public void testTruncateFailsIfNotOpen() {
+		WritableNioFile inTest = new WritableNioFile(file);
+		inTest.close();
+
+		thrown.expect(UncheckedIOException.class);
+		thrown.expectMessage("already closed");
+
+		inTest.truncate();
+	}
+
+	@Test
+	public void testTruncateInvokesChannelsOpenWithModeWriteIfInvokedForTheFirstTimeBeforeInvokingTruncate() {
+		WritableNioFile inTest = new WritableNioFile(file);
+
+		inTest.truncate();
+
+		InOrder inOrder = inOrder(channel);
+		inOrder.verify(channel).open(WRITE);
+		inOrder.verify(channel).truncate(anyInt());
+	}
+
+	@Test
+	public void testTruncateChannelsTruncateWithZeroAsParameter() {
+		WritableNioFile inTest = new WritableNioFile(file);
+
+		inTest.truncate();
+
+		verify(channel).truncate(0);
+	}
+
+	@Test
+	public void testCloseClosesChannelIfOpenedAndUnlocksWriteLock() {
+		WritableNioFile inTest = new WritableNioFile(file);
+		inTest.truncate();
+
+		inTest.close();
+
+		InOrder inOrder = inOrder(channel, writeLock);
+		inOrder.verify(channel).close();
+		inOrder.verify(writeLock).unlock();
+	}
+
+	@Test
+	public void testCloseDoesNothingOnSecondInvocation() {
+		WritableNioFile inTest = new WritableNioFile(file);
+		inTest.truncate();
+
+		inTest.close();
+		inTest.close();
+
+		InOrder inOrder = inOrder(channel, writeLock);
+		inOrder.verify(channel).close();
+		inOrder.verify(writeLock).unlock();
+	}
+
+	@Test
+	public void testCloseOnlyUnlocksWriteLockIfChannelNotOpen() {
+		WritableNioFile inTest = new WritableNioFile(file);
+
+		inTest.close();
+
+		verify(writeLock).unlock();
+		verifyZeroInteractions(channel);
+	}
+
+	@Test
+	public void testCloseUnlocksWriteLockEvenIfCloseThrowsException() {
+		WritableNioFile inTest = new WritableNioFile(file);
+		inTest.truncate();
+		String message = "exceptionMessage";
+		doThrow(new RuntimeException(message)).when(channel).close();
+
+		thrown.expectMessage(message);
+
+		try {
+			inTest.close();
+		} finally {
+			verify(writeLock).unlock();
+		}
 	}
 
 	@Test
