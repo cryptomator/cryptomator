@@ -8,9 +8,9 @@
  *******************************************************************************/
 package org.cryptomator.crypto.engine;
 
-abstract class CryptoException extends RuntimeException {
+public class AuthenticationFailedException extends CryptoException {
 
-	public CryptoException(String message, Throwable cause) {
+	public AuthenticationFailedException(String message, Throwable cause) {
 		super(message, cause);
 	}
 

@@ -8,7 +8,6 @@
  *******************************************************************************/
 package org.cryptomator.crypto.engine.impl;
 
-import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -18,7 +17,7 @@ import javax.crypto.SecretKey;
 
 import org.apache.commons.codec.binary.Base32;
 import org.apache.commons.codec.binary.BaseNCodec;
-import org.cryptomator.crypto.engine.CryptoException;
+import org.cryptomator.crypto.engine.AuthenticationFailedException;
 import org.cryptomator.crypto.engine.FilenameCryptor;
 import org.cryptomator.siv.SivMode;
 
@@ -58,7 +57,7 @@ class FilenameCryptorImpl implements FilenameCryptor {
 			final byte[] cleartextBytes = AES_SIV.decrypt(encryptionKey, macKey, encryptedBytes);
 			return new String(cleartextBytes, StandardCharsets.UTF_8);
 		} catch (AEADBadTagException e) {
-			throw new UncheckedIOException(new CryptoException("Authentication failed.", e));
+			throw new AuthenticationFailedException("Authentication failed.", e);
 		}
 	}
 

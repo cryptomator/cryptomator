@@ -9,11 +9,13 @@
 package org.cryptomator.crypto.engine.impl;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
+import org.cryptomator.crypto.engine.AuthenticationFailedException;
 import org.cryptomator.crypto.engine.FilenameCryptor;
 import org.junit.Assert;
 import org.junit.Test;
@@ -60,6 +62,18 @@ public class FilenameCryptorImplTest {
 			final String hashedDirectory2 = filenameCryptor.hashDirectoryId(originalDirectoryId);
 			Assert.assertEquals(hashedDirectory1, hashedDirectory2);
 		}
+	}
+
+	@Test(expected = AuthenticationFailedException.class)
+	public void testDecryptionOfManipulatedFilename() {
+		final byte[] keyBytes = new byte[32];
+		final SecretKey encryptionKey = new SecretKeySpec(keyBytes, "AES");
+		final SecretKey macKey = new SecretKeySpec(keyBytes, "AES");
+		final FilenameCryptor filenameCryptor = new FilenameCryptorImpl(encryptionKey, macKey);
+
+		final byte[] encrypted = filenameCryptor.encryptFilename("test").getBytes(StandardCharsets.UTF_8);
+		encrypted[0] ^= (byte) 0x01; // change 1 bit in first byte
+		filenameCryptor.decryptFilename(new String(encrypted, StandardCharsets.UTF_8));
 	}
 
 }
