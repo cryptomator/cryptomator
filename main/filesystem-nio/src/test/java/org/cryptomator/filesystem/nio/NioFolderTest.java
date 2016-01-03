@@ -2,479 +2,498 @@ package org.cryptomator.filesystem.nio;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
-import static org.cryptomator.common.test.matcher.ContainsMatcher.containsInAnyOrder;
-import static org.cryptomator.common.test.matcher.OptionalMatcher.presentOptionalWithValueThat;
-import static org.cryptomator.filesystem.nio.FilesystemSetupUtils.emptyFilesystem;
-import static org.cryptomator.filesystem.nio.FilesystemSetupUtils.file;
-import static org.cryptomator.filesystem.nio.FilesystemSetupUtils.folder;
-import static org.cryptomator.filesystem.nio.FilesystemSetupUtils.testFilesystem;
-import static org.cryptomator.filesystem.nio.NioNodeMatcher.fileWithName;
-import static org.cryptomator.filesystem.nio.NioNodeMatcher.folderWithName;
-import static org.cryptomator.filesystem.nio.PathMatcher.doesNotExist;
-import static org.cryptomator.filesystem.nio.PathMatcher.isDirectory;
-import static org.cryptomator.filesystem.nio.PathMatcher.isFile;
+import static org.cryptomator.common.test.matcher.ContainsMatcher.contains;
+import static org.cryptomator.filesystem.nio.ReflectiveClassMatchers.aClassThatDoesDeclareMethod;
+import static org.cryptomator.filesystem.nio.ReflectiveClassMatchers.aClassThatDoesNotDeclareMethod;
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.sameInstance;
-import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.CoreMatchers.theInstance;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.FileTime;
 import java.time.Instant;
+import java.util.Optional;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.FileSystem;
 import org.cryptomator.filesystem.Folder;
+import org.cryptomator.filesystem.WritableFile;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+import org.mockito.InOrder;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
+import de.bechte.junit.runners.context.HierarchicalContextRunner;
+
+@RunWith(HierarchicalContextRunner.class)
 public class NioFolderTest {
+
+	private static final String SEPARATOR = "/";
 
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
 
-	@Test
-	public void testNameIsNameOfFolder() throws IOException {
-		final String folderName = "nameOfFolder";
-		NioFileSystem fileSystem = NioFileSystem.rootedAt(emptyFilesystem());
-		Folder folder = fileSystem.folder(folderName);
+	private NioFileSystem fileSystem;
+	private Optional<NioFolder> parent;
 
-		assertThat(folder, folderWithName(folderName));
+	private Path path;
+	private NioAccess nioAccess;
+	private InstanceFactory instanceFactory;
+
+	private NioFolder inTest;
+
+	@Before
+	public void setUp() {
+		path = mock(Path.class);
+		nioAccess = mock(NioAccess.class);
+		instanceFactory = mock(InstanceFactory.class);
+		fileSystem = mock(NioFileSystem.class);
+		parent = Optional.of(fileSystem);
+
+		Path maybeNonAbsolutePath = mock(Path.class);
+		when(maybeNonAbsolutePath.toAbsolutePath()).thenReturn(path);
+
+		when(parent.get().fileSystem()).thenReturn(fileSystem);
+
+		when(nioAccess.separator()).thenReturn(SEPARATOR);
+
+		inTest = new NioFolder(parent, maybeNonAbsolutePath, nioAccess, instanceFactory);
 	}
 
-	@Test
-	public void testCreateSucceedsIfFolderExists() throws IOException {
-		String folderName = "nameOfFolder";
-		Path testFilesystemPath = testFilesystem( //
-				folder(folderName));
-		NioFileSystem fileSystem = NioFileSystem.rootedAt(testFilesystemPath);
-		Folder existingFolder = fileSystem.folder(folderName);
+	public class ChildrenTests {
 
-		existingFolder.create();
+		@Test
+		public void testChildrenConvertsPathWhichIsADirectoryToAnNioFolderUsingTheInstanceFactory() throws IOException {
+			Path childFolderPath = mock(Path.class);
+			NioFolder nioFolderCreatedFromChildFolderPath = mock(NioFolder.class);
+			Stream<Path> childrenPaths = Stream.<Path>builder().add(childFolderPath).build();
+			when(nioAccess.isDirectory(childFolderPath)).thenReturn(true);
+			when(nioAccess.list(path)).thenReturn(childrenPaths);
+			when(instanceFactory.nioFolder(Optional.of(inTest), childFolderPath, nioAccess)).thenReturn(nioFolderCreatedFromChildFolderPath);
 
-		assertThat(Files.isDirectory(testFilesystemPath.resolve(folderName)), is(true));
+			assertThat(inTest.children().collect(toList()), contains(theInstance(nioFolderCreatedFromChildFolderPath)));
+		}
+
+		@Test
+		public void testChildrenConvertsPathWhichIsAFileToAnNioFileUsingTheInstanceFactory() throws IOException {
+			Path childFilePath = mock(Path.class);
+			NioFile nioFileCreatedFromChildFolderPath = mock(NioFile.class);
+			Stream<Path> childrenPaths = Stream.<Path>builder().add(childFilePath).build();
+			when(nioAccess.isDirectory(childFilePath)).thenReturn(false);
+			when(nioAccess.list(path)).thenReturn(childrenPaths);
+			when(instanceFactory.nioFile(Optional.of(inTest), childFilePath, nioAccess)).thenReturn(nioFileCreatedFromChildFolderPath);
+
+			assertThat(inTest.children().collect(toList()), contains(theInstance(nioFileCreatedFromChildFolderPath)));
+		}
+
+		@Test
+		public void testChildrenConvertsAllPathsToFilesAndFolders() throws IOException {
+			Path childFilePath = mock(Path.class);
+			Path childFolderPath = mock(Path.class);
+			Path anotherChildFilePath = mock(Path.class);
+			Path anotherChildFolderPath = mock(Path.class);
+			NioFile nioFileCreatedFromChildFilePath = mock(NioFile.class);
+			NioFile anotherNioFileCreatedFromChildFilePath = mock(NioFile.class);
+			NioFolder nioFolderCreatedFromChildFolderPath = mock(NioFolder.class);
+			NioFolder anotherNioFolderCreatedFromChildFolderPath = mock(NioFolder.class);
+			Stream<Path> childrenPaths = Stream.<Path>builder() //
+					.add(childFilePath) // NioFolder
+					.add(childFolderPath) //
+					.add(anotherChildFilePath) //
+					.add(anotherChildFolderPath).build();
+			when(nioAccess.isDirectory(childFilePath)).thenReturn(false);
+			when(nioAccess.isDirectory(childFolderPath)).thenReturn(true);
+			when(nioAccess.isDirectory(anotherChildFilePath)).thenReturn(false);
+			when(nioAccess.isDirectory(anotherChildFolderPath)).thenReturn(true);
+			when(nioAccess.list(path)).thenReturn(childrenPaths);
+			when(instanceFactory.nioFile(Optional.of(inTest), childFilePath, nioAccess)).thenReturn(nioFileCreatedFromChildFilePath);
+			when(instanceFactory.nioFolder(Optional.of(inTest), childFolderPath, nioAccess)).thenReturn(nioFolderCreatedFromChildFolderPath);
+			when(instanceFactory.nioFile(Optional.of(inTest), anotherChildFilePath, nioAccess)).thenReturn(anotherNioFileCreatedFromChildFilePath);
+			when(instanceFactory.nioFolder(Optional.of(inTest), anotherChildFolderPath, nioAccess)).thenReturn(anotherNioFolderCreatedFromChildFolderPath);
+
+			assertThat(inTest.children().collect(toList()),
+					contains( //
+							theInstance(nioFileCreatedFromChildFilePath), //
+							theInstance(nioFolderCreatedFromChildFolderPath), //
+							theInstance(anotherNioFileCreatedFromChildFilePath), //
+							theInstance(anotherNioFolderCreatedFromChildFolderPath)));
+		}
+
+		@Test
+		public void testFilesIsNotOverwritten() {
+			assertThat(Folder.class, aClassThatDoesDeclareMethod("files"));
+			assertThat(NioFolder.class, aClassThatDoesNotDeclareMethod("files"));
+		}
+
+		@Test
+		public void testFoldersIsNotOverwritten() {
+			assertThat(Folder.class, aClassThatDoesDeclareMethod("folders"));
+			assertThat(NioFolder.class, aClassThatDoesNotDeclareMethod("folders"));
+		}
+
+		@Test
+		public void testChildrenWrapsIOExceptionFromListInUncheckedIOException() throws IOException {
+			IOException exceptionFromList = new IOException();
+			when(nioAccess.list(path)).thenThrow(exceptionFromList);
+
+			thrown.expect(UncheckedIOException.class);
+			thrown.expectCause(is(exceptionFromList));
+
+			inTest.children();
+		}
+
 	}
 
-	@Test
-	public void testCreateSucceedsIfFolderDoesNotExist() throws IOException {
-		String folderName = "nameOfFolder";
-		Path testFilesystemPath = emptyFilesystem();
-		NioFileSystem fileSystem = NioFileSystem.rootedAt(testFilesystemPath);
-		Folder nonExistingFolder = fileSystem.folder(folderName);
+	public class FileTests {
 
-		nonExistingFolder.create();
+		@Test
+		public void testFileResolvesTheNameAgainstThePathAndCreatesAnNioFileUsingTheInstanceFactory() {
+			String name = "theFileName";
+			Path resolvedPath = mock(Path.class);
+			NioFile fileCreatedByInstanceFactory = mock(NioFile.class);
+			when(path.resolve(name)).thenReturn(resolvedPath);
+			when(instanceFactory.nioFile(Optional.of(inTest), resolvedPath, nioAccess)).thenReturn(fileCreatedByInstanceFactory);
 
-		assertThat(Files.isDirectory(testFilesystemPath.resolve(folderName)), is(true));
+			File result = inTest.file(name);
+
+			assertThat(result, is(fileCreatedByInstanceFactory));
+		}
+
+		@Test
+		public void testSecondInvocationOfFileReturnsChachedResult() {
+			String name = "theFileName";
+			Path resolvedPath = mock(Path.class);
+			NioFile fileCreatedByInstanceFactory = mock(NioFile.class);
+			when(path.resolve(name)).thenReturn(resolvedPath);
+			when(instanceFactory.nioFile(Optional.of(inTest), resolvedPath, nioAccess)).thenReturn(fileCreatedByInstanceFactory);
+
+			File result = inTest.file(name);
+			File secondResult = inTest.file(name);
+
+			assertThat(result, is(fileCreatedByInstanceFactory));
+			assertThat(secondResult, is(fileCreatedByInstanceFactory));
+			verify(instanceFactory).nioFile(Optional.of(inTest), resolvedPath, nioAccess);
+		}
+
+		@Test
+		public void testFileInvokedWithNameContainingSeparatorThrowsIllegalArgumentException() {
+			String name = "nameContaining" + SEPARATOR;
+
+			thrown.expect(IllegalArgumentException.class);
+			thrown.expectMessage(name);
+
+			inTest.file(name);
+		}
+
+		@Test
+		public void testResolveFileIsNotOverwritten() {
+			assertThat(Folder.class, is(aClassThatDoesDeclareMethod("resolveFile", String.class)));
+			assertThat(NioFolder.class, is(aClassThatDoesNotDeclareMethod("resolveFile", String.class)));
+		}
+
 	}
 
-	@Test
-	public void testCreateSucceedsIfParentIsMissing() throws IOException {
-		String parentFolderName = "nameOfParentFolder";
-		String folderName = "nameOfFolder";
-		Path emptyFilesystemPath = emptyFilesystem();
-		NioFileSystem fileSystem = NioFileSystem.rootedAt(emptyFilesystemPath);
-		Folder folderWithNonExistingParent = fileSystem.folder(parentFolderName).folder(folderName);
+	public class FolderTests {
 
-		folderWithNonExistingParent.create();
+		@Test
+		public void testFolderResolvesTheNameAgainstThePathAndCreatesAnNioFolderUsingTheInstanceFactory() {
+			String name = "theFolderName";
+			Path resolvedPath = mock(Path.class);
+			NioFolder folderCreatedByInstanceFactory = mock(NioFolder.class);
+			when(path.resolve(name)).thenReturn(resolvedPath);
+			when(instanceFactory.nioFolder(Optional.of(inTest), resolvedPath, nioAccess)).thenReturn(folderCreatedByInstanceFactory);
 
-		assertThat(Files.isDirectory(emptyFilesystemPath.resolve(parentFolderName).resolve(folderName)), is(true));
+			Folder result = inTest.folder(name);
+
+			assertThat(result, is(folderCreatedByInstanceFactory));
+		}
+
+		@Test
+		public void testSecondInvocationOfFileReturnsChachedResult() {
+			String name = "theFolderName";
+			Path resolvedPath = mock(Path.class);
+			NioFolder folderCreatedByInstanceFactory = mock(NioFolder.class);
+			when(path.resolve(name)).thenReturn(resolvedPath);
+			when(instanceFactory.nioFolder(Optional.of(inTest), resolvedPath, nioAccess)).thenReturn(folderCreatedByInstanceFactory);
+
+			Folder result = inTest.folder(name);
+			Folder secondResult = inTest.folder(name);
+
+			assertThat(result, is(folderCreatedByInstanceFactory));
+			assertThat(secondResult, is(folderCreatedByInstanceFactory));
+			verify(instanceFactory).nioFolder(Optional.of(inTest), resolvedPath, nioAccess);
+		}
+
+		@Test
+		public void testFolderInvokedWithNameContainingSeparatorThrowsIllegalArgumentException() {
+			String name = "nameContaining" + SEPARATOR;
+
+			thrown.expect(IllegalArgumentException.class);
+			thrown.expectMessage(name);
+
+			inTest.folder(name);
+		}
+
+		@Test
+		public void testResolveFolderIsNotOverwritten() {
+			assertThat(Folder.class, is(aClassThatDoesDeclareMethod("resolveFolder", String.class)));
+			assertThat(NioFolder.class, is(aClassThatDoesNotDeclareMethod("resolveFolder", String.class)));
+		}
+
 	}
 
-	@Test
-	public void testCreateWithFolderWhichIsAFileThrowsUncheckedIOExceptionWithAbsolutePathOfFolderInMessage() throws IOException {
-		String folderName = "nameOfFolder";
-		Path testFilesystemPath = testFilesystem(file(folderName));
-		NioFileSystem fileSystem = NioFileSystem.rootedAt(testFilesystemPath);
-		Folder folderWhichIsAFile = fileSystem.folder(folderName);
+	public class CreateTests {
 
-		thrown.expect(UncheckedIOException.class);
-		thrown.expectMessage(testFilesystemPath.resolve(folderName).toString());
+		@Test
+		public void testCreateDelegatesToNioAccessCreateDirectories() throws IOException {
+			inTest.create();
 
-		folderWhichIsAFile.create();
+			verify(nioAccess).createDirectories(path);
+		}
+
+		@Test
+		public void testWrapesIOExceptionThrownByCreateDirectoriesInUncheckedIOException() throws IOException {
+			IOException exceptionFromCreateDirectories = new IOException();
+			doThrow(exceptionFromCreateDirectories).when(nioAccess).createDirectories(path);
+
+			thrown.expect(UncheckedIOException.class);
+			thrown.expectCause(is(exceptionFromCreateDirectories));
+
+			inTest.create();
+		}
+
 	}
 
-	@Test
-	public void testChildrenOfEmptyNioFolderAreEmpty() throws IOException {
-		NioFolder folder = NioFileSystem.rootedAt(emptyFilesystem());
+	public class LastModifiedTests {
 
-		assertThat(folder.children().collect(toList()), is(empty()));
+		@Test
+		public void testLastModifiedReturnsLastModifiedTimeForExistingFolder() throws IOException {
+			Instant instant = Instant.parse("2016-01-04T01:24:32Z");
+			when(nioAccess.exists(path)).thenReturn(true);
+			when(nioAccess.isDirectory(path)).thenReturn(true);
+			when(nioAccess.getLastModifiedTime(path)).thenReturn(FileTime.from(instant));
+
+			Instant result = inTest.lastModified();
+
+			assertThat(result, is(instant));
+		}
+
+		@Test
+		public void testLastModifiedInvokesGetLastModifiedTimeForNonExistingFolder() throws IOException {
+			Instant instant = Instant.parse("2016-01-04T01:24:32Z");
+			when(nioAccess.exists(path)).thenReturn(false);
+			when(nioAccess.getLastModifiedTime(path)).thenReturn(FileTime.from(instant));
+
+			Instant result = inTest.lastModified();
+
+			assertThat(result, is(instant));
+		}
+
+		@Test
+		public void testLastModifiedWrapsIOExceptionThrownByGetLastModifiedTimeInUncheckedIOException() throws IOException {
+			IOException exceptionThrownFromGetLastModifiedTime = new IOException();
+			when(nioAccess.exists(path)).thenReturn(true);
+			when(nioAccess.isDirectory(path)).thenReturn(true);
+			when(nioAccess.getLastModifiedTime(path)).thenThrow(exceptionThrownFromGetLastModifiedTime);
+
+			thrown.expect(UncheckedIOException.class);
+			thrown.expectCause(is(exceptionThrownFromGetLastModifiedTime));
+
+			inTest.lastModified();
+		}
+
+		@Test
+		public void testLastModifiedThrowsUncheckedIOExceptionIfPathExistsButIsNoFolder() {
+			when(nioAccess.exists(path)).thenReturn(true);
+			when(nioAccess.isDirectory(path)).thenReturn(false);
+
+			thrown.expect(UncheckedIOException.class);
+			thrown.expectMessage(format("%s is a file", path));
+
+			inTest.lastModified();
+		}
+
 	}
 
-	@Test
-	public void testChildrenOfNonExistingFolderThrowsUncheckedIOExceptionWithAbolutePathOfFolderInMessage() throws IOException {
-		String nameOfNonExistingFolder = "nameOfFolder";
-		Path filesystemPath = emptyFilesystem();
-		Folder folder = NioFileSystem.rootedAt(filesystemPath).folder(nameOfNonExistingFolder);
+	public class ExistTests {
 
-		thrown.expect(UncheckedIOException.class);
-		thrown.expectMessage(filesystemPath.resolve(nameOfNonExistingFolder).toString());
+		@Test
+		public void testExistsIfExisting() {
+			when(nioAccess.isDirectory(path)).thenReturn(true);
 
-		folder.children();
+			assertThat(inTest.exists(), is(true));
+		}
+
+		@Test
+		public void testExistsIfNotExisting() {
+			when(nioAccess.isDirectory(path)).thenReturn(false);
+
+			assertThat(inTest.exists(), is(false));
+		}
+
 	}
 
-	@Test
-	public void testChildrenOfFolderWhichIsAFileThrowsUncheckedIOExceptionWithAbsolutePathOfFolderInMessage() throws IOException {
-		String folderName = "nameOfFolder";
-		Path filesystemPath = testFilesystem(file(folderName));
-		Folder folder = NioFileSystem.rootedAt(filesystemPath).folder(folderName);
+	public class MoveToTests {
 
-		thrown.expect(UncheckedIOException.class);
-		thrown.expectMessage(filesystemPath.resolve(folderName).toString());
+		@Test
+		public void testMoveToThrowsIllegalArgumentExceptionIfTargetDoesNotBelongToSameFilesystem() {
+			Folder target = mock(Folder.class);
+			when(target.fileSystem()).thenReturn(mock(FileSystem.class));
 
-		folder.children();
+			thrown.expect(IllegalArgumentException.class);
+			thrown.expectMessage("Can only move a Folder to a Folder in the same FileSystem");
+
+			inTest.moveTo(target);
+		}
+
+		@Test
+		public void testMoveToWrapsIOExceptionThrownByNioAccessMoveInUncheckedIOException() throws IOException {
+			NioFolder target = mock(NioFolder.class);
+			Path targetPath = mock(Path.class);
+			when(target.fileSystem()).thenReturn(fileSystem);
+			when(target.path()).thenReturn(targetPath);
+			when(target.parent()).thenReturn(Optional.empty());
+			IOException exceptionThrownByMoveTo = new IOException();
+			doThrow(exceptionThrownByMoveTo).when(nioAccess).move(path, targetPath);
+
+			thrown.expect(UncheckedIOException.class);
+			thrown.expectCause(is(exceptionThrownByMoveTo));
+
+			inTest.moveTo(target);
+		}
+
+		@Test
+		public void testMoveToDeletesTargetAndDelegatesToNioAccessMoveIfTargetHasNoParent() throws IOException {
+			NioFolder target = mock(NioFolder.class);
+			Path targetPath = mock(Path.class);
+			when(target.fileSystem()).thenReturn(fileSystem);
+			when(target.path()).thenReturn(targetPath);
+			when(target.parent()).thenReturn(Optional.empty());
+
+			inTest.moveTo(target);
+
+			InOrder inOrder = inOrder(target, nioAccess);
+			inOrder.verify(target).delete();
+			inOrder.verify(nioAccess).move(path, targetPath);
+		}
+
+		@SuppressWarnings({"unchecked", "rawtypes"})
+		@Test
+		public void testMoveToDeletesTargetCreatesTargetsParentAndDelegatesToNioAccessMoveIfTargetHasAParent() throws IOException {
+			NioFolder target = mock(NioFolder.class);
+			NioFolder parentOfTarget = mock(NioFolder.class);
+			Path targetPath = mock(Path.class);
+			when(target.fileSystem()).thenReturn(fileSystem);
+			when(target.path()).thenReturn(targetPath);
+			when(target.parent()).thenReturn((Optional) Optional.of(parentOfTarget));
+
+			inTest.moveTo(target);
+
+			InOrder inOrder = inOrder(target, parentOfTarget, nioAccess);
+			inOrder.verify(target).delete();
+			inOrder.verify(parentOfTarget).create();
+			inOrder.verify(nioAccess).move(path, targetPath);
+		}
+
 	}
 
-	@Test
-	public void testChildrenOfFolderAreCorrect() throws IOException {
-		String folderName1 = "folder1";
-		String folderName2 = "folder2";
-		String fileName1 = "file1";
-		String fileName2 = "file2";
+	public class DeleteTests {
+
+		@Test
+		public void testDeleteDoesNothingIfFolderDoesNotExist() {
+			when(nioAccess.isDirectory(path)).thenReturn(false);
+
+			inTest.delete();
+		}
+
+		@Test
+		public void testDeleteInvokesDeleteOnChildFolderAndNioAccessDeleteAfterwards() throws IOException {
+			Path folderChildPath = mock(Path.class);
+			NioFolder folderChild = mock(NioFolder.class);
+			when(nioAccess.isDirectory(path)).thenReturn(true);
+			when(nioAccess.isDirectory(folderChildPath)).thenReturn(true);
+			when(instanceFactory.nioFolder(Optional.of(inTest), folderChildPath, nioAccess)).thenReturn(folderChild);
+			when(nioAccess.list(path)).thenAnswer(answerFrom(() -> Stream.of(folderChildPath)));
+
+			inTest.delete();
+
+			InOrder inOrder = inOrder(nioAccess, folderChild);
+			inOrder.verify(nioAccess).isDirectory(path);
+			inOrder.verify(nioAccess).list(path);
+			inOrder.verify(folderChild).delete();
+			inOrder.verify(nioAccess).list(path);
+			inOrder.verify(nioAccess).delete(path);
+		}
+
+		@Test
+		public void testDeleteInvokesDeleteOnChildFileAndNioAccessDeleteAfterwards() throws IOException {
+			Path fileChildPath = mock(Path.class);
+			NioFile fileChild = mock(NioFile.class);
+			WritableFile writableFile = mock(WritableFile.class);
+			when(fileChild.openWritable()).thenReturn(writableFile);
+			when(nioAccess.isDirectory(path)).thenReturn(true);
+			when(nioAccess.isDirectory(fileChildPath)).thenReturn(false);
+			when(instanceFactory.nioFile(Optional.of(inTest), fileChildPath, nioAccess)).thenReturn(fileChild);
+			when(nioAccess.list(path)).thenAnswer(answerFrom(() -> Stream.of(fileChildPath)));
+
+			inTest.delete();
+
+			InOrder inOrder = inOrder(nioAccess, fileChild, writableFile);
+			inOrder.verify(nioAccess).isDirectory(path);
+			inOrder.verify(nioAccess).list(path);
+			inOrder.verify(nioAccess).list(path);
+			inOrder.verify(fileChild).openWritable();
+			inOrder.verify(writableFile).delete();
+			inOrder.verify(writableFile).close();
+			inOrder.verify(nioAccess).delete(path);
+		}
+
+		@Test
+		public void testDeleteWrapsIOExceptionFromFolderDeleteInUncheckedIOException() throws IOException {
+			Path fileChildPath = mock(Path.class);
+			NioFile fileChild = mock(NioFile.class);
+			WritableFile writableFile = mock(WritableFile.class);
+			when(fileChild.openWritable()).thenReturn(writableFile);
+			when(nioAccess.isDirectory(path)).thenReturn(true);
+			when(nioAccess.isDirectory(fileChildPath)).thenReturn(false);
+			when(instanceFactory.nioFile(Optional.of(inTest), fileChildPath, nioAccess)).thenReturn(fileChild);
+			when(nioAccess.list(path)).thenAnswer(answerFrom(() -> Stream.of(fileChildPath)));
+			IOException exceptionFromDelete = new IOException();
+			doThrow(exceptionFromDelete).when(nioAccess).delete(path);
+
+			thrown.expect(UncheckedIOException.class);
+			thrown.expectCause(is(exceptionFromDelete));
+
+			inTest.delete();
+		}
 
-		NioFolder folder = NioFileSystem.rootedAt(testFilesystem( //
-				folder(folderName1), //
-				folder(folderName2), //
-				file(fileName1), //
-				file(fileName2)));
-
-		assertThat(folder.children().collect(toList()),
-				containsInAnyOrder( //
-						folderWithName(folderName1), //
-						folderWithName(folderName2), //
-						fileWithName(fileName1), //
-						fileWithName(fileName2)));
-	}
-
-	@Test
-	public void testFilesDoesContainOnlyFileChildren() throws IOException {
-		String folderName1 = "folder1";
-		String folderName2 = "folder2";
-		String fileName1 = "file1";
-		String fileName2 = "file2";
-
-		NioFolder folder = NioFileSystem.rootedAt(testFilesystem( //
-				folder(folderName1), //
-				folder(folderName2), //
-				file(fileName1), //
-				file(fileName2)));
-
-		assertThat(folder.files().collect(toList()),
-				containsInAnyOrder( //
-						fileWithName(fileName1), //
-						fileWithName(fileName2)));
-	}
-
-	@Test
-	public void testFilesOfNonExistingFolderThrowsUncheckedIOExceptionWithAbolutePathOfFolderInMessage() throws IOException {
-		Path emptyFolderPath = emptyFilesystem();
-		NioFolder folder = NioFileSystem.rootedAt(emptyFolderPath);
-		Files.delete(emptyFolderPath);
-
-		thrown.expect(UncheckedIOException.class);
-		thrown.expectMessage(emptyFolderPath.toString());
-
-		folder.files();
-	}
-
-	@Test
-	public void testFoldersDoesContainOnlyFolderChildren() throws IOException {
-		String folderName1 = "folder1";
-		String folderName2 = "folder2";
-		String fileName1 = "file1";
-		String fileName2 = "file2";
-
-		NioFolder folder = NioFileSystem.rootedAt(testFilesystem( //
-				folder(folderName1), //
-				folder(folderName2), //
-				file(fileName1), //
-				file(fileName2)));
-
-		assertThat(folder.folders().collect(toList()),
-				containsInAnyOrder( //
-						folderWithName(folderName1), //
-						folderWithName(folderName2)));
-	}
-
-	@Test
-	public void testFoldersOfNonExistingFolderThrowsUncheckedIOExceptionWithAbolutePathOfFolderInMessage() throws IOException {
-		Path emptyFilesystemPath = emptyFilesystem();
-		NioFolder folder = NioFileSystem.rootedAt(emptyFilesystemPath);
-		Files.delete(emptyFilesystemPath);
-
-		thrown.expect(UncheckedIOException.class);
-		thrown.expectMessage(emptyFilesystemPath.toString());
-
-		folder.folders();
-	}
-
-	@Test
-	public void testDeleteOfEmptyFolderDeletesIt() throws IOException {
-		String folderName = "nameOfFolder";
-		Path filesystemPath = testFilesystem( //
-				folder(folderName));
-		Folder folder = NioFileSystem.rootedAt(filesystemPath).folder(folderName);
-
-		folder.delete();
-
-		assertThat(filesystemPath.resolve(folderName), doesNotExist());
-	}
-
-	@Test
-	public void testDeleteOfFolderWithChildrenDeletesItAndAllChildrenRecursive() throws IOException {
-		String folderName = "nameOfFolder";
-		Path filesystemPath = testFilesystem( //
-				folder(folderName), //
-				folder(folderName + "/subfolder1"), //
-				file(folderName + "/subfolder1/fileName1"), //
-				folder(folderName + "/subfolder2"), //
-				file(folderName + "/fileName1"), //
-				file(folderName + "/fileName2"));
-		Folder folder = NioFileSystem.rootedAt(filesystemPath).folder(folderName);
-
-		folder.delete();
-
-		assertThat(filesystemPath.resolve(folderName), doesNotExist());
-	}
-
-	@Test
-	public void testDeleteOfNonExistingFolderDoesNothing() throws IOException {
-		String folderName = "nameOfFolder";
-		Path filesystemPath = emptyFilesystem();
-		Folder nonExistingFolder = NioFileSystem.rootedAt(filesystemPath).folder(folderName);
-
-		nonExistingFolder.delete();
-
-		assertThat(filesystemPath.resolve(folderName), doesNotExist());
-	}
-
-	@Test
-	public void testDeleteOfFolderWhichIsAFileDoesNothing() throws IOException {
-		String folderName = "nameOfFolder";
-		Path filesystemPath = testFilesystem( //
-				file(folderName));
-		Folder folder = NioFileSystem.rootedAt(filesystemPath).folder(folderName);
-
-		folder.delete();
-
-		assertThat(filesystemPath.resolve(folderName), isFile());
-	}
-
-	@Test
-	public void testExistsReturnsTrueForExistingDirectory() throws IOException {
-		String folderName = "nameOfFolder";
-		Path filesystemPath = testFilesystem( //
-				folder(folderName));
-		Folder folder = NioFileSystem.rootedAt(filesystemPath).folder(folderName);
-
-		assertThat(folder.exists(), is(true));
-	}
-
-	@Test
-	public void testExistsReturnsFalseForNonExistingDirectory() throws IOException {
-		String folderName = "nameOfFolder";
-		Path filesystemPath = emptyFilesystem();
-		Folder nonExistingFolder = NioFileSystem.rootedAt(filesystemPath).folder(folderName);
-
-		assertThat(nonExistingFolder.exists(), is(false));
-	}
-
-	@Test
-	public void testExistsReturnsFalseForDirectoryWhichIsAFile() throws IOException {
-		String folderName = "nameOfFolder";
-		Path filesystemPath = testFilesystem( //
-				file(folderName));
-		Folder folder = NioFileSystem.rootedAt(filesystemPath).folder(folderName);
-
-		assertThat(folder.exists(), is(false));
-	}
-
-	@Test
-	public void testIsAncestorOfWithChildReturnsTrue() throws IOException {
-		Folder folder = NioFileSystem.rootedAt(emptyFilesystem()).folder("a");
-		Folder child = folder.folder("b");
-
-		assertThat(folder.isAncestorOf(child), is(true));
-	}
-
-	@Test
-	public void testIsAncestorOfWithChildOfChildReturnsTrue() throws IOException {
-		Folder folder = NioFileSystem.rootedAt(emptyFilesystem()).folder("a");
-		Folder child = folder.folder("b");
-		File childOfChild = child.file("c");
-
-		assertThat(folder.isAncestorOf(childOfChild), is(true));
-	}
-
-	@Test
-	public void testIsAncestorOfWithSiblingReturnsFalse() throws IOException {
-		FileSystem fileSystem = NioFileSystem.rootedAt(emptyFilesystem());
-		Folder folder = fileSystem.folder("a");
-		Folder sibling = fileSystem.folder("b");
-
-		assertThat(folder.isAncestorOf(sibling), is(false));
-	}
-
-	@Test
-	public void testIsAncestorOfWithParentReturnsFalse() throws IOException {
-		Folder parent = NioFileSystem.rootedAt(emptyFilesystem()).folder("a");
-		Folder folder = parent.folder("b");
-
-		assertThat(folder.isAncestorOf(parent), is(false));
-	}
-
-	@Test
-	public void testLastModifiedOfExistingFolderReturnsLastModifiedDate() throws IOException {
-		String folderName = "nameOfFolder";
-		Instant lastModified = Instant.parse("2015-12-29T15:36:10.00Z");
-		Folder folder = NioFileSystem
-				.rootedAt(testFilesystem( //
-						folder(folderName).withLastModified(lastModified))) //
-				.folder(folderName);
-
-		assertThat(folder.lastModified(), is(lastModified));
-	}
-
-	@Test
-	public void testLastModifiedOfNonExistingFolderThrowsUncheckedIOExceptionWithAbsolutePathOfFolder() throws IOException {
-		String folderName = "nameOfFolder";
-		Path filesystemPath = emptyFilesystem();
-		Folder folder = NioFileSystem.rootedAt(filesystemPath).folder(folderName);
-
-		thrown.expect(UncheckedIOException.class);
-		thrown.expectMessage(filesystemPath.resolve(folderName).toString());
-
-		folder.lastModified();
-	}
-
-	@Test
-	public void testLastModifiedOfFolderWhichIsAFileThrowsUncheckedIOExceptionWithAbsolutePathOfFolder() throws IOException {
-		String folderName = "nameOfFolder";
-		Path filesystemPath = testFilesystem(file(folderName));
-		Folder folder = NioFileSystem //
-				.rootedAt(filesystemPath) //
-				.folder(folderName);
-
-		thrown.expect(UncheckedIOException.class);
-		thrown.expectMessage(filesystemPath.resolve(folderName).toString());
-
-		folder.lastModified();
-	}
-
-	@Test
-	public void testParentOfDirectChildOfFilesystemReturnsFilesystem() throws IOException {
-		FileSystem fileSystem = NioFileSystem.rootedAt(emptyFilesystem());
-		Folder folder = fileSystem.folder("aName");
-
-		assertThat(folder.parent(), presentOptionalWithValueThat(is(sameInstance(fileSystem))));
-	}
-
-	@Test
-	public void testParentOfChildOfFolderReturnsFolder() throws IOException {
-		Folder folder = NioFileSystem.rootedAt(emptyFilesystem()).folder("aName");
-		Folder child = folder.folder("anotherName");
-
-		assertThat(child.parent(), presentOptionalWithValueThat(is(sameInstance(folder))));
-	}
-
-	@Test
-	public void testMoveToOfFolderToNonExistingFolderMovesFolder() throws IOException {
-		Path filesystemPath = testFilesystem( //
-				folder("folderToMove"));
-		NioFileSystem fileSystem = NioFileSystem.rootedAt(filesystemPath);
-		Folder folderToMove = fileSystem.folder("folderToMove");
-		Folder folderToMoveTo = fileSystem.folder("folderToMoveTo");
-
-		folderToMove.moveTo(folderToMoveTo);
-
-		assertThat(filesystemPath.resolve("folderToMove"), doesNotExist());
-		assertThat(filesystemPath.resolve("folderToMoveTo"), isDirectory());
-	}
-
-	@Test
-	public void testMoveToOfFolderWithChildrenMovesFolderAndChildren() throws IOException {
-		Path filesystemPath = testFilesystem( //
-				folder("folderToMove"), //
-				folder("folderToMove/subfolder1"), //
-				folder("folderToMove/subfolder2"), //
-				file("folderToMove/subfolder1/file1").withData("dataOfFile1"), //
-				file("folderToMove/file2").withData("dataOfFile2"), //
-				file("folderToMove/file3").withData("dataOfFile3"));
-		NioFileSystem fileSystem = NioFileSystem.rootedAt(filesystemPath);
-		Folder folderToMove = fileSystem.folder("folderToMove");
-		Folder folderToMoveTo = fileSystem.folder("folderToMoveTo");
-
-		folderToMove.moveTo(folderToMoveTo);
-
-		assertThat(filesystemPath.resolve("folderToMove"), doesNotExist());
-		assertThat(filesystemPath.resolve("folderToMoveTo"), isDirectory());
-		assertThat(filesystemPath.resolve("folderToMoveTo/subfolder1"), isDirectory());
-		assertThat(filesystemPath.resolve("folderToMoveTo/subfolder2"), isDirectory());
-		assertThat(filesystemPath.resolve("folderToMoveTo/subfolder1/file1"), isFile().withContent("dataOfFile1"));
-		assertThat(filesystemPath.resolve("folderToMoveTo/file2"), isFile().withContent("dataOfFile2"));
-		assertThat(filesystemPath.resolve("folderToMoveTo/file3"), isFile().withContent("dataOfFile3"));
-	}
-
-	@Test
-	public void testMoveToOfFolderToExistingFolderReplacesTargetFolder() throws IOException {
-		Path filesystemPath = testFilesystem( //
-				folder("folderToMove"), //
-				file("folderToMove/file1").withData("dataOfFile1"), //
-				file("folderToMove/file2").withData("dataOfFile2"), //
-				folder("folderToMoveTo"), //
-				file("folderToMoveTo/file1").withData("wrongDataOfFile1"), //
-				file("folderToMoveTo/fileWhichShouldNotExistAfterMove"));
-		NioFileSystem fileSystem = NioFileSystem.rootedAt(filesystemPath);
-		Folder folderToMove = fileSystem.folder("folderToMove");
-		Folder folderToMoveTo = fileSystem.folder("folderToMoveTo");
-
-		folderToMove.moveTo(folderToMoveTo);
-
-		assertThat(filesystemPath.resolve("folderToMove"), doesNotExist());
-		assertThat(filesystemPath.resolve("folderToMoveTo"), isDirectory());
-		assertThat(filesystemPath.resolve("folderToMoveTo/file1"), isFile().withContent("dataOfFile1"));
-		assertThat(filesystemPath.resolve("folderToMoveTo/file2"), isFile().withContent("dataOfFile2"));
-		assertThat(filesystemPath.resolve("folderToMoveTo/fileWhichShouldNotExistAfterMove"), doesNotExist());
-	}
-
-	@Test
-	public void testMoveToOfFolderToExistingFileThrowsUncheckedIOExceptionWithAbsolutePathOfTarget() throws IOException {
-		Path filesystemPath = testFilesystem( //
-				folder("folderToMove"), //
-				file("folderToMoveTo"));
-		FileSystem fileSystem = NioFileSystem.rootedAt(filesystemPath);
-		Folder folderToMove = fileSystem.folder("folderToMove");
-		Folder folderToMoveTo = fileSystem.folder("folderToMoveTo");
-
-		thrown.expect(UncheckedIOException.class);
-		thrown.expectMessage(filesystemPath.resolve("folderToMoveTo").toString());
-
-		folderToMove.moveTo(folderToMoveTo);
-	}
-
-	@Test
-	public void testMoveToOfFolderToFolderOfAnotherFileSystemDoesNothingAndhrowsIllegalArgumentException() throws IOException {
-		Path filesystemPath = testFilesystem(folder("folderToMove"));
-		Folder folderToMove = NioFileSystem.rootedAt(filesystemPath).folder("folderToMove");
-		Folder folderToMoveTo = NioFileSystem.rootedAt(filesystemPath).folder("folderToMoveTo");
-
-		thrown.expect(IllegalArgumentException.class);
-
-		folderToMove.moveTo(folderToMoveTo);
-
-		assertThat(filesystemPath.resolve("folderToMove"), isDirectory());
-		assertThat(filesystemPath.resolve("folderToMoveTo"), doesNotExist());
 	}
 
 	@Test
 	public void testToString() {
-		Path filesystemPath = emptyFilesystem();
-		Path pathOfFolder = filesystemPath.resolve("aFolder").toAbsolutePath();
-		Folder folder = NioFileSystem.rootedAt(filesystemPath).folder("aFolder");
+		assertThat(inTest.toString(), is(format("NioFolder(%s)", path)));
+	}
 
-		assertThat(folder.toString(), is(format("NioFolder(%s)", pathOfFolder)));
+	private <T> Answer<T> answerFrom(Supplier<T> supplier) {
+		return new Answer<T>() {
+			@Override
+			public T answer(InvocationOnMock invocation) throws Throwable {
+				return supplier.get();
+			}
+		};
 	}
 
 }

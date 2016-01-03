@@ -4,11 +4,9 @@ import static java.lang.String.format;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.Optional;
-import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.cryptomator.filesystem.File;
@@ -20,17 +18,9 @@ class NioFile extends NioNode implements File {
 	private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock(true);
 	private SharedFileChannel sharedChannel;
 
-	public NioFile(Optional<NioFolder> parent, Path path) {
-		super(parent, path);
-		sharedChannel = new SharedFileChannel(path);
-	}
-
-	SharedFileChannel channel() {
-		return sharedChannel;
-	}
-
-	public ReadWriteLock lock() {
-		return lock;
+	public NioFile(Optional<NioFolder> parent, Path eventuallyNonAbsolutePath, NioAccess nioAccess, InstanceFactory instanceFactory) {
+		super(parent, eventuallyNonAbsolutePath, nioAccess, instanceFactory);
+		sharedChannel = instanceFactory.sharedFileChannel(path, nioAccess);
 	}
 
 	@Override
@@ -42,7 +32,11 @@ class NioFile extends NioNode implements File {
 			throw new IllegalStateException("Current thread is already reading this file");
 		}
 		lock.readLock().lock();
-		return new ReadableNioFile(this);
+		return instanceFactory.readableNioFile(fileSystem(), path, sharedChannel, this::unlockReadLock);
+	}
+
+	private void unlockReadLock() {
+		lock.readLock().unlock();
 	}
 
 	@Override
@@ -54,17 +48,21 @@ class NioFile extends NioNode implements File {
 			throw new IllegalStateException("Current thread is currently reading this file");
 		}
 		lock.writeLock().lock();
-		return new WritableNioFile(this);
+		return instanceFactory.writableNioFile(fileSystem(), path, sharedChannel, this::unlockWriteLock, nioAccess);
+	}
+
+	private void unlockWriteLock() {
+		lock.writeLock().unlock();
 	}
 
 	@Override
 	public boolean exists() throws UncheckedIOException {
-		return Files.isRegularFile(path);
+		return nioAccess.isRegularFile(path);
 	}
 
 	@Override
 	public Instant lastModified() throws UncheckedIOException {
-		if (Files.exists(path) && !exists()) {
+		if (nioAccess.exists(path) && !exists()) {
 			throw new UncheckedIOException(new IOException(format("%s is a folder", path)));
 		}
 		return super.lastModified();
@@ -73,7 +71,6 @@ class NioFile extends NioNode implements File {
 	@Override
 	public int compareTo(File o) {
 		if (belongsToSameFilesystem(o)) {
-			assert o instanceof NioNode;
 			return path.compareTo(((NioFile) o).path);
 		} else {
 			throw new IllegalArgumentException("Can not mix File objects from different file systems");
@@ -83,10 +80,6 @@ class NioFile extends NioNode implements File {
 	@Override
 	public String toString() {
 		return format("NioFile(%s)", path);
-	}
-
-	Path path() {
-		return path;
 	}
 
 }

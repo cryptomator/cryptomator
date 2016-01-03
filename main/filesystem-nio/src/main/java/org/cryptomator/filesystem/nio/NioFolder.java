@@ -1,11 +1,9 @@
 package org.cryptomator.filesystem.nio;
 
 import static java.lang.String.format;
-import static org.cryptomator.filesystem.FileSystemVisitor.fileSystemVisitor;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.Optional;
@@ -21,21 +19,21 @@ class NioFolder extends NioNode implements Folder {
 	private final WeakValuedCache<Path, NioFolder> folders = WeakValuedCache.usingLoader(this::folderFromPath);
 	private final WeakValuedCache<Path, NioFile> files = WeakValuedCache.usingLoader(this::fileFromPath);
 
-	public NioFolder(Optional<NioFolder> parent, Path path) {
-		super(parent, path);
+	public NioFolder(Optional<NioFolder> parent, Path path, NioAccess nioAccess, InstanceFactory instanceFactory) {
+		super(parent, path, nioAccess, instanceFactory);
 	}
 
 	@Override
 	public Stream<? extends Node> children() throws UncheckedIOException {
 		try {
-			return Files.list(path).map(this::childPathToNode);
+			return nioAccess.list(path).map(this::childPathToNode);
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
 		}
 	}
 
 	private NioNode childPathToNode(Path childPath) {
-		if (Files.isDirectory(childPath)) {
+		if (nioAccess.isDirectory(childPath)) {
 			return folders.get(childPath);
 		} else {
 			return files.get(childPath);
@@ -43,27 +41,35 @@ class NioFolder extends NioNode implements Folder {
 	}
 
 	private NioFile fileFromPath(Path path) {
-		return new NioFile(Optional.of(this), path);
+		return instanceFactory.nioFile(Optional.of(this), path, nioAccess);
 	}
 
 	private NioFolder folderFromPath(Path path) {
-		return new NioFolder(Optional.of(this), path);
+		return instanceFactory.nioFolder(Optional.of(this), path, nioAccess);
 	}
 
 	@Override
 	public File file(String name) throws UncheckedIOException {
+		assertDoesNotContainsSeparator(name);
 		return files.get(path.resolve(name));
 	}
 
 	@Override
 	public Folder folder(String name) throws UncheckedIOException {
+		assertDoesNotContainsSeparator(name);
 		return folders.get(path.resolve(name));
+	}
+
+	private void assertDoesNotContainsSeparator(String name) {
+		if (name.contains(nioAccess.separator())) {
+			throw new IllegalArgumentException(format("Name must not contain file system separator (name: %s, separator: %s)", name, nioAccess.separator()));
+		}
 	}
 
 	@Override
 	public void create() throws UncheckedIOException {
 		try {
-			Files.createDirectories(path);
+			nioAccess.createDirectories(path);
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
 		}
@@ -71,7 +77,7 @@ class NioFolder extends NioNode implements Folder {
 
 	@Override
 	public Instant lastModified() throws UncheckedIOException {
-		if (Files.exists(path) && !Files.isDirectory(path)) {
+		if (nioAccess.exists(path) && !nioAccess.isDirectory(path)) {
 			throw new UncheckedIOException(new IOException(format("%s is a file", path)));
 		}
 		return super.lastModified();
@@ -79,7 +85,7 @@ class NioFolder extends NioNode implements Folder {
 
 	@Override
 	public boolean exists() throws UncheckedIOException {
-		return Files.isDirectory(path);
+		return nioAccess.isDirectory(path);
 	}
 
 	@Override
@@ -95,10 +101,14 @@ class NioFolder extends NioNode implements Folder {
 		try {
 			target.delete();
 			target.parent().ifPresent(folder -> folder.create());
-			Files.move(path, target.path);
+			nioAccess.move(path(), target.path());
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
 		}
+	}
+
+	Path path() {
+		return path;
 	}
 
 	@Override
@@ -111,23 +121,18 @@ class NioFolder extends NioNode implements Folder {
 		if (!exists()) {
 			return;
 		}
-		fileSystemVisitor() //
-				.forEachFile(NioFolder::deleteFile) //
-				.afterFolder(NioFolder::deleteEmptyFolder) //
-				.visit(this);
+		folders().forEach(Folder::delete);
+		files().forEach(NioFolder::deleteFile);
+		try {
+			nioAccess.delete(path);
+		} catch (IOException e) {
+			throw new UncheckedIOException(e);
+		}
 	}
 
 	private static final void deleteFile(File file) {
 		try (WritableFile writableFile = file.openWritable()) {
 			writableFile.delete();
-		}
-	}
-
-	private static final void deleteEmptyFolder(Folder folder) {
-		try {
-			Files.delete(((NioFolder) folder).path);
-		} catch (IOException e) {
-			throw new UncheckedIOException(e);
 		}
 	}
 

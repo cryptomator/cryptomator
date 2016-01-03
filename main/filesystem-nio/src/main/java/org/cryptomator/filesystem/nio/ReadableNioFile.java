@@ -6,26 +6,34 @@ import static org.cryptomator.filesystem.nio.OpenMode.READ;
 import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
+import java.nio.file.Path;
 
+import org.cryptomator.filesystem.FileSystem;
 import org.cryptomator.filesystem.ReadableFile;
 import org.cryptomator.filesystem.WritableFile;
 
 class ReadableNioFile implements ReadableFile {
 
-	private final NioFile nioFile;
+	private final FileSystem fileSystem;
+	private final Path path;
+	private final SharedFileChannel channel;
+	private final Runnable afterCloseCallback;
 
 	private boolean open = true;
 	private long position = 0;
 
-	public ReadableNioFile(NioFile nioFile) {
-		this.nioFile = nioFile;
-		nioFile.channel().open(READ);
+	public ReadableNioFile(FileSystem fileSystem, Path path, SharedFileChannel channel, Runnable afterCloseCallback) {
+		this.fileSystem = fileSystem;
+		this.path = path;
+		this.channel = channel;
+		this.afterCloseCallback = afterCloseCallback;
+		channel.open(READ);
 	}
 
 	@Override
 	public int read(ByteBuffer target) throws UncheckedIOException {
 		assertOpen();
-		int read = nioFile.channel().readFully(position, target);
+		int read = channel.readFully(position, target);
 		if (read != SharedFileChannel.EOF) {
 			position += read;
 		}
@@ -57,7 +65,7 @@ class ReadableNioFile implements ReadableFile {
 	}
 
 	private boolean belongsToSameFilesystem(WritableFile other) {
-		return other instanceof WritableNioFile && ((WritableNioFile) other).nioFile().belongsToSameFilesystem(nioFile);
+		return other instanceof WritableNioFile && ((WritableNioFile) other).fileSystem() == fileSystem;
 	}
 
 	private void internalCopyTo(WritableNioFile target) {
@@ -65,10 +73,10 @@ class ReadableNioFile implements ReadableFile {
 		target.ensureChannelIsOpened();
 		SharedFileChannel targetChannel = target.channel();
 		targetChannel.truncate(0);
-		long size = nioFile.channel().size();
+		long size = channel.size();
 		long transferred = 0;
 		while (transferred < size) {
-			transferred += nioFile.channel().transferTo(transferred, size - transferred, targetChannel, transferred);
+			transferred += channel.transferTo(transferred, size - transferred, targetChannel, transferred);
 		}
 	}
 
@@ -79,9 +87,9 @@ class ReadableNioFile implements ReadableFile {
 		}
 		open = false;
 		try {
-			nioFile.channel().close();
+			channel.close();
 		} finally {
-			nioFile.lock().readLock().unlock();
+			afterCloseCallback.run();
 		}
 	}
 
@@ -93,7 +101,7 @@ class ReadableNioFile implements ReadableFile {
 
 	@Override
 	public String toString() {
-		return format("Readable%s", nioFile);
+		return format("ReadableNioFile(%s)", path);
 	}
 
 }

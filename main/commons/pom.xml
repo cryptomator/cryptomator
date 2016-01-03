@@ -12,5 +12,12 @@
 	<artifactId>commons</artifactId>
 	<name>Cryptomator common</name>
 	<description>Shared utilities</description>
+	
+	<dependencies>
+		<dependency>
+			<groupId>org.cryptomator</groupId>
+			<artifactId>commons-test</artifactId>
+		</dependency>
+	</dependencies>
 
 </project>

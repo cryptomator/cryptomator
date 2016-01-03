@@ -8,7 +8,7 @@ import java.util.Iterator;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
-public final class PathResolver {
+final class PathResolver {
 
 	private static final String DOT = ".";
 	private static final String DOTDOT = "..";

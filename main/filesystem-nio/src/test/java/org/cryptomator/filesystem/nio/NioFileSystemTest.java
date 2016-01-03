@@ -1,52 +1,60 @@
 package org.cryptomator.filesystem.nio;
 
-import static org.cryptomator.filesystem.nio.FilesystemSetupUtils.emptyFilesystem;
-import static org.cryptomator.filesystem.nio.FilesystemSetupUtils.file;
-import static org.cryptomator.filesystem.nio.FilesystemSetupUtils.testFilesystem;
-import static org.cryptomator.filesystem.nio.PathMatcher.isDirectory;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Optional;
 
-import org.junit.Rule;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 public class NioFileSystemTest {
 
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
+	private Path path;
 
-	@Test
-	public void testParentIsEmpty() throws IOException {
-		NioFileSystem fileSystem = NioFileSystem.rootedAt(emptyFilesystem());
+	private InstanceFactory instanceFactory;
 
-		assertThat(fileSystem.parent().isPresent(), is(false));
+	private NioAccess nioAccess;
+
+	private NioFileSystem inTest;
+
+	@Before
+	public void setUp() {
+		path = mock(Path.class);
+		instanceFactory = mock(InstanceFactory.class);
+		nioAccess = mock(NioAccess.class);
+
+		when(path.toAbsolutePath()).thenReturn(path);
+
+		InstanceFactory.DEFAULT.set(instanceFactory);
+		NioAccess.DEFAULT.set(nioAccess);
+
+		inTest = NioFileSystem.rootedAt(path);
 	}
 
 	@Test
-	public void testObtainingAFileSystemWithNonExistingRootCreatesItIncludingAllParentFolders() throws IOException {
-		Path emptyFilesystem = emptyFilesystem();
-		Path nonExistingFilesystemRoot = emptyFilesystem.resolve("nonExistingRoot");
-		Files.delete(emptyFilesystem);
-
-		NioFileSystem.rootedAt(nonExistingFilesystemRoot);
-
-		assertThat(nonExistingFilesystemRoot, isDirectory());
+	public void testRootedAtCreatesNioFileSystemWithPath() {
+		assertThat(inTest.instanceFactory, is(instanceFactory));
+		assertThat(inTest.path, is(path));
+		assertThat(inTest.nioAccess, is(nioAccess));
+		assertThat(inTest.parent, is(Optional.empty()));
 	}
 
 	@Test
-	public void testObtainingAFileSystemWhooseRootIsAFileFails() throws IOException {
-		Path emptyFilesystem = testFilesystem(file("rootWhichIsAFile"));
-		Path rootWhichIsAFile = emptyFilesystem.resolve("rootWhichIsAFile");
+	public void testRootedAtCreatesFolder() throws IOException {
+		verify(nioAccess).createDirectories(path);
+	}
 
-		thrown.expect(UncheckedIOException.class);
-
-		NioFileSystem.rootedAt(rootWhichIsAFile);
+	@After
+	public void tearDown() {
+		InstanceFactory.DEFAULT.reset();
+		NioAccess.DEFAULT.reset();
 	}
 
 }

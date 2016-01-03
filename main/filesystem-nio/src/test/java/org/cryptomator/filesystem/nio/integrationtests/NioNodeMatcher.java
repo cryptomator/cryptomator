@@ -1,4 +1,4 @@
-package org.cryptomator.filesystem.nio;
+package org.cryptomator.filesystem.nio.integrationtests;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 

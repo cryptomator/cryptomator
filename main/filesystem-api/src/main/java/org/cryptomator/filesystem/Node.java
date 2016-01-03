@@ -33,4 +33,17 @@ public interface Node {
 
 	Instant lastModified() throws UncheckedIOException;
 
+	/**
+	 * @return the {@link FileSystem} this Node belongs to
+	 */
+	default FileSystem fileSystem() {
+		return parent() //
+				.map(Node::fileSystem) //
+				.orElseGet(() -> (FileSystem) this);
+	}
+
+	default boolean belongsToSameFilesystem(Node other) {
+		return fileSystem() == other.fileSystem();
+	}
+
 }

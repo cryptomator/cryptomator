@@ -12,7 +12,7 @@ public class NioFileSystem extends NioFolder implements FileSystem {
 	}
 
 	private NioFileSystem(Path root) {
-		super(Optional.empty(), root);
+		super(Optional.empty(), root, NioAccess.DEFAULT.get(), InstanceFactory.DEFAULT.get());
 		create();
 	}
 

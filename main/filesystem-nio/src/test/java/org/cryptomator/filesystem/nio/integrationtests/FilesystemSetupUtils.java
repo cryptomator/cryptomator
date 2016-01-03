@@ -1,4 +1,4 @@
-package org.cryptomator.filesystem.nio;
+package org.cryptomator.filesystem.nio.integrationtests;
 
 import java.io.IOException;
 import java.io.OutputStream;

@@ -2,7 +2,6 @@ package org.cryptomator.filesystem.nio;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.Optional;
@@ -15,25 +14,14 @@ abstract class NioNode implements Node {
 	protected final Optional<NioFolder> parent;
 	protected final Path path;
 
-	private NioFileSystem fileSystem;
+	protected final NioAccess nioAccess;
+	protected final InstanceFactory instanceFactory;
 
-	public NioNode(Optional<NioFolder> parent, Path path) {
+	public NioNode(Optional<NioFolder> parent, Path path, NioAccess nioAccess, InstanceFactory instanceFactoy) {
 		this.path = path.toAbsolutePath();
 		this.parent = parent;
-	}
-
-	NioFileSystem fileSystem() {
-		if (fileSystem == null) {
-			fileSystem = parent //
-					.map(NioNode::fileSystem) //
-					.orElseGet(() -> (NioFileSystem) this);
-		}
-		return fileSystem;
-	}
-
-	boolean belongsToSameFilesystem(Node other) {
-		return other instanceof NioNode //
-				&& ((NioNode) other).fileSystem() == fileSystem();
+		this.nioAccess = nioAccess;
+		this.instanceFactory = instanceFactoy;
 	}
 
 	@Override
@@ -49,7 +37,7 @@ abstract class NioNode implements Node {
 	@Override
 	public Instant lastModified() throws UncheckedIOException {
 		try {
-			return Files.getLastModifiedTime(path).toInstant();
+			return nioAccess.getLastModifiedTime(path).toInstant();
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
 		}

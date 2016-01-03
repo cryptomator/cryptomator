@@ -1,9 +1,12 @@
 package org.cryptomator.filesystem.nio;
 
+import static java.lang.String.format;
+
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.Map;
@@ -16,21 +19,29 @@ class SharedFileChannel {
 	public static final int EOF = -1;
 
 	private final Path path;
+	private final NioAccess nioAccess;
 
 	private Map<Thread, Thread> openedBy = new ConcurrentHashMap<>();
 	private Lock lock = new ReentrantLock();
 
 	private FileChannel delegate;
 
-	public SharedFileChannel(Path path) {
+	public SharedFileChannel(Path path, NioAccess nioAccess) {
 		this.path = path;
+		this.nioAccess = nioAccess;
+	}
+
+	public void openIfClosed(OpenMode mode) {
+		if (!openedBy.containsKey(Thread.currentThread())) {
+			open(mode);
+		}
 	}
 
 	public void open(OpenMode mode) {
 		doLocked(() -> {
 			Thread thread = Thread.currentThread();
 			if (openedBy.put(thread, thread) != null) {
-				throw new IllegalStateException("A thread can only open a SharedFileChannel once");
+				throw new IllegalStateException("SharedFileChannel already open for current thread");
 			}
 			if (delegate == null) {
 				createChannel(mode);
@@ -38,8 +49,18 @@ class SharedFileChannel {
 		});
 	}
 
+	public void closeIfOpen() {
+		if (openedBy.containsKey(Thread.currentThread())) {
+			internalClose();
+		}
+	}
+
 	public void close() {
 		assertOpenedByCurrentThread();
+		internalClose();
+	}
+
+	private void internalClose() {
 		doLocked(() -> {
 			openedBy.remove(Thread.currentThread());
 			try {
@@ -54,14 +75,6 @@ class SharedFileChannel {
 		});
 	}
 
-	/**
-	 * @deprecated only intended to be used in tests
-	 */
-	@Deprecated
-	void forceClose() {
-		closeSilently(delegate);
-	}
-
 	private void assertOpenedByCurrentThread() {
 		if (!openedBy.containsKey(Thread.currentThread())) {
 			throw new IllegalStateException("SharedFileChannel closed for current thread");
@@ -70,30 +83,23 @@ class SharedFileChannel {
 
 	private void createChannel(OpenMode mode) {
 		try {
-			FileChannel readChannel = null;
-			if (mode == OpenMode.READ) {
-				readChannel = FileChannel.open(path, StandardOpenOption.READ);
+			if (nioAccess.isDirectory(path)) {
+				throw new IOException(format("%s is a directory", path));
 			}
-			delegate = FileChannel.open(path, StandardOpenOption.CREATE, StandardOpenOption.READ, StandardOpenOption.WRITE);
-			closeSilently(readChannel);
+			if (mode == OpenMode.READ) {
+				if (!nioAccess.isRegularFile(path)) {
+					throw new NoSuchFileException(format("%s does not exist", path));
+				}
+			}
+			delegate = nioAccess.open(path, StandardOpenOption.CREATE, StandardOpenOption.READ, StandardOpenOption.WRITE);
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
 		}
 	}
 
-	private void closeSilently(FileChannel channel) {
-		if (channel != null) {
-			try {
-				channel.close();
-			} catch (IOException e) {
-				// ignore
-			}
-		}
-	}
-
 	private void closeChannel() {
 		try {
-			delegate.close();
+			nioAccess.close(delegate);
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
 		} finally {
@@ -146,15 +152,18 @@ class SharedFileChannel {
 	public long transferTo(long position, long count, SharedFileChannel targetChannel, long targetPosition) {
 		assertOpenedByCurrentThread();
 		targetChannel.assertOpenedByCurrentThread();
+		if (count < 0) {
+			throw new IllegalArgumentException("Count must not be negative");
+		}
 		try {
-			long maxPosition = delegate.size();
-			long maxCount = Math.min(count, maxPosition - position);
-			long remaining = maxCount;
+			long maxPosition = Math.min(delegate.size(), position + count);
+			long transferCount = Math.max(0, maxPosition - position);
+			long remaining = transferCount;
 			targetChannel.delegate.position(targetPosition);
 			while (remaining > 0) {
 				remaining -= delegate.transferTo(maxPosition - remaining, remaining, targetChannel.delegate);
 			}
-			return maxCount;
+			return transferCount;
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
 		}
@@ -179,12 +188,12 @@ class SharedFileChannel {
 	}
 
 	private int tryWriteFully(long position, ByteBuffer source) throws IOException {
-		int initialRemaining = source.remaining();
-		long maxPosition = position + initialRemaining;
+		int count = source.remaining();
+		long maxPosition = position + count;
 		do {
 			delegate.write(source, maxPosition - source.remaining());
 		} while (source.hasRemaining());
-		return initialRemaining - source.remaining();
+		return count;
 	}
 
 }

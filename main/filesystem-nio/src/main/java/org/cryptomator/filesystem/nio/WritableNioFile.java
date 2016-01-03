@@ -8,30 +8,37 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
 import java.time.Instant;
 
+import org.cryptomator.filesystem.FileSystem;
 import org.cryptomator.filesystem.WritableFile;
 
 class WritableNioFile implements WritableFile {
 
-	private final NioFile nioFile;
+	private final FileSystem fileSystem;
+	private final Path path;
+	private final SharedFileChannel channel;
+	private final NioAccess nioAccess;
+	private Runnable afterCloseCallback;
 
-	private boolean channelOpened = false;
 	private boolean open = true;
 	private long position = 0;
 
-	public WritableNioFile(NioFile nioFile) {
-		this.nioFile = nioFile;
+	public WritableNioFile(FileSystem fileSystem, Path path, SharedFileChannel channel, Runnable afterCloseCallback, NioAccess nioAccess) {
+		this.fileSystem = fileSystem;
+		this.path = path;
+		this.channel = channel;
+		this.afterCloseCallback = afterCloseCallback;
+		this.nioAccess = nioAccess;
 	}
 
 	@Override
 	public int write(ByteBuffer source) throws UncheckedIOException {
 		assertOpen();
 		ensureChannelIsOpened();
-		int written = nioFile.channel().writeFully(position, source);
+		int written = channel.writeFully(position, source);
 		position += written;
 		return written;
 	}
@@ -48,7 +55,7 @@ class WritableNioFile implements WritableFile {
 	}
 
 	private boolean belongsToSameFilesystem(WritableFile other) {
-		return other instanceof WritableNioFile && ((WritableNioFile) other).nioFile().belongsToSameFilesystem(nioFile);
+		return other instanceof WritableNioFile && ((WritableNioFile) other).fileSystem() == fileSystem;
 	}
 
 	@Override
@@ -65,27 +72,27 @@ class WritableNioFile implements WritableFile {
 
 	private void internalMoveTo(WritableNioFile other) {
 		other.assertOpen();
+		assertMovePreconditionsAreMet(other);
 		try {
-			assertMovePreconditionsAreMet(other);
 			closeChannelIfOpened();
 			other.closeChannelIfOpened();
-			Files.move(path(), other.path(), REPLACE_EXISTING);
+			nioAccess.move(path, other.path(), REPLACE_EXISTING);
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
 		} finally {
 			open = false;
 			other.open = false;
-			other.nioFile.lock().writeLock().unlock();
-			nioFile.lock().writeLock().unlock();
+			other.invokeAfterCloseCallback();
+			invokeAfterCloseCallback();
 		}
 	}
 
 	private void assertMovePreconditionsAreMet(WritableNioFile other) {
-		if (Files.isDirectory(path())) {
-			throw new UncheckedIOException(new IOException(format("Can not move %s to %s. Source is a directory", path(), other.path())));
+		if (nioAccess.isDirectory(path)) {
+			throw new UncheckedIOException(new IOException(format("Can not move %s to %s. Source is a directory", path, other.path())));
 		}
-		if (Files.isDirectory(other.path())) {
-			throw new UncheckedIOException(new IOException(format("Can not move %s to %s. Target is a directory", path(), other.path())));
+		if (nioAccess.isDirectory(other.path())) {
+			throw new UncheckedIOException(new IOException(format("Can not move %s to %s. Target is a directory", path, other.path())));
 		}
 	}
 
@@ -94,7 +101,7 @@ class WritableNioFile implements WritableFile {
 		assertOpen();
 		ensureChannelIsOpened();
 		try {
-			Files.setLastModifiedTime(path(), FileTime.from(instant));
+			nioAccess.setLastModifiedTime(path, FileTime.from(instant));
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
 		}
@@ -105,12 +112,12 @@ class WritableNioFile implements WritableFile {
 		assertOpen();
 		try {
 			closeChannelIfOpened();
-			Files.delete(nioFile.path());
+			nioAccess.delete(path);
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
 		} finally {
 			open = false;
-			nioFile.lock().writeLock().unlock();
+			invokeAfterCloseCallback();
 		}
 	}
 
@@ -118,7 +125,7 @@ class WritableNioFile implements WritableFile {
 	public void truncate() throws UncheckedIOException {
 		assertOpen();
 		ensureChannelIsOpened();
-		nioFile.channel().truncate(0);
+		channel.truncate(0);
 	}
 
 	@Override
@@ -130,33 +137,32 @@ class WritableNioFile implements WritableFile {
 		try {
 			closeChannelIfOpened();
 		} finally {
-			nioFile.lock().writeLock().unlock();
+			afterCloseCallback.run();
 		}
 	}
 
 	void ensureChannelIsOpened() {
-		if (!channelOpened) {
-			nioFile.channel().open(WRITE);
-			channelOpened = true;
-		}
+		channel.openIfClosed(WRITE);
 	}
 
-	private void closeChannelIfOpened() {
-		if (channelOpened) {
-			channel().close();
-		}
+	void closeChannelIfOpened() {
+		channel.closeIfOpen();
 	}
 
-	SharedFileChannel channel() {
-		return nioFile.channel();
+	FileSystem fileSystem() {
+		return fileSystem;
 	}
 
 	Path path() {
-		return nioFile.path;
+		return path;
 	}
 
-	NioFile nioFile() {
-		return nioFile;
+	SharedFileChannel channel() {
+		return channel;
+	}
+
+	void invokeAfterCloseCallback() {
+		afterCloseCallback.run();
 	}
 
 	void assertOpen() {
@@ -167,7 +173,7 @@ class WritableNioFile implements WritableFile {
 
 	@Override
 	public String toString() {
-		return format("Writable%s", this.nioFile);
+		return format("WritableNioFile(%s)", path);
 	}
 
 }

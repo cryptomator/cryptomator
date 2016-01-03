@@ -1,5 +1,6 @@
-package org.cryptomator.filesystem.nio;
+package org.cryptomator.filesystem.nio.integrationtests;
 
+import static java.util.Arrays.copyOfRange;
 import static org.hamcrest.CoreMatchers.is;
 
 import java.io.IOException;
@@ -63,6 +64,10 @@ class PathMatcher {
 			return new IsFileWithContentMatcher(value.getBytes());
 		}
 
+		public Matcher<Path> withPartialContentAt(int offset, byte[] value) {
+			return new IsFileWithContentMatcher(offset, value);
+		}
+
 		public Matcher<Path> withContent(byte[] value) {
 			return new IsFileWithContentMatcher(value);
 		}
@@ -75,10 +80,19 @@ class PathMatcher {
 
 	public static class IsFileWithContentMatcher extends TypeSafeDiagnosingMatcher<Path> {
 
+		private static final int NO_OFFSET = -1;
+
 		private final byte[] expectedContent;
+		private final int offset;
+
+		public IsFileWithContentMatcher(int offset, byte[] content) {
+			this.expectedContent = content;
+			this.offset = offset;
+		}
 
 		public IsFileWithContentMatcher(byte[] content) {
 			this.expectedContent = content;
+			this.offset = NO_OFFSET;
 		}
 
 		@Override
@@ -86,6 +100,10 @@ class PathMatcher {
 			description //
 					.appendText("a file with content ") //
 					.appendText(Arrays.toString(expectedContent));
+			if (offset != NO_OFFSET) {
+				description.appendText(" starting at byte ") //
+						.appendValue(offset);
+			}
 		}
 
 		@Override
@@ -96,10 +114,18 @@ class PathMatcher {
 			}
 
 			byte[] actualContent = getFileContent(path);
+			if (offset != NO_OFFSET) {
+				actualContent = copyOfRange(actualContent, offset, offset + expectedContent.length);
+			}
+
 			if (!Arrays.equals(actualContent, expectedContent)) {
 				mismatchDescription //
 						.appendText("a file with content ") //
 						.appendText(Arrays.toString(actualContent));
+				if (offset != NO_OFFSET) {
+					mismatchDescription.appendText(" starting at byte ") //
+							.appendValue(offset);
+				}
 				return false;
 			}
 

@@ -1,5 +1,6 @@
 package org.cryptomator.filesystem.nio;
 
+import static java.lang.String.format;
 import static org.cryptomator.filesystem.nio.OpenMode.READ;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -13,57 +14,52 @@ import static org.mockito.Mockito.when;
 
 import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
+import java.nio.file.Path;
 
+import org.cryptomator.filesystem.FileSystem;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InOrder;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 
 import de.bechte.junit.runners.context.HierarchicalContextRunner;
 
 @RunWith(HierarchicalContextRunner.class)
-@SuppressWarnings("resource")
 public class ReadableNioFileTest {
 
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
 
-	private NioFile file;
+	private FileSystem fileSystem;
+
+	private Path path;
 
 	private SharedFileChannel channel;
 
-	private ReadWriteLock lock;
+	private Runnable afterCloseCallback;
 
-	private Lock readLock;
+	private ReadableNioFile inTest;
 
 	@Before
 	public void setup() {
-		file = mock(NioFile.class);
+		fileSystem = mock(FileSystem.class);
+		path = mock(Path.class);
 		channel = mock(SharedFileChannel.class);
-		lock = mock(ReadWriteLock.class);
-		readLock = mock(Lock.class);
+		afterCloseCallback = mock(Runnable.class);
 
-		when(file.channel()).thenReturn(channel);
-		when(file.lock()).thenReturn(lock);
-		when(lock.readLock()).thenReturn(readLock);
+		inTest = new ReadableNioFile(fileSystem, path, channel, afterCloseCallback);
 	}
 
 	@Test
 	public void testConstructorInvokesOpenWithReadModeOnChannelOfNioFile() {
-		new ReadableNioFile(file);
-
 		verify(channel).open(READ);
 	}
 
 	@Test
 	public void testReadFailsIfClosed() {
-		ReadableNioFile inTest = new ReadableNioFile(file);
 		ByteBuffer irrelevant = null;
 		inTest.close();
 
@@ -75,7 +71,6 @@ public class ReadableNioFileTest {
 
 	@Test
 	public void testPositionFailsIfClosed() {
-		ReadableNioFile inTest = new ReadableNioFile(file);
 		int irrelevant = 1;
 		inTest.close();
 
@@ -87,7 +82,6 @@ public class ReadableNioFileTest {
 
 	@Test
 	public void testPositionFailsIfNegative() {
-		ReadableNioFile inTest = new ReadableNioFile(file);
 
 		thrown.expect(IllegalArgumentException.class);
 
@@ -96,7 +90,6 @@ public class ReadableNioFileTest {
 
 	@Test
 	public void testReadDelegatesToChannelReadFullyWithZeroPositionIfNotSet() {
-		ReadableNioFile inTest = new ReadableNioFile(file);
 		ByteBuffer buffer = mock(ByteBuffer.class);
 
 		inTest.read(buffer);
@@ -106,7 +99,6 @@ public class ReadableNioFileTest {
 
 	@Test
 	public void testReadDelegatesToChannelReadFullyWithPositionAtEndOfPreviousReadIfInvokedTwice() {
-		ReadableNioFile inTest = new ReadableNioFile(file);
 		ByteBuffer buffer = mock(ByteBuffer.class);
 		int endOfPreviousRead = 10;
 		when(channel.readFully(0, buffer)).thenReturn(endOfPreviousRead);
@@ -120,7 +112,6 @@ public class ReadableNioFileTest {
 
 	@Test
 	public void testReadDelegatesToChannelReadFullyWithPositionUnchangedIfPreviousReadReturnedEof() {
-		ReadableNioFile inTest = new ReadableNioFile(file);
 		ByteBuffer buffer = mock(ByteBuffer.class);
 		when(channel.readFully(0, buffer)).thenReturn(SharedFileChannel.EOF);
 
@@ -132,7 +123,6 @@ public class ReadableNioFileTest {
 
 	@Test
 	public void testReadDelegatesToChannelReadFullyWithSetPosition() {
-		ReadableNioFile inTest = new ReadableNioFile(file);
 		ByteBuffer buffer = mock(ByteBuffer.class);
 		int position = 10;
 		inTest.position(position);
@@ -144,7 +134,6 @@ public class ReadableNioFileTest {
 
 	@Test
 	public void testReadReturnsValueOfChannelReadFully() {
-		ReadableNioFile inTest = new ReadableNioFile(file);
 		ByteBuffer buffer = mock(ByteBuffer.class);
 		int expectedResult = 37028;
 		when(channel.readFully(0, buffer)).thenReturn(expectedResult);
@@ -156,7 +145,6 @@ public class ReadableNioFileTest {
 
 	@Test
 	public void testReadDoesNotModifyBuffer() {
-		ReadableNioFile inTest = new ReadableNioFile(file);
 		ByteBuffer buffer = mock(ByteBuffer.class);
 
 		inTest.read(buffer);
@@ -166,68 +154,56 @@ public class ReadableNioFileTest {
 
 	public class CopyTo {
 
-		@Mock
-		private NioFile otherFile;
+		private WritableNioFile target;
 
-		@Mock
-		private WritableNioFile writableOtherFile;
-
-		@Mock
-		private SharedFileChannel otherChannel;
+		private SharedFileChannel channelOfTarget;
 
 		@Before
 		public void setup() {
-			otherFile = mock(NioFile.class);
-			writableOtherFile = mock(WritableNioFile.class);
-			otherChannel = mock(SharedFileChannel.class);
-
-			when(writableOtherFile.nioFile()).thenReturn(otherFile);
-			when(writableOtherFile.channel()).thenReturn(otherChannel);
+			target = mock(WritableNioFile.class);
+			channelOfTarget = mock(SharedFileChannel.class);
+			when(target.fileSystem()).thenReturn(fileSystem);
+			when(target.channel()).thenReturn(channelOfTarget);
 		}
 
 		@Test
 		public void testCopyToFailsIfTargetBelongsToOtherFileSystem() {
-			ReadableNioFile inTest = new ReadableNioFile(file);
-			when(otherFile.belongsToSameFilesystem(file)).thenReturn(false);
+			WritableNioFile targetFromOtherFileSystem = mock(WritableNioFile.class);
+			when(targetFromOtherFileSystem.fileSystem()).thenReturn(mock(FileSystem.class));
 
 			thrown.expect(IllegalArgumentException.class);
 
-			inTest.copyTo(writableOtherFile);
+			inTest.copyTo(targetFromOtherFileSystem);
 		}
 
 		@Test
 		public void testCopyToFailsIfSourceIsClosed() {
-			ReadableNioFile inTest = new ReadableNioFile(file);
-			when(otherFile.belongsToSameFilesystem(file)).thenReturn(true);
+			when(target.fileSystem()).thenReturn(fileSystem);
 			inTest.close();
 
 			thrown.expect(UncheckedIOException.class);
 			thrown.expectMessage("already closed");
 
-			inTest.copyTo(writableOtherFile);
+			inTest.copyTo(target);
 		}
 
 		@Test
 		public void testCopyToAssertsThatTargetIsOpenEnsuresTargetChannelIsOpenTuncatesItAndTransfersDataFromSourceChannel() {
-			ReadableNioFile inTest = new ReadableNioFile(file);
-			when(otherFile.belongsToSameFilesystem(file)).thenReturn(true);
 			long sizeOfSourceChannel = 3283;
 			when(channel.size()).thenReturn(sizeOfSourceChannel);
-			when(channel.transferTo(0, sizeOfSourceChannel, otherChannel, 0)).thenReturn(sizeOfSourceChannel);
+			when(channel.transferTo(0, sizeOfSourceChannel, channelOfTarget, 0)).thenReturn(sizeOfSourceChannel);
 
-			inTest.copyTo(writableOtherFile);
+			inTest.copyTo(target);
 
-			InOrder inOrder = inOrder(writableOtherFile, otherChannel, channel);
-			inOrder.verify(writableOtherFile).assertOpen();
-			inOrder.verify(writableOtherFile).ensureChannelIsOpened();
-			inOrder.verify(otherChannel).truncate(0);
-			inOrder.verify(channel).transferTo(0, sizeOfSourceChannel, otherChannel, 0);
+			InOrder inOrder = inOrder(target, channel, channelOfTarget);
+			inOrder.verify(target).assertOpen();
+			inOrder.verify(target).ensureChannelIsOpened();
+			inOrder.verify(channelOfTarget).truncate(0);
+			inOrder.verify(channel).transferTo(0, sizeOfSourceChannel, channelOfTarget, 0);
 		}
 
 		@Test
 		public void testCopyToInvokesTransferToUntilAllBytesHaveBeenTransferred() {
-			ReadableNioFile inTest = new ReadableNioFile(file);
-			when(otherFile.belongsToSameFilesystem(file)).thenReturn(true);
 			long firstTransferAmount = 100;
 			long secondTransferAmount = 300;
 			long thirdTransferAmount = 500;
@@ -235,30 +211,27 @@ public class ReadableNioFileTest {
 			long sizeRemainingAfterFirstTransfer = sizeRemainingAfterSecondTransfer + secondTransferAmount;
 			long size = sizeRemainingAfterFirstTransfer + firstTransferAmount;
 			when(channel.size()).thenReturn(size);
-			when(channel.transferTo(0, size, otherChannel, 0)).thenReturn(firstTransferAmount);
-			when(channel.transferTo(firstTransferAmount, sizeRemainingAfterFirstTransfer, otherChannel, firstTransferAmount)).thenReturn(secondTransferAmount);
-			when(channel.transferTo(firstTransferAmount + secondTransferAmount, sizeRemainingAfterSecondTransfer, otherChannel, firstTransferAmount + secondTransferAmount)).thenReturn(thirdTransferAmount);
+			when(channel.transferTo(0, size, channelOfTarget, 0)).thenReturn(firstTransferAmount);
+			when(channel.transferTo(firstTransferAmount, sizeRemainingAfterFirstTransfer, channelOfTarget, firstTransferAmount)).thenReturn(secondTransferAmount);
+			when(channel.transferTo(firstTransferAmount + secondTransferAmount, sizeRemainingAfterSecondTransfer, channelOfTarget, firstTransferAmount + secondTransferAmount)).thenReturn(thirdTransferAmount);
 
-			inTest.copyTo(writableOtherFile);
+			inTest.copyTo(target);
 
 			InOrder inOrder = inOrder(channel);
-			inOrder.verify(channel).transferTo(0, size, otherChannel, 0);
-			inOrder.verify(channel).transferTo(firstTransferAmount, sizeRemainingAfterFirstTransfer, otherChannel, firstTransferAmount);
-			inOrder.verify(channel).transferTo(firstTransferAmount + secondTransferAmount, sizeRemainingAfterSecondTransfer, otherChannel, firstTransferAmount + secondTransferAmount);
+			inOrder.verify(channel).transferTo(0, size, channelOfTarget, 0);
+			inOrder.verify(channel).transferTo(firstTransferAmount, sizeRemainingAfterFirstTransfer, channelOfTarget, firstTransferAmount);
+			inOrder.verify(channel).transferTo(firstTransferAmount + secondTransferAmount, sizeRemainingAfterSecondTransfer, channelOfTarget, firstTransferAmount + secondTransferAmount);
 		}
 
 	}
 
 	@Test
 	public void testIsOpenReturnsTrueForNewReadableNioFile() {
-		ReadableNioFile inTest = new ReadableNioFile(file);
-
 		assertThat(inTest.isOpen(), is(true));
 	}
 
 	@Test
 	public void testIsOpenReturnsFalseForClosed() {
-		ReadableNioFile inTest = new ReadableNioFile(file);
 		inTest.close();
 
 		assertThat(inTest.isOpen(), is(false));
@@ -266,30 +239,25 @@ public class ReadableNioFileTest {
 
 	@Test
 	public void testCloseClosesChannelAndUnlocksReadLock() {
-		ReadableNioFile inTest = new ReadableNioFile(file);
-
 		inTest.close();
 
-		InOrder inOrder = Mockito.inOrder(channel, readLock);
+		InOrder inOrder = Mockito.inOrder(channel, afterCloseCallback);
 		inOrder.verify(channel).close();
-		inOrder.verify(readLock).unlock();
+		inOrder.verify(afterCloseCallback).run();
 	}
 
 	@Test
 	public void testCloseClosesChannelAndUnlocksReadLockOnlyOnceIfInvokedTwice() {
-		ReadableNioFile inTest = new ReadableNioFile(file);
-
 		inTest.close();
 		inTest.close();
 
-		InOrder inOrder = Mockito.inOrder(channel, readLock);
+		InOrder inOrder = Mockito.inOrder(channel, afterCloseCallback);
 		inOrder.verify(channel).close();
-		inOrder.verify(readLock).unlock();
+		inOrder.verify(afterCloseCallback).run();
 	}
 
 	@Test
 	public void testCloseUnlocksReadLockEvenIfCloseFails() {
-		ReadableNioFile inTest = new ReadableNioFile(file);
 		String message = "exceptionMessage";
 		doThrow(new RuntimeException(message)).when(channel).close();
 
@@ -298,16 +266,13 @@ public class ReadableNioFileTest {
 		try {
 			inTest.close();
 		} finally {
-			verify(readLock).unlock();
+			verify(afterCloseCallback).run();
 		}
 	}
 
 	@Test
 	public void testToString() {
-		String nioFileToString = file.toString();
-		ReadableNioFile inTest = new ReadableNioFile(file);
-
-		assertThat(inTest.toString(), is("Readable" + nioFileToString));
+		assertThat(inTest.toString(), is(format("ReadableNioFile(%s)", path)));
 	}
 
 }
