@@ -60,7 +60,7 @@ public class FileContentDecryptorImplTest {
 		}
 	}
 
-	@Test
+	@Test(timeout = 2000)
 	public void testPartialDecryption() throws InterruptedException {
 		final byte[] keyBytes = new byte[32];
 		final SecretKey encryptionKey = new SecretKeySpec(keyBytes, "AES");
@@ -90,10 +90,9 @@ public class FileContentDecryptorImplTest {
 		for (int i = 3; i >= 0; i--) {
 			int ciphertextPos = (int) cryptor.toCiphertextPos(i * 32768);
 			try (FileContentDecryptor decryptor = cryptor.createFileContentDecryptor(header, ciphertextPos)) {
-				ByteBuffer intBuf = ByteBuffer.allocate(32768);
-				intBuf.clear();
 				ciphertext.position(ciphertextPos);
 				decryptor.append(ciphertext);
+				decryptor.append(FileContentCryptor.EOF);
 				ByteBuffer decrypted = decryptor.cleartext();
 				Assert.assertEquals(i, decrypted.getInt());
 			}

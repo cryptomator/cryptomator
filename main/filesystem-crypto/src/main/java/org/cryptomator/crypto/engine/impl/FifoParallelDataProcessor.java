@@ -68,15 +68,4 @@ class FifoParallelDataProcessor<T> {
 		return processedData.take().get();
 	}
 
-	/**
-	 * Stops work in progress immediatley.
-	 */
-	@Deprecated
-	void cancelAllPendingJobs() {
-		Future<T> job;
-		while ((job = processedData.poll()) != null) {
-			job.cancel(true);
-		}
-	}
-
 }
