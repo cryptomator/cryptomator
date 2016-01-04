@@ -70,6 +70,20 @@ public class FileContentDecryptorImplTest {
 		ByteBuffer header = ByteBuffer.allocate(cryptor.getHeaderSize());
 		ByteBuffer ciphertext = ByteBuffer.allocate(131200); // 4 * (32k + 32)
 		try (FileContentEncryptor encryptor = cryptor.createFileContentEncryptor(Optional.empty(), 0)) {
+			final Thread ciphertextWriter = new Thread(() -> {
+				ByteBuffer buf;
+				try {
+					while ((buf = encryptor.ciphertext()) != FileContentCryptor.EOF) {
+						ByteBuffers.copy(buf, ciphertext);
+					}
+					ciphertext.flip();
+				} catch (InterruptedException e) {
+					Thread.currentThread().interrupt();
+				}
+			});
+			ciphertextWriter.start();
+
+			// write cleartext:
 			ByteBuffer intBuf = ByteBuffer.allocate(32768);
 			for (int i = 0; i < 4; i++) {
 				intBuf.clear();
@@ -78,23 +92,29 @@ public class FileContentDecryptorImplTest {
 				encryptor.append(intBuf);
 			}
 			encryptor.append(FileContentCryptor.EOF);
-			ByteBuffer buf;
-			while ((buf = encryptor.ciphertext()) != FileContentCryptor.EOF) {
-				ByteBuffers.copy(buf, ciphertext);
-			}
-			ByteBuffers.copy(encryptor.getHeader(), header);
+			ciphertextWriter.join();
+			header = encryptor.getHeader();
 		}
-		header.flip();
-		ciphertext.flip();
 
 		for (int i = 3; i >= 0; i--) {
-			int ciphertextPos = (int) cryptor.toCiphertextPos(i * 32768);
+			final int ciphertextPos = (int) cryptor.toCiphertextPos(i * 32768);
 			try (FileContentDecryptor decryptor = cryptor.createFileContentDecryptor(header, ciphertextPos)) {
-				ciphertext.position(ciphertextPos);
-				decryptor.append(ciphertext);
-				decryptor.append(FileContentCryptor.EOF);
+				final Thread ciphertextReader = new Thread(() -> {
+					try {
+						ciphertext.position(ciphertextPos);
+						decryptor.append(ciphertext);
+						decryptor.append(FileContentCryptor.EOF);
+					} catch (InterruptedException e) {
+						Thread.currentThread().interrupt();
+					}
+				});
+				ciphertextReader.start();
+
+				// read cleartext:
 				ByteBuffer decrypted = decryptor.cleartext();
 				Assert.assertEquals(i, decrypted.getInt());
+
+				ciphertextReader.interrupt();
 			}
 		}
 
