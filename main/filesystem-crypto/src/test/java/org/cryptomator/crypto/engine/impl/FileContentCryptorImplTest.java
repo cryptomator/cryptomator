@@ -30,9 +30,9 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class FileContentCryptorTest {
+public class FileContentCryptorImplTest {
 
-	private static final Logger LOG = LoggerFactory.getLogger(FileContentCryptorTest.class);
+	private static final Logger LOG = LoggerFactory.getLogger(FileContentCryptorImplTest.class);
 
 	private static final SecureRandom RANDOM_MOCK = new SecureRandom() {
 
@@ -74,8 +74,8 @@ public class FileContentCryptorTest {
 		final SecretKey macKey = new SecretKeySpec(keyBytes, "HmacSHA256");
 		FileContentCryptor cryptor = new FileContentCryptorImpl(encryptionKey, macKey, RANDOM_MOCK);
 
-		ByteBuffer tooShortHeader = ByteBuffer.allocate(64);
-		cryptor.createFileContentDecryptor(tooShortHeader, 3);
+		ByteBuffer header = ByteBuffer.allocate(cryptor.getHeaderSize());
+		cryptor.createFileContentDecryptor(header, 3);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
@@ -85,8 +85,7 @@ public class FileContentCryptorTest {
 		final SecretKey macKey = new SecretKeySpec(keyBytes, "HmacSHA256");
 		FileContentCryptor cryptor = new FileContentCryptorImpl(encryptionKey, macKey, RANDOM_MOCK);
 
-		ByteBuffer tooShortHeader = ByteBuffer.allocate(64);
-		cryptor.createFileContentEncryptor(Optional.of(tooShortHeader), 3);
+		cryptor.createFileContentEncryptor(Optional.empty(), 3);
 	}
 
 	@Test
