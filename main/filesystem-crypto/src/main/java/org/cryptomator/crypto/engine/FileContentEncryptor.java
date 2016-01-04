@@ -44,23 +44,6 @@ public interface FileContentEncryptor extends Destroyable, Closeable {
 	ByteBuffer ciphertext() throws InterruptedException;
 
 	/**
-	 * Calculates the cleartext bytes required to perform a partial encryption of a specific cleartext byte range.
-	 * If this decryptor doesn't support partial encryption the result will be <code>[0, {@link Long#MAX_VALUE}]</code>.
-	 * 
-	 * @param cleartextRange The cleartext range the caller wants to ecnrypt.
-	 * @return The cleartext range required in order to encrypt the given cleartext range.
-	 */
-	ByteRange cleartextRequiredToEncryptRange(ByteRange cleartextRange);
-
-	/**
-	 * Informs the encryptor, what the first byte of the next cleartext block will be. This method needs to be called only for partial encryption.
-	 * 
-	 * @param nextCleartextByte The first byte of the next cleartext buffer given via {@link #append(ByteBuffer)}.
-	 * @throws IllegalArgumentException If nextCleartextByte is an invalid starting point. Only start bytes determined by {@link #cleartextRequiredToEncryptRange(ByteRange)} are supported.
-	 */
-	void skipToPosition(long nextCleartextByte) throws IllegalArgumentException;
-
-	/**
 	 * Clears file-specific sensitive information.
 	 */
 	@Override

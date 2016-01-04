@@ -10,6 +10,14 @@ package org.cryptomator.crypto.engine;
 
 abstract class CryptoException extends RuntimeException {
 
+	public CryptoException() {
+		super();
+	}
+
+	public CryptoException(Throwable cause) {
+		super(cause);
+	}
+
 	public CryptoException(String message, Throwable cause) {
 		super(message, cause);
 	}

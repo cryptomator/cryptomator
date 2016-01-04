@@ -10,6 +10,7 @@ package org.cryptomator.crypto.engine.impl;
 
 import java.lang.reflect.Field;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -19,25 +20,12 @@ import org.junit.Test;
 
 public class FifoParallelDataProcessorTest {
 
-	@Test(expected = IllegalStateException.class)
-	public void testRethrowsException() throws InterruptedException {
+	@Test(expected = ExecutionException.class)
+	public void testRethrowsExceptionAsExecutionException() throws InterruptedException, ExecutionException {
 		FifoParallelDataProcessor<Object> processor = new FifoParallelDataProcessor<>(1, 1);
 		try {
 			processor.submit(() -> {
-				throw new IllegalStateException("will be rethrown during 'processedData()'");
-			});
-		} catch (Exception e) {
-			Assert.fail("Exception must not yet be thrown.");
-		}
-		processor.processedData();
-	}
-
-	@Test(expected = RuntimeException.class)
-	public void testRethrowsCheckedExceptionAsRuntimeExceptions() throws InterruptedException {
-		FifoParallelDataProcessor<Object> processor = new FifoParallelDataProcessor<>(1, 1);
-		try {
-			processor.submit(() -> {
-				throw new Exception("will be wrapped in a RuntimeException during 'processedData()'");
+				throw new Exception("will be wrapped in a ExecutionException during 'processedData()'");
 			});
 		} catch (Exception e) {
 			Assert.fail("Exception must not yet be thrown.");
@@ -56,7 +44,7 @@ public class FifoParallelDataProcessorTest {
 	}
 
 	@Test
-	public void testStrictFifoOrder() throws InterruptedException {
+	public void testStrictFifoOrder() throws InterruptedException, ExecutionException {
 		FifoParallelDataProcessor<Integer> processor = new FifoParallelDataProcessor<>(4, 10);
 		processor.submit(new IntegerJob(100, 1));
 		processor.submit(new IntegerJob(50, 2));
@@ -74,7 +62,7 @@ public class FifoParallelDataProcessorTest {
 	}
 
 	@Test
-	public void testBlockingBehaviour() throws InterruptedException {
+	public void testBlockingBehaviour() throws InterruptedException, ExecutionException {
 		FifoParallelDataProcessor<Integer> processor = new FifoParallelDataProcessor<>(1, 1);
 		processor.submitPreprocessed(1); // #1 in queue
 
@@ -95,7 +83,7 @@ public class FifoParallelDataProcessorTest {
 	}
 
 	@Test
-	public void testInterruptionDuringSubmission() throws InterruptedException {
+	public void testInterruptionDuringSubmission() throws InterruptedException, ExecutionException {
 		FifoParallelDataProcessor<Integer> processor = new FifoParallelDataProcessor<>(1, 1);
 		processor.submitPreprocessed(1); // #1 in queue
 

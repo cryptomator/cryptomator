@@ -53,7 +53,7 @@ public class FileContentCryptorTest {
 		FileContentCryptor cryptor = new FileContentCryptorImpl(encryptionKey, macKey, RANDOM_MOCK);
 
 		ByteBuffer tooShortHeader = ByteBuffer.allocate(63);
-		cryptor.createFileContentDecryptor(tooShortHeader);
+		cryptor.createFileContentDecryptor(tooShortHeader, 0);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
@@ -64,7 +64,29 @@ public class FileContentCryptorTest {
 		FileContentCryptor cryptor = new FileContentCryptorImpl(encryptionKey, macKey, RANDOM_MOCK);
 
 		ByteBuffer tooShortHeader = ByteBuffer.allocate(63);
-		cryptor.createFileContentEncryptor(Optional.of(tooShortHeader));
+		cryptor.createFileContentEncryptor(Optional.of(tooShortHeader), 0);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testInvalidStartingPointInDecryptor() throws InterruptedException {
+		final byte[] keyBytes = new byte[32];
+		final SecretKey encryptionKey = new SecretKeySpec(keyBytes, "AES");
+		final SecretKey macKey = new SecretKeySpec(keyBytes, "HmacSHA256");
+		FileContentCryptor cryptor = new FileContentCryptorImpl(encryptionKey, macKey, RANDOM_MOCK);
+
+		ByteBuffer tooShortHeader = ByteBuffer.allocate(64);
+		cryptor.createFileContentDecryptor(tooShortHeader, 3);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testInvalidStartingPointEncryptor() throws InterruptedException {
+		final byte[] keyBytes = new byte[32];
+		final SecretKey encryptionKey = new SecretKeySpec(keyBytes, "AES");
+		final SecretKey macKey = new SecretKeySpec(keyBytes, "HmacSHA256");
+		FileContentCryptor cryptor = new FileContentCryptorImpl(encryptionKey, macKey, RANDOM_MOCK);
+
+		ByteBuffer tooShortHeader = ByteBuffer.allocate(64);
+		cryptor.createFileContentEncryptor(Optional.of(tooShortHeader), 3);
 	}
 
 	@Test
@@ -76,7 +98,7 @@ public class FileContentCryptorTest {
 
 		ByteBuffer header = ByteBuffer.allocate(cryptor.getHeaderSize());
 		ByteBuffer ciphertext = ByteBuffer.allocate(100);
-		try (FileContentEncryptor encryptor = cryptor.createFileContentEncryptor(Optional.empty())) {
+		try (FileContentEncryptor encryptor = cryptor.createFileContentEncryptor(Optional.empty(), 0)) {
 			encryptor.append(ByteBuffer.wrap("cleartext message".getBytes()));
 			encryptor.append(FileContentCryptor.EOF);
 			ByteBuffer buf;
@@ -89,7 +111,7 @@ public class FileContentCryptorTest {
 		ciphertext.flip();
 
 		ByteBuffer plaintext = ByteBuffer.allocate(100);
-		try (FileContentDecryptor decryptor = cryptor.createFileContentDecryptor(header)) {
+		try (FileContentDecryptor decryptor = cryptor.createFileContentDecryptor(header, 0)) {
 			decryptor.append(ciphertext);
 			decryptor.append(FileContentCryptor.EOF);
 			ByteBuffer buf;
@@ -115,7 +137,7 @@ public class FileContentCryptorTest {
 		final Thread fileWriter;
 		final ByteBuffer header;
 		final long encStart = System.nanoTime();
-		try (FileContentEncryptor encryptor = cryptor.createFileContentEncryptor(Optional.empty())) {
+		try (FileContentEncryptor encryptor = cryptor.createFileContentEncryptor(Optional.empty(), 0)) {
 			fileWriter = new Thread(() -> {
 				try (FileChannel fc = FileChannel.open(tmpFile, StandardOpenOption.WRITE)) {
 					ByteBuffer ciphertext;
@@ -142,7 +164,7 @@ public class FileContentCryptorTest {
 
 		final Thread fileReader;
 		final long decStart = System.nanoTime();
-		try (FileContentDecryptor decryptor = cryptor.createFileContentDecryptor(header)) {
+		try (FileContentDecryptor decryptor = cryptor.createFileContentDecryptor(header, 0)) {
 			fileReader = new Thread(() -> {
 				try (FileChannel fc = FileChannel.open(tmpFile, StandardOpenOption.READ)) {
 					ByteBuffer ciphertext = ByteBuffer.allocate(654321);

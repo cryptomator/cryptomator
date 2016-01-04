@@ -35,11 +35,14 @@ class BlockAlignedReadableFile extends DelegatingReadableFile {
 	public void position(long logicalPosition) throws UncheckedIOException {
 		long blockNumber = logicalPosition / blockSize;
 		long physicalPosition = blockNumber * blockSize;
+		assert physicalPosition <= logicalPosition;
+		int diff = (int) (logicalPosition - physicalPosition);
+		assert diff >= 0;
+		assert diff < blockSize;
 		super.position(physicalPosition);
 		eofReached = false;
 		readCurrentBlock();
-		int advance = (int) (logicalPosition - physicalPosition);
-		currentBlockBuffer.position(advance);
+		currentBlockBuffer.position(diff);
 	}
 
 	@Override

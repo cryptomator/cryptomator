@@ -44,7 +44,6 @@ class BlockAlignedWritableFile extends DelegatingWritableFile {
 	public int write(ByteBuffer source) throws UncheckedIOException {
 		int written = 0;
 		while (source.hasRemaining()) {
-			currentBlockBuffer.limit(Math.max(currentBlockBuffer.limit(), Math.min(currentBlockBuffer.position() + source.remaining(), currentBlockBuffer.capacity())));
 			written += ByteBuffers.copy(source, currentBlockBuffer);
 			writeCurrentBlockIfNeeded();
 		}
@@ -53,6 +52,7 @@ class BlockAlignedWritableFile extends DelegatingWritableFile {
 
 	@Override
 	public void close() throws UncheckedIOException {
+		currentBlockBuffer.flip();
 		writeCurrentBlock();
 		readableFile.close();
 		super.close();
@@ -73,7 +73,7 @@ class BlockAlignedWritableFile extends DelegatingWritableFile {
 	private void readCurrentBlock() {
 		currentBlockBuffer.clear();
 		readableFile.read(currentBlockBuffer);
-		currentBlockBuffer.flip();
+		currentBlockBuffer.rewind();
 	}
 
 }

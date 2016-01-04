@@ -39,24 +39,7 @@ public interface FileContentDecryptor extends Destroyable, Closeable {
 	 * 
 	 * @return Decrypted cleartext or {@link FileContentCryptor#EOF}.
 	 */
-	ByteBuffer cleartext() throws InterruptedException;
-
-	/**
-	 * Calculates the ciphertext bytes required to perform a partial decryption of a requested cleartext byte range.
-	 * If this decryptor doesn't support partial decryption the result will be <code>[0, {@link Long#MAX_VALUE}]</code>.
-	 * 
-	 * @param cleartextRange The cleartext range the caller is interested in.
-	 * @return The ciphertext range required in order to decrypt the cleartext range.
-	 */
-	ByteRange ciphertextRequiredToDecryptRange(ByteRange cleartextRange);
-
-	/**
-	 * Informs the decryptor, what the first byte of the next ciphertext block will be. This method needs to be called only for partial decryption.
-	 * 
-	 * @param nextCiphertextByte The first byte of the next ciphertext buffer given via {@link #append(ByteBuffer)}.
-	 * @throws IllegalArgumentException If nextCiphertextByte is an invalid starting point. Only start bytes determined by {@link #ciphertextRequiredToDecryptRange(ByteRange)} are supported.
-	 */
-	void skipToPosition(long nextCiphertextByte) throws IllegalArgumentException;
+	ByteBuffer cleartext() throws InterruptedException, AuthenticationFailedException;
 
 	/**
 	 * Clears file-specific sensitive information.

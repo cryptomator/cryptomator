@@ -8,11 +8,15 @@
  *******************************************************************************/
 package org.cryptomator.crypto.engine.impl;
 
+import static org.cryptomator.crypto.engine.impl.FileContentCryptorImpl.CHUNK_SIZE;
+import static org.cryptomator.crypto.engine.impl.FileContentCryptorImpl.MAC_SIZE;
+
 import java.nio.ByteBuffer;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 
 import javax.crypto.Cipher;
 import javax.crypto.Mac;
@@ -20,7 +24,7 @@ import javax.crypto.SecretKey;
 import javax.crypto.ShortBufferException;
 import javax.crypto.spec.IvParameterSpec;
 
-import org.cryptomator.crypto.engine.ByteRange;
+import org.cryptomator.crypto.engine.AuthenticationFailedException;
 import org.cryptomator.crypto.engine.FileContentCryptor;
 import org.cryptomator.crypto.engine.FileContentDecryptor;
 import org.cryptomator.io.ByteBuffers;
@@ -29,8 +33,6 @@ class FileContentDecryptorImpl implements FileContentDecryptor {
 
 	private static final int AES_BLOCK_LENGTH_IN_BYTES = 16;
 	private static final String HMAC_SHA256 = "HmacSHA256";
-	private static final int CHUNK_SIZE = 32 * 1024;
-	private static final int MAC_SIZE = 32;
 	private static final int NUM_THREADS = Runtime.getRuntime().availableProcessors();
 	private static final int READ_AHEAD = 2;
 
@@ -40,10 +42,11 @@ class FileContentDecryptorImpl implements FileContentDecryptor {
 	private ByteBuffer ciphertextBuffer = ByteBuffer.allocate(CHUNK_SIZE + MAC_SIZE);
 	private long chunkNumber = 0;
 
-	public FileContentDecryptorImpl(SecretKey headerKey, SecretKey macKey, ByteBuffer header) {
+	public FileContentDecryptorImpl(SecretKey headerKey, SecretKey macKey, ByteBuffer header, long firstCiphertextByte) {
 		final ThreadLocalMac hmacSha256 = new ThreadLocalMac(macKey, HMAC_SHA256);
 		this.hmacSha256 = hmacSha256;
 		this.header = FileHeader.decrypt(headerKey, hmacSha256, header);
+		this.chunkNumber = firstCiphertextByte / CHUNK_SIZE; // floor() by int-truncation
 	}
 
 	@Override
@@ -73,8 +76,10 @@ class FileContentDecryptorImpl implements FileContentDecryptor {
 
 	private void submitCiphertextBuffer() throws InterruptedException {
 		ciphertextBuffer.flip();
-		Callable<ByteBuffer> encryptionJob = new DecryptionJob(ciphertextBuffer, chunkNumber++);
-		dataProcessor.submit(encryptionJob);
+		if (ciphertextBuffer.hasRemaining()) {
+			Callable<ByteBuffer> encryptionJob = new DecryptionJob(ciphertextBuffer, chunkNumber++);
+			dataProcessor.submit(encryptionJob);
+		}
 	}
 
 	private void submitEof() throws InterruptedException {
@@ -83,17 +88,15 @@ class FileContentDecryptorImpl implements FileContentDecryptor {
 
 	@Override
 	public ByteBuffer cleartext() throws InterruptedException {
-		return dataProcessor.processedData();
-	}
-
-	@Override
-	public ByteRange ciphertextRequiredToDecryptRange(ByteRange cleartextRange) {
-		return ByteRange.of(0, Long.MAX_VALUE);
-	}
-
-	@Override
-	public void skipToPosition(long nextCiphertextByte) throws IllegalArgumentException {
-		throw new UnsupportedOperationException("Partial decryption not supported.");
+		try {
+			return dataProcessor.processedData();
+		} catch (ExecutionException e) {
+			if (e.getCause() instanceof AuthenticationFailedException) {
+				throw new AuthenticationFailedException(e);
+			} else {
+				throw new RuntimeException(e);
+			}
+		}
 	}
 
 	@Override
@@ -130,8 +133,7 @@ class FileContentDecryptorImpl implements FileContentDecryptor {
 				Mac mac = hmacSha256.get();
 				mac.update(ciphertextChunk.asReadOnlyBuffer());
 				if (!MessageDigest.isEqual(expectedMac, mac.doFinal())) {
-					// TODO handle invalid MAC properly
-					throw new IllegalArgumentException("Corrupt mac.");
+					throw new AuthenticationFailedException();
 				}
 
 				Cipher cipher = ThreadLocalAesCtrCipher.get();

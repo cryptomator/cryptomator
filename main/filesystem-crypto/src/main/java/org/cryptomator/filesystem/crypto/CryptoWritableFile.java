@@ -12,7 +12,6 @@ import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 import java.time.Instant;
 import java.util.Optional;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -33,9 +32,9 @@ class CryptoWritableFile implements WritableFile {
 
 	public CryptoWritableFile(FileContentCryptor cryptor, WritableFile file) {
 		this.file = file;
-		this.encryptor = cryptor.createFileContentEncryptor(Optional.empty());
+		this.encryptor = cryptor.createFileContentEncryptor(Optional.empty(), 0);
 		writeHeader();
-		this.writeTask = executorService.submit(new Writer());
+		this.writeTask = executorService.submit(new CiphertextWriter(file, encryptor));
 	}
 
 	private void writeHeader() {
@@ -117,23 +116,6 @@ class CryptoWritableFile implements WritableFile {
 			executorService.shutdownNow();
 			file.close();
 		}
-	}
-
-	private class Writer implements Callable<Void> {
-
-		@Override
-		public Void call() {
-			try {
-				ByteBuffer ciphertext;
-				while ((ciphertext = encryptor.ciphertext()) != FileContentCryptor.EOF) {
-					file.write(ciphertext);
-				}
-			} catch (InterruptedException e) {
-				Thread.currentThread().interrupt();
-			}
-			return null;
-		}
-
 	}
 
 }

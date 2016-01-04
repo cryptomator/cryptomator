@@ -41,7 +41,7 @@ public class FileContentEncryptorImplTest {
 		final SecretKey headerKey = new SecretKeySpec(keyBytes, "AES");
 		final SecretKey macKey = new SecretKeySpec(keyBytes, "AES");
 
-		try (FileContentEncryptor encryptor = new FileContentEncryptorImpl(headerKey, macKey, RANDOM_MOCK)) {
+		try (FileContentEncryptor encryptor = new FileContentEncryptorImpl(headerKey, macKey, RANDOM_MOCK, 0)) {
 			encryptor.append(ByteBuffer.wrap("hello ".getBytes()));
 			encryptor.append(ByteBuffer.wrap("world".getBytes()));
 			encryptor.append(FileContentCryptor.EOF);

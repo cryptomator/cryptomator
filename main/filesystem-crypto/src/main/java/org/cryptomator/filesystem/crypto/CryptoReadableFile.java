@@ -10,7 +10,6 @@ package org.cryptomator.filesystem.crypto;
 
 import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -24,35 +23,24 @@ import org.cryptomator.io.ByteBuffers;
 
 class CryptoReadableFile implements ReadableFile {
 
-	private static final int READ_BUFFER_SIZE = 32 * 1024 + 32; // aligned with
-																// encrypted
-																// chunk size +
-																// MAC size
 	private static final ByteBuffer EMPTY_BUFFER = ByteBuffer.allocate(0);
 
 	private final ExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
-	private final FileContentDecryptor decryptor;
+	private final ByteBuffer header;
+	private final FileContentCryptor cryptor;
 	private final ReadableFile file;
+	private FileContentDecryptor decryptor;
 	private Future<Void> readAheadTask;
 	private ByteBuffer bufferedCleartext = EMPTY_BUFFER;
 
 	public CryptoReadableFile(FileContentCryptor cryptor, ReadableFile file) {
-		final int headerSize = cryptor.getHeaderSize();
-		final ByteBuffer header = ByteBuffer.allocate(headerSize);
+		this.header = ByteBuffer.allocate(cryptor.getHeaderSize());
+		this.cryptor = cryptor;
+		this.file = file;
 		file.position(0);
 		file.read(header);
 		header.flip();
-		this.decryptor = cryptor.createFileContentDecryptor(header);
-		this.file = file;
-		this.prepareReadAtPhysicalPosition(headerSize + 0);
-	}
-
-	private void prepareReadAtPhysicalPosition(long pos) {
-		if (readAheadTask != null) {
-			readAheadTask.cancel(true);
-			bufferedCleartext = EMPTY_BUFFER;
-		}
-		readAheadTask = executorService.submit(new Reader(pos));
+		this.position(0);
 	}
 
 	@Override
@@ -75,7 +63,13 @@ class CryptoReadableFile implements ReadableFile {
 
 	@Override
 	public void position(long position) throws UncheckedIOException {
-		throw new UnsupportedOperationException("Partial read unsupported");
+		if (readAheadTask != null) {
+			readAheadTask.cancel(true);
+			bufferedCleartext = EMPTY_BUFFER;
+		}
+		long ciphertextPos = cryptor.toCiphertextPos(position);
+		decryptor = cryptor.createFileContentDecryptor(header.asReadOnlyBuffer(), ciphertextPos);
+		readAheadTask = executorService.submit(new CiphertextReader(file, decryptor, header.remaining() + ciphertextPos));
 	}
 
 	private void bufferCleartext() throws InterruptedException {
@@ -108,37 +102,6 @@ class CryptoReadableFile implements ReadableFile {
 	public void close() {
 		executorService.shutdownNow();
 		file.close();
-	}
-
-	private class Reader implements Callable<Void> {
-
-		private final long startpos;
-
-		public Reader(long startpos) {
-			this.startpos = startpos;
-		}
-
-		@Override
-		public Void call() {
-			file.position(startpos);
-			int bytesRead = -1;
-			try {
-				do {
-					ByteBuffer ciphertext = ByteBuffer.allocate(READ_BUFFER_SIZE);
-					file.read(ciphertext);
-					ciphertext.flip();
-					bytesRead = ciphertext.remaining();
-					if (bytesRead > 0) {
-						decryptor.append(ciphertext);
-					}
-				} while (bytesRead > 0);
-				decryptor.append(FileContentCryptor.EOF);
-			} catch (InterruptedException e) {
-				Thread.currentThread().interrupt();
-			}
-			return null;
-		}
-
 	}
 
 }

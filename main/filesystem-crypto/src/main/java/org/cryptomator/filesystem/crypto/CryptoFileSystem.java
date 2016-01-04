@@ -12,6 +12,7 @@ import java.nio.ByteBuffer;
 import java.util.Optional;
 
 import org.cryptomator.crypto.engine.Cryptor;
+import org.cryptomator.crypto.engine.InvalidPassphraseException;
 import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.FileSystem;
 import org.cryptomator.filesystem.Folder;
@@ -27,17 +28,17 @@ public class CryptoFileSystem extends CryptoFolder implements FileSystem {
 
 	private final Folder physicalRoot;
 
-	public CryptoFileSystem(Folder physicalRoot, Cryptor cryptor, CharSequence passphrase) {
+	public CryptoFileSystem(Folder physicalRoot, Cryptor cryptor, CharSequence passphrase) throws InvalidPassphraseException {
 		super(null, "", cryptor);
 		this.physicalRoot = physicalRoot;
 		final File masterkeyFile = physicalRoot.file(MASTERKEY_FILENAME);
 		if (masterkeyFile.exists()) {
 			final boolean unlocked = decryptMasterKeyFile(cryptor, masterkeyFile, passphrase);
 			if (!unlocked) {
-				// TODO new InvalidPassphraseException() ?
-				throw new IllegalArgumentException("Wrong passphrase.");
+				throw new InvalidPassphraseException();
 			}
 		} else {
+			cryptor.randomizeMasterkey();
 			encryptMasterKeyFile(cryptor, masterkeyFile, passphrase);
 		}
 		assert masterkeyFile.exists() : "A CryptoFileSystem can not exist without a masterkey file.";

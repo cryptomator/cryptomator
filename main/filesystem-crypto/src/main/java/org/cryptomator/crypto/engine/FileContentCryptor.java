@@ -24,16 +24,25 @@ public interface FileContentCryptor {
 	int getHeaderSize();
 
 	/**
+	 * @return The ciphertext position that correlates to the cleartext position.
+	 */
+	long toCiphertextPos(long cleartextPos);
+
+	/**
 	 * @param header The full fixed-length header of an encrypted file. The caller is required to pass the exact amount of bytes returned by {@link #getHeaderSize()}.
+	 * @param firstCiphertextByte Position of the first ciphertext byte passed to the decryptor. If the decryptor can not fast-forward to the requested byte, an exception is thrown.
+	 *            If firstCiphertextByte is an invalid starting point, i.e. doesn't align with the decryptors internal block size, an IllegalArgumentException will be thrown.
 	 * @return A possibly new FileContentDecryptor instance which is capable of decrypting ciphertexts associated with the given file header.
 	 */
-	FileContentDecryptor createFileContentDecryptor(ByteBuffer header);
+	FileContentDecryptor createFileContentDecryptor(ByteBuffer header, long firstCiphertextByte) throws IllegalArgumentException;
 
 	/**
 	 * @param header The full fixed-length header of an encrypted file or {@link Optional#empty()}. The caller is required to pass the exact amount of bytes returned by {@link #getHeaderSize()}.
 	 *            If the header is empty, a new one will be created by the returned encryptor.
+	 * @param firstCleartextByte Position of the first cleartext byte passed to the encryptor. If the encryptor can not fast-forward to the requested byte, an exception is thrown.
+	 *            If firstCiphertextByte is an invalid starting point, i.e. doesn't align with the encryptors internal block size, an IllegalArgumentException will be thrown.
 	 * @return A possibly new FileContentEncryptor instance which is capable of encrypting cleartext associated with the given file header.
 	 */
-	FileContentEncryptor createFileContentEncryptor(Optional<ByteBuffer> header);
+	FileContentEncryptor createFileContentEncryptor(Optional<ByteBuffer> header, long firstCleartextByte) throws IllegalArgumentException;
 
 }

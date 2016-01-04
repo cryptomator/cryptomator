@@ -8,11 +8,14 @@
  *******************************************************************************/
 package org.cryptomator.crypto.engine.impl;
 
+import static org.cryptomator.crypto.engine.impl.FileContentCryptorImpl.CHUNK_SIZE;
+
 import java.nio.ByteBuffer;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.SecureRandom;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.LongAdder;
 
 import javax.crypto.Cipher;
@@ -21,7 +24,6 @@ import javax.crypto.SecretKey;
 import javax.crypto.ShortBufferException;
 import javax.crypto.spec.IvParameterSpec;
 
-import org.cryptomator.crypto.engine.ByteRange;
 import org.cryptomator.crypto.engine.FileContentCryptor;
 import org.cryptomator.crypto.engine.FileContentEncryptor;
 import org.cryptomator.io.ByteBuffers;
@@ -30,7 +32,6 @@ class FileContentEncryptorImpl implements FileContentEncryptor {
 
 	private static final int AES_BLOCK_LENGTH_IN_BYTES = 16;
 	private static final String HMAC_SHA256 = "HmacSHA256";
-	private static final int CHUNK_SIZE = 32 * 1024;
 	private static final int NUM_THREADS = Runtime.getRuntime().availableProcessors();
 	private static final int READ_AHEAD = 2;
 
@@ -42,7 +43,10 @@ class FileContentEncryptorImpl implements FileContentEncryptor {
 	private ByteBuffer cleartextBuffer = ByteBuffer.allocate(CHUNK_SIZE);
 	private long chunkNumber = 0;
 
-	public FileContentEncryptorImpl(SecretKey headerKey, SecretKey macKey, SecureRandom randomSource) {
+	public FileContentEncryptorImpl(SecretKey headerKey, SecretKey macKey, SecureRandom randomSource, long firstCleartextByte) {
+		if (firstCleartextByte != 0) {
+			throw new UnsupportedOperationException("Partial encryption not supported.");
+		}
 		this.hmacSha256 = new ThreadLocalMac(macKey, HMAC_SHA256);
 		this.headerKey = headerKey;
 		this.header = new FileHeader(randomSource);
@@ -87,17 +91,11 @@ class FileContentEncryptorImpl implements FileContentEncryptor {
 
 	@Override
 	public ByteBuffer ciphertext() throws InterruptedException {
-		return dataProcessor.processedData();
-	}
-
-	@Override
-	public ByteRange cleartextRequiredToEncryptRange(ByteRange cleartextRange) {
-		return ByteRange.of(0, Long.MAX_VALUE);
-	}
-
-	@Override
-	public void skipToPosition(long nextCleartextByte) throws IllegalArgumentException {
-		throw new UnsupportedOperationException("Partial encryption not supported.");
+		try {
+			return dataProcessor.processedData();
+		} catch (ExecutionException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Override

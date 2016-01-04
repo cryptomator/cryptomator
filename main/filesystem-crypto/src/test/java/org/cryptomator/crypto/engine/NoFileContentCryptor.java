@@ -21,7 +21,12 @@ class NoFileContentCryptor implements FileContentCryptor {
 	}
 
 	@Override
-	public FileContentDecryptor createFileContentDecryptor(ByteBuffer header) {
+	public long toCiphertextPos(long cleartextPos) {
+		return cleartextPos;
+	}
+
+	@Override
+	public FileContentDecryptor createFileContentDecryptor(ByteBuffer header, long firstCiphertextByte) {
 		if (header.remaining() != getHeaderSize()) {
 			throw new IllegalArgumentException("Invalid header size.");
 		}
@@ -29,7 +34,7 @@ class NoFileContentCryptor implements FileContentCryptor {
 	}
 
 	@Override
-	public FileContentEncryptor createFileContentEncryptor(Optional<ByteBuffer> header) {
+	public FileContentEncryptor createFileContentEncryptor(Optional<ByteBuffer> header, long firstCleartextByte) {
 		return new Encryptor();
 	}
 
@@ -64,16 +69,6 @@ class NoFileContentCryptor implements FileContentCryptor {
 		@Override
 		public ByteBuffer cleartext() throws InterruptedException {
 			return cleartextQueue.take();
-		}
-
-		@Override
-		public ByteRange ciphertextRequiredToDecryptRange(ByteRange cleartextRange) {
-			return cleartextRange;
-		}
-
-		@Override
-		public void skipToPosition(long nextCiphertextByte) throws IllegalArgumentException {
-			// no-op
 		}
 
 		@Override
@@ -113,16 +108,6 @@ class NoFileContentCryptor implements FileContentCryptor {
 		@Override
 		public ByteBuffer ciphertext() throws InterruptedException {
 			return ciphertextQueue.take();
-		}
-
-		@Override
-		public ByteRange cleartextRequiredToEncryptRange(ByteRange cleartextRange) {
-			return cleartextRange;
-		}
-
-		@Override
-		public void skipToPosition(long nextCleartextByte) throws IllegalArgumentException {
-			// no-op
 		}
 
 		@Override

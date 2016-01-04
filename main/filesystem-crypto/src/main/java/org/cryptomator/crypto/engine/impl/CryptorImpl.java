@@ -43,25 +43,8 @@ public class CryptorImpl implements Cryptor {
 	private final AtomicReference<FileContentCryptor> fileContentCryptor = new AtomicReference<>();
 	private final SecureRandom randomSource;
 
-	/**
-	 * Designated constructor.
-	 * 
-	 * Package-visible for testing only, use secondary constructors otherwise to ensure a proper PRNG.
-	 */
 	CryptorImpl(SecureRandom randomSource) {
 		this.randomSource = randomSource;
-	}
-
-	public CryptorImpl() {
-		this(getStrongSecureRandom());
-	}
-
-	private static SecureRandom getStrongSecureRandom() {
-		try {
-			return SecureRandom.getInstanceStrong();
-		} catch (NoSuchAlgorithmException e) {
-			throw new IllegalStateException("No strong PRNGs available.", e);
-		}
 	}
 
 	@Override

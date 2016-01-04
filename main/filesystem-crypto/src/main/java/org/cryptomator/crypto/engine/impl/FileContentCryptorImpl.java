@@ -18,13 +18,16 @@ import org.cryptomator.crypto.engine.FileContentCryptor;
 import org.cryptomator.crypto.engine.FileContentDecryptor;
 import org.cryptomator.crypto.engine.FileContentEncryptor;
 
-class FileContentCryptorImpl implements FileContentCryptor {
+public class FileContentCryptorImpl implements FileContentCryptor {
+
+	public static final int CHUNK_SIZE = 32 * 1024;
+	static final int MAC_SIZE = 32;
 
 	private final SecretKey encryptionKey;
 	private final SecretKey macKey;
 	private final SecureRandom randomSource;
 
-	public FileContentCryptorImpl(SecretKey encryptionKey, SecretKey macKey, SecureRandom randomSource) {
+	FileContentCryptorImpl(SecretKey encryptionKey, SecretKey macKey, SecureRandom randomSource) {
 		this.encryptionKey = encryptionKey;
 		this.macKey = macKey;
 		this.randomSource = randomSource;
@@ -36,19 +39,36 @@ class FileContentCryptorImpl implements FileContentCryptor {
 	}
 
 	@Override
-	public FileContentDecryptor createFileContentDecryptor(ByteBuffer header) {
-		if (header.remaining() != getHeaderSize()) {
-			throw new IllegalArgumentException("Invalid header.");
-		}
-		return new FileContentDecryptorImpl(encryptionKey, macKey, header);
+	public long toCiphertextPos(long cleartextPos) {
+		long chunkNum = cleartextPos / CHUNK_SIZE;
+		long cleartextChunkStart = chunkNum * CHUNK_SIZE;
+		assert cleartextChunkStart <= cleartextPos;
+		long chunkInternalDiff = cleartextPos - cleartextChunkStart;
+		assert chunkInternalDiff >= 0 && chunkInternalDiff < CHUNK_SIZE;
+		long ciphertextChunkStart = chunkNum * (CHUNK_SIZE + MAC_SIZE);
+		return ciphertextChunkStart + chunkInternalDiff;
 	}
 
 	@Override
-	public FileContentEncryptor createFileContentEncryptor(Optional<ByteBuffer> header) {
+	public FileContentDecryptor createFileContentDecryptor(ByteBuffer header, long firstCiphertextByte) {
+		if (header.remaining() != getHeaderSize()) {
+			throw new IllegalArgumentException("Invalid header.");
+		}
+		if (firstCiphertextByte % (CHUNK_SIZE + MAC_SIZE) != 0) {
+			throw new IllegalArgumentException("Invalid starting point for decryption.");
+		}
+		return new FileContentDecryptorImpl(encryptionKey, macKey, header, firstCiphertextByte);
+	}
+
+	@Override
+	public FileContentEncryptor createFileContentEncryptor(Optional<ByteBuffer> header, long firstCleartextByte) {
 		if (header.isPresent() && header.get().remaining() != getHeaderSize()) {
 			throw new IllegalArgumentException("Invalid header.");
 		}
-		return new FileContentEncryptorImpl(encryptionKey, macKey, randomSource);
+		if (firstCleartextByte % CHUNK_SIZE != 0) {
+			throw new IllegalArgumentException("Invalid starting point for encryption.");
+		}
+		return new FileContentEncryptorImpl(encryptionKey, macKey, randomSource, firstCleartextByte);
 	}
 
 }

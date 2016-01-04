@@ -31,5 +31,5 @@ public interface FilenameCryptor {
 	 * @param ciphertextName Ciphertext only, with any additional strings like file extensions stripped first.
 	 * @return cleartext filename, probably including its cleartext file extension.
 	 */
-	String decryptFilename(String ciphertextName);
+	String decryptFilename(String ciphertextName) throws AuthenticationFailedException;
 }

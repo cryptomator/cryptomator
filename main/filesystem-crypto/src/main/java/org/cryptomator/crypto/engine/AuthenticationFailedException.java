@@ -10,6 +10,14 @@ package org.cryptomator.crypto.engine;
 
 public class AuthenticationFailedException extends CryptoException {
 
+	public AuthenticationFailedException() {
+		super();
+	}
+
+	public AuthenticationFailedException(Throwable cause) {
+		super(cause);
+	}
+
 	public AuthenticationFailedException(String message, Throwable cause) {
 		super(message, cause);
 	}

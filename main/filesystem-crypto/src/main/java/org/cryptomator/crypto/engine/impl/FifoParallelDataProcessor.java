@@ -64,15 +64,18 @@ class FifoParallelDataProcessor<T> {
 	 * @return Next job result
 	 * @throws InterruptedException If the calling thread was interrupted while waiting for the next result.
 	 */
-	T processedData() throws InterruptedException {
-		try {
-			return processedData.take().get();
-		} catch (ExecutionException e) {
-			if (e.getCause() instanceof RuntimeException) {
-				throw (RuntimeException) e.getCause();
-			} else {
-				throw new RuntimeException(e);
-			}
+	T processedData() throws InterruptedException, ExecutionException {
+		return processedData.take().get();
+	}
+
+	/**
+	 * Stops work in progress immediatley.
+	 */
+	@Deprecated
+	void cancelAllPendingJobs() {
+		Future<T> job;
+		while ((job = processedData.poll()) != null) {
+			job.cancel(true);
 		}
 	}
 

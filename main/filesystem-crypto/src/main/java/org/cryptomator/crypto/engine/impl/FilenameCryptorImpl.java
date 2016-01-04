@@ -51,7 +51,7 @@ class FilenameCryptorImpl implements FilenameCryptor {
 	}
 
 	@Override
-	public String decryptFilename(String ciphertextName) {
+	public String decryptFilename(String ciphertextName) throws AuthenticationFailedException {
 		final byte[] encryptedBytes = BASE32.decode(ciphertextName);
 		try {
 			final byte[] cleartextBytes = AES_SIV.decrypt(encryptionKey, macKey, encryptedBytes);

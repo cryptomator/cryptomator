@@ -8,18 +8,23 @@
  *******************************************************************************/
 package org.cryptomator.filesystem.crypto;
 
+import java.io.IOException;
+import java.io.Reader;
+import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.cryptomator.crypto.engine.Cryptor;
 import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.Folder;
 import org.cryptomator.filesystem.Node;
-import org.cryptomator.filesystem.ReadableFile;
 import org.cryptomator.filesystem.WritableFile;
 
 class CryptoFolder extends CryptoNode implements Folder {
@@ -46,13 +51,10 @@ class CryptoFolder extends CryptoNode implements Folder {
 		if (directoryId.get() == null) {
 			File dirFile = physicalFile();
 			if (dirFile.exists()) {
-				try (ReadableFile readable = dirFile.openReadable()) {
-					final ByteBuffer buf = ByteBuffer.allocate(64);
-					readable.read(buf);
-					buf.flip();
-					byte[] bytes = new byte[buf.remaining()];
-					buf.get(bytes);
-					directoryId.set(new String(bytes));
+				try (Reader reader = Channels.newReader(dirFile.openReadable(), StandardCharsets.UTF_8.newDecoder(), -1)) {
+					directoryId.set(IOUtils.toString(reader));
+				} catch (IOException e) {
+					throw new UncheckedIOException(e);
 				}
 			} else {
 				directoryId.compareAndSet(null, UUID.randomUUID().toString());
