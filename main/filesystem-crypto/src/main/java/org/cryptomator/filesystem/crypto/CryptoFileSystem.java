@@ -19,7 +19,7 @@ import org.cryptomator.filesystem.Folder;
 import org.cryptomator.filesystem.ReadableFile;
 import org.cryptomator.filesystem.WritableFile;
 
-public class CryptoFileSystem extends CryptoFolder implements FileSystem {
+class CryptoFileSystem extends CryptoFolder implements FileSystem {
 
 	private static final String DATA_ROOT_DIR = "d";
 	private static final String ROOT_DIR_FILE = "root";

@@ -9,15 +9,15 @@ import dagger.Module;
 import dagger.Provides;
 
 @Module
-public class CryptoModule {
+public class CryptoEngineModule {
 
 	@Provides
-	Cryptor provideCryptor(SecureRandom secureRandom) {
+	public Cryptor provideCryptor(SecureRandom secureRandom) {
 		return new CryptorImpl(secureRandom);
 	}
 
 	@Provides
-	SecureRandom provideSecureRandom() {
+	public SecureRandom provideSecureRandom() {
 		try {
 			return SecureRandom.getInstanceStrong();
 		} catch (NoSuchAlgorithmException e) {

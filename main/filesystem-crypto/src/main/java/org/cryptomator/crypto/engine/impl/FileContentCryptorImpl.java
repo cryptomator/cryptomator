@@ -21,7 +21,7 @@ import org.cryptomator.crypto.engine.FileContentEncryptor;
 public class FileContentCryptorImpl implements FileContentCryptor {
 
 	public static final int CHUNK_SIZE = 32 * 1024;
-	static final int MAC_SIZE = 32;
+	public static final int MAC_SIZE = 32;
 
 	private final SecretKey encryptionKey;
 	private final SecretKey macKey;
