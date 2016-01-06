@@ -2,8 +2,7 @@ Cryptomator
 ====================
 
 [![Build Status](https://travis-ci.org/cryptomator/cryptomator.svg?branch=master)](https://travis-ci.org/cryptomator/cryptomator)
-[![Join the chat at https://gitter.im/totalvoidness/cryptomator](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/cryptomator/cryptomator?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-[![Flattr Cryptomator](https://api.flattr.com/button/flattr-badge-large.png)](https://flattr.com/submit/auto?user_id=totalvoidness&url=https%3A%2F%2Fgithub.com%2Ftotalvoidness%2Fcryptomator&title=Cryptomator&language=en_GB&tags=github&category=software)
+[![Join the chat at https://gitter.im/cryptomator/cryptomator](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/cryptomator/cryptomator?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 Multiplatform transparent client-side encryption of your files in the cloud.
 
@@ -36,19 +35,9 @@ If you want to take a look at the current beta version, go ahead and get your co
 ## Building
 
 #### Dependencies
-* Java 8
+* Java 8 + JCE unlimited strength policy files (needed for 256-bit keys)
 * Maven 3
-* Optional: OS-dependent build tools for native packaging
-* Optional: JCE unlimited strength policy files (needed for 256-bit keys)
-
-#### Building on Debian-based OS
-```bash
-apt-get install oracle-java8-installer oracle-java8-unlimited-jce-policy fakeroot maven git
-git clone https://github.com/cryptomator/cryptomator.git
-cd cryptomator/main
-git checkout 0.7.1
-mvn clean install -Pdebian
-```
+* Optional: OS-dependent build tools for native packaging (See [Windows](https://github.com/cryptomator/cryptomator-win), [OS X](https://github.com/cryptomator/cryptomator-osx), [Debian](https://github.com/cryptomator/cryptomator-deb))
 
 ## License
 
