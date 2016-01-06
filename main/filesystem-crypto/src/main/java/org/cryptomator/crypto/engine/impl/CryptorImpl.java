@@ -43,7 +43,7 @@ public class CryptorImpl implements Cryptor {
 	private final AtomicReference<FileContentCryptor> fileContentCryptor = new AtomicReference<>();
 	private final SecureRandom randomSource;
 
-	CryptorImpl(SecureRandom randomSource) {
+	public CryptorImpl(SecureRandom randomSource) {
 		this.randomSource = randomSource;
 	}
 

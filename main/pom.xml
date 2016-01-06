@@ -258,6 +258,7 @@
 		<module>filesystem-nio</module>
 		<module>filesystem-nameshortening</module>
 		<module>filesystem-crypto</module>
+		<module>filesystem-invariants-tests</module>
 		<module>crypto-api</module>
 		<module>crypto-aes</module>
 		<module>jackrabbit-filesystem-adapter</module>
