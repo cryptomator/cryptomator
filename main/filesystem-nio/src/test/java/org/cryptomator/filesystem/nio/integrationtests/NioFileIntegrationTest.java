@@ -16,12 +16,10 @@ import java.time.Instant;
 import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.FileSystem;
 import org.cryptomator.filesystem.nio.NioFileSystem;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-@Ignore
 public class NioFileIntegrationTest {
 
 	@Rule

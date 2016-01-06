@@ -12,12 +12,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.cryptomator.filesystem.nio.NioFileSystem;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-@Ignore
 public class NioFileSystemIntegrationTest {
 
 	@Rule
