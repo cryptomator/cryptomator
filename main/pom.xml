@@ -267,36 +267,6 @@
 
 	<profiles>
 		<profile>
-			<id>debian</id>
-			<modules>
-				<module>installer-debian</module>
-			</modules>
-		</profile>
-		<profile>
-			<id>osx</id>
-			<modules>
-				<module>installer-osx</module>
-			</modules>
-		</profile>
-		<profile>
-			<id>osx-mas</id>
-			<modules>
-				<module>installer-osx-mas</module>
-			</modules>
-		</profile>
-		<profile>
-			<id>win</id>
-			<modules>
-				<module>installer-win</module>
-			</modules>
-		</profile>
-		<profile>
-			<id>win-portable</id>
-			<modules>
-				<module>installer-win-portable</module>
-			</modules>
-		</profile>
-		<profile>
 			<id>uber-jar</id>
 			<modules>
 				<module>uber-jar</module>
