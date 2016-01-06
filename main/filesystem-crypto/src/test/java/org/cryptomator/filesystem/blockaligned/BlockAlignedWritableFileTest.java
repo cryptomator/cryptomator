@@ -17,8 +17,33 @@ import org.cryptomator.filesystem.WritableFile;
 import org.cryptomator.filesystem.inmem.InMemoryFileSystem;
 import org.junit.Assert;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 public class BlockAlignedWritableFileTest {
+
+	@Test
+	public void testSwitchingModes() {
+		FileSystem fs = new InMemoryFileSystem();
+		File file = fs.file("test");
+		try (WritableFile w = file.openWritable()) {
+			w.write(ByteBuffer.wrap(new byte[] {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09}));
+		}
+
+		BlockAlignedWritableFile writable = Mockito.spy(new BlockAlignedWritableFile(file.openWritable(), file.openReadable(), 2));
+		writable.write(ByteBuffer.wrap(new byte[] {0x11, 0x12, 0x13}));
+		Mockito.verify(writable, Mockito.never()).switchToBlockAlignedMode();
+		writable.position(1);
+		Mockito.verify(writable).switchToBlockAlignedMode();
+		writable.write(ByteBuffer.wrap(new byte[] {0x14, 0x15, 0x16}));
+		writable.close();
+
+		try (ReadableFile r = file.openReadable()) {
+			ByteBuffer buf = ByteBuffer.allocate(10);
+			r.read(buf);
+			buf.flip();
+			Assert.assertArrayEquals(new byte[] {0x11, 0x14, 0x15, 0x16, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09}, buf.array());
+		}
+	}
 
 	@Test
 	public void testWrite() {

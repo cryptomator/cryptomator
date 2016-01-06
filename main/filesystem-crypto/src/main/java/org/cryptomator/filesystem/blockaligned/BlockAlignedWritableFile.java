@@ -21,6 +21,11 @@ class BlockAlignedWritableFile extends DelegatingWritableFile {
 	private final int blockSize;
 	private final ReadableFile readableFile;
 	private final ByteBuffer currentBlockBuffer;
+	private Mode mode = Mode.PASSTHROUGH;
+
+	private enum Mode {
+		BLOCK_ALIGNED, PASSTHROUGH;
+	}
 
 	public BlockAlignedWritableFile(WritableFile delegate, ReadableFile readableFile, int blockSize) {
 		super(delegate);
@@ -31,6 +36,7 @@ class BlockAlignedWritableFile extends DelegatingWritableFile {
 
 	@Override
 	public void position(long logicalPosition) throws UncheckedIOException {
+		switchToBlockAlignedMode();
 		long blockNumber = logicalPosition / blockSize;
 		long physicalPosition = blockNumber * blockSize;
 		readableFile.position(physicalPosition);
@@ -40,8 +46,24 @@ class BlockAlignedWritableFile extends DelegatingWritableFile {
 		super.position(physicalPosition);
 	}
 
+	// visible for testing
+	void switchToBlockAlignedMode() {
+		mode = Mode.BLOCK_ALIGNED;
+	}
+
 	@Override
 	public int write(ByteBuffer source) throws UncheckedIOException {
+		switch (mode) {
+		case PASSTHROUGH:
+			return super.write(source);
+		case BLOCK_ALIGNED:
+			return writeBlockAligned(source);
+		default:
+			throw new IllegalStateException("Unsupported mode " + mode);
+		}
+	}
+
+	private int writeBlockAligned(ByteBuffer source) {
 		int written = 0;
 		while (source.hasRemaining()) {
 			written += ByteBuffers.copy(source, currentBlockBuffer);

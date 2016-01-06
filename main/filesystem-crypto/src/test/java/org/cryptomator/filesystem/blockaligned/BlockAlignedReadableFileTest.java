@@ -18,6 +18,7 @@ import org.cryptomator.filesystem.WritableFile;
 import org.cryptomator.filesystem.inmem.InMemoryFileSystem;
 import org.junit.Assert;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 public class BlockAlignedReadableFileTest {
 
@@ -25,6 +26,26 @@ public class BlockAlignedReadableFileTest {
 	public void testInvalidBlockSize() {
 		@SuppressWarnings(value = {"resource", "unused"})
 		ReadableFile r = new BlockAlignedReadableFile(null, 0);
+	}
+
+	@Test
+	public void testSwitchingModes() {
+		FileSystem fs = new InMemoryFileSystem();
+		File file = fs.file("test");
+		try (WritableFile w = file.openWritable()) {
+			w.write(ByteBuffer.wrap(new byte[] {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09}));
+		}
+
+		BlockAlignedReadableFile readable = Mockito.spy(new BlockAlignedReadableFile(file.openReadable(), 2));
+		ByteBuffer firstRead = ByteBuffer.allocate(4);
+		readable.read(firstRead);
+		Mockito.verify(readable, Mockito.never()).switchToBlockAlignedMode();
+		readable.position(0);
+		Mockito.verify(readable).switchToBlockAlignedMode();
+		ByteBuffer secondRead = ByteBuffer.allocate(4);
+		readable.read(secondRead);
+		Assert.assertArrayEquals(firstRead.array(), secondRead.array());
+		readable.close();
 	}
 
 	@Test
