@@ -125,8 +125,8 @@ abstract class DavNode<T extends FileSystemResourceLocator> implements DavResour
 			this.setCreationTime(createTime);
 		} else if (Arrays.asList(DAV_MODIFIEDDATE_PROPNAMES).contains(namespacelessPropertyName) && property.getValue() instanceof String) {
 			final String lastModifiedTimeStr = (String) property.getValue();
-			final Instant createTime = Instant.from(DateTimeFormatter.RFC_1123_DATE_TIME.parse(lastModifiedTimeStr));
-			this.setCreationTime(createTime);
+			final Instant modificationTime = Instant.from(DateTimeFormatter.RFC_1123_DATE_TIME.parse(lastModifiedTimeStr));
+			this.setModificationTime(modificationTime);
 		}
 	}
 
