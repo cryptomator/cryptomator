@@ -21,6 +21,7 @@ import org.cryptomator.io.ByteBuffers;
 public class InMemoryWritableFile implements WritableFile {
 
 	private final Consumer<Instant> lastModifiedSetter;
+	private final Consumer<Instant> creationTimeSetter;
 	private final Supplier<ByteBuffer> contentGetter;
 	private final Consumer<ByteBuffer> contentSetter;
 	private final Consumer<Void> deleter;
@@ -29,12 +30,14 @@ public class InMemoryWritableFile implements WritableFile {
 	private boolean open;
 	private int position = 0;
 
-	public InMemoryWritableFile(Consumer<Instant> lastModifiedSetter, Supplier<ByteBuffer> contentGetter, Consumer<ByteBuffer> contentSetter, Consumer<Void> deleter, WriteLock writeLock) {
+	public InMemoryWritableFile(Consumer<Instant> lastModifiedSetter, Consumer<Instant> creationTimeSetter, Supplier<ByteBuffer> contentGetter, Consumer<ByteBuffer> contentSetter, Consumer<Void> deleter,
+			WriteLock writeLock) {
 		this.lastModifiedSetter = lastModifiedSetter;
 		this.contentGetter = contentGetter;
 		this.contentSetter = contentSetter;
 		this.deleter = deleter;
 		this.writeLock = writeLock;
+		this.creationTimeSetter = creationTimeSetter;
 	}
 
 	@Override
@@ -96,6 +99,11 @@ public class InMemoryWritableFile implements WritableFile {
 		open = false;
 		writeLock.unlock();
 		lastModifiedSetter.accept(Instant.now());
+	}
+
+	@Override
+	public void setCreationTime(Instant instant) throws UncheckedIOException {
+		creationTimeSetter.accept(instant);
 	}
 
 }

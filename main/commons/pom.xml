@@ -12,11 +12,24 @@
 	<artifactId>commons</artifactId>
 	<name>Cryptomator common</name>
 	<description>Shared utilities</description>
-	
+
 	<dependencies>
 		<dependency>
-			<groupId>org.cryptomator</groupId>
-			<artifactId>commons-test</artifactId>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>de.bechte.junit</groupId>
+			<artifactId>junit-hierarchicalcontextrunner</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.hamcrest</groupId>
+			<artifactId>hamcrest-all</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.hamcrest</groupId>
+			<artifactId>hamcrest-all</artifactId>
 		</dependency>
 	</dependencies>
 

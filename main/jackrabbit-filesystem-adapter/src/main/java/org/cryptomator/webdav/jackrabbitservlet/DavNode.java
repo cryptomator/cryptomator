@@ -28,7 +28,9 @@ import org.apache.jackrabbit.webdav.property.DavProperty;
 import org.apache.jackrabbit.webdav.property.DavPropertyName;
 import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
 import org.apache.jackrabbit.webdav.property.DavPropertySet;
+import org.apache.jackrabbit.webdav.property.DefaultDavProperty;
 import org.apache.jackrabbit.webdav.property.PropEntry;
+import org.cryptomator.filesystem.FileSystemFeature;
 import org.cryptomator.filesystem.jackrabbit.FileSystemResourceLocator;
 
 abstract class DavNode<T extends FileSystemResourceLocator> implements DavResource {
@@ -106,7 +108,16 @@ abstract class DavNode<T extends FileSystemResourceLocator> implements DavResour
 
 	@Override
 	public DavProperty<?> getProperty(DavPropertyName name) {
-		return getProperties().get(name);
+		final String namespacelessPropertyName = name.getName();
+		if (Arrays.asList(DAV_CREATIONDATE_PROPNAMES).contains(namespacelessPropertyName)) {
+			if (node.fileSystem().supports(FileSystemFeature.CREATION_TIME_FEATURE)) {
+				return new DefaultDavProperty<>(name, DateTimeFormatter.RFC_1123_DATE_TIME.format(node.creationTime()));
+			} else {
+				return null;
+			}
+		} else {
+			return getProperties().get(name);
+		}
 	}
 
 	@Override
@@ -116,8 +127,6 @@ abstract class DavNode<T extends FileSystemResourceLocator> implements DavResour
 
 	@Override
 	public void setProperty(DavProperty<?> property) throws DavException {
-		getProperties().add(property);
-
 		final String namespacelessPropertyName = property.getName().getName();
 		if (Arrays.asList(DAV_CREATIONDATE_PROPNAMES).contains(namespacelessPropertyName) && property.getValue() instanceof String) {
 			final String createDateStr = (String) property.getValue();
@@ -127,6 +136,9 @@ abstract class DavNode<T extends FileSystemResourceLocator> implements DavResour
 			final String lastModifiedTimeStr = (String) property.getValue();
 			final Instant modificationTime = Instant.from(DateTimeFormatter.RFC_1123_DATE_TIME.parse(lastModifiedTimeStr));
 			this.setModificationTime(modificationTime);
+			getProperties().add(property);
+		} else {
+			getProperties().add(property);
 		}
 	}
 

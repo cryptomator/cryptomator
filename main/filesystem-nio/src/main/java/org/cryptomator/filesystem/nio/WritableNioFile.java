@@ -129,6 +129,17 @@ class WritableNioFile implements WritableFile {
 	}
 
 	@Override
+	public void setCreationTime(Instant instant) throws UncheckedIOException {
+		assertOpen();
+		ensureChannelIsOpened();
+		try {
+			nioAccess.setCreationTime(path, FileTime.from(instant));
+		} catch (IOException e) {
+			throw new UncheckedIOException(e);
+		}
+	}
+
+	@Override
 	public void close() throws UncheckedIOException {
 		if (!open) {
 			return;

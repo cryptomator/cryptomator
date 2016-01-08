@@ -15,6 +15,7 @@ import org.cryptomator.crypto.engine.Cryptor;
 import org.cryptomator.crypto.engine.InvalidPassphraseException;
 import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.FileSystem;
+import org.cryptomator.filesystem.FileSystemFeature;
 import org.cryptomator.filesystem.Folder;
 import org.cryptomator.filesystem.ReadableFile;
 import org.cryptomator.filesystem.WritableFile;
@@ -102,6 +103,11 @@ public class CryptoFileSystem extends CryptoFolder implements FileSystem {
 			writable.write(buf);
 		}
 		physicalFolder().create();
+	}
+
+	@Override
+	public boolean supports(FileSystemFeature feature) {
+		return physicalRoot.fileSystem().supports(feature);
 	}
 
 	@Override

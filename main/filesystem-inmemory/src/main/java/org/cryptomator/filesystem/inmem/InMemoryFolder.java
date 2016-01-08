@@ -25,8 +25,8 @@ class InMemoryFolder extends InMemoryNode implements Folder {
 	final Map<String, InMemoryFile> volatileFiles = new HashMap<>();
 	final Map<String, InMemoryFolder> volatileFolders = new HashMap<>();
 
-	public InMemoryFolder(InMemoryFolder parent, String name, Instant lastModified) {
-		super(parent, name, lastModified);
+	public InMemoryFolder(InMemoryFolder parent, String name, Instant lastModified, Instant creationTime) {
+		super(parent, name, lastModified, creationTime);
 	}
 
 	@Override
@@ -41,7 +41,7 @@ class InMemoryFolder extends InMemoryNode implements Folder {
 			return (InMemoryFile) node;
 		} else {
 			return volatileFiles.computeIfAbsent(name, (n) -> {
-				return new InMemoryFile(this, n, Instant.MIN);
+				return new InMemoryFile(this, n, Instant.MIN, Instant.MIN);
 			});
 		}
 	}
@@ -53,7 +53,7 @@ class InMemoryFolder extends InMemoryNode implements Folder {
 			return (InMemoryFolder) node;
 		} else {
 			return volatileFolders.computeIfAbsent(name, (n) -> {
-				return new InMemoryFolder(this, n, Instant.MIN);
+				return new InMemoryFolder(this, n, Instant.MIN, Instant.MIN);
 			});
 		}
 	}
@@ -74,6 +74,7 @@ class InMemoryFolder extends InMemoryNode implements Folder {
 		});
 		parent.volatileFolders.remove(name);
 		assert this.exists();
+		creationTime = Instant.now();
 	}
 
 	@Override
@@ -81,11 +82,11 @@ class InMemoryFolder extends InMemoryNode implements Folder {
 		if (target.exists()) {
 			target.delete();
 		}
-		assert!target.exists();
+		assert !target.exists();
 		target.create();
 		this.copyTo(target);
 		this.delete();
-		assert!this.exists();
+		assert !this.exists();
 	}
 
 	@Override
@@ -107,7 +108,7 @@ class InMemoryFolder extends InMemoryNode implements Folder {
 				subFolder.delete();
 			}
 		}
-		assert!this.exists();
+		assert !this.exists();
 	}
 
 	@Override

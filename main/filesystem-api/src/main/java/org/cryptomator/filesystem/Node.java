@@ -5,6 +5,7 @@
  ******************************************************************************/
 package org.cryptomator.filesystem;
 
+import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.time.Instant;
 import java.util.Optional;
@@ -32,6 +33,20 @@ public interface Node {
 	boolean exists() throws UncheckedIOException;
 
 	Instant lastModified() throws UncheckedIOException;
+
+	/**
+	 * <p>
+	 * Determines the creation time of this node.
+	 * <p>
+	 * Setting the creation time may not be supported by all {@link FileSystem FileSystems}. If the {@code FileSystem} this {@code Node} belongs to does not support the
+	 * {@link FileSystemFeature#CREATION_TIME_FEATURE} the behavior of this method is unspecified.
+	 * 
+	 * @returns the creation time of the file.
+	 * @see FileSystem#supports(Class)
+	 */
+	default Instant creationTime() throws UncheckedIOException {
+		throw new UncheckedIOException(new IOException("CreationTime not supported"));
+	}
 
 	/**
 	 * @return the {@link FileSystem} this Node belongs to

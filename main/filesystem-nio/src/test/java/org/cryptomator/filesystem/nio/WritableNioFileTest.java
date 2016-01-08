@@ -5,7 +5,9 @@ import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static org.cryptomator.filesystem.nio.OpenMode.WRITE;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
@@ -282,6 +284,44 @@ public class WritableNioFileTest {
 			thrown.expectCause(is(exceptionFromSetLastModified));
 
 			inTest.setLastModified(instant);
+		}
+
+	}
+
+	public class SetCreationTimeTests {
+
+		@Test
+		public void testSetCreationTimeFailsIfNotOpen() {
+			Instant irrelevant = null;
+			inTest.close();
+
+			thrown.expect(UncheckedIOException.class);
+			thrown.expectMessage("already closed");
+
+			inTest.setCreationTime(irrelevant);
+		}
+
+		@Test
+		public void testSetCreationTimeOpensChannelIfClosedAndInvokesNioAccessSetCreationTimeAfterwards() throws IOException {
+			Instant instant = Instant.parse("2016-01-08T22:32:00Z");
+
+			inTest.setCreationTime(instant);
+
+			InOrder inOrder = inOrder(nioAccess, channel);
+			inOrder.verify(channel).openIfClosed(OpenMode.WRITE);
+			inOrder.verify(nioAccess).setCreationTime(path, FileTime.from(instant));
+		}
+
+		@Test
+		public void testSetCreationTimeWrapsIOExceptionFromSetCreationTimeInUncheckedIOException() throws IOException {
+			IOException exceptionFromSetCreationTime = new IOException();
+			Instant irrelevant = Instant.now();
+			doThrow(exceptionFromSetCreationTime).when(nioAccess).setCreationTime(same(path), any());
+
+			thrown.expect(UncheckedIOException.class);
+			thrown.expectCause(is(exceptionFromSetCreationTime));
+
+			inTest.setCreationTime(irrelevant);
 		}
 
 	}

@@ -410,6 +410,57 @@ public class NioFolderTest {
 
 	}
 
+	public class CreationTimeTests {
+
+		@Test
+		public void testCreationTimeDelegatesToNioAccessCreationTimeForExistingFolder() throws IOException {
+			Instant exectedResult = Instant.parse("2016-01-08T19:49:00Z");
+			when(nioAccess.getCreationTime(path)).thenReturn(FileTime.from(exectedResult));
+			when(nioAccess.exists(path)).thenReturn(true);
+			when(nioAccess.isDirectory(path)).thenReturn(true);
+
+			Instant result = inTest.creationTime();
+
+			assertThat(result, is(exectedResult));
+		}
+
+		@Test
+		public void testCreationTimeDelegatesToNioAccessCreationTimeForNonExistingFolder() throws IOException {
+			Instant exectedResult = Instant.parse("2016-01-08T19:49:00Z");
+			when(nioAccess.getCreationTime(path)).thenReturn(FileTime.from(exectedResult));
+			when(nioAccess.exists(path)).thenReturn(false);
+
+			Instant result = inTest.creationTime();
+
+			assertThat(result, is(exectedResult));
+		}
+
+		@Test
+		public void testCreationTimeWrapsIOExceptionFromNioAccessCreationTimeInUncheckedIOException() throws IOException {
+			IOException exceptionFromCreationTime = new IOException();
+			when(nioAccess.getCreationTime(path)).thenThrow(exceptionFromCreationTime);
+			when(nioAccess.exists(path)).thenReturn(true);
+			when(nioAccess.isDirectory(path)).thenReturn(true);
+
+			thrown.expect(UncheckedIOException.class);
+			thrown.expectCause(is(exceptionFromCreationTime));
+
+			inTest.creationTime();
+		}
+
+		@Test
+		public void testCreationTimeThrowsExceptionIfFileIsNoDirectory() {
+			when(nioAccess.exists(path)).thenReturn(true);
+			when(nioAccess.isDirectory(path)).thenReturn(false);
+
+			thrown.expect(UncheckedIOException.class);
+			thrown.expectMessage(format("%s is a file", path));
+
+			inTest.creationTime();
+		}
+
+	}
+
 	public class DeleteTests {
 
 		@Test

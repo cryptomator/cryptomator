@@ -40,4 +40,10 @@ interface NioAccess {
 
 	String separator();
 
+	FileTime getCreationTime(Path path, LinkOption... options) throws IOException;
+
+	void setCreationTime(Path path, FileTime creationTime, LinkOption... options) throws IOException;
+
+	boolean supportsCreationTime(Path path);
+
 }

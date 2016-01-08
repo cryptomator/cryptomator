@@ -9,6 +9,7 @@
 package org.cryptomator.filesystem.delegating;
 
 import java.io.UncheckedIOException;
+import java.time.Instant;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -88,6 +89,11 @@ public abstract class DelegatingFolder<R extends DelegatingReadableFile, W exten
 		} else {
 			throw new IllegalArgumentException("Can only move DelegatingFolder to other DelegatingFolder.");
 		}
+	}
+
+	@Override
+	public void setCreationTime(Instant instant) throws UncheckedIOException {
+		delegate.setCreationTime(instant);
 	}
 
 }

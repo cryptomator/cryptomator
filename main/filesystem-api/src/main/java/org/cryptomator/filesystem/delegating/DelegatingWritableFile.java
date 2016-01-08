@@ -67,4 +67,9 @@ public class DelegatingWritableFile implements WritableFile {
 		delegate.close();
 	}
 
+	@Override
+	public void setCreationTime(Instant instant) throws UncheckedIOException {
+		delegate.setCreationTime(instant);
+	}
+
 }

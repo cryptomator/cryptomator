@@ -112,6 +112,14 @@ class NioFolder extends NioNode implements Folder {
 	}
 
 	@Override
+	public Instant creationTime() throws UncheckedIOException {
+		if (nioAccess.exists(path) && !nioAccess.isDirectory(path)) {
+			throw new UncheckedIOException(new IOException(format("%s is a file", path)));
+		}
+		return super.creationTime();
+	}
+
+	@Override
 	public String toString() {
 		return format("NioFolder(%s)", path);
 	}

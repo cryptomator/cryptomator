@@ -40,6 +40,11 @@ abstract class DelegatingNode<T extends Node> implements Node {
 	}
 
 	@Override
+	public Instant creationTime() throws UncheckedIOException {
+		return delegate.creationTime();
+	}
+
+	@Override
 	public int hashCode() {
 		return delegate.hashCode();
 	}

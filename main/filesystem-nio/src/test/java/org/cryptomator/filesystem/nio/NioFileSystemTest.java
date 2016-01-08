@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Optional;
 
+import org.cryptomator.filesystem.FileSystemFeature;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -49,6 +50,31 @@ public class NioFileSystemTest {
 	@Test
 	public void testRootedAtCreatesFolder() throws IOException {
 		verify(nioAccess).createDirectories(path);
+	}
+
+	@Test
+	public void testSupportsCreationTimeDelegatesToNioAccessWithTrue() {
+		when(nioAccess.supportsCreationTime(path)).thenReturn(true);
+
+		boolean result = inTest.supports(FileSystemFeature.CREATION_TIME_FEATURE);
+
+		assertThat(result, is(true));
+	}
+
+	@Test
+	public void testSupportsWithOtherFeatureReturnsFalse() {
+		boolean result = inTest.supports(null);
+
+		assertThat(result, is(false));
+	}
+
+	@Test
+	public void testSupportsCreationTimeDelegatesToNioAccessWithFalse() {
+		when(nioAccess.supportsCreationTime(path)).thenReturn(false);
+
+		boolean result = inTest.supports(FileSystemFeature.CREATION_TIME_FEATURE);
+
+		assertThat(result, is(false));
 	}
 
 	@After

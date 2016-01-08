@@ -54,4 +54,9 @@ public class CryptoFile extends CryptoNode implements File {
 		return toString().compareTo(o.toString());
 	}
 
+	@Override
+	public Instant creationTime() throws UncheckedIOException {
+		return physicalFile().creationTime();
+	}
+
 }

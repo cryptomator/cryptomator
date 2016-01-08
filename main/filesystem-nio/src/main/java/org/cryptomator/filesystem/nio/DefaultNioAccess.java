@@ -8,11 +8,18 @@ import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributeView;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileAttribute;
 import java.nio.file.attribute.FileTime;
 import java.util.stream.Stream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 class DefaultNioAccess implements NioAccess {
+
+	private static final Logger LOG = LoggerFactory.getLogger(DefaultNioAccess.class);
 
 	@Override
 	public FileChannel open(Path path, OpenOption... options) throws IOException {
@@ -72,6 +79,32 @@ class DefaultNioAccess implements NioAccess {
 	@Override
 	public String separator() {
 		return FileSystems.getDefault().getSeparator();
+	}
+
+	@Override
+	public FileTime getCreationTime(Path path, LinkOption... options) throws IOException {
+		return Files.readAttributes(path, BasicFileAttributes.class, options).creationTime();
+	}
+
+	@Override
+	public void setCreationTime(Path path, FileTime creationTime, LinkOption... options) throws IOException {
+		Files.getFileAttributeView(path, BasicFileAttributeView.class, options).setTimes(null, null, creationTime);
+	}
+
+	@Override
+	public boolean supportsCreationTime(Path path) {
+		try {
+			Path file = Files.createTempFile(path, "creationTimeCheck", "tmp");
+			long expected = 1184725140000L;
+			long millisecondsInADay = 86400000L;
+			FileTime fileTime = FileTime.fromMillis(expected);
+			Files.getFileAttributeView(file, BasicFileAttributeView.class).setTimes(null, null, fileTime);
+			long actual = Files.readAttributes(file, BasicFileAttributes.class).creationTime().toMillis();
+			return Math.abs(expected - actual) <= millisecondsInADay;
+		} catch (IOException e) {
+			LOG.info("supportsCreationTime failed", e);
+			return false;
+		}
 	}
 
 }

@@ -26,8 +26,8 @@ class InMemoryFile extends InMemoryNode implements File {
 	private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 	private ByteBuffer content = ByteBuffer.allocate(0);
 
-	public InMemoryFile(InMemoryFolder parent, String name, Instant lastModified) {
-		super(parent, name, lastModified);
+	public InMemoryFile(InMemoryFolder parent, String name, Instant lastModified, Instant creationTime) {
+		super(parent, name, lastModified, creationTime);
 	}
 
 	@Override
@@ -48,17 +48,22 @@ class InMemoryFile extends InMemoryNode implements File {
 		parent.children.compute(this.name(), (k, v) -> {
 			if (v == null || v == this) {
 				this.lastModified = Instant.now();
+				this.creationTime = Instant.now();
 				return this;
 			} else {
 				throw new UncheckedIOException(new FileExistsException(k));
 			}
 		});
 		parent.volatileFiles.remove(name);
-		return new InMemoryWritableFile(this::setLastModified, this::getContent, this::setContent, this::delete, writeLock);
+		return new InMemoryWritableFile(this::setLastModified, this::setCreationTime, this::getContent, this::setContent, this::delete, writeLock);
 	}
 
 	private void setLastModified(Instant lastModified) {
 		this.lastModified = lastModified;
+	}
+
+	private void setCreationTime(Instant creationTime) {
+		this.creationTime = creationTime;
 	}
 
 	private ByteBuffer getContent() {
@@ -75,7 +80,7 @@ class InMemoryFile extends InMemoryNode implements File {
 			// returning null removes the entry.
 			return null;
 		});
-		assert!this.exists();
+		assert !this.exists();
 	}
 
 	@Override

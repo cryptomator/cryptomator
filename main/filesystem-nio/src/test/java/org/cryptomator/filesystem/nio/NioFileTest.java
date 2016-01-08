@@ -295,6 +295,46 @@ public class NioFileTest {
 
 	}
 
+	public class CreationTime {
+
+		@Test
+		public void testCreationTimeDelegatesToNioAccessCreationTime() throws IOException {
+			Instant exectedResult = Instant.parse("2016-01-08T19:49:00Z");
+			when(nioAccess.getCreationTime(path)).thenReturn(FileTime.from(exectedResult));
+			when(nioAccess.exists(path)).thenReturn(true);
+			when(nioAccess.isRegularFile(path)).thenReturn(true);
+
+			Instant result = inTest.creationTime();
+
+			assertThat(result, is(exectedResult));
+		}
+
+		@Test
+		public void testCreationTimeWrapsIOExceptionFromNioAccessCreationTimeInUncheckedIOException() throws IOException {
+			IOException exceptionFromCreationTime = new IOException();
+			when(nioAccess.getCreationTime(path)).thenThrow(exceptionFromCreationTime);
+			when(nioAccess.exists(path)).thenReturn(true);
+			when(nioAccess.isRegularFile(path)).thenReturn(true);
+
+			thrown.expect(UncheckedIOException.class);
+			thrown.expectCause(is(exceptionFromCreationTime));
+
+			inTest.creationTime();
+		}
+
+		@Test
+		public void testCreationTimeThrowsExceptionIfFileIsNoRegularFile() {
+			when(nioAccess.exists(path)).thenReturn(true);
+			when(nioAccess.isRegularFile(path)).thenReturn(false);
+
+			thrown.expect(UncheckedIOException.class);
+			thrown.expectMessage(format("%s is a folder", path));
+
+			inTest.creationTime();
+		}
+
+	}
+
 	@Test
 	public void testNameReturnsFileNameOfPath() {
 		Path fileName = mock(Path.class);

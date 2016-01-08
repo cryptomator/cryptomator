@@ -21,6 +21,7 @@ import org.apache.jackrabbit.webdav.DavSession;
 import org.apache.jackrabbit.webdav.io.InputContext;
 import org.apache.jackrabbit.webdav.io.OutputContext;
 import org.apache.jackrabbit.webdav.lock.LockManager;
+import org.cryptomator.filesystem.FileSystemFeature;
 import org.cryptomator.filesystem.ReadableFile;
 import org.cryptomator.filesystem.WritableFile;
 import org.cryptomator.filesystem.jackrabbit.FileLocator;
@@ -98,8 +99,11 @@ class DavFile extends DavNode<FileLocator> {
 
 	@Override
 	protected void setCreationTime(Instant instant) {
-		// TODO Auto-generated method stub
-
+		if (node.fileSystem().supports(FileSystemFeature.CREATION_TIME_FEATURE)) {
+			try (WritableFile writable = node.openWritable()) {
+				writable.setCreationTime(instant);
+			}
+		}
 	}
 
 }

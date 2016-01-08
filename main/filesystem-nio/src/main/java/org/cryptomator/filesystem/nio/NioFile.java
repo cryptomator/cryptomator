@@ -82,4 +82,12 @@ class NioFile extends NioNode implements File {
 		return format("NioFile(%s)", path);
 	}
 
+	@Override
+	public Instant creationTime() throws UncheckedIOException {
+		if (nioAccess.exists(path) && !exists()) {
+			throw new UncheckedIOException(new IOException(format("%s is a folder", path)));
+		}
+		return super.creationTime();
+	}
+
 }

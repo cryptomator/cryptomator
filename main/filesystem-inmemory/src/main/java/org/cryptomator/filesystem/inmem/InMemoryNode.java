@@ -8,6 +8,8 @@
  *******************************************************************************/
 package org.cryptomator.filesystem.inmem;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.time.Instant;
 import java.util.Optional;
 
@@ -18,11 +20,13 @@ class InMemoryNode implements Node {
 	protected final InMemoryFolder parent;
 	protected final String name;
 	protected Instant lastModified;
+	protected Instant creationTime;
 
-	public InMemoryNode(InMemoryFolder parent, String name, Instant lastModified) {
+	public InMemoryNode(InMemoryFolder parent, String name, Instant lastModified, Instant creationTime) {
 		this.parent = parent;
 		this.name = name;
 		this.lastModified = lastModified;
+		this.creationTime = creationTime;
 	}
 
 	@Override
@@ -63,6 +67,15 @@ class InMemoryNode implements Node {
 					&& (this.name == null && other.name == null || this.name.equals(other.name));
 		} else {
 			return false;
+		}
+	}
+
+	@Override
+	public Instant creationTime() throws UncheckedIOException {
+		if (exists()) {
+			return creationTime;
+		} else {
+			throw new UncheckedIOException(new IOException("Node does not exist"));
 		}
 	}
 

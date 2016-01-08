@@ -94,6 +94,11 @@ class CryptoWritableFile implements WritableFile {
 	}
 
 	@Override
+	public void setCreationTime(Instant instant) throws UncheckedIOException {
+		file.setCreationTime(instant);
+	}
+
+	@Override
 	public boolean isOpen() {
 		return file.isOpen();
 	}

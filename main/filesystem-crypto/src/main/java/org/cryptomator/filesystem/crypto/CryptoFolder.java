@@ -147,6 +147,11 @@ class CryptoFolder extends CryptoNode implements Folder {
 	}
 
 	@Override
+	public Instant creationTime() throws UncheckedIOException {
+		return physicalFile().creationTime();
+	}
+
+	@Override
 	public String toString() {
 		return parent.toString() + name + "/";
 	}

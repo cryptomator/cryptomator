@@ -31,6 +31,7 @@ import org.apache.jackrabbit.webdav.property.DavPropertyName;
 import org.apache.jackrabbit.webdav.property.DefaultDavProperty;
 import org.apache.jackrabbit.webdav.property.ResourceType;
 import org.cryptomator.filesystem.File;
+import org.cryptomator.filesystem.FileSystemFeature;
 import org.cryptomator.filesystem.Folder;
 import org.cryptomator.filesystem.Node;
 import org.cryptomator.filesystem.WritableFile;
@@ -154,8 +155,9 @@ class DavFolder extends DavNode<FolderLocator> {
 
 	@Override
 	protected void setCreationTime(Instant instant) {
-		// TODO Auto-generated method stub
-
+		if (node.fileSystem().supports(FileSystemFeature.CREATION_TIME_FEATURE)) {
+			node.setCreationTime(instant);
+		}
 	}
 
 }

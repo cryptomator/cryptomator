@@ -16,6 +16,7 @@ import static org.mockito.Mockito.when;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
+import java.nio.channels.SeekableByteChannel;
 import java.nio.file.CopyOption;
 import java.nio.file.DirectoryStream;
 import java.nio.file.FileSystem;
@@ -34,7 +35,12 @@ import java.util.HashSet;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Matchers;
 
+import de.bechte.junit.runners.context.HierarchicalContextRunner;
+
+@RunWith(HierarchicalContextRunner.class)
 public class DefaultNioAccessTest {
 
 	private DefaultNioAccess inTest = new DefaultNioAccess();
@@ -184,6 +190,159 @@ public class DefaultNioAccessTest {
 		inTest.close(channel);
 
 		verify(implCloseChannel).run();
+	}
+
+	@Test
+	public void testGetCreationTimeReadsAttributesUsingProviderAndReturnsValueFromThem() throws IOException {
+		FileTime expectedValue = FileTime.from(Instant.parse("2016-01-08T22:32:00Z"));
+		BasicFileAttributes attributes = mock(BasicFileAttributes.class);
+		when(attributes.creationTime()).thenReturn(expectedValue);
+		LinkOption[] options = {LinkOption.NOFOLLOW_LINKS};
+		when(provider.readAttributes(path, BasicFileAttributes.class, options)).thenReturn(attributes);
+
+		FileTime result = inTest.getCreationTime(path, options);
+
+		assertThat(result, is(expectedValue));
+	}
+
+	@Test
+	public void testSetCreationTimeGetsAttributeViewUsingProviderAndSetsCreationTimeUsingIt() throws IOException {
+		FileTime fileTime = FileTime.from(Instant.now());
+		BasicFileAttributeView attributes = mock(BasicFileAttributeView.class);
+		LinkOption[] options = {LinkOption.NOFOLLOW_LINKS};
+		when(provider.getFileAttributeView(path, BasicFileAttributeView.class, options)).thenReturn(attributes);
+
+		inTest.setCreationTime(path, fileTime, options);
+
+		verify(attributes).setTimes(null, null, fileTime);
+	}
+
+	public class SupportsCreationTimeTests {
+
+		@Test
+		public void testSupportsCreationTimeReturnsTrueIfGetCreationTimeIsADayOfFromSetCreationTime() throws IOException {
+			long expectedMillisSet = 1184725140000L;
+			long millisecondsInADay = 86400000L;
+			Path tempFileName = mock(Path.class);
+			Path tempFile = mock(Path.class);
+			when(tempFile.getFileSystem()).thenReturn(fileSystem);
+			when(fileSystem.getPath(Matchers.any())).thenReturn(tempFileName);
+			when(path.resolve(tempFileName)).thenReturn(tempFile);
+			when(provider.newByteChannel(any(), any())).thenReturn(mock(SeekableByteChannel.class));
+			BasicFileAttributeView attributesView = mock(BasicFileAttributeView.class);
+			BasicFileAttributes attributes = mock(BasicFileAttributes.class);
+			when(provider.getFileAttributeView(tempFile, BasicFileAttributeView.class)).thenReturn(attributesView);
+			when(provider.readAttributes(tempFile, BasicFileAttributes.class)).thenReturn(attributes);
+			when(attributes.creationTime()).thenReturn(FileTime.fromMillis(expectedMillisSet + millisecondsInADay));
+
+			boolean result = inTest.supportsCreationTime(path);
+
+			assertThat(result, is(true));
+			verify(attributesView).setTimes(null, null, FileTime.fromMillis(expectedMillisSet));
+		}
+
+		@Test
+		public void testSupportsCreationTimeReturnsTrueIfGetCreationTimeIsADayOfBeforeSetCreationTime() throws IOException {
+			long expectedMillisSet = 1184725140000L;
+			long millisecondsInADay = 86400000L;
+			Path tempFileName = mock(Path.class);
+			Path tempFile = mock(Path.class);
+			when(tempFile.getFileSystem()).thenReturn(fileSystem);
+			when(fileSystem.getPath(Matchers.any())).thenReturn(tempFileName);
+			when(path.resolve(tempFileName)).thenReturn(tempFile);
+			when(provider.newByteChannel(any(), any())).thenReturn(mock(SeekableByteChannel.class));
+			BasicFileAttributeView attributesView = mock(BasicFileAttributeView.class);
+			BasicFileAttributes attributes = mock(BasicFileAttributes.class);
+			when(provider.getFileAttributeView(tempFile, BasicFileAttributeView.class)).thenReturn(attributesView);
+			when(provider.readAttributes(tempFile, BasicFileAttributes.class)).thenReturn(attributes);
+			when(attributes.creationTime()).thenReturn(FileTime.fromMillis(expectedMillisSet - millisecondsInADay));
+
+			boolean result = inTest.supportsCreationTime(path);
+
+			assertThat(result, is(true));
+			verify(attributesView).setTimes(null, null, FileTime.fromMillis(expectedMillisSet));
+		}
+
+		@Test
+		public void testSupportsCreationTimeSucceedsIfGetCreationTimeIsADayOfBeforeSetCreationTime() throws IOException {
+			long expectedMillisSet = 1184725140000L;
+			long millisecondsInADay = 86400000L;
+			Path tempFileName = mock(Path.class);
+			Path tempFile = mock(Path.class);
+			when(tempFile.getFileSystem()).thenReturn(fileSystem);
+			when(fileSystem.getPath(Matchers.any())).thenReturn(tempFileName);
+			when(path.resolve(tempFileName)).thenReturn(tempFile);
+			when(provider.newByteChannel(any(), any())).thenReturn(mock(SeekableByteChannel.class));
+			BasicFileAttributeView attributesView = mock(BasicFileAttributeView.class);
+			BasicFileAttributes attributes = mock(BasicFileAttributes.class);
+			when(provider.getFileAttributeView(tempFile, BasicFileAttributeView.class)).thenReturn(attributesView);
+			when(provider.readAttributes(tempFile, BasicFileAttributes.class)).thenReturn(attributes);
+			when(attributes.creationTime()).thenReturn(FileTime.fromMillis(expectedMillisSet - millisecondsInADay));
+
+			boolean result = inTest.supportsCreationTime(path);
+
+			assertThat(result, is(true));
+			verify(attributesView).setTimes(null, null, FileTime.fromMillis(expectedMillisSet));
+		}
+
+		@Test
+		public void testSupportsCreationTimeReturnsFalseIfGetCreationTimeIsMoreAsADayOfFromSetCreationTime() throws IOException {
+			long expectedMillisSet = 1184725140000L;
+			long millisecondsInADay = 86400000L;
+			Path tempFileName = mock(Path.class);
+			Path tempFile = mock(Path.class);
+			when(tempFile.getFileSystem()).thenReturn(fileSystem);
+			when(fileSystem.getPath(Matchers.any())).thenReturn(tempFileName);
+			when(path.resolve(tempFileName)).thenReturn(tempFile);
+			when(provider.newByteChannel(any(), any())).thenReturn(mock(SeekableByteChannel.class));
+			BasicFileAttributeView attributesView = mock(BasicFileAttributeView.class);
+			BasicFileAttributes attributes = mock(BasicFileAttributes.class);
+			when(provider.getFileAttributeView(tempFile, BasicFileAttributeView.class)).thenReturn(attributesView);
+			when(provider.readAttributes(tempFile, BasicFileAttributes.class)).thenReturn(attributes);
+			when(attributes.creationTime()).thenReturn(FileTime.fromMillis(expectedMillisSet + millisecondsInADay + 1));
+
+			boolean result = inTest.supportsCreationTime(path);
+
+			assertThat(result, is(false));
+			verify(attributesView).setTimes(null, null, FileTime.fromMillis(expectedMillisSet));
+		}
+
+		@Test
+		public void testSupportsCreationTimeReturnsFalseIfGetCreationTimeIsMoreAsADayBeforeSetCreationTime() throws IOException {
+			long expectedMillisSet = 1184725140000L;
+			long millisecondsInADay = 86400000L;
+			Path tempFileName = mock(Path.class);
+			Path tempFile = mock(Path.class);
+			when(tempFile.getFileSystem()).thenReturn(fileSystem);
+			when(fileSystem.getPath(Matchers.any())).thenReturn(tempFileName);
+			when(path.resolve(tempFileName)).thenReturn(tempFile);
+			when(provider.newByteChannel(any(), any())).thenReturn(mock(SeekableByteChannel.class));
+			BasicFileAttributeView attributesView = mock(BasicFileAttributeView.class);
+			BasicFileAttributes attributes = mock(BasicFileAttributes.class);
+			when(provider.getFileAttributeView(tempFile, BasicFileAttributeView.class)).thenReturn(attributesView);
+			when(provider.readAttributes(tempFile, BasicFileAttributes.class)).thenReturn(attributes);
+			when(attributes.creationTime()).thenReturn(FileTime.fromMillis(expectedMillisSet - millisecondsInADay - 1));
+
+			boolean result = inTest.supportsCreationTime(path);
+
+			assertThat(result, is(false));
+			verify(attributesView).setTimes(null, null, FileTime.fromMillis(expectedMillisSet));
+		}
+
+		@Test
+		public void testSupportsCreationTimeReturnsFalseIfIOExceptionOccurs() throws IOException {
+			Path tempFileName = mock(Path.class);
+			Path tempFile = mock(Path.class);
+			when(tempFile.getFileSystem()).thenReturn(fileSystem);
+			when(fileSystem.getPath(Matchers.any())).thenReturn(tempFileName);
+			when(path.resolve(tempFileName)).thenReturn(tempFile);
+			when(provider.newByteChannel(any(), any())).thenThrow(new IOException());
+
+			boolean result = inTest.supportsCreationTime(path);
+
+			assertThat(result, is(false));
+		}
+
 	}
 
 	@Test

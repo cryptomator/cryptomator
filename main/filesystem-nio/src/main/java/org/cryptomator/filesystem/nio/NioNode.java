@@ -43,4 +43,13 @@ abstract class NioNode implements Node {
 		}
 	}
 
+	@Override
+	public Instant creationTime() throws UncheckedIOException {
+		try {
+			return nioAccess.getCreationTime(path).toInstant();
+		} catch (IOException e) {
+			throw new UncheckedIOException(e);
+		}
+	}
+
 }
