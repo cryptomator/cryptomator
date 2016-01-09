@@ -10,6 +10,7 @@ package org.cryptomator.filesystem.delegating;
 
 import java.io.UncheckedIOException;
 import java.time.Instant;
+import java.util.Optional;
 
 import org.cryptomator.filesystem.Node;
 
@@ -40,7 +41,7 @@ abstract class DelegatingNode<T extends Node> implements Node {
 	}
 
 	@Override
-	public Instant creationTime() throws UncheckedIOException {
+	public Optional<Instant> creationTime() throws UncheckedIOException {
 		return delegate.creationTime();
 	}
 

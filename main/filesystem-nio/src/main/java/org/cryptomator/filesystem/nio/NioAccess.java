@@ -44,6 +44,4 @@ interface NioAccess {
 
 	void setCreationTime(Path path, FileTime creationTime, LinkOption... options) throws IOException;
 
-	boolean supportsCreationTime(Path path);
-
 }

@@ -23,8 +23,4 @@ public interface FileSystem extends Folder {
 		return Optional.empty();
 	}
 
-	default boolean supports(FileSystemFeature feature) {
-		return false;
-	}
-
 }

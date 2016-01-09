@@ -304,7 +304,7 @@ public class NioFileTest {
 			when(nioAccess.exists(path)).thenReturn(true);
 			when(nioAccess.isRegularFile(path)).thenReturn(true);
 
-			Instant result = inTest.creationTime();
+			Instant result = inTest.creationTime().get();
 
 			assertThat(result, is(exectedResult));
 		}

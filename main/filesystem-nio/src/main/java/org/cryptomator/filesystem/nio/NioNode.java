@@ -43,10 +43,17 @@ abstract class NioNode implements Node {
 		}
 	}
 
+	private static final Instant JANNUARY_THE_SECOND_NINTEENHUNDRED_SEVENTY = Instant.parse("1970-01-02T00:00:00Z");
+
 	@Override
-	public Instant creationTime() throws UncheckedIOException {
+	public Optional<Instant> creationTime() throws UncheckedIOException {
 		try {
-			return nioAccess.getCreationTime(path).toInstant();
+			Instant instant = nioAccess.getCreationTime(path).toInstant();
+			if (instant.isBefore(JANNUARY_THE_SECOND_NINTEENHUNDRED_SEVENTY)) {
+				return Optional.empty();
+			} else {
+				return Optional.of(instant);
+			}
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
 		}

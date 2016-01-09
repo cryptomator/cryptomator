@@ -71,9 +71,9 @@ class InMemoryNode implements Node {
 	}
 
 	@Override
-	public Instant creationTime() throws UncheckedIOException {
+	public Optional<Instant> creationTime() throws UncheckedIOException {
 		if (exists()) {
-			return creationTime;
+			return Optional.of(creationTime);
 		} else {
 			throw new UncheckedIOException(new IOException("Node does not exist"));
 		}

@@ -419,7 +419,7 @@ public class NioFolderTest {
 			when(nioAccess.exists(path)).thenReturn(true);
 			when(nioAccess.isDirectory(path)).thenReturn(true);
 
-			Instant result = inTest.creationTime();
+			Instant result = inTest.creationTime().get();
 
 			assertThat(result, is(exectedResult));
 		}
@@ -430,7 +430,7 @@ public class NioFolderTest {
 			when(nioAccess.getCreationTime(path)).thenReturn(FileTime.from(exectedResult));
 			when(nioAccess.exists(path)).thenReturn(false);
 
-			Instant result = inTest.creationTime();
+			Instant result = inTest.creationTime().get();
 
 			assertThat(result, is(exectedResult));
 		}

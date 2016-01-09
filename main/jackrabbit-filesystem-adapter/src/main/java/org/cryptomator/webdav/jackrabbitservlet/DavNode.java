@@ -16,6 +16,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.Temporal;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.jackrabbit.webdav.DavException;
 import org.apache.jackrabbit.webdav.DavResource;
@@ -33,7 +34,6 @@ import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
 import org.apache.jackrabbit.webdav.property.DavPropertySet;
 import org.apache.jackrabbit.webdav.property.DefaultDavProperty;
 import org.apache.jackrabbit.webdav.property.PropEntry;
-import org.cryptomator.filesystem.FileSystemFeature;
 import org.cryptomator.filesystem.jackrabbit.FileSystemResourceLocator;
 
 abstract class DavNode<T extends FileSystemResourceLocator> implements DavResource {
@@ -113,12 +113,7 @@ abstract class DavNode<T extends FileSystemResourceLocator> implements DavResour
 	public DavProperty<?> getProperty(DavPropertyName name) {
 		final String namespacelessPropertyName = name.getName();
 		if (Arrays.asList(DAV_CREATIONDATE_PROPNAMES).contains(namespacelessPropertyName)) {
-			if (node.fileSystem().supports(FileSystemFeature.CREATION_TIME_FEATURE)) {
-				Temporal creationDate = OffsetDateTime.ofInstant(node.creationTime(), ZoneOffset.UTC);
-				return new DefaultDavProperty<>(name, DateTimeFormatter.RFC_1123_DATE_TIME.format(creationDate));
-			} else {
-				return null;
-			}
+			return creationDateProperty(name).orElse(null);
 		} else if (Arrays.asList(DAV_MODIFIEDDATE_PROPNAMES).contains(namespacelessPropertyName)) {
 			Temporal lastModifiedDate = OffsetDateTime.ofInstant(node.lastModified(), ZoneOffset.UTC);
 			return new DefaultDavProperty<>(name, DateTimeFormatter.RFC_1123_DATE_TIME.format(lastModifiedDate));
@@ -133,11 +128,8 @@ abstract class DavNode<T extends FileSystemResourceLocator> implements DavResour
 	@Override
 	public DavPropertySet getProperties() {
 		// creation date:
-		if (node.exists() && node.fileSystem().supports(FileSystemFeature.CREATION_TIME_FEATURE)) {
-			Temporal creationDate = OffsetDateTime.ofInstant(node.creationTime(), ZoneOffset.UTC);
-			String createionDateStr = DateTimeFormatter.RFC_1123_DATE_TIME.format(creationDate);
-			DavProperty<String> creationDateProp = new DefaultDavProperty<>(DavPropertyName.CREATIONDATE, createionDateStr);
-			properties.add(creationDateProp);
+		if (node.exists()) {
+			creationDateProperty(DavPropertyName.CREATIONDATE).ifPresent(properties::add);
 		}
 		// modification date:
 		if (node.exists()) {
@@ -148,6 +140,12 @@ abstract class DavNode<T extends FileSystemResourceLocator> implements DavResour
 			properties.add(lastModifiedDateProp);
 		}
 		return properties;
+	}
+
+	private Optional<DavProperty<?>> creationDateProperty(DavPropertyName name) {
+		return node.creationTime() //
+				.map(creationTime -> OffsetDateTime.ofInstant(creationTime, ZoneOffset.UTC)) //
+				.map(creationDate -> new DefaultDavProperty<>(name, DateTimeFormatter.RFC_1123_DATE_TIME.format(creationDate)));
 	}
 
 	@Override

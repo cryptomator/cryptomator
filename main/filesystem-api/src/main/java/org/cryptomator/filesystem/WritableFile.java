@@ -29,10 +29,9 @@ public interface WritableFile extends WritableByteChannel {
 	 * Sets the creation time of the file.
 	 * <p>
 	 * Setting the creation time may not be supported by all {@link FileSystem FileSystems}. If the {@code FileSystem} this {@code WritableFile} belongs to does not support the
-	 * {@link FileSystemFeature#CREATION_TIME_FEATURE} the behavior of this method is unspecified.
+	 * setting the creation time the behavior of this method is unspecified.
 	 * 
 	 * @param instant the time to set as creation time
-	 * @see FileSystem#supports(Class)
 	 */
 	default void setCreationTime(Instant instant) throws UncheckedIOException {
 		throw new UncheckedIOException(new IOException("CreationTime not supported"));

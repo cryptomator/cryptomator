@@ -15,6 +15,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
@@ -147,7 +148,7 @@ class CryptoFolder extends CryptoNode implements Folder {
 	}
 
 	@Override
-	public Instant creationTime() throws UncheckedIOException {
+	public Optional<Instant> creationTime() throws UncheckedIOException {
 		return physicalFile().creationTime();
 	}
 

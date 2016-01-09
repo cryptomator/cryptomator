@@ -91,20 +91,4 @@ class DefaultNioAccess implements NioAccess {
 		Files.getFileAttributeView(path, BasicFileAttributeView.class, options).setTimes(null, null, creationTime);
 	}
 
-	@Override
-	public boolean supportsCreationTime(Path path) {
-		try {
-			Path file = Files.createTempFile(path, "creationTimeCheck", "tmp");
-			long expected = 1184725140000L;
-			long millisecondsInADay = 86400000L;
-			FileTime fileTime = FileTime.fromMillis(expected);
-			Files.getFileAttributeView(file, BasicFileAttributeView.class).setTimes(null, null, fileTime);
-			long actual = Files.readAttributes(file, BasicFileAttributes.class).creationTime().toMillis();
-			return Math.abs(expected - actual) <= millisecondsInADay;
-		} catch (IOException e) {
-			LOG.info("supportsCreationTime failed", e);
-			return false;
-		}
-	}
-
 }

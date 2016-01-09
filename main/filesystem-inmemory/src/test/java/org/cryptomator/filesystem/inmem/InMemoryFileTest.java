@@ -37,8 +37,8 @@ public class InMemoryFileTest {
 			maxCreationTime = Instant.now();
 		}
 
-		assertThat(inTest.creationTime().isBefore(minCreationTime), is(false));
-		assertThat(inTest.creationTime().isAfter(maxCreationTime), is(false));
+		assertThat(inTest.creationTime().get().isBefore(minCreationTime), is(false));
+		assertThat(inTest.creationTime().get().isAfter(maxCreationTime), is(false));
 	}
 
 	@Test
@@ -50,7 +50,7 @@ public class InMemoryFileTest {
 			writable.setCreationTime(creationTime);
 		}
 
-		assertThat(inTest.creationTime(), is(creationTime));
+		assertThat(inTest.creationTime().get(), is(creationTime));
 	}
 
 }

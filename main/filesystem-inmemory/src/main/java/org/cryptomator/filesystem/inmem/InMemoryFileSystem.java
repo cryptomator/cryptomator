@@ -12,7 +12,6 @@ import java.time.Instant;
 import java.util.Optional;
 
 import org.cryptomator.filesystem.FileSystem;
-import org.cryptomator.filesystem.FileSystemFeature;
 
 public class InMemoryFileSystem extends InMemoryFolder implements FileSystem {
 
@@ -38,11 +37,6 @@ public class InMemoryFileSystem extends InMemoryFolder implements FileSystem {
 	@Override
 	public String toString() {
 		return "/";
-	}
-
-	@Override
-	public boolean supports(FileSystemFeature feature) {
-		return feature == FileSystemFeature.CREATION_TIME_FEATURE;
 	}
 
 }
