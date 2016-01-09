@@ -9,6 +9,7 @@
 package org.cryptomator.webdav.jackrabbitservlet;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.WritableByteChannel;
@@ -21,6 +22,10 @@ import org.apache.jackrabbit.webdav.DavSession;
 import org.apache.jackrabbit.webdav.io.InputContext;
 import org.apache.jackrabbit.webdav.io.OutputContext;
 import org.apache.jackrabbit.webdav.lock.LockManager;
+import org.apache.jackrabbit.webdav.property.DavProperty;
+import org.apache.jackrabbit.webdav.property.DavPropertyName;
+import org.apache.jackrabbit.webdav.property.DavPropertySet;
+import org.apache.jackrabbit.webdav.property.DefaultDavProperty;
 import org.cryptomator.filesystem.FileSystemFeature;
 import org.cryptomator.filesystem.ReadableFile;
 import org.cryptomator.filesystem.WritableFile;
@@ -89,6 +94,30 @@ class DavFile extends DavNode<FileLocator> {
 		} else {
 			throw new IllegalArgumentException("Destination not a DavFolder: " + destination.getClass().getName());
 		}
+	}
+
+	@Override
+	public DavProperty<?> getProperty(DavPropertyName name) {
+		if (DavPropertyName.GETCONTENTLENGTH.equals(name) && node.exists()) {
+			try (ReadableFile src = node.openReadable()) {
+				return new DefaultDavProperty<Long>(DavPropertyName.GETCONTENTLENGTH, src.size());
+			}
+		} else {
+			return super.getProperty(name);
+		}
+	}
+
+	@Override
+	public DavPropertySet getProperties() {
+		final DavPropertySet result = super.getProperties();
+		if (node.exists()) {
+			try (ReadableFile src = node.openReadable()) {
+				result.add(new DefaultDavProperty<Long>(DavPropertyName.GETCONTENTLENGTH, src.size()));
+			} catch (UncheckedIOException e) {
+				result.add(new DefaultDavProperty<Long>(DavPropertyName.GETCONTENTLENGTH, -1l));
+			}
+		}
+		return result;
 	}
 
 	@Override

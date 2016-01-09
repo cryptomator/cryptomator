@@ -10,7 +10,10 @@ package org.cryptomator.webdav.jackrabbitservlet;
 
 import java.io.UncheckedIOException;
 import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.Temporal;
 import java.util.Arrays;
 import java.util.List;
 
@@ -111,17 +114,39 @@ abstract class DavNode<T extends FileSystemResourceLocator> implements DavResour
 		final String namespacelessPropertyName = name.getName();
 		if (Arrays.asList(DAV_CREATIONDATE_PROPNAMES).contains(namespacelessPropertyName)) {
 			if (node.fileSystem().supports(FileSystemFeature.CREATION_TIME_FEATURE)) {
-				return new DefaultDavProperty<>(name, DateTimeFormatter.RFC_1123_DATE_TIME.format(node.creationTime()));
+				Temporal creationDate = OffsetDateTime.ofInstant(node.creationTime(), ZoneId.systemDefault());
+				return new DefaultDavProperty<>(name, DateTimeFormatter.RFC_1123_DATE_TIME.format(creationDate));
 			} else {
 				return null;
 			}
+		} else if (Arrays.asList(DAV_MODIFIEDDATE_PROPNAMES).contains(namespacelessPropertyName)) {
+			Temporal lastModifiedDate = OffsetDateTime.ofInstant(node.lastModified(), ZoneId.systemDefault());
+			return new DefaultDavProperty<>(name, DateTimeFormatter.RFC_1123_DATE_TIME.format(lastModifiedDate));
 		} else {
-			return getProperties().get(name);
+			return properties.get(name);
 		}
 	}
 
+	/**
+	 * Returns a current snapshot of all available properties.
+	 */
 	@Override
 	public DavPropertySet getProperties() {
+		// creation date:
+		if (node.exists() && node.fileSystem().supports(FileSystemFeature.CREATION_TIME_FEATURE)) {
+			Temporal creationDate = OffsetDateTime.ofInstant(node.creationTime(), ZoneId.systemDefault());
+			String createionDateStr = DateTimeFormatter.RFC_1123_DATE_TIME.format(creationDate);
+			DavProperty<String> creationDateProp = new DefaultDavProperty<>(DavPropertyName.CREATIONDATE, createionDateStr);
+			properties.add(creationDateProp);
+		}
+		// modification date:
+		if (node.exists()) {
+			Temporal lastModifiedDate = OffsetDateTime.ofInstant(node.lastModified(), ZoneId.systemDefault());
+			String lastModifiedDateStr = DateTimeFormatter.RFC_1123_DATE_TIME.format(lastModifiedDate);
+			System.err.println(lastModifiedDateStr);
+			DavProperty<String> lastModifiedDateProp = new DefaultDavProperty<>(DavPropertyName.GETLASTMODIFIED, lastModifiedDateStr);
+			properties.add(lastModifiedDateProp);
+		}
 		return properties;
 	}
 
@@ -129,17 +154,15 @@ abstract class DavNode<T extends FileSystemResourceLocator> implements DavResour
 	public void setProperty(DavProperty<?> property) throws DavException {
 		final String namespacelessPropertyName = property.getName().getName();
 		if (Arrays.asList(DAV_CREATIONDATE_PROPNAMES).contains(namespacelessPropertyName) && property.getValue() instanceof String) {
-			final String createDateStr = (String) property.getValue();
-			final Instant createTime = Instant.from(DateTimeFormatter.RFC_1123_DATE_TIME.parse(createDateStr));
-			this.setCreationTime(createTime);
+			String createDateStr = (String) property.getValue();
+			OffsetDateTime creationDate = OffsetDateTime.from(DateTimeFormatter.RFC_1123_DATE_TIME.parse(createDateStr));
+			this.setCreationTime(creationDate.toInstant());
 		} else if (Arrays.asList(DAV_MODIFIEDDATE_PROPNAMES).contains(namespacelessPropertyName) && property.getValue() instanceof String) {
-			final String lastModifiedTimeStr = (String) property.getValue();
-			final Instant modificationTime = Instant.from(DateTimeFormatter.RFC_1123_DATE_TIME.parse(lastModifiedTimeStr));
-			this.setModificationTime(modificationTime);
-			getProperties().add(property);
-		} else {
-			getProperties().add(property);
+			String lastModifiedDateStr = (String) property.getValue();
+			OffsetDateTime lastModifiedDate = OffsetDateTime.from(DateTimeFormatter.RFC_1123_DATE_TIME.parse(lastModifiedDateStr));
+			this.setModificationTime(lastModifiedDate.toInstant());
 		}
+		properties.add(property);
 	}
 
 	@Override
