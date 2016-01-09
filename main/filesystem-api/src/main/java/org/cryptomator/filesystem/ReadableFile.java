@@ -29,7 +29,15 @@ public interface ReadableFile extends ReadableByteChannel {
 	 *             if an {@link IOException} occurs while reading from this
 	 *             {@code ReadableBytes}
 	 */
+	@Override
 	int read(ByteBuffer target) throws UncheckedIOException;
+
+	/**
+	 * @return The current size of the file. This value is a snapshot and might have been changed by concurrent modifications.
+	 * @throws UncheckedIOException
+	 *             if an {@link IOException} occurs
+	 */
+	long size() throws UncheckedIOException;
 
 	/**
 	 * <p>

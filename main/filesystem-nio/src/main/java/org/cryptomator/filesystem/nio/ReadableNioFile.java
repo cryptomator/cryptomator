@@ -46,6 +46,11 @@ class ReadableNioFile implements ReadableFile {
 	}
 
 	@Override
+	public long size() throws UncheckedIOException {
+		return channel.size();
+	}
+
+	@Override
 	public void position(long position) throws UncheckedIOException {
 		assertOpen();
 		if (position < 0) {
@@ -73,7 +78,7 @@ class ReadableNioFile implements ReadableFile {
 		target.ensureChannelIsOpened();
 		SharedFileChannel targetChannel = target.channel();
 		targetChannel.truncate(0);
-		long size = channel.size();
+		long size = size();
 		long transferred = 0;
 		while (transferred < size) {
 			transferred += channel.transferTo(transferred, size - transferred, targetChannel, transferred);

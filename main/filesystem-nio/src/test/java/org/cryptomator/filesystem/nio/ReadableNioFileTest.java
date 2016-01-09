@@ -89,6 +89,16 @@ public class ReadableNioFileTest {
 	}
 
 	@Test
+	public void testSizeReturnsSizeOfChannel() {
+		long expectedSize = 85472;
+		when(channel.size()).thenReturn(expectedSize);
+
+		long actualSize = inTest.size();
+
+		assertThat(actualSize, is(expectedSize));
+	}
+
+	@Test
 	public void testReadDelegatesToChannelReadFullyWithZeroPositionIfNotSet() {
 		ByteBuffer buffer = mock(ByteBuffer.class);
 

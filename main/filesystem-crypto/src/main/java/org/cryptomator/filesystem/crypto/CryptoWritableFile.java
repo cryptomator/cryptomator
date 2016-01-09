@@ -109,6 +109,7 @@ class CryptoWritableFile implements WritableFile {
 			encryptor.append(FileContentCryptor.EOF);
 			writeTask.get();
 			writeHeader();
+			// TODO append padding
 		} catch (ExecutionException e) {
 			if (e.getCause() instanceof UncheckedIOException) {
 				throw (UncheckedIOException) e.getCause();

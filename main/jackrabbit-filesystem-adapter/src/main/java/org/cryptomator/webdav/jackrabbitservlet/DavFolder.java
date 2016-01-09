@@ -40,6 +40,8 @@ import org.cryptomator.filesystem.jackrabbit.FolderLocator;
 
 class DavFolder extends DavNode<FolderLocator> {
 
+	private static final int BUFFER_SIZE = 32 * 1024;
+
 	public DavFolder(FilesystemResourceFactory factory, LockManager lockManager, DavSession session, FolderLocator folder) {
 		super(factory, lockManager, session, folder);
 		properties.add(new ResourceType(ResourceType.COLLECTION));
@@ -73,7 +75,7 @@ class DavFolder extends DavNode<FolderLocator> {
 
 	private void addMemberFile(DavFile memberFile, InputStream inputStream) {
 		try (ReadableByteChannel src = Channels.newChannel(inputStream); WritableFile dst = node.file(memberFile.getDisplayName()).openWritable()) {
-			ByteBuffer buf = ByteBuffer.allocate(1337);
+			ByteBuffer buf = ByteBuffer.allocate(BUFFER_SIZE);
 			while (src.read(buf) != -1) {
 				buf.flip();
 				dst.write(buf);
@@ -150,7 +152,6 @@ class DavFolder extends DavNode<FolderLocator> {
 	@Override
 	protected void setModificationTime(Instant instant) {
 		// TODO Auto-generated method stub
-
 	}
 
 	@Override

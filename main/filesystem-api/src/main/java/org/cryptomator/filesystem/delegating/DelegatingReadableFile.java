@@ -43,6 +43,11 @@ public class DelegatingReadableFile implements ReadableFile {
 	}
 
 	@Override
+	public long size() throws UncheckedIOException {
+		return delegate.size();
+	}
+
+	@Override
 	public void position(long position) throws UncheckedIOException {
 		delegate.position(position);
 	}

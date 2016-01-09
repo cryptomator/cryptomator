@@ -28,6 +28,8 @@ import org.cryptomator.filesystem.jackrabbit.FileLocator;
 
 class DavFile extends DavNode<FileLocator> {
 
+	private static final int BUFFER_SIZE = 32 * 1024;
+
 	public DavFile(FilesystemResourceFactory factory, LockManager lockManager, DavSession session, FileLocator node) {
 		super(factory, lockManager, session, node);
 	}
@@ -44,9 +46,8 @@ class DavFile extends DavNode<FileLocator> {
 			return;
 		}
 		try (ReadableFile src = node.openReadable(); WritableByteChannel dst = Channels.newChannel(outputContext.getOutputStream())) {
-			// TODO filesize before sending content
-			outputContext.setContentLength(-1l);
-			ByteBuffer buf = ByteBuffer.allocate(1337);
+			outputContext.setContentLength(src.size());
+			ByteBuffer buf = ByteBuffer.allocate(BUFFER_SIZE);
 			do {
 				buf.clear();
 				src.read(buf);
