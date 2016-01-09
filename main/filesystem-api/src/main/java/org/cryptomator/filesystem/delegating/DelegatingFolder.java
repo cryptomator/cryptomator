@@ -63,6 +63,10 @@ public abstract class DelegatingFolder<R extends DelegatingReadableFile, W exten
 
 	@Override
 	public void create() throws UncheckedIOException {
+		if (exists()) {
+			return;
+		}
+		parent().ifPresent(p -> p.create());
 		delegate.create();
 	}
 

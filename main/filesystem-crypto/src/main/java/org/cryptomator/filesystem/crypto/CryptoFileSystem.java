@@ -85,7 +85,7 @@ public class CryptoFileSystem extends CryptoFolder implements FileSystem {
 
 	@Override
 	public boolean exists() {
-		return physicalRoot.exists();
+		return physicalFile().exists() && physicalFolder().exists();
 	}
 
 	@Override
