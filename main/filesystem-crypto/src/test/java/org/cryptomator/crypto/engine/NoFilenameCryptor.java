@@ -8,7 +8,8 @@
  *******************************************************************************/
 package org.cryptomator.crypto.engine;
 
-import java.nio.charset.StandardCharsets;
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -22,18 +23,18 @@ class NoFilenameCryptor implements FilenameCryptor {
 
 	@Override
 	public String hashDirectoryId(String cleartextDirectoryId) {
-		final byte[] cleartextBytes = cleartextDirectoryId.getBytes(StandardCharsets.UTF_8);
+		final byte[] cleartextBytes = cleartextDirectoryId.getBytes(UTF_8);
 		final byte[] hashedBytes = SHA1.get().digest(cleartextBytes);
 		return BASE32.encodeAsString(hashedBytes);
 	}
 
 	@Override
-	public String encryptFilename(String cleartextName) {
+	public String encryptFilename(String cleartextName, byte[]... associatedData) {
 		return cleartextName;
 	}
 
 	@Override
-	public String decryptFilename(String ciphertextName) {
+	public String decryptFilename(String ciphertextName, byte[]... associatedData) {
 		return ciphertextName;
 	}
 

@@ -8,8 +8,9 @@
  *******************************************************************************/
 package org.cryptomator.crypto.engine.impl;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
 import javax.crypto.SecretKey;
@@ -71,9 +72,32 @@ public class FilenameCryptorImplTest {
 		final SecretKey macKey = new SecretKeySpec(keyBytes, "AES");
 		final FilenameCryptor filenameCryptor = new FilenameCryptorImpl(encryptionKey, macKey);
 
-		final byte[] encrypted = filenameCryptor.encryptFilename("test").getBytes(StandardCharsets.UTF_8);
+		final byte[] encrypted = filenameCryptor.encryptFilename("test").getBytes(UTF_8);
 		encrypted[0] ^= (byte) 0x01; // change 1 bit in first byte
-		filenameCryptor.decryptFilename(new String(encrypted, StandardCharsets.UTF_8));
+		filenameCryptor.decryptFilename(new String(encrypted, UTF_8));
+	}
+
+	@Test
+	public void testDeterministicEncryptionOfFilenamesWithAssociatedData() {
+		final byte[] keyBytes = new byte[32];
+		final SecretKey encryptionKey = new SecretKeySpec(keyBytes, "AES");
+		final SecretKey macKey = new SecretKeySpec(keyBytes, "AES");
+		final FilenameCryptor filenameCryptor = new FilenameCryptorImpl(encryptionKey, macKey);
+
+		final String encrypted = filenameCryptor.encryptFilename("test", "ad".getBytes(UTF_8));
+		final String decrypted = filenameCryptor.decryptFilename(encrypted, "ad".getBytes(UTF_8));
+		Assert.assertEquals("test", decrypted);
+	}
+
+	@Test(expected = AuthenticationFailedException.class)
+	public void testDeterministicEncryptionOfFilenamesWithWrongAssociatedData() {
+		final byte[] keyBytes = new byte[32];
+		final SecretKey encryptionKey = new SecretKeySpec(keyBytes, "AES");
+		final SecretKey macKey = new SecretKeySpec(keyBytes, "AES");
+		final FilenameCryptor filenameCryptor = new FilenameCryptorImpl(encryptionKey, macKey);
+
+		final String encrypted = filenameCryptor.encryptFilename("test", "right".getBytes(UTF_8));
+		filenameCryptor.decryptFilename(encrypted, "wrong".getBytes(UTF_8));
 	}
 
 }

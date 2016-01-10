@@ -8,12 +8,13 @@
  *******************************************************************************/
 package org.cryptomator.filesystem.crypto;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import java.io.IOException;
 import java.io.Reader;
 import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
-import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
@@ -52,7 +53,7 @@ class CryptoFolder extends CryptoNode implements Folder {
 		if (directoryId.get() == null) {
 			File dirFile = physicalFile();
 			if (dirFile.exists()) {
-				try (Reader reader = Channels.newReader(dirFile.openReadable(), StandardCharsets.UTF_8.newDecoder(), -1)) {
+				try (Reader reader = Channels.newReader(dirFile.openReadable(), UTF_8.newDecoder(), -1)) {
 					directoryId.set(IOUtils.toString(reader));
 				} catch (IOException e) {
 					throw new UncheckedIOException(e);

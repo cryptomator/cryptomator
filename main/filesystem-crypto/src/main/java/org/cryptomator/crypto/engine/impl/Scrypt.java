@@ -8,9 +8,10 @@
  *******************************************************************************/
 package org.cryptomator.crypto.engine.impl;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 import org.bouncycastle.crypto.generators.SCrypt;
@@ -34,7 +35,7 @@ final class Scrypt {
 	 */
 	public static byte[] scrypt(CharSequence passphrase, byte[] salt, int costParam, int blockSize, int keyLengthInBytes) {
 		// This is an attempt to get the password bytes without copies of the password being created in some dark places inside the JVM:
-		final ByteBuffer buf = StandardCharsets.UTF_8.encode(CharBuffer.wrap(passphrase));
+		final ByteBuffer buf = UTF_8.encode(CharBuffer.wrap(passphrase));
 		final byte[] pw = new byte[buf.remaining()];
 		buf.get(pw);
 		try {

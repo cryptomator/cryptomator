@@ -8,7 +8,8 @@
  *******************************************************************************/
 package org.cryptomator.crypto.engine.impl;
 
-import java.nio.charset.StandardCharsets;
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -37,25 +38,25 @@ class FilenameCryptorImpl implements FilenameCryptor {
 
 	@Override
 	public String hashDirectoryId(String cleartextDirectoryId) {
-		final byte[] cleartextBytes = cleartextDirectoryId.getBytes(StandardCharsets.UTF_8);
+		final byte[] cleartextBytes = cleartextDirectoryId.getBytes(UTF_8);
 		byte[] encryptedBytes = AES_SIV.encrypt(encryptionKey, macKey, cleartextBytes);
 		final byte[] hashedBytes = SHA1.get().digest(encryptedBytes);
 		return BASE32.encodeAsString(hashedBytes);
 	}
 
 	@Override
-	public String encryptFilename(String cleartextName) {
-		final byte[] cleartextBytes = cleartextName.getBytes(StandardCharsets.UTF_8);
-		final byte[] encryptedBytes = AES_SIV.encrypt(encryptionKey, macKey, cleartextBytes);
+	public String encryptFilename(String cleartextName, byte[]... associatedData) {
+		final byte[] cleartextBytes = cleartextName.getBytes(UTF_8);
+		final byte[] encryptedBytes = AES_SIV.encrypt(encryptionKey, macKey, cleartextBytes, associatedData);
 		return BASE32.encodeAsString(encryptedBytes);
 	}
 
 	@Override
-	public String decryptFilename(String ciphertextName) throws AuthenticationFailedException {
+	public String decryptFilename(String ciphertextName, byte[]... associatedData) throws AuthenticationFailedException {
 		final byte[] encryptedBytes = BASE32.decode(ciphertextName);
 		try {
-			final byte[] cleartextBytes = AES_SIV.decrypt(encryptionKey, macKey, encryptedBytes);
-			return new String(cleartextBytes, StandardCharsets.UTF_8);
+			final byte[] cleartextBytes = AES_SIV.decrypt(encryptionKey, macKey, encryptedBytes, associatedData);
+			return new String(cleartextBytes, UTF_8);
 		} catch (AEADBadTagException e) {
 			throw new AuthenticationFailedException("Authentication failed.", e);
 		}

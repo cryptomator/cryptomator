@@ -23,13 +23,15 @@ public interface FilenameCryptor {
 
 	/**
 	 * @param cleartextName original filename including cleartext file extension
+	 * @param associatedData optional associated data, that will not get encrypted but needs to be provided during decryption
 	 * @return encrypted filename without any file extension
 	 */
-	String encryptFilename(String cleartextName);
+	String encryptFilename(String cleartextName, byte[]... associatedData);
 
 	/**
 	 * @param ciphertextName Ciphertext only, with any additional strings like file extensions stripped first.
+	 * @param associatedData the same associated data used during encryption, otherwise and {@link AuthenticationFailedException} will be thrown
 	 * @return cleartext filename, probably including its cleartext file extension.
 	 */
-	String decryptFilename(String ciphertextName) throws AuthenticationFailedException;
+	String decryptFilename(String ciphertextName, byte[]... associatedData) throws AuthenticationFailedException;
 }
