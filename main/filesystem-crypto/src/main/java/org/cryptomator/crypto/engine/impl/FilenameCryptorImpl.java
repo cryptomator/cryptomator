@@ -26,7 +26,12 @@ class FilenameCryptorImpl implements FilenameCryptor {
 
 	private static final BaseNCodec BASE32 = new Base32();
 	private static final ThreadLocal<MessageDigest> SHA1 = new ThreadLocalSha1();
-	private static final SivMode AES_SIV = new SivMode();
+	private static final ThreadLocal<SivMode> AES_SIV = new ThreadLocal<SivMode>() {
+		@Override
+		protected SivMode initialValue() {
+			return new SivMode();
+		};
+	};
 
 	private final SecretKey encryptionKey;
 	private final SecretKey macKey;
@@ -39,7 +44,7 @@ class FilenameCryptorImpl implements FilenameCryptor {
 	@Override
 	public String hashDirectoryId(String cleartextDirectoryId) {
 		final byte[] cleartextBytes = cleartextDirectoryId.getBytes(UTF_8);
-		byte[] encryptedBytes = AES_SIV.encrypt(encryptionKey, macKey, cleartextBytes);
+		byte[] encryptedBytes = AES_SIV.get().encrypt(encryptionKey, macKey, cleartextBytes);
 		final byte[] hashedBytes = SHA1.get().digest(encryptedBytes);
 		return BASE32.encodeAsString(hashedBytes);
 	}
@@ -47,7 +52,7 @@ class FilenameCryptorImpl implements FilenameCryptor {
 	@Override
 	public String encryptFilename(String cleartextName, byte[]... associatedData) {
 		final byte[] cleartextBytes = cleartextName.getBytes(UTF_8);
-		final byte[] encryptedBytes = AES_SIV.encrypt(encryptionKey, macKey, cleartextBytes, associatedData);
+		final byte[] encryptedBytes = AES_SIV.get().encrypt(encryptionKey, macKey, cleartextBytes, associatedData);
 		return BASE32.encodeAsString(encryptedBytes);
 	}
 
@@ -55,7 +60,7 @@ class FilenameCryptorImpl implements FilenameCryptor {
 	public String decryptFilename(String ciphertextName, byte[]... associatedData) throws AuthenticationFailedException {
 		final byte[] encryptedBytes = BASE32.decode(ciphertextName);
 		try {
-			final byte[] cleartextBytes = AES_SIV.decrypt(encryptionKey, macKey, encryptedBytes, associatedData);
+			final byte[] cleartextBytes = AES_SIV.get().decrypt(encryptionKey, macKey, encryptedBytes, associatedData);
 			return new String(cleartextBytes, UTF_8);
 		} catch (AEADBadTagException e) {
 			throw new AuthenticationFailedException("Authentication failed.", e);

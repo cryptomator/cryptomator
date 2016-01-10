@@ -10,12 +10,12 @@ class TestDelegatingFolder extends DelegatingFolder<DelegatingReadableFile, Dele
 	}
 
 	@Override
-	protected TestDelegatingFile file(File delegate) {
+	protected TestDelegatingFile newFile(File delegate) {
 		return new TestDelegatingFile(this, delegate);
 	}
 
 	@Override
-	protected TestDelegatingFolder folder(Folder delegate) {
+	protected TestDelegatingFolder newFolder(Folder delegate) {
 		return new TestDelegatingFolder(this, delegate);
 	}
 

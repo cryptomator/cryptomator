@@ -49,7 +49,8 @@ abstract class CryptoNode implements Node {
 
 	@Override
 	public boolean exists() {
-		return parent.children().anyMatch(node -> node.equals(this));
+		return physicalFile().exists();
+		// return parent.children().anyMatch(node -> node.equals(this));
 	}
 
 	@Override

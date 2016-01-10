@@ -13,6 +13,7 @@ import java.time.Instant;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import org.cryptomator.common.WeakValuedCache;
 import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.Folder;
 import org.cryptomator.filesystem.Node;
@@ -21,6 +22,8 @@ public abstract class DelegatingFolder<R extends DelegatingReadableFile, W exten
 		implements Folder {
 
 	private final D parent;
+	private final WeakValuedCache<Folder, D> folders = WeakValuedCache.usingLoader(this::newFolder);
+	private final WeakValuedCache<File, F> files = WeakValuedCache.usingLoader(this::newFile);
 
 	public DelegatingFolder(D parent, Folder delegate) {
 		super(delegate);
@@ -39,27 +42,27 @@ public abstract class DelegatingFolder<R extends DelegatingReadableFile, W exten
 
 	@Override
 	public Stream<D> folders() {
-		return delegate.folders().map(this::folder);
+		return delegate.folders().map(folders::get);
 	}
 
 	@Override
 	public Stream<F> files() throws UncheckedIOException {
-		return delegate.files().map(this::file);
+		return delegate.files().map(files::get);
 	}
 
 	@Override
 	public F file(String name) throws UncheckedIOException {
-		return file(delegate.file(name));
+		return files.get(delegate.file(name));
 	}
 
-	protected abstract F file(File delegate);
+	protected abstract F newFile(File delegate);
 
 	@Override
 	public D folder(String name) throws UncheckedIOException {
-		return folder(delegate.folder(name));
+		return folders.get(delegate.folder(name));
 	}
 
-	protected abstract D folder(Folder delegate);
+	protected abstract D newFolder(Folder delegate);
 
 	@Override
 	public void create() throws UncheckedIOException {

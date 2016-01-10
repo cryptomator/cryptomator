@@ -161,4 +161,17 @@ public class DelegatingFolderTest {
 		Mockito.verify(mockFolder).delete();
 	}
 
+	@Test
+	public void testSubresourcesAreSameInstance() {
+		Folder mockFolder = Mockito.mock(Folder.class);
+		Folder mockSubFolder = Mockito.mock(Folder.class);
+		File mockSubFile = Mockito.mock(File.class);
+		Mockito.when(mockFolder.folder("mockSubFolder")).thenReturn(mockSubFolder);
+		Mockito.when(mockFolder.file("mockSubFile")).thenReturn(mockSubFile);
+
+		DelegatingFolder<?, ?, ?, ?> delegatingFolder = new TestDelegatingFolder(null, mockFolder);
+		Assert.assertSame(delegatingFolder.folder("mockSubFolder"), delegatingFolder.folder("mockSubFolder"));
+		Assert.assertSame(delegatingFolder.file("mockSubFile"), delegatingFolder.file("mockSubFile"));
+	}
+
 }

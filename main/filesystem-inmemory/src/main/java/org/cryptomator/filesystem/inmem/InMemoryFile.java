@@ -45,7 +45,7 @@ class InMemoryFile extends InMemoryNode implements File {
 		final WriteLock writeLock = lock.writeLock();
 		writeLock.lock();
 		final InMemoryFolder parent = parent().get();
-		parent.children.compute(this.name(), (k, v) -> {
+		parent.existingChildren.compute(this.name(), (k, v) -> {
 			if (v == null || v == this) {
 				this.lastModified = Instant.now();
 				this.creationTime = Instant.now();
@@ -54,7 +54,6 @@ class InMemoryFile extends InMemoryNode implements File {
 				throw new UncheckedIOException(new FileExistsException(k));
 			}
 		});
-		parent.volatileFiles.remove(name);
 		return new InMemoryWritableFile(this::setLastModified, this::setCreationTime, this::getContent, this::setContent, this::delete, writeLock);
 	}
 
@@ -76,11 +75,11 @@ class InMemoryFile extends InMemoryNode implements File {
 
 	private void delete(Void param) {
 		final InMemoryFolder parent = parent().get();
-		parent.children.computeIfPresent(this.name(), (k, v) -> {
+		parent.existingChildren.computeIfPresent(this.name(), (k, v) -> {
 			// returning null removes the entry.
 			return null;
 		});
-		assert !this.exists();
+		assert!this.exists();
 	}
 
 	@Override

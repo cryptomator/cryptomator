@@ -78,6 +78,18 @@ public class FilenameCryptorImplTest {
 	}
 
 	@Test
+	public void testEncryptionOfSameFilenamesWithDifferentAssociatedData() {
+		final byte[] keyBytes = new byte[32];
+		final SecretKey encryptionKey = new SecretKeySpec(keyBytes, "AES");
+		final SecretKey macKey = new SecretKeySpec(keyBytes, "AES");
+		final FilenameCryptor filenameCryptor = new FilenameCryptorImpl(encryptionKey, macKey);
+
+		final String encrypted1 = filenameCryptor.encryptFilename("test", "ad1".getBytes(UTF_8));
+		final String encrypted2 = filenameCryptor.encryptFilename("test", "ad2".getBytes(UTF_8));
+		Assert.assertNotEquals(encrypted1, encrypted2);
+	}
+
+	@Test
 	public void testDeterministicEncryptionOfFilenamesWithAssociatedData() {
 		final byte[] keyBytes = new byte[32];
 		final SecretKey encryptionKey = new SecretKeySpec(keyBytes, "AES");

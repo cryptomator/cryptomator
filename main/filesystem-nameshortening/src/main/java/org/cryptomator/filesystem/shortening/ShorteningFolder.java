@@ -43,12 +43,12 @@ class ShorteningFolder extends DelegatingFolder<DelegatingReadableFile, Delegati
 	}
 
 	@Override
-	protected ShorteningFile file(File delegate) {
+	protected ShorteningFile newFile(File delegate) {
 		return new ShorteningFile(this, delegate, null, shortener);
 	}
 
 	@Override
-	protected ShorteningFolder folder(Folder delegate) {
+	protected ShorteningFolder newFolder(Folder delegate) {
 		return new ShorteningFolder(this, delegate, null, shortener);
 	}
 

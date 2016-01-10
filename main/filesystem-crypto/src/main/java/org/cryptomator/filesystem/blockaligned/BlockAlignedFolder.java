@@ -22,12 +22,12 @@ class BlockAlignedFolder extends DelegatingFolder<BlockAlignedReadableFile, Bloc
 	}
 
 	@Override
-	protected BlockAlignedFile file(File delegate) {
+	protected BlockAlignedFile newFile(File delegate) {
 		return new BlockAlignedFile(this, delegate, blockSize);
 	}
 
 	@Override
-	protected BlockAlignedFolder folder(Folder delegate) {
+	protected BlockAlignedFolder newFolder(Folder delegate) {
 		return new BlockAlignedFolder(this, delegate, blockSize);
 	}
 

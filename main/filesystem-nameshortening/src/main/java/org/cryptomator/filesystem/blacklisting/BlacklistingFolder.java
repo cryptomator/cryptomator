@@ -28,16 +28,16 @@ class BlacklistingFolder extends DelegatingFolder<DelegatingReadableFile, Delega
 
 	@Override
 	public Stream<BlacklistingFolder> folders() {
-		return delegate.folders().filter(hiddenNodes.negate()).map(this::folder);
+		return delegate.folders().filter(hiddenNodes.negate()).map(this::newFolder);
 	}
 
 	@Override
 	public Stream<BlacklistingFile> files() {
-		return delegate.files().filter(hiddenNodes.negate()).map(this::file);
+		return delegate.files().filter(hiddenNodes.negate()).map(this::newFile);
 	}
 
 	@Override
-	protected BlacklistingFile file(File delegate) {
+	protected BlacklistingFile newFile(File delegate) {
 		if (hiddenNodes.test(delegate)) {
 			throw new UncheckedIOException("'" + delegate.name() + "' is a reserved name.", new FileAlreadyExistsException(delegate.name()));
 		}
@@ -45,7 +45,7 @@ class BlacklistingFolder extends DelegatingFolder<DelegatingReadableFile, Delega
 	}
 
 	@Override
-	protected BlacklistingFolder folder(Folder delegate) {
+	protected BlacklistingFolder newFolder(Folder delegate) {
 		if (hiddenNodes.test(delegate)) {
 			throw new UncheckedIOException("'" + delegate.name() + "' is a reserved name.", new FileAlreadyExistsException(delegate.name()));
 		}

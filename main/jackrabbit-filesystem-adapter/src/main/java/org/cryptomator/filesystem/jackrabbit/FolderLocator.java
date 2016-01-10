@@ -23,7 +23,7 @@ public class FolderLocator extends DelegatingFolder<DelegatingReadableFile, Dele
 	}
 
 	@Override
-	protected FileLocator file(File delegate) {
+	protected FileLocator newFile(File delegate) {
 		return new FileLocator(factory, prefix, this, delegate);
 	}
 
@@ -33,7 +33,7 @@ public class FolderLocator extends DelegatingFolder<DelegatingReadableFile, Dele
 	}
 
 	@Override
-	protected FolderLocator folder(Folder delegate) {
+	protected FolderLocator newFolder(Folder delegate) {
 		return new FolderLocator(factory, prefix, this, delegate);
 	}
 
