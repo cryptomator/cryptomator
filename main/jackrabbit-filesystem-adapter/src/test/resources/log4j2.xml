@@ -23,7 +23,6 @@
 	<Loggers>
 		<!-- show our own debug messages: -->
 		<Logger name="org.cryptomator" level="DEBUG" />
-		<Logger name="org.eclipse.jetty.server.Server" level="DEBUG" />
 		<!-- mute dependencies: -->
 		<Root level="INFO">
 			<AppenderRef ref="Console" />
