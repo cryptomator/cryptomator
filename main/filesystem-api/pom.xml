@@ -15,7 +15,12 @@
 	<name>Cryptomator filesystem: API</name>
 
 	<dependencies>
-		<!-- commons -->
+		<dependency>
+			<groupId>org.cryptomator</groupId>
+			<artifactId>commons</artifactId>
+		</dependency>
+		
+		<!-- apache commons -->
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
