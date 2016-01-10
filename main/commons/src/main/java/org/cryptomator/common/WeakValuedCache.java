@@ -1,4 +1,4 @@
-package org.cryptomator.filesystem.nio;
+package org.cryptomator.common;
 
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
@@ -9,7 +9,7 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.util.concurrent.ExecutionError;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 
-class WeakValuedCache<Key, Value> {
+public class WeakValuedCache<Key, Value> {
 
 	private final LoadingCache<Key, Value> delegate;
 

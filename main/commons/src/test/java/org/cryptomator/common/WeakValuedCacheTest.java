@@ -1,4 +1,4 @@
-package org.cryptomator.filesystem.nio;
+package org.cryptomator.common;
 
 import static java.lang.String.format;
 import static org.hamcrest.CoreMatchers.is;
@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.function.Function;
 
+import org.cryptomator.common.WeakValuedCache;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
