@@ -19,6 +19,7 @@ import javax.servlet.DispatcherType;
 import org.cryptomator.filesystem.FileSystem;
 import org.cryptomator.webdav.filters.AcceptRangeFilter;
 import org.cryptomator.webdav.filters.LoggingHttpFilter;
+import org.cryptomator.webdav.filters.PutIdleTimeoutFilter;
 import org.cryptomator.webdav.filters.UriNormalizationFilter;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
@@ -55,10 +56,11 @@ class FileSystemBasedWebDavServer {
 		servletContext.addServlet(servletHolder, "/*");
 		servletContext.addFilter(AcceptRangeFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
 		servletContext.addFilter(UriNormalizationFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
+		servletContext.addFilter(PutIdleTimeoutFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
 		servletContext.addFilter(LoggingHttpFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
 		servletCollection.mapContexts();
 
-		server.setConnectors(new Connector[] { localConnector });
+		server.setConnectors(new Connector[] {localConnector});
 		server.setHandler(servletCollection);
 	}
 
