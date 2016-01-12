@@ -25,24 +25,6 @@ public class FileSystemResourceLocatorFactoryTest {
 	}
 
 	@Test
-	public void testCreateFoldersEvenWhenRequestingFiles() {
-		FileSystemResourceLocator locator = factory.createResourceLocator(null, null, "/existingFolder");
-		Assert.assertTrue(locator instanceof FolderLocator);
-
-		locator = factory.createResourceLocator("http://localhost/contextroot", "http://localhost/contextroot/existingFolder");
-		Assert.assertTrue(locator instanceof FolderLocator);
-	}
-
-	@Test
-	public void testCreateFilesEvenWhenRequestingFolders() {
-		FileSystemResourceLocator locator = factory.createResourceLocator(null, null, "/existingFile/");
-		Assert.assertTrue(locator instanceof FileLocator);
-
-		locator = factory.createResourceLocator("http://localhost/contextroot", "http://localhost/contextroot/existingFile/");
-		Assert.assertTrue(locator instanceof FileLocator);
-	}
-
-	@Test
 	public void testCreateFolders() {
 		FileSystemResourceLocator locator = factory.createResourceLocator(null, null, "/foo/bar/");
 		Assert.assertTrue(locator instanceof FolderLocator);
