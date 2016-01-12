@@ -1,6 +1,7 @@
 package org.cryptomator.webdav.filters;
 
 import java.io.IOException;
+import java.util.function.Function;
 
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -11,6 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.cryptomator.webdav.filters.UriNormalizationFilter.ResourceTypeChecker.ResourceType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,17 +29,6 @@ public class UriNormalizationFilter implements HttpFilter {
 	private static final String[] FILE_METHODS = {"PUT"};
 	private static final String[] DIRECTORY_METHODS = {"MKCOL"};
 
-	@FunctionalInterface
-	public interface ResourceTypeChecker {
-
-		enum ResourceType {
-			FILE, FOLDER, NONEXISTING
-		};
-
-		ResourceType typeOfResource(String resourcePath);
-
-	}
-
 	private final ResourceTypeChecker resourceTypeChecker;
 
 	public UriNormalizationFilter(ResourceTypeChecker resourceTypeChecker) {
@@ -51,29 +42,65 @@ public class UriNormalizationFilter implements HttpFilter {
 
 	@Override
 	public void doFilterHttp(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
-		switch (resourceTypeChecker.typeOfResource(request.getPathInfo())) {
-		case FILE:
-			chain.doFilter(new FileUriRequest(request), response);
-			return;
-		case FOLDER:
-			chain.doFilter(new FolderUriRequest(request), response);
-			return;
-		case NONEXISTING:
-		default:
-			if (ArrayUtils.contains(FILE_METHODS, request.getMethod().toUpperCase())) {
-				chain.doFilter(new FileUriRequest(request), response);
-			} else if (ArrayUtils.contains(DIRECTORY_METHODS, request.getMethod().toUpperCase())) {
-				chain.doFilter(new FolderUriRequest(request), response);
-			} else {
-				LOG.warn("Could not determine resource type for URI {}. Leaving request unmodified.", request.getRequestURI());
-				chain.doFilter(request, response);
-			}
-		}
+		ResourceType resourceType = resourceTypeChecker.typeOfResource(request.getPathInfo());
+		HttpServletRequest normalizedRequest = resourceType.normalizedRequest(request);
+		chain.doFilter(normalizedRequest, response);
 	}
 
 	@Override
 	public void destroy() {
 		// no-op
+	}
+
+	private static HttpServletRequest normalizedFileRequest(HttpServletRequest originalRequest) {
+		LOG.debug("Treating resource as file: {}", originalRequest.getRequestURI());
+		return new FileUriRequest(originalRequest);
+	}
+
+	private static HttpServletRequest normalizedFolderRequest(HttpServletRequest originalRequest) {
+		LOG.debug("Treating resource as folder: {}", originalRequest.getRequestURI());
+		return new FolderUriRequest(originalRequest);
+	}
+
+	private static HttpServletRequest normalizedRequestForUnknownResource(HttpServletRequest originalRequest) {
+		final String requestMethod = originalRequest.getMethod().toUpperCase();
+		if (ArrayUtils.contains(FILE_METHODS, requestMethod)) {
+			return normalizedFileRequest(originalRequest);
+		} else if (ArrayUtils.contains(DIRECTORY_METHODS, requestMethod)) {
+			return normalizedFolderRequest(originalRequest);
+		} else {
+			LOG.debug("Could not determine resource type of resource: {}", originalRequest.getRequestURI());
+			return originalRequest;
+		}
+	}
+
+	@FunctionalInterface
+	public interface ResourceTypeChecker {
+
+		enum ResourceType {
+			FILE(UriNormalizationFilter::normalizedFileRequest), //
+			FOLDER(UriNormalizationFilter::normalizedFolderRequest), //
+			UNKNOWN(UriNormalizationFilter::normalizedRequestForUnknownResource);
+
+			private final Function<HttpServletRequest, HttpServletRequest> wrapper;
+
+			private ResourceType(Function<HttpServletRequest, HttpServletRequest> wrapper) {
+				this.wrapper = wrapper;
+			}
+
+			private HttpServletRequest normalizedRequest(HttpServletRequest request) {
+				return wrapper.apply(request);
+			}
+		};
+
+		/**
+		 * Checks if the resource with the given resource name is a file, a folder or doesn't exist.
+		 * 
+		 * @param resourcePath Relative URI of the resource in question.
+		 * @return Type of the resource or {@link ResourceType#UNKNOWN UNKNOWN} for non-existing resources. Never <code>null</code>.
+		 */
+		ResourceType typeOfResource(String resourcePath);
+
 	}
 
 	/**
@@ -116,7 +143,6 @@ public class UriNormalizationFilter implements HttpFilter {
 
 		public FileUriRequest(HttpServletRequest request) {
 			super(request);
-			LOG.debug("Treating resource as file: {}", request.getRequestURI());
 		}
 
 		@Override
@@ -133,7 +159,6 @@ public class UriNormalizationFilter implements HttpFilter {
 
 		public FolderUriRequest(HttpServletRequest request) {
 			super(request);
-			LOG.debug("Treating resource as folder: {}", request.getRequestURI());
 		}
 
 		@Override

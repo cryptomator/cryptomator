@@ -54,7 +54,7 @@ class FileSystemBasedWebDavServer {
 			} else if (fileSystem.resolveFile(path).exists()) {
 				return ResourceType.FILE;
 			} else {
-				return ResourceType.NONEXISTING;
+				return ResourceType.UNKNOWN;
 			}
 		};
 
