@@ -5,6 +5,7 @@ import static java.util.stream.Collectors.toList;
 import static org.cryptomator.common.test.matcher.ContainsMatcher.contains;
 import static org.cryptomator.filesystem.nio.ReflectiveClassMatchers.aClassThatDoesDeclareMethod;
 import static org.cryptomator.filesystem.nio.ReflectiveClassMatchers.aClassThatDoesNotDeclareMethod;
+import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.theInstance;
 import static org.junit.Assert.assertThat;
@@ -23,6 +24,7 @@ import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import org.cryptomator.common.AutoClosingStream;
 import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.FileSystem;
 import org.cryptomator.filesystem.Folder;
@@ -74,6 +76,14 @@ public class NioFolderTest {
 	}
 
 	public class ChildrenTests {
+
+		@Test
+		public void testChildrenReturnsAnAutoClosingStream() throws IOException {
+			Stream<Path> childrenPaths = Stream.<Path>builder().build();
+			when(nioAccess.list(path)).thenReturn(childrenPaths);
+
+			assertThat(inTest.children(), is(instanceOf(AutoClosingStream.class)));
+		}
 
 		@Test
 		public void testChildrenConvertsPathWhichIsADirectoryToAnNioFolderUsingTheInstanceFactory() throws IOException {

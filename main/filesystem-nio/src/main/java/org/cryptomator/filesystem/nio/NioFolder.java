@@ -9,6 +9,7 @@ import java.time.Instant;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import org.cryptomator.common.AutoClosingStream;
 import org.cryptomator.common.WeakValuedCache;
 import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.Folder;
@@ -27,7 +28,7 @@ class NioFolder extends NioNode implements Folder {
 	@Override
 	public Stream<? extends Node> children() throws UncheckedIOException {
 		try {
-			return nioAccess.list(path).map(this::childPathToNode);
+			return AutoClosingStream.from(nioAccess.list(path).map(this::childPathToNode));
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
 		}
@@ -130,6 +131,7 @@ class NioFolder extends NioNode implements Folder {
 		if (!exists()) {
 			return;
 		}
+
 		folders().forEach(Folder::delete);
 		files().forEach(NioFolder::deleteFile);
 		try {
