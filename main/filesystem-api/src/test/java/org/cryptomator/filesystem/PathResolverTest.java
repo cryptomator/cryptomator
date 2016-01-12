@@ -28,6 +28,13 @@ public class PathResolverTest {
 	}
 
 	@Test
+	public void testResolveSameFolder() {
+		Assert.assertEquals(foo, PathResolver.resolveFolder(foo, ""));
+		Assert.assertEquals(foo, PathResolver.resolveFolder(foo, "/"));
+		Assert.assertEquals(foo, PathResolver.resolveFolder(foo, "///"));
+	}
+
+	@Test
 	public void testResolveChildFolder() {
 		Assert.assertEquals(bar, PathResolver.resolveFolder(root, "foo/bar"));
 		Assert.assertEquals(bar, PathResolver.resolveFolder(root, "foo/./bar"));
@@ -48,11 +55,6 @@ public class PathResolverTest {
 	@Test(expected = UncheckedIOException.class)
 	public void testResolveUnresolvableFolder() {
 		PathResolver.resolveFolder(root, "..");
-	}
-
-	@Test(expected = IllegalArgumentException.class)
-	public void testResolveFolderWithEmptyPath() {
-		PathResolver.resolveFolder(root, "");
 	}
 
 	@Test(expected = IllegalArgumentException.class)

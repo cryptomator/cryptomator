@@ -21,10 +21,13 @@ import org.cryptomator.webdav.filters.AcceptRangeFilter;
 import org.cryptomator.webdav.filters.LoggingHttpFilter;
 import org.cryptomator.webdav.filters.PutIdleTimeoutFilter;
 import org.cryptomator.webdav.filters.UriNormalizationFilter;
+import org.cryptomator.webdav.filters.UriNormalizationFilter.ResourceTypeChecker;
+import org.cryptomator.webdav.filters.UriNormalizationFilter.ResourceTypeChecker.ResourceType;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
+import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
@@ -45,6 +48,16 @@ class FileSystemBasedWebDavServer {
 		localConnector.setPort(8080);
 		servletCollection = new ContextHandlerCollection();
 
+		final ResourceTypeChecker resourceTypeChecker = (path) -> {
+			if (fileSystem.resolveFolder(path).exists()) {
+				return ResourceType.FOLDER;
+			} else if (fileSystem.resolveFile(path).exists()) {
+				return ResourceType.FILE;
+			} else {
+				return ResourceType.NONEXISTING;
+			}
+		};
+
 		URI servletContextRootUri;
 		try {
 			servletContextRootUri = new URI("http", null, "localhost", 8080, "/", null, null);
@@ -55,7 +68,7 @@ class FileSystemBasedWebDavServer {
 		final ServletHolder servletHolder = new ServletHolder("FileSystem-WebDAV-Servlet", new WebDavServlet(servletContextRootUri, fileSystem));
 		servletContext.addServlet(servletHolder, "/*");
 		servletContext.addFilter(AcceptRangeFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
-		servletContext.addFilter(UriNormalizationFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
+		servletContext.addFilter(new FilterHolder(new UriNormalizationFilter(resourceTypeChecker)), "/*", EnumSet.of(DispatcherType.REQUEST));
 		servletContext.addFilter(PutIdleTimeoutFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
 		servletContext.addFilter(LoggingHttpFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
 		servletCollection.mapContexts();

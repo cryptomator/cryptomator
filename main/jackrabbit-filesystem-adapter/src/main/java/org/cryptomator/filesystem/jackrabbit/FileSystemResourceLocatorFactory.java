@@ -37,17 +37,10 @@ public class FileSystemResourceLocatorFactory implements DavLocatorFactory {
 	private FileSystemResourceLocator createResourceLocator(String path) {
 		if (StringUtils.isEmpty(path) || "/".equals(path)) {
 			return fs;
-		}
-		final FolderLocator folder = fs.resolveFolder(path);
-		final FileLocator file = fs.resolveFile(path);
-		if (folder.exists()) {
-			return folder;
-		} else if (file.exists()) {
-			return file;
 		} else if (path.endsWith("/")) {
-			return folder;
+			return fs.resolveFolder(path);
 		} else {
-			return file;
+			return fs.resolveFile(path);
 		}
 
 	}

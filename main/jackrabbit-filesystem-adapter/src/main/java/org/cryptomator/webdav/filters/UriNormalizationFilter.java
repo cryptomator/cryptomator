@@ -11,16 +11,38 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * Depending on the HTTP method a "/" is added to or removed from the end of an URI.
- * For example <code>MKCOL</code> creates a directory (ending on "/"), while <code>PUT</code> creates a file (not ending on "/").
+ * Normalizes all URIs contained in requests depending on the resource type of existing resources.
+ * URIs identifying directories will always end on "/", URIs identifying files will not.
+ * 
+ * If the resource type is unknown, because the resource doesn't exist yet, this filter will determine the resource type based on the HTTP method,
+ * e.g. a MKCOL request will result in a directory..
  */
 public class UriNormalizationFilter implements HttpFilter {
 
+	private static final Logger LOG = LoggerFactory.getLogger(UriNormalizationFilter.class);
 	private static final String[] FILE_METHODS = {"PUT"};
 	private static final String[] DIRECTORY_METHODS = {"MKCOL"};
-	private static final String MOVE = "MOVE";
+
+	@FunctionalInterface
+	public interface ResourceTypeChecker {
+
+		enum ResourceType {
+			FILE, FOLDER, NONEXISTING
+		};
+
+		ResourceType typeOfResource(String resourcePath);
+
+	}
+
+	private final ResourceTypeChecker resourceTypeChecker;
+
+	public UriNormalizationFilter(ResourceTypeChecker resourceTypeChecker) {
+		this.resourceTypeChecker = resourceTypeChecker;
+	}
 
 	@Override
 	public void init(FilterConfig filterConfig) throws ServletException {
@@ -29,14 +51,23 @@ public class UriNormalizationFilter implements HttpFilter {
 
 	@Override
 	public void doFilterHttp(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
-		if (ArrayUtils.contains(FILE_METHODS, request.getMethod().toUpperCase())) {
+		switch (resourceTypeChecker.typeOfResource(request.getPathInfo())) {
+		case FILE:
 			chain.doFilter(new FileUriRequest(request), response);
-		} else if (ArrayUtils.contains(DIRECTORY_METHODS, request.getMethod().toUpperCase())) {
-			chain.doFilter(new DirectoryUriRequest(request), response);
-		} else if (MOVE.equalsIgnoreCase(request.getMethod())) {
-			chain.doFilter(new CanonicalMoveRequest(request), response);
-		} else {
-			chain.doFilter(request, response);
+			return;
+		case FOLDER:
+			chain.doFilter(new FolderUriRequest(request), response);
+			return;
+		case NONEXISTING:
+		default:
+			if (ArrayUtils.contains(FILE_METHODS, request.getMethod().toUpperCase())) {
+				chain.doFilter(new FileUriRequest(request), response);
+			} else if (ArrayUtils.contains(DIRECTORY_METHODS, request.getMethod().toUpperCase())) {
+				chain.doFilter(new FolderUriRequest(request), response);
+			} else {
+				LOG.warn("Could not determine resource type for URI {}. Leaving request unmodified.", request.getRequestURI());
+				chain.doFilter(request, response);
+			}
 		}
 	}
 
@@ -46,19 +77,21 @@ public class UriNormalizationFilter implements HttpFilter {
 	}
 
 	/**
-	 * Makes the destination header end on "/" if moving a directory and remove additional "/" if moving a file.
+	 * Adjusts headers containing URIs depending on the request URI.
 	 */
-	private static class CanonicalMoveRequest extends HttpServletRequestWrapper {
+	private static class SuffixPreservingRequest extends HttpServletRequestWrapper {
 
-		private static String DESTINATION_HEADER = "Destination";
+		private static final String HEADER_DESTINATION = "Destination";
+		private static final String METHOD_MOVE = "MOVE";
+		private static final String METHOD_COPY = "COPY";
 
-		public CanonicalMoveRequest(HttpServletRequest request) {
+		public SuffixPreservingRequest(HttpServletRequest request) {
 			super(request);
 		}
 
 		@Override
 		public String getHeader(String name) {
-			if (name.equalsIgnoreCase(DESTINATION_HEADER)) {
+			if ((METHOD_MOVE.equalsIgnoreCase(getMethod()) || METHOD_COPY.equalsIgnoreCase(getMethod())) && HEADER_DESTINATION.equalsIgnoreCase(name)) {
 				return sameSuffixAsUri(super.getHeader(name));
 			} else {
 				return super.getHeader(name);
@@ -79,10 +112,11 @@ public class UriNormalizationFilter implements HttpFilter {
 	/**
 	 * HTTP request, whose URI never ends on "/".
 	 */
-	private static class FileUriRequest extends HttpServletRequestWrapper {
+	private static class FileUriRequest extends SuffixPreservingRequest {
 
 		public FileUriRequest(HttpServletRequest request) {
 			super(request);
+			LOG.debug("Treating resource as file: {}", request.getRequestURI());
 		}
 
 		@Override
@@ -95,10 +129,11 @@ public class UriNormalizationFilter implements HttpFilter {
 	/**
 	 * HTTP request, whose URI always ends on "/".
 	 */
-	private static class DirectoryUriRequest extends HttpServletRequestWrapper {
+	private static class FolderUriRequest extends SuffixPreservingRequest {
 
-		public DirectoryUriRequest(HttpServletRequest request) {
+		public FolderUriRequest(HttpServletRequest request) {
 			super(request);
+			LOG.debug("Treating resource as folder: {}", request.getRequestURI());
 		}
 
 		@Override

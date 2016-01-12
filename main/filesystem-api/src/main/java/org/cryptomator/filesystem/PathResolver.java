@@ -45,6 +45,16 @@ final class PathResolver {
 	 * </tr>
 	 * <tr>
 	 * <td>/foo/bar</td>
+	 * <td>/</td>
+	 * <td>/foo/bar</td>
+	 * </tr>
+	 * <tr>
+	 * <td>/foo/bar</td>
+	 * <td></td>
+	 * <td>/foo/bar</td>
+	 * </tr>
+	 * <tr>
+	 * <td>/foo/bar</td>
 	 * <td>../../..</td>
 	 * <td>Exception</td>
 	 * </tr>
@@ -58,7 +68,7 @@ final class PathResolver {
 	public static Folder resolveFolder(Folder dir, String relativePath) {
 		final String[] fragments = StringUtils.split(relativePath, '/');
 		if (ArrayUtils.isEmpty(fragments)) {
-			throw new IllegalArgumentException("Empty relativePath");
+			return dir;
 		}
 		return resolveFolder(dir, Arrays.stream(fragments).iterator());
 	}
@@ -69,6 +79,8 @@ final class PathResolver {
 	 * @param dir The directory from which to resolve the path.
 	 * @param relativePath The path relative to a given directory.
 	 * @return The file with the given path relative to the given dir.
+	 * @throws IllegalArgumentException
+	 *             if relativePath is empty, as this path would resolve to the directory itself, which obviously can't be a file.
 	 */
 	public static File resolveFile(Folder dir, String relativePath) {
 		final String[] fragments = StringUtils.split(relativePath, '/');

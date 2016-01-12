@@ -48,10 +48,12 @@ public interface Folder extends Node {
 	/**
 	 * Returns a file by resolving a path relative to this folder.
 	 * 
-	 * @param path A unix-style path, which is always relative to this folder, no matter if it starts with a slash or not
+	 * @param path A unix-style path, which is always relative to this folder, no matter if it starts with a slash or not. Path must not be empty.
 	 * @return File with the given path relative to this folder
+	 * @throws IllegalArgumentException
+	 *             if relativePath is empty
 	 */
-	default File resolveFile(String relativePath) throws UncheckedIOException {
+	default File resolveFile(String relativePath) throws UncheckedIOException, IllegalArgumentException {
 		return PathResolver.resolveFile(this, relativePath);
 	}
 
@@ -68,8 +70,8 @@ public interface Folder extends Node {
 	/**
 	 * Returns a folder by resolving a path relative to this folder.
 	 * 
-	 * @param path A unix-style path, which is always relative to this folder, no matter if it starts with a slash or not
-	 * @return Folder with the given path relative to this folder
+	 * @param path A unix-style path, which is always relative to this folder, no matter if it starts with a slash or not. Path may be empty.
+	 * @return Folder with the given path relative to this folder. Returns <code>this</code> if path is empty.
 	 */
 	default Folder resolveFolder(String relativePath) throws UncheckedIOException {
 		return PathResolver.resolveFolder(this, relativePath);
