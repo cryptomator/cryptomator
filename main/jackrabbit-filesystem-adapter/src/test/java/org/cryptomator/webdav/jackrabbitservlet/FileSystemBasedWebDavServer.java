@@ -19,7 +19,7 @@ import javax.servlet.DispatcherType;
 import org.cryptomator.filesystem.FileSystem;
 import org.cryptomator.webdav.filters.AcceptRangeFilter;
 import org.cryptomator.webdav.filters.LoggingHttpFilter;
-import org.cryptomator.webdav.filters.PutIdleTimeoutFilter;
+import org.cryptomator.webdav.filters.MacChunkedPutCompatibilityFilter;
 import org.cryptomator.webdav.filters.UriNormalizationFilter;
 import org.cryptomator.webdav.filters.UriNormalizationFilter.ResourceTypeChecker;
 import org.cryptomator.webdav.filters.UriNormalizationFilter.ResourceTypeChecker.ResourceType;
@@ -69,7 +69,7 @@ class FileSystemBasedWebDavServer {
 		servletContext.addServlet(servletHolder, "/*");
 		servletContext.addFilter(AcceptRangeFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
 		servletContext.addFilter(new FilterHolder(new UriNormalizationFilter(resourceTypeChecker)), "/*", EnumSet.of(DispatcherType.REQUEST));
-		servletContext.addFilter(PutIdleTimeoutFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
+		servletContext.addFilter(MacChunkedPutCompatibilityFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
 		servletContext.addFilter(LoggingHttpFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
 		servletCollection.mapContexts();
 
