@@ -11,21 +11,23 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.IntSummaryStatistics;
 import java.util.List;
-import java.util.Optional;
+import java.util.OptionalDouble;
+import java.util.OptionalInt;
 import java.util.function.BiConsumer;
-import java.util.function.BinaryOperator;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.IntBinaryOperator;
+import java.util.function.IntConsumer;
 import java.util.function.IntFunction;
-import java.util.function.Predicate;
+import java.util.function.IntPredicate;
+import java.util.function.IntToDoubleFunction;
+import java.util.function.IntToLongFunction;
+import java.util.function.IntUnaryOperator;
+import java.util.function.ObjIntConsumer;
 import java.util.function.Supplier;
-import java.util.function.ToDoubleFunction;
-import java.util.function.ToIntFunction;
-import java.util.function.ToLongFunction;
 import java.util.stream.BaseStream;
-import java.util.stream.Collector;
 import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
@@ -44,19 +46,9 @@ import org.mockito.InOrder;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
 @RunWith(Theories.class)
-public class AutoClosingStreamTest {
+public class AutoClosingIntStreamTest {
 
-	private static final Predicate A_PREDICATE = any -> true;
-	private static final Function A_FUNCTION = any -> null;
-	private static final ToDoubleFunction A_TO_DOUBLE_FUNCTION = any -> 0d;
-	private static final ToIntFunction A_TO_INT_FUNCTION = any -> 1;
-	private static final ToLongFunction A_TO_LONG_FUNCTION = any -> 1L;
-	private static final Consumer A_CONSUMER = any -> {
-	};
-	private static final Comparator A_COMPARATOR = (left, right) -> 0;
-	private static final Collector A_COLLECTOR = mock(Collector.class);
-	private static final BinaryOperator A_BINARY_OPERATOR = (left, right) -> null;
-	private static final Object AN_OBJECT = new Object();
+	private static final IntPredicate AN_INT_PREDICATE = any -> true;
 	private static final IntFunction AN_INT_FUNCTION = i -> null;
 	private static final BiConsumer A_BICONSUMER = (a, b) -> {
 	};
@@ -67,49 +59,54 @@ public class AutoClosingStreamTest {
 
 	@DataPoints("terminalOperations")
 	public static final List<TerminalOperation<?>> TERMINAL_OPERATIONS = new ArrayList<>();
+	private static final IntUnaryOperator AN_INT_UNARY_OPERATOR = i -> 3;
+	private static final IntToDoubleFunction AN_INT_TO_DOUBLE_FUNCTION = i -> 3d;
+	private static final IntToLongFunction AN_INT_TO_LONG_FUNCTION = i -> 5L;
+	private static final IntConsumer AN_INT_CONSUMER = i -> {
+	};
+	private static final ObjIntConsumer AN_OBJ_INT_CONSUMER = (a, b) -> {
+	};
+	private static final IntBinaryOperator AN_INT_BINARY_OPERATOR = (a, b) -> a;
 
 	static {
 		// define intermediate operations
-		test(Stream.class, Stream::distinct);
-		test(Stream.class, stream -> stream.filter(A_PREDICATE));
-		test(Stream.class, stream -> stream.flatMap(A_FUNCTION));
-		test(DoubleStream.class, stream -> stream.flatMapToDouble(A_FUNCTION));
-		test(IntStream.class, stream -> stream.flatMapToInt(A_FUNCTION));
-		test(LongStream.class, stream -> stream.flatMapToLong(A_FUNCTION));
-		test(Stream.class, stream -> stream.limit(5));
-		test(Stream.class, stream -> stream.map(A_FUNCTION));
-		test(DoubleStream.class, stream -> stream.mapToDouble(A_TO_DOUBLE_FUNCTION));
-		test(IntStream.class, stream -> stream.mapToInt(A_TO_INT_FUNCTION));
-		test(LongStream.class, stream -> stream.mapToLong(A_TO_LONG_FUNCTION));
-		test(Stream.class, Stream::parallel);
-		test(Stream.class, stream -> stream.peek(A_CONSUMER));
-		test(Stream.class, Stream::sequential);
-		test(Stream.class, stream -> stream.skip(5));
-		test(Stream.class, Stream::sorted);
-		test(Stream.class, stream -> stream.sorted(A_COMPARATOR));
-		test(Stream.class, Stream::unordered);
+		test(IntStream.class, IntStream::distinct);
+		test(IntStream.class, stream -> stream.filter(AN_INT_PREDICATE));
+		test(IntStream.class, stream -> stream.flatMap(AN_INT_FUNCTION));
+		test(IntStream.class, stream -> stream.limit(5));
+		test(IntStream.class, stream -> stream.map(AN_INT_UNARY_OPERATOR));
+		test(DoubleStream.class, stream -> stream.mapToDouble(AN_INT_TO_DOUBLE_FUNCTION));
+		test(Stream.class, stream -> stream.mapToObj(AN_INT_FUNCTION));
+		test(LongStream.class, stream -> stream.mapToLong(AN_INT_TO_LONG_FUNCTION));
+		test(IntStream.class, IntStream::parallel);
+		test(IntStream.class, stream -> stream.peek(AN_INT_CONSUMER));
+		test(IntStream.class, IntStream::sequential);
+		test(IntStream.class, stream -> stream.skip(5));
+		test(IntStream.class, IntStream::sorted);
+		test(IntStream.class, IntStream::unordered);
+		test(Stream.class, IntStream::boxed);
 
 		// define terminal operations
-		test(stream -> stream.allMatch(A_PREDICATE), true);
-		test(stream -> stream.anyMatch(A_PREDICATE), true);
-		test(stream -> stream.collect(A_COLLECTOR), new Object());
-		test(stream -> stream.collect(A_SUPPLIER, A_BICONSUMER, A_BICONSUMER), new Object());
-		test(Stream::count, 3L);
-		test(Stream::findAny, Optional.of(new Object()));
-		test(Stream::findFirst, Optional.of(new Object()));
-		test(stream -> stream.forEach(A_CONSUMER));
-		test(stream -> stream.forEachOrdered(A_CONSUMER));
-		test(stream -> stream.max(A_COMPARATOR), Optional.of(new Object()));
-		test(stream -> stream.min(A_COMPARATOR), Optional.of(new Object()));
-		test(stream -> stream.noneMatch(A_PREDICATE), true);
-		test(stream -> stream.reduce(A_BINARY_OPERATOR), Optional.of(new Object()));
-		test(stream -> stream.reduce(AN_OBJECT, A_BINARY_OPERATOR), Optional.of(new Object()));
-		test(stream -> stream.reduce(AN_OBJECT, A_BINARY_OPERATOR, A_BINARY_OPERATOR), Optional.of(new Object()));
-		test(Stream::toArray, new Object[1]);
-		test(stream -> stream.toArray(AN_INT_FUNCTION), new Object[1]);
+		test(stream -> stream.allMatch(AN_INT_PREDICATE), true);
+		test(stream -> stream.anyMatch(AN_INT_PREDICATE), true);
+		test(stream -> stream.collect(A_SUPPLIER, AN_OBJ_INT_CONSUMER, A_BICONSUMER), 7);
+		test(IntStream::count, 3L);
+		test(IntStream::findAny, OptionalInt.of(3));
+		test(IntStream::findFirst, OptionalInt.of(3));
+		test(stream -> stream.forEach(AN_INT_CONSUMER));
+		test(stream -> stream.forEachOrdered(AN_INT_CONSUMER));
+		test(stream -> stream.max(), OptionalInt.of(3));
+		test(stream -> stream.min(), OptionalInt.of(3));
+		test(stream -> stream.noneMatch(AN_INT_PREDICATE), true);
+		test(stream -> stream.reduce(AN_INT_BINARY_OPERATOR), OptionalInt.of(3));
+		test(stream -> stream.reduce(1, AN_INT_BINARY_OPERATOR), 3);
+		test(IntStream::toArray, new int[1]);
+		test(IntStream::sum, 1);
+		test(IntStream::average, OptionalDouble.of(3d));
+		test(IntStream::summaryStatistics, new IntSummaryStatistics());
 	}
 
-	private static <T> void test(Consumer<Stream> consumer) {
+	private static <T> void test(Consumer<IntStream> consumer) {
 		TERMINAL_OPERATIONS.add(new TerminalOperation<T>() {
 			@Override
 			public T result() {
@@ -117,14 +114,14 @@ public class AutoClosingStreamTest {
 			}
 
 			@Override
-			public T apply(Stream stream) {
+			public T apply(IntStream stream) {
 				consumer.accept(stream);
 				return null;
 			}
 		});
 	}
 
-	private static <T> void test(Function<Stream, T> function, T result) {
+	private static <T> void test(Function<IntStream, T> function, T result) {
 		TERMINAL_OPERATIONS.add(new TerminalOperation<T>() {
 			@Override
 			public T result() {
@@ -132,13 +129,13 @@ public class AutoClosingStreamTest {
 			}
 
 			@Override
-			public T apply(Stream stream) {
+			public T apply(IntStream stream) {
 				return function.apply(stream);
 			}
 		});
 	}
 
-	private static <T extends BaseStream> void test(Class<? extends T> type, Function<Stream, T> function) {
+	private static <T extends BaseStream> void test(Class<? extends T> type, Function<IntStream, T> function) {
 		INTERMEDIATE_OPERATIONS.add(new IntermediateOperation<T>() {
 			@Override
 			public Class<? extends T> type() {
@@ -146,7 +143,7 @@ public class AutoClosingStreamTest {
 			}
 
 			@Override
-			public T apply(Stream stream) {
+			public T apply(IntStream stream) {
 				return function.apply(stream);
 			}
 		});
@@ -155,13 +152,13 @@ public class AutoClosingStreamTest {
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
 
-	private Stream<Object> delegate;
-	private Stream<Object> inTest;
+	private IntStream delegate;
+	private IntStream inTest;
 
 	@Before
 	public void setUp() {
-		delegate = mock(Stream.class);
-		inTest = AutoClosingStream.from(delegate);
+		delegate = mock(IntStream.class);
+		inTest = AutoClosingIntStream.from(delegate);
 	}
 
 	@Theory
@@ -216,7 +213,7 @@ public class AutoClosingStreamTest {
 
 		T result();
 
-		T apply(Stream stream);
+		T apply(IntStream stream);
 
 	}
 
@@ -224,7 +221,7 @@ public class AutoClosingStreamTest {
 
 		Class<? extends T> type();
 
-		T apply(Stream stream);
+		T apply(IntStream stream);
 
 	}
 

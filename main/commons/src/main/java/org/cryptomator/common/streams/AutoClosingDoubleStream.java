@@ -11,7 +11,6 @@ import java.util.function.DoublePredicate;
 import java.util.function.ObjDoubleConsumer;
 import java.util.function.Supplier;
 import java.util.stream.DoubleStream;
-import java.util.stream.Stream;
 
 public class AutoClosingDoubleStream extends DelegatingDoubleStream {
 
@@ -171,15 +170,6 @@ public class AutoClosingDoubleStream extends DelegatingDoubleStream {
 	public OptionalDouble findAny() {
 		try {
 			return super.findAny();
-		} finally {
-			close();
-		}
-	}
-
-	@Override
-	public Stream<Double> boxed() {
-		try {
-			return super.boxed();
 		} finally {
 			close();
 		}
