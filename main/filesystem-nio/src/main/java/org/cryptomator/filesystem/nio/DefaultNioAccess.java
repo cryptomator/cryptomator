@@ -14,12 +14,7 @@ import java.nio.file.attribute.FileAttribute;
 import java.nio.file.attribute.FileTime;
 import java.util.stream.Stream;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 class DefaultNioAccess implements NioAccess {
-
-	private static final Logger LOG = LoggerFactory.getLogger(DefaultNioAccess.class);
 
 	@Override
 	public FileChannel open(Path path, OpenOption... options) throws IOException {

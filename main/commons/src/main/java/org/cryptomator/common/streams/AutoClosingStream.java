@@ -1,4 +1,6 @@
-package org.cryptomator.common;
+package org.cryptomator.common.streams;
+
+import static org.cryptomator.common.streams.AutoClosingStreamFactory.AUTO_CLOSING_STREAM_FACTORY;
 
 import java.util.Comparator;
 import java.util.Optional;
@@ -23,15 +25,14 @@ import java.util.stream.Stream;
  * 
  * @author Markus Kreusch
  */
-public final class AutoClosingStream<T> extends DelegatingStream<T> {
+public class AutoClosingStream<T> extends DelegatingStream<T> {
 
 	public static <T> Stream<T> from(Stream<T> delegate) {
 		return new AutoClosingStream<>(delegate);
 	}
 
-	@SuppressWarnings("unchecked")
 	private AutoClosingStream(Stream<T> delegate) {
-		super(delegate, AutoClosingStream::new);
+		super(delegate, AUTO_CLOSING_STREAM_FACTORY);
 	}
 
 	public void forEach(Consumer<? super T> action) {

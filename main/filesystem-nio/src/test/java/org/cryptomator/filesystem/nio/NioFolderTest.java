@@ -24,7 +24,7 @@ import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import org.cryptomator.common.AutoClosingStream;
+import org.cryptomator.common.streams.AutoClosingStream;
 import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.FileSystem;
 import org.cryptomator.filesystem.Folder;

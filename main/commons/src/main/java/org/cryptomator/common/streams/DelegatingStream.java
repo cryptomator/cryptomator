@@ -1,4 +1,4 @@
-package org.cryptomator.common;
+package org.cryptomator.common.streams;
 
 import java.util.Comparator;
 import java.util.Iterator;
@@ -24,19 +24,11 @@ import java.util.stream.Stream;
 abstract class DelegatingStream<T> implements Stream<T> {
 
 	private final Stream<T> delegate;
-	private final StreamWrapper wrapper;
+	private final DelegatingStreamFactory wrapper;
 
-	protected DelegatingStream(Stream<T> delegate, StreamWrapper wrapper) {
+	protected DelegatingStream(Stream<T> delegate, DelegatingStreamFactory wrapper) {
 		this.delegate = delegate;
 		this.wrapper = wrapper;
-	}
-
-	private <S> Stream<S> wrapped(Stream<S> other) {
-		if (getClass().isInstance(other)) {
-			return other;
-		} else {
-			return wrapper.wrap(other);
-		}
 	}
 
 	public Iterator<T> iterator() {
@@ -52,19 +44,19 @@ abstract class DelegatingStream<T> implements Stream<T> {
 	}
 
 	public Stream<T> sequential() {
-		return wrapped(delegate.sequential());
+		return wrapper.from(delegate.sequential());
 	}
 
 	public Stream<T> parallel() {
-		return wrapped(delegate.parallel());
+		return wrapper.from(delegate.parallel());
 	}
 
 	public Stream<T> unordered() {
-		return wrapped(delegate.unordered());
+		return wrapper.from(delegate.unordered());
 	}
 
 	public Stream<T> onClose(Runnable closeHandler) {
-		return wrapped(delegate.onClose(closeHandler));
+		return wrapper.from(delegate.onClose(closeHandler));
 	}
 
 	public void close() {
@@ -72,63 +64,63 @@ abstract class DelegatingStream<T> implements Stream<T> {
 	}
 
 	public Stream<T> filter(Predicate<? super T> predicate) {
-		return wrapped(delegate.filter(predicate));
+		return wrapper.from(delegate.filter(predicate));
 	}
 
 	public <R> Stream<R> map(Function<? super T, ? extends R> mapper) {
-		return wrapped(delegate.map(mapper));
+		return wrapper.from(delegate.map(mapper));
 	}
 
 	public IntStream mapToInt(ToIntFunction<? super T> mapper) {
-		return delegate.mapToInt(mapper);
+		return wrapper.from(delegate.mapToInt(mapper));
 	}
 
 	public LongStream mapToLong(ToLongFunction<? super T> mapper) {
-		return delegate.mapToLong(mapper);
+		return wrapper.from(delegate.mapToLong(mapper));
 	}
 
 	public DoubleStream mapToDouble(ToDoubleFunction<? super T> mapper) {
-		return delegate.mapToDouble(mapper);
+		return wrapper.from(delegate.mapToDouble(mapper));
 	}
 
 	public <R> Stream<R> flatMap(Function<? super T, ? extends Stream<? extends R>> mapper) {
-		return wrapped(delegate.flatMap(mapper));
+		return wrapper.from(delegate.flatMap(mapper));
 	}
 
 	public IntStream flatMapToInt(Function<? super T, ? extends IntStream> mapper) {
-		return delegate.flatMapToInt(mapper);
+		return wrapper.from(delegate.flatMapToInt(mapper));
 	}
 
 	public LongStream flatMapToLong(Function<? super T, ? extends LongStream> mapper) {
-		return delegate.flatMapToLong(mapper);
+		return wrapper.from(delegate.flatMapToLong(mapper));
 	}
 
 	public DoubleStream flatMapToDouble(Function<? super T, ? extends DoubleStream> mapper) {
-		return delegate.flatMapToDouble(mapper);
+		return wrapper.from(delegate.flatMapToDouble(mapper));
 	}
 
 	public Stream<T> distinct() {
-		return wrapped(delegate.distinct());
+		return wrapper.from(delegate.distinct());
 	}
 
 	public Stream<T> sorted() {
-		return wrapped(delegate.sorted());
+		return wrapper.from(delegate.sorted());
 	}
 
 	public Stream<T> sorted(Comparator<? super T> comparator) {
-		return wrapped(delegate.sorted(comparator));
+		return wrapper.from(delegate.sorted(comparator));
 	}
 
 	public Stream<T> peek(Consumer<? super T> action) {
-		return wrapped(delegate.peek(action));
+		return wrapper.from(delegate.peek(action));
 	}
 
 	public Stream<T> limit(long maxSize) {
-		return wrapped(delegate.limit(maxSize));
+		return wrapper.from(delegate.limit(maxSize));
 	}
 
 	public Stream<T> skip(long n) {
-		return wrapped(delegate.skip(n));
+		return wrapper.from(delegate.skip(n));
 	}
 
 	public void forEach(Consumer<? super T> action) {
@@ -197,12 +189,6 @@ abstract class DelegatingStream<T> implements Stream<T> {
 
 	public Optional<T> findAny() {
 		return delegate.findAny();
-	}
-
-	public interface StreamWrapper {
-
-		<S> Stream<S> wrap(Stream<S> other);
-
 	}
 
 }

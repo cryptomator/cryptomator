@@ -1,4 +1,4 @@
-package org.cryptomator.common;
+package org.cryptomator.common.streams;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
+import org.cryptomator.common.streams.AutoClosingStream;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InOrder;
