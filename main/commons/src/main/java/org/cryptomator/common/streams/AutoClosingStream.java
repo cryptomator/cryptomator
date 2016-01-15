@@ -12,16 +12,15 @@ import java.util.function.IntFunction;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
-import java.util.stream.DoubleStream;
-import java.util.stream.IntStream;
-import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 /**
  * <p>
- * A Stream which is automatically closed on after execution of a terminal operation.
+ * A Stream which is automatically closed after execution of a terminal operation.
  * <p>
- * The stream keeps its auto closing behavior on invocations of intermediate operations as long as no conversion to an {@link IntStream}, {@link LongStream} or {@link DoubleStream} occurs.
+ * Streams returned by intermediate operations are also auto closing.
+ * <p>
+ * <b>Note:</b> When using {@link #iterator()} or {@link #spliterator()} auto closing does not occur.
  * 
  * @author Markus Kreusch
  */
