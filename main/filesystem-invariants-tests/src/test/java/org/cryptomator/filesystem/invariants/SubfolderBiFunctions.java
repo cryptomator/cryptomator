@@ -5,13 +5,13 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.cryptomator.filesystem.Folder;
-import org.cryptomator.filesystem.invariants.SubfolderFactories.SubfolderFactory;
+import org.cryptomator.filesystem.invariants.SubfolderBiFunctions.SubfolderBiFunction;
 
-class SubfolderFactories implements Iterable<SubfolderFactory> {
+class SubfolderBiFunctions implements Iterable<SubfolderBiFunction> {
 
-	private final List<SubfolderFactory> factories = new ArrayList<>();
+	private final List<SubfolderBiFunction> factories = new ArrayList<>();
 
-	public SubfolderFactories() {
+	public SubfolderBiFunctions() {
 		addNonExisting("invoke folder", this::invokeFolder);
 		addNonExisting("create and delete", this::createAndDeleteFolder);
 		addNonExisting("delete by moving", this::moveFolderAway);
@@ -54,8 +54,8 @@ class SubfolderFactories implements Iterable<SubfolderFactory> {
 		return target;
 	}
 
-	private void addExisting(String name, ExistingSubfolderFactory factory) {
-		factories.add(new ExistingSubfolderFactory() {
+	private void addExisting(String name, ExistingSubfolderBiFunction factory) {
+		factories.add(new ExistingSubfolderBiFunction() {
 			@Override
 			public Folder subfolderWithName(Folder parent, String name) {
 				return factory.subfolderWithName(parent, name);
@@ -68,8 +68,8 @@ class SubfolderFactories implements Iterable<SubfolderFactory> {
 		});
 	}
 
-	private void addNonExisting(String name, NonExistingSubfolderFactory factory) {
-		factories.add(new NonExistingSubfolderFactory() {
+	private void addNonExisting(String name, NonExistingSubfolderSubfolderBiFunction factory) {
+		factories.add(new NonExistingSubfolderSubfolderBiFunction() {
 			@Override
 			public Folder subfolderWithName(Folder parent, String name) {
 				return factory.subfolderWithName(parent, name);
@@ -82,30 +82,30 @@ class SubfolderFactories implements Iterable<SubfolderFactory> {
 		});
 	}
 
-	public interface SubfolderFactory {
+	public interface SubfolderBiFunction {
 
 		Folder subfolderWithName(Folder parent, String name);
 
-		boolean createsExistingFolder();
+		boolean returnedFoldersExist();
 
 	}
 
-	public interface ExistingSubfolderFactory extends SubfolderFactory {
+	public interface ExistingSubfolderBiFunction extends SubfolderBiFunction {
 		@Override
-		default boolean createsExistingFolder() {
+		default boolean returnedFoldersExist() {
 			return true;
 		}
 	}
 
-	public interface NonExistingSubfolderFactory extends SubfolderFactory {
+	public interface NonExistingSubfolderSubfolderBiFunction extends SubfolderBiFunction {
 		@Override
-		default boolean createsExistingFolder() {
+		default boolean returnedFoldersExist() {
 			return false;
 		}
 	}
 
 	@Override
-	public Iterator<SubfolderFactory> iterator() {
+	public Iterator<SubfolderBiFunction> iterator() {
 		return factories.iterator();
 	}
 

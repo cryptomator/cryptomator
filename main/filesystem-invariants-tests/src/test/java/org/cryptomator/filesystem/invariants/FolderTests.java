@@ -7,7 +7,7 @@ import static org.junit.Assume.assumeThat;
 import org.cryptomator.filesystem.FileSystem;
 import org.cryptomator.filesystem.Folder;
 import org.cryptomator.filesystem.invariants.FileSystemFactories.FileSystemFactory;
-import org.cryptomator.filesystem.invariants.SubfolderFactories.SubfolderFactory;
+import org.cryptomator.filesystem.invariants.SubfolderBiFunctions.SubfolderBiFunction;
 import org.junit.Rule;
 import org.junit.experimental.theories.DataPoints;
 import org.junit.experimental.theories.Theories;
@@ -24,14 +24,14 @@ public class FolderTests {
 	public static final Iterable<FileSystemFactory> FILE_SYSTEM_FACTORIES = new FileSystemFactories();
 
 	@DataPoints
-	public static final Iterable<SubfolderFactory> SUBFOLDER_FACTORIES = new SubfolderFactories();
+	public static final Iterable<SubfolderBiFunction> SUBFOLDER_FACTORIES = new SubfolderBiFunctions();
 
 	@Rule
 	public final ExpectedException thrown = ExpectedException.none();
 
 	@Theory
-	public void testExistingFolderExists(FileSystemFactory fileSystemFactory, SubfolderFactory subfolderFactory) {
-		assumeThat(subfolderFactory.createsExistingFolder(), is(true));
+	public void testExistingFolderExists(FileSystemFactory fileSystemFactory, SubfolderBiFunction subfolderFactory) {
+		assumeThat(subfolderFactory.returnedFoldersExist(), is(true));
 
 		FileSystem fileSystem = fileSystemFactory.create();
 		Folder existingFolder = subfolderFactory.subfolderWithName(fileSystem, FOLDER_NAME);
@@ -40,8 +40,8 @@ public class FolderTests {
 	}
 
 	@Theory
-	public void testNonExistingFolderDoesntExists(FileSystemFactory fileSystemFactory, SubfolderFactory subfolderFactory) {
-		assumeThat(subfolderFactory.createsExistingFolder(), is(false));
+	public void testNonExistingFolderDoesntExists(FileSystemFactory fileSystemFactory, SubfolderBiFunction subfolderFactory) {
+		assumeThat(subfolderFactory.returnedFoldersExist(), is(false));
 
 		FileSystem fileSystem = fileSystemFactory.create();
 		Folder existingFolder = subfolderFactory.subfolderWithName(fileSystem, FOLDER_NAME);
