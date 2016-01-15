@@ -81,8 +81,10 @@ class FileContentEncryptorImpl implements FileContentEncryptor {
 
 	private void submitCleartextBuffer() throws InterruptedException {
 		cleartextBuffer.flip();
-		Callable<ByteBuffer> encryptionJob = new EncryptionJob(cleartextBuffer, chunkNumber++);
-		dataProcessor.submit(encryptionJob);
+		if (cleartextBuffer.hasRemaining()) {
+			Callable<ByteBuffer> encryptionJob = new EncryptionJob(cleartextBuffer, chunkNumber++);
+			dataProcessor.submit(encryptionJob);
+		}
 	}
 
 	private void submitEof() throws InterruptedException {

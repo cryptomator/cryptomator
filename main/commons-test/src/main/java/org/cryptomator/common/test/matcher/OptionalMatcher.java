@@ -13,7 +13,7 @@ public class OptionalMatcher {
 			@Override
 			public void describeTo(Description description) {
 				description //
-						.appendText("a present Optional with a value that") //
+						.appendText("a present Optional with a value that ") //
 						.appendDescriptionOf(valueMatcher);
 			}
 
@@ -23,7 +23,7 @@ public class OptionalMatcher {
 					if (valueMatcher.matches(item.get())) {
 						return true;
 					} else {
-						mismatchDescription.appendText("a present Optional with value that");
+						mismatchDescription.appendText("a present Optional with value that ");
 						valueMatcher.describeMismatch(item, mismatchDescription);
 						return false;
 					}

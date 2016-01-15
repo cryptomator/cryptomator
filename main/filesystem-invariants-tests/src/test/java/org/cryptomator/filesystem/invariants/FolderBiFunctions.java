@@ -5,19 +5,20 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.cryptomator.filesystem.Folder;
-import org.cryptomator.filesystem.invariants.SubfolderBiFunctions.SubfolderBiFunction;
+import org.cryptomator.filesystem.invariants.FolderBiFunctions.FolderBiFunction;
 
-class SubfolderBiFunctions implements Iterable<SubfolderBiFunction> {
+class FolderBiFunctions implements Iterable<FolderBiFunction> {
 
-	private final List<SubfolderBiFunction> factories = new ArrayList<>();
+	private final List<FolderBiFunction> factories = new ArrayList<>();
 
-	public SubfolderBiFunctions() {
+	public FolderBiFunctions() {
 		addNonExisting("invoke folder", this::invokeFolder);
 		addNonExisting("create and delete", this::createAndDeleteFolder);
-		addNonExisting("delete by moving", this::moveFolderAway);
+		addNonExisting("delete by moving", this::deleteFolderByMoving);
 
 		addExisting("invoke folder and create", this::invokeFolderAndCreate);
 		addExisting("create by moving", this::createByMoving);
+		addExisting("create by copying", this::createByCopying);
 	}
 
 	private Folder invokeFolder(Folder parent, String name) {
@@ -37,7 +38,7 @@ class SubfolderBiFunctions implements Iterable<SubfolderBiFunction> {
 		return result;
 	}
 
-	private Folder moveFolderAway(Folder parent, String name) {
+	private Folder deleteFolderByMoving(Folder parent, String name) {
 		Folder result = parent.folder(name);
 		result.create();
 		Folder target = parent.folder("subfolderFactoryMoveFolderAway");
@@ -51,6 +52,15 @@ class SubfolderBiFunctions implements Iterable<SubfolderBiFunction> {
 		temporary.create();
 		Folder target = parent.folder(name);
 		temporary.moveTo(target);
+		return target;
+	}
+
+	private Folder createByCopying(Folder parent, String name) {
+		Folder temporary = parent.folder("subfolderFactoryCreateByCopying");
+		temporary.create();
+		Folder target = parent.folder(name);
+		temporary.copyTo(target);
+		temporary.delete();
 		return target;
 	}
 
@@ -82,7 +92,7 @@ class SubfolderBiFunctions implements Iterable<SubfolderBiFunction> {
 		});
 	}
 
-	public interface SubfolderBiFunction {
+	public interface FolderBiFunction {
 
 		Folder subfolderWithName(Folder parent, String name);
 
@@ -90,14 +100,14 @@ class SubfolderBiFunctions implements Iterable<SubfolderBiFunction> {
 
 	}
 
-	public interface ExistingSubfolderBiFunction extends SubfolderBiFunction {
+	public interface ExistingSubfolderBiFunction extends FolderBiFunction {
 		@Override
 		default boolean returnedFoldersExist() {
 			return true;
 		}
 	}
 
-	public interface NonExistingSubfolderSubfolderBiFunction extends SubfolderBiFunction {
+	public interface NonExistingSubfolderSubfolderBiFunction extends FolderBiFunction {
 		@Override
 		default boolean returnedFoldersExist() {
 			return false;
@@ -105,7 +115,7 @@ class SubfolderBiFunctions implements Iterable<SubfolderBiFunction> {
 	}
 
 	@Override
-	public Iterator<SubfolderBiFunction> iterator() {
+	public Iterator<FolderBiFunction> iterator() {
 		return factories.iterator();
 	}
 
