@@ -13,9 +13,9 @@ import java.io.UncheckedIOException;
 import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.FileSystem;
 import org.cryptomator.filesystem.Folder;
-import org.cryptomator.filesystem.invariants.FileBiFunctions.FileBiFunction;
+import org.cryptomator.filesystem.invariants.WaysToObtainAFile.WayToObtainAFile;
 import org.cryptomator.filesystem.invariants.FileSystemFactories.FileSystemFactory;
-import org.cryptomator.filesystem.invariants.FolderBiFunctions.FolderBiFunction;
+import org.cryptomator.filesystem.invariants.WaysToObtainAFolder.WayToObtainAFolder;
 import org.junit.Rule;
 import org.junit.experimental.theories.DataPoints;
 import org.junit.experimental.theories.Theories;
@@ -32,20 +32,20 @@ public class FolderChildrenTests {
 	public static final Iterable<FileSystemFactory> FILE_SYSTEM_FACTORIES = new FileSystemFactories();
 
 	@DataPoints
-	public static final Iterable<FolderBiFunction> SUBFOLDER_BI_FUNCTIONS = new FolderBiFunctions();
+	public static final Iterable<WayToObtainAFolder> WAYS_TO_OBTAIN_A_FOLDER = new WaysToObtainAFolder();
 
 	@DataPoints
-	public static final Iterable<FileBiFunction> SUBFILE_BI_FUNCTIONS = new FileBiFunctions();
+	public static final Iterable<WayToObtainAFile> WAYS_TO_OBTAIN_A_FILE = new WaysToObtainAFile();
 
 	@Rule
 	public final ExpectedException thrown = ExpectedException.none();
 
 	@Theory
-	public void testChildrenThrowsExceptionIfFolderDoesNotExist(FileSystemFactory fileSystemFactory, FolderBiFunction folderFunction) {
+	public void testChildrenThrowsExceptionIfFolderDoesNotExist(FileSystemFactory fileSystemFactory, WayToObtainAFolder folderFunction) {
 		assumeThat(folderFunction.returnedFoldersExist(), is(false));
 
 		FileSystem fileSystem = fileSystemFactory.create();
-		Folder nonExistingFolder = folderFunction.subfolderWithName(fileSystem, FOLDER_NAME);
+		Folder nonExistingFolder = folderFunction.folderWithName(fileSystem, FOLDER_NAME);
 
 		thrown.expect(UncheckedIOException.class);
 
@@ -53,11 +53,11 @@ public class FolderChildrenTests {
 	}
 
 	@Theory
-	public void testFilesThrowsExceptionIfFolderDoesNotExist(FileSystemFactory fileSystemFactory, FolderBiFunction folderFunction) {
+	public void testFilesThrowsExceptionIfFolderDoesNotExist(FileSystemFactory fileSystemFactory, WayToObtainAFolder folderFunction) {
 		assumeThat(folderFunction.returnedFoldersExist(), is(false));
 
 		FileSystem fileSystem = fileSystemFactory.create();
-		Folder nonExistingFolder = folderFunction.subfolderWithName(fileSystem, FOLDER_NAME);
+		Folder nonExistingFolder = folderFunction.folderWithName(fileSystem, FOLDER_NAME);
 
 		thrown.expect(UncheckedIOException.class);
 
@@ -65,11 +65,11 @@ public class FolderChildrenTests {
 	}
 
 	@Theory
-	public void testFoldersThrowsExceptionIfFolderDoesNotExist(FileSystemFactory fileSystemFactory, FolderBiFunction folderFunction) {
+	public void testFoldersThrowsExceptionIfFolderDoesNotExist(FileSystemFactory fileSystemFactory, WayToObtainAFolder folderFunction) {
 		assumeThat(folderFunction.returnedFoldersExist(), is(false));
 
 		FileSystem fileSystem = fileSystemFactory.create();
-		Folder nonExistingFolder = folderFunction.subfolderWithName(fileSystem, FOLDER_NAME);
+		Folder nonExistingFolder = folderFunction.folderWithName(fileSystem, FOLDER_NAME);
 
 		thrown.expect(UncheckedIOException.class);
 
@@ -77,87 +77,87 @@ public class FolderChildrenTests {
 	}
 
 	@Theory
-	public void testChildrenIsEmptyForEmptyFolder(FileSystemFactory fileSystemFactory, FolderBiFunction folderFunction) {
+	public void testChildrenIsEmptyForEmptyFolder(FileSystemFactory fileSystemFactory, WayToObtainAFolder folderFunction) {
 		assumeThat(folderFunction.returnedFoldersExist(), is(true));
 
 		FileSystem fileSystem = fileSystemFactory.create();
-		Folder existingFolder = folderFunction.subfolderWithName(fileSystem, FOLDER_NAME);
+		Folder existingFolder = folderFunction.folderWithName(fileSystem, FOLDER_NAME);
 
 		assertThat(existingFolder.children().count(), is(0L));
 	}
 
 	@Theory
-	public void testFilesIsEmptyForEmptyFolder(FileSystemFactory fileSystemFactory, FolderBiFunction folderFunction) {
+	public void testFilesIsEmptyForEmptyFolder(FileSystemFactory fileSystemFactory, WayToObtainAFolder folderFunction) {
 		assumeThat(folderFunction.returnedFoldersExist(), is(true));
 
 		FileSystem fileSystem = fileSystemFactory.create();
-		Folder existingFolder = folderFunction.subfolderWithName(fileSystem, FOLDER_NAME);
+		Folder existingFolder = folderFunction.folderWithName(fileSystem, FOLDER_NAME);
 
 		assertThat(existingFolder.files().count(), is(0L));
 	}
 
 	@Theory
-	public void testFoldersIsEmptyForEmptyFolder(FileSystemFactory fileSystemFactory, FolderBiFunction folderFunction) {
+	public void testFoldersIsEmptyForEmptyFolder(FileSystemFactory fileSystemFactory, WayToObtainAFolder folderFunction) {
 		assumeThat(folderFunction.returnedFoldersExist(), is(true));
 
 		FileSystem fileSystem = fileSystemFactory.create();
-		Folder existingFolder = folderFunction.subfolderWithName(fileSystem, FOLDER_NAME);
+		Folder existingFolder = folderFunction.folderWithName(fileSystem, FOLDER_NAME);
 
 		assertThat(existingFolder.folders().count(), is(0L));
 	}
 
 	@Theory
-	public void testChildrenContainsCreatedChildFolder(FileSystemFactory fileSystemFactory, FolderBiFunction existingFolderFunction, FolderBiFunction childExistingFolderFunction) {
+	public void testChildrenContainsCreatedChildFolder(FileSystemFactory fileSystemFactory, WayToObtainAFolder existingFolderFunction, WayToObtainAFolder childExistingFolderFunction) {
 		assumeThat(existingFolderFunction.returnedFoldersExist(), is(true));
 		assumeThat(childExistingFolderFunction.returnedFoldersExist(), is(true));
 
 		String childName = "childFolderName";
 
 		FileSystem fileSystem = fileSystemFactory.create();
-		Folder existingFolder = existingFolderFunction.subfolderWithName(fileSystem, FOLDER_NAME);
-		Folder childFolder = childExistingFolderFunction.subfolderWithName(existingFolder, childName);
+		Folder existingFolder = existingFolderFunction.folderWithName(fileSystem, FOLDER_NAME);
+		Folder childFolder = childExistingFolderFunction.folderWithName(existingFolder, childName);
 
 		assertThat(existingFolder.children().collect(toList()), containsInAnyOrder(equalTo(childFolder)));
 	}
 
 	@Theory
-	public void testChildrenDoesNotContainCreatedAndDeletedChildFolder(FileSystemFactory fileSystemFactory, FolderBiFunction existingFolderFunction, FolderBiFunction childExistingFolderFunction) {
+	public void testChildrenDoesNotContainCreatedAndDeletedChildFolder(FileSystemFactory fileSystemFactory, WayToObtainAFolder existingFolderFunction, WayToObtainAFolder childExistingFolderFunction) {
 		assumeThat(existingFolderFunction.returnedFoldersExist(), is(true));
 		assumeThat(childExistingFolderFunction.returnedFoldersExist(), is(true));
 
 		String childName = "childFolderName";
 
 		FileSystem fileSystem = fileSystemFactory.create();
-		Folder existingFolder = existingFolderFunction.subfolderWithName(fileSystem, FOLDER_NAME);
-		Folder childFolder = childExistingFolderFunction.subfolderWithName(existingFolder, childName);
+		Folder existingFolder = existingFolderFunction.folderWithName(fileSystem, FOLDER_NAME);
+		Folder childFolder = childExistingFolderFunction.folderWithName(existingFolder, childName);
 		childFolder.delete();
 
 		assertThat(existingFolder.children().collect(toList()), is(empty()));
 	}
 
 	@Theory
-	public void testChildrenContainsCreatedFile(FileSystemFactory fileSystemFactory, FolderBiFunction existingFolderFunction, FileBiFunction existingFileFunction) {
+	public void testChildrenContainsCreatedFile(FileSystemFactory fileSystemFactory, WayToObtainAFolder existingFolderFunction, WayToObtainAFile existingFileFunction) {
 		assumeThat(existingFolderFunction.returnedFoldersExist(), is(true));
 		assumeThat(existingFileFunction.returnedFilesExist(), is(true));
 
 		String childName = "childFolderName";
 
 		FileSystem fileSystem = fileSystemFactory.create();
-		Folder existingFolder = existingFolderFunction.subfolderWithName(fileSystem, FOLDER_NAME);
+		Folder existingFolder = existingFolderFunction.folderWithName(fileSystem, FOLDER_NAME);
 		File file = existingFileFunction.fileWithName(existingFolder, childName);
 
 		assertThat(existingFolder.children().collect(toList()), containsInAnyOrder(equalTo(file)));
 	}
 
 	@Theory
-	public void testChildrenDoesNotContainCreatedAndDeletedFile(FileSystemFactory fileSystemFactory, FolderBiFunction existingFolderFunction, FileBiFunction existingFileFunction) {
+	public void testChildrenDoesNotContainCreatedAndDeletedFile(FileSystemFactory fileSystemFactory, WayToObtainAFolder existingFolderFunction, WayToObtainAFile existingFileFunction) {
 		assumeThat(existingFolderFunction.returnedFoldersExist(), is(true));
 		assumeThat(existingFileFunction.returnedFilesExist(), is(true));
 
 		String childName = "childFolderName";
 
 		FileSystem fileSystem = fileSystemFactory.create();
-		Folder existingFolder = existingFolderFunction.subfolderWithName(fileSystem, FOLDER_NAME);
+		Folder existingFolder = existingFolderFunction.folderWithName(fileSystem, FOLDER_NAME);
 		File file = existingFileFunction.fileWithName(existingFolder, childName);
 		file.delete();
 
@@ -165,14 +165,14 @@ public class FolderChildrenTests {
 	}
 
 	@Theory
-	public void testFoldersDoesNotContainAndFilesContainsCreatedFile(FileSystemFactory fileSystemFactory, FolderBiFunction existingFolderFunction, FileBiFunction existingFileFunction) {
+	public void testFoldersDoesNotContainAndFilesContainsCreatedFile(FileSystemFactory fileSystemFactory, WayToObtainAFolder existingFolderFunction, WayToObtainAFile existingFileFunction) {
 		assumeThat(existingFolderFunction.returnedFoldersExist(), is(true));
 		assumeThat(existingFileFunction.returnedFilesExist(), is(true));
 
 		String childName = "childFolderName";
 
 		FileSystem fileSystem = fileSystemFactory.create();
-		Folder existingFolder = existingFolderFunction.subfolderWithName(fileSystem, FOLDER_NAME);
+		Folder existingFolder = existingFolderFunction.folderWithName(fileSystem, FOLDER_NAME);
 		File file = existingFileFunction.fileWithName(existingFolder, childName);
 
 		assertThat(existingFolder.folders().collect(toList()), is(empty()));
@@ -180,14 +180,14 @@ public class FolderChildrenTests {
 	}
 
 	@Theory
-	public void testFoldersAndFilesDoesNotContainCreatedAndDeletedFile(FileSystemFactory fileSystemFactory, FolderBiFunction existingFolderFunction, FileBiFunction existingFileFunction) {
+	public void testFoldersAndFilesDoesNotContainCreatedAndDeletedFile(FileSystemFactory fileSystemFactory, WayToObtainAFolder existingFolderFunction, WayToObtainAFile existingFileFunction) {
 		assumeThat(existingFolderFunction.returnedFoldersExist(), is(true));
 		assumeThat(existingFileFunction.returnedFilesExist(), is(true));
 
 		String childName = "childFolderName";
 
 		FileSystem fileSystem = fileSystemFactory.create();
-		Folder existingFolder = existingFolderFunction.subfolderWithName(fileSystem, FOLDER_NAME);
+		Folder existingFolder = existingFolderFunction.folderWithName(fileSystem, FOLDER_NAME);
 		File file = existingFileFunction.fileWithName(existingFolder, childName);
 		file.delete();
 
@@ -196,30 +196,30 @@ public class FolderChildrenTests {
 	}
 
 	@Theory
-	public void testFoldersContainsAndFilesDoesNotContainCreatedChildFolder(FileSystemFactory fileSystemFactory, FolderBiFunction existingFolderFunction, FolderBiFunction childExistingFolderFunction) {
+	public void testFoldersContainsAndFilesDoesNotContainCreatedChildFolder(FileSystemFactory fileSystemFactory, WayToObtainAFolder existingFolderFunction, WayToObtainAFolder childExistingFolderFunction) {
 		assumeThat(existingFolderFunction.returnedFoldersExist(), is(true));
 		assumeThat(childExistingFolderFunction.returnedFoldersExist(), is(true));
 
 		String childName = "childFolderName";
 
 		FileSystem fileSystem = fileSystemFactory.create();
-		Folder existingFolder = existingFolderFunction.subfolderWithName(fileSystem, FOLDER_NAME);
-		Folder childFolder = childExistingFolderFunction.subfolderWithName(existingFolder, childName);
+		Folder existingFolder = existingFolderFunction.folderWithName(fileSystem, FOLDER_NAME);
+		Folder childFolder = childExistingFolderFunction.folderWithName(existingFolder, childName);
 
 		assertThat(existingFolder.folders().collect(toList()), containsInAnyOrder(equalTo(childFolder)));
 		assertThat(existingFolder.files().collect(toList()), is(empty()));
 	}
 
 	@Theory
-	public void testFoldersAndFilesDoesNotContainCreatedAndDeletedChildFolder(FileSystemFactory fileSystemFactory, FolderBiFunction existingFolderFunction, FolderBiFunction childExistingFolderFunction) {
+	public void testFoldersAndFilesDoesNotContainCreatedAndDeletedChildFolder(FileSystemFactory fileSystemFactory, WayToObtainAFolder existingFolderFunction, WayToObtainAFolder childExistingFolderFunction) {
 		assumeThat(existingFolderFunction.returnedFoldersExist(), is(true));
 		assumeThat(childExistingFolderFunction.returnedFoldersExist(), is(true));
 
 		String childName = "childFolderName";
 
 		FileSystem fileSystem = fileSystemFactory.create();
-		Folder existingFolder = existingFolderFunction.subfolderWithName(fileSystem, FOLDER_NAME);
-		Folder childFolder = childExistingFolderFunction.subfolderWithName(existingFolder, childName);
+		Folder existingFolder = existingFolderFunction.folderWithName(fileSystem, FOLDER_NAME);
+		Folder childFolder = childExistingFolderFunction.folderWithName(existingFolder, childName);
 		childFolder.delete();
 
 		assertThat(existingFolder.folders().collect(toList()), is(empty()));

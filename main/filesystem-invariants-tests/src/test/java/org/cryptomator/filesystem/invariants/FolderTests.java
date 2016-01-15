@@ -12,7 +12,7 @@ import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.FileSystem;
 import org.cryptomator.filesystem.Folder;
 import org.cryptomator.filesystem.invariants.FileSystemFactories.FileSystemFactory;
-import org.cryptomator.filesystem.invariants.FolderBiFunctions.FolderBiFunction;
+import org.cryptomator.filesystem.invariants.WaysToObtainAFolder.WayToObtainAFolder;
 import org.junit.Rule;
 import org.junit.experimental.theories.DataPoints;
 import org.junit.experimental.theories.Theories;
@@ -36,7 +36,7 @@ public class FolderTests {
 	public static final Iterable<FileSystemFactory> FILE_SYSTEM_FACTORIES = new FileSystemFactories();
 
 	@DataPoints
-	public static final Iterable<FolderBiFunction> SUBFOLDER_FACTORIES = new FolderBiFunctions();
+	public static final Iterable<WayToObtainAFolder> WAYS_TO_OBTAIN_A_FOLDER = new WaysToObtainAFolder();
 
 	@Rule
 	public final ExpectedException thrown = ExpectedException.none();
@@ -49,10 +49,10 @@ public class FolderTests {
 	}
 
 	@Theory
-	public void testFolderOnSubfolderReturnsFolder(FileSystemFactory fileSystemFactory, FolderBiFunction folderBiFunction) {
+	public void testFolderOnSubfolderReturnsFolder(FileSystemFactory fileSystemFactory, WayToObtainAFolder folderBiFunction) {
 		FileSystem fileSystem = fileSystemFactory.create();
 
-		Folder folder = folderBiFunction.subfolderWithName(fileSystem, FOLDER_NAME);
+		Folder folder = folderBiFunction.folderWithName(fileSystem, FOLDER_NAME);
 
 		assertThat(folder.folder(FOLDER_NAME), is(notNullValue()));
 	}
@@ -69,10 +69,10 @@ public class FolderTests {
 	}
 
 	@Theory
-	public void testResolveFolderOnSubfolderReturnsFolder(FileSystemFactory fileSystemFactory, FolderBiFunction folderBiFunction) {
+	public void testResolveFolderOnSubfolderReturnsFolder(FileSystemFactory fileSystemFactory, WayToObtainAFolder folderBiFunction) {
 		FileSystem fileSystem = fileSystemFactory.create();
 
-		Folder folder = folderBiFunction.subfolderWithName(fileSystem, FOLDER_NAME);
+		Folder folder = folderBiFunction.folderWithName(fileSystem, FOLDER_NAME);
 		Folder resolvedFolder = folder.resolveFolder(PATH);
 
 		assertThat(resolvedFolder, is(folderWithName(PATH_NAME_2)));
@@ -88,10 +88,10 @@ public class FolderTests {
 	}
 
 	@Theory
-	public void testFileOnSubfolderReturnsFile(FileSystemFactory fileSystemFactory, FolderBiFunction folderBiFunction) {
+	public void testFileOnSubfolderReturnsFile(FileSystemFactory fileSystemFactory, WayToObtainAFolder folderBiFunction) {
 		FileSystem fileSystem = fileSystemFactory.create();
 
-		Folder folder = folderBiFunction.subfolderWithName(fileSystem, FOLDER_NAME);
+		Folder folder = folderBiFunction.folderWithName(fileSystem, FOLDER_NAME);
 
 		assertThat(folder.file(FILE_NAME), is(notNullValue()));
 	}
@@ -108,10 +108,10 @@ public class FolderTests {
 	}
 
 	@Theory
-	public void testResolveFileOnSubfolderReturnsFile(FileSystemFactory fileSystemFactory, FolderBiFunction folderBiFunction) {
+	public void testResolveFileOnSubfolderReturnsFile(FileSystemFactory fileSystemFactory, WayToObtainAFolder folderBiFunction) {
 		FileSystem fileSystem = fileSystemFactory.create();
 
-		Folder folder = folderBiFunction.subfolderWithName(fileSystem, FOLDER_NAME);
+		Folder folder = folderBiFunction.folderWithName(fileSystem, FOLDER_NAME);
 		File resolvedFile = folder.resolveFile(PATH);
 
 		assertThat(resolvedFile, is(fileWithName(PATH_NAME_2)));
@@ -120,82 +120,82 @@ public class FolderTests {
 	}
 
 	@Theory
-	public void testExistingFolderExists(FileSystemFactory fileSystemFactory, FolderBiFunction folderBiFunction) {
+	public void testExistingFolderExists(FileSystemFactory fileSystemFactory, WayToObtainAFolder folderBiFunction) {
 		assumeThat(folderBiFunction.returnedFoldersExist(), is(true));
 
 		FileSystem fileSystem = fileSystemFactory.create();
-		Folder existingFolder = folderBiFunction.subfolderWithName(fileSystem, FOLDER_NAME);
+		Folder existingFolder = folderBiFunction.folderWithName(fileSystem, FOLDER_NAME);
 
 		assertThat(existingFolder.exists(), is(true));
 	}
 
 	@Theory
-	public void testNonExistingFolderDoesntExists(FileSystemFactory fileSystemFactory, FolderBiFunction folderBiFunction) {
+	public void testNonExistingFolderDoesntExists(FileSystemFactory fileSystemFactory, WayToObtainAFolder folderBiFunction) {
 		assumeThat(folderBiFunction.returnedFoldersExist(), is(false));
 
 		FileSystem fileSystem = fileSystemFactory.create();
-		Folder existingFolder = folderBiFunction.subfolderWithName(fileSystem, FOLDER_NAME);
+		Folder existingFolder = folderBiFunction.folderWithName(fileSystem, FOLDER_NAME);
 
 		assertThat(existingFolder.exists(), is(false));
 	}
 
 	@Theory
-	public void testFolderIsNotAncecstorOfItself(FileSystemFactory fileSystemFactory, FolderBiFunction folderBiFunction) {
+	public void testFolderIsNotAncecstorOfItself(FileSystemFactory fileSystemFactory, WayToObtainAFolder folderBiFunction) {
 		FileSystem fileSystem = fileSystemFactory.create();
 
-		Folder folder = folderBiFunction.subfolderWithName(fileSystem, FOLDER_NAME);
+		Folder folder = folderBiFunction.folderWithName(fileSystem, FOLDER_NAME);
 
 		assertThat(folder.isAncestorOf(folder), is(false));
 	}
 
 	@Theory
-	public void testFolderIsNotAncecstorOfItsParent(FileSystemFactory fileSystemFactory, FolderBiFunction folderBiFunction) {
+	public void testFolderIsNotAncecstorOfItsParent(FileSystemFactory fileSystemFactory, WayToObtainAFolder folderBiFunction) {
 		FileSystem fileSystem = fileSystemFactory.create();
 
-		Folder parent = folderBiFunction.subfolderWithName(fileSystem, FOLDER_NAME);
-		Folder child = folderBiFunction.subfolderWithName(parent, FOLDER_NAME);
+		Folder parent = folderBiFunction.folderWithName(fileSystem, FOLDER_NAME);
+		Folder child = folderBiFunction.folderWithName(parent, FOLDER_NAME);
 
 		assertThat(child.isAncestorOf(parent), is(false));
 	}
 
 	@Theory
-	public void testFolderIsNotAncecstorOfItsParentsParent(FileSystemFactory fileSystemFactory, FolderBiFunction folderBiFunction) {
+	public void testFolderIsNotAncecstorOfItsParentsParent(FileSystemFactory fileSystemFactory, WayToObtainAFolder folderBiFunction) {
 		FileSystem fileSystem = fileSystemFactory.create();
 
-		Folder parentsParent = folderBiFunction.subfolderWithName(fileSystem, FOLDER_NAME);
-		Folder parent = folderBiFunction.subfolderWithName(parentsParent, FOLDER_NAME);
-		Folder child = folderBiFunction.subfolderWithName(parent, FOLDER_NAME);
+		Folder parentsParent = folderBiFunction.folderWithName(fileSystem, FOLDER_NAME);
+		Folder parent = folderBiFunction.folderWithName(parentsParent, FOLDER_NAME);
+		Folder child = folderBiFunction.folderWithName(parent, FOLDER_NAME);
 
 		assertThat(child.isAncestorOf(parentsParent), is(false));
 	}
 
 	@Theory
-	public void testFolderIsNotAncecstorOfItsSibling(FileSystemFactory fileSystemFactory, FolderBiFunction folderBiFunction) {
+	public void testFolderIsNotAncecstorOfItsSibling(FileSystemFactory fileSystemFactory, WayToObtainAFolder folderBiFunction) {
 		FileSystem fileSystem = fileSystemFactory.create();
 
-		Folder folder = folderBiFunction.subfolderWithName(fileSystem, FOLDER_NAME);
-		Folder sibling = folderBiFunction.subfolderWithName(fileSystem, FOLDER_NAME_2);
+		Folder folder = folderBiFunction.folderWithName(fileSystem, FOLDER_NAME);
+		Folder sibling = folderBiFunction.folderWithName(fileSystem, FOLDER_NAME_2);
 
 		assertThat(folder.isAncestorOf(sibling), is(false));
 	}
 
 	@Theory
-	public void testFolderIsAncecstorOfItsChild(FileSystemFactory fileSystemFactory, FolderBiFunction folderBiFunction) {
+	public void testFolderIsAncecstorOfItsChild(FileSystemFactory fileSystemFactory, WayToObtainAFolder folderBiFunction) {
 		FileSystem fileSystem = fileSystemFactory.create();
 
-		Folder folder = folderBiFunction.subfolderWithName(fileSystem, FOLDER_NAME);
-		Folder child = folderBiFunction.subfolderWithName(folder, FOLDER_NAME);
+		Folder folder = folderBiFunction.folderWithName(fileSystem, FOLDER_NAME);
+		Folder child = folderBiFunction.folderWithName(folder, FOLDER_NAME);
 
 		assertThat(folder.isAncestorOf(child), is(true));
 	}
 
 	@Theory
-	public void testFolderIsAncecstorOfItsChildsChild(FileSystemFactory fileSystemFactory, FolderBiFunction folderBiFunction) {
+	public void testFolderIsAncecstorOfItsChildsChild(FileSystemFactory fileSystemFactory, WayToObtainAFolder folderBiFunction) {
 		FileSystem fileSystem = fileSystemFactory.create();
 
-		Folder folder = folderBiFunction.subfolderWithName(fileSystem, FOLDER_NAME);
-		Folder child = folderBiFunction.subfolderWithName(folder, FOLDER_NAME);
-		Folder childsChild = folderBiFunction.subfolderWithName(child, FOLDER_NAME);
+		Folder folder = folderBiFunction.folderWithName(fileSystem, FOLDER_NAME);
+		Folder child = folderBiFunction.folderWithName(folder, FOLDER_NAME);
+		Folder childsChild = folderBiFunction.folderWithName(child, FOLDER_NAME);
 
 		assertThat(folder.isAncestorOf(childsChild), is(true));
 	}

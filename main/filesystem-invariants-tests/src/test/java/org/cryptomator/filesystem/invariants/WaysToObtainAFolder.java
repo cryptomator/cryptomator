@@ -5,13 +5,13 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.cryptomator.filesystem.Folder;
-import org.cryptomator.filesystem.invariants.FolderBiFunctions.FolderBiFunction;
+import org.cryptomator.filesystem.invariants.WaysToObtainAFolder.WayToObtainAFolder;
 
-class FolderBiFunctions implements Iterable<FolderBiFunction> {
+class WaysToObtainAFolder implements Iterable<WayToObtainAFolder> {
 
-	private final List<FolderBiFunction> factories = new ArrayList<>();
+	private final List<WayToObtainAFolder> values = new ArrayList<>();
 
-	public FolderBiFunctions() {
+	public WaysToObtainAFolder() {
 		addNonExisting("invoke folder", this::invokeFolder);
 		addNonExisting("create and delete", this::createAndDeleteFolder);
 		addNonExisting("delete by moving", this::deleteFolderByMoving);
@@ -41,14 +41,14 @@ class FolderBiFunctions implements Iterable<FolderBiFunction> {
 	private Folder deleteFolderByMoving(Folder parent, String name) {
 		Folder result = parent.folder(name);
 		result.create();
-		Folder target = parent.folder("subfolderFactoryMoveFolderAway");
+		Folder target = parent.folder("willNotExistMoveFolderAway");
 		result.moveTo(target);
 		target.delete();
 		return result;
 	}
 
 	private Folder createByMoving(Folder parent, String name) {
-		Folder temporary = parent.folder("subfolderFactoryCreateByMoving");
+		Folder temporary = parent.folder("willNotExistCreateByMoving");
 		temporary.create();
 		Folder target = parent.folder(name);
 		temporary.moveTo(target);
@@ -56,7 +56,7 @@ class FolderBiFunctions implements Iterable<FolderBiFunction> {
 	}
 
 	private Folder createByCopying(Folder parent, String name) {
-		Folder temporary = parent.folder("subfolderFactoryCreateByCopying");
+		Folder temporary = parent.folder("willNotExistCreateByCopying");
 		temporary.create();
 		Folder target = parent.folder(name);
 		temporary.copyTo(target);
@@ -64,11 +64,11 @@ class FolderBiFunctions implements Iterable<FolderBiFunction> {
 		return target;
 	}
 
-	private void addExisting(String name, ExistingSubfolderBiFunction factory) {
-		factories.add(new ExistingSubfolderBiFunction() {
+	private void addExisting(String name, WayToObtainAFolderThatExists factory) {
+		values.add(new WayToObtainAFolderThatExists() {
 			@Override
-			public Folder subfolderWithName(Folder parent, String name) {
-				return factory.subfolderWithName(parent, name);
+			public Folder folderWithName(Folder parent, String name) {
+				return factory.folderWithName(parent, name);
 			}
 
 			@Override
@@ -78,11 +78,11 @@ class FolderBiFunctions implements Iterable<FolderBiFunction> {
 		});
 	}
 
-	private void addNonExisting(String name, NonExistingSubfolderSubfolderBiFunction factory) {
-		factories.add(new NonExistingSubfolderSubfolderBiFunction() {
+	private void addNonExisting(String name, WayToObtainAFolderThatDoesntExists factory) {
+		values.add(new WayToObtainAFolderThatDoesntExists() {
 			@Override
-			public Folder subfolderWithName(Folder parent, String name) {
-				return factory.subfolderWithName(parent, name);
+			public Folder folderWithName(Folder parent, String name) {
+				return factory.folderWithName(parent, name);
 			}
 
 			@Override
@@ -92,22 +92,22 @@ class FolderBiFunctions implements Iterable<FolderBiFunction> {
 		});
 	}
 
-	public interface FolderBiFunction {
+	public interface WayToObtainAFolder {
 
-		Folder subfolderWithName(Folder parent, String name);
+		Folder folderWithName(Folder parent, String name);
 
 		boolean returnedFoldersExist();
 
 	}
 
-	public interface ExistingSubfolderBiFunction extends FolderBiFunction {
+	public interface WayToObtainAFolderThatExists extends WayToObtainAFolder {
 		@Override
 		default boolean returnedFoldersExist() {
 			return true;
 		}
 	}
 
-	public interface NonExistingSubfolderSubfolderBiFunction extends FolderBiFunction {
+	public interface WayToObtainAFolderThatDoesntExists extends WayToObtainAFolder {
 		@Override
 		default boolean returnedFoldersExist() {
 			return false;
@@ -115,8 +115,8 @@ class FolderBiFunctions implements Iterable<FolderBiFunction> {
 	}
 
 	@Override
-	public Iterator<FolderBiFunction> iterator() {
-		return factories.iterator();
+	public Iterator<WayToObtainAFolder> iterator() {
+		return values.iterator();
 	}
 
 }

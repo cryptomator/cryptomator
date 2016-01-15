@@ -8,13 +8,13 @@ import java.util.List;
 import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.Folder;
 import org.cryptomator.filesystem.WritableFile;
-import org.cryptomator.filesystem.invariants.FileBiFunctions.FileBiFunction;
+import org.cryptomator.filesystem.invariants.WaysToObtainAFile.WayToObtainAFile;
 
-class FileBiFunctions implements Iterable<FileBiFunction> {
+class WaysToObtainAFile implements Iterable<WayToObtainAFile> {
 
-	private final List<FileBiFunction> factories = new ArrayList<>();
+	private final List<WayToObtainAFile> values = new ArrayList<>();
 
-	public FileBiFunctions() {
+	public WaysToObtainAFile() {
 		addNonExisting("invoke file", this::invokeFile);
 
 		addExisting("create file by writing to it", this::createFileUsingTouch);
@@ -32,8 +32,8 @@ class FileBiFunctions implements Iterable<FileBiFunction> {
 		return result;
 	}
 
-	private void addExisting(String name, ExistingFileBiFunction factory) {
-		factories.add(new ExistingFileBiFunction() {
+	private void addExisting(String name, WayToObtainAFileThatExists factory) {
+		values.add(new WayToObtainAFileThatExists() {
 			@Override
 			public File fileWithName(Folder parent, String name) {
 				return factory.fileWithName(parent, name);
@@ -46,8 +46,8 @@ class FileBiFunctions implements Iterable<FileBiFunction> {
 		});
 	}
 
-	private void addNonExisting(String name, NonExistingFileBiFunction factory) {
-		factories.add(new NonExistingFileBiFunction() {
+	private void addNonExisting(String name, WayToObtainAFileThatDoesntExist factory) {
+		values.add(new WayToObtainAFileThatDoesntExist() {
 			@Override
 			public File fileWithName(Folder parent, String name) {
 				return factory.fileWithName(parent, name);
@@ -60,7 +60,7 @@ class FileBiFunctions implements Iterable<FileBiFunction> {
 		});
 	}
 
-	public interface FileBiFunction {
+	public interface WayToObtainAFile {
 
 		File fileWithName(Folder parent, String name);
 
@@ -68,14 +68,14 @@ class FileBiFunctions implements Iterable<FileBiFunction> {
 
 	}
 
-	public interface ExistingFileBiFunction extends FileBiFunction {
+	public interface WayToObtainAFileThatExists extends WayToObtainAFile {
 		@Override
 		default boolean returnedFilesExist() {
 			return true;
 		}
 	}
 
-	public interface NonExistingFileBiFunction extends FileBiFunction {
+	public interface WayToObtainAFileThatDoesntExist extends WayToObtainAFile {
 		@Override
 		default boolean returnedFilesExist() {
 			return false;
@@ -83,8 +83,8 @@ class FileBiFunctions implements Iterable<FileBiFunction> {
 	}
 
 	@Override
-	public Iterator<FileBiFunction> iterator() {
-		return factories.iterator();
+	public Iterator<WayToObtainAFile> iterator() {
+		return values.iterator();
 	}
 
 }
