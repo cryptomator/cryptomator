@@ -1,5 +1,7 @@
 package org.cryptomator.filesystem.crypto;
 
+import java.io.InterruptedIOException;
+import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 import java.util.concurrent.Callable;
 
@@ -25,7 +27,7 @@ class CiphertextWriter implements Callable<Void> {
 				file.write(ciphertext);
 			}
 		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
+			throw new UncheckedIOException(new InterruptedIOException("Task interrupted while waiting for ciphertext"));
 		}
 		return null;
 	}

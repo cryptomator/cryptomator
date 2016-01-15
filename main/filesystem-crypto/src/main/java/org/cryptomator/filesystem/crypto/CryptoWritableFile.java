@@ -23,8 +23,12 @@ import org.cryptomator.crypto.engine.FileContentCryptor;
 import org.cryptomator.crypto.engine.FileContentEncryptor;
 import org.cryptomator.filesystem.WritableFile;
 import org.cryptomator.io.ByteBuffers;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class CryptoWritableFile implements WritableFile {
+
+	private static final Logger LOG = LoggerFactory.getLogger(CryptoWritableFile.class);
 
 	final WritableFile file;
 	private final ExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
@@ -82,6 +86,7 @@ class CryptoWritableFile implements WritableFile {
 
 	@Override
 	public void delete() {
+		writeTask.cancel(true);
 		file.delete();
 	}
 
@@ -107,9 +112,9 @@ class CryptoWritableFile implements WritableFile {
 	@Override
 	public void close() {
 		try {
-			encryptor.append(FileContentCryptor.EOF);
-			writeTask.get();
 			if (file.isOpen()) {
+				encryptor.append(FileContentCryptor.EOF);
+				writeTask.get();
 				writeHeader();
 				// TODO append padding
 			}

@@ -27,7 +27,7 @@ public class InMemoryWritableFile implements WritableFile {
 	private final Consumer<Void> deleter;
 	private final WriteLock writeLock;
 
-	private boolean open;
+	private boolean open = true;
 	private int position = 0;
 
 	public InMemoryWritableFile(Consumer<Instant> lastModifiedSetter, Consumer<Instant> creationTimeSetter, Supplier<ByteBuffer> contentGetter, Consumer<ByteBuffer> contentSetter, Consumer<Void> deleter,
