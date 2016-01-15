@@ -8,6 +8,7 @@
  *******************************************************************************/
 package org.cryptomator.filesystem.crypto;
 
+import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 import java.time.Instant;
@@ -112,7 +113,7 @@ class CryptoWritableFile implements WritableFile {
 			// TODO append padding
 		} catch (ExecutionException e) {
 			if (e.getCause() instanceof UncheckedIOException) {
-				throw (UncheckedIOException) e.getCause();
+				throw new UncheckedIOException(new IOException(e));
 			} else {
 				throw new IllegalStateException("Unexpected exception while waiting for encrypted file to be written", e);
 			}
