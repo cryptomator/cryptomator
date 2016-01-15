@@ -75,4 +75,10 @@ public interface File extends Node, Comparable<File> {
 		Mover.move(this, destination);
 	}
 
+	default void delete() {
+		try (WritableFile writableFile = openWritable()) {
+			writableFile.delete();
+		}
+	}
+
 }

@@ -8,6 +8,9 @@
  *******************************************************************************/
 package org.cryptomator.filesystem.inmem;
 
+import static java.lang.String.format;
+
+import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.time.Instant;
 import java.util.Iterator;
@@ -32,7 +35,11 @@ class InMemoryFolder extends InMemoryNode implements Folder {
 
 	@Override
 	public Stream<InMemoryNode> children() {
-		return existingChildren.values().stream();
+		if (exists()) {
+			return existingChildren.values().stream();
+		} else {
+			throw new UncheckedIOException(new IOException(format("Folder %s does not exist", this)));
+		}
 	}
 
 	@Override
@@ -76,11 +83,11 @@ class InMemoryFolder extends InMemoryNode implements Folder {
 		if (target.exists()) {
 			target.delete();
 		}
-		assert!target.exists();
+		assert !target.exists();
 		target.create();
 		this.copyTo(target);
 		this.delete();
-		assert!this.exists();
+		assert !this.exists();
 	}
 
 	@Override
@@ -102,7 +109,7 @@ class InMemoryFolder extends InMemoryNode implements Folder {
 				subFolder.delete();
 			}
 		}
-		assert!this.exists();
+		assert !this.exists();
 	}
 
 	@Override

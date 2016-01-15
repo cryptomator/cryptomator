@@ -31,7 +31,7 @@ public interface Folder extends Node {
 	 * @return the created {@code Stream}
 	 * @throws UncheckedIOException
 	 *             if an {@link IOException} occurs while initializing the
-	 *             stream
+	 *             stream or the {@code Folder} does not exist
 	 */
 	Stream<? extends Node> children() throws UncheckedIOException;
 

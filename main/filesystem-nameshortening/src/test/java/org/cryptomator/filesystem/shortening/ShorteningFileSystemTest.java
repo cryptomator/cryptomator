@@ -41,6 +41,7 @@ public class ShorteningFileSystemTest {
 	public void testMoveLongFolders() {
 		final FileSystem underlyingFs = new InMemoryFileSystem();
 		final Folder metadataRoot = underlyingFs.folder("m");
+		metadataRoot.create();
 		final FileSystem fs = new ShorteningFileSystem(underlyingFs, metadataRoot, 10);
 
 		final Folder shortNamedFolder = fs.folder("test");
@@ -56,6 +57,7 @@ public class ShorteningFileSystemTest {
 	public void testMoveLongFiles() throws UncheckedIOException, TimeoutException {
 		final FileSystem underlyingFs = new InMemoryFileSystem();
 		final Folder metadataRoot = underlyingFs.folder("m");
+		metadataRoot.create();
 		final FileSystem fs = new ShorteningFileSystem(underlyingFs, metadataRoot, 10);
 
 		final File shortNamedFolder = fs.file("test");

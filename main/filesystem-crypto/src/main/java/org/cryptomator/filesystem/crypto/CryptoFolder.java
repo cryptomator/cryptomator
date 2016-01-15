@@ -25,6 +25,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.cryptomator.common.WeakValuedCache;
 import org.cryptomator.crypto.engine.Cryptor;
+import org.cryptomator.filesystem.Deleter;
 import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.Folder;
 import org.cryptomator.filesystem.Node;
@@ -159,8 +160,12 @@ class CryptoFolder extends CryptoNode implements Folder {
 
 	@Override
 	public void delete() {
-		// TODO Auto-generated method stub
-
+		if (!exists()) {
+			return;
+		}
+		Deleter.deleteContent(this);
+		physicalFile().delete();
+		physicalFolder().delete();
 	}
 
 	@Override

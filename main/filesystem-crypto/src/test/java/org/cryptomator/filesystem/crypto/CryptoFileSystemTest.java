@@ -50,13 +50,9 @@ public class CryptoFileSystemTest {
 		Assert.assertTrue(masterkeyBkupFile.exists());
 		fs.create();
 		Assert.assertTrue(physicalDataRoot.exists());
-		Assert.assertEquals(3, physicalFs.children().count()); // d +
-																// masterkey.cryptomator
-																// +
-																// masterkey.cryptomator.bkup
+		Assert.assertEquals(3, physicalFs.children().count()); // d + masterkey.cryptomator + masterkey.cryptomator.bkup
 		Assert.assertEquals(1, physicalDataRoot.files().count()); // ROOT file
-		Assert.assertEquals(1, physicalDataRoot.folders().count()); // ROOT
-																	// directory
+		Assert.assertEquals(1, physicalDataRoot.folders().count()); // ROOT directory
 	}
 
 	@Test(timeout = 1000)

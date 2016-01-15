@@ -12,6 +12,7 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -492,7 +493,7 @@ public class NioFolderTest {
 			inTest.delete();
 
 			InOrder inOrder = inOrder(nioAccess, folderChild);
-			inOrder.verify(nioAccess).isDirectory(path);
+			inOrder.verify(nioAccess, times(2)).isDirectory(path);
 			inOrder.verify(nioAccess).list(path);
 			inOrder.verify(folderChild).delete();
 			inOrder.verify(nioAccess).list(path);
@@ -503,8 +504,6 @@ public class NioFolderTest {
 		public void testDeleteInvokesDeleteOnChildFileAndNioAccessDeleteAfterwards() throws IOException {
 			Path fileChildPath = mock(Path.class);
 			NioFile fileChild = mock(NioFile.class);
-			WritableFile writableFile = mock(WritableFile.class);
-			when(fileChild.openWritable()).thenReturn(writableFile);
 			when(nioAccess.isDirectory(path)).thenReturn(true);
 			when(nioAccess.isDirectory(fileChildPath)).thenReturn(false);
 			when(instanceFactory.nioFile(Optional.of(inTest), fileChildPath, nioAccess)).thenReturn(fileChild);
@@ -512,13 +511,11 @@ public class NioFolderTest {
 
 			inTest.delete();
 
-			InOrder inOrder = inOrder(nioAccess, fileChild, writableFile);
-			inOrder.verify(nioAccess).isDirectory(path);
+			InOrder inOrder = inOrder(nioAccess, fileChild);
+			inOrder.verify(nioAccess, times(2)).isDirectory(path);
 			inOrder.verify(nioAccess).list(path);
 			inOrder.verify(nioAccess).list(path);
-			inOrder.verify(fileChild).openWritable();
-			inOrder.verify(writableFile).delete();
-			inOrder.verify(writableFile).close();
+			inOrder.verify(fileChild).delete();
 			inOrder.verify(nioAccess).delete(path);
 		}
 

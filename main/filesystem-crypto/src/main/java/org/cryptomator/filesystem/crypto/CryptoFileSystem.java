@@ -44,6 +44,7 @@ public class CryptoFileSystem extends CryptoFolder implements FileSystem {
 		assert masterkeyFile.exists() : "A CryptoFileSystem can not exist without a masterkey file.";
 		final File backupFile = physicalRoot.file(MASTERKEY_BACKUP_FILENAME);
 		masterkeyFile.copyTo(backupFile);
+		create();
 	}
 
 	private static boolean decryptMasterKeyFile(Cryptor cryptor, File masterkeyFile, CharSequence passphrase) {

@@ -41,7 +41,7 @@ class InMemoryNode implements Node {
 
 	@Override
 	public boolean exists() {
-		return parent.children().anyMatch(node -> node.equals(this));
+		return parent.exists() && parent.children().anyMatch(node -> node.equals(this));
 	}
 
 	@Override

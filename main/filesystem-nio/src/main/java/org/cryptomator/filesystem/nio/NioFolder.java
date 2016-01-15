@@ -11,10 +11,10 @@ import java.util.stream.Stream;
 
 import org.cryptomator.common.WeakValuedCache;
 import org.cryptomator.common.streams.AutoClosingStream;
+import org.cryptomator.filesystem.Deleter;
 import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.Folder;
 import org.cryptomator.filesystem.Node;
-import org.cryptomator.filesystem.WritableFile;
 
 class NioFolder extends NioNode implements Folder {
 
@@ -131,19 +131,11 @@ class NioFolder extends NioNode implements Folder {
 		if (!exists()) {
 			return;
 		}
-
-		folders().forEach(Folder::delete);
-		files().forEach(NioFolder::deleteFile);
+		Deleter.deleteContent(this);
 		try {
 			nioAccess.delete(path);
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
-		}
-	}
-
-	private static final void deleteFile(File file) {
-		try (WritableFile writableFile = file.openWritable()) {
-			writableFile.delete();
 		}
 	}
 
