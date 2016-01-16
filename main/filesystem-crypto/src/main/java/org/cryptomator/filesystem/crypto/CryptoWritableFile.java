@@ -114,7 +114,7 @@ class CryptoWritableFile implements WritableFile {
 				// TODO append padding
 			}
 		} catch (ExecutionException e) {
-			if (e.getCause() instanceof UncheckedIOException) {
+			if (e.getCause() instanceof UncheckedIOException || e.getCause() instanceof IOException) {
 				throw new UncheckedIOException(new IOException(e));
 			} else {
 				throw new IllegalStateException("Unexpected exception while waiting for encrypted file to be written", e);
