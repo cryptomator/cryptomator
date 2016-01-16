@@ -120,7 +120,7 @@ class CryptoWritableFile implements WritableFile {
 				throw new IllegalStateException("Unexpected exception while waiting for encrypted file to be written", e);
 			}
 		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
+			throw new UncheckedIOException(new InterruptedIOException("Task interrupted while flushing encrypted content"));
 		} finally {
 			executorService.shutdownNow();
 			file.close();
