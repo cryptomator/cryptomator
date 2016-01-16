@@ -9,6 +9,7 @@
 package org.cryptomator.filesystem.crypto;
 
 import java.io.IOException;
+import java.io.InterruptedIOException;
 import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 import java.time.Instant;
@@ -18,17 +19,12 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import org.cryptomator.common.UncheckedInterruptedException;
 import org.cryptomator.crypto.engine.FileContentCryptor;
 import org.cryptomator.crypto.engine.FileContentEncryptor;
 import org.cryptomator.filesystem.WritableFile;
 import org.cryptomator.io.ByteBuffers;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 class CryptoWritableFile implements WritableFile {
-
-	private static final Logger LOG = LoggerFactory.getLogger(CryptoWritableFile.class);
 
 	final WritableFile file;
 	private final ExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
@@ -59,8 +55,7 @@ class CryptoWritableFile implements WritableFile {
 			encryptor.append(cleartextCopy);
 			return size;
 		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
-			throw new UncheckedInterruptedException(e);
+			throw new UncheckedIOException(new InterruptedIOException("Task interrupted while waiting for encryptor capacity"));
 		}
 	}
 

@@ -8,13 +8,13 @@
  *******************************************************************************/
 package org.cryptomator.filesystem.crypto;
 
+import java.io.InterruptedIOException;
 import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import org.cryptomator.common.UncheckedInterruptedException;
 import org.cryptomator.crypto.engine.FileContentCryptor;
 import org.cryptomator.crypto.engine.FileContentDecryptor;
 import org.cryptomator.filesystem.ReadableFile;
@@ -56,8 +56,7 @@ class CryptoReadableFile implements ReadableFile {
 			}
 			return bytesRead;
 		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
-			throw new UncheckedInterruptedException(e);
+			throw new UncheckedIOException(new InterruptedIOException("Task interrupted while waiting for cleartext"));
 		}
 	}
 

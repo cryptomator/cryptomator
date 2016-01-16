@@ -1,5 +1,6 @@
 package org.cryptomator.filesystem.crypto;
 
+import java.io.InterruptedIOException;
 import java.nio.ByteBuffer;
 import java.util.concurrent.Callable;
 
@@ -22,7 +23,7 @@ class CiphertextReader implements Callable<Void> {
 	}
 
 	@Override
-	public Void call() {
+	public Void call() throws InterruptedIOException {
 		file.position(startpos);
 		int bytesRead = -1;
 		try {
@@ -37,7 +38,7 @@ class CiphertextReader implements Callable<Void> {
 			} while (bytesRead > 0);
 			decryptor.append(FileContentCryptor.EOF);
 		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
+			throw new InterruptedIOException("Task interrupted while waiting for ciphertext");
 		}
 		return null;
 	}
