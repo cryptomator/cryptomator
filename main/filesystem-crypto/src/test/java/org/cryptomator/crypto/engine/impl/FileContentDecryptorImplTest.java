@@ -8,6 +8,8 @@
  *******************************************************************************/
 package org.cryptomator.crypto.engine.impl;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 import java.security.SecureRandom;
 import java.util.Arrays;
@@ -57,6 +59,19 @@ public class FileContentDecryptorImplTest {
 			}
 
 			Assert.assertArrayEquals("hello world".getBytes(), result.array());
+		}
+	}
+
+	@Test(expected = UncheckedIOException.class)
+	public void testPassthroughException() throws InterruptedException {
+		final byte[] keyBytes = new byte[32];
+		final SecretKey headerKey = new SecretKeySpec(keyBytes, "AES");
+		final SecretKey macKey = new SecretKeySpec(keyBytes, "AES");
+		final byte[] header = Base64.decode("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAwN74OFIGKQKgsI7bakfCYm1VXJZiKFLyhZkQCz0Ye/il0PmdZOYsSYEH9h6S00RsdHL3wLtB1FJsb9QLTtP00H8M2theZaZdlKTmjhXsmbc=");
+
+		try (FileContentDecryptor decryptor = new FileContentDecryptorImpl(headerKey, macKey, ByteBuffer.wrap(header), 0)) {
+			decryptor.cancelWithException(new IOException("can not do"));
+			decryptor.cleartext();
 		}
 	}
 

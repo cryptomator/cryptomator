@@ -10,6 +10,8 @@ package org.cryptomator.crypto.engine.impl;
 
 import static org.cryptomator.crypto.engine.impl.FileContentCryptorImpl.CHUNK_SIZE;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -72,6 +74,13 @@ class FileContentEncryptorImpl implements FileContentEncryptor {
 		}
 	}
 
+	@Override
+	public void cancelWithException(Exception cause) throws InterruptedException {
+		dataProcessor.submit(() -> {
+			throw cause;
+		});
+	}
+
 	private void submitCleartextBufferIfFull() throws InterruptedException {
 		if (!cleartextBuffer.hasRemaining()) {
 			submitCleartextBuffer();
@@ -96,7 +105,11 @@ class FileContentEncryptorImpl implements FileContentEncryptor {
 		try {
 			return dataProcessor.processedData();
 		} catch (ExecutionException e) {
-			throw new RuntimeException(e);
+			if (e.getCause() instanceof IOException || e.getCause() instanceof UncheckedIOException) {
+				throw new UncheckedIOException(new IOException("Encryption failed due to I/O exception during cleartext supply.", e));
+			} else {
+				throw new RuntimeException(e);
+			}
 		}
 	}
 

@@ -8,10 +8,13 @@
  *******************************************************************************/
 package org.cryptomator.crypto.engine;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.function.Supplier;
 
 class NoFileContentCryptor implements FileContentCryptor {
 
@@ -40,7 +43,7 @@ class NoFileContentCryptor implements FileContentCryptor {
 
 	private class Decryptor implements FileContentDecryptor {
 
-		private final BlockingQueue<ByteBuffer> cleartextQueue = new LinkedBlockingQueue<>();
+		private final BlockingQueue<Supplier<ByteBuffer>> cleartextQueue = new LinkedBlockingQueue<>();
 		private final long contentLength;
 
 		private Decryptor(ByteBuffer header) {
@@ -57,9 +60,9 @@ class NoFileContentCryptor implements FileContentCryptor {
 		public void append(ByteBuffer ciphertext) {
 			try {
 				if (ciphertext == FileContentCryptor.EOF) {
-					cleartextQueue.put(FileContentCryptor.EOF);
+					cleartextQueue.put(() -> FileContentCryptor.EOF);
 				} else {
-					cleartextQueue.put(ciphertext.asReadOnlyBuffer());
+					cleartextQueue.put(ciphertext::asReadOnlyBuffer);
 				}
 			} catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
@@ -67,8 +70,15 @@ class NoFileContentCryptor implements FileContentCryptor {
 		}
 
 		@Override
+		public void cancelWithException(Exception cause) throws InterruptedException {
+			cleartextQueue.put(() -> {
+				throw new UncheckedIOException(new IOException(cause));
+			});
+		}
+
+		@Override
 		public ByteBuffer cleartext() throws InterruptedException {
-			return cleartextQueue.take();
+			return cleartextQueue.take().get();
 		}
 
 		@Override
@@ -80,7 +90,7 @@ class NoFileContentCryptor implements FileContentCryptor {
 
 	private class Encryptor implements FileContentEncryptor {
 
-		private final BlockingQueue<ByteBuffer> ciphertextQueue = new LinkedBlockingQueue<>();
+		private final BlockingQueue<Supplier<ByteBuffer>> ciphertextQueue = new LinkedBlockingQueue<>();
 		private long numCleartextBytesEncrypted = 0;
 
 		@Override
@@ -94,10 +104,10 @@ class NoFileContentCryptor implements FileContentCryptor {
 		public void append(ByteBuffer cleartext) {
 			try {
 				if (cleartext == FileContentCryptor.EOF) {
-					ciphertextQueue.put(FileContentCryptor.EOF);
+					ciphertextQueue.put(() -> FileContentCryptor.EOF);
 				} else {
 					int cleartextLen = cleartext.remaining();
-					ciphertextQueue.put(cleartext.asReadOnlyBuffer());
+					ciphertextQueue.put(cleartext::asReadOnlyBuffer);
 					numCleartextBytesEncrypted += cleartextLen;
 				}
 			} catch (InterruptedException e) {
@@ -106,8 +116,15 @@ class NoFileContentCryptor implements FileContentCryptor {
 		}
 
 		@Override
+		public void cancelWithException(Exception cause) throws InterruptedException {
+			ciphertextQueue.put(() -> {
+				throw new UncheckedIOException(new IOException(cause));
+			});
+		}
+
+		@Override
 		public ByteBuffer ciphertext() throws InterruptedException {
-			return ciphertextQueue.take();
+			return ciphertextQueue.take().get();
 		}
 
 		@Override

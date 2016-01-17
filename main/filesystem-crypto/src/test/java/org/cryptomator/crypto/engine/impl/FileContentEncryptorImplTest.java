@@ -8,6 +8,8 @@
  *******************************************************************************/
 package org.cryptomator.crypto.engine.impl;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 import java.security.SecureRandom;
 import java.util.Arrays;
@@ -56,6 +58,18 @@ public class FileContentEncryptorImplTest {
 			// MAC: echo -n "tPCsFM1g/ubfJMY=" | base64 --decode | openssl dgst -sha256 -mac HMAC -macopt hexkey:0000000000000000000000000000000000000000000000000000000000000000 -binary | base64
 			// echo -n "tPCsFM1g/ubfJMY=" | base64 --decode > A; echo -n "vgKHHT4f1jx31zBUSXSM+j5C7kYo0iCF78Z+yFMFcx0=" | base64 --decode >> A; cat A | base64
 			Assert.assertArrayEquals(Base64.decode("tPCsFM1g/ubfJMa+AocdPh/WPHfXMFRJdIz6PkLuRijSIIXvxn7IUwVzHQ=="), result.array());
+		}
+	}
+
+	@Test(expected = UncheckedIOException.class)
+	public void testPassthroughException() throws InterruptedException {
+		final byte[] keyBytes = new byte[32];
+		final SecretKey headerKey = new SecretKeySpec(keyBytes, "AES");
+		final SecretKey macKey = new SecretKeySpec(keyBytes, "AES");
+
+		try (FileContentEncryptor encryptor = new FileContentEncryptorImpl(headerKey, macKey, RANDOM_MOCK, 0)) {
+			encryptor.cancelWithException(new IOException("can not do"));
+			encryptor.ciphertext();
 		}
 	}
 

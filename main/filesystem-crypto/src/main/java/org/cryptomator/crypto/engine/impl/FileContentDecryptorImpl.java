@@ -11,6 +11,8 @@ package org.cryptomator.crypto.engine.impl;
 import static org.cryptomator.crypto.engine.impl.FileContentCryptorImpl.CHUNK_SIZE;
 import static org.cryptomator.crypto.engine.impl.FileContentCryptorImpl.MAC_SIZE;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -67,6 +69,13 @@ class FileContentDecryptorImpl implements FileContentDecryptor {
 		}
 	}
 
+	@Override
+	public void cancelWithException(Exception cause) throws InterruptedException {
+		dataProcessor.submit(() -> {
+			throw cause;
+		});
+	}
+
 	private void submitCiphertextBufferIfFull() throws InterruptedException {
 		if (!ciphertextBuffer.hasRemaining()) {
 			submitCiphertextBuffer();
@@ -93,6 +102,8 @@ class FileContentDecryptorImpl implements FileContentDecryptor {
 		} catch (ExecutionException e) {
 			if (e.getCause() instanceof AuthenticationFailedException) {
 				throw new AuthenticationFailedException(e);
+			} else if (e.getCause() instanceof IOException || e.getCause() instanceof UncheckedIOException) {
+				throw new UncheckedIOException(new IOException("Decryption failed due to I/O exception during ciphertext supply.", e));
 			} else {
 				throw new RuntimeException(e);
 			}

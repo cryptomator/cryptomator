@@ -9,6 +9,7 @@
 package org.cryptomator.crypto.engine;
 
 import java.io.Closeable;
+import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 
 import javax.security.auth.Destroyable;
@@ -34,14 +35,23 @@ public interface FileContentEncryptor extends Destroyable, Closeable {
 	void append(ByteBuffer cleartext) throws InterruptedException;
 
 	/**
+	 * Cancels encryption due to an exception in the thread responsible for appending cleartext.
+	 * The exception will be the root cause of an {@link UncheckedIOException} thrown by {@link #ciphertext()} when retrieving the encrypted result.
+	 * 
+	 * @param cause The exception making it impossible to {@link #append(ByteBuffer)} further cleartext.
+	 */
+	void cancelWithException(Exception cause) throws InterruptedException;
+
+	/**
 	 * Returns the next ciphertext in byte-by-byte FIFO order, meaning in the order cleartext has been appended to this encryptor.
 	 * However the number and size of the ciphertext byte buffers doesn't need to resemble the cleartext buffers.
 	 * 
 	 * This method might block if no ciphertext is available yet.
 	 * 
 	 * @return Encrypted ciphertext of {@link FileContentCryptor#EOF}.
+	 * @throws UncheckedIOException In case of I/O exceptions, e.g. caused by previous {@link #cancelWithException(Exception)}.
 	 */
-	ByteBuffer ciphertext() throws InterruptedException;
+	ByteBuffer ciphertext() throws InterruptedException, UncheckedIOException;
 
 	/**
 	 * Clears file-specific sensitive information.
