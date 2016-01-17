@@ -40,11 +40,19 @@ class SharedFileChannel {
 	public void open(OpenMode mode) {
 		doLocked(() -> {
 			Thread thread = Thread.currentThread();
-			if (openedBy.put(thread, thread) != null) {
-				throw new IllegalStateException("SharedFileChannel already open for current thread");
-			}
-			if (delegate == null) {
-				createChannel(mode);
+			boolean failed = true;
+			try {
+				if (openedBy.put(thread, thread) != null) {
+					throw new IllegalStateException("SharedFileChannel already open for current thread");
+				}
+				if (delegate == null) {
+					createChannel(mode);
+				}
+				failed = false;
+			} finally {
+				if (failed) {
+					openedBy.remove(thread);
+				}
 			}
 		});
 	}
