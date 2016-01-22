@@ -1,6 +1,7 @@
 package org.cryptomator.filesystem.nio;
 
 import static java.lang.String.format;
+import static org.cryptomator.common.test.matcher.OptionalMatcher.emptyOptional;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
@@ -299,7 +300,7 @@ public class NioFileTest {
 
 		@Test
 		public void testCreationTimeDelegatesToNioAccessCreationTime() throws IOException {
-			Instant exectedResult = Instant.parse("2016-01-08T19:49:00Z");
+			Instant exectedResult = Instant.parse("1970-01-02T00:00:00Z");
 			when(nioAccess.getCreationTime(path)).thenReturn(FileTime.from(exectedResult));
 			when(nioAccess.exists(path)).thenReturn(true);
 			when(nioAccess.isRegularFile(path)).thenReturn(true);
@@ -307,6 +308,15 @@ public class NioFileTest {
 			Instant result = inTest.creationTime().get();
 
 			assertThat(result, is(exectedResult));
+		}
+
+		@Test
+		public void testCreationTimeReturnsEmptyOptionalIfNioAccessCreationTimeReturnsValueBeforeJanuaryTheSecondNineteenhundredSeventy() throws IOException {
+			when(nioAccess.getCreationTime(path)).thenReturn(FileTime.from(Instant.parse("1970-01-01T23:59:59Z")));
+			when(nioAccess.exists(path)).thenReturn(true);
+			when(nioAccess.isRegularFile(path)).thenReturn(true);
+
+			assertThat(inTest.creationTime(), is(emptyOptional()));
 		}
 
 		@Test

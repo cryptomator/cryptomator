@@ -24,6 +24,7 @@ class WritableNioFile implements WritableFile {
 	private Runnable afterCloseCallback;
 
 	private boolean open = true;
+	private boolean channelOpened = false;
 	private long position = 0;
 
 	public WritableNioFile(FileSystem fileSystem, Path path, SharedFileChannel channel, Runnable afterCloseCallback, NioAccess nioAccess) {
@@ -153,11 +154,16 @@ class WritableNioFile implements WritableFile {
 	}
 
 	void ensureChannelIsOpened() {
-		channel.openIfClosed(WRITE);
+		if (!channelOpened) {
+			channel.open(WRITE);
+			channelOpened = true;
+		}
 	}
 
 	void closeChannelIfOpened() {
-		channel.closeIfOpen();
+		if (channelOpened) {
+			channel.close();
+		}
 	}
 
 	FileSystem fileSystem() {

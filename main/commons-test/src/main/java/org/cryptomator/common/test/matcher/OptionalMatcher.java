@@ -37,4 +37,25 @@ public class OptionalMatcher {
 		};
 	}
 
+	public static <T> Matcher<Optional<T>> emptyOptional() {
+		return new TypeSafeDiagnosingMatcher<Optional<T>>(Optional.class) {
+			@Override
+			public void describeTo(Description description) {
+				description.appendText("an empty Optional");
+			}
+
+			@Override
+			protected boolean matchesSafely(Optional<T> item, Description mismatchDescription) {
+				if (item.isPresent()) {
+					mismatchDescription.appendText("a present Optional of ").appendValue(item.get());
+					return false;
+				} else {
+					return true;
+				}
+
+			}
+
+		};
+	}
+
 }

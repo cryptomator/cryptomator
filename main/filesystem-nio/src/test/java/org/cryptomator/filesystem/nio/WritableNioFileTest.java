@@ -89,7 +89,7 @@ public class WritableNioFileTest {
 			inTest.write(irrelevant);
 
 			InOrder inOrder = inOrder(channel);
-			inOrder.verify(channel).openIfClosed(WRITE);
+			inOrder.verify(channel).open(WRITE);
 			inOrder.verify(channel).writeFully(0, irrelevant);
 		}
 
@@ -217,11 +217,12 @@ public class WritableNioFileTest {
 			when(nioAccess.isDirectory(path)).thenReturn(false);
 			when(nioAccess.isDirectory(pathOfTarget)).thenReturn(false);
 
+			inTest.ensureChannelIsOpened();
 			inTest.moveTo(target);
 
 			InOrder inOrder = inOrder(target, nioAccess, channel, afterCloseCallback);
 			inOrder.verify(target).assertOpen();
-			inOrder.verify(channel).closeIfOpen();
+			inOrder.verify(channel).close();
 			inOrder.verify(target).closeChannelIfOpened();
 			inOrder.verify(nioAccess).move(path, pathOfTarget, REPLACE_EXISTING);
 			inOrder.verify(target).invokeAfterCloseCallback();
@@ -269,7 +270,7 @@ public class WritableNioFileTest {
 			inTest.setLastModified(instant);
 
 			InOrder inOrder = inOrder(channel, nioAccess);
-			inOrder.verify(channel).openIfClosed(OpenMode.WRITE);
+			inOrder.verify(channel).open(OpenMode.WRITE);
 			inOrder.verify(nioAccess).setLastModifiedTime(path, time);
 		}
 
@@ -308,7 +309,7 @@ public class WritableNioFileTest {
 			inTest.setCreationTime(instant);
 
 			InOrder inOrder = inOrder(nioAccess, channel);
-			inOrder.verify(channel).openIfClosed(OpenMode.WRITE);
+			inOrder.verify(channel).open(OpenMode.WRITE);
 			inOrder.verify(nioAccess).setCreationTime(path, FileTime.from(instant));
 		}
 
@@ -330,10 +331,11 @@ public class WritableNioFileTest {
 
 		@Test
 		public void testDeleteClosesChannelIfOpenAndDeletesFileAndInvokesAfterCloseCallback() throws IOException {
+			inTest.ensureChannelIsOpened();
 			inTest.delete();
 
 			InOrder inOrder = inOrder(channel, nioAccess, afterCloseCallback);
-			inOrder.verify(channel).closeIfOpen();
+			inOrder.verify(channel).close();
 			inOrder.verify(nioAccess).delete(path);
 			inOrder.verify(afterCloseCallback).run();
 		}
@@ -384,7 +386,7 @@ public class WritableNioFileTest {
 			inTest.truncate();
 
 			InOrder inOrder = inOrder(channel);
-			inOrder.verify(channel).openIfClosed(WRITE);
+			inOrder.verify(channel).open(WRITE);
 			inOrder.verify(channel).truncate(anyInt());
 		}
 
@@ -406,7 +408,7 @@ public class WritableNioFileTest {
 			inTest.close();
 
 			InOrder inOrder = inOrder(channel, afterCloseCallback);
-			inOrder.verify(channel).closeIfOpen();
+			inOrder.verify(channel).close();
 			inOrder.verify(afterCloseCallback).run();
 		}
 
@@ -418,7 +420,7 @@ public class WritableNioFileTest {
 			inTest.close();
 
 			InOrder inOrder = inOrder(channel, afterCloseCallback);
-			inOrder.verify(channel).closeIfOpen();
+			inOrder.verify(channel).close();
 			verify(afterCloseCallback).run();
 		}
 
@@ -426,7 +428,7 @@ public class WritableNioFileTest {
 		public void testCloseInvokesAfterCloseCallbackEvenIfCloseThrowsException() {
 			inTest.truncate();
 			String message = "exceptionMessage";
-			doThrow(new RuntimeException(message)).when(channel).closeIfOpen();
+			doThrow(new RuntimeException(message)).when(channel).close();
 
 			thrown.expectMessage(message);
 
@@ -522,17 +524,33 @@ public class WritableNioFileTest {
 	}
 
 	@Test
-	public void testEnsureChannelIsOpenedInvokesChannelOpenIfClosedWithModeWrite() {
+	public void testEnsureChannelIsOpenedInvokesChannelOpenWithModeWrite() {
 		inTest.ensureChannelIsOpened();
 
-		verify(channel).openIfClosed(WRITE);
+		verify(channel).open(WRITE);
 	}
 
 	@Test
-	public void testCloseChannelIfOpenInvokesChannelsCloseIfOpen() {
+	public void testEnsureChannelIsOpenedInvokesChannelOpenWithModeWriteOnlyOnceIfInvokedTwice() {
+		inTest.ensureChannelIsOpened();
+		inTest.ensureChannelIsOpened();
+
+		verify(channel).open(WRITE);
+	}
+
+	@Test
+	public void testCloseChannelIfOpenInvokesChannelsCloseIfOpenedEarlier() {
+		inTest.ensureChannelIsOpened();
 		inTest.closeChannelIfOpened();
 
-		verify(channel).closeIfOpen();
+		verify(channel).close();
+	}
+
+	@Test
+	public void testCloseChannelIfOpenDoesNotInvokeChannelsCloseIfNotOpenedEarlier() {
+		inTest.closeChannelIfOpened();
+
+		verifyZeroInteractions(channel);
 	}
 
 	@Test

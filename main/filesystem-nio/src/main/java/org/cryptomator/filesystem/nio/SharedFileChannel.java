@@ -9,8 +9,6 @@ import java.nio.channels.FileChannel;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -20,8 +18,8 @@ class SharedFileChannel {
 
 	private final Path path;
 	private final NioAccess nioAccess;
+	private final OpenCloseCounter openCloseCounter;
 
-	private Map<Thread, Thread> openedBy = new ConcurrentHashMap<>();
 	private Lock lock = new ReentrantLock();
 
 	private FileChannel delegate;
@@ -29,64 +27,39 @@ class SharedFileChannel {
 	public SharedFileChannel(Path path, NioAccess nioAccess) {
 		this.path = path;
 		this.nioAccess = nioAccess;
-	}
-
-	public void openIfClosed(OpenMode mode) {
-		if (!openedBy.containsKey(Thread.currentThread())) {
-			open(mode);
-		}
+		this.openCloseCounter = new OpenCloseCounter();
 	}
 
 	public void open(OpenMode mode) {
 		doLocked(() -> {
-			Thread thread = Thread.currentThread();
 			boolean failed = true;
 			try {
-				if (openedBy.put(thread, thread) != null) {
-					throw new IllegalStateException("SharedFileChannel already open for current thread");
-				}
+				openCloseCounter.countOpen();
 				if (delegate == null) {
 					createChannel(mode);
 				}
 				failed = false;
 			} finally {
 				if (failed) {
-					openedBy.remove(thread);
+					openCloseCounter.countClose();
 				}
 			}
 		});
 	}
 
-	public void closeIfOpen() {
-		if (openedBy.containsKey(Thread.currentThread())) {
-			internalClose();
-		}
-	}
-
 	public void close() {
-		assertOpenedByCurrentThread();
-		internalClose();
-	}
-
-	private void internalClose() {
 		doLocked(() -> {
-			openedBy.remove(Thread.currentThread());
+			openCloseCounter.countClose();
 			try {
 				delegate.force(true);
 			} catch (IOException e) {
 				throw new UncheckedIOException(e);
 			} finally {
-				if (openedBy.isEmpty()) {
+				if (!openCloseCounter.isOpen()) {
 					closeChannel();
 				}
 			}
 		});
-	}
-
-	private void assertOpenedByCurrentThread() {
-		if (!openedBy.containsKey(Thread.currentThread())) {
-			throw new IllegalStateException("SharedFileChannel closed for current thread");
-		}
 	}
 
 	private void createChannel(OpenMode mode) {
@@ -116,7 +89,7 @@ class SharedFileChannel {
 	}
 
 	public int readFully(long position, ByteBuffer target) {
-		assertOpenedByCurrentThread();
+		assertOpen();
 		try {
 			return tryReadFully(position, target);
 		} catch (IOException e) {
@@ -140,7 +113,7 @@ class SharedFileChannel {
 	}
 
 	public void truncate(int i) {
-		assertOpenedByCurrentThread();
+		assertOpen();
 		try {
 			delegate.truncate(i);
 		} catch (IOException e) {
@@ -149,7 +122,7 @@ class SharedFileChannel {
 	}
 
 	public long size() {
-		assertOpenedByCurrentThread();
+		assertOpen();
 		try {
 			return delegate.size();
 		} catch (IOException e) {
@@ -158,8 +131,8 @@ class SharedFileChannel {
 	}
 
 	public long transferTo(long position, long count, SharedFileChannel targetChannel, long targetPosition) {
-		assertOpenedByCurrentThread();
-		targetChannel.assertOpenedByCurrentThread();
+		assertOpen();
+		targetChannel.assertOpen();
 		if (count < 0) {
 			throw new IllegalArgumentException("Count must not be negative");
 		}
@@ -187,7 +160,7 @@ class SharedFileChannel {
 	}
 
 	public int writeFully(long position, ByteBuffer source) {
-		assertOpenedByCurrentThread();
+		assertOpen();
 		try {
 			return tryWriteFully(position, source);
 		} catch (IOException e) {
@@ -202,6 +175,12 @@ class SharedFileChannel {
 			delegate.write(source, maxPosition - source.remaining());
 		} while (source.hasRemaining());
 		return count;
+	}
+
+	private void assertOpen() {
+		if (!openCloseCounter.isOpen()) {
+			throw new IllegalStateException("SharedFileChannel is not open");
+		}
 	}
 
 }

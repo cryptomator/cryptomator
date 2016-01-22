@@ -17,17 +17,17 @@ class WaysToObtainAFile implements Iterable<WayToObtainAFile> {
 	public WaysToObtainAFile() {
 		addNonExisting("invoke file", this::invokeFile);
 
-		addExisting("create file by writing to it", this::createFileUsingTouch);
+		addExisting("create file by writing to it", this::createFileByWritingToIt);
 	}
 
-	private File invokeFile(Folder parent, String name) {
+	private File invokeFile(Folder parent, String name, byte[] content) {
 		return parent.file(name);
 	}
 
-	private File createFileUsingTouch(Folder parent, String name) {
+	private File createFileByWritingToIt(Folder parent, String name, byte[] content) {
 		File result = parent.file(name);
 		try (WritableFile writable = result.openWritable()) {
-			writable.write(ByteBuffer.wrap(new byte[] {1}));
+			writable.write(ByteBuffer.wrap(content));
 		}
 		return result;
 	}
@@ -35,8 +35,8 @@ class WaysToObtainAFile implements Iterable<WayToObtainAFile> {
 	private void addExisting(String name, WayToObtainAFileThatExists factory) {
 		values.add(new WayToObtainAFileThatExists() {
 			@Override
-			public File fileWithName(Folder parent, String name) {
-				return factory.fileWithName(parent, name);
+			public File fileWithNameAndContent(Folder parent, String name, byte[] content) {
+				return factory.fileWithNameAndContent(parent, name, content);
 			}
 
 			@Override
@@ -49,8 +49,8 @@ class WaysToObtainAFile implements Iterable<WayToObtainAFile> {
 	private void addNonExisting(String name, WayToObtainAFileThatDoesntExist factory) {
 		values.add(new WayToObtainAFileThatDoesntExist() {
 			@Override
-			public File fileWithName(Folder parent, String name) {
-				return factory.fileWithName(parent, name);
+			public File fileWithNameAndContent(Folder parent, String name, byte[] content) {
+				return factory.fileWithNameAndContent(parent, name, content);
 			}
 
 			@Override
@@ -62,20 +62,24 @@ class WaysToObtainAFile implements Iterable<WayToObtainAFile> {
 
 	public interface WayToObtainAFile {
 
-		File fileWithName(Folder parent, String name);
+		default File fileWithName(Folder parent, String name) {
+			return fileWithNameAndContent(parent, name, new byte[0]);
+		}
+
+		File fileWithNameAndContent(Folder parent, String name, byte[] content);
 
 		boolean returnedFilesExist();
 
 	}
 
-	public interface WayToObtainAFileThatExists extends WayToObtainAFile {
+	private interface WayToObtainAFileThatExists extends WayToObtainAFile {
 		@Override
 		default boolean returnedFilesExist() {
 			return true;
 		}
 	}
 
-	public interface WayToObtainAFileThatDoesntExist extends WayToObtainAFile {
+	private interface WayToObtainAFileThatDoesntExist extends WayToObtainAFile {
 		@Override
 		default boolean returnedFilesExist() {
 			return false;

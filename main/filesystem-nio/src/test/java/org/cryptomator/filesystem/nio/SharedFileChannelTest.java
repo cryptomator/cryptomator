@@ -86,16 +86,6 @@ public class SharedFileChannelTest {
 		}
 
 		@Test
-		public void testOpenIfClosedOpensAChannelIfChannelIsNotOpenOpenModeIsReadAndFileExists() throws IOException {
-			when(nioAccess.isDirectory(path)).thenReturn(false);
-			when(nioAccess.isRegularFile(path)).thenReturn(true);
-
-			inTest.openIfClosed(OpenMode.READ);
-
-			verify(nioAccess).open(path, StandardOpenOption.CREATE, StandardOpenOption.READ, StandardOpenOption.WRITE);
-		}
-
-		@Test
 		public void testOpenOpensAChannelIfOpenModeIsWriteAndFileExists() throws IOException {
 			when(nioAccess.isDirectory(path)).thenReturn(false);
 			when(nioAccess.isRegularFile(path)).thenReturn(true);
@@ -129,41 +119,6 @@ public class SharedFileChannelTest {
 		}
 
 		@Test
-		public void testOpenFailsIfInvokedTwiceBeforeClose() {
-			when(nioAccess.isDirectory(path)).thenReturn(false);
-			when(nioAccess.isRegularFile(path)).thenReturn(false);
-
-			inTest.open(OpenMode.WRITE);
-
-			thrown.expect(IllegalStateException.class);
-			thrown.expectMessage("already open for current thread");
-
-			inTest.open(OpenMode.WRITE);
-		}
-
-		@Test
-		public void testOpenIfClosedDoesDoNothingIfInvokedOnOpenChannel() {
-			when(nioAccess.isDirectory(path)).thenReturn(false);
-			when(nioAccess.isRegularFile(path)).thenReturn(false);
-
-			inTest.open(OpenMode.WRITE);
-
-			inTest.openIfClosed(OpenMode.READ);
-		}
-
-		@Test
-		public void testOpenWorksIfInvokedTwiceAfterClose() throws IOException {
-			when(nioAccess.isDirectory(path)).thenReturn(false);
-			when(nioAccess.isRegularFile(path)).thenReturn(false);
-			when(nioAccess.open(path, StandardOpenOption.CREATE, StandardOpenOption.READ, StandardOpenOption.WRITE)).thenReturn(mock(FileChannel.class));
-
-			inTest.open(OpenMode.WRITE);
-			inTest.close();
-
-			inTest.open(OpenMode.WRITE);
-		}
-
-		@Test
 		public void testOpenDoesNotOpenChannelTwiceIfInvokedTwiceByDifferentThreads() throws IOException {
 			when(nioAccess.isDirectory(path)).thenReturn(false);
 			when(nioAccess.isRegularFile(path)).thenReturn(false);
@@ -182,14 +137,9 @@ public class SharedFileChannelTest {
 		@Test
 		public void testCloseIfNotOpenFails() {
 			thrown.expect(IllegalStateException.class);
-			thrown.expectMessage("closed for current thread");
+			thrown.expectMessage("Close without corresponding open");
 
 			inTest.close();
-		}
-
-		@Test
-		public void testCloseIfOpenDoesNothingIfNotOpen() {
-			inTest.closeIfOpen();
 		}
 
 		@Test
@@ -201,7 +151,7 @@ public class SharedFileChannelTest {
 			inTest.close();
 
 			thrown.expect(IllegalStateException.class);
-			thrown.expectMessage("closed for current thread");
+			thrown.expectMessage("Close without corresponding open");
 
 			inTest.close();
 		}
@@ -255,19 +205,6 @@ public class SharedFileChannelTest {
 			thrown.expectCause(is(exceptionFromClose));
 
 			inTest.close();
-		}
-
-		@Test
-		public void testCloseIfOpenClosesChannelIfOpen() throws IOException {
-			when(nioAccess.isDirectory(path)).thenReturn(false);
-			when(nioAccess.isRegularFile(path)).thenReturn(false);
-			FileChannel channel = mock(FileChannel.class);
-			when(nioAccess.open(path, StandardOpenOption.CREATE, StandardOpenOption.READ, StandardOpenOption.WRITE)).thenReturn(channel);
-			inTest.open(OpenMode.WRITE);
-
-			inTest.closeIfOpen();
-
-			verify(nioAccess).close(channel);
 		}
 
 		@Test
@@ -686,7 +623,7 @@ public class SharedFileChannelTest {
 			ByteBuffer irrelevant = null;
 
 			thrown.expect(IllegalStateException.class);
-			thrown.expectMessage("closed for current thread");
+			thrown.expectMessage("SharedFileChannel is not open");
 
 			inTest.readFully(0, irrelevant);
 		}
@@ -694,7 +631,7 @@ public class SharedFileChannelTest {
 		@Test
 		public void testTruncateFailsIfNotOpen() {
 			thrown.expect(IllegalStateException.class);
-			thrown.expectMessage("closed for current thread");
+			thrown.expectMessage("SharedFileChannel is not open");
 
 			inTest.truncate(0);
 		}
@@ -702,7 +639,7 @@ public class SharedFileChannelTest {
 		@Test
 		public void testSizeFailsIfNotOpen() {
 			thrown.expect(IllegalStateException.class);
-			thrown.expectMessage("closed for current thread");
+			thrown.expectMessage("SharedFileChannel is not open");
 
 			inTest.size();
 		}
@@ -712,7 +649,7 @@ public class SharedFileChannelTest {
 			SharedFileChannel irrelevant = null;
 
 			thrown.expect(IllegalStateException.class);
-			thrown.expectMessage("closed for current thread");
+			thrown.expectMessage("SharedFileChannel is not open");
 
 			inTest.transferTo(0, 0, irrelevant, 0);
 		}
@@ -724,7 +661,7 @@ public class SharedFileChannelTest {
 			inTest.open(OpenMode.WRITE);
 
 			thrown.expect(IllegalStateException.class);
-			thrown.expectMessage("closed for current thread");
+			thrown.expectMessage("SharedFileChannel is not open");
 
 			inTest.transferTo(0, 0, targetInTest, 0);
 		}
@@ -734,7 +671,7 @@ public class SharedFileChannelTest {
 			ByteBuffer irrelevant = null;
 
 			thrown.expect(IllegalStateException.class);
-			thrown.expectMessage("closed for current thread");
+			thrown.expectMessage("SharedFileChannel is not open");
 
 			inTest.writeFully(0, irrelevant);
 		}

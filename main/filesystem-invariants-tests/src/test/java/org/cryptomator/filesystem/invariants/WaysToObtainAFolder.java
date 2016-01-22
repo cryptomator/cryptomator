@@ -100,14 +100,14 @@ class WaysToObtainAFolder implements Iterable<WayToObtainAFolder> {
 
 	}
 
-	public interface WayToObtainAFolderThatExists extends WayToObtainAFolder {
+	private interface WayToObtainAFolderThatExists extends WayToObtainAFolder {
 		@Override
 		default boolean returnedFoldersExist() {
 			return true;
 		}
 	}
 
-	public interface WayToObtainAFolderThatDoesntExists extends WayToObtainAFolder {
+	private interface WayToObtainAFolderThatDoesntExists extends WayToObtainAFolder {
 		@Override
 		default boolean returnedFoldersExist() {
 			return false;
