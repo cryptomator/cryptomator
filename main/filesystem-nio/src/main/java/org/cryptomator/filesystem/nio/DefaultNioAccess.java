@@ -1,7 +1,7 @@
 package org.cryptomator.filesystem.nio;
 
 import java.io.IOException;
-import java.nio.channels.FileChannel;
+import java.nio.channels.AsynchronousFileChannel;
 import java.nio.file.CopyOption;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
@@ -17,8 +17,8 @@ import java.util.stream.Stream;
 class DefaultNioAccess implements NioAccess {
 
 	@Override
-	public FileChannel open(Path path, OpenOption... options) throws IOException {
-		return FileChannel.open(path, options);
+	public AsynchronousFileChannel open(Path path, OpenOption... options) throws IOException {
+		return AsynchronousFileChannel.open(path, options);
 	}
 
 	@Override
@@ -57,7 +57,7 @@ class DefaultNioAccess implements NioAccess {
 	}
 
 	@Override
-	public void close(FileChannel channel) throws IOException {
+	public void close(AsynchronousFileChannel channel) throws IOException {
 		channel.close();
 	}
 

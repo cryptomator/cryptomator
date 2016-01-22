@@ -13,7 +13,6 @@ import org.cryptomator.filesystem.Folder;
 import org.cryptomator.filesystem.invariants.FileSystemFactories.FileSystemFactory;
 import org.cryptomator.filesystem.invariants.WaysToObtainAFile.WayToObtainAFile;
 import org.cryptomator.filesystem.invariants.WaysToObtainAFolder.WayToObtainAFolder;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.experimental.theories.DataPoints;
 import org.junit.experimental.theories.Theories;
@@ -104,8 +103,6 @@ public class FolderCopyToTests {
 	}
 
 	@Theory
-	@Ignore
-	// FIXME not working yet due to concurrent access to and interruption of channel
 	public void testCopyAFolderWithChildrenCopiesChildrenRecursive(FileSystemFactory fileSystemFactory, WayToObtainAFolder wayToObtainAnExistingFolder, WayToObtainAFile wayToObtainAnExisitingFile,
 			WayToObtainAFolder wayToObtainANonExistingFolder) {
 

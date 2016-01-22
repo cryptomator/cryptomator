@@ -1,7 +1,7 @@
 package org.cryptomator.filesystem.nio;
 
 import java.io.IOException;
-import java.nio.channels.FileChannel;
+import java.nio.channels.AsynchronousFileChannel;
 import java.nio.file.CopyOption;
 import java.nio.file.LinkOption;
 import java.nio.file.OpenOption;
@@ -16,7 +16,7 @@ interface NioAccess {
 
 	public static final Holder<NioAccess> DEFAULT = new Holder<>(new DefaultNioAccess());
 
-	FileChannel open(Path path, OpenOption... options) throws IOException;
+	AsynchronousFileChannel open(Path path, OpenOption... options) throws IOException;
 
 	boolean isRegularFile(Path path, LinkOption... options);
 
@@ -32,7 +32,7 @@ interface NioAccess {
 
 	void delete(Path path) throws IOException;
 
-	void close(FileChannel channel) throws IOException;
+	void close(AsynchronousFileChannel channel) throws IOException;
 
 	void move(Path source, Path target, CopyOption... options) throws IOException;
 

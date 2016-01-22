@@ -3,12 +3,14 @@ package org.cryptomator.filesystem.nio;
 import static java.lang.String.format;
 
 import java.io.IOException;
+import java.io.InterruptedIOException;
 import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
+import java.nio.channels.AsynchronousFileChannel;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -22,7 +24,7 @@ class SharedFileChannel {
 
 	private Lock lock = new ReentrantLock();
 
-	private FileChannel delegate;
+	private AsynchronousFileChannel delegate;
 
 	public SharedFileChannel(Path path, NioAccess nioAccess) {
 		this.path = path;
@@ -92,16 +94,18 @@ class SharedFileChannel {
 		assertOpen();
 		try {
 			return tryReadFully(position, target);
-		} catch (IOException e) {
-			throw new UncheckedIOException(e);
+		} catch (InterruptedException e) {
+			throw new UncheckedIOException(new InterruptedIOException("read has been interrupted"));
+		} catch (ExecutionException e) {
+			throw new UncheckedIOException(new IOException(e));
 		}
 	}
 
-	private int tryReadFully(long position, ByteBuffer target) throws IOException {
+	private int tryReadFully(long position, ByteBuffer target) throws InterruptedException, ExecutionException {
 		int initialRemaining = target.remaining();
 		long maxPosition = position + initialRemaining;
 		do {
-			if (delegate.read(target, maxPosition - target.remaining()) == EOF) {
+			if (delegate.read(target, maxPosition - target.remaining()).get() == EOF) {
 				if (initialRemaining == target.remaining()) {
 					return EOF;
 				} else {
@@ -137,14 +141,25 @@ class SharedFileChannel {
 			throw new IllegalArgumentException("Count must not be negative");
 		}
 		try {
+			ByteBuffer buffer = ByteBuffer.allocate(32 * 1024);
 			long maxPosition = Math.min(delegate.size(), position + count);
 			long transferCount = Math.max(0, maxPosition - position);
-			long remaining = transferCount;
-			targetChannel.delegate.position(targetPosition);
-			while (remaining > 0) {
-				remaining -= delegate.transferTo(maxPosition - remaining, remaining, targetChannel.delegate);
+			long transferred = 0;
+			while (transferred < transferCount) {
+				int read = delegate.read(buffer, position + transferred).get();
+				if (read == -1) {
+					throw new IllegalStateException("Reached end of file during transfer to");
+				}
+				buffer.flip();
+				while (buffer.hasRemaining()) {
+					transferred += targetChannel.delegate.write(buffer, targetPosition + transferred).get();
+				}
 			}
 			return transferCount;
+		} catch (InterruptedException e) {
+			throw new UncheckedIOException(new InterruptedIOException("read has been interrupted"));
+		} catch (ExecutionException e) {
+			throw new UncheckedIOException(new IOException(e));
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
 		}
@@ -163,16 +178,18 @@ class SharedFileChannel {
 		assertOpen();
 		try {
 			return tryWriteFully(position, source);
-		} catch (IOException e) {
-			throw new UncheckedIOException(e);
+		} catch (InterruptedException e) {
+			throw new UncheckedIOException(new InterruptedIOException("read has been interrupted"));
+		} catch (ExecutionException e) {
+			throw new UncheckedIOException(new IOException(e));
 		}
 	}
 
-	private int tryWriteFully(long position, ByteBuffer source) throws IOException {
+	private int tryWriteFully(long position, ByteBuffer source) throws InterruptedException, ExecutionException {
 		int count = source.remaining();
 		long maxPosition = position + count;
 		do {
-			delegate.write(source, maxPosition - source.remaining());
+			delegate.write(source, maxPosition - source.remaining()).get();
 		} while (source.hasRemaining());
 		return count;
 	}

@@ -15,7 +15,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.channels.FileChannel;
+import java.nio.channels.AsynchronousFileChannel;
 import java.nio.file.CopyOption;
 import java.nio.file.DirectoryStream;
 import java.nio.file.FileSystem;
@@ -64,10 +64,10 @@ public class DefaultNioAccessTest {
 	@Test
 	public void testOpenCallsOpenOnProvider() throws IOException {
 		OpenOption[] options = {StandardOpenOption.APPEND};
-		FileChannel channel = mock(FileChannel.class);
-		when(provider.newFileChannel(path, new HashSet<>(asList(options)))).thenReturn(channel);
+		AsynchronousFileChannel channel = mock(AsynchronousFileChannel.class);
+		when(provider.newAsynchronousFileChannel(path, new HashSet<>(asList(options)), null, new FileAttribute[0])).thenReturn(channel);
 
-		FileChannel result = inTest.open(path, options);
+		AsynchronousFileChannel result = inTest.open(path, options);
 
 		assertThat(result, is(channel));
 	}
@@ -177,17 +177,11 @@ public class DefaultNioAccessTest {
 
 	@Test
 	public void testCloseInvokesCloseOnChannel() throws IOException {
-		Runnable implCloseChannel = mock(Runnable.class);
-		FileChannel channel = new FileChannelAdapter() {
-			@Override
-			public void implCloseChannel() throws IOException {
-				implCloseChannel.run();
-			}
-		};
+		AsynchronousFileChannel channel = mock(AsynchronousFileChannel.class);
 
 		inTest.close(channel);
 
-		verify(implCloseChannel).run();
+		verify(channel).close();
 	}
 
 	@Test
