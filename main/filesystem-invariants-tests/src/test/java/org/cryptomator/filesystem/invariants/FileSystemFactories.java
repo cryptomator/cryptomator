@@ -13,9 +13,11 @@ import java.util.List;
 import org.cryptomator.crypto.engine.impl.CryptorImpl;
 import org.cryptomator.filesystem.FileSystem;
 import org.cryptomator.filesystem.crypto.CryptoFileSystem;
+import org.cryptomator.filesystem.crypto.CryptoFileSystemDelegate;
 import org.cryptomator.filesystem.inmem.InMemoryFileSystem;
 import org.cryptomator.filesystem.invariants.FileSystemFactories.FileSystemFactory;
 import org.cryptomator.filesystem.nio.NioFileSystem;
+import org.mockito.Mockito;
 
 class FileSystemFactories implements Iterable<FileSystemFactory> {
 
@@ -48,11 +50,11 @@ class FileSystemFactories implements Iterable<FileSystemFactory> {
 	}
 
 	private FileSystem createCryptoFileSystemInMemory() {
-		return new CryptoFileSystem(createInMemoryFileSystem(), new CryptorImpl(RANDOM_MOCK), "aPassphrase");
+		return new CryptoFileSystem(createInMemoryFileSystem(), new CryptorImpl(RANDOM_MOCK), Mockito.mock(CryptoFileSystemDelegate.class), "aPassphrase");
 	}
 
 	private FileSystem createCryptoFileSystemNio() {
-		return new CryptoFileSystem(createNioFileSystem(), new CryptorImpl(RANDOM_MOCK), "aPassphrase");
+		return new CryptoFileSystem(createNioFileSystem(), new CryptorImpl(RANDOM_MOCK), Mockito.mock(CryptoFileSystemDelegate.class), "aPassphrase");
 	}
 
 	private void add(String name, FileSystemFactory factory) {

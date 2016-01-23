@@ -41,13 +41,15 @@ class FileContentDecryptorImpl implements FileContentDecryptor {
 	private final FifoParallelDataProcessor<ByteBuffer> dataProcessor = new FifoParallelDataProcessor<>(NUM_THREADS, NUM_THREADS + READ_AHEAD);
 	private final ThreadLocal<Mac> hmacSha256;
 	private final FileHeader header;
+	private final boolean authenticate;
 	private ByteBuffer ciphertextBuffer = ByteBuffer.allocate(CHUNK_SIZE + MAC_SIZE);
 	private long chunkNumber = 0;
 
-	public FileContentDecryptorImpl(SecretKey headerKey, SecretKey macKey, ByteBuffer header, long firstCiphertextByte) {
+	public FileContentDecryptorImpl(SecretKey headerKey, SecretKey macKey, ByteBuffer header, long firstCiphertextByte, boolean authenticate) {
 		final ThreadLocalMac hmacSha256 = new ThreadLocalMac(macKey, HMAC_SHA256);
 		this.hmacSha256 = hmacSha256;
 		this.header = FileHeader.decrypt(headerKey, hmacSha256, header);
+		this.authenticate = authenticate;
 		this.chunkNumber = firstCiphertextByte / CHUNK_SIZE; // floor() by int-truncation
 	}
 
@@ -141,10 +143,12 @@ class FileContentDecryptorImpl implements FileContentDecryptor {
 		@Override
 		public ByteBuffer call() {
 			try {
-				Mac mac = hmacSha256.get();
-				mac.update(ciphertextChunk.asReadOnlyBuffer());
-				if (!MessageDigest.isEqual(expectedMac, mac.doFinal())) {
-					throw new AuthenticationFailedException();
+				if (authenticate) {
+					Mac mac = hmacSha256.get();
+					mac.update(ciphertextChunk.asReadOnlyBuffer());
+					if (!MessageDigest.isEqual(expectedMac, mac.doFinal())) {
+						throw new AuthenticationFailedException();
+					}
 				}
 
 				Cipher cipher = ThreadLocalAesCtrCipher.get();

@@ -50,14 +50,14 @@ public class FileContentCryptorImpl implements FileContentCryptor {
 	}
 
 	@Override
-	public FileContentDecryptor createFileContentDecryptor(ByteBuffer header, long firstCiphertextByte) {
+	public FileContentDecryptor createFileContentDecryptor(ByteBuffer header, long firstCiphertextByte, boolean authenticate) {
 		if (header.remaining() != getHeaderSize()) {
 			throw new IllegalArgumentException("Invalid header.");
 		}
 		if (firstCiphertextByte % (CHUNK_SIZE + MAC_SIZE) != 0) {
 			throw new IllegalArgumentException("Invalid starting point for decryption.");
 		}
-		return new FileContentDecryptorImpl(encryptionKey, macKey, header, firstCiphertextByte);
+		return new FileContentDecryptorImpl(encryptionKey, macKey, header, firstCiphertextByte, authenticate);
 	}
 
 	@Override

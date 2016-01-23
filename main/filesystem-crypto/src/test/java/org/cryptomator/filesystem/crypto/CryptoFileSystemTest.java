@@ -27,6 +27,7 @@ import org.cryptomator.filesystem.WritableFile;
 import org.cryptomator.filesystem.inmem.InMemoryFileSystem;
 import org.junit.Assert;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 public class CryptoFileSystemTest {
 
@@ -45,7 +46,7 @@ public class CryptoFileSystemTest {
 		Assert.assertFalse(physicalDataRoot.exists());
 
 		// init crypto fs:
-		final FileSystem fs = new CryptoFileSystem(physicalFs, cryptor, "foo");
+		final FileSystem fs = new CryptoFileSystem(physicalFs, cryptor, Mockito.mock(CryptoFileSystemDelegate.class), "foo");
 		Assert.assertTrue(masterkeyFile.exists());
 		Assert.assertTrue(masterkeyBkupFile.exists());
 		fs.create();
@@ -66,7 +67,7 @@ public class CryptoFileSystemTest {
 		Assert.assertFalse(masterkeyBkupFile.exists());
 
 		// first initialization:
-		new CryptoFileSystem(physicalFs, cryptor, "foo");
+		new CryptoFileSystem(physicalFs, cryptor, Mockito.mock(CryptoFileSystemDelegate.class), "foo");
 		Assert.assertTrue(masterkeyBkupFile.exists());
 		final Instant bkupDateT0 = masterkeyBkupFile.lastModified();
 
@@ -75,7 +76,7 @@ public class CryptoFileSystemTest {
 		Thread.sleep(1);
 
 		// second initialization:
-		new CryptoFileSystem(physicalFs, cryptor, "foo");
+		new CryptoFileSystem(physicalFs, cryptor, Mockito.mock(CryptoFileSystemDelegate.class), "foo");
 		Assert.assertTrue(masterkeyBkupFile.exists());
 		final Instant bkupDateT1 = masterkeyBkupFile.lastModified();
 
@@ -88,7 +89,7 @@ public class CryptoFileSystemTest {
 		final Cryptor cryptor = new NoCryptor();
 		final FileSystem physicalFs = new InMemoryFileSystem();
 		final Folder physicalDataRoot = physicalFs.folder("d");
-		final FileSystem fs = new CryptoFileSystem(physicalFs, cryptor, "foo");
+		final FileSystem fs = new CryptoFileSystem(physicalFs, cryptor, Mockito.mock(CryptoFileSystemDelegate.class), "foo");
 		fs.create();
 
 		// add another encrypted folder:
@@ -108,7 +109,7 @@ public class CryptoFileSystemTest {
 		// mock stuff and prepare crypto FS:
 		final Cryptor cryptor = new NoCryptor();
 		final FileSystem physicalFs = new InMemoryFileSystem();
-		final FileSystem fs = new CryptoFileSystem(physicalFs, cryptor, "foo");
+		final FileSystem fs = new CryptoFileSystem(physicalFs, cryptor, Mockito.mock(CryptoFileSystemDelegate.class), "foo");
 		fs.create();
 
 		// create foo/bar/ and then move foo/ to baz/:
@@ -131,7 +132,7 @@ public class CryptoFileSystemTest {
 		// mock stuff and prepare crypto FS:
 		final Cryptor cryptor = new NoCryptor();
 		final FileSystem physicalFs = new InMemoryFileSystem();
-		final FileSystem fs = new CryptoFileSystem(physicalFs, cryptor, "foo");
+		final FileSystem fs = new CryptoFileSystem(physicalFs, cryptor, Mockito.mock(CryptoFileSystemDelegate.class), "foo");
 		fs.create();
 
 		// create foo/bar/ and then try to move foo/bar/ to foo/
@@ -141,12 +142,12 @@ public class CryptoFileSystemTest {
 		fooBarFolder.moveTo(fooFolder);
 	}
 
-	@Test(timeout = 10000000)
+	@Test(timeout = 10000)
 	public void testWriteAndReadEncryptedFile() {
 		// mock stuff and prepare crypto FS:
 		final Cryptor cryptor = new NoCryptor();
 		final FileSystem physicalFs = new InMemoryFileSystem();
-		final FileSystem fs = new CryptoFileSystem(physicalFs, cryptor, "foo");
+		final FileSystem fs = new CryptoFileSystem(physicalFs, cryptor, Mockito.mock(CryptoFileSystemDelegate.class), "foo");
 		fs.create();
 
 		// write test content to file

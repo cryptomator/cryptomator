@@ -38,6 +38,11 @@ abstract class CryptoNode implements Node {
 	}
 
 	@Override
+	public CryptoFileSystem fileSystem() {
+		return (CryptoFileSystem) Node.super.fileSystem();
+	}
+
+	@Override
 	public Optional<CryptoFolder> parent() {
 		return Optional.of(parent);
 	}
@@ -73,5 +78,13 @@ abstract class CryptoNode implements Node {
 			return false;
 		}
 	}
+
+	/**
+	 * Unix-style cleartext path rooted at the vault's top-level directory.
+	 * 
+	 * @return Vault-relative cleartext path.
+	 */
+	@Override
+	public abstract String toString();
 
 }

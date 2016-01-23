@@ -19,6 +19,7 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.bouncycastle.util.encoders.Base64;
+import org.cryptomator.crypto.engine.AuthenticationFailedException;
 import org.cryptomator.crypto.engine.FileContentCryptor;
 import org.cryptomator.crypto.engine.FileContentDecryptor;
 import org.cryptomator.crypto.engine.FileContentEncryptor;
@@ -47,7 +48,51 @@ public class FileContentDecryptorImplTest {
 		final byte[] header = Base64.decode("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAwN74OFIGKQKgsI7bakfCYm1VXJZiKFLyhZkQCz0Ye/il0PmdZOYsSYEH9h6S00RsdHL3wLtB1FJsb9QLTtP00H8M2theZaZdlKTmjhXsmbc=");
 		final byte[] content = Base64.decode("tPCsFM1g/ubfJMa+AocdPh/WPHfXMFRJdIz6PkLuRijSIIXvxn7IUwVzHQ==");
 
-		try (FileContentDecryptor decryptor = new FileContentDecryptorImpl(headerKey, macKey, ByteBuffer.wrap(header), 0)) {
+		try (FileContentDecryptor decryptor = new FileContentDecryptorImpl(headerKey, macKey, ByteBuffer.wrap(header), 0, true)) {
+			decryptor.append(ByteBuffer.wrap(Arrays.copyOfRange(content, 0, 15)));
+			decryptor.append(ByteBuffer.wrap(Arrays.copyOfRange(content, 15, 43)));
+			decryptor.append(FileContentCryptor.EOF);
+
+			ByteBuffer result = ByteBuffer.allocate(11); // we just care about the first 11 bytes, as this is the ciphertext.
+			ByteBuffer buf;
+			while ((buf = decryptor.cleartext()) != FileContentCryptor.EOF) {
+				ByteBuffers.copy(buf, result);
+			}
+
+			Assert.assertArrayEquals("hello world".getBytes(), result.array());
+		}
+	}
+
+	@Test(expected = AuthenticationFailedException.class)
+	public void testManipulatedDecryption() throws InterruptedException {
+		final byte[] keyBytes = new byte[32];
+		final SecretKey headerKey = new SecretKeySpec(keyBytes, "AES");
+		final SecretKey macKey = new SecretKeySpec(keyBytes, "HmacSHA256");
+		final byte[] header = Base64.decode("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAwN74OFIGKQKgsI7bakfCYm1VXJZiKFLyhZkQCz0Ye/il0PmdZOYsSYEH9h6S00RsdHL3wLtB1FJsb9QLTtP00H8M2theZaZdlKTmjhXsmbc=");
+		final byte[] content = Base64.decode("tPCsFM1g/ubfJMa+AocdPh/WPHfXMFRJdIz6PkLuRijSIIXvxn7IUwVzHq==");
+
+		try (FileContentDecryptor decryptor = new FileContentDecryptorImpl(headerKey, macKey, ByteBuffer.wrap(header), 0, true)) {
+			decryptor.append(ByteBuffer.wrap(Arrays.copyOfRange(content, 0, 15)));
+			decryptor.append(ByteBuffer.wrap(Arrays.copyOfRange(content, 15, 43)));
+			decryptor.append(FileContentCryptor.EOF);
+
+			ByteBuffer result = ByteBuffer.allocate(11); // we just care about the first 11 bytes, as this is the ciphertext.
+			ByteBuffer buf;
+			while ((buf = decryptor.cleartext()) != FileContentCryptor.EOF) {
+				ByteBuffers.copy(buf, result);
+			}
+		}
+	}
+
+	@Test
+	public void testManipulatedDecryptionWithSuppressedAuthentication() throws InterruptedException {
+		final byte[] keyBytes = new byte[32];
+		final SecretKey headerKey = new SecretKeySpec(keyBytes, "AES");
+		final SecretKey macKey = new SecretKeySpec(keyBytes, "HmacSHA256");
+		final byte[] header = Base64.decode("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAwN74OFIGKQKgsI7bakfCYm1VXJZiKFLyhZkQCz0Ye/il0PmdZOYsSYEH9h6S00RsdHL3wLtB1FJsb9QLTtP00H8M2theZaZdlKTmjhXsmbc=");
+		final byte[] content = Base64.decode("tPCsFM1g/ubfJMa+AocdPh/WPHfXMFRJdIz6PkLuRijSIIXvxn7IUwVzHq==");
+
+		try (FileContentDecryptor decryptor = new FileContentDecryptorImpl(headerKey, macKey, ByteBuffer.wrap(header), 0, false)) {
 			decryptor.append(ByteBuffer.wrap(Arrays.copyOfRange(content, 0, 15)));
 			decryptor.append(ByteBuffer.wrap(Arrays.copyOfRange(content, 15, 43)));
 			decryptor.append(FileContentCryptor.EOF);
@@ -69,7 +114,7 @@ public class FileContentDecryptorImplTest {
 		final SecretKey macKey = new SecretKeySpec(keyBytes, "AES");
 		final byte[] header = Base64.decode("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAwN74OFIGKQKgsI7bakfCYm1VXJZiKFLyhZkQCz0Ye/il0PmdZOYsSYEH9h6S00RsdHL3wLtB1FJsb9QLTtP00H8M2theZaZdlKTmjhXsmbc=");
 
-		try (FileContentDecryptor decryptor = new FileContentDecryptorImpl(headerKey, macKey, ByteBuffer.wrap(header), 0)) {
+		try (FileContentDecryptor decryptor = new FileContentDecryptorImpl(headerKey, macKey, ByteBuffer.wrap(header), 0, true)) {
 			decryptor.cancelWithException(new IOException("can not do"));
 			decryptor.cleartext();
 		}
@@ -113,7 +158,7 @@ public class FileContentDecryptorImplTest {
 
 		for (int i = 3; i >= 0; i--) {
 			final int ciphertextPos = (int) cryptor.toCiphertextPos(i * 32768);
-			try (FileContentDecryptor decryptor = cryptor.createFileContentDecryptor(header, ciphertextPos)) {
+			try (FileContentDecryptor decryptor = cryptor.createFileContentDecryptor(header, ciphertextPos, true)) {
 				final Thread ciphertextReader = new Thread(() -> {
 					try {
 						ciphertext.position(ciphertextPos);

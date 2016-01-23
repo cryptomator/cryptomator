@@ -24,9 +24,9 @@ public class CryptoFileSystemFactory {
 		this.blockAlignedFileSystemFactory = blockAlignedFileSystemFactory;
 	}
 
-	public FileSystem get(Folder root, CharSequence passphrase) {
+	public FileSystem get(Folder root, CharSequence passphrase, CryptoFileSystemDelegate delegate) {
 		final FileSystem nameShorteningFs = shorteningFileSystemFactory.get(root);
-		final FileSystem cryptoFs = new CryptoFileSystem(nameShorteningFs, cryptorProvider.get(), passphrase);
+		final FileSystem cryptoFs = new CryptoFileSystem(nameShorteningFs, cryptorProvider.get(), delegate, passphrase);
 		return blockAlignedFileSystemFactory.get(cryptoFs);
 	}
 }

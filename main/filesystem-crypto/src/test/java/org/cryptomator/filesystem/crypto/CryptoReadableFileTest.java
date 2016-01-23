@@ -30,7 +30,7 @@ public class CryptoReadableFileTest {
 		}).thenThrow(new UncheckedIOException(new IOException("failed.")));
 
 		@SuppressWarnings("resource")
-		ReadableFile cryptoReadableFile = new CryptoReadableFile(fileContentCryptor, underlyingFile);
+		ReadableFile cryptoReadableFile = new CryptoReadableFile(fileContentCryptor, underlyingFile, true);
 		cryptoReadableFile.read(ByteBuffer.allocate(1));
 	}
 

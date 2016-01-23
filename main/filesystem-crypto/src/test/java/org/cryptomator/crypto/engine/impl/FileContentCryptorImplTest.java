@@ -53,7 +53,7 @@ public class FileContentCryptorImplTest {
 		FileContentCryptor cryptor = new FileContentCryptorImpl(encryptionKey, macKey, RANDOM_MOCK);
 
 		ByteBuffer tooShortHeader = ByteBuffer.allocate(63);
-		cryptor.createFileContentDecryptor(tooShortHeader, 0);
+		cryptor.createFileContentDecryptor(tooShortHeader, 0, true);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
@@ -75,7 +75,7 @@ public class FileContentCryptorImplTest {
 		FileContentCryptor cryptor = new FileContentCryptorImpl(encryptionKey, macKey, RANDOM_MOCK);
 
 		ByteBuffer header = ByteBuffer.allocate(cryptor.getHeaderSize());
-		cryptor.createFileContentDecryptor(header, 3);
+		cryptor.createFileContentDecryptor(header, 3, true);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
@@ -110,7 +110,7 @@ public class FileContentCryptorImplTest {
 		ciphertext.flip();
 
 		ByteBuffer plaintext = ByteBuffer.allocate(100);
-		try (FileContentDecryptor decryptor = cryptor.createFileContentDecryptor(header, 0)) {
+		try (FileContentDecryptor decryptor = cryptor.createFileContentDecryptor(header, 0, true)) {
 			decryptor.append(ciphertext);
 			decryptor.append(FileContentCryptor.EOF);
 			ByteBuffer buf;
@@ -163,7 +163,7 @@ public class FileContentCryptorImplTest {
 
 		final Thread fileReader;
 		final long decStart = System.nanoTime();
-		try (FileContentDecryptor decryptor = cryptor.createFileContentDecryptor(header, 0)) {
+		try (FileContentDecryptor decryptor = cryptor.createFileContentDecryptor(header, 0, true)) {
 			fileReader = new Thread(() -> {
 				try (FileChannel fc = FileChannel.open(tmpFile, StandardOpenOption.READ)) {
 					ByteBuffer ciphertext = ByteBuffer.allocate(654321);

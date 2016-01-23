@@ -27,10 +27,12 @@ public class CryptoFileSystem extends CryptoFolder implements FileSystem {
 	private static final String MASTERKEY_BACKUP_FILENAME = "masterkey.cryptomator.bkup";
 
 	private final Folder physicalRoot;
+	private final CryptoFileSystemDelegate delegate;
 
-	public CryptoFileSystem(Folder physicalRoot, Cryptor cryptor, CharSequence passphrase) throws InvalidPassphraseException {
+	public CryptoFileSystem(Folder physicalRoot, Cryptor cryptor, CryptoFileSystemDelegate delegate, CharSequence passphrase) throws InvalidPassphraseException {
 		super(null, "", cryptor);
 		this.physicalRoot = physicalRoot;
+		this.delegate = delegate;
 		final File masterkeyFile = physicalRoot.file(MASTERKEY_FILENAME);
 		if (masterkeyFile.exists()) {
 			final boolean unlocked = decryptMasterKeyFile(cryptor, masterkeyFile, passphrase);
@@ -66,6 +68,10 @@ public class CryptoFileSystem extends CryptoFolder implements FileSystem {
 			final byte[] fileContents = cryptor.writeKeysToMasterkeyFile(passphrase);
 			file.write(ByteBuffer.wrap(fileContents));
 		}
+	}
+
+	CryptoFileSystemDelegate delegate() {
+		return delegate;
 	}
 
 	@Override
@@ -107,7 +113,7 @@ public class CryptoFileSystem extends CryptoFolder implements FileSystem {
 
 	@Override
 	public String toString() {
-		return physicalRoot + ":::/";
+		return "/";
 	}
 
 }

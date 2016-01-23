@@ -29,14 +29,16 @@ class CryptoReadableFile implements ReadableFile {
 	private final ByteBuffer header;
 	private final FileContentCryptor cryptor;
 	private final ReadableFile file;
+	private final boolean authenticate;
 	private FileContentDecryptor decryptor;
 	private Future<Void> readAheadTask;
 	private ByteBuffer bufferedCleartext = EMPTY_BUFFER;
 
-	public CryptoReadableFile(FileContentCryptor cryptor, ReadableFile file) {
+	public CryptoReadableFile(FileContentCryptor cryptor, ReadableFile file, boolean authenticate) {
 		this.header = ByteBuffer.allocate(cryptor.getHeaderSize());
 		this.cryptor = cryptor;
 		this.file = file;
+		this.authenticate = authenticate;
 		file.position(0);
 		file.read(header);
 		header.flip();
@@ -73,7 +75,7 @@ class CryptoReadableFile implements ReadableFile {
 			bufferedCleartext = EMPTY_BUFFER;
 		}
 		long ciphertextPos = cryptor.toCiphertextPos(position);
-		decryptor = cryptor.createFileContentDecryptor(header.asReadOnlyBuffer(), ciphertextPos);
+		decryptor = cryptor.createFileContentDecryptor(header.asReadOnlyBuffer(), ciphertextPos, authenticate);
 		readAheadTask = executorService.submit(new CiphertextReader(file, decryptor, header.remaining() + ciphertextPos));
 	}
 

@@ -15,6 +15,7 @@ import org.cryptomator.filesystem.inmem.InMemoryFileSystem;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,13 +25,15 @@ public class CryptoFileSystemComponentIntegrationTest {
 
 	private static final Logger LOG = LoggerFactory.getLogger(CryptoFileSystemComponentIntegrationTest.class);
 
+	private CryptoFileSystemDelegate cryptoDelegate;
 	private FileSystem ciphertextFs;
 	private FileSystem cleartextFs;
 
 	@Before
 	public void setupFileSystems() {
+		cryptoDelegate = Mockito.mock(CryptoFileSystemDelegate.class);
 		ciphertextFs = new InMemoryFileSystem();
-		cleartextFs = cryptoFsComp.cryptoFileSystemFactory().get(ciphertextFs, "TopSecret");
+		cleartextFs = cryptoFsComp.cryptoFileSystemFactory().get(ciphertextFs, "TopSecret", cryptoDelegate);
 		cleartextFs.create();
 	}
 
@@ -77,7 +80,38 @@ public class CryptoFileSystemComponentIntegrationTest {
 		}
 	}
 
-	@Test(timeout = 2000000) // assuming a minimum speed of 10mb/s during encryption and decryption 20s should be enough
+	@Test
+	public void testForcedDecryptionOfManipulatedFile() {
+		// write test content to encrypted file
+		try (WritableFile writable = cleartextFs.file("test1.txt").openWritable()) {
+			writable.write(ByteBuffer.wrap("Hello World".getBytes()));
+		}
+
+		File physicalFile = ciphertextFs.folder("d").folders().findAny().get().folders().findAny().get().files().findAny().get();
+		Assert.assertTrue(physicalFile.exists());
+
+		// toggle last bit
+		try (WritableFile writable = physicalFile.openWritable(); ReadableFile readable = physicalFile.openReadable()) {
+			ByteBuffer buf = ByteBuffer.allocate((int) readable.size());
+			readable.read(buf);
+			buf.array()[buf.limit() - 1] ^= 0x01;
+			buf.flip();
+			writable.write(buf);
+		}
+
+		// whitelist
+		Mockito.when(cryptoDelegate.shouldSkipAuthentication("/test1.txt")).thenReturn(true);
+
+		// read test content from decrypted file
+		try (ReadableFile readable = cleartextFs.file("test1.txt").openReadable()) {
+			ByteBuffer buf = ByteBuffer.allocate(11);
+			readable.read(buf);
+			buf.flip();
+			Assert.assertArrayEquals("Hello World".getBytes(), buf.array());
+		}
+	}
+
+	@Test(timeout = 20000) // assuming a minimum speed of 10mb/s during encryption and decryption 20s should be enough
 	public void testEncryptionAndDecryptionSpeed() throws InterruptedException, IOException {
 		File file = cleartextFs.file("benchmark.test");
 
