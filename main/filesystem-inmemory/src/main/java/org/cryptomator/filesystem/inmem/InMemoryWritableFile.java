@@ -28,7 +28,7 @@ public class InMemoryWritableFile implements WritableFile {
 	private final WriteLock writeLock;
 
 	private boolean open = true;
-	private int position = 0;
+	private volatile int position = 0;
 
 	public InMemoryWritableFile(Consumer<Instant> lastModifiedSetter, Consumer<Instant> creationTimeSetter, Supplier<ByteBuffer> contentGetter, Consumer<ByteBuffer> contentSetter, Consumer<Void> deleter,
 			WriteLock writeLock) {
@@ -74,15 +74,19 @@ public class InMemoryWritableFile implements WritableFile {
 	@Override
 	public int write(ByteBuffer source) throws UncheckedIOException {
 		ByteBuffer destination = contentGetter.get();
+		int oldFileSize = destination.limit();
 		int requiredSize = position + source.remaining();
+		int newFileSize = Math.max(oldFileSize, requiredSize);
 		if (destination.capacity() < requiredSize) {
 			ByteBuffer old = destination;
-			old.rewind();
-			destination = ByteBuffer.allocate(requiredSize);
+			old.clear();
+			int newBufferSize = Math.max(requiredSize, (int) (destination.capacity() * InMemoryFile.GROWTH_RATE));
+			destination = ByteBuffer.allocate(newBufferSize);
 			ByteBuffers.copy(old, destination);
 			contentSetter.accept(destination);
 		}
 		destination.position(position);
+		destination.limit(newFileSize);
 		int numWritten = ByteBuffers.copy(source, destination);
 		this.position += numWritten;
 		return numWritten;

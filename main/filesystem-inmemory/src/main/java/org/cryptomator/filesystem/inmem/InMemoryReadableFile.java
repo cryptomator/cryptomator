@@ -22,7 +22,7 @@ class InMemoryReadableFile implements ReadableFile {
 	private final Supplier<ByteBuffer> contentGetter;
 	private final ReadLock readLock;
 	private boolean open = true;
-	private int position = 0;
+	private volatile int position = 0;
 
 	public InMemoryReadableFile(Supplier<ByteBuffer> contentGetter, ReadLock readLock) {
 		this.contentGetter = contentGetter;

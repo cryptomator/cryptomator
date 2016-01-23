@@ -23,11 +23,18 @@ import org.cryptomator.filesystem.WritableFile;
 
 class InMemoryFile extends InMemoryNode implements File {
 
+	/** 1000kb */
+	static final int INITIAL_SIZE = 100 * 1024;
+
+	/** 140% */
+	static final double GROWTH_RATE = 1.4;
+
 	private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
-	private ByteBuffer content = ByteBuffer.allocate(0);
+	private volatile ByteBuffer content = ByteBuffer.allocate(INITIAL_SIZE);
 
 	public InMemoryFile(InMemoryFolder parent, String name, Instant lastModified, Instant creationTime) {
 		super(parent, name, lastModified, creationTime);
+		content.flip();
 	}
 
 	@Override

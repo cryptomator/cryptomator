@@ -1,5 +1,6 @@
 package org.cryptomator.filesystem.crypto;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
@@ -14,10 +15,14 @@ import org.cryptomator.filesystem.inmem.InMemoryFileSystem;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CryptoFileSystemComponentIntegrationTest {
 
 	private static final CryptoFileSystemComponent cryptoFsComp = DaggerCryptoFileSystemComponent.builder().cryptoEngineModule(new CryptoEngineTestModule()).build();
+
+	private static final Logger LOG = LoggerFactory.getLogger(CryptoFileSystemComponentIntegrationTest.class);
 
 	private FileSystem ciphertextFs;
 	private FileSystem cleartextFs;
@@ -70,6 +75,37 @@ public class CryptoFileSystemComponentIntegrationTest {
 			buf2.flip();
 			Assert.assertArrayEquals(" World".getBytes(), Arrays.copyOfRange(buf2.array(), 0, buf2.remaining()));
 		}
+	}
+
+	@Test(timeout = 2000000) // assuming a minimum speed of 10mb/s during encryption and decryption 20s should be enough
+	public void testEncryptionAndDecryptionSpeed() throws InterruptedException, IOException {
+		File file = cleartextFs.file("benchmark.test");
+
+		final long encStart = System.nanoTime();
+		try (WritableFile writable = file.openWritable()) {
+			final ByteBuffer cleartext = ByteBuffer.allocate(100000); // 100k
+			for (int i = 0; i < 1000; i++) { // 100M total
+				cleartext.rewind();
+				writable.write(cleartext);
+			}
+		}
+		final long encEnd = System.nanoTime();
+		LOG.debug("Encryption of 100M took {}ms", (encEnd - encStart) / 1000 / 1000);
+
+		final long decStart = System.nanoTime();
+		try (ReadableFile readable = file.openReadable()) {
+			final ByteBuffer cleartext = ByteBuffer.allocate(100000); // 100k
+			for (int i = 0; i < 1000; i++) { // 100M total
+				cleartext.clear();
+				readable.read(cleartext);
+				cleartext.flip();
+				Assert.assertEquals(cleartext.get(), 0x00);
+			}
+		}
+		final long decEnd = System.nanoTime();
+		LOG.debug("Decryption of 100M took {}ms", (decEnd - decStart) / 1000 / 1000);
+
+		file.delete();
 	}
 
 	@Test
