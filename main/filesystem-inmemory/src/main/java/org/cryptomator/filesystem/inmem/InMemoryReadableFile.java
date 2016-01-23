@@ -37,7 +37,8 @@ class InMemoryReadableFile implements ReadableFile {
 	@Override
 	public void copyTo(WritableFile other) throws UncheckedIOException {
 		ByteBuffer source = contentGetter.get().asReadOnlyBuffer();
-		source.position(position);
+		source.position(0);
+		other.truncate();
 		this.position += other.write(source);
 	}
 
