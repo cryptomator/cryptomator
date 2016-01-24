@@ -61,6 +61,11 @@ class FileContentEncryptorImpl implements FileContentEncryptor {
 	}
 
 	@Override
+	public int getHeaderSize() {
+		return FileHeader.HEADER_SIZE;
+	}
+
+	@Override
 	public void append(ByteBuffer cleartext) throws InterruptedException {
 		cleartextBytesEncrypted.add(cleartext.remaining());
 		if (cleartext == FileContentCryptor.EOF) {

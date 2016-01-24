@@ -12,7 +12,6 @@ import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 
 import org.cryptomator.filesystem.ReadableFile;
-import org.cryptomator.filesystem.WritableFile;
 
 public class DelegatingReadableFile implements ReadableFile {
 
@@ -25,16 +24,6 @@ public class DelegatingReadableFile implements ReadableFile {
 	@Override
 	public boolean isOpen() {
 		return delegate.isOpen();
-	}
-
-	@Override
-	public void copyTo(WritableFile destination) throws UncheckedIOException {
-		if (destination instanceof DelegatingWritableFile) {
-			final WritableFile delegateDest = ((DelegatingWritableFile) destination).delegate;
-			delegate.copyTo(delegateDest);
-		} else {
-			delegate.copyTo(destination);
-		}
 	}
 
 	@Override

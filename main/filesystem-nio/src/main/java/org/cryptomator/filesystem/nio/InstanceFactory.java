@@ -18,6 +18,6 @@ interface InstanceFactory {
 
 	WritableNioFile writableNioFile(FileSystem fileSystem, Path path, SharedFileChannel channel, Runnable afterCloseCallback, NioAccess nioAccess);
 
-	ReadableNioFile readableNioFile(FileSystem fileSystem, Path path, SharedFileChannel channel, Runnable afterCloseCallback);
+	ReadableNioFile readableNioFile(Path path, SharedFileChannel channel, Runnable afterCloseCallback);
 
 }

@@ -18,7 +18,6 @@ import java.util.concurrent.Future;
 import org.cryptomator.crypto.engine.FileContentCryptor;
 import org.cryptomator.crypto.engine.FileContentDecryptor;
 import org.cryptomator.filesystem.ReadableFile;
-import org.cryptomator.filesystem.WritableFile;
 import org.cryptomator.io.ByteBuffers;
 
 class CryptoReadableFile implements ReadableFile {
@@ -88,16 +87,6 @@ class CryptoReadableFile implements ReadableFile {
 	private int readFromBufferedCleartext(ByteBuffer target) {
 		assert bufferedCleartext != null;
 		return ByteBuffers.copy(bufferedCleartext, target);
-	}
-
-	@Override
-	public void copyTo(WritableFile other) {
-		if (other instanceof CryptoWritableFile) {
-			CryptoWritableFile dst = (CryptoWritableFile) other;
-			file.copyTo(dst.file);
-		} else {
-			throw new IllegalArgumentException("Can not move CryptoFile to conventional File.");
-		}
 	}
 
 	@Override

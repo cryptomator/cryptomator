@@ -32,7 +32,7 @@ class NioFile extends NioNode implements File {
 			throw new IllegalStateException("Current thread is already reading this file");
 		}
 		lock.readLock().lock();
-		return instanceFactory.readableNioFile(fileSystem(), path, sharedChannel, this::unlockReadLock);
+		return instanceFactory.readableNioFile(path, sharedChannel, this::unlockReadLock);
 	}
 
 	private void unlockReadLock() {

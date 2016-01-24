@@ -81,7 +81,7 @@ public class DefaultInstanceFactoryTest {
 	@Test
 	public void testReadableNioFileCreatesWritableNioFile() throws IOException {
 		Runnable afterCloseCallback = mock(Runnable.class);
-		ReadableNioFile result = inTest.readableNioFile(fileSystem, path, channel, afterCloseCallback);
+		ReadableNioFile result = inTest.readableNioFile(path, channel, afterCloseCallback);
 
 		assertThat(result.toString(), is(format("ReadableNioFile(%s)", path)));
 

@@ -134,37 +134,6 @@ class SharedFileChannel {
 		}
 	}
 
-	public long transferTo(long position, long count, SharedFileChannel targetChannel, long targetPosition) {
-		assertOpen();
-		targetChannel.assertOpen();
-		if (count < 0) {
-			throw new IllegalArgumentException("Count must not be negative");
-		}
-		try {
-			ByteBuffer buffer = ByteBuffer.allocate(32 * 1024);
-			long maxPosition = Math.min(delegate.size(), position + count);
-			long transferCount = Math.max(0, maxPosition - position);
-			long transferred = 0;
-			while (transferred < transferCount) {
-				int read = delegate.read(buffer, position + transferred).get();
-				if (read == -1) {
-					throw new IllegalStateException("Reached end of file during transfer to");
-				}
-				buffer.flip();
-				while (buffer.hasRemaining()) {
-					transferred += targetChannel.delegate.write(buffer, targetPosition + transferred).get();
-				}
-			}
-			return transferCount;
-		} catch (InterruptedException e) {
-			throw new UncheckedIOException(new InterruptedIOException("read has been interrupted"));
-		} catch (ExecutionException e) {
-			throw new UncheckedIOException(new IOException(e));
-		} catch (IOException e) {
-			throw new UncheckedIOException(e);
-		}
-	}
-
 	private void doLocked(Runnable task) {
 		lock.lock();
 		try {

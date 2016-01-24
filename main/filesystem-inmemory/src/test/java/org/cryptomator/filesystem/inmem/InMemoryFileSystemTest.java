@@ -110,11 +110,7 @@ public class InMemoryFileSystemTest {
 
 		// copy foo to bar
 		File barFile = fs.file("bar.txt");
-		try (WritableFile writable = barFile.openWritable()) {
-			try (ReadableFile readable = fooFile.openReadable()) {
-				readable.copyTo(writable);
-			}
-		}
+		fooFile.copyTo(barFile);
 		Assert.assertTrue(fooFile.exists());
 		Assert.assertTrue(barFile.exists());
 

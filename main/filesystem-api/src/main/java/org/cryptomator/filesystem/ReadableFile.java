@@ -12,8 +12,6 @@ import java.nio.channels.ReadableByteChannel;
 
 public interface ReadableFile extends ReadableByteChannel {
 
-	void copyTo(WritableFile other) throws UncheckedIOException;
-
 	/**
 	 * <p>
 	 * Tries to fill the remaining space in the given byte buffer with data from

@@ -28,14 +28,21 @@ class CryptoWritableFile implements WritableFile {
 
 	final WritableFile file;
 	private final ExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
-	private final FileContentEncryptor encryptor;
-	private final Future<Void> writeTask;
+	private final FileContentCryptor cryptor;
+
+	private FileContentEncryptor encryptor;
+	private Future<Void> writeTask;
 
 	public CryptoWritableFile(FileContentCryptor cryptor, WritableFile file) {
 		this.file = file;
-		this.encryptor = cryptor.createFileContentEncryptor(Optional.empty(), 0);
+		this.cryptor = cryptor;
+		initialize(0);
+	}
+
+	private void initialize(long firstCleartextByte) {
+		encryptor = cryptor.createFileContentEncryptor(Optional.empty(), firstCleartextByte);
 		writeHeader();
-		this.writeTask = executorService.submit(new CiphertextWriter(file, encryptor));
+		writeTask = executorService.submit(new CiphertextWriter(file, encryptor));
 	}
 
 	private void writeHeader() {
@@ -87,11 +94,9 @@ class CryptoWritableFile implements WritableFile {
 
 	@Override
 	public void truncate() {
-		/*
-		 * TODO kill writer thread (EOF) and reinitialize CryptoWritableFile
-		 * after truncating the file
-		 */
-		throw new UnsupportedOperationException("Truncate not supported yet");
+		terminateAndWaitForWriteTask();
+		file.truncate();
+		initialize(0);
 	}
 
 	@Override
@@ -108,11 +113,20 @@ class CryptoWritableFile implements WritableFile {
 	public void close() {
 		try {
 			if (file.isOpen()) {
-				encryptor.append(FileContentCryptor.EOF);
-				writeTask.get();
+				terminateAndWaitForWriteTask();
 				writeHeader();
 				// TODO append padding
 			}
+		} finally {
+			executorService.shutdownNow();
+			file.close();
+		}
+	}
+
+	private void terminateAndWaitForWriteTask() {
+		try {
+			encryptor.append(FileContentCryptor.EOF);
+			writeTask.get();
 		} catch (ExecutionException e) {
 			if (e.getCause() instanceof UncheckedIOException || e.getCause() instanceof IOException) {
 				throw new UncheckedIOException(new IOException(e));
@@ -121,9 +135,6 @@ class CryptoWritableFile implements WritableFile {
 			}
 		} catch (InterruptedException e) {
 			throw new UncheckedIOException(new InterruptedIOException("Task interrupted while flushing encrypted content"));
-		} finally {
-			executorService.shutdownNow();
-			file.close();
 		}
 	}
 

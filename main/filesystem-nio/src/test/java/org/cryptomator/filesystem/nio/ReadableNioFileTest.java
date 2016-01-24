@@ -5,7 +5,6 @@ import static org.cryptomator.filesystem.nio.OpenMode.READ;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -16,7 +15,6 @@ import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 import java.nio.file.Path;
 
-import org.cryptomator.filesystem.FileSystem;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -33,8 +31,6 @@ public class ReadableNioFileTest {
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
 
-	private FileSystem fileSystem;
-
 	private Path path;
 
 	private SharedFileChannel channel;
@@ -45,12 +41,11 @@ public class ReadableNioFileTest {
 
 	@Before
 	public void setup() {
-		fileSystem = mock(FileSystem.class);
 		path = mock(Path.class);
 		channel = mock(SharedFileChannel.class);
 		afterCloseCallback = mock(Runnable.class);
 
-		inTest = new ReadableNioFile(fileSystem, path, channel, afterCloseCallback);
+		inTest = new ReadableNioFile(path, channel, afterCloseCallback);
 	}
 
 	@Test
@@ -160,79 +155,6 @@ public class ReadableNioFileTest {
 		inTest.read(buffer);
 
 		verifyZeroInteractions(buffer);
-	}
-
-	public class CopyTo {
-
-		private WritableNioFile target;
-
-		private SharedFileChannel channelOfTarget;
-
-		@Before
-		public void setup() {
-			target = mock(WritableNioFile.class);
-			channelOfTarget = mock(SharedFileChannel.class);
-			when(target.fileSystem()).thenReturn(fileSystem);
-			when(target.channel()).thenReturn(channelOfTarget);
-		}
-
-		@Test
-		public void testCopyToFailsIfTargetBelongsToOtherFileSystem() {
-			WritableNioFile targetFromOtherFileSystem = mock(WritableNioFile.class);
-			when(targetFromOtherFileSystem.fileSystem()).thenReturn(mock(FileSystem.class));
-
-			thrown.expect(IllegalArgumentException.class);
-
-			inTest.copyTo(targetFromOtherFileSystem);
-		}
-
-		@Test
-		public void testCopyToFailsIfSourceIsClosed() {
-			when(target.fileSystem()).thenReturn(fileSystem);
-			inTest.close();
-
-			thrown.expect(UncheckedIOException.class);
-			thrown.expectMessage("already closed");
-
-			inTest.copyTo(target);
-		}
-
-		@Test
-		public void testCopyToAssertsThatTargetIsOpenEnsuresTargetChannelIsOpenTuncatesItAndTransfersDataFromSourceChannel() {
-			long sizeOfSourceChannel = 3283;
-			when(channel.size()).thenReturn(sizeOfSourceChannel);
-			when(channel.transferTo(0, sizeOfSourceChannel, channelOfTarget, 0)).thenReturn(sizeOfSourceChannel);
-
-			inTest.copyTo(target);
-
-			InOrder inOrder = inOrder(target, channel, channelOfTarget);
-			inOrder.verify(target).assertOpen();
-			inOrder.verify(target).ensureChannelIsOpened();
-			inOrder.verify(channelOfTarget).truncate(0);
-			inOrder.verify(channel).transferTo(0, sizeOfSourceChannel, channelOfTarget, 0);
-		}
-
-		@Test
-		public void testCopyToInvokesTransferToUntilAllBytesHaveBeenTransferred() {
-			long firstTransferAmount = 100;
-			long secondTransferAmount = 300;
-			long thirdTransferAmount = 500;
-			long sizeRemainingAfterSecondTransfer = thirdTransferAmount;
-			long sizeRemainingAfterFirstTransfer = sizeRemainingAfterSecondTransfer + secondTransferAmount;
-			long size = sizeRemainingAfterFirstTransfer + firstTransferAmount;
-			when(channel.size()).thenReturn(size);
-			when(channel.transferTo(0, size, channelOfTarget, 0)).thenReturn(firstTransferAmount);
-			when(channel.transferTo(firstTransferAmount, sizeRemainingAfterFirstTransfer, channelOfTarget, firstTransferAmount)).thenReturn(secondTransferAmount);
-			when(channel.transferTo(firstTransferAmount + secondTransferAmount, sizeRemainingAfterSecondTransfer, channelOfTarget, firstTransferAmount + secondTransferAmount)).thenReturn(thirdTransferAmount);
-
-			inTest.copyTo(target);
-
-			InOrder inOrder = inOrder(channel);
-			inOrder.verify(channel).transferTo(0, size, channelOfTarget, 0);
-			inOrder.verify(channel).transferTo(firstTransferAmount, sizeRemainingAfterFirstTransfer, channelOfTarget, firstTransferAmount);
-			inOrder.verify(channel).transferTo(firstTransferAmount + secondTransferAmount, sizeRemainingAfterSecondTransfer, channelOfTarget, firstTransferAmount + secondTransferAmount);
-		}
-
 	}
 
 	@Test

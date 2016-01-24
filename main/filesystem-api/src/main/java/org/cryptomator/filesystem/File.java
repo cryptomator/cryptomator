@@ -15,6 +15,8 @@ import java.io.UncheckedIOException;
  */
 public interface File extends Node, Comparable<File> {
 
+	static final int EOF = -1;
+
 	/**
 	 * <p>
 	 * Opens this file for reading.

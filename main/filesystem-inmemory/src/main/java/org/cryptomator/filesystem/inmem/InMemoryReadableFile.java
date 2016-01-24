@@ -14,7 +14,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 import java.util.function.Supplier;
 
 import org.cryptomator.filesystem.ReadableFile;
-import org.cryptomator.filesystem.WritableFile;
 import org.cryptomator.io.ByteBuffers;
 
 class InMemoryReadableFile implements ReadableFile {
@@ -32,14 +31,6 @@ class InMemoryReadableFile implements ReadableFile {
 	@Override
 	public boolean isOpen() {
 		return open;
-	}
-
-	@Override
-	public void copyTo(WritableFile other) throws UncheckedIOException {
-		ByteBuffer source = contentGetter.get().asReadOnlyBuffer();
-		source.position(0);
-		other.truncate();
-		this.position += other.write(source);
 	}
 
 	@Override

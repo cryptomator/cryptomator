@@ -11,7 +11,6 @@ package org.cryptomator.filesystem.delegating;
 import java.nio.ByteBuffer;
 
 import org.cryptomator.filesystem.ReadableFile;
-import org.cryptomator.filesystem.WritableFile;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -29,29 +28,6 @@ public class DelegatingReadableFileTest {
 
 		Mockito.when(mockReadableFile.isOpen()).thenReturn(false);
 		Assert.assertFalse(delegatingReadableFile.isOpen());
-	}
-
-	@Test
-	public void testCopyTo() {
-		ReadableFile mockReadableFile = Mockito.mock(ReadableFile.class);
-		WritableFile mockWritableFile = Mockito.mock(WritableFile.class);
-		@SuppressWarnings("resource")
-		DelegatingReadableFile delegatingReadableFile = new DelegatingReadableFile(mockReadableFile);
-		DelegatingWritableFile delegatingWritableFile = new DelegatingWritableFile(mockWritableFile);
-
-		delegatingReadableFile.copyTo(delegatingWritableFile);
-		Mockito.verify(mockReadableFile).copyTo(mockWritableFile);
-	}
-
-	@Test
-	public void testCopyToDestinationFromDifferentLayer() {
-		ReadableFile mockReadableFile = Mockito.mock(ReadableFile.class);
-		WritableFile mockWritableFile = Mockito.mock(WritableFile.class);
-		@SuppressWarnings("resource")
-		DelegatingReadableFile delegatingReadableFile = new DelegatingReadableFile(mockReadableFile);
-
-		delegatingReadableFile.copyTo(mockWritableFile);
-		Mockito.verify(mockReadableFile).copyTo(mockWritableFile);
 	}
 
 	@Test

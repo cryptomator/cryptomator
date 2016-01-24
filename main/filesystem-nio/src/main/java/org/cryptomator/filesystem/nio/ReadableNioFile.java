@@ -8,13 +8,10 @@ import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
 import java.nio.file.Path;
 
-import org.cryptomator.filesystem.FileSystem;
 import org.cryptomator.filesystem.ReadableFile;
-import org.cryptomator.filesystem.WritableFile;
 
 class ReadableNioFile implements ReadableFile {
 
-	private final FileSystem fileSystem;
 	private final Path path;
 	private final SharedFileChannel channel;
 	private final Runnable afterCloseCallback;
@@ -22,8 +19,7 @@ class ReadableNioFile implements ReadableFile {
 	private boolean open = true;
 	private long position = 0;
 
-	public ReadableNioFile(FileSystem fileSystem, Path path, SharedFileChannel channel, Runnable afterCloseCallback) {
-		this.fileSystem = fileSystem;
+	public ReadableNioFile(Path path, SharedFileChannel channel, Runnable afterCloseCallback) {
 		this.path = path;
 		this.channel = channel;
 		this.afterCloseCallback = afterCloseCallback;
@@ -57,32 +53,6 @@ class ReadableNioFile implements ReadableFile {
 			throw new IllegalArgumentException();
 		}
 		this.position = position;
-	}
-
-	@Override
-	public void copyTo(WritableFile other) throws UncheckedIOException {
-		assertOpen();
-		if (belongsToSameFilesystem(other)) {
-			internalCopyTo((WritableNioFile) other);
-		} else {
-			throw new IllegalArgumentException("Can only copy to a WritableFile from the same FileSystem");
-		}
-	}
-
-	private boolean belongsToSameFilesystem(WritableFile other) {
-		return other instanceof WritableNioFile && ((WritableNioFile) other).fileSystem() == fileSystem;
-	}
-
-	private void internalCopyTo(WritableNioFile target) {
-		target.assertOpen();
-		target.ensureChannelIsOpened();
-		SharedFileChannel targetChannel = target.channel();
-		targetChannel.truncate(0);
-		long size = size();
-		long transferred = 0;
-		while (transferred < size) {
-			transferred += channel.transferTo(transferred, size - transferred, targetChannel, transferred);
-		}
 	}
 
 	@Override

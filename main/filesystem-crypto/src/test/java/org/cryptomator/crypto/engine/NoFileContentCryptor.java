@@ -101,6 +101,11 @@ class NoFileContentCryptor implements FileContentCryptor {
 		}
 
 		@Override
+		public int getHeaderSize() {
+			return Long.BYTES;
+		}
+
+		@Override
 		public void append(ByteBuffer cleartext) {
 			try {
 				if (cleartext == FileContentCryptor.EOF) {

@@ -654,28 +654,6 @@ public class SharedFileChannelTest {
 		}
 
 		@Test
-		public void testTransferToFailsIfSourceNotOpen() {
-			SharedFileChannel irrelevant = null;
-
-			thrown.expect(IllegalStateException.class);
-			thrown.expectMessage("SharedFileChannel is not open");
-
-			inTest.transferTo(0, 0, irrelevant, 0);
-		}
-
-		@Test
-		public void testTransferToFailsIfTargetNotOpen() {
-			Path targetPath = mock(Path.class);
-			SharedFileChannel targetInTest = new SharedFileChannel(targetPath, nioAccess);
-			inTest.open(OpenMode.WRITE);
-
-			thrown.expect(IllegalStateException.class);
-			thrown.expectMessage("SharedFileChannel is not open");
-
-			inTest.transferTo(0, 0, targetInTest, 0);
-		}
-
-		@Test
 		public void testWriteFullyFailsIfNotOpen() {
 			ByteBuffer irrelevant = null;
 

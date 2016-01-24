@@ -28,6 +28,11 @@ public interface FileContentEncryptor extends Destroyable, Closeable {
 	ByteBuffer getHeader();
 
 	/**
+	 * @return the size of headers created by this {@code FileContentCryptor}. The length of headers returned by {@link #getHeader()} equals this value.
+	 */
+	int getHeaderSize();
+
+	/**
 	 * Appends further cleartext to this encryptor. This method might block until space becomes available.
 	 * 
 	 * @param cleartext Cleartext data or {@link FileContentCryptor#EOF} to indicate the end of a cleartext.

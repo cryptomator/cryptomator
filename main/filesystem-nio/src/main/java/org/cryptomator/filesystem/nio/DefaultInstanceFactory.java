@@ -28,8 +28,8 @@ class DefaultInstanceFactory implements InstanceFactory {
 	}
 
 	@Override
-	public ReadableNioFile readableNioFile(FileSystem fileSystem, Path path, SharedFileChannel channel, Runnable afterCloseCallback) {
-		return new ReadableNioFile(fileSystem, path, channel, afterCloseCallback);
+	public ReadableNioFile readableNioFile(Path path, SharedFileChannel channel, Runnable afterCloseCallback) {
+		return new ReadableNioFile(path, channel, afterCloseCallback);
 	}
 
 }

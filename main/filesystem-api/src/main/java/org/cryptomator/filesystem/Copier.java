@@ -8,7 +8,13 @@
  *******************************************************************************/
 package org.cryptomator.filesystem;
 
+import static org.cryptomator.filesystem.File.EOF;
+
+import java.nio.ByteBuffer;
+
 class Copier {
+
+	private static final int COPY_BUFFER_SIZE = 128 * 1024;
 
 	public static void copy(Folder source, Folder destination) {
 		assertFoldersAreNotNested(source, destination);
@@ -29,7 +35,15 @@ class Copier {
 
 	public static void copy(File source, File destination) {
 		try (OpenFiles openFiles = DeadlockSafeFileOpener.withReadable(source).andWritable(destination).open()) {
-			openFiles.readable(source).copyTo(openFiles.writable(destination));
+			ReadableFile readable = openFiles.readable(source);
+			WritableFile writable = openFiles.writable(destination);
+			ByteBuffer buffer = ByteBuffer.allocate(COPY_BUFFER_SIZE);
+			writable.truncate();
+			while (readable.read(buffer) != EOF) {
+				buffer.flip();
+				writable.write(buffer);
+				buffer.clear();
+			}
 		}
 	}
 

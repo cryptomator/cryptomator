@@ -85,7 +85,7 @@ public class NioFileTest {
 		@Test
 		public void testOpenReadableCreatesReadableNioFileFromNioFile() {
 			ReadableNioFile readableNioFile = mock(ReadableNioFile.class);
-			when(instanceFactory.readableNioFile(same(fileSystem), same(path), same(channel), any())).thenReturn(readableNioFile);
+			when(instanceFactory.readableNioFile(same(path), same(channel), any())).thenReturn(readableNioFile);
 
 			ReadableFile readableFile = inTest.openReadable();
 
@@ -106,7 +106,7 @@ public class NioFileTest {
 		public void testOpenReadableInvokedAfterAfterCloseOperationCreatesNewReadableFile() {
 			ReadableNioFile readableNioFile = mock(ReadableNioFile.class);
 			ArgumentCaptor<Runnable> captor = ArgumentCaptor.forClass(Runnable.class);
-			when(instanceFactory.readableNioFile(same(fileSystem), same(path), same(channel), captor.capture())).thenReturn(null, readableNioFile);
+			when(instanceFactory.readableNioFile(same(path), same(channel), captor.capture())).thenReturn(null, readableNioFile);
 			inTest.openReadable();
 			captor.getValue().run();
 
@@ -181,7 +181,7 @@ public class NioFileTest {
 		@Test
 		public void testOpenWritableInvokedAfterInvokingAfterCloseOperationWorks() {
 			ArgumentCaptor<Runnable> captor = ArgumentCaptor.forClass(Runnable.class);
-			when(instanceFactory.readableNioFile(same(fileSystem), same(path), same(channel), captor.capture())).thenReturn(null);
+			when(instanceFactory.readableNioFile(same(path), same(channel), captor.capture())).thenReturn(null);
 			inTest.openReadable();
 			captor.getValue().run();
 
