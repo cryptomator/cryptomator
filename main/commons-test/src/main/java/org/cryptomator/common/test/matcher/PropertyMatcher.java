@@ -14,11 +14,11 @@ import org.hamcrest.TypeSafeDiagnosingMatcher;
 public class PropertyMatcher<T, P> extends TypeSafeDiagnosingMatcher<T> {
 
 	private final Class<T> expectedType;
-	private final Function<T, P> getter;
+	private final Function<? super T, P> getter;
 	private final String name;
 	private final Matcher<? super P> subMatcher;
 
-	public PropertyMatcher(Class<T> type, Function<T, P> getter, String name, Matcher<? super P> subMatcher) {
+	public PropertyMatcher(Class<T> type, Function<? super T, P> getter, String name, Matcher<? super P> subMatcher) {
 		super(type);
 		this.expectedType = type;
 		this.getter = getter;
@@ -32,7 +32,7 @@ public class PropertyMatcher<T, P> extends TypeSafeDiagnosingMatcher<T> {
 				.appendText(expectedType.getSimpleName()) //
 				.appendText(" with a ") //
 				.appendText(name) //
-				.appendText(" that is ") //
+				.appendText(" that ") //
 				.appendDescriptionOf(subMatcher);
 	}
 
@@ -46,7 +46,7 @@ public class PropertyMatcher<T, P> extends TypeSafeDiagnosingMatcher<T> {
 					.appendText(expectedType.getSimpleName()) //
 					.appendText(" with a ") //
 					.appendText(name) //
-					.appendText(" that was ");
+					.appendText(" that ");
 			subMatcher.describeMismatch(propertyValue, mismatchDescription);
 			return false;
 		}

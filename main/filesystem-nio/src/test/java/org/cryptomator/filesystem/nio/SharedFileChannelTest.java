@@ -2,8 +2,8 @@ package org.cryptomator.filesystem.nio;
 
 import static java.lang.String.format;
 import static org.apache.commons.lang3.concurrent.ConcurrentUtils.constantFuture;
+import static org.cryptomator.common.test.matcher.ExceptionMatcher.ofType;
 import static org.cryptomator.filesystem.nio.SharedFileChannel.EOF;
-import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.doThrow;
@@ -262,12 +262,13 @@ public class SharedFileChannelTest {
 		public void testReadFullyWrapsExceptionFromReadInUncheckedIOException() throws InterruptedException, ExecutionException {
 			ByteBuffer buffer = ByteBuffer.allocate(0);
 			ExecutionException exceptionFromRead = new ExecutionException(new IOException());
+			@SuppressWarnings("unchecked")
 			Future<Integer> result = mock(Future.class);
 			when(channel.read(buffer, 0)).thenReturn(result);
 			when(result.get()).thenThrow(exceptionFromRead);
 
 			thrown.expect(UncheckedIOException.class);
-			thrown.expectCause(is(instanceOf(IOException.class))); // TODO check correct cause of cause
+			thrown.expectCause(is(ofType(IOException.class).withCauseThat(is(exceptionFromRead))));
 
 			inTest.readFully(0, buffer);
 		}
@@ -555,12 +556,13 @@ public class SharedFileChannelTest {
 			int position = 0;
 			ByteBuffer buffer = ByteBuffer.allocate(count);
 			ExecutionException exceptionFromWrite = new ExecutionException(new IOException());
+			@SuppressWarnings("unchecked")
 			Future<Integer> result = mock(Future.class);
 			when(channel.write(buffer, position)).thenReturn(result);
 			when(result.get()).thenThrow(exceptionFromWrite);
 
 			thrown.expect(UncheckedIOException.class);
-			thrown.expectCause(is(instanceOf(IOException.class))); // TODO check correct cause of cause
+			thrown.expectCause(is(ofType(IOException.class).withCauseThat(is(exceptionFromWrite))));
 
 			inTest.writeFully(position, buffer);
 		}
