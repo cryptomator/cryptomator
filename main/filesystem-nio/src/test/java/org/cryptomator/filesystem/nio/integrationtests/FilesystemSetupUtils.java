@@ -1,5 +1,7 @@
 package org.cryptomator.filesystem.nio.integrationtests;
 
+import static org.cryptomator.common.test.TempFilesRemovedOnShutdown.createTempDirectory;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UncheckedIOException;
@@ -15,7 +17,7 @@ class FilesystemSetupUtils {
 
 	public static Path emptyFilesystem() {
 		try {
-			return Files.createTempDirectory("test-filesystem");
+			return createTempDirectory("test-filesystem");
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
 		}
@@ -23,7 +25,7 @@ class FilesystemSetupUtils {
 
 	public static Path testFilesystem(Entry firstEntry, Entry... entries) {
 		try {
-			Path root = Files.createTempDirectory("test-filesystem");
+			Path root = createTempDirectory("test-filesystem");
 			firstEntry.create(root);
 			for (Entry entry : entries) {
 				entry.create(root);

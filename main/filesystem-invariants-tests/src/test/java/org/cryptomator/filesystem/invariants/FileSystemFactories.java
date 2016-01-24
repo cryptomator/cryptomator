@@ -1,6 +1,6 @@
 package org.cryptomator.filesystem.invariants;
 
-import static java.nio.file.Files.createTempDirectory;
+import static org.cryptomator.common.test.TempFilesRemovedOnShutdown.createTempDirectory;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
