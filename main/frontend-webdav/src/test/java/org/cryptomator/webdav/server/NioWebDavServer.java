@@ -6,7 +6,7 @@
  * Contributors:
  *     Sebastian Stenzel - initial API and implementation
  *******************************************************************************/
-package org.cryptomator.webdav.jackrabbitservlet;
+package org.cryptomator.webdav.server;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -16,20 +16,30 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.EnumSet;
 import java.util.Optional;
+
+import javax.servlet.DispatcherType;
 
 import org.cryptomator.filesystem.FileSystem;
 import org.cryptomator.filesystem.nio.NioFileSystem;
+import org.cryptomator.webdav.filters.LoggingHttpFilter;
+import org.eclipse.jetty.servlet.ServletContextHandler;
 
 public class NioWebDavServer {
 
 	private static final String PATH_TO_SERVE_PROPERTY = "pathToServe";
 
 	public static void main(String[] args) throws Exception {
-		FileSystem fileSystem = setupFilesystem();
-		FileSystemBasedWebDavServer server = new FileSystemBasedWebDavServer(fileSystem);
-
+		WebDavServer server = DaggerWebDavComponent.create().getServer();
+		server.setPort(8080);
 		server.start();
+
+		FileSystem fileSystem = setupFilesystem();
+		ServletContextHandler servlet = server.addServlet(fileSystem, "/foo");
+		servlet.addFilter(LoggingHttpFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
+		servlet.start();
+
 		System.out.println("Server started. Press any key to stop it...");
 		System.in.read();
 		server.stop();

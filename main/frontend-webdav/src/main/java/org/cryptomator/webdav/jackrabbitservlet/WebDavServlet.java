@@ -19,7 +19,7 @@ import org.apache.jackrabbit.webdav.server.AbstractWebdavServlet;
 import org.cryptomator.filesystem.Folder;
 import org.cryptomator.filesystem.jackrabbit.FileSystemResourceLocatorFactory;
 
-class WebDavServlet extends AbstractWebdavServlet {
+public class WebDavServlet extends AbstractWebdavServlet {
 
 	private static final long serialVersionUID = -6632687979352625020L;
 
