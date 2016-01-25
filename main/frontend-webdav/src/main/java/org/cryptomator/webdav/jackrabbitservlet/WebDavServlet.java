@@ -16,10 +16,10 @@ import org.apache.jackrabbit.webdav.DavResourceFactory;
 import org.apache.jackrabbit.webdav.DavSessionProvider;
 import org.apache.jackrabbit.webdav.WebdavRequest;
 import org.apache.jackrabbit.webdav.server.AbstractWebdavServlet;
-import org.cryptomator.filesystem.FileSystem;
+import org.cryptomator.filesystem.Folder;
 import org.cryptomator.filesystem.jackrabbit.FileSystemResourceLocatorFactory;
 
-public class WebDavServlet extends AbstractWebdavServlet {
+class WebDavServlet extends AbstractWebdavServlet {
 
 	private static final long serialVersionUID = -6632687979352625020L;
 
@@ -27,9 +27,9 @@ public class WebDavServlet extends AbstractWebdavServlet {
 	private final DavLocatorFactory davLocatorFactory;
 	private final DavResourceFactory davResourceFactory;
 
-	public WebDavServlet(URI contextRootUri, FileSystem filesystem) {
+	public WebDavServlet(URI contextRootUri, Folder root) {
 		davSessionProvider = new DavSessionProviderImpl();
-		davLocatorFactory = new FileSystemResourceLocatorFactory(contextRootUri, filesystem);
+		davLocatorFactory = new FileSystemResourceLocatorFactory(contextRootUri, root);
 		davResourceFactory = new FilesystemResourceFactory();
 	}
 

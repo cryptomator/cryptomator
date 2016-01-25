@@ -259,9 +259,9 @@
 		<module>filesystem-nameshortening</module>
 		<module>filesystem-crypto</module>
 		<module>filesystem-invariants-tests</module>
+		<module>frontend-webdav</module>
 		<module>crypto-api</module>
 		<module>crypto-aes</module>
-		<module>jackrabbit-filesystem-adapter</module>
 		<module>core</module>
 		<module>ui</module>
 	</modules>

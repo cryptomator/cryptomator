@@ -10,26 +10,14 @@ package org.cryptomator.webdav.jackrabbitservlet;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.EnumSet;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import javax.servlet.DispatcherType;
-
 import org.cryptomator.filesystem.FileSystem;
-import org.cryptomator.webdav.filters.AcceptRangeFilter;
-import org.cryptomator.webdav.filters.LoggingHttpFilter;
-import org.cryptomator.webdav.filters.MacChunkedPutCompatibilityFilter;
-import org.cryptomator.webdav.filters.UriNormalizationFilter;
-import org.cryptomator.webdav.filters.UriNormalizationFilter.ResourceTypeChecker;
-import org.cryptomator.webdav.filters.UriNormalizationFilter.ResourceTypeChecker.ResourceType;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
-import org.eclipse.jetty.servlet.FilterHolder;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.eclipse.jetty.util.thread.ThreadPool;
 
@@ -48,29 +36,18 @@ class FileSystemBasedWebDavServer {
 		localConnector.setPort(8080);
 		servletCollection = new ContextHandlerCollection();
 
-		final ResourceTypeChecker resourceTypeChecker = (path) -> {
-			if (fileSystem.resolveFolder(path).exists()) {
-				return ResourceType.FOLDER;
-			} else if (fileSystem.resolveFile(path).exists()) {
-				return ResourceType.FILE;
-			} else {
-				return ResourceType.UNKNOWN;
-			}
-		};
-
-		URI servletContextRootUri;
+		final URI servletContextRoot1;
+		final URI servletContextRoot2;
 		try {
-			servletContextRootUri = new URI("http", null, "localhost", 8080, "/", null, null);
+			servletContextRoot1 = new URI("http", null, "localhost", 8080, "/foo/", null, null);
+			servletContextRoot2 = new URI("http", null, "localhost", 8080, "/bar/", null, null);
 		} catch (URISyntaxException e) {
 			throw new IllegalStateException(e);
 		}
-		final ServletContextHandler servletContext = new ServletContextHandler(servletCollection, "/", ServletContextHandler.SESSIONS);
-		final ServletHolder servletHolder = new ServletHolder("FileSystem-WebDAV-Servlet", new WebDavServlet(servletContextRootUri, fileSystem));
-		servletContext.addServlet(servletHolder, "/*");
-		servletContext.addFilter(AcceptRangeFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
-		servletContext.addFilter(new FilterHolder(new UriNormalizationFilter(resourceTypeChecker)), "/*", EnumSet.of(DispatcherType.REQUEST));
-		servletContext.addFilter(MacChunkedPutCompatibilityFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
-		servletContext.addFilter(LoggingHttpFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
+
+		final WebDavServletContextFactory servletContextFactory = new WebDavServletContextFactory();
+		servletCollection.addHandler(servletContextFactory.create(servletContextRoot1, fileSystem));
+		servletCollection.addHandler(servletContextFactory.create(servletContextRoot2, fileSystem));
 		servletCollection.mapContexts();
 
 		server.setConnectors(new Connector[] {localConnector});

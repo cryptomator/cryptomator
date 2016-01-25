@@ -3,7 +3,7 @@
   Copyright (c) 2015 Sebastian Stenzel
   This file is licensed under the terms of the MIT license.
   See the LICENSE.txt file for more info.
-  
+
   Contributors:
       Sebastian Stenzel - initial API and implementation
 -->
@@ -14,12 +14,13 @@
 		<artifactId>main</artifactId>
 		<version>0.11.0-SNAPSHOT</version>
 	</parent>
-	<artifactId>jackrabbit-filesystem-adapter</artifactId>
-	<name>Jackrabbit filesystem-WebDAV-adapter</name>
-	<description>WebDAV servlet based on Apache Jackrabbit serving files from a filesystem</description>
+	<artifactId>frontend-webdav</artifactId>
+	<name>Jackrabbit-based WebDAV filesystem frontend</name>
+	<description>Provides access via WebDAV to filesystems</description>
 
 	<properties>
 		<jackrabbit.version>2.11.0</jackrabbit.version>
+		<jetty.version>9.3.3.v20150827</jetty.version>
 	</properties>
 
 	<dependencies>
@@ -43,7 +44,19 @@
 			<artifactId>jackrabbit-webdav</artifactId>
 			<version>${jackrabbit.version}</version>
 		</dependency>
-		
+
+		<!-- Jetty -->
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-server</artifactId>
+			<version>${jetty.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-webapp</artifactId>
+			<version>${jetty.version}</version>
+		</dependency>
+
 		<!-- Commons -->
 		<dependency>
 			<groupId>org.apache.commons</groupId>
@@ -58,18 +71,6 @@
 		<dependency>
 			<groupId>org.cryptomator</groupId>
 			<artifactId>commons-test</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-server</artifactId>
-			<version>9.3.3.v20150827</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-webapp</artifactId>
-			<version>9.3.3.v20150827</version>
-			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>commons-httpclient</groupId>
