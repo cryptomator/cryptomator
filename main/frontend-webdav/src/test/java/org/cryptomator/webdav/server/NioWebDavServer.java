@@ -31,7 +31,7 @@ public class NioWebDavServer {
 	private static final String PATH_TO_SERVE_PROPERTY = "pathToServe";
 
 	public static void main(String[] args) throws Exception {
-		WebDavServer server = DaggerWebDavComponent.create().getServer();
+		WebDavServer server = DaggerWebDavComponent.create().server();
 		server.setPort(8080);
 		server.start();
 

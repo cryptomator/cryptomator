@@ -36,7 +36,7 @@ public class WebDavServer {
 	private final WebDavServletContextFactory servletContextFactory;
 
 	@Inject
-	public WebDavServer(WebDavServletContextFactory servletContextFactory) {
+	WebDavServer(WebDavServletContextFactory servletContextFactory) {
 		final BlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(MAX_PENDING_REQUESTS);
 		final ThreadPool tp = new QueuedThreadPool(MAX_THREADS, MIN_THREADS, THREAD_IDLE_SECONDS, queue);
 		this.server = new Server(tp);

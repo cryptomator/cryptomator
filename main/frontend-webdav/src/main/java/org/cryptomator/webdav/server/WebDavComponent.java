@@ -8,6 +8,6 @@ import dagger.Component;
 @Component
 public interface WebDavComponent {
 
-	WebDavServer getServer();
+	WebDavServer server();
 
 }

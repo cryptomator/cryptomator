@@ -22,7 +22,7 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 public class InMemoryWebDavServer {
 
 	public static void main(String[] args) throws Exception {
-		WebDavServer server = DaggerWebDavComponent.create().getServer();
+		WebDavServer server = DaggerWebDavComponent.create().server();
 		server.setPort(8080);
 		server.start();
 
