@@ -8,31 +8,22 @@
  ******************************************************************************/
 package org.cryptomator.ui.controllers;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
-import java.nio.file.StandardOpenOption;
 import java.util.Comparator;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
 import javax.inject.Inject;
-import javax.security.auth.DestroyFailedException;
 
 import org.apache.commons.lang3.CharUtils;
 import org.apache.commons.lang3.SystemUtils;
-import org.cryptomator.crypto.exceptions.UnsupportedKeyLengthException;
-import org.cryptomator.crypto.exceptions.UnsupportedVaultException;
-import org.cryptomator.crypto.exceptions.WrongPasswordException;
+import org.cryptomator.crypto.engine.InvalidPassphraseException;
+import org.cryptomator.frontend.FrontendCreationFailedException;
+import org.cryptomator.frontend.webdav.mount.WindowsDriveLetters;
 import org.cryptomator.ui.controls.SecPasswordField;
 import org.cryptomator.ui.model.Vault;
 import org.cryptomator.ui.util.FXThreads;
-import org.cryptomator.ui.util.mount.CommandFailedException;
-import org.cryptomator.ui.util.mount.WindowsDriveLetters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -258,49 +249,30 @@ public class UnlockController extends AbstractFXMLViewController {
 		setControlsDisabled(true);
 		progressIndicator.setVisible(true);
 		downloadsPageLink.setVisible(false);
-		final Path masterKeyPath = vault.getPath().resolve(Vault.VAULT_MASTERKEY_FILE);
-		final Path masterKeyBackupPath = vault.getPath().resolve(Vault.VAULT_MASTERKEY_BACKUP_FILE);
 		final CharSequence password = passwordField.getCharacters();
-		try (final InputStream masterKeyInputStream = Files.newInputStream(masterKeyPath, StandardOpenOption.READ)) {
-			vault.getCryptor().decryptMasterKey(masterKeyInputStream, password);
-			if (!vault.startServer()) {
-				messageText.setText(resourceBundle.getString("unlock.messageLabel.startServerFailed"));
-				vault.getCryptor().destroy();
-				return;
-			}
-			// at this point we know for sure, that the masterkey can be decrypted, so lets make a backup:
-			Files.copy(masterKeyPath, masterKeyBackupPath, StandardCopyOption.REPLACE_EXISTING);
-			vault.setUnlocked(true);
-			final Future<Boolean> futureMount = exec.submit(vault::mount);
+		try {
+			vault.activateFrontend(password);
+			Future<Boolean> futureMount = exec.submit(vault::mount);
 			FXThreads.runOnMainThreadWhenFinished(exec, futureMount, this::unlockAndMountFinished);
-		} catch (IOException ex) {
-			setControlsDisabled(false);
-			progressIndicator.setVisible(false);
-			messageText.setText(resourceBundle.getString("unlock.errorMessage.decryptionFailed"));
-			LOG.error("Decryption failed for technical reasons.", ex);
-		} catch (WrongPasswordException e) {
+		} catch (InvalidPassphraseException e) {
 			setControlsDisabled(false);
 			progressIndicator.setVisible(false);
 			messageText.setText(resourceBundle.getString("unlock.errorMessage.wrongPassword"));
 			Platform.runLater(passwordField::requestFocus);
-		} catch (UnsupportedKeyLengthException ex) {
+		} catch (FrontendCreationFailedException ex) {
 			setControlsDisabled(false);
 			progressIndicator.setVisible(false);
-			messageText.setText(resourceBundle.getString("unlock.errorMessage.unsupportedKeyLengthInstallJCE"));
-			LOG.warn("Unsupported Key-Length. Please install Oracle Java Cryptography Extension (JCE).", ex);
-		} catch (UnsupportedVaultException e) {
-			setControlsDisabled(false);
-			progressIndicator.setVisible(false);
-			downloadsPageLink.setVisible(true);
-			if (e.isVaultOlderThanSoftware()) {
-				messageText.setText(resourceBundle.getString("unlock.errorMessage.unsupportedVersion.vaultOlderThanSoftware") + " ");
-			} else if (e.isSoftwareOlderThanVault()) {
-				messageText.setText(resourceBundle.getString("unlock.errorMessage.unsupportedVersion.softwareOlderThanVault") + " ");
-			}
-		} catch (DestroyFailedException e) {
-			setControlsDisabled(false);
-			progressIndicator.setVisible(false);
-			LOG.error("Destruction of cryptor threw an exception.", e);
+			messageText.setText(resourceBundle.getString("unlock.errorMessage.decryptionFailed"));
+			LOG.error("Decryption failed for technical reasons.", ex);
+			// } catch (UnsupportedVaultException e) {
+			// setControlsDisabled(false);
+			// progressIndicator.setVisible(false);
+			// downloadsPageLink.setVisible(true);
+			// if (e.isVaultOlderThanSoftware()) {
+			// messageText.setText(resourceBundle.getString("unlock.errorMessage.unsupportedVersion.vaultOlderThanSoftware") + " ");
+			// } else if (e.isSoftwareOlderThanVault()) {
+			// messageText.setText(resourceBundle.getString("unlock.errorMessage.unsupportedVersion.softwareOlderThanVault") + " ");
+			// }
 		} finally {
 			passwordField.swipe();
 		}
@@ -317,18 +289,9 @@ public class UnlockController extends AbstractFXMLViewController {
 		progressIndicator.setVisible(false);
 		setControlsDisabled(false);
 		if (vault.isUnlocked() && !mountSuccess) {
-			exec.submit(() -> {
-				vault.stopServer();
-				vault.setUnlocked(false);
-			});
+			exec.submit(vault::deactivateFrontend);
 		} else if (vault.isUnlocked() && mountSuccess) {
-			exec.submit(() -> {
-				try {
-					vault.reveal();
-				} catch (CommandFailedException e) {
-					LOG.error("Failed to reveal mounted vault", e);
-				}
-			});
+			exec.submit(vault::reveal);
 		}
 		if (mountSuccess && listener != null) {
 			listener.didUnlock(this);

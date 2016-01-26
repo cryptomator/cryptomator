@@ -9,14 +9,8 @@
 package org.cryptomator.ui.controllers;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.URL;
 import java.nio.file.FileAlreadyExistsException;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.InvalidPathException;
-import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
 import java.util.ResourceBundle;
 
 import javax.inject.Inject;
@@ -90,23 +84,11 @@ public class InitializeController extends AbstractFXMLViewController {
 	@FXML
 	protected void initializeVault(ActionEvent event) {
 		setControlsDisabled(true);
-		final Path masterKeyPath = vault.getPath().resolve(Vault.VAULT_MASTERKEY_FILE);
-		final CharSequence password = passwordField.getCharacters();
-		try (OutputStream masterKeyOutputStream = Files.newOutputStream(masterKeyPath, StandardOpenOption.WRITE, StandardOpenOption.CREATE_NEW)) {
-			vault.getCryptor().randomizeMasterKey();
-			vault.getCryptor().encryptMasterKey(masterKeyOutputStream, password);
-			final String dataRootDir = vault.getCryptor().encryptDirectoryPath("", FileSystems.getDefault().getSeparator());
-			final Path dataRootPath = vault.getPath().resolve("d").resolve(dataRootDir);
-			final Path metadataPath = vault.getPath().resolve("m");
-			Files.createDirectories(dataRootPath);
-			Files.createDirectories(metadataPath);
-			if (listener != null) {
-				listener.didInitialize(this);
-			}
+		final CharSequence passphrase = passwordField.getCharacters();
+		try {
+			vault.create(passphrase);
 		} catch (FileAlreadyExistsException ex) {
 			messageLabel.setText(resourceBundle.getString("initialize.messageLabel.alreadyInitialized"));
-		} catch (InvalidPathException ex) {
-			messageLabel.setText(resourceBundle.getString("initialize.messageLabel.invalidPath"));
 		} catch (IOException ex) {
 			LOG.error("I/O Exception", ex);
 		} finally {

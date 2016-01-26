@@ -7,18 +7,17 @@ import java.util.concurrent.Executors;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
-import org.cryptomator.crypto.Cryptor;
-import org.cryptomator.crypto.SamplingCryptorDecorator;
-import org.cryptomator.crypto.aes256.CryptoModule;
+import org.cryptomator.filesystem.crypto.CryptoFileSystemModule;
+import org.cryptomator.frontend.FrontendFactory;
+import org.cryptomator.frontend.webdav.WebDavServer;
+import org.cryptomator.frontend.webdav.mount.WebDavMounter;
+import org.cryptomator.frontend.webdav.mount.WebDavMounterProvider;
 import org.cryptomator.ui.model.VaultObjectMapperProvider;
 import org.cryptomator.ui.settings.Settings;
 import org.cryptomator.ui.settings.SettingsProvider;
 import org.cryptomator.ui.util.DeferredCloser;
 import org.cryptomator.ui.util.DeferredCloser.Closer;
 import org.cryptomator.ui.util.SemVerComparator;
-import org.cryptomator.ui.util.mount.WebDavMounter;
-import org.cryptomator.ui.util.mount.WebDavMounterProvider;
-import org.cryptomator.webdav.WebDavServer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -26,7 +25,7 @@ import dagger.Module;
 import dagger.Provides;
 import javafx.application.Application;
 
-@Module(includes = CryptoModule.class)
+@Module(includes = CryptoFileSystemModule.class)
 class CryptomatorModule {
 
 	private final Application application;
@@ -83,16 +82,9 @@ class CryptomatorModule {
 
 	@Provides
 	@Singleton
-	WebDavServer provideWebDavServer() {
-		final WebDavServer webDavServer = new WebDavServer();
+	FrontendFactory provideFrontendFactory(WebDavServer webDavServer) {
 		webDavServer.start();
 		return closeLater(webDavServer, WebDavServer::stop);
-	}
-
-	@Provides
-	@Named("SamplingCryptor")
-	Cryptor provideCryptor(Cryptor cryptor) {
-		return SamplingCryptorDecorator.decorate(cryptor);
 	}
 
 	private <T> T closeLater(T object, Closer<T> closer) {

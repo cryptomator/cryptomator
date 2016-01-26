@@ -5,6 +5,7 @@ import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import org.cryptomator.crypto.engine.Cryptor;
+import org.cryptomator.crypto.engine.InvalidPassphraseException;
 import org.cryptomator.filesystem.FileSystem;
 import org.cryptomator.filesystem.Folder;
 import org.cryptomator.filesystem.blockaligned.BlockAlignedFileSystemFactory;
@@ -24,7 +25,7 @@ public class CryptoFileSystemFactory {
 		this.blockAlignedFileSystemFactory = blockAlignedFileSystemFactory;
 	}
 
-	public FileSystem get(Folder root, CharSequence passphrase, CryptoFileSystemDelegate delegate) {
+	public FileSystem get(Folder root, CharSequence passphrase, CryptoFileSystemDelegate delegate) throws InvalidPassphraseException {
 		final FileSystem nameShorteningFs = shorteningFileSystemFactory.get(root);
 		final FileSystem cryptoFs = new CryptoFileSystem(nameShorteningFs, cryptorProvider.get(), delegate, passphrase);
 		return blockAlignedFileSystemFactory.get(cryptoFs);

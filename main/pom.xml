@@ -54,17 +54,16 @@
 			<!-- modules -->
 			<dependency>
 				<groupId>org.cryptomator</groupId>
+				<artifactId>commons</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.cryptomator</groupId>
 				<artifactId>commons-test</artifactId>
 				<version>${project.version}</version>
 				<scope>test</scope>
 			</dependency>
-
-
-			<dependency>
-				<groupId>org.cryptomator</groupId>
-				<artifactId>commons</artifactId>
-				<version>${project.version}</version>
-			</dependency>
+			
 			<dependency>
 				<groupId>org.cryptomator</groupId>
 				<artifactId>filesystem-api</artifactId>
@@ -91,22 +90,18 @@
 				<artifactId>filesystem-crypto</artifactId>
 				<version>${project.version}</version>
 			</dependency>
+			
+			<dependency>
+				<groupId>org.cryptomator</groupId>
+				<artifactId>frontend-api</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.cryptomator</groupId>
+				<artifactId>frontend-webdav</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 
-			<dependency>
-				<groupId>org.cryptomator</groupId>
-				<artifactId>core</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.cryptomator</groupId>
-				<artifactId>crypto-api</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.cryptomator</groupId>
-				<artifactId>crypto-aes</artifactId>
-				<version>${project.version}</version>
-			</dependency>
 			<dependency>
 				<groupId>org.cryptomator</groupId>
 				<artifactId>ui</artifactId>
@@ -259,10 +254,8 @@
 		<module>filesystem-nameshortening</module>
 		<module>filesystem-crypto</module>
 		<module>filesystem-invariants-tests</module>
+		<module>frontend-api</module>
 		<module>frontend-webdav</module>
-		<module>crypto-api</module>
-		<module>crypto-aes</module>
-		<module>core</module>
 		<module>ui</module>
 	</modules>
 

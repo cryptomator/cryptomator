@@ -3,33 +3,31 @@ package org.cryptomator.ui.model;
 import java.nio.file.Path;
 
 import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Provider;
 import javax.inject.Singleton;
 
-import org.cryptomator.crypto.Cryptor;
+import org.cryptomator.filesystem.crypto.CryptoFileSystemFactory;
+import org.cryptomator.frontend.FrontendFactory;
+import org.cryptomator.frontend.webdav.mount.WebDavMounter;
 import org.cryptomator.ui.util.DeferredCloser;
-import org.cryptomator.ui.util.mount.WebDavMounter;
-import org.cryptomator.webdav.WebDavServer;
+
+import dagger.Lazy;
 
 @Singleton
 public class VaultFactory {
 
-	private final WebDavServer server;
-	private final Provider<Cryptor> cryptorProvider;
-	private final WebDavMounter mounter;
+	private final Lazy<FrontendFactory> frontendFactory;
+	private final CryptoFileSystemFactory cryptoFileSystemFactory;
 	private final DeferredCloser closer;
 
 	@Inject
-	public VaultFactory(WebDavServer server, @Named("SamplingCryptor") Provider<Cryptor> cryptorProvider, WebDavMounter mounter, DeferredCloser closer) {
-		this.server = server;
-		this.cryptorProvider = cryptorProvider;
-		this.mounter = mounter;
+	public VaultFactory(Lazy<FrontendFactory> frontendFactory, CryptoFileSystemFactory cryptoFileSystemFactory, WebDavMounter mounter, DeferredCloser closer) {
+		this.frontendFactory = frontendFactory;
+		this.cryptoFileSystemFactory = cryptoFileSystemFactory;
 		this.closer = closer;
 	}
 
 	public Vault createVault(Path path) {
-		return new Vault(path, server, cryptorProvider.get(), mounter, closer);
+		return new Vault(path, frontendFactory, cryptoFileSystemFactory, closer);
 	}
 
 }

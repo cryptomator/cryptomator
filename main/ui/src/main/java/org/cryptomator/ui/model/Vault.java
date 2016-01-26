@@ -2,6 +2,8 @@ package org.cryptomator.ui.model;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.io.UncheckedIOException;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.Normalizer;
@@ -11,62 +13,58 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import javax.security.auth.DestroyFailedException;
-
 import org.apache.commons.lang3.CharUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.cryptomator.crypto.Cryptor;
+import org.cryptomator.filesystem.FileSystem;
+import org.cryptomator.filesystem.crypto.CryptoFileSystemDelegate;
+import org.cryptomator.filesystem.crypto.CryptoFileSystemFactory;
+import org.cryptomator.filesystem.nio.NioFileSystem;
+import org.cryptomator.frontend.Frontend;
+import org.cryptomator.frontend.Frontend.MountParam;
+import org.cryptomator.frontend.FrontendCreationFailedException;
+import org.cryptomator.frontend.FrontendFactory;
 import org.cryptomator.ui.util.DeferredClosable;
 import org.cryptomator.ui.util.DeferredCloser;
 import org.cryptomator.ui.util.FXThreads;
-import org.cryptomator.ui.util.mount.CommandFailedException;
-import org.cryptomator.ui.util.mount.WebDavMount;
-import org.cryptomator.ui.util.mount.WebDavMounter;
-import org.cryptomator.ui.util.mount.WebDavMounter.MountParam;
-import org.cryptomator.webdav.WebDavServer;
-import org.cryptomator.webdav.WebDavServer.ServletLifeCycleAdapter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableMap;
 
+import dagger.Lazy;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
-public class Vault implements Serializable {
+public class Vault implements Serializable, CryptoFileSystemDelegate {
 
 	private static final long serialVersionUID = 3754487289683599469L;
-	private static final Logger LOG = LoggerFactory.getLogger(Vault.class);
 
+	@Deprecated
 	public static final String VAULT_FILE_EXTENSION = ".cryptomator";
+
+	@Deprecated
 	public static final String VAULT_MASTERKEY_FILE = "masterkey.cryptomator";
-	public static final String VAULT_MASTERKEY_BACKUP_FILE = "masterkey.cryptomator.bkup";
 
 	private final Path path;
-	private final WebDavServer server;
-	private final Cryptor cryptor;
-	private final WebDavMounter mounter;
+	private final Lazy<FrontendFactory> frontendFactory;
 	private final DeferredCloser closer;
+	private final CryptoFileSystemFactory cryptoFileSystemFactory;
 	private final ObjectProperty<Boolean> unlocked = new SimpleObjectProperty<Boolean>(this, "unlocked", Boolean.FALSE);
 	private final ObservableList<String> namesOfResourcesWithInvalidMac = FXThreads.observableListOnMainThread(FXCollections.observableArrayList());
 	private final Set<String> whitelistedResourcesWithInvalidMac = new HashSet<>();
 
 	private String mountName;
 	private Character winDriveLetter;
-	private DeferredClosable<ServletLifeCycleAdapter> webDavServlet = DeferredClosable.empty();
-	private DeferredClosable<WebDavMount> webDavMount = DeferredClosable.empty();
+	private DeferredClosable<Frontend> filesystemFrontend = DeferredClosable.empty();
 
 	/**
 	 * Package private constructor, use {@link VaultFactory}.
 	 */
-	Vault(final Path vaultDirectoryPath, final WebDavServer server, final Cryptor cryptor, final WebDavMounter mounter, final DeferredCloser closer) {
+	Vault(Path vaultDirectoryPath, Lazy<FrontendFactory> frontendFactory, CryptoFileSystemFactory cryptoFileSystemFactory, DeferredCloser closer) {
 		this.path = vaultDirectoryPath;
-		this.server = server;
-		this.cryptor = cryptor;
-		this.mounter = mounter;
+		this.frontendFactory = frontendFactory;
 		this.closer = closer;
+		this.cryptoFileSystemFactory = cryptoFileSystemFactory;
 
 		try {
 			setMountName(getName());
@@ -84,35 +82,34 @@ public class Vault implements Serializable {
 		return Files.isRegularFile(masterKeyPath);
 	}
 
-	public synchronized boolean startServer() {
-		namesOfResourcesWithInvalidMac.clear();
-		whitelistedResourcesWithInvalidMac.clear();
-		Optional<ServletLifeCycleAdapter> o = webDavServlet.get();
-		if (o.isPresent() && o.get().isRunning()) {
-			return false;
+	public void create(CharSequence passphrase) throws IOException {
+		try {
+			FileSystem fs = NioFileSystem.rootedAt(path);
+			if (fs.children().count() > 0) {
+				throw new FileAlreadyExistsException(null, null, "Vault location not empty.");
+			}
+			cryptoFileSystemFactory.get(fs, passphrase, this);
+		} catch (UncheckedIOException e) {
+			throw new IOException(e);
 		}
-		ServletLifeCycleAdapter servlet = server.createServlet(path, cryptor, namesOfResourcesWithInvalidMac, whitelistedResourcesWithInvalidMac, mountName);
-		if (servlet.start()) {
-			webDavServlet = closer.closeLater(servlet);
-			return true;
-		}
-		return false;
 	}
 
-	public void stopServer() {
+	public synchronized void activateFrontend(CharSequence passphrase) throws FrontendCreationFailedException {
 		try {
-			unmount();
-		} catch (CommandFailedException e) {
-			LOG.warn("Unmounting failed. Locking anyway...", e);
+			FileSystem fs = NioFileSystem.rootedAt(path);
+			FileSystem cryptoFs = cryptoFileSystemFactory.get(fs, passphrase, this);
+			String contextPath = StringUtils.prependIfMissing(mountName, "/");
+			Frontend frontend = frontendFactory.get().create(cryptoFs, contextPath);
+			filesystemFrontend = closer.closeLater(frontend);
+			setUnlocked(true);
+		} catch (UncheckedIOException e) {
+			throw new FrontendCreationFailedException(e);
 		}
-		webDavServlet.close();
-		try {
-			cryptor.destroy();
-		} catch (DestroyFailedException e) {
-			LOG.error("Destruction of cryptor throw an exception.", e);
-		}
-		whitelistedResourcesWithInvalidMac.clear();
-		namesOfResourcesWithInvalidMac.clear();
+	}
+
+	public synchronized void deactivateFrontend() {
+		filesystemFrontend.close();
+		setUnlocked(false);
 	}
 
 	private Map<MountParam, Optional<String>> getMountParams() {
@@ -123,32 +120,35 @@ public class Vault implements Serializable {
 	}
 
 	public Boolean mount() {
-		final ServletLifeCycleAdapter servlet = webDavServlet.get().orElse(null);
-		if (servlet == null || !servlet.isRunning()) {
+		// TODO exception handling
+		Frontend frontend = filesystemFrontend.get().orElse(null);
+		if (frontend == null) {
 			return false;
-		}
-		try {
-			webDavMount = closer.closeLater(mounter.mount(servlet.getServletUri(), getMountParams()));
-			return true;
-		} catch (CommandFailedException e) {
-			LOG.warn("mount failed", e);
-			return false;
+		} else {
+			return frontend.mount(getMountParams());
 		}
 	}
 
-	public void reveal() throws CommandFailedException {
-		final WebDavMount mnt = webDavMount.get().orElse(null);
-		if (mnt != null) {
-			mnt.reveal();
-		}
+	public void reveal() {
+		// TODO exception handling
+		filesystemFrontend.get().ifPresent(Frontend::reveal);
 	}
 
-	public void unmount() throws CommandFailedException {
-		final WebDavMount mnt = webDavMount.get().orElse(null);
-		if (mnt != null) {
-			mnt.unmount();
-		}
-		webDavMount = DeferredClosable.empty();
+	public void unmount() {
+		// TODO exception handling
+		filesystemFrontend.get().ifPresent(Frontend::unmount);
+	}
+
+	/* Delegate Methods */
+
+	@Override
+	public void authenticationFailed(String cleartextPath) {
+		namesOfResourcesWithInvalidMac.add(cleartextPath);
+	}
+
+	@Override
+	public boolean shouldSkipAuthentication(String cleartextPath) {
+		return namesOfResourcesWithInvalidMac.contains(cleartextPath);
 	}
 
 	/* Getter/Setter */
@@ -164,9 +164,9 @@ public class Vault implements Serializable {
 		return StringUtils.removeEnd(path.getFileName().toString(), VAULT_FILE_EXTENSION);
 	}
 
-	public Cryptor getCryptor() {
-		return cryptor;
-	}
+	// public Cryptor getCryptor() {
+	// return cryptor;
+	// }
 
 	public ObjectProperty<Boolean> unlockedProperty() {
 		return unlocked;
