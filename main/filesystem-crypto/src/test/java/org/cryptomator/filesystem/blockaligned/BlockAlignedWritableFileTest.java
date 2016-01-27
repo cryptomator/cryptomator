@@ -29,7 +29,7 @@ public class BlockAlignedWritableFileTest {
 			w.write(ByteBuffer.wrap(new byte[] {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09}));
 		}
 
-		BlockAlignedWritableFile writable = Mockito.spy(new BlockAlignedWritableFile(file.openWritable(), file.openReadable(), 2));
+		BlockAlignedWritableFile writable = Mockito.spy(new BlockAlignedWritableFile(file::openWritable, file::openReadable, 2));
 		writable.write(ByteBuffer.wrap(new byte[] {0x11, 0x12, 0x13}));
 		Mockito.verify(writable, Mockito.never()).switchToBlockAlignedMode();
 		writable.position(1);
@@ -59,7 +59,7 @@ public class BlockAlignedWritableFileTest {
 	}
 
 	private void testWrite(File file, int blockSize) {
-		try (WritableFile w = new BlockAlignedWritableFile(file.openWritable(), file.openReadable(), blockSize)) {
+		try (WritableFile w = new BlockAlignedWritableFile(file::openWritable, file::openReadable, blockSize)) {
 			w.position(4);
 			w.write(ByteBuffer.wrap(new byte[] {0x11, 0x22, 0x33}));
 		}

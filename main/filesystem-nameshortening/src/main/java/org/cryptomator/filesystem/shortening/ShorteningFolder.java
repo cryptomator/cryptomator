@@ -7,10 +7,8 @@ import org.cryptomator.common.LazyInitializer;
 import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.Folder;
 import org.cryptomator.filesystem.delegating.DelegatingFolder;
-import org.cryptomator.filesystem.delegating.DelegatingReadableFile;
-import org.cryptomator.filesystem.delegating.DelegatingWritableFile;
 
-class ShorteningFolder extends DelegatingFolder<DelegatingReadableFile, DelegatingWritableFile, ShorteningFolder, ShorteningFile> {
+class ShorteningFolder extends DelegatingFolder<ShorteningFolder, ShorteningFile> {
 
 	private final AtomicReference<String> longName;
 	private final FilenameShortener shortener;

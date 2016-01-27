@@ -13,7 +13,7 @@ import java.io.UncheckedIOException;
 import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.delegating.DelegatingFile;
 
-class BlockAlignedFile extends DelegatingFile<BlockAlignedReadableFile, BlockAlignedWritableFile, BlockAlignedFolder> {
+class BlockAlignedFile extends DelegatingFile<BlockAlignedFolder> {
 
 	private final int blockSize;
 
@@ -29,7 +29,7 @@ class BlockAlignedFile extends DelegatingFile<BlockAlignedReadableFile, BlockAli
 
 	@Override
 	public BlockAlignedWritableFile openWritable() throws UncheckedIOException {
-		return new BlockAlignedWritableFile(delegate.openWritable(), delegate.openReadable(), blockSize);
+		return new BlockAlignedWritableFile(delegate::openWritable, delegate::openReadable, blockSize);
 	}
 
 }

@@ -18,8 +18,7 @@ import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.Folder;
 import org.cryptomator.filesystem.Node;
 
-public abstract class DelegatingFolder<R extends DelegatingReadableFile, W extends DelegatingWritableFile, D extends DelegatingFolder<R, W, D, F>, F extends DelegatingFile<R, W, D>> extends DelegatingNode<Folder>
-		implements Folder {
+public abstract class DelegatingFolder<D extends DelegatingFolder<D, F>, F extends DelegatingFile<D>> extends DelegatingNode<Folder>implements Folder {
 
 	private final D parent;
 	private final WeakValuedCache<Folder, D> folders = WeakValuedCache.usingLoader(this::newFolder);
@@ -81,7 +80,7 @@ public abstract class DelegatingFolder<R extends DelegatingReadableFile, W exten
 	@Override
 	public void copyTo(Folder destination) throws UncheckedIOException {
 		if (destination instanceof DelegatingFolder) {
-			final Folder delegateDest = ((DelegatingFolder<?, ?, ?, ?>) destination).delegate;
+			final Folder delegateDest = ((DelegatingFolder<?, ?>) destination).delegate;
 			delegate.copyTo(delegateDest);
 		} else {
 			delegate.copyTo(destination);
@@ -91,7 +90,7 @@ public abstract class DelegatingFolder<R extends DelegatingReadableFile, W exten
 	@Override
 	public void moveTo(Folder destination) {
 		if (getClass().equals(destination.getClass())) {
-			final Folder delegateDest = ((DelegatingFolder<?, ?, ?, ?>) destination).delegate;
+			final Folder delegateDest = ((DelegatingFolder<?, ?>) destination).delegate;
 			delegate.moveTo(delegateDest);
 		} else {
 			throw new IllegalArgumentException("Can only move DelegatingFolder to other DelegatingFolder.");

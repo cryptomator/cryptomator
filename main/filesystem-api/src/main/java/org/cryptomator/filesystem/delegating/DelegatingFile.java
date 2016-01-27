@@ -12,8 +12,10 @@ import java.io.UncheckedIOException;
 import java.util.Optional;
 
 import org.cryptomator.filesystem.File;
+import org.cryptomator.filesystem.ReadableFile;
+import org.cryptomator.filesystem.WritableFile;
 
-public abstract class DelegatingFile<R extends DelegatingReadableFile, W extends DelegatingWritableFile, D extends DelegatingFolder<R, W, D, ?>> extends DelegatingNode<File>implements File {
+public abstract class DelegatingFile<D extends DelegatingFolder<D, ?>> extends DelegatingNode<File>implements File {
 
 	private final D parent;
 
@@ -28,15 +30,19 @@ public abstract class DelegatingFile<R extends DelegatingReadableFile, W extends
 	}
 
 	@Override
-	public abstract R openReadable() throws UncheckedIOException;
+	public ReadableFile openReadable() throws UncheckedIOException {
+		return delegate.openReadable();
+	}
 
 	@Override
-	public abstract W openWritable() throws UncheckedIOException;
+	public WritableFile openWritable() throws UncheckedIOException {
+		return delegate.openWritable();
+	}
 
 	@Override
 	public void copyTo(File destination) {
 		if (getClass().equals(destination.getClass())) {
-			final File delegateDest = ((DelegatingFile<?, ?, ?>) destination).delegate;
+			final File delegateDest = ((DelegatingFile<?>) destination).delegate;
 			delegate.copyTo(delegateDest);
 		} else {
 			delegate.copyTo(destination);
@@ -46,7 +52,7 @@ public abstract class DelegatingFile<R extends DelegatingReadableFile, W extends
 	@Override
 	public void moveTo(File destination) {
 		if (getClass().equals(destination.getClass())) {
-			final File delegateDest = ((DelegatingFile<?, ?, ?>) destination).delegate;
+			final File delegateDest = ((DelegatingFile<?>) destination).delegate;
 			delegate.moveTo(delegateDest);
 		} else {
 			throw new IllegalArgumentException("Can only move DelegatingFile to other DelegatingFile.");
@@ -56,7 +62,7 @@ public abstract class DelegatingFile<R extends DelegatingReadableFile, W extends
 	@Override
 	public int compareTo(File o) {
 		if (getClass().equals(o.getClass())) {
-			final File delegateOther = ((DelegatingFile<?, ?, ?>) o).delegate;
+			final File delegateOther = ((DelegatingFile<?>) o).delegate;
 			return delegate.compareTo(delegateOther);
 		} else {
 			return delegate.compareTo(o);

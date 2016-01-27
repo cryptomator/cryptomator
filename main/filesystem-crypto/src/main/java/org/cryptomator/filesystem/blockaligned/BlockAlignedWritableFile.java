@@ -10,44 +10,51 @@ package org.cryptomator.filesystem.blockaligned;
 
 import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
+import java.time.Instant;
+import java.util.Optional;
+import java.util.function.Supplier;
 
 import org.cryptomator.filesystem.ReadableFile;
 import org.cryptomator.filesystem.WritableFile;
-import org.cryptomator.filesystem.delegating.DelegatingWritableFile;
 import org.cryptomator.io.ByteBuffers;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-class BlockAlignedWritableFile extends DelegatingWritableFile {
+class BlockAlignedWritableFile implements WritableFile {
 
+	private static final Logger LOG = LoggerFactory.getLogger(BlockAlignedWritableFile.class);
+
+	private final Supplier<WritableFile> openWritable;
+	private final Supplier<ReadableFile> openReadable;
 	private final int blockSize;
-	private final ReadableFile readableFile;
 	private final ByteBuffer currentBlockBuffer;
 	private Mode mode = Mode.PASSTHROUGH;
+	private Optional<WritableFile> delegate;
+	private long logicalPosition;
 
 	private enum Mode {
 		BLOCK_ALIGNED, PASSTHROUGH;
 	}
 
-	public BlockAlignedWritableFile(WritableFile delegate, ReadableFile readableFile, int blockSize) {
-		super(delegate);
-		this.readableFile = readableFile;
+	public BlockAlignedWritableFile(Supplier<WritableFile> openWritable, Supplier<ReadableFile> openReadable, int blockSize) {
+		this.openWritable = openWritable;
+		this.openReadable = openReadable;
 		this.blockSize = blockSize;
 		this.currentBlockBuffer = ByteBuffer.allocate(blockSize);
+		currentBlockBuffer.flip(); // make sure the buffer has no remaining bytes by default
+		delegate = Optional.of(openWritable.get());
 	}
 
 	@Override
 	public void position(long logicalPosition) throws UncheckedIOException {
 		switchToBlockAlignedMode();
-		long blockNumber = logicalPosition / blockSize;
-		long physicalPosition = blockNumber * blockSize;
-		readableFile.position(physicalPosition);
-		readableFile.read(currentBlockBuffer);
-		int advance = (int) (logicalPosition - physicalPosition);
-		currentBlockBuffer.position(advance);
-		super.position(physicalPosition);
+		this.logicalPosition = logicalPosition;
+		readCurrentBlock();
 	}
 
 	// visible for testing
 	void switchToBlockAlignedMode() {
+		LOG.debug("switching to blockaligend write...");
 		mode = Mode.BLOCK_ALIGNED;
 	}
 
@@ -55,7 +62,7 @@ class BlockAlignedWritableFile extends DelegatingWritableFile {
 	public int write(ByteBuffer source) throws UncheckedIOException {
 		switch (mode) {
 		case PASSTHROUGH:
-			return super.write(source);
+			return delegate.get().write(source);
 		case BLOCK_ALIGNED:
 			return writeBlockAligned(source);
 		default:
@@ -64,20 +71,21 @@ class BlockAlignedWritableFile extends DelegatingWritableFile {
 	}
 
 	private int writeBlockAligned(ByteBuffer source) {
-		int written = 0;
+		int writtenTotal = 0;
 		while (source.hasRemaining()) {
-			written += ByteBuffers.copy(source, currentBlockBuffer);
+			int written = ByteBuffers.copy(source, currentBlockBuffer);
+			logicalPosition += written;
 			writeCurrentBlockIfNeeded();
+			writtenTotal += written;
 		}
-		return written;
+		return writtenTotal;
 	}
 
 	@Override
 	public void close() throws UncheckedIOException {
 		currentBlockBuffer.flip();
 		writeCurrentBlock();
-		readableFile.close();
-		super.close();
+		delegate.ifPresent(WritableFile::close);
 	}
 
 	private void writeCurrentBlockIfNeeded() {
@@ -89,13 +97,60 @@ class BlockAlignedWritableFile extends DelegatingWritableFile {
 
 	private void writeCurrentBlock() {
 		currentBlockBuffer.rewind();
-		super.write(currentBlockBuffer);
+		delegate.get().write(currentBlockBuffer);
 	}
 
 	private void readCurrentBlock() {
+		// TODO lock that shit
+
+		// determine right position:
+		long blockNumber = logicalPosition / blockSize;
+		long physicalPosition = blockNumber * blockSize;
+
+		// switch from write to read access:
+		delegate.get().close();
 		currentBlockBuffer.clear();
-		readableFile.read(currentBlockBuffer);
-		currentBlockBuffer.rewind();
+		try (ReadableFile r = openReadable.get()) {
+			r.position(physicalPosition);
+			r.read(currentBlockBuffer);
+		}
+		int advance = (int) (logicalPosition - physicalPosition);
+		currentBlockBuffer.position(advance);
+
+		// continue write access:
+		WritableFile w = openWritable.get();
+		w.position(physicalPosition);
+		delegate = Optional.of(w);
+	}
+
+	@Override
+	public boolean isOpen() {
+		return delegate.get().isOpen();
+	}
+
+	@Override
+	public void moveTo(WritableFile destination) throws UncheckedIOException {
+		if (destination instanceof BlockAlignedWritableFile) {
+			final WritableFile delegateDest = ((BlockAlignedWritableFile) destination).delegate.get();
+			delegate.get().moveTo(delegateDest);
+		} else {
+			throw new IllegalArgumentException("Can only move DelegatingWritableFile to a DelegatingWritableFile.");
+		}
+	}
+
+	@Override
+	public void setLastModified(Instant instant) throws UncheckedIOException {
+		delegate.get().setLastModified(instant);
+	}
+
+	@Override
+	public void delete() throws UncheckedIOException {
+		delegate.get().delete();
+	}
+
+	@Override
+	public void truncate() throws UncheckedIOException {
+		delegate.get().truncate();
 	}
 
 }

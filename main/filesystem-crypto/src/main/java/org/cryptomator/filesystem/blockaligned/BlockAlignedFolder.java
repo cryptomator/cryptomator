@@ -12,7 +12,7 @@ import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.Folder;
 import org.cryptomator.filesystem.delegating.DelegatingFolder;
 
-class BlockAlignedFolder extends DelegatingFolder<BlockAlignedReadableFile, BlockAlignedWritableFile, BlockAlignedFolder, BlockAlignedFile> {
+class BlockAlignedFolder extends DelegatingFolder<BlockAlignedFolder, BlockAlignedFile> {
 
 	private final int blockSize;
 

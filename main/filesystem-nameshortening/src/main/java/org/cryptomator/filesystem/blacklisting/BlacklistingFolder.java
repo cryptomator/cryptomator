@@ -9,10 +9,8 @@ import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.Folder;
 import org.cryptomator.filesystem.Node;
 import org.cryptomator.filesystem.delegating.DelegatingFolder;
-import org.cryptomator.filesystem.delegating.DelegatingReadableFile;
-import org.cryptomator.filesystem.delegating.DelegatingWritableFile;
 
-class BlacklistingFolder extends DelegatingFolder<DelegatingReadableFile, DelegatingWritableFile, BlacklistingFolder, BlacklistingFile> {
+class BlacklistingFolder extends DelegatingFolder<BlacklistingFolder, BlacklistingFile> {
 
 	private final Predicate<Node> hiddenNodes;
 

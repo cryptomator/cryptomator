@@ -12,11 +12,11 @@ import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 
 import org.cryptomator.filesystem.ReadableFile;
-import org.cryptomator.filesystem.delegating.DelegatingReadableFile;
 import org.cryptomator.io.ByteBuffers;
 
-class BlockAlignedReadableFile extends DelegatingReadableFile {
+class BlockAlignedReadableFile implements ReadableFile {
 
+	private final ReadableFile delegate;
 	private final int blockSize;
 	private final ByteBuffer currentBlockBuffer;
 	private boolean eofReached = false;
@@ -27,10 +27,10 @@ class BlockAlignedReadableFile extends DelegatingReadableFile {
 	}
 
 	public BlockAlignedReadableFile(ReadableFile delegate, int blockSize) {
-		super(delegate);
 		if (blockSize < 1) {
 			throw new IllegalArgumentException("Invalid block size");
 		}
+		this.delegate = delegate;
 		this.blockSize = blockSize;
 		this.currentBlockBuffer = ByteBuffer.allocate(blockSize);
 		this.currentBlockBuffer.flip(); // so remaining() is 0 -> next read will read from physical source.
@@ -45,7 +45,7 @@ class BlockAlignedReadableFile extends DelegatingReadableFile {
 		int diff = (int) (logicalPosition - physicalPosition);
 		assert diff >= 0;
 		assert diff < blockSize;
-		super.position(physicalPosition);
+		delegate.position(physicalPosition);
 		eofReached = false;
 		readCurrentBlock();
 		currentBlockBuffer.position(diff);
@@ -60,7 +60,7 @@ class BlockAlignedReadableFile extends DelegatingReadableFile {
 	public int read(ByteBuffer target) throws UncheckedIOException {
 		switch (mode) {
 		case PASSTHROUGH:
-			return super.read(target);
+			return delegate.read(target);
 		case BLOCK_ALIGNED:
 			return readBlockAligned(target);
 		default:
@@ -85,10 +85,25 @@ class BlockAlignedReadableFile extends DelegatingReadableFile {
 
 	private void readCurrentBlock() {
 		currentBlockBuffer.clear();
-		if (super.read(currentBlockBuffer) == -1) {
+		if (delegate.read(currentBlockBuffer) == -1) {
 			eofReached = true;
 		}
 		currentBlockBuffer.flip();
+	}
+
+	@Override
+	public boolean isOpen() {
+		return delegate.isOpen();
+	}
+
+	@Override
+	public long size() throws UncheckedIOException {
+		return delegate.size();
+	}
+
+	@Override
+	public void close() throws UncheckedIOException {
+		delegate.close();
 	}
 
 }

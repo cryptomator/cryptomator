@@ -3,7 +3,7 @@ package org.cryptomator.filesystem.delegating;
 import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.Folder;
 
-class TestDelegatingFolder extends DelegatingFolder<DelegatingReadableFile, DelegatingWritableFile, TestDelegatingFolder, TestDelegatingFile> {
+class TestDelegatingFolder extends DelegatingFolder<TestDelegatingFolder, TestDelegatingFile> {
 
 	public TestDelegatingFolder(TestDelegatingFolder parent, Folder delegate) {
 		super(parent, delegate);

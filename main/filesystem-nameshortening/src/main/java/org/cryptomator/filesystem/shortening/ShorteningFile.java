@@ -5,11 +5,10 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.cryptomator.common.LazyInitializer;
 import org.cryptomator.filesystem.File;
+import org.cryptomator.filesystem.WritableFile;
 import org.cryptomator.filesystem.delegating.DelegatingFile;
-import org.cryptomator.filesystem.delegating.DelegatingReadableFile;
-import org.cryptomator.filesystem.delegating.DelegatingWritableFile;
 
-class ShorteningFile extends DelegatingFile<DelegatingReadableFile, DelegatingWritableFile, ShorteningFolder> {
+class ShorteningFile extends DelegatingFile<ShorteningFolder> {
 
 	private final AtomicReference<String> longName;
 	private final FilenameShortener shortener;
@@ -32,16 +31,11 @@ class ShorteningFile extends DelegatingFile<DelegatingReadableFile, DelegatingWr
 	}
 
 	@Override
-	public DelegatingReadableFile openReadable() throws UncheckedIOException {
-		return new DelegatingReadableFile(delegate.openReadable());
-	}
-
-	@Override
-	public DelegatingWritableFile openWritable() throws UncheckedIOException {
+	public WritableFile openWritable() throws UncheckedIOException {
 		if (shortener.isShortened(shortenedName())) {
 			shortener.saveMapping(name(), shortenedName());
 		}
-		return new DelegatingWritableFile(delegate.openWritable());
+		return super.openWritable();
 	}
 
 }

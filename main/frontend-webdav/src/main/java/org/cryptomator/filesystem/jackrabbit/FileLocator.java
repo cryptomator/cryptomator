@@ -8,16 +8,13 @@
  *******************************************************************************/
 package org.cryptomator.filesystem.jackrabbit;
 
-import java.io.UncheckedIOException;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.jackrabbit.webdav.DavLocatorFactory;
 import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.delegating.DelegatingFile;
-import org.cryptomator.filesystem.delegating.DelegatingReadableFile;
-import org.cryptomator.filesystem.delegating.DelegatingWritableFile;
 
-public class FileLocator extends DelegatingFile<DelegatingReadableFile, DelegatingWritableFile, FolderLocator>implements FileSystemResourceLocator {
+public class FileLocator extends DelegatingFile<FolderLocator>implements FileSystemResourceLocator {
 
 	private final DavLocatorFactory factory;
 	private final String prefix;
@@ -27,16 +24,6 @@ public class FileLocator extends DelegatingFile<DelegatingReadableFile, Delegati
 		super(parent, delegate);
 		this.factory = factory;
 		this.prefix = prefix;
-	}
-
-	@Override
-	public DelegatingReadableFile openReadable() throws UncheckedIOException {
-		return new DelegatingReadableFile(delegate.openReadable());
-	}
-
-	@Override
-	public DelegatingWritableFile openWritable() throws UncheckedIOException {
-		return new DelegatingWritableFile(delegate.openWritable());
 	}
 
 	@Override
