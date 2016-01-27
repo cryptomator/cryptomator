@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import org.cryptomator.frontend.webdav.mount.CommandFailedException;
+import org.cryptomator.frontend.CommandFailedException;
 
 public final class Script {
 

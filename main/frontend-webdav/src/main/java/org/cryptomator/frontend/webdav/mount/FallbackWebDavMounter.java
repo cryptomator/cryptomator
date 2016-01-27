@@ -12,6 +12,7 @@ import java.net.URI;
 import java.util.Map;
 import java.util.Optional;
 
+import org.cryptomator.frontend.CommandFailedException;
 import org.cryptomator.frontend.Frontend.MountParam;
 
 /**

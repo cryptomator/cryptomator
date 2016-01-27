@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.SystemUtils;
-import org.cryptomator.frontend.webdav.mount.CommandFailedException;
+import org.cryptomator.frontend.CommandFailedException;
 
 /**
  * <p>

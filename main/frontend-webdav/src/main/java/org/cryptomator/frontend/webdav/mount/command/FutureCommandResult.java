@@ -17,7 +17,7 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.cryptomator.frontend.webdav.mount.CommandFailedException;
+import org.cryptomator.frontend.CommandFailedException;
 
 final class FutureCommandResult implements Future<CommandResult>, Runnable {
 	

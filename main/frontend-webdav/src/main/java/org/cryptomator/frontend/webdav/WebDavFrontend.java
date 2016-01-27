@@ -4,9 +4,9 @@ import java.net.URI;
 import java.util.Map;
 import java.util.Optional;
 
+import org.cryptomator.frontend.CommandFailedException;
 import org.cryptomator.frontend.Frontend;
 import org.cryptomator.frontend.FrontendCreationFailedException;
-import org.cryptomator.frontend.webdav.mount.CommandFailedException;
 import org.cryptomator.frontend.webdav.mount.WebDavMount;
 import org.cryptomator.frontend.webdav.mount.WebDavMounterProvider;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -36,36 +36,21 @@ class WebDavFrontend implements Frontend {
 	}
 
 	@Override
-	public boolean mount(Map<MountParam, Optional<String>> mountParams) {
-		try {
-			mount = webdavMounterProvider.get().mount(uri, mountParams);
-			return true;
-		} catch (CommandFailedException e) {
-			return false;
+	public void mount(Map<MountParam, Optional<String>> mountParams) throws CommandFailedException {
+		mount = webdavMounterProvider.get().mount(uri, mountParams);
+	}
+
+	@Override
+	public void unmount() throws CommandFailedException {
+		if (mount != null) {
+			mount.unmount();
 		}
 	}
 
 	@Override
-	public void unmount() {
+	public void reveal() throws CommandFailedException {
 		if (mount != null) {
-			try {
-				mount.unmount();
-			} catch (CommandFailedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-	}
-
-	@Override
-	public void reveal() {
-		if (mount != null) {
-			try {
-				mount.reveal();
-			} catch (CommandFailedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			mount.reveal();
 		}
 	}
 

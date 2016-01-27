@@ -15,10 +15,12 @@ import java.util.Set;
 
 import org.apache.commons.lang3.CharUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.cryptomator.common.Optionals;
 import org.cryptomator.filesystem.FileSystem;
 import org.cryptomator.filesystem.crypto.CryptoFileSystemDelegate;
 import org.cryptomator.filesystem.crypto.CryptoFileSystemFactory;
 import org.cryptomator.filesystem.nio.NioFileSystem;
+import org.cryptomator.frontend.CommandFailedException;
 import org.cryptomator.frontend.Frontend;
 import org.cryptomator.frontend.Frontend.MountParam;
 import org.cryptomator.frontend.FrontendCreationFailedException;
@@ -120,23 +122,22 @@ public class Vault implements Serializable, CryptoFileSystemDelegate {
 	}
 
 	public Boolean mount() {
-		// TODO exception handling
-		Frontend frontend = filesystemFrontend.get().orElse(null);
-		if (frontend == null) {
+		try {
+			Optionals.ifPresent(filesystemFrontend.get(), f -> {
+				f.mount(getMountParams());
+			});
+			return true;
+		} catch (CommandFailedException e) {
 			return false;
-		} else {
-			return frontend.mount(getMountParams());
 		}
 	}
 
-	public void reveal() {
-		// TODO exception handling
-		filesystemFrontend.get().ifPresent(Frontend::reveal);
+	public void reveal() throws CommandFailedException {
+		Optionals.ifPresent(filesystemFrontend.get(), Frontend::reveal);
 	}
 
-	public void unmount() {
-		// TODO exception handling
-		filesystemFrontend.get().ifPresent(Frontend::unmount);
+	public void unmount() throws CommandFailedException {
+		Optionals.ifPresent(filesystemFrontend.get(), Frontend::unmount);
 	}
 
 	/* Delegate Methods */

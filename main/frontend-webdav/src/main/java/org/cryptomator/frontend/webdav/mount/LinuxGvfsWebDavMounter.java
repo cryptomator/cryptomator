@@ -18,6 +18,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.frontend.CommandFailedException;
 import org.cryptomator.frontend.Frontend.MountParam;
 import org.cryptomator.frontend.webdav.mount.command.Script;
 

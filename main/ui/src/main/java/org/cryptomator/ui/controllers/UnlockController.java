@@ -19,6 +19,7 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.CharUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.crypto.engine.InvalidPassphraseException;
+import org.cryptomator.frontend.CommandFailedException;
 import org.cryptomator.frontend.FrontendCreationFailedException;
 import org.cryptomator.frontend.webdav.mount.WindowsDriveLetters;
 import org.cryptomator.ui.controls.SecPasswordField;
@@ -291,7 +292,13 @@ public class UnlockController extends AbstractFXMLViewController {
 		if (vault.isUnlocked() && !mountSuccess) {
 			exec.submit(vault::deactivateFrontend);
 		} else if (vault.isUnlocked() && mountSuccess) {
-			exec.submit(vault::reveal);
+			exec.submit(() -> {
+				try {
+					vault.reveal();
+				} catch (CommandFailedException e) {
+					LOG.error("Failed to reveal mounted vault", e);
+				}
+			});
 		}
 		if (mountSuccess && listener != null) {
 			listener.didUnlock(this);

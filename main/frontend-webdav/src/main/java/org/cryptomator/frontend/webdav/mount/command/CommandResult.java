@@ -15,7 +15,7 @@ import java.io.IOException;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.util.Strings;
-import org.cryptomator.frontend.webdav.mount.CommandFailedException;
+import org.cryptomator.frontend.CommandFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

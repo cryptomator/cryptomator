@@ -9,10 +9,10 @@ public interface Frontend extends AutoCloseable {
 		MOUNT_NAME, WIN_DRIVE_LETTER
 	}
 
-	boolean mount(Map<MountParam, Optional<String>> map);
+	void mount(Map<MountParam, Optional<String>> map) throws CommandFailedException;
 
-	void unmount();
+	void unmount() throws CommandFailedException;
 
-	void reveal();
+	void reveal() throws CommandFailedException;
 
 }

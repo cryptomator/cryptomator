@@ -15,6 +15,7 @@ import java.util.concurrent.ExecutorService;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
+import org.cryptomator.frontend.CommandFailedException;
 import org.cryptomator.ui.model.Vault;
 import org.cryptomator.ui.util.ActiveWindowStyleSupport;
 
@@ -78,20 +79,28 @@ public class UnlockedController extends AbstractFXMLViewController {
 
 	@FXML
 	private void didClickRevealVault(ActionEvent event) {
-		exec.submit(vault::reveal);
+		exec.submit(() -> {
+			try {
+				vault.reveal();
+			} catch (CommandFailedException e) {
+				Platform.runLater(() -> {
+					messageLabel.setText(resourceBundle.getString("unlocked.label.revealFailed"));
+				});
+			}
+		});
 	}
 
 	@FXML
 	private void didClickCloseVault(ActionEvent event) {
 		exec.submit(() -> {
-			// try {
-			vault.unmount();
-			// } catch (CommandFailedException e) {
-			// Platform.runLater(() -> {
-			// messageLabel.setText(resourceBundle.getString("unlocked.label.unmountFailed"));
-			// });
-			// return;
-			// }
+			try {
+				vault.unmount();
+			} catch (CommandFailedException e) {
+				Platform.runLater(() -> {
+					messageLabel.setText(resourceBundle.getString("unlocked.label.unmountFailed"));
+				});
+				return;
+			}
 			vault.deactivateFrontend();
 			if (listener != null) {
 				Platform.runLater(() -> {

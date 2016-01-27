@@ -8,6 +8,8 @@
  ******************************************************************************/
 package org.cryptomator.frontend.webdav.mount;
 
+import org.cryptomator.frontend.CommandFailedException;
+
 /**
  * A mounted webdav share.
  * 
