@@ -24,6 +24,7 @@ import org.cryptomator.common.LazyInitializer;
 import org.cryptomator.crypto.engine.Cryptor;
 import org.cryptomator.crypto.engine.FileContentCryptor;
 import org.cryptomator.crypto.engine.FilenameCryptor;
+import org.cryptomator.crypto.engine.InvalidPassphraseException;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -86,7 +87,7 @@ public class CryptorImpl implements Cryptor {
 	}
 
 	@Override
-	public boolean readKeysFromMasterkeyFile(byte[] masterkeyFileContents, CharSequence passphrase) {
+	public void readKeysFromMasterkeyFile(byte[] masterkeyFileContents, CharSequence passphrase) {
 		final KeyFile keyFile;
 		try {
 			final ObjectMapper om = new ObjectMapper();
@@ -107,9 +108,8 @@ public class CryptorImpl implements Cryptor {
 			final SecretKey kek = new SecretKeySpec(kekBytes, ENCRYPTION_ALG);
 			this.encryptionKey = AesKeyWrap.unwrap(kek, keyFile.getEncryptionMasterKey(), ENCRYPTION_ALG);
 			this.macKey = AesKeyWrap.unwrap(kek, keyFile.getMacMasterKey(), MAC_ALG);
-			return true;
 		} catch (InvalidKeyException e) {
-			return false;
+			throw new InvalidPassphraseException();
 		} catch (NoSuchAlgorithmException e) {
 			throw new IllegalStateException("Hard-coded algorithm doesn't exist.", e);
 		} finally {
@@ -152,17 +152,20 @@ public class CryptorImpl implements Cryptor {
 	/* ======================= destruction ======================= */
 
 	@Override
-	public void destroy() throws DestroyFailedException {
+	public void destroy() {
 		destroyQuietly(encryptionKey);
 		destroyQuietly(macKey);
 	}
 
 	@Override
 	public boolean isDestroyed() {
-		return encryptionKey.isDestroyed() && macKey.isDestroyed();
+		return (encryptionKey == null || encryptionKey.isDestroyed()) && (macKey == null || macKey.isDestroyed());
 	}
 
 	private void destroyQuietly(Destroyable d) {
+		if (d == null) {
+			return;
+		}
 		try {
 			d.destroy();
 		} catch (DestroyFailedException e) {

@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import org.cryptomator.crypto.engine.Cryptor;
 import org.cryptomator.crypto.engine.impl.CryptorImpl;
 import org.cryptomator.filesystem.FileSystem;
 import org.cryptomator.filesystem.crypto.CryptoFileSystem;
@@ -50,11 +51,17 @@ class FileSystemFactories implements Iterable<FileSystemFactory> {
 	}
 
 	private FileSystem createCryptoFileSystemInMemory() {
-		return new CryptoFileSystem(createInMemoryFileSystem(), new CryptorImpl(RANDOM_MOCK), Mockito.mock(CryptoFileSystemDelegate.class), "aPassphrase");
+		return new CryptoFileSystem(createInMemoryFileSystem(), createCryptor(), Mockito.mock(CryptoFileSystemDelegate.class), "aPassphrase");
 	}
 
 	private FileSystem createCryptoFileSystemNio() {
-		return new CryptoFileSystem(createNioFileSystem(), new CryptorImpl(RANDOM_MOCK), Mockito.mock(CryptoFileSystemDelegate.class), "aPassphrase");
+		return new CryptoFileSystem(createNioFileSystem(), createCryptor(), Mockito.mock(CryptoFileSystemDelegate.class), "aPassphrase");
+	}
+
+	private Cryptor createCryptor() {
+		Cryptor cryptor = new CryptorImpl(RANDOM_MOCK);
+		cryptor.randomizeMasterkey();
+		return cryptor;
 	}
 
 	private void add(String name, FileSystemFactory factory) {

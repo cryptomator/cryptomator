@@ -29,15 +29,19 @@ public class NoCryptor implements Cryptor {
 	}
 
 	@Override
-	public boolean readKeysFromMasterkeyFile(byte[] masterkeyFileContents, CharSequence passphrase) {
+	public void readKeysFromMasterkeyFile(byte[] masterkeyFileContents, CharSequence passphrase) {
 		// thanks, but I don't need a key, if I'm not encryption anything...
-		return true;
 	}
 
 	@Override
 	public byte[] writeKeysToMasterkeyFile(CharSequence passphrase) {
 		// ok, if you insist to get my non-existing key data... here you go:
 		return new byte[0];
+	}
+
+	@Override
+	public void destroy() {
+		// no-op
 	}
 
 }

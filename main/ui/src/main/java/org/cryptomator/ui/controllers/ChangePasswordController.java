@@ -1,17 +1,20 @@
 package org.cryptomator.ui.controllers;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.cryptomator.crypto.engine.InvalidPassphraseException;
 import org.cryptomator.ui.controls.SecPasswordField;
 import org.cryptomator.ui.model.Vault;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -96,80 +99,38 @@ public class ChangePasswordController extends AbstractFXMLViewController {
 
 	@FXML
 	private void didClickChangePasswordButton(ActionEvent event) {
-		throw new UnsupportedOperationException("TODO");
-		/*
-		 * downloadsPageLink.setVisible(false);
-		 * final Path masterKeyPath = vault.getPath().resolve(Vault.VAULT_MASTERKEY_FILE);
-		 * final Path masterKeyBackupPath = vault.getPath().resolve(Vault.VAULT_MASTERKEY_BACKUP_FILE);
-		 * 
-		 * // decrypt with old password:
-		 * final CharSequence oldPassword = oldPasswordField.getCharacters();
-		 * try (final InputStream masterKeyInputStream = Files.newInputStream(masterKeyPath, StandardOpenOption.READ)) {
-		 * vault.getCryptor().decryptMasterKey(masterKeyInputStream, oldPassword);
-		 * Files.copy(masterKeyPath, masterKeyBackupPath, StandardCopyOption.REPLACE_EXISTING);
-		 * } catch (IOException ex) {
-		 * messageText.setText(resourceBundle.getString("changePassword.errorMessage.decryptionFailed"));
-		 * LOG.error("Decryption failed for technical reasons.", ex);
-		 * newPasswordField.swipe();
-		 * retypePasswordField.swipe();
-		 * return;
-		 * } catch (WrongPasswordException e) {
-		 * messageText.setText(resourceBundle.getString("changePassword.errorMessage.wrongPassword"));
-		 * newPasswordField.swipe();
-		 * retypePasswordField.swipe();
-		 * Platform.runLater(oldPasswordField::requestFocus);
-		 * return;
-		 * } catch (UnsupportedKeyLengthException ex) {
-		 * messageText.setText(resourceBundle.getString("changePassword.errorMessage.unsupportedKeyLengthInstallJCE"));
-		 * LOG.warn("Unsupported Key-Length. Please install Oracle Java Cryptography Extension (JCE).", ex);
-		 * newPasswordField.swipe();
-		 * retypePasswordField.swipe();
-		 * return;
-		 * } catch (UnsupportedVaultException e) {
-		 * downloadsPageLink.setVisible(true);
-		 * if (e.isVaultOlderThanSoftware()) {
-		 * messageText.setText(resourceBundle.getString("changePassword.errorMessage.unsupportedVersion.vaultOlderThanSoftware") + " ");
-		 * } else if (e.isSoftwareOlderThanVault()) {
-		 * messageText.setText(resourceBundle.getString("changePassword.errorMessage.unsupportedVersion.softwareOlderThanVault") + " ");
-		 * }
-		 * newPasswordField.swipe();
-		 * retypePasswordField.swipe();
-		 * return;
-		 * } finally {
-		 * oldPasswordField.swipe();
-		 * }
-		 * 
-		 * // when we reach this line, decryption was successful.
-		 * 
-		 * // encrypt with new password:
-		 * final CharSequence newPassword = newPasswordField.getCharacters();
-		 * try (final OutputStream masterKeyOutputStream = Files.newOutputStream(masterKeyPath, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.SYNC)) {
-		 * vault.getCryptor().encryptMasterKey(masterKeyOutputStream, newPassword);
-		 * messageText.setText(resourceBundle.getString("changePassword.infoMessage.success"));
-		 * Platform.runLater(this::didChangePassword);
-		 * // At this point the backup is still using the old password.
-		 * // It will be changed as soon as the user unlocks the vault the next time.
-		 * // This way he can still restore the old password, if he doesn't remember the new one.
-		 * } catch (IOException ex) {
-		 * LOG.error("Re-encryption failed for technical reasons. Restoring Backup.", ex);
-		 * this.restoreBackupQuietly();
-		 * } finally {
-		 * newPasswordField.swipe();
-		 * retypePasswordField.swipe();
-		 * }
-		 */
-	}
-
-	private void restoreBackupQuietly() {
-		/*
-		 * final Path masterKeyPath = vault.getPath().resolve(Vault.VAULT_MASTERKEY_FILE);
-		 * final Path masterKeyBackupPath = vault.getPath().resolve(Vault.VAULT_MASTERKEY_BACKUP_FILE);
-		 * try {
-		 * Files.copy(masterKeyBackupPath, masterKeyPath, StandardCopyOption.REPLACE_EXISTING);
-		 * } catch (IOException ex) {
-		 * LOG.error("Restoring Backup failed.", ex);
-		 * }
-		 */
+		downloadsPageLink.setVisible(false);
+		try {
+			vault.changePassphrase(oldPasswordField.getCharacters(), newPasswordField.getCharacters());
+			messageText.setText(resourceBundle.getString("changePassword.infoMessage.success"));
+			Platform.runLater(this::didChangePassword);
+		} catch (InvalidPassphraseException e) {
+			messageText.setText(resourceBundle.getString("changePassword.errorMessage.wrongPassword"));
+			newPasswordField.swipe();
+			retypePasswordField.swipe();
+			Platform.runLater(oldPasswordField::requestFocus);
+			return;
+		} catch (IOException ex) {
+			messageText.setText(resourceBundle.getString("changePassword.errorMessage.decryptionFailed"));
+			LOG.error("Decryption failed for technical reasons.", ex);
+			newPasswordField.swipe();
+			retypePasswordField.swipe();
+			return;
+			// } catch (UnsupportedVaultException e) {
+			// downloadsPageLink.setVisible(true);
+			// if (e.isVaultOlderThanSoftware()) {
+			// messageText.setText(resourceBundle.getString("changePassword.errorMessage.unsupportedVersion.vaultOlderThanSoftware") + " ");
+			// } else if (e.isSoftwareOlderThanVault()) {
+			// messageText.setText(resourceBundle.getString("changePassword.errorMessage.unsupportedVersion.softwareOlderThanVault") + " ");
+			// }
+			// newPasswordField.swipe();
+			// retypePasswordField.swipe();
+			// return;
+		} finally {
+			oldPasswordField.swipe();
+			newPasswordField.swipe();
+			retypePasswordField.swipe();
+		}
 	}
 
 	private void didChangePassword() {

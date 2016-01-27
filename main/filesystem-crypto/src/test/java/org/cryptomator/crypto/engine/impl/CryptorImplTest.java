@@ -11,19 +11,28 @@ package org.cryptomator.crypto.engine.impl;
 import java.io.IOException;
 
 import org.cryptomator.crypto.engine.Cryptor;
+import org.cryptomator.crypto.engine.InvalidPassphraseException;
 import org.junit.Assert;
 import org.junit.Test;
 
 public class CryptorImplTest {
 
 	@Test
-	public void testMasterkeyDecryption() throws IOException {
+	public void testMasterkeyDecryptionWithCorrectPassphrase() throws IOException {
 		final String testMasterKey = "{\"version\":3,\"scryptSalt\":\"AAAAAAAAAAA=\",\"scryptCostParam\":2,\"scryptBlockSize\":8," //
 				+ "\"primaryMasterKey\":\"mM+qoQ+o0qvPTiDAZYt+flaC3WbpNAx1sTXaUzxwpy0M9Ctj6Tih/Q==\"," //
 				+ "\"hmacMasterKey\":\"mM+qoQ+o0qvPTiDAZYt+flaC3WbpNAx1sTXaUzxwpy0M9Ctj6Tih/Q==\"}";
 		final Cryptor cryptor = TestCryptorImplFactory.insecureCryptorImpl();
-		Assert.assertFalse(cryptor.readKeysFromMasterkeyFile(testMasterKey.getBytes(), "qwe"));
-		Assert.assertTrue(cryptor.readKeysFromMasterkeyFile(testMasterKey.getBytes(), "asd"));
+		cryptor.readKeysFromMasterkeyFile(testMasterKey.getBytes(), "asd");
+	}
+
+	@Test(expected = InvalidPassphraseException.class)
+	public void testMasterkeyDecryptionWithWrongPassphrase() throws IOException {
+		final String testMasterKey = "{\"version\":3,\"scryptSalt\":\"AAAAAAAAAAA=\",\"scryptCostParam\":2,\"scryptBlockSize\":8," //
+				+ "\"primaryMasterKey\":\"mM+qoQ+o0qvPTiDAZYt+flaC3WbpNAx1sTXaUzxwpy0M9Ctj6Tih/Q==\"," //
+				+ "\"hmacMasterKey\":\"mM+qoQ+o0qvPTiDAZYt+flaC3WbpNAx1sTXaUzxwpy0M9Ctj6Tih/Q==\"}";
+		final Cryptor cryptor = TestCryptorImplFactory.insecureCryptorImpl();
+		cryptor.readKeysFromMasterkeyFile(testMasterKey.getBytes(), "qwe");
 	}
 
 	@Test

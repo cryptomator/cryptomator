@@ -21,8 +21,11 @@ public interface Cryptor extends Destroyable {
 
 	void randomizeMasterkey();
 
-	boolean readKeysFromMasterkeyFile(byte[] masterkeyFileContents, CharSequence passphrase);
+	void readKeysFromMasterkeyFile(byte[] masterkeyFileContents, CharSequence passphrase) throws InvalidPassphraseException;
 
 	byte[] writeKeysToMasterkeyFile(CharSequence passphrase);
+
+	@Override
+	void destroy();
 
 }

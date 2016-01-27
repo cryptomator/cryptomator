@@ -16,6 +16,7 @@ import java.util.Set;
 import org.apache.commons.lang3.CharUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.cryptomator.common.Optionals;
+import org.cryptomator.crypto.engine.InvalidPassphraseException;
 import org.cryptomator.filesystem.FileSystem;
 import org.cryptomator.filesystem.crypto.CryptoFileSystemDelegate;
 import org.cryptomator.filesystem.crypto.CryptoFileSystemFactory;
@@ -90,7 +91,16 @@ public class Vault implements Serializable, CryptoFileSystemDelegate {
 			if (fs.children().count() > 0) {
 				throw new FileAlreadyExistsException(null, null, "Vault location not empty.");
 			}
-			cryptoFileSystemFactory.get(fs, passphrase, this);
+			cryptoFileSystemFactory.initializeNew(fs, passphrase);
+		} catch (UncheckedIOException e) {
+			throw new IOException(e);
+		}
+	}
+
+	public void changePassphrase(CharSequence oldPassphrase, CharSequence newPassphrase) throws IOException, InvalidPassphraseException {
+		try {
+			FileSystem fs = NioFileSystem.rootedAt(path);
+			cryptoFileSystemFactory.changePassphrase(fs, oldPassphrase, newPassphrase);
 		} catch (UncheckedIOException e) {
 			throw new IOException(e);
 		}
@@ -99,7 +109,7 @@ public class Vault implements Serializable, CryptoFileSystemDelegate {
 	public synchronized void activateFrontend(CharSequence passphrase) throws FrontendCreationFailedException {
 		try {
 			FileSystem fs = NioFileSystem.rootedAt(path);
-			FileSystem cryptoFs = cryptoFileSystemFactory.get(fs, passphrase, this);
+			FileSystem cryptoFs = cryptoFileSystemFactory.unlockExisting(fs, passphrase, this);
 			String contextPath = StringUtils.prependIfMissing(mountName, "/");
 			Frontend frontend = frontendFactory.get().create(cryptoFs, contextPath);
 			filesystemFrontend = closer.closeLater(frontend);
@@ -164,10 +174,6 @@ public class Vault implements Serializable, CryptoFileSystemDelegate {
 	public String getName() {
 		return StringUtils.removeEnd(path.getFileName().toString(), VAULT_FILE_EXTENSION);
 	}
-
-	// public Cryptor getCryptor() {
-	// return cryptor;
-	// }
 
 	public ObjectProperty<Boolean> unlockedProperty() {
 		return unlocked;

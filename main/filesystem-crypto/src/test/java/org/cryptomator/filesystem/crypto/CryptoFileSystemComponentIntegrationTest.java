@@ -1,6 +1,7 @@
 package org.cryptomator.filesystem.crypto;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
@@ -33,8 +34,33 @@ public class CryptoFileSystemComponentIntegrationTest {
 	public void setupFileSystems() {
 		cryptoDelegate = Mockito.mock(CryptoFileSystemDelegate.class);
 		ciphertextFs = new InMemoryFileSystem();
-		cleartextFs = cryptoFsComp.cryptoFileSystemFactory().get(ciphertextFs, "TopSecret", cryptoDelegate);
+		cryptoFsComp.cryptoFileSystemFactory().initializeNew(ciphertextFs, "TopSecret");
+		cleartextFs = cryptoFsComp.cryptoFileSystemFactory().unlockExisting(ciphertextFs, "TopSecret", cryptoDelegate);
 		cleartextFs.create();
+	}
+
+	@Test(timeout = 1000)
+	public void testVaultStructureInitializationAndBackupBehaviour() throws UncheckedIOException, IOException {
+		final FileSystem physicalFs = new InMemoryFileSystem();
+		final File masterkeyFile = physicalFs.file("masterkey.cryptomator");
+		final File masterkeyBkupFile = physicalFs.file("masterkey.cryptomator.bkup");
+		final Folder physicalDataRoot = physicalFs.folder("d");
+		Assert.assertFalse(masterkeyFile.exists());
+		Assert.assertFalse(masterkeyBkupFile.exists());
+		Assert.assertFalse(physicalDataRoot.exists());
+
+		cryptoFsComp.cryptoFileSystemFactory().initializeNew(physicalFs, "asd");
+		Assert.assertTrue(masterkeyFile.exists());
+		Assert.assertFalse(masterkeyBkupFile.exists());
+		Assert.assertFalse(physicalDataRoot.exists());
+
+		@SuppressWarnings("unused")
+		final FileSystem cryptoFs = cryptoFsComp.cryptoFileSystemFactory().unlockExisting(physicalFs, "asd", cryptoDelegate);
+		Assert.assertTrue(masterkeyBkupFile.exists());
+		Assert.assertTrue(physicalDataRoot.exists());
+		Assert.assertEquals(3, physicalFs.children().count()); // d + masterkey.cryptomator + masterkey.cryptomator.bkup
+		Assert.assertEquals(1, physicalDataRoot.files().count()); // ROOT file
+		Assert.assertEquals(1, physicalDataRoot.folders().count()); // ROOT directory
 	}
 
 	@Test
