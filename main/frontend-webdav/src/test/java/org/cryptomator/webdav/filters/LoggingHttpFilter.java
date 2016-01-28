@@ -109,8 +109,7 @@ public class LoggingHttpFilter implements HttpFilter {
 		LOG.error(
 				format("## Request ##\n" + //
 						"%s %s %s\n" //
-						+ "%s\n" //
-						+ "%s\n\n", //
+						+ "%s\n", //
 				request.getMethod(), request.getRequestURI(), request.getProtocol(), //
 				headers(request)), //
 				throwable);
