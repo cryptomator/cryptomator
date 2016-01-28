@@ -174,4 +174,15 @@ public class DelegatingFolderTest {
 		Assert.assertSame(delegatingFolder.file("mockSubFile"), delegatingFolder.file("mockSubFile"));
 	}
 
+	@Test
+	public void testSetCreationTime() {
+		Folder mockFolder = Mockito.mock(Folder.class);
+		DelegatingFolder<?, ?> delegatingFolder = new TestDelegatingFolder(null, mockFolder);
+
+		Instant now = Instant.now();
+
+		delegatingFolder.setCreationTime(now);
+		Mockito.verify(mockFolder).setCreationTime(now);
+	}
+
 }
