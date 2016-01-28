@@ -55,7 +55,7 @@ class ShorteningFolder extends DelegatingFolder<ShorteningFolder, ShorteningFile
 		if (exists()) {
 			return;
 		}
-		parent().get().create();
+		parent().ifPresent(Folder::create);
 		if (shortener.isShortened(shortenedName())) {
 			shortener.saveMapping(name(), shortenedName());
 		}
