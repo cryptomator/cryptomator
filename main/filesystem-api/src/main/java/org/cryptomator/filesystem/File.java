@@ -77,7 +77,16 @@ public interface File extends Node, Comparable<File> {
 		Mover.move(this, destination);
 	}
 
+	/**
+	 * <p>
+	 * Deletes the file if it exists.
+	 * <p>
+	 * Does nothign if the file does not exist.
+	 */
 	default void delete() {
+		if (!exists()) {
+			return;
+		}
 		try (WritableFile writableFile = openWritable()) {
 			writableFile.delete();
 		}

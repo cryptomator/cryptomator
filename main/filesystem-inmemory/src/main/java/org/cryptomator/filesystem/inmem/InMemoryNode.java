@@ -46,6 +46,9 @@ class InMemoryNode implements Node {
 
 	@Override
 	public Instant lastModified() {
+		if (!exists()) {
+			throw new UncheckedIOException(new IOException("File does not exist"));
+		}
 		return lastModified;
 	}
 

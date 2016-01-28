@@ -18,6 +18,7 @@ import org.cryptomator.filesystem.crypto.CryptoFileSystemDelegate;
 import org.cryptomator.filesystem.inmem.InMemoryFileSystem;
 import org.cryptomator.filesystem.invariants.FileSystemFactories.FileSystemFactory;
 import org.cryptomator.filesystem.nio.NioFileSystem;
+import org.cryptomator.filesystem.shortening.ShorteningFileSystem;
 import org.mockito.Mockito;
 
 class FileSystemFactories implements Iterable<FileSystemFactory> {
@@ -36,6 +37,8 @@ class FileSystemFactories implements Iterable<FileSystemFactory> {
 		add("InMemoryFileSystem", this::createInMemoryFileSystem);
 		add("CryptoFileSystem(NioFileSystem)", this::createCryptoFileSystemNio);
 		add("CryptoFileSystem(InMemoryFileSystem)", this::createCryptoFileSystemInMemory);
+		add("ShorteningFileSystem(NioFileSystem)", this::createShorteningFileSystemNio);
+		add("ShorteningFileSystem(InMemoryFileSystem)", this::createShorteningFileSystemInMemory);
 	}
 
 	private FileSystem createNioFileSystem() {
@@ -56,6 +59,16 @@ class FileSystemFactories implements Iterable<FileSystemFactory> {
 
 	private FileSystem createCryptoFileSystemNio() {
 		return new CryptoFileSystem(createNioFileSystem(), createCryptor(), Mockito.mock(CryptoFileSystemDelegate.class), "aPassphrase");
+	}
+
+	private FileSystem createShorteningFileSystemNio() {
+		FileSystem delegate = createNioFileSystem();
+		return new ShorteningFileSystem(delegate.folder("d"), delegate.folder("m"), 3);
+	}
+
+	private FileSystem createShorteningFileSystemInMemory() {
+		FileSystem delegate = createInMemoryFileSystem();
+		return new ShorteningFileSystem(delegate.folder("d"), delegate.folder("m"), 3);
 	}
 
 	private Cryptor createCryptor() {

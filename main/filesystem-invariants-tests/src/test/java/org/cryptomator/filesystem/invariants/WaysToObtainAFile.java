@@ -16,19 +16,60 @@ class WaysToObtainAFile implements Iterable<WayToObtainAFile> {
 
 	public WaysToObtainAFile() {
 		addNonExisting("invoke file", this::invokeFile);
+		addNonExisting("delete file created by writing to it", this::deleteFileCreatedByWritingToIt);
 
 		addExisting("create file by writing to it", this::createFileByWritingToIt);
+		addExisting("create file by copying", this::createFileByCopying);
+		addExisting("create file by moving", this::createFileByMoving);
 	}
 
 	private File invokeFile(Folder parent, String name, byte[] content) {
 		return parent.file(name);
 	}
 
-	private File createFileByWritingToIt(Folder parent, String name, byte[] content) {
+	private File deleteFileCreatedByWritingToIt(Folder parent, String name, byte[] content) {
+		boolean deleteParent = !parent.exists();
+		parent.create();
 		File result = parent.file(name);
 		try (WritableFile writable = result.openWritable()) {
 			writable.write(ByteBuffer.wrap(content));
 		}
+		result.delete();
+		if (deleteParent) {
+			parent.delete();
+		}
+		return result;
+	}
+
+	private File createFileByWritingToIt(Folder parent, String name, byte[] content) {
+		parent.create();
+		File result = parent.file(name);
+		try (WritableFile writable = result.openWritable()) {
+			writable.write(ByteBuffer.wrap(content));
+		}
+		return result;
+	}
+
+	private File createFileByCopying(Folder parent, String name, byte[] content) {
+		parent.create();
+		File tmp = parent.file(name + ".createFileByCopying.tmp");
+		try (WritableFile writable = tmp.openWritable()) {
+			writable.write(ByteBuffer.wrap(content));
+		}
+		File result = parent.file(name);
+		tmp.copyTo(result);
+		tmp.delete();
+		return result;
+	}
+
+	private File createFileByMoving(Folder parent, String name, byte[] content) {
+		parent.create();
+		File tmp = parent.file(name + ".createFileByCopying.tmp");
+		try (WritableFile writable = tmp.openWritable()) {
+			writable.write(ByteBuffer.wrap(content));
+		}
+		File result = parent.file(name);
+		tmp.moveTo(result);
 		return result;
 	}
 
