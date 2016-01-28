@@ -20,20 +20,12 @@ public class StatsFileSystem extends StatsFolder implements FileSystem {
 		this.written = written;
 	}
 
-	public long getBytesRead() {
-		return read.sum();
+	public long getThenResetBytesRead() {
+		return read.sumThenReset();
 	}
 
-	public void resetBytesRead() {
-		read.reset();
-	}
-
-	public long getBytesWritten() {
-		return written.sum();
-	}
-
-	public void resetBytesWritten() {
-		written.reset();
+	public long getThenResetBytesWritten() {
+		return written.sumThenReset();
 	}
 
 }

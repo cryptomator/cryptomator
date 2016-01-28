@@ -90,6 +90,11 @@
 				<artifactId>filesystem-crypto</artifactId>
 				<version>${project.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>org.cryptomator</groupId>
+				<artifactId>filesystem-stats</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 			
 			<dependency>
 				<groupId>org.cryptomator</groupId>

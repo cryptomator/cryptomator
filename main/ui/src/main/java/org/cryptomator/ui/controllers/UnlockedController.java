@@ -29,6 +29,7 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart.Data;
 import javafx.scene.chart.XYChart.Series;
 import javafx.scene.control.Label;
 import javafx.stage.Stage;
@@ -126,7 +127,7 @@ public class UnlockedController extends AbstractFXMLViewController {
 	// IO Graph
 	// ****************************************
 
-	private void startIoSampling(final Object sampler) {
+	private void startIoSampling() {
 		final Series<Number, Number> decryptedBytes = new Series<>();
 		decryptedBytes.setName("decrypted");
 		final Series<Number, Number> encryptedBytes = new Series<>();
@@ -136,7 +137,7 @@ public class UnlockedController extends AbstractFXMLViewController {
 		ioGraph.getData().add(encryptedBytes);
 
 		ioAnimation = new Timeline();
-		ioAnimation.getKeyFrames().add(new KeyFrame(Duration.seconds(IO_SAMPLING_INTERVAL), new IoSamplingAnimationHandler(sampler, decryptedBytes, encryptedBytes)));
+		ioAnimation.getKeyFrames().add(new KeyFrame(Duration.seconds(IO_SAMPLING_INTERVAL), new IoSamplingAnimationHandler(decryptedBytes, encryptedBytes)));
 		ioAnimation.setCycleCount(Animation.INDEFINITE);
 		ioAnimation.play();
 	}
@@ -153,45 +154,41 @@ public class UnlockedController extends AbstractFXMLViewController {
 		private static final double BYTES_TO_MEGABYTES_FACTOR = 1.0 / IO_SAMPLING_INTERVAL / 1024.0 / 1024.0;
 		private static final double SMOOTHING_FACTOR = 0.3;
 		private static final long EFFECTIVELY_ZERO = 100000; // 100kb
-		private final Object sampler;
 		private final Series<Number, Number> decryptedBytes;
 		private final Series<Number, Number> encryptedBytes;
-		private final int step = 0;
-		private final long oldDecBytes = 0;
-		private final long oldEncBytes = 0;
+		private int step = 0;
+		private long oldDecBytes = 0;
+		private long oldEncBytes = 0;
 
-		public IoSamplingAnimationHandler(Object sampler, Series<Number, Number> decryptedBytes, Series<Number, Number> encryptedBytes) {
-			this.sampler = sampler;
+		public IoSamplingAnimationHandler(Series<Number, Number> decryptedBytes, Series<Number, Number> encryptedBytes) {
 			this.decryptedBytes = decryptedBytes;
 			this.encryptedBytes = encryptedBytes;
 		}
 
 		@Override
 		public void handle(ActionEvent event) {
-			/*
-			 * step++;
-			 * 
-			 * final long decBytes = sampler.pollDecryptedBytes(true);
-			 * final double smoothedDecBytes = oldDecBytes + SMOOTHING_FACTOR * (decBytes - oldDecBytes);
-			 * final double smoothedDecMb = smoothedDecBytes * BYTES_TO_MEGABYTES_FACTOR;
-			 * oldDecBytes = smoothedDecBytes > EFFECTIVELY_ZERO ? (long) smoothedDecBytes : 0l;
-			 * decryptedBytes.getData().add(new Data<Number, Number>(step, smoothedDecMb));
-			 * if (decryptedBytes.getData().size() > IO_SAMPLING_STEPS) {
-			 * decryptedBytes.getData().remove(0);
-			 * }
-			 * 
-			 * final long encBytes = sampler.pollEncryptedBytes(true);
-			 * final double smoothedEncBytes = oldEncBytes + SMOOTHING_FACTOR * (encBytes - oldEncBytes);
-			 * final double smoothedEncMb = smoothedEncBytes * BYTES_TO_MEGABYTES_FACTOR;
-			 * oldEncBytes = smoothedEncBytes > EFFECTIVELY_ZERO ? (long) smoothedEncBytes : 0l;
-			 * encryptedBytes.getData().add(new Data<Number, Number>(step, smoothedEncMb));
-			 * if (encryptedBytes.getData().size() > IO_SAMPLING_STEPS) {
-			 * encryptedBytes.getData().remove(0);
-			 * }
-			 * 
-			 * xAxis.setLowerBound(step - IO_SAMPLING_STEPS);
-			 * xAxis.setUpperBound(step);
-			 */
+			step++;
+
+			final long decBytes = vault.pollBytesRead();
+			final double smoothedDecBytes = oldDecBytes + SMOOTHING_FACTOR * (decBytes - oldDecBytes);
+			final double smoothedDecMb = smoothedDecBytes * BYTES_TO_MEGABYTES_FACTOR;
+			oldDecBytes = smoothedDecBytes > EFFECTIVELY_ZERO ? (long) smoothedDecBytes : 0l;
+			decryptedBytes.getData().add(new Data<Number, Number>(step, smoothedDecMb));
+			if (decryptedBytes.getData().size() > IO_SAMPLING_STEPS) {
+				decryptedBytes.getData().remove(0);
+			}
+
+			final long encBytes = vault.pollBytesWritten();
+			final double smoothedEncBytes = oldEncBytes + SMOOTHING_FACTOR * (encBytes - oldEncBytes);
+			final double smoothedEncMb = smoothedEncBytes * BYTES_TO_MEGABYTES_FACTOR;
+			oldEncBytes = smoothedEncBytes > EFFECTIVELY_ZERO ? (long) smoothedEncBytes : 0l;
+			encryptedBytes.getData().add(new Data<Number, Number>(step, smoothedEncMb));
+			if (encryptedBytes.getData().size() > IO_SAMPLING_STEPS) {
+				encryptedBytes.getData().remove(0);
+			}
+
+			xAxis.setLowerBound(step - IO_SAMPLING_STEPS);
+			xAxis.setUpperBound(step);
 		}
 	}
 
@@ -214,15 +211,9 @@ public class UnlockedController extends AbstractFXMLViewController {
 			}
 		});
 
-		// sample crypto-throughput:
-		/*
-		 * stopIoSampling();
-		 * if (vault.getCryptor() instanceof CryptorIOSampling) {
-		 * startIoSampling((CryptorIOSampling) vault.getCryptor());
-		 * } else {
-		 * ioGraph.setVisible(false);
-		 * }
-		 */
+		// (re)start throughput statistics:
+		stopIoSampling();
+		startIoSampling();
 	}
 
 	public LockListener getListener() {

@@ -21,6 +21,7 @@ import org.cryptomator.filesystem.FileSystem;
 import org.cryptomator.filesystem.crypto.CryptoFileSystemDelegate;
 import org.cryptomator.filesystem.crypto.CryptoFileSystemFactory;
 import org.cryptomator.filesystem.nio.NioFileSystem;
+import org.cryptomator.filesystem.stats.StatsFileSystem;
 import org.cryptomator.frontend.CommandFailedException;
 import org.cryptomator.frontend.Frontend;
 import org.cryptomator.frontend.Frontend.MountParam;
@@ -42,7 +43,6 @@ public class Vault implements Serializable, CryptoFileSystemDelegate {
 
 	private static final long serialVersionUID = 3754487289683599469L;
 
-	@Deprecated
 	public static final String VAULT_FILE_EXTENSION = ".cryptomator";
 
 	@Deprecated
@@ -58,6 +58,7 @@ public class Vault implements Serializable, CryptoFileSystemDelegate {
 
 	private String mountName;
 	private Character winDriveLetter;
+	private Optional<StatsFileSystem> statsFileSystem = Optional.empty();
 	private DeferredClosable<Frontend> filesystemFrontend = DeferredClosable.empty();
 
 	/**
@@ -76,14 +77,10 @@ public class Vault implements Serializable, CryptoFileSystemDelegate {
 		}
 	}
 
-	public boolean isValidVaultDirectory() {
-		return Files.isDirectory(path) && path.getFileName().toString().endsWith(VAULT_FILE_EXTENSION);
-	}
-
-	public boolean containsMasterKey() throws IOException {
-		final Path masterKeyPath = path.resolve(VAULT_MASTERKEY_FILE);
-		return Files.isRegularFile(masterKeyPath);
-	}
+	/*
+	 * ******************************************************************************
+	 * Commands
+	 ********************************************************************************/
 
 	public void create(CharSequence passphrase) throws IOException {
 		try {
@@ -110,10 +107,12 @@ public class Vault implements Serializable, CryptoFileSystemDelegate {
 		try {
 			FileSystem fs = NioFileSystem.rootedAt(path);
 			FileSystem cryptoFs = cryptoFileSystemFactory.unlockExisting(fs, passphrase, this);
+			StatsFileSystem statsFs = new StatsFileSystem(cryptoFs);
+			statsFileSystem = Optional.of(statsFs);
 			String contextPath = StringUtils.prependIfMissing(mountName, "/");
-			Frontend frontend = frontendFactory.get().create(cryptoFs, contextPath);
+			Frontend frontend = frontendFactory.get().create(statsFs, contextPath);
 			filesystemFrontend = closer.closeLater(frontend);
-			setUnlocked(true);
+			unlocked.set(true);
 		} catch (UncheckedIOException e) {
 			throw new FrontendCreationFailedException(e);
 		}
@@ -121,7 +120,8 @@ public class Vault implements Serializable, CryptoFileSystemDelegate {
 
 	public synchronized void deactivateFrontend() {
 		filesystemFrontend.close();
-		setUnlocked(false);
+		statsFileSystem = Optional.empty();
+		unlocked.set(false);
 	}
 
 	private Map<MountParam, Optional<String>> getMountParams() {
@@ -150,7 +150,10 @@ public class Vault implements Serializable, CryptoFileSystemDelegate {
 		Optionals.ifPresent(filesystemFrontend.get(), Frontend::unmount);
 	}
 
-	/* Delegate Methods */
+	/*
+	 * ******************************************************************************
+	 * Delegate methods
+	 ********************************************************************************/
 
 	@Override
 	public void authenticationFailed(String cleartextPath) {
@@ -162,7 +165,10 @@ public class Vault implements Serializable, CryptoFileSystemDelegate {
 		return namesOfResourcesWithInvalidMac.contains(cleartextPath);
 	}
 
-	/* Getter/Setter */
+	/*
+	 * ******************************************************************************
+	 * Getter/Setter
+	 ********************************************************************************/
 
 	public Path getPath() {
 		return path;
@@ -175,6 +181,15 @@ public class Vault implements Serializable, CryptoFileSystemDelegate {
 		return StringUtils.removeEnd(path.getFileName().toString(), VAULT_FILE_EXTENSION);
 	}
 
+	public boolean isValidVaultDirectory() {
+		return Files.isDirectory(path) && path.getFileName().toString().endsWith(VAULT_FILE_EXTENSION);
+	}
+
+	public boolean containsMasterKey() throws IOException {
+		final Path masterKeyPath = path.resolve(VAULT_MASTERKEY_FILE);
+		return Files.isRegularFile(masterKeyPath);
+	}
+
 	public ObjectProperty<Boolean> unlockedProperty() {
 		return unlocked;
 	}
@@ -183,16 +198,20 @@ public class Vault implements Serializable, CryptoFileSystemDelegate {
 		return unlocked.get();
 	}
 
-	public void setUnlocked(boolean unlocked) {
-		this.unlocked.set(unlocked);
-	}
-
 	public ObservableList<String> getNamesOfResourcesWithInvalidMac() {
 		return namesOfResourcesWithInvalidMac;
 	}
 
 	public Set<String> getWhitelistedResourcesWithInvalidMac() {
 		return whitelistedResourcesWithInvalidMac;
+	}
+
+	public long pollBytesRead() {
+		return statsFileSystem.map(StatsFileSystem::getThenResetBytesRead).orElse(0l);
+	}
+
+	public long pollBytesWritten() {
+		return statsFileSystem.map(StatsFileSystem::getThenResetBytesWritten).orElse(0l);
 	}
 
 	/**
@@ -247,7 +266,10 @@ public class Vault implements Serializable, CryptoFileSystemDelegate {
 		this.winDriveLetter = winDriveLetter;
 	}
 
-	/* hashcode/equals */
+	/*
+	 * ******************************************************************************
+	 * Hashcode / Equals
+	 ********************************************************************************/
 
 	@Override
 	public int hashCode() {

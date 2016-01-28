@@ -36,6 +36,10 @@
 		</dependency>
 		<dependency>
 			<groupId>org.cryptomator</groupId>
+			<artifactId>filesystem-stats</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.cryptomator</groupId>
 			<artifactId>frontend-api</artifactId>
 		</dependency>
 		<dependency>
