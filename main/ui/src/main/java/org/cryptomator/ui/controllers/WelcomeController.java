@@ -14,6 +14,7 @@ import java.net.URL;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
 
@@ -26,6 +27,7 @@ import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.cookie.CookiePolicy;
 import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.commons.httpclient.params.HttpClientParams;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.ui.settings.Settings;
@@ -138,6 +140,7 @@ public class WelcomeController extends AbstractFXMLViewController {
 		});
 		final HttpClient client = new HttpClient();
 		final HttpMethod method = new GetMethod("https://cryptomator.org/downloads/latestVersion.json");
+		client.getParams().setParameter(HttpClientParams.USER_AGENT, "Cryptomator VersionChecker/" + applicationVersion().orElse("SNAPSHOT"));
 		client.getParams().setCookiePolicy(CookiePolicy.IGNORE_COOKIES);
 		client.getParams().setConnectionManagerTimeout(5000);
 		try {
@@ -161,6 +164,10 @@ public class WelcomeController extends AbstractFXMLViewController {
 		}
 	}
 
+	private Optional<String> applicationVersion() {
+		return Optional.ofNullable(getClass().getPackage().getImplementationVersion());
+	}
+
 	private void compareVersions(final Map<String, String> latestVersions) {
 		final String latestVersion;
 		if (SystemUtils.IS_OS_MAC_OSX) {
@@ -173,7 +180,7 @@ public class WelcomeController extends AbstractFXMLViewController {
 			// no version check possible on unsupported OS
 			return;
 		}
-		final String currentVersion = WelcomeController.class.getPackage().getImplementationVersion();
+		final String currentVersion = applicationVersion().orElse(null);
 		LOG.debug("Current version: {}, lastest version: {}", currentVersion, latestVersion);
 		if (currentVersion != null && semVerComparator.compare(currentVersion, latestVersion) < 0) {
 			final String msg = String.format(resourceBundle.getString("welcome.newVersionMessage"), latestVersion, currentVersion);

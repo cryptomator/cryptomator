@@ -8,6 +8,7 @@
  *******************************************************************************/
 package org.cryptomator.filesystem.inmem;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.time.Instant;
@@ -47,7 +48,7 @@ class InMemoryNode implements Node {
 	@Override
 	public Instant lastModified() {
 		if (!exists()) {
-			throw new UncheckedIOException(new IOException("File does not exist"));
+			throw new UncheckedIOException(new FileNotFoundException("File does not exist"));
 		}
 		return lastModified;
 	}
