@@ -11,7 +11,6 @@ package org.cryptomator.webdav.jackrabbitservlet;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
-import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.time.Instant;
@@ -37,9 +36,9 @@ import org.cryptomator.filesystem.WritableFile;
 import org.cryptomator.filesystem.jackrabbit.FileLocator;
 import org.cryptomator.filesystem.jackrabbit.FolderLocator;
 
-class DavFolder extends DavNode<FolderLocator> {
+import com.google.common.io.ByteStreams;
 
-	private static final int BUFFER_SIZE = 32 * 1024;
+class DavFolder extends DavNode<FolderLocator> {
 
 	public DavFolder(FilesystemResourceFactory factory, LockManager lockManager, DavSession session, FolderLocator folder) {
 		super(factory, lockManager, session, folder);
@@ -74,12 +73,7 @@ class DavFolder extends DavNode<FolderLocator> {
 
 	private void addMemberFile(DavFile memberFile, InputStream inputStream) {
 		try (ReadableByteChannel src = Channels.newChannel(inputStream); WritableFile dst = node.file(memberFile.getDisplayName()).openWritable()) {
-			ByteBuffer buf = ByteBuffer.allocate(BUFFER_SIZE);
-			while (src.read(buf) != -1) {
-				buf.flip();
-				dst.write(buf);
-				buf.clear();
-			}
+			ByteStreams.copy(src, dst);
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
 		}

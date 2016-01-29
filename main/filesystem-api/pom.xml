@@ -20,6 +20,12 @@
 			<artifactId>commons</artifactId>
 		</dependency>
 		
+		<!-- Guava -->
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+		</dependency>
+
 		<!-- apache commons -->
 		<dependency>
 			<groupId>commons-io</groupId>

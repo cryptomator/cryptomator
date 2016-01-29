@@ -135,7 +135,6 @@ abstract class DavNode<T extends FileSystemResourceLocator> implements DavResour
 		if (node.exists()) {
 			Temporal lastModifiedDate = OffsetDateTime.ofInstant(node.lastModified(), ZoneOffset.UTC);
 			String lastModifiedDateStr = DateTimeFormatter.RFC_1123_DATE_TIME.format(lastModifiedDate);
-			System.err.println(lastModifiedDateStr);
 			DavProperty<String> lastModifiedDateProp = new DefaultDavProperty<>(DavPropertyName.GETLASTMODIFIED, lastModifiedDateStr);
 			properties.add(lastModifiedDateProp);
 		}

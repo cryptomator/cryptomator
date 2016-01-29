@@ -9,7 +9,6 @@
 package org.cryptomator.webdav.jackrabbitservlet;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.WritableByteChannel;
 import java.time.Instant;
@@ -28,9 +27,9 @@ import org.cryptomator.filesystem.ReadableFile;
 import org.cryptomator.filesystem.WritableFile;
 import org.cryptomator.filesystem.jackrabbit.FileLocator;
 
-class DavFile extends DavNode<FileLocator> {
+import com.google.common.io.ByteStreams;
 
-	private static final int BUFFER_SIZE = 32 * 1024;
+class DavFile extends DavNode<FileLocator> {
 
 	public DavFile(FilesystemResourceFactory factory, LockManager lockManager, DavSession session, FileLocator node) {
 		super(factory, lockManager, session, node);
@@ -49,12 +48,7 @@ class DavFile extends DavNode<FileLocator> {
 		}
 		try (ReadableFile src = node.openReadable(); WritableByteChannel dst = Channels.newChannel(outputContext.getOutputStream())) {
 			outputContext.setContentLength(src.size());
-			ByteBuffer buf = ByteBuffer.allocate(BUFFER_SIZE);
-			do {
-				buf.clear();
-				src.read(buf);
-				buf.flip();
-			} while (dst.write(buf) > 0);
+			ByteStreams.copy(src, dst);
 		}
 	}
 

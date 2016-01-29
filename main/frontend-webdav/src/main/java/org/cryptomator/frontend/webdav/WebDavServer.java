@@ -108,6 +108,7 @@ public class WebDavServer implements FrontendFactory {
 			throw new IllegalStateException(e);
 		}
 		final ServletContextHandler handler = addServlet(root, uri);
+		LOG.info("Servlet available under " + uri);
 		return new WebDavFrontend(webdavMounterProvider, handler, uri);
 	}
 

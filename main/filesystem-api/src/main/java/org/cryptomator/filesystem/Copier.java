@@ -8,13 +8,12 @@
  *******************************************************************************/
 package org.cryptomator.filesystem;
 
-import static org.cryptomator.filesystem.File.EOF;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 
-import java.nio.ByteBuffer;
+import com.google.common.io.ByteStreams;
 
 class Copier {
-
-	private static final int COPY_BUFFER_SIZE = 128 * 1024;
 
 	public static void copy(Folder source, Folder destination) {
 		assertFoldersAreNotNested(source, destination);
@@ -37,13 +36,10 @@ class Copier {
 		try (OpenFiles openFiles = DeadlockSafeFileOpener.withReadable(source).andWritable(destination).open()) {
 			ReadableFile readable = openFiles.readable(source);
 			WritableFile writable = openFiles.writable(destination);
-			ByteBuffer buffer = ByteBuffer.allocate(COPY_BUFFER_SIZE);
 			writable.truncate();
-			while (readable.read(buffer) != EOF) {
-				buffer.flip();
-				writable.write(buffer);
-				buffer.clear();
-			}
+			ByteStreams.copy(readable, writable);
+		} catch (IOException e) {
+			throw new UncheckedIOException(e);
 		}
 	}
 
