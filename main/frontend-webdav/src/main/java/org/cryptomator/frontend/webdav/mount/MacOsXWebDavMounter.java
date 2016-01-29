@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 Sebastian Stenzel, Markus Kreusch
+ * Copyright (c) 2014, 2016 Sebastian Stenzel, Markus Kreusch
  * This file is licensed under the terms of the MIT license.
  * See the LICENSE.txt file for more info.
  * 
