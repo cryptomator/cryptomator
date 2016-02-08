@@ -23,6 +23,6 @@ public class BlockAlignedFileSystemFactory {
 	}
 
 	public FileSystem get(Folder root) {
-		return new BlockAlignedFileSystem(root, FileContentCryptorImpl.CHUNK_SIZE);
+		return new BlockAlignedFileSystem(root, FileContentCryptorImpl.PAYLOAD_SIZE);
 	}
 }

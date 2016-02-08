@@ -8,7 +8,7 @@
  *******************************************************************************/
 package org.cryptomator.crypto.engine.impl;
 
-import static org.cryptomator.crypto.engine.impl.FileContentCryptorImpl.CHUNK_SIZE;
+import static org.cryptomator.crypto.engine.impl.FileContentCryptorImpl.PAYLOAD_SIZE;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -32,17 +32,18 @@ import org.cryptomator.io.ByteBuffers;
 
 class FileContentEncryptorImpl implements FileContentEncryptor {
 
-	private static final int AES_BLOCK_LENGTH_IN_BYTES = 16;
+	private static final int NONCE_SIZE = 16;
 	private static final String HMAC_SHA256 = "HmacSHA256";
 	private static final int NUM_THREADS = Runtime.getRuntime().availableProcessors();
 	private static final int READ_AHEAD = 2;
 
 	private final FifoParallelDataProcessor<ByteBuffer> dataProcessor = new FifoParallelDataProcessor<>(NUM_THREADS, NUM_THREADS + READ_AHEAD);
 	private final ThreadLocalMac hmacSha256;
-	private final FileHeader header;
 	private final SecretKey headerKey;
+	private final FileHeader header;
+	private final SecureRandom randomSource;
 	private final LongAdder cleartextBytesEncrypted = new LongAdder();
-	private ByteBuffer cleartextBuffer = ByteBuffer.allocate(CHUNK_SIZE);
+	private ByteBuffer cleartextBuffer = ByteBuffer.allocate(PAYLOAD_SIZE);
 	private long chunkNumber = 0;
 
 	public FileContentEncryptorImpl(SecretKey headerKey, SecretKey macKey, SecureRandom randomSource, long firstCleartextByte) {
@@ -52,6 +53,7 @@ class FileContentEncryptorImpl implements FileContentEncryptor {
 		this.hmacSha256 = new ThreadLocalMac(macKey, HMAC_SHA256);
 		this.headerKey = headerKey;
 		this.header = new FileHeader(randomSource);
+		this.randomSource = randomSource;
 	}
 
 	@Override
@@ -89,7 +91,7 @@ class FileContentEncryptorImpl implements FileContentEncryptor {
 	private void submitCleartextBufferIfFull() throws InterruptedException {
 		if (!cleartextBuffer.hasRemaining()) {
 			submitCleartextBuffer();
-			cleartextBuffer = ByteBuffer.allocate(CHUNK_SIZE);
+			cleartextBuffer = ByteBuffer.allocate(PAYLOAD_SIZE);
 		}
 	}
 
@@ -126,30 +128,36 @@ class FileContentEncryptorImpl implements FileContentEncryptor {
 	private class EncryptionJob implements Callable<ByteBuffer> {
 
 		private final ByteBuffer cleartextChunk;
-		private final byte[] nonceAndCtr;
 
 		public EncryptionJob(ByteBuffer cleartextChunk, long chunkNumber) {
 			this.cleartextChunk = cleartextChunk;
-
-			final ByteBuffer nonceAndCounterBuf = ByteBuffer.allocate(AES_BLOCK_LENGTH_IN_BYTES);
-			nonceAndCounterBuf.put(header.getNonce());
-			nonceAndCounterBuf.putLong(chunkNumber * CHUNK_SIZE / AES_BLOCK_LENGTH_IN_BYTES);
-			this.nonceAndCtr = nonceAndCounterBuf.array();
 		}
 
 		@Override
 		public ByteBuffer call() {
 			try {
-				Cipher cipher = ThreadLocalAesCtrCipher.get();
-				cipher.init(Cipher.ENCRYPT_MODE, header.getPayload().getContentKey(), new IvParameterSpec(nonceAndCtr));
-				Mac mac = hmacSha256.get();
-				ByteBuffer ciphertextChunk = ByteBuffer.allocate(cipher.getOutputSize(cleartextChunk.remaining()) + mac.getMacLength());
+				final Cipher cipher = ThreadLocalAesCtrCipher.get();
+				final Mac mac = hmacSha256.get();
+				final ByteBuffer ciphertextChunk = ByteBuffer.allocate(NONCE_SIZE + cleartextChunk.remaining() + mac.getMacLength());
+
+				// nonce
+				byte[] nonce = new byte[NONCE_SIZE];
+				randomSource.nextBytes(nonce);
+				ciphertextChunk.put(nonce);
+
+				// payload:
+				cipher.init(Cipher.ENCRYPT_MODE, header.getPayload().getContentKey(), new IvParameterSpec(nonce));
+				assert cipher.getOutputSize(cleartextChunk.remaining()) == cleartextChunk.remaining() : "input length should be equal to output length in CTR mode.";
 				cipher.update(cleartextChunk, ciphertextChunk);
+
+				// mac:
 				ByteBuffer ciphertextSoFar = ciphertextChunk.asReadOnlyBuffer();
 				ciphertextSoFar.flip();
 				mac.update(ciphertextSoFar);
 				byte[] authenticationCode = mac.doFinal();
 				ciphertextChunk.put(authenticationCode);
+
+				// flip and return:
 				ciphertextChunk.flip();
 				return ciphertextChunk;
 			} catch (InvalidKeyException e) {

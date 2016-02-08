@@ -48,16 +48,17 @@ public class FileContentEncryptorImplTest {
 			encryptor.append(ByteBuffer.wrap("world".getBytes()));
 			encryptor.append(FileContentCryptor.EOF);
 
-			ByteBuffer result = ByteBuffer.allocate(43); // 11 bytes ciphertext + 32 bytes mac.
+			ByteBuffer result = ByteBuffer.allocate(59); // 16 bytes iv + 11 bytes ciphertext + 32 bytes mac.
 			ByteBuffer buf;
 			while ((buf = encryptor.ciphertext()) != FileContentCryptor.EOF) {
 				ByteBuffers.copy(buf, result);
 			}
 
 			// Ciphertext: echo -n "hello world" | openssl enc -aes-256-ctr -K 0000000000000000000000000000000000000000000000000000000000000000 -iv 00000000000000000000000000000000 | base64
-			// MAC: echo -n "tPCsFM1g/ubfJMY=" | base64 --decode | openssl dgst -sha256 -mac HMAC -macopt hexkey:0000000000000000000000000000000000000000000000000000000000000000 -binary | base64
-			// echo -n "tPCsFM1g/ubfJMY=" | base64 --decode > A; echo -n "vgKHHT4f1jx31zBUSXSM+j5C7kYo0iCF78Z+yFMFcx0=" | base64 --decode >> A; cat A | base64
-			Assert.assertArrayEquals(Base64.decode("tPCsFM1g/ubfJMa+AocdPh/WPHfXMFRJdIz6PkLuRijSIIXvxn7IUwVzHQ=="), result.array());
+			// MAC: echo -n "AAAAAAAAAAAAAAAAAAAAAA==" | base64 --decode > A; echo -n "tPCsFM1g/ubfJMY=" | base64 --decode >> A; cat A | openssl dgst -sha256 -mac HMAC -macopt
+			// hexkey:0000000000000000000000000000000000000000000000000000000000000000 -binary | base64
+			// echo -n "+8Yv6jcvXJj89WiHAxAtgbZR7mpsskLFfGCVDm6NO8U=" | base64 --decode >> A; cat A | base64
+			Assert.assertArrayEquals(Base64.decode("AAAAAAAAAAAAAAAAAAAAALTwrBTNYP7m3yTG+8Yv6jcvXJj89WiHAxAtgbZR7mpsskLFfGCVDm6NO8U="), result.array());
 		}
 	}
 

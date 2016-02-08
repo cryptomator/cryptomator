@@ -8,8 +8,8 @@
  *******************************************************************************/
 package org.cryptomator.crypto.engine.impl;
 
-import static org.cryptomator.crypto.engine.impl.FileContentCryptorImpl.CHUNK_SIZE;
 import static org.cryptomator.crypto.engine.impl.FileContentCryptorImpl.MAC_SIZE;
+import static org.cryptomator.crypto.engine.impl.FileContentCryptorImpl.PAYLOAD_SIZE;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -33,7 +33,7 @@ import org.cryptomator.io.ByteBuffers;
 
 class FileContentDecryptorImpl implements FileContentDecryptor {
 
-	private static final int AES_BLOCK_LENGTH_IN_BYTES = 16;
+	private static final int NONCE_SIZE = 16;
 	private static final String HMAC_SHA256 = "HmacSHA256";
 	private static final int NUM_THREADS = Runtime.getRuntime().availableProcessors();
 	private static final int READ_AHEAD = 2;
@@ -42,7 +42,7 @@ class FileContentDecryptorImpl implements FileContentDecryptor {
 	private final ThreadLocal<Mac> hmacSha256;
 	private final FileHeader header;
 	private final boolean authenticate;
-	private ByteBuffer ciphertextBuffer = ByteBuffer.allocate(CHUNK_SIZE + MAC_SIZE);
+	private ByteBuffer ciphertextBuffer = ByteBuffer.allocate(NONCE_SIZE + PAYLOAD_SIZE + MAC_SIZE);
 	private long chunkNumber = 0;
 
 	public FileContentDecryptorImpl(SecretKey headerKey, SecretKey macKey, ByteBuffer header, long firstCiphertextByte, boolean authenticate) {
@@ -50,7 +50,7 @@ class FileContentDecryptorImpl implements FileContentDecryptor {
 		this.hmacSha256 = hmacSha256;
 		this.header = FileHeader.decrypt(headerKey, hmacSha256, header);
 		this.authenticate = authenticate;
-		this.chunkNumber = firstCiphertextByte / CHUNK_SIZE; // floor() by int-truncation
+		this.chunkNumber = firstCiphertextByte / PAYLOAD_SIZE; // floor() by int-truncation
 	}
 
 	@Override
@@ -81,7 +81,7 @@ class FileContentDecryptorImpl implements FileContentDecryptor {
 	private void submitCiphertextBufferIfFull() throws InterruptedException {
 		if (!ciphertextBuffer.hasRemaining()) {
 			submitCiphertextBuffer();
-			ciphertextBuffer = ByteBuffer.allocate(CHUNK_SIZE + MAC_SIZE);
+			ciphertextBuffer = ByteBuffer.allocate(NONCE_SIZE + PAYLOAD_SIZE + MAC_SIZE);
 		}
 	}
 
@@ -119,25 +119,24 @@ class FileContentDecryptorImpl implements FileContentDecryptor {
 
 	private class DecryptionJob implements Callable<ByteBuffer> {
 
+		private final byte[] nonce;
 		private final ByteBuffer ciphertextChunk;
 		private final byte[] expectedMac;
-		private final byte[] nonceAndCtr;
 
 		public DecryptionJob(ByteBuffer ciphertextChunk, long chunkNumber) {
-			if (ciphertextChunk.remaining() < MAC_SIZE) {
-				throw new IllegalArgumentException("Chunk must end with a MAC");
+			if (ciphertextChunk.remaining() < NONCE_SIZE + MAC_SIZE) {
+				throw new IllegalArgumentException("Chunk must at least contain a NONCE and a MAC");
 			}
+			this.nonce = new byte[NONCE_SIZE];
+			ByteBuffer nonceBuf = ciphertextChunk.asReadOnlyBuffer();
+			nonceBuf.position(0).limit(NONCE_SIZE);
+			nonceBuf.get(nonce);
 			this.ciphertextChunk = ciphertextChunk.asReadOnlyBuffer();
-			this.ciphertextChunk.position(0).limit(ciphertextChunk.limit() - MAC_SIZE);
+			this.ciphertextChunk.position(NONCE_SIZE).limit(ciphertextChunk.limit() - MAC_SIZE);
 			this.expectedMac = new byte[MAC_SIZE];
 			ByteBuffer macBuf = ciphertextChunk.asReadOnlyBuffer();
 			macBuf.position(macBuf.limit() - MAC_SIZE);
 			macBuf.get(expectedMac);
-
-			final ByteBuffer nonceAndCounterBuf = ByteBuffer.allocate(AES_BLOCK_LENGTH_IN_BYTES);
-			nonceAndCounterBuf.put(header.getNonce());
-			nonceAndCounterBuf.putLong(chunkNumber * CHUNK_SIZE / AES_BLOCK_LENGTH_IN_BYTES);
-			this.nonceAndCtr = nonceAndCounterBuf.array();
 		}
 
 		@Override
@@ -145,6 +144,7 @@ class FileContentDecryptorImpl implements FileContentDecryptor {
 			try {
 				if (authenticate) {
 					Mac mac = hmacSha256.get();
+					mac.update(nonce);
 					mac.update(ciphertextChunk.asReadOnlyBuffer());
 					if (!MessageDigest.isEqual(expectedMac, mac.doFinal())) {
 						throw new AuthenticationFailedException();
@@ -152,7 +152,7 @@ class FileContentDecryptorImpl implements FileContentDecryptor {
 				}
 
 				Cipher cipher = ThreadLocalAesCtrCipher.get();
-				cipher.init(Cipher.DECRYPT_MODE, header.getPayload().getContentKey(), new IvParameterSpec(nonceAndCtr));
+				cipher.init(Cipher.DECRYPT_MODE, header.getPayload().getContentKey(), new IvParameterSpec(nonce));
 				ByteBuffer cleartextChunk = ByteBuffer.allocate(cipher.getOutputSize(ciphertextChunk.remaining()));
 				cipher.update(ciphertextChunk, cleartextChunk);
 				cleartextChunk.flip();
