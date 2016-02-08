@@ -46,4 +46,15 @@ class ShorteningFile extends DelegatingFile<ShorteningFolder> {
 		return super.openWritable();
 	}
 
+	@Override
+	public void moveTo(File destination) {
+		super.moveTo(destination);
+		if (destination instanceof ShorteningFile) {
+			ShorteningFile dest = (ShorteningFile) destination;
+			if (shortener.isShortened(dest.shortenedName())) {
+				shortener.saveMapping(dest.name(), dest.shortenedName());
+			}
+		}
+	}
+
 }
