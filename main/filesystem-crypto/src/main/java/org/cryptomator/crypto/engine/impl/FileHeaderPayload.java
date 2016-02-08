@@ -11,14 +11,12 @@ package org.cryptomator.crypto.engine.impl;
 import java.nio.ByteBuffer;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Arrays;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.ShortBufferException;
 import javax.crypto.spec.IvParameterSpec;
@@ -33,7 +31,6 @@ class FileHeaderPayload implements Destroyable {
 	private static final int CONTENT_KEY_POS = 8;
 	private static final int CONTENT_KEY_LEN = 32;
 	private static final String AES = "AES";
-	private static final String AES_CBC = "AES/CBC/PKCS5Padding";
 
 	private long filesize;
 	private final SecretKey contentKey;
@@ -93,15 +90,15 @@ class FileHeaderPayload implements Destroyable {
 	public ByteBuffer toCiphertextByteBuffer(SecretKey headerKey, byte[] iv) {
 		final ByteBuffer cleartext = toCleartextByteBuffer();
 		try {
-			final Cipher cipher = Cipher.getInstance(AES_CBC);
+			Cipher cipher = ThreadLocalAesCtrCipher.get();
 			cipher.init(Cipher.ENCRYPT_MODE, headerKey, new IvParameterSpec(iv));
 			final int ciphertextLength = cipher.getOutputSize(cleartext.remaining());
-			assert ciphertextLength == 48 : "8 byte long and 32 byte file key should fit into 3 blocks";
+			assert ciphertextLength == cleartext.remaining() : "in counter mode outputlength == input length";
 			final ByteBuffer ciphertext = ByteBuffer.allocate(ciphertextLength);
 			cipher.doFinal(cleartext, ciphertext);
 			ciphertext.flip();
 			return ciphertext;
-		} catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | ShortBufferException | IllegalBlockSizeException | BadPaddingException e) {
+		} catch (InvalidKeyException | InvalidAlgorithmParameterException | ShortBufferException | IllegalBlockSizeException | BadPaddingException e) {
 			throw new IllegalStateException("Unable to compute encrypted header.", e);
 		} finally {
 			Arrays.fill(cleartext.array(), (byte) 0x00);
@@ -134,15 +131,15 @@ class FileHeaderPayload implements Destroyable {
 
 	private static ByteBuffer decryptPayload(ByteBuffer ciphertext, SecretKey headerKey, byte[] iv) {
 		try {
-			final Cipher cipher = Cipher.getInstance(AES_CBC);
+			Cipher cipher = ThreadLocalAesCtrCipher.get();
 			cipher.init(Cipher.DECRYPT_MODE, headerKey, new IvParameterSpec(iv));
 			final int cleartextLength = cipher.getOutputSize(ciphertext.remaining());
-			assert cleartextLength == ciphertext.remaining() : "decryption shouldn't need more output than input buffer size.";
+			assert cleartextLength == ciphertext.remaining() : "in counter mode outputlength == input length";
 			final ByteBuffer cleartext = ByteBuffer.allocate(cleartextLength);
 			cipher.doFinal(ciphertext, cleartext);
 			cleartext.flip();
 			return cleartext;
-		} catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | ShortBufferException | IllegalBlockSizeException | BadPaddingException e) {
+		} catch (InvalidKeyException | InvalidAlgorithmParameterException | ShortBufferException | IllegalBlockSizeException | BadPaddingException e) {
 			throw new IllegalStateException("Unable to decrypt header.", e);
 		}
 	}

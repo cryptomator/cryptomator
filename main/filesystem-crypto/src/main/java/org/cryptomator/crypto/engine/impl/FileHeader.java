@@ -19,41 +19,31 @@ import javax.security.auth.Destroyable;
 
 class FileHeader implements Destroyable {
 
-	static final int HEADER_SIZE = 104;
+	static final int HEADER_SIZE = 88;
 
 	private static final int IV_POS = 0;
 	private static final int IV_LEN = 16;
-	private static final int NONCE_POS = 16;
-	private static final int NONCE_LEN = 8;
-	private static final int PAYLOAD_POS = 24;
-	private static final int PAYLOAD_LEN = 48;
-	private static final int MAC_POS = 72;
+	private static final int PAYLOAD_POS = 16;
+	private static final int PAYLOAD_LEN = 40;
+	private static final int MAC_POS = 56;
 	private static final int MAC_LEN = 32;
 
 	private final byte[] iv;
-	private final byte[] nonce;
 	private final FileHeaderPayload payload;
 
 	public FileHeader(SecureRandom randomSource) {
 		this.iv = new byte[IV_LEN];
-		this.nonce = new byte[NONCE_LEN];
 		this.payload = new FileHeaderPayload(randomSource);
 		randomSource.nextBytes(iv);
-		randomSource.nextBytes(nonce);
 	}
 
-	private FileHeader(byte[] iv, byte[] nonce, FileHeaderPayload payload) {
+	private FileHeader(byte[] iv, FileHeaderPayload payload) {
 		this.iv = iv;
-		this.nonce = nonce;
 		this.payload = payload;
 	}
 
 	public byte[] getIv() {
 		return iv;
-	}
-
-	public byte[] getNonce() {
-		return nonce;
 	}
 
 	public FileHeaderPayload getPayload() {
@@ -64,8 +54,6 @@ class FileHeader implements Destroyable {
 		ByteBuffer result = ByteBuffer.allocate(HEADER_SIZE);
 		result.position(IV_POS).limit(IV_POS + IV_LEN);
 		result.put(iv);
-		result.position(NONCE_POS).limit(NONCE_POS + NONCE_LEN);
-		result.put(nonce);
 		result.position(PAYLOAD_POS).limit(PAYLOAD_POS + PAYLOAD_LEN);
 		result.put(payload.toCiphertextByteBuffer(headerKey, iv));
 		ByteBuffer resultSoFar = result.asReadOnlyBuffer();
@@ -101,17 +89,12 @@ class FileHeader implements Destroyable {
 		ivBuf.position(IV_POS).limit(IV_POS + IV_LEN);
 		ivBuf.get(iv);
 
-		final byte[] nonce = new byte[NONCE_LEN];
-		final ByteBuffer nonceBuf = header.asReadOnlyBuffer();
-		nonceBuf.position(NONCE_POS).limit(NONCE_POS + NONCE_LEN);
-		nonceBuf.get(nonce);
-
 		final ByteBuffer payloadBuf = header.asReadOnlyBuffer();
 		payloadBuf.position(PAYLOAD_POS).limit(PAYLOAD_POS + PAYLOAD_LEN);
 
 		final FileHeaderPayload payload = FileHeaderPayload.fromCiphertextByteBuffer(payloadBuf, headerKey, iv);
 
-		return new FileHeader(iv, nonce, payload);
+		return new FileHeader(iv, payload);
 	}
 
 	private static void checkHeaderMac(ByteBuffer header, Mac mac) throws IllegalArgumentException {
