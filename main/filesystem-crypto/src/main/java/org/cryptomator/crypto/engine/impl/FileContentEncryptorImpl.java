@@ -26,6 +26,7 @@ import javax.crypto.SecretKey;
 import javax.crypto.ShortBufferException;
 import javax.crypto.spec.IvParameterSpec;
 
+import org.apache.commons.codec.binary.Hex;
 import org.cryptomator.crypto.engine.FileContentCryptor;
 import org.cryptomator.crypto.engine.FileContentEncryptor;
 import org.cryptomator.io.ByteBuffers;
@@ -127,10 +128,13 @@ class FileContentEncryptorImpl implements FileContentEncryptor {
 
 	private class EncryptionJob implements Callable<ByteBuffer> {
 
-		private final ByteBuffer cleartextChunk;
+		private final ByteBuffer inBuf;
+		private final ByteBuffer chunkNumberBigEndian = ByteBuffer.allocate(Long.BYTES);
 
 		public EncryptionJob(ByteBuffer cleartextChunk, long chunkNumber) {
-			this.cleartextChunk = cleartextChunk;
+			this.inBuf = cleartextChunk;
+			chunkNumberBigEndian.putLong(chunkNumber);
+			chunkNumberBigEndian.rewind();
 		}
 
 		@Override
@@ -138,28 +142,32 @@ class FileContentEncryptorImpl implements FileContentEncryptor {
 			try {
 				final Cipher cipher = ThreadLocalAesCtrCipher.get();
 				final Mac mac = hmacSha256.get();
-				final ByteBuffer ciphertextChunk = ByteBuffer.allocate(NONCE_SIZE + cleartextChunk.remaining() + mac.getMacLength());
+				final ByteBuffer outBuf = ByteBuffer.allocate(NONCE_SIZE + inBuf.remaining() + mac.getMacLength());
 
 				// nonce
 				byte[] nonce = new byte[NONCE_SIZE];
 				randomSource.nextBytes(nonce);
-				ciphertextChunk.put(nonce);
+				outBuf.put(nonce);
 
 				// payload:
 				cipher.init(Cipher.ENCRYPT_MODE, header.getPayload().getContentKey(), new IvParameterSpec(nonce));
-				assert cipher.getOutputSize(cleartextChunk.remaining()) == cleartextChunk.remaining() : "input length should be equal to output length in CTR mode.";
-				cipher.update(cleartextChunk, ciphertextChunk);
+				assert cipher.getOutputSize(inBuf.remaining()) == inBuf.remaining() : "input length should be equal to output length in CTR mode.";
+				int bytesEncrypted = cipher.update(inBuf, outBuf);
 
 				// mac:
-				ByteBuffer ciphertextSoFar = ciphertextChunk.asReadOnlyBuffer();
-				ciphertextSoFar.flip();
-				mac.update(ciphertextSoFar);
+				ByteBuffer ciphertextBuf = outBuf.asReadOnlyBuffer();
+				ciphertextBuf.position(NONCE_SIZE).limit(NONCE_SIZE + bytesEncrypted);
+				mac.update(header.getIv());
+				mac.update(chunkNumberBigEndian.asReadOnlyBuffer());
+				mac.update(nonce);
+				mac.update(ciphertextBuf);
 				byte[] authenticationCode = mac.doFinal();
-				ciphertextChunk.put(authenticationCode);
+				Hex.encodeHexString(authenticationCode);
+				outBuf.put(authenticationCode);
 
 				// flip and return:
-				ciphertextChunk.flip();
-				return ciphertextChunk;
+				outBuf.flip();
+				return outBuf;
 			} catch (InvalidKeyException e) {
 				throw new IllegalStateException("File content key created by current class invalid.", e);
 			} catch (ShortBufferException e) {

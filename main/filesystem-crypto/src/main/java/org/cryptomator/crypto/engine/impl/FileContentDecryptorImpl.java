@@ -120,7 +120,8 @@ class FileContentDecryptorImpl implements FileContentDecryptor {
 	private class DecryptionJob implements Callable<ByteBuffer> {
 
 		private final byte[] nonce;
-		private final ByteBuffer ciphertextChunk;
+		private final ByteBuffer inBuf;
+		private final ByteBuffer chunkNumberBigEndian = ByteBuffer.allocate(Long.BYTES);
 		private final byte[] expectedMac;
 
 		public DecryptionJob(ByteBuffer ciphertextChunk, long chunkNumber) {
@@ -131,8 +132,10 @@ class FileContentDecryptorImpl implements FileContentDecryptor {
 			ByteBuffer nonceBuf = ciphertextChunk.asReadOnlyBuffer();
 			nonceBuf.position(0).limit(NONCE_SIZE);
 			nonceBuf.get(nonce);
-			this.ciphertextChunk = ciphertextChunk.asReadOnlyBuffer();
-			this.ciphertextChunk.position(NONCE_SIZE).limit(ciphertextChunk.limit() - MAC_SIZE);
+			this.inBuf = ciphertextChunk.asReadOnlyBuffer();
+			this.inBuf.position(NONCE_SIZE).limit(ciphertextChunk.limit() - MAC_SIZE);
+			chunkNumberBigEndian.putLong(chunkNumber);
+			chunkNumberBigEndian.rewind();
 			this.expectedMac = new byte[MAC_SIZE];
 			ByteBuffer macBuf = ciphertextChunk.asReadOnlyBuffer();
 			macBuf.position(macBuf.limit() - MAC_SIZE);
@@ -144,8 +147,10 @@ class FileContentDecryptorImpl implements FileContentDecryptor {
 			try {
 				if (authenticate) {
 					Mac mac = hmacSha256.get();
+					mac.update(header.getIv());
+					mac.update(chunkNumberBigEndian.asReadOnlyBuffer());
 					mac.update(nonce);
-					mac.update(ciphertextChunk.asReadOnlyBuffer());
+					mac.update(inBuf.asReadOnlyBuffer());
 					if (!MessageDigest.isEqual(expectedMac, mac.doFinal())) {
 						throw new AuthenticationFailedException();
 					}
@@ -153,10 +158,10 @@ class FileContentDecryptorImpl implements FileContentDecryptor {
 
 				Cipher cipher = ThreadLocalAesCtrCipher.get();
 				cipher.init(Cipher.DECRYPT_MODE, header.getPayload().getContentKey(), new IvParameterSpec(nonce));
-				ByteBuffer cleartextChunk = ByteBuffer.allocate(cipher.getOutputSize(ciphertextChunk.remaining()));
-				cipher.update(ciphertextChunk, cleartextChunk);
-				cleartextChunk.flip();
-				return cleartextChunk;
+				ByteBuffer outBuf = ByteBuffer.allocate(cipher.getOutputSize(inBuf.remaining()));
+				cipher.update(inBuf, outBuf);
+				outBuf.flip();
+				return outBuf;
 			} catch (InvalidKeyException e) {
 				throw new IllegalStateException("File content key created by current class invalid.", e);
 			} catch (ShortBufferException e) {

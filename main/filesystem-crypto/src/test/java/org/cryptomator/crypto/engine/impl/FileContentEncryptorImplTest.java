@@ -54,11 +54,20 @@ public class FileContentEncryptorImplTest {
 				ByteBuffers.copy(buf, result);
 			}
 
-			// Ciphertext: echo -n "hello world" | openssl enc -aes-256-ctr -K 0000000000000000000000000000000000000000000000000000000000000000 -iv 00000000000000000000000000000000 | base64
-			// MAC: echo -n "AAAAAAAAAAAAAAAAAAAAAA==" | base64 --decode > A; echo -n "tPCsFM1g/ubfJMY=" | base64 --decode >> A; cat A | openssl dgst -sha256 -mac HMAC -macopt
-			// hexkey:0000000000000000000000000000000000000000000000000000000000000000 -binary | base64
-			// echo -n "+8Yv6jcvXJj89WiHAxAtgbZR7mpsskLFfGCVDm6NO8U=" | base64 --decode >> A; cat A | base64
-			Assert.assertArrayEquals(Base64.decode("AAAAAAAAAAAAAAAAAAAAALTwrBTNYP7m3yTG+8Yv6jcvXJj89WiHAxAtgbZR7mpsskLFfGCVDm6NO8U="), result.array());
+			// # CIPHERTEXT:
+			// echo -n "hello world" | openssl enc -aes-256-ctr -K 0000000000000000000000000000000000000000000000000000000000000000 -iv 00000000000000000000000000000000 | base64
+			//
+			// # MAC:
+			// # 0x00-bytes for IV + blocknumber + nonce: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==
+			// echo -n "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==" | base64 --decode > A; echo -n "tPCsFM1g/ubfJMY=" | base64 --decode >> A;
+			// cat A | openssl dgst -sha256 -mac HMAC -macopt hexkey:0000000000000000000000000000000000000000000000000000000000000000 -binary | base64
+			//
+			// # FULL CHUNK:
+			// echo -n "AAAAAAAAAAAAAAAAAAAAAA==" | base64 --decode > B;
+			// echo -n "tPCsFM1g/ubfJMY=" | base64 --decode >> B;
+			// echo -n "Klhka9WPvX1Lpn5EYfVxlyX1ISgRXtdRnivM7r6F3Og=" | base64 --decode >> B;
+			// cat B | base64
+			Assert.assertArrayEquals(Base64.decode("AAAAAAAAAAAAAAAAAAAAALTwrBTNYP7m3yTGKlhka9WPvX1Lpn5EYfVxlyX1ISgRXtdRnivM7r6F3Og="), result.array());
 		}
 	}
 

@@ -46,7 +46,7 @@ public class FileContentDecryptorImplTest {
 		final SecretKey headerKey = new SecretKeySpec(keyBytes, "AES");
 		final SecretKey macKey = new SecretKeySpec(keyBytes, "HmacSHA256");
 		final byte[] header = Base64.decode("AAAAAAAAAAAAAAAAAAAAANyVwHiiQImjrUiiFJKEIIdTD4r7x0U2ualjtPHEy3OLzqdAPU1ga26lJzstK9RUv1hj5zDC4wC9FgMfoVE1mD0HnuENuYXkJA==");
-		final byte[] content = Base64.decode("AAAAAAAAAAAAAAAAAAAAALTwrBTNYP7m3yTG+8Yv6jcvXJj89WiHAxAtgbZR7mpsskLFfGCVDm6NO8U=");
+		final byte[] content = Base64.decode("AAAAAAAAAAAAAAAAAAAAALTwrBTNYP7m3yTGKlhka9WPvX1Lpn5EYfVxlyX1ISgRXtdRnivM7r6F3Og=");
 
 		try (FileContentDecryptor decryptor = new FileContentDecryptorImpl(headerKey, macKey, ByteBuffer.wrap(header), 0, true)) {
 			decryptor.append(ByteBuffer.wrap(Arrays.copyOfRange(content, 0, 15)));
@@ -69,7 +69,7 @@ public class FileContentDecryptorImplTest {
 		final SecretKey headerKey = new SecretKeySpec(keyBytes, "AES");
 		final SecretKey macKey = new SecretKeySpec(keyBytes, "HmacSHA256");
 		final byte[] header = Base64.decode("AAAAAAAAAAAAAAAAAAAAANyVwHiiQImjrUiiFJKEIIdTD4r7x0U2ualjtPHEy3OLzqdAPU1ga26lJzstK9RUv1hj5zDC4wC9FgMfoVE1mD0HnuENuYXkJA==");
-		final byte[] content = Base64.decode("aAAAAAAAAAAAAAAAAAAAALTwrBTNYP7m3yTG+8Yv6jcvXJj89WiHAxAtgbZR7mpsskLFfGCVDm6NO8U=");
+		final byte[] content = Base64.decode("aAAAAAAAAAAAAAAAAAAAALTwrBTNYP7m3yTGKlhka9WPvX1Lpn5EYfVxlyX1ISgRXtdRnivM7r6F3Og=");
 
 		try (FileContentDecryptor decryptor = new FileContentDecryptorImpl(headerKey, macKey, ByteBuffer.wrap(header), 0, true)) {
 			decryptor.append(ByteBuffer.wrap(Arrays.copyOfRange(content, 0, 15)));
@@ -90,7 +90,7 @@ public class FileContentDecryptorImplTest {
 		final SecretKey headerKey = new SecretKeySpec(keyBytes, "AES");
 		final SecretKey macKey = new SecretKeySpec(keyBytes, "HmacSHA256");
 		final byte[] header = Base64.decode("AAAAAAAAAAAAAAAAAAAAANyVwHiiQImjrUiiFJKEIIdTD4r7x0U2ualjtPHEy3OLzqdAPU1ga26lJzstK9RUv1hj5zDC4wC9FgMfoVE1mD0HnuENuYXkJA==");
-		final byte[] content = Base64.decode("AAAAAAAAAAAAAAAAAAAAALTwrBTNYP7m3yTG+8Yv6jcvXJj89WiHAxAtgbZR7mpsskLFfGCVDm6NO8u=");
+		final byte[] content = Base64.decode("AAAAAAAAAAAAAAAAAAAAALTwrBTNYP7m3yTGKlhka9WPvX1Lpn5EYfVxlyX1ISgRXtdRnivM7r6F3OG=");
 
 		try (FileContentDecryptor decryptor = new FileContentDecryptorImpl(headerKey, macKey, ByteBuffer.wrap(header), 0, false)) {
 			decryptor.append(ByteBuffer.wrap(Arrays.copyOfRange(content, 0, 15)));
