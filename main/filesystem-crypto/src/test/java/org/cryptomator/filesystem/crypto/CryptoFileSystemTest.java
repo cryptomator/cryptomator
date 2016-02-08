@@ -13,6 +13,7 @@ import static org.cryptomator.filesystem.FileSystemVisitor.fileSystemVisitor;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -71,6 +72,45 @@ public class CryptoFileSystemTest {
 		Assert.assertFalse(fooBarFolder.exists());
 		Assert.assertTrue(bazFolder.exists());
 		Assert.assertTrue(bazBarFolder.exists());
+	}
+
+	@Test(timeout = 1000, expected = UnsupportedOperationException.class)
+	public void testMovingOfRootDir() throws UncheckedIOException, IOException {
+		// mock stuff and prepare crypto FS:
+		final Cryptor cryptor = new NoCryptor();
+		final FileSystem physicalFs = new InMemoryFileSystem();
+		final FileSystem fs = new CryptoFileSystem(physicalFs, cryptor, Mockito.mock(CryptoFileSystemDelegate.class), "foo");
+		fs.create();
+		fs.moveTo(fs.folder("subFolder"));
+	}
+
+	@Test(timeout = 1000, expected = UnsupportedOperationException.class)
+	public void testDeletingOfRootDir() throws UncheckedIOException, IOException {
+		// mock stuff and prepare crypto FS:
+		final Cryptor cryptor = new NoCryptor();
+		final FileSystem physicalFs = new InMemoryFileSystem();
+		final FileSystem fs = new CryptoFileSystem(physicalFs, cryptor, Mockito.mock(CryptoFileSystemDelegate.class), "foo");
+		fs.create();
+		fs.delete();
+	}
+
+	@Test(timeout = 100000)
+	public void testCreationAndLastModifiedDateOfRootDir() throws UncheckedIOException, IOException, InterruptedException {
+		// mock stuff and prepare crypto FS:
+		final Cryptor cryptor = new NoCryptor();
+		final FileSystem physicalFs = new InMemoryFileSystem();
+
+		final Instant minDate = Instant.now();
+		Thread.sleep(10);
+		final FileSystem fs = new CryptoFileSystem(physicalFs, cryptor, Mockito.mock(CryptoFileSystemDelegate.class), "foo");
+		Thread.sleep(10);
+		final Instant maxDate = Instant.now();
+
+		Assert.assertTrue(fs.creationTime().isPresent());
+		Assert.assertTrue(fs.creationTime().get().isAfter(minDate));
+		Assert.assertTrue(fs.creationTime().get().isBefore(maxDate));
+		Assert.assertTrue(fs.lastModified().isAfter(minDate));
+		Assert.assertTrue(fs.lastModified().isBefore(maxDate));
 	}
 
 	@Test(timeout = 1000, expected = IllegalArgumentException.class)

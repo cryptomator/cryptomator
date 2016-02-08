@@ -8,7 +8,8 @@
  *******************************************************************************/
 package org.cryptomator.filesystem.crypto;
 
-import java.nio.ByteBuffer;
+import java.io.UncheckedIOException;
+import java.time.Instant;
 import java.util.Optional;
 
 import org.cryptomator.crypto.engine.Cryptor;
@@ -16,12 +17,11 @@ import org.cryptomator.crypto.engine.InvalidPassphraseException;
 import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.FileSystem;
 import org.cryptomator.filesystem.Folder;
-import org.cryptomator.filesystem.WritableFile;
 
 public class CryptoFileSystem extends CryptoFolder implements FileSystem {
 
 	private static final String DATA_ROOT_DIR = "d";
-	private static final String ROOT_DIR_FILE = "root";
+	private static final String ROOT_DIRECOTRY_ID = "";
 
 	private final Folder physicalRoot;
 	private final CryptoFileSystemDelegate delegate;
@@ -41,8 +41,13 @@ public class CryptoFileSystem extends CryptoFolder implements FileSystem {
 	}
 
 	@Override
+	protected String getDirectoryId() {
+		return ROOT_DIRECOTRY_ID;
+	}
+
+	@Override
 	protected File physicalFile() {
-		return physicalDataRoot().file(ROOT_DIR_FILE);
+		throw new UnsupportedOperationException("Crypto filesystem root doesn't provide a directory file, as the directory ID is fixed.");
 	}
 
 	@Override
@@ -57,23 +62,31 @@ public class CryptoFileSystem extends CryptoFolder implements FileSystem {
 
 	@Override
 	public boolean exists() {
-		return physicalFile().exists() && physicalFolder().exists();
+		return physicalFolder().exists();
+	}
+
+	@Override
+	public Optional<Instant> creationTime() throws UncheckedIOException {
+		return physicalFolder().creationTime();
+	}
+
+	@Override
+	public Instant lastModified() {
+		return physicalFolder().lastModified();
 	}
 
 	@Override
 	public void delete() {
-		// no-op.
+		throw new UnsupportedOperationException("Can not delete CryptoFileSytem root.");
+	}
+
+	@Override
+	public void moveTo(Folder target) {
+		throw new UnsupportedOperationException("Can not move CryptoFileSytem root.");
 	}
 
 	@Override
 	public void create() {
-		physicalDataRoot().create();
-		final File dirFile = physicalFile();
-		final String directoryId = getDirectoryId();
-		try (WritableFile writable = dirFile.openWritable()) {
-			final ByteBuffer buf = ByteBuffer.wrap(directoryId.getBytes());
-			writable.write(buf);
-		}
 		physicalFolder().create();
 	}
 

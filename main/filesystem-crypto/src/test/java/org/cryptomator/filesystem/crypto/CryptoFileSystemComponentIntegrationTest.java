@@ -67,7 +67,6 @@ public class CryptoFileSystemComponentIntegrationTest {
 		Assert.assertTrue(masterkeyBkupFile.exists());
 		Assert.assertTrue(physicalDataRoot.exists());
 		Assert.assertEquals(3, physicalFs.children().count()); // d + masterkey.cryptomator + masterkey.cryptomator.bkup
-		Assert.assertEquals(1, physicalDataRoot.files().count()); // ROOT file
 		Assert.assertEquals(1, physicalDataRoot.folders().count()); // ROOT directory
 	}
 
