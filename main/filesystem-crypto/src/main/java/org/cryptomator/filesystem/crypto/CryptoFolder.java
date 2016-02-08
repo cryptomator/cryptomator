@@ -19,6 +19,7 @@ import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import org.apache.commons.io.IOUtils;
@@ -33,7 +34,7 @@ import org.cryptomator.filesystem.WritableFile;
 
 class CryptoFolder extends CryptoNode implements Folder {
 
-	static final String DIR_EXT = ".dir";
+	static final String DIR_SUFFIX = "_";
 
 	private final WeakValuedCache<String, CryptoFolder> folders = WeakValuedCache.usingLoader(this::newFolder);
 	private final WeakValuedCache<String, CryptoFile> files = WeakValuedCache.usingLoader(this::newFile);
@@ -46,7 +47,7 @@ class CryptoFolder extends CryptoNode implements Folder {
 	@Override
 	protected String encryptedName() {
 		final byte[] parentDirId = parent().map(CryptoFolder::getDirectoryId).map(s -> s.getBytes(UTF_8)).orElse(null);
-		return cryptor.getFilenameCryptor().encryptFilename(name(), parentDirId) + DIR_EXT;
+		return cryptor.getFilenameCryptor().encryptFilename(name(), parentDirId) + DIR_SUFFIX;
 	}
 
 	Folder physicalFolder() {
@@ -82,13 +83,16 @@ class CryptoFolder extends CryptoNode implements Folder {
 
 	@Override
 	public Stream<CryptoFile> files() {
-		return physicalFolder().files().map(File::name).filter(s -> s.endsWith(CryptoFile.FILE_EXT)).map(this::decryptChildFileName).map(this::file);
+		return physicalFolder().files().map(File::name).filter(isEncryptedFileName()).map(this::decryptChildFileName).map(this::file);
+	}
+
+	private Predicate<String> isEncryptedFileName() {
+		return (String name) -> cryptor.getFilenameCryptor().isEncryptedFilename(name);
 	}
 
 	private String decryptChildFileName(String encryptedFileName) {
 		final byte[] dirId = getDirectoryId().getBytes(UTF_8);
-		final String ciphertext = StringUtils.removeEnd(encryptedFileName, CryptoFile.FILE_EXT);
-		return cryptor.getFilenameCryptor().decryptFilename(ciphertext, dirId);
+		return cryptor.getFilenameCryptor().decryptFilename(encryptedFileName, dirId);
 	}
 
 	@Override
@@ -102,12 +106,16 @@ class CryptoFolder extends CryptoNode implements Folder {
 
 	@Override
 	public Stream<CryptoFolder> folders() {
-		return physicalFolder().files().map(File::name).filter(s -> s.endsWith(CryptoFolder.DIR_EXT)).map(this::decryptChildFolderName).map(this::folder);
+		return physicalFolder().files().map(File::name).filter(isEncryptedDirectoryName()).map(this::decryptChildFolderName).map(this::folder);
+	}
+
+	private Predicate<String> isEncryptedDirectoryName() {
+		return (String name) -> name.endsWith(DIR_SUFFIX) && isEncryptedFileName().test(StringUtils.removeEnd(name, DIR_SUFFIX));
 	}
 
 	private String decryptChildFolderName(String encryptedFolderName) {
 		final byte[] dirId = getDirectoryId().getBytes(UTF_8);
-		final String ciphertext = StringUtils.removeEnd(encryptedFolderName, CryptoFolder.DIR_EXT);
+		final String ciphertext = StringUtils.removeEnd(encryptedFolderName, CryptoFolder.DIR_SUFFIX);
 		return cryptor.getFilenameCryptor().decryptFilename(ciphertext, dirId);
 	}
 

@@ -50,6 +50,11 @@ class FilenameCryptorImpl implements FilenameCryptor {
 	}
 
 	@Override
+	public boolean isEncryptedFilename(String ciphertextName) {
+		return BASE32.isInAlphabet(ciphertextName);
+	}
+
+	@Override
 	public String encryptFilename(String cleartextName, byte[]... associatedData) {
 		final byte[] cleartextBytes = cleartextName.getBytes(UTF_8);
 		final byte[] encryptedBytes = AES_SIV.get().encrypt(encryptionKey, macKey, cleartextBytes, associatedData);

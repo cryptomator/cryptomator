@@ -21,8 +21,6 @@ import org.cryptomator.filesystem.WritableFile;
 
 public class CryptoFile extends CryptoNode implements File {
 
-	static final String FILE_EXT = ".file";
-
 	public CryptoFile(CryptoFolder parent, String name, Cryptor cryptor) {
 		super(parent, name, cryptor);
 	}
@@ -30,7 +28,7 @@ public class CryptoFile extends CryptoNode implements File {
 	@Override
 	protected String encryptedName() {
 		final byte[] parentDirId = parent.getDirectoryId().getBytes(UTF_8);
-		return cryptor.getFilenameCryptor().encryptFilename(name(), parentDirId) + FILE_EXT;
+		return cryptor.getFilenameCryptor().encryptFilename(name(), parentDirId);
 	}
 
 	@Override

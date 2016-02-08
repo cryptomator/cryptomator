@@ -29,6 +29,11 @@ class NoFilenameCryptor implements FilenameCryptor {
 	}
 
 	@Override
+	public boolean isEncryptedFilename(String ciphertextName) {
+		return true;
+	}
+
+	@Override
 	public String encryptFilename(String cleartextName, byte[]... associatedData) {
 		return cleartextName;
 	}

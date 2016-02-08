@@ -22,6 +22,14 @@ public interface FilenameCryptor {
 	String hashDirectoryId(String cleartextDirectoryId);
 
 	/**
+	 * Tests without an actual decryption attempt, if a name is a well-formed ciphertext.
+	 * 
+	 * @param ciphertextName Filename in question
+	 * @return <code>true</code> if the given name is likely to be a valid ciphertext
+	 */
+	boolean isEncryptedFilename(String ciphertextName);
+
+	/**
 	 * @param cleartextName original filename including cleartext file extension
 	 * @param associatedData optional associated data, that will not get encrypted but needs to be provided during decryption
 	 * @return encrypted filename without any file extension

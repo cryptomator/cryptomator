@@ -19,7 +19,7 @@ import org.cryptomator.filesystem.blacklisting.SamePathPredicate;
 @Singleton
 public class ShorteningFileSystemFactory {
 
-	private static final int SHORTENING_THRESHOLD = 140;
+	private static final int SHORTENING_THRESHOLD = 129; // 128 + "_"
 	private static final String METADATA_FOLDER_NAME = "m";
 
 	private final BlacklistingFileSystemFactory blacklistingFileSystemFactory;
