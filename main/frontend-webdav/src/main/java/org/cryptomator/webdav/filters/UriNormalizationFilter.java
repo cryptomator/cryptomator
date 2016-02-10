@@ -140,13 +140,10 @@ public class UriNormalizationFilter implements HttpFilter {
 			final ResourceType resourceType = resourceTypeChecker.typeOfResource(pathWithinContext);
 			switch (resourceType) {
 			case FILE:
-				System.out.println("DST is file " + uri);
 				return asFileUri(uri);
 			case FOLDER:
-				System.out.println("DST is folder " + uri);
 				return asFolderUri(uri);
 			default:
-				System.out.println("DST doesn't exist " + uri);
 				if (this.getRequestURI().endsWith("/")) {
 					return asFolderUri(uri);
 				} else {
