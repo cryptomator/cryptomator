@@ -19,7 +19,7 @@
 	<description>Provides access via WebDAV to filesystems</description>
 
 	<properties>
-		<jackrabbit.version>2.11.0</jackrabbit.version>
+		<jackrabbit.version>2.11.3</jackrabbit.version>
 		<jetty.version>9.3.3.v20150827</jetty.version>
 	</properties>
 

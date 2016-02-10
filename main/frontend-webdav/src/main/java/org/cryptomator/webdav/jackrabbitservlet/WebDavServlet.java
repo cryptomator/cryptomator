@@ -8,13 +8,19 @@
  *******************************************************************************/
 package org.cryptomator.webdav.jackrabbitservlet;
 
+import java.io.IOException;
 import java.net.URI;
 
+import org.apache.jackrabbit.webdav.DavException;
 import org.apache.jackrabbit.webdav.DavLocatorFactory;
 import org.apache.jackrabbit.webdav.DavResource;
 import org.apache.jackrabbit.webdav.DavResourceFactory;
+import org.apache.jackrabbit.webdav.DavServletResponse;
 import org.apache.jackrabbit.webdav.DavSessionProvider;
 import org.apache.jackrabbit.webdav.WebdavRequest;
+import org.apache.jackrabbit.webdav.WebdavResponse;
+import org.apache.jackrabbit.webdav.lock.Scope;
+import org.apache.jackrabbit.webdav.lock.Type;
 import org.apache.jackrabbit.webdav.server.AbstractWebdavServlet;
 import org.cryptomator.filesystem.Folder;
 import org.cryptomator.filesystem.jackrabbit.FileSystemResourceLocatorFactory;
@@ -66,6 +72,48 @@ public class WebDavServlet extends AbstractWebdavServlet {
 	@Override
 	public void setResourceFactory(DavResourceFactory resourceFactory) {
 		throw new UnsupportedOperationException("Setting resourceFactory not supported.");
+	}
+
+	/* LOCK stuff */
+
+	@Override
+	protected int validateDestination(DavResource destResource, WebdavRequest request, boolean checkHeader) throws DavException {
+		if (destResource.hasLock(Type.WRITE, Scope.EXCLUSIVE) && (request.getHeader(HEADER_IF) == null || !request.matchesIfHeader(destResource))) {
+			throw new DavException(DavServletResponse.SC_LOCKED, "The destination resource was locked");
+		}
+		return super.validateDestination(destResource, request, checkHeader);
+	}
+
+	@Override
+	protected void doPut(WebdavRequest request, WebdavResponse response, DavResource resource) throws IOException, DavException {
+		if (resource.hasLock(Type.WRITE, Scope.EXCLUSIVE) && (request.getHeader(HEADER_IF) == null || !request.matchesIfHeader(resource))) {
+			throw new DavException(DavServletResponse.SC_LOCKED, "The resource was locked");
+		}
+		super.doPut(request, response, resource);
+	}
+
+	@Override
+	protected void doDelete(WebdavRequest request, WebdavResponse response, DavResource resource) throws IOException, DavException {
+		if (resource.hasLock(Type.WRITE, Scope.EXCLUSIVE) && (request.getHeader(HEADER_IF) == null || !request.matchesIfHeader(resource))) {
+			throw new DavException(DavServletResponse.SC_LOCKED, "The resource was locked");
+		}
+		super.doDelete(request, response, resource);
+	}
+
+	@Override
+	protected void doMove(WebdavRequest request, WebdavResponse response, DavResource resource) throws IOException, DavException {
+		if (resource.hasLock(Type.WRITE, Scope.EXCLUSIVE) && (request.getHeader(HEADER_IF) == null || !request.matchesIfHeader(resource))) {
+			throw new DavException(DavServletResponse.SC_LOCKED, "The source resource was locked");
+		}
+		super.doMove(request, response, resource);
+	}
+
+	@Override
+	protected void doPropPatch(WebdavRequest request, WebdavResponse response, DavResource resource) throws IOException, DavException {
+		if (resource.hasLock(Type.WRITE, Scope.EXCLUSIVE) && (request.getHeader(HEADER_IF) == null || !request.matchesIfHeader(resource))) {
+			throw new DavException(DavServletResponse.SC_LOCKED, "The resource was locked");
+		}
+		super.doPropPatch(request, response, resource);
 	}
 
 }

@@ -21,6 +21,7 @@ import java.util.Optional;
 import org.apache.jackrabbit.webdav.DavException;
 import org.apache.jackrabbit.webdav.DavResource;
 import org.apache.jackrabbit.webdav.DavResourceLocator;
+import org.apache.jackrabbit.webdav.DavServletResponse;
 import org.apache.jackrabbit.webdav.DavSession;
 import org.apache.jackrabbit.webdav.MultiStatusResponse;
 import org.apache.jackrabbit.webdav.lock.ActiveLock;
@@ -226,6 +227,9 @@ abstract class DavNode<T extends FileSystemResourceLocator> implements DavResour
 
 	@Override
 	public ActiveLock lock(LockInfo reqLockInfo) throws DavException {
+		if (Scope.SHARED.equals(reqLockInfo.getScope())) {
+			throw new DavException(DavServletResponse.SC_PRECONDITION_FAILED, "Only exclusive write locks supported.");
+		}
 		return lockManager.createLock(reqLockInfo, this);
 	}
 
