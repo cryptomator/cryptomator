@@ -9,7 +9,7 @@
 package org.cryptomator.webdav.filters;
 
 import java.io.IOException;
-import java.util.function.Function;
+import java.net.URI;
 
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -37,68 +37,11 @@ public class UriNormalizationFilter implements HttpFilter {
 	private static final String[] FILE_METHODS = {"PUT"};
 	private static final String[] DIRECTORY_METHODS = {"MKCOL"};
 
-	private final ResourceTypeChecker resourceTypeChecker;
-
-	public UriNormalizationFilter(ResourceTypeChecker resourceTypeChecker) {
-		this.resourceTypeChecker = resourceTypeChecker;
-	}
-
-	@Override
-	public void init(FilterConfig filterConfig) throws ServletException {
-		// no-op
-	}
-
-	@Override
-	public void doFilterHttp(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
-		ResourceType resourceType = resourceTypeChecker.typeOfResource(request.getPathInfo());
-		HttpServletRequest normalizedRequest = resourceType.normalizedRequest(request);
-		chain.doFilter(normalizedRequest, response);
-	}
-
-	@Override
-	public void destroy() {
-		// no-op
-	}
-
-	private static HttpServletRequest normalizedFileRequest(HttpServletRequest originalRequest) {
-		LOG.debug("Treating resource as file: {}", originalRequest.getRequestURI());
-		return new FileUriRequest(originalRequest);
-	}
-
-	private static HttpServletRequest normalizedFolderRequest(HttpServletRequest originalRequest) {
-		LOG.debug("Treating resource as folder: {}", originalRequest.getRequestURI());
-		return new FolderUriRequest(originalRequest);
-	}
-
-	private static HttpServletRequest normalizedRequestForUnknownResource(HttpServletRequest originalRequest) {
-		final String requestMethod = originalRequest.getMethod().toUpperCase();
-		if (ArrayUtils.contains(FILE_METHODS, requestMethod)) {
-			return normalizedFileRequest(originalRequest);
-		} else if (ArrayUtils.contains(DIRECTORY_METHODS, requestMethod)) {
-			return normalizedFolderRequest(originalRequest);
-		} else {
-			LOG.debug("Could not determine resource type of resource: {}", originalRequest.getRequestURI());
-			return originalRequest;
-		}
-	}
-
 	@FunctionalInterface
 	public interface ResourceTypeChecker {
 
 		enum ResourceType {
-			FILE(UriNormalizationFilter::normalizedFileRequest), //
-			FOLDER(UriNormalizationFilter::normalizedFolderRequest), //
-			UNKNOWN(UriNormalizationFilter::normalizedRequestForUnknownResource);
-
-			private final Function<HttpServletRequest, HttpServletRequest> wrapper;
-
-			private ResourceType(Function<HttpServletRequest, HttpServletRequest> wrapper) {
-				this.wrapper = wrapper;
-			}
-
-			private HttpServletRequest normalizedRequest(HttpServletRequest request) {
-				return wrapper.apply(request);
-			}
+			FILE, FOLDER, UNKNOWN;
 		};
 
 		/**
@@ -111,10 +54,67 @@ public class UriNormalizationFilter implements HttpFilter {
 
 	}
 
+	private final ResourceTypeChecker resourceTypeChecker;
+	private String contextPath;
+
+	public UriNormalizationFilter(ResourceTypeChecker resourceTypeChecker) {
+		this.resourceTypeChecker = resourceTypeChecker;
+	}
+
+	@Override
+	public void init(FilterConfig filterConfig) throws ServletException {
+		contextPath = filterConfig.getServletContext().getContextPath();
+	}
+
+	@Override
+	public void doFilterHttp(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
+		final ResourceType resourceType = resourceTypeChecker.typeOfResource(request.getPathInfo());
+		final HttpServletRequest normalizedRequest;
+		switch (resourceType) {
+		case FILE:
+			normalizedRequest = normalizedFileRequest(request);
+			break;
+		case FOLDER:
+			normalizedRequest = normalizedFolderRequest(request);
+			break;
+		default:
+			normalizedRequest = normalizedRequestForUnknownResource(request);
+			break;
+		}
+		chain.doFilter(normalizedRequest, response);
+	}
+
+	@Override
+	public void destroy() {
+		// no-op
+	}
+
+	private HttpServletRequest normalizedFileRequest(HttpServletRequest originalRequest) {
+		LOG.trace("Treating resource as file: {}", originalRequest.getRequestURI());
+		return new FileUriRequest(originalRequest);
+	}
+
+	private HttpServletRequest normalizedFolderRequest(HttpServletRequest originalRequest) {
+		LOG.trace("Treating resource as folder: {}", originalRequest.getRequestURI());
+		return new FolderUriRequest(originalRequest);
+	}
+
+	private HttpServletRequest normalizedRequestForUnknownResource(HttpServletRequest originalRequest) {
+		final String requestMethod = originalRequest.getMethod().toUpperCase();
+		if (ArrayUtils.contains(FILE_METHODS, requestMethod)) {
+			return normalizedFileRequest(originalRequest);
+		} else if (ArrayUtils.contains(DIRECTORY_METHODS, requestMethod)) {
+			return normalizedFolderRequest(originalRequest);
+		} else {
+			LOG.debug("Could not determine resource type of resource: {}", originalRequest.getRequestURI());
+			return originalRequest;
+		}
+	}
+
 	/**
 	 * Adjusts headers containing URIs depending on the request URI.
 	 */
-	private static class SuffixPreservingRequest extends HttpServletRequestWrapper {
+	private class SuffixPreservingRequest extends HttpServletRequestWrapper {
 
 		private static final String HEADER_DESTINATION = "Destination";
 		private static final String METHOD_MOVE = "MOVE";
@@ -122,24 +122,45 @@ public class UriNormalizationFilter implements HttpFilter {
 
 		public SuffixPreservingRequest(HttpServletRequest request) {
 			super(request);
+			request.getContextPath();
 		}
 
 		@Override
 		public String getHeader(String name) {
 			if ((METHOD_MOVE.equalsIgnoreCase(getMethod()) || METHOD_COPY.equalsIgnoreCase(getMethod())) && HEADER_DESTINATION.equalsIgnoreCase(name)) {
-				return sameSuffixAsUri(super.getHeader(name));
+				final String uri = URI.create(super.getHeader(name)).getPath();
+				return bestGuess(uri);
 			} else {
 				return super.getHeader(name);
 			}
 		}
 
-		private String sameSuffixAsUri(String str) {
-			final String uri = this.getRequestURI();
-			if (uri.endsWith("/")) {
-				return StringUtils.appendIfMissing(str, "/");
-			} else {
-				return StringUtils.removeEnd(str, "/");
+		private String bestGuess(String uri) {
+			final String pathWithinContext = StringUtils.removeStart(uri, contextPath);
+			final ResourceType resourceType = resourceTypeChecker.typeOfResource(pathWithinContext);
+			switch (resourceType) {
+			case FILE:
+				System.out.println("DST is file " + uri);
+				return asFileUri(uri);
+			case FOLDER:
+				System.out.println("DST is folder " + uri);
+				return asFolderUri(uri);
+			default:
+				System.out.println("DST doesn't exist " + uri);
+				if (this.getRequestURI().endsWith("/")) {
+					return asFolderUri(uri);
+				} else {
+					return asFileUri(uri);
+				}
 			}
+		}
+
+		protected String asFileUri(String uri) {
+			return StringUtils.removeEnd(uri, "/");
+		}
+
+		protected String asFolderUri(String uri) {
+			return StringUtils.appendIfMissing(uri, "/");
 		}
 
 	}
@@ -147,7 +168,7 @@ public class UriNormalizationFilter implements HttpFilter {
 	/**
 	 * HTTP request, whose URI never ends on "/".
 	 */
-	private static class FileUriRequest extends SuffixPreservingRequest {
+	private class FileUriRequest extends SuffixPreservingRequest {
 
 		public FileUriRequest(HttpServletRequest request) {
 			super(request);
@@ -155,7 +176,7 @@ public class UriNormalizationFilter implements HttpFilter {
 
 		@Override
 		public String getRequestURI() {
-			return StringUtils.removeEnd(super.getRequestURI(), "/");
+			return asFileUri(super.getRequestURI());
 		}
 
 	}
@@ -163,7 +184,7 @@ public class UriNormalizationFilter implements HttpFilter {
 	/**
 	 * HTTP request, whose URI always ends on "/".
 	 */
-	private static class FolderUriRequest extends SuffixPreservingRequest {
+	private class FolderUriRequest extends SuffixPreservingRequest {
 
 		public FolderUriRequest(HttpServletRequest request) {
 			super(request);
@@ -171,7 +192,7 @@ public class UriNormalizationFilter implements HttpFilter {
 
 		@Override
 		public String getRequestURI() {
-			return StringUtils.appendIfMissing(super.getRequestURI(), "/");
+			return asFolderUri(super.getRequestURI());
 		}
 
 	}

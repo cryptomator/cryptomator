@@ -11,12 +11,12 @@ package org.cryptomator.filesystem.inmem;
 import java.io.FileNotFoundException;
 import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
+import java.nio.file.FileAlreadyExistsException;
 import java.time.Instant;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 
-import org.apache.commons.io.FileExistsException;
 import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.ReadableFile;
 import org.cryptomator.filesystem.WritableFile;
@@ -53,12 +53,15 @@ class InMemoryFile extends InMemoryNode implements File {
 		writeLock.lock();
 		final InMemoryFolder parent = parent().get();
 		parent.existingChildren.compute(this.name(), (k, v) -> {
-			if (v == null || v == this) {
-				this.lastModified = Instant.now();
-				this.creationTime = Instant.now();
-				return this;
+			if (v != null && v != this) {
+				// other file or folder with same name already exists.
+				throw new UncheckedIOException(new FileAlreadyExistsException(k));
 			} else {
-				throw new UncheckedIOException(new FileExistsException(k));
+				if (v == null) {
+					this.creationTime = Instant.now();
+				}
+				this.lastModified = Instant.now();
+				return this;
 			}
 		});
 		return new InMemoryWritableFile(this::setLastModified, this::setCreationTime, this::getContent, this::setContent, this::delete, writeLock);

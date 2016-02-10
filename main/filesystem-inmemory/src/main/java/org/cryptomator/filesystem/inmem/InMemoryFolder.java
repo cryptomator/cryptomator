@@ -15,7 +15,7 @@ import java.io.UncheckedIOException;
 import java.time.Instant;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 import org.apache.commons.io.FileExistsException;
@@ -24,7 +24,7 @@ import org.cryptomator.filesystem.Folder;
 
 class InMemoryFolder extends InMemoryNode implements Folder {
 
-	final Map<String, InMemoryNode> existingChildren = new TreeMap<>();
+	final Map<String, InMemoryNode> existingChildren = new ConcurrentHashMap<>();
 
 	private final WeakValuedCache<String, InMemoryFolder> folders = WeakValuedCache.usingLoader(this::newFolder);
 	private final WeakValuedCache<String, InMemoryFile> files = WeakValuedCache.usingLoader(this::newFile);
@@ -67,11 +67,12 @@ class InMemoryFolder extends InMemoryNode implements Folder {
 		}
 		parent.create();
 		parent.existingChildren.compute(name, (k, v) -> {
-			if (v == null) {
+			if (v != null) {
+				// other file or folder with same name already exists.
+				throw new UncheckedIOException(new FileExistsException(k));
+			} else {
 				this.lastModified = Instant.now();
 				return this;
-			} else {
-				throw new UncheckedIOException(new FileExistsException(k));
 			}
 		});
 		assert this.exists();
@@ -83,11 +84,11 @@ class InMemoryFolder extends InMemoryNode implements Folder {
 		if (target.exists()) {
 			target.delete();
 		}
-		assert !target.exists();
+		assert!target.exists();
 		target.create();
 		this.copyTo(target);
 		this.delete();
-		assert !this.exists();
+		assert!this.exists();
 	}
 
 	@Override
@@ -109,7 +110,12 @@ class InMemoryFolder extends InMemoryNode implements Folder {
 				subFolder.delete();
 			}
 		}
-		assert !this.exists();
+		assert!this.exists();
+	}
+
+	@Override
+	public void setCreationTime(Instant instant) throws UncheckedIOException {
+		creationTime = instant;
 	}
 
 	@Override

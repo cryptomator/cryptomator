@@ -17,6 +17,7 @@ import java.util.Optional;
 import org.apache.jackrabbit.webdav.DavException;
 import org.apache.jackrabbit.webdav.DavResource;
 import org.apache.jackrabbit.webdav.DavResourceIterator;
+import org.apache.jackrabbit.webdav.DavServletResponse;
 import org.apache.jackrabbit.webdav.DavSession;
 import org.apache.jackrabbit.webdav.io.InputContext;
 import org.apache.jackrabbit.webdav.io.OutputContext;
@@ -25,6 +26,8 @@ import org.apache.jackrabbit.webdav.property.DavProperty;
 import org.apache.jackrabbit.webdav.property.DavPropertyName;
 import org.apache.jackrabbit.webdav.property.DavPropertySet;
 import org.apache.jackrabbit.webdav.property.DefaultDavProperty;
+import org.cryptomator.filesystem.File;
+import org.cryptomator.filesystem.Folder;
 import org.cryptomator.filesystem.ReadableFile;
 import org.cryptomator.filesystem.WritableFile;
 import org.cryptomator.filesystem.jackrabbit.FileLocator;
@@ -73,7 +76,23 @@ class DavFile extends DavNode<FileLocator> {
 	public void move(DavResource destination) throws DavException {
 		if (destination instanceof DavFile) {
 			DavFile dst = (DavFile) destination;
+			if (dst.node.exists()) {
+				// Overwrite header already checked by AbstractWebdavServlet#validateDestination
+				dst.node.delete();
+			} else if (!dst.node.parent().get().exists()) {
+				throw new DavException(DavServletResponse.SC_CONFLICT, "Destination's parent doesn't exist.");
+			}
 			node.moveTo(dst.node);
+		} else if (destination instanceof DavFolder) {
+			DavFolder dst = (DavFolder) destination;
+			Folder parent = dst.node.parent().get();
+			File newDst = parent.file(dst.node.name());
+			if (dst.node.exists()) {
+				dst.node.delete();
+			} else if (!parent.exists()) {
+				throw new DavException(DavServletResponse.SC_CONFLICT, "Destination's parent doesn't exist.");
+			}
+			node.moveTo(newDst);
 		} else {
 			throw new IllegalArgumentException("Destination not a DavFolder: " + destination.getClass().getName());
 		}
@@ -83,9 +102,25 @@ class DavFile extends DavNode<FileLocator> {
 	public void copy(DavResource destination, boolean shallow) throws DavException {
 		if (destination instanceof DavFile) {
 			DavFile dst = (DavFile) destination;
+			if (dst.node.exists()) {
+				// Overwrite header already checked by AbstractWebdavServlet#validateDestination
+				dst.node.delete();
+			} else if (!dst.node.parent().get().exists()) {
+				throw new DavException(DavServletResponse.SC_CONFLICT, "Destination's parent doesn't exist.");
+			}
 			node.copyTo(dst.node);
+		} else if (destination instanceof DavFolder) {
+			DavFolder dst = (DavFolder) destination;
+			Folder parent = dst.node.parent().get();
+			File newDst = parent.file(dst.node.name());
+			if (dst.node.exists()) {
+				dst.node.delete();
+			} else if (!parent.exists()) {
+				throw new DavException(DavServletResponse.SC_CONFLICT, "Destination's parent doesn't exist.");
+			}
+			node.copyTo(newDst);
 		} else {
-			throw new IllegalArgumentException("Destination not a DavFolder: " + destination.getClass().getName());
+			throw new IllegalArgumentException("Destination not a DavFile: " + destination.getClass().getName());
 		}
 	}
 

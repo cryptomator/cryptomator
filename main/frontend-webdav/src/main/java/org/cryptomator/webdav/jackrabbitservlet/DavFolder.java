@@ -124,7 +124,22 @@ class DavFolder extends DavNode<FolderLocator> {
 	public void move(DavResource destination) throws DavException {
 		if (destination instanceof DavFolder) {
 			DavFolder dst = (DavFolder) destination;
+			if (dst.node.exists()) {
+				dst.node.delete();
+			} else if (!dst.node.parent().get().exists()) {
+				throw new DavException(DavServletResponse.SC_CONFLICT, "Destination's parent doesn't exist.");
+			}
 			node.moveTo(dst.node);
+		} else if (destination instanceof DavFile) {
+			DavFile dst = (DavFile) destination;
+			Folder parent = dst.node.parent().get();
+			Folder newDst = parent.folder(dst.node.name());
+			if (dst.node.exists()) {
+				dst.node.delete();
+			} else if (!parent.exists()) {
+				throw new DavException(DavServletResponse.SC_CONFLICT, "Destination's parent doesn't exist.");
+			}
+			node.moveTo(newDst);
 		} else {
 			throw new IllegalArgumentException("Destination not a DavFolder: " + destination.getClass().getName());
 		}
@@ -132,11 +147,31 @@ class DavFolder extends DavNode<FolderLocator> {
 
 	@Override
 	public void copy(DavResource destination, boolean shallow) throws DavException {
-		if (shallow) {
-			throw new UnsupportedOperationException("Shallow copy of directories not supported.");
-		} else if (destination instanceof DavFolder) {
+		if (destination instanceof DavFolder) {
 			DavFolder dst = (DavFolder) destination;
-			node.copyTo(dst.node);
+			if (dst.node.exists()) {
+				dst.node.delete();
+			} else if (!dst.node.parent().get().exists()) {
+				throw new DavException(DavServletResponse.SC_CONFLICT, "Destination's parent doesn't exist.");
+			}
+			dst.node.create();
+			if (shallow) {
+				// http://www.webdav.org/specs/rfc2518.html#copy.for.collections
+				node.creationTime().ifPresent(dst::setCreationTime);
+				dst.setModificationTime(node.lastModified());
+			} else {
+				node.copyTo(dst.node);
+			}
+		} else if (destination instanceof DavFile) {
+			DavFile dst = (DavFile) destination;
+			Folder parent = dst.node.parent().get();
+			Folder newDst = parent.folder(dst.node.name());
+			if (dst.node.exists()) {
+				dst.node.delete();
+			} else if (!parent.exists()) {
+				throw new DavException(DavServletResponse.SC_CONFLICT, "Destination's parent doesn't exist.");
+			}
+			node.copyTo(newDst);
 		} else {
 			throw new IllegalArgumentException("Destination not a DavFolder: " + destination.getClass().getName());
 		}

@@ -126,6 +126,36 @@ public class UriNormalizationFilterTest {
 		Assert.assertEquals("/404/", wrappedReq.getValue().getHeader("Destination"));
 	}
 
+	/* MIXED */
+
+	@Test
+	public void testCopyFileToFolderRequest() throws IOException, ServletException {
+		Mockito.when(request.getPathInfo()).thenReturn("/file/");
+		Mockito.when(request.getRequestURI()).thenReturn("/file/");
+		Mockito.when(request.getMethod()).thenReturn("COPY");
+		Mockito.when(request.getHeader("Destination")).thenReturn("/folder");
+		filter.doFilter(request, response, chain);
+
+		ArgumentCaptor<HttpServletRequest> wrappedReq = ArgumentCaptor.forClass(HttpServletRequest.class);
+		Mockito.verify(chain).doFilter(wrappedReq.capture(), Mockito.any(ServletResponse.class));
+		Assert.assertEquals("/file", wrappedReq.getValue().getRequestURI());
+		Assert.assertEquals("/folder/", wrappedReq.getValue().getHeader("Destination"));
+	}
+
+	@Test
+	public void testMoveFolderToFileRequest() throws IOException, ServletException {
+		Mockito.when(request.getPathInfo()).thenReturn("/folder");
+		Mockito.when(request.getRequestURI()).thenReturn("/folder");
+		Mockito.when(request.getMethod()).thenReturn("COPY");
+		Mockito.when(request.getHeader("Destination")).thenReturn("/file/");
+		filter.doFilter(request, response, chain);
+
+		ArgumentCaptor<HttpServletRequest> wrappedReq = ArgumentCaptor.forClass(HttpServletRequest.class);
+		Mockito.verify(chain).doFilter(wrappedReq.capture(), Mockito.any(ServletResponse.class));
+		Assert.assertEquals("/folder/", wrappedReq.getValue().getRequestURI());
+		Assert.assertEquals("/file", wrappedReq.getValue().getHeader("Destination"));
+	}
+
 	/* UNKNOWN */
 
 	@Test
