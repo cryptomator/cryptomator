@@ -6,7 +6,7 @@
  * Contributors:
  *     Sebastian Stenzel - initial API and implementation
  *******************************************************************************/
-package org.cryptomator.webdav.filters;
+package org.cryptomator.frontend.webdav.filters;
 
 import java.io.IOException;
 
@@ -17,6 +17,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.cryptomator.frontend.webdav.filters.MacChunkedPutCompatibilityFilter;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

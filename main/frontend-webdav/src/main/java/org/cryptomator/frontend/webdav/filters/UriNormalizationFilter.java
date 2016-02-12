@@ -6,7 +6,7 @@
  * Contributors:
  *     Sebastian Stenzel - initial API and implementation
  *******************************************************************************/
-package org.cryptomator.webdav.filters;
+package org.cryptomator.frontend.webdav.filters;
 
 import java.io.IOException;
 import java.net.URI;
@@ -20,7 +20,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.cryptomator.webdav.filters.UriNormalizationFilter.ResourceTypeChecker.ResourceType;
+import org.cryptomator.frontend.webdav.filters.UriNormalizationFilter.ResourceTypeChecker.ResourceType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

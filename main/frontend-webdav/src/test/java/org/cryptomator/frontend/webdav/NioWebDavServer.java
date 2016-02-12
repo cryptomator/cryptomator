@@ -24,7 +24,7 @@ import javax.servlet.DispatcherType;
 
 import org.cryptomator.filesystem.FileSystem;
 import org.cryptomator.filesystem.nio.NioFileSystem;
-import org.cryptomator.webdav.filters.LoggingHttpFilter;
+import org.cryptomator.frontend.webdav.filters.LoggingHttpFilter;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 
 public class NioWebDavServer {

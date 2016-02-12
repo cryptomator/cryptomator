@@ -6,7 +6,7 @@
  * Contributors:
  *     Sebastian Stenzel - initial API and implementation
  *******************************************************************************/
-package org.cryptomator.webdav.filters;
+package org.cryptomator.frontend.webdav.filters;
 
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
@@ -24,6 +24,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.cryptomator.frontend.webdav.filters.HttpFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

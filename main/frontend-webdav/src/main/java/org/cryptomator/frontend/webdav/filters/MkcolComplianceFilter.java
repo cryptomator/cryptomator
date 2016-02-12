@@ -6,7 +6,7 @@
  * Contributors:
  *     Sebastian Stenzel - initial API and implementation
  *******************************************************************************/
-package org.cryptomator.webdav.filters;
+package org.cryptomator.frontend.webdav.filters;
 
 import java.io.IOException;
 

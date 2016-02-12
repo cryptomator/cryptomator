@@ -6,7 +6,7 @@
  * Contributors:
  *     Sebastian Stenzel - initial API and implementation
  *******************************************************************************/
-package org.cryptomator.webdav.jackrabbitservlet;
+package org.cryptomator.frontend.webdav.jackrabbitservlet;
 
 import java.io.IOException;
 import java.net.URI;

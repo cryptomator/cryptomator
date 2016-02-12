@@ -1,4 +1,4 @@
-package org.cryptomator.webdav.jackrabbitservlet;
+package org.cryptomator.frontend.webdav.jackrabbitservlet;
 
 import org.apache.jackrabbit.webdav.DavConstants;
 import org.apache.jackrabbit.webdav.lock.AbstractActiveLock;

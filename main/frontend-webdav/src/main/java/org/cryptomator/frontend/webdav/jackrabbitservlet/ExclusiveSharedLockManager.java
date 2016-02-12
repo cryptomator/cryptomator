@@ -1,4 +1,4 @@
-package org.cryptomator.webdav.jackrabbitservlet;
+package org.cryptomator.frontend.webdav.jackrabbitservlet;
 
 import java.util.Collection;
 import java.util.Collections;
