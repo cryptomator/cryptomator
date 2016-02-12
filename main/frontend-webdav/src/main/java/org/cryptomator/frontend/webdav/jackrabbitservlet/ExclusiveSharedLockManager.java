@@ -41,22 +41,22 @@ public class ExclusiveSharedLockManager implements LockManager {
 		FileSystemResourceLocator locator = resource.getLocator();
 		removedExpiredLocksInLocatorHierarchy(locator);
 
+		// look for existing locks on this resource or its ancestors:
 		ActiveLock existingExclusiveLock = getLock(lockInfo.getType(), Scope.EXCLUSIVE, resource);
 		ActiveLock existingSharedLock = getLock(lockInfo.getType(), Scope.SHARED, resource);
 		boolean hasExclusiveLock = existingExclusiveLock != null;
 		boolean hasSharedLock = existingSharedLock != null;
 		boolean isLocked = hasExclusiveLock || hasSharedLock;
 		if ((Scope.EXCLUSIVE.equals(lockInfo.getScope()) && isLocked) || (Scope.SHARED.equals(lockInfo.getScope()) && hasExclusiveLock)) {
-			throw new DavException(DavServletResponse.SC_LOCKED, "Resource already locked.");
+			throw new DavException(DavServletResponse.SC_LOCKED, "Resource (or parent resource) already locked.");
 		}
 
-		for (Entry<FileSystemResourceLocator, Map<String, ActiveLock>> entry : lockedResources.entrySet()) {
-			final FileSystemResourceLocator entryLocator = entry.getKey();
-			final Collection<ActiveLock> entryLocks = entry.getValue().values();
-			if (isAncestor(entryLocator, locator) && isAffectedByParentLocks(lockInfo, locator, entryLocks, entryLocator)) {
-				throw new DavException(DavServletResponse.SC_LOCKED, "Parent resource already locked. " + entryLocator);
-			} else if (isAncestor(locator, entryLocator) && isAffectedByChildLocks(lockInfo, locator, entryLocks, entryLocator)) {
-				throw new DavException(DavServletResponse.SC_CONFLICT, "Subresource already locked. " + entryLocator);
+		// look for locked children:
+		for (Entry<FileSystemResourceLocator, Map<String, ActiveLock>> potentialChild : lockedResources.entrySet()) {
+			final FileSystemResourceLocator childLocator = potentialChild.getKey();
+			final Collection<ActiveLock> childLocks = potentialChild.getValue().values();
+			if (isChild(locator, childLocator) && isAffectedByChildLocks(lockInfo, locator, childLocks, childLocator)) {
+				throw new DavException(DavServletResponse.SC_CONFLICT, "Subresource already locked. " + childLocator);
 			}
 		}
 
@@ -65,29 +65,18 @@ public class ExclusiveSharedLockManager implements LockManager {
 	}
 
 	private void removedExpiredLocksInLocatorHierarchy(FileSystemResourceLocator locator) {
+		Objects.requireNonNull(locator);
 		lockedResources.getOrDefault(locator, Collections.emptyMap()).values().removeIf(ActiveLock::isExpired);
 		locator.parent().ifPresent(this::removedExpiredLocksInLocatorHierarchy);
 	}
 
-	private boolean isAncestor(FileSystemResourceLocator parent, FileSystemResourceLocator child) {
+	private boolean isChild(FileSystemResourceLocator parent, FileSystemResourceLocator child) {
 		if (parent instanceof FolderLocator) {
 			FolderLocator folder = (FolderLocator) parent;
 			return folder.isAncestorOf(child);
 		} else {
 			return false;
 		}
-	}
-
-	private boolean isAffectedByParentLocks(LockInfo childLockInfo, FileSystemResourceLocator childLocator, Collection<ActiveLock> parentLocks, FileSystemResourceLocator parentLocator) {
-		assert childLocator.parent().isPresent();
-		for (ActiveLock lock : parentLocks) {
-			if (Scope.SHARED.equals(childLockInfo.getScope()) && Scope.SHARED.equals(lock.getScope())) {
-				continue;
-			} else if (lock.isDeep() || childLocator.parent().get().equals(parentLocator)) {
-				return true;
-			}
-		}
-		return false;
 	}
 
 	private boolean isAffectedByChildLocks(LockInfo parentLockInfo, FileSystemResourceLocator parentLocator, Collection<ActiveLock> childLocks, FileSystemResourceLocator childLocator) {
@@ -107,7 +96,7 @@ public class ExclusiveSharedLockManager implements LockManager {
 		ActiveLock lock = getLock(lockInfo.getType(), lockInfo.getScope(), resource);
 		if (lock == null) {
 			throw new DavException(DavServletResponse.SC_PRECONDITION_FAILED);
-		} else if (!lock.getToken().equals(lockToken)) {
+		} else if (!lock.isLockedByToken(lockToken)) {
 			throw new DavException(DavServletResponse.SC_LOCKED);
 		}
 		lock.setTimeout(lockInfo.getTimeout());
@@ -144,24 +133,24 @@ public class ExclusiveSharedLockManager implements LockManager {
 	@Override
 	public ActiveLock getLock(Type type, Scope scope, DavResource resource) {
 		if (resource instanceof DavNode) {
-			return getLockInternal(type, scope, ((DavNode<?>) resource).getLocator());
+			return getLockInternal(type, scope, ((DavNode<?>) resource).getLocator(), 0);
 		} else {
 			throw new IllegalArgumentException("Unsupported resource type " + resource.getClass());
 		}
 	}
 
-	private ActiveLock getLockInternal(Type type, Scope scope, FileSystemResourceLocator locator) {
+	private ActiveLock getLockInternal(Type type, Scope scope, FileSystemResourceLocator locator, int depth) {
 		// try to find a lock directly on this resource:
 		if (lockedResources.containsKey(locator)) {
 			for (ActiveLock lock : lockedResources.get(locator).values()) {
-				if (type.equals(lock.getType()) && scope.equals(lock.getScope())) {
+				if (type.equals(lock.getType()) && scope.equals(lock.getScope()) && (depth == 0 || lock.isDeep())) {
 					return lock;
 				}
 			}
 		}
 		// or otherwise look for parent locks:
 		if (locator.parent().isPresent()) {
-			return getLockInternal(type, scope, locator.parent().get());
+			return getLockInternal(type, scope, locator.parent().get(), depth++);
 		} else {
 			return null;
 		}

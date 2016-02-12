@@ -14,7 +14,7 @@ import java.util.Optional;
 
 import org.cryptomator.filesystem.Node;
 
-abstract class DelegatingNode<T extends Node> implements Node {
+public abstract class DelegatingNode<T extends Node> implements Node {
 
 	protected final T delegate;
 
