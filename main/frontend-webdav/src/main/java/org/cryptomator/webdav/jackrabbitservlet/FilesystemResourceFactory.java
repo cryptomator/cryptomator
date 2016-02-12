@@ -16,7 +16,6 @@ import org.apache.jackrabbit.webdav.DavServletRequest;
 import org.apache.jackrabbit.webdav.DavServletResponse;
 import org.apache.jackrabbit.webdav.DavSession;
 import org.apache.jackrabbit.webdav.lock.LockManager;
-import org.apache.jackrabbit.webdav.lock.SimpleLockManager;
 import org.cryptomator.filesystem.jackrabbit.FileLocator;
 import org.cryptomator.filesystem.jackrabbit.FolderLocator;
 
@@ -25,7 +24,7 @@ class FilesystemResourceFactory implements DavResourceFactory {
 	private final LockManager lockManager;
 
 	public FilesystemResourceFactory() {
-		this.lockManager = new SimpleLockManager();
+		this.lockManager = new ExclusiveSharedLockManager();
 	}
 
 	@Override

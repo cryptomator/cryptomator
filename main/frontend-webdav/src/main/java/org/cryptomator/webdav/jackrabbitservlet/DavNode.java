@@ -16,12 +16,12 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.Temporal;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import org.apache.jackrabbit.webdav.DavException;
 import org.apache.jackrabbit.webdav.DavResource;
-import org.apache.jackrabbit.webdav.DavResourceLocator;
-import org.apache.jackrabbit.webdav.DavServletResponse;
 import org.apache.jackrabbit.webdav.DavSession;
 import org.apache.jackrabbit.webdav.MultiStatusResponse;
 import org.apache.jackrabbit.webdav.lock.ActiveLock;
@@ -78,7 +78,7 @@ abstract class DavNode<T extends FileSystemResourceLocator> implements DavResour
 	}
 
 	@Override
-	public DavResourceLocator getLocator() {
+	public FileSystemResourceLocator getLocator() {
 		return node;
 	}
 
@@ -202,7 +202,7 @@ abstract class DavNode<T extends FileSystemResourceLocator> implements DavResour
 
 	@Override
 	public boolean isLockable(Type type, Scope scope) {
-		return true;
+		return Type.WRITE.equals(type) && Scope.EXCLUSIVE.equals(scope) || Scope.SHARED.equals(scope);
 	}
 
 	@Override
@@ -218,18 +218,12 @@ abstract class DavNode<T extends FileSystemResourceLocator> implements DavResour
 	@Override
 	public ActiveLock[] getLocks() {
 		final ActiveLock exclusiveWriteLock = getLock(Type.WRITE, Scope.EXCLUSIVE);
-		if (exclusiveWriteLock != null) {
-			return new ActiveLock[] {exclusiveWriteLock};
-		} else {
-			return new ActiveLock[0];
-		}
+		final ActiveLock sharedWriteLock = getLock(Type.WRITE, Scope.SHARED);
+		return Stream.of(exclusiveWriteLock, sharedWriteLock).filter(Objects::nonNull).toArray(ActiveLock[]::new);
 	}
 
 	@Override
 	public ActiveLock lock(LockInfo reqLockInfo) throws DavException {
-		if (Scope.SHARED.equals(reqLockInfo.getScope())) {
-			throw new DavException(DavServletResponse.SC_PRECONDITION_FAILED, "Only exclusive write locks supported.");
-		}
 		return lockManager.createLock(reqLockInfo, this);
 	}
 

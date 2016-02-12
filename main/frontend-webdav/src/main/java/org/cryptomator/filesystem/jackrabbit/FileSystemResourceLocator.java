@@ -9,23 +9,12 @@
 package org.cryptomator.filesystem.jackrabbit;
 
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.jackrabbit.webdav.DavResourceLocator;
 import org.apache.jackrabbit.webdav.util.EncodeUtil;
-import org.cryptomator.common.LazyInitializer;
 import org.cryptomator.filesystem.Node;
 
 public interface FileSystemResourceLocator extends DavResourceLocator, Node {
-
-	@Override
-	default String getResourcePath() {
-		return LazyInitializer.initializeLazily(getResourcePathRef(), this::computeResourcePath);
-	}
-
-	AtomicReference<String> getResourcePathRef();
-
-	String computeResourcePath();
 
 	@Override
 	Optional<FolderLocator> parent();

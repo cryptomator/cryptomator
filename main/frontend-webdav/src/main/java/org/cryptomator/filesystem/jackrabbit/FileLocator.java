@@ -14,7 +14,7 @@ import org.apache.jackrabbit.webdav.DavLocatorFactory;
 import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.delegating.DelegatingFile;
 
-public class FileLocator extends DelegatingFile<FolderLocator>implements FileSystemResourceLocator {
+public class FileLocator extends DelegatingFile<FolderLocator>implements InternalFileSystemResourceLocator {
 
 	private final DavLocatorFactory factory;
 	private final String prefix;

@@ -16,7 +16,7 @@ import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.Folder;
 import org.cryptomator.filesystem.delegating.DelegatingFolder;
 
-public class FolderLocator extends DelegatingFolder<FolderLocator, FileLocator>implements FileSystemResourceLocator {
+public class FolderLocator extends DelegatingFolder<FolderLocator, FileLocator>implements InternalFileSystemResourceLocator {
 
 	private final DavLocatorFactory factory;
 	private final String prefix;
