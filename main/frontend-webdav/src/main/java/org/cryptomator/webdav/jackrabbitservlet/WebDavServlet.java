@@ -11,14 +11,17 @@ package org.cryptomator.webdav.jackrabbitservlet;
 import java.io.IOException;
 import java.net.URI;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.jackrabbit.webdav.DavException;
 import org.apache.jackrabbit.webdav.DavLocatorFactory;
 import org.apache.jackrabbit.webdav.DavResource;
 import org.apache.jackrabbit.webdav.DavResourceFactory;
 import org.apache.jackrabbit.webdav.DavServletResponse;
+import org.apache.jackrabbit.webdav.DavSession;
 import org.apache.jackrabbit.webdav.DavSessionProvider;
 import org.apache.jackrabbit.webdav.WebdavRequest;
 import org.apache.jackrabbit.webdav.WebdavResponse;
+import org.apache.jackrabbit.webdav.lock.ActiveLock;
 import org.apache.jackrabbit.webdav.lock.Scope;
 import org.apache.jackrabbit.webdav.lock.Type;
 import org.apache.jackrabbit.webdav.server.AbstractWebdavServlet;
@@ -78,7 +81,7 @@ public class WebDavServlet extends AbstractWebdavServlet {
 
 	@Override
 	protected int validateDestination(DavResource destResource, WebdavRequest request, boolean checkHeader) throws DavException {
-		if (isLocked(destResource) && (request.getHeader(HEADER_IF) == null || !request.matchesIfHeader(destResource))) {
+		if (isLocked(destResource) && !hasCorrectLockTokens(request.getDavSession(), destResource)) {
 			throw new DavException(DavServletResponse.SC_LOCKED, "The destination resource is locked");
 		}
 		return super.validateDestination(destResource, request, checkHeader);
@@ -86,7 +89,7 @@ public class WebDavServlet extends AbstractWebdavServlet {
 
 	@Override
 	protected void doPut(WebdavRequest request, WebdavResponse response, DavResource resource) throws IOException, DavException {
-		if (isLocked(resource) && (request.getHeader(HEADER_IF) == null || !request.matchesIfHeader(resource))) {
+		if (isLocked(resource) && !hasCorrectLockTokens(request.getDavSession(), resource)) {
 			throw new DavException(DavServletResponse.SC_LOCKED, "The resource is locked");
 		}
 		super.doPut(request, response, resource);
@@ -94,7 +97,7 @@ public class WebDavServlet extends AbstractWebdavServlet {
 
 	@Override
 	protected void doDelete(WebdavRequest request, WebdavResponse response, DavResource resource) throws IOException, DavException {
-		if (isLocked(resource) && (request.getHeader(HEADER_IF) == null || !request.matchesIfHeader(resource))) {
+		if (isLocked(resource) && !hasCorrectLockTokens(request.getDavSession(), resource)) {
 			throw new DavException(DavServletResponse.SC_LOCKED, "The resource is locked");
 		}
 		super.doDelete(request, response, resource);
@@ -102,7 +105,7 @@ public class WebDavServlet extends AbstractWebdavServlet {
 
 	@Override
 	protected void doMove(WebdavRequest request, WebdavResponse response, DavResource resource) throws IOException, DavException {
-		if (isLocked(resource) && (request.getHeader(HEADER_IF) == null || !request.matchesIfHeader(resource))) {
+		if (isLocked(resource) && !hasCorrectLockTokens(request.getDavSession(), resource)) {
 			throw new DavException(DavServletResponse.SC_LOCKED, "The source resource is locked");
 		}
 		super.doMove(request, response, resource);
@@ -110,10 +113,19 @@ public class WebDavServlet extends AbstractWebdavServlet {
 
 	@Override
 	protected void doPropPatch(WebdavRequest request, WebdavResponse response, DavResource resource) throws IOException, DavException {
-		if (isLocked(resource) && (request.getHeader(HEADER_IF) == null || !request.matchesIfHeader(resource))) {
+		if (isLocked(resource) && !hasCorrectLockTokens(request.getDavSession(), resource)) {
 			throw new DavException(DavServletResponse.SC_LOCKED, "The resource is locked");
 		}
 		super.doPropPatch(request, response, resource);
+	}
+
+	private boolean hasCorrectLockTokens(DavSession session, DavResource resource) {
+		boolean access = true;
+		final String[] providedLockTokens = session.getLockTokens();
+		for (ActiveLock lock : resource.getLocks()) {
+			access &= ArrayUtils.contains(providedLockTokens, lock.getToken());
+		}
+		return access;
 	}
 
 	private boolean isLocked(DavResource resource) {
