@@ -120,10 +120,10 @@ public class WebDavServlet extends AbstractWebdavServlet {
 	}
 
 	private boolean hasCorrectLockTokens(DavSession session, DavResource resource) {
-		boolean access = true;
+		boolean access = false;
 		final String[] providedLockTokens = session.getLockTokens();
 		for (ActiveLock lock : resource.getLocks()) {
-			access &= ArrayUtils.contains(providedLockTokens, lock.getToken());
+			access |= ArrayUtils.contains(providedLockTokens, lock.getToken());
 		}
 		return access;
 	}
