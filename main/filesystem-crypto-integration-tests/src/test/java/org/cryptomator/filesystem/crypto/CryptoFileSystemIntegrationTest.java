@@ -13,7 +13,6 @@ import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
-import org.cryptomator.crypto.engine.impl.CryptoEngineTestModule;
 import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.FileSystem;
 import org.cryptomator.filesystem.Folder;
@@ -28,11 +27,11 @@ import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CryptoFileSystemComponentIntegrationTest {
+public class CryptoFileSystemIntegrationTest {
 
-	private static final CryptoFileSystemComponent cryptoFsComp = DaggerCryptoFileSystemComponent.builder().cryptoEngineModule(new CryptoEngineTestModule()).build();
+	private static final Logger LOG = LoggerFactory.getLogger(CryptoFileSystemIntegrationTest.class);
 
-	private static final Logger LOG = LoggerFactory.getLogger(CryptoFileSystemComponentIntegrationTest.class);
+	private final CryptoFileSystemTestComponent cryptoFsComp = DaggerCryptoFileSystemTestComponent.builder().cryptoEngineModule(new CryptoEngineTestModule()).build();
 
 	private CryptoFileSystemDelegate cryptoDelegate;
 	private FileSystem ciphertextFs;
@@ -42,9 +41,9 @@ public class CryptoFileSystemComponentIntegrationTest {
 	public void setupFileSystems() {
 		cryptoDelegate = Mockito.mock(CryptoFileSystemDelegate.class);
 		ciphertextFs = new InMemoryFileSystem();
-		cryptoFsComp.cryptoFileSystemFactory().initializeNew(ciphertextFs, "TopSecret");
-		cleartextFs = cryptoFsComp.cryptoFileSystemFactory().unlockExisting(ciphertextFs, "TopSecret", cryptoDelegate);
-		cleartextFs.create();
+		FileSystem shorteningFs = cryptoFsComp.shorteningFileSystemFactory().get(ciphertextFs);
+		cryptoFsComp.cryptoFileSystemFactory().initializeNew(shorteningFs, "TopSecret");
+		cleartextFs = cryptoFsComp.cryptoFileSystemFactory().unlockExisting(shorteningFs, "TopSecret", cryptoDelegate);
 	}
 
 	@Test(timeout = 1000)

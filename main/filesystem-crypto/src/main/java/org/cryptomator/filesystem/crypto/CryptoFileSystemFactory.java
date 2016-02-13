@@ -18,19 +18,16 @@ import org.cryptomator.crypto.engine.InvalidPassphraseException;
 import org.cryptomator.filesystem.FileSystem;
 import org.cryptomator.filesystem.Folder;
 import org.cryptomator.filesystem.blockaligned.BlockAlignedFileSystemFactory;
-import org.cryptomator.filesystem.shortening.ShorteningFileSystemFactory;
 
 @Singleton
 public class CryptoFileSystemFactory {
 
 	private final Masterkeys masterkeys;
-	private final ShorteningFileSystemFactory shorteningFileSystemFactory;
 	private final BlockAlignedFileSystemFactory blockAlignedFileSystemFactory;
 
 	@Inject
-	public CryptoFileSystemFactory(Masterkeys masterkeys, ShorteningFileSystemFactory shorteningFileSystemFactory, BlockAlignedFileSystemFactory blockAlignedFileSystemFactory) {
+	public CryptoFileSystemFactory(Masterkeys masterkeys, BlockAlignedFileSystemFactory blockAlignedFileSystemFactory) {
 		this.masterkeys = masterkeys;
-		this.shorteningFileSystemFactory = shorteningFileSystemFactory;
 		this.blockAlignedFileSystemFactory = blockAlignedFileSystemFactory;
 	}
 
@@ -41,8 +38,7 @@ public class CryptoFileSystemFactory {
 	public FileSystem unlockExisting(Folder vaultLocation, CharSequence passphrase, CryptoFileSystemDelegate delegate) throws InvalidPassphraseException {
 		final Cryptor cryptor = masterkeys.decrypt(vaultLocation, passphrase);
 		masterkeys.backup(vaultLocation);
-		final FileSystem nameShorteningFs = shorteningFileSystemFactory.get(vaultLocation);
-		final FileSystem cryptoFs = new CryptoFileSystem(nameShorteningFs, cryptor, delegate, passphrase);
+		final FileSystem cryptoFs = new CryptoFileSystem(vaultLocation, cryptor, delegate, passphrase);
 		return blockAlignedFileSystemFactory.get(cryptoFs);
 	}
 

@@ -4,17 +4,15 @@ import static org.cryptomator.common.test.TempFilesRemovedOnShutdown.createTempD
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.security.SecureRandom;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import org.cryptomator.crypto.engine.Cryptor;
-import org.cryptomator.crypto.engine.impl.CryptorImpl;
 import org.cryptomator.filesystem.FileSystem;
-import org.cryptomator.filesystem.crypto.CryptoFileSystem;
+import org.cryptomator.filesystem.crypto.CryptoEngineTestModule;
 import org.cryptomator.filesystem.crypto.CryptoFileSystemDelegate;
+import org.cryptomator.filesystem.crypto.CryptoFileSystemTestComponent;
+import org.cryptomator.filesystem.crypto.DaggerCryptoFileSystemTestComponent;
 import org.cryptomator.filesystem.inmem.InMemoryFileSystem;
 import org.cryptomator.filesystem.invariants.FileSystemFactories.FileSystemFactory;
 import org.cryptomator.filesystem.nio.NioFileSystem;
@@ -23,12 +21,7 @@ import org.mockito.Mockito;
 
 class FileSystemFactories implements Iterable<FileSystemFactory> {
 
-	private static final SecureRandom RANDOM_MOCK = new SecureRandom() {
-		@Override
-		public void nextBytes(byte[] bytes) {
-			Arrays.fill(bytes, (byte) 0x00);
-		}
-	};
+	private static final CryptoFileSystemTestComponent CRYPTO_FS_COMP = DaggerCryptoFileSystemTestComponent.builder().cryptoEngineModule(new CryptoEngineTestModule()).build();
 
 	private final List<FileSystemFactory> factories = new ArrayList<>();
 
@@ -54,11 +47,15 @@ class FileSystemFactories implements Iterable<FileSystemFactory> {
 	}
 
 	private FileSystem createCryptoFileSystemInMemory() {
-		return new CryptoFileSystem(createInMemoryFileSystem(), createCryptor(), Mockito.mock(CryptoFileSystemDelegate.class), "aPassphrase");
+		FileSystem delegate = createInMemoryFileSystem();
+		CRYPTO_FS_COMP.cryptoFileSystemFactory().initializeNew(delegate, "aPassphrase");
+		return CRYPTO_FS_COMP.cryptoFileSystemFactory().unlockExisting(delegate, "aPassphrase", Mockito.mock(CryptoFileSystemDelegate.class));
 	}
 
 	private FileSystem createCryptoFileSystemNio() {
-		return new CryptoFileSystem(createNioFileSystem(), createCryptor(), Mockito.mock(CryptoFileSystemDelegate.class), "aPassphrase");
+		FileSystem delegate = createNioFileSystem();
+		CRYPTO_FS_COMP.cryptoFileSystemFactory().initializeNew(delegate, "aPassphrase");
+		return CRYPTO_FS_COMP.cryptoFileSystemFactory().unlockExisting(delegate, "aPassphrase", Mockito.mock(CryptoFileSystemDelegate.class));
 	}
 
 	private FileSystem createShorteningFileSystemNio() {
@@ -69,12 +66,6 @@ class FileSystemFactories implements Iterable<FileSystemFactory> {
 	private FileSystem createShorteningFileSystemInMemory() {
 		FileSystem delegate = createInMemoryFileSystem();
 		return new ShorteningFileSystem(delegate.folder("d"), delegate.folder("m"), 3);
-	}
-
-	private Cryptor createCryptor() {
-		Cryptor cryptor = new CryptorImpl(RANDOM_MOCK);
-		cryptor.randomizeMasterkey();
-		return cryptor;
 	}
 
 	private void add(String name, FileSystemFactory factory) {

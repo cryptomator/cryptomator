@@ -18,7 +18,7 @@ import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.FileSystem;
 import org.cryptomator.filesystem.Folder;
 
-public class CryptoFileSystem extends CryptoFolder implements FileSystem {
+class CryptoFileSystem extends CryptoFolder implements FileSystem {
 
 	private static final String DATA_ROOT_DIR = "d";
 	private static final String ROOT_DIRECOTRY_ID = "";

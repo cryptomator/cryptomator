@@ -11,6 +11,8 @@ package org.cryptomator.crypto.engine.impl;
 import java.security.SecureRandom;
 import java.util.Arrays;
 
+import org.cryptomator.crypto.engine.Cryptor;
+
 public class TestCryptorImplFactory {
 
 	private static final SecureRandom RANDOM_MOCK = new SecureRandom() {
@@ -27,7 +29,7 @@ public class TestCryptorImplFactory {
 	/**
 	 * @return A CryptorImpl with a mocked PRNG, that can be used during tests without the need of "real" random numbers.
 	 */
-	public static CryptorImpl insecureCryptorImpl() {
+	public static Cryptor insecureCryptorImpl() {
 		return new CryptorImpl(RANDOM_MOCK);
 	}
 

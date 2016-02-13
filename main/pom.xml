@@ -92,6 +92,12 @@
 			</dependency>
 			<dependency>
 				<groupId>org.cryptomator</groupId>
+				<artifactId>filesystem-crypto-integration-tests</artifactId>
+				<version>${project.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.cryptomator</groupId>
 				<artifactId>filesystem-stats</artifactId>
 				<version>${project.version}</version>
 			</dependency>
@@ -258,6 +264,7 @@
 		<module>filesystem-nio</module>
 		<module>filesystem-nameshortening</module>
 		<module>filesystem-crypto</module>
+		<module>filesystem-crypto-integration-tests</module>
 		<module>filesystem-stats</module>
 		<module>filesystem-invariants-tests</module>
 		<module>frontend-api</module>

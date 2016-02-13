@@ -6,10 +6,12 @@
  * Contributors:
  *     Sebastian Stenzel - initial API and implementation
  *******************************************************************************/
-package org.cryptomator.crypto.engine.impl;
+package org.cryptomator.filesystem.crypto;
 
 import java.security.SecureRandom;
 import java.util.Arrays;
+
+import org.cryptomator.crypto.engine.impl.CryptoEngineModule;
 
 /**
  * Used as drop-in-replacement for {@link CryptoEngineModule} during unit tests.

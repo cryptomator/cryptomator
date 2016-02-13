@@ -30,9 +30,10 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 public class NioWebDavServer {
 
 	private static final String PATH_TO_SERVE_PROPERTY = "pathToServe";
+	private static final WebDavComponent WEVDAV_COMP = DaggerWebDavComponent.create();
 
 	public static void main(String[] args) throws Exception {
-		WebDavServer server = DaggerWebDavComponent.create().server();
+		WebDavServer server = WEVDAV_COMP.server();
 		server.setPort(8080);
 		server.start();
 

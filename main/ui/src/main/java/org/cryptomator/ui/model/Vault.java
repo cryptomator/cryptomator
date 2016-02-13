@@ -29,6 +29,7 @@ import org.cryptomator.filesystem.FileSystem;
 import org.cryptomator.filesystem.crypto.CryptoFileSystemDelegate;
 import org.cryptomator.filesystem.crypto.CryptoFileSystemFactory;
 import org.cryptomator.filesystem.nio.NioFileSystem;
+import org.cryptomator.filesystem.shortening.ShorteningFileSystemFactory;
 import org.cryptomator.filesystem.stats.StatsFileSystem;
 import org.cryptomator.frontend.CommandFailedException;
 import org.cryptomator.frontend.Frontend;
@@ -59,6 +60,7 @@ public class Vault implements Serializable, CryptoFileSystemDelegate {
 	private final Path path;
 	private final Lazy<FrontendFactory> frontendFactory;
 	private final DeferredCloser closer;
+	private final ShorteningFileSystemFactory shorteningFileSystemFactory;
 	private final CryptoFileSystemFactory cryptoFileSystemFactory;
 	private final ObjectProperty<Boolean> unlocked = new SimpleObjectProperty<Boolean>(this, "unlocked", Boolean.FALSE);
 	private final ObservableList<String> namesOfResourcesWithInvalidMac = FXThreads.observableListOnMainThread(FXCollections.observableArrayList());
@@ -72,10 +74,11 @@ public class Vault implements Serializable, CryptoFileSystemDelegate {
 	/**
 	 * Package private constructor, use {@link VaultFactory}.
 	 */
-	Vault(Path vaultDirectoryPath, Lazy<FrontendFactory> frontendFactory, CryptoFileSystemFactory cryptoFileSystemFactory, DeferredCloser closer) {
+	Vault(Path vaultDirectoryPath, Lazy<FrontendFactory> frontendFactory, ShorteningFileSystemFactory shorteningFileSystemFactory, CryptoFileSystemFactory cryptoFileSystemFactory, DeferredCloser closer) {
 		this.path = vaultDirectoryPath;
 		this.frontendFactory = frontendFactory;
 		this.closer = closer;
+		this.shorteningFileSystemFactory = shorteningFileSystemFactory;
 		this.cryptoFileSystemFactory = cryptoFileSystemFactory;
 
 		try {
@@ -114,7 +117,8 @@ public class Vault implements Serializable, CryptoFileSystemDelegate {
 	public synchronized void activateFrontend(CharSequence passphrase) throws FrontendCreationFailedException {
 		try {
 			FileSystem fs = NioFileSystem.rootedAt(path);
-			FileSystem cryptoFs = cryptoFileSystemFactory.unlockExisting(fs, passphrase, this);
+			FileSystem shorteningFs = shorteningFileSystemFactory.get(fs);
+			FileSystem cryptoFs = cryptoFileSystemFactory.unlockExisting(shorteningFs, passphrase, this);
 			StatsFileSystem statsFs = new StatsFileSystem(cryptoFs);
 			statsFileSystem = Optional.of(statsFs);
 			String contextPath = StringUtils.prependIfMissing(mountName, "/");

@@ -29,7 +29,7 @@ import org.cryptomator.crypto.engine.InvalidPassphraseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class CryptorImpl implements Cryptor {
+class CryptorImpl implements Cryptor {
 
 	private static final int SCRYPT_SALT_LENGTH = 8;
 	private static final int SCRYPT_COST_PARAM = 1 << 14;

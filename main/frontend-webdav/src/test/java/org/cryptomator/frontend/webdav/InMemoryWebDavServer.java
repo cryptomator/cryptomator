@@ -9,25 +9,31 @@
 package org.cryptomator.frontend.webdav;
 
 import java.net.URI;
-import java.nio.ByteBuffer;
 import java.util.EnumSet;
 
 import javax.servlet.DispatcherType;
 
 import org.cryptomator.filesystem.FileSystem;
-import org.cryptomator.filesystem.WritableFile;
+import org.cryptomator.filesystem.crypto.CryptoEngineTestModule;
+import org.cryptomator.filesystem.crypto.CryptoFileSystemDelegate;
+import org.cryptomator.filesystem.crypto.CryptoFileSystemTestComponent;
+import org.cryptomator.filesystem.crypto.DaggerCryptoFileSystemTestComponent;
 import org.cryptomator.filesystem.inmem.InMemoryFileSystem;
 import org.cryptomator.frontend.webdav.filters.LoggingHttpFilter;
 import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.mockito.Mockito;
 
 public class InMemoryWebDavServer {
 
+	private static final CryptoFileSystemTestComponent CRYPTO_FS_COMP = DaggerCryptoFileSystemTestComponent.builder().cryptoEngineModule(new CryptoEngineTestModule()).build();
+	private static final WebDavComponent WEVDAV_COMP = DaggerWebDavComponent.create();
+
 	public static void main(String[] args) throws Exception {
-		WebDavServer server = DaggerWebDavComponent.create().server();
+		WebDavServer server = WEVDAV_COMP.server();
 		server.setPort(8080);
 		server.start();
 
-		FileSystem fileSystem = setupFilesystem();
+		FileSystem fileSystem = cryptoFileSystem();
 		ServletContextHandler servlet = server.addServlet(fileSystem, URI.create("http://localhost:8080/foo"));
 		servlet.addFilter(LoggingHttpFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
 		servlet.start();
@@ -37,14 +43,18 @@ public class InMemoryWebDavServer {
 		server.stop();
 	}
 
-	private static FileSystem setupFilesystem() {
-		FileSystem fileSystem = new InMemoryFileSystem();
-		fileSystem.folder("mamals").folder("cats").create();
-		fileSystem.folder("mamals").folder("dogs").create();
-		try (WritableFile writable = fileSystem.folder("mamals").folder("cats").file("Garfield.txt").openWritable()) {
-			writable.write(ByteBuffer.wrap("meow".getBytes()));
-		}
-		return fileSystem;
+	private static FileSystem cryptoFileSystem() {
+		FileSystem shorteningFileSystem = shorteningFileSystem();
+		CRYPTO_FS_COMP.cryptoFileSystemFactory().initializeNew(shorteningFileSystem, "asd");
+		return CRYPTO_FS_COMP.cryptoFileSystemFactory().unlockExisting(shorteningFileSystem, "asd", Mockito.mock(CryptoFileSystemDelegate.class));
+	}
+
+	private static FileSystem shorteningFileSystem() {
+		return CRYPTO_FS_COMP.shorteningFileSystemFactory().get(inMemoryFileSystem());
+	}
+
+	private static FileSystem inMemoryFileSystem() {
+		return new InMemoryFileSystem();
 	}
 
 }

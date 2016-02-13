@@ -15,7 +15,7 @@ import java.util.concurrent.Executors;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
-import org.cryptomator.filesystem.crypto.CryptoFileSystemModule;
+import org.cryptomator.crypto.engine.impl.CryptoEngineModule;
 import org.cryptomator.frontend.FrontendFactory;
 import org.cryptomator.frontend.webdav.WebDavServer;
 import org.cryptomator.frontend.webdav.mount.WebDavMounter;
@@ -33,7 +33,7 @@ import dagger.Module;
 import dagger.Provides;
 import javafx.application.Application;
 
-@Module(includes = CryptoFileSystemModule.class)
+@Module(includes = CryptoEngineModule.class)
 class CryptomatorModule {
 
 	private final Application application;

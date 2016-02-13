@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  Copyright (c) 2015 Sebastian Stenzel
+  Copyright (c) 2016 Sebastian Stenzel
   This file is licensed under the terms of the MIT license.
   See the LICENSE.txt file for more info.
   
@@ -14,13 +14,8 @@
 		<artifactId>main</artifactId>
 		<version>0.11.0-SNAPSHOT</version>
 	</parent>
-	<artifactId>filesystem-crypto</artifactId>
-	<name>Cryptomator filesystem: Encryption layer</name>
-	
-	<properties>
-		<bouncycastle.version>1.51</bouncycastle.version>
-		<sivmode.version>1.0.2</sivmode.version>
-	</properties>
+	<artifactId>filesystem-crypto-integration-tests</artifactId>
+	<name>Cryptomator filesystem: Encryption layer tests</name>
 
 	<dependencies>
 		<dependency>
@@ -29,37 +24,13 @@
 		</dependency>
 		<dependency>
 			<groupId>org.cryptomator</groupId>
-			<artifactId>commons</artifactId>
+			<artifactId>filesystem-crypto</artifactId>
 		</dependency>
-		
-		<!-- Crypto -->
 		<dependency>
 			<groupId>org.cryptomator</groupId>
-			<artifactId>siv-mode</artifactId>
-			<version>${sivmode.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.bouncycastle</groupId>
-			<artifactId>bcprov-jdk15on</artifactId>
-			<version>${bouncycastle.version}</version>
+			<artifactId>filesystem-nameshortening</artifactId>
 		</dependency>
 
-		<!-- Commons -->
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-lang3</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>commons-codec</groupId>
-			<artifactId>commons-codec</artifactId>
-		</dependency>
-		
-		<!-- JSON -->
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-databind</artifactId>
-		</dependency>
-		
 		<!-- DI -->
 		<dependency>
 			<groupId>com.google.dagger</groupId>
@@ -70,7 +41,7 @@
 			<artifactId>dagger-compiler</artifactId>
 			<scope>provided</scope>
 		</dependency>
-		
+
 		<!-- Tests -->
 		<dependency>
 			<groupId>org.cryptomator</groupId>
@@ -81,7 +52,7 @@
 			<artifactId>filesystem-inmemory</artifactId>
 		</dependency>
 	</dependencies>
-	
+
 	<build>
 		<plugins>
 			<plugin>

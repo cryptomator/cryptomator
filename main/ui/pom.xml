@@ -32,6 +32,10 @@
 		</dependency>
 		<dependency>
 			<groupId>org.cryptomator</groupId>
+			<artifactId>filesystem-nameshortening</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.cryptomator</groupId>
 			<artifactId>filesystem-crypto</artifactId>
 		</dependency>
 		<dependency>

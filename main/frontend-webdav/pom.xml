@@ -94,13 +94,26 @@
 			<artifactId>commons-test</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>commons-httpclient</groupId>
-			<artifactId>commons-httpclient</artifactId>
+			<groupId>org.cryptomator</groupId>
+			<artifactId>filesystem-inmemory</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.cryptomator</groupId>
+			<artifactId>filesystem-crypto-integration-tests</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.cryptomator</groupId>
+			<artifactId>filesystem-nameshortening</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.cryptomator</groupId>
-			<artifactId>filesystem-inmemory</artifactId>
+			<artifactId>filesystem-crypto</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>commons-httpclient</groupId>
+			<artifactId>commons-httpclient</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
