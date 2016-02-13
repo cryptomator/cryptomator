@@ -10,15 +10,15 @@ package org.cryptomator.filesystem.inmem;
 
 import static java.lang.String.format;
 
-import java.io.IOException;
+import java.io.FileNotFoundException;
 import java.io.UncheckedIOException;
+import java.nio.file.FileAlreadyExistsException;
 import java.time.Instant;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
-import org.apache.commons.io.FileExistsException;
 import org.cryptomator.common.WeakValuedCache;
 import org.cryptomator.filesystem.Folder;
 
@@ -38,7 +38,7 @@ class InMemoryFolder extends InMemoryNode implements Folder {
 		if (exists()) {
 			return existingChildren.values().stream();
 		} else {
-			throw new UncheckedIOException(new IOException(format("Folder %s does not exist", this)));
+			throw new UncheckedIOException(new FileNotFoundException(format("Folder %s does not exist", this)));
 		}
 	}
 
@@ -69,7 +69,7 @@ class InMemoryFolder extends InMemoryNode implements Folder {
 		parent.existingChildren.compute(name, (k, v) -> {
 			if (v != null) {
 				// other file or folder with same name already exists.
-				throw new UncheckedIOException(new FileExistsException(k));
+				throw new UncheckedIOException(new FileAlreadyExistsException(k));
 			} else {
 				this.lastModified = Instant.now();
 				return this;
@@ -111,11 +111,6 @@ class InMemoryFolder extends InMemoryNode implements Folder {
 			}
 		}
 		assert!this.exists();
-	}
-
-	@Override
-	public void setCreationTime(Instant instant) throws UncheckedIOException {
-		creationTime = instant;
 	}
 
 	@Override

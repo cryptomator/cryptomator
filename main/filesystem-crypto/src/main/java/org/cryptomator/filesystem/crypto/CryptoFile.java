@@ -12,7 +12,6 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.io.UncheckedIOException;
 import java.time.Instant;
-import java.util.Optional;
 
 import org.cryptomator.crypto.engine.Cryptor;
 import org.cryptomator.filesystem.File;
@@ -55,11 +54,6 @@ public class CryptoFile extends CryptoNode implements File {
 	@Override
 	public int compareTo(File o) {
 		return toString().compareTo(o.toString());
-	}
-
-	@Override
-	public Optional<Instant> creationTime() throws UncheckedIOException {
-		return physicalFile().creationTime();
 	}
 
 }

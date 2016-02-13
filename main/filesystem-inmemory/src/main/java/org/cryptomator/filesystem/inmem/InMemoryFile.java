@@ -71,10 +71,6 @@ class InMemoryFile extends InMemoryNode implements File {
 		this.lastModified = lastModified;
 	}
 
-	private void setCreationTime(Instant creationTime) {
-		this.creationTime = creationTime;
-	}
-
 	private ByteBuffer getContent() {
 		return content;
 	}

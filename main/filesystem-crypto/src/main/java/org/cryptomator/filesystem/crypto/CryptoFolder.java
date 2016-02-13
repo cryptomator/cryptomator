@@ -13,10 +13,9 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.UncheckedIOException;
-import java.nio.ByteBuffer;
+import java.io.Writer;
 import java.nio.channels.Channels;
 import java.time.Instant;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
@@ -30,7 +29,6 @@ import org.cryptomator.filesystem.Deleter;
 import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.Folder;
 import org.cryptomator.filesystem.Node;
-import org.cryptomator.filesystem.WritableFile;
 
 class CryptoFolder extends CryptoNode implements Folder {
 
@@ -131,14 +129,16 @@ class CryptoFolder extends CryptoNode implements Folder {
 	@Override
 	public void create() {
 		final File dirFile = physicalFile();
-		if (dirFile.exists()) {
+		final Folder dir = physicalFolder();
+		if (dirFile.exists() && dir.exists()) {
 			return;
 		}
 		parent.create();
 		final String directoryId = getDirectoryId();
-		try (WritableFile writable = dirFile.openWritable()) {
-			final ByteBuffer buf = ByteBuffer.wrap(directoryId.getBytes());
-			writable.write(buf);
+		try (Writer writer = Channels.newWriter(dirFile.openWritable(), UTF_8.newEncoder(), -1)) {
+			writer.write(directoryId);
+		} catch (IOException e) {
+			throw new UncheckedIOException(e);
 		}
 		physicalFolder().create();
 	}
@@ -157,13 +157,15 @@ class CryptoFolder extends CryptoNode implements Folder {
 			throw new IllegalArgumentException("Can not move directories containing one another (src: " + this + ", dst: " + target + ")");
 		}
 
+		// directoryId will be used by target, from now on we must no longer use the same id
+		// a new one will be generated on-demand.
+		final String oldDirectoryId = getDirectoryId();
+		directoryId.set(null);
+
 		target.physicalFile().parent().get().create();
 		this.physicalFile().moveTo(target.physicalFile());
 
-		// directoryId is now used by target, we must no longer use the same id
-		// (we'll generate a new one when needed)
-		target.directoryId.set(getDirectoryId());
-		directoryId.set(null);
+		target.directoryId.set(oldDirectoryId);
 	}
 
 	@Override
@@ -172,13 +174,9 @@ class CryptoFolder extends CryptoNode implements Folder {
 			return;
 		}
 		Deleter.deleteContent(this);
-		physicalFile().delete();
 		physicalFolder().delete();
-	}
-
-	@Override
-	public Optional<Instant> creationTime() throws UncheckedIOException {
-		return physicalFile().creationTime();
+		physicalFile().delete();
+		directoryId.set(null);
 	}
 
 	@Override

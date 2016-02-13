@@ -144,6 +144,11 @@ class BlockAlignedWritableFile implements WritableFile {
 	}
 
 	@Override
+	public void setCreationTime(Instant instant) throws UncheckedIOException {
+		delegate.get().setCreationTime(instant);
+	}
+
+	@Override
 	public void delete() throws UncheckedIOException {
 		delegate.get().delete();
 	}

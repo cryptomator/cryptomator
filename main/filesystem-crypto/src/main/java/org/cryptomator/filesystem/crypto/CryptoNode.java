@@ -8,6 +8,8 @@
  *******************************************************************************/
 package org.cryptomator.filesystem.crypto;
 
+import java.io.UncheckedIOException;
+import java.time.Instant;
 import java.util.Optional;
 
 import org.cryptomator.crypto.engine.Cryptor;
@@ -55,7 +57,16 @@ abstract class CryptoNode implements Node {
 	@Override
 	public boolean exists() {
 		return physicalFile().exists();
-		// return parent.children().anyMatch(node -> node.equals(this));
+	}
+
+	@Override
+	public Optional<Instant> creationTime() throws UncheckedIOException {
+		return physicalFile().creationTime();
+	}
+
+	@Override
+	public void setCreationTime(Instant instant) throws UncheckedIOException {
+		physicalFile().setCreationTime(instant);
 	}
 
 	@Override

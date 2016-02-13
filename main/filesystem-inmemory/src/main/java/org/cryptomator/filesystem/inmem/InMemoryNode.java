@@ -83,4 +83,9 @@ class InMemoryNode implements Node {
 		}
 	}
 
+	@Override
+	public void setCreationTime(Instant creationTime) throws UncheckedIOException {
+		this.creationTime = creationTime;
+	}
+
 }

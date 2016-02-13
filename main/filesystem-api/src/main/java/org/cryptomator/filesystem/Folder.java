@@ -7,7 +7,6 @@ package org.cryptomator.filesystem;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.time.Instant;
 import java.util.stream.Stream;
 
 /**
@@ -149,19 +148,6 @@ public interface Folder extends Node {
 		} else {
 			return this.isAncestorOf(node.parent().get());
 		}
-	}
-
-	/**
-	 * <p>
-	 * Sets the creation time of the folder.
-	 * <p>
-	 * Setting the creation time may not be supported by all {@link FileSystem FileSystems}. If the {@code FileSystem} this {@code Folder} belongs to does not support the
-	 * setting the creation time the behavior of this method is unspecified.
-	 * 
-	 * @param instant the time to set as creation time
-	 */
-	default void setCreationTime(Instant instant) throws UncheckedIOException {
-		throw new UncheckedIOException(new IOException("CreationTime not supported"));
 	}
 
 }

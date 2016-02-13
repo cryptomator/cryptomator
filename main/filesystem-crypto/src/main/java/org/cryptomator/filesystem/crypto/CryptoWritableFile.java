@@ -87,6 +87,11 @@ class CryptoWritableFile implements WritableFile {
 	}
 
 	@Override
+	public void setCreationTime(Instant instant) throws UncheckedIOException {
+		file.setCreationTime(instant);
+	}
+
+	@Override
 	public void delete() {
 		writeTask.cancel(true);
 		file.delete();
@@ -97,11 +102,6 @@ class CryptoWritableFile implements WritableFile {
 		terminateAndWaitForWriteTask();
 		file.truncate();
 		initialize(0);
-	}
-
-	@Override
-	public void setCreationTime(Instant instant) throws UncheckedIOException {
-		file.setCreationTime(instant);
 	}
 
 	@Override

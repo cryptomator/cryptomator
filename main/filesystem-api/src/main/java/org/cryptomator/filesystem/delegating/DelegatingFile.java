@@ -9,6 +9,7 @@
 package org.cryptomator.filesystem.delegating;
 
 import java.io.UncheckedIOException;
+import java.time.Instant;
 import java.util.Optional;
 
 import org.cryptomator.filesystem.File;
@@ -67,6 +68,16 @@ public abstract class DelegatingFile<D extends DelegatingFolder<D, ?>> extends D
 		} else {
 			return delegate.compareTo(o);
 		}
+	}
+
+	@Override
+	public Optional<Instant> creationTime() throws UncheckedIOException {
+		return delegate.creationTime();
+	}
+
+	@Override
+	public void setCreationTime(Instant instant) throws UncheckedIOException {
+		delegate.setCreationTime(instant);
 	}
 
 }

@@ -147,15 +147,20 @@ class DavFolder extends DavNode<FolderLocator> {
 
 	@Override
 	public void copy(DavResource destination, boolean shallow) throws DavException {
-		if (destination instanceof DavFolder) {
-			DavFolder dst = (DavFolder) destination;
-			if (dst.node.exists()) {
-				dst.node.delete();
-			} else if (!dst.node.parent().get().exists()) {
+		if (!node.exists()) {
+			throw new DavException(DavServletResponse.SC_NOT_FOUND);
+		}
+		if (destination instanceof DavNode) {
+			DavNode<?> dst = (DavNode<?>) destination;
+			if (!dst.node.parent().get().exists()) {
 				throw new DavException(DavServletResponse.SC_CONFLICT, "Destination's parent doesn't exist.");
 			}
-			dst.node.create();
+		}
+		if (destination instanceof DavFolder) {
+			DavFolder dst = (DavFolder) destination;
 			if (shallow) {
+				// create destination, if it doesn't exist yet:
+				dst.node.create();
 				// http://www.webdav.org/specs/rfc2518.html#copy.for.collections
 				node.creationTime().ifPresent(dst::setCreationTime);
 				dst.setModificationTime(node.lastModified());
@@ -168,8 +173,6 @@ class DavFolder extends DavNode<FolderLocator> {
 			Folder newDst = parent.folder(dst.node.name());
 			if (dst.node.exists()) {
 				dst.node.delete();
-			} else if (!parent.exists()) {
-				throw new DavException(DavServletResponse.SC_CONFLICT, "Destination's parent doesn't exist.");
 			}
 			node.copyTo(newDst);
 		} else {

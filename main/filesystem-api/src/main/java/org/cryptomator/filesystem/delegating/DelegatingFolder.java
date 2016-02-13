@@ -98,6 +98,11 @@ public abstract class DelegatingFolder<D extends DelegatingFolder<D, F>, F exten
 	}
 
 	@Override
+	public Optional<Instant> creationTime() throws UncheckedIOException {
+		return delegate.creationTime();
+	}
+
+	@Override
 	public void setCreationTime(Instant instant) throws UncheckedIOException {
 		delegate.setCreationTime(instant);
 	}

@@ -3,6 +3,7 @@ package org.cryptomator.filesystem.nio;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Path;
+import java.nio.file.attribute.FileTime;
 import java.time.Instant;
 import java.util.Optional;
 
@@ -54,6 +55,15 @@ abstract class NioNode implements Node {
 			} else {
 				return Optional.of(instant);
 			}
+		} catch (IOException e) {
+			throw new UncheckedIOException(e);
+		}
+	}
+
+	@Override
+	public void setCreationTime(Instant creationTime) throws UncheckedIOException {
+		try {
+			nioAccess.setCreationTime(path, FileTime.from(creationTime));
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
 		}
