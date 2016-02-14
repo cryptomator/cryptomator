@@ -2,9 +2,7 @@ package org.cryptomator.filesystem.invariants;
 
 import static org.cryptomator.common.test.matcher.OptionalMatcher.presentOptionalWithValueThat;
 import static org.cryptomator.filesystem.invariants.matchers.InstantMatcher.inRangeInclusiveWithTolerance;
-import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assume.assumeThat;
 
@@ -179,9 +177,6 @@ public class FileTests {
 	public void testCanNotCreateFileWhichExistsAsFolderByWriting(FileSystemFactory fileSystemFactory, WayToObtainAFile wayToObtainANonExistingFile, WayToObtainAFolder wayToObtainAnExistingFolder) {
 		assumeThat(wayToObtainANonExistingFile.returnedFilesExist(), is(false));
 		assumeThat(wayToObtainAnExistingFolder.returnedFoldersExist(), is(true));
-
-		// TODO implement checks in CryptoFileSystem to avoid creation of a file and folder with equal names
-		assumeThat(fileSystemFactory.toString(), not(containsString("Crypto")));
 
 		FileSystem fileSystem = fileSystemFactory.create();
 		File file = wayToObtainANonExistingFile.fileWithName(fileSystem, FILE_NAME);

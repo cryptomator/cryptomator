@@ -8,10 +8,13 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assume.assumeThat;
 
+import java.io.UncheckedIOException;
+
 import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.FileSystem;
 import org.cryptomator.filesystem.Folder;
 import org.cryptomator.filesystem.invariants.FileSystemFactories.FileSystemFactory;
+import org.cryptomator.filesystem.invariants.WaysToObtainAFile.WayToObtainAFile;
 import org.cryptomator.filesystem.invariants.WaysToObtainAFolder.WayToObtainAFolder;
 import org.junit.Rule;
 import org.junit.experimental.theories.DataPoints;
@@ -37,6 +40,9 @@ public class FolderTests {
 
 	@DataPoints
 	public static final Iterable<WayToObtainAFolder> WAYS_TO_OBTAIN_A_FOLDER = new WaysToObtainAFolder();
+
+	@DataPoints
+	public static final Iterable<WayToObtainAFile> WAYS_TO_OBTAIN_A_FILE = new WaysToObtainAFile();
 
 	@Rule
 	public final ExpectedException thrown = ExpectedException.none();
@@ -198,6 +204,21 @@ public class FolderTests {
 		Folder childsChild = folderBiFunction.folderWithName(child, FOLDER_NAME);
 
 		assertThat(folder.isAncestorOf(childsChild), is(true));
+	}
+
+	@Theory
+	public void testFolderWhichExistsAsFileCanNotBeCreated(FileSystemFactory fileSystemFactory, WayToObtainAFolder wayToObtainANonExistingFolder, WayToObtainAFile wayToObtainAnExistingFile) {
+		assumeThat(wayToObtainAnExistingFile.returnedFilesExist(), is(true));
+		assumeThat(wayToObtainANonExistingFolder.returnedFoldersExist(), is(false));
+
+		FileSystem fileSystem = fileSystemFactory.create();
+
+		Folder folder = wayToObtainANonExistingFolder.folderWithName(fileSystem, FOLDER_NAME);
+		wayToObtainAnExistingFile.fileWithName(fileSystem, FOLDER_NAME);
+
+		thrown.expect(UncheckedIOException.class);
+
+		folder.create();
 	}
 
 }

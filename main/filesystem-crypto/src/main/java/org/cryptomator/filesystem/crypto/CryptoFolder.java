@@ -16,6 +16,7 @@ import java.io.Reader;
 import java.io.UncheckedIOException;
 import java.io.Writer;
 import java.nio.channels.Channels;
+import java.nio.file.FileAlreadyExistsException;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
@@ -151,6 +152,9 @@ class CryptoFolder extends CryptoNode implements Folder {
 			return;
 		} else if (!newDirIdGiven) {
 			throw new IllegalStateException("Newly created folder, that didn't exist before, already had an directoryId.");
+		}
+		if (parent.file(name).exists()) {
+			throw new UncheckedIOException(new FileAlreadyExistsException(toString()));
 		}
 		try (Writer writer = Channels.newWriter(dirFile.openWritable(), UTF_8.newEncoder(), -1)) {
 			writer.write(directoryId.get());

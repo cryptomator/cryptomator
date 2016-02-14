@@ -11,6 +11,9 @@ package org.cryptomator.filesystem.crypto;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.util.Optional;
+import java.io.UncheckedIOException;
+import java.nio.file.FileAlreadyExistsException;
+import java.time.Instant;
 
 import org.cryptomator.crypto.engine.Cryptor;
 import org.cryptomator.filesystem.File;
@@ -38,6 +41,9 @@ public class CryptoFile extends CryptoNode implements File {
 
 	@Override
 	public WritableFile openWritable() {
+		if (parent.folder(name).exists()) {
+			throw new UncheckedIOException(new FileAlreadyExistsException(toString()));
+		}
 		return new CryptoWritableFile(cryptor.getFileContentCryptor(), forceGetPhysicalFile().openWritable());
 	}
 
