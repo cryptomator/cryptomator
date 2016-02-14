@@ -2,16 +2,20 @@ package org.cryptomator.filesystem.invariants;
 
 import static org.cryptomator.common.test.matcher.OptionalMatcher.presentOptionalWithValueThat;
 import static org.cryptomator.filesystem.invariants.matchers.InstantMatcher.inRangeInclusiveWithTolerance;
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assume.assumeThat;
 
 import java.io.UncheckedIOException;
+import java.nio.ByteBuffer;
 import java.time.Instant;
 
 import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.FileSystem;
 import org.cryptomator.filesystem.Folder;
+import org.cryptomator.filesystem.WritableFile;
 import org.cryptomator.filesystem.invariants.FileSystemFactories.FileSystemFactory;
 import org.cryptomator.filesystem.invariants.WaysToObtainAFile.WayToObtainAFile;
 import org.cryptomator.filesystem.invariants.WaysToObtainAFolder.WayToObtainAFolder;
@@ -156,6 +160,50 @@ public class FileTests {
 		thrown.expect(UncheckedIOException.class);
 
 		System.out.println(wayToObtainANonExistingFile.fileWithName(fileSystem, FILE_NAME).lastModified());
+	}
+
+	@Theory
+	public void testCanNotOpenFileWhichExistsAsFolderForReading(FileSystemFactory fileSystemFactory, WayToObtainAFile wayToObtainANonExistingFile, WayToObtainAFolder wayToObtainAnExistingFolder) {
+		assumeThat(wayToObtainANonExistingFile.returnedFilesExist(), is(false));
+		assumeThat(wayToObtainAnExistingFolder.returnedFoldersExist(), is(true));
+		FileSystem fileSystem = fileSystemFactory.create();
+		File file = wayToObtainANonExistingFile.fileWithName(fileSystem, FILE_NAME);
+		wayToObtainAnExistingFolder.folderWithName(fileSystem, FILE_NAME);
+
+		thrown.expect(UncheckedIOException.class);
+
+		file.openReadable();
+	}
+
+	@Theory
+	public void testCanNotCreateFileWhichExistsAsFolderByWriting(FileSystemFactory fileSystemFactory, WayToObtainAFile wayToObtainANonExistingFile, WayToObtainAFolder wayToObtainAnExistingFolder) {
+		assumeThat(wayToObtainANonExistingFile.returnedFilesExist(), is(false));
+		assumeThat(wayToObtainAnExistingFolder.returnedFoldersExist(), is(true));
+
+		// TODO implement checks in CryptoFileSystem to avoid creation of a file and folder with equal names
+		assumeThat(fileSystemFactory.toString(), not(containsString("Crypto")));
+
+		FileSystem fileSystem = fileSystemFactory.create();
+		File file = wayToObtainANonExistingFile.fileWithName(fileSystem, FILE_NAME);
+		wayToObtainAnExistingFolder.folderWithName(fileSystem, FILE_NAME);
+
+		thrown.expect(UncheckedIOException.class);
+
+		try (WritableFile writable = file.openWritable()) {
+			ByteBuffer buffer = ByteBuffer.allocate(1);
+			writable.write(buffer);
+		}
+	}
+
+	@Theory
+	public void testCanNotReadFromNonExistingFile(FileSystemFactory fileSystemFactory, WayToObtainAFile wayToObtainANonExistingFile) {
+		assumeThat(wayToObtainANonExistingFile.returnedFilesExist(), is(false));
+		FileSystem fileSystem = fileSystemFactory.create();
+		File file = wayToObtainANonExistingFile.fileWithName(fileSystem, FILE_NAME);
+
+		thrown.expect(UncheckedIOException.class);
+
+		file.openReadable();
 	}
 
 }
