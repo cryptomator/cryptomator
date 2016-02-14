@@ -133,14 +133,13 @@ public class DelegatingFolderTest {
 		Mockito.verify(mockFolder1).copyTo(mockFolder2);
 	}
 
-	@Test
+	@Test(expected = IllegalArgumentException.class)
 	public void testCopyToDestinationFromDifferentLayer() {
 		Folder mockFolder1 = Mockito.mock(Folder.class);
 		Folder mockFolder2 = Mockito.mock(Folder.class);
 		DelegatingFolder<?, ?> delegatingFolder1 = new TestDelegatingFolder(null, mockFolder1);
 
 		delegatingFolder1.copyTo(mockFolder2);
-		Mockito.verify(mockFolder1).copyTo(mockFolder2);
 	}
 
 	@Test

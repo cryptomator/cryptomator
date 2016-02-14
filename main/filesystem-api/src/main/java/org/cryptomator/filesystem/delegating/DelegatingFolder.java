@@ -83,7 +83,7 @@ public abstract class DelegatingFolder<D extends DelegatingFolder<D, F>, F exten
 			final Folder delegateDest = ((DelegatingFolder<?, ?>) destination).delegate;
 			delegate.copyTo(delegateDest);
 		} else {
-			Folder.super.copyTo(destination);
+			throw new IllegalArgumentException("Can only copy DelegatingFolder to other DelegatingFolder.");
 		}
 	}
 
