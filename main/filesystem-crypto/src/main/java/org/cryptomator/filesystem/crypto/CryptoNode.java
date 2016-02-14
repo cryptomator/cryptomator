@@ -8,6 +8,7 @@
  *******************************************************************************/
 package org.cryptomator.filesystem.crypto;
 
+import java.io.FileNotFoundException;
 import java.io.UncheckedIOException;
 import java.time.Instant;
 import java.util.Optional;
@@ -33,10 +34,20 @@ abstract class CryptoNode implements Node {
 		return parent.physicalDataRoot();
 	}
 
-	protected abstract String encryptedName();
+	protected abstract Optional<String> encryptedName();
 
-	protected File physicalFile() {
-		return parent.physicalFolder().file(encryptedName());
+	protected Optional<File> physicalFile() {
+		if (parent.exists() && encryptedName().isPresent()) {
+			return Optional.of(parent.forceGetPhysicalFolder().file(encryptedName().get()));
+		} else {
+			return Optional.empty();
+		}
+	}
+
+	protected File forceGetPhysicalFile() {
+		return physicalFile().orElseThrow(() -> {
+			return new UncheckedIOException(new FileNotFoundException(toString()));
+		});
 	}
 
 	@Override
@@ -56,17 +67,22 @@ abstract class CryptoNode implements Node {
 
 	@Override
 	public boolean exists() {
-		return physicalFile().exists();
+		return physicalFile().map(File::exists).orElse(false);
+	}
+
+	@Override
+	public Instant lastModified() {
+		return forceGetPhysicalFile().lastModified();
 	}
 
 	@Override
 	public Optional<Instant> creationTime() throws UncheckedIOException {
-		return physicalFile().creationTime();
+		return forceGetPhysicalFile().creationTime();
 	}
 
 	@Override
 	public void setCreationTime(Instant instant) throws UncheckedIOException {
-		physicalFile().setCreationTime(instant);
+		forceGetPhysicalFile().setCreationTime(instant);
 	}
 
 	@Override

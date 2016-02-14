@@ -42,29 +42,47 @@ class InMemoryFile extends InMemoryNode implements File {
 		if (!exists()) {
 			throw new UncheckedIOException(new FileNotFoundException(this.name() + " does not exist"));
 		}
+		boolean success = false;
 		final ReadLock readLock = lock.readLock();
 		readLock.lock();
-		return new InMemoryReadableFile(this::getContent, readLock);
+		try {
+			final ReadableFile result = new InMemoryReadableFile(this::getContent, readLock);
+			success = true;
+			return result;
+		} finally {
+			if (!success) {
+				readLock.unlock();
+			}
+		}
 	}
 
 	@Override
 	public WritableFile openWritable() {
+		boolean success = false;
 		final WriteLock writeLock = lock.writeLock();
 		writeLock.lock();
-		final InMemoryFolder parent = parent().get();
-		parent.existingChildren.compute(this.name(), (k, v) -> {
-			if (v != null && v != this) {
-				// other file or folder with same name already exists.
-				throw new UncheckedIOException(new FileAlreadyExistsException(k));
-			} else {
-				if (v == null) {
-					this.creationTime = Instant.now();
+		try {
+			final InMemoryFolder parent = parent().get();
+			parent.existingChildren.compute(this.name(), (k, v) -> {
+				if (v != null && v != this) {
+					// other file or folder with same name already exists.
+					throw new UncheckedIOException(new FileAlreadyExistsException(k));
+				} else {
+					if (v == null) {
+						this.creationTime = Instant.now();
+					}
+					this.lastModified = Instant.now();
+					return this;
 				}
-				this.lastModified = Instant.now();
-				return this;
+			});
+			final WritableFile result = new InMemoryWritableFile(this::setLastModified, this::setCreationTime, this::getContent, this::setContent, this::delete, writeLock);
+			success = true;
+			return result;
+		} finally {
+			if (!success) {
+				writeLock.unlock();
 			}
-		});
-		return new InMemoryWritableFile(this::setLastModified, this::setCreationTime, this::getContent, this::setContent, this::delete, writeLock);
+		}
 	}
 
 	private void setLastModified(Instant lastModified) {
@@ -80,6 +98,8 @@ class InMemoryFile extends InMemoryNode implements File {
 	}
 
 	private void delete(Void param) {
+		content = ByteBuffer.allocate(INITIAL_SIZE);
+		content.flip();
 		final InMemoryFolder parent = parent().get();
 		parent.existingChildren.computeIfPresent(this.name(), (k, v) -> {
 			// returning null removes the entry.

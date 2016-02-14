@@ -51,6 +51,55 @@ public class CryptoFileSystemTest {
 																	// foo + bar
 	}
 
+	@Test(timeout = 2000)
+	public void testDirectoryCopyAndMove() throws UncheckedIOException, IOException {
+		// mock stuff and prepare crypto FS:
+		final Cryptor cryptor = new NoCryptor();
+		final FileSystem physicalFs = new InMemoryFileSystem();
+		final FileSystem fs = new CryptoFileSystem(physicalFs, cryptor, Mockito.mock(CryptoFileSystemDelegate.class), "foo");
+
+		// create /src/one/two/ and /dst/one:
+		final Folder src = fs.folder("src");
+		final Folder srcSub = src.folder("one");
+		final Folder srcSubSub = srcSub.folder("two");
+		final Folder dst = fs.folder("dst");
+		final Folder dstSub = dst.folder("one");
+		final Folder dstSubSub = dstSub.folder("two");
+		final Folder dst2 = fs.folder("dst2");
+
+		srcSubSub.create();
+		dstSub.create();
+		Assert.assertTrue(srcSubSub.exists());
+		Assert.assertTrue(dstSub.exists());
+		Assert.assertFalse(dstSubSub.exists());
+		Assert.assertFalse(dst2.exists());
+
+		src.copyTo(dst2);
+		Assert.assertTrue(dst2.exists());
+		Assert.assertTrue(dst2.folder("one").exists());
+		Assert.assertTrue(dst2.folder("one").folder("two").exists());
+
+		dst.delete();
+		Assert.assertFalse(dst.exists());
+		Assert.assertFalse(dst.folder("one").exists());
+		Assert.assertFalse(dst.folder("one").folder("two").exists());
+
+		dst2.moveTo(dst);
+		Assert.assertTrue(dst.exists());
+		Assert.assertTrue(dst.folder("one").exists());
+		Assert.assertTrue(dst.folder("one").folder("two").exists());
+
+		dst.folder("one").delete();
+		Assert.assertTrue(dst.exists());
+		Assert.assertFalse(dst.folder("one").exists());
+		Assert.assertFalse(dst.folder("one").folder("two").exists());
+
+		dst.copyTo(dst2);
+		Assert.assertTrue(dst2.exists());
+		Assert.assertFalse(dst2.folder("one").exists());
+		Assert.assertFalse(dst2.folder("one").folder("two").exists());
+	}
+
 	@Test(timeout = 1000)
 	public void testDirectoryMoving() throws UncheckedIOException, IOException {
 		// mock stuff and prepare crypto FS:

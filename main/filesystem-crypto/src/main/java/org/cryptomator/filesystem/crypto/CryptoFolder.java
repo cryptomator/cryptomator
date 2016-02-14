@@ -10,12 +10,13 @@ package org.cryptomator.filesystem.crypto;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.UncheckedIOException;
 import java.io.Writer;
 import java.nio.channels.Channels;
-import java.time.Instant;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
@@ -43,35 +44,47 @@ class CryptoFolder extends CryptoNode implements Folder {
 	}
 
 	@Override
-	protected String encryptedName() {
-		final byte[] parentDirId = parent().map(CryptoFolder::getDirectoryId).map(s -> s.getBytes(UTF_8)).orElse(null);
-		return cryptor.getFilenameCryptor().encryptFilename(name(), parentDirId) + DIR_SUFFIX;
+	protected Optional<String> encryptedName() {
+		if (parent().isPresent()) {
+			return parent().get().getDirectoryId().map(s -> s.getBytes(UTF_8)).map(parentDirId -> {
+				return cryptor.getFilenameCryptor().encryptFilename(name(), parentDirId) + DIR_SUFFIX;
+			});
+		} else {
+			return Optional.of(cryptor.getFilenameCryptor().encryptFilename(name()) + DIR_SUFFIX);
+		}
 	}
 
-	Folder physicalFolder() {
-		final String encryptedThenHashedDirId = cryptor.getFilenameCryptor().hashDirectoryId(getDirectoryId());
-		return physicalDataRoot().folder(encryptedThenHashedDirId.substring(0, 2)).folder(encryptedThenHashedDirId.substring(2));
+	Optional<Folder> physicalFolder() {
+		if (getDirectoryId().isPresent()) {
+			final String encryptedThenHashedDirId = cryptor.getFilenameCryptor().hashDirectoryId(getDirectoryId().get());
+			return Optional.of(physicalDataRoot().folder(encryptedThenHashedDirId.substring(0, 2)).folder(encryptedThenHashedDirId.substring(2)));
+		} else {
+			return Optional.empty();
+		}
 	}
 
-	protected String getDirectoryId() {
-		if (directoryId.get() == null) {
-			File dirFile = physicalFile();
+	Folder forceGetPhysicalFolder() {
+		return physicalFolder().orElseThrow(() -> {
+			return new UncheckedIOException(new FileNotFoundException(toString()));
+		});
+	}
+
+	protected Optional<String> getDirectoryId() {
+		if (directoryId.get() != null) {
+			return Optional.of(directoryId.get());
+		}
+		if (physicalFile().isPresent()) {
+			File dirFile = physicalFile().get();
 			if (dirFile.exists()) {
 				try (Reader reader = Channels.newReader(dirFile.openReadable(), UTF_8.newDecoder(), -1)) {
 					directoryId.set(IOUtils.toString(reader));
+					return Optional.of(directoryId.get());
 				} catch (IOException e) {
 					throw new UncheckedIOException(e);
 				}
-			} else {
-				directoryId.compareAndSet(null, UUID.randomUUID().toString());
 			}
 		}
-		return directoryId.get();
-	}
-
-	@Override
-	public Instant lastModified() {
-		return physicalFile().lastModified();
+		return Optional.empty();
 	}
 
 	@Override
@@ -81,15 +94,16 @@ class CryptoFolder extends CryptoNode implements Folder {
 
 	@Override
 	public Stream<CryptoFile> files() {
-		return physicalFolder().files().map(File::name).filter(isEncryptedFileName()).map(this::decryptChildFileName).map(this::file);
+		assert forceGetPhysicalFolder().exists();
+		return forceGetPhysicalFolder().files().map(File::name).filter(isEncryptedFileName()).map(this::decryptChildFileName).map(this::file);
 	}
 
 	private Predicate<String> isEncryptedFileName() {
-		return (String name) -> cryptor.getFilenameCryptor().isEncryptedFilename(name);
+		return (String name) -> !name.endsWith(DIR_SUFFIX) && cryptor.getFilenameCryptor().isEncryptedFilename(name);
 	}
 
 	private String decryptChildFileName(String encryptedFileName) {
-		final byte[] dirId = getDirectoryId().getBytes(UTF_8);
+		final byte[] dirId = getDirectoryId().get().getBytes(UTF_8);
 		return cryptor.getFilenameCryptor().decryptFilename(encryptedFileName, dirId);
 	}
 
@@ -104,15 +118,16 @@ class CryptoFolder extends CryptoNode implements Folder {
 
 	@Override
 	public Stream<CryptoFolder> folders() {
-		return physicalFolder().files().map(File::name).filter(isEncryptedDirectoryName()).map(this::decryptChildFolderName).map(this::folder);
+		assert forceGetPhysicalFolder().exists();
+		return forceGetPhysicalFolder().files().map(File::name).filter(isEncryptedDirectoryName()).map(this::decryptChildFolderName).map(this::folder);
 	}
 
 	private Predicate<String> isEncryptedDirectoryName() {
-		return (String name) -> name.endsWith(DIR_SUFFIX) && isEncryptedFileName().test(StringUtils.removeEnd(name, DIR_SUFFIX));
+		return (String name) -> name.endsWith(DIR_SUFFIX) && cryptor.getFilenameCryptor().isEncryptedFilename(StringUtils.removeEnd(name, DIR_SUFFIX));
 	}
 
 	private String decryptChildFolderName(String encryptedFolderName) {
-		final byte[] dirId = getDirectoryId().getBytes(UTF_8);
+		final byte[] dirId = getDirectoryId().get().getBytes(UTF_8);
 		final String ciphertext = StringUtils.removeEnd(encryptedFolderName, CryptoFolder.DIR_SUFFIX);
 		return cryptor.getFilenameCryptor().decryptFilename(ciphertext, dirId);
 	}
@@ -128,19 +143,21 @@ class CryptoFolder extends CryptoNode implements Folder {
 
 	@Override
 	public void create() {
-		final File dirFile = physicalFile();
-		final Folder dir = physicalFolder();
+		parent.create();
+		final boolean newDirIdGiven = directoryId.compareAndSet(null, UUID.randomUUID().toString());
+		final File dirFile = forceGetPhysicalFile();
+		final Folder dir = forceGetPhysicalFolder();
 		if (dirFile.exists() && dir.exists()) {
 			return;
+		} else if (!newDirIdGiven) {
+			throw new IllegalStateException("Newly created folder, that didn't exist before, already had an directoryId.");
 		}
-		parent.create();
-		final String directoryId = getDirectoryId();
 		try (Writer writer = Channels.newWriter(dirFile.openWritable(), UTF_8.newEncoder(), -1)) {
-			writer.write(directoryId);
+			writer.write(directoryId.get());
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
 		}
-		physicalFolder().create();
+		dir.create();
 	}
 
 	@Override
@@ -156,26 +173,36 @@ class CryptoFolder extends CryptoNode implements Folder {
 		if (this.isAncestorOf(target) || target.isAncestorOf(this)) {
 			throw new IllegalArgumentException("Can not move directories containing one another (src: " + this + ", dst: " + target + ")");
 		}
+		assert target.parent().isPresent() : "Target can not be root, thus has a parent";
 
-		// directoryId will be used by target, from now on we must no longer use the same id
-		// a new one will be generated on-demand.
-		final String oldDirectoryId = getDirectoryId();
+		target.parent().get().create();
+
+		// explicitly delete target, otherwise same-named folders may keep their directory ids
+		target.delete();
+
+		final File dirFile = forceGetPhysicalFile();
+		final String dirId = getDirectoryId().get();
+		boolean dirIdMovedSuccessfully = target.directoryId.compareAndSet(null, dirId);
+		if (!dirIdMovedSuccessfully) {
+			throw new IllegalStateException("Target's directoryId wasn't null, even though it has been explicitly deleted.");
+		}
+		dirFile.moveTo(target.forceGetPhysicalFile());
 		directoryId.set(null);
 
-		target.physicalFile().parent().get().create();
-		this.physicalFile().moveTo(target.physicalFile());
-
-		target.directoryId.set(oldDirectoryId);
+		assert!exists();
+		assert target.exists();
+		assert!dirFile.exists();
 	}
 
 	@Override
 	public void delete() {
 		if (!exists()) {
+			directoryId.set(null);
 			return;
 		}
 		Deleter.deleteContent(this);
-		physicalFolder().delete();
-		physicalFile().delete();
+		forceGetPhysicalFolder().delete();
+		forceGetPhysicalFile().delete();
 		directoryId.set(null);
 	}
 

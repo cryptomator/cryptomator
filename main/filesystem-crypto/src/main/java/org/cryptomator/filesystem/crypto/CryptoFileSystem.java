@@ -41,12 +41,12 @@ class CryptoFileSystem extends CryptoFolder implements FileSystem {
 	}
 
 	@Override
-	protected String getDirectoryId() {
-		return ROOT_DIRECOTRY_ID;
+	protected Optional<String> getDirectoryId() {
+		return Optional.of(ROOT_DIRECOTRY_ID);
 	}
 
 	@Override
-	protected File physicalFile() {
+	protected Optional<File> physicalFile() {
 		throw new UnsupportedOperationException("Crypto filesystem root doesn't provide a directory file, as the directory ID is fixed.");
 	}
 
@@ -62,17 +62,17 @@ class CryptoFileSystem extends CryptoFolder implements FileSystem {
 
 	@Override
 	public boolean exists() {
-		return physicalFolder().exists();
+		return forceGetPhysicalFolder().exists();
 	}
 
 	@Override
 	public Optional<Instant> creationTime() throws UncheckedIOException {
-		return physicalFolder().creationTime();
+		return forceGetPhysicalFolder().creationTime();
 	}
 
 	@Override
 	public Instant lastModified() {
-		return physicalFolder().lastModified();
+		return forceGetPhysicalFolder().lastModified();
 	}
 
 	@Override
@@ -87,7 +87,7 @@ class CryptoFileSystem extends CryptoFolder implements FileSystem {
 
 	@Override
 	public void create() {
-		physicalFolder().create();
+		forceGetPhysicalFolder().create();
 	}
 
 	@Override

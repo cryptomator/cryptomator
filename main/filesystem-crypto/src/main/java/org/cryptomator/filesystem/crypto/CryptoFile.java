@@ -10,8 +10,7 @@ package org.cryptomator.filesystem.crypto;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-import java.io.UncheckedIOException;
-import java.time.Instant;
+import java.util.Optional;
 
 import org.cryptomator.crypto.engine.Cryptor;
 import org.cryptomator.filesystem.File;
@@ -25,25 +24,21 @@ public class CryptoFile extends CryptoNode implements File {
 	}
 
 	@Override
-	protected String encryptedName() {
-		final byte[] parentDirId = parent.getDirectoryId().getBytes(UTF_8);
-		return cryptor.getFilenameCryptor().encryptFilename(name(), parentDirId);
-	}
-
-	@Override
-	public Instant lastModified() throws UncheckedIOException {
-		return physicalFile().lastModified();
+	protected Optional<String> encryptedName() {
+		return parent().get().getDirectoryId().map(s -> s.getBytes(UTF_8)).map(parentDirId -> {
+			return cryptor.getFilenameCryptor().encryptFilename(name(), parentDirId);
+		});
 	}
 
 	@Override
 	public ReadableFile openReadable() {
 		boolean authenticate = !fileSystem().delegate().shouldSkipAuthentication(toString());
-		return new CryptoReadableFile(cryptor.getFileContentCryptor(), physicalFile().openReadable(), authenticate);
+		return new CryptoReadableFile(cryptor.getFileContentCryptor(), forceGetPhysicalFile().openReadable(), authenticate);
 	}
 
 	@Override
 	public WritableFile openWritable() {
-		return new CryptoWritableFile(cryptor.getFileContentCryptor(), physicalFile().openWritable());
+		return new CryptoWritableFile(cryptor.getFileContentCryptor(), forceGetPhysicalFile().openWritable());
 	}
 
 	@Override
