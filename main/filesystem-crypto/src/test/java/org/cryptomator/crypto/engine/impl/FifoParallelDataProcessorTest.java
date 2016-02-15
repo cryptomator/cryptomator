@@ -12,6 +12,7 @@ import java.lang.reflect.Field;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -22,7 +23,8 @@ public class FifoParallelDataProcessorTest {
 
 	@Test(expected = ExecutionException.class)
 	public void testRethrowsExceptionAsExecutionException() throws InterruptedException, ExecutionException {
-		FifoParallelDataProcessor<Object> processor = new FifoParallelDataProcessor<>(1, 1);
+		ExecutorService exec = Executors.newSingleThreadExecutor();
+		FifoParallelDataProcessor<Object> processor = new FifoParallelDataProcessor<>(1, exec);
 		try {
 			processor.submit(() -> {
 				throw new Exception("will be wrapped in a ExecutionException during 'processedData()'");
@@ -31,21 +33,25 @@ public class FifoParallelDataProcessorTest {
 			Assert.fail("Exception must not yet be thrown.");
 		}
 		processor.processedData();
+		exec.shutdownNow();
 	}
 
 	@Test(expected = RejectedExecutionException.class)
 	public void testRejectExecutionAfterShutdown() throws InterruptedException, ReflectiveOperationException, SecurityException {
-		FifoParallelDataProcessor<Integer> processor = new FifoParallelDataProcessor<>(1, 1);
+		ExecutorService exec = Executors.newSingleThreadExecutor();
+		FifoParallelDataProcessor<Integer> processor = new FifoParallelDataProcessor<>(1, exec);
 		Field field = FifoParallelDataProcessor.class.getDeclaredField("executorService");
 		field.setAccessible(true);
 		ExecutorService executorService = (ExecutorService) field.get(processor);
 		executorService.shutdownNow();
 		processor.submit(new IntegerJob(0, 1));
+		exec.shutdownNow();
 	}
 
 	@Test
 	public void testStrictFifoOrder() throws InterruptedException, ExecutionException {
-		FifoParallelDataProcessor<Integer> processor = new FifoParallelDataProcessor<>(4, 10);
+		ExecutorService exec = Executors.newFixedThreadPool(4);
+		FifoParallelDataProcessor<Integer> processor = new FifoParallelDataProcessor<>(10, exec);
 		processor.submit(new IntegerJob(100, 1));
 		processor.submit(new IntegerJob(50, 2));
 		processor.submitPreprocessed(3);
@@ -59,11 +65,13 @@ public class FifoParallelDataProcessorTest {
 		Assert.assertEquals(4, (int) processor.processedData());
 		Assert.assertEquals(5, (int) processor.processedData());
 		Assert.assertEquals(6, (int) processor.processedData());
+		exec.shutdownNow();
 	}
 
 	@Test
 	public void testBlockingBehaviour() throws InterruptedException, ExecutionException {
-		FifoParallelDataProcessor<Integer> processor = new FifoParallelDataProcessor<>(1, 1);
+		ExecutorService exec = Executors.newSingleThreadExecutor();
+		FifoParallelDataProcessor<Integer> processor = new FifoParallelDataProcessor<>(1, exec);
 		processor.submitPreprocessed(1); // #1 in queue
 
 		Thread t1 = new Thread(() -> {
@@ -80,11 +88,13 @@ public class FifoParallelDataProcessorTest {
 		Assert.assertEquals(1, (int) processor.processedData());
 		Assert.assertEquals(2, (int) processor.processedData());
 		t1.join();
+		exec.shutdownNow();
 	}
 
 	@Test
 	public void testInterruptionDuringSubmission() throws InterruptedException, ExecutionException {
-		FifoParallelDataProcessor<Integer> processor = new FifoParallelDataProcessor<>(1, 1);
+		ExecutorService exec = Executors.newSingleThreadExecutor();
+		FifoParallelDataProcessor<Integer> processor = new FifoParallelDataProcessor<>(1, exec);
 		processor.submitPreprocessed(1); // #1 in queue
 
 		final AtomicBoolean interruptedExceptionThrown = new AtomicBoolean(false);
@@ -104,6 +114,7 @@ public class FifoParallelDataProcessorTest {
 		Assert.assertFalse(t1.isAlive());
 		Assert.assertTrue(interruptedExceptionThrown.get());
 		Assert.assertEquals(1, (int) processor.processedData());
+		exec.shutdownNow();
 	}
 
 	private static class IntegerJob implements Callable<Integer> {

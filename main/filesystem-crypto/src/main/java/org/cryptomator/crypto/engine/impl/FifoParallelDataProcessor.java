@@ -13,7 +13,6 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
 
@@ -31,9 +30,9 @@ class FifoParallelDataProcessor<T> {
 	 * @param numThreads How many jobs can run in parallel.
 	 * @param workAhead Maximum number of jobs accepted in {@link #submit(Callable)} without blocking until results are polled from {@link #processedData()}.
 	 */
-	public FifoParallelDataProcessor(int numThreads, int workAhead) {
+	public FifoParallelDataProcessor(int workAhead, ExecutorService executorService) {
 		this.processedData = new ArrayBlockingQueue<>(workAhead);
-		this.executorService = Executors.newFixedThreadPool(numThreads);
+		this.executorService = executorService;
 	}
 
 	/**

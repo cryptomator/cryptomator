@@ -19,6 +19,8 @@ import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.crypto.Cipher;
 import javax.crypto.Mac;
@@ -37,8 +39,9 @@ class FileContentDecryptorImpl implements FileContentDecryptor {
 	private static final String HMAC_SHA256 = "HmacSHA256";
 	private static final int NUM_THREADS = Runtime.getRuntime().availableProcessors();
 	private static final int READ_AHEAD = 2;
+	private static final ExecutorService SHARED_DECRYPTION_EXECUTOR = Executors.newFixedThreadPool(NUM_THREADS);
 
-	private final FifoParallelDataProcessor<ByteBuffer> dataProcessor = new FifoParallelDataProcessor<>(NUM_THREADS, NUM_THREADS + READ_AHEAD);
+	private final FifoParallelDataProcessor<ByteBuffer> dataProcessor = new FifoParallelDataProcessor<>(NUM_THREADS + READ_AHEAD, SHARED_DECRYPTION_EXECUTOR);
 	private final ThreadLocal<Mac> hmacSha256;
 	private final FileHeader header;
 	private final boolean authenticate;
