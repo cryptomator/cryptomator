@@ -23,14 +23,15 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.cryptomator.common.LazyInitializer;
 import org.cryptomator.common.WeakValuedCache;
 import org.cryptomator.crypto.engine.Cryptor;
 import org.cryptomator.filesystem.Deleter;
 import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.Folder;
 import org.cryptomator.filesystem.Node;
+import org.cryptomator.io.FileContents;
 
 class CryptoFolder extends CryptoNode implements Folder {
 
