@@ -69,6 +69,7 @@ class InMemoryFile extends InMemoryNode implements File {
 					throw new UncheckedIOException(new FileAlreadyExistsException(k));
 				} else {
 					if (v == null) {
+						assert!content.hasRemaining();
 						this.creationTime = Instant.now();
 					}
 					this.lastModified = Instant.now();

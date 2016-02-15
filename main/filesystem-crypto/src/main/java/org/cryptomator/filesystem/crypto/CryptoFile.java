@@ -10,10 +10,9 @@ package org.cryptomator.filesystem.crypto;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-import java.util.Optional;
 import java.io.UncheckedIOException;
 import java.nio.file.FileAlreadyExistsException;
-import java.time.Instant;
+import java.util.Optional;
 
 import org.cryptomator.crypto.engine.Cryptor;
 import org.cryptomator.filesystem.File;

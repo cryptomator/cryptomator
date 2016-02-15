@@ -11,12 +11,10 @@ package org.cryptomator.filesystem.crypto;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.Reader;
 import java.io.UncheckedIOException;
-import java.io.Writer;
-import java.nio.channels.Channels;
 import java.nio.file.FileAlreadyExistsException;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
@@ -29,6 +27,7 @@ import org.cryptomator.common.WeakValuedCache;
 import org.cryptomator.crypto.engine.Cryptor;
 import org.cryptomator.filesystem.Deleter;
 import org.cryptomator.filesystem.File;
+import org.cryptomator.filesystem.FileSystemVisitor;
 import org.cryptomator.filesystem.Folder;
 import org.cryptomator.filesystem.Node;
 import org.cryptomator.io.FileContents;
@@ -164,11 +163,15 @@ class CryptoFolder extends CryptoNode implements Folder {
 		}
 		assert target.parent().isPresent() : "Target can not be root, thus has a parent";
 
+		// prepare target:
 		target.parent().get().create();
-
-		// explicitly delete target, otherwise same-named folders may keep their directory ids
 		target.delete();
 
+		// determine subFolder as long as we can still browse our current hierarchy:
+		Collection<Folder> subFolders = new HashSet<>();
+		FileSystemVisitor.fileSystemVisitor().beforeFolder(subFolders::add).visit(this);
+
+		// perform the actual move:
 		final File dirFile = forceGetPhysicalFile();
 		final String dirId = getDirectoryId().get();
 		boolean dirIdMovedSuccessfully = target.directoryId.compareAndSet(null, dirId);
@@ -176,17 +179,20 @@ class CryptoFolder extends CryptoNode implements Folder {
 			throw new IllegalStateException("Target's directoryId wasn't null, even though it has been explicitly deleted.");
 		}
 		dirFile.moveTo(target.forceGetPhysicalFile());
-		directoryId.set(null);
+
+		// invalidate the directory id of any directory beneath the _old_ location:
+		subFolders.stream().filter(CryptoFolder.class::isInstance).map(CryptoFolder.class::cast).forEach(folder -> {
+			folder.directoryId.set(null);
+		});
 
 		assert!exists();
 		assert target.exists();
-		assert!dirFile.exists();
 	}
 
 	@Override
 	public void delete() {
 		if (!exists()) {
-			directoryId.set(null);
+			assert directoryId.get() == null : "nonexisting folder still has a directory id";
 			return;
 		}
 		Deleter.deleteContent(this);
