@@ -97,7 +97,8 @@ class InMemoryFile extends InMemoryNode implements File {
 		this.content = content;
 	}
 
-	private void delete(Void param) {
+	@Override
+	public void delete() {
 		content = ByteBuffer.allocate(INITIAL_SIZE);
 		content.flip();
 		final InMemoryFolder parent = parent().get();

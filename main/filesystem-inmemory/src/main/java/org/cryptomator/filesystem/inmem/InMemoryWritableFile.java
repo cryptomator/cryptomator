@@ -24,14 +24,13 @@ public class InMemoryWritableFile implements WritableFile {
 	private final Consumer<Instant> creationTimeSetter;
 	private final Supplier<ByteBuffer> contentGetter;
 	private final Consumer<ByteBuffer> contentSetter;
-	private final Consumer<Void> deleter;
+	private final Runnable deleter;
 	private final WriteLock writeLock;
 
 	private boolean open = true;
 	private volatile int position = 0;
 
-	public InMemoryWritableFile(Consumer<Instant> lastModifiedSetter, Consumer<Instant> creationTimeSetter, Supplier<ByteBuffer> contentGetter, Consumer<ByteBuffer> contentSetter, Consumer<Void> deleter,
-			WriteLock writeLock) {
+	public InMemoryWritableFile(Consumer<Instant> lastModifiedSetter, Consumer<Instant> creationTimeSetter, Supplier<ByteBuffer> contentGetter, Consumer<ByteBuffer> contentSetter, Runnable deleter, WriteLock writeLock) {
 		this.lastModifiedSetter = lastModifiedSetter;
 		this.contentGetter = contentGetter;
 		this.contentSetter = contentSetter;
@@ -52,7 +51,7 @@ public class InMemoryWritableFile implements WritableFile {
 			destination.contentSetter.accept(this.contentGetter.get());
 			destination.contentGetter.get().rewind();
 		}
-		deleter.accept(null);
+		deleter.run();
 	}
 
 	@Override
@@ -62,7 +61,7 @@ public class InMemoryWritableFile implements WritableFile {
 
 	@Override
 	public void delete() throws UncheckedIOException {
-		deleter.accept(null);
+		deleter.run();
 		open = false;
 	}
 
