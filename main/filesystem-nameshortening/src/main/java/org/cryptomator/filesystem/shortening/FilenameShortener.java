@@ -8,22 +8,16 @@
  *******************************************************************************/
 package org.cryptomator.filesystem.shortening;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-
 import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.Reader;
 import java.io.UncheckedIOException;
-import java.io.Writer;
-import java.nio.channels.Channels;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 import org.apache.commons.codec.binary.Base32;
 import org.apache.commons.codec.binary.BaseNCodec;
-import org.apache.commons.io.IOUtils;
 import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.Folder;
+import org.cryptomator.io.FileContents;
 
 class FilenameShortener {
 
@@ -64,11 +58,7 @@ class FilenameShortener {
 		final File mappingFile = mappingFile(shortName);
 		if (!mappingFile.exists()) {
 			mappingFile.parent().get().create();
-			try (Writer writer = Channels.newWriter(mappingFile.openWritable(), UTF_8.newEncoder(), -1)) {
-				writer.write(longName);
-			} catch (IOException e) {
-				throw new UncheckedIOException(e);
-			}
+			FileContents.UTF_8.writeContents(mappingFile, longName);
 		}
 	}
 
@@ -82,11 +72,7 @@ class FilenameShortener {
 		if (!mappingFile.exists()) {
 			throw new UncheckedIOException(new FileNotFoundException("Mapping file not found " + mappingFile));
 		} else {
-			try (Reader reader = Channels.newReader(mappingFile.openReadable(), UTF_8.newDecoder(), -1)) {
-				return IOUtils.toString(reader);
-			} catch (IOException e) {
-				throw new UncheckedIOException(e);
-			}
+			return FileContents.UTF_8.readContents(mappingFile);
 		}
 	}
 

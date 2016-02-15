@@ -71,21 +71,9 @@ class CryptoFolder extends CryptoNode implements Folder {
 	}
 
 	protected Optional<String> getDirectoryId() {
-		if (directoryId.get() != null) {
-			return Optional.of(directoryId.get());
-		}
-		if (physicalFile().isPresent()) {
-			File dirFile = physicalFile().get();
-			if (dirFile.exists()) {
-				try (Reader reader = Channels.newReader(dirFile.openReadable(), UTF_8.newDecoder(), -1)) {
-					directoryId.set(IOUtils.toString(reader));
-					return Optional.of(directoryId.get());
-				} catch (IOException e) {
-					throw new UncheckedIOException(e);
-				}
-			}
-		}
-		return Optional.empty();
+		return Optional.ofNullable(LazyInitializer.initializeLazily(directoryId, () -> {
+			return physicalFile().filter(File::exists).map(FileContents.UTF_8::readContents).orElse(null);
+		}));
 	}
 
 	@Override
@@ -156,11 +144,7 @@ class CryptoFolder extends CryptoNode implements Folder {
 		if (parent.file(name).exists()) {
 			throw new UncheckedIOException(new FileAlreadyExistsException(toString()));
 		}
-		try (Writer writer = Channels.newWriter(dirFile.openWritable(), UTF_8.newEncoder(), -1)) {
-			writer.write(directoryId.get());
-		} catch (IOException e) {
-			throw new UncheckedIOException(e);
-		}
+		FileContents.UTF_8.writeContents(dirFile, directoryId.get());
 		dir.create();
 	}
 

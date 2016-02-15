@@ -10,9 +10,6 @@ package org.cryptomator.io;
 
 import java.nio.ByteBuffer;
 
-/**
- * TODO this probably doesn't belong into this maven module, but it is used by various filesystem layers.
- */
 public final class ByteBuffers {
 
 	private ByteBuffers() {
