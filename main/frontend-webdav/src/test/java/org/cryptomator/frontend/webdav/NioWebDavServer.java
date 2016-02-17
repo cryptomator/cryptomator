@@ -38,7 +38,7 @@ public class NioWebDavServer {
 		server.start();
 
 		FileSystem fileSystem = setupFilesystem();
-		ServletContextHandler servlet = server.addServlet(fileSystem, URI.create("http://localhost:8080/foo"));
+		ServletContextHandler servlet = server.addServlet(fileSystem, URI.create("http://localhost:8080/"));
 		servlet.addFilter(LoggingHttpFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
 		servlet.start();
 
