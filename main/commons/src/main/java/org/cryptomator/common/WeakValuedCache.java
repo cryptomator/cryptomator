@@ -1,6 +1,7 @@
 package org.cryptomator.common;
 
 import java.util.concurrent.ExecutionException;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 import com.google.common.cache.CacheBuilder;
@@ -38,6 +39,10 @@ public class WeakValuedCache<Key, Value> {
 		} catch (ExecutionError e) {
 			throw (Error) e.getCause();
 		}
+	}
+
+	public void forEach(BiConsumer<Key, Value> function) {
+		delegate.asMap().forEach(function);
 	}
 
 }

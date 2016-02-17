@@ -13,8 +13,6 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import java.io.FileNotFoundException;
 import java.io.UncheckedIOException;
 import java.nio.file.FileAlreadyExistsException;
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
@@ -27,7 +25,6 @@ import org.cryptomator.common.WeakValuedCache;
 import org.cryptomator.crypto.engine.Cryptor;
 import org.cryptomator.filesystem.Deleter;
 import org.cryptomator.filesystem.File;
-import org.cryptomator.filesystem.FileSystemVisitor;
 import org.cryptomator.filesystem.Folder;
 import org.cryptomator.filesystem.Node;
 import org.cryptomator.io.FileContents;
@@ -142,7 +139,7 @@ class CryptoFolder extends CryptoNode implements Folder {
 			throw new IllegalStateException("Newly created folder, that didn't exist before, already had an directoryId.");
 		}
 		if (parent.file(name).exists()) {
-			throw new UncheckedIOException(new FileAlreadyExistsException(toString()));
+			throw new UncheckedIOException(new FileAlreadyExistsException(parent.file(name).toString()));
 		}
 		FileContents.UTF_8.writeContents(dirFile, directoryId.get());
 		dir.create();
@@ -167,10 +164,6 @@ class CryptoFolder extends CryptoNode implements Folder {
 		target.parent().get().create();
 		target.delete();
 
-		// determine subFolder as long as we can still browse our current hierarchy:
-		Collection<Folder> subFolders = new HashSet<>();
-		FileSystemVisitor.fileSystemVisitor().beforeFolder(subFolders::add).visit(this);
-
 		// perform the actual move:
 		final File dirFile = forceGetPhysicalFile();
 		final String dirId = getDirectoryId().get();
@@ -180,10 +173,8 @@ class CryptoFolder extends CryptoNode implements Folder {
 		}
 		dirFile.moveTo(target.forceGetPhysicalFile());
 
-		// invalidate the directory id of any directory beneath the _old_ location:
-		subFolders.stream().filter(CryptoFolder.class::isInstance).map(CryptoFolder.class::cast).forEach(folder -> {
-			folder.directoryId.set(null);
-		});
+		// cut all ties:
+		this.invalidateDirectoryIdsRecursively();
 
 		assert!exists();
 		assert target.exists();
@@ -198,7 +189,14 @@ class CryptoFolder extends CryptoNode implements Folder {
 		Deleter.deleteContent(this);
 		forceGetPhysicalFolder().delete();
 		forceGetPhysicalFile().delete();
+		invalidateDirectoryIdsRecursively();
+	}
+
+	private void invalidateDirectoryIdsRecursively() {
 		directoryId.set(null);
+		folders.forEach((name, folder) -> {
+			folder.invalidateDirectoryIdsRecursively();
+		});
 	}
 
 	@Override
