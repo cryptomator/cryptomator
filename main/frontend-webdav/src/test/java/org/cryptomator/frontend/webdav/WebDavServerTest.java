@@ -487,30 +487,4 @@ public class WebDavServerTest {
 		Assert.assertTrue(success.get());
 	}
 
-	@Test
-	public void testUnsatisfiableRangeRequest() throws IOException, URISyntaxException {
-		final String testResourceUrl = servletRoot + "/unsatisfiableRangeRequestTestFile.txt";
-		final HttpClient client = new HttpClient();
-
-		// prepare file content:
-		final byte[] fileContent = "This is some test file content.".getBytes();
-
-		// put request:
-		final EntityEnclosingMethod putMethod = new PutMethod(testResourceUrl.toString());
-		putMethod.setRequestEntity(new ByteArrayRequestEntity(fileContent));
-		final int putResponse = client.executeMethod(putMethod);
-		putMethod.releaseConnection();
-		Assert.assertEquals(201, putResponse);
-
-		// get request:
-		final HttpMethod getMethod = new GetMethod(testResourceUrl.toString());
-		getMethod.addRequestHeader("Range", "chunks=1-2");
-		final int getResponse = client.executeMethod(getMethod);
-		final byte[] response = new byte[fileContent.length];
-		IOUtils.read(getMethod.getResponseBodyAsStream(), response);
-		getMethod.releaseConnection();
-		Assert.assertEquals(416, getResponse);
-		Assert.assertArrayEquals(fileContent, response);
-	}
-
 }
