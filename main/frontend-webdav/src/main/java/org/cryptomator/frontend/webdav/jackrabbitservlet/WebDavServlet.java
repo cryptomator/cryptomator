@@ -27,10 +27,16 @@ import org.apache.jackrabbit.webdav.lock.Type;
 import org.apache.jackrabbit.webdav.server.AbstractWebdavServlet;
 import org.cryptomator.filesystem.Folder;
 import org.cryptomator.filesystem.jackrabbit.FileSystemResourceLocatorFactory;
+import org.eclipse.jetty.http.HttpHeader;
+import org.eclipse.jetty.io.EofException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class WebDavServlet extends AbstractWebdavServlet {
 
 	private static final long serialVersionUID = -6632687979352625020L;
+
+	private static final Logger LOG = LoggerFactory.getLogger(WebDavServlet.class);
 
 	private final DavSessionProvider davSessionProvider;
 	private final DavLocatorFactory davLocatorFactory;
@@ -75,6 +81,23 @@ public class WebDavServlet extends AbstractWebdavServlet {
 	@Override
 	public void setResourceFactory(DavResourceFactory resourceFactory) {
 		throw new UnsupportedOperationException("Setting resourceFactory not supported.");
+	}
+
+	/* GET stuff */
+
+	@Override
+	protected void doGet(WebdavRequest request, WebdavResponse response, DavResource resource) throws IOException, DavException {
+		if (request.getHeader(HttpHeader.RANGE.asString()) != null) {
+			try {
+				super.doGet(request, response, resource);
+			} catch (EofException e) {
+				if (LOG.isDebugEnabled()) {
+					LOG.trace("Unexpected end of stream during delivery of partial content (client hung up).");
+				}
+			}
+		} else {
+			super.doGet(request, response, resource);
+		}
 	}
 
 	/* LOCK stuff */
