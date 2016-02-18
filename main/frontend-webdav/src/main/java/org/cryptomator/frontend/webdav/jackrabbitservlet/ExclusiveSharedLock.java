@@ -14,7 +14,7 @@ import org.apache.jackrabbit.webdav.lock.LockInfo;
 import org.apache.jackrabbit.webdav.lock.Scope;
 import org.apache.jackrabbit.webdav.lock.Type;
 
-public class ExclusiveSharedLock extends AbstractActiveLock {
+class ExclusiveSharedLock extends AbstractActiveLock {
 
 	private final String token;
 	private final Type type;

@@ -27,7 +27,6 @@ import org.apache.jackrabbit.webdav.lock.Type;
 import org.apache.jackrabbit.webdav.server.AbstractWebdavServlet;
 import org.cryptomator.filesystem.Folder;
 import org.cryptomator.filesystem.jackrabbit.FileSystemResourceLocatorFactory;
-import org.eclipse.jetty.http.HttpHeader;
 import org.eclipse.jetty.io.EofException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,16 +86,14 @@ public class WebDavServlet extends AbstractWebdavServlet {
 
 	@Override
 	protected void doGet(WebdavRequest request, WebdavResponse response, DavResource resource) throws IOException, DavException {
-		if (request.getHeader(HttpHeader.RANGE.asString()) != null) {
-			try {
-				super.doGet(request, response, resource);
-			} catch (EofException e) {
-				if (LOG.isDebugEnabled()) {
-					LOG.trace("Unexpected end of stream during delivery of partial content (client hung up).");
-				}
-			}
-		} else {
+		try {
 			super.doGet(request, response, resource);
+		} catch (EofException e) {
+			// Jetty EOF (other than IO EOF) is thrown when the connection is closed by the client.
+			// If the client is no longer interested in further content, we don't care.
+			if (LOG.isDebugEnabled()) {
+				LOG.trace("Unexpected end of stream during GET (client hung up).");
+			}
 		}
 	}
 

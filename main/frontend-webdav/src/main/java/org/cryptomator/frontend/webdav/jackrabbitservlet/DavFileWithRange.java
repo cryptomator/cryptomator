@@ -23,7 +23,7 @@ import com.google.common.io.ByteStreams;
  * 
  * @see {@link https://tools.ietf.org/html/rfc7233#section-4}
  */
-public class DavFileWithRange extends DavFile {
+class DavFileWithRange extends DavFile {
 
 	private final Pair<String, String> requestRange;
 

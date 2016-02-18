@@ -28,7 +28,6 @@ import javax.crypto.SecretKey;
 import javax.crypto.ShortBufferException;
 import javax.crypto.spec.IvParameterSpec;
 
-import org.apache.commons.codec.binary.Hex;
 import org.cryptomator.crypto.engine.FileContentCryptor;
 import org.cryptomator.crypto.engine.FileContentEncryptor;
 import org.cryptomator.io.ByteBuffers;
@@ -165,7 +164,6 @@ class FileContentEncryptorImpl implements FileContentEncryptor {
 				mac.update(nonce);
 				mac.update(ciphertextBuf);
 				byte[] authenticationCode = mac.doFinal();
-				Hex.encodeHexString(authenticationCode);
 				outBuf.put(authenticationCode);
 
 				// flip and return:

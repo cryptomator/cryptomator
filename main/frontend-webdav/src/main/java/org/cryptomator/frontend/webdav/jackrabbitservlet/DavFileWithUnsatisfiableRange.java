@@ -19,7 +19,7 @@ import com.google.common.io.ByteStreams;
  * 
  * @see {@link https://tools.ietf.org/html/rfc7233#section-4.2}
  */
-public class DavFileWithUnsatisfiableRange extends DavFile {
+class DavFileWithUnsatisfiableRange extends DavFile {
 
 	public DavFileWithUnsatisfiableRange(FilesystemResourceFactory factory, LockManager lockManager, DavSession session, FileLocator node) throws DavException {
 		super(factory, lockManager, session, node);

@@ -35,7 +35,11 @@ public class CryptoFile extends CryptoNode implements File {
 	@Override
 	public ReadableFile openReadable() {
 		boolean authenticate = !fileSystem().delegate().shouldSkipAuthentication(toString());
-		return new CryptoReadableFile(cryptor.getFileContentCryptor(), forceGetPhysicalFile().openReadable(), authenticate);
+		return new CryptoReadableFile(cryptor.getFileContentCryptor(), forceGetPhysicalFile().openReadable(), authenticate, this::reportAuthError);
+	}
+
+	private void reportAuthError() {
+		fileSystem().delegate().authenticationFailed(this.toString());
 	}
 
 	@Override

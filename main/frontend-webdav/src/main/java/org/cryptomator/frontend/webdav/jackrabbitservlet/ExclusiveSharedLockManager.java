@@ -30,7 +30,7 @@ import org.apache.jackrabbit.webdav.lock.Type;
 import org.cryptomator.filesystem.jackrabbit.FileSystemResourceLocator;
 import org.cryptomator.filesystem.jackrabbit.FolderLocator;
 
-public class ExclusiveSharedLockManager implements LockManager {
+class ExclusiveSharedLockManager implements LockManager {
 
 	private final ConcurrentMap<FileSystemResourceLocator, Map<String, ActiveLock>> lockedResources = new ConcurrentHashMap<>();
 

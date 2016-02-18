@@ -33,7 +33,7 @@ public class InMemoryWebDavServer {
 		server.setPort(8080);
 		server.start();
 
-		FileSystem fileSystem = inMemoryFileSystem();
+		FileSystem fileSystem = cryptoFileSystem();
 		ServletContextHandler servlet = server.addServlet(fileSystem, URI.create("http://localhost:8080/foo"));
 		servlet.addFilter(LoggingHttpFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
 		servlet.start();

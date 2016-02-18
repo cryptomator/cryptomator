@@ -8,6 +8,7 @@
  *******************************************************************************/
 package org.cryptomator.filesystem.crypto;
 
+import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
@@ -15,6 +16,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import org.cryptomator.crypto.engine.AuthenticationFailedException;
 import org.cryptomator.crypto.engine.FileContentCryptor;
 import org.cryptomator.crypto.engine.FileContentDecryptor;
 import org.cryptomator.filesystem.ReadableFile;
@@ -29,15 +31,17 @@ class CryptoReadableFile implements ReadableFile {
 	private final FileContentCryptor cryptor;
 	private final ReadableFile file;
 	private final boolean authenticate;
+	private final Runnable onAuthError;
 	private FileContentDecryptor decryptor;
 	private Future<Void> readAheadTask;
 	private ByteBuffer bufferedCleartext = EMPTY_BUFFER;
 
-	public CryptoReadableFile(FileContentCryptor cryptor, ReadableFile file, boolean authenticate) {
+	public CryptoReadableFile(FileContentCryptor cryptor, ReadableFile file, boolean authenticate, Runnable onAuthError) {
 		this.header = ByteBuffer.allocate(cryptor.getHeaderSize());
 		this.cryptor = cryptor;
 		this.file = file;
 		this.authenticate = authenticate;
+		this.onAuthError = onAuthError;
 		file.position(0);
 		file.read(header);
 		header.flip();
@@ -58,6 +62,8 @@ class CryptoReadableFile implements ReadableFile {
 			return bytesRead;
 		} catch (InterruptedException e) {
 			throw new UncheckedIOException(new InterruptedIOException("Task interrupted while waiting for cleartext"));
+		} catch (IOException e) {
+			throw new UncheckedIOException(e);
 		}
 	}
 
@@ -78,9 +84,14 @@ class CryptoReadableFile implements ReadableFile {
 		readAheadTask = executorService.submit(new CiphertextReader(file, decryptor, header.remaining() + ciphertextPos));
 	}
 
-	private void bufferCleartext() throws InterruptedException {
+	private void bufferCleartext() throws InterruptedException, IOException {
 		if (!bufferedCleartext.hasRemaining()) {
-			bufferedCleartext = decryptor.cleartext();
+			try {
+				bufferedCleartext = decryptor.cleartext();
+			} catch (AuthenticationFailedException e) {
+				onAuthError.run();
+				throw new IOException("Failed to decrypt file due to an authentication error.", e);
+			}
 		}
 	}
 
