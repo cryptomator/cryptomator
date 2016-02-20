@@ -14,6 +14,10 @@ abstract class CryptoException extends RuntimeException {
 		super();
 	}
 
+	public CryptoException(String message) {
+		super(message);
+	}
+
 	public CryptoException(Throwable cause) {
 		super(cause);
 	}

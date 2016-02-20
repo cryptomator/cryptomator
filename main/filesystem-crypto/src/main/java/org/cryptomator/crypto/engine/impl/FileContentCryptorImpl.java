@@ -23,6 +23,7 @@ public class FileContentCryptorImpl implements FileContentCryptor {
 	public static final int PAYLOAD_SIZE = 32 * 1024;
 	public static final int NONCE_SIZE = 16;
 	public static final int MAC_SIZE = 32;
+	public static final int CHUNK_SIZE = NONCE_SIZE + PAYLOAD_SIZE + MAC_SIZE;
 
 	private final SecretKey encryptionKey;
 	private final SecretKey macKey;
@@ -46,7 +47,7 @@ public class FileContentCryptorImpl implements FileContentCryptor {
 		assert cleartextChunkStart <= cleartextPos;
 		long chunkInternalDiff = cleartextPos - cleartextChunkStart;
 		assert chunkInternalDiff >= 0 && chunkInternalDiff < PAYLOAD_SIZE;
-		long ciphertextChunkStart = chunkNum * (NONCE_SIZE + PAYLOAD_SIZE + MAC_SIZE);
+		long ciphertextChunkStart = chunkNum * CHUNK_SIZE;
 		return ciphertextChunkStart + chunkInternalDiff;
 	}
 
@@ -55,7 +56,7 @@ public class FileContentCryptorImpl implements FileContentCryptor {
 		if (header.remaining() != getHeaderSize()) {
 			throw new IllegalArgumentException("Invalid header.");
 		}
-		if (firstCiphertextByte % (NONCE_SIZE + PAYLOAD_SIZE + MAC_SIZE) != 0) {
+		if (firstCiphertextByte % CHUNK_SIZE != 0) {
 			throw new IllegalArgumentException("Invalid starting point for decryption.");
 		}
 		return new FileContentDecryptorImpl(encryptionKey, macKey, header, firstCiphertextByte, authenticate);

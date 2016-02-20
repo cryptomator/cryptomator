@@ -14,6 +14,10 @@ public class AuthenticationFailedException extends CryptoException {
 		super();
 	}
 
+	public AuthenticationFailedException(String message) {
+		super(message);
+	}
+
 	public AuthenticationFailedException(Throwable cause) {
 		super(cause);
 	}

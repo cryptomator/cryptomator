@@ -11,7 +11,13 @@ package org.cryptomator.filesystem.crypto;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ForkJoinTask;
+import java.util.concurrent.Future;
 
 import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.FileSystem;
@@ -175,32 +181,118 @@ public class CryptoFileSystemIntegrationTest {
 	}
 
 	@Test
-	public void testRandomAccess() {
+	public void testRandomAccessOnLastBlock() {
+		// prepare test data:
+		ByteBuffer testData = ByteBuffer.allocate(16000 * Integer.BYTES); // < 64kb
+		for (int i = 0; i < 16000; i++) {
+			testData.putInt(i);
+		}
+
+		// write test data to file:
 		File cleartextFile = cleartextFs.file("test");
 		try (WritableFile writable = cleartextFile.openWritable()) {
-			ByteBuffer buf = ByteBuffer.allocate(25000);
-			for (int i = 0; i < 40; i++) { // 40 * 25k = 1M
-				buf.clear();
-				Arrays.fill(buf.array(), (byte) i);
-				writable.write(buf);
-			}
+			testData.flip();
+			writable.write(testData);
 		}
 
-		Folder ciphertextRootFolder = ciphertextFs.folder("d").folders().findAny().get().folders().findAny().get();
-		Assert.assertTrue(ciphertextRootFolder.exists());
-		File ciphertextFile = ciphertextRootFolder.files().findAny().get();
-		Assert.assertTrue(ciphertextFile.exists());
-
+		// read last block:
 		try (ReadableFile readable = cleartextFile.openReadable()) {
-			ByteBuffer buf = ByteBuffer.allocate(1);
-			for (int i = 0; i < 40; i++) {
+			ByteBuffer buf = ByteBuffer.allocate(Integer.BYTES);
+			buf.clear();
+			readable.position(15999 * Integer.BYTES);
+			readable.read(buf);
+			buf.flip();
+			Assert.assertEquals(15999, buf.getInt());
+		}
+	}
+
+	@Test
+	public void testSequentialRandomAccess() {
+		// prepare test data:
+		ByteBuffer testData = ByteBuffer.allocate(1_000_000 * Integer.BYTES); // = 4MB
+		for (int i = 0; i < 1000000; i++) {
+			testData.putInt(i);
+		}
+
+		// write test data to file:
+		File cleartextFile = cleartextFs.file("test");
+		try (WritableFile writable = cleartextFile.openWritable()) {
+			testData.flip();
+			writable.write(testData);
+		}
+
+		// shuffle our test positions:
+		List<Integer> nums = new ArrayList<>();
+		for (int i = 0; i < 1_000_000; i++) {
+			nums.add(i);
+		}
+		Collections.shuffle(nums);
+
+		// read parts from positions:
+		try (ReadableFile readable = cleartextFile.openReadable()) {
+			ByteBuffer buf = ByteBuffer.allocate(Integer.BYTES);
+			for (int i = 0; i < 1000; i++) {
+				int num = nums.get(i);
 				buf.clear();
-				readable.position(i * 25000 + (long) Math.random() * 24999); // "random access", told you so.
+				readable.position(num * Integer.BYTES);
 				readable.read(buf);
 				buf.flip();
-				Assert.assertEquals(i, buf.get());
+				Assert.assertEquals(num, buf.getInt());
 			}
 		}
+	}
+
+	@Test
+	public void testParallelRandomAccess() {
+		// prepare test data:
+		ByteBuffer testData = ByteBuffer.allocate(1_000_000 * Integer.BYTES); // = 4MB
+		for (int i = 0; i < 1000000; i++) {
+			testData.putInt(i);
+		}
+
+		// write test data to file:
+		final File cleartextFile = cleartextFs.file("test");
+		try (WritableFile writable = cleartextFile.openWritable()) {
+			testData.flip();
+			writable.write(testData);
+		}
+
+		// shuffle our test positions:
+		List<Integer> nums = new ArrayList<>();
+		for (int i = 0; i < 1_000_000; i++) {
+			nums.add(i);
+		}
+		Collections.shuffle(nums);
+
+		// read parts from positions in parallel:
+		final ForkJoinPool pool = new ForkJoinPool(10);
+		final List<Future<Boolean>> tasks = new ArrayList<>();
+		for (int i = 0; i < 1000; i++) {
+			final int num = nums.get(i);
+			final ForkJoinTask<Boolean> task = ForkJoinTask.adapt(() -> {
+				try (ReadableFile readable = cleartextFile.openReadable()) {
+					ByteBuffer buf = ByteBuffer.allocate(Integer.BYTES);
+					buf.clear();
+					readable.position(num * Integer.BYTES);
+					readable.read(buf);
+					buf.flip();
+					int numRead = buf.getInt();
+					return num == numRead;
+				}
+			});
+			pool.execute(task);
+			tasks.add(task);
+		}
+
+		// Wait for tasks to finish and check results
+		Assert.assertTrue(tasks.stream().allMatch(task -> {
+			try {
+				return task.get();
+			} catch (Exception e) {
+				e.printStackTrace();
+				return false;
+			}
+		}));
 	}
 
 }
