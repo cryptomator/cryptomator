@@ -54,7 +54,7 @@ class BlockAlignedWritableFile implements WritableFile {
 
 	// visible for testing
 	void switchToBlockAlignedMode() {
-		LOG.debug("switching to blockaligend write...");
+		LOG.trace("switching to blockaligend write...");
 		mode = Mode.BLOCK_ALIGNED;
 	}
 

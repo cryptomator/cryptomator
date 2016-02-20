@@ -69,12 +69,16 @@ class BlockAlignedReadableFile implements ReadableFile {
 	}
 
 	private int readBlockAligned(ByteBuffer target) {
-		int read = -1;
-		while (!eofReached && target.hasRemaining()) {
-			read += ByteBuffers.copy(currentBlockBuffer, target);
-			readCurrentBlockIfNeeded();
+		if (eofReached) {
+			return -1;
+		} else {
+			int read = 0;
+			while (!eofReached && target.hasRemaining()) {
+				read += ByteBuffers.copy(currentBlockBuffer, target);
+				readCurrentBlockIfNeeded();
+			}
+			return read;
 		}
-		return read;
 	}
 
 	private void readCurrentBlockIfNeeded() {
