@@ -11,6 +11,8 @@ package org.cryptomator.frontend.webdav.jackrabbitservlet;
 import java.io.IOException;
 import java.net.URI;
 
+import javax.servlet.ServletException;
+
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.jackrabbit.webdav.DavException;
 import org.apache.jackrabbit.webdav.DavLocatorFactory;
@@ -80,6 +82,17 @@ public class WebDavServlet extends AbstractWebdavServlet {
 	@Override
 	public void setResourceFactory(DavResourceFactory resourceFactory) {
 		throw new UnsupportedOperationException("Setting resourceFactory not supported.");
+	}
+
+	/* Unchecked DAV exception rewrapping */
+
+	@Override
+	protected boolean execute(WebdavRequest request, WebdavResponse response, int method, DavResource resource) throws ServletException, IOException, DavException {
+		try {
+			return super.execute(request, response, method, resource);
+		} catch (UncheckedDavException e) {
+			throw e.toDavException();
+		}
 	}
 
 	/* GET stuff */

@@ -9,6 +9,7 @@ import java.util.Objects;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.jackrabbit.webdav.DavException;
+import org.apache.jackrabbit.webdav.DavServletResponse;
 import org.apache.jackrabbit.webdav.DavSession;
 import org.apache.jackrabbit.webdav.io.OutputContext;
 import org.apache.jackrabbit.webdav.lock.LockManager;
@@ -41,9 +42,10 @@ class DavFileWithRange extends DavFile {
 		try (ReadableFile src = node.openReadable(); OutputStream out = outputContext.getOutputStream()) {
 			final long contentLength = src.size();
 			final Pair<Long, Long> range = getEffectiveRange(contentLength);
-			assert range.getLeft() >= 0;
-			assert range.getLeft() <= range.getRight();
-			assert range.getRight() <= contentLength;
+			if (range.getLeft() < 0 || range.getLeft() > range.getRight() || range.getRight() > contentLength) {
+				outputContext.setProperty(HttpHeader.CONTENT_RANGE.asString(), "bytes */" + contentLength);
+				throw new UncheckedDavException(DavServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE, "Valid Range would be in [0, " + contentLength + "]");
+			}
 			final Long rangeLength = range.getRight() - range.getLeft() + 1;
 			outputContext.setContentLength(rangeLength);
 			outputContext.setProperty(HttpHeader.CONTENT_RANGE.asString(), contentRangeResponseHeader(range.getLeft(), range.getRight(), contentLength));
