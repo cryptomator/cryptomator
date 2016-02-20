@@ -40,6 +40,7 @@
 		<commons-httpclient.version>3.1</commons-httpclient.version>
 		<jackson-databind.version>2.4.4</jackson-databind.version>
 		<mockito.version>1.10.19</mockito.version>
+		<dagger.version>2.0.2</dagger.version>
 	</properties>
 
 	<repositories>
@@ -181,12 +182,12 @@
 			<dependency>
 				<groupId>com.google.dagger</groupId>
 				<artifactId>dagger</artifactId>
-				<version>2.0.2</version>
+				<version>${dagger.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.google.dagger</groupId>
 				<artifactId>dagger-compiler</artifactId>
-				<version>2.0.2</version>
+				<version>${dagger.version}</version>
 				<scope>provided</scope>
 			</dependency>
 

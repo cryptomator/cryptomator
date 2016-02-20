@@ -42,10 +42,24 @@
 		</dependency>
 		<dependency>
 			<groupId>org.cryptomator</groupId>
+			<artifactId>filesystem-stats</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.cryptomator</groupId>
 			<artifactId>commons-test</artifactId>
 		</dependency>
+
+		<dependency>
+			<groupId>com.google.dagger</groupId>
+			<artifactId>dagger</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.google.dagger</groupId>
+			<artifactId>dagger-compiler</artifactId>
+			<scope>provided</scope>
+		</dependency>
 	</dependencies>
-	
+
 	<build>
 		<plugins>
 			<plugin>
