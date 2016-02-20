@@ -173,8 +173,8 @@ public class FileReadWriteTests {
 			try (ReadableFile readable = file.openReadable()) {
 				ByteBuffer buf = ByteBuffer.wrap(actualData2);
 				Thread.sleep(10);
-				readable.position(1);
 				assertTrue("readTask2 must be second to set its position", state.compareAndSet(1, 2));
+				readable.position(1);
 				readable.read(buf);
 				assertTrue("readTask2 must be first to finish reading", state.compareAndSet(2, 3));
 				return null;
