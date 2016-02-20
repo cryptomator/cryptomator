@@ -28,7 +28,19 @@ public class FileContentEncryptorImplTest {
 
 	private static final SecureRandom RANDOM_MOCK = new SecureRandom() {
 
-		private static final long serialVersionUID = 1505563778398085504L;
+		@Override
+		public void nextBytes(byte[] bytes) {
+			Arrays.fill(bytes, (byte) 0x00);
+		}
+
+	};
+
+	private static final SecureRandom RANDOM_MOCK_2 = new SecureRandom() {
+
+		@Override
+		public int nextInt(int bound) {
+			return 42;
+		}
 
 		@Override
 		public void nextBytes(byte[] bytes) {
@@ -80,6 +92,26 @@ public class FileContentEncryptorImplTest {
 		try (FileContentEncryptor encryptor = new FileContentEncryptorImpl(headerKey, macKey, RANDOM_MOCK, 0)) {
 			encryptor.cancelWithException(new IOException("can not do"));
 			encryptor.ciphertext();
+		}
+	}
+
+	@Test
+	public void testSizeObfuscation() throws InterruptedException {
+		final byte[] keyBytes = new byte[32];
+		final SecretKey headerKey = new SecretKeySpec(keyBytes, "AES");
+		final SecretKey macKey = new SecretKeySpec(keyBytes, "AES");
+
+		try (FileContentEncryptor encryptor = new FileContentEncryptorImpl(headerKey, macKey, RANDOM_MOCK_2, 0)) {
+			encryptor.append(FileContentCryptor.EOF);
+
+			ByteBuffer result = ByteBuffer.allocate(91); // 16 bytes iv + 42 bytes size obfuscation + 32 bytes mac + 1
+			ByteBuffer buf;
+			while ((buf = encryptor.ciphertext()) != FileContentCryptor.EOF) {
+				ByteBuffers.copy(buf, result);
+			}
+			result.flip();
+
+			Assert.assertEquals(90, result.remaining());
 		}
 	}
 

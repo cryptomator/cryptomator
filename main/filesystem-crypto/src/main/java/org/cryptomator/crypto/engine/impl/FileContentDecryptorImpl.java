@@ -22,6 +22,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.LongAdder;
 
 import javax.crypto.Cipher;
 import javax.crypto.Mac;
@@ -45,6 +46,8 @@ class FileContentDecryptorImpl implements FileContentDecryptor {
 	private final ThreadLocal<Mac> hmacSha256;
 	private final FileHeader header;
 	private final boolean authenticate;
+	private final LongAdder cleartextBytesScheduledForDecryption = new LongAdder();
+	private final LongAdder cleartextBytesDecrypted = new LongAdder();
 	private ByteBuffer ciphertextBuffer = ByteBuffer.allocate(CHUNK_SIZE);
 	private long chunkNumber = 0;
 
@@ -63,11 +66,13 @@ class FileContentDecryptorImpl implements FileContentDecryptor {
 
 	@Override
 	public void append(ByteBuffer ciphertext) throws InterruptedException {
-		if (ciphertext == FileContentCryptor.EOF) {
+		if (cleartextBytesScheduledForDecryption.sum() >= contentLength()) {
+			submitEof();
+		} else if (ciphertext == FileContentCryptor.EOF) {
 			submitCiphertextBuffer();
 			submitEof();
 		} else {
-			while (ciphertext.hasRemaining()) {
+			while (ciphertext.hasRemaining() && cleartextBytesScheduledForDecryption.sum() < contentLength()) {
 				ByteBuffers.copy(ciphertext, ciphertextBuffer);
 				submitCiphertextBufferIfFull();
 			}
@@ -91,6 +96,7 @@ class FileContentDecryptorImpl implements FileContentDecryptor {
 	private void submitCiphertextBuffer() throws InterruptedException {
 		ciphertextBuffer.flip();
 		if (ciphertextBuffer.hasRemaining()) {
+			cleartextBytesScheduledForDecryption.add(ciphertextBuffer.remaining() - MAC_SIZE - NONCE_SIZE);
 			Callable<ByteBuffer> encryptionJob = new DecryptionJob(ciphertextBuffer, chunkNumber++);
 			dataProcessor.submit(encryptionJob);
 		}
@@ -103,7 +109,15 @@ class FileContentDecryptorImpl implements FileContentDecryptor {
 	@Override
 	public ByteBuffer cleartext() throws InterruptedException {
 		try {
-			return dataProcessor.processedData();
+			final ByteBuffer cleartext = dataProcessor.processedData();
+			long bytesUntilLogicalEof = contentLength() - cleartextBytesDecrypted.sum();
+			if (bytesUntilLogicalEof <= 0) {
+				return FileContentCryptor.EOF;
+			} else if (bytesUntilLogicalEof < cleartext.remaining()) {
+				cleartext.limit((int) bytesUntilLogicalEof);
+			}
+			cleartextBytesDecrypted.add(cleartext.remaining());
+			return cleartext;
 		} catch (ExecutionException e) {
 			if (e.getCause() instanceof AuthenticationFailedException) {
 				throw new AuthenticationFailedException(e);

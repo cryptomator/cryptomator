@@ -115,7 +115,6 @@ class CryptoWritableFile implements WritableFile {
 			if (file.isOpen()) {
 				terminateAndWaitForWriteTask();
 				writeHeader();
-				// TODO append padding
 			}
 		} finally {
 			executorService.shutdownNow();

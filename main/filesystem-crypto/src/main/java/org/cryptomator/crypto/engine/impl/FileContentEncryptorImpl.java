@@ -8,6 +8,7 @@
  *******************************************************************************/
 package org.cryptomator.crypto.engine.impl;
 
+import static org.cryptomator.crypto.engine.impl.FileContentCryptorImpl.NONCE_SIZE;
 import static org.cryptomator.crypto.engine.impl.FileContentCryptorImpl.PAYLOAD_SIZE;
 
 import java.io.IOException;
@@ -34,8 +35,9 @@ import org.cryptomator.io.ByteBuffers;
 
 class FileContentEncryptorImpl implements FileContentEncryptor {
 
-	private static final int NONCE_SIZE = 16;
 	private static final String HMAC_SHA256 = "HmacSHA256";
+	private static final int PADDING_LOWER_BOUND = 4 * 1024; // 4k
+	private static final int PADDING_UPPER_BOUND = 16 * 1024 * 1024; // 16M
 	private static final int NUM_THREADS = Runtime.getRuntime().availableProcessors();
 	private static final int READ_AHEAD = 2;
 	private static final ExecutorService SHARED_DECRYPTION_EXECUTOR = Executors.newFixedThreadPool(NUM_THREADS);
@@ -45,7 +47,7 @@ class FileContentEncryptorImpl implements FileContentEncryptor {
 	private final SecretKey headerKey;
 	private final FileHeader header;
 	private final SecureRandom randomSource;
-	private final LongAdder cleartextBytesEncrypted = new LongAdder();
+	private final LongAdder cleartextBytesScheduledForEncryption = new LongAdder();
 	private ByteBuffer cleartextBuffer = ByteBuffer.allocate(PAYLOAD_SIZE);
 	private long chunkNumber = 0;
 
@@ -61,7 +63,7 @@ class FileContentEncryptorImpl implements FileContentEncryptor {
 
 	@Override
 	public ByteBuffer getHeader() {
-		header.getPayload().setFilesize(cleartextBytesEncrypted.sum());
+		header.getPayload().setFilesize(cleartextBytesScheduledForEncryption.sum());
 		return header.toByteBuffer(headerKey, hmacSha256);
 	}
 
@@ -72,15 +74,31 @@ class FileContentEncryptorImpl implements FileContentEncryptor {
 
 	@Override
 	public void append(ByteBuffer cleartext) throws InterruptedException {
-		cleartextBytesEncrypted.add(cleartext.remaining());
+		cleartextBytesScheduledForEncryption.add(cleartext.remaining());
 		if (cleartext == FileContentCryptor.EOF) {
+			appendSizeObfuscationPadding(cleartextBytesScheduledForEncryption.sum());
 			submitCleartextBuffer();
 			submitEof();
 		} else {
-			while (cleartext.hasRemaining()) {
-				ByteBuffers.copy(cleartext, cleartextBuffer);
-				submitCleartextBufferIfFull();
-			}
+			appendAllAndSubmitIfFull(cleartext);
+		}
+	}
+
+	private void appendSizeObfuscationPadding(long actualSize) throws InterruptedException {
+		final int maxPaddingLength = (int) Math.min(Math.max(actualSize / 10, PADDING_LOWER_BOUND), PADDING_UPPER_BOUND); // preferably 10%, but at least lower bound and no more than upper bound
+		final int randomPaddingLength = randomSource.nextInt(maxPaddingLength);
+		int remainingPadding = randomPaddingLength;
+		while (remainingPadding > 0) {
+			ByteBuffer buf = ByteBuffer.allocate(Math.min(remainingPadding, PAYLOAD_SIZE));
+			appendAllAndSubmitIfFull(buf);
+			remainingPadding -= buf.capacity();
+		}
+	}
+
+	private void appendAllAndSubmitIfFull(ByteBuffer cleartext) throws InterruptedException {
+		while (cleartext.hasRemaining()) {
+			ByteBuffers.copy(cleartext, cleartextBuffer);
+			submitCleartextBufferIfFull();
 		}
 	}
 
