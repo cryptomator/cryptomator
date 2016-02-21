@@ -106,7 +106,7 @@ public class UriNormalizationFilter implements HttpFilter {
 		} else if (ArrayUtils.contains(DIRECTORY_METHODS, requestMethod)) {
 			return normalizedFolderRequest(originalRequest);
 		} else {
-			LOG.debug("Could not determine resource type of resource: {}", originalRequest.getRequestURI());
+			LOG.trace("Could not determine resource type of resource: {}", originalRequest.getRequestURI());
 			return originalRequest;
 		}
 	}
