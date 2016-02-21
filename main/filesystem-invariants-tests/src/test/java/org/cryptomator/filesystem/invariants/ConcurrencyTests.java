@@ -89,17 +89,14 @@ public class ConcurrencyTests {
 
 		private final SynchronousQueue<Runnable> handoverQueue = new SynchronousQueue<>();
 		private final Thread thread = new Thread(() -> {
-			Runnable task;
-			while (true) {
-				try {
-					task = handoverQueue.take();
-				} catch (InterruptedException e) {
-					return;
+			try {
+				Runnable task;
+				while ((task = handoverQueue.take()) != TERMINATION_HINT) {
+					task.run();
 				}
-				if (task == TERMINATION_HINT) {
-					break;
-				}
-				task.run();
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+				return;
 			}
 		});
 
