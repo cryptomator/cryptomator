@@ -128,7 +128,7 @@ public class UriNormalizationFilter implements HttpFilter {
 		@Override
 		public String getHeader(String name) {
 			if ((METHOD_MOVE.equalsIgnoreCase(getMethod()) || METHOD_COPY.equalsIgnoreCase(getMethod())) && HEADER_DESTINATION.equalsIgnoreCase(name)) {
-				final String uri = URI.create(super.getHeader(name)).getPath();
+				final String uri = URI.create(super.getHeader(name)).getRawPath();
 				return bestGuess(uri);
 			} else {
 				return super.getHeader(name);
