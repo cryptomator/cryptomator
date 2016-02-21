@@ -47,11 +47,21 @@ public class InMemoryWritableFile implements WritableFile {
 	@Override
 	public void moveTo(WritableFile other) throws UncheckedIOException {
 		if (other instanceof InMemoryWritableFile) {
-			InMemoryWritableFile destination = (InMemoryWritableFile) other;
+			internalMoveTo((InMemoryWritableFile) other);
+		} else {
+			throw new IllegalArgumentException("Can only move an InMemoryWritableFile to another InMemoryWritableFile");
+		}
+	}
+
+	private void internalMoveTo(InMemoryWritableFile destination) {
+		try {
 			destination.contentSetter.accept(this.contentGetter.get());
 			destination.contentGetter.get().rewind();
+			deleter.run();
+		} finally {
+			open = false;
+			destination.open = false;
 		}
-		deleter.run();
 	}
 
 	@Override
@@ -84,8 +94,8 @@ public class InMemoryWritableFile implements WritableFile {
 			ByteBuffers.copy(old, destination);
 			contentSetter.accept(destination);
 		}
-		destination.position(position);
 		destination.limit(newFileSize);
+		destination.position(position);
 		int numWritten = ByteBuffers.copy(source, destination);
 		this.position += numWritten;
 		return numWritten;

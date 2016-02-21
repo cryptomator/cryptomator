@@ -23,6 +23,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.LongAdder;
+import java.util.function.Supplier;
 
 import javax.crypto.Cipher;
 import javax.crypto.Mac;
@@ -43,7 +44,7 @@ class FileContentDecryptorImpl implements FileContentDecryptor {
 	private static final ExecutorService SHARED_DECRYPTION_EXECUTOR = Executors.newFixedThreadPool(NUM_THREADS);
 
 	private final FifoParallelDataProcessor<ByteBuffer> dataProcessor = new FifoParallelDataProcessor<>(NUM_THREADS + READ_AHEAD, SHARED_DECRYPTION_EXECUTOR);
-	private final ThreadLocal<Mac> hmacSha256;
+	private final Supplier<Mac> hmacSha256;
 	private final FileHeader header;
 	private final boolean authenticate;
 	private final LongAdder cleartextBytesScheduledForDecryption = new LongAdder();
@@ -52,8 +53,7 @@ class FileContentDecryptorImpl implements FileContentDecryptor {
 	private long chunkNumber = 0;
 
 	public FileContentDecryptorImpl(SecretKey headerKey, SecretKey macKey, ByteBuffer header, long firstCiphertextByte, boolean authenticate) {
-		final ThreadLocalMac hmacSha256 = new ThreadLocalMac(macKey, HMAC_SHA256);
-		this.hmacSha256 = hmacSha256;
+		this.hmacSha256 = new ThreadLocalMac(macKey, HMAC_SHA256);
 		this.header = FileHeader.decrypt(headerKey, hmacSha256, header);
 		this.authenticate = authenticate;
 		this.chunkNumber = firstCiphertextByte / CHUNK_SIZE; // floor() by int-truncation
