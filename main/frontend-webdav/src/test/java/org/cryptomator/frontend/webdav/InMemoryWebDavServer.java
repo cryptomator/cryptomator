@@ -8,39 +8,20 @@
  *******************************************************************************/
 package org.cryptomator.frontend.webdav;
 
-import java.net.URI;
-import java.util.EnumSet;
-
-import javax.servlet.DispatcherType;
-
 import org.cryptomator.filesystem.FileSystem;
 import org.cryptomator.filesystem.crypto.CryptoEngineTestModule;
 import org.cryptomator.filesystem.crypto.CryptoFileSystemDelegate;
 import org.cryptomator.filesystem.crypto.CryptoFileSystemTestComponent;
 import org.cryptomator.filesystem.crypto.DaggerCryptoFileSystemTestComponent;
 import org.cryptomator.filesystem.inmem.InMemoryFileSystem;
-import org.cryptomator.frontend.webdav.filters.LoggingHttpFilter;
-import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.mockito.Mockito;
 
 public class InMemoryWebDavServer {
 
 	private static final CryptoFileSystemTestComponent CRYPTO_FS_COMP = DaggerCryptoFileSystemTestComponent.builder().cryptoEngineModule(new CryptoEngineTestModule()).build();
-	private static final WebDavComponent WEVDAV_COMP = DaggerWebDavComponent.create();
 
 	public static void main(String[] args) throws Exception {
-		WebDavServer server = WEVDAV_COMP.server();
-		server.setPort(8080);
-		server.start();
-
-		FileSystem fileSystem = cryptoFileSystem();
-		ServletContextHandler servlet = server.addServlet(fileSystem, URI.create("http://localhost:8080/foo"));
-		servlet.addFilter(LoggingHttpFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
-		servlet.start();
-
-		System.out.println("Server started. Press any key to stop it...");
-		System.in.read();
-		server.stop();
+		new FileSystemWebDabServer(cryptoFileSystem()).run();
 	}
 
 	private static FileSystem cryptoFileSystem() {
