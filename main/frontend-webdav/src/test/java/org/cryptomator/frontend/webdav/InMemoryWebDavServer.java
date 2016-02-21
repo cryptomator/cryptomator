@@ -21,7 +21,7 @@ public class InMemoryWebDavServer {
 	private static final CryptoFileSystemTestComponent CRYPTO_FS_COMP = DaggerCryptoFileSystemTestComponent.builder().cryptoEngineModule(new CryptoEngineTestModule()).build();
 
 	public static void main(String[] args) throws Exception {
-		new FileSystemWebDabServer(cryptoFileSystem()).run();
+		new FileSystemWebDavServer(cryptoFileSystem()).run();
 	}
 
 	private static FileSystem cryptoFileSystem() {

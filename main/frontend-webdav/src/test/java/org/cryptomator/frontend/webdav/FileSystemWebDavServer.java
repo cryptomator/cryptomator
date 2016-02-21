@@ -17,13 +17,13 @@ import org.cryptomator.filesystem.FileSystem;
 import org.cryptomator.frontend.webdav.filters.LoggingHttpFilter;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 
-class FileSystemWebDabServer {
+class FileSystemWebDavServer {
 
 	private static final WebDavComponent WEVDAV_COMP = DaggerWebDavComponent.create();
 
 	private final FileSystem fileSystem;
 
-	public FileSystemWebDabServer(FileSystem fileSystem) {
+	public FileSystemWebDavServer(FileSystem fileSystem) {
 		this.fileSystem = fileSystem;
 	}
 

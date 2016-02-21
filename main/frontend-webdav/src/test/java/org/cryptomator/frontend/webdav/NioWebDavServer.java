@@ -26,7 +26,7 @@ public class NioWebDavServer {
 	private static final String PATH_TO_SERVE_PROPERTY = "pathToServe";
 
 	public static void main(String[] args) throws Exception {
-		new FileSystemWebDabServer(nioFileSystem()).run();
+		new FileSystemWebDavServer(nioFileSystem()).run();
 	}
 
 	private static FileSystem nioFileSystem() {
