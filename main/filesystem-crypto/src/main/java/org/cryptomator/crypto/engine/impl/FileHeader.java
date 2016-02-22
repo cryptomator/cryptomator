@@ -17,6 +17,8 @@ import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.security.auth.Destroyable;
 
+import org.cryptomator.crypto.engine.AuthenticationFailedException;
+
 class FileHeader implements Destroyable {
 
 	static final int HEADER_SIZE = 88;
@@ -77,7 +79,7 @@ class FileHeader implements Destroyable {
 		payload.destroy();
 	}
 
-	public static FileHeader decrypt(SecretKey headerKey, Supplier<Mac> hmacSha256Factory, ByteBuffer header) throws IllegalArgumentException {
+	public static FileHeader decrypt(SecretKey headerKey, Supplier<Mac> hmacSha256Factory, ByteBuffer header) throws IllegalArgumentException, AuthenticationFailedException {
 		if (header.remaining() != HEADER_SIZE) {
 			throw new IllegalArgumentException("Invalid header size.");
 		}
@@ -97,7 +99,7 @@ class FileHeader implements Destroyable {
 		return new FileHeader(iv, payload);
 	}
 
-	private static void checkHeaderMac(ByteBuffer header, Mac mac) throws IllegalArgumentException {
+	private static void checkHeaderMac(ByteBuffer header, Mac mac) throws AuthenticationFailedException {
 		assert mac.getMacLength() == MAC_LEN;
 		ByteBuffer headerData = header.asReadOnlyBuffer();
 		headerData.position(0).limit(MAC_POS);
@@ -108,7 +110,7 @@ class FileHeader implements Destroyable {
 		headerMac.get(expectedMac);
 
 		if (!MessageDigest.isEqual(expectedMac, mac.doFinal())) {
-			throw new IllegalArgumentException("Corrupt header.");
+			throw new AuthenticationFailedException("Corrupt header.");
 		}
 	}
 

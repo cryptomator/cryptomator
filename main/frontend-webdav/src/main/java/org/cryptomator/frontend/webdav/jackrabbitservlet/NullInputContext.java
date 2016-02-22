@@ -5,7 +5,7 @@ import java.io.InputStream;
 
 import org.apache.jackrabbit.webdav.io.InputContext;
 
-public class NullInputContext implements InputContext {
+class NullInputContext implements InputContext {
 
 	@Override
 	public boolean hasStream() {

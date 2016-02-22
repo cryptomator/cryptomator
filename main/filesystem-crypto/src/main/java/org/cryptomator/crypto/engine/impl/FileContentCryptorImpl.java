@@ -14,6 +14,7 @@ import java.util.Optional;
 
 import javax.crypto.SecretKey;
 
+import org.cryptomator.crypto.engine.AuthenticationFailedException;
 import org.cryptomator.crypto.engine.FileContentCryptor;
 import org.cryptomator.crypto.engine.FileContentDecryptor;
 import org.cryptomator.crypto.engine.FileContentEncryptor;
@@ -52,7 +53,7 @@ public class FileContentCryptorImpl implements FileContentCryptor {
 	}
 
 	@Override
-	public FileContentDecryptor createFileContentDecryptor(ByteBuffer header, long firstCiphertextByte, boolean authenticate) {
+	public FileContentDecryptor createFileContentDecryptor(ByteBuffer header, long firstCiphertextByte, boolean authenticate) throws IllegalArgumentException, AuthenticationFailedException {
 		if (header.remaining() != getHeaderSize()) {
 			throw new IllegalArgumentException("Invalid header.");
 		}

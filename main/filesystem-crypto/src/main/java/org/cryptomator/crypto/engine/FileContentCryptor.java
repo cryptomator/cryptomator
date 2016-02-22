@@ -35,7 +35,7 @@ public interface FileContentCryptor {
 	 * @param authenticate Skip authentication by setting this flag to <code>false</code>. Should be <code>true</code> by default.
 	 * @return A possibly new FileContentDecryptor instance which is capable of decrypting ciphertexts associated with the given file header.
 	 */
-	FileContentDecryptor createFileContentDecryptor(ByteBuffer header, long firstCiphertextByte, boolean authenticate) throws IllegalArgumentException;
+	FileContentDecryptor createFileContentDecryptor(ByteBuffer header, long firstCiphertextByte, boolean authenticate) throws IllegalArgumentException, AuthenticationFailedException;
 
 	/**
 	 * @param header The full fixed-length header of an encrypted file or {@link Optional#empty()}. The caller is required to pass the exact amount of bytes returned by {@link #getHeaderSize()}.

@@ -64,7 +64,19 @@ public class FileContentDecryptorImplTest {
 	}
 
 	@Test(expected = AuthenticationFailedException.class)
-	public void testManipulatedDecryption() throws InterruptedException {
+	public void testManipulatedHeaderDecryption() throws InterruptedException {
+		final byte[] keyBytes = new byte[32];
+		final SecretKey headerKey = new SecretKeySpec(keyBytes, "AES");
+		final SecretKey macKey = new SecretKeySpec(keyBytes, "HmacSHA256");
+		final byte[] header = Base64.decode("AAAAAAAAAAAAAAAAAAAAANyVwHiiQImjrUiiFJKEIIdTD4r7x0U2ualjtPHEy3OLzqdAPU1ga26lJzstK9RUv1hj5zDC4wC9FgMfoVE1mD0HnuENuYXkJa==");
+
+		try (FileContentDecryptor decryptor = new FileContentDecryptorImpl(headerKey, macKey, ByteBuffer.wrap(header), 0, true)) {
+
+		}
+	}
+
+	@Test(expected = AuthenticationFailedException.class)
+	public void testManipulatedContentDecryption() throws InterruptedException {
 		final byte[] keyBytes = new byte[32];
 		final SecretKey headerKey = new SecretKeySpec(keyBytes, "AES");
 		final SecretKey macKey = new SecretKeySpec(keyBytes, "HmacSHA256");
