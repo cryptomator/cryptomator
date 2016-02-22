@@ -87,11 +87,13 @@ class FileContentEncryptorImpl implements FileContentEncryptor {
 	private void appendSizeObfuscationPadding(long actualSize) throws InterruptedException {
 		final int maxPaddingLength = (int) Math.min(Math.max(actualSize / 10, PADDING_LOWER_BOUND), PADDING_UPPER_BOUND); // preferably 10%, but at least lower bound and no more than upper bound
 		final int randomPaddingLength = randomSource.nextInt(maxPaddingLength);
+		final ByteBuffer buf = ByteBuffer.allocate(PAYLOAD_SIZE);
 		int remainingPadding = randomPaddingLength;
 		while (remainingPadding > 0) {
-			ByteBuffer buf = ByteBuffer.allocate(Math.min(remainingPadding, PAYLOAD_SIZE));
+			int bytesInCurrentIteration = Math.min(remainingPadding, PAYLOAD_SIZE);
+			buf.clear().limit(bytesInCurrentIteration);
 			appendAllAndSubmitIfFull(buf);
-			remainingPadding -= buf.capacity();
+			remainingPadding -= bytesInCurrentIteration;
 		}
 	}
 
