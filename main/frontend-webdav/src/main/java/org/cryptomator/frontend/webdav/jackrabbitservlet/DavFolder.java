@@ -73,6 +73,7 @@ class DavFolder extends DavNode<FolderLocator> {
 
 	private void addMemberFile(DavFile memberFile, InputStream inputStream) {
 		try (ReadableByteChannel src = Channels.newChannel(inputStream); WritableFile dst = node.file(memberFile.getDisplayName()).openWritable()) {
+			dst.truncate();
 			ByteStreams.copy(src, dst);
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);

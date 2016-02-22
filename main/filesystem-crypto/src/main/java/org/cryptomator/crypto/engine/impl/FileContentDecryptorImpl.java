@@ -11,6 +11,7 @@ package org.cryptomator.crypto.engine.impl;
 import static org.cryptomator.crypto.engine.impl.FileContentCryptorImpl.CHUNK_SIZE;
 import static org.cryptomator.crypto.engine.impl.FileContentCryptorImpl.MAC_SIZE;
 import static org.cryptomator.crypto.engine.impl.FileContentCryptorImpl.NONCE_SIZE;
+import static org.cryptomator.crypto.engine.impl.FileContentCryptorImpl.PAYLOAD_SIZE;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -31,6 +32,7 @@ import javax.crypto.SecretKey;
 import javax.crypto.ShortBufferException;
 import javax.crypto.spec.IvParameterSpec;
 
+import org.apache.commons.codec.binary.Hex;
 import org.cryptomator.crypto.engine.AuthenticationFailedException;
 import org.cryptomator.crypto.engine.FileContentCryptor;
 import org.cryptomator.crypto.engine.FileContentDecryptor;
@@ -47,7 +49,7 @@ class FileContentDecryptorImpl implements FileContentDecryptor {
 	private final Supplier<Mac> hmacSha256;
 	private final FileHeader header;
 	private final boolean authenticate;
-	private final LongAdder cleartextBytesScheduledForDecryption = new LongAdder();
+	private final LongAdder ciphertextBytesScheduledForDecryption = new LongAdder();
 	private final LongAdder cleartextBytesDecrypted = new LongAdder();
 	private ByteBuffer ciphertextBuffer = ByteBuffer.allocate(CHUNK_SIZE);
 	private long chunkNumber = 0;
@@ -66,13 +68,15 @@ class FileContentDecryptorImpl implements FileContentDecryptor {
 
 	@Override
 	public void append(ByteBuffer ciphertext) throws InterruptedException {
-		if (cleartextBytesScheduledForDecryption.sum() >= contentLength()) {
-			submitEof();
-		} else if (ciphertext == FileContentCryptor.EOF) {
+		long numChunksNeeded = (contentLength() - 1) / PAYLOAD_SIZE + 1;
+		long numCiphertextBytesNeeded = numChunksNeeded * CHUNK_SIZE;
+
+		if (ciphertext == FileContentCryptor.EOF || ciphertextBytesScheduledForDecryption.sum() >= numCiphertextBytesNeeded) {
 			submitCiphertextBuffer();
 			submitEof();
 		} else {
-			while (ciphertext.hasRemaining() && cleartextBytesScheduledForDecryption.sum() < contentLength()) {
+			ciphertextBytesScheduledForDecryption.add(ciphertext.remaining());
+			while (ciphertext.hasRemaining()) {
 				ByteBuffers.copy(ciphertext, ciphertextBuffer);
 				submitCiphertextBufferIfFull();
 			}
@@ -96,7 +100,6 @@ class FileContentDecryptorImpl implements FileContentDecryptor {
 	private void submitCiphertextBuffer() throws InterruptedException {
 		ciphertextBuffer.flip();
 		if (ciphertextBuffer.hasRemaining()) {
-			cleartextBytesScheduledForDecryption.add(ciphertextBuffer.remaining() - MAC_SIZE - NONCE_SIZE);
 			Callable<ByteBuffer> encryptionJob = new DecryptionJob(ciphertextBuffer, chunkNumber++);
 			dataProcessor.submit(encryptionJob);
 		}

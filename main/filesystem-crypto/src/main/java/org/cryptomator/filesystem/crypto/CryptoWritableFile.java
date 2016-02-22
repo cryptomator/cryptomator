@@ -31,7 +31,6 @@ class CryptoWritableFile implements WritableFile {
 
 	private FileContentEncryptor encryptor;
 	private Future<Void> writeTask;
-	private boolean contentChanged = false;
 
 	public CryptoWritableFile(FileContentCryptor cryptor, WritableFile file) {
 		this.file = file;
@@ -54,7 +53,6 @@ class CryptoWritableFile implements WritableFile {
 
 	@Override
 	public int write(ByteBuffer source) {
-		contentChanged = true;
 		final int size = source.remaining();
 		final ByteBuffer cleartextCopy = ByteBuffer.allocate(size);
 		ByteBuffers.copy(source, cleartextCopy);
@@ -74,7 +72,6 @@ class CryptoWritableFile implements WritableFile {
 
 	@Override
 	public void truncate() {
-		contentChanged = true;
 		terminateAndWaitForWriteTask();
 		file.truncate();
 		initialize(0);
@@ -88,7 +85,7 @@ class CryptoWritableFile implements WritableFile {
 	@Override
 	public void close() {
 		try {
-			if (contentChanged && file.isOpen()) {
+			if (file.isOpen()) {
 				terminateAndWaitForWriteTask();
 				writeHeader();
 			}
