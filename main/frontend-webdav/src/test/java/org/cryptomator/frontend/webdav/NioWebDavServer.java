@@ -19,14 +19,30 @@ import java.nio.file.Paths;
 import java.util.Optional;
 
 import org.cryptomator.filesystem.FileSystem;
+import org.cryptomator.filesystem.crypto.CryptoEngineTestModule;
+import org.cryptomator.filesystem.crypto.CryptoFileSystemDelegate;
+import org.cryptomator.filesystem.crypto.CryptoFileSystemTestComponent;
+import org.cryptomator.filesystem.crypto.DaggerCryptoFileSystemTestComponent;
 import org.cryptomator.filesystem.nio.NioFileSystem;
+import org.mockito.Mockito;
 
 public class NioWebDavServer {
 
+	private static final CryptoFileSystemTestComponent CRYPTO_FS_COMP = DaggerCryptoFileSystemTestComponent.builder().cryptoEngineModule(new CryptoEngineTestModule()).build();
 	private static final String PATH_TO_SERVE_PROPERTY = "pathToServe";
 
 	public static void main(String[] args) throws Exception {
-		new FileSystemWebDavServer(nioFileSystem()).run();
+		new FileSystemWebDavServer(cryptoFileSystem()).run();
+	}
+
+	private static FileSystem cryptoFileSystem() {
+		FileSystem shorteningFileSystem = shorteningFileSystem();
+		CRYPTO_FS_COMP.cryptoFileSystemFactory().initializeNew(shorteningFileSystem, "asd");
+		return CRYPTO_FS_COMP.cryptoFileSystemFactory().unlockExisting(shorteningFileSystem, "asd", Mockito.mock(CryptoFileSystemDelegate.class));
+	}
+
+	private static FileSystem shorteningFileSystem() {
+		return CRYPTO_FS_COMP.shorteningFileSystemFactory().get(nioFileSystem());
 	}
 
 	private static FileSystem nioFileSystem() {
