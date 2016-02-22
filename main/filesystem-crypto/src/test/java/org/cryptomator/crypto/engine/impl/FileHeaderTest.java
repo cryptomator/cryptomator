@@ -16,6 +16,7 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.bouncycastle.util.encoders.Base64;
+import org.cryptomator.crypto.engine.AuthenticationFailedException;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -63,7 +64,7 @@ public class FileHeaderTest {
 		Assert.assertArrayEquals(new byte[32], header.getPayload().getContentKey().getEncoded());
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test(expected = AuthenticationFailedException.class)
 	public void testDecryptionWithInvalidMac1() {
 		final byte[] keyBytes = new byte[32];
 		final SecretKey headerKey = new SecretKeySpec(keyBytes, "AES");
@@ -72,7 +73,7 @@ public class FileHeaderTest {
 		FileHeader.decrypt(headerKey, new ThreadLocalMac(macKey, "HmacSHA256"), headerBuf);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test(expected = AuthenticationFailedException.class)
 	public void testDecryptionWithInvalidMac2() {
 		final byte[] keyBytes = new byte[32];
 		final SecretKey headerKey = new SecretKeySpec(keyBytes, "AES");
