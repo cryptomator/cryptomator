@@ -128,26 +128,25 @@ public class UriNormalizationFilter implements HttpFilter {
 		@Override
 		public String getHeader(String name) {
 			if ((METHOD_MOVE.equalsIgnoreCase(getMethod()) || METHOD_COPY.equalsIgnoreCase(getMethod())) && HEADER_DESTINATION.equalsIgnoreCase(name)) {
-				final String uri = URI.create(super.getHeader(name)).getRawPath();
-				return bestGuess(uri);
+				return bestGuess(URI.create(super.getHeader(name)));
 			} else {
 				return super.getHeader(name);
 			}
 		}
 
-		private String bestGuess(String uri) {
-			final String pathWithinContext = StringUtils.removeStart(uri, contextPath);
+		private String bestGuess(URI uri) {
+			final String pathWithinContext = StringUtils.removeStart(uri.getPath(), contextPath);
 			final ResourceType resourceType = resourceTypeChecker.typeOfResource(pathWithinContext);
 			switch (resourceType) {
 			case FILE:
-				return asFileUri(uri);
+				return asFileUri(uri.getRawPath());
 			case FOLDER:
-				return asFolderUri(uri);
+				return asFolderUri(uri.getRawPath());
 			default:
 				if (this.getRequestURI().endsWith("/")) {
-					return asFolderUri(uri);
+					return asFolderUri(uri.getRawPath());
 				} else {
-					return asFileUri(uri);
+					return asFileUri(uri.getRawPath());
 				}
 			}
 		}
