@@ -16,7 +16,7 @@ interface InstanceFactory {
 
 	SharedFileChannel sharedFileChannel(Path path, NioAccess nioAccess);
 
-	WritableNioFile writableNioFile(FileSystem fileSystem, Path path, SharedFileChannel channel, Runnable afterCloseCallback, NioAccess nioAccess);
+	WritableNioFile writableNioFile(FileSystem fileSystem, Path path, SharedFileChannel channel, Runnable afterCloseCallback);
 
 	ReadableNioFile readableNioFile(Path path, SharedFileChannel channel, Runnable afterCloseCallback);
 

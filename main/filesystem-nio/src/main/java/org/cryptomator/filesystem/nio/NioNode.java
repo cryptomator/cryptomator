@@ -25,6 +25,11 @@ abstract class NioNode implements Node {
 		this.instanceFactory = instanceFactoy;
 	}
 
+	// visible for testing
+	Path path() {
+		return path;
+	}
+
 	@Override
 	public String name() throws UncheckedIOException {
 		return path.getFileName().toString();
@@ -35,6 +40,8 @@ abstract class NioNode implements Node {
 		return parent;
 	}
 
+	private static final Instant JANNUARY_THE_SECOND_NINTEENHUNDRED_SEVENTY = Instant.parse("1970-01-02T00:00:00Z");
+
 	@Override
 	public Instant lastModified() throws UncheckedIOException {
 		try {
@@ -44,7 +51,14 @@ abstract class NioNode implements Node {
 		}
 	}
 
-	private static final Instant JANNUARY_THE_SECOND_NINTEENHUNDRED_SEVENTY = Instant.parse("1970-01-02T00:00:00Z");
+	@Override
+	public void setLastModified(Instant lastModified) throws UncheckedIOException {
+		try {
+			nioAccess.setLastModifiedTime(path, FileTime.from(lastModified));
+		} catch (IOException e) {
+			throw new UncheckedIOException(e);
+		}
+	}
 
 	@Override
 	public Optional<Instant> creationTime() throws UncheckedIOException {

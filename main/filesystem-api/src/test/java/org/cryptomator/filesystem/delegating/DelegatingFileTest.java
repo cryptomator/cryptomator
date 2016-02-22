@@ -9,6 +9,7 @@
 package org.cryptomator.filesystem.delegating;
 
 import java.time.Instant;
+import java.util.Optional;
 
 import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.Folder;
@@ -54,11 +55,41 @@ public class DelegatingFileTest {
 	@Test
 	public void testLastModified() {
 		File mockFile = Mockito.mock(File.class);
-		Instant now = Instant.now();
-
-		Mockito.when(mockFile.lastModified()).thenReturn(now);
 		DelegatingFile<?> delegatingFile = new TestDelegatingFile(null, mockFile);
+
+		Instant now = Instant.now();
+		Mockito.when(mockFile.lastModified()).thenReturn(now);
 		Assert.assertEquals(now, delegatingFile.lastModified());
+	}
+
+	@Test
+	public void testSetLastModified() {
+		File mockFile = Mockito.mock(File.class);
+		DelegatingFile<?> delegatingFile = new TestDelegatingFile(null, mockFile);
+
+		Instant now = Instant.now();
+		delegatingFile.setLastModified(now);
+		Mockito.verify(mockFile).setLastModified(now);
+	}
+
+	@Test
+	public void testCreationTime() {
+		File mockFile = Mockito.mock(File.class);
+		DelegatingFile<?> delegatingFile = new TestDelegatingFile(null, mockFile);
+
+		Instant now = Instant.now();
+		Mockito.when(mockFile.creationTime()).thenReturn(Optional.of(now));
+		Assert.assertEquals(now, delegatingFile.creationTime().get());
+	}
+
+	@Test
+	public void testSetCreationTime() {
+		File mockFile = Mockito.mock(File.class);
+		DelegatingFile<?> delegatingFile = new TestDelegatingFile(null, mockFile);
+
+		Instant now = Instant.now();
+		delegatingFile.setCreationTime(now);
+		Mockito.verify(mockFile).setCreationTime(now);
 	}
 
 	@Test
@@ -120,6 +151,15 @@ public class DelegatingFileTest {
 
 		delegatingFile1.copyTo(mockFile2);
 		Mockito.verify(mockFile1).copyTo(mockFile2);
+	}
+
+	@Test
+	public void testDelete() {
+		File mockFile = Mockito.mock(File.class);
+		DelegatingFile<?> delegatingFile = new TestDelegatingFile(null, mockFile);
+
+		delegatingFile.delete();
+		Mockito.verify(mockFile).delete();
 	}
 
 	@Test

@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
-import java.time.Instant;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -71,32 +70,6 @@ class CryptoWritableFile implements WritableFile {
 	@Override
 	public void position(long position) {
 		throw new UnsupportedOperationException("Partial write not implemented yet.");
-	}
-
-	@Override
-	public void moveTo(WritableFile other) {
-		if (other instanceof CryptoWritableFile) {
-			CryptoWritableFile dst = (CryptoWritableFile) other;
-			file.moveTo(dst.file);
-		} else {
-			throw new IllegalArgumentException("Can not move CryptoFile to conventional File.");
-		}
-	}
-
-	@Override
-	public void setLastModified(Instant instant) {
-		file.setLastModified(instant);
-	}
-
-	@Override
-	public void setCreationTime(Instant instant) throws UncheckedIOException {
-		file.setCreationTime(instant);
-	}
-
-	@Override
-	public void delete() {
-		writeTask.cancel(true);
-		file.delete();
 	}
 
 	@Override

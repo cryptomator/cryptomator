@@ -116,11 +116,7 @@ public class InMemoryFileSystemTest {
 
 		// move bar to baz
 		File bazFile = fs.file("baz.txt");
-		try (WritableFile src = barFile.openWritable()) {
-			try (WritableFile dst = bazFile.openWritable()) {
-				src.moveTo(dst);
-			}
-		}
+		barFile.moveTo(bazFile);
 		Assert.assertFalse(barFile.exists());
 		Assert.assertTrue(bazFile.exists());
 

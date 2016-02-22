@@ -30,9 +30,34 @@ public interface Node {
 	 */
 	Optional<? extends Folder> parent() throws UncheckedIOException;
 
+	/**
+	 * @return <code>true</code> if the node exists.
+	 */
 	boolean exists() throws UncheckedIOException;
 
+	/**
+	 * <p>
+	 * Deletes the node if it exists.
+	 * <p>
+	 * Does nothing if the node does not exist.
+	 */
+	void delete() throws UncheckedIOException;
+
+	/**
+	 * <p>
+	 * Determines the last modified date of this node.
+	 * 
+	 * @returns the last modified date of the file
+	 */
 	Instant lastModified() throws UncheckedIOException;
+
+	/**
+	 * <p>
+	 * Sets the last modified date of the file.
+	 * 
+	 * @param lastModified the time to set as creation time
+	 */
+	void setLastModified(Instant lastModified) throws UncheckedIOException;
 
 	/**
 	 * <p>
@@ -53,9 +78,9 @@ public interface Node {
 	 * Setting the creation time may not be supported by all {@link FileSystem FileSystems}. If the {@code FileSystem} this {@code Node} belongs to does not support the
 	 * setting the creation time the behavior of this method is unspecified.
 	 * 
-	 * @param instant the time to set as creation time
+	 * @param creationTime the time to set as creation time
 	 */
-	default void setCreationTime(Instant instant) throws UncheckedIOException {
+	default void setCreationTime(Instant creationTime) throws UncheckedIOException {
 		throw new UncheckedIOException(new IOException("CreationTime not supported"));
 	}
 

@@ -10,7 +10,6 @@ package org.cryptomator.filesystem.inmem;
 
 import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
-import java.time.Instant;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -20,59 +19,22 @@ import org.cryptomator.io.ByteBuffers;
 
 public class InMemoryWritableFile implements WritableFile {
 
-	private final Consumer<Instant> lastModifiedSetter;
-	private final Consumer<Instant> creationTimeSetter;
 	private final Supplier<ByteBuffer> contentGetter;
 	private final Consumer<ByteBuffer> contentSetter;
-	private final Runnable deleter;
 	private final WriteLock writeLock;
 
 	private boolean open = true;
 	private volatile int position = 0;
 
-	public InMemoryWritableFile(Consumer<Instant> lastModifiedSetter, Consumer<Instant> creationTimeSetter, Supplier<ByteBuffer> contentGetter, Consumer<ByteBuffer> contentSetter, Runnable deleter, WriteLock writeLock) {
-		this.lastModifiedSetter = lastModifiedSetter;
+	public InMemoryWritableFile(Supplier<ByteBuffer> contentGetter, Consumer<ByteBuffer> contentSetter, WriteLock writeLock) {
 		this.contentGetter = contentGetter;
 		this.contentSetter = contentSetter;
-		this.deleter = deleter;
 		this.writeLock = writeLock;
-		this.creationTimeSetter = creationTimeSetter;
 	}
 
 	@Override
 	public boolean isOpen() {
 		return open;
-	}
-
-	@Override
-	public void moveTo(WritableFile other) throws UncheckedIOException {
-		if (other instanceof InMemoryWritableFile) {
-			internalMoveTo((InMemoryWritableFile) other);
-		} else {
-			throw new IllegalArgumentException("Can only move an InMemoryWritableFile to another InMemoryWritableFile");
-		}
-	}
-
-	private void internalMoveTo(InMemoryWritableFile destination) {
-		try {
-			destination.contentSetter.accept(this.contentGetter.get());
-			destination.contentGetter.get().rewind();
-			deleter.run();
-		} finally {
-			open = false;
-			destination.open = false;
-		}
-	}
-
-	@Override
-	public void setLastModified(Instant instant) throws UncheckedIOException {
-		lastModifiedSetter.accept(instant);
-	}
-
-	@Override
-	public void delete() throws UncheckedIOException {
-		deleter.run();
-		open = false;
 	}
 
 	@Override
@@ -111,12 +73,6 @@ public class InMemoryWritableFile implements WritableFile {
 	public void close() throws UncheckedIOException {
 		open = false;
 		writeLock.unlock();
-		lastModifiedSetter.accept(Instant.now());
-	}
-
-	@Override
-	public void setCreationTime(Instant instant) throws UncheckedIOException {
-		creationTimeSetter.accept(instant);
 	}
 
 }

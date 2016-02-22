@@ -23,8 +23,8 @@ class DefaultInstanceFactory implements InstanceFactory {
 	}
 
 	@Override
-	public WritableNioFile writableNioFile(FileSystem fileSystem, Path path, SharedFileChannel channel, Runnable afterCloseCallback, NioAccess nioAccess) {
-		return new WritableNioFile(fileSystem, path, channel, afterCloseCallback, nioAccess);
+	public WritableNioFile writableNioFile(FileSystem fileSystem, Path path, SharedFileChannel channel, Runnable afterCloseCallback) {
+		return new WritableNioFile(fileSystem, path, channel, afterCloseCallback);
 	}
 
 	@Override

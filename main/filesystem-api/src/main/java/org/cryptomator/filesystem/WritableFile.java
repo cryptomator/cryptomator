@@ -9,41 +9,8 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.WritableByteChannel;
-import java.time.Instant;
 
 public interface WritableFile extends WritableByteChannel {
-
-	/**
-	 * <p>
-	 * Moves this file including content to another.
-	 * <p>
-	 * Moving a file causes itself and the target to be
-	 * {@link WritableFile#close() closed}.
-	 */
-	void moveTo(WritableFile other) throws UncheckedIOException;
-
-	void setLastModified(Instant instant) throws UncheckedIOException;
-
-	/**
-	 * <p>
-	 * Sets the creation time of the file.
-	 * <p>
-	 * Setting the creation time may not be supported by all {@link FileSystem FileSystems}. If the {@code FileSystem} this {@code WritableFile} belongs to does not support the
-	 * setting the creation time the behavior of this method is unspecified.
-	 * 
-	 * @param instant the time to set as creation time
-	 */
-	default void setCreationTime(Instant instant) throws UncheckedIOException {
-		throw new UncheckedIOException(new IOException("CreationTime not supported"));
-	}
-
-	/**
-	 * <p>
-	 * Deletes this file from the file system.
-	 * <p>
-	 * Deleting a file causes it to be {@link WritableFile#close() closed}.
-	 */
-	void delete() throws UncheckedIOException;
 
 	void truncate() throws UncheckedIOException;
 
@@ -58,6 +25,7 @@ public interface WritableFile extends WritableByteChannel {
 	 * @throws UncheckedIOException
 	 *             if an {@link IOException} occurs while writing
 	 */
+	@Override
 	int write(ByteBuffer source) throws UncheckedIOException;
 
 	/**

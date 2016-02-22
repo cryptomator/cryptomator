@@ -12,6 +12,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 import java.io.UncheckedIOException;
+import java.nio.ByteBuffer;
 import java.time.Instant;
 
 import org.cryptomator.filesystem.WritableFile;
@@ -27,38 +28,39 @@ public class InMemoryFileTest {
 	@Test
 	public void testCreationTimeOfNonExistingFileThrowsUncheckedIOException() {
 		InMemoryFileSystem fileSystem = new InMemoryFileSystem();
-		InMemoryFile inTest = fileSystem.file("foo");
+		InMemoryFile file = fileSystem.file("foo");
 
 		thrown.expect(UncheckedIOException.class);
 
-		inTest.creationTime();
+		file.creationTime();
 	}
 
 	@Test
 	public void testCreationTimeOfCreatedFileIsSetToInstantDuringCreation() {
 		InMemoryFileSystem fileSystem = new InMemoryFileSystem();
-		InMemoryFile inTest = fileSystem.file("foo");
+		InMemoryFile file = fileSystem.file("foo");
 
 		Instant minCreationTime = Instant.now();
 		Instant maxCreationTime;
-		try (WritableFile writable = inTest.openWritable()) {
+		try (WritableFile writable = file.openWritable()) {
 			maxCreationTime = Instant.now();
 		}
 
-		assertThat(inTest.creationTime().get().isBefore(minCreationTime), is(false));
-		assertThat(inTest.creationTime().get().isAfter(maxCreationTime), is(false));
+		assertThat(file.creationTime().get().isBefore(minCreationTime), is(false));
+		assertThat(file.creationTime().get().isAfter(maxCreationTime), is(false));
 	}
 
 	@Test
-	public void testCreationTimeSetInWritableFileIsSaved() {
+	public void testCreationTimeSetIsSaved() {
 		Instant creationTime = Instant.parse("2015-03-23T21:11:32Z");
 		InMemoryFileSystem fileSystem = new InMemoryFileSystem();
-		InMemoryFile inTest = fileSystem.file("foo");
-		try (WritableFile writable = inTest.openWritable()) {
-			writable.setCreationTime(creationTime);
+		InMemoryFile file = fileSystem.file("foo");
+		try (WritableFile writable = file.openWritable()) {
+			writable.write(ByteBuffer.allocate(0));
 		}
 
-		assertThat(inTest.creationTime().get(), is(creationTime));
+		file.setCreationTime(creationTime);
+		assertThat(file.creationTime().get(), is(creationTime));
 	}
 
 }

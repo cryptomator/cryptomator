@@ -41,8 +41,18 @@ public abstract class DelegatingNode<T extends Node> implements Node {
 	}
 
 	@Override
+	public void setLastModified(Instant instant) throws UncheckedIOException {
+		delegate.setLastModified(instant);
+	}
+
+	@Override
 	public Optional<Instant> creationTime() throws UncheckedIOException {
 		return delegate.creationTime();
+	}
+
+	@Override
+	public void setCreationTime(Instant instant) throws UncheckedIOException {
+		delegate.setCreationTime(instant);
 	}
 
 	@Override

@@ -10,7 +10,6 @@ package org.cryptomator.filesystem.delegating;
 
 import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
-import java.time.Instant;
 
 import org.cryptomator.filesystem.WritableFile;
 
@@ -25,26 +24,6 @@ public class DelegatingWritableFile implements WritableFile {
 	@Override
 	public boolean isOpen() {
 		return delegate.isOpen();
-	}
-
-	@Override
-	public void moveTo(WritableFile destination) throws UncheckedIOException {
-		if (getClass().equals(destination.getClass())) {
-			final WritableFile delegateDest = ((DelegatingWritableFile) destination).delegate;
-			delegate.moveTo(delegateDest);
-		} else {
-			throw new IllegalArgumentException("Can only move DelegatingWritableFile to a DelegatingWritableFile.");
-		}
-	}
-
-	@Override
-	public void setLastModified(Instant instant) throws UncheckedIOException {
-		delegate.setLastModified(instant);
-	}
-
-	@Override
-	public void delete() throws UncheckedIOException {
-		delegate.delete();
 	}
 
 	@Override
@@ -65,11 +44,6 @@ public class DelegatingWritableFile implements WritableFile {
 	@Override
 	public void close() throws UncheckedIOException {
 		delegate.close();
-	}
-
-	@Override
-	public void setCreationTime(Instant instant) throws UncheckedIOException {
-		delegate.setCreationTime(instant);
 	}
 
 }

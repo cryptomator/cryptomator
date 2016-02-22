@@ -76,13 +76,18 @@ abstract class CryptoNode implements Node {
 	}
 
 	@Override
+	public void setLastModified(Instant lastModified) throws UncheckedIOException {
+		forceGetPhysicalFile().setLastModified(lastModified);
+	}
+
+	@Override
 	public Optional<Instant> creationTime() throws UncheckedIOException {
 		return forceGetPhysicalFile().creationTime();
 	}
 
 	@Override
-	public void setCreationTime(Instant instant) throws UncheckedIOException {
-		forceGetPhysicalFile().setCreationTime(instant);
+	public void setCreationTime(Instant creationTime) throws UncheckedIOException {
+		forceGetPhysicalFile().setCreationTime(creationTime);
 	}
 
 	@Override

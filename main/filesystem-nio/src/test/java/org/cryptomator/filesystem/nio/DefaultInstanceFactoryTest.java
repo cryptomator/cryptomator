@@ -23,7 +23,7 @@ public class DefaultInstanceFactoryTest {
 	private NioAccess nioAccess;
 	private SharedFileChannel channel;
 
-	private DefaultInstanceFactory inTest = new DefaultInstanceFactory();
+	private final DefaultInstanceFactory inTest = new DefaultInstanceFactory();
 
 	@Before
 	public void setUp() {
@@ -67,14 +67,13 @@ public class DefaultInstanceFactoryTest {
 	@Test
 	public void testWritableNioFileCreatesWritableNioFile() throws IOException {
 		Runnable afterCloseCallback = mock(Runnable.class);
-		WritableNioFile result = inTest.writableNioFile(fileSystem, path, channel, afterCloseCallback, nioAccess);
+		WritableNioFile result = inTest.writableNioFile(fileSystem, path, channel, afterCloseCallback);
 
 		assertThat(result.path(), is(path));
 		assertThat(result.channel(), is(channel));
 		assertThat(result.fileSystem(), is(fileSystem));
 
-		result.delete();
-		verify(nioAccess).delete(path);
+		result.close();
 		verify(afterCloseCallback).run();
 	}
 

@@ -1,13 +1,17 @@
 package org.cryptomator.filesystem.nio;
 
 import static java.lang.String.format;
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static org.cryptomator.common.test.matcher.OptionalMatcher.emptyOptional;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.same;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -27,6 +31,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 
 import de.bechte.junit.runners.context.HierarchicalContextRunner;
 
@@ -128,7 +133,7 @@ public class NioFileTest {
 		@Test
 		public void testOpenReadableInvokedAfterInvokingAfterCloseOperationWorks() {
 			ArgumentCaptor<Runnable> captor = ArgumentCaptor.forClass(Runnable.class);
-			when(instanceFactory.writableNioFile(same(fileSystem), same(path), same(channel), captor.capture(), same(nioAccess))).thenReturn(null);
+			when(instanceFactory.writableNioFile(same(fileSystem), same(path), same(channel), captor.capture())).thenReturn(null);
 			inTest.openWritable();
 			captor.getValue().run();
 
@@ -138,7 +143,7 @@ public class NioFileTest {
 		@Test
 		public void testOpenWritableCreatesWritableNioFileFromNioFileAndNioAccessUsingInstanceFactory() {
 			WritableNioFile writableNioFile = mock(WritableNioFile.class);
-			when(instanceFactory.writableNioFile(same(fileSystem), same(path), same(channel), any(), same(nioAccess))).thenReturn(writableNioFile);
+			when(instanceFactory.writableNioFile(same(fileSystem), same(path), same(channel), any())).thenReturn(writableNioFile);
 
 			WritableFile writableFile = inTest.openWritable();
 
@@ -149,7 +154,7 @@ public class NioFileTest {
 		public void testOpenWritableInvokedAfterAfterCloseOperationCreatesNewWritableFile() {
 			WritableNioFile writableNioFile = mock(WritableNioFile.class);
 			ArgumentCaptor<Runnable> captor = ArgumentCaptor.forClass(Runnable.class);
-			when(instanceFactory.writableNioFile(same(fileSystem), same(path), same(channel), captor.capture(), same(nioAccess))).thenReturn(null, writableNioFile);
+			when(instanceFactory.writableNioFile(same(fileSystem), same(path), same(channel), captor.capture())).thenReturn(null, writableNioFile);
 			inTest.openWritable();
 			captor.getValue().run();
 
@@ -186,6 +191,74 @@ public class NioFileTest {
 			captor.getValue().run();
 
 			inTest.openWritable();
+		}
+
+	}
+
+	public class MoveTo {
+
+		private NioFile target;
+
+		private Path pathOfTarget;
+
+		@Before
+		public void setUp() {
+			target = mock(NioFile.class);
+			pathOfTarget = mock(Path.class);
+			when(target.fileSystem()).thenReturn(fileSystem);
+			when(target.path()).thenReturn(pathOfTarget);
+		}
+
+		@Test
+		public void testMoveToFailsIfTargetIsNoWritableNioFile() {
+			thrown.expect(IllegalArgumentException.class);
+			thrown.expectMessage("Can only move to a File from the same FileSystem");
+
+			inTest.moveTo(mock(File.class));
+		}
+
+		@Test
+		public void testMoveToFailsIfTargetIsNotFromSameFileSystem() {
+			NioFile targetFromOtherFileSystem = mock(NioFile.class);
+			when(targetFromOtherFileSystem.fileSystem()).thenReturn(mock(FileSystem.class));
+
+			thrown.expect(IllegalArgumentException.class);
+			thrown.expectMessage("Can only move to a File from the same FileSystem");
+
+			inTest.moveTo(targetFromOtherFileSystem);
+		}
+
+		@Test
+		public void testMoveToFailsIfTargetIsDirectory() {
+			when(nioAccess.isDirectory(path)).thenReturn(false);
+			when(nioAccess.isDirectory(pathOfTarget)).thenReturn(true);
+
+			thrown.expect(UncheckedIOException.class);
+			thrown.expectMessage("Target is a directory");
+			thrown.expectMessage(path.toString());
+			thrown.expectMessage(pathOfTarget.toString());
+
+			inTest.moveTo(target);
+		}
+
+		@Test
+		public void testMoveToDoesNothingIfTargetIsSameInstance() {
+			inTest.moveTo(inTest);
+
+			verifyZeroInteractions(nioAccess);
+		}
+
+		@Test
+		public void testMoveToWrapsIOExceptionFromMoveInUncheckedIOException() throws IOException {
+			when(nioAccess.isDirectory(path)).thenReturn(false);
+			when(nioAccess.isDirectory(pathOfTarget)).thenReturn(false);
+			IOException exceptionFromMove = new IOException();
+			doThrow(exceptionFromMove).when(nioAccess).move(path, pathOfTarget, REPLACE_EXISTING);
+
+			thrown.expect(UncheckedIOException.class);
+			thrown.expectCause(is(exceptionFromMove));
+
+			inTest.moveTo(target);
 		}
 
 	}
@@ -259,39 +332,30 @@ public class NioFileTest {
 
 	}
 
-	public class CompareTo {
+	public class SetLastModified {
 
-		private Path otherPath;
-		private NioFile otherInTest;
+		@Test
+		public void testSetLastModifiedOpensChannelIfClosedAndSetsLastModifiedTime() throws IOException {
+			Instant instant = Instant.parse("2016-01-05T13:51:00Z");
+			FileTime time = FileTime.from(instant);
 
-		@Before
-		public void setUp() {
-			otherPath = mock(Path.class);
+			inTest.setLastModified(instant);
 
-			Path maybeNonAbsolutePath = mock(Path.class);
-			when(maybeNonAbsolutePath.toAbsolutePath()).thenReturn(otherPath);
-
-			otherInTest = new NioFile(parent, maybeNonAbsolutePath, nioAccess, instanceFactory);
+			InOrder inOrder = inOrder(channel, nioAccess);
+			inOrder.verify(nioAccess).setLastModifiedTime(path, time);
 		}
 
 		@Test
-		public void testCompareToFileFromOtherFileSystemThrowsIllegalArgumentException() {
-			File other = mock(File.class);
-			when(other.fileSystem()).thenReturn(mock(FileSystem.class));
+		public void testSetLastModifiedWrapsIOExceptionFromSetLastModifiedInUncheckedIOException() throws IOException {
+			IOException exceptionFromSetLastModified = new IOException();
+			Instant instant = Instant.parse("2016-01-05T13:51:00Z");
+			FileTime time = FileTime.from(instant);
+			doThrow(exceptionFromSetLastModified).when(nioAccess).setLastModifiedTime(path, time);
 
-			thrown.expect(IllegalArgumentException.class);
+			thrown.expect(UncheckedIOException.class);
+			thrown.expectCause(is(exceptionFromSetLastModified));
 
-			inTest.compareTo(other);
-		}
-
-		@Test
-		public void testCompareToReturnsResultOfPathsCompareTo() {
-			int expectedResult = 2873;
-			when(path.compareTo(otherPath)).thenReturn(expectedResult);
-
-			int result = inTest.compareTo(otherInTest);
-
-			assertThat(result, is(expectedResult));
+			inTest.setLastModified(instant);
 		}
 
 	}
@@ -341,6 +405,69 @@ public class NioFileTest {
 			thrown.expectMessage(format("%s is a folder", path));
 
 			inTest.creationTime();
+		}
+
+	}
+
+	public class SetCreationTime {
+
+		@Test
+		public void testSetCreationTimeOpensChannelIfClosedAndInvokesNioAccessSetCreationTimeAfterwards() throws IOException {
+			Instant instant = Instant.parse("2016-01-08T22:32:00Z");
+
+			inTest.setCreationTime(instant);
+
+			InOrder inOrder = inOrder(nioAccess, channel);
+			inOrder.verify(nioAccess).setCreationTime(path, FileTime.from(instant));
+		}
+
+		@Test
+		public void testSetCreationTimeWrapsIOExceptionFromSetCreationTimeInUncheckedIOException() throws IOException {
+			IOException exceptionFromSetCreationTime = new IOException();
+			Instant irrelevant = Instant.now();
+			doThrow(exceptionFromSetCreationTime).when(nioAccess).setCreationTime(same(path), any());
+
+			thrown.expect(UncheckedIOException.class);
+			thrown.expectCause(is(exceptionFromSetCreationTime));
+
+			inTest.setCreationTime(irrelevant);
+		}
+
+	}
+
+	public class CompareTo {
+
+		private Path otherPath;
+		private NioFile otherInTest;
+
+		@Before
+		public void setUp() {
+			otherPath = mock(Path.class);
+
+			Path maybeNonAbsolutePath = mock(Path.class);
+			when(maybeNonAbsolutePath.toAbsolutePath()).thenReturn(otherPath);
+
+			otherInTest = new NioFile(parent, maybeNonAbsolutePath, nioAccess, instanceFactory);
+		}
+
+		@Test
+		public void testCompareToFileFromOtherFileSystemThrowsIllegalArgumentException() {
+			File other = mock(File.class);
+			when(other.fileSystem()).thenReturn(mock(FileSystem.class));
+
+			thrown.expect(IllegalArgumentException.class);
+
+			inTest.compareTo(other);
+		}
+
+		@Test
+		public void testCompareToReturnsResultOfPathsCompareTo() {
+			int expectedResult = 2873;
+			when(path.compareTo(otherPath)).thenReturn(expectedResult);
+
+			int result = inTest.compareTo(otherInTest);
+
+			assertThat(result, is(expectedResult));
 		}
 
 	}

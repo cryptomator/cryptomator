@@ -73,23 +73,9 @@ public interface File extends Node, Comparable<File> {
 		Copier.copy(this, destination);
 	}
 
-	default void moveTo(File destination) {
-		Mover.move(this, destination);
-	}
-
 	/**
-	 * <p>
-	 * Deletes the file if it exists.
-	 * <p>
-	 * Does nothign if the file does not exist.
+	 * Moves this file including content to a new location specified by <code>destination</code>.
 	 */
-	default void delete() {
-		if (!exists()) {
-			return;
-		}
-		try (WritableFile writableFile = openWritable()) {
-			writableFile.delete();
-		}
-	}
+	void moveTo(File destination) throws UncheckedIOException;
 
 }

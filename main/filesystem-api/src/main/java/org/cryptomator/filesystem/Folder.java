@@ -99,14 +99,6 @@ public interface Folder extends Node {
 	}
 
 	/**
-	 * <p>
-	 * Deletes the directory including all child elements.
-	 * <p>
-	 * If the directory does not exist this method does nothing.
-	 */
-	void delete();
-
-	/**
 	 * Moves this directory and its contents to the given destination. If the
 	 * target exists it is deleted before performing the move.
 	 */

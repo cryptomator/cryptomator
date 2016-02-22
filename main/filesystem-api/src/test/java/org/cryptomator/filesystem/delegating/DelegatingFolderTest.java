@@ -11,6 +11,7 @@ package org.cryptomator.filesystem.delegating;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -58,11 +59,41 @@ public class DelegatingFolderTest {
 	@Test
 	public void testLastModified() {
 		Folder mockFolder = Mockito.mock(Folder.class);
-		Instant now = Instant.now();
-
-		Mockito.when(mockFolder.lastModified()).thenReturn(now);
 		DelegatingFolder<?, ?> delegatingFolder = new TestDelegatingFolder(null, mockFolder);
+
+		Instant now = Instant.now();
+		Mockito.when(mockFolder.lastModified()).thenReturn(now);
 		Assert.assertEquals(now, delegatingFolder.lastModified());
+	}
+
+	@Test
+	public void testSetLastModified() {
+		Folder mockFolder = Mockito.mock(Folder.class);
+		DelegatingFolder<?, ?> delegatingFolder = new TestDelegatingFolder(null, mockFolder);
+
+		Instant now = Instant.now();
+		delegatingFolder.setLastModified(now);
+		Mockito.verify(mockFolder).setLastModified(now);
+	}
+
+	@Test
+	public void testCreationTime() {
+		Folder mockFolder = Mockito.mock(Folder.class);
+		DelegatingFolder<?, ?> delegatingFolder = new TestDelegatingFolder(null, mockFolder);
+
+		Instant now = Instant.now();
+		Mockito.when(mockFolder.creationTime()).thenReturn(Optional.of(now));
+		Assert.assertEquals(now, delegatingFolder.creationTime().get());
+	}
+
+	@Test
+	public void testSetCreationTime() {
+		Folder mockFolder = Mockito.mock(Folder.class);
+		DelegatingFolder<?, ?> delegatingFolder = new TestDelegatingFolder(null, mockFolder);
+
+		Instant now = Instant.now();
+		delegatingFolder.setCreationTime(now);
+		Mockito.verify(mockFolder).setCreationTime(now);
 	}
 
 	@Test
@@ -172,16 +203,4 @@ public class DelegatingFolderTest {
 		Assert.assertSame(delegatingFolder.folder("mockSubFolder"), delegatingFolder.folder("mockSubFolder"));
 		Assert.assertSame(delegatingFolder.file("mockSubFile"), delegatingFolder.file("mockSubFile"));
 	}
-
-	@Test
-	public void testSetCreationTime() {
-		Folder mockFolder = Mockito.mock(Folder.class);
-		DelegatingFolder<?, ?> delegatingFolder = new TestDelegatingFolder(null, mockFolder);
-
-		Instant now = Instant.now();
-
-		delegatingFolder.setCreationTime(now);
-		Mockito.verify(mockFolder).setCreationTime(now);
-	}
-
 }

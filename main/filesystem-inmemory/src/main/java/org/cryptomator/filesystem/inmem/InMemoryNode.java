@@ -16,7 +16,7 @@ import java.util.Optional;
 
 import org.cryptomator.filesystem.Node;
 
-class InMemoryNode implements Node {
+abstract class InMemoryNode implements Node {
 
 	protected final InMemoryFolder parent;
 	protected final String name;
@@ -54,6 +54,25 @@ class InMemoryNode implements Node {
 	}
 
 	@Override
+	public void setLastModified(Instant lastModified) throws UncheckedIOException {
+		this.lastModified = lastModified;
+	}
+
+	@Override
+	public Optional<Instant> creationTime() throws UncheckedIOException {
+		if (exists()) {
+			return Optional.of(creationTime);
+		} else {
+			throw new UncheckedIOException(new IOException("Node does not exist"));
+		}
+	}
+
+	@Override
+	public void setCreationTime(Instant creationTime) throws UncheckedIOException {
+		this.creationTime = creationTime;
+	}
+
+	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
@@ -72,20 +91,6 @@ class InMemoryNode implements Node {
 		} else {
 			return false;
 		}
-	}
-
-	@Override
-	public Optional<Instant> creationTime() throws UncheckedIOException {
-		if (exists()) {
-			return Optional.of(creationTime);
-		} else {
-			throw new UncheckedIOException(new IOException("Node does not exist"));
-		}
-	}
-
-	@Override
-	public void setCreationTime(Instant creationTime) throws UncheckedIOException {
-		this.creationTime = creationTime;
 	}
 
 }

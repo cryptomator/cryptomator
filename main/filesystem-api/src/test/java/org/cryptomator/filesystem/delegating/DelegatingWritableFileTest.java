@@ -9,7 +9,6 @@
 package org.cryptomator.filesystem.delegating;
 
 import java.nio.ByteBuffer;
-import java.time.Instant;
 
 import org.cryptomator.filesystem.WritableFile;
 import org.junit.Assert;
@@ -29,49 +28,6 @@ public class DelegatingWritableFileTest {
 
 		Mockito.when(mockWritableFile.isOpen()).thenReturn(false);
 		Assert.assertFalse(delegatingWritableFile.isOpen());
-	}
-
-	@Test
-	public void testMoveTo() {
-		WritableFile mockWritableFile1 = Mockito.mock(WritableFile.class);
-		WritableFile mockWritableFile2 = Mockito.mock(WritableFile.class);
-		@SuppressWarnings("resource")
-		DelegatingWritableFile delegatingWritableFile1 = new DelegatingWritableFile(mockWritableFile1);
-		DelegatingWritableFile delegatingWritableFile2 = new DelegatingWritableFile(mockWritableFile2);
-
-		delegatingWritableFile1.moveTo(delegatingWritableFile2);
-		Mockito.verify(mockWritableFile1).moveTo(mockWritableFile2);
-	}
-
-	@Test(expected = IllegalArgumentException.class)
-	public void testMoveToDestinationFromDifferentLayer() {
-		WritableFile mockWritableFile1 = Mockito.mock(WritableFile.class);
-		WritableFile mockWritableFile2 = Mockito.mock(WritableFile.class);
-		@SuppressWarnings("resource")
-		DelegatingWritableFile delegatingWritableFile1 = new DelegatingWritableFile(mockWritableFile1);
-
-		delegatingWritableFile1.moveTo(mockWritableFile2);
-	}
-
-	@Test
-	public void testSetLastModified() {
-		WritableFile mockWritableFile = Mockito.mock(WritableFile.class);
-		@SuppressWarnings("resource")
-		DelegatingWritableFile delegatingWritableFile = new DelegatingWritableFile(mockWritableFile);
-
-		Instant now = Instant.now();
-		delegatingWritableFile.setLastModified(now);
-		Mockito.verify(mockWritableFile).setLastModified(now);
-	}
-
-	@Test
-	public void testDelete() {
-		WritableFile mockWritableFile = Mockito.mock(WritableFile.class);
-		@SuppressWarnings("resource")
-		DelegatingWritableFile delegatingWritableFile = new DelegatingWritableFile(mockWritableFile);
-
-		delegatingWritableFile.delete();
-		Mockito.verify(mockWritableFile).delete();
 	}
 
 	@Test
@@ -113,18 +69,6 @@ public class DelegatingWritableFileTest {
 
 		delegatingWritableFile.close();
 		Mockito.verify(mockWritableFile).close();
-	}
-
-	@Test
-	public void testSetCreationTime() {
-		WritableFile mockWritableFile = Mockito.mock(WritableFile.class);
-		@SuppressWarnings("resource")
-		DelegatingWritableFile delegatingWritableFile = new DelegatingWritableFile(mockWritableFile);
-
-		Instant now = Instant.now();
-
-		delegatingWritableFile.setCreationTime(now);
-		Mockito.verify(mockWritableFile).setCreationTime(now);
 	}
 
 }

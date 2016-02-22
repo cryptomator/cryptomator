@@ -29,7 +29,6 @@ import org.apache.jackrabbit.webdav.lock.LockManager;
 import org.apache.jackrabbit.webdav.property.DavPropertyName;
 import org.apache.jackrabbit.webdav.property.DefaultDavProperty;
 import org.apache.jackrabbit.webdav.property.ResourceType;
-import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.Folder;
 import org.cryptomator.filesystem.Node;
 import org.cryptomator.filesystem.WritableFile;
@@ -98,17 +97,7 @@ class DavFolder extends DavNode<FolderLocator> {
 	@Override
 	public void removeMember(DavResource member) throws DavException {
 		final Node child = getMemberNode(member.getDisplayName());
-		if (child instanceof Folder) {
-			Folder folder = (Folder) child;
-			folder.delete();
-		} else if (child instanceof File) {
-			File file = (File) child;
-			try (WritableFile writable = file.openWritable()) {
-				writable.delete();
-			}
-		} else {
-			throw new IllegalStateException("Unexpected node type: " + child.getClass().getName());
-		}
+		child.delete();
 	}
 
 	/**

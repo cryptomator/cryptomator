@@ -75,10 +75,7 @@ public class ShorteningFileSystemTest {
 		Assert.assertFalse(metadataRoot.children().findAny().isPresent());
 
 		final File longNamedFolder = fs.file("morethantenchars");
-		try (WritableFile src = shortNamedFolder.openWritable(); //
-				WritableFile dst = longNamedFolder.openWritable()) {
-			src.moveTo(dst);
-		}
+		shortNamedFolder.moveTo(longNamedFolder);
 		Assert.assertTrue(metadataRoot.children().findAny().isPresent());
 	}
 

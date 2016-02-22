@@ -60,4 +60,19 @@ public class CryptoFile extends CryptoNode implements File {
 		return toString().compareTo(o.toString());
 	}
 
+	@Override
+	public void delete() throws UncheckedIOException {
+		forceGetPhysicalFile().delete();
+	}
+
+	@Override
+	public void moveTo(File destination) throws UncheckedIOException {
+		if (destination instanceof CryptoFile) {
+			CryptoFile dst = (CryptoFile) destination;
+			forceGetPhysicalFile().moveTo(dst.forceGetPhysicalFile());
+		} else {
+			throw new IllegalArgumentException("Can not move CryptoFile to conventional File.");
+		}
+	}
+
 }

@@ -10,7 +10,6 @@ package org.cryptomator.filesystem.blockaligned;
 
 import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
-import java.time.Instant;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -126,31 +125,6 @@ class BlockAlignedWritableFile implements WritableFile {
 	@Override
 	public boolean isOpen() {
 		return delegate.get().isOpen();
-	}
-
-	@Override
-	public void moveTo(WritableFile destination) throws UncheckedIOException {
-		if (destination instanceof BlockAlignedWritableFile) {
-			final WritableFile delegateDest = ((BlockAlignedWritableFile) destination).delegate.get();
-			delegate.get().moveTo(delegateDest);
-		} else {
-			throw new IllegalArgumentException("Can only move DelegatingWritableFile to a DelegatingWritableFile.");
-		}
-	}
-
-	@Override
-	public void setLastModified(Instant instant) throws UncheckedIOException {
-		delegate.get().setLastModified(instant);
-	}
-
-	@Override
-	public void setCreationTime(Instant instant) throws UncheckedIOException {
-		delegate.get().setCreationTime(instant);
-	}
-
-	@Override
-	public void delete() throws UncheckedIOException {
-		delegate.get().delete();
 	}
 
 	@Override

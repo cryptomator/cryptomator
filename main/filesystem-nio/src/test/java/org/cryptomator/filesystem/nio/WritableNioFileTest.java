@@ -1,13 +1,10 @@
 package org.cryptomator.filesystem.nio;
 
 import static java.lang.String.format;
-import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static org.cryptomator.filesystem.nio.OpenMode.WRITE;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
@@ -15,15 +12,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
-import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 import java.nio.file.Path;
-import java.nio.file.attribute.FileTime;
-import java.time.Instant;
 
 import org.cryptomator.filesystem.FileSystem;
-import org.cryptomator.filesystem.WritableFile;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -47,8 +40,6 @@ public class WritableNioFileTest {
 
 	private Runnable afterCloseCallback;
 
-	private NioAccess nioAccess;
-
 	private WritableNioFile inTest;
 
 	@Before
@@ -57,8 +48,7 @@ public class WritableNioFileTest {
 		channel = mock(SharedFileChannel.class);
 		path = mock(Path.class);
 		afterCloseCallback = mock(Runnable.class);
-		nioAccess = mock(NioAccess.class);
-		inTest = new WritableNioFile(fileSystem, path, channel, afterCloseCallback, nioAccess);
+		inTest = new WritableNioFile(fileSystem, path, channel, afterCloseCallback);
 	}
 
 	public class ConstructorTests {
@@ -143,238 +133,6 @@ public class WritableNioFileTest {
 			int result = inTest.write(buffer);
 
 			assertThat(result, is(resultOfWriteFully));
-		}
-
-	}
-
-	public class MoveToTests {
-
-		private WritableNioFile target;
-
-		private Path pathOfTarget;
-
-		@Before
-		public void setUp() {
-			target = mock(WritableNioFile.class);
-			pathOfTarget = mock(Path.class);
-			when(target.fileSystem()).thenReturn(fileSystem);
-			when(target.path()).thenReturn(pathOfTarget);
-		}
-
-		@Test
-		public void testMoveToFailsIfTargetIsNoWritableNioFile() {
-			thrown.expect(IllegalArgumentException.class);
-			thrown.expectMessage("Can only move to a WritableFile from the same FileSystem");
-
-			inTest.moveTo(mock(WritableFile.class));
-		}
-
-		@Test
-		public void testMoveToFailsIfTargetIsNotFromSameFileSystem() {
-			WritableNioFile targetFromOtherFileSystem = mock(WritableNioFile.class);
-			when(targetFromOtherFileSystem.fileSystem()).thenReturn(mock(FileSystem.class));
-
-			thrown.expect(IllegalArgumentException.class);
-			thrown.expectMessage("Can only move to a WritableFile from the same FileSystem");
-
-			inTest.moveTo(mock(WritableFile.class));
-		}
-
-		@Test
-		public void testMoveToFailsIfSourceIsDirectory() {
-			when(nioAccess.isDirectory(path)).thenReturn(true);
-
-			thrown.expect(UncheckedIOException.class);
-			thrown.expectMessage("Source is a directory");
-			thrown.expectMessage(path.toString());
-			thrown.expectMessage(pathOfTarget.toString());
-
-			inTest.moveTo(target);
-		}
-
-		@Test
-		public void testMoveToFailsIfTargetIsDirectory() {
-			when(nioAccess.isDirectory(path)).thenReturn(false);
-			when(nioAccess.isDirectory(pathOfTarget)).thenReturn(true);
-
-			thrown.expect(UncheckedIOException.class);
-			thrown.expectMessage("Target is a directory");
-			thrown.expectMessage(path.toString());
-			thrown.expectMessage(pathOfTarget.toString());
-
-			inTest.moveTo(target);
-		}
-
-		@Test
-		public void testMoveToDoesNothingIfTargetIsSameInstance() {
-			inTest.moveTo(inTest);
-
-			verifyZeroInteractions(nioAccess);
-		}
-
-		@Test
-		public void testMoveToAssertsTargetIsOpenClosesChannelsIfOpenMovesFileAndInvokesAfterCloseCallbacks() throws IOException {
-			when(nioAccess.isDirectory(path)).thenReturn(false);
-			when(nioAccess.isDirectory(pathOfTarget)).thenReturn(false);
-
-			inTest.ensureChannelIsOpened();
-			inTest.moveTo(target);
-
-			InOrder inOrder = inOrder(target, nioAccess, channel, afterCloseCallback);
-			inOrder.verify(target).assertOpen();
-			inOrder.verify(channel).close();
-			inOrder.verify(target).closeChannelIfOpened();
-			inOrder.verify(nioAccess).move(path, pathOfTarget, REPLACE_EXISTING);
-			inOrder.verify(target).invokeAfterCloseCallback();
-			inOrder.verify(afterCloseCallback).run();
-		}
-
-		@Test
-		public void testMoveToWrapsIOExceptionFromMoveInUncheckedIOException() throws IOException {
-			when(nioAccess.isDirectory(path)).thenReturn(false);
-			when(nioAccess.isDirectory(pathOfTarget)).thenReturn(false);
-			IOException exceptionFromMove = new IOException();
-			doThrow(exceptionFromMove).when(nioAccess).move(path, pathOfTarget, REPLACE_EXISTING);
-
-			thrown.expect(UncheckedIOException.class);
-			thrown.expectCause(is(exceptionFromMove));
-
-			inTest.moveTo(target);
-		}
-
-		@Test
-		public void testMoveToInvokesAfterCloseCallbacksEvenIfMoveToThrowsException() throws IOException {
-			when(nioAccess.isDirectory(path)).thenReturn(false);
-			when(nioAccess.isDirectory(pathOfTarget)).thenReturn(false);
-			IOException exceptionFromMove = new IOException();
-			doThrow(exceptionFromMove).when(nioAccess).move(path, pathOfTarget, REPLACE_EXISTING);
-
-			thrown.expect(UncheckedIOException.class);
-			thrown.expectCause(is(exceptionFromMove));
-
-			inTest.moveTo(target);
-
-			verify(target).invokeAfterCloseCallback();
-			verify(afterCloseCallback).run();
-		}
-
-	}
-
-	public class SetLastModifiedTests {
-
-		@Test
-		public void testSetLastModifiedOpensChannelIfClosedAndSetsLastModifiedTime() throws IOException {
-			Instant instant = Instant.parse("2016-01-05T13:51:00Z");
-			FileTime time = FileTime.from(instant);
-
-			inTest.setLastModified(instant);
-
-			InOrder inOrder = inOrder(channel, nioAccess);
-			inOrder.verify(channel).open(OpenMode.WRITE);
-			inOrder.verify(nioAccess).setLastModifiedTime(path, time);
-		}
-
-		@Test
-		public void testSetLastModifiedWrapsIOExceptionFromSetLastModifiedInUncheckedIOException() throws IOException {
-			IOException exceptionFromSetLastModified = new IOException();
-			Instant instant = Instant.parse("2016-01-05T13:51:00Z");
-			FileTime time = FileTime.from(instant);
-			doThrow(exceptionFromSetLastModified).when(nioAccess).setLastModifiedTime(path, time);
-
-			thrown.expect(UncheckedIOException.class);
-			thrown.expectCause(is(exceptionFromSetLastModified));
-
-			inTest.setLastModified(instant);
-		}
-
-	}
-
-	public class SetCreationTimeTests {
-
-		@Test
-		public void testSetCreationTimeFailsIfNotOpen() {
-			Instant irrelevant = null;
-			inTest.close();
-
-			thrown.expect(UncheckedIOException.class);
-			thrown.expectMessage("already closed");
-
-			inTest.setCreationTime(irrelevant);
-		}
-
-		@Test
-		public void testSetCreationTimeOpensChannelIfClosedAndInvokesNioAccessSetCreationTimeAfterwards() throws IOException {
-			Instant instant = Instant.parse("2016-01-08T22:32:00Z");
-
-			inTest.setCreationTime(instant);
-
-			InOrder inOrder = inOrder(nioAccess, channel);
-			inOrder.verify(channel).open(OpenMode.WRITE);
-			inOrder.verify(nioAccess).setCreationTime(path, FileTime.from(instant));
-		}
-
-		@Test
-		public void testSetCreationTimeWrapsIOExceptionFromSetCreationTimeInUncheckedIOException() throws IOException {
-			IOException exceptionFromSetCreationTime = new IOException();
-			Instant irrelevant = Instant.now();
-			doThrow(exceptionFromSetCreationTime).when(nioAccess).setCreationTime(same(path), any());
-
-			thrown.expect(UncheckedIOException.class);
-			thrown.expectCause(is(exceptionFromSetCreationTime));
-
-			inTest.setCreationTime(irrelevant);
-		}
-
-	}
-
-	public class DeleteTests {
-
-		@Test
-		public void testDeleteClosesChannelIfOpenAndDeletesFileAndInvokesAfterCloseCallback() throws IOException {
-			inTest.ensureChannelIsOpened();
-			inTest.delete();
-
-			InOrder inOrder = inOrder(channel, nioAccess, afterCloseCallback);
-			inOrder.verify(channel).close();
-			inOrder.verify(nioAccess).delete(path);
-			inOrder.verify(afterCloseCallback).run();
-		}
-
-		@Test
-		public void testDeleteClosesWritableNioFile() {
-			inTest.delete();
-
-			assertThat(inTest.isOpen(), is(false));
-		}
-
-		@Test
-		public void testDeleteClosesWritableNioFileEvenIfDeleteFails() throws IOException {
-			IOException exceptionFromDelete = new IOException();
-			doThrow(exceptionFromDelete).when(nioAccess).delete(path);
-
-			thrown.expect(UncheckedIOException.class);
-			thrown.expectCause(is(exceptionFromDelete));
-
-			try {
-				inTest.delete();
-			} finally {
-				assertThat(inTest.isOpen(), is(false));
-			}
-		}
-
-		@Test
-		public void testDeleteInvokesAfterCloseCallbackEvenIfDeleteFails() throws IOException {
-			IOException exceptionFromDelete = new IOException();
-			doThrow(exceptionFromDelete).when(nioAccess).delete(path);
-
-			thrown.expect(UncheckedIOException.class);
-			thrown.expectCause(is(exceptionFromDelete));
-
-			try {
-				inTest.delete();
-			} finally {
-				verify(afterCloseCallback).run();
-			}
 		}
 
 	}
@@ -489,36 +247,6 @@ public class WritableNioFileTest {
 			thrown.expectMessage("already closed");
 
 			inTest.truncate();
-		}
-
-		@Test
-		public void testMoveToFailsIfClosed() {
-			inTest.close();
-
-			thrown.expect(UncheckedIOException.class);
-			thrown.expectMessage("already closed");
-
-			inTest.moveTo(null);
-		}
-
-		@Test
-		public void testSetLastModifiedFailsIfClosed() {
-			inTest.close();
-
-			thrown.expect(UncheckedIOException.class);
-			thrown.expectMessage("already closed");
-
-			inTest.setLastModified(null);
-		}
-
-		@Test
-		public void testDeleteFailsIfClosed() {
-			inTest.close();
-
-			thrown.expect(UncheckedIOException.class);
-			thrown.expectMessage("already closed");
-
-			inTest.delete();
 		}
 
 	}

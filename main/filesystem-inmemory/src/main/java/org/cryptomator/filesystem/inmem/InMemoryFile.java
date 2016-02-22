@@ -38,6 +38,22 @@ class InMemoryFile extends InMemoryNode implements File {
 	}
 
 	@Override
+	public void moveTo(File destination) throws UncheckedIOException {
+		if (destination instanceof InMemoryFile) {
+			internalMoveTo((InMemoryFile) destination);
+		} else {
+			throw new IllegalArgumentException("Can only move an InMemoryFile to another InMemoryFile");
+		}
+	}
+
+	private void internalMoveTo(InMemoryFile destination) {
+		this.content.rewind();
+		destination.create();
+		destination.content = this.content;
+		this.delete();
+	}
+
+	@Override
 	public ReadableFile openReadable() {
 		if (!exists()) {
 			throw new UncheckedIOException(new FileNotFoundException(this.name() + " does not exist"));
@@ -62,21 +78,8 @@ class InMemoryFile extends InMemoryNode implements File {
 		final WriteLock writeLock = lock.writeLock();
 		writeLock.lock();
 		try {
-			final InMemoryFolder parent = parent().get();
-			parent.existingChildren.compute(this.name(), (k, v) -> {
-				if (v != null && v != this) {
-					// other file or folder with same name already exists.
-					throw new UncheckedIOException(new FileAlreadyExistsException(k));
-				} else {
-					if (v == null) {
-						assert!content.hasRemaining();
-						this.creationTime = Instant.now();
-					}
-					this.lastModified = Instant.now();
-					return this;
-				}
-			});
-			final WritableFile result = new InMemoryWritableFile(this::setLastModified, this::setCreationTime, this::getContent, this::setContent, this::delete, writeLock);
+			create();
+			final WritableFile result = new InMemoryWritableFile(this::getContent, this::setContent, writeLock);
 			success = true;
 			return result;
 		} finally {
@@ -86,8 +89,21 @@ class InMemoryFile extends InMemoryNode implements File {
 		}
 	}
 
-	private void setLastModified(Instant lastModified) {
-		this.lastModified = lastModified;
+	private void create() {
+		final InMemoryFolder parent = parent().get();
+		parent.existingChildren.compute(this.name(), (k, v) -> {
+			if (v != null && v != this) {
+				// other file or folder with same name already exists.
+				throw new UncheckedIOException(new FileAlreadyExistsException(k));
+			} else {
+				if (v == null) {
+					assert!content.hasRemaining();
+					this.creationTime = Instant.now();
+				}
+				this.lastModified = Instant.now();
+				return this;
+			}
+		});
 	}
 
 	private ByteBuffer getContent() {
