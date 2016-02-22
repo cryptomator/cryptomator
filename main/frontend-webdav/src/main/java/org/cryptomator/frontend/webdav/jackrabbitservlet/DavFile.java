@@ -21,6 +21,8 @@ import org.apache.jackrabbit.webdav.DavServletResponse;
 import org.apache.jackrabbit.webdav.DavSession;
 import org.apache.jackrabbit.webdav.io.InputContext;
 import org.apache.jackrabbit.webdav.io.OutputContext;
+import org.apache.jackrabbit.webdav.lock.ActiveLock;
+import org.apache.jackrabbit.webdav.lock.LockInfo;
 import org.apache.jackrabbit.webdav.lock.LockManager;
 import org.apache.jackrabbit.webdav.property.DavProperty;
 import org.apache.jackrabbit.webdav.property.DavPropertyName;
@@ -164,6 +166,15 @@ class DavFile extends DavNode<FileLocator> {
 		try (WritableFile writable = node.openWritable()) {
 			writable.setCreationTime(instant);
 		}
+	}
+
+	@Override
+	public ActiveLock lock(LockInfo reqLockInfo) throws DavException {
+		ActiveLock lock = super.lock(reqLockInfo);
+		if (!exists()) {
+			getCollection().addMember(this, new NullInputContext());
+		}
+		return lock;
 	}
 
 }

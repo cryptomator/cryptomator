@@ -61,6 +61,7 @@ class DavFolder extends DavNode<FolderLocator> {
 		if (resource instanceof DavFolder) {
 			addMemberFolder((DavFolder) resource);
 		} else if (resource instanceof DavFile) {
+			assert inputContext.hasStream();
 			addMemberFile((DavFile) resource, inputContext.getInputStream());
 		} else {
 			throw new IllegalArgumentException("Unsupported resource type: " + resource.getClass().getName());

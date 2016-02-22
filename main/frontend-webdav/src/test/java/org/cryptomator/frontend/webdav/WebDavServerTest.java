@@ -45,9 +45,13 @@ import org.apache.jackrabbit.webdav.MultiStatus;
 import org.apache.jackrabbit.webdav.MultiStatusResponse;
 import org.apache.jackrabbit.webdav.client.methods.CopyMethod;
 import org.apache.jackrabbit.webdav.client.methods.DavMethodBase;
+import org.apache.jackrabbit.webdav.client.methods.LockMethod;
 import org.apache.jackrabbit.webdav.client.methods.MkColMethod;
 import org.apache.jackrabbit.webdav.client.methods.MoveMethod;
 import org.apache.jackrabbit.webdav.client.methods.PropFindMethod;
+import org.apache.jackrabbit.webdav.lock.LockInfo;
+import org.apache.jackrabbit.webdav.lock.Scope;
+import org.apache.jackrabbit.webdav.lock.Type;
 import org.cryptomator.filesystem.FileSystem;
 import org.cryptomator.filesystem.ReadableFile;
 import org.cryptomator.filesystem.WritableFile;
@@ -171,6 +175,40 @@ public class WebDavServerTest {
 		Collection<String> hrefs = Arrays.asList(ms.getResponses()).stream().map(MultiStatusResponse::getHref).collect(Collectors.toSet());
 
 		Assert.assertTrue(CollectionUtils.containsAll(hrefs, Arrays.asList(servletRoot + "/folder1/", servletRoot + "/folder2/", servletRoot + "/file1")));
+	}
+
+	/* LOCK */
+
+	@Test
+	public void testLockExisting() throws IOException, DavException {
+		final HttpClient client = new HttpClient();
+
+		// create file:
+		try (WritableFile writable = fs.file("foo.txt").openWritable()) {
+			writable.write(ByteBuffer.allocate(0));
+		}
+
+		// lock existing file:
+		LockInfo lockInfo = new LockInfo(Scope.EXCLUSIVE, Type.WRITE, "le me", 3600, false);
+		final DavMethodBase lockMethod = new LockMethod(servletRoot + "/foo.txt", lockInfo);
+		final int lockResponse = client.executeMethod(lockMethod);
+		Assert.assertEquals(200, lockResponse);
+
+		lockMethod.releaseConnection();
+	}
+
+	@Test
+	public void testLockNonExisting() throws IOException, DavException {
+		final HttpClient client = new HttpClient();
+
+		// lock nonexisting file:
+		LockInfo lockInfo = new LockInfo(Scope.EXCLUSIVE, Type.WRITE, "le me", 3600, false);
+		final DavMethodBase lockMethod = new LockMethod(servletRoot + "/foo.txt", lockInfo);
+		final int lockResponse = client.executeMethod(lockMethod);
+		Assert.assertEquals(201, lockResponse);
+		Assert.assertTrue(fs.file("foo.txt").exists());
+
+		lockMethod.releaseConnection();
 	}
 
 	/* MOVE */
