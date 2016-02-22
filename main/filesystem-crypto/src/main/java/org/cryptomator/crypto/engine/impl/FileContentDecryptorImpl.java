@@ -32,7 +32,6 @@ import javax.crypto.SecretKey;
 import javax.crypto.ShortBufferException;
 import javax.crypto.spec.IvParameterSpec;
 
-import org.apache.commons.codec.binary.Hex;
 import org.cryptomator.crypto.engine.AuthenticationFailedException;
 import org.cryptomator.crypto.engine.FileContentCryptor;
 import org.cryptomator.crypto.engine.FileContentDecryptor;
@@ -49,7 +48,6 @@ class FileContentDecryptorImpl implements FileContentDecryptor {
 	private final Supplier<Mac> hmacSha256;
 	private final FileHeader header;
 	private final boolean authenticate;
-	private final LongAdder ciphertextBytesScheduledForDecryption = new LongAdder();
 	private final LongAdder cleartextBytesDecrypted = new LongAdder();
 	private ByteBuffer ciphertextBuffer = ByteBuffer.allocate(CHUNK_SIZE);
 	private long chunkNumber = 0;
@@ -68,14 +66,10 @@ class FileContentDecryptorImpl implements FileContentDecryptor {
 
 	@Override
 	public void append(ByteBuffer ciphertext) throws InterruptedException {
-		long numChunksNeeded = (contentLength() - 1) / PAYLOAD_SIZE + 1;
-		long numCiphertextBytesNeeded = numChunksNeeded * CHUNK_SIZE;
-
-		if (ciphertext == FileContentCryptor.EOF || ciphertextBytesScheduledForDecryption.sum() >= numCiphertextBytesNeeded) {
+		if (ciphertext == FileContentCryptor.EOF) {
 			submitCiphertextBuffer();
 			submitEof();
 		} else {
-			ciphertextBytesScheduledForDecryption.add(ciphertext.remaining());
 			while (ciphertext.hasRemaining()) {
 				ByteBuffers.copy(ciphertext, ciphertextBuffer);
 				submitCiphertextBufferIfFull();

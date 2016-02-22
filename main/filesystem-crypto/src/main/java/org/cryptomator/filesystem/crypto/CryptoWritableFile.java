@@ -40,7 +40,7 @@ class CryptoWritableFile implements WritableFile {
 
 	private void initialize(long firstCleartextByte) {
 		encryptor = cryptor.createFileContentEncryptor(Optional.empty(), firstCleartextByte);
-		file.position(cryptor.getHeaderSize()); // skip header size, header is written on close
+		writeHeader(); // write header with "zero content length" to avoid read access while still writing
 		writeTask = executorService.submit(new CiphertextWriter(file, encryptor));
 	}
 
