@@ -8,14 +8,19 @@
  *******************************************************************************/
 package org.cryptomator.filesystem.shortening;
 
-import org.cryptomator.filesystem.FileSystem;
 import org.cryptomator.filesystem.Folder;
+import org.cryptomator.filesystem.delegating.DelegatingFileSystem;
 
-public class ShorteningFileSystem extends ShorteningFolder implements FileSystem {
+public class ShorteningFileSystem extends ShorteningFolder implements DelegatingFileSystem {
 
 	public ShorteningFileSystem(Folder root, Folder metadataRoot, int threshold) {
 		super(null, root, "", new FilenameShortener(metadataRoot, threshold));
 		create();
+	}
+
+	@Override
+	public Folder getDelegate() {
+		return delegate;
 	}
 
 }

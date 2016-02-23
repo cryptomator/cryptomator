@@ -56,6 +56,16 @@ class CryptoFileSystem extends CryptoFolder implements FileSystem {
 	}
 
 	@Override
+	public Optional<Long> quotaUsedBytes() {
+		return physicalRoot.fileSystem().quotaUsedBytes();
+	}
+
+	@Override
+	public Optional<Long> quotaAvailableBytes() {
+		return physicalRoot.fileSystem().quotaAvailableBytes();
+	}
+
+	@Override
 	public Optional<CryptoFolder> parent() {
 		return Optional.empty();
 	}

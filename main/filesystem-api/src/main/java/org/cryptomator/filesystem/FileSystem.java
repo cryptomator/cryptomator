@@ -23,4 +23,8 @@ public interface FileSystem extends Folder {
 		return Optional.empty();
 	}
 
+	Optional<Long> quotaUsedBytes();
+
+	Optional<Long> quotaAvailableBytes();
+
 }

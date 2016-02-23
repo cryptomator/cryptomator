@@ -16,4 +16,16 @@ public class NioFileSystem extends NioFolder implements FileSystem {
 		create();
 	}
 
+	@Override
+	public Optional<Long> quotaUsedBytes() {
+		// TODO du -sh
+		return Optional.empty();
+	}
+
+	@Override
+	public Optional<Long> quotaAvailableBytes() {
+		// TODO df -lh
+		return Optional.empty();
+	}
+
 }

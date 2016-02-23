@@ -9,10 +9,10 @@
 package org.cryptomator.filesystem.jackrabbit;
 
 import org.apache.jackrabbit.webdav.DavLocatorFactory;
-import org.cryptomator.filesystem.FileSystem;
 import org.cryptomator.filesystem.Folder;
+import org.cryptomator.filesystem.delegating.DelegatingFileSystem;
 
-class FileSystemLocator extends FolderLocator implements FileSystem {
+class FileSystemLocator extends FolderLocator implements DelegatingFileSystem {
 
 	public FileSystemLocator(DavLocatorFactory factory, String prefix, Folder delegate) {
 		super(factory, prefix, null, delegate);
@@ -26,6 +26,11 @@ class FileSystemLocator extends FolderLocator implements FileSystem {
 	@Override
 	public String getResourcePath() {
 		return "/";
+	}
+
+	@Override
+	public Folder getDelegate() {
+		return delegate;
 	}
 
 }

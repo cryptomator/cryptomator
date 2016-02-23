@@ -10,10 +10,10 @@ package org.cryptomator.filesystem.stats;
 
 import java.util.concurrent.atomic.LongAdder;
 
-import org.cryptomator.filesystem.FileSystem;
 import org.cryptomator.filesystem.Folder;
+import org.cryptomator.filesystem.delegating.DelegatingFileSystem;
 
-public class StatsFileSystem extends StatsFolder implements FileSystem {
+public class StatsFileSystem extends StatsFolder implements DelegatingFileSystem {
 
 	private final LongAdder read;
 	private final LongAdder written;
@@ -34,6 +34,11 @@ public class StatsFileSystem extends StatsFolder implements FileSystem {
 
 	public long getThenResetBytesWritten() {
 		return written.sumThenReset();
+	}
+
+	@Override
+	public Folder getDelegate() {
+		return delegate;
 	}
 
 }

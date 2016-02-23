@@ -17,6 +17,7 @@ import java.time.Instant;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.jackrabbit.webdav.DavException;
 import org.apache.jackrabbit.webdav.DavResource;
 import org.apache.jackrabbit.webdav.DavResourceIterator;
@@ -26,6 +27,7 @@ import org.apache.jackrabbit.webdav.DavSession;
 import org.apache.jackrabbit.webdav.io.InputContext;
 import org.apache.jackrabbit.webdav.io.OutputContext;
 import org.apache.jackrabbit.webdav.lock.LockManager;
+import org.apache.jackrabbit.webdav.property.DavProperty;
 import org.apache.jackrabbit.webdav.property.DavPropertyName;
 import org.apache.jackrabbit.webdav.property.DefaultDavProperty;
 import org.apache.jackrabbit.webdav.property.ResourceType;
@@ -38,6 +40,9 @@ import org.cryptomator.filesystem.jackrabbit.FolderLocator;
 import com.google.common.io.ByteStreams;
 
 class DavFolder extends DavNode<FolderLocator> {
+
+	private static final DavPropertyName PROPERTY_QUOTA_AVAILABLE = DavPropertyName.create("quota-available-bytes");
+	private static final DavPropertyName PROPERTY_QUOTA_USED = DavPropertyName.create("quota-used-bytes");
 
 	public DavFolder(FilesystemResourceFactory factory, LockManager lockManager, DavSession session, FolderLocator folder) {
 		super(factory, lockManager, session, folder);
@@ -173,12 +178,28 @@ class DavFolder extends DavNode<FolderLocator> {
 
 	@Override
 	protected void setModificationTime(Instant instant) {
-		// TODO Auto-generated method stub
+		node.setLastModified(instant);
 	}
 
 	@Override
 	protected void setCreationTime(Instant instant) {
 		node.setCreationTime(instant);
+	}
+
+	@Override
+	public DavPropertyName[] getPropertyNames() {
+		return ArrayUtils.addAll(super.getPropertyNames(), PROPERTY_QUOTA_AVAILABLE, PROPERTY_QUOTA_USED);
+	}
+
+	@Override
+	public DavProperty<?> getProperty(DavPropertyName name) {
+		if (PROPERTY_QUOTA_AVAILABLE.equals(name)) {
+			return node.fileSystem().quotaAvailableBytes().map(numBytes -> new DefaultDavProperty<Long>(name, numBytes)).orElse(null);
+		} else if (PROPERTY_QUOTA_USED.equals(name)) {
+			return node.fileSystem().quotaUsedBytes().map(numBytes -> new DefaultDavProperty<Long>(name, numBytes)).orElse(null);
+		} else {
+			return super.getProperty(name);
+		}
 	}
 
 }

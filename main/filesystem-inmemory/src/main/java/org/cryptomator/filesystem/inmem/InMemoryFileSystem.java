@@ -39,4 +39,16 @@ public class InMemoryFileSystem extends InMemoryFolder implements FileSystem {
 		return "/";
 	}
 
+	@Override
+	public Optional<Long> quotaUsedBytes() {
+		long used = Runtime.getRuntime().totalMemory();
+		return Optional.of(used);
+	}
+
+	@Override
+	public Optional<Long> quotaAvailableBytes() {
+		long available = Runtime.getRuntime().freeMemory();
+		return Optional.of(available);
+	}
+
 }

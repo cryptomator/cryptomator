@@ -20,6 +20,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import org.apache.jackrabbit.webdav.DavConstants;
 import org.apache.jackrabbit.webdav.DavException;
 import org.apache.jackrabbit.webdav.DavResource;
 import org.apache.jackrabbit.webdav.DavSession;
@@ -40,8 +41,8 @@ import org.cryptomator.filesystem.jackrabbit.FileSystemResourceLocator;
 abstract class DavNode<T extends FileSystemResourceLocator> implements DavResource {
 
 	private static final String DAV_COMPLIANCE_CLASSES = "1, 2";
-	private static final String[] DAV_CREATIONDATE_PROPNAMES = {DavPropertyName.CREATIONDATE.getName(), "Win32CreationTime"};
-	private static final String[] DAV_MODIFIEDDATE_PROPNAMES = {DavPropertyName.GETLASTMODIFIED.getName(), "Win32LastModifiedTime"};
+	private static final String[] DAV_CREATIONDATE_PROPNAMES = {DavConstants.PROPERTY_CREATIONDATE, "Win32CreationTime"};
+	private static final String[] DAV_MODIFIEDDATE_PROPNAMES = {DavConstants.PROPERTY_GETLASTMODIFIED, "Win32LastModifiedTime"};
 
 	protected final FilesystemResourceFactory factory;
 	protected final LockManager lockManager;
