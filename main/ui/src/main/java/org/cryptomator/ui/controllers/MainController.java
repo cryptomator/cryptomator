@@ -22,10 +22,6 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 
-import org.cryptomator.ui.controllers.ChangePasswordController.ChangePasswordListener;
-import org.cryptomator.ui.controllers.InitializeController.InitializationListener;
-import org.cryptomator.ui.controllers.UnlockController.UnlockListener;
-import org.cryptomator.ui.controllers.UnlockedController.LockListener;
 import org.cryptomator.ui.controls.DirectoryListCell;
 import org.cryptomator.ui.model.Vault;
 import org.cryptomator.ui.model.VaultFactory;
@@ -53,7 +49,7 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
 @Singleton
-public class MainController extends AbstractFXMLViewController implements InitializationListener, UnlockListener, LockListener, ChangePasswordListener {
+public class MainController extends AbstractFXMLViewController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(MainController.class);
 
@@ -273,10 +269,9 @@ public class MainController extends AbstractFXMLViewController implements Initia
 		contentPane.getChildren().clear();
 		contentPane.getChildren().add(root);
 		ctrl.setVault(vault);
-		ctrl.setListener(this);
+		ctrl.setListener(this::didInitialize);
 	}
 
-	@Override
 	public void didInitialize(InitializeController ctrl) {
 		showUnlockView(ctrl.getVault());
 	}
@@ -287,10 +282,9 @@ public class MainController extends AbstractFXMLViewController implements Initia
 		contentPane.getChildren().clear();
 		contentPane.getChildren().add(root);
 		ctrl.setVault(vault);
-		ctrl.setListener(this);
+		ctrl.setListener(this::didUnlock);
 	}
 
-	@Override
 	public void didUnlock(UnlockController ctrl) {
 		showUnlockedView(ctrl.getVault());
 		Platform.setImplicitExit(false);
@@ -302,10 +296,9 @@ public class MainController extends AbstractFXMLViewController implements Initia
 		contentPane.getChildren().clear();
 		contentPane.getChildren().add(root);
 		ctrl.setVault(vault);
-		ctrl.setListener(this);
+		ctrl.setListener(this::didLock);
 	}
 
-	@Override
 	public void didLock(UnlockedController ctrl) {
 		showUnlockView(ctrl.getVault());
 		if (getUnlockedVaults().isEmpty()) {
@@ -319,10 +312,9 @@ public class MainController extends AbstractFXMLViewController implements Initia
 		contentPane.getChildren().clear();
 		contentPane.getChildren().add(root);
 		ctrl.setVault(vault);
-		ctrl.setListener(this);
+		ctrl.setListener(this::didChangePassword);
 	}
 
-	@Override
 	public void didChangePassword(ChangePasswordController ctrl) {
 		showUnlockView(ctrl.getVault());
 	}

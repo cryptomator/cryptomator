@@ -10,6 +10,7 @@ package org.cryptomator.ui.controllers;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 import javax.inject.Inject;
@@ -35,7 +36,7 @@ public class ChangePasswordController extends AbstractFXMLViewController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ChangePasswordController.class);
 
-	private ChangePasswordListener listener;
+	private Optional<ChangePasswordListener> listener = Optional.empty();
 	private Vault vault;
 
 	@FXML
@@ -111,7 +112,7 @@ public class ChangePasswordController extends AbstractFXMLViewController {
 		try {
 			vault.changePassphrase(oldPasswordField.getCharacters(), newPasswordField.getCharacters());
 			messageText.setText(resourceBundle.getString("changePassword.infoMessage.success"));
-			Platform.runLater(this::didChangePassword);
+			listener.ifPresent(this::invokeListenerLater);
 		} catch (InvalidPassphraseException e) {
 			messageText.setText(resourceBundle.getString("changePassword.errorMessage.wrongPassword"));
 			newPasswordField.swipe();
@@ -141,12 +142,6 @@ public class ChangePasswordController extends AbstractFXMLViewController {
 		}
 	}
 
-	private void didChangePassword() {
-		if (listener != null) {
-			listener.didChangePassword(this);
-		}
-	}
-
 	/* Getter/Setter */
 
 	public Vault getVault() {
@@ -158,15 +153,22 @@ public class ChangePasswordController extends AbstractFXMLViewController {
 	}
 
 	public ChangePasswordListener getListener() {
-		return listener;
+		return listener.orElse(null);
 	}
 
 	public void setListener(ChangePasswordListener listener) {
-		this.listener = listener;
+		this.listener = Optional.ofNullable(listener);
 	}
 
 	/* callback */
 
+	private void invokeListenerLater(ChangePasswordListener listener) {
+		Platform.runLater(() -> {
+			listener.didChangePassword(this);
+		});
+	}
+
+	@FunctionalInterface
 	interface ChangePasswordListener {
 		void didChangePassword(ChangePasswordController ctrl);
 	}

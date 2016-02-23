@@ -9,6 +9,7 @@
 package org.cryptomator.ui.controllers;
 
 import java.net.URL;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
 
@@ -39,7 +40,7 @@ public class UnlockedController extends AbstractFXMLViewController {
 
 	private static final int IO_SAMPLING_STEPS = 100;
 	private static final double IO_SAMPLING_INTERVAL = 0.25;
-	private LockListener listener;
+	private Optional<LockListener> listener = Optional.empty();
 	private Vault vault;
 	private Timeline ioAnimation;
 
@@ -103,11 +104,7 @@ public class UnlockedController extends AbstractFXMLViewController {
 				return;
 			}
 			vault.deactivateFrontend();
-			if (listener != null) {
-				Platform.runLater(() -> {
-					listener.didLock(this);
-				});
-			}
+			listener.ifPresent(this::invokeListenerLater);
 		});
 	}
 
@@ -217,15 +214,22 @@ public class UnlockedController extends AbstractFXMLViewController {
 	}
 
 	public LockListener getListener() {
-		return listener;
+		return listener.orElse(null);
 	}
 
 	public void setListener(LockListener listener) {
-		this.listener = listener;
+		this.listener = Optional.ofNullable(listener);
 	}
 
 	/* callback */
 
+	private void invokeListenerLater(LockListener listener) {
+		Platform.runLater(() -> {
+			listener.didLock(this);
+		});
+	}
+
+	@FunctionalInterface
 	interface LockListener {
 		void didLock(UnlockedController ctrl);
 	}

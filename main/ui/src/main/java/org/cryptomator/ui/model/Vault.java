@@ -88,10 +88,9 @@ public class Vault implements Serializable, CryptoFileSystemDelegate {
 		}
 	}
 
-	/*
-	 * ******************************************************************************
-	 * Commands
-	 ********************************************************************************/
+	// ******************************************************************************
+	// Commands
+	// ********************************************************************************/
 
 	public void create(CharSequence passphrase) throws IOException {
 		try {
@@ -162,10 +161,9 @@ public class Vault implements Serializable, CryptoFileSystemDelegate {
 		Optionals.ifPresent(filesystemFrontend.get(), Frontend::unmount);
 	}
 
-	/*
-	 * ******************************************************************************
-	 * Delegate methods
-	 ********************************************************************************/
+	// ******************************************************************************
+	// Delegate methods
+	// ********************************************************************************/
 
 	@Override
 	public void authenticationFailed(String cleartextPath) {
@@ -177,10 +175,9 @@ public class Vault implements Serializable, CryptoFileSystemDelegate {
 		return namesOfResourcesWithInvalidMac.contains(cleartextPath);
 	}
 
-	/*
-	 * ******************************************************************************
-	 * Getter/Setter
-	 ********************************************************************************/
+	// ******************************************************************************
+	// Getter/Setter
+	// *******************************************************************************/
 
 	public Path getPath() {
 		return path;
@@ -278,10 +275,9 @@ public class Vault implements Serializable, CryptoFileSystemDelegate {
 		this.winDriveLetter = winDriveLetter;
 	}
 
-	/*
-	 * ******************************************************************************
-	 * Hashcode / Equals
-	 ********************************************************************************/
+	// ******************************************************************************
+	// Hashcode / Equals
+	// *******************************************************************************/
 
 	@Override
 	public int hashCode() {

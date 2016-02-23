@@ -11,6 +11,7 @@ package org.cryptomator.ui.controllers;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.FileAlreadyExistsException;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 import javax.inject.Inject;
@@ -21,6 +22,7 @@ import org.cryptomator.ui.model.Vault;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javafx.application.Platform;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -33,7 +35,7 @@ public class InitializeController extends AbstractFXMLViewController {
 	private static final Logger LOG = LoggerFactory.getLogger(InitializeController.class);
 
 	private Vault vault;
-	private InitializationListener listener;
+	private Optional<InitializationListener> listener = Optional.empty();
 
 	@FXML
 	private SecPasswordField passwordField;
@@ -87,6 +89,7 @@ public class InitializeController extends AbstractFXMLViewController {
 		final CharSequence passphrase = passwordField.getCharacters();
 		try {
 			vault.create(passphrase);
+			listener.ifPresent(this::invokeListenerLater);
 		} catch (FileAlreadyExistsException ex) {
 			messageLabel.setText(resourceBundle.getString("initialize.messageLabel.alreadyInitialized"));
 		} catch (IOException ex) {
@@ -115,15 +118,22 @@ public class InitializeController extends AbstractFXMLViewController {
 	}
 
 	public InitializationListener getListener() {
-		return listener;
+		return listener.orElse(null);
 	}
 
 	public void setListener(InitializationListener listener) {
-		this.listener = listener;
+		this.listener = Optional.ofNullable(listener);
 	}
 
 	/* callback */
 
+	private void invokeListenerLater(InitializationListener listener) {
+		Platform.runLater(() -> {
+			listener.didInitialize(this);
+		});
+	}
+
+	@FunctionalInterface
 	interface InitializationListener {
 		void didInitialize(InitializeController ctrl);
 	}
