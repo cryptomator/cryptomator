@@ -19,7 +19,7 @@ import org.cryptomator.filesystem.delegating.DelegatingFile;
 import org.cryptomator.filesystem.delegating.DelegatingReadableFile;
 import org.cryptomator.filesystem.delegating.DelegatingWritableFile;
 
-public class StatsFile extends DelegatingFile<StatsFolder> {
+class StatsFile extends DelegatingFile<StatsFolder> {
 
 	private final Consumer<Long> readCounter;
 	private final Consumer<Long> writeCounter;

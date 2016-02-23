@@ -1,5 +1,7 @@
 package org.cryptomator.filesystem.nio;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
 
@@ -18,14 +20,25 @@ public class NioFileSystem extends NioFolder implements FileSystem {
 
 	@Override
 	public Optional<Long> quotaUsedBytes() {
-		// TODO du -sh
-		return Optional.empty();
+		try {
+			long availableBytes = Files.getFileStore(path).getUsableSpace();
+			long totalBytes = Files.getFileStore(path).getTotalSpace();
+			return Optional.of(totalBytes - availableBytes);
+		} catch (IOException e) {
+			e.printStackTrace();
+			return Optional.empty();
+		}
 	}
 
 	@Override
 	public Optional<Long> quotaAvailableBytes() {
-		// TODO df -lh
-		return Optional.empty();
+		try {
+			long availableBytes = Files.getFileStore(path).getUsableSpace();
+			return Optional.of(availableBytes);
+		} catch (IOException e) {
+			e.printStackTrace();
+			return Optional.empty();
+		}
 	}
 
 }
