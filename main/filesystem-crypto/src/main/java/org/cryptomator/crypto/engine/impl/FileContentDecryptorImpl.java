@@ -8,9 +8,9 @@
  *******************************************************************************/
 package org.cryptomator.crypto.engine.impl;
 
-import static org.cryptomator.crypto.engine.impl.FileContentCryptorImpl.CHUNK_SIZE;
-import static org.cryptomator.crypto.engine.impl.FileContentCryptorImpl.MAC_SIZE;
-import static org.cryptomator.crypto.engine.impl.FileContentCryptorImpl.NONCE_SIZE;
+import static org.cryptomator.crypto.engine.impl.Constants.CHUNK_SIZE;
+import static org.cryptomator.crypto.engine.impl.Constants.MAC_SIZE;
+import static org.cryptomator.crypto.engine.impl.Constants.NONCE_SIZE;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;

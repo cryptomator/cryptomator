@@ -8,10 +8,11 @@
  *******************************************************************************/
 package org.cryptomator.filesystem.blockaligned;
 
+import static org.cryptomator.crypto.engine.impl.Constants.PAYLOAD_SIZE;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import org.cryptomator.crypto.engine.impl.FileContentCryptorImpl;
 import org.cryptomator.filesystem.FileSystem;
 import org.cryptomator.filesystem.Folder;
 
@@ -23,6 +24,6 @@ public class BlockAlignedFileSystemFactory {
 	}
 
 	public FileSystem get(Folder root) {
-		return new BlockAlignedFileSystem(root, FileContentCryptorImpl.PAYLOAD_SIZE);
+		return new BlockAlignedFileSystem(root, PAYLOAD_SIZE);
 	}
 }

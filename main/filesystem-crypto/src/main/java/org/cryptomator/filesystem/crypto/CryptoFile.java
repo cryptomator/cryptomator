@@ -19,7 +19,7 @@ import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.ReadableFile;
 import org.cryptomator.filesystem.WritableFile;
 
-public class CryptoFile extends CryptoNode implements File {
+class CryptoFile extends CryptoNode implements File {
 
 	public CryptoFile(CryptoFolder parent, String name, Cryptor cryptor) {
 		super(parent, name, cryptor);
