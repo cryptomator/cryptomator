@@ -8,6 +8,8 @@
  *******************************************************************************/
 package org.cryptomator.crypto.engine.impl;
 
+import static org.cryptomator.crypto.engine.impl.Constants.CURRENT_VAULT_VERSION;
+
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -25,6 +27,7 @@ import org.cryptomator.crypto.engine.Cryptor;
 import org.cryptomator.crypto.engine.FileContentCryptor;
 import org.cryptomator.crypto.engine.FilenameCryptor;
 import org.cryptomator.crypto.engine.InvalidPassphraseException;
+import org.cryptomator.crypto.engine.UnsupportedVaultFormatException;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -97,10 +100,8 @@ class CryptorImpl implements Cryptor {
 		}
 
 		// check version
-		if (keyFile.getVersion() != KeyFile.CURRENT_VERSION) {
-			// TODO
-			// throw new UnsupportedVaultException(keyfile.getVersion(), KeyFile.CURRENT_VERSION);
-			throw new IllegalArgumentException("Unsupported key (expected version: " + KeyFile.CURRENT_VERSION + ", actual version: " + keyFile.getVersion() + ")");
+		if (keyFile.getVersion() != CURRENT_VAULT_VERSION) {
+			throw new UnsupportedVaultFormatException(keyFile.getVersion(), CURRENT_VAULT_VERSION);
 		}
 
 		final byte[] kekBytes = Scrypt.scrypt(passphrase, keyFile.getScryptSalt(), keyFile.getScryptCostParam(), keyFile.getScryptBlockSize(), KEYLENGTH_IN_BYTES);
@@ -134,7 +135,7 @@ class CryptorImpl implements Cryptor {
 		}
 
 		final KeyFile keyfile = new KeyFile();
-		keyfile.setVersion(KeyFile.CURRENT_VERSION);
+		keyfile.setVersion(CURRENT_VAULT_VERSION);
 		keyfile.setScryptSalt(scryptSalt);
 		keyfile.setScryptCostParam(SCRYPT_COST_PARAM);
 		keyfile.setScryptBlockSize(SCRYPT_BLOCK_SIZE);

@@ -10,13 +10,14 @@ package org.cryptomator.crypto.engine.impl;
 
 import java.io.Serializable;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 @JsonPropertyOrder(value = {"version", "scryptSalt", "scryptCostParam", "scryptBlockSize", "primaryMasterKey", "hmacMasterKey"})
 class KeyFile implements Serializable {
 
-	static final Integer CURRENT_VERSION = 3;
 	private static final long serialVersionUID = 8578363158959619885L;
 
 	@JsonProperty("version")

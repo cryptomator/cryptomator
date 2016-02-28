@@ -8,6 +8,9 @@
  *******************************************************************************/
 package org.cryptomator.filesystem.crypto;
 
+import static org.cryptomator.filesystem.crypto.Constants.MASTERKEY_BACKUP_FILENAME;
+import static org.cryptomator.filesystem.crypto.Constants.MASTERKEY_FILENAME;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
@@ -27,9 +30,6 @@ import org.cryptomator.filesystem.WritableFile;
 
 @Singleton
 class Masterkeys {
-
-	private static final String MASTERKEY_FILENAME = "masterkey.cryptomator";
-	private static final String MASTERKEY_BACKUP_FILENAME = "masterkey.cryptomator.bkup";
 
 	private final Provider<Cryptor> cryptorProvider;
 

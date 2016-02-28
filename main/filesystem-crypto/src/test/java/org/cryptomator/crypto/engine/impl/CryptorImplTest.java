@@ -12,6 +12,7 @@ import java.io.IOException;
 
 import org.cryptomator.crypto.engine.Cryptor;
 import org.cryptomator.crypto.engine.InvalidPassphraseException;
+import org.cryptomator.crypto.engine.UnsupportedVaultFormatException;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -29,6 +30,15 @@ public class CryptorImplTest {
 	@Test(expected = InvalidPassphraseException.class)
 	public void testMasterkeyDecryptionWithWrongPassphrase() throws IOException {
 		final String testMasterKey = "{\"version\":3,\"scryptSalt\":\"AAAAAAAAAAA=\",\"scryptCostParam\":2,\"scryptBlockSize\":8," //
+				+ "\"primaryMasterKey\":\"mM+qoQ+o0qvPTiDAZYt+flaC3WbpNAx1sTXaUzxwpy0M9Ctj6Tih/Q==\"," //
+				+ "\"hmacMasterKey\":\"mM+qoQ+o0qvPTiDAZYt+flaC3WbpNAx1sTXaUzxwpy0M9Ctj6Tih/Q==\"}";
+		final Cryptor cryptor = TestCryptorImplFactory.insecureCryptorImpl();
+		cryptor.readKeysFromMasterkeyFile(testMasterKey.getBytes(), "qwe");
+	}
+
+	@Test(expected = UnsupportedVaultFormatException.class)
+	public void testMasterkeyDecryptionWithWrongVaultFormat() throws IOException {
+		final String testMasterKey = "{\"version\":-1,\"scryptSalt\":\"AAAAAAAAAAA=\",\"scryptCostParam\":2,\"scryptBlockSize\":8," //
 				+ "\"primaryMasterKey\":\"mM+qoQ+o0qvPTiDAZYt+flaC3WbpNAx1sTXaUzxwpy0M9Ctj6Tih/Q==\"," //
 				+ "\"hmacMasterKey\":\"mM+qoQ+o0qvPTiDAZYt+flaC3WbpNAx1sTXaUzxwpy0M9Ctj6Tih/Q==\"}";
 		final Cryptor cryptor = TestCryptorImplFactory.insecureCryptorImpl();

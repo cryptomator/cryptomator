@@ -9,6 +9,7 @@
 package org.cryptomator.filesystem.crypto;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.cryptomator.filesystem.crypto.Constants.DIR_SUFFIX;
 
 import java.io.FileNotFoundException;
 import java.io.UncheckedIOException;
@@ -30,8 +31,6 @@ import org.cryptomator.filesystem.Node;
 import org.cryptomator.io.FileContents;
 
 class CryptoFolder extends CryptoNode implements Folder {
-
-	static final String DIR_SUFFIX = "_";
 
 	private final WeakValuedCache<String, CryptoFolder> folders = WeakValuedCache.usingLoader(this::newFolder);
 	private final WeakValuedCache<String, CryptoFile> files = WeakValuedCache.usingLoader(this::newFile);
@@ -114,7 +113,7 @@ class CryptoFolder extends CryptoNode implements Folder {
 
 	private String decryptChildFolderName(String encryptedFolderName) {
 		final byte[] dirId = getDirectoryId().get().getBytes(UTF_8);
-		final String ciphertext = StringUtils.removeEnd(encryptedFolderName, CryptoFolder.DIR_SUFFIX);
+		final String ciphertext = StringUtils.removeEnd(encryptedFolderName, DIR_SUFFIX);
 		return cryptor.getFilenameCryptor().decryptFilename(ciphertext, dirId);
 	}
 

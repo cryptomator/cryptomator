@@ -8,6 +8,9 @@
  *******************************************************************************/
 package org.cryptomator.filesystem.crypto;
 
+import static org.cryptomator.filesystem.crypto.Constants.DATA_ROOT_DIR;
+import static org.cryptomator.filesystem.crypto.Constants.ROOT_DIRECOTRY_ID;
+
 import java.io.UncheckedIOException;
 import java.time.Instant;
 import java.util.Optional;
@@ -19,9 +22,6 @@ import org.cryptomator.filesystem.FileSystem;
 import org.cryptomator.filesystem.Folder;
 
 class CryptoFileSystem extends CryptoFolder implements FileSystem {
-
-	private static final String DATA_ROOT_DIR = "d";
-	private static final String ROOT_DIRECOTRY_ID = "";
 
 	private final Folder physicalRoot;
 	private final CryptoFileSystemDelegate delegate;

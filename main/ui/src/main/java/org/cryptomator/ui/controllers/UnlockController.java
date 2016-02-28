@@ -20,6 +20,7 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.CharUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.crypto.engine.InvalidPassphraseException;
+import org.cryptomator.crypto.engine.UnsupportedVaultFormatException;
 import org.cryptomator.frontend.CommandFailedException;
 import org.cryptomator.frontend.FrontendCreationFailedException;
 import org.cryptomator.frontend.webdav.mount.WindowsDriveLetters;
@@ -261,20 +262,21 @@ public class UnlockController extends AbstractFXMLViewController {
 			progressIndicator.setVisible(false);
 			messageText.setText(resourceBundle.getString("unlock.errorMessage.wrongPassword"));
 			Platform.runLater(passwordField::requestFocus);
+		} catch (UnsupportedVaultFormatException e) {
+			setControlsDisabled(false);
+			progressIndicator.setVisible(false);
+			downloadsPageLink.setVisible(true);
+			LOG.warn("Unable to unlock vault: " + e.getMessage());
+			if (e.isVaultOlderThanSoftware()) {
+				messageText.setText(resourceBundle.getString("unlock.errorMessage.unsupportedVersion.vaultOlderThanSoftware") + " ");
+			} else if (e.isSoftwareOlderThanVault()) {
+				messageText.setText(resourceBundle.getString("unlock.errorMessage.unsupportedVersion.softwareOlderThanVault") + " ");
+			}
 		} catch (FrontendCreationFailedException ex) {
 			setControlsDisabled(false);
 			progressIndicator.setVisible(false);
 			messageText.setText(resourceBundle.getString("unlock.errorMessage.decryptionFailed"));
 			LOG.error("Decryption failed for technical reasons.", ex);
-			// } catch (UnsupportedVaultException e) {
-			// setControlsDisabled(false);
-			// progressIndicator.setVisible(false);
-			// downloadsPageLink.setVisible(true);
-			// if (e.isVaultOlderThanSoftware()) {
-			// messageText.setText(resourceBundle.getString("unlock.errorMessage.unsupportedVersion.vaultOlderThanSoftware") + " ");
-			// } else if (e.isSoftwareOlderThanVault()) {
-			// messageText.setText(resourceBundle.getString("unlock.errorMessage.unsupportedVersion.softwareOlderThanVault") + " ");
-			// }
 		} finally {
 			passwordField.swipe();
 		}
