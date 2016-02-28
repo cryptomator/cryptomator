@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
 public class MainApplication extends Application {
@@ -69,6 +70,7 @@ public class MainApplication extends Application {
 		final ResourceBundle rb = ResourceBundle.getBundle("localization");
 		primaryStage.setTitle(rb.getString("app.name"));
 		primaryStage.setResizable(false);
+		primaryStage.getIcons().add(new Image(MainApplication.class.getResourceAsStream("/window_icon.png"))); 
 		primaryStage.show();
 
 		ActiveWindowStyleSupport.startObservingFocus(primaryStage);
