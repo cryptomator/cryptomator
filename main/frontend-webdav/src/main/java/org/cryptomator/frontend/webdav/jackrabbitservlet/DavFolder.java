@@ -26,6 +26,7 @@ import org.apache.jackrabbit.webdav.DavServletResponse;
 import org.apache.jackrabbit.webdav.DavSession;
 import org.apache.jackrabbit.webdav.io.InputContext;
 import org.apache.jackrabbit.webdav.io.OutputContext;
+import org.apache.jackrabbit.webdav.lock.ActiveLock;
 import org.apache.jackrabbit.webdav.lock.LockManager;
 import org.apache.jackrabbit.webdav.property.DavProperty;
 import org.apache.jackrabbit.webdav.property.DavPropertyName;
@@ -102,6 +103,9 @@ class DavFolder extends DavNode<FolderLocator> {
 
 	@Override
 	public void removeMember(DavResource member) throws DavException {
+		for (ActiveLock lock : member.getLocks()) {
+			member.unlock(lock.getToken());
+		}
 		final Node child = getMemberNode(member.getDisplayName());
 		child.delete();
 	}
