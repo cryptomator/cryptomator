@@ -8,6 +8,8 @@
  *******************************************************************************/
 package org.cryptomator.filesystem.crypto;
 
+import static org.cryptomator.filesystem.crypto.Constants.MASTERKEY_FILENAME;
+
 import java.io.UncheckedIOException;
 
 import javax.inject.Inject;
@@ -29,6 +31,10 @@ public class CryptoFileSystemFactory {
 	public CryptoFileSystemFactory(Masterkeys masterkeys, BlockAlignedFileSystemFactory blockAlignedFileSystemFactory) {
 		this.masterkeys = masterkeys;
 		this.blockAlignedFileSystemFactory = blockAlignedFileSystemFactory;
+	}
+
+	public boolean isValidVaultStructure(Folder vaultLocation) {
+		return vaultLocation.file(MASTERKEY_FILENAME).exists();
 	}
 
 	public void initializeNew(Folder vaultLocation, CharSequence passphrase) {

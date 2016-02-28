@@ -181,7 +181,7 @@ public class MainController extends AbstractFXMLViewController {
 	 * @param path non-null, writable, existing directory
 	 */
 	public void addVault(final Path path, boolean select) {
-		// TODO: Files.isWritable is broken on windows. Fix in Java 8u72, see https://bugs.openjdk.java.net/browse/JDK-8034057
+		// TODO: `|| !Files.isWritable(path)` is broken on windows. Fix in Java 8u72, see https://bugs.openjdk.java.net/browse/JDK-8034057
 		if (path == null) {
 			return;
 		}
@@ -189,7 +189,7 @@ public class MainController extends AbstractFXMLViewController {
 		final Path vaultPath;
 		if (path != null && Files.isDirectory(path)) {
 			vaultPath = path;
-		} else if (path != null && Files.isRegularFile(path) && path.getParent().getFileName().toString().endsWith(Vault.VAULT_FILE_EXTENSION)) {
+		} else if (path != null && Files.isRegularFile(path)) {
 			vaultPath = path.getParent();
 		} else {
 			return;
@@ -244,16 +244,12 @@ public class MainController extends AbstractFXMLViewController {
 	// ****************************************
 
 	private void showVault(Vault vault) {
-		try {
-			if (vault.isUnlocked()) {
-				this.showUnlockedView(vault);
-			} else if (vault.containsMasterKey()) {
-				this.showUnlockView(vault);
-			} else {
-				this.showInitializeView(vault);
-			}
-		} catch (IOException e) {
-			LOG.error("Failed to analyze directory.", e);
+		if (vault.isUnlocked()) {
+			this.showUnlockedView(vault);
+		} else if (vault.isValidVaultDirectory()) {
+			this.showUnlockView(vault);
+		} else {
+			this.showInitializeView(vault);
 		}
 	}
 

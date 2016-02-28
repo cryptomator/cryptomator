@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.io.UncheckedIOException;
 import java.nio.file.FileAlreadyExistsException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.Normalizer;
 import java.text.Normalizer.Form;
@@ -20,9 +19,11 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.lang3.CharUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.cryptomator.common.LazyInitializer;
 import org.cryptomator.common.Optionals;
 import org.cryptomator.crypto.engine.InvalidPassphraseException;
 import org.cryptomator.filesystem.FileSystem;
@@ -54,9 +55,6 @@ public class Vault implements Serializable, CryptoFileSystemDelegate {
 
 	public static final String VAULT_FILE_EXTENSION = ".cryptomator";
 
-	@Deprecated
-	public static final String VAULT_MASTERKEY_FILE = "masterkey.cryptomator";
-
 	private final Path path;
 	private final Lazy<FrontendFactory> frontendFactory;
 	private final DeferredCloser closer;
@@ -65,6 +63,7 @@ public class Vault implements Serializable, CryptoFileSystemDelegate {
 	private final ObjectProperty<Boolean> unlocked = new SimpleObjectProperty<Boolean>(this, "unlocked", Boolean.FALSE);
 	private final ObservableList<String> namesOfResourcesWithInvalidMac = FXThreads.observableListOnMainThread(FXCollections.observableArrayList());
 	private final Set<String> whitelistedResourcesWithInvalidMac = new HashSet<>();
+	private final AtomicReference<FileSystem> nioFileSystem = new AtomicReference<>();
 
 	private String mountName;
 	private Character winDriveLetter;
@@ -88,13 +87,17 @@ public class Vault implements Serializable, CryptoFileSystemDelegate {
 		}
 	}
 
+	private FileSystem getNioFileSystem() {
+		return LazyInitializer.initializeLazily(nioFileSystem, () -> NioFileSystem.rootedAt(path));
+	}
+
 	// ******************************************************************************
 	// Commands
 	// ********************************************************************************/
 
 	public void create(CharSequence passphrase) throws IOException {
 		try {
-			FileSystem fs = NioFileSystem.rootedAt(path);
+			FileSystem fs = getNioFileSystem();
 			if (fs.children().count() > 0) {
 				throw new FileAlreadyExistsException(null, null, "Vault location not empty.");
 			}
@@ -106,8 +109,7 @@ public class Vault implements Serializable, CryptoFileSystemDelegate {
 
 	public void changePassphrase(CharSequence oldPassphrase, CharSequence newPassphrase) throws IOException, InvalidPassphraseException {
 		try {
-			FileSystem fs = NioFileSystem.rootedAt(path);
-			cryptoFileSystemFactory.changePassphrase(fs, oldPassphrase, newPassphrase);
+			cryptoFileSystemFactory.changePassphrase(getNioFileSystem(), oldPassphrase, newPassphrase);
 		} catch (UncheckedIOException e) {
 			throw new IOException(e);
 		}
@@ -115,7 +117,7 @@ public class Vault implements Serializable, CryptoFileSystemDelegate {
 
 	public synchronized void activateFrontend(CharSequence passphrase) throws FrontendCreationFailedException {
 		try {
-			FileSystem fs = NioFileSystem.rootedAt(path);
+			FileSystem fs = getNioFileSystem();
 			FileSystem shorteningFs = shorteningFileSystemFactory.get(fs);
 			FileSystem cryptoFs = cryptoFileSystemFactory.unlockExisting(shorteningFs, passphrase, this);
 			StatsFileSystem statsFs = new StatsFileSystem(cryptoFs);
@@ -191,12 +193,7 @@ public class Vault implements Serializable, CryptoFileSystemDelegate {
 	}
 
 	public boolean isValidVaultDirectory() {
-		return Files.isDirectory(path) && path.getFileName().toString().endsWith(VAULT_FILE_EXTENSION);
-	}
-
-	public boolean containsMasterKey() throws IOException {
-		final Path masterKeyPath = path.resolve(VAULT_MASTERKEY_FILE);
-		return Files.isRegularFile(masterKeyPath);
+		return cryptoFileSystemFactory.isValidVaultStructure(getNioFileSystem());
 	}
 
 	public ObjectProperty<Boolean> unlockedProperty() {

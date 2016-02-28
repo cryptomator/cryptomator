@@ -17,7 +17,6 @@ import java.util.concurrent.ExecutorService;
 
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.ui.controllers.MainController;
-import org.cryptomator.ui.model.Vault;
 import org.cryptomator.ui.util.ActiveWindowStyleSupport;
 import org.cryptomator.ui.util.DeferredCloser;
 import org.cryptomator.ui.util.SingleInstanceManager;
@@ -90,18 +89,12 @@ public class MainApplication extends Application {
 	}
 
 	private void handleCommandLineArg(String arg) {
-		// only open files with our file extension:
-		if (!arg.endsWith(Vault.VAULT_FILE_EXTENSION)) {
-			LOG.warn("Invalid vault path %s", arg);
-			return;
-		}
-
 		// find correct location:
 		final Path path = FileSystems.getDefault().getPath(arg);
 		final Path vaultPath;
 		if (Files.isDirectory(path)) {
 			vaultPath = path;
-		} else if (Files.isRegularFile(path) && path.getParent().getFileName().toString().endsWith(Vault.VAULT_FILE_EXTENSION)) {
+		} else if (Files.isRegularFile(path)) {
 			vaultPath = path.getParent();
 		} else {
 			LOG.warn("Invalid vault path %s", arg);
