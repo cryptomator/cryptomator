@@ -62,7 +62,7 @@ public class SettingsProvider implements Provider<Settings> {
 	}
 
 	private Path getSettingsPath() throws IOException {
-		String settingsPathProperty = System.getProperty("settingsPath");
+		String settingsPathProperty = System.getProperty("cryptomator.settingsPath");
 		if (settingsPathProperty == null) {
 			return SETTINGS_DIR.resolve(SETTINGS_FILE);
 		} else {
