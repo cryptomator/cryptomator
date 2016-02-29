@@ -61,10 +61,7 @@ public class LoopbackFilterTest {
 		Mockito.when(request.getRemoteAddr()).thenReturn(hostname);
 		
 		filter.doFilter(request, response, chain);
-
-		ArgumentCaptor<Integer> statusCode = ArgumentCaptor.forClass(Integer.class);
-		Mockito.verify(response).sendError(statusCode.capture(), Mockito.anyString());
-		Assert.assertEquals(405, statusCode.getValue().intValue());
+		Mockito.verify(response).sendError(Mockito.eq(405), Mockito.anyString());
 	}
 
 }
