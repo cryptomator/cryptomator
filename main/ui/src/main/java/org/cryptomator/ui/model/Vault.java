@@ -193,7 +193,11 @@ public class Vault implements Serializable, CryptoFileSystemDelegate {
 	}
 
 	public boolean isValidVaultDirectory() {
-		return cryptoFileSystemFactory.isValidVaultStructure(getNioFileSystem());
+		try {
+			return cryptoFileSystemFactory.isValidVaultStructure(getNioFileSystem());
+		} catch (UncheckedIOException e) {
+			return false;
+		}
 	}
 
 	public ObjectProperty<Boolean> unlockedProperty() {
