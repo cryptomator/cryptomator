@@ -29,6 +29,7 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.image.Image;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 public class MainApplication extends Application {
@@ -51,6 +52,7 @@ public class MainApplication extends Application {
 
 	@Override
 	public void start(final Stage primaryStage) throws IOException {
+		Font.loadFont(getClass().getResourceAsStream("/css/ionicons.ttf"), 12.0);
 		ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
 		FXMLLoader.setDefaultClassLoader(contextClassLoader);
 		Platform.runLater(() -> {
@@ -70,7 +72,7 @@ public class MainApplication extends Application {
 		final ResourceBundle rb = ResourceBundle.getBundle("localization");
 		primaryStage.setTitle(rb.getString("app.name"));
 		primaryStage.setResizable(false);
-		primaryStage.getIcons().add(new Image(MainApplication.class.getResourceAsStream("/window_icon.png"))); 
+		primaryStage.getIcons().add(new Image(MainApplication.class.getResourceAsStream("/window_icon.png")));
 		primaryStage.show();
 
 		ActiveWindowStyleSupport.startObservingFocus(primaryStage);

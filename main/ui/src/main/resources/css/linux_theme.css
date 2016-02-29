@@ -166,20 +166,37 @@
 	-fx-alignment: CENTER_LEFT;
 }
 
-.tool-bar.list-related-toolbar .toggle-button {
-	-fx-padding: 0.4em 0.8em 0.4em 0.8em;
+.tool-bar.list-related-toolbar .spacer {
+	-fx-border-color: transparent COLOR_BORDER transparent transparent;
+    -fx-border-width: 1;
+}
+
+.tool-bar.list-related-toolbar .toggle-button,
+.tool-bar.list-related-toolbar .button {
+	-fx-font-family: Ionicons;
+	-fx-font-size: 1.8em;
+	-fx-text-fill: COLOR_TEXT;
+	-fx-padding: 0.2em 0.8em 0.2em 0.8em;
 	-fx-background-color: transparent;
 	-fx-background-insets: 1;
 	-fx-border-color: transparent COLOR_BORDER transparent transparent;
 	-fx-border-width: 1;
 }
 
-.tool-bar.list-related-toolbar .toggle-button:hover {
+.tool-bar.list-related-toolbar .toggle-button:disabled,
+.tool-bar.list-related-toolbar .button:disabled {
+	-fx-text-fill: COLOR_TEXT_DISABLED;
+}
+
+.tool-bar.list-related-toolbar .toggle-button:hover,
+.tool-bar.list-related-toolbar .button:hover {
 	-fx-background-color: COLOR_VGRAD_MEDIUM;
 }
 
 .tool-bar.list-related-toolbar .toggle-button:armed,
-.tool-bar.list-related-toolbar .toggle-button:selected {
+.tool-bar.list-related-toolbar .toggle-button:selected,
+.tool-bar.list-related-toolbar .button:armed,
+.tool-bar.list-related-toolbar .button:selected {
 	-fx-background-color: COLOR_VGRAD_DARK;
 }
 
@@ -190,6 +207,7 @@
  ******************************************************************************/
 
 .context-menu {
+	-fx-font-size: 12px;
 	-fx-background-color: COLOR_BORDER, COLOR_BACKGROUND;
 	-fx-background-insets: 0, 1;
 	-fx-padding: 1;

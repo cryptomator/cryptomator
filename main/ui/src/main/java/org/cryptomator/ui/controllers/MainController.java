@@ -38,6 +38,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Side;
 import javafx.scene.Parent;
+import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
@@ -69,6 +70,9 @@ public class MainController extends AbstractFXMLViewController {
 
 	@FXML
 	private ToggleButton addVaultButton;
+
+	@FXML
+	private Button removeVaultButton;
 
 	@FXML
 	private Pane contentPane;
@@ -110,6 +114,7 @@ public class MainController extends AbstractFXMLViewController {
 		vaultList.setItems(items);
 		vaultList.setCellFactory(this::createDirecoryListCell);
 		vaultList.getSelectionModel().getSelectedItems().addListener(this::selectedVaultDidChange);
+		removeVaultButton.disableProperty().bind(vaultList.getSelectionModel().selectedItemProperty().isNull());
 		this.showWelcomeView();
 	}
 

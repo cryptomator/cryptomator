@@ -222,17 +222,33 @@
     -fx-alignment: CENTER_LEFT;
 }
 
-.tool-bar.list-related-toolbar .toggle-button {
+.tool-bar.list-related-toolbar .spacer {
+	-fx-border-color: transparent COLOR_BORDER transparent transparent;
+    -fx-border-width: 1;
+}
+
+.tool-bar.list-related-toolbar .toggle-button,
+.tool-bar.list-related-toolbar .button {
+	-fx-font-family: Ionicons;
+	-fx-font-size: 1.4em;
+	-fx-text-fill: COLOR_TEXT;
 	-fx-background-color: transparent;
-	-fx-padding: 0.2em 0.8em 0.2em 0.8em;
+	-fx-padding: 0.1em 0.6em 0.1em 0.6em;
 	-fx-background-insets: 0;
 	-fx-background-radius: 0;
 	-fx-border-color: transparent COLOR_BORDER transparent transparent;
     -fx-border-width: 1;
 }
 
+.tool-bar.list-related-toolbar .toggle-button:disabled,
+.tool-bar.list-related-toolbar .button:disabled {
+	-fx-text-fill: COLOR_TEXT_DISABLED;
+}
+
 .tool-bar.list-related-toolbar .toggle-button:armed,
-.tool-bar.list-related-toolbar .toggle-button:selected {
+.tool-bar.list-related-toolbar .toggle-button:selected,
+.tool-bar.list-related-toolbar .button:armed,
+.tool-bar.list-related-toolbar .button:selected {
 	-fx-background-color: linear-gradient(to bottom, #C0C0C0 0%, #ADADAD 100%);
 }
 
@@ -243,6 +259,7 @@
  ******************************************************************************/
 
 .context-menu {
+	-fx-font-size: 13px;
     -fx-background-color: rgba(255.0, 255.0, 255.0, 0.9);
     -fx-background-insets: 0;
     -fx-background-radius: 4.0;

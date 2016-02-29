@@ -4,7 +4,7 @@ Copyright (c) 2014, Sebastian Stenzel
 Cryptomator is licensed under the MIT license. The details can be found in the accompanying license file.
 
 ## Third party softwares
-Cryptomator uses third party softwares that may be licensed under different licenses.
+Cryptomator uses third party libraries and fonts that may be licensed under different licenses.
 
 ### AquaFX
 The ProgressIndicator in ui/src/main/resource/css/mac_theme.css contains code from the AquaFX project.
@@ -61,6 +61,11 @@ Copyright 1999-2012 Apache Software Foundation
 This product includes software developed at The Apache Software Foundation (http://www.apache.org/).
 
 ResolverUtil.java Copyright 2005-2006 Tim Fennell
+
+### Ionicons
+Copyright (c) 2016 Drifty (http://drifty.com/)
+
+ionicons.ttf Licensed under the accompanying MIT license
 
 ### Jackrabbit WebDAV Library
 Copyright 2004-2014 The Apache Software Foundation
