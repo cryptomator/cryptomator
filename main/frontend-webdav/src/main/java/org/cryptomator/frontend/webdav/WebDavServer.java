@@ -16,7 +16,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.filesystem.Folder;
 import org.cryptomator.frontend.Frontend;
 import org.cryptomator.frontend.FrontendCreationFailedException;
@@ -36,7 +35,6 @@ import org.slf4j.LoggerFactory;
 public class WebDavServer implements FrontendFactory {
 
 	private static final Logger LOG = LoggerFactory.getLogger(WebDavServer.class);
-	private static final String LOCALHOST = SystemUtils.IS_OS_WINDOWS ? "::1" : "localhost";
 	private static final int MAX_PENDING_REQUESTS = 200;
 	private static final int MAX_THREADS = 200;
 	private static final int MIN_THREADS = 4;
@@ -57,8 +55,8 @@ public class WebDavServer implements FrontendFactory {
 		this.servletCollection = new ContextHandlerCollection();
 		this.servletContextFactory = servletContextFactory;
 		this.webdavMounterProvider = webdavMounterProvider;
-
-		localConnector.setHost(LOCALHOST);
+		
+		servletCollection.addHandler(WindowsCompatibilityServlet.createServletContextHandler());
 		server.setConnectors(new Connector[] {localConnector});
 		server.setHandler(servletCollection);
 	}
@@ -111,7 +109,7 @@ public class WebDavServer implements FrontendFactory {
 		}
 		final URI uri;
 		try {
-			uri = new URI("http", null, LOCALHOST, getPort(), contextPath, null, null);
+			uri = new URI("http", null, "localhost", getPort(), contextPath, null, null);
 		} catch (URISyntaxException e) {
 			throw new IllegalStateException(e);
 		}

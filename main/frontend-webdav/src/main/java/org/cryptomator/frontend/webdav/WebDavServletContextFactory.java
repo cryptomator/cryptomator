@@ -19,6 +19,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.filesystem.Folder;
 import org.cryptomator.frontend.webdav.filters.AcceptRangeFilter;
+import org.cryptomator.frontend.webdav.filters.LoopbackFilter;
 import org.cryptomator.frontend.webdav.filters.MacChunkedPutCompatibilityFilter;
 import org.cryptomator.frontend.webdav.filters.MkcolComplianceFilter;
 import org.cryptomator.frontend.webdav.filters.UriNormalizationFilter;
@@ -65,6 +66,7 @@ class WebDavServletContextFactory {
 		final ServletContextHandler servletContext = new ServletContextHandler(null, contextPath, ServletContextHandler.SESSIONS);
 		final ServletHolder servletHolder = new ServletHolder(contextPath, new WebDavServlet(contextRoot, root));
 		servletContext.addServlet(servletHolder, WILDCARD);
+		servletContext.addFilter(LoopbackFilter.class, WILDCARD, EnumSet.of(DispatcherType.REQUEST));
 		servletContext.addFilter(MkcolComplianceFilter.class, WILDCARD, EnumSet.of(DispatcherType.REQUEST));
 		servletContext.addFilter(AcceptRangeFilter.class, WILDCARD, EnumSet.of(DispatcherType.REQUEST));
 		servletContext.addFilter(new FilterHolder(new UriNormalizationFilter(resourceTypeChecker)), WILDCARD, EnumSet.of(DispatcherType.REQUEST));
