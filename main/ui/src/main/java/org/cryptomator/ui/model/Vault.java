@@ -13,6 +13,7 @@ import java.io.Serializable;
 import java.io.UncheckedIOException;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.Normalizer;
 import java.text.Normalizer.Form;
 import java.util.HashSet;
@@ -23,6 +24,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.lang3.CharUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.LazyInitializer;
 import org.cryptomator.common.Optionals;
 import org.cryptomator.crypto.engine.InvalidPassphraseException;
@@ -183,6 +185,17 @@ public class Vault implements Serializable, CryptoFileSystemDelegate {
 
 	public Path getPath() {
 		return path;
+	}
+
+	public String getDisplayablePath() {
+		Path homeDir = Paths.get(SystemUtils.USER_HOME);
+		if (path.startsWith(homeDir)) {
+			Path relativePath = homeDir.relativize(path);
+			String homePrefix = SystemUtils.IS_OS_WINDOWS ? "~\\" : "~/";
+			return homePrefix + relativePath.toString();
+		} else {
+			return path.toString();
+		}
 	}
 
 	/**

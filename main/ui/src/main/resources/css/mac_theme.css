@@ -14,6 +14,7 @@
     -fx-font-size: 13px;
 	
 	COLOR_TEXT: #000;
+	COLOR_TEXT_LIGHT: #888;
 	COLOR_TEXT_DISABLED: #B5B5B5;
 	COLOR_HYPERLINK: #0069D9;
 	COLOR_BORDER: #C8C8C8;
@@ -151,7 +152,7 @@
 }
 .list-cell {
     -fx-background-color: #FFF;
-    -fx-padding: 0.8em 0.5em 0.8em 0.5em;
+    -fx-padding: 6px;
     -fx-text-fill: COLOR_TEXT;
     -fx-opacity: 1;
 }
@@ -167,6 +168,17 @@
 .root.inactive-window .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:selected, 
 .root.inactive-window .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:selected:hover {
     -fx-background-color: #DCDCDC;
+    -fx-text-fill: #FFF;
+}
+
+.list-cell .detail-label {
+	-fx-text-fill: COLOR_TEXT_LIGHT;
+	-fx-font-size: 0.8em;
+}
+
+.list-view:focused > .virtual-flow > .clipped-container > .sheet > .list-cell:focused .detail-label,
+.list-view > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:selected .detail-label, 
+.list-view > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:selected:hover .detail-label{
     -fx-text-fill: #FFF;
 }
 
@@ -302,9 +314,9 @@
  ******************************************************************************/
 
 .tooltip {
-	-fx-background-color: COLOR_BORDER;
+	-fx-background-color: COLOR_BORDER, COLOR_BACKGROUND;
     -fx-padding: 0.2em 0.4em 0.2em 0.4em;
-    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 2, 0, 0, 0);
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.5), 2, 0, 0, 0);
     -fx-font-size: 0.8em;
 }
 

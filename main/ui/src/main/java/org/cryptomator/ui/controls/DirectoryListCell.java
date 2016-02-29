@@ -8,18 +8,23 @@
  *******************************************************************************/
 package org.cryptomator.ui.controls;
 
+import org.cryptomator.ui.model.Vault;
+
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.geometry.Pos;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Label;
+import javafx.scene.control.OverrunStyle;
 import javafx.scene.control.Tooltip;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
 
-import org.cryptomator.ui.model.Vault;
-
-public class DirectoryListCell extends DraggableListCell<Vault> implements ChangeListener<Boolean> {
+public class DirectoryListCell extends DraggableListCell<Vault>implements ChangeListener<Boolean> {
 
 	// fill: #FD4943, stroke: #E1443F
 	private static final Color RED_FILL = Color.rgb(253, 73, 67);
@@ -30,12 +35,25 @@ public class DirectoryListCell extends DraggableListCell<Vault> implements Chang
 	private static final Color GREEN_STROKE = Color.rgb(48, 183, 64);
 
 	private final Circle statusIndicator = new Circle(4.5);
+	private final Label nameText = new Label();
+	private final Label pathText = new Label();
+	private final VBox vbox = new VBox(4.0, nameText, pathText);
+	private final HBox hbox = new HBox(6.0, statusIndicator, vbox);
 	private ContextMenu vaultContextMenu;
 
 	public DirectoryListCell() {
-		setGraphic(statusIndicator);
-		setGraphicTextGap(12.0);
-		setContentDisplay(ContentDisplay.LEFT);
+		hbox.setAlignment(Pos.CENTER_LEFT);
+		hbox.setPrefWidth(1);
+		vbox.setFillWidth(true);
+
+		nameText.textFillProperty().bind(this.textFillProperty());
+		nameText.fontProperty().bind(this.fontProperty());
+
+		pathText.setTextOverrun(OverrunStyle.ELLIPSIS);
+		pathText.getStyleClass().add("detail-label");
+
+		setGraphic(hbox);
+		setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
 	}
 
 	@Override
@@ -46,12 +64,14 @@ public class DirectoryListCell extends DraggableListCell<Vault> implements Chang
 		}
 		super.updateItem(item, empty);
 		if (item == null) {
-			setText(null);
+			nameText.setText(null);
+			pathText.setText(null);
 			setTooltip(null);
 			setContextMenu(null);
 			statusIndicator.setVisible(false);
 		} else {
-			setText(item.getName());
+			nameText.setText(item.getName());
+			pathText.setText(item.getDisplayablePath());
 			setTooltip(new Tooltip(item.getPath().toString()));
 			statusIndicator.setVisible(true);
 			item.unlockedProperty().addListener(this);

@@ -138,7 +138,7 @@
 }
 .list-cell {
     -fx-background-color: #FFF;
-    -fx-padding: 0.8em 0.5em 0.8em 0.5em;
+    -fx-padding: 0.6em;
     -fx-text-fill: COLOR_TEXT;
     -fx-opacity: 1;
 }
@@ -152,6 +152,11 @@
 }
 .list-cell:filled:hover {
     -fx-background-color: #F7F7F7;
+}
+
+.list-cell .detail-label {
+	-fx-text-fill: COLOR_TEXT_DISABLED;
+	-fx-font-size: 0.8em;
 }
 
 /*******************************************************************************
