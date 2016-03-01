@@ -39,11 +39,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
-import javafx.scene.control.CheckBox;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
@@ -60,9 +58,6 @@ public class WelcomeController extends AbstractFXMLViewController {
 
 	@FXML
 	private Node checkForUpdatesContainer;
-
-	@FXML
-	private CheckBox checkForUpdatesCheckbox;
 
 	@FXML
 	private Label checkForUpdatesStatus;
@@ -99,31 +94,17 @@ public class WelcomeController extends AbstractFXMLViewController {
 	@Override
 	public void initialize() {
 		botImageView.setImage(new Image(getClass().getResource("/bot_welcome.png").toString()));
-		checkForUpdatesCheckbox.setSelected(settings.isCheckForUpdatesEnabled());
-		checkForUpdatesCheckbox.selectedProperty().addListener(this::checkForUpdatesChanged);
 		if (areUpdatesManagedExternally()) {
 			checkForUpdatesContainer.setVisible(false);
 			checkForUpdatesContainer.setManaged(false);
-		} else {
-			checkForUpdatesCheckbox.setSelected(settings.isCheckForUpdatesEnabled());
-			checkForUpdatesCheckbox.selectedProperty().addListener(this::checkForUpdatesChanged);
-			if (settings.isCheckForUpdatesEnabled()) {
-				executor.execute(this::checkForUpdates);
-			}
+		} else if (settings.isCheckForUpdatesEnabled()) {
+			executor.execute(this::checkForUpdates);
 		}
 	}
 
 	// ****************************************
 	// Check for updates
 	// ****************************************
-
-	private void checkForUpdatesChanged(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-		assert newValue != null;
-		settings.setCheckForUpdatesEnabled(newValue);
-		if (newValue) {
-			executor.execute(this::checkForUpdates);
-		}
-	}
 
 	private boolean areUpdatesManagedExternally() {
 		return Boolean.parseBoolean(System.getProperty("cryptomator.updatesManagedExternally", "false"));
@@ -134,7 +115,6 @@ public class WelcomeController extends AbstractFXMLViewController {
 			return;
 		}
 		Platform.runLater(() -> {
-			checkForUpdatesCheckbox.setVisible(false);
 			checkForUpdatesStatus.setText(resourceBundle.getString("welcome.checkForUpdates.label.currentlyChecking"));
 			checkForUpdatesIndicator.setVisible(true);
 		});
@@ -157,8 +137,7 @@ public class WelcomeController extends AbstractFXMLViewController {
 			// no error handling required. Maybe next time the version check is successful.
 		} finally {
 			Platform.runLater(() -> {
-				checkForUpdatesCheckbox.setVisible(true);
-				checkForUpdatesStatus.setText(resourceBundle.getString("welcome.checkForUpdates.label.checkboxLabel"));
+				checkForUpdatesStatus.setText("");
 				checkForUpdatesIndicator.setVisible(false);
 			});
 		}

@@ -31,7 +31,7 @@
 				<MenuItem text="%main.directoryList.contextMenu.changePassword" onAction="#didClickChangePassword" />
 			</items>
 		</ContextMenu>
-		<ContextMenu fx:id="addVaultContextMenu" onShowing="#willShowAddVaultContextMenu" onHidden="#didHideAddVaultContextMenu">
+		<ContextMenu fx:id="addVaultContextMenu">
 			<items>
 				<MenuItem text="%main.addDirectory.contextMenu.new" onAction="#didClickCreateNewVault" />
 				<MenuItem text="%main.addDirectory.contextMenu.open" onAction="#didClickAddExistingVaults" />
@@ -49,7 +49,7 @@
 						<Button text="&#xf462;" fx:id="removeVaultButton" onAction="#didClickRemoveSelectedEntry" focusTraversable="false" cacheShape="true" cache="true"/>
 						<Pane HBox.hgrow="ALWAYS" styleClass="spacer" />
 						<!-- future use: -->
-						<Button text="&#xf43c;" disable="true" focusTraversable="false" cacheShape="true" cache="true"/>
+						<ToggleButton text="&#xf43c;" fx:id="settingsButton" onAction="#didClickShowSettings" focusTraversable="false" cacheShape="true" cache="true"/>
 					</items>
 				</ToolBar>
 			</children>

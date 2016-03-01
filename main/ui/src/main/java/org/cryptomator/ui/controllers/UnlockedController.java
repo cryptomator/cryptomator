@@ -19,11 +19,14 @@ import javax.inject.Provider;
 import org.cryptomator.frontend.CommandFailedException;
 import org.cryptomator.ui.model.Vault;
 import org.cryptomator.ui.util.ActiveWindowStyleSupport;
+import org.fxmisc.easybind.EasyBind;
 
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ListChangeListener;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -40,9 +43,21 @@ public class UnlockedController extends AbstractFXMLViewController {
 
 	private static final int IO_SAMPLING_STEPS = 100;
 	private static final double IO_SAMPLING_INTERVAL = 0.25;
+
+	private final Stage macWarningsWindow = new Stage();
+	private final MacWarningsController macWarningsController;
+	private final ExecutorService exec;
+	private final ObjectProperty<Vault> vault = new SimpleObjectProperty<>();
 	private Optional<LockListener> listener = Optional.empty();
-	private Vault vault;
 	private Timeline ioAnimation;
+
+	@Inject
+	public UnlockedController(Provider<MacWarningsController> macWarningsControllerProvider, ExecutorService exec) {
+		this.macWarningsController = macWarningsControllerProvider.get();
+		this.exec = exec;
+
+		macWarningsController.vault.bind(this.vault);
+	}
 
 	@FXML
 	private Label messageLabel;
@@ -53,14 +68,12 @@ public class UnlockedController extends AbstractFXMLViewController {
 	@FXML
 	private NumberAxis xAxis;
 
-	private final Stage macWarningsWindow = new Stage();
-	private final MacWarningsController macWarningsController;
-	private final ExecutorService exec;
+	@Override
+	public void initialize() {
+		macWarningsController.initStage(macWarningsWindow);
+		ActiveWindowStyleSupport.startObservingFocus(macWarningsWindow);
 
-	@Inject
-	public UnlockedController(Provider<MacWarningsController> macWarningsControllerProvider, ExecutorService exec) {
-		this.macWarningsController = macWarningsControllerProvider.get();
-		this.exec = exec;
+		EasyBind.subscribe(vault, this::vaultChanged);
 	}
 
 	@Override
@@ -73,17 +86,30 @@ public class UnlockedController extends AbstractFXMLViewController {
 		return ResourceBundle.getBundle("localization");
 	}
 
-	@Override
-	public void initialize() {
-		macWarningsController.initStage(macWarningsWindow);
-		ActiveWindowStyleSupport.startObservingFocus(macWarningsWindow);
+	private void vaultChanged(Vault newVault) {
+		if (newVault == null) {
+			return;
+		}
+
+		// listen to MAC warnings as long as this vault is unlocked:
+		final ListChangeListener<String> macWarningsListener = this::macWarningsDidChange;
+		newVault.getNamesOfResourcesWithInvalidMac().addListener(macWarningsListener);
+		newVault.unlockedProperty().addListener((observable, oldValue, newValue) -> {
+			if (Boolean.FALSE.equals(newValue)) {
+				newVault.getNamesOfResourcesWithInvalidMac().removeListener(macWarningsListener);
+			}
+		});
+
+		// (re)start throughput statistics:
+		stopIoSampling();
+		startIoSampling();
 	}
 
 	@FXML
 	private void didClickRevealVault(ActionEvent event) {
 		exec.submit(() -> {
 			try {
-				vault.reveal();
+				vault.get().reveal();
 			} catch (CommandFailedException e) {
 				Platform.runLater(() -> {
 					messageLabel.setText(resourceBundle.getString("unlocked.label.revealFailed"));
@@ -96,14 +122,14 @@ public class UnlockedController extends AbstractFXMLViewController {
 	private void didClickCloseVault(ActionEvent event) {
 		exec.submit(() -> {
 			try {
-				vault.unmount();
+				vault.get().unmount();
 			} catch (CommandFailedException e) {
 				Platform.runLater(() -> {
 					messageLabel.setText(resourceBundle.getString("unlocked.label.unmountFailed"));
 				});
 				return;
 			}
-			vault.deactivateFrontend();
+			vault.get().deactivateFrontend();
 			listener.ifPresent(this::invokeListenerLater);
 		});
 	}
@@ -166,7 +192,7 @@ public class UnlockedController extends AbstractFXMLViewController {
 		public void handle(ActionEvent event) {
 			step++;
 
-			final long decBytes = vault.pollBytesRead();
+			final long decBytes = vault.get().pollBytesRead();
 			final double smoothedDecBytes = oldDecBytes + SMOOTHING_FACTOR * (decBytes - oldDecBytes);
 			final double smoothedDecMb = smoothedDecBytes * BYTES_TO_MEGABYTES_FACTOR;
 			oldDecBytes = smoothedDecBytes > EFFECTIVELY_ZERO ? (long) smoothedDecBytes : 0l;
@@ -175,7 +201,7 @@ public class UnlockedController extends AbstractFXMLViewController {
 				decryptedBytes.getData().remove(0);
 			}
 
-			final long encBytes = vault.pollBytesWritten();
+			final long encBytes = vault.get().pollBytesWritten();
 			final double smoothedEncBytes = oldEncBytes + SMOOTHING_FACTOR * (encBytes - oldEncBytes);
 			final double smoothedEncMb = smoothedEncBytes * BYTES_TO_MEGABYTES_FACTOR;
 			oldEncBytes = smoothedEncBytes > EFFECTIVELY_ZERO ? (long) smoothedEncBytes : 0l;
@@ -192,26 +218,14 @@ public class UnlockedController extends AbstractFXMLViewController {
 	/* Getter/Setter */
 
 	public Vault getVault() {
-		return vault;
+		return this.vault.get();
 	}
 
 	public void setVault(Vault vault) {
-		this.vault = vault;
-		macWarningsController.setVault(vault);
-
-		// listen to MAC warnings as long as this vault is unlocked:
-		final ListChangeListener<String> macWarningsListener = this::macWarningsDidChange;
-		vault.getNamesOfResourcesWithInvalidMac().addListener(macWarningsListener);
-		vault.unlockedProperty().addListener((observable, oldValue, newValue) -> {
-			if (Boolean.FALSE.equals(newValue)) {
-				vault.getNamesOfResourcesWithInvalidMac().removeListener(macWarningsListener);
-			}
-		});
-
-		// (re)start throughput statistics:
-		stopIoSampling();
-		startIoSampling();
+		this.vault.set(vault);
 	}
+
+	/* callback */
 
 	public LockListener getListener() {
 		return listener.orElse(null);
@@ -220,8 +234,6 @@ public class UnlockedController extends AbstractFXMLViewController {
 	public void setListener(LockListener listener) {
 		this.listener = Optional.ofNullable(listener);
 	}
-
-	/* callback */
 
 	private void invokeListenerLater(LockListener listener) {
 		Platform.runLater(() -> {

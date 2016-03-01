@@ -70,7 +70,7 @@ public class MainApplication extends Application {
 		mainCtrl.initStage(primaryStage);
 
 		final ResourceBundle rb = ResourceBundle.getBundle("localization");
-		primaryStage.setTitle(rb.getString("app.name"));
+		primaryStage.titleProperty().bind(mainCtrl.windowTitle());
 		primaryStage.setResizable(false);
 		primaryStage.getIcons().add(new Image(MainApplication.class.getResourceAsStream("/window_icon.png")));
 		primaryStage.show();

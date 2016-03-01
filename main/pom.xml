@@ -170,6 +170,13 @@
 				<artifactId>commons-httpclient</artifactId>
 				<version>${commons-httpclient.version}</version>
 			</dependency>
+			
+			<!-- EasyBind -->
+			<dependency>
+				<groupId>org.fxmisc.easybind</groupId>
+				<artifactId>easybind</artifactId>
+				<version>1.0.3</version>
+			</dependency>	
 
 			<!-- Guava -->
 			<dependency>

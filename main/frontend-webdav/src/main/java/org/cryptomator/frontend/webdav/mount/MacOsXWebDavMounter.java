@@ -72,8 +72,6 @@ final class MacOsXWebDavMounter implements WebDavMounterStrategy {
 			String activateAppleScript = String.format("tell application \"Finder\" to activate \"%s\"", volumeIdentifier);
 			String ejectAppleScript = String.format("tell application \"Finder\" to if \"%s\" exists then eject \"%s\"", volumeIdentifier, volumeIdentifier);
 
-			System.err.println("open: " + openAppleScript + "\nactivate: " + activateAppleScript + "\neject: " + ejectAppleScript);
-
 			this.revealCommand = new ProcessBuilder("/usr/bin/osascript", "-e", openAppleScript, "-e", activateAppleScript);
 			this.unmountCommand = new ProcessBuilder("/usr/bin/osascript", "-e", ejectAppleScript);
 		}

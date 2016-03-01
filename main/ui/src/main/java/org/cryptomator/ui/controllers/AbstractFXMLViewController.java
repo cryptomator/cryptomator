@@ -11,6 +11,9 @@ package org.cryptomator.ui.controllers;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.concurrent.atomic.AtomicReference;
+
+import org.cryptomator.common.LazyInitializer;
 
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -23,7 +26,7 @@ import javafx.stage.Stage;
  */
 abstract class AbstractFXMLViewController implements Initializable {
 
-	private Parent fxmlRoot;
+	private final AtomicReference<Parent> fxmlRoot = new AtomicReference<>();
 
 	/**
 	 * URL from #initialize(URL, ResourceBundle)
@@ -80,16 +83,15 @@ abstract class AbstractFXMLViewController implements Initializable {
 	 * 
 	 * @return Parent view element.
 	 */
-	protected final synchronized Parent loadFxml() {
-		if (fxmlRoot == null) {
+	protected final Parent loadFxml() {
+		return LazyInitializer.initializeLazily(fxmlRoot, () -> {
 			final FXMLLoader loader = createFxmlLoader();
 			try {
-				fxmlRoot = loader.load();
+				return loader.load();
 			} catch (IOException e) {
 				throw new IllegalStateException("Could not load FXML file from location: " + loader.getLocation(), e);
 			}
-		}
-		return fxmlRoot;
+		});
 	}
 
 	/**

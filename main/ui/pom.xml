@@ -50,6 +50,12 @@
 			<groupId>org.cryptomator</groupId>
 			<artifactId>frontend-webdav</artifactId>
 		</dependency>
+		
+		<!-- EasyBind -->
+		<dependency>
+			<groupId>org.fxmisc.easybind</groupId>
+			<artifactId>easybind</artifactId>
+		</dependency>	
 
 		<!-- JSON -->
 		<dependency>

@@ -10,10 +10,8 @@ package org.cryptomator.ui.controllers;
 
 import java.net.URL;
 import java.util.Comparator;
-import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
 
 import javax.inject.Inject;
 
@@ -26,12 +24,14 @@ import org.cryptomator.frontend.FrontendCreationFailedException;
 import org.cryptomator.frontend.webdav.mount.WindowsDriveLetters;
 import org.cryptomator.ui.controls.SecPasswordField;
 import org.cryptomator.ui.model.Vault;
-import org.cryptomator.ui.util.FXThreads;
+import org.fxmisc.easybind.EasyBind;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -51,8 +51,18 @@ public class UnlockController extends AbstractFXMLViewController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(UnlockController.class);
 
-	private Optional<UnlockListener> listener = Optional.empty();
-	private Vault vault;
+	private final ExecutorService exec;
+	private final Application app;
+	private final WindowsDriveLetters driveLetters;
+	private final ChangeListener<Character> driveLetterChangeListener = this::winDriveLetterDidChange;
+	final ObjectProperty<Vault> vault = new SimpleObjectProperty<>();
+
+	@Inject
+	public UnlockController(Application app, ExecutorService exec, WindowsDriveLetters driveLetters) {
+		this.app = app;
+		this.exec = exec;
+		this.driveLetters = driveLetters;
+	}
 
 	@FXML
 	private SecPasswordField passwordField;
@@ -84,16 +94,22 @@ public class UnlockController extends AbstractFXMLViewController {
 	@FXML
 	private GridPane advancedOptions;
 
-	private final ExecutorService exec;
-	private final Application app;
-	private final WindowsDriveLetters driveLetters;
-	private final ChangeListener<Character> driveLetterChangeListener = this::winDriveLetterDidChange;
+	@Override
+	public void initialize() {
+		advancedOptions.managedProperty().bind(advancedOptions.visibleProperty());
+		mountName.addEventFilter(KeyEvent.KEY_TYPED, this::filterAlphanumericKeyEvents);
+		mountName.textProperty().addListener(this::mountNameDidChange);
+		if (SystemUtils.IS_OS_WINDOWS) {
+			winDriveLetter.setConverter(new WinDriveLetterLabelConverter());
+		} else {
+			winDriveLetterLabel.setVisible(false);
+			winDriveLetterLabel.setManaged(false);
+			winDriveLetter.setVisible(false);
+			winDriveLetter.setManaged(false);
+		}
+		unlockButton.disableProperty().bind(passwordField.textProperty().isEmpty());
 
-	@Inject
-	public UnlockController(Application app, ExecutorService exec, WindowsDriveLetters driveLetters) {
-		this.app = app;
-		this.exec = exec;
-		this.driveLetters = driveLetters;
+		EasyBind.subscribe(vault, this::vaultChanged);
 	}
 
 	@Override
@@ -106,25 +122,11 @@ public class UnlockController extends AbstractFXMLViewController {
 		return ResourceBundle.getBundle("localization");
 	}
 
-	@Override
-	public void initialize() {
-		passwordField.textProperty().addListener(this::passwordFieldsDidChange);
-		advancedOptions.managedProperty().bind(advancedOptions.visibleProperty());
-		mountName.addEventFilter(KeyEvent.KEY_TYPED, this::filterAlphanumericKeyEvents);
-		mountName.textProperty().addListener(this::mountNameDidChange);
-		if (SystemUtils.IS_OS_WINDOWS) {
-			winDriveLetter.setConverter(new WinDriveLetterLabelConverter());
-		} else {
-			winDriveLetterLabel.setVisible(false);
-			winDriveLetterLabel.setManaged(false);
-			winDriveLetter.setVisible(false);
-			winDriveLetter.setManaged(false);
+	private void vaultChanged(Vault newVault) {
+		if (newVault == null) {
+			return;
 		}
-	}
-
-	private void resetView() {
 		passwordField.clear();
-		unlockButton.setDisable(true);
 		advancedOptions.setVisible(false);
 		advancedOptionsButton.setText(resourceBundle.getString("unlock.button.advancedOptions.show"));
 		progressIndicator.setVisible(false);
@@ -138,15 +140,10 @@ public class UnlockController extends AbstractFXMLViewController {
 		}
 		downloadsPageLink.setVisible(false);
 		messageText.setText(null);
-	}
-
-	// ****************************************
-	// Password field
-	// ****************************************
-
-	private void passwordFieldsDidChange(ObservableValue<? extends String> property, String oldValue, String newValue) {
-		boolean passwordIsEmpty = passwordField.getText().isEmpty();
-		unlockButton.setDisable(passwordIsEmpty);
+		mountName.setText(newVault.getMountName());
+		if (SystemUtils.IS_OS_WINDOWS) {
+			chooseSelectedDriveLetter();
+		}
 	}
 
 	// ****************************************
@@ -183,14 +180,14 @@ public class UnlockController extends AbstractFXMLViewController {
 	}
 
 	private void mountNameDidChange(ObservableValue<? extends String> property, String oldValue, String newValue) {
-		if (vault == null) {
+		if (vault.get() == null) {
 			return;
 		}
 		// newValue is guaranteed to be a-z0-9_, see #filterAlphanumericKeyEvents
 		if (newValue.isEmpty()) {
-			mountName.setText(vault.getMountName());
+			mountName.setText(vault.get().getMountName());
 		} else {
-			vault.setMountName(newValue);
+			vault.get().setMountName(newValue);
 		}
 	}
 
@@ -237,99 +234,19 @@ public class UnlockController extends AbstractFXMLViewController {
 	}
 
 	private void winDriveLetterDidChange(ObservableValue<? extends Character> property, Character oldValue, Character newValue) {
-		if (vault == null) {
+		if (vault.get() == null) {
 			return;
 		}
-		vault.setWinDriveLetter(newValue);
-	}
-
-	// ****************************************
-	// Unlock button
-	// ****************************************
-
-	@FXML
-	private void didClickUnlockButton(ActionEvent event) {
-		setControlsDisabled(true);
-		progressIndicator.setVisible(true);
-		downloadsPageLink.setVisible(false);
-		final CharSequence password = passwordField.getCharacters();
-		try {
-			vault.activateFrontend(password);
-			Future<Boolean> futureMount = exec.submit(vault::mount);
-			FXThreads.runOnMainThreadWhenFinished(exec, futureMount, this::unlockAndMountFinished);
-		} catch (InvalidPassphraseException e) {
-			setControlsDisabled(false);
-			progressIndicator.setVisible(false);
-			messageText.setText(resourceBundle.getString("unlock.errorMessage.wrongPassword"));
-			Platform.runLater(passwordField::requestFocus);
-		} catch (UnsupportedVaultFormatException e) {
-			setControlsDisabled(false);
-			progressIndicator.setVisible(false);
-			downloadsPageLink.setVisible(true);
-			LOG.warn("Unable to unlock vault: " + e.getMessage());
-			if (e.isVaultOlderThanSoftware()) {
-				messageText.setText(resourceBundle.getString("unlock.errorMessage.unsupportedVersion.vaultOlderThanSoftware") + " ");
-			} else if (e.isSoftwareOlderThanVault()) {
-				messageText.setText(resourceBundle.getString("unlock.errorMessage.unsupportedVersion.softwareOlderThanVault") + " ");
-			}
-		} catch (FrontendCreationFailedException ex) {
-			setControlsDisabled(false);
-			progressIndicator.setVisible(false);
-			messageText.setText(resourceBundle.getString("unlock.errorMessage.decryptionFailed"));
-			LOG.error("Decryption failed for technical reasons.", ex);
-		} finally {
-			passwordField.swipe();
-		}
-	}
-
-	private void setControlsDisabled(boolean disable) {
-		passwordField.setDisable(disable);
-		mountName.setDisable(disable);
-		unlockButton.setDisable(disable);
-		advancedOptionsButton.setDisable(disable);
-	}
-
-	private void unlockAndMountFinished(boolean mountSuccess) {
-		progressIndicator.setVisible(false);
-		setControlsDisabled(false);
-		if (vault.isUnlocked() && !mountSuccess) {
-			exec.submit(vault::deactivateFrontend);
-		} else if (vault.isUnlocked() && mountSuccess) {
-			exec.submit(() -> {
-				try {
-					vault.reveal();
-				} catch (CommandFailedException e) {
-					LOG.error("Failed to reveal mounted vault", e);
-				}
-			});
-		}
-		if (mountSuccess) {
-			listener.ifPresent(this::invokeListenerLater);
-		}
-	}
-
-	/* Getter/Setter */
-
-	public Vault getVault() {
-		return vault;
-	}
-
-	public void setVault(Vault vault) {
-		this.resetView();
-		this.vault = vault;
-		this.mountName.setText(vault.getMountName());
-		if (SystemUtils.IS_OS_WINDOWS) {
-			chooseSelectedDriveLetter();
-		}
+		vault.get().setWinDriveLetter(newValue);
 	}
 
 	private void chooseSelectedDriveLetter() {
 		assert SystemUtils.IS_OS_WINDOWS;
 		// if the vault prefers a drive letter, that is currently occupied, this is our last chance to reset this:
-		if (driveLetters.getOccupiedDriveLetters().contains(vault.getWinDriveLetter())) {
-			vault.setWinDriveLetter(null);
+		if (driveLetters.getOccupiedDriveLetters().contains(vault.get().getWinDriveLetter())) {
+			vault.get().setWinDriveLetter(null);
 		}
-		final Character letter = vault.getWinDriveLetter();
+		final Character letter = vault.get().getWinDriveLetter();
 		if (letter == null) {
 			// first option is known to be 'auto-assign' due to #WinDriveLetterComparator.
 			this.winDriveLetter.getSelectionModel().selectFirst();
@@ -338,25 +255,55 @@ public class UnlockController extends AbstractFXMLViewController {
 		}
 	}
 
-	public UnlockListener getListener() {
-		return listener.orElse(null);
+	// ****************************************
+	// Unlock button
+	// ****************************************
+
+	@FXML
+	private void didClickUnlockButton(ActionEvent event) {
+		mountName.setDisable(true);
+		advancedOptionsButton.setDisable(true);
+		progressIndicator.setVisible(true);
+		downloadsPageLink.setVisible(false);
+		CharSequence password = passwordField.getCharacters();
+		exec.submit(() -> this.unlock(password));
+
 	}
 
-	public void setListener(UnlockListener listener) {
-		this.listener = Optional.ofNullable(listener);
-	}
-
-	/* callback */
-
-	private void invokeListenerLater(UnlockListener listener) {
-		Platform.runLater(() -> {
-			listener.didUnlock(this);
-		});
-	}
-
-	@FunctionalInterface
-	interface UnlockListener {
-		void didUnlock(UnlockController ctrl);
+	private void unlock(CharSequence password) {
+		try {
+			vault.get().activateFrontend(password);
+			vault.get().reveal();
+		} catch (InvalidPassphraseException e) {
+			Platform.runLater(() -> {
+				messageText.setText(resourceBundle.getString("unlock.errorMessage.wrongPassword"));
+				passwordField.requestFocus();
+			});
+		} catch (UnsupportedVaultFormatException e) {
+			LOG.warn("Unable to unlock vault: " + e.getMessage());
+			Platform.runLater(() -> {
+				downloadsPageLink.setVisible(true);
+				if (e.isVaultOlderThanSoftware()) {
+					messageText.setText(resourceBundle.getString("unlock.errorMessage.unsupportedVersion.vaultOlderThanSoftware") + " ");
+				} else if (e.isSoftwareOlderThanVault()) {
+					messageText.setText(resourceBundle.getString("unlock.errorMessage.unsupportedVersion.softwareOlderThanVault") + " ");
+				}
+			});
+		} catch (FrontendCreationFailedException e) {
+			LOG.error("Decryption failed for technical reasons.", e);
+			Platform.runLater(() -> {
+				messageText.setText(resourceBundle.getString("unlock.errorMessage.decryptionFailed"));
+			});
+		} catch (CommandFailedException e) {
+			LOG.error("Failed to reveal mounted vault", e);
+		} finally {
+			Platform.runLater(() -> {
+				passwordField.swipe();
+				mountName.setDisable(false);
+				advancedOptionsButton.setDisable(false);
+				progressIndicator.setVisible(false);
+			});
+		}
 	}
 
 }

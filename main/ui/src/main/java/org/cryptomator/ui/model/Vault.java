@@ -46,8 +46,9 @@ import org.cryptomator.ui.util.FXThreads;
 import com.google.common.collect.ImmutableMap;
 
 import dagger.Lazy;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
+import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
@@ -62,7 +63,7 @@ public class Vault implements Serializable, CryptoFileSystemDelegate {
 	private final DeferredCloser closer;
 	private final ShorteningFileSystemFactory shorteningFileSystemFactory;
 	private final CryptoFileSystemFactory cryptoFileSystemFactory;
-	private final ObjectProperty<Boolean> unlocked = new SimpleObjectProperty<Boolean>(this, "unlocked", Boolean.FALSE);
+	private final BooleanProperty unlocked = new SimpleBooleanProperty();
 	private final ObservableList<String> namesOfResourcesWithInvalidMac = FXThreads.observableListOnMainThread(FXCollections.observableArrayList());
 	private final Set<String> whitelistedResourcesWithInvalidMac = new HashSet<>();
 	private final AtomicReference<FileSystem> nioFileSystem = new AtomicReference<>();
@@ -118,6 +119,7 @@ public class Vault implements Serializable, CryptoFileSystemDelegate {
 	}
 
 	public synchronized void activateFrontend(CharSequence passphrase) throws FrontendCreationFailedException {
+		boolean success = false;
 		try {
 			FileSystem fs = getNioFileSystem();
 			FileSystem shorteningFs = shorteningFileSystemFactory.get(fs);
@@ -127,16 +129,21 @@ public class Vault implements Serializable, CryptoFileSystemDelegate {
 			String contextPath = StringUtils.prependIfMissing(mountName, "/");
 			Frontend frontend = frontendFactory.get().create(statsFs, contextPath);
 			filesystemFrontend = closer.closeLater(frontend);
-			unlocked.set(true);
-		} catch (UncheckedIOException e) {
+			frontend.mount(getMountParams());
+			success = true;
+		} catch (UncheckedIOException | CommandFailedException e) {
 			throw new FrontendCreationFailedException(e);
+		} finally {
+			// unlocked is a observable property and should only be changed by the FX application thread
+			final boolean finalSuccess = success;
+			Platform.runLater(() -> unlocked.set(finalSuccess));
 		}
 	}
 
 	public synchronized void deactivateFrontend() {
 		filesystemFrontend.close();
 		statsFileSystem = Optional.empty();
-		unlocked.set(false);
+		Platform.runLater(() -> unlocked.set(false));
 	}
 
 	private Map<MountParam, Optional<String>> getMountParams() {
@@ -144,17 +151,6 @@ public class Vault implements Serializable, CryptoFileSystemDelegate {
 				MountParam.MOUNT_NAME, Optional.ofNullable(mountName), //
 				MountParam.WIN_DRIVE_LETTER, Optional.ofNullable(CharUtils.toString(winDriveLetter)) //
 		);
-	}
-
-	public Boolean mount() {
-		try {
-			Optionals.ifPresent(filesystemFrontend.get(), f -> {
-				f.mount(getMountParams());
-			});
-			return true;
-		} catch (CommandFailedException e) {
-			return false;
-		}
 	}
 
 	public void reveal() throws CommandFailedException {
@@ -213,7 +209,7 @@ public class Vault implements Serializable, CryptoFileSystemDelegate {
 		}
 	}
 
-	public ObjectProperty<Boolean> unlockedProperty() {
+	public BooleanProperty unlockedProperty() {
 		return unlocked;
 	}
 

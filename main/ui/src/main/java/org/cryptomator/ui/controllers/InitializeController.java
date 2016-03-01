@@ -9,6 +9,7 @@
 package org.cryptomator.ui.controllers;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.net.URL;
 import java.nio.file.FileAlreadyExistsException;
 import java.util.Optional;
@@ -23,7 +24,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javafx.application.Platform;
-import javafx.beans.value.ObservableValue;
+import javafx.beans.binding.BooleanBinding;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -34,8 +37,12 @@ public class InitializeController extends AbstractFXMLViewController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(InitializeController.class);
 
-	private Vault vault;
+	final ObjectProperty<Vault> vault = new SimpleObjectProperty<>();
 	private Optional<InitializationListener> listener = Optional.empty();
+
+	@Inject
+	public InitializeController() {
+	}
 
 	@FXML
 	private SecPasswordField passwordField;
@@ -49,8 +56,11 @@ public class InitializeController extends AbstractFXMLViewController {
 	@FXML
 	private Label messageLabel;
 
-	@Inject
-	public InitializeController() {
+	@Override
+	public void initialize() {
+		BooleanBinding passwordIsEmpty = passwordField.textProperty().isEmpty();
+		BooleanBinding passwordsDiffer = passwordField.textProperty().isNotEqualTo(retypePasswordField.textProperty());
+		okButton.disableProperty().bind(passwordIsEmpty.or(passwordsDiffer));
 	}
 
 	@Override
@@ -63,59 +73,28 @@ public class InitializeController extends AbstractFXMLViewController {
 		return ResourceBundle.getBundle("localization");
 	}
 
-	@Override
-	public void initialize() {
-		passwordField.textProperty().addListener(this::passwordFieldsDidChange);
-		retypePasswordField.textProperty().addListener(this::passwordFieldsDidChange);
-	}
-
-	// ****************************************
-	// Password fields
-	// ****************************************
-
-	private void passwordFieldsDidChange(ObservableValue<? extends String> property, String oldValue, String newValue) {
-		boolean passwordIsEmpty = passwordField.getText().isEmpty();
-		boolean passwordsAreEqual = passwordField.getText().equals(retypePasswordField.getText());
-		okButton.setDisable(passwordIsEmpty || !passwordsAreEqual);
-	}
-
 	// ****************************************
 	// OK button
 	// ****************************************
 
 	@FXML
 	protected void initializeVault(ActionEvent event) {
-		setControlsDisabled(true);
 		final CharSequence passphrase = passwordField.getCharacters();
 		try {
-			vault.create(passphrase);
+			vault.get().create(passphrase);
 			listener.ifPresent(this::invokeListenerLater);
 		} catch (FileAlreadyExistsException ex) {
 			messageLabel.setText(resourceBundle.getString("initialize.messageLabel.alreadyInitialized"));
-		} catch (IOException ex) {
+		} catch (UncheckedIOException | IOException ex) {
 			LOG.error("I/O Exception", ex);
+			messageLabel.setText(resourceBundle.getString("initialize.messageLabel.initializationFailed"));
 		} finally {
-			setControlsDisabled(false);
 			passwordField.swipe();
 			retypePasswordField.swipe();
 		}
 	}
 
-	private void setControlsDisabled(boolean disable) {
-		passwordField.setDisable(disable);
-		retypePasswordField.setDisable(disable);
-		okButton.setDisable(disable);
-	}
-
 	/* Getter/Setter */
-
-	public Vault getVault() {
-		return vault;
-	}
-
-	public void setVault(Vault vault) {
-		this.vault = vault;
-	}
 
 	public InitializationListener getListener() {
 		return listener.orElse(null);

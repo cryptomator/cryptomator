@@ -9,6 +9,7 @@
 package org.cryptomator.ui.controllers;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.net.URL;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -17,6 +18,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.cryptomator.crypto.engine.InvalidPassphraseException;
+import org.cryptomator.crypto.engine.UnsupportedVaultFormatException;
 import org.cryptomator.ui.controls.SecPasswordField;
 import org.cryptomator.ui.model.Vault;
 import org.slf4j.Logger;
@@ -24,7 +26,9 @@ import org.slf4j.LoggerFactory;
 
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.beans.value.ObservableValue;
+import javafx.beans.binding.BooleanBinding;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -36,8 +40,14 @@ public class ChangePasswordController extends AbstractFXMLViewController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ChangePasswordController.class);
 
+	private final Application app;
+	final ObjectProperty<Vault> vault = new SimpleObjectProperty<>();
 	private Optional<ChangePasswordListener> listener = Optional.empty();
-	private Vault vault;
+
+	@Inject
+	public ChangePasswordController(Application app) {
+		this.app = app;
+	}
 
 	@FXML
 	private SecPasswordField oldPasswordField;
@@ -57,12 +67,12 @@ public class ChangePasswordController extends AbstractFXMLViewController {
 	@FXML
 	private Hyperlink downloadsPageLink;
 
-	private final Application app;
-
-	@Inject
-	public ChangePasswordController(Application app) {
-		super();
-		this.app = app;
+	@Override
+	public void initialize() {
+		BooleanBinding oldPasswordIsEmpty = oldPasswordField.textProperty().isEmpty();
+		BooleanBinding newPasswordIsEmpty = newPasswordField.textProperty().isEmpty();
+		BooleanBinding passwordsDiffer = newPasswordField.textProperty().isNotEqualTo(retypePasswordField.textProperty());
+		changePasswordButton.disableProperty().bind(oldPasswordIsEmpty.or(newPasswordIsEmpty.or(passwordsDiffer)));
 	}
 
 	@Override
@@ -73,24 +83,6 @@ public class ChangePasswordController extends AbstractFXMLViewController {
 	@Override
 	protected ResourceBundle getFxmlResourceBundle() {
 		return ResourceBundle.getBundle("localization");
-	}
-
-	@Override
-	public void initialize() {
-		oldPasswordField.textProperty().addListener(this::passwordFieldsDidChange);
-		newPasswordField.textProperty().addListener(this::passwordFieldsDidChange);
-		retypePasswordField.textProperty().addListener(this::passwordFieldsDidChange);
-	}
-
-	// ****************************************
-	// Password fields
-	// ****************************************
-
-	private void passwordFieldsDidChange(ObservableValue<? extends String> property, String oldValue, String newValue) {
-		boolean oldPasswordIsEmpty = oldPasswordField.getText().isEmpty();
-		boolean newPasswordIsEmpty = newPasswordField.getText().isEmpty();
-		boolean passwordsAreEqual = newPasswordField.getText().equals(retypePasswordField.getText());
-		changePasswordButton.setDisable(oldPasswordIsEmpty || newPasswordIsEmpty || !passwordsAreEqual);
 	}
 
 	// ****************************************
@@ -110,31 +102,23 @@ public class ChangePasswordController extends AbstractFXMLViewController {
 	private void didClickChangePasswordButton(ActionEvent event) {
 		downloadsPageLink.setVisible(false);
 		try {
-			vault.changePassphrase(oldPasswordField.getCharacters(), newPasswordField.getCharacters());
+			vault.get().changePassphrase(oldPasswordField.getCharacters(), newPasswordField.getCharacters());
 			messageText.setText(resourceBundle.getString("changePassword.infoMessage.success"));
 			listener.ifPresent(this::invokeListenerLater);
 		} catch (InvalidPassphraseException e) {
 			messageText.setText(resourceBundle.getString("changePassword.errorMessage.wrongPassword"));
-			newPasswordField.swipe();
-			retypePasswordField.swipe();
 			Platform.runLater(oldPasswordField::requestFocus);
-			return;
-		} catch (IOException ex) {
+		} catch (UncheckedIOException | IOException ex) {
 			messageText.setText(resourceBundle.getString("changePassword.errorMessage.decryptionFailed"));
 			LOG.error("Decryption failed for technical reasons.", ex);
-			newPasswordField.swipe();
-			retypePasswordField.swipe();
-			return;
-			// } catch (UnsupportedVaultException e) {
-			// downloadsPageLink.setVisible(true);
-			// if (e.isVaultOlderThanSoftware()) {
-			// messageText.setText(resourceBundle.getString("changePassword.errorMessage.unsupportedVersion.vaultOlderThanSoftware") + " ");
-			// } else if (e.isSoftwareOlderThanVault()) {
-			// messageText.setText(resourceBundle.getString("changePassword.errorMessage.unsupportedVersion.softwareOlderThanVault") + " ");
-			// }
-			// newPasswordField.swipe();
-			// retypePasswordField.swipe();
-			// return;
+		} catch (UnsupportedVaultFormatException e) {
+			downloadsPageLink.setVisible(true);
+			LOG.warn("Unable to unlock vault: " + e.getMessage());
+			if (e.isVaultOlderThanSoftware()) {
+				messageText.setText(resourceBundle.getString("unlock.errorMessage.unsupportedVersion.vaultOlderThanSoftware") + " ");
+			} else if (e.isSoftwareOlderThanVault()) {
+				messageText.setText(resourceBundle.getString("unlock.errorMessage.unsupportedVersion.softwareOlderThanVault") + " ");
+			}
 		} finally {
 			oldPasswordField.swipe();
 			newPasswordField.swipe();
@@ -143,14 +127,6 @@ public class ChangePasswordController extends AbstractFXMLViewController {
 	}
 
 	/* Getter/Setter */
-
-	public Vault getVault() {
-		return vault;
-	}
-
-	public void setVault(Vault vault) {
-		this.vault = vault;
-	}
 
 	public ChangePasswordListener getListener() {
 		return listener.orElse(null);

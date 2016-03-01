@@ -13,6 +13,7 @@ package org.cryptomator.ui.util;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.function.Consumer;
 
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
@@ -42,14 +43,14 @@ import javafx.collections.ObservableSet;
  * // when done, update text label:
  * runOnMainThreadWhenFinished(futureBookName, (bookName) -&gt; {
  * 	myLabel.setText(bookName);
- * }, (exception) -&gt; {
+ * } , (exception) -&gt; {
  * 	myLabel.setText(&quot;An exception occured: &quot; + exception.getMessage());
  * });
  * </pre>
  */
 public final class FXThreads {
 
-	private static final CallbackWhenTaskFailed DUMMY_EXCEPTION_CALLBACK = (e) -> {
+	private static final Consumer<Exception> DUMMY_EXCEPTION_CALLBACK = (e) -> {
 		// ignore.
 	};
 
@@ -65,11 +66,11 @@ public final class FXThreads {
 	 * });
 	 * </pre>
 	 * 
-	 * @param executor
+	 * @param executor The service to execute the background task on
 	 * @param task The task to wait for.
 	 * @param successCallback The action to perform, when the task finished.
 	 */
-	public static <T> void runOnMainThreadWhenFinished(ExecutorService executor, Future<T> task, CallbackWhenTaskFinished<T> successCallback) {
+	public static <T> void runOnMainThreadWhenFinished(ExecutorService executor, Future<T> task, Consumer<T> successCallback) {
 		runOnMainThreadWhenFinished(executor, task, successCallback, DUMMY_EXCEPTION_CALLBACK);
 	}
 
@@ -82,7 +83,7 @@ public final class FXThreads {
 	 * 
 	 * runOnMainThreadWhenFinished(futureBookNamePossiblyFailing, (bookName) -&gt; {
 	 * 	myLabel.setText(bookName);
-	 * }, (exception) -&gt; {
+	 * } , (exception) -&gt; {
 	 * 	myLabel.setText(&quot;An exception occured: &quot; + exception.getMessage());
 	 * });
 	 * </pre>
@@ -92,7 +93,7 @@ public final class FXThreads {
 	 * @param successCallback The action to perform, when the task finished.
 	 * @param exceptionCallback
 	 */
-	public static <T> void runOnMainThreadWhenFinished(ExecutorService executor, Future<T> task, CallbackWhenTaskFinished<T> successCallback, CallbackWhenTaskFailed exceptionCallback) {
+	public static <T> void runOnMainThreadWhenFinished(ExecutorService executor, Future<T> task, Consumer<T> successCallback, Consumer<Exception> exceptionCallback) {
 		Objects.requireNonNull(task, "task must not be null.");
 		Objects.requireNonNull(successCallback, "successCallback must not be null.");
 		Objects.requireNonNull(exceptionCallback, "exceptionCallback must not be null.");
@@ -100,22 +101,14 @@ public final class FXThreads {
 			try {
 				final T result = task.get();
 				Platform.runLater(() -> {
-					successCallback.taskFinished(result);
+					successCallback.accept(result);
 				});
 			} catch (Exception e) {
 				Platform.runLater(() -> {
-					exceptionCallback.taskFailed(e);
+					exceptionCallback.accept(e);
 				});
 			}
 		});
-	}
-
-	public interface CallbackWhenTaskFinished<T> {
-		void taskFinished(T result);
-	}
-
-	public interface CallbackWhenTaskFailed {
-		void taskFailed(Throwable t);
 	}
 
 	public static <E> ObservableSet<E> observableSetOnMainThread(ObservableSet<E> set) {

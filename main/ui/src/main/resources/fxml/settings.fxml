@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright (c) 2014 Sebastian Stenzel
+  This file is licensed under the terms of the MIT license.
+  See the LICENSE.txt file for more info.
+  
+  Contributors:
+      Sebastian Stenzel - initial API and implementation
+-->
+<?import java.net.URL?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.CheckBox?>
+
+<GridPane vgap="12.0" hgap="12.0" prefWidth="400.0" xmlns:fx="http://javafx.com/fxml" cacheShape="true" cache="true">
+	<padding>
+		<Insets top="24.0" right="24.0" bottom="24.0" left="24.0" />
+	</padding>
+	
+	<columnConstraints>
+		<ColumnConstraints percentWidth="38.2"/>
+		<ColumnConstraints percentWidth="61.8"/>
+	</columnConstraints>
+
+	<children>
+		<!-- Row 0 -->
+		<Label GridPane.rowIndex="0" GridPane.columnIndex="0" text="%settings.checkForUpdates.label" cacheShape="true" cache="true" />
+		<CheckBox GridPane.rowIndex="0" GridPane.columnIndex="1" fx:id="checkForUpdatesCheckbox" cacheShape="true" cache="true" />
+	</children>
+</GridPane>
+
+
+					

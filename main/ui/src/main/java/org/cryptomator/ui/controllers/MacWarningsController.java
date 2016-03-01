@@ -19,8 +19,10 @@ import org.cryptomator.ui.model.Vault;
 import javafx.application.Application;
 import javafx.beans.Observable;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.beans.value.WeakChangeListener;
@@ -38,33 +40,23 @@ import javafx.util.StringConverter;
 
 public class MacWarningsController extends AbstractFXMLViewController {
 
-	@FXML
-	private ListView<Warning> warningsList;
-
-	@FXML
-	private Button whitelistButton;
-
 	private final Application application;
 	private final ObservableList<Warning> warnings = FXCollections.observableArrayList();
 	private final ListChangeListener<String> unauthenticatedResourcesChangeListener = this::unauthenticatedResourcesDidChange;
 	private final ChangeListener<Boolean> stageVisibilityChangeListener = this::windowVisibilityDidChange;
+	final ObjectProperty<Vault> vault = new SimpleObjectProperty<>();
 	private Stage stage;
-	private Vault vault;
 
 	@Inject
 	public MacWarningsController(Application application) {
 		this.application = application;
 	}
 
-	@Override
-	protected URL getFxmlResourceUrl() {
-		return getClass().getResource("/fxml/mac_warnings.fxml");
-	}
+	@FXML
+	private ListView<Warning> warningsList;
 
-	@Override
-	protected ResourceBundle getFxmlResourceBundle() {
-		return ResourceBundle.getBundle("localization");
-	}
+	@FXML
+	private Button whitelistButton;
 
 	@Override
 	public void initialize() {
@@ -86,6 +78,16 @@ public class MacWarningsController extends AbstractFXMLViewController {
 	}
 
 	@Override
+	protected URL getFxmlResourceUrl() {
+		return getClass().getResource("/fxml/mac_warnings.fxml");
+	}
+
+	@Override
+	protected ResourceBundle getFxmlResourceBundle() {
+		return ResourceBundle.getBundle("localization");
+	}
+
+	@Override
 	public void initStage(Stage stage) {
 		super.initStage(stage);
 		this.stage = stage;
@@ -96,8 +98,8 @@ public class MacWarningsController extends AbstractFXMLViewController {
 	private void didClickWhitelistButton(ActionEvent event) {
 		warnings.filtered(w -> w.isSelected()).stream().forEach(w -> {
 			final String resourceToBeWhitelisted = w.getName();
-			vault.getWhitelistedResourcesWithInvalidMac().add(resourceToBeWhitelisted);
-			vault.getNamesOfResourcesWithInvalidMac().remove(resourceToBeWhitelisted);
+			vault.get().getWhitelistedResourcesWithInvalidMac().add(resourceToBeWhitelisted);
+			vault.get().getNamesOfResourcesWithInvalidMac().remove(resourceToBeWhitelisted);
 		});
 		warnings.removeIf(w -> w.isSelected());
 	}
@@ -125,21 +127,17 @@ public class MacWarningsController extends AbstractFXMLViewController {
 
 	private void windowVisibilityDidChange(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
 		if (Boolean.TRUE.equals(newValue)) {
-			stage.setTitle(String.format(resourceBundle.getString("macWarnings.windowTitle"), vault.getName()));
-			warnings.addAll(vault.getNamesOfResourcesWithInvalidMac().stream().map(Warning::new).collect(Collectors.toList()));
-			vault.getNamesOfResourcesWithInvalidMac().addListener(this.unauthenticatedResourcesChangeListener);
+			stage.setTitle(String.format(resourceBundle.getString("macWarnings.windowTitle"), vault.get().getName()));
+			warnings.addAll(vault.get().getNamesOfResourcesWithInvalidMac().stream().map(Warning::new).collect(Collectors.toList()));
+			vault.get().getNamesOfResourcesWithInvalidMac().addListener(this.unauthenticatedResourcesChangeListener);
 		} else {
-			vault.getNamesOfResourcesWithInvalidMac().clear();
-			vault.getNamesOfResourcesWithInvalidMac().removeListener(this.unauthenticatedResourcesChangeListener);
+			vault.get().getNamesOfResourcesWithInvalidMac().clear();
+			vault.get().getNamesOfResourcesWithInvalidMac().removeListener(this.unauthenticatedResourcesChangeListener);
 		}
 	}
 
 	private void disableWhitelistButtonIfNothingSelected() {
 		whitelistButton.setDisable(warnings.filtered(w -> w.isSelected()).isEmpty());
-	}
-
-	public void setVault(Vault vault) {
-		this.vault = vault;
 	}
 
 	private class Warning {

@@ -26,7 +26,7 @@ public class SecPasswordField extends PasswordField {
 	 * Imagine the following example with <code>pass</code> being the password, <code>x</code> being the swipe char and <code>'</code> being the offset of the char array:
 	 * <ol>
 	 * <li>Append filling chars to the end of the password: <code>passxxxx'</code></li>
-	 * <li>Delete first 4 chars. Internal implementation will then copy the following chars to the position, where the deletion occured: <code>xxxx'xxxx</code></li>
+	 * <li>Delete first 4 chars. Internal implementation will then copy subsequent chars to the position, where the deletion occured: <code>xxxx'xxxx</code></li>
 	 * <li>Delete first 4 chars again, as we appended 4 chars in step 1: <code>'xxxxxx</code></li>
 	 * </ol>
 	 */
@@ -37,8 +37,8 @@ public class SecPasswordField extends PasswordField {
 		this.getContent().insert(pwLength, new String(fillingChars), false);
 		this.getContent().delete(0, pwLength, true);
 		this.getContent().delete(0, pwLength, true);
-		// previous text has now been overwritten. still we need to update the text to trigger some property bindings:
-		this.setText("");
+		// previous text has now been overwritten. but we still need to update the text to trigger some property bindings:
+		this.clear();
 	}
 
 }

@@ -29,8 +29,7 @@
 			<Label alignment="CENTER" style="-fx-font-size: 1.5em;" text="%welcome.welcomeLabel" cacheShape="true" cache="true" />
 			<VBox fx:id="checkForUpdatesContainer" prefWidth="400.0" alignment="CENTER" spacing="5.0" cacheShape="true" cache="true">
 				<HBox alignment="CENTER" spacing="5.0" cacheShape="true" cache="true">
-					<CheckBox fx:id="checkForUpdatesCheckbox" cacheShape="true" cache="true" />
-					<Label fx:id="checkForUpdatesStatus" text="%welcome.checkForUpdates.label.checkboxLabel" cacheShape="true" cache="true" />
+					<Label fx:id="checkForUpdatesStatus" cacheShape="true" cache="true" />
 					<ProgressIndicator fx:id="checkForUpdatesIndicator" progress="-1" prefWidth="15.0" prefHeight="15.0" visible="false" cacheShape="true" cache="true" cacheHint="SPEED" />
 				</HBox>
 				<Hyperlink alignment="CENTER" fx:id="updateLink" onAction="#didClickUpdateLink" visible="false" cacheShape="true" cache="true" />

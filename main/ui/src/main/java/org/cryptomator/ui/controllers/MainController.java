@@ -13,10 +13,10 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -26,13 +26,19 @@ import org.cryptomator.ui.controls.DirectoryListCell;
 import org.cryptomator.ui.model.Vault;
 import org.cryptomator.ui.model.VaultFactory;
 import org.cryptomator.ui.settings.Settings;
+import org.cryptomator.ui.util.Listeners;
+import org.fxmisc.easybind.EasyBind;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import dagger.Lazy;
 import javafx.application.Platform;
+import javafx.beans.binding.Binding;
+import javafx.beans.binding.BooleanBinding;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -47,12 +53,41 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
 
 @Singleton
 public class MainController extends AbstractFXMLViewController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(MainController.class);
+
+	private final VaultFactory vaultFactoy;
+	private final Lazy<WelcomeController> welcomeController;
+	private final Lazy<InitializeController> initializeController;
+	private final Lazy<UnlockController> unlockController;
+	private final Provider<UnlockedController> unlockedControllerProvider;
+	private final Lazy<ChangePasswordController> changePasswordController;
+	private final Lazy<SettingsController> settingsController;
+	private final ObjectProperty<AbstractFXMLViewController> activeController = new SimpleObjectProperty<>();
+	private final ObservableList<Vault> vaults;
+	private final ObjectProperty<Vault> selectedVault = new SimpleObjectProperty<>();
+	private final Binding<Boolean> isSelectedVaultUnlocked = EasyBind.select(selectedVault).selectObject(Vault::unlockedProperty);
+	private final BooleanBinding isShowingSettings;
+	private final Map<Vault, UnlockedController> unlockedVaults = new HashMap<>();
+
+	@Inject
+	public MainController(Settings settings, VaultFactory vaultFactoy, Lazy<WelcomeController> welcomeController, Lazy<InitializeController> initializeController, Lazy<UnlockController> unlockController,
+			Provider<UnlockedController> unlockedControllerProvider, Lazy<ChangePasswordController> changePasswordController, Lazy<SettingsController> settingsController) {
+		this.vaultFactoy = vaultFactoy;
+		this.welcomeController = welcomeController;
+		this.initializeController = initializeController;
+		this.unlockController = unlockController;
+		this.unlockedControllerProvider = unlockedControllerProvider;
+		this.changePasswordController = changePasswordController;
+		this.settingsController = settingsController;
+		this.vaults = FXCollections.observableList(settings.getDirectories());
+
+		// derived bindings:
+		this.isShowingSettings = activeController.isEqualTo(settingsController.get());
+	}
 
 	private Stage stage;
 
@@ -75,27 +110,23 @@ public class MainController extends AbstractFXMLViewController {
 	private Button removeVaultButton;
 
 	@FXML
+	private ToggleButton settingsButton;
+
+	@FXML
 	private Pane contentPane;
 
-	private final Settings settings;
-	private final VaultFactory vaultFactoy;
-	private final Lazy<WelcomeController> welcomeController;
-	private final Lazy<InitializeController> initializeController;
-	private final Lazy<UnlockController> unlockController;
-	private final Provider<UnlockedController> unlockedController;
-	private final Lazy<ChangePasswordController> changePasswordController;
-
-	@Inject
-	public MainController(Settings settings, VaultFactory vaultFactoy, Lazy<WelcomeController> welcomeController, Lazy<InitializeController> initializeController, Lazy<UnlockController> unlockController,
-			Provider<UnlockedController> unlockedController, Lazy<ChangePasswordController> changePasswordController) {
-		super();
-		this.settings = settings;
-		this.vaultFactoy = vaultFactoy;
-		this.welcomeController = welcomeController;
-		this.initializeController = initializeController;
-		this.unlockController = unlockController;
-		this.unlockedController = unlockedController;
-		this.changePasswordController = changePasswordController;
+	@Override
+	public void initialize() {
+		activeController.addListener(this::activeControllerDidChange);
+		activeController.set(welcomeController.get());
+		vaultList.setItems(vaults);
+		vaultList.setCellFactory(this::createDirecoryListCell);
+		selectedVault.addListener(this::selectedVaultDidChange);
+		selectedVault.bind(vaultList.getSelectionModel().selectedItemProperty());
+		addVaultContextMenu.showingProperty().addListener(Listeners.withNewValue(addVaultButton::setSelected));
+		removeVaultButton.disableProperty().bind(selectedVault.isNull());
+		isShowingSettings.addListener(Listeners.withNewValue(settingsButton::setSelected));
+		isSelectedVaultUnlocked.addListener(Listeners.withNewValue(this::selectedVaultUnlockedDidChange));
 	}
 
 	@Override
@@ -108,14 +139,10 @@ public class MainController extends AbstractFXMLViewController {
 		return ResourceBundle.getBundle("localization");
 	}
 
-	@Override
-	public void initialize() {
-		final ObservableList<Vault> items = FXCollections.observableList(settings.getDirectories());
-		vaultList.setItems(items);
-		vaultList.setCellFactory(this::createDirecoryListCell);
-		vaultList.getSelectionModel().getSelectedItems().addListener(this::selectedVaultDidChange);
-		removeVaultButton.disableProperty().bind(vaultList.getSelectionModel().selectedItemProperty().isNull());
-		this.showWelcomeView();
+	private ListCell<Vault> createDirecoryListCell(ListView<Vault> param) {
+		final DirectoryListCell cell = new DirectoryListCell();
+		cell.setVaultContextMenu(vaultListCellContextMenu);
+		return cell;
 	}
 
 	@Override
@@ -131,16 +158,6 @@ public class MainController extends AbstractFXMLViewController {
 		} else {
 			addVaultContextMenu.show(addVaultButton, Side.RIGHT, 0.0, 0.0);
 		}
-	}
-
-	@FXML
-	private void willShowAddVaultContextMenu(WindowEvent event) {
-		addVaultButton.setSelected(true);
-	}
-
-	@FXML
-	private void didHideAddVaultContextMenu(WindowEvent event) {
-		addVaultButton.setSelected(false);
 	}
 
 	@FXML
@@ -201,143 +218,117 @@ public class MainController extends AbstractFXMLViewController {
 		}
 
 		final Vault vault = vaultFactoy.createVault(vaultPath);
-		if (!vaultList.getItems().contains(vault)) {
-			vaultList.getItems().add(vault);
+		if (!vaults.contains(vault)) {
+			vaults.add(vault);
 		}
 		vaultList.getSelectionModel().select(vault);
 	}
 
-	private ListCell<Vault> createDirecoryListCell(ListView<Vault> param) {
-		final DirectoryListCell cell = new DirectoryListCell();
-		cell.setVaultContextMenu(vaultListCellContextMenu);
-		return cell;
-	}
-
-	private void selectedVaultDidChange(ListChangeListener.Change<? extends Vault> change) {
-		final Vault selectedVault = vaultList.getSelectionModel().getSelectedItem();
-		if (selectedVault == null) {
-			stage.setTitle(resourceBundle.getString("app.name"));
-			showWelcomeView();
-		} else if (!Files.isDirectory(selectedVault.getPath())) {
-			Platform.runLater(() -> {
-				vaultList.getItems().remove(selectedVault);
-				vaultList.getSelectionModel().clearSelection();
-			});
-			stage.setTitle(resourceBundle.getString("app.name"));
-			showWelcomeView();
-		} else {
-			stage.setTitle(selectedVault.getName());
-			showVault(selectedVault);
-		}
-	}
-
 	@FXML
 	private void didClickRemoveSelectedEntry(ActionEvent e) {
-		final Vault selectedVault = vaultList.getSelectionModel().getSelectedItem();
-		vaultList.getItems().remove(selectedVault);
-		vaultList.getSelectionModel().clearSelection();
+		vaults.remove(selectedVault.get());
 	}
 
 	@FXML
 	private void didClickChangePassword(ActionEvent e) {
-		final Vault selectedVault = vaultList.getSelectionModel().getSelectedItem();
-		showChangePasswordView(selectedVault);
+		showChangePasswordView();
+	}
+
+	@FXML
+	private void didClickShowSettings(ActionEvent e) {
+		if (settingsController.get().equals(activeController.get())) {
+			activeController.set(welcomeController.get());
+		} else {
+			activeController.set(settingsController.get());
+		}
+		vaultList.getSelectionModel().clearSelection();
+	}
+
+	// ****************************************
+	// Bindings and Property Listeners
+	// ****************************************
+
+	private void activeControllerDidChange(ObservableValue<? extends AbstractFXMLViewController> property, AbstractFXMLViewController oldValue, AbstractFXMLViewController newValue) {
+		final Parent root = newValue.loadFxml();
+		contentPane.getChildren().clear();
+		contentPane.getChildren().add(root);
+	}
+
+	private void selectedVaultDidChange(ObservableValue<? extends Vault> property, Vault oldValue, Vault newValue) {
+		if (newValue == null) {
+			return;
+		}
+		if (newValue.isUnlocked()) {
+			this.showUnlockedView(newValue);
+		} else if (newValue.isValidVaultDirectory()) {
+			this.showUnlockView();
+		} else {
+			this.showInitializeView();
+		}
+	}
+
+	private void selectedVaultUnlockedDidChange(Boolean unlocked) {
+		if (unlocked == null) {
+			// no vault selected -> no-op
+		} else if (unlocked) {
+			Platform.setImplicitExit(false);
+			this.showUnlockedView(selectedVault.get());
+		} else {
+			this.showUnlockView();
+		}
+	}
+
+	public Binding<String> windowTitle() {
+		return EasyBind.monadic(selectedVault).map(Vault::getName).orElse(resourceBundle.getString("app.name"));
 	}
 
 	// ****************************************
 	// Subcontroller for right panel
 	// ****************************************
 
-	private void showVault(Vault vault) {
-		if (vault.isUnlocked()) {
-			this.showUnlockedView(vault);
-		} else if (vault.isValidVaultDirectory()) {
-			this.showUnlockView(vault);
-		} else {
-			this.showInitializeView(vault);
-		}
-	}
-
-	private void showWelcomeView() {
-		final Parent root = welcomeController.get().loadFxml();
-		contentPane.getChildren().clear();
-		contentPane.getChildren().add(root);
-	}
-
-	private void showInitializeView(Vault vault) {
+	private void showInitializeView() {
 		final InitializeController ctrl = initializeController.get();
-		final Parent root = ctrl.loadFxml();
-		contentPane.getChildren().clear();
-		contentPane.getChildren().add(root);
-		ctrl.setVault(vault);
+		ctrl.vault.bind(selectedVault);
 		ctrl.setListener(this::didInitialize);
+		activeController.set(ctrl);
 	}
 
 	public void didInitialize(InitializeController ctrl) {
-		showUnlockView(ctrl.getVault());
+		showUnlockView();
 	}
 
-	private void showUnlockView(Vault vault) {
+	private void showUnlockView() {
 		final UnlockController ctrl = unlockController.get();
-		final Parent root = ctrl.loadFxml();
-		contentPane.getChildren().clear();
-		contentPane.getChildren().add(root);
-		ctrl.setVault(vault);
-		ctrl.setListener(this::didUnlock);
-	}
-
-	public void didUnlock(UnlockController ctrl) {
-		showUnlockedView(ctrl.getVault());
-		Platform.setImplicitExit(false);
+		ctrl.vault.bind(selectedVault);
+		activeController.set(ctrl);
 	}
 
 	private void showUnlockedView(Vault vault) {
-		final UnlockedController ctrl = unlockedController.get();
-		final Parent root = ctrl.loadFxml();
-		contentPane.getChildren().clear();
-		contentPane.getChildren().add(root);
+		final UnlockedController ctrl = unlockedVaults.computeIfAbsent(vault, k -> {
+			return unlockedControllerProvider.get();
+		});
 		ctrl.setVault(vault);
 		ctrl.setListener(this::didLock);
+		activeController.set(ctrl);
 	}
 
 	public void didLock(UnlockedController ctrl) {
-		showUnlockView(ctrl.getVault());
-		if (getUnlockedVaults().isEmpty()) {
+		unlockedVaults.remove(ctrl.getVault());
+		showUnlockView();
+		if (vaults.stream().anyMatch(Vault::isUnlocked)) {
 			Platform.setImplicitExit(true);
 		}
 	}
 
-	private void showChangePasswordView(Vault vault) {
+	private void showChangePasswordView() {
 		final ChangePasswordController ctrl = changePasswordController.get();
-		final Parent root = ctrl.loadFxml();
-		contentPane.getChildren().clear();
-		contentPane.getChildren().add(root);
-		ctrl.setVault(vault);
+		ctrl.vault.bind(selectedVault);
 		ctrl.setListener(this::didChangePassword);
+		activeController.set(ctrl);
 	}
 
 	public void didChangePassword(ChangePasswordController ctrl) {
-		showUnlockView(ctrl.getVault());
-	}
-
-	/* Convenience */
-
-	public Collection<Vault> getVaults() {
-		return vaultList.getItems();
-	}
-
-	public Collection<Vault> getUnlockedVaults() {
-		return getVaults().stream().filter(d -> d.isUnlocked()).collect(Collectors.toSet());
-	}
-
-	/* public Getter/Setter */
-
-	public Stage getStage() {
-		return stage;
-	}
-
-	public void setStage(Stage stage) {
-		this.stage = stage;
+		showUnlockView();
 	}
 
 	/**
