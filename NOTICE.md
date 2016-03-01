@@ -50,6 +50,11 @@ Copyright 2012 Square, Inc.
 
 Licensed under the Apache License, Version 2.0
 
+### EasyBind
+Copyright (c) 2014, TomasMikula
+
+Licensed under the accompanying BSD simplified license.
+
 ### Apache Jakarta HttpClient
 Copyright 1999-2007 The Apache Software Foundation
 
