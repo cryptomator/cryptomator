@@ -90,7 +90,8 @@ class CryptomatorModule {
 
 	@Provides
 	@Singleton
-	FrontendFactory provideFrontendFactory(WebDavServer webDavServer) {
+	FrontendFactory provideFrontendFactory(WebDavServer webDavServer, Settings settings) {
+		webDavServer.setPort(settings.getPort());
 		webDavServer.start();
 		return closeLater(webDavServer, WebDavServer::stop);
 	}

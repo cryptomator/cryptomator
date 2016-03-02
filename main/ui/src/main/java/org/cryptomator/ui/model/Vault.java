@@ -45,7 +45,6 @@ import org.cryptomator.ui.util.FXThreads;
 
 import com.google.common.collect.ImmutableMap;
 
-import dagger.Lazy;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -59,7 +58,6 @@ public class Vault implements Serializable, CryptoFileSystemDelegate {
 	public static final String VAULT_FILE_EXTENSION = ".cryptomator";
 
 	private final Path path;
-	private final Lazy<FrontendFactory> frontendFactory;
 	private final DeferredCloser closer;
 	private final ShorteningFileSystemFactory shorteningFileSystemFactory;
 	private final CryptoFileSystemFactory cryptoFileSystemFactory;
@@ -76,9 +74,8 @@ public class Vault implements Serializable, CryptoFileSystemDelegate {
 	/**
 	 * Package private constructor, use {@link VaultFactory}.
 	 */
-	Vault(Path vaultDirectoryPath, Lazy<FrontendFactory> frontendFactory, ShorteningFileSystemFactory shorteningFileSystemFactory, CryptoFileSystemFactory cryptoFileSystemFactory, DeferredCloser closer) {
+	Vault(Path vaultDirectoryPath, ShorteningFileSystemFactory shorteningFileSystemFactory, CryptoFileSystemFactory cryptoFileSystemFactory, DeferredCloser closer) {
 		this.path = vaultDirectoryPath;
-		this.frontendFactory = frontendFactory;
 		this.closer = closer;
 		this.shorteningFileSystemFactory = shorteningFileSystemFactory;
 		this.cryptoFileSystemFactory = cryptoFileSystemFactory;
@@ -118,7 +115,7 @@ public class Vault implements Serializable, CryptoFileSystemDelegate {
 		}
 	}
 
-	public synchronized void activateFrontend(CharSequence passphrase) throws FrontendCreationFailedException {
+	public synchronized void activateFrontend(FrontendFactory frontendFactory, CharSequence passphrase) throws FrontendCreationFailedException {
 		boolean success = false;
 		try {
 			FileSystem fs = getNioFileSystem();
@@ -127,7 +124,7 @@ public class Vault implements Serializable, CryptoFileSystemDelegate {
 			StatsFileSystem statsFs = new StatsFileSystem(cryptoFs);
 			statsFileSystem = Optional.of(statsFs);
 			String contextPath = StringUtils.prependIfMissing(mountName, "/");
-			Frontend frontend = frontendFactory.get().create(statsFs, contextPath);
+			Frontend frontend = frontendFactory.create(statsFs, contextPath);
 			filesystemFrontend = closer.closeLater(frontend);
 			frontend.mount(getMountParams());
 			success = true;

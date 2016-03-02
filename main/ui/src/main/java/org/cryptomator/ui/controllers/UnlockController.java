@@ -21,6 +21,7 @@ import org.cryptomator.crypto.engine.InvalidPassphraseException;
 import org.cryptomator.crypto.engine.UnsupportedVaultFormatException;
 import org.cryptomator.frontend.CommandFailedException;
 import org.cryptomator.frontend.FrontendCreationFailedException;
+import org.cryptomator.frontend.FrontendFactory;
 import org.cryptomator.frontend.webdav.mount.WindowsDriveLetters;
 import org.cryptomator.ui.controls.SecPasswordField;
 import org.cryptomator.ui.model.Vault;
@@ -28,6 +29,7 @@ import org.fxmisc.easybind.EasyBind;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import dagger.Lazy;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
@@ -51,16 +53,18 @@ public class UnlockController extends AbstractFXMLViewController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(UnlockController.class);
 
-	private final ExecutorService exec;
 	private final Application app;
+	private final ExecutorService exec;
+	private final Lazy<FrontendFactory> frontendFactory;
 	private final WindowsDriveLetters driveLetters;
 	private final ChangeListener<Character> driveLetterChangeListener = this::winDriveLetterDidChange;
 	final ObjectProperty<Vault> vault = new SimpleObjectProperty<>();
 
 	@Inject
-	public UnlockController(Application app, ExecutorService exec, WindowsDriveLetters driveLetters) {
+	public UnlockController(Application app, ExecutorService exec, Lazy<FrontendFactory> frontendFactory, WindowsDriveLetters driveLetters) {
 		this.app = app;
 		this.exec = exec;
+		this.frontendFactory = frontendFactory;
 		this.driveLetters = driveLetters;
 	}
 
@@ -272,7 +276,7 @@ public class UnlockController extends AbstractFXMLViewController {
 
 	private void unlock(CharSequence password) {
 		try {
-			vault.get().activateFrontend(password);
+			vault.get().activateFrontend(frontendFactory.get(), password);
 			vault.get().reveal();
 		} catch (InvalidPassphraseException e) {
 			Platform.runLater(() -> {
