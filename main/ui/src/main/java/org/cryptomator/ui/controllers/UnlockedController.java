@@ -39,6 +39,8 @@ import javafx.scene.chart.XYChart.Series;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.ToggleButton;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
 import javafx.stage.PopupWindow.AnchorLocation;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -153,6 +155,13 @@ public class UnlockedController extends AbstractFXMLViewController {
 				});
 			}
 		});
+	}
+
+	@FXML
+	private void didClickCopyUrl(ActionEvent event) {
+		ClipboardContent clipboardContent = new ClipboardContent();
+		clipboardContent.putUrl(vault.get().getWebDavUrl());
+		Clipboard.getSystemClipboard().setContent(clipboardContent);
 	}
 
 	// ****************************************

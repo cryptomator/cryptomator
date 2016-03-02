@@ -23,4 +23,7 @@ public interface Frontend extends AutoCloseable {
 
 	void reveal() throws CommandFailedException;
 
+	// For now let's assume every single frontend knows what a WebDAV url is ;-)
+	String getWebDavUrl();
+
 }

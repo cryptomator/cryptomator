@@ -30,7 +30,7 @@
 			<items>
 				<MenuItem text="%unlocked.moreOptions.reveal" onAction="#didClickRevealVault"/>
 				<!-- Future use: -->
-				<MenuItem text="%unlocked.moreOptions.copyUrl" disable="true"/>
+				<MenuItem text="%unlocked.moreOptions.copyUrl" onAction="#didClickCopyUrl"/>
 			</items>
 		</ContextMenu>
 	</fx:define>

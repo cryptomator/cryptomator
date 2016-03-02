@@ -176,6 +176,10 @@ public class Vault implements Serializable, CryptoFileSystemDelegate {
 	// Getter/Setter
 	// *******************************************************************************/
 
+	public String getWebDavUrl() {
+		return filesystemFrontend.get().map(Frontend::getWebDavUrl).orElseThrow(IllegalStateException::new);
+	}
+
 	public Path getPath() {
 		return path;
 	}

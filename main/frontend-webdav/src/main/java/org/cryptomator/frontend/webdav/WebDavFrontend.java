@@ -62,4 +62,9 @@ class WebDavFrontend implements Frontend {
 		}
 	}
 
+	@Override
+	public String getWebDavUrl() {
+		return uri.toString();
+	}
+
 }
