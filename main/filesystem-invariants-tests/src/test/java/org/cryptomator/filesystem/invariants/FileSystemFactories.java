@@ -60,12 +60,12 @@ class FileSystemFactories implements Iterable<FileSystemFactory> {
 
 	private FileSystem createShorteningFileSystemNio() {
 		FileSystem delegate = createNioFileSystem();
-		return new ShorteningFileSystem(delegate.folder("d"), delegate.folder("m"), 3);
+		return new ShorteningFileSystem(delegate, "m", 3);
 	}
 
 	private FileSystem createShorteningFileSystemInMemory() {
 		FileSystem delegate = createInMemoryFileSystem();
-		return new ShorteningFileSystem(delegate.folder("d"), delegate.folder("m"), 3);
+		return new ShorteningFileSystem(delegate, "m", 3);
 	}
 
 	private void add(String name, FileSystemFactory factory) {

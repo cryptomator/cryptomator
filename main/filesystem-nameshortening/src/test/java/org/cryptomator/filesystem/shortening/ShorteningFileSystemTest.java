@@ -8,36 +8,93 @@
  *******************************************************************************/
 package org.cryptomator.filesystem.shortening;
 
+import static java.lang.String.format;
+import static java.util.stream.Collectors.toList;
+import static org.cryptomator.common.test.matcher.ContainsMatcher.contains;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+
 import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 import java.time.Instant;
 import java.util.concurrent.TimeoutException;
 
+import org.cryptomator.common.test.matcher.PropertyMatcher;
 import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.FileSystem;
 import org.cryptomator.filesystem.Folder;
 import org.cryptomator.filesystem.ReadableFile;
 import org.cryptomator.filesystem.WritableFile;
 import org.cryptomator.filesystem.inmem.InMemoryFileSystem;
+import org.hamcrest.Matcher;
 import org.junit.Assert;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 public class ShorteningFileSystemTest {
+
+	@Rule
+	public ExpectedException thrown = ExpectedException.none();
+
+	private static final String METADATA_DIR_NAME = "m";
+	private static final int THRESHOLD = 10;
+	private static final String NAME_LONGER_THAN_THRESHOLD = "morethantenchars";
 
 	@Test
 	public void testImplicitCreationOfMetadataFolder() {
 		final FileSystem underlyingFs = new InMemoryFileSystem();
-		final Folder metadataRoot = underlyingFs.folder("m");
-		final FileSystem fs = new ShorteningFileSystem(underlyingFs, metadataRoot, 10);
-		fs.folder("morethantenchars").create();
+		final Folder metadataRoot = underlyingFs.folder(METADATA_DIR_NAME);
+		final FileSystem fs = new ShorteningFileSystem(underlyingFs, METADATA_DIR_NAME, THRESHOLD);
+		fs.folder(NAME_LONGER_THAN_THRESHOLD).create();
 		Assert.assertTrue(metadataRoot.exists());
+	}
+
+	@Test
+	public void testMetadataFolderIsNotIncludedInFolderListing() {
+		final FileSystem underlyingFs = new InMemoryFileSystem();
+		final FileSystem fs = new ShorteningFileSystem(underlyingFs, METADATA_DIR_NAME, THRESHOLD);
+		fs.folder(NAME_LONGER_THAN_THRESHOLD).create();
+
+		assertThat(fs.folders().collect(toList()), contains(folderWithName(NAME_LONGER_THAN_THRESHOLD)));
+	}
+
+	@Test
+	public void testMetadataFolderIsNotIncludedInChildrenListing() {
+		final FileSystem underlyingFs = new InMemoryFileSystem();
+		final FileSystem fs = new ShorteningFileSystem(underlyingFs, METADATA_DIR_NAME, THRESHOLD);
+		fs.folder(NAME_LONGER_THAN_THRESHOLD).create();
+
+		assertThat(fs.children().collect(toList()), contains(folderWithName(NAME_LONGER_THAN_THRESHOLD)));
+	}
+
+	@Test
+	public void testCanNotObtainFolderWithNameOfMetadataFolder() {
+		final FileSystem underlyingFs = new InMemoryFileSystem();
+		final FileSystem fs = new ShorteningFileSystem(underlyingFs, METADATA_DIR_NAME, THRESHOLD);
+
+		thrown.expect(UncheckedIOException.class);
+		thrown.expectMessage(format("'%s' is a reserved name", METADATA_DIR_NAME));
+
+		fs.folder(METADATA_DIR_NAME);
+	}
+
+	@Test
+	public void testCanNotObtainFileWithNameOfMetadataFolder() {
+		final FileSystem underlyingFs = new InMemoryFileSystem();
+		final FileSystem fs = new ShorteningFileSystem(underlyingFs, METADATA_DIR_NAME, THRESHOLD);
+
+		thrown.expect(UncheckedIOException.class);
+		thrown.expectMessage(format("'%s' is a reserved name", METADATA_DIR_NAME));
+
+		fs.file(METADATA_DIR_NAME);
 	}
 
 	@Test
 	public void testDeflate() {
 		final FileSystem underlyingFs = new InMemoryFileSystem();
-		final Folder metadataRoot = underlyingFs.folder("m");
-		final FileSystem fs = new ShorteningFileSystem(underlyingFs, metadataRoot, 10);
+		final Folder metadataRoot = underlyingFs.folder(METADATA_DIR_NAME);
+		final FileSystem fs = new ShorteningFileSystem(underlyingFs, METADATA_DIR_NAME, 10);
 		final Folder longNamedFolder = fs.folder("morethantenchars"); // base32(sha1(morethantenchars)) = QMJL5GQUETRX2YRV6XDTJQ6NNM7IEUHP
 		final File correspondingMetadataFile = metadataRoot.folder("QM").folder("JL").file("QMJL5GQUETRX2YRV6XDTJQ6NNM7IEUHP.lng");
 		longNamedFolder.create();
@@ -48,9 +105,9 @@ public class ShorteningFileSystemTest {
 	@Test
 	public void testMoveLongFolders() {
 		final FileSystem underlyingFs = new InMemoryFileSystem();
-		final Folder metadataRoot = underlyingFs.folder("m");
+		final Folder metadataRoot = underlyingFs.folder(METADATA_DIR_NAME);
 		metadataRoot.create();
-		final FileSystem fs = new ShorteningFileSystem(underlyingFs, metadataRoot, 10);
+		final FileSystem fs = new ShorteningFileSystem(underlyingFs, METADATA_DIR_NAME, THRESHOLD);
 
 		final Folder shortNamedFolder = fs.folder("test");
 		shortNamedFolder.create();
@@ -64,9 +121,9 @@ public class ShorteningFileSystemTest {
 	@Test
 	public void testMoveLongFiles() throws UncheckedIOException, TimeoutException {
 		final FileSystem underlyingFs = new InMemoryFileSystem();
-		final Folder metadataRoot = underlyingFs.folder("m");
+		final Folder metadataRoot = underlyingFs.folder(METADATA_DIR_NAME);
 		metadataRoot.create();
-		final FileSystem fs = new ShorteningFileSystem(underlyingFs, metadataRoot, 10);
+		final FileSystem fs = new ShorteningFileSystem(underlyingFs, METADATA_DIR_NAME, THRESHOLD);
 
 		final File shortNamedFolder = fs.file("test");
 		try (WritableFile file = shortNamedFolder.openWritable()) {
@@ -82,12 +139,11 @@ public class ShorteningFileSystemTest {
 	@Test
 	public void testDeflateAndInflateFolder() {
 		final FileSystem underlyingFs = new InMemoryFileSystem();
-		final Folder metadataRoot = underlyingFs.folder("m");
-		final FileSystem fs1 = new ShorteningFileSystem(underlyingFs, metadataRoot, 10);
+		final FileSystem fs1 = new ShorteningFileSystem(underlyingFs, METADATA_DIR_NAME, THRESHOLD);
 		final Folder longNamedFolder1 = fs1.folder("morethantenchars");
 		longNamedFolder1.create();
 
-		final FileSystem fs2 = new ShorteningFileSystem(underlyingFs, metadataRoot, 10);
+		final FileSystem fs2 = new ShorteningFileSystem(underlyingFs, METADATA_DIR_NAME, THRESHOLD);
 		final Folder longNamedFolder2 = fs2.folder("morethantenchars");
 		Assert.assertTrue(longNamedFolder2.exists());
 	}
@@ -95,17 +151,16 @@ public class ShorteningFileSystemTest {
 	@Test
 	public void testDeflateAndInflateFolderAndFile() throws UncheckedIOException, TimeoutException {
 		final FileSystem underlyingFs = new InMemoryFileSystem();
-		final Folder metadataRoot = underlyingFs.folder("m");
 
 		// write:
-		final FileSystem fs1 = new ShorteningFileSystem(underlyingFs, metadataRoot, 10);
+		final FileSystem fs1 = new ShorteningFileSystem(underlyingFs, METADATA_DIR_NAME, THRESHOLD);
 		fs1.folder("morethantenchars").create();
 		try (WritableFile file = fs1.folder("morethantenchars").file("morethanelevenchars.txt").openWritable()) {
 			file.write(ByteBuffer.wrap("hello world".getBytes()));
 		}
 
 		// read
-		final FileSystem fs2 = new ShorteningFileSystem(underlyingFs, metadataRoot, 10);
+		final FileSystem fs2 = new ShorteningFileSystem(underlyingFs, METADATA_DIR_NAME, THRESHOLD);
 		try (ReadableFile file = fs2.folder("morethantenchars").file("morethanelevenchars.txt").openReadable()) {
 			ByteBuffer buf = ByteBuffer.allocate(11);
 			file.read(buf);
@@ -116,8 +171,7 @@ public class ShorteningFileSystemTest {
 	@Test
 	public void testPassthroughShortNamedFiles() throws UncheckedIOException, TimeoutException, InterruptedException {
 		final FileSystem underlyingFs = new InMemoryFileSystem();
-		final Folder metadataRoot = underlyingFs.folder("m");
-		final FileSystem fs = new ShorteningFileSystem(underlyingFs, metadataRoot, 10);
+		final FileSystem fs = new ShorteningFileSystem(underlyingFs, METADATA_DIR_NAME, THRESHOLD);
 
 		final Instant testStart = Instant.now();
 
@@ -149,6 +203,10 @@ public class ShorteningFileSystemTest {
 			Assert.assertEquals("hello world", new String(buf.array()));
 		}
 		Assert.assertTrue(fs.folder("foo").file("test2.txt").lastModified().isAfter(testStart));
+	}
+
+	public static Matcher<Folder> folderWithName(String name) {
+		return new PropertyMatcher<>(Folder.class, Folder::name, "name", is(name));
 	}
 
 }
