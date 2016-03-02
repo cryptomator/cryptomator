@@ -293,13 +293,11 @@ public class UnlockController extends AbstractFXMLViewController {
 					messageText.setText(resourceBundle.getString("unlock.errorMessage.unsupportedVersion.softwareOlderThanVault") + " ");
 				}
 			});
-		} catch (FrontendCreationFailedException e) {
+		} catch (FrontendCreationFailedException | CommandFailedException e) {
 			LOG.error("Decryption failed for technical reasons.", e);
 			Platform.runLater(() -> {
-				messageText.setText(resourceBundle.getString("unlock.errorMessage.decryptionFailed"));
+				messageText.setText(resourceBundle.getString("unlock.errorMessage.mountingFailed"));
 			});
-		} catch (CommandFailedException e) {
-			LOG.error("Failed to reveal mounted vault", e);
 		} finally {
 			Platform.runLater(() -> {
 				passwordField.swipe();

@@ -72,7 +72,9 @@ public class MainApplication extends Application {
 		final ResourceBundle rb = ResourceBundle.getBundle("localization");
 		primaryStage.titleProperty().bind(mainCtrl.windowTitle());
 		primaryStage.setResizable(false);
-		primaryStage.getIcons().add(new Image(MainApplication.class.getResourceAsStream("/window_icon.png")));
+		if (SystemUtils.IS_OS_WINDOWS) {
+			primaryStage.getIcons().add(new Image(MainApplication.class.getResourceAsStream("/window_icon.png")));
+		}
 		primaryStage.show();
 
 		ActiveWindowStyleSupport.startObservingFocus(primaryStage);

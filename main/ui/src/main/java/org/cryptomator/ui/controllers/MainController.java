@@ -161,7 +161,7 @@ public class MainController extends AbstractFXMLViewController {
 		if (addVaultContextMenu.isShowing()) {
 			addVaultContextMenu.hide();
 		} else {
-			addVaultContextMenu.show(addVaultButton, Side.RIGHT, 0.0, 0.0);
+			addVaultContextMenu.show(addVaultButton, Side.BOTTOM, 0.0, 0.0);
 		}
 	}
 

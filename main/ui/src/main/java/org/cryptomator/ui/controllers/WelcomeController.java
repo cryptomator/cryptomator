@@ -53,6 +53,19 @@ public class WelcomeController extends AbstractFXMLViewController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(WelcomeController.class);
 
+	private final Application app;
+	private final Settings settings;
+	private final Comparator<String> semVerComparator;
+	private final ExecutorService executor;
+
+	@Inject
+	public WelcomeController(Application app, Settings settings, @Named("SemVer") Comparator<String> semVerComparator, ExecutorService executor) {
+		this.app = app;
+		this.settings = settings;
+		this.semVerComparator = semVerComparator;
+		this.executor = executor;
+	}
+
 	@FXML
 	private ImageView botImageView;
 
@@ -68,17 +81,15 @@ public class WelcomeController extends AbstractFXMLViewController {
 	@FXML
 	private Hyperlink updateLink;
 
-	private final Application app;
-	private final Settings settings;
-	private final Comparator<String> semVerComparator;
-	private final ExecutorService executor;
-
-	@Inject
-	public WelcomeController(Application app, Settings settings, @Named("SemVer") Comparator<String> semVerComparator, ExecutorService executor) {
-		this.app = app;
-		this.settings = settings;
-		this.semVerComparator = semVerComparator;
-		this.executor = executor;
+	@Override
+	public void initialize() {
+		botImageView.setImage(new Image(getClass().getResource("/bot_welcome.png").toString()));
+		if (areUpdatesManagedExternally()) {
+			checkForUpdatesContainer.setVisible(false);
+			checkForUpdatesContainer.setManaged(false);
+		} else if (settings.isCheckForUpdatesEnabled()) {
+			executor.execute(this::checkForUpdates);
+		}
 	}
 
 	@Override
@@ -89,17 +100,6 @@ public class WelcomeController extends AbstractFXMLViewController {
 	@Override
 	protected ResourceBundle getFxmlResourceBundle() {
 		return ResourceBundle.getBundle("localization");
-	}
-
-	@Override
-	public void initialize() {
-		botImageView.setImage(new Image(getClass().getResource("/bot_welcome.png").toString()));
-		if (areUpdatesManagedExternally()) {
-			checkForUpdatesContainer.setVisible(false);
-			checkForUpdatesContainer.setManaged(false);
-		} else if (settings.isCheckForUpdatesEnabled()) {
-			executor.execute(this::checkForUpdates);
-		}
 	}
 
 	// ****************************************

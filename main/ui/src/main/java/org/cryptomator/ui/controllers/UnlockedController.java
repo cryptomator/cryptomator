@@ -31,11 +31,15 @@ import javafx.collections.ListChangeListener;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.geometry.Side;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart.Data;
 import javafx.scene.chart.XYChart.Series;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
+import javafx.scene.control.ToggleButton;
+import javafx.stage.PopupWindow.AnchorLocation;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -68,12 +72,19 @@ public class UnlockedController extends AbstractFXMLViewController {
 	@FXML
 	private NumberAxis xAxis;
 
+	@FXML
+	private ToggleButton moreOptionsButton;
+
+	@FXML
+	private ContextMenu moreOptionsMenu;
+
 	@Override
 	public void initialize() {
 		macWarningsController.initStage(macWarningsWindow);
 		ActiveWindowStyleSupport.startObservingFocus(macWarningsWindow);
 
 		EasyBind.subscribe(vault, this::vaultChanged);
+		EasyBind.subscribe(moreOptionsMenu.showingProperty(), moreOptionsButton::setSelected);
 	}
 
 	@Override
@@ -106,20 +117,7 @@ public class UnlockedController extends AbstractFXMLViewController {
 	}
 
 	@FXML
-	private void didClickRevealVault(ActionEvent event) {
-		exec.submit(() -> {
-			try {
-				vault.get().reveal();
-			} catch (CommandFailedException e) {
-				Platform.runLater(() -> {
-					messageLabel.setText(resourceBundle.getString("unlocked.label.revealFailed"));
-				});
-			}
-		});
-	}
-
-	@FXML
-	private void didClickCloseVault(ActionEvent event) {
+	private void didClickLockVault(ActionEvent event) {
 		exec.submit(() -> {
 			try {
 				vault.get().unmount();
@@ -131,6 +129,29 @@ public class UnlockedController extends AbstractFXMLViewController {
 			}
 			vault.get().deactivateFrontend();
 			listener.ifPresent(this::invokeListenerLater);
+		});
+	}
+
+	@FXML
+	private void didClickMoreOptions(ActionEvent event) {
+		if (moreOptionsMenu.isShowing()) {
+			moreOptionsMenu.hide();
+		} else {
+			moreOptionsMenu.setAnchorLocation(AnchorLocation.CONTENT_TOP_RIGHT);
+			moreOptionsMenu.show(moreOptionsButton, Side.BOTTOM, moreOptionsButton.getWidth(), 0.0);
+		}
+	}
+
+	@FXML
+	private void didClickRevealVault(ActionEvent event) {
+		exec.submit(() -> {
+			try {
+				vault.get().reveal();
+			} catch (CommandFailedException e) {
+				Platform.runLater(() -> {
+					messageLabel.setText(resourceBundle.getString("unlocked.label.revealFailed"));
+				});
+			}
 		});
 	}
 
