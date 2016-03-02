@@ -6,7 +6,7 @@
  * Contributors:
  *     Sebastian Stenzel - initial API and implementation
  *******************************************************************************/
-package org.cryptomator.filesystem.blockaligned;
+package org.cryptomator.filesystem.crypto;
 
 import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;

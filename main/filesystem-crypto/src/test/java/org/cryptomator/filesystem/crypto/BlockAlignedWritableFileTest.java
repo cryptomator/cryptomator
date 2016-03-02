@@ -6,7 +6,7 @@
  * Contributors:
  *     Sebastian Stenzel - initial API and implementation
  *******************************************************************************/
-package org.cryptomator.filesystem.blockaligned;
+package org.cryptomator.filesystem.crypto;
 
 import java.nio.ByteBuffer;
 
@@ -14,6 +14,7 @@ import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.FileSystem;
 import org.cryptomator.filesystem.ReadableFile;
 import org.cryptomator.filesystem.WritableFile;
+import org.cryptomator.filesystem.crypto.BlockAlignedWritableFile;
 import org.cryptomator.filesystem.inmem.InMemoryFileSystem;
 import org.junit.Assert;
 import org.junit.Test;

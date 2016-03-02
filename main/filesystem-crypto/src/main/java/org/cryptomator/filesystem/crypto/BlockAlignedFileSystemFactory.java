@@ -6,7 +6,7 @@
  * Contributors:
  *     Sebastian Stenzel - initial API and implementation
  *******************************************************************************/
-package org.cryptomator.filesystem.blockaligned;
+package org.cryptomator.filesystem.crypto;
 
 import static org.cryptomator.crypto.engine.impl.Constants.PAYLOAD_SIZE;
 

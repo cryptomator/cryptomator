@@ -19,7 +19,6 @@ import org.cryptomator.crypto.engine.Cryptor;
 import org.cryptomator.crypto.engine.InvalidPassphraseException;
 import org.cryptomator.filesystem.FileSystem;
 import org.cryptomator.filesystem.Folder;
-import org.cryptomator.filesystem.blockaligned.BlockAlignedFileSystemFactory;
 
 @Singleton
 public class CryptoFileSystemFactory {
