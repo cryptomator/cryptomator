@@ -90,7 +90,7 @@ final class MacOsXWebDavMounter implements WebDavMounterStrategy {
 		public void reveal() throws CommandFailedException {
 			try {
 				Process proc = revealCommand.start();
-				waitForProcessAndCheckSuccess(proc, 1, TimeUnit.SECONDS);
+				waitForProcessAndCheckSuccess(proc, 2, TimeUnit.SECONDS);
 			} catch (IOException e) {
 				throw new CommandFailedException(e);
 			}

@@ -26,8 +26,8 @@ import org.cryptomator.ui.controls.DirectoryListCell;
 import org.cryptomator.ui.model.Vault;
 import org.cryptomator.ui.model.VaultFactory;
 import org.cryptomator.ui.settings.Settings;
-import org.cryptomator.ui.util.Listeners;
 import org.fxmisc.easybind.EasyBind;
+import org.fxmisc.easybind.monadic.MonadicBinding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +37,6 @@ import javafx.beans.binding.Binding;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -69,7 +68,8 @@ public class MainController extends AbstractFXMLViewController {
 	private final ObjectProperty<AbstractFXMLViewController> activeController = new SimpleObjectProperty<>();
 	private final ObservableList<Vault> vaults;
 	private final ObjectProperty<Vault> selectedVault = new SimpleObjectProperty<>();
-	private final Binding<Boolean> isSelectedVaultUnlocked = EasyBind.select(selectedVault).selectObject(Vault::unlockedProperty);
+	private final MonadicBinding<Boolean> isSelectedVaultUnlocked = EasyBind.select(selectedVault).selectObject(Vault::unlockedProperty);
+	private final Binding<Boolean> canEditSelectedVault = EasyBind.combine(selectedVault.isNull(), isSelectedVaultUnlocked.orElse(false), Boolean::logicalOr);
 	private final BooleanBinding isShowingSettings;
 	private final Map<Vault, UnlockedController> unlockedVaults = new HashMap<>();
 
@@ -117,16 +117,17 @@ public class MainController extends AbstractFXMLViewController {
 
 	@Override
 	public void initialize() {
-		activeController.addListener(this::activeControllerDidChange);
-		activeController.set(welcomeController.get());
 		vaultList.setItems(vaults);
 		vaultList.setCellFactory(this::createDirecoryListCell);
-		selectedVault.addListener(this::selectedVaultDidChange);
+		activeController.set(welcomeController.get());
 		selectedVault.bind(vaultList.getSelectionModel().selectedItemProperty());
-		addVaultContextMenu.showingProperty().addListener(Listeners.withNewValue(addVaultButton::setSelected));
-		removeVaultButton.disableProperty().bind(selectedVault.isNull());
-		isShowingSettings.addListener(Listeners.withNewValue(settingsButton::setSelected));
-		isSelectedVaultUnlocked.addListener(Listeners.withNewValue(this::selectedVaultUnlockedDidChange));
+		removeVaultButton.disableProperty().bind(canEditSelectedVault);
+
+		EasyBind.subscribe(activeController, this::activeControllerDidChange);
+		EasyBind.subscribe(selectedVault, this::selectedVaultDidChange);
+		EasyBind.subscribe(isSelectedVaultUnlocked, this::selectedVaultUnlockedDidChange);
+		EasyBind.subscribe(isShowingSettings, settingsButton::setSelected);
+		EasyBind.subscribe(addVaultContextMenu.showingProperty(), addVaultButton::setSelected);
 	}
 
 	@Override
@@ -150,6 +151,10 @@ public class MainController extends AbstractFXMLViewController {
 		super.initStage(stage);
 		this.stage = stage;
 	}
+
+	// ****************************************
+	// UI Events
+	// ****************************************
 
 	@FXML
 	private void didClickAddVault(ActionEvent event) {
@@ -245,16 +250,16 @@ public class MainController extends AbstractFXMLViewController {
 	}
 
 	// ****************************************
-	// Bindings and Property Listeners
+	// Binding Listeners
 	// ****************************************
 
-	private void activeControllerDidChange(ObservableValue<? extends AbstractFXMLViewController> property, AbstractFXMLViewController oldValue, AbstractFXMLViewController newValue) {
+	private void activeControllerDidChange(AbstractFXMLViewController newValue) {
 		final Parent root = newValue.loadFxml();
 		contentPane.getChildren().clear();
 		contentPane.getChildren().add(root);
 	}
 
-	private void selectedVaultDidChange(ObservableValue<? extends Vault> property, Vault oldValue, Vault newValue) {
+	private void selectedVaultDidChange(Vault newValue) {
 		if (newValue == null) {
 			return;
 		}
@@ -277,6 +282,10 @@ public class MainController extends AbstractFXMLViewController {
 			this.showUnlockView();
 		}
 	}
+
+	// ****************************************
+	// Public Bindings
+	// ****************************************
 
 	public Binding<String> windowTitle() {
 		return EasyBind.monadic(selectedVault).map(Vault::getName).orElse(resourceBundle.getString("app.name"));
