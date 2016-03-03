@@ -16,7 +16,7 @@ import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.cryptomator.ui.controllers.MainController;
+import org.cryptomator.common.ConsumerThrowingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,23 +41,8 @@ import com.google.common.annotations.VisibleForTesting;
  * @author Tillmann Gaida
  */
 public class DeferredCloser implements AutoCloseable {
-	public static interface Closer<T> {
-		void close(T object) throws Exception;
-	}
 
-	static class EmptyResource<T> implements DeferredClosable<T> {
-		@Override
-		public Optional<T> get() {
-			return Optional.empty();
-		}
-
-		@Override
-		public void close() {
-
-		}
-	}
-
-	private static final Logger LOG = LoggerFactory.getLogger(MainController.class);
+	private static final Logger LOG = LoggerFactory.getLogger(DeferredCloser.class);
 
 	@VisibleForTesting
 	final Map<Long, ManagedResource<?>> cleanups = new ConcurrentSkipListMap<>();
@@ -65,13 +50,13 @@ public class DeferredCloser implements AutoCloseable {
 	@VisibleForTesting
 	final AtomicLong counter = new AtomicLong();
 
-	public class ManagedResource<T> implements DeferredClosable<T> {
+	private class ManagedResource<T> implements DeferredClosable<T> {
 		private final long number = counter.incrementAndGet();
 
 		private final AtomicReference<T> object = new AtomicReference<>();
-		private final Closer<T> closer;
+		private final ConsumerThrowingException<T, Exception> closer;
 
-		ManagedResource(T object, Closer<T> closer) {
+		public ManagedResource(T object, ConsumerThrowingException<T, Exception> closer) {
 			super();
 			this.object.set(object);
 			this.closer = closer;
@@ -82,11 +67,10 @@ public class DeferredCloser implements AutoCloseable {
 			final T oldObject = object.getAndSet(null);
 			if (oldObject != null) {
 				cleanups.remove(number);
-
 				try {
-					closer.close(oldObject);
+					closer.accept(oldObject);
 				} catch (Exception e) {
-					LOG.error("exception closing resource", e);
+					LOG.error("Closing resource failed.", e);
 				}
 			}
 		}
@@ -109,7 +93,7 @@ public class DeferredCloser implements AutoCloseable {
 		}
 	}
 
-	public <T> DeferredClosable<T> closeLater(T object, Closer<T> closer) {
+	public <T> DeferredClosable<T> closeLater(T object, ConsumerThrowingException<T, Exception> closer) {
 		Objects.requireNonNull(object);
 		Objects.requireNonNull(closer);
 		final ManagedResource<T> resource = new ManagedResource<T>(object, closer);
@@ -129,5 +113,17 @@ public class DeferredCloser implements AutoCloseable {
 	@SuppressWarnings("unchecked")
 	public static <T> DeferredClosable<T> empty() {
 		return (DeferredClosable<T>) EMPTY_RESOURCE;
+	}
+
+	static class EmptyResource<T> implements DeferredClosable<T> {
+		@Override
+		public Optional<T> get() {
+			return Optional.empty();
+		}
+
+		@Override
+		public void close() {
+
+		}
 	}
 }

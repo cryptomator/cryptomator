@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.cryptomator.ui.model.Vault;
+import org.cryptomator.ui.settings.Localization;
 
 import javafx.application.Application;
 import javafx.beans.Observable;
@@ -41,6 +42,7 @@ import javafx.util.StringConverter;
 public class MacWarningsController extends AbstractFXMLViewController {
 
 	private final Application application;
+	private final Localization localization;
 	private final ObservableList<Warning> warnings = FXCollections.observableArrayList();
 	private final ListChangeListener<String> unauthenticatedResourcesChangeListener = this::unauthenticatedResourcesDidChange;
 	private final ChangeListener<Boolean> stageVisibilityChangeListener = this::windowVisibilityDidChange;
@@ -48,8 +50,9 @@ public class MacWarningsController extends AbstractFXMLViewController {
 	private Stage stage;
 
 	@Inject
-	public MacWarningsController(Application application) {
+	public MacWarningsController(Application application, Localization localization) {
 		this.application = application;
+		this.localization = localization;
 	}
 
 	@FXML
@@ -84,7 +87,7 @@ public class MacWarningsController extends AbstractFXMLViewController {
 
 	@Override
 	protected ResourceBundle getFxmlResourceBundle() {
-		return ResourceBundle.getBundle("localization");
+		return localization;
 	}
 
 	@Override
@@ -127,7 +130,7 @@ public class MacWarningsController extends AbstractFXMLViewController {
 
 	private void windowVisibilityDidChange(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
 		if (Boolean.TRUE.equals(newValue)) {
-			stage.setTitle(String.format(resourceBundle.getString("macWarnings.windowTitle"), vault.get().getName()));
+			stage.setTitle(String.format(localization.getString("macWarnings.windowTitle"), vault.get().getName()));
 			warnings.addAll(vault.get().getNamesOfResourcesWithInvalidMac().stream().map(Warning::new).collect(Collectors.toList()));
 			vault.get().getNamesOfResourcesWithInvalidMac().addListener(this.unauthenticatedResourcesChangeListener);
 		} else {

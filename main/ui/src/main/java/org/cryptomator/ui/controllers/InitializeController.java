@@ -20,6 +20,7 @@ import javax.inject.Singleton;
 
 import org.cryptomator.ui.controls.SecPasswordField;
 import org.cryptomator.ui.model.Vault;
+import org.cryptomator.ui.settings.Localization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,11 +38,13 @@ public class InitializeController extends AbstractFXMLViewController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(InitializeController.class);
 
+	private final Localization localization;
 	final ObjectProperty<Vault> vault = new SimpleObjectProperty<>();
 	private Optional<InitializationListener> listener = Optional.empty();
 
 	@Inject
-	public InitializeController() {
+	public InitializeController(Localization localization) {
+		this.localization = localization;
 	}
 
 	@FXML
@@ -70,7 +73,7 @@ public class InitializeController extends AbstractFXMLViewController {
 
 	@Override
 	protected ResourceBundle getFxmlResourceBundle() {
-		return ResourceBundle.getBundle("localization");
+		return localization;
 	}
 
 	// ****************************************
@@ -84,10 +87,10 @@ public class InitializeController extends AbstractFXMLViewController {
 			vault.get().create(passphrase);
 			listener.ifPresent(this::invokeListenerLater);
 		} catch (FileAlreadyExistsException ex) {
-			messageLabel.setText(resourceBundle.getString("initialize.messageLabel.alreadyInitialized"));
+			messageLabel.setText(localization.getString("initialize.messageLabel.alreadyInitialized"));
 		} catch (UncheckedIOException | IOException ex) {
 			LOG.error("I/O Exception", ex);
-			messageLabel.setText(resourceBundle.getString("initialize.messageLabel.initializationFailed"));
+			messageLabel.setText(localization.getString("initialize.messageLabel.initializationFailed"));
 		} finally {
 			passwordField.swipe();
 			retypePasswordField.swipe();

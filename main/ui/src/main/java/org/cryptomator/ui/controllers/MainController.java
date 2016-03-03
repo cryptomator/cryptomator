@@ -19,12 +19,14 @@ import java.util.Map;
 import java.util.ResourceBundle;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import org.cryptomator.ui.controls.DirectoryListCell;
 import org.cryptomator.ui.model.Vault;
 import org.cryptomator.ui.model.VaultFactory;
+import org.cryptomator.ui.settings.Localization;
 import org.cryptomator.ui.settings.Settings;
 import org.fxmisc.easybind.EasyBind;
 import org.fxmisc.easybind.monadic.MonadicBinding;
@@ -58,6 +60,8 @@ public class MainController extends AbstractFXMLViewController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(MainController.class);
 
+	private final Stage mainWindow;
+	private final Localization localization;
 	private final VaultFactory vaultFactoy;
 	private final Lazy<WelcomeController> welcomeController;
 	private final Lazy<InitializeController> initializeController;
@@ -74,8 +78,11 @@ public class MainController extends AbstractFXMLViewController {
 	private final Map<Vault, UnlockedController> unlockedVaults = new HashMap<>();
 
 	@Inject
-	public MainController(Settings settings, VaultFactory vaultFactoy, Lazy<WelcomeController> welcomeController, Lazy<InitializeController> initializeController, Lazy<UnlockController> unlockController,
-			Provider<UnlockedController> unlockedControllerProvider, Lazy<ChangePasswordController> changePasswordController, Lazy<SettingsController> settingsController) {
+	public MainController(@Named("mainWindow") Stage mainWindow, Localization localization, Settings settings, VaultFactory vaultFactoy, Lazy<WelcomeController> welcomeController,
+			Lazy<InitializeController> initializeController, Lazy<UnlockController> unlockController, Provider<UnlockedController> unlockedControllerProvider, Lazy<ChangePasswordController> changePasswordController,
+			Lazy<SettingsController> settingsController) {
+		this.mainWindow = mainWindow;
+		this.localization = localization;
 		this.vaultFactoy = vaultFactoy;
 		this.welcomeController = welcomeController;
 		this.initializeController = initializeController;
@@ -88,8 +95,6 @@ public class MainController extends AbstractFXMLViewController {
 		// derived bindings:
 		this.isShowingSettings = activeController.isEqualTo(settingsController.get());
 	}
-
-	private Stage stage;
 
 	@FXML
 	private ContextMenu vaultListCellContextMenu;
@@ -137,19 +142,13 @@ public class MainController extends AbstractFXMLViewController {
 
 	@Override
 	protected ResourceBundle getFxmlResourceBundle() {
-		return ResourceBundle.getBundle("localization");
+		return localization;
 	}
 
 	private ListCell<Vault> createDirecoryListCell(ListView<Vault> param) {
 		final DirectoryListCell cell = new DirectoryListCell();
 		cell.setVaultContextMenu(vaultListCellContextMenu);
 		return cell;
-	}
-
-	@Override
-	public void initStage(Stage stage) {
-		super.initStage(stage);
-		this.stage = stage;
 	}
 
 	// ****************************************
@@ -169,7 +168,7 @@ public class MainController extends AbstractFXMLViewController {
 	private void didClickCreateNewVault(ActionEvent event) {
 		final FileChooser fileChooser = new FileChooser();
 		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Cryptomator vault", "*" + Vault.VAULT_FILE_EXTENSION));
-		final File file = fileChooser.showSaveDialog(stage);
+		final File file = fileChooser.showSaveDialog(mainWindow);
 		if (file == null) {
 			return;
 		}
@@ -194,7 +193,7 @@ public class MainController extends AbstractFXMLViewController {
 	private void didClickAddExistingVaults(ActionEvent event) {
 		final FileChooser fileChooser = new FileChooser();
 		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Cryptomator vault", "*" + Vault.VAULT_FILE_EXTENSION));
-		final List<File> files = fileChooser.showOpenMultipleDialog(stage);
+		final List<File> files = fileChooser.showOpenMultipleDialog(mainWindow);
 		if (files != null) {
 			for (final File file : files) {
 				addVault(file.toPath(), false);
@@ -288,7 +287,7 @@ public class MainController extends AbstractFXMLViewController {
 	// ****************************************
 
 	public Binding<String> windowTitle() {
-		return EasyBind.monadic(selectedVault).map(Vault::getName).orElse(resourceBundle.getString("app.name"));
+		return EasyBind.monadic(selectedVault).map(Vault::getName).orElse(localization.getString("app.name"));
 	}
 
 	// ****************************************
@@ -338,15 +337,6 @@ public class MainController extends AbstractFXMLViewController {
 
 	public void didChangePassword(ChangePasswordController ctrl) {
 		showUnlockView();
-	}
-
-	/**
-	 * Attempts to make the application window visible.
-	 */
-	public void toFront() {
-		stage.setIconified(false);
-		stage.show();
-		stage.toFront();
 	}
 
 }

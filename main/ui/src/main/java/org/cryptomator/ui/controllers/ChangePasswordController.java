@@ -21,6 +21,7 @@ import org.cryptomator.crypto.engine.InvalidPassphraseException;
 import org.cryptomator.crypto.engine.UnsupportedVaultFormatException;
 import org.cryptomator.ui.controls.SecPasswordField;
 import org.cryptomator.ui.model.Vault;
+import org.cryptomator.ui.settings.Localization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,12 +42,14 @@ public class ChangePasswordController extends AbstractFXMLViewController {
 	private static final Logger LOG = LoggerFactory.getLogger(ChangePasswordController.class);
 
 	private final Application app;
+	private final Localization localization;
 	final ObjectProperty<Vault> vault = new SimpleObjectProperty<>();
 	private Optional<ChangePasswordListener> listener = Optional.empty();
 
 	@Inject
-	public ChangePasswordController(Application app) {
+	public ChangePasswordController(Application app, Localization localization) {
 		this.app = app;
+		this.localization = localization;
 	}
 
 	@FXML
@@ -82,7 +85,7 @@ public class ChangePasswordController extends AbstractFXMLViewController {
 
 	@Override
 	protected ResourceBundle getFxmlResourceBundle() {
-		return ResourceBundle.getBundle("localization");
+		return localization;
 	}
 
 	// ****************************************
@@ -103,21 +106,21 @@ public class ChangePasswordController extends AbstractFXMLViewController {
 		downloadsPageLink.setVisible(false);
 		try {
 			vault.get().changePassphrase(oldPasswordField.getCharacters(), newPasswordField.getCharacters());
-			messageText.setText(resourceBundle.getString("changePassword.infoMessage.success"));
+			messageText.setText(localization.getString("changePassword.infoMessage.success"));
 			listener.ifPresent(this::invokeListenerLater);
 		} catch (InvalidPassphraseException e) {
-			messageText.setText(resourceBundle.getString("changePassword.errorMessage.wrongPassword"));
+			messageText.setText(localization.getString("changePassword.errorMessage.wrongPassword"));
 			Platform.runLater(oldPasswordField::requestFocus);
 		} catch (UncheckedIOException | IOException ex) {
-			messageText.setText(resourceBundle.getString("changePassword.errorMessage.decryptionFailed"));
+			messageText.setText(localization.getString("changePassword.errorMessage.decryptionFailed"));
 			LOG.error("Decryption failed for technical reasons.", ex);
 		} catch (UnsupportedVaultFormatException e) {
 			downloadsPageLink.setVisible(true);
 			LOG.warn("Unable to unlock vault: " + e.getMessage());
 			if (e.isVaultOlderThanSoftware()) {
-				messageText.setText(resourceBundle.getString("unlock.errorMessage.unsupportedVersion.vaultOlderThanSoftware") + " ");
+				messageText.setText(localization.getString("unlock.errorMessage.unsupportedVersion.vaultOlderThanSoftware") + " ");
 			} else if (e.isSoftwareOlderThanVault()) {
-				messageText.setText(resourceBundle.getString("unlock.errorMessage.unsupportedVersion.softwareOlderThanVault") + " ");
+				messageText.setText(localization.getString("unlock.errorMessage.unsupportedVersion.softwareOlderThanVault") + " ");
 			}
 		} finally {
 			oldPasswordField.swipe();

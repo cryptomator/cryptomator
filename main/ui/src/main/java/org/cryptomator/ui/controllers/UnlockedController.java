@@ -18,6 +18,7 @@ import javax.inject.Provider;
 
 import org.cryptomator.frontend.CommandFailedException;
 import org.cryptomator.ui.model.Vault;
+import org.cryptomator.ui.settings.Localization;
 import org.cryptomator.ui.util.ActiveWindowStyleSupport;
 import org.fxmisc.easybind.EasyBind;
 
@@ -50,6 +51,7 @@ public class UnlockedController extends AbstractFXMLViewController {
 	private static final int IO_SAMPLING_STEPS = 100;
 	private static final double IO_SAMPLING_INTERVAL = 0.25;
 
+	private final Localization localization;
 	private final Stage macWarningsWindow = new Stage();
 	private final MacWarningsController macWarningsController;
 	private final ExecutorService exec;
@@ -58,7 +60,8 @@ public class UnlockedController extends AbstractFXMLViewController {
 	private Timeline ioAnimation;
 
 	@Inject
-	public UnlockedController(Provider<MacWarningsController> macWarningsControllerProvider, ExecutorService exec) {
+	public UnlockedController(Localization localization, Provider<MacWarningsController> macWarningsControllerProvider, ExecutorService exec) {
+		this.localization = localization;
 		this.macWarningsController = macWarningsControllerProvider.get();
 		this.exec = exec;
 
@@ -96,7 +99,7 @@ public class UnlockedController extends AbstractFXMLViewController {
 
 	@Override
 	protected ResourceBundle getFxmlResourceBundle() {
-		return ResourceBundle.getBundle("localization");
+		return localization;
 	}
 
 	private void vaultChanged(Vault newVault) {
@@ -125,7 +128,7 @@ public class UnlockedController extends AbstractFXMLViewController {
 				vault.get().unmount();
 			} catch (CommandFailedException e) {
 				Platform.runLater(() -> {
-					messageLabel.setText(resourceBundle.getString("unlocked.label.unmountFailed"));
+					messageLabel.setText(localization.getString("unlocked.label.unmountFailed"));
 				});
 				return;
 			}
@@ -151,7 +154,7 @@ public class UnlockedController extends AbstractFXMLViewController {
 				vault.get().reveal();
 			} catch (CommandFailedException e) {
 				Platform.runLater(() -> {
-					messageLabel.setText(resourceBundle.getString("unlocked.label.revealFailed"));
+					messageLabel.setText(localization.getString("unlocked.label.revealFailed"));
 				});
 			}
 		});

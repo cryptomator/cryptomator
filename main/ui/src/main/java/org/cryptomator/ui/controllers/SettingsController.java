@@ -15,6 +15,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.apache.commons.lang3.CharUtils;
+import org.cryptomator.ui.settings.Localization;
 import org.cryptomator.ui.settings.Settings;
 import org.fxmisc.easybind.EasyBind;
 
@@ -26,10 +27,12 @@ import javafx.scene.input.KeyEvent;
 @Singleton
 public class SettingsController extends AbstractFXMLViewController {
 
+	private final Localization localization;
 	private final Settings settings;
 
 	@Inject
-	public SettingsController(Settings settings) {
+	public SettingsController(Localization localization, Settings settings) {
+		this.localization = localization;
 		this.settings = settings;
 	}
 
@@ -57,7 +60,7 @@ public class SettingsController extends AbstractFXMLViewController {
 
 	@Override
 	protected ResourceBundle getFxmlResourceBundle() {
-		return ResourceBundle.getBundle("localization");
+		return localization;
 	}
 
 	private void portDidChange(String newValue) {

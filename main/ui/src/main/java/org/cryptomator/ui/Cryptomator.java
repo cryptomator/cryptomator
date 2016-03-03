@@ -19,8 +19,6 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
-import javafx.application.Application;
-
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.ui.util.SingleInstanceManager;
 import org.cryptomator.ui.util.SingleInstanceManager.RemoteInstance;
@@ -28,11 +26,12 @@ import org.eclipse.jetty.util.ConcurrentHashSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javafx.application.Application;
+
 public class Cryptomator {
-	public static final Logger LOG = LoggerFactory.getLogger(MainApplication.class);
 
 	public static final CompletableFuture<Consumer<File>> OPEN_FILE_HANDLER = new CompletableFuture<>();
-
+	private static final Logger LOG = LoggerFactory.getLogger(Cryptomator.class);
 	private static final Set<Runnable> SHUTDOWN_TASKS = new ConcurrentHashSet<>();
 	private static final CleanShutdownPerformer CLEAN_SHUTDOWN_PERFORMER = new CleanShutdownPerformer();
 

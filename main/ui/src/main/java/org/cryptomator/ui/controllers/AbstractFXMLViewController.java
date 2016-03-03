@@ -29,16 +29,6 @@ abstract class AbstractFXMLViewController implements Initializable {
 	private final AtomicReference<Parent> fxmlRoot = new AtomicReference<>();
 
 	/**
-	 * URL from #initialize(URL, ResourceBundle)
-	 */
-	protected URL rootUrl;
-
-	/**
-	 * ResourceBundle from #initialize(URL, ResourceBundle)
-	 */
-	protected ResourceBundle resourceBundle;
-
-	/**
 	 * Gets the URL to the FXML file describing the view presented by this controller.<br/>
 	 * 
 	 * A default implementation would look like this:<br/>
@@ -57,8 +47,6 @@ abstract class AbstractFXMLViewController implements Initializable {
 
 	@Override
 	public final void initialize(URL location, ResourceBundle resources) {
-		this.rootUrl = location;
-		this.resourceBundle = resources;
 		this.initialize();
 	}
 

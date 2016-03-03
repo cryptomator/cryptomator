@@ -24,7 +24,6 @@ import org.cryptomator.ui.model.VaultObjectMapperProvider;
 import org.cryptomator.ui.settings.Settings;
 import org.cryptomator.ui.settings.SettingsProvider;
 import org.cryptomator.ui.util.DeferredCloser;
-import org.cryptomator.ui.util.DeferredCloser.Closer;
 import org.cryptomator.ui.util.SemVerComparator;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -32,16 +31,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import dagger.Module;
 import dagger.Provides;
 import javafx.application.Application;
+import javafx.stage.Stage;
 
 @Module(includes = CryptoEngineModule.class)
 class CryptomatorModule {
 
 	private final Application application;
-	private final DeferredCloser deferredCloser;
+	private final Stage mainWindow;
 
-	public CryptomatorModule(Application application) {
+	public CryptomatorModule(Application application, Stage mainWindow) {
 		this.application = application;
-		this.deferredCloser = new DeferredCloser();
+		this.mainWindow = mainWindow;
 	}
 
 	@Provides
@@ -52,8 +52,17 @@ class CryptomatorModule {
 
 	@Provides
 	@Singleton
+	@Named("mainWindow")
+	Stage provideMainWindow() {
+		return mainWindow;
+	}
+
+	@Provides
+	@Singleton
 	DeferredCloser provideDeferredCloser() {
-		return deferredCloser;
+		DeferredCloser closer = new DeferredCloser();
+		Cryptomator.addShutdownTask(closer::close);
+		return closer;
 	}
 
 	@Provides
@@ -78,8 +87,8 @@ class CryptomatorModule {
 
 	@Provides
 	@Singleton
-	ExecutorService provideExecutorService() {
-		return closeLater(Executors.newCachedThreadPool(), ExecutorService::shutdown);
+	ExecutorService provideExecutorService(DeferredCloser closer) {
+		return closer.closeLater(Executors.newCachedThreadPool(), ExecutorService::shutdown).get().orElseThrow(IllegalStateException::new);
 	}
 
 	@Provides
@@ -90,14 +99,10 @@ class CryptomatorModule {
 
 	@Provides
 	@Singleton
-	FrontendFactory provideFrontendFactory(WebDavServer webDavServer, Settings settings) {
+	FrontendFactory provideFrontendFactory(DeferredCloser closer, WebDavServer webDavServer, Settings settings) {
 		webDavServer.setPort(settings.getPort());
 		webDavServer.start();
-		return closeLater(webDavServer, WebDavServer::stop);
-	}
-
-	private <T> T closeLater(T object, Closer<T> closer) {
-		return deferredCloser.closeLater(object, closer).get().get();
+		return closer.closeLater(webDavServer, WebDavServer::stop).get().orElseThrow(IllegalStateException::new);
 	}
 
 }

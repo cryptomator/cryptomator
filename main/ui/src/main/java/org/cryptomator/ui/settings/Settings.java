@@ -17,13 +17,14 @@ import org.cryptomator.ui.model.Vault;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-@JsonPropertyOrder(value = {"directories", "checkForUpdatesEnabled", "port"})
+@JsonPropertyOrder(value = {"directories", "checkForUpdatesEnabled", "port", "numTrayNotifications"})
 public class Settings implements Serializable {
 
 	private static final long serialVersionUID = 7609959894417878744L;
 	public static final int MIN_PORT = 1024;
 	public static final int MAX_PORT = 65535;
 	public static final int DEFAULT_PORT = 0;
+	public static final int DEFAULT_NUM_TRAY_NOTIFICATIONS = 3;
 
 	@JsonProperty("directories")
 	private List<Vault> directories;
@@ -33,6 +34,9 @@ public class Settings implements Serializable {
 
 	@JsonProperty("port")
 	private Integer port;
+
+	@JsonProperty("numTrayNotifications")
+	private Integer numTrayNotifications;
 
 	/**
 	 * Package-private constructor; use {@link SettingsProvider}.
@@ -80,6 +84,14 @@ public class Settings implements Serializable {
 
 	private boolean isPortValid(int port) {
 		return port == DEFAULT_PORT || port >= MIN_PORT && port <= MAX_PORT;
+	}
+
+	public Integer getNumTrayNotifications() {
+		return numTrayNotifications == null ? DEFAULT_NUM_TRAY_NOTIFICATIONS : numTrayNotifications;
+	}
+
+	public void setNumTrayNotifications(Integer numTrayNotifications) {
+		this.numTrayNotifications = numTrayNotifications;
 	}
 
 }

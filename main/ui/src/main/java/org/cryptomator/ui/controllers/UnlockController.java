@@ -25,6 +25,7 @@ import org.cryptomator.frontend.FrontendFactory;
 import org.cryptomator.frontend.webdav.mount.WindowsDriveLetters;
 import org.cryptomator.ui.controls.SecPasswordField;
 import org.cryptomator.ui.model.Vault;
+import org.cryptomator.ui.settings.Localization;
 import org.fxmisc.easybind.EasyBind;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,6 +55,7 @@ public class UnlockController extends AbstractFXMLViewController {
 	private static final Logger LOG = LoggerFactory.getLogger(UnlockController.class);
 
 	private final Application app;
+	private final Localization localization;
 	private final ExecutorService exec;
 	private final Lazy<FrontendFactory> frontendFactory;
 	private final WindowsDriveLetters driveLetters;
@@ -61,8 +63,9 @@ public class UnlockController extends AbstractFXMLViewController {
 	final ObjectProperty<Vault> vault = new SimpleObjectProperty<>();
 
 	@Inject
-	public UnlockController(Application app, ExecutorService exec, Lazy<FrontendFactory> frontendFactory, WindowsDriveLetters driveLetters) {
+	public UnlockController(Application app, Localization localization, ExecutorService exec, Lazy<FrontendFactory> frontendFactory, WindowsDriveLetters driveLetters) {
 		this.app = app;
+		this.localization = localization;
 		this.exec = exec;
 		this.frontendFactory = frontendFactory;
 		this.driveLetters = driveLetters;
@@ -123,7 +126,7 @@ public class UnlockController extends AbstractFXMLViewController {
 
 	@Override
 	protected ResourceBundle getFxmlResourceBundle() {
-		return ResourceBundle.getBundle("localization");
+		return localization;
 	}
 
 	private void vaultChanged(Vault newVault) {
@@ -132,7 +135,7 @@ public class UnlockController extends AbstractFXMLViewController {
 		}
 		passwordField.clear();
 		advancedOptions.setVisible(false);
-		advancedOptionsButton.setText(resourceBundle.getString("unlock.button.advancedOptions.show"));
+		advancedOptionsButton.setText(localization.getString("unlock.button.advancedOptions.show"));
 		progressIndicator.setVisible(false);
 		if (SystemUtils.IS_OS_WINDOWS) {
 			winDriveLetter.valueProperty().removeListener(driveLetterChangeListener);
@@ -167,9 +170,9 @@ public class UnlockController extends AbstractFXMLViewController {
 	private void didClickAdvancedOptionsButton(ActionEvent event) {
 		advancedOptions.setVisible(!advancedOptions.isVisible());
 		if (advancedOptions.isVisible()) {
-			advancedOptionsButton.setText(resourceBundle.getString("unlock.button.advancedOptions.hide"));
+			advancedOptionsButton.setText(localization.getString("unlock.button.advancedOptions.hide"));
 		} else {
-			advancedOptionsButton.setText(resourceBundle.getString("unlock.button.advancedOptions.show"));
+			advancedOptionsButton.setText(localization.getString("unlock.button.advancedOptions.show"));
 		}
 	}
 
@@ -203,7 +206,7 @@ public class UnlockController extends AbstractFXMLViewController {
 		@Override
 		public String toString(Character letter) {
 			if (letter == null) {
-				return resourceBundle.getString("unlock.choicebox.winDriveLetter.auto");
+				return localization.getString("unlock.choicebox.winDriveLetter.auto");
 			} else {
 				return Character.toString(letter) + ":";
 			}
@@ -211,7 +214,7 @@ public class UnlockController extends AbstractFXMLViewController {
 
 		@Override
 		public Character fromString(String string) {
-			if (resourceBundle.getString("unlock.choicebox.winDriveLetter.auto").equals(string)) {
+			if (localization.getString("unlock.choicebox.winDriveLetter.auto").equals(string)) {
 				return null;
 			} else {
 				return CharUtils.toCharacterObject(string);
@@ -280,7 +283,7 @@ public class UnlockController extends AbstractFXMLViewController {
 			vault.get().reveal();
 		} catch (InvalidPassphraseException e) {
 			Platform.runLater(() -> {
-				messageText.setText(resourceBundle.getString("unlock.errorMessage.wrongPassword"));
+				messageText.setText(localization.getString("unlock.errorMessage.wrongPassword"));
 				passwordField.requestFocus();
 			});
 		} catch (UnsupportedVaultFormatException e) {
@@ -288,15 +291,15 @@ public class UnlockController extends AbstractFXMLViewController {
 			Platform.runLater(() -> {
 				downloadsPageLink.setVisible(true);
 				if (e.isVaultOlderThanSoftware()) {
-					messageText.setText(resourceBundle.getString("unlock.errorMessage.unsupportedVersion.vaultOlderThanSoftware") + " ");
+					messageText.setText(localization.getString("unlock.errorMessage.unsupportedVersion.vaultOlderThanSoftware") + " ");
 				} else if (e.isSoftwareOlderThanVault()) {
-					messageText.setText(resourceBundle.getString("unlock.errorMessage.unsupportedVersion.softwareOlderThanVault") + " ");
+					messageText.setText(localization.getString("unlock.errorMessage.unsupportedVersion.softwareOlderThanVault") + " ");
 				}
 			});
 		} catch (FrontendCreationFailedException | CommandFailedException e) {
 			LOG.error("Decryption failed for technical reasons.", e);
 			Platform.runLater(() -> {
-				messageText.setText(resourceBundle.getString("unlock.errorMessage.mountingFailed"));
+				messageText.setText(localization.getString("unlock.errorMessage.mountingFailed"));
 			});
 		} finally {
 			Platform.runLater(() -> {

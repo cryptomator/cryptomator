@@ -30,6 +30,7 @@ import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.params.HttpClientParams;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.ui.settings.Localization;
 import org.cryptomator.ui.settings.Settings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,13 +55,15 @@ public class WelcomeController extends AbstractFXMLViewController {
 	private static final Logger LOG = LoggerFactory.getLogger(WelcomeController.class);
 
 	private final Application app;
+	private final Localization localization;
 	private final Settings settings;
 	private final Comparator<String> semVerComparator;
 	private final ExecutorService executor;
 
 	@Inject
-	public WelcomeController(Application app, Settings settings, @Named("SemVer") Comparator<String> semVerComparator, ExecutorService executor) {
+	public WelcomeController(Application app, Localization localization, Settings settings, @Named("SemVer") Comparator<String> semVerComparator, ExecutorService executor) {
 		this.app = app;
+		this.localization = localization;
 		this.settings = settings;
 		this.semVerComparator = semVerComparator;
 		this.executor = executor;
@@ -99,7 +102,7 @@ public class WelcomeController extends AbstractFXMLViewController {
 
 	@Override
 	protected ResourceBundle getFxmlResourceBundle() {
-		return ResourceBundle.getBundle("localization");
+		return localization;
 	}
 
 	// ****************************************
@@ -115,7 +118,7 @@ public class WelcomeController extends AbstractFXMLViewController {
 			return;
 		}
 		Platform.runLater(() -> {
-			checkForUpdatesStatus.setText(resourceBundle.getString("welcome.checkForUpdates.label.currentlyChecking"));
+			checkForUpdatesStatus.setText(localization.getString("welcome.checkForUpdates.label.currentlyChecking"));
 			checkForUpdatesIndicator.setVisible(true);
 		});
 		final HttpClient client = new HttpClient();
@@ -162,7 +165,7 @@ public class WelcomeController extends AbstractFXMLViewController {
 		final String currentVersion = applicationVersion().orElse(null);
 		LOG.debug("Current version: {}, lastest version: {}", currentVersion, latestVersion);
 		if (currentVersion != null && semVerComparator.compare(currentVersion, latestVersion) < 0) {
-			final String msg = String.format(resourceBundle.getString("welcome.newVersionMessage"), latestVersion, currentVersion);
+			final String msg = String.format(localization.getString("welcome.newVersionMessage"), latestVersion, currentVersion);
 			Platform.runLater(() -> {
 				this.updateLink.setText(msg);
 				this.updateLink.setVisible(true);
