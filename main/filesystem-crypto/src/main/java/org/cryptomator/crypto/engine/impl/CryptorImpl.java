@@ -11,17 +11,21 @@ package org.cryptomator.crypto.engine.impl;
 import static org.cryptomator.crypto.engine.impl.Constants.CURRENT_VAULT_VERSION;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.security.InvalidKeyException;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicReference;
 
+import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import javax.security.auth.DestroyFailedException;
 import javax.security.auth.Destroyable;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.cryptomator.common.LazyInitializer;
 import org.cryptomator.crypto.engine.Cryptor;
 import org.cryptomator.crypto.engine.FileContentCryptor;
@@ -100,15 +104,21 @@ class CryptorImpl implements Cryptor {
 		}
 
 		// check version
-		if (keyFile.getVersion() != CURRENT_VAULT_VERSION) {
+		if (keyFile.getVersion() != CURRENT_VAULT_VERSION || ArrayUtils.isEmpty(keyFile.getVersionMac())) {
 			throw new UnsupportedVaultFormatException(keyFile.getVersion(), CURRENT_VAULT_VERSION);
 		}
 
 		final byte[] kekBytes = Scrypt.scrypt(passphrase, keyFile.getScryptSalt(), keyFile.getScryptCostParam(), keyFile.getScryptBlockSize(), KEYLENGTH_IN_BYTES);
 		try {
 			final SecretKey kek = new SecretKeySpec(kekBytes, ENCRYPTION_ALG);
-			this.encryptionKey = AesKeyWrap.unwrap(kek, keyFile.getEncryptionMasterKey(), ENCRYPTION_ALG);
 			this.macKey = AesKeyWrap.unwrap(kek, keyFile.getMacMasterKey(), MAC_ALG);
+			final Mac mac = new ThreadLocalMac(macKey, MAC_ALG).get();
+			final byte[] versionMac = mac.doFinal(ByteBuffer.allocate(Integer.BYTES).putInt(CURRENT_VAULT_VERSION).array());
+			if (!MessageDigest.isEqual(versionMac, keyFile.getVersionMac())) {
+				destroyQuietly(macKey);
+				throw new UnsupportedVaultFormatException(Integer.MAX_VALUE, CURRENT_VAULT_VERSION);
+			}
+			this.encryptionKey = AesKeyWrap.unwrap(kek, keyFile.getEncryptionMasterKey(), ENCRYPTION_ALG);
 		} catch (InvalidKeyException e) {
 			throw new InvalidPassphraseException();
 		} catch (NoSuchAlgorithmException e) {
@@ -134,6 +144,9 @@ class CryptorImpl implements Cryptor {
 			Arrays.fill(kekBytes, (byte) 0x00);
 		}
 
+		final Mac mac = new ThreadLocalMac(macKey, MAC_ALG).get();
+		final byte[] versionMac = mac.doFinal(ByteBuffer.allocate(Integer.BYTES).putInt(CURRENT_VAULT_VERSION).array());
+
 		final KeyFile keyfile = new KeyFile();
 		keyfile.setVersion(CURRENT_VAULT_VERSION);
 		keyfile.setScryptSalt(scryptSalt);
@@ -141,6 +154,7 @@ class CryptorImpl implements Cryptor {
 		keyfile.setScryptBlockSize(SCRYPT_BLOCK_SIZE);
 		keyfile.setEncryptionMasterKey(wrappedEncryptionKey);
 		keyfile.setMacMasterKey(wrappedMacKey);
+		keyfile.setVersionMac(versionMac);
 
 		try {
 			final ObjectMapper om = new ObjectMapper();

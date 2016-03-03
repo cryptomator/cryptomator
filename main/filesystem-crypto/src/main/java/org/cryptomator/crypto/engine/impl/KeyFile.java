@@ -15,7 +15,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonPropertyOrder(value = {"version", "scryptSalt", "scryptCostParam", "scryptBlockSize", "primaryMasterKey", "hmacMasterKey"})
+@JsonPropertyOrder(value = {"version", "scryptSalt", "scryptCostParam", "scryptBlockSize", "primaryMasterKey", "hmacMasterKey", "versionMac"})
 class KeyFile implements Serializable {
 
 	private static final long serialVersionUID = 8578363158959619885L;
@@ -37,6 +37,9 @@ class KeyFile implements Serializable {
 
 	@JsonProperty("hmacMasterKey")
 	private byte[] macMasterKey;
+
+	@JsonProperty("versionMac")
+	private byte[] versionMac;
 
 	public Integer getVersion() {
 		return version;
@@ -84,6 +87,14 @@ class KeyFile implements Serializable {
 
 	public void setMacMasterKey(byte[] macMasterKey) {
 		this.macMasterKey = macMasterKey;
+	}
+
+	public byte[] getVersionMac() {
+		return versionMac;
+	}
+
+	public void setVersionMac(byte[] versionMac) {
+		this.versionMac = versionMac;
 	}
 
 }
