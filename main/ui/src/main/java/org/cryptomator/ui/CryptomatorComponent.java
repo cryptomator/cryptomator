@@ -15,7 +15,6 @@ import javax.inject.Singleton;
 import org.cryptomator.ui.controllers.MainController;
 import org.cryptomator.ui.settings.Localization;
 import org.cryptomator.ui.util.DeferredCloser;
-import org.cryptomator.ui.util.TrayIconUtil;
 
 import dagger.Component;
 

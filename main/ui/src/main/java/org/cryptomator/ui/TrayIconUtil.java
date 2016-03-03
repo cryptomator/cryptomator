@@ -6,7 +6,7 @@
  * Contributors:
  *     Sebastian Stenzel - initial API and implementation
  *******************************************************************************/
-package org.cryptomator.ui.util;
+package org.cryptomator.ui;
 
 import java.awt.AWTException;
 import java.awt.Image;
@@ -30,6 +30,7 @@ import javax.swing.SwingUtilities;
 
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.ui.settings.Localization;
+import org.cryptomator.ui.settings.Settings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,17 +38,19 @@ import javafx.application.Platform;
 import javafx.stage.Stage;
 
 @Singleton
-public final class TrayIconUtil {
+class TrayIconUtil {
 
 	private static final Logger LOG = LoggerFactory.getLogger(TrayIconUtil.class);
 
 	private final Stage mainWindow;
 	private final Localization localization;
+	private final Settings settings;
 
 	@Inject
-	public TrayIconUtil(@Named("mainWindow") Stage mainWindow, Localization localization) {
+	public TrayIconUtil(@Named("mainWindow") Stage mainWindow, Localization localization, Settings settings) {
 		this.mainWindow = mainWindow;
 		this.localization = localization;
+		this.settings = settings;
 	}
 
 	public void initTrayIcon(Runnable exitCommand) {
@@ -83,9 +86,9 @@ public final class TrayIconUtil {
 
 		final Image image;
 		if (SystemUtils.IS_OS_MAC_OSX && isMacMenuBarDarkMode()) {
-			image = Toolkit.getDefaultToolkit().getImage(TrayIconUtil.class.getResource("/tray_icon_white.png"));
+			image = Toolkit.getDefaultToolkit().getImage(getClass().getResource("/tray_icon_white.png"));
 		} else {
-			image = Toolkit.getDefaultToolkit().getImage(TrayIconUtil.class.getResource("/tray_icon.png"));
+			image = Toolkit.getDefaultToolkit().getImage(getClass().getResource("/tray_icon.png"));
 		}
 
 		return new TrayIcon(image, localization.getString("app.name"), popup);
@@ -108,6 +111,11 @@ public final class TrayIconUtil {
 	}
 
 	private void showTrayNotification(TrayIcon trayIcon) {
+		if (settings.getNumTrayNotifications() <= 0) {
+			return;
+		} else {
+			settings.setNumTrayNotifications(settings.getNumTrayNotifications() - 1);
+		}
 		final Runnable notificationCmd;
 		if (SystemUtils.IS_OS_MAC_OSX) {
 			final String title = localization.getString("tray.infoMsg.title");
