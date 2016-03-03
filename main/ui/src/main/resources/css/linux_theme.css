@@ -251,11 +251,14 @@
 	-fx-background-color: transparent;
 	-fx-padding: 0.4em;
 }
-.menu-item:focused {
-	-fx-background-color: COLOR_VGRAD_DARK;
+.menu-item > .graphic-container {
+    -fx-padding: 0 6px 0 0;
 }
 .menu-item > .label {
 	-fx-text-fill: COLOR_TEXT;
+}
+.menu-item:focused {
+	-fx-background-color: COLOR_VGRAD_DARK;
 }
 .menu-item:disabled > .label {
 	-fx-text-fill: COLOR_TEXT_DISABLED;

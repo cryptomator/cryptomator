@@ -8,41 +8,28 @@
       Sebastian Stenzel - initial API and implementation
 -->
 <?import java.net.URL?>
-<?import java.lang.String?>
-<?import javafx.scene.shape.Arc?>
-<?import javafx.scene.shape.QuadCurve?>
-<?import javafx.scene.shape.Path?>
-<?import javafx.scene.shape.Line?>
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.control.Label?>
 <?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Hyperlink?>
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.control.ProgressIndicator?>
+<?import javafx.scene.control.Button?>
 
-<AnchorPane xmlns:fx="http://javafx.com/fxml" cacheShape="true" cache="true">
+<VBox prefWidth="400.0" prefHeight="400.0" spacing="24.0" alignment="CENTER" xmlns:fx="http://javafx.com/fxml" cacheShape="true" cache="true">
 	
-	<children>
-		<VBox AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="20.0" prefWidth="400.0" alignment="CENTER" spacing="10.0" cacheShape="true" cache="true">
-			<Label alignment="CENTER" style="-fx-font-size: 1.5em;" text="%welcome.welcomeLabel" cacheShape="true" cache="true" />
-			<VBox fx:id="checkForUpdatesContainer" prefWidth="400.0" alignment="CENTER" spacing="5.0" cacheShape="true" cache="true">
-				<HBox alignment="CENTER" spacing="5.0" cacheShape="true" cache="true">
-					<Label fx:id="checkForUpdatesStatus" cacheShape="true" cache="true" />
-					<ProgressIndicator fx:id="checkForUpdatesIndicator" progress="-1" prefWidth="15.0" prefHeight="15.0" visible="false" cacheShape="true" cache="true" cacheHint="SPEED" />
-				</HBox>
-				<Hyperlink alignment="CENTER" fx:id="updateLink" onAction="#didClickUpdateLink" visible="false" cacheShape="true" cache="true" />
-			</VBox>
-		</VBox>
-		
-		<ImageView fx:id="botImageView" AnchorPane.leftAnchor="100.0" AnchorPane.topAnchor="200.0" fitHeight="200.0" preserveRatio="true" smooth="false" cache="true"/>
-		
-		<Line AnchorPane.leftAnchor="4.0" AnchorPane.topAnchor="380.0" startX="0.0" endX="6.0" startY="5.0" endY="0.0" strokeWidth="1.0" cache="true" />
-		<Line AnchorPane.leftAnchor="6.0" AnchorPane.topAnchor="385.0" startX="0.0" endX="15.0" startY="0.0" endY="0.0" strokeWidth="1.0" cache="true" />
-		<Line AnchorPane.leftAnchor="4.0" AnchorPane.topAnchor="385.0" startX="0.0" endX="6.0" startY="0.0" endY="5.0" strokeWidth="1.0" cache="true" />
-		
-		<Label AnchorPane.leftAnchor="25.0" AnchorPane.topAnchor="377.0" text="%welcome.addButtonInstructionLabel" cacheShape="true" cache="true" />
-	</children>
+	<VBox fx:id="checkForUpdatesContainer" spacing="6.0" alignment="CENTER" cacheShape="true" cache="true">
+		<HBox alignment="CENTER" spacing="5.0" cacheShape="true" cache="true">
+			<Label fx:id="checkForUpdatesStatus" cacheShape="true" cache="true" />
+			<ProgressIndicator fx:id="checkForUpdatesIndicator" progress="-1" prefWidth="15.0" prefHeight="15.0" cacheShape="true" cache="true" cacheHint="SPEED" />
+		</HBox>
+		<Hyperlink alignment="CENTER" fx:id="updateLink" onAction="#didClickUpdateLink" cacheShape="true" cache="true" />
+	</VBox>
 	
-</AnchorPane>
+	<ImageView fitHeight="200.0" preserveRatio="true" smooth="false" cache="true">
+		<Image url="/bot_welcome.png"/>
+	</ImageView>
+
+</VBox>

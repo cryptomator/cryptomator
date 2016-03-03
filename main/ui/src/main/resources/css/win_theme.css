@@ -291,6 +291,9 @@
     -fx-border-width: 0.0 0.0 0.0 0.0;
     -fx-border-color:transparent;
 }
+.menu-item > .graphic-container {
+    -fx-padding: 0 6px 0 0;
+}
 .menu-item >.label {
     -fx-padding: 0em 0.5em 0em 0em;
     -fx-text-fill: COLOR_TEXT;

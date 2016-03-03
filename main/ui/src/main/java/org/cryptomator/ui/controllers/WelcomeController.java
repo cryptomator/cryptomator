@@ -46,8 +46,6 @@ import javafx.scene.Node;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 
 @Singleton
 public class WelcomeController extends AbstractFXMLViewController {
@@ -70,9 +68,6 @@ public class WelcomeController extends AbstractFXMLViewController {
 	}
 
 	@FXML
-	private ImageView botImageView;
-
-	@FXML
 	private Node checkForUpdatesContainer;
 
 	@FXML
@@ -86,10 +81,8 @@ public class WelcomeController extends AbstractFXMLViewController {
 
 	@Override
 	public void initialize() {
-		botImageView.setImage(new Image(getClass().getResource("/bot_welcome.png").toString()));
 		if (areUpdatesManagedExternally()) {
 			checkForUpdatesContainer.setVisible(false);
-			checkForUpdatesContainer.setManaged(false);
 		} else if (settings.isCheckForUpdatesEnabled()) {
 			executor.execute(this::checkForUpdates);
 		}
@@ -114,9 +107,6 @@ public class WelcomeController extends AbstractFXMLViewController {
 	}
 
 	private void checkForUpdates() {
-		if (areUpdatesManagedExternally()) {
-			return;
-		}
 		Platform.runLater(() -> {
 			checkForUpdatesStatus.setText(localization.getString("welcome.checkForUpdates.label.currentlyChecking"));
 			checkForUpdatesIndicator.setVisible(true);

@@ -19,6 +19,7 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.Label?>
 
 <HBox fx:id="rootPane" prefHeight="440.0" prefWidth="652.0" spacing="12.0" xmlns:fx="http://javafx.com/fxml" cacheShape="true" cache="true">
 
@@ -27,14 +28,22 @@
 	<fx:define>
 		<ContextMenu fx:id="vaultListCellContextMenu">
 			<items>
-				<MenuItem text="%main.directoryList.contextMenu.remove" onAction="#didClickRemoveSelectedEntry" />
-				<MenuItem text="%main.directoryList.contextMenu.changePassword" onAction="#didClickChangePassword" />
+				<MenuItem text="%main.directoryList.contextMenu.remove" onAction="#didClickRemoveSelectedEntry">
+					<graphic><Label text="&#xf12a;" styleClass="ionicons"/></graphic>
+				</MenuItem>
+				<MenuItem text="%main.directoryList.contextMenu.changePassword" onAction="#didClickChangePassword">
+					<graphic><Label text="&#xf2bf;" styleClass="ionicons"/></graphic>
+				</MenuItem>
 			</items>
 		</ContextMenu>
 		<ContextMenu fx:id="addVaultContextMenu">
 			<items>
-				<MenuItem text="%main.addDirectory.contextMenu.new" onAction="#didClickCreateNewVault" />
-				<MenuItem text="%main.addDirectory.contextMenu.open" onAction="#didClickAddExistingVaults" />
+				<MenuItem text="%main.addDirectory.contextMenu.new"  onAction="#didClickCreateNewVault">
+					<graphic><Label text="&#xf2c7;" styleClass="ionicons"/></graphic>
+				</MenuItem>
+				<MenuItem text="%main.addDirectory.contextMenu.open" onAction="#didClickAddExistingVaults">
+					<graphic><Label text="&#xf2f5;" styleClass="ionicons"/></graphic>
+				</MenuItem>
 			</items>
 		</ContextMenu>
 	</fx:define>
@@ -51,6 +60,7 @@
 			</items>
 		</ToolBar>
 	</VBox>
+	
 	<Pane fx:id="contentPane" prefWidth="400.0" cacheShape="true" cache="true"/>
 
 </HBox>
