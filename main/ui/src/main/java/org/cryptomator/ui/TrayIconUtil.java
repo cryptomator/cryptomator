@@ -86,7 +86,9 @@ class TrayIconUtil {
 
 		final Image image;
 		if (SystemUtils.IS_OS_MAC_OSX && isMacMenuBarDarkMode()) {
-			image = Toolkit.getDefaultToolkit().getImage(getClass().getResource("/tray_icon_white.png"));
+			image = Toolkit.getDefaultToolkit().getImage(getClass().getResource("/tray_icon_mac_white.png"));
+		} else if (SystemUtils.IS_OS_MAC_OSX) {
+			image = Toolkit.getDefaultToolkit().getImage(getClass().getResource("/tray_icon_mac_black.png"));
 		} else {
 			image = Toolkit.getDefaultToolkit().getImage(getClass().getResource("/tray_icon.png"));
 		}
