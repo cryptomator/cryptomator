@@ -324,7 +324,7 @@ public class MainController extends AbstractFXMLViewController {
 	public void didLock(UnlockedController ctrl) {
 		unlockedVaults.remove(ctrl.getVault());
 		showUnlockView();
-		if (vaults.stream().anyMatch(Vault::isUnlocked)) {
+		if (!vaults.stream().anyMatch(Vault::isUnlocked)) {
 			Platform.setImplicitExit(true);
 		}
 	}
