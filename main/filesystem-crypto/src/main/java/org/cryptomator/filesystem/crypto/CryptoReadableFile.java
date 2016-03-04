@@ -43,7 +43,10 @@ class CryptoReadableFile implements ReadableFile {
 		this.authenticate = authenticate;
 		this.onAuthError = onAuthError;
 		file.position(0);
-		file.read(header);
+		int headerBytesRead = file.read(header);
+		if (headerBytesRead != header.capacity()) {
+			throw new IllegalArgumentException("File too short to contain a header.");
+		}
 		header.flip();
 		this.position(0);
 	}

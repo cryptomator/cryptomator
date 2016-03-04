@@ -47,10 +47,10 @@ class CiphertextReader implements Callable<Void> {
 			int bytesRead = -1;
 			do {
 				ByteBuffer ciphertext = ByteBuffer.allocate(READ_BUFFER_SIZE);
-				file.read(ciphertext);
-				ciphertext.flip();
-				bytesRead = ciphertext.remaining();
+				bytesRead = file.read(ciphertext);
 				if (bytesRead > 0) {
+					ciphertext.flip();
+					assert bytesRead == ciphertext.remaining();
 					decryptor.append(ciphertext);
 				}
 			} while (bytesRead > 0);
