@@ -10,6 +10,8 @@ package org.cryptomator.filesystem.inmem;
 
 import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 import java.util.function.Supplier;
 
@@ -20,8 +22,8 @@ class InMemoryReadableFile implements ReadableFile {
 
 	private final Supplier<ByteBuffer> contentGetter;
 	private final ReadLock readLock;
-	private boolean open = true;
-	private volatile int position = 0;
+	private final AtomicInteger position = new AtomicInteger();
+	private final AtomicBoolean open = new AtomicBoolean(true);
 
 	public InMemoryReadableFile(Supplier<ByteBuffer> contentGetter, ReadLock readLock) {
 		this.contentGetter = contentGetter;
@@ -30,19 +32,21 @@ class InMemoryReadableFile implements ReadableFile {
 
 	@Override
 	public boolean isOpen() {
-		return open;
+		return open.get();
 	}
 
 	@Override
 	public int read(ByteBuffer destination) throws UncheckedIOException {
 		ByteBuffer source = contentGetter.get().asReadOnlyBuffer();
-		if (position >= source.limit()) {
+		int toBeCopied = destination.remaining();
+		int pos = position.getAndAdd(toBeCopied);
+		if (pos >= source.limit()) {
 			return -1;
 		} else {
-			source.position(position);
+			source.position(pos);
 			assert source.hasRemaining();
 			int numRead = ByteBuffers.copy(source, destination);
-			this.position += numRead;
+			assert numRead <= toBeCopied;
 			return numRead;
 		}
 	}
@@ -55,12 +59,12 @@ class InMemoryReadableFile implements ReadableFile {
 	@Override
 	public void position(long position) throws UncheckedIOException {
 		assert position < Integer.MAX_VALUE : "Can not use that big in-memory files.";
-		this.position = (int) position;
+		this.position.set((int) position);
 	}
 
 	@Override
 	public void close() throws UncheckedIOException {
-		open = false;
+		open.set(false);
 		readLock.unlock();
 	}
 

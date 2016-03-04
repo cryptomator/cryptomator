@@ -10,6 +10,9 @@ package org.cryptomator.filesystem.inmem;
 
 import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -22,9 +25,9 @@ public class InMemoryWritableFile implements WritableFile {
 	private final Supplier<ByteBuffer> contentGetter;
 	private final Consumer<ByteBuffer> contentSetter;
 	private final WriteLock writeLock;
-
-	private boolean open = true;
-	private volatile int position = 0;
+	private final AtomicInteger position = new AtomicInteger();
+	private final AtomicBoolean open = new AtomicBoolean(true);
+	private final ReentrantLock writingLock = new ReentrantLock();
 
 	public InMemoryWritableFile(Supplier<ByteBuffer> contentGetter, Consumer<ByteBuffer> contentSetter, WriteLock writeLock) {
 		this.contentGetter = contentGetter;
@@ -34,44 +37,65 @@ public class InMemoryWritableFile implements WritableFile {
 
 	@Override
 	public boolean isOpen() {
-		return open;
+		return open.get();
 	}
 
 	@Override
 	public void truncate() throws UncheckedIOException {
-		contentSetter.accept(ByteBuffer.allocate(0));
+		writingLock.lock();
+		try {
+			contentSetter.accept(InMemoryFile.createNewEmptyByteBuffer());
+			position.set(0);
+		} finally {
+			writingLock.unlock();
+		}
 	}
 
 	@Override
 	public int write(ByteBuffer source) throws UncheckedIOException {
-		ByteBuffer destination = contentGetter.get();
-		int oldFileSize = destination.limit();
-		int requiredSize = position + source.remaining();
-		int newFileSize = Math.max(oldFileSize, requiredSize);
-		if (destination.capacity() < requiredSize) {
-			ByteBuffer old = destination;
-			old.clear();
-			int newBufferSize = Math.max(requiredSize, (int) (destination.capacity() * InMemoryFile.GROWTH_RATE));
-			destination = ByteBuffer.allocate(newBufferSize);
-			ByteBuffers.copy(old, destination);
-			contentSetter.accept(destination);
+		writingLock.lock();
+		try {
+			ByteBuffer content = contentGetter.get();
+			int prevLimit = content.limit();
+
+			int toBeCopied = source.remaining();
+			int pos = position.getAndAdd(toBeCopied);
+			int ourLimit = pos + toBeCopied;
+			int newLimit = Math.max(prevLimit, ourLimit);
+
+			ByteBuffer destination = ensureCapacity(content, newLimit);
+			destination.limit(newLimit).position(pos);
+			return ByteBuffers.copy(source, destination);
+		} finally {
+			writingLock.unlock();
 		}
-		destination.limit(newFileSize);
-		destination.position(position);
-		int numWritten = ByteBuffers.copy(source, destination);
-		this.position += numWritten;
-		return numWritten;
+	}
+
+	private ByteBuffer ensureCapacity(ByteBuffer buf, int limit) {
+		assert writingLock.isHeldByCurrentThread();
+		if (buf.capacity() < limit) {
+			int oldPos = buf.position();
+			buf.clear();
+			int newBufferSize = Math.max(limit, (int) (buf.capacity() * InMemoryFile.GROWTH_RATE));
+			ByteBuffer newBuf = ByteBuffer.allocate(newBufferSize);
+			ByteBuffers.copy(buf, newBuf);
+			newBuf.limit(limit).position(oldPos);
+			contentSetter.accept(newBuf);
+			return newBuf;
+		} else {
+			return buf;
+		}
 	}
 
 	@Override
 	public void position(long position) throws UncheckedIOException {
 		assert position < Integer.MAX_VALUE : "Can not use that big in-memory files.";
-		this.position = (int) position;
+		this.position.set((int) position);
 	}
 
 	@Override
 	public void close() throws UncheckedIOException {
-		open = false;
+		open.set(false);
 		writeLock.unlock();
 	}
 

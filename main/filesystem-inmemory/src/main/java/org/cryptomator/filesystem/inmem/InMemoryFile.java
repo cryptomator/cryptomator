@@ -13,6 +13,7 @@ import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 import java.nio.file.FileAlreadyExistsException;
 import java.time.Instant;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
@@ -30,11 +31,16 @@ class InMemoryFile extends InMemoryNode implements File {
 	static final double GROWTH_RATE = 1.4;
 
 	private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
-	private volatile ByteBuffer content = ByteBuffer.allocate(INITIAL_SIZE);
+	private final AtomicReference<ByteBuffer> content = new AtomicReference<>(createNewEmptyByteBuffer());
 
 	public InMemoryFile(InMemoryFolder parent, String name, Instant lastModified, Instant creationTime) {
 		super(parent, name, lastModified, creationTime);
-		content.flip();
+	}
+
+	static ByteBuffer createNewEmptyByteBuffer() {
+		final ByteBuffer buf = ByteBuffer.allocate(INITIAL_SIZE);
+		buf.flip();
+		return buf;
 	}
 
 	@Override
@@ -47,9 +53,9 @@ class InMemoryFile extends InMemoryNode implements File {
 	}
 
 	private void internalMoveTo(InMemoryFile destination) {
-		this.content.rewind();
+		this.content.get().rewind();
 		destination.create();
-		destination.content = this.content;
+		destination.content.set(this.content.getAndSet(createNewEmptyByteBuffer()));
 		this.delete();
 	}
 
@@ -62,7 +68,7 @@ class InMemoryFile extends InMemoryNode implements File {
 		final ReadLock readLock = lock.readLock();
 		readLock.lock();
 		try {
-			final ReadableFile result = new InMemoryReadableFile(this::getContent, readLock);
+			final ReadableFile result = new InMemoryReadableFile(content::get, readLock);
 			success = true;
 			return result;
 		} finally {
@@ -79,7 +85,7 @@ class InMemoryFile extends InMemoryNode implements File {
 		writeLock.lock();
 		try {
 			create();
-			final WritableFile result = new InMemoryWritableFile(this::getContent, this::setContent, writeLock);
+			final WritableFile result = new InMemoryWritableFile(content::get, content::set, writeLock);
 			success = true;
 			return result;
 		} finally {
@@ -97,7 +103,7 @@ class InMemoryFile extends InMemoryNode implements File {
 				throw new UncheckedIOException(new FileAlreadyExistsException(k));
 			} else {
 				if (v == null) {
-					assert!content.hasRemaining();
+					assert!content.get().hasRemaining();
 					this.creationTime = Instant.now();
 				}
 				this.lastModified = Instant.now();
@@ -106,18 +112,9 @@ class InMemoryFile extends InMemoryNode implements File {
 		});
 	}
 
-	private ByteBuffer getContent() {
-		return content;
-	}
-
-	private void setContent(ByteBuffer content) {
-		this.content = content;
-	}
-
 	@Override
 	public void delete() {
-		content = ByteBuffer.allocate(INITIAL_SIZE);
-		content.flip();
+		content.set(createNewEmptyByteBuffer());
 		final InMemoryFolder parent = parent().get();
 		parent.existingChildren.computeIfPresent(this.name(), (k, v) -> {
 			// returning null removes the entry.
