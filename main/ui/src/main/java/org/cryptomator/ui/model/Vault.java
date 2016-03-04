@@ -9,7 +9,6 @@
 package org.cryptomator.ui.model;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.io.UncheckedIOException;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Path;
@@ -51,9 +50,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
-public class Vault implements Serializable, CryptoFileSystemDelegate {
-
-	private static final long serialVersionUID = 3754487289683599469L;
+public class Vault implements CryptoFileSystemDelegate {
 
 	public static final String VAULT_FILE_EXTENSION = ".cryptomator";
 
