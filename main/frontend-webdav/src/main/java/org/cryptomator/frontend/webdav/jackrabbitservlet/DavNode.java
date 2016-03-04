@@ -37,6 +37,7 @@ import org.apache.jackrabbit.webdav.property.DavPropertySet;
 import org.apache.jackrabbit.webdav.property.DefaultDavProperty;
 import org.apache.jackrabbit.webdav.property.PropEntry;
 import org.cryptomator.filesystem.jackrabbit.FileSystemResourceLocator;
+import org.cryptomator.filesystem.jackrabbit.FolderLocator;
 
 abstract class DavNode<T extends FileSystemResourceLocator> implements DavResource {
 
@@ -187,18 +188,14 @@ abstract class DavNode<T extends FileSystemResourceLocator> implements DavResour
 	}
 
 	@Override
-	public DavResource getCollection() {
+	public DavFolder getCollection() {
 		if (node.isRootLocation()) {
 			return null;
 		}
 
 		assert node.parent().isPresent() : "as my mom always sais: if it's not root, it has a parent";
-		final FileSystemResourceLocator parentPath = node.parent().get();
-		try {
-			return factory.createResource(parentPath, session);
-		} catch (DavException e) {
-			throw new IllegalStateException("Unable to get parent resource with path " + parentPath, e);
-		}
+		final FolderLocator parentPath = node.parent().get();
+		return factory.createFolder(parentPath, session);
 	}
 
 	@Override

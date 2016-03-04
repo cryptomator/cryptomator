@@ -50,7 +50,7 @@ class FilesystemResourceFactory implements DavResourceFactory {
 	}
 
 	@Override
-	public DavResource createResource(DavResourceLocator locator, DavSession session) throws DavException {
+	public DavResource createResource(DavResourceLocator locator, DavSession session) {
 		if (locator instanceof FolderLocator) {
 			FolderLocator folder = (FolderLocator) locator;
 			return createFolder(folder, session);

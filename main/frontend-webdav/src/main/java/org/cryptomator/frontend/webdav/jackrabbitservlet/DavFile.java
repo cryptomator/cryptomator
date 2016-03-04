@@ -167,7 +167,9 @@ class DavFile extends DavNode<FileLocator> {
 	public ActiveLock lock(LockInfo reqLockInfo) throws DavException {
 		ActiveLock lock = super.lock(reqLockInfo);
 		if (!exists()) {
-			getCollection().addMember(this, new NullInputContext());
+			DavFolder parentFolder = getCollection();
+			assert parentFolder != null : "File always has a folder.";
+			parentFolder.addMember(this, new NullInputContext());
 		}
 		return lock;
 	}
