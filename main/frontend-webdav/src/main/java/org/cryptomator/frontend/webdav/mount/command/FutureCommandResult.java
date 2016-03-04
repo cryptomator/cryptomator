@@ -20,15 +20,15 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.cryptomator.frontend.CommandFailedException;
 
 final class FutureCommandResult implements Future<CommandResult>, Runnable {
-	
+
 	private final Process process;
 	private final AtomicBoolean canceled = new AtomicBoolean();
 	private final AtomicBoolean done = new AtomicBoolean();
 	private final Lock lock = new ReentrantLock();
 	private final Condition doneCondition = lock.newCondition();
-	
+
 	private CommandFailedException exception;
-	
+
 	FutureCommandResult(Process process) {
 		this.process = process;
 	}
@@ -49,7 +49,7 @@ final class FutureCommandResult implements Future<CommandResult>, Runnable {
 	public boolean isCancelled() {
 		return canceled.get();
 	}
-	
+
 	private void setDone() {
 		lock.lock();
 		try {
@@ -69,7 +69,7 @@ final class FutureCommandResult implements Future<CommandResult>, Runnable {
 	public CommandResult get() throws InterruptedException, ExecutionException {
 		lock.lock();
 		try {
-			while(!done.get()) {
+			while (!done.get()) {
 				doneCondition.await();
 			}
 		} finally {
@@ -85,8 +85,12 @@ final class FutureCommandResult implements Future<CommandResult>, Runnable {
 	public CommandResult get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
 		lock.lock();
 		try {
-			while(!done.get()) {
-				doneCondition.await(timeout, unit);
+			boolean doneInTime = true;
+			if (!done.get()) {
+				doneInTime = doneCondition.await(timeout, unit);
+			}
+			if (!doneInTime) {
+				throw new TimeoutException();
 			}
 		} finally {
 			lock.unlock();
