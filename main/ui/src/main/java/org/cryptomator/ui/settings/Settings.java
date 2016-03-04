@@ -24,7 +24,7 @@ public class Settings implements Serializable {
 	public static final int MIN_PORT = 1024;
 	public static final int MAX_PORT = 65535;
 	public static final int DEFAULT_PORT = 0;
-	public static final int DEFAULT_NUM_TRAY_NOTIFICATIONS = 3;
+	public static final Integer DEFAULT_NUM_TRAY_NOTIFICATIONS = 3;
 
 	@JsonProperty("directories")
 	private List<Vault> directories;
