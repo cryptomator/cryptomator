@@ -160,8 +160,8 @@ class CryptoFolder extends CryptoNode implements Folder {
 		assert target.parent().isPresent() : "Target can not be root, thus has a parent";
 
 		// prepare target:
-		target.parent().get().create();
 		target.delete();
+		target.parent().get().create();
 
 		// perform the actual move:
 		final File dirFile = forceGetPhysicalFile();
@@ -186,7 +186,12 @@ class CryptoFolder extends CryptoNode implements Folder {
 			return;
 		}
 		Deleter.deleteContent(this);
-		forceGetPhysicalFolder().delete();
+		Folder physicalFolder = forceGetPhysicalFolder();
+		physicalFolder.delete();
+		Folder physicalFolderParent = physicalFolder.parent().get();
+		if (physicalFolderParent.folders().count() == 0) {
+			physicalFolderParent.delete();
+		}
 		forceGetPhysicalFile().delete();
 		invalidateDirectoryIdsRecursively();
 	}

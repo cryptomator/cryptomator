@@ -12,7 +12,7 @@ import static java.lang.String.format;
 
 import java.util.function.Consumer;
 
-public class FileSystemVisitor {
+public class FolderVisitor {
 
 	private final Consumer<Folder> beforeFolderVisitor;
 	private final Consumer<Folder> afterFolderVisitor;
@@ -20,7 +20,7 @@ public class FileSystemVisitor {
 	private final Consumer<Node> nodeVisitor;
 	private final int maxDepth;
 
-	public FileSystemVisitor(FileSystemVisitorBuilder builder) {
+	public FolderVisitor(FolderVisitorBuilder builder) {
 		this.beforeFolderVisitor = builder.beforeFolderVisitor;
 		this.afterFolderVisitor = builder.afterFolderVisitor;
 		this.fileVisitor = builder.fileVisitor;
@@ -28,19 +28,19 @@ public class FileSystemVisitor {
 		this.maxDepth = builder.maxDepth;
 	}
 
-	public static FileSystemVisitorBuilder fileSystemVisitor() {
-		return new FileSystemVisitorBuilder();
+	public static FolderVisitorBuilder folderVisitor() {
+		return new FolderVisitorBuilder();
 	}
 
-	public FileSystemVisitor visit(Folder folder) {
+	public FolderVisitor visit(Folder folder) {
 		return visit(folder, 0);
 	}
 
-	public FileSystemVisitor visit(File file) {
+	public FolderVisitor visit(File file) {
 		return visit(file, 0);
 	}
 
-	private FileSystemVisitor visit(Folder folder, int depth) {
+	private FolderVisitor visit(Folder folder, int depth) {
 		beforeFolderVisitor.accept(folder);
 		nodeVisitor.accept(folder);
 		final int childDepth = depth + 1;
@@ -52,13 +52,13 @@ public class FileSystemVisitor {
 		return this;
 	}
 
-	private FileSystemVisitor visit(File file, int depth) {
+	private FolderVisitor visit(File file, int depth) {
 		nodeVisitor.accept(file);
 		fileVisitor.accept(file);
 		return this;
 	}
 
-	public static class FileSystemVisitorBuilder {
+	public static class FolderVisitorBuilder {
 
 		private Consumer<Folder> beforeFolderVisitor = noOp();
 		private Consumer<Folder> afterFolderVisitor = noOp();
@@ -66,10 +66,10 @@ public class FileSystemVisitor {
 		private Consumer<Node> nodeVisitor = noOp();
 		private int maxDepth = Integer.MAX_VALUE;
 
-		private FileSystemVisitorBuilder() {
+		private FolderVisitorBuilder() {
 		}
 
-		public FileSystemVisitorBuilder beforeFolder(Consumer<Folder> beforeFolderVisitor) {
+		public FolderVisitorBuilder beforeFolder(Consumer<Folder> beforeFolderVisitor) {
 			if (beforeFolderVisitor == null) {
 				throw new IllegalArgumentException("Vistior may not be null");
 			}
@@ -77,7 +77,7 @@ public class FileSystemVisitor {
 			return this;
 		}
 
-		public FileSystemVisitorBuilder afterFolder(Consumer<Folder> afterFolderVisitor) {
+		public FolderVisitorBuilder afterFolder(Consumer<Folder> afterFolderVisitor) {
 			if (afterFolderVisitor == null) {
 				throw new IllegalArgumentException("Vistior may not be null");
 			}
@@ -85,7 +85,7 @@ public class FileSystemVisitor {
 			return this;
 		}
 
-		public FileSystemVisitorBuilder forEachFile(Consumer<File> fileVisitor) {
+		public FolderVisitorBuilder forEachFile(Consumer<File> fileVisitor) {
 			if (fileVisitor == null) {
 				throw new IllegalArgumentException("Vistior may not be null");
 			}
@@ -93,7 +93,7 @@ public class FileSystemVisitor {
 			return this;
 		}
 
-		public FileSystemVisitorBuilder forEachNode(Consumer<Node> nodeVisitor) {
+		public FolderVisitorBuilder forEachNode(Consumer<Node> nodeVisitor) {
 			if (nodeVisitor == null) {
 				throw new IllegalArgumentException("Vistior may not be null");
 			}
@@ -101,7 +101,7 @@ public class FileSystemVisitor {
 			return this;
 		}
 
-		public FileSystemVisitorBuilder withMaxDepth(int maxDepth) {
+		public FolderVisitorBuilder withMaxDepth(int maxDepth) {
 			if (maxDepth < 0) {
 				throw new IllegalArgumentException(format("maxDepth must not be smaller 0 but was %d", maxDepth));
 			}
@@ -109,16 +109,16 @@ public class FileSystemVisitor {
 			return this;
 		}
 
-		public FileSystemVisitor visit(Folder folder) {
+		public FolderVisitor visit(Folder folder) {
 			return build().visit(folder);
 		}
 
-		public FileSystemVisitor visit(File file) {
+		public FolderVisitor visit(File file) {
 			return build().visit(file);
 		}
 
-		public FileSystemVisitor build() {
-			return new FileSystemVisitor(this);
+		public FolderVisitor build() {
+			return new FolderVisitor(this);
 		}
 
 		private static <T> Consumer<T> noOp() {

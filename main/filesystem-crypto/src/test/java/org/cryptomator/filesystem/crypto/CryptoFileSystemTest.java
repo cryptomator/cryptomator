@@ -8,14 +8,15 @@
  *******************************************************************************/
 package org.cryptomator.filesystem.crypto;
 
-import static org.cryptomator.filesystem.FileSystemVisitor.fileSystemVisitor;
+import static org.hamcrest.Matchers.both;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.lessThanOrEqualTo;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 import java.time.Instant;
 import java.util.Arrays;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.cryptomator.crypto.engine.Cryptor;
 import org.cryptomator.crypto.engine.NoCryptor;
@@ -37,7 +38,6 @@ public class CryptoFileSystemTest {
 		final FileSystem physicalFs = new InMemoryFileSystem();
 		final Folder physicalDataRoot = physicalFs.folder("d");
 		final FileSystem fs = new CryptoFileSystem(physicalFs, cryptor, Mockito.mock(CryptoFileSystemDelegate.class), "foo");
-		fs.create();
 
 		// add another encrypted folder:
 		final Folder fooFolder = fs.folder("foo");
@@ -47,8 +47,24 @@ public class CryptoFileSystemTest {
 		fooBarFolder.create();
 		Assert.assertTrue(fooFolder.exists());
 		Assert.assertTrue(fooBarFolder.exists());
-		Assert.assertEquals(3, countDataFolders(physicalDataRoot)); // parent +
-																	// foo + bar
+		Assert.assertEquals(3, countDataFolders(physicalDataRoot)); // parent + foo + bar
+	}
+
+	@Test(timeout = 1000)
+	public void testDirectoryDeletion() throws UncheckedIOException, IOException {
+		// mock stuff and prepare crypto FS:
+		final Cryptor cryptor = new NoCryptor();
+		final FileSystem physicalFs = new InMemoryFileSystem();
+		final Folder physicalDataRoot = physicalFs.folder("d");
+		final FileSystem fs = new CryptoFileSystem(physicalFs, cryptor, Mockito.mock(CryptoFileSystemDelegate.class), "foo");
+
+		// create and delete folders:
+		fs.folder("foo").folder("bar").folder("baz").create();
+		Assert.assertEquals(4, countDataFolders(physicalDataRoot)); // root + foo + bar + baz
+		Assert.assertThat(physicalDataRoot.folders().count(), both(greaterThanOrEqualTo(1l)).and(lessThanOrEqualTo(4l))); // parent folders of the 4 folders
+		fs.folder("foo").delete();
+		Assert.assertEquals(1, countDataFolders(physicalDataRoot)); // just root
+		Assert.assertEquals(1, physicalDataRoot.folders().count()); // just the parent of root
 	}
 
 	@Test(timeout = 2000)
@@ -204,22 +220,10 @@ public class CryptoFileSystemTest {
 	}
 
 	/**
-	 * @return number of folders on second level inside the given dataRoot
-	 *         folder.
+	 * @return number of folders on second level inside the given dataRoot folder.
 	 */
 	private static int countDataFolders(Folder dataRoot) {
-		final AtomicInteger num = new AtomicInteger();
-		fileSystemVisitor() //
-				.afterFolder(folder -> {
-					final Folder parent = folder.parent().get();
-					final Folder parentOfParent = parent.parent().orElse(null);
-					if (parentOfParent != null && parentOfParent.equals(dataRoot)) {
-						num.incrementAndGet();
-					}
-				}) //
-				.withMaxDepth(2) //
-				.visit(dataRoot);
-		return num.get();
+		return (int) dataRoot.folders().flatMap(Folder::folders).count();
 	}
 
 }
