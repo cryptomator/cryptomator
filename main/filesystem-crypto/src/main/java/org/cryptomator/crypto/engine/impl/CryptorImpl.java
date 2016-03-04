@@ -101,7 +101,7 @@ class CryptorImpl implements Cryptor {
 			final ObjectMapper om = new ObjectMapper();
 			keyFile = om.readValue(masterkeyFileContents, KeyFile.class);
 			if (keyFile == null) {
-				throw new InvalidFormatException("Could not read masterkey file", keyFile, KeyFile.class);
+				throw new InvalidFormatException("Could not read masterkey file", null, KeyFile.class);
 			}
 		} catch (IOException e) {
 			throw new IllegalArgumentException("Unable to parse masterkeyFileContents", e);
