@@ -158,7 +158,7 @@ class ExclusiveSharedLockManager implements LockManager {
 		}
 		// or otherwise look for parent locks:
 		if (locator.parent().isPresent()) {
-			return getLockInternal(type, scope, locator.parent().get(), depth++);
+			return getLockInternal(type, scope, locator.parent().get(), depth + 1);
 		} else {
 			return null;
 		}
