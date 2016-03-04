@@ -124,7 +124,9 @@ public class WelcomeController extends AbstractFXMLViewController {
 				final ObjectMapper mapper = new ObjectMapper();
 				final Map<String, String> map = mapper.readValue(responseData, new TypeReference<HashMap<String, String>>() {
 				});
-				this.compareVersions(map);
+				if (map != null) {
+					this.compareVersions(map);
+				}
 			}
 		} catch (IOException e) {
 			// no error handling required. Maybe next time the version check is successful.
