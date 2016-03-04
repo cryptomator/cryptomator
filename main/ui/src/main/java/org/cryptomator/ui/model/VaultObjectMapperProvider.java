@@ -50,7 +50,7 @@ public class VaultObjectMapperProvider implements Provider<ObjectMapper> {
 		return om;
 	}
 
-	private class VaultSerializer extends JsonSerializer<Vault> {
+	private static class VaultSerializer extends JsonSerializer<Vault> {
 
 		@Override
 		public void serialize(Vault value, JsonGenerator jgen, SerializerProvider provider) throws IOException, JsonProcessingException {
