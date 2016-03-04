@@ -86,8 +86,8 @@ abstract class InMemoryNode implements Node {
 		if (obj instanceof InMemoryNode) {
 			InMemoryNode other = (InMemoryNode) obj;
 			return this.getClass() == other.getClass() //
-					&& (this.parent == null && other.parent == null || this.parent.equals(other.parent)) //
-					&& (this.name == null && other.name == null || this.name.equals(other.name));
+					&& (this.parent == null && other.parent == null || this.parent != null && this.parent.equals(other.parent)) //
+					&& (this.name == null && other.name == null || this.name != null && this.name.equals(other.name));
 		} else {
 			return false;
 		}
