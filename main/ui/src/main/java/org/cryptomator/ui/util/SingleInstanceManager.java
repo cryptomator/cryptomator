@@ -22,6 +22,7 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.channels.WritableByteChannel;
+import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
@@ -68,7 +69,7 @@ public class SingleInstanceManager {
 		 */
 		public boolean sendMessage(String string, long timeout) throws IOException {
 			Objects.requireNonNull(string);
-			byte[] message = string.getBytes();
+			byte[] message = string.getBytes(StandardCharsets.UTF_8);
 			if (message.length >= 256 * 256) {
 				throw new IOException("Message too long.");
 			}
@@ -107,7 +108,7 @@ public class SingleInstanceManager {
 	 */
 	public static class LocalInstance implements Closeable {
 		private class ChannelState {
-			ByteBuffer write = ByteBuffer.wrap(applicationKey.getBytes());
+			ByteBuffer write = ByteBuffer.wrap(applicationKey.getBytes(StandardCharsets.UTF_8));
 			ByteBuffer readLength = ByteBuffer.allocate(2);
 			ByteBuffer readMessage = null;
 		}
@@ -265,7 +266,7 @@ public class SingleInstanceManager {
 
 			LOG.debug("connected to instance {}", port.get());
 
-			final byte[] bytes = applicationKey.getBytes();
+			final byte[] bytes = applicationKey.getBytes(StandardCharsets.UTF_8);
 			ByteBuffer buf = ByteBuffer.allocate(bytes.length);
 			tryFill(channel, buf, 1000);
 			if (buf.hasRemaining()) {
