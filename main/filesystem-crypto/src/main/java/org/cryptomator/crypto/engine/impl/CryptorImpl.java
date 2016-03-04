@@ -35,6 +35,7 @@ import org.cryptomator.crypto.engine.UnsupportedVaultFormatException;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 
 class CryptorImpl implements Cryptor {
 
@@ -99,9 +100,13 @@ class CryptorImpl implements Cryptor {
 		try {
 			final ObjectMapper om = new ObjectMapper();
 			keyFile = om.readValue(masterkeyFileContents, KeyFile.class);
+			if (keyFile == null) {
+				throw new InvalidFormatException("Could not read masterkey file", keyFile, KeyFile.class);
+			}
 		} catch (IOException e) {
 			throw new IllegalArgumentException("Unable to parse masterkeyFileContents", e);
 		}
+		assert keyFile != null;
 
 		// check version
 		if (keyFile.getVersion() != CURRENT_VAULT_VERSION || ArrayUtils.isEmpty(keyFile.getVersionMac())) {

@@ -27,6 +27,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
 @Singleton
@@ -70,6 +71,9 @@ public class VaultObjectMapperProvider implements Provider<ObjectMapper> {
 		@Override
 		public Vault deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
 			final JsonNode node = jp.readValueAsTree();
+			if (node == null || !node.has("path")) {
+				throw new InvalidFormatException("Node is null or doesn't contain a path.", node, Vault.class);
+			}
 			final String pathStr = node.get("path").asText();
 			final Path path = FileSystems.getDefault().getPath(pathStr);
 			final Vault vault = vaultFactoy.createVault(path);
