@@ -109,7 +109,7 @@ class CryptorImpl implements Cryptor {
 		assert keyFile != null;
 
 		// check version
-		if (keyFile.getVersion() != CURRENT_VAULT_VERSION || ArrayUtils.isEmpty(keyFile.getVersionMac())) {
+		if (!CURRENT_VAULT_VERSION.equals(keyFile.getVersion()) || ArrayUtils.isEmpty(keyFile.getVersionMac())) {
 			throw new UnsupportedVaultFormatException(keyFile.getVersion(), CURRENT_VAULT_VERSION);
 		}
 
