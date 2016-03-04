@@ -10,6 +10,7 @@ package org.cryptomator.filesystem.shortening;
 
 import java.io.FileNotFoundException;
 import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -44,7 +45,7 @@ class FilenameShortener {
 		if (longName.length() < threshold) {
 			return longName;
 		} else {
-			final byte[] hashBytes = SHA1.get().digest(longName.getBytes());
+			final byte[] hashBytes = SHA1.get().digest(longName.getBytes(StandardCharsets.UTF_8));
 			final String hash = BASE32.encodeAsString(hashBytes);
 			return hash + LONG_NAME_FILE_EXT;
 		}
