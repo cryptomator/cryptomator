@@ -84,7 +84,7 @@ public class SingleInstanceManager {
 					return true;
 				}
 				return !buf.hasRemaining();
-			}, timeout, 10);
+			} , timeout, 10);
 			return !buf.hasRemaining();
 		}
 
@@ -139,10 +139,17 @@ public class SingleInstanceManager {
 		void handleSelection(SelectionKey key) throws IOException {
 			if (key.isAcceptable()) {
 				final SocketChannel accepted = channel.accept();
-				if (accepted != null) {
-					LOG.debug("accepted incoming connection");
-					accepted.configureBlocking(false);
-					accepted.register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE);
+				SelectionKey keyOfAcceptedConnection = null;
+				try {
+					if (accepted != null) {
+						LOG.debug("accepted incoming connection");
+						accepted.configureBlocking(false);
+						keyOfAcceptedConnection = accepted.register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE);
+					}
+				} finally {
+					if (keyOfAcceptedConnection == null) {
+						accepted.close();
+					}
 				}
 			}
 
@@ -189,6 +196,7 @@ public class SingleInstanceManager {
 			}
 		}
 
+		@Override
 		public void close() {
 			IOUtils.closeQuietly(selector);
 			IOUtils.closeQuietly(channel);
@@ -359,7 +367,7 @@ public class SingleInstanceManager {
 					}
 				}
 				return !buf.hasRemaining();
-			}, timeout, 1);
+			} , timeout, 1);
 		}
 	}
 }
