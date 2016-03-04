@@ -30,6 +30,7 @@ public final class CommandResult {
 
 	/**
 	 * Constructs a CommandResult from a terminated process and closes all its streams.
+	 * 
 	 * @param process An <strong>already finished</strong> process.
 	 */
 	CommandResult(Process process) {
@@ -52,7 +53,7 @@ public final class CommandResult {
 			logDebugInfo();
 		}
 	}
-	
+
 	/**
 	 * @return Data written to STDOUT
 	 */
@@ -94,10 +95,10 @@ public final class CommandResult {
 		assertNoException();
 		int exitValue = getExitValue();
 		if (exitValue != 0) {
-			throw new CommandFailedException(format("Command execution failed. Exit code: %d\n" + "# Output:\n" + "%s\n" + "# Error:\n" + "%s", exitValue, stdout, stderr));
+			throw new CommandFailedException(format("Command execution failed. Exit code: %d %n# Output:%n%s %n# Error: %n%s", exitValue, stdout, stderr));
 		}
 	}
-	
+
 	private void assertNoException() throws CommandFailedException {
 		if (exception != null) {
 			throw exception;
