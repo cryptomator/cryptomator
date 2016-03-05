@@ -32,10 +32,14 @@ import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.Folder;
 import org.cryptomator.filesystem.ReadableFile;
 import org.cryptomator.filesystem.jackrabbit.FileLocator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.io.ByteStreams;
 
 class DavFile extends DavNode<FileLocator> {
+
+	private static final Logger LOG = LoggerFactory.getLogger(DavFile.class);
 
 	public DavFile(FilesystemResourceFactory factory, LockManager lockManager, DavSession session, FileLocator node) {
 		super(factory, lockManager, session, node);
@@ -128,7 +132,7 @@ class DavFile extends DavNode<FileLocator> {
 	@Override
 	public DavProperty<?> getProperty(DavPropertyName name) {
 		if (DavPropertyName.GETCONTENTLENGTH.equals(name)) {
-			return sizeProperty().get();
+			return sizeProperty().orElse(null);
 		} else {
 			return super.getProperty(name);
 		}
@@ -147,6 +151,9 @@ class DavFile extends DavNode<FileLocator> {
 		if (node.exists()) {
 			try (ReadableFile src = node.openReadable()) {
 				return Optional.of(new DefaultDavProperty<Long>(DavPropertyName.GETCONTENTLENGTH, src.size()));
+			} catch (RuntimeException e) {
+				LOG.warn("Could not determine file size of " + getResourcePath(), e);
+				return Optional.empty();
 			}
 		} else {
 			return Optional.empty();
