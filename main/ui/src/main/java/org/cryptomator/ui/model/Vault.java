@@ -166,7 +166,7 @@ public class Vault implements CryptoFileSystemDelegate {
 
 	@Override
 	public boolean shouldSkipAuthentication(String cleartextPath) {
-		return namesOfResourcesWithInvalidMac.contains(cleartextPath);
+		return whitelistedResourcesWithInvalidMac.contains(cleartextPath);
 	}
 
 	// ******************************************************************************
