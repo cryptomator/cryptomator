@@ -164,6 +164,7 @@ public class UnlockedController extends AbstractFXMLViewController {
 	private void didClickCopyUrl(ActionEvent event) {
 		ClipboardContent clipboardContent = new ClipboardContent();
 		clipboardContent.putUrl(vault.get().getWebDavUrl());
+		clipboardContent.putString(vault.get().getWebDavUrl());
 		Clipboard.getSystemClipboard().setContent(clipboardContent);
 	}
 
