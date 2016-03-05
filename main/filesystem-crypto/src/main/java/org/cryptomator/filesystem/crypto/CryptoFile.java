@@ -35,7 +35,17 @@ class CryptoFile extends CryptoNode implements File {
 	@Override
 	public ReadableFile openReadable() {
 		boolean authenticate = !fileSystem().delegate().shouldSkipAuthentication(toString());
-		return new CryptoReadableFile(cryptor.getFileContentCryptor(), forceGetPhysicalFile().openReadable(), authenticate, this::reportAuthError);
+		ReadableFile physicalReadable = forceGetPhysicalFile().openReadable();
+		boolean success = false;
+		try {
+			final ReadableFile result = new CryptoReadableFile(cryptor.getFileContentCryptor(), physicalReadable, authenticate, this::reportAuthError);
+			success = true;
+			return result;
+		} finally {
+			if (!success) {
+				physicalReadable.close();
+			}
+		}
 	}
 
 	private void reportAuthError() {
@@ -47,7 +57,17 @@ class CryptoFile extends CryptoNode implements File {
 		if (parent.folder(name).exists()) {
 			throw new UncheckedIOException(new FileAlreadyExistsException(toString()));
 		}
-		return new CryptoWritableFile(cryptor.getFileContentCryptor(), forceGetPhysicalFile().openWritable());
+		WritableFile physicalWrtiable = forceGetPhysicalFile().openWritable();
+		boolean success = false;
+		try {
+			final WritableFile result = new CryptoWritableFile(cryptor.getFileContentCryptor(), physicalWrtiable);
+			success = true;
+			return result;
+		} finally {
+			if (!success) {
+				physicalWrtiable.close();
+			}
+		}
 	}
 
 	@Override
