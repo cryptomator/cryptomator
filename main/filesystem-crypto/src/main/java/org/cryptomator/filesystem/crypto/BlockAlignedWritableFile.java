@@ -111,7 +111,8 @@ class BlockAlignedWritableFile implements WritableFile {
 		currentBlockBuffer.clear();
 		try (ReadableFile r = openReadable.get()) {
 			r.position(physicalPosition);
-			r.read(currentBlockBuffer);
+			int numRead = r.read(currentBlockBuffer);
+			assert numRead == currentBlockBuffer.position();
 		}
 		int advance = (int) (logicalPosition - physicalPosition);
 		currentBlockBuffer.position(advance);
