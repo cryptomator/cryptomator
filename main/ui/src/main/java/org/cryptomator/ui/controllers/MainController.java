@@ -231,6 +231,9 @@ public class MainController extends AbstractFXMLViewController {
 	@FXML
 	private void didClickRemoveSelectedEntry(ActionEvent e) {
 		vaults.remove(selectedVault.get());
+		if (vaults.isEmpty()) {
+			activeController.set(welcomeController.get());
+		}
 	}
 
 	@FXML
