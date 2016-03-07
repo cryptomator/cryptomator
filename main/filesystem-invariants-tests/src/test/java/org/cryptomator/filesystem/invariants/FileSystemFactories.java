@@ -17,6 +17,7 @@ import org.cryptomator.filesystem.inmem.InMemoryFileSystem;
 import org.cryptomator.filesystem.invariants.FileSystemFactories.FileSystemFactory;
 import org.cryptomator.filesystem.nio.NioFileSystem;
 import org.cryptomator.filesystem.shortening.ShorteningFileSystem;
+import org.cryptomator.filesystem.stats.StatsFileSystem;
 import org.mockito.Mockito;
 
 class FileSystemFactories implements Iterable<FileSystemFactory> {
@@ -28,10 +29,46 @@ class FileSystemFactories implements Iterable<FileSystemFactory> {
 	public FileSystemFactories() {
 		add("NioFileSystem", this::createNioFileSystem);
 		add("InMemoryFileSystem", this::createInMemoryFileSystem);
-		add("CryptoFileSystem(NioFileSystem)", this::createCryptoFileSystemNio);
-		add("CryptoFileSystem(InMemoryFileSystem)", this::createCryptoFileSystemInMemory);
-		add("ShorteningFileSystem(NioFileSystem)", this::createShorteningFileSystemNio);
-		add("ShorteningFileSystem(InMemoryFileSystem)", this::createShorteningFileSystemInMemory);
+		add("CryptoFileSystem > NioFileSystem", this::createCryptoFileSystemNio);
+		add("CryptoFileSystem > InMemoryFileSystem", this::createCryptoFileSystemInMemory);
+		add("ShorteningFileSystem > NioFileSystem", this::createShorteningFileSystemNio);
+		add("ShorteningFileSystem > InMemoryFileSystem", this::createShorteningFileSystemInMemory);
+		add("StatsFileSystem > NioFileSystem", this::createStatsFileSystemNio);
+		add("StatsFileSystem > InMemoryFileSystem", this::createStatsFileSystemInMemory);
+		add("StatsFileSystem > CryptoFileSystem > ShorteningFileSystem > InMemoryFileSystem", this::createCompoundFileSystemInMemory);
+		add("StatsFileSystem > CryptoFileSystem > ShorteningFileSystem > NioFileSystem", this::createCompoundFileSystemNio);
+	}
+
+	private FileSystem createCryptoFileSystemInMemory() {
+		return createCryptoFileSystem(createInMemoryFileSystem());
+	}
+
+	private FileSystem createCryptoFileSystemNio() {
+		return createCryptoFileSystem(createNioFileSystem());
+	}
+
+	private FileSystem createShorteningFileSystemNio() {
+		return createShorteningFileSystem(createNioFileSystem());
+	}
+
+	private FileSystem createShorteningFileSystemInMemory() {
+		return createShorteningFileSystem(createInMemoryFileSystem());
+	}
+
+	private FileSystem createStatsFileSystemNio() {
+		return createStatsFileSystem(createNioFileSystem());
+	}
+
+	private FileSystem createStatsFileSystemInMemory() {
+		return createStatsFileSystem(createInMemoryFileSystem());
+	}
+
+	private FileSystem createCompoundFileSystemNio() {
+		return createCompoundFileSystem(createNioFileSystem());
+	}
+
+	private FileSystem createCompoundFileSystemInMemory() {
+		return createCompoundFileSystem(createInMemoryFileSystem());
 	}
 
 	private FileSystem createNioFileSystem() {
@@ -46,25 +83,20 @@ class FileSystemFactories implements Iterable<FileSystemFactory> {
 		return new InMemoryFileSystem();
 	}
 
-	private FileSystem createCryptoFileSystemInMemory() {
-		FileSystem delegate = createInMemoryFileSystem();
+	private FileSystem createCompoundFileSystem(FileSystem delegate) {
+		return createStatsFileSystem(createCryptoFileSystem(createShorteningFileSystem(delegate)));
+	}
+
+	private FileSystem createStatsFileSystem(FileSystem delegate) {
+		return new StatsFileSystem(delegate);
+	}
+
+	private FileSystem createCryptoFileSystem(FileSystem delegate) {
 		CRYPTO_FS_COMP.cryptoFileSystemFactory().initializeNew(delegate, "aPassphrase");
 		return CRYPTO_FS_COMP.cryptoFileSystemFactory().unlockExisting(delegate, "aPassphrase", Mockito.mock(CryptoFileSystemDelegate.class));
 	}
 
-	private FileSystem createCryptoFileSystemNio() {
-		FileSystem delegate = createNioFileSystem();
-		CRYPTO_FS_COMP.cryptoFileSystemFactory().initializeNew(delegate, "aPassphrase");
-		return CRYPTO_FS_COMP.cryptoFileSystemFactory().unlockExisting(delegate, "aPassphrase", Mockito.mock(CryptoFileSystemDelegate.class));
-	}
-
-	private FileSystem createShorteningFileSystemNio() {
-		FileSystem delegate = createNioFileSystem();
-		return new ShorteningFileSystem(delegate, "m", 3);
-	}
-
-	private FileSystem createShorteningFileSystemInMemory() {
-		FileSystem delegate = createInMemoryFileSystem();
+	private FileSystem createShorteningFileSystem(FileSystem delegate) {
 		return new ShorteningFileSystem(delegate, "m", 3);
 	}
 
