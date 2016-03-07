@@ -186,9 +186,9 @@ public class UnlockedController extends AbstractFXMLViewController {
 
 	private void startIoSampling() {
 		final Series<Number, Number> decryptedBytes = new Series<>();
-		decryptedBytes.setName("decrypted");
+		decryptedBytes.setName(localization.getString("unlocked.label.statsDecrypted"));
 		final Series<Number, Number> encryptedBytes = new Series<>();
-		encryptedBytes.setName("encrypted");
+		encryptedBytes.setName(localization.getString("unlocked.label.statsEncrypted"));
 
 		ioGraph.getData().add(decryptedBytes);
 		ioGraph.getData().add(encryptedBytes);
