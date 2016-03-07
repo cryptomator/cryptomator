@@ -260,8 +260,9 @@ public class MainController extends AbstractFXMLViewController {
 
 	private void selectedVaultDidChange(Vault newValue) {
 		if (newValue == null) {
-			activeController.set(welcomeController.get());
-		} else if (newValue.isUnlocked()) {
+			return;
+		}
+		if (newValue.isUnlocked()) {
 			this.showUnlockedView(newValue);
 		} else if (newValue.isValidVaultDirectory()) {
 			this.showUnlockView();
