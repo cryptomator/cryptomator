@@ -109,7 +109,7 @@ public class MacWarningsController extends AbstractFXMLViewController {
 
 	@FXML
 	private void didClickMoreInformationButton(ActionEvent event) {
-		application.getHostServices().showDocument("https://cryptomator.org/help.html#macWarning");
+		application.getHostServices().showDocument("https://cryptomator.org/faq/#macWarning");
 	}
 
 	private void unauthenticatedResourcesDidChange(Change<? extends String> change) {
