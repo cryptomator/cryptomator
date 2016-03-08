@@ -65,7 +65,7 @@
 
 .button,
 .toggle-button {
-	-fx-pref-height: 25px;
+	-fx-pref-height: 27px;
 	-fx-background-color: COLOR_BORDER, linear-gradient(to bottom, #F0F0F0 0%, #E5E5E5 100%);
 	-fx-background-insets: 0, 1;
     -fx-padding: 2px 12px 2px 12px;
