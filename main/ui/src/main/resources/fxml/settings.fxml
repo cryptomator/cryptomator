@@ -16,8 +16,9 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox prefWidth="400.0" alignment="TOP_CENTER" spacing="12.0" cacheShape="true" cache="true">
-	<GridPane VBox.vgrow="ALWAYS" vgap="12.0" hgap="12.0" xmlns:fx="http://javafx.com/fxml" cacheShape="true" cache="true">
+<VBox prefWidth="400.0" alignment="TOP_CENTER" spacing="12.0" xmlns:fx="http://javafx.com/fxml" cacheShape="true" cache="true">
+	<Label VBox.vgrow="NEVER" fx:id="versionLabel" alignment="CENTER" cacheShape="true" cache="true" />
+	<GridPane VBox.vgrow="ALWAYS" vgap="12.0" hgap="12.0" cacheShape="true" cache="true">
 		<padding>
 			<Insets top="24.0" right="12.0" bottom="24.0" left="12.0" />
 		</padding>

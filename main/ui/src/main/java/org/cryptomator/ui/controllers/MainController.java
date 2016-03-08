@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
 import dagger.Lazy;
 import javafx.application.Platform;
 import javafx.beans.binding.Binding;
+import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -120,6 +121,9 @@ public class MainController extends AbstractFXMLViewController {
 	@FXML
 	private Pane contentPane;
 
+	@FXML
+	private Pane emptyListInstructions;
+
 	@Override
 	public void initialize() {
 		vaultList.setItems(vaults);
@@ -127,6 +131,7 @@ public class MainController extends AbstractFXMLViewController {
 		activeController.set(welcomeController.get());
 		selectedVault.bind(vaultList.getSelectionModel().selectedItemProperty());
 		removeVaultButton.disableProperty().bind(canEditSelectedVault);
+		emptyListInstructions.visibleProperty().bind(Bindings.isEmpty(vaults));
 
 		EasyBind.subscribe(activeController, this::activeControllerDidChange);
 		EasyBind.subscribe(selectedVault, this::selectedVaultDidChange);

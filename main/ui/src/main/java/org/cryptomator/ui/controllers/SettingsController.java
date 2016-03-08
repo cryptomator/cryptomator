@@ -9,6 +9,7 @@
 package org.cryptomator.ui.controllers;
 
 import java.net.URL;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 import javax.inject.Inject;
@@ -21,6 +22,7 @@ import org.fxmisc.easybind.EasyBind;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
 
@@ -42,12 +44,16 @@ public class SettingsController extends AbstractFXMLViewController {
 	@FXML
 	private TextField portField;
 
+	@FXML
+	private Label versionLabel;
+
 	@Override
 	public void initialize() {
 		checkForUpdatesCheckbox.setDisable(areUpdatesManagedExternally());
 		checkForUpdatesCheckbox.setSelected(settings.isCheckForUpdatesEnabled() && !areUpdatesManagedExternally());
 		portField.setText(String.valueOf(settings.getPort()));
 		portField.addEventFilter(KeyEvent.KEY_TYPED, this::filterNumericKeyEvents);
+		versionLabel.setText(String.format(localization.getString("settings.version.label"), applicationVersion().orElse("SNAPSHOT")));
 
 		EasyBind.subscribe(portField.textProperty(), this::portDidChange);
 		EasyBind.subscribe(checkForUpdatesCheckbox.selectedProperty(), settings::setCheckForUpdatesEnabled);
@@ -61,6 +67,10 @@ public class SettingsController extends AbstractFXMLViewController {
 	@Override
 	protected ResourceBundle getFxmlResourceBundle() {
 		return localization;
+	}
+
+	private Optional<String> applicationVersion() {
+		return Optional.ofNullable(getClass().getPackage().getImplementationVersion());
 	}
 
 	private void portDidChange(String newValue) {

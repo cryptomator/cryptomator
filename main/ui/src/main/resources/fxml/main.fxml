@@ -20,6 +20,9 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.shape.Arc?>
 
 <HBox fx:id="rootPane" prefHeight="440.0" prefWidth="652.0" spacing="12.0" xmlns:fx="http://javafx.com/fxml" cacheShape="true" cache="true">
 
@@ -49,7 +52,15 @@
 	</fx:define>
 
 	<VBox prefWidth="200.0" cacheShape="true" cache="true">
-		<ListView fx:id="vaultList" VBox.vgrow="ALWAYS" focusTraversable="false" cacheShape="true" cache="true"/>
+		<StackPane VBox.vgrow="ALWAYS" cacheShape="true" cache="true">
+			<ListView fx:id="vaultList" focusTraversable="false" cacheShape="true" cache="true"/>
+			<AnchorPane fx:id="emptyListInstructions" cacheShape="true" cache="true">
+				<HBox AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.bottomAnchor="100.0" alignment="CENTER" cacheShape="true" cache="true">
+					<Label textAlignment="CENTER" text="%main.emptyListInstructions" wrapText="true" cacheShape="true" cache="true"/>
+				</HBox>
+				<Arc AnchorPane.bottomAnchor="5.0" type="OPEN" centerX="-10.0" centerY="0.0" radiusY="100.0" radiusX="60.0" startAngle="0" length="-60.0" strokeWidth="1" stroke="BLACK" fill="TRANSPARENT"/>
+			</AnchorPane>
+		</StackPane>
 		<ToolBar VBox.vgrow="NEVER" styleClass="list-related-toolbar" cacheShape="true" cache="true">
 			<items>
 				<ToggleButton text="&#xf489;" styleClass="ionicons" fx:id="addVaultButton" onAction="#didClickAddVault" focusTraversable="false" cacheShape="true" cache="true"/>

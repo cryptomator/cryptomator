@@ -20,7 +20,7 @@
 
 <VBox prefWidth="400.0" prefHeight="400.0" spacing="24.0" alignment="CENTER" xmlns:fx="http://javafx.com/fxml" cacheShape="true" cache="true">
 	
-	<VBox fx:id="checkForUpdatesContainer" spacing="6.0" alignment="CENTER" cacheShape="true" cache="true">
+	<VBox fx:id="checkForUpdatesContainer" spacing="6.0" alignment="CENTER" cacheShape="true" cache="true" prefHeight="50.0">
 		<HBox alignment="CENTER" spacing="5.0" cacheShape="true" cache="true">
 			<Label fx:id="checkForUpdatesStatus" cacheShape="true" cache="true" />
 			<ProgressIndicator fx:id="checkForUpdatesIndicator" progress="-1" prefWidth="15.0" prefHeight="15.0" cacheShape="true" cache="true" cacheHint="SPEED" />
@@ -28,8 +28,10 @@
 		<Hyperlink alignment="CENTER" fx:id="updateLink" onAction="#didClickUpdateLink" cacheShape="true" cache="true" />
 	</VBox>
 	
-	<ImageView fitHeight="200.0" preserveRatio="true" smooth="false" cache="true">
+	<ImageView fitHeight="200.0" preserveRatio="true" smooth="false" cache="true" style="-fx-background-color: green;">
 		<Image url="/bot_welcome.png"/>
 	</ImageView>
+	
+	<VBox prefHeight="50.0"/>
 
 </VBox>
