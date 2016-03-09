@@ -39,7 +39,7 @@ addons:
 
 deploy:
   provider: releases
-  prerelease: true
+  prerelease: false
   api_key:
     secure: "ZjE1j93v3qbPIe2YbmhS319aCbMdLQw0HuymmluTurxXsZtn9D4t2+eTr99vBVxGRuB5lzzGezPR5zjk5W7iHF7xhwrawXrFzr2rPJWzWFt0aM+Ry2njU1ROTGGXGTbv4anWeBlgMxLEInTAy/9ytOGNJlec83yc0THpOY2wxnk="
   file: main/uber-jar/target/Cryptomator-$TRAVIS_TAG.jar
