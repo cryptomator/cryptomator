@@ -14,6 +14,7 @@ import org.cryptomator.crypto.engine.Cryptor;
 import org.cryptomator.crypto.engine.InvalidPassphraseException;
 import org.cryptomator.crypto.engine.UnsupportedVaultFormatException;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class CryptorImplTest {
@@ -48,6 +49,7 @@ public class CryptorImplTest {
 		cryptor.readKeysFromMasterkeyFile(testMasterKey.getBytes(), "asd");
 	}
 
+	@Ignore
 	@Test(expected = UnsupportedVaultFormatException.class)
 	public void testMasterkeyDecryptionWithMissingVersionMac() throws IOException {
 		final String testMasterKey = "{\"version\":3,\"scryptSalt\":\"AAAAAAAAAAA=\",\"scryptCostParam\":2,\"scryptBlockSize\":8," //
@@ -57,6 +59,7 @@ public class CryptorImplTest {
 		cryptor.readKeysFromMasterkeyFile(testMasterKey.getBytes(), "asd");
 	}
 
+	@Ignore
 	@Test(expected = UnsupportedVaultFormatException.class)
 	public void testMasterkeyDecryptionWithWrongVersionMac() throws IOException {
 		final String testMasterKey = "{\"version\":3,\"scryptSalt\":\"AAAAAAAAAAA=\",\"scryptCostParam\":2,\"scryptBlockSize\":8," //

@@ -13,7 +13,6 @@ import static org.cryptomator.crypto.engine.impl.Constants.CURRENT_VAULT_VERSION
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.security.InvalidKeyException;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Arrays;
@@ -25,7 +24,6 @@ import javax.crypto.spec.SecretKeySpec;
 import javax.security.auth.DestroyFailedException;
 import javax.security.auth.Destroyable;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.cryptomator.common.LazyInitializer;
 import org.cryptomator.crypto.engine.Cryptor;
 import org.cryptomator.crypto.engine.FileContentCryptor;
@@ -109,7 +107,7 @@ class CryptorImpl implements Cryptor {
 		assert keyFile != null;
 
 		// check version
-		if (!CURRENT_VAULT_VERSION.equals(keyFile.getVersion()) || ArrayUtils.isEmpty(keyFile.getVersionMac())) {
+		if (!CURRENT_VAULT_VERSION.equals(keyFile.getVersion())) {
 			throw new UnsupportedVaultFormatException(keyFile.getVersion(), CURRENT_VAULT_VERSION);
 		}
 
@@ -117,12 +115,13 @@ class CryptorImpl implements Cryptor {
 		try {
 			final SecretKey kek = new SecretKeySpec(kekBytes, ENCRYPTION_ALG);
 			this.macKey = AesKeyWrap.unwrap(kek, keyFile.getMacMasterKey(), MAC_ALG);
-			final Mac mac = new ThreadLocalMac(macKey, MAC_ALG).get();
-			final byte[] versionMac = mac.doFinal(ByteBuffer.allocate(Integer.BYTES).putInt(CURRENT_VAULT_VERSION).array());
-			if (!MessageDigest.isEqual(versionMac, keyFile.getVersionMac())) {
-				destroyQuietly(macKey);
-				throw new UnsupportedVaultFormatException(Integer.MAX_VALUE, CURRENT_VAULT_VERSION);
-			}
+			// future use (as soon as we need to prevent downgrade attacks):
+//			final Mac mac = new ThreadLocalMac(macKey, MAC_ALG).get();
+//			final byte[] versionMac = mac.doFinal(ByteBuffer.allocate(Integer.BYTES).putInt(CURRENT_VAULT_VERSION).array());
+//			if (!MessageDigest.isEqual(versionMac, keyFile.getVersionMac())) {
+//				destroyQuietly(macKey);
+//				throw new UnsupportedVaultFormatException(Integer.MAX_VALUE, CURRENT_VAULT_VERSION);
+//			}
 			this.encryptionKey = AesKeyWrap.unwrap(kek, keyFile.getEncryptionMasterKey(), ENCRYPTION_ALG);
 		} catch (InvalidKeyException e) {
 			throw new InvalidPassphraseException();
