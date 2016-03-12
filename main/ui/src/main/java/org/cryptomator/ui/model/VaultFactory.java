@@ -15,7 +15,6 @@ import javax.inject.Singleton;
 
 import org.cryptomator.filesystem.crypto.CryptoFileSystemFactory;
 import org.cryptomator.filesystem.shortening.ShorteningFileSystemFactory;
-import org.cryptomator.frontend.webdav.mount.WebDavMounter;
 import org.cryptomator.ui.util.DeferredCloser;
 
 @Singleton
@@ -26,7 +25,7 @@ public class VaultFactory {
 	private final DeferredCloser closer;
 
 	@Inject
-	public VaultFactory(ShorteningFileSystemFactory shorteningFileSystemFactory, CryptoFileSystemFactory cryptoFileSystemFactory, WebDavMounter mounter, DeferredCloser closer) {
+	public VaultFactory(ShorteningFileSystemFactory shorteningFileSystemFactory, CryptoFileSystemFactory cryptoFileSystemFactory, DeferredCloser closer) {
 		this.shorteningFileSystemFactory = shorteningFileSystemFactory;
 		this.cryptoFileSystemFactory = cryptoFileSystemFactory;
 		this.closer = closer;

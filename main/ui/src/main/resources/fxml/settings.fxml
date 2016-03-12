@@ -36,6 +36,10 @@
 			<!-- Row 1 -->
 			<Label GridPane.rowIndex="1" GridPane.columnIndex="0" text="%settings.port.label" cacheShape="true" cache="true" />
 			<TextField GridPane.rowIndex="1" GridPane.columnIndex="1" fx:id="portField" cacheShape="true" cache="true" promptText="%settings.port.prompt" />
+			
+			<!-- Row 2 -->
+			<Label GridPane.rowIndex="2" GridPane.columnIndex="0" text="%settings.useipv6.label" cacheShape="true" cache="true" />
+			<CheckBox GridPane.rowIndex="2" GridPane.columnIndex="1" fx:id="useIpv6Checkbox" cacheShape="true" cache="true" />
 		</children>
 	</GridPane>
 	<Label VBox.vgrow="NEVER" text="%settings.requiresRestartLabel" alignment="CENTER" cacheShape="true" cache="true" />

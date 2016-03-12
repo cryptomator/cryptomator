@@ -16,6 +16,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.apache.commons.lang3.CharUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.ui.settings.Localization;
 import org.cryptomator.ui.settings.Settings;
 import org.fxmisc.easybind.EasyBind;
@@ -43,6 +44,9 @@ public class SettingsController extends AbstractFXMLViewController {
 
 	@FXML
 	private TextField portField;
+	
+	@FXML
+	private CheckBox useIpv6Checkbox;
 
 	@FXML
 	private Label versionLabel;
@@ -53,10 +57,13 @@ public class SettingsController extends AbstractFXMLViewController {
 		checkForUpdatesCheckbox.setSelected(settings.isCheckForUpdatesEnabled() && !areUpdatesManagedExternally());
 		portField.setText(String.valueOf(settings.getPort()));
 		portField.addEventFilter(KeyEvent.KEY_TYPED, this::filterNumericKeyEvents);
+		useIpv6Checkbox.setDisable(!SystemUtils.IS_OS_WINDOWS);
+		useIpv6Checkbox.setSelected(SystemUtils.IS_OS_WINDOWS && settings.shouldUseIpv6());
 		versionLabel.setText(String.format(localization.getString("settings.version.label"), applicationVersion().orElse("SNAPSHOT")));
 
-		EasyBind.subscribe(portField.textProperty(), this::portDidChange);
 		EasyBind.subscribe(checkForUpdatesCheckbox.selectedProperty(), settings::setCheckForUpdatesEnabled);
+		EasyBind.subscribe(portField.textProperty(), this::portDidChange);
+		EasyBind.subscribe(useIpv6Checkbox.selectedProperty(), settings::setUseIpv6);
 	}
 
 	@Override

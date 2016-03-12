@@ -26,6 +26,7 @@ import org.cryptomator.frontend.webdav.mount.WindowsDriveLetters;
 import org.cryptomator.ui.controls.SecPasswordField;
 import org.cryptomator.ui.model.Vault;
 import org.cryptomator.ui.settings.Localization;
+import org.cryptomator.ui.settings.Settings;
 import org.fxmisc.easybind.EasyBind;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,16 +59,18 @@ public class UnlockController extends AbstractFXMLViewController {
 	private final Localization localization;
 	private final ExecutorService exec;
 	private final Lazy<FrontendFactory> frontendFactory;
+	private final Settings settings;
 	private final WindowsDriveLetters driveLetters;
 	private final ChangeListener<Character> driveLetterChangeListener = this::winDriveLetterDidChange;
 	final ObjectProperty<Vault> vault = new SimpleObjectProperty<>();
 
 	@Inject
-	public UnlockController(Application app, Localization localization, ExecutorService exec, Lazy<FrontendFactory> frontendFactory, WindowsDriveLetters driveLetters) {
+	public UnlockController(Application app, Localization localization, ExecutorService exec, Lazy<FrontendFactory> frontendFactory, Settings settings, WindowsDriveLetters driveLetters) {
 		this.app = app;
 		this.localization = localization;
 		this.exec = exec;
 		this.frontendFactory = frontendFactory;
+		this.settings = settings;
 		this.driveLetters = driveLetters;
 	}
 
@@ -279,7 +282,7 @@ public class UnlockController extends AbstractFXMLViewController {
 
 	private void unlock(CharSequence password) {
 		try {
-			vault.get().activateFrontend(frontendFactory.get(), password);
+			vault.get().activateFrontend(frontendFactory.get(), settings, password);
 			vault.get().reveal();
 		} catch (InvalidPassphraseException e) {
 			Platform.runLater(() -> {

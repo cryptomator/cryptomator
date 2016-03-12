@@ -38,6 +38,7 @@ import org.cryptomator.frontend.Frontend;
 import org.cryptomator.frontend.Frontend.MountParam;
 import org.cryptomator.frontend.FrontendCreationFailedException;
 import org.cryptomator.frontend.FrontendFactory;
+import org.cryptomator.ui.settings.Settings;
 import org.cryptomator.ui.util.DeferredClosable;
 import org.cryptomator.ui.util.DeferredCloser;
 import org.cryptomator.ui.util.FXThreads;
@@ -112,7 +113,7 @@ public class Vault implements CryptoFileSystemDelegate {
 		}
 	}
 
-	public synchronized void activateFrontend(FrontendFactory frontendFactory, CharSequence passphrase) throws FrontendCreationFailedException {
+	public synchronized void activateFrontend(FrontendFactory frontendFactory, Settings settings, CharSequence passphrase) throws FrontendCreationFailedException {
 		boolean success = false;
 		try {
 			FileSystem fs = getNioFileSystem();
@@ -123,7 +124,7 @@ public class Vault implements CryptoFileSystemDelegate {
 			String contextPath = StringUtils.prependIfMissing(mountName, "/");
 			Frontend frontend = frontendFactory.create(statsFs, contextPath);
 			filesystemFrontend = closer.closeLater(frontend);
-			frontend.mount(getMountParams());
+			frontend.mount(getMountParams(settings));
 			success = true;
 		} catch (UncheckedIOException | CommandFailedException e) {
 			throw new FrontendCreationFailedException(e);
@@ -140,10 +141,12 @@ public class Vault implements CryptoFileSystemDelegate {
 		Platform.runLater(() -> unlocked.set(false));
 	}
 
-	private Map<MountParam, Optional<String>> getMountParams() {
+	private Map<MountParam, Optional<String>> getMountParams(Settings settings) {
+		String hostname = SystemUtils.IS_OS_WINDOWS && settings.shouldUseIpv6() ? "0--1.ipv6-literal.net" : "localhost";
 		return ImmutableMap.of( //
 				MountParam.MOUNT_NAME, Optional.ofNullable(mountName), //
-				MountParam.WIN_DRIVE_LETTER, Optional.ofNullable(CharUtils.toString(winDriveLetter)) //
+				MountParam.WIN_DRIVE_LETTER, Optional.ofNullable(CharUtils.toString(winDriveLetter)), //
+				MountParam.HOSTNAME, Optional.of(hostname) //
 		);
 	}
 

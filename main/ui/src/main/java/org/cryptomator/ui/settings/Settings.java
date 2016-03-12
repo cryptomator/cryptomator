@@ -17,13 +17,14 @@ import org.cryptomator.ui.model.Vault;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-@JsonPropertyOrder(value = {"directories", "checkForUpdatesEnabled", "port", "numTrayNotifications"})
+@JsonPropertyOrder(value = {"directories", "checkForUpdatesEnabled", "port", "useIpv6", "numTrayNotifications"})
 public class Settings implements Serializable {
 
 	private static final long serialVersionUID = 7609959894417878744L;
 	public static final int MIN_PORT = 1024;
 	public static final int MAX_PORT = 65535;
 	public static final int DEFAULT_PORT = 0;
+	public static final boolean DEFAULT_USE_IPV6 = false;
 	public static final Integer DEFAULT_NUM_TRAY_NOTIFICATIONS = 3;
 
 	@JsonProperty("directories")
@@ -34,6 +35,9 @@ public class Settings implements Serializable {
 
 	@JsonProperty("port")
 	private Integer port;
+	
+	@JsonProperty("useIpv6")
+	private Boolean useIpv6;
 
 	@JsonProperty("numTrayNotifications")
 	private Integer numTrayNotifications;
@@ -84,6 +88,14 @@ public class Settings implements Serializable {
 
 	private boolean isPortValid(int port) {
 		return port == DEFAULT_PORT || port >= MIN_PORT && port <= MAX_PORT;
+	}
+
+	public boolean shouldUseIpv6() {
+		return useIpv6 == null ? DEFAULT_USE_IPV6 : useIpv6;
+	}
+
+	public void setUseIpv6(boolean useIpv6) {
+		this.useIpv6 = useIpv6;
 	}
 
 	public Integer getNumTrayNotifications() {

@@ -12,6 +12,7 @@ package org.cryptomator.frontend.webdav.mount;
 import static org.cryptomator.frontend.webdav.mount.command.Script.fromLines;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -31,14 +32,15 @@ import org.cryptomator.frontend.webdav.mount.command.Script;
 /**
  * A {@link WebDavMounterStrategy} utilizing the "net use" command.
  * <p>
- * Tested on Windows 7 but should also work on Windows 8.
+ * Tested on Windows 7, 8.1 and 10.
  */
 @Singleton
 final class WindowsWebDavMounter implements WebDavMounterStrategy {
 
 	private static final Pattern WIN_MOUNT_DRIVELETTER_PATTERN = Pattern.compile("\\s*([A-Z]):\\s*");
-	private static final int MAX_MOUNT_ATTEMPTS = 8;
-	private static final char AUTO_ASSIGN_DRIVE_LETTER = '*';
+	private static final String AUTO_ASSIGN_DRIVE_LETTER = "*";
+	private static final String LOCALHOST = "localhost";
+	private static final int MOUNT_TIMEOUT_SECONDS = 60;
 	private final WindowsDriveLetters driveLetters;
 
 	@Inject
@@ -58,56 +60,41 @@ final class WindowsWebDavMounter implements WebDavMounterStrategy {
 
 	@Override
 	public WebDavMount mount(URI uri, Map<MountParam, Optional<String>> mountParams) throws CommandFailedException {
-		final Character driveLetter = mountParams.get(MountParam.WIN_DRIVE_LETTER).map(CharUtils::toCharacterObject).orElse(AUTO_ASSIGN_DRIVE_LETTER);
-		if (driveLetters.getOccupiedDriveLetters().contains(driveLetter)) {
+		final String driveLetter = mountParams.getOrDefault(MountParam.WIN_DRIVE_LETTER, Optional.of(AUTO_ASSIGN_DRIVE_LETTER)).orElse(AUTO_ASSIGN_DRIVE_LETTER);
+		if (driveLetters.getOccupiedDriveLetters().contains(CharUtils.toChar(driveLetter))) {
 			throw new CommandFailedException("Drive letter occupied.");
 		}
-
-		final String driveLetterStr = driveLetter.charValue() == AUTO_ASSIGN_DRIVE_LETTER ? CharUtils.toString(AUTO_ASSIGN_DRIVE_LETTER) : driveLetter + ":";
-		final Script localhostMountScript = fromLines("net use %DRIVE_LETTER% \\\\localhost@%DAV_PORT%\\DavWWWRoot%DAV_UNC_PATH% /persistent:no");
-		localhostMountScript.addEnv("DRIVE_LETTER", driveLetterStr);
-		localhostMountScript.addEnv("DAV_PORT", String.valueOf(uri.getPort()));
-		localhostMountScript.addEnv("DAV_UNC_PATH", uri.getRawPath().replace('/', '\\'));
-		CommandResult mountResult;
+		
+		final String hostname = mountParams.getOrDefault(MountParam.HOSTNAME, Optional.of(LOCALHOST)).orElse(LOCALHOST);
 		try {
-			mountResult = localhostMountScript.execute(5, TimeUnit.SECONDS);
-		} catch (CommandFailedException ex) {
-			final Script ipv6literaltMountScript = fromLines("net use %DRIVE_LETTER% \\\\0--1.ipv6-literal.net@%DAV_PORT%\\DavWWWRoot%DAV_UNC_PATH% /persistent:no");
-			ipv6literaltMountScript.addEnv("DRIVE_LETTER", driveLetterStr);
-			ipv6literaltMountScript.addEnv("DAV_PORT", String.valueOf(uri.getPort()));
-			ipv6literaltMountScript.addEnv("DAV_UNC_PATH", uri.getRawPath().replace('/', '\\'));
-			final Script proxyBypassScript = fromLines(
-					"reg add \"HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings\" /v \"ProxyOverride\" /d \"<local>;0--1.ipv6-literal.net;0--1.ipv6-literal.net:%DAV_PORT%\" /f");
-			proxyBypassScript.addEnv("DAV_PORT", String.valueOf(uri.getPort()));
-			mountResult = bypassProxyAndRetryMount(localhostMountScript, ipv6literaltMountScript, proxyBypassScript);
+			final URI adjustedUri = new URI(uri.getScheme(), uri.getUserInfo(), hostname, uri.getPort(), uri.getPath(), uri.getQuery(), uri.getFragment());
+			CommandResult mountResult = mount(adjustedUri, driveLetter);
+			return new WindowsWebDavMount(AUTO_ASSIGN_DRIVE_LETTER.equals(driveLetter) ? getDriveLetter(mountResult.getStdOut()) : driveLetter);
+		} catch (URISyntaxException e) {
+			throw new IllegalArgumentException("Invalid host: " + hostname);
 		}
-		return new WindowsWebDavMount(driveLetter.charValue() == AUTO_ASSIGN_DRIVE_LETTER ? getDriveLetter(mountResult.getStdOut()) : driveLetter);
+	}
+	
+	private CommandResult mount(URI uri, String driveLetter) throws CommandFailedException {
+		final Script proxyBypassScript = fromLines(
+				"reg add \"HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings\" /v \"ProxyOverride\" /d \"<local>;%DAV_HOST%;%DAV_HOST%:%DAV_PORT%\" /f");
+		proxyBypassScript.addEnv("DAV_HOST", uri.getHost());
+		proxyBypassScript.addEnv("DAV_PORT", String.valueOf(uri.getPort()));
+		proxyBypassScript.execute();
+		
+		final String driveLetterStr = AUTO_ASSIGN_DRIVE_LETTER.equals(driveLetter) ? AUTO_ASSIGN_DRIVE_LETTER : driveLetter + ":";
+		final Script mountScript = fromLines("net use %DRIVE_LETTER% \\\\%DAV_HOST%@%DAV_PORT%\\DavWWWRoot%DAV_UNC_PATH% /persistent:no");
+		mountScript.addEnv("DRIVE_LETTER", driveLetterStr);
+		mountScript.addEnv("DAV_HOST", uri.getHost());
+		mountScript.addEnv("DAV_PORT", String.valueOf(uri.getPort()));
+		mountScript.addEnv("DAV_UNC_PATH", uri.getRawPath().replace('/', '\\'));
+		return mountScript.execute(MOUNT_TIMEOUT_SECONDS, TimeUnit.SECONDS);
 	}
 
-	private CommandResult bypassProxyAndRetryMount(Script localhostMountScript, Script ipv6literalMountScript, Script proxyBypassScript) throws CommandFailedException {
-		CommandFailedException latestException = null;
-		for (int i = 0; i < MAX_MOUNT_ATTEMPTS; i++) {
-			try {
-				// wait a moment before next attempt
-				Thread.sleep(5000);
-				proxyBypassScript.execute();
-				// alternate localhost and 0--1.ipv6literal.net
-				final Script mountScript = (i % 2 == 0) ? localhostMountScript : ipv6literalMountScript;
-				return mountScript.execute(3, TimeUnit.SECONDS);
-			} catch (CommandFailedException ex) {
-				latestException = ex;
-			} catch (InterruptedException ex) {
-				Thread.currentThread().interrupt();
-				throw new CommandFailedException(ex);
-			}
-		}
-		throw latestException;
-	}
-
-	private Character getDriveLetter(String result) throws CommandFailedException {
+	private String getDriveLetter(String result) throws CommandFailedException {
 		final Matcher matcher = WIN_MOUNT_DRIVELETTER_PATTERN.matcher(result);
 		if (matcher.find()) {
-			return CharUtils.toCharacterObject(matcher.group(1));
+			return matcher.group(1);
 		} else {
 			throw new CommandFailedException("Failed to get a drive letter from net use output.");
 		}
@@ -118,10 +105,10 @@ final class WindowsWebDavMounter implements WebDavMounterStrategy {
 		private final Script openExplorerScript;
 		private final Script unmountScript;
 
-		private WindowsWebDavMount(Character driveLetter) {
-			this.driveLetter = driveLetter;
+		private WindowsWebDavMount(String driveLetter) {
+			this.driveLetter = CharUtils.toCharacterObject(driveLetter);
 			this.openExplorerScript = fromLines("start explorer.exe " + driveLetter + ":");
-			this.unmountScript = fromLines("net use " + driveLetter + ": /delete").addEnv("DRIVE_LETTER", Character.toString(driveLetter));
+			this.unmountScript = fromLines("net use " + driveLetter + ": /delete");
 		}
 
 		@Override
