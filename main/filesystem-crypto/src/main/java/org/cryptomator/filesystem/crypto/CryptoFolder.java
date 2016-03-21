@@ -80,8 +80,8 @@ class CryptoFolder extends CryptoNode implements Folder {
 
 	@Override
 	public Stream<CryptoFile> files() {
-		assert forceGetPhysicalFolder().exists();
-		return forceGetPhysicalFolder().files().map(File::name).filter(isEncryptedFileName()).map(this::decryptChildFileName).map(this::file);
+		final Stream<? extends File> files = physicalFolder().filter(Folder::exists).map(Folder::files).orElse(Stream.empty());
+		return files.map(File::name).filter(isEncryptedFileName()).map(this::decryptChildFileName).map(this::file);
 	}
 
 	private Predicate<String> isEncryptedFileName() {
@@ -104,8 +104,8 @@ class CryptoFolder extends CryptoNode implements Folder {
 
 	@Override
 	public Stream<CryptoFolder> folders() {
-		assert forceGetPhysicalFolder().exists();
-		return forceGetPhysicalFolder().files().map(File::name).filter(isEncryptedDirectoryName()).map(this::decryptChildFolderName).map(this::folder);
+		final Stream<? extends File> files = physicalFolder().filter(Folder::exists).map(Folder::files).orElse(Stream.empty());
+		return files.map(File::name).filter(isEncryptedDirectoryName()).map(this::decryptChildFolderName).map(this::folder);
 	}
 
 	private Predicate<String> isEncryptedDirectoryName() {
@@ -190,7 +190,7 @@ class CryptoFolder extends CryptoNode implements Folder {
 		Folder physicalFolder = forceGetPhysicalFolder();
 		physicalFolder.delete();
 		Folder physicalFolderParent = physicalFolder.parent().get();
-		if (physicalFolderParent.folders().count() == 0) {
+		if (physicalFolderParent.exists() && physicalFolderParent.folders().count() == 0) {
 			physicalFolderParent.delete();
 		}
 		forceGetPhysicalFile().delete();
