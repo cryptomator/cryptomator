@@ -13,6 +13,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.cryptomator.common.WeakValuedCache;
+import org.cryptomator.common.streams.AutoClosingStream;
 import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.Folder;
 import org.cryptomator.filesystem.Node;
@@ -35,7 +36,7 @@ public abstract class DelegatingFolder<D extends DelegatingFolder<D, F>, F exten
 
 	@Override
 	public Stream<? extends Node> children() throws UncheckedIOException {
-		return Stream.concat(folders(), files());
+		return AutoClosingStream.from(Stream.concat(folders(), files()));
 	}
 
 	@Override

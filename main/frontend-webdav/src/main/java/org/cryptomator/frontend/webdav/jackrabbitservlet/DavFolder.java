@@ -32,6 +32,7 @@ import org.apache.jackrabbit.webdav.property.DavProperty;
 import org.apache.jackrabbit.webdav.property.DavPropertyName;
 import org.apache.jackrabbit.webdav.property.DefaultDavProperty;
 import org.apache.jackrabbit.webdav.property.ResourceType;
+import org.cryptomator.common.streams.AutoClosingStream;
 import org.cryptomator.filesystem.Folder;
 import org.cryptomator.filesystem.Node;
 import org.cryptomator.filesystem.WritableFile;
@@ -90,7 +91,8 @@ class DavFolder extends DavNode<FolderLocator> {
 	public DavResourceIterator getMembers() {
 		final Stream<DavFolder> folders = node.folders().map(this::folderToDavFolder);
 		final Stream<DavFile> files = node.files().map(this::fileToDavFile);
-		return new DavResourceIteratorImpl(Stream.concat(folders, files).collect(Collectors.toList()));
+		final Stream<DavResource> members = AutoClosingStream.from(Stream.concat(folders, files));
+		return new DavResourceIteratorImpl(members.collect(Collectors.toList()));
 	}
 
 	private DavFolder folderToDavFolder(FolderLocator memberFolder) {
@@ -115,9 +117,15 @@ class DavFolder extends DavNode<FolderLocator> {
 	 *             Error 404 if no child with the given name exists
 	 */
 	private Node getMemberNode(String name) throws DavException {
-		return node.children().filter(c -> c.name().equals(name)).findAny().orElseThrow(() -> {
-			return new DavException(DavServletResponse.SC_NOT_FOUND, "No such file or directory: " + node.getResourcePath() + name);
-		});
+		Node file = node.file(name);
+		Node folder = node.folder(name);
+		if (file.exists()) {
+			return file;
+		} else if (folder.exists()) {
+			return folder;
+		} else {
+			throw new DavException(DavServletResponse.SC_NOT_FOUND, "No such file or directory: " + node.getResourcePath() + name);
+		}
 	}
 
 	@Override

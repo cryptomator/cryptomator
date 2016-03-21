@@ -23,6 +23,7 @@ import java.util.stream.Stream;
 import org.apache.commons.lang3.StringUtils;
 import org.cryptomator.common.LazyInitializer;
 import org.cryptomator.common.WeakValuedCache;
+import org.cryptomator.common.streams.AutoClosingStream;
 import org.cryptomator.crypto.engine.Cryptor;
 import org.cryptomator.filesystem.Deleter;
 import org.cryptomator.filesystem.File;
@@ -74,7 +75,7 @@ class CryptoFolder extends CryptoNode implements Folder {
 
 	@Override
 	public Stream<? extends Node> children() {
-		return Stream.concat(files(), folders());
+		return AutoClosingStream.from(Stream.concat(files(), folders()));
 	}
 
 	@Override
