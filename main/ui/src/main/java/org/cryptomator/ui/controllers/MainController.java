@@ -172,19 +172,12 @@ public class MainController extends AbstractFXMLViewController {
 	@FXML
 	private void didClickCreateNewVault(ActionEvent event) {
 		final FileChooser fileChooser = new FileChooser();
-		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Cryptomator vault", "*" + Vault.VAULT_FILE_EXTENSION));
 		final File file = fileChooser.showSaveDialog(mainWindow);
 		if (file == null) {
 			return;
 		}
 		try {
-			final Path vaultDir;
-			// enforce .cryptomator file extension:
-			if (!file.getName().endsWith(Vault.VAULT_FILE_EXTENSION)) {
-				vaultDir = file.toPath().resolveSibling(file.getName() + Vault.VAULT_FILE_EXTENSION);
-			} else {
-				vaultDir = file.toPath();
-			}
+			final Path vaultDir = file.toPath();
 			if (!Files.exists(vaultDir)) {
 				Files.createDirectory(vaultDir);
 			}
