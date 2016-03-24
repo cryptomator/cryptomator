@@ -29,5 +29,5 @@ interface CryptomatorComponent {
 
 	Localization localization();
 
-	TrayIconUtil trayIconUtil();
+	ExitUtil exitUtil();
 }

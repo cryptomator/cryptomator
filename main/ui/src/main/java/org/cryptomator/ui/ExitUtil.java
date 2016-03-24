@@ -38,22 +38,41 @@ import javafx.application.Platform;
 import javafx.stage.Stage;
 
 @Singleton
-class TrayIconUtil {
+class ExitUtil {
 
-	private static final Logger LOG = LoggerFactory.getLogger(TrayIconUtil.class);
+	private static final Logger LOG = LoggerFactory.getLogger(ExitUtil.class);
 
 	private final Stage mainWindow;
 	private final Localization localization;
 	private final Settings settings;
 
 	@Inject
-	public TrayIconUtil(@Named("mainWindow") Stage mainWindow, Localization localization, Settings settings) {
+	public ExitUtil(@Named("mainWindow") Stage mainWindow, Localization localization, Settings settings) {
 		this.mainWindow = mainWindow;
 		this.localization = localization;
 		this.settings = settings;
 	}
 
-	public void initTrayIcon(Runnable exitCommand) {
+	public void initExitHandler(Runnable exitCommand) {
+		if (SystemUtils.IS_OS_LINUX) {
+			initMinimizeExitHandler(exitCommand);
+		} else {
+			initTrayIconExitHandler(exitCommand);
+		}
+	}
+
+	private void initMinimizeExitHandler(Runnable exitCommand) {
+		mainWindow.setOnCloseRequest(e -> {
+			if (Platform.isImplicitExit()) {
+				exitCommand.run();
+			} else {
+				mainWindow.setIconified(true);
+				e.consume();
+			}
+		});
+	}
+
+	private void initTrayIconExitHandler(Runnable exitCommand) {
 		final TrayIcon trayIcon = createTrayIcon(exitCommand);
 		try {
 			SystemTray.getSystemTray().add(trayIcon);
