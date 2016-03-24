@@ -11,10 +11,12 @@ package org.cryptomator.ui.model;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.Normalizer;
 import java.text.Normalizer.Form;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
@@ -42,12 +44,17 @@ import org.cryptomator.ui.settings.Settings;
 import org.cryptomator.ui.util.DeferredClosable;
 import org.cryptomator.ui.util.DeferredCloser;
 import org.cryptomator.ui.util.FXThreads;
+import org.fxmisc.easybind.EasyBind;
 
 import com.google.common.collect.ImmutableMap;
 
 import javafx.application.Platform;
+import javafx.beans.binding.Binding;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
@@ -55,7 +62,7 @@ public class Vault implements CryptoFileSystemDelegate {
 
 	public static final String VAULT_FILE_EXTENSION = ".cryptomator";
 
-	private final Path path;
+	private final ObjectProperty<Path> path;
 	private final DeferredCloser closer;
 	private final ShorteningFileSystemFactory shorteningFileSystemFactory;
 	private final CryptoFileSystemFactory cryptoFileSystemFactory;
@@ -73,20 +80,20 @@ public class Vault implements CryptoFileSystemDelegate {
 	 * Package private constructor, use {@link VaultFactory}.
 	 */
 	Vault(Path vaultDirectoryPath, ShorteningFileSystemFactory shorteningFileSystemFactory, CryptoFileSystemFactory cryptoFileSystemFactory, DeferredCloser closer) {
-		this.path = vaultDirectoryPath;
+		this.path = new SimpleObjectProperty<Path>(vaultDirectoryPath);
 		this.closer = closer;
 		this.shorteningFileSystemFactory = shorteningFileSystemFactory;
 		this.cryptoFileSystemFactory = cryptoFileSystemFactory;
 
 		try {
-			setMountName(getName());
+			setMountName(name().getValue());
 		} catch (IllegalArgumentException e) {
 			// mount name needs to be set by the user explicitly later
 		}
 	}
 
 	private FileSystem getNioFileSystem() {
-		return LazyInitializer.initializeLazily(nioFileSystem, () -> NioFileSystem.rootedAt(path));
+		return LazyInitializer.initializeLazily(nioFileSystem, () -> NioFileSystem.rootedAt(path.getValue()));
 	}
 
 	// ******************************************************************************
@@ -158,6 +165,16 @@ public class Vault implements CryptoFileSystemDelegate {
 		Optionals.ifPresent(filesystemFrontend.get(), Frontend::unmount);
 	}
 
+	public boolean needsUpgrade() {
+		return availableUpgrade().isPresent();
+	}
+
+	public Optional<UpgradeInstruction> availableUpgrade() {
+		return Arrays.stream(UpgradeInstruction.AVAILABLE_INSTRUCTIONS).filter(instruction -> {
+			return instruction.isApplicable(this);
+		}).findAny();
+	}
+
 	// ******************************************************************************
 	// Delegate methods
 	// ********************************************************************************/
@@ -180,31 +197,42 @@ public class Vault implements CryptoFileSystemDelegate {
 		return filesystemFrontend.get().map(Frontend::getWebDavUrl).orElseThrow(IllegalStateException::new);
 	}
 
-	public Path getPath() {
+	void setPath(Path path) {
+		this.path.set(path);
+		this.nioFileSystem.set(null);
+	}
+
+	public ReadOnlyObjectProperty<Path> path() {
 		return path;
 	}
 
-	public String getDisplayablePath() {
+	public Binding<String> displayablePath() {
 		Path homeDir = Paths.get(SystemUtils.USER_HOME);
-		if (path.startsWith(homeDir)) {
-			Path relativePath = homeDir.relativize(path);
-			String homePrefix = SystemUtils.IS_OS_WINDOWS ? "~\\" : "~/";
-			return homePrefix + relativePath.toString();
-		} else {
-			return path.toString();
-		}
+		return EasyBind.map(path, p -> {
+			if (p.startsWith(homeDir)) {
+				Path relativePath = homeDir.relativize(p);
+				String homePrefix = SystemUtils.IS_OS_WINDOWS ? "~\\" : "~/";
+				return homePrefix + relativePath.toString();
+			} else {
+				return path.toString();
+			}
+		});
 	}
 
 	/**
 	 * @return Directory name without preceeding path components and file extension
 	 */
-	public String getName() {
-		return StringUtils.removeEnd(path.getFileName().toString(), VAULT_FILE_EXTENSION);
+	public Binding<String> name() {
+		return EasyBind.map(path, p -> p.getFileName().toString());
+	}
+
+	public boolean doesVaultDirectoryExist() {
+		return Files.isDirectory(path.getValue());
 	}
 
 	public boolean isValidVaultDirectory() {
 		try {
-			return cryptoFileSystemFactory.isValidVaultStructure(getNioFileSystem());
+			return doesVaultDirectoryExist() && cryptoFileSystemFactory.isValidVaultStructure(getNioFileSystem());
 		} catch (UncheckedIOException e) {
 			return false;
 		}
@@ -292,14 +320,14 @@ public class Vault implements CryptoFileSystemDelegate {
 
 	@Override
 	public int hashCode() {
-		return path.hashCode();
+		return path.getValue().hashCode();
 	}
 
 	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof Vault) {
 			final Vault other = (Vault) obj;
-			return this.path.equals(other.path);
+			return this.path.getValue().equals(other.path.getValue());
 		} else {
 			return false;
 		}

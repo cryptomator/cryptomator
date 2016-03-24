@@ -16,7 +16,6 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.ResourceBundle;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -57,15 +56,16 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 @Singleton
-public class MainController extends AbstractFXMLViewController {
+public class MainController extends LocalizedFXMLViewController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(MainController.class);
 
 	private final Stage mainWindow;
-	private final Localization localization;
 	private final VaultFactory vaultFactoy;
 	private final Lazy<WelcomeController> welcomeController;
 	private final Lazy<InitializeController> initializeController;
+	private final Lazy<NotFoundController> notFoundController;
+	private final Lazy<UpgradeController> upgradeController;
 	private final Lazy<UnlockController> unlockController;
 	private final Provider<UnlockedController> unlockedControllerProvider;
 	private final Lazy<ChangePasswordController> changePasswordController;
@@ -73,20 +73,22 @@ public class MainController extends AbstractFXMLViewController {
 	private final ObjectProperty<AbstractFXMLViewController> activeController = new SimpleObjectProperty<>();
 	private final ObservableList<Vault> vaults;
 	private final ObjectProperty<Vault> selectedVault = new SimpleObjectProperty<>();
-	private final MonadicBinding<Boolean> isSelectedVaultUnlocked = EasyBind.select(selectedVault).selectObject(Vault::unlockedProperty);
+	private final MonadicBinding<Boolean> isSelectedVaultUnlocked = EasyBind.select(selectedVault).selectObject(Vault::unlockedProperty);;
 	private final Binding<Boolean> canEditSelectedVault = EasyBind.combine(selectedVault.isNull(), isSelectedVaultUnlocked.orElse(false), Boolean::logicalOr);
 	private final BooleanBinding isShowingSettings;
 	private final Map<Vault, UnlockedController> unlockedVaults = new HashMap<>();
 
 	@Inject
 	public MainController(@Named("mainWindow") Stage mainWindow, Localization localization, Settings settings, VaultFactory vaultFactoy, Lazy<WelcomeController> welcomeController,
-			Lazy<InitializeController> initializeController, Lazy<UnlockController> unlockController, Provider<UnlockedController> unlockedControllerProvider, Lazy<ChangePasswordController> changePasswordController,
-			Lazy<SettingsController> settingsController) {
+			Lazy<InitializeController> initializeController, Lazy<NotFoundController> notFoundController, Lazy<UpgradeController> upgradeController, Lazy<UnlockController> unlockController,
+			Provider<UnlockedController> unlockedControllerProvider, Lazy<ChangePasswordController> changePasswordController, Lazy<SettingsController> settingsController) {
+		super(localization);
 		this.mainWindow = mainWindow;
-		this.localization = localization;
 		this.vaultFactoy = vaultFactoy;
 		this.welcomeController = welcomeController;
 		this.initializeController = initializeController;
+		this.notFoundController = notFoundController;
+		this.upgradeController = upgradeController;
 		this.unlockController = unlockController;
 		this.unlockedControllerProvider = unlockedControllerProvider;
 		this.changePasswordController = changePasswordController;
@@ -133,9 +135,8 @@ public class MainController extends AbstractFXMLViewController {
 		removeVaultButton.disableProperty().bind(canEditSelectedVault);
 		emptyListInstructions.visibleProperty().bind(Bindings.isEmpty(vaults));
 
-		EasyBind.subscribe(activeController, this::activeControllerDidChange);
 		EasyBind.subscribe(selectedVault, this::selectedVaultDidChange);
-		EasyBind.subscribe(isSelectedVaultUnlocked, this::selectedVaultUnlockedDidChange);
+		EasyBind.subscribe(activeController, this::activeControllerDidChange);
 		EasyBind.subscribe(isShowingSettings, settingsButton::setSelected);
 		EasyBind.subscribe(addVaultContextMenu.showingProperty(), addVaultButton::setSelected);
 	}
@@ -143,11 +144,6 @@ public class MainController extends AbstractFXMLViewController {
 	@Override
 	protected URL getFxmlResourceUrl() {
 		return getClass().getResource("/fxml/main.fxml");
-	}
-
-	@Override
-	protected ResourceBundle getFxmlResourceBundle() {
-		return localization;
 	}
 
 	private ListCell<Vault> createDirecoryListCell(ListView<Vault> param) {
@@ -265,21 +261,14 @@ public class MainController extends AbstractFXMLViewController {
 		}
 		if (newValue.isUnlocked()) {
 			this.showUnlockedView(newValue);
+		} else if (!newValue.doesVaultDirectoryExist()) {
+			this.showNotFoundView();
+		} else if (newValue.isValidVaultDirectory() && newValue.needsUpgrade()) {
+			this.showUpgradeView();
 		} else if (newValue.isValidVaultDirectory()) {
 			this.showUnlockView();
 		} else {
 			this.showInitializeView();
-		}
-	}
-
-	private void selectedVaultUnlockedDidChange(Boolean unlocked) {
-		if (unlocked == null) {
-			// no vault selected -> no-op
-		} else if (unlocked) {
-			Platform.setImplicitExit(false);
-			this.showUnlockedView(selectedVault.get());
-		} else {
-			this.showUnlockView();
 		}
 	}
 
@@ -288,12 +277,17 @@ public class MainController extends AbstractFXMLViewController {
 	// ****************************************
 
 	public Binding<String> windowTitle() {
-		return EasyBind.monadic(selectedVault).map(Vault::getName).orElse(localization.getString("app.name"));
+		return EasyBind.monadic(selectedVault).flatMap(Vault::name).orElse(localization.getString("app.name"));
 	}
 
 	// ****************************************
 	// Subcontroller for right panel
 	// ****************************************
+
+	private void showNotFoundView() {
+		final NotFoundController ctrl = notFoundController.get();
+		activeController.set(ctrl);
+	}
 
 	private void showInitializeView() {
 		final InitializeController ctrl = initializeController.get();
@@ -302,14 +296,33 @@ public class MainController extends AbstractFXMLViewController {
 		activeController.set(ctrl);
 	}
 
-	public void didInitialize(InitializeController ctrl) {
+	public void didInitialize() {
+		showUnlockView();
+	}
+
+	private void showUpgradeView() {
+		final UpgradeController ctrl = upgradeController.get();
+		ctrl.vault.bind(selectedVault);
+		ctrl.setListener(this::didUpgrade);
+		activeController.set(ctrl);
+	}
+
+	public void didUpgrade() {
 		showUnlockView();
 	}
 
 	private void showUnlockView() {
 		final UnlockController ctrl = unlockController.get();
 		ctrl.vault.bind(selectedVault);
+		ctrl.setListener(this::didUnlock);
 		activeController.set(ctrl);
+	}
+
+	public void didUnlock(Vault vault) {
+		Platform.setImplicitExit(false);
+		if (vault.equals(selectedVault.getValue())) {
+			this.showUnlockedView(vault);
+		}
 	}
 
 	private void showUnlockedView(Vault vault) {
@@ -336,7 +349,7 @@ public class MainController extends AbstractFXMLViewController {
 		activeController.set(ctrl);
 	}
 
-	public void didChangePassword(ChangePasswordController ctrl) {
+	public void didChangePassword() {
 		showUnlockView();
 	}
 

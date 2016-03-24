@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.URL;
 import java.util.Optional;
-import java.util.ResourceBundle;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -37,19 +36,18 @@ import javafx.scene.control.Hyperlink;
 import javafx.scene.text.Text;
 
 @Singleton
-public class ChangePasswordController extends AbstractFXMLViewController {
+public class ChangePasswordController extends LocalizedFXMLViewController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ChangePasswordController.class);
 
 	private final Application app;
-	private final Localization localization;
 	final ObjectProperty<Vault> vault = new SimpleObjectProperty<>();
 	private Optional<ChangePasswordListener> listener = Optional.empty();
 
 	@Inject
 	public ChangePasswordController(Application app, Localization localization) {
+		super(localization);
 		this.app = app;
-		this.localization = localization;
 	}
 
 	@FXML
@@ -81,11 +79,6 @@ public class ChangePasswordController extends AbstractFXMLViewController {
 	@Override
 	protected URL getFxmlResourceUrl() {
 		return getClass().getResource("/fxml/change_password.fxml");
-	}
-
-	@Override
-	protected ResourceBundle getFxmlResourceBundle() {
-		return localization;
 	}
 
 	// ****************************************
@@ -143,13 +136,13 @@ public class ChangePasswordController extends AbstractFXMLViewController {
 
 	private void invokeListenerLater(ChangePasswordListener listener) {
 		Platform.runLater(() -> {
-			listener.didChangePassword(this);
+			listener.didChangePassword();
 		});
 	}
 
 	@FunctionalInterface
 	interface ChangePasswordListener {
-		void didChangePassword(ChangePasswordController ctrl);
+		void didChangePassword();
 	}
 
 }

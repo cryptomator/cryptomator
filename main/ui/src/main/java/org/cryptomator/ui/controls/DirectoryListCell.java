@@ -9,9 +9,8 @@
 package org.cryptomator.ui.controls;
 
 import org.cryptomator.ui.model.Vault;
+import org.fxmisc.easybind.EasyBind;
 
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.geometry.Pos;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.ContextMenu;
@@ -21,14 +20,17 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
 
-public class DirectoryListCell extends DraggableListCell<Vault>implements ChangeListener<Boolean> {
+public class DirectoryListCell extends DraggableListCell<Vault> {
 
 	// fill: #FD4943, stroke: #E1443F
 	private static final Color RED_FILL = Color.rgb(253, 73, 67);
 	private static final Color RED_STROKE = Color.rgb(225, 68, 63);
+
+	// fill: #FFBF2F, stroke: #E4AC36
+	// private static final Color YELLOW_FILL = Color.rgb(255, 191, 47);
+	// private static final Color YELLOW_STROKE = Color.rgb(228, 172, 54);
 
 	// fill: #28CA40, stroke: #30B740
 	private static final Color GREEN_FILL = Color.rgb(40, 202, 64);
@@ -46,11 +48,26 @@ public class DirectoryListCell extends DraggableListCell<Vault>implements Change
 		hbox.setPrefWidth(1);
 		vbox.setFillWidth(true);
 
+		nameText.textProperty().bind(EasyBind.monadic(itemProperty()).flatMap(Vault::name));
 		nameText.textFillProperty().bind(this.textFillProperty());
 		nameText.fontProperty().bind(this.fontProperty());
 
+		pathText.textProperty().bind(EasyBind.monadic(itemProperty()).flatMap(Vault::displayablePath));
 		pathText.setTextOverrun(OverrunStyle.ELLIPSIS);
 		pathText.getStyleClass().add("detail-label");
+
+		statusIndicator.fillProperty().bind(EasyBind.monadic(itemProperty()).flatMap(Vault::unlockedProperty).map(unlocked -> {
+			return unlocked ? GREEN_FILL : RED_FILL;
+		}));
+
+		statusIndicator.strokeProperty().bind(EasyBind.monadic(itemProperty()).flatMap(Vault::unlockedProperty).map(unlocked -> {
+			return unlocked ? GREEN_STROKE : RED_STROKE;
+		}));
+
+		tooltipProperty().bind(EasyBind.monadic(itemProperty()).flatMap(Vault::path).map(p -> new Tooltip(p.toString())));
+		contextMenuProperty().bind(EasyBind.monadic(itemProperty()).flatMap(Vault::unlockedProperty).map(unlocked -> {
+			return unlocked ? null : vaultContextMenu;
+		}));
 
 		setGraphic(hbox);
 		setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
@@ -58,46 +75,11 @@ public class DirectoryListCell extends DraggableListCell<Vault>implements Change
 
 	@Override
 	protected void updateItem(Vault item, boolean empty) {
-		final Vault oldItem = super.getItem();
-		if (oldItem != null) {
-			oldItem.unlockedProperty().removeListener(this);
-		}
 		super.updateItem(item, empty);
 		if (item == null) {
-			nameText.setText(null);
-			pathText.setText(null);
-			setTooltip(null);
-			setContextMenu(null);
 			statusIndicator.setVisible(false);
 		} else {
-			nameText.setText(item.getName());
-			pathText.setText(item.getDisplayablePath());
-			setTooltip(new Tooltip(item.getPath().toString()));
 			statusIndicator.setVisible(true);
-			item.unlockedProperty().addListener(this);
-			updateStatusIndicator();
-			updateContextMenu();
-		}
-	}
-
-	@Override
-	public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-		updateStatusIndicator();
-		updateContextMenu();
-	}
-
-	private void updateStatusIndicator() {
-		final Paint fillColor = getItem().isUnlocked() ? GREEN_FILL : RED_FILL;
-		final Paint strokeColor = getItem().isUnlocked() ? GREEN_STROKE : RED_STROKE;
-		statusIndicator.setFill(fillColor);
-		statusIndicator.setStroke(strokeColor);
-	}
-
-	private void updateContextMenu() {
-		if (getItem().isUnlocked()) {
-			this.setContextMenu(null);
-		} else {
-			this.setContextMenu(vaultContextMenu);
 		}
 	}
 

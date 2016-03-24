@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright (c) 2014 Sebastian Stenzel
+  This file is licensed under the terms of the MIT license.
+  See the LICENSE.txt file for more info.
+  
+  Contributors:
+      Sebastian Stenzel - initial API and implementation
+-->
+<?import java.lang.String?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox prefWidth="400.0" prefHeight="400.0" spacing="24.0" alignment="CENTER" xmlns:fx="http://javafx.com/fxml" cacheShape="true" cache="true">
+
+	<Label text="%notfound.label" textAlignment="CENTER" wrapText="true" cacheShape="true" cache="true"/>
+	
+</VBox>
+
+

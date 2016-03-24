@@ -15,7 +15,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
 
 import javax.inject.Inject;
@@ -48,20 +47,19 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 
 @Singleton
-public class WelcomeController extends AbstractFXMLViewController {
+public class WelcomeController extends LocalizedFXMLViewController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(WelcomeController.class);
 
 	private final Application app;
-	private final Localization localization;
 	private final Settings settings;
 	private final Comparator<String> semVerComparator;
 	private final ExecutorService executor;
 
 	@Inject
 	public WelcomeController(Application app, Localization localization, Settings settings, @Named("SemVer") Comparator<String> semVerComparator, ExecutorService executor) {
+		super(localization);
 		this.app = app;
-		this.localization = localization;
 		this.settings = settings;
 		this.semVerComparator = semVerComparator;
 		this.executor = executor;
@@ -91,11 +89,6 @@ public class WelcomeController extends AbstractFXMLViewController {
 	@Override
 	protected URL getFxmlResourceUrl() {
 		return getClass().getResource("/fxml/welcome.fxml");
-	}
-
-	@Override
-	protected ResourceBundle getFxmlResourceBundle() {
-		return localization;
 	}
 
 	// ****************************************

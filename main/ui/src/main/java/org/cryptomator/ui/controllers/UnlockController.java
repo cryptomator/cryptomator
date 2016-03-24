@@ -10,7 +10,7 @@ package org.cryptomator.ui.controllers;
 
 import java.net.URL;
 import java.util.Comparator;
-import java.util.ResourceBundle;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
 import javax.inject.Inject;
@@ -51,23 +51,23 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.text.Text;
 import javafx.util.StringConverter;
 
-public class UnlockController extends AbstractFXMLViewController {
+public class UnlockController extends LocalizedFXMLViewController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(UnlockController.class);
 
 	private final Application app;
-	private final Localization localization;
 	private final ExecutorService exec;
 	private final Lazy<FrontendFactory> frontendFactory;
 	private final Settings settings;
 	private final WindowsDriveLetters driveLetters;
 	private final ChangeListener<Character> driveLetterChangeListener = this::winDriveLetterDidChange;
 	final ObjectProperty<Vault> vault = new SimpleObjectProperty<>();
+	private Optional<UnlockListener> listener = Optional.empty();
 
 	@Inject
 	public UnlockController(Application app, Localization localization, ExecutorService exec, Lazy<FrontendFactory> frontendFactory, Settings settings, WindowsDriveLetters driveLetters) {
+		super(localization);
 		this.app = app;
-		this.localization = localization;
 		this.exec = exec;
 		this.frontendFactory = frontendFactory;
 		this.settings = settings;
@@ -125,11 +125,6 @@ public class UnlockController extends AbstractFXMLViewController {
 	@Override
 	protected URL getFxmlResourceUrl() {
 		return getClass().getResource("/fxml/unlock.fxml");
-	}
-
-	@Override
-	protected ResourceBundle getFxmlResourceBundle() {
-		return localization;
 	}
 
 	private void vaultChanged(Vault newVault) {
@@ -276,21 +271,24 @@ public class UnlockController extends AbstractFXMLViewController {
 		progressIndicator.setVisible(true);
 		downloadsPageLink.setVisible(false);
 		CharSequence password = passwordField.getCharacters();
-		exec.submit(() -> this.unlock(password));
+		exec.submit(() -> this.unlock(vault.get(), password));
 
 	}
 
-	private void unlock(CharSequence password) {
+	private void unlock(Vault vault, CharSequence password) {
 		try {
-			vault.get().activateFrontend(frontendFactory.get(), settings, password);
-			vault.get().reveal();
+			vault.activateFrontend(frontendFactory.get(), settings, password);
+			vault.reveal();
+			Platform.runLater(() -> {
+				messageText.setText(null);
+				listener.ifPresent(lstnr -> lstnr.didUnlock(vault));
+			});
 		} catch (InvalidPassphraseException e) {
 			Platform.runLater(() -> {
 				messageText.setText(localization.getString("unlock.errorMessage.wrongPassword"));
 				passwordField.requestFocus();
 			});
 		} catch (UnsupportedVaultFormatException e) {
-			LOG.warn("Unable to unlock vault: " + e.getMessage());
 			Platform.runLater(() -> {
 				downloadsPageLink.setVisible(true);
 				if (e.isVaultOlderThanSoftware()) {
@@ -312,6 +310,17 @@ public class UnlockController extends AbstractFXMLViewController {
 				progressIndicator.setVisible(false);
 			});
 		}
+	}
+
+	/* callback */
+
+	public void setListener(UnlockListener listener) {
+		this.listener = Optional.ofNullable(listener);
+	}
+
+	@FunctionalInterface
+	interface UnlockListener {
+		void didUnlock(Vault vault);
 	}
 
 }

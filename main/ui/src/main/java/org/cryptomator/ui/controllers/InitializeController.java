@@ -13,7 +13,6 @@ import java.io.UncheckedIOException;
 import java.net.URL;
 import java.nio.file.FileAlreadyExistsException;
 import java.util.Optional;
-import java.util.ResourceBundle;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -34,17 +33,16 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 
 @Singleton
-public class InitializeController extends AbstractFXMLViewController {
+public class InitializeController extends LocalizedFXMLViewController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(InitializeController.class);
 
-	private final Localization localization;
 	final ObjectProperty<Vault> vault = new SimpleObjectProperty<>();
 	private Optional<InitializationListener> listener = Optional.empty();
 
 	@Inject
 	public InitializeController(Localization localization) {
-		this.localization = localization;
+		super(localization);
 	}
 
 	@FXML
@@ -69,11 +67,6 @@ public class InitializeController extends AbstractFXMLViewController {
 	@Override
 	protected URL getFxmlResourceUrl() {
 		return getClass().getResource("/fxml/initialize.fxml");
-	}
-
-	@Override
-	protected ResourceBundle getFxmlResourceBundle() {
-		return localization;
 	}
 
 	// ****************************************
@@ -111,13 +104,13 @@ public class InitializeController extends AbstractFXMLViewController {
 
 	private void invokeListenerLater(InitializationListener listener) {
 		Platform.runLater(() -> {
-			listener.didInitialize(this);
+			listener.didInitialize();
 		});
 	}
 
 	@FunctionalInterface
 	interface InitializationListener {
-		void didInitialize(InitializeController ctrl);
+		void didInitialize();
 	}
 
 }

@@ -55,7 +55,7 @@ public class VaultObjectMapperProvider implements Provider<ObjectMapper> {
 		@Override
 		public void serialize(Vault value, JsonGenerator jgen, SerializerProvider provider) throws IOException, JsonProcessingException {
 			jgen.writeStartObject();
-			jgen.writeStringField("path", value.getPath().toString());
+			jgen.writeStringField("path", value.path().getValue().toString());
 			jgen.writeStringField("mountName", value.getMountName());
 			final Character winDriveLetter = value.getWinDriveLetter();
 			if (winDriveLetter != null) {
