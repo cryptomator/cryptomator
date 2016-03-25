@@ -27,7 +27,12 @@ public class CryptoEngineModule {
 	@Provides
 	public SecureRandom provideSecureRandom() {
 		try {
-			return SecureRandom.getInstanceStrong();
+			// https://tersesystems.com/2015/12/17/the-right-way-to-use-securerandom/
+			final SecureRandom nativeRandom = SecureRandom.getInstanceStrong();
+			byte[] seed = nativeRandom.generateSeed(55); // NIST SP800-90A suggests 440 bits for SHA1 seed
+			SecureRandom sha1Random = SecureRandom.getInstance("SHA1PRNG");
+			sha1Random.setSeed(seed);
+			return sha1Random;
 		} catch (NoSuchAlgorithmException e) {
 			throw new IllegalStateException("No strong PRNGs available.", e);
 		}

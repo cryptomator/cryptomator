@@ -9,7 +9,6 @@
 package org.cryptomator.ui.controllers;
 
 import java.net.URL;
-import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -39,10 +38,9 @@ import javafx.scene.control.cell.CheckBoxListCell;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
 
-public class MacWarningsController extends AbstractFXMLViewController {
+public class MacWarningsController extends LocalizedFXMLViewController {
 
 	private final Application application;
-	private final Localization localization;
 	private final ObservableList<Warning> warnings = FXCollections.observableArrayList();
 	private final ListChangeListener<String> unauthenticatedResourcesChangeListener = this::unauthenticatedResourcesDidChange;
 	private final ChangeListener<Boolean> stageVisibilityChangeListener = this::windowVisibilityDidChange;
@@ -51,8 +49,8 @@ public class MacWarningsController extends AbstractFXMLViewController {
 
 	@Inject
 	public MacWarningsController(Application application, Localization localization) {
+		super(localization);
 		this.application = application;
-		this.localization = localization;
 	}
 
 	@FXML
@@ -83,11 +81,6 @@ public class MacWarningsController extends AbstractFXMLViewController {
 	@Override
 	protected URL getFxmlResourceUrl() {
 		return getClass().getResource("/fxml/mac_warnings.fxml");
-	}
-
-	@Override
-	protected ResourceBundle getFxmlResourceBundle() {
-		return localization;
 	}
 
 	@Override
@@ -130,7 +123,7 @@ public class MacWarningsController extends AbstractFXMLViewController {
 
 	private void windowVisibilityDidChange(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
 		if (Boolean.TRUE.equals(newValue)) {
-			stage.setTitle(String.format(localization.getString("macWarnings.windowTitle"), vault.get().getName()));
+			stage.setTitle(String.format(localization.getString("macWarnings.windowTitle"), vault.get().name().getValue()));
 			warnings.addAll(vault.get().getNamesOfResourcesWithInvalidMac().stream().map(Warning::new).collect(Collectors.toList()));
 			vault.get().getNamesOfResourcesWithInvalidMac().addListener(this.unauthenticatedResourcesChangeListener);
 		} else {

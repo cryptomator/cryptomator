@@ -10,7 +10,6 @@ package org.cryptomator.ui.controllers;
 
 import java.net.URL;
 import java.util.Optional;
-import java.util.ResourceBundle;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -28,14 +27,13 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
 
 @Singleton
-public class SettingsController extends AbstractFXMLViewController {
+public class SettingsController extends LocalizedFXMLViewController {
 
-	private final Localization localization;
 	private final Settings settings;
 
 	@Inject
 	public SettingsController(Localization localization, Settings settings) {
-		this.localization = localization;
+		super(localization);
 		this.settings = settings;
 	}
 
@@ -44,7 +42,7 @@ public class SettingsController extends AbstractFXMLViewController {
 
 	@FXML
 	private TextField portField;
-	
+
 	@FXML
 	private CheckBox useIpv6Checkbox;
 
@@ -69,11 +67,6 @@ public class SettingsController extends AbstractFXMLViewController {
 	@Override
 	protected URL getFxmlResourceUrl() {
 		return getClass().getResource("/fxml/settings.fxml");
-	}
-
-	@Override
-	protected ResourceBundle getFxmlResourceBundle() {
-		return localization;
 	}
 
 	private Optional<String> applicationVersion() {

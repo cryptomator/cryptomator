@@ -67,7 +67,7 @@ public class MainApplication extends Application {
 		// show window and start observing its focus:
 		primaryStage.show();
 		ActiveWindowStyleSupport.startObservingFocus(primaryStage);
-		comp.trayIconUtil().initTrayIcon(this::quit);
+		comp.exitUtil().initExitHandler(this::quit);
 
 		// open files, if requested during startup:
 		for (String arg : getParameters().getUnnamed()) {

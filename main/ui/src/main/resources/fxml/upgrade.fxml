@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright (c) 2014 Sebastian Stenzel
+  This file is licensed under the terms of the MIT license.
+  See the LICENSE.txt file for more info.
+  
+  Contributors:
+      Sebastian Stenzel - initial API and implementation
+-->
+<?import java.lang.String?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressIndicator?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox prefWidth="400.0" prefHeight="400.0" spacing="24.0" alignment="CENTER" xmlns:fx="http://javafx.com/fxml" cacheShape="true" cache="true">
+
+	<Label fx:id="upgradeLabel" textAlignment="CENTER" wrapText="true"/>
+
+	<Button fx:id="upgradeButton" text="%upgrade.button" prefWidth="150.0" onAction="#didClickUpgradeButton" cacheShape="true" cache="true" />
+
+	<ProgressIndicator progress="-1" fx:id="progressIndicator" visible="false" cacheShape="true" cache="true" cacheHint="SPEED" />
+	
+	<Label fx:id="errorLabel" textAlignment="CENTER" wrapText="true"/>
+</VBox>
+
+

@@ -10,7 +10,6 @@ package org.cryptomator.ui.controllers;
 
 import java.net.URL;
 import java.util.Optional;
-import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
 
 import javax.inject.Inject;
@@ -46,12 +45,11 @@ import javafx.stage.PopupWindow.AnchorLocation;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
-public class UnlockedController extends AbstractFXMLViewController {
+public class UnlockedController extends LocalizedFXMLViewController {
 
 	private static final int IO_SAMPLING_STEPS = 100;
 	private static final double IO_SAMPLING_INTERVAL = 0.25;
 
-	private final Localization localization;
 	private final Stage macWarningsWindow = new Stage();
 	private final MacWarningsController macWarningsController;
 	private final ExecutorService exec;
@@ -61,7 +59,7 @@ public class UnlockedController extends AbstractFXMLViewController {
 
 	@Inject
 	public UnlockedController(Localization localization, Provider<MacWarningsController> macWarningsControllerProvider, ExecutorService exec) {
-		this.localization = localization;
+		super(localization);
 		this.macWarningsController = macWarningsControllerProvider.get();
 		this.exec = exec;
 
@@ -95,11 +93,6 @@ public class UnlockedController extends AbstractFXMLViewController {
 	@Override
 	protected URL getFxmlResourceUrl() {
 		return getClass().getResource("/fxml/unlocked.fxml");
-	}
-
-	@Override
-	protected ResourceBundle getFxmlResourceBundle() {
-		return localization;
 	}
 
 	private void vaultChanged(Vault newVault) {
@@ -260,10 +253,6 @@ public class UnlockedController extends AbstractFXMLViewController {
 	}
 
 	/* callback */
-
-	public LockListener getListener() {
-		return listener.orElse(null);
-	}
 
 	public void setListener(LockListener listener) {
 		this.listener = Optional.ofNullable(listener);
