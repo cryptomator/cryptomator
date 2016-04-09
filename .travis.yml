@@ -1,3 +1,7 @@
+sudo: required
+
+dist: trusty
+
 language: java
 
 jdk:
@@ -8,7 +12,7 @@ env:
     - secure: "Lgj042RD0X3rB8VZVZLWP1GetLhjd3PqI5JbJMlzgHJpDI6RkFIBLN9SWAGmkLPCehIp2zA5tu9+UVy0NNMxm9xz6SyjMCaxS28/fnYEXaNmwwDSF6O6gLUbdxyzoYIFPYOPmFxpzhebqnNIsxaM29oZpgRgUGqosCczQxiB+Ng=" #coveralls
     - secure: "IfYURwZaDWuBDvyn47n0k1Zod/IQw1FF+CS5nnV08Q+NfC3vGGJMwV8m59XnbfwnWGxwvCaAbk4qP6s6+ijgZNKkvgfFMo3rfTok5zt43bIqgaFOANYV+OC/1c59gYD6ZUxhW5iNgMgU3qdsRtJuwSmfkVv/jKyLGfAbS4kN8BA=" #coverity
 
-before_install: "curl -L --cookie 'oraclelicense=accept-securebackup-cookie;'  http://download.oracle.com/otn-pub/java/jce/8/jce_policy-8.zip -o /tmp/policy.zip && sudo unzip -j -o /tmp/policy.zip *.jar -d `jdk_switcher home oraclejdk8`/jre/lib/security && rm /tmp/policy.zip"
+before_install: "curl -L --cookie 'oraclelicense=accept-securebackup-cookie;' http://download.oracle.com/otn-pub/java/jce/8/jce_policy-8.zip -o /tmp/policy.zip && sudo unzip -j -o /tmp/policy.zip *.jar -d `jdk_switcher home oraclejdk8`/jre/lib/security && rm /tmp/policy.zip"
 
 script: mvn -fmain/pom.xml clean test
 
@@ -27,7 +31,7 @@ notifications:
     on_success: change
     on_failure: always
 
-before_deploy: mvn -fmain/pom.xml -Puber-jar clean package -DskipTests
+before_deploy: mvn -fmain/pom.xml -Prelease clean package -DskipTests
 
 addons:
   coverity_scan:
@@ -42,7 +46,9 @@ deploy:
   prerelease: false
   api_key:
     secure: "ZjE1j93v3qbPIe2YbmhS319aCbMdLQw0HuymmluTurxXsZtn9D4t2+eTr99vBVxGRuB5lzzGezPR5zjk5W7iHF7xhwrawXrFzr2rPJWzWFt0aM+Ry2njU1ROTGGXGTbv4anWeBlgMxLEInTAy/9ytOGNJlec83yc0THpOY2wxnk="
-  file: main/uber-jar/target/Cryptomator-$TRAVIS_TAG.jar
+  file:
+    - "main/uber-jar/target/Cryptomator-$TRAVIS_TAG.jar"
+    - "main/ant-kit/target/Cryptomator-$TRAVIS_TAG.tar.gz"
   skip_cleanup: true
   on:
     repo: cryptomator/cryptomator

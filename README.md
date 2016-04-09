@@ -1,44 +1,66 @@
-Cryptomator
-====================
+![cryptomator](cryptomator.png)
 
 [![Build Status](https://travis-ci.org/cryptomator/cryptomator.svg?branch=master)](https://travis-ci.org/cryptomator/cryptomator)
+[![Coverity Scan Build Status](https://scan.coverity.com/projects/cryptomator-cryptomator/badge.svg?flat=1)](https://scan.coverity.com/projects/cryptomator-cryptomator)
+[![Coverage Status](https://coveralls.io/repos/github/cryptomator/cryptomator/badge.svg?branch=master)](https://coveralls.io/github/cryptomator/cryptomator?branch=master)
 [![Join the chat at https://gitter.im/cryptomator/cryptomator](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/cryptomator/cryptomator?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Twitter](https://img.shields.io/badge/twitter-@Cryptomator-blue.svg?style=flat)](http://twitter.com/Cryptomator)
 
-Multiplatform transparent client-side encryption of your files in the cloud.
+Multi-platform transparent client-side encryption of your files in the cloud.
 
-If you want to take a look at the current beta version, go ahead and get your copy of cryptomator on  [Cryptomator.org](https://cryptomator.org) or clone and build Cryptomator using Maven (instructions below).
+Download native binaries of Cryptomator on [cryptomator.org](https://cryptomator.org/) or clone and build Cryptomator using Maven (instructions below).
 
 ## Features
-- Totally transparent: Just work on the encrypted volume, as if it was an USB flash drive
-- Works with Dropbox, OneDrive (Skydrive), Google Drive and any other cloud storage, that syncs with a local directory.
-- In fact it works with any directory. You can use it to encrypt as many folders as you like
+
+- Works with Dropbox, Google Drive, OneDrive, and any other cloud storage service that synchronizes with a local directory
+- Open Source means: No backdoors, control is better than trust
+- Client-side: No accounts, no data shared with any online service
+- Totally transparent: Just work on the virtual drive as if it were a USB flash drive
 - AES encryption with 256-bit key length
-- Client-side. No accounts, no data shared with any online service
-- Filenames get encrypted too
-- No need to provide credentials for any 3rd party service
-- Open Source means: No backdoors. Control is better than trust
-- Use as many encrypted folders in your Dropbox as you want. Each having individual passwords
-- No commercial interest, no government agency, no wasted taxpayers' money ;-)
+- Filenames get encrypted, too
+- Use as many vaults in your Dropbox as you want, each having individual passwords
 
 ### Privacy
-- 256 bit keys (unlimited strength policy bundled with native binaries - 128-bit elsewhere)
+
+- 256-bit keys (unlimited strength policy bundled with native binaries)
 - Scrypt key derivation
-- Cryptographically secure random numbers for salts, IVs and the master key of course
-- Sensitive data is swiped from the heap asap
+- Cryptographically secure random numbers for salts, IVs and the masterkey of course
+- Sensitive data is wiped from the heap asap
 - Lightweight: [Complexity kills security](https://www.schneier.com/essays/archives/1999/11/a_plea_for_simplicit.html)
 
 ### Consistency
+
 - HMAC over file contents to recognize changed ciphertext before decryption
-- I/O operations are transactional and atomic, if the file systems support it
-- Each file contains all information needed for decryption (except for the key of course). No common metadata means no [SPOF](http://en.wikipedia.org/wiki/Single_point_of_failure)
+- I/O operations are transactional and atomic, if the filesystems support it
+- Each file contains all information needed for decryption (except for the key of course), no common metadata means no [SPOF](http://en.wikipedia.org/wiki/Single_point_of_failure)
+
+### Security Architecture
+
+For more information on the security details visit [cryptomator.org](https://cryptomator.org/architecture/).
 
 ## Building
 
-#### Dependencies
+### Dependencies
+
 * Java 8 + JCE unlimited strength policy files (needed for 256-bit keys)
 * Maven 3
-* Optional: OS-dependent build tools for native packaging (See [Windows](https://github.com/cryptomator/cryptomator-win), [OS X](https://github.com/cryptomator/cryptomator-osx), [Debian](https://github.com/cryptomator/cryptomator-deb))
+* Optional: OS-dependent build tools for native packaging (see [Windows](https://github.com/cryptomator/cryptomator-win), [OS X](https://github.com/cryptomator/cryptomator-osx), [Debian](https://github.com/cryptomator/cryptomator-deb))
+
+### Run Maven
+
+```
+cd main
+mvn clean install
+```
+
+## Contributing to Cryptomator
+
+Please read our [contribution guide](https://github.com/cryptomator/cryptomator/blob/master/CONTRIBUTING.md), if you would like to report a bug, ask a question or help us with coding.
+
+## Code of Conduct
+
+Help us keep Cryptomator open and inclusive. Please read and follow our [Code of Conduct](https://github.com/cryptomator/cryptomator/blob/master/CODE_OF_CONDUCT.md).
 
 ## License
 
-Distributed under the MIT X Consortium license. See the LICENSE file for more info.
+Distributed under the MIT X Consortium license. See the `LICENSES/MIT-X-Consortium-License.txt` file for more info.
