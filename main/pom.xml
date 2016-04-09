@@ -274,9 +274,10 @@
 
 	<profiles>
 		<profile>
-			<id>uber-jar</id>
+			<id>release</id>
 			<modules>
 				<module>uber-jar</module>
+				<module>ant-kit</module>
 			</modules>
 		</profile>
 	</profiles>
