@@ -9,7 +9,7 @@
 	<parent>
 		<groupId>org.cryptomator</groupId>
 		<artifactId>main</artifactId>
-		<version>1.0.3</version>
+		<version>1.0.3b</version>
 	</parent>
 	<artifactId>filesystem-api</artifactId>
 	<name>Cryptomator filesystem: API</name>
