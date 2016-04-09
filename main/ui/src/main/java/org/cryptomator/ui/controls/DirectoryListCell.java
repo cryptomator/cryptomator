@@ -56,13 +56,8 @@ public class DirectoryListCell extends DraggableListCell<Vault> {
 		pathText.setTextOverrun(OverrunStyle.ELLIPSIS);
 		pathText.getStyleClass().add("detail-label");
 
-		statusIndicator.fillProperty().bind(EasyBind.monadic(itemProperty()).flatMap(Vault::unlockedProperty).map(unlocked -> {
-			return unlocked ? GREEN_FILL : RED_FILL;
-		}));
-
-		statusIndicator.strokeProperty().bind(EasyBind.monadic(itemProperty()).flatMap(Vault::unlockedProperty).map(unlocked -> {
-			return unlocked ? GREEN_STROKE : RED_STROKE;
-		}));
+		statusIndicator.fillProperty().bind(EasyBind.monadic(itemProperty()).flatMap(Vault::unlockedProperty).filter(Boolean.TRUE::equals).map(unlocked -> GREEN_FILL).orElse(RED_FILL));
+		statusIndicator.strokeProperty().bind(EasyBind.monadic(itemProperty()).flatMap(Vault::unlockedProperty).filter(Boolean.TRUE::equals).map(unlocked -> GREEN_STROKE).orElse(RED_STROKE));
 
 		tooltipProperty().bind(EasyBind.monadic(itemProperty()).flatMap(Vault::path).map(p -> new Tooltip(p.toString())));
 		contextMenuProperty().bind(EasyBind.monadic(itemProperty()).flatMap(Vault::unlockedProperty).map(unlocked -> {
