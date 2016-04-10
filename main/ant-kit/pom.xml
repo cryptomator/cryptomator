@@ -22,9 +22,7 @@
 		</dependency>
 	</dependencies>
 
-	<build>
-		<defaultGoal>clean assembly:assembly</defaultGoal>
-		
+	<build>	
 		<plugins>
 			<!-- copy libraries to target/libs/: -->
 			<plugin>
@@ -73,6 +71,15 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-assembly-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>make-assembly</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
 				<configuration>
 					<descriptor>assembly.xml</descriptor>
 					<finalName>cryptomator_${project.version}</finalName>
