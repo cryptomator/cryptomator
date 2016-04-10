@@ -22,9 +22,7 @@
 		</dependency>
 	</dependencies>
 
-	<build>
-		<defaultGoal>clean assembly:assembly</defaultGoal>
-		
+	<build>	
 		<plugins>
 			<!-- copy libraries to target/libs/: -->
 			<plugin>
