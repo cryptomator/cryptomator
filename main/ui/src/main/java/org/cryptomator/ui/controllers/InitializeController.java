@@ -79,12 +79,9 @@ public class InitializeController extends LocalizedFXMLViewController {
 			checkPasswordStrength(newValue);
 		});
 
-		// progressbar graphic properties
-		passwordStrengthShape.setFill(Color.web("#ff1a1a"));
-		passwordStrengthShape.setStroke(Color.GRAY);
-
 		// default password strength bar visual properties
-		changeProgressBarAspect(0f, 0f, Color.web("#ff1a1a"));
+		passwordStrengthShape.setStroke(Color.GRAY);
+		changeProgressBarAspect(0f, 0f, Color.web("#FF0000"));
 		passwordStrengthLabel.setText(localization.getString("initialize.messageLabel.passwordStrength") + " : 0%");
 
 		// preparing inputs for the password strength checker

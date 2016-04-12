@@ -11,11 +11,19 @@ package org.cryptomator.ui.controllers;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import com.nulabinc.zxcvbn.Strength;
+import com.nulabinc.zxcvbn.Zxcvbn;
+import javafx.scene.control.Label;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
+import org.apache.commons.lang3.StringUtils;
 import org.cryptomator.crypto.engine.InvalidPassphraseException;
 import org.cryptomator.crypto.engine.UnsupportedVaultFormatException;
 import org.cryptomator.ui.controls.SecPasswordField;
@@ -43,6 +51,8 @@ public class ChangePasswordController extends LocalizedFXMLViewController {
 	private final Application app;
 	final ObjectProperty<Vault> vault = new SimpleObjectProperty<>();
 	private Optional<ChangePasswordListener> listener = Optional.empty();
+	private Zxcvbn zxcvbn = new Zxcvbn();
+	private List<String> sanitizedInputs = new ArrayList();
 
 	@Inject
 	public ChangePasswordController(Application app, Localization localization) {
@@ -68,12 +78,29 @@ public class ChangePasswordController extends LocalizedFXMLViewController {
 	@FXML
 	private Hyperlink downloadsPageLink;
 
+	@FXML
+	private Label passwordStrengthLabel;
+
+	@FXML
+	private Rectangle passwordStrengthShape;
+
 	@Override
 	public void initialize() {
 		BooleanBinding oldPasswordIsEmpty = oldPasswordField.textProperty().isEmpty();
 		BooleanBinding newPasswordIsEmpty = newPasswordField.textProperty().isEmpty();
 		BooleanBinding passwordsDiffer = newPasswordField.textProperty().isNotEqualTo(retypePasswordField.textProperty());
 		changePasswordButton.disableProperty().bind(oldPasswordIsEmpty.or(newPasswordIsEmpty.or(passwordsDiffer)));
+		newPasswordField.textProperty().addListener((observable, oldValue, newValue) -> {
+			checkPasswordStrength(newValue);
+		});
+
+		// default password strength bar visual properties
+		passwordStrengthShape.setStroke(Color.GRAY);
+		changeProgressBarAspect(0f, 0f, Color.web("#FF0000"));
+		passwordStrengthLabel.setText(localization.getString("initialize.messageLabel.passwordStrength") + " : 0%");
+
+		// preparing inputs for the password strength checker
+		sanitizedInputs.add("cryptomator");
 	}
 
 	@Override
@@ -120,6 +147,51 @@ public class ChangePasswordController extends LocalizedFXMLViewController {
 			newPasswordField.swipe();
 			retypePasswordField.swipe();
 		}
+	}
+
+	// ****************************************
+	// Password strength management
+	// ****************************************
+
+	private void checkPasswordStrength(String password) {
+		int strengthPercentage = 0;
+		if (StringUtils.isEmpty(password)) {
+			changeProgressBarAspect(0f, 0f, Color.web("#FF0000"));
+			passwordStrengthLabel.setText(localization.getString("initialize.messageLabel.passwordStrength") + " : " + strengthPercentage + "%");
+		} else {
+			Color color = Color.web("#FF0000");
+			Strength strength = zxcvbn.measure(password, sanitizedInputs);
+			switch (strength.getScore()) {
+				case 0:
+					strengthPercentage = 20;
+					break;
+				case 1:
+					strengthPercentage = 40;
+					color = Color.web("#FF8000");
+					break;
+				case 2:
+					strengthPercentage = 60;
+					color = Color.web("#FFBF00");
+					break;
+				case 3:
+					strengthPercentage = 80;
+					color = Color.web("#FFFF00");
+					break;
+				case 4:
+					strengthPercentage = 100;
+					color = Color.web("#BFFF00");
+					break;
+			}
+
+			passwordStrengthLabel.setText(localization.getString("initialize.messageLabel.passwordStrength") + " : " + strengthPercentage + "%");
+			changeProgressBarAspect(0.5f, strengthPercentage * 2.23f, color); // 2.23f is the factor used to get the width to fit the window
+		}
+	}
+
+	private void changeProgressBarAspect(float strokeWidth, float length, Color color) {
+		passwordStrengthShape.setFill(color);
+		passwordStrengthShape.setStrokeWidth(strokeWidth);
+		passwordStrengthShape.setWidth(length);
 	}
 
 	/* Getter/Setter */
