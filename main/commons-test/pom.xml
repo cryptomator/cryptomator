@@ -10,7 +10,7 @@
 	<parent>
 		<groupId>org.cryptomator</groupId>
 		<artifactId>main</artifactId>
-		<version>1.0.3b</version>
+		<version>1.0.3c</version>
 	</parent>
 	<artifactId>commons-test</artifactId>
 	<name>Cryptomator common test dependencies</name>
