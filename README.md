@@ -5,6 +5,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/cryptomator/cryptomator/badge.svg?branch=master)](https://coveralls.io/github/cryptomator/cryptomator?branch=master)
 [![Join the chat at https://gitter.im/cryptomator/cryptomator](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/cryptomator/cryptomator?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![Twitter](https://img.shields.io/badge/twitter-@Cryptomator-blue.svg?style=flat)](http://twitter.com/Cryptomator)
+[![POEditor](https://img.shields.io/badge/POEditor-Help%20Translate-blue.svg?style=flat)](https://poeditor.com/join/project/bHwbvJmx0E)
 
 Multi-platform transparent client-side encryption of your files in the cloud.
 

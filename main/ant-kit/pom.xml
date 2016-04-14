@@ -67,7 +67,7 @@
 				</executions>
 			</plugin>
 
-			<!-- create cryptomator_1.2.3-4.tar.gz: -->
+			<!-- create antkit.tar.gz: -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-assembly-plugin</artifactId>
@@ -81,8 +81,11 @@
 					</execution>
 				</executions>
 				<configuration>
-					<descriptor>assembly.xml</descriptor>
-					<finalName>cryptomator_${project.version}</finalName>
+					<descriptors>
+						<descriptor>assembly.xml</descriptor>
+					</descriptors>
+					<appendAssemblyId>false</appendAssemblyId>
+					<finalName>antkit</finalName>
 				</configuration>
 			</plugin>
 		</plugins>

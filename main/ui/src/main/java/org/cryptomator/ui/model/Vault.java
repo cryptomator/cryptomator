@@ -214,7 +214,7 @@ public class Vault implements CryptoFileSystemDelegate {
 				String homePrefix = SystemUtils.IS_OS_WINDOWS ? "~\\" : "~/";
 				return homePrefix + relativePath.toString();
 			} else {
-				return path.toString();
+				return path.getValue().toString();
 			}
 		});
 	}
