@@ -79,9 +79,7 @@ public class InitializeController extends LocalizedFXMLViewController {
 		BooleanBinding passwordIsEmpty = passwordField.textProperty().isEmpty();
 		BooleanBinding passwordsDiffer = passwordField.textProperty().isNotEqualTo(retypePasswordField.textProperty());
 		okButton.disableProperty().bind(passwordIsEmpty.or(passwordsDiffer));
-		EasyBind.subscribe(passwordField.textProperty(), this::checkPasswordStrength);
-
-		strengthRater.setLocalization(localization);
+		passwordStrength.bind(EasyBind.map(passwordField.textProperty(), strengthRater::computeRate));
 
 		passwordStrengthShape.widthProperty().bind(EasyBind.map(passwordStrength, strengthRater::getWidth));
 		passwordStrengthShape.fillProperty().bind(EasyBind.map(passwordStrength, strengthRater::getStrengthColor));
@@ -123,12 +121,6 @@ public class InitializeController extends LocalizedFXMLViewController {
 
 	public void setListener(InitializationListener listener) {
 		this.listener = Optional.ofNullable(listener);
-	}
-
-	/* Methods */
-
-	private void checkPasswordStrength(String password) {
-		passwordStrength.set(strengthRater.computeRate(password));
 	}
 
 	/* callback */

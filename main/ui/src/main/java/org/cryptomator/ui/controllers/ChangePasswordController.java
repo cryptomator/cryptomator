@@ -97,9 +97,7 @@ public class ChangePasswordController extends LocalizedFXMLViewController {
 		BooleanBinding newPasswordIsEmpty = newPasswordField.textProperty().isEmpty();
 		BooleanBinding passwordsDiffer = newPasswordField.textProperty().isNotEqualTo(retypePasswordField.textProperty());
 		changePasswordButton.disableProperty().bind(oldPasswordIsEmpty.or(newPasswordIsEmpty.or(passwordsDiffer)));
-		EasyBind.subscribe(newPasswordField.textProperty(), this::checkPasswordStrength);
-
-		strengthRater.setLocalization(localization);
+		passwordStrength.bind(EasyBind.map(newPasswordField.textProperty(), strengthRater::computeRate));
 
 		passwordStrengthShape.widthProperty().bind(EasyBind.map(passwordStrength, strengthRater::getWidth));
 		passwordStrengthShape.fillProperty().bind(EasyBind.map(passwordStrength, strengthRater::getStrengthColor));
@@ -153,13 +151,6 @@ public class ChangePasswordController extends LocalizedFXMLViewController {
 		}
 	}
 
-	// ****************************************
-	// Password strength management
-	// ****************************************
-
-	private void checkPasswordStrength(String password) {
-		passwordStrength.set(strengthRater.computeRate(password));
-	}
 	/* Getter/Setter */
 
 	public ChangePasswordListener getListener() {

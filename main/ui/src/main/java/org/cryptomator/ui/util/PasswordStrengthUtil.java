@@ -22,14 +22,16 @@ import java.util.List;
 @Singleton
 public class PasswordStrengthUtil {
 
-    private Zxcvbn zxcvbn = new Zxcvbn();
-    private List<String> sanitizedInputs = new ArrayList<>();
-    private Localization localization;
+    private final Zxcvbn zxcvbn;
+    private final List<String> sanitizedInputs;
+    private final Localization localization;
 
     @Inject
-    public PasswordStrengthUtil(){
-        // preparing inputs for the password strength checker
-        sanitizedInputs.add("cryptomator");
+    public PasswordStrengthUtil(Localization localization){
+        this.localization = localization;
+        this.zxcvbn = new Zxcvbn();
+        this.sanitizedInputs = new ArrayList<>();
+        this.sanitizedInputs.add("cryptomator");
     }
 
     public int computeRate(String password) {
@@ -105,16 +107,6 @@ public class PasswordStrengthUtil {
         } else {
             return "";
         }
-    }
-
-    /* Getter / Setter */
-
-    public Localization getLocalization() {
-        return localization;
-    }
-
-    public void setLocalization(Localization localization) {
-        this.localization = localization;
     }
 
 }
