@@ -25,7 +25,7 @@
 			<Label fx:id="checkForUpdatesStatus" cacheShape="true" cache="true" />
 			<ProgressIndicator fx:id="checkForUpdatesIndicator" progress="-1" prefWidth="15.0" prefHeight="15.0" cacheShape="true" cache="true" cacheHint="SPEED" />
 		</HBox>
-		<Hyperlink alignment="CENTER" fx:id="updateLink" onAction="#didClickUpdateLink" cacheShape="true" cache="true" />
+		<Hyperlink alignment="CENTER" fx:id="updateLink" onAction="#didClickUpdateLink" cacheShape="true" cache="true" disable="true" />
 	</VBox>
 	
 	<ImageView fitHeight="200.0" preserveRatio="true" smooth="false" cache="true" style="-fx-background-color: green;">

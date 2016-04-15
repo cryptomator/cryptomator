@@ -5,13 +5,13 @@
  *
  * Contributors:
  *     Sebastian Stenzel - initial API and implementation
+ *     Jean-Noël Charon - password strength meter
  ******************************************************************************/
 package org.cryptomator.ui.controllers;
 
 import javafx.application.Platform;
 import javafx.beans.binding.BooleanBinding;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.*;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -22,6 +22,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.cryptomator.ui.controls.SecPasswordField;
 import org.cryptomator.ui.model.Vault;
 import org.cryptomator.ui.settings.Localization;
+import org.cryptomator.ui.util.PasswordStrengthUtil;
+import org.fxmisc.easybind.EasyBind;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,13 +46,15 @@ public class InitializeController extends LocalizedFXMLViewController {
 
 	final ObjectProperty<Vault> vault = new SimpleObjectProperty<>();
 	private Optional<InitializationListener> listener = Optional.empty();
-	private Zxcvbn zxcvbn = new Zxcvbn();
-	private List<String> sanitizedInputs = new ArrayList();
+	final IntegerProperty passwordStrength = new SimpleIntegerProperty(); // 0-4
 
 	@Inject
 	public InitializeController(Localization localization) {
 		super(localization);
 	}
+
+	@Inject
+	PasswordStrengthUtil strengthRater;
 
 	@FXML
 	private SecPasswordField passwordField;
@@ -75,17 +79,14 @@ public class InitializeController extends LocalizedFXMLViewController {
 		BooleanBinding passwordIsEmpty = passwordField.textProperty().isEmpty();
 		BooleanBinding passwordsDiffer = passwordField.textProperty().isNotEqualTo(retypePasswordField.textProperty());
 		okButton.disableProperty().bind(passwordIsEmpty.or(passwordsDiffer));
-		passwordField.textProperty().addListener((observable, oldValue, newValue) -> {
-			checkPasswordStrength(newValue);
-		});
+		EasyBind.subscribe(passwordField.textProperty(), this::checkPasswordStrength);
 
-		// default password strength bar visual properties
-		passwordStrengthShape.setStroke(Color.GRAY);
-		changeProgressBarAspect(0f, 0f, Color.web("#FF0000"));
-		passwordStrengthLabel.setText(localization.getString("initialize.messageLabel.passwordStrength") + " : 0%");
+		strengthRater.setLocalization(localization);
 
-		// preparing inputs for the password strength checker
-		sanitizedInputs.add("cryptomator");
+		passwordStrengthShape.widthProperty().bind(EasyBind.map(passwordStrength, strengthRater::getWidth));
+		passwordStrengthShape.fillProperty().bind(EasyBind.map(passwordStrength, strengthRater::getStrengthColor));
+		passwordStrengthShape.strokeWidthProperty().bind(EasyBind.map(passwordStrength, strengthRater::getStrokeWidth));
+		passwordStrengthLabel.textProperty().bind(EasyBind.map(passwordStrength, strengthRater::getStrengthDescription));
 	}
 
 	@Override
@@ -127,44 +128,7 @@ public class InitializeController extends LocalizedFXMLViewController {
 	/* Methods */
 
 	private void checkPasswordStrength(String password) {
-		int strengthPercentage = 0;
-		if (StringUtils.isEmpty(password)) {
-			changeProgressBarAspect(0f, 0f, Color.web("#FF0000"));
-			passwordStrengthLabel.setText(localization.getString("initialize.messageLabel.passwordStrength") + " : " + strengthPercentage + "%");
-		} else {
-			Color color = Color.web("#FF0000");
-			Strength strength = zxcvbn.measure(password, sanitizedInputs);
-			switch (strength.getScore()) {
-				case 0:
-					strengthPercentage = 20;
-					break;
-				case 1:
-					strengthPercentage = 40;
-					color = Color.web("#FF8000");
-					break;
-				case 2:
-					strengthPercentage = 60;
-					color = Color.web("#FFBF00");
-					break;
-				case 3:
-					strengthPercentage = 80;
-					color = Color.web("#FFFF00");
-					break;
-				case 4:
-					strengthPercentage = 100;
-					color = Color.web("#BFFF00");
-					break;
-			}
-
-			passwordStrengthLabel.setText(localization.getString("initialize.messageLabel.passwordStrength") + " : " + strengthPercentage + "%");
-			changeProgressBarAspect(0.5f, strengthPercentage * 2.23f, color); // 2.23f is the factor used to get the width to fit the window
-		}
-	}
-
-	private void changeProgressBarAspect(float strokeWidth, float length, Color color) {
-		passwordStrengthShape.setFill(color);
-		passwordStrengthShape.setStrokeWidth(strokeWidth);
-		passwordStrengthShape.setWidth(length);
+		passwordStrength.set(strengthRater.computeRate(password));
 	}
 
 	/* callback */

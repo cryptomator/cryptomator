@@ -7,6 +7,7 @@
   
   Contributors:
       Sebastian Stenzel - initial API and implementation
+      Jean-Noël Charon - password strength meter
 -->
 
 <?import java.lang.*?>
@@ -45,7 +46,7 @@
 		<Label fx:id="passwordStrengthLabel" cache="true" cacheShape="true" text="" GridPane.columnIndex="1" GridPane.rowIndex="2" />
 
 		<!-- Row 2 -->
-		<Rectangle fx:id="passwordStrengthShape" width="0" height="15" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+		<Rectangle fx:id="passwordStrengthShape" width="0" height="15" GridPane.columnIndex="1" GridPane.rowIndex="3" fill="#FF0000" stroke="grey" strokeWidth="0" />
 
 		<!-- Row 3 -->
 		<Button fx:id="okButton" cache="true" cacheShape="true" defaultButton="true" disable="true" focusTraversable="false" onAction="#initializeVault" prefWidth="150.0" text="%initialize.button.ok" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.halignment="RIGHT" GridPane.rowIndex="4" />
