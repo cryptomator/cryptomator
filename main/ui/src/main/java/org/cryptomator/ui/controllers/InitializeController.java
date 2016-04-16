@@ -9,16 +9,15 @@
  ******************************************************************************/
 package org.cryptomator.ui.controllers;
 
-import javafx.application.Platform;
-import javafx.beans.binding.BooleanBinding;
-import javafx.beans.property.*;
-import javafx.event.ActionEvent;
-import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
-import org.apache.commons.lang3.StringUtils;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.net.URL;
+import java.nio.file.FileAlreadyExistsException;
+import java.util.Optional;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 import org.cryptomator.ui.controls.SecPasswordField;
 import org.cryptomator.ui.model.Vault;
 import org.cryptomator.ui.settings.Localization;
@@ -27,34 +26,33 @@ import org.fxmisc.easybind.EasyBind;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.net.URL;
-import java.nio.file.FileAlreadyExistsException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
-import com.nulabinc.zxcvbn.*;
+import javafx.application.Platform;
+import javafx.beans.binding.BooleanBinding;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.shape.Rectangle;
 
 @Singleton
 public class InitializeController extends LocalizedFXMLViewController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(InitializeController.class);
 
+	private final PasswordStrengthUtil strengthRater;
 	final ObjectProperty<Vault> vault = new SimpleObjectProperty<>();
 	private Optional<InitializationListener> listener = Optional.empty();
-	final IntegerProperty passwordStrength = new SimpleIntegerProperty(); // 0-4
+	private final IntegerProperty passwordStrength = new SimpleIntegerProperty(); // 0-4
 
 	@Inject
-	public InitializeController(Localization localization) {
+	public InitializeController(Localization localization, PasswordStrengthUtil strengthRater) {
 		super(localization);
+		this.strengthRater = strengthRater;
 	}
-
-	@Inject
-	PasswordStrengthUtil strengthRater;
 
 	@FXML
 	private SecPasswordField passwordField;
