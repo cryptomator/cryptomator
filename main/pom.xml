@@ -238,6 +238,7 @@
 				<artifactId>hamcrest-all</artifactId>
 				<version>${hamcrest.version}</version>
 			</dependency>
+
 		</dependencies>
 	</dependencyManagement>
 

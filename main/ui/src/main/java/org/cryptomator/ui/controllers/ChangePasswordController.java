@@ -5,22 +5,35 @@
  *
  * Contributors:
  *     Sebastian Stenzel - initial API and implementation
+ *     Jean-Noël Charon - password strength meter
  *******************************************************************************/
 package org.cryptomator.ui.controllers;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import com.nulabinc.zxcvbn.Strength;
+import com.nulabinc.zxcvbn.Zxcvbn;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.scene.control.Label;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
+import org.apache.commons.lang3.StringUtils;
 import org.cryptomator.crypto.engine.InvalidPassphraseException;
 import org.cryptomator.crypto.engine.UnsupportedVaultFormatException;
 import org.cryptomator.ui.controls.SecPasswordField;
 import org.cryptomator.ui.model.Vault;
 import org.cryptomator.ui.settings.Localization;
+import org.cryptomator.ui.util.PasswordStrengthUtil;
+import org.fxmisc.easybind.EasyBind;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,12 +56,16 @@ public class ChangePasswordController extends LocalizedFXMLViewController {
 	private final Application app;
 	final ObjectProperty<Vault> vault = new SimpleObjectProperty<>();
 	private Optional<ChangePasswordListener> listener = Optional.empty();
+	final IntegerProperty passwordStrength = new SimpleIntegerProperty(); // 0-4
 
 	@Inject
 	public ChangePasswordController(Application app, Localization localization) {
 		super(localization);
 		this.app = app;
 	}
+
+	@Inject
+	PasswordStrengthUtil strengthRater;
 
 	@FXML
 	private SecPasswordField oldPasswordField;
@@ -68,12 +85,24 @@ public class ChangePasswordController extends LocalizedFXMLViewController {
 	@FXML
 	private Hyperlink downloadsPageLink;
 
+	@FXML
+	private Label passwordStrengthLabel;
+
+	@FXML
+	private Rectangle passwordStrengthShape;
+
 	@Override
 	public void initialize() {
 		BooleanBinding oldPasswordIsEmpty = oldPasswordField.textProperty().isEmpty();
 		BooleanBinding newPasswordIsEmpty = newPasswordField.textProperty().isEmpty();
 		BooleanBinding passwordsDiffer = newPasswordField.textProperty().isNotEqualTo(retypePasswordField.textProperty());
 		changePasswordButton.disableProperty().bind(oldPasswordIsEmpty.or(newPasswordIsEmpty.or(passwordsDiffer)));
+		passwordStrength.bind(EasyBind.map(newPasswordField.textProperty(), strengthRater::computeRate));
+
+		passwordStrengthShape.widthProperty().bind(EasyBind.map(passwordStrength, strengthRater::getWidth));
+		passwordStrengthShape.fillProperty().bind(EasyBind.map(passwordStrength, strengthRater::getStrengthColor));
+		passwordStrengthShape.strokeWidthProperty().bind(EasyBind.map(passwordStrength, strengthRater::getStrokeWidth));
+		passwordStrengthLabel.textProperty().bind(EasyBind.map(passwordStrength, strengthRater::getStrengthDescription));
 	}
 
 	@Override

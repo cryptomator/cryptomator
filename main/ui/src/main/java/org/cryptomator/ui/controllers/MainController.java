@@ -8,30 +8,6 @@
  ******************************************************************************/
 package org.cryptomator.ui.controllers;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Provider;
-import javax.inject.Singleton;
-
-import org.cryptomator.ui.controls.DirectoryListCell;
-import org.cryptomator.ui.model.Vault;
-import org.cryptomator.ui.model.VaultFactory;
-import org.cryptomator.ui.settings.Localization;
-import org.cryptomator.ui.settings.Settings;
-import org.fxmisc.easybind.EasyBind;
-import org.fxmisc.easybind.monadic.MonadicBinding;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import dagger.Lazy;
 import javafx.application.Platform;
 import javafx.beans.binding.Binding;
@@ -45,15 +21,35 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Side;
 import javafx.scene.Parent;
-import javafx.scene.control.Button;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
-import javafx.scene.control.ToggleButton;
+import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import org.cryptomator.ui.controls.DirectoryListCell;
+import org.cryptomator.ui.model.Vault;
+import org.cryptomator.ui.model.VaultFactory;
+import org.cryptomator.ui.settings.Localization;
+import org.cryptomator.ui.settings.Settings;
+import org.cryptomator.ui.util.DialogBuilderUtil;
+import org.fxmisc.easybind.EasyBind;
+import org.fxmisc.easybind.monadic.MonadicBinding;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Provider;
+import javax.inject.Singleton;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @Singleton
 public class MainController extends LocalizedFXMLViewController {
@@ -224,7 +220,16 @@ public class MainController extends LocalizedFXMLViewController {
 
 	@FXML
 	private void didClickRemoveSelectedEntry(ActionEvent e) {
-		vaults.remove(selectedVault.get());
+		Alert confirmationDlg = DialogBuilderUtil.buildConfirmationDialog(
+				localization.getString("main.vaultRemoval.confirmation.title"),
+				localization.getString("main.vaultRemoval.confirmation.header"),
+				localization.getString("main.vaultRemoval.confirmation.content"));
+
+		Optional<ButtonType> result = confirmationDlg.showAndWait();
+		if (result.get() == ButtonType.OK) {
+			vaults.remove(selectedVault.get());
+		}
+
 		if (vaults.isEmpty()) {
 			activeController.set(welcomeController.get());
 		}
