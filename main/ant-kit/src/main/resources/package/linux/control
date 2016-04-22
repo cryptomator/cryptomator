@@ -1,0 +1,16 @@
+Package: APPLICATION_PACKAGE
+Version: APPLICATION_VERSION
+Section: contrib/utils
+Maintainer: Sebastian Stenzel <sebastian.stenzel@gmail.com>
+Homepage: https://cryptomator.org
+Vcs-Git: https://github.com/totalvoidness/cryptomator.git
+Vcs-Browser: https://github.com/totalvoidness/cryptomator
+Priority: optional
+Architecture: APPLICATION_ARCH
+Provides: APPLICATION_PACKAGE
+Installed-Size: APPLICATION_INSTALLED_SIZE
+Depends: gvfs-bin, gvfs-backends, gvfs-fuse, xdg-utils
+Description: Multi-platform client-side encryption of your cloud files.
+ Cryptomator provides free client-side AES encryption for your cloud files.
+ Create encrypted vaults, which get mounted as virtual volumes. Whatever
+ you save on one of these volumes will end up encrypted inside your vault.
