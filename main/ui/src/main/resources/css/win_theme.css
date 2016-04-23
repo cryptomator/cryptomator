@@ -522,7 +522,7 @@
  ******************************************************************************/
 
 .dialog-pane {
-    -fx-background-color: -fx-background;
+    -fx-background-color: COLOR_BACKGROUND;
     -fx-padding: 0;
 }
 
@@ -550,7 +550,7 @@
 .dialog-pane:header .header-panel {
     /*-fx-padding: 0.833em 1.166em 0.833em 1.166em; *//* 10px 14px 10px 14px */
     -fx-padding: 0.833em; /* 10px */
-    -fx-background-color: -fx-box-border, linear-gradient(-fx-background, derive(-fx-background, 30%));
+    -fx-background-color: COLOR_BORDER, linear-gradient(COLOR_BACKGROUND, derive(COLOR_BACKGROUND, 30%));
     -fx-background-insets: 0, 0 0 1 0;
 }
 
