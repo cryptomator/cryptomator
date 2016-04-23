@@ -5,6 +5,7 @@
  * 
  * Contributors:
  *     Sebastian Stenzel - initial API and implementation
+ *     Jean-Noël Charon - implementation of the dialog css
  *
  */
  
@@ -513,3 +514,88 @@
 }
 .default-color0.chart-series-line { -fx-stroke: COLOR_CHART_GREEN; }
 .default-color1.chart-series-line { -fx-stroke: COLOR_CHART_RED; }
+
+/*******************************************************************************
+ *                                                                             *
+ * Dialog                                                                      *
+ *                                                                             *
+ ******************************************************************************/
+
+.dialog-pane {
+    -fx-background-color: -fx-background;
+    -fx-padding: 0;
+}
+
+.dialog-pane > .expandable-content {
+    -fx-padding: 0.666em; /* 8px */
+}
+
+.dialog-pane > .button-bar > .container {
+    -fx-padding: 0.833em; /* 10px */
+}
+
+.dialog-pane > .content.label {
+    -fx-alignment: top-left;
+    -fx-padding: 1.333em 0.833em 0 0.833em; /* 16px 10px 0px 10px */
+}
+
+.dialog-pane > .content {
+    -fx-padding: 0.833em; /* 10 */
+}
+
+.dialog-pane:no-header .graphic-container {
+    -fx-padding: 0.833em 0 0 0.833em; /* 10px 0px 0px 10px */
+}
+
+.dialog-pane:header .header-panel {
+    /*-fx-padding: 0.833em 1.166em 0.833em 1.166em; *//* 10px 14px 10px 14px */
+    -fx-padding: 0.833em; /* 10px */
+    -fx-background-color: -fx-box-border, linear-gradient(-fx-background, derive(-fx-background, 30%));
+    -fx-background-insets: 0, 0 0 1 0;
+}
+
+.dialog-pane:header .header-panel .label {
+    -fx-font-size: 1.167em; /* 14px */
+    -fx-wrap-text: true;
+}
+
+.dialog-pane:header .header-panel .graphic-container {
+    /* This prevents the text in the header running directly into the graphic */
+    -fx-padding: 0 0 0 0.833em; /* 0px 0px 0px 10px */
+}
+
+.dialog-pane > .button-bar > .container > .details-button {
+  -fx-alignment: baseline-left;
+  -fx-focus-traversable: false;
+  -fx-padding: 0.416em; /* 5px */
+}
+
+.dialog-pane > .button-bar > .container > .details-button.more {
+    -fx-graphic: url("dialog-more-details.png");
+}
+
+.dialog-pane > .button-bar > .container > .details-button.less {
+    -fx-graphic: url("dialog-fewer-details.png");
+}
+
+.dialog-pane > .button-bar > .container > .details-button:hover {
+    -fx-underline: true;
+}
+
+.alert.confirmation.dialog-pane,
+.text-input-dialog.dialog-pane,
+.choice-dialog.dialog-pane {
+    -fx-graphic: url("dialog-confirm.png");
+}
+
+.alert.information.dialog-pane {
+    -fx-graphic: url("dialog-information.png");
+}
+
+.alert.error.dialog-pane {
+    -fx-graphic: url("dialog-error.png");
+}
+
+.alert.warning.dialog-pane {
+    -fx-graphic: url("dialog-warning.png");
+}
