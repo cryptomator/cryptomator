@@ -15,6 +15,11 @@
 			<outputDirectory>libs</outputDirectory>
 		</fileSet>
 		<fileSet>
+			<directory>target/package</directory>
+			<filtered>false</filtered>
+			<outputDirectory>package</outputDirectory>
+		</fileSet>
+		<fileSet>
 			<directory>target</directory>
 			<includes>
 				<include>build.xml</include>
