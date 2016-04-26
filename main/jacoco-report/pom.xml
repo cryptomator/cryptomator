@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (c) 2016 Sebastian Stenzel This file is licensed under the terms of the MIT license. See the LICENSE.txt file for more info. -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.cryptomator</groupId>
+		<artifactId>main</artifactId>
+		<version>1.1.0-SNAPSHOT</version>
+	</parent>
+	<artifactId>jacoco-report</artifactId>
+	<name>Cryptomator Code Coverage Report</name>
+
+	<dependencies>
+		<!-- Commons -->
+		<dependency>
+			<groupId>org.cryptomator</groupId>
+			<artifactId>commons</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.cryptomator</groupId>
+			<artifactId>commons-test</artifactId>
+		</dependency>
+
+		<!-- Filesystem Layers -->
+		<dependency>
+			<groupId>org.cryptomator</groupId>
+			<artifactId>filesystem-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.cryptomator</groupId>
+			<artifactId>filesystem-crypto</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.cryptomator</groupId>
+			<artifactId>filesystem-crypto-integration-tests</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.cryptomator</groupId>
+			<artifactId>filesystem-inmemory</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.cryptomator</groupId>
+			<artifactId>filesystem-nameshortening</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.cryptomator</groupId>
+			<artifactId>filesystem-nio</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.cryptomator</groupId>
+			<artifactId>filesystem-stats</artifactId>
+		</dependency>
+
+		<!-- Frontends -->
+		<dependency>
+			<groupId>org.cryptomator</groupId>
+			<artifactId>frontend-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.cryptomator</groupId>
+			<artifactId>frontend-webdav</artifactId>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>report-aggregate</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>report-aggregate</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+</project>
