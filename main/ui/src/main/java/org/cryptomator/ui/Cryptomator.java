@@ -36,6 +36,8 @@ public class Cryptomator {
 	private static final CleanShutdownPerformer CLEAN_SHUTDOWN_PERFORMER = new CleanShutdownPerformer();
 
 	public static void main(String[] args) {
+		String cryptomatorVersion = Optional.ofNullable(Cryptomator.class.getPackage().getImplementationVersion()).orElse("SNAPSHOT");
+		LOG.info("Starting Cryptomator {} on {} {} ({})", cryptomatorVersion, SystemUtils.OS_NAME, SystemUtils.OS_VERSION, SystemUtils.OS_ARCH);
 		if (SystemUtils.IS_OS_MAC_OSX) {
 			/*
 			 * On OSX we're in an awkward position. We need to register a handler in the main thread of this application. However, we can't

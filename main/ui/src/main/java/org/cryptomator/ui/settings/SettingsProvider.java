@@ -23,7 +23,6 @@ import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import org.apache.commons.lang3.SystemUtils;
-import org.cryptomator.ui.util.DeferredCloser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +31,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Singleton
 public class SettingsProvider implements Provider<Settings> {
 
-	private static final Logger LOG = LoggerFactory.getLogger(Settings.class);
+	private static final Logger LOG = LoggerFactory.getLogger(SettingsProvider.class);
 	private static final Path SETTINGS_DIR;
 	private static final String SETTINGS_FILE = "settings.json";
 
@@ -52,12 +51,10 @@ public class SettingsProvider implements Provider<Settings> {
 		}
 	}
 
-	private final DeferredCloser deferredCloser;
 	private final ObjectMapper objectMapper;
 
 	@Inject
-	public SettingsProvider(DeferredCloser deferredCloser, @Named("VaultJsonMapper") ObjectMapper objectMapper) {
-		this.deferredCloser = deferredCloser;
+	public SettingsProvider(@Named("VaultJsonMapper") ObjectMapper objectMapper) {
 		this.objectMapper = objectMapper;
 	}
 
@@ -77,12 +74,12 @@ public class SettingsProvider implements Provider<Settings> {
 			final Path settingsPath = getSettingsPath();
 			final InputStream in = Files.newInputStream(settingsPath, StandardOpenOption.READ);
 			settings = objectMapper.readValue(in, Settings.class);
+			LOG.info("Settings loaded from " + settingsPath);
 		} catch (IOException e) {
-			LOG.warn("Failed to load settings, creating new one.");
+			LOG.info("Failed to load settings, creating new one.");
 			settings = new Settings();
 		}
-		deferredCloser.closeLater(settings, this::save);
-		return settings;
+		return settings.withSaveCmd(this::save);
 	}
 
 	private void save(Settings settings) {
@@ -94,6 +91,7 @@ public class SettingsProvider implements Provider<Settings> {
 			Files.createDirectories(settingsPath.getParent());
 			final OutputStream out = Files.newOutputStream(settingsPath, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
 			objectMapper.writeValue(out, settings);
+			LOG.info("Settings saved to " + settingsPath);
 		} catch (IOException e) {
 			LOG.error("Failed to save settings.", e);
 		}
