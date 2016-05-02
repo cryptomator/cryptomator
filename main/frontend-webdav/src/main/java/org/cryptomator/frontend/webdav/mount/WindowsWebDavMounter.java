@@ -60,12 +60,12 @@ final class WindowsWebDavMounter implements WebDavMounterStrategy {
 
 	@Override
 	public WebDavMount mount(URI uri, Map<MountParam, Optional<String>> mountParams) throws CommandFailedException {
-		final String driveLetter = mountParams.getOrDefault(MountParam.WIN_DRIVE_LETTER, Optional.of(AUTO_ASSIGN_DRIVE_LETTER)).orElse(AUTO_ASSIGN_DRIVE_LETTER);
+		final String driveLetter = mountParams.getOrDefault(MountParam.WIN_DRIVE_LETTER, Optional.empty()).orElse(AUTO_ASSIGN_DRIVE_LETTER);
 		if (driveLetters.getOccupiedDriveLetters().contains(CharUtils.toChar(driveLetter))) {
 			throw new CommandFailedException("Drive letter occupied.");
 		}
-		
-		final String hostname = mountParams.getOrDefault(MountParam.HOSTNAME, Optional.of(LOCALHOST)).orElse(LOCALHOST);
+
+		final String hostname = mountParams.getOrDefault(MountParam.HOSTNAME, Optional.empty()).orElse(LOCALHOST);
 		try {
 			final URI adjustedUri = new URI(uri.getScheme(), uri.getUserInfo(), hostname, uri.getPort(), uri.getPath(), uri.getQuery(), uri.getFragment());
 			CommandResult mountResult = mount(adjustedUri, driveLetter);
@@ -74,14 +74,13 @@ final class WindowsWebDavMounter implements WebDavMounterStrategy {
 			throw new IllegalArgumentException("Invalid host: " + hostname);
 		}
 	}
-	
+
 	private CommandResult mount(URI uri, String driveLetter) throws CommandFailedException {
-		final Script proxyBypassScript = fromLines(
-				"reg add \"HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings\" /v \"ProxyOverride\" /d \"<local>;%DAV_HOST%;%DAV_HOST%:%DAV_PORT%\" /f");
+		final Script proxyBypassScript = fromLines("reg add \"HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings\" /v \"ProxyOverride\" /d \"<local>;%DAV_HOST%;%DAV_HOST%:%DAV_PORT%\" /f");
 		proxyBypassScript.addEnv("DAV_HOST", uri.getHost());
 		proxyBypassScript.addEnv("DAV_PORT", String.valueOf(uri.getPort()));
 		proxyBypassScript.execute();
-		
+
 		final String driveLetterStr = AUTO_ASSIGN_DRIVE_LETTER.equals(driveLetter) ? AUTO_ASSIGN_DRIVE_LETTER : driveLetter + ":";
 		final Script mountScript = fromLines("net use %DRIVE_LETTER% \\\\%DAV_HOST%@%DAV_PORT%\\DavWWWRoot%DAV_UNC_PATH% /persistent:no");
 		mountScript.addEnv("DRIVE_LETTER", driveLetterStr);
