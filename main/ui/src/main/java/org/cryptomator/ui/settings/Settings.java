@@ -48,26 +48,11 @@ public class Settings implements Serializable {
 	/**
 	 * Package-private constructor; use {@link SettingsProvider}.
 	 */
-	Settings() {
-		this.saveCmd = s -> {
-		};
-	}
-
-	private Settings(Consumer<Settings> saveCmd) {
+	Settings(Consumer<Settings> saveCmd) {
 		this.saveCmd = saveCmd;
 	}
 
-	Settings withSaveCmd(Consumer<Settings> saveCmd) {
-		final Settings result = new Settings(saveCmd);
-		result.directories = this.directories;
-		result.checkForUpdatesEnabled = this.checkForUpdatesEnabled;
-		result.port = this.port;
-		result.useIpv6 = this.useIpv6;
-		result.numTrayNotifications = this.numTrayNotifications;
-		return result;
-	}
-
-	private void save() {
+	public void save() {
 		saveCmd.accept(this);
 	}
 
@@ -82,7 +67,6 @@ public class Settings implements Serializable {
 
 	public void setDirectories(List<Vault> directories) {
 		this.directories = directories;
-		save();
 	}
 
 	public boolean isCheckForUpdatesEnabled() {
@@ -92,7 +76,6 @@ public class Settings implements Serializable {
 
 	public void setCheckForUpdatesEnabled(boolean checkForUpdatesEnabled) {
 		this.checkForUpdatesEnabled = checkForUpdatesEnabled;
-		save();
 	}
 
 	public void setPort(int port) {
@@ -100,7 +83,6 @@ public class Settings implements Serializable {
 			throw new IllegalArgumentException("Invalid port");
 		}
 		this.port = port;
-		save();
 	}
 
 	public int getPort() {
@@ -121,7 +103,6 @@ public class Settings implements Serializable {
 
 	public void setUseIpv6(boolean useIpv6) {
 		this.useIpv6 = useIpv6;
-		save();
 	}
 
 	public Integer getNumTrayNotifications() {
@@ -130,7 +111,6 @@ public class Settings implements Serializable {
 
 	public void setNumTrayNotifications(Integer numTrayNotifications) {
 		this.numTrayNotifications = numTrayNotifications;
-		save();
 	}
 
 }

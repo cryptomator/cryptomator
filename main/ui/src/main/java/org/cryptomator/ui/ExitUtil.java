@@ -136,6 +136,7 @@ class ExitUtil {
 			return;
 		} else {
 			settings.setNumTrayNotifications(settings.getNumTrayNotifications() - 1);
+			settings.save();
 		}
 		final Runnable notificationCmd;
 		if (SystemUtils.IS_OS_MAC_OSX) {
