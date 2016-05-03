@@ -1,0 +1,88 @@
+# Copyright (c) 2016 The Cryptomator Contributors
+# This file is licensed under the terms of the MIT license.
+# See the LICENSE.txt file for more info.
+#
+# Contributors:
+#     Filip Havrlent
+#     Tatiana Chovancová
+
+# Copyright (c) 2016 The Cryptomator Contributors
+# This file is licensed under the terms of the MIT license.
+# See the LICENSE.txt file for more info.
+app.name = Cryptomator
+# main.fxml
+main.emptyListInstructions = Pridať trezor
+main.directoryList.contextMenu.remove = Odstrániť zo zoznamu
+main.directoryList.contextMenu.changePassword = Zmeniť heslo
+main.addDirectory.contextMenu.new = Vytvoriť nový trezor
+main.addDirectory.contextMenu.open = Otvoriť existujúci trezor
+# welcome.fxml
+welcome.checkForUpdates.label.currentlyChecking = Kontrolujú sa aktualizácie...
+welcome.newVersionMessage = Verzia %s je pripravená na stiahnutie. Toto je verzia %s.
+# initialize.fxml
+initialize.label.password = Heslo
+initialize.label.retypePassword = Zadajte heslo znova
+initialize.button.ok = Vytvoriť trezor
+initialize.messageLabel.alreadyInitialized = Trezor je už inicializovaný
+initialize.messageLabel.initializationFailed = Nepodarilo sa inicializovať trezor. Pozrite súbor záznamov pre viac detailov.
+# notfound.fxml
+notfound.label = Trezor nemohol byť nenájdený. Bol presunutý?
+# upgrade.fxml
+upgrade.button = Upgradnúť trezor
+upgrade.version3dropBundleExtension.msg = Tento trezor musí byť premigrovaný na nový formát. "%1$s" bude premenovaný na "%2$s". Prosím, uistite sa že je dokončená synchronizácia skôr než budete pokračovať.
+upgrade.version3dropBundleExtension.err.alreadyExists = Automatická migrácia zlyhala. "%s" už existuje.
+# unlock.fxml
+unlock.label.password = Heslo
+unlock.label.mountName = Názov jednotky
+unlock.label.winDriveLetter = Označenie jednotky
+unlock.label.downloadsPageLink = Všetky verzie Cryptomatoru
+unlock.label.advancedHeading = Pokročilé nastavenia
+unlock.button.unlock = Odomknúť trezor
+unlock.button.advancedOptions.show = Viac nastavení
+unlock.button.advancedOptions.hide = Menej nastavení
+unlock.choicebox.winDriveLetter.auto = Priradiť automaticky
+unlock.errorMessage.wrongPassword = Nesprávne heslo
+unlock.errorMessage.mountingFailed = Pripájanie zlyhalo. Viac informácii v logu.
+unlock.errorMessage.unsupportedKeyLengthInstallJCE = Dešifrovanie zlyhalo. Prosím nainštalujte Oracle JCE Unlimited Strength Policy Files.
+unlock.errorMessage.unsupportedVersion.vaultOlderThanSoftware = Nepodporovaný trezor. Tento trezor bol vytvorený staršou verziou Cryptromatoru.
+unlock.errorMessage.unsupportedVersion.softwareOlderThanVault = Nepodporovaný trezor. Bol vytvorený z novšou verziou Cryptomatoru.
+unlock.messageLabel.startServerFailed = Spustenie WebDAv servera zlyhalo.
+# change_password.fxml
+changePassword.label.oldPassword = Staré heslo
+changePassword.label.newPassword = Nové heslo
+changePassword.label.retypePassword = Znova zadajte heslo
+changePassword.label.downloadsPageLink = Všetky verzie Cryptomatoru.
+changePassword.button.change = Zmeniť heslo
+changePassword.errorMessage.wrongPassword = Nesprávne heslo
+changePassword.errorMessage.decryptionFailed = Dešifrovanie zlyhalo.
+changePassword.errorMessage.unsupportedKeyLengthInstallJCE = Dešifrovanie zlyhalo. Prosím nainštalujte Oracle JCE Unlimited Strength Policy.
+changePassword.errorMessage.unsupportedVersion.vaultOlderThanSoftware = Nepodporovaný trezor. Bol vytvorený staršou verziou Cryptomatoru.
+changePassword.errorMessage.unsupportedVersion.softwareOlderThanVault = Nepodporovaný trezor. Bol vytvorený novšou verziou Cryptomatoru.
+changePassword.infoMessage.success = Heslo zmenené
+# unlocked.fxml
+unlocked.button.lock = Zamknúť trezor
+unlocked.moreOptions.reveal = Odhaliť jednotku
+unlocked.moreOptions.copyUrl = Kopírovať WebDAV URL
+unlocked.label.revealFailed = Príkaz zlyhal
+unlocked.label.unmountFailed = Odpájanie jednotky zlyhalo
+unlocked.label.statsEncrypted = zašifrované
+unlocked.label.statsDecrypted = dešifrované
+unlocked.ioGraph.yAxis.label = Priepustnosť (MiB/s)
+# mac_warnings.fxml
+macWarnings.windowTitle = Upozornenie - Poškodený súbor v %s
+macWarnings.message = Cryptomator odhalil potencionálne škodlivé poškodenie v nasledujúcich súboroch\:
+macWarnings.moreInformationButton = Zistiť viac
+macWarnings.whitelistButton = Napriek tomu dešifrovať vybrané
+# settings.fxml
+settings.version.label = Verzia %s
+settings.checkForUpdates.label = Skontrolovať aktualizácie
+settings.port.label = WebDAV Port *
+settings.port.prompt = 0 \= Vybrať automaticky
+settings.useipv6.label = Použiť IPv6
+settings.requiresRestartLabel = * Cryptomator vyžaduje reštart
+# tray icon
+tray.menu.open = Otvoriť
+tray.menu.quit = Vypnúť
+tray.infoMsg.title = Stále beží
+tray.infoMsg.msg = Cryptomator je stále spustený. Vypnite ho pomocou ikony v systémovej lište.
+tray.infoMsg.msg.osx = Cryptomator je stále sputený. Ukončite ho pomocou ikony v menu.

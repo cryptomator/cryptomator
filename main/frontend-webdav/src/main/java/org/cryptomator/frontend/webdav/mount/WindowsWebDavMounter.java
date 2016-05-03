@@ -11,10 +11,16 @@ package org.cryptomator.frontend.webdav.mount;
 
 import static org.cryptomator.frontend.webdav.mount.command.Script.fromLines;
 
+import java.io.IOException;
+import java.io.InterruptedIOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -22,12 +28,16 @@ import java.util.regex.Pattern;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.CharUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.frontend.CommandFailedException;
 import org.cryptomator.frontend.Frontend.MountParam;
 import org.cryptomator.frontend.webdav.mount.command.CommandResult;
 import org.cryptomator.frontend.webdav.mount.command.Script;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A {@link WebDavMounterStrategy} utilizing the "net use" command.
@@ -37,7 +47,9 @@ import org.cryptomator.frontend.webdav.mount.command.Script;
 @Singleton
 final class WindowsWebDavMounter implements WebDavMounterStrategy {
 
+	private static final Logger LOG = LoggerFactory.getLogger(WindowsWebDavMounter.class);
 	private static final Pattern WIN_MOUNT_DRIVELETTER_PATTERN = Pattern.compile("\\s*([A-Z]):\\s*");
+	private static final Pattern REG_QUERY_PROXY_OVERRIDES_PATTERN = Pattern.compile("\\s*ProxyOverride\\s+REG_SZ\\s+(.*)\\s*");
 	private static final String AUTO_ASSIGN_DRIVE_LETTER = "*";
 	private static final String LOCALHOST = "localhost";
 	private static final int MOUNT_TIMEOUT_SECONDS = 60;
@@ -60,12 +72,12 @@ final class WindowsWebDavMounter implements WebDavMounterStrategy {
 
 	@Override
 	public WebDavMount mount(URI uri, Map<MountParam, Optional<String>> mountParams) throws CommandFailedException {
-		final String driveLetter = mountParams.getOrDefault(MountParam.WIN_DRIVE_LETTER, Optional.of(AUTO_ASSIGN_DRIVE_LETTER)).orElse(AUTO_ASSIGN_DRIVE_LETTER);
+		final String driveLetter = mountParams.getOrDefault(MountParam.WIN_DRIVE_LETTER, Optional.empty()).orElse(AUTO_ASSIGN_DRIVE_LETTER);
 		if (driveLetters.getOccupiedDriveLetters().contains(CharUtils.toChar(driveLetter))) {
 			throw new CommandFailedException("Drive letter occupied.");
 		}
-		
-		final String hostname = mountParams.getOrDefault(MountParam.HOSTNAME, Optional.of(LOCALHOST)).orElse(LOCALHOST);
+
+		final String hostname = mountParams.getOrDefault(MountParam.HOSTNAME, Optional.empty()).orElse(LOCALHOST);
 		try {
 			final URI adjustedUri = new URI(uri.getScheme(), uri.getUserInfo(), hostname, uri.getPort(), uri.getPath(), uri.getQuery(), uri.getFragment());
 			CommandResult mountResult = mount(adjustedUri, driveLetter);
@@ -74,14 +86,14 @@ final class WindowsWebDavMounter implements WebDavMounterStrategy {
 			throw new IllegalArgumentException("Invalid host: " + hostname);
 		}
 	}
-	
+
 	private CommandResult mount(URI uri, String driveLetter) throws CommandFailedException {
-		final Script proxyBypassScript = fromLines(
-				"reg add \"HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings\" /v \"ProxyOverride\" /d \"<local>;%DAV_HOST%;%DAV_HOST%:%DAV_PORT%\" /f");
-		proxyBypassScript.addEnv("DAV_HOST", uri.getHost());
-		proxyBypassScript.addEnv("DAV_PORT", String.valueOf(uri.getPort()));
-		proxyBypassScript.execute();
-		
+		try {
+			addProxyOverrides(uri);
+		} catch (IOException e) {
+			throw new CommandFailedException(e);
+		}
+
 		final String driveLetterStr = AUTO_ASSIGN_DRIVE_LETTER.equals(driveLetter) ? AUTO_ASSIGN_DRIVE_LETTER : driveLetter + ":";
 		final Script mountScript = fromLines("net use %DRIVE_LETTER% \\\\%DAV_HOST%@%DAV_PORT%\\DavWWWRoot%DAV_UNC_PATH% /persistent:no");
 		mountScript.addEnv("DRIVE_LETTER", driveLetterStr);
@@ -89,6 +101,44 @@ final class WindowsWebDavMounter implements WebDavMounterStrategy {
 		mountScript.addEnv("DAV_PORT", String.valueOf(uri.getPort()));
 		mountScript.addEnv("DAV_UNC_PATH", uri.getRawPath().replace('/', '\\'));
 		return mountScript.execute(MOUNT_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+	}
+	
+	private void addProxyOverrides(URI uri) throws IOException, CommandFailedException {
+		try {
+			// get existing value for ProxyOverride key from reqistry:
+			ProcessBuilder query = new ProcessBuilder("reg", "query", "\"HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings\"", "/v", "ProxyOverride");
+			Process queryCmd = query.start();
+			String queryStdOut = IOUtils.toString(queryCmd.getInputStream(), StandardCharsets.UTF_8);
+			int queryResult = queryCmd.waitFor();
+			
+			// determine new value for ProxyOverride key:
+			Set<String> overrides = new HashSet<>();
+			Matcher matcher = REG_QUERY_PROXY_OVERRIDES_PATTERN.matcher(queryStdOut);
+			if (queryResult == 0 && matcher.find()) {
+				String[] existingOverrides = StringUtils.split(matcher.group(1), ';');
+				overrides.addAll(Arrays.asList(existingOverrides));
+			}
+			overrides.removeIf(s -> s.startsWith(uri.getHost() + ":"));
+			overrides.add("<local>");
+			overrides.add(uri.getHost());
+			overrides.add(uri.getHost() + ":" + uri.getPort());
+			
+			// set new value:
+			String overridesStr = StringUtils.join(overrides, ';');
+			ProcessBuilder add = new ProcessBuilder("reg", "add", "\"HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings\"", "/v", "ProxyOverride", "/d", "\"" + overridesStr + "\"", "/f");
+			LOG.debug("Invoking command: " + StringUtils.join(add.command(), ' '));
+			Process addCmd = add.start();
+			int addResult = addCmd.waitFor();
+			if (addResult != 0) {
+				String addStdErr = IOUtils.toString(addCmd.getErrorStream(), StandardCharsets.UTF_8);
+				throw new CommandFailedException(addStdErr);
+			}
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			InterruptedIOException ioException = new InterruptedIOException();
+			ioException.initCause(e);
+			throw ioException;
+		}
 	}
 
 	private String getDriveLetter(String result) throws CommandFailedException {

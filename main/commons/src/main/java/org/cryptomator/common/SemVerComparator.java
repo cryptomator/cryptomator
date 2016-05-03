@@ -6,7 +6,7 @@
  * Contributors:
  *     Sebastian Stenzel - initial API and implementation
  *******************************************************************************/
-package org.cryptomator.ui.util;
+package org.cryptomator.common;
 
 import java.util.Comparator;
 
