@@ -24,7 +24,7 @@ public class Settings implements Serializable {
 	private static final long serialVersionUID = 7609959894417878744L;
 	public static final int MIN_PORT = 1024;
 	public static final int MAX_PORT = 65535;
-	public static final int DEFAULT_PORT = 0;
+	public static final int DEFAULT_PORT = 42427;
 	public static final boolean DEFAULT_USE_IPV6 = false;
 	public static final Integer DEFAULT_NUM_TRAY_NOTIFICATIONS = 3;
 
