@@ -12,11 +12,13 @@ package org.cryptomator.frontend.webdav.mount;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.util.Comparator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
 
 import org.apache.commons.io.IOUtils;
@@ -26,15 +28,18 @@ import org.cryptomator.frontend.CommandFailedException;
 import org.cryptomator.frontend.Frontend.MountParam;
 
 @Singleton
-final class MacOsXWebDavMounter implements WebDavMounterStrategy {
+final class MacOsXAppleScriptWebDavMounter implements WebDavMounterStrategy {
+
+	private final Comparator<String> semVerComparator;
 
 	@Inject
-	MacOsXWebDavMounter() {
+	MacOsXAppleScriptWebDavMounter(@Named("SemVer") Comparator<String> semVerComparator) {
+		this.semVerComparator = semVerComparator;
 	}
 
 	@Override
 	public boolean shouldWork() {
-		return SystemUtils.IS_OS_MAC_OSX;
+		return SystemUtils.IS_OS_MAC_OSX && semVerComparator.compare(SystemUtils.OS_VERSION, "10.10") >= 0;
 	}
 
 	@Override

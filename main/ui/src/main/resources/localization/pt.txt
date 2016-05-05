@@ -1,0 +1,34 @@
+# Copyright (c) 2016 The Cryptomator Contributors
+# This file is licensed under the terms of the MIT license.
+# See the LICENSE.txt file for more info.
+#
+# Contributors:
+#     Will
+#     André Di Biasi
+
+app.name = Cryptomator
+main.directoryList.contextMenu.remove = Remover da lista
+main.directoryList.contextMenu.changePassword = Alterar senha
+# welcome.fxml
+welcome.checkForUpdates.label.currentlyChecking = Procurando atualizações...
+# initialize.fxml
+initialize.label.password = Senha
+initialize.label.retypePassword = Digite a senha novamente
+# unlock.fxml
+unlock.label.password = Senha
+unlock.label.advancedHeading = Opções avançadas
+unlock.button.advancedOptions.hide = Menos opções
+unlock.choicebox.winDriveLetter.auto = Atribuir automaticamente
+unlock.errorMessage.wrongPassword = Senha incorreta
+unlock.errorMessage.mountingFailed = Montagem falhou. Veja o arquivo de log para detalhes
+unlock.messageLabel.startServerFailed = Inicialização do servidor WEBDAV falhou
+# change_password.fxml
+changePassword.label.oldPassword = Senha antiga
+changePassword.label.newPassword = Nova senha
+changePassword.label.retypePassword = Digite a senha novamente
+changePassword.button.change = Alterar senha
+changePassword.infoMessage.success = Senha alterada
+unlocked.label.revealFailed = Falha no comando
+unlocked.label.unmountFailed = Falha ao ejetar o drive
+unlocked.label.statsEncrypted = encriptado
+macWarnings.moreInformationButton = Saiba mais

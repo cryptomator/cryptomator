@@ -17,6 +17,7 @@ import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener.Change;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -91,6 +92,9 @@ public class MainController extends LocalizedFXMLViewController {
 		this.changePasswordController = changePasswordController;
 		this.settingsController = settingsController;
 		this.vaults = FXCollections.observableList(settings.getDirectories());
+		this.vaults.addListener((Change<? extends Vault> c) -> {
+			settings.save();
+		});
 
 		// derived bindings:
 		this.isShowingSettings = activeController.isEqualTo(settingsController.get());

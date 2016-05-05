@@ -38,6 +38,7 @@ public class MainApplication extends Application {
 
 	@Override
 	public void start(Stage primaryStage) throws IOException {
+		LOG.info("JavaFX application started");
 		final CryptomatorComponent comp = DaggerCryptomatorComponent.builder().cryptomatorModule(new CryptomatorModule(this, primaryStage)).build();
 		final MainController mainCtrl = comp.mainController();
 		closer = comp.deferredCloser();
