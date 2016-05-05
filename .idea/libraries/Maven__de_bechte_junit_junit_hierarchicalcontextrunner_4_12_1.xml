@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: de.bechte.junit:junit-hierarchicalcontextrunner:4.12.1">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/de/bechte/junit/junit-hierarchicalcontextrunner/4.12.1/junit-hierarchicalcontextrunner-4.12.1.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/de/bechte/junit/junit-hierarchicalcontextrunner/4.12.1/junit-hierarchicalcontextrunner-4.12.1-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/de/bechte/junit/junit-hierarchicalcontextrunner/4.12.1/junit-hierarchicalcontextrunner-4.12.1-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

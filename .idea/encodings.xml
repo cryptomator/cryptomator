@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding">
+    <file url="file://$PROJECT_DIR$/main" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/main/ant-kit" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/main/commons" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/main/commons-test" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/main/filesystem-api" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/main/filesystem-crypto" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/main/filesystem-crypto-integration-tests" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/main/filesystem-inmemory" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/main/filesystem-invariants-tests" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/main/filesystem-nameshortening" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/main/filesystem-nio" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/main/filesystem-stats" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/main/frontend-api" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/main/frontend-webdav" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/main/uber-jar" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/main/ui" charset="UTF-8" />
+  </component>
+</project>

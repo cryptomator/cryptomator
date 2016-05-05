@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <resourceExtensions />
+    <wildcardResourcePatterns>
+      <entry name="!?*.java" />
+      <entry name="!?*.form" />
+      <entry name="!?*.class" />
+      <entry name="!?*.groovy" />
+      <entry name="!?*.scala" />
+      <entry name="!?*.flex" />
+      <entry name="!?*.kt" />
+      <entry name="!?*.clj" />
+      <entry name="!?*.aj" />
+    </wildcardResourcePatterns>
+    <annotationProcessing>
+      <profile default="true" name="Default" enabled="false">
+        <processorPath useClasspath="true" />
+      </profile>
+      <profile default="false" name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="commons" />
+        <module name="commons-test" />
+        <module name="filesystem-api" />
+        <module name="filesystem-crypto" />
+        <module name="filesystem-crypto-integration-tests" />
+        <module name="filesystem-inmemory" />
+        <module name="filesystem-invariants-tests" />
+        <module name="filesystem-nameshortening" />
+        <module name="filesystem-nio" />
+        <module name="filesystem-stats" />
+        <module name="frontend-api" />
+        <module name="frontend-webdav" />
+        <module name="ui" />
+      </profile>
+    </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="ant-kit" target="1.8" />
+      <module name="commons" target="1.8" />
+      <module name="commons-test" target="1.8" />
+      <module name="filesystem-api" target="1.8" />
+      <module name="filesystem-crypto" target="1.8" />
+      <module name="filesystem-crypto-integration-tests" target="1.8" />
+      <module name="filesystem-inmemory" target="1.8" />
+      <module name="filesystem-invariants-tests" target="1.8" />
+      <module name="filesystem-nameshortening" target="1.8" />
+      <module name="filesystem-nio" target="1.8" />
+      <module name="filesystem-stats" target="1.8" />
+      <module name="frontend-api" target="1.8" />
+      <module name="frontend-webdav" target="1.8" />
+      <module name="main" target="1.8" />
+      <module name="uber-jar" target="1.8" />
+      <module name="ui" target="1.8" />
+    </bytecodeTargetLevel>
+  </component>
+</project>

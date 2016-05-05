@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/../cryptomator.idea/ant-kit.iml" filepath="$PROJECT_DIR$/../cryptomator.idea/ant-kit.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../cryptomator.idea/commons.iml" filepath="$PROJECT_DIR$/../cryptomator.idea/commons.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../cryptomator.idea/commons-test.iml" filepath="$PROJECT_DIR$/../cryptomator.idea/commons-test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../cryptomator.idea/filesystem-api.iml" filepath="$PROJECT_DIR$/../cryptomator.idea/filesystem-api.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../cryptomator.idea/filesystem-crypto.iml" filepath="$PROJECT_DIR$/../cryptomator.idea/filesystem-crypto.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../cryptomator.idea/filesystem-crypto-integration-tests.iml" filepath="$PROJECT_DIR$/../cryptomator.idea/filesystem-crypto-integration-tests.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../cryptomator.idea/filesystem-inmemory.iml" filepath="$PROJECT_DIR$/../cryptomator.idea/filesystem-inmemory.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../cryptomator.idea/filesystem-invariants-tests.iml" filepath="$PROJECT_DIR$/../cryptomator.idea/filesystem-invariants-tests.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../cryptomator.idea/filesystem-nameshortening.iml" filepath="$PROJECT_DIR$/../cryptomator.idea/filesystem-nameshortening.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../cryptomator.idea/filesystem-nio.iml" filepath="$PROJECT_DIR$/../cryptomator.idea/filesystem-nio.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../cryptomator.idea/filesystem-stats.iml" filepath="$PROJECT_DIR$/../cryptomator.idea/filesystem-stats.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../cryptomator.idea/frontend-api.iml" filepath="$PROJECT_DIR$/../cryptomator.idea/frontend-api.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../cryptomator.idea/frontend-webdav.iml" filepath="$PROJECT_DIR$/../cryptomator.idea/frontend-webdav.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../cryptomator.idea/main.iml" filepath="$PROJECT_DIR$/../cryptomator.idea/main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../cryptomator.idea/uber-jar.iml" filepath="$PROJECT_DIR$/../cryptomator.idea/uber-jar.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../cryptomator.idea/ui.iml" filepath="$PROJECT_DIR$/../cryptomator.idea/ui.iml" />
+    </modules>
+  </component>
+</project>
