@@ -154,6 +154,7 @@ public class WelcomeController extends LocalizedFXMLViewController {
 			Platform.runLater(() -> {
 				this.updateLink.setText(msg);
 				this.updateLink.setVisible(true);
+				this.updateLink.setDisable(false);
 			});
 		}
 	}
