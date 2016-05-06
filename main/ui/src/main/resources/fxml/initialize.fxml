@@ -6,15 +6,22 @@
   
   Contributors:
       Sebastian Stenzel - initial API and implementation
+      Jean-Noël Charon - password strength meter
 -->
+
+<?import java.lang.*?>
 <?import java.net.URL?>
 <?import javafx.scene.layout.HBox?>
-<?import org.cryptomator.ui.controls.SecPasswordField?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.ProgressIndicator?>
+<?import org.cryptomator.ui.controls.SecPasswordField?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
 
 <GridPane vgap="12.0" hgap="12.0" prefWidth="400.0" xmlns:fx="http://javafx.com/fxml" cacheShape="true" cache="true">
 	<padding>
@@ -30,17 +37,28 @@
 		<!-- Row 0 -->
 		<Label GridPane.rowIndex="0" GridPane.columnIndex="0" text="%initialize.label.password" cacheShape="true" cache="true" />
 		<SecPasswordField fx:id="passwordField" GridPane.rowIndex="0" GridPane.columnIndex="1" cacheShape="true" cache="true" />
-		
+
 		<!-- Row 1 -->
 		<Label GridPane.rowIndex="1" GridPane.columnIndex="0" text="%initialize.label.retypePassword" cacheShape="true" cache="true" />
 		<SecPasswordField fx:id="retypePasswordField" GridPane.rowIndex="1" GridPane.columnIndex="1" cacheShape="true" cache="true" />
 		
 		<!-- Row 2 -->
-		<Button fx:id="okButton" defaultButton="true" GridPane.rowIndex="2" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.halignment="RIGHT" text="%initialize.button.ok" prefWidth="150.0" onAction="#initializeVault" focusTraversable="false" disable="true" cacheShape="true" cache="true" />
-				
+		<VBox GridPane.columnIndex="1" GridPane.rowIndex="2" spacing="6.0">
+			<HBox spacing="6.0" prefHeight="6.0" cacheShape="true" cache="true">
+				<Region HBox.hgrow="ALWAYS" fx:id="passwordStrengthLevel0" cacheShape="true" cache="true" />
+				<Region HBox.hgrow="ALWAYS" fx:id="passwordStrengthLevel1" cacheShape="true" cache="true" />
+				<Region HBox.hgrow="ALWAYS" fx:id="passwordStrengthLevel2" cacheShape="true" cache="true" />
+				<Region HBox.hgrow="ALWAYS" fx:id="passwordStrengthLevel3" cacheShape="true" cache="true" />
+				<Region HBox.hgrow="ALWAYS" fx:id="passwordStrengthLevel4" cacheShape="true" cache="true" />
+			</HBox>
+			<Label fx:id="passwordStrengthLabel" styleClass="caption-label" cache="true" cacheShape="true" text="" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+		</VBox>
+
 		<!-- Row 3 -->
-		<Label fx:id="messageLabel" GridPane.rowIndex="3" GridPane.columnIndex="0" GridPane.columnSpan="2" cacheShape="true" cache="true" />
+		<Button fx:id="okButton" cache="true" cacheShape="true" defaultButton="true" disable="true" focusTraversable="false" onAction="#initializeVault" prefWidth="150.0" text="%initialize.button.ok" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.halignment="RIGHT" GridPane.rowIndex="3" />
+
+		<!-- Row 4 -->
+		<Label fx:id="messageLabel" cache="true" cacheShape="true" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="4" />
+
 	</children>
 </GridPane>
-
-

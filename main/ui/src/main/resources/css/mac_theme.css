@@ -49,6 +49,10 @@
 	-fx-font-family: Ionicons;
 }
 
+.caption-label {
+	-fx-font-size: 0.9em;
+}
+
 /****************************************************************************
  *																			*
  * Hyperlinks																*

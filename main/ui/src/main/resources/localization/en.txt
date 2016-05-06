@@ -24,6 +24,11 @@ initialize.label.retypePassword=Retype password
 initialize.button.ok=Create vault
 initialize.messageLabel.alreadyInitialized=Vault already initialized
 initialize.messageLabel.initializationFailed=Could not initialize vault. See logfile for details.
+initialize.messageLabel.passwordStrength.0=Very weak
+initialize.messageLabel.passwordStrength.1=Weak
+initialize.messageLabel.passwordStrength.2=Fair
+initialize.messageLabel.passwordStrength.3=Strong
+initialize.messageLabel.passwordStrength.4=Very strong
 
 # notfound.fxml
 notfound.label=Vault couldn't be found. Has it been moved?
