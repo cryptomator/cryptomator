@@ -4,11 +4,13 @@ import static org.cryptomator.common.test.TempFilesRemovedOnShutdown.createTempD
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.text.Normalizer.Form;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 import org.cryptomator.filesystem.FileSystem;
+import org.cryptomator.filesystem.charsets.NormalizedNameFileSystem;
 import org.cryptomator.filesystem.crypto.CryptoEngineTestModule;
 import org.cryptomator.filesystem.crypto.CryptoFileSystemDelegate;
 import org.cryptomator.filesystem.crypto.CryptoFileSystemTestComponent;
@@ -35,8 +37,10 @@ class FileSystemFactories implements Iterable<FileSystemFactory> {
 		add("ShorteningFileSystem > InMemoryFileSystem", this::createShorteningFileSystemInMemory);
 		add("StatsFileSystem > NioFileSystem", this::createStatsFileSystemNio);
 		add("StatsFileSystem > InMemoryFileSystem", this::createStatsFileSystemInMemory);
-		add("StatsFileSystem > CryptoFileSystem > ShorteningFileSystem > InMemoryFileSystem", this::createCompoundFileSystemInMemory);
-		add("StatsFileSystem > CryptoFileSystem > ShorteningFileSystem > NioFileSystem", this::createCompoundFileSystemNio);
+		add("NormalizingFileSystem > NioFileSystem", this::createNormalizingFileSystemNio);
+		add("NormalizingFileSystem > InMemoryFileSystem", this::createNormalizingFileSystemInMemory);
+		add("StatsFileSystem > NormalizingFileSystem > CryptoFileSystem > ShorteningFileSystem > InMemoryFileSystem", this::createCompoundFileSystemInMemory);
+		add("StatsFileSystem > NormalizingFileSystem > CryptoFileSystem > ShorteningFileSystem > NioFileSystem", this::createCompoundFileSystemNio);
 	}
 
 	private FileSystem createCryptoFileSystemInMemory() {
@@ -63,6 +67,14 @@ class FileSystemFactories implements Iterable<FileSystemFactory> {
 		return createStatsFileSystem(createInMemoryFileSystem());
 	}
 
+	private FileSystem createNormalizingFileSystemNio() {
+		return createNormalizingFileSystem(createInMemoryFileSystem());
+	}
+
+	private FileSystem createNormalizingFileSystemInMemory() {
+		return createNormalizingFileSystem(createInMemoryFileSystem());
+	}
+
 	private FileSystem createCompoundFileSystemNio() {
 		return createCompoundFileSystem(createNioFileSystem());
 	}
@@ -84,11 +96,15 @@ class FileSystemFactories implements Iterable<FileSystemFactory> {
 	}
 
 	private FileSystem createCompoundFileSystem(FileSystem delegate) {
-		return createStatsFileSystem(createCryptoFileSystem(createShorteningFileSystem(delegate)));
+		return createStatsFileSystem(createNormalizingFileSystem(createCryptoFileSystem(createShorteningFileSystem(delegate))));
 	}
 
 	private FileSystem createStatsFileSystem(FileSystem delegate) {
 		return new StatsFileSystem(delegate);
+	}
+
+	private FileSystem createNormalizingFileSystem(FileSystem delegate) {
+		return new NormalizedNameFileSystem(delegate, Form.NFC);
 	}
 
 	private FileSystem createCryptoFileSystem(FileSystem delegate) {

@@ -82,6 +82,11 @@
 			</dependency>
 			<dependency>
 				<groupId>org.cryptomator</groupId>
+				<artifactId>filesystem-charsets</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.cryptomator</groupId>
 				<artifactId>filesystem-nio</artifactId>
 				<version>${project.version}</version>
 			</dependency>
@@ -286,6 +291,7 @@
 		<module>frontend-api</module>
 		<module>frontend-webdav</module>
 		<module>ui</module>
+		<module>filesystem-charsets</module>
 	</modules>
 
 	<profiles>
