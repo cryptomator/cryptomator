@@ -30,6 +30,7 @@ import org.cryptomator.common.LazyInitializer;
 import org.cryptomator.common.Optionals;
 import org.cryptomator.crypto.engine.InvalidPassphraseException;
 import org.cryptomator.filesystem.FileSystem;
+import org.cryptomator.filesystem.charsets.NormalizedNameFileSystem;
 import org.cryptomator.filesystem.crypto.CryptoFileSystemDelegate;
 import org.cryptomator.filesystem.crypto.CryptoFileSystemFactory;
 import org.cryptomator.filesystem.nio.NioFileSystem;
@@ -126,7 +127,8 @@ public class Vault implements CryptoFileSystemDelegate {
 			FileSystem fs = getNioFileSystem();
 			FileSystem shorteningFs = shorteningFileSystemFactory.get(fs);
 			FileSystem cryptoFs = cryptoFileSystemFactory.unlockExisting(shorteningFs, passphrase, this);
-			StatsFileSystem statsFs = new StatsFileSystem(cryptoFs);
+			FileSystem normalizingFs = new NormalizedNameFileSystem(cryptoFs, SystemUtils.IS_OS_MAC_OSX ? Form.NFD : Form.NFC);
+			StatsFileSystem statsFs = new StatsFileSystem(normalizingFs);
 			statsFileSystem = Optional.of(statsFs);
 			String contextPath = StringUtils.prependIfMissing(mountName, "/");
 			Frontend frontend = frontendFactory.create(statsFs, contextPath);
