@@ -8,105 +8,76 @@
  *******************************************************************************/
 package org.cryptomator.ui.util;
 
-import com.nulabinc.zxcvbn.Zxcvbn;
-import javafx.beans.property.IntegerProperty;
-import javafx.scene.paint.Color;
-import org.apache.commons.lang3.StringUtils;
-import org.cryptomator.ui.settings.Localization;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.util.ArrayList;
-import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
+import org.cryptomator.ui.settings.Localization;
+
+import com.nulabinc.zxcvbn.Zxcvbn;
+
+import javafx.geometry.Insets;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.CornerRadii;
+import javafx.scene.paint.Color;
 
 @Singleton
 public class PasswordStrengthUtil {
 
-    private final Zxcvbn zxcvbn;
-    private final List<String> sanitizedInputs;
-    private final Localization localization;
+	private final Zxcvbn zxcvbn;
+	private final List<String> sanitizedInputs;
+	private final Localization localization;
 
-    @Inject
-    public PasswordStrengthUtil(Localization localization){
-        this.localization = localization;
-        this.zxcvbn = new Zxcvbn();
-        this.sanitizedInputs = new ArrayList<>();
-        this.sanitizedInputs.add("cryptomator");
-    }
+	@Inject
+	public PasswordStrengthUtil(Localization localization) {
+		this.localization = localization;
+		this.zxcvbn = new Zxcvbn();
+		this.sanitizedInputs = new ArrayList<>();
+		this.sanitizedInputs.add("cryptomator");
+	}
 
-    public int computeRate(String password) {
-        if (StringUtils.isEmpty(password)) {
-            return -1;
-        } else {
-            return zxcvbn.measure(password, sanitizedInputs).getScore();
-        }
-    }
+	public int computeRate(String password) {
+		if (StringUtils.isEmpty(password)) {
+			return -1;
+		} else {
+			return zxcvbn.measure(password, sanitizedInputs).getScore();
+		}
+	}
 
-    public Color getStrengthColor(Number score) {
-        Color strengthColor = Color.web("#FF0000");
-        switch (score.intValue()) {
-            case 0:
-                strengthColor = Color.web("#FF0000");
-                break;
-            case 1:
-                strengthColor = Color.web("#FF8000");
-                break;
-            case 2:
-                strengthColor = Color.web("#FFBF00");
-                break;
-            case 3:
-                strengthColor = Color.web("#FFFF00");
-                break;
-            case 4:
-                strengthColor = Color.web("#BFFF00");
-                break;
-            default:
-                strengthColor = Color.web("#FF0000");
-                break;
-        }
-        return strengthColor;
-    }
+	public Color getStrengthColor(Number score) {
+		switch (score.intValue()) {
+		case 0:
+			return Color.web("#e74c3c");
+		case 1:
+			return Color.web("#e67e22");
+		case 2:
+			return Color.web("#f1c40f");
+		case 3:
+			return Color.web("#40d47e");
+		case 4:
+			return Color.web("#27ae60");
+		default:
+			return Color.TRANSPARENT;
+		}
+	}
 
-    public int getWidth(Number score) {
-        int width = 0;
-        switch (score.intValue()) {
-            case 0:
-                width += 5;
-                break;
-            case 1:
-                width += 25;
-                break;
-            case 2:
-                width += 50;
-                break;
-            case 3:
-                width += 75;
-                break;
-            case 4:
-                width = 100;
-                break;
-            default:
-                width = 0;
-                break;
-        }
-        return Math.round(width*2.23f);
-    }
+	public Background getBackgroundWithStrengthColor(Number score) {
+		Color c = this.getStrengthColor(score);
+		BackgroundFill fill = new BackgroundFill(c, CornerRadii.EMPTY, Insets.EMPTY);
+		return new Background(fill);
+	}
 
-    public float getStrokeWidth(Number score) {
-        if (score.intValue() >= 0) {
-            return 0.5f;
-        } else {
-            return 0;
-        }
-    }
-
-    public String getStrengthDescription(Number score) {
-        if (score.intValue() >= 0) {
-            return String.format(localization.getString("initialize.messageLabel.passwordStrength"),
-                    localization.getString("initialize.messageLabel.passwordStrength." + score.intValue()));
-        } else {
-            return "";
-        }
-    }
+	public String getStrengthDescription(Number score) {
+		String key = "initialize.messageLabel.passwordStrength." + score.intValue();
+		if (localization.containsKey(key)) {
+			return localization.getString(key);
+		} else {
+			return "";
+		}
+	}
 
 }

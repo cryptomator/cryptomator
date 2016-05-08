@@ -1,0 +1,84 @@
+# Copyright (c) 2016 The Cryptomator Contributors
+# This file is licensed under the terms of the MIT license.
+# See the LICENSE.txt file for more info.
+#
+# Contributors:
+#     ChangHwan Kim
+
+app.name = Cryptomator
+# main.fxml
+main.emptyListInstructions = 여기를 클릭하여 보관함 추가하기
+main.directoryList.contextMenu.remove = 목록에서 삭제
+main.directoryList.contextMenu.changePassword = 비밀번호 변경
+main.addDirectory.contextMenu.new = 새 보관함 만들기
+main.addDirectory.contextMenu.open = 기존 보관함 열기
+# welcome.fxml
+welcome.checkForUpdates.label.currentlyChecking = 업데이트 확인
+welcome.newVersionMessage = %s 버전이 새로 다운로드 가능합니다. 지금 버전은 %s 입니다.
+# initialize.fxml
+initialize.label.password = 비밀번호
+initialize.label.retypePassword = 비밀번호 재입력
+initialize.button.ok = 보관함 만들기
+initialize.messageLabel.alreadyInitialized = 이미 보관함이 초기화되었습니다.
+initialize.messageLabel.initializationFailed = 보관함을 초기화할 수 없습니다. 자세한 사항은 로그 파일을 참조하세요.
+# notfound.fxml
+notfound.label = 보관함을 찾을 수 없습니다. 옮겨진 것은 아닌가요?
+# upgrade.fxml
+upgrade.button = 보관함 업그레이드
+upgrade.version3dropBundleExtension.msg = 이 보관함은 새로운 형식으로 다시 바뀔 필요가 있습니다. "%1$s"의 이름은 "%2$s"로 바뀔 것입니다. 진행하기 전에 동기화가 완료되었는지 다시 한 번 확인해주시기 바랍니다.
+upgrade.version3dropBundleExtension.err.alreadyExists = 자동 마이그레이션 실패. "%s"가 이미 존재합니다.
+# unlock.fxml
+unlock.label.password = 비밀번호
+unlock.label.mountName = 드라이브 이름
+unlock.label.winDriveLetter = 드라이브 문자
+unlock.label.downloadsPageLink = 모든 Cryptomator 버전
+unlock.label.advancedHeading = 고급 옵션
+unlock.button.unlock = 보관함 해제
+unlock.button.advancedOptions.show = 더 많은 옵션
+unlock.button.advancedOptions.hide = 기본 옵션
+unlock.choicebox.winDriveLetter.auto = 자동으로 할당
+unlock.errorMessage.wrongPassword = 틀린 비밀번호
+unlock.errorMessage.mountingFailed = 마운트 실패. 자세한 사항은 로그 파일을 참조하세요.
+unlock.errorMessage.unsupportedKeyLengthInstallJCE = 복호화 실패. Oracle JCE Unlimited Strength Policy Files을 설치하세요.
+unlock.errorMessage.unsupportedVersion.vaultOlderThanSoftware = 지원되지 않는 보관함. 이 보관함은 이전 버전의 Cryptomator에서 생성되었습니다.
+unlock.errorMessage.unsupportedVersion.softwareOlderThanVault = 지원되지 않는 보관함. 이 보관함은 최신 버전의 Cryptomator에서 생성되었습니다.
+unlock.messageLabel.startServerFailed = WedDAV 서버 시작 실패
+# change_password.fxml
+changePassword.label.oldPassword = 이전 비밀번호
+changePassword.label.newPassword = 새로운 비밀번호
+changePassword.label.retypePassword = 비밀번호 재입력
+changePassword.label.downloadsPageLink = 모든 Cryptomator 버전
+changePassword.button.change = 비밀번호 변경
+changePassword.errorMessage.wrongPassword = 틀린 비밀번호
+changePassword.errorMessage.decryptionFailed = 복호화 실패
+changePassword.errorMessage.unsupportedKeyLengthInstallJCE = 복호화 실패. Oracle JCE Unlimited Strength Policy Files을 설치하세요.
+changePassword.errorMessage.unsupportedVersion.vaultOlderThanSoftware = 지원되지 않는 보관함. 이 보관함은 이전 버전의 Cryptomator에서 생성되었습니다.
+changePassword.errorMessage.unsupportedVersion.softwareOlderThanVault = 지원되지 않는 보관함. 이 보관함은 최신 버전의 Cryptomator에서 생성되었습니다.
+changePassword.infoMessage.success = 비밀번호 변경
+# unlocked.fxml
+unlocked.button.lock = 보관함 잠그기
+unlocked.moreOptions.reveal = 드라이브 표시
+unlocked.moreOptions.copyUrl = WebDAV 주소 복사
+unlocked.label.revealFailed = 명령 실패
+unlocked.label.unmountFailed = 드라이브 추출 실패
+unlocked.label.statsEncrypted = 암호화
+unlocked.label.statsDecrypted = 복호화
+unlocked.ioGraph.yAxis.label = 처리량 (MiB/s)
+# mac_warnings.fxml
+macWarnings.windowTitle = 위험 - %s에 손상된 파일
+macWarnings.message = Cryptomator가 다음 파일들에서 잠재적인 손상 위험을 감지했습니다.
+macWarnings.moreInformationButton = 더 알아보기
+macWarnings.whitelistButton = 선택 항목 강제 복호화
+# settings.fxml
+settings.version.label = 버전 %s
+settings.checkForUpdates.label = 업데이트 확인
+settings.port.label = WebDAV 포트 *
+settings.port.prompt = 0 \= 자동으로 선택
+settings.useipv6.label = IPv6 사용
+settings.requiresRestartLabel = * Cryptomator 재시작 필요
+# tray icon
+tray.menu.open = 열기
+tray.menu.quit = 종료
+tray.infoMsg.title = 계속 실행 중입니다.
+tray.infoMsg.msg = Cryptomator가 계속 실행 중입니다. 종료하실려면 트레이 아이콘에서 해주세요.
+tray.infoMsg.msg.osx = Cryptomator가 계속 실행중입니다. 종료하실려면 메뉴 바 아이콘에서 해주세요.

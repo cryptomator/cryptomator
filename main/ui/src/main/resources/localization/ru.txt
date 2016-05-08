@@ -1,0 +1,55 @@
+# Copyright (c) 2016 The Cryptomator Contributors
+# This file is licensed under the terms of the MIT license.
+# See the LICENSE.txt file for more info.
+#
+# Contributors:
+#     Garik
+#     Konstantine
+
+app.name = Cryptomator
+# main.fxml
+main.emptyListInstructions = Нажмите здесь что добавить хранилище
+main.directoryList.contextMenu.remove = Удалить из списка
+main.directoryList.contextMenu.changePassword = Сменить пароль
+main.addDirectory.contextMenu.new = Создать новое хранилище
+main.addDirectory.contextMenu.open = Открыть существующее хранилище
+# welcome.fxml
+welcome.checkForUpdates.label.currentlyChecking = Проверка обновлений...
+welcome.newVersionMessage = Версия может быть скачена. Это.
+# initialize.fxml
+initialize.label.password = Пароль
+initialize.label.retypePassword = Повторите пароль
+initialize.button.ok = Создать хранилище
+initialize.messageLabel.alreadyInitialized = Хранилище уже инициализировано
+initialize.messageLabel.initializationFailed = Невозможно инициировать хранилище. Смотрите лог для деталей.
+# notfound.fxml
+notfound.label = Хранилище не найдено.Оно было удалено?
+# upgrade.fxml
+upgrade.button = Обновить хранилище
+upgrade.version3dropBundleExtension.msg = Этому хранилищу нужно мигрировать в новый формат.\n"%1$s" will be renamed to "%2$s".\nPlease make sure synchronization has finished before proceeding.
+upgrade.version3dropBundleExtension.err.alreadyExists = Автоматическая миграция не удалась.\n"%" уже существует.
+# unlock.fxml
+unlock.label.password = Пароль
+unlock.label.mountName = Имя носителя
+changePassword.errorMessage.wrongPassword = Неправильный пароль
+changePassword.errorMessage.decryptionFailed = Расшифровка провалилась
+changePassword.errorMessage.unsupportedKeyLengthInstallJCE = Расшифровка не удалась. Пожалуйста установите Oracle JCE Unlimited Strength Policy.
+changePassword.infoMessage.success = Пароль изменился
+# unlocked.fxml
+unlocked.button.lock = Заблокировать хранилище
+unlocked.moreOptions.copyUrl = Скопировать WebDAV URL
+unlocked.label.revealFailed = Команда не удалась
+unlocked.label.unmountFailed = Извлечение диска не удалось
+unlocked.label.statsEncrypted = зашифровано
+unlocked.label.statsDecrypted = расшифровано
+macWarnings.moreInformationButton = Изучить больше
+# settings.fxml
+settings.version.label = Версия %s
+settings.checkForUpdates.label = Проверка обновлений
+settings.requiresRestartLabel = * Cryptomator должен перезагрузится
+# tray icon
+tray.menu.open = Открыть
+tray.menu.quit = Выйти
+tray.infoMsg.title = Всё ещё работает
+tray.infoMsg.msg = Cryptomator работает. Выйдите c помощью иконки в трее.
+tray.infoMsg.msg.osx = Cryptomator всё ещё работает.Выйдите с помощью иконки в меню баре.

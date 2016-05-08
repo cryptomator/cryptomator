@@ -59,9 +59,9 @@ public class SettingsController extends LocalizedFXMLViewController {
 		useIpv6Checkbox.setSelected(SystemUtils.IS_OS_WINDOWS && settings.shouldUseIpv6());
 		versionLabel.setText(String.format(localization.getString("settings.version.label"), applicationVersion().orElse("SNAPSHOT")));
 
-		EasyBind.subscribe(checkForUpdatesCheckbox.selectedProperty(), settings::setCheckForUpdatesEnabled);
+		EasyBind.subscribe(checkForUpdatesCheckbox.selectedProperty(), this::checkForUpdateDidChange);
 		EasyBind.subscribe(portField.textProperty(), this::portDidChange);
-		EasyBind.subscribe(useIpv6Checkbox.selectedProperty(), settings::setUseIpv6);
+		EasyBind.subscribe(useIpv6Checkbox.selectedProperty(), this::useIpv6DidChange);
 	}
 
 	@Override
@@ -73,19 +73,28 @@ public class SettingsController extends LocalizedFXMLViewController {
 		return Optional.ofNullable(getClass().getPackage().getImplementationVersion());
 	}
 
+	private void checkForUpdateDidChange(Boolean newValue) {
+		settings.setCheckForUpdatesEnabled(newValue);
+		settings.save();
+	}
+
 	private void portDidChange(String newValue) {
 		try {
 			int port = Integer.parseInt(newValue);
-			if (port < Settings.MIN_PORT) {
+			if (port < Settings.MIN_PORT || port > Settings.MAX_PORT) {
 				settings.setPort(Settings.DEFAULT_PORT);
-			} else if (port < Settings.MAX_PORT) {
-				settings.setPort(port);
 			} else {
-				portField.setText(String.valueOf(Settings.MAX_PORT));
+				settings.setPort(port);
+				settings.save();
 			}
 		} catch (NumberFormatException e) {
 			portField.setText(String.valueOf(Settings.DEFAULT_PORT));
 		}
+	}
+
+	private void useIpv6DidChange(Boolean newValue) {
+		settings.setUseIpv6(newValue);
+		settings.save();
 	}
 
 	private void filterNumericKeyEvents(KeyEvent t) {

@@ -12,21 +12,11 @@ package org.cryptomator.ui.controllers;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import com.nulabinc.zxcvbn.Strength;
-import com.nulabinc.zxcvbn.Zxcvbn;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.scene.control.Label;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
-import org.apache.commons.lang3.StringUtils;
 import org.cryptomator.crypto.engine.InvalidPassphraseException;
 import org.cryptomator.crypto.engine.UnsupportedVaultFormatException;
 import org.cryptomator.ui.controls.SecPasswordField;
@@ -40,12 +30,16 @@ import org.slf4j.LoggerFactory;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.binding.BooleanBinding;
+import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Hyperlink;
+import javafx.scene.control.Label;
+import javafx.scene.layout.Region;
 import javafx.scene.text.Text;
 
 @Singleton
@@ -54,18 +48,17 @@ public class ChangePasswordController extends LocalizedFXMLViewController {
 	private static final Logger LOG = LoggerFactory.getLogger(ChangePasswordController.class);
 
 	private final Application app;
+	private final PasswordStrengthUtil strengthRater;
 	final ObjectProperty<Vault> vault = new SimpleObjectProperty<>();
 	private Optional<ChangePasswordListener> listener = Optional.empty();
-	final IntegerProperty passwordStrength = new SimpleIntegerProperty(); // 0-4
+	private final IntegerProperty passwordStrength = new SimpleIntegerProperty(); // 0-4
 
 	@Inject
-	public ChangePasswordController(Application app, Localization localization) {
+	public ChangePasswordController(Application app, PasswordStrengthUtil strengthRater, Localization localization) {
 		super(localization);
 		this.app = app;
+		this.strengthRater = strengthRater;
 	}
-
-	@Inject
-	PasswordStrengthUtil strengthRater;
 
 	@FXML
 	private SecPasswordField oldPasswordField;
@@ -89,7 +82,19 @@ public class ChangePasswordController extends LocalizedFXMLViewController {
 	private Label passwordStrengthLabel;
 
 	@FXML
-	private Rectangle passwordStrengthShape;
+	private Region passwordStrengthLevel0;
+
+	@FXML
+	private Region passwordStrengthLevel1;
+
+	@FXML
+	private Region passwordStrengthLevel2;
+
+	@FXML
+	private Region passwordStrengthLevel3;
+
+	@FXML
+	private Region passwordStrengthLevel4;
 
 	@Override
 	public void initialize() {
@@ -99,9 +104,16 @@ public class ChangePasswordController extends LocalizedFXMLViewController {
 		changePasswordButton.disableProperty().bind(oldPasswordIsEmpty.or(newPasswordIsEmpty.or(passwordsDiffer)));
 		passwordStrength.bind(EasyBind.map(newPasswordField.textProperty(), strengthRater::computeRate));
 
-		passwordStrengthShape.widthProperty().bind(EasyBind.map(passwordStrength, strengthRater::getWidth));
-		passwordStrengthShape.fillProperty().bind(EasyBind.map(passwordStrength, strengthRater::getStrengthColor));
-		passwordStrengthShape.strokeWidthProperty().bind(EasyBind.map(passwordStrength, strengthRater::getStrokeWidth));
+		passwordStrengthLevel0.visibleProperty().bind(passwordStrength.greaterThanOrEqualTo(0));
+		passwordStrengthLevel1.visibleProperty().bind(passwordStrength.greaterThanOrEqualTo(1));
+		passwordStrengthLevel2.visibleProperty().bind(passwordStrength.greaterThanOrEqualTo(2));
+		passwordStrengthLevel3.visibleProperty().bind(passwordStrength.greaterThanOrEqualTo(3));
+		passwordStrengthLevel4.visibleProperty().bind(passwordStrength.greaterThanOrEqualTo(4));
+		passwordStrengthLevel0.backgroundProperty().bind(EasyBind.map(passwordStrength, strengthRater::getBackgroundWithStrengthColor));
+		passwordStrengthLevel1.backgroundProperty().bind(EasyBind.map(passwordStrength, strengthRater::getBackgroundWithStrengthColor));
+		passwordStrengthLevel2.backgroundProperty().bind(EasyBind.map(passwordStrength, strengthRater::getBackgroundWithStrengthColor));
+		passwordStrengthLevel3.backgroundProperty().bind(EasyBind.map(passwordStrength, strengthRater::getBackgroundWithStrengthColor));
+		passwordStrengthLevel4.backgroundProperty().bind(EasyBind.map(passwordStrength, strengthRater::getBackgroundWithStrengthColor));
 		passwordStrengthLabel.textProperty().bind(EasyBind.map(passwordStrength, strengthRater::getStrengthDescription));
 	}
 
