@@ -18,17 +18,8 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>org.cryptomator</groupId>
-			<artifactId>commons</artifactId>
-		</dependency>
-		
-		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.mockito</groupId>
-			<artifactId>mockito-core</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>de.bechte.junit</groupId>
@@ -37,6 +28,11 @@
 		<dependency>
 			<groupId>org.hamcrest</groupId>
 			<artifactId>hamcrest-all</artifactId>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.cryptomator</groupId>
+			<artifactId>commons</artifactId>
 		</dependency>
 	</dependencies>
 
