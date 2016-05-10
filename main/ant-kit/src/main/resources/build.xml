@@ -50,6 +50,7 @@
 			<fx:resources>
 				<fx:fileset dir="antbuild" type="jar" includes="Cryptomator-${project.version}.jar" />
 				<fx:fileset dir="libs" type="jar" includes="*.jar" excludes="ui-${project.version}.jar"/>
+				<fx:fileset dir="fixed-binaries" type="data" includes="linux-launcher-*" arch=""/>
 			</fx:resources>
 			<fx:permissions elevated="false" />
 			<fx:preferences install="true" />
