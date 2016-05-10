@@ -44,6 +44,9 @@ public class SettingsController extends LocalizedFXMLViewController {
 	private TextField portField;
 
 	@FXML
+	private Label useIpv6Label;
+
+	@FXML
 	private CheckBox useIpv6Checkbox;
 
 	@FXML
@@ -55,7 +58,8 @@ public class SettingsController extends LocalizedFXMLViewController {
 		checkForUpdatesCheckbox.setSelected(settings.isCheckForUpdatesEnabled() && !areUpdatesManagedExternally());
 		portField.setText(String.valueOf(settings.getPort()));
 		portField.addEventFilter(KeyEvent.KEY_TYPED, this::filterNumericKeyEvents);
-		useIpv6Checkbox.setDisable(!SystemUtils.IS_OS_WINDOWS);
+		useIpv6Label.setVisible(SystemUtils.IS_OS_WINDOWS);
+		useIpv6Checkbox.setVisible(SystemUtils.IS_OS_WINDOWS);
 		useIpv6Checkbox.setSelected(SystemUtils.IS_OS_WINDOWS && settings.shouldUseIpv6());
 		versionLabel.setText(String.format(localization.getString("settings.version.label"), applicationVersion().orElse("SNAPSHOT")));
 
@@ -81,7 +85,7 @@ public class SettingsController extends LocalizedFXMLViewController {
 	private void portDidChange(String newValue) {
 		try {
 			int port = Integer.parseInt(newValue);
-			if (port < Settings.MIN_PORT || port > Settings.MAX_PORT) {
+			if (!settings.isPortValid(port)) {
 				settings.setPort(Settings.DEFAULT_PORT);
 			} else {
 				settings.setPort(port);
