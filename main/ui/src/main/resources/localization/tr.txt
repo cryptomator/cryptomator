@@ -1,0 +1,89 @@
+# Copyright (c) 2016 The Cryptomator Contributors
+# This file is licensed under the terms of the MIT license.
+# See the LICENSE.txt file for more info.
+#
+# Contributors:
+#     Cem KOÇ
+
+app.name = Cryptomator
+# main.fxml
+main.emptyListInstructions = Kasa eklemek için tıkla
+main.directoryList.contextMenu.remove = Listeden sil
+main.directoryList.contextMenu.changePassword = Şifreyi değiştir
+main.addDirectory.contextMenu.new = Yeni bir kasa yarat
+main.addDirectory.contextMenu.open = Var olan kasayı aç
+# welcome.fxml
+welcome.checkForUpdates.label.currentlyChecking = Güncellemeler kontrol ediliyor...
+welcome.newVersionMessage = Sürüm %s indirilebilir. Şu anki sürüm\: %s
+# initialize.fxml
+initialize.label.password = Şifre
+initialize.label.retypePassword = Şifre (tekrar)
+initialize.button.ok = Kasa oluştur
+initialize.messageLabel.alreadyInitialized = Kasa çoktan başlatıldı
+initialize.messageLabel.initializationFailed = Kasa başlatılamadı. Detaylar için log dosyasına bakın.
+# notfound.fxml
+notfound.label = Kasa bulunamadı. Yeri değişmiş olabilir mi ?
+# upgrade.fxml
+upgrade.button = Kasayı yükselt.
+upgrade.version3dropBundleExtension.msg = Bu kasanın yeni formata geçirilmesi gerekmekte. "%1$s" ismi "%2$s" olarak değiştirilecek. Devam etmeden önce senkronizasyonun bittiğine emin olun.
+upgrade.version3dropBundleExtension.err.alreadyExists = Otomatik format değiştirme sırasında hata. "%s" zaten bulunmakta.
+# unlock.fxml
+unlock.label.password = Şifre
+unlock.label.mountName = Sürücü ismi
+unlock.label.winDriveLetter = Sürücü konumu
+unlock.label.downloadsPageLink = Tüm Cryptomator sürümleri
+unlock.label.advancedHeading = Gelişmiş seçenekler
+unlock.button.unlock = Kasayı aç
+unlock.button.advancedOptions.show = Daha fazla seçenek
+unlock.button.advancedOptions.hide = Daha az seçenek
+unlock.choicebox.winDriveLetter.auto = Otomatik ata
+unlock.errorMessage.wrongPassword = Yanlış şifre
+unlock.errorMessage.mountingFailed = Başlama başarısız. Detaylar için log dosyasına bakın
+unlock.errorMessage.unsupportedKeyLengthInstallJCE = Şifre çözme başarısız. Lütfen Oracle JCE Unlimited Strength Policy yükleyin.
+unlock.errorMessage.unsupportedVersion.vaultOlderThanSoftware = Desteklenmeyen kasa. Bu kasa daha eski bir Cryptomator sürümü ile oluşturulmuş.
+unlock.errorMessage.unsupportedVersion.softwareOlderThanVault = Desteklenmeyen kasa. Bu kasa daha yeni bir Cryptomator sürümü ile oluşturulmuş.
+unlock.messageLabel.startServerFailed = WebDAV sunucu başlatma başarısız.
+# change_password.fxml
+changePassword.label.oldPassword = Eski şifre
+changePassword.label.newPassword = Yeni şifre
+changePassword.label.retypePassword = Yeni şifre (tekrar)
+changePassword.label.downloadsPageLink = Tüm Cryptomator sürümleri
+changePassword.button.change = Şifreyi değiştir
+changePassword.errorMessage.wrongPassword = Yanlış şifre
+changePassword.errorMessage.decryptionFailed = Şifre çözme başarısız
+changePassword.errorMessage.unsupportedKeyLengthInstallJCE = Şifre çözme başarısız. Lütfen Oracle JCE Unlimited Strength Policy yükleyin.
+changePassword.errorMessage.unsupportedVersion.vaultOlderThanSoftware = Desteklenmeyen kasa. Bu kasa daha eski bir Cryptomator sürümü ile oluşturulmuş.
+changePassword.errorMessage.unsupportedVersion.softwareOlderThanVault = Desteklenmeyen kasa. Bu kasa daha yeni bir Cryptomator sürümü ile oluşturulmuş.
+changePassword.infoMessage.success = Şifre değiştirildi.
+# unlocked.fxml
+unlocked.button.lock = Kasayı kilitle
+unlocked.moreOptions.reveal = Sürücüyü göster
+unlocked.moreOptions.copyUrl = WebDAV URl'sini kopyala
+unlocked.label.revealFailed = Komut başarısız
+unlocked.label.unmountFailed = Sürücü çıkarma başarısız
+unlocked.label.statsEncrypted = şifrelenmiş
+unlocked.label.statsDecrypted = şifresi çözülmüş
+unlocked.ioGraph.yAxis.label = Veri hacmi (MiB/s)
+# mac_warnings.fxml
+macWarnings.windowTitle = Tehlike - Bozuk dosya - %s
+macWarnings.message = Cryptomator bu satırlarda kötücül olma olasılığına sahip bozulmalar tespit etti\:
+macWarnings.moreInformationButton = Daha fazla öğren
+macWarnings.whitelistButton = Seçilenleri her halükarda şifrele
+# settings.fxml
+settings.version.label = Sürüm %s
+settings.checkForUpdates.label = Güncellemeleri denetle
+settings.port.label = WebDAV Port *
+settings.port.prompt = 0 \= Otomatik seç
+settings.useipv6.label = IPv6 kullan
+settings.requiresRestartLabel = * Cryptomator yeniden başlatılması gerek
+# tray icon
+tray.menu.open = Aç
+tray.menu.quit = Çıkış
+tray.infoMsg.title = Hala çalışıyor
+tray.infoMsg.msg = Cryptomator hala çalışıyor. Bildirim simgesi ile çıkış yapın.
+tray.infoMsg.msg.osx = Cryptomator hala çalışıyor. Menü bar simgesi ile çıkış yapın.
+initialize.messageLabel.passwordStrength.0 = Çok zayıf
+initialize.messageLabel.passwordStrength.1 = Zayıf
+initialize.messageLabel.passwordStrength.2 = İyi
+initialize.messageLabel.passwordStrength.3 = Güçlü
+initialize.messageLabel.passwordStrength.4 = Çok güçlü
