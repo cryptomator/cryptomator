@@ -18,7 +18,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
-import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
@@ -37,10 +37,14 @@ class CryptoFolder extends CryptoNode implements Folder {
 	private final WeakValuedCache<String, CryptoFolder> folders = WeakValuedCache.usingLoader(this::newFolder);
 	private final WeakValuedCache<String, CryptoFile> files = WeakValuedCache.usingLoader(this::newFile);
 	private final AtomicReference<String> directoryId = new AtomicReference<>();
+	private final ConflictResolver conflictResolver;
 
 	public CryptoFolder(CryptoFolder parent, String name, Cryptor cryptor) {
 		super(parent, name, cryptor);
+		this.conflictResolver = new ConflictResolver(cryptor.getFilenameCryptor().encryptedNamePattern(), this::decryptChildName, this::encryptChildName);
 	}
+
+	/* ======================= name + directory id ======================= */
 
 	@Override
 	protected Optional<String> encryptedName() {
@@ -74,27 +78,49 @@ class CryptoFolder extends CryptoNode implements Folder {
 		}));
 	}
 
+	/* ======================= children ======================= */
+
 	@Override
 	public Stream<? extends Node> children() {
 		return AutoClosingStream.from(Stream.concat(files(), folders()));
 	}
 
+	private Stream<File> nonConflictingFiles() {
+		final Stream<? extends File> files = physicalFolder().filter(Folder::exists).map(Folder::files).orElse(Stream.empty());
+		return files.filter(containsEncryptedName()).map(conflictResolver::resolveIfNecessary);
+	}
+
+	private Predicate<File> containsEncryptedName() {
+		final Pattern encryptedNamePattern = cryptor.getFilenameCryptor().encryptedNamePattern();
+		return (File file) -> encryptedNamePattern.matcher(file.name()).find();
+	}
+
+	private String decryptChildName(String ciphertextFileName) {
+		final byte[] dirId = getDirectoryId().get().getBytes(UTF_8);
+		return cryptor.getFilenameCryptor().decryptFilename(ciphertextFileName, dirId);
+	}
+
+	private String encryptChildName(String cleartextFileName) {
+		final byte[] dirId = getDirectoryId().get().getBytes(UTF_8);
+		return cryptor.getFilenameCryptor().encryptFilename(cleartextFileName, dirId);
+	}
+
 	@Override
 	public Stream<CryptoFile> files() {
-		final Stream<? extends File> files = physicalFolder().filter(Folder::exists).map(Folder::files).orElse(Stream.empty());
-		return files.map(File::name).filter(isEncryptedFileName()).map(this::decryptChildFileName).map(this::file);
+		return nonConflictingFiles().map(File::name).filter(endsWithDirSuffix().negate()).map(this::decryptChildName).map(this::file);
 	}
 
-	private Predicate<String> isEncryptedFileName() {
-		return (String name) -> {
-			final Matcher m = cryptor.getFilenameCryptor().encryptedNamePattern().matcher(name);
-			return m.matches();
-		};
+	@Override
+	public Stream<CryptoFolder> folders() {
+		return nonConflictingFiles().map(File::name).filter(endsWithDirSuffix()).map(this::removeDirSuffix).map(this::decryptChildName).map(this::folder);
 	}
 
-	private String decryptChildFileName(String encryptedFileName) {
-		final byte[] dirId = getDirectoryId().get().getBytes(UTF_8);
-		return cryptor.getFilenameCryptor().decryptFilename(encryptedFileName, dirId);
+	private Predicate<String> endsWithDirSuffix() {
+		return (String encryptedFolderName) -> StringUtils.endsWith(encryptedFolderName, DIR_SUFFIX);
+	}
+
+	private String removeDirSuffix(String encryptedFolderName) {
+		return StringUtils.removeEnd(encryptedFolderName, DIR_SUFFIX);
 	}
 
 	@Override
@@ -102,41 +128,20 @@ class CryptoFolder extends CryptoNode implements Folder {
 		return files.get(name);
 	}
 
-	public CryptoFile newFile(String name) {
-		return new CryptoFile(this, name, cryptor);
-	}
-
-	@Override
-	public Stream<CryptoFolder> folders() {
-		final Stream<? extends File> files = physicalFolder().filter(Folder::exists).map(Folder::files).orElse(Stream.empty());
-		return files.map(File::name).filter(isEncryptedDirectoryName()).map(this::decryptChildFolderName).map(this::folder);
-	}
-
-	private Predicate<String> isEncryptedDirectoryName() {
-		return (String name) -> {
-			if (name.endsWith(DIR_SUFFIX)) {
-				final Matcher m = cryptor.getFilenameCryptor().encryptedNamePattern().matcher(StringUtils.removeEnd(name, DIR_SUFFIX));
-				return m.matches();
-			} else {
-				return false;
-			}
-		};
-	}
-
-	private String decryptChildFolderName(String encryptedFolderName) {
-		final byte[] dirId = getDirectoryId().get().getBytes(UTF_8);
-		final String ciphertext = StringUtils.removeEnd(encryptedFolderName, DIR_SUFFIX);
-		return cryptor.getFilenameCryptor().decryptFilename(ciphertext, dirId);
-	}
-
 	@Override
 	public CryptoFolder folder(String name) {
 		return folders.get(name);
 	}
 
-	public CryptoFolder newFolder(String name) {
+	private CryptoFile newFile(String name) {
+		return new CryptoFile(this, name, cryptor);
+	}
+
+	private CryptoFolder newFolder(String name) {
 		return new CryptoFolder(this, name, cryptor);
 	}
+
+	/* ======================= create/move/delete ======================= */
 
 	@Override
 	public void create() {
