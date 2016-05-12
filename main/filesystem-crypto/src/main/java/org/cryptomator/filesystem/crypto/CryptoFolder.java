@@ -18,6 +18,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
+import java.util.regex.Matcher;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
@@ -85,7 +86,10 @@ class CryptoFolder extends CryptoNode implements Folder {
 	}
 
 	private Predicate<String> isEncryptedFileName() {
-		return (String name) -> !name.endsWith(DIR_SUFFIX) && cryptor.getFilenameCryptor().isEncryptedFilename(name);
+		return (String name) -> {
+			final Matcher m = cryptor.getFilenameCryptor().encryptedNamePattern().matcher(name);
+			return m.matches();
+		};
 	}
 
 	private String decryptChildFileName(String encryptedFileName) {
@@ -109,7 +113,14 @@ class CryptoFolder extends CryptoNode implements Folder {
 	}
 
 	private Predicate<String> isEncryptedDirectoryName() {
-		return (String name) -> name.endsWith(DIR_SUFFIX) && cryptor.getFilenameCryptor().isEncryptedFilename(StringUtils.removeEnd(name, DIR_SUFFIX));
+		return (String name) -> {
+			if (name.endsWith(DIR_SUFFIX)) {
+				final Matcher m = cryptor.getFilenameCryptor().encryptedNamePattern().matcher(StringUtils.removeEnd(name, DIR_SUFFIX));
+				return m.matches();
+			} else {
+				return false;
+			}
+		};
 	}
 
 	private String decryptChildFolderName(String encryptedFolderName) {
@@ -176,7 +187,7 @@ class CryptoFolder extends CryptoNode implements Folder {
 		// cut all ties:
 		this.invalidateDirectoryIdsRecursively();
 
-		assert!exists();
+		assert !exists();
 		assert target.exists();
 	}
 

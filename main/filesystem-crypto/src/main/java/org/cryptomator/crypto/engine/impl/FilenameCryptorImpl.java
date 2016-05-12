@@ -12,6 +12,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.regex.Pattern;
 
 import javax.crypto.AEADBadTagException;
 import javax.crypto.SecretKey;
@@ -25,6 +26,7 @@ import org.cryptomator.siv.SivMode;
 class FilenameCryptorImpl implements FilenameCryptor {
 
 	private static final BaseNCodec BASE32 = new Base32();
+	private static final Pattern BASE32_PATTERN = Pattern.compile("([A-Z0-9]{8})*[A-Z0-9=]{8}");
 	private static final ThreadLocal<MessageDigest> SHA1 = new ThreadLocalSha1();
 	private static final ThreadLocal<SivMode> AES_SIV = new ThreadLocal<SivMode>() {
 		@Override
@@ -50,8 +52,8 @@ class FilenameCryptorImpl implements FilenameCryptor {
 	}
 
 	@Override
-	public boolean isEncryptedFilename(String ciphertextName) {
-		return BASE32.isInAlphabet(ciphertextName);
+	public Pattern encryptedNamePattern() {
+		return BASE32_PATTERN;
 	}
 
 	@Override

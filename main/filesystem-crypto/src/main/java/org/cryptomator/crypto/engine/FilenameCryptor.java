@@ -8,6 +8,8 @@
  *******************************************************************************/
 package org.cryptomator.crypto.engine;
 
+import java.util.regex.Pattern;
+
 /**
  * Provides deterministic encryption capabilities as filenames must not change on subsequent encryption attempts,
  * otherwise each change results in major directory structure changes which would be a terrible idea for cloud storage encryption.
@@ -22,12 +24,9 @@ public interface FilenameCryptor {
 	String hashDirectoryId(String cleartextDirectoryId);
 
 	/**
-	 * Tests without an actual decryption attempt, if a name is a well-formed ciphertext.
-	 * 
-	 * @param ciphertextName Filename in question
-	 * @return <code>true</code> if the given name is likely to be a valid ciphertext
+	 * @return A Pattern that can be used to test, if a name is a well-formed ciphertext.
 	 */
-	boolean isEncryptedFilename(String ciphertextName);
+	Pattern encryptedNamePattern();
 
 	/**
 	 * @param cleartextName original filename including cleartext file extension
