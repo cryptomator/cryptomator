@@ -52,11 +52,15 @@ final class ConflictResolver {
 			Folder folder = conflictingFile.parent().get();
 			File canonicalFile = folder.file(isDirectory ? ciphertext + DIR_SUFFIX : ciphertext);
 			if (canonicalFile.exists()) {
-				// CONFLICT!!!!!11
-				String conflictId = createConflictId();
-				String alternativeCleartext = cleartext + " (Conflict " + conflictId + ")";
-				String alternativeCiphertext = nameEncryptor.apply(alternativeCleartext);
-				File alternativeFile = folder.file(isDirectory ? alternativeCiphertext + DIR_SUFFIX : alternativeCiphertext);
+				// conflict detected! look for an alternative name:
+				File alternativeFile;
+				String conflictId;
+				do {
+					conflictId = createConflictId();
+					String alternativeCleartext = cleartext + " (Conflict " + conflictId + ")";
+					String alternativeCiphertext = nameEncryptor.apply(alternativeCleartext);
+					alternativeFile = folder.file(isDirectory ? alternativeCiphertext + DIR_SUFFIX : alternativeCiphertext);
+				} while (alternativeFile.exists());
 				LOG.info("Detected conflict {}:\n{}\n{}", conflictId, canonicalFile, conflictingFile);
 				conflictingFile.moveTo(alternativeFile);
 				return alternativeFile;
