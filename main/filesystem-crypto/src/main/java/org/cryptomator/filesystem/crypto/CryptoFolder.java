@@ -25,15 +25,19 @@ import org.apache.commons.lang3.StringUtils;
 import org.cryptomator.common.LazyInitializer;
 import org.cryptomator.common.WeakValuedCache;
 import org.cryptomator.common.streams.AutoClosingStream;
+import org.cryptomator.crypto.engine.CryptoException;
 import org.cryptomator.crypto.engine.Cryptor;
 import org.cryptomator.filesystem.Deleter;
 import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.Folder;
 import org.cryptomator.filesystem.Node;
 import org.cryptomator.io.FileContents;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class CryptoFolder extends CryptoNode implements Folder {
 
+	private static final Logger LOG = LoggerFactory.getLogger(CryptoFolder.class);
 	private final WeakValuedCache<String, CryptoFolder> folders = WeakValuedCache.usingLoader(this::newFolder);
 	private final WeakValuedCache<String, CryptoFile> files = WeakValuedCache.usingLoader(this::newFile);
 	private final AtomicReference<String> directoryId = new AtomicReference<>();
@@ -49,9 +53,7 @@ class CryptoFolder extends CryptoNode implements Folder {
 	@Override
 	protected Optional<String> encryptedName() {
 		if (parent().isPresent()) {
-			return parent().get().getDirectoryId().map(s -> s.getBytes(UTF_8)).map(parentDirId -> {
-				return cryptor.getFilenameCryptor().encryptFilename(name(), parentDirId) + DIR_SUFFIX;
-			});
+			return parent().get().encryptChildName(name()).map(s -> s + DIR_SUFFIX);
 		} else {
 			return Optional.of(cryptor.getFilenameCryptor().encryptFilename(name()) + DIR_SUFFIX);
 		}
@@ -95,24 +97,31 @@ class CryptoFolder extends CryptoNode implements Folder {
 		return (File file) -> encryptedNamePattern.matcher(file.name()).find();
 	}
 
-	private String decryptChildName(String ciphertextFileName) {
-		final byte[] dirId = getDirectoryId().get().getBytes(UTF_8);
-		return cryptor.getFilenameCryptor().decryptFilename(ciphertextFileName, dirId);
+	Optional<String> decryptChildName(String ciphertextFileName) {
+		return getDirectoryId().map(s -> s.getBytes(UTF_8)).map(dirId -> {
+			try {
+				return cryptor.getFilenameCryptor().decryptFilename(ciphertextFileName, dirId);
+			} catch (CryptoException e) {
+				LOG.warn("Filename decryption of {} failed: {}", ciphertextFileName, e.getMessage());
+				return null;
+			}
+		});
 	}
 
-	private String encryptChildName(String cleartextFileName) {
-		final byte[] dirId = getDirectoryId().get().getBytes(UTF_8);
-		return cryptor.getFilenameCryptor().encryptFilename(cleartextFileName, dirId);
+	Optional<String> encryptChildName(String cleartextFileName) {
+		return getDirectoryId().map(s -> s.getBytes(UTF_8)).map(dirId -> {
+			return cryptor.getFilenameCryptor().encryptFilename(cleartextFileName, dirId);
+		});
 	}
 
 	@Override
 	public Stream<CryptoFile> files() {
-		return nonConflictingFiles().map(File::name).filter(endsWithDirSuffix().negate()).map(this::decryptChildName).map(this::file);
+		return nonConflictingFiles().map(File::name).filter(endsWithDirSuffix().negate()).map(this::decryptChildName).filter(Optional::isPresent).map(Optional::get).map(this::file);
 	}
 
 	@Override
 	public Stream<CryptoFolder> folders() {
-		return nonConflictingFiles().map(File::name).filter(endsWithDirSuffix()).map(this::removeDirSuffix).map(this::decryptChildName).map(this::folder);
+		return nonConflictingFiles().map(File::name).filter(endsWithDirSuffix()).map(this::removeDirSuffix).map(this::decryptChildName).filter(Optional::isPresent).map(Optional::get).map(this::folder);
 	}
 
 	private Predicate<String> endsWithDirSuffix() {

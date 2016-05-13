@@ -2,7 +2,7 @@ package org.cryptomator.filesystem.crypto;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
-import java.util.function.UnaryOperator;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 
 import org.apache.commons.codec.binary.Base32;
@@ -29,8 +29,8 @@ public class ConflictResolverTest {
 	public void setup() {
 		Pattern base32Pattern = Pattern.compile("([A-Z0-9]{8})*[A-Z0-9=]{8}");
 		BaseNCodec base32 = new Base32();
-		UnaryOperator<String> decode = (s) -> new String(base32.decode(s), StandardCharsets.UTF_8);
-		UnaryOperator<String> encode = (s) -> base32.encodeAsString(s.getBytes(StandardCharsets.UTF_8));
+		Function<String, Optional<String>> decode = (s) -> Optional.of(new String(base32.decode(s), StandardCharsets.UTF_8));
+		Function<String, Optional<String>> encode = (s) -> Optional.of(base32.encodeAsString(s.getBytes(StandardCharsets.UTF_8)));
 		conflictResolver = new ConflictResolver(base32Pattern, decode, encode);
 
 		folder = Mockito.mock(Folder.class);
@@ -41,8 +41,8 @@ public class ConflictResolverTest {
 		resolved = Mockito.mock(File.class);
 		unrelatedFile = Mockito.mock(File.class);
 
-		String canonicalFileName = encode.apply("test name");
-		String canonicalFolderName = encode.apply("test name") + Constants.DIR_SUFFIX;
+		String canonicalFileName = encode.apply("test name").get();
+		String canonicalFolderName = canonicalFileName + Constants.DIR_SUFFIX;
 		String conflictingFileName = canonicalFileName + " (version 2)";
 		String conflictingFolderName = canonicalFolderName + " (version 2)";
 		String unrelatedName = "notBa$e32!";
