@@ -5,32 +5,9 @@
  * 
  * Contributors:
  *     Sebastian Stenzel - initial API and implementation
+ *     Jean-Noël Charon - confirmation dialog on vault removal
  ******************************************************************************/
 package org.cryptomator.ui.controllers;
-
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Provider;
-import javax.inject.Singleton;
-
-import org.cryptomator.ui.controls.DirectoryListCell;
-import org.cryptomator.ui.model.Vault;
-import org.cryptomator.ui.model.VaultFactory;
-import org.cryptomator.ui.settings.Localization;
-import org.cryptomator.ui.settings.Settings;
-import org.fxmisc.easybind.EasyBind;
-import org.fxmisc.easybind.monadic.MonadicBinding;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import dagger.Lazy;
 import javafx.application.Platform;
@@ -40,20 +17,41 @@ import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener.Change;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Side;
 import javafx.scene.Parent;
-import javafx.scene.control.Button;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
-import javafx.scene.control.ToggleButton;
+import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import org.cryptomator.ui.controls.DirectoryListCell;
+import org.cryptomator.ui.model.Vault;
+import org.cryptomator.ui.model.VaultFactory;
+import org.cryptomator.ui.settings.Localization;
+import org.cryptomator.ui.settings.Settings;
+import org.cryptomator.ui.util.DialogBuilderUtil;
+import org.fxmisc.easybind.EasyBind;
+import org.fxmisc.easybind.monadic.MonadicBinding;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Provider;
+import javax.inject.Singleton;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @Singleton
 public class MainController extends LocalizedFXMLViewController {
@@ -94,6 +92,9 @@ public class MainController extends LocalizedFXMLViewController {
 		this.changePasswordController = changePasswordController;
 		this.settingsController = settingsController;
 		this.vaults = FXCollections.observableList(settings.getDirectories());
+		this.vaults.addListener((Change<? extends Vault> c) -> {
+			settings.save();
+		});
 
 		// derived bindings:
 		this.isShowingSettings = activeController.isEqualTo(settingsController.get());
@@ -224,9 +225,17 @@ public class MainController extends LocalizedFXMLViewController {
 
 	@FXML
 	private void didClickRemoveSelectedEntry(ActionEvent e) {
-		vaults.remove(selectedVault.get());
-		if (vaults.isEmpty()) {
-			activeController.set(welcomeController.get());
+		Dialog confirmDialog = DialogBuilderUtil.buildConfirmationDialog(
+				localization.getString("main.directoryList.remove.confirmation.title"),
+				localization.getString("main.directoryList.remove.confirmation.header"),
+				localization.getString("main.directoryList.remove.confirmation.content")
+		);
+		Optional<ButtonType> choice = confirmDialog.showAndWait();
+		if (choice.get() == ButtonType.OK){
+			vaults.remove(selectedVault.get());
+			if (vaults.isEmpty()) {
+				activeController.set(welcomeController.get());
+			}
 		}
 	}
 

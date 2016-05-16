@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <!--
   Copyright (c) 2014 Sebastian Stenzel
   This file is licensed under the terms of the MIT license.
@@ -6,15 +7,21 @@
   
   Contributors:
       Sebastian Stenzel - initial API and implementation
+      Jean-Noël Charon - password strength meter
 -->
+
+<?import java.lang.*?>
 <?import java.net.URL?>
 <?import javafx.scene.layout.HBox?>
-<?import org.cryptomator.ui.controls.SecPasswordField?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.ProgressIndicator?>
+<?import org.cryptomator.ui.controls.SecPasswordField?>
+<?import javafx.scene.shape.Rectangle?>
 
 <GridPane vgap="12.0" hgap="12.0" prefWidth="400.0" xmlns:fx="http://javafx.com/fxml" cacheShape="true" cache="true">
 	<padding>
@@ -30,17 +37,22 @@
 		<!-- Row 0 -->
 		<Label GridPane.rowIndex="0" GridPane.columnIndex="0" text="%initialize.label.password" cacheShape="true" cache="true" />
 		<SecPasswordField fx:id="passwordField" GridPane.rowIndex="0" GridPane.columnIndex="1" cacheShape="true" cache="true" />
-		
+
 		<!-- Row 1 -->
 		<Label GridPane.rowIndex="1" GridPane.columnIndex="0" text="%initialize.label.retypePassword" cacheShape="true" cache="true" />
 		<SecPasswordField fx:id="retypePasswordField" GridPane.rowIndex="1" GridPane.columnIndex="1" cacheShape="true" cache="true" />
-		
+
 		<!-- Row 2 -->
-		<Button fx:id="okButton" defaultButton="true" GridPane.rowIndex="2" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.halignment="RIGHT" text="%initialize.button.ok" prefWidth="150.0" onAction="#initializeVault" focusTraversable="false" disable="true" cacheShape="true" cache="true" />
-				
+		<Label fx:id="passwordStrengthLabel" cache="true" cacheShape="true" text="" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+
+		<!-- Row 2 -->
+		<Rectangle fx:id="passwordStrengthShape" width="0" height="15" GridPane.columnIndex="1" GridPane.rowIndex="3" fill="#FF0000" stroke="grey" strokeWidth="0" />
+
 		<!-- Row 3 -->
-		<Label fx:id="messageLabel" GridPane.rowIndex="3" GridPane.columnIndex="0" GridPane.columnSpan="2" cacheShape="true" cache="true" />
+		<Button fx:id="okButton" cache="true" cacheShape="true" defaultButton="true" disable="true" focusTraversable="false" onAction="#initializeVault" prefWidth="150.0" text="%initialize.button.ok" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.halignment="RIGHT" GridPane.rowIndex="4" />
+
+		<!-- Row 4 -->
+		<Label fx:id="messageLabel" cache="true" cacheShape="true" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="5" />
+
 	</children>
 </GridPane>
-
-

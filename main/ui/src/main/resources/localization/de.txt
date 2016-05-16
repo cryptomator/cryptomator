@@ -1,9 +1,13 @@
 # Copyright (c) 2016 The Cryptomator Contributors
 # This file is licensed under the terms of the MIT license.
 # See the LICENSE.txt file for more info.
-# 
+#
 # Contributors:
-#     Markus Kreusch - initial translation
+#     Markus Kreusch
+#     Michael Schmetter
+#     Sebastian Wiesendahl
+#     Tim Marius Wunderlich
+
 app.name = Cryptomator
 # main.fxml
 main.emptyListInstructions = Klicken Sie hier, um neue Tresore hinzuzufügen
@@ -65,6 +69,7 @@ unlocked.label.statsDecrypted = entschlüsselt
 unlocked.ioGraph.yAxis.label = Durchsatz (MiB/s)
 # mac_warnings.fxml
 macWarnings.windowTitle = Achtung - Kompromittierte Datei in %s
+# "potentially detected" or "potentially malicious"?
 macWarnings.message = Cryptomator hat möglicherweise unerlaubte Veränderungen in den folgenden Dateien erkannt\:
 macWarnings.moreInformationButton = Mehr erfahren
 macWarnings.whitelistButton = Trotzdem entschlüsseln

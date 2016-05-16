@@ -11,6 +11,7 @@ package org.cryptomator.ui.settings;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 import org.cryptomator.ui.model.Vault;
 
@@ -23,9 +24,11 @@ public class Settings implements Serializable {
 	private static final long serialVersionUID = 7609959894417878744L;
 	public static final int MIN_PORT = 1024;
 	public static final int MAX_PORT = 65535;
-	public static final int DEFAULT_PORT = 0;
+	public static final int DEFAULT_PORT = 42427;
 	public static final boolean DEFAULT_USE_IPV6 = false;
 	public static final Integer DEFAULT_NUM_TRAY_NOTIFICATIONS = 3;
+
+	private final Consumer<Settings> saveCmd;
 
 	@JsonProperty("directories")
 	private List<Vault> directories;
@@ -35,7 +38,7 @@ public class Settings implements Serializable {
 
 	@JsonProperty("port")
 	private Integer port;
-	
+
 	@JsonProperty("useIpv6")
 	private Boolean useIpv6;
 
@@ -45,8 +48,12 @@ public class Settings implements Serializable {
 	/**
 	 * Package-private constructor; use {@link SettingsProvider}.
 	 */
-	Settings() {
+	Settings(Consumer<Settings> saveCmd) {
+		this.saveCmd = saveCmd;
+	}
 
+	public void save() {
+		saveCmd.accept(this);
 	}
 
 	/* Getter/Setter */

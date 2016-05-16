@@ -8,13 +8,13 @@
  *******************************************************************************/
 package org.cryptomator.ui;
 
-import java.util.Comparator;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
 
+import org.cryptomator.common.CommonsModule;
 import org.cryptomator.crypto.engine.impl.CryptoEngineModule;
 import org.cryptomator.frontend.FrontendFactory;
 import org.cryptomator.frontend.webdav.WebDavServer;
@@ -24,7 +24,6 @@ import org.cryptomator.ui.model.VaultObjectMapperProvider;
 import org.cryptomator.ui.settings.Settings;
 import org.cryptomator.ui.settings.SettingsProvider;
 import org.cryptomator.ui.util.DeferredCloser;
-import org.cryptomator.ui.util.SemVerComparator;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -33,7 +32,7 @@ import dagger.Provides;
 import javafx.application.Application;
 import javafx.stage.Stage;
 
-@Module(includes = CryptoEngineModule.class)
+@Module(includes = {CryptoEngineModule.class, CommonsModule.class})
 class CryptomatorModule {
 
 	private final Application application;
@@ -63,13 +62,6 @@ class CryptomatorModule {
 		DeferredCloser closer = new DeferredCloser();
 		Cryptomator.addShutdownTask(closer::close);
 		return closer;
-	}
-
-	@Provides
-	@Singleton
-	@Named("SemVer")
-	Comparator<String> provideSemVerComparator() {
-		return new SemVerComparator();
 	}
 
 	@Provides
