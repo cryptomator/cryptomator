@@ -8,8 +8,6 @@
  *******************************************************************************/
 package org.cryptomator.filesystem.shortening;
 
-import java.io.UncheckedIOException;
-
 import org.cryptomator.filesystem.FileSystem;
 import org.cryptomator.filesystem.inmem.InMemoryFileSystem;
 import org.junit.Assert;
@@ -45,12 +43,12 @@ public class FilenameShortenerTest {
 		Assert.assertEquals("short", shortener.inflate("short"));
 	}
 
-	@Test(expected = UncheckedIOException.class)
+	@Test
 	public void testInflateWithoutMappingFile() {
 		FileSystem fs = new InMemoryFileSystem();
 		FilenameShortener shortener = new FilenameShortener(fs, 10);
 
-		shortener.inflate("iJustMadeThisNameUp.lng");
+		Assert.assertEquals("iJustMadeThisNameUp.lng", shortener.inflate("iJustMadeThisNameUp.lng"));
 	}
 
 }

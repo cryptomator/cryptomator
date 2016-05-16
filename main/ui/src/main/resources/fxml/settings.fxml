@@ -38,7 +38,7 @@
 			<TextField GridPane.rowIndex="1" GridPane.columnIndex="1" fx:id="portField" cacheShape="true" cache="true" promptText="%settings.port.prompt" />
 			
 			<!-- Row 2 -->
-			<Label GridPane.rowIndex="2" GridPane.columnIndex="0" text="%settings.useipv6.label" cacheShape="true" cache="true" />
+			<Label GridPane.rowIndex="2" GridPane.columnIndex="0" fx:id="useIpv6Label" text="%settings.useipv6.label" cacheShape="true" cache="true" />
 			<CheckBox GridPane.rowIndex="2" GridPane.columnIndex="1" fx:id="useIpv6Checkbox" cacheShape="true" cache="true" />
 		</children>
 	</GridPane>

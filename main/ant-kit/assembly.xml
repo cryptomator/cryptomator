@@ -15,6 +15,12 @@
 			<outputDirectory>libs</outputDirectory>
 		</fileSet>
 		<fileSet>
+			<directory>target/fixed-binaries</directory>
+			<filtered>false</filtered>
+			<outputDirectory>fixed-binaries</outputDirectory>
+			<fileMode>755</fileMode>
+		</fileSet>
+		<fileSet>
 			<directory>target/package</directory>
 			<filtered>false</filtered>
 			<outputDirectory>package</outputDirectory>

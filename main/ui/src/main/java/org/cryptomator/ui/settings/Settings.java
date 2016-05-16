@@ -93,8 +93,8 @@ public class Settings implements Serializable {
 		}
 	}
 
-	private boolean isPortValid(int port) {
-		return port == DEFAULT_PORT || port >= MIN_PORT && port <= MAX_PORT;
+	public boolean isPortValid(int port) {
+		return port == DEFAULT_PORT || port >= MIN_PORT && port <= MAX_PORT || port == 0;
 	}
 
 	public boolean shouldUseIpv6() {

@@ -16,6 +16,7 @@ import static org.junit.Assert.assertThat;
 
 import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.concurrent.TimeoutException;
 
@@ -100,6 +101,31 @@ public class ShorteningFileSystemTest {
 		longNamedFolder.create();
 		Assert.assertTrue(longNamedFolder.exists());
 		Assert.assertTrue(correspondingMetadataFile.exists());
+	}
+
+	@Test
+	public void testInflate() {
+		final FileSystem underlyingFs = new InMemoryFileSystem();
+		final Folder metadataRoot = underlyingFs.folder(METADATA_DIR_NAME);
+		final FileSystem fs = new ShorteningFileSystem(underlyingFs, METADATA_DIR_NAME, 10);
+		final File correspondingMetadataFile = metadataRoot.folder("QM").folder("JL").file("QMJL5GQUETRX2YRV6XDTJQ6NNM7IEUHP.lng");
+		final Folder shortenedFolder = underlyingFs.folder("QMJL5GQUETRX2YRV6XDTJQ6NNM7IEUHP.lng");
+		shortenedFolder.create();
+		correspondingMetadataFile.parent().get().create();
+		try (WritableFile w = correspondingMetadataFile.openWritable()) {
+			w.write(ByteBuffer.wrap("morethantenchars".getBytes(StandardCharsets.UTF_8)));
+		}
+		Assert.assertTrue(correspondingMetadataFile.exists());
+		Assert.assertTrue(fs.folders().map(Folder::name).anyMatch(n -> n.equals("morethantenchars")));
+	}
+
+	@Test
+	public void testInflateFailedDueToMissingMapping() {
+		final FileSystem underlyingFs = new InMemoryFileSystem();
+		final FileSystem fs = new ShorteningFileSystem(underlyingFs, METADATA_DIR_NAME, 10);
+		final Folder shortenedFolder = underlyingFs.folder("QMJL5GQUETRX2YRV6XDTJQ6NNM7IEUHP.lng");
+		shortenedFolder.create();
+		Assert.assertTrue(fs.folders().map(Folder::name).anyMatch(n -> n.equals("QMJL5GQUETRX2YRV6XDTJQ6NNM7IEUHP.lng")));
 	}
 
 	@Test

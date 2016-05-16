@@ -8,7 +8,7 @@
  *******************************************************************************/
 package org.cryptomator.crypto.engine;
 
-abstract class CryptoException extends RuntimeException {
+public abstract class CryptoException extends RuntimeException {
 
 	public CryptoException() {
 		super();

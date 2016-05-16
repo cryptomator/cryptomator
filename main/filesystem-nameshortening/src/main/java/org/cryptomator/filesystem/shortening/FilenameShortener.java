@@ -8,8 +8,6 @@
  *******************************************************************************/
 package org.cryptomator.filesystem.shortening;
 
-import java.io.FileNotFoundException;
-import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -19,9 +17,12 @@ import org.apache.commons.codec.binary.BaseNCodec;
 import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.Folder;
 import org.cryptomator.io.FileContents;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class FilenameShortener {
 
+	private static final Logger LOG = LoggerFactory.getLogger(FilenameShortener.class);
 	private static final String LONG_NAME_FILE_EXT = ".lng";
 	private static final ThreadLocal<MessageDigest> SHA1 = new ThreadLocalSha1();
 	private static final BaseNCodec BASE32 = new Base32();
@@ -71,7 +72,8 @@ class FilenameShortener {
 	private String loadMapping(String shortName) {
 		final File mappingFile = mappingFile(shortName);
 		if (!mappingFile.exists()) {
-			throw new UncheckedIOException(new FileNotFoundException("Mapping file not found " + mappingFile));
+			LOG.warn("Mapping file not found: " + mappingFile);
+			return shortName;
 		} else {
 			return FileContents.UTF_8.readContents(mappingFile);
 		}

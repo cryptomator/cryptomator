@@ -3,6 +3,8 @@
 # See the LICENSE.txt file for more info.
 #
 # Contributors:
+#     Christian Schmickler
+#     Joscha Feth
 #     Markus Kreusch
 #     Michael Schmetter
 #     Sebastian Wiesendahl
@@ -86,3 +88,8 @@ tray.menu.quit = Beenden
 tray.infoMsg.title = Cryptomator läuft noch
 tray.infoMsg.msg = Cryptomator läuft noch. Mit dem Tray-Icon beenden.
 tray.infoMsg.msg.osx = Cryptomator läuft noch. Über die Menüleiste beenden.
+initialize.messageLabel.passwordStrength.0 = Sehr schwach
+initialize.messageLabel.passwordStrength.1 = Schwach
+initialize.messageLabel.passwordStrength.2 = Mittel
+initialize.messageLabel.passwordStrength.3 = Stark
+initialize.messageLabel.passwordStrength.4 = Sehr stark

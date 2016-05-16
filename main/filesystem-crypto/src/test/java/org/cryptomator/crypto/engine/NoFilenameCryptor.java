@@ -12,6 +12,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.regex.Pattern;
 
 import org.apache.commons.codec.binary.Base32;
 import org.apache.commons.codec.binary.BaseNCodec;
@@ -19,6 +20,7 @@ import org.apache.commons.codec.binary.BaseNCodec;
 class NoFilenameCryptor implements FilenameCryptor {
 
 	private static final BaseNCodec BASE32 = new Base32();
+	private static final Pattern WILDCARD_PATTERN = Pattern.compile(".*");
 	private static final ThreadLocal<MessageDigest> SHA1 = new ThreadLocalSha1();
 
 	@Override
@@ -29,8 +31,8 @@ class NoFilenameCryptor implements FilenameCryptor {
 	}
 
 	@Override
-	public boolean isEncryptedFilename(String ciphertextName) {
-		return true;
+	public Pattern encryptedNamePattern() {
+		return WILDCARD_PATTERN;
 	}
 
 	@Override

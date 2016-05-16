@@ -8,8 +8,6 @@
  *******************************************************************************/
 package org.cryptomator.filesystem.crypto;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-
 import java.io.UncheckedIOException;
 import java.nio.file.FileAlreadyExistsException;
 import java.util.Optional;
@@ -27,9 +25,7 @@ class CryptoFile extends CryptoNode implements File {
 
 	@Override
 	protected Optional<String> encryptedName() {
-		return parent().get().getDirectoryId().map(s -> s.getBytes(UTF_8)).map(parentDirId -> {
-			return cryptor.getFilenameCryptor().encryptFilename(name(), parentDirId);
-		});
+		return parent().get().encryptChildName(name());
 	}
 
 	@Override

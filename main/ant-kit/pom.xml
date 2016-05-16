@@ -60,6 +60,16 @@
 								<resource>
 									<directory>src/main/resources</directory>
 									<filtering>true</filtering>
+									<excludes>
+										<exclude>fixed-binaries/**</exclude>
+									</excludes>
+								</resource>
+								<resource>
+									<directory>src/main/resources</directory>
+									<filtering>false</filtering>
+									<includes>
+										<include>fixed-binaries/**</include>
+									</includes>
 								</resource>
 							</resources>
 						</configuration>
