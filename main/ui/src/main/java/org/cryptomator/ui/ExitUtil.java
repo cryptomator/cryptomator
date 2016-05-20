@@ -27,6 +27,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.TrayIcon.MessageType;
 import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.IOException;
@@ -71,20 +72,12 @@ class ExitUtil {
 		final TrayIcon trayIcon = createTrayIcon(exitCommand);
 		try {
 			// I'm sorry but no lambda here as several methods must be implemented
-			trayIcon.addMouseListener(new MouseListener() {
+			trayIcon.addMouseListener(new MouseAdapter() {
 				public void mouseClicked(MouseEvent e) {
 					if (e.getButton() == MouseEvent.BUTTON1 && e.getClickCount() == 2) {
 						restoreFromTray(new ActionEvent(e.getSource(), e.getID(), e.paramString()));
 					}
 				}
-
-				public void mouseEntered(MouseEvent e) {}
-
-				public void mouseExited(MouseEvent e) {}
-
-				public void mousePressed(MouseEvent e) {}
-
-				public void mouseReleased(MouseEvent e) {}
 			});
 
 			SystemTray.getSystemTray().add(trayIcon);
