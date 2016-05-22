@@ -25,7 +25,7 @@ final class ThreadLocalAesCtrCipher {
 		try {
 			return Cipher.getInstance(AES_CTR);
 		} catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
-			throw new IllegalStateException("Could not create MAC.", e);
+			throw new IllegalStateException("Could not create Cipher.", e);
 		}
 	}
 
