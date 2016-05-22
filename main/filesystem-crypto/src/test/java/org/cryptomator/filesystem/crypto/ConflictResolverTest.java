@@ -93,7 +93,7 @@ public class ConflictResolverTest {
 	}
 
 	@Test
-	public void testConflictingFileIfCanonicalDoesnExist() {
+	public void testConflictingFileIfCanonicalDoesntExist() {
 		Mockito.when(canonicalFile.exists()).thenReturn(false);
 		File resolved = conflictResolver.resolveIfNecessary(conflictingFile);
 		Mockito.verify(conflictingFile).moveTo(canonicalFile);

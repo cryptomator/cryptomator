@@ -22,7 +22,7 @@ class ShorteningFile extends DelegatingFile<ShorteningFolder> {
 	private final FilenameShortener shortener;
 
 	public ShorteningFile(ShorteningFolder parent, File delegate, String name, FilenameShortener shortener) {
-		super(parent, delegate);
+		super(parent, ConflictResolver.resolveConflictIfNecessary(delegate, shortener));
 		this.longName = new AtomicReference<>(name);
 		this.shortener = shortener;
 	}
