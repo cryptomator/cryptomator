@@ -9,13 +9,19 @@
  *******************************************************************************/
 package org.cryptomator.ui;
 
-import javafx.application.Platform;
-import javafx.stage.Stage;
-import org.apache.commons.lang3.SystemUtils;
-import org.cryptomator.ui.settings.Localization;
-import org.cryptomator.ui.settings.Settings;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.awt.AWTException;
+import java.awt.Image;
+import java.awt.MenuItem;
+import java.awt.PopupMenu;
+import java.awt.SystemTray;
+import java.awt.Toolkit;
+import java.awt.TrayIcon;
+import java.awt.TrayIcon.MessageType;
+import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -23,15 +29,16 @@ import javax.inject.Singleton;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
-import javax.swing.*;
-import java.awt.*;
-import java.awt.TrayIcon.MessageType;
-import java.awt.event.ActionEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.io.IOException;
-import java.util.concurrent.TimeUnit;
+import javax.swing.SwingUtilities;
+
+import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.ui.settings.Localization;
+import org.cryptomator.ui.settings.Settings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javafx.application.Platform;
+import javafx.stage.Stage;
 
 @Singleton
 class ExitUtil {
@@ -71,14 +78,10 @@ class ExitUtil {
 	private void initTrayIconExitHandler(Runnable exitCommand) {
 		final TrayIcon trayIcon = createTrayIcon(exitCommand);
 		try {
-			// I'm sorry but no lambda here as several methods must be implemented
-			trayIcon.addMouseListener(new MouseAdapter() {
-				public void mouseClicked(MouseEvent e) {
-					if (e.getButton() == MouseEvent.BUTTON1 && e.getClickCount() == 2) {
-						restoreFromTray(new ActionEvent(e.getSource(), e.getID(), e.paramString()));
-					}
-				}
-			});
+			// double clicking tray icon should open Cryptomator
+			if (SystemUtils.IS_OS_WINDOWS) {
+				trayIcon.addMouseListener(new TrayIconMouseListener());
+			}
 
 			SystemTray.getSystemTray().add(trayIcon);
 			mainWindow.setOnCloseRequest((e) -> {
@@ -171,6 +174,17 @@ class ExitUtil {
 		SwingUtilities.invokeLater(() -> {
 			notificationCmd.run();
 		});
+	}
+
+	private class TrayIconMouseListener extends MouseAdapter {
+
+		@Override
+		public void mouseClicked(MouseEvent e) {
+			if (e.getButton() == MouseEvent.BUTTON1 && e.getClickCount() == 2) {
+				restoreFromTray(new ActionEvent(e.getSource(), e.getID(), e.paramString()));
+			}
+		}
+
 	}
 
 	private void restoreFromTray(ActionEvent event) {
