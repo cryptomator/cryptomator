@@ -102,7 +102,7 @@ public class MacWarningsController extends LocalizedFXMLViewController {
 
 	@FXML
 	private void didClickMoreInformationButton(ActionEvent event) {
-		application.getHostServices().showDocument("https://cryptomator.org/faq/#macWarning");
+		application.getHostServices().showDocument("https://cryptomator.freshdesk.com/support/solutions/articles/16000003666-what-does-mac-authentication-failed-mean-");
 	}
 
 	private void unauthenticatedResourcesDidChange(Change<? extends String> change) {
