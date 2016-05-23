@@ -45,7 +45,7 @@ For more information on the security details visit [cryptomator.org](https://cry
 
 * Java 8 + JCE unlimited strength policy files (needed for 256-bit keys)
 * Maven 3
-* Optional: OS-dependent build tools for native packaging (see [Windows](https://github.com/cryptomator/cryptomator-win), [OS X](https://github.com/cryptomator/cryptomator-osx), [Debian](https://github.com/cryptomator/cryptomator-deb))
+* Optional: OS-dependent build tools for native packaging (see [Windows](https://github.com/cryptomator/cryptomator-win), [OS X](https://github.com/cryptomator/cryptomator-osx), [Linux](https://github.com/cryptomator/builder-containers))
 
 ### Run Maven
 
