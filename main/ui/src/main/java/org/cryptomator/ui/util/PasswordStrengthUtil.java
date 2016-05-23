@@ -61,7 +61,7 @@ public class PasswordStrengthUtil {
 		case 4:
 			return Color.web("#27ae60");
 		default:
-			return Color.TRANSPARENT;
+			return Color.web("#ffffff", 0.5);
 		}
 	}
 
@@ -69,6 +69,10 @@ public class PasswordStrengthUtil {
 		Color c = this.getStrengthColor(score);
 		BackgroundFill fill = new BackgroundFill(c, CornerRadii.EMPTY, Insets.EMPTY);
 		return new Background(fill);
+	}
+
+	public Background getBackgroundWithStrengthColor(Number score, Number threshold) {
+		return score.intValue() >= threshold.intValue() ? getBackgroundWithStrengthColor(score) : getBackgroundWithStrengthColor(-1);
 	}
 
 	public String getStrengthDescription(Number score) {

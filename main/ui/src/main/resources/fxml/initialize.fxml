@@ -51,14 +51,17 @@
 				<Region HBox.hgrow="ALWAYS" fx:id="passwordStrengthLevel3" cacheShape="true" cache="true" />
 				<Region HBox.hgrow="ALWAYS" fx:id="passwordStrengthLevel4" cacheShape="true" cache="true" />
 			</HBox>
-			<Label fx:id="passwordStrengthLabel" styleClass="caption-label" cache="true" cacheShape="true" text="" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+			<Label fx:id="passwordStrengthLabel" styleClass="caption-label" cache="true" cacheShape="true" text="" />
 		</VBox>
-
+		
 		<!-- Row 3 -->
-		<Button fx:id="okButton" cache="true" cacheShape="true" defaultButton="true" disable="true" focusTraversable="false" onAction="#initializeVault" prefWidth="150.0" text="%initialize.button.ok" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.halignment="RIGHT" GridPane.rowIndex="3" />
+		<Label text="%initialize.label.doNotForget" wrapText="true" cache="true" cacheShape="true" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="3" />		
 
 		<!-- Row 4 -->
-		<Label fx:id="messageLabel" cache="true" cacheShape="true" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="4" />
+		<Button fx:id="okButton" cache="true" cacheShape="true" defaultButton="true" disable="true" focusTraversable="false" onAction="#initializeVault" prefWidth="150.0" text="%initialize.button.ok" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.halignment="RIGHT" GridPane.rowIndex="4" />
+
+		<!-- Row 5 -->
+		<Label fx:id="messageLabel" cache="true" cacheShape="true" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="5" />
 
 	</children>
 </GridPane>

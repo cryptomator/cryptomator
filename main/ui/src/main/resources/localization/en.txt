@@ -29,6 +29,7 @@ initialize.messageLabel.passwordStrength.1=Weak
 initialize.messageLabel.passwordStrength.2=Fair
 initialize.messageLabel.passwordStrength.3=Strong
 initialize.messageLabel.passwordStrength.4=Very strong
+initialize.label.doNotForget=IMPORTANT: There is no way to recover your data, if you forget your password.
 
 # notfound.fxml
 notfound.label=Vault couldn't be found. Has it been moved?
@@ -51,7 +52,6 @@ unlock.button.advancedOptions.hide=Less options
 unlock.choicebox.winDriveLetter.auto=Assign automatically
 unlock.errorMessage.wrongPassword=Wrong password
 unlock.errorMessage.mountingFailed=Mounting failed. See logfile for details.
-unlock.errorMessage.unsupportedKeyLengthInstallJCE=Decryption failed. Please install Oracle JCE Unlimited Strength Policy.
 unlock.errorMessage.unsupportedVersion.vaultOlderThanSoftware=Unsupported vault. This vault has been created with an older version of Cryptomator.
 unlock.errorMessage.unsupportedVersion.softwareOlderThanVault=Unsupported vault. This vault has been created with a newer version of Cryptomator.
 unlock.messageLabel.startServerFailed=Starting WebDAV server failed.
@@ -64,9 +64,6 @@ changePassword.label.downloadsPageLink=All Cryptomator versions
 changePassword.button.change=Change password
 changePassword.errorMessage.wrongPassword=Wrong password
 changePassword.errorMessage.decryptionFailed=Decryption failed
-changePassword.errorMessage.unsupportedKeyLengthInstallJCE=Decryption failed. Please install Oracle JCE Unlimited Strength Policy.
-changePassword.errorMessage.unsupportedVersion.vaultOlderThanSoftware=Unsupported vault. This vault has been created with an older version of Cryptomator.
-changePassword.errorMessage.unsupportedVersion.softwareOlderThanVault=Unsupported vault. This vault has been created with a newer version of Cryptomator.
 changePassword.infoMessage.success=Password changed
 
 # unlocked.fxml

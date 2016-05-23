@@ -91,16 +91,11 @@ public class InitializeController extends LocalizedFXMLViewController {
 		okButton.disableProperty().bind(passwordIsEmpty.or(passwordsDiffer));
 		passwordStrength.bind(EasyBind.map(passwordField.textProperty(), strengthRater::computeRate));
 
-		passwordStrengthLevel0.visibleProperty().bind(passwordStrength.greaterThanOrEqualTo(0));
-		passwordStrengthLevel1.visibleProperty().bind(passwordStrength.greaterThanOrEqualTo(1));
-		passwordStrengthLevel2.visibleProperty().bind(passwordStrength.greaterThanOrEqualTo(2));
-		passwordStrengthLevel3.visibleProperty().bind(passwordStrength.greaterThanOrEqualTo(3));
-		passwordStrengthLevel4.visibleProperty().bind(passwordStrength.greaterThanOrEqualTo(4));
-		passwordStrengthLevel0.backgroundProperty().bind(EasyBind.map(passwordStrength, strengthRater::getBackgroundWithStrengthColor));
-		passwordStrengthLevel1.backgroundProperty().bind(EasyBind.map(passwordStrength, strengthRater::getBackgroundWithStrengthColor));
-		passwordStrengthLevel2.backgroundProperty().bind(EasyBind.map(passwordStrength, strengthRater::getBackgroundWithStrengthColor));
-		passwordStrengthLevel3.backgroundProperty().bind(EasyBind.map(passwordStrength, strengthRater::getBackgroundWithStrengthColor));
-		passwordStrengthLevel4.backgroundProperty().bind(EasyBind.map(passwordStrength, strengthRater::getBackgroundWithStrengthColor));
+		passwordStrengthLevel0.backgroundProperty().bind(EasyBind.combine(passwordStrength, new SimpleIntegerProperty(0), strengthRater::getBackgroundWithStrengthColor));
+		passwordStrengthLevel1.backgroundProperty().bind(EasyBind.combine(passwordStrength, new SimpleIntegerProperty(1), strengthRater::getBackgroundWithStrengthColor));
+		passwordStrengthLevel2.backgroundProperty().bind(EasyBind.combine(passwordStrength, new SimpleIntegerProperty(2), strengthRater::getBackgroundWithStrengthColor));
+		passwordStrengthLevel3.backgroundProperty().bind(EasyBind.combine(passwordStrength, new SimpleIntegerProperty(3), strengthRater::getBackgroundWithStrengthColor));
+		passwordStrengthLevel4.backgroundProperty().bind(EasyBind.combine(passwordStrength, new SimpleIntegerProperty(4), strengthRater::getBackgroundWithStrengthColor));
 		passwordStrengthLabel.textProperty().bind(EasyBind.map(passwordStrength, strengthRater::getStrengthDescription));
 	}
 
