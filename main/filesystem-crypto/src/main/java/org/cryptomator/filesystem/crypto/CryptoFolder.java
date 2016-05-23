@@ -89,7 +89,7 @@ class CryptoFolder extends CryptoNode implements Folder {
 
 	private Stream<File> nonConflictingFiles() {
 		final Stream<? extends File> files = physicalFolder().filter(Folder::exists).map(Folder::files).orElse(Stream.empty());
-		return files.filter(containsEncryptedName()).map(conflictResolver::resolveIfNecessary);
+		return files.filter(containsEncryptedName()).map(conflictResolver::resolveIfNecessary).distinct();
 	}
 
 	private Predicate<File> containsEncryptedName() {

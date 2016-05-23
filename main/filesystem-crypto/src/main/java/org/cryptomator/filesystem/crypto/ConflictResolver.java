@@ -12,6 +12,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.Folder;
+import org.cryptomator.io.FileContents;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,7 +53,13 @@ final class ConflictResolver {
 			Folder folder = conflictingFile.parent().get();
 			File canonicalFile = folder.file(isDirectory ? ciphertext + DIR_SUFFIX : ciphertext);
 			if (canonicalFile.exists()) {
-				// conflict detected! look for an alternative name:
+				// there must not be two directories pointing to the same directory id. In this case no human interaction is needed to resolve this conflict:
+				if (isDirectory && FileContents.UTF_8.readContents(canonicalFile).equals(FileContents.UTF_8.readContents(conflictingFile))) {
+					conflictingFile.delete();
+					return canonicalFile;
+				}
+
+				// conventional conflict detected! look for an alternative name:
 				File alternativeFile;
 				String conflictId;
 				do {
