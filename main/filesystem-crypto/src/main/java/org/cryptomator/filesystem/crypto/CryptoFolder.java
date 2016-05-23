@@ -8,6 +8,7 @@
  *******************************************************************************/
 package org.cryptomator.filesystem.crypto;
 
+import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.cryptomator.filesystem.crypto.Constants.DIR_SUFFIX;
 
@@ -88,8 +89,12 @@ class CryptoFolder extends CryptoNode implements Folder {
 	}
 
 	private Stream<File> nonConflictingFiles() {
-		final Stream<? extends File> files = physicalFolder().filter(Folder::exists).map(Folder::files).orElse(Stream.empty());
-		return files.filter(containsEncryptedName()).map(conflictResolver::resolveIfNecessary).distinct();
+		if (exists()) {
+			final Stream<? extends File> files = physicalFolder().filter(Folder::exists).map(Folder::files).orElse(Stream.empty());
+			return files.filter(containsEncryptedName()).map(conflictResolver::resolveIfNecessary).distinct();
+		} else {
+			throw new UncheckedIOException(new FileNotFoundException(format("Folder %s does not exist", this)));
+		}
 	}
 
 	private Predicate<File> containsEncryptedName() {
