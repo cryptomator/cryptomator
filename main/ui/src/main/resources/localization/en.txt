@@ -15,7 +15,7 @@ main.addDirectory.contextMenu.new=Create new vault
 main.addDirectory.contextMenu.open=Open existing vault
 main.directoryList.remove.confirmation.title=Remove Vault
 main.directoryList.remove.confirmation.header=Do you really want to remove this vault?
-main.directoryList.remove.confirmation.content=The vault will only be removed from the list. To permanently delete it, please delete the files from your filesystem. Lorem ipsum, wie das duftet, kräftig, deftig, würzig, gut. Pommersche aus dem Buchenrauch, naturgewürzt und das schmeckt man auch.
+main.directoryList.remove.confirmation.content=The vault will only be removed from the list. To permanently delete it, please delete the files from your filesystem.
 
 # welcome.fxml
 welcome.checkForUpdates.label.currentlyChecking=Checking for Updates...
@@ -32,7 +32,7 @@ initialize.messageLabel.passwordStrength.1=Weak
 initialize.messageLabel.passwordStrength.2=Fair
 initialize.messageLabel.passwordStrength.3=Strong
 initialize.messageLabel.passwordStrength.4=Very strong
-initialize.label.doNotForget=IMPORTANT: There is no way to recover your data, if you forget your password.
+initialize.label.doNotForget=IMPORTANT: If you forget your password, there is no way to recover your data.
 
 # notfound.fxml
 notfound.label=Vault couldn't be found. Has it been moved?
