@@ -543,7 +543,7 @@
     -fx-background-color: COLOR_BACKGROUND;
     -fx-padding: 20px 20px 20px 96px;
     
-    -fx-background-image: url("/img/dialog-icon.png");
+    -fx-background-image: url("/img/dialog-appicon.png");
     -fx-background-repeat: no-repeat;
     -fx-background-position: 20px 20px;
 }

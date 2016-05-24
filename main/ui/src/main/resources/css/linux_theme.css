@@ -77,7 +77,7 @@
 	-fx-pref-height: 25px;
 	-fx-background-color: COLOR_BORDER, COLOR_VGRAD_LIGHT;
 	-fx-background-insets: 0, 1;
-	-fx-padding: 4px 8px 4px 8px;
+	-fx-padding: 4px 12px 6px 12px;
 	-fx-text-fill: COLOR_TEXT;
 	-fx-alignment: CENTER;
 }
@@ -451,79 +451,55 @@
 
 .dialog-pane {
     -fx-background-color: COLOR_BACKGROUND;
-    -fx-padding: 0;
+    -fx-padding: 20px 20px 20px 96px;
+    
+    -fx-background-image: url("/img/dialog-appicon.png");
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: 20px 20px;
 }
 
-.dialog-pane > .expandable-content {
-    -fx-padding: 0.666em; /* 8px */
-}
-
-.dialog-pane > .button-bar > .container {
-    -fx-padding: 0.833em; /* 10px */
-}
-
-.dialog-pane > .content.label {
-    -fx-alignment: top-left;
-    -fx-padding: 1.333em 0.833em 0 0.833em; /* 16px 10px 0px 10px */
-}
-
-.dialog-pane > .content {
-    -fx-padding: 0.833em; /* 10 */
-}
-
-.dialog-pane:no-header .graphic-container {
-    -fx-padding: 0.833em 0 0 0.833em; /* 10px 0px 0px 10px */
-}
-
+/* HEADER */
 .dialog-pane:header .header-panel {
-    /*-fx-padding: 0.833em 1.166em 0.833em 1.166em; *//* 10px 14px 10px 14px */
-    -fx-padding: 0.833em; /* 10px */
-    -fx-background-color: COLOR_BORDER, linear-gradient(COLOR_BACKGROUND, derive(COLOR_BACKGROUND, 30%));
-    -fx-background-insets: 0, 0 0 1 0;
+    -fx-padding: 0 0 12px 0;
 }
 
+/* TITLE */
 .dialog-pane:header .header-panel .label {
-    -fx-font-size: 1.167em; /* 14px */
+    -fx-font-weight: bold;
     -fx-wrap-text: true;
+    -fx-font-size: 14px;
 }
 
-.dialog-pane:header .header-panel .graphic-container {
-    /* This prevents the text in the header running directly into the graphic */
-    -fx-padding: 0 0 0 0.833em; /* 0px 0px 0px 10px */
+/* CONTENT LABEL */
+.dialog-pane > .content {
+	-fx-alignment: top-left;
+	-fx-wrap-text: true;
+	-fx-font-size: 12px;
 }
 
-.dialog-pane > .button-bar > .container > .details-button {
-  -fx-alignment: baseline-left;
-  -fx-focus-traversable: false;
-  -fx-padding: 0.416em; /* 5px */
-}
-
-.dialog-pane > .button-bar > .container > .details-button.more {
-    -fx-graphic: url("dialog-more-details.png");
-}
-
-.dialog-pane > .button-bar > .container > .details-button.less {
-    -fx-graphic: url("dialog-fewer-details.png");
-}
-
-.dialog-pane > .button-bar > .container > .details-button:hover {
-    -fx-underline: true;
+/* BUTTONS */
+.dialog-pane > .button-bar > .container {
+    -fx-padding: 20px 0 0 0;
 }
 
 .alert.confirmation.dialog-pane,
 .text-input-dialog.dialog-pane,
 .choice-dialog.dialog-pane {
-    -fx-graphic: url("dialog-confirm.png");
+	-fx-padding: 20px 20px 20px 80px;
+	-fx-background-image: url("/img/dialog-confirm.png");
 }
 
 .alert.information.dialog-pane {
-    -fx-graphic: url("dialog-information.png");
+	-fx-padding: 20px 20px 20px 80px;
+	-fx-background-image: url("/img/dialog-information.png");
 }
 
 .alert.error.dialog-pane {
-    -fx-graphic: url("dialog-error.png");
+	-fx-padding: 20px 20px 20px 80px;
+	-fx-background-image: url("/img/dialog-error.png");
 }
 
 .alert.warning.dialog-pane {
-    -fx-graphic: url("dialog-warning.png");
+	-fx-padding: 20px 20px 20px 80px;
+	-fx-background-image: url("/img/dialog-warning.png");
 }
