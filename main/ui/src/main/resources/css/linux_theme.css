@@ -5,6 +5,7 @@
  * 
  * Contributors:
  *     Sebastian Stenzel - initial API and implementation
+ *     Jean-Noël Charon - implementation of the dialog css
  *
  */
  
@@ -80,7 +81,7 @@
 	-fx-pref-height: 25px;
 	-fx-background-color: COLOR_BORDER, COLOR_VGRAD_LIGHT;
 	-fx-background-insets: 0, 1;
-	-fx-padding: 4px 8px 4px 8px;
+	-fx-padding: 4px 12px 6px 12px;
 	-fx-text-fill: COLOR_TEXT;
 	-fx-alignment: CENTER;
 }
@@ -445,3 +446,64 @@
 }
 .default-color0.chart-series-line { -fx-stroke: COLOR_CHART_GREEN; }
 .default-color1.chart-series-line { -fx-stroke: COLOR_CHART_RED; }
+
+/*******************************************************************************
+ *                                                                             *
+ * Dialog                                                                      *
+ *                                                                             *
+ ******************************************************************************/
+
+.dialog-pane {
+    -fx-background-color: COLOR_BACKGROUND;
+    -fx-padding: 20px 20px 20px 96px;
+    
+    -fx-background-image: url("/img/dialog-appicon.png");
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: 20px 20px;
+}
+
+/* HEADER */
+.dialog-pane:header .header-panel {
+    -fx-padding: 0 0 12px 0;
+}
+
+/* TITLE */
+.dialog-pane:header .header-panel .label {
+    -fx-font-weight: bold;
+    -fx-wrap-text: true;
+    -fx-font-size: 14px;
+}
+
+/* CONTENT LABEL */
+.dialog-pane > .content {
+	-fx-alignment: top-left;
+	-fx-wrap-text: true;
+	-fx-font-size: 12px;
+}
+
+/* BUTTONS */
+.dialog-pane > .button-bar > .container {
+    -fx-padding: 20px 0 0 0;
+}
+
+.alert.confirmation.dialog-pane,
+.text-input-dialog.dialog-pane,
+.choice-dialog.dialog-pane {
+	-fx-padding: 20px 20px 20px 80px;
+	-fx-background-image: url("/img/dialog-confirm.png");
+}
+
+.alert.information.dialog-pane {
+	-fx-padding: 20px 20px 20px 80px;
+	-fx-background-image: url("/img/dialog-information.png");
+}
+
+.alert.error.dialog-pane {
+	-fx-padding: 20px 20px 20px 80px;
+	-fx-background-image: url("/img/dialog-error.png");
+}
+
+.alert.warning.dialog-pane {
+	-fx-padding: 20px 20px 20px 80px;
+	-fx-background-image: url("/img/dialog-warning.png");
+}

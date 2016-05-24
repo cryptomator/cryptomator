@@ -13,6 +13,9 @@ main.directoryList.contextMenu.remove=Remove from list
 main.directoryList.contextMenu.changePassword=Change password
 main.addDirectory.contextMenu.new=Create new vault
 main.addDirectory.contextMenu.open=Open existing vault
+main.directoryList.remove.confirmation.title=Remove Vault
+main.directoryList.remove.confirmation.header=Do you really want to remove this vault?
+main.directoryList.remove.confirmation.content=The vault will only be removed from the list. To permanently delete it, please delete the files from your filesystem. Lorem ipsum, wie das duftet, kräftig, deftig, würzig, gut. Pommersche aus dem Buchenrauch, naturgewürzt und das schmeckt man auch.
 
 # welcome.fxml
 welcome.checkForUpdates.label.currentlyChecking=Checking for Updates...

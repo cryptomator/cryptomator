@@ -5,6 +5,7 @@
  * 
  * Contributors:
  *     Sebastian Stenzel - initial API and implementation
+ *     Jean-Noël Charon - implementation of the dialog css
  *
  */
  
@@ -23,6 +24,10 @@
 	
 	COLOR_CHART_GREEN: #A1CD5f;
 	COLOR_CHART_RED: #C75050;
+	
+	COLOR_HGRAD_BTN_BACKGROUND: linear-gradient(to bottom, #F0F0F0 0%, #E5E5E5 100%);
+	COLOR_HGRAD_BTN_DISABLED_BORDER: linear-gradient(to bottom, #D2D2D2 0%, #C4C4C4 100%);
+	COLOR_HGRAD_BTN_ARMED_BACKGROUND: linear-gradient(to bottom, #DAECFC 0%, #C4E0FC 100%);
 	
 	-fx-background-color: COLOR_BACKGROUND;
 	-fx-text-fill: COLOR_TEXT;
@@ -70,7 +75,7 @@
 .button,
 .toggle-button {
 	-fx-pref-height: 27px;
-	-fx-background-color: COLOR_BORDER, linear-gradient(to bottom, #F0F0F0 0%, #E5E5E5 100%);
+	-fx-background-color: COLOR_BORDER, COLOR_HGRAD_BTN_BACKGROUND;
 	-fx-background-insets: 0, 1;
     -fx-padding: 2px 12px 2px 12px;
     -fx-text-fill: COLOR_TEXT;
@@ -80,12 +85,12 @@
 }
 
 .button:default {
-	-fx-background-color: COLOR_BORDER_FOCUS, linear-gradient(to bottom, #F0F0F0 0%, #E5E5E5 100%);
+	-fx-background-color: COLOR_BORDER_FOCUS, COLOR_HGRAD_BTN_BACKGROUND;
 }
 
 .button:disabled,
 .button:default:disabled {
-	-fx-background-color: linear-gradient(to bottom, #D2D2D2 0%, #C4C4C4 100%), #F2F2F2;
+	-fx-background-color: COLOR_HGRAD_BTN_DISABLED_BORDER, #F2F2F2;
     -fx-text-fill: #8B8B8B;
 }
 
@@ -93,7 +98,7 @@
 .button:default:armed,
 .toggle-button:armed,
 .toggle-button:selected {
-    -fx-background-color: COLOR_BORDER_FOCUS, linear-gradient(to bottom, #DAECFC 0%, #C4E0FC 100%);
+    -fx-background-color: COLOR_BORDER_FOCUS, COLOR_HGRAD_BTN_ARMED_BACKGROUND;
 }
 
 .button:focused,
@@ -517,3 +522,72 @@
 }
 .default-color0.chart-series-line { -fx-stroke: COLOR_CHART_GREEN; }
 .default-color1.chart-series-line { -fx-stroke: COLOR_CHART_RED; }
+
+/*******************************************************************************
+ *                                                                             *
+ * Dialog                                                                      *
+ *                                                                             *
+ ******************************************************************************/
+
+.dialog-pane {
+    -fx-background-color: COLOR_BACKGROUND;
+    -fx-padding: 20px 20px 20px 96px;
+    
+    -fx-background-image: url("/img/dialog-appicon.png");
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: 20px 20px;
+}
+
+/* HEADER */
+.dialog-pane:header .header-panel {
+    -fx-padding: 0 0 12px 0;
+}
+
+/* TITLE */
+.dialog-pane:header .header-panel .label {
+    -fx-font-weight: bold;
+    -fx-wrap-text: true;
+}
+
+/* CONTENT LABEL */
+.dialog-pane > .content {
+	-fx-alignment: top-left;
+	-fx-wrap-text: true;
+	-fx-font-size: 11px;
+	-fx-line-spacing: 1.0;
+}
+
+/* BUTTONS */
+.dialog-pane > .button-bar > .container {
+    -fx-padding: 20px 0 0 0;
+}
+
+.dialog-pane > .button-bar .button:default {
+	-fx-background-color: COLOR_BORDER_FOCUS, COLOR_HGRAD_BTN_BACKGROUND;
+}
+
+.dialog-pane > .button-bar .button:default:armed {
+    -fx-background-color: COLOR_BORDER_FOCUS, COLOR_HGRAD_BTN_ARMED_BACKGROUND;
+}
+
+.alert.confirmation.dialog-pane,
+.text-input-dialog.dialog-pane,
+.choice-dialog.dialog-pane {
+	-fx-padding: 20px 20px 20px 80px;
+	-fx-background-image: url("/img/dialog-confirm.png");
+}
+
+.alert.information.dialog-pane {
+	-fx-padding: 20px 20px 20px 80px;
+	-fx-background-image: url("/img/dialog-information.png");
+}
+
+.alert.error.dialog-pane {
+	-fx-padding: 20px 20px 20px 80px;
+	-fx-background-image: url("/img/dialog-error.png");
+}
+
+.alert.warning.dialog-pane {
+	-fx-padding: 20px 20px 20px 80px;
+	-fx-background-image: url("/img/dialog-warning.png");
+}

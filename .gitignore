@@ -11,3 +11,9 @@
 .classpath
 target/
 test-output/
+
+# IntelliJ Settings Files #
+.idea/
+out/
+.idea_modules/
+*.iws

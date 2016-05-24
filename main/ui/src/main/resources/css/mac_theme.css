@@ -5,11 +5,12 @@
  * 
  * Contributors:
  *     Sebastian Stenzel - initial API and implementation
+ *     Jean-Noël Charon - implementation of the dialog css
  *
  */
  
 .root {
-	-fx-font-family: 'lucida-grande';
+	-fx-font-family: 'lucida-grande', sans-serif;
 	-fx-font-smoothing-type: lcd;
     -fx-font-size: 13px;
 	
@@ -535,3 +536,52 @@
 }
 .default-color0.chart-series-line { -fx-stroke: COLOR_CHART_GREEN; }
 .default-color1.chart-series-line { -fx-stroke: COLOR_CHART_RED; }
+
+/*******************************************************************************
+ *                                                                             *
+ * Dialog                                                                      *
+ *                                                                             *
+ ******************************************************************************/
+
+.dialog-pane {
+    -fx-background-color: COLOR_BACKGROUND;
+    -fx-padding: 20px 20px 20px 96px;
+    
+    -fx-background-image: url("/img/dialog-appicon.png");
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: 20px 20px;
+}
+
+/* HEADER */
+.dialog-pane:header .header-panel {
+    -fx-padding: 0 0 12px 0;
+}
+
+/* TITLE */
+.dialog-pane:header .header-panel .label {
+    -fx-font-weight: bold;
+    -fx-wrap-text: true;
+}
+
+/* CONTENT LABEL */
+.dialog-pane > .content {
+	-fx-alignment: top-left;
+	-fx-wrap-text: true;
+	-fx-font-size: 11px;
+	-fx-line-spacing: 1.0;
+}
+
+/* BUTTONS */
+.dialog-pane > .button-bar > .container {
+    -fx-padding: 12px 0 0 0;
+}
+
+.dialog-pane > .button-bar .button:default {
+	-fx-background-color: COLOR_HGRAD_BTN_DEF_BORDER, COLOR_HGRAD_BTN_DEF_BACKGROUND;
+    -fx-text-fill: #FFF;
+}
+
+.dialog-pane > .button-bar .button:default:armed {
+    -fx-background-color: COLOR_HGRAD_BTN_ARMED_BORDER, COLOR_HGRAD_BTN_ARMED_BACKGROUND;
+    -fx-text-fill: #FFF;
+}
