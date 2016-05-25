@@ -58,7 +58,7 @@ public class UpgradeController extends LocalizedFXMLViewController {
 			return instruction.map(this::upgradeNotification).orElse("");
 		}).orElse(""));
 
-		EasyBind.subscribe(vault, this::vaultChanged);
+		EasyBind.subscribe(vault, this::vaultDidChange);
 	}
 
 	@Override
@@ -66,7 +66,7 @@ public class UpgradeController extends LocalizedFXMLViewController {
 		return getClass().getResource("/fxml/upgrade.fxml");
 	}
 
-	private void vaultChanged(Vault newVault) {
+	private void vaultDidChange(Vault newVault) {
 		errorLabel.setText(null);
 	}
 

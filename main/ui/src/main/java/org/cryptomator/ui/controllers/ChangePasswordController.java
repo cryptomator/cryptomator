@@ -122,6 +122,9 @@ public class ChangePasswordController extends LocalizedFXMLViewController {
 		oldPasswordField.clear();
 		newPasswordField.clear();
 		retypePasswordField.clear();
+		// trigger "default" change to refresh key bindings:
+		changePasswordButton.setDefaultButton(false);
+		changePasswordButton.setDefaultButton(true);
 	}
 
 	// ****************************************

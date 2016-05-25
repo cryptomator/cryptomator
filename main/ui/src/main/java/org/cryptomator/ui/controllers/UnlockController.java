@@ -149,6 +149,9 @@ public class UnlockController extends LocalizedFXMLViewController {
 		if (SystemUtils.IS_OS_WINDOWS) {
 			chooseSelectedDriveLetter();
 		}
+		// trigger "default" change to refresh key bindings:
+		unlockButton.setDefaultButton(false);
+		unlockButton.setDefaultButton(true);
 	}
 
 	// ****************************************

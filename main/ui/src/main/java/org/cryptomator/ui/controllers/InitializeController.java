@@ -108,6 +108,9 @@ public class InitializeController extends LocalizedFXMLViewController {
 	private void vaultDidChange(Vault newVault) {
 		passwordField.clear();
 		retypePasswordField.clear();
+		// trigger "default" change to refresh key bindings:
+		okButton.setDefaultButton(false);
+		okButton.setDefaultButton(true);
 	}
 
 	// ****************************************
