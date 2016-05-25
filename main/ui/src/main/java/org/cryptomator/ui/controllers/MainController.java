@@ -32,7 +32,6 @@ import org.cryptomator.ui.settings.Localization;
 import org.cryptomator.ui.settings.Settings;
 import org.cryptomator.ui.util.DialogBuilderUtil;
 import org.fxmisc.easybind.EasyBind;
-import org.fxmisc.easybind.monadic.MonadicBinding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,6 +40,7 @@ import javafx.application.Platform;
 import javafx.beans.binding.Binding;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
+import javafx.beans.binding.BooleanExpression;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
@@ -56,6 +56,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
@@ -80,8 +81,9 @@ public class MainController extends LocalizedFXMLViewController {
 	private final ObjectProperty<AbstractFXMLViewController> activeController = new SimpleObjectProperty<>();
 	private final ObservableList<Vault> vaults;
 	private final ObjectProperty<Vault> selectedVault = new SimpleObjectProperty<>();
-	private final MonadicBinding<Boolean> isSelectedVaultUnlocked = EasyBind.select(selectedVault).selectObject(Vault::unlockedProperty);;
-	private final Binding<Boolean> canEditSelectedVault = EasyBind.combine(selectedVault.isNull(), isSelectedVaultUnlocked.orElse(false), Boolean::logicalOr);
+	private final BooleanExpression isSelectedVaultUnlocked = BooleanBinding.booleanExpression(EasyBind.select(selectedVault).selectObject(Vault::unlockedProperty).orElse(false));
+	private final BooleanExpression isSelectedVaultValid = BooleanBinding.booleanExpression(EasyBind.monadic(selectedVault).map(Vault::isValidVaultDirectory).orElse(false));
+	private final BooleanExpression canEditSelectedVault = selectedVault.isNotNull().and(isSelectedVaultUnlocked.not());
 	private final BooleanBinding isShowingSettings;
 	private final Map<Vault, UnlockedController> unlockedVaults = new HashMap<>();
 
@@ -113,6 +115,9 @@ public class MainController extends LocalizedFXMLViewController {
 	private ContextMenu vaultListCellContextMenu;
 
 	@FXML
+	private MenuItem changePasswordMenuItem;
+
+	@FXML
 	private ContextMenu addVaultContextMenu;
 
 	@FXML
@@ -142,8 +147,9 @@ public class MainController extends LocalizedFXMLViewController {
 		vaultList.setCellFactory(this::createDirecoryListCell);
 		activeController.set(welcomeController.get());
 		selectedVault.bind(vaultList.getSelectionModel().selectedItemProperty());
-		removeVaultButton.disableProperty().bind(canEditSelectedVault);
+		removeVaultButton.disableProperty().bind(canEditSelectedVault.not());
 		emptyListInstructions.visibleProperty().bind(Bindings.isEmpty(vaults));
+		changePasswordMenuItem.visibleProperty().bind(isSelectedVaultValid);
 
 		EasyBind.subscribe(selectedVault, this::selectedVaultDidChange);
 		EasyBind.subscribe(activeController, this::activeControllerDidChange);

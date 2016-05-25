@@ -34,7 +34,7 @@
 				<MenuItem text="%main.directoryList.contextMenu.remove" onAction="#didClickRemoveSelectedEntry">
 					<graphic><Label text="&#xf12a;" styleClass="ionicons"/></graphic>
 				</MenuItem>
-				<MenuItem text="%main.directoryList.contextMenu.changePassword" onAction="#didClickChangePassword">
+				<MenuItem text="%main.directoryList.contextMenu.changePassword" fx:id="changePasswordMenuItem" onAction="#didClickChangePassword">
 					<graphic><Label text="&#xf2bf;" styleClass="ionicons"/></graphic>
 				</MenuItem>
 			</items>

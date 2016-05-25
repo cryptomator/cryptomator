@@ -119,7 +119,7 @@ public class UnlockController extends LocalizedFXMLViewController {
 		}
 		unlockButton.disableProperty().bind(passwordField.textProperty().isEmpty());
 
-		EasyBind.subscribe(vault, this::vaultChanged);
+		EasyBind.subscribe(vault, this::vaultDidChange);
 	}
 
 	@Override
@@ -127,7 +127,7 @@ public class UnlockController extends LocalizedFXMLViewController {
 		return getClass().getResource("/fxml/unlock.fxml");
 	}
 
-	private void vaultChanged(Vault newVault) {
+	private void vaultDidChange(Vault newVault) {
 		if (newVault == null) {
 			return;
 		}

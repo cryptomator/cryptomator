@@ -101,6 +101,7 @@ public class ChangePasswordController extends LocalizedFXMLViewController {
 		BooleanBinding oldPasswordIsEmpty = oldPasswordField.textProperty().isEmpty();
 		BooleanBinding newPasswordIsEmpty = newPasswordField.textProperty().isEmpty();
 		BooleanBinding passwordsDiffer = newPasswordField.textProperty().isNotEqualTo(retypePasswordField.textProperty());
+		EasyBind.subscribe(vault, this::vaultDidChange);
 		changePasswordButton.disableProperty().bind(oldPasswordIsEmpty.or(newPasswordIsEmpty.or(passwordsDiffer)));
 		passwordStrength.bind(EasyBind.map(newPasswordField.textProperty(), strengthRater::computeRate));
 
@@ -115,6 +116,12 @@ public class ChangePasswordController extends LocalizedFXMLViewController {
 	@Override
 	protected URL getFxmlResourceUrl() {
 		return getClass().getResource("/fxml/change_password.fxml");
+	}
+
+	private void vaultDidChange(Vault newVault) {
+		oldPasswordField.clear();
+		newPasswordField.clear();
+		retypePasswordField.clear();
 	}
 
 	// ****************************************

@@ -88,6 +88,7 @@ public class InitializeController extends LocalizedFXMLViewController {
 	public void initialize() {
 		BooleanBinding passwordIsEmpty = passwordField.textProperty().isEmpty();
 		BooleanBinding passwordsDiffer = passwordField.textProperty().isNotEqualTo(retypePasswordField.textProperty());
+		EasyBind.subscribe(vault, this::vaultDidChange);
 		okButton.disableProperty().bind(passwordIsEmpty.or(passwordsDiffer));
 		passwordStrength.bind(EasyBind.map(passwordField.textProperty(), strengthRater::computeRate));
 
@@ -102,6 +103,11 @@ public class InitializeController extends LocalizedFXMLViewController {
 	@Override
 	protected URL getFxmlResourceUrl() {
 		return getClass().getResource("/fxml/initialize.fxml");
+	}
+
+	private void vaultDidChange(Vault newVault) {
+		passwordField.clear();
+		retypePasswordField.clear();
 	}
 
 	// ****************************************
