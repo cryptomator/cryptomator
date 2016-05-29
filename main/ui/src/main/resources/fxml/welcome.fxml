@@ -24,6 +24,14 @@
 		<HBox alignment="CENTER" spacing="5.0" cacheShape="true" cache="true">
 			<Label fx:id="checkForUpdatesStatus" cacheShape="true" cache="true" />
 			<ProgressIndicator fx:id="checkForUpdatesIndicator" progress="-1" prefWidth="15.0" prefHeight="15.0" cacheShape="true" cache="true" cacheHint="SPEED" />
+			<Label fx:id="checkForUpdatesErrorLabel" />
+			<Button fx:id="checkForUpdatesRetryButton" cache="true" cacheShape="true" defaultButton="true" onAction="#executeCheckForUpdates" text="%welcome.checkForUpdates.retry">
+				<graphic>
+					<ImageView>
+						<Image url="@../img/refresh.png"/>
+					</ImageView>
+				</graphic>
+			</Button>
 		</HBox>
 		<Hyperlink alignment="CENTER" fx:id="updateLink" onAction="#didClickUpdateLink" cacheShape="true" cache="true" disable="true" />
 	</VBox>

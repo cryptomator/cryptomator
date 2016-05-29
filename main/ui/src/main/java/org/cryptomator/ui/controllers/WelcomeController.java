@@ -5,6 +5,7 @@
  * 
  * Contributors:
  *     Sebastian Stenzel - initial API and implementation
+ *     Jean-Noël Charon - adjustments in the check for updates
  ******************************************************************************/
 package org.cryptomator.ui.controllers;
 
@@ -21,6 +22,8 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
+import javafx.scene.control.Button;
+import javafx.scene.image.Image;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.HttpStatus;
@@ -45,6 +48,7 @@ import javafx.scene.Node;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
+import javafx.scene.image.ImageView;
 
 @Singleton
 public class WelcomeController extends LocalizedFXMLViewController {
@@ -75,6 +79,12 @@ public class WelcomeController extends LocalizedFXMLViewController {
 	private ProgressIndicator checkForUpdatesIndicator;
 
 	@FXML
+	private Label checkForUpdatesErrorLabel;
+
+	@FXML
+	private Button checkForUpdatesRetryButton;
+
+	@FXML
 	private Hyperlink updateLink;
 
 	@Override
@@ -82,7 +92,7 @@ public class WelcomeController extends LocalizedFXMLViewController {
 		if (areUpdatesManagedExternally()) {
 			checkForUpdatesContainer.setVisible(false);
 		} else if (settings.isCheckForUpdatesEnabled()) {
-			executor.execute(this::checkForUpdates);
+			executeCheckForUpdates(null);
 		}
 	}
 
@@ -99,10 +109,17 @@ public class WelcomeController extends LocalizedFXMLViewController {
 		return Boolean.parseBoolean(System.getProperty("cryptomator.updatesManagedExternally", "false"));
 	}
 
+	@FXML
+	private void executeCheckForUpdates(ActionEvent event) {
+		executor.execute(this::checkForUpdates);
+	}
+
 	private void checkForUpdates() {
 		Platform.runLater(() -> {
 			checkForUpdatesStatus.setText(localization.getString("welcome.checkForUpdates.label.currentlyChecking"));
 			checkForUpdatesIndicator.setVisible(true);
+			checkForUpdatesErrorLabel.setVisible(false);
+			checkForUpdatesRetryButton.setVisible(false);
 		});
 		final HttpClient client = new HttpClient();
 		final HttpMethod method = new GetMethod("https://cryptomator.org/downloads/latestVersion.json");
@@ -121,13 +138,21 @@ public class WelcomeController extends LocalizedFXMLViewController {
 					this.compareVersions(map);
 				}
 			}
-		} catch (IOException e) {
-			// no error handling required. Maybe next time the version check is successful.
-		} finally {
 			Platform.runLater(() -> {
 				checkForUpdatesStatus.setText("");
 				checkForUpdatesIndicator.setVisible(false);
+				checkForUpdatesErrorLabel.setVisible(false);
+				checkForUpdatesRetryButton.setVisible(false);
 			});
+		} catch (IOException e) {
+			// no error handling required. Maybe next time the version check is successful.
+			Platform.runLater(() -> {
+				checkForUpdatesStatus.setText(localization.getString("welcome.checkForUpdates.label.error"));
+				checkForUpdatesIndicator.setVisible(false);
+				checkForUpdatesErrorLabel.setVisible(true);
+				checkForUpdatesRetryButton.setVisible(true);
+			});
+		} finally {
 		}
 	}
 
