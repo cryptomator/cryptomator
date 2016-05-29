@@ -20,6 +20,8 @@ main.directoryList.remove.confirmation.content=The vault will only be removed fr
 # welcome.fxml
 welcome.checkForUpdates.label.currentlyChecking=Checking for Updates...
 welcome.newVersionMessage=Version %s can be downloaded. This is %s.
+welcome.checkForUpdates.label.error=Update check failed
+welcome.checkForUpdates.retry=Retry
 
 # initialize.fxml
 initialize.label.password=Password
