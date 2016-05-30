@@ -15,16 +15,16 @@ main.directoryList.contextMenu.changePassword = Changer le mot de passe
 main.addDirectory.contextMenu.new = Créer un nouveau coffre
 main.addDirectory.contextMenu.open = Ouvrir un coffre existant
 # welcome.fxml
-welcome.checkForUpdates.label.currentlyChecking = Recherche de mise à jour...
-welcome.newVersionMessage = La version %s peut-être téléchargée. Il s'agit de %s.
+welcome.checkForUpdates.label.currentlyChecking = Recherche de mise à jour…
+welcome.newVersionMessage = La version %s peut-être téléchargée. Il s’agit de %s.
 # initialize.fxml
 initialize.label.password = Mot de passe
 initialize.label.retypePassword = Confirmation
 initialize.button.ok = Créer le coffre
 initialize.messageLabel.alreadyInitialized = Coffre déjà initialisé
-initialize.messageLabel.initializationFailed = Impossible d'initialiser le coffre. Voir le fichier de log pour plus de détails.
+initialize.messageLabel.initializationFailed = Impossible d’initialiser le coffre. Voir le fichier de log pour plus de détails.
 # notfound.fxml
-notfound.label = Coffre introuvable. A t'il été déplacé?
+notfound.label = Coffre introuvable. A-t-il été déplacé ?
 # upgrade.fxml
 upgrade.button = Mettre à niveau
 upgrade.version3dropBundleExtension.msg = Ce coffre doit être converti dans un format plus récent.\n"%1$s" sera renommé en "%2$s".\nAssurez-vous que la synchronisation est terminée avant de continuer.
@@ -36,15 +36,15 @@ unlock.label.winDriveLetter = Lettre du lecteur
 unlock.label.downloadsPageLink = Toutes les versions de Cryptomator
 unlock.label.advancedHeading = Options avancées
 unlock.button.unlock = Déverrouiller le coffre
-unlock.button.advancedOptions.show = Plus d'options
-unlock.button.advancedOptions.hide = Moins d'options
+unlock.button.advancedOptions.show = Plus d’options
+unlock.button.advancedOptions.hide = Moins d’options
 unlock.choicebox.winDriveLetter.auto = Assigner automatiquement
 unlock.errorMessage.wrongPassword = Mot de passe incorrect
-unlock.errorMessage.mountingFailed = Echec du montage. Voir le fichier de log pour plus de détails.
-unlock.errorMessage.unsupportedKeyLengthInstallJCE = Echec du décryptage. Veuillez installer la Policy Oracle "JCE Unlimited Strength Policy".
+unlock.errorMessage.mountingFailed = Échec du montage. Voir le fichier de log pour plus de détails.
+unlock.errorMessage.unsupportedKeyLengthInstallJCE = Échec du déchiffrement. Veuillez installer la Policy Oracle "JCE Unlimited Strength Policy".
 unlock.errorMessage.unsupportedVersion.vaultOlderThanSoftware = Coffre non supporté. Ce coffre a été créé avec une ancienne version de Cryptomator.
 unlock.errorMessage.unsupportedVersion.softwareOlderThanVault = Coffre non supporté. Ce coffre a été créé avec une version de Cryptomator plus récente.
-unlock.messageLabel.startServerFailed = Le serveur WebDAV n'a pas pu démarrer.
+unlock.messageLabel.startServerFailed = Le serveur WebDAV n’a pas pu démarrer.
 # change_password.fxml
 changePassword.label.oldPassword = Ancien mot de passe
 changePassword.label.newPassword = Nouveau mot de passe
@@ -52,35 +52,35 @@ changePassword.label.retypePassword = Vérification
 changePassword.label.downloadsPageLink = Toutes les versions de Cryptomator
 changePassword.button.change = Modification du mot de masse
 changePassword.errorMessage.wrongPassword = Mot de passe incorrect
-changePassword.errorMessage.decryptionFailed = Echec du décryptage
-changePassword.errorMessage.unsupportedKeyLengthInstallJCE = Echec du décryptage. Veuillez installer la Policy Oracle "JCE Unlimited Strength Policy".
+changePassword.errorMessage.decryptionFailed = Échec du déchiffrement
+changePassword.errorMessage.unsupportedKeyLengthInstallJCE = Échec du déchiffrement. Veuillez installer la Policy Oracle "JCE Unlimited Strength Policy".
 changePassword.errorMessage.unsupportedVersion.vaultOlderThanSoftware = Coffre non supporté. Ce coffre a été créé avec une ancienne version de Cryptomator.
 changePassword.errorMessage.unsupportedVersion.softwareOlderThanVault = Coffre non supporté. Ce coffre a été créé avec une version de Cryptomator plus récente.
-changePassword.infoMessage.success = Password changed
+changePassword.infoMessage.success = Mot de passe modifié
 # unlocked.fxml
 unlocked.button.lock = Verrouiller le coffre
 unlocked.moreOptions.reveal = Voir le lecteur
-unlocked.moreOptions.copyUrl = Copier l'URL WebDAV
-unlocked.label.revealFailed = Echec de la commande
-unlocked.label.unmountFailed = Echec de l'éjection du lecteur
-unlocked.label.statsEncrypted = crypté
-unlocked.label.statsDecrypted = décryptage
+unlocked.moreOptions.copyUrl = Copier l’URL WebDAV
+unlocked.label.revealFailed = Échec de la commande
+unlocked.label.unmountFailed = Échec de l’éjection du lecteur
+unlocked.label.statsEncrypted = chiffrement
+unlocked.label.statsDecrypted = déchiffrement
 unlocked.ioGraph.yAxis.label = Débit (MiB/s)
 # mac_warnings.fxml
 macWarnings.windowTitle = Attention - Fichier corrompu dans %s
 macWarnings.message = Cryptomator a détecté des corruptions de données dans les fichiers suivants\:
 macWarnings.moreInformationButton = En savoir plus
-macWarnings.whitelistButton = Décrypter tout de même
+macWarnings.whitelistButton = Déchiffrer tout de même
 # settings.fxml
 settings.version.label = Version %s
 settings.checkForUpdates.label = Vérif. des mises à jour
 settings.port.label = Port WebDAV *
 settings.port.prompt = 0 \= Choix automatique
-settings.useipv6.label = Utiliser un litéral IPv6
+settings.useipv6.label = Utiliser un littéral IPv6
 settings.requiresRestartLabel = * Redémarrage requis
 # tray icon
 tray.menu.open = Ouvrir
 tray.menu.quit = Quitter
 tray.infoMsg.title = Toujours en fonctionnement
-tray.infoMsg.msg = Cryptomator est toujours en fonctionnement. Utiliser l'icône de la barre des tâches pour quitter.
+tray.infoMsg.msg = Cryptomator est toujours en fonctionnement. Utilisez l’icône de la barre des tâches pour quitter.
 tray.infoMsg.msg.osx = Cryptomator est toujours en fonctionnement. Utilisez la barre de menu pour quitter.
