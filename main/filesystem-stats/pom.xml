@@ -12,7 +12,11 @@
 	<parent>
 		<groupId>org.cryptomator</groupId>
 		<artifactId>main</artifactId>
+<<<<<<< HEAD
 		<version>1.1.0</version>
+=======
+		<version>1.2.0-SNAPSHOT</version>
+>>>>>>> cryptomator/develop
 	</parent>
 	<artifactId>filesystem-stats</artifactId>
 	<name>Cryptomator filesystem: Throughput statistics</name>
