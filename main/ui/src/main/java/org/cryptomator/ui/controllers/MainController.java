@@ -202,7 +202,7 @@ public class MainController extends LocalizedFXMLViewController {
 	@FXML
 	private void didClickAddExistingVaults(ActionEvent event) {
 		final FileChooser fileChooser = new FileChooser();
-		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Cryptomator vault", "*" + Vault.VAULT_FILE_EXTENSION));
+		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Cryptomator Masterkey", "*" + Vault.VAULT_FILE_EXTENSION));
 		final List<File> files = fileChooser.showOpenMultipleDialog(mainWindow);
 		if (files != null) {
 			for (final File file : files) {
