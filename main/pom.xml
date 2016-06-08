@@ -49,16 +49,6 @@
 			<url>https://jitpack.io</url>
 		</repository>
 	</repositories>
-	
-	<pluginRepositories>
-		<pluginRepository>
-			<id>jacoco-snapshots</id>
-			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</pluginRepository>
-	</pluginRepositories>
 
 	<dependencyManagement>
 		<dependencies>
@@ -332,7 +322,7 @@
 				<plugin>
 					<groupId>org.jacoco</groupId>
 					<artifactId>jacoco-maven-plugin</artifactId>
-					<version>0.7.7-SNAPSHOT</version>
+					<version>0.7.7.201606060606</version>
 					<executions>
 						<execution>
 							<id>prepare-agent</id>
