@@ -32,7 +32,7 @@ public class WindowsCompatibilityServlet extends HttpServlet {
 	protected void doOptions(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		resp.addHeader("DAV", "1, 2");
 		resp.addHeader("MS-Author-Via", "DAV");
-		// resp.addHeader("Allow", "OPTIONS, GET, HEAD, POST, TRACE, PROPFIND, PROPPATCH, MKCOL, COPY, PUT, DELETE, MOVE, LOCK, UNLOCK");
+		resp.addHeader("Allow", "OPTIONS, GET, HEAD");
 		resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
 	}
 	
