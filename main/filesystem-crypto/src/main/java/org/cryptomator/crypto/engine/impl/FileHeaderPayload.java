@@ -11,12 +11,14 @@ package org.cryptomator.crypto.engine.impl;
 import java.nio.ByteBuffer;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Arrays;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.ShortBufferException;
 import javax.crypto.spec.IvParameterSpec;
@@ -36,13 +38,13 @@ class FileHeaderPayload implements Destroyable {
 	private final SecretKey contentKey;
 
 	public FileHeaderPayload(SecureRandom randomSource) {
-		filesize = 0;
-		final byte[] contentKey = new byte[CONTENT_KEY_LEN];
+		this.filesize = 0;
 		try {
-			randomSource.nextBytes(contentKey);
-			this.contentKey = new SecretKeySpec(contentKey, AES);
-		} finally {
-			Arrays.fill(contentKey, (byte) 0x00);
+			KeyGenerator keyGen = KeyGenerator.getInstance(AES);
+			keyGen.init(CONTENT_KEY_LEN * Byte.SIZE, randomSource);
+			this.contentKey = keyGen.generateKey();
+		} catch (NoSuchAlgorithmException e) {
+			throw new IllegalStateException("Hard-coded algorithm doesn't exist.", e);
 		}
 	}
 

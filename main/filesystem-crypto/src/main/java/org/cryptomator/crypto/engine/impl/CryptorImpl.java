@@ -18,6 +18,7 @@ import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicReference;
 
+import javax.crypto.KeyGenerator;
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -81,14 +82,15 @@ class CryptorImpl implements Cryptor {
 
 	@Override
 	public void randomizeMasterkey() {
-		final byte[] randomBytes = new byte[KEYLENGTH_IN_BYTES];
 		try {
-			randomSource.nextBytes(randomBytes);
-			encryptionKey = new SecretKeySpec(randomBytes, ENCRYPTION_ALG);
-			randomSource.nextBytes(randomBytes);
-			macKey = new SecretKeySpec(randomBytes, MAC_ALG);
-		} finally {
-			Arrays.fill(randomBytes, (byte) 0x00);
+			KeyGenerator encKeyGen = KeyGenerator.getInstance(ENCRYPTION_ALG);
+			encKeyGen.init(KEYLENGTH_IN_BYTES * Byte.SIZE, randomSource);
+			encryptionKey = encKeyGen.generateKey();
+			KeyGenerator macKeyGen = KeyGenerator.getInstance(MAC_ALG);
+			macKeyGen.init(KEYLENGTH_IN_BYTES * Byte.SIZE, randomSource);
+			macKey = macKeyGen.generateKey();
+		} catch (NoSuchAlgorithmException e) {
+			throw new IllegalStateException("Hard-coded algorithm doesn't exist.", e);
 		}
 	}
 
@@ -116,12 +118,12 @@ class CryptorImpl implements Cryptor {
 			final SecretKey kek = new SecretKeySpec(kekBytes, ENCRYPTION_ALG);
 			this.macKey = AesKeyWrap.unwrap(kek, keyFile.getMacMasterKey(), MAC_ALG);
 			// future use (as soon as we need to prevent downgrade attacks):
-//			final Mac mac = new ThreadLocalMac(macKey, MAC_ALG).get();
-//			final byte[] versionMac = mac.doFinal(ByteBuffer.allocate(Integer.BYTES).putInt(CURRENT_VAULT_VERSION).array());
-//			if (!MessageDigest.isEqual(versionMac, keyFile.getVersionMac())) {
-//				destroyQuietly(macKey);
-//				throw new UnsupportedVaultFormatException(Integer.MAX_VALUE, CURRENT_VAULT_VERSION);
-//			}
+			// final Mac mac = new ThreadLocalMac(macKey, MAC_ALG).get();
+			// final byte[] versionMac = mac.doFinal(ByteBuffer.allocate(Integer.BYTES).putInt(CURRENT_VAULT_VERSION).array());
+			// if (!MessageDigest.isEqual(versionMac, keyFile.getVersionMac())) {
+			// destroyQuietly(macKey);
+			// throw new UnsupportedVaultFormatException(Integer.MAX_VALUE, CURRENT_VAULT_VERSION);
+			// }
 			this.encryptionKey = AesKeyWrap.unwrap(kek, keyFile.getEncryptionMasterKey(), ENCRYPTION_ALG);
 		} catch (InvalidKeyException e) {
 			throw new InvalidPassphraseException();
