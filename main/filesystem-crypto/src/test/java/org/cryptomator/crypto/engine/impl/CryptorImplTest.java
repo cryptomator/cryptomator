@@ -21,20 +21,20 @@ public class CryptorImplTest {
 
 	@Test
 	public void testMasterkeyDecryptionWithCorrectPassphrase() throws IOException {
-		final String testMasterKey = "{\"version\":3,\"scryptSalt\":\"AAAAAAAAAAA=\",\"scryptCostParam\":2,\"scryptBlockSize\":8," //
+		final String testMasterKey = "{\"version\":4,\"scryptSalt\":\"AAAAAAAAAAA=\",\"scryptCostParam\":2,\"scryptBlockSize\":8," //
 				+ "\"primaryMasterKey\":\"mM+qoQ+o0qvPTiDAZYt+flaC3WbpNAx1sTXaUzxwpy0M9Ctj6Tih/Q==\"," //
 				+ "\"hmacMasterKey\":\"mM+qoQ+o0qvPTiDAZYt+flaC3WbpNAx1sTXaUzxwpy0M9Ctj6Tih/Q==\"," //
-				+ "\"versionMac\":\"iUmRRHITuyJsJbVNqGNw+82YQ4A3Rma7j/y1v0DCVLA=\"}";
+				+ "\"versionMac\":\"Z9J8Uc5K1f7YKckLUFpXG39NHK1qUjzadw5nvOqvfok=\"}";
 		final Cryptor cryptor = TestCryptorImplFactory.insecureCryptorImpl();
 		cryptor.readKeysFromMasterkeyFile(testMasterKey.getBytes(), "asd");
 	}
 
 	@Test(expected = InvalidPassphraseException.class)
 	public void testMasterkeyDecryptionWithWrongPassphrase() throws IOException {
-		final String testMasterKey = "{\"version\":3,\"scryptSalt\":\"AAAAAAAAAAA=\",\"scryptCostParam\":2,\"scryptBlockSize\":8," //
+		final String testMasterKey = "{\"version\":4,\"scryptSalt\":\"AAAAAAAAAAA=\",\"scryptCostParam\":2,\"scryptBlockSize\":8," //
 				+ "\"primaryMasterKey\":\"mM+qoQ+o0qvPTiDAZYt+flaC3WbpNAx1sTXaUzxwpy0M9Ctj6Tih/Q==\"," //
 				+ "\"hmacMasterKey\":\"mM+qoQ+o0qvPTiDAZYt+flaC3WbpNAx1sTXaUzxwpy0M9Ctj6Tih/Q==\"," //
-				+ "\"versionMac\":\"iUmRRHITuyJsJbVNqGNw+82YQ4A3Rma7j/y1v0DCVLA=\"}";
+				+ "\"versionMac\":\"Z9J8Uc5K1f7YKckLUFpXG39NHK1qUjzadw5nvOqvfok=\"}";
 		final Cryptor cryptor = TestCryptorImplFactory.insecureCryptorImpl();
 		cryptor.readKeysFromMasterkeyFile(testMasterKey.getBytes(), "qwe");
 	}
@@ -44,7 +44,7 @@ public class CryptorImplTest {
 		final String testMasterKey = "{\"version\":-1,\"scryptSalt\":\"AAAAAAAAAAA=\",\"scryptCostParam\":2,\"scryptBlockSize\":8," //
 				+ "\"primaryMasterKey\":\"mM+qoQ+o0qvPTiDAZYt+flaC3WbpNAx1sTXaUzxwpy0M9Ctj6Tih/Q==\"," //
 				+ "\"hmacMasterKey\":\"mM+qoQ+o0qvPTiDAZYt+flaC3WbpNAx1sTXaUzxwpy0M9Ctj6Tih/Q==\"," //
-				+ "\"versionMac\":\"iUmRRHITuyJsJbVNqGNw+82YQ4A3Rma7j/y1v0DCVLA=\"}";
+				+ "\"versionMac\":\"Z9J8Uc5K1f7YKckLUFpXG39NHK1qUjzadw5nvOqvfok=\"}";
 		final Cryptor cryptor = TestCryptorImplFactory.insecureCryptorImpl();
 		cryptor.readKeysFromMasterkeyFile(testMasterKey.getBytes(), "asd");
 	}
@@ -62,23 +62,24 @@ public class CryptorImplTest {
 	@Ignore
 	@Test(expected = UnsupportedVaultFormatException.class)
 	public void testMasterkeyDecryptionWithWrongVersionMac() throws IOException {
-		final String testMasterKey = "{\"version\":3,\"scryptSalt\":\"AAAAAAAAAAA=\",\"scryptCostParam\":2,\"scryptBlockSize\":8," //
+		final String testMasterKey = "{\"version\":4,\"scryptSalt\":\"AAAAAAAAAAA=\",\"scryptCostParam\":2,\"scryptBlockSize\":8," //
 				+ "\"primaryMasterKey\":\"mM+qoQ+o0qvPTiDAZYt+flaC3WbpNAx1sTXaUzxwpy0M9Ctj6Tih/Q==\"," //
 				+ "\"hmacMasterKey\":\"mM+qoQ+o0qvPTiDAZYt+flaC3WbpNAx1sTXaUzxwpy0M9Ctj6Tih/Q==\"," //
-				+ "\"versionMac\":\"iUmRRHITuyJsJbVNqGNw+82YQ4A3Rma7j/y1v0DCVLa=\"}";
+				+ "\"versionMac\":\"z9J8Uc5K1f7YKckLUFpXG39NHK1qUjzadw5nvOqvfoK=\"}";
 		final Cryptor cryptor = TestCryptorImplFactory.insecureCryptorImpl();
 		cryptor.readKeysFromMasterkeyFile(testMasterKey.getBytes(), "asd");
 	}
 
 	@Test
 	public void testMasterkeyEncryption() throws IOException {
-		final String expectedMasterKey = "{\"version\":3,\"scryptSalt\":\"AAAAAAAAAAA=\",\"scryptCostParam\":16384,\"scryptBlockSize\":8," //
+		final String expectedMasterKey = "{\"version\":4,\"scryptSalt\":\"AAAAAAAAAAA=\",\"scryptCostParam\":16384,\"scryptBlockSize\":8," //
 				+ "\"primaryMasterKey\":\"BJPIq5pvhN24iDtPJLMFPLaVJWdGog9k4n0P03j4ru+ivbWY9OaRGQ==\"," //
 				+ "\"hmacMasterKey\":\"BJPIq5pvhN24iDtPJLMFPLaVJWdGog9k4n0P03j4ru+ivbWY9OaRGQ==\"," //
-				+ "\"versionMac\":\"iUmRRHITuyJsJbVNqGNw+82YQ4A3Rma7j/y1v0DCVLA=\"}";
+				+ "\"versionMac\":\"Z9J8Uc5K1f7YKckLUFpXG39NHK1qUjzadw5nvOqvfok=\"}";
 		final Cryptor cryptor = TestCryptorImplFactory.insecureCryptorImpl();
 		cryptor.randomizeMasterkey();
 		final byte[] masterkeyFile = cryptor.writeKeysToMasterkeyFile("asd");
+		System.out.println(new String(masterkeyFile));
 		Assert.assertArrayEquals(expectedMasterKey.getBytes(), masterkeyFile);
 	}
 
