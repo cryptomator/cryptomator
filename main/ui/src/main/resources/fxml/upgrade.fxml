@@ -12,10 +12,13 @@
 <?import javafx.scene.control.ProgressIndicator?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.layout.VBox?>
+<?import org.cryptomator.ui.controls.SecPasswordField?>
 
 <VBox prefWidth="400.0" prefHeight="400.0" spacing="24.0" alignment="CENTER" xmlns:fx="http://javafx.com/fxml" cacheShape="true" cache="true">
 
 	<Label fx:id="upgradeLabel" textAlignment="CENTER" wrapText="true"/>
+	
+	<SecPasswordField fx:id="passwordField" prefWidth="300.0" cacheShape="true" cache="true" />
 
 	<Button fx:id="upgradeButton" text="%upgrade.button" prefWidth="150.0" onAction="#didClickUpgradeButton" cacheShape="true" cache="true" />
 

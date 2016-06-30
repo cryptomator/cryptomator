@@ -26,6 +26,7 @@ import javax.inject.Singleton;
 
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.ui.controls.DirectoryListCell;
+import org.cryptomator.ui.model.UpgradeStrategies;
 import org.cryptomator.ui.model.Vault;
 import org.cryptomator.ui.model.VaultFactory;
 import org.cryptomator.ui.settings.Localization;
@@ -78,6 +79,7 @@ public class MainController extends LocalizedFXMLViewController {
 	private final Provider<UnlockedController> unlockedControllerProvider;
 	private final Lazy<ChangePasswordController> changePasswordController;
 	private final Lazy<SettingsController> settingsController;
+	private final Lazy<UpgradeStrategies> upgradeStrategies;
 	private final ObjectProperty<AbstractFXMLViewController> activeController = new SimpleObjectProperty<>();
 	private final ObservableList<Vault> vaults;
 	private final ObjectProperty<Vault> selectedVault = new SimpleObjectProperty<>();
@@ -90,7 +92,7 @@ public class MainController extends LocalizedFXMLViewController {
 	@Inject
 	public MainController(@Named("mainWindow") Stage mainWindow, Localization localization, Settings settings, VaultFactory vaultFactoy, Lazy<WelcomeController> welcomeController,
 			Lazy<InitializeController> initializeController, Lazy<NotFoundController> notFoundController, Lazy<UpgradeController> upgradeController, Lazy<UnlockController> unlockController,
-			Provider<UnlockedController> unlockedControllerProvider, Lazy<ChangePasswordController> changePasswordController, Lazy<SettingsController> settingsController) {
+			Provider<UnlockedController> unlockedControllerProvider, Lazy<ChangePasswordController> changePasswordController, Lazy<SettingsController> settingsController, Lazy<UpgradeStrategies> upgradeStrategies) {
 		super(localization);
 		this.mainWindow = mainWindow;
 		this.vaultFactoy = vaultFactoy;
@@ -102,6 +104,7 @@ public class MainController extends LocalizedFXMLViewController {
 		this.unlockedControllerProvider = unlockedControllerProvider;
 		this.changePasswordController = changePasswordController;
 		this.settingsController = settingsController;
+		this.upgradeStrategies = upgradeStrategies;
 		this.vaults = FXCollections.observableList(settings.getDirectories());
 		this.vaults.addListener((Change<? extends Vault> c) -> {
 			settings.save();
@@ -288,7 +291,7 @@ public class MainController extends LocalizedFXMLViewController {
 			this.showUnlockedView(newValue);
 		} else if (!newValue.doesVaultDirectoryExist()) {
 			this.showNotFoundView();
-		} else if (newValue.isValidVaultDirectory() && newValue.needsUpgrade()) {
+		} else if (newValue.isValidVaultDirectory() && upgradeStrategies.get().getUpgradeStrategy(newValue).isPresent()) {
 			this.showUpgradeView();
 		} else if (newValue.isValidVaultDirectory()) {
 			this.showUnlockView();

@@ -7,8 +7,10 @@ import java.util.concurrent.ExecutorService;
 
 import javax.inject.Inject;
 
-import org.cryptomator.ui.model.UpgradeInstruction;
-import org.cryptomator.ui.model.UpgradeInstruction.UpgradeFailedException;
+import org.cryptomator.ui.controls.SecPasswordField;
+import org.cryptomator.ui.model.UpgradeStrategies;
+import org.cryptomator.ui.model.UpgradeStrategy;
+import org.cryptomator.ui.model.UpgradeStrategy.UpgradeFailedException;
 import org.cryptomator.ui.model.Vault;
 import org.cryptomator.ui.settings.Localization;
 import org.fxmisc.easybind.EasyBind;
@@ -16,7 +18,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javafx.application.Platform;
-import javafx.beans.binding.Binding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
@@ -30,18 +31,23 @@ public class UpgradeController extends LocalizedFXMLViewController {
 	private static final Logger LOG = LoggerFactory.getLogger(UpgradeController.class);
 
 	final ObjectProperty<Vault> vault = new SimpleObjectProperty<>();
+	final ObjectProperty<Optional<UpgradeStrategy>> strategy = new SimpleObjectProperty<>();
+	private final UpgradeStrategies strategies;
 	private final ExecutorService exec;
-	private final Binding<Optional<UpgradeInstruction>> upgradeInstruction = EasyBind.monadic(vault).map(Vault::availableUpgrade);
 	private Optional<UpgradeListener> listener = Optional.empty();
 
 	@Inject
-	public UpgradeController(Localization localization, ExecutorService exec) {
+	public UpgradeController(Localization localization, UpgradeStrategies strategies, ExecutorService exec) {
 		super(localization);
+		this.strategies = strategies;
 		this.exec = exec;
 	}
 
 	@FXML
 	private Label upgradeLabel;
+
+	@FXML
+	private SecPasswordField passwordField;
 
 	@FXML
 	private Button upgradeButton;
@@ -54,9 +60,11 @@ public class UpgradeController extends LocalizedFXMLViewController {
 
 	@Override
 	protected void initialize() {
-		upgradeLabel.textProperty().bind(EasyBind.monadic(upgradeInstruction).map(instruction -> {
+		upgradeLabel.textProperty().bind(EasyBind.monadic(strategy).map(instruction -> {
 			return instruction.map(this::upgradeNotification).orElse("");
 		}).orElse(""));
+
+		upgradeButton.disableProperty().bind(passwordField.textProperty().isEmpty().or(passwordField.disabledProperty()));
 
 		EasyBind.subscribe(vault, this::vaultDidChange);
 	}
@@ -68,14 +76,15 @@ public class UpgradeController extends LocalizedFXMLViewController {
 
 	private void vaultDidChange(Vault newVault) {
 		errorLabel.setText(null);
+		strategy.set(strategies.getUpgradeStrategy(newVault));
 	}
 
 	// ****************************************
 	// Upgrade label
 	// ****************************************
 
-	private String upgradeNotification(UpgradeInstruction instruction) {
-		return instruction.getNotification(vault.get(), localization);
+	private String upgradeNotification(UpgradeStrategy instruction) {
+		return instruction.getNotification(vault.get());
 	}
 
 	// ****************************************
@@ -84,34 +93,43 @@ public class UpgradeController extends LocalizedFXMLViewController {
 
 	@FXML
 	private void didClickUpgradeButton(ActionEvent event) {
-		upgradeInstruction.getValue().ifPresent(this::upgrade);
+		strategy.getValue().ifPresent(this::upgrade);
 	}
 
-	private void upgrade(UpgradeInstruction instruction) {
-		Vault v = vault.getValue();
-		Objects.requireNonNull(v);
+	private void upgrade(UpgradeStrategy instruction) {
+		Vault v = Objects.requireNonNull(vault.getValue());
+		passwordField.setDisable(true);
 		progressIndicator.setVisible(true);
-		upgradeButton.setDisable(true);
 		exec.submit(() -> {
 			if (!instruction.isApplicable(v)) {
 				LOG.error("No upgrade needed for " + v.path().getValue());
 				throw new IllegalStateException("No ugprade needed for " + v.path().getValue());
 			}
 			try {
-				instruction.upgrade(v, localization);
-				Platform.runLater(() -> {
-					progressIndicator.setVisible(false);
-					upgradeButton.setDisable(false);
-					listener.ifPresent(UpgradeListener::didUpgrade);
-				});
+				instruction.upgrade(v, passwordField.getCharacters());
+				Platform.runLater(this::showNextUpgrade);
 			} catch (UpgradeFailedException e) {
 				Platform.runLater(() -> {
 					errorLabel.setText(e.getLocalizedMessage());
+				});
+			} finally {
+				Platform.runLater(() -> {
 					progressIndicator.setVisible(false);
-					upgradeButton.setDisable(false);
+					passwordField.setDisable(false);
+					passwordField.swipe();
 				});
 			}
 		});
+	}
+
+	private void showNextUpgrade() {
+		errorLabel.setText(null);
+		Optional<UpgradeStrategy> nextStrategy = strategies.getUpgradeStrategy(vault.getValue());
+		if (nextStrategy.isPresent()) {
+			strategy.set(nextStrategy);
+		} else {
+			listener.ifPresent(UpgradeListener::didUpgrade);
+		}
 	}
 
 	/* callback */

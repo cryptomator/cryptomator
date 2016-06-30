@@ -16,7 +16,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.Normalizer;
 import java.text.Normalizer.Form;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
@@ -64,9 +63,9 @@ public class Vault implements CryptoFileSystemDelegate {
 	public static final String VAULT_FILE_EXTENSION = ".cryptomator";
 
 	private final ObjectProperty<Path> path;
-	private final DeferredCloser closer;
 	private final ShorteningFileSystemFactory shorteningFileSystemFactory;
 	private final CryptoFileSystemFactory cryptoFileSystemFactory;
+	private final DeferredCloser closer;
 	private final BooleanProperty unlocked = new SimpleBooleanProperty();
 	private final ObservableList<String> namesOfResourcesWithInvalidMac = FXThreads.observableListOnMainThread(FXCollections.observableArrayList());
 	private final Set<String> whitelistedResourcesWithInvalidMac = new HashSet<>();
@@ -82,9 +81,9 @@ public class Vault implements CryptoFileSystemDelegate {
 	 */
 	Vault(Path vaultDirectoryPath, ShorteningFileSystemFactory shorteningFileSystemFactory, CryptoFileSystemFactory cryptoFileSystemFactory, DeferredCloser closer) {
 		this.path = new SimpleObjectProperty<Path>(vaultDirectoryPath);
-		this.closer = closer;
 		this.shorteningFileSystemFactory = shorteningFileSystemFactory;
 		this.cryptoFileSystemFactory = cryptoFileSystemFactory;
+		this.closer = closer;
 
 		try {
 			setMountName(name().getValue());
@@ -165,16 +164,6 @@ public class Vault implements CryptoFileSystemDelegate {
 
 	public void unmount() throws CommandFailedException {
 		Optionals.ifPresent(filesystemFrontend.get(), Frontend::unmount);
-	}
-
-	public boolean needsUpgrade() {
-		return availableUpgrade().isPresent();
-	}
-
-	public Optional<UpgradeInstruction> availableUpgrade() {
-		return Arrays.stream(UpgradeInstruction.AVAILABLE_INSTRUCTIONS).filter(instruction -> {
-			return instruction.isApplicable(this);
-		}).findAny();
 	}
 
 	// ******************************************************************************
