@@ -5,7 +5,7 @@ public final class Constants {
 	private Constants() {
 	}
 
-	static final Integer CURRENT_VAULT_VERSION = 3;
+	static final Integer CURRENT_VAULT_VERSION = 4;
 
 	public static final int PAYLOAD_SIZE = 32 * 1024;
 	public static final int NONCE_SIZE = 16;

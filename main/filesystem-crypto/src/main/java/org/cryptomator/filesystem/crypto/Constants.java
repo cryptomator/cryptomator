@@ -11,6 +11,6 @@ public final class Constants {
 	static final String MASTERKEY_FILENAME = "masterkey.cryptomator";
 	static final String MASTERKEY_BACKUP_FILENAME = "masterkey.cryptomator.bkup";
 
-	static final String DIR_SUFFIX = "_";
+	static final String DIR_PREFIX = "0";
 
 }

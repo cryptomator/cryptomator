@@ -1,6 +1,6 @@
 package org.cryptomator.filesystem.crypto;
 
-import static org.cryptomator.filesystem.crypto.Constants.DIR_SUFFIX;
+import static org.cryptomator.filesystem.crypto.Constants.DIR_PREFIX;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -32,7 +32,7 @@ final class ConflictResolver {
 	}
 
 	public File resolveIfNecessary(File file) {
-		Matcher m = encryptedNamePattern.matcher(StringUtils.removeEnd(file.name(), DIR_SUFFIX));
+		Matcher m = encryptedNamePattern.matcher(StringUtils.removeStart(file.name(), DIR_PREFIX));
 		if (m.matches()) {
 			// full match, use file as is
 			return file;
@@ -47,11 +47,11 @@ final class ConflictResolver {
 
 	private File resolveConflict(File conflictingFile, MatchResult matchResult) {
 		String ciphertext = matchResult.group();
-		boolean isDirectory = conflictingFile.name().substring(matchResult.end()).startsWith(DIR_SUFFIX);
+		boolean isDirectory = conflictingFile.name().startsWith(DIR_PREFIX);
 		Optional<String> cleartext = nameDecryptor.apply(ciphertext);
 		if (cleartext.isPresent()) {
 			Folder folder = conflictingFile.parent().get();
-			File canonicalFile = folder.file(isDirectory ? ciphertext + DIR_SUFFIX : ciphertext);
+			File canonicalFile = folder.file(isDirectory ? DIR_PREFIX + ciphertext : ciphertext);
 			if (canonicalFile.exists()) {
 				// there must not be two directories pointing to the same directory id. In this case no human interaction is needed to resolve this conflict:
 				if (isDirectory && FileContents.UTF_8.readContents(canonicalFile).equals(FileContents.UTF_8.readContents(conflictingFile))) {
@@ -66,7 +66,7 @@ final class ConflictResolver {
 					conflictId = createConflictId();
 					String alternativeCleartext = cleartext.get() + " (Conflict " + conflictId + ")";
 					String alternativeCiphertext = nameEncryptor.apply(alternativeCleartext).get();
-					alternativeFile = folder.file(isDirectory ? alternativeCiphertext + DIR_SUFFIX : alternativeCiphertext);
+					alternativeFile = folder.file(isDirectory ? DIR_PREFIX + alternativeCiphertext : alternativeCiphertext);
 				} while (alternativeFile.exists());
 				LOG.info("Detected conflict {}:\n{}\n{}", conflictId, canonicalFile, conflictingFile);
 				conflictingFile.moveTo(alternativeFile);
