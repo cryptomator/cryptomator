@@ -18,8 +18,8 @@ main.directoryList.contextMenu.changePassword = Passwort ändern
 main.addDirectory.contextMenu.new = Tresor erstellen
 main.addDirectory.contextMenu.open = Tresor öffnen
 # welcome.fxml
-welcome.checkForUpdates.label.currentlyChecking = Auf Updates prüfen...
-welcome.newVersionMessage = Version %s kann heruntergeladen werden. Aktuelle Version %s.
+welcome.checkForUpdates.label.currentlyChecking = Prüfe auf Updates...
+welcome.newVersionMessage = Version %s kann heruntergeladen werden. Momentane Version %s.
 # initialize.fxml
 initialize.label.password = Passwort
 initialize.label.retypePassword = Passwort bestätigen
@@ -44,7 +44,6 @@ unlock.button.advancedOptions.hide = Weniger Optionen
 unlock.choicebox.winDriveLetter.auto = Automatisch ermitteln
 unlock.errorMessage.wrongPassword = Falsches Passwort
 unlock.errorMessage.mountingFailed = Verbindung fehlgeschlagen. Details in der Log-Datei.
-unlock.errorMessage.unsupportedKeyLengthInstallJCE = Entschlüsselung fehlgeschlagen. Bitte die Oracle JCE Unlimited Strength Policy installieren.
 unlock.errorMessage.unsupportedVersion.vaultOlderThanSoftware = Tresor nicht unterstützt. Der Tresor wurde mit einer älteren Version von Cryptomator erstellt.
 unlock.errorMessage.unsupportedVersion.softwareOlderThanVault = Tresor nicht unterstützt. Der Tresor wurde mit einer neueren Version von Cryptomator erstellt.
 unlock.messageLabel.startServerFailed = Starten des WebDAV-Servers fehlgeschlagen.
@@ -56,9 +55,6 @@ changePassword.label.downloadsPageLink = Alle Cryptomator Versionen
 changePassword.button.change = Passwort ändern
 changePassword.errorMessage.wrongPassword = Falsches Passwort
 changePassword.errorMessage.decryptionFailed = Entschlüsselung fehlgeschlagen
-changePassword.errorMessage.unsupportedKeyLengthInstallJCE = Entschlüsselung fehlgeschlagen. Bitte die Oracle JCE Unlimited Strength Policy installieren.
-changePassword.errorMessage.unsupportedVersion.vaultOlderThanSoftware = Tresor nicht unterstützt. Der Tresor wurde mit einer älteren Version von Cryptomator erstellt.
-changePassword.errorMessage.unsupportedVersion.softwareOlderThanVault = Tresor nicht unterstützt. Der Tresor wurde mit einer neueren Version von Cryptomator erstellt.
 changePassword.infoMessage.success = Passwort geändert
 # unlocked.fxml
 unlocked.button.lock = Tresor sperren
@@ -93,3 +89,7 @@ initialize.messageLabel.passwordStrength.1 = Schwach
 initialize.messageLabel.passwordStrength.2 = Mittel
 initialize.messageLabel.passwordStrength.3 = Stark
 initialize.messageLabel.passwordStrength.4 = Sehr stark
+initialize.label.doNotForget = WICHTIG\: Falls Sie Ihr Passwort vergessen, gibt es keine Möglichkeit Ihre Daten wiederherzustellen.
+main.directoryList.remove.confirmation.title = Tresor entfernen
+main.directoryList.remove.confirmation.header = Möchten Sie diesen Tresor wirklich entfernen?
+main.directoryList.remove.confirmation.content = Dieser Tresor wird nur aus der Liste entfernt. Um den Tresor unwiderruflich zu löschen, entfernen Sie bitte die Dateien aus Ihrem Dateisystem.

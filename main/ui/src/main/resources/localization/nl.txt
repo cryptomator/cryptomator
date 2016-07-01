@@ -1,0 +1,89 @@
+# Copyright (c) 2016 The Cryptomator Contributors
+# This file is licensed under the terms of the MIT license.
+# See the LICENSE.txt file for more info.
+#
+# Contributors:
+#     Pascal van Rossem
+
+app.name = Cryptomator
+# main.fxml
+main.emptyListInstructions = Klik hier om een kluis toe te voegen
+main.directoryList.contextMenu.remove = Verwijder van lijst
+main.directoryList.contextMenu.changePassword = Verander wachtwoord
+main.addDirectory.contextMenu.new = Creeer nieuwe kluis
+main.addDirectory.contextMenu.open = Open bestaande kluis
+# welcome.fxml
+welcome.checkForUpdates.label.currentlyChecking = Controleren op Updates...
+welcome.newVersionMessage = Versie %s kan worden gedownload. Dit is %s.
+# initialize.fxml
+initialize.label.password = Wachtwoord
+initialize.label.retypePassword = Voer wachtwoord opnieuw in
+initialize.button.ok = Creëer kluis
+initialize.messageLabel.alreadyInitialized = Kluis reeds geinitialiseerd
+initialize.messageLabel.initializationFailed = Kon kluis niet initialiseren. Zie logbestand voor details.
+# notfound.fxml
+notfound.label = Kluis kon niet gevonden worden. Is de kluis wellicht verplaatst?
+# upgrade.fxml
+upgrade.button = Upgrade kluis
+upgrade.version3dropBundleExtension.msg = Deze kluis dient te worden gemigreerd naar een nieuwer formaat.\n"%1$s" zal worden hernoemd naar "%2$s".\nZorg ervoor dat de synchronisatie voltooid is alvorens door te gaan.
+upgrade.version3dropBundleExtension.err.alreadyExists = Automatische migratie mislukt.\n"%s" bestaat al.
+# unlock.fxml
+unlock.label.password = Wachtwoord
+unlock.label.mountName = Schijfnaam
+unlock.label.winDriveLetter = Schijfletter
+unlock.label.downloadsPageLink = Alle Cryptomator versies
+unlock.label.advancedHeading = Geavanceerde opties
+unlock.button.unlock = Ontgrendel kluis
+unlock.button.advancedOptions.show = Meer opties
+unlock.button.advancedOptions.hide = Minder opties
+unlock.choicebox.winDriveLetter.auto = Automatisch toekennen
+unlock.errorMessage.wrongPassword = Verkeerd wachtwoord
+unlock.errorMessage.mountingFailed = Mounten mislukt. Zie logbestand voor details.
+unlock.errorMessage.unsupportedVersion.vaultOlderThanSoftware = Niet ondersteunde kluis. Deze kluis is gecreëerd met een oudere versie van Cryptomator.
+unlock.errorMessage.unsupportedVersion.softwareOlderThanVault = Niet ondersteunde kluis. Deze kluis is gecreëerd met een nieuwere versie van Cryptomator.
+unlock.messageLabel.startServerFailed = WebDAV server starten mislukt.
+# change_password.fxml
+changePassword.label.oldPassword = Huidig wachtwoord
+changePassword.label.newPassword = Nieuw wachtwoord
+changePassword.label.retypePassword = Herhaal wachtwoord
+changePassword.label.downloadsPageLink = Alle Cryptomator versies
+changePassword.button.change = Verander wachtwoord
+changePassword.errorMessage.wrongPassword = Alle Cryptomator versies
+changePassword.errorMessage.decryptionFailed = Decoderen mislukt
+changePassword.infoMessage.success = Wachtwoord verandert
+# unlocked.fxml
+unlocked.button.lock = Vergrendel kluis
+unlocked.moreOptions.reveal = Onthul schijf
+unlocked.moreOptions.copyUrl = Kopieer WebDAV URL
+unlocked.label.revealFailed = Commando mislukt
+unlocked.label.unmountFailed = Uitwerpen schijf mislukt
+unlocked.label.statsEncrypted = versleuteld
+unlocked.label.statsDecrypted = gedecodeerd
+unlocked.ioGraph.yAxis.label = Doorvoer (MiB/s)
+# mac_warnings.fxml
+macWarnings.windowTitle = Pas op - Corrupt bestand in %s
+macWarnings.message = Cryptomator heeft mogelijk kwaadwillende corrupte items aangetroffen in de volgende bestanden\:
+macWarnings.moreInformationButton = Leer meer
+macWarnings.whitelistButton = Doorgaan met decoderen van selectie
+# settings.fxml
+settings.version.label = Versie %s
+settings.checkForUpdates.label = Controleer op updates
+settings.port.label = WebDAV Poort *
+settings.port.prompt = 0 \= Kies automatisch
+settings.useipv6.label = Gebruik IPv6 literal
+settings.requiresRestartLabel = * Cryptomator dient te worden herstart
+# tray icon
+tray.menu.open = Open
+tray.menu.quit = Afsluiten
+tray.infoMsg.title = Nog steeds actief
+tray.infoMsg.msg = Cryptomator is nog steeds actief. Sluit het af via het icon in het systeemvak.
+tray.infoMsg.msg.osx = Cryptomator is nog steeds actief. Sluit het af via het icon op de menubalk.
+initialize.messageLabel.passwordStrength.0 = Zeer zwak
+initialize.messageLabel.passwordStrength.1 = Zwak
+initialize.messageLabel.passwordStrength.2 = Redelijk
+initialize.messageLabel.passwordStrength.3 = Sterk
+initialize.messageLabel.passwordStrength.4 = Zeer sterk
+initialize.label.doNotForget = BELANGRIJK\: Indien je het wachtwoord vergeet, is er geen manier om je data te herstellen.
+main.directoryList.remove.confirmation.title = Verwijder Kluis
+main.directoryList.remove.confirmation.header = Weet je zeker dat je deze kluis wilt verwijderen?
+main.directoryList.remove.confirmation.content = De kluis zal alleen van de lijst worden verwijdert. Verwijder de bestanden van het bestandssysteem voor permanente verwijdering.
