@@ -77,6 +77,9 @@ public class UpgradeController extends LocalizedFXMLViewController {
 	private void vaultDidChange(Vault newVault) {
 		errorLabel.setText(null);
 		strategy.set(strategies.getUpgradeStrategy(newVault));
+		// trigger "default" change to refresh key bindings:
+		upgradeButton.setDefaultButton(false);
+		upgradeButton.setDefaultButton(true);
 	}
 
 	// ****************************************
