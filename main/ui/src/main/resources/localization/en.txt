@@ -26,7 +26,7 @@ initialize.label.password=Password
 initialize.label.retypePassword=Retype password
 initialize.button.ok=Create vault
 initialize.messageLabel.alreadyInitialized=Vault already initialized
-initialize.messageLabel.initializationFailed=Could not initialize vault. See logfile for details.
+initialize.messageLabel.initializationFailed=Could not initialize vault. See log file for details.
 initialize.messageLabel.passwordStrength.0=Very weak
 initialize.messageLabel.passwordStrength.1=Weak
 initialize.messageLabel.passwordStrength.2=Fair
@@ -43,6 +43,9 @@ upgrade.button=Upgrade vault
 upgrade.version3dropBundleExtension.msg=This vault needs to be migrated to a newer format.\n"%1$s" will be renamed to "%2$s".\nPlease make sure synchronization has finished before proceeding.
 upgrade.version3dropBundleExtension.err.alreadyExists=Automatic migration failed.\n"%s" already exists.
 
+upgrade.version3to4.msg=This vault needs to be migrated to a newer format.\nEncrypted folder names will be updated.\nPlease make sure synchronization has finished before proceeding.
+upgrade.version3to4.err.io=Migration failed due to an I/O Exception. See log file for details.
+
 # unlock.fxml
 unlock.label.password=Password
 unlock.label.mountName=Drive name
@@ -54,7 +57,7 @@ unlock.button.advancedOptions.show=More options
 unlock.button.advancedOptions.hide=Less options
 unlock.choicebox.winDriveLetter.auto=Assign automatically
 unlock.errorMessage.wrongPassword=Wrong password
-unlock.errorMessage.mountingFailed=Mounting failed. See logfile for details.
+unlock.errorMessage.mountingFailed=Mounting failed. See log file for details.
 unlock.errorMessage.unsupportedVersion.vaultOlderThanSoftware=Unsupported vault. This vault has been created with an older version of Cryptomator.
 unlock.errorMessage.unsupportedVersion.softwareOlderThanVault=Unsupported vault. This vault has been created with a newer version of Cryptomator.
 unlock.messageLabel.startServerFailed=Starting WebDAV server failed.

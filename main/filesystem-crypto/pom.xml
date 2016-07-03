@@ -19,7 +19,7 @@
 	
 	<properties>
 		<bouncycastle.version>1.51</bouncycastle.version>
-		<sivmode.version>1.0.2</sivmode.version>
+		<sivmode.version>1.0.4</sivmode.version>
 	</properties>
 
 	<dependencies>
