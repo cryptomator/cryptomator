@@ -73,7 +73,7 @@ public abstract class UpgradeStrategy {
 	/**
 	 * Thrown when data migration failed.
 	 */
-	public class UpgradeFailedException extends Exception {
+	public static class UpgradeFailedException extends Exception {
 
 		UpgradeFailedException() {
 		}
