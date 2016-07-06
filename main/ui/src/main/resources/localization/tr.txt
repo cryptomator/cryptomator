@@ -14,7 +14,7 @@ main.addDirectory.contextMenu.new = Yeni bir kasa yarat
 main.addDirectory.contextMenu.open = Var olan kasayı aç
 # welcome.fxml
 welcome.checkForUpdates.label.currentlyChecking = Güncellemeler kontrol ediliyor...
-welcome.newVersionMessage = Sürüm %s indirilebilir. Şu anki sürüm\: %s
+welcome.newVersionMessage = Sürüm %1$s indirilebilir. Şu anki sürüm\: %2$s
 # initialize.fxml
 initialize.label.password = Şifre
 initialize.label.retypePassword = Şifre (tekrar)

@@ -14,7 +14,7 @@ main.addDirectory.contextMenu.new = Creeer nieuwe kluis
 main.addDirectory.contextMenu.open = Open bestaande kluis
 # welcome.fxml
 welcome.checkForUpdates.label.currentlyChecking = Controleren op Updates...
-welcome.newVersionMessage = Versie %s kan worden gedownload. Dit is %s.
+welcome.newVersionMessage = Versie %1$s kan worden gedownload. Dit is %2$s.
 # initialize.fxml
 initialize.label.password = Wachtwoord
 initialize.label.retypePassword = Voer wachtwoord opnieuw in

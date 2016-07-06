@@ -16,7 +16,7 @@ main.addDirectory.contextMenu.new = Crear una nueva caja fuerte
 main.addDirectory.contextMenu.open = Abrir una caja fuerte existente
 # welcome.fxml
 welcome.checkForUpdates.label.currentlyChecking = Chequando por actualizaciónes...
-welcome.newVersionMessage = Se puede bajar version %s. Este es %s.
+welcome.newVersionMessage = Se puede bajar version %1$s. Este es %2$s.
 # initialize.fxml
 initialize.label.password = Contraseña
 initialize.label.retypePassword = Reintroduzca contraseña

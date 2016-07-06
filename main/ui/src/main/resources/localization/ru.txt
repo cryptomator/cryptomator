@@ -17,7 +17,7 @@ main.addDirectory.contextMenu.open = Открыть существующее х�
 # welcome.fxml
 welcome.checkForUpdates.label.currentlyChecking = Проверка обновлений...
 # Does the first %s mean the new version number, and the second %s - the current version user has?
-welcome.newVersionMessage = Доступна версия %s. У вас %s.
+welcome.newVersionMessage = Доступна версия %1$s. У вас %2$s.
 # initialize.fxml
 initialize.label.password = Пароль
 initialize.label.retypePassword = Введите пароль ещё раз

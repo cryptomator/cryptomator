@@ -14,7 +14,7 @@ main.addDirectory.contextMenu.new = Crea un nuovo vault
 main.addDirectory.contextMenu.open = Apri un vault
 # welcome.fxml
 welcome.checkForUpdates.label.currentlyChecking = Verifica aggiornamenti...
-welcome.newVersionMessage = La versione %s può essere scaricata. Questa è %s
+welcome.newVersionMessage = La versione %2$s può essere scaricata. Questa è %1$s
 # initialize.fxml
 initialize.label.password = Password
 initialize.label.retypePassword = Conferma password
