@@ -1,3 +1,11 @@
+/*******************************************************************************
+ * Copyright (c) 2016 Sebastian Stenzel and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the accompanying LICENSE.txt.
+ *
+ * Contributors:
+ *     Sebastian Stenzel - initial API and implementation
+ *******************************************************************************/
 package org.cryptomator.ui;
 
 import java.io.IOException;
@@ -30,7 +38,7 @@ public class LocalizationTest {
 	 */
 	private static final String ARG_INDEX_REGEX = "(\\d+\\$)?"; // e.g. %1$s
 	private static final String FLAG_REGEX = "[-#+ 0,\\(]*"; // e.g. %0,f
-	private static final String WIDTH_AND_PRECISION_REGEX = "(\\d*(\\.\\d+))?"; // e.g. %4.2f
+	private static final String WIDTH_AND_PRECISION_REGEX = "(\\d*(\\.\\d+)?)?"; // e.g. %4.2f
 	private static final String GENERAL_CONVERSION_REGEX = "[bBhHsScCdoxXeEfgGaA%n]"; // e.g. %f
 	private static final String TIME_CONVERSION_REGEX = "[tT][HIklMSLNpzZsQBbhAaCYyjmdeRTrDFc]"; // e.g. %1$tY-%1$tm-%1$td
 	private static final String CONVERSION_REGEX = "(" + GENERAL_CONVERSION_REGEX + "|" + TIME_CONVERSION_REGEX + ")";
