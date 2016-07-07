@@ -1,15 +1,3 @@
-# Copyright (c) 2016 The Cryptomator Contributors
-# This file is licensed under the terms of the MIT license.
-# See the LICENSE.txt file for more info.
-#
-# Contributors:
-#     Christian Schmickler
-#     Joscha Feth
-#     Markus Kreusch
-#     Michael Schmetter
-#     Sebastian Wiesendahl
-#     Tim Marius Wunderlich
-
 app.name = Cryptomator
 # main.fxml
 main.emptyListInstructions = Klicken Sie hier, um neue Tresore hinzuzufügen
@@ -93,3 +81,5 @@ initialize.label.doNotForget = WICHTIG\: Falls Sie Ihr Passwort vergessen, gibt 
 main.directoryList.remove.confirmation.title = Tresor entfernen
 main.directoryList.remove.confirmation.header = Möchten Sie diesen Tresor wirklich entfernen?
 main.directoryList.remove.confirmation.content = Dieser Tresor wird nur aus der Liste entfernt. Um den Tresor unwiderruflich zu löschen, entfernen Sie bitte die Dateien aus Ihrem Dateisystem.
+upgrade.version3to4.msg = Dieser Tresor muss auf ein neueres Format aktualisiert werden.\nVerschlüsselte Ordnernamen werden dabei aktualisiert.\nStellen Sie bitte sicher, dass derzeit keine Synchronisation stattfindet.
+upgrade.version3to4.err.io = Migration aufgrund eines I/O-Fehlers fehlgeschlagen.\nWeitere Informationen in der Log-Datei.
