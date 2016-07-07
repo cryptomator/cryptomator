@@ -1,15 +1,3 @@
-# Copyright (c) 2016 The Cryptomator Contributors
-# This file is licensed under the terms of the MIT license.
-# See the LICENSE.txt file for more info.
-#
-# Contributors:
-#     Baptiste Peugnez
-#     Jean-Noël Charon
-#     M. B
-#     Maxence MOHR
-#     Olivier Thomasson
-#     vesparny
-
 app.name = Cryptomator
 # main.fxml
 main.emptyListInstructions = Cliquez ici pour ajouter un coffre
@@ -95,3 +83,5 @@ initialize.label.doNotForget = ATTENTION \: Si vous oubliez votre mot de passe, 
 main.directoryList.remove.confirmation.title = Retirer un coffre
 main.directoryList.remove.confirmation.header = Voulez-vous vraiment retirer ce coffre ?
 main.directoryList.remove.confirmation.content = Le coffre sera simplement retiré de la liste. Pour le supprimer complètement, supprimez les fichiers depuis votre système de fichiers.
+upgrade.version3to4.msg = Ce coffre doit être converti dans un nouveau format. Les noms de dossiers chiffrés seront mis à jour.\nMerci de vous assurer que la procédure de synchronisation est terminée avant de continuer.
+upgrade.version3to4.err.io = La migration a échoué à cause d'une erreur d'entrée/sortie. Référez-vous au fichier log pour plus de détails.
