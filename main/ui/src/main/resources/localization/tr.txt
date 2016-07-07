@@ -1,10 +1,3 @@
-# Copyright (c) 2016 The Cryptomator Contributors
-# This file is licensed under the terms of the MIT license.
-# See the LICENSE.txt file for more info.
-#
-# Contributors:
-#     Cem KOÇ
-
 app.name = Cryptomator
 # main.fxml
 main.emptyListInstructions = Kasa eklemek için tıkla
@@ -87,3 +80,5 @@ initialize.label.doNotForget = ÖNEMLİ\: Şifrenizi unutursanız, geri almanın
 main.directoryList.remove.confirmation.title = Kasayı Sil
 main.directoryList.remove.confirmation.header = Kasayı silmek istediğinize emin misiniz ?
 main.directoryList.remove.confirmation.content = Kasa yalnızca listeden silinecek. Tamamen silmek için dosya sisteminizden dosyaları elle siliniz.
+upgrade.version3to4.msg = Bu kasanın yeni formata geçirilmesi gerekmekte. Şifreli klasör isimleri güncellenecek. Devam etmeden önce senkronizasyonun bittiğine emin olun.
+upgrade.version3to4.err.io = Format değiştirme işlemi I/O Hatası dolayısı ile başarısız oldu. Detaylar için log dosyasına bakın
