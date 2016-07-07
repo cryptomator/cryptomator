@@ -1,10 +1,3 @@
-# Copyright (c) 2016 The Cryptomator Contributors
-# This file is licensed under the terms of the MIT license.
-# See the LICENSE.txt file for more info.
-#
-# Contributors:
-#     ChangHwan Kim
-
 app.name = Cryptomator
 # main.fxml
 main.emptyListInstructions = 여기를 클릭하여 보관함 추가하기
@@ -14,7 +7,7 @@ main.addDirectory.contextMenu.new = 새 보관함 만들기
 main.addDirectory.contextMenu.open = 기존 보관함 열기
 # welcome.fxml
 welcome.checkForUpdates.label.currentlyChecking = 업데이트 확인 중...
-welcome.newVersionMessage = %s 버전이 새로 다운로드 가능합니다. 지금 버전은 %s 입니다.
+welcome.newVersionMessage = %1$s 버전이 새로 다운로드 가능합니다. 지금 버전은 %2$s 입니다.
 # initialize.fxml
 initialize.label.password = 비밀번호
 initialize.label.retypePassword = 비밀번호 재입력
@@ -87,3 +80,5 @@ initialize.label.doNotForget = 중요\: 만약 비밀번호를 잊으셨다면, 
 main.directoryList.remove.confirmation.title = 보관함 삭제
 main.directoryList.remove.confirmation.header = 정말 이 보관함을 삭제하시겠습니까?
 main.directoryList.remove.confirmation.content = 보관함이 목록에서만 제거되었습니다. 데이터를 완전히 제거하시려면, 여러분의 파일시스템이서 제거해 주시기 바랍니다.
+upgrade.version3to4.msg = 이 보관함은 새로운 형식으로 바뀔 필요가 있습니다. 암호화된 폴더 이름이 업데이트 될 것입니다. 진행하기 전에 동기화가 완료되었는지 확인하기 바랍니다.
+upgrade.version3to4.err.io = 입출력 예외 문제로 마이그레이션이 실패하였습니다. 자세한 사항은 로그 파일을 확인하세요.

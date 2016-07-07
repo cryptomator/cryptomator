@@ -1,10 +1,3 @@
-# Copyright (c) 2016 The Cryptomator Contributors
-# This file is licensed under the terms of the MIT license.
-# See the LICENSE.txt file for more info.
-#
-# Contributors:
-#     Roland Burda
-
 app.name = Cryptomator
 # main.fxml
 main.emptyListInstructions = Kattints ide egy széf létrehozásához
@@ -14,7 +7,7 @@ main.addDirectory.contextMenu.new = Új széf létrehozása
 main.addDirectory.contextMenu.open = Létező széf megnyitása
 # welcome.fxml
 welcome.checkForUpdates.label.currentlyChecking = Frissítések keresése...
-welcome.newVersionMessage = Új verzió érhető el\: %s. Jelenlegi verzió\: %s.
+welcome.newVersionMessage = Új verzió érhető el\: %1$s. Jelenlegi verzió\: %2$s.
 # initialize.fxml
 initialize.label.password = Jelszó
 initialize.label.retypePassword = Jelszó ismét

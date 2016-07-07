@@ -1,10 +1,3 @@
-# Copyright (c) 2016 The Cryptomator Contributors
-# This file is licensed under the terms of the MIT license.
-# See the LICENSE.txt file for more info.
-#
-# Contributors:
-#     Pascal van Rossem
-
 app.name = Cryptomator
 # main.fxml
 main.emptyListInstructions = Klik hier om een kluis toe te voegen
@@ -14,18 +7,18 @@ main.addDirectory.contextMenu.new = Creeer nieuwe kluis
 main.addDirectory.contextMenu.open = Open bestaande kluis
 # welcome.fxml
 welcome.checkForUpdates.label.currentlyChecking = Controleren op Updates...
-welcome.newVersionMessage = Versie %s kan worden gedownload. Dit is %s.
+welcome.newVersionMessage = Versie %1$s kan worden gedownload. Dit is %2$s.
 # initialize.fxml
 initialize.label.password = Wachtwoord
 initialize.label.retypePassword = Voer wachtwoord opnieuw in
 initialize.button.ok = Creëer kluis
-initialize.messageLabel.alreadyInitialized = Kluis reeds geinitialiseerd
+initialize.messageLabel.alreadyInitialized = Kluis reeds geïnitialiseerd
 initialize.messageLabel.initializationFailed = Kon kluis niet initialiseren. Zie logbestand voor details.
 # notfound.fxml
 notfound.label = Kluis kon niet gevonden worden. Is de kluis wellicht verplaatst?
 # upgrade.fxml
 upgrade.button = Upgrade kluis
-upgrade.version3dropBundleExtension.msg = Deze kluis dient te worden gemigreerd naar een nieuwer formaat.\n"%1$s" zal worden hernoemd naar "%2$s".\nZorg ervoor dat de synchronisatie voltooid is alvorens door te gaan.
+upgrade.version3dropBundleExtension.msg = Deze kluis dient te worden gemigreerd naar een nieuwer type.\n"%1$s" zal worden hernoemd naar "%2$s".\nZorg ervoor dat de synchronisatie voltooid is alvorens door te gaan.
 upgrade.version3dropBundleExtension.err.alreadyExists = Automatische migratie mislukt.\n"%s" bestaat al.
 # unlock.fxml
 unlock.label.password = Wachtwoord
@@ -53,7 +46,7 @@ changePassword.errorMessage.decryptionFailed = Decoderen mislukt
 changePassword.infoMessage.success = Wachtwoord verandert
 # unlocked.fxml
 unlocked.button.lock = Vergrendel kluis
-unlocked.moreOptions.reveal = Onthul schijf
+unlocked.moreOptions.reveal = Maak schijf zichtbaar
 unlocked.moreOptions.copyUrl = Kopieer WebDAV URL
 unlocked.label.revealFailed = Commando mislukt
 unlocked.label.unmountFailed = Uitwerpen schijf mislukt
@@ -87,3 +80,5 @@ initialize.label.doNotForget = BELANGRIJK\: Indien je het wachtwoord vergeet, is
 main.directoryList.remove.confirmation.title = Verwijder Kluis
 main.directoryList.remove.confirmation.header = Weet je zeker dat je deze kluis wilt verwijderen?
 main.directoryList.remove.confirmation.content = De kluis zal alleen van de lijst worden verwijdert. Verwijder de bestanden van het bestandssysteem voor permanente verwijdering.
+upgrade.version3to4.msg = Deze kluis dient gemigreerd te worden naar een nieuwer type. \nVersleutelde mapnamen zullen worden geüpdatet. \nZorg ervoor dat de synchronisatie voltooid is alvorens door te gaan.
+upgrade.version3to4.err.io = Migratie mislukt door een I/O Exception. Zie logbestand voor details.

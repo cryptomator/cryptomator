@@ -1,11 +1,6 @@
 # Copyright (c) 2016 The Cryptomator Contributors
 # This file is licensed under the terms of the MIT license.
 # See the LICENSE.txt file for more info.
-#
-# Contributors:
-#     Filip Havrlent
-#     Tatiana Chovancová
-
 app.name = Cryptomator
 # main.fxml
 main.emptyListInstructions = Pridať trezor
@@ -15,7 +10,7 @@ main.addDirectory.contextMenu.new = Vytvoriť nový trezor
 main.addDirectory.contextMenu.open = Otvoriť existujúci trezor
 # welcome.fxml
 welcome.checkForUpdates.label.currentlyChecking = Kontrolujú sa aktualizácie...
-welcome.newVersionMessage = Verzia %s je pripravená na stiahnutie. Toto je verzia %s.
+welcome.newVersionMessage = Verzia %1$s je pripravená na stiahnutie. Toto je verzia %2$s.
 # initialize.fxml
 initialize.label.password = Heslo
 initialize.label.retypePassword = Zadajte heslo znova
