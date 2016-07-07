@@ -1,11 +1,3 @@
-# Copyright (c) 2016 The Cryptomator Contributors
-# This file is licensed under the terms of the MIT license.
-# See the LICENSE.txt file for more info.
-#
-# Contributos:
-#     Jay
-#     Sebastian Wiesendahl
-
 app.name = Cryptomator
 # main.fxml
 main.emptyListInstructions = Click aquí para añadir una caja fuerte
@@ -79,8 +71,8 @@ settings.requiresRestartLabel = * Cryptomator se necesita reiniciar
 tray.menu.open = Abrir
 tray.menu.quit = Salir
 tray.infoMsg.title = Todavía en ejecución
-tray.infoMsg.msg = Cryptomator todavía esta en ejecución. Sale del icono del tray.
-tray.infoMsg.msg.osx = Cryptomator todavía esta en ejecución. Sale del icono de la barra del menú.
+tray.infoMsg.msg = Cryptomator todavía esta en ejecución. Para salir usa el icono del tray.
+tray.infoMsg.msg.osx = Cryptomator todavía esta en ejecución. Para salir usa el icono de la barra del menú.
 initialize.messageLabel.passwordStrength.0 = muy débil
 initialize.messageLabel.passwordStrength.1 = débil
 initialize.messageLabel.passwordStrength.2 = suficiente
@@ -90,3 +82,5 @@ initialize.label.doNotForget = IMPORTANTE\: Si olivdes tú contraseña no hay ni
 main.directoryList.remove.confirmation.title = Borrar caja fuerte
 main.directoryList.remove.confirmation.header = ¿Quieres de verdad borrar este caja fuerte?
 main.directoryList.remove.confirmation.content = La caja fuerte solo se borra de la lista. Para eliminarla permanente por favor elimina los datos de tú sistema de archivos.
+upgrade.version3to4.msg = Este caja fuerte se debe migrar a un formato más reciente.\nLos nombres de las carpetas cifradas se actualizan.\nPor favor asegurarse de que la sincronización ha terminado antes de seguir.
+upgrade.version3to4.err.io = Migración ha fallado por causa de una excepción I/O. Para detalles revisa el archivo de registro.
