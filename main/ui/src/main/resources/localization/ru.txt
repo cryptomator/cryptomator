@@ -1,29 +1,20 @@
-# Copyright (c) 2016 The Cryptomator Contributors
-# This file is licensed under the terms of the MIT license.
-# See the LICENSE.txt file for more info.
-#
-# Contributors:
-#     Garik
-#     Konstantine
-#     Dmitry
-
 app.name = Cryptomator
 # main.fxml
 main.emptyListInstructions = Нажмите здесь, чтобы добавить хранилище
 main.directoryList.contextMenu.remove = Удалить из списка
 main.directoryList.contextMenu.changePassword = Сменить пароль
 main.addDirectory.contextMenu.new = Создать новое хранилище
-main.addDirectory.contextMenu.open = Открыть существующее хранилище 
+main.addDirectory.contextMenu.open = Открыть имеющееся хранилище
 # welcome.fxml
 welcome.checkForUpdates.label.currentlyChecking = Проверка обновлений...
 # Does the first %s mean the new version number, and the second %s - the current version user has?
-welcome.newVersionMessage = Доступна версия %1$s. У вас %2$s.
+welcome.newVersionMessage = Доступна версия %1$s. У вас версия %2$s.
 # initialize.fxml
 initialize.label.password = Пароль
 initialize.label.retypePassword = Введите пароль ещё раз
 initialize.button.ok = Создать хранилище
 initialize.messageLabel.alreadyInitialized = Хранилище уже инициализировано
-initialize.messageLabel.initializationFailed = Невозможно инициализировать хранилище. См. подробности в отчёте.
+initialize.messageLabel.initializationFailed = Невозможно инициализировать хранилище. См. подробности в файле-отчёте.
 # notfound.fxml
 notfound.label = Хранилище не найдено. Оно было перемещено?
 # upgrade.fxml
@@ -41,7 +32,7 @@ unlock.button.advancedOptions.show = Ещё настройки
 unlock.button.advancedOptions.hide = Убрать настройки
 unlock.choicebox.winDriveLetter.auto = Автоназначение
 unlock.errorMessage.wrongPassword = Неверный пароль
-unlock.errorMessage.mountingFailed = Ошибка монтирования. См. подробности в отчёте.
+unlock.errorMessage.mountingFailed = Ошибка монтирования. См. подробности в файле-отчёте.
 unlock.errorMessage.unsupportedVersion.vaultOlderThanSoftware = Неподдерживаемое хранилище. Оно было создано в более старой версии Cryptomator.
 unlock.errorMessage.unsupportedVersion.softwareOlderThanVault = Неподдерживаемое хранилище. Оно было создано в более новой версии Cryptomator.
 unlock.messageLabel.startServerFailed = Ошибка запуска сервера WebDAV.
@@ -91,3 +82,5 @@ initialize.label.doNotForget = ВАЖНО\: Если вы забудете св�
 main.directoryList.remove.confirmation.title = Удаление хранилища
 main.directoryList.remove.confirmation.header = Вы действительно хотите удалить это хранилище?
 main.directoryList.remove.confirmation.content = Хранилище будет удалено только из списка. Чтобы стереть его окончательно, удалите файлы из файловой системы.
+upgrade.version3to4.msg = Это хранилище требуется преобразовать в новый формат. Зашифрованные имена папок будут обновлены. Прежде чем продолжить, выполните синхронизацию.
+upgrade.version3to4.err.io = Преобразование не выполнено из-за ошибки ввода-вывода. См. подробности в файле-отчёте.
