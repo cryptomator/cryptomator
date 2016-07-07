@@ -1,6 +1,7 @@
 package org.cryptomator.ui.model;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -86,7 +87,24 @@ class UpgradeVersion3DropBundleExtension extends UpgradeStrategy {
 
 	@Override
 	public boolean isApplicable(Vault vault) {
-		return vault.path().getValue().getFileName().toString().endsWith(Vault.VAULT_FILE_EXTENSION);
+		Path vaultPath = vault.path().getValue();
+		if (vaultPath.toString().endsWith(Vault.VAULT_FILE_EXTENSION)) {
+			final Path masterkeyFile = vaultPath.resolve(Constants.MASTERKEY_FILENAME);
+			try {
+				if (Files.isRegularFile(masterkeyFile)) {
+					final String keyContents = new String(Files.readAllBytes(masterkeyFile), StandardCharsets.UTF_8);
+					return keyContents.contains("\"version\":3") || keyContents.contains("\"version\": 3");
+				} else {
+					LOG.warn("Not a file: {}", masterkeyFile);
+					return false;
+				}
+			} catch (IOException e) {
+				LOG.warn("Could not determine, whether upgrade is applicable.", e);
+				return false;
+			}
+		} else {
+			return false;
+		}
 	}
 
 }
