@@ -1,12 +1,3 @@
-# Copyright (c) 2016 The Cryptomator Contributors
-# This file is licensed under the terms of the MIT license.
-# See the LICENSE.txt file for more info.
-#
-# Contributors:
-#     Jean-Noël Charon
-#     Olivier Thomasson
-#     vesparny
-
 app.name = Cryptomator
 # main.fxml
 main.emptyListInstructions = Cliquez ici pour ajouter un coffre
@@ -16,7 +7,7 @@ main.addDirectory.contextMenu.new = Créer un nouveau coffre
 main.addDirectory.contextMenu.open = Ouvrir un coffre existant
 # welcome.fxml
 welcome.checkForUpdates.label.currentlyChecking = Recherche de mise à jour...
-welcome.newVersionMessage = La version %s peut-être téléchargée. Il s'agit de %s.
+welcome.newVersionMessage = La version %1$s peut-être téléchargée. Il s'agit de %2$s.
 # initialize.fxml
 initialize.label.password = Mot de passe
 initialize.label.retypePassword = Confirmation
@@ -41,7 +32,6 @@ unlock.button.advancedOptions.hide = Moins d'options
 unlock.choicebox.winDriveLetter.auto = Assigner automatiquement
 unlock.errorMessage.wrongPassword = Mot de passe incorrect
 unlock.errorMessage.mountingFailed = Echec du montage. Voir le fichier de log pour plus de détails.
-unlock.errorMessage.unsupportedKeyLengthInstallJCE = Echec du décryptage. Veuillez installer la Policy Oracle "JCE Unlimited Strength Policy".
 unlock.errorMessage.unsupportedVersion.vaultOlderThanSoftware = Coffre non supporté. Ce coffre a été créé avec une ancienne version de Cryptomator.
 unlock.errorMessage.unsupportedVersion.softwareOlderThanVault = Coffre non supporté. Ce coffre a été créé avec une version de Cryptomator plus récente.
 unlock.messageLabel.startServerFailed = Le serveur WebDAV n'a pas pu démarrer.
@@ -52,25 +42,25 @@ changePassword.label.retypePassword = Vérification
 changePassword.label.downloadsPageLink = Toutes les versions de Cryptomator
 changePassword.button.change = Modification du mot de masse
 changePassword.errorMessage.wrongPassword = Mot de passe incorrect
-changePassword.errorMessage.decryptionFailed = Echec du décryptage
-changePassword.errorMessage.unsupportedKeyLengthInstallJCE = Echec du décryptage. Veuillez installer la Policy Oracle "JCE Unlimited Strength Policy".
-changePassword.errorMessage.unsupportedVersion.vaultOlderThanSoftware = Coffre non supporté. Ce coffre a été créé avec une ancienne version de Cryptomator.
-changePassword.errorMessage.unsupportedVersion.softwareOlderThanVault = Coffre non supporté. Ce coffre a été créé avec une version de Cryptomator plus récente.
-changePassword.infoMessage.success = Password changed
+# En français, on dit déchiffrement lorsque la clé est connue
+changePassword.errorMessage.decryptionFailed = Echec du déchiffrement
+changePassword.infoMessage.success = Mot de passe modifié
 # unlocked.fxml
 unlocked.button.lock = Verrouiller le coffre
 unlocked.moreOptions.reveal = Voir le lecteur
 unlocked.moreOptions.copyUrl = Copier l'URL WebDAV
 unlocked.label.revealFailed = Echec de la commande
 unlocked.label.unmountFailed = Echec de l'éjection du lecteur
-unlocked.label.statsEncrypted = crypté
-unlocked.label.statsDecrypted = décryptage
+# Crypter n'existe pas en français.
+unlocked.label.statsEncrypted = chiffré
+# Décryptage signifie récupérer les données en clair tout en ne connaissant pas la clé
+unlocked.label.statsDecrypted = déchiffré
 unlocked.ioGraph.yAxis.label = Débit (MiB/s)
 # mac_warnings.fxml
 macWarnings.windowTitle = Attention - Fichier corrompu dans %s
 macWarnings.message = Cryptomator a détecté des corruptions de données dans les fichiers suivants\:
 macWarnings.moreInformationButton = En savoir plus
-macWarnings.whitelistButton = Décrypter tout de même
+macWarnings.whitelistButton = Déchiffrer tout de même
 # settings.fxml
 settings.version.label = Version %s
 settings.checkForUpdates.label = Vérif. des mises à jour
@@ -84,3 +74,14 @@ tray.menu.quit = Quitter
 tray.infoMsg.title = Toujours en fonctionnement
 tray.infoMsg.msg = Cryptomator est toujours en fonctionnement. Utiliser l'icône de la barre des tâches pour quitter.
 tray.infoMsg.msg.osx = Cryptomator est toujours en fonctionnement. Utilisez la barre de menu pour quitter.
+initialize.messageLabel.passwordStrength.0 = Très faible
+initialize.messageLabel.passwordStrength.1 = Faible
+initialize.messageLabel.passwordStrength.2 = Raisonnable
+initialize.messageLabel.passwordStrength.3 = Fort
+initialize.messageLabel.passwordStrength.4 = Très fort\n
+initialize.label.doNotForget = ATTENTION \: Si vous oubliez votre mot de passe, il n'y aura aucun moyen de récupérer vos données.
+main.directoryList.remove.confirmation.title = Retirer un coffre
+main.directoryList.remove.confirmation.header = Voulez-vous vraiment retirer ce coffre ?
+main.directoryList.remove.confirmation.content = Le coffre sera simplement retiré de la liste. Pour le supprimer complètement, supprimez les fichiers depuis votre système de fichiers.
+upgrade.version3to4.msg = Ce coffre doit être converti dans un nouveau format. Les noms de dossiers chiffrés seront mis à jour.\nMerci de vous assurer que la procédure de synchronisation est terminée avant de continuer.
+upgrade.version3to4.err.io = La migration a échoué à cause d'une erreur d'entrée/sortie. Référez-vous au fichier log pour plus de détails.

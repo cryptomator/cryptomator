@@ -1,10 +1,3 @@
-# Copyright (c) 2016 The Cryptomator Contributors
-# This file is licensed under the terms of the MIT license.
-# See the LICENSE.txt file for more info.
-#
-# Contributors:
-#     vesparny
-
 app.name = Cryptomator
 # main.fxml
 main.emptyListInstructions = Clicca qui per aggiungere un vault
@@ -14,7 +7,7 @@ main.addDirectory.contextMenu.new = Crea un nuovo vault
 main.addDirectory.contextMenu.open = Apri un vault
 # welcome.fxml
 welcome.checkForUpdates.label.currentlyChecking = Verifica aggiornamenti...
-welcome.newVersionMessage = La versione %s può essere scaricata. Questa è %s
+welcome.newVersionMessage = La versione %1$s può essere scaricata. Questa è %2$s
 # initialize.fxml
 initialize.label.password = Password
 initialize.label.retypePassword = Conferma password
@@ -39,7 +32,6 @@ unlock.button.advancedOptions.hide = Meno opzioni
 unlock.choicebox.winDriveLetter.auto = Assegna automaticamente
 unlock.errorMessage.wrongPassword = Password errata
 unlock.errorMessage.mountingFailed = Montaggio fallito. Controlla il file di log per dettagli.
-unlock.errorMessage.unsupportedKeyLengthInstallJCE = Decriptaggio fallito.
 unlock.errorMessage.unsupportedVersion.vaultOlderThanSoftware = Vault non supportato. Questo vault è stato creato con una versione di Cryptomator più vecchia.
 unlock.errorMessage.unsupportedVersion.softwareOlderThanVault = Vault non supportato. Questo vault è stato creato con una versione di Cryptomator più recente.
 unlock.messageLabel.startServerFailed = Avvio del server WebDAV fallito
@@ -51,19 +43,16 @@ changePassword.label.downloadsPageLink = Tutte le versioni di Cryptomator
 changePassword.button.change = Cambia la password
 changePassword.errorMessage.wrongPassword = Password errata
 changePassword.errorMessage.decryptionFailed = Decriptaggio fallito
-changePassword.errorMessage.unsupportedKeyLengthInstallJCE = Decriptaggio fallito. Per favore installa Oracle JCE Unlimited Strength Policy
-changePassword.errorMessage.unsupportedVersion.vaultOlderThanSoftware = Vault non supportato. Questo vault è stato creato con una versione di Cryptomator più recente.
-changePassword.errorMessage.unsupportedVersion.softwareOlderThanVault = Vault non supportato. Questo vault è stato creato con una versione di Cryptomator più vecchia.
 changePassword.infoMessage.success = Password cambiata
 # unlocked.fxml
-unlocked.button.lock = Blocca vault
+unlocked.button.lock = Blocca vault 
 unlocked.moreOptions.reveal = Apri il disco
 unlocked.moreOptions.copyUrl = Copia url WebDAV
 unlocked.label.revealFailed = Comando fallito
 unlocked.label.unmountFailed = Espulsione disco fallita
 unlocked.label.statsEncrypted = criptato
 unlocked.label.statsDecrypted = decriptato
-unlocked.ioGraph.yAxis.label = Volume dati (MiB/s)
+unlocked.ioGraph.yAxis.label = Volume dati (MiB/s) 
 # mac_warnings.fxml
 macWarnings.windowTitle = Pericolo - File corroto in %s
 macWarnings.message = Cryptomator ha individuato potenziali pericolose corruzioni nei seguenti file\:
@@ -80,5 +69,14 @@ settings.requiresRestartLabel = * Cryptomator deve essere riavviato
 tray.menu.open = Apri
 tray.menu.quit = Chiudi
 tray.infoMsg.title = Ancora in esecuzione
-tray.infoMsg.msg = Cryptomator è ancora in esecuzione. Chiudilo utilizzando l'icona nel menù di stato.
+tray.infoMsg.msg = Cryptomator è ancora in esecuzione. Chiudilo utilizzando l'icona nel menù di stato. 
 tray.infoMsg.msg.osx = Cryptomator è ancora in esecuzione. Chiudilo utilizzando l'icona nella barra del menù. 
+initialize.messageLabel.passwordStrength.0 = Molto debole
+initialize.messageLabel.passwordStrength.1 = Debole
+initialize.messageLabel.passwordStrength.2 = Buona
+initialize.messageLabel.passwordStrength.3 = Sicura
+initialize.messageLabel.passwordStrength.4 = Molto sicura
+initialize.label.doNotForget = IMPORTANTE\: Se dimentichi la password, non c'è modo di recuperare i tuoi dati.
+main.directoryList.remove.confirmation.title = Rimuovi vault
+main.directoryList.remove.confirmation.header = Vuoi davvero rimuovere questo vault?
+main.directoryList.remove.confirmation.content = Il vault sarà rimosso solo dalla lista. Per eliminarlo definitivamente, elimina per favore i file dal tuo hard disk.

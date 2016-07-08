@@ -1,55 +1,86 @@
-# Copyright (c) 2016 The Cryptomator Contributors
-# This file is licensed under the terms of the MIT license.
-# See the LICENSE.txt file for more info.
-#
-# Contributors:
-#     Garik
-#     Konstantine
-
 app.name = Cryptomator
 # main.fxml
-main.emptyListInstructions = Нажмите здесь что добавить хранилище
+main.emptyListInstructions = Нажмите здесь, чтобы добавить хранилище
 main.directoryList.contextMenu.remove = Удалить из списка
 main.directoryList.contextMenu.changePassword = Сменить пароль
 main.addDirectory.contextMenu.new = Создать новое хранилище
-main.addDirectory.contextMenu.open = Открыть существующее хранилище
+main.addDirectory.contextMenu.open = Открыть имеющееся хранилище
 # welcome.fxml
 welcome.checkForUpdates.label.currentlyChecking = Проверка обновлений...
-welcome.newVersionMessage = Версия может быть скачена. Это.
+# Does the first %s mean the new version number, and the second %s - the current version user has?
+welcome.newVersionMessage = Доступна версия %1$s. У вас версия %2$s.
 # initialize.fxml
 initialize.label.password = Пароль
-initialize.label.retypePassword = Повторите пароль
+initialize.label.retypePassword = Введите пароль ещё раз
 initialize.button.ok = Создать хранилище
 initialize.messageLabel.alreadyInitialized = Хранилище уже инициализировано
-initialize.messageLabel.initializationFailed = Невозможно инициировать хранилище. Смотрите лог для деталей.
+initialize.messageLabel.initializationFailed = Невозможно инициализировать хранилище. См. подробности в файле-отчёте.
 # notfound.fxml
-notfound.label = Хранилище не найдено.Оно было удалено?
+notfound.label = Хранилище не найдено. Оно было перемещено?
 # upgrade.fxml
 upgrade.button = Обновить хранилище
-upgrade.version3dropBundleExtension.msg = Этому хранилищу нужно мигрировать в новый формат.\n"%1$s" will be renamed to "%2$s".\nPlease make sure synchronization has finished before proceeding.
-upgrade.version3dropBundleExtension.err.alreadyExists = Автоматическая миграция не удалась.\n"%" уже существует.
+upgrade.version3dropBundleExtension.msg = Это хранилище нужно преобразовать в новый формат.\n"%1$s" будет переименовано в "%2$s".\nПрежде чем продолжить, выполните синхронизацию.
+upgrade.version3dropBundleExtension.err.alreadyExists = Автоматическое преобразование не выполнено.\n"%s" уже существует.
 # unlock.fxml
 unlock.label.password = Пароль
-unlock.label.mountName = Имя носителя
-changePassword.errorMessage.wrongPassword = Неправильный пароль
-changePassword.errorMessage.decryptionFailed = Расшифровка провалилась
-changePassword.errorMessage.unsupportedKeyLengthInstallJCE = Расшифровка не удалась. Пожалуйста установите Oracle JCE Unlimited Strength Policy.
-changePassword.infoMessage.success = Пароль изменился
+unlock.label.mountName = Имя диска
+unlock.label.winDriveLetter = Буква диска
+unlock.label.downloadsPageLink = Все версии Cryptomator
+unlock.label.advancedHeading = Дополнительно
+unlock.button.unlock = Разблокировать хранилище
+unlock.button.advancedOptions.show = Ещё настройки
+unlock.button.advancedOptions.hide = Убрать настройки
+unlock.choicebox.winDriveLetter.auto = Автоназначение
+unlock.errorMessage.wrongPassword = Неверный пароль
+unlock.errorMessage.mountingFailed = Ошибка монтирования. См. подробности в файле-отчёте.
+unlock.errorMessage.unsupportedVersion.vaultOlderThanSoftware = Неподдерживаемое хранилище. Оно было создано в более старой версии Cryptomator.
+unlock.errorMessage.unsupportedVersion.softwareOlderThanVault = Неподдерживаемое хранилище. Оно было создано в более новой версии Cryptomator.
+unlock.messageLabel.startServerFailed = Ошибка запуска сервера WebDAV.
+# change_password.fxml
+changePassword.label.oldPassword = Старый пароль
+changePassword.label.newPassword = Новый пароль
+changePassword.label.retypePassword = Введите пароль ещё раз
+changePassword.label.downloadsPageLink = Все версии Cryptomator
+changePassword.button.change = Сменить пароль
+changePassword.errorMessage.wrongPassword = Неверный пароль
+changePassword.errorMessage.decryptionFailed = Ошибка дешифрования
+changePassword.infoMessage.success = Пароль изменён
 # unlocked.fxml
 unlocked.button.lock = Заблокировать хранилище
-unlocked.moreOptions.copyUrl = Скопировать WebDAV URL
-unlocked.label.revealFailed = Команда не удалась
-unlocked.label.unmountFailed = Извлечение диска не удалось
+# Does it mean "open" drive?
+unlocked.moreOptions.reveal = Открыть накопитель
+unlocked.moreOptions.copyUrl = Скопировать URL-адрес WebDAV
+unlocked.label.revealFailed = Ошибка команды
+unlocked.label.unmountFailed = Ошибка извлечения диска
 unlocked.label.statsEncrypted = зашифровано
 unlocked.label.statsDecrypted = расшифровано
-macWarnings.moreInformationButton = Изучить больше
+unlocked.ioGraph.yAxis.label = Пропускная способность (МиБ/с)
+# mac_warnings.fxml
+macWarnings.windowTitle = Внимание\! Повреждённый файл в %s
+macWarnings.message = Cryptomator обнаружил потенциально опасные повреждения в следующих файлах\:
+macWarnings.moreInformationButton = Подробнее
+macWarnings.whitelistButton = Дешифровать выбранные всё равно
 # settings.fxml
 settings.version.label = Версия %s
 settings.checkForUpdates.label = Проверка обновлений
-settings.requiresRestartLabel = * Cryptomator должен перезагрузится
+settings.port.label = Порт WebDAV *
+settings.port.prompt = 0 \= автовыбор
+settings.useipv6.label = Использование IPv
+settings.requiresRestartLabel = * Требуется перезагрузка Cryptomator
 # tray icon
 tray.menu.open = Открыть
-tray.menu.quit = Выйти
-tray.infoMsg.title = Всё ещё работает
-tray.infoMsg.msg = Cryptomator работает. Выйдите c помощью иконки в трее.
-tray.infoMsg.msg.osx = Cryptomator всё ещё работает.Выйдите с помощью иконки в меню баре.
+tray.menu.quit = Выход
+tray.infoMsg.title = Всё ещё выполняется
+tray.infoMsg.msg = Cryptomator всё ещё работает. Выйдите c помощью значка в области уведомлений.
+tray.infoMsg.msg.osx = Cryptomator всё ещё работает. Выйдите с помощью значка в строке меню.
+initialize.messageLabel.passwordStrength.0 = Очень слабый
+initialize.messageLabel.passwordStrength.1 = Слабый
+initialize.messageLabel.passwordStrength.2 = Приемлемый
+initialize.messageLabel.passwordStrength.3 = Сильный
+initialize.messageLabel.passwordStrength.4 = Очень сильный
+initialize.label.doNotForget = ВАЖНО\: Если вы забудете свой пароль, то восстановить данные будет невозможно.
+main.directoryList.remove.confirmation.title = Удаление хранилища
+main.directoryList.remove.confirmation.header = Вы действительно хотите удалить это хранилище?
+main.directoryList.remove.confirmation.content = Хранилище будет удалено только из списка. Чтобы стереть его окончательно, удалите файлы из файловой системы.
+upgrade.version3to4.msg = Это хранилище требуется преобразовать в новый формат. Зашифрованные имена папок будут обновлены. Прежде чем продолжить, выполните синхронизацию.
+upgrade.version3to4.err.io = Преобразование не выполнено из-за ошибки ввода-вывода. См. подробности в файле-отчёте.

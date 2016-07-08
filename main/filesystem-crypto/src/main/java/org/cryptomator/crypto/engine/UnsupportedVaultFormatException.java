@@ -11,28 +11,28 @@ package org.cryptomator.crypto.engine;
 public class UnsupportedVaultFormatException extends CryptoException {
 
 	private final Integer detectedVersion;
-	private final Integer supportedVersion;
+	private final Integer latestSupportedVersion;
 
-	public UnsupportedVaultFormatException(Integer detectedVersion, Integer supportedVersion) {
-		super("Tried to open vault of version " + detectedVersion + ", but can only handle version " + supportedVersion);
+	public UnsupportedVaultFormatException(Integer detectedVersion, Integer latestSupportedVersion) {
+		super("Tried to open vault of version " + detectedVersion + ", latest supported version is " + latestSupportedVersion);
 		this.detectedVersion = detectedVersion;
-		this.supportedVersion = supportedVersion;
+		this.latestSupportedVersion = latestSupportedVersion;
 	}
 
 	public Integer getDetectedVersion() {
 		return detectedVersion;
 	}
 
-	public Integer getSupportedVersion() {
-		return supportedVersion;
+	public Integer getLatestSupportedVersion() {
+		return latestSupportedVersion;
 	}
 
 	public boolean isVaultOlderThanSoftware() {
-		return detectedVersion == null || detectedVersion < supportedVersion;
+		return detectedVersion == null || detectedVersion < latestSupportedVersion;
 	}
 
 	public boolean isSoftwareOlderThanVault() {
-		return detectedVersion > supportedVersion;
+		return detectedVersion > latestSupportedVersion;
 	}
 
 }

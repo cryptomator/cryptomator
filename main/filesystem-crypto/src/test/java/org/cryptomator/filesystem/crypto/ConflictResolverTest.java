@@ -46,7 +46,7 @@ public class ConflictResolverTest {
 		unrelatedFile = Mockito.mock(File.class);
 
 		String canonicalFileName = encode.apply("test name").get();
-		String canonicalFolderName = canonicalFileName + Constants.DIR_SUFFIX;
+		String canonicalFolderName = Constants.DIR_PREFIX + canonicalFileName;
 		String conflictingFileName = canonicalFileName + " (version 2)";
 		String conflictingFolderName = canonicalFolderName + " (version 2)";
 		String unrelatedName = "notBa$e32!";
@@ -70,6 +70,7 @@ public class ConflictResolverTest {
 		Mockito.doReturn(Optional.of(folder)).when(unrelatedFile).parent();
 
 		Mockito.when(folder.file(Mockito.startsWith(canonicalFileName.substring(0, 8)))).thenReturn(resolved);
+		Mockito.when(folder.file(Mockito.startsWith(canonicalFolderName.substring(0, 8)))).thenReturn(resolved);
 		Mockito.when(folder.file(canonicalFileName)).thenReturn(canonicalFile);
 		Mockito.when(folder.file(canonicalFolderName)).thenReturn(canonicalFolder);
 		Mockito.when(folder.file(conflictingFileName)).thenReturn(conflictingFile);

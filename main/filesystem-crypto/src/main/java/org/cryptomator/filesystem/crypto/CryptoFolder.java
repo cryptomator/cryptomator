@@ -10,7 +10,7 @@ package org.cryptomator.filesystem.crypto;
 
 import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.cryptomator.filesystem.crypto.Constants.DIR_SUFFIX;
+import static org.cryptomator.filesystem.crypto.Constants.DIR_PREFIX;
 
 import java.io.FileNotFoundException;
 import java.io.UncheckedIOException;
@@ -54,9 +54,9 @@ class CryptoFolder extends CryptoNode implements Folder {
 	@Override
 	protected Optional<String> encryptedName() {
 		if (parent().isPresent()) {
-			return parent().get().encryptChildName(name()).map(s -> s + DIR_SUFFIX);
+			return parent().get().encryptChildName(name()).map(s -> DIR_PREFIX + s);
 		} else {
-			return Optional.of(cryptor.getFilenameCryptor().encryptFilename(name()) + DIR_SUFFIX);
+			return Optional.of(DIR_PREFIX + cryptor.getFilenameCryptor().encryptFilename(name()));
 		}
 	}
 
@@ -121,20 +121,20 @@ class CryptoFolder extends CryptoNode implements Folder {
 
 	@Override
 	public Stream<CryptoFile> files() {
-		return nonConflictingFiles().map(File::name).filter(endsWithDirSuffix().negate()).map(this::decryptChildName).filter(Optional::isPresent).map(Optional::get).map(this::file);
+		return nonConflictingFiles().map(File::name).filter(startsWithDirPrefix().negate()).map(this::decryptChildName).filter(Optional::isPresent).map(Optional::get).map(this::file);
 	}
 
 	@Override
 	public Stream<CryptoFolder> folders() {
-		return nonConflictingFiles().map(File::name).filter(endsWithDirSuffix()).map(this::removeDirSuffix).map(this::decryptChildName).filter(Optional::isPresent).map(Optional::get).map(this::folder);
+		return nonConflictingFiles().map(File::name).filter(startsWithDirPrefix()).map(this::removeDirPrefix).map(this::decryptChildName).filter(Optional::isPresent).map(Optional::get).map(this::folder);
 	}
 
-	private Predicate<String> endsWithDirSuffix() {
-		return (String encryptedFolderName) -> StringUtils.endsWith(encryptedFolderName, DIR_SUFFIX);
+	private Predicate<String> startsWithDirPrefix() {
+		return (String encryptedFolderName) -> StringUtils.startsWith(encryptedFolderName, DIR_PREFIX);
 	}
 
-	private String removeDirSuffix(String encryptedFolderName) {
-		return StringUtils.removeEnd(encryptedFolderName, DIR_SUFFIX);
+	private String removeDirPrefix(String encryptedFolderName) {
+		return StringUtils.removeStart(encryptedFolderName, DIR_PREFIX);
 	}
 
 	@Override
