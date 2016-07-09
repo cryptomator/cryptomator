@@ -80,29 +80,29 @@ public class ConflictResolverTest {
 
 	@Test
 	public void testCanonicalName() {
-		File resolved = conflictResolver.resolveIfNecessary(canonicalFile);
-		Assert.assertSame(canonicalFile, resolved);
+		File result = conflictResolver.resolveIfNecessary(canonicalFile);
+		Assert.assertSame(canonicalFile, result);
 	}
 
 	@Test
 	public void testUnrelatedName() {
-		File resolved = conflictResolver.resolveIfNecessary(unrelatedFile);
-		Assert.assertSame(unrelatedFile, resolved);
+		File result = conflictResolver.resolveIfNecessary(unrelatedFile);
+		Assert.assertSame(unrelatedFile, result);
 	}
 
 	@Test
 	public void testConflictingFile() {
-		File resolved = conflictResolver.resolveIfNecessary(conflictingFile);
+		File result = conflictResolver.resolveIfNecessary(conflictingFile);
 		Mockito.verify(conflictingFile).moveTo(resolved);
-		Assert.assertSame(resolved, resolved);
+		Assert.assertSame(resolved, result);
 	}
 
 	@Test
 	public void testConflictingFileIfCanonicalDoesntExist() {
 		Mockito.when(canonicalFile.exists()).thenReturn(false);
-		File resolved = conflictResolver.resolveIfNecessary(conflictingFile);
-		Mockito.verify(conflictingFile).moveTo(canonicalFile);
-		Assert.assertSame(canonicalFile, resolved);
+		File result = conflictResolver.resolveIfNecessary(conflictingFile);
+		Mockito.verify(conflictingFile).moveTo(resolved);
+		Assert.assertSame(resolved, result);
 	}
 
 	@Test
@@ -122,9 +122,11 @@ public class ConflictResolverTest {
 	@Test
 	public void testConflictingFolderWithSameId() {
 		ReadableFile directoryId1 = Mockito.mock(ReadableFile.class);
+		ReadableFile directoryId2 = Mockito.mock(ReadableFile.class);
 		Mockito.when(canonicalFolder.openReadable()).thenReturn(directoryId1);
-		Mockito.when(conflictingFolder.openReadable()).thenReturn(directoryId1);
+		Mockito.when(conflictingFolder.openReadable()).thenReturn(directoryId2);
 		Mockito.when(directoryId1.read(Mockito.any())).thenAnswer(new FillBufferAnswer("id1"));
+		Mockito.when(directoryId2.read(Mockito.any())).thenAnswer(new FillBufferAnswer("id1"));
 
 		File result = conflictResolver.resolveIfNecessary(conflictingFolder);
 		Mockito.verify(conflictingFolder).delete();
