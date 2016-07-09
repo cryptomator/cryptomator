@@ -2,6 +2,7 @@ package org.cryptomator.filesystem.crypto;
 
 import static org.cryptomator.filesystem.crypto.Constants.DIR_PREFIX;
 
+import java.nio.ByteBuffer;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
@@ -12,7 +13,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.Folder;
-import org.cryptomator.io.FileContents;
+import org.cryptomator.filesystem.ReadableFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,6 +21,7 @@ final class ConflictResolver {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ConflictResolver.class);
 	private static final int UUID_FIRST_GROUP_STRLEN = 8;
+	private static final int MAX_DIR_FILE_SIZE = 87; // "normal" file header has 88 bytes
 
 	private final Pattern encryptedNamePattern;
 	private final Function<String, Optional<String>> nameDecryptor;
@@ -52,13 +54,11 @@ final class ConflictResolver {
 		if (cleartext.isPresent()) {
 			Folder folder = conflictingFile.parent().get();
 			File canonicalFile = folder.file(isDirectory ? DIR_PREFIX + ciphertext : ciphertext);
-			if (canonicalFile.exists()) {
+			if (isDirectory && canonicalFile.exists() && isSameFileBasedOnSample(canonicalFile, conflictingFile, MAX_DIR_FILE_SIZE)) {
 				// there must not be two directories pointing to the same directory id. In this case no human interaction is needed to resolve this conflict:
-				if (isDirectory && FileContents.UTF_8.readContents(canonicalFile).equals(FileContents.UTF_8.readContents(conflictingFile))) {
-					conflictingFile.delete();
-					return canonicalFile;
-				}
-
+				conflictingFile.delete();
+				return canonicalFile;
+			} else {
 				// conventional conflict detected! look for an alternative name:
 				File alternativeFile;
 				String conflictId;
@@ -71,13 +71,26 @@ final class ConflictResolver {
 				LOG.info("Detected conflict {}:\n{}\n{}", conflictId, canonicalFile, conflictingFile);
 				conflictingFile.moveTo(alternativeFile);
 				return alternativeFile;
-			} else {
-				conflictingFile.moveTo(canonicalFile);
-				return canonicalFile;
 			}
 		} else {
 			// not decryptable; false positive
 			return conflictingFile;
+		}
+	}
+
+	private boolean isSameFileBasedOnSample(File file1, File file2, int sampleSize) {
+		try (ReadableFile r1 = file1.openReadable(); ReadableFile r2 = file2.openReadable()) {
+			if (r1.size() != r2.size()) {
+				return false;
+			} else {
+				ByteBuffer beginOfFile1 = ByteBuffer.allocate(sampleSize);
+				ByteBuffer beginOfFile2 = ByteBuffer.allocate(sampleSize);
+				r1.read(beginOfFile1);
+				r2.read(beginOfFile2);
+				beginOfFile1.flip();
+				beginOfFile2.flip();
+				return beginOfFile1.equals(beginOfFile2);
+			}
 		}
 	}
 
