@@ -19,6 +19,9 @@ public class UpgradeStrategies {
 	}
 
 	public Optional<UpgradeStrategy> getUpgradeStrategy(Vault vault) {
+		if (vault == null) {
+			return Optional.empty();
+		}
 		return strategies.stream().filter(strategy -> {
 			return strategy.isApplicable(vault);
 		}).findFirst();
