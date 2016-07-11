@@ -7,7 +7,7 @@ main.addDirectory.contextMenu.new = Créer un nouveau coffre
 main.addDirectory.contextMenu.open = Ouvrir un coffre existant
 # welcome.fxml
 welcome.checkForUpdates.label.currentlyChecking = Recherche de mise à jour...
-welcome.newVersionMessage = La version %1$s peut-être téléchargée. Il s'agit de %2$s.
+welcome.newVersionMessage = La version %1$s peut-être téléchargée.\nIl s'agit de %2$s.
 # initialize.fxml
 initialize.label.password = Mot de passe
 initialize.label.retypePassword = Confirmation

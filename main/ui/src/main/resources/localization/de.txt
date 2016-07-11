@@ -7,7 +7,7 @@ main.addDirectory.contextMenu.new = Tresor erstellen
 main.addDirectory.contextMenu.open = Tresor öffnen
 # welcome.fxml
 welcome.checkForUpdates.label.currentlyChecking = Prüfe auf Updates...
-welcome.newVersionMessage = Version %1$s kann heruntergeladen werden. Momentane Version %2$s.
+welcome.newVersionMessage = Version %1$s kann heruntergeladen werden.\nMomentane Version %2$s.
 # initialize.fxml
 initialize.label.password = Passwort
 initialize.label.retypePassword = Passwort bestätigen

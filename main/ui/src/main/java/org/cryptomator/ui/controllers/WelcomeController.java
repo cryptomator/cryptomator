@@ -161,7 +161,7 @@ public class WelcomeController extends LocalizedFXMLViewController {
 
 	@FXML
 	public void didClickUpdateLink(ActionEvent event) {
-		app.getHostServices().showDocument("https://cryptomator.org/#download");
+		app.getHostServices().showDocument("https://cryptomator.org/");
 	}
 
 }
