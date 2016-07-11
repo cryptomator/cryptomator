@@ -7,7 +7,7 @@ main.addDirectory.contextMenu.new = Új széf létrehozása
 main.addDirectory.contextMenu.open = Létező széf megnyitása
 # welcome.fxml
 welcome.checkForUpdates.label.currentlyChecking = Frissítések keresése...
-welcome.newVersionMessage = Új verzió érhető el\: %1$s. Jelenlegi verzió\: %2$s.
+welcome.newVersionMessage = Új verzió érhető el\: %1$s.\nJelenlegi verzió\: %2$s.
 # initialize.fxml
 initialize.label.password = Jelszó
 initialize.label.retypePassword = Jelszó ismét

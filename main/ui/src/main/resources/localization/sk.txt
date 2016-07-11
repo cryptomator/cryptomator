@@ -10,7 +10,7 @@ main.addDirectory.contextMenu.new = Vytvoriť nový trezor
 main.addDirectory.contextMenu.open = Otvoriť existujúci trezor
 # welcome.fxml
 welcome.checkForUpdates.label.currentlyChecking = Kontrolujú sa aktualizácie...
-welcome.newVersionMessage = Verzia %1$s je pripravená na stiahnutie. Toto je verzia %2$s.
+welcome.newVersionMessage = Verzia %1$s je pripravená na stiahnutie.\nToto je verzia %2$s.
 # initialize.fxml
 initialize.label.password = Heslo
 initialize.label.retypePassword = Zadajte heslo znova
