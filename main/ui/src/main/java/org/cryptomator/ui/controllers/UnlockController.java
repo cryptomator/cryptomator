@@ -246,6 +246,7 @@ public class UnlockController extends LocalizedFXMLViewController {
 			return;
 		}
 		vault.get().setWinDriveLetter(newValue);
+		settings.save();
 	}
 
 	private void chooseSelectedDriveLetter() {
