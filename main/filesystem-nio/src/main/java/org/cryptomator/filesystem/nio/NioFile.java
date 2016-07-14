@@ -30,13 +30,21 @@ class NioFile extends NioNode implements File {
 	@Override
 	public ReadableFile openReadable() throws UncheckedIOException {
 		if (lock.getWriteHoldCount() > 0) {
-			throw new IllegalStateException("Current thread is currently writing this file");
+			throw new IllegalStateException("Current thread is currently writing " + path);
 		}
 		if (lock.getReadHoldCount() > 0) {
-			throw new IllegalStateException("Current thread is already reading this file");
+			throw new IllegalStateException("Current thread is already reading " + path);
 		}
 		lock.readLock().lock();
-		return instanceFactory.readableNioFile(path, sharedChannel, this::unlockReadLock);
+		ReadableFile result = null;
+		try {
+			result = instanceFactory.readableNioFile(path, sharedChannel, this::unlockReadLock);
+		} finally {
+			if (result == null) {
+				unlockReadLock();
+			}
+		}
+		return result;
 	}
 
 	private void unlockReadLock() {
@@ -46,13 +54,21 @@ class NioFile extends NioNode implements File {
 	@Override
 	public WritableFile openWritable() throws UncheckedIOException {
 		if (lock.getWriteHoldCount() > 0) {
-			throw new IllegalStateException("Current thread is already writing this file");
+			throw new IllegalStateException("Current thread is already writing " + path);
 		}
 		if (lock.getReadHoldCount() > 0) {
-			throw new IllegalStateException("Current thread is currently reading this file");
+			throw new IllegalStateException("Current thread is currently reading " + path);
 		}
 		lockWriteLock();
-		return instanceFactory.writableNioFile(fileSystem(), path, sharedChannel, this::unlockWriteLock);
+		WritableFile result = null;
+		try {
+			result = instanceFactory.writableNioFile(fileSystem(), path, sharedChannel, this::unlockWriteLock);
+		} finally {
+			if (result == null) {
+				unlockWriteLock();
+			}
+		}
+		return result;
 	}
 
 	// visible for testing

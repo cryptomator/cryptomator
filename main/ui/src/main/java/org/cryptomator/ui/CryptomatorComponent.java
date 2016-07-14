@@ -14,6 +14,7 @@ import javax.inject.Singleton;
 
 import org.cryptomator.ui.controllers.MainController;
 import org.cryptomator.ui.settings.Localization;
+import org.cryptomator.ui.util.AsyncTaskService;
 import org.cryptomator.ui.util.DeferredCloser;
 
 import dagger.Component;
@@ -21,6 +22,9 @@ import dagger.Component;
 @Singleton
 @Component(modules = CryptomatorModule.class)
 interface CryptomatorComponent {
+
+	AsyncTaskService asyncTaskService();
+
 	ExecutorService executorService();
 
 	DeferredCloser deferredCloser();
