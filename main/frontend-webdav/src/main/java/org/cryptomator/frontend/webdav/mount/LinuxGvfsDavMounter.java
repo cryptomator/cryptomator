@@ -23,21 +23,21 @@ import org.cryptomator.frontend.Frontend.MountParam;
 import org.cryptomator.frontend.webdav.mount.command.Script;
 
 @Singleton
-final class LinuxGvfsWebDavMounter implements WebDavMounterStrategy {
+final class LinuxGvfsDavMounter implements WebDavMounterStrategy {
 
 	@Inject
-	LinuxGvfsWebDavMounter() {
+	LinuxGvfsDavMounter() {
 	}
 
 	@Override
 	public boolean shouldWork(Map<MountParam, Optional<String>> mountParams) {
 		if (SystemUtils.IS_OS_LINUX) {
 			Optional<String> prefScheme = mountParams.getOrDefault(MountParam.PREFERRED_GVFS_SCHEME, Optional.empty());
-			boolean prefSchemeIsUnspecifiedOrWebDav = !prefScheme.isPresent() || prefScheme.get().equalsIgnoreCase("webdav");
+			boolean prefSchemeIsUnspecifiedOrDav = !prefScheme.isPresent() || prefScheme.get().equalsIgnoreCase("dav");
 			final Script checkScripts = Script.fromLines("which gvfs-mount xdg-open");
 			try {
 				checkScripts.execute();
-				return prefSchemeIsUnspecifiedOrWebDav;
+				return prefSchemeIsUnspecifiedOrDav;
 			} catch (CommandFailedException e) {
 				return false;
 			}
@@ -55,15 +55,15 @@ final class LinuxGvfsWebDavMounter implements WebDavMounterStrategy {
 	public WebDavMount mount(URI uri, Map<MountParam, Optional<String>> mountParams) throws CommandFailedException {
 		final Script mountScript = Script.fromLines("set -x", "gvfs-mount \"dav:$DAV_SSP\"").addEnv("DAV_SSP", uri.getRawSchemeSpecificPart());
 		mountScript.execute();
-		return new LinuxGvfsWebDavMount(uri);
+		return new LinuxGvfsDavMount(uri);
 	}
 
-	private static class LinuxGvfsWebDavMount extends AbstractWebDavMount {
+	private static class LinuxGvfsDavMount extends AbstractWebDavMount {
 		private final URI webDavUri;
 		private final Script testMountStillExistsScript;
 		private final Script unmountScript;
 
-		private LinuxGvfsWebDavMount(URI webDavUri) {
+		private LinuxGvfsDavMount(URI webDavUri) {
 			this.webDavUri = webDavUri;
 			this.testMountStillExistsScript = Script.fromLines("set -x", "test `gvfs-mount --list | grep \"$DAV_SSP\" | wc -l` -eq 1").addEnv("DAV_SSP", webDavUri.getRawSchemeSpecificPart());
 			this.unmountScript = Script.fromLines("set -x", "gvfs-mount -u \"dav:$DAV_SSP\"").addEnv("DAV_SSP", webDavUri.getRawSchemeSpecificPart());

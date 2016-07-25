@@ -23,7 +23,7 @@ import org.cryptomator.frontend.Frontend.MountParam;
 final class FallbackWebDavMounter implements WebDavMounterStrategy {
 
 	@Override
-	public boolean shouldWork() {
+	public boolean shouldWork(Map<MountParam, Optional<String>> mountParams) {
 		return true;
 	}
 

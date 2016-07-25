@@ -38,7 +38,7 @@ final class MacOsXAppleScriptWebDavMounter implements WebDavMounterStrategy {
 	}
 
 	@Override
-	public boolean shouldWork() {
+	public boolean shouldWork(Map<MountParam, Optional<String>> mountParams) {
 		return SystemUtils.IS_OS_MAC_OSX && semVerComparator.compare(SystemUtils.OS_VERSION, "10.10") >= 0;
 	}
 

@@ -17,9 +17,8 @@ import javax.inject.Singleton;
 import org.cryptomator.common.CommonsModule;
 import org.cryptomator.crypto.engine.impl.CryptoEngineModule;
 import org.cryptomator.frontend.FrontendFactory;
+import org.cryptomator.frontend.webdav.WebDavModule;
 import org.cryptomator.frontend.webdav.WebDavServer;
-import org.cryptomator.frontend.webdav.mount.WebDavMounter;
-import org.cryptomator.frontend.webdav.mount.WebDavMounterProvider;
 import org.cryptomator.ui.model.VaultObjectMapperProvider;
 import org.cryptomator.ui.settings.Settings;
 import org.cryptomator.ui.settings.SettingsProvider;
@@ -32,7 +31,7 @@ import dagger.Provides;
 import javafx.application.Application;
 import javafx.stage.Stage;
 
-@Module(includes = {CryptoEngineModule.class, CommonsModule.class})
+@Module(includes = {CryptoEngineModule.class, CommonsModule.class, WebDavModule.class})
 class CryptomatorModule {
 
 	private final Application application;
@@ -81,12 +80,6 @@ class CryptomatorModule {
 	@Singleton
 	ExecutorService provideExecutorService(DeferredCloser closer) {
 		return closer.closeLater(Executors.newCachedThreadPool(), ExecutorService::shutdown).get().orElseThrow(IllegalStateException::new);
-	}
-
-	@Provides
-	@Singleton
-	WebDavMounter provideWebDavMounter(WebDavMounterProvider webDavMounterProvider) {
-		return webDavMounterProvider.get();
 	}
 
 	@Provides

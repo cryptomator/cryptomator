@@ -22,6 +22,7 @@ import org.fxmisc.easybind.EasyBind;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
@@ -52,6 +53,12 @@ public class SettingsController extends LocalizedFXMLViewController {
 	@FXML
 	private Label versionLabel;
 
+	@FXML
+	private Label prefGvfsSchemeLabel;
+
+	@FXML
+	private ChoiceBox<String> prefGvfsScheme;
+
 	@Override
 	public void initialize() {
 		checkForUpdatesCheckbox.setDisable(areUpdatesManagedExternally());
@@ -62,10 +69,16 @@ public class SettingsController extends LocalizedFXMLViewController {
 		useIpv6Checkbox.setVisible(SystemUtils.IS_OS_WINDOWS);
 		useIpv6Checkbox.setSelected(SystemUtils.IS_OS_WINDOWS && settings.shouldUseIpv6());
 		versionLabel.setText(String.format(localization.getString("settings.version.label"), applicationVersion().orElse("SNAPSHOT")));
+		prefGvfsSchemeLabel.setVisible(SystemUtils.IS_OS_LINUX);
+		prefGvfsScheme.setVisible(SystemUtils.IS_OS_LINUX);
+		prefGvfsScheme.getItems().add("dav");
+		prefGvfsScheme.getItems().add("webdav");
+		prefGvfsScheme.setValue(settings.getPreferredGvfsScheme());
 
 		EasyBind.subscribe(checkForUpdatesCheckbox.selectedProperty(), this::checkForUpdateDidChange);
 		EasyBind.subscribe(portField.textProperty(), this::portDidChange);
 		EasyBind.subscribe(useIpv6Checkbox.selectedProperty(), this::useIpv6DidChange);
+		EasyBind.subscribe(prefGvfsScheme.valueProperty(), this::prefGvfsSchemeDidChange);
 	}
 
 	@Override
@@ -98,6 +111,11 @@ public class SettingsController extends LocalizedFXMLViewController {
 
 	private void useIpv6DidChange(Boolean newValue) {
 		settings.setUseIpv6(newValue);
+		settings.save();
+	}
+
+	private void prefGvfsSchemeDidChange(String newValue) {
+		settings.setPreferredGvfsScheme(newValue);
 		settings.save();
 	}
 

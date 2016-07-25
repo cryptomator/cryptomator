@@ -154,7 +154,8 @@ public class Vault implements CryptoFileSystemDelegate {
 		return ImmutableMap.of( //
 				MountParam.MOUNT_NAME, Optional.ofNullable(mountName), //
 				MountParam.WIN_DRIVE_LETTER, Optional.ofNullable(CharUtils.toString(winDriveLetter)), //
-				MountParam.HOSTNAME, Optional.of(hostname) //
+				MountParam.HOSTNAME, Optional.of(hostname), //
+				MountParam.PREFERRED_GVFS_SCHEME, Optional.ofNullable(settings.getPreferredGvfsScheme()) //
 		);
 	}
 
