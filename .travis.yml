@@ -55,12 +55,12 @@ deploy:
     repo: cryptomator/cryptomator
     tags: true
 - provider: script
-  script: curl -X POST -u cryptobot:${BINTRAY_API_KEY} -H "Content-Type: application/json" -d '{"name": "${TRAVIS_TAG}", "vcs_tag": "${TRAVIS_TAG}"}' https://api.bintray.com/packages/cryptomator/cryptomator/cryptomator-win/versions
+  script: "curl -X POST -u cryptobot:${BINTRAY_API_KEY} -H 'Content-Type: application/json' -d '{\"name\": \"${TRAVIS_TAG}\", \"vcs_tag\": \"${TRAVIS_TAG}\"}' https://api.bintray.com/packages/cryptomator/cryptomator/cryptomator-win/versions"
   on:
     repo: cryptomator/cryptomator
     tags: true
 - provider: script
-  script: curl -X POST -u cryptobot:${BINTRAY_API_KEY} -H "Content-Type: application/json" -d '{"name": "${TRAVIS_TAG}", "vcs_tag": "${TRAVIS_TAG}"}' https://api.bintray.com/packages/cryptomator/cryptomator/cryptomator-osx/versions
+  script: "curl -X POST -u cryptobot:${BINTRAY_API_KEY} -H 'Content-Type: application/json' -d '{\"name\": \"${TRAVIS_TAG}\", \"vcs_tag\": \"${TRAVIS_TAG}\"}' https://api.bintray.com/packages/cryptomator/cryptomator/cryptomator-osx/versions"
   on:
     repo: cryptomator/cryptomator
     tags: true
