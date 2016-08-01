@@ -18,7 +18,7 @@ import org.cryptomator.ui.model.Vault;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-@JsonPropertyOrder(value = {"directories", "checkForUpdatesEnabled", "port", "useIpv6", "numTrayNotifications"})
+@JsonPropertyOrder(value = {"directories", "checkForUpdatesEnabled", "port", "useIpv6", "numTrayNotifications", "preferredGvfsScheme"})
 public class Settings implements Serializable {
 
 	private static final long serialVersionUID = 7609959894417878744L;
@@ -27,6 +27,7 @@ public class Settings implements Serializable {
 	public static final int DEFAULT_PORT = 42427;
 	public static final boolean DEFAULT_USE_IPV6 = false;
 	public static final Integer DEFAULT_NUM_TRAY_NOTIFICATIONS = 3;
+	public static final String DEFAULT_GVFS_SCHEME = "dav";
 
 	private final Consumer<Settings> saveCmd;
 
@@ -44,6 +45,9 @@ public class Settings implements Serializable {
 
 	@JsonProperty("numTrayNotifications")
 	private Integer numTrayNotifications;
+
+	@JsonProperty("preferredGvfsScheme")
+	private String preferredGvfsScheme;
 
 	/**
 	 * Package-private constructor; use {@link SettingsProvider}.
@@ -111,6 +115,14 @@ public class Settings implements Serializable {
 
 	public void setNumTrayNotifications(Integer numTrayNotifications) {
 		this.numTrayNotifications = numTrayNotifications;
+	}
+
+	public String getPreferredGvfsScheme() {
+		return preferredGvfsScheme == null ? DEFAULT_GVFS_SCHEME : preferredGvfsScheme;
+	}
+
+	public void setPreferredGvfsScheme(String preferredGvfsScheme) {
+		this.preferredGvfsScheme = preferredGvfsScheme;
 	}
 
 }

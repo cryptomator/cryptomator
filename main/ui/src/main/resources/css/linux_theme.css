@@ -325,6 +325,32 @@
 	-fx-background-color: COLOR_TEXT;
 }
 
+/*******************************************************************************
+ *                                                                             *
+ * ChoiceBox                                                                   *
+ *                                                                             *
+ ******************************************************************************/
+
+.choice-box {
+	-fx-background-color: COLOR_BORDER_DARK, COLOR_BACKGROUND;
+	-fx-background-insets: 0, 1;
+	-fx-background-radius: 0, 0;
+	-fx-padding: 0.1em 0.6em 0.1em 0.6em;
+	-fx-text-fill: COLOR_TEXT;
+}
+
+.choice-box > .open-button > .arrow {
+	-fx-background-color: transparent, COLOR_TEXT;
+	-fx-background-insets: 0 0 -1 0, 0;
+	-fx-padding: 0.166667em 0.333333em 0.166667em 0.333333em; /* 2 4 2 4 */
+	-fx-shape: "M 0 0 h 7 l -3.5 4 z";
+}
+
+.choice-box .context-menu {
+	-fx-background-color: COLOR_BORDER, #FFF;
+    -fx-background-insets: 0, 1;
+}
+
 /****************************************************************************
  *																			*
  * ProgressIndicator														*

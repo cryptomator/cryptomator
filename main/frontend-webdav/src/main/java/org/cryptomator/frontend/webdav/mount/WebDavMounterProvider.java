@@ -10,34 +10,35 @@
 package org.cryptomator.frontend.webdav.mount;
 
 import java.util.Collection;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
+import javax.inject.Named;
 import javax.inject.Singleton;
 
+import org.cryptomator.frontend.Frontend.MountParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
-public class WebDavMounterProvider implements Provider<WebDavMounter> {
+public class WebDavMounterProvider {
 
 	private static final Logger LOG = LoggerFactory.getLogger(WebDavMounterProvider.class);
-	private final WebDavMounterStrategy choosenStrategy;
+	private final Collection<WebDavMounterStrategy> availableStrategies;
+	private final WebDavMounterStrategy fallbackStrategy;
 
 	@Inject
-	public WebDavMounterProvider(MountStrategies availableStrategies) {
-		this.choosenStrategy = getStrategyWhichShouldWork(availableStrategies);
+	public WebDavMounterProvider(Set<WebDavMounterStrategy> availableStrategies, @Named("fallback") WebDavMounterStrategy fallbackStrategy) {
+		this.availableStrategies = availableStrategies;
+		this.fallbackStrategy = fallbackStrategy;
 	}
 
-	@Override
-	public WebDavMounter get() {
-		return this.choosenStrategy;
-	}
-
-	private WebDavMounterStrategy getStrategyWhichShouldWork(Collection<WebDavMounterStrategy> availableStrategies) {
-		WebDavMounterStrategy strategy = availableStrategies.stream().filter(WebDavMounterStrategy::shouldWork).findFirst().orElse(new FallbackWebDavMounter());
-		LOG.info("Using {}", strategy.getClass().getSimpleName());
-		return strategy;
+	public WebDavMounter chooseMounter(Map<MountParam, Optional<String>> mountParams) {
+		WebDavMounterStrategy result = availableStrategies.stream().filter(strategy -> strategy.shouldWork(mountParams)).findFirst().orElse(fallbackStrategy);
+		LOG.info("Using {}", result.getClass().getSimpleName());
+		return result;
 	}
 
 }

@@ -45,7 +45,7 @@ class WebDavFrontend implements Frontend {
 
 	@Override
 	public void mount(Map<MountParam, Optional<String>> mountParams) throws CommandFailedException {
-		mount = webdavMounterProvider.get().mount(uri, mountParams);
+		mount = webdavMounterProvider.chooseMounter(mountParams).mount(uri, mountParams);
 	}
 
 	@Override

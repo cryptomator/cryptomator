@@ -14,7 +14,12 @@ import java.util.Optional;
 public interface Frontend extends AutoCloseable {
 
 	public enum MountParam {
-		MOUNT_NAME, HOSTNAME, WIN_DRIVE_LETTER
+		MOUNT_NAME, HOSTNAME, WIN_DRIVE_LETTER,
+
+		/**
+		 * "dav" or "webdav"
+		 */
+		PREFERRED_GVFS_SCHEME
 	}
 
 	void mount(Map<MountParam, Optional<String>> map) throws CommandFailedException;
