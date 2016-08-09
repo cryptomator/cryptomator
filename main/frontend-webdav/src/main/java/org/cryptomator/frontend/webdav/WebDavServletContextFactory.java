@@ -22,6 +22,7 @@ import org.cryptomator.frontend.webdav.filters.AcceptRangeFilter;
 import org.cryptomator.frontend.webdav.filters.LoopbackFilter;
 import org.cryptomator.frontend.webdav.filters.MacChunkedPutCompatibilityFilter;
 import org.cryptomator.frontend.webdav.filters.MkcolComplianceFilter;
+import org.cryptomator.frontend.webdav.filters.PostRequestBlockingFilter;
 import org.cryptomator.frontend.webdav.filters.UriNormalizationFilter;
 import org.cryptomator.frontend.webdav.filters.UriNormalizationFilter.ResourceTypeChecker;
 import org.cryptomator.frontend.webdav.filters.UriNormalizationFilter.ResourceTypeChecker.ResourceType;
@@ -67,6 +68,7 @@ class WebDavServletContextFactory {
 		final ServletHolder servletHolder = new ServletHolder(contextPath, new WebDavServlet(contextRoot, root));
 		servletContext.addServlet(servletHolder, WILDCARD);
 		servletContext.addFilter(LoopbackFilter.class, WILDCARD, EnumSet.of(DispatcherType.REQUEST));
+		servletContext.addFilter(PostRequestBlockingFilter.class, WILDCARD, EnumSet.of(DispatcherType.REQUEST));
 		servletContext.addFilter(MkcolComplianceFilter.class, WILDCARD, EnumSet.of(DispatcherType.REQUEST));
 		servletContext.addFilter(AcceptRangeFilter.class, WILDCARD, EnumSet.of(DispatcherType.REQUEST));
 		servletContext.addFilter(new FilterHolder(new UriNormalizationFilter(resourceTypeChecker)), WILDCARD, EnumSet.of(DispatcherType.REQUEST));
