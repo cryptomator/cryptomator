@@ -43,6 +43,8 @@ class DavFile extends DavNode<FileLocator> {
 	protected static final String CONTENT_TYPE_VALUE = "application/octet-stream";
 	protected static final String CONTENT_DISPOSITION_HEADER = "Content-Disposition";
 	protected static final String CONTENT_DISPOSITION_VALUE = "attachment";
+	protected static final String X_CONTENT_TYPE_OPTIONS_HEADER = "X-Content-Type-Options";
+	protected static final String X_CONTENT_TYPE_OPTIONS_VALUE = "nosniff";
 
 	public DavFile(FilesystemResourceFactory factory, LockManager lockManager, DavSession session, FileLocator node) {
 		super(factory, lockManager, session, node);
@@ -61,6 +63,7 @@ class DavFile extends DavNode<FileLocator> {
 		}
 		outputContext.setContentType(CONTENT_TYPE_VALUE);
 		outputContext.setProperty(CONTENT_DISPOSITION_HEADER, CONTENT_DISPOSITION_VALUE);
+		outputContext.setProperty(X_CONTENT_TYPE_OPTIONS_HEADER, X_CONTENT_TYPE_OPTIONS_VALUE);
 		try (ReadableFile src = node.openReadable(); WritableByteChannel dst = Channels.newChannel(outputContext.getOutputStream())) {
 			outputContext.setContentLength(src.size());
 			ByteStreams.copy(src, dst);
