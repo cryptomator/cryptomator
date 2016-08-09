@@ -57,6 +57,8 @@ class DavFileWithRange extends DavFile {
 			final Long rangeLength = range.getRight() - range.getLeft() + 1;
 			outputContext.setContentLength(rangeLength);
 			outputContext.setProperty(HttpHeader.CONTENT_RANGE.asString(), contentRangeResponseHeader(range.getLeft(), range.getRight(), contentLength));
+			outputContext.setContentType(CONTENT_TYPE_VALUE);
+			outputContext.setProperty(CONTENT_DISPOSITION_HEADER, CONTENT_DISPOSITION_VALUE);
 			src.position(range.getLeft());
 			InputStream limitedIn = ByteStreams.limit(Channels.newInputStream(src), rangeLength);
 			ByteStreams.copy(limitedIn, out);
