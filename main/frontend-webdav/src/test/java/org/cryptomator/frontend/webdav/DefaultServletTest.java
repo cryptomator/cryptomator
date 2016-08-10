@@ -8,6 +8,8 @@
  *******************************************************************************/
 package org.cryptomator.frontend.webdav;
 
+import static org.mockito.Mockito.mock;
+
 import java.io.IOException;
 
 import javax.servlet.Servlet;
@@ -21,21 +23,26 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 
-public class WindowsCompatibilityServletTest {
+public class DefaultServletTest {
+	
+	private Tarpit tarpit = mock(Tarpit.class);
+	
+	private DefaultServlet inTest = new DefaultServlet(tarpit);
 	
 	@Test
 	public void testFactory() throws ServletException {
-		ServletHolder[] holders = WindowsCompatibilityServlet.createServletContextHandler().getServletHandler().getServlets();
+		
+		ServletHolder[] holders = inTest.createServletContextHandler().getServletHandler().getServlets();
 		Assert.assertEquals(1, holders.length);
 		ServletHolder holder = holders[0];
 		
 		Servlet servlet = holder.getServlet();
-		Assert.assertTrue(servlet instanceof WindowsCompatibilityServlet);
+		Assert.assertTrue(servlet instanceof DefaultServlet);
 	}
 	
 	@Test
 	public void testResponse() throws IOException, ServletException {
-		final WindowsCompatibilityServlet servlet = new WindowsCompatibilityServlet();
+		final DefaultServlet servlet = inTest;
 		final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
 		final HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
 		

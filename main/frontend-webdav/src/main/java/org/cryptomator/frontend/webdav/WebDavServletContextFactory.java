@@ -35,10 +35,9 @@ import org.eclipse.jetty.servlet.ServletHolder;
 class WebDavServletContextFactory {
 
 	private static final String WILDCARD = "/*";
-
+	
 	@Inject
-	public WebDavServletContextFactory() {
-	}
+	public WebDavServletContextFactory() {}
 
 	/**
 	 * Creates a new Jetty ServletContextHandler, that can be be added to a servletCollection as follows:

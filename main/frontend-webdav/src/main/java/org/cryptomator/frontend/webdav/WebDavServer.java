@@ -47,7 +47,7 @@ public class WebDavServer implements FrontendFactory {
 	private final WebDavMounterProvider webdavMounterProvider;
 
 	@Inject
-	WebDavServer(WebDavServletContextFactory servletContextFactory, WebDavMounterProvider webdavMounterProvider) {
+	WebDavServer(WebDavServletContextFactory servletContextFactory, WebDavMounterProvider webdavMounterProvider, DefaultServlet defaultServlet) {
 		final BlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(MAX_PENDING_REQUESTS);
 		final ThreadPool tp = new QueuedThreadPool(MAX_THREADS, MIN_THREADS, THREAD_IDLE_SECONDS, queue);
 		this.server = new Server(tp);
@@ -56,7 +56,7 @@ public class WebDavServer implements FrontendFactory {
 		this.servletContextFactory = servletContextFactory;
 		this.webdavMounterProvider = webdavMounterProvider;
 		
-		servletCollection.addHandler(WindowsCompatibilityServlet.createServletContextHandler());
+		servletCollection.addHandler(defaultServlet.createServletContextHandler());
 		server.setConnectors(new Connector[] {localConnector});
 		server.setHandler(servletCollection);
 	}
