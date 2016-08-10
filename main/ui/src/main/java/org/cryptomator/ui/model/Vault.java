@@ -8,6 +8,8 @@
  *******************************************************************************/
 package org.cryptomator.ui.model;
 
+import static org.apache.commons.lang3.StringUtils.stripStart;
+
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.FileAlreadyExistsException;
@@ -70,7 +72,8 @@ public class Vault implements CryptoFileSystemDelegate {
 	private final ObservableList<String> namesOfResourcesWithInvalidMac = FXThreads.observableListOnMainThread(FXCollections.observableArrayList());
 	private final Set<String> whitelistedResourcesWithInvalidMac = new HashSet<>();
 	private final AtomicReference<FileSystem> nioFileSystem = new AtomicReference<>();
-
+	private final String id;
+	
 	private String mountName;
 	private Character winDriveLetter;
 	private Optional<StatsFileSystem> statsFileSystem = Optional.empty();
@@ -78,13 +81,14 @@ public class Vault implements CryptoFileSystemDelegate {
 
 	/**
 	 * Package private constructor, use {@link VaultFactory}.
+	 * @param string 
 	 */
-	Vault(Path vaultDirectoryPath, ShorteningFileSystemFactory shorteningFileSystemFactory, CryptoFileSystemFactory cryptoFileSystemFactory, DeferredCloser closer) {
+	Vault(String id, Path vaultDirectoryPath, ShorteningFileSystemFactory shorteningFileSystemFactory, CryptoFileSystemFactory cryptoFileSystemFactory, DeferredCloser closer) {
 		this.path = new SimpleObjectProperty<Path>(vaultDirectoryPath);
 		this.shorteningFileSystemFactory = shorteningFileSystemFactory;
 		this.cryptoFileSystemFactory = cryptoFileSystemFactory;
 		this.closer = closer;
-
+		this.id = id;
 		try {
 			setMountName(name().getValue());
 		} catch (IllegalArgumentException e) {
@@ -129,8 +133,7 @@ public class Vault implements CryptoFileSystemDelegate {
 			FileSystem normalizingFs = new NormalizedNameFileSystem(cryptoFs, SystemUtils.IS_OS_MAC_OSX ? Form.NFD : Form.NFC);
 			StatsFileSystem statsFs = new StatsFileSystem(normalizingFs);
 			statsFileSystem = Optional.of(statsFs);
-			String contextPath = StringUtils.prependIfMissing(mountName, "/");
-			Frontend frontend = frontendFactory.create(statsFs, contextPath);
+			Frontend frontend = frontendFactory.create(statsFs, contextPath());
 			filesystemFrontend = closer.closeLater(frontend);
 			frontend.mount(getMountParams(settings));
 			success = true;
@@ -141,6 +144,10 @@ public class Vault implements CryptoFileSystemDelegate {
 			final boolean finalSuccess = success;
 			Platform.runLater(() -> unlocked.set(finalSuccess));
 		}
+	}
+
+	private String contextPath() {
+		return String.format("/%s/%s", id, stripStart(mountName, "/"));
 	}
 
 	public synchronized void deactivateFrontend() {
@@ -304,6 +311,10 @@ public class Vault implements CryptoFileSystemDelegate {
 
 	public void setWinDriveLetter(Character winDriveLetter) {
 		this.winDriveLetter = winDriveLetter;
+	}
+	
+	public String getId() {
+		return id;
 	}
 
 	// ******************************************************************************
