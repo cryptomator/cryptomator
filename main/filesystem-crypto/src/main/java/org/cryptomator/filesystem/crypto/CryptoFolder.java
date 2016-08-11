@@ -10,6 +10,7 @@ package org.cryptomator.filesystem.crypto;
 
 import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.apache.commons.lang3.StringUtils.removeStart;
 import static org.cryptomator.filesystem.crypto.Constants.DIR_PREFIX;
 
 import java.io.FileNotFoundException;
@@ -91,15 +92,15 @@ class CryptoFolder extends CryptoNode implements Folder {
 	private Stream<File> nonConflictingFiles() {
 		if (exists()) {
 			final Stream<? extends File> files = physicalFolder().filter(Folder::exists).map(Folder::files).orElse(Stream.empty());
-			return files.filter(containsEncryptedName()).map(conflictResolver::resolveIfNecessary).distinct();
+			return files.filter(startsWithEncryptedName()).map(conflictResolver::resolveIfNecessary).distinct();
 		} else {
 			throw new UncheckedIOException(new FileNotFoundException(format("Folder %s does not exist", this)));
 		}
 	}
 
-	private Predicate<File> containsEncryptedName() {
+	private Predicate<File> startsWithEncryptedName() {
 		final Pattern encryptedNamePattern = cryptor.getFilenameCryptor().encryptedNamePattern();
-		return (File file) -> encryptedNamePattern.matcher(file.name()).find();
+		return (File file) -> encryptedNamePattern.matcher(removeStart(file.name(),DIR_PREFIX)).find();
 	}
 
 	Optional<String> decryptChildName(String ciphertextFileName) {

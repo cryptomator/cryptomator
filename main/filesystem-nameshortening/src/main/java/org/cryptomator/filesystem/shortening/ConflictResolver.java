@@ -14,7 +14,7 @@ final class ConflictResolver {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ConflictResolver.class);
 	private static final String LONG_NAME_FILE_EXT = ".lng";
-	private static final Pattern BASE32_PATTERN = Pattern.compile("([A-Z0-9]{8})*[A-Z0-9=]{8}");
+	private static final Pattern BASE32_PATTERN = Pattern.compile("^0?([A-Z2-7]{8})*[A-Z2-7=]{8}");
 	private static final int UUID_FIRST_GROUP_STRLEN = 8;
 
 	private ConflictResolver() {
