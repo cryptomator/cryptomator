@@ -133,7 +133,7 @@ final class WindowsWebDavMounter implements WebDavMounterStrategy {
 				String addStdErr = IOUtils.toString(addCmd.getErrorStream(), StandardCharsets.UTF_8);
 				throw new CommandFailedException(addStdErr);
 			}
-		} catch (IOException e) {
+		} catch (IOException | CommandFailedException e) {
 			LOG.info("Failed to add proxy overrides", e);
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
