@@ -17,13 +17,14 @@ import javax.inject.Singleton;
 import org.cryptomator.common.CommonsModule;
 import org.cryptomator.crypto.engine.impl.CryptoEngineModule;
 import org.cryptomator.frontend.FrontendFactory;
+import org.cryptomator.frontend.webdav.WebDavModule;
 import org.cryptomator.frontend.webdav.WebDavServer;
-import org.cryptomator.frontend.webdav.mount.WebDavMounter;
-import org.cryptomator.frontend.webdav.mount.WebDavMounterProvider;
 import org.cryptomator.ui.model.VaultObjectMapperProvider;
 import org.cryptomator.ui.settings.Settings;
 import org.cryptomator.ui.settings.SettingsProvider;
 import org.cryptomator.ui.util.DeferredCloser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -32,9 +33,10 @@ import dagger.Provides;
 import javafx.application.Application;
 import javafx.stage.Stage;
 
-@Module(includes = {CryptoEngineModule.class, CommonsModule.class})
+@Module(includes = {CryptoEngineModule.class, CommonsModule.class, WebDavModule.class})
 class CryptomatorModule {
 
+	private static final Logger LOG = LoggerFactory.getLogger(CryptomatorModule.class);
 	private final Application application;
 	private final Stage mainWindow;
 
@@ -60,7 +62,13 @@ class CryptomatorModule {
 	@Singleton
 	DeferredCloser provideDeferredCloser() {
 		DeferredCloser closer = new DeferredCloser();
-		Cryptomator.addShutdownTask(closer::close);
+		Cryptomator.addShutdownTask(() -> {
+			try {
+				closer.close();
+			} catch (Exception e) {
+				LOG.error("Error during shutdown.", e);
+			}
+		});
 		return closer;
 	}
 
@@ -81,12 +89,6 @@ class CryptomatorModule {
 	@Singleton
 	ExecutorService provideExecutorService(DeferredCloser closer) {
 		return closer.closeLater(Executors.newCachedThreadPool(), ExecutorService::shutdown).get().orElseThrow(IllegalStateException::new);
-	}
-
-	@Provides
-	@Singleton
-	WebDavMounter provideWebDavMounter(WebDavMounterProvider webDavMounterProvider) {
-		return webDavMounterProvider.get();
 	}
 
 	@Provides

@@ -61,7 +61,7 @@ final class WindowsWebDavMounter implements WebDavMounterStrategy {
 	}
 
 	@Override
-	public boolean shouldWork() {
+	public boolean shouldWork(Map<MountParam, Optional<String>> mountParams) {
 		return SystemUtils.IS_OS_WINDOWS;
 	}
 
@@ -102,7 +102,7 @@ final class WindowsWebDavMounter implements WebDavMounterStrategy {
 		mountScript.addEnv("DAV_UNC_PATH", uri.getRawPath().replace('/', '\\'));
 		return mountScript.execute(MOUNT_TIMEOUT_SECONDS, TimeUnit.SECONDS);
 	}
-	
+
 	private void addProxyOverrides(URI uri) throws IOException, CommandFailedException {
 		try {
 			// get existing value for ProxyOverride key from reqistry:
@@ -110,7 +110,7 @@ final class WindowsWebDavMounter implements WebDavMounterStrategy {
 			Process queryCmd = query.start();
 			String queryStdOut = IOUtils.toString(queryCmd.getInputStream(), StandardCharsets.UTF_8);
 			int queryResult = queryCmd.waitFor();
-			
+
 			// determine new value for ProxyOverride key:
 			Set<String> overrides = new HashSet<>();
 			Matcher matcher = REG_QUERY_PROXY_OVERRIDES_PATTERN.matcher(queryStdOut);
@@ -122,7 +122,7 @@ final class WindowsWebDavMounter implements WebDavMounterStrategy {
 			overrides.add("<local>");
 			overrides.add(uri.getHost());
 			overrides.add(uri.getHost() + ":" + uri.getPort());
-			
+
 			// set new value:
 			String overridesStr = StringUtils.join(overrides, ';');
 			ProcessBuilder add = new ProcessBuilder("reg", "add", "\"HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings\"", "/v", "ProxyOverride", "/d", "\"" + overridesStr + "\"", "/f");
@@ -133,6 +133,8 @@ final class WindowsWebDavMounter implements WebDavMounterStrategy {
 				String addStdErr = IOUtils.toString(addCmd.getErrorStream(), StandardCharsets.UTF_8);
 				throw new CommandFailedException(addStdErr);
 			}
+		} catch (IOException | CommandFailedException e) {
+			LOG.info("Failed to add proxy overrides", e);
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 			InterruptedIOException ioException = new InterruptedIOException();
@@ -158,7 +160,7 @@ final class WindowsWebDavMounter implements WebDavMounterStrategy {
 		private WindowsWebDavMount(String driveLetter) {
 			this.driveLetter = CharUtils.toCharacterObject(driveLetter);
 			this.openExplorerScript = fromLines("start explorer.exe " + driveLetter + ":");
-			this.unmountScript = fromLines("net use " + driveLetter + ": /delete");
+			this.unmountScript = fromLines("net use " + driveLetter + ": /delete /no");
 		}
 
 		@Override

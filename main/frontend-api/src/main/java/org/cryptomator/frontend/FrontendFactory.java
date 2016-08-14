@@ -16,10 +16,11 @@ public interface FrontendFactory {
 	 * Provides a new frontend to access the given folder.
 	 * 
 	 * @param root Root resource accessible through this frontend.
-	 * @param uniqueName Name of the frontend, i.e. used to create subresources for the different frontends inside of a common virtual drive.
+	 * @param id unique id of the frontend, i.e. used to generate a unique uri
+	 * @param name Name of the frontend, i.e. used to generate a readable/recognizable name of a common virtual drive
 	 * @return A new frontend
 	 * @throws FrontendCreationFailedException If creation was not possible.
 	 */
-	Frontend create(Folder root, String uniqueName) throws FrontendCreationFailedException;
+	Frontend create(Folder root, FrontendId id, String name) throws FrontendCreationFailedException;
 
 }

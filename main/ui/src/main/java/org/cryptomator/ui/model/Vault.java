@@ -8,6 +8,8 @@
  *******************************************************************************/
 package org.cryptomator.ui.model;
 
+import static org.apache.commons.lang3.StringUtils.stripStart;
+
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.FileAlreadyExistsException;
@@ -40,6 +42,7 @@ import org.cryptomator.frontend.Frontend;
 import org.cryptomator.frontend.Frontend.MountParam;
 import org.cryptomator.frontend.FrontendCreationFailedException;
 import org.cryptomator.frontend.FrontendFactory;
+import org.cryptomator.frontend.FrontendId;
 import org.cryptomator.ui.settings.Settings;
 import org.cryptomator.ui.util.DeferredClosable;
 import org.cryptomator.ui.util.DeferredCloser;
@@ -70,6 +73,7 @@ public class Vault implements CryptoFileSystemDelegate {
 	private final ObservableList<String> namesOfResourcesWithInvalidMac = FXThreads.observableListOnMainThread(FXCollections.observableArrayList());
 	private final Set<String> whitelistedResourcesWithInvalidMac = new HashSet<>();
 	private final AtomicReference<FileSystem> nioFileSystem = new AtomicReference<>();
+	private final String id;
 
 	private String mountName;
 	private Character winDriveLetter;
@@ -78,13 +82,15 @@ public class Vault implements CryptoFileSystemDelegate {
 
 	/**
 	 * Package private constructor, use {@link VaultFactory}.
+	 * 
+	 * @param string
 	 */
-	Vault(Path vaultDirectoryPath, ShorteningFileSystemFactory shorteningFileSystemFactory, CryptoFileSystemFactory cryptoFileSystemFactory, DeferredCloser closer) {
+	Vault(String id, Path vaultDirectoryPath, ShorteningFileSystemFactory shorteningFileSystemFactory, CryptoFileSystemFactory cryptoFileSystemFactory, DeferredCloser closer) {
 		this.path = new SimpleObjectProperty<Path>(vaultDirectoryPath);
 		this.shorteningFileSystemFactory = shorteningFileSystemFactory;
 		this.cryptoFileSystemFactory = cryptoFileSystemFactory;
 		this.closer = closer;
-
+		this.id = id;
 		try {
 			setMountName(name().getValue());
 		} catch (IllegalArgumentException e) {
@@ -129,8 +135,7 @@ public class Vault implements CryptoFileSystemDelegate {
 			FileSystem normalizingFs = new NormalizedNameFileSystem(cryptoFs, SystemUtils.IS_OS_MAC_OSX ? Form.NFD : Form.NFC);
 			StatsFileSystem statsFs = new StatsFileSystem(normalizingFs);
 			statsFileSystem = Optional.of(statsFs);
-			String contextPath = StringUtils.prependIfMissing(mountName, "/");
-			Frontend frontend = frontendFactory.create(statsFs, contextPath);
+			Frontend frontend = frontendFactory.create(statsFs, FrontendId.from(id), stripStart(mountName, "/"));
 			filesystemFrontend = closer.closeLater(frontend);
 			frontend.mount(getMountParams(settings));
 			success = true;
@@ -143,7 +148,7 @@ public class Vault implements CryptoFileSystemDelegate {
 		}
 	}
 
-	public synchronized void deactivateFrontend() {
+	public synchronized void deactivateFrontend() throws Exception {
 		filesystemFrontend.close();
 		statsFileSystem = Optional.empty();
 		Platform.runLater(() -> unlocked.set(false));
@@ -154,16 +159,13 @@ public class Vault implements CryptoFileSystemDelegate {
 		return ImmutableMap.of( //
 				MountParam.MOUNT_NAME, Optional.ofNullable(mountName), //
 				MountParam.WIN_DRIVE_LETTER, Optional.ofNullable(CharUtils.toString(winDriveLetter)), //
-				MountParam.HOSTNAME, Optional.of(hostname) //
+				MountParam.HOSTNAME, Optional.of(hostname), //
+				MountParam.PREFERRED_GVFS_SCHEME, Optional.ofNullable(settings.getPreferredGvfsScheme()) //
 		);
 	}
 
 	public void reveal() throws CommandFailedException {
 		Optionals.ifPresent(filesystemFrontend.get(), Frontend::reveal);
-	}
-
-	public void unmount() throws CommandFailedException {
-		Optionals.ifPresent(filesystemFrontend.get(), Frontend::unmount);
 	}
 
 	// ******************************************************************************
@@ -303,6 +305,10 @@ public class Vault implements CryptoFileSystemDelegate {
 
 	public void setWinDriveLetter(Character winDriveLetter) {
 		this.winDriveLetter = winDriveLetter;
+	}
+
+	public String getId() {
+		return id;
 	}
 
 	// ******************************************************************************

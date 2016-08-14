@@ -24,12 +24,15 @@ class WebDavFrontend implements Frontend {
 	private final WebDavMounterProvider webdavMounterProvider;
 	private final ServletContextHandler handler;
 	private final URI uri;
+	private final Runnable afterClose;
+
 	private WebDavMount mount;
 
-	public WebDavFrontend(WebDavMounterProvider webdavMounterProvider, ServletContextHandler handler, URI uri) throws FrontendCreationFailedException {
+	public WebDavFrontend(WebDavMounterProvider webdavMounterProvider, ServletContextHandler handler, URI uri, Runnable afterUnmount) throws FrontendCreationFailedException {
 		this.webdavMounterProvider = webdavMounterProvider;
 		this.handler = handler;
 		this.uri = uri;
+		this.afterClose = afterUnmount;
 		try {
 			handler.start();
 		} catch (Exception e) {
@@ -39,19 +42,23 @@ class WebDavFrontend implements Frontend {
 
 	@Override
 	public void close() throws Exception {
-		unmount();
-		handler.stop();
+		try {
+			unmount();
+			handler.stop();
+		} finally {
+			afterClose.run();
+		}
 	}
 
 	@Override
 	public void mount(Map<MountParam, Optional<String>> mountParams) throws CommandFailedException {
-		mount = webdavMounterProvider.get().mount(uri, mountParams);
+		mount = webdavMounterProvider.chooseMounter(mountParams).mount(uri, mountParams);
 	}
 
-	@Override
-	public void unmount() throws CommandFailedException {
+	private void unmount() throws CommandFailedException {
 		if (mount != null) {
 			mount.unmount();
+			mount = null;
 		}
 	}
 

@@ -29,12 +29,6 @@ public interface DeferredClosable<T> extends AutoCloseable {
 	public Optional<T> get();
 
 	/**
-	 * Quietly closes the Object. If the object was closed before, nothing
-	 * happens.
-	 */
-	public void close();
-
-	/**
 	 * @return an empty object.
 	 */
 	public static <T> DeferredClosable<T> empty() {

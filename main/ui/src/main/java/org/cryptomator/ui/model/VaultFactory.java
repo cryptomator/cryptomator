@@ -15,6 +15,7 @@ import javax.inject.Singleton;
 
 import org.cryptomator.filesystem.crypto.CryptoFileSystemFactory;
 import org.cryptomator.filesystem.shortening.ShorteningFileSystemFactory;
+import org.cryptomator.frontend.FrontendId;
 import org.cryptomator.ui.util.DeferredCloser;
 
 @Singleton
@@ -31,8 +32,12 @@ public class VaultFactory {
 		this.closer = closer;
 	}
 
+	public Vault createVault(String id, Path path) {
+		return new Vault(id, path, shorteningFileSystemFactory, cryptoFileSystemFactory, closer);
+	}
+
 	public Vault createVault(Path path) {
-		return new Vault(path, shorteningFileSystemFactory, cryptoFileSystemFactory, closer);
+		return createVault(FrontendId.generate().toString(), path);
 	}
 
 }

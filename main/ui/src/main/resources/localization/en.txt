@@ -94,6 +94,7 @@ settings.checkForUpdates.label=Check for updates
 settings.port.label=WebDAV Port *
 settings.port.prompt=0 = Choose automatically
 settings.useipv6.label=Use IPv6 literal
+settings.prefGvfsScheme.label=WebDAV scheme
 settings.requiresRestartLabel=* Cryptomator needs to restart
 
 # tray icon

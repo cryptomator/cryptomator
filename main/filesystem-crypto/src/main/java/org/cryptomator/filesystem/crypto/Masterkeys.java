@@ -16,6 +16,7 @@ import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -52,10 +53,14 @@ class Masterkeys {
 	public Cryptor decrypt(Folder vaultLocation, CharSequence passphrase) throws InvalidPassphraseException {
 		File masterkeyFile = vaultLocation.file(MASTERKEY_FILENAME);
 		Cryptor cryptor = cryptorProvider.get();
+		boolean success = false;
 		try {
 			readMasterKey(masterkeyFile, cryptor, passphrase);
-		} catch (UncheckedIOException e) {
-			cryptor.destroy();
+			success = true;
+		} finally {
+			if (!success) {
+				cryptor.destroy();
+			}
 		}
 		return cryptor;
 	}
@@ -86,7 +91,9 @@ class Masterkeys {
 	/* I/O */
 
 	private static void readMasterKey(File file, Cryptor cryptor, CharSequence passphrase) throws UncheckedIOException, InvalidPassphraseException {
-		try (InputStream in = Channels.newInputStream(file.openReadable())) {
+		try ( //
+				ReadableByteChannel channel = file.openReadable(); //
+				InputStream in = Channels.newInputStream(channel)) {
 			final byte[] fileContents = IOUtils.toByteArray(in);
 			cryptor.readKeysFromMasterkeyFile(fileContents, passphrase);
 		} catch (IOException e) {

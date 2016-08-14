@@ -11,7 +11,6 @@ package org.cryptomator.ui.controllers;
 import java.net.URL;
 import java.util.Comparator;
 import java.util.Optional;
-import java.util.concurrent.ExecutorService;
 
 import javax.inject.Inject;
 
@@ -27,6 +26,7 @@ import org.cryptomator.ui.controls.SecPasswordField;
 import org.cryptomator.ui.model.Vault;
 import org.cryptomator.ui.settings.Localization;
 import org.cryptomator.ui.settings.Settings;
+import org.cryptomator.ui.util.AsyncTaskService;
 import org.fxmisc.easybind.EasyBind;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +56,7 @@ public class UnlockController extends LocalizedFXMLViewController {
 	private static final Logger LOG = LoggerFactory.getLogger(UnlockController.class);
 
 	private final Application app;
-	private final ExecutorService exec;
+	private final AsyncTaskService asyncTaskService;
 	private final Lazy<FrontendFactory> frontendFactory;
 	private final Settings settings;
 	private final WindowsDriveLetters driveLetters;
@@ -65,10 +65,10 @@ public class UnlockController extends LocalizedFXMLViewController {
 	private Optional<UnlockListener> listener = Optional.empty();
 
 	@Inject
-	public UnlockController(Application app, Localization localization, ExecutorService exec, Lazy<FrontendFactory> frontendFactory, Settings settings, WindowsDriveLetters driveLetters) {
+	public UnlockController(Application app, Localization localization, AsyncTaskService asyncTaskService, Lazy<FrontendFactory> frontendFactory, Settings settings, WindowsDriveLetters driveLetters) {
 		super(localization);
 		this.app = app;
-		this.exec = exec;
+		this.asyncTaskService = asyncTaskService;
 		this.frontendFactory = frontendFactory;
 		this.settings = settings;
 		this.driveLetters = driveLetters;
@@ -246,6 +246,7 @@ public class UnlockController extends LocalizedFXMLViewController {
 			return;
 		}
 		vault.get().setWinDriveLetter(newValue);
+		settings.save();
 	}
 
 	private void chooseSelectedDriveLetter() {
@@ -274,8 +275,7 @@ public class UnlockController extends LocalizedFXMLViewController {
 		progressIndicator.setVisible(true);
 		downloadsPageLink.setVisible(false);
 		CharSequence password = passwordField.getCharacters();
-		exec.submit(() -> this.unlock(vault.get(), password));
-
+		asyncTaskService.asyncTaskOf(() -> this.unlock(vault.get(), password)).run();
 	}
 
 	private void unlock(Vault vault, CharSequence password) {

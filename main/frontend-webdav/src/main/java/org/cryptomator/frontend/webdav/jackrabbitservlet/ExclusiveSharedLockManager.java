@@ -69,7 +69,8 @@ class ExclusiveSharedLockManager implements LockManager {
 		}
 
 		String token = DavConstants.OPAQUE_LOCK_TOKEN_PREFIX + UUID.randomUUID();
-		return lockedResources.computeIfAbsent(locator, loc -> new HashMap<>()).computeIfAbsent(token, t -> new ExclusiveSharedLock(t, lockInfo));
+		Map<String, ActiveLock> lockMap = Objects.requireNonNull(lockedResources.computeIfAbsent(locator, loc -> new HashMap<>()));
+		return lockMap.computeIfAbsent(token, t -> new ExclusiveSharedLock(t, lockInfo));
 	}
 
 	private void removedExpiredLocksInLocatorHierarchy(FileSystemResourceLocator locator) {

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.UncheckedIOException;
 import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
@@ -28,7 +29,9 @@ public final class FileContents {
 	 * @return The file's content interpreted in this FileContents' charset.
 	 */
 	public String readContents(File file) {
-		try (Reader reader = Channels.newReader(file.openReadable(), charset.newDecoder(), -1)) {
+		try ( //
+				ReadableByteChannel channel = file.openReadable(); //
+				Reader reader = Channels.newReader(channel, charset.newDecoder(), -1)) {
 			return IOUtils.toString(reader);
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);

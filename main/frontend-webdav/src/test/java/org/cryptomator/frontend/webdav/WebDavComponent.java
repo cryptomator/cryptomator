@@ -10,12 +10,10 @@ package org.cryptomator.frontend.webdav;
 
 import javax.inject.Singleton;
 
-import org.cryptomator.common.CommonsModule;
-
 import dagger.Component;
 
 @Singleton
-@Component(modules = {CommonsModule.class})
+@Component(modules = {WebDavModule.class})
 public interface WebDavComponent {
 
 	WebDavServer server();

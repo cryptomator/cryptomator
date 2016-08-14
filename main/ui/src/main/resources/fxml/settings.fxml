@@ -15,6 +15,7 @@
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.ChoiceBox?>
 
 <VBox prefWidth="400.0" alignment="TOP_CENTER" spacing="12.0" xmlns:fx="http://javafx.com/fxml" cacheShape="true" cache="true">
 	<Label VBox.vgrow="NEVER" fx:id="versionLabel" alignment="CENTER" cacheShape="true" cache="true" />
@@ -40,6 +41,11 @@
 			<!-- Row 2 -->
 			<Label GridPane.rowIndex="2" GridPane.columnIndex="0" fx:id="useIpv6Label" text="%settings.useipv6.label" cacheShape="true" cache="true" />
 			<CheckBox GridPane.rowIndex="2" GridPane.columnIndex="1" fx:id="useIpv6Checkbox" cacheShape="true" cache="true" />
+			
+			<!-- Row 3 -->
+			<Label GridPane.rowIndex="3" GridPane.columnIndex="0" fx:id="prefGvfsSchemeLabel" text="%settings.prefGvfsScheme.label" cacheShape="true" cache="true" />
+			<ChoiceBox GridPane.rowIndex="3" GridPane.columnIndex="1" fx:id="prefGvfsScheme" GridPane.hgrow="ALWAYS" maxWidth="Infinity" cacheShape="true" cache="true" />
+			
 		</children>
 	</GridPane>
 	<Label VBox.vgrow="NEVER" text="%settings.requiresRestartLabel" alignment="CENTER" cacheShape="true" cache="true" />

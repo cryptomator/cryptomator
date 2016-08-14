@@ -10,7 +10,6 @@ package org.cryptomator.ui.controllers;
 
 import java.net.URL;
 import java.util.Optional;
-import java.util.concurrent.ExecutorService;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -19,6 +18,7 @@ import org.cryptomator.frontend.CommandFailedException;
 import org.cryptomator.ui.model.Vault;
 import org.cryptomator.ui.settings.Localization;
 import org.cryptomator.ui.util.ActiveWindowStyleSupport;
+import org.cryptomator.ui.util.AsyncTaskService;
 import org.fxmisc.easybind.EasyBind;
 
 import javafx.animation.Animation;
@@ -52,16 +52,16 @@ public class UnlockedController extends LocalizedFXMLViewController {
 
 	private final Stage macWarningsWindow = new Stage();
 	private final MacWarningsController macWarningsController;
-	private final ExecutorService exec;
+	private final AsyncTaskService asyncTaskService;
 	private final ObjectProperty<Vault> vault = new SimpleObjectProperty<>();
 	private Optional<LockListener> listener = Optional.empty();
 	private Timeline ioAnimation;
 
 	@Inject
-	public UnlockedController(Localization localization, Provider<MacWarningsController> macWarningsControllerProvider, ExecutorService exec) {
+	public UnlockedController(Localization localization, Provider<MacWarningsController> macWarningsControllerProvider, AsyncTaskService asyncTaskService) {
 		super(localization);
 		this.macWarningsController = macWarningsControllerProvider.get();
-		this.exec = exec;
+		this.asyncTaskService = asyncTaskService;
 
 		macWarningsController.vault.bind(this.vault);
 	}
@@ -116,18 +116,13 @@ public class UnlockedController extends LocalizedFXMLViewController {
 
 	@FXML
 	private void didClickLockVault(ActionEvent event) {
-		exec.submit(() -> {
-			try {
-				vault.get().unmount();
-			} catch (CommandFailedException e) {
-				Platform.runLater(() -> {
-					messageLabel.setText(localization.getString("unlocked.label.unmountFailed"));
-				});
-				return;
-			}
+		asyncTaskService.asyncTaskOf(() -> {
 			vault.get().deactivateFrontend();
-			listener.ifPresent(this::invokeListenerLater);
-		});
+		}).onSuccess(() -> {
+			listener.ifPresent(listener -> listener.didLock(this));
+		}).onError(Exception.class, () -> {
+			messageLabel.setText(localization.getString("unlocked.label.unmountFailed"));
+		}).run();
 	}
 
 	@FXML
@@ -142,15 +137,11 @@ public class UnlockedController extends LocalizedFXMLViewController {
 
 	@FXML
 	private void didClickRevealVault(ActionEvent event) {
-		exec.submit(() -> {
-			try {
-				vault.get().reveal();
-			} catch (CommandFailedException e) {
-				Platform.runLater(() -> {
-					messageLabel.setText(localization.getString("unlocked.label.revealFailed"));
-				});
-			}
-		});
+		asyncTaskService.asyncTaskOf(() -> {
+			vault.get().reveal();
+		}).onError(CommandFailedException.class, () -> {
+			messageLabel.setText(localization.getString("unlocked.label.revealFailed"));
+		}).run();
 	}
 
 	@FXML
@@ -256,12 +247,6 @@ public class UnlockedController extends LocalizedFXMLViewController {
 
 	public void setListener(LockListener listener) {
 		this.listener = Optional.ofNullable(listener);
-	}
-
-	private void invokeListenerLater(LockListener listener) {
-		Platform.runLater(() -> {
-			listener.didLock(this);
-		});
 	}
 
 	@FunctionalInterface

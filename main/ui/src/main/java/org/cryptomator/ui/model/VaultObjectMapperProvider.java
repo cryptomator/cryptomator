@@ -57,6 +57,7 @@ public class VaultObjectMapperProvider implements Provider<ObjectMapper> {
 			jgen.writeStartObject();
 			jgen.writeStringField("path", value.path().getValue().toString());
 			jgen.writeStringField("mountName", value.getMountName());
+			jgen.writeStringField("id", value.getId());
 			final Character winDriveLetter = value.getWinDriveLetter();
 			if (winDriveLetter != null) {
 				jgen.writeStringField("winDriveLetter", Character.toString(winDriveLetter));
@@ -76,7 +77,12 @@ public class VaultObjectMapperProvider implements Provider<ObjectMapper> {
 			}
 			final String pathStr = node.get("path").asText();
 			final Path path = FileSystems.getDefault().getPath(pathStr);
-			final Vault vault = vaultFactoy.createVault(path);
+			final Vault vault;
+			if (node.has("id")) {
+				vault = vaultFactoy.createVault(node.get("id").asText(), path);
+			} else {
+				vault = vaultFactoy.createVault(path);
+			}
 			if (node.has("mountName")) {
 				vault.setMountName(node.get("mountName").asText());
 			}

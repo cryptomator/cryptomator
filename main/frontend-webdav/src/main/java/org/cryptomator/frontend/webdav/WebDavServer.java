@@ -8,6 +8,8 @@
  *******************************************************************************/
 package org.cryptomator.frontend.webdav;
 
+import static java.lang.String.format;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.concurrent.BlockingQueue;
@@ -20,6 +22,7 @@ import org.cryptomator.filesystem.Folder;
 import org.cryptomator.frontend.Frontend;
 import org.cryptomator.frontend.FrontendCreationFailedException;
 import org.cryptomator.frontend.FrontendFactory;
+import org.cryptomator.frontend.FrontendId;
 import org.cryptomator.frontend.webdav.mount.WebDavMounterProvider;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
@@ -45,9 +48,10 @@ public class WebDavServer implements FrontendFactory {
 	private final ContextHandlerCollection servletCollection;
 	private final WebDavServletContextFactory servletContextFactory;
 	private final WebDavMounterProvider webdavMounterProvider;
+	private final Tarpit tarpit;
 
 	@Inject
-	WebDavServer(WebDavServletContextFactory servletContextFactory, WebDavMounterProvider webdavMounterProvider) {
+	WebDavServer(WebDavServletContextFactory servletContextFactory, WebDavMounterProvider webdavMounterProvider, DefaultServlet defaultServlet, Tarpit tarpit) {
 		final BlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(MAX_PENDING_REQUESTS);
 		final ThreadPool tp = new QueuedThreadPool(MAX_THREADS, MIN_THREADS, THREAD_IDLE_SECONDS, queue);
 		this.server = new Server(tp);
@@ -55,8 +59,9 @@ public class WebDavServer implements FrontendFactory {
 		this.servletCollection = new ContextHandlerCollection();
 		this.servletContextFactory = servletContextFactory;
 		this.webdavMounterProvider = webdavMounterProvider;
-		
-		servletCollection.addHandler(WindowsCompatibilityServlet.createServletContextHandler());
+		this.tarpit = tarpit;
+
+		servletCollection.addHandler(defaultServlet.createServletContextHandler());
 		server.setConnectors(new Connector[] {localConnector});
 		server.setHandler(servletCollection);
 	}
@@ -103,10 +108,8 @@ public class WebDavServer implements FrontendFactory {
 	}
 
 	@Override
-	public Frontend create(Folder root, String contextPath) throws FrontendCreationFailedException {
-		if (!contextPath.startsWith("/")) {
-			throw new IllegalArgumentException("contextPath must begin with '/'");
-		}
+	public Frontend create(Folder root, FrontendId id, String name) throws FrontendCreationFailedException {
+		String contextPath = format("/%s/%s", id, name);
 		final URI uri;
 		try {
 			uri = new URI("http", null, "localhost", getPort(), contextPath, null, null);
@@ -114,8 +117,9 @@ public class WebDavServer implements FrontendFactory {
 			throw new IllegalStateException(e);
 		}
 		final ServletContextHandler handler = addServlet(root, uri);
+		tarpit.register(id);
 		LOG.info("Servlet available under " + uri);
-		return new WebDavFrontend(webdavMounterProvider, handler, uri);
+		return new WebDavFrontend(webdavMounterProvider, handler, uri, () -> tarpit.unregister(id));
 	}
 
 }

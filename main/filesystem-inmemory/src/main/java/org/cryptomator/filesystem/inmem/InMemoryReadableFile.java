@@ -64,8 +64,10 @@ class InMemoryReadableFile implements ReadableFile {
 
 	@Override
 	public void close() throws UncheckedIOException {
-		open.set(false);
-		readLock.unlock();
+		if (open.get()) {
+			open.set(false);
+			readLock.unlock();
+		}
 	}
 
 }

@@ -9,7 +9,7 @@ Priority: optional
 Architecture: APPLICATION_ARCH
 Provides: APPLICATION_PACKAGE
 Installed-Size: APPLICATION_INSTALLED_SIZE
-Depends: gvfs-bin, gvfs-backends, gvfs-fuse, xdg-utils
+Depends: gvfs-bin, gvfs-backends, gvfs-fuse
 Description: Multi-platform client-side encryption of your cloud files.
  Cryptomator provides free client-side AES encryption for your cloud files.
  Create encrypted vaults, which get mounted as virtual volumes. Whatever

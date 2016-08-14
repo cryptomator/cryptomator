@@ -9,6 +9,11 @@
  ******************************************************************************/
 package org.cryptomator.frontend.webdav.mount;
 
+import java.util.Map;
+import java.util.Optional;
+
+import org.cryptomator.frontend.Frontend.MountParam;
+
 /**
  * A strategy able to mount a webdav share and display it to the user.
  * 
@@ -19,7 +24,7 @@ interface WebDavMounterStrategy extends WebDavMounter {
 	/**
 	 * @return {@code false} if this {@code WebDavMounterStrategy} can not work on the local machine, {@code true} if it could work
 	 */
-	boolean shouldWork();
+	boolean shouldWork(Map<MountParam, Optional<String>> mountParams);
 
 	/**
 	 * Invoked when mounting strategy gets chosen. On some operating systems (we don't want to tell names here) mounting might be faster,

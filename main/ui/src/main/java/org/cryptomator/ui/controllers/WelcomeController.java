@@ -8,14 +8,12 @@
  ******************************************************************************/
 package org.cryptomator.ui.controllers;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ExecutorService;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -31,6 +29,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.ui.settings.Localization;
 import org.cryptomator.ui.settings.Settings;
+import org.cryptomator.ui.util.AsyncTaskService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,15 +53,15 @@ public class WelcomeController extends LocalizedFXMLViewController {
 	private final Application app;
 	private final Settings settings;
 	private final Comparator<String> semVerComparator;
-	private final ExecutorService executor;
+	private final AsyncTaskService asyncTaskService;
 
 	@Inject
-	public WelcomeController(Application app, Localization localization, Settings settings, @Named("SemVer") Comparator<String> semVerComparator, ExecutorService executor) {
+	public WelcomeController(Application app, Localization localization, Settings settings, @Named("SemVer") Comparator<String> semVerComparator, AsyncTaskService asyncTaskService) {
 		super(localization);
 		this.app = app;
 		this.settings = settings;
 		this.semVerComparator = semVerComparator;
-		this.executor = executor;
+		this.asyncTaskService = asyncTaskService;
 	}
 
 	@FXML
@@ -82,7 +81,7 @@ public class WelcomeController extends LocalizedFXMLViewController {
 		if (areUpdatesManagedExternally()) {
 			checkForUpdatesContainer.setVisible(false);
 		} else if (settings.isCheckForUpdatesEnabled()) {
-			executor.execute(this::checkForUpdates);
+			this.checkForUpdates();
 		}
 	}
 
@@ -100,16 +99,14 @@ public class WelcomeController extends LocalizedFXMLViewController {
 	}
 
 	private void checkForUpdates() {
-		Platform.runLater(() -> {
-			checkForUpdatesStatus.setText(localization.getString("welcome.checkForUpdates.label.currentlyChecking"));
-			checkForUpdatesIndicator.setVisible(true);
-		});
-		final HttpClient client = new HttpClient();
-		final HttpMethod method = new GetMethod("https://cryptomator.org/downloads/latestVersion.json");
-		client.getParams().setParameter(HttpClientParams.USER_AGENT, "Cryptomator VersionChecker/" + applicationVersion().orElse("SNAPSHOT"));
-		client.getParams().setCookiePolicy(CookiePolicy.IGNORE_COOKIES);
-		client.getParams().setConnectionManagerTimeout(5000);
-		try {
+		checkForUpdatesStatus.setText(localization.getString("welcome.checkForUpdates.label.currentlyChecking"));
+		checkForUpdatesIndicator.setVisible(true);
+		asyncTaskService.asyncTaskOf(() -> {
+			final HttpClient client = new HttpClient();
+			final HttpMethod method = new GetMethod("https://cryptomator.org/downloads/latestVersion.json");
+			client.getParams().setParameter(HttpClientParams.USER_AGENT, "Cryptomator VersionChecker/" + applicationVersion().orElse("SNAPSHOT"));
+			client.getParams().setCookiePolicy(CookiePolicy.IGNORE_COOKIES);
+			client.getParams().setConnectionManagerTimeout(5000);
 			client.executeMethod(method);
 			final InputStream responseBodyStream = method.getResponseBodyAsStream();
 			if (method.getStatusCode() == HttpStatus.SC_OK && responseBodyStream != null) {
@@ -121,14 +118,10 @@ public class WelcomeController extends LocalizedFXMLViewController {
 					this.compareVersions(map);
 				}
 			}
-		} catch (IOException e) {
-			// no error handling required. Maybe next time the version check is successful.
-		} finally {
-			Platform.runLater(() -> {
-				checkForUpdatesStatus.setText("");
-				checkForUpdatesIndicator.setVisible(false);
-			});
-		}
+		}).andFinally(() -> {
+			checkForUpdatesStatus.setText("");
+			checkForUpdatesIndicator.setVisible(false);
+		}).run();
 	}
 
 	private Optional<String> applicationVersion() {
