@@ -8,6 +8,7 @@ package org.cryptomator.frontend.webdav;
 import static java.lang.Math.max;
 import static java.lang.System.currentTimeMillis;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -21,7 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
-class Tarpit {
+class Tarpit implements Serializable {
 
 	private static final Logger LOG = LoggerFactory.getLogger(Tarpit.class);
 	private static final long DELAY_MS = 10000;

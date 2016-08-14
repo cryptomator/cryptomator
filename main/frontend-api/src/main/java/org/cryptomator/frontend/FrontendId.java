@@ -2,12 +2,13 @@ package org.cryptomator.frontend;
 
 import static java.util.UUID.randomUUID;
 
+import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.UUID;
 
-public class FrontendId {
+public class FrontendId implements Serializable {
 
 	public static final String FRONTEND_ID_PATTERN = "[a-zA-Z0-9_-]{12}";
 
