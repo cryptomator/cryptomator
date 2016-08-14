@@ -148,7 +148,7 @@ public class Vault implements CryptoFileSystemDelegate {
 		}
 	}
 
-	public synchronized void deactivateFrontend() {
+	public synchronized void deactivateFrontend() throws Exception {
 		filesystemFrontend.close();
 		statsFileSystem = Optional.empty();
 		Platform.runLater(() -> unlocked.set(false));
@@ -166,10 +166,6 @@ public class Vault implements CryptoFileSystemDelegate {
 
 	public void reveal() throws CommandFailedException {
 		Optionals.ifPresent(filesystemFrontend.get(), Frontend::reveal);
-	}
-
-	public void unmount() throws CommandFailedException {
-		Optionals.ifPresent(filesystemFrontend.get(), Frontend::unmount);
 	}
 
 	// ******************************************************************************

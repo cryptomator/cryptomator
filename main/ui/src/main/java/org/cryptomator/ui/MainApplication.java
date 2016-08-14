@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.concurrent.ExecutionException;
 
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.ui.controllers.MainController;
@@ -126,7 +127,11 @@ public class MainApplication extends Application {
 
 	@Override
 	public void stop() {
-		closer.close();
+		try {
+			closer.close();
+		} catch (ExecutionException e) {
+			LOG.error("Error closing ressources", e);
+		}
 	}
 
 }

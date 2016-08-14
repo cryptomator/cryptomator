@@ -55,10 +55,10 @@ class WebDavFrontend implements Frontend {
 		mount = webdavMounterProvider.chooseMounter(mountParams).mount(uri, mountParams);
 	}
 
-	@Override
-	public void unmount() throws CommandFailedException {
+	private void unmount() throws CommandFailedException {
 		if (mount != null) {
 			mount.unmount();
+			mount = null;
 		}
 	}
 

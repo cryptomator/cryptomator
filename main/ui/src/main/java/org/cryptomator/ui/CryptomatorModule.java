@@ -23,6 +23,8 @@ import org.cryptomator.ui.model.VaultObjectMapperProvider;
 import org.cryptomator.ui.settings.Settings;
 import org.cryptomator.ui.settings.SettingsProvider;
 import org.cryptomator.ui.util.DeferredCloser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -34,6 +36,7 @@ import javafx.stage.Stage;
 @Module(includes = {CryptoEngineModule.class, CommonsModule.class, WebDavModule.class})
 class CryptomatorModule {
 
+	private static final Logger LOG = LoggerFactory.getLogger(CryptomatorModule.class);
 	private final Application application;
 	private final Stage mainWindow;
 
@@ -59,7 +62,13 @@ class CryptomatorModule {
 	@Singleton
 	DeferredCloser provideDeferredCloser() {
 		DeferredCloser closer = new DeferredCloser();
-		Cryptomator.addShutdownTask(closer::close);
+		Cryptomator.addShutdownTask(() -> {
+			try {
+				closer.close();
+			} catch (Exception e) {
+				LOG.error("Error during shutdown.", e);
+			}
+		});
 		return closer;
 	}
 
