@@ -61,13 +61,18 @@ final class CommandRunner {
 	static CommandResult execute(Script script, long timeout, TimeUnit unit) throws CommandFailedException {
 		try {
 			final List<String> env = script.environment().entrySet().stream().map(e -> e.getKey() + "=" + e.getValue()).collect(Collectors.toList());
+			final String[] lines = script.getLines();
+			if (lines.length == 0) {
+				throw new IllegalArgumentException("Invalid script");
+			}
 			CommandResult result = null;
-			for (final String line : script.getLines()) {
+			for (final String line : lines) {
 				final String[] cmds = ArrayUtils.add(determineCli(), line);
 				final Process proc = Runtime.getRuntime().exec(cmds, env.toArray(new String[0]));
 				result = run(proc, timeout, unit);
 				result.assertOk();
 			}
+			assert result != null;
 			return result;
 		} catch (IOException e) {
 			throw new CommandFailedException(e);
