@@ -117,12 +117,11 @@ public class UnlockedController extends LocalizedFXMLViewController {
 	@FXML
 	private void didClickLockVault(ActionEvent event) {
 		asyncTaskService.asyncTaskOf(() -> {
-			vault.get().unmount();
 			vault.get().deactivateFrontend();
-		}).onError(CommandFailedException.class, () -> {
-			messageLabel.setText(localization.getString("unlocked.label.unmountFailed"));
-		}).andFinally(() -> {
+		}).onSuccess(() -> {
 			listener.ifPresent(listener -> listener.didLock(this));
+		}).onError(Exception.class, () -> {
+			messageLabel.setText(localization.getString("unlocked.label.unmountFailed"));
 		}).run();
 	}
 

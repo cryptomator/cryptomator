@@ -86,7 +86,7 @@ final class LinuxGvfsWebDavMounter implements WebDavMounterStrategy {
 
 		@Override
 		public void reveal() throws CommandFailedException {
-			Script.fromLines("set -x", "xdg-open \"webdav:$DAV_SSP\"").addEnv("DAV_SSP", webDavUri.getRawSchemeSpecificPart()).execute();
+			Script.fromLines("set -x", "gvfs-open \"webdav:$DAV_SSP\"").addEnv("DAV_SSP", webDavUri.getRawSchemeSpecificPart()).execute();
 		}
 
 	}

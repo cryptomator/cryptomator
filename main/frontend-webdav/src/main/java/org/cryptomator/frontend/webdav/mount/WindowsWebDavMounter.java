@@ -160,7 +160,7 @@ final class WindowsWebDavMounter implements WebDavMounterStrategy {
 		private WindowsWebDavMount(String driveLetter) {
 			this.driveLetter = CharUtils.toCharacterObject(driveLetter);
 			this.openExplorerScript = fromLines("start explorer.exe " + driveLetter + ":");
-			this.unmountScript = fromLines("net use " + driveLetter + ": /delete");
+			this.unmountScript = fromLines("net use " + driveLetter + ": /delete /no");
 		}
 
 		@Override

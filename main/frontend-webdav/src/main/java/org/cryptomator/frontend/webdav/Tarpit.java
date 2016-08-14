@@ -8,22 +8,49 @@ package org.cryptomator.frontend.webdav;
 import static java.lang.Math.max;
 import static java.lang.System.currentTimeMillis;
 
+import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.servlet.http.HttpServletRequest;
 
+import org.cryptomator.frontend.FrontendId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Singleton
-class Tarpit {
-	
+class Tarpit implements Serializable {
+
+	private static final Logger LOG = LoggerFactory.getLogger(Tarpit.class);
 	private static final long DELAY_MS = 10000;
-	
+
+	private final Set<FrontendId> validFrontendIds = new HashSet<>();
+
 	@Inject
-	public Tarpit() {}
-	
+	public Tarpit() {
+	}
+
+	public void register(FrontendId frontendId) {
+		validFrontendIds.add(frontendId);
+	}
+
+	public void unregister(FrontendId frontendId) {
+		validFrontendIds.remove(frontendId);
+	}
+
 	public void handle(HttpServletRequest req) {
-		if (isRequestWithVaultId(req)) {
+		if (isRequestWithInvalidVaultId(req)) {
 			delayExecutionUninterruptibly();
+			LOG.debug("Delayed request to " + req.getRequestURI() + " by " + DELAY_MS + "ms");
 		}
+	}
+
+	private boolean isRequestWithInvalidVaultId(HttpServletRequest req) {
+		Optional<FrontendId> frontendId = ContextPaths.extractFrontendId(req.getServletPath());
+		return frontendId.isPresent() && !isValid(frontendId.get());
 	}
 
 	private void delayExecutionUninterruptibly() {
@@ -38,9 +65,8 @@ class Tarpit {
 		}
 	}
 
-	private boolean isRequestWithVaultId(HttpServletRequest req) {
-		String path = req.getServletPath();
-		return path.matches("^/[a-zA-Z0-9_-]{12}/.*$");
+	private boolean isValid(FrontendId frontendId) {
+		return validFrontendIds.contains(frontendId);
 	}
 
 }

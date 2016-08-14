@@ -13,12 +13,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicReference;
 
 import org.cryptomator.common.ConsumerThrowingException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.annotations.VisibleForTesting;
 
@@ -31,7 +29,7 @@ import com.google.common.annotations.VisibleForTesting;
  * 
  * <p>
  * If you have a {@link DeferredCloser} instance present, call
- * {@link #closeLater(Object, Closer)} immediately after you have opened the
+ * {@link #closeLater(Object, ConsumerThrowingException)} immediately after you have opened the
  * resource and return a resource handle. If {@link #close()} is called, the
  * resource will be closed. Calling {@link DeferredClosable#close()} on the resource
  * handle will also close the resource and prevent a second closing by
@@ -42,8 +40,6 @@ import com.google.common.annotations.VisibleForTesting;
  */
 public class DeferredCloser implements AutoCloseable {
 
-	private static final Logger LOG = LoggerFactory.getLogger(DeferredCloser.class);
-
 	@VisibleForTesting
 	final Map<Long, ManagedResource<?>> cleanups = new ConcurrentSkipListMap<>();
 
@@ -51,33 +47,32 @@ public class DeferredCloser implements AutoCloseable {
 	final AtomicLong counter = new AtomicLong();
 
 	private class ManagedResource<T> implements DeferredClosable<T> {
+		
 		private final long number = counter.incrementAndGet();
-
-		private final AtomicReference<T> object = new AtomicReference<>();
+		private final T object;
 		private final ConsumerThrowingException<T, Exception> closer;
+		private boolean closed = false;
 
 		public ManagedResource(T object, ConsumerThrowingException<T, Exception> closer) {
 			super();
-			this.object.set(object);
-			this.closer = closer;
+			this.object = Objects.requireNonNull(object);
+			this.closer = Objects.requireNonNull(closer);
 		}
 
 		@Override
-		public void close() {
-			final T oldObject = object.getAndSet(null);
-			if (oldObject != null) {
-				cleanups.remove(number);
-				try {
-					closer.accept(oldObject);
-				} catch (Exception e) {
-					LOG.error("Closing resource failed.", e);
-				}
-			}
+		public synchronized void close() throws Exception {
+			closer.accept(object);
+			cleanups.remove(number);
+			closed = true;
 		}
 
 		@Override
 		public Optional<T> get() throws IllegalStateException {
-			return Optional.ofNullable(object.get());
+			if (closed) {
+				return Optional.empty();
+			} else {
+				return Optional.of(object);
+			}
 		}
 	}
 
@@ -85,11 +80,23 @@ public class DeferredCloser implements AutoCloseable {
 	 * Closes all added objects which have not been closed before and releases references.
 	 */
 	@Override
-	public void close() {
+	public void close() throws ExecutionException {
+		ExecutionException exception = null;
 		for (Iterator<ManagedResource<?>> iterator = cleanups.values().iterator(); iterator.hasNext();) {
 			final ManagedResource<?> closableProvider = iterator.next();
-			closableProvider.close();
-			iterator.remove();
+			try {
+				closableProvider.close();
+				iterator.remove();
+			} catch (Exception e) {
+				if (exception == null) {
+					exception = new ExecutionException(e);
+				} else {
+					exception.addSuppressed(e);
+				}
+			}
+		}
+		if (exception != null) {
+			throw exception;
 		}
 	}
 

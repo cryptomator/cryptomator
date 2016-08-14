@@ -24,7 +24,10 @@ public interface Frontend extends AutoCloseable {
 
 	void mount(Map<MountParam, Optional<String>> map) throws CommandFailedException;
 
-	void unmount() throws CommandFailedException;
+	/**
+	 * Unmounts the file system and stops any file system handler threads.
+	 */
+	void close() throws Exception;
 
 	void reveal() throws CommandFailedException;
 

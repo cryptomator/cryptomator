@@ -85,11 +85,15 @@ final class ConflictResolver {
 			} else {
 				ByteBuffer beginOfFile1 = ByteBuffer.allocate(sampleSize);
 				ByteBuffer beginOfFile2 = ByteBuffer.allocate(sampleSize);
-				r1.read(beginOfFile1);
-				r2.read(beginOfFile2);
-				beginOfFile1.flip();
-				beginOfFile2.flip();
-				return beginOfFile1.equals(beginOfFile2);
+				int bytesRead1 = r1.read(beginOfFile1);
+				int bytesRead2 = r2.read(beginOfFile2);
+				if (bytesRead1 == bytesRead2) {
+					beginOfFile1.flip();
+					beginOfFile2.flip();
+					return beginOfFile1.equals(beginOfFile2);
+				} else {
+					return false;
+				}
 			}
 		}
 	}
