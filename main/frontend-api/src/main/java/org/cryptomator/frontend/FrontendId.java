@@ -3,6 +3,7 @@ package org.cryptomator.frontend;
 import static java.util.UUID.randomUUID;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.UUID;
 
@@ -37,7 +38,7 @@ public class FrontendId {
 
 	private static String asBase64String(ByteBuffer bytes) {
 		ByteBuffer base64Buffer = Base64.getUrlEncoder().encode(bytes);
-		return new String(asByteArray(base64Buffer));
+		return new String(asByteArray(base64Buffer), StandardCharsets.US_ASCII);
 	}
 
 	private static ByteBuffer nineBytesFrom(UUID uuid) {
