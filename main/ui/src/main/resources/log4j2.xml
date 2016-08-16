@@ -10,7 +10,7 @@
 <Configuration status="WARN" packages="org.cryptomator.ui.logging">
 
 	<Appenders>
-		<Console name="Console" target="SYSTEM_OUT">
+		<Console name="StdOut" target="SYSTEM_OUT">
 			<PatternLayout pattern="%16d %-5p [%c{1}:%L] %m%n" />
 			<ThresholdFilter level="WARN" onMatch="DENY" onMismatch="ACCEPT" />
 		</Console>
@@ -18,21 +18,27 @@
 			<PatternLayout pattern="%16d %-5p [%c{1}:%L] %m%n" />
 			<ThresholdFilter level="WARN" onMatch="ACCEPT" onMismatch="DENY" />
 		</Console>
-		<!-- <File fileName="${sys:logPath}" ...> not feasible for paths like ~/foo/bar -->
-		<ConfigurableFile name="File" pathPropertyName="cryptomator.logPath">
+		<ConfigurableFile name="DefaultLog" pathPropertyName="cryptomator.logPath" append="false">
+			<PatternLayout pattern="%16d %-5p [%c{1}:%L] %m%n" />
+		</ConfigurableFile>
+		<ConfigurableFile name="UpgradeLog" pathPropertyName="cryptomator.upgradeLogPath" append="true">
 			<PatternLayout pattern="%16d %-5p [%c{1}:%L] %m%n" />
 		</ConfigurableFile>
 	</Appenders>
 
 	<Loggers>
-		<!-- show our own debug messages: -->
+		<!-- package-specific config: -->
 		<Logger name="org.cryptomator" level="DEBUG" />
 		<Logger name="org.eclipse.jetty.server.Server" level="DEBUG" />
-		<!-- mute dependencies: -->
+		<Logger name="org.cryptomator.ui.model" level="INFO">
+			<AppenderRef ref="UpgradeLog" />
+		</Logger>
+		
+		<!-- defaults: -->
 		<Root level="INFO">
-			<AppenderRef ref="Console" />
+			<AppenderRef ref="StdOut" />
 			<AppenderRef ref="StdErr" />
-			<AppenderRef ref="File" />
+			<AppenderRef ref="DefaultLog" />
 		</Root>
 	</Loggers>
 
