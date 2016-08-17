@@ -17,6 +17,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -28,6 +29,7 @@ import javax.inject.Named;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,23 +40,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class SettingsProvider implements Provider<Settings> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(SettingsProvider.class);
-	private static final Path SETTINGS_DIR;
-	private static final String SETTINGS_FILE = "settings.json";
+	private static final Path DEFAULT_SETTINGS_PATH;
 	private static final long SAVE_DELAY_MS = 1000;
 
 	static {
-		final String appdata = System.getenv("APPDATA");
 		final FileSystem fs = FileSystems.getDefault();
-
-		if (SystemUtils.IS_OS_WINDOWS && appdata != null) {
-			SETTINGS_DIR = fs.getPath(appdata, "Cryptomator");
-		} else if (SystemUtils.IS_OS_WINDOWS && appdata == null) {
-			SETTINGS_DIR = fs.getPath(SystemUtils.USER_HOME, ".Cryptomator");
+		if (SystemUtils.IS_OS_WINDOWS) {
+			DEFAULT_SETTINGS_PATH = fs.getPath(SystemUtils.USER_HOME, "AppData/Roaming/Cryptomator/settings.json");
 		} else if (SystemUtils.IS_OS_MAC_OSX) {
-			SETTINGS_DIR = fs.getPath(SystemUtils.USER_HOME, "Library/Application Support/Cryptomator");
+			DEFAULT_SETTINGS_PATH = fs.getPath(SystemUtils.USER_HOME, "Library/Application Support/Cryptomator/settings.json");
 		} else {
-			// (os.contains("solaris") || os.contains("sunos") || os.contains("linux") || os.contains("unix"))
-			SETTINGS_DIR = fs.getPath(SystemUtils.USER_HOME, ".Cryptomator");
+			DEFAULT_SETTINGS_PATH = fs.getPath(SystemUtils.USER_HOME, ".Cryptomator/settings.json");
 		}
 	}
 
@@ -68,12 +64,8 @@ public class SettingsProvider implements Provider<Settings> {
 	}
 
 	private Path getSettingsPath() throws IOException {
-		String settingsPathProperty = System.getProperty("cryptomator.settingsPath");
-		if (settingsPathProperty == null) {
-			return SETTINGS_DIR.resolve(SETTINGS_FILE);
-		} else {
-			return FileSystems.getDefault().getPath(settingsPathProperty);
-		}
+		final String settingsPathProperty = System.getProperty("cryptomator.settingsPath");
+		return Optional.ofNullable(settingsPathProperty).filter(StringUtils::isNotBlank).map(FileSystems.getDefault()::getPath).orElse(DEFAULT_SETTINGS_PATH);
 	}
 
 	@Override
@@ -96,7 +88,7 @@ public class SettingsProvider implements Provider<Settings> {
 		}
 		ScheduledFuture<?> saveCmd = saveScheduler.schedule(() -> {
 			this.save(settings);
-		} , SAVE_DELAY_MS, TimeUnit.MILLISECONDS);
+		}, SAVE_DELAY_MS, TimeUnit.MILLISECONDS);
 		ScheduledFuture<?> previousSaveCmd = scheduledSaveCmd.getAndSet(saveCmd);
 		if (previousSaveCmd != null) {
 			previousSaveCmd.cancel(false);
