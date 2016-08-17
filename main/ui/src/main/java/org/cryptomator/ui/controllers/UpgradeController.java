@@ -15,11 +15,13 @@ import org.cryptomator.ui.settings.Localization;
 import org.cryptomator.ui.util.AsyncTaskService;
 import org.fxmisc.easybind.EasyBind;
 
+import javafx.beans.binding.BooleanExpression;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 
@@ -45,6 +47,9 @@ public class UpgradeController extends LocalizedFXMLViewController {
 	private SecPasswordField passwordField;
 
 	@FXML
+	private CheckBox confirmationCheckbox;
+
+	@FXML
 	private Button upgradeButton;
 
 	@FXML
@@ -59,7 +64,9 @@ public class UpgradeController extends LocalizedFXMLViewController {
 			return instruction.map(this::upgradeNotification).orElse("");
 		}).orElse(""));
 
-		upgradeButton.disableProperty().bind(passwordField.textProperty().isEmpty().or(passwordField.disabledProperty()));
+		BooleanExpression passwordProvided = passwordField.textProperty().isNotEmpty().and(passwordField.disabledProperty().not());
+		BooleanExpression syncFinished = confirmationCheckbox.selectedProperty();
+		upgradeButton.disableProperty().bind(passwordProvided.not().or(syncFinished.not()));
 
 		EasyBind.subscribe(vault, this::vaultDidChange);
 	}

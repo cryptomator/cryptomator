@@ -38,6 +38,7 @@ initialize.label.doNotForget=IMPORTANT: If you forget your password, there is no
 notfound.label=Vault couldn't be found. Has it been moved?
 
 # upgrade.fxml
+upgrade.confirmation.label=Yes, I've made sure that synchronization has finished
 upgrade.button=Upgrade vault
 
 upgrade.version3dropBundleExtension.msg=This vault needs to be migrated to a newer format.\n"%1$s" will be renamed to "%2$s".\nPlease make sure synchronization has finished before proceeding.

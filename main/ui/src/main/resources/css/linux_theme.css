@@ -305,17 +305,17 @@
  ****************************************************************************/
 
 .check-box {
-	-fx-label-padding: 0 0 0 3;
+	-fx-label-padding: 0 0 0 6px;
 	-fx-text-fill: COLOR_TEXT;
 }
 .check-box > .box {
-	-fx-padding: 3;
+	-fx-padding: 3px;
 	-fx-background-color: COLOR_BORDER_DARK, #FFF;
 	-fx-background-insets: 0, 1;
 }
 .check-box > .box > .mark {
 	-fx-background-color: transparent;
-	-fx-padding: 4;
+	-fx-padding: 4px;
 	-fx-shape: "M-1,4, L-1,5.5 L3.5,8.5 L9,0 L9,-1 L7,-1 L3,6 L1,4 Z";
 }
 .check-box:selected > .box {
