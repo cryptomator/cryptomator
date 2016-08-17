@@ -65,7 +65,15 @@ public class SettingsProvider implements Provider<Settings> {
 
 	private Path getSettingsPath() throws IOException {
 		final String settingsPathProperty = System.getProperty("cryptomator.settingsPath");
-		return Optional.ofNullable(settingsPathProperty).filter(StringUtils::isNotBlank).map(FileSystems.getDefault()::getPath).orElse(DEFAULT_SETTINGS_PATH);
+		return Optional.ofNullable(settingsPathProperty).filter(StringUtils::isNotBlank).map(this::replaceHomeDir).map(FileSystems.getDefault()::getPath).orElse(DEFAULT_SETTINGS_PATH);
+	}
+
+	private String replaceHomeDir(String path) {
+		if (path.startsWith("~/")) {
+			return SystemUtils.USER_HOME + path.substring(1);
+		} else {
+			return path;
+		}
 	}
 
 	@Override
