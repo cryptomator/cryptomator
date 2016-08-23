@@ -21,7 +21,7 @@ public class CryptorImplTest {
 
 	@Test
 	public void testMasterkeyDecryptionWithCorrectPassphrase() throws IOException {
-		final String testMasterKey = "{\"version\":4,\"scryptSalt\":\"AAAAAAAAAAA=\",\"scryptCostParam\":2,\"scryptBlockSize\":8," //
+		final String testMasterKey = "{\"version\":5,\"scryptSalt\":\"AAAAAAAAAAA=\",\"scryptCostParam\":2,\"scryptBlockSize\":8," //
 				+ "\"primaryMasterKey\":\"mM+qoQ+o0qvPTiDAZYt+flaC3WbpNAx1sTXaUzxwpy0M9Ctj6Tih/Q==\"," //
 				+ "\"hmacMasterKey\":\"mM+qoQ+o0qvPTiDAZYt+flaC3WbpNAx1sTXaUzxwpy0M9Ctj6Tih/Q==\"," //
 				+ "\"versionMac\":\"Z9J8Uc5K1f7YKckLUFpXG39NHK1qUjzadw5nvOqvfok=\"}";
@@ -31,7 +31,7 @@ public class CryptorImplTest {
 
 	@Test(expected = InvalidPassphraseException.class)
 	public void testMasterkeyDecryptionWithWrongPassphrase() throws IOException {
-		final String testMasterKey = "{\"version\":4,\"scryptSalt\":\"AAAAAAAAAAA=\",\"scryptCostParam\":2,\"scryptBlockSize\":8," //
+		final String testMasterKey = "{\"version\":5,\"scryptSalt\":\"AAAAAAAAAAA=\",\"scryptCostParam\":2,\"scryptBlockSize\":8," //
 				+ "\"primaryMasterKey\":\"mM+qoQ+o0qvPTiDAZYt+flaC3WbpNAx1sTXaUzxwpy0M9Ctj6Tih/Q==\"," //
 				+ "\"hmacMasterKey\":\"mM+qoQ+o0qvPTiDAZYt+flaC3WbpNAx1sTXaUzxwpy0M9Ctj6Tih/Q==\"," //
 				+ "\"versionMac\":\"Z9J8Uc5K1f7YKckLUFpXG39NHK1qUjzadw5nvOqvfok=\"}";
@@ -52,7 +52,7 @@ public class CryptorImplTest {
 	@Ignore
 	@Test(expected = UnsupportedVaultFormatException.class)
 	public void testMasterkeyDecryptionWithMissingVersionMac() throws IOException {
-		final String testMasterKey = "{\"version\":3,\"scryptSalt\":\"AAAAAAAAAAA=\",\"scryptCostParam\":2,\"scryptBlockSize\":8," //
+		final String testMasterKey = "{\"version\":5,\"scryptSalt\":\"AAAAAAAAAAA=\",\"scryptCostParam\":2,\"scryptBlockSize\":8," //
 				+ "\"primaryMasterKey\":\"mM+qoQ+o0qvPTiDAZYt+flaC3WbpNAx1sTXaUzxwpy0M9Ctj6Tih/Q==\"," //
 				+ "\"hmacMasterKey\":\"mM+qoQ+o0qvPTiDAZYt+flaC3WbpNAx1sTXaUzxwpy0M9Ctj6Tih/Q==\"}";
 		final Cryptor cryptor = TestCryptorImplFactory.insecureCryptorImpl();
@@ -62,7 +62,7 @@ public class CryptorImplTest {
 	@Ignore
 	@Test(expected = UnsupportedVaultFormatException.class)
 	public void testMasterkeyDecryptionWithWrongVersionMac() throws IOException {
-		final String testMasterKey = "{\"version\":4,\"scryptSalt\":\"AAAAAAAAAAA=\",\"scryptCostParam\":2,\"scryptBlockSize\":8," //
+		final String testMasterKey = "{\"version\":5,\"scryptSalt\":\"AAAAAAAAAAA=\",\"scryptCostParam\":2,\"scryptBlockSize\":8," //
 				+ "\"primaryMasterKey\":\"mM+qoQ+o0qvPTiDAZYt+flaC3WbpNAx1sTXaUzxwpy0M9Ctj6Tih/Q==\"," //
 				+ "\"hmacMasterKey\":\"mM+qoQ+o0qvPTiDAZYt+flaC3WbpNAx1sTXaUzxwpy0M9Ctj6Tih/Q==\"," //
 				+ "\"versionMac\":\"z9J8Uc5K1f7YKckLUFpXG39NHK1qUjzadw5nvOqvfoK=\"}";
@@ -72,14 +72,13 @@ public class CryptorImplTest {
 
 	@Test
 	public void testMasterkeyEncryption() throws IOException {
-		final String expectedMasterKey = "{\"version\":4,\"scryptSalt\":\"AAAAAAAAAAA=\",\"scryptCostParam\":16384,\"scryptBlockSize\":8," //
+		final String expectedMasterKey = "{\"version\":5,\"scryptSalt\":\"AAAAAAAAAAA=\",\"scryptCostParam\":16384,\"scryptBlockSize\":8," //
 				+ "\"primaryMasterKey\":\"BJPIq5pvhN24iDtPJLMFPLaVJWdGog9k4n0P03j4ru+ivbWY9OaRGQ==\"," //
 				+ "\"hmacMasterKey\":\"BJPIq5pvhN24iDtPJLMFPLaVJWdGog9k4n0P03j4ru+ivbWY9OaRGQ==\"," //
-				+ "\"versionMac\":\"Z9J8Uc5K1f7YKckLUFpXG39NHK1qUjzadw5nvOqvfok=\"}";
+				+ "\"versionMac\":\"yuwoRE9GSdgQ2b//qRpTCj3W0qsVLxYVa7/KB3PkfA4=\"}";
 		final Cryptor cryptor = TestCryptorImplFactory.insecureCryptorImpl();
 		cryptor.randomizeMasterkey();
 		final byte[] masterkeyFile = cryptor.writeKeysToMasterkeyFile("asd");
-		System.out.println(new String(masterkeyFile));
 		Assert.assertArrayEquals(expectedMasterKey.getBytes(), masterkeyFile);
 	}
 

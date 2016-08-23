@@ -22,7 +22,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.LongAdder;
 import java.util.function.Supplier;
 
 import javax.crypto.Cipher;
@@ -47,7 +46,6 @@ class FileContentDecryptorImpl implements FileContentDecryptor {
 	private final Supplier<Mac> hmacSha256;
 	private final FileHeader header;
 	private final boolean authenticate;
-	private final LongAdder cleartextBytesDecrypted = new LongAdder();
 	private ByteBuffer ciphertextBuffer = ByteBuffer.allocate(CHUNK_SIZE);
 	private long chunkNumber = 0;
 
@@ -56,11 +54,6 @@ class FileContentDecryptorImpl implements FileContentDecryptor {
 		this.header = FileHeader.decrypt(headerKey, hmacSha256, header);
 		this.authenticate = authenticate;
 		this.chunkNumber = firstCiphertextByte / CHUNK_SIZE; // floor() by int-truncation
-	}
-
-	@Override
-	public long contentLength() {
-		return header.getPayload().getFilesize();
 	}
 
 	@Override
@@ -105,15 +98,7 @@ class FileContentDecryptorImpl implements FileContentDecryptor {
 	@Override
 	public ByteBuffer cleartext() throws InterruptedException {
 		try {
-			final ByteBuffer cleartext = dataProcessor.processedData();
-			long bytesUntilLogicalEof = contentLength() - cleartextBytesDecrypted.sum();
-			if (bytesUntilLogicalEof <= 0) {
-				return FileContentCryptor.EOF;
-			} else if (bytesUntilLogicalEof < cleartext.remaining()) {
-				cleartext.limit((int) bytesUntilLogicalEof);
-			}
-			cleartextBytesDecrypted.add(cleartext.remaining());
-			return cleartext;
+			return dataProcessor.processedData();
 		} catch (ExecutionException e) {
 			if (e.getCause() instanceof AuthenticationFailedException) {
 				throw new AuthenticationFailedException(e);

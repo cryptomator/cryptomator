@@ -9,7 +9,6 @@
 package org.cryptomator.crypto.engine.impl;
 
 import static org.cryptomator.crypto.engine.impl.Constants.CURRENT_VAULT_VERSION;
-import static org.cryptomator.crypto.engine.impl.Constants.SUPPORTED_VAULT_VERSIONS;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -110,7 +109,7 @@ class CryptorImpl implements Cryptor {
 		assert keyFile != null;
 
 		// check version
-		if (!SUPPORTED_VAULT_VERSIONS.contains(keyFile.getVersion())) {
+		if (CURRENT_VAULT_VERSION != keyFile.getVersion()) {
 			throw new UnsupportedVaultFormatException(keyFile.getVersion(), CURRENT_VAULT_VERSION);
 		}
 
