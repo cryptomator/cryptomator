@@ -31,13 +31,6 @@ public interface ReadableFile extends ReadableByteChannel {
 	int read(ByteBuffer target) throws UncheckedIOException;
 
 	/**
-	 * @return The current size of the file. This value is a snapshot and might have been changed by concurrent modifications.
-	 * @throws UncheckedIOException
-	 *             if an {@link IOException} occurs
-	 */
-	long size() throws UncheckedIOException;
-
-	/**
 	 * <p>
 	 * Fast-forwards or rewinds the file to the specified position.
 	 * <p>

@@ -18,6 +18,11 @@ import java.util.stream.Stream;
 class DefaultNioAccess implements NioAccess {
 
 	@Override
+	public long size(Path path) throws IOException {
+		return Files.size(path);
+	}
+
+	@Override
 	public AsynchronousFileChannel open(Path path, OpenOption... options) throws IOException {
 		return AsynchronousFileChannel.open(path, options);
 	}
@@ -59,7 +64,8 @@ class DefaultNioAccess implements NioAccess {
 		} catch (AccessDeniedException e) {
 			// workaround for https://github.com/cryptomator/cryptomator/issues/317
 			try {
-				if (path.toFile().delete()) return;
+				if (path.toFile().delete())
+					return;
 			} catch (UnsupportedOperationException e2) {
 				// ignore
 			}

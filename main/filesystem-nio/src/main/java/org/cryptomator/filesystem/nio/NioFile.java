@@ -28,6 +28,15 @@ class NioFile extends NioNode implements File {
 	}
 
 	@Override
+	public long size() throws UncheckedIOException {
+		try {
+			return nioAccess.size(path);
+		} catch (IOException e) {
+			throw new UncheckedIOException(e);
+		}
+	}
+
+	@Override
 	public ReadableFile openReadable() throws UncheckedIOException {
 		if (lock.getWriteHoldCount() > 0) {
 			throw new IllegalStateException("Current thread is currently writing " + path);

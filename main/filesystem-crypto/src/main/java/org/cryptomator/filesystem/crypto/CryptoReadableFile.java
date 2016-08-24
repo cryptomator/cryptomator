@@ -8,9 +8,6 @@
  *******************************************************************************/
 package org.cryptomator.filesystem.crypto;
 
-import static org.cryptomator.crypto.engine.impl.Constants.CHUNK_SIZE;
-import static org.cryptomator.crypto.engine.impl.Constants.PAYLOAD_SIZE;
-
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.io.UncheckedIOException;
@@ -71,20 +68,6 @@ class CryptoReadableFile implements ReadableFile {
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
 		}
-	}
-
-	@Override
-	public long size() throws UncheckedIOException {
-		long ciphertextSize = file.size() - cryptor.getHeaderSize();
-		long overheadPerChunk = CHUNK_SIZE - PAYLOAD_SIZE;
-		long numFullChunks = ciphertextSize / CHUNK_SIZE; // floor by int-truncation
-		long additionalCiphertextBytes = ciphertextSize % CHUNK_SIZE;
-		if (additionalCiphertextBytes > 0 && additionalCiphertextBytes <= overheadPerChunk) {
-			throw new IllegalArgumentException("Method not defined for input value " + ciphertextSize);
-		}
-		long additionalCleartextBytes = (additionalCiphertextBytes == 0) ? 0 : additionalCiphertextBytes - overheadPerChunk;
-		assert additionalCleartextBytes >= 0;
-		return PAYLOAD_SIZE * numFullChunks + additionalCleartextBytes;
 	}
 
 	@Override

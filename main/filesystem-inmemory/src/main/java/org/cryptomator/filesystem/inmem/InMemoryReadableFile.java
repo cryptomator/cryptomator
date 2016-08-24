@@ -52,11 +52,6 @@ class InMemoryReadableFile implements ReadableFile {
 	}
 
 	@Override
-	public long size() throws UncheckedIOException {
-		return contentGetter.get().limit();
-	}
-
-	@Override
 	public void position(long position) throws UncheckedIOException {
 		assert position < Integer.MAX_VALUE : "Can not use that big in-memory files.";
 		this.position.set((int) position);

@@ -47,8 +47,8 @@ class DavFileWithRange extends DavFile {
 		if (!outputContext.hasStream()) {
 			return;
 		}
+		final long contentLength = node.size();
 		try (ReadableFile src = node.openReadable(); OutputStream out = outputContext.getOutputStream()) {
-			final long contentLength = src.size();
 			final Pair<Long, Long> range = getEffectiveRange(contentLength);
 			if (range.getLeft() < 0 || range.getLeft() > range.getRight() || range.getRight() > contentLength) {
 				outputContext.setProperty(HttpHeader.CONTENT_RANGE.asString(), "bytes */" + contentLength);

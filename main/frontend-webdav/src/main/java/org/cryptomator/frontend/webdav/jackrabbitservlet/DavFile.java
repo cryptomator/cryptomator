@@ -32,14 +32,11 @@ import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.Folder;
 import org.cryptomator.filesystem.ReadableFile;
 import org.cryptomator.filesystem.jackrabbit.FileLocator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.io.ByteStreams;
 
 class DavFile extends DavNode<FileLocator> {
 
-	private static final Logger LOG = LoggerFactory.getLogger(DavFile.class);
 	protected static final String CONTENT_TYPE_VALUE = "application/octet-stream";
 	protected static final String CONTENT_DISPOSITION_HEADER = "Content-Disposition";
 	protected static final String CONTENT_DISPOSITION_VALUE = "attachment";
@@ -64,8 +61,8 @@ class DavFile extends DavNode<FileLocator> {
 		outputContext.setContentType(CONTENT_TYPE_VALUE);
 		outputContext.setProperty(CONTENT_DISPOSITION_HEADER, CONTENT_DISPOSITION_VALUE);
 		outputContext.setProperty(X_CONTENT_TYPE_OPTIONS_HEADER, X_CONTENT_TYPE_OPTIONS_VALUE);
+		outputContext.setContentLength(node.size());
 		try (ReadableFile src = node.openReadable(); WritableByteChannel dst = Channels.newChannel(outputContext.getOutputStream())) {
-			outputContext.setContentLength(src.size());
 			ByteStreams.copy(src, dst);
 		}
 	}
@@ -157,12 +154,7 @@ class DavFile extends DavNode<FileLocator> {
 
 	private Optional<DavProperty<?>> sizeProperty() {
 		if (node.exists()) {
-			try (ReadableFile src = node.openReadable()) {
-				return Optional.of(new DefaultDavProperty<Long>(DavPropertyName.GETCONTENTLENGTH, src.size()));
-			} catch (RuntimeException e) {
-				LOG.warn("Could not determine file size of " + getResourcePath(), e);
-				return Optional.empty();
-			}
+			return Optional.of(new DefaultDavProperty<Long>(DavPropertyName.GETCONTENTLENGTH, node.size()));
 		} else {
 			return Optional.empty();
 		}

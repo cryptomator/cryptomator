@@ -35,20 +35,6 @@ public class FileContentEncryptorImplTest {
 
 	};
 
-	private static final SecureRandom RANDOM_MOCK_2 = new SecureRandom() {
-
-		@Override
-		public int nextInt(int bound) {
-			return 42;
-		}
-
-		@Override
-		public void nextBytes(byte[] bytes) {
-			Arrays.fill(bytes, (byte) 0x00);
-		}
-
-	};
-
 	@Test
 	public void testEncryption() throws InterruptedException {
 		final byte[] keyBytes = new byte[32];
