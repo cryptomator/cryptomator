@@ -1,24 +1,15 @@
-sudo: required
-
-dist: trusty
-
 language: java
-
+sudo: required
+dist: trusty
 jdk:
 - oraclejdk8
-
 env:
   global:
-    - secure: "Lgj042RD0X3rB8VZVZLWP1GetLhjd3PqI5JbJMlzgHJpDI6RkFIBLN9SWAGmkLPCehIp2zA5tu9+UVy0NNMxm9xz6SyjMCaxS28/fnYEXaNmwwDSF6O6gLUbdxyzoYIFPYOPmFxpzhebqnNIsxaM29oZpgRgUGqosCczQxiB+Ng=" #coveralls
     - secure: "IfYURwZaDWuBDvyn47n0k1Zod/IQw1FF+CS5nnV08Q+NfC3vGGJMwV8m59XnbfwnWGxwvCaAbk4qP6s6+ijgZNKkvgfFMo3rfTok5zt43bIqgaFOANYV+OC/1c59gYD6ZUxhW5iNgMgU3qdsRtJuwSmfkVv/jKyLGfAbS4kN8BA=" #coverity
     - secure: "lV9OwUbHMrMpLUH1CY+Z4puLDdFXytudyPlG1eGRsesdpuG6KM3uQVz6uAtf6lrU8DRbMM/T7ML+PmvQ4UoPPYLdLxESLLBat2qUPOIVBOhTSlCc7I0DmGy04CSvkeMy8dPaQC0ukgNiR7zwoNzfcpGRN/U9S8tziDruuHoZSrg=" #bintray
-
 before_install: "curl -L --cookie 'oraclelicense=accept-securebackup-cookie;' http://download.oracle.com/otn-pub/java/jce/8/jce_policy-8.zip -o /tmp/policy.zip && sudo unzip -j -o /tmp/policy.zip *.jar -d `jdk_switcher home oraclejdk8`/jre/lib/security && rm /tmp/policy.zip"
-
 script: mvn -fmain/pom.xml clean test
-
-after_success: mvn -fmain/pom.xml -Ptest-coverage clean test jacoco:report-aggregate coveralls:report
-
+after_success: "mvn -fmain/pom.xml -Ptest-coverage clean test jacoco:report-aggregate && bash <(curl -s https://codecov.io/bash)"
 notifications:
   webhooks:
     urls:
@@ -31,9 +22,6 @@ notifications:
       secure: "lngJ/HEAFBbD5AdiO9avMqptKpZHdmEwOzS9FabZjkdFh7yAYueTk5RniPUvShjsKtThYm7cJ8AtDMDwc07NvPrzbMBRtUJGwuDT+7c7YFALGFJ1NYi+emkC9x1oafvmPgEYSE+tMKzNcwrHi3ytGgKdIotsKwaF35QNXYA9aMs="
     on_success: change
     on_failure: always
-
-before_deploy: mvn -fmain/pom.xml -Prelease clean package -DskipTests
-
 addons:
   coverity_scan:
     project:
@@ -41,7 +29,7 @@ addons:
     notification_email: sebastian.stenzel@cryptomator.org
     build_command: "mvn -fmain/pom.xml clean test -DskipTests"
     branch_pattern: release.*
-
+before_deploy: mvn -fmain/pom.xml -Prelease clean package -DskipTests
 deploy:
 - provider: releases
   prerelease: false

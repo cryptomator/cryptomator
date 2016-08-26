@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Copyright (c) 2014 Sebastian Stenzel This file is licensed under the 
-	terms of the MIT license. See the LICENSE.txt file for more info. Contributors: 
+<!-- Copyright (c) 2014 Sebastian Stenzel This file is licensed under the
+	terms of the MIT license. See the LICENSE.txt file for more info. Contributors:
 	Sebastian Stenzel - initial API and implementation -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.cryptomator</groupId>
 	<artifactId>main</artifactId>
@@ -57,7 +56,7 @@
 				<version>${project.version}</version>
 				<scope>test</scope>
 			</dependency>
-			
+
 			<dependency>
 				<groupId>org.cryptomator</groupId>
 				<artifactId>filesystem-api</artifactId>
@@ -106,7 +105,7 @@
 				<artifactId>filesystem-stats</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-			
+
 			<dependency>
 				<groupId>org.cryptomator</groupId>
 				<artifactId>frontend-api</artifactId>
@@ -168,19 +167,18 @@
 				<version>${commons-codec.version}</version>
 			</dependency>
 			<dependency>
-				<!-- org.apache.httpcomponents:httpclient is newer, but jackrabbit uses 
-					this version. We don't have a reason to upgrade -->
+				<!-- org.apache.httpcomponents:httpclient is newer, but jackrabbit uses this version. We don't have a reason to upgrade -->
 				<groupId>commons-httpclient</groupId>
 				<artifactId>commons-httpclient</artifactId>
 				<version>${commons-httpclient.version}</version>
 			</dependency>
-			
+
 			<!-- EasyBind -->
 			<dependency>
 				<groupId>org.fxmisc.easybind</groupId>
 				<artifactId>easybind</artifactId>
 				<version>1.0.3</version>
-			</dependency>	
+			</dependency>
 
 			<!-- Guava -->
 			<dependency>
@@ -341,17 +339,6 @@
 				<configuration>
 					<source>1.8</source>
 					<target>1.8</target>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.eluder.coveralls</groupId>
-				<artifactId>coveralls-maven-plugin</artifactId>
-				<version>4.0.0</version>
-				<configuration>
-					<jacocoReports>
-						<jacocoReport>jacoco-report/target/site/jacoco-aggregate/jacoco.xml</jacocoReport>
-					</jacocoReports>
-					<repoToken>${env.COVERALLS_REPO_TOKEN}</repoToken>
 				</configuration>
 			</plugin>
 		</plugins>
