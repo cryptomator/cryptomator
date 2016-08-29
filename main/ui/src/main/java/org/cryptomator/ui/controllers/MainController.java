@@ -29,6 +29,7 @@ import org.cryptomator.ui.controls.DirectoryListCell;
 import org.cryptomator.ui.model.UpgradeStrategies;
 import org.cryptomator.ui.model.Vault;
 import org.cryptomator.ui.model.VaultFactory;
+import org.cryptomator.ui.model.Vaults;
 import org.cryptomator.ui.settings.Localization;
 import org.cryptomator.ui.settings.Settings;
 import org.cryptomator.ui.util.DialogBuilderUtil;
@@ -44,9 +45,6 @@ import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.BooleanExpression;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener.Change;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Side;
@@ -81,7 +79,7 @@ public class MainController extends LocalizedFXMLViewController {
 	private final Lazy<SettingsController> settingsController;
 	private final Lazy<UpgradeStrategies> upgradeStrategies;
 	private final ObjectProperty<AbstractFXMLViewController> activeController = new SimpleObjectProperty<>();
-	private final ObservableList<Vault> vaults;
+	private final Vaults vaults;
 	private final ObjectProperty<Vault> selectedVault = new SimpleObjectProperty<>();
 	private final BooleanExpression isSelectedVaultUnlocked = BooleanBinding.booleanExpression(EasyBind.select(selectedVault).selectObject(Vault::unlockedProperty).orElse(false));
 	private final BooleanExpression isSelectedVaultValid = BooleanBinding.booleanExpression(EasyBind.monadic(selectedVault).map(Vault::isValidVaultDirectory).orElse(false));
@@ -92,7 +90,8 @@ public class MainController extends LocalizedFXMLViewController {
 	@Inject
 	public MainController(@Named("mainWindow") Stage mainWindow, Localization localization, Settings settings, VaultFactory vaultFactoy, Lazy<WelcomeController> welcomeController,
 			Lazy<InitializeController> initializeController, Lazy<NotFoundController> notFoundController, Lazy<UpgradeController> upgradeController, Lazy<UnlockController> unlockController,
-			Provider<UnlockedController> unlockedControllerProvider, Lazy<ChangePasswordController> changePasswordController, Lazy<SettingsController> settingsController, Lazy<UpgradeStrategies> upgradeStrategies) {
+			Provider<UnlockedController> unlockedControllerProvider, Lazy<ChangePasswordController> changePasswordController, Lazy<SettingsController> settingsController, Lazy<UpgradeStrategies> upgradeStrategies,
+			Vaults vaults) {
 		super(localization);
 		this.mainWindow = mainWindow;
 		this.vaultFactoy = vaultFactoy;
@@ -105,10 +104,7 @@ public class MainController extends LocalizedFXMLViewController {
 		this.changePasswordController = changePasswordController;
 		this.settingsController = settingsController;
 		this.upgradeStrategies = upgradeStrategies;
-		this.vaults = FXCollections.observableList(settings.getDirectories());
-		this.vaults.addListener((Change<? extends Vault> c) -> {
-			settings.save();
-		});
+		this.vaults = vaults;
 
 		// derived bindings:
 		this.isShowingSettings = activeController.isEqualTo(settingsController.get());

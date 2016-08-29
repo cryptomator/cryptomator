@@ -8,6 +8,8 @@
  *******************************************************************************/
 package org.cryptomator.ui;
 
+import static java.util.stream.Collectors.toList;
+
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -17,9 +19,12 @@ import javax.inject.Singleton;
 import org.cryptomator.common.CommonsModule;
 import org.cryptomator.crypto.engine.impl.CryptoEngineModule;
 import org.cryptomator.frontend.FrontendFactory;
+import org.cryptomator.frontend.FrontendId;
 import org.cryptomator.frontend.webdav.WebDavModule;
 import org.cryptomator.frontend.webdav.WebDavServer;
+import org.cryptomator.ui.model.Vault;
 import org.cryptomator.ui.model.VaultObjectMapperProvider;
+import org.cryptomator.ui.model.Vaults;
 import org.cryptomator.ui.settings.Settings;
 import org.cryptomator.ui.settings.SettingsProvider;
 import org.cryptomator.ui.util.DeferredCloser;
@@ -31,6 +36,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import dagger.Module;
 import dagger.Provides;
 import javafx.application.Application;
+import javafx.beans.Observable;
 import javafx.stage.Stage;
 
 @Module(includes = {CryptoEngineModule.class, CommonsModule.class, WebDavModule.class})
@@ -93,10 +99,19 @@ class CryptomatorModule {
 
 	@Provides
 	@Singleton
-	FrontendFactory provideFrontendFactory(DeferredCloser closer, WebDavServer webDavServer, Settings settings) {
+	FrontendFactory provideFrontendFactory(DeferredCloser closer, WebDavServer webDavServer, Vaults vaults, Settings settings) {
+		vaults.addListener((Observable o) -> setValidFrontendIds(webDavServer, vaults));
+		setValidFrontendIds(webDavServer, vaults);
 		webDavServer.setPort(settings.getPort());
 		webDavServer.start();
 		return closer.closeLater(webDavServer, WebDavServer::stop).get().orElseThrow(IllegalStateException::new);
+	}
+
+	private void setValidFrontendIds(WebDavServer webDavServer, Vaults vaults) {
+		webDavServer.setValidFrontendIds(vaults.stream() //
+				.map(Vault::getId)
+				.map(FrontendId::from)
+				.collect(toList()));
 	}
 
 }

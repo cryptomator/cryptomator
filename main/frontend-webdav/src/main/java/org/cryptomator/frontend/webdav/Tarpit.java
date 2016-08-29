@@ -7,8 +7,10 @@ package org.cryptomator.frontend.webdav;
 
 import static java.lang.Math.max;
 import static java.lang.System.currentTimeMillis;
+import static java.util.Collections.synchronizedSet;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -27,18 +29,15 @@ class Tarpit implements Serializable {
 	private static final Logger LOG = LoggerFactory.getLogger(Tarpit.class);
 	private static final long DELAY_MS = 10000;
 
-	private final Set<FrontendId> validFrontendIds = new HashSet<>();
+	private final Set<FrontendId> validFrontendIds = synchronizedSet(new HashSet<>());
 
 	@Inject
-	public Tarpit() {
-	}
+	public Tarpit() {}
 
-	public void register(FrontendId frontendId) {
-		validFrontendIds.add(frontendId);
-	}
-
-	public void unregister(FrontendId frontendId) {
-		validFrontendIds.remove(frontendId);
+	public void setValidFrontendIds(Collection<FrontendId> validFrontendIds) {
+		this.validFrontendIds.retainAll(validFrontendIds);
+		this.validFrontendIds.addAll(validFrontendIds);
+		validFrontendIds.forEach(System.out::println);
 	}
 
 	public void handle(HttpServletRequest req) {
