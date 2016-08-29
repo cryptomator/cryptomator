@@ -273,6 +273,7 @@
 		<module>frontend-webdav</module>
 		<module>ui</module>
 		<module>filesystem-charsets</module>
+		<module>keychain</module>
 	</modules>
 
 	<profiles>
