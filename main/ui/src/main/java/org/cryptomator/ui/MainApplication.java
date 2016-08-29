@@ -16,6 +16,8 @@ import java.util.concurrent.ExecutionException;
 
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.ui.controllers.MainController;
+import org.cryptomator.ui.jni.JniException;
+import org.cryptomator.ui.jni.MacFunctions;
 import org.cryptomator.ui.util.ActiveWindowStyleSupport;
 import org.cryptomator.ui.util.DeferredCloser;
 import org.cryptomator.ui.util.SingleInstanceManager;
@@ -67,6 +69,7 @@ public class MainApplication extends Application {
 		}
 
 		// show window and start observing its focus:
+		comp.nativeMacFunctions().ifPresent(JniException.ignore(MacFunctions::transformToForegroundApplication));
 		primaryStage.show();
 		ActiveWindowStyleSupport.startObservingFocus(primaryStage);
 		comp.exitUtil().initExitHandler(this::quit);
