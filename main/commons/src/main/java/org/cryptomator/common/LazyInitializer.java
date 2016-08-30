@@ -17,16 +17,17 @@ public final class LazyInitializer {
 	 * @return The initialized value
 	 */
 	public static <T> T initializeLazily(AtomicReference<T> reference, Supplier<T> factory) {
-		final T existingInstance = reference.get();
-		if (existingInstance != null) {
-			return existingInstance;
+		final T existing = reference.get();
+		if (existing != null) {
+			return existing;
 		} else {
-			final T newInstance = factory.get();
-			if (reference.compareAndSet(null, newInstance)) {
-				return newInstance;
-			} else {
-				return reference.get();
-			}
+			return reference.updateAndGet(currentValue -> {
+				if (currentValue == null) {
+					return factory.get();
+				} else {
+					return currentValue;
+				}
+			});
 		}
 	}
 

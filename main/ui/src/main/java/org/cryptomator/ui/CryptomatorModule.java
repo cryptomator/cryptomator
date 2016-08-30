@@ -8,6 +8,7 @@
  *******************************************************************************/
 package org.cryptomator.ui;
 
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -19,6 +20,8 @@ import org.cryptomator.crypto.engine.impl.CryptoEngineModule;
 import org.cryptomator.frontend.FrontendFactory;
 import org.cryptomator.frontend.webdav.WebDavModule;
 import org.cryptomator.frontend.webdav.WebDavServer;
+import org.cryptomator.jni.JniModule;
+import org.cryptomator.jni.MacFunctions;
 import org.cryptomator.ui.model.VaultObjectMapperProvider;
 import org.cryptomator.ui.settings.Settings;
 import org.cryptomator.ui.settings.SettingsProvider;
@@ -97,6 +100,12 @@ class CryptomatorModule {
 		webDavServer.setPort(settings.getPort());
 		webDavServer.start();
 		return closer.closeLater(webDavServer, WebDavServer::stop).get().orElseThrow(IllegalStateException::new);
+	}
+
+	@Provides
+	@Singleton
+	Optional<MacFunctions> provideMacFunctions() {
+		return JniModule.macFunctions();
 	}
 
 }
