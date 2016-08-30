@@ -16,6 +16,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
 import java.time.Instant;
@@ -81,6 +82,27 @@ public class NioFileTest {
 		@Test
 		public void testConstructorSetsParentPassedToIt() {
 			assertThat(inTest.parent(), is(parent));
+		}
+
+	}
+
+	public class Size {
+
+		@Test
+		public void testSizeReturnsSizeOfRegularFile() throws IOException {
+			when(nioAccess.size(path)).thenReturn(42l);
+
+			assertThat(inTest.size(), is(42l));
+		}
+
+		@Test
+		public void testSizeThrowsExceptionIfRegularFileThrowsException() throws IOException {
+			Throwable t = new NoSuchFileException("foo");
+			when(nioAccess.size(path)).thenThrow(t);
+
+			thrown.expect(UncheckedIOException.class);
+			thrown.expectCause(org.hamcrest.Matchers.sameInstance(t));
+			inTest.size();
 		}
 
 	}

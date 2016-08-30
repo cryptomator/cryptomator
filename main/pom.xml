@@ -27,6 +27,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
 		<!-- dependency versions -->
+		<cryptomator.cryptolib.version>1.0.0-SNAPSHOT</cryptomator.cryptolib.version>
 		<log4j.version>2.1</log4j.version>
 		<slf4j.version>1.7.7</slf4j.version>
 		<junit.version>4.12</junit.version>
@@ -121,6 +122,13 @@
 				<groupId>org.cryptomator</groupId>
 				<artifactId>ui</artifactId>
 				<version>${project.version}</version>
+			</dependency>
+			
+			<!-- Libs -->
+			<dependency>
+				<groupId>org.cryptomator</groupId>
+				<artifactId>cryptolib</artifactId>
+				<version>${cryptomator.cryptolib.version}</version>
 			</dependency>
 
 			<!-- Logging -->

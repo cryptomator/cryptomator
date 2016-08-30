@@ -71,12 +71,6 @@ class CryptoReadableFile implements ReadableFile {
 	}
 
 	@Override
-	public long size() throws UncheckedIOException {
-		assert decryptor != null : "decryptor is always being set during position(long)";
-		return decryptor.contentLength();
-	}
-
-	@Override
 	public void position(long position) throws UncheckedIOException {
 		if (readAheadTask != null) {
 			readAheadTask.cancel(true);

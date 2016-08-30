@@ -20,11 +20,6 @@ import javax.security.auth.Destroyable;
 public interface FileContentDecryptor extends Destroyable, Closeable {
 
 	/**
-	 * @return Number of bytes of the decrypted file.
-	 */
-	long contentLength();
-
-	/**
 	 * Appends further ciphertext to this decryptor. This method might block until space becomes available. If so, it is interruptable.
 	 * 
 	 * @param cleartext Cleartext data or {@link FileContentCryptor#EOF} to indicate the end of a ciphertext.

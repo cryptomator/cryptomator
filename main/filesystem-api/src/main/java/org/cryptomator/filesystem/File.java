@@ -18,6 +18,13 @@ public interface File extends Node, Comparable<File> {
 	static final int EOF = -1;
 
 	/**
+	 * @return The current size of the file. This value is a snapshot and might have been changed by concurrent modifications.
+	 * @throws UncheckedIOException
+	 *             if an {@link IOException} occurs
+	 */
+	long size() throws UncheckedIOException;
+
+	/**
 	 * <p>
 	 * Opens this file for reading.
 	 * <p>
@@ -39,7 +46,6 @@ public interface File extends Node, Comparable<File> {
 	 *             if an {@link IOException} occurs while opening the file, the
 	 *             file does not exist or is a directory
 	 */
-
 	ReadableFile openReadable() throws UncheckedIOException;
 
 	/**
