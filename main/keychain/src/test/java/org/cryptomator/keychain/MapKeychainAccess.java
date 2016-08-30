@@ -18,6 +18,12 @@ class MapKeychainAccess implements KeychainAccessStrategy {
 	}
 
 	@Override
+	public void deletePassphrase(String key) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
 	public boolean isSupported() {
 		return true;
 	}

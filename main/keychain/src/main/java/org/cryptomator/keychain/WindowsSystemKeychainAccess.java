@@ -38,6 +38,12 @@ class WindowsSystemKeychainAccess implements KeychainAccessStrategy {
 	}
 
 	@Override
+	public void deletePassphrase(String key) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
 	public boolean isSupported() {
 		return SystemUtils.IS_OS_WINDOWS && keyStore != null;
 	}

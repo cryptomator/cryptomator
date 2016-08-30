@@ -16,4 +16,11 @@ public interface KeychainAccess {
 	 */
 	CharSequence loadPassphrase(String key);
 
+	/**
+	 * Deletes a passphrase with a given key.
+	 * 
+	 * @param key Unique key previously used while {@link #storePassphrase(String, CharSequence) storing a passphrase}.
+	 */
+	void deletePassphrase(String key);
+
 }

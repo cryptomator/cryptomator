@@ -38,4 +38,9 @@ class MacSystemKeychainAccess implements KeychainAccessStrategy {
 		return SystemUtils.IS_OS_MAC_OSX && keychain != null;
 	}
 
+	@Override
+	public void deletePassphrase(String key) {
+		keychain.deletePassword(key);
+	}
+
 }
