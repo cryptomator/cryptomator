@@ -8,6 +8,7 @@
  *******************************************************************************/
 package org.cryptomator.ui;
 
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -19,7 +20,8 @@ import org.cryptomator.crypto.engine.impl.CryptoEngineModule;
 import org.cryptomator.frontend.FrontendFactory;
 import org.cryptomator.frontend.webdav.WebDavModule;
 import org.cryptomator.frontend.webdav.WebDavServer;
-import org.cryptomator.ui.jni.JniModule;
+import org.cryptomator.jni.JniModule;
+import org.cryptomator.jni.MacFunctions;
 import org.cryptomator.ui.model.VaultObjectMapperProvider;
 import org.cryptomator.ui.settings.Settings;
 import org.cryptomator.ui.settings.SettingsProvider;
@@ -34,7 +36,7 @@ import dagger.Provides;
 import javafx.application.Application;
 import javafx.stage.Stage;
 
-@Module(includes = {CryptoEngineModule.class, CommonsModule.class, WebDavModule.class, JniModule.class})
+@Module(includes = {CryptoEngineModule.class, CommonsModule.class, WebDavModule.class})
 class CryptomatorModule {
 
 	private static final Logger LOG = LoggerFactory.getLogger(CryptomatorModule.class);
@@ -98,6 +100,12 @@ class CryptomatorModule {
 		webDavServer.setPort(settings.getPort());
 		webDavServer.start();
 		return closer.closeLater(webDavServer, WebDavServer::stop).get().orElseThrow(IllegalStateException::new);
+	}
+
+	@Provides
+	@Singleton
+	Optional<MacFunctions> provideMacFunctions() {
+		return JniModule.macFunctions();
 	}
 
 }

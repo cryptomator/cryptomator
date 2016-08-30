@@ -13,8 +13,8 @@ import java.util.concurrent.ExecutorService;
 
 import javax.inject.Singleton;
 
+import org.cryptomator.jni.MacFunctions;
 import org.cryptomator.ui.controllers.MainController;
-import org.cryptomator.ui.jni.MacFunctions;
 import org.cryptomator.ui.settings.Localization;
 import org.cryptomator.ui.util.AsyncTaskService;
 import org.cryptomator.ui.util.DeferredCloser;
@@ -38,4 +38,5 @@ interface CryptomatorComponent {
 	ExitUtil exitUtil();
 
 	Optional<MacFunctions> nativeMacFunctions();
+
 }

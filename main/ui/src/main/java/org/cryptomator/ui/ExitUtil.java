@@ -33,8 +33,9 @@ import javax.script.ScriptException;
 import javax.swing.SwingUtilities;
 
 import org.apache.commons.lang3.SystemUtils;
-import org.cryptomator.ui.jni.JniException;
-import org.cryptomator.ui.jni.MacFunctions;
+import org.cryptomator.jni.JniException;
+import org.cryptomator.jni.MacApplicationUiState;
+import org.cryptomator.jni.MacFunctions;
 import org.cryptomator.ui.settings.Localization;
 import org.cryptomator.ui.settings.Settings;
 import org.slf4j.Logger;
@@ -93,7 +94,7 @@ class ExitUtil {
 				if (Platform.isImplicitExit()) {
 					exitCommand.run();
 				} else {
-					macFunctions.ifPresent(JniException.ignore(MacFunctions::transformToAgentApplication));
+					macFunctions.map(MacFunctions::uiState).ifPresent(JniException.ignore(MacApplicationUiState::transformToAgentApplication));
 					mainWindow.close();
 					this.showTrayNotification(trayIcon);
 				}
@@ -195,7 +196,7 @@ class ExitUtil {
 
 	private void restoreFromTray(ActionEvent event) {
 		Platform.runLater(() -> {
-			macFunctions.ifPresent(JniException.ignore(MacFunctions::transformToForegroundApplication));
+			macFunctions.map(MacFunctions::uiState).ifPresent(JniException.ignore(MacApplicationUiState::transformToForegroundApplication));
 			mainWindow.show();
 			mainWindow.requestFocus();
 		});
