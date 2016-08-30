@@ -43,20 +43,6 @@ public class FileContentCryptorImplTest {
 
 	};
 
-	private static final SecureRandom RANDOM_MOCK_2 = new SecureRandom() {
-
-		@Override
-		public int nextInt(int bound) {
-			return 500;
-		}
-
-		@Override
-		public void nextBytes(byte[] bytes) {
-			Arrays.fill(bytes, (byte) 0x00);
-		}
-
-	};
-
 	@Test(expected = IllegalArgumentException.class)
 	public void testShortHeaderInDecryptor() throws InterruptedException {
 		final byte[] keyBytes = new byte[32];
@@ -135,45 +121,6 @@ public class FileContentCryptorImplTest {
 		byte[] result = new byte[plaintext.remaining()];
 		plaintext.get(result);
 		Assert.assertArrayEquals("cleartext message".getBytes(), result);
-	}
-
-	@Test
-	public void testEncryptionAndDecryptionWithSizeObfuscationPadding() throws InterruptedException {
-		final byte[] keyBytes = new byte[32];
-		final SecretKey encryptionKey = new SecretKeySpec(keyBytes, "AES");
-		final SecretKey macKey = new SecretKeySpec(keyBytes, "HmacSHA256");
-		FileContentCryptor cryptor = new FileContentCryptorImpl(encryptionKey, macKey, RANDOM_MOCK_2);
-
-		ByteBuffer header = ByteBuffer.allocate(cryptor.getHeaderSize());
-		ByteBuffer ciphertext = ByteBuffer.allocate(16 + 11 + 500 + 32 + 1); // 16 bytes iv + 11 bytes ciphertext + 500 bytes padding + 32 bytes mac + 1.
-		try (FileContentEncryptor encryptor = cryptor.createFileContentEncryptor(Optional.empty(), 0)) {
-			encryptor.append(ByteBuffer.wrap("hello world".getBytes()));
-			encryptor.append(FileContentCryptor.EOF);
-			ByteBuffer buf;
-			while ((buf = encryptor.ciphertext()) != FileContentCryptor.EOF) {
-				ByteBuffers.copy(buf, ciphertext);
-			}
-			ByteBuffers.copy(encryptor.getHeader(), header);
-		}
-		header.flip();
-		ciphertext.flip();
-
-		Assert.assertEquals(16 + 11 + 500 + 32, ciphertext.remaining());
-
-		ByteBuffer plaintext = ByteBuffer.allocate(12); // 11 bytes plaintext + 1
-		try (FileContentDecryptor decryptor = cryptor.createFileContentDecryptor(header, 0, true)) {
-			decryptor.append(ciphertext);
-			decryptor.append(FileContentCryptor.EOF);
-			ByteBuffer buf;
-			while ((buf = decryptor.cleartext()) != FileContentCryptor.EOF) {
-				ByteBuffers.copy(buf, plaintext);
-			}
-		}
-		plaintext.flip();
-
-		byte[] result = new byte[plaintext.remaining()];
-		plaintext.get(result);
-		Assert.assertArrayEquals("hello world".getBytes(), result);
 	}
 
 	@Test(timeout = 20000) // assuming a minimum speed of 10mb/s during encryption and decryption 20s should be enough

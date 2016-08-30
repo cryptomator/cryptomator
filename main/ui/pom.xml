@@ -59,6 +59,12 @@
 			<artifactId>jni</artifactId>
 		</dependency>
 		
+		<!-- CryptoLib -->
+		<dependency>
+			<groupId>org.cryptomator</groupId>
+			<artifactId>cryptolib</artifactId>
+		</dependency>
+		
 		<!-- EasyBind -->
 		<dependency>
 			<groupId>org.fxmisc.easybind</groupId>

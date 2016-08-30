@@ -16,6 +16,8 @@ interface NioAccess {
 
 	public static final Holder<NioAccess> DEFAULT = new Holder<>(new DefaultNioAccess());
 
+	long size(Path path) throws IOException;
+
 	AsynchronousFileChannel open(Path path, OpenOption... options) throws IOException;
 
 	boolean isRegularFile(Path path, LinkOption... options);

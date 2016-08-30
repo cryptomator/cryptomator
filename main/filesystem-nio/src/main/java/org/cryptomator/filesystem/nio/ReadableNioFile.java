@@ -42,11 +42,6 @@ class ReadableNioFile implements ReadableFile {
 	}
 
 	@Override
-	public long size() throws UncheckedIOException {
-		return channel.size();
-	}
-
-	@Override
 	public void position(long position) throws UncheckedIOException {
 		assertOpen();
 		if (position < 0) {

@@ -39,10 +39,10 @@ class DavFileWithUnsatisfiableRange extends DavFile {
 		if (!outputContext.hasStream()) {
 			return;
 		}
+		final long contentLength = node.size();
+		outputContext.setContentLength(contentLength);
+		outputContext.setProperty(HttpHeader.CONTENT_RANGE.asString(), "bytes */" + contentLength);
 		try (ReadableFile src = node.openReadable(); OutputStream out = outputContext.getOutputStream()) {
-			final long contentLength = src.size();
-			outputContext.setContentLength(contentLength);
-			outputContext.setProperty(HttpHeader.CONTENT_RANGE.asString(), "bytes */" + contentLength);
 			ByteStreams.copy(src, Channels.newChannel(out));
 		}
 	}

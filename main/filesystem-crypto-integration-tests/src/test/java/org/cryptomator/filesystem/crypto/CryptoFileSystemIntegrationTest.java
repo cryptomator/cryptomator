@@ -130,7 +130,7 @@ public class CryptoFileSystemIntegrationTest {
 
 		// toggle last bit
 		try (WritableFile writable = physicalFile.openWritable(); ReadableFile readable = physicalFile.openReadable()) {
-			ByteBuffer buf = ByteBuffer.allocate((int) readable.size());
+			ByteBuffer buf = ByteBuffer.allocate((int) physicalFile.size());
 			readable.read(buf);
 			buf.array()[buf.limit() - 1] ^= 0x01;
 			buf.flip();

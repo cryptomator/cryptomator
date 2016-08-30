@@ -8,6 +8,9 @@
  *******************************************************************************/
 package org.cryptomator.filesystem.crypto;
 
+import static org.cryptomator.crypto.engine.impl.Constants.CHUNK_SIZE;
+import static org.cryptomator.crypto.engine.impl.Constants.PAYLOAD_SIZE;
+
 import java.io.UncheckedIOException;
 import java.nio.file.FileAlreadyExistsException;
 import java.util.Optional;
@@ -26,6 +29,25 @@ class CryptoFile extends CryptoNode implements File {
 	@Override
 	protected Optional<String> encryptedName() {
 		return parent().get().encryptChildName(name());
+	}
+
+	@Override
+	public long size() throws UncheckedIOException {
+		if (!physicalFile().isPresent()) {
+			return -1l;
+		} else {
+			File file = physicalFile().get();
+			long ciphertextSize = file.size() - cryptor.getFileContentCryptor().getHeaderSize();
+			long overheadPerChunk = CHUNK_SIZE - PAYLOAD_SIZE;
+			long numFullChunks = ciphertextSize / CHUNK_SIZE; // floor by int-truncation
+			long additionalCiphertextBytes = ciphertextSize % CHUNK_SIZE;
+			if (additionalCiphertextBytes > 0 && additionalCiphertextBytes <= overheadPerChunk) {
+				throw new IllegalArgumentException("Method not defined for input value " + ciphertextSize);
+			}
+			long additionalCleartextBytes = (additionalCiphertextBytes == 0) ? 0 : additionalCiphertextBytes - overheadPerChunk;
+			assert additionalCleartextBytes >= 0;
+			return PAYLOAD_SIZE * numFullChunks + additionalCleartextBytes;
+		}
 	}
 
 	@Override

@@ -43,17 +43,6 @@ public class DelegatingReadableFileTest {
 	}
 
 	@Test
-	public void testSize() {
-		ReadableFile mockReadableFile = Mockito.mock(ReadableFile.class);
-		@SuppressWarnings("resource")
-		DelegatingReadableFile delegatingReadableFile = new DelegatingReadableFile(mockReadableFile);
-
-		Mockito.when(mockReadableFile.size()).thenReturn(42l);
-		Assert.assertEquals(42l, delegatingReadableFile.size());
-		Mockito.verify(mockReadableFile).size();
-	}
-
-	@Test
 	public void testPosition() {
 		ReadableFile mockReadableFile = Mockito.mock(ReadableFile.class);
 		@SuppressWarnings("resource")

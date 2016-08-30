@@ -12,6 +12,7 @@ import static java.lang.String.format;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Collection;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -117,9 +118,12 @@ public class WebDavServer implements FrontendFactory {
 			throw new IllegalStateException(e);
 		}
 		final ServletContextHandler handler = addServlet(root, uri);
-		tarpit.register(id);
 		LOG.info("Servlet available under " + uri);
-		return new WebDavFrontend(webdavMounterProvider, handler, uri, () -> tarpit.unregister(id));
+		return new WebDavFrontend(webdavMounterProvider, handler, uri);
+	}
+	
+	public void setValidFrontendIds(Collection<FrontendId> validFrontendIds) {
+		tarpit.setValidFrontendIds(validFrontendIds);
 	}
 
 }

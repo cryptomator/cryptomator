@@ -44,16 +44,9 @@ class NoFileContentCryptor implements FileContentCryptor {
 	private class Decryptor implements FileContentDecryptor {
 
 		private final BlockingQueue<Supplier<ByteBuffer>> cleartextQueue = new LinkedBlockingQueue<>();
-		private final long contentLength;
 
 		private Decryptor(ByteBuffer header) {
 			assert header.remaining() == Long.BYTES;
-			this.contentLength = header.getLong();
-		}
-
-		@Override
-		public long contentLength() {
-			return contentLength;
 		}
 
 		@Override
