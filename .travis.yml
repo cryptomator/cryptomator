@@ -1,5 +1,6 @@
 language: java
-sudo: false
+sudo: required
+dist: trusty
 jdk:
 - oraclejdk8
 env:
@@ -8,23 +9,25 @@ env:
     - secure: "lV9OwUbHMrMpLUH1CY+Z4puLDdFXytudyPlG1eGRsesdpuG6KM3uQVz6uAtf6lrU8DRbMM/T7ML+PmvQ4UoPPYLdLxESLLBat2qUPOIVBOhTSlCc7I0DmGy04CSvkeMy8dPaQC0ukgNiR7zwoNzfcpGRN/U9S8tziDruuHoZSrg=" #bintray
 addons:
   apt:
+    sources:
+    - sourceline: 'ppa:webupd8team/java'
     packages:
-    - oracle-java8-installer
+    - oracle-java8-unlimited-jce-policy
   coverity_scan:
     project:
       name: "cryptomator/cryptomator"
     notification_email: sebastian.stenzel@cryptomator.org
     build_command: "mvn -fmain/pom.xml clean test -DskipTests"
     branch_pattern: release.*
+script:
+- mvn -fmain/pom.xml -Ptest-coverage clean test jacoco:report-aggregate
 before_cache:
-- mvn -fmain/pom.xml -Ptest-coverage clean test -DskipTests
 - mvn -fmain/pom.xml -Prelease clean test -DskipTests
 cache:
   directories:
   - $HOME/.m2
-before_install: "curl -L --cookie 'oraclelicense=accept-securebackup-cookie;' http://download.oracle.com/otn-pub/java/jce/8/jce_policy-8.zip -o /tmp/policy.zip && unzip -j -o /tmp/policy.zip *.jar -d `jdk_switcher home oraclejdk8`/jre/lib/security && rm /tmp/policy.zip"
-script: mvn -fmain/pom.xml clean test
-after_success: "mvn -fmain/pom.xml -Ptest-coverage clean test jacoco:report-aggregate && bash <(curl -s https://codecov.io/bash)"
+after_success:
+- "bash <(curl -s https://codecov.io/bash)"
 notifications:
   webhooks:
     urls:
@@ -37,7 +40,8 @@ notifications:
       secure: "lngJ/HEAFBbD5AdiO9avMqptKpZHdmEwOzS9FabZjkdFh7yAYueTk5RniPUvShjsKtThYm7cJ8AtDMDwc07NvPrzbMBRtUJGwuDT+7c7YFALGFJ1NYi+emkC9x1oafvmPgEYSE+tMKzNcwrHi3ytGgKdIotsKwaF35QNXYA9aMs="
     on_success: change
     on_failure: always
-before_deploy: mvn -fmain/pom.xml -Prelease clean package -DskipTests
+before_deploy:
+- mvn -fmain/pom.xml -Prelease clean package -DskipTests
 deploy:
 - provider: releases
   prerelease: false
