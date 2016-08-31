@@ -2,6 +2,10 @@ language: java
 sudo: false
 jdk:
 - oraclejdk8
+env:
+  global:
+    - secure: "IfYURwZaDWuBDvyn47n0k1Zod/IQw1FF+CS5nnV08Q+NfC3vGGJMwV8m59XnbfwnWGxwvCaAbk4qP6s6+ijgZNKkvgfFMo3rfTok5zt43bIqgaFOANYV+OC/1c59gYD6ZUxhW5iNgMgU3qdsRtJuwSmfkVv/jKyLGfAbS4kN8BA=" #coverity
+    - secure: "lV9OwUbHMrMpLUH1CY+Z4puLDdFXytudyPlG1eGRsesdpuG6KM3uQVz6uAtf6lrU8DRbMM/T7ML+PmvQ4UoPPYLdLxESLLBat2qUPOIVBOhTSlCc7I0DmGy04CSvkeMy8dPaQC0ukgNiR7zwoNzfcpGRN/U9S8tziDruuHoZSrg=" #bintray
 addons:
   apt:
     packages:
@@ -18,10 +22,7 @@ before_cache:
 cache:
   directories:
   - $HOME/.m2
-env:
-  global:
-    - secure: "IfYURwZaDWuBDvyn47n0k1Zod/IQw1FF+CS5nnV08Q+NfC3vGGJMwV8m59XnbfwnWGxwvCaAbk4qP6s6+ijgZNKkvgfFMo3rfTok5zt43bIqgaFOANYV+OC/1c59gYD6ZUxhW5iNgMgU3qdsRtJuwSmfkVv/jKyLGfAbS4kN8BA=" #coverity
-    - secure: "lV9OwUbHMrMpLUH1CY+Z4puLDdFXytudyPlG1eGRsesdpuG6KM3uQVz6uAtf6lrU8DRbMM/T7ML+PmvQ4UoPPYLdLxESLLBat2qUPOIVBOhTSlCc7I0DmGy04CSvkeMy8dPaQC0ukgNiR7zwoNzfcpGRN/U9S8tziDruuHoZSrg=" #bintray
+before_install: "curl -L --cookie 'oraclelicense=accept-securebackup-cookie;' http://download.oracle.com/otn-pub/java/jce/8/jce_policy-8.zip -o /tmp/policy.zip && unzip -j -o /tmp/policy.zip *.jar -d `jdk_switcher home oraclejdk8`/jre/lib/security && rm /tmp/policy.zip"
 script: mvn -fmain/pom.xml clean test
 after_success: "mvn -fmain/pom.xml -Ptest-coverage clean test jacoco:report-aggregate && bash <(curl -s https://codecov.io/bash)"
 notifications:
