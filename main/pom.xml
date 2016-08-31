@@ -273,6 +273,7 @@
 		<module>filesystem-inmemory</module>
 		<module>filesystem-nio</module>
 		<module>filesystem-nameshortening</module>
+		<module>filesystem-charsets</module>
 		<module>filesystem-crypto</module>
 		<module>filesystem-crypto-integration-tests</module>
 		<module>filesystem-stats</module>
@@ -280,7 +281,6 @@
 		<module>frontend-api</module>
 		<module>frontend-webdav</module>
 		<module>ui</module>
-		<module>filesystem-charsets</module>
 	</modules>
 
 	<profiles>
