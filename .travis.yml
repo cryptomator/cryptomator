@@ -6,6 +6,8 @@ addons:
     - oracle-java8-installer
     - oracle-java8-unlimited-jce-policy
     - oracle-java8-set-default
+jdk:
+  - oraclejdk8
 cache:
   directories:
   - $HOME/.m2
