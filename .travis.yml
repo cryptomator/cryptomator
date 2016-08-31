@@ -1,8 +1,10 @@
 language: java
-sudo: required
-dist: trusty
-jdk:
-- oraclejdk8
+sudo: false
+addons:
+  apt:
+    packages:
+    - oracle-java8-installer
+    - oracle-java8-unlimited-jce-policy
 cache:
   directories:
   - $HOME/.m2
