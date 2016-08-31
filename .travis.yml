@@ -5,6 +5,7 @@ addons:
     packages:
     - oracle-java8-installer
     - oracle-java8-unlimited-jce-policy
+    - oracle-java8-set-default
 cache:
   directories:
   - $HOME/.m2
