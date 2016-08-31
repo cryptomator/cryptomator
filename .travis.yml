@@ -2,6 +2,8 @@ language: java
 sudo: false
 addons:
   apt:
+    sources:
+    - sourceline: 'ppa:webupd8team/java'
     packages:
     - oracle-java8-installer
     - oracle-java8-unlimited-jce-policy
