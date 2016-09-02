@@ -68,12 +68,16 @@
 			</HBox>
 			
 			<!-- Row 3.1 -->
-			<Label text="%unlock.label.mountName" GridPane.rowIndex="1" GridPane.columnIndex="0" cacheShape="true" cache="true" />
-			<TextField fx:id="mountName" GridPane.rowIndex="1" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" maxWidth="Infinity" cacheShape="true" cache="true" />
+			<Label GridPane.rowIndex="1" GridPane.columnIndex="0" text="%unlock.label.savePassword" cacheShape="true" cache="true" />
+			<CheckBox GridPane.rowIndex="1" GridPane.columnIndex="1" fx:id="savePassword" cacheShape="true" cache="true" />
 			
 			<!-- Row 3.2 -->
-			<Label fx:id="winDriveLetterLabel" text="%unlock.label.winDriveLetter" GridPane.rowIndex="2" GridPane.columnIndex="0" cacheShape="true" cache="true" />
-			<ChoiceBox fx:id="winDriveLetter" GridPane.rowIndex="2" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" maxWidth="Infinity" cacheShape="true" cache="true" />
+			<Label GridPane.rowIndex="2" GridPane.columnIndex="0" text="%unlock.label.mountName"  cacheShape="true" cache="true" />
+			<TextField GridPane.rowIndex="2" GridPane.columnIndex="1" fx:id="mountName"  GridPane.hgrow="ALWAYS" maxWidth="Infinity" cacheShape="true" cache="true" />
+			
+			<!-- Row 3.3 -->
+			<Label GridPane.rowIndex="3" GridPane.columnIndex="0" fx:id="winDriveLetterLabel" text="%unlock.label.winDriveLetter" cacheShape="true" cache="true" />
+			<ChoiceBox GridPane.rowIndex="3" GridPane.columnIndex="1" fx:id="winDriveLetter" GridPane.hgrow="ALWAYS" maxWidth="Infinity" cacheShape="true" cache="true" />
 		</GridPane>
 		
 		<!-- Row 4 -->

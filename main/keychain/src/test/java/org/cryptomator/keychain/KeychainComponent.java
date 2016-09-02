@@ -8,7 +8,7 @@ import dagger.Component;
 
 @Singleton
 @Component(modules = KeychainModule.class)
-public interface KeychainComponent {
+interface KeychainComponent {
 
 	Optional<KeychainAccess> keychainAccess();
 

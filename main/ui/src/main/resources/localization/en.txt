@@ -49,6 +49,7 @@ upgrade.version3to4.err.io=Migration failed due to an I/O Exception. See log fil
 
 # unlock.fxml
 unlock.label.password=Password
+unlock.label.savePassword=Save password
 unlock.label.mountName=Drive name
 unlock.label.winDriveLetter=Drive letter
 unlock.label.downloadsPageLink=All Cryptomator versions

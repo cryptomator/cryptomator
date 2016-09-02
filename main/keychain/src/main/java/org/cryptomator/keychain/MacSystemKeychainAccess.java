@@ -1,7 +1,5 @@
 package org.cryptomator.keychain;
 
-import java.nio.CharBuffer;
-
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -29,8 +27,8 @@ class MacSystemKeychainAccess implements KeychainAccessStrategy {
 	}
 
 	@Override
-	public CharSequence loadPassphrase(String key) {
-		return CharBuffer.wrap(keychain.loadPassword(key));
+	public char[] loadPassphrase(String key) {
+		return keychain.loadPassword(key);
 	}
 
 	@Override

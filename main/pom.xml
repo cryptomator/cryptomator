@@ -58,7 +58,6 @@
 				<version>${project.version}</version>
 				<scope>test</scope>
 			</dependency>
-
 			<dependency>
 				<groupId>org.cryptomator</groupId>
 				<artifactId>filesystem-api</artifactId>
@@ -107,7 +106,6 @@
 				<artifactId>filesystem-stats</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.cryptomator</groupId>
 				<artifactId>frontend-api</artifactId>
@@ -118,7 +116,11 @@
 				<artifactId>frontend-webdav</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
+			<dependency>
+				<groupId>org.cryptomator</groupId>
+				<artifactId>keychain</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 			<dependency>
 				<groupId>org.cryptomator</groupId>
 				<artifactId>ui</artifactId>

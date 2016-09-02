@@ -32,7 +32,7 @@ class WindowsSystemKeychainAccess implements KeychainAccessStrategy {
 	}
 
 	@Override
-	public CharSequence loadPassphrase(String key) {
+	public char[] loadPassphrase(String key) {
 		// TODO Auto-generated method stub
 		return null;
 	}

@@ -14,7 +14,7 @@ public interface KeychainAccess {
 	 * @param key Unique key previously used while {@link #storePassphrase(String, CharSequence) storing a passphrase}.
 	 * @return The stored passphrase for the given key or <code>null</code> if no value for the given key could be found.
 	 */
-	CharSequence loadPassphrase(String key);
+	char[] loadPassphrase(String key);
 
 	/**
 	 * Deletes a passphrase with a given key.

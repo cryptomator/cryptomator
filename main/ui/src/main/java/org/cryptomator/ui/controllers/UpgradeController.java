@@ -27,11 +27,11 @@ import javafx.scene.control.ProgressIndicator;
 
 public class UpgradeController extends LocalizedFXMLViewController {
 
-	final ObjectProperty<Vault> vault = new SimpleObjectProperty<>();
-	final ObjectProperty<Optional<UpgradeStrategy>> strategy = new SimpleObjectProperty<>();
+	private final ObjectProperty<Optional<UpgradeStrategy>> strategy = new SimpleObjectProperty<>();
 	private final UpgradeStrategies strategies;
 	private final AsyncTaskService asyncTaskService;
 	private Optional<UpgradeListener> listener = Optional.empty();
+	private Vault vault;
 
 	@Inject
 	public UpgradeController(Localization localization, UpgradeStrategies strategies, AsyncTaskService asyncTaskService) {
@@ -67,8 +67,6 @@ public class UpgradeController extends LocalizedFXMLViewController {
 		BooleanExpression passwordProvided = passwordField.textProperty().isNotEmpty().and(passwordField.disabledProperty().not());
 		BooleanExpression syncFinished = confirmationCheckbox.selectedProperty();
 		upgradeButton.disableProperty().bind(passwordProvided.not().or(syncFinished.not()));
-
-		EasyBind.subscribe(vault, this::vaultDidChange);
 	}
 
 	@Override
@@ -76,9 +74,10 @@ public class UpgradeController extends LocalizedFXMLViewController {
 		return getClass().getResource("/fxml/upgrade.fxml");
 	}
 
-	private void vaultDidChange(Vault newVault) {
+	void setVault(Vault vault) {
+		this.vault = Objects.requireNonNull(vault);
 		errorLabel.setText(null);
-		strategy.set(strategies.getUpgradeStrategy(newVault));
+		strategy.set(strategies.getUpgradeStrategy(vault));
 		// trigger "default" change to refresh key bindings:
 		upgradeButton.setDefaultButton(false);
 		upgradeButton.setDefaultButton(true);
@@ -89,7 +88,7 @@ public class UpgradeController extends LocalizedFXMLViewController {
 	// ****************************************
 
 	private String upgradeNotification(UpgradeStrategy instruction) {
-		return instruction.getNotification(vault.get());
+		return instruction.getNotification(vault);
 	}
 
 	// ****************************************
@@ -102,15 +101,14 @@ public class UpgradeController extends LocalizedFXMLViewController {
 	}
 
 	private void upgrade(UpgradeStrategy instruction) {
-		Vault v = Objects.requireNonNull(vault.getValue());
 		passwordField.setDisable(true);
 		progressIndicator.setVisible(true);
 		asyncTaskService //
 				.asyncTaskOf(() -> {
-					if (!instruction.isApplicable(v)) {
-						throw new IllegalStateException("No ugprade needed for " + v.path().getValue());
+					if (!instruction.isApplicable(vault)) {
+						throw new IllegalStateException("No ugprade needed for " + vault.path().getValue());
 					}
-					instruction.upgrade(v, passwordField.getCharacters());
+					instruction.upgrade(vault, passwordField.getCharacters());
 				}) //
 				.onSuccess(this::showNextUpgrade) //
 				.onError(UpgradeFailedException.class, e -> {
@@ -125,7 +123,7 @@ public class UpgradeController extends LocalizedFXMLViewController {
 
 	private void showNextUpgrade() {
 		errorLabel.setText(null);
-		Optional<UpgradeStrategy> nextStrategy = strategies.getUpgradeStrategy(vault.getValue());
+		Optional<UpgradeStrategy> nextStrategy = strategies.getUpgradeStrategy(vault);
 		if (nextStrategy.isPresent()) {
 			strategy.set(nextStrategy);
 		} else {
