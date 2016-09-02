@@ -32,12 +32,12 @@ class Tarpit implements Serializable {
 	private final Set<FrontendId> validFrontendIds = synchronizedSet(new HashSet<>());
 
 	@Inject
-	public Tarpit() {}
+	public Tarpit() {
+	}
 
 	public void setValidFrontendIds(Collection<FrontendId> validFrontendIds) {
 		this.validFrontendIds.retainAll(validFrontendIds);
 		this.validFrontendIds.addAll(validFrontendIds);
-		validFrontendIds.forEach(System.out::println);
 	}
 
 	public void handle(HttpServletRequest req) {
