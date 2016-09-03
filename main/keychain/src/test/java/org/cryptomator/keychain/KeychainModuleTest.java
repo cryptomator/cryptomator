@@ -9,7 +9,7 @@ public class KeychainModuleTest {
 
 	@Test
 	public void testGetKeychain() {
-		Optional<KeychainAccess> keychainAccess = DaggerKeychainComponent.builder().keychainModule(new KeychainTestModule()).build().keychainAccess();
+		Optional<KeychainAccess> keychainAccess = DaggerTestKeychainComponent.builder().jniModule(new TestJniModule()).keychainModule(new TestKeychainModule()).build().keychainAccess();
 		Assert.assertTrue(keychainAccess.isPresent());
 		Assert.assertTrue(keychainAccess.get() instanceof MapKeychainAccess);
 	}

@@ -10,7 +10,6 @@ package org.cryptomator.ui;
 
 import static java.util.stream.Collectors.toList;
 
-import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -24,7 +23,6 @@ import org.cryptomator.frontend.FrontendId;
 import org.cryptomator.frontend.webdav.WebDavModule;
 import org.cryptomator.frontend.webdav.WebDavServer;
 import org.cryptomator.jni.JniModule;
-import org.cryptomator.jni.MacFunctions;
 import org.cryptomator.keychain.KeychainModule;
 import org.cryptomator.ui.model.Vault;
 import org.cryptomator.ui.model.VaultObjectMapperProvider;
@@ -43,7 +41,7 @@ import javafx.application.Application;
 import javafx.beans.Observable;
 import javafx.stage.Stage;
 
-@Module(includes = {CryptoEngineModule.class, CommonsModule.class, WebDavModule.class, KeychainModule.class})
+@Module(includes = {CryptoEngineModule.class, CommonsModule.class, WebDavModule.class, KeychainModule.class, JniModule.class})
 class CryptomatorModule {
 
 	private static final Logger LOG = LoggerFactory.getLogger(CryptomatorModule.class);
@@ -109,12 +107,6 @@ class CryptomatorModule {
 		webDavServer.setPort(settings.getPort());
 		webDavServer.start();
 		return closer.closeLater(webDavServer, WebDavServer::stop).get().orElseThrow(IllegalStateException::new);
-	}
-
-	@Provides
-	@Singleton
-	Optional<MacFunctions> provideMacFunctions() {
-		return JniModule.macFunctions();
 	}
 
 	private void setValidFrontendIds(WebDavServer webDavServer, Vaults vaults) {

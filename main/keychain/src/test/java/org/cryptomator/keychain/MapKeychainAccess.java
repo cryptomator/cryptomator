@@ -23,8 +23,7 @@ class MapKeychainAccess implements KeychainAccessStrategy {
 
 	@Override
 	public void deletePassphrase(String key) {
-		// TODO Auto-generated method stub
-
+		map.remove(key);
 	}
 
 	@Override

@@ -1,21 +1,21 @@
 package org.cryptomator.keychain;
 
+import java.util.Optional;
+
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 import org.apache.commons.lang3.SystemUtils;
-import org.cryptomator.jni.JniModule;
+import org.cryptomator.jni.MacFunctions;
 import org.cryptomator.jni.MacKeychainAccess;
 
-@Singleton
 class MacSystemKeychainAccess implements KeychainAccessStrategy {
 
 	private final MacKeychainAccess keychain;
 
 	@Inject
-	public MacSystemKeychainAccess() {
-		if (JniModule.macFunctions().isPresent()) {
-			this.keychain = JniModule.macFunctions().get().getKeychainAccess();
+	public MacSystemKeychainAccess(Optional<MacFunctions> macFunctions) {
+		if (macFunctions.isPresent()) {
+			this.keychain = macFunctions.get().keychainAccess();
 		} else {
 			this.keychain = null;
 		}
