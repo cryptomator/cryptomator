@@ -64,11 +64,14 @@ class WindowsProtectedKeychainAccess implements KeychainAccessStrategy {
 		} else {
 			this.dataProtection = null;
 		}
-		final String keychainPathProperty = System.getProperty("cryptomator.keychainPath");
+		String keychainPathProperty = System.getProperty("cryptomator.keychainPath");
 		if (dataProtection != null && keychainPathProperty == null) {
-			LOG.warn("Windows DataProtection module loaded, but no keychainPath configured.");
+			LOG.warn("Windows DataProtection module loaded, but no cryptomator.keychainPath property found.");
 		}
 		if (keychainPathProperty != null) {
+			if (keychainPathProperty.startsWith("~/")) {
+				keychainPathProperty = SystemUtils.USER_HOME + keychainPathProperty.substring(1);
+			}
 			this.keychainPath = FileSystems.getDefault().getPath(keychainPathProperty);
 		} else {
 			this.keychainPath = null;
