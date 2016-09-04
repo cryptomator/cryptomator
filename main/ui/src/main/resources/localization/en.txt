@@ -26,6 +26,7 @@ initialize.label.password=Password
 initialize.label.retypePassword=Retype password
 initialize.button.ok=Create vault
 initialize.messageLabel.alreadyInitialized=Vault already initialized
+initialize.messageLabel.notEmpty=Vault not empty
 initialize.messageLabel.initializationFailed=Could not initialize vault. See log file for details.
 initialize.messageLabel.passwordStrength.0=Very weak
 initialize.messageLabel.passwordStrength.1=Weak

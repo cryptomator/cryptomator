@@ -10,8 +10,8 @@
 package org.cryptomator.ui.controllers;
 
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.net.URL;
+import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.FileAlreadyExistsException;
 import java.util.Objects;
 import java.util.Optional;
@@ -124,7 +124,9 @@ public class InitializeController extends LocalizedFXMLViewController {
 			listener.ifPresent(this::invokeListenerLater);
 		} catch (FileAlreadyExistsException ex) {
 			messageLabel.setText(localization.getString("initialize.messageLabel.alreadyInitialized"));
-		} catch (UncheckedIOException | IOException ex) {
+		} catch (DirectoryNotEmptyException ex) {
+			messageLabel.setText(localization.getString("initialize.messageLabel.notEmpty"));
+		} catch (IOException ex) {
 			LOG.error("I/O Exception", ex);
 			messageLabel.setText(localization.getString("initialize.messageLabel.initializationFailed"));
 		} finally {
