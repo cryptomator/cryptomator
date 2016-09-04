@@ -26,6 +26,7 @@ initialize.label.password=Password
 initialize.label.retypePassword=Retype password
 initialize.button.ok=Create vault
 initialize.messageLabel.alreadyInitialized=Vault already initialized
+initialize.messageLabel.notEmpty=Vault not empty
 initialize.messageLabel.initializationFailed=Could not initialize vault. See log file for details.
 initialize.messageLabel.passwordStrength.0=Very weak
 initialize.messageLabel.passwordStrength.1=Weak
@@ -49,6 +50,7 @@ upgrade.version3to4.err.io=Migration failed due to an I/O Exception. See log fil
 
 # unlock.fxml
 unlock.label.password=Password
+unlock.label.savePassword=Save password
 unlock.label.mountName=Drive name
 unlock.label.winDriveLetter=Drive letter
 unlock.label.downloadsPageLink=All Cryptomator versions

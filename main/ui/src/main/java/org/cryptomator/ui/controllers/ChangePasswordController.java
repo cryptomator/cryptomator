@@ -12,6 +12,7 @@ package org.cryptomator.ui.controllers;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.URL;
+import java.util.Objects;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -31,9 +32,7 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -49,9 +48,9 @@ public class ChangePasswordController extends LocalizedFXMLViewController {
 
 	private final Application app;
 	private final PasswordStrengthUtil strengthRater;
-	final ObjectProperty<Vault> vault = new SimpleObjectProperty<>();
-	private Optional<ChangePasswordListener> listener = Optional.empty();
 	private final IntegerProperty passwordStrength = new SimpleIntegerProperty(); // 0-4
+	private Optional<ChangePasswordListener> listener = Optional.empty();
+	private Vault vault;
 
 	@Inject
 	public ChangePasswordController(Application app, PasswordStrengthUtil strengthRater, Localization localization) {
@@ -101,7 +100,6 @@ public class ChangePasswordController extends LocalizedFXMLViewController {
 		BooleanBinding oldPasswordIsEmpty = oldPasswordField.textProperty().isEmpty();
 		BooleanBinding newPasswordIsEmpty = newPasswordField.textProperty().isEmpty();
 		BooleanBinding passwordsDiffer = newPasswordField.textProperty().isNotEqualTo(retypePasswordField.textProperty());
-		EasyBind.subscribe(vault, this::vaultDidChange);
 		changePasswordButton.disableProperty().bind(oldPasswordIsEmpty.or(newPasswordIsEmpty.or(passwordsDiffer)));
 		passwordStrength.bind(EasyBind.map(newPasswordField.textProperty(), strengthRater::computeRate));
 
@@ -118,10 +116,11 @@ public class ChangePasswordController extends LocalizedFXMLViewController {
 		return getClass().getResource("/fxml/change_password.fxml");
 	}
 
-	private void vaultDidChange(Vault newVault) {
-		oldPasswordField.clear();
-		newPasswordField.clear();
-		retypePasswordField.clear();
+	void setVault(Vault vault) {
+		this.vault = Objects.requireNonNull(vault);
+		oldPasswordField.swipe();
+		newPasswordField.swipe();
+		retypePasswordField.swipe();
 		// trigger "default" change to refresh key bindings:
 		changePasswordButton.setDefaultButton(false);
 		changePasswordButton.setDefaultButton(true);
@@ -144,7 +143,7 @@ public class ChangePasswordController extends LocalizedFXMLViewController {
 	private void didClickChangePasswordButton(ActionEvent event) {
 		downloadsPageLink.setVisible(false);
 		try {
-			vault.get().changePassphrase(oldPasswordField.getCharacters(), newPasswordField.getCharacters());
+			vault.changePassphrase(oldPasswordField.getCharacters(), newPasswordField.getCharacters());
 			messageText.setText(localization.getString("changePassword.infoMessage.success"));
 			listener.ifPresent(this::invokeListenerLater);
 		} catch (InvalidPassphraseException e) {

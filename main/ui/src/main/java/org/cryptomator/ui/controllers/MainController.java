@@ -315,7 +315,8 @@ public class MainController extends LocalizedFXMLViewController {
 
 	private void showInitializeView() {
 		final InitializeController ctrl = initializeController.get();
-		ctrl.vault.bind(selectedVault);
+		ctrl.loadFxml();
+		ctrl.setVault(selectedVault.get());
 		ctrl.setListener(this::didInitialize);
 		activeController.set(ctrl);
 	}
@@ -326,7 +327,8 @@ public class MainController extends LocalizedFXMLViewController {
 
 	private void showUpgradeView() {
 		final UpgradeController ctrl = upgradeController.get();
-		ctrl.vault.bind(selectedVault);
+		ctrl.loadFxml();
+		ctrl.setVault(selectedVault.get());
 		ctrl.setListener(this::didUpgrade);
 		activeController.set(ctrl);
 	}
@@ -337,7 +339,8 @@ public class MainController extends LocalizedFXMLViewController {
 
 	private void showUnlockView() {
 		final UnlockController ctrl = unlockController.get();
-		ctrl.vault.bind(selectedVault);
+		ctrl.loadFxml();
+		ctrl.setVault(selectedVault.get());
 		ctrl.setListener(this::didUnlock);
 		activeController.set(ctrl);
 	}
@@ -353,6 +356,7 @@ public class MainController extends LocalizedFXMLViewController {
 		final UnlockedController ctrl = unlockedVaults.computeIfAbsent(vault, k -> {
 			return unlockedControllerProvider.get();
 		});
+		ctrl.loadFxml();
 		ctrl.setVault(vault);
 		ctrl.setListener(this::didLock);
 		activeController.set(ctrl);
@@ -368,7 +372,8 @@ public class MainController extends LocalizedFXMLViewController {
 
 	private void showChangePasswordView() {
 		final ChangePasswordController ctrl = changePasswordController.get();
-		ctrl.vault.bind(selectedVault);
+		ctrl.loadFxml();
+		ctrl.setVault(selectedVault.get());
 		ctrl.setListener(this::didChangePassword);
 		activeController.set(ctrl);
 	}

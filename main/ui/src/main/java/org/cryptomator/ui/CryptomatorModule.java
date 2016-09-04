@@ -22,6 +22,8 @@ import org.cryptomator.frontend.FrontendFactory;
 import org.cryptomator.frontend.FrontendId;
 import org.cryptomator.frontend.webdav.WebDavModule;
 import org.cryptomator.frontend.webdav.WebDavServer;
+import org.cryptomator.jni.JniModule;
+import org.cryptomator.keychain.KeychainModule;
 import org.cryptomator.ui.model.Vault;
 import org.cryptomator.ui.model.VaultObjectMapperProvider;
 import org.cryptomator.ui.model.Vaults;
@@ -39,7 +41,7 @@ import javafx.application.Application;
 import javafx.beans.Observable;
 import javafx.stage.Stage;
 
-@Module(includes = {CryptoEngineModule.class, CommonsModule.class, WebDavModule.class})
+@Module(includes = {CryptoEngineModule.class, CommonsModule.class, WebDavModule.class, KeychainModule.class, JniModule.class})
 class CryptomatorModule {
 
 	private static final Logger LOG = LoggerFactory.getLogger(CryptomatorModule.class);
@@ -109,9 +111,7 @@ class CryptomatorModule {
 
 	private void setValidFrontendIds(WebDavServer webDavServer, Vaults vaults) {
 		webDavServer.setValidFrontendIds(vaults.stream() //
-				.map(Vault::getId)
-				.map(FrontendId::from)
-				.collect(toList()));
+				.map(Vault::getId).map(FrontendId::from).collect(toList()));
 	}
 
 }

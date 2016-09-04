@@ -12,6 +12,7 @@ import static org.apache.commons.lang3.StringUtils.stripStart;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -30,6 +31,7 @@ import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.LazyInitializer;
 import org.cryptomator.common.Optionals;
 import org.cryptomator.crypto.engine.InvalidPassphraseException;
+import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.FileSystem;
 import org.cryptomator.filesystem.charsets.NormalizedNameFileSystem;
 import org.cryptomator.filesystem.crypto.CryptoFileSystemDelegate;
@@ -109,8 +111,10 @@ public class Vault implements CryptoFileSystemDelegate {
 	public void create(CharSequence passphrase) throws IOException {
 		try {
 			FileSystem fs = getNioFileSystem();
-			if (fs.children().count() > 0) {
-				throw new FileAlreadyExistsException(null, null, "Vault location not empty.");
+			if (fs.files().map(File::name).filter(s -> s.endsWith(VAULT_FILE_EXTENSION)).count() > 0) {
+				throw new FileAlreadyExistsException("masterkey.cryptomator", null, "Vault location not empty.");
+			} else if (fs.folders().count() > 0) {
+				throw new DirectoryNotEmptyException(fs.toString());
 			}
 			cryptoFileSystemFactory.initializeNew(fs, passphrase);
 		} catch (UncheckedIOException e) {

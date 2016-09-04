@@ -28,6 +28,7 @@
 
 		<!-- dependency versions -->
 		<cryptomator.cryptolib.version>1.0.0-SNAPSHOT</cryptomator.cryptolib.version>
+		<cryptomator.jni.version>1.0.0-SNAPSHOT</cryptomator.jni.version>
 		<log4j.version>2.1</log4j.version>
 		<slf4j.version>1.7.7</slf4j.version>
 		<junit.version>4.12</junit.version>
@@ -40,7 +41,7 @@
 		<commons-httpclient.version>3.1</commons-httpclient.version>
 		<jackson-databind.version>2.4.4</jackson-databind.version>
 		<mockito.version>1.10.19</mockito.version>
-		<dagger.version>2.4</dagger.version>
+		<dagger.version>2.6.1</dagger.version>
 	</properties>
 
 	<dependencyManagement>
@@ -57,7 +58,6 @@
 				<version>${project.version}</version>
 				<scope>test</scope>
 			</dependency>
-
 			<dependency>
 				<groupId>org.cryptomator</groupId>
 				<artifactId>filesystem-api</artifactId>
@@ -106,7 +106,6 @@
 				<artifactId>filesystem-stats</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.cryptomator</groupId>
 				<artifactId>frontend-api</artifactId>
@@ -117,18 +116,27 @@
 				<artifactId>frontend-webdav</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
+			<dependency>
+				<groupId>org.cryptomator</groupId>
+				<artifactId>keychain</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 			<dependency>
 				<groupId>org.cryptomator</groupId>
 				<artifactId>ui</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			
-			<!-- Libs -->
+			<!-- Cryptomator Libs -->
 			<dependency>
 				<groupId>org.cryptomator</groupId>
 				<artifactId>cryptolib</artifactId>
 				<version>${cryptomator.cryptolib.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.cryptomator</groupId>
+				<artifactId>jni</artifactId>
+				<version>${cryptomator.jni.version}</version>
 			</dependency>
 
 			<!-- Logging -->
@@ -280,6 +288,7 @@
 		<module>filesystem-invariants-tests</module>
 		<module>frontend-api</module>
 		<module>frontend-webdav</module>
+		<module>keychain</module>
 		<module>ui</module>
 	</modules>
 

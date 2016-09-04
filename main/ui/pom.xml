@@ -54,6 +54,14 @@
 			<groupId>org.cryptomator</groupId>
 			<artifactId>frontend-webdav</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.cryptomator</groupId>
+			<artifactId>jni</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.cryptomator</groupId>
+			<artifactId>keychain</artifactId>
+		</dependency>
 		
 		<!-- CryptoLib -->
 		<dependency>

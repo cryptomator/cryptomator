@@ -10,9 +10,10 @@
 package org.cryptomator.ui.controllers;
 
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.net.URL;
+import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.FileAlreadyExistsException;
+import java.util.Objects;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -29,9 +30,7 @@ import org.slf4j.LoggerFactory;
 import javafx.application.Platform;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -44,9 +43,9 @@ public class InitializeController extends LocalizedFXMLViewController {
 	private static final Logger LOG = LoggerFactory.getLogger(InitializeController.class);
 
 	private final PasswordStrengthUtil strengthRater;
-	final ObjectProperty<Vault> vault = new SimpleObjectProperty<>();
-	private Optional<InitializationListener> listener = Optional.empty();
 	private final IntegerProperty passwordStrength = new SimpleIntegerProperty(); // 0-4
+	private Optional<InitializationListener> listener = Optional.empty();
+	private Vault vault;
 
 	@Inject
 	public InitializeController(Localization localization, PasswordStrengthUtil strengthRater) {
@@ -88,7 +87,6 @@ public class InitializeController extends LocalizedFXMLViewController {
 	public void initialize() {
 		BooleanBinding passwordIsEmpty = passwordField.textProperty().isEmpty();
 		BooleanBinding passwordsDiffer = passwordField.textProperty().isNotEqualTo(retypePasswordField.textProperty());
-		EasyBind.subscribe(vault, this::vaultDidChange);
 		okButton.disableProperty().bind(passwordIsEmpty.or(passwordsDiffer));
 		passwordStrength.bind(EasyBind.map(passwordField.textProperty(), strengthRater::computeRate));
 
@@ -105,9 +103,10 @@ public class InitializeController extends LocalizedFXMLViewController {
 		return getClass().getResource("/fxml/initialize.fxml");
 	}
 
-	private void vaultDidChange(Vault newVault) {
-		passwordField.clear();
-		retypePasswordField.clear();
+	void setVault(Vault vault) {
+		this.vault = Objects.requireNonNull(vault);
+		passwordField.swipe();
+		retypePasswordField.swipe();
 		// trigger "default" change to refresh key bindings:
 		okButton.setDefaultButton(false);
 		okButton.setDefaultButton(true);
@@ -121,11 +120,13 @@ public class InitializeController extends LocalizedFXMLViewController {
 	protected void initializeVault(ActionEvent event) {
 		final CharSequence passphrase = passwordField.getCharacters();
 		try {
-			vault.get().create(passphrase);
+			vault.create(passphrase);
 			listener.ifPresent(this::invokeListenerLater);
 		} catch (FileAlreadyExistsException ex) {
 			messageLabel.setText(localization.getString("initialize.messageLabel.alreadyInitialized"));
-		} catch (UncheckedIOException | IOException ex) {
+		} catch (DirectoryNotEmptyException ex) {
+			messageLabel.setText(localization.getString("initialize.messageLabel.notEmpty"));
+		} catch (IOException ex) {
 			LOG.error("I/O Exception", ex);
 			messageLabel.setText(localization.getString("initialize.messageLabel.initializationFailed"));
 		} finally {
