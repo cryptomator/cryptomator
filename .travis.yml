@@ -3,6 +3,9 @@ sudo: required
 dist: trusty
 jdk:
 - oraclejdk8
+cache:
+  directories:
+  - $HOME/.m2
 env:
   global:
     - secure: "IfYURwZaDWuBDvyn47n0k1Zod/IQw1FF+CS5nnV08Q+NfC3vGGJMwV8m59XnbfwnWGxwvCaAbk4qP6s6+ijgZNKkvgfFMo3rfTok5zt43bIqgaFOANYV+OC/1c59gYD6ZUxhW5iNgMgU3qdsRtJuwSmfkVv/jKyLGfAbS4kN8BA=" #coverity
@@ -14,13 +17,11 @@ addons:
     notification_email: sebastian.stenzel@cryptomator.org
     build_command: "mvn -fmain/pom.xml clean test -DskipTests"
     branch_pattern: release.*
+install:
+- mvn -fmain/pom.xml dependency:go-offline -Ptest-coverage
+- mvn -fmain/pom.xml dependency:go-offline -Prelease
 script:
 - mvn --update-snapshots -fmain/pom.xml -Ptest-coverage clean test jacoco:report-aggregate
-before_cache:
-- mvn -fmain/pom.xml -Prelease clean test -DskipTests
-cache:
-  directories:
-  - $HOME/.m2
 after_success:
 - "bash <(curl -s https://codecov.io/bash)"
 notifications:
