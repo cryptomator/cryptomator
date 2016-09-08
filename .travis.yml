@@ -18,6 +18,7 @@ addons:
     build_command: "mvn -fmain/pom.xml clean test -DskipTests"
     branch_pattern: release.*
 install:
+# "clean" needed until https://bugs.openjdk.java.net/browse/JDK-8067747 is resolved.
 - mvn -fmain/pom.xml clean package -DskipTests dependency:go-offline -Ptest-coverage
 - mvn -fmain/pom.xml clean package -DskipTests dependency:go-offline -Prelease
 script:
