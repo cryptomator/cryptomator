@@ -18,8 +18,8 @@ addons:
     build_command: "mvn -fmain/pom.xml clean test -DskipTests"
     branch_pattern: release.*
 install:
-- mvn -fmain/pom.xml dependency:go-offline -Ptest-coverage
-- mvn -fmain/pom.xml dependency:go-offline -Prelease
+- mvn -fmain/pom.xml package -DskipTests dependency:go-offline -Ptest-coverage
+- mvn -fmain/pom.xml package -DskipTests dependency:go-offline -Prelease
 script:
 - mvn --update-snapshots -fmain/pom.xml -Ptest-coverage clean test jacoco:report-aggregate
 after_success:
