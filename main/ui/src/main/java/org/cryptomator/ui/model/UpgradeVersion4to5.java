@@ -9,14 +9,16 @@ import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.security.SecureRandom;
 import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.cryptomator.cryptolib.Cryptors;
+import org.cryptomator.cryptolib.api.CryptoLibVersion;
+import org.cryptomator.cryptolib.api.CryptoLibVersion.Version;
 import org.cryptomator.cryptolib.api.Cryptor;
+import org.cryptomator.cryptolib.api.CryptorProvider;
 import org.cryptomator.cryptolib.api.FileHeader;
 import org.cryptomator.ui.settings.Localization;
 import org.slf4j.Logger;
@@ -33,8 +35,8 @@ class UpgradeVersion4to5 extends UpgradeStrategy {
 	private static final Pattern BASE32_PATTERN = Pattern.compile("^([A-Z2-7]{8})*[A-Z2-7=]{8}");
 
 	@Inject
-	public UpgradeVersion4to5(SecureRandom secureRandom, Localization localization) {
-		super(Cryptors.version1(secureRandom), localization, 4, 5);
+	public UpgradeVersion4to5(@CryptoLibVersion(Version.ONE) CryptorProvider version1CryptorProvider, Localization localization) {
+		super(version1CryptorProvider, localization, 4, 5);
 	}
 
 	@Override

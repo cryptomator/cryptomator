@@ -3,14 +3,15 @@ package org.cryptomator.ui.model;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.security.SecureRandom;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.apache.commons.lang3.StringUtils;
-import org.cryptomator.cryptolib.Cryptors;
+import org.cryptomator.cryptolib.api.CryptoLibVersion;
+import org.cryptomator.cryptolib.api.CryptoLibVersion.Version;
 import org.cryptomator.cryptolib.api.Cryptor;
+import org.cryptomator.cryptolib.api.CryptorProvider;
 import org.cryptomator.ui.settings.Localization;
 import org.cryptomator.ui.settings.Settings;
 import org.slf4j.Logger;
@@ -25,8 +26,8 @@ class UpgradeVersion3DropBundleExtension extends UpgradeStrategy {
 	private final Settings settings;
 
 	@Inject
-	public UpgradeVersion3DropBundleExtension(SecureRandom secureRandom, Localization localization, Settings settings) {
-		super(Cryptors.version1(secureRandom), localization, 3, 3);
+	public UpgradeVersion3DropBundleExtension(@CryptoLibVersion(Version.ONE) CryptorProvider version1CryptorProvider, Localization localization, Settings settings) {
+		super(version1CryptorProvider, localization, 3, 3);
 		this.settings = settings;
 	}
 

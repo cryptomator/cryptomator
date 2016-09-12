@@ -9,7 +9,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.security.MessageDigest;
-import java.security.SecureRandom;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -19,8 +18,10 @@ import javax.inject.Singleton;
 import org.apache.commons.codec.binary.Base32;
 import org.apache.commons.codec.binary.BaseNCodec;
 import org.apache.commons.lang3.StringUtils;
-import org.cryptomator.cryptolib.Cryptors;
+import org.cryptomator.cryptolib.api.CryptoLibVersion;
+import org.cryptomator.cryptolib.api.CryptoLibVersion.Version;
 import org.cryptomator.cryptolib.api.Cryptor;
+import org.cryptomator.cryptolib.api.CryptorProvider;
 import org.cryptomator.cryptolib.common.MessageDigestSupplier;
 import org.cryptomator.ui.settings.Localization;
 import org.slf4j.Logger;
@@ -44,8 +45,8 @@ class UpgradeVersion3to4 extends UpgradeStrategy {
 	private final BaseNCodec base32 = new Base32();
 
 	@Inject
-	public UpgradeVersion3to4(SecureRandom secureRandom, Localization localization) {
-		super(Cryptors.version1(secureRandom), localization, 3, 4);
+	public UpgradeVersion3to4(@CryptoLibVersion(Version.ONE) CryptorProvider version1CryptorProvider, Localization localization) {
+		super(version1CryptorProvider, localization, 3, 4);
 	}
 
 	@Override

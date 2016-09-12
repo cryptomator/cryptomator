@@ -18,6 +18,7 @@ import javax.inject.Singleton;
 
 import org.cryptomator.common.CommonsModule;
 import org.cryptomator.crypto.engine.impl.CryptoEngineModule;
+import org.cryptomator.cryptolib.CryptoLibModule;
 import org.cryptomator.frontend.FrontendFactory;
 import org.cryptomator.frontend.FrontendId;
 import org.cryptomator.frontend.webdav.WebDavModule;
@@ -41,7 +42,7 @@ import javafx.application.Application;
 import javafx.beans.Observable;
 import javafx.stage.Stage;
 
-@Module(includes = {CryptoEngineModule.class, CommonsModule.class, WebDavModule.class, KeychainModule.class, JniModule.class})
+@Module(includes = {CryptoEngineModule.class, CommonsModule.class, WebDavModule.class, KeychainModule.class, JniModule.class, CryptoLibModule.class})
 class CryptomatorModule {
 
 	private static final Logger LOG = LoggerFactory.getLogger(CryptomatorModule.class);
