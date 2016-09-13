@@ -28,7 +28,7 @@
 
 		<!-- dependency versions -->
 		<cryptomator.cryptolib.version>1.0.1</cryptomator.cryptolib.version>
-		<cryptomator.jni.version>1.0.0-SNAPSHOT</cryptomator.jni.version>
+		<cryptomator.jni.version>1.0.0</cryptomator.jni.version>
 		<log4j.version>2.1</log4j.version>
 		<slf4j.version>1.7.7</slf4j.version>
 		<junit.version>4.12</junit.version>
