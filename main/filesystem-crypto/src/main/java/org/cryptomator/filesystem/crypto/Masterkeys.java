@@ -103,6 +103,7 @@ class Masterkeys {
 
 	private static void writeMasterKey(File file, Cryptor cryptor, CharSequence passphrase) throws UncheckedIOException {
 		try (WritableFile writable = file.openWritable()) {
+			writable.truncate();
 			final byte[] fileContents = cryptor.writeKeysToMasterkeyFile(passphrase);
 			writable.write(ByteBuffer.wrap(fileContents));
 		}
