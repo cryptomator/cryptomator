@@ -57,7 +57,15 @@ public abstract class UpgradeStrategy {
 			Files.write(masterkeyFileAfterUpgrade, upgradedMasterkeyFileContents, StandardOpenOption.TRUNCATE_EXISTING);
 		} catch (InvalidPassphraseException e) {
 			throw new UpgradeFailedException(localization.getString("unlock.errorMessage.wrongPassword"));
-		} catch (IOException | UnsupportedVaultFormatException e) {
+		} catch (UnsupportedVaultFormatException e) {
+			if (e.getDetectedVersion() == Integer.MAX_VALUE) {
+				LOG.warn("Version MAC authentication error in vault {}", vault.path().get());
+				throw new UpgradeFailedException(localization.getString("unlock.errorMessage.unauthenticVersionMac"));
+			} else {
+				LOG.warn("Upgrade failed.", e);
+				throw new UpgradeFailedException("Upgrade failed. Details in log message.");
+			}
+		} catch (IOException e) {
 			LOG.warn("Upgrade failed.", e);
 			throw new UpgradeFailedException("Upgrade failed. Details in log message.");
 		} finally {

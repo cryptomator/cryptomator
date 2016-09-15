@@ -124,6 +124,7 @@ public class ChangePasswordController extends LocalizedFXMLViewController {
 		// trigger "default" change to refresh key bindings:
 		changePasswordButton.setDefaultButton(false);
 		changePasswordButton.setDefaultButton(true);
+		messageText.setText(null);
 	}
 
 	// ****************************************
@@ -144,7 +145,7 @@ public class ChangePasswordController extends LocalizedFXMLViewController {
 		downloadsPageLink.setVisible(false);
 		try {
 			vault.changePassphrase(oldPasswordField.getCharacters(), newPasswordField.getCharacters());
-			messageText.setText(localization.getString("changePassword.infoMessage.success"));
+			messageText.setText(null);
 			listener.ifPresent(this::invokeListenerLater);
 		} catch (InvalidPassphraseException e) {
 			messageText.setText(localization.getString("changePassword.errorMessage.wrongPassword"));
