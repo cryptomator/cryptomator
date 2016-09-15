@@ -82,3 +82,9 @@ main.directoryList.remove.confirmation.header = Kasayı silmek istediğinize emi
 main.directoryList.remove.confirmation.content = Kasa yalnızca listeden silinecek. Tamamen silmek için dosya sisteminizden dosyaları elle siliniz.
 upgrade.version3to4.msg = Bu kasanın yeni formata geçirilmesi gerekmekte. Şifreli klasör isimleri güncellenecek. Devam etmeden önce senkronizasyonun bittiğine emin olun.
 upgrade.version3to4.err.io = Format değiştirme işlemi I/O Hatası dolayısı ile başarısız oldu. Detaylar için log dosyasına bakın
+settings.prefGvfsScheme.label = WebDAV scheme
+# upgrade.fxml
+upgrade.confirmation.label = Yes, I've made sure that synchronization has finished
+initialize.messageLabel.notEmpty = Vault not empty
+unlock.label.savePassword = Save password
+unlock.errorMessage.unauthenticVersionMac = Could not authenticate version MAC.

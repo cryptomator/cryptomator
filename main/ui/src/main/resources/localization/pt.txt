@@ -1,34 +1,90 @@
-# Copyright (c) 2016 The Cryptomator Contributors
-# This file is licensed under the terms of the MIT license.
-# See the LICENSE.txt file for more info.
-#
-# Contributors:
-#     Will
-#     André Di Biasi
-
 app.name = Cryptomator
+# main.fxml
+main.emptyListInstructions = Clique aqui para adicionar uma caixa-forte
 main.directoryList.contextMenu.remove = Remover da lista
 main.directoryList.contextMenu.changePassword = Alterar senha
+main.addDirectory.contextMenu.new = Criar nova caixa-forte
+main.addDirectory.contextMenu.open = Abrir caixa-forte existente
 # welcome.fxml
-welcome.checkForUpdates.label.currentlyChecking = Procurando atualizações...
+welcome.checkForUpdates.label.currentlyChecking = Buscando por atualizações...
+welcome.newVersionMessage = Versão %1$s pode ser abaixada. Esta é a versão %2$s.
 # initialize.fxml
 initialize.label.password = Senha
-initialize.label.retypePassword = Digite a senha novamente
+initialize.label.retypePassword = Redigitar senha
+initialize.button.ok = Criar caixa-forte
+initialize.messageLabel.alreadyInitialized = Caixa-forte já inicializada
+initialize.messageLabel.initializationFailed = Não pôde inicializar a caixa-forte. Ver arquivo de log para mais detalhes.
+# notfound.fxml
+notfound.label = A caixa-forte não pode ser encontrada. Ela foi movida?
+# upgrade.fxml
+upgrade.button = Atualizar caixa-forte
+upgrade.version3dropBundleExtension.msg = Esta caixa-forte tem que ser a migrada a um novo formato. "%1$s" será renomeada para "%2$s". Por favor assegure-se de que a sincronização foi finalizada antes de proceder com a migração.
+upgrade.version3dropBundleExtension.err.alreadyExists = A migração automática falhou. "%s" já existe.
 # unlock.fxml
 unlock.label.password = Senha
+unlock.label.mountName = Nome do drive
+unlock.label.winDriveLetter = Letra do drive
+unlock.label.downloadsPageLink = Todas as versões do Cryptomator
 unlock.label.advancedHeading = Opções avançadas
+unlock.button.unlock = Abrir caixa-forte
+unlock.button.advancedOptions.show = Mais opções
 unlock.button.advancedOptions.hide = Menos opções
 unlock.choicebox.winDriveLetter.auto = Atribuir automaticamente
-unlock.errorMessage.wrongPassword = Senha incorreta
-unlock.errorMessage.mountingFailed = Montagem falhou. Veja o arquivo de log para detalhes
-unlock.messageLabel.startServerFailed = Inicialização do servidor WEBDAV falhou
+unlock.errorMessage.wrongPassword = Senha errada
+unlock.errorMessage.mountingFailed = Falha ao montar. Ver arquivo de log para mais detalhes.
+unlock.errorMessage.unsupportedVersion.vaultOlderThanSoftware = Caixa-forte não suportada. Esta caixa-forte foi criada por uma versão antiga do Cryptomator.
+unlock.errorMessage.unsupportedVersion.softwareOlderThanVault = Caixa-forte não suportada. Esta caixa-forte foi criada por uma versão mais nova do Cryptomator.
+unlock.messageLabel.startServerFailed = Falha ao iniciar servidor WebDAV.
 # change_password.fxml
-changePassword.label.oldPassword = Senha antiga
+changePassword.label.oldPassword = Senha anterior
 changePassword.label.newPassword = Nova senha
-changePassword.label.retypePassword = Digite a senha novamente
+changePassword.label.retypePassword = Re-digitar senha
+changePassword.label.downloadsPageLink = Todas as versões do Cryptomator
 changePassword.button.change = Alterar senha
+changePassword.errorMessage.wrongPassword = Senha incorreta
+changePassword.errorMessage.decryptionFailed = Falha ao desencriptar
 changePassword.infoMessage.success = Senha alterada
-unlocked.label.revealFailed = Falha no comando
-unlocked.label.unmountFailed = Falha ao ejetar o drive
+# unlocked.fxml
+unlocked.button.lock = Fechar caixa-forte
+unlocked.moreOptions.reveal = Mostrar drive
+unlocked.moreOptions.copyUrl = Copiar URL WebDAV
+unlocked.label.revealFailed = Falha ao mostrar drive
+unlocked.label.unmountFailed = Falha ao ejetar drive
 unlocked.label.statsEncrypted = encriptado
+unlocked.label.statsDecrypted = desencriptado
+unlocked.ioGraph.yAxis.label = Taxa de transferência (MiB/s)
+# mac_warnings.fxml
+macWarnings.windowTitle = Perigo - Arquivo corrompido na %s
+macWarnings.message = Cryptomator detectou potenciais corrupções maliciosas nos seguintes arquivos\:
 macWarnings.moreInformationButton = Saiba mais
+macWarnings.whitelistButton = Desencriptar selecionado de qualquer modo
+# settings.fxml
+settings.version.label = Versão %s
+settings.checkForUpdates.label = Verificar por atualizações
+settings.port.label = Port WebDAV *
+settings.port.prompt = 0 \= Escolher automaticamente
+settings.useipv6.label = Usar IPv6 literal
+settings.requiresRestartLabel = * Cryptomator necessita ser reiniciado
+# tray icon
+tray.menu.open = Abrir
+tray.menu.quit = Sair
+tray.infoMsg.title = Ainda em execução
+tray.infoMsg.msg = Cryptomator ainda está ativo. Finalize-o a partir do ícone da bandeja.
+tray.infoMsg.msg.osx = Cryptomator ainda está ativo. Finalize-o a partir do ícone da barra de menu.
+initialize.messageLabel.passwordStrength.0 = Muito fraca
+initialize.messageLabel.passwordStrength.1 = Fraca
+initialize.messageLabel.passwordStrength.2 = Razoável
+initialize.messageLabel.passwordStrength.3 = Forte
+initialize.messageLabel.passwordStrength.4 = Muito forte
+initialize.label.doNotForget = IMPORTANTE\: se você esquecer a sua senha, não haverá como recuperar os seus dados.
+main.directoryList.remove.confirmation.title = Remover caixa-forte
+main.directoryList.remove.confirmation.header = Você realmente quer remover esta caixa-forte?
+main.directoryList.remove.confirmation.content = A caixa-forte somente será removida da lista. Para apagá-la permanentemente, por favor apagar os arquivos do seu sistema de arquivos.
+upgrade.version3to4.msg = Esta caixa-forte tem que ser migrada a um novo formato. Os nomes das pastas encriptadas serão atualizados. Por favor assegure-se de que a sincronização foi finalizada antes de proceder com a migração.
+upgrade.version3to4.err.io = Falha na migração devido a um erro de E/S. Ver arquivo de log para mais detalhes.
+settings.prefGvfsScheme.label = WebDAV scheme
+# upgrade.fxml
+upgrade.confirmation.label = Yes, I've made sure that synchronization has finished
+initialize.messageLabel.notEmpty = Vault not empty
+unlock.label.savePassword = Save password
+unlock.errorMessage.unauthenticVersionMac = Could not authenticate version MAC.
