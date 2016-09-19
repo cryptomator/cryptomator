@@ -84,3 +84,9 @@ main.directoryList.remove.confirmation.header = Вы действительно 
 main.directoryList.remove.confirmation.content = Хранилище будет удалено только из списка. Чтобы стереть его окончательно, удалите файлы из файловой системы.
 upgrade.version3to4.msg = Это хранилище требуется преобразовать в новый формат. Зашифрованные имена папок будут обновлены. Прежде чем продолжить, выполните синхронизацию.
 upgrade.version3to4.err.io = Преобразование не выполнено из-за ошибки ввода-вывода. См. подробности в файле-отчёте.
+settings.prefGvfsScheme.label = Схема WebDAV
+# upgrade.fxml
+upgrade.confirmation.label = Да, синхронизация точно завершена
+initialize.messageLabel.notEmpty = Vault not empty
+unlock.label.savePassword = Save password
+unlock.errorMessage.unauthenticVersionMac = Could not authenticate version MAC.

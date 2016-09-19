@@ -31,6 +31,16 @@ public class DelegatingFileTest {
 	}
 
 	@Test
+	public void testSize() {
+		File mockFile = Mockito.mock(File.class);
+		DelegatingFile<?> delegatingFile = new TestDelegatingFile(null, mockFile);
+
+		Mockito.when(mockFile.size()).thenReturn(42l);
+		Assert.assertEquals(42l, delegatingFile.size());
+		Mockito.verify(mockFile).size();
+	}
+
+	@Test
 	public void testParent() {
 		Folder mockFolder = Mockito.mock(Folder.class);
 		File mockFile = Mockito.mock(File.class);

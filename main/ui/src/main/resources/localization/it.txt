@@ -18,7 +18,7 @@ initialize.messageLabel.initializationFailed = Non è possibile inizializzare il
 notfound.label = Il vault non può essere trovato. E' stato rimosso?
 # upgrade.fxml
 upgrade.button = Aggiorna vault
-upgrade.version3dropBundleExtension.msg = Questo vault deve essere migrato ad un nuovo formato.\n"%1$s" verrà rinominato in "%2$s".\nPer favore verifica che la sincronizzazione sia finita prima di procedere\n
+upgrade.version3dropBundleExtension.msg = Questo vault deve essere migrato ad un nuovo formato.\n"%1$s" verrà rinominato in "%2$s".\nPer favore verifica che la sincronizzazione sia finita prima di procedere
 upgrade.version3dropBundleExtension.err.alreadyExists = Migrazione automatica fallita.\n"%s" esiste già.
 # unlock.fxml
 unlock.label.password = Password
@@ -45,14 +45,14 @@ changePassword.errorMessage.wrongPassword = Password errata
 changePassword.errorMessage.decryptionFailed = Decriptaggio fallito
 changePassword.infoMessage.success = Password cambiata
 # unlocked.fxml
-unlocked.button.lock = Blocca vault 
+unlocked.button.lock = Blocca vault
 unlocked.moreOptions.reveal = Apri il disco
 unlocked.moreOptions.copyUrl = Copia url WebDAV
 unlocked.label.revealFailed = Comando fallito
 unlocked.label.unmountFailed = Espulsione disco fallita
 unlocked.label.statsEncrypted = criptato
 unlocked.label.statsDecrypted = decriptato
-unlocked.ioGraph.yAxis.label = Volume dati (MiB/s) 
+unlocked.ioGraph.yAxis.label = Volume dati (MiB/s)
 # mac_warnings.fxml
 macWarnings.windowTitle = Pericolo - File corroto in %s
 macWarnings.message = Cryptomator ha individuato potenziali pericolose corruzioni nei seguenti file\:
@@ -69,8 +69,8 @@ settings.requiresRestartLabel = * Cryptomator deve essere riavviato
 tray.menu.open = Apri
 tray.menu.quit = Chiudi
 tray.infoMsg.title = Ancora in esecuzione
-tray.infoMsg.msg = Cryptomator è ancora in esecuzione. Chiudilo utilizzando l'icona nel menù di stato. 
-tray.infoMsg.msg.osx = Cryptomator è ancora in esecuzione. Chiudilo utilizzando l'icona nella barra del menù. 
+tray.infoMsg.msg = Cryptomator è ancora in esecuzione. Chiudilo utilizzando l'icona nel menù di stato.
+tray.infoMsg.msg.osx = Cryptomator è ancora in esecuzione. Chiudilo utilizzando l'icona nella barra del menù.
 initialize.messageLabel.passwordStrength.0 = Molto debole
 initialize.messageLabel.passwordStrength.1 = Debole
 initialize.messageLabel.passwordStrength.2 = Buona
@@ -80,3 +80,11 @@ initialize.label.doNotForget = IMPORTANTE\: Se dimentichi la password, non c'è 
 main.directoryList.remove.confirmation.title = Rimuovi vault
 main.directoryList.remove.confirmation.header = Vuoi davvero rimuovere questo vault?
 main.directoryList.remove.confirmation.content = Il vault sarà rimosso solo dalla lista. Per eliminarlo definitivamente, elimina per favore i file dal tuo hard disk.
+upgrade.version3to4.msg = This vault needs to be migrated to a newer format.\nEncrypted folder names will be updated.\nPlease make sure synchronization has finished before proceeding.
+upgrade.version3to4.err.io = Migration failed due to an I/O Exception. See log file for details.
+settings.prefGvfsScheme.label = WebDAV scheme
+# upgrade.fxml
+upgrade.confirmation.label = Yes, I've made sure that synchronization has finished
+initialize.messageLabel.notEmpty = Vault not empty
+unlock.label.savePassword = Save password
+unlock.errorMessage.unauthenticVersionMac = Could not authenticate version MAC.

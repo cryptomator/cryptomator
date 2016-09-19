@@ -15,7 +15,7 @@ import org.cryptomator.filesystem.File;
 import org.cryptomator.filesystem.ReadableFile;
 import org.cryptomator.filesystem.WritableFile;
 
-public abstract class DelegatingFile<D extends DelegatingFolder<D, ?>> extends DelegatingNode<File>implements File {
+public abstract class DelegatingFile<D extends DelegatingFolder<D, ?>> extends DelegatingNode<File> implements File {
 
 	private final D parent;
 
@@ -27,6 +27,11 @@ public abstract class DelegatingFile<D extends DelegatingFolder<D, ?>> extends D
 	@Override
 	public Optional<D> parent() throws UncheckedIOException {
 		return Optional.of(parent);
+	}
+
+	@Override
+	public long size() throws UncheckedIOException {
+		return delegate.size();
 	}
 
 	@Override

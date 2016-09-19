@@ -56,10 +56,23 @@ public class FileHeaderTest {
 		final byte[] keyBytes = new byte[32];
 		final SecretKey headerKey = new SecretKeySpec(keyBytes, "AES");
 		final SecretKey macKey = new SecretKeySpec(keyBytes, "HmacSHA256");
+		final ByteBuffer headerBuf = ByteBuffer.wrap(Base64.decode("AAAAAAAAAAAAAAAAAAAAACNqP4ddv3Z2rUiiFJKEIIdTD4r7x0U2ualjtPHEy3OLzqdAPU1ga24VjC86+zlHN49BfMdzvHF3f9EE0LSnRLSsu6ps3IRcJg=="));
+		final FileHeader header = FileHeader.decrypt(headerKey, new ThreadLocalMac(macKey, "HmacSHA256"), headerBuf);
+
+		Assert.assertEquals(-1l, header.getPayload().getFilesize());
+		Assert.assertArrayEquals(new byte[16], header.getIv());
+		Assert.assertArrayEquals(new byte[32], header.getPayload().getContentKey().getEncoded());
+	}
+
+	@Test
+	public void testDecryptionOfOldHeader() {
+		final byte[] keyBytes = new byte[32];
+		final SecretKey headerKey = new SecretKeySpec(keyBytes, "AES");
+		final SecretKey macKey = new SecretKeySpec(keyBytes, "HmacSHA256");
 		final ByteBuffer headerBuf = ByteBuffer.wrap(Base64.decode("AAAAAAAAAAAAAAAAAAAAANyVwHiiQImjrUiiFJKEIIdTD4r7x0U2ualjtPHEy3OLzqdAPU1ga26lJzstK9RUv1hj5zDC4wC9FgMfoVE1mD0HnuENuYXkJA=="));
 		final FileHeader header = FileHeader.decrypt(headerKey, new ThreadLocalMac(macKey, "HmacSHA256"), headerBuf);
 
-		Assert.assertEquals(42, header.getPayload().getFilesize());
+		Assert.assertEquals(42l, header.getPayload().getFilesize());
 		Assert.assertArrayEquals(new byte[16], header.getIv());
 		Assert.assertArrayEquals(new byte[32], header.getPayload().getContentKey().getEncoded());
 	}

@@ -12,9 +12,12 @@ import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.concurrent.ExecutionException;
 
 import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.cryptolib.common.SecureRandomModule;
 import org.cryptomator.ui.controllers.MainController;
 import org.cryptomator.ui.util.ActiveWindowStyleSupport;
 import org.cryptomator.ui.util.DeferredCloser;
@@ -40,7 +43,15 @@ public class MainApplication extends Application {
 	@Override
 	public void start(Stage primaryStage) throws IOException {
 		LOG.info("JavaFX application started");
-		final CryptomatorComponent comp = DaggerCryptomatorComponent.builder().cryptomatorModule(new CryptomatorModule(this, primaryStage)).build();
+		final CryptomatorComponent comp;
+		try {
+			comp = DaggerCryptomatorComponent.builder() //
+					.cryptomatorModule(new CryptomatorModule(this, primaryStage)) //
+					.secureRandomModule(new SecureRandomModule(SecureRandom.getInstanceStrong())) //
+					.build();
+		} catch (NoSuchAlgorithmException e) {
+			throw new IllegalStateException("Every implementation of the Java platform is required to support at least one strong SecureRandom implementation.", e);
+		}
 		final MainController mainCtrl = comp.mainController();
 		closer = comp.deferredCloser();
 

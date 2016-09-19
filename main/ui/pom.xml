@@ -12,7 +12,7 @@
 	<parent>
 		<groupId>org.cryptomator</groupId>
 		<artifactId>main</artifactId>
-		<version>1.1.4</version>
+		<version>1.2.0</version>
 	</parent>
 	<artifactId>ui</artifactId>
 	<name>Cryptomator GUI</name>
@@ -53,6 +53,20 @@
 		<dependency>
 			<groupId>org.cryptomator</groupId>
 			<artifactId>frontend-webdav</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.cryptomator</groupId>
+			<artifactId>jni</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.cryptomator</groupId>
+			<artifactId>keychain</artifactId>
+		</dependency>
+		
+		<!-- CryptoLib -->
+		<dependency>
+			<groupId>org.cryptomator</groupId>
+			<artifactId>cryptolib</artifactId>
 		</dependency>
 		
 		<!-- EasyBind -->

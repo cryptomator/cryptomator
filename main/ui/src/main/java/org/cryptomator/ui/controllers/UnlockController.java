@@ -9,7 +9,9 @@
 package org.cryptomator.ui.controllers;
 
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Objects;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -22,25 +24,24 @@ import org.cryptomator.frontend.CommandFailedException;
 import org.cryptomator.frontend.FrontendCreationFailedException;
 import org.cryptomator.frontend.FrontendFactory;
 import org.cryptomator.frontend.webdav.mount.WindowsDriveLetters;
+import org.cryptomator.keychain.KeychainAccess;
 import org.cryptomator.ui.controls.SecPasswordField;
 import org.cryptomator.ui.model.Vault;
 import org.cryptomator.ui.settings.Localization;
 import org.cryptomator.ui.settings.Settings;
 import org.cryptomator.ui.util.AsyncTaskService;
-import org.fxmisc.easybind.EasyBind;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import dagger.Lazy;
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
@@ -61,21 +62,33 @@ public class UnlockController extends LocalizedFXMLViewController {
 	private final Settings settings;
 	private final WindowsDriveLetters driveLetters;
 	private final ChangeListener<Character> driveLetterChangeListener = this::winDriveLetterDidChange;
-	final ObjectProperty<Vault> vault = new SimpleObjectProperty<>();
+	private final Optional<KeychainAccess> keychainAccess;
+	private Vault vault;
 	private Optional<UnlockListener> listener = Optional.empty();
 
 	@Inject
-	public UnlockController(Application app, Localization localization, AsyncTaskService asyncTaskService, Lazy<FrontendFactory> frontendFactory, Settings settings, WindowsDriveLetters driveLetters) {
+	public UnlockController(Application app, Localization localization, AsyncTaskService asyncTaskService, Lazy<FrontendFactory> frontendFactory, Settings settings, WindowsDriveLetters driveLetters,
+			Optional<KeychainAccess> keychainAccess) {
 		super(localization);
 		this.app = app;
 		this.asyncTaskService = asyncTaskService;
 		this.frontendFactory = frontendFactory;
 		this.settings = settings;
 		this.driveLetters = driveLetters;
+		this.keychainAccess = keychainAccess;
 	}
 
 	@FXML
 	private SecPasswordField passwordField;
+
+	@FXML
+	private Button advancedOptionsButton;
+
+	@FXML
+	private Button unlockButton;
+
+	@FXML
+	private CheckBox savePassword;
 
 	@FXML
 	private TextField mountName;
@@ -85,12 +98,6 @@ public class UnlockController extends LocalizedFXMLViewController {
 
 	@FXML
 	private ChoiceBox<Character> winDriveLetter;
-
-	@FXML
-	private Button advancedOptionsButton;
-
-	@FXML
-	private Button unlockButton;
 
 	@FXML
 	private ProgressIndicator progressIndicator;
@@ -107,8 +114,10 @@ public class UnlockController extends LocalizedFXMLViewController {
 	@Override
 	public void initialize() {
 		advancedOptions.managedProperty().bind(advancedOptions.visibleProperty());
+		unlockButton.disableProperty().bind(passwordField.textProperty().isEmpty());
 		mountName.addEventFilter(KeyEvent.KEY_TYPED, this::filterAlphanumericKeyEvents);
 		mountName.textProperty().addListener(this::mountNameDidChange);
+		savePassword.setDisable(!keychainAccess.isPresent());
 		if (SystemUtils.IS_OS_WINDOWS) {
 			winDriveLetter.setConverter(new WinDriveLetterLabelConverter());
 		} else {
@@ -117,9 +126,6 @@ public class UnlockController extends LocalizedFXMLViewController {
 			winDriveLetter.setVisible(false);
 			winDriveLetter.setManaged(false);
 		}
-		unlockButton.disableProperty().bind(passwordField.textProperty().isEmpty());
-
-		EasyBind.subscribe(vault, this::vaultDidChange);
 	}
 
 	@Override
@@ -127,11 +133,15 @@ public class UnlockController extends LocalizedFXMLViewController {
 		return getClass().getResource("/fxml/unlock.fxml");
 	}
 
-	private void vaultDidChange(Vault newVault) {
-		if (newVault == null) {
+	void setVault(Vault vault) {
+		// trigger "default" change to refresh key bindings:
+		unlockButton.setDefaultButton(false);
+		unlockButton.setDefaultButton(true);
+		if (vault.equals(this.vault)) {
 			return;
 		}
-		passwordField.clear();
+		this.vault = Objects.requireNonNull(vault);
+		passwordField.swipe();
 		advancedOptions.setVisible(false);
 		advancedOptionsButton.setText(localization.getString("unlock.button.advancedOptions.show"));
 		progressIndicator.setVisible(false);
@@ -145,13 +155,21 @@ public class UnlockController extends LocalizedFXMLViewController {
 		}
 		downloadsPageLink.setVisible(false);
 		messageText.setText(null);
-		mountName.setText(newVault.getMountName());
+		mountName.setText(vault.getMountName());
 		if (SystemUtils.IS_OS_WINDOWS) {
 			chooseSelectedDriveLetter();
 		}
-		// trigger "default" change to refresh key bindings:
-		unlockButton.setDefaultButton(false);
-		unlockButton.setDefaultButton(true);
+		savePassword.setSelected(false);
+		// auto-fill pw from keychain:
+		if (keychainAccess.isPresent()) {
+			char[] storedPw = keychainAccess.get().loadPassphrase(vault.getId());
+			if (storedPw != null) {
+				savePassword.setSelected(true);
+				passwordField.setText(new String(storedPw));
+				passwordField.selectRange(storedPw.length, storedPw.length);
+				Arrays.fill(storedPw, ' ');
+			}
+		}
 	}
 
 	// ****************************************
@@ -160,7 +178,7 @@ public class UnlockController extends LocalizedFXMLViewController {
 
 	@FXML
 	public void didClickDownloadsLink(ActionEvent event) {
-		app.getHostServices().showDocument("https://cryptomator.org/downloads/");
+		app.getHostServices().showDocument("https://cryptomator.org/downloads/#allVersions");
 	}
 
 	// ****************************************
@@ -188,14 +206,11 @@ public class UnlockController extends LocalizedFXMLViewController {
 	}
 
 	private void mountNameDidChange(ObservableValue<? extends String> property, String oldValue, String newValue) {
-		if (vault.get() == null) {
-			return;
-		}
 		// newValue is guaranteed to be a-z0-9_, see #filterAlphanumericKeyEvents
 		if (newValue.isEmpty()) {
-			mountName.setText(vault.get().getMountName());
+			mountName.setText(vault.getMountName());
 		} else {
-			vault.get().setMountName(newValue);
+			vault.setMountName(newValue);
 		}
 	}
 
@@ -242,20 +257,17 @@ public class UnlockController extends LocalizedFXMLViewController {
 	}
 
 	private void winDriveLetterDidChange(ObservableValue<? extends Character> property, Character oldValue, Character newValue) {
-		if (vault.get() == null) {
-			return;
-		}
-		vault.get().setWinDriveLetter(newValue);
+		vault.setWinDriveLetter(newValue);
 		settings.save();
 	}
 
 	private void chooseSelectedDriveLetter() {
 		assert SystemUtils.IS_OS_WINDOWS;
 		// if the vault prefers a drive letter, that is currently occupied, this is our last chance to reset this:
-		if (driveLetters.getOccupiedDriveLetters().contains(vault.get().getWinDriveLetter())) {
-			vault.get().setWinDriveLetter(null);
+		if (driveLetters.getOccupiedDriveLetters().contains(vault.getWinDriveLetter())) {
+			vault.setWinDriveLetter(null);
 		}
-		final Character letter = vault.get().getWinDriveLetter();
+		final Character letter = vault.getWinDriveLetter();
 		if (letter == null) {
 			// first option is known to be 'auto-assign' due to #WinDriveLetterComparator.
 			this.winDriveLetter.getSelectionModel().selectFirst();
@@ -275,10 +287,10 @@ public class UnlockController extends LocalizedFXMLViewController {
 		progressIndicator.setVisible(true);
 		downloadsPageLink.setVisible(false);
 		CharSequence password = passwordField.getCharacters();
-		asyncTaskService.asyncTaskOf(() -> this.unlock(vault.get(), password)).run();
+		asyncTaskService.asyncTaskOf(() -> this.unlock(password)).run();
 	}
 
-	private void unlock(Vault vault, CharSequence password) {
+	private void unlock(CharSequence password) {
 		try {
 			vault.activateFrontend(frontendFactory.get(), settings, password);
 			vault.reveal();
@@ -286,18 +298,28 @@ public class UnlockController extends LocalizedFXMLViewController {
 				messageText.setText(null);
 				listener.ifPresent(lstnr -> lstnr.didUnlock(vault));
 			});
+			if (keychainAccess.isPresent() && savePassword.isSelected()) {
+				keychainAccess.get().storePassphrase(vault.getId(), password);
+			} else {
+				passwordField.swipe();
+			}
 		} catch (InvalidPassphraseException e) {
 			Platform.runLater(() -> {
 				messageText.setText(localization.getString("unlock.errorMessage.wrongPassword"));
+				passwordField.selectAll();
 				passwordField.requestFocus();
 			});
 		} catch (UnsupportedVaultFormatException e) {
 			Platform.runLater(() -> {
-				downloadsPageLink.setVisible(true);
 				if (e.isVaultOlderThanSoftware()) {
+					// whitespace after localized text used as separator between text and hyperlink
 					messageText.setText(localization.getString("unlock.errorMessage.unsupportedVersion.vaultOlderThanSoftware") + " ");
+					downloadsPageLink.setVisible(true);
 				} else if (e.isSoftwareOlderThanVault()) {
 					messageText.setText(localization.getString("unlock.errorMessage.unsupportedVersion.softwareOlderThanVault") + " ");
+					downloadsPageLink.setVisible(true);
+				} else if (e.getDetectedVersion() == Integer.MAX_VALUE) {
+					messageText.setText(localization.getString("unlock.errorMessage.unauthenticVersionMac"));
 				}
 			});
 		} catch (FrontendCreationFailedException | CommandFailedException e) {
@@ -307,7 +329,6 @@ public class UnlockController extends LocalizedFXMLViewController {
 			});
 		} finally {
 			Platform.runLater(() -> {
-				passwordField.swipe();
 				mountName.setDisable(false);
 				advancedOptionsButton.setDisable(false);
 				progressIndicator.setVisible(false);

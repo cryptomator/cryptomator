@@ -26,6 +26,7 @@ initialize.label.password=Password
 initialize.label.retypePassword=Retype password
 initialize.button.ok=Create vault
 initialize.messageLabel.alreadyInitialized=Vault already initialized
+initialize.messageLabel.notEmpty=Vault not empty
 initialize.messageLabel.initializationFailed=Could not initialize vault. See log file for details.
 initialize.messageLabel.passwordStrength.0=Very weak
 initialize.messageLabel.passwordStrength.1=Weak
@@ -38,6 +39,7 @@ initialize.label.doNotForget=IMPORTANT: If you forget your password, there is no
 notfound.label=Vault couldn't be found. Has it been moved?
 
 # upgrade.fxml
+upgrade.confirmation.label=Yes, I've made sure that synchronization has finished
 upgrade.button=Upgrade vault
 
 upgrade.version3dropBundleExtension.msg=This vault needs to be migrated to a newer format.\n"%1$s" will be renamed to "%2$s".\nPlease make sure synchronization has finished before proceeding.
@@ -48,6 +50,7 @@ upgrade.version3to4.err.io=Migration failed due to an I/O Exception. See log fil
 
 # unlock.fxml
 unlock.label.password=Password
+unlock.label.savePassword=Save password
 unlock.label.mountName=Drive name
 unlock.label.winDriveLetter=Drive letter
 unlock.label.downloadsPageLink=All Cryptomator versions
@@ -60,6 +63,7 @@ unlock.errorMessage.wrongPassword=Wrong password
 unlock.errorMessage.mountingFailed=Mounting failed. See log file for details.
 unlock.errorMessage.unsupportedVersion.vaultOlderThanSoftware=Unsupported vault. This vault has been created with an older version of Cryptomator.
 unlock.errorMessage.unsupportedVersion.softwareOlderThanVault=Unsupported vault. This vault has been created with a newer version of Cryptomator.
+unlock.errorMessage.unauthenticVersionMac=Could not authenticate version MAC.
 unlock.messageLabel.startServerFailed=Starting WebDAV server failed.
 
 # change_password.fxml
@@ -70,7 +74,6 @@ changePassword.label.downloadsPageLink=All Cryptomator versions
 changePassword.button.change=Change password
 changePassword.errorMessage.wrongPassword=Wrong password
 changePassword.errorMessage.decryptionFailed=Decryption failed
-changePassword.infoMessage.success=Password changed
 
 # unlocked.fxml
 unlocked.button.lock=Lock vault

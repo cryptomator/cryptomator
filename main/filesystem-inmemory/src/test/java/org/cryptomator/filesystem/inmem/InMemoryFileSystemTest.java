@@ -104,9 +104,7 @@ public class InMemoryFileSystemTest {
 		Assert.assertTrue(fooFile.exists());
 
 		// check if size = 11 bytes
-		try (ReadableFile readable = fooFile.openReadable()) {
-			Assert.assertEquals(11, readable.size());
-		}
+		Assert.assertEquals(11, fooFile.size());
 
 		// copy foo to bar
 		File barFile = fs.file("bar.txt");

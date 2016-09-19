@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Copyright (c) 2014 Sebastian Stenzel This file is licensed under the 
-	terms of the MIT license. See the LICENSE.txt file for more info. Contributors: 
+<!-- Copyright (c) 2014 Sebastian Stenzel This file is licensed under the
+	terms of the MIT license. See the LICENSE.txt file for more info. Contributors:
 	Sebastian Stenzel - initial API and implementation -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.cryptomator</groupId>
 	<artifactId>main</artifactId>
-	<version>1.1.4</version>
+	<version>1.2.0</version>
 	<packaging>pom</packaging>
 	<name>Cryptomator</name>
 
@@ -28,6 +27,8 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
 		<!-- dependency versions -->
+		<cryptomator.cryptolib.version>1.0.2</cryptomator.cryptolib.version>
+		<cryptomator.jni.version>1.0.0</cryptomator.jni.version>
 		<log4j.version>2.1</log4j.version>
 		<slf4j.version>1.7.7</slf4j.version>
 		<junit.version>4.12</junit.version>
@@ -40,8 +41,21 @@
 		<commons-httpclient.version>3.1</commons-httpclient.version>
 		<jackson-databind.version>2.4.4</jackson-databind.version>
 		<mockito.version>1.10.19</mockito.version>
-		<dagger.version>2.4</dagger.version>
+		<dagger.version>2.6.1</dagger.version>
 	</properties>
+
+	<repositories>
+		<repository>
+			<id>ossrh-snapshots</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
 
 	<dependencyManagement>
 		<dependencies>
@@ -57,7 +71,6 @@
 				<version>${project.version}</version>
 				<scope>test</scope>
 			</dependency>
-			
 			<dependency>
 				<groupId>org.cryptomator</groupId>
 				<artifactId>filesystem-api</artifactId>
@@ -106,7 +119,6 @@
 				<artifactId>filesystem-stats</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-			
 			<dependency>
 				<groupId>org.cryptomator</groupId>
 				<artifactId>frontend-api</artifactId>
@@ -117,11 +129,27 @@
 				<artifactId>frontend-webdav</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
+			<dependency>
+				<groupId>org.cryptomator</groupId>
+				<artifactId>keychain</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 			<dependency>
 				<groupId>org.cryptomator</groupId>
 				<artifactId>ui</artifactId>
 				<version>${project.version}</version>
+			</dependency>
+			
+			<!-- Cryptomator Libs -->
+			<dependency>
+				<groupId>org.cryptomator</groupId>
+				<artifactId>cryptolib</artifactId>
+				<version>${cryptomator.cryptolib.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.cryptomator</groupId>
+				<artifactId>jni</artifactId>
+				<version>${cryptomator.jni.version}</version>
 			</dependency>
 
 			<!-- Logging -->
@@ -168,19 +196,18 @@
 				<version>${commons-codec.version}</version>
 			</dependency>
 			<dependency>
-				<!-- org.apache.httpcomponents:httpclient is newer, but jackrabbit uses 
-					this version. We don't have a reason to upgrade -->
+				<!-- org.apache.httpcomponents:httpclient is newer, but jackrabbit uses this version. We don't have a reason to upgrade -->
 				<groupId>commons-httpclient</groupId>
 				<artifactId>commons-httpclient</artifactId>
 				<version>${commons-httpclient.version}</version>
 			</dependency>
-			
+
 			<!-- EasyBind -->
 			<dependency>
 				<groupId>org.fxmisc.easybind</groupId>
 				<artifactId>easybind</artifactId>
 				<version>1.0.3</version>
-			</dependency>	
+			</dependency>
 
 			<!-- Guava -->
 			<dependency>
@@ -267,14 +294,15 @@
 		<module>filesystem-inmemory</module>
 		<module>filesystem-nio</module>
 		<module>filesystem-nameshortening</module>
+		<module>filesystem-charsets</module>
 		<module>filesystem-crypto</module>
 		<module>filesystem-crypto-integration-tests</module>
 		<module>filesystem-stats</module>
 		<module>filesystem-invariants-tests</module>
 		<module>frontend-api</module>
 		<module>frontend-webdav</module>
+		<module>keychain</module>
 		<module>ui</module>
-		<module>filesystem-charsets</module>
 	</modules>
 
 	<profiles>
@@ -341,17 +369,6 @@
 				<configuration>
 					<source>1.8</source>
 					<target>1.8</target>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.eluder.coveralls</groupId>
-				<artifactId>coveralls-maven-plugin</artifactId>
-				<version>4.0.0</version>
-				<configuration>
-					<jacocoReports>
-						<jacocoReport>jacoco-report/target/site/jacoco-aggregate/jacoco.xml</jacocoReport>
-					</jacocoReports>
-					<repoToken>${env.COVERALLS_REPO_TOKEN}</repoToken>
 				</configuration>
 			</plugin>
 		</plugins>

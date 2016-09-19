@@ -21,21 +21,6 @@
 		</fx:jar>
 	</target>
 	
-	<!-- Create native image -->
-	<target name="create-linux-image-with-jvm" depends="create-jar">
-		<fx:deploy nativeBundles="image" outdir="antbuild" outfile="Cryptomator-${project.version}" verbose="true">
-			<fx:application refid="Cryptomator" />
-			<fx:platform j2se="8.0">
-				<fx:property name="cryptomator.logPath" value="~/.Cryptomator/cryptomator.log" />
-				<fx:jvmarg value="-Xmx512m"/>
-			</fx:platform>
-			<fx:resources>
-				<fx:fileset dir="antbuild" type="jar" includes="Cryptomator-${project.version}.jar" />
-				<fx:fileset dir="libs" type="jar" includes="*.jar" excludes="ui-${project.version}.jar"/>
-			</fx:resources>
-		</fx:deploy>
-	</target>
-	
 	<!-- Create Debian package -->
 	<target name="deb" depends="create-jar">
 		<fx:deploy nativeBundles="deb" outdir="antbuild" outfile="Cryptomator-${project.version}" verbose="true">
@@ -45,7 +30,9 @@
 			</fx:info>
 			<fx:platform j2se="8.0">
 				<fx:property name="cryptomator.logPath" value="~/.Cryptomator/cryptomator.log" />
-				<fx:jvmarg value="-Xmx1048m"/>
+				<fx:property name="cryptomator.upgradeLogPath" value="~/.Cryptomator/upgrade.log" />
+				<fx:property name="cryptomator.settingsPath" value="~/.Cryptomator/settings.json" />
+				<fx:jvmarg value="-Xmx512m"/>
 			</fx:platform>
 			<fx:resources>
 				<fx:fileset dir="antbuild" type="jar" includes="Cryptomator-${project.version}.jar" />
@@ -66,7 +53,9 @@
 			</fx:info>
 			<fx:platform j2se="8.0">
 				<fx:property name="cryptomator.logPath" value="~/.Cryptomator/cryptomator.log" />
-				<fx:jvmarg value="-Xmx1048m"/>
+				<fx:property name="cryptomator.upgradeLogPath" value="~/.Cryptomator/upgrade.log" />
+				<fx:property name="cryptomator.settingsPath" value="~/.Cryptomator/settings.json" />
+				<fx:jvmarg value="-Xmx512m"/>
 			</fx:platform>
 			<fx:resources>
 				<fx:fileset dir="antbuild" type="jar" includes="Cryptomator-${project.version}.jar" />

@@ -44,6 +44,11 @@ class InMemoryFile extends InMemoryNode implements File {
 	}
 
 	@Override
+	public long size() throws UncheckedIOException {
+		return content.get().limit();
+	}
+
+	@Override
 	public void moveTo(File destination) throws UncheckedIOException {
 		if (destination instanceof InMemoryFile) {
 			internalMoveTo((InMemoryFile) destination);
@@ -103,7 +108,7 @@ class InMemoryFile extends InMemoryNode implements File {
 				throw new UncheckedIOException(new FileAlreadyExistsException(k));
 			} else {
 				if (v == null) {
-					assert!content.get().hasRemaining();
+					assert !content.get().hasRemaining();
 					this.creationTime = Instant.now();
 				}
 				this.lastModified = Instant.now();
@@ -120,7 +125,7 @@ class InMemoryFile extends InMemoryNode implements File {
 			// returning null removes the entry.
 			return null;
 		});
-		assert!this.exists();
+		assert !this.exists();
 	}
 
 	@Override

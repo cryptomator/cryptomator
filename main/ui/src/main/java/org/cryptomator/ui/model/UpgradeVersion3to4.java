@@ -9,19 +9,20 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import org.apache.commons.codec.binary.Base32;
 import org.apache.commons.codec.binary.BaseNCodec;
 import org.apache.commons.lang3.StringUtils;
-import org.cryptomator.crypto.engine.Cryptor;
-import org.cryptomator.filesystem.crypto.Constants;
+import org.cryptomator.cryptolib.api.CryptoLibVersion;
+import org.cryptomator.cryptolib.api.CryptoLibVersion.Version;
+import org.cryptomator.cryptolib.api.Cryptor;
+import org.cryptomator.cryptolib.api.CryptorProvider;
+import org.cryptomator.cryptolib.common.MessageDigestSupplier;
 import org.cryptomator.ui.settings.Localization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,17 +41,12 @@ class UpgradeVersion3to4 extends UpgradeStrategy {
 	private static final String OLD_FOLDER_SUFFIX = "_";
 	private static final String NEW_FOLDER_PREFIX = "0";
 
-	private final MessageDigest sha1;
+	private final MessageDigest sha1 = MessageDigestSupplier.SHA1.get();
 	private final BaseNCodec base32 = new Base32();
 
 	@Inject
-	public UpgradeVersion3to4(Provider<Cryptor> cryptorProvider, Localization localization) {
-		super(cryptorProvider, localization);
-		try {
-			sha1 = MessageDigest.getInstance("SHA-1");
-		} catch (NoSuchAlgorithmException e) {
-			throw new AssertionError("SHA-1 exists in every JVM");
-		}
+	public UpgradeVersion3to4(@CryptoLibVersion(Version.ONE) CryptorProvider version1CryptorProvider, Localization localization) {
+		super(version1CryptorProvider, localization, 3, 4);
 	}
 
 	@Override
@@ -141,23 +137,6 @@ class UpgradeVersion3to4 extends UpgradeStrategy {
 			}
 		} else {
 			LOG.warn("Found uninflatable long file name. Expected: {}", oldMetadataFile);
-		}
-	}
-
-	@Override
-	public boolean isApplicable(Vault vault) {
-		final Path masterkeyFile = vault.path().getValue().resolve(Constants.MASTERKEY_FILENAME);
-		try {
-			if (Files.isRegularFile(masterkeyFile)) {
-				final String keyContents = new String(Files.readAllBytes(masterkeyFile), UTF_8);
-				return keyContents.contains("\"version\":3") || keyContents.contains("\"version\": 3");
-			} else {
-				LOG.warn("Not a file: {}", masterkeyFile);
-				return false;
-			}
-		} catch (IOException e) {
-			LOG.warn("Could not determine, whether upgrade is applicable.", e);
-			return false;
 		}
 	}
 

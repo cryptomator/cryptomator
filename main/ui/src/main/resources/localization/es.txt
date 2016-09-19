@@ -14,7 +14,7 @@ initialize.label.password = Contraseña
 initialize.label.retypePassword = Reintroduzca contraseña
 initialize.button.ok = Crear caja fuerte
 initialize.messageLabel.alreadyInitialized = Caja fuerte ya está inicializado
-initialize.messageLabel.initializationFailed = No se pudo inicializar la caja fuerte. Ver archivo de registro para detalles. 
+initialize.messageLabel.initializationFailed = No se pudo inicializar la caja fuerte. Ver archivo de registro para detalles.
 # notfound.fxml
 notfound.label = No se pudo encontrar la caja fuerte. Se movió a otro lugar?
 # upgrade.fxml
@@ -84,3 +84,9 @@ main.directoryList.remove.confirmation.header = ¿Quieres de verdad borrar este 
 main.directoryList.remove.confirmation.content = La caja fuerte solo se borra de la lista. Para eliminarla permanente por favor elimina los datos de tú sistema de archivos.
 upgrade.version3to4.msg = Este caja fuerte se debe migrar a un formato más reciente.\nLos nombres de las carpetas cifradas se actualizan.\nPor favor asegurarse de que la sincronización ha terminado antes de seguir.
 upgrade.version3to4.err.io = Migración ha fallado por causa de una excepción I/O. Para detalles revisa el archivo de registro.
+settings.prefGvfsScheme.label = WebDAV scheme
+# upgrade.fxml
+upgrade.confirmation.label = Yes, I've made sure that synchronization has finished
+initialize.messageLabel.notEmpty = Vault not empty
+unlock.label.savePassword = Save password
+unlock.errorMessage.unauthenticVersionMac = Could not authenticate version MAC.

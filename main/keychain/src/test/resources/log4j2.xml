@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+  Copyright (c) 2014 Markus Kreusch
+  This file is licensed under the terms of the MIT license.
+  See the LICENSE.txt file for more info.
+  
+  Contributors:
+      Sebastian Stenzel - log4j config for WebDAV unit tests
+-->
+<Configuration status="WARN">
+
+	<Appenders>
+		<Console name="Console" target="SYSTEM_OUT">
+			<PatternLayout pattern="%16d %-5p [%c{1}:%L] %m%n" />
+			<ThresholdFilter level="WARN" onMatch="DENY" onMismatch="ACCEPT" />
+		</Console>
+		<Console name="StdErr" target="SYSTEM_ERR">
+			<PatternLayout pattern="%16d %-5p [%c{1}:%L] %m%n" />
+			<ThresholdFilter level="WARN" onMatch="ACCEPT" onMismatch="DENY" />
+		</Console>
+	</Appenders>
+
+	<Loggers>
+		<!-- show our own debug messages: -->
+		<Logger name="org.cryptomator" level="DEBUG" />
+		<!-- mute dependencies: -->
+		<Root level="INFO">
+			<AppenderRef ref="Console" />
+			<AppenderRef ref="StdErr" />
+		</Root>
+	</Loggers>
+
+</Configuration>

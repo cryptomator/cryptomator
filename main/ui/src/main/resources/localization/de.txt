@@ -83,3 +83,9 @@ main.directoryList.remove.confirmation.header = Möchten Sie diesen Tresor wirkl
 main.directoryList.remove.confirmation.content = Dieser Tresor wird nur aus der Liste entfernt. Um den Tresor unwiderruflich zu löschen, entfernen Sie bitte die Dateien aus Ihrem Dateisystem.
 upgrade.version3to4.msg = Dieser Tresor muss auf ein neueres Format aktualisiert werden.\nVerschlüsselte Ordnernamen werden dabei aktualisiert.\nStellen Sie bitte sicher, dass derzeit keine Synchronisation stattfindet.
 upgrade.version3to4.err.io = Migration aufgrund eines I/O-Fehlers fehlgeschlagen.\nWeitere Informationen in der Log-Datei.
+settings.prefGvfsScheme.label = WebDAV Schema
+# upgrade.fxml
+upgrade.confirmation.label = Ja, die Synchronisation ist abgeschlossen
+initialize.messageLabel.notEmpty = Tresor ist nicht leer
+unlock.label.savePassword = Passwort speichern
+unlock.errorMessage.unauthenticVersionMac = Versions-MAC konnte nicht authentifiziert werden.

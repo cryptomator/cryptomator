@@ -36,8 +36,6 @@ import org.cryptomator.io.ByteBuffers;
 class FileContentEncryptorImpl implements FileContentEncryptor {
 
 	private static final String HMAC_SHA256 = "HmacSHA256";
-	private static final int PADDING_LOWER_BOUND = 4 * 1024; // 4k
-	private static final int PADDING_UPPER_BOUND = 16 * 1024 * 1024; // 16M
 	private static final int NUM_THREADS = Runtime.getRuntime().availableProcessors();
 	private static final int READ_AHEAD = 2;
 	private static final ExecutorService SHARED_DECRYPTION_EXECUTOR = Executors.newFixedThreadPool(NUM_THREADS);
@@ -63,7 +61,7 @@ class FileContentEncryptorImpl implements FileContentEncryptor {
 
 	@Override
 	public ByteBuffer getHeader() {
-		header.getPayload().setFilesize(cleartextBytesScheduledForEncryption.sum());
+		header.getPayload().setFilesize(-1l);
 		return header.toByteBuffer(headerKey, hmacSha256);
 	}
 
@@ -76,24 +74,10 @@ class FileContentEncryptorImpl implements FileContentEncryptor {
 	public void append(ByteBuffer cleartext) throws InterruptedException {
 		cleartextBytesScheduledForEncryption.add(cleartext.remaining());
 		if (cleartext == FileContentCryptor.EOF) {
-			appendSizeObfuscationPadding(cleartextBytesScheduledForEncryption.sum());
 			submitCleartextBuffer();
 			submitEof();
 		} else {
 			appendAllAndSubmitIfFull(cleartext);
-		}
-	}
-
-	private void appendSizeObfuscationPadding(long actualSize) throws InterruptedException {
-		final int maxPaddingLength = (int) Math.min(Math.max(actualSize / 10, PADDING_LOWER_BOUND), PADDING_UPPER_BOUND); // preferably 10%, but at least lower bound and no more than upper bound
-		final int randomPaddingLength = randomSource.nextInt(maxPaddingLength);
-		final ByteBuffer buf = ByteBuffer.allocate(PAYLOAD_SIZE);
-		int remainingPadding = randomPaddingLength;
-		while (remainingPadding > 0) {
-			int bytesInCurrentIteration = Math.min(remainingPadding, PAYLOAD_SIZE);
-			buf.clear().limit(bytesInCurrentIteration);
-			appendAllAndSubmitIfFull(buf);
-			remainingPadding -= bytesInCurrentIteration;
 		}
 	}
 

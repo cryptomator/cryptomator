@@ -39,7 +39,7 @@ public class Localization extends ResourceBundle {
 			Objects.requireNonNull(in);
 			Reader reader = new InputStreamReader(in, StandardCharsets.UTF_8);
 			this.fallback = new PropertyResourceBundle(reader);
-			LOG.info("Loaded localization from {}", LOCALIZATION_FILE);
+			LOG.info("Loaded localization from bundle:{}", LOCALIZATION_FILE);
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
 		}

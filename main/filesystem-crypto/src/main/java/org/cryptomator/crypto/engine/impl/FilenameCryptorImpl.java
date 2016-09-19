@@ -15,6 +15,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.regex.Pattern;
 
 import javax.crypto.AEADBadTagException;
+import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.SecretKey;
 
 import org.apache.commons.codec.binary.Base32;
@@ -70,8 +71,8 @@ class FilenameCryptorImpl implements FilenameCryptor {
 		try {
 			final byte[] cleartextBytes = AES_SIV.get().decrypt(encryptionKey, macKey, encryptedBytes, associatedData);
 			return new String(cleartextBytes, UTF_8);
-		} catch (AEADBadTagException e) {
-			throw new AuthenticationFailedException("Authentication failed.", e);
+		} catch (AEADBadTagException | IllegalBlockSizeException e) {
+			throw new AuthenticationFailedException("Invalid ciphertext.", e);
 		}
 	}
 

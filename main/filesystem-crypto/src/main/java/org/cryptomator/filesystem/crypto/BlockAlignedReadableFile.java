@@ -101,11 +101,6 @@ class BlockAlignedReadableFile implements ReadableFile {
 	}
 
 	@Override
-	public long size() throws UncheckedIOException {
-		return delegate.size();
-	}
-
-	@Override
 	public void close() throws UncheckedIOException {
 		delegate.close();
 	}
