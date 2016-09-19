@@ -78,10 +78,16 @@ initialize.messageLabel.passwordStrength.0 = Très faible
 initialize.messageLabel.passwordStrength.1 = Faible
 initialize.messageLabel.passwordStrength.2 = Raisonnable
 initialize.messageLabel.passwordStrength.3 = Fort
-initialize.messageLabel.passwordStrength.4 = Très fort\n
+initialize.messageLabel.passwordStrength.4 = Très fort
 initialize.label.doNotForget = ATTENTION \: Si vous oubliez votre mot de passe, il n'y aura aucun moyen de récupérer vos données.
 main.directoryList.remove.confirmation.title = Retirer un coffre
 main.directoryList.remove.confirmation.header = Voulez-vous vraiment retirer ce coffre ?
 main.directoryList.remove.confirmation.content = Le coffre sera simplement retiré de la liste. Pour le supprimer complètement, supprimez les fichiers depuis votre système de fichiers.
 upgrade.version3to4.msg = Ce coffre doit être converti dans un nouveau format. Les noms de dossiers chiffrés seront mis à jour.\nMerci de vous assurer que la procédure de synchronisation est terminée avant de continuer.
 upgrade.version3to4.err.io = La migration a échoué à cause d'une erreur d'entrée/sortie. Référez-vous au fichier log pour plus de détails.
+settings.prefGvfsScheme.label = Schéma d'URI WebDAV
+# upgrade.fxml
+upgrade.confirmation.label = Oui, je suis certain que la synchronisation est finie
+initialize.messageLabel.notEmpty = Vault not empty
+unlock.label.savePassword = Save password
+unlock.errorMessage.unauthenticVersionMac = Could not authenticate version MAC.

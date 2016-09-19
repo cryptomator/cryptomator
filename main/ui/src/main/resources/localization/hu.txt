@@ -80,3 +80,11 @@ initialize.label.doNotForget = FONTOS\: Ha elfelejted a jelszavadat, akkor nincs
 main.directoryList.remove.confirmation.title = Széf eltávolítása
 main.directoryList.remove.confirmation.header = Tényleg törölni akarod ezt a széfet?
 main.directoryList.remove.confirmation.content = A széf csak a listából lesz eltávolítva. Végleges törléshez kérlek töröld a merevlemezen tárolt fájlokat.
+upgrade.version3to4.msg = Ennek a széfnek egy újabb formátumra való migrációja szükséges. A titkosított könyvtárnevek frissítve lesznek. Kérlek, győződj meg a szinkronizáció befejeztéről mielőtt továbblépnél.
+upgrade.version3to4.err.io = Migráció meghíusúlt egy I/O kivétel miatt. Kérlek nézd meg a naplófájlt a további részletekért.
+settings.prefGvfsScheme.label = WebDAV séma
+# upgrade.fxml
+upgrade.confirmation.label = Yes, I've made sure that synchronization has finished
+initialize.messageLabel.notEmpty = Vault not empty
+unlock.label.savePassword = Save password
+unlock.errorMessage.unauthenticVersionMac = Could not authenticate version MAC.

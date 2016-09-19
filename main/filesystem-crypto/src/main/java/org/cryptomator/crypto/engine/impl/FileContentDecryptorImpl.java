@@ -54,6 +54,11 @@ class FileContentDecryptorImpl implements FileContentDecryptor {
 		this.header = FileHeader.decrypt(headerKey, hmacSha256, header);
 		this.authenticate = authenticate;
 		this.chunkNumber = firstCiphertextByte / CHUNK_SIZE; // floor() by int-truncation
+		
+		// vault version 5 and onwards should have filesize: -1
+		if (this.header.getPayload().getFilesize() != -1l) {
+			throw new UncheckedIOException(new IOException("Attempted to decrypt file with invalid header (probably from previous vault version)"));
+		}
 	}
 
 	@Override

@@ -82,3 +82,9 @@ main.directoryList.remove.confirmation.header = 정말 이 보관함을 삭제�
 main.directoryList.remove.confirmation.content = 보관함이 목록에서만 제거되었습니다. 데이터를 완전히 제거하시려면, 여러분의 파일시스템이서 제거해 주시기 바랍니다.
 upgrade.version3to4.msg = 이 보관함은 새로운 형식으로 바뀔 필요가 있습니다. 암호화된 폴더 이름이 업데이트 될 것입니다. 진행하기 전에 동기화가 완료되었는지 확인하기 바랍니다.
 upgrade.version3to4.err.io = 입출력 예외 문제로 마이그레이션이 실패하였습니다. 자세한 사항은 로그 파일을 확인하세요.
+settings.prefGvfsScheme.label = WebDAV sceme
+# upgrade.fxml
+upgrade.confirmation.label = 네. 동기화가 완료되었음을 확인하였습니다.
+initialize.messageLabel.notEmpty = Vault not empty
+unlock.label.savePassword = Save password
+unlock.errorMessage.unauthenticVersionMac = Could not authenticate version MAC.

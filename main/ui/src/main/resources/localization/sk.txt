@@ -22,7 +22,7 @@ notfound.label = Trezor nemohol byť nenájdený. Bol presunutý?
 # upgrade.fxml
 upgrade.button = Upgradnúť trezor
 upgrade.version3dropBundleExtension.msg = Tento trezor musí byť premigrovaný na nový formát. "%1$s" bude premenovaný na "%2$s". Prosím, uistite sa že je dokončená synchronizácia skôr než budete pokračovať.
-upgrade.version3dropBundleExtension.err.alreadyExists = Automatická migrácia zlyhala. "%s" už existuje. 
+upgrade.version3dropBundleExtension.err.alreadyExists = Automatická migrácia zlyhala. "%s" už existuje.
 # unlock.fxml
 unlock.label.password = Heslo
 unlock.label.mountName = Názov jednotky
@@ -74,3 +74,20 @@ tray.menu.quit = Vypnúť
 tray.infoMsg.title = Stále beží
 tray.infoMsg.msg = Cryptomator je stále spustený. Vypnite ho pomocou ikony v systémovej lište.
 tray.infoMsg.msg.osx = Cryptomator je stále sputený. Ukončite ho pomocou ikony v menu.
+initialize.messageLabel.passwordStrength.0 = Very weak
+initialize.messageLabel.passwordStrength.1 = Weak
+initialize.messageLabel.passwordStrength.2 = Fair
+initialize.messageLabel.passwordStrength.3 = Strong
+initialize.messageLabel.passwordStrength.4 = Very strong
+initialize.label.doNotForget = IMPORTANT\: If you forget your password, there is no way to recover your data.
+main.directoryList.remove.confirmation.title = Remove Vault
+main.directoryList.remove.confirmation.header = Do you really want to remove this vault?
+main.directoryList.remove.confirmation.content = The vault will only be removed from the list. To permanently delete it, please delete the files from your filesystem.
+upgrade.version3to4.msg = This vault needs to be migrated to a newer format.\nEncrypted folder names will be updated.\nPlease make sure synchronization has finished before proceeding.
+upgrade.version3to4.err.io = Migration failed due to an I/O Exception. See log file for details.
+settings.prefGvfsScheme.label = WebDAV scheme
+# upgrade.fxml
+upgrade.confirmation.label = Yes, I've made sure that synchronization has finished
+initialize.messageLabel.notEmpty = Vault not empty
+unlock.label.savePassword = Save password
+unlock.errorMessage.unauthenticVersionMac = Could not authenticate version MAC.

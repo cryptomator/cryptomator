@@ -82,3 +82,9 @@ main.directoryList.remove.confirmation.header = Weet je zeker dat je deze kluis 
 main.directoryList.remove.confirmation.content = De kluis zal alleen van de lijst worden verwijdert. Verwijder de bestanden van het bestandssysteem voor permanente verwijdering.
 upgrade.version3to4.msg = Deze kluis dient gemigreerd te worden naar een nieuwer type. \nVersleutelde mapnamen zullen worden geüpdatet. \nZorg ervoor dat de synchronisatie voltooid is alvorens door te gaan.
 upgrade.version3to4.err.io = Migratie mislukt door een I/O Exception. Zie logbestand voor details.
+settings.prefGvfsScheme.label = WebDAV scheme
+# upgrade.fxml
+upgrade.confirmation.label = Yes, I've made sure that synchronization has finished
+initialize.messageLabel.notEmpty = Vault not empty
+unlock.label.savePassword = Save password
+unlock.errorMessage.unauthenticVersionMac = Could not authenticate version MAC.

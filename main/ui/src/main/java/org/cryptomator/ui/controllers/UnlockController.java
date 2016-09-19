@@ -178,7 +178,7 @@ public class UnlockController extends LocalizedFXMLViewController {
 
 	@FXML
 	public void didClickDownloadsLink(ActionEvent event) {
-		app.getHostServices().showDocument("https://cryptomator.org/downloads/");
+		app.getHostServices().showDocument("https://cryptomator.org/downloads/#allVersions");
 	}
 
 	// ****************************************
@@ -311,11 +311,15 @@ public class UnlockController extends LocalizedFXMLViewController {
 			});
 		} catch (UnsupportedVaultFormatException e) {
 			Platform.runLater(() -> {
-				downloadsPageLink.setVisible(true);
 				if (e.isVaultOlderThanSoftware()) {
+					// whitespace after localized text used as separator between text and hyperlink
 					messageText.setText(localization.getString("unlock.errorMessage.unsupportedVersion.vaultOlderThanSoftware") + " ");
+					downloadsPageLink.setVisible(true);
 				} else if (e.isSoftwareOlderThanVault()) {
 					messageText.setText(localization.getString("unlock.errorMessage.unsupportedVersion.softwareOlderThanVault") + " ");
+					downloadsPageLink.setVisible(true);
+				} else if (e.getDetectedVersion() == Integer.MAX_VALUE) {
+					messageText.setText(localization.getString("unlock.errorMessage.unauthenticVersionMac"));
 				}
 			});
 		} catch (FrontendCreationFailedException | CommandFailedException e) {

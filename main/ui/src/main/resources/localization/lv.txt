@@ -1,0 +1,91 @@
+app.name = Cryptomator
+# main.fxml
+main.emptyListInstructions = Noklikšķiniet šeit, lai pievienotu glabātuvi
+main.directoryList.contextMenu.remove = Noņemt no saraksta
+main.directoryList.contextMenu.changePassword = Mainīt paroli
+main.addDirectory.contextMenu.new = Izveidot jaunu glabātuvi
+main.addDirectory.contextMenu.open = Atvērt esošu glabātuvi
+# welcome.fxml
+welcome.checkForUpdates.label.currentlyChecking = Pārbauda atjauninājumus...
+welcome.newVersionMessage = Lejupielādei pieejama versija %1$s.\nŠī ir %2$s. 
+# initialize.fxml
+initialize.label.password = Parole
+initialize.label.retypePassword = Atkārto paroli
+initialize.button.ok = Izveidot glabātuvi
+initialize.messageLabel.alreadyInitialized = Glabātuve jau ir inicializēta
+initialize.messageLabel.initializationFailed = Nevarēja inicializēt glabātuvi. Sīkākai informācijai skati žurnālu.
+# notfound.fxml
+notfound.label = Nevar atrast glabātuvi. Vai tā ir pārvietota?
+# upgrade.fxml
+upgrade.button = Atjaunināt glabātuvi
+upgrade.version3dropBundleExtension.msg = Šī glabātuve ir jāmigrē uz jaunākas versijas formātu.\n"%1$s" tiks pārsaukta par "%2$s".\nPirms palaišanas pārliecinies, ka ir beigusies sinhronizācija.
+upgrade.version3dropBundleExtension.err.alreadyExists = Automātiskā migrācija neizdevās.\n"%s" jau eksistē.
+# unlock.fxml
+unlock.label.password = Parole
+unlock.label.mountName = Diska nosaukums
+unlock.label.winDriveLetter = Diska burts
+unlock.label.downloadsPageLink = Visas Cryptomator versijas
+unlock.label.advancedHeading = Papildus opcijas
+unlock.button.unlock = Atslēgt glabātuvi
+unlock.button.advancedOptions.show = Vairāk opcijas
+unlock.button.advancedOptions.hide = Mazāk opcijas
+unlock.choicebox.winDriveLetter.auto = Piešķirt automātiski
+unlock.errorMessage.wrongPassword = Nepareiza parole
+unlock.errorMessage.mountingFailed = Montēšana neizdevās. Sīkākai informācijai skati žurnālu.
+unlock.errorMessage.unsupportedVersion.vaultOlderThanSoftware = Neatbastīta glabātuve. Šī glabātuve ir veidota ar vecāku Cryptomator versiju.
+unlock.errorMessage.unsupportedVersion.softwareOlderThanVault = Neatbastīta glabātuve. Šī glabātuve ir veidota ar jaunāku Cryptomator versiju.
+unlock.messageLabel.startServerFailed = WebDAV servera palaišana neizdevās.
+# change_password.fxml
+changePassword.label.oldPassword = Vecā parole
+changePassword.label.newPassword = Jaunā parole
+changePassword.label.retypePassword = Atkārto paroli
+changePassword.label.downloadsPageLink = Visas Cryptomator versijas
+changePassword.button.change = Mainīt paroli
+changePassword.errorMessage.wrongPassword = Nepareiza parole
+changePassword.errorMessage.decryptionFailed = Atšifrēšana neizdevās
+changePassword.infoMessage.success = Parole nomainīta
+# unlocked.fxml
+unlocked.button.lock = Aizslēgt glabātuvi
+unlocked.moreOptions.reveal = Atklāt disku
+unlocked.moreOptions.copyUrl = Kopēt WebDAV saiti
+unlocked.label.revealFailed = Komunikācija neizdevās
+unlocked.label.unmountFailed = Diska izgrūšana neizdevās
+unlocked.label.statsEncrypted = šifrēts
+unlocked.label.statsDecrypted = atšifrēts
+unlocked.ioGraph.yAxis.label = Caurlaidība (MiB/s)
+# mac_warnings.fxml
+macWarnings.windowTitle = Bīstami - %s satur bojātu datni
+macWarnings.message = Cryptomator konstatēja potenciāli ļaunprātīgu bojājumu sekojošām datnēm\:
+macWarnings.moreInformationButton = Skatīt vairāk
+macWarnings.whitelistButton = Atšifrēt iezīmēto tāpat
+# settings.fxml
+settings.version.label = Versija %s
+settings.checkForUpdates.label = Meklēt atjauninājumus
+settings.port.label = WebDAV Ports *
+settings.port.prompt = 0 \= automātiski
+settings.useipv6.label = Izmantot IPv6
+settings.requiresRestartLabel = * Cryptomator nepieciešams restarts
+# tray icon
+tray.menu.open = Atvērt
+tray.menu.quit = Iziet
+tray.infoMsg.title = Joprojām darbojās
+# Fuzzy
+tray.infoMsg.msg = Cryptomator joprojām darbojās. Iziet var no ikonas.
+tray.infoMsg.msg.osx = Cryptomator is still alive. joprojām darbojās. Iziet var no izvēlnes ikonas.
+initialize.messageLabel.passwordStrength.0 = Ļoti vāja
+initialize.messageLabel.passwordStrength.1 = Vāja
+initialize.messageLabel.passwordStrength.2 = Vidēja
+initialize.messageLabel.passwordStrength.3 = Stipra
+initialize.messageLabel.passwordStrength.4 = Ļoti stipra
+initialize.label.doNotForget = SVARĪGI\: Ja tu aizmirsti paroli, nav ceļa datu atjaunošanai
+main.directoryList.remove.confirmation.title = Noņemt glabātuvi
+main.directoryList.remove.confirmation.header = Vai tiešām vēlie noņemt šo glabātuvi?
+main.directoryList.remove.confirmation.content = Glabātuve tiks noņemta tikai no saraksta. Lai to dzēstu pilnībā, lūdzu nodzēs to no datņu sistēmas.
+upgrade.version3to4.msg = Šī glabātuve ir jāmigrē uz jaunāku formāta versiju. Sifrētie mapju nosaukumi tiks atjaunināti. Pirms palaišanas lūdzu pārliecinies, ka ir pabeigusies sinhronizācija.
+upgrade.version3to4.err.io = Migrācija neizdevās dēļ I/O izņēmuma. Sīkākai informācijai skati žurnālu.
+settings.prefGvfsScheme.label = WebDAV shēma
+# upgrade.fxml
+upgrade.confirmation.label = Jā, esmu pārliecinājies, ka sinhronizācija ir pabeigta.
+initialize.messageLabel.notEmpty = Vault not empty
+unlock.label.savePassword = Save password
+unlock.errorMessage.unauthenticVersionMac = Could not authenticate version MAC.

@@ -168,7 +168,7 @@ public class Vault implements CryptoFileSystemDelegate {
 		);
 	}
 
-	public void reveal() throws CommandFailedException {
+	public synchronized void reveal() throws CommandFailedException {
 		Optionals.ifPresent(filesystemFrontend.get(), Frontend::reveal);
 	}
 
@@ -190,7 +190,7 @@ public class Vault implements CryptoFileSystemDelegate {
 	// Getter/Setter
 	// *******************************************************************************/
 
-	public String getWebDavUrl() {
+	public synchronized String getWebDavUrl() {
 		return filesystemFrontend.get().map(Frontend::getWebDavUrl).orElseThrow(IllegalStateException::new);
 	}
 
