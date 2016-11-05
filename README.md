@@ -21,7 +21,6 @@ Download native binaries of Cryptomator on [cryptomator.org](https://cryptomator
 - AES encryption with 256-bit key length
 - File names get encrypted
 - File metadata gets encrypted
-- File size gets obfuscated with random padding.
 - Folder structure gets obfuscated
 - Use as many vaults in your Dropbox as you want, each having individual passwords
 
