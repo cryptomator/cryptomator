@@ -20,7 +20,6 @@ Download native binaries of Cryptomator on [cryptomator.org](https://cryptomator
 - Totally transparent: Just work on the virtual drive as if it were a USB flash drive
 - AES encryption with 256-bit key length
 - File names get encrypted
-- File metadata gets encrypted
 - Folder structure gets obfuscated
 - Use as many vaults in your Dropbox as you want, each having individual passwords
 
