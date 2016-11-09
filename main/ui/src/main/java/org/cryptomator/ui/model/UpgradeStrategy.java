@@ -41,6 +41,7 @@ public abstract class UpgradeStrategy {
 	 * Upgrades a vault. Might take a moment, should be run in a background thread.
 	 */
 	public void upgrade(Vault vault, CharSequence passphrase) throws UpgradeFailedException {
+		LOG.info("Upgrading {} from {} to {}.", vault.path().getValue(), vaultVersionBeforeUpgrade, vaultVersionAfterUpgrade);
 		Cryptor cryptor = null;
 		try {
 			final Path masterkeyFile = vault.path().getValue().resolve(Constants.MASTERKEY_FILENAME);
@@ -49,12 +50,14 @@ public abstract class UpgradeStrategy {
 			// create backup, as soon as we know the password was correct:
 			final Path masterkeyBackupFile = vault.path().getValue().resolve(Constants.MASTERKEY_BACKUP_FILENAME);
 			Files.copy(masterkeyFile, masterkeyBackupFile, StandardCopyOption.REPLACE_EXISTING);
+			LOG.info("Backuped masterkey.");
 			// do stuff:
 			upgrade(vault, cryptor);
 			// write updated masterkey file:
 			final byte[] upgradedMasterkeyFileContents = cryptor.writeKeysToMasterkeyFile(passphrase, vaultVersionAfterUpgrade).serialize();
 			final Path masterkeyFileAfterUpgrade = vault.path().getValue().resolve(Constants.MASTERKEY_FILENAME); // path may have changed
 			Files.write(masterkeyFileAfterUpgrade, upgradedMasterkeyFileContents, StandardOpenOption.TRUNCATE_EXISTING);
+			LOG.info("Updated masterkey.");
 		} catch (InvalidPassphraseException e) {
 			throw new UpgradeFailedException(localization.getString("unlock.errorMessage.wrongPassword"));
 		} catch (UnsupportedVaultFormatException e) {

@@ -57,6 +57,8 @@ class UpgradeVersion4to5 extends UpgradeStrategy {
 				public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
 					if (BASE32_PATTERN.matcher(file.getFileName().toString()).find() && attrs.size() > cryptor.fileHeaderCryptor().headerSize()) {
 						migrate(file, attrs, cryptor);
+					} else {
+						LOG.info("Skipping irrelevant file {}.", file);
 					}
 					return FileVisitResult.CONTINUE;
 				}
@@ -70,18 +72,20 @@ class UpgradeVersion4to5 extends UpgradeStrategy {
 	}
 
 	private void migrate(Path file, BasicFileAttributes attrs, Cryptor cryptor) throws IOException {
+		LOG.info("Starting migration of {}...", file);
 		try (FileChannel ch = FileChannel.open(file, StandardOpenOption.READ, StandardOpenOption.WRITE)) {
 			// read header:
 			ByteBuffer headerBuf = ByteBuffer.allocate(cryptor.fileHeaderCryptor().headerSize());
 			ch.read(headerBuf);
 			headerBuf.flip();
+			LOG.info("\tHeader read");
 			FileHeader header = cryptor.fileHeaderCryptor().decryptHeader(headerBuf);
 			long cleartextSize = header.getFilesize();
 			if (cleartextSize < 0) {
-				LOG.info("Skipping already migrated file {}.", file);
+				LOG.info("\tSkipping already migrated file");
 				return;
 			} else if (cleartextSize > attrs.size()) {
-				LOG.warn("Skipping file {} with invalid file size {}/{}", file, cleartextSize, attrs.size());
+				LOG.warn("\tSkipping file with invalid file size {}/{}", cleartextSize, attrs.size());
 				return;
 			}
 			int headerSize = cryptor.fileHeaderCryptor().headerSize();
@@ -93,12 +97,13 @@ class UpgradeVersion4to5 extends UpgradeStrategy {
 			long newAdditionalCiphertextBytes = newCiphertextSize % ciphertextChunkSize;
 			if (newAdditionalCiphertextBytes == 0) {
 				// (new) last block is already correct. just truncate:
-				LOG.info("Migrating {} of cleartext size {}: Truncating to new ciphertext size: {}", file, cleartextSize, newEOF);
+				LOG.info("\tMigrating cleartext size {}: Truncating to new ciphertext size: {}", cleartextSize, newEOF);
 				ch.truncate(newEOF);
+				LOG.info("\tFile truncated");
 			} else {
 				// last block may contain padding and needs to be re-encrypted:
 				long lastChunkIdx = newFullChunks;
-				LOG.info("Migrating {} of cleartext size {}: Re-encrypting chunk {}. New ciphertext size: {}", file, cleartextSize, lastChunkIdx, newEOF);
+				LOG.info("\tMigrating cleartext size {}: Re-encrypting chunk {}. New ciphertext size: {}", cleartextSize, lastChunkIdx, newEOF);
 				long beginOfLastChunk = headerSize + lastChunkIdx * ciphertextChunkSize;
 				assert beginOfLastChunk < newEOF;
 				int lastCleartextChunkLength = (int) (cleartextSize % cleartextChunkSize);
@@ -116,15 +121,18 @@ class UpgradeVersion4to5 extends UpgradeStrategy {
 					ch.truncate(beginOfLastChunk);
 					ch.write(newLastChunkCiphertext);
 				} else {
-					LOG.error("Reached EOF at position {}/{}", beginOfLastChunk, newEOF);
+					LOG.error("\tReached EOF at position {}/{}", beginOfLastChunk, newEOF);
 					return; // must exit method before changing header!
 				}
+				LOG.info("\tReencrypted last block");
 			}
 			header.setFilesize(-1l);
 			ByteBuffer newHeaderBuf = cryptor.fileHeaderCryptor().encryptHeader(header);
 			ch.position(0);
 			ch.write(newHeaderBuf);
+			LOG.info("\tUpdated header");
 		}
+		LOG.info("Finished migration of {}.", file);
 	}
 
 }
