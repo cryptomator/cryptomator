@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>org.cryptomator</groupId>
 		<artifactId>main</artifactId>
-		<version>1.2.0</version>
+		<version>1.2.1</version>
 	</parent>
 	<artifactId>filesystem-nio</artifactId>
 	<name>Cryptomator filesystem: NIO-based physical layer</name>

@@ -1,0 +1,89 @@
+app.name = Cryptomator
+# main.fxml
+main.emptyListInstructions = 按這裡新增檔案庫
+main.directoryList.contextMenu.remove = 從清單移除
+main.directoryList.contextMenu.changePassword = 變更密碼
+main.addDirectory.contextMenu.new = 建立新的檔案庫
+main.addDirectory.contextMenu.open = 打開現有的檔案庫
+# welcome.fxml
+welcome.checkForUpdates.label.currentlyChecking = 檢查更新...
+welcome.newVersionMessage = 版本 %1$s 可下載。這是 %2$s 。
+# initialize.fxml
+initialize.label.password = 密碼
+initialize.label.retypePassword = 重新輸入密碼
+initialize.button.ok = 建立檔案庫
+initialize.messageLabel.alreadyInitialized = 已初始化檔案庫
+initialize.messageLabel.initializationFailed = 無法初始化檔案庫。取得詳細資訊，請查看紀錄。
+# notfound.fxml
+notfound.label = 無法找到檔案庫。已經移置別的地方？
+# upgrade.fxml
+upgrade.button = 升級檔案庫
+upgrade.version3dropBundleExtension.msg = 這個檔案庫需要被轉移到新的格式。\n"%1$s" 將會重新命名為 "%2$s"。\n在進行之前，請確認同步已完成。
+upgrade.version3dropBundleExtension.err.alreadyExists = 自動轉移失敗。\n"%s" 已存在。
+# unlock.fxml
+unlock.label.password = 密碼
+unlock.label.mountName = 磁碟名稱
+unlock.label.winDriveLetter = 磁碟代號
+unlock.label.downloadsPageLink = 所有的 Cryptomator 版本
+unlock.label.advancedHeading = 進階選項
+unlock.button.unlock = 解鎖檔案庫
+unlock.button.advancedOptions.show = 更多選項
+unlock.button.advancedOptions.hide = 更少選項
+unlock.choicebox.winDriveLetter.auto = 自動指定
+unlock.errorMessage.wrongPassword = 錯誤的密碼
+unlock.errorMessage.mountingFailed = 掛載失敗。取得詳細資訊，請查看紀錄。
+unlock.errorMessage.unsupportedVersion.vaultOlderThanSoftware = 不支援的檔案庫。這個檔案庫是由舊版本的 Cryptomator 所建立的。
+unlock.errorMessage.unsupportedVersion.softwareOlderThanVault = 不支援的檔案庫。這個檔案庫是由新版本的 Cryptomator 所建立的。
+unlock.messageLabel.startServerFailed = 啟動 WebDAV 伺服器失敗。
+# change_password.fxml
+changePassword.label.oldPassword = 舊密碼
+changePassword.label.newPassword = 新密碼
+changePassword.label.retypePassword = 重新輸入密碼
+changePassword.label.downloadsPageLink = 所有的 Cryptomator 版本
+changePassword.button.change = 變更密碼
+changePassword.errorMessage.wrongPassword = 錯誤的密碼
+changePassword.errorMessage.decryptionFailed = 解密失敗
+# unlocked.fxml
+unlocked.button.lock = 鎖住檔案庫
+unlocked.moreOptions.reveal = 打開磁碟
+unlocked.moreOptions.copyUrl = 複製 WebDAV 網址
+unlocked.label.revealFailed = 指令錯誤
+unlocked.label.unmountFailed = 插入磁碟錯誤
+unlocked.label.statsEncrypted = 加密的
+unlocked.label.statsDecrypted = 解密的
+unlocked.ioGraph.yAxis.label = 傳輸量 (MiB/s)
+# mac_warnings.fxml
+macWarnings.windowTitle = 危險 - 損壞的檔案在 %s
+macWarnings.message = Cryptomator 在下列檔案中，偵測到潛在的損壞威脅：
+macWarnings.moreInformationButton = 取得更多
+macWarnings.whitelistButton = 總是解密所選的
+# settings.fxml
+settings.version.label = 版本 %s
+settings.checkForUpdates.label = 檢查更新
+settings.port.label = WebDAV 埠號 *
+settings.port.prompt = 0 \= 自動選擇
+settings.useipv6.label = 使用 IPv6 literal
+settings.requiresRestartLabel = * Cryptomator 需要更新 
+# tray icon
+tray.menu.open = 打開
+tray.menu.quit = 離開
+tray.infoMsg.title = 仍然在執行
+tray.infoMsg.msg = Cryptomator 仍然在運作。從工具列的圖示點選離開。
+tray.infoMsg.msg.osx = Cryptomator 仍然在運作。從選單列上點選離開。
+initialize.messageLabel.passwordStrength.0 = 非常弱的
+initialize.messageLabel.passwordStrength.1 = 弱的
+initialize.messageLabel.passwordStrength.2 = 正常的
+initialize.messageLabel.passwordStrength.3 = 強的
+initialize.messageLabel.passwordStrength.4 = 非常強的
+initialize.label.doNotForget = 重要：如果你忘記的密碼，就無法還原你的資料。
+main.directoryList.remove.confirmation.title = 移除檔案庫
+main.directoryList.remove.confirmation.header = 你真的想要移除這個檔案庫？
+main.directoryList.remove.confirmation.content = 這個檔案庫只會從清單中移除。如果要永久刪除，請從檔案系統中刪除。
+upgrade.version3to4.msg = 這個檔案庫需要被轉移到新的格式。\n加密的資料夾名稱將會被更新。\n在進行之前，請確認同步已完成。
+upgrade.version3to4.err.io = 由於 I/O 的例外，轉移失敗。取得詳細資訊，請查看紀錄。
+settings.prefGvfsScheme.label = WebDAV 格式
+# upgrade.fxml
+upgrade.confirmation.label = 是的，請確認同步已完成。
+initialize.messageLabel.notEmpty = 檔案庫不是空的
+unlock.label.savePassword = 儲存密碼
+unlock.errorMessage.unauthenticVersionMac = 無法認證消息驗證碼版本。
