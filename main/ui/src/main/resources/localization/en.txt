@@ -79,6 +79,7 @@ changePassword.errorMessage.decryptionFailed=Decryption failed
 unlocked.button.lock=Lock vault
 unlocked.moreOptions.reveal=Reveal drive
 unlocked.moreOptions.copyUrl=Copy WebDAV URL
+unlocked.label.mountFailed=Connecting drive failed
 unlocked.label.revealFailed=Command failed
 unlocked.label.unmountFailed=Ejecting drive failed
 unlocked.label.statsEncrypted=encrypted

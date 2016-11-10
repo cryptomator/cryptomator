@@ -50,6 +50,8 @@ import org.cryptomator.ui.util.DeferredClosable;
 import org.cryptomator.ui.util.DeferredCloser;
 import org.cryptomator.ui.util.FXThreads;
 import org.fxmisc.easybind.EasyBind;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableMap;
 
@@ -65,6 +67,8 @@ import javafx.collections.ObservableList;
 
 public class Vault implements CryptoFileSystemDelegate {
 
+	private static final Logger LOG = LoggerFactory.getLogger(CryptoFileSystemDelegate.class);
+
 	public static final String VAULT_FILE_EXTENSION = ".cryptomator";
 
 	private final ObjectProperty<Path> path;
@@ -72,6 +76,7 @@ public class Vault implements CryptoFileSystemDelegate {
 	private final CryptoFileSystemFactory cryptoFileSystemFactory;
 	private final DeferredCloser closer;
 	private final BooleanProperty unlocked = new SimpleBooleanProperty();
+	private final BooleanProperty mounted = new SimpleBooleanProperty();
 	private final ObservableList<String> namesOfResourcesWithInvalidMac = FXThreads.observableListOnMainThread(FXCollections.observableArrayList());
 	private final Set<String> whitelistedResourcesWithInvalidMac = new HashSet<>();
 	private final AtomicReference<FileSystem> nioFileSystem = new AtomicReference<>();
@@ -131,7 +136,8 @@ public class Vault implements CryptoFileSystemDelegate {
 	}
 
 	public synchronized void activateFrontend(FrontendFactory frontendFactory, Settings settings, CharSequence passphrase) throws FrontendCreationFailedException {
-		boolean success = false;
+		boolean launchSuccess = false;
+		boolean mountSuccess = false;
 		try {
 			FileSystem fs = getNioFileSystem();
 			FileSystem shorteningFs = shorteningFileSystemFactory.get(fs);
@@ -140,22 +146,32 @@ public class Vault implements CryptoFileSystemDelegate {
 			StatsFileSystem statsFs = new StatsFileSystem(normalizingFs);
 			statsFileSystem = Optional.of(statsFs);
 			Frontend frontend = frontendFactory.create(statsFs, FrontendId.from(id), stripStart(mountName, "/"));
+			launchSuccess = true;
 			filesystemFrontend = closer.closeLater(frontend);
 			frontend.mount(getMountParams(settings));
-			success = true;
-		} catch (UncheckedIOException | CommandFailedException e) {
+			mountSuccess = true;
+		} catch (UncheckedIOException e) {
 			throw new FrontendCreationFailedException(e);
+		} catch (CommandFailedException e) {
+			LOG.error("Failed to mount vault " + mountName, e);
 		} finally {
 			// unlocked is a observable property and should only be changed by the FX application thread
-			final boolean finalSuccess = success;
-			Platform.runLater(() -> unlocked.set(finalSuccess));
+			boolean finalLaunchSuccess = launchSuccess;
+			boolean finalMountSuccess = mountSuccess;
+			Platform.runLater(() -> {
+				unlocked.set(finalLaunchSuccess);
+				mounted.set(finalMountSuccess);
+			});
 		}
 	}
 
 	public synchronized void deactivateFrontend() throws Exception {
 		filesystemFrontend.close();
 		statsFileSystem = Optional.empty();
-		Platform.runLater(() -> unlocked.set(false));
+		Platform.runLater(() -> {
+			mounted.set(false);
+			unlocked.set(false);
+		});
 	}
 
 	private Map<MountParam, Optional<String>> getMountParams(Settings settings) {
@@ -239,8 +255,16 @@ public class Vault implements CryptoFileSystemDelegate {
 		return unlocked;
 	}
 
+	public BooleanProperty mountedProperty() {
+		return mounted;
+	}
+
 	public boolean isUnlocked() {
 		return unlocked.get();
+	}
+
+	public boolean isMounted() {
+		return mounted.get();
 	}
 
 	public ObservableList<String> getNamesOfResourcesWithInvalidMac() {

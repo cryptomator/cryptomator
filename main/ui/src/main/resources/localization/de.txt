@@ -48,6 +48,7 @@ changePassword.infoMessage.success = Passwort geändert
 unlocked.button.lock = Tresor sperren
 unlocked.moreOptions.reveal = Laufwerk anzeigen
 unlocked.moreOptions.copyUrl = WebDAV-URL kopieren
+unlocked.label.mountFailed = Verbinden des Laufwerks fehlgeschlagen
 unlocked.label.revealFailed = Befehl fehlgeschlagen
 unlocked.label.unmountFailed = Trennen des Laufwerks fehlgeschlagen
 unlocked.label.statsEncrypted = verschlüsselt

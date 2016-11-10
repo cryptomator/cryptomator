@@ -95,7 +95,7 @@ final class WindowsWebDavMounter implements WebDavMounterStrategy {
 		}
 
 		final String driveLetterStr = AUTO_ASSIGN_DRIVE_LETTER.equals(driveLetter) ? AUTO_ASSIGN_DRIVE_LETTER : driveLetter + ":";
-		final Script mountScript = fromLines("net use %DRIVE_LETTER% \\\\%DAV_HOST%@%DAV_PORT%\\DavWWWRoot%DAV_UNC_PATH% /persistent:no");
+		final Script mountScript = fromLines("net use %DRIVE_LETTER%a \\\\%DAV_HOST%@%DAV_PORT%\\DavWWWRoot%DAV_UNC_PATH% /persistent:no");
 		mountScript.addEnv("DRIVE_LETTER", driveLetterStr);
 		mountScript.addEnv("DAV_HOST", uri.getHost());
 		mountScript.addEnv("DAV_PORT", String.valueOf(uri.getPort()));
