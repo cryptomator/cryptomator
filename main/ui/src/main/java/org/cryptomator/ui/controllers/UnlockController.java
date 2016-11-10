@@ -301,7 +301,7 @@ public class UnlockController extends LocalizedFXMLViewController {
 			if (keychainAccess.isPresent() && savePassword.isSelected()) {
 				keychainAccess.get().storePassphrase(vault.getId(), password);
 			} else {
-				passwordField.swipe();
+				Platform.runLater(passwordField::swipe);
 			}
 		} catch (InvalidPassphraseException e) {
 			Platform.runLater(() -> {
