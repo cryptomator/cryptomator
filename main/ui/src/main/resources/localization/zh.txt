@@ -1,0 +1,91 @@
+app.name = Cryptomator
+# main.fxml
+main.emptyListInstructions = 单击此处添加保管库
+main.directoryList.contextMenu.remove = 从列表中删除
+main.directoryList.contextMenu.changePassword = 更改密码
+main.addDirectory.contextMenu.new = 创建新保管库
+main.addDirectory.contextMenu.open = 打开现有保管库
+# welcome.fxml
+welcome.checkForUpdates.label.currentlyChecking = 正在检查更新……
+welcome.newVersionMessage = 发现新版本版本%1$s\n当前版本%2$s
+# initialize.fxml
+initialize.label.password = 密码
+initialize.label.retypePassword = 确认密码
+initialize.button.ok = 创建保管库
+initialize.messageLabel.alreadyInitialized = 保管库已初始化
+initialize.messageLabel.initializationFailed = 无法初始化保管库。 有关详情，请参阅日志文件。
+# notfound.fxml
+notfound.label = 找不到保险柜。 是否已被移动？
+# upgrade.fxml
+upgrade.button = 升级保险柜
+upgrade.version3dropBundleExtension.msg = 此保管库需要迁移到较新的格式。\n"%1$s"将重命名为"%2$s"。\n请确保同步已完成，然后再继续。
+upgrade.version3dropBundleExtension.err.alreadyExists = 自动迁移失败。\n"%s"已存在
+# unlock.fxml
+unlock.label.password = 密码
+unlock.label.mountName = 驱动器名称
+unlock.label.winDriveLetter = 驱动器号
+unlock.label.downloadsPageLink = 所有Cryptomator版本
+unlock.label.advancedHeading = 高级选项
+unlock.button.unlock = 保险柜解锁
+unlock.button.advancedOptions.show = 更多选项
+unlock.button.advancedOptions.hide = 更少选项
+unlock.choicebox.winDriveLetter.auto = 自动分配
+unlock.errorMessage.wrongPassword = 密码错误
+unlock.errorMessage.mountingFailed = 挂载失败。有关详情，请参阅日志文件。
+unlock.errorMessage.unsupportedVersion.vaultOlderThanSoftware = 不支持的保管库。 此保管库由旧版本的Cryptomator创建。
+unlock.errorMessage.unsupportedVersion.softwareOlderThanVault = 不支持的保管库。 此保管库由较新版本的Cryptomator创建。
+unlock.messageLabel.startServerFailed = 启动WebDAV服务器失败。
+# change_password.fxml
+changePassword.label.oldPassword = 旧密码
+changePassword.label.newPassword = 新密码
+changePassword.label.retypePassword = 确认新密码
+changePassword.label.downloadsPageLink = 所有Cryptomator版本
+changePassword.button.change = 更改密码
+changePassword.errorMessage.wrongPassword = 密码错误
+changePassword.errorMessage.decryptionFailed = 解密失败
+# unlocked.fxml
+unlocked.button.lock = 保险柜上锁
+unlocked.moreOptions.reveal = 显示驱动器
+unlocked.moreOptions.copyUrl = 复制WebDAV地址(URL)
+unlocked.label.revealFailed = 命令失败
+unlocked.label.unmountFailed = 弹出驱动器失败
+unlocked.label.statsEncrypted = 加密
+unlocked.label.statsDecrypted = 解密
+unlocked.ioGraph.yAxis.label = 吞吐量(Mib/s)
+# mac_warnings.fxml
+macWarnings.windowTitle = 危险 - 在%s有文件损坏
+macWarnings.message = Cryptomator检测到以下文件中的潜在恶意损坏：
+macWarnings.moreInformationButton = 了解更多
+macWarnings.whitelistButton = 任然解密选择项
+# settings.fxml
+settings.version.label = 版本%s
+settings.checkForUpdates.label = 检查更新
+# What's the "*" mean?
+settings.port.label = WebDAV 端口 *
+settings.port.prompt = 0 \=自动选择
+settings.useipv6.label = 使用IPv6
+settings.requiresRestartLabel = * Cryptomator需要重新启动
+# tray icon
+tray.menu.open = 打开
+tray.menu.quit = 退出
+tray.infoMsg.title = 仍在运行
+tray.infoMsg.msg = Cryptomator仍在运行。 从托盘图标中退出。
+tray.infoMsg.msg.osx = Cryptomator仍在运行。 从菜单栏图标中退出。
+initialize.messageLabel.passwordStrength.0 = 非常简单
+initialize.messageLabel.passwordStrength.1 = 简单
+initialize.messageLabel.passwordStrength.2 = 平均水平
+initialize.messageLabel.passwordStrength.3 = 强壮
+initialize.messageLabel.passwordStrength.4 = 非常强壮
+initialize.label.doNotForget = 重要信息：如果您忘记了密码，将无法恢复您的数据。
+main.directoryList.remove.confirmation.title = 移除保险柜
+main.directoryList.remove.confirmation.header = 您确定要删除此保管库吗？
+main.directoryList.remove.confirmation.content = 文件库将仅从列表中删除。 要永久删除它，请从文件系统中删除这些文件。
+upgrade.version3to4.msg = 此保管库需要迁移到较新的格式。\n加密的文件夹名称将更新。\n请确保同步已完成，然后再继续。
+upgrade.version3to4.err.io = 由于I/O异常，迁移失败。有关详情，请参阅日志文件。
+settings.prefGvfsScheme.label = WebDAV方案
+# upgrade.fxml
+upgrade.confirmation.label = 是的，我确保同步已完成
+initialize.messageLabel.notEmpty = 保险柜非空
+unlock.label.savePassword = 保存密码
+# This Mac means Mac(Apple) or Mac address?
+unlock.errorMessage.unauthenticVersionMac = 无法验证消息验证代码的版本。
