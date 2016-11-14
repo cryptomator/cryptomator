@@ -35,9 +35,10 @@ import org.eclipse.jetty.servlet.ServletHolder;
 class WebDavServletContextFactory {
 
 	private static final String WILDCARD = "/*";
-	
+
 	@Inject
-	public WebDavServletContextFactory() {}
+	public WebDavServletContextFactory() {
+	}
 
 	/**
 	 * Creates a new Jetty ServletContextHandler, that can be be added to a servletCollection as follows:
@@ -63,7 +64,7 @@ class WebDavServletContextFactory {
 			}
 		};
 		final String contextPath = StringUtils.removeEnd(contextRoot.getPath(), "/");
-		final ServletContextHandler servletContext = new ServletContextHandler(null, contextPath, ServletContextHandler.SESSIONS);
+		final ServletContextHandler servletContext = new FontendIdHidingServletContextHandler(null, contextPath, ServletContextHandler.SESSIONS);
 		final ServletHolder servletHolder = new ServletHolder(contextPath, new WebDavServlet(contextRoot, root));
 		servletContext.addServlet(servletHolder, WILDCARD);
 		servletContext.addFilter(LoopbackFilter.class, WILDCARD, EnumSet.of(DispatcherType.REQUEST));

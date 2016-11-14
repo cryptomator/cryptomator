@@ -59,6 +59,9 @@ public class SettingsController extends LocalizedFXMLViewController {
 	@FXML
 	private ChoiceBox<String> prefGvfsScheme;
 
+	@FXML
+	private CheckBox debugModeCheckbox;
+
 	@Override
 	public void initialize() {
 		checkForUpdatesCheckbox.setDisable(areUpdatesManagedExternally());
@@ -74,11 +77,13 @@ public class SettingsController extends LocalizedFXMLViewController {
 		prefGvfsScheme.getItems().add("dav");
 		prefGvfsScheme.getItems().add("webdav");
 		prefGvfsScheme.setValue(settings.getPreferredGvfsScheme());
+		debugModeCheckbox.setSelected(settings.getDebugMode());
 
 		EasyBind.subscribe(checkForUpdatesCheckbox.selectedProperty(), this::checkForUpdateDidChange);
 		EasyBind.subscribe(portField.textProperty(), this::portDidChange);
 		EasyBind.subscribe(useIpv6Checkbox.selectedProperty(), this::useIpv6DidChange);
 		EasyBind.subscribe(prefGvfsScheme.valueProperty(), this::prefGvfsSchemeDidChange);
+		EasyBind.subscribe(debugModeCheckbox.selectedProperty(), this::debugModeDidChange);
 	}
 
 	@Override
@@ -111,6 +116,11 @@ public class SettingsController extends LocalizedFXMLViewController {
 
 	private void useIpv6DidChange(Boolean newValue) {
 		settings.setUseIpv6(newValue);
+		settings.save();
+	}
+
+	private void debugModeDidChange(Boolean newValue) {
+		settings.setDebugMode(newValue);
 		settings.save();
 	}
 

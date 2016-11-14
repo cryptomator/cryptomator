@@ -66,6 +66,7 @@ settings.checkForUpdates.label = Auf Updates prüfen
 settings.port.label = WebDAV Port *
 settings.port.prompt = 0 \= Automatisch wählen
 settings.useipv6.label = IPv6-Literal nutzen
+settings.debugMode.label= Debug Modus *
 settings.requiresRestartLabel = * benötigt Neustart von Cryptomator
 # tray icon
 tray.menu.open = Öffnen

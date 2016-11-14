@@ -13,7 +13,6 @@ import java.net.URL;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -29,6 +28,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.ui.settings.Localization;
 import org.cryptomator.ui.settings.Settings;
+import org.cryptomator.ui.util.ApplicationVersion;
 import org.cryptomator.ui.util.AsyncTaskService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -104,7 +104,7 @@ public class WelcomeController extends LocalizedFXMLViewController {
 		asyncTaskService.asyncTaskOf(() -> {
 			final HttpClient client = new HttpClient();
 			final HttpMethod method = new GetMethod("https://cryptomator.org/downloads/latestVersion.json");
-			client.getParams().setParameter(HttpClientParams.USER_AGENT, "Cryptomator VersionChecker/" + applicationVersion().orElse("SNAPSHOT"));
+			client.getParams().setParameter(HttpClientParams.USER_AGENT, "Cryptomator VersionChecker/" + ApplicationVersion.orElse("SNAPSHOT"));
 			client.getParams().setCookiePolicy(CookiePolicy.IGNORE_COOKIES);
 			client.getParams().setConnectionManagerTimeout(5000);
 			client.executeMethod(method);
@@ -124,10 +124,6 @@ public class WelcomeController extends LocalizedFXMLViewController {
 		}).run();
 	}
 
-	private Optional<String> applicationVersion() {
-		return Optional.ofNullable(getClass().getPackage().getImplementationVersion());
-	}
-
 	private void compareVersions(final Map<String, String> latestVersions) {
 		final String latestVersion;
 		if (SystemUtils.IS_OS_MAC_OSX) {
@@ -140,7 +136,7 @@ public class WelcomeController extends LocalizedFXMLViewController {
 			// no version check possible on unsupported OS
 			return;
 		}
-		final String currentVersion = applicationVersion().orElse(null);
+		final String currentVersion = ApplicationVersion.orElse(null);
 		LOG.debug("Current version: {}, lastest version: {}", currentVersion, latestVersion);
 		if (currentVersion != null && semVerComparator.compare(currentVersion, latestVersion) < 0) {
 			final String msg = String.format(localization.getString("welcome.newVersionMessage"), latestVersion, currentVersion);

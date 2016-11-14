@@ -43,18 +43,46 @@ public class MainApplication extends Application {
 	@Override
 	public void start(Stage primaryStage) throws IOException {
 		LOG.info("JavaFX application started");
-		final CryptomatorComponent comp;
+
+		CryptomatorComponent comp = createCryptomatorComponent(primaryStage);
+		MainController mainCtrl = comp.mainController();
+		closer = comp.deferredCloser();
+
+		comp.debugMode().initialize();
+
+		setupFXMLClassLoader();
+		setupStylesheets();
+
+		initializeStage(primaryStage, mainCtrl);
+		showWindow(primaryStage);
+
+		registerExitHandler(comp);
+
+		openFilesRequestedDuringStartup(primaryStage, mainCtrl);
+		registerApplicationToProcessOpenFileRequests(primaryStage, comp, mainCtrl);
+	}
+
+	@Override
+	public void stop() {
 		try {
-			comp = DaggerCryptomatorComponent.builder() //
+			closer.close();
+		} catch (ExecutionException e) {
+			LOG.error("Error closing ressources", e);
+		}
+	}
+
+	private CryptomatorComponent createCryptomatorComponent(Stage primaryStage) {
+		try {
+			return DaggerCryptomatorComponent.builder() //
 					.cryptomatorModule(new CryptomatorModule(this, primaryStage)) //
 					.secureRandomModule(new SecureRandomModule(SecureRandom.getInstanceStrong())) //
 					.build();
 		} catch (NoSuchAlgorithmException e) {
 			throw new IllegalStateException("Every implementation of the Java platform is required to support at least one strong SecureRandom implementation.", e);
 		}
-		final MainController mainCtrl = comp.mainController();
-		closer = comp.deferredCloser();
+	}
 
+	private void setupFXMLClassLoader() {
 		ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
 		FXMLLoader.setDefaultClassLoader(contextClassLoader);
 		Platform.runLater(() -> {
@@ -66,33 +94,53 @@ public class MainApplication extends Application {
 				Thread.currentThread().setContextClassLoader(contextClassLoader);
 			}
 		});
+	}
 
-		// Set stylesheets and initialize stage:
+	private void setupStylesheets() {
 		Font.loadFont(getClass().getResourceAsStream("/css/ionicons.ttf"), 12.0);
 		chooseNativeStylesheet();
+	}
+
+	private void initializeStage(Stage primaryStage, MainController mainCtrl) {
 		mainCtrl.initStage(primaryStage);
 		primaryStage.titleProperty().bind(mainCtrl.windowTitle());
 		primaryStage.setResizable(false);
 		if (SystemUtils.IS_OS_WINDOWS) {
 			primaryStage.getIcons().add(new Image(MainApplication.class.getResourceAsStream("/window_icon.png")));
 		}
+	}
 
-		// show window and start observing its focus:
+	private void showWindow(Stage primaryStage) {
 		primaryStage.show();
 		ActiveWindowStyleSupport.startObservingFocus(primaryStage);
-		comp.exitUtil().initExitHandler(this::quit);
+	}
 
-		// open files, if requested during startup:
+	private void registerExitHandler(CryptomatorComponent comp) {
+		comp.exitUtil().initExitHandler(this::quit);
+	}
+
+	private void openFilesRequestedDuringStartup(Stage primaryStage, final MainController mainCtrl) {
 		for (String arg : getParameters().getUnnamed()) {
 			handleCommandLineArg(arg, primaryStage, mainCtrl);
 		}
 		if (SystemUtils.IS_OS_MAC_OSX) {
 			Cryptomator.OPEN_FILE_HANDLER.complete(file -> handleCommandLineArg(file.getAbsolutePath(), primaryStage, mainCtrl));
 		}
+	}
 
-		// register this application instance as primary application, that other instances can send open file requests to:
+	private void registerApplicationToProcessOpenFileRequests(Stage primaryStage, final CryptomatorComponent comp, final MainController mainCtrl) throws IOException {
 		LocalInstance cryptomatorGuiInstance = closer.closeLater(SingleInstanceManager.startLocalInstance(APPLICATION_KEY, comp.executorService()), LocalInstance::close).get().get();
 		cryptomatorGuiInstance.registerListener(arg -> handleCommandLineArg(arg, primaryStage, mainCtrl));
+	}
+
+	private void chooseNativeStylesheet() {
+		if (SystemUtils.IS_OS_MAC_OSX) {
+			setUserAgentStylesheet(getClass().getResource("/css/mac_theme.css").toString());
+		} else if (SystemUtils.IS_OS_LINUX) {
+			setUserAgentStylesheet(getClass().getResource("/css/linux_theme.css").toString());
+		} else if (SystemUtils.IS_OS_WINDOWS) {
+			setUserAgentStylesheet(getClass().getResource("/css/win_theme.css").toString());
+		}
 	}
 
 	private void handleCommandLineArg(String arg, Stage primaryStage, MainController mainCtrl) {
@@ -118,31 +166,12 @@ public class MainApplication extends Application {
 		});
 	}
 
-	private void chooseNativeStylesheet() {
-		if (SystemUtils.IS_OS_MAC_OSX) {
-			setUserAgentStylesheet(getClass().getResource("/css/mac_theme.css").toString());
-		} else if (SystemUtils.IS_OS_LINUX) {
-			setUserAgentStylesheet(getClass().getResource("/css/linux_theme.css").toString());
-		} else if (SystemUtils.IS_OS_WINDOWS) {
-			setUserAgentStylesheet(getClass().getResource("/css/win_theme.css").toString());
-		}
-	}
-
 	private void quit() {
 		Platform.runLater(() -> {
 			stop();
 			Platform.exit();
 			System.exit(0);
 		});
-	}
-
-	@Override
-	public void stop() {
-		try {
-			closer.close();
-		} catch (ExecutionException e) {
-			LOG.error("Error closing ressources", e);
-		}
 	}
 
 }

@@ -28,6 +28,7 @@ public class Settings implements Serializable {
 	public static final boolean DEFAULT_USE_IPV6 = false;
 	public static final Integer DEFAULT_NUM_TRAY_NOTIFICATIONS = 3;
 	public static final String DEFAULT_GVFS_SCHEME = "dav";
+	public static final boolean DEFAULT_DEBUG_MODE = false;
 
 	private final Consumer<Settings> saveCmd;
 
@@ -48,6 +49,9 @@ public class Settings implements Serializable {
 
 	@JsonProperty("preferredGvfsScheme")
 	private String preferredGvfsScheme;
+
+	@JsonProperty("debugMode")
+	private Boolean debugMode;
 
 	/**
 	 * Package-private constructor; use {@link SettingsProvider}.
@@ -123,6 +127,14 @@ public class Settings implements Serializable {
 
 	public void setPreferredGvfsScheme(String preferredGvfsScheme) {
 		this.preferredGvfsScheme = preferredGvfsScheme;
+	}
+
+	public boolean getDebugMode() {
+		return debugMode == null ? DEFAULT_DEBUG_MODE : debugMode;
+	}
+
+	public void setDebugMode(boolean debugMode) {
+		this.debugMode = debugMode;
 	}
 
 }
