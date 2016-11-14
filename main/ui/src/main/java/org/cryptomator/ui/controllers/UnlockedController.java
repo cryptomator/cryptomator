@@ -38,6 +38,7 @@ import javafx.scene.chart.XYChart.Data;
 import javafx.scene.chart.XYChart.Series;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
@@ -81,10 +82,15 @@ public class UnlockedController extends LocalizedFXMLViewController {
 	@FXML
 	private ContextMenu moreOptionsMenu;
 
+	@FXML
+	private MenuItem revealVaultMenuItem;
+
 	@Override
 	public void initialize() {
 		macWarningsController.initStage(macWarningsWindow);
 		ActiveWindowStyleSupport.startObservingFocus(macWarningsWindow);
+
+		revealVaultMenuItem.disableProperty().bind(EasyBind.map(vault, vault -> vault != null && !vault.isMounted()));
 
 		EasyBind.subscribe(vault, this::vaultChanged);
 		EasyBind.subscribe(moreOptionsMenu.showingProperty(), moreOptionsButton::setSelected);
@@ -108,6 +114,11 @@ public class UnlockedController extends LocalizedFXMLViewController {
 				newVault.getNamesOfResourcesWithInvalidMac().removeListener(macWarningsListener);
 			}
 		});
+
+		if (!vault.get().isMounted()) {
+			// TODO Markus Kreusch #393: hyperlink auf FAQ oder sowas?
+			messageLabel.setText(localization.getString("unlocked.label.mountFailed"));
+		}
 
 		// (re)start throughput statistics:
 		stopIoSampling();
