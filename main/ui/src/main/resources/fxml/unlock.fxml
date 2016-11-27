@@ -69,7 +69,7 @@
 			
 			<!-- Row 3.1 -->
 			<Label GridPane.rowIndex="1" GridPane.columnIndex="0" text="%unlock.label.savePassword" cacheShape="true" cache="true" />
-			<CheckBox GridPane.rowIndex="1" GridPane.columnIndex="1" fx:id="savePassword" cacheShape="true" cache="true" />
+			<CheckBox GridPane.rowIndex="1" GridPane.columnIndex="1" fx:id="savePassword" onAction="#didClickSavePasswordCheckbox" cacheShape="true" cache="true" />
 			
 			<!-- Row 3.2 -->
 			<Label GridPane.rowIndex="2" GridPane.columnIndex="0" text="%unlock.label.mountName"  cacheShape="true" cache="true" />
