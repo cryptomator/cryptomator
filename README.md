@@ -53,8 +53,10 @@ For more information on the security details visit [cryptomator.org](https://cry
 
 ```
 cd main
-mvn clean install
+mvn clean install -Prelease
 ```
+
+An executable jar file will be created inside `main/uber-jar/target`.
 
 ## Contributing to Cryptomator
 
