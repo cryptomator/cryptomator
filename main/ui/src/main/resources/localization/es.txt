@@ -1,6 +1,6 @@
 app.name = Cryptomator
 # main.fxml
-main.emptyListInstructions = Click aquí para añadir una caja fuerte
+main.emptyListInstructions = Clic aquí para añadir una caja fuerte
 # should it be imperative?
 main.directoryList.contextMenu.remove = Eliminar de la lista
 main.directoryList.contextMenu.changePassword = Cambiar la contraseña
@@ -45,7 +45,6 @@ changePassword.label.downloadsPageLink = Todas las versiones de Cryptomator
 changePassword.button.change = Cambiar contraseña
 changePassword.errorMessage.wrongPassword = Contraseña incorrecta
 changePassword.errorMessage.decryptionFailed = Decifración ha fallado
-changePassword.infoMessage.success = Contraseña se ha cambiado
 # unlocked.fxml
 unlocked.button.lock = Encerrar caja fuerte
 unlocked.moreOptions.reveal = Mostrar disco
@@ -78,15 +77,21 @@ initialize.messageLabel.passwordStrength.1 = débil
 initialize.messageLabel.passwordStrength.2 = suficiente
 initialize.messageLabel.passwordStrength.3 = fuerte
 initialize.messageLabel.passwordStrength.4 = muy fuerte
-initialize.label.doNotForget = IMPORTANTE\: Si olivdes tú contraseña no hay ninguna manera de recuperar tus datos.
+initialize.label.doNotForget = IMPORTANTE\: Si olivdes tú contraseña, no hay ninguna manera de recuperar tus datos.
 main.directoryList.remove.confirmation.title = Borrar caja fuerte
 main.directoryList.remove.confirmation.header = ¿Quieres de verdad borrar este caja fuerte?
 main.directoryList.remove.confirmation.content = La caja fuerte solo se borra de la lista. Para eliminarla permanente por favor elimina los datos de tú sistema de archivos.
 upgrade.version3to4.msg = Este caja fuerte se debe migrar a un formato más reciente.\nLos nombres de las carpetas cifradas se actualizan.\nPor favor asegurarse de que la sincronización ha terminado antes de seguir.
 upgrade.version3to4.err.io = Migración ha fallado por causa de una excepción I/O. Para detalles revisa el archivo de registro.
-settings.prefGvfsScheme.label = WebDAV scheme
+# or esequema WEBDAV but I think sistema sounds better
+settings.prefGvfsScheme.label = sistema WebDAV
 # upgrade.fxml
-upgrade.confirmation.label = Yes, I've made sure that synchronization has finished
-initialize.messageLabel.notEmpty = Vault not empty
-unlock.label.savePassword = Save password
-unlock.errorMessage.unauthenticVersionMac = Could not authenticate version MAC.
+upgrade.confirmation.label = Sí, me he asegurado de que la sincronización ha terminado
+initialize.messageLabel.notEmpty = Caja fuerte no está vacio
+unlock.label.savePassword = Contraseña segura
+unlock.errorMessage.unauthenticVersionMac = No se pudo autentificar la version de MAC.
+unlocked.label.mountFailed = Connecting drive failed
+unlock.savePassword.delete.confirmation.title = Delete Saved Password
+unlock.savePassword.delete.confirmation.header = Do you really want to delete the saved password of this vault?
+unlock.savePassword.delete.confirmation.content = The saved password of this vault will be immediately deleted from your system keychain. If you'd like to save your password again, you'd have to unlock your vault with the "Save password" option enabled.
+settings.debugMode.label = Debug mode *

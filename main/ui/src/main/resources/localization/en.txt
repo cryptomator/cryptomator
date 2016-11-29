@@ -58,6 +58,9 @@ unlock.label.advancedHeading=Advanced options
 unlock.button.unlock=Unlock vault
 unlock.button.advancedOptions.show=More options
 unlock.button.advancedOptions.hide=Less options
+unlock.savePassword.delete.confirmation.title=Delete Saved Password
+unlock.savePassword.delete.confirmation.header=Do you really want to delete the saved password of this vault?
+unlock.savePassword.delete.confirmation.content=The saved password of this vault will be immediately deleted from your system keychain. If you'd like to save your password again, you'd have to unlock your vault with the "Save password" option enabled.
 unlock.choicebox.winDriveLetter.auto=Assign automatically
 unlock.errorMessage.wrongPassword=Wrong password
 unlock.errorMessage.mountingFailed=Mounting failed. See log file for details.
@@ -79,6 +82,7 @@ changePassword.errorMessage.decryptionFailed=Decryption failed
 unlocked.button.lock=Lock vault
 unlocked.moreOptions.reveal=Reveal drive
 unlocked.moreOptions.copyUrl=Copy WebDAV URL
+unlocked.label.mountFailed=Connecting drive failed
 unlocked.label.revealFailed=Command failed
 unlocked.label.unmountFailed=Ejecting drive failed
 unlocked.label.statsEncrypted=encrypted
@@ -98,6 +102,7 @@ settings.port.label=WebDAV Port *
 settings.port.prompt=0 = Choose automatically
 settings.useipv6.label=Use IPv6 literal
 settings.prefGvfsScheme.label=WebDAV scheme
+settings.debugMode.label=Debug mode *
 settings.requiresRestartLabel=* Cryptomator needs to restart
 
 # tray icon

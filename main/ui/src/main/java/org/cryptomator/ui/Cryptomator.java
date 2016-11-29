@@ -20,6 +20,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.ui.util.ApplicationVersion;
 import org.cryptomator.ui.util.SingleInstanceManager;
 import org.cryptomator.ui.util.SingleInstanceManager.RemoteInstance;
 import org.eclipse.jetty.util.ConcurrentHashSet;
@@ -33,60 +34,59 @@ public class Cryptomator {
 	public static final CompletableFuture<Consumer<File>> OPEN_FILE_HANDLER = new CompletableFuture<>();
 	private static final Logger LOG = LoggerFactory.getLogger(Cryptomator.class);
 	private static final Set<Runnable> SHUTDOWN_TASKS = new ConcurrentHashSet<>();
-	private static final CleanShutdownPerformer CLEAN_SHUTDOWN_PERFORMER = new CleanShutdownPerformer();
 
 	public static void main(String[] args) {
-		String cryptomatorVersion = Optional.ofNullable(Cryptomator.class.getPackage().getImplementationVersion()).orElse("SNAPSHOT");
-		LOG.info("Starting Cryptomator {} on {} {} ({})", cryptomatorVersion, SystemUtils.OS_NAME, SystemUtils.OS_VERSION, SystemUtils.OS_ARCH);
+		LOG.info("Starting Cryptomator {} on {} {} ({})", ApplicationVersion.orElse("SNAPSHOT"), SystemUtils.OS_NAME, SystemUtils.OS_VERSION, SystemUtils.OS_ARCH);
+
 		if (SystemUtils.IS_OS_MAC_OSX) {
-			/*
-			 * On OSX we're in an awkward position. We need to register a handler in the main thread of this application. However, we can't
-			 * even pass objects to the application, so we're forced to use a static CompletableFuture for the handler, which actually opens
-			 * the file in the application.
-			 * 
-			 * Code taken from https://github.com/axet/desktop/blob/master/src/main/java/com/github/axet/desktop/os/mac/AppleHandlers.java
-			 */
-			try {
-				final Class<?> applicationClass = Class.forName("com.apple.eawt.Application");
-				final Class<?> openFilesHandlerClass = Class.forName("com.apple.eawt.OpenFilesHandler");
-				final Method getApplication = applicationClass.getMethod("getApplication");
-				final Object application = getApplication.invoke(null);
-				final Method setOpenFileHandler = applicationClass.getMethod("setOpenFileHandler", openFilesHandlerClass);
-
-				final ClassLoader openFilesHandlerClassLoader = openFilesHandlerClass.getClassLoader();
-				final OpenFilesHandlerClassHandler openFilesHandlerHandler = new OpenFilesHandlerClassHandler();
-				final Object openFilesHandlerObject = Proxy.newProxyInstance(openFilesHandlerClassLoader, new Class<?>[] {openFilesHandlerClass}, openFilesHandlerHandler);
-
-				setOpenFileHandler.invoke(application, openFilesHandlerObject);
-			} catch (ReflectiveOperationException | RuntimeException e) {
-				// Since we're trying to call OS-specific code, we'll just have
-				// to hope for the best.
-				LOG.error("exception adding OSX file open handler", e);
-			}
+			addOsxFileOpenHandler();
 		}
 
-		/*
-		 * Perform certain things on VM termination.
-		 */
-		Runtime.getRuntime().addShutdownHook(CLEAN_SHUTDOWN_PERFORMER);
+		new CleanShutdownPerformer().registerShutdownHook();
 
-		/*
-		 * Before starting the application, we check if there is already an instance running on this computer. If so, we send our command
-		 * line arguments to that instance and quit.
-		 */
-		final Optional<RemoteInstance> remoteInstance = SingleInstanceManager.getRemoteInstance(MainApplication.APPLICATION_KEY);
-
-		if (remoteInstance.isPresent()) {
-			try (RemoteInstance instance = remoteInstance.get()) {
-				LOG.info("An instance of Cryptomator is already running at {}.", instance.getRemotePort());
-				for (int i = 0; i < args.length; i++) {
-					remoteInstance.get().sendMessage(args[i], 100);
-				}
-			} catch (Exception e) {
-				LOG.error("Error forwarding arguments to remote instance", e);
-			}
+		final Optional<RemoteInstance> runningInstance = SingleInstanceManager.getRemoteInstance(MainApplication.APPLICATION_KEY);
+		if (runningInstance.isPresent()) {
+			sendArgsToRunningInstance(args, runningInstance);
 		} else {
 			Application.launch(MainApplication.class, args);
+		}
+	}
+
+	private static void addOsxFileOpenHandler() {
+		/*
+		 * On OSX we're in an awkward position. We need to register a handler in the main thread of this application. However, we can't
+		 * even pass objects to the application, so we're forced to use a static CompletableFuture for the handler, which actually opens
+		 * the file in the application.
+		 * 
+		 * Code taken from https://github.com/axet/desktop/blob/master/src/main/java/com/github/axet/desktop/os/mac/AppleHandlers.java
+		 */
+		try {
+			final Class<?> applicationClass = Class.forName("com.apple.eawt.Application");
+			final Class<?> openFilesHandlerClass = Class.forName("com.apple.eawt.OpenFilesHandler");
+			final Method getApplication = applicationClass.getMethod("getApplication");
+			final Object application = getApplication.invoke(null);
+			final Method setOpenFileHandler = applicationClass.getMethod("setOpenFileHandler", openFilesHandlerClass);
+
+			final ClassLoader openFilesHandlerClassLoader = openFilesHandlerClass.getClassLoader();
+			final OpenFilesHandlerClassHandler openFilesHandlerHandler = new OpenFilesHandlerClassHandler();
+			final Object openFilesHandlerObject = Proxy.newProxyInstance(openFilesHandlerClassLoader, new Class<?>[] {openFilesHandlerClass}, openFilesHandlerHandler);
+
+			setOpenFileHandler.invoke(application, openFilesHandlerObject);
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			// Since we're trying to call OS-specific code, we'll just have
+			// to hope for the best.
+			LOG.error("exception adding OSX file open handler", e);
+		}
+	}
+
+	private static void sendArgsToRunningInstance(String[] args, final Optional<RemoteInstance> remoteInstance) {
+		try (RemoteInstance instance = remoteInstance.get()) {
+			LOG.info("An instance of Cryptomator is already running at {}.", instance.getRemotePort());
+			for (int i = 0; i < args.length; i++) {
+				remoteInstance.get().sendMessage(args[i], 100);
+			}
+		} catch (Exception e) {
+			LOG.error("Error forwarding arguments to remote instance", e);
 		}
 	}
 
@@ -110,6 +110,10 @@ public class Cryptomator {
 				}
 			});
 			SHUTDOWN_TASKS.clear();
+		}
+
+		public void registerShutdownHook() {
+			Runtime.getRuntime().addShutdownHook(this);
 		}
 	}
 

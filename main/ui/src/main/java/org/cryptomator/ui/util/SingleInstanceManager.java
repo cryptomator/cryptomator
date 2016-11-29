@@ -85,7 +85,7 @@ public class SingleInstanceManager {
 					return true;
 				}
 				return !buf.hasRemaining();
-			} , timeout, 10);
+			}, timeout, 10);
 			return !buf.hasRemaining();
 		}
 
@@ -117,13 +117,14 @@ public class SingleInstanceManager {
 		final String applicationKey;
 		final ServerSocketChannel channel;
 		final Selector selector;
-		int port = 0;
+		final int port;
 
-		public LocalInstance(String applicationKey, ServerSocketChannel channel, Selector selector) {
+		public LocalInstance(String applicationKey, ServerSocketChannel channel, Selector selector, int port) {
 			Objects.requireNonNull(applicationKey);
 			this.applicationKey = applicationKey;
 			this.channel = channel;
 			this.selector = selector;
+			this.port = port;
 		}
 
 		/**
@@ -317,28 +318,27 @@ public class SingleInstanceManager {
 	 */
 	public static LocalInstance startLocalInstance(String applicationKey, ExecutorService exec) throws IOException {
 		final ServerSocketChannel channel = ServerSocketChannel.open();
-		channel.configureBlocking(false);
-		channel.bind(new InetSocketAddress(InetAddress.getLoopbackAddress(), 0));
+		boolean success = false;
+		try {
+			channel.configureBlocking(false);
+			channel.bind(new InetSocketAddress(InetAddress.getLoopbackAddress(), 0));
 
-		final int port = ((InetSocketAddress) channel.getLocalAddress()).getPort();
-		Preferences.userNodeForPackage(Cryptomator.class).putInt(applicationKey, port);
-		LOG.debug("InstanceManager bound to port {}", port);
+			final int port = ((InetSocketAddress) channel.getLocalAddress()).getPort();
+			Preferences.userNodeForPackage(Cryptomator.class).putInt(applicationKey, port);
+			LOG.debug("InstanceManager bound to port {}", port);
 
-		Selector selector = Selector.open();
-		channel.register(selector, SelectionKey.OP_ACCEPT);
+			Selector selector = Selector.open();
+			channel.register(selector, SelectionKey.OP_ACCEPT);
+			LocalInstance instance = new LocalInstance(applicationKey, channel, selector, port);
+			exec.submit(instance::selectionLoop);
 
-		LocalInstance instance = new LocalInstance(applicationKey, channel, selector);
-
-		exec.submit(() -> {
-			try {
-				instance.port = ((InetSocketAddress) channel.getLocalAddress()).getPort();
-			} catch (IOException e) {
-
+			success = true;
+			return instance;
+		} finally {
+			if (!success) {
+				channel.close();
 			}
-			instance.selectionLoop();
-		});
-
-		return instance;
+		}
 	}
 
 	/**
@@ -368,7 +368,7 @@ public class SingleInstanceManager {
 					}
 				}
 				return !buf.hasRemaining();
-			} , timeout, 1);
+			}, timeout, 1);
 		}
 	}
 }

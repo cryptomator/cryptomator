@@ -8,8 +8,6 @@
  *******************************************************************************/
 package org.cryptomator.frontend.webdav;
 
-import static java.lang.String.format;
-
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collection;
@@ -110,7 +108,7 @@ public class WebDavServer implements FrontendFactory {
 
 	@Override
 	public Frontend create(Folder root, FrontendId id, String name) throws FrontendCreationFailedException {
-		String contextPath = format("/%s/%s", id, name);
+		String contextPath = ContextPaths.from(id, name);
 		final URI uri;
 		try {
 			uri = new URI("http", null, "localhost", getPort(), contextPath, null, null);
@@ -118,10 +116,10 @@ public class WebDavServer implements FrontendFactory {
 			throw new IllegalStateException(e);
 		}
 		final ServletContextHandler handler = addServlet(root, uri);
-		LOG.info("Servlet available under " + uri);
+		LOG.info("Servlet available under " + ContextPaths.removeFrontendId(uri.toString()));
 		return new WebDavFrontend(webdavMounterProvider, handler, uri);
 	}
-	
+
 	public void setValidFrontendIds(Collection<FrontendId> validFrontendIds) {
 		tarpit.setValidFrontendIds(validFrontendIds);
 	}

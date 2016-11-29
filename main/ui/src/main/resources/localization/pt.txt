@@ -1,24 +1,24 @@
 app.name = Cryptomator
 # main.fxml
-main.emptyListInstructions = Clique aqui para adicionar uma caixa-forte
+main.emptyListInstructions = Clique aqui para adicionar um cofre
 main.directoryList.contextMenu.remove = Remover da lista
 main.directoryList.contextMenu.changePassword = Alterar senha
-main.addDirectory.contextMenu.new = Criar nova caixa-forte
-main.addDirectory.contextMenu.open = Abrir caixa-forte existente
+main.addDirectory.contextMenu.new = Criar um novo cofre
+main.addDirectory.contextMenu.open = Abrir um cofre já existente
 # welcome.fxml
 welcome.checkForUpdates.label.currentlyChecking = Buscando por atualizações...
-welcome.newVersionMessage = Versão %1$s pode ser abaixada. Esta é a versão %2$s.
+welcome.newVersionMessage = Versão %1$s pode ser baixada. Esta é a versão %2$s.
 # initialize.fxml
 initialize.label.password = Senha
-initialize.label.retypePassword = Redigitar senha
-initialize.button.ok = Criar caixa-forte
-initialize.messageLabel.alreadyInitialized = Caixa-forte já inicializada
-initialize.messageLabel.initializationFailed = Não pôde inicializar a caixa-forte. Ver arquivo de log para mais detalhes.
+initialize.label.retypePassword = Redigite a senha
+initialize.button.ok = Criar cofre
+initialize.messageLabel.alreadyInitialized = Cofre já inicializado
+initialize.messageLabel.initializationFailed = Não pôde inicializar o cofre. Veja o arquivo de log para mais detalhes.
 # notfound.fxml
-notfound.label = A caixa-forte não pode ser encontrada. Ela foi movida?
+notfound.label = O cofre não pode ser encontrado. Pode ter sido movido?
 # upgrade.fxml
-upgrade.button = Atualizar caixa-forte
-upgrade.version3dropBundleExtension.msg = Esta caixa-forte tem que ser a migrada a um novo formato. "%1$s" será renomeada para "%2$s". Por favor assegure-se de que a sincronização foi finalizada antes de proceder com a migração.
+upgrade.button = Atualizar cofre
+upgrade.version3dropBundleExtension.msg = Esse cofre tem que ser migrado paraa um novo formato. "%1$s" será renomeada para "%2$s". Por favor assegure-se de que a sincronização foi finalizada antes de proceder com a migração.
 upgrade.version3dropBundleExtension.err.alreadyExists = A migração automática falhou. "%s" já existe.
 # unlock.fxml
 unlock.label.password = Senha
@@ -26,45 +26,48 @@ unlock.label.mountName = Nome do drive
 unlock.label.winDriveLetter = Letra do drive
 unlock.label.downloadsPageLink = Todas as versões do Cryptomator
 unlock.label.advancedHeading = Opções avançadas
-unlock.button.unlock = Abrir caixa-forte
+unlock.button.unlock = Abrir cofre
 unlock.button.advancedOptions.show = Mais opções
 unlock.button.advancedOptions.hide = Menos opções
 unlock.choicebox.winDriveLetter.auto = Atribuir automaticamente
 unlock.errorMessage.wrongPassword = Senha errada
-unlock.errorMessage.mountingFailed = Falha ao montar. Ver arquivo de log para mais detalhes.
-unlock.errorMessage.unsupportedVersion.vaultOlderThanSoftware = Caixa-forte não suportada. Esta caixa-forte foi criada por uma versão antiga do Cryptomator.
-unlock.errorMessage.unsupportedVersion.softwareOlderThanVault = Caixa-forte não suportada. Esta caixa-forte foi criada por uma versão mais nova do Cryptomator.
+unlock.errorMessage.mountingFailed = Falha ao montar. Veja o arquivo de log para mais detalhes.
+unlock.errorMessage.unsupportedVersion.vaultOlderThanSoftware = Cofre não suportado. Esse cofre foi criado por uma versão antiga do Cryptomator.
+unlock.errorMessage.unsupportedVersion.softwareOlderThanVault = Cofre não suportado. Esse cofre foi criado por uma versão mais nova do Cryptomator.
 unlock.messageLabel.startServerFailed = Falha ao iniciar servidor WebDAV.
 # change_password.fxml
-changePassword.label.oldPassword = Senha anterior
+changePassword.label.oldPassword = Senha atual
 changePassword.label.newPassword = Nova senha
 changePassword.label.retypePassword = Re-digitar senha
 changePassword.label.downloadsPageLink = Todas as versões do Cryptomator
 changePassword.button.change = Alterar senha
 changePassword.errorMessage.wrongPassword = Senha incorreta
 changePassword.errorMessage.decryptionFailed = Falha ao desencriptar
-changePassword.infoMessage.success = Senha alterada
 # unlocked.fxml
-unlocked.button.lock = Fechar caixa-forte
+unlocked.button.lock = Fechar cofre
 unlocked.moreOptions.reveal = Mostrar drive
 unlocked.moreOptions.copyUrl = Copiar URL WebDAV
 unlocked.label.revealFailed = Falha ao mostrar drive
 unlocked.label.unmountFailed = Falha ao ejetar drive
-unlocked.label.statsEncrypted = encriptado
-unlocked.label.statsDecrypted = desencriptado
+unlocked.label.statsEncrypted = Encriptado
+unlocked.label.statsDecrypted = Desencriptado
 unlocked.ioGraph.yAxis.label = Taxa de transferência (MiB/s)
 # mac_warnings.fxml
 macWarnings.windowTitle = Perigo - Arquivo corrompido na %s
+# Fuzzy
 macWarnings.message = Cryptomator detectou potenciais corrupções maliciosas nos seguintes arquivos\:
 macWarnings.moreInformationButton = Saiba mais
+# Fuzzy
 macWarnings.whitelistButton = Desencriptar selecionado de qualquer modo
 # settings.fxml
 settings.version.label = Versão %s
 settings.checkForUpdates.label = Verificar por atualizações
-settings.port.label = Port WebDAV *
+# Fuzzy
+settings.port.label = Porta WebDAV *
 settings.port.prompt = 0 \= Escolher automaticamente
+# Fuzzy
 settings.useipv6.label = Usar IPv6 literal
-settings.requiresRestartLabel = * Cryptomator necessita ser reiniciado
+settings.requiresRestartLabel = * Cryptomator precisa ser reiniciado
 # tray icon
 tray.menu.open = Abrir
 tray.menu.quit = Sair
@@ -77,14 +80,21 @@ initialize.messageLabel.passwordStrength.2 = Razoável
 initialize.messageLabel.passwordStrength.3 = Forte
 initialize.messageLabel.passwordStrength.4 = Muito forte
 initialize.label.doNotForget = IMPORTANTE\: se você esquecer a sua senha, não haverá como recuperar os seus dados.
-main.directoryList.remove.confirmation.title = Remover caixa-forte
-main.directoryList.remove.confirmation.header = Você realmente quer remover esta caixa-forte?
-main.directoryList.remove.confirmation.content = A caixa-forte somente será removida da lista. Para apagá-la permanentemente, por favor apagar os arquivos do seu sistema de arquivos.
-upgrade.version3to4.msg = Esta caixa-forte tem que ser migrada a um novo formato. Os nomes das pastas encriptadas serão atualizados. Por favor assegure-se de que a sincronização foi finalizada antes de proceder com a migração.
-upgrade.version3to4.err.io = Falha na migração devido a um erro de E/S. Ver arquivo de log para mais detalhes.
-settings.prefGvfsScheme.label = WebDAV scheme
+main.directoryList.remove.confirmation.title = Remover cofre
+main.directoryList.remove.confirmation.header = Você realmente quer remover esse cofre?
+main.directoryList.remove.confirmation.content = O cofre somente será removido da lista. Para apagá-lo permanentemente, por favor apagar os arquivos do seu sistema de arquivos.
+upgrade.version3to4.msg = Esse cofre tem que ser migrado a um novo formato. Os nomes das pastas encriptadas serão atualizados. Por favor assegure-se de que a sincronização foi finalizada antes de proceder com a migração.
+upgrade.version3to4.err.io = Falha na migração devido a um erro de E/S. Veja o arquivo de log para mais detalhes.
+# Fuzzy
+settings.prefGvfsScheme.label = Esquema WebDAV
 # upgrade.fxml
-upgrade.confirmation.label = Yes, I've made sure that synchronization has finished
-initialize.messageLabel.notEmpty = Vault not empty
-unlock.label.savePassword = Save password
-unlock.errorMessage.unauthenticVersionMac = Could not authenticate version MAC.
+upgrade.confirmation.label = Sim, tenho certeza de que a sincronização foi concluída
+initialize.messageLabel.notEmpty = Cofre não vazio
+unlock.label.savePassword = Salvar senha
+# Fuzzy
+unlock.errorMessage.unauthenticVersionMac = Não foi possível autenticar a versão MAC
+unlocked.label.mountFailed = Connecting drive failed
+unlock.savePassword.delete.confirmation.title = Delete Saved Password
+unlock.savePassword.delete.confirmation.header = Do you really want to delete the saved password of this vault?
+unlock.savePassword.delete.confirmation.content = The saved password of this vault will be immediately deleted from your system keychain. If you'd like to save your password again, you'd have to unlock your vault with the "Save password" option enabled.
+settings.debugMode.label = Debug mode *

@@ -43,7 +43,6 @@ changePassword.label.downloadsPageLink = Alle Cryptomator Versionen
 changePassword.button.change = Passwort ändern
 changePassword.errorMessage.wrongPassword = Falsches Passwort
 changePassword.errorMessage.decryptionFailed = Entschlüsselung fehlgeschlagen
-changePassword.infoMessage.success = Passwort geändert
 # unlocked.fxml
 unlocked.button.lock = Tresor sperren
 unlocked.moreOptions.reveal = Laufwerk anzeigen
@@ -89,3 +88,8 @@ upgrade.confirmation.label = Ja, die Synchronisation ist abgeschlossen
 initialize.messageLabel.notEmpty = Tresor ist nicht leer
 unlock.label.savePassword = Passwort speichern
 unlock.errorMessage.unauthenticVersionMac = Versions-MAC konnte nicht authentifiziert werden.
+unlocked.label.mountFailed = Verbinden des Laufwerks fehlgeschlagen
+unlock.savePassword.delete.confirmation.title = Gespeichertes Passwort löschen
+unlock.savePassword.delete.confirmation.header = Möchten Sie das gespeicherte Passwort von diesem Tresor wirklich löschen?
+unlock.savePassword.delete.confirmation.content = Das gespeicherte Passwort von diesem Tresor wird sofort aus Ihrem System-Schlüsselbund gelöscht. Falls Sie das Passwort erneut speichern möchten, müssen Sie den Tresor entsperren und dabei die "Passwort speichern"-Option aktiviert haben.
+settings.debugMode.label = Debug-Modus *

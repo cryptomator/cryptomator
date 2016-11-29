@@ -37,6 +37,8 @@ interface CryptomatorComponent {
 
 	ExitUtil exitUtil();
 
+	DebugMode debugMode();
+
 	Optional<MacFunctions> nativeMacFunctions();
 
 }

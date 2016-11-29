@@ -15,7 +15,7 @@ initialize.button.ok = Créer le coffre
 initialize.messageLabel.alreadyInitialized = Coffre déjà initialisé
 initialize.messageLabel.initializationFailed = Impossible d'initialiser le coffre. Voir le fichier de log pour plus de détails.
 # notfound.fxml
-notfound.label = Coffre introuvable. A t'il été déplacé?
+notfound.label = Coffre introuvable. A-t-il été déplacé?
 # upgrade.fxml
 upgrade.button = Mettre à niveau
 upgrade.version3dropBundleExtension.msg = Ce coffre doit être converti dans un format plus récent.\n"%1$s" sera renommé en "%2$s".\nAssurez-vous que la synchronisation est terminée avant de continuer.
@@ -44,7 +44,6 @@ changePassword.button.change = Modification du mot de masse
 changePassword.errorMessage.wrongPassword = Mot de passe incorrect
 # En français, on dit déchiffrement lorsque la clé est connue
 changePassword.errorMessage.decryptionFailed = Echec du déchiffrement
-changePassword.infoMessage.success = Mot de passe modifié
 # unlocked.fxml
 unlocked.button.lock = Verrouiller le coffre
 unlocked.moreOptions.reveal = Voir le lecteur
@@ -58,7 +57,7 @@ unlocked.label.statsDecrypted = déchiffré
 unlocked.ioGraph.yAxis.label = Débit (MiB/s)
 # mac_warnings.fxml
 macWarnings.windowTitle = Attention - Fichier corrompu dans %s
-macWarnings.message = Cryptomator a détecté des corruptions de données dans les fichiers suivants\:
+macWarnings.message = Cryptomator a détecté des corruptions de données dans les fichiers suivants \:
 macWarnings.moreInformationButton = En savoir plus
 macWarnings.whitelistButton = Déchiffrer tout de même
 # settings.fxml
@@ -82,12 +81,17 @@ initialize.messageLabel.passwordStrength.4 = Très fort
 initialize.label.doNotForget = ATTENTION \: Si vous oubliez votre mot de passe, il n'y aura aucun moyen de récupérer vos données.
 main.directoryList.remove.confirmation.title = Retirer un coffre
 main.directoryList.remove.confirmation.header = Voulez-vous vraiment retirer ce coffre ?
-main.directoryList.remove.confirmation.content = Le coffre sera simplement retiré de la liste. Pour le supprimer complètement, supprimez les fichiers depuis votre système de fichiers.
+main.directoryList.remove.confirmation.content = Le coffre sera seulement retiré de la liste. Pour le supprimer complètement, supprimez les fichiers depuis votre système de fichiers.
 upgrade.version3to4.msg = Ce coffre doit être converti dans un nouveau format. Les noms de dossiers chiffrés seront mis à jour.\nMerci de vous assurer que la procédure de synchronisation est terminée avant de continuer.
 upgrade.version3to4.err.io = La migration a échoué à cause d'une erreur d'entrée/sortie. Référez-vous au fichier log pour plus de détails.
 settings.prefGvfsScheme.label = Schéma d'URI WebDAV
 # upgrade.fxml
-upgrade.confirmation.label = Oui, je suis certain que la synchronisation est finie
-initialize.messageLabel.notEmpty = Vault not empty
-unlock.label.savePassword = Save password
-unlock.errorMessage.unauthenticVersionMac = Could not authenticate version MAC.
+upgrade.confirmation.label = Oui, je suis certain que la synchronisation est terminée
+initialize.messageLabel.notEmpty = Le coffre n'est pas vide
+unlock.label.savePassword = Se souvenir du mot de passe
+unlock.errorMessage.unauthenticVersionMac = Impossible d'authentifier la version MAC
+unlocked.label.mountFailed = Echec de connexion au lecteur
+unlock.savePassword.delete.confirmation.title = Delete Saved Password
+unlock.savePassword.delete.confirmation.header = Do you really want to delete the saved password of this vault?
+unlock.savePassword.delete.confirmation.content = The saved password of this vault will be immediately deleted from your system keychain. If you'd like to save your password again, you'd have to unlock your vault with the "Save password" option enabled.
+settings.debugMode.label = Debug mode *

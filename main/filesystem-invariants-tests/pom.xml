@@ -9,7 +9,7 @@
 	<parent>
 		<groupId>org.cryptomator</groupId>
 		<artifactId>main</artifactId>
-		<version>1.2.2</version>
+		<version>1.2.3</version>
 	</parent>
 	<artifactId>filesystem-invariants-tests</artifactId>
 	<name>Cryptomator filesystem: Invariants tests</name>

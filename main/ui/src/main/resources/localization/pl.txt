@@ -43,7 +43,6 @@ changePassword.label.downloadsPageLink = Wszystkie wersje Cryptomatora
 changePassword.button.change = Zmień hasło
 changePassword.errorMessage.wrongPassword = Złe hasło
 changePassword.errorMessage.decryptionFailed = Błąd deszyfracji
-changePassword.infoMessage.success = Hasło zmienione
 # unlocked.fxml
 unlocked.button.lock = Zablokuj kryptę
 unlocked.moreOptions.reveal = Zwolnij napęd
@@ -85,6 +84,11 @@ upgrade.version3to4.err.io = Błąd migracji  I/O Exception. Sprawdź logi
 settings.prefGvfsScheme.label = Schemat WebDAV
 # upgrade.fxml
 upgrade.confirmation.label = Tak, jestem pewien, że zakończyłem synchronizacje
-initialize.messageLabel.notEmpty = Vault not empty
-unlock.label.savePassword = Save password
-unlock.errorMessage.unauthenticVersionMac = Could not authenticate version MAC.
+initialize.messageLabel.notEmpty = Krypta pusta
+unlock.label.savePassword = Zapisz hasło
+unlock.errorMessage.unauthenticVersionMac = Nie udało się uwierzytelnić wersji MAC
+unlocked.label.mountFailed = Connecting drive failed
+unlock.savePassword.delete.confirmation.title = Delete Saved Password
+unlock.savePassword.delete.confirmation.header = Do you really want to delete the saved password of this vault?
+unlock.savePassword.delete.confirmation.content = The saved password of this vault will be immediately deleted from your system keychain. If you'd like to save your password again, you'd have to unlock your vault with the "Save password" option enabled.
+settings.debugMode.label = Debug mode *

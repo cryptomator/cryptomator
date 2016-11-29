@@ -30,6 +30,7 @@ import org.cryptomator.ui.model.Vault;
 import org.cryptomator.ui.settings.Localization;
 import org.cryptomator.ui.settings.Settings;
 import org.cryptomator.ui.util.AsyncTaskService;
+import org.cryptomator.ui.util.DialogBuilderUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +41,9 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Hyperlink;
@@ -274,6 +277,37 @@ public class UnlockController extends LocalizedFXMLViewController {
 		} else {
 			this.winDriveLetter.getSelectionModel().select(letter);
 		}
+	}
+
+	// ****************************************
+	// Save password checkbox
+	// ****************************************
+
+	@FXML
+	private void didClickSavePasswordCheckbox(ActionEvent event) {
+		if (!savePassword.isSelected() && hasStoredPassword()) {
+			Alert confirmDialog = DialogBuilderUtil.buildConfirmationDialog( //
+					localization.getString("unlock.savePassword.delete.confirmation.title"), //
+					localization.getString("unlock.savePassword.delete.confirmation.header"), //
+					localization.getString("unlock.savePassword.delete.confirmation.content"), //
+					SystemUtils.IS_OS_MAC_OSX ? ButtonType.CANCEL : ButtonType.OK);
+
+			Optional<ButtonType> choice = confirmDialog.showAndWait();
+			if (ButtonType.OK.equals(choice.get())) {
+				keychainAccess.get().deletePassphrase(vault.getId());
+			} else if (ButtonType.CANCEL.equals(choice.get())) {
+				savePassword.setSelected(true);
+			}
+		}
+	}
+
+	private boolean hasStoredPassword() {
+		char[] storedPw = keychainAccess.get().loadPassphrase(vault.getId());
+		boolean hasPw = (storedPw != null);
+		if (storedPw != null) {
+			Arrays.fill(storedPw, ' ');
+		}
+		return hasPw;
 	}
 
 	// ****************************************

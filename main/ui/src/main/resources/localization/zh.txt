@@ -89,3 +89,8 @@ initialize.messageLabel.notEmpty = 保险柜非空
 unlock.label.savePassword = 保存密码
 # This Mac means Mac(Apple) or Mac address?
 unlock.errorMessage.unauthenticVersionMac = 无法验证消息验证代码的版本。
+unlocked.label.mountFailed = Connecting drive failed
+unlock.savePassword.delete.confirmation.title = Delete Saved Password
+unlock.savePassword.delete.confirmation.header = Do you really want to delete the saved password of this vault?
+unlock.savePassword.delete.confirmation.content = The saved password of this vault will be immediately deleted from your system keychain. If you'd like to save your password again, you'd have to unlock your vault with the "Save password" option enabled.
+settings.debugMode.label = Debug mode *

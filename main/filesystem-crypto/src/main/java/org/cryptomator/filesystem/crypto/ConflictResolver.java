@@ -68,7 +68,7 @@ final class ConflictResolver {
 					String alternativeCiphertext = nameEncryptor.apply(alternativeCleartext).get();
 					alternativeFile = folder.file(isDirectory ? DIR_PREFIX + alternativeCiphertext : alternativeCiphertext);
 				} while (alternativeFile.exists());
-				LOG.info("Detected conflict {}:\n{}\n{}", conflictId, canonicalFile, conflictingFile);
+				LOG.debug("Detected conflict {}:\n{}\n{}", conflictId, canonicalFile, conflictingFile);
 				conflictingFile.moveTo(alternativeFile);
 				return alternativeFile;
 			}

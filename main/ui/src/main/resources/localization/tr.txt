@@ -43,7 +43,6 @@ changePassword.label.downloadsPageLink = Tüm Cryptomator sürümleri
 changePassword.button.change = Şifreyi değiştir
 changePassword.errorMessage.wrongPassword = Yanlış şifre
 changePassword.errorMessage.decryptionFailed = Şifre çözme başarısız
-changePassword.infoMessage.success = Şifre değiştirildi.
 # unlocked.fxml
 unlocked.button.lock = Kasayı kilitle
 unlocked.moreOptions.reveal = Sürücüyü göster
@@ -88,3 +87,8 @@ upgrade.confirmation.label = Yes, I've made sure that synchronization has finish
 initialize.messageLabel.notEmpty = Vault not empty
 unlock.label.savePassword = Save password
 unlock.errorMessage.unauthenticVersionMac = Could not authenticate version MAC.
+unlocked.label.mountFailed = Connecting drive failed
+unlock.savePassword.delete.confirmation.title = Delete Saved Password
+unlock.savePassword.delete.confirmation.header = Do you really want to delete the saved password of this vault?
+unlock.savePassword.delete.confirmation.content = The saved password of this vault will be immediately deleted from your system keychain. If you'd like to save your password again, you'd have to unlock your vault with the "Save password" option enabled.
+settings.debugMode.label = Debug mode *

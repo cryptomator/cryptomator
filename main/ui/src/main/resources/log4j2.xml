@@ -27,9 +27,13 @@
 	</Appenders>
 
 	<Loggers>
-		<!-- package-specific config: -->
-		<Logger name="org.cryptomator" level="DEBUG" />
-		<Logger name="org.eclipse.jetty.server.Server" level="DEBUG" />
+		<!--
+			= NOTE =
+			All loggers below are set to info.
+			This is required to allow changing the levels of the loggers programmatically.
+		-->
+		<Logger name="org.cryptomator" level="INFO" />
+		<Logger name="org.eclipse.jetty.server.Server" level="INFO" />
 		<Logger name="org.cryptomator.ui.model" level="INFO">
 			<AppenderRef ref="UpgradeLog" />
 		</Logger>
