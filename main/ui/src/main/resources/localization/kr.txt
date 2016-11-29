@@ -43,7 +43,6 @@ changePassword.label.downloadsPageLink = 모든 Cryptomator 버전
 changePassword.button.change = 비밀번호 변경
 changePassword.errorMessage.wrongPassword = 틀린 비밀번호
 changePassword.errorMessage.decryptionFailed = 복호화 실패
-changePassword.infoMessage.success = 비밀번호 변경
 # unlocked.fxml
 unlocked.button.lock = 보관함 잠그기
 unlocked.moreOptions.reveal = 드라이브 표시
@@ -85,6 +84,11 @@ upgrade.version3to4.err.io = 입출력 예외 문제로 마이그레이션이 �
 settings.prefGvfsScheme.label = WebDAV sceme
 # upgrade.fxml
 upgrade.confirmation.label = 네. 동기화가 완료되었음을 확인하였습니다.
-initialize.messageLabel.notEmpty = Vault not empty
-unlock.label.savePassword = Save password
+initialize.messageLabel.notEmpty = 보관함이 비어있지 않음
+unlock.label.savePassword = 비밀번호 저장
 unlock.errorMessage.unauthenticVersionMac = Could not authenticate version MAC.
+unlocked.label.mountFailed = Connecting drive failed
+unlock.savePassword.delete.confirmation.title = Delete Saved Password
+unlock.savePassword.delete.confirmation.header = Do you really want to delete the saved password of this vault?
+unlock.savePassword.delete.confirmation.content = The saved password of this vault will be immediately deleted from your system keychain. If you'd like to save your password again, you'd have to unlock your vault with the "Save password" option enabled.
+settings.debugMode.label = Debug mode *

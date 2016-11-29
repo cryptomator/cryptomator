@@ -43,7 +43,6 @@ changePassword.label.downloadsPageLink = Visas Cryptomator versijas
 changePassword.button.change = Mainīt paroli
 changePassword.errorMessage.wrongPassword = Nepareiza parole
 changePassword.errorMessage.decryptionFailed = Atšifrēšana neizdevās
-changePassword.infoMessage.success = Parole nomainīta
 # unlocked.fxml
 unlocked.button.lock = Aizslēgt glabātuvi
 unlocked.moreOptions.reveal = Atklāt disku
@@ -89,3 +88,8 @@ upgrade.confirmation.label = Jā, esmu pārliecinājies, ka sinhronizācija ir p
 initialize.messageLabel.notEmpty = Vault not empty
 unlock.label.savePassword = Save password
 unlock.errorMessage.unauthenticVersionMac = Could not authenticate version MAC.
+unlocked.label.mountFailed = Connecting drive failed
+unlock.savePassword.delete.confirmation.title = Delete Saved Password
+unlock.savePassword.delete.confirmation.header = Do you really want to delete the saved password of this vault?
+unlock.savePassword.delete.confirmation.content = The saved password of this vault will be immediately deleted from your system keychain. If you'd like to save your password again, you'd have to unlock your vault with the "Save password" option enabled.
+settings.debugMode.label = Debug mode *

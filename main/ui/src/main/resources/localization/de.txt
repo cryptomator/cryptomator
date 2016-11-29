@@ -43,12 +43,10 @@ changePassword.label.downloadsPageLink = Alle Cryptomator Versionen
 changePassword.button.change = Passwort ändern
 changePassword.errorMessage.wrongPassword = Falsches Passwort
 changePassword.errorMessage.decryptionFailed = Entschlüsselung fehlgeschlagen
-changePassword.infoMessage.success = Passwort geändert
 # unlocked.fxml
 unlocked.button.lock = Tresor sperren
 unlocked.moreOptions.reveal = Laufwerk anzeigen
 unlocked.moreOptions.copyUrl = WebDAV-URL kopieren
-unlocked.label.mountFailed = Verbinden des Laufwerks fehlgeschlagen
 unlocked.label.revealFailed = Befehl fehlgeschlagen
 unlocked.label.unmountFailed = Trennen des Laufwerks fehlgeschlagen
 unlocked.label.statsEncrypted = verschlüsselt
@@ -66,7 +64,6 @@ settings.checkForUpdates.label = Auf Updates prüfen
 settings.port.label = WebDAV Port *
 settings.port.prompt = 0 \= Automatisch wählen
 settings.useipv6.label = IPv6-Literal nutzen
-settings.debugMode.label= Debug Modus *
 settings.requiresRestartLabel = * benötigt Neustart von Cryptomator
 # tray icon
 tray.menu.open = Öffnen
@@ -91,3 +88,8 @@ upgrade.confirmation.label = Ja, die Synchronisation ist abgeschlossen
 initialize.messageLabel.notEmpty = Tresor ist nicht leer
 unlock.label.savePassword = Passwort speichern
 unlock.errorMessage.unauthenticVersionMac = Versions-MAC konnte nicht authentifiziert werden.
+unlocked.label.mountFailed = Verbinden des Laufwerks fehlgeschlagen
+unlock.savePassword.delete.confirmation.title = Gespeichertes Passwort löschen
+unlock.savePassword.delete.confirmation.header = Möchten Sie das gespeicherte Passwort von diesem Tresor wirklich löschen?
+unlock.savePassword.delete.confirmation.content = Das gespeicherte Passwort von diesem Tresor wird sofort aus Ihrem System-Schlüsselbund gelöscht. Falls Sie das Passwort erneut speichern möchten, müssen Sie den Tresor entsperren und dabei die "Passwort speichern"-Option aktiviert haben.
+settings.debugMode.label = Debug-Modus *

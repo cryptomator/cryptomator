@@ -44,7 +44,6 @@ changePassword.label.downloadsPageLink = Все версии Cryptomator
 changePassword.button.change = Сменить пароль
 changePassword.errorMessage.wrongPassword = Неверный пароль
 changePassword.errorMessage.decryptionFailed = Ошибка дешифрования
-changePassword.infoMessage.success = Пароль изменён
 # unlocked.fxml
 unlocked.button.lock = Заблокировать хранилище
 # Does it mean "open" drive?
@@ -87,6 +86,11 @@ upgrade.version3to4.err.io = Преобразование не выполнен�
 settings.prefGvfsScheme.label = Схема WebDAV
 # upgrade.fxml
 upgrade.confirmation.label = Да, синхронизация точно завершена
-initialize.messageLabel.notEmpty = Vault not empty
-unlock.label.savePassword = Save password
-unlock.errorMessage.unauthenticVersionMac = Could not authenticate version MAC.
+initialize.messageLabel.notEmpty = Хранилище не пусто
+unlock.label.savePassword = Сохранить пароль
+unlock.errorMessage.unauthenticVersionMac = Не удалось идентифицировать версию MAC.
+unlocked.label.mountFailed = Connecting drive failed
+unlock.savePassword.delete.confirmation.title = Delete Saved Password
+unlock.savePassword.delete.confirmation.header = Do you really want to delete the saved password of this vault?
+unlock.savePassword.delete.confirmation.content = The saved password of this vault will be immediately deleted from your system keychain. If you'd like to save your password again, you'd have to unlock your vault with the "Save password" option enabled.
+settings.debugMode.label = Debug mode *
