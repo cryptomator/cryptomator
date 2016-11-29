@@ -40,9 +40,9 @@ class NormalizedNameFolder extends DelegatingFolder<NormalizedNameFolder, Normal
 		NormalizedNameFile nfcFile = super.file(nfcName);
 		NormalizedNameFile nfdFile = super.file(nfdName);
 		if (!nfcName.equals(nfdName) && nfcFile.exists() && nfdFile.exists()) {
-			LOG.warn("Ambiguous file names \"" + nfcName + "\" (NFC) vs. \"" + nfdName + "\" (NFD). Both files exist. Using \"" + nfcName + "\" (NFC).");
+			LOG.debug("Ambiguous file names \"" + nfcName + "\" (NFC) vs. \"" + nfdName + "\" (NFD). Both files exist. Using \"" + nfcName + "\" (NFC).");
 		} else if (!nfcName.equals(nfdName) && !nfcFile.exists() && nfdFile.exists()) {
-			LOG.info("Moving file from \"" + nfcName + "\" (NFD) to \"" + nfdName + "\" (NFC).");
+			LOG.debug("Moving file from \"" + nfcName + "\" (NFD) to \"" + nfdName + "\" (NFC).");
 			nfdFile.moveTo(nfcFile);
 		}
 		return nfcFile;
@@ -60,9 +60,9 @@ class NormalizedNameFolder extends DelegatingFolder<NormalizedNameFolder, Normal
 		NormalizedNameFolder nfcFolder = super.folder(nfcName);
 		NormalizedNameFolder nfdFolder = super.folder(nfdName);
 		if (!nfcName.equals(nfdName) && nfcFolder.exists() && nfdFolder.exists()) {
-			LOG.warn("Ambiguous folder names \"" + nfcName + "\" (NFC) vs. \"" + nfdName + "\" (NFD). Both files exist. Using \"" + nfcName + "\" (NFC).");
+			LOG.debug("Ambiguous folder names \"" + nfcName + "\" (NFC) vs. \"" + nfdName + "\" (NFD). Both files exist. Using \"" + nfcName + "\" (NFC).");
 		} else if (!nfcName.equals(nfdName) && !nfcFolder.exists() && nfdFolder.exists()) {
-			LOG.info("Moving folder from \"" + nfcName + "\" (NFD) to \"" + nfdName + "\" (NFC).");
+			LOG.debug("Moving folder from \"" + nfcName + "\" (NFD) to \"" + nfdName + "\" (NFC).");
 			nfdFolder.moveTo(nfcFolder);
 		}
 		return nfcFolder;

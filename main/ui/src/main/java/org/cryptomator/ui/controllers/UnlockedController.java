@@ -58,15 +58,6 @@ public class UnlockedController extends LocalizedFXMLViewController {
 	private Optional<LockListener> listener = Optional.empty();
 	private Timeline ioAnimation;
 
-	@Inject
-	public UnlockedController(Localization localization, Provider<MacWarningsController> macWarningsControllerProvider, AsyncTaskService asyncTaskService) {
-		super(localization);
-		this.macWarningsController = macWarningsControllerProvider.get();
-		this.asyncTaskService = asyncTaskService;
-
-		macWarningsController.vault.bind(this.vault);
-	}
-
 	@FXML
 	private Label messageLabel;
 
@@ -84,6 +75,15 @@ public class UnlockedController extends LocalizedFXMLViewController {
 
 	@FXML
 	private MenuItem revealVaultMenuItem;
+
+	@Inject
+	public UnlockedController(Localization localization, Provider<MacWarningsController> macWarningsControllerProvider, AsyncTaskService asyncTaskService) {
+		super(localization);
+		this.macWarningsController = macWarningsControllerProvider.get();
+		this.asyncTaskService = asyncTaskService;
+
+		macWarningsController.vault.bind(this.vault);
+	}
 
 	@Override
 	public void initialize() {

@@ -18,6 +18,10 @@ class ContextPaths {
 		return format("/%s/%s", id, name);
 	}
 
+	public static String removeFrontendId(String path) {
+		return path.replaceAll("/" + FRONTEND_ID_PATTERN + "/", "/[...]/");
+	}
+
 	public static Optional<FrontendId> extractFrontendId(String path) {
 		Matcher matcher = SERVLET_PATH_WITH_FRONTEND_ID_PATTERN.matcher(path);
 		if (matcher.matches()) {
