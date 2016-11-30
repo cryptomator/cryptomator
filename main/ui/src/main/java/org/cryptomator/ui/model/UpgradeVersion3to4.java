@@ -50,7 +50,12 @@ class UpgradeVersion3to4 extends UpgradeStrategy {
 	}
 
 	@Override
-	public String getNotification(Vault vault) {
+	public String getTitle(Vault vault) {
+		return localization.getString("upgrade.version3to4.title");
+	}
+
+	@Override
+	public String getMessage(Vault vault) {
 		return localization.getString("upgrade.version3to4.msg");
 	}
 

@@ -40,8 +40,13 @@ class UpgradeVersion4to5 extends UpgradeStrategy {
 	}
 
 	@Override
-	public String getNotification(Vault vault) {
-		return localization.getString("upgrade.version3to4.msg");
+	public String getTitle(Vault vault) {
+		return localization.getString("upgrade.version4to5.title");
+	}
+
+	@Override
+	public String getMessage(Vault vault) {
+		return localization.getString("upgrade.version4to5.msg");
 	}
 
 	@Override
@@ -66,7 +71,7 @@ class UpgradeVersion4to5 extends UpgradeStrategy {
 			});
 		} catch (IOException e) {
 			LOG.error("Migration failed.", e);
-			throw new UpgradeFailedException(localization.getString("upgrade.version3to4.err.io"));
+			throw new UpgradeFailedException(localization.getString("upgrade.version4to5.err.io"));
 		}
 		LOG.info("Migration finished.");
 	}

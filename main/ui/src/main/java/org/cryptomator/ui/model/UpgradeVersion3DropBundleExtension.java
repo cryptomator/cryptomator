@@ -32,7 +32,12 @@ class UpgradeVersion3DropBundleExtension extends UpgradeStrategy {
 	}
 
 	@Override
-	public String getNotification(Vault vault) {
+	public String getTitle(Vault vault) {
+		return localization.getString("upgrade.version3dropBundleExtension.title");
+	}
+
+	@Override
+	public String getMessage(Vault vault) {
 		String fmt = localization.getString("upgrade.version3dropBundleExtension.msg");
 		Path path = vault.path().getValue();
 		String oldVaultName = path.getFileName().toString();
