@@ -61,8 +61,8 @@ class UpgradeVersion3to4 extends UpgradeStrategy {
 
 	@Override
 	protected void upgrade(Vault vault, Cryptor cryptor) throws UpgradeFailedException {
-		Path dataDir = vault.path().get().resolve("d");
-		Path metadataDir = vault.path().get().resolve("m");
+		Path dataDir = vault.getPath().resolve("d");
+		Path metadataDir = vault.getPath().resolve("m");
 		if (!Files.isDirectory(dataDir)) {
 			return; // empty vault. no migration needed.
 		}

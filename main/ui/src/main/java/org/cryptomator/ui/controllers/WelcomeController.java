@@ -9,9 +9,11 @@
 package org.cryptomator.ui.controllers;
 
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -24,7 +26,6 @@ import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.cookie.CookiePolicy;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.params.HttpClientParams;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.ui.settings.Localization;
 import org.cryptomator.ui.settings.Settings;
@@ -33,8 +34,9 @@ import org.cryptomator.ui.util.AsyncTaskService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -110,10 +112,10 @@ public class WelcomeController extends LocalizedFXMLViewController {
 			client.executeMethod(method);
 			final InputStream responseBodyStream = method.getResponseBodyAsStream();
 			if (method.getStatusCode() == HttpStatus.SC_OK && responseBodyStream != null) {
-				final byte[] responseData = IOUtils.toByteArray(responseBodyStream);
-				final ObjectMapper mapper = new ObjectMapper();
-				final Map<String, String> map = mapper.readValue(responseData, new TypeReference<HashMap<String, String>>() {
-				});
+				Gson gson = new GsonBuilder().setLenient().create();
+				Reader utf8Reader = new InputStreamReader(responseBodyStream, StandardCharsets.UTF_8);
+				Map<String, String> map = gson.fromJson(utf8Reader, new TypeToken<Map<String, String>>() {
+				}.getType());
 				if (map != null) {
 					this.compareVersions(map);
 				}

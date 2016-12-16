@@ -65,8 +65,8 @@ public class Localization extends ResourceBundle {
 	}
 
 	// returns null if no resource for given path
-	private ResourceBundle loadLocalizationFile(String resourcePath) throws IOException {
-		try (InputStream in = getClass().getResourceAsStream(resourcePath)) {
+	private static ResourceBundle loadLocalizationFile(String resourcePath) throws IOException {
+		try (InputStream in = Localization.class.getResourceAsStream(resourcePath)) {
 			if (in != null) {
 				Reader reader = new InputStreamReader(in, StandardCharsets.UTF_8);
 				return new PropertyResourceBundle(reader);

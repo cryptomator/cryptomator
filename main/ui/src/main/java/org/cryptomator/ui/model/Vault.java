@@ -8,96 +8,61 @@
  *******************************************************************************/
 package org.cryptomator.ui.model;
 
-import static org.apache.commons.lang3.StringUtils.stripStart;
-
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.nio.file.DirectoryNotEmptyException;
-import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.Normalizer;
 import java.text.Normalizer.Form;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Optional;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.apache.commons.lang3.CharUtils;
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.LazyInitializer;
-import org.cryptomator.common.Optionals;
-import org.cryptomator.crypto.engine.InvalidPassphraseException;
-import org.cryptomator.filesystem.File;
-import org.cryptomator.filesystem.FileSystem;
-import org.cryptomator.filesystem.charsets.NormalizedNameFileSystem;
-import org.cryptomator.filesystem.crypto.CryptoFileSystemDelegate;
-import org.cryptomator.filesystem.crypto.CryptoFileSystemFactory;
-import org.cryptomator.filesystem.nio.NioFileSystem;
-import org.cryptomator.filesystem.shortening.ShorteningFileSystemFactory;
-import org.cryptomator.filesystem.stats.StatsFileSystem;
-import org.cryptomator.frontend.CommandFailedException;
-import org.cryptomator.frontend.Frontend;
-import org.cryptomator.frontend.Frontend.MountParam;
-import org.cryptomator.frontend.FrontendCreationFailedException;
-import org.cryptomator.frontend.FrontendFactory;
-import org.cryptomator.frontend.FrontendId;
-import org.cryptomator.ui.settings.Settings;
-import org.cryptomator.ui.util.DeferredClosable;
+import org.cryptomator.cryptofs.CryptoFileSystem;
+import org.cryptomator.cryptofs.CryptoFileSystemProperties;
+import org.cryptomator.cryptofs.CryptoFileSystemProvider;
+import org.cryptomator.cryptolib.api.InvalidPassphraseException;
+import org.cryptomator.frontend.webdav.WebDavServer;
+import org.cryptomator.ui.model.VaultModule.PerVault;
+import org.cryptomator.ui.settings.VaultSettings;
 import org.cryptomator.ui.util.DeferredCloser;
-import org.cryptomator.ui.util.FXThreads;
 import org.fxmisc.easybind.EasyBind;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.ImmutableMap;
-
 import javafx.application.Platform;
 import javafx.beans.binding.Binding;
 import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
-public class Vault implements CryptoFileSystemDelegate {
+@PerVault
+public class Vault {
 
-	private static final Logger LOG = LoggerFactory.getLogger(CryptoFileSystemDelegate.class);
-
+	private static final Logger LOG = LoggerFactory.getLogger(Vault.class);
 	public static final String VAULT_FILE_EXTENSION = ".cryptomator";
 
-	private final ObjectProperty<Path> path;
-	private final ShorteningFileSystemFactory shorteningFileSystemFactory;
-	private final CryptoFileSystemFactory cryptoFileSystemFactory;
+	private final VaultSettings vaultSettings;
+	private final WebDavServer server;
 	private final DeferredCloser closer;
+
 	private final BooleanProperty unlocked = new SimpleBooleanProperty();
 	private final BooleanProperty mounted = new SimpleBooleanProperty();
-	private final ObservableList<String> namesOfResourcesWithInvalidMac = FXThreads.observableListOnMainThread(FXCollections.observableArrayList());
-	private final Set<String> whitelistedResourcesWithInvalidMac = new HashSet<>();
-	private final AtomicReference<FileSystem> nioFileSystem = new AtomicReference<>();
-	private final String id;
 
-	private String mountName;
-	private Character winDriveLetter;
-	private Optional<StatsFileSystem> statsFileSystem = Optional.empty();
-	private DeferredClosable<Frontend> filesystemFrontend = DeferredClosable.empty();
+	private final AtomicReference<CryptoFileSystem> cryptoFileSystem = new AtomicReference<>();
 
-	/**
-	 * Package private constructor, use {@link VaultFactory}.
-	 * 
-	 * @param string
-	 */
-	Vault(String id, Path vaultDirectoryPath, ShorteningFileSystemFactory shorteningFileSystemFactory, CryptoFileSystemFactory cryptoFileSystemFactory, DeferredCloser closer) {
-		this.path = new SimpleObjectProperty<Path>(vaultDirectoryPath);
-		this.shorteningFileSystemFactory = shorteningFileSystemFactory;
-		this.cryptoFileSystemFactory = cryptoFileSystemFactory;
+	@Inject
+	Vault(VaultSettings vaultSettings, WebDavServer server, DeferredCloser closer) {
+		this.vaultSettings = vaultSettings;
+		this.server = server;
 		this.closer = closer;
-		this.id = id;
 		try {
 			setMountName(name().getValue());
 		} catch (IllegalArgumentException e) {
@@ -105,129 +70,92 @@ public class Vault implements CryptoFileSystemDelegate {
 		}
 	}
 
-	private FileSystem getNioFileSystem() {
-		return LazyInitializer.initializeLazily(nioFileSystem, () -> NioFileSystem.rootedAt(path.getValue()));
-	}
-
 	// ******************************************************************************
 	// Commands
 	// ********************************************************************************/
 
+	private CryptoFileSystem getCryptoFileSystem(CharSequence passphrase) throws IOException {
+		return LazyInitializer.initializeLazily(cryptoFileSystem, () -> createCryptoFileSystem(passphrase), IOException.class);
+	}
+
+	private CryptoFileSystem createCryptoFileSystem(CharSequence passphrase) throws IOException {
+		CryptoFileSystemProperties fsProps = CryptoFileSystemProperties.cryptoFileSystemProperties().withPassphrase(passphrase).build();
+		CryptoFileSystem fs = CryptoFileSystemProvider.newFileSystem(getPath(), fsProps);
+		closer.closeLater(fs);
+		return fs;
+	}
+
 	public void create(CharSequence passphrase) throws IOException {
-		try {
-			FileSystem fs = getNioFileSystem();
-			if (fs.files().map(File::name).filter(s -> s.endsWith(VAULT_FILE_EXTENSION)).count() > 0) {
-				throw new FileAlreadyExistsException("masterkey.cryptomator", null, "Vault location not empty.");
-			} else if (fs.folders().count() > 0) {
-				throw new DirectoryNotEmptyException(fs.toString());
-			}
-			cryptoFileSystemFactory.initializeNew(fs, passphrase);
-		} catch (UncheckedIOException e) {
-			throw new IOException(e);
-		}
+		getCryptoFileSystem(passphrase);
+		// TODO and now?
 	}
 
 	public void changePassphrase(CharSequence oldPassphrase, CharSequence newPassphrase) throws IOException, InvalidPassphraseException {
-		try {
-			cryptoFileSystemFactory.changePassphrase(getNioFileSystem(), oldPassphrase, newPassphrase);
-		} catch (UncheckedIOException e) {
-			throw new IOException(e);
-		}
+		// TODO implement
 	}
 
-	public synchronized void activateFrontend(FrontendFactory frontendFactory, Settings settings, CharSequence passphrase) throws FrontendCreationFailedException {
+	public synchronized void activateFrontend(CharSequence passphrase) {
 		boolean launchSuccess = false;
 		boolean mountSuccess = false;
 		try {
-			FileSystem fs = getNioFileSystem();
-			FileSystem shorteningFs = shorteningFileSystemFactory.get(fs);
-			FileSystem cryptoFs = cryptoFileSystemFactory.unlockExisting(shorteningFs, passphrase, this);
-			FileSystem normalizingFs = new NormalizedNameFileSystem(cryptoFs, SystemUtils.IS_OS_MAC_OSX ? Form.NFD : Form.NFC);
-			StatsFileSystem statsFs = new StatsFileSystem(normalizingFs);
-			statsFileSystem = Optional.of(statsFs);
-			Frontend frontend = frontendFactory.create(statsFs, FrontendId.from(id), stripStart(mountName, "/"));
-			launchSuccess = true;
-			filesystemFrontend = closer.closeLater(frontend);
-			frontend.mount(getMountParams(settings));
-			mountSuccess = true;
-		} catch (UncheckedIOException e) {
-			throw new FrontendCreationFailedException(e);
-		} catch (CommandFailedException e) {
-			LOG.error("Failed to mount vault " + mountName, e);
+			FileSystem fs = getCryptoFileSystem(passphrase);
+			if (!server.isRunning()) {
+				server.start();
+			}
+			server.startWebDavServlet(fs.getPath("/"), vaultSettings.getId());
+		} catch (IOException e) {
+			LOG.error("Unable to provide frontend", e);
 		} finally {
 			// unlocked is a observable property and should only be changed by the FX application thread
-			boolean finalLaunchSuccess = launchSuccess;
-			boolean finalMountSuccess = mountSuccess;
 			Platform.runLater(() -> {
-				unlocked.set(finalLaunchSuccess);
-				mounted.set(finalMountSuccess);
+				unlocked.set(launchSuccess);
+				mounted.set(mountSuccess);
 			});
 		}
 	}
 
 	public synchronized void deactivateFrontend() throws Exception {
-		filesystemFrontend.close();
-		statsFileSystem = Optional.empty();
+		CryptoFileSystem fs = cryptoFileSystem.getAndSet(null);
+		if (fs != null) {
+			fs.close();
+		}
+		// TODO overheadhunter remove servlet from server
 		Platform.runLater(() -> {
 			mounted.set(false);
 			unlocked.set(false);
 		});
 	}
 
-	private Map<MountParam, Optional<String>> getMountParams(Settings settings) {
-		String hostname = SystemUtils.IS_OS_WINDOWS && settings.shouldUseIpv6() ? "0--1.ipv6-literal.net" : "localhost";
-		return ImmutableMap.of( //
-				MountParam.MOUNT_NAME, Optional.ofNullable(mountName), //
-				MountParam.WIN_DRIVE_LETTER, Optional.ofNullable(CharUtils.toString(winDriveLetter)), //
-				MountParam.HOSTNAME, Optional.of(hostname), //
-				MountParam.PREFERRED_GVFS_SCHEME, Optional.ofNullable(settings.getPreferredGvfsScheme()) //
-		);
-	}
-
-	public synchronized void reveal() throws CommandFailedException {
-		Optionals.ifPresent(filesystemFrontend.get(), Frontend::reveal);
-	}
-
-	// ******************************************************************************
-	// Delegate methods
-	// ********************************************************************************/
-
-	@Override
-	public void authenticationFailed(String cleartextPath) {
-		namesOfResourcesWithInvalidMac.add(cleartextPath);
-	}
-
-	@Override
-	public boolean shouldSkipAuthentication(String cleartextPath) {
-		return whitelistedResourcesWithInvalidMac.contains(cleartextPath);
+	public synchronized void reveal() {
+		// TODO implement
 	}
 
 	// ******************************************************************************
 	// Getter/Setter
 	// *******************************************************************************/
 
+	public VaultSettings getVaultSettings() {
+		return vaultSettings;
+	}
+
 	public synchronized String getWebDavUrl() {
-		return filesystemFrontend.get().map(Frontend::getWebDavUrl).orElseThrow(IllegalStateException::new);
+		// TODO implement
+		return "http://localhost/not/implemented";
 	}
 
-	void setPath(Path path) {
-		this.path.set(path);
-		this.nioFileSystem.set(null);
-	}
-
-	public ReadOnlyObjectProperty<Path> path() {
-		return path;
+	public Path getPath() {
+		return vaultSettings.pathProperty().getValue();
 	}
 
 	public Binding<String> displayablePath() {
 		Path homeDir = Paths.get(SystemUtils.USER_HOME);
-		return EasyBind.map(path, p -> {
+		return EasyBind.map(vaultSettings.pathProperty(), p -> {
 			if (p.startsWith(homeDir)) {
 				Path relativePath = homeDir.relativize(p);
 				String homePrefix = SystemUtils.IS_OS_WINDOWS ? "~\\" : "~/";
 				return homePrefix + relativePath.toString();
 			} else {
-				return path.getValue().toString();
+				return p.toString();
 			}
 		});
 	}
@@ -236,16 +164,16 @@ public class Vault implements CryptoFileSystemDelegate {
 	 * @return Directory name without preceeding path components and file extension
 	 */
 	public Binding<String> name() {
-		return EasyBind.map(path, p -> p.getFileName().toString());
+		return EasyBind.map(vaultSettings.pathProperty(), p -> p.getFileName().toString());
 	}
 
 	public boolean doesVaultDirectoryExist() {
-		return Files.isDirectory(path.getValue());
+		return Files.isDirectory(getPath());
 	}
 
 	public boolean isValidVaultDirectory() {
 		try {
-			return doesVaultDirectoryExist() && cryptoFileSystemFactory.isValidVaultStructure(getNioFileSystem());
+			return doesVaultDirectoryExist(); // TODO: && cryptoFileSystemFactory.isValidVaultStructure(getNioFileSystem());
 		} catch (UncheckedIOException e) {
 			return false;
 		}
@@ -268,19 +196,23 @@ public class Vault implements CryptoFileSystemDelegate {
 	}
 
 	public ObservableList<String> getNamesOfResourcesWithInvalidMac() {
-		return namesOfResourcesWithInvalidMac;
+		// TODO overheadhunter implement.
+		return null;
 	}
 
 	public Set<String> getWhitelistedResourcesWithInvalidMac() {
-		return whitelistedResourcesWithInvalidMac;
+		// TODO overheadhunter implement.
+		return null;
 	}
 
 	public long pollBytesRead() {
-		return statsFileSystem.map(StatsFileSystem::getThenResetBytesRead).orElse(0l);
+		// TODO overheadhunter implement.
+		return 0l;
 	}
 
 	public long pollBytesWritten() {
-		return statsFileSystem.map(StatsFileSystem::getThenResetBytesWritten).orElse(0l);
+		// TODO overheadhunter implement.
+		return 0l;
 	}
 
 	/**
@@ -310,7 +242,7 @@ public class Vault implements CryptoFileSystemDelegate {
 	}
 
 	public String getMountName() {
-		return mountName;
+		return vaultSettings.getMountName();
 	}
 
 	/**
@@ -320,23 +252,32 @@ public class Vault implements CryptoFileSystemDelegate {
 	 * @throws IllegalArgumentException if the name is empty after normalization
 	 */
 	public void setMountName(String mountName) throws IllegalArgumentException {
-		mountName = normalize(mountName);
-		if (StringUtils.isEmpty(mountName)) {
+		String normalized = normalize(mountName);
+		if (StringUtils.isEmpty(normalized)) {
 			throw new IllegalArgumentException("mount name is empty");
+		} else {
+			vaultSettings.setMountName(normalized);
 		}
-		this.mountName = mountName;
 	}
 
 	public Character getWinDriveLetter() {
-		return winDriveLetter;
+		if (vaultSettings.getWinDriveLetter() == null) {
+			return null;
+		} else {
+			return vaultSettings.getWinDriveLetter().charAt(0);
+		}
 	}
 
 	public void setWinDriveLetter(Character winDriveLetter) {
-		this.winDriveLetter = winDriveLetter;
+		if (winDriveLetter == null) {
+			vaultSettings.setWinDriveLetter(null);
+		} else {
+			vaultSettings.setWinDriveLetter(String.valueOf(winDriveLetter));
+		}
 	}
 
 	public String getId() {
-		return id;
+		return vaultSettings.getId();
 	}
 
 	// ******************************************************************************
@@ -345,14 +286,14 @@ public class Vault implements CryptoFileSystemDelegate {
 
 	@Override
 	public int hashCode() {
-		return path.getValue().hashCode();
+		return Objects.hash(vaultSettings);
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj instanceof Vault) {
+		if (obj instanceof Vault && obj.getClass().equals(this.getClass())) {
 			final Vault other = (Vault) obj;
-			return this.path.getValue().equals(other.path.getValue());
+			return Objects.equals(this.vaultSettings, other.vaultSettings);
 		} else {
 			return false;
 		}

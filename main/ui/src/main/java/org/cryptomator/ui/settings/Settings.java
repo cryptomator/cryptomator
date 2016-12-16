@@ -8,20 +8,15 @@
  ******************************************************************************/
 package org.cryptomator.ui.settings;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-import org.cryptomator.ui.model.Vault;
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+public class Settings {
 
-@JsonPropertyOrder(value = {"directories", "checkForUpdatesEnabled", "port", "useIpv6", "numTrayNotifications", "preferredGvfsScheme"})
-public class Settings implements Serializable {
-
-	private static final long serialVersionUID = 7609959894417878744L;
 	public static final int MIN_PORT = 1024;
 	public static final int MAX_PORT = 65535;
 	public static final int DEFAULT_PORT = 42427;
@@ -32,25 +27,32 @@ public class Settings implements Serializable {
 
 	private final Consumer<Settings> saveCmd;
 
-	@JsonProperty("directories")
-	private List<Vault> directories;
+	@Expose
+	@SerializedName("directories")
+	private List<VaultSettings> directories;
 
-	@JsonProperty("checkForUpdatesEnabled")
+	@Expose
+	@SerializedName("checkForUpdatesEnabled")
 	private Boolean checkForUpdatesEnabled;
 
-	@JsonProperty("port")
+	@Expose
+	@SerializedName("port")
 	private Integer port;
 
-	@JsonProperty("useIpv6")
+	@Expose
+	@SerializedName("useIpv6")
 	private Boolean useIpv6;
 
-	@JsonProperty("numTrayNotifications")
+	@Expose
+	@SerializedName("numTrayNotifications")
 	private Integer numTrayNotifications;
 
-	@JsonProperty("preferredGvfsScheme")
+	@Expose
+	@SerializedName("preferredGvfsScheme")
 	private String preferredGvfsScheme;
 
-	@JsonProperty("debugMode")
+	@Expose
+	@SerializedName("debugMode")
 	private Boolean debugMode;
 
 	/**
@@ -61,19 +63,21 @@ public class Settings implements Serializable {
 	}
 
 	public void save() {
-		saveCmd.accept(this);
+		if (saveCmd != null) {
+			saveCmd.accept(this);
+		}
 	}
 
 	/* Getter/Setter */
 
-	public List<Vault> getDirectories() {
+	public List<VaultSettings> getDirectories() {
 		if (directories == null) {
 			directories = new ArrayList<>();
 		}
 		return directories;
 	}
 
-	public void setDirectories(List<Vault> directories) {
+	public void setDirectories(List<VaultSettings> directories) {
 		this.directories = directories;
 	}
 

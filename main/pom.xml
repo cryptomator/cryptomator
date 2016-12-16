@@ -27,7 +27,9 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
 		<!-- dependency versions -->
-		<cryptomator.cryptolib.version>1.0.7</cryptomator.cryptolib.version>
+		<cryptomator.cryptolib.version>1.0.9</cryptomator.cryptolib.version>
+		<cryptomator.cryptofs.version>1.0.1</cryptomator.cryptofs.version>
+		<cryptomator.webdav.version>0.2.3</cryptomator.webdav.version>
 		<cryptomator.jni.version>1.0.0</cryptomator.jni.version>
 		<log4j.version>2.1</log4j.version>
 		<slf4j.version>1.7.7</slf4j.version>
@@ -39,7 +41,6 @@
 		<commons-lang3.version>3.4</commons-lang3.version>
 		<commons-codec.version>1.10</commons-codec.version>
 		<commons-httpclient.version>3.1</commons-httpclient.version>
-		<jackson-databind.version>2.4.4</jackson-databind.version>
 		<mockito.version>1.10.19</mockito.version>
 		<dagger.version>2.6.1</dagger.version>
 	</properties>
@@ -73,64 +74,6 @@
 			</dependency>
 			<dependency>
 				<groupId>org.cryptomator</groupId>
-				<artifactId>filesystem-api</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.cryptomator</groupId>
-				<artifactId>filesystem-charsets</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.cryptomator</groupId>
-				<artifactId>filesystem-nio</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.cryptomator</groupId>
-				<artifactId>filesystem-inmemory</artifactId>
-				<version>${project.version}</version>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.cryptomator</groupId>
-				<artifactId>filesystem-invariants-tests</artifactId>
-				<version>${project.version}</version>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.cryptomator</groupId>
-				<artifactId>filesystem-nameshortening</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.cryptomator</groupId>
-				<artifactId>filesystem-crypto</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.cryptomator</groupId>
-				<artifactId>filesystem-crypto-integration-tests</artifactId>
-				<version>${project.version}</version>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.cryptomator</groupId>
-				<artifactId>filesystem-stats</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.cryptomator</groupId>
-				<artifactId>frontend-api</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.cryptomator</groupId>
-				<artifactId>frontend-webdav</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.cryptomator</groupId>
 				<artifactId>keychain</artifactId>
 				<version>${project.version}</version>
 			</dependency>
@@ -145,6 +88,16 @@
 				<groupId>org.cryptomator</groupId>
 				<artifactId>cryptolib</artifactId>
 				<version>${cryptomator.cryptolib.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.cryptomator</groupId>
+				<artifactId>cryptofs</artifactId>
+				<version>${cryptomator.cryptofs.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.cryptomator</groupId>
+				<artifactId>webdav-nio-adapter</artifactId>
+				<version>${cryptomator.webdav.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.cryptomator</groupId>
@@ -231,9 +184,9 @@
 
 			<!-- JSON -->
 			<dependency>
-				<groupId>com.fasterxml.jackson.core</groupId>
-				<artifactId>jackson-databind</artifactId>
-				<version>${jackson-databind.version}</version>
+				<groupId>com.google.code.gson</groupId>
+				<artifactId>gson</artifactId>
+				<version>2.8.0</version>
 			</dependency>
 
 			<!-- JUnit / Mockito / Hamcrest -->
@@ -290,17 +243,6 @@
 	<modules>
 		<module>commons</module>
 		<module>commons-test</module>
-		<module>filesystem-api</module>
-		<module>filesystem-inmemory</module>
-		<module>filesystem-nio</module>
-		<module>filesystem-nameshortening</module>
-		<module>filesystem-charsets</module>
-		<module>filesystem-crypto</module>
-		<module>filesystem-crypto-integration-tests</module>
-		<module>filesystem-stats</module>
-		<module>filesystem-invariants-tests</module>
-		<module>frontend-api</module>
-		<module>frontend-webdav</module>
 		<module>keychain</module>
 		<module>ui</module>
 	</modules>

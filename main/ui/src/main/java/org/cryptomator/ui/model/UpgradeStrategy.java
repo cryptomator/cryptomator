@@ -11,7 +11,6 @@ import org.cryptomator.cryptolib.api.CryptorProvider;
 import org.cryptomator.cryptolib.api.InvalidPassphraseException;
 import org.cryptomator.cryptolib.api.KeyFile;
 import org.cryptomator.cryptolib.api.UnsupportedVaultFormatException;
-import org.cryptomator.filesystem.crypto.Constants;
 import org.cryptomator.ui.settings.Localization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +18,8 @@ import org.slf4j.LoggerFactory;
 public abstract class UpgradeStrategy {
 
 	private static final Logger LOG = LoggerFactory.getLogger(UpgradeStrategy.class);
+	private static final String MASTERKEY_FILENAME = "masterkey.cryptomator";
+	private static final String MASTERKEY_BACKUP_FILENAME = "masterkey.cryptomator.bkup";
 
 	protected final CryptorProvider cryptorProvider;
 	protected final Localization localization;
@@ -46,28 +47,28 @@ public abstract class UpgradeStrategy {
 	 * Upgrades a vault. Might take a moment, should be run in a background thread.
 	 */
 	public void upgrade(Vault vault, CharSequence passphrase) throws UpgradeFailedException {
-		LOG.info("Upgrading {} from {} to {}.", vault.path().getValue(), vaultVersionBeforeUpgrade, vaultVersionAfterUpgrade);
+		LOG.info("Upgrading {} from {} to {}.", vault.getPath(), vaultVersionBeforeUpgrade, vaultVersionAfterUpgrade);
 		Cryptor cryptor = null;
 		try {
-			final Path masterkeyFile = vault.path().getValue().resolve(Constants.MASTERKEY_FILENAME);
+			final Path masterkeyFile = vault.getPath().resolve(MASTERKEY_FILENAME);
 			final byte[] masterkeyFileContents = Files.readAllBytes(masterkeyFile);
 			cryptor = cryptorProvider.createFromKeyFile(KeyFile.parse(masterkeyFileContents), passphrase, vaultVersionBeforeUpgrade);
 			// create backup, as soon as we know the password was correct:
-			final Path masterkeyBackupFile = vault.path().getValue().resolve(Constants.MASTERKEY_BACKUP_FILENAME);
+			final Path masterkeyBackupFile = vault.getPath().resolve(MASTERKEY_BACKUP_FILENAME);
 			Files.copy(masterkeyFile, masterkeyBackupFile, StandardCopyOption.REPLACE_EXISTING);
 			LOG.info("Backuped masterkey.");
 			// do stuff:
 			upgrade(vault, cryptor);
 			// write updated masterkey file:
 			final byte[] upgradedMasterkeyFileContents = cryptor.writeKeysToMasterkeyFile(passphrase, vaultVersionAfterUpgrade).serialize();
-			final Path masterkeyFileAfterUpgrade = vault.path().getValue().resolve(Constants.MASTERKEY_FILENAME); // path may have changed
+			final Path masterkeyFileAfterUpgrade = vault.getPath().resolve(MASTERKEY_FILENAME); // path may have changed
 			Files.write(masterkeyFileAfterUpgrade, upgradedMasterkeyFileContents, StandardOpenOption.TRUNCATE_EXISTING);
 			LOG.info("Updated masterkey.");
 		} catch (InvalidPassphraseException e) {
 			throw new UpgradeFailedException(localization.getString("unlock.errorMessage.wrongPassword"));
 		} catch (UnsupportedVaultFormatException e) {
 			if (e.getDetectedVersion() == Integer.MAX_VALUE) {
-				LOG.warn("Version MAC authentication error in vault {}", vault.path().get());
+				LOG.warn("Version MAC authentication error in vault {}", vault.getPath());
 				throw new UpgradeFailedException(localization.getString("unlock.errorMessage.unauthenticVersionMac"));
 			} else {
 				LOG.warn("Upgrade failed.", e);
@@ -91,7 +92,7 @@ public abstract class UpgradeStrategy {
 	 * @return <code>true</code> if and only if the vault can be migrated to a newer version without the risk of data losses.
 	 */
 	public boolean isApplicable(Vault vault) {
-		final Path masterkeyFile = vault.path().getValue().resolve(Constants.MASTERKEY_FILENAME);
+		final Path masterkeyFile = vault.getPath().resolve(MASTERKEY_FILENAME);
 		try {
 			if (Files.isRegularFile(masterkeyFile)) {
 				byte[] masterkeyFileContents = Files.readAllBytes(masterkeyFile);

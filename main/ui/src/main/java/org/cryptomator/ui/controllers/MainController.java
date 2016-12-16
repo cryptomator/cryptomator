@@ -29,9 +29,10 @@ import org.cryptomator.ui.controls.DirectoryListCell;
 import org.cryptomator.ui.model.UpgradeStrategies;
 import org.cryptomator.ui.model.Vault;
 import org.cryptomator.ui.model.VaultFactory;
-import org.cryptomator.ui.model.Vaults;
+import org.cryptomator.ui.model.VaultList;
 import org.cryptomator.ui.settings.Localization;
 import org.cryptomator.ui.settings.Settings;
+import org.cryptomator.ui.settings.VaultSettings;
 import org.cryptomator.ui.util.DialogBuilderUtil;
 import org.fxmisc.easybind.EasyBind;
 import org.slf4j.Logger;
@@ -79,7 +80,7 @@ public class MainController extends LocalizedFXMLViewController {
 	private final Lazy<SettingsController> settingsController;
 	private final Lazy<UpgradeStrategies> upgradeStrategies;
 	private final ObjectProperty<AbstractFXMLViewController> activeController = new SimpleObjectProperty<>();
-	private final Vaults vaults;
+	private final VaultList vaults;
 	private final ObjectProperty<Vault> selectedVault = new SimpleObjectProperty<>();
 	private final BooleanExpression isSelectedVaultUnlocked = BooleanBinding.booleanExpression(EasyBind.select(selectedVault).selectObject(Vault::unlockedProperty).orElse(false));
 	private final BooleanExpression isSelectedVaultValid = BooleanBinding.booleanExpression(EasyBind.monadic(selectedVault).map(Vault::isValidVaultDirectory).orElse(false));
@@ -91,7 +92,7 @@ public class MainController extends LocalizedFXMLViewController {
 	public MainController(@Named("mainWindow") Stage mainWindow, Localization localization, Settings settings, VaultFactory vaultFactoy, Lazy<WelcomeController> welcomeController,
 			Lazy<InitializeController> initializeController, Lazy<NotFoundController> notFoundController, Lazy<UpgradeController> upgradeController, Lazy<UnlockController> unlockController,
 			Provider<UnlockedController> unlockedControllerProvider, Lazy<ChangePasswordController> changePasswordController, Lazy<SettingsController> settingsController, Lazy<UpgradeStrategies> upgradeStrategies,
-			Vaults vaults) {
+			VaultList vaults) {
 		super(localization);
 		this.mainWindow = mainWindow;
 		this.vaultFactoy = vaultFactoy;
@@ -230,7 +231,9 @@ public class MainController extends LocalizedFXMLViewController {
 			return;
 		}
 
-		final Vault vault = vaultFactoy.createVault(vaultPath);
+		final VaultSettings vaultSettings = VaultSettings.withRandomId();
+		vaultSettings.setPath(vaultPath);
+		final Vault vault = vaultFactoy.get(vaultSettings);
 		if (!vaults.contains(vault)) {
 			vaults.add(vault);
 		}

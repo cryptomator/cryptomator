@@ -51,7 +51,7 @@ class UpgradeVersion4to5 extends UpgradeStrategy {
 
 	@Override
 	protected void upgrade(Vault vault, Cryptor cryptor) throws UpgradeFailedException {
-		Path dataDir = vault.path().get().resolve("d");
+		Path dataDir = vault.getPath().resolve("d");
 		if (!Files.isDirectory(dataDir)) {
 			return; // empty vault. no migration needed.
 		}
@@ -76,6 +76,7 @@ class UpgradeVersion4to5 extends UpgradeStrategy {
 		LOG.info("Migration finished.");
 	}
 
+	@SuppressWarnings("deprecation")
 	private void migrate(Path file, BasicFileAttributes attrs, Cryptor cryptor) throws IOException {
 		LOG.info("Starting migration of {}...", file);
 		try (FileChannel ch = FileChannel.open(file, StandardOpenOption.READ, StandardOpenOption.WRITE)) {

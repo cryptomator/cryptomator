@@ -116,7 +116,7 @@ public class UpgradeController extends LocalizedFXMLViewController {
 		asyncTaskService //
 				.asyncTaskOf(() -> {
 					if (!instruction.isApplicable(vault)) {
-						throw new IllegalStateException("No ugprade needed for " + vault.path().getValue());
+						throw new IllegalStateException("No ugprade needed for " + vault.getPath());
 					}
 					instruction.upgrade(vault, passwordField.getCharacters());
 				}) //

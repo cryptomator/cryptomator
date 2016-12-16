@@ -59,7 +59,7 @@ public class DirectoryListCell extends DraggableListCell<Vault> {
 		statusIndicator.fillProperty().bind(EasyBind.monadic(itemProperty()).flatMap(Vault::unlockedProperty).filter(Boolean.TRUE::equals).map(unlocked -> GREEN_FILL).orElse(RED_FILL));
 		statusIndicator.strokeProperty().bind(EasyBind.monadic(itemProperty()).flatMap(Vault::unlockedProperty).filter(Boolean.TRUE::equals).map(unlocked -> GREEN_STROKE).orElse(RED_STROKE));
 
-		tooltipProperty().bind(EasyBind.monadic(itemProperty()).flatMap(Vault::path).map(p -> new Tooltip(p.toString())));
+		tooltipProperty().bind(EasyBind.monadic(itemProperty()).flatMap(Vault::displayablePath).map(p -> new Tooltip(p.toString())));
 		contextMenuProperty().bind(EasyBind.monadic(itemProperty()).flatMap(Vault::unlockedProperty).map(unlocked -> {
 			return unlocked ? null : vaultContextMenu;
 		}));

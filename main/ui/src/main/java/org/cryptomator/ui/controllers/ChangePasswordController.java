@@ -18,8 +18,8 @@ import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import org.cryptomator.crypto.engine.InvalidPassphraseException;
-import org.cryptomator.crypto.engine.UnsupportedVaultFormatException;
+import org.cryptomator.cryptolib.api.InvalidPassphraseException;
+import org.cryptomator.cryptolib.api.UnsupportedVaultFormatException;
 import org.cryptomator.ui.controls.SecPasswordField;
 import org.cryptomator.ui.model.Vault;
 import org.cryptomator.ui.settings.Localization;

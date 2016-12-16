@@ -14,7 +14,6 @@ import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
-import org.cryptomator.frontend.CommandFailedException;
 import org.cryptomator.ui.model.Vault;
 import org.cryptomator.ui.settings.Localization;
 import org.cryptomator.ui.util.ActiveWindowStyleSupport;
@@ -107,13 +106,16 @@ public class UnlockedController extends LocalizedFXMLViewController {
 		}
 
 		// listen to MAC warnings as long as this vault is unlocked:
-		final ListChangeListener<String> macWarningsListener = this::macWarningsDidChange;
-		newVault.getNamesOfResourcesWithInvalidMac().addListener(macWarningsListener);
-		newVault.unlockedProperty().addListener((observable, oldValue, newValue) -> {
-			if (Boolean.FALSE.equals(newValue)) {
-				newVault.getNamesOfResourcesWithInvalidMac().removeListener(macWarningsListener);
-			}
-		});
+		// TODO overheadhunter: reimplement eventually
+		/*
+		 * final ListChangeListener<String> macWarningsListener = this::macWarningsDidChange;
+		 * newVault.getNamesOfResourcesWithInvalidMac().addListener(macWarningsListener);
+		 * newVault.unlockedProperty().addListener((observable, oldValue, newValue) -> {
+		 * if (Boolean.FALSE.equals(newValue)) {
+		 * newVault.getNamesOfResourcesWithInvalidMac().removeListener(macWarningsListener);
+		 * }
+		 * });
+		 */
 
 		if (!vault.get().isMounted()) {
 			// TODO Markus Kreusch #393: hyperlink auf FAQ oder sowas?
@@ -150,7 +152,8 @@ public class UnlockedController extends LocalizedFXMLViewController {
 	private void didClickRevealVault(ActionEvent event) {
 		asyncTaskService.asyncTaskOf(() -> {
 			vault.get().reveal();
-		}).onError(CommandFailedException.class, () -> {
+		}).onError(RuntimeException.class, () -> {
+			// TODO overheadhunter catch more specific exception type thrown by reveal()
 			messageLabel.setText(localization.getString("unlocked.label.revealFailed"));
 		}).run();
 	}
