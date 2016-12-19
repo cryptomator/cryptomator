@@ -55,8 +55,8 @@ class VaultSettingsJsonAdapter extends TypeAdapter<VaultSettings> {
 		in.endObject();
 
 		VaultSettings settings = (id == null) ? VaultSettings.withRandomId() : new VaultSettings(id);
-		settings.setPath(Paths.get(path));
 		settings.setMountName(mountName);
+		settings.setPath(Paths.get(path));
 		settings.setWinDriveLetter(winDriveLetter);
 		return settings;
 	}

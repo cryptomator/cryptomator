@@ -14,8 +14,6 @@ import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.text.Normalizer;
-import java.text.Normalizer.Form;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
@@ -63,11 +61,6 @@ public class Vault {
 		this.vaultSettings = vaultSettings;
 		this.server = server;
 		this.closer = closer;
-		try {
-			setMountName(name().getValue());
-		} catch (IllegalArgumentException e) {
-			// mount name needs to be set by the user explicitly later
-		}
 	}
 
 	// ******************************************************************************
@@ -102,7 +95,7 @@ public class Vault {
 			if (!server.isRunning()) {
 				server.start();
 			}
-			server.startWebDavServlet(fs.getPath("/"), vaultSettings.getId());
+			server.startWebDavServlet(fs.getPath("/"), vaultSettings.getId() + "/" + vaultSettings.getMountName());
 		} catch (IOException e) {
 			LOG.error("Unable to provide frontend", e);
 		} finally {
@@ -215,32 +208,6 @@ public class Vault {
 		return 0l;
 	}
 
-	/**
-	 * Tries to form a similar string using the regular latin alphabet.
-	 * 
-	 * @param string
-	 * @return a string composed of a-z, A-Z, 0-9, and _.
-	 */
-	public static String normalize(String string) {
-		String normalized = Normalizer.normalize(string, Form.NFD);
-		StringBuilder builder = new StringBuilder();
-		for (int i = 0; i < normalized.length(); i++) {
-			char c = normalized.charAt(i);
-			if (Character.isWhitespace(c)) {
-				if (builder.length() == 0 || builder.charAt(builder.length() - 1) != '_') {
-					builder.append('_');
-				}
-			} else if (c < 127 && Character.isLetterOrDigit(c)) {
-				builder.append(c);
-			} else if (c < 127) {
-				if (builder.length() == 0 || builder.charAt(builder.length() - 1) != '_') {
-					builder.append('_');
-				}
-			}
-		}
-		return builder.toString();
-	}
-
 	public String getMountName() {
 		return vaultSettings.getMountName();
 	}
@@ -252,11 +219,10 @@ public class Vault {
 	 * @throws IllegalArgumentException if the name is empty after normalization
 	 */
 	public void setMountName(String mountName) throws IllegalArgumentException {
-		String normalized = normalize(mountName);
-		if (StringUtils.isEmpty(normalized)) {
+		if (StringUtils.isBlank(mountName)) {
 			throw new IllegalArgumentException("mount name is empty");
 		} else {
-			vaultSettings.setMountName(normalized);
+			vaultSettings.setMountName(mountName);
 		}
 	}
 

@@ -6,21 +6,21 @@
  * Contributors:
  *     Sebastian Stenzel - initial API and implementation
  *******************************************************************************/
-package org.cryptomator.ui.model;
+package org.cryptomator.ui.settings;
 
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-public class VaultTest {
+public class VaultSettingsTest {
 
 	@Test
 	public void testNormalize() throws Exception {
-		assertEquals("_", Vault.normalize(" "));
-		assertEquals("a", Vault.normalize("ä"));
-		assertEquals("C", Vault.normalize("Ĉ"));
-		assertEquals("_", Vault.normalize(":"));
-		assertEquals("", Vault.normalize("汉语"));
+		assertEquals("_", VaultSettings.normalizeMountName(" "));
+		assertEquals("a", VaultSettings.normalizeMountName("ä"));
+		assertEquals("C", VaultSettings.normalizeMountName("Ĉ"));
+		assertEquals("_", VaultSettings.normalizeMountName(":"));
+		assertEquals("_", VaultSettings.normalizeMountName("汉语"));
 	}
 
 }

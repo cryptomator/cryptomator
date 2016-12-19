@@ -7,6 +7,8 @@ import java.util.Base64;
 import java.util.Objects;
 import java.util.UUID;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.google.gson.annotations.JsonAdapter;
 
 import javafx.beans.property.Property;
@@ -46,6 +48,28 @@ public class VaultSettings {
 		return uuidBuffer.array();
 	}
 
+	/*
+	 * visible for testing
+	 */
+	static String normalizeMountName(String mountName) {
+		String normalizedMountName = StringUtils.stripAccents(mountName);
+		StringBuilder builder = new StringBuilder();
+		for (char c : normalizedMountName.toCharArray()) {
+			if (Character.isWhitespace(c)) {
+				if (builder.length() == 0 || builder.charAt(builder.length() - 1) != '_') {
+					builder.append('_');
+				}
+			} else if (c < 127 && Character.isLetterOrDigit(c)) {
+				builder.append(c);
+			} else {
+				if (builder.length() == 0 || builder.charAt(builder.length() - 1) != '_') {
+					builder.append('_');
+				}
+			}
+		}
+		return builder.toString();
+	}
+
 	/* Getter/Setter */
 
 	public String getId() {
@@ -62,6 +86,9 @@ public class VaultSettings {
 
 	public void setPath(Path path) {
 		this.path.setValue(path);
+		if (StringUtils.isBlank(getMountName())) {
+			setMountName(path.getFileName().toString());
+		}
 	}
 
 	public Property<String> mountNameProperty() {
@@ -73,7 +100,7 @@ public class VaultSettings {
 	}
 
 	public void setMountName(String mountName) {
-		this.mountName.setValue(mountName);
+		this.mountName.setValue(normalizeMountName(mountName));
 	}
 
 	public Property<String> winDriveLetterProperty() {
