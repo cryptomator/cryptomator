@@ -12,21 +12,17 @@ import java.net.URL;
 import java.util.Optional;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 
 import org.cryptomator.ui.model.Vault;
 import org.cryptomator.ui.settings.Localization;
-import org.cryptomator.ui.util.ActiveWindowStyleSupport;
 import org.cryptomator.ui.util.AsyncTaskService;
 import org.fxmisc.easybind.EasyBind;
 
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
-import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.collections.ListChangeListener;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -42,7 +38,6 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.stage.PopupWindow.AnchorLocation;
-import javafx.stage.Stage;
 import javafx.util.Duration;
 
 public class UnlockedController extends LocalizedFXMLViewController {
@@ -50,8 +45,6 @@ public class UnlockedController extends LocalizedFXMLViewController {
 	private static final int IO_SAMPLING_STEPS = 100;
 	private static final double IO_SAMPLING_INTERVAL = 0.25;
 
-	private final Stage macWarningsWindow = new Stage();
-	private final MacWarningsController macWarningsController;
 	private final AsyncTaskService asyncTaskService;
 	private final ObjectProperty<Vault> vault = new SimpleObjectProperty<>();
 	private Optional<LockListener> listener = Optional.empty();
@@ -76,19 +69,13 @@ public class UnlockedController extends LocalizedFXMLViewController {
 	private MenuItem revealVaultMenuItem;
 
 	@Inject
-	public UnlockedController(Localization localization, Provider<MacWarningsController> macWarningsControllerProvider, AsyncTaskService asyncTaskService) {
+	public UnlockedController(Localization localization, AsyncTaskService asyncTaskService) {
 		super(localization);
-		this.macWarningsController = macWarningsControllerProvider.get();
 		this.asyncTaskService = asyncTaskService;
-
-		macWarningsController.vault.bind(this.vault);
 	}
 
 	@Override
 	public void initialize() {
-		macWarningsController.initStage(macWarningsWindow);
-		ActiveWindowStyleSupport.startObservingFocus(macWarningsWindow);
-
 		revealVaultMenuItem.disableProperty().bind(EasyBind.map(vault, vault -> vault != null && !vault.isMounted()));
 
 		EasyBind.subscribe(vault, this::vaultChanged);
@@ -104,18 +91,6 @@ public class UnlockedController extends LocalizedFXMLViewController {
 		if (newVault == null) {
 			return;
 		}
-
-		// listen to MAC warnings as long as this vault is unlocked:
-		// TODO overheadhunter: reimplement eventually
-		/*
-		 * final ListChangeListener<String> macWarningsListener = this::macWarningsDidChange;
-		 * newVault.getNamesOfResourcesWithInvalidMac().addListener(macWarningsListener);
-		 * newVault.unlockedProperty().addListener((observable, oldValue, newValue) -> {
-		 * if (Boolean.FALSE.equals(newValue)) {
-		 * newVault.getNamesOfResourcesWithInvalidMac().removeListener(macWarningsListener);
-		 * }
-		 * });
-		 */
 
 		if (!vault.get().isMounted()) {
 			// TODO Markus Kreusch #393: hyperlink auf FAQ oder sowas?
@@ -164,18 +139,6 @@ public class UnlockedController extends LocalizedFXMLViewController {
 		clipboardContent.putUrl(vault.get().getWebDavUrl());
 		clipboardContent.putString(vault.get().getWebDavUrl());
 		Clipboard.getSystemClipboard().setContent(clipboardContent);
-	}
-
-	// ****************************************
-	// MAC Auth Warnings
-	// ****************************************
-
-	private void macWarningsDidChange(ListChangeListener.Change<? extends String> change) {
-		if (change.getList().size() > 0) {
-			Platform.runLater(macWarningsWindow::show);
-		} else {
-			Platform.runLater(macWarningsWindow::hide);
-		}
 	}
 
 	// ****************************************

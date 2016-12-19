@@ -95,12 +95,6 @@ unlocked.label.statsEncrypted=encrypted
 unlocked.label.statsDecrypted=decrypted
 unlocked.ioGraph.yAxis.label=Throughput (MiB/s)
 
-# mac_warnings.fxml
-macWarnings.windowTitle=Danger - Corrupted file in %s
-macWarnings.message=Cryptomator detected potentially malicious corruptions in the following files:
-macWarnings.moreInformationButton=Learn More
-macWarnings.whitelistButton=Decrypt Selected Anyway
-
 # settings.fxml
 settings.version.label=Version %s
 settings.checkForUpdates.label=Check for Updates
