@@ -15,7 +15,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.inject.Inject;
@@ -39,21 +38,20 @@ import javafx.application.Platform;
 import javafx.beans.binding.Binding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.collections.ObservableList;
 
 @PerVault
 public class Vault {
 
 	private static final Logger LOG = LoggerFactory.getLogger(Vault.class);
+
+	@Deprecated
 	public static final String VAULT_FILE_EXTENSION = ".cryptomator";
 
 	private final VaultSettings vaultSettings;
 	private final WebDavServer server;
 	private final DeferredCloser closer;
-
 	private final BooleanProperty unlocked = new SimpleBooleanProperty();
 	private final BooleanProperty mounted = new SimpleBooleanProperty();
-
 	private final AtomicReference<CryptoFileSystem> cryptoFileSystem = new AtomicReference<>();
 
 	@Inject
@@ -79,16 +77,16 @@ public class Vault {
 	}
 
 	public void create(CharSequence passphrase) throws IOException {
-		getCryptoFileSystem(passphrase);
-		// TODO and now?
+		// TODO overheadhunter/markuskreusch check (via cryptofs) if already existing? if not, just call:
+		getCryptoFileSystem(passphrase); // implicitly creates a non-existing vault
 	}
 
 	public void changePassphrase(CharSequence oldPassphrase, CharSequence newPassphrase) throws IOException, InvalidPassphraseException {
-		// TODO implement
+		// TODO overheadhunter/markuskreusch implement in cryptofs
 	}
 
 	public synchronized void activateFrontend(CharSequence passphrase) {
-		boolean launchSuccess = false;
+		boolean unlockSuccess = false;
 		boolean mountSuccess = false;
 		try {
 			FileSystem fs = getCryptoFileSystem(passphrase);
@@ -101,7 +99,7 @@ public class Vault {
 		} finally {
 			// unlocked is a observable property and should only be changed by the FX application thread
 			Platform.runLater(() -> {
-				unlocked.set(launchSuccess);
+				unlocked.set(unlockSuccess);
 				mounted.set(mountSuccess);
 			});
 		}
@@ -120,7 +118,7 @@ public class Vault {
 	}
 
 	public synchronized void reveal() {
-		// TODO implement
+		// TODO overheadhunter implement mounting utility in webdav-nio-adapter
 	}
 
 	// ******************************************************************************
@@ -131,7 +129,7 @@ public class Vault {
 		return vaultSettings;
 	}
 
-	public synchronized String getWebDavUrl() {
+	public String getWebDavUrl() {
 		// TODO implement
 		return "http://localhost/not/implemented";
 	}
@@ -157,7 +155,7 @@ public class Vault {
 	 * @return Directory name without preceeding path components and file extension
 	 */
 	public Binding<String> name() {
-		return EasyBind.map(vaultSettings.pathProperty(), p -> p.getFileName().toString());
+		return EasyBind.map(vaultSettings.pathProperty(), Path::getFileName).map(Path::toString);
 	}
 
 	public boolean doesVaultDirectoryExist() {
@@ -166,7 +164,7 @@ public class Vault {
 
 	public boolean isValidVaultDirectory() {
 		try {
-			return doesVaultDirectoryExist(); // TODO: && cryptoFileSystemFactory.isValidVaultStructure(getNioFileSystem());
+			return doesVaultDirectoryExist(); // TODO overheadhunter/markuskreusch: && CryptoFileSystemProvider.isValidVaultStructure(getPath());
 		} catch (UncheckedIOException e) {
 			return false;
 		}
@@ -188,16 +186,6 @@ public class Vault {
 		return mounted.get();
 	}
 
-	public ObservableList<String> getNamesOfResourcesWithInvalidMac() {
-		// TODO overheadhunter implement.
-		return null;
-	}
-
-	public Set<String> getWhitelistedResourcesWithInvalidMac() {
-		// TODO overheadhunter implement.
-		return null;
-	}
-
 	public long pollBytesRead() {
 		// TODO overheadhunter implement.
 		return 0l;
@@ -212,12 +200,6 @@ public class Vault {
 		return vaultSettings.getMountName();
 	}
 
-	/**
-	 * sets the mount name while normalizing it
-	 * 
-	 * @param mountName
-	 * @throws IllegalArgumentException if the name is empty after normalization
-	 */
 	public void setMountName(String mountName) throws IllegalArgumentException {
 		if (StringUtils.isBlank(mountName)) {
 			throw new IllegalArgumentException("mount name is empty");
