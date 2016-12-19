@@ -72,14 +72,12 @@ abstract class AbstractFXMLViewController implements Initializable {
 	 * @return Parent view element.
 	 */
 	protected final Parent loadFxml() {
-		return LazyInitializer.initializeLazily(fxmlRoot, () -> {
-			final FXMLLoader loader = createFxmlLoader();
-			try {
-				return loader.load();
-			} catch (IOException e) {
-				throw new IllegalStateException("Could not load FXML file from location: " + loader.getLocation(), e);
-			}
-		});
+		final FXMLLoader loader = createFxmlLoader();
+		try {
+			return LazyInitializer.initializeLazily(fxmlRoot, loader::load, IOException.class);
+		} catch (IOException e) {
+			throw new IllegalStateException("Could not load FXML file from location: " + loader.getLocation(), e);
+		}
 	}
 
 	/**
