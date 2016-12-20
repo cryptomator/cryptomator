@@ -187,13 +187,21 @@ public class Vault {
 	}
 
 	public long pollBytesRead() {
-		// TODO overheadhunter implement.
-		return 0l;
+		CryptoFileSystem fs = cryptoFileSystem.get();
+		if (fs != null) {
+			return fs.getStats().pollBytesRead();
+		} else {
+			return 0l;
+		}
 	}
 
 	public long pollBytesWritten() {
-		// TODO overheadhunter implement.
-		return 0l;
+		CryptoFileSystem fs = cryptoFileSystem.get();
+		if (fs != null) {
+			return fs.getStats().pollBytesWritten();
+		} else {
+			return 0l;
+		}
 	}
 
 	public String getMountName() {
