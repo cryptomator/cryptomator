@@ -21,6 +21,7 @@ import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.cryptolib.api.InvalidPassphraseException;
 import org.cryptomator.cryptolib.api.UnsupportedVaultFormatException;
 import org.cryptomator.frontend.webdav.ServerLifecycleException;
+import org.cryptomator.frontend.webdav.mount.Mounter.CommandFailedException;
 import org.cryptomator.keychain.KeychainAccess;
 import org.cryptomator.ui.controls.SecPasswordField;
 import org.cryptomator.ui.model.Vault;
@@ -350,7 +351,7 @@ public class UnlockController extends LocalizedFXMLViewController {
 					messageText.setText(localization.getString("unlock.errorMessage.unauthenticVersionMac"));
 				}
 			});
-		} catch (ServerLifecycleException e) {
+		} catch (ServerLifecycleException | CommandFailedException e) {
 			LOG.error("Unlock failed for technical reasons.", e);
 			Platform.runLater(() -> {
 				messageText.setText(localization.getString("unlock.errorMessage.mountingFailed"));

@@ -14,6 +14,7 @@ import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -27,6 +28,9 @@ import org.cryptomator.cryptofs.CryptoFileSystemProperties;
 import org.cryptomator.cryptofs.CryptoFileSystemProvider;
 import org.cryptomator.cryptolib.api.InvalidPassphraseException;
 import org.cryptomator.frontend.webdav.WebDavServer;
+import org.cryptomator.frontend.webdav.mount.Mounter.CommandFailedException;
+import org.cryptomator.frontend.webdav.mount.Mounter.Mount;
+import org.cryptomator.frontend.webdav.servlet.WebDavServletController;
 import org.cryptomator.ui.model.VaultModule.PerVault;
 import org.cryptomator.ui.settings.VaultSettings;
 import org.cryptomator.ui.util.DeferredCloser;
@@ -53,6 +57,9 @@ public class Vault {
 	private final BooleanProperty unlocked = new SimpleBooleanProperty();
 	private final BooleanProperty mounted = new SimpleBooleanProperty();
 	private final AtomicReference<CryptoFileSystem> cryptoFileSystem = new AtomicReference<>();
+
+	private WebDavServletController servlet;
+	private Mount mount;
 
 	@Inject
 	Vault(VaultSettings vaultSettings, WebDavServer server, DeferredCloser closer) {
@@ -93,32 +100,48 @@ public class Vault {
 			if (!server.isRunning()) {
 				server.start();
 			}
-			server.startWebDavServlet(fs.getPath("/"), vaultSettings.getId() + "/" + vaultSettings.getMountName());
+			servlet = server.createWebDavServlet(fs.getPath("/"), vaultSettings.getId() + "/" + vaultSettings.getMountName());
+			servlet.start();
+			unlockSuccess = true;
+
+			mount = servlet.mount(Collections.emptyMap());
+			mountSuccess = true;
 		} catch (IOException e) {
-			LOG.error("Unable to provide frontend", e);
+			LOG.error("Unable to provide filesystem", e);
+		} catch (CommandFailedException e) {
+			LOG.error("Unable to mount filesystem", e);
 		} finally {
 			// unlocked is a observable property and should only be changed by the FX application thread
+			final boolean finalUnlockSuccess = unlockSuccess;
+			final boolean finalMountSuccess = mountSuccess;
 			Platform.runLater(() -> {
-				unlocked.set(unlockSuccess);
-				mounted.set(mountSuccess);
+				unlocked.set(finalUnlockSuccess);
+				mounted.set(finalMountSuccess);
 			});
 		}
 	}
 
 	public synchronized void deactivateFrontend() throws Exception {
+		if (mount != null) {
+			mount.unmount();
+		}
+		if (servlet != null) {
+			servlet.stop();
+		}
 		CryptoFileSystem fs = cryptoFileSystem.getAndSet(null);
 		if (fs != null) {
 			fs.close();
 		}
-		// TODO overheadhunter remove servlet from server
 		Platform.runLater(() -> {
 			mounted.set(false);
 			unlocked.set(false);
 		});
 	}
 
-	public synchronized void reveal() {
-		// TODO overheadhunter implement mounting utility in webdav-nio-adapter
+	public void reveal() throws CommandFailedException {
+		if (mount != null) {
+			mount.reveal();
+		}
 	}
 
 	// ******************************************************************************
