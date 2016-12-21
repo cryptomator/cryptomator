@@ -50,12 +50,14 @@ public final class LazyInitializer {
 		}
 	}
 
-	private static <T> UnaryOperator<T> invokeFactoryIfNull(SupplierThrowingException<T, ?> factory) throws InitializationException {
+	private static <T, E extends Exception> UnaryOperator<T> invokeFactoryIfNull(SupplierThrowingException<T, E> factory) throws InitializationException {
 		return currentValue -> {
 			if (currentValue == null) {
 				try {
 					return factory.get();
-				} catch (Throwable e) {
+				} catch (RuntimeException e) {
+					throw e; // don't catch unchecked exceptions
+				} catch (Exception e) {
 					throw new InitializationException(e);
 				}
 			} else {

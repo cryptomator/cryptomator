@@ -26,6 +26,7 @@ import org.cryptomator.common.LazyInitializer;
 import org.cryptomator.cryptofs.CryptoFileSystem;
 import org.cryptomator.cryptofs.CryptoFileSystemProperties;
 import org.cryptomator.cryptofs.CryptoFileSystemProvider;
+import org.cryptomator.cryptolib.api.CryptoException;
 import org.cryptomator.cryptolib.api.InvalidPassphraseException;
 import org.cryptomator.frontend.webdav.WebDavServer;
 import org.cryptomator.frontend.webdav.mount.Mounter.CommandFailedException;
@@ -76,7 +77,7 @@ public class Vault {
 		return LazyInitializer.initializeLazily(cryptoFileSystem, () -> createCryptoFileSystem(passphrase), IOException.class);
 	}
 
-	private CryptoFileSystem createCryptoFileSystem(CharSequence passphrase) throws IOException {
+	private CryptoFileSystem createCryptoFileSystem(CharSequence passphrase) throws IOException, CryptoException {
 		CryptoFileSystemProperties fsProps = CryptoFileSystemProperties.cryptoFileSystemProperties().withPassphrase(passphrase).build();
 		CryptoFileSystem fs = CryptoFileSystemProvider.newFileSystem(getPath(), fsProps);
 		closer.closeLater(fs);
