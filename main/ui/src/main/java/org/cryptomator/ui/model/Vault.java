@@ -9,7 +9,9 @@
 package org.cryptomator.ui.model;
 
 import java.io.IOException;
-import java.io.UncheckedIOException;
+import java.nio.file.DirectoryNotEmptyException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -49,9 +51,6 @@ public class Vault {
 
 	private static final Logger LOG = LoggerFactory.getLogger(Vault.class);
 
-	@Deprecated
-	public static final String VAULT_FILE_EXTENSION = ".cryptomator";
-
 	private final VaultSettings vaultSettings;
 	private final WebDavServer server;
 	private final DeferredCloser closer;
@@ -85,12 +84,22 @@ public class Vault {
 	}
 
 	public void create(CharSequence passphrase) throws IOException {
-		// TODO overheadhunter/markuskreusch check (via cryptofs) if already existing? if not, just call:
-		getCryptoFileSystem(passphrase); // implicitly creates a non-existing vault
+		try (DirectoryStream<Path> stream = Files.newDirectoryStream(getPath())) {
+			for (Path file : stream) {
+				if (!file.getFileName().toString().startsWith(".")) {
+					throw new DirectoryNotEmptyException(getPath().toString());
+				}
+			}
+		}
+		if (!isValidVaultDirectory()) {
+			getCryptoFileSystem(passphrase); // implicitly creates a non-existing vault
+		} else {
+			throw new FileAlreadyExistsException(getPath().toString());
+		}
 	}
 
 	public void changePassphrase(CharSequence oldPassphrase, CharSequence newPassphrase) throws IOException, InvalidPassphraseException {
-		// TODO overheadhunter/markuskreusch implement in cryptofs
+		CryptoFileSystemProvider.changePassphrase(getPath(), oldPassphrase, newPassphrase);
 	}
 
 	public synchronized void activateFrontend(CharSequence passphrase) {
@@ -187,11 +196,7 @@ public class Vault {
 	}
 
 	public boolean isValidVaultDirectory() {
-		try {
-			return doesVaultDirectoryExist(); // TODO overheadhunter/markuskreusch: && CryptoFileSystemProvider.isValidVaultStructure(getPath());
-		} catch (UncheckedIOException e) {
-			return false;
-		}
+		return CryptoFileSystemProvider.containsVault(getPath());
 	}
 
 	public BooleanProperty unlockedProperty() {

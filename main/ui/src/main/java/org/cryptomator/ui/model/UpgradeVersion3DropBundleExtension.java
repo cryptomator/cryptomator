@@ -41,7 +41,7 @@ class UpgradeVersion3DropBundleExtension extends UpgradeStrategy {
 		String fmt = localization.getString("upgrade.version3dropBundleExtension.msg");
 		Path path = vault.getPath();
 		String oldVaultName = path.getFileName().toString();
-		String newVaultName = StringUtils.removeEnd(oldVaultName, Vault.VAULT_FILE_EXTENSION);
+		String newVaultName = StringUtils.removeEnd(oldVaultName, ".cryptomator");
 		return String.format(fmt, oldVaultName, newVaultName);
 	}
 
@@ -49,7 +49,7 @@ class UpgradeVersion3DropBundleExtension extends UpgradeStrategy {
 	protected void upgrade(Vault vault, Cryptor cryptor) throws UpgradeFailedException {
 		Path path = vault.getPath();
 		String oldVaultName = path.getFileName().toString();
-		String newVaultName = StringUtils.removeEnd(oldVaultName, Vault.VAULT_FILE_EXTENSION);
+		String newVaultName = StringUtils.removeEnd(oldVaultName, ".cryptomator");
 		Path newPath = path.resolveSibling(newVaultName);
 		if (Files.exists(newPath)) {
 			String fmt = localization.getString("upgrade.version3dropBundleExtension.err.alreadyExists");
@@ -73,7 +73,7 @@ class UpgradeVersion3DropBundleExtension extends UpgradeStrategy {
 	@Override
 	public boolean isApplicable(Vault vault) {
 		Path vaultPath = vault.getPath();
-		if (vaultPath.toString().endsWith(Vault.VAULT_FILE_EXTENSION)) {
+		if (vaultPath.toString().endsWith(".cryptomator")) {
 			return super.isApplicable(vault);
 		} else {
 			return false;
