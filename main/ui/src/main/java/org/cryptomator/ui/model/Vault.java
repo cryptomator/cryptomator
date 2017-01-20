@@ -50,6 +50,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 public class Vault {
 
 	private static final Logger LOG = LoggerFactory.getLogger(Vault.class);
+	private static final String MASTERKEY_FILENAME = "masterkey.cryptomator";
 
 	private final VaultSettings vaultSettings;
 	private final WebDavServer server;
@@ -77,7 +78,10 @@ public class Vault {
 	}
 
 	private CryptoFileSystem createCryptoFileSystem(CharSequence passphrase) throws IOException, CryptoException {
-		CryptoFileSystemProperties fsProps = CryptoFileSystemProperties.cryptoFileSystemProperties().withPassphrase(passphrase).build();
+		CryptoFileSystemProperties fsProps = CryptoFileSystemProperties.cryptoFileSystemProperties() //
+				.withPassphrase(passphrase) //
+				.withMasterkeyFilename(MASTERKEY_FILENAME) //
+				.build();
 		CryptoFileSystem fs = CryptoFileSystemProvider.newFileSystem(getPath(), fsProps);
 		closer.closeLater(fs);
 		return fs;
@@ -99,7 +103,7 @@ public class Vault {
 	}
 
 	public void changePassphrase(CharSequence oldPassphrase, CharSequence newPassphrase) throws IOException, InvalidPassphraseException {
-		CryptoFileSystemProvider.changePassphrase(getPath(), oldPassphrase, newPassphrase);
+		CryptoFileSystemProvider.changePassphrase(getPath(), MASTERKEY_FILENAME, oldPassphrase, newPassphrase);
 	}
 
 	public synchronized void activateFrontend(CharSequence passphrase) {
@@ -196,7 +200,7 @@ public class Vault {
 	}
 
 	public boolean isValidVaultDirectory() {
-		return CryptoFileSystemProvider.containsVault(getPath());
+		return CryptoFileSystemProvider.containsVault(getPath(), MASTERKEY_FILENAME);
 	}
 
 	public BooleanProperty unlockedProperty() {
