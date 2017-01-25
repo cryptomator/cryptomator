@@ -16,7 +16,6 @@ import java.util.Objects;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.jackrabbit.webdav.DavException;
 import org.apache.jackrabbit.webdav.DavServletResponse;
 import org.apache.jackrabbit.webdav.DavSession;
 import org.apache.jackrabbit.webdav.io.OutputContext;
@@ -36,7 +35,7 @@ class DavFileWithRange extends DavFile {
 
 	private final Pair<String, String> requestRange;
 
-	public DavFileWithRange(FilesystemResourceFactory factory, LockManager lockManager, DavSession session, FileLocator node, Pair<String, String> requestRange) throws DavException {
+	public DavFileWithRange(FilesystemResourceFactory factory, LockManager lockManager, DavSession session, FileLocator node, Pair<String, String> requestRange) {
 		super(factory, lockManager, session, node);
 		this.requestRange = Objects.requireNonNull(requestRange);
 	}
@@ -48,18 +47,18 @@ class DavFileWithRange extends DavFile {
 			return;
 		}
 		final long contentLength = node.size();
+		final Pair<Long, Long> range = getEffectiveRange(contentLength);
+		if (range.getLeft() < 0 || range.getLeft() > range.getRight() || range.getRight() > contentLength) {
+			outputContext.setProperty(HttpHeader.CONTENT_RANGE.asString(), "bytes */" + contentLength);
+			throw new UncheckedDavException(DavServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE, "Valid Range would be in [0, " + contentLength + "]");
+		}
+		final Long rangeLength = range.getRight() - range.getLeft() + 1;
+		outputContext.setContentLength(rangeLength);
+		outputContext.setProperty(HttpHeader.CONTENT_RANGE.asString(), contentRangeResponseHeader(range.getLeft(), range.getRight(), contentLength));
+		outputContext.setContentType(CONTENT_TYPE_VALUE);
+		outputContext.setProperty(CONTENT_DISPOSITION_HEADER, CONTENT_DISPOSITION_VALUE);
+		outputContext.setProperty(X_CONTENT_TYPE_OPTIONS_HEADER, X_CONTENT_TYPE_OPTIONS_VALUE);
 		try (ReadableFile src = node.openReadable(); OutputStream out = outputContext.getOutputStream()) {
-			final Pair<Long, Long> range = getEffectiveRange(contentLength);
-			if (range.getLeft() < 0 || range.getLeft() > range.getRight() || range.getRight() > contentLength) {
-				outputContext.setProperty(HttpHeader.CONTENT_RANGE.asString(), "bytes */" + contentLength);
-				throw new UncheckedDavException(DavServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE, "Valid Range would be in [0, " + contentLength + "]");
-			}
-			final Long rangeLength = range.getRight() - range.getLeft() + 1;
-			outputContext.setContentLength(rangeLength);
-			outputContext.setProperty(HttpHeader.CONTENT_RANGE.asString(), contentRangeResponseHeader(range.getLeft(), range.getRight(), contentLength));
-			outputContext.setContentType(CONTENT_TYPE_VALUE);
-			outputContext.setProperty(CONTENT_DISPOSITION_HEADER, CONTENT_DISPOSITION_VALUE);
-			outputContext.setProperty(X_CONTENT_TYPE_OPTIONS_HEADER, X_CONTENT_TYPE_OPTIONS_VALUE);
 			src.position(range.getLeft());
 			InputStream limitedIn = ByteStreams.limit(Channels.newInputStream(src), rangeLength);
 			ByteStreams.copy(limitedIn, out);

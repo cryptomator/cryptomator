@@ -85,17 +85,11 @@ class FilesystemResourceFactory implements DavResourceFactory {
 		final String rangeHeader = request.getHeader(HttpHeader.RANGE.asString());
 		try {
 			// 206 for ranged resources:
-			final Pair<String, String> parsedRange = parseRangeRequestHeader(rangeHeader);
+			final Pair<String, String> parsedRange = parseSingleByteRange(rangeHeader);
 			response.setStatus(DavServletResponse.SC_PARTIAL_CONTENT);
 			return new DavFileWithRange(this, lockManager, session, file, parsedRange);
-		} catch (DavException ex) {
-			if (ex.getErrorCode() == DavServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE) {
-				// 416 for unsatisfiable ranges:
-				response.setStatus(DavServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
-				return new DavFileWithUnsatisfiableRange(this, lockManager, session, file);
-			} else {
-				throw new DavException(ex.getErrorCode(), ex);
-			}
+		} catch (NotASingleByteRangeException ex) {
+			return createFile(file, session);
 		}
 	}
 
@@ -108,17 +102,18 @@ class FilesystemResourceFactory implements DavResourceFactory {
 	 * </code>
 	 * 
 	 * @return Tuple of lower and upper range.
-	 * @throws DavException HTTP statuscode 400 for malformed requests. 416 if requested range is not supported.
+	 * @throws DavException HTTP statuscode 400 for malformed requests.
+	 * @throws NotASingleByteRangeException Indicating a range that is not supported by this server, i.e. range header should be ignored.
 	 */
-	private Pair<String, String> parseRangeRequestHeader(String rangeHeader) throws DavException {
+	private Pair<String, String> parseSingleByteRange(String rangeHeader) throws DavException, NotASingleByteRangeException {
 		assert rangeHeader != null;
 		if (!rangeHeader.startsWith(RANGE_BYTE_PREFIX)) {
-			throw new DavException(DavServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
+			throw new NotASingleByteRangeException();
 		}
 		final String byteRangeSet = StringUtils.removeStartIgnoreCase(rangeHeader, RANGE_BYTE_PREFIX);
 		final String[] byteRanges = StringUtils.split(byteRangeSet, RANGE_SET_SEP);
 		if (byteRanges.length != 1) {
-			throw new DavException(DavServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
+			throw new NotASingleByteRangeException();
 		}
 		final String byteRange = byteRanges[0];
 		final String[] bytePos = StringUtils.splitPreserveAllTokens(byteRange, RANGE_SEP);
@@ -144,6 +139,9 @@ class FilesystemResourceFactory implements DavResourceFactory {
 				throw new DavException(DavServletResponse.SC_BAD_REQUEST, "Unsupported If-Range header: " + ifRangeHeader);
 			}
 		}
+	}
+
+	private static class NotASingleByteRangeException extends Exception {
 	}
 
 }
