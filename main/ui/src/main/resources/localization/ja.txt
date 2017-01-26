@@ -1,0 +1,99 @@
+app.name = Cryptomator
+# main.fxml
+main.emptyListInstructions = ここをクリックして金庫を追加する
+main.directoryList.contextMenu.remove = リストから削除する
+main.directoryList.contextMenu.changePassword = パスワード変更
+main.addDirectory.contextMenu.new = 新しい金庫を作成する
+main.addDirectory.contextMenu.open = 既存の金庫を開く
+# welcome.fxml
+welcome.checkForUpdates.label.currentlyChecking = アップデートを確認中...
+welcome.newVersionMessage = バージョン%1$sがダウンロードできます。\n現在のバージョンは%2$sです。
+# initialize.fxml
+initialize.label.password = パスワード
+initialize.label.retypePassword = パスワード再入力
+initialize.button.ok = 金庫を作成
+initialize.messageLabel.alreadyInitialized = 金庫がすでに初期化されています。
+initialize.messageLabel.initializationFailed = 金庫の初期化ができませんでした。詳細はログファイルをご覧ください。
+# notfound.fxml
+notfound.label = 金庫が見つかりませんでした。動かされたのですか？
+# upgrade.fxml
+upgrade.button = 金庫をアップグレードする
+upgrade.version3dropBundleExtension.msg = この金庫を新しい形式に移行する必要があります。\n"%1$s"は"%2$s"に変更されます。\n続行する前に同期が完了していることをご確認ください。
+upgrade.version3dropBundleExtension.err.alreadyExists = 自動移行が失敗しました。\n"%s"はすでに存在します。
+# unlock.fxml
+unlock.label.password = パスワード
+unlock.label.mountName = ドライブ名
+unlock.label.winDriveLetter = ドライブ文字
+unlock.label.downloadsPageLink = 全てのCryptomatorバージョン
+unlock.label.advancedHeading = 詳細オプション
+unlock.button.unlock = 金庫を解除する
+unlock.button.advancedOptions.show = その他のオプション
+unlock.button.advancedOptions.hide = 基本オプション
+unlock.choicebox.winDriveLetter.auto = 自動に割り当てる
+unlock.errorMessage.wrongPassword = 間違ったパスワード
+unlock.errorMessage.mountingFailed = 取り付けに失敗しました。詳細はログファイルをご覧ください。
+unlock.errorMessage.unsupportedVersion.vaultOlderThanSoftware = サポートされていない金庫です。この金庫は古いバージョンのCryptomatorから作成されました。
+unlock.errorMessage.unsupportedVersion.softwareOlderThanVault = サポートされていない金庫です。この金庫は新しいバージョンのCryptomatorから作成されました。
+unlock.messageLabel.startServerFailed = WebDAVサーバーの起動失敗
+# change_password.fxml
+changePassword.label.oldPassword = 古いパスワード
+changePassword.label.newPassword = 新しいパスワード
+changePassword.label.retypePassword = 二回目のパスワード(確認用)
+changePassword.label.downloadsPageLink = 全てのCryptomatorのバージョン
+changePassword.button.change = パスワードの変更
+changePassword.errorMessage.wrongPassword = 違うパスワード
+changePassword.errorMessage.decryptionFailed = 解読不可
+# unlocked.fxml
+unlocked.button.lock = 金庫の施錠
+unlocked.moreOptions.reveal = 金庫ドライブの表示
+unlocked.moreOptions.copyUrl = WebDAVのURLのコピー
+unlocked.label.revealFailed = 入力エラー
+unlocked.label.unmountFailed = 外部出力の排出エラー
+unlocked.label.statsEncrypted = 暗号化
+unlocked.label.statsDecrypted = 解読
+unlocked.ioGraph.yAxis.label = 情報処理量
+# mac_warnings.fxml
+macWarnings.windowTitle = 危険-有害でフォルダの%s
+macWarnings.message = Cryptomatorは、以下のファイルで潜在的に悪意のある改悪されたものを見つけました
+macWarnings.moreInformationButton = より習得する
+macWarnings.whitelistButton = フォルダを選択、解読してください
+# settings.fxml
+settings.version.label = バージョンの%s
+settings.checkForUpdates.label = 最新版のチェック
+settings.port.label = WebDAVの移動
+settings.port.prompt = 0＝自動的に選択します
+settings.useipv6.label = IPv6をそのまま使用してください
+settings.requiresRestartLabel = Cryptomatorの再起動が必要です
+# tray icon
+tray.menu.open = 開く
+tray.menu.quit = 閉じる
+tray.infoMsg.title = バックグラウンドで稼働中
+tray.infoMsg.msg = Cryptomatorはまだ稼働しています。終了はトレイアイコンからしてください。
+tray.infoMsg.msg.osx = Cryptomatorはまだ稼働しています。終了はメヌーバーアイコンからしてください。
+initialize.messageLabel.passwordStrength.0 = 非常に弱い
+initialize.messageLabel.passwordStrength.1 = 弱い
+initialize.messageLabel.passwordStrength.2 = 普通
+initialize.messageLabel.passwordStrength.3 = 強い
+initialize.messageLabel.passwordStrength.4 = 非常に強い
+initialize.label.doNotForget = 重要：パスワードを忘れましたら、あなたのデータは復旧できません。
+main.directoryList.remove.confirmation.title = 金庫の削除
+main.directoryList.remove.confirmation.header = 本当にこの金庫を取り除きたいですか？
+main.directoryList.remove.confirmation.content = 金庫はリストのみで削除されます。永久に削除するなら、ファイルシステムからファイルを削除してください。
+upgrade.version3to4.msg = This vault needs to be migrated to a newer format.\nEncrypted folder names will be updated.\nPlease make sure synchronization has finished before proceeding.
+upgrade.version3to4.err.io = Migration failed due to an I/O Exception. See log file for details.
+settings.prefGvfsScheme.label = WebDAV Scheme
+# upgrade.fxml
+upgrade.confirmation.label = Yes, I've made sure that synchronization has finished
+initialize.messageLabel.notEmpty = Vault not empty
+unlock.label.savePassword = Save Password
+unlock.errorMessage.unauthenticVersionMac = Could not authenticate version MAC.
+unlocked.label.mountFailed = Connecting drive failed
+unlock.savePassword.delete.confirmation.title = Delete Saved Password
+unlock.savePassword.delete.confirmation.header = Do you really want to delete the saved password of this vault?
+unlock.savePassword.delete.confirmation.content = The saved password of this vault will be immediately deleted from your system keychain. If you'd like to save your password again, you'd have to unlock your vault with the "Save password" option enabled.
+settings.debugMode.label = Debug Mode *
+upgrade.version3dropBundleExtension.title = Vault Version 3 Upgrade (Drop Bundle Extension)
+upgrade.version3to4.title = Vault Version 3 to 4 Upgrade
+upgrade.version4to5.title = Vault Version 4 to 5 Upgrade
+upgrade.version4to5.msg = This vault needs to be migrated to a newer format.\nEncrypted files will be updated.\nPlease make sure synchronization has finished before proceeding.\n\nNote\: Modification date of all files will be changed to the current date/time in the process.
+upgrade.version4to5.err.io = Migration failed due to an I/O Exception. See log file for details.
