@@ -31,22 +31,24 @@
 	</columnConstraints>
 
 	<children>
-		<Label fx:id="upgradeLabel" wrapText="true" GridPane.rowIndex="0" GridPane.columnIndex="0" GridPane.columnSpan="2" cacheShape="true" cache="true" />
+		<Label fx:id="upgradeTitleLabel" wrapText="true" GridPane.rowIndex="0" GridPane.columnIndex="0" GridPane.columnSpan="2" cacheShape="true" cache="true" />
+		
+		<Label fx:id="upgradeMsgLabel" wrapText="true" GridPane.rowIndex="1" GridPane.columnIndex="0" GridPane.columnSpan="2" cacheShape="true" cache="true" />
 
-		<Pane prefHeight="12.0" GridPane.rowIndex="1" GridPane.columnIndex="0" GridPane.columnSpan="2" cacheShape="true" cache="true">
+		<Pane prefHeight="12.0" GridPane.rowIndex="2" GridPane.columnIndex="0" GridPane.columnSpan="2" cacheShape="true" cache="true">
 		</Pane>
 
-		<Label text="%unlock.label.password" GridPane.rowIndex="2" GridPane.columnIndex="0" cacheShape="true" cache="true" />
-		<SecPasswordField fx:id="passwordField" GridPane.rowIndex="2" GridPane.columnIndex="1" cacheShape="true" cache="true" />
+		<Label text="%unlock.label.password" GridPane.rowIndex="3" GridPane.columnIndex="0" cacheShape="true" cache="true" />
+		<SecPasswordField fx:id="passwordField" GridPane.rowIndex="3" GridPane.columnIndex="1" cacheShape="true" cache="true" />
 		
-		<CheckBox fx:id="confirmationCheckbox" text="%upgrade.confirmation.label" wrapText="true" GridPane.rowIndex="3" GridPane.columnIndex="0" GridPane.columnSpan="2" cacheShape="true" cache="true" />
+		<CheckBox fx:id="confirmationCheckbox" text="%upgrade.confirmation.label" wrapText="true" GridPane.rowIndex="4" GridPane.columnIndex="0" GridPane.columnSpan="2" cacheShape="true" cache="true" />
 
-		<HBox alignment="CENTER_RIGHT" GridPane.hgrow="ALWAYS" GridPane.rowIndex="4" GridPane.columnIndex="0" GridPane.columnSpan="2" cacheShape="true" cache="true">
+		<HBox alignment="CENTER_RIGHT" GridPane.hgrow="ALWAYS" GridPane.rowIndex="5" GridPane.columnIndex="0" GridPane.columnSpan="2" cacheShape="true" cache="true">
 			<Button fx:id="upgradeButton" text="%upgrade.button" prefWidth="150.0" onAction="#didClickUpgradeButton" cacheShape="true" cache="true" />
 		</HBox>
 
-		<ProgressIndicator progress="-1" fx:id="progressIndicator" visible="false" GridPane.rowIndex="5" GridPane.columnIndex="0" GridPane.columnSpan="2" cacheShape="true" cache="true" cacheHint="SPEED" />
+		<ProgressIndicator progress="-1" fx:id="progressIndicator" visible="false" GridPane.rowIndex="6" GridPane.columnIndex="0" GridPane.columnSpan="2" cacheShape="true" cache="true" cacheHint="SPEED" />
 
-		<Label fx:id="errorLabel" wrapText="true" GridPane.rowIndex="6" GridPane.columnIndex="0" GridPane.columnSpan="2" cacheShape="true" cache="true" />
+		<Label fx:id="errorLabel" wrapText="true" GridPane.rowIndex="7" GridPane.columnIndex="0" GridPane.columnSpan="2" cacheShape="true" cache="true" />
 	</children>
 </GridPane>

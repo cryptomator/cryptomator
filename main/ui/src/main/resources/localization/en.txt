@@ -9,10 +9,10 @@ app.name=Cryptomator
 
 # main.fxml
 main.emptyListInstructions=Click here to add a vault
-main.directoryList.contextMenu.remove=Remove from list
-main.directoryList.contextMenu.changePassword=Change password
-main.addDirectory.contextMenu.new=Create new vault
-main.addDirectory.contextMenu.open=Open existing vault
+main.directoryList.contextMenu.remove=Remove from List
+main.directoryList.contextMenu.changePassword=Change Password
+main.addDirectory.contextMenu.new=Create New Vault
+main.addDirectory.contextMenu.open=Open Existing Vault
 main.directoryList.remove.confirmation.title=Remove Vault
 main.directoryList.remove.confirmation.header=Do you really want to remove this vault?
 main.directoryList.remove.confirmation.content=The vault will only be removed from the list. To permanently delete it, please delete the files from your filesystem.
@@ -23,8 +23,8 @@ welcome.newVersionMessage=Version %1$s can be downloaded.\nThis is %2$s.
 
 # initialize.fxml
 initialize.label.password=Password
-initialize.label.retypePassword=Retype password
-initialize.button.ok=Create vault
+initialize.label.retypePassword=Retype Password
+initialize.button.ok=Create Vault
 initialize.messageLabel.alreadyInitialized=Vault already initialized
 initialize.messageLabel.notEmpty=Vault not empty
 initialize.messageLabel.initializationFailed=Could not initialize vault. See log file for details.
@@ -40,24 +40,30 @@ notfound.label=Vault couldn't be found. Has it been moved?
 
 # upgrade.fxml
 upgrade.confirmation.label=Yes, I've made sure that synchronization has finished
-upgrade.button=Upgrade vault
+upgrade.button=Upgrade Vault
 
+upgrade.version3dropBundleExtension.title=Vault Version 3 Upgrade (Drop Bundle Extension)
 upgrade.version3dropBundleExtension.msg=This vault needs to be migrated to a newer format.\n"%1$s" will be renamed to "%2$s".\nPlease make sure synchronization has finished before proceeding.
 upgrade.version3dropBundleExtension.err.alreadyExists=Automatic migration failed.\n"%s" already exists.
 
+upgrade.version3to4.title=Vault Version 3 to 4 Upgrade
 upgrade.version3to4.msg=This vault needs to be migrated to a newer format.\nEncrypted folder names will be updated.\nPlease make sure synchronization has finished before proceeding.
 upgrade.version3to4.err.io=Migration failed due to an I/O Exception. See log file for details.
 
+upgrade.version4to5.title=Vault Version 4 to 5 Upgrade
+upgrade.version4to5.msg=This vault needs to be migrated to a newer format.\nEncrypted files will be updated.\nPlease make sure synchronization has finished before proceeding.\n\nNote: Modification date of all files will be changed to the current date/time in the process.
+upgrade.version4to5.err.io=Migration failed due to an I/O Exception. See log file for details.
+
 # unlock.fxml
 unlock.label.password=Password
-unlock.label.savePassword=Save password
-unlock.label.mountName=Drive name
-unlock.label.winDriveLetter=Drive letter
+unlock.label.savePassword=Save Password
+unlock.label.mountName=Drive Name
+unlock.label.winDriveLetter=Drive Letter
 unlock.label.downloadsPageLink=All Cryptomator versions
-unlock.label.advancedHeading=Advanced options
-unlock.button.unlock=Unlock vault
-unlock.button.advancedOptions.show=More options
-unlock.button.advancedOptions.hide=Less options
+unlock.label.advancedHeading=Advanced Options
+unlock.button.unlock=Unlock Vault
+unlock.button.advancedOptions.show=More Options
+unlock.button.advancedOptions.hide=Less Options
 unlock.savePassword.delete.confirmation.title=Delete Saved Password
 unlock.savePassword.delete.confirmation.header=Do you really want to delete the saved password of this vault?
 unlock.savePassword.delete.confirmation.content=The saved password of this vault will be immediately deleted from your system keychain. If you'd like to save your password again, you'd have to unlock your vault with the "Save password" option enabled.
@@ -70,17 +76,17 @@ unlock.errorMessage.unauthenticVersionMac=Could not authenticate version MAC.
 unlock.messageLabel.startServerFailed=Starting WebDAV server failed.
 
 # change_password.fxml
-changePassword.label.oldPassword=Old password
-changePassword.label.newPassword=New password
-changePassword.label.retypePassword=Retype password
+changePassword.label.oldPassword=Old Password
+changePassword.label.newPassword=New Nassword
+changePassword.label.retypePassword=Retype Password
 changePassword.label.downloadsPageLink=All Cryptomator versions
-changePassword.button.change=Change password
+changePassword.button.change=Change Password
 changePassword.errorMessage.wrongPassword=Wrong password
 changePassword.errorMessage.decryptionFailed=Decryption failed
 
 # unlocked.fxml
-unlocked.button.lock=Lock vault
-unlocked.moreOptions.reveal=Reveal drive
+unlocked.button.lock=Lock Vault
+unlocked.moreOptions.reveal=Reveal Drive
 unlocked.moreOptions.copyUrl=Copy WebDAV URL
 unlocked.label.mountFailed=Connecting drive failed
 unlocked.label.revealFailed=Command failed
@@ -92,22 +98,22 @@ unlocked.ioGraph.yAxis.label=Throughput (MiB/s)
 # mac_warnings.fxml
 macWarnings.windowTitle=Danger - Corrupted file in %s
 macWarnings.message=Cryptomator detected potentially malicious corruptions in the following files:
-macWarnings.moreInformationButton=Learn more
-macWarnings.whitelistButton=Decrypt selected anyway
+macWarnings.moreInformationButton=Learn More
+macWarnings.whitelistButton=Decrypt Selected Anyway
 
 # settings.fxml
 settings.version.label=Version %s
-settings.checkForUpdates.label=Check for updates
+settings.checkForUpdates.label=Check for Updates
 settings.port.label=WebDAV Port *
 settings.port.prompt=0 = Choose automatically
-settings.useipv6.label=Use IPv6 literal
-settings.prefGvfsScheme.label=WebDAV scheme
-settings.debugMode.label=Debug mode *
+settings.useipv6.label=Use IPv6 Literal
+settings.prefGvfsScheme.label=WebDAV Scheme
+settings.debugMode.label=Debug Mode *
 settings.requiresRestartLabel=* Cryptomator needs to restart
 
 # tray icon
 tray.menu.open=Open
 tray.menu.quit=Quit
-tray.infoMsg.title=Still running
+tray.infoMsg.title=Still Running
 tray.infoMsg.msg=Cryptomator is still alive. Quit it from the tray icon.
 tray.infoMsg.msg.osx=Cryptomator is still alive. Quit it from the menu bar icon.

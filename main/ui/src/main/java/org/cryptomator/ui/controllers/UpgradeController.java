@@ -41,7 +41,10 @@ public class UpgradeController extends LocalizedFXMLViewController {
 	}
 
 	@FXML
-	private Label upgradeLabel;
+	private Label upgradeTitleLabel;
+
+	@FXML
+	private Label upgradeMsgLabel;
 
 	@FXML
 	private SecPasswordField passwordField;
@@ -60,8 +63,11 @@ public class UpgradeController extends LocalizedFXMLViewController {
 
 	@Override
 	protected void initialize() {
-		upgradeLabel.textProperty().bind(EasyBind.monadic(strategy).map(instruction -> {
-			return instruction.map(this::upgradeNotification).orElse("");
+		upgradeTitleLabel.textProperty().bind(EasyBind.monadic(strategy).map(instruction -> {
+			return instruction.map(this::upgradeTitle).orElse("");
+		}).orElse(""));
+		upgradeMsgLabel.textProperty().bind(EasyBind.monadic(strategy).map(instruction -> {
+			return instruction.map(this::upgradeMessage).orElse("");
 		}).orElse(""));
 
 		BooleanExpression passwordProvided = passwordField.textProperty().isNotEmpty().and(passwordField.disabledProperty().not());
@@ -87,8 +93,12 @@ public class UpgradeController extends LocalizedFXMLViewController {
 	// Upgrade label
 	// ****************************************
 
-	private String upgradeNotification(UpgradeStrategy instruction) {
-		return instruction.getNotification(vault);
+	private String upgradeTitle(UpgradeStrategy instruction) {
+		return instruction.getTitle(vault);
+	}
+
+	private String upgradeMessage(UpgradeStrategy instruction) {
+		return instruction.getMessage(vault);
 	}
 
 	// ****************************************

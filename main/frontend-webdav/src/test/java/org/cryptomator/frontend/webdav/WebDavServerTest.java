@@ -376,7 +376,7 @@ public class WebDavServerTest {
 		final HttpMethod getMethod = new GetMethod(servletRoot + "/foo.txt");
 		getMethod.addRequestHeader("Range", "chunks=1-2");
 		final int statusCode = client.executeMethod(getMethod);
-		Assert.assertEquals(416, statusCode);
+		Assert.assertEquals(200, statusCode);
 		Assert.assertArrayEquals(testContent, getMethod.getResponseBody());
 		getMethod.releaseConnection();
 	}

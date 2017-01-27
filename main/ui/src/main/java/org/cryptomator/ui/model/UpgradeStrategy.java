@@ -33,9 +33,14 @@ public abstract class UpgradeStrategy {
 	}
 
 	/**
-	 * @return Localized string to display to the user when an upgrade is needed.
+	 * @return Localized title string to display to the user when an upgrade is needed.
 	 */
-	public abstract String getNotification(Vault vault);
+	public abstract String getTitle(Vault vault);
+
+	/**
+	 * @return Localized message string to display to the user when an upgrade is needed.
+	 */
+	public abstract String getMessage(Vault vault);
 
 	/**
 	 * Upgrades a vault. Might take a moment, should be run in a background thread.
