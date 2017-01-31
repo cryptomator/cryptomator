@@ -82,7 +82,7 @@ public class WelcomeController extends LocalizedFXMLViewController {
 	public void initialize() {
 		if (areUpdatesManagedExternally()) {
 			checkForUpdatesContainer.setVisible(false);
-		} else if (settings.isCheckForUpdatesEnabled()) {
+		} else if (settings.checkForUpdates().get()) {
 			this.checkForUpdates();
 		}
 	}

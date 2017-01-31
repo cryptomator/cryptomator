@@ -8,6 +8,7 @@
  *******************************************************************************/
 package org.cryptomator.ui;
 
+import java.net.InetSocketAddress;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -22,12 +23,14 @@ import org.cryptomator.keychain.KeychainModule;
 import org.cryptomator.ui.settings.Settings;
 import org.cryptomator.ui.settings.SettingsProvider;
 import org.cryptomator.ui.util.DeferredCloser;
+import org.fxmisc.easybind.EasyBind;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import dagger.Module;
 import dagger.Provides;
 import javafx.application.Application;
+import javafx.beans.binding.Binding;
 import javafx.stage.Stage;
 
 @Module(includes = {CommonsModule.class, KeychainModule.class, JniModule.class, CryptoLibModule.class})
@@ -83,8 +86,20 @@ class CryptomatorModule {
 
 	@Provides
 	@Singleton
-	WebDavServer provideWebDavServer(Settings settings) {
-		return WebDavServer.create("localhost", settings.getPort());
+	Binding<InetSocketAddress> provideServerSocketAddressBinding(Settings settings) {
+		return EasyBind.combine(settings.useIpv6(), settings.port(), (useIpv6, port) -> {
+			String host = useIpv6 ? "::1" : "localhost";
+			return InetSocketAddress.createUnresolved(host, port.intValue());
+		});
+	}
+
+	@Provides
+	@Singleton
+	WebDavServer provideWebDavServer(Binding<InetSocketAddress> serverSocketAddressBinding) {
+		WebDavServer server = WebDavServer.create();
+		// no need to unsubscribe eventually, because server is a singleton
+		EasyBind.subscribe(serverSocketAddressBinding, server::bind);
+		return server;
 	}
 
 }

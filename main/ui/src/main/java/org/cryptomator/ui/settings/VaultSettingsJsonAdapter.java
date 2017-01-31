@@ -1,3 +1,8 @@
+/*******************************************************************************
+ * Copyright (c) 2017 Skymatic UG (haftungsbeschränkt).
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the accompanying LICENSE file.
+ *******************************************************************************/
 package org.cryptomator.ui.settings;
 
 import java.io.IOException;
@@ -18,9 +23,9 @@ class VaultSettingsJsonAdapter extends TypeAdapter<VaultSettings> {
 	public void write(JsonWriter out, VaultSettings value) throws IOException {
 		out.beginObject();
 		out.name("id").value(value.getId());
-		out.name("path").value(value.getPath().toString());
-		out.name("mountName").value(value.getMountName());
-		out.name("winDriveLetter").value(value.getWinDriveLetter());
+		out.name("path").value(value.path().get().toString());
+		out.name("mountName").value(value.mountName().get());
+		out.name("winDriveLetter").value(value.winDriveLetter().get());
 		out.endObject();
 	}
 
@@ -55,9 +60,9 @@ class VaultSettingsJsonAdapter extends TypeAdapter<VaultSettings> {
 		in.endObject();
 
 		VaultSettings settings = (id == null) ? VaultSettings.withRandomId() : new VaultSettings(id);
-		settings.setMountName(mountName);
-		settings.setPath(Paths.get(path));
-		settings.setWinDriveLetter(winDriveLetter);
+		settings.mountName().set(mountName);
+		settings.path().set(Paths.get(path));
+		settings.winDriveLetter().set(winDriveLetter);
 		return settings;
 	}
 

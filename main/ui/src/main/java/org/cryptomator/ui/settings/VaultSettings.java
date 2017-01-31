@@ -1,3 +1,8 @@
+/*******************************************************************************
+ * Copyright (c) 2017 Skymatic UG (haftungsbeschränkt).
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the accompanying LICENSE file.
+ *******************************************************************************/
 package org.cryptomator.ui.settings;
 
 import java.nio.ByteBuffer;
@@ -8,23 +13,31 @@ import java.util.Objects;
 import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
+import org.fxmisc.easybind.EasyBind;
 
-import com.google.gson.annotations.JsonAdapter;
-
-import javafx.beans.property.Property;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 
-@JsonAdapter(VaultSettingsJsonAdapter.class)
 public class VaultSettings {
 
 	private final String id;
-	private final Property<Path> path = new SimpleObjectProperty<>();
-	private final Property<String> mountName = new SimpleStringProperty();
-	private final Property<String> winDriveLetter = new SimpleStringProperty();
+	private final ObjectProperty<Path> path = new SimpleObjectProperty<>();
+	private final StringProperty mountName = new SimpleStringProperty();
+	private final StringProperty winDriveLetter = new SimpleStringProperty();
 
 	public VaultSettings(String id) {
 		this.id = Objects.requireNonNull(id);
+
+		EasyBind.subscribe(path, this::deriveMountNameFromPath);
+		// TODO: automatically save settings, when chaning vaultSettings
+	}
+
+	private void deriveMountNameFromPath(Path path) {
+		if (path != null && StringUtils.isBlank(mountName.get())) {
+			mountName.set(normalizeMountName(path.getFileName().toString()));
+		}
 	}
 
 	public static VaultSettings withRandomId() {
@@ -48,10 +61,7 @@ public class VaultSettings {
 		return uuidBuffer.array();
 	}
 
-	/*
-	 * visible for testing
-	 */
-	static String normalizeMountName(String mountName) {
+	public static String normalizeMountName(String mountName) {
 		String normalizedMountName = StringUtils.stripAccents(mountName);
 		StringBuilder builder = new StringBuilder();
 		for (char c : normalizedMountName.toCharArray()) {
@@ -76,43 +86,16 @@ public class VaultSettings {
 		return id;
 	}
 
-	public Property<Path> pathProperty() {
+	public ObjectProperty<Path> path() {
 		return path;
 	}
 
-	public Path getPath() {
-		return path.getValue();
-	}
-
-	public void setPath(Path path) {
-		this.path.setValue(path);
-		if (StringUtils.isBlank(getMountName())) {
-			setMountName(path.getFileName().toString());
-		}
-	}
-
-	public Property<String> mountNameProperty() {
+	public StringProperty mountName() {
 		return mountName;
 	}
 
-	public String getMountName() {
-		return mountName.getValue();
-	}
-
-	public void setMountName(String mountName) {
-		this.mountName.setValue(normalizeMountName(mountName));
-	}
-
-	public Property<String> winDriveLetterProperty() {
-		return mountName;
-	}
-
-	public String getWinDriveLetter() {
-		return winDriveLetter.getValue();
-	}
-
-	public void setWinDriveLetter(String winDriveLetter) {
-		this.winDriveLetter.setValue(winDriveLetter);
+	public StringProperty winDriveLetter() {
+		return winDriveLetter;
 	}
 
 	/* Hashcode/Equals */

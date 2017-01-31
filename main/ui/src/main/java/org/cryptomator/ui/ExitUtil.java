@@ -147,11 +147,11 @@ class ExitUtil {
 	}
 
 	private void showTrayNotification(TrayIcon trayIcon) {
-		if (settings.getNumTrayNotifications() <= 0) {
+		int remainingTrayNotification = settings.numTrayNotifications().get();
+		if (remainingTrayNotification <= 0) {
 			return;
 		} else {
-			settings.setNumTrayNotifications(settings.getNumTrayNotifications() - 1);
-			settings.save();
+			settings.numTrayNotifications().set(remainingTrayNotification - 1);
 		}
 		final Runnable notificationCmd;
 		if (SystemUtils.IS_OS_MAC_OSX) {

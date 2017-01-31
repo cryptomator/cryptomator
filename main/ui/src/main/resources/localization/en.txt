@@ -98,8 +98,9 @@ unlocked.ioGraph.yAxis.label=Throughput (MiB/s)
 # settings.fxml
 settings.version.label=Version %s
 settings.checkForUpdates.label=Check for Updates
-settings.port.label=WebDAV Port *
+settings.port.label=WebDAV Port
 settings.port.prompt=0 = Choose automatically
+settings.port.apply=Apply
 settings.useipv6.label=Use IPv6 Literal
 settings.prefGvfsScheme.label=WebDAV Scheme
 settings.debugMode.label=Debug Mode *

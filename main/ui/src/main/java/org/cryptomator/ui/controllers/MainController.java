@@ -232,7 +232,7 @@ public class MainController extends LocalizedFXMLViewController {
 		}
 
 		final VaultSettings vaultSettings = VaultSettings.withRandomId();
-		vaultSettings.setPath(vaultPath);
+		vaultSettings.path().set(vaultPath);
 		final Vault vault = vaultFactoy.get(vaultSettings);
 		if (!vaults.contains(vault)) {
 			vaults.add(vault);

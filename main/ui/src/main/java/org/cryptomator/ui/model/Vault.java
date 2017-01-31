@@ -114,7 +114,7 @@ public class Vault {
 			if (!server.isRunning()) {
 				server.start();
 			}
-			servlet = server.createWebDavServlet(fs.getPath("/"), vaultSettings.getId() + "/" + vaultSettings.getMountName());
+			servlet = server.createWebDavServlet(fs.getPath("/"), vaultSettings.getId() + "/" + vaultSettings.mountName().get());
 			servlet.start();
 			unlockSuccess = true;
 
@@ -167,17 +167,16 @@ public class Vault {
 	}
 
 	public String getWebDavUrl() {
-		// TODO implement
-		return "http://localhost/not/implemented";
+		return servlet.getServletRootUri().toString();
 	}
 
 	public Path getPath() {
-		return vaultSettings.pathProperty().getValue();
+		return vaultSettings.path().getValue();
 	}
 
 	public Binding<String> displayablePath() {
 		Path homeDir = Paths.get(SystemUtils.USER_HOME);
-		return EasyBind.map(vaultSettings.pathProperty(), p -> {
+		return EasyBind.map(vaultSettings.path(), p -> {
 			if (p.startsWith(homeDir)) {
 				Path relativePath = homeDir.relativize(p);
 				String homePrefix = SystemUtils.IS_OS_WINDOWS ? "~\\" : "~/";
@@ -192,7 +191,7 @@ public class Vault {
 	 * @return Directory name without preceeding path components and file extension
 	 */
 	public Binding<String> name() {
-		return EasyBind.map(vaultSettings.pathProperty(), Path::getFileName).map(Path::toString);
+		return EasyBind.map(vaultSettings.path(), Path::getFileName).map(Path::toString);
 	}
 
 	public boolean doesVaultDirectoryExist() {
@@ -238,30 +237,30 @@ public class Vault {
 	}
 
 	public String getMountName() {
-		return vaultSettings.getMountName();
+		return vaultSettings.mountName().get();
 	}
 
 	public void setMountName(String mountName) throws IllegalArgumentException {
 		if (StringUtils.isBlank(mountName)) {
 			throw new IllegalArgumentException("mount name is empty");
 		} else {
-			vaultSettings.setMountName(mountName);
+			vaultSettings.mountName().set(VaultSettings.normalizeMountName(mountName));
 		}
 	}
 
 	public Character getWinDriveLetter() {
-		if (vaultSettings.getWinDriveLetter() == null) {
+		if (vaultSettings.winDriveLetter().get() == null) {
 			return null;
 		} else {
-			return vaultSettings.getWinDriveLetter().charAt(0);
+			return vaultSettings.winDriveLetter().get().charAt(0);
 		}
 	}
 
 	public void setWinDriveLetter(Character winDriveLetter) {
 		if (winDriveLetter == null) {
-			vaultSettings.setWinDriveLetter(null);
+			vaultSettings.winDriveLetter().set(null);
 		} else {
-			vaultSettings.setWinDriveLetter(String.valueOf(winDriveLetter));
+			vaultSettings.winDriveLetter().set(String.valueOf(winDriveLetter));
 		}
 	}
 

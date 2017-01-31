@@ -1,3 +1,8 @@
+/*******************************************************************************
+ * Copyright (c) 2017 Skymatic UG (haftungsbeschränkt).
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the accompanying LICENSE file.
+ *******************************************************************************/
 package org.cryptomator.ui.model;
 
 import java.io.IOException;
@@ -60,7 +65,7 @@ class UpgradeVersion3DropBundleExtension extends UpgradeStrategy {
 				LOG.info("Renaming {} to {}", path, newPath.getFileName());
 				Files.move(path, path.resolveSibling(newVaultName));
 				Platform.runLater(() -> {
-					vault.getVaultSettings().setPath(newPath);
+					vault.getVaultSettings().path().set(newPath);
 					settings.save();
 				});
 			} catch (IOException e) {

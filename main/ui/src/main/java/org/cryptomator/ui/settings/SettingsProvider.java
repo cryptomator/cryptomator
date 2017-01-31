@@ -21,7 +21,6 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -63,15 +62,15 @@ public class SettingsProvider implements Provider<Settings> {
 	private final ScheduledExecutorService saveScheduler = Executors.newSingleThreadScheduledExecutor();
 	private final AtomicReference<ScheduledFuture<?>> scheduledSaveCmd = new AtomicReference<>();
 	private final AtomicReference<Settings> settings = new AtomicReference<>();
-	private final SettingsInstanceCreator settingsInstanceCreator = new SettingsInstanceCreator(this::scheduleSave);
+	private final SettingsJsonAdapter settingsJsonAdapter = new SettingsJsonAdapter(this::scheduleSave);
 	private final Gson gson;
 
 	@Inject
 	public SettingsProvider() {
-		GsonBuilder gsonBuilder = new GsonBuilder() //
-				.setPrettyPrinting().setLenient().disableHtmlEscaping().excludeFieldsWithoutExposeAnnotation();
-		gsonBuilder.registerTypeAdapter(Settings.class, settingsInstanceCreator);
-		this.gson = gsonBuilder.create();
+		this.gson = new GsonBuilder() //
+				.setPrettyPrinting().setLenient().disableHtmlEscaping() //
+				.registerTypeAdapter(Settings.class, settingsJsonAdapter) //
+				.create();
 	}
 
 	private Path getSettingsPath() {
@@ -101,7 +100,7 @@ public class SettingsProvider implements Provider<Settings> {
 			LOG.info("Settings loaded from " + settingsPath);
 		} catch (IOException e) {
 			LOG.info("Failed to load settings, creating new one.");
-			settings = settingsInstanceCreator.createInstance(Settings.class);
+			settings = new Settings(this::scheduleSave);
 		}
 		return settings;
 	}
@@ -120,7 +119,7 @@ public class SettingsProvider implements Provider<Settings> {
 	}
 
 	private void save(Settings settings) {
-		Objects.requireNonNull(settings);
+		assert settings != null : "method should only be invoked by #scheduleSave, which checks for null";
 		final Path settingsPath = getSettingsPath();
 		try {
 			Files.createDirectories(settingsPath.getParent());

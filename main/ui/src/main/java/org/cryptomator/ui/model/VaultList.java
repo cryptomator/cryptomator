@@ -1,3 +1,8 @@
+/*******************************************************************************
+ * Copyright (c) 2017 Skymatic UG (haftungsbeschränkt).
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the accompanying LICENSE file.
+ *******************************************************************************/
 package org.cryptomator.ui.model;
 
 import java.util.ArrayList;
@@ -9,7 +14,6 @@ import javax.inject.Singleton;
 import org.cryptomator.ui.settings.Settings;
 import org.cryptomator.ui.settings.VaultSettings;
 
-import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener.Change;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.TransformationList;
@@ -22,14 +26,9 @@ public class VaultList extends TransformationList<Vault, VaultSettings> {
 
 	@Inject
 	public VaultList(Settings settings, VaultFactory vaultFactory) {
-		this(FXCollections.observableList(settings.getDirectories()), settings, vaultFactory);
-	}
-
-	private VaultList(ObservableList<VaultSettings> source, Settings settings, VaultFactory vaultFactory) {
-		super(source);
-		this.source = source;
+		super(settings.getDirectories());
+		this.source = settings.getDirectories();
 		this.vaultFactory = vaultFactory;
-		addListener((Change<? extends Vault> change) -> settings.save());
 	}
 
 	@Override
