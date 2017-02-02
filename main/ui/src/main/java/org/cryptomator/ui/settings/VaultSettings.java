@@ -19,19 +19,28 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.beans.value.ObservableValue;
 
 public class VaultSettings {
 
+	private final Settings settings;
 	private final String id;
 	private final ObjectProperty<Path> path = new SimpleObjectProperty<>();
 	private final StringProperty mountName = new SimpleStringProperty();
 	private final StringProperty winDriveLetter = new SimpleStringProperty();
 
-	public VaultSettings(String id) {
+	public VaultSettings(Settings settings, String id) {
+		this.settings = settings;
 		this.id = Objects.requireNonNull(id);
 
 		EasyBind.subscribe(path, this::deriveMountNameFromPath);
-		// TODO: automatically save settings, when chaning vaultSettings
+		path.addListener(this::somethingChanged);
+		mountName.addListener(this::somethingChanged);
+		winDriveLetter.addListener(this::somethingChanged);
+	}
+
+	private void somethingChanged(ObservableValue<?> observable, Object oldValue, Object newValue) {
+		settings.save();
 	}
 
 	private void deriveMountNameFromPath(Path path) {
@@ -40,8 +49,8 @@ public class VaultSettings {
 		}
 	}
 
-	public static VaultSettings withRandomId() {
-		return new VaultSettings(generateId());
+	public static VaultSettings withRandomId(Settings settings) {
+		return new VaultSettings(settings, generateId());
 	}
 
 	private static String generateId() {

@@ -18,7 +18,6 @@ import org.cryptomator.cryptolib.api.CryptoLibVersion.Version;
 import org.cryptomator.cryptolib.api.Cryptor;
 import org.cryptomator.cryptolib.api.CryptorProvider;
 import org.cryptomator.ui.settings.Localization;
-import org.cryptomator.ui.settings.Settings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,12 +27,10 @@ import javafx.application.Platform;
 class UpgradeVersion3DropBundleExtension extends UpgradeStrategy {
 
 	private static final Logger LOG = LoggerFactory.getLogger(UpgradeVersion3DropBundleExtension.class);
-	private final Settings settings;
 
 	@Inject
-	public UpgradeVersion3DropBundleExtension(@CryptoLibVersion(Version.ONE) CryptorProvider version1CryptorProvider, Localization localization, Settings settings) {
+	public UpgradeVersion3DropBundleExtension(@CryptoLibVersion(Version.ONE) CryptorProvider version1CryptorProvider, Localization localization) {
 		super(version1CryptorProvider, localization, 3, 3);
-		this.settings = settings;
 	}
 
 	@Override
@@ -66,7 +63,6 @@ class UpgradeVersion3DropBundleExtension extends UpgradeStrategy {
 				Files.move(path, path.resolveSibling(newVaultName));
 				Platform.runLater(() -> {
 					vault.getVaultSettings().path().set(newPath);
-					settings.save();
 				});
 			} catch (IOException e) {
 				LOG.error("Vault migration failed", e);

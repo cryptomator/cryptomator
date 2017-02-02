@@ -11,15 +11,13 @@ import java.nio.file.Paths;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
-class VaultSettingsJsonAdapter extends TypeAdapter<VaultSettings> {
+class VaultSettingsJsonAdapter {
 
 	private static final Logger LOG = LoggerFactory.getLogger(VaultSettingsJsonAdapter.class);
 
-	@Override
 	public void write(JsonWriter out, VaultSettings value) throws IOException {
 		out.beginObject();
 		out.name("id").value(value.getId());
@@ -29,8 +27,7 @@ class VaultSettingsJsonAdapter extends TypeAdapter<VaultSettings> {
 		out.endObject();
 	}
 
-	@Override
-	public VaultSettings read(JsonReader in) throws IOException {
+	public VaultSettings read(JsonReader in, Settings settings) throws IOException {
 		String id = null;
 		String path = null;
 		String mountName = null;
@@ -59,11 +56,11 @@ class VaultSettingsJsonAdapter extends TypeAdapter<VaultSettings> {
 		}
 		in.endObject();
 
-		VaultSettings settings = (id == null) ? VaultSettings.withRandomId() : new VaultSettings(id);
-		settings.mountName().set(mountName);
-		settings.path().set(Paths.get(path));
-		settings.winDriveLetter().set(winDriveLetter);
-		return settings;
+		VaultSettings vaultSettings = (id == null) ? VaultSettings.withRandomId(settings) : new VaultSettings(settings, id);
+		vaultSettings.mountName().set(mountName);
+		vaultSettings.path().set(Paths.get(path));
+		vaultSettings.winDriveLetter().set(winDriveLetter);
+		return vaultSettings;
 	}
 
 }

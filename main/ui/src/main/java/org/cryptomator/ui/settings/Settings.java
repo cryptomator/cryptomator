@@ -59,7 +59,7 @@ public class Settings {
 		this.save();
 	}
 
-	public void save() {
+	void save() {
 		if (saveCmd != null) {
 			saveCmd.accept(this);
 		}

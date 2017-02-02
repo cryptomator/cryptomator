@@ -27,7 +27,6 @@ import org.cryptomator.ui.controls.SecPasswordField;
 import org.cryptomator.ui.model.Vault;
 import org.cryptomator.ui.model.WindowsDriveLetters;
 import org.cryptomator.ui.settings.Localization;
-import org.cryptomator.ui.settings.Settings;
 import org.cryptomator.ui.util.AsyncTaskService;
 import org.cryptomator.ui.util.DialogBuilderUtil;
 import org.slf4j.Logger;
@@ -59,7 +58,6 @@ public class UnlockController extends LocalizedFXMLViewController {
 
 	private final Application app;
 	private final AsyncTaskService asyncTaskService;
-	private final Settings settings;
 	private final WindowsDriveLetters driveLetters;
 	private final ChangeListener<Character> driveLetterChangeListener = this::winDriveLetterDidChange;
 	private final Optional<KeychainAccess> keychainAccess;
@@ -67,11 +65,10 @@ public class UnlockController extends LocalizedFXMLViewController {
 	private Optional<UnlockListener> listener = Optional.empty();
 
 	@Inject
-	public UnlockController(Application app, Localization localization, AsyncTaskService asyncTaskService, Settings settings, WindowsDriveLetters driveLetters, Optional<KeychainAccess> keychainAccess) {
+	public UnlockController(Application app, Localization localization, AsyncTaskService asyncTaskService, WindowsDriveLetters driveLetters, Optional<KeychainAccess> keychainAccess) {
 		super(localization);
 		this.app = app;
 		this.asyncTaskService = asyncTaskService;
-		this.settings = settings;
 		this.driveLetters = driveLetters;
 		this.keychainAccess = keychainAccess;
 	}
@@ -256,7 +253,6 @@ public class UnlockController extends LocalizedFXMLViewController {
 
 	private void winDriveLetterDidChange(ObservableValue<? extends Character> property, Character oldValue, Character newValue) {
 		vault.setWinDriveLetter(newValue);
-		settings.save();
 	}
 
 	private void chooseSelectedDriveLetter() {

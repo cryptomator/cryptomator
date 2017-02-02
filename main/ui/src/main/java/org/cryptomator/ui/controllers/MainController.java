@@ -69,6 +69,7 @@ public class MainController extends LocalizedFXMLViewController {
 	private static final Logger LOG = LoggerFactory.getLogger(MainController.class);
 
 	private final Stage mainWindow;
+	private final Settings settings;
 	private final VaultFactory vaultFactoy;
 	private final Lazy<WelcomeController> welcomeController;
 	private final Lazy<InitializeController> initializeController;
@@ -95,6 +96,7 @@ public class MainController extends LocalizedFXMLViewController {
 			VaultList vaults) {
 		super(localization);
 		this.mainWindow = mainWindow;
+		this.settings = settings;
 		this.vaultFactoy = vaultFactoy;
 		this.welcomeController = welcomeController;
 		this.initializeController = initializeController;
@@ -231,7 +233,7 @@ public class MainController extends LocalizedFXMLViewController {
 			return;
 		}
 
-		final VaultSettings vaultSettings = VaultSettings.withRandomId();
+		final VaultSettings vaultSettings = VaultSettings.withRandomId(settings);
 		vaultSettings.path().set(vaultPath);
 		final Vault vault = vaultFactoy.get(vaultSettings);
 		if (!vaults.contains(vault)) {

@@ -60,7 +60,7 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 			String name = in.nextName();
 			switch (name) {
 			case "directories":
-				settings.getDirectories().addAll(readVaultSettingsArray(in));
+				settings.getDirectories().addAll(readVaultSettingsArray(in, settings));
 				break;
 			case "checkForUpdatesEnabled":
 				settings.checkForUpdates().set(in.nextBoolean());
@@ -90,11 +90,11 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 		return settings;
 	}
 
-	private List<VaultSettings> readVaultSettingsArray(JsonReader in) throws IOException {
+	private List<VaultSettings> readVaultSettingsArray(JsonReader in, Settings settings) throws IOException {
 		List<VaultSettings> result = new ArrayList<>();
 		in.beginArray();
 		while (!JsonToken.END_ARRAY.equals(in.peek())) {
-			result.add(vaultSettingsJsonAdapter.read(in));
+			result.add(vaultSettingsJsonAdapter.read(in, settings));
 		}
 		in.endArray();
 		return result;
