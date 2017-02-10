@@ -13,6 +13,11 @@
 - [Contact us](https://cryptomator.org/contact/) directly by writing an email. Wir sprechen auch Deutsch!
 - Have a chat with us on [Gitter](https://gitter.im/cryptomator/cryptomator).
 
+## Do you miss a feature?
+
+- Ensure the feature was not [already requested](https://github.com/cryptomator/cryptomator/issues).
+- You're welcome to suggest a feature by [submitting a new issue](https://github.com/cryptomator/cryptomator/issues/new).
+
 ## Did you write a patch that fixes a bug?
 
 - Open a new pull request with the patch.
