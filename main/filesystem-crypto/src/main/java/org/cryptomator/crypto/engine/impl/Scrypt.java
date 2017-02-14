@@ -27,7 +27,7 @@ final class Scrypt {
 	 * 
 	 * @param passphrase The passphrase
 	 * @param salt Salt, ideally randomly generated
-	 * @param costParam Cost parameter <code>N</code>, larger than 1, a power of 2 and less than <code>2^(128 * costParam / 8)</code>
+	 * @param costParam Cost parameter <code>N</code>, larger than 1, a power of 2 and less than <code>2^(128 * blockSize / 8)</code>
 	 * @param blockSize Block size <code>r</code>
 	 * @param keyLengthInBytes Key output length <code>dkLen</code>
 	 * @return Derived key
