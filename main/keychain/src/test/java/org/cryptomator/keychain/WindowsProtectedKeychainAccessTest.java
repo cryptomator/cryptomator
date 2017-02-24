@@ -31,7 +31,7 @@ public class WindowsProtectedKeychainAccessTest {
 		WinFunctions winFunctions = Mockito.mock(WinFunctions.class);
 		WinDataProtection winDataProtection = Mockito.mock(WinDataProtection.class);
 		Mockito.when(winFunctions.dataProtection()).thenReturn(winDataProtection);
-		Answer<byte[]> answerReturningFirstArg = invocation -> invocation.getArgumentAt(0, byte[].class).clone();
+		Answer<byte[]> answerReturningFirstArg = invocation -> ((byte[]) invocation.getArgument(0)).clone();
 		Mockito.when(winDataProtection.protect(Mockito.any(), Mockito.any())).thenAnswer(answerReturningFirstArg);
 		Mockito.when(winDataProtection.unprotect(Mockito.any(), Mockito.any())).thenAnswer(answerReturningFirstArg);
 		keychain = new WindowsProtectedKeychainAccess(Optional.of(winFunctions));

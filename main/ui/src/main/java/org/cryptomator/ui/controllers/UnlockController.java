@@ -317,7 +317,8 @@ public class UnlockController extends LocalizedFXMLViewController {
 
 	private void unlock(CharSequence password) {
 		try {
-			vault.activateFrontend(password);
+			vault.unlock(password);
+			vault.mount();
 			vault.reveal();
 			Platform.runLater(() -> {
 				messageText.setText(null);

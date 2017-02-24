@@ -16,7 +16,8 @@ import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -33,8 +34,10 @@ import org.cryptomator.cryptolib.api.InvalidPassphraseException;
 import org.cryptomator.frontend.webdav.WebDavServer;
 import org.cryptomator.frontend.webdav.mount.Mounter.CommandFailedException;
 import org.cryptomator.frontend.webdav.mount.Mounter.Mount;
+import org.cryptomator.frontend.webdav.mount.Mounter.MountParam;
 import org.cryptomator.frontend.webdav.servlet.WebDavServletController;
 import org.cryptomator.ui.model.VaultModule.PerVault;
+import org.cryptomator.ui.settings.Settings;
 import org.cryptomator.ui.settings.VaultSettings;
 import org.cryptomator.ui.util.DeferredCloser;
 import org.fxmisc.easybind.EasyBind;
@@ -52,6 +55,7 @@ public class Vault {
 	private static final Logger LOG = LoggerFactory.getLogger(Vault.class);
 	private static final String MASTERKEY_FILENAME = "masterkey.cryptomator";
 
+	private final Settings settings;
 	private final VaultSettings vaultSettings;
 	private final WebDavServer server;
 	private final DeferredCloser closer;
@@ -63,7 +67,8 @@ public class Vault {
 	private Mount mount;
 
 	@Inject
-	Vault(VaultSettings vaultSettings, WebDavServer server, DeferredCloser closer) {
+	Vault(Settings settings, VaultSettings vaultSettings, WebDavServer server, DeferredCloser closer) {
+		this.settings = settings;
 		this.vaultSettings = vaultSettings;
 		this.server = server;
 		this.closer = closer;
@@ -106,9 +111,7 @@ public class Vault {
 		CryptoFileSystemProvider.changePassphrase(getPath(), MASTERKEY_FILENAME, oldPassphrase, newPassphrase);
 	}
 
-	public synchronized void activateFrontend(CharSequence passphrase) {
-		boolean unlockSuccess = false;
-		boolean mountSuccess = false;
+	public synchronized void unlock(CharSequence passphrase) {
 		try {
 			FileSystem fs = getCryptoFileSystem(passphrase);
 			if (!server.isRunning()) {
@@ -116,29 +119,43 @@ public class Vault {
 			}
 			servlet = server.createWebDavServlet(fs.getPath("/"), vaultSettings.getId() + "/" + vaultSettings.mountName().get());
 			servlet.start();
-			unlockSuccess = true;
-
-			mount = servlet.mount(Collections.emptyMap());
-			mountSuccess = true;
+			Platform.runLater(() -> {
+				unlocked.set(true);
+			});
 		} catch (IOException e) {
 			LOG.error("Unable to provide filesystem", e);
-		} catch (CommandFailedException e) {
-			LOG.error("Unable to mount filesystem", e);
-		} finally {
-			// unlocked is a observable property and should only be changed by the FX application thread
-			final boolean finalUnlockSuccess = unlockSuccess;
-			final boolean finalMountSuccess = mountSuccess;
-			Platform.runLater(() -> {
-				unlocked.set(finalUnlockSuccess);
-				mounted.set(finalMountSuccess);
-			});
 		}
 	}
 
-	public synchronized void deactivateFrontend() throws Exception {
+	public synchronized void mount() {
+		if (servlet == null) {
+			throw new IllegalStateException("Mounting requires unlocked WebDAV servlet.");
+		}
+
+		Map<MountParam, String> mountOptions = new HashMap<>();
+		mountOptions.put(MountParam.WIN_DRIVE_LETTER, vaultSettings.winDriveLetter().get());
+		mountOptions.put(MountParam.PREFERRED_GVFS_SCHEME, settings.preferredGvfsScheme().get());
+
+		try {
+			mount = servlet.mount(mountOptions);
+			Platform.runLater(() -> {
+				mounted.set(true);
+			});
+		} catch (CommandFailedException e) {
+			LOG.error("Unable to mount filesystem", e);
+		}
+	}
+
+	public synchronized void unmount() throws Exception {
 		if (mount != null) {
 			mount.unmount();
 		}
+		Platform.runLater(() -> {
+			mounted.set(false);
+		});
+	}
+
+	public synchronized void lock() throws Exception {
 		if (servlet != null) {
 			servlet.stop();
 		}
@@ -147,7 +164,6 @@ public class Vault {
 			fs.close();
 		}
 		Platform.runLater(() -> {
-			mounted.set(false);
 			unlocked.set(false);
 		});
 	}

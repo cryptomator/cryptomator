@@ -105,7 +105,8 @@ public class UnlockedController extends LocalizedFXMLViewController {
 	@FXML
 	private void didClickLockVault(ActionEvent event) {
 		asyncTaskService.asyncTaskOf(() -> {
-			vault.get().deactivateFrontend();
+			vault.get().unmount();
+			vault.get().lock();
 		}).onSuccess(() -> {
 			listener.ifPresent(listener -> listener.didLock(this));
 		}).onError(Exception.class, () -> {
