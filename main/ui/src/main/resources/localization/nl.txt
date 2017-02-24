@@ -2,22 +2,24 @@ app.name = Cryptomator
 # main.fxml
 main.emptyListInstructions = Klik hier om een kluis toe te voegen
 main.directoryList.contextMenu.remove = Verwijder van lijst
-main.directoryList.contextMenu.changePassword = Verander wachtwoord
-main.addDirectory.contextMenu.new = Creëer nieuwe kluis
-main.addDirectory.contextMenu.open = Open bestaande kluis
+# The current Dutch translation of this string (and other, similar contexts) is not in accordance with Windows convention, which is to translate options like this with infinitivies and not imperatives, so "Wachtwoord wijzigen," not "Wijzig wachtwoord." MacOS uses imperatives in Dutch, not Windows.
+main.directoryList.contextMenu.changePassword = Verander Wachtwoord
+main.addDirectory.contextMenu.new = Maak Nieuwe Kluis
+main.addDirectory.contextMenu.open = Open Bestaande Kluis
 # welcome.fxml
 welcome.checkForUpdates.label.currentlyChecking = Controleren op updates...
 welcome.newVersionMessage = Versie %1$s kan worden gedownload.\nDit is %2$s.
 # initialize.fxml
 initialize.label.password = Wachtwoord
 initialize.label.retypePassword = Voer wachtwoord opnieuw in
+# This is not in accordance with Dutch conventions. Not only does it use an imperative, but 'create' is generally translated as 'maken' or 'aanmaken', not 'creëren'. So "Kluis maken."
 initialize.button.ok = Creëer kluis
 initialize.messageLabel.alreadyInitialized = Kluis reeds geïnitialiseerd
 initialize.messageLabel.initializationFailed = Kon kluis niet initialiseren. Zie logbestand voor details.
 # notfound.fxml
-notfound.label = Kluis kon niet gevonden worden. Is de kluis wellicht verplaatst?
+notfound.label = Kluis kon niet gevonden worden. Is hij verplaatst?
 # upgrade.fxml
-upgrade.button = Upgrade kluis
+upgrade.button = Upgrade Kluis
 upgrade.version3dropBundleExtension.msg = Deze kluis dient te worden gemigreerd naar een nieuwer type.\n"%1$s" zal worden hernoemd naar "%2$s".\nZorg ervoor dat de synchronisatie voltooid is alvorens door te gaan.
 upgrade.version3dropBundleExtension.err.alreadyExists = Automatische migratie mislukt.\n"%s" bestaat al.
 # unlock.fxml
@@ -25,22 +27,22 @@ unlock.label.password = Wachtwoord
 unlock.label.mountName = Schijfnaam
 unlock.label.winDriveLetter = Schijfletter
 unlock.label.downloadsPageLink = Alle Cryptomator versies
-unlock.label.advancedHeading = Geavanceerde opties
-unlock.button.unlock = Ontgrendel kluis
-unlock.button.advancedOptions.show = Meer opties
-unlock.button.advancedOptions.hide = Minder opties
+unlock.label.advancedHeading = Geavanceerde Opties
+unlock.button.unlock = Ontgrendel Kluis
+unlock.button.advancedOptions.show = Meer Opties
+unlock.button.advancedOptions.hide = Minder Opties
 unlock.choicebox.winDriveLetter.auto = Automatisch toekennen
 unlock.errorMessage.wrongPassword = Verkeerd wachtwoord
 unlock.errorMessage.mountingFailed = Mounten mislukt. Zie logbestand voor details.
-unlock.errorMessage.unsupportedVersion.vaultOlderThanSoftware = Kluis ontoegankelijk. Deze kluis is gecreëerd met een oudere versie van Cryptomator.
-unlock.errorMessage.unsupportedVersion.softwareOlderThanVault = Kluis ontoegankelijk. Deze kluis is gecreëerd met een nieuwere versie van Cryptomator.
+unlock.errorMessage.unsupportedVersion.vaultOlderThanSoftware = Niet ondersteunde kluis. Deze kluis is gemaakt met een nieuwere versie van Cryptomator.
+unlock.errorMessage.unsupportedVersion.softwareOlderThanVault = Niet ondersteunde kluis. Deze kluis is gemaakt met een nieuwere versie van Cryptomator.
 unlock.messageLabel.startServerFailed = WebDAV server starten mislukt.
 # change_password.fxml
-changePassword.label.oldPassword = Huidig wachtwoord
-changePassword.label.newPassword = Nieuw wachtwoord
-changePassword.label.retypePassword = Herhaal wachtwoord
+changePassword.label.oldPassword = Huidig Wachtwoord
+changePassword.label.newPassword = Nieuw Wachtwoord
+changePassword.label.retypePassword = Herhaal Wachtwoord
 changePassword.label.downloadsPageLink = Alle Cryptomator versies
-changePassword.button.change = Verander wachtwoord
+changePassword.button.change = Verander Wachtwoord
 changePassword.errorMessage.wrongPassword = Alle Cryptomator versies
 changePassword.errorMessage.decryptionFailed = Decoderen mislukt
 # unlocked.fxml
@@ -56,7 +58,7 @@ unlocked.ioGraph.yAxis.label = Doorvoer (MiB/s)
 macWarnings.windowTitle = Pas op - Corrupt bestand in %s
 macWarnings.message = Cryptomator heeft mogelijk kwaadwillende corrupte items aangetroffen in de volgende bestanden\:
 macWarnings.moreInformationButton = Leer meer
-macWarnings.whitelistButton = Desondanks selectie decoderen
+macWarnings.whitelistButton = Geselecteerde toch Decoderen
 # settings.fxml
 settings.version.label = Versie %s
 settings.checkForUpdates.label = Controleer op updates
@@ -67,9 +69,9 @@ settings.requiresRestartLabel = * Cryptomator dient te worden herstart
 # tray icon
 tray.menu.open = Open
 tray.menu.quit = Afsluiten
-tray.infoMsg.title = Nog steeds actief
-tray.infoMsg.msg = Cryptomator is nog steeds actief. Sluit het af via het icon in het systeemvak.
-tray.infoMsg.msg.osx = Cryptomator is nog steeds actief. Sluit het af via het icon op de menubalk.
+tray.infoMsg.title = Nog Steeds Actief
+tray.infoMsg.msg = Cryptomator is nog steeds actief. Sluit af via het icoon in het systeemvak.
+tray.infoMsg.msg.osx = Cryptomator is nog steeds actief. Sluit af via het icoon op de menubalk.
 initialize.messageLabel.passwordStrength.0 = Zeer zwak
 initialize.messageLabel.passwordStrength.1 = Zwak
 initialize.messageLabel.passwordStrength.2 = Redelijk
@@ -85,10 +87,15 @@ settings.prefGvfsScheme.label = WebDAV schema
 # upgrade.fxml
 upgrade.confirmation.label = Ja, ik heb geverifieerd dat de synchronisatie voltooid is
 initialize.messageLabel.notEmpty = Kluis niet leeg
-unlock.label.savePassword = Wachtwoord bewaren
+unlock.label.savePassword = Wachtwoord Opslaan
 unlock.errorMessage.unauthenticVersionMac = MAC authenticatie mislukt
-unlocked.label.mountFailed = Connecting drive failed
-unlock.savePassword.delete.confirmation.title = Delete Saved Password
-unlock.savePassword.delete.confirmation.header = Do you really want to delete the saved password of this vault?
-unlock.savePassword.delete.confirmation.content = The saved password of this vault will be immediately deleted from your system keychain. If you'd like to save your password again, you'd have to unlock your vault with the "Save password" option enabled.
-settings.debugMode.label = Debug mode *
+unlocked.label.mountFailed = Verbinden van schijf mislukt
+unlock.savePassword.delete.confirmation.title = Verwijder Opgeslagen Wachtwoord
+unlock.savePassword.delete.confirmation.header = Ben je zeker dat je het opgeslagen wachtwoord van deze kluis wilt verwijderen?
+unlock.savePassword.delete.confirmation.content = Het opgeslagen wachtwoord van deze kluis zal onmiddellijk verwijderd worden van je systeem sleutelhanger. Als je opnieuw je wachtwoord wilt opslaan, zal je je kluis moeten ontgrendelen met de optie "Sla wachtwoord op" aan.
+settings.debugMode.label = Debug Mode *
+upgrade.version3dropBundleExtension.title = Kluis Versie 3 Upgrade (Drop Bundel Extensie)
+upgrade.version3to4.title = Kluis Versie 3 naar 4 Upgrade
+upgrade.version4to5.title = Kluis Versie 4 naar 5 Upgrade
+upgrade.version4to5.msg = Deze kluis moet gemigreerd worden naar een nieuw formaat.\nVersleutelde bestanden zullen bijgewerkt worden.\nZorg ervoor dat synchronisatie voltooid is alvorens verder te gaan.\n\nLet op\: Tijdens dit proces zal de wijzigingsdatum van alle bestanden gewijzigd worden naar de huidige datum/tijd.
+upgrade.version4to5.err.io = Migratie mislukt door een I/O Exception. Bekijk log file voor details.

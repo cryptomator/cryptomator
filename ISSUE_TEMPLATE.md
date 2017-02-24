@@ -1,19 +1,38 @@
-### Basic Info
+To tick a checkbox replace [ ] with [x]. Make sure to replace placeholders (…) accordingly.
 
-- I'm running Cryptomator on: [Windows, OS X, and/or Debian (or other Linux Distribution), don't forget the version]
-- I'm using Cryptomator in version: [you can check the version in the settings of Cryptomator]
+## Issue Checklist
 
-### Description
+Before creating a new issue make sure that you
+- [ ] searched [existing (and closed) issues](https://github.com/cryptomator/cryptomator/issues).
+- [ ] searched the [knowledge base](https://cryptomator.freshdesk.com/support/solutions).
+- [ ] have read the [contribution guide](https://github.com/cryptomator/cryptomator/blob/master/CONTRIBUTING.md).
+- [ ] have read the [Code of Conduct](https://github.com/cryptomator/cryptomator/blob/master/CODE_OF_CONDUCT.md).
 
-[description of the bug, question or feature - what did you do? what problem occurred? etc.]
+## Basic Info
 
-### Log File (optional)
+This is a
+- [ ] bug report.
+- [ ] feature request.
+- [ ] question or something else.
 
-```
-[insert relevant parts of the log file here if applicable,
-don't forget to redact sensitive information
+I'm using
+- [ ] Windows in version: …
+- [ ] macOS in version: …
+- [ ] Linux in version: …
 
-on Windows: %appdata%/Cryptomator/cryptomator.log
-on OS X: ~/Library/Logs/Cryptomator/cryptomator.log
-on Debian: ~/.Cryptomator/cryptomator.log]
-```
+I'm running Cryptomator in version: …  
+(You can check the version in the Cryptomator settings.)
+
+## Description
+
+…  
+(Please describe in detail what you did, what you expected, and what really happened.)
+
+## Attachments (optional)
+
+If you want to add the log file or screenshots, please add them as attachments. If your log file seems empty and doesn't show any errors, you may enable the [debug mode](https://cryptomator.freshdesk.com/support/solutions/articles/16000046480) first and reproduce the problem to ensure all important information is contained in there. You may use test data or redact sensitive information from the log file.
+
+You can find the log file
+- on Windows: %appdata%/Cryptomator/cryptomator.log
+- on macOS: ~/Library/Logs/Cryptomator/cryptomator.log
+- on Linux: ~/.Cryptomator/cryptomator.log

@@ -31,8 +31,8 @@ public class LocalizationTest {
 	private static final Logger LOG = LoggerFactory.getLogger(LocalizationTest.class);
 	private static final String RESOURCE_FOLDER_PATH = "/localization/";
 	private static final String REF_FILE_NAME = "en.txt";
-	private static final String[] LANG_FILE_NAMES = {"de.txt", "es.txt", "fr.txt", "hu.txt", "it.txt", "kr.txt", "lv.txt", "nl.txt", "pl.txt", "pt.txt", "ru.txt", "sk.txt", "tr.txt", "uk.txt", "zh_HK.txt", "zh_TW.txt",
-			"zh.txt"};
+	private static final String[] LANG_FILE_NAMES = {"de.txt", "es.txt", "fr.txt", "hu.txt", "it.txt", "ja.txt", "kr.txt", "lv.txt", "nl.txt", "pl.txt", "pt.txt", "ru.txt", "sk.txt", "tr.txt", "uk.txt", "zh_HK.txt",
+			"zh_TW.txt", "zh.txt"};
 
 	/*
 	 * @see Formatter

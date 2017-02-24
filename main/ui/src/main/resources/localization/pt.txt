@@ -62,10 +62,8 @@ macWarnings.whitelistButton = Desencriptar selecionado de qualquer modo
 # settings.fxml
 settings.version.label = Versão %s
 settings.checkForUpdates.label = Verificar por atualizações
-# Fuzzy
 settings.port.label = Porta WebDAV *
 settings.port.prompt = 0 \= Escolher automaticamente
-# Fuzzy
 settings.useipv6.label = Usar IPv6 literal
 settings.requiresRestartLabel = * Cryptomator precisa ser reiniciado
 # tray icon
@@ -83,18 +81,21 @@ initialize.label.doNotForget = IMPORTANTE\: se você esquecer a sua senha, não 
 main.directoryList.remove.confirmation.title = Remover cofre
 main.directoryList.remove.confirmation.header = Você realmente quer remover esse cofre?
 main.directoryList.remove.confirmation.content = O cofre somente será removido da lista. Para apagá-lo permanentemente, por favor apagar os arquivos do seu sistema de arquivos.
-upgrade.version3to4.msg = Esse cofre tem que ser migrado a um novo formato. Os nomes das pastas encriptadas serão atualizados. Por favor assegure-se de que a sincronização foi finalizada antes de proceder com a migração.
+upgrade.version3to4.msg = Esse cofre tem que ser migrado a um novo formato. Os nomes das pastas encriptadas serão atualizados. Por favor, assegure-se de que a sincronização do cofre foi finalizada antes de proceder com a sua migração.
 upgrade.version3to4.err.io = Falha na migração devido a um erro de E/S. Veja o arquivo de log para mais detalhes.
-# Fuzzy
 settings.prefGvfsScheme.label = Esquema WebDAV
 # upgrade.fxml
 upgrade.confirmation.label = Sim, tenho certeza de que a sincronização foi concluída
 initialize.messageLabel.notEmpty = Cofre não vazio
-unlock.label.savePassword = Salvar senha
-# Fuzzy
-unlock.errorMessage.unauthenticVersionMac = Não foi possível autenticar a versão MAC
-unlocked.label.mountFailed = Connecting drive failed
-unlock.savePassword.delete.confirmation.title = Delete Saved Password
-unlock.savePassword.delete.confirmation.header = Do you really want to delete the saved password of this vault?
-unlock.savePassword.delete.confirmation.content = The saved password of this vault will be immediately deleted from your system keychain. If you'd like to save your password again, you'd have to unlock your vault with the "Save password" option enabled.
-settings.debugMode.label = Debug mode *
+unlock.label.savePassword = Armazenar senha
+unlock.errorMessage.unauthenticVersionMac = Não foi possível autenticar a versão do MAC.
+unlocked.label.mountFailed = Falha ao conectar o drive
+unlock.savePassword.delete.confirmation.title = Apagar a senha armazenada
+unlock.savePassword.delete.confirmation.header = Você realmente quer apagar a senha armazenada deste cofre?
+unlock.savePassword.delete.confirmation.content = A senha deste cofre que se encontra armazenada será imediatamente apagada do gestor de senhas do seu sistema. Se você quiser armazenar a sua senha novamente, você terá que abrir o seu cofre com a opção "Armazenar Senha" habilitada.
+settings.debugMode.label = Modo de Debug *
+upgrade.version3dropBundleExtension.title = Atualização para a versão 3 do cofre (Drop Bundle Extension)
+upgrade.version3to4.title = Atualização do cofre da versão 3 para 4
+upgrade.version4to5.title = Atualização do cofre da versão 4 para 5
+upgrade.version4to5.msg = Este cofre precisa ser migrado a um novo formato.\nOs arquivos encriptados serão atualizados.\nPor favor, assegure-se de que a sincronização do cofre foi finalizada antes de proceder com a sua migração.\n\nNota\: A data de modificação de todos os arquivos do cofre será alterada durante o processo para a data e hora corrente.
+upgrade.version4to5.err.io = A migração falhou devido a uma exceção de I/O. Ver arquivo de log para mais detalhes.
