@@ -12,6 +12,7 @@
 		<artifactId>main</artifactId>
 		<version>1.3.0-SNAPSHOT</version>
 	</parent>
+	<packaging>pom</packaging>
 	<artifactId>commons-test</artifactId>
 	<name>Cryptomator common test dependencies</name>
 	<description>Shared utilities for tests</description>

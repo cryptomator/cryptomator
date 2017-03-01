@@ -77,8 +77,8 @@
 			<artifactId>commons-collections4</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>commons-httpclient</groupId>
-			<artifactId>commons-httpclient</artifactId>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
 		</dependency>
 
 		<!-- DI -->
@@ -102,7 +102,7 @@
 		<dependency>
 			<groupId>com.nulab-inc</groupId>
 			<artifactId>zxcvbn</artifactId>
-			<version>1.1.1</version>
+			<version>1.2.2</version>
 		</dependency>
 	</dependencies>
 </project>
