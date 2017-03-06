@@ -8,24 +8,20 @@
  *******************************************************************************/
 package org.cryptomator.ui;
 
-import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
 import javax.inject.Singleton;
 
-import org.cryptomator.jni.MacFunctions;
 import org.cryptomator.ui.controllers.MainController;
-import org.cryptomator.ui.settings.Localization;
-import org.cryptomator.ui.util.AsyncTaskService;
+import org.cryptomator.ui.model.VaultComponent;
+import org.cryptomator.ui.model.VaultModule;
 import org.cryptomator.ui.util.DeferredCloser;
 
 import dagger.Component;
 
 @Singleton
 @Component(modules = CryptomatorModule.class)
-interface CryptomatorComponent {
-
-	AsyncTaskService asyncTaskService();
+public interface CryptomatorComponent {
 
 	ExecutorService executorService();
 
@@ -33,12 +29,10 @@ interface CryptomatorComponent {
 
 	MainController mainController();
 
-	Localization localization();
-
 	ExitUtil exitUtil();
 
 	DebugMode debugMode();
 
-	Optional<MacFunctions> nativeMacFunctions();
+	VaultComponent newVaultComponent(VaultModule vaultModule);
 
 }

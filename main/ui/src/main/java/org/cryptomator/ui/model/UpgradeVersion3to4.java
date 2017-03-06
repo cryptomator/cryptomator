@@ -1,3 +1,8 @@
+/*******************************************************************************
+ * Copyright (c) 2017 Skymatic UG (haftungsbeschränkt).
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the accompanying LICENSE file.
+ *******************************************************************************/
 package org.cryptomator.ui.model;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -61,8 +66,8 @@ class UpgradeVersion3to4 extends UpgradeStrategy {
 
 	@Override
 	protected void upgrade(Vault vault, Cryptor cryptor) throws UpgradeFailedException {
-		Path dataDir = vault.path().get().resolve("d");
-		Path metadataDir = vault.path().get().resolve("m");
+		Path dataDir = vault.getPath().resolve("d");
+		Path metadataDir = vault.getPath().resolve("m");
 		if (!Files.isDirectory(dataDir)) {
 			return; // empty vault. no migration needed.
 		}

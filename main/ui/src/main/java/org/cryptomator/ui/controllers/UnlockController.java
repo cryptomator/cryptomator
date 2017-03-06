@@ -18,23 +18,20 @@ import javax.inject.Inject;
 
 import org.apache.commons.lang3.CharUtils;
 import org.apache.commons.lang3.SystemUtils;
-import org.cryptomator.crypto.engine.InvalidPassphraseException;
-import org.cryptomator.crypto.engine.UnsupportedVaultFormatException;
-import org.cryptomator.frontend.CommandFailedException;
-import org.cryptomator.frontend.FrontendCreationFailedException;
-import org.cryptomator.frontend.FrontendFactory;
-import org.cryptomator.frontend.webdav.mount.WindowsDriveLetters;
+import org.cryptomator.cryptolib.api.InvalidPassphraseException;
+import org.cryptomator.cryptolib.api.UnsupportedVaultFormatException;
+import org.cryptomator.frontend.webdav.ServerLifecycleException;
+import org.cryptomator.frontend.webdav.mount.Mounter.CommandFailedException;
 import org.cryptomator.keychain.KeychainAccess;
 import org.cryptomator.ui.controls.SecPasswordField;
 import org.cryptomator.ui.model.Vault;
+import org.cryptomator.ui.model.WindowsDriveLetters;
 import org.cryptomator.ui.settings.Localization;
-import org.cryptomator.ui.settings.Settings;
 import org.cryptomator.ui.util.AsyncTaskService;
 import org.cryptomator.ui.util.DialogBuilderUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import dagger.Lazy;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -61,8 +58,6 @@ public class UnlockController extends LocalizedFXMLViewController {
 
 	private final Application app;
 	private final AsyncTaskService asyncTaskService;
-	private final Lazy<FrontendFactory> frontendFactory;
-	private final Settings settings;
 	private final WindowsDriveLetters driveLetters;
 	private final ChangeListener<Character> driveLetterChangeListener = this::winDriveLetterDidChange;
 	private final Optional<KeychainAccess> keychainAccess;
@@ -70,13 +65,10 @@ public class UnlockController extends LocalizedFXMLViewController {
 	private Optional<UnlockListener> listener = Optional.empty();
 
 	@Inject
-	public UnlockController(Application app, Localization localization, AsyncTaskService asyncTaskService, Lazy<FrontendFactory> frontendFactory, Settings settings, WindowsDriveLetters driveLetters,
-			Optional<KeychainAccess> keychainAccess) {
+	public UnlockController(Application app, Localization localization, AsyncTaskService asyncTaskService, WindowsDriveLetters driveLetters, Optional<KeychainAccess> keychainAccess) {
 		super(localization);
 		this.app = app;
 		this.asyncTaskService = asyncTaskService;
-		this.frontendFactory = frontendFactory;
-		this.settings = settings;
 		this.driveLetters = driveLetters;
 		this.keychainAccess = keychainAccess;
 	}
@@ -261,7 +253,6 @@ public class UnlockController extends LocalizedFXMLViewController {
 
 	private void winDriveLetterDidChange(ObservableValue<? extends Character> property, Character oldValue, Character newValue) {
 		vault.setWinDriveLetter(newValue);
-		settings.save();
 	}
 
 	private void chooseSelectedDriveLetter() {
@@ -326,7 +317,8 @@ public class UnlockController extends LocalizedFXMLViewController {
 
 	private void unlock(CharSequence password) {
 		try {
-			vault.activateFrontend(frontendFactory.get(), settings, password);
+			vault.unlock(password);
+			vault.mount();
 			vault.reveal();
 			Platform.runLater(() -> {
 				messageText.setText(null);
@@ -356,8 +348,8 @@ public class UnlockController extends LocalizedFXMLViewController {
 					messageText.setText(localization.getString("unlock.errorMessage.unauthenticVersionMac"));
 				}
 			});
-		} catch (FrontendCreationFailedException | CommandFailedException e) {
-			LOG.error("Decryption failed for technical reasons.", e);
+		} catch (ServerLifecycleException | CommandFailedException e) {
+			LOG.error("Unlock failed for technical reasons.", e);
 			Platform.runLater(() -> {
 				messageText.setText(localization.getString("unlock.errorMessage.mountingFailed"));
 			});

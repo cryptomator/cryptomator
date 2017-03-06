@@ -1,3 +1,8 @@
+/*******************************************************************************
+ * Copyright (c) 2017 Skymatic UG (haftungsbeschränkt).
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the accompanying LICENSE file.
+ *******************************************************************************/
 package org.cryptomator.ui.model;
 
 import java.io.IOException;
@@ -13,7 +18,6 @@ import org.cryptomator.cryptolib.api.CryptoLibVersion.Version;
 import org.cryptomator.cryptolib.api.Cryptor;
 import org.cryptomator.cryptolib.api.CryptorProvider;
 import org.cryptomator.ui.settings.Localization;
-import org.cryptomator.ui.settings.Settings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,12 +27,10 @@ import javafx.application.Platform;
 class UpgradeVersion3DropBundleExtension extends UpgradeStrategy {
 
 	private static final Logger LOG = LoggerFactory.getLogger(UpgradeVersion3DropBundleExtension.class);
-	private final Settings settings;
 
 	@Inject
-	public UpgradeVersion3DropBundleExtension(@CryptoLibVersion(Version.ONE) CryptorProvider version1CryptorProvider, Localization localization, Settings settings) {
+	public UpgradeVersion3DropBundleExtension(@CryptoLibVersion(Version.ONE) CryptorProvider version1CryptorProvider, Localization localization) {
 		super(version1CryptorProvider, localization, 3, 3);
-		this.settings = settings;
 	}
 
 	@Override
@@ -39,17 +41,17 @@ class UpgradeVersion3DropBundleExtension extends UpgradeStrategy {
 	@Override
 	public String getMessage(Vault vault) {
 		String fmt = localization.getString("upgrade.version3dropBundleExtension.msg");
-		Path path = vault.path().getValue();
+		Path path = vault.getPath();
 		String oldVaultName = path.getFileName().toString();
-		String newVaultName = StringUtils.removeEnd(oldVaultName, Vault.VAULT_FILE_EXTENSION);
+		String newVaultName = StringUtils.removeEnd(oldVaultName, ".cryptomator");
 		return String.format(fmt, oldVaultName, newVaultName);
 	}
 
 	@Override
 	protected void upgrade(Vault vault, Cryptor cryptor) throws UpgradeFailedException {
-		Path path = vault.path().getValue();
+		Path path = vault.getPath();
 		String oldVaultName = path.getFileName().toString();
-		String newVaultName = StringUtils.removeEnd(oldVaultName, Vault.VAULT_FILE_EXTENSION);
+		String newVaultName = StringUtils.removeEnd(oldVaultName, ".cryptomator");
 		Path newPath = path.resolveSibling(newVaultName);
 		if (Files.exists(newPath)) {
 			String fmt = localization.getString("upgrade.version3dropBundleExtension.err.alreadyExists");
@@ -60,8 +62,7 @@ class UpgradeVersion3DropBundleExtension extends UpgradeStrategy {
 				LOG.info("Renaming {} to {}", path, newPath.getFileName());
 				Files.move(path, path.resolveSibling(newVaultName));
 				Platform.runLater(() -> {
-					vault.setPath(newPath);
-					settings.save();
+					vault.getVaultSettings().path().set(newPath);
 				});
 			} catch (IOException e) {
 				LOG.error("Vault migration failed", e);
@@ -72,8 +73,8 @@ class UpgradeVersion3DropBundleExtension extends UpgradeStrategy {
 
 	@Override
 	public boolean isApplicable(Vault vault) {
-		Path vaultPath = vault.path().getValue();
-		if (vaultPath.toString().endsWith(Vault.VAULT_FILE_EXTENSION)) {
+		Path vaultPath = vault.getPath();
+		if (vaultPath.toString().endsWith(".cryptomator")) {
 			return super.isApplicable(vault);
 		} else {
 			return false;

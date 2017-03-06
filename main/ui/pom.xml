@@ -24,35 +24,11 @@
 		</dependency>
 		<dependency>
 			<groupId>org.cryptomator</groupId>
-			<artifactId>filesystem-api</artifactId>
+			<artifactId>cryptofs</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.cryptomator</groupId>
-			<artifactId>filesystem-nio</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.cryptomator</groupId>
-			<artifactId>filesystem-nameshortening</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.cryptomator</groupId>
-			<artifactId>filesystem-crypto</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.cryptomator</groupId>
-			<artifactId>filesystem-charsets</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.cryptomator</groupId>
-			<artifactId>filesystem-stats</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.cryptomator</groupId>
-			<artifactId>frontend-api</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.cryptomator</groupId>
-			<artifactId>frontend-webdav</artifactId>
+			<artifactId>webdav-nio-adapter</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.cryptomator</groupId>
@@ -77,8 +53,8 @@
 
 		<!-- JSON -->
 		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-databind</artifactId>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
 		</dependency>
 	
 		<!-- Guava -->
@@ -97,8 +73,12 @@
 			<artifactId>commons-lang3</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>commons-httpclient</groupId>
-			<artifactId>commons-httpclient</artifactId>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-collections4</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
 		</dependency>
 
 		<!-- DI -->
@@ -122,7 +102,7 @@
 		<dependency>
 			<groupId>com.nulab-inc</groupId>
 			<artifactId>zxcvbn</artifactId>
-			<version>1.1.1</version>
+			<version>1.2.2</version>
 		</dependency>
 	</dependencies>
 </project>

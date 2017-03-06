@@ -27,21 +27,25 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
 		<!-- dependency versions -->
-		<cryptomator.cryptolib.version>1.0.7</cryptomator.cryptolib.version>
+		<cryptomator.cryptolib.version>1.1.1</cryptomator.cryptolib.version>
+		<cryptomator.cryptofs.version>1.1.1</cryptomator.cryptofs.version>
+		<cryptomator.webdav.version>0.4.0</cryptomator.webdav.version>
 		<cryptomator.jni.version>1.0.0</cryptomator.jni.version>
 		<log4j.version>2.1</log4j.version>
-		<slf4j.version>1.7.7</slf4j.version>
+		<slf4j.version>1.7.24</slf4j.version>
 		<junit.version>4.12</junit.version>
 		<junit.hierarchicalrunner.version>4.12.1</junit.hierarchicalrunner.version>
 		<hamcrest.version>1.3</hamcrest.version> <!-- keep in sync with version required by JUnit -->
 		<commons-io.version>2.4</commons-io.version>
 		<commons-collections.version>4.0</commons-collections.version>
-		<commons-lang3.version>3.4</commons-lang3.version>
+		<commons-lang3.version>3.5</commons-lang3.version>
 		<commons-codec.version>1.10</commons-codec.version>
-		<commons-httpclient.version>3.1</commons-httpclient.version>
-		<jackson-databind.version>2.4.4</jackson-databind.version>
-		<mockito.version>1.10.19</mockito.version>
-		<dagger.version>2.6.1</dagger.version>
+		<httpclient.version>4.5.3</httpclient.version>
+		<mockito.version>2.7.12</mockito.version>
+		<dagger.version>2.9</dagger.version>
+		<easybind.version>1.0.3</easybind.version>
+		<guava.version>21.0</guava.version>
+		<gson.version>2.8.0</gson.version>
 	</properties>
 
 	<repositories>
@@ -73,64 +77,6 @@
 			</dependency>
 			<dependency>
 				<groupId>org.cryptomator</groupId>
-				<artifactId>filesystem-api</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.cryptomator</groupId>
-				<artifactId>filesystem-charsets</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.cryptomator</groupId>
-				<artifactId>filesystem-nio</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.cryptomator</groupId>
-				<artifactId>filesystem-inmemory</artifactId>
-				<version>${project.version}</version>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.cryptomator</groupId>
-				<artifactId>filesystem-invariants-tests</artifactId>
-				<version>${project.version}</version>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.cryptomator</groupId>
-				<artifactId>filesystem-nameshortening</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.cryptomator</groupId>
-				<artifactId>filesystem-crypto</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.cryptomator</groupId>
-				<artifactId>filesystem-crypto-integration-tests</artifactId>
-				<version>${project.version}</version>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.cryptomator</groupId>
-				<artifactId>filesystem-stats</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.cryptomator</groupId>
-				<artifactId>frontend-api</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.cryptomator</groupId>
-				<artifactId>frontend-webdav</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.cryptomator</groupId>
 				<artifactId>keychain</artifactId>
 				<version>${project.version}</version>
 			</dependency>
@@ -145,6 +91,16 @@
 				<groupId>org.cryptomator</groupId>
 				<artifactId>cryptolib</artifactId>
 				<version>${cryptomator.cryptolib.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.cryptomator</groupId>
+				<artifactId>cryptofs</artifactId>
+				<version>${cryptomator.cryptofs.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.cryptomator</groupId>
+				<artifactId>webdav-nio-adapter</artifactId>
+				<version>${cryptomator.webdav.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.cryptomator</groupId>
@@ -196,24 +152,23 @@
 				<version>${commons-codec.version}</version>
 			</dependency>
 			<dependency>
-				<!-- org.apache.httpcomponents:httpclient is newer, but jackrabbit uses this version. We don't have a reason to upgrade -->
-				<groupId>commons-httpclient</groupId>
-				<artifactId>commons-httpclient</artifactId>
-				<version>${commons-httpclient.version}</version>
+				<groupId>org.apache.httpcomponents</groupId>
+				<artifactId>httpclient</artifactId>
+				<version>${httpclient.version}</version>
 			</dependency>
 
 			<!-- EasyBind -->
 			<dependency>
 				<groupId>org.fxmisc.easybind</groupId>
 				<artifactId>easybind</artifactId>
-				<version>1.0.3</version>
+				<version>${easybind.version}</version>
 			</dependency>
 
 			<!-- Guava -->
 			<dependency>
 				<groupId>com.google.guava</groupId>
 				<artifactId>guava</artifactId>
-				<version>19.0</version>
+				<version>${guava.version}</version>
 			</dependency>
 
 			<!-- DI -->
@@ -231,9 +186,9 @@
 
 			<!-- JSON -->
 			<dependency>
-				<groupId>com.fasterxml.jackson.core</groupId>
-				<artifactId>jackson-databind</artifactId>
-				<version>${jackson-databind.version}</version>
+				<groupId>com.google.code.gson</groupId>
+				<artifactId>gson</artifactId>
+				<version>${gson.version}</version>
 			</dependency>
 
 			<!-- JUnit / Mockito / Hamcrest -->
@@ -290,17 +245,6 @@
 	<modules>
 		<module>commons</module>
 		<module>commons-test</module>
-		<module>filesystem-api</module>
-		<module>filesystem-inmemory</module>
-		<module>filesystem-nio</module>
-		<module>filesystem-nameshortening</module>
-		<module>filesystem-charsets</module>
-		<module>filesystem-crypto</module>
-		<module>filesystem-crypto-integration-tests</module>
-		<module>filesystem-stats</module>
-		<module>filesystem-invariants-tests</module>
-		<module>frontend-api</module>
-		<module>frontend-webdav</module>
 		<module>keychain</module>
 		<module>ui</module>
 	</modules>
@@ -325,8 +269,8 @@
 		<pluginManagement>
 			<plugins>
 				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-dependency-plugin</artifactId>
+					<version>3.0.0</version>
 					<executions>
 						<execution>
 							<id>copy-libs</id>
@@ -343,7 +287,7 @@
 				<plugin>
 					<groupId>org.jacoco</groupId>
 					<artifactId>jacoco-maven-plugin</artifactId>
-					<version>0.7.7.201606060606</version>
+					<version>0.7.9</version>
 					<executions>
 						<execution>
 							<id>prepare-agent</id>
@@ -363,9 +307,8 @@
 		</pluginManagement>
 		<plugins>
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.2</version>
+				<version>3.6.1</version>
 				<configuration>
 					<source>1.8</source>
 					<target>1.8</target>

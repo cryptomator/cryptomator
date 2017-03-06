@@ -8,133 +8,91 @@
  ******************************************************************************/
 package org.cryptomator.ui.settings;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.Consumer;
 
-import org.cryptomator.ui.model.Vault;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+public class Settings {
 
-@JsonPropertyOrder(value = {"directories", "checkForUpdatesEnabled", "port", "useIpv6", "numTrayNotifications", "preferredGvfsScheme"})
-public class Settings implements Serializable {
-
-	private static final long serialVersionUID = 7609959894417878744L;
 	public static final int MIN_PORT = 1024;
 	public static final int MAX_PORT = 65535;
+	public static final boolean DEFAULT_CHECK_FOR_UDPATES = true;
 	public static final int DEFAULT_PORT = 42427;
 	public static final boolean DEFAULT_USE_IPV6 = false;
-	public static final Integer DEFAULT_NUM_TRAY_NOTIFICATIONS = 3;
+	public static final int DEFAULT_NUM_TRAY_NOTIFICATIONS = 3;
 	public static final String DEFAULT_GVFS_SCHEME = "dav";
 	public static final boolean DEFAULT_DEBUG_MODE = false;
 
 	private final Consumer<Settings> saveCmd;
-
-	@JsonProperty("directories")
-	private List<Vault> directories;
-
-	@JsonProperty("checkForUpdatesEnabled")
-	private Boolean checkForUpdatesEnabled;
-
-	@JsonProperty("port")
-	private Integer port;
-
-	@JsonProperty("useIpv6")
-	private Boolean useIpv6;
-
-	@JsonProperty("numTrayNotifications")
-	private Integer numTrayNotifications;
-
-	@JsonProperty("preferredGvfsScheme")
-	private String preferredGvfsScheme;
-
-	@JsonProperty("debugMode")
-	private Boolean debugMode;
+	private final ObservableList<VaultSettings> directories = FXCollections.observableArrayList();
+	private final BooleanProperty checkForUpdates = new SimpleBooleanProperty(DEFAULT_CHECK_FOR_UDPATES);
+	private final IntegerProperty port = new SimpleIntegerProperty(DEFAULT_PORT);
+	private final BooleanProperty useIpv6 = new SimpleBooleanProperty(DEFAULT_USE_IPV6);
+	private final IntegerProperty numTrayNotifications = new SimpleIntegerProperty(DEFAULT_NUM_TRAY_NOTIFICATIONS);
+	private final StringProperty preferredGvfsScheme = new SimpleStringProperty(DEFAULT_GVFS_SCHEME);
+	private final BooleanProperty debugMode = new SimpleBooleanProperty(DEFAULT_DEBUG_MODE);
 
 	/**
 	 * Package-private constructor; use {@link SettingsProvider}.
 	 */
 	Settings(Consumer<Settings> saveCmd) {
 		this.saveCmd = saveCmd;
+		directories.addListener((ListChangeListener.Change<? extends VaultSettings> change) -> this.save());
+		checkForUpdates.addListener(this::somethingChanged);
+		port.addListener(this::somethingChanged);
+		useIpv6.addListener(this::somethingChanged);
+		numTrayNotifications.addListener(this::somethingChanged);
+		preferredGvfsScheme.addListener(this::somethingChanged);
+		debugMode.addListener(this::somethingChanged);
 	}
 
-	public void save() {
-		saveCmd.accept(this);
+	private void somethingChanged(ObservableValue<?> observable, Object oldValue, Object newValue) {
+		this.save();
+	}
+
+	void save() {
+		if (saveCmd != null) {
+			saveCmd.accept(this);
+		}
 	}
 
 	/* Getter/Setter */
 
-	public List<Vault> getDirectories() {
-		if (directories == null) {
-			directories = new ArrayList<>();
-		}
+	public ObservableList<VaultSettings> getDirectories() {
 		return directories;
 	}
 
-	public void setDirectories(List<Vault> directories) {
-		this.directories = directories;
+	public BooleanProperty checkForUpdates() {
+		return checkForUpdates;
 	}
 
-	public boolean isCheckForUpdatesEnabled() {
-		// not false meaning "null or true", so that true is the default value, if not setting exists yet.
-		return !Boolean.FALSE.equals(checkForUpdatesEnabled);
+	public IntegerProperty port() {
+		return port;
 	}
 
-	public void setCheckForUpdatesEnabled(boolean checkForUpdatesEnabled) {
-		this.checkForUpdatesEnabled = checkForUpdatesEnabled;
+	public BooleanProperty useIpv6() {
+		return useIpv6;
 	}
 
-	public void setPort(int port) {
-		if (!isPortValid(port)) {
-			throw new IllegalArgumentException("Invalid port");
-		}
-		this.port = port;
+	public IntegerProperty numTrayNotifications() {
+		return numTrayNotifications;
 	}
 
-	public int getPort() {
-		if (port == null || !isPortValid(port)) {
-			return DEFAULT_PORT;
-		} else {
-			return port;
-		}
+	public StringProperty preferredGvfsScheme() {
+		return preferredGvfsScheme;
 	}
 
-	public boolean isPortValid(int port) {
-		return port == DEFAULT_PORT || port >= MIN_PORT && port <= MAX_PORT || port == 0;
-	}
-
-	public boolean shouldUseIpv6() {
-		return useIpv6 == null ? DEFAULT_USE_IPV6 : useIpv6;
-	}
-
-	public void setUseIpv6(boolean useIpv6) {
-		this.useIpv6 = useIpv6;
-	}
-
-	public Integer getNumTrayNotifications() {
-		return numTrayNotifications == null ? DEFAULT_NUM_TRAY_NOTIFICATIONS : numTrayNotifications;
-	}
-
-	public void setNumTrayNotifications(Integer numTrayNotifications) {
-		this.numTrayNotifications = numTrayNotifications;
-	}
-
-	public String getPreferredGvfsScheme() {
-		return preferredGvfsScheme == null ? DEFAULT_GVFS_SCHEME : preferredGvfsScheme;
-	}
-
-	public void setPreferredGvfsScheme(String preferredGvfsScheme) {
-		this.preferredGvfsScheme = preferredGvfsScheme;
-	}
-
-	public boolean getDebugMode() {
-		return debugMode == null ? DEFAULT_DEBUG_MODE : debugMode;
-	}
-
-	public void setDebugMode(boolean debugMode) {
-		this.debugMode = debugMode;
+	public BooleanProperty debugMode() {
+		return debugMode;
 	}
 
 }

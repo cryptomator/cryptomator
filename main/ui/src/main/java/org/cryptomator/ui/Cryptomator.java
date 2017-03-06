@@ -15,15 +15,15 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.function.Consumer;
 
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.ui.util.ApplicationVersion;
 import org.cryptomator.ui.util.SingleInstanceManager;
 import org.cryptomator.ui.util.SingleInstanceManager.RemoteInstance;
-import org.eclipse.jetty.util.ConcurrentHashSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +33,7 @@ public class Cryptomator {
 
 	public static final CompletableFuture<Consumer<File>> OPEN_FILE_HANDLER = new CompletableFuture<>();
 	private static final Logger LOG = LoggerFactory.getLogger(Cryptomator.class);
-	private static final Set<Runnable> SHUTDOWN_TASKS = new ConcurrentHashSet<>();
+	private static final ConcurrentMap<Runnable, Boolean> SHUTDOWN_TASKS = new ConcurrentHashMap<>();
 
 	public static void main(String[] args) {
 		LOG.info("Starting Cryptomator {} on {} {} ({})", ApplicationVersion.orElse("SNAPSHOT"), SystemUtils.OS_NAME, SystemUtils.OS_VERSION, SystemUtils.OS_ARCH);
@@ -91,7 +91,7 @@ public class Cryptomator {
 	}
 
 	public static void addShutdownTask(Runnable r) {
-		SHUTDOWN_TASKS.add(r);
+		SHUTDOWN_TASKS.put(r, Boolean.TRUE);
 	}
 
 	public static void removeShutdownTask(Runnable r) {
@@ -102,7 +102,7 @@ public class Cryptomator {
 		@Override
 		public void run() {
 			LOG.debug("Shutting down");
-			SHUTDOWN_TASKS.forEach(r -> {
+			SHUTDOWN_TASKS.keySet().forEach(r -> {
 				try {
 					r.run();
 				} catch (RuntimeException e) {

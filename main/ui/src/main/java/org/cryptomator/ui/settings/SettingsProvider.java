@@ -10,13 +10,17 @@ package org.cryptomator.ui.settings;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Reader;
+import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -25,16 +29,17 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.common.LazyInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 @Singleton
 public class SettingsProvider implements Provider<Settings> {
@@ -54,16 +59,21 @@ public class SettingsProvider implements Provider<Settings> {
 		}
 	}
 
-	private final ObjectMapper objectMapper;
 	private final ScheduledExecutorService saveScheduler = Executors.newSingleThreadScheduledExecutor();
 	private final AtomicReference<ScheduledFuture<?>> scheduledSaveCmd = new AtomicReference<>();
+	private final AtomicReference<Settings> settings = new AtomicReference<>();
+	private final SettingsJsonAdapter settingsJsonAdapter = new SettingsJsonAdapter(this::scheduleSave);
+	private final Gson gson;
 
 	@Inject
-	public SettingsProvider(@Named("VaultJsonMapper") ObjectMapper objectMapper) {
-		this.objectMapper = objectMapper;
+	public SettingsProvider() {
+		this.gson = new GsonBuilder() //
+				.setPrettyPrinting().setLenient().disableHtmlEscaping() //
+				.registerTypeAdapter(Settings.class, settingsJsonAdapter) //
+				.create();
 	}
 
-	private Path getSettingsPath() throws IOException {
+	private Path getSettingsPath() {
 		final String settingsPathProperty = System.getProperty("cryptomator.settingsPath");
 		return Optional.ofNullable(settingsPathProperty).filter(StringUtils::isNotBlank).map(this::replaceHomeDir).map(FileSystems.getDefault()::getPath).orElse(DEFAULT_SETTINGS_PATH);
 	}
@@ -78,14 +88,19 @@ public class SettingsProvider implements Provider<Settings> {
 
 	@Override
 	public Settings get() {
-		final Settings settings = new Settings(this::scheduleSave);
-		try {
-			final Path settingsPath = getSettingsPath();
-			final InputStream in = Files.newInputStream(settingsPath, StandardOpenOption.READ);
-			objectMapper.readerForUpdating(settings).readValue(in);
+		return LazyInitializer.initializeLazily(settings, this::load);
+	}
+
+	private Settings load() {
+		Settings settings;
+		final Path settingsPath = getSettingsPath();
+		try (InputStream in = Files.newInputStream(settingsPath, StandardOpenOption.READ); //
+				Reader reader = new InputStreamReader(in, StandardCharsets.UTF_8)) {
+			settings = gson.fromJson(reader, Settings.class);
 			LOG.info("Settings loaded from " + settingsPath);
 		} catch (IOException e) {
 			LOG.info("Failed to load settings, creating new one.");
+			settings = new Settings(this::scheduleSave);
 		}
 		return settings;
 	}
@@ -104,13 +119,15 @@ public class SettingsProvider implements Provider<Settings> {
 	}
 
 	private void save(Settings settings) {
-		Objects.requireNonNull(settings);
+		assert settings != null : "method should only be invoked by #scheduleSave, which checks for null";
+		final Path settingsPath = getSettingsPath();
 		try {
-			final Path settingsPath = getSettingsPath();
 			Files.createDirectories(settingsPath.getParent());
-			final OutputStream out = Files.newOutputStream(settingsPath, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
-			objectMapper.writeValue(out, settings);
-			LOG.info("Settings saved to " + settingsPath);
+			try (OutputStream out = Files.newOutputStream(settingsPath, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING); //
+					Writer writer = new OutputStreamWriter(out, StandardCharsets.UTF_8)) {
+				gson.toJson(settings, writer);
+				LOG.info("Settings saved to " + settingsPath);
+			}
 		} catch (IOException e) {
 			LOG.error("Failed to save settings.", e);
 		}
