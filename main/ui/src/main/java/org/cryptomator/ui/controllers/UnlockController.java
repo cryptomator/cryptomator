@@ -86,7 +86,13 @@ public class UnlockController extends LocalizedFXMLViewController {
 	private CheckBox savePassword;
 
 	@FXML
+	private CheckBox mountAfterUnlock;
+
+	@FXML
 	private TextField mountName;
+
+	@FXML
+	private CheckBox revealAfterMount;
 
 	@FXML
 	private Label winDriveLetterLabel;
@@ -110,6 +116,8 @@ public class UnlockController extends LocalizedFXMLViewController {
 	public void initialize() {
 		advancedOptions.managedProperty().bind(advancedOptions.visibleProperty());
 		unlockButton.disableProperty().bind(passwordField.textProperty().isEmpty());
+		mountName.disableProperty().bind(mountAfterUnlock.selectedProperty().not());
+		revealAfterMount.disableProperty().bind(mountAfterUnlock.selectedProperty().not());
 		mountName.addEventFilter(KeyEvent.KEY_TYPED, this::filterAlphanumericKeyEvents);
 		mountName.textProperty().addListener(this::mountNameDidChange);
 		savePassword.setDisable(!keychainAccess.isPresent());
@@ -129,6 +137,11 @@ public class UnlockController extends LocalizedFXMLViewController {
 	}
 
 	void setVault(Vault vault) {
+		// TODO overheadhunter refactor
+		if (this.vault != null) {
+			this.vault.getVaultSettings().mountAfterUnlock().unbind();
+			this.vault.getVaultSettings().revealAfterMount().unbind();
+		}
 		// trigger "default" change to refresh key bindings:
 		unlockButton.setDefaultButton(false);
 		unlockButton.setDefaultButton(true);
@@ -165,6 +178,10 @@ public class UnlockController extends LocalizedFXMLViewController {
 				Arrays.fill(storedPw, ' ');
 			}
 		}
+		mountAfterUnlock.setSelected(this.vault.getVaultSettings().mountAfterUnlock().get());
+		revealAfterMount.setSelected(this.vault.getVaultSettings().revealAfterMount().get());
+		this.vault.getVaultSettings().mountAfterUnlock().bind(mountAfterUnlock.selectedProperty());
+		this.vault.getVaultSettings().revealAfterMount().bind(revealAfterMount.selectedProperty());
 	}
 
 	// ****************************************
@@ -318,8 +335,12 @@ public class UnlockController extends LocalizedFXMLViewController {
 	private void unlock(CharSequence password) {
 		try {
 			vault.unlock(password);
-			vault.mount();
-			vault.reveal();
+			if (mountAfterUnlock.isSelected()) {
+				vault.mount();
+				if (revealAfterMount.isSelected()) {
+					vault.reveal();
+				}
+			}
 			Platform.runLater(() -> {
 				messageText.setText(null);
 				listener.ifPresent(lstnr -> lstnr.didUnlock(vault));

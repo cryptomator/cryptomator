@@ -15,7 +15,9 @@ import java.util.UUID;
 import org.apache.commons.lang3.StringUtils;
 import org.fxmisc.easybind.EasyBind;
 
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -28,6 +30,8 @@ public class VaultSettings {
 	private final ObjectProperty<Path> path = new SimpleObjectProperty<>();
 	private final StringProperty mountName = new SimpleStringProperty();
 	private final StringProperty winDriveLetter = new SimpleStringProperty();
+	private final BooleanProperty mountAfterUnlock = new SimpleBooleanProperty();
+	private final BooleanProperty revealAfterMount = new SimpleBooleanProperty();
 
 	public VaultSettings(Settings settings, String id) {
 		this.settings = settings;
@@ -37,6 +41,7 @@ public class VaultSettings {
 		path.addListener(this::somethingChanged);
 		mountName.addListener(this::somethingChanged);
 		winDriveLetter.addListener(this::somethingChanged);
+		mountAfterUnlock.addListener(this::somethingChanged);
 	}
 
 	private void somethingChanged(ObservableValue<?> observable, Object oldValue, Object newValue) {
@@ -105,6 +110,14 @@ public class VaultSettings {
 
 	public StringProperty winDriveLetter() {
 		return winDriveLetter;
+	}
+
+	public BooleanProperty mountAfterUnlock() {
+		return mountAfterUnlock;
+	}
+
+	public BooleanProperty revealAfterMount() {
+		return revealAfterMount;
 	}
 
 	/* Hashcode/Equals */

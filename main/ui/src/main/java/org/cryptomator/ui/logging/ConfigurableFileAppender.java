@@ -50,12 +50,12 @@ public class ConfigurableFileAppender extends AbstractOutputStreamAppender<FileM
 	public static AbstractAppender createAppender(@PluginAttribute("name") final String name, @PluginAttribute("pathPropertyName") final String pathPropertyName, @PluginAttribute("append") final String append,
 			@PluginElement("Layout") Layout<? extends Serializable> layout) {
 		if (name == null) {
-			LOGGER.error("No name provided for HomeDirectoryAwareFileAppender");
+			LOGGER.error("No name provided for ConfigurableFileAppender");
 			return null;
 		}
 
 		if (pathPropertyName == null) {
-			LOGGER.error("No pathPropertyName provided for HomeDirectoryAwareFileAppender with name " + name);
+			LOGGER.error("No pathPropertyName provided for ConfigurableFileAppender with name " + name);
 			return null;
 		}
 
