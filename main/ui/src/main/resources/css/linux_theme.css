@@ -137,6 +137,10 @@
 .text-input:focused {
 	-fx-background-color: COLOR_BORDER_DARK, #FFF;
 }
+.text-input:disabled {
+	-fx-background-color: COLOR_BORDER, COLOR_BACKGROUND;
+	-fx-text-fill: COLOR_TEXT_DISABLED;
+}
 
 /****************************************************************************
  *																			*
@@ -310,7 +314,7 @@
 }
 .check-box > .box {
 	-fx-padding: 3px;
-	-fx-background-color: COLOR_BORDER_DARK, #FFF;
+	-fx-background-color: COLOR_BORDER, #FFF;
 	-fx-background-insets: 0, 1;
 }
 .check-box > .box > .mark {
@@ -318,11 +322,20 @@
 	-fx-padding: 4px;
 	-fx-shape: "M-1,4, L-1,5.5 L3.5,8.5 L9,0 L9,-1 L7,-1 L3,6 L1,4 Z";
 }
-.check-box:selected > .box {
-	-fx-background-color: COLOR_BORDER_DARK, COLOR_BACKGROUND;
+/* armed: */
+.check-box:armed > .box {
+	-fx-background-color: COLOR_BORDER_DARK, #FFF;
 }
+/* selected: */
 .check-box:selected > .box > .mark {
 	-fx-background-color: COLOR_TEXT;
+}
+/* disabled: */
+.check-box:disabled > .box {
+	-fx-background-color: COLOR_BORDER, COLOR_BACKGROUND;
+}
+.check-box:disabled:selected > .box > .mark {
+	-fx-background-color: COLOR_TEXT_DISABLED;
 }
 
 /*******************************************************************************

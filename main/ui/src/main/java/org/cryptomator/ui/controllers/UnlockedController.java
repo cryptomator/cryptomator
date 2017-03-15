@@ -92,7 +92,7 @@ public class UnlockedController extends LocalizedFXMLViewController {
 			return;
 		}
 
-		if (!vault.get().isMounted()) {
+		if (newVault.getVaultSettings().mountAfterUnlock().get() && !newVault.isMounted()) {
 			// TODO Markus Kreusch #393: hyperlink auf FAQ oder sowas?
 			messageLabel.setText(localization.getString("unlocked.label.mountFailed"));
 		}

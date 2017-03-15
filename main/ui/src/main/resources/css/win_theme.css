@@ -140,6 +140,10 @@
 .text-input:focused {
 	-fx-background-color: COLOR_BORDER_FOCUS, #FFF;
 }
+.text-input:disabled {
+	-fx-background-color: COLOR_BORDER, #F1F1F1;
+	-fx-text-fill: COLOR_TEXT_DISABLED;
+}
 
 /****************************************************************************
  *																			*
@@ -362,17 +366,26 @@
     -fx-border-color: COLOR_BORDER;
     -fx-background-color: #FFF;
 }
-.check-box:hover > .box,
-.check-box:armed > .box {
-	-fx-border-color: COLOR_BORDER_FOCUS;
-}
 .check-box > .box > .mark {
     -fx-background-color: transparent;
     -fx-padding: 4px;
     -fx-shape: "M-1,4, L-1,5.5 L3.5,8.5 L9,0 L9,-1 L7,-1 L3,6 L1,4 Z";
 }
+/* armed/hover: */
+.check-box:hover > .box,
+.check-box:armed > .box {
+	-fx-border-color: COLOR_BORDER_FOCUS;
+}
+/* selected: */
 .check-box:selected > .box > .mark {
     -fx-background-color: black;
+}
+/* disabled: */
+.check-box:disabled > .box {
+	-fx-background-color: #F1F1F1;
+}
+.check-box:disabled:selected > .box > .mark {
+	-fx-background-color: COLOR_TEXT_DISABLED;
 }
 
 /*******************************************************************************

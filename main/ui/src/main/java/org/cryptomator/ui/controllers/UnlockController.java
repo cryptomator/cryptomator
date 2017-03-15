@@ -324,8 +324,7 @@ public class UnlockController extends LocalizedFXMLViewController {
 
 	@FXML
 	private void didClickUnlockButton(ActionEvent event) {
-		mountName.setDisable(true);
-		advancedOptionsButton.setDisable(true);
+		advancedOptions.setDisable(true);
 		progressIndicator.setVisible(true);
 		downloadsPageLink.setVisible(false);
 		CharSequence password = passwordField.getCharacters();
@@ -376,8 +375,7 @@ public class UnlockController extends LocalizedFXMLViewController {
 			});
 		} finally {
 			Platform.runLater(() -> {
-				mountName.setDisable(false);
-				advancedOptionsButton.setDisable(false);
+				advancedOptions.setDisable(false);
 				progressIndicator.setVisible(false);
 			});
 		}
