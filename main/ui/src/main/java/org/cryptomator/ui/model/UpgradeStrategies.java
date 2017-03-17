@@ -8,7 +8,7 @@ package org.cryptomator.ui.model;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Optional;
+import java.util.Objects;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -23,13 +23,11 @@ public class UpgradeStrategies {
 		strategies = Collections.unmodifiableList(Arrays.asList(upgrader1, upgrader2, upgrader3));
 	}
 
-	public Optional<UpgradeStrategy> getUpgradeStrategy(Vault vault) {
-		if (vault == null) {
-			return Optional.empty();
-		}
+	public UpgradeStrategy getUpgradeStrategy(Vault vault) {
+		Objects.requireNonNull(vault);
 		return strategies.stream().filter(strategy -> {
 			return strategy.isApplicable(vault);
-		}).findFirst();
+		}).findFirst().orElse(null);
 	}
 
 }

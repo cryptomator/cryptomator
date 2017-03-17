@@ -27,6 +27,7 @@ import javax.inject.Singleton;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.ui.controls.DirectoryListCell;
 import org.cryptomator.ui.model.UpgradeStrategies;
+import org.cryptomator.ui.model.UpgradeStrategy;
 import org.cryptomator.ui.model.Vault;
 import org.cryptomator.ui.model.VaultFactory;
 import org.cryptomator.ui.model.VaultList;
@@ -35,6 +36,7 @@ import org.cryptomator.ui.settings.Settings;
 import org.cryptomator.ui.settings.VaultSettings;
 import org.cryptomator.ui.util.DialogBuilderUtil;
 import org.fxmisc.easybind.EasyBind;
+import org.fxmisc.easybind.monadic.MonadicBinding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -79,20 +81,20 @@ public class MainController extends LocalizedFXMLViewController {
 	private final Provider<UnlockedController> unlockedControllerProvider;
 	private final Lazy<ChangePasswordController> changePasswordController;
 	private final Lazy<SettingsController> settingsController;
-	private final Lazy<UpgradeStrategies> upgradeStrategies;
 	private final ObjectProperty<AbstractFXMLViewController> activeController = new SimpleObjectProperty<>();
 	private final VaultList vaults;
 	private final ObjectProperty<Vault> selectedVault = new SimpleObjectProperty<>();
 	private final BooleanExpression isSelectedVaultUnlocked = BooleanBinding.booleanExpression(EasyBind.select(selectedVault).selectObject(Vault::unlockedProperty).orElse(false));
 	private final BooleanExpression isSelectedVaultValid = BooleanBinding.booleanExpression(EasyBind.monadic(selectedVault).map(Vault::isValidVaultDirectory).orElse(false));
 	private final BooleanExpression canEditSelectedVault = selectedVault.isNotNull().and(isSelectedVaultUnlocked.not());
+	private final MonadicBinding<UpgradeStrategy> upgradeStrategyForSelectedVault;
 	private final BooleanBinding isShowingSettings;
 	private final Map<Vault, UnlockedController> unlockedVaults = new HashMap<>();
 
 	@Inject
 	public MainController(@Named("mainWindow") Stage mainWindow, Localization localization, Settings settings, VaultFactory vaultFactoy, Lazy<WelcomeController> welcomeController,
 			Lazy<InitializeController> initializeController, Lazy<NotFoundController> notFoundController, Lazy<UpgradeController> upgradeController, Lazy<UnlockController> unlockController,
-			Provider<UnlockedController> unlockedControllerProvider, Lazy<ChangePasswordController> changePasswordController, Lazy<SettingsController> settingsController, Lazy<UpgradeStrategies> upgradeStrategies,
+			Provider<UnlockedController> unlockedControllerProvider, Lazy<ChangePasswordController> changePasswordController, Lazy<SettingsController> settingsController, UpgradeStrategies upgradeStrategies,
 			VaultList vaults) {
 		super(localization);
 		this.mainWindow = mainWindow;
@@ -106,11 +108,11 @@ public class MainController extends LocalizedFXMLViewController {
 		this.unlockedControllerProvider = unlockedControllerProvider;
 		this.changePasswordController = changePasswordController;
 		this.settingsController = settingsController;
-		this.upgradeStrategies = upgradeStrategies;
 		this.vaults = vaults;
 
 		// derived bindings:
 		this.isShowingSettings = activeController.isEqualTo(settingsController.get());
+		this.upgradeStrategyForSelectedVault = EasyBind.monadic(selectedVault).map(upgradeStrategies::getUpgradeStrategy);
 	}
 
 	@FXML
@@ -151,7 +153,7 @@ public class MainController extends LocalizedFXMLViewController {
 		selectedVault.bind(vaultList.getSelectionModel().selectedItemProperty());
 		removeVaultButton.disableProperty().bind(canEditSelectedVault.not());
 		emptyListInstructions.visibleProperty().bind(Bindings.isEmpty(vaults));
-		changePasswordMenuItem.visibleProperty().bind(isSelectedVaultValid);
+		changePasswordMenuItem.visibleProperty().bind(isSelectedVaultValid.and(Bindings.isNull(upgradeStrategyForSelectedVault)));
 
 		EasyBind.subscribe(selectedVault, this::selectedVaultDidChange);
 		EasyBind.subscribe(activeController, this::activeControllerDidChange);
@@ -292,7 +294,7 @@ public class MainController extends LocalizedFXMLViewController {
 			this.showUnlockedView(newValue);
 		} else if (!newValue.doesVaultDirectoryExist()) {
 			this.showNotFoundView();
-		} else if (newValue.isValidVaultDirectory() && upgradeStrategies.get().getUpgradeStrategy(newValue).isPresent()) {
+		} else if (newValue.isValidVaultDirectory() && upgradeStrategyForSelectedVault.isPresent()) {
 			this.showUpgradeView();
 		} else if (newValue.isValidVaultDirectory()) {
 			this.showUnlockView();

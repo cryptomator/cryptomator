@@ -32,7 +32,7 @@ import javafx.scene.control.ProgressIndicator;
 
 public class UpgradeController extends LocalizedFXMLViewController {
 
-	private final ObjectProperty<Optional<UpgradeStrategy>> strategy = new SimpleObjectProperty<>();
+	private final ObjectProperty<UpgradeStrategy> strategy = new SimpleObjectProperty<>();
 	private final UpgradeStrategies strategies;
 	private final AsyncTaskService asyncTaskService;
 	private Optional<UpgradeListener> listener = Optional.empty();
@@ -68,12 +68,8 @@ public class UpgradeController extends LocalizedFXMLViewController {
 
 	@Override
 	protected void initialize() {
-		upgradeTitleLabel.textProperty().bind(EasyBind.monadic(strategy).map(instruction -> {
-			return instruction.map(this::upgradeTitle).orElse("");
-		}).orElse(""));
-		upgradeMsgLabel.textProperty().bind(EasyBind.monadic(strategy).map(instruction -> {
-			return instruction.map(this::upgradeMessage).orElse("");
-		}).orElse(""));
+		upgradeTitleLabel.textProperty().bind(EasyBind.monadic(strategy).map(this::upgradeTitle).orElse(""));
+		upgradeMsgLabel.textProperty().bind(EasyBind.monadic(strategy).map(this::upgradeMessage).orElse(""));
 
 		BooleanExpression passwordProvided = passwordField.textProperty().isNotEmpty().and(passwordField.disabledProperty().not());
 		BooleanExpression syncFinished = confirmationCheckbox.selectedProperty();
@@ -112,7 +108,7 @@ public class UpgradeController extends LocalizedFXMLViewController {
 
 	@FXML
 	private void didClickUpgradeButton(ActionEvent event) {
-		strategy.getValue().ifPresent(this::upgrade);
+		EasyBind.monadic(strategy).ifPresent(this::upgrade);
 	}
 
 	private void upgrade(UpgradeStrategy instruction) {
@@ -138,8 +134,8 @@ public class UpgradeController extends LocalizedFXMLViewController {
 
 	private void showNextUpgrade() {
 		errorLabel.setText(null);
-		Optional<UpgradeStrategy> nextStrategy = strategies.getUpgradeStrategy(vault);
-		if (nextStrategy.isPresent()) {
+		UpgradeStrategy nextStrategy = strategies.getUpgradeStrategy(vault);
+		if (nextStrategy != null) {
 			strategy.set(nextStrategy);
 		} else {
 			listener.ifPresent(UpgradeListener::didUpgrade);
