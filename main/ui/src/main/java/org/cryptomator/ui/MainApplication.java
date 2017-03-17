@@ -9,6 +9,7 @@
 package org.cryptomator.ui;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -97,8 +98,17 @@ public class MainApplication extends Application {
 	}
 
 	private void setupStylesheets() {
-		Font.loadFont(getClass().getResourceAsStream("/css/ionicons.ttf"), 12.0);
+		loadFont("/css/ionicons.ttf");
+		loadFont("/css/fontawesome-webfont.ttf");
 		chooseNativeStylesheet();
+	}
+
+	private void loadFont(String resourcePath) {
+		try (InputStream in = getClass().getResourceAsStream(resourcePath)) {
+			Font.loadFont(in, 12.0);
+		} catch (IOException e) {
+			LOG.warn("Error loading font from path: " + resourcePath, e);
+		}
 	}
 
 	private void initializeStage(Stage primaryStage, MainController mainCtrl) {

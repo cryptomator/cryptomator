@@ -51,6 +51,9 @@
 	-fx-font-family: Ionicons;
 }
 
+.fontawesome {
+	-fx-font-family: FontAwesome;
+}
 .caption-label {
 	-fx-font-size: 0.9em;
 }
