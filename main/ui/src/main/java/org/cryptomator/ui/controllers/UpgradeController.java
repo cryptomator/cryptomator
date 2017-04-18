@@ -5,7 +5,6 @@
  *******************************************************************************/
 package org.cryptomator.ui.controllers;
 
-import java.net.URL;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -25,12 +24,14 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
+import javafx.scene.layout.GridPane;
 
-public class UpgradeController extends LocalizedFXMLViewController {
+public class UpgradeController implements ViewController {
 
 	private final ObjectProperty<UpgradeStrategy> strategy = new SimpleObjectProperty<>();
 	private final UpgradeStrategies strategies;
@@ -40,7 +41,6 @@ public class UpgradeController extends LocalizedFXMLViewController {
 
 	@Inject
 	public UpgradeController(Localization localization, UpgradeStrategies strategies, AsyncTaskService asyncTaskService) {
-		super(localization);
 		this.strategies = strategies;
 		this.asyncTaskService = asyncTaskService;
 	}
@@ -66,8 +66,11 @@ public class UpgradeController extends LocalizedFXMLViewController {
 	@FXML
 	private Label errorLabel;
 
+	@FXML
+	private GridPane root;
+
 	@Override
-	protected void initialize() {
+	public void initialize() {
 		upgradeTitleLabel.textProperty().bind(EasyBind.monadic(strategy).map(this::upgradeTitle).orElse(""));
 		upgradeMsgLabel.textProperty().bind(EasyBind.monadic(strategy).map(this::upgradeMessage).orElse(""));
 
@@ -77,8 +80,8 @@ public class UpgradeController extends LocalizedFXMLViewController {
 	}
 
 	@Override
-	protected URL getFxmlResourceUrl() {
-		return getClass().getResource("/fxml/upgrade.fxml");
+	public Parent getRoot() {
+		return root;
 	}
 
 	void setVault(Vault vault) {

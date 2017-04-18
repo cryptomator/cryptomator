@@ -8,7 +8,6 @@
  ******************************************************************************/
 package org.cryptomator.ui.controllers;
 
-import java.net.URL;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -27,6 +26,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Side;
+import javafx.scene.Parent;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart.Data;
@@ -37,14 +37,16 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
+import javafx.scene.layout.VBox;
 import javafx.stage.PopupWindow.AnchorLocation;
 import javafx.util.Duration;
 
-public class UnlockedController extends LocalizedFXMLViewController {
+public class UnlockedController implements ViewController {
 
 	private static final int IO_SAMPLING_STEPS = 100;
 	private static final double IO_SAMPLING_INTERVAL = 0.25;
 
+	private final Localization localization;
 	private final AsyncTaskService asyncTaskService;
 	private final ObjectProperty<Vault> vault = new SimpleObjectProperty<>();
 	private Optional<LockListener> listener = Optional.empty();
@@ -68,9 +70,12 @@ public class UnlockedController extends LocalizedFXMLViewController {
 	@FXML
 	private MenuItem revealVaultMenuItem;
 
+	@FXML
+	private VBox root;
+
 	@Inject
 	public UnlockedController(Localization localization, AsyncTaskService asyncTaskService) {
-		super(localization);
+		this.localization = localization;
 		this.asyncTaskService = asyncTaskService;
 	}
 
@@ -83,8 +88,8 @@ public class UnlockedController extends LocalizedFXMLViewController {
 	}
 
 	@Override
-	protected URL getFxmlResourceUrl() {
-		return getClass().getResource("/fxml/unlocked.fxml");
+	public Parent getRoot() {
+		return root;
 	}
 
 	private void vaultChanged(Vault newVault) {

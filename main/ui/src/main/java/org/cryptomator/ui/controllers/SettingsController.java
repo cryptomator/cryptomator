@@ -8,10 +8,10 @@
  ******************************************************************************/
 package org.cryptomator.ui.controllers;
 
-import java.net.URL;
 import java.util.Optional;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
 
 import org.apache.commons.lang3.CharUtils;
@@ -22,22 +22,27 @@ import org.cryptomator.ui.settings.Localization;
 import javafx.beans.binding.Bindings;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.VBox;
 
 @Singleton
-public class SettingsController extends LocalizedFXMLViewController {
+public class SettingsController implements ViewController {
 
+	private final Localization localization;
 	private final Settings settings;
+	private final Optional<String> applicationVersion;
 
 	@Inject
-	public SettingsController(Localization localization, Settings settings) {
-		super(localization);
+	public SettingsController(Localization localization, Settings settings, @Named("applicationVersion") Optional<String> applicationVersion) {
+		this.localization = localization;
 		this.settings = settings;
+		this.applicationVersion = applicationVersion;
 	}
 
 	@FXML
@@ -67,6 +72,9 @@ public class SettingsController extends LocalizedFXMLViewController {
 	@FXML
 	private CheckBox debugModeCheckbox;
 
+	@FXML
+	private VBox root;
+
 	@Override
 	public void initialize() {
 		checkForUpdatesCheckbox.setDisable(areUpdatesManagedExternally());
@@ -78,7 +86,7 @@ public class SettingsController extends LocalizedFXMLViewController {
 		useIpv6Label.setVisible(SystemUtils.IS_OS_WINDOWS);
 		useIpv6Checkbox.setVisible(SystemUtils.IS_OS_WINDOWS);
 		useIpv6Checkbox.setSelected(SystemUtils.IS_OS_WINDOWS && settings.useIpv6().get());
-		versionLabel.setText(String.format(localization.getString("settings.version.label"), applicationVersion().orElse("SNAPSHOT")));
+		versionLabel.setText(String.format(localization.getString("settings.version.label"), applicationVersion.orElse("SNAPSHOT")));
 		prefGvfsSchemeLabel.setVisible(SystemUtils.IS_OS_LINUX);
 		prefGvfsScheme.setVisible(SystemUtils.IS_OS_LINUX);
 		prefGvfsScheme.getItems().add("dav");
@@ -93,12 +101,8 @@ public class SettingsController extends LocalizedFXMLViewController {
 	}
 
 	@Override
-	protected URL getFxmlResourceUrl() {
-		return getClass().getResource("/fxml/settings.fxml");
-	}
-
-	private Optional<String> applicationVersion() {
-		return Optional.ofNullable(getClass().getPackage().getImplementationVersion());
+	public Parent getRoot() {
+		return root;
 	}
 
 	@FXML

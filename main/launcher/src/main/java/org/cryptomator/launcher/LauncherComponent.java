@@ -3,7 +3,7 @@ package org.cryptomator.launcher;
 import javax.inject.Singleton;
 
 import org.cryptomator.logging.DebugMode;
-import org.cryptomator.ui.controllers.MainController;
+import org.cryptomator.ui.controllers.ViewControllerLoader;
 
 import dagger.Component;
 
@@ -11,7 +11,7 @@ import dagger.Component;
 @Component(modules = LauncherModule.class)
 interface LauncherComponent {
 
-	MainController mainController();
+	ViewControllerLoader fxmlLoader();
 
 	DebugMode debugMode();
 

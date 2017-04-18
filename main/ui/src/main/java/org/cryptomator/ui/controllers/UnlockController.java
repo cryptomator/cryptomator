@@ -8,7 +8,6 @@
  ******************************************************************************/
 package org.cryptomator.ui.controllers;
 
-import java.net.URL;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Objects;
@@ -38,6 +37,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
@@ -52,11 +52,12 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.text.Text;
 import javafx.util.StringConverter;
 
-public class UnlockController extends LocalizedFXMLViewController {
+public class UnlockController implements ViewController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(UnlockController.class);
 
 	private final Application app;
+	private final Localization localization;
 	private final AsyncTaskService asyncTaskService;
 	private final WindowsDriveLetters driveLetters;
 	private final ChangeListener<Character> driveLetterChangeListener = this::winDriveLetterDidChange;
@@ -66,8 +67,8 @@ public class UnlockController extends LocalizedFXMLViewController {
 
 	@Inject
 	public UnlockController(Application app, Localization localization, AsyncTaskService asyncTaskService, WindowsDriveLetters driveLetters, Optional<KeychainAccess> keychainAccess) {
-		super(localization);
 		this.app = app;
+		this.localization = localization;
 		this.asyncTaskService = asyncTaskService;
 		this.driveLetters = driveLetters;
 		this.keychainAccess = keychainAccess;
@@ -112,6 +113,9 @@ public class UnlockController extends LocalizedFXMLViewController {
 	@FXML
 	private GridPane advancedOptions;
 
+	@FXML
+	private GridPane root;
+
 	@Override
 	public void initialize() {
 		advancedOptions.managedProperty().bind(advancedOptions.visibleProperty());
@@ -132,8 +136,8 @@ public class UnlockController extends LocalizedFXMLViewController {
 	}
 
 	@Override
-	protected URL getFxmlResourceUrl() {
-		return getClass().getResource("/fxml/unlock.fxml");
+	public Parent getRoot() {
+		return root;
 	}
 
 	void setVault(Vault vault) {

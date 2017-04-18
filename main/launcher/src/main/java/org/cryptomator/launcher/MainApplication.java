@@ -27,7 +27,7 @@ public class MainApplication extends Application {
 
 		launcherComponent.debugMode().initialize();
 
-		MainController mainCtrl = launcherComponent.mainController();
+		MainController mainCtrl = launcherComponent.fxmlLoader().load("/fxml/main.fxml");
 		mainCtrl.initStage(primaryStage);
 
 		primaryStage.show();

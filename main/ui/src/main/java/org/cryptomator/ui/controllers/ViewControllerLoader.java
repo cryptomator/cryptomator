@@ -1,0 +1,44 @@
+package org.cryptomator.ui.controllers;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UncheckedIOException;
+import java.util.Map;
+
+import javax.inject.Inject;
+import javax.inject.Provider;
+import javax.inject.Singleton;
+
+import org.cryptomator.ui.settings.Localization;
+
+import javafx.fxml.FXMLLoader;
+
+@Singleton
+public class ViewControllerLoader {
+
+	private final Map<Class<? extends ViewController>, Provider<ViewController>> controllerProviders;
+	private final Localization localization;
+
+	@Inject
+	public ViewControllerLoader(Map<Class<? extends ViewController>, Provider<ViewController>> controllerProviders, Localization localization) {
+		this.controllerProviders = controllerProviders;
+		this.localization = localization;
+	}
+
+	public <T extends ViewController> T load(String resourceName) {
+		FXMLLoader loader = new FXMLLoader();
+		loader.setControllerFactory(this::constructController);
+		loader.setResources(localization);
+		try (InputStream in = getClass().getResourceAsStream(resourceName)) {
+			loader.load(in);
+		} catch (IOException e) {
+			throw new UncheckedIOException("Error loading FXML: " + resourceName, e);
+		}
+		return loader.getController();
+	}
+
+	private ViewController constructController(Class<?> clazz) {
+		return controllerProviders.get(clazz).get();
+	}
+
+}

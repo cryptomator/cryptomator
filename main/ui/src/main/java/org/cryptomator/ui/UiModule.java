@@ -22,6 +22,7 @@ import org.cryptomator.common.settings.SettingsProvider;
 import org.cryptomator.frontend.webdav.WebDavServer;
 import org.cryptomator.jni.JniModule;
 import org.cryptomator.keychain.KeychainModule;
+import org.cryptomator.ui.controllers.ViewControllerModule;
 import org.cryptomator.ui.model.VaultComponent;
 import org.cryptomator.ui.util.DeferredCloser;
 import org.fxmisc.easybind.EasyBind;
@@ -32,7 +33,7 @@ import dagger.Module;
 import dagger.Provides;
 import javafx.beans.binding.Binding;
 
-@Module(includes = {CommonsModule.class, KeychainModule.class, JniModule.class}, subcomponents = {VaultComponent.class})
+@Module(includes = {ViewControllerModule.class, CommonsModule.class, KeychainModule.class, JniModule.class}, subcomponents = {VaultComponent.class})
 public class UiModule {
 
 	private static final Logger LOG = LoggerFactory.getLogger(UiModule.class);

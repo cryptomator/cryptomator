@@ -16,6 +16,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.Optional;
+import java.util.ResourceBundle;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -43,17 +44,20 @@ import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
+import javafx.scene.layout.VBox;
 
 @Singleton
-public class WelcomeController extends LocalizedFXMLViewController {
+public class WelcomeController implements ViewController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(WelcomeController.class);
 
 	private final Application app;
 	private final Optional<String> applicationVersion;
+	private final Localization localization;
 	private final Settings settings;
 	private final Comparator<String> semVerComparator;
 	private final AsyncTaskService asyncTaskService;
@@ -61,9 +65,9 @@ public class WelcomeController extends LocalizedFXMLViewController {
 	@Inject
 	public WelcomeController(Application app, @Named("applicationVersion") Optional<String> applicationVersion, Localization localization, Settings settings, @Named("SemVer") Comparator<String> semVerComparator,
 			AsyncTaskService asyncTaskService) {
-		super(localization);
 		this.app = app;
 		this.applicationVersion = applicationVersion;
+		this.localization = localization;
 		this.settings = settings;
 		this.semVerComparator = semVerComparator;
 		this.asyncTaskService = asyncTaskService;
@@ -81,8 +85,11 @@ public class WelcomeController extends LocalizedFXMLViewController {
 	@FXML
 	private Hyperlink updateLink;
 
+	@FXML
+	private VBox root;
+
 	@Override
-	public void initialize() {
+	public void initialize(URL location, ResourceBundle resources) {
 		if (areUpdatesManagedExternally()) {
 			checkForUpdatesContainer.setVisible(false);
 		} else if (settings.checkForUpdates().get()) {
@@ -91,8 +98,8 @@ public class WelcomeController extends LocalizedFXMLViewController {
 	}
 
 	@Override
-	protected URL getFxmlResourceUrl() {
-		return getClass().getResource("/fxml/welcome.fxml");
+	public Parent getRoot() {
+		return root;
 	}
 
 	// ****************************************
