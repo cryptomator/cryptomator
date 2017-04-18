@@ -12,7 +12,7 @@ import java.util.Objects;
 
 import javax.inject.Scope;
 
-import org.cryptomator.ui.settings.VaultSettings;
+import org.cryptomator.common.settings.VaultSettings;
 
 import dagger.Module;
 import dagger.Provides;

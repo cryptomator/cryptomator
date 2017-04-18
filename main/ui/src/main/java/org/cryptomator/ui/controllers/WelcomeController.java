@@ -15,6 +15,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Comparator;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -27,9 +28,8 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
+import org.cryptomator.common.settings.Settings;
 import org.cryptomator.ui.settings.Localization;
-import org.cryptomator.ui.settings.Settings;
-import org.cryptomator.ui.util.ApplicationVersion;
 import org.cryptomator.ui.util.AsyncTaskService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,14 +53,17 @@ public class WelcomeController extends LocalizedFXMLViewController {
 	private static final Logger LOG = LoggerFactory.getLogger(WelcomeController.class);
 
 	private final Application app;
+	private final Optional<String> applicationVersion;
 	private final Settings settings;
 	private final Comparator<String> semVerComparator;
 	private final AsyncTaskService asyncTaskService;
 
 	@Inject
-	public WelcomeController(Application app, Localization localization, Settings settings, @Named("SemVer") Comparator<String> semVerComparator, AsyncTaskService asyncTaskService) {
+	public WelcomeController(Application app, @Named("applicationVersion") Optional<String> applicationVersion, Localization localization, Settings settings, @Named("SemVer") Comparator<String> semVerComparator,
+			AsyncTaskService asyncTaskService) {
 		super(localization);
 		this.app = app;
+		this.applicationVersion = applicationVersion;
 		this.settings = settings;
 		this.semVerComparator = semVerComparator;
 		this.asyncTaskService = asyncTaskService;
@@ -112,7 +115,7 @@ public class WelcomeController extends LocalizedFXMLViewController {
 			HttpClientBuilder httpClientBuilder = HttpClients.custom() //
 					.disableCookieManagement() //
 					.setDefaultRequestConfig(requestConfig) //
-					.setUserAgent("Cryptomator VersionChecker/" + ApplicationVersion.orElse("SNAPSHOT"));
+					.setUserAgent("Cryptomator VersionChecker/" + applicationVersion.orElse("SNAPSHOT"));
 			LOG.debug("Checking for updates...");
 			try (CloseableHttpClient client = httpClientBuilder.build()) {
 				HttpGet request = new HttpGet("https://cryptomator.org/downloads/latestVersion.json");
@@ -148,7 +151,7 @@ public class WelcomeController extends LocalizedFXMLViewController {
 			// no version check possible on unsupported OS
 			return;
 		}
-		final String currentVersion = ApplicationVersion.orElse(null);
+		final String currentVersion = applicationVersion.orElse(null);
 		LOG.info("Current version: {}, lastest version: {}", currentVersion, latestVersion);
 		if (currentVersion != null && semVerComparator.compare(currentVersion, latestVersion) < 0) {
 			final String msg = String.format(localization.getString("welcome.newVersionMessage"), latestVersion, currentVersion);

@@ -33,11 +33,11 @@ import javax.script.ScriptException;
 import javax.swing.SwingUtilities;
 
 import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.common.settings.Settings;
 import org.cryptomator.jni.JniException;
 import org.cryptomator.jni.MacApplicationUiState;
 import org.cryptomator.jni.MacFunctions;
 import org.cryptomator.ui.settings.Localization;
-import org.cryptomator.ui.settings.Settings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,7 +45,7 @@ import javafx.application.Platform;
 import javafx.stage.Stage;
 
 @Singleton
-class ExitUtil {
+public class ExitUtil {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ExitUtil.class);
 
@@ -62,7 +62,15 @@ class ExitUtil {
 		this.macFunctions = macFunctions;
 	}
 
-	public void initExitHandler(Runnable exitCommand) {
+	public void initExitHandler() {
+		initExitHandler(ExitUtil::platformExitOnMainThread);
+	}
+
+	private static void platformExitOnMainThread() {
+		Platform.runLater(Platform::exit);
+	}
+
+	private void initExitHandler(Runnable exitCommand) {
 		if (SystemUtils.IS_OS_LINUX) {
 			initMinimizeExitHandler(exitCommand);
 		} else {

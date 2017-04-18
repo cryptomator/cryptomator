@@ -12,6 +12,10 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.stage.Window;
 
+/**
+ * @deprecated use https://github.com/TomasMikula/EasyBind#conditional-collection-membership
+ */
+@Deprecated
 public class ActiveWindowStyleSupport implements ChangeListener<Boolean> {
 
 	public static final String ACTIVE_WINDOW_STYLE_CLASS = "active-window";

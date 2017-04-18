@@ -10,6 +10,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 
 import org.cryptomator.cryptolib.api.Cryptor;
 import org.cryptomator.cryptolib.api.CryptorProvider;
@@ -36,6 +38,14 @@ public abstract class UpgradeStrategy {
 		this.localization = localization;
 		this.vaultVersionBeforeUpgrade = vaultVersionBeforeUpgrade;
 		this.vaultVersionAfterUpgrade = vaultVersionAfterUpgrade;
+	}
+
+	static SecureRandom strongSecureRandom() {
+		try {
+			return SecureRandom.getInstanceStrong();
+		} catch (NoSuchAlgorithmException e) {
+			throw new IllegalStateException("A strong algorithm must exist in every Java platform.", e);
+		}
 	}
 
 	/**

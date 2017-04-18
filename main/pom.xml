@@ -31,7 +31,7 @@
 		<cryptomator.cryptofs.version>1.2.0</cryptomator.cryptofs.version>
 		<cryptomator.webdav.version>0.4.0</cryptomator.webdav.version>
 		<cryptomator.jni.version>1.0.0</cryptomator.jni.version>
-		<log4j.version>2.1</log4j.version>
+		<log4j.version>2.8.1</log4j.version> <!-- keep in sync with https://github.com/edwgiz/maven-shaded-log4j-transformer (used in uber-jar), or wait for https://issues.apache.org/jira/browse/LOG4J2-954 fix -->
 		<slf4j.version>1.7.25</slf4j.version>
 		<junit.version>4.12</junit.version>
 		<junit.hierarchicalrunner.version>4.12.1</junit.hierarchicalrunner.version>
@@ -71,12 +71,6 @@
 			</dependency>
 			<dependency>
 				<groupId>org.cryptomator</groupId>
-				<artifactId>commons-test</artifactId>
-				<version>${project.version}</version>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.cryptomator</groupId>
 				<artifactId>keychain</artifactId>
 				<version>${project.version}</version>
 			</dependency>
@@ -85,7 +79,12 @@
 				<artifactId>ui</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-			
+			<dependency>
+				<groupId>org.cryptomator</groupId>
+				<artifactId>launcher</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
 			<!-- Cryptomator Libs -->
 			<dependency>
 				<groupId>org.cryptomator</groupId>
@@ -112,6 +111,11 @@
 			<dependency>
 				<groupId>org.slf4j</groupId>
 				<artifactId>slf4j-api</artifactId>
+				<version>${slf4j.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-simple</artifactId>
 				<version>${slf4j.version}</version>
 			</dependency>
 			<dependency>
@@ -212,12 +216,6 @@
 				<groupId>org.mockito</groupId>
 				<artifactId>mockito-core</artifactId>
 				<version>${mockito.version}</version>
-				<exclusions>
-					<exclusion>
-						<artifactId>hamcrest-core</artifactId>
-						<groupId>org.hamcrest</groupId>
-					</exclusion>
-				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>org.hamcrest</groupId>
@@ -228,25 +226,37 @@
 	</dependencyManagement>
 
 	<dependencies>
+		<!-- common dependencies for all modules -->
 		<dependency>
-			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-core</artifactId>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-slf4j-impl</artifactId>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-jul</artifactId>
+			<groupId>org.hamcrest</groupId>
+			<artifactId>hamcrest-all</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>de.bechte.junit</groupId>
+			<artifactId>junit-hierarchicalcontextrunner</artifactId>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 
 	<modules>
 		<module>commons</module>
-		<module>commons-test</module>
 		<module>keychain</module>
 		<module>ui</module>
+		<module>launcher</module>
 	</modules>
 
 	<profiles>

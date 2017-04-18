@@ -3,23 +3,18 @@
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the accompanying LICENSE file.
  *******************************************************************************/
-package org.cryptomator.ui.model;
+package org.cryptomator.launcher;
 
-import org.cryptomator.ui.model.VaultModule.PerVault;
+import java.util.Optional;
 
-import dagger.Subcomponent;
+public class ApplicationVersion {
 
-@PerVault
-@Subcomponent(modules = {VaultModule.class})
-public interface VaultComponent {
+	public static String orElse(String other) {
+		return get().orElse(other);
+	}
 
-	Vault vault();
-
-	@Subcomponent.Builder
-	interface Builder {
-		Builder vaultModule(VaultModule module);
-
-		VaultComponent build();
+	public static Optional<String> get() {
+		return Optional.ofNullable(Cryptomator.class.getPackage().getImplementationVersion());
 	}
 
 }

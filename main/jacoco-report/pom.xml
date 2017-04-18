@@ -9,18 +9,7 @@
 	</parent>
 	<artifactId>jacoco-report</artifactId>
 	<name>Cryptomator Code Coverage Report</name>
-
-	<dependencies>
-		<!-- Commons -->
-		<dependency>
-			<groupId>org.cryptomator</groupId>
-			<artifactId>commons</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.cryptomator</groupId>
-			<artifactId>commons-test</artifactId>
-		</dependency>
-	</dependencies>
+	<packaging>pom</packaging>
 
 	<build>
 		<plugins>

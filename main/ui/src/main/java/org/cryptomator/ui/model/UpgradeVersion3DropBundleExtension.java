@@ -13,10 +13,8 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.apache.commons.lang3.StringUtils;
-import org.cryptomator.cryptolib.api.CryptoLibVersion;
-import org.cryptomator.cryptolib.api.CryptoLibVersion.Version;
+import org.cryptomator.cryptolib.Cryptors;
 import org.cryptomator.cryptolib.api.Cryptor;
-import org.cryptomator.cryptolib.api.CryptorProvider;
 import org.cryptomator.ui.settings.Localization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,8 +27,8 @@ class UpgradeVersion3DropBundleExtension extends UpgradeStrategy {
 	private static final Logger LOG = LoggerFactory.getLogger(UpgradeVersion3DropBundleExtension.class);
 
 	@Inject
-	public UpgradeVersion3DropBundleExtension(@CryptoLibVersion(Version.ONE) CryptorProvider version1CryptorProvider, Localization localization) {
-		super(version1CryptorProvider, localization, 3, 3);
+	public UpgradeVersion3DropBundleExtension(Localization localization) {
+		super(Cryptors.version1(UpgradeStrategy.strongSecureRandom()), localization, 3, 3);
 	}
 
 	@Override

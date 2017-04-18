@@ -14,18 +14,18 @@ import java.util.concurrent.ConcurrentMap;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import org.cryptomator.ui.CryptomatorComponent;
-import org.cryptomator.ui.settings.VaultSettings;
+import org.cryptomator.common.settings.VaultSettings;
+import org.cryptomator.ui.model.VaultComponent.Builder;
 
 @Singleton
 public class VaultFactory {
 
-	private final CryptomatorComponent cryptomatorComponent;
+	private final Builder vaultComponentBuilder;
 	private final ConcurrentMap<VaultSettings, Vault> vaults = new ConcurrentHashMap<>();
 
 	@Inject
-	public VaultFactory(CryptomatorComponent cryptomatorComponent) {
-		this.cryptomatorComponent = cryptomatorComponent;
+	public VaultFactory(VaultComponent.Builder vaultComponentBuilder) {
+		this.vaultComponentBuilder = vaultComponentBuilder;
 	}
 
 	public Vault get(VaultSettings vaultSettings) {
@@ -34,7 +34,7 @@ public class VaultFactory {
 
 	private Vault create(VaultSettings vaultSettings) {
 		VaultModule module = new VaultModule(vaultSettings);
-		VaultComponent comp = cryptomatorComponent.newVaultComponent(module);
+		VaultComponent comp = vaultComponentBuilder.vaultModule(module).build();
 		return comp.vault();
 	}
 

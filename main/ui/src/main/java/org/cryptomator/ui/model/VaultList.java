@@ -11,8 +11,8 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import org.cryptomator.ui.settings.Settings;
-import org.cryptomator.ui.settings.VaultSettings;
+import org.cryptomator.common.settings.Settings;
+import org.cryptomator.common.settings.VaultSettings;
 
 import javafx.collections.ListChangeListener.Change;
 import javafx.collections.ObservableList;

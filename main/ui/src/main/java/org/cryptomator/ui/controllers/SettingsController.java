@@ -16,8 +16,8 @@ import javax.inject.Singleton;
 
 import org.apache.commons.lang3.CharUtils;
 import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.common.settings.Settings;
 import org.cryptomator.ui.settings.Localization;
-import org.cryptomator.ui.settings.Settings;
 
 import javafx.beans.binding.Bindings;
 import javafx.event.ActionEvent;
