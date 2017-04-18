@@ -85,7 +85,7 @@ public class MainController implements ViewController {
 	private final BlockingQueue<Path> fileOpenRequests;
 	private final Settings settings;
 	private final VaultFactory vaultFactoy;
-	private final ViewControllerLoader fxmlLoader;
+	private final ViewControllerLoader viewControllerLoader;
 	private final ObjectProperty<ViewController> activeController = new SimpleObjectProperty<>();
 	private final VaultList vaults;
 	private final ObjectProperty<Vault> selectedVault = new SimpleObjectProperty<>();
@@ -100,7 +100,7 @@ public class MainController implements ViewController {
 
 	@Inject
 	public MainController(@Named("mainWindow") Stage mainWindow, ExecutorService executorService, @Named("fileOpenRequests") BlockingQueue<Path> fileOpenRequests, ExitUtil exitUtil, Localization localization,
-			Settings settings, VaultFactory vaultFactoy, ViewControllerLoader fxmlLoader, UpgradeStrategies upgradeStrategies, VaultList vaults) {
+			Settings settings, VaultFactory vaultFactoy, ViewControllerLoader viewControllerLoader, UpgradeStrategies upgradeStrategies, VaultList vaults) {
 		this.mainWindow = mainWindow;
 		this.executorService = executorService;
 		this.fileOpenRequests = fileOpenRequests;
@@ -108,7 +108,7 @@ public class MainController implements ViewController {
 		this.localization = localization;
 		this.settings = settings;
 		this.vaultFactoy = vaultFactoy;
-		this.fxmlLoader = fxmlLoader;
+		this.viewControllerLoader = viewControllerLoader;
 		this.vaults = vaults;
 
 		// derived bindings:
@@ -150,7 +150,7 @@ public class MainController implements ViewController {
 	public void initialize() {
 		vaultList.setItems(vaults);
 		vaultList.setCellFactory(this::createDirecoryListCell);
-		activeController.set(fxmlLoader.load("/fxml/welcome.fxml"));
+		activeController.set(viewControllerLoader.load("/fxml/welcome.fxml"));
 		selectedVault.bind(vaultList.getSelectionModel().selectedItemProperty());
 		removeVaultButton.disableProperty().bind(canEditSelectedVault.not());
 		emptyListInstructions.visibleProperty().bind(Bindings.isEmpty(vaults));
@@ -306,7 +306,7 @@ public class MainController implements ViewController {
 		if (ButtonType.OK.equals(choice.get())) {
 			vaults.remove(selectedVault.get());
 			if (vaults.isEmpty()) {
-				activeController.set(fxmlLoader.load("/fxml/welcome.fxml"));
+				activeController.set(viewControllerLoader.load("/fxml/welcome.fxml"));
 			}
 		}
 	}
@@ -319,9 +319,9 @@ public class MainController implements ViewController {
 	@FXML
 	private void didClickShowSettings(ActionEvent e) {
 		if (isShowingSettings.get()) {
-			activeController.set(fxmlLoader.load("/fxml/welcome.fxml"));
+			activeController.set(viewControllerLoader.load("/fxml/welcome.fxml"));
 		} else {
-			activeController.set(fxmlLoader.load("/fxml/settings.fxml"));
+			activeController.set(viewControllerLoader.load("/fxml/settings.fxml"));
 		}
 		vaultList.getSelectionModel().clearSelection();
 	}
@@ -366,11 +366,11 @@ public class MainController implements ViewController {
 	// ****************************************
 
 	private void showNotFoundView() {
-		activeController.set(fxmlLoader.load("/fxml/notfound.fxml"));
+		activeController.set(viewControllerLoader.load("/fxml/notfound.fxml"));
 	}
 
 	private void showInitializeView() {
-		final InitializeController ctrl = fxmlLoader.load("/fxml/initialize.fxml");
+		final InitializeController ctrl = viewControllerLoader.load("/fxml/initialize.fxml");
 		ctrl.setVault(selectedVault.get());
 		ctrl.setListener(this::didInitialize);
 		activeController.set(ctrl);
@@ -381,7 +381,7 @@ public class MainController implements ViewController {
 	}
 
 	private void showUpgradeView() {
-		final UpgradeController ctrl = fxmlLoader.load("/fxml/upgrade.fxml");
+		final UpgradeController ctrl = viewControllerLoader.load("/fxml/upgrade.fxml");
 		ctrl.setVault(selectedVault.get());
 		ctrl.setListener(this::didUpgrade);
 		activeController.set(ctrl);
@@ -392,7 +392,7 @@ public class MainController implements ViewController {
 	}
 
 	private void showUnlockView() {
-		final UnlockController ctrl = fxmlLoader.load("/fxml/unlock.fxml");
+		final UnlockController ctrl = viewControllerLoader.load("/fxml/unlock.fxml");
 		ctrl.setVault(selectedVault.get());
 		ctrl.setListener(this::didUnlock);
 		activeController.set(ctrl);
@@ -407,7 +407,7 @@ public class MainController implements ViewController {
 
 	private void showUnlockedView(Vault vault) {
 		final UnlockedController ctrl = unlockedVaults.computeIfAbsent(vault, k -> {
-			return fxmlLoader.load("/fxml/unlocked.fxml");
+			return viewControllerLoader.load("/fxml/unlocked.fxml");
 		});
 		ctrl.setVault(vault);
 		ctrl.setListener(this::didLock);
@@ -423,7 +423,7 @@ public class MainController implements ViewController {
 	}
 
 	private void showChangePasswordView() {
-		final ChangePasswordController ctrl = fxmlLoader.load("/fxml/change_password.fxml");
+		final ChangePasswordController ctrl = viewControllerLoader.load("/fxml/change_password.fxml");
 		ctrl.setVault(selectedVault.get());
 		ctrl.setListener(this::didChangePassword);
 		activeController.set(ctrl);
