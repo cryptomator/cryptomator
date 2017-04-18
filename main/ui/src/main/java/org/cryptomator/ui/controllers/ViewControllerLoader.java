@@ -38,7 +38,11 @@ public class ViewControllerLoader {
 	}
 
 	private ViewController constructController(Class<?> clazz) {
-		return controllerProviders.get(clazz).get();
+		Provider<ViewController> ctrlProvider = controllerProviders.get(clazz);
+		if (ctrlProvider == null) {
+			throw new IllegalStateException("No provider for type " + clazz.getName() + " registered.");
+		}
+		return ctrlProvider.get();
 	}
 
 }
