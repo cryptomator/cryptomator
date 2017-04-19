@@ -125,7 +125,7 @@ public class WelcomeController implements ViewController {
 					.setUserAgent("Cryptomator VersionChecker/" + applicationVersion.orElse("SNAPSHOT"));
 			LOG.debug("Checking for updates...");
 			try (CloseableHttpClient client = httpClientBuilder.build()) {
-				HttpGet request = new HttpGet("https://cryptomator.org/downloads/latestVersion.json");
+				HttpGet request = new HttpGet("https://api.cryptomator.org/updates/latestVersion.json");
 				try (CloseableHttpResponse response = client.execute(request)) {
 					if (response.getStatusLine().getStatusCode() == 200 && response.getEntity() != null) {
 						try (InputStream in = response.getEntity().getContent()) {
