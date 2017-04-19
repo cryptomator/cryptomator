@@ -8,12 +8,14 @@ package org.cryptomator.ui.model;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.file.FileVisitOption;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.EnumSet;
 import java.util.regex.Pattern;
 
 import javax.inject.Inject;
@@ -34,6 +36,8 @@ import org.slf4j.LoggerFactory;
 class UpgradeVersion4to5 extends UpgradeStrategy {
 
 	private static final Logger LOG = LoggerFactory.getLogger(UpgradeVersion4to5.class);
+	private static final Pattern LVL1_DIR_PATTERN = Pattern.compile("[A-Z2-7]{2}");
+	private static final Pattern LVL2_DIR_PATTERN = Pattern.compile("[A-Z2-7]{30}");
 	private static final Pattern BASE32_PATTERN = Pattern.compile("^([A-Z2-7]{8})*[A-Z2-7=]{8}");
 
 	@Inject
@@ -58,11 +62,28 @@ class UpgradeVersion4to5 extends UpgradeStrategy {
 			return; // empty vault. no migration needed.
 		}
 		try {
-			Files.walkFileTree(dataDir, new SimpleFileVisitor<Path>() {
+			Files.walkFileTree(dataDir, EnumSet.noneOf(FileVisitOption.class), 3, new SimpleFileVisitor<Path>() {
+
+				@Override
+				public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+					if (dir.equals(dataDir)) {
+						// path/to/vault/d
+						return FileVisitResult.CONTINUE;
+					} else if (dir.getParent().equals(dataDir) && LVL1_DIR_PATTERN.matcher(dir.getFileName().toString()).matches()) {
+						// path/to/vault/d/AB
+						return FileVisitResult.CONTINUE;
+					} else if (dir.getParent().getParent().equals(dataDir) && LVL2_DIR_PATTERN.matcher(dir.getFileName().toString()).matches()) {
+						// path/to/vault/d/AB/CDEFGHIJKLMNOPQRSTUVWXYZ234567
+						return FileVisitResult.CONTINUE;
+					} else {
+						LOG.info("Skipping irrelevant directory {}", dir);
+						return FileVisitResult.SKIP_SUBTREE;
+					}
+				}
 
 				@Override
 				public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-					if (BASE32_PATTERN.matcher(file.getFileName().toString()).find() && attrs.size() > cryptor.fileHeaderCryptor().headerSize()) {
+					if (attrs.isRegularFile() && BASE32_PATTERN.matcher(file.getFileName().toString()).find() && attrs.size() > cryptor.fileHeaderCryptor().headerSize()) {
 						migrate(file, attrs, cryptor);
 					} else {
 						LOG.info("Skipping irrelevant file {}.", file);
