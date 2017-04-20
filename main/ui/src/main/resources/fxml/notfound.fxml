@@ -11,7 +11,7 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox prefWidth="400.0" prefHeight="400.0" spacing="24.0" alignment="CENTER" xmlns:fx="http://javafx.com/fxml" cacheShape="true" cache="true">
+<VBox fx:controller="org.cryptomator.ui.controllers.NotFoundController" fx:id="root" prefWidth="400.0" prefHeight="400.0" spacing="24.0" alignment="CENTER" xmlns:fx="http://javafx.com/fxml" cacheShape="true" cache="true">
 
 	<Label text="%notfound.label" textAlignment="CENTER" wrapText="true" cacheShape="true" cache="true"/>
 	

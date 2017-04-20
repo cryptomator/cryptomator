@@ -16,7 +16,7 @@
 	
 	COLOR_TEXT: #000;
 	COLOR_TEXT_LIGHT: #888;
-	COLOR_TEXT_DISABLED: #B5B5B5;
+	COLOR_TEXT_DISABLED: #7B7B7B;
 	COLOR_HYPERLINK: #0069D9;
 	COLOR_BORDER: #C8C8C8;
 	COLOR_BORDER_DARK: #B5B5B5;
@@ -48,6 +48,10 @@
 
 .ionicons {
 	-fx-font-family: Ionicons;
+}
+
+.fontawesome {
+	-fx-font-family: FontAwesome;
 }
 
 .caption-label {
@@ -164,6 +168,10 @@
     -fx-background-insets: -3, 0;
     -fx-background-radius: 3, 0;
     -fx-prompt-text-fill: transparent;
+}
+.text-input:disabled {
+	-fx-text-fill: COLOR_TEXT_DISABLED;
+    -fx-border-color: #CDCDCD;
 }
 
 /****************************************************************************
@@ -400,6 +408,7 @@
     -fx-padding: 4px;
     -fx-shape: "M-1,4, L-1,5.5 L3.5,8.5 L9,0 L9,-1 L7,-1 L3,6 L1,4 Z";
 }
+/* selected: */
 .root.active-window .check-box:selected > .box {
 	-fx-background-color: #2C90FC, #3B99FC;
 	-fx-background-insets: 0, 1;
@@ -409,6 +418,20 @@
 }
 .root.inactive-window .check-box:selected > .box > .mark {
     -fx-background-color: #444444;
+}
+/* disabled: */
+.check-box:disabled {
+	-fx-text-fill: COLOR_TEXT_DISABLED;
+}
+.root.active-window .check-box:disabled > .box,
+.root.active-window .check-box:disabled:selected > .box,
+.root.inactive-window .check-box:disabled > .box,
+.root.inactive-window .check-box:disabled:selected > .box {
+    -fx-background-color: linear-gradient(to bottom, #BBBBBB 0%, #C2C2C2 100%), #E9E9E9, #F1F1F1;
+}
+.root.active-window .check-box:disabled:selected > .box > .mark,
+.root.inactive-window .check-box:disabled:selected > .box > .mark {
+    -fx-background-color: COLOR_TEXT_DISABLED;
 }
 
 /****************************************************************************

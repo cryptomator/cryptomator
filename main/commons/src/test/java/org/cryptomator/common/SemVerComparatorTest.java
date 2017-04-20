@@ -10,7 +10,6 @@ package org.cryptomator.common;
 
 import java.util.Comparator;
 
-import org.cryptomator.common.SemVerComparator;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -22,8 +21,10 @@ public class SemVerComparatorTest {
 
 	@Test
 	public void compareEqualVersions() {
-		final int comparisonResult = semVerComparator.compare("1.23.4", "1.23.4");
-		Assert.assertEquals(0, Integer.signum(comparisonResult));
+		Assert.assertEquals(0, Integer.signum(semVerComparator.compare("1.23.4", "1.23.4")));
+		Assert.assertEquals(0, Integer.signum(semVerComparator.compare("1.23.4-alpha", "1.23.4-alpha")));
+		Assert.assertEquals(0, Integer.signum(semVerComparator.compare("1.23.4+20170101", "1.23.4+20171231")));
+		Assert.assertEquals(0, Integer.signum(semVerComparator.compare("1.23.4-alpha+20170101", "1.23.4-alpha+20171231")));
 	}
 
 	// newer versions in first argument
@@ -33,7 +34,11 @@ public class SemVerComparatorTest {
 		Assert.assertEquals(1, Integer.signum(semVerComparator.compare("1.23.5", "1.23.4")));
 		Assert.assertEquals(1, Integer.signum(semVerComparator.compare("1.24.4", "1.23.4")));
 		Assert.assertEquals(1, Integer.signum(semVerComparator.compare("1.23.4", "1.23")));
-		Assert.assertEquals(1, Integer.signum(semVerComparator.compare("1.23.4a", "1.23.4")));
+		Assert.assertEquals(1, Integer.signum(semVerComparator.compare("1.23.4", "1.23.4-SNAPSHOT")));
+		Assert.assertEquals(1, Integer.signum(semVerComparator.compare("1.23.4", "1.23.4-56.78")));
+		Assert.assertEquals(1, Integer.signum(semVerComparator.compare("1.23.4-beta", "1.23.4-alpha")));
+		Assert.assertEquals(1, Integer.signum(semVerComparator.compare("1.23.4-alpha.1", "1.23.4-alpha")));
+		Assert.assertEquals(1, Integer.signum(semVerComparator.compare("1.23.4-56.79", "1.23.4-56.78")));
 	}
 
 	// newer versions in second argument
@@ -43,7 +48,11 @@ public class SemVerComparatorTest {
 		Assert.assertEquals(-1, Integer.signum(semVerComparator.compare("1.23.4", "1.23.5")));
 		Assert.assertEquals(-1, Integer.signum(semVerComparator.compare("1.23.4", "1.24.4")));
 		Assert.assertEquals(-1, Integer.signum(semVerComparator.compare("1.23", "1.23.4")));
-		Assert.assertEquals(-1, Integer.signum(semVerComparator.compare("1.23.4", "1.23.4a")));
+		Assert.assertEquals(-1, Integer.signum(semVerComparator.compare("1.23.4-SNAPSHOT", "1.23.4")));
+		Assert.assertEquals(-1, Integer.signum(semVerComparator.compare("1.23.4-56.78", "1.23.4")));
+		Assert.assertEquals(-1, Integer.signum(semVerComparator.compare("1.23.4-alpha", "1.23.4-beta")));
+		Assert.assertEquals(-1, Integer.signum(semVerComparator.compare("1.23.4-alpha", "1.23.4-alpha.1")));
+		Assert.assertEquals(-1, Integer.signum(semVerComparator.compare("1.23.4-56.78", "1.23.4-56.79")));
 	}
 
 }

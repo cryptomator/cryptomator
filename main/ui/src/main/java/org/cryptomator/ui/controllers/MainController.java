@@ -11,33 +11,39 @@ package org.cryptomator.ui.controllers;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.common.settings.Settings;
+import org.cryptomator.common.settings.VaultSettings;
+import org.cryptomator.ui.ExitUtil;
 import org.cryptomator.ui.controls.DirectoryListCell;
 import org.cryptomator.ui.model.UpgradeStrategies;
+import org.cryptomator.ui.model.UpgradeStrategy;
 import org.cryptomator.ui.model.Vault;
 import org.cryptomator.ui.model.VaultFactory;
-import org.cryptomator.ui.model.Vaults;
+import org.cryptomator.ui.model.VaultList;
 import org.cryptomator.ui.settings.Localization;
-import org.cryptomator.ui.settings.Settings;
 import org.cryptomator.ui.util.DialogBuilderUtil;
 import org.fxmisc.easybind.EasyBind;
+import org.fxmisc.easybind.Subscription;
+import org.fxmisc.easybind.monadic.MonadicBinding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import dagger.Lazy;
+import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.binding.Binding;
 import javafx.beans.binding.Bindings;
@@ -49,6 +55,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Side;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
@@ -57,57 +64,56 @@ import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ToggleButton;
+import javafx.scene.image.Image;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.scene.text.Font;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 @Singleton
-public class MainController extends LocalizedFXMLViewController {
+public class MainController implements ViewController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(MainController.class);
+	private static final String ACTIVE_WINDOW_STYLE_CLASS = "active-window";
+	private static final String INACTIVE_WINDOW_STYLE_CLASS = "inactive-window";
 
 	private final Stage mainWindow;
+	private final ExitUtil exitUtil;
+	private final Localization localization;
+	private final ExecutorService executorService;
+	private final BlockingQueue<Path> fileOpenRequests;
+	private final Settings settings;
 	private final VaultFactory vaultFactoy;
-	private final Lazy<WelcomeController> welcomeController;
-	private final Lazy<InitializeController> initializeController;
-	private final Lazy<NotFoundController> notFoundController;
-	private final Lazy<UpgradeController> upgradeController;
-	private final Lazy<UnlockController> unlockController;
-	private final Provider<UnlockedController> unlockedControllerProvider;
-	private final Lazy<ChangePasswordController> changePasswordController;
-	private final Lazy<SettingsController> settingsController;
-	private final Lazy<UpgradeStrategies> upgradeStrategies;
-	private final ObjectProperty<AbstractFXMLViewController> activeController = new SimpleObjectProperty<>();
-	private final Vaults vaults;
+	private final ViewControllerLoader viewControllerLoader;
+	private final ObjectProperty<ViewController> activeController = new SimpleObjectProperty<>();
+	private final VaultList vaults;
 	private final ObjectProperty<Vault> selectedVault = new SimpleObjectProperty<>();
-	private final BooleanExpression isSelectedVaultUnlocked = BooleanBinding.booleanExpression(EasyBind.select(selectedVault).selectObject(Vault::unlockedProperty).orElse(false));
-	private final BooleanExpression isSelectedVaultValid = BooleanBinding.booleanExpression(EasyBind.monadic(selectedVault).map(Vault::isValidVaultDirectory).orElse(false));
+	private final BooleanExpression isSelectedVaultUnlocked = BooleanExpression.booleanExpression(EasyBind.select(selectedVault).selectObject(Vault::unlockedProperty).orElse(false));
+	private final BooleanExpression isSelectedVaultValid = BooleanExpression.booleanExpression(EasyBind.monadic(selectedVault).map(Vault::isValidVaultDirectory).orElse(false));
 	private final BooleanExpression canEditSelectedVault = selectedVault.isNotNull().and(isSelectedVaultUnlocked.not());
+	private final MonadicBinding<UpgradeStrategy> upgradeStrategyForSelectedVault;
 	private final BooleanBinding isShowingSettings;
 	private final Map<Vault, UnlockedController> unlockedVaults = new HashMap<>();
 
+	private Subscription subs = Subscription.EMPTY;
+
 	@Inject
-	public MainController(@Named("mainWindow") Stage mainWindow, Localization localization, Settings settings, VaultFactory vaultFactoy, Lazy<WelcomeController> welcomeController,
-			Lazy<InitializeController> initializeController, Lazy<NotFoundController> notFoundController, Lazy<UpgradeController> upgradeController, Lazy<UnlockController> unlockController,
-			Provider<UnlockedController> unlockedControllerProvider, Lazy<ChangePasswordController> changePasswordController, Lazy<SettingsController> settingsController, Lazy<UpgradeStrategies> upgradeStrategies,
-			Vaults vaults) {
-		super(localization);
+	public MainController(@Named("mainWindow") Stage mainWindow, ExecutorService executorService, @Named("fileOpenRequests") BlockingQueue<Path> fileOpenRequests, ExitUtil exitUtil, Localization localization,
+			Settings settings, VaultFactory vaultFactoy, ViewControllerLoader viewControllerLoader, UpgradeStrategies upgradeStrategies, VaultList vaults) {
 		this.mainWindow = mainWindow;
+		this.executorService = executorService;
+		this.fileOpenRequests = fileOpenRequests;
+		this.exitUtil = exitUtil;
+		this.localization = localization;
+		this.settings = settings;
 		this.vaultFactoy = vaultFactoy;
-		this.welcomeController = welcomeController;
-		this.initializeController = initializeController;
-		this.notFoundController = notFoundController;
-		this.upgradeController = upgradeController;
-		this.unlockController = unlockController;
-		this.unlockedControllerProvider = unlockedControllerProvider;
-		this.changePasswordController = changePasswordController;
-		this.settingsController = settingsController;
-		this.upgradeStrategies = upgradeStrategies;
+		this.viewControllerLoader = viewControllerLoader;
 		this.vaults = vaults;
 
 		// derived bindings:
-		this.isShowingSettings = activeController.isEqualTo(settingsController.get());
+		this.isShowingSettings = Bindings.equal(SettingsController.class, EasyBind.monadic(activeController).map(ViewController::getClass));
+		this.upgradeStrategyForSelectedVault = EasyBind.monadic(selectedVault).map(upgradeStrategies::getUpgradeStrategy);
 	}
 
 	@FXML
@@ -120,7 +126,7 @@ public class MainController extends LocalizedFXMLViewController {
 	private ContextMenu addVaultContextMenu;
 
 	@FXML
-	private HBox rootPane;
+	private HBox root;
 
 	@FXML
 	private ListView<Vault> vaultList;
@@ -144,21 +150,69 @@ public class MainController extends LocalizedFXMLViewController {
 	public void initialize() {
 		vaultList.setItems(vaults);
 		vaultList.setCellFactory(this::createDirecoryListCell);
-		activeController.set(welcomeController.get());
+		activeController.set(viewControllerLoader.load("/fxml/welcome.fxml"));
 		selectedVault.bind(vaultList.getSelectionModel().selectedItemProperty());
 		removeVaultButton.disableProperty().bind(canEditSelectedVault.not());
 		emptyListInstructions.visibleProperty().bind(Bindings.isEmpty(vaults));
-		changePasswordMenuItem.visibleProperty().bind(isSelectedVaultValid);
+		changePasswordMenuItem.visibleProperty().bind(isSelectedVaultValid.and(Bindings.isNull(upgradeStrategyForSelectedVault)));
 
-		EasyBind.subscribe(selectedVault, this::selectedVaultDidChange);
-		EasyBind.subscribe(activeController, this::activeControllerDidChange);
-		EasyBind.subscribe(isShowingSettings, settingsButton::setSelected);
-		EasyBind.subscribe(addVaultContextMenu.showingProperty(), addVaultButton::setSelected);
+		subs = subs.and(EasyBind.subscribe(selectedVault, this::selectedVaultDidChange));
+		subs = subs.and(EasyBind.subscribe(activeController, this::activeControllerDidChange));
+		subs = subs.and(EasyBind.subscribe(isShowingSettings, settingsButton::setSelected));
+		subs = subs.and(EasyBind.subscribe(addVaultContextMenu.showingProperty(), addVaultButton::setSelected));
 	}
 
 	@Override
-	protected URL getFxmlResourceUrl() {
-		return getClass().getResource("/fxml/main.fxml");
+	public Parent getRoot() {
+		return root;
+	}
+
+	public void initStage(Stage stage) {
+		stage.setScene(new Scene(getRoot()));
+		stage.sizeToScene();
+		stage.titleProperty().bind(windowTitle());
+		stage.setResizable(false);
+		loadFont("/css/ionicons.ttf");
+		loadFont("/css/fontawesome-webfont.ttf");
+		if (SystemUtils.IS_OS_MAC_OSX) {
+			subs = subs.and(EasyBind.includeWhen(mainWindow.getScene().getRoot().getStyleClass(), ACTIVE_WINDOW_STYLE_CLASS, mainWindow.focusedProperty()));
+			subs = subs.and(EasyBind.includeWhen(mainWindow.getScene().getRoot().getStyleClass(), INACTIVE_WINDOW_STYLE_CLASS, mainWindow.focusedProperty().not()));
+			Application.setUserAgentStylesheet(getClass().getResource("/css/mac_theme.css").toString());
+		} else if (SystemUtils.IS_OS_LINUX) {
+			Application.setUserAgentStylesheet(getClass().getResource("/css/linux_theme.css").toString());
+		} else if (SystemUtils.IS_OS_WINDOWS) {
+			stage.getIcons().add(new Image(getClass().getResourceAsStream("/window_icon.png")));
+			Application.setUserAgentStylesheet(getClass().getResource("/css/win_theme.css").toString());
+		}
+		exitUtil.initExitHandler();
+		listenToFileOpenRequests(stage);
+	}
+
+	private void loadFont(String resourcePath) {
+		try (InputStream in = getClass().getResourceAsStream(resourcePath)) {
+			Font.loadFont(in, 12.0);
+		} catch (IOException e) {
+			LOG.warn("Error loading font from path: " + resourcePath, e);
+		}
+	}
+
+	private void listenToFileOpenRequests(Stage stage) {
+		executorService.submit(() -> {
+			while (!Thread.interrupted()) {
+				try {
+					final Path path = fileOpenRequests.take();
+					Platform.runLater(() -> {
+						addVault(path, true);
+						stage.setIconified(false);
+						stage.show();
+						stage.toFront();
+						stage.requestFocus();
+					});
+				} catch (InterruptedException e) {
+					Thread.currentThread().interrupt();
+				}
+			}
+		});
 	}
 
 	private ListCell<Vault> createDirecoryListCell(ListView<Vault> param) {
@@ -201,7 +255,7 @@ public class MainController extends LocalizedFXMLViewController {
 	@FXML
 	private void didClickAddExistingVaults(ActionEvent event) {
 		final FileChooser fileChooser = new FileChooser();
-		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Cryptomator Masterkey", "*" + Vault.VAULT_FILE_EXTENSION));
+		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Cryptomator Masterkey", "*.cryptomator"));
 		final List<File> files = fileChooser.showOpenMultipleDialog(mainWindow);
 		if (files != null) {
 			for (final File file : files) {
@@ -213,28 +267,31 @@ public class MainController extends LocalizedFXMLViewController {
 	/**
 	 * adds the given directory or selects it if it is already in the list of directories.
 	 * 
-	 * @param path non-null, writable, existing directory
+	 * @param path to a vault directory or masterkey file
 	 */
 	public void addVault(final Path path, boolean select) {
-		// TODO: `|| !Files.isWritable(path)` is broken on windows. Fix in Java 8u72, see https://bugs.openjdk.java.net/browse/JDK-8034057
-		if (path == null) {
-			return;
-		}
-
 		final Path vaultPath;
 		if (path != null && Files.isDirectory(path)) {
 			vaultPath = path;
 		} else if (path != null && Files.isRegularFile(path)) {
 			vaultPath = path.getParent();
 		} else {
+			LOG.warn("Ignoring attempt to add vault with invalid path: {}", path);
 			return;
 		}
 
-		final Vault vault = vaultFactoy.createVault(vaultPath);
+		final Vault vault = vaults.stream().filter(v -> v.getPath().equals(vaultPath)).findAny().orElseGet(() -> {
+			VaultSettings vaultSettings = VaultSettings.withRandomId(settings);
+			vaultSettings.path().set(vaultPath);
+			return vaultFactoy.get(vaultSettings);
+		});
+
 		if (!vaults.contains(vault)) {
 			vaults.add(vault);
 		}
-		vaultList.getSelectionModel().select(vault);
+		if (select) {
+			vaultList.getSelectionModel().select(vault);
+		}
 	}
 
 	@FXML
@@ -249,7 +306,7 @@ public class MainController extends LocalizedFXMLViewController {
 		if (ButtonType.OK.equals(choice.get())) {
 			vaults.remove(selectedVault.get());
 			if (vaults.isEmpty()) {
-				activeController.set(welcomeController.get());
+				activeController.set(viewControllerLoader.load("/fxml/welcome.fxml"));
 			}
 		}
 	}
@@ -261,10 +318,10 @@ public class MainController extends LocalizedFXMLViewController {
 
 	@FXML
 	private void didClickShowSettings(ActionEvent e) {
-		if (settingsController.get().equals(activeController.get())) {
-			activeController.set(welcomeController.get());
+		if (isShowingSettings.get()) {
+			activeController.set(viewControllerLoader.load("/fxml/welcome.fxml"));
 		} else {
-			activeController.set(settingsController.get());
+			activeController.set(viewControllerLoader.load("/fxml/settings.fxml"));
 		}
 		vaultList.getSelectionModel().clearSelection();
 	}
@@ -273,8 +330,8 @@ public class MainController extends LocalizedFXMLViewController {
 	// Binding Listeners
 	// ****************************************
 
-	private void activeControllerDidChange(AbstractFXMLViewController newValue) {
-		final Parent root = newValue.loadFxml();
+	private void activeControllerDidChange(ViewController newValue) {
+		final Parent root = newValue.getRoot();
 		contentPane.getChildren().clear();
 		contentPane.getChildren().add(root);
 	}
@@ -287,7 +344,7 @@ public class MainController extends LocalizedFXMLViewController {
 			this.showUnlockedView(newValue);
 		} else if (!newValue.doesVaultDirectoryExist()) {
 			this.showNotFoundView();
-		} else if (newValue.isValidVaultDirectory() && upgradeStrategies.get().getUpgradeStrategy(newValue).isPresent()) {
+		} else if (newValue.isValidVaultDirectory() && upgradeStrategyForSelectedVault.isPresent()) {
 			this.showUpgradeView();
 		} else if (newValue.isValidVaultDirectory()) {
 			this.showUnlockView();
@@ -309,13 +366,11 @@ public class MainController extends LocalizedFXMLViewController {
 	// ****************************************
 
 	private void showNotFoundView() {
-		final NotFoundController ctrl = notFoundController.get();
-		activeController.set(ctrl);
+		activeController.set(viewControllerLoader.load("/fxml/notfound.fxml"));
 	}
 
 	private void showInitializeView() {
-		final InitializeController ctrl = initializeController.get();
-		ctrl.loadFxml();
+		final InitializeController ctrl = viewControllerLoader.load("/fxml/initialize.fxml");
 		ctrl.setVault(selectedVault.get());
 		ctrl.setListener(this::didInitialize);
 		activeController.set(ctrl);
@@ -326,8 +381,7 @@ public class MainController extends LocalizedFXMLViewController {
 	}
 
 	private void showUpgradeView() {
-		final UpgradeController ctrl = upgradeController.get();
-		ctrl.loadFxml();
+		final UpgradeController ctrl = viewControllerLoader.load("/fxml/upgrade.fxml");
 		ctrl.setVault(selectedVault.get());
 		ctrl.setListener(this::didUpgrade);
 		activeController.set(ctrl);
@@ -338,8 +392,7 @@ public class MainController extends LocalizedFXMLViewController {
 	}
 
 	private void showUnlockView() {
-		final UnlockController ctrl = unlockController.get();
-		ctrl.loadFxml();
+		final UnlockController ctrl = viewControllerLoader.load("/fxml/unlock.fxml");
 		ctrl.setVault(selectedVault.get());
 		ctrl.setListener(this::didUnlock);
 		activeController.set(ctrl);
@@ -354,9 +407,8 @@ public class MainController extends LocalizedFXMLViewController {
 
 	private void showUnlockedView(Vault vault) {
 		final UnlockedController ctrl = unlockedVaults.computeIfAbsent(vault, k -> {
-			return unlockedControllerProvider.get();
+			return viewControllerLoader.load("/fxml/unlocked.fxml");
 		});
-		ctrl.loadFxml();
 		ctrl.setVault(vault);
 		ctrl.setListener(this::didLock);
 		activeController.set(ctrl);
@@ -371,8 +423,7 @@ public class MainController extends LocalizedFXMLViewController {
 	}
 
 	private void showChangePasswordView() {
-		final ChangePasswordController ctrl = changePasswordController.get();
-		ctrl.loadFxml();
+		final ChangePasswordController ctrl = viewControllerLoader.load("/fxml/change_password.fxml");
 		ctrl.setVault(selectedVault.get());
 		ctrl.setListener(this::didChangePassword);
 		activeController.set(ctrl);

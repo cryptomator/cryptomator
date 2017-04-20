@@ -57,7 +57,9 @@ upgrade.version4to5.err.io=Migration failed due to an I/O Exception. See log fil
 # unlock.fxml
 unlock.label.password=Password
 unlock.label.savePassword=Save Password
+unlock.label.mountAfterUnlock=Mount Drive
 unlock.label.mountName=Drive Name
+unlock.label.revealAfterMount=Reveal Drive
 unlock.label.winDriveLetter=Drive Letter
 unlock.label.downloadsPageLink=All Cryptomator versions
 unlock.label.advancedHeading=Advanced Options
@@ -95,17 +97,12 @@ unlocked.label.statsEncrypted=encrypted
 unlocked.label.statsDecrypted=decrypted
 unlocked.ioGraph.yAxis.label=Throughput (MiB/s)
 
-# mac_warnings.fxml
-macWarnings.windowTitle=Danger - Corrupted file in %s
-macWarnings.message=Cryptomator detected potentially malicious corruptions in the following files:
-macWarnings.moreInformationButton=Learn More
-macWarnings.whitelistButton=Decrypt Selected Anyway
-
 # settings.fxml
 settings.version.label=Version %s
 settings.checkForUpdates.label=Check for Updates
-settings.port.label=WebDAV Port *
+settings.port.label=WebDAV Port
 settings.port.prompt=0 = Choose automatically
+settings.port.apply=Apply
 settings.useipv6.label=Use IPv6 Literal
 settings.prefGvfsScheme.label=WebDAV Scheme
 settings.debugMode.label=Debug Mode *

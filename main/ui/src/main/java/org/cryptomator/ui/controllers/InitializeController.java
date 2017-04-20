@@ -10,7 +10,6 @@
 package org.cryptomator.ui.controllers;
 
 import java.io.IOException;
-import java.net.URL;
 import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.FileAlreadyExistsException;
 import java.util.Objects;
@@ -33,15 +32,18 @@ import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Region;
 
 @Singleton
-public class InitializeController extends LocalizedFXMLViewController {
+public class InitializeController implements ViewController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(InitializeController.class);
 
+	private final Localization localization;
 	private final PasswordStrengthUtil strengthRater;
 	private final IntegerProperty passwordStrength = new SimpleIntegerProperty(); // 0-4
 	private Optional<InitializationListener> listener = Optional.empty();
@@ -49,7 +51,7 @@ public class InitializeController extends LocalizedFXMLViewController {
 
 	@Inject
 	public InitializeController(Localization localization, PasswordStrengthUtil strengthRater) {
-		super(localization);
+		this.localization = localization;
 		this.strengthRater = strengthRater;
 	}
 
@@ -83,6 +85,9 @@ public class InitializeController extends LocalizedFXMLViewController {
 	@FXML
 	private Region passwordStrengthLevel4;
 
+	@FXML
+	private GridPane root;
+
 	@Override
 	public void initialize() {
 		BooleanBinding passwordIsEmpty = passwordField.textProperty().isEmpty();
@@ -99,8 +104,8 @@ public class InitializeController extends LocalizedFXMLViewController {
 	}
 
 	@Override
-	protected URL getFxmlResourceUrl() {
-		return getClass().getResource("/fxml/initialize.fxml");
+	public Parent getRoot() {
+		return root;
 	}
 
 	void setVault(Vault vault) {

@@ -8,36 +8,34 @@
  *******************************************************************************/
 package org.cryptomator.ui.model;
 
-import java.nio.file.Path;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import org.cryptomator.filesystem.crypto.CryptoFileSystemFactory;
-import org.cryptomator.filesystem.shortening.ShorteningFileSystemFactory;
-import org.cryptomator.frontend.FrontendId;
-import org.cryptomator.ui.util.DeferredCloser;
+import org.cryptomator.common.settings.VaultSettings;
+import org.cryptomator.ui.model.VaultComponent.Builder;
 
 @Singleton
 public class VaultFactory {
 
-	private final ShorteningFileSystemFactory shorteningFileSystemFactory;
-	private final CryptoFileSystemFactory cryptoFileSystemFactory;
-	private final DeferredCloser closer;
+	private final Builder vaultComponentBuilder;
+	private final ConcurrentMap<VaultSettings, Vault> vaults = new ConcurrentHashMap<>();
 
 	@Inject
-	public VaultFactory(ShorteningFileSystemFactory shorteningFileSystemFactory, CryptoFileSystemFactory cryptoFileSystemFactory, DeferredCloser closer) {
-		this.shorteningFileSystemFactory = shorteningFileSystemFactory;
-		this.cryptoFileSystemFactory = cryptoFileSystemFactory;
-		this.closer = closer;
+	public VaultFactory(VaultComponent.Builder vaultComponentBuilder) {
+		this.vaultComponentBuilder = vaultComponentBuilder;
 	}
 
-	public Vault createVault(String id, Path path) {
-		return new Vault(id, path, shorteningFileSystemFactory, cryptoFileSystemFactory, closer);
+	public Vault get(VaultSettings vaultSettings) {
+		return vaults.computeIfAbsent(vaultSettings, this::create);
 	}
 
-	public Vault createVault(Path path) {
-		return createVault(FrontendId.generate().toString(), path);
+	private Vault create(VaultSettings vaultSettings) {
+		VaultModule module = new VaultModule(vaultSettings);
+		VaultComponent comp = vaultComponentBuilder.vaultModule(module).build();
+		return comp.vault();
 	}
 
 }

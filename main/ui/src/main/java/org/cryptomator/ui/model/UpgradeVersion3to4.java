@@ -1,14 +1,21 @@
+/*******************************************************************************
+ * Copyright (c) 2017 Skymatic UG (haftungsbeschränkt).
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the accompanying LICENSE file.
+ *******************************************************************************/
 package org.cryptomator.ui.model;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.io.IOException;
+import java.nio.file.FileVisitOption;
 import java.nio.file.FileVisitResult;
-import java.nio.file.FileVisitor;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.security.MessageDigest;
+import java.util.EnumSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -18,10 +25,8 @@ import javax.inject.Singleton;
 import org.apache.commons.codec.binary.Base32;
 import org.apache.commons.codec.binary.BaseNCodec;
 import org.apache.commons.lang3.StringUtils;
-import org.cryptomator.cryptolib.api.CryptoLibVersion;
-import org.cryptomator.cryptolib.api.CryptoLibVersion.Version;
+import org.cryptomator.cryptolib.Cryptors;
 import org.cryptomator.cryptolib.api.Cryptor;
-import org.cryptomator.cryptolib.api.CryptorProvider;
 import org.cryptomator.cryptolib.common.MessageDigestSupplier;
 import org.cryptomator.ui.settings.Localization;
 import org.slf4j.Logger;
@@ -35,6 +40,8 @@ import org.slf4j.LoggerFactory;
 class UpgradeVersion3to4 extends UpgradeStrategy {
 
 	private static final Logger LOG = LoggerFactory.getLogger(UpgradeVersion3to4.class);
+	private static final Pattern LVL1_DIR_PATTERN = Pattern.compile("[A-Z2-7]{2}");
+	private static final Pattern LVL2_DIR_PATTERN = Pattern.compile("[A-Z2-7]{30}");
 	private static final Pattern BASE32_FOLLOWED_BY_UNDERSCORE_PATTERN = Pattern.compile("^(([A-Z2-7]{8})*[A-Z2-7=]{8})_");
 	private static final int FILE_MIN_SIZE = 88; // vault version 3 files have a header of 88 bytes (assuming no chunks at all)
 	private static final String LONG_FILENAME_SUFFIX = ".lng";
@@ -45,8 +52,8 @@ class UpgradeVersion3to4 extends UpgradeStrategy {
 	private final BaseNCodec base32 = new Base32();
 
 	@Inject
-	public UpgradeVersion3to4(@CryptoLibVersion(Version.ONE) CryptorProvider version1CryptorProvider, Localization localization) {
-		super(version1CryptorProvider, localization, 3, 4);
+	public UpgradeVersion3to4(Localization localization) {
+		super(Cryptors.version1(UpgradeStrategy.strongSecureRandom()), localization, 3, 4);
 	}
 
 	@Override
@@ -61,17 +68,29 @@ class UpgradeVersion3to4 extends UpgradeStrategy {
 
 	@Override
 	protected void upgrade(Vault vault, Cryptor cryptor) throws UpgradeFailedException {
-		Path dataDir = vault.path().get().resolve("d");
-		Path metadataDir = vault.path().get().resolve("m");
+		Path dataDir = vault.getPath().resolve("d");
+		Path metadataDir = vault.getPath().resolve("m");
 		if (!Files.isDirectory(dataDir)) {
 			return; // empty vault. no migration needed.
 		}
 		try {
-			Files.walkFileTree(dataDir, new FileVisitor<Path>() {
+			Files.walkFileTree(dataDir, EnumSet.noneOf(FileVisitOption.class), 3, new SimpleFileVisitor<Path>() {
 
 				@Override
 				public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-					return FileVisitResult.CONTINUE;
+					if (dir.equals(dataDir)) {
+						// path/to/vault/d
+						return FileVisitResult.CONTINUE;
+					} else if (dir.getParent().equals(dataDir) && LVL1_DIR_PATTERN.matcher(dir.getFileName().toString()).matches()) {
+						// path/to/vault/d/AB
+						return FileVisitResult.CONTINUE;
+					} else if (dir.getParent().getParent().equals(dataDir) && LVL2_DIR_PATTERN.matcher(dir.getFileName().toString()).matches()) {
+						// path/to/vault/d/AB/CDEFGHIJKLMNOPQRSTUVWXYZ234567
+						return FileVisitResult.CONTINUE;
+					} else {
+						LOG.info("Skipping irrelevant directory {}", dir);
+						return FileVisitResult.SKIP_SUBTREE;
+					}
 				}
 
 				@Override
@@ -82,16 +101,6 @@ class UpgradeVersion3to4 extends UpgradeStrategy {
 					} else {
 						migrate(file, attrs);
 					}
-					return FileVisitResult.CONTINUE;
-				}
-
-				@Override
-				public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
-					throw exc;
-				}
-
-				@Override
-				public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
 					return FileVisitResult.CONTINUE;
 				}
 
@@ -107,7 +116,7 @@ class UpgradeVersion3to4 extends UpgradeStrategy {
 		String name = file.getFileName().toString();
 		long size = attrs.size();
 		Matcher m = BASE32_FOLLOWED_BY_UNDERSCORE_PATTERN.matcher(name);
-		if (m.find(0) && size < FILE_MIN_SIZE) {
+		if (attrs.isRegularFile() && m.find(0) && size < FILE_MIN_SIZE) {
 			String base32 = m.group(1);
 			String suffix = name.substring(m.end());
 			String renamed = NEW_FOLDER_PREFIX + base32 + (suffix.isEmpty() ? "" : " " + suffix);

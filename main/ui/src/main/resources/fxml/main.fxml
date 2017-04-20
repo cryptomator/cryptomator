@@ -24,7 +24,7 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.shape.Arc?>
 
-<HBox fx:id="rootPane" prefHeight="440.0" prefWidth="652.0" spacing="12.0" xmlns:fx="http://javafx.com/fxml" cacheShape="true" cache="true">
+<HBox fx:controller="org.cryptomator.ui.controllers.MainController" fx:id="root" prefHeight="440.0" prefWidth="652.0" spacing="12.0" xmlns:fx="http://javafx.com/fxml" cacheShape="true" cache="true">
 
 	<padding><Insets top="20" right="20" bottom="20" left="20.0"/></padding>
 

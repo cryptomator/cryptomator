@@ -5,66 +5,11 @@
 	<parent>
 		<groupId>org.cryptomator</groupId>
 		<artifactId>main</artifactId>
-		<version>1.2.4</version>
+		<version>1.3.0-rc1</version>
 	</parent>
 	<artifactId>jacoco-report</artifactId>
 	<name>Cryptomator Code Coverage Report</name>
-
-	<dependencies>
-		<!-- Commons -->
-		<dependency>
-			<groupId>org.cryptomator</groupId>
-			<artifactId>commons</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.cryptomator</groupId>
-			<artifactId>commons-test</artifactId>
-		</dependency>
-
-		<!-- Filesystem Layers -->
-		<dependency>
-			<groupId>org.cryptomator</groupId>
-			<artifactId>filesystem-api</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.cryptomator</groupId>
-			<artifactId>filesystem-charsets</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.cryptomator</groupId>
-			<artifactId>filesystem-crypto</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.cryptomator</groupId>
-			<artifactId>filesystem-crypto-integration-tests</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.cryptomator</groupId>
-			<artifactId>filesystem-inmemory</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.cryptomator</groupId>
-			<artifactId>filesystem-nameshortening</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.cryptomator</groupId>
-			<artifactId>filesystem-nio</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.cryptomator</groupId>
-			<artifactId>filesystem-stats</artifactId>
-		</dependency>
-
-		<!-- Frontends -->
-		<dependency>
-			<groupId>org.cryptomator</groupId>
-			<artifactId>frontend-api</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.cryptomator</groupId>
-			<artifactId>frontend-webdav</artifactId>
-		</dependency>
-	</dependencies>
+	<packaging>pom</packaging>
 
 	<build>
 		<plugins>

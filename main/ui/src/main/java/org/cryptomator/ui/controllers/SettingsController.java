@@ -8,34 +8,41 @@
  ******************************************************************************/
 package org.cryptomator.ui.controllers;
 
-import java.net.URL;
 import java.util.Optional;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
 
 import org.apache.commons.lang3.CharUtils;
 import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.common.settings.Settings;
 import org.cryptomator.ui.settings.Localization;
-import org.cryptomator.ui.settings.Settings;
-import org.fxmisc.easybind.EasyBind;
 
+import javafx.beans.binding.Bindings;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.Parent;
+import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.VBox;
 
 @Singleton
-public class SettingsController extends LocalizedFXMLViewController {
+public class SettingsController implements ViewController {
 
+	private final Localization localization;
 	private final Settings settings;
+	private final Optional<String> applicationVersion;
 
 	@Inject
-	public SettingsController(Localization localization, Settings settings) {
-		super(localization);
+	public SettingsController(Localization localization, Settings settings, @Named("applicationVersion") Optional<String> applicationVersion) {
+		this.localization = localization;
 		this.settings = settings;
+		this.applicationVersion = applicationVersion;
 	}
 
 	@FXML
@@ -43,6 +50,9 @@ public class SettingsController extends LocalizedFXMLViewController {
 
 	@FXML
 	private TextField portField;
+
+	@FXML
+	private Button changePortButton;
 
 	@FXML
 	private Label useIpv6Label;
@@ -62,71 +72,61 @@ public class SettingsController extends LocalizedFXMLViewController {
 	@FXML
 	private CheckBox debugModeCheckbox;
 
+	@FXML
+	private VBox root;
+
 	@Override
 	public void initialize() {
 		checkForUpdatesCheckbox.setDisable(areUpdatesManagedExternally());
-		checkForUpdatesCheckbox.setSelected(settings.isCheckForUpdatesEnabled() && !areUpdatesManagedExternally());
-		portField.setText(String.valueOf(settings.getPort()));
+		checkForUpdatesCheckbox.setSelected(settings.checkForUpdates().get() && !areUpdatesManagedExternally());
+		portField.setText(String.valueOf(settings.port().intValue()));
 		portField.addEventFilter(KeyEvent.KEY_TYPED, this::filterNumericKeyEvents);
+		changePortButton.visibleProperty().bind(settings.port().asString().isNotEqualTo(portField.textProperty()));
+		changePortButton.disableProperty().bind(Bindings.createBooleanBinding(this::isPortValid, portField.textProperty()).not());
 		useIpv6Label.setVisible(SystemUtils.IS_OS_WINDOWS);
 		useIpv6Checkbox.setVisible(SystemUtils.IS_OS_WINDOWS);
-		useIpv6Checkbox.setSelected(SystemUtils.IS_OS_WINDOWS && settings.shouldUseIpv6());
-		versionLabel.setText(String.format(localization.getString("settings.version.label"), applicationVersion().orElse("SNAPSHOT")));
+		useIpv6Checkbox.setSelected(SystemUtils.IS_OS_WINDOWS && settings.useIpv6().get());
+		versionLabel.setText(String.format(localization.getString("settings.version.label"), applicationVersion.orElse("SNAPSHOT")));
 		prefGvfsSchemeLabel.setVisible(SystemUtils.IS_OS_LINUX);
 		prefGvfsScheme.setVisible(SystemUtils.IS_OS_LINUX);
 		prefGvfsScheme.getItems().add("dav");
 		prefGvfsScheme.getItems().add("webdav");
-		prefGvfsScheme.setValue(settings.getPreferredGvfsScheme());
-		debugModeCheckbox.setSelected(settings.getDebugMode());
+		prefGvfsScheme.setValue(settings.preferredGvfsScheme().get());
+		debugModeCheckbox.setSelected(settings.debugMode().get());
 
-		EasyBind.subscribe(checkForUpdatesCheckbox.selectedProperty(), this::checkForUpdateDidChange);
-		EasyBind.subscribe(portField.textProperty(), this::portDidChange);
-		EasyBind.subscribe(useIpv6Checkbox.selectedProperty(), this::useIpv6DidChange);
-		EasyBind.subscribe(prefGvfsScheme.valueProperty(), this::prefGvfsSchemeDidChange);
-		EasyBind.subscribe(debugModeCheckbox.selectedProperty(), this::debugModeDidChange);
+		settings.checkForUpdates().bind(checkForUpdatesCheckbox.selectedProperty());
+		settings.useIpv6().bind(useIpv6Checkbox.selectedProperty());
+		settings.preferredGvfsScheme().bind(prefGvfsScheme.valueProperty());
+		settings.debugMode().bind(debugModeCheckbox.selectedProperty());
 	}
 
 	@Override
-	protected URL getFxmlResourceUrl() {
-		return getClass().getResource("/fxml/settings.fxml");
+	public Parent getRoot() {
+		return root;
 	}
 
-	private Optional<String> applicationVersion() {
-		return Optional.ofNullable(getClass().getPackage().getImplementationVersion());
-	}
-
-	private void checkForUpdateDidChange(Boolean newValue) {
-		settings.setCheckForUpdatesEnabled(newValue);
-		settings.save();
-	}
-
-	private void portDidChange(String newValue) {
+	@FXML
+	private void changePort(ActionEvent evt) {
+		assert isPortValid() : "Button must be disabled, if port is invalid.";
 		try {
-			int port = Integer.parseInt(newValue);
-			if (!settings.isPortValid(port)) {
-				settings.setPort(Settings.DEFAULT_PORT);
-			} else {
-				settings.setPort(port);
-				settings.save();
-			}
+			int port = Integer.parseInt(portField.getText());
+			settings.port().set(port);
 		} catch (NumberFormatException e) {
-			portField.setText(String.valueOf(Settings.DEFAULT_PORT));
+			throw new IllegalStateException("Button must be disabled, if port is invalid.", e);
 		}
 	}
 
-	private void useIpv6DidChange(Boolean newValue) {
-		settings.setUseIpv6(newValue);
-		settings.save();
-	}
-
-	private void debugModeDidChange(Boolean newValue) {
-		settings.setDebugMode(newValue);
-		settings.save();
-	}
-
-	private void prefGvfsSchemeDidChange(String newValue) {
-		settings.setPreferredGvfsScheme(newValue);
-		settings.save();
+	private boolean isPortValid() {
+		try {
+			int port = Integer.parseInt(portField.getText());
+			if (port == 0 || port >= Settings.MIN_PORT && port <= Settings.MAX_PORT) {
+				return true;
+			} else {
+				return false;
+			}
+		} catch (NumberFormatException e) {
+			return false;
+		}
 	}
 
 	private void filterNumericKeyEvents(KeyEvent t) {

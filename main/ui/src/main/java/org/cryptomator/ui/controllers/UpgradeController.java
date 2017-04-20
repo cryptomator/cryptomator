@@ -1,6 +1,10 @@
+/*******************************************************************************
+ * Copyright (c) 2017 Skymatic UG (haftungsbeschränkt).
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the accompanying LICENSE file.
+ *******************************************************************************/
 package org.cryptomator.ui.controllers;
 
-import java.net.URL;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -20,14 +24,16 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
+import javafx.scene.layout.GridPane;
 
-public class UpgradeController extends LocalizedFXMLViewController {
+public class UpgradeController implements ViewController {
 
-	private final ObjectProperty<Optional<UpgradeStrategy>> strategy = new SimpleObjectProperty<>();
+	private final ObjectProperty<UpgradeStrategy> strategy = new SimpleObjectProperty<>();
 	private final UpgradeStrategies strategies;
 	private final AsyncTaskService asyncTaskService;
 	private Optional<UpgradeListener> listener = Optional.empty();
@@ -35,7 +41,6 @@ public class UpgradeController extends LocalizedFXMLViewController {
 
 	@Inject
 	public UpgradeController(Localization localization, UpgradeStrategies strategies, AsyncTaskService asyncTaskService) {
-		super(localization);
 		this.strategies = strategies;
 		this.asyncTaskService = asyncTaskService;
 	}
@@ -61,14 +66,13 @@ public class UpgradeController extends LocalizedFXMLViewController {
 	@FXML
 	private Label errorLabel;
 
+	@FXML
+	private GridPane root;
+
 	@Override
-	protected void initialize() {
-		upgradeTitleLabel.textProperty().bind(EasyBind.monadic(strategy).map(instruction -> {
-			return instruction.map(this::upgradeTitle).orElse("");
-		}).orElse(""));
-		upgradeMsgLabel.textProperty().bind(EasyBind.monadic(strategy).map(instruction -> {
-			return instruction.map(this::upgradeMessage).orElse("");
-		}).orElse(""));
+	public void initialize() {
+		upgradeTitleLabel.textProperty().bind(EasyBind.monadic(strategy).map(this::upgradeTitle).orElse(""));
+		upgradeMsgLabel.textProperty().bind(EasyBind.monadic(strategy).map(this::upgradeMessage).orElse(""));
 
 		BooleanExpression passwordProvided = passwordField.textProperty().isNotEmpty().and(passwordField.disabledProperty().not());
 		BooleanExpression syncFinished = confirmationCheckbox.selectedProperty();
@@ -76,8 +80,8 @@ public class UpgradeController extends LocalizedFXMLViewController {
 	}
 
 	@Override
-	protected URL getFxmlResourceUrl() {
-		return getClass().getResource("/fxml/upgrade.fxml");
+	public Parent getRoot() {
+		return root;
 	}
 
 	void setVault(Vault vault) {
@@ -107,7 +111,7 @@ public class UpgradeController extends LocalizedFXMLViewController {
 
 	@FXML
 	private void didClickUpgradeButton(ActionEvent event) {
-		strategy.getValue().ifPresent(this::upgrade);
+		EasyBind.monadic(strategy).ifPresent(this::upgrade);
 	}
 
 	private void upgrade(UpgradeStrategy instruction) {
@@ -116,7 +120,7 @@ public class UpgradeController extends LocalizedFXMLViewController {
 		asyncTaskService //
 				.asyncTaskOf(() -> {
 					if (!instruction.isApplicable(vault)) {
-						throw new IllegalStateException("No ugprade needed for " + vault.path().getValue());
+						throw new IllegalStateException("No ugprade needed for " + vault.getPath());
 					}
 					instruction.upgrade(vault, passwordField.getCharacters());
 				}) //
@@ -133,8 +137,8 @@ public class UpgradeController extends LocalizedFXMLViewController {
 
 	private void showNextUpgrade() {
 		errorLabel.setText(null);
-		Optional<UpgradeStrategy> nextStrategy = strategies.getUpgradeStrategy(vault);
-		if (nextStrategy.isPresent()) {
+		UpgradeStrategy nextStrategy = strategies.getUpgradeStrategy(vault);
+		if (nextStrategy != null) {
 			strategy.set(nextStrategy);
 		} else {
 			listener.ifPresent(UpgradeListener::didUpgrade);

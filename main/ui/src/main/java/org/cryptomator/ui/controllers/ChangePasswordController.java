@@ -11,15 +11,14 @@ package org.cryptomator.ui.controllers;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.net.URL;
 import java.util.Objects;
 import java.util.Optional;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import org.cryptomator.crypto.engine.InvalidPassphraseException;
-import org.cryptomator.crypto.engine.UnsupportedVaultFormatException;
+import org.cryptomator.cryptolib.api.InvalidPassphraseException;
+import org.cryptomator.cryptolib.api.UnsupportedVaultFormatException;
 import org.cryptomator.ui.controls.SecPasswordField;
 import org.cryptomator.ui.model.Vault;
 import org.cryptomator.ui.settings.Localization;
@@ -35,28 +34,31 @@ import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Region;
 import javafx.scene.text.Text;
 
 @Singleton
-public class ChangePasswordController extends LocalizedFXMLViewController {
+public class ChangePasswordController implements ViewController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ChangePasswordController.class);
 
 	private final Application app;
 	private final PasswordStrengthUtil strengthRater;
+	private final Localization localization;
 	private final IntegerProperty passwordStrength = new SimpleIntegerProperty(); // 0-4
 	private Optional<ChangePasswordListener> listener = Optional.empty();
 	private Vault vault;
 
 	@Inject
 	public ChangePasswordController(Application app, PasswordStrengthUtil strengthRater, Localization localization) {
-		super(localization);
 		this.app = app;
 		this.strengthRater = strengthRater;
+		this.localization = localization;
 	}
 
 	@FXML
@@ -95,6 +97,9 @@ public class ChangePasswordController extends LocalizedFXMLViewController {
 	@FXML
 	private Region passwordStrengthLevel4;
 
+	@FXML
+	private GridPane root;
+
 	@Override
 	public void initialize() {
 		BooleanBinding oldPasswordIsEmpty = oldPasswordField.textProperty().isEmpty();
@@ -112,8 +117,8 @@ public class ChangePasswordController extends LocalizedFXMLViewController {
 	}
 
 	@Override
-	protected URL getFxmlResourceUrl() {
-		return getClass().getResource("/fxml/change_password.fxml");
+	public Parent getRoot() {
+		return root;
 	}
 
 	void setVault(Vault vault) {

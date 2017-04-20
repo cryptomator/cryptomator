@@ -16,8 +16,10 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.Button?>
 
-<VBox prefWidth="400.0" alignment="TOP_CENTER" spacing="12.0" xmlns:fx="http://javafx.com/fxml" cacheShape="true" cache="true">
+<VBox fx:controller="org.cryptomator.ui.controllers.SettingsController" fx:id="root" prefWidth="400.0" alignment="TOP_CENTER" spacing="12.0" xmlns:fx="http://javafx.com/fxml" cacheShape="true" cache="true">
 	<Label VBox.vgrow="NEVER" fx:id="versionLabel" alignment="CENTER" cacheShape="true" cache="true" />
 	<GridPane VBox.vgrow="ALWAYS" vgap="12.0" hgap="12.0" cacheShape="true" cache="true">
 		<padding>
@@ -36,7 +38,11 @@
 			
 			<!-- Row 1 -->
 			<Label GridPane.rowIndex="1" GridPane.columnIndex="0" text="%settings.port.label" cacheShape="true" cache="true" />
-			<TextField GridPane.rowIndex="1" GridPane.columnIndex="1" fx:id="portField" cacheShape="true" cache="true" promptText="%settings.port.prompt" />
+			<HBox GridPane.rowIndex="1" GridPane.columnIndex="1" spacing="6.0">
+				<TextField  fx:id="portField" cacheShape="true" cache="true" promptText="%settings.port.prompt" />
+				<Button text="%settings.port.apply" fx:id="changePortButton" onAction="#changePort"/>
+			</HBox>
+			
 			
 			<!-- Row 2 -->
 			<Label GridPane.rowIndex="2" GridPane.columnIndex="0" fx:id="useIpv6Label" text="%settings.useipv6.label" cacheShape="true" cache="true" />

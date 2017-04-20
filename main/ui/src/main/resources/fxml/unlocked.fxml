@@ -23,7 +23,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.layout.Pane?>
 
-<VBox prefWidth="400.0" prefHeight="400.0" spacing="6.0" xmlns:fx="http://javafx.com/fxml" cacheShape="true" cache="true">
+<VBox fx:controller="org.cryptomator.ui.controllers.UnlockedController" fx:id="root" prefWidth="400.0" prefHeight="400.0" spacing="6.0" xmlns:fx="http://javafx.com/fxml" cacheShape="true" cache="true">
 
 	<fx:define>
 		<ContextMenu fx:id="moreOptionsMenu">
