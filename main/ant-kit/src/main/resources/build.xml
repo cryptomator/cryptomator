@@ -3,15 +3,15 @@
 	<taskdef uri="javafx:com.sun.javafx.tools.ant" resource="com/sun/javafx/tools/ant/antlib.xml" classpath="\${java.class.path}:\${java.home}/../lib/ant-javafx.jar:." />
 	
 	<!-- Define application to build -->
-	<fx:application id="Cryptomator" name="Cryptomator" version="${project.version}" mainClass="org.cryptomator.ui.Cryptomator" />
+	<fx:application id="Cryptomator" name="Cryptomator" version="${project.version}" mainClass="org.cryptomator.launcher.Cryptomator" />
 	
 	<!-- Create main application jar -->
 	<target name="create-jar">
 		<fx:jar destfile="antbuild/Cryptomator-${project.version}.jar">
 			<fx:application refid="Cryptomator" />
-			<fx:fileset dir="libs" includes="ui-${project.version}.jar" />
+			<fx:fileset dir="libs" includes="launcher-${project.version}.jar" />
 			<fx:resources>
-				<fx:fileset dir="libs" type="jar" includes="*.jar" excludes="ui-${project.version}.jar" />
+				<fx:fileset dir="libs" type="jar" includes="*.jar" excludes="launcher-${project.version}.jar" />
 			</fx:resources>
 			<fx:manifest>
 				<fx:attribute name="Implementation-Vendor" value="cryptomator.org" />
@@ -32,11 +32,12 @@
 				<fx:property name="cryptomator.logPath" value="~/.Cryptomator/cryptomator.log" />
 				<fx:property name="cryptomator.upgradeLogPath" value="~/.Cryptomator/upgrade.log" />
 				<fx:property name="cryptomator.settingsPath" value="~/.Cryptomator/settings.json" />
+				<fx:property name="cryptomator.ipcPortPath" value="~/.Cryptomator/ipcPort.bin" />
 				<fx:jvmarg value="-Xmx512m"/>
 			</fx:platform>
 			<fx:resources>
 				<fx:fileset dir="antbuild" type="jar" includes="Cryptomator-${project.version}.jar" />
-				<fx:fileset dir="libs" type="jar" includes="*.jar" excludes="ui-${project.version}.jar"/>
+				<fx:fileset dir="libs" type="jar" includes="*.jar" excludes="launcher-${project.version}.jar"/>
 				<fx:fileset dir="fixed-binaries" type="data" includes="linux-launcher-*" arch=""/>
 			</fx:resources>
 			<fx:permissions elevated="false" />
@@ -55,11 +56,12 @@
 				<fx:property name="cryptomator.logPath" value="~/.Cryptomator/cryptomator.log" />
 				<fx:property name="cryptomator.upgradeLogPath" value="~/.Cryptomator/upgrade.log" />
 				<fx:property name="cryptomator.settingsPath" value="~/.Cryptomator/settings.json" />
+				<fx:property name="cryptomator.ipcPortPath" value="~/.Cryptomator/ipcPort.bin" />
 				<fx:jvmarg value="-Xmx512m"/>
 			</fx:platform>
 			<fx:resources>
 				<fx:fileset dir="antbuild" type="jar" includes="Cryptomator-${project.version}.jar" />
-				<fx:fileset dir="libs" type="jar" includes="*.jar" excludes="ui-${project.version}.jar"/>
+				<fx:fileset dir="libs" type="jar" includes="*.jar" excludes="launcher-${project.version}.jar"/>
 				<fx:fileset dir="fixed-binaries" type="data" includes="linux-launcher-*" arch=""/>
 			</fx:resources>
 			<fx:permissions elevated="false" />

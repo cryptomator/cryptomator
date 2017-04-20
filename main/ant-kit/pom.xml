@@ -18,7 +18,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.cryptomator</groupId>
-			<artifactId>ui</artifactId>
+			<artifactId>launcher</artifactId>
 		</dependency>
 	</dependencies>
 
