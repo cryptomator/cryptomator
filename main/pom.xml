@@ -29,7 +29,7 @@
 		<!-- dependency versions -->
 		<cryptomator.cryptolib.version>1.1.1</cryptomator.cryptolib.version>
 		<cryptomator.cryptofs.version>1.2.0</cryptomator.cryptofs.version>
-		<cryptomator.webdav.version>0.4.0</cryptomator.webdav.version>
+		<cryptomator.webdav.version>0.5.0</cryptomator.webdav.version>
 		<cryptomator.jni.version>1.0.0</cryptomator.jni.version>
 		<log4j.version>2.8.1</log4j.version> <!-- keep in sync with https://github.com/edwgiz/maven-shaded-log4j-transformer (used in uber-jar), or wait for https://issues.apache.org/jira/browse/LOG4J2-954 fix -->
 		<slf4j.version>1.7.25</slf4j.version>
