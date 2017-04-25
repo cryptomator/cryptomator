@@ -1,19 +1,19 @@
 app.name = Cryptomator
 # main.fxml
-main.emptyListInstructions = Clic aquí para añadir una caja fuerte
+main.emptyListInstructions = Haz clic aquí para añadir una caja fuerte
 # should it be imperative?
 main.directoryList.contextMenu.remove = Eliminar de la lista
 main.directoryList.contextMenu.changePassword = Cambiar la contraseña
 main.addDirectory.contextMenu.new = Crear una nueva caja fuerte
 main.addDirectory.contextMenu.open = Abrir una caja fuerte existente
 # welcome.fxml
-welcome.checkForUpdates.label.currentlyChecking = Chequando por actualizaciónes...
-welcome.newVersionMessage = Se puede bajar version %1$s.\nEste es %2$s.
+welcome.checkForUpdates.label.currentlyChecking = Comprobando actualizaciones...
+welcome.newVersionMessage = La versión %1$s está disponible para descargar.\nLa versión actual es %2$s.
 # initialize.fxml
 initialize.label.password = Contraseña
-initialize.label.retypePassword = Reintroduzca contraseña
+initialize.label.retypePassword = Repetir contraseña
 initialize.button.ok = Crear caja fuerte
-initialize.messageLabel.alreadyInitialized = Caja fuerte ya está inicializado
+initialize.messageLabel.alreadyInitialized = La caja fuerte ya está inicializada
 initialize.messageLabel.initializationFailed = No se pudo inicializar la caja fuerte. Ver archivo de registro para detalles.
 # notfound.fxml
 notfound.label = No se pudo encontrar la caja fuerte. Se movió a otro lugar?
@@ -23,48 +23,43 @@ upgrade.version3dropBundleExtension.msg = Este caja fuerte se debe actualizar a 
 upgrade.version3dropBundleExtension.err.alreadyExists = Migración automática ha fallado.\n"%s" ya existe.
 # unlock.fxml
 unlock.label.password = Contraseña
-unlock.label.mountName = Nombre del disco
-unlock.label.winDriveLetter = Letra del disco
+unlock.label.mountName = Nombre de la unidad
+unlock.label.winDriveLetter = Letra de la unidad
 unlock.label.downloadsPageLink = Todas las versiones de Cryptomator
 unlock.label.advancedHeading = Opciones avanzadas
-unlock.button.unlock = Abrir caja fuerte
+unlock.button.unlock = Desbloquear caja fuerte
 unlock.button.advancedOptions.show = Más opciones
 unlock.button.advancedOptions.hide = Menos opciones
 unlock.choicebox.winDriveLetter.auto = Asignar automáticamente
 unlock.errorMessage.wrongPassword = Contraseña incorrecta
-unlock.errorMessage.mountingFailed = Monteo ha fallado. Ver archivo del registro para detalles.
-unlock.errorMessage.unsupportedVersion.vaultOlderThanSoftware = Caja fuerte insupportado. Este caja se ha creado con una versión pasada de Cryptomator.
-unlock.errorMessage.unsupportedVersion.softwareOlderThanVault = Caja fuerte insupportado. Este caja se ha creado con una versión nueva de Cryptomator.
+unlock.errorMessage.mountingFailed = El montaje ha fallado. Ver archivo del registro para detalles.
+unlock.errorMessage.unsupportedVersion.vaultOlderThanSoftware = Caja fuerte no soportada. Ésta caja se ha creado con una versión anterior de Cryptomator.
+unlock.errorMessage.unsupportedVersion.softwareOlderThanVault = Caja fuerte no soportada. Ésta caja se ha creado con una versión nueva de Cryptomator.
 unlock.messageLabel.startServerFailed = Iniciación del servidor de WebDAV ha fallado.
 # change_password.fxml
-changePassword.label.oldPassword = Contraseña anterior
+changePassword.label.oldPassword = Contraseña antigua
 # Can also use "current password" = "contraseña actual"
 changePassword.label.newPassword = Nueva contraseña
-changePassword.label.retypePassword = Reintroduzca contraseña
+changePassword.label.retypePassword = Repetir contraseña
 changePassword.label.downloadsPageLink = Todas las versiones de Cryptomator
 changePassword.button.change = Cambiar contraseña
 changePassword.errorMessage.wrongPassword = Contraseña incorrecta
 changePassword.errorMessage.decryptionFailed = Decifración ha fallado
 # unlocked.fxml
 unlocked.button.lock = Encerrar caja fuerte
-unlocked.moreOptions.reveal = Mostrar disco
+unlocked.moreOptions.reveal = Revelar unidad
 unlocked.moreOptions.copyUrl = Copiar URL de WebDAV
 unlocked.label.revealFailed = Comando ha fallado
 unlocked.label.unmountFailed = Expulsar el disco ha fallado
 unlocked.label.statsEncrypted = cifrado
 unlocked.label.statsDecrypted = decifrado
 unlocked.ioGraph.yAxis.label = Procesamiento (MiB/s)
-# mac_warnings.fxml
-macWarnings.windowTitle = Peligro - archivo corrupto en %s
-macWarnings.message = Cryptomator ha detectado corrupciones malciosas en los seguientes archivos\:
-macWarnings.moreInformationButton = Aprende más
-macWarnings.whitelistButton = Decifrar selecionado de todos modos
 # settings.fxml
-settings.version.label = Version %s
-settings.checkForUpdates.label = Chequear por actualizaciones
-settings.port.label = Puerta de WebDAV *
-settings.port.prompt = 0 \= Elige automáticamente
-settings.useipv6.label = Usa literal de IPv6
+settings.version.label = Versión %s
+settings.checkForUpdates.label = Comprobar actualizaciones
+settings.port.label = Puerto WebDAV
+settings.port.prompt = 0 \= Elegir automáticamente
+settings.useipv6.label = Usar IPv6 literal
 settings.requiresRestartLabel = * Cryptomator se necesita reiniciar
 # tray icon
 tray.menu.open = Abrir
@@ -72,31 +67,34 @@ tray.menu.quit = Salir
 tray.infoMsg.title = Todavía en ejecución
 tray.infoMsg.msg = Cryptomator todavía esta en ejecución. Para salir usa el icono del tray.
 tray.infoMsg.msg.osx = Cryptomator todavía esta en ejecución. Para salir usa el icono de la barra del menú.
-initialize.messageLabel.passwordStrength.0 = muy débil
-initialize.messageLabel.passwordStrength.1 = débil
-initialize.messageLabel.passwordStrength.2 = suficiente
-initialize.messageLabel.passwordStrength.3 = fuerte
-initialize.messageLabel.passwordStrength.4 = muy fuerte
-initialize.label.doNotForget = IMPORTANTE\: Si olivdes tú contraseña, no hay ninguna manera de recuperar tus datos.
+initialize.messageLabel.passwordStrength.0 = Muy débil
+initialize.messageLabel.passwordStrength.1 = Débil
+initialize.messageLabel.passwordStrength.2 = Suficiente
+initialize.messageLabel.passwordStrength.3 = Fuerte
+initialize.messageLabel.passwordStrength.4 = Muy fuerte
+initialize.label.doNotForget = IMPORTANTE\: Si olivdas tú contraseña, no hay ninguna manera de recuperar tus datos.
 main.directoryList.remove.confirmation.title = Borrar caja fuerte
-main.directoryList.remove.confirmation.header = ¿Quieres de verdad borrar este caja fuerte?
+main.directoryList.remove.confirmation.header = ¿Quieres de verdad borrar esta caja fuerte?
 main.directoryList.remove.confirmation.content = La caja fuerte solo se borra de la lista. Para eliminarla permanente por favor elimina los datos de tú sistema de archivos.
 upgrade.version3to4.msg = Este caja fuerte se debe migrar a un formato más reciente.\nLos nombres de las carpetas cifradas se actualizan.\nPor favor asegurarse de que la sincronización ha terminado antes de seguir.
 upgrade.version3to4.err.io = Migración ha fallado por causa de una excepción I/O. Para detalles revisa el archivo de registro.
 # or esequema WEBDAV but I think sistema sounds better
-settings.prefGvfsScheme.label = sistema WebDAV
+settings.prefGvfsScheme.label = Esquema WebDAV
 # upgrade.fxml
 upgrade.confirmation.label = Sí, me he asegurado de que la sincronización ha terminado
-initialize.messageLabel.notEmpty = Caja fuerte no está vacio
-unlock.label.savePassword = Contraseña segura
-unlock.errorMessage.unauthenticVersionMac = No se pudo autentificar la version de MAC.
-unlocked.label.mountFailed = Connecting drive failed
-unlock.savePassword.delete.confirmation.title = Delete Saved Password
-unlock.savePassword.delete.confirmation.header = Do you really want to delete the saved password of this vault?
-unlock.savePassword.delete.confirmation.content = The saved password of this vault will be immediately deleted from your system keychain. If you'd like to save your password again, you'd have to unlock your vault with the "Save password" option enabled.
-settings.debugMode.label = Debug Mode *
-upgrade.version3dropBundleExtension.title = Vault Version 3 Upgrade (Drop Bundle Extension)
-upgrade.version3to4.title = Vault Version 3 to 4 Upgrade
-upgrade.version4to5.title = Vault Version 4 to 5 Upgrade
-upgrade.version4to5.msg = This vault needs to be migrated to a newer format.\nEncrypted files will be updated.\nPlease make sure synchronization has finished before proceeding.\n\nNote\: Modification date of all files will be changed to the current date/time in the process.
-upgrade.version4to5.err.io = Migration failed due to an I/O Exception. See log file for details.
+initialize.messageLabel.notEmpty = Caja fuerte no está vacia
+unlock.label.savePassword = Guardar contraseña
+unlock.errorMessage.unauthenticVersionMac = No se pudo autentificar la versión de MAC.
+unlocked.label.mountFailed = Error al montar la unidad
+unlock.savePassword.delete.confirmation.title = Borrar contraseña guardada
+unlock.savePassword.delete.confirmation.header = ¿Quieres borrar la contraseña guardada de esta unidad?
+unlock.savePassword.delete.confirmation.content = La contraseña guardada de esta caja fuerte, será borrada inmediatamente del sistema de claves. Si quieres guardar tu contraseña de nuevo, tienes que volver a desbloquear la caja fuerte marcando la opción de "Guardar contraseña".
+settings.debugMode.label = Modo depuración *
+upgrade.version3dropBundleExtension.title = Actualizar caja fuerte a la versión 3 (Drop Bundle Extension)
+upgrade.version3to4.title = Actualizar caja fuerte de versión 3 a 4
+upgrade.version4to5.title = Actualizar caja fuerte de versión 3 a 4
+upgrade.version4to5.msg = Esta caja fuerte tiene que ser migrada a un formato nuevo.\nLos archivos encriptados se actualizarán.\nPor favor, asegúrate de que la sincronización ha terminado antes de empezar con el proceso.\n\nNota\: Las fechas de modificación de todos los archivos, se cambiarán a la fecha actual.
+upgrade.version4to5.err.io = La migración ha fallado por una excepción E/S. Consulta el log para ver más detalles.
+settings.port.apply = Aplicar
+unlock.label.mountAfterUnlock = Montar unidad
+unlock.label.revealAfterMount = Revelar unidad

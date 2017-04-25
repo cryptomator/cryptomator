@@ -1,0 +1,97 @@
+app.name = Криптоматор
+# main.fxml
+main.emptyListInstructions = Натиснете тук за да добавите сейф
+main.directoryList.contextMenu.remove = Премахнете от листа
+main.directoryList.contextMenu.changePassword = Сменете парола
+main.addDirectory.contextMenu.new = Създайте нов сейф
+main.addDirectory.contextMenu.open = Отворете съществуващ сейф
+# welcome.fxml
+welcome.checkForUpdates.label.currentlyChecking = Проверете за нови версии
+welcome.newVersionMessage = Version %1$s can be downloaded.\nThis is %2$s.
+# initialize.fxml
+initialize.label.password = Парола
+initialize.label.retypePassword = Повторете Паролата
+initialize.button.ok = Създайте Сейф
+initialize.messageLabel.alreadyInitialized = Сейфа е вече активен
+initialize.messageLabel.initializationFailed = Неуспешно активиране на сейф. Проверете лог файловете за повече информация.
+# notfound.fxml
+notfound.label = Сейфа не може да бъде намерен. Може би е бил преместен?
+# upgrade.fxml
+upgrade.button = Обновете версията на Сейф
+upgrade.version3dropBundleExtension.msg = This vault needs to be migrated to a newer format.\n"%1$s" will be renamed to "%2$s".\nPlease make sure synchronization has finished before proceeding.
+upgrade.version3dropBundleExtension.err.alreadyExists = Автоматичната миграция е неуспешна. "%s" вече съществува.
+# unlock.fxml
+unlock.label.password = Парола
+unlock.label.mountName = Име на диск
+unlock.label.winDriveLetter = Инициали на диск
+unlock.label.downloadsPageLink = Покажи всички версии на Криптоматор
+unlock.label.advancedHeading = Опции за напреднали
+unlock.button.unlock = Отключи Сейф
+unlock.button.advancedOptions.show = Покажи повече опции
+unlock.button.advancedOptions.hide = Покажи по-малко опции
+unlock.choicebox.winDriveLetter.auto = Автоматично наименование на Диска
+unlock.errorMessage.wrongPassword = Неправилна парола
+unlock.errorMessage.mountingFailed = Неуспешно активиране на диска. За повече информация вижте лог файла.
+unlock.errorMessage.unsupportedVersion.vaultOlderThanSoftware = Неподържана версия. Този сейф е бил създаден със стара версия на Криптоматор.
+unlock.errorMessage.unsupportedVersion.softwareOlderThanVault = Неподържана версия. Този сейф е бил създаден с по-нова версия на Криптоматор.
+unlock.messageLabel.startServerFailed = Неуспешно стартиране на WebDAV сървъра.
+# change_password.fxml
+changePassword.label.oldPassword = Стара парола
+changePassword.label.newPassword = Нова парола
+changePassword.label.retypePassword = Повторете паролата
+changePassword.label.downloadsPageLink = All Cryptomator versions
+changePassword.button.change = Смени паролата
+changePassword.errorMessage.wrongPassword = Неправилна парола
+changePassword.errorMessage.decryptionFailed = Неуспешно декриптиране
+# unlocked.fxml
+unlocked.button.lock = Заключи Сейфа
+unlocked.moreOptions.reveal = Покажи 
+unlocked.moreOptions.copyUrl = Copy WebDAV URL
+unlocked.label.revealFailed = Командата е неуспешна
+unlocked.label.unmountFailed = Ejecting drive failed
+unlocked.label.statsEncrypted = encrypted
+unlocked.label.statsDecrypted = decrypted
+unlocked.ioGraph.yAxis.label = Throughput (MiB/s)
+# settings.fxml
+settings.version.label = Version %s
+settings.checkForUpdates.label = Check for Updates
+settings.port.label = WebDAV Port
+settings.port.prompt = 0 \= Choose automatically
+settings.useipv6.label = Use IPv6 Literal
+settings.requiresRestartLabel = * Cryptomator needs to restart
+# tray icon
+tray.menu.open = Open
+tray.menu.quit = Quit
+tray.infoMsg.title = Still Running
+tray.infoMsg.msg = Cryptomator is still alive. Quit it from the tray icon.
+tray.infoMsg.msg.osx = Cryptomator is still alive. Quit it from the menu bar icon.
+initialize.messageLabel.passwordStrength.0 = Very weak
+initialize.messageLabel.passwordStrength.1 = Weak
+initialize.messageLabel.passwordStrength.2 = Fair
+initialize.messageLabel.passwordStrength.3 = Strong
+initialize.messageLabel.passwordStrength.4 = Very strong
+initialize.label.doNotForget = IMPORTANT\: If you forget your password, there is no way to recover your data.
+main.directoryList.remove.confirmation.title = Remove Vault
+main.directoryList.remove.confirmation.header = Do you really want to remove this vault?
+main.directoryList.remove.confirmation.content = The vault will only be removed from the list. To permanently delete it, please delete the files from your filesystem.
+upgrade.version3to4.msg = This vault needs to be migrated to a newer format.\nEncrypted folder names will be updated.\nPlease make sure synchronization has finished before proceeding.
+upgrade.version3to4.err.io = Migration failed due to an I/O Exception. See log file for details.
+settings.prefGvfsScheme.label = WebDAV Scheme
+# upgrade.fxml
+upgrade.confirmation.label = Yes, I've made sure that synchronization has finished
+initialize.messageLabel.notEmpty = Vault not empty
+unlock.label.savePassword = Save Password
+unlock.errorMessage.unauthenticVersionMac = Could not authenticate version MAC.
+unlocked.label.mountFailed = Connecting drive failed
+unlock.savePassword.delete.confirmation.title = Delete Saved Password
+unlock.savePassword.delete.confirmation.header = Do you really want to delete the saved password of this vault?
+unlock.savePassword.delete.confirmation.content = The saved password of this vault will be immediately deleted from your system keychain. If you'd like to save your password again, you'd have to unlock your vault with the "Save password" option enabled.
+settings.debugMode.label = Debug Mode *
+upgrade.version3dropBundleExtension.title = Vault Version 3 Upgrade (Drop Bundle Extension)
+upgrade.version3to4.title = Vault Version 3 to 4 Upgrade
+upgrade.version4to5.title = Vault Version 4 to 5 Upgrade
+upgrade.version4to5.msg = This vault needs to be migrated to a newer format.\nEncrypted files will be updated.\nPlease make sure synchronization has finished before proceeding.\n\nNote\: Modification date of all files will be changed to the current date/time in the process.
+upgrade.version4to5.err.io = Migration failed due to an I/O Exception. See log file for details.
+settings.port.apply = Apply
+unlock.label.mountAfterUnlock = Mount Drive
+unlock.label.revealAfterMount = Reveal Drive

@@ -1,0 +1,97 @@
+app.name = كريبتوماتور
+# main.fxml
+main.emptyListInstructions = اضغط هنا لاضافة محفظة
+main.directoryList.contextMenu.remove = ازل من القائمة
+main.directoryList.contextMenu.changePassword = تغيير كلمة المرور
+main.addDirectory.contextMenu.new = انشاء محفظة جديدة
+main.addDirectory.contextMenu.open = افتح محفظة موجوده
+# welcome.fxml
+welcome.checkForUpdates.label.currentlyChecking = فحص التحديثات
+welcome.newVersionMessage = يمكنك الان تحميل الاصدار رقم %1$s\nالاصدار الحالي %2$s
+# initialize.fxml
+initialize.label.password = كلمة المرور
+initialize.label.retypePassword = اعد كتابة كلمة المرور
+initialize.button.ok = انشاء محفظة
+initialize.messageLabel.alreadyInitialized = لقد تم تهيئة المحفظة
+initialize.messageLabel.initializationFailed = تعذر تهيئة المحفظة . يرجي مراجعة ملف التفاصيل ( log file )
+# notfound.fxml
+notfound.label = تعذر العثور علي المحفظه , هل قمت بنقلها ؟
+# upgrade.fxml
+upgrade.button = ترقية المحفظة
+upgrade.version3dropBundleExtension.msg = This vault needs to be migrated to a newer format.\n"%1$s" will be renamed to "%2$s".\nPlease make sure synchronization has finished before proceeding.
+upgrade.version3dropBundleExtension.err.alreadyExists = Automatic migration failed.\n"%s" already exists.
+# unlock.fxml
+unlock.label.password = كلمة المرور
+unlock.label.mountName = Drive Name
+unlock.label.winDriveLetter = Drive Letter
+unlock.label.downloadsPageLink = جميع اصدارات كريبتوماتور
+unlock.label.advancedHeading = خيارات اضافية
+unlock.button.unlock = افتح المحفظة
+unlock.button.advancedOptions.show = خيارات اكثر
+unlock.button.advancedOptions.hide = خيارات اقل
+unlock.choicebox.winDriveLetter.auto = دخول تلقائي
+unlock.errorMessage.wrongPassword = كلمة مرور خاطئة
+unlock.errorMessage.mountingFailed = فشل الدخول الي المحفظة . يرجي مراجعة ملف التفاصيل ( log file )
+unlock.errorMessage.unsupportedVersion.vaultOlderThanSoftware = محفظة غير مدعومة . هذه المحفظة تم انشاؤها بواسطة اصدار اقدم من كريبتوماتور
+unlock.errorMessage.unsupportedVersion.softwareOlderThanVault = محفظة غير مدعومة . هذه المحفظة تم انشاؤها بواسطة اصدار احدث من كريبتوماتور
+unlock.messageLabel.startServerFailed = Starting WebDAV server failed.
+# change_password.fxml
+changePassword.label.oldPassword = كلمة المرور القديمة
+changePassword.label.newPassword = كلمة المرور الجديدة
+changePassword.label.retypePassword = اعد كتابة كلمة المرور
+changePassword.label.downloadsPageLink = جميع اصدارات كريبتوماتور
+changePassword.button.change = تغيير كلمة المرور
+changePassword.errorMessage.wrongPassword = كلمة مرور خاطئة
+changePassword.errorMessage.decryptionFailed = فشل فك التشفير
+# unlocked.fxml
+unlocked.button.lock = اغلاق المحفظة
+unlocked.moreOptions.reveal = Reveal Drive
+unlocked.moreOptions.copyUrl = نسخ رابط ويب داف ( WebDAV )
+unlocked.label.revealFailed = Command failed
+unlocked.label.unmountFailed = Ejecting drive failed
+unlocked.label.statsEncrypted = مشفر
+unlocked.label.statsDecrypted = غير مشفر
+unlocked.ioGraph.yAxis.label = Throughput (MiB/s)
+# settings.fxml
+settings.version.label = الاصدار %s 
+settings.checkForUpdates.label = افحص التحديثات
+settings.port.label = منفذ ويب داف ( WebDAV )
+settings.port.prompt = 0 \= Choose automatically
+settings.useipv6.label = Use IPv6 Literal
+settings.requiresRestartLabel = * Cryptomator needs to restart
+# tray icon
+tray.menu.open = فتح
+tray.menu.quit = اغلاق
+tray.infoMsg.title = لا يزال مستخدم
+tray.infoMsg.msg = Cryptomator is still alive. Quit it from the tray icon.
+tray.infoMsg.msg.osx = Cryptomator is still alive. Quit it from the menu bar icon.
+initialize.messageLabel.passwordStrength.0 = ضعيف جدا
+initialize.messageLabel.passwordStrength.1 = ضعيف
+initialize.messageLabel.passwordStrength.2 = عادي
+initialize.messageLabel.passwordStrength.3 = قوي
+initialize.messageLabel.passwordStrength.4 = قوي جدا
+initialize.label.doNotForget = هام \: في حالة نسيانك لكلمة المرور , لا يوجد طريقة لاستعادتها مره اخري
+main.directoryList.remove.confirmation.title = ازالة المحفظة
+main.directoryList.remove.confirmation.header = هل تريد فعلا ازالة المحفظة ؟
+main.directoryList.remove.confirmation.content = The vault will only be removed from the list. To permanently delete it, please delete the files from your filesystem.
+upgrade.version3to4.msg = This vault needs to be migrated to a newer format.\nEncrypted folder names will be updated.\nPlease make sure synchronization has finished before proceeding.
+upgrade.version3to4.err.io = Migration failed due to an I/O Exception. See log file for details.
+settings.prefGvfsScheme.label = WebDAV Scheme
+# upgrade.fxml
+upgrade.confirmation.label = Yes, I've made sure that synchronization has finished
+initialize.messageLabel.notEmpty = المحفظة غير فارغة
+unlock.label.savePassword = حفظ كلمة المرور
+unlock.errorMessage.unauthenticVersionMac = Could not authenticate version MAC.
+unlocked.label.mountFailed = Connecting drive failed
+unlock.savePassword.delete.confirmation.title = حذف كلمة المرور المحفوظة
+unlock.savePassword.delete.confirmation.header = Do you really want to delete the saved password of this vault?
+unlock.savePassword.delete.confirmation.content = The saved password of this vault will be immediately deleted from your system keychain. If you'd like to save your password again, you'd have to unlock your vault with the "Save password" option enabled.
+settings.debugMode.label = Debug Mode *
+upgrade.version3dropBundleExtension.title = Vault Version 3 Upgrade (Drop Bundle Extension)
+upgrade.version3to4.title = Vault Version 3 to 4 Upgrade
+upgrade.version4to5.title = Vault Version 4 to 5 Upgrade
+upgrade.version4to5.msg = This vault needs to be migrated to a newer format.\nEncrypted files will be updated.\nPlease make sure synchronization has finished before proceeding.\n\nNote\: Modification date of all files will be changed to the current date/time in the process.
+upgrade.version4to5.err.io = Migration failed due to an I/O Exception. See log file for details.
+settings.port.apply = Apply
+unlock.label.mountAfterUnlock = Mount Drive
+unlock.label.revealAfterMount = Reveal Drive

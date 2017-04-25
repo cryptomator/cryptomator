@@ -52,11 +52,6 @@ unlocked.label.unmountFailed = Вилучення диска невдале
 unlocked.label.statsEncrypted = зашифровано
 unlocked.label.statsDecrypted = розшифровано
 unlocked.ioGraph.yAxis.label = Пропускна спроможність (МіБ/с)
-# mac_warnings.fxml
-macWarnings.windowTitle = Небезпека - Пошкоджений файл в %s
-macWarnings.message = Cryptomator виявив потенційно небезпечні пошкодження в наступних файлах\:
-macWarnings.moreInformationButton = Докладніше
-macWarnings.whitelistButton = Розшифрувати обрані все одно
 # settings.fxml
 settings.version.label = Версія %s
 settings.checkForUpdates.label = Перевірити оновлення
@@ -97,3 +92,6 @@ upgrade.version3to4.title = Vault Version 3 to 4 Upgrade
 upgrade.version4to5.title = Vault Version 4 to 5 Upgrade
 upgrade.version4to5.msg = This vault needs to be migrated to a newer format.\nEncrypted files will be updated.\nPlease make sure synchronization has finished before proceeding.\n\nNote\: Modification date of all files will be changed to the current date/time in the process.
 upgrade.version4to5.err.io = Migration failed due to an I/O Exception. See log file for details.
+settings.port.apply = Apply
+unlock.label.mountAfterUnlock = Mount Drive
+unlock.label.revealAfterMount = Reveal Drive
