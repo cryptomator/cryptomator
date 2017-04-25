@@ -52,11 +52,6 @@ unlocked.label.unmountFailed = Meghajtó leválasztása sikertelen
 unlocked.label.statsEncrypted = titkosított
 unlocked.label.statsDecrypted = titkosítás feloldva
 unlocked.ioGraph.yAxis.label = Teljesítmény (MiB/s)
-# mac_warnings.fxml
-macWarnings.windowTitle = Veszély - Korrupt fájl a következőben\: %s
-macWarnings.message = Cryptomator potenciálisan rosszindulatú hibákat fedezett fel a következő fájlokban\:
-macWarnings.moreInformationButton = Tudj meg többet
-macWarnings.whitelistButton = Kiválasztottak titkosításának feloldása mindenképp
 # settings.fxml
 settings.version.label = Verzió\: %s
 settings.checkForUpdates.label = Frissítések keresése
@@ -97,3 +92,6 @@ upgrade.version3to4.title = Széf verziófrissítése 3-ról 4-re
 upgrade.version4to5.title = Széf verziófrissítése 4-ről 5-re
 upgrade.version4to5.msg = Ennek a széfnek egy újabb formátumra való migrációja szükséges. A titkosított könyvtárnevek frissítve lesznek. Kérlek, győződj meg a szinkronizáció befejeztéről mielőtt továbblépnél.\n\nMegjegyzés\: A összes fájl módosításának dátuma az aktuális időre fog módosulni
 upgrade.version4to5.err.io = Migráció meghíusúlt egy I/O kivétel miatt. Kérlek nézd meg a naplófájlt a további részletekért.
+settings.port.apply = Apply
+unlock.label.mountAfterUnlock = Mount Drive
+unlock.label.revealAfterMount = Reveal Drive

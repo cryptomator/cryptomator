@@ -1,0 +1,97 @@
+app.name = Cryptomator
+# main.fxml
+main.emptyListInstructions = Tryk her for at tilføje en ny Vault
+main.directoryList.contextMenu.remove = Fjern fra listen
+main.directoryList.contextMenu.changePassword = Skift adgangskode
+main.addDirectory.contextMenu.new = Opret ny Vault
+main.addDirectory.contextMenu.open = Åben en eksisterende Vault
+# welcome.fxml
+welcome.checkForUpdates.label.currentlyChecking = Tjek for opdateringer
+welcome.newVersionMessage = Version %1$s kan nu hentes.\nDette er %2$s.
+# initialize.fxml
+initialize.label.password = Adgangskode
+initialize.label.retypePassword = Gentag Adgangskode
+initialize.button.ok = Opret Vault
+initialize.messageLabel.alreadyInitialized = Vault er allerede initialiseret
+initialize.messageLabel.initializationFailed = Kunne ikke initialisere Vault. Se logfilen for yderligere detaljer.
+# notfound.fxml
+notfound.label = Vault'en kunne ikke findes. Er den blevet flyttet?
+# upgrade.fxml
+upgrade.button = Opgradér Vault
+upgrade.version3dropBundleExtension.msg = Denne Vault skal migreres til et nyere format.\n"%1$s" vil blive omdøbt til "%2$s".\nVent venligst til al synkronisering er gennemført, inden du fortsætter.
+upgrade.version3dropBundleExtension.err.alreadyExists = Automatisk migrering fejlede.\n"%s" eksisterer allerede.
+# unlock.fxml
+unlock.label.password = Adgangskode
+unlock.label.mountName = Drev navn
+unlock.label.winDriveLetter = Drev bogstav
+unlock.label.downloadsPageLink = Alle Cryptomator versioner
+unlock.label.advancedHeading = Avancerede Indstillinger
+unlock.button.unlock = Lås op for Vault
+unlock.button.advancedOptions.show = Flere valgmuligheder
+unlock.button.advancedOptions.hide = Færre valgmuligheder
+unlock.choicebox.winDriveLetter.auto = Tildel automatisk
+unlock.errorMessage.wrongPassword = Forkert adgangskode
+unlock.errorMessage.mountingFailed = Montering fejlede. Se logfilen for yderligere detaljer.
+unlock.errorMessage.unsupportedVersion.vaultOlderThanSoftware = Ikke-understøttet Vault. Denne Vault er blevet oprettet med en ældre version af Cryptomator.
+unlock.errorMessage.unsupportedVersion.softwareOlderThanVault = Ikke-understøttet Vault. Denne Vault er blevet oprettet med en nyere version af Cryptomator.
+unlock.messageLabel.startServerFailed = Kunne ikke starte WebDAV server.
+# change_password.fxml
+changePassword.label.oldPassword = Gammel adgangskode
+changePassword.label.newPassword = Ny adgangskode
+changePassword.label.retypePassword = Gentag adgangskode
+changePassword.label.downloadsPageLink = Alle Cryptomator versioner
+changePassword.button.change = Skift adgangskode
+changePassword.errorMessage.wrongPassword = Forkert adgangskode
+changePassword.errorMessage.decryptionFailed = Dekryptering fejlede
+# unlocked.fxml
+unlocked.button.lock = Lås Vault
+unlocked.moreOptions.reveal = Vis drev
+unlocked.moreOptions.copyUrl = Kopier WebDAV URL
+unlocked.label.revealFailed = Kommando fejlede
+unlocked.label.unmountFailed = Afmontering af drev fejlede
+unlocked.label.statsEncrypted = Krypteret
+unlocked.label.statsDecrypted = Dekrypteret
+unlocked.ioGraph.yAxis.label = Throughput (MiB/s)
+# settings.fxml
+settings.version.label = Version %s
+settings.checkForUpdates.label = Tjek for opdateringer
+settings.port.label = WebDAV Port
+settings.port.prompt = 0 \= Vælg automatisk
+settings.useipv6.label = Brug IPv6 adresse
+settings.requiresRestartLabel = * Cryptomator skal genstartes
+# tray icon
+tray.menu.open = Åbn
+tray.menu.quit = Afslut
+tray.infoMsg.title = Kører Stadig
+tray.infoMsg.msg = Cryptomator kører stadig. Afslut programmet fra tray-ikonet.
+tray.infoMsg.msg.osx = Cryptomator kører stadig. Afslut programmet fra menu-baren.
+initialize.messageLabel.passwordStrength.0 = Meget svag
+initialize.messageLabel.passwordStrength.1 = Svag
+initialize.messageLabel.passwordStrength.2 = Mellem
+initialize.messageLabel.passwordStrength.3 = Stærk
+initialize.messageLabel.passwordStrength.4 = Meget stærk
+initialize.label.doNotForget = VIGTIGT\: Hvis du glemmer dit password, er der ingen måde hvorpå data kan genskabes.
+main.directoryList.remove.confirmation.title = Slet Vault
+main.directoryList.remove.confirmation.header = Er du sikker på at du vil slette denne Vault?
+main.directoryList.remove.confirmation.content = Valgte Vault vil kun blive slettet fra listen. For at slette denne permanent, skal du slette filerne fra dit filsystem.
+upgrade.version3to4.msg = Denne Vault skal migreres til et nyere format.\nDe krypterede foldernavne vil blive opdateret.\nVent venligst til al synkronisering er gennemført, inden du fortsætter.
+upgrade.version3to4.err.io = Migrering fejlede pga. en I/O fejl. Se logfilen for yderligere detaljer.
+settings.prefGvfsScheme.label = WebDAV Scheme
+# upgrade.fxml
+upgrade.confirmation.label = Ja, jeg har sikret mig at al synkronisering er gennemført.
+initialize.messageLabel.notEmpty = Vault er ikke tom
+unlock.label.savePassword = Gem adgangskode
+unlock.errorMessage.unauthenticVersionMac = Kunne ikke autentificere versions-MAC
+unlocked.label.mountFailed = Montering af drev fejlede
+unlock.savePassword.delete.confirmation.title = Slet gemt adgangskode
+unlock.savePassword.delete.confirmation.header = Er du sikker på at du vil slette den til Vault'en gemte adgangskode?
+unlock.savePassword.delete.confirmation.content = Den til Vault'en gemte adgangskode vil blive slettet fra dit systems keychain med øjeblikkelig virkning. Hvis du vil gemme din adgangskode på ny, skal du låse din Vault op med indstillingen "Gem adgangskode" slået til.
+settings.debugMode.label = Debug Tilstand *
+upgrade.version3dropBundleExtension.title = Vault Version 3 Opgradering (Drop Bundle Extension)
+upgrade.version3to4.title = Vault Version 3 til 4 Opgradering
+upgrade.version4to5.title = Vault Version 4 til 5 Opgradering
+upgrade.version4to5.msg = Denne Vault skal migreres til et nyere format.\nDe krypterede filer vil blive opdateret.\nVent venligst til al synkronisering er gennemført, inden du fortsætter.\n\nNote\: Denne proces vil påvirke ændringsdato og -tidspunkt for samtlige filer.
+upgrade.version4to5.err.io = Migrering fejlede pga. en I/O fejl. Se logfilen for yderligere detaljer.
+settings.port.apply = Gem
+unlock.label.mountAfterUnlock = Monter drev
+unlock.label.revealAfterMount = Vis drev

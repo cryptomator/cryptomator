@@ -52,13 +52,6 @@ unlocked.label.unmountFailed = Falha ao ejetar drive
 unlocked.label.statsEncrypted = Encriptado
 unlocked.label.statsDecrypted = Desencriptado
 unlocked.ioGraph.yAxis.label = Taxa de transferência (MiB/s)
-# mac_warnings.fxml
-macWarnings.windowTitle = Perigo - Arquivo corrompido na %s
-# Fuzzy
-macWarnings.message = Cryptomator detectou potenciais corrupções maliciosas nos seguintes arquivos\:
-macWarnings.moreInformationButton = Saiba mais
-# Fuzzy
-macWarnings.whitelistButton = Desencriptar selecionado de qualquer modo
 # settings.fxml
 settings.version.label = Versão %s
 settings.checkForUpdates.label = Verificar por atualizações
@@ -99,3 +92,6 @@ upgrade.version3to4.title = Atualização do cofre da versão 3 para 4
 upgrade.version4to5.title = Atualização do cofre da versão 4 para 5
 upgrade.version4to5.msg = Este cofre precisa ser migrado a um novo formato.\nOs arquivos encriptados serão atualizados.\nPor favor, assegure-se de que a sincronização do cofre foi finalizada antes de proceder com a sua migração.\n\nNota\: A data de modificação de todos os arquivos do cofre será alterada durante o processo para a data e hora corrente.
 upgrade.version4to5.err.io = A migração falhou devido a uma exceção de I/O. Ver arquivo de log para mais detalhes.
+settings.port.apply = Apply
+unlock.label.mountAfterUnlock = Mount Drive
+unlock.label.revealAfterMount = Reveal Drive

@@ -55,11 +55,6 @@ unlocked.label.unmountFailed = Odpájanie jednotky zlyhalo
 unlocked.label.statsEncrypted = zašifrované
 unlocked.label.statsDecrypted = dešifrované
 unlocked.ioGraph.yAxis.label = Priepustnosť (MiB/s)
-# mac_warnings.fxml
-macWarnings.windowTitle = Upozornenie - Poškodený súbor v %s
-macWarnings.message = Cryptomator odhalil potencionálne škodlivé poškodenie v nasledujúcich súboroch\:
-macWarnings.moreInformationButton = Zistiť viac
-macWarnings.whitelistButton = Napriek tomu dešifrovať vybrané
 # settings.fxml
 settings.version.label = Verzia %s
 settings.checkForUpdates.label = Skontrolovať aktualizácie
@@ -100,3 +95,6 @@ upgrade.version3to4.title = Vault Version 3 to 4 Upgrade
 upgrade.version4to5.title = Vault Version 4 to 5 Upgrade
 upgrade.version4to5.msg = This vault needs to be migrated to a newer format.\nEncrypted files will be updated.\nPlease make sure synchronization has finished before proceeding.\n\nNote\: Modification date of all files will be changed to the current date/time in the process.
 upgrade.version4to5.err.io = Migration failed due to an I/O Exception. See log file for details.
+settings.port.apply = Apply
+unlock.label.mountAfterUnlock = Mount Drive
+unlock.label.revealAfterMount = Reveal Drive

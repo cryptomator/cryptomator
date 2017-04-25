@@ -119,10 +119,11 @@ public class WelcomeController implements ViewController {
 					.setConnectionRequestTimeout(5000) //
 					.setSocketTimeout(5000) //
 					.build();
+			String userAgent = String.format("Cryptomator VersionChecker/%s %s %s (%s)", applicationVersion.orElse("SNAPSHOT"), SystemUtils.OS_NAME, SystemUtils.OS_VERSION, SystemUtils.OS_ARCH);
 			HttpClientBuilder httpClientBuilder = HttpClients.custom() //
 					.disableCookieManagement() //
 					.setDefaultRequestConfig(requestConfig) //
-					.setUserAgent("Cryptomator VersionChecker/" + applicationVersion.orElse("SNAPSHOT"));
+					.setUserAgent(userAgent);
 			LOG.debug("Checking for updates...");
 			try (CloseableHttpClient client = httpClientBuilder.build()) {
 				HttpGet request = new HttpGet("https://api.cryptomator.org/updates/latestVersion.json");

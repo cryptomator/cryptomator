@@ -55,11 +55,6 @@ unlocked.label.statsEncrypted = chiffré
 # Décryptage signifie récupérer les données en clair tout en ne connaissant pas la clé
 unlocked.label.statsDecrypted = déchiffré
 unlocked.ioGraph.yAxis.label = Débit (MiB/s)
-# mac_warnings.fxml
-macWarnings.windowTitle = Attention - Fichier corrompu dans %s
-macWarnings.message = Cryptomator a détecté des corruptions de données dans les fichiers suivants \:
-macWarnings.moreInformationButton = En savoir plus
-macWarnings.whitelistButton = Déchiffrer tout de même
 # settings.fxml
 settings.version.label = Version %s
 settings.checkForUpdates.label = Vérif. des mises à jour
@@ -100,3 +95,6 @@ upgrade.version3to4.title = metre à jour le coffre de la version 3 à la versio
 upgrade.version4to5.title = metre à jour le coffre de la version 4 à la version 5
 upgrade.version4to5.msg = ce coffre doit être mis à jour vers un format plus récent.\nles fichiés chiffrés seront mis à jour.\nVeuillez vérifier que la synchronisation est terminée avant de commencer.\n\nNote \: la date de modification des fichiers sera mise à jour avec la date courante.
 upgrade.version4to5.err.io = Migration échouée due à une erreur de lecture. Lisez les logs pour plus de détails.
+settings.port.apply = Appliquer
+unlock.label.mountAfterUnlock = Monter un lecteur
+unlock.label.revealAfterMount = Voir le lecteur

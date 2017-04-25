@@ -52,12 +52,6 @@ unlocked.label.unmountFailed = Trennen des Laufwerks fehlgeschlagen
 unlocked.label.statsEncrypted = verschlüsselt
 unlocked.label.statsDecrypted = entschlüsselt
 unlocked.ioGraph.yAxis.label = Durchsatz (MiB/s)
-# mac_warnings.fxml
-macWarnings.windowTitle = Achtung - Kompromittierte Datei in %s
-# "potentially detected" or "potentially malicious"?
-macWarnings.message = Cryptomator hat möglicherweise unerlaubte Veränderungen in den folgenden Dateien erkannt\:
-macWarnings.moreInformationButton = Mehr erfahren
-macWarnings.whitelistButton = Trotzdem entschlüsseln
 # settings.fxml
 settings.version.label = Version %s
 settings.checkForUpdates.label = Auf Updates prüfen
@@ -98,3 +92,6 @@ upgrade.version3to4.title = Upgrade Tresor-Version 3 zu 4
 upgrade.version4to5.title = Upgrade Tresor-Version 4 zu 5
 upgrade.version4to5.msg = Dieser Tresor muss auf ein neueres Format aktualisiert werden.\nVerschlüsselte Dateien werden dabei aktualisiert.\nStellen Sie bitte sicher, dass derzeit keine Synchronisation stattfindet.\n\nHinweis\: Beim Upgrade wird das Änderungsdatum aller Dateien auf das aktuelle Datum geändert.
 upgrade.version4to5.err.io = Migration aufgrund eines I/O-Fehlers fehlgeschlagen.\nWeitere Informationen in der Log-Datei.
+settings.port.apply = Anwenden
+unlock.label.mountAfterUnlock = Laufwerk verbinden
+unlock.label.revealAfterMount = Laufwerk anzeigen

@@ -52,11 +52,6 @@ unlocked.label.unmountFailed = 弹出驱动器失败
 unlocked.label.statsEncrypted = 加密
 unlocked.label.statsDecrypted = 解密
 unlocked.ioGraph.yAxis.label = 吞吐量(Mib/s)
-# mac_warnings.fxml
-macWarnings.windowTitle = 危险 - 在%s有文件损坏
-macWarnings.message = Cryptomator检测到以下文件中的潜在恶意损坏：
-macWarnings.moreInformationButton = 了解更多
-macWarnings.whitelistButton = 任然解密选择项
 # settings.fxml
 settings.version.label = 版本%s
 settings.checkForUpdates.label = 检查更新
@@ -99,3 +94,6 @@ upgrade.version3to4.title = Vault Version 3 to 4 Upgrade
 upgrade.version4to5.title = Vault Version 4 to 5 Upgrade
 upgrade.version4to5.msg = This vault needs to be migrated to a newer format.\nEncrypted files will be updated.\nPlease make sure synchronization has finished before proceeding.\n\nNote\: Modification date of all files will be changed to the current date/time in the process.
 upgrade.version4to5.err.io = Migration failed due to an I/O Exception. See log file for details.
+settings.port.apply = Apply
+unlock.label.mountAfterUnlock = Mount Drive
+unlock.label.revealAfterMount = Reveal Drive
