@@ -54,11 +54,6 @@ unlocked.label.unmountFailed = Uitwerpen schijf mislukt
 unlocked.label.statsEncrypted = versleuteld
 unlocked.label.statsDecrypted = gedecodeerd
 unlocked.ioGraph.yAxis.label = Doorvoer (MiB/s)
-# mac_warnings.fxml
-macWarnings.windowTitle = Pas op - Corrupt bestand in %s
-macWarnings.message = Cryptomator heeft mogelijk kwaadwillende corrupte items aangetroffen in de volgende bestanden\:
-macWarnings.moreInformationButton = Leer meer
-macWarnings.whitelistButton = Geselecteerde toch Decoderen
 # settings.fxml
 settings.version.label = Versie %s
 settings.checkForUpdates.label = Controleer op updates
@@ -99,3 +94,6 @@ upgrade.version3to4.title = Kluis Versie 3 naar 4 Upgrade
 upgrade.version4to5.title = Kluis Versie 4 naar 5 Upgrade
 upgrade.version4to5.msg = Deze kluis moet gemigreerd worden naar een nieuw formaat.\nVersleutelde bestanden zullen bijgewerkt worden.\nZorg ervoor dat synchronisatie voltooid is alvorens verder te gaan.\n\nLet op\: Tijdens dit proces zal de wijzigingsdatum van alle bestanden gewijzigd worden naar de huidige datum/tijd.
 upgrade.version4to5.err.io = Migratie mislukt door een I/O Exception. Bekijk log file voor details.
+settings.port.apply = Apply
+unlock.label.mountAfterUnlock = Mount Drive
+unlock.label.revealAfterMount = Reveal Drive

@@ -16,8 +16,6 @@ import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -34,9 +32,9 @@ import org.cryptomator.cryptofs.CryptoFileSystemProvider;
 import org.cryptomator.cryptolib.api.CryptoException;
 import org.cryptomator.cryptolib.api.InvalidPassphraseException;
 import org.cryptomator.frontend.webdav.WebDavServer;
+import org.cryptomator.frontend.webdav.mount.MountParams;
 import org.cryptomator.frontend.webdav.mount.Mounter.CommandFailedException;
 import org.cryptomator.frontend.webdav.mount.Mounter.Mount;
-import org.cryptomator.frontend.webdav.mount.Mounter.MountParam;
 import org.cryptomator.frontend.webdav.servlet.WebDavServletController;
 import org.cryptomator.ui.model.VaultModule.PerVault;
 import org.cryptomator.ui.util.DeferredCloser;
@@ -132,12 +130,13 @@ public class Vault {
 			throw new IllegalStateException("Mounting requires unlocked WebDAV servlet.");
 		}
 
-		Map<MountParam, String> mountOptions = new HashMap<>();
-		mountOptions.put(MountParam.WIN_DRIVE_LETTER, vaultSettings.winDriveLetter().get());
-		mountOptions.put(MountParam.PREFERRED_GVFS_SCHEME, settings.preferredGvfsScheme().get());
+		MountParams mountParams = MountParams.create() //
+				.withWindowsDriveLetter(vaultSettings.winDriveLetter().get()) //
+				.withPreferredGvfsScheme(settings.preferredGvfsScheme().get()) //
+				.build();
 
 		try {
-			mount = servlet.mount(mountOptions);
+			mount = servlet.mount(mountParams);
 			Platform.runLater(() -> {
 				mounted.set(true);
 			});

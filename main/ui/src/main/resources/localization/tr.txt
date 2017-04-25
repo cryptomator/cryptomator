@@ -52,11 +52,6 @@ unlocked.label.unmountFailed = Sürücü çıkarma başarısız
 unlocked.label.statsEncrypted = şifrelenmiş
 unlocked.label.statsDecrypted = şifresi çözülmüş
 unlocked.ioGraph.yAxis.label = Veri hacmi (MiB/s)
-# mac_warnings.fxml
-macWarnings.windowTitle = Tehlike - Bozuk dosya - %s
-macWarnings.message = Cryptomator bu satırlarda kötücül olma olasılığına sahip bozulmalar tespit etti\:
-macWarnings.moreInformationButton = Daha fazla öğren
-macWarnings.whitelistButton = Seçilenleri her halükarda şifrele
 # settings.fxml
 settings.version.label = Sürüm %s
 settings.checkForUpdates.label = Güncellemeleri denetle
@@ -97,3 +92,6 @@ upgrade.version3to4.title = Vault Version 3 to 4 Upgrade
 upgrade.version4to5.title = Vault Version 4 to 5 Upgrade
 upgrade.version4to5.msg = This vault needs to be migrated to a newer format.\nEncrypted files will be updated.\nPlease make sure synchronization has finished before proceeding.\n\nNote\: Modification date of all files will be changed to the current date/time in the process.
 upgrade.version4to5.err.io = Migration failed due to an I/O Exception. See log file for details.
+settings.port.apply = Apply
+unlock.label.mountAfterUnlock = Mount Drive
+unlock.label.revealAfterMount = Reveal Drive

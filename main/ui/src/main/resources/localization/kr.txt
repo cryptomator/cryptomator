@@ -52,11 +52,6 @@ unlocked.label.unmountFailed = 드라이브 추출 실패
 unlocked.label.statsEncrypted = 암호화
 unlocked.label.statsDecrypted = 복호화
 unlocked.ioGraph.yAxis.label = 처리량 (MiB/s)
-# mac_warnings.fxml
-macWarnings.windowTitle = 위험 - %s에 손상된 파일
-macWarnings.message = Cryptomator가 다음 파일들에서 잠재적인 손상 위험을 감지했습니다.
-macWarnings.moreInformationButton = 더 알아보기
-macWarnings.whitelistButton = 선택 항목 강제로 암호 풀기
 # settings.fxml
 settings.version.label = 버전 %s
 settings.checkForUpdates.label = 업데이트 확인
@@ -97,3 +92,6 @@ upgrade.version3to4.title = 보관함 버전 3에서 4로 업그레이드
 upgrade.version4to5.title = 보관함 버전 4에서 5로 업그레이드
 upgrade.version4to5.msg = 이 보관함은 새로운 포맷으로 이전되어야 합니다.\n암호화된 파일들은 업데이트 될 것입니다.\n진행하기 전에 동기화가 완료되었는지 확인해주세요.\n\n참고\: 모든 파일의  수정 날짜는 과정 진행 중에 현재 날짜/시간으로 바뀔 것입니다.
 upgrade.version4to5.err.io = I/O 예외에 의해 마이그레이션 실패. 자세한 사항은 로그 파일을 참조하세요.
+settings.port.apply = 적용
+unlock.label.mountAfterUnlock = 드라이브 마운트
+unlock.label.revealAfterMount = 드라이브 공개
