@@ -10,6 +10,8 @@ package org.cryptomator.common.settings;
 
 import java.util.function.Consumer;
 
+import org.apache.commons.lang3.SystemUtils;
+
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -27,7 +29,7 @@ public class Settings {
 	public static final int MAX_PORT = 65535;
 	public static final boolean DEFAULT_CHECK_FOR_UDPATES = true;
 	public static final int DEFAULT_PORT = 42427;
-	public static final boolean DEFAULT_USE_IPV6 = false;
+	public static final boolean DEFAULT_USE_IPV6 = SystemUtils.IS_OS_WINDOWS;
 	public static final int DEFAULT_NUM_TRAY_NOTIFICATIONS = 3;
 	public static final String DEFAULT_GVFS_SCHEME = "dav";
 	public static final boolean DEFAULT_DEBUG_MODE = false;
