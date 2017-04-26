@@ -69,7 +69,10 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 				settings.port().set(in.nextInt());
 				break;
 			case "useIpv6":
-				settings.useIpv6().set(in.nextBoolean());
+				// Temporarily we will disable loading this setting, as we want the default value on each app start.
+				// This setting might be removed completely in the future
+				// settings.useIpv6().set(in.nextBoolean());
+				in.skipValue();
 				break;
 			case "numTrayNotifications":
 				settings.numTrayNotifications().set(in.nextInt());

@@ -25,13 +25,16 @@ import javafx.beans.value.ObservableValue;
 
 public class VaultSettings {
 
+	public static final boolean DEFAULT_MOUNT_AFTER_UNLOCK = true;
+	public static final boolean DEFAULT_REAVEAL_AFTER_MOUNT = true;
+
 	private final Settings settings;
 	private final String id;
 	private final ObjectProperty<Path> path = new SimpleObjectProperty<>();
 	private final StringProperty mountName = new SimpleStringProperty();
 	private final StringProperty winDriveLetter = new SimpleStringProperty();
-	private final BooleanProperty mountAfterUnlock = new SimpleBooleanProperty();
-	private final BooleanProperty revealAfterMount = new SimpleBooleanProperty();
+	private final BooleanProperty mountAfterUnlock = new SimpleBooleanProperty(DEFAULT_MOUNT_AFTER_UNLOCK);
+	private final BooleanProperty revealAfterMount = new SimpleBooleanProperty(DEFAULT_REAVEAL_AFTER_MOUNT);
 
 	public VaultSettings(Settings settings, String id) {
 		this.settings = settings;
@@ -42,6 +45,7 @@ public class VaultSettings {
 		mountName.addListener(this::somethingChanged);
 		winDriveLetter.addListener(this::somethingChanged);
 		mountAfterUnlock.addListener(this::somethingChanged);
+		revealAfterMount.addListener(this::somethingChanged);
 	}
 
 	private void somethingChanged(ObservableValue<?> observable, Object oldValue, Object newValue) {
