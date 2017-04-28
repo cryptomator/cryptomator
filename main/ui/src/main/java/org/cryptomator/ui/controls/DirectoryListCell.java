@@ -20,9 +20,12 @@ import javafx.scene.control.OverrunStyle;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 
 public class DirectoryListCell extends DraggableListCell<Vault> {
 
+	private static final Color UNLOCKED_ICON_COLOR = new Color(0.901, 0.494, 0.133, 1.0);
 	private final Label statusText = new Label();
 	private final Label nameText = new Label();
 	private final Label pathText = new Label();
@@ -45,7 +48,7 @@ public class DirectoryListCell extends DraggableListCell<Vault> {
 
 		MonadicBinding<Boolean> optionalItemIsUnlocked = EasyBind.monadic(itemProperty()).flatMap(Vault::unlockedProperty);
 		statusText.textProperty().bind(optionalItemIsUnlocked.map(this::getStatusIconText));
-		statusText.textFillProperty().bind(this.textFillProperty());
+		statusText.textFillProperty().bind(EasyBind.combine(optionalItemIsUnlocked, textFillProperty(), this::getStatusIconColor));
 		statusText.setMinSize(16.0, 16.0);
 		statusText.setAlignment(Pos.CENTER);
 		statusText.getStyleClass().add("fontawesome");
@@ -64,6 +67,14 @@ public class DirectoryListCell extends DraggableListCell<Vault> {
 			return "\uf023";
 		} else {
 			return "";
+		}
+	}
+
+	private Paint getStatusIconColor(Boolean unlockedOrNull, Paint lockedValue) {
+		if (Boolean.TRUE.equals(unlockedOrNull)) {
+			return UNLOCKED_ICON_COLOR;
+		} else {
+			return lockedValue;
 		}
 	}
 
