@@ -96,6 +96,9 @@ unlocked.label.unmountFailed=Ejecting drive failed
 unlocked.label.statsEncrypted=encrypted
 unlocked.label.statsDecrypted=decrypted
 unlocked.ioGraph.yAxis.label=Throughput (MiB/s)
+unlocked.lock.force.confirmation.title=Locking of %1$s failed
+unlocked.lock.force.confirmation.header=Do you want to force locking?
+unlocked.lock.force.confirmation.content=This may be because other programs are still accessing files in the vault or because some other problem occurred.\n\nPrograms still accessing the files may not work correctly and data not already written by those programs may be lost. 
 
 # settings.fxml
 settings.version.label=Version %s

@@ -23,6 +23,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.common.ConsumerThrowingException;
 import org.cryptomator.common.LazyInitializer;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VaultSettings;
@@ -146,12 +147,24 @@ public class Vault {
 	}
 
 	public synchronized void unmount() throws Exception {
+		unmount(mount -> mount.unmount());
+	}
+
+	public synchronized void unmountForced() throws Exception {
+		unmount(mount -> mount.forced().get().unmount());
+	}
+
+	private synchronized void unmount(ConsumerThrowingException<Mount, CommandFailedException> command) throws CommandFailedException {
 		if (mount != null) {
-			mount.unmount();
+			command.accept(mount);
 		}
 		Platform.runLater(() -> {
 			mounted.set(false);
 		});
+	}
+
+	public boolean supportsForcedUnmount() {
+		return mount != null && mount.forced().isPresent();
 	}
 
 	public synchronized void lock() throws Exception {
