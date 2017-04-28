@@ -12,7 +12,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.rmi.ConnectException;
-import java.rmi.NoSuchObjectException;
 import java.rmi.NotBoundException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
@@ -113,7 +112,7 @@ abstract class InterProcessCommunicator implements InterProcessCommunicationProt
 		}
 
 		@Override
-		public void close() throws IOException {
+		public void close() {
 			// no-op
 		}
 
@@ -150,14 +149,14 @@ abstract class InterProcessCommunicator implements InterProcessCommunicationProt
 		}
 
 		@Override
-		public void close() throws IOException {
+		public void close() {
 			try {
 				registry.unbind(RMI_NAME);
 				UnicastRemoteObject.unexportObject(remote, true);
 				socket.close();
 				LOG.debug("Server shut down.");
-			} catch (NotBoundException | NoSuchObjectException e) {
-				// ignore
+			} catch (NotBoundException | IOException e) {
+				LOG.warn("Failed to close IPC Server.", e);
 			}
 		}
 
