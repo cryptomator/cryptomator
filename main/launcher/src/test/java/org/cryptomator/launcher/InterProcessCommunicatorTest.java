@@ -6,6 +6,7 @@ import java.nio.channels.SeekableByteChannel;
 import java.nio.file.FileSystem;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.spi.FileSystemProvider;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -18,6 +19,7 @@ public class InterProcessCommunicatorTest {
 
 	Path portFilePath = Mockito.mock(Path.class);
 	Path portFileParentPath = Mockito.mock(Path.class);
+	BasicFileAttributes portFileParentPathAttrs = Mockito.mock(BasicFileAttributes.class);
 	FileSystem fs = Mockito.mock(FileSystem.class);
 	FileSystemProvider provider = Mockito.mock(FileSystemProvider.class);
 	SeekableByteChannel portFileChannel = Mockito.mock(SeekableByteChannel.class);
@@ -26,9 +28,13 @@ public class InterProcessCommunicatorTest {
 	@Before
 	public void setup() throws IOException {
 		Mockito.when(portFilePath.getFileSystem()).thenReturn(fs);
+		Mockito.when(portFilePath.toAbsolutePath()).thenReturn(portFilePath);
+		Mockito.when(portFilePath.normalize()).thenReturn(portFilePath);
 		Mockito.when(portFilePath.getParent()).thenReturn(portFileParentPath);
 		Mockito.when(portFileParentPath.getFileSystem()).thenReturn(fs);
 		Mockito.when(fs.provider()).thenReturn(provider);
+		Mockito.when(provider.readAttributes(portFileParentPath, BasicFileAttributes.class)).thenReturn(portFileParentPathAttrs);
+		Mockito.when(portFileParentPathAttrs.isDirectory()).thenReturn(false, true); // Guava's MoreFiles will check if dir exists before attempting to create them.
 		Mockito.when(provider.newByteChannel(Mockito.eq(portFilePath), Mockito.any(), Mockito.any())).thenReturn(portFileChannel);
 		Mockito.when(portFileChannel.read(Mockito.any())).then(invocation -> {
 			ByteBuffer buf = invocation.getArgument(0);
