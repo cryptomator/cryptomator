@@ -26,6 +26,8 @@ import org.apache.commons.lang3.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.io.MoreFiles;
+
 /**
  * First running application on a machine opens a server socket. Further processes will connect as clients.
  */
@@ -221,7 +223,7 @@ abstract class InterProcessCommunicator implements InterProcessCommunicationProt
 		ByteBuffer buf = ByteBuffer.allocate(Integer.BYTES);
 		buf.putInt(port);
 		buf.flip();
-		Files.createDirectories(path.getParent());
+		MoreFiles.createParentDirectories(path);
 		try (WritableByteChannel ch = Files.newByteChannel(path, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
 			if (ch.write(buf) != Integer.BYTES) {
 				throw new IOException("Did not write expected number of bytes.");

@@ -4,6 +4,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
+import com.google.common.base.Throwables;
+
 public final class LazyInitializer {
 
 	private LazyInitializer() {
@@ -41,11 +43,8 @@ public final class LazyInitializer {
 			try {
 				return reference.updateAndGet(invokeFactoryIfNull(factory));
 			} catch (InitializationException e) {
-				if (exceptionType.isInstance(e.getCause())) {
-					throw exceptionType.cast(e.getCause());
-				} else {
-					throw e;
-				}
+				Throwables.throwIfInstanceOf(e.getCause(), exceptionType);
+				throw e;
 			}
 		}
 	}
@@ -55,9 +54,8 @@ public final class LazyInitializer {
 			if (currentValue == null) {
 				try {
 					return factory.get();
-				} catch (RuntimeException e) {
-					throw e; // don't catch unchecked exceptions
 				} catch (Exception e) {
+					Throwables.throwIfUnchecked(e); // don't catch unchecked exceptions
 					throw new InitializationException(e);
 				}
 			} else {
