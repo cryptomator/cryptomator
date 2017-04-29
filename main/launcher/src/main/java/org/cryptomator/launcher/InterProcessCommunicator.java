@@ -221,6 +221,7 @@ abstract class InterProcessCommunicator implements InterProcessCommunicationProt
 		ByteBuffer buf = ByteBuffer.allocate(Integer.BYTES);
 		buf.putInt(port);
 		buf.flip();
+		Files.createDirectories(path.getParent());
 		try (WritableByteChannel ch = Files.newByteChannel(path, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
 			if (ch.write(buf) != Integer.BYTES) {
 				throw new IOException("Did not write expected number of bytes.");
