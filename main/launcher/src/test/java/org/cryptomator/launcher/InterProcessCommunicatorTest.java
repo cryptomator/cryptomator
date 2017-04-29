@@ -17,6 +17,7 @@ import org.mockito.Mockito;
 public class InterProcessCommunicatorTest {
 
 	Path portFilePath = Mockito.mock(Path.class);
+	Path portFileParentPath = Mockito.mock(Path.class);
 	FileSystem fs = Mockito.mock(FileSystem.class);
 	FileSystemProvider provider = Mockito.mock(FileSystemProvider.class);
 	SeekableByteChannel portFileChannel = Mockito.mock(SeekableByteChannel.class);
@@ -25,6 +26,8 @@ public class InterProcessCommunicatorTest {
 	@Before
 	public void setup() throws IOException {
 		Mockito.when(portFilePath.getFileSystem()).thenReturn(fs);
+		Mockito.when(portFilePath.getParent()).thenReturn(portFileParentPath);
+		Mockito.when(portFileParentPath.getFileSystem()).thenReturn(fs);
 		Mockito.when(fs.provider()).thenReturn(provider);
 		Mockito.when(provider.newByteChannel(Mockito.eq(portFilePath), Mockito.any(), Mockito.any())).thenReturn(portFileChannel);
 		Mockito.when(portFileChannel.read(Mockito.any())).then(invocation -> {
@@ -45,6 +48,7 @@ public class InterProcessCommunicatorTest {
 		InterProcessCommunicationProtocol protocol = Mockito.mock(InterProcessCommunicationProtocol.class);
 		try (InterProcessCommunicator result = InterProcessCommunicator.start(portFilePath, protocol)) {
 			Assert.assertTrue(result.isServer());
+			Mockito.verify(provider).createDirectory(portFileParentPath);
 			Mockito.verifyZeroInteractions(protocol);
 			result.handleLaunchArgs(new String[] {"foo"});
 		}
@@ -57,6 +61,7 @@ public class InterProcessCommunicatorTest {
 		InterProcessCommunicationProtocol protocol = Mockito.mock(InterProcessCommunicationProtocol.class);
 		try (InterProcessCommunicator result = InterProcessCommunicator.start(portFilePath, protocol)) {
 			Assert.assertTrue(result.isServer());
+			Mockito.verify(provider).createDirectory(portFileParentPath);
 			Mockito.verifyZeroInteractions(protocol);
 		}
 	}
@@ -67,10 +72,12 @@ public class InterProcessCommunicatorTest {
 		InterProcessCommunicationProtocol protocol = Mockito.mock(InterProcessCommunicationProtocol.class);
 		try (InterProcessCommunicator result1 = InterProcessCommunicator.start(portFilePath, protocol)) {
 			Assert.assertTrue(result1.isServer());
+			Mockito.verify(provider, Mockito.times(1)).createDirectory(portFileParentPath);
 			Mockito.verifyZeroInteractions(protocol);
 
 			try (InterProcessCommunicator result2 = InterProcessCommunicator.start(portFilePath, null)) {
 				Assert.assertFalse(result2.isServer());
+				Mockito.verify(provider, Mockito.times(1)).createDirectory(portFileParentPath);
 				Assert.assertNotSame(result1, result2);
 
 				result2.handleLaunchArgs(new String[] {"foo"});
