@@ -31,6 +31,9 @@ import org.cryptomator.ui.util.DialogBuilderUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.CharMatcher;
+import com.google.common.base.Strings;
+
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -55,6 +58,11 @@ import javafx.util.StringConverter;
 public class UnlockController implements ViewController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(UnlockController.class);
+	private static final CharMatcher ALPHA_NUMERIC_MATCHER = CharMatcher.inRange('a', 'z') //
+			.or(CharMatcher.inRange('A', 'Z')) //
+			.or(CharMatcher.inRange('0', '9')) //
+			.or(CharMatcher.is('_')) //
+			.precomputed();
 
 	private final Application app;
 	private final Localization localization;
@@ -212,11 +220,7 @@ public class UnlockController implements ViewController {
 	}
 
 	private void filterAlphanumericKeyEvents(KeyEvent t) {
-		if (t.getCharacter() == null || t.getCharacter().length() == 0) {
-			return;
-		}
-		char c = CharUtils.toChar(t.getCharacter());
-		if (!(CharUtils.isAsciiAlphanumeric(c) || c == '_')) {
+		if (!Strings.isNullOrEmpty(t.getCharacter()) && !ALPHA_NUMERIC_MATCHER.matchesAllOf(t.getCharacter())) {
 			t.consume();
 		}
 	}
