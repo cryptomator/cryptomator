@@ -188,7 +188,7 @@ public class Vault {
 	// *******************************************************************************/
 
 	public Observable[] observables() {
-		return new Observable[] {unlockedProperty(), mountedProperty()};
+		return new Observable[] {unlocked, mounted};
 	}
 
 	public VaultSettings getVaultSettings() {

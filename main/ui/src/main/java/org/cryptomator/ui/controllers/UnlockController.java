@@ -202,10 +202,6 @@ public class UnlockController implements ViewController {
 		mountAfterUnlock.setSelected(settings.mountAfterUnlock().get());
 		revealAfterMount.setSelected(settings.revealAfterMount().get());
 
-		// settings.unlockAfterStartup().bind(unlockAfterStartup.selectedProperty());
-		// settings.mountAfterUnlock().bind(mountAfterUnlock.selectedProperty());
-		// settings.revealAfterMount().bind(revealAfterMount.selectedProperty());
-
 		vaultSubs = vaultSubs.and(EasyBind.subscribe(unlockAfterStartup.selectedProperty(), settings.unlockAfterStartup()::set));
 		vaultSubs = vaultSubs.and(EasyBind.subscribe(mountAfterUnlock.selectedProperty(), settings.mountAfterUnlock()::set));
 		vaultSubs = vaultSubs.and(EasyBind.subscribe(revealAfterMount.selectedProperty(), settings.revealAfterMount()::set));

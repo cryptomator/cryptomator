@@ -50,8 +50,8 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.BooleanExpression;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -115,7 +115,7 @@ public class MainController implements ViewController {
 		// derived bindings:
 		this.isShowingSettings = Bindings.equal(SettingsController.class, EasyBind.monadic(activeController).map(ViewController::getClass));
 		this.upgradeStrategyForSelectedVault = EasyBind.monadic(selectedVault).map(upgradeStrategies::getUpgradeStrategy);
-		this.areAllVaultsLocked = new SimpleBooleanProperty(false).not(); // = Bindings.isEmpty(FXCollections.observableList(vaults, Vault::observables).filtered(Vault::isUnlocked));
+		this.areAllVaultsLocked = Bindings.isEmpty(FXCollections.observableList(vaults, Vault::observables).filtered(Vault::isUnlocked));
 
 		EasyBind.subscribe(areAllVaultsLocked, Platform::setImplicitExit);
 		autoUnlocker.unlockAllSilently();
