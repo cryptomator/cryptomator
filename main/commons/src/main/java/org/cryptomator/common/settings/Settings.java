@@ -34,20 +34,19 @@ public class Settings {
 	public static final String DEFAULT_GVFS_SCHEME = "dav";
 	public static final boolean DEFAULT_DEBUG_MODE = false;
 
-	private final Consumer<Settings> saveCmd;
-	private final ObservableList<VaultSettings> directories = FXCollections.observableArrayList();
+	private final ObservableList<VaultSettings> directories = FXCollections.observableArrayList(VaultSettings::observables);
 	private final BooleanProperty checkForUpdates = new SimpleBooleanProperty(DEFAULT_CHECK_FOR_UDPATES);
 	private final IntegerProperty port = new SimpleIntegerProperty(DEFAULT_PORT);
 	private final BooleanProperty useIpv6 = new SimpleBooleanProperty(DEFAULT_USE_IPV6);
 	private final IntegerProperty numTrayNotifications = new SimpleIntegerProperty(DEFAULT_NUM_TRAY_NOTIFICATIONS);
 	private final StringProperty preferredGvfsScheme = new SimpleStringProperty(DEFAULT_GVFS_SCHEME);
 	private final BooleanProperty debugMode = new SimpleBooleanProperty(DEFAULT_DEBUG_MODE);
+	private Consumer<Settings> saveCmd;
 
 	/**
 	 * Package-private constructor; use {@link SettingsProvider}.
 	 */
-	Settings(Consumer<Settings> saveCmd) {
-		this.saveCmd = saveCmd;
+	Settings() {
 		directories.addListener((ListChangeListener.Change<? extends VaultSettings> change) -> this.save());
 		checkForUpdates.addListener(this::somethingChanged);
 		port.addListener(this::somethingChanged);
@@ -55,6 +54,10 @@ public class Settings {
 		numTrayNotifications.addListener(this::somethingChanged);
 		preferredGvfsScheme.addListener(this::somethingChanged);
 		debugMode.addListener(this::somethingChanged);
+	}
+
+	void setSaveCmd(Consumer<Settings> saveCmd) {
+		this.saveCmd = saveCmd;
 	}
 
 	private void somethingChanged(ObservableValue<?> observable, Object oldValue, Object newValue) {

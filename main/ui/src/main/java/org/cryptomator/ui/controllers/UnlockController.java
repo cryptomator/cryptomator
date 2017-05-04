@@ -17,6 +17,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.lang3.CharUtils;
 import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.cryptolib.api.InvalidPassphraseException;
 import org.cryptomator.cryptolib.api.UnsupportedVaultFormatException;
 import org.cryptomator.frontend.webdav.ServerLifecycleException;
@@ -28,6 +29,8 @@ import org.cryptomator.ui.model.WindowsDriveLetters;
 import org.cryptomator.ui.settings.Localization;
 import org.cryptomator.ui.util.AsyncTaskService;
 import org.cryptomator.ui.util.DialogBuilderUtil;
+import org.fxmisc.easybind.EasyBind;
+import org.fxmisc.easybind.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,6 +75,7 @@ public class UnlockController implements ViewController {
 	private final Optional<KeychainAccess> keychainAccess;
 	private Vault vault;
 	private Optional<UnlockListener> listener = Optional.empty();
+	private Subscription vaultSubs = Subscription.EMPTY;
 
 	@Inject
 	public UnlockController(Application app, Localization localization, AsyncTaskService asyncTaskService, WindowsDriveLetters driveLetters, Optional<KeychainAccess> keychainAccess) {
@@ -124,6 +128,9 @@ public class UnlockController implements ViewController {
 	@FXML
 	private GridPane root;
 
+	@FXML
+	private CheckBox unlockAfterStartup;
+
 	@Override
 	public void initialize() {
 		advancedOptions.managedProperty().bind(advancedOptions.visibleProperty());
@@ -133,6 +140,7 @@ public class UnlockController implements ViewController {
 		mountName.addEventFilter(KeyEvent.KEY_TYPED, this::filterAlphanumericKeyEvents);
 		mountName.textProperty().addListener(this::mountNameDidChange);
 		savePassword.setDisable(!keychainAccess.isPresent());
+		unlockAfterStartup.disableProperty().bind(savePassword.disabledProperty().or(savePassword.selectedProperty().not()));
 		if (SystemUtils.IS_OS_WINDOWS) {
 			winDriveLetter.setConverter(new WinDriveLetterLabelConverter());
 		} else {
@@ -149,18 +157,17 @@ public class UnlockController implements ViewController {
 	}
 
 	void setVault(Vault vault) {
-		// TODO overheadhunter refactor
-		if (this.vault != null) {
-			this.vault.getVaultSettings().mountAfterUnlock().unbind();
-			this.vault.getVaultSettings().revealAfterMount().unbind();
-		}
+		vaultSubs.unsubscribe();
+		vaultSubs = Subscription.EMPTY;
+
 		// trigger "default" change to refresh key bindings:
 		unlockButton.setDefaultButton(false);
 		unlockButton.setDefaultButton(true);
-		if (vault.equals(this.vault)) {
+		if (Objects.equals(this.vault, Objects.requireNonNull(vault))) {
 			return;
 		}
-		this.vault = Objects.requireNonNull(vault);
+		assert vault != null;
+		this.vault = vault;
 		passwordField.swipe();
 		advancedOptions.setVisible(false);
 		advancedOptionsButton.setText(localization.getString("unlock.button.advancedOptions.show"));
@@ -190,10 +197,18 @@ public class UnlockController implements ViewController {
 				Arrays.fill(storedPw, ' ');
 			}
 		}
-		mountAfterUnlock.setSelected(this.vault.getVaultSettings().mountAfterUnlock().get());
-		revealAfterMount.setSelected(this.vault.getVaultSettings().revealAfterMount().get());
-		this.vault.getVaultSettings().mountAfterUnlock().bind(mountAfterUnlock.selectedProperty());
-		this.vault.getVaultSettings().revealAfterMount().bind(revealAfterMount.selectedProperty());
+		VaultSettings settings = vault.getVaultSettings();
+		unlockAfterStartup.setSelected(savePassword.isSelected() && settings.unlockAfterStartup().get());
+		mountAfterUnlock.setSelected(settings.mountAfterUnlock().get());
+		revealAfterMount.setSelected(settings.revealAfterMount().get());
+
+		// settings.unlockAfterStartup().bind(unlockAfterStartup.selectedProperty());
+		// settings.mountAfterUnlock().bind(mountAfterUnlock.selectedProperty());
+		// settings.revealAfterMount().bind(revealAfterMount.selectedProperty());
+
+		vaultSubs = vaultSubs.and(EasyBind.subscribe(unlockAfterStartup.selectedProperty(), settings.unlockAfterStartup()::set));
+		vaultSubs = vaultSubs.and(EasyBind.subscribe(mountAfterUnlock.selectedProperty(), settings.mountAfterUnlock()::set));
+		vaultSubs = vaultSubs.and(EasyBind.subscribe(revealAfterMount.selectedProperty(), settings.revealAfterMount()::set));
 	}
 
 	// ****************************************

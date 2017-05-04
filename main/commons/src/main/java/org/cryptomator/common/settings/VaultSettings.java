@@ -15,41 +15,36 @@ import java.util.UUID;
 import org.apache.commons.lang3.StringUtils;
 import org.fxmisc.easybind.EasyBind;
 
+import javafx.beans.Observable;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.beans.value.ObservableValue;
 
 public class VaultSettings {
 
+	public static final boolean DEFAULT_UNLOCK_AFTER_STARTUP = false;
 	public static final boolean DEFAULT_MOUNT_AFTER_UNLOCK = true;
 	public static final boolean DEFAULT_REAVEAL_AFTER_MOUNT = true;
 
-	private final Settings settings;
 	private final String id;
 	private final ObjectProperty<Path> path = new SimpleObjectProperty<>();
 	private final StringProperty mountName = new SimpleStringProperty();
 	private final StringProperty winDriveLetter = new SimpleStringProperty();
+	private final BooleanProperty unlockAfterStartup = new SimpleBooleanProperty(DEFAULT_UNLOCK_AFTER_STARTUP);
 	private final BooleanProperty mountAfterUnlock = new SimpleBooleanProperty(DEFAULT_MOUNT_AFTER_UNLOCK);
 	private final BooleanProperty revealAfterMount = new SimpleBooleanProperty(DEFAULT_REAVEAL_AFTER_MOUNT);
 
-	public VaultSettings(Settings settings, String id) {
-		this.settings = settings;
+	public VaultSettings(String id) {
 		this.id = Objects.requireNonNull(id);
 
 		EasyBind.subscribe(path, this::deriveMountNameFromPath);
-		path.addListener(this::somethingChanged);
-		mountName.addListener(this::somethingChanged);
-		winDriveLetter.addListener(this::somethingChanged);
-		mountAfterUnlock.addListener(this::somethingChanged);
-		revealAfterMount.addListener(this::somethingChanged);
 	}
 
-	private void somethingChanged(ObservableValue<?> observable, Object oldValue, Object newValue) {
-		settings.save();
+	Observable[] observables() {
+		return new Observable[] {path, mountName, winDriveLetter, unlockAfterStartup, mountAfterUnlock, revealAfterMount};
 	}
 
 	private void deriveMountNameFromPath(Path path) {
@@ -58,8 +53,8 @@ public class VaultSettings {
 		}
 	}
 
-	public static VaultSettings withRandomId(Settings settings) {
-		return new VaultSettings(settings, generateId());
+	public static VaultSettings withRandomId() {
+		return new VaultSettings(generateId());
 	}
 
 	private static String generateId() {
@@ -114,6 +109,10 @@ public class VaultSettings {
 
 	public StringProperty winDriveLetter() {
 		return winDriveLetter;
+	}
+
+	public BooleanProperty unlockAfterStartup() {
+		return unlockAfterStartup;
 	}
 
 	public BooleanProperty mountAfterUnlock() {

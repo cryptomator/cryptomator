@@ -24,18 +24,20 @@ class VaultSettingsJsonAdapter {
 		out.name("path").value(value.path().get().toString());
 		out.name("mountName").value(value.mountName().get());
 		out.name("winDriveLetter").value(value.winDriveLetter().get());
+		out.name("unlockAfterStartup").value(value.unlockAfterStartup().get());
 		out.name("mountAfterUnlock").value(value.mountAfterUnlock().get());
 		out.name("revealAfterMount").value(value.revealAfterMount().get());
 		out.endObject();
 	}
 
-	public VaultSettings read(JsonReader in, Settings settings) throws IOException {
+	public VaultSettings read(JsonReader in) throws IOException {
 		String id = null;
 		String path = null;
 		String mountName = null;
 		String winDriveLetter = null;
-		boolean mountAfterUnlock = true;
-		boolean revealAfterMount = true;
+		boolean unlockAfterStartup = VaultSettings.DEFAULT_UNLOCK_AFTER_STARTUP;
+		boolean mountAfterUnlock = VaultSettings.DEFAULT_MOUNT_AFTER_UNLOCK;
+		boolean revealAfterMount = VaultSettings.DEFAULT_REAVEAL_AFTER_MOUNT;
 
 		in.beginObject();
 		while (in.hasNext()) {
@@ -53,6 +55,9 @@ class VaultSettingsJsonAdapter {
 			case "winDriveLetter":
 				winDriveLetter = in.nextString();
 				break;
+			case "unlockAfterStartup":
+				unlockAfterStartup = in.nextBoolean();
+				break;
 			case "mountAfterUnlock":
 				mountAfterUnlock = in.nextBoolean();
 				break;
@@ -66,10 +71,11 @@ class VaultSettingsJsonAdapter {
 		}
 		in.endObject();
 
-		VaultSettings vaultSettings = (id == null) ? VaultSettings.withRandomId(settings) : new VaultSettings(settings, id);
+		VaultSettings vaultSettings = (id == null) ? VaultSettings.withRandomId() : new VaultSettings(id);
 		vaultSettings.mountName().set(mountName);
 		vaultSettings.path().set(Paths.get(path));
 		vaultSettings.winDriveLetter().set(winDriveLetter);
+		vaultSettings.unlockAfterStartup().set(unlockAfterStartup);
 		vaultSettings.mountAfterUnlock().set(mountAfterUnlock);
 		vaultSettings.revealAfterMount().set(revealAfterMount);
 		return vaultSettings;

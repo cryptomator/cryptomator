@@ -5,8 +5,8 @@
  *******************************************************************************/
 package org.cryptomator.ui.model;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.IntStream;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -14,7 +14,9 @@ import javax.inject.Singleton;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VaultSettings;
 
-import javafx.collections.ListChangeListener.Change;
+import com.google.common.collect.Lists;
+
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.TransformationList;
 
@@ -59,15 +61,15 @@ public class VaultList extends TransformationList<Vault, VaultSettings> {
 	}
 
 	@Override
-	protected void sourceChanged(Change<? extends VaultSettings> c) {
+	protected void sourceChanged(ListChangeListener.Change<? extends VaultSettings> c) {
 		this.fireChange(new VaultListChange(c));
 	}
 
-	private class VaultListChange extends Change<Vault> {
+	private class VaultListChange extends ListChangeListener.Change<Vault> {
 
-		private final Change<? extends VaultSettings> delegate;
+		private final ListChangeListener.Change<? extends VaultSettings> delegate;
 
-		public VaultListChange(Change<? extends VaultSettings> delegate) {
+		public VaultListChange(ListChangeListener.Change<? extends VaultSettings> delegate) {
 			super(VaultList.this);
 			this.delegate = delegate;
 		}
@@ -75,6 +77,11 @@ public class VaultList extends TransformationList<Vault, VaultSettings> {
 		@Override
 		public boolean next() {
 			return delegate.next();
+		}
+
+		@Override
+		public boolean wasUpdated() {
+			return delegate.wasUpdated();
 		}
 
 		@Override
@@ -94,25 +101,26 @@ public class VaultList extends TransformationList<Vault, VaultSettings> {
 
 		@Override
 		public List<Vault> getRemoved() {
-			List<Vault> removed = new ArrayList<>();
-			for (VaultSettings s : delegate.getRemoved()) {
-				removed.add(vaultFactory.get(s));
-			}
-			return removed;
+			return Lists.transform(delegate.getRemoved(), vaultFactory::get);
+		}
+
+		@Override
+		public boolean wasPermutated() {
+			return delegate.wasPermutated();
 		}
 
 		@Override
 		protected int[] getPermutation() {
 			if (delegate.wasPermutated()) {
-				int len = getTo() - getFrom();
-				int[] permutations = new int[len];
-				for (int i = 0; i < len; i++) {
-					permutations[i] = getPermutation(i);
-				}
-				return permutations;
+				return IntStream.range(getFrom(), getTo()).map(delegate::getPermutation).toArray();
 			} else {
 				return new int[0];
 			}
+		}
+
+		@Override
+		public String toString() {
+			return delegate.toString();
 		}
 
 	}

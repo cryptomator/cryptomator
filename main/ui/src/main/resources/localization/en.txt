@@ -59,6 +59,7 @@ unlock.label.password=Password
 unlock.label.savePassword=Save Password
 unlock.label.mountAfterUnlock=Mount Drive
 unlock.label.mountName=Drive Name
+unlock.label.unlockAfterStartup=Unlock On Start
 unlock.label.revealAfterMount=Reveal Drive
 unlock.label.winDriveLetter=Drive Letter
 unlock.label.downloadsPageLink=All Cryptomator versions

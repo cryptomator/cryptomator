@@ -15,12 +15,11 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.cryptomator.common.settings.VaultSettings;
-import org.cryptomator.ui.model.VaultComponent.Builder;
 
 @Singleton
 public class VaultFactory {
 
-	private final Builder vaultComponentBuilder;
+	private final VaultComponent.Builder vaultComponentBuilder;
 	private final ConcurrentMap<VaultSettings, Vault> vaults = new ConcurrentHashMap<>();
 
 	@Inject

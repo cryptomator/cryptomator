@@ -8,7 +8,6 @@ package org.cryptomator.common.settings;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,12 +21,7 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(SettingsJsonAdapter.class);
 
-	private final Consumer<Settings> saveCmd;
 	private final VaultSettingsJsonAdapter vaultSettingsJsonAdapter = new VaultSettingsJsonAdapter();
-
-	public SettingsJsonAdapter(Consumer<Settings> saveCmd) {
-		this.saveCmd = saveCmd;
-	}
 
 	@Override
 	public void write(JsonWriter out, Settings value) throws IOException {
@@ -53,14 +47,14 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 
 	@Override
 	public Settings read(JsonReader in) throws IOException {
-		Settings settings = new Settings(saveCmd);
+		Settings settings = new Settings();
 
 		in.beginObject();
 		while (in.hasNext()) {
 			String name = in.nextName();
 			switch (name) {
 			case "directories":
-				settings.getDirectories().addAll(readVaultSettingsArray(in, settings));
+				settings.getDirectories().addAll(readVaultSettingsArray(in));
 				break;
 			case "checkForUpdatesEnabled":
 				settings.checkForUpdates().set(in.nextBoolean());
@@ -93,11 +87,11 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 		return settings;
 	}
 
-	private List<VaultSettings> readVaultSettingsArray(JsonReader in, Settings settings) throws IOException {
+	private List<VaultSettings> readVaultSettingsArray(JsonReader in) throws IOException {
 		List<VaultSettings> result = new ArrayList<>();
 		in.beginArray();
 		while (!JsonToken.END_ARRAY.equals(in.peek())) {
-			result.add(vaultSettingsJsonAdapter.read(in, settings));
+			result.add(vaultSettingsJsonAdapter.read(in));
 		}
 		in.endArray();
 		return result;

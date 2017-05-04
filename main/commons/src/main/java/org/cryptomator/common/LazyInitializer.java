@@ -43,6 +43,7 @@ public final class LazyInitializer {
 			try {
 				return reference.updateAndGet(invokeFactoryIfNull(factory));
 			} catch (InitializationException e) {
+				Throwables.throwIfUnchecked(e);
 				Throwables.throwIfInstanceOf(e.getCause(), exceptionType);
 				throw e;
 			}

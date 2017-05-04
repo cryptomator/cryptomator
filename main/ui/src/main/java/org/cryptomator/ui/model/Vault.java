@@ -44,6 +44,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javafx.application.Platform;
+import javafx.beans.Observable;
 import javafx.beans.binding.Binding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -77,7 +78,7 @@ public class Vault {
 	// Commands
 	// ********************************************************************************/
 
-	private CryptoFileSystem getCryptoFileSystem(CharSequence passphrase) throws IOException {
+	private CryptoFileSystem getCryptoFileSystem(CharSequence passphrase) throws IOException, CryptoException {
 		return LazyInitializer.initializeLazily(cryptoFileSystem, () -> createCryptoFileSystem(passphrase), IOException.class);
 	}
 
@@ -126,7 +127,7 @@ public class Vault {
 		}
 	}
 
-	public synchronized void mount() {
+	public synchronized void mount() throws CommandFailedException {
 		if (servlet == null) {
 			throw new IllegalStateException("Mounting requires unlocked WebDAV servlet.");
 		}
@@ -136,14 +137,10 @@ public class Vault {
 				.withPreferredGvfsScheme(settings.preferredGvfsScheme().get()) //
 				.build();
 
-		try {
-			mount = servlet.mount(mountParams);
-			Platform.runLater(() -> {
-				mounted.set(true);
-			});
-		} catch (CommandFailedException e) {
-			LOG.error("Unable to mount filesystem", e);
-		}
+		mount = servlet.mount(mountParams);
+		Platform.runLater(() -> {
+			mounted.set(true);
+		});
 	}
 
 	public synchronized void unmount() throws Exception {
@@ -189,6 +186,10 @@ public class Vault {
 	// ******************************************************************************
 	// Getter/Setter
 	// *******************************************************************************/
+
+	public Observable[] observables() {
+		return new Observable[] {unlockedProperty(), mountedProperty()};
+	}
 
 	public VaultSettings getVaultSettings() {
 		return vaultSettings;

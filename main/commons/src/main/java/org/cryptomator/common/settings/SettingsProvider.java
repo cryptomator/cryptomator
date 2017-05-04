@@ -62,7 +62,7 @@ public class SettingsProvider implements Provider<Settings> {
 	private final ScheduledExecutorService saveScheduler = Executors.newSingleThreadScheduledExecutor();
 	private final AtomicReference<ScheduledFuture<?>> scheduledSaveCmd = new AtomicReference<>();
 	private final AtomicReference<Settings> settings = new AtomicReference<>();
-	private final SettingsJsonAdapter settingsJsonAdapter = new SettingsJsonAdapter(this::scheduleSave);
+	private final SettingsJsonAdapter settingsJsonAdapter = new SettingsJsonAdapter();
 	private final Gson gson;
 
 	@Inject
@@ -100,8 +100,9 @@ public class SettingsProvider implements Provider<Settings> {
 			LOG.info("Settings loaded from " + settingsPath);
 		} catch (IOException e) {
 			LOG.info("Failed to load settings, creating new one.");
-			settings = new Settings(this::scheduleSave);
+			settings = new Settings();
 		}
+		settings.setSaveCmd(this::scheduleSave);
 		return settings;
 	}
 

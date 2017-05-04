@@ -11,7 +11,6 @@ import java.nio.file.Paths;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 import com.google.gson.stream.JsonReader;
 
@@ -23,9 +22,8 @@ public class VaultSettingsJsonAdapterTest {
 	public void testDeserialize() throws IOException {
 		String json = "{\"id\": \"foo\", \"path\": \"/foo/bar\", \"mountName\": \"test\", \"winDriveLetter\": \"X\", \"shouldBeIgnored\": true}";
 		JsonReader jsonReader = new JsonReader(new StringReader(json));
-		Settings settings = Mockito.mock(Settings.class);
 
-		VaultSettings vaultSettings = adapter.read(jsonReader, settings);
+		VaultSettings vaultSettings = adapter.read(jsonReader);
 		Assert.assertEquals("foo", vaultSettings.getId());
 		Assert.assertEquals(Paths.get("/foo/bar"), vaultSettings.path().get());
 		Assert.assertEquals("test", vaultSettings.mountName().get());
