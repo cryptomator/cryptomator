@@ -68,24 +68,20 @@
 			</HBox>
 			
 			<!-- Row 3.1 -->
-			<Label GridPane.rowIndex="1" GridPane.columnIndex="0" text="%unlock.label.savePassword" cacheShape="true" cache="true" />
-			<CheckBox GridPane.rowIndex="1" GridPane.columnIndex="1" fx:id="savePassword" onAction="#didClickSavePasswordCheckbox" cacheShape="true" cache="true" />
+			<CheckBox GridPane.rowIndex="1" GridPane.columnIndex="0" GridPane.columnSpan="2" fx:id="savePassword" text="%unlock.label.savePassword" onAction="#didClickSavePasswordCheckbox" cacheShape="true" cache="true" />
 			
 			<!-- Row 3.2 -->
-			<Label GridPane.rowIndex="2" GridPane.columnIndex="0" text="%unlock.label.unlockAfterStartup" cacheShape="true" cache="true" />
-			<CheckBox GridPane.rowIndex="2" GridPane.columnIndex="1" fx:id="unlockAfterStartup" cacheShape="true" cache="true" />
+			<CheckBox GridPane.rowIndex="2" GridPane.columnIndex="0" GridPane.columnSpan="2" fx:id="unlockAfterStartup" text="%unlock.label.unlockAfterStartup" cacheShape="true" cache="true" />
 			
 			<!-- Row 3.3 -->
-			<Label GridPane.rowIndex="3" GridPane.columnIndex="0" text="%unlock.label.mountAfterUnlock" cacheShape="true" cache="true" />
-			<CheckBox GridPane.rowIndex="3" GridPane.columnIndex="1" fx:id="mountAfterUnlock" cacheShape="true" cache="true" />
+			<CheckBox GridPane.rowIndex="3" GridPane.columnIndex="0" GridPane.columnSpan="2" fx:id="mountAfterUnlock" text="%unlock.label.mountAfterUnlock" cacheShape="true" cache="true" />
 			
 			<!-- Row 3.4 -->
 			<Label GridPane.rowIndex="4" GridPane.columnIndex="0" text="%unlock.label.mountName"  cacheShape="true" cache="true" />
 			<TextField GridPane.rowIndex="4" GridPane.columnIndex="1" fx:id="mountName" GridPane.hgrow="ALWAYS" maxWidth="Infinity" cacheShape="true" cache="true" />
 			
 			<!-- Row 3.5 -->
-			<Label GridPane.rowIndex="5" GridPane.columnIndex="0" text="%unlock.label.revealAfterMount" cacheShape="true" cache="true" />
-			<CheckBox GridPane.rowIndex="5" GridPane.columnIndex="1" fx:id="revealAfterMount" cacheShape="true" cache="true" />
+			<CheckBox GridPane.rowIndex="5" GridPane.columnIndex="0" GridPane.columnSpan="2" fx:id="revealAfterMount" text="%unlock.label.revealAfterMount" cacheShape="true" cache="true" />
 			
 			<!-- Row 3.6 -->
 			<Label GridPane.rowIndex="6" GridPane.columnIndex="0" fx:id="winDriveLetterLabel" text="%unlock.label.winDriveLetter" cacheShape="true" cache="true" />
