@@ -2,8 +2,11 @@ package org.cryptomator.ui.model;
 
 import java.nio.CharBuffer;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -18,6 +21,7 @@ import org.slf4j.LoggerFactory;
 public class AutoUnlocker {
 
 	private static final Logger LOG = LoggerFactory.getLogger(AutoUnlocker.class);
+	private static final int NAP_TIME_MILLIS = 500;
 
 	private final Optional<KeychainAccess> keychainAccess;
 	private final VaultList vaults;
@@ -31,8 +35,9 @@ public class AutoUnlocker {
 	}
 
 	public void unlockAllSilently() {
-		if (keychainAccess.isPresent()) {
-			vaults.stream().filter(this::shouldUnlockAfterStartup).map(this::createUnlockTask).forEach(executor::submit);
+		Collection<Vault> vaultsToUnlock = vaults.stream().filter(this::shouldUnlockAfterStartup).collect(Collectors.toList());
+		if (keychainAccess.isPresent() && !vaultsToUnlock.isEmpty()) {
+			executor.submit(() -> unlockAll(vaultsToUnlock));
 		}
 	}
 
@@ -40,8 +45,19 @@ public class AutoUnlocker {
 		return vault.getVaultSettings().unlockAfterStartup().get();
 	}
 
-	private Runnable createUnlockTask(Vault vault) {
-		return () -> unlockSilently(vault);
+	private void unlockAll(Collection<Vault> vaults) {
+		try {
+			Iterator<Vault> iterator = vaults.iterator();
+			assert iterator.hasNext() : "vaults must not be empty";
+			unlockSilently(iterator.next());
+			while (iterator.hasNext()) {
+				Thread.sleep(NAP_TIME_MILLIS);
+				unlockSilently(iterator.next());
+			}
+		} catch (InterruptedException e) {
+			LOG.warn("Auto unlock thread interrupted.");
+			Thread.currentThread().interrupt();
+		}
 	}
 
 	private void unlockSilently(Vault vault) {
