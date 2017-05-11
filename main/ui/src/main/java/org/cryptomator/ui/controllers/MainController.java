@@ -189,8 +189,13 @@ public class MainController implements ViewController {
 			stage.getIcons().add(new Image(getClass().getResourceAsStream("/window_icon.png")));
 			Application.setUserAgentStylesheet(getClass().getResource("/css/win_theme.css").toString());
 		}
-		exitUtil.initExitHandler();
+		exitUtil.initExitHandler(this::gracefulShutdown);
 		listenToFileOpenRequests(stage);
+	}
+
+	private void gracefulShutdown() {
+		vaults.filtered(Vault::isUnlocked).forEach(Vault::prepareForShutdown);
+		Platform.runLater(Platform::exit);
 	}
 
 	private void loadFont(String resourcePath) {

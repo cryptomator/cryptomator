@@ -18,13 +18,14 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
-import org.cryptomator.common.ConsumerThrowingException;
 import org.cryptomator.common.LazyInitializer;
+import org.cryptomator.common.Optionals;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.cryptofs.CryptoFileSystem;
@@ -36,6 +37,7 @@ import org.cryptomator.frontend.webdav.WebDavServer;
 import org.cryptomator.frontend.webdav.mount.MountParams;
 import org.cryptomator.frontend.webdav.mount.Mounter.CommandFailedException;
 import org.cryptomator.frontend.webdav.mount.Mounter.Mount;
+import org.cryptomator.frontend.webdav.mount.Mounter.UnmountOperation;
 import org.cryptomator.frontend.webdav.servlet.WebDavServletController;
 import org.cryptomator.ui.model.VaultModule.PerVault;
 import org.cryptomator.ui.util.DeferredCloser;
@@ -143,17 +145,17 @@ public class Vault {
 		});
 	}
 
-	public synchronized void unmount() throws Exception {
-		unmount(mount -> mount.unmount());
+	public synchronized void unmount() throws CommandFailedException {
+		unmount(Function.identity());
 	}
 
-	public synchronized void unmountForced() throws Exception {
-		unmount(mount -> mount.forced().get().unmount());
+	public synchronized void unmountForced() throws CommandFailedException {
+		unmount(Optionals.unwrap(Mount::forced));
 	}
 
-	private synchronized void unmount(ConsumerThrowingException<Mount, CommandFailedException> command) throws CommandFailedException {
+	private synchronized void unmount(Function<Mount, ? extends UnmountOperation> unmountOperationChooser) throws CommandFailedException {
 		if (mount != null) {
-			command.accept(mount);
+			unmountOperationChooser.apply(mount).unmount();
 		}
 		Platform.runLater(() -> {
 			mounted.set(false);
@@ -175,6 +177,30 @@ public class Vault {
 		Platform.runLater(() -> {
 			unlocked.set(false);
 		});
+	}
+
+	/**
+	 * Ejects any mounted drives and locks this vault. no-op if this vault is currently locked.
+	 */
+	public void prepareForShutdown() {
+		try {
+			unmount();
+		} catch (CommandFailedException e) {
+			if (supportsForcedUnmount()) {
+				try {
+					unmountForced();
+				} catch (CommandFailedException e1) {
+					LOG.warn("Failed to force unmount vault.");
+				}
+			} else {
+				LOG.warn("Failed to gracefully unmount vault.");
+			}
+		}
+		try {
+			lock();
+		} catch (Exception e) {
+			LOG.warn("Failed to lock vault.");
+		}
 	}
 
 	public void reveal() throws CommandFailedException {

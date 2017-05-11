@@ -62,15 +62,7 @@ public class ExitUtil {
 		this.macFunctions = macFunctions;
 	}
 
-	public void initExitHandler() {
-		initExitHandler(ExitUtil::platformExitOnMainThread);
-	}
-
-	private static void platformExitOnMainThread() {
-		Platform.runLater(Platform::exit);
-	}
-
-	private void initExitHandler(Runnable exitCommand) {
+	public void initExitHandler(Runnable exitCommand) {
 		if (SystemUtils.IS_OS_LINUX) {
 			initMinimizeExitHandler(exitCommand);
 		} else {
