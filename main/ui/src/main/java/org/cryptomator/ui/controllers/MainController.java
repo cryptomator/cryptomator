@@ -264,7 +264,7 @@ public class MainController implements ViewController {
 		final List<File> files = fileChooser.showOpenMultipleDialog(mainWindow);
 		if (files != null) {
 			for (final File file : files) {
-				addVault(file.toPath(), false);
+				addVault(file.toPath(), true);
 			}
 		}
 	}
