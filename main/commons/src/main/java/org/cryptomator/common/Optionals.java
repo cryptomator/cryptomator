@@ -20,11 +20,11 @@ public final class Optionals {
 	 * 
 	 * @param <T> the type of the input to the function
 	 * @param <R> the type of the result of the function
-	 * @param optionalFunction An input function {@code Function<Foo, Optional<Bar>>}
-	 * @return A {@code Function<Foo, Bar>}, that may throw an NoSuchElementException, if the original function returns an empty optional.
+	 * @param function An {@code Optional}-bearing input function {@code Function<Foo, Optional<Bar>>}
+	 * @return A {@code Function<Foo, Bar>}, that may throw a NoSuchElementException, if the original function returns an empty optional.
 	 */
-	public static <T, R> Function<T, R> unwrap(Function<T, Optional<R>> optionalFunction) {
-		return t -> optionalFunction.apply(t).get();
+	public static <T, R> Function<T, R> unwrap(Function<T, Optional<R>> function) {
+		return t -> function.apply(t).get();
 	}
 
 }
