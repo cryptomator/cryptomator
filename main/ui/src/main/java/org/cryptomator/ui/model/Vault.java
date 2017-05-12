@@ -216,7 +216,7 @@ public class Vault {
 		return vaultSettings;
 	}
 
-	public String getWebDavUrl() {
+	public synchronized String getWebDavUrl() {
 		return servlet.getServletRootUri().toString();
 	}
 
