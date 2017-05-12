@@ -28,7 +28,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.cryptomator.cryptolib.Cryptors;
 import org.cryptomator.cryptolib.api.Cryptor;
 import org.cryptomator.cryptolib.common.MessageDigestSupplier;
-import org.cryptomator.ui.settings.Localization;
+import org.cryptomator.ui.l10n.Localization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

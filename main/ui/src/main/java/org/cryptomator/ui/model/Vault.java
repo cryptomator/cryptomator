@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Sebastian Stenzel and others.
+ * Copyright (c) 2016, 2017 Sebastian Stenzel and others.
  * This file is licensed under the terms of the MIT license.
  * See the LICENSE.txt file for more info.
  *
@@ -18,12 +18,14 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.LazyInitializer;
+import org.cryptomator.common.Optionals;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.cryptofs.CryptoFileSystem;
@@ -35,14 +37,15 @@ import org.cryptomator.frontend.webdav.WebDavServer;
 import org.cryptomator.frontend.webdav.mount.MountParams;
 import org.cryptomator.frontend.webdav.mount.Mounter.CommandFailedException;
 import org.cryptomator.frontend.webdav.mount.Mounter.Mount;
+import org.cryptomator.frontend.webdav.mount.Mounter.UnmountOperation;
 import org.cryptomator.frontend.webdav.servlet.WebDavServletController;
 import org.cryptomator.ui.model.VaultModule.PerVault;
-import org.cryptomator.ui.util.DeferredCloser;
 import org.fxmisc.easybind.EasyBind;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javafx.application.Platform;
+import javafx.beans.Observable;
 import javafx.beans.binding.Binding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -56,7 +59,6 @@ public class Vault {
 	private final Settings settings;
 	private final VaultSettings vaultSettings;
 	private final WebDavServer server;
-	private final DeferredCloser closer;
 	private final BooleanProperty unlocked = new SimpleBooleanProperty();
 	private final BooleanProperty mounted = new SimpleBooleanProperty();
 	private final AtomicReference<CryptoFileSystem> cryptoFileSystem = new AtomicReference<>();
@@ -65,18 +67,17 @@ public class Vault {
 	private Mount mount;
 
 	@Inject
-	Vault(Settings settings, VaultSettings vaultSettings, WebDavServer server, DeferredCloser closer) {
+	Vault(Settings settings, VaultSettings vaultSettings, WebDavServer server) {
 		this.settings = settings;
 		this.vaultSettings = vaultSettings;
 		this.server = server;
-		this.closer = closer;
 	}
 
 	// ******************************************************************************
 	// Commands
 	// ********************************************************************************/
 
-	private CryptoFileSystem getCryptoFileSystem(CharSequence passphrase) throws IOException {
+	private CryptoFileSystem getCryptoFileSystem(CharSequence passphrase) throws IOException, CryptoException {
 		return LazyInitializer.initializeLazily(cryptoFileSystem, () -> createCryptoFileSystem(passphrase), IOException.class);
 	}
 
@@ -85,9 +86,7 @@ public class Vault {
 				.withPassphrase(passphrase) //
 				.withMasterkeyFilename(MASTERKEY_FILENAME) //
 				.build();
-		CryptoFileSystem fs = CryptoFileSystemProvider.newFileSystem(getPath(), fsProps);
-		closer.closeLater(fs);
-		return fs;
+		return CryptoFileSystemProvider.newFileSystem(getPath(), fsProps);
 	}
 
 	public void create(CharSequence passphrase) throws IOException {
@@ -99,7 +98,7 @@ public class Vault {
 			}
 		}
 		if (!isValidVaultDirectory()) {
-			getCryptoFileSystem(passphrase); // implicitly creates a non-existing vault
+			createCryptoFileSystem(passphrase).close(); // implicitly creates a non-existing vault
 		} else {
 			throw new FileAlreadyExistsException(getPath().toString());
 		}
@@ -125,7 +124,7 @@ public class Vault {
 		}
 	}
 
-	public synchronized void mount() {
+	public synchronized void mount() throws CommandFailedException {
 		if (servlet == null) {
 			throw new IllegalStateException("Mounting requires unlocked WebDAV servlet.");
 		}
@@ -135,23 +134,31 @@ public class Vault {
 				.withPreferredGvfsScheme(settings.preferredGvfsScheme().get()) //
 				.build();
 
-		try {
-			mount = servlet.mount(mountParams);
-			Platform.runLater(() -> {
-				mounted.set(true);
-			});
-		} catch (CommandFailedException e) {
-			LOG.error("Unable to mount filesystem", e);
-		}
+		mount = servlet.mount(mountParams);
+		Platform.runLater(() -> {
+			mounted.set(true);
+		});
 	}
 
-	public synchronized void unmount() throws Exception {
+	public synchronized void unmount() throws CommandFailedException {
+		unmount(Function.identity());
+	}
+
+	public synchronized void unmountForced() throws CommandFailedException {
+		unmount(Optionals.unwrap(Mount::forced));
+	}
+
+	private synchronized void unmount(Function<Mount, ? extends UnmountOperation> unmountOperationChooser) throws CommandFailedException {
 		if (mount != null) {
-			mount.unmount();
+			unmountOperationChooser.apply(mount).unmount();
 		}
 		Platform.runLater(() -> {
 			mounted.set(false);
 		});
+	}
+
+	public boolean supportsForcedUnmount() {
+		return mount != null && mount.forced().isPresent();
 	}
 
 	public synchronized void lock() throws Exception {
@@ -167,6 +174,30 @@ public class Vault {
 		});
 	}
 
+	/**
+	 * Ejects any mounted drives and locks this vault. no-op if this vault is currently locked.
+	 */
+	public void prepareForShutdown() {
+		try {
+			unmount();
+		} catch (CommandFailedException e) {
+			if (supportsForcedUnmount()) {
+				try {
+					unmountForced();
+				} catch (CommandFailedException e1) {
+					LOG.warn("Failed to force unmount vault.");
+				}
+			} else {
+				LOG.warn("Failed to gracefully unmount vault.");
+			}
+		}
+		try {
+			lock();
+		} catch (Exception e) {
+			LOG.warn("Failed to lock vault.");
+		}
+	}
+
 	public void reveal() throws CommandFailedException {
 		if (mount != null) {
 			mount.reveal();
@@ -176,6 +207,10 @@ public class Vault {
 	// ******************************************************************************
 	// Getter/Setter
 	// *******************************************************************************/
+
+	public Observable[] observables() {
+		return new Observable[] {unlocked, mounted};
+	}
 
 	public VaultSettings getVaultSettings() {
 		return vaultSettings;

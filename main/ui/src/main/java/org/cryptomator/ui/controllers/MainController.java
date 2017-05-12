@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014, 2016 Sebastian Stenzel
+ * Copyright (c) 2014, 2017 Sebastian Stenzel
  * This file is licensed under the terms of the MIT license.
  * See the LICENSE.txt file for more info.
  * 
@@ -26,16 +26,16 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 
 import org.apache.commons.lang3.SystemUtils;
-import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.ui.ExitUtil;
 import org.cryptomator.ui.controls.DirectoryListCell;
+import org.cryptomator.ui.l10n.Localization;
+import org.cryptomator.ui.model.AutoUnlocker;
 import org.cryptomator.ui.model.UpgradeStrategies;
 import org.cryptomator.ui.model.UpgradeStrategy;
 import org.cryptomator.ui.model.Vault;
 import org.cryptomator.ui.model.VaultFactory;
 import org.cryptomator.ui.model.VaultList;
-import org.cryptomator.ui.settings.Localization;
 import org.cryptomator.ui.util.DialogBuilderUtil;
 import org.fxmisc.easybind.EasyBind;
 import org.fxmisc.easybind.Subscription;
@@ -51,6 +51,8 @@ import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.BooleanExpression;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Side;
@@ -83,11 +85,11 @@ public class MainController implements ViewController {
 	private final Localization localization;
 	private final ExecutorService executorService;
 	private final BlockingQueue<Path> fileOpenRequests;
-	private final Settings settings;
 	private final VaultFactory vaultFactoy;
 	private final ViewControllerLoader viewControllerLoader;
 	private final ObjectProperty<ViewController> activeController = new SimpleObjectProperty<>();
-	private final VaultList vaults;
+	private final ObservableList<Vault> vaults;
+	private final BooleanBinding areAllVaultsLocked;
 	private final ObjectProperty<Vault> selectedVault = new SimpleObjectProperty<>();
 	private final BooleanExpression isSelectedVaultUnlocked = BooleanExpression.booleanExpression(EasyBind.select(selectedVault).selectObject(Vault::unlockedProperty).orElse(false));
 	private final BooleanExpression isSelectedVaultValid = BooleanExpression.booleanExpression(EasyBind.monadic(selectedVault).map(Vault::isValidVaultDirectory).orElse(false));
@@ -100,13 +102,12 @@ public class MainController implements ViewController {
 
 	@Inject
 	public MainController(@Named("mainWindow") Stage mainWindow, ExecutorService executorService, @Named("fileOpenRequests") BlockingQueue<Path> fileOpenRequests, ExitUtil exitUtil, Localization localization,
-			Settings settings, VaultFactory vaultFactoy, ViewControllerLoader viewControllerLoader, UpgradeStrategies upgradeStrategies, VaultList vaults) {
+			VaultFactory vaultFactoy, ViewControllerLoader viewControllerLoader, UpgradeStrategies upgradeStrategies, VaultList vaults, AutoUnlocker autoUnlocker) {
 		this.mainWindow = mainWindow;
 		this.executorService = executorService;
 		this.fileOpenRequests = fileOpenRequests;
 		this.exitUtil = exitUtil;
 		this.localization = localization;
-		this.settings = settings;
 		this.vaultFactoy = vaultFactoy;
 		this.viewControllerLoader = viewControllerLoader;
 		this.vaults = vaults;
@@ -114,6 +115,10 @@ public class MainController implements ViewController {
 		// derived bindings:
 		this.isShowingSettings = Bindings.equal(SettingsController.class, EasyBind.monadic(activeController).map(ViewController::getClass));
 		this.upgradeStrategyForSelectedVault = EasyBind.monadic(selectedVault).map(upgradeStrategies::getUpgradeStrategy);
+		this.areAllVaultsLocked = Bindings.isEmpty(FXCollections.observableList(vaults, Vault::observables).filtered(Vault::isUnlocked));
+
+		EasyBind.subscribe(areAllVaultsLocked, Platform::setImplicitExit);
+		autoUnlocker.unlockAllSilently();
 	}
 
 	@FXML
@@ -184,8 +189,13 @@ public class MainController implements ViewController {
 			stage.getIcons().add(new Image(getClass().getResourceAsStream("/window_icon.png")));
 			Application.setUserAgentStylesheet(getClass().getResource("/css/win_theme.css").toString());
 		}
-		exitUtil.initExitHandler();
+		exitUtil.initExitHandler(this::gracefulShutdown);
 		listenToFileOpenRequests(stage);
+	}
+
+	private void gracefulShutdown() {
+		vaults.filtered(Vault::isUnlocked).forEach(Vault::prepareForShutdown);
+		Platform.runLater(Platform::exit);
 	}
 
 	private void loadFont(String resourcePath) {
@@ -259,7 +269,7 @@ public class MainController implements ViewController {
 		final List<File> files = fileChooser.showOpenMultipleDialog(mainWindow);
 		if (files != null) {
 			for (final File file : files) {
-				addVault(file.toPath(), false);
+				addVault(file.toPath(), true);
 			}
 		}
 	}
@@ -281,7 +291,7 @@ public class MainController implements ViewController {
 		}
 
 		final Vault vault = vaults.stream().filter(v -> v.getPath().equals(vaultPath)).findAny().orElseGet(() -> {
-			VaultSettings vaultSettings = VaultSettings.withRandomId(settings);
+			VaultSettings vaultSettings = VaultSettings.withRandomId();
 			vaultSettings.path().set(vaultPath);
 			return vaultFactoy.get(vaultSettings);
 		});
@@ -399,7 +409,6 @@ public class MainController implements ViewController {
 	}
 
 	public void didUnlock(Vault vault) {
-		Platform.setImplicitExit(false);
 		if (vault.equals(selectedVault.getValue())) {
 			this.showUnlockedView(vault);
 		}
@@ -417,9 +426,6 @@ public class MainController implements ViewController {
 	public void didLock(UnlockedController ctrl) {
 		unlockedVaults.remove(ctrl.getVault());
 		showUnlockView();
-		if (!vaults.stream().anyMatch(Vault::isUnlocked)) {
-			Platform.setImplicitExit(true);
-		}
 	}
 
 	private void showChangePasswordView() {

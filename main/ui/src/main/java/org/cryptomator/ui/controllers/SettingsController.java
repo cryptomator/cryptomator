@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014, 2016 Sebastian Stenzel
+ * Copyright (c) 2014, 2017 Sebastian Stenzel
  * This file is licensed under the terms of the MIT license.
  * See the LICENSE.txt file for more info.
  * 
@@ -14,10 +14,12 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
-import org.apache.commons.lang3.CharUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.settings.Settings;
-import org.cryptomator.ui.settings.Localization;
+import org.cryptomator.ui.l10n.Localization;
+
+import com.google.common.base.CharMatcher;
+import com.google.common.base.Strings;
 
 import javafx.beans.binding.Bindings;
 import javafx.event.ActionEvent;
@@ -33,6 +35,8 @@ import javafx.scene.layout.VBox;
 
 @Singleton
 public class SettingsController implements ViewController {
+
+	private static final CharMatcher DIGITS_MATCHER = CharMatcher.inRange('0', '9');
 
 	private final Localization localization;
 	private final Settings settings;
@@ -130,11 +134,7 @@ public class SettingsController implements ViewController {
 	}
 
 	private void filterNumericKeyEvents(KeyEvent t) {
-		if (t.getCharacter() == null || t.getCharacter().length() == 0) {
-			return;
-		}
-		char c = CharUtils.toChar(t.getCharacter());
-		if (!(CharUtils.isAsciiNumeric(c) || c == '_')) {
+		if (!Strings.isNullOrEmpty(t.getCharacter()) && !DIGITS_MATCHER.matchesAllOf(t.getCharacter())) {
 			t.consume();
 		}
 	}

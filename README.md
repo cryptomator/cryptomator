@@ -3,8 +3,6 @@
 [![Build Status](https://travis-ci.org/cryptomator/cryptomator.svg?branch=master)](https://travis-ci.org/cryptomator/cryptomator)
 [![Coverity Scan Build Status](https://scan.coverity.com/projects/cryptomator-cryptomator/badge.svg?flat=1)](https://scan.coverity.com/projects/cryptomator-cryptomator)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/2a0adf3cec6a4143b91035d3924178f1)](https://www.codacy.com/app/cryptomator/cryptomator?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=cryptomator/cryptomator&amp;utm_campaign=Badge_Grade)
-[![Coverage Status](https://coveralls.io/repos/github/cryptomator/cryptomator/badge.svg?branch=master)](https://coveralls.io/github/cryptomator/cryptomator?branch=master)
-[![Join the chat at https://gitter.im/cryptomator/cryptomator](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/cryptomator/cryptomator?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![Twitter](https://img.shields.io/badge/twitter-@Cryptomator-blue.svg?style=flat)](http://twitter.com/Cryptomator)
 [![POEditor](https://img.shields.io/badge/POEditor-Help%20Translate-blue.svg?style=flat)](https://poeditor.com/join/project/bHwbvJmx0E)
 

@@ -6,7 +6,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.cryptomator</groupId>
 	<artifactId>main</artifactId>
-	<version>1.3.0-rc3</version>
+	<version>1.3.0-rc4</version>
 	<packaging>pom</packaging>
 	<name>Cryptomator</name>
 
@@ -29,8 +29,8 @@
 		<!-- dependency versions -->
 		<cryptomator.cryptolib.version>1.1.1</cryptomator.cryptolib.version>
 		<cryptomator.cryptofs.version>1.2.2</cryptomator.cryptofs.version>
-		<cryptomator.webdav.version>0.5.1</cryptomator.webdav.version>
-		<cryptomator.jni.version>1.0.1</cryptomator.jni.version>
+		<cryptomator.webdav.version>0.6.0</cryptomator.webdav.version>
+		<cryptomator.jni.version>1.0.2</cryptomator.jni.version>
 		<log4j.version>2.8.1</log4j.version> <!-- keep in sync with https://github.com/edwgiz/maven-shaded-log4j-transformer (used in uber-jar), or wait for https://issues.apache.org/jira/browse/LOG4J2-954 fix -->
 		<slf4j.version>1.7.25</slf4j.version>
 		<junit.version>4.12</junit.version>
@@ -269,10 +269,18 @@
 			</modules>
 		</profile>
 		<profile>
-			<id>test-coverage</id>
+			<id>coverage</id>
 			<modules>
 				<module>jacoco-report</module>
 			</modules>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.jacoco</groupId>
+						<artifactId>jacoco-maven-plugin</artifactId>
+					</plugin>
+				</plugins>
+			</build>
 		</profile>
 	</profiles>
 

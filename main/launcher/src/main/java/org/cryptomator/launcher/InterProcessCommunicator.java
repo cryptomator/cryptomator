@@ -12,7 +12,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.rmi.ConnectException;
-import java.rmi.NoSuchObjectException;
 import java.rmi.NotBoundException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
@@ -26,6 +25,8 @@ import java.rmi.server.UnicastRemoteObject;
 import org.apache.commons.lang3.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.io.MoreFiles;
 
 /**
  * First running application on a machine opens a server socket. Further processes will connect as clients.
@@ -113,7 +114,7 @@ abstract class InterProcessCommunicator implements InterProcessCommunicationProt
 		}
 
 		@Override
-		public void close() throws IOException {
+		public void close() {
 			// no-op
 		}
 
@@ -150,14 +151,14 @@ abstract class InterProcessCommunicator implements InterProcessCommunicationProt
 		}
 
 		@Override
-		public void close() throws IOException {
+		public void close() {
 			try {
 				registry.unbind(RMI_NAME);
 				UnicastRemoteObject.unexportObject(remote, true);
 				socket.close();
 				LOG.debug("Server shut down.");
-			} catch (NotBoundException | NoSuchObjectException e) {
-				// ignore
+			} catch (NotBoundException | IOException e) {
+				LOG.warn("Failed to close IPC Server.", e);
 			}
 		}
 
@@ -222,6 +223,7 @@ abstract class InterProcessCommunicator implements InterProcessCommunicationProt
 		ByteBuffer buf = ByteBuffer.allocate(Integer.BYTES);
 		buf.putInt(port);
 		buf.flip();
+		MoreFiles.createParentDirectories(path);
 		try (WritableByteChannel ch = Files.newByteChannel(path, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
 			if (ch.write(buf) != Integer.BYTES) {
 				throw new IOException("Did not write expected number of bytes.");

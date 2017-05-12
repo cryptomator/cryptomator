@@ -12,10 +12,7 @@ import org.junit.Test;
 
 public class SettingsJsonAdapterTest {
 
-	private final SettingsJsonAdapter adapter = new SettingsJsonAdapter(this::noop);
-
-	private void noop(Settings settings) {
-	}
+	private final SettingsJsonAdapter adapter = new SettingsJsonAdapter();
 
 	@Test
 	public void testDeserialize() throws IOException {

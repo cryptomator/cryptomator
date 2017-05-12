@@ -8,8 +8,9 @@ cache:
   - $HOME/.m2
 env:
   global:
-    - secure: "IfYURwZaDWuBDvyn47n0k1Zod/IQw1FF+CS5nnV08Q+NfC3vGGJMwV8m59XnbfwnWGxwvCaAbk4qP6s6+ijgZNKkvgfFMo3rfTok5zt43bIqgaFOANYV+OC/1c59gYD6ZUxhW5iNgMgU3qdsRtJuwSmfkVv/jKyLGfAbS4kN8BA=" #coverity
-    - secure: "lV9OwUbHMrMpLUH1CY+Z4puLDdFXytudyPlG1eGRsesdpuG6KM3uQVz6uAtf6lrU8DRbMM/T7ML+PmvQ4UoPPYLdLxESLLBat2qUPOIVBOhTSlCc7I0DmGy04CSvkeMy8dPaQC0ukgNiR7zwoNzfcpGRN/U9S8tziDruuHoZSrg=" #bintray
+    - secure: "IfYURwZaDWuBDvyn47n0k1Zod/IQw1FF+CS5nnV08Q+NfC3vGGJMwV8m59XnbfwnWGxwvCaAbk4qP6s6+ijgZNKkvgfFMo3rfTok5zt43bIqgaFOANYV+OC/1c59gYD6ZUxhW5iNgMgU3qdsRtJuwSmfkVv/jKyLGfAbS4kN8BA=" # COVERITY_SCAN_TOKEN
+    - secure: "lV9OwUbHMrMpLUH1CY+Z4puLDdFXytudyPlG1eGRsesdpuG6KM3uQVz6uAtf6lrU8DRbMM/T7ML+PmvQ4UoPPYLdLxESLLBat2qUPOIVBOhTSlCc7I0DmGy04CSvkeMy8dPaQC0ukgNiR7zwoNzfcpGRN/U9S8tziDruuHoZSrg=" # BINTRAY_API_KEY
+    - secure: "oWFgRTVP6lyTa7qVxlvkpm20MtVc3BtmsNXQJS6bfg2A0o/iCQMNx7OD59BaafCLGRKvCcJVESiC8FlSylVMS7CDSyYu0gg70NUiIuHp4NBM5inFWYCy/PdQsCTzr5uvNG+rMFQpMFRaCV0FrfM3tLondcVkhsHL68l93Xoexx4=" # CODACY_PROJECT_TOKEN
 addons:
   coverity_scan:
     project:
@@ -19,24 +20,10 @@ addons:
     branch_pattern: release.*
 install:
 # "clean" needed until https://bugs.openjdk.java.net/browse/JDK-8067747 is resolved.
-- mvn -fmain/pom.xml clean package -DskipTests dependency:go-offline -Ptest-coverage
+- mvn -fmain/pom.xml clean package -DskipTests dependency:go-offline -Pcoverage
 - mvn -fmain/pom.xml clean package -DskipTests dependency:go-offline -Prelease
 script:
-- mvn --update-snapshots -fmain/pom.xml -Ptest-coverage clean test jacoco:report-aggregate
-after_success:
-- "bash <(curl -s https://codecov.io/bash)"
-notifications:
-  webhooks:
-    urls:
-    - https://webhooks.gitter.im/e/7d429ab35361726e26f2
-    on_success: change
-    on_failure: always
-    on_start: false
-  slack:
-    rooms:
-      secure: "lngJ/HEAFBbD5AdiO9avMqptKpZHdmEwOzS9FabZjkdFh7yAYueTk5RniPUvShjsKtThYm7cJ8AtDMDwc07NvPrzbMBRtUJGwuDT+7c7YFALGFJ1NYi+emkC9x1oafvmPgEYSE+tMKzNcwrHi3ytGgKdIotsKwaF35QNXYA9aMs="
-    on_success: change
-    on_failure: always
+- mvn --update-snapshots -fmain/pom.xml clean test jacoco:report verify -Pcoverage
 before_deploy:
 - mvn -fmain/pom.xml -Prelease clean package -DskipTests
 deploy:

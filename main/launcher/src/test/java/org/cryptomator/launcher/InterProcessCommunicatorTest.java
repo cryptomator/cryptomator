@@ -6,6 +6,7 @@ import java.nio.channels.SeekableByteChannel;
 import java.nio.file.FileSystem;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.spi.FileSystemProvider;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -17,6 +18,8 @@ import org.mockito.Mockito;
 public class InterProcessCommunicatorTest {
 
 	Path portFilePath = Mockito.mock(Path.class);
+	Path portFileParentPath = Mockito.mock(Path.class);
+	BasicFileAttributes portFileParentPathAttrs = Mockito.mock(BasicFileAttributes.class);
 	FileSystem fs = Mockito.mock(FileSystem.class);
 	FileSystemProvider provider = Mockito.mock(FileSystemProvider.class);
 	SeekableByteChannel portFileChannel = Mockito.mock(SeekableByteChannel.class);
@@ -25,7 +28,13 @@ public class InterProcessCommunicatorTest {
 	@Before
 	public void setup() throws IOException {
 		Mockito.when(portFilePath.getFileSystem()).thenReturn(fs);
+		Mockito.when(portFilePath.toAbsolutePath()).thenReturn(portFilePath);
+		Mockito.when(portFilePath.normalize()).thenReturn(portFilePath);
+		Mockito.when(portFilePath.getParent()).thenReturn(portFileParentPath);
+		Mockito.when(portFileParentPath.getFileSystem()).thenReturn(fs);
 		Mockito.when(fs.provider()).thenReturn(provider);
+		Mockito.when(provider.readAttributes(portFileParentPath, BasicFileAttributes.class)).thenReturn(portFileParentPathAttrs);
+		Mockito.when(portFileParentPathAttrs.isDirectory()).thenReturn(false, true); // Guava's MoreFiles will check if dir exists before attempting to create them.
 		Mockito.when(provider.newByteChannel(Mockito.eq(portFilePath), Mockito.any(), Mockito.any())).thenReturn(portFileChannel);
 		Mockito.when(portFileChannel.read(Mockito.any())).then(invocation -> {
 			ByteBuffer buf = invocation.getArgument(0);
@@ -45,6 +54,7 @@ public class InterProcessCommunicatorTest {
 		InterProcessCommunicationProtocol protocol = Mockito.mock(InterProcessCommunicationProtocol.class);
 		try (InterProcessCommunicator result = InterProcessCommunicator.start(portFilePath, protocol)) {
 			Assert.assertTrue(result.isServer());
+			Mockito.verify(provider).createDirectory(portFileParentPath);
 			Mockito.verifyZeroInteractions(protocol);
 			result.handleLaunchArgs(new String[] {"foo"});
 		}
@@ -57,6 +67,7 @@ public class InterProcessCommunicatorTest {
 		InterProcessCommunicationProtocol protocol = Mockito.mock(InterProcessCommunicationProtocol.class);
 		try (InterProcessCommunicator result = InterProcessCommunicator.start(portFilePath, protocol)) {
 			Assert.assertTrue(result.isServer());
+			Mockito.verify(provider).createDirectory(portFileParentPath);
 			Mockito.verifyZeroInteractions(protocol);
 		}
 	}
@@ -67,10 +78,12 @@ public class InterProcessCommunicatorTest {
 		InterProcessCommunicationProtocol protocol = Mockito.mock(InterProcessCommunicationProtocol.class);
 		try (InterProcessCommunicator result1 = InterProcessCommunicator.start(portFilePath, protocol)) {
 			Assert.assertTrue(result1.isServer());
+			Mockito.verify(provider, Mockito.times(1)).createDirectory(portFileParentPath);
 			Mockito.verifyZeroInteractions(protocol);
 
 			try (InterProcessCommunicator result2 = InterProcessCommunicator.start(portFilePath, null)) {
 				Assert.assertFalse(result2.isServer());
+				Mockito.verify(provider, Mockito.times(1)).createDirectory(portFileParentPath);
 				Assert.assertNotSame(result1, result2);
 
 				result2.handleLaunchArgs(new String[] {"foo"});

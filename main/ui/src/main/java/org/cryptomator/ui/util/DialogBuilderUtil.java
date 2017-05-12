@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Sebastian Stenzel and others.
+ * Copyright (c) 2016, 2017 Sebastian Stenzel and others.
  * This file is licensed under the terms of the MIT license.
  * See the LICENSE.txt file for more info.
  *
@@ -34,11 +34,15 @@ public class DialogBuilderUtil {
 		return buildDialog(title, header, content, Alert.AlertType.CONFIRMATION, defaultButton);
 	}
 
-	private static Alert buildDialog(String title, String header, String content, Alert.AlertType type, ButtonType defaultButton) {
+	public static Alert buildYesNoDialog(String title, String header, String content, ButtonType defaultButton) {
+		return buildDialog(title, header, content, Alert.AlertType.CONFIRMATION, defaultButton, ButtonType.YES, ButtonType.NO);
+	}
+
+	private static Alert buildDialog(String title, String header, String content, Alert.AlertType type, ButtonType defaultButton, ButtonType... buttons) {
 		Text contentText = new Text(content);
 		contentText.setWrappingWidth(360.0);
 
-		Alert alert = new Alert(type);
+		Alert alert = new Alert(type, content, buttons);
 		alert.setTitle(title);
 		alert.setHeaderText(header);
 		alert.getDialogPane().setContent(contentText);

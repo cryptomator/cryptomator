@@ -1,3 +1,8 @@
+/*******************************************************************************
+ * Copyright (c) 2017 Skymatic UG (haftungsbeschränkt).
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the accompanying LICENSE file.
+ *******************************************************************************/
 package org.cryptomator.ui.controllers;
 
 import java.io.IOException;
@@ -9,7 +14,7 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 
-import org.cryptomator.ui.settings.Localization;
+import org.cryptomator.ui.l10n.Localization;
 
 import javafx.fxml.FXMLLoader;
 

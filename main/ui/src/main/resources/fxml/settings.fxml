@@ -53,7 +53,7 @@
 			<ChoiceBox GridPane.rowIndex="3" GridPane.columnIndex="1" fx:id="prefGvfsScheme" GridPane.hgrow="ALWAYS" maxWidth="Infinity" cacheShape="true" cache="true" />
 			
 			<!-- Row 4 -->
-			<Label GridPane.rowIndex="4" GridPane.columnIndex="0" fx:id="debugModeLabel" text="%settings.debugMode.label" cacheShape="true" cache="true" />
+			<Label GridPane.rowIndex="4" GridPane.columnIndex="0" text="%settings.debugMode.label" cacheShape="true" cache="true" />
 			<CheckBox GridPane.rowIndex="4" GridPane.columnIndex="1" fx:id="debugModeCheckbox" cacheShape="true" cache="true" />
 			
 		</children>

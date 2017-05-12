@@ -18,7 +18,7 @@ import org.cryptomator.cryptolib.api.CryptorProvider;
 import org.cryptomator.cryptolib.api.InvalidPassphraseException;
 import org.cryptomator.cryptolib.api.KeyFile;
 import org.cryptomator.cryptolib.api.UnsupportedVaultFormatException;
-import org.cryptomator.ui.settings.Localization;
+import org.cryptomator.ui.l10n.Localization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

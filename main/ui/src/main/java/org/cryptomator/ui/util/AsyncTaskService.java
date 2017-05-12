@@ -49,7 +49,7 @@ public class AsyncTaskService {
 
 		private ConsumerThrowingException<ResultType, ?> successHandler = value -> {
 		};
-		private List<ErrorHandler<Throwable>> errorHandlers = new ArrayList<>();
+		private final List<ErrorHandler<Throwable>> errorHandlers = new ArrayList<>();
 		private RunnableThrowingException<?> finallyHandler = () -> {
 		};
 

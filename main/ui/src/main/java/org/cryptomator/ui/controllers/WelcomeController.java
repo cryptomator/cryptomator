@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014, 2016 Sebastian Stenzel
+ * Copyright (c) 2014, 2017 Sebastian Stenzel
  * This file is licensed under the terms of the MIT license.
  * See the LICENSE.txt file for more info.
  * 
@@ -30,7 +30,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.cryptomator.common.settings.Settings;
-import org.cryptomator.ui.settings.Localization;
+import org.cryptomator.ui.l10n.Localization;
 import org.cryptomator.ui.util.AsyncTaskService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

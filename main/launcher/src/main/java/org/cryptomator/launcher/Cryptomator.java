@@ -17,7 +17,7 @@ public class Cryptomator {
 	private static final Logger LOG = LoggerFactory.getLogger(Cryptomator.class);
 	static final BlockingQueue<Path> FILE_OPEN_REQUESTS = new ArrayBlockingQueue<>(10);
 
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) {
 		LOG.info("Starting Cryptomator {} on {} {} ({})", ApplicationVersion.orElse("SNAPSHOT"), SystemUtils.OS_NAME, SystemUtils.OS_VERSION, SystemUtils.OS_ARCH);
 
 		FileOpenRequestHandler fileOpenRequestHandler = new FileOpenRequestHandler(FILE_OPEN_REQUESTS);
@@ -30,6 +30,8 @@ public class Cryptomator {
 				communicator.handleLaunchArgs(args);
 				LOG.info("Found running application instance. Shutting down.");
 			}
+		} catch (IOException e) {
+			LOG.error("Failed to initiate inter-process communication.", e);
 		}
 		System.exit(0); // end remaining non-daemon threads.
 	}

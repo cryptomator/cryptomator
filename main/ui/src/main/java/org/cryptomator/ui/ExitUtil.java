@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Sebastian Stenzel and others.
+ * Copyright (c) 2016, 2017 Sebastian Stenzel and others.
  * This file is licensed under the terms of the MIT license.
  * See the LICENSE.txt file for more info.
  *
@@ -37,7 +37,7 @@ import org.cryptomator.common.settings.Settings;
 import org.cryptomator.jni.JniException;
 import org.cryptomator.jni.MacApplicationUiState;
 import org.cryptomator.jni.MacFunctions;
-import org.cryptomator.ui.settings.Localization;
+import org.cryptomator.ui.l10n.Localization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,15 +62,7 @@ public class ExitUtil {
 		this.macFunctions = macFunctions;
 	}
 
-	public void initExitHandler() {
-		initExitHandler(ExitUtil::platformExitOnMainThread);
-	}
-
-	private static void platformExitOnMainThread() {
-		Platform.runLater(Platform::exit);
-	}
-
-	private void initExitHandler(Runnable exitCommand) {
+	public void initExitHandler(Runnable exitCommand) {
 		if (SystemUtils.IS_OS_LINUX) {
 			initMinimizeExitHandler(exitCommand);
 		} else {
