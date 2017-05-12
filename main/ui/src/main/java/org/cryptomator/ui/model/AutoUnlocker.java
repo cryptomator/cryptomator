@@ -69,6 +69,7 @@ public class AutoUnlocker {
 		char[] storedPw = keychainAccess.get().loadPassphrase(vault.getId());
 		if (storedPw == null) {
 			LOG.warn("No passphrase stored in keychain for vault registered for auto unlocking: {}", vault.getPath());
+			return;
 		}
 		try {
 			vault.unlock(CharBuffer.wrap(storedPw));
