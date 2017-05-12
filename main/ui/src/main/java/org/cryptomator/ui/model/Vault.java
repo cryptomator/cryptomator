@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Sebastian Stenzel and others.
+ * Copyright (c) 2016, 2017 Sebastian Stenzel and others.
  * This file is licensed under the terms of the MIT license.
  * See the LICENSE.txt file for more info.
  *
@@ -40,7 +40,6 @@ import org.cryptomator.frontend.webdav.mount.Mounter.Mount;
 import org.cryptomator.frontend.webdav.mount.Mounter.UnmountOperation;
 import org.cryptomator.frontend.webdav.servlet.WebDavServletController;
 import org.cryptomator.ui.model.VaultModule.PerVault;
-import org.cryptomator.ui.util.DeferredCloser;
 import org.fxmisc.easybind.EasyBind;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,7 +59,6 @@ public class Vault {
 	private final Settings settings;
 	private final VaultSettings vaultSettings;
 	private final WebDavServer server;
-	private final DeferredCloser closer;
 	private final BooleanProperty unlocked = new SimpleBooleanProperty();
 	private final BooleanProperty mounted = new SimpleBooleanProperty();
 	private final AtomicReference<CryptoFileSystem> cryptoFileSystem = new AtomicReference<>();
@@ -69,11 +67,10 @@ public class Vault {
 	private Mount mount;
 
 	@Inject
-	Vault(Settings settings, VaultSettings vaultSettings, WebDavServer server, DeferredCloser closer) {
+	Vault(Settings settings, VaultSettings vaultSettings, WebDavServer server) {
 		this.settings = settings;
 		this.vaultSettings = vaultSettings;
 		this.server = server;
-		this.closer = closer;
 	}
 
 	// ******************************************************************************
@@ -89,9 +86,7 @@ public class Vault {
 				.withPassphrase(passphrase) //
 				.withMasterkeyFilename(MASTERKEY_FILENAME) //
 				.build();
-		CryptoFileSystem fs = CryptoFileSystemProvider.newFileSystem(getPath(), fsProps);
-		closer.closeLater(fs);
-		return fs;
+		return CryptoFileSystemProvider.newFileSystem(getPath(), fsProps);
 	}
 
 	public void create(CharSequence passphrase) throws IOException {
@@ -103,7 +98,7 @@ public class Vault {
 			}
 		}
 		if (!isValidVaultDirectory()) {
-			getCryptoFileSystem(passphrase); // implicitly creates a non-existing vault
+			createCryptoFileSystem(passphrase).close(); // implicitly creates a non-existing vault
 		} else {
 			throw new FileAlreadyExistsException(getPath().toString());
 		}

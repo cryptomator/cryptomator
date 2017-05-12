@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014, 2016 Sebastian Stenzel
+ * Copyright (c) 2014, 2017 Sebastian Stenzel
  * This file is licensed under the terms of the MIT license.
  * See the LICENSE.txt file for more info.
  * 
@@ -16,7 +16,7 @@ import javax.inject.Singleton;
 
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.settings.Settings;
-import org.cryptomator.ui.settings.Localization;
+import org.cryptomator.ui.l10n.Localization;
 
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Strings;

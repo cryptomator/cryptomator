@@ -11,11 +11,11 @@ import java.util.Optional;
 import javax.inject.Inject;
 
 import org.cryptomator.ui.controls.SecPasswordField;
+import org.cryptomator.ui.l10n.Localization;
 import org.cryptomator.ui.model.UpgradeStrategies;
 import org.cryptomator.ui.model.UpgradeStrategy;
 import org.cryptomator.ui.model.UpgradeStrategy.UpgradeFailedException;
 import org.cryptomator.ui.model.Vault;
-import org.cryptomator.ui.settings.Localization;
 import org.cryptomator.ui.util.AsyncTaskService;
 import org.fxmisc.easybind.EasyBind;
 

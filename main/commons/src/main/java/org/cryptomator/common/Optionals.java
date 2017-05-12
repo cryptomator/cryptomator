@@ -8,13 +8,6 @@ public final class Optionals {
 	private Optionals() {
 	}
 
-	public static <T, E extends Exception> void ifPresent(Optional<T> optional, ConsumerThrowingException<T, E> consumer) throws E {
-		final T t = optional.orElse(null);
-		if (t != null) {
-			consumer.accept(t);
-		}
-	}
-
 	/**
 	 * Returns a function that is equivalent to the input function but immediately gets the value of the returned optional when invoked.
 	 * 

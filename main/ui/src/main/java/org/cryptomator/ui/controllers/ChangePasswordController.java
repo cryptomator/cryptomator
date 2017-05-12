@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Sebastian Stenzel and others.
+ * Copyright (c) 2016, 2017 Sebastian Stenzel and others.
  * This file is licensed under the terms of the MIT license.
  * See the LICENSE.txt file for more info.
  *
@@ -20,8 +20,8 @@ import javax.inject.Singleton;
 import org.cryptomator.cryptolib.api.InvalidPassphraseException;
 import org.cryptomator.cryptolib.api.UnsupportedVaultFormatException;
 import org.cryptomator.ui.controls.SecPasswordField;
+import org.cryptomator.ui.l10n.Localization;
 import org.cryptomator.ui.model.Vault;
-import org.cryptomator.ui.settings.Localization;
 import org.cryptomator.ui.util.PasswordStrengthUtil;
 import org.fxmisc.easybind.EasyBind;
 import org.slf4j.Logger;
