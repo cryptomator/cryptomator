@@ -41,17 +41,8 @@
 								<Implementation-Version>${project.version}</Implementation-Version>
 							</manifestEntries>
 						</transformer>
-						<transformer implementation="com.github.edwgiz.mavenShadePlugin.log4j2CacheTransformer.PluginsCacheFileTransformer">
-						</transformer>
 					</transformers>
 				</configuration>
-				<dependencies>
-					<dependency>
-						<groupId>com.github.edwgiz</groupId>
-						<artifactId>maven-shade-plugin.log4j2-cachefile-transformer</artifactId>
-						<version>${log4j.version}</version>
-					</dependency>
-				</dependencies>
 			</plugin>
 		</plugins>
 	</build>

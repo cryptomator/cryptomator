@@ -46,21 +46,21 @@ public class Localization extends ResourceBundle {
 
 			String language = Locale.getDefault().getLanguage();
 			String region = Locale.getDefault().getCountry();
-			LOG.info("Detected language \"{}\" and region \"{}\"", language, region);
+			LOG.debug("Detected language \"{}\" and region \"{}\"", language, region);
 
 			ResourceBundle localizationBundle = null;
 			if (StringUtils.isNotEmpty(language) && StringUtils.isNotEmpty(region)) {
 				String file = String.format(LOCALIZATION_FILENAME_FMT, language + "_" + region);
-				LOG.info("Attempting to load localization from: {}", file);
+				LOG.trace("Attempting to load localization from: {}", file);
 				localizationBundle = loadLocalizationFile(file);
 			}
 			if (StringUtils.isNotEmpty(language) && localizationBundle == null) {
 				String file = String.format(LOCALIZATION_FILENAME_FMT, language);
-				LOG.info("Attempting to load localization from: {}", file);
+				LOG.trace("Attempting to load localization from: {}", file);
 				localizationBundle = loadLocalizationFile(file);
 			}
 			if (localizationBundle == null) {
-				LOG.info("No localization found. Falling back to default language.");
+				LOG.debug("No localization found. Falling back to default language.");
 				localizationBundle = this.fallback;
 			}
 			this.localized = Objects.requireNonNull(localizationBundle);
