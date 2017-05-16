@@ -15,7 +15,7 @@ main.addDirectory.contextMenu.new=Create New Vault
 main.addDirectory.contextMenu.open=Open Existing Vault
 main.directoryList.remove.confirmation.title=Remove Vault
 main.directoryList.remove.confirmation.header=Do you really want to remove this vault?
-main.directoryList.remove.confirmation.content=The vault will only be removed from the list. To permanently delete it, please delete the files from your filesystem.
+main.directoryList.remove.confirmation.content=The vault will only be removed from the list. To permanently delete it, please delete the vault from your filesystem.
 
 # welcome.fxml
 welcome.checkForUpdates.label.currentlyChecking=Checking for Updates...
@@ -69,7 +69,7 @@ unlock.button.advancedOptions.show=More Options
 unlock.button.advancedOptions.hide=Less Options
 unlock.savePassword.delete.confirmation.title=Delete Saved Password
 unlock.savePassword.delete.confirmation.header=Do you really want to delete the saved password of this vault?
-unlock.savePassword.delete.confirmation.content=The saved password of this vault will be immediately deleted from your system keychain. If you'd like to save your password again, you'd have to unlock your vault with the "Save password" option enabled.
+unlock.savePassword.delete.confirmation.content=The saved password of this vault will be immediately deleted from your system keychain. If you'd like to save your password again, you'd have to unlock your vault with the "Save Password" option enabled.
 unlock.choicebox.winDriveLetter.auto=Assign automatically
 unlock.errorMessage.wrongPassword=Wrong password
 unlock.errorMessage.mountingFailed=Mounting failed. See log file for details.
@@ -99,7 +99,7 @@ unlocked.label.statsDecrypted=decrypted
 unlocked.ioGraph.yAxis.label=Throughput (MiB/s)
 unlocked.lock.force.confirmation.title=Locking of %1$s failed
 unlocked.lock.force.confirmation.header=Do you want to force locking?
-unlocked.lock.force.confirmation.content=This may be because other programs are still accessing files in the vault or because some other problem occurred.\n\nPrograms still accessing the files may not work correctly and data not already written by those programs may be lost. 
+unlocked.lock.force.confirmation.content=This may be because other programs are still accessing files in the vault or because some other problem occurred.\n\nPrograms still accessing the files may not work correctly and data not already written by those programs may be lost.
 
 # settings.fxml
 settings.version.label=Version %s
