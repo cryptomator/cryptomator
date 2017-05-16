@@ -49,6 +49,7 @@ abstract class InterProcessCommunicator implements InterProcessCommunicationProt
 
 	// visible for testing
 	static InterProcessCommunicator start(Path portFilePath, InterProcessCommunicationProtocol endpoint) throws IOException {
+		System.setProperty("java.rmi.server.hostname", "localhost");
 		// try to connect to existing server:
 		int port = readPort(portFilePath);
 		LOG.debug("Connecting to running process on TCP port {}...", port);
@@ -95,7 +96,7 @@ abstract class InterProcessCommunicator implements InterProcessCommunicationProt
 			if (port == 0) {
 				throw new ConnectException("Can not connect to port 0.");
 			}
-			Registry registry = LocateRegistry.getRegistry(port);
+			Registry registry = LocateRegistry.getRegistry("localhost", port);
 			this.remote = (IpcProtocolRemote) registry.lookup(RMI_NAME);
 		}
 
@@ -127,7 +128,7 @@ abstract class InterProcessCommunicator implements InterProcessCommunicationProt
 		private final IpcProtocolRemoteImpl remote;
 
 		private ServerCommunicator(InterProcessCommunicationProtocol delegate) throws IOException {
-			this.socket = new ServerSocket(0, Byte.MAX_VALUE, InetAddress.getLocalHost());
+			this.socket = new ServerSocket(0, Byte.MAX_VALUE, InetAddress.getByName("localhost"));
 			RMIClientSocketFactory csf = RMISocketFactory.getDefaultSocketFactory();
 			SingletonServerSocketFactory ssf = new SingletonServerSocketFactory(socket);
 			this.registry = LocateRegistry.createRegistry(0, csf, ssf);
