@@ -29,13 +29,13 @@
 				<fx:association mimetype="application/x-vnd.cryptomator-vault-metadata" extension="cryptomator" description="Cryptomator Vault Metadata" />
 			</fx:info>
 			<fx:platform j2se="8.0">
-				<fx:property name="cryptomator.logPath" value="~/.Cryptomator/cryptomator.log" />
-				<fx:property name="cryptomator.upgradeLogPath" value="~/.Cryptomator/upgrade.log" />
+				<fx:property name="logback.configurationFile" value="logback.xml" />
 				<fx:property name="cryptomator.settingsPath" value="~/.Cryptomator/settings.json" />
 				<fx:property name="cryptomator.ipcPortPath" value="~/.Cryptomator/ipcPort.bin" />
 				<fx:jvmarg value="-Xmx512m"/>
 			</fx:platform>
 			<fx:resources>
+				<fx:fileset dir="." type="data" includes="logback.xml" />
 				<fx:fileset dir="antbuild" type="jar" includes="Cryptomator-${project.version}.jar" />
 				<fx:fileset dir="libs" type="jar" includes="*.jar" excludes="launcher-${project.version}.jar"/>
 				<fx:fileset dir="fixed-binaries" type="data" includes="linux-launcher-*" arch=""/>
@@ -53,13 +53,13 @@
 				<fx:association mimetype="application/x-vnd.cryptomator-vault-metadata" extension="cryptomator" description="Cryptomator Vault Metadata" />
 			</fx:info>
 			<fx:platform j2se="8.0">
-				<fx:property name="cryptomator.logPath" value="~/.Cryptomator/cryptomator.log" />
-				<fx:property name="cryptomator.upgradeLogPath" value="~/.Cryptomator/upgrade.log" />
+				<fx:property name="logback.configurationFile" value="logback.xml" />
 				<fx:property name="cryptomator.settingsPath" value="~/.Cryptomator/settings.json" />
 				<fx:property name="cryptomator.ipcPortPath" value="~/.Cryptomator/ipcPort.bin" />
 				<fx:jvmarg value="-Xmx512m"/>
 			</fx:platform>
 			<fx:resources>
+				<fx:fileset dir="." type="data" includes="logback.xml" />
 				<fx:fileset dir="antbuild" type="jar" includes="Cryptomator-${project.version}.jar" />
 				<fx:fileset dir="libs" type="jar" includes="*.jar" excludes="launcher-${project.version}.jar"/>
 				<fx:fileset dir="fixed-binaries" type="data" includes="linux-launcher-*" arch=""/>
