@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE xml>
 <!-- log config used during unit tests and starts from IDE. For production please specify -Dlogback.configurationFile=/path/to/config -->
-<configuration scan="true" debug="true">
+<configuration>
 
 	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
 		<encoder>
@@ -9,11 +9,12 @@
 		</encoder>
 	</appender>
 
-	<logger name="org.cryptomator" level="INFO" />
+	<logger name="org.cryptomator" level="DEBUG" />
+	<logger name="org.eclipse.jetty" level="INFO" />
 	<logger name="org.eclipse.jetty.server.Server" level="INFO" />
 	<logger name="org.apache" level="INFO" />
 
-	<root level="DEBUG">
+	<root level="INFO">
 		<appender-ref ref="STDOUT" />
 	</root>
 </configuration>
