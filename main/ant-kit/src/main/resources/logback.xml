@@ -7,12 +7,21 @@
 			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
 		</encoder>
 	</appender>
-	<appender name="FILE" class="ch.qos.logback.core.FileAppender">
+	
+	<appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
 		<file>${user.home}/.Cryptomator/cryptomator.log</file>
+		<append>false</append>
+		<rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+			<fileNamePattern>${user.home}/.Cryptomator/cryptomator%i.log</fileNamePattern>
+			<minIndex>0</minIndex>
+			<maxIndex>9</maxIndex>
+		</rollingPolicy>
+		<triggeringPolicy class="org.cryptomator.logging.LaunchBasedTriggeringPolicy" />
 		<encoder>
 			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
 		</encoder>
 	</appender>
+	
 	<appender name="UPGRADE_FILE" class="ch.qos.logback.core.FileAppender">
 		<file>${user.home}/.Cryptomator/cryptomator.log</file>
 		<encoder>
