@@ -71,7 +71,7 @@ public class DebugMode {
 
 		public void execute(LoggerContext context) {
 			Logger logger = context.getLogger(loggerName);
-			if (logger.getLevel().isGreaterOrEqual(level)) {
+			if (logger != null && logger.getEffectiveLevel().isGreaterOrEqual(level)) {
 				logger.setLevel(level);
 			}
 		}
