@@ -25,16 +25,17 @@
 			<groupId>org.cryptomator</groupId>
 			<artifactId>jni</artifactId>
 		</dependency>
+		
+		<!-- Google -->
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+		</dependency>
 
 		<!-- DI -->
 		<dependency>
 			<groupId>com.google.dagger</groupId>
 			<artifactId>dagger</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.google.dagger</groupId>
-			<artifactId>dagger-compiler</artifactId>
-			<scope>provided</scope>
 		</dependency>
 		
 		<!-- Logging -->
