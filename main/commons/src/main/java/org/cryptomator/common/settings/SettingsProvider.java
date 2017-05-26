@@ -97,6 +97,9 @@ public class SettingsProvider implements Provider<Settings> {
 		try (InputStream in = Files.newInputStream(settingsPath, StandardOpenOption.READ); //
 				Reader reader = new InputStreamReader(in, StandardCharsets.UTF_8)) {
 			settings = gson.fromJson(reader, Settings.class);
+			if (settings == null) {
+				throw new IOException("Unexpected EOF");
+			}
 			LOG.info("Settings loaded from " + settingsPath);
 		} catch (IOException e) {
 			LOG.info("Failed to load settings, creating new one.");

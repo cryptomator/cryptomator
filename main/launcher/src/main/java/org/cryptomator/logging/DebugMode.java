@@ -6,29 +6,27 @@
 package org.cryptomator.logging;
 
 import static java.util.Arrays.asList;
-import static org.apache.logging.log4j.LogManager.ROOT_LOGGER_NAME;
 
 import java.util.Collection;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.LoggerContext;
-import org.apache.logging.log4j.core.config.Configuration;
-import org.apache.logging.log4j.core.config.LoggerConfig;
 import org.cryptomator.common.settings.Settings;
-import org.slf4j.Logger;
+import org.slf4j.ILoggerFactory;
 import org.slf4j.LoggerFactory;
+
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.LoggerContext;
 
 @Singleton
 public class DebugMode {
 
-	private static final Logger LOG = LoggerFactory.getLogger(DebugMode.class);
+	private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(DebugMode.class);
 
 	private static final Collection<LoggerUpgrade> LOGGER_UPGRADES = asList( //
-			loggerUpgrade(ROOT_LOGGER_NAME, Level.INFO), //
+			loggerUpgrade(org.slf4j.Logger.ROOT_LOGGER_NAME, Level.INFO), //
 			loggerUpgrade("org.cryptomator", Level.TRACE), //
 			loggerUpgrade("org.eclipse.jetty.server.Server", Level.DEBUG) //
 	);
@@ -48,10 +46,13 @@ public class DebugMode {
 	}
 
 	private void enable() {
-		LoggerContext context = (LoggerContext) LogManager.getContext(false);
-		Configuration config = context.getConfiguration();
-		LOGGER_UPGRADES.forEach(loggerUpgrade -> loggerUpgrade.execute(config));
-		context.updateLoggers();
+		ILoggerFactory loggerFactory = LoggerFactory.getILoggerFactory();
+		if (loggerFactory instanceof LoggerContext) {
+			LoggerContext context = (LoggerContext) loggerFactory;
+			LOGGER_UPGRADES.forEach(loggerUpgrade -> loggerUpgrade.execute(context));
+		} else {
+			LOG.warn("SLF4J not bound to Logback.");
+		}
 	}
 
 	private static LoggerUpgrade loggerUpgrade(String loggerName, Level minLevel) {
@@ -68,10 +69,10 @@ public class DebugMode {
 			this.level = minLevel;
 		}
 
-		public void execute(Configuration config) {
-			LoggerConfig loggerConfig = config.getLoggerConfig(loggerName);
-			if (loggerConfig.getLevel().isMoreSpecificThan(level)) {
-				loggerConfig.setLevel(level);
+		public void execute(LoggerContext context) {
+			Logger logger = context.getLogger(loggerName);
+			if (logger != null && logger.getEffectiveLevel().isGreaterOrEqual(level)) {
+				logger.setLevel(level);
 			}
 		}
 
