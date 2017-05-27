@@ -12,7 +12,10 @@ import java.lang.reflect.Proxy;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
+import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.common.SupplierThrowingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +34,13 @@ public class EawtApplicationWrapper {
 		this.application = applicationClass.getMethod("getApplication").invoke(null);
 	}
 
+	/**
+	 * @return A wrapper for com.apple.ewat.Application if the current OS is macOS and the class is available in this JVM.
+	 */
 	public static Optional<EawtApplicationWrapper> getApplication() {
+		if (!SystemUtils.IS_OS_MAC_OSX) {
+			return Optional.empty();
+		}
 		try {
 			return Optional.of(new EawtApplicationWrapper());
 		} catch (ReflectiveOperationException e) {
@@ -50,15 +59,12 @@ public class EawtApplicationWrapper {
 		try {
 			Class<?> openFilesEventClass = Class.forName("com.apple.eawt.AppEvent$OpenFilesEvent");
 			Method getFiles = openFilesEventClass.getMethod("getFiles");
-			setOpenFileHandler(newMethodSpecificInvocationHandler("openFiles", args -> {
-				try {
-					Object openFilesEvent = args[0];
-					@SuppressWarnings("unchecked")
-					List<File> files = (List<File>) getFiles.invoke(openFilesEvent);
-					handler.accept(files);
-				} catch (ReflectiveOperationException e) {
-					LOG.error("Error invoking openFileHandler.", e);
-				}
+			setOpenFileHandler(methodSpecificInvocationHandler("openFiles", args -> {
+				Object openFilesEvent = args[0];
+				assert openFilesEventClass.isInstance(openFilesEvent);
+				@SuppressWarnings("unchecked")
+				List<File> files = (List<File>) uncheckedReflectiveOperation(() -> getFiles.invoke(openFilesEvent));
+				handler.accept(files);
 				return null;
 			}));
 		} catch (ReflectiveOperationException e) {
@@ -75,7 +81,7 @@ public class EawtApplicationWrapper {
 
 	public void setPreferencesHandler(Runnable handler) {
 		try {
-			setPreferencesHandler(newMethodSpecificInvocationHandler("handlePreferences", args -> {
+			setPreferencesHandler(methodSpecificInvocationHandler("handlePreferences", args -> {
 				handler.run();
 				return null;
 			}));
@@ -84,22 +90,38 @@ public class EawtApplicationWrapper {
 		}
 	}
 
-	@FunctionalInterface
-	private static interface MethodSpecificInvocationHandler {
-		Object invoke(Object[] args);
-	}
-
-	private static InvocationHandler newMethodSpecificInvocationHandler(String methodName, MethodSpecificInvocationHandler handler) {
+	private static InvocationHandler methodSpecificInvocationHandler(String methodName, Function<Object[], Object> handler) {
 		return new InvocationHandler() {
 			@Override
 			public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 				if (method.getName().equals(methodName)) {
-					return handler.invoke(args);
+					return handler.apply(args);
 				} else {
-					return null;
+					throw new UnsupportedOperationException("Unexpected invocation " + method.getName() + ", expected " + methodName);
 				}
 			}
 		};
+	}
+
+	/**
+	 * Wraps {@link ReflectiveOperationException}s as {@link UncheckedReflectiveOperationException}.
+	 * 
+	 * @param operation Invokation throwing an ReflectiveOperationException
+	 * @return Result returned by <code>operation</code>
+	 * @throws UncheckedReflectiveOperationException in case <code>operation</code> throws an ReflectiveOperationException.
+	 */
+	private static <T> T uncheckedReflectiveOperation(SupplierThrowingException<T, ReflectiveOperationException> operation) throws UncheckedReflectiveOperationException {
+		try {
+			return operation.get();
+		} catch (ReflectiveOperationException e) {
+			throw new UncheckedReflectiveOperationException(e);
+		}
+	}
+
+	private static class UncheckedReflectiveOperationException extends RuntimeException {
+		public UncheckedReflectiveOperationException(ReflectiveOperationException cause) {
+			super(cause);
+		}
 	}
 
 }

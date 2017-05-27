@@ -13,7 +13,6 @@ import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.util.concurrent.BlockingQueue;
 
-import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.ui.util.EawtApplicationWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,13 +24,11 @@ class FileOpenRequestHandler {
 
 	public FileOpenRequestHandler(BlockingQueue<Path> fileOpenRequests) {
 		this.fileOpenRequests = fileOpenRequests;
-		if (SystemUtils.IS_OS_MAC_OSX) {
-			EawtApplicationWrapper.getApplication().ifPresent(app -> {
-				app.setOpenFileHandler(files -> {
-					files.stream().map(File::toPath).forEach(fileOpenRequests::add);
-				});
+		EawtApplicationWrapper.getApplication().ifPresent(app -> {
+			app.setOpenFileHandler(files -> {
+				files.stream().map(File::toPath).forEach(fileOpenRequests::add);
 			});
-		}
+		});
 	}
 
 	public void handleLaunchArgs(String[] args) {
