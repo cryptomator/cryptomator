@@ -33,6 +33,7 @@ import org.cryptomator.cryptofs.CryptoFileSystemProperties;
 import org.cryptomator.cryptofs.CryptoFileSystemProvider;
 import org.cryptomator.cryptolib.api.CryptoException;
 import org.cryptomator.cryptolib.api.InvalidPassphraseException;
+import org.cryptomator.frontend.webdav.ServerLifecycleException;
 import org.cryptomator.frontend.webdav.WebDavServer;
 import org.cryptomator.frontend.webdav.mount.MountParams;
 import org.cryptomator.frontend.webdav.mount.Mounter.CommandFailedException;
@@ -108,7 +109,7 @@ public class Vault {
 		CryptoFileSystemProvider.changePassphrase(getPath(), MASTERKEY_FILENAME, oldPassphrase, newPassphrase);
 	}
 
-	public synchronized void unlock(CharSequence passphrase) {
+	public synchronized void unlock(CharSequence passphrase) throws ServerLifecycleException {
 		try {
 			FileSystem fs = getCryptoFileSystem(passphrase);
 			if (!server.isRunning()) {

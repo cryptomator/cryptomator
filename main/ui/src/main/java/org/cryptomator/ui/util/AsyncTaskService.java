@@ -32,6 +32,12 @@ public class AsyncTaskService {
 		this.executor = executor;
 	}
 
+	/**
+	 * Creates a new async task
+	 * 
+	 * @param task Tasks to be invoked in a background thread.
+	 * @return The async task
+	 */
 	public AsyncTaskWithoutSuccessHandler<Void> asyncTaskOf(RunnableThrowingException<?> task) {
 		return new AsyncTaskImpl<>(() -> {
 			task.run();
@@ -39,6 +45,12 @@ public class AsyncTaskService {
 		});
 	}
 
+	/**
+	 * Creates a new async task
+	 * 
+	 * @param task Tasks to be invoked in a background thread.
+	 * @return The async task
+	 */
 	public <ResultType> AsyncTaskWithoutSuccessHandler<ResultType> asyncTaskOf(SupplierThrowingException<ResultType, ?> task) {
 		return new AsyncTaskImpl<>(task);
 	}
@@ -153,27 +165,55 @@ public class AsyncTaskService {
 
 	public interface AsyncTaskWithoutSuccessHandler<ResultType> extends AsyncTaskWithoutErrorHandler {
 
+		/**
+		 * @param handler Tasks to be invoked on the JavaFX application thread.
+		 * @return The async task
+		 */
 		AsyncTaskWithoutErrorHandler onSuccess(ConsumerThrowingException<ResultType, ?> handler);
 
+		/**
+		 * @param handler Tasks to be invoked on the JavaFX application thread.
+		 * @return The async task
+		 */
 		AsyncTaskWithoutErrorHandler onSuccess(RunnableThrowingException<?> handler);
 
 	}
 
 	public interface AsyncTaskWithoutErrorHandler extends AsyncTaskWithoutFinallyHandler {
 
+		/**
+		 * @param type Exception type to catch
+		 * @param handler Tasks to be invoked on the JavaFX application thread.
+		 * @return The async task
+		 */
 		<ErrorType extends Throwable> AsyncTaskWithoutErrorHandler onError(Class<ErrorType> type, ConsumerThrowingException<ErrorType, ?> handler);
 
+		/**
+		 * @param type Exception type to catch
+		 * @param handler Tasks to be invoked on the JavaFX application thread.
+		 * @return The async task
+		 */
 		<ErrorType extends Throwable> AsyncTaskWithoutErrorHandler onError(Class<ErrorType> type, RunnableThrowingException<?> handler);
 
 	}
 
 	public interface AsyncTaskWithoutFinallyHandler extends AsyncTask {
 
+		/**
+		 * @param handler Tasks to be invoked on the JavaFX application thread.
+		 * @return The async task
+		 */
 		AsyncTask andFinally(RunnableThrowingException<?> handler);
 
 	}
 
 	public interface AsyncTask extends Runnable {
+
+		/**
+		 * Starts the async task.
+		 */
+		@Override
+		void run();
 	}
 
 }

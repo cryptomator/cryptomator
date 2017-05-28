@@ -14,6 +14,7 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
+import org.cryptomator.frontend.webdav.mount.Mounter.CommandFailedException;
 import org.cryptomator.ui.l10n.Localization;
 import org.cryptomator.ui.model.Vault;
 import org.cryptomator.ui.util.AsyncTaskService;
@@ -25,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.beans.binding.BooleanExpression;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
@@ -58,6 +60,7 @@ public class UnlockedController implements ViewController {
 	private final Localization localization;
 	private final AsyncTaskService asyncTaskService;
 	private final ObjectProperty<Vault> vault = new SimpleObjectProperty<>();
+	private final BooleanExpression vaultMounted = BooleanExpression.booleanExpression(EasyBind.select(vault).selectObject(Vault::mountedProperty).orElse(false));
 	private Optional<LockListener> listener = Optional.empty();
 	private Timeline ioAnimation;
 
@@ -77,6 +80,9 @@ public class UnlockedController implements ViewController {
 	private ContextMenu moreOptionsMenu;
 
 	@FXML
+	private MenuItem mountVaultMenuItem;
+
+	@FXML
 	private MenuItem revealVaultMenuItem;
 
 	@FXML
@@ -90,7 +96,8 @@ public class UnlockedController implements ViewController {
 
 	@Override
 	public void initialize() {
-		revealVaultMenuItem.disableProperty().bind(EasyBind.map(vault, vault -> vault != null && !vault.isMounted()));
+		revealVaultMenuItem.disableProperty().bind(vaultMounted.not());
+		mountVaultMenuItem.disableProperty().bind(vaultMounted);
 
 		EasyBind.subscribe(vault, this::vaultChanged);
 		EasyBind.subscribe(moreOptionsMenu.showingProperty(), moreOptionsButton::setSelected);
@@ -106,9 +113,8 @@ public class UnlockedController implements ViewController {
 			return;
 		}
 
-		if (newVault.getVaultSettings().mountAfterUnlock().get() && !newVault.isMounted()) {
-			// TODO Markus Kreusch #393: hyperlink auf FAQ oder sowas?
-			messageLabel.setText(localization.getString("unlocked.label.mountFailed"));
+		if (newVault.getVaultSettings().mountAfterUnlock().get()) {
+			mountVault(newVault);
 		}
 
 		// (re)start throughput statistics:
@@ -186,11 +192,35 @@ public class UnlockedController implements ViewController {
 	}
 
 	@FXML
-	private void didClickRevealVault(ActionEvent event) {
+	public void didClickMountVault(ActionEvent event) {
+		mountVault(vault.get());
+	}
+
+	private void mountVault(Vault vault) {
 		asyncTaskService.asyncTaskOf(() -> {
-			vault.get().reveal();
-		}).onError(RuntimeException.class, () -> {
-			// TODO overheadhunter catch more specific exception type thrown by reveal()
+			vault.mount();
+		}).onSuccess(() -> {
+			messageLabel.setText(null);
+			if (vault.getVaultSettings().revealAfterMount().get()) {
+				revealVault(vault);
+			}
+		}).onError(CommandFailedException.class, e -> {
+			// TODO Markus Kreusch #393: hyperlink auf FAQ oder sowas?
+			messageLabel.setText(localization.getString("unlocked.label.mountFailed"));
+		}).run();
+	}
+
+	@FXML
+	private void didClickRevealVault(ActionEvent event) {
+		revealVault(vault.get());
+	}
+
+	private void revealVault(Vault vault) {
+		asyncTaskService.asyncTaskOf(() -> {
+			vault.reveal();
+		}).onSuccess(() -> {
+			messageLabel.setText(null);
+		}).onError(CommandFailedException.class, () -> {
 			messageLabel.setText(localization.getString("unlocked.label.revealFailed"));
 		}).run();
 	}
