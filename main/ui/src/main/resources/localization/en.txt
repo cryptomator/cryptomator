@@ -90,6 +90,7 @@ changePassword.errorMessage.decryptionFailed=Decryption failed
 # unlocked.fxml
 unlocked.button.lock=Lock Vault
 unlocked.moreOptions.mount=Mount Drive
+unlocked.moreOptions.unmount=Eject Drive
 unlocked.moreOptions.reveal=Reveal Drive
 unlocked.moreOptions.copyUrl=Copy WebDAV URL
 unlocked.label.mountFailed=Connecting drive failed

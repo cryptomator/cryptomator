@@ -162,7 +162,7 @@ public class Vault {
 		return mount != null && mount.forced().isPresent();
 	}
 
-	public synchronized void lock() throws Exception {
+	public synchronized void lock() throws ServerLifecycleException, IOException {
 		if (servlet != null) {
 			servlet.stop();
 		}
