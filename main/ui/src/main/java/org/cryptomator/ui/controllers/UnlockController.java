@@ -21,7 +21,6 @@ import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.cryptolib.api.InvalidPassphraseException;
 import org.cryptomator.cryptolib.api.UnsupportedVaultFormatException;
 import org.cryptomator.frontend.webdav.ServerLifecycleException;
-import org.cryptomator.frontend.webdav.mount.Mounter.CommandFailedException;
 import org.cryptomator.keychain.KeychainAccess;
 import org.cryptomator.ui.controls.SecPasswordField;
 import org.cryptomator.ui.l10n.Localization;
@@ -38,7 +37,6 @@ import com.google.common.base.CharMatcher;
 import com.google.common.base.Strings;
 
 import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -345,59 +343,42 @@ public class UnlockController implements ViewController {
 	private void didClickUnlockButton(ActionEvent event) {
 		advancedOptions.setDisable(true);
 		progressIndicator.setVisible(true);
-		downloadsPageLink.setVisible(false);
-		CharSequence password = passwordField.getCharacters();
-		asyncTaskService.asyncTaskOf(() -> this.unlock(password)).run();
-	}
 
-	private void unlock(CharSequence password) {
-		try {
+		CharSequence password = passwordField.getCharacters();
+		asyncTaskService.asyncTaskOf(() -> {
 			vault.unlock(password);
-			if (mountAfterUnlock.isSelected()) {
-				vault.mount();
-				if (revealAfterMount.isSelected()) {
-					vault.reveal();
-				}
-			}
-			Platform.runLater(() -> {
-				messageText.setText(null);
-				listener.ifPresent(lstnr -> lstnr.didUnlock(vault));
-			});
 			if (keychainAccess.isPresent() && savePassword.isSelected()) {
 				keychainAccess.get().storePassphrase(vault.getId(), password);
-			} else {
-				Platform.runLater(passwordField::swipe);
 			}
-		} catch (InvalidPassphraseException e) {
-			Platform.runLater(() -> {
-				messageText.setText(localization.getString("unlock.errorMessage.wrongPassword"));
-				passwordField.selectAll();
-				passwordField.requestFocus();
-			});
-		} catch (UnsupportedVaultFormatException e) {
-			Platform.runLater(() -> {
-				if (e.isVaultOlderThanSoftware()) {
-					// whitespace after localized text used as separator between text and hyperlink
-					messageText.setText(localization.getString("unlock.errorMessage.unsupportedVersion.vaultOlderThanSoftware") + " ");
-					downloadsPageLink.setVisible(true);
-				} else if (e.isSoftwareOlderThanVault()) {
-					messageText.setText(localization.getString("unlock.errorMessage.unsupportedVersion.softwareOlderThanVault") + " ");
-					downloadsPageLink.setVisible(true);
-				} else if (e.getDetectedVersion() == Integer.MAX_VALUE) {
-					messageText.setText(localization.getString("unlock.errorMessage.unauthenticVersionMac"));
-				}
-			});
-		} catch (ServerLifecycleException | CommandFailedException e) {
+		}).onSuccess(() -> {
+			messageText.setText(null);
+			downloadsPageLink.setVisible(false);
+			listener.ifPresent(lstnr -> lstnr.didUnlock(vault));
+		}).onError(InvalidPassphraseException.class, e -> {
+			messageText.setText(localization.getString("unlock.errorMessage.wrongPassword"));
+			passwordField.selectAll();
+			passwordField.requestFocus();
+		}).onError(UnsupportedVaultFormatException.class, e -> {
+			if (e.isVaultOlderThanSoftware()) {
+				// whitespace after localized text used as separator between text and hyperlink
+				messageText.setText(localization.getString("unlock.errorMessage.unsupportedVersion.vaultOlderThanSoftware") + " ");
+				downloadsPageLink.setVisible(true);
+			} else if (e.isSoftwareOlderThanVault()) {
+				messageText.setText(localization.getString("unlock.errorMessage.unsupportedVersion.softwareOlderThanVault") + " ");
+				downloadsPageLink.setVisible(true);
+			} else if (e.getDetectedVersion() == Integer.MAX_VALUE) {
+				messageText.setText(localization.getString("unlock.errorMessage.unauthenticVersionMac"));
+			}
+		}).onError(ServerLifecycleException.class, e -> {
 			LOG.error("Unlock failed for technical reasons.", e);
-			Platform.runLater(() -> {
-				messageText.setText(localization.getString("unlock.errorMessage.mountingFailed"));
-			});
-		} finally {
-			Platform.runLater(() -> {
-				advancedOptions.setDisable(false);
-				progressIndicator.setVisible(false);
-			});
-		}
+			messageText.setText(localization.getString("unlock.errorMessage.unlockFailed"));
+		}).andFinally(() -> {
+			if (!savePassword.isSelected()) {
+				passwordField.swipe();
+			}
+			advancedOptions.setDisable(false);
+			progressIndicator.setVisible(false);
+		}).run();
 	}
 
 	/* callback */

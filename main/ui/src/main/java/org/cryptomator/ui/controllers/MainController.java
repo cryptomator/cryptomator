@@ -37,6 +37,7 @@ import org.cryptomator.ui.model.Vault;
 import org.cryptomator.ui.model.VaultFactory;
 import org.cryptomator.ui.model.VaultList;
 import org.cryptomator.ui.util.DialogBuilderUtil;
+import org.cryptomator.ui.util.EawtApplicationWrapper;
 import org.fxmisc.easybind.EasyBind;
 import org.fxmisc.easybind.Subscription;
 import org.fxmisc.easybind.monadic.MonadicBinding;
@@ -119,6 +120,12 @@ public class MainController implements ViewController {
 
 		EasyBind.subscribe(areAllVaultsLocked, Platform::setImplicitExit);
 		autoUnlocker.unlockAllSilently();
+
+		EawtApplicationWrapper.getApplication().ifPresent(app -> {
+			app.setPreferencesHandler(() -> {
+				Platform.runLater(this::toggleShowSettings);
+			});
+		});
 	}
 
 	@FXML
@@ -328,10 +335,14 @@ public class MainController implements ViewController {
 
 	@FXML
 	private void didClickShowSettings(ActionEvent e) {
+		toggleShowSettings();
+	}
+
+	private void toggleShowSettings() {
 		if (isShowingSettings.get()) {
-			activeController.set(viewControllerLoader.load("/fxml/welcome.fxml"));
+			showWelcomeView();
 		} else {
-			activeController.set(viewControllerLoader.load("/fxml/settings.fxml"));
+			showPreferencesView();
 		}
 		vaultList.getSelectionModel().clearSelection();
 	}
@@ -374,6 +385,14 @@ public class MainController implements ViewController {
 	// ****************************************
 	// Subcontroller for right panel
 	// ****************************************
+
+	private void showWelcomeView() {
+		activeController.set(viewControllerLoader.load("/fxml/welcome.fxml"));
+	}
+
+	private void showPreferencesView() {
+		activeController.set(viewControllerLoader.load("/fxml/settings.fxml"));
+	}
 
 	private void showNotFoundView() {
 		activeController.set(viewControllerLoader.load("/fxml/notfound.fxml"));

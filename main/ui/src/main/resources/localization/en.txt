@@ -72,7 +72,7 @@ unlock.savePassword.delete.confirmation.header=Do you really want to delete the 
 unlock.savePassword.delete.confirmation.content=The saved password of this vault will be immediately deleted from your system keychain. If you'd like to save your password again, you'd have to unlock your vault with the "Save Password" option enabled.
 unlock.choicebox.winDriveLetter.auto=Assign automatically
 unlock.errorMessage.wrongPassword=Wrong password
-unlock.errorMessage.mountingFailed=Mounting failed. See log file for details.
+unlock.errorMessage.unlockFailed=Unlock failed. See log file for details.
 unlock.errorMessage.unsupportedVersion.vaultOlderThanSoftware=Unsupported vault. This vault has been created with an older version of Cryptomator.
 unlock.errorMessage.unsupportedVersion.softwareOlderThanVault=Unsupported vault. This vault has been created with a newer version of Cryptomator.
 unlock.errorMessage.unauthenticVersionMac=Could not authenticate version MAC.
@@ -89,6 +89,8 @@ changePassword.errorMessage.decryptionFailed=Decryption failed
 
 # unlocked.fxml
 unlocked.button.lock=Lock Vault
+unlocked.moreOptions.mount=Mount Drive
+unlocked.moreOptions.unmount=Eject Drive
 unlocked.moreOptions.reveal=Reveal Drive
 unlocked.moreOptions.copyUrl=Copy WebDAV URL
 unlocked.label.mountFailed=Connecting drive failed

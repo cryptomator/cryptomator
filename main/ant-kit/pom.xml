@@ -8,7 +8,7 @@
 	<parent>
 		<groupId>org.cryptomator</groupId>
 		<artifactId>main</artifactId>
-		<version>1.3.0-rc6</version>
+		<version>1.3.0-rc7</version>
 	</parent>
 	<artifactId>ant-kit</artifactId>
 	<packaging>pom</packaging>

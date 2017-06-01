@@ -10,10 +10,13 @@ package org.cryptomator.ui.controllers;
 
 import static java.lang.String.format;
 
+import java.io.IOException;
 import java.util.Optional;
 
 import javax.inject.Inject;
 
+import org.cryptomator.frontend.webdav.ServerLifecycleException;
+import org.cryptomator.frontend.webdav.mount.Mounter.CommandFailedException;
 import org.cryptomator.ui.l10n.Localization;
 import org.cryptomator.ui.model.Vault;
 import org.cryptomator.ui.util.AsyncTaskService;
@@ -22,9 +25,12 @@ import org.fxmisc.easybind.EasyBind;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.util.concurrent.Runnables;
+
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.beans.binding.BooleanExpression;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
@@ -58,6 +64,7 @@ public class UnlockedController implements ViewController {
 	private final Localization localization;
 	private final AsyncTaskService asyncTaskService;
 	private final ObjectProperty<Vault> vault = new SimpleObjectProperty<>();
+	private final BooleanExpression vaultMounted = BooleanExpression.booleanExpression(EasyBind.select(vault).selectObject(Vault::mountedProperty).orElse(false));
 	private Optional<LockListener> listener = Optional.empty();
 	private Timeline ioAnimation;
 
@@ -77,6 +84,12 @@ public class UnlockedController implements ViewController {
 	private ContextMenu moreOptionsMenu;
 
 	@FXML
+	private MenuItem mountVaultMenuItem;
+
+	@FXML
+	private MenuItem unmountVaultMenuItem;
+
+	@FXML
 	private MenuItem revealVaultMenuItem;
 
 	@FXML
@@ -90,7 +103,9 @@ public class UnlockedController implements ViewController {
 
 	@Override
 	public void initialize() {
-		revealVaultMenuItem.disableProperty().bind(EasyBind.map(vault, vault -> vault != null && !vault.isMounted()));
+		mountVaultMenuItem.disableProperty().bind(vaultMounted);
+		unmountVaultMenuItem.disableProperty().bind(vaultMounted.not());
+		revealVaultMenuItem.disableProperty().bind(vaultMounted.not());
 
 		EasyBind.subscribe(vault, this::vaultChanged);
 		EasyBind.subscribe(moreOptionsMenu.showingProperty(), moreOptionsButton::setSelected);
@@ -106,9 +121,8 @@ public class UnlockedController implements ViewController {
 			return;
 		}
 
-		if (newVault.getVaultSettings().mountAfterUnlock().get() && !newVault.isMounted()) {
-			// TODO Markus Kreusch #393: hyperlink auf FAQ oder sowas?
-			messageLabel.setText(localization.getString("unlocked.label.mountFailed"));
+		if (newVault.getVaultSettings().mountAfterUnlock().get()) {
+			mountVault(newVault);
 		}
 
 		// (re)start throughput statistics:
@@ -118,61 +132,16 @@ public class UnlockedController implements ViewController {
 
 	@FXML
 	private void didClickLockVault(ActionEvent event) {
-		regularLockVault();
+		regularUnmountVault(this::lockVault);
 	}
 
-	private void regularLockVault() {
-		asyncTaskService.asyncTaskOf(() -> {
-			vault.get().unmount();
+	private void lockVault() {
+		try {
 			vault.get().lock();
-		}).onSuccess(() -> {
-			listener.ifPresent(listener -> listener.didLock(this));
-			LOG.trace("Regular lock succeeded");
-		}).onError(Exception.class, e -> {
-			onRegularLockVaultFailed(e);
-		}).run();
-	}
-
-	private void forcedLockVault() {
-		asyncTaskService.asyncTaskOf(() -> {
-			vault.get().unmountForced();
-			vault.get().lock();
-		}).onSuccess(() -> {
-			listener.ifPresent(listener -> listener.didLock(this));
-			LOG.trace("Forced lock succeeded");
-		}).onError(Exception.class, e -> {
-			onForcedLockVaultFailed(e);
-		}).run();
-	}
-
-	private void onRegularLockVaultFailed(Exception e) {
-		if (vault.get().supportsForcedUnmount()) {
-			LOG.trace("Regular unmount failed", e);
-			Alert confirmDialog = DialogBuilderUtil.buildYesNoDialog( //
-					format(localization.getString("unlocked.lock.force.confirmation.title"), vault.get().name().getValue()), //
-					localization.getString("unlocked.lock.force.confirmation.header"), //
-					localization.getString("unlocked.lock.force.confirmation.content"), //
-					ButtonType.NO);
-
-			Optional<ButtonType> choice = confirmDialog.showAndWait();
-			if (ButtonType.YES.equals(choice.get())) {
-				forcedLockVault();
-			} else {
-				LOG.trace("Unmount cancelled", e);
-			}
-		} else {
-			LOG.error("Regular unmount failed", e);
-			showUnmountFailedMessage();
+		} catch (ServerLifecycleException | IOException e) {
+			LOG.error("Lock failed", e);
 		}
-	}
-
-	private void onForcedLockVaultFailed(Exception e) {
-		LOG.error("Forced unmount failed", e);
-		showUnmountFailedMessage();
-	}
-
-	private void showUnmountFailedMessage() {
-		messageLabel.setText(localization.getString("unlocked.label.unmountFailed"));
+		listener.ifPresent(listener -> listener.didLock(this));
 	}
 
 	@FXML
@@ -186,11 +155,88 @@ public class UnlockedController implements ViewController {
 	}
 
 	@FXML
-	private void didClickRevealVault(ActionEvent event) {
+	public void didClickMountVault(ActionEvent event) {
+		mountVault(vault.get());
+	}
+
+	private void mountVault(Vault vault) {
 		asyncTaskService.asyncTaskOf(() -> {
-			vault.get().reveal();
-		}).onError(RuntimeException.class, () -> {
-			// TODO overheadhunter catch more specific exception type thrown by reveal()
+			vault.mount();
+		}).onSuccess(() -> {
+			LOG.trace("Mount succeeded.");
+			messageLabel.setText(null);
+			if (vault.getVaultSettings().revealAfterMount().get()) {
+				revealVault(vault);
+			}
+		}).onError(CommandFailedException.class, e -> {
+			LOG.error("Mount failed.", e);
+			// TODO Markus Kreusch #393: hyperlink auf FAQ oder sowas?
+			messageLabel.setText(localization.getString("unlocked.label.mountFailed"));
+		}).run();
+	}
+
+	@FXML
+	public void didClickUnmountVault(ActionEvent event) {
+		regularUnmountVault(Runnables.doNothing());
+	}
+
+	private void regularUnmountVault(Runnable onSuccess) {
+		asyncTaskService.asyncTaskOf(() -> {
+			vault.get().unmount();
+		}).onSuccess(() -> {
+			LOG.trace("Regular unmount succeeded.");
+			onSuccess.run();
+		}).onError(Exception.class, e -> {
+			onRegularUnmountVaultFailed(e, onSuccess);
+		}).run();
+	}
+
+	private void forcedUnmountVault(Runnable onSuccess) {
+		asyncTaskService.asyncTaskOf(() -> {
+			vault.get().unmountForced();
+		}).onSuccess(() -> {
+			LOG.trace("Forced unmount succeeded.");
+			onSuccess.run();
+		}).onError(Exception.class, e -> {
+			LOG.error("Forced unmount failed.", e);
+			messageLabel.setText(localization.getString("unlocked.label.unmountFailed"));
+		}).run();
+	}
+
+	private void onRegularUnmountVaultFailed(Exception e, Runnable onSuccess) {
+		if (vault.get().supportsForcedUnmount()) {
+			LOG.trace("Regular unmount failed.", e);
+			Alert confirmDialog = DialogBuilderUtil.buildYesNoDialog( //
+					format(localization.getString("unlocked.lock.force.confirmation.title"), vault.get().name().getValue()), //
+					localization.getString("unlocked.lock.force.confirmation.header"), //
+					localization.getString("unlocked.lock.force.confirmation.content"), //
+					ButtonType.NO);
+
+			Optional<ButtonType> choice = confirmDialog.showAndWait();
+			if (ButtonType.YES.equals(choice.get())) {
+				forcedUnmountVault(onSuccess);
+			} else {
+				LOG.trace("Unmount cancelled.", e);
+			}
+		} else {
+			LOG.error("Regular unmount failed.", e);
+			messageLabel.setText(localization.getString("unlocked.label.unmountFailed"));
+		}
+	}
+
+	@FXML
+	private void didClickRevealVault(ActionEvent event) {
+		revealVault(vault.get());
+	}
+
+	private void revealVault(Vault vault) {
+		asyncTaskService.asyncTaskOf(() -> {
+			vault.reveal();
+		}).onSuccess(() -> {
+			LOG.trace("Reveal succeeded.");
+			messageLabel.setText(null);
+		}).onError(CommandFailedException.class, e -> {
+			LOG.error("Reveal failed.", e);
 			messageLabel.setText(localization.getString("unlocked.label.revealFailed"));
 		}).run();
 	}
