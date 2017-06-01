@@ -16,6 +16,7 @@ import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.EnumSet;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
@@ -30,6 +31,7 @@ import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.cryptofs.CryptoFileSystem;
 import org.cryptomator.cryptofs.CryptoFileSystemProperties;
+import org.cryptomator.cryptofs.CryptoFileSystemProperties.FileSystemFlags;
 import org.cryptomator.cryptofs.CryptoFileSystemProvider;
 import org.cryptomator.cryptolib.api.CryptoException;
 import org.cryptomator.cryptolib.api.InvalidPassphraseException;
@@ -79,12 +81,13 @@ public class Vault {
 	// ********************************************************************************/
 
 	private CryptoFileSystem getCryptoFileSystem(CharSequence passphrase) throws IOException, CryptoException {
-		return LazyInitializer.initializeLazily(cryptoFileSystem, () -> createCryptoFileSystem(passphrase), IOException.class);
+		return LazyInitializer.initializeLazily(cryptoFileSystem, () -> unlockCryptoFileSystem(passphrase), IOException.class);
 	}
 
-	private CryptoFileSystem createCryptoFileSystem(CharSequence passphrase) throws IOException, CryptoException {
+	private CryptoFileSystem unlockCryptoFileSystem(CharSequence passphrase) throws IOException, CryptoException {
 		CryptoFileSystemProperties fsProps = CryptoFileSystemProperties.cryptoFileSystemProperties() //
 				.withPassphrase(passphrase) //
+				.withFlags(EnumSet.noneOf(FileSystemFlags.class)) // TODO: use withFlags() with CryptoFS 1.3.1
 				.withMasterkeyFilename(MASTERKEY_FILENAME) //
 				.build();
 		return CryptoFileSystemProvider.newFileSystem(getPath(), fsProps);
@@ -99,7 +102,7 @@ public class Vault {
 			}
 		}
 		if (!isValidVaultDirectory()) {
-			createCryptoFileSystem(passphrase).close(); // implicitly creates a non-existing vault
+			CryptoFileSystemProvider.initialize(getPath(), MASTERKEY_FILENAME, passphrase);
 		} else {
 			throw new FileAlreadyExistsException(getPath().toString());
 		}
