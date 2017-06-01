@@ -63,11 +63,8 @@ public abstract class UpgradeStrategy {
 	 */
 	public void upgrade(Vault vault, CharSequence passphrase) throws UpgradeFailedException {
 		LOG.info("Upgrading {} from {} to {}.", vault.getPath(), vaultVersionBeforeUpgrade, vaultVersionAfterUpgrade);
-		Cryptor cryptor = null;
-		try {
-			final Path masterkeyFile = vault.getPath().resolve(MASTERKEY_FILENAME);
-			final byte[] masterkeyFileContents = Files.readAllBytes(masterkeyFile);
-			cryptor = cryptorProvider.createFromKeyFile(KeyFile.parse(masterkeyFileContents), passphrase, vaultVersionBeforeUpgrade);
+		final Path masterkeyFile = vault.getPath().resolve(MASTERKEY_FILENAME);
+		try (Cryptor cryptor = cryptorProvider.createFromKeyFile(KeyFile.parse(Files.readAllBytes(masterkeyFile)), passphrase, vaultVersionBeforeUpgrade)) {
 			// create backup, as soon as we know the password was correct:
 			final Path masterkeyBackupFile = vault.getPath().resolve(MASTERKEY_BACKUP_FILENAME);
 			Files.copy(masterkeyFile, masterkeyBackupFile, StandardCopyOption.REPLACE_EXISTING);
@@ -92,10 +89,6 @@ public abstract class UpgradeStrategy {
 		} catch (IOException e) {
 			LOG.warn("Upgrade failed.", e);
 			throw new UpgradeFailedException("Upgrade failed. Details in log message.");
-		} finally {
-			if (cryptor != null) {
-				cryptor.destroy();
-			}
 		}
 	}
 
