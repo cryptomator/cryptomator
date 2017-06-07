@@ -30,7 +30,7 @@ import com.google.common.util.concurrent.Runnables;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
-import javafx.beans.binding.BooleanExpression;
+import javafx.beans.binding.ObjectExpression;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
@@ -64,7 +64,7 @@ public class UnlockedController implements ViewController {
 	private final Localization localization;
 	private final AsyncTaskService asyncTaskService;
 	private final ObjectProperty<Vault> vault = new SimpleObjectProperty<>();
-	private final BooleanExpression vaultMounted = BooleanExpression.booleanExpression(EasyBind.select(vault).selectObject(Vault::mountedProperty).orElse(false));
+	private final ObjectExpression<Vault.State> vaultState = ObjectExpression.objectExpression(EasyBind.select(vault).selectObject(Vault::stateProperty));
 	private Optional<LockListener> listener = Optional.empty();
 	private Timeline ioAnimation;
 
@@ -103,9 +103,9 @@ public class UnlockedController implements ViewController {
 
 	@Override
 	public void initialize() {
-		mountVaultMenuItem.disableProperty().bind(vaultMounted);
-		unmountVaultMenuItem.disableProperty().bind(vaultMounted.not());
-		revealVaultMenuItem.disableProperty().bind(vaultMounted.not());
+		mountVaultMenuItem.disableProperty().bind(vaultState.isEqualTo(Vault.State.UNLOCKED).not()); // enable when unlocked
+		unmountVaultMenuItem.disableProperty().bind(vaultState.isEqualTo(Vault.State.MOUNTED).not()); // enable when mounted
+		revealVaultMenuItem.disableProperty().bind(vaultState.isEqualTo(Vault.State.MOUNTED).not()); // enable when mounted
 
 		EasyBind.subscribe(vault, this::vaultChanged);
 		EasyBind.subscribe(moreOptionsMenu.showingProperty(), moreOptionsButton::setSelected);
@@ -121,7 +121,7 @@ public class UnlockedController implements ViewController {
 			return;
 		}
 
-		if (newVault.getVaultSettings().mountAfterUnlock().get()) {
+		if (newVault.getState() == Vault.State.UNLOCKED && newVault.getVaultSettings().mountAfterUnlock().get()) {
 			mountVault(newVault);
 		}
 
