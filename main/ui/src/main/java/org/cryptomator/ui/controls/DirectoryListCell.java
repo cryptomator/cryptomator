@@ -31,12 +31,11 @@ public class DirectoryListCell extends DraggableListCell<Vault> {
 	private final Label pathText = new Label();
 	private final VBox vbox = new VBox(4.0, nameText, pathText);
 	private final HBox hbox = new HBox(6.0, statusText, vbox);
-	private final ObjectExpression<Vault.State> vaultState;
 
 	private ContextMenu vaultContextMenu;
 
 	public DirectoryListCell() {
-		vaultState = ObjectExpression.objectExpression(EasyBind.select(itemProperty()).selectObject(Vault::stateProperty));
+		ObjectExpression<Vault.State> vaultState = ObjectExpression.objectExpression(EasyBind.select(itemProperty()).selectObject(Vault::stateProperty));
 
 		hbox.setAlignment(Pos.CENTER_LEFT);
 		hbox.setPrefWidth(1);

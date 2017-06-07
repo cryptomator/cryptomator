@@ -167,6 +167,7 @@ public class Vault {
 		});
 		if (mount != null) {
 			unmountOperationChooser.apply(mount).unmount();
+			mount = null;
 		}
 		Platform.runLater(() -> {
 			state.set(State.UNLOCKED);
