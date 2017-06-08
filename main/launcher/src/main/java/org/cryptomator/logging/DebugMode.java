@@ -28,7 +28,7 @@ public class DebugMode {
 	private static final Collection<LoggerUpgrade> LOGGER_UPGRADES = asList( //
 			loggerUpgrade(org.slf4j.Logger.ROOT_LOGGER_NAME, Level.INFO), //
 			loggerUpgrade("org.cryptomator", Level.TRACE), //
-			loggerUpgrade("org.eclipse.jetty.server.Server", Level.DEBUG) //
+			loggerUpgrade("org.eclipse.jetty.server.HttpChannel", Level.DEBUG) //
 	);
 
 	private final Settings settings;
