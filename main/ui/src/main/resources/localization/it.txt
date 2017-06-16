@@ -2,7 +2,7 @@ app.name = Cryptomator
 # main.fxml
 main.emptyListInstructions = Clicca qui per aggiungere un vault
 main.directoryList.contextMenu.remove = Rimuovi dalla lista
-main.directoryList.contextMenu.changePassword = Cambia la password
+main.directoryList.contextMenu.changePassword = Cambio password
 main.addDirectory.contextMenu.new = Crea un nuovo vault
 main.addDirectory.contextMenu.open = Apri un vault
 # welcome.fxml
@@ -11,7 +11,7 @@ welcome.newVersionMessage = La versione %1$s può essere scaricata.\nQuesta è %
 # initialize.fxml
 initialize.label.password = Password
 initialize.label.retypePassword = Conferma password
-initialize.button.ok = Crea un vault
+initialize.button.ok = Crea Vault
 initialize.messageLabel.alreadyInitialized = Vault già inizializzato
 initialize.messageLabel.initializationFailed = Non è possibile inizializzare il vault. Controlla il file di log per dettagli.
 # notfound.fxml
@@ -31,7 +31,6 @@ unlock.button.advancedOptions.show = Più opzioni
 unlock.button.advancedOptions.hide = Meno opzioni
 unlock.choicebox.winDriveLetter.auto = Assegna automaticamente
 unlock.errorMessage.wrongPassword = Password errata
-unlock.errorMessage.mountingFailed = Montaggio fallito. Controlla il file di log per dettagli.
 unlock.errorMessage.unsupportedVersion.vaultOlderThanSoftware = Vault non supportato. Questo vault è stato creato con una versione di Cryptomator più vecchia.
 unlock.errorMessage.unsupportedVersion.softwareOlderThanVault = Vault non supportato. Questo vault è stato creato con una versione di Cryptomator più recente.
 unlock.messageLabel.startServerFailed = Avvio del server WebDAV fallito
@@ -92,6 +91,13 @@ upgrade.version3to4.title = Aggiornamento Vault da versione 3 a 4
 upgrade.version4to5.title = Aggiornamento da versione 4 a 5
 upgrade.version4to5.msg = Questo vault ha bisogno di essere migrato ad un formato piu' recente. Tutti i files criptati saranno aggiornati. Per favore assicurati che la sincronizzazione sia terminata prima di procedere.\n\nNota\: la data di modifica di tutti i files cambiera' alla data/ora attuale del processo.
 upgrade.version4to5.err.io = Migrazione fallita a causa di una eccezione I/O. Verifica il file di log per i dettagli.
-settings.port.apply = Apply
-unlock.label.mountAfterUnlock = Mount Drive
-unlock.label.revealAfterMount = Reveal Drive
+settings.port.apply = Conferma
+unlock.label.mountAfterUnlock = Monta il disco
+unlock.label.revealAfterMount = Mostra il disco
+unlocked.lock.force.confirmation.title = Il blocco di %1$s è fallito
+unlocked.lock.force.confirmation.header = Vuoi forzare il blocco?
+unlocked.lock.force.confirmation.content = E' accaduto questo perchè altri programmi stanno ancora utilizzando i dati nel vault o perchè è accaduto un altro problema
+unlock.label.unlockAfterStartup = Blocco automatico all'avvio (Sperimentale)
+unlock.errorMessage.unlockFailed = Unlock failed. See log file for details.
+unlocked.moreOptions.mount = Mount Drive
+unlocked.moreOptions.unmount = Eject Drive
