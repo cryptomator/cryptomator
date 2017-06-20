@@ -19,8 +19,8 @@ public class UpgradeStrategies {
 	private final Collection<UpgradeStrategy> strategies;
 
 	@Inject
-	public UpgradeStrategies(UpgradeVersion3DropBundleExtension upgrader1, UpgradeVersion3to4 upgrader2, UpgradeVersion4to5 upgrader3) {
-		strategies = Collections.unmodifiableList(Arrays.asList(upgrader1, upgrader2, upgrader3));
+	public UpgradeStrategies(UpgradeVersion3DropBundleExtension upgrader1, UpgradeVersion3to4 upgrader2, UpgradeVersion4to5 upgrader3, UpgradeVersion5toX upgrader4) {
+		strategies = Collections.unmodifiableList(Arrays.asList(upgrader1, upgrader2, upgrader3, upgrader4));
 	}
 
 	public UpgradeStrategy getUpgradeStrategy(Vault vault) {

@@ -16,7 +16,6 @@ import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.EnumSet;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
@@ -32,7 +31,6 @@ import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.cryptofs.CryptoFileSystem;
 import org.cryptomator.cryptofs.CryptoFileSystemProperties;
-import org.cryptomator.cryptofs.CryptoFileSystemProperties.FileSystemFlags;
 import org.cryptomator.cryptofs.CryptoFileSystemProvider;
 import org.cryptomator.cryptolib.api.CryptoException;
 import org.cryptomator.cryptolib.api.InvalidPassphraseException;
@@ -86,14 +84,14 @@ public class Vault {
 	// Commands
 	// ********************************************************************************/
 
-	private CryptoFileSystem getCryptoFileSystem(CharSequence passphrase) throws IOException, CryptoException {
+	private CryptoFileSystem getCryptoFileSystem(CharSequence passphrase) throws IOException, InvalidPassphraseException, CryptoException {
 		return LazyInitializer.initializeLazily(cryptoFileSystem, () -> unlockCryptoFileSystem(passphrase), IOException.class);
 	}
 
-	private CryptoFileSystem unlockCryptoFileSystem(CharSequence passphrase) throws IOException, CryptoException {
+	private CryptoFileSystem unlockCryptoFileSystem(CharSequence passphrase) throws IOException, InvalidPassphraseException, CryptoException {
 		CryptoFileSystemProperties fsProps = CryptoFileSystemProperties.cryptoFileSystemProperties() //
 				.withPassphrase(passphrase) //
-				.withFlags(EnumSet.noneOf(FileSystemFlags.class)) // TODO: use withFlags() with CryptoFS 1.3.1
+				.withFlags() //
 				.withMasterkeyFilename(MASTERKEY_FILENAME) //
 				.build();
 		return CryptoFileSystemProvider.newFileSystem(getPath(), fsProps);
@@ -118,7 +116,7 @@ public class Vault {
 		CryptoFileSystemProvider.changePassphrase(getPath(), MASTERKEY_FILENAME, oldPassphrase, newPassphrase);
 	}
 
-	public synchronized void unlock(CharSequence passphrase) throws ServerLifecycleException {
+	public synchronized void unlock(CharSequence passphrase) throws InvalidPassphraseException, ServerLifecycleException {
 		try {
 			FileSystem fs = getCryptoFileSystem(passphrase);
 			if (!server.isRunning()) {

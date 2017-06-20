@@ -54,6 +54,9 @@ upgrade.version4to5.title=Vault Version 4 to 5 Upgrade
 upgrade.version4to5.msg=This vault needs to be migrated to a newer format.\nEncrypted files will be updated.\nPlease make sure synchronization has finished before proceeding.\n\nNote: Modification date of all files will be changed to the current date/time in the process.
 upgrade.version4to5.err.io=Migration failed due to an I/O Exception. See log file for details.
 
+upgrade.version5toX.title=Vault Version Upgrade
+upgrade.version5toX.msg=This vault needs to be migrated to a newer format.\nPlease make sure synchronization has finished before proceeding.
+
 # unlock.fxml
 unlock.label.password=Password
 unlock.label.savePassword=Save Password
