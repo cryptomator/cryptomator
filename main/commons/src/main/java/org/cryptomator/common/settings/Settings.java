@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014, 2016 Sebastian Stenzel
+ * Copyright (c) 2014, 2017 Sebastian Stenzel
  * All rights reserved.
  * This program and the accompanying materials are made available under the terms of the accompanying LICENSE file.
  * 
