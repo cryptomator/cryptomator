@@ -32,6 +32,7 @@
 				<fx:property name="cryptomator.logPath" value="~/.Cryptomator/cryptomator.log" />
 				<fx:property name="cryptomator.upgradeLogPath" value="~/.Cryptomator/upgrade.log" />
 				<fx:property name="cryptomator.settingsPath" value="~/.Cryptomator/settings.json" />
+				<fx:jvmarg value="-Xss2m"/>
 				<fx:jvmarg value="-Xmx512m"/>
 			</fx:platform>
 			<fx:resources>
@@ -55,6 +56,7 @@
 				<fx:property name="cryptomator.logPath" value="~/.Cryptomator/cryptomator.log" />
 				<fx:property name="cryptomator.upgradeLogPath" value="~/.Cryptomator/upgrade.log" />
 				<fx:property name="cryptomator.settingsPath" value="~/.Cryptomator/settings.json" />
+				<fx:jvmarg value="-Xss2m"/>
 				<fx:jvmarg value="-Xmx512m"/>
 			</fx:platform>
 			<fx:resources>
