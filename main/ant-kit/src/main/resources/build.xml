@@ -32,6 +32,7 @@
 				<fx:property name="logback.configurationFile" value="logback.xml" />
 				<fx:property name="cryptomator.settingsPath" value="~/.Cryptomator/settings.json" />
 				<fx:property name="cryptomator.ipcPortPath" value="~/.Cryptomator/ipcPort.bin" />
+				<fx:jvmarg value="-Xss2m"/>
 				<fx:jvmarg value="-Xmx512m"/>
 			</fx:platform>
 			<fx:resources>
@@ -56,6 +57,7 @@
 				<fx:property name="logback.configurationFile" value="logback.xml" />
 				<fx:property name="cryptomator.settingsPath" value="~/.Cryptomator/settings.json" />
 				<fx:property name="cryptomator.ipcPortPath" value="~/.Cryptomator/ipcPort.bin" />
+				<fx:jvmarg value="-Xss2m"/>
 				<fx:jvmarg value="-Xmx512m"/>
 			</fx:platform>
 			<fx:resources>
