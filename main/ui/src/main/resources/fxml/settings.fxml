@@ -43,18 +43,13 @@
 				<Button text="%settings.port.apply" fx:id="changePortButton" onAction="#changePort"/>
 			</HBox>
 			
-			
 			<!-- Row 2 -->
-			<Label GridPane.rowIndex="2" GridPane.columnIndex="0" fx:id="useIpv6Label" text="%settings.useipv6.label" cacheShape="true" cache="true" />
-			<CheckBox GridPane.rowIndex="2" GridPane.columnIndex="1" fx:id="useIpv6Checkbox" cacheShape="true" cache="true" />
+			<Label GridPane.rowIndex="2" GridPane.columnIndex="0" fx:id="prefGvfsSchemeLabel" text="%settings.prefGvfsScheme.label" cacheShape="true" cache="true" />
+			<ChoiceBox GridPane.rowIndex="2" GridPane.columnIndex="1" fx:id="prefGvfsScheme" GridPane.hgrow="ALWAYS" maxWidth="Infinity" cacheShape="true" cache="true" />
 			
 			<!-- Row 3 -->
-			<Label GridPane.rowIndex="3" GridPane.columnIndex="0" fx:id="prefGvfsSchemeLabel" text="%settings.prefGvfsScheme.label" cacheShape="true" cache="true" />
-			<ChoiceBox GridPane.rowIndex="3" GridPane.columnIndex="1" fx:id="prefGvfsScheme" GridPane.hgrow="ALWAYS" maxWidth="Infinity" cacheShape="true" cache="true" />
-			
-			<!-- Row 4 -->
-			<Label GridPane.rowIndex="4" GridPane.columnIndex="0" text="%settings.debugMode.label" cacheShape="true" cache="true" />
-			<CheckBox GridPane.rowIndex="4" GridPane.columnIndex="1" fx:id="debugModeCheckbox" cacheShape="true" cache="true" />
+			<Label GridPane.rowIndex="3" GridPane.columnIndex="0" text="%settings.debugMode.label" cacheShape="true" cache="true" />
+			<CheckBox GridPane.rowIndex="3" GridPane.columnIndex="1" fx:id="debugModeCheckbox" cacheShape="true" cache="true" />
 			
 		</children>
 	</GridPane>

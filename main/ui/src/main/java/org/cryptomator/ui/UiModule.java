@@ -16,6 +16,7 @@ import java.util.function.Consumer;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
+import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.CommonsModule;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.SettingsProvider;
@@ -50,8 +51,8 @@ public class UiModule {
 	@Provides
 	@Singleton
 	Binding<InetSocketAddress> provideServerSocketAddressBinding(Settings settings) {
-		return EasyBind.combine(settings.useIpv6(), settings.port(), (useIpv6, port) -> {
-			String host = useIpv6 ? "::1" : "localhost";
+		return EasyBind.map(settings.port(), (Number port) -> {
+			String host = SystemUtils.IS_OS_WINDOWS ? "127.0.0.1" : "localhost";
 			return InetSocketAddress.createUnresolved(host, port.intValue());
 		});
 	}
