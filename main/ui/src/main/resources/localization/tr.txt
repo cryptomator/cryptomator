@@ -56,7 +56,6 @@ settings.version.label = Sürüm %s
 settings.checkForUpdates.label = Güncellemeleri denetle
 settings.port.label = WebDAV Port *
 settings.port.prompt = 0 \= Otomatik seç
-settings.useipv6.label = IPv6 kullan
 settings.requiresRestartLabel = * Cryptomator yeniden başlatılması gerek
 # tray icon
 tray.menu.open = Aç
@@ -101,3 +100,5 @@ unlock.label.unlockAfterStartup = Auto-Unlock on Start (Experimental)
 unlock.errorMessage.unlockFailed = Unlock failed. See log file for details.
 unlocked.moreOptions.mount = Mount Drive
 unlocked.moreOptions.unmount = Eject Drive
+upgrade.version5toX.title = Vault Version Upgrade
+upgrade.version5toX.msg = This vault needs to be migrated to a newer format.\nPlease make sure synchronization has finished before proceeding.

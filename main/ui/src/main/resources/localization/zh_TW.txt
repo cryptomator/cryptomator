@@ -56,7 +56,6 @@ settings.version.label = 版本 %s
 settings.checkForUpdates.label = 檢查更新
 settings.port.label = WebDAV 埠號 *
 settings.port.prompt = 0 \= 自動選擇
-settings.useipv6.label = 使用 IPv6 literal
 settings.requiresRestartLabel = * Cryptomator 需要更新 
 # tray icon
 tray.menu.open = 打開
@@ -101,3 +100,5 @@ unlock.label.unlockAfterStartup = 啟動時，自動解鎖（實驗中）
 unlock.errorMessage.unlockFailed = Unlock failed. See log file for details.
 unlocked.moreOptions.mount = Mount Drive
 unlocked.moreOptions.unmount = Eject Drive
+upgrade.version5toX.title = Vault Version Upgrade
+upgrade.version5toX.msg = This vault needs to be migrated to a newer format.\nPlease make sure synchronization has finished before proceeding.

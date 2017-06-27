@@ -58,7 +58,6 @@ settings.version.label = Версия %s
 settings.checkForUpdates.label = Проверка обновлений
 settings.port.label = Порт WebDAV *
 settings.port.prompt = 0 \= автовыбор
-settings.useipv6.label = Использование IPv
 settings.requiresRestartLabel = * Требуется перезагрузка Cryptomator
 # tray icon
 tray.menu.open = Открыть
@@ -103,3 +102,5 @@ unlock.label.unlockAfterStartup = Автоблокировка при старт
 unlock.errorMessage.unlockFailed = Ошибка разблокировки. См. подробности в отчёте.
 unlocked.moreOptions.mount = Смонтировать диск
 unlocked.moreOptions.unmount = Извлечь диск
+upgrade.version5toX.title = Vault Version Upgrade
+upgrade.version5toX.msg = This vault needs to be migrated to a newer format.\nPlease make sure synchronization has finished before proceeding.

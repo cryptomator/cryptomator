@@ -56,7 +56,6 @@ settings.version.label = Wersja %s
 settings.checkForUpdates.label = Sprawdzaj aktualizacje
 settings.port.label = Port WebDAV
 settings.port.prompt = 0 \= Automatycznie
-settings.useipv6.label = Użyj IPv6
 settings.requiresRestartLabel = * Cryptomator wymaga restartu
 # tray icon
 tray.menu.open = Otwórz
@@ -101,3 +100,5 @@ unlock.label.unlockAfterStartup = Auto-odblokowywanie podczas uruchamiania (Eksp
 unlock.errorMessage.unlockFailed = Błąd odblokowywania. Szczegóły błędu znajdziesz w logach.
 unlocked.moreOptions.mount = Podłącz dysk
 unlocked.moreOptions.unmount = Odłącz dysk
+upgrade.version5toX.title = Aktualizacja wersji krypty
+upgrade.version5toX.msg = Krypta wymaga aktualizacji do nowszej wersji.\nZanim kontynuujesz, upewnij się, że synchronizacja plików została ukończona.

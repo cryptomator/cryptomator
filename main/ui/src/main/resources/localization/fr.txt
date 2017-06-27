@@ -59,7 +59,6 @@ settings.version.label = Version %s
 settings.checkForUpdates.label = Vérif. des mises à jour
 settings.port.label = Port WebDAV *
 settings.port.prompt = 0 \= Choix automatique
-settings.useipv6.label = Utiliser un litéral IPv6
 settings.requiresRestartLabel = * Redémarrage requis
 # tray icon
 tray.menu.open = Ouvrir
@@ -104,3 +103,5 @@ unlock.label.unlockAfterStartup = Auto-Unlock on Start (Experimental)
 unlock.errorMessage.unlockFailed = Unlock failed. See log file for details.
 unlocked.moreOptions.mount = Mount Drive
 unlocked.moreOptions.unmount = Eject Drive
+upgrade.version5toX.title = Vault Version Upgrade
+upgrade.version5toX.msg = This vault needs to be migrated to a newer format.\nPlease make sure synchronization has finished before proceeding.
