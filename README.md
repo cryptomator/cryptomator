@@ -5,6 +5,7 @@
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/2a0adf3cec6a4143b91035d3924178f1)](https://www.codacy.com/app/cryptomator/cryptomator?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=cryptomator/cryptomator&amp;utm_campaign=Badge_Grade)
 [![Twitter](https://img.shields.io/badge/twitter-@Cryptomator-blue.svg?style=flat)](http://twitter.com/Cryptomator)
 [![POEditor](https://img.shields.io/badge/POEditor-Help%20Translate-blue.svg?style=flat)](https://poeditor.com/join/project/bHwbvJmx0E)
+[![Latest Release](https://img.shields.io/github/release/cryptomator/cryptomator.svg)](https://github.com/cryptomator/cryptomator/releases/latest)
 
 Multi-platform transparent client-side encryption of your files in the cloud.
 
