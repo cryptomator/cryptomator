@@ -63,21 +63,17 @@ public abstract class UpgradeStrategy {
 	 */
 	public void upgrade(Vault vault, CharSequence passphrase) throws UpgradeFailedException {
 		LOG.info("Upgrading {} from {} to {}.", vault.getPath(), vaultVersionBeforeUpgrade, vaultVersionAfterUpgrade);
-		Cryptor cryptor = null;
-		try {
-			final Path masterkeyFile = vault.getPath().resolve(MASTERKEY_FILENAME);
-			final byte[] masterkeyFileContents = Files.readAllBytes(masterkeyFile);
-			cryptor = cryptorProvider.createFromKeyFile(KeyFile.parse(masterkeyFileContents), passphrase, vaultVersionBeforeUpgrade);
+		final Path masterkeyFileBeforeUpgrade = vault.getPath().resolve(MASTERKEY_FILENAME);
+		try (Cryptor cryptor = readMasterkeyFile(masterkeyFileBeforeUpgrade, passphrase)) {
 			// create backup, as soon as we know the password was correct:
-			final Path masterkeyBackupFile = vault.getPath().resolve(MASTERKEY_BACKUP_FILENAME);
-			Files.copy(masterkeyFile, masterkeyBackupFile, StandardCopyOption.REPLACE_EXISTING);
+			Path masterkeyBackupFile = vault.getPath().resolve(MASTERKEY_BACKUP_FILENAME);
+			Files.copy(masterkeyFileBeforeUpgrade, masterkeyBackupFile, StandardCopyOption.REPLACE_EXISTING);
 			LOG.info("Backuped masterkey.");
 			// do stuff:
 			upgrade(vault, cryptor);
 			// write updated masterkey file:
-			final byte[] upgradedMasterkeyFileContents = cryptor.writeKeysToMasterkeyFile(passphrase, vaultVersionAfterUpgrade).serialize();
-			final Path masterkeyFileAfterUpgrade = vault.getPath().resolve(MASTERKEY_FILENAME); // path may have changed
-			Files.write(masterkeyFileAfterUpgrade, upgradedMasterkeyFileContents, StandardOpenOption.TRUNCATE_EXISTING);
+			Path masterkeyFileAfterUpgrade = vault.getPath().resolve(MASTERKEY_FILENAME); // path may have changed
+			writeMasterkeyFile(masterkeyFileAfterUpgrade, cryptor, passphrase);
 			LOG.info("Updated masterkey.");
 		} catch (InvalidPassphraseException e) {
 			throw new UpgradeFailedException(localization.getString("unlock.errorMessage.wrongPassword"));
@@ -92,11 +88,18 @@ public abstract class UpgradeStrategy {
 		} catch (IOException e) {
 			LOG.warn("Upgrade failed.", e);
 			throw new UpgradeFailedException("Upgrade failed. Details in log message.");
-		} finally {
-			if (cryptor != null) {
-				cryptor.destroy();
-			}
 		}
+	}
+
+	protected Cryptor readMasterkeyFile(Path masterkeyFile, CharSequence passphrase) throws UnsupportedVaultFormatException, InvalidPassphraseException, IOException {
+		byte[] fileContents = Files.readAllBytes(masterkeyFile);
+		KeyFile keyFile = KeyFile.parse(fileContents);
+		return cryptorProvider.createFromKeyFile(keyFile, passphrase, vaultVersionBeforeUpgrade);
+	}
+
+	protected void writeMasterkeyFile(Path masterkeyFile, Cryptor cryptor, CharSequence passphrase) throws IOException {
+		byte[] fileContents = cryptor.writeKeysToMasterkeyFile(passphrase, vaultVersionAfterUpgrade).serialize();
+		Files.write(masterkeyFile, fileContents, StandardOpenOption.TRUNCATE_EXISTING);
 	}
 
 	protected abstract void upgrade(Vault vault, Cryptor cryptor) throws UpgradeFailedException;

@@ -30,7 +30,6 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 		writeVaultSettingsArray(out, value.getDirectories());
 		out.name("checkForUpdatesEnabled").value(value.checkForUpdates().get());
 		out.name("port").value(value.port().get());
-		out.name("useIpv6").value(value.useIpv6().get());
 		out.name("numTrayNotifications").value(value.numTrayNotifications().get());
 		out.name("preferredGvfsScheme").value(value.preferredGvfsScheme().get());
 		out.name("debugMode").value(value.debugMode().get());
@@ -61,12 +60,6 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 				break;
 			case "port":
 				settings.port().set(in.nextInt());
-				break;
-			case "useIpv6":
-				// Temporarily we will disable loading this setting, as we want the default value on each app start.
-				// This setting might be removed completely in the future
-				// settings.useIpv6().set(in.nextBoolean());
-				in.skipValue();
 				break;
 			case "numTrayNotifications":
 				settings.numTrayNotifications().set(in.nextInt());

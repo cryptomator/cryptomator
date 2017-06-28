@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright (c) 2014, 2017 Sebastian Stenzel
- * This file is licensed under the terms of the MIT license.
- * See the LICENSE.txt file for more info.
+ * All rights reserved.
+ * This program and the accompanying materials are made available under the terms of the accompanying LICENSE file.
  * 
  * Contributors:
  *     Sebastian Stenzel - initial API and implementation
@@ -59,12 +59,6 @@ public class SettingsController implements ViewController {
 	private Button changePortButton;
 
 	@FXML
-	private Label useIpv6Label;
-
-	@FXML
-	private CheckBox useIpv6Checkbox;
-
-	@FXML
 	private Label versionLabel;
 
 	@FXML
@@ -87,9 +81,6 @@ public class SettingsController implements ViewController {
 		portField.addEventFilter(KeyEvent.KEY_TYPED, this::filterNumericKeyEvents);
 		changePortButton.visibleProperty().bind(settings.port().asString().isNotEqualTo(portField.textProperty()));
 		changePortButton.disableProperty().bind(Bindings.createBooleanBinding(this::isPortValid, portField.textProperty()).not());
-		useIpv6Label.setVisible(SystemUtils.IS_OS_WINDOWS);
-		useIpv6Checkbox.setVisible(SystemUtils.IS_OS_WINDOWS);
-		useIpv6Checkbox.setSelected(SystemUtils.IS_OS_WINDOWS && settings.useIpv6().get());
 		versionLabel.setText(String.format(localization.getString("settings.version.label"), applicationVersion.orElse("SNAPSHOT")));
 		prefGvfsSchemeLabel.setVisible(SystemUtils.IS_OS_LINUX);
 		prefGvfsScheme.setVisible(SystemUtils.IS_OS_LINUX);
@@ -99,7 +90,6 @@ public class SettingsController implements ViewController {
 		debugModeCheckbox.setSelected(settings.debugMode().get());
 
 		settings.checkForUpdates().bind(checkForUpdatesCheckbox.selectedProperty());
-		settings.useIpv6().bind(useIpv6Checkbox.selectedProperty());
 		settings.preferredGvfsScheme().bind(prefGvfsScheme.valueProperty());
 		settings.debugMode().bind(debugModeCheckbox.selectedProperty());
 	}

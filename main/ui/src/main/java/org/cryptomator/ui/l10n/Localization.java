@@ -22,10 +22,11 @@ import java.util.ResourceBundle;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.Sets;
 
 @Singleton
 public class Localization extends ResourceBundle {
@@ -88,7 +89,7 @@ public class Localization extends ResourceBundle {
 
 	@Override
 	public Enumeration<String> getKeys() {
-		Collection<String> keys = CollectionUtils.union(localized.keySet(), fallback.keySet());
+		Collection<String> keys = Sets.union(localized.keySet(), fallback.keySet());
 		return Collections.enumeration(keys);
 	}
 

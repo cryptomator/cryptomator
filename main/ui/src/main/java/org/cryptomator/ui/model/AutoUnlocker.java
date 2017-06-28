@@ -5,6 +5,7 @@
  *******************************************************************************/
 package org.cryptomator.ui.model;
 
+import java.io.IOException;
 import java.nio.CharBuffer;
 import java.util.Arrays;
 import java.util.Collection;
@@ -74,7 +75,7 @@ public class AutoUnlocker {
 		try {
 			vault.unlock(CharBuffer.wrap(storedPw));
 			mountSilently(vault);
-		} catch (CryptoException e) {
+		} catch (IOException | CryptoException e) {
 			LOG.error("Auto unlock failed.", e);
 		} finally {
 			Arrays.fill(storedPw, ' ');

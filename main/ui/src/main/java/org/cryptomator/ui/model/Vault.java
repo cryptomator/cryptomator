@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright (c) 2016, 2017 Sebastian Stenzel and others.
- * This file is licensed under the terms of the MIT license.
- * See the LICENSE.txt file for more info.
+ * All rights reserved.
+ * This program and the accompanying materials are made available under the terms of the accompanying LICENSE file.
  *
  * Contributors:
  *     Sebastian Stenzel - initial API and implementation
@@ -14,12 +14,13 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.EnumSet;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 import javax.inject.Inject;
 
@@ -31,7 +32,6 @@ import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.cryptofs.CryptoFileSystem;
 import org.cryptomator.cryptofs.CryptoFileSystemProperties;
-import org.cryptomator.cryptofs.CryptoFileSystemProperties.FileSystemFlags;
 import org.cryptomator.cryptofs.CryptoFileSystemProvider;
 import org.cryptomator.cryptolib.api.CryptoException;
 import org.cryptomator.cryptolib.api.InvalidPassphraseException;
@@ -50,24 +50,29 @@ import org.slf4j.LoggerFactory;
 import javafx.application.Platform;
 import javafx.beans.Observable;
 import javafx.beans.binding.Binding;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 
 @PerVault
 public class Vault {
 
+	public static final Predicate<Vault> NOT_LOCKED = hasState(State.LOCKED).negate();
 	private static final Logger LOG = LoggerFactory.getLogger(Vault.class);
 	private static final String MASTERKEY_FILENAME = "masterkey.cryptomator";
 
 	private final Settings settings;
 	private final VaultSettings vaultSettings;
 	private final WebDavServer server;
-	private final BooleanProperty unlocked = new SimpleBooleanProperty();
-	private final BooleanProperty mounted = new SimpleBooleanProperty();
 	private final AtomicReference<CryptoFileSystem> cryptoFileSystem = new AtomicReference<>();
+	private final ObjectProperty<State> state = new SimpleObjectProperty<State>(State.LOCKED);
 
 	private WebDavServletController servlet;
 	private Mount mount;
+
+	public enum State {
+		LOCKED, UNLOCKED, MOUNTING, MOUNTED, UNMOUNTING
+	};
 
 	@Inject
 	Vault(Settings settings, VaultSettings vaultSettings, WebDavServer server) {
@@ -80,14 +85,14 @@ public class Vault {
 	// Commands
 	// ********************************************************************************/
 
-	private CryptoFileSystem getCryptoFileSystem(CharSequence passphrase) throws IOException, CryptoException {
+	private CryptoFileSystem getCryptoFileSystem(CharSequence passphrase) throws NoSuchFileException, IOException, InvalidPassphraseException, CryptoException {
 		return LazyInitializer.initializeLazily(cryptoFileSystem, () -> unlockCryptoFileSystem(passphrase), IOException.class);
 	}
 
-	private CryptoFileSystem unlockCryptoFileSystem(CharSequence passphrase) throws IOException, CryptoException {
+	private CryptoFileSystem unlockCryptoFileSystem(CharSequence passphrase) throws NoSuchFileException, IOException, InvalidPassphraseException, CryptoException {
 		CryptoFileSystemProperties fsProps = CryptoFileSystemProperties.cryptoFileSystemProperties() //
 				.withPassphrase(passphrase) //
-				.withFlags(EnumSet.noneOf(FileSystemFlags.class)) // TODO: use withFlags() with CryptoFS 1.3.1
+				.withFlags() //
 				.withMasterkeyFilename(MASTERKEY_FILENAME) //
 				.build();
 		return CryptoFileSystemProvider.newFileSystem(getPath(), fsProps);
@@ -112,20 +117,16 @@ public class Vault {
 		CryptoFileSystemProvider.changePassphrase(getPath(), MASTERKEY_FILENAME, oldPassphrase, newPassphrase);
 	}
 
-	public synchronized void unlock(CharSequence passphrase) throws ServerLifecycleException {
-		try {
-			FileSystem fs = getCryptoFileSystem(passphrase);
-			if (!server.isRunning()) {
-				server.start();
-			}
-			servlet = server.createWebDavServlet(fs.getPath("/"), vaultSettings.getId() + "/" + vaultSettings.mountName().get());
-			servlet.start();
-			Platform.runLater(() -> {
-				unlocked.set(true);
-			});
-		} catch (IOException e) {
-			LOG.error("Unable to provide filesystem", e);
+	public synchronized void unlock(CharSequence passphrase) throws ServerLifecycleException, CryptoException, IOException {
+		FileSystem fs = getCryptoFileSystem(passphrase);
+		if (!server.isRunning()) {
+			server.start();
 		}
+		servlet = server.createWebDavServlet(fs.getPath("/"), vaultSettings.getId() + "/" + vaultSettings.mountName().get());
+		servlet.start();
+		Platform.runLater(() -> {
+			state.set(State.UNLOCKED);
+		});
 	}
 
 	public synchronized void mount() throws CommandFailedException {
@@ -138,9 +139,12 @@ public class Vault {
 				.withPreferredGvfsScheme(settings.preferredGvfsScheme().get()) //
 				.build();
 
-		mount = servlet.mount(mountParams);
 		Platform.runLater(() -> {
-			mounted.set(true);
+			state.set(State.MOUNTING);
+		});
+		mount = servlet.mount(mountParams); // might block this thread for a while
+		Platform.runLater(() -> {
+			state.set(State.MOUNTED);
 		});
 	}
 
@@ -153,11 +157,15 @@ public class Vault {
 	}
 
 	private synchronized void unmount(Function<Mount, ? extends UnmountOperation> unmountOperationChooser) throws CommandFailedException {
+		Platform.runLater(() -> {
+			state.set(State.UNMOUNTING);
+		});
 		if (mount != null) {
 			unmountOperationChooser.apply(mount).unmount();
+			mount = null;
 		}
 		Platform.runLater(() -> {
-			mounted.set(false);
+			state.set(State.UNLOCKED);
 		});
 	}
 
@@ -174,7 +182,7 @@ public class Vault {
 			fs.close();
 		}
 		Platform.runLater(() -> {
-			unlocked.set(false);
+			state.set(State.LOCKED);
 		});
 	}
 
@@ -212,8 +220,22 @@ public class Vault {
 	// Getter/Setter
 	// *******************************************************************************/
 
+	public State getState() {
+		return state.get();
+	}
+
+	public ReadOnlyObjectProperty<State> stateProperty() {
+		return state;
+	}
+
+	public static Predicate<Vault> hasState(State state) {
+		return vault -> {
+			return vault.getState() == state;
+		};
+	}
+
 	public Observable[] observables() {
-		return new Observable[] {unlocked, mounted};
+		return new Observable[] {state};
 	}
 
 	public VaultSettings getVaultSettings() {
@@ -254,22 +276,6 @@ public class Vault {
 
 	public boolean isValidVaultDirectory() {
 		return CryptoFileSystemProvider.containsVault(getPath(), MASTERKEY_FILENAME);
-	}
-
-	public BooleanProperty unlockedProperty() {
-		return unlocked;
-	}
-
-	public BooleanProperty mountedProperty() {
-		return mounted;
-	}
-
-	public boolean isUnlocked() {
-		return unlocked.get();
-	}
-
-	public boolean isMounted() {
-		return mounted.get();
 	}
 
 	public long pollBytesRead() {

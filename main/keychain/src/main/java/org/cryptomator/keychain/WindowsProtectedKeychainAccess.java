@@ -1,3 +1,8 @@
+/*******************************************************************************
+ * Copyright (c) 2017 Skymatic UG (haftungsbeschränkt).
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the accompanying LICENSE file.
+ *******************************************************************************/
 package org.cryptomator.keychain;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -13,7 +18,6 @@ import java.io.Writer;
 import java.lang.reflect.Type;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
@@ -27,13 +31,13 @@ import java.util.UUID;
 
 import javax.inject.Inject;
 
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.jni.WinDataProtection;
 import org.cryptomator.jni.WinFunctions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.io.BaseEncoding;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializationContext;
@@ -174,16 +178,16 @@ class WindowsProtectedKeychainAccess implements KeychainAccessStrategy {
 
 	private static class ByteArrayJsonAdapter implements JsonSerializer<byte[]>, JsonDeserializer<byte[]> {
 
-		private static final Base64 BASE64 = new Base64();
+		private static final BaseEncoding BASE64 = BaseEncoding.base64();
 
 		@Override
 		public byte[] deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-			return BASE64.decode(json.getAsString().getBytes(StandardCharsets.UTF_8));
+			return BASE64.decode(json.getAsString());
 		}
 
 		@Override
 		public JsonElement serialize(byte[] src, Type typeOfSrc, JsonSerializationContext context) {
-			return new JsonPrimitive(new String(BASE64.encode(src), StandardCharsets.UTF_8));
+			return new JsonPrimitive(BASE64.encode(src));
 		}
 
 	}

@@ -1,7 +1,7 @@
 /*******************************************************************************
- * Copyright (c) 2014, 2016 Sebastian Stenzel
- * This file is licensed under the terms of the MIT license.
- * See the LICENSE.txt file for more info.
+ * Copyright (c) 2014, 2017 Sebastian Stenzel
+ * All rights reserved.
+ * This program and the accompanying materials are made available under the terms of the accompanying LICENSE file.
  * 
  * Contributors:
  *     Sebastian Stenzel - initial API and implementation
@@ -9,8 +9,6 @@
 package org.cryptomator.common.settings;
 
 import java.util.function.Consumer;
-
-import org.apache.commons.lang3.SystemUtils;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
@@ -29,7 +27,6 @@ public class Settings {
 	public static final int MAX_PORT = 65535;
 	public static final boolean DEFAULT_CHECK_FOR_UDPATES = true;
 	public static final int DEFAULT_PORT = 42427;
-	public static final boolean DEFAULT_USE_IPV6 = SystemUtils.IS_OS_WINDOWS;
 	public static final int DEFAULT_NUM_TRAY_NOTIFICATIONS = 3;
 	public static final String DEFAULT_GVFS_SCHEME = "dav";
 	public static final boolean DEFAULT_DEBUG_MODE = false;
@@ -37,7 +34,6 @@ public class Settings {
 	private final ObservableList<VaultSettings> directories = FXCollections.observableArrayList(VaultSettings::observables);
 	private final BooleanProperty checkForUpdates = new SimpleBooleanProperty(DEFAULT_CHECK_FOR_UDPATES);
 	private final IntegerProperty port = new SimpleIntegerProperty(DEFAULT_PORT);
-	private final BooleanProperty useIpv6 = new SimpleBooleanProperty(DEFAULT_USE_IPV6);
 	private final IntegerProperty numTrayNotifications = new SimpleIntegerProperty(DEFAULT_NUM_TRAY_NOTIFICATIONS);
 	private final StringProperty preferredGvfsScheme = new SimpleStringProperty(DEFAULT_GVFS_SCHEME);
 	private final BooleanProperty debugMode = new SimpleBooleanProperty(DEFAULT_DEBUG_MODE);
@@ -50,7 +46,6 @@ public class Settings {
 		directories.addListener((ListChangeListener.Change<? extends VaultSettings> change) -> this.save());
 		checkForUpdates.addListener(this::somethingChanged);
 		port.addListener(this::somethingChanged);
-		useIpv6.addListener(this::somethingChanged);
 		numTrayNotifications.addListener(this::somethingChanged);
 		preferredGvfsScheme.addListener(this::somethingChanged);
 		debugMode.addListener(this::somethingChanged);
@@ -82,10 +77,6 @@ public class Settings {
 
 	public IntegerProperty port() {
 		return port;
-	}
-
-	public BooleanProperty useIpv6() {
-		return useIpv6;
 	}
 
 	public IntegerProperty numTrayNotifications() {

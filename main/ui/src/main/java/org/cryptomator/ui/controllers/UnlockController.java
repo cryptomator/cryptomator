@@ -1,13 +1,14 @@
 /*******************************************************************************
  * Copyright (c) 2014, 2017 Sebastian Stenzel
- * This file is licensed under the terms of the MIT license.
- * See the LICENSE.txt file for more info.
+ * All rights reserved.
+ * This program and the accompanying materials are made available under the terms of the accompanying LICENSE file.
  * 
  * Contributors:
  *     Sebastian Stenzel - initial API and implementation
  ******************************************************************************/
 package org.cryptomator.ui.controllers;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Objects;
@@ -370,6 +371,9 @@ public class UnlockController implements ViewController {
 				messageText.setText(localization.getString("unlock.errorMessage.unauthenticVersionMac"));
 			}
 		}).onError(ServerLifecycleException.class, e -> {
+			LOG.error("Unlock failed for technical reasons.", e);
+			messageText.setText(localization.getString("unlock.errorMessage.unlockFailed"));
+		}).onError(IOException.class, e -> {
 			LOG.error("Unlock failed for technical reasons.", e);
 			messageText.setText(localization.getString("unlock.errorMessage.unlockFailed"));
 		}).andFinally(() -> {

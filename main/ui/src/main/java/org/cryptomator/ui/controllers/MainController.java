@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright (c) 2014, 2017 Sebastian Stenzel
- * This file is licensed under the terms of the MIT license.
- * See the LICENSE.txt file for more info.
+ * All rights reserved.
+ * This program and the accompanying materials are made available under the terms of the accompanying LICENSE file.
  * 
  * Contributors:
  *     Sebastian Stenzel - initial API and implementation
@@ -50,6 +50,7 @@ import javafx.beans.binding.Binding;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.BooleanExpression;
+import javafx.beans.binding.ObjectExpression;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
@@ -92,9 +93,9 @@ public class MainController implements ViewController {
 	private final ObservableList<Vault> vaults;
 	private final BooleanBinding areAllVaultsLocked;
 	private final ObjectProperty<Vault> selectedVault = new SimpleObjectProperty<>();
-	private final BooleanExpression isSelectedVaultUnlocked = BooleanExpression.booleanExpression(EasyBind.select(selectedVault).selectObject(Vault::unlockedProperty).orElse(false));
+	private final ObjectExpression<Vault.State> selectedVaultState = ObjectExpression.objectExpression(EasyBind.select(selectedVault).selectObject(Vault::stateProperty));
 	private final BooleanExpression isSelectedVaultValid = BooleanExpression.booleanExpression(EasyBind.monadic(selectedVault).map(Vault::isValidVaultDirectory).orElse(false));
-	private final BooleanExpression canEditSelectedVault = selectedVault.isNotNull().and(isSelectedVaultUnlocked.not());
+	private final BooleanExpression canEditSelectedVault = selectedVaultState.isEqualTo(Vault.State.LOCKED);
 	private final MonadicBinding<UpgradeStrategy> upgradeStrategyForSelectedVault;
 	private final BooleanBinding isShowingSettings;
 	private final Map<Vault, UnlockedController> unlockedVaults = new HashMap<>();
@@ -116,7 +117,7 @@ public class MainController implements ViewController {
 		// derived bindings:
 		this.isShowingSettings = Bindings.equal(SettingsController.class, EasyBind.monadic(activeController).map(ViewController::getClass));
 		this.upgradeStrategyForSelectedVault = EasyBind.monadic(selectedVault).map(upgradeStrategies::getUpgradeStrategy);
-		this.areAllVaultsLocked = Bindings.isEmpty(FXCollections.observableList(vaults, Vault::observables).filtered(Vault::isUnlocked));
+		this.areAllVaultsLocked = Bindings.isEmpty(FXCollections.observableList(vaults, Vault::observables).filtered(Vault.NOT_LOCKED));
 
 		EasyBind.subscribe(areAllVaultsLocked, Platform::setImplicitExit);
 		autoUnlocker.unlockAllSilently();
@@ -201,7 +202,7 @@ public class MainController implements ViewController {
 	}
 
 	private void gracefulShutdown() {
-		vaults.filtered(Vault::isUnlocked).forEach(Vault::prepareForShutdown);
+		vaults.filtered(Vault.NOT_LOCKED).forEach(Vault::prepareForShutdown);
 		Platform.runLater(Platform::exit);
 	}
 
@@ -361,7 +362,7 @@ public class MainController implements ViewController {
 		if (newValue == null) {
 			return;
 		}
-		if (newValue.isUnlocked()) {
+		if (newValue.getState() != Vault.State.LOCKED) {
 			this.showUnlockedView(newValue);
 		} else if (!newValue.doesVaultDirectoryExist()) {
 			this.showNotFoundView();

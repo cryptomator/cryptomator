@@ -67,4 +67,4 @@ Help us keep Cryptomator open and inclusive. Please read and follow our [Code of
 
 ## License
 
-Distributed under the MIT X Consortium license. See the `LICENSES/MIT-X-Consortium-License.txt` file for more info.
+This project is dual-licensed under the GPLv3 for FOSS projects as well as a commercial license for independent software vendors and resellers. If you want to modify this application under different conditions, feel free to contact our support team.

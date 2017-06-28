@@ -1,3 +1,8 @@
+/*******************************************************************************
+ * Copyright (c) 2017 Skymatic UG (haftungsbeschränkt).
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the accompanying LICENSE file.
+ *******************************************************************************/
 package org.cryptomator.common;
 
 import java.util.concurrent.atomic.AtomicReference;
@@ -43,7 +48,7 @@ public final class LazyInitializer {
 			try {
 				return reference.updateAndGet(invokeFactoryIfNull(factory));
 			} catch (InitializationException e) {
-				Throwables.throwIfUnchecked(e);
+				Throwables.throwIfUnchecked(e.getCause());
 				Throwables.throwIfInstanceOf(e.getCause(), exceptionType);
 				throw e;
 			}
@@ -56,7 +61,6 @@ public final class LazyInitializer {
 				try {
 					return factory.get();
 				} catch (Exception e) {
-					Throwables.throwIfUnchecked(e); // don't catch unchecked exceptions
 					throw new InitializationException(e);
 				}
 			} else {
