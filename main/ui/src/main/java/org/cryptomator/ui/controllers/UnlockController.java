@@ -8,6 +8,7 @@
  ******************************************************************************/
 package org.cryptomator.ui.controllers;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Objects;
@@ -370,6 +371,9 @@ public class UnlockController implements ViewController {
 				messageText.setText(localization.getString("unlock.errorMessage.unauthenticVersionMac"));
 			}
 		}).onError(ServerLifecycleException.class, e -> {
+			LOG.error("Unlock failed for technical reasons.", e);
+			messageText.setText(localization.getString("unlock.errorMessage.unlockFailed"));
+		}).onError(IOException.class, e -> {
 			LOG.error("Unlock failed for technical reasons.", e);
 			messageText.setText(localization.getString("unlock.errorMessage.unlockFailed"));
 		}).andFinally(() -> {

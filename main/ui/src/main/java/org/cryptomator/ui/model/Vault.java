@@ -14,6 +14,7 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
@@ -84,11 +85,11 @@ public class Vault {
 	// Commands
 	// ********************************************************************************/
 
-	private CryptoFileSystem getCryptoFileSystem(CharSequence passphrase) throws IOException, InvalidPassphraseException, CryptoException {
+	private CryptoFileSystem getCryptoFileSystem(CharSequence passphrase) throws NoSuchFileException, IOException, InvalidPassphraseException, CryptoException {
 		return LazyInitializer.initializeLazily(cryptoFileSystem, () -> unlockCryptoFileSystem(passphrase), IOException.class);
 	}
 
-	private CryptoFileSystem unlockCryptoFileSystem(CharSequence passphrase) throws IOException, InvalidPassphraseException, CryptoException {
+	private CryptoFileSystem unlockCryptoFileSystem(CharSequence passphrase) throws NoSuchFileException, IOException, InvalidPassphraseException, CryptoException {
 		CryptoFileSystemProperties fsProps = CryptoFileSystemProperties.cryptoFileSystemProperties() //
 				.withPassphrase(passphrase) //
 				.withFlags() //
@@ -116,20 +117,16 @@ public class Vault {
 		CryptoFileSystemProvider.changePassphrase(getPath(), MASTERKEY_FILENAME, oldPassphrase, newPassphrase);
 	}
 
-	public synchronized void unlock(CharSequence passphrase) throws InvalidPassphraseException, ServerLifecycleException {
-		try {
-			FileSystem fs = getCryptoFileSystem(passphrase);
-			if (!server.isRunning()) {
-				server.start();
-			}
-			servlet = server.createWebDavServlet(fs.getPath("/"), vaultSettings.getId() + "/" + vaultSettings.mountName().get());
-			servlet.start();
-			Platform.runLater(() -> {
-				state.set(State.UNLOCKED);
-			});
-		} catch (IOException e) {
-			LOG.error("Unable to provide filesystem", e);
+	public synchronized void unlock(CharSequence passphrase) throws ServerLifecycleException, CryptoException, IOException {
+		FileSystem fs = getCryptoFileSystem(passphrase);
+		if (!server.isRunning()) {
+			server.start();
 		}
+		servlet = server.createWebDavServlet(fs.getPath("/"), vaultSettings.getId() + "/" + vaultSettings.mountName().get());
+		servlet.start();
+		Platform.runLater(() -> {
+			state.set(State.UNLOCKED);
+		});
 	}
 
 	public synchronized void mount() throws CommandFailedException {

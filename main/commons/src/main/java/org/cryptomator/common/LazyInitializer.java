@@ -48,7 +48,7 @@ public final class LazyInitializer {
 			try {
 				return reference.updateAndGet(invokeFactoryIfNull(factory));
 			} catch (InitializationException e) {
-				Throwables.throwIfUnchecked(e);
+				Throwables.throwIfUnchecked(e.getCause());
 				Throwables.throwIfInstanceOf(e.getCause(), exceptionType);
 				throw e;
 			}
@@ -61,7 +61,6 @@ public final class LazyInitializer {
 				try {
 					return factory.get();
 				} catch (Exception e) {
-					Throwables.throwIfUnchecked(e); // don't catch unchecked exceptions
 					throw new InitializationException(e);
 				}
 			} else {
