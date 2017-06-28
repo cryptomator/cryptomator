@@ -10,8 +10,6 @@ package org.cryptomator.common.settings;
 
 import java.util.function.Consumer;
 
-import org.apache.commons.lang3.SystemUtils;
-
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleBooleanProperty;
