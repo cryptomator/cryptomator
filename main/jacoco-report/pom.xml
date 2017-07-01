@@ -35,7 +35,7 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		
+
 		<!-- binary dependency used during build -->
 		<dependency>
 			<groupId>com.codacy</groupId>
