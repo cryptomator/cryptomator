@@ -15,7 +15,6 @@ import java.util.Objects;
 import java.util.Optional;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 import org.cryptomator.cryptolib.api.InvalidPassphraseException;
 import org.cryptomator.cryptolib.api.UnsupportedVaultFormatException;
@@ -42,7 +41,6 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Region;
 import javafx.scene.text.Text;
 
-@Singleton
 public class ChangePasswordController implements ViewController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ChangePasswordController.class);
@@ -123,9 +121,6 @@ public class ChangePasswordController implements ViewController {
 
 	void setVault(Vault vault) {
 		this.vault = Objects.requireNonNull(vault);
-		oldPasswordField.swipe();
-		newPasswordField.swipe();
-		retypePasswordField.swipe();
 		// trigger "default" change to refresh key bindings:
 		changePasswordButton.setDefaultButton(false);
 		changePasswordButton.setDefaultButton(true);
