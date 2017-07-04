@@ -16,7 +16,6 @@ import java.util.Objects;
 import java.util.Optional;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 import org.cryptomator.ui.controls.SecPasswordField;
 import org.cryptomator.ui.l10n.Localization;
@@ -28,8 +27,8 @@ import org.slf4j.LoggerFactory;
 
 import javafx.application.Platform;
 import javafx.beans.binding.BooleanBinding;
-import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
@@ -38,14 +37,13 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Region;
 
-@Singleton
 public class InitializeController implements ViewController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(InitializeController.class);
 
 	private final Localization localization;
 	private final PasswordStrengthUtil strengthRater;
-	private final IntegerProperty passwordStrength = new SimpleIntegerProperty(); // 0-4
+	private ObservableValue<Integer> passwordStrength; // 0-4
 	private Optional<InitializationListener> listener = Optional.empty();
 	private Vault vault;
 
@@ -93,7 +91,7 @@ public class InitializeController implements ViewController {
 		BooleanBinding passwordIsEmpty = passwordField.textProperty().isEmpty();
 		BooleanBinding passwordsDiffer = passwordField.textProperty().isNotEqualTo(retypePasswordField.textProperty());
 		okButton.disableProperty().bind(passwordIsEmpty.or(passwordsDiffer));
-		passwordStrength.bind(EasyBind.map(passwordField.textProperty(), strengthRater::computeRate));
+		passwordStrength = EasyBind.map(passwordField.textProperty(), strengthRater::computeRate);
 
 		passwordStrengthLevel0.backgroundProperty().bind(EasyBind.combine(passwordStrength, new SimpleIntegerProperty(0), strengthRater::getBackgroundWithStrengthColor));
 		passwordStrengthLevel1.backgroundProperty().bind(EasyBind.combine(passwordStrength, new SimpleIntegerProperty(1), strengthRater::getBackgroundWithStrengthColor));
@@ -110,8 +108,6 @@ public class InitializeController implements ViewController {
 
 	void setVault(Vault vault) {
 		this.vault = Objects.requireNonNull(vault);
-		passwordField.swipe();
-		retypePasswordField.swipe();
 		// trigger "default" change to refresh key bindings:
 		okButton.setDefaultButton(false);
 		okButton.setDefaultButton(true);
