@@ -167,7 +167,6 @@ public class UnlockController implements ViewController {
 		}
 		assert vault != null;
 		this.vault = vault;
-		passwordField.swipe();
 		advancedOptions.setVisible(false);
 		advancedOptionsButton.setText(localization.getString("unlock.button.advancedOptions.show"));
 		progressIndicator.setVisible(false);
