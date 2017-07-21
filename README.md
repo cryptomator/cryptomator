@@ -6,6 +6,7 @@
 [![Twitter](https://img.shields.io/badge/twitter-@Cryptomator-blue.svg?style=flat)](http://twitter.com/Cryptomator)
 [![POEditor](https://img.shields.io/badge/POEditor-Help%20Translate-blue.svg?style=flat)](https://poeditor.com/join/project/bHwbvJmx0E)
 [![Latest Release](https://img.shields.io/github/release/cryptomator/cryptomator.svg)](https://github.com/cryptomator/cryptomator/releases/latest)
+[![Community](https://img.shields.io/badge/help-Community-orange.svg)](https://community.cryptomator.org)
 
 Multi-platform transparent client-side encryption of your files in the cloud.
 
@@ -57,14 +58,6 @@ mvn clean install -Prelease
 ```
 
 An executable jar file will be created inside `main/uber-jar/target`.
-
-## Contributing to Cryptomator
-
-Please read our [contribution guide](https://github.com/cryptomator/cryptomator/blob/master/CONTRIBUTING.md), if you would like to report a bug, ask a question or help us with coding.
-
-## Code of Conduct
-
-Help us keep Cryptomator open and inclusive. Please read and follow our [Code of Conduct](https://github.com/cryptomator/cryptomator/blob/master/CODE_OF_CONDUCT.md).
 
 ## License
 
