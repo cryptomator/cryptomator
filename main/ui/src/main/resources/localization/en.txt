@@ -83,7 +83,7 @@ unlock.messageLabel.startServerFailed=Starting WebDAV server failed.
 
 # change_password.fxml
 changePassword.label.oldPassword=Old Password
-changePassword.label.newPassword=New Nassword
+changePassword.label.newPassword=New Password
 changePassword.label.retypePassword=Retype Password
 changePassword.label.downloadsPageLink=All Cryptomator versions
 changePassword.button.change=Change Password
