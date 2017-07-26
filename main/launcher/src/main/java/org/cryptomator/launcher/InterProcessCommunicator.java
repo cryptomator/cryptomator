@@ -17,6 +17,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.rmi.ConnectException;
+import java.rmi.ConnectIOException;
 import java.rmi.NotBoundException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
@@ -62,8 +63,8 @@ abstract class InterProcessCommunicator implements InterProcessCommunicationProt
 			ClientCommunicator client = new ClientCommunicator(port);
 			LOG.trace("Connected to running process.");
 			return client;
-		} catch (ConnectException | NotBoundException e) {
-			LOG.debug("Did not find running process.");
+		} catch (ConnectException | ConnectIOException | NotBoundException e) {
+			LOG.debug("Could not connect to running process.");
 			// continue
 		}
 
