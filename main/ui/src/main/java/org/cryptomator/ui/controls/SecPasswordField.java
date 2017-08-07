@@ -11,6 +11,9 @@ package org.cryptomator.ui.controls;
 import java.util.Arrays;
 
 import javafx.scene.control.PasswordField;
+import javafx.scene.input.DragEvent;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.TransferMode;
 
 /**
  * Compromise in security. While the text can be swiped, any access to the {@link #getText()} method will create a copy of the String in the heap.
@@ -18,6 +21,27 @@ import javafx.scene.control.PasswordField;
 public class SecPasswordField extends PasswordField {
 
 	private static final char SWIPE_CHAR = ' ';
+
+	public SecPasswordField() {
+		this.onDragOverProperty().set(this::handleDragOver);
+		this.onDragDroppedProperty().set(this::handleDragDropped);
+	}
+
+	private void handleDragOver(DragEvent event) {
+		Dragboard dragboard = event.getDragboard();
+		if (dragboard.hasString() && dragboard.getString() != null) {
+			event.acceptTransferModes(TransferMode.COPY);
+		}
+		event.consume();
+	}
+
+	private void handleDragDropped(DragEvent event) {
+		Dragboard dragboard = event.getDragboard();
+		if (dragboard.hasString() && dragboard.getString() != null) {
+			insertText(getCaretPosition(), dragboard.getString());
+		}
+		event.consume();
+	}
 
 	/**
 	 * {@link #getContent()} uses a StringBuilder, which in turn is backed by a char[].
