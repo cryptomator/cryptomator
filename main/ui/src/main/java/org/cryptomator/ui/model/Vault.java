@@ -9,6 +9,8 @@
 package org.cryptomator.ui.model;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.FileAlreadyExistsException;
@@ -60,6 +62,7 @@ public class Vault {
 	public static final Predicate<Vault> NOT_LOCKED = hasState(State.LOCKED).negate();
 	private static final Logger LOG = LoggerFactory.getLogger(Vault.class);
 	private static final String MASTERKEY_FILENAME = "masterkey.cryptomator";
+	private static final String LOCALHOST_ALIAS = "cryptomator-vault";
 
 	private final Settings settings;
 	private final VaultSettings vaultSettings;
@@ -137,6 +140,7 @@ public class Vault {
 		MountParams mountParams = MountParams.create() //
 				.withWindowsDriveLetter(vaultSettings.winDriveLetter().get()) //
 				.withPreferredGvfsScheme(settings.preferredGvfsScheme().get()) //
+				.withWebdavHostname(getLocalhostAliasOrNull()) //
 				.build();
 
 		Platform.runLater(() -> {
@@ -146,6 +150,19 @@ public class Vault {
 		Platform.runLater(() -> {
 			state.set(State.MOUNTED);
 		});
+	}
+
+	private String getLocalhostAliasOrNull() {
+		try {
+			InetAddress alias = InetAddress.getByName(LOCALHOST_ALIAS);
+			if (alias.getHostAddress().equals("127.0.0.1")) {
+				return LOCALHOST_ALIAS;
+			} else {
+				return null;
+			}
+		} catch (UnknownHostException e) {
+			return null;
+		}
 	}
 
 	public synchronized void unmount() throws CommandFailedException {
