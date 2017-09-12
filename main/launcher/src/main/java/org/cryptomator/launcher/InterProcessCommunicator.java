@@ -80,7 +80,7 @@ abstract class InterProcessCommunicator implements InterProcessCommunicationProt
 		final String settingsPathProperty = System.getProperty("cryptomator.ipcPortPath");
 		if (settingsPathProperty == null) {
 			LOG.warn("System property cryptomator.ipcPortPath not set.");
-			return Paths.get("ipcPort.tmp");
+			return Paths.get(".ipcPort.tmp");
 		} else {
 			return Paths.get(replaceHomeDir(settingsPathProperty));
 		}
