@@ -121,7 +121,7 @@ class UpgradeVersion3to4 extends UpgradeStrategy {
 		if (m.find(0)) {
 			String base32 = m.group(1);
 			String suffix = name.substring(m.end());
-			String renamed = NEW_FOLDER_PREFIX + base32 + StringUtils.prependIfMissing(suffix, " ");
+			String renamed = NEW_FOLDER_PREFIX + base32 + suffix;
 			renameWithoutOverwriting(file, renamed);
 		}
 	}
@@ -163,7 +163,8 @@ class UpgradeVersion3to4 extends UpgradeStrategy {
 				Files.move(path, newPath);
 				Files.createDirectories(newMetadataFile.getParent());
 				Files.write(newMetadataFile, newLongName.getBytes(UTF_8));
-				LOG.info("Renaming {} to {}\nCreating {}", path, newName, newMetadataFile);
+				LOG.info("Renaming {} to {}.", path, newName);
+				LOG.info("Creating {}.", newMetadataFile);
 			}
 		}
 	}
