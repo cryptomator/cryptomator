@@ -72,6 +72,10 @@
 			<groupId>com.google.dagger</groupId>
 			<artifactId>dagger</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>com.google.dagger</groupId>
+			<artifactId>dagger-compiler</artifactId>
+		</dependency>
 
 		<!-- Zxcvbn -->
 		<dependency>
