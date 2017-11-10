@@ -11,8 +11,6 @@ package org.cryptomator.ui.model;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.nio.file.DirectoryNotEmptyException;
-import java.nio.file.DirectoryStream;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
@@ -102,13 +100,6 @@ public class Vault {
 	}
 
 	public void create(CharSequence passphrase) throws IOException {
-		try (DirectoryStream<Path> stream = Files.newDirectoryStream(getPath())) {
-			for (Path file : stream) {
-				if (!file.getFileName().toString().startsWith(".")) {
-					throw new DirectoryNotEmptyException(getPath().toString());
-				}
-			}
-		}
 		if (!isValidVaultDirectory()) {
 			CryptoFileSystemProvider.initialize(getPath(), MASTERKEY_FILENAME, passphrase);
 		} else {
