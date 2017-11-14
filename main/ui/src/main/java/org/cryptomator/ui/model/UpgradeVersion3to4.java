@@ -97,7 +97,7 @@ class UpgradeVersion3to4 extends UpgradeStrategy {
 				@Override
 				public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
 					String name = file.getFileName().toString();
-					if (!attrs.isRegularFile() || attrs.size() > FILE_MIN_SIZE) {
+					if (attrs.size() > FILE_MIN_SIZE) {
 						LOG.trace("Skipping non-directory file {}.", file);
 					} else if (name.endsWith(LONG_FILENAME_EXT)) {
 						migrateLong(metadataDir, file);
@@ -147,7 +147,7 @@ class UpgradeVersion3to4 extends UpgradeStrategy {
 			String oldCanonicalName = oldNameBase32 + LONG_FILENAME_EXT;
 
 			Path oldMetadataFile = metadataDir.resolve(oldCanonicalName.substring(0, 2)).resolve(oldCanonicalName.substring(2, 4)).resolve(oldCanonicalName);
-			if (!Files.isRegularFile(oldMetadataFile)) {
+			if (!Files.isReadable(oldMetadataFile)) {
 				LOG.warn("Found uninflatable long file name. Expected: {}", oldMetadataFile);
 				return;
 			}
