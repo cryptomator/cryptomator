@@ -9,6 +9,8 @@
  ******************************************************************************/
 package org.cryptomator.ui.controllers;
 
+import static org.cryptomator.ui.util.DialogBuilderUtil.buildErrorDialog;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,6 +22,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
+import java.util.stream.Stream;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -261,13 +264,28 @@ public class MainController implements ViewController {
 		}
 		try {
 			final Path vaultDir = file.toPath();
-			if (!Files.exists(vaultDir)) {
+			if (Files.exists(vaultDir)) {
+				try (Stream<Path> stream = Files.list(vaultDir)) {
+					if (stream.filter(this::isNotHidden).findAny().isPresent()) {
+						buildErrorDialog( //
+								localization.getString("main.createVault.nonEmptyDir.title"), //
+								localization.getString("main.createVault.nonEmptyDir.header"), //
+								localization.getString("main.createVault.nonEmptyDir.content"), //
+								ButtonType.OK).show();
+						return;
+					}
+				}
+			} else {
 				Files.createDirectory(vaultDir);
 			}
 			addVault(vaultDir, true);
 		} catch (IOException e) {
 			LOG.error("Unable to create vault", e);
 		}
+	}
+
+	private boolean isNotHidden(Path file) {
+		return !file.getFileName().toString().startsWith(".");
 	}
 
 	@FXML
