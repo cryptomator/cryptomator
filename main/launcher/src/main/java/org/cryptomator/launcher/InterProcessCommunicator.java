@@ -102,7 +102,7 @@ abstract class InterProcessCommunicator implements InterProcessCommunicationProt
 			}
 			try {
 				int port = ClientCommunicator.readPort(portFilePath);
-				LOG.debug("Connecting to port {}...");
+				LOG.debug("Connecting to port {}...", port);
 				Registry registry = LocateRegistry.getRegistry("localhost", port, new ClientSocketFactory());
 				this.remote = (IpcProtocolRemote) registry.lookup(RMI_NAME);
 			} catch (IOException e) {
