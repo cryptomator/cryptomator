@@ -20,4 +20,4 @@ out/
 *.iml
 
 # Temporary file created by test launcher
-main/launcher/ipcPort.tmp
+main/launcher/.ipcPort.tmp

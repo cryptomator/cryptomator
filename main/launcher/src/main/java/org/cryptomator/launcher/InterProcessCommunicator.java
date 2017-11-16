@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
@@ -250,9 +252,21 @@ abstract class InterProcessCommunicator implements InterProcessCommunicationProt
 
 		@Override
 		public Socket createSocket(String host, int port) throws IOException {
-			Socket socket = new Socket(host, port);
-			socket.setSoTimeout(1000); // 1s
-			return socket;
+			return new SocketWithFixedTimeout(host, port, 1000);
+		}
+
+	}
+
+	private static class SocketWithFixedTimeout extends Socket {
+
+		public SocketWithFixedTimeout(String host, int port, int timeoutInMs) throws UnknownHostException, IOException {
+			super(host, port);
+			super.setSoTimeout(timeoutInMs);
+		}
+
+		@Override
+		public synchronized void setSoTimeout(int timeout) throws SocketException {
+			// do nothing, timeout is fixed
 		}
 
 	}
