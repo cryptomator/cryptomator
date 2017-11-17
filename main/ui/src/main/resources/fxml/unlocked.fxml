@@ -54,8 +54,8 @@
 			<Label fx:id="messageLabel" cacheShape="true" cache="true" />
 		</Pane>
 		<HBox styleClass="segmented-button-bar" HBox.hgrow="NEVER" alignment="CENTER_RIGHT" cacheShape="true" cache="true">
-			<Button text="%unlocked.button.lock" styleClass="first" onAction="#didClickLockVault" focusTraversable="false" cacheShape="true" cache="true"/>
-			<ToggleButton text="&#xf104;" styleClass="last,ionicons" focusTraversable="false" fx:id="moreOptionsButton" onAction="#didClickMoreOptions" />
+			<Button text="%unlocked.button.lock" styleClass="first" onAction="#didClickLockVault" focusTraversable="true" cacheShape="true" cache="true"/>
+			<ToggleButton text="&#xf104;" styleClass="last,ionicons" focusTraversable="true" fx:id="moreOptionsButton" onAction="#didClickMoreOptions" />
 		</HBox>
 	</HBox>
 

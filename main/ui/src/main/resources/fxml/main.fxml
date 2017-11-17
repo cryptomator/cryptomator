@@ -53,7 +53,7 @@
 
 	<VBox prefWidth="200.0" cacheShape="true" cache="true">
 		<StackPane VBox.vgrow="ALWAYS" cacheShape="true" cache="true">
-			<ListView fx:id="vaultList" focusTraversable="false" cacheShape="true" cache="true"/>
+			<ListView fx:id="vaultList" focusTraversable="true" cacheShape="true" cache="true"/>
 			<AnchorPane fx:id="emptyListInstructions" cacheShape="true" cache="true">
 				<HBox AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.bottomAnchor="100.0" alignment="CENTER" cacheShape="true" cache="true">
 					<Label textAlignment="CENTER" text="%main.emptyListInstructions" wrapText="true" cacheShape="true" cache="true"/>
@@ -63,11 +63,11 @@
 		</StackPane>
 		<ToolBar VBox.vgrow="NEVER" styleClass="list-related-toolbar" cacheShape="true" cache="true">
 			<items>
-				<ToggleButton text="&#xf489;" styleClass="ionicons" fx:id="addVaultButton" onAction="#didClickAddVault" focusTraversable="false" cacheShape="true" cache="true"/>
-				<Button text="&#xf462;" styleClass="ionicons" fx:id="removeVaultButton" onAction="#didClickRemoveSelectedEntry" focusTraversable="false" cacheShape="true" cache="true"/>
+				<ToggleButton text="&#xf489;" styleClass="ionicons" fx:id="addVaultButton" onAction="#didClickAddVault" focusTraversable="true" cacheShape="true" cache="true"/>
+				<Button text="&#xf462;" styleClass="ionicons" fx:id="removeVaultButton" onAction="#didClickRemoveSelectedEntry" focusTraversable="true" cacheShape="true" cache="true"/>
 				<Pane HBox.hgrow="ALWAYS" styleClass="spacer" />
 				<!-- future use: -->
-				<ToggleButton text="&#xf43c;" styleClass="ionicons" fx:id="settingsButton" onAction="#didClickShowSettings" focusTraversable="false" cacheShape="true" cache="true"/>
+				<ToggleButton text="&#xf43c;" styleClass="ionicons" fx:id="settingsButton" onAction="#didClickShowSettings" focusTraversable="true" cacheShape="true" cache="true"/>
 			</items>
 		</ToolBar>
 	</VBox>
