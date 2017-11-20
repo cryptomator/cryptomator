@@ -161,6 +161,10 @@
     -fx-padding: 1;
 }
 
+.list-view:focused {
+	-fx-border-style: dotted inside;
+}
+
 .list-view > .virtual-flow > .scroll-bar:vertical{
     -fx-background-insets: 0, 0 0 0 1;
     -fx-padding: -1 -1 -1 0;
@@ -380,6 +384,10 @@
 .check-box:armed > .box {
 	-fx-border-color: COLOR_BORDER_FOCUS;
 }
+/* focused */
+.check-box:focused {
+	-fx-border-style: dotted inside;
+}
 /* selected: */
 .check-box:selected > .box > .mark {
     -fx-background-color: black;
@@ -404,6 +412,10 @@
 	-fx-background-radius: 0, 0;
 	-fx-padding: 0.1em 0.6em 0.1em 0.6em;
 	-fx-text-fill: COLOR_TEXT;
+}
+
+.choice-box:focused {
+	-fx-border-style: dotted inside;
 }
 
 .choice-box > .open-button > .arrow {
