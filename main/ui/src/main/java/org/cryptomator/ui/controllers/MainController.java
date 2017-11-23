@@ -16,7 +16,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,7 +41,6 @@ import org.cryptomator.ui.model.VaultFactory;
 import org.cryptomator.ui.model.VaultList;
 import org.cryptomator.ui.util.DialogBuilderUtil;
 import org.cryptomator.ui.util.EawtApplicationWrapper;
-import org.cryptomator.ui.util.ProcessFilePath;
 import org.fxmisc.easybind.EasyBind;
 import org.fxmisc.easybind.Subscription;
 import org.fxmisc.easybind.monadic.MonadicBinding;
@@ -265,7 +263,7 @@ public class MainController implements ViewController {
 			return;
 		}
 		try {
-			final Path vaultDir = Paths.get(ProcessFilePath.processFilePath(file.getPath()));
+			final Path vaultDir = file.toPath();
 			if (Files.exists(vaultDir)) {
 				try (Stream<Path> stream = Files.list(vaultDir)) {
 					if (stream.filter(this::isNotHidden).findAny().isPresent()) {
