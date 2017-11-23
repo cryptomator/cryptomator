@@ -77,7 +77,6 @@ upgrade.version3to4.err.io = Błąd aktualizacji z powodu problemów z odczytem/
 settings.prefGvfsScheme.label = Schemat WebDAV
 # upgrade.fxml
 upgrade.confirmation.label = Tak, synchronizacja plików na pewno została ukończona.
-initialize.messageLabel.notEmpty = Krypta nie jest pusta
 unlock.label.savePassword = Zapisz hasło
 unlock.errorMessage.unauthenticVersionMac = Nie udało się uwierzytelnić wersji MAC
 unlocked.label.mountFailed = Błąd podłączanie dysku.
@@ -102,3 +101,6 @@ unlocked.moreOptions.mount = Podłącz dysk
 unlocked.moreOptions.unmount = Odłącz dysk
 upgrade.version5toX.title = Aktualizacja wersji krypty
 upgrade.version5toX.msg = Krypta wymaga aktualizacji do nowszej wersji.\nZanim kontynuujesz, upewnij się, że synchronizacja plików została ukończona.
+main.createVault.nonEmptyDir.title = Creating vault failed
+main.createVault.nonEmptyDir.header = Chosen directory is not empty
+main.createVault.nonEmptyDir.content = The selected directory already contains files (possibly hidden). A vault can only be created in an empty directory.

@@ -77,7 +77,6 @@ upgrade.version3to4.err.io = Falha na migração devido a um erro de E/S. Veja o
 settings.prefGvfsScheme.label = Esquema WebDAV
 # upgrade.fxml
 upgrade.confirmation.label = Sim, tenho certeza de que a sincronização foi concluída
-initialize.messageLabel.notEmpty = Cofre não vazio
 unlock.label.savePassword = Armazenar senha
 unlock.errorMessage.unauthenticVersionMac = Não foi possível autenticar a versão do MAC.
 unlocked.label.mountFailed = Falha ao conectar o drive
@@ -102,3 +101,6 @@ unlocked.moreOptions.mount = Mount Drive
 unlocked.moreOptions.unmount = Eject Drive
 upgrade.version5toX.title = Vault Version Upgrade
 upgrade.version5toX.msg = This vault needs to be migrated to a newer format.\nPlease make sure synchronization has finished before proceeding.
+main.createVault.nonEmptyDir.title = Creating vault failed
+main.createVault.nonEmptyDir.header = Chosen directory is not empty
+main.createVault.nonEmptyDir.content = The selected directory already contains files (possibly hidden). A vault can only be created in an empty directory.
