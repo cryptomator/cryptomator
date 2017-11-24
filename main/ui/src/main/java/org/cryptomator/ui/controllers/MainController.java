@@ -66,6 +66,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.Cell;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
@@ -332,6 +333,7 @@ public class MainController implements ViewController {
 		}
 		if (select) {
 			vaultList.getSelectionModel().select(vault);
+			activeController.get().focus();
 		}
 	}
 
@@ -348,6 +350,8 @@ public class MainController implements ViewController {
 			vaults.remove(selectedVault.get());
 			if (vaults.isEmpty()) {
 				activeController.set(viewControllerLoader.load("/fxml/welcome.fxml"));
+			} else {
+				activeController.get().focus();
 			}
 		}
 	}
@@ -405,8 +409,7 @@ public class MainController implements ViewController {
 	}
 
 	private void didClickOnListCell(MouseEvent e) {
-		if (MouseEvent.MOUSE_CLICKED.equals(e.getEventType()) && e.getSource() instanceof DirectoryListCell) {
-			assert ((DirectoryListCell) e.getSource()).isSelected() : "click event occurs after mousedown, which causes selection of cell";
+		if (MouseEvent.MOUSE_CLICKED.equals(e.getEventType()) && e.getSource() instanceof Cell && ((Cell<?>) e.getSource()).isSelected()) {
 			activeController.get().focus();
 		}
 	}
