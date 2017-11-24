@@ -24,4 +24,8 @@ public interface ViewController extends Initializable {
 		// no-op
 	}
 
+	default void focus() {
+		// no-op
+	}
+
 }

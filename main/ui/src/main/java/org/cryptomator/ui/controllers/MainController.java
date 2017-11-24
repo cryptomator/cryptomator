@@ -72,6 +72,9 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.image.Image;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.text.Font;
@@ -165,6 +168,7 @@ public class MainController implements ViewController {
 	@Override
 	public void initialize() {
 		vaultList.setItems(vaults);
+		vaultList.setOnKeyPressed(this::didPressKeyOnList);
 		vaultList.setCellFactory(this::createDirecoryListCell);
 		activeController.set(viewControllerLoader.load("/fxml/welcome.fxml"));
 		selectedVault.bind(vaultList.getSelectionModel().selectedItemProperty());
@@ -239,6 +243,7 @@ public class MainController implements ViewController {
 	private ListCell<Vault> createDirecoryListCell(ListView<Vault> param) {
 		final DirectoryListCell cell = new DirectoryListCell();
 		cell.setVaultContextMenu(vaultListCellContextMenu);
+		cell.setOnMouseClicked(this::didClickOnListCell);
 		return cell;
 	}
 
@@ -393,6 +398,19 @@ public class MainController implements ViewController {
 		}
 	}
 
+	private void didPressKeyOnList(KeyEvent e) {
+		if (e.getCode() == KeyCode.ENTER || e.getCode() == KeyCode.SPACE) {
+			activeController.get().focus();
+		}
+	}
+
+	private void didClickOnListCell(MouseEvent e) {
+		if (MouseEvent.MOUSE_CLICKED.equals(e.getEventType()) && e.getSource() instanceof DirectoryListCell) {
+			assert ((DirectoryListCell) e.getSource()).isSelected() : "click event occurs after mousedown, which causes selection of cell";
+			activeController.get().focus();
+		}
+	}
+
 	// ****************************************
 	// Public Bindings
 	// ****************************************
@@ -471,6 +489,7 @@ public class MainController implements ViewController {
 		ctrl.setVault(selectedVault.get());
 		ctrl.setListener(this::didChangePassword);
 		activeController.set(ctrl);
+		Platform.runLater(ctrl::focus);
 	}
 
 	public void didChangePassword() {
