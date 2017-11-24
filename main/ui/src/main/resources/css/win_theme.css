@@ -157,40 +157,48 @@
  
 .list-view {
     -fx-background-color: COLOR_BORDER, #FFF;
+    -fx-border-style: dotted inside;
+    -fx-border-color: transparent;
     -fx-background-insets: 0, 1;
     -fx-padding: 1;
 }
 
 .list-view:focused {
-	-fx-border-style: dotted inside;
+	-fx-border-color: black;
 }
 
 .list-view > .virtual-flow > .scroll-bar:vertical{
     -fx-background-insets: 0, 0 0 0 1;
     -fx-padding: -1 -1 -1 0;
 }
+
 .list-view > .virtual-flow > .scroll-bar:horizontal{
     -fx-background-insets: 0, 1 0 0 0;
     -fx-padding: 0 -1 -1 -1;
 }
+
 .list-view > .virtual-flow > .corner {
     -fx-background-color: COLOR_BORDER, COLOR_CONTROL_BASE;
     -fx-background-insets: 0, 1 0 0 1;
 }
+
 .list-cell {
     -fx-background-color: #FFF;
     -fx-padding: 0.6em;
     -fx-text-fill: COLOR_TEXT;
     -fx-opacity: 1;
 }
+
 .list-view:focused > .virtual-flow > .clipped-container > .sheet > .list-cell:focused {
     -fx-background-color: COLOR_BORDER_FOCUS, #FFF;
     -fx-background-insets: 0, 1;
 }
+
 .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:selected {
     -fx-background-color: #DEDEDE, #F7F7F7;
     -fx-background-insets: 0, 1;
 }
+
 .list-cell:filled:hover {
     -fx-background-color: #F7F7F7;
 }
@@ -368,6 +376,8 @@
 .check-box {
     -fx-label-padding: 0 0 0 6px;
     -fx-text-fill: COLOR_TEXT;
+    -fx-border-style: dotted inside;
+    -fx-border-color: transparent;
 }
 .check-box > .box {
     -fx-padding: 1px;
@@ -386,7 +396,7 @@
 }
 /* focused */
 .check-box:focused {
-	-fx-border-style: dotted inside;
+	-fx-border-color: black;
 }
 /* selected: */
 .check-box:selected > .box > .mark {
