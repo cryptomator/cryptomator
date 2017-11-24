@@ -169,7 +169,7 @@ public class MainController implements ViewController {
 	@Override
 	public void initialize() {
 		vaultList.setItems(vaults);
-		vaultList.setOnKeyPressed(this::didPressKeyOnList);
+		vaultList.setOnKeyReleased(this::didPressKeyOnList);
 		vaultList.setCellFactory(this::createDirecoryListCell);
 		activeController.set(viewControllerLoader.load("/fxml/welcome.fxml"));
 		selectedVault.bind(vaultList.getSelectionModel().selectedItemProperty());
@@ -447,6 +447,7 @@ public class MainController implements ViewController {
 
 	public void didInitialize() {
 		showUnlockView();
+		activeController.get().focus();
 	}
 
 	private void showUpgradeView() {
