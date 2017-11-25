@@ -459,6 +459,7 @@ public class MainController implements ViewController {
 
 	public void didUpgrade() {
 		showUnlockView();
+		activeController.get().focus();
 	}
 
 	private void showUnlockView() {
@@ -486,6 +487,7 @@ public class MainController implements ViewController {
 	public void didLock(UnlockedController ctrl) {
 		unlockedVaults.remove(ctrl.getVault());
 		showUnlockView();
+		activeController.get().focus();
 	}
 
 	private void showChangePasswordView() {
@@ -498,6 +500,7 @@ public class MainController implements ViewController {
 
 	public void didChangePassword() {
 		showUnlockView();
+		activeController.get().focus();
 	}
 
 }
