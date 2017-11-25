@@ -83,7 +83,7 @@ class UpgradeVersion4to5 extends UpgradeStrategy {
 
 				@Override
 				public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-					if (attrs.isRegularFile() && BASE32_PATTERN.matcher(file.getFileName().toString()).find() && attrs.size() > cryptor.fileHeaderCryptor().headerSize()) {
+					if (BASE32_PATTERN.matcher(file.getFileName().toString()).find() && attrs.size() > cryptor.fileHeaderCryptor().headerSize()) {
 						migrate(file, attrs, cryptor);
 					} else {
 						LOG.info("Skipping irrelevant file {}.", file);

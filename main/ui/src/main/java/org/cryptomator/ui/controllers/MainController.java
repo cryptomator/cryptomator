@@ -9,6 +9,8 @@
  ******************************************************************************/
 package org.cryptomator.ui.controllers;
 
+import static org.cryptomator.ui.util.DialogBuilderUtil.buildErrorDialog;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,6 +22,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
+import java.util.stream.Stream;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -63,12 +66,16 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.Cell;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.image.Image;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.text.Font;
@@ -162,6 +169,7 @@ public class MainController implements ViewController {
 	@Override
 	public void initialize() {
 		vaultList.setItems(vaults);
+		vaultList.setOnKeyReleased(this::didPressKeyOnList);
 		vaultList.setCellFactory(this::createDirecoryListCell);
 		activeController.set(viewControllerLoader.load("/fxml/welcome.fxml"));
 		selectedVault.bind(vaultList.getSelectionModel().selectedItemProperty());
@@ -236,6 +244,7 @@ public class MainController implements ViewController {
 	private ListCell<Vault> createDirecoryListCell(ListView<Vault> param) {
 		final DirectoryListCell cell = new DirectoryListCell();
 		cell.setVaultContextMenu(vaultListCellContextMenu);
+		cell.setOnMouseClicked(this::didClickOnListCell);
 		return cell;
 	}
 
@@ -261,13 +270,28 @@ public class MainController implements ViewController {
 		}
 		try {
 			final Path vaultDir = file.toPath();
-			if (!Files.exists(vaultDir)) {
+			if (Files.exists(vaultDir)) {
+				try (Stream<Path> stream = Files.list(vaultDir)) {
+					if (stream.filter(this::isNotHidden).findAny().isPresent()) {
+						buildErrorDialog( //
+								localization.getString("main.createVault.nonEmptyDir.title"), //
+								localization.getString("main.createVault.nonEmptyDir.header"), //
+								localization.getString("main.createVault.nonEmptyDir.content"), //
+								ButtonType.OK).show();
+						return;
+					}
+				}
+			} else {
 				Files.createDirectory(vaultDir);
 			}
 			addVault(vaultDir, true);
 		} catch (IOException e) {
 			LOG.error("Unable to create vault", e);
 		}
+	}
+
+	private boolean isNotHidden(Path file) {
+		return !file.getFileName().toString().startsWith(".");
 	}
 
 	@FXML
@@ -309,6 +333,7 @@ public class MainController implements ViewController {
 		}
 		if (select) {
 			vaultList.getSelectionModel().select(vault);
+			activeController.get().focus();
 		}
 	}
 
@@ -325,6 +350,8 @@ public class MainController implements ViewController {
 			vaults.remove(selectedVault.get());
 			if (vaults.isEmpty()) {
 				activeController.set(viewControllerLoader.load("/fxml/welcome.fxml"));
+			} else {
+				activeController.get().focus();
 			}
 		}
 	}
@@ -375,6 +402,18 @@ public class MainController implements ViewController {
 		}
 	}
 
+	private void didPressKeyOnList(KeyEvent e) {
+		if (e.getCode() == KeyCode.ENTER || e.getCode() == KeyCode.SPACE) {
+			activeController.get().focus();
+		}
+	}
+
+	private void didClickOnListCell(MouseEvent e) {
+		if (MouseEvent.MOUSE_CLICKED.equals(e.getEventType()) && e.getSource() instanceof Cell && ((Cell<?>) e.getSource()).isSelected()) {
+			activeController.get().focus();
+		}
+	}
+
 	// ****************************************
 	// Public Bindings
 	// ****************************************
@@ -408,6 +447,7 @@ public class MainController implements ViewController {
 
 	public void didInitialize() {
 		showUnlockView();
+		activeController.get().focus();
 	}
 
 	private void showUpgradeView() {
@@ -419,6 +459,7 @@ public class MainController implements ViewController {
 
 	public void didUpgrade() {
 		showUnlockView();
+		activeController.get().focus();
 	}
 
 	private void showUnlockView() {
@@ -446,6 +487,7 @@ public class MainController implements ViewController {
 	public void didLock(UnlockedController ctrl) {
 		unlockedVaults.remove(ctrl.getVault());
 		showUnlockView();
+		activeController.get().focus();
 	}
 
 	private void showChangePasswordView() {
@@ -453,10 +495,12 @@ public class MainController implements ViewController {
 		ctrl.setVault(selectedVault.get());
 		ctrl.setListener(this::didChangePassword);
 		activeController.set(ctrl);
+		Platform.runLater(ctrl::focus);
 	}
 
 	public void didChangePassword() {
 		showUnlockView();
+		activeController.get().focus();
 	}
 
 }

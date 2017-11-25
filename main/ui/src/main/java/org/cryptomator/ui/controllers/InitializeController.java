@@ -10,7 +10,6 @@
 package org.cryptomator.ui.controllers;
 
 import java.io.IOException;
-import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.FileAlreadyExistsException;
 import java.util.Objects;
 import java.util.Optional;
@@ -106,6 +105,11 @@ public class InitializeController implements ViewController {
 		return root;
 	}
 
+	@Override
+	public void focus() {
+		passwordField.requestFocus();
+	}
+
 	void setVault(Vault vault) {
 		this.vault = Objects.requireNonNull(vault);
 		// trigger "default" change to refresh key bindings:
@@ -125,8 +129,6 @@ public class InitializeController implements ViewController {
 			listener.ifPresent(this::invokeListenerLater);
 		} catch (FileAlreadyExistsException ex) {
 			messageLabel.setText(localization.getString("initialize.messageLabel.alreadyInitialized"));
-		} catch (DirectoryNotEmptyException ex) {
-			messageLabel.setText(localization.getString("initialize.messageLabel.notEmpty"));
 		} catch (IOException ex) {
 			LOG.error("I/O Exception", ex);
 			messageLabel.setText(localization.getString("initialize.messageLabel.initializationFailed"));

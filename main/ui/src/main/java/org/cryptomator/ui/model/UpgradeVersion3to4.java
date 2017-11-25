@@ -42,9 +42,10 @@ class UpgradeVersion3to4 extends UpgradeStrategy {
 	private static final Logger LOG = LoggerFactory.getLogger(UpgradeVersion3to4.class);
 	private static final Pattern LVL1_DIR_PATTERN = Pattern.compile("[A-Z2-7]{2}");
 	private static final Pattern LVL2_DIR_PATTERN = Pattern.compile("[A-Z2-7]{30}");
-	private static final Pattern BASE32_FOLLOWED_BY_UNDERSCORE_PATTERN = Pattern.compile("^(([A-Z2-7]{8})*[A-Z2-7=]{8})_");
+	private static final Pattern BASE32_PATTERN = Pattern.compile("^(([A-Z2-7]{8})*[A-Z2-7=]{8})");
+	private static final Pattern BASE32_FOLLOWED_BY_UNDERSCORE_PATTERN = Pattern.compile(BASE32_PATTERN.pattern() + "_");
 	private static final int FILE_MIN_SIZE = 88; // vault version 3 files have a header of 88 bytes (assuming no chunks at all)
-	private static final String LONG_FILENAME_SUFFIX = ".lng";
+	private static final String LONG_FILENAME_EXT = ".lng";
 	private static final String OLD_FOLDER_SUFFIX = "_";
 	private static final String NEW_FOLDER_PREFIX = "0";
 
@@ -96,10 +97,12 @@ class UpgradeVersion3to4 extends UpgradeStrategy {
 				@Override
 				public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
 					String name = file.getFileName().toString();
-					if (name.endsWith(LONG_FILENAME_SUFFIX)) {
+					if (attrs.size() > FILE_MIN_SIZE) {
+						LOG.trace("Skipping non-directory file {}.", file);
+					} else if (name.endsWith(LONG_FILENAME_EXT)) {
 						migrateLong(metadataDir, file);
 					} else {
-						migrate(file, attrs);
+						migrate(file);
 					}
 					return FileVisitResult.CONTINUE;
 				}
@@ -112,14 +115,13 @@ class UpgradeVersion3to4 extends UpgradeStrategy {
 		LOG.info("Migration finished.");
 	}
 
-	private void migrate(Path file, BasicFileAttributes attrs) throws IOException {
+	private void migrate(Path file) throws IOException {
 		String name = file.getFileName().toString();
-		long size = attrs.size();
 		Matcher m = BASE32_FOLLOWED_BY_UNDERSCORE_PATTERN.matcher(name);
-		if (attrs.isRegularFile() && m.find(0) && size < FILE_MIN_SIZE) {
+		if (m.find(0)) {
 			String base32 = m.group(1);
 			String suffix = name.substring(m.end());
-			String renamed = NEW_FOLDER_PREFIX + base32 + (suffix.isEmpty() ? "" : " " + suffix);
+			String renamed = NEW_FOLDER_PREFIX + base32 + suffix;
 			renameWithoutOverwriting(file, renamed);
 		}
 	}
@@ -135,22 +137,35 @@ class UpgradeVersion3to4 extends UpgradeStrategy {
 
 	private void migrateLong(Path metadataDir, Path path) throws IOException {
 		String oldName = path.getFileName().toString();
-		Path oldMetadataFile = metadataDir.resolve(oldName.substring(0, 2)).resolve(oldName.substring(2, 4)).resolve(oldName);
-		if (Files.isRegularFile(oldMetadataFile)) {
-			String oldContent = new String(Files.readAllBytes(oldMetadataFile), UTF_8);
-			if (oldContent.endsWith(OLD_FOLDER_SUFFIX)) {
-				String newContent = NEW_FOLDER_PREFIX + StringUtils.removeEnd(oldContent, OLD_FOLDER_SUFFIX);
-				String newName = base32.encodeAsString(sha1.digest(newContent.getBytes(UTF_8))) + LONG_FILENAME_SUFFIX;
+		assert oldName.endsWith(LONG_FILENAME_EXT);
+		String oldNameBase = StringUtils.removeEnd(oldName, LONG_FILENAME_EXT);
+
+		Matcher m = BASE32_PATTERN.matcher(oldNameBase);
+		if (m.find(0)) {
+			String oldNameBase32 = m.group(1);
+			String oldNameSuffix = oldNameBase.substring(m.end());
+			String oldCanonicalName = oldNameBase32 + LONG_FILENAME_EXT;
+
+			Path oldMetadataFile = metadataDir.resolve(oldCanonicalName.substring(0, 2)).resolve(oldCanonicalName.substring(2, 4)).resolve(oldCanonicalName);
+			if (!Files.isReadable(oldMetadataFile)) {
+				LOG.warn("Found uninflatable long file name. Expected: {}", oldMetadataFile);
+				return;
+			}
+
+			String oldLongName = new String(Files.readAllBytes(oldMetadataFile), UTF_8);
+			if (oldLongName.endsWith(OLD_FOLDER_SUFFIX)) {
+				String newLongName = NEW_FOLDER_PREFIX + StringUtils.removeEnd(oldLongName, OLD_FOLDER_SUFFIX);
+				String newCanonicalBase32 = base32.encodeAsString(sha1.digest(newLongName.getBytes(UTF_8)));
+				String newCanonicalName = newCanonicalBase32 + LONG_FILENAME_EXT;
+				Path newMetadataFile = metadataDir.resolve(newCanonicalName.substring(0, 2)).resolve(newCanonicalName.substring(2, 4)).resolve(newCanonicalName);
+				String newName = newCanonicalBase32 + oldNameSuffix + LONG_FILENAME_EXT;
 				Path newPath = path.resolveSibling(newName);
-				Path newMetadataFile = metadataDir.resolve(newName.substring(0, 2)).resolve(newName.substring(2, 4)).resolve(newName);
 				Files.move(path, newPath);
 				Files.createDirectories(newMetadataFile.getParent());
-				Files.write(newMetadataFile, newContent.getBytes(UTF_8));
-				Files.delete(oldMetadataFile);
-				LOG.info("Renaming {} to {}\nDeleting {}\nCreating {}", path, newName, oldMetadataFile, newMetadataFile);
+				Files.write(newMetadataFile, newLongName.getBytes(UTF_8));
+				LOG.info("Renaming {} to {}.", path, newName);
+				LOG.info("Creating {}.", newMetadataFile);
 			}
-		} else {
-			LOG.warn("Found uninflatable long file name. Expected: {}", oldMetadataFile);
 		}
 	}
 

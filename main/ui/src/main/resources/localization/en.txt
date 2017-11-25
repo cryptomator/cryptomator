@@ -16,6 +16,9 @@ main.addDirectory.contextMenu.open=Open Existing Vault
 main.directoryList.remove.confirmation.title=Remove Vault
 main.directoryList.remove.confirmation.header=Do you really want to remove this vault?
 main.directoryList.remove.confirmation.content=The vault will only be removed from the list. To permanently delete it, please delete the vault from your filesystem.
+main.createVault.nonEmptyDir.title=Creating vault failed
+main.createVault.nonEmptyDir.header=Chosen directory is not empty
+main.createVault.nonEmptyDir.content=The selected directory already contains files (possibly hidden). A vault can only be created in an empty directory.
 
 # welcome.fxml
 welcome.checkForUpdates.label.currentlyChecking=Checking for Updates...
@@ -26,7 +29,6 @@ initialize.label.password=Password
 initialize.label.retypePassword=Retype Password
 initialize.button.ok=Create Vault
 initialize.messageLabel.alreadyInitialized=Vault already initialized
-initialize.messageLabel.notEmpty=Vault not empty
 initialize.messageLabel.initializationFailed=Could not initialize vault. See log file for details.
 initialize.messageLabel.passwordStrength.0=Very weak
 initialize.messageLabel.passwordStrength.1=Weak
@@ -83,7 +85,7 @@ unlock.messageLabel.startServerFailed=Starting WebDAV server failed.
 
 # change_password.fxml
 changePassword.label.oldPassword=Old Password
-changePassword.label.newPassword=New Nassword
+changePassword.label.newPassword=New Password
 changePassword.label.retypePassword=Retype Password
 changePassword.label.downloadsPageLink=All Cryptomator versions
 changePassword.button.change=Change Password

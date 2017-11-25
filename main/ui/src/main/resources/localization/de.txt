@@ -77,7 +77,6 @@ upgrade.version3to4.err.io = Migration aufgrund eines I/O-Fehlers fehlgeschlagen
 settings.prefGvfsScheme.label = WebDAV Schema
 # upgrade.fxml
 upgrade.confirmation.label = Ja, die Synchronisation ist abgeschlossen
-initialize.messageLabel.notEmpty = Tresor ist nicht leer
 unlock.label.savePassword = Passwort speichern
 unlock.errorMessage.unauthenticVersionMac = Versions-MAC konnte nicht authentifiziert werden.
 unlocked.label.mountFailed = Verbinden des Laufwerks fehlgeschlagen
@@ -102,3 +101,6 @@ unlocked.moreOptions.mount = Laufwerk verbinden
 unlocked.moreOptions.unmount = Laufwerk auswerfen
 upgrade.version5toX.title = Upgrade Tresor-Version 5 zu X
 upgrade.version5toX.msg = Dieser Tresor muss auf ein neueres Format aktualisiert werden.\nStellen Sie sicher, dass keine Synchronisation stattfindet, bevor Sie fortfahren.
+main.createVault.nonEmptyDir.title = Erstellung des Tresors fehlgeschlagen
+main.createVault.nonEmptyDir.header = Ausgewählter Ordner ist nicht leer
+main.createVault.nonEmptyDir.content = Der ausgewählte Ordner enthält bereits Dateien (möglicherweise unsichtbar). Ein Tresor kann nur innerhalb eines leeren Ordners erstellt werden.

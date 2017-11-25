@@ -119,6 +119,11 @@ public class ChangePasswordController implements ViewController {
 		return root;
 	}
 
+	@Override
+	public void focus() {
+		oldPasswordField.requestFocus();
+	}
+
 	void setVault(Vault vault) {
 		this.vault = Objects.requireNonNull(vault);
 		// trigger "default" change to refresh key bindings:

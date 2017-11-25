@@ -108,6 +108,13 @@
 	-fx-text-fill: COLOR_TEXT_DISABLED;
 }
 
+.button:focused,
+.toggle-button:focused {
+	-fx-border-color: black;
+	-fx-border-insets: 2px;
+	-fx-border-style: dotted inside;
+}
+
 /****************************************************************************
  *																			*
  * Segmented Buttons														*
@@ -155,6 +162,10 @@
 	-fx-background-color: COLOR_BORDER, #FFF;
 	-fx-background-insets: 0, 1;
 	-fx-padding: 1;
+}
+
+.list-view:focused {
+	-fx-border-style: dotted inside;
 }
 
 .list-cell {
@@ -241,6 +252,12 @@
 .tool-bar.list-related-toolbar .button:armed,
 .tool-bar.list-related-toolbar .button:selected {
 	-fx-background-color: COLOR_VGRAD_DARK;
+}
+
+.tool-bar.list-related-toolbar .toggle-button:focused,
+.tool-bar.list-related-toolbar .button:focused {
+	-fx-border-style: dotted inside;
+	-fx-border-color: black;
 }
 
 /*******************************************************************************
@@ -333,6 +350,10 @@
 .check-box:selected > .box > .mark {
 	-fx-background-color: COLOR_TEXT;
 }
+/* focused */
+.check-box:focused {
+	-fx-border-style: dotted inside;
+}
 /* disabled: */
 .check-box:disabled > .box {
 	-fx-background-color: COLOR_BORDER, COLOR_BACKGROUND;
@@ -353,6 +374,10 @@
 	-fx-background-radius: 0, 0;
 	-fx-padding: 0.1em 0.6em 0.1em 0.6em;
 	-fx-text-fill: COLOR_TEXT;
+}
+
+.choice-box:focused {
+	-fx-border-style: dotted inside;
 }
 
 .choice-box > .open-button > .arrow {

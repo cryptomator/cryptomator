@@ -112,13 +112,8 @@ public abstract class UpgradeStrategy {
 	public boolean isApplicable(Vault vault) {
 		final Path masterkeyFile = vault.getPath().resolve(MASTERKEY_FILENAME);
 		try {
-			if (Files.isRegularFile(masterkeyFile)) {
-				byte[] masterkeyFileContents = Files.readAllBytes(masterkeyFile);
-				return KeyFile.parse(masterkeyFileContents).getVersion() == vaultVersionBeforeUpgrade;
-			} else {
-				LOG.warn("Not a file: {}", masterkeyFile);
-				return false;
-			}
+			byte[] masterkeyFileContents = Files.readAllBytes(masterkeyFile);
+			return KeyFile.parse(masterkeyFileContents).getVersion() == vaultVersionBeforeUpgrade;
 		} catch (IOException e) {
 			LOG.warn("Could not determine, whether upgrade is applicable.", e);
 			return false;

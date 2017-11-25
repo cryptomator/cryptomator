@@ -79,7 +79,6 @@ upgrade.version3to4.err.io = I/O Exception\: migratie mislukt. Zie logbestand vo
 settings.prefGvfsScheme.label = WebDAV schema
 # upgrade.fxml
 upgrade.confirmation.label = Ja, ik heb geverifieerd dat de synchronisatie voltooid is
-initialize.messageLabel.notEmpty = Kluis niet leeg
 unlock.label.savePassword = Wachtwoord Opslaan
 unlock.errorMessage.unauthenticVersionMac = MAC authenticatie mislukt
 unlocked.label.mountFailed = Verbinden van schijf mislukt
@@ -104,3 +103,6 @@ unlocked.moreOptions.mount = Mount Drive
 unlocked.moreOptions.unmount = Eject Drive
 upgrade.version5toX.title = Vault Version Upgrade
 upgrade.version5toX.msg = This vault needs to be migrated to a newer format.\nPlease make sure synchronization has finished before proceeding.
+main.createVault.nonEmptyDir.title = Creating vault failed
+main.createVault.nonEmptyDir.header = Chosen directory is not empty
+main.createVault.nonEmptyDir.content = The selected directory already contains files (possibly hidden). A vault can only be created in an empty directory.

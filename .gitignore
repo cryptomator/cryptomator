@@ -17,3 +17,7 @@ test-output/
 out/
 .idea_modules/
 *.iws
+*.iml
+
+# Temporary file created by test launcher
+main/launcher/.ipcPort.tmp

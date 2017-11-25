@@ -84,6 +84,11 @@ public class UpgradeController implements ViewController {
 		return root;
 	}
 
+	@Override
+	public void focus() {
+		passwordField.requestFocus();
+	}
+
 	void setVault(Vault vault) {
 		this.vault = Objects.requireNonNull(vault);
 		errorLabel.setText(null);
