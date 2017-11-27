@@ -32,7 +32,6 @@ public class FileOpenRequestHandlerTest {
 		Mockito.when(fs.provider()).thenReturn(provider);
 		Mockito.when(fs.getPath(Mockito.anyString())).thenReturn(p1, p2);
 		Mockito.when(provider.readAttributes(Mockito.any(), Mockito.eq(BasicFileAttributes.class))).thenReturn(attrs);
-		Mockito.when(attrs.isRegularFile()).thenReturn(true);
 
 		BlockingQueue<Path> queue = new ArrayBlockingQueue<>(10);
 		FileOpenRequestHandler handler = new FileOpenRequestHandler(queue);

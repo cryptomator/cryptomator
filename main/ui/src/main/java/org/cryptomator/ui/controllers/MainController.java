@@ -315,7 +315,7 @@ public class MainController implements ViewController {
 		final Path vaultPath;
 		if (path != null && Files.isDirectory(path)) {
 			vaultPath = path;
-		} else if (path != null && Files.isRegularFile(path)) {
+		} else if (path != null && Files.isReadable(path)) {
 			vaultPath = path.getParent();
 		} else {
 			LOG.warn("Ignoring attempt to add vault with invalid path: {}", path);
