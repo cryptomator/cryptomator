@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.cryptomator</groupId>
 		<artifactId>main</artifactId>
-		<version>1.4.0-SNAPSHOT</version>
+		<version>1.3.3</version>
 	</parent>
 	<artifactId>commons</artifactId>
 	<name>Cryptomator Commons</name>
