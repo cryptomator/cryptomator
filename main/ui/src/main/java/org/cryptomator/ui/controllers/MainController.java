@@ -9,8 +9,7 @@
  ******************************************************************************/
 package org.cryptomator.ui.controllers;
 
-import static org.cryptomator.ui.util.DialogBuilderUtil.buildErrorDialog;
-
+import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,25 +26,6 @@ import java.util.stream.Stream;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
-
-import org.apache.commons.lang3.SystemUtils;
-import org.cryptomator.common.settings.VaultSettings;
-import org.cryptomator.ui.ExitUtil;
-import org.cryptomator.ui.controls.DirectoryListCell;
-import org.cryptomator.ui.l10n.Localization;
-import org.cryptomator.ui.model.AutoUnlocker;
-import org.cryptomator.ui.model.UpgradeStrategies;
-import org.cryptomator.ui.model.UpgradeStrategy;
-import org.cryptomator.ui.model.Vault;
-import org.cryptomator.ui.model.VaultFactory;
-import org.cryptomator.ui.model.VaultList;
-import org.cryptomator.ui.util.DialogBuilderUtil;
-import org.cryptomator.ui.util.EawtApplicationWrapper;
-import org.fxmisc.easybind.EasyBind;
-import org.fxmisc.easybind.Subscription;
-import org.fxmisc.easybind.monadic.MonadicBinding;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -81,6 +61,25 @@ import javafx.scene.layout.Pane;
 import javafx.scene.text.Font;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.common.settings.VaultSettings;
+import org.cryptomator.ui.ExitUtil;
+import org.cryptomator.ui.controls.DirectoryListCell;
+import org.cryptomator.ui.l10n.Localization;
+import org.cryptomator.ui.model.AutoUnlocker;
+import org.cryptomator.ui.model.UpgradeStrategies;
+import org.cryptomator.ui.model.UpgradeStrategy;
+import org.cryptomator.ui.model.Vault;
+import org.cryptomator.ui.model.VaultFactory;
+import org.cryptomator.ui.model.VaultList;
+import org.cryptomator.ui.util.DialogBuilderUtil;
+import org.fxmisc.easybind.EasyBind;
+import org.fxmisc.easybind.Subscription;
+import org.fxmisc.easybind.monadic.MonadicBinding;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import static org.cryptomator.ui.util.DialogBuilderUtil.buildErrorDialog;
 
 @Singleton
 public class MainController implements ViewController {
@@ -129,10 +128,8 @@ public class MainController implements ViewController {
 		EasyBind.subscribe(areAllVaultsLocked, Platform::setImplicitExit);
 		autoUnlocker.unlockAllSilently();
 
-		EawtApplicationWrapper.getApplication().ifPresent(app -> {
-			app.setPreferencesHandler(() -> {
-				Platform.runLater(this::toggleShowSettings);
-			});
+		Desktop.getDesktop().setPreferencesHandler(e -> {
+			Platform.runLater(this::toggleShowSettings);
 		});
 	}
 

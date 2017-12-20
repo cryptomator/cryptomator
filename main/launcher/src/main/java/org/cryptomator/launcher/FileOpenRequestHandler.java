@@ -6,6 +6,7 @@
  *******************************************************************************/
 package org.cryptomator.launcher;
 
+import java.awt.Desktop;
 import java.io.File;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
@@ -13,7 +14,6 @@ import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.util.concurrent.BlockingQueue;
 
-import org.cryptomator.ui.util.EawtApplicationWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,10 +24,8 @@ class FileOpenRequestHandler {
 
 	public FileOpenRequestHandler(BlockingQueue<Path> fileOpenRequests) {
 		this.fileOpenRequests = fileOpenRequests;
-		EawtApplicationWrapper.getApplication().ifPresent(app -> {
-			app.setOpenFileHandler(files -> {
-				files.stream().map(File::toPath).forEach(fileOpenRequests::add);
-			});
+		Desktop.getDesktop().setOpenFileHandler(e -> {
+			e.getFiles().stream().map(File::toPath).forEach(fileOpenRequests::add);
 		});
 	}
 
