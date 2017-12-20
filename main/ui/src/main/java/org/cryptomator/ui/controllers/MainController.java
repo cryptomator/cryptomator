@@ -396,7 +396,7 @@ public class MainController implements ViewController {
 		} else if (newValue.isValidVaultDirectory() && upgradeStrategyForSelectedVault.isPresent()) {
 			this.showUpgradeView();
 		} else if (newValue.isValidVaultDirectory()) {
-			this.showUnlockView();
+			this.showUnlockView(UnlockController.State.UNLOCKING);
 		} else {
 			this.showInitializeView();
 		}
@@ -446,7 +446,7 @@ public class MainController implements ViewController {
 	}
 
 	public void didInitialize() {
-		showUnlockView();
+		showUnlockView(UnlockController.State.INITIALIZED);
 		activeController.get().focus();
 	}
 
@@ -458,13 +458,13 @@ public class MainController implements ViewController {
 	}
 
 	public void didUpgrade() {
-		showUnlockView();
+		showUnlockView(UnlockController.State.UPGRADED);
 		activeController.get().focus();
 	}
 
-	private void showUnlockView() {
+	private void showUnlockView(UnlockController.State state) {
 		final UnlockController ctrl = viewControllerLoader.load("/fxml/unlock.fxml");
-		ctrl.setVault(selectedVault.get());
+		ctrl.setVault(selectedVault.get(), state);
 		ctrl.setListener(this::didUnlock);
 		activeController.set(ctrl);
 	}
@@ -486,7 +486,7 @@ public class MainController implements ViewController {
 
 	public void didLock(UnlockedController ctrl) {
 		unlockedVaults.remove(ctrl.getVault());
-		showUnlockView();
+		showUnlockView(UnlockController.State.UNLOCKING);
 		activeController.get().focus();
 	}
 
@@ -499,7 +499,7 @@ public class MainController implements ViewController {
 	}
 
 	public void didChangePassword() {
-		showUnlockView();
+		showUnlockView(UnlockController.State.PASSWORD_CHANGED);
 		activeController.get().focus();
 	}
 

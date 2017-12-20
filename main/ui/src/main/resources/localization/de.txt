@@ -34,6 +34,10 @@ unlock.errorMessage.wrongPassword = Falsches Passwort
 unlock.errorMessage.unsupportedVersion.vaultOlderThanSoftware = Tresor nicht unterstützt. Der Tresor wurde mit einer älteren Version von Cryptomator erstellt.
 unlock.errorMessage.unsupportedVersion.softwareOlderThanVault = Tresor nicht unterstützt. Der Tresor wurde mit einer neueren Version von Cryptomator erstellt.
 unlock.messageLabel.startServerFailed = Starten des WebDAV-Servers fehlgeschlagen.
+unlock.successLabel.vaultCreated = Der Tresor wurde erfolgreich erstellt.
+unlock.successLabel.passwordChanged = Das Passwort wurde erfolgreich geändert.
+unlock.successLabel.upgraded = Cryptomator wurde erfolgreich geupdated.
+
 # change_password.fxml
 changePassword.label.oldPassword = Altes Passwort
 changePassword.label.newPassword = Neues Passwort

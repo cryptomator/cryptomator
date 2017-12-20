@@ -95,6 +95,9 @@ public class UnlockController implements ViewController {
 	private Button unlockButton;
 
 	@FXML
+	private Label successMessage;
+
+	@FXML
 	private CheckBox savePassword;
 
 	@FXML
@@ -160,7 +163,7 @@ public class UnlockController implements ViewController {
 		passwordField.requestFocus();
 	}
 
-	void setVault(Vault vault) {
+	void setVault(Vault vault, State state) {
 		vaultSubs.unsubscribe();
 		vaultSubs = Subscription.EMPTY;
 
@@ -175,6 +178,10 @@ public class UnlockController implements ViewController {
 		advancedOptions.setVisible(false);
 		advancedOptionsButton.setText(localization.getString("unlock.button.advancedOptions.show"));
 		progressIndicator.setVisible(false);
+		successMessage.setVisible(didChange(state));
+		if (successMessage.isVisible()) {
+			successMessage.setText(localization.getString(state.successMessage()));
+		}
 		if (SystemUtils.IS_OS_WINDOWS) {
 			winDriveLetter.valueProperty().removeListener(driveLetterChangeListener);
 			winDriveLetter.getItems().clear();
@@ -225,6 +232,7 @@ public class UnlockController implements ViewController {
 
 	@FXML
 	private void didClickAdvancedOptionsButton(ActionEvent event) {
+		successMessage.setVisible(false);
 		advancedOptions.setVisible(!advancedOptions.isVisible());
 		if (advancedOptions.isVisible()) {
 			advancedOptionsButton.setText(localization.getString("unlock.button.advancedOptions.hide"));
@@ -389,6 +397,15 @@ public class UnlockController implements ViewController {
 		}).run();
 	}
 
+	private boolean didChange(State state) {
+		switch (state) {
+			case UNLOCKING:
+				return false;
+			default:
+				return true;
+		}
+	}
+
 	/* callback */
 
 	public void setListener(UnlockListener listener) {
@@ -398,6 +415,29 @@ public class UnlockController implements ViewController {
 	@FunctionalInterface
 	interface UnlockListener {
 		void didUnlock(Vault vault);
+	}
+
+	/* state */
+
+	public enum State {
+		UNLOCKING(empty()),
+		INITIALIZED("unlock.successLabel.vaultCreated"),
+		PASSWORD_CHANGED("unlock.successLabel.passwordChanged"),
+		UPGRADED("unlock.successLabel.upgraded");
+
+		private static String empty() {
+			return "";
+		}
+
+		private String successMessage;
+
+		State(String successMessage) {
+			this.successMessage = successMessage;
+		}
+
+		public String successMessage() {
+			return successMessage;
+		}
 	}
 
 }

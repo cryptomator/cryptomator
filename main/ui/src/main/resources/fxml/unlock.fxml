@@ -47,6 +47,9 @@
 		</HBox>
 		
 		<!-- Row 3 -->
+		<Label fx:id="successMessage" cacheShape="true" cache="true" visible="true" GridPane.rowIndex="3" GridPane.columnIndex="0" GridPane.columnSpan="2"/>
+
+		<!-- Row 3 -->
 		<GridPane fx:id="advancedOptions" vgap="12.0" hgap="12.0" prefWidth="400.0" GridPane.rowIndex="3" GridPane.columnIndex="0" GridPane.columnSpan="2" visible="false" cacheShape="true" cache="true">
 			<padding>
 				<Insets top="24.0" />
