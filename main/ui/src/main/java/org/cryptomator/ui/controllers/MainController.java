@@ -74,8 +74,6 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyCodeCombination;
-import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
@@ -108,9 +106,6 @@ public class MainController implements ViewController {
 	private final MonadicBinding<UpgradeStrategy> upgradeStrategyForSelectedVault;
 	private final BooleanBinding isShowingSettings;
 	private final Map<Vault, UnlockedController> unlockedVaults = new HashMap<>();
-
-	private final KeyCombination keyCodeCombinationCtrlUp = new KeyCodeCombination(KeyCode.UP, KeyCombination.CONTROL_DOWN);
-	private final KeyCombination keyCodeCombinationCtrlDown = new KeyCodeCombination(KeyCode.DOWN, KeyCombination.CONTROL_DOWN);
 
 	private Subscription subs = Subscription.EMPTY;
 
@@ -415,15 +410,10 @@ public class MainController implements ViewController {
 	}
 
 	private void didPressKeyOnRoot(KeyEvent event) {
-		if (keyCodeCombinationCtrlUp.match(event)) {
+		if (event.isControlDown() && event.getCode().isDigitKey()) {
 			vaultList.getSelectionModel().select(
-					vaultList.getSelectionModel().getSelectedIndex() == 0 ? 0
-							: vaultList.getSelectionModel().getSelectedIndex() - 1);
-		} else if (keyCodeCombinationCtrlDown.match(event)) {
-			vaultList.getSelectionModel().select(
-					vaultList.getSelectionModel().getSelectedIndex() == vaultList.getItems().size()
-							? vaultList.getItems().size()
-							: vaultList.getSelectionModel().getSelectedIndex() + 1);
+					Integer.valueOf(event.getText()) == 0 ?
+							10 : Integer.valueOf(event.getText()) - 1);
 		}
 	}
 
