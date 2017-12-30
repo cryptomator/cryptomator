@@ -128,9 +128,13 @@ public class MainController implements ViewController {
 		EasyBind.subscribe(areAllVaultsLocked, Platform::setImplicitExit);
 		autoUnlocker.unlockAllSilently();
 
-		Desktop.getDesktop().setPreferencesHandler(e -> {
-			Platform.runLater(this::toggleShowSettings);
-		});
+		try {
+			Desktop.getDesktop().setPreferencesHandler(e -> {
+				Platform.runLater(this::toggleShowSettings);
+			});
+		} catch (UnsupportedOperationException e) {
+			LOG.info("Unable to setPreferencesHandler, probably not supported on this OS.");
+		}
 	}
 
 	@FXML

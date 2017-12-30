@@ -24,9 +24,13 @@ class FileOpenRequestHandler {
 
 	public FileOpenRequestHandler(BlockingQueue<Path> fileOpenRequests) {
 		this.fileOpenRequests = fileOpenRequests;
-		Desktop.getDesktop().setOpenFileHandler(e -> {
-			e.getFiles().stream().map(File::toPath).forEach(fileOpenRequests::add);
-		});
+		try {
+			Desktop.getDesktop().setOpenFileHandler(e -> {
+				e.getFiles().stream().map(File::toPath).forEach(fileOpenRequests::add);
+			});
+		} catch (UnsupportedOperationException e) {
+			LOG.info("Unable to setOpenFileHandler, probably not supported on this OS.");
+		}
 	}
 
 	public void handleLaunchArgs(String[] args) {
