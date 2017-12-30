@@ -21,7 +21,7 @@ addons:
     build_command: "mvn -fmain/pom.xml clean test -DskipTests"
     branch_pattern: release.*
 install:
-- mvn -fmain/pom.xml dependency:go-offline -Pcoverage,release
+- mvn -fmain/pom.xml clean install -DskipTests dependency:go-offline -Pcoverage,release # "clean install" needed until we can exclude artifacts currently in the reactor, see https://maven.apache.org/plugins/maven-dependency-plugin/go-offline-mojo.html#excludeReactor and https://issues.apache.org/jira/browse/MDEP-568
 script:
 - mvn --update-snapshots -fmain/pom.xml clean test jacoco:report verify -Pcoverage
 after_success:
