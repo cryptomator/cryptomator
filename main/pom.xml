@@ -27,7 +27,7 @@
 		<cryptomator.cryptolib.version>1.2.0-SNAPSHOT</cryptomator.cryptolib.version>
 		<cryptomator.cryptofs.version>1.5.0-SNAPSHOT</cryptomator.cryptofs.version>
 		<cryptomator.webdav.version>1.0.3</cryptomator.webdav.version>
-		<cryptomator.jni.version>2.0.0-SNAPSHOT</cryptomator.jni.version>
+		<cryptomator.jni.version>2.0.0</cryptomator.jni.version>
 		
 		<commons-io.version>2.5</commons-io.version>
 		<commons-lang3.version>3.6</commons-lang3.version>
