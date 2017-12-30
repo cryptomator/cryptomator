@@ -38,10 +38,6 @@
 			<groupId>com.google.dagger</groupId>
 			<artifactId>dagger-compiler</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>com.google.auto</groupId>
-			<artifactId>auto-common</artifactId>
-		</dependency>
 		
 		<!-- Logging -->
 		<dependency>
