@@ -251,7 +251,7 @@ public class Vault {
 	}
 
 	public synchronized String getWebDavUrl() {
-		return servlet.getServletRootUri().toString();
+		return servlet.getServletRootUri().toString() + "/";
 	}
 
 	public Path getPath() {

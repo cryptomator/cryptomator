@@ -61,8 +61,6 @@ public class UnlockedController implements ViewController {
 	private static final int IO_SAMPLING_STEPS = 100;
 	private static final double IO_SAMPLING_INTERVAL = 0.25;
 
-	private static final String TRAILING_SLASH = "/";
-
 	private final Localization localization;
 	private final AsyncTaskService asyncTaskService;
 	private final ObjectProperty<Vault> vault = new SimpleObjectProperty<>();
@@ -246,8 +244,8 @@ public class UnlockedController implements ViewController {
 	@FXML
 	private void didClickCopyUrl(ActionEvent event) {
 		ClipboardContent clipboardContent = new ClipboardContent();
-		clipboardContent.putUrl(vault.get().getWebDavUrl() + TRAILING_SLASH);
-		clipboardContent.putString(vault.get().getWebDavUrl() + TRAILING_SLASH);
+		clipboardContent.putUrl(vault.get().getWebDavUrl());
+		clipboardContent.putString(vault.get().getWebDavUrl());
 		Clipboard.getSystemClipboard().setContent(clipboardContent);
 	}
 
