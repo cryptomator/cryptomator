@@ -35,22 +35,37 @@
 			<!-- Row 0 -->
 			<Label GridPane.rowIndex="0" GridPane.columnIndex="0" text="%settings.checkForUpdates.label" cacheShape="true" cache="true" />
 			<CheckBox GridPane.rowIndex="0" GridPane.columnIndex="1" fx:id="checkForUpdatesCheckbox" cacheShape="true" cache="true" />
-			
+
 			<!-- Row 1 -->
-			<Label GridPane.rowIndex="1" GridPane.columnIndex="0" text="%settings.port.label" cacheShape="true" cache="true" />
-			<HBox GridPane.rowIndex="1" GridPane.columnIndex="1" spacing="6.0">
-				<TextField  fx:id="portField" cacheShape="true" cache="true" promptText="%settings.port.prompt" />
-				<Button text="%settings.port.apply" fx:id="changePortButton" onAction="#changePort"/>
-			</HBox>
-			
+			<Label GridPane.rowIndex="1" GridPane.columnIndex="0" text="%settings.debugMode.label" cacheShape="true" cache="true" />
+			<CheckBox GridPane.rowIndex="1" GridPane.columnIndex="1" fx:id="debugModeCheckbox" cacheShape="true" cache="true" />
+
 			<!-- Row 2 -->
-			<Label GridPane.rowIndex="2" GridPane.columnIndex="0" fx:id="prefGvfsSchemeLabel" text="%settings.prefGvfsScheme.label" cacheShape="true" cache="true" />
-			<ChoiceBox GridPane.rowIndex="2" GridPane.columnIndex="1" fx:id="prefGvfsScheme" GridPane.hgrow="ALWAYS" maxWidth="Infinity" cacheShape="true" cache="true" />
-			
-			<!-- Row 3 -->
-			<Label GridPane.rowIndex="3" GridPane.columnIndex="0" text="%settings.debugMode.label" cacheShape="true" cache="true" />
-			<CheckBox GridPane.rowIndex="3" GridPane.columnIndex="1" fx:id="debugModeCheckbox" cacheShape="true" cache="true" />
-			
+			<Label fx:id="nioAdapterLabel" GridPane.rowIndex="2" GridPane.columnIndex="0" text="%settings.nioAdapter.label" cacheShape="true" cache="true" />
+			<ChoiceBox GridPane.rowIndex="2" GridPane.columnIndex="1" fx:id="nioAdapter" cacheShape="true" cache="true" />
+
+			<!-- Row 3 Alt 1-->
+			<GridPane fx:id="webdavNioAdapter" vgap="12.0" hgap="12.0" GridPane.rowIndex="3" GridPane.columnIndex="0" GridPane.columnSpan="2" visible="true" cacheShape="true" cache="true">
+				<Label fx:id="portFieldLabel" GridPane.rowIndex="3" GridPane.columnIndex="0" text="%settings.webdav.port.label" cacheShape="true" cache="true" />
+				<HBox GridPane.rowIndex="3" GridPane.columnIndex="1" spacing="6.0">
+					<TextField  fx:id="portField" cacheShape="true" cache="true" promptText="%settings.webdav.port.prompt" />
+					<Button text="%settings.webdav.port.apply" fx:id="changePortButton" onAction="#changePort"/>
+				</HBox>
+
+				<!-- Row 4 -->
+				<Label GridPane.rowIndex="4" GridPane.columnIndex="0" fx:id="prefGvfsSchemeLabel" text="%settings.webdav.prefGvfsScheme.label" cacheShape="true" cache="true" />
+				<ChoiceBox GridPane.rowIndex="4" GridPane.columnIndex="1" fx:id="prefGvfsScheme" GridPane.hgrow="ALWAYS" maxWidth="Infinity" cacheShape="true" cache="true" />
+			</GridPane>
+
+			<!-- Row 3 Alt 2-->
+			<GridPane fx:id="fuseNioAdapter" vgap="12.0" hgap="12.0" GridPane.rowIndex="3" GridPane.columnIndex="0" GridPane.columnSpan="2" visible="false" cacheShape="true" cache="true">
+				<Label fx:id="defaultMountDirLabel" GridPane.rowIndex="3" GridPane.columnIndex="0" text="%settings.fuse.defaultMntDir.label" cacheShape="true" cache="true"/>
+				<HBox GridPane.rowIndex="3" GridPane.columnIndex="1" spacing="6.0">
+					<TextField  fx:id="defaultMountDir" cacheShape="true" cache="true" promptText="%settings.fuse.defaultMntDir.defaultVal" />
+					<Button text="%settings.webdav.port.apply" fx:id="changeDefaultMountDirButton" onAction="#changeDefaultMountDir"/>
+				</HBox>
+			</GridPane>
+
 		</children>
 	</GridPane>
 	<Label VBox.vgrow="NEVER" text="%settings.requiresRestartLabel" alignment="CENTER" cacheShape="true" cache="true" />

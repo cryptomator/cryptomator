@@ -33,6 +33,8 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 		out.name("numTrayNotifications").value(value.numTrayNotifications().get());
 		out.name("preferredGvfsScheme").value(value.preferredGvfsScheme().get());
 		out.name("debugMode").value(value.debugMode().get());
+		out.name("nioAdapterImpl").value(value.usedNioAdapterImpl().get());
+		out.name("defaultMountDir").value(value.defaultMountDir().get());
 		out.endObject();
 	}
 
@@ -69,6 +71,12 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 				break;
 			case "debugMode":
 				settings.debugMode().set(in.nextBoolean());
+				break;
+			case "nioAdapterImpl":
+				settings.usedNioAdapterImpl().set(in.nextString());
+				break;
+			case "defaultMountDir":
+				settings.defaultMountDir().set(in.nextString());
 				break;
 			default:
 				LOG.warn("Unsupported vault setting found in JSON: " + name);

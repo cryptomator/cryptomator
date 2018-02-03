@@ -30,6 +30,8 @@ public class Settings {
 	public static final int DEFAULT_NUM_TRAY_NOTIFICATIONS = 3;
 	public static final String DEFAULT_GVFS_SCHEME = "dav";
 	public static final boolean DEFAULT_DEBUG_MODE = false;
+	public static final String DEFAULT_DEFAULT_MOUNT_DIR = System.getProperty("user.home");
+	public static final String DEFAULT_NIO_ADAPTER = "WEBDAV";
 
 	private final ObservableList<VaultSettings> directories = FXCollections.observableArrayList(VaultSettings::observables);
 	private final BooleanProperty checkForUpdates = new SimpleBooleanProperty(DEFAULT_CHECK_FOR_UDPATES);
@@ -37,6 +39,9 @@ public class Settings {
 	private final IntegerProperty numTrayNotifications = new SimpleIntegerProperty(DEFAULT_NUM_TRAY_NOTIFICATIONS);
 	private final StringProperty preferredGvfsScheme = new SimpleStringProperty(DEFAULT_GVFS_SCHEME);
 	private final BooleanProperty debugMode = new SimpleBooleanProperty(DEFAULT_DEBUG_MODE);
+	private final StringProperty nioAdapterImpl = new SimpleStringProperty(DEFAULT_NIO_ADAPTER);
+	private final StringProperty defaultMountDir = new SimpleStringProperty(DEFAULT_DEFAULT_MOUNT_DIR);
+
 	private Consumer<Settings> saveCmd;
 
 	/**
@@ -49,6 +54,8 @@ public class Settings {
 		numTrayNotifications.addListener(this::somethingChanged);
 		preferredGvfsScheme.addListener(this::somethingChanged);
 		debugMode.addListener(this::somethingChanged);
+		nioAdapterImpl.addListener(this::somethingChanged);
+		defaultMountDir.addListener(this::somethingChanged);
 	}
 
 	void setSaveCmd(Consumer<Settings> saveCmd) {
@@ -91,4 +98,11 @@ public class Settings {
 		return debugMode;
 	}
 
+	public StringProperty usedNioAdapterImpl() {
+		return nioAdapterImpl;
+	}
+
+	public StringProperty defaultMountDir() {
+		return defaultMountDir;
+	}
 }

@@ -34,6 +34,7 @@ class VaultSettingsJsonAdapter {
 		String id = null;
 		String path = null;
 		String mountName = null;
+		String mountPath = null;
 		String winDriveLetter = null;
 		boolean unlockAfterStartup = VaultSettings.DEFAULT_UNLOCK_AFTER_STARTUP;
 		boolean mountAfterUnlock = VaultSettings.DEFAULT_MOUNT_AFTER_UNLOCK;
@@ -64,6 +65,8 @@ class VaultSettingsJsonAdapter {
 			case "revealAfterMount":
 				revealAfterMount = in.nextBoolean();
 				break;
+			case "mountPath":
+				mountPath = in.nextString();
 			default:
 				LOG.warn("Unsupported vault setting found in JSON: " + name);
 				in.skipValue();
@@ -78,6 +81,7 @@ class VaultSettingsJsonAdapter {
 		vaultSettings.unlockAfterStartup().set(unlockAfterStartup);
 		vaultSettings.mountAfterUnlock().set(mountAfterUnlock);
 		vaultSettings.revealAfterMount().set(revealAfterMount);
+		vaultSettings.mountPath().set(mountPath);
 		return vaultSettings;
 	}
 

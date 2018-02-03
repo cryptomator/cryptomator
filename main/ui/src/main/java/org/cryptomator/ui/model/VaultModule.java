@@ -43,13 +43,13 @@ public class VaultModule {
 
 	@Provides
 	@PerVault
-	public NioAdapter provideNioAdpater(Settings settings, WebDavNioAdapter webDavNioAdapter) {
+	public NioAdapter provideNioAdpater(Settings settings, WebDavNioAdapter webDavNioAdapter, FuseNioAdapter fuseNioAdapter) {
 		NioAdapterImpl impl = NioAdapterImpl.valueOf(settings.usedNioAdapterImpl().get());
 		switch (impl) {
 			case WEBDAV:
 				return webDavNioAdapter;
 			case FUSE:
-				throw new NotImplementedException();
+				return fuseNioAdapter;
 			default:
 				//this should not happen!
 				throw new IllegalStateException("Unsupported NioAdapter: " + settings.usedNioAdapterImpl().get());

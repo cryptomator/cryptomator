@@ -28,7 +28,8 @@
 		<cryptomator.cryptofs.version>1.4.5</cryptomator.cryptofs.version>
 		<cryptomator.webdav.version>1.0.3</cryptomator.webdav.version>
 		<cryptomator.jni.version>1.0.2</cryptomator.jni.version>
-		
+		<cryptomator.fuse.version>0.1.1-SNAPSHOT</cryptomator.fuse.version>
+
 		<commons-io.version>2.5</commons-io.version>
 		<commons-lang3.version>3.6</commons-lang3.version>
 		<httpclient.version>4.5.3</httpclient.version>
@@ -95,6 +96,11 @@
 				<groupId>org.cryptomator</groupId>
 				<artifactId>cryptofs</artifactId>
 				<version>${cryptomator.cryptofs.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.cryptomator</groupId>
+				<artifactId>fuse-nio-adapter</artifactId>
+				<version>${cryptomator.fuse.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.cryptomator</groupId>

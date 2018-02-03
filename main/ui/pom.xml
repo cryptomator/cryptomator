@@ -30,7 +30,11 @@
 			<groupId>org.cryptomator</groupId>
 			<artifactId>keychain</artifactId>
 		</dependency>
-		
+		<dependency>
+			<groupId>org.cryptomator</groupId>
+			<artifactId>fuse-nio-adapter</artifactId>
+		</dependency>
+
 		<!-- CryptoLib -->
 		<dependency>
 			<groupId>org.cryptomator</groupId>

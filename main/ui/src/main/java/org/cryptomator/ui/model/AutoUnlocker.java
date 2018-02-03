@@ -18,7 +18,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.cryptomator.cryptolib.api.CryptoException;
-import org.cryptomator.frontend.webdav.mount.Mounter.CommandFailedException;
 import org.cryptomator.keychain.KeychainAccess;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

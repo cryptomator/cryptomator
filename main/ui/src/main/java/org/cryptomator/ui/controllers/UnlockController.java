@@ -8,7 +8,9 @@
  ******************************************************************************/
 package org.cryptomator.ui.controllers;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.*;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Objects;
@@ -16,6 +18,8 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
+import javafx.beans.Observable;
+import javafx.beans.binding.Bindings;
 import org.apache.commons.lang3.CharUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.settings.VaultSettings;
@@ -113,6 +117,15 @@ public class UnlockController implements ViewController {
 	private ChoiceBox<Character> winDriveLetter;
 
 	@FXML
+	private Label mountPathLabel;
+
+	@FXML
+	private TextField mountPath;
+
+	@FXML
+	private Button changeMountPathButton;
+
+	@FXML
 	private ProgressIndicator progressIndicator;
 
 	@FXML
@@ -142,12 +155,26 @@ public class UnlockController implements ViewController {
 		unlockAfterStartup.disableProperty().bind(savePassword.disabledProperty().or(savePassword.selectedProperty().not()));
 		if (SystemUtils.IS_OS_WINDOWS) {
 			winDriveLetter.setConverter(new WinDriveLetterLabelConverter());
+			mountPathLabel.setVisible(false);
+			mountPathLabel.setManaged(false);
+			mountPath.setVisible(false);
+			mountPath.setManaged(false);
+			changeMountPathButton.setVisible(false);
+			changeMountPathButton.setManaged(false);
 		} else {
 			winDriveLetterLabel.setVisible(false);
 			winDriveLetterLabel.setManaged(false);
 			winDriveLetter.setVisible(false);
 			winDriveLetter.setManaged(false);
 		}
+		changeMountPathButton.disableProperty().bind(Bindings.createBooleanBinding(this::isDirVaild, mountPath.textProperty()).not());
+		changeMountPathButton.visibleProperty().bind(
+				Bindings.createBooleanBinding(
+						()-> mountPathLabel.isVisible() && mountPath.textProperty().isEmpty().not().get(),
+						mountPathLabel.visibleProperty(),
+						mountPath.textProperty().isEmpty().not()
+				)
+		);
 	}
 
 	@Override
@@ -208,6 +235,7 @@ public class UnlockController implements ViewController {
 		vaultSubs = vaultSubs.and(EasyBind.subscribe(unlockAfterStartup.selectedProperty(), settings.unlockAfterStartup()::set));
 		vaultSubs = vaultSubs.and(EasyBind.subscribe(mountAfterUnlock.selectedProperty(), settings.mountAfterUnlock()::set));
 		vaultSubs = vaultSubs.and(EasyBind.subscribe(revealAfterMount.selectedProperty(), settings.revealAfterMount()::set));
+
 	}
 
 	// ****************************************
@@ -232,6 +260,32 @@ public class UnlockController implements ViewController {
 			advancedOptionsButton.setText(localization.getString("unlock.button.advancedOptions.show"));
 		}
 	}
+
+	@FXML
+	private void didClickchangeMountPathButton(ActionEvent event){
+		assert isDirVaild();
+		vault.setMountPath(mountPath.getText());
+	}
+
+	private boolean isDirVaild(){
+		try{
+			if(!mountPath.textProperty().isEmpty().get()){
+				Path p = Paths.get(mountPath.textProperty().get());
+				return Files.isDirectory(p) && Files.isReadable(p) && Files.isWritable(p) && Files.isExecutable(p);
+			}
+			else{
+				//default path will be taken
+				return true;
+			}
+
+		}
+		catch (InvalidPathException e){
+			LOG.info("Invalid path");
+			return false;
+		}
+	}
+
+
 
 	private void filterAlphanumericKeyEvents(KeyEvent t) {
 		if (!Strings.isNullOrEmpty(t.getCharacter()) && !ALPHA_NUMERIC_MATCHER.matchesAllOf(t.getCharacter())) {
