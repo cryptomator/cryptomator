@@ -8,10 +8,14 @@ public interface NioAdapter {
 
 	void mount() throws CommandFailedException;
 
+	default void reveal() throws CommandFailedException {
+		throw new CommandFailedException("Not implemented.");
+	}
+
 	void unmount() throws CommandFailedException;
 
 	default void unmountForced() throws CommandFailedException {
-		throw new CommandFailedException("Operation not supported");
+		throw new CommandFailedException("Operation not supported.");
 	}
 
 	void stop();

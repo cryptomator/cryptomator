@@ -178,11 +178,8 @@ public class Vault {
 		}
 	}
 
-	/**
-	 * TODO: implement it again
-	 */
 	public void reveal() throws CommandFailedException {
-
+		nioAdapter.reveal();
 	}
 
 	// ******************************************************************************

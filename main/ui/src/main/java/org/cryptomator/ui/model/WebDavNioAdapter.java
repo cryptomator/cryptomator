@@ -60,6 +60,16 @@ public class WebDavNioAdapter implements NioAdapter {
 	}
 
 	@Override
+	public void reveal() throws CommandFailedException {
+		try {
+			mount.reveal();
+		} catch (Mounter.CommandFailedException e) {
+			e.printStackTrace();
+			throw new CommandFailedException(e);
+		}
+	}
+
+	@Override
 	public synchronized void unmount() throws CommandFailedException {
 		try {
 			mount.unmount();
