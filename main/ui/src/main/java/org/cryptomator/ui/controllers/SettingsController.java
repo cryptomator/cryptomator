@@ -138,8 +138,8 @@ public class SettingsController implements ViewController {
 		fuseNioAdapter.managedProperty().bind(fuseNioAdapter.visibleProperty());
 		defaultMountDirLabel.managedProperty().bind(fuseNioAdapter.visibleProperty());
 		defaultMountDir.managedProperty().bind(fuseNioAdapter.visibleProperty());
-		defaultMountDirLabel.setVisible(SystemUtils.IS_OS_LINUX);
-		defaultMountDir.setVisible(SystemUtils.IS_OS_LINUX);
+		defaultMountDirLabel.setVisible(!SystemUtils.IS_OS_WINDOWS);
+		defaultMountDir.setVisible(!SystemUtils.IS_OS_WINDOWS);
 		defaultMountDir.setText(String.valueOf(settings.defaultMountDir().get()));
 		changeDefaultMountDirButton.setVisible(false);
 		changeDefaultMountDirButton.visibleProperty().bind(
