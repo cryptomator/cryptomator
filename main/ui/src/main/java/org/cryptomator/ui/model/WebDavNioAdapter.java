@@ -12,7 +12,6 @@ import org.cryptomator.frontend.webdav.servlet.WebDavServletController;
 import javax.inject.Inject;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.function.Function;
 
 @VaultModule.PerVault
 public class WebDavNioAdapter implements NioAdapter {
@@ -27,18 +26,18 @@ public class WebDavNioAdapter implements NioAdapter {
 	private Mounter.Mount mount;
 
 	@Inject
-	public WebDavNioAdapter(WebDavServer server, VaultSettings vaultSettings, Settings settings){
+	public WebDavNioAdapter(WebDavServer server, VaultSettings vaultSettings, Settings settings) {
 		this.server = server;
 		this.vaultSettings = vaultSettings;
 		this.settings = settings;
 	}
 
 	@Override
-	public void unlock(CryptoFileSystem fs){
-		if(!server.isRunning()){
+	public void unlock(CryptoFileSystem fs) {
+		if (!server.isRunning()) {
 			server.start();
 		}
-		servlet = server.createWebDavServlet(fs.getPath("/"), vaultSettings.getId()+ "/" + vaultSettings.mountName().get());
+		servlet = server.createWebDavServlet(fs.getPath("/"), vaultSettings.getId() + "/" + vaultSettings.mountName().get());
 		servlet.start();
 	}
 
@@ -64,14 +63,13 @@ public class WebDavNioAdapter implements NioAdapter {
 	public synchronized void unmount() throws CommandFailedException {
 		try {
 			mount.unmount();
-		}
-		catch (Mounter.CommandFailedException e){
+		} catch (Mounter.CommandFailedException e) {
 			throw new CommandFailedException(e);
 		}
 	}
 
 	@Override
-	public synchronized void unmountForced(){
+	public synchronized void unmountForced() {
 		mount.forced();
 	}
 
@@ -90,7 +88,7 @@ public class WebDavNioAdapter implements NioAdapter {
 
 	@Override
 	public void stop() {
-		if(servlet != null){
+		if (servlet != null) {
 			servlet.stop();
 		}
 

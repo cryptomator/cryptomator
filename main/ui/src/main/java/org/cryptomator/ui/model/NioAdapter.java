@@ -2,9 +2,6 @@ package org.cryptomator.ui.model;
 
 import org.cryptomator.cryptofs.CryptoFileSystem;
 
-import java.util.HashMap;
-
-
 public interface NioAdapter {
 
 	void unlock(CryptoFileSystem fs);
@@ -12,6 +9,10 @@ public interface NioAdapter {
 	void mount() throws CommandFailedException;
 
 	void unmount() throws CommandFailedException;
+
+	default void unmountForced() throws CommandFailedException {
+		throw new CommandFailedException("Operation not supported");
+	}
 
 	void stop();
 
@@ -25,7 +26,4 @@ public interface NioAdapter {
 		return false;
 	}
 
-	default void unmountForced() throws CommandFailedException {
-		throw new CommandFailedException("Operation not supported");
-	}
 }
