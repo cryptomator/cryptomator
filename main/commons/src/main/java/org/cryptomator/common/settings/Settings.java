@@ -2,7 +2,7 @@
  * Copyright (c) 2014, 2017 Sebastian Stenzel
  * All rights reserved.
  * This program and the accompanying materials are made available under the terms of the accompanying LICENSE file.
- * 
+ *
  * Contributors:
  *     Sebastian Stenzel - initial API and implementation
  ******************************************************************************/
@@ -31,7 +31,7 @@ public class Settings {
 	public static final String DEFAULT_GVFS_SCHEME = "dav";
 	public static final boolean DEFAULT_DEBUG_MODE = false;
 	public static final String DEFAULT_DEFAULT_MOUNT_DIR = System.getProperty("user.home");
-	public static final String DEFAULT_NIO_ADAPTER = "WEBDAV";
+	public static final String DEFAULT_NIO_ADAPTER = "webdav";
 
 	private final ObservableList<VaultSettings> directories = FXCollections.observableArrayList(VaultSettings::observables);
 	private final BooleanProperty checkForUpdates = new SimpleBooleanProperty(DEFAULT_CHECK_FOR_UDPATES);

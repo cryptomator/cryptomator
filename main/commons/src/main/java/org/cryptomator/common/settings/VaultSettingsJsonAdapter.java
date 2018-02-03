@@ -27,6 +27,7 @@ class VaultSettingsJsonAdapter {
 		out.name("unlockAfterStartup").value(value.unlockAfterStartup().get());
 		out.name("mountAfterUnlock").value(value.mountAfterUnlock().get());
 		out.name("revealAfterMount").value(value.revealAfterMount().get());
+		out.name("mountPath").value(value.mountPath().get());
 		out.endObject();
 	}
 
@@ -44,32 +45,33 @@ class VaultSettingsJsonAdapter {
 		while (in.hasNext()) {
 			String name = in.nextName();
 			switch (name) {
-			case "id":
-				id = in.nextString();
-				break;
-			case "path":
-				path = in.nextString();
-				break;
-			case "mountName":
-				mountName = in.nextString();
-				break;
-			case "winDriveLetter":
-				winDriveLetter = in.nextString();
-				break;
-			case "unlockAfterStartup":
-				unlockAfterStartup = in.nextBoolean();
-				break;
-			case "mountAfterUnlock":
-				mountAfterUnlock = in.nextBoolean();
-				break;
-			case "revealAfterMount":
-				revealAfterMount = in.nextBoolean();
-				break;
-			case "mountPath":
-				mountPath = in.nextString();
-			default:
-				LOG.warn("Unsupported vault setting found in JSON: " + name);
-				in.skipValue();
+				case "id":
+					id = in.nextString();
+					break;
+				case "path":
+					path = in.nextString();
+					break;
+				case "mountName":
+					mountName = in.nextString();
+					break;
+				case "winDriveLetter":
+					winDriveLetter = in.nextString();
+					break;
+				case "unlockAfterStartup":
+					unlockAfterStartup = in.nextBoolean();
+					break;
+				case "mountAfterUnlock":
+					mountAfterUnlock = in.nextBoolean();
+					break;
+				case "revealAfterMount":
+					revealAfterMount = in.nextBoolean();
+					break;
+				case "mountPath":
+					mountPath = in.nextString();
+					break;
+				default:
+					LOG.warn("Unsupported vault setting found in JSON: " + name);
+					in.skipValue();
 			}
 		}
 		in.endObject();

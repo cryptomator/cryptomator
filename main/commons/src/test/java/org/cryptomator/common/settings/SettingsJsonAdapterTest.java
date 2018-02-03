@@ -22,7 +22,9 @@ public class SettingsJsonAdapterTest {
 				+ "\"checkForUpdatesEnabled\": true,"//
 				+ "\"port\": 8080,"//
 				+ "\"useIpv6\": true,"//
-				+ "\"numTrayNotifications\": 42}";
+				+ "\"numTrayNotifications\": 42,"//
+				+ "\"nioAdapterImpl\": \"webdav\","//
+				+ "\"defaultMountDir\": \"/home/test/crypto\"}";
 
 		Settings settings = adapter.fromJson(json);
 
@@ -32,6 +34,8 @@ public class SettingsJsonAdapterTest {
 		// Assert.assertTrue(settings.useIpv6().get()); temporarily ignored
 		Assert.assertEquals(42, settings.numTrayNotifications().get());
 		Assert.assertEquals("dav", settings.preferredGvfsScheme().get());
+		Assert.assertEquals("webdav", settings.usedNioAdapterImpl().get());
+		Assert.assertEquals("/home/test/crypto", settings.defaultMountDir().get());
 	}
 
 }
