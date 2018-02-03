@@ -12,10 +12,12 @@ import java.util.Objects;
 
 import javax.inject.Scope;
 
+import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VaultSettings;
 
 import dagger.Module;
 import dagger.Provides;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 @Module
 public class VaultModule {
@@ -36,6 +38,21 @@ public class VaultModule {
 	@Documented
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface PerVault {
+
 	}
 
+	@Provides
+	@PerVault
+	public NioAdapter provideNioAdpater(Settings settings, WebDavNioAdapter webDavNioAdapter) {
+		NioAdapterImpl impl = NioAdapterImpl.valueOf(settings.usedNioAdapterImpl().get());
+		switch (impl) {
+			case WEBDAV:
+				return webDavNioAdapter;
+			case FUSE:
+				throw new NotImplementedException();
+			default:
+				//this should not happen!
+				throw new IllegalStateException("Unsupported NioAdapter: " + settings.usedNioAdapterImpl().get());
+		}
+	}
 }
