@@ -299,7 +299,7 @@ public class Vault {
 	}
 
 	public String getFilesystemRootUrl() {
-		return nioAdapter.getFilesystemRootUrl();
+		return nioAdapter.getFsRootUrlString();
 	}
 
 	public String getId() {

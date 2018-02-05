@@ -12,6 +12,7 @@ import java.util.Objects;
 
 import javax.inject.Scope;
 
+import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VaultSettings;
 
@@ -53,6 +54,43 @@ public class VaultModule {
 			default:
 				//this should not happen!
 				throw new IllegalStateException("Unsupported NioAdapter: " + settings.usedNioAdapterImpl().get());
+		}
+	}
+
+	//TODO: ask sebi if this should be here
+
+	private final OS os = OS.getCurrentOS();
+
+	private enum OS {
+		WINDOWS,
+		LINUX,
+		MAC;
+
+		public static OS getCurrentOS() {
+			if (SystemUtils.IS_OS_WINDOWS) {
+				return WINDOWS;
+			} else if (SystemUtils.IS_OS_MAC) {
+				return MAC;
+			} else {
+				return LINUX;
+			}
+		}
+
+	}
+
+	@Provides
+	@VaultModule.PerVault
+	FuseEnvironment providesFuseEnvironment(WindowsFuseEnvironment windowsFuseEnvironment, LinuxFuseEnvironment linuxFuseEnvironment, MacFuseEnvironment macFuseEnvironment){
+		switch (os){
+			case LINUX:
+				return linuxFuseEnvironment;
+			case WINDOWS:
+				return windowsFuseEnvironment;
+			case MAC:
+				return macFuseEnvironment;
+			default:
+				//TODO: should be better something else returned?
+				return null;
 		}
 	}
 }

@@ -20,7 +20,7 @@ public interface NioAdapter {
 
 	void stop();
 
-	String getFilesystemRootUrl();
+	String getFsRootUrlString();
 
 	default boolean isSupported() {
 		return false;

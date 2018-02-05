@@ -104,7 +104,7 @@ public class WebDavNioAdapter implements NioAdapter {
 
 	}
 
-	public synchronized String getFilesystemRootUrl() {
+	public synchronized String getFsRootUrlString() {
 		return servlet.getServletRootUri().toString();
 	}
 
