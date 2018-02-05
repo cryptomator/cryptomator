@@ -43,13 +43,9 @@ public class FuseNioAdapter implements NioAdapter {
 		}
 	}
 
-	/**
-	 * TODO: implement it!
-	 * @throws CommandFailedException
-	 */
 	@Override
 	public void reveal() throws CommandFailedException{
-		//fuseEnv.revealFsRootUrlInFilesystemManager(SOMETHING);
+		fuseEnv.revealFsRootInFilesystemManager();
 	}
 
 	@Override
