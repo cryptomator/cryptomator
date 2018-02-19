@@ -59,11 +59,6 @@
 
 			<!-- Row 3 Alt 2-->
 			<GridPane fx:id="fuseNioAdapter" vgap="12.0" hgap="12.0" GridPane.rowIndex="3" GridPane.columnIndex="0" GridPane.columnSpan="2" visible="false" cacheShape="true" cache="true">
-				<Label fx:id="defaultMountDirLabel" GridPane.rowIndex="3" GridPane.columnIndex="0" text="%settings.fuse.defaultMntDir.label" cacheShape="true" cache="true"/>
-				<HBox GridPane.rowIndex="3" GridPane.columnIndex="1" spacing="6.0">
-					<TextField  fx:id="defaultMountDir" cacheShape="true" cache="true" promptText="%settings.fuse.defaultMntDir.defaultVal" />
-					<Button text="%settings.webdav.port.apply" fx:id="changeDefaultMountDirButton" onAction="#changeDefaultMountDir"/>
-				</HBox>
 			</GridPane>
 
 		</children>

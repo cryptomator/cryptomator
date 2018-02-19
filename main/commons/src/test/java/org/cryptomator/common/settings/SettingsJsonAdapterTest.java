@@ -35,7 +35,6 @@ public class SettingsJsonAdapterTest {
 		Assert.assertEquals(42, settings.numTrayNotifications().get());
 		Assert.assertEquals("dav", settings.preferredGvfsScheme().get());
 		Assert.assertEquals("webdav", settings.usedNioAdapterImpl().get());
-		Assert.assertEquals("/home/test/crypto", settings.defaultMountDir().get());
 	}
 
 }

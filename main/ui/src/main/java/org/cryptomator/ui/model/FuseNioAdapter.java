@@ -23,35 +23,30 @@ public class FuseNioAdapter implements NioAdapter {
 	}
 
 	@Override
-	public void unlock(CryptoFileSystem fs) {
+	public void prepare(CryptoFileSystem fs) {
 		this.cfs = fs;
 		ffs = AdapterFactory.createReadWriteAdapter(fs.getPath("/"));
 	}
 
-	/**
-	 * TODO: should createTempDirectory() be used instead of createDirectory()?
-	 *
-	 * @throws CommandFailedException
-	 */
 	@Override
 	public void mount() throws CommandFailedException {
-	try {
-		fuseEnv.prepare();
-		ffs.mount(fuseEnv.getFsRootPath(), false, false, fuseEnv.getMountParameters());
-	} catch (Exception e) {
+		try {
+			fuseEnv.prepare();
+			ffs.mount(fuseEnv.getFsRootPath(), false, false, fuseEnv.getMountParameters());
+		} catch (Exception e) {
 			throw new CommandFailedException("Unable to mount Filesystem", e);
 		}
 	}
 
 	@Override
-	public void reveal() throws CommandFailedException{
+	public void reveal() throws CommandFailedException {
 		fuseEnv.revealFsRootInFilesystemManager();
 	}
 
 	@Override
 	public synchronized void unmount() throws CommandFailedException {
 		if (cfs.getStats().pollBytesRead() == 0 && cfs.getStats().pollBytesWritten() == 0) {
-			unmountForced();
+			unmountRaw();
 		} else {
 			throw new CommandFailedException("Pending read or write operations.");
 		}
@@ -59,6 +54,10 @@ public class FuseNioAdapter implements NioAdapter {
 
 	@Override
 	public synchronized void unmountForced() throws CommandFailedException {
+		this.unmountRaw();
+	}
+
+	private synchronized void unmountRaw() {
 		ffs.umount();
 	}
 
@@ -68,7 +67,7 @@ public class FuseNioAdapter implements NioAdapter {
 	}
 
 	@Override
-	public String getFsRootUrlString() {
+	public String getMountUrl() {
 		return fuseEnv.getFsRootPath().toUri().toString();
 	}
 

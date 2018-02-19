@@ -4,7 +4,7 @@ import org.cryptomator.cryptofs.CryptoFileSystem;
 
 public interface NioAdapter {
 
-	void unlock(CryptoFileSystem fs);
+	void prepare(CryptoFileSystem fs);
 
 	void mount() throws CommandFailedException;
 
@@ -20,7 +20,7 @@ public interface NioAdapter {
 
 	void stop();
 
-	String getFsRootUrlString();
+	String getMountUrl();
 
 	default boolean isSupported() {
 		return false;

@@ -122,8 +122,6 @@ settings.requiresRestartLabel=* Cryptomator needs to restart
 settings.nioAdapter.label= Mount-Methode *
 settings.nioAdapter.webdav=WebDAV
 settings.nioAdapter.fuse=FUSE
-settings.fuse.defaultMntDir.label=Default mounting point
-settings.fuse.defaultMntDir.defaultVal=/dev/null
 
 # tray icon
 tray.menu.open=Open

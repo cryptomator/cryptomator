@@ -30,7 +30,6 @@ import org.cryptomator.cryptolib.api.CryptoException;
 import org.cryptomator.cryptolib.api.InvalidPassphraseException;
 import org.cryptomator.ui.model.VaultModule.PerVault;
 
-import com.google.common.base.Strings;
 import javafx.application.Platform;
 import javafx.beans.Observable;
 import javafx.beans.binding.Binding;
@@ -68,10 +67,6 @@ public class Vault {
 		this.settings = settings;
 		this.vaultSettings = vaultSettings;
 		this.nioAdapter = nioAdapter;
-
-		if (Strings.isNullOrEmpty(vaultSettings.mountPath().get())) {
-			vaultSettings.mountPath().set(settings.defaultMountDir().get() + "/" + vaultSettings.mountName().get());
-		}
 	}
 
 	// ******************************************************************************
@@ -105,7 +100,7 @@ public class Vault {
 
 	public synchronized void unlock(CharSequence passphrase) throws CryptoException, IOException {
 		CryptoFileSystem fs = getCryptoFileSystem(passphrase);
-		nioAdapter.unlock(fs);
+		nioAdapter.prepare(fs);
 		Platform.runLater(() -> {
 			state.set(State.UNLOCKED);
 		});
@@ -267,11 +262,7 @@ public class Vault {
 	}
 
 	public void setMountPath(String mountPath) {
-		if (mountPath.isEmpty()) {
-			vaultSettings.mountPath().set(settings.defaultMountDir().get());
-		} else {
-			vaultSettings.mountPath().set(mountPath);
-		}
+		vaultSettings.mountPath().set(mountPath);
 	}
 
 	public void setMountName(String mountName) throws IllegalArgumentException {
@@ -299,7 +290,7 @@ public class Vault {
 	}
 
 	public String getFilesystemRootUrl() {
-		return nioAdapter.getFsRootUrlString();
+		return nioAdapter.getMountUrl();
 	}
 
 	public String getId() {

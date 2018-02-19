@@ -2,22 +2,18 @@
  * Copyright (c) 2014, 2017 Sebastian Stenzel
  * All rights reserved.
  * This program and the accompanying materials are made available under the terms of the accompanying LICENSE file.
- * 
+ *
  * Contributors:
  *     Sebastian Stenzel - initial API and implementation
  ******************************************************************************/
 package org.cryptomator.ui.controllers;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Optional;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
-import javafx.beans.Observable;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.layout.GridPane;
 import org.apache.commons.lang3.SystemUtils;
@@ -81,15 +77,6 @@ public class SettingsController implements ViewController {
 	private Label prefGvfsSchemeLabel;
 
 	@FXML
-	private Label defaultMountDirLabel;
-
-	@FXML
-	private TextField defaultMountDir;
-
-	@FXML
-	private Button changeDefaultMountDirButton;
-
-	@FXML
 	private ChoiceBox<String> prefGvfsScheme;
 
 	@FXML
@@ -114,7 +101,7 @@ public class SettingsController implements ViewController {
 		nioAdapter.getItems().addAll(getSupportedAdapters());
 		nioAdapter.setValue(settings.usedNioAdapterImpl().get());
 		nioAdapter.setVisible(true);
-		nioAdapter.getSelectionModel().selectedItemProperty().addListener( (ObservableValue<? extends String> observable, String oldVal, String newVal) -> changeNioView(newVal) );
+		nioAdapter.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends String> observable, String oldVal, String newVal) -> changeNioView(newVal));
 
 
 		//WEBDAV
@@ -136,20 +123,6 @@ public class SettingsController implements ViewController {
 
 		//FUSE
 		fuseNioAdapter.managedProperty().bind(fuseNioAdapter.visibleProperty());
-		defaultMountDirLabel.managedProperty().bind(fuseNioAdapter.visibleProperty());
-		defaultMountDir.managedProperty().bind(fuseNioAdapter.visibleProperty());
-		defaultMountDirLabel.setVisible(!SystemUtils.IS_OS_WINDOWS);
-		defaultMountDir.setVisible(!SystemUtils.IS_OS_WINDOWS);
-		defaultMountDir.setText(String.valueOf(settings.defaultMountDir().get()));
-		changeDefaultMountDirButton.setVisible(false);
-		changeDefaultMountDirButton.visibleProperty().bind(
-				Bindings.createBooleanBinding(
-						() ->  fuseNioAdapter.visibleProperty().get() && settings.defaultMountDir().isNotEqualTo(Strings.nullToEmpty(defaultMountDir.getText())).get() ,
-						fuseNioAdapter.visibleProperty(),
-						settings.defaultMountDir().isNotEqualTo(defaultMountDir.textProperty())
-						)
-		);
-		changeDefaultMountDirButton.disableProperty().bind(Bindings.createBooleanBinding(this::isDirValid, defaultMountDir.textProperty()).not());
 
 		debugModeCheckbox.setSelected(settings.debugMode().get());
 
@@ -160,7 +133,7 @@ public class SettingsController implements ViewController {
 	}
 
 	//TODO: how to implement this?
-	private String [] getSupportedAdapters() {
+	private String[] getSupportedAdapters() {
 		return new String[]{NioAdapterImpl.FUSE.name(), NioAdapterImpl.WEBDAV.name()};
 	}
 
@@ -182,23 +155,6 @@ public class SettingsController implements ViewController {
 			settings.port().set(port);
 		} catch (NumberFormatException e) {
 			throw new IllegalStateException("Button must be disabled, if port is invalid.", e);
-		}
-	}
-
-	@FXML
-	private void changeDefaultMountDir(ActionEvent event){
-		assert isDirValid() : "Error. Not a valid Directory. Does and exist and do you have the needed Rights?";
-		settings.defaultMountDir().set(defaultMountDir.getText());
-	}
-
-	private boolean isDirValid(){
-		if(SystemUtils.IS_OS_WINDOWS){
-			//this should never ever happen!
-			return false;
-		}
-		else{
-			Path path = Paths.get(defaultMountDir.getText());
-			return Files.isDirectory(path) && Files.isReadable(path) && Files.isWritable(path) && Files.isExecutable(path);
 		}
 	}
 

@@ -90,7 +90,7 @@
 			<!-- Row 3.6 Alt2 -->
 			<Label GridPane.rowIndex="6" GridPane.columnIndex="0" fx:id="mountPathLabel" text="%unlock.label.mountPath" cacheShape="true" cache="true" />
 
-			<HBox GridPane.rowIndex="6" GridPane.columnIndex="1" spacing="6.0">
+			<HBox GridPane.rowIndex="6" GridPane.columnIndex="1" fx:id="mountPathBox" spacing="6.0">
 				<TextField GridPane.rowIndex="6" GridPane.columnIndex="1" fx:id="mountPath"  cacheShape="true" cache="true" />
 				<Button text="%unlock.label.mountPathButton" fx:id="changeMountPathButton" onAction="#didClickchangeMountPathButton"/>
 			</HBox>

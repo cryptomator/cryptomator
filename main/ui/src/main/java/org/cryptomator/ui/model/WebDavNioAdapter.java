@@ -33,7 +33,7 @@ public class WebDavNioAdapter implements NioAdapter {
 	}
 
 	@Override
-	public void unlock(CryptoFileSystem fs) {
+	public void prepare(CryptoFileSystem fs) {
 		if (!server.isRunning()) {
 			server.start();
 		}
@@ -104,7 +104,7 @@ public class WebDavNioAdapter implements NioAdapter {
 
 	}
 
-	public synchronized String getFsRootUrlString() {
+	public synchronized String getMountUrl() {
 		return servlet.getServletRootUri().toString();
 	}
 

@@ -2,13 +2,12 @@
  * Copyright (c) 2014, 2017 Sebastian Stenzel
  * All rights reserved.
  * This program and the accompanying materials are made available under the terms of the accompanying LICENSE file.
- * 
+ *
  * Contributors:
  *     Sebastian Stenzel - initial API and implementation
  ******************************************************************************/
 package org.cryptomator.ui.controllers;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
 import java.util.Arrays;
@@ -18,8 +17,8 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
-import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
+import javafx.scene.layout.HBox;
 import org.apache.commons.lang3.CharUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.settings.VaultSettings;
@@ -117,6 +116,9 @@ public class UnlockController implements ViewController {
 	private ChoiceBox<Character> winDriveLetter;
 
 	@FXML
+	private HBox mountPathBox;
+
+	@FXML
 	private Label mountPathLabel;
 
 	@FXML
@@ -155,6 +157,7 @@ public class UnlockController implements ViewController {
 		unlockAfterStartup.disableProperty().bind(savePassword.disabledProperty().or(savePassword.selectedProperty().not()));
 		if (SystemUtils.IS_OS_WINDOWS) {
 			winDriveLetter.setConverter(new WinDriveLetterLabelConverter());
+			mountPathBox.setMouseTransparent(true);
 			mountPathLabel.setVisible(false);
 			mountPathLabel.setManaged(false);
 			mountPath.setVisible(false);
@@ -170,7 +173,7 @@ public class UnlockController implements ViewController {
 		changeMountPathButton.disableProperty().bind(Bindings.createBooleanBinding(this::isDirVaild, mountPath.textProperty()).not());
 		changeMountPathButton.visibleProperty().bind(
 				Bindings.createBooleanBinding(
-						()-> mountPathLabel.isVisible() && mountPath.textProperty().isEmpty().not().get(),
+						() -> mountPathLabel.isVisible() && mountPath.textProperty().isEmpty().not().get(),
 						mountPathLabel.visibleProperty(),
 						mountPath.textProperty().isEmpty().not()
 				)
@@ -262,29 +265,26 @@ public class UnlockController implements ViewController {
 	}
 
 	@FXML
-	private void didClickchangeMountPathButton(ActionEvent event){
+	private void didClickchangeMountPathButton(ActionEvent event) {
 		assert isDirVaild();
 		vault.setMountPath(mountPath.getText());
 	}
 
-	private boolean isDirVaild(){
-		try{
-			if(!mountPath.textProperty().isEmpty().get()){
+	private boolean isDirVaild() {
+		try {
+			if (!mountPath.textProperty().isEmpty().get()) {
 				Path p = Paths.get(mountPath.textProperty().get());
 				return Files.isDirectory(p) && Files.isReadable(p) && Files.isWritable(p) && Files.isExecutable(p);
-			}
-			else{
+			} else {
 				//default path will be taken
 				return true;
 			}
 
-		}
-		catch (InvalidPathException e){
+		} catch (InvalidPathException e) {
 			LOG.info("Invalid path");
 			return false;
 		}
 	}
-
 
 
 	private void filterAlphanumericKeyEvents(KeyEvent t) {
@@ -451,6 +451,7 @@ public class UnlockController implements ViewController {
 
 	@FunctionalInterface
 	interface UnlockListener {
+
 		void didUnlock(Vault vault);
 	}
 
