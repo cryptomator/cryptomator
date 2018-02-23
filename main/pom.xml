@@ -31,8 +31,7 @@
 		
 		<commons-io.version>2.5</commons-io.version>
 		<commons-lang3.version>3.6</commons-lang3.version>
-		<httpclient.version>4.5.4</httpclient.version>
-		
+
 		<easybind.version>1.0.3</easybind.version>
 		
 		<guava.version>23.6-jre</guava.version>
@@ -139,11 +138,6 @@
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-lang3</artifactId>
 				<version>${commons-lang3.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.httpcomponents</groupId>
-				<artifactId>httpclient</artifactId>
-				<version>${httpclient.version}</version>
 			</dependency>
 
 			<!-- EasyBind -->
@@ -313,6 +307,10 @@
 					<source>9</source>
 					<target>9</target>
 					<release>9</release>
+					<compilerArgs>
+						<arg>--add-modules</arg>
+						<arg>jdk.incubator.httpclient</arg>
+					</compilerArgs>
 				</configuration>
 			</plugin>
 		</plugins>
