@@ -159,12 +159,6 @@
 				<version>${dagger.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.google.dagger</groupId>
-				<artifactId>dagger-compiler</artifactId>
-				<version>${dagger.version}</version>
-				<optional>true</optional>
-			</dependency>
-			<dependency>
 				<groupId>com.google.code.gson</groupId>
 				<artifactId>gson</artifactId>
 				<version>${gson.version}</version>
@@ -311,6 +305,13 @@
 						<arg>--add-modules</arg>
 						<arg>jdk.incubator.httpclient</arg>
 					</compilerArgs>
+					<annotationProcessorPaths>
+						<path>
+							<groupId>com.google.dagger</groupId>
+							<artifactId>dagger-compiler</artifactId>
+							<version>${dagger.version}</version>
+						</path>
+					</annotationProcessorPaths>
 				</configuration>
 			</plugin>
 		</plugins>
