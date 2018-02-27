@@ -290,7 +290,7 @@ public class Vault {
 	}
 
 	public String getFilesystemRootUrl() {
-		return nioAdapter.getMountUrl();
+		return nioAdapter.getMountUri();
 	}
 
 	public String getId() {

@@ -20,7 +20,7 @@ public interface NioAdapter {
 
 	void stop();
 
-	String getMountUrl();
+	String getMountUri();
 
 	default boolean isSupported() {
 		return false;

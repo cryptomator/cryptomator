@@ -104,12 +104,13 @@ public class WebDavNioAdapter implements NioAdapter {
 
 	}
 
-	public synchronized String getMountUrl() {
+	public synchronized String getMountUri() {
 		return servlet.getServletRootUri().toString();
 	}
 
 	/**
 	 * TODO: what to check wether it is implemented?
+	 *
 	 * @return
 	 */
 	@Override
