@@ -45,7 +45,7 @@ public class FuseVolume implements Volume {
 	public void mount() throws CommandFailedException {
 		try {
 			EnvironmentVariables envVars = EnvironmentVariables.create()
-					.withMountName(vaultSettings.mountName().getValue() + vaultSettings.getId())
+					.withMountName(vaultSettings.mountName().getValue() + "_ID-" + vaultSettings.getId())
 					.withMountPath(chooseMountRootPath())
 					.build();
 			fuseMnt.mount(cfs.getPath("/"), envVars);
