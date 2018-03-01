@@ -258,11 +258,11 @@ public class Vault {
 	}
 
 	public StringProperty getMountPathProperty() {
-		return vaultSettings.mountPath();
+		return vaultSettings.individualMountPath();
 	}
 
 	public void setMountPath(String mountPath) {
-		vaultSettings.mountPath().set(mountPath);
+		vaultSettings.individualMountPath().set(mountPath);
 	}
 
 	public void setMountName(String mountName) throws IllegalArgumentException {

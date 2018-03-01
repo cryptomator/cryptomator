@@ -36,7 +36,7 @@ public class FuseVolume implements Volume {
 	@Override
 	public void prepare(CryptoFileSystem fs) {
 		this.cfs = fs;
-		if (!(vaultSettings.mountPath().isNotNull().get() || SystemUtils.IS_OS_WINDOWS)) {
+		if (!(vaultSettings.individualMountPath().isNotNull().get() || SystemUtils.IS_OS_WINDOWS)) {
 			fuseMnt.useExtraMountDir();
 		}
 	}
@@ -64,17 +64,12 @@ public class FuseVolume implements Volume {
 				// auto assign drive letter selected
 				return windowsDriveLetters.getAvailableDriveLetters().iterator().next() + ":\\";
 			}
-		} else {
-			if (vaultSettings.mountPath().isNotNull().get()) {
+		} else if (vaultSettings.individualMountPath().isNotNull().get()) {
 				//specific path given
-				vaultSettings.mountPath().getValue();
-			} else {
-				//choose default path
-				return SystemUtils.IS_OS_MAC ? DEFAULT_MOUNTROOTPATH_MAC : DEFAULT_MOUNTROOTPATH_LINUX;
-			}
-
-		}
-		return null;
+				return vaultSettings.individualMountPath().getValue();
+        }
+		//choose default path
+		return SystemUtils.IS_OS_MAC ? DEFAULT_MOUNTROOTPATH_MAC : DEFAULT_MOUNTROOTPATH_LINUX;
 	}
 
 	@Override
