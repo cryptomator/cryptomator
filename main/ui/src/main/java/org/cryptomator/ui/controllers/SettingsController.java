@@ -105,6 +105,7 @@ public class SettingsController implements ViewController {
 
 
 		//WEBDAV
+		webdavVolume.setVisible(settings.usedNioAdapterImpl().getValue().equals(NioAdapterImpl.WEBDAV.name()));
 		webdavVolume.managedProperty().bind(webdavVolume.visibleProperty());
 		prefGvfsScheme.managedProperty().bind(webdavVolume.visibleProperty());
 		prefGvfsSchemeLabel.managedProperty().bind(webdavVolume.visibleProperty());
@@ -122,6 +123,7 @@ public class SettingsController implements ViewController {
 		prefGvfsScheme.setVisible(SystemUtils.IS_OS_LINUX);
 
 		//FUSE
+		fuseVolume.setVisible(settings.usedNioAdapterImpl().getValue().equals(NioAdapterImpl.FUSE.name()));
 		fuseVolume.managedProperty().bind(fuseVolume.visibleProperty());
 
 		debugModeCheckbox.setSelected(settings.debugMode().get());
