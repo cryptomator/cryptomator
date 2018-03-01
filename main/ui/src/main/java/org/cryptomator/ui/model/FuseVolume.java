@@ -17,8 +17,8 @@ import java.nio.file.Paths;
 public class FuseVolume implements Volume {
 
 	private static final Logger LOG = LoggerFactory.getLogger(FuseVolume.class);
-	private static final String DEFAULT_MOUNTROOTPATH_MAC = System.getProperty("user.home") + "Library/Application Support/Cryptomator";
-	private static final String DEFAULT_MOUNTROOTPATH_LINUX = System.getProperty("user.home") + ".Cryptomator";
+	private static final String DEFAULT_MOUNTROOTPATH_MAC = System.getProperty("user.home") + "/Library/Application Support/Cryptomator";
+	private static final String DEFAULT_MOUNTROOTPATH_LINUX = System.getProperty("user.home") + "/.Cryptomator";
 
 	private final FuseMount fuseMnt;
 	private final VaultSettings vaultSettings;
