@@ -12,7 +12,7 @@ import java.util.Objects;
 
 import javax.inject.Scope;
 
-import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.common.settings.NioAdapterImpl;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VaultSettings;
 

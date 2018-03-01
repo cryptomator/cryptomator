@@ -19,7 +19,7 @@ import javafx.scene.layout.GridPane;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.ui.l10n.Localization;
-import org.cryptomator.ui.model.NioAdapterImpl;
+import org.cryptomator.common.settings.NioAdapterImpl;
 
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Strings;
@@ -138,8 +138,8 @@ public class SettingsController implements ViewController {
 	}
 
 	private void changeNioView(String newVal) {
-		fuseNioAdapter.setVisible(newVal.equalsIgnoreCase("FUSE"));
-		webdavNioAdapter.setVisible(newVal.equalsIgnoreCase("WEBDAV"));
+		fuseNioAdapter.setVisible(newVal.equalsIgnoreCase(NioAdapterImpl.FUSE.name()));
+		webdavNioAdapter.setVisible(newVal.equalsIgnoreCase(NioAdapterImpl.WEBDAV.name()));
 	}
 
 	@Override
