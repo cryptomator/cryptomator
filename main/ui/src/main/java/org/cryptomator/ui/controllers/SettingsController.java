@@ -83,7 +83,7 @@ public class SettingsController implements ViewController {
 	private Label volumeLabel;
 
 	@FXML
-	private ChoiceBox<String> nioAdapter;
+	private ChoiceBox<String> volume;
 
 	@FXML
 	private CheckBox debugModeCheckbox;
@@ -98,10 +98,10 @@ public class SettingsController implements ViewController {
 		checkForUpdatesCheckbox.setSelected(settings.checkForUpdates().get() && !areUpdatesManagedExternally());
 
 		//NIOADAPTER
-		nioAdapter.getItems().addAll(getSupportedAdapters());
-		nioAdapter.setValue(settings.usedNioAdapterImpl().get());
-		nioAdapter.setVisible(true);
-		nioAdapter.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends String> observable, String oldVal, String newVal) -> changeNioView(newVal));
+		volume.getItems().addAll(getSupportedAdapters());
+		volume.setValue(settings.usedNioAdapterImpl().get());
+		volume.setVisible(true);
+		volume.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends String> observable, String oldVal, String newVal) -> changeNioView(newVal));
 
 
 		//WEBDAV
@@ -128,7 +128,7 @@ public class SettingsController implements ViewController {
 
 		settings.checkForUpdates().bind(checkForUpdatesCheckbox.selectedProperty());
 		settings.preferredGvfsScheme().bind(prefGvfsScheme.valueProperty());
-		settings.usedNioAdapterImpl().bind(nioAdapter.valueProperty());
+		settings.usedNioAdapterImpl().bind(volume.valueProperty());
 		settings.debugMode().bind(debugModeCheckbox.selectedProperty());
 	}
 
