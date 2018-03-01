@@ -56,10 +56,10 @@ public class SettingsController implements ViewController {
 	private CheckBox checkForUpdatesCheckbox;
 
 	@FXML
-	private GridPane webdavNioAdapter;
+	private GridPane webdavVolume;
 
 	@FXML
-	private GridPane fuseNioAdapter;
+	private GridPane fuseVolume;
 
 	@FXML
 	private Label portFieldLabel;
@@ -80,7 +80,7 @@ public class SettingsController implements ViewController {
 	private ChoiceBox<String> prefGvfsScheme;
 
 	@FXML
-	private Label nioAdapterLabel;
+	private Label volumeLabel;
 
 	@FXML
 	private ChoiceBox<String> nioAdapter;
@@ -105,12 +105,12 @@ public class SettingsController implements ViewController {
 
 
 		//WEBDAV
-		webdavNioAdapter.managedProperty().bind(webdavNioAdapter.visibleProperty());
-		prefGvfsScheme.managedProperty().bind(webdavNioAdapter.visibleProperty());
-		prefGvfsSchemeLabel.managedProperty().bind(webdavNioAdapter.visibleProperty());
-		portFieldLabel.managedProperty().bind(webdavNioAdapter.visibleProperty());
-		changePortButton.managedProperty().bind(webdavNioAdapter.visibleProperty());
-		portField.managedProperty().bind(webdavNioAdapter.visibleProperty());
+		webdavVolume.managedProperty().bind(webdavVolume.visibleProperty());
+		prefGvfsScheme.managedProperty().bind(webdavVolume.visibleProperty());
+		prefGvfsSchemeLabel.managedProperty().bind(webdavVolume.visibleProperty());
+		portFieldLabel.managedProperty().bind(webdavVolume.visibleProperty());
+		changePortButton.managedProperty().bind(webdavVolume.visibleProperty());
+		portField.managedProperty().bind(webdavVolume.visibleProperty());
 		portField.setText(String.valueOf(settings.port().intValue()));
 		portField.addEventFilter(KeyEvent.KEY_TYPED, this::filterNumericKeyEvents);
 		changePortButton.visibleProperty().bind(settings.port().asString().isNotEqualTo(portField.textProperty()));
@@ -122,7 +122,7 @@ public class SettingsController implements ViewController {
 		prefGvfsScheme.setVisible(SystemUtils.IS_OS_LINUX);
 
 		//FUSE
-		fuseNioAdapter.managedProperty().bind(fuseNioAdapter.visibleProperty());
+		fuseVolume.managedProperty().bind(fuseVolume.visibleProperty());
 
 		debugModeCheckbox.setSelected(settings.debugMode().get());
 
@@ -138,8 +138,8 @@ public class SettingsController implements ViewController {
 	}
 
 	private void changeNioView(String newVal) {
-		fuseNioAdapter.setVisible(newVal.equalsIgnoreCase(NioAdapterImpl.FUSE.name()));
-		webdavNioAdapter.setVisible(newVal.equalsIgnoreCase(NioAdapterImpl.WEBDAV.name()));
+		fuseVolume.setVisible(newVal.equalsIgnoreCase(NioAdapterImpl.FUSE.name()));
+		webdavVolume.setVisible(newVal.equalsIgnoreCase(NioAdapterImpl.WEBDAV.name()));
 	}
 
 	@Override

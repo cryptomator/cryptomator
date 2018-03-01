@@ -56,17 +56,17 @@ public class Vault {
 	private final AtomicReference<CryptoFileSystem> cryptoFileSystem = new AtomicReference<>();
 	private final ObjectProperty<State> state = new SimpleObjectProperty<State>(State.LOCKED);
 
-	private NioAdapter nioAdapter;
+	private Volume volume;
 
 	public enum State {
 		LOCKED, UNLOCKED, MOUNTING, MOUNTED, UNMOUNTING
 	}
 
 	@Inject
-	Vault(Settings settings, VaultSettings vaultSettings, NioAdapter nioAdapter) {
+	Vault(Settings settings, VaultSettings vaultSettings, Volume volume) {
 		this.settings = settings;
 		this.vaultSettings = vaultSettings;
-		this.nioAdapter = nioAdapter;
+		this.volume = volume;
 	}
 
 	// ******************************************************************************
@@ -100,7 +100,7 @@ public class Vault {
 
 	public synchronized void unlock(CharSequence passphrase) throws CryptoException, IOException {
 		CryptoFileSystem fs = getCryptoFileSystem(passphrase);
-		nioAdapter.prepare(fs);
+		volume.prepare(fs);
 		Platform.runLater(() -> {
 			state.set(State.UNLOCKED);
 		});
@@ -110,7 +110,7 @@ public class Vault {
 		Platform.runLater(() -> {
 			state.set(State.MOUNTING);
 		});
-		nioAdapter.mount();
+		volume.mount();
 		Platform.runLater(() -> {
 			state.set(State.MOUNTED);
 		});
@@ -128,10 +128,10 @@ public class Vault {
 		Platform.runLater(() -> {
 			state.set(State.UNMOUNTING);
 		});
-		if (forced && nioAdapter.supportsForcedUnmount()) {
-			nioAdapter.unmountForced();
+		if (forced && volume.supportsForcedUnmount()) {
+			volume.unmountForced();
 		} else {
-			nioAdapter.unmount();
+			volume.unmount();
 		}
 		Platform.runLater(() -> {
 			state.set(State.UNLOCKED);
@@ -139,7 +139,7 @@ public class Vault {
 	}
 
 	public synchronized void lock() throws IOException {
-		nioAdapter.stop();
+		volume.stop();
 		CryptoFileSystem fs = cryptoFileSystem.getAndSet(null);
 		if (fs != null) {
 			fs.close();
@@ -156,7 +156,7 @@ public class Vault {
 		try {
 			unmount();
 		} catch (CommandFailedException e) {
-			if (nioAdapter.supportsForcedUnmount()) {
+			if (volume.supportsForcedUnmount()) {
 				try {
 					unmountForced();
 				} catch (CommandFailedException e1) {
@@ -174,7 +174,7 @@ public class Vault {
 	}
 
 	public void reveal() throws CommandFailedException {
-		nioAdapter.reveal();
+		volume.reveal();
 	}
 
 	// ******************************************************************************
@@ -290,7 +290,7 @@ public class Vault {
 	}
 
 	public String getFilesystemRootUrl() {
-		return nioAdapter.getMountUri();
+		return volume.getMountUri();
 	}
 
 	public String getId() {
@@ -317,6 +317,6 @@ public class Vault {
 	}
 
 	public boolean supportsForcedUnmount() {
-		return nioAdapter.supportsForcedUnmount();
+		return volume.supportsForcedUnmount();
 	}
 }

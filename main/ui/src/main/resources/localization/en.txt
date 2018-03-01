@@ -119,9 +119,9 @@ settings.webdav.port.apply=Apply
 settings.webdav.prefGvfsScheme.label=WebDAV Scheme
 settings.debugMode.label=Debug Mode *
 settings.requiresRestartLabel=* Cryptomator needs to restart
-settings.nioAdapter.label= Mount-Methode *
-settings.nioAdapter.webdav=WebDAV
-settings.nioAdapter.fuse=FUSE
+settings.volume.label= Mount-Methode *
+settings.volume.webdav=WebDAV
+settings.volume.fuse=FUSE
 
 # tray icon
 tray.menu.open=Open

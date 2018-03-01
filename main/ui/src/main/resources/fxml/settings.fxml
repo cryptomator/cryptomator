@@ -41,11 +41,11 @@
 			<CheckBox GridPane.rowIndex="1" GridPane.columnIndex="1" fx:id="debugModeCheckbox" cacheShape="true" cache="true" />
 
 			<!-- Row 2 -->
-			<Label fx:id="nioAdapterLabel" GridPane.rowIndex="2" GridPane.columnIndex="0" text="%settings.nioAdapter.label" cacheShape="true" cache="true" />
-			<ChoiceBox GridPane.rowIndex="2" GridPane.columnIndex="1" fx:id="nioAdapter" cacheShape="true" cache="true" />
+			<Label fx:id="volumeLabel" GridPane.rowIndex="2" GridPane.columnIndex="0" text="%settings.volume.label" cacheShape="true" cache="true" />
+			<ChoiceBox GridPane.rowIndex="2" GridPane.columnIndex="1" fx:id="volume" cacheShape="true" cache="true" />
 
 			<!-- Row 3 Alt 1-->
-			<GridPane fx:id="webdavNioAdapter" vgap="12.0" hgap="12.0" GridPane.rowIndex="3" GridPane.columnIndex="0" GridPane.columnSpan="2" visible="true" cacheShape="true" cache="true">
+			<GridPane fx:id="webdavVolume" vgap="12.0" hgap="12.0" GridPane.rowIndex="3" GridPane.columnIndex="0" GridPane.columnSpan="2" visible="true" cacheShape="true" cache="true">
 				<Label fx:id="portFieldLabel" GridPane.rowIndex="3" GridPane.columnIndex="0" text="%settings.webdav.port.label" cacheShape="true" cache="true" />
 				<HBox GridPane.rowIndex="3" GridPane.columnIndex="1" spacing="6.0">
 					<TextField  fx:id="portField" cacheShape="true" cache="true" promptText="%settings.webdav.port.prompt" />
@@ -58,7 +58,7 @@
 			</GridPane>
 
 			<!-- Row 3 Alt 2-->
-			<GridPane fx:id="fuseNioAdapter" vgap="12.0" hgap="12.0" GridPane.rowIndex="3" GridPane.columnIndex="0" GridPane.columnSpan="2" visible="false" cacheShape="true" cache="true">
+			<GridPane fx:id="fuseVolume" vgap="12.0" hgap="12.0" GridPane.rowIndex="3" GridPane.columnIndex="0" GridPane.columnSpan="2" visible="false" cacheShape="true" cache="true">
 			</GridPane>
 
 		</children>

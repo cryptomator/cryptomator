@@ -14,9 +14,11 @@ import javax.inject.Inject;
 import java.nio.file.Paths;
 
 @VaultModule.PerVault
-public class FuseNioAdapter implements NioAdapter {
+public class FuseVolume implements Volume {
 
-	private static final Logger LOG = LoggerFactory.getLogger(FuseNioAdapter.class);
+	private static final Logger LOG = LoggerFactory.getLogger(FuseVolume.class);
+	private static final String DEFAULT_MOUNTROOTPATH_MAC = System.getProperty("user.home") + "Library/Application Support/Cryptomator";
+	private static final String DEFAULT_MOUNTROOTPATH_LINUX = System.getProperty("user.home") + ".Cryptomator";
 
 	private final FuseMount fuseMnt;
 	private final VaultSettings vaultSettings;
@@ -25,7 +27,7 @@ public class FuseNioAdapter implements NioAdapter {
 	private CryptoFileSystem cfs;
 
 	@Inject
-	public FuseNioAdapter(VaultSettings vaultSettings, WindowsDriveLetters windowsDriveLetters) {
+	public FuseVolume(VaultSettings vaultSettings, WindowsDriveLetters windowsDriveLetters) {
 		this.vaultSettings = vaultSettings;
 		this.windowsDriveLetters = windowsDriveLetters;
 		this.fuseMnt = MountFactory.createMountObject();
@@ -44,8 +46,7 @@ public class FuseNioAdapter implements NioAdapter {
 		try {
 			EnvironmentVariables envVars = EnvironmentVariables.create()
 					.withMountName(vaultSettings.mountName().getValue() + vaultSettings.getId())
-					.withMountPath(
-							SystemUtils.IS_OS_WINDOWS? computeWinDriveLetter() : vaultSettings.mountPath().getValue())
+					.withMountPath(chooseMountRootPath())
 					.build();
 			fuseMnt.mount(cfs.getPath("/"), envVars);
 		} catch (Exception e) {
@@ -53,13 +54,27 @@ public class FuseNioAdapter implements NioAdapter {
 		}
 	}
 
-	private String computeWinDriveLetter(){
-		if(vaultSettings.winDriveLetter().get() != null){
-			return vaultSettings.winDriveLetter().getValue()+":\\";
+	private String chooseMountRootPath() {
+		if (SystemUtils.IS_OS_WINDOWS) {
+			//windows case
+			if (vaultSettings.winDriveLetter().get() != null) {
+				// specific drive letter selected
+				return vaultSettings.winDriveLetter().getValue() + ":\\";
+			} else {
+				// auto assign drive letter selected
+				return windowsDriveLetters.getAvailableDriveLetters().iterator().next() + ":\\";
+			}
+		} else {
+			if (vaultSettings.mountPath().isNotNull().get()) {
+				//specific path given
+				vaultSettings.mountPath().getValue();
+			} else {
+				//choose default path
+				return SystemUtils.IS_OS_MAC ? DEFAULT_MOUNTROOTPATH_MAC : DEFAULT_MOUNTROOTPATH_LINUX;
+			}
+
 		}
-		else{
-			return windowsDriveLetters.getAvailableDriveLetters().iterator().next()+":\\";
-		}
+		return null;
 	}
 
 	@Override

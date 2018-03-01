@@ -2,7 +2,10 @@ package org.cryptomator.ui.model;
 
 import org.cryptomator.cryptofs.CryptoFileSystem;
 
-public interface NioAdapter {
+/**
+ * Takes a Volume and usess it to mount an unlocked vault
+ */
+public interface Volume {
 
 	void prepare(CryptoFileSystem fs);
 

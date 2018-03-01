@@ -14,7 +14,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 @VaultModule.PerVault
-public class WebDavNioAdapter implements NioAdapter {
+public class WebDavVolume implements Volume {
 
 	private static final String LOCALHOST_ALIAS = "cryptomator-vault";
 
@@ -26,7 +26,7 @@ public class WebDavNioAdapter implements NioAdapter {
 	private Mounter.Mount mount;
 
 	@Inject
-	public WebDavNioAdapter(WebDavServer server, VaultSettings vaultSettings, Settings settings) {
+	public WebDavVolume(WebDavServer server, VaultSettings vaultSettings, Settings settings) {
 		this.server = server;
 		this.vaultSettings = vaultSettings;
 		this.settings = settings;
