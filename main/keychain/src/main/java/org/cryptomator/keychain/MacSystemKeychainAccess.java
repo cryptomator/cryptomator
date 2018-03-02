@@ -15,35 +15,35 @@ import org.cryptomator.jni.MacKeychainAccess;
 
 class MacSystemKeychainAccess implements KeychainAccessStrategy {
 
-	private final MacKeychainAccess keychain;
+	private final Optional<MacFunctions> macFunctions;
 
 	@Inject
 	public MacSystemKeychainAccess(Optional<MacFunctions> macFunctions) {
-		if (macFunctions.isPresent()) {
-			this.keychain = macFunctions.get().keychainAccess();
-		} else {
-			this.keychain = null;
-		}
+		this.macFunctions = macFunctions;
+	}
+
+	private MacKeychainAccess keychain() {
+		return macFunctions.orElseThrow(IllegalStateException::new).keychainAccess();
 	}
 
 	@Override
 	public void storePassphrase(String key, CharSequence passphrase) {
-		keychain.storePassword(key, passphrase);
+		keychain().storePassword(key, passphrase);
 	}
 
 	@Override
 	public char[] loadPassphrase(String key) {
-		return keychain.loadPassword(key);
+		return keychain().loadPassword(key);
 	}
 
 	@Override
 	public boolean isSupported() {
-		return SystemUtils.IS_OS_MAC_OSX && keychain != null;
+		return SystemUtils.IS_OS_MAC_OSX && macFunctions.isPresent();
 	}
 
 	@Override
 	public void deletePassphrase(String key) {
-		keychain.deletePassword(key);
+		keychain().deletePassword(key);
 	}
 
 }

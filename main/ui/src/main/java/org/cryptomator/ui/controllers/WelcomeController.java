@@ -8,11 +8,10 @@
  ******************************************************************************/
 package org.cryptomator.ui.controllers;
 
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
+import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.Optional;
@@ -22,23 +21,9 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
-import org.apache.commons.lang3.SystemUtils;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.client.HttpClients;
-import org.cryptomator.common.settings.Settings;
-import org.cryptomator.ui.l10n.Localization;
-import org.cryptomator.ui.util.AsyncTaskService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -49,6 +34,15 @@ import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.layout.VBox;
+import jdk.incubator.http.HttpClient;
+import jdk.incubator.http.HttpRequest;
+import jdk.incubator.http.HttpResponse;
+import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.common.settings.Settings;
+import org.cryptomator.ui.l10n.Localization;
+import org.cryptomator.ui.util.AsyncTaskService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Singleton
 public class WelcomeController implements ViewController {
@@ -114,31 +108,21 @@ public class WelcomeController implements ViewController {
 		checkForUpdatesStatus.setText(localization.getString("welcome.checkForUpdates.label.currentlyChecking"));
 		checkForUpdatesIndicator.setVisible(true);
 		asyncTaskService.asyncTaskOf(() -> {
-			RequestConfig requestConfig = RequestConfig.custom() //
-					.setConnectTimeout(5000) //
-					.setConnectionRequestTimeout(5000) //
-					.setSocketTimeout(5000) //
-					.build();
 			String userAgent = String.format("Cryptomator VersionChecker/%s %s %s (%s)", applicationVersion.orElse("SNAPSHOT"), SystemUtils.OS_NAME, SystemUtils.OS_VERSION, SystemUtils.OS_ARCH);
-			HttpClientBuilder httpClientBuilder = HttpClients.custom() //
-					.disableCookieManagement() //
-					.setDefaultRequestConfig(requestConfig) //
-					.setUserAgent(userAgent);
-			LOG.debug("Checking for updates...");
-			try (CloseableHttpClient client = httpClientBuilder.build()) {
-				HttpGet request = new HttpGet("https://api.cryptomator.org/updates/latestVersion.json");
-				try (CloseableHttpResponse response = client.execute(request)) {
-					if (response.getStatusLine().getStatusCode() == 200 && response.getEntity() != null) {
-						try (InputStream in = response.getEntity().getContent()) {
-							Gson gson = new GsonBuilder().setLenient().create();
-							Reader utf8Reader = new InputStreamReader(in, StandardCharsets.UTF_8);
-							Map<String, String> map = gson.fromJson(utf8Reader, new TypeToken<Map<String, String>>() {
-							}.getType());
-							if (map != null) {
-								this.compareVersions(map);
-							}
-						}
-					}
+			HttpClient client = HttpClient.newHttpClient();
+			HttpRequest request = HttpRequest.newBuilder()
+					.GET()
+					.uri(new URI("https://api.cryptomator.org/updates/latestVersion.json"))
+					.header("User-Agent", userAgent)
+					.timeout(Duration.ofSeconds(5))
+					.build();
+			HttpResponse<String> response = client.send(request, HttpResponse.BodyHandler.asString(StandardCharsets.UTF_8));
+			if (response.statusCode() == 200) {
+				Gson gson = new GsonBuilder().setLenient().create();
+				Map<String, String> map = gson.fromJson(response.body(), new TypeToken<Map<String, String>>() {
+				}.getType());
+				if (map != null) {
+					this.compareVersions(map);
 				}
 			}
 		}).andFinally(() -> {

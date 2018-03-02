@@ -1,8 +1,7 @@
 language: java
-sudo: required
-dist: trusty
+sudo: false
 jdk:
-- oraclejdk8
+- oraclejdk9
 cache:
   directories:
   - $HOME/.m2
@@ -12,6 +11,9 @@ env:
     - secure: "lV9OwUbHMrMpLUH1CY+Z4puLDdFXytudyPlG1eGRsesdpuG6KM3uQVz6uAtf6lrU8DRbMM/T7ML+PmvQ4UoPPYLdLxESLLBat2qUPOIVBOhTSlCc7I0DmGy04CSvkeMy8dPaQC0ukgNiR7zwoNzfcpGRN/U9S8tziDruuHoZSrg=" # BINTRAY_API_KEY
     - secure: "oWFgRTVP6lyTa7qVxlvkpm20MtVc3BtmsNXQJS6bfg2A0o/iCQMNx7OD59BaafCLGRKvCcJVESiC8FlSylVMS7CDSyYu0gg70NUiIuHp4NBM5inFWYCy/PdQsCTzr5uvNG+rMFQpMFRaCV0FrfM3tLondcVkhsHL68l93Xoexx4=" # CODACY_PROJECT_TOKEN
 addons:
+  apt:
+    packages:
+    - haveged
   coverity_scan:
     project:
       name: "cryptomator/cryptomator"
@@ -19,13 +21,16 @@ addons:
     build_command: "mvn -fmain/pom.xml clean test -DskipTests"
     branch_pattern: release.*
 install:
-# "clean" needed until https://bugs.openjdk.java.net/browse/JDK-8067747 is resolved.
-- mvn -fmain/pom.xml clean package -DskipTests dependency:go-offline -Pcoverage
-- mvn -fmain/pom.xml clean package -DskipTests dependency:go-offline -Prelease
+- mvn -fmain/pom.xml clean install -DskipTests dependency:go-offline -Pcoverage,release # "clean install" needed until we can exclude artifacts currently in the reactor, see https://maven.apache.org/plugins/maven-dependency-plugin/go-offline-mojo.html#excludeReactor and https://issues.apache.org/jira/browse/MDEP-568
 script:
 - mvn --update-snapshots -fmain/pom.xml clean test jacoco:report verify -Pcoverage
+after_success:
+- jdk_switcher use oraclejdk8
+- curl -o ~/codacy-coverage-reporter-assembly-latest.jar https://oss.sonatype.org/service/local/repositories/releases/content/com/codacy/codacy-coverage-reporter/2.0.1/codacy-coverage-reporter-2.0.1-assembly.jar
+- $JAVA_HOME/bin/java -cp ~/codacy-coverage-reporter-assembly-latest.jar com.codacy.CodacyCoverageReporter -l Java -r main/jacoco-report/target/site/jacoco-aggregate/jacoco.xml
 before_deploy:
-- mvn -fmain/pom.xml -Prelease clean package -DskipTests
+- jdk_switcher use oraclejdk9
+- mvn -fmain/pom.xml -Prelease package -DskipTests
 deploy:
 - provider: releases
   prerelease: false

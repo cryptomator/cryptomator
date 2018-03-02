@@ -14,9 +14,11 @@ public class KeychainModuleTest {
 
 	@Test
 	public void testGetKeychain() {
-		Optional<KeychainAccess> keychainAccess = DaggerTestKeychainComponent.builder().jniModule(new TestJniModule()).keychainModule(new TestKeychainModule()).build().keychainAccess();
+		Optional<KeychainAccess> keychainAccess = DaggerTestKeychainComponent.builder().keychainModule(new TestKeychainModule()).build().keychainAccess();
 		Assert.assertTrue(keychainAccess.isPresent());
 		Assert.assertTrue(keychainAccess.get() instanceof MapKeychainAccess);
+		keychainAccess.get().storePassphrase("test", "asd");
+		Assert.assertArrayEquals("asd".toCharArray(), keychainAccess.get().loadPassphrase("test"));
 	}
 
 }

@@ -27,27 +27,6 @@
 		<dependency>
 			<groupId>org.cryptomator</groupId>
 			<artifactId>launcher</artifactId>
-			<exclusions>
-				<exclusion>
-					<!-- conflict with codacy-coverage-reporter -->
-					<groupId>org.apache.logging.log4j</groupId>
-					<artifactId>*</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-
-		<!-- binary dependency used during build -->
-		<dependency>
-			<groupId>com.codacy</groupId>
-			<artifactId>codacy-coverage-reporter</artifactId>
-			<version>1.0.13</version>
-			<classifier>assembly</classifier>
-			<exclusions>
-				<exclusion>
-					<groupId>*</groupId>
-					<artifactId>*</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 	</dependencies>
 
@@ -63,28 +42,6 @@
 						<goals>
 							<goal>report-aggregate</goal>
 						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>exec-maven-plugin</artifactId>
-				<version>1.5.0</version>
-				<executions>
-					<execution>
-						<phase>verify</phase>
-						<goals>
-							<goal>java</goal>
-						</goals>
-						<configuration>
-							<mainClass>com.codacy.CodacyCoverageReporter</mainClass>
-							<arguments>
-								<argument>-l</argument>
-								<argument>Java</argument>
-								<argument>-r</argument>
-								<argument>${project.build.directory}/site/jacoco-aggregate/jacoco.xml</argument>
-							</arguments>
-						</configuration>
 					</execution>
 				</executions>
 			</plugin>
