@@ -16,22 +16,20 @@ import java.util.function.Consumer;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
+import dagger.Module;
+import dagger.Provides;
+import javafx.beans.binding.Binding;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.CommonsModule;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.SettingsProvider;
 import org.cryptomator.frontend.webdav.WebDavServer;
-import org.cryptomator.jni.JniModule;
 import org.cryptomator.keychain.KeychainModule;
 import org.cryptomator.ui.controllers.ViewControllerModule;
 import org.cryptomator.ui.model.VaultComponent;
 import org.fxmisc.easybind.EasyBind;
 
-import dagger.Module;
-import dagger.Provides;
-import javafx.beans.binding.Binding;
-
-@Module(includes = {ViewControllerModule.class, CommonsModule.class, KeychainModule.class, JniModule.class}, subcomponents = {VaultComponent.class})
+@Module(includes = {ViewControllerModule.class, CommonsModule.class, KeychainModule.class}, subcomponents = {VaultComponent.class})
 public class UiModule {
 
 	@Provides

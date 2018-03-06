@@ -39,6 +39,11 @@ public class VaultList extends TransformationList<Vault, VaultSettings> {
 	}
 
 	@Override
+	public int getViewIndex(int index) {
+		return index;
+	}
+
+	@Override
 	public Vault get(int index) {
 		VaultSettings s = source.get(index);
 		return vaultFactory.get(s);
