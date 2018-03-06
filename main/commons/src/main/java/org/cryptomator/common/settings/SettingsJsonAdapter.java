@@ -33,6 +33,7 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 		out.name("numTrayNotifications").value(value.numTrayNotifications().get());
 		out.name("preferredGvfsScheme").value(value.preferredGvfsScheme().get());
 		out.name("debugMode").value(value.debugMode().get());
+		out.name("nioAdapterImpl").value(value.usedNioAdapterImpl().get());
 		out.endObject();
 	}
 
@@ -52,27 +53,30 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 		while (in.hasNext()) {
 			String name = in.nextName();
 			switch (name) {
-			case "directories":
-				settings.getDirectories().addAll(readVaultSettingsArray(in));
-				break;
-			case "checkForUpdatesEnabled":
-				settings.checkForUpdates().set(in.nextBoolean());
-				break;
-			case "port":
-				settings.port().set(in.nextInt());
-				break;
-			case "numTrayNotifications":
-				settings.numTrayNotifications().set(in.nextInt());
-				break;
-			case "preferredGvfsScheme":
-				settings.preferredGvfsScheme().set(in.nextString());
-				break;
-			case "debugMode":
-				settings.debugMode().set(in.nextBoolean());
-				break;
-			default:
-				LOG.warn("Unsupported vault setting found in JSON: " + name);
-				in.skipValue();
+				case "directories":
+					settings.getDirectories().addAll(readVaultSettingsArray(in));
+					break;
+				case "checkForUpdatesEnabled":
+					settings.checkForUpdates().set(in.nextBoolean());
+					break;
+				case "port":
+					settings.port().set(in.nextInt());
+					break;
+				case "numTrayNotifications":
+					settings.numTrayNotifications().set(in.nextInt());
+					break;
+				case "preferredGvfsScheme":
+					settings.preferredGvfsScheme().set(in.nextString());
+					break;
+				case "debugMode":
+					settings.debugMode().set(in.nextBoolean());
+					break;
+				case "nioAdapterImpl":
+					settings.usedNioAdapterImpl().set(in.nextString());
+					break;
+				default:
+					LOG.warn("Unsupported vault setting found in JSON: " + name);
+					in.skipValue();
 			}
 		}
 		in.endObject();

@@ -244,8 +244,8 @@ public class UnlockedController implements ViewController {
 	@FXML
 	private void didClickCopyUrl(ActionEvent event) {
 		ClipboardContent clipboardContent = new ClipboardContent();
-		clipboardContent.putUrl(vault.get().getWebDavUrl());
-		clipboardContent.putString(vault.get().getWebDavUrl());
+		clipboardContent.putUrl(vault.get().getFilesystemRootUrl());
+		clipboardContent.putString(vault.get().getFilesystemRootUrl());
 		Clipboard.getSystemClipboard().setContent(clipboardContent);
 	}
 

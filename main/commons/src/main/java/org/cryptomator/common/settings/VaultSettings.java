@@ -36,6 +36,7 @@ public class VaultSettings {
 	private final BooleanProperty unlockAfterStartup = new SimpleBooleanProperty(DEFAULT_UNLOCK_AFTER_STARTUP);
 	private final BooleanProperty mountAfterUnlock = new SimpleBooleanProperty(DEFAULT_MOUNT_AFTER_UNLOCK);
 	private final BooleanProperty revealAfterMount = new SimpleBooleanProperty(DEFAULT_REAVEAL_AFTER_MOUNT);
+	private final StringProperty individualMountPath = new SimpleStringProperty();
 
 	public VaultSettings(String id) {
 		this.id = Objects.requireNonNull(id);
@@ -44,7 +45,7 @@ public class VaultSettings {
 	}
 
 	Observable[] observables() {
-		return new Observable[] {path, mountName, winDriveLetter, unlockAfterStartup, mountAfterUnlock, revealAfterMount};
+		return new Observable[]{path, mountName, winDriveLetter, unlockAfterStartup, mountAfterUnlock, revealAfterMount, individualMountPath};
 	}
 
 	private void deriveMountNameFromPath(Path path) {
@@ -121,6 +122,10 @@ public class VaultSettings {
 
 	public BooleanProperty revealAfterMount() {
 		return revealAfterMount;
+	}
+
+	public StringProperty individualMountPath() {
+		return individualMountPath;
 	}
 
 	/* Hashcode/Equals */

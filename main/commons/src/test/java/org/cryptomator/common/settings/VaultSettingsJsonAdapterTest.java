@@ -20,7 +20,7 @@ public class VaultSettingsJsonAdapterTest {
 
 	@Test
 	public void testDeserialize() throws IOException {
-		String json = "{\"id\": \"foo\", \"path\": \"/foo/bar\", \"mountName\": \"test\", \"winDriveLetter\": \"X\", \"shouldBeIgnored\": true}";
+		String json = "{\"id\": \"foo\", \"path\": \"/foo/bar\", \"mountName\": \"test\", \"winDriveLetter\": \"X\", \"shouldBeIgnored\": true, \"individualMountPath\": \"/home/test/crypto\"}";
 		JsonReader jsonReader = new JsonReader(new StringReader(json));
 
 		VaultSettings vaultSettings = adapter.read(jsonReader);
@@ -28,6 +28,7 @@ public class VaultSettingsJsonAdapterTest {
 		Assert.assertEquals(Paths.get("/foo/bar"), vaultSettings.path().get());
 		Assert.assertEquals("test", vaultSettings.mountName().get());
 		Assert.assertEquals("X", vaultSettings.winDriveLetter().get());
+		Assert.assertEquals("/home/test/crypto", vaultSettings.individualMountPath().get());
 	}
 
 }

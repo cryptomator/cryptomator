@@ -2,7 +2,7 @@
  * Copyright (c) 2014, 2017 Sebastian Stenzel
  * All rights reserved.
  * This program and the accompanying materials are made available under the terms of the accompanying LICENSE file.
- * 
+ *
  * Contributors:
  *     Sebastian Stenzel - initial API and implementation
  ******************************************************************************/
@@ -14,9 +14,12 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
+import javafx.beans.value.ObservableValue;
+import javafx.scene.layout.GridPane;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.ui.l10n.Localization;
+import org.cryptomator.common.settings.NioAdapterImpl;
 
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Strings;
@@ -53,6 +56,15 @@ public class SettingsController implements ViewController {
 	private CheckBox checkForUpdatesCheckbox;
 
 	@FXML
+	private GridPane webdavVolume;
+
+	@FXML
+	private GridPane fuseVolume;
+
+	@FXML
+	private Label portFieldLabel;
+
+	@FXML
 	private TextField portField;
 
 	@FXML
@@ -68,6 +80,12 @@ public class SettingsController implements ViewController {
 	private ChoiceBox<String> prefGvfsScheme;
 
 	@FXML
+	private Label volumeLabel;
+
+	@FXML
+	private ChoiceBox<String> volume;
+
+	@FXML
 	private CheckBox debugModeCheckbox;
 
 	@FXML
@@ -75,23 +93,55 @@ public class SettingsController implements ViewController {
 
 	@Override
 	public void initialize() {
+		versionLabel.setText(String.format(localization.getString("settings.version.label"), applicationVersion.orElse("SNAPSHOT")));
 		checkForUpdatesCheckbox.setDisable(areUpdatesManagedExternally());
 		checkForUpdatesCheckbox.setSelected(settings.checkForUpdates().get() && !areUpdatesManagedExternally());
+
+		//NIOADAPTER
+		volume.getItems().addAll(getSupportedAdapters());
+		volume.setValue(settings.usedNioAdapterImpl().get());
+		volume.setVisible(true);
+		volume.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends String> observable, String oldVal, String newVal) -> changeNioView(newVal));
+
+
+		//WEBDAV
+		webdavVolume.setVisible(settings.usedNioAdapterImpl().getValue().equals(NioAdapterImpl.WEBDAV.name()));
+		webdavVolume.managedProperty().bind(webdavVolume.visibleProperty());
+		prefGvfsScheme.managedProperty().bind(webdavVolume.visibleProperty());
+		prefGvfsSchemeLabel.managedProperty().bind(webdavVolume.visibleProperty());
+		portFieldLabel.managedProperty().bind(webdavVolume.visibleProperty());
+		changePortButton.managedProperty().bind(webdavVolume.visibleProperty());
+		portField.managedProperty().bind(webdavVolume.visibleProperty());
 		portField.setText(String.valueOf(settings.port().intValue()));
 		portField.addEventFilter(KeyEvent.KEY_TYPED, this::filterNumericKeyEvents);
 		changePortButton.visibleProperty().bind(settings.port().asString().isNotEqualTo(portField.textProperty()));
 		changePortButton.disableProperty().bind(Bindings.createBooleanBinding(this::isPortValid, portField.textProperty()).not());
-		versionLabel.setText(String.format(localization.getString("settings.version.label"), applicationVersion.orElse("SNAPSHOT")));
-		prefGvfsSchemeLabel.setVisible(SystemUtils.IS_OS_LINUX);
-		prefGvfsScheme.setVisible(SystemUtils.IS_OS_LINUX);
 		prefGvfsScheme.getItems().add("dav");
 		prefGvfsScheme.getItems().add("webdav");
 		prefGvfsScheme.setValue(settings.preferredGvfsScheme().get());
+		prefGvfsSchemeLabel.setVisible(SystemUtils.IS_OS_LINUX);
+		prefGvfsScheme.setVisible(SystemUtils.IS_OS_LINUX);
+
+		//FUSE
+		fuseVolume.setVisible(settings.usedNioAdapterImpl().getValue().equals(NioAdapterImpl.FUSE.name()));
+		fuseVolume.managedProperty().bind(fuseVolume.visibleProperty());
+
 		debugModeCheckbox.setSelected(settings.debugMode().get());
 
 		settings.checkForUpdates().bind(checkForUpdatesCheckbox.selectedProperty());
 		settings.preferredGvfsScheme().bind(prefGvfsScheme.valueProperty());
+		settings.usedNioAdapterImpl().bind(volume.valueProperty());
 		settings.debugMode().bind(debugModeCheckbox.selectedProperty());
+	}
+
+	//TODO: how to implement this?
+	private String[] getSupportedAdapters() {
+		return new String[]{NioAdapterImpl.FUSE.name(), NioAdapterImpl.WEBDAV.name()};
+	}
+
+	private void changeNioView(String newVal) {
+		fuseVolume.setVisible(newVal.equalsIgnoreCase(NioAdapterImpl.FUSE.name()));
+		webdavVolume.setVisible(newVal.equalsIgnoreCase(NioAdapterImpl.WEBDAV.name()));
 	}
 
 	@Override
