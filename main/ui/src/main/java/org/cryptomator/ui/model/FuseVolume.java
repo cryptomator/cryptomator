@@ -74,7 +74,11 @@ public class FuseVolume implements Volume {
 
 	@Override
 	public void reveal() throws CommandFailedException {
-		//fuseMnt.reveal();
+		try {
+			fuseMnt.reveal();
+		} catch (org.cryptomator.frontend.fuse.mount.CommandFailedException e) {
+			LOG.info("Revealing the vault in file manger failed: "+e.getMessage());
+		}
 	}
 
 	@Override
@@ -114,7 +118,7 @@ public class FuseVolume implements Volume {
 	}
 
 	/**
-	 * TODO: chang this to a real implementation
+	 * TODO: change this to a real implementation
 	 *
 	 * @return
 	 */
