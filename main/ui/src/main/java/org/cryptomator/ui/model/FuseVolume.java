@@ -65,11 +65,12 @@ public class FuseVolume implements Volume {
 				return windowsDriveLetters.getAvailableDriveLetters().iterator().next() + ":\\";
 			}
 		} else if (vaultSettings.individualMountPath().isNotNull().get()) {
-				//specific path given
-				return vaultSettings.individualMountPath().getValue();
-        }
-		//choose default path
-		return SystemUtils.IS_OS_MAC ? DEFAULT_MOUNTROOTPATH_MAC : DEFAULT_MOUNTROOTPATH_LINUX;
+			//specific path given
+			return vaultSettings.individualMountPath().getValue();
+		} else {
+			//choose default path
+			return SystemUtils.IS_OS_MAC ? DEFAULT_MOUNTROOTPATH_MAC : DEFAULT_MOUNTROOTPATH_LINUX;
+		}
 	}
 
 	@Override
@@ -77,7 +78,8 @@ public class FuseVolume implements Volume {
 		try {
 			fuseMnt.reveal();
 		} catch (org.cryptomator.frontend.fuse.mount.CommandFailedException e) {
-			LOG.info("Revealing the vault in file manger failed: "+e.getMessage());
+			LOG.info("Revealing the vault in file manger failed: " + e.getMessage());
+			throw new CommandFailedException(e);
 		}
 	}
 
