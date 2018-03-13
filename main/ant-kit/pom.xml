@@ -57,6 +57,7 @@
 									<directory>src/main/resources</directory>
 									<filtering>true</filtering>
 									<excludes>
+										<exclude>logback.xml</exclude>
 										<exclude>fixed-binaries/**</exclude>
 									</excludes>
 								</resource>
@@ -64,6 +65,7 @@
 									<directory>src/main/resources</directory>
 									<filtering>false</filtering>
 									<includes>
+										<include>logback.xml</include>
 										<include>fixed-binaries/**</include>
 									</includes>
 								</resource>
@@ -76,7 +78,7 @@
 			<!-- create antkit.tar.gz: -->
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
-				<version>3.0.0</version>
+				<version>3.1.0</version>
 				<executions>
 					<execution>
 						<id>make-assembly</id>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.3 http://maven.apache.org/xsd/assembly-1.1.3.xsd">
+<assembly xmlns="http://maven.apache.org/ASSEMBLY/2.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/ASSEMBLY/2.0.0 http://maven.apache.org/xsd/assembly-2.0.0.xsd">
 	<id>tarball</id>
 	<includeBaseDirectory>false</includeBaseDirectory>
 	<formats>
@@ -29,6 +29,7 @@
 			<directory>target</directory>
 			<includes>
 				<include>build.xml</include>
+				<include>logback.xml</include>
 			</includes>
 			<filtered>false</filtered>
 			<outputDirectory>.</outputDirectory>
