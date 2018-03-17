@@ -175,7 +175,7 @@ public class UnlockController implements ViewController {
 			winDriveLetterLabel.setManaged(false);
 			winDriveLetter.setVisible(false);
 			winDriveLetter.setManaged(false);
-			if(settings.usedNioAdapterImpl().isEqualTo(NioAdapterImpl.WEBDAV.name()).get()){
+			if(NioAdapterImpl.WEBDAV.equals(settings.usedNioAdapterImpl().get())){
 				mountPathLabel.setVisible(false);
 				mountPathLabel.setManaged(false);
 			}

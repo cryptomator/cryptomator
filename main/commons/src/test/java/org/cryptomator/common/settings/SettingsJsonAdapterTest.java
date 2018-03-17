@@ -21,20 +21,17 @@ public class SettingsJsonAdapterTest {
 		String json = "{\"directories\": [" + vault1Json + "," + vault2Json + "]," //
 				+ "\"checkForUpdatesEnabled\": true,"//
 				+ "\"port\": 8080,"//
-				+ "\"useIpv6\": true,"//
 				+ "\"numTrayNotifications\": 42,"//
-				+ "\"nioAdapterImpl\": \"webdav\","//
-				+ "\"defaultMountDir\": \"/home/test/crypto\"}";
+				+ "\"nioAdapterImpl\": \"webdav\"}";
 
 		Settings settings = adapter.fromJson(json);
 
 		Assert.assertTrue(settings.checkForUpdates().get());
 		Assert.assertEquals(2, settings.getDirectories().size());
 		Assert.assertEquals(8080, settings.port().get());
-		// Assert.assertTrue(settings.useIpv6().get()); temporarily ignored
 		Assert.assertEquals(42, settings.numTrayNotifications().get());
 		Assert.assertEquals("dav", settings.preferredGvfsScheme().get());
-		Assert.assertEquals("webdav", settings.usedNioAdapterImpl().get());
+		Assert.assertEquals(NioAdapterImpl.WEBDAV, settings.usedNioAdapterImpl().get());
 	}
 
 }

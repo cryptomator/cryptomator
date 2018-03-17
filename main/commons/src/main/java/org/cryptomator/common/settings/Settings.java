@@ -12,8 +12,10 @@ import java.util.function.Consumer;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
@@ -30,7 +32,7 @@ public class Settings {
 	public static final int DEFAULT_NUM_TRAY_NOTIFICATIONS = 3;
 	public static final String DEFAULT_GVFS_SCHEME = "dav";
 	public static final boolean DEFAULT_DEBUG_MODE = false;
-	public static final String DEFAULT_NIO_ADAPTER = NioAdapterImpl.WEBDAV.name();
+	public static final NioAdapterImpl DEFAULT_NIO_ADAPTER = NioAdapterImpl.WEBDAV;
 
 	private final ObservableList<VaultSettings> directories = FXCollections.observableArrayList(VaultSettings::observables);
 	private final BooleanProperty checkForUpdates = new SimpleBooleanProperty(DEFAULT_CHECK_FOR_UDPATES);
@@ -38,7 +40,7 @@ public class Settings {
 	private final IntegerProperty numTrayNotifications = new SimpleIntegerProperty(DEFAULT_NUM_TRAY_NOTIFICATIONS);
 	private final StringProperty preferredGvfsScheme = new SimpleStringProperty(DEFAULT_GVFS_SCHEME);
 	private final BooleanProperty debugMode = new SimpleBooleanProperty(DEFAULT_DEBUG_MODE);
-	private final StringProperty nioAdapterImpl = new SimpleStringProperty(DEFAULT_NIO_ADAPTER);
+	private final ObjectProperty<NioAdapterImpl> nioAdapterImpl = new SimpleObjectProperty<>(DEFAULT_NIO_ADAPTER);
 
 	private Consumer<Settings> saveCmd;
 
@@ -95,7 +97,7 @@ public class Settings {
 		return debugMode;
 	}
 
-	public StringProperty usedNioAdapterImpl() {
+	public ObjectProperty<NioAdapterImpl> usedNioAdapterImpl() {
 		return nioAdapterImpl;
 	}
 
