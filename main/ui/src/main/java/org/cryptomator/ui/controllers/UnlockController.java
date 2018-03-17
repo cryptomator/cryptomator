@@ -21,7 +21,7 @@ import javafx.beans.binding.Bindings;
 import javafx.scene.layout.HBox;
 import org.apache.commons.lang3.CharUtils;
 import org.apache.commons.lang3.SystemUtils;
-import org.cryptomator.common.settings.NioAdapterImpl;
+import org.cryptomator.common.settings.VolumeImpl;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.cryptolib.api.InvalidPassphraseException;
@@ -175,7 +175,7 @@ public class UnlockController implements ViewController {
 			winDriveLetterLabel.setManaged(false);
 			winDriveLetter.setVisible(false);
 			winDriveLetter.setManaged(false);
-			if(NioAdapterImpl.WEBDAV.equals(settings.usedNioAdapterImpl().get())){
+			if(VolumeImpl.WEBDAV.equals(settings.volumeImpl().get())){
 				mountPathLabel.setVisible(false);
 				mountPathLabel.setManaged(false);
 			}

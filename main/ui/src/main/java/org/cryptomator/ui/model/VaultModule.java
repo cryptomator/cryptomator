@@ -12,7 +12,7 @@ import java.util.Objects;
 
 import javax.inject.Scope;
 
-import org.cryptomator.common.settings.NioAdapterImpl;
+import org.cryptomator.common.settings.VolumeImpl;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VaultSettings;
 
@@ -44,7 +44,7 @@ public class VaultModule {
 	@Provides
 	@PerVault
 	public Volume provideNioAdpater(Settings settings, WebDavVolume webDavVolume, FuseVolume fuseVolume) {
-		NioAdapterImpl impl = settings.usedNioAdapterImpl().get();
+		VolumeImpl impl = settings.volumeImpl().get();
 		switch (impl) {
 			case WEBDAV:
 				return webDavVolume;

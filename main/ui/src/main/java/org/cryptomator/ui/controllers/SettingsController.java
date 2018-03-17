@@ -30,7 +30,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.util.StringConverter;
 import org.apache.commons.lang3.SystemUtils;
-import org.cryptomator.common.settings.NioAdapterImpl;
+import org.cryptomator.common.settings.VolumeImpl;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.ui.l10n.Localization;
 
@@ -81,7 +81,7 @@ public class SettingsController implements ViewController {
 	private Label volumeLabel;
 
 	@FXML
-	private ChoiceBox<NioAdapterImpl> volume;
+	private ChoiceBox<VolumeImpl> volume;
 
 	@FXML
 	private CheckBox debugModeCheckbox;
@@ -97,12 +97,12 @@ public class SettingsController implements ViewController {
 
 		//NIOADAPTER
 		volume.getItems().addAll(getSupportedAdapters());
-		volume.setValue(settings.usedNioAdapterImpl().get());
+		volume.setValue(settings.volumeImpl().get());
 		volume.setVisible(true);
 		volume.setConverter(new NioAdapterImplStringConverter());
 
 		//WEBDAV
-		webdavVolume.visibleProperty().bind(volume.valueProperty().isEqualTo(NioAdapterImpl.WEBDAV));
+		webdavVolume.visibleProperty().bind(volume.valueProperty().isEqualTo(VolumeImpl.WEBDAV));
 		webdavVolume.managedProperty().bind(webdavVolume.visibleProperty());
 		prefGvfsScheme.managedProperty().bind(webdavVolume.visibleProperty());
 		prefGvfsSchemeLabel.managedProperty().bind(webdavVolume.visibleProperty());
@@ -120,20 +120,20 @@ public class SettingsController implements ViewController {
 		prefGvfsScheme.setVisible(SystemUtils.IS_OS_LINUX);
 
 		//FUSE
-		fuseVolume.visibleProperty().bind(volume.valueProperty().isEqualTo(NioAdapterImpl.FUSE));
+		fuseVolume.visibleProperty().bind(volume.valueProperty().isEqualTo(VolumeImpl.FUSE));
 		fuseVolume.managedProperty().bind(fuseVolume.visibleProperty());
 
 		debugModeCheckbox.setSelected(settings.debugMode().get());
 
 		settings.checkForUpdates().bind(checkForUpdatesCheckbox.selectedProperty());
 		settings.preferredGvfsScheme().bind(prefGvfsScheme.valueProperty());
-		settings.usedNioAdapterImpl().bind(volume.valueProperty());
+		settings.volumeImpl().bind(volume.valueProperty());
 		settings.debugMode().bind(debugModeCheckbox.selectedProperty());
 	}
 
 	//TODO: how to implement this?
-	private NioAdapterImpl[] getSupportedAdapters() {
-		return new NioAdapterImpl[]{NioAdapterImpl.FUSE, NioAdapterImpl.WEBDAV};
+	private VolumeImpl[] getSupportedAdapters() {
+		return new VolumeImpl[]{VolumeImpl.FUSE, VolumeImpl.WEBDAV};
 	}
 
 	@Override
@@ -175,16 +175,16 @@ public class SettingsController implements ViewController {
 		return Boolean.parseBoolean(System.getProperty("cryptomator.updatesManagedExternally", "false"));
 	}
 
-	private static class NioAdapterImplStringConverter extends StringConverter<NioAdapterImpl> {
+	private static class NioAdapterImplStringConverter extends StringConverter<VolumeImpl> {
 
 		@Override
-		public String toString(NioAdapterImpl object) {
-			return object.name();
+		public String toString(VolumeImpl object) {
+			return object.getDisplayName();
 		}
 
 		@Override
-		public NioAdapterImpl fromString(String string) {
-			return NioAdapterImpl.valueOf(string);
+		public VolumeImpl fromString(String string) {
+			return VolumeImpl.forDisplayName(string);
 		}
 	}
 

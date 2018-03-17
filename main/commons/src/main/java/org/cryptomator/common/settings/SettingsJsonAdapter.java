@@ -33,7 +33,7 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 		out.name("numTrayNotifications").value(value.numTrayNotifications().get());
 		out.name("preferredGvfsScheme").value(value.preferredGvfsScheme().get());
 		out.name("debugMode").value(value.debugMode().get());
-		out.name("nioAdapterImpl").value(value.usedNioAdapterImpl().get().name());
+		out.name("volumeImpl").value(value.volumeImpl().get().name());
 		out.endObject();
 	}
 
@@ -71,8 +71,8 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 				case "debugMode":
 					settings.debugMode().set(in.nextBoolean());
 					break;
-				case "nioAdapterImpl":
-					settings.usedNioAdapterImpl().set(parseNioAdapterName(in.nextString()));
+				case "volumeImpl":
+					settings.volumeImpl().set(parseNioAdapterName(in.nextString()));
 					break;
 				default:
 					LOG.warn("Unsupported vault setting found in JSON: " + name);
@@ -84,11 +84,11 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 		return settings;
 	}
 
-	private NioAdapterImpl parseNioAdapterName(String nioAdapterName) {
+	private VolumeImpl parseNioAdapterName(String nioAdapterName) {
 		try {
-			return NioAdapterImpl.valueOf(nioAdapterName);
+			return VolumeImpl.valueOf(nioAdapterName);
 		} catch (IllegalArgumentException e) {
-			return Settings.DEFAULT_NIO_ADAPTER;
+			return Settings.DEFAULT_VOLUME_IMPL;
 		}
 	}
 
