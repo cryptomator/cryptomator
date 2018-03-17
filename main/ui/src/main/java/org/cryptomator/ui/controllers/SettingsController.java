@@ -14,17 +14,8 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
-import javafx.beans.value.ObservableValue;
-import javafx.scene.layout.GridPane;
-import javafx.util.StringConverter;
-import org.apache.commons.lang3.SystemUtils;
-import org.cryptomator.common.settings.Settings;
-import org.cryptomator.ui.l10n.Localization;
-import org.cryptomator.common.settings.NioAdapterImpl;
-
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Strings;
-
 import javafx.beans.binding.Bindings;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -35,8 +26,13 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
-import org.fxmisc.easybind.EasyBind;
+import javafx.util.StringConverter;
+import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.common.settings.NioAdapterImpl;
+import org.cryptomator.common.settings.Settings;
+import org.cryptomator.ui.l10n.Localization;
 
 @Singleton
 public class SettingsController implements ViewController {

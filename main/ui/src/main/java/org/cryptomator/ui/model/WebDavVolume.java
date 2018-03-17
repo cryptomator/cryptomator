@@ -10,6 +10,8 @@ import org.cryptomator.frontend.webdav.mount.Mounter;
 import org.cryptomator.frontend.webdav.servlet.WebDavServletController;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
+
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
@@ -18,22 +20,26 @@ public class WebDavVolume implements Volume {
 
 	private static final String LOCALHOST_ALIAS = "cryptomator-vault";
 
-	private final WebDavServer server;
+	private final Provider<WebDavServer> serverProvider;
 	private final VaultSettings vaultSettings;
 	private final Settings settings;
 
+	private WebDavServer server;
 	private WebDavServletController servlet;
 	private Mounter.Mount mount;
 
 	@Inject
-	public WebDavVolume(WebDavServer server, VaultSettings vaultSettings, Settings settings) {
-		this.server = server;
+	public WebDavVolume(Provider<WebDavServer> serverProvider, VaultSettings vaultSettings, Settings settings) {
+		this.serverProvider = serverProvider;
 		this.vaultSettings = vaultSettings;
 		this.settings = settings;
 	}
 
 	@Override
 	public void prepare(CryptoFileSystem fs) {
+		if (server == null) {
+			server = serverProvider.get();
+		}
 		if (!server.isRunning()) {
 			server.start();
 		}
