@@ -2,7 +2,7 @@
  * Copyright (c) 2014, 2017 Sebastian Stenzel
  * All rights reserved.
  * This program and the accompanying materials are made available under the terms of the accompanying LICENSE file.
- * 
+ *
  * Contributors:
  *     Sebastian Stenzel - initial API and implementation
  ******************************************************************************/
@@ -178,9 +178,9 @@ public class UnlockController implements ViewController {
 		advancedOptions.setVisible(false);
 		advancedOptionsButton.setText(localization.getString("unlock.button.advancedOptions.show"));
 		progressIndicator.setVisible(false);
-		successMessage.setVisible(didChange(state));
-		if (successMessage.isVisible()) {
-			successMessage.setText(localization.getString(state.successMessage()));
+		successMessage.setVisible(state.shouldShowStatusMessage());
+		if (successMessage.isVisible() && state.successMessage().isPresent()) {
+			successMessage.setText(localization.getString(state.successMessage().get()));
 		}
 		if (SystemUtils.IS_OS_WINDOWS) {
 			winDriveLetter.valueProperty().removeListener(driveLetterChangeListener);
@@ -397,15 +397,6 @@ public class UnlockController implements ViewController {
 		}).run();
 	}
 
-	private boolean didChange(State state) {
-		switch (state) {
-			case UNLOCKING:
-				return false;
-			default:
-				return true;
-		}
-	}
-
 	/* callback */
 
 	public void setListener(UnlockListener listener) {
@@ -414,29 +405,37 @@ public class UnlockController implements ViewController {
 
 	@FunctionalInterface
 	interface UnlockListener {
+
 		void didUnlock(Vault vault);
 	}
 
 	/* state */
 
 	public enum State {
-		UNLOCKING(empty()),
-		INITIALIZED("unlock.successLabel.vaultCreated"),
-		PASSWORD_CHANGED("unlock.successLabel.passwordChanged"),
-		UPGRADED("unlock.successLabel.upgraded");
+		UNLOCKING(false),
+		INITIALIZED("unlock.successLabel.vaultCreated", true),
+		PASSWORD_CHANGED("unlock.successLabel.passwordChanged", true),
+		UPGRADED("unlock.successLabel.upgraded", true);
 
-		private static String empty() {
-			return "";
+		private Optional<String> successMessage;
+		private boolean shouldShowStatusMessage;
+
+		State(boolean shouldShowStatusMessage) {
+			this.successMessage = Optional.empty();
+			this.shouldShowStatusMessage = shouldShowStatusMessage;
 		}
 
-		private String successMessage;
-
-		State(String successMessage) {
-			this.successMessage = successMessage;
+		State(String successMessage, boolean shouldShowStatusMessage) {
+			this.successMessage = Optional.of(successMessage);
+			this.shouldShowStatusMessage = shouldShowStatusMessage;
 		}
 
-		public String successMessage() {
+		public Optional<String> successMessage() {
 			return successMessage;
+		}
+
+		public boolean shouldShowStatusMessage() {
+			return shouldShowStatusMessage;
 		}
 	}
 
