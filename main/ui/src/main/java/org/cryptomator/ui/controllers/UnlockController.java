@@ -412,22 +412,22 @@ public class UnlockController implements ViewController {
 	/* state */
 
 	public enum State {
-		UNLOCKING(false),
-		INITIALIZED("unlock.successLabel.vaultCreated", true),
-		PASSWORD_CHANGED("unlock.successLabel.passwordChanged", true),
-		UPGRADED("unlock.successLabel.upgraded", true);
+		UNLOCKING(),
+		INITIALIZED("unlock.successLabel.vaultCreated"),
+		PASSWORD_CHANGED("unlock.successLabel.passwordChanged"),
+		UPGRADED("unlock.successLabel.upgraded");
 
 		private Optional<String> successMessage;
 		private boolean shouldShowStatusMessage;
 
-		State(boolean shouldShowStatusMessage) {
+		State() {
 			this.successMessage = Optional.empty();
-			this.shouldShowStatusMessage = shouldShowStatusMessage;
+			this.shouldShowStatusMessage = false;
 		}
 
-		State(String successMessage, boolean shouldShowStatusMessage) {
+		State(String successMessage) {
 			this.successMessage = Optional.of(successMessage);
-			this.shouldShowStatusMessage = shouldShowStatusMessage;
+			this.shouldShowStatusMessage = true;
 		}
 
 		public Optional<String> successMessage() {
