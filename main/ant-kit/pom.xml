@@ -56,17 +56,15 @@
 								<resource>
 									<directory>src/main/resources</directory>
 									<filtering>true</filtering>
-									<excludes>
-										<exclude>logback.xml</exclude>
-										<exclude>fixed-binaries/**</exclude>
-									</excludes>
+									<includes>
+										<include>build.xml</include>
+									</includes>
 								</resource>
 								<resource>
 									<directory>src/main/resources</directory>
 									<filtering>false</filtering>
 									<includes>
 										<include>logback.xml</include>
-										<include>fixed-binaries/**</include>
 									</includes>
 								</resource>
 							</resources>

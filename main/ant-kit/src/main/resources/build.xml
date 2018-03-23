@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="Cryptomator" default="create-jar" basedir="." xmlns:fx="javafx:com.sun.javafx.tools.ant">
-	<taskdef uri="javafx:com.sun.javafx.tools.ant" resource="com/sun/javafx/tools/ant/antlib.xml" classpath="\${java.class.path}:\${java.home}/../lib/ant-javafx.jar:." />
+	<taskdef uri="javafx:com.sun.javafx.tools.ant" resource="com/sun/javafx/tools/ant/antlib.xml" classpath="\${java.class.path}:\${java.home}/lib/ant-javafx.jar:." />
 	
 	<!-- Define application to build -->
 	<fx:application id="Cryptomator" name="Cryptomator" version="${project.version}" mainClass="org.cryptomator.launcher.Cryptomator" />
@@ -20,51 +20,25 @@
 			</fx:manifest>
 		</fx:jar>
 	</target>
-	
-	<!-- Create Debian package -->
-	<target name="deb" depends="create-jar">
-		<fx:deploy nativeBundles="deb" outdir="antbuild" outfile="Cryptomator-${project.version}" verbose="true">
+
+	<!-- Create Image package -->
+	<target name="image" depends="create-jar">
+		<fx:deploy nativeBundles="image" outdir="antbuild" verbose="true">
 			<fx:application refid="Cryptomator" />
-			<fx:info title="Cryptomator" vendor="cryptomator.org" copyright="cryptomator.org" license="MIT" category="Utility">
-				<fx:association mimetype="application/x-vnd.cryptomator-vault-metadata" extension="cryptomator" description="Cryptomator Vault Metadata" />
-			</fx:info>
-			<fx:platform j2se="8.0">
+			<fx:info title="Cryptomator" vendor="cryptomator.org" copyright="cryptomator.org" license="GPL" category="Utility"/>
+			<fx:platform j2se="9.0">
 				<fx:property name="logback.configurationFile" value="logback.xml" />
 				<fx:property name="cryptomator.settingsPath" value="~/.Cryptomator/settings.json" />
 				<fx:property name="cryptomator.ipcPortPath" value="~/.Cryptomator/ipcPort.bin" />
 				<fx:jvmarg value="-Xss2m"/>
 				<fx:jvmarg value="-Xmx512m"/>
+				<fx:jvmarg value="--add-modules"/>
+				<fx:jvmarg value="jdk.incubator.httpclient"/>
 			</fx:platform>
 			<fx:resources>
 				<fx:fileset dir="." type="data" includes="logback.xml" />
 				<fx:fileset dir="antbuild" type="jar" includes="Cryptomator-${project.version}.jar" />
 				<fx:fileset dir="libs" type="jar" includes="*.jar" excludes="launcher-${project.version}.jar"/>
-				<fx:fileset dir="fixed-binaries" type="data" includes="linux-launcher-*" arch=""/>
-			</fx:resources>
-			<fx:permissions elevated="false" />
-			<fx:preferences install="true" />
-		</fx:deploy>
-	</target>
-	
-	<!-- Create Red Hat package -->
-	<target name="rpm" depends="create-jar">
-		<fx:deploy nativeBundles="rpm" outdir="antbuild" outfile="Cryptomator-${project.version}" verbose="true">
-			<fx:application refid="Cryptomator" />
-			<fx:info title="Cryptomator" vendor="cryptomator.org" copyright="cryptomator.org" license="MIT" category="Utility">
-				<fx:association mimetype="application/x-vnd.cryptomator-vault-metadata" extension="cryptomator" description="Cryptomator Vault Metadata" />
-			</fx:info>
-			<fx:platform j2se="8.0">
-				<fx:property name="logback.configurationFile" value="logback.xml" />
-				<fx:property name="cryptomator.settingsPath" value="~/.Cryptomator/settings.json" />
-				<fx:property name="cryptomator.ipcPortPath" value="~/.Cryptomator/ipcPort.bin" />
-				<fx:jvmarg value="-Xss2m"/>
-				<fx:jvmarg value="-Xmx512m"/>
-			</fx:platform>
-			<fx:resources>
-				<fx:fileset dir="." type="data" includes="logback.xml" />
-				<fx:fileset dir="antbuild" type="jar" includes="Cryptomator-${project.version}.jar" />
-				<fx:fileset dir="libs" type="jar" includes="*.jar" excludes="launcher-${project.version}.jar"/>
-				<fx:fileset dir="fixed-binaries" type="data" includes="linux-launcher-*" arch=""/>
 			</fx:resources>
 			<fx:permissions elevated="false" />
 			<fx:preferences install="true" />
