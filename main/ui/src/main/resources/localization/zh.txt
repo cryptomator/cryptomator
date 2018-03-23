@@ -54,9 +54,6 @@ unlocked.ioGraph.yAxis.label = 吞吐量 (Mib/s)
 # settings.fxml
 settings.version.label = 版本 %s
 settings.checkForUpdates.label = 检查更新
-# What's the "*" mean?
-settings.port.label = WebDAV 端口*
-settings.port.prompt = 0 \= 自动选择
 settings.requiresRestartLabel = * Cryptomator 需要重启
 # tray icon
 tray.menu.open = 打开
@@ -75,7 +72,6 @@ main.directoryList.remove.confirmation.header = 确定要移除此资料库吗�
 main.directoryList.remove.confirmation.content = 资料库将仅从列表中移除，如需永久删除，请从文件系统中删除这些文件。
 upgrade.version3to4.msg = 此资料库需要升级至最新版本，\n已加密的文件夹名称将更新。\n请确保同步完成后再继续操作。
 upgrade.version3to4.err.io = 由于 I/O 异常，迁移失败。请查看日志来获得详细信息。
-settings.prefGvfsScheme.label = WebDAV 格式
 # upgrade.fxml
 upgrade.confirmation.label = 没错，同步已完成。
 unlock.label.savePassword = 保存密码
@@ -91,7 +87,6 @@ upgrade.version3to4.title = 升级资料库到第四版
 upgrade.version4to5.title = 升级资料库到第五版
 upgrade.version4to5.msg = 此资料库需要升级至最新版本，\n已加密的数据将被更新。\n请确保同步完成后再继续操作。
 upgrade.version4to5.err.io = 升级因 I/O 错误失败。请查看日志来获得详细信息。
-settings.port.apply = 应用
 unlock.label.mountAfterUnlock = 装载驱动器
 unlock.label.revealAfterMount = 显示驱动器
 unlocked.lock.force.confirmation.title = 无法锁定 %1$s
@@ -106,3 +101,15 @@ upgrade.version5toX.msg = 此资料库需要升级至最新版本，\n请确保�
 main.createVault.nonEmptyDir.title = Creating vault failed
 main.createVault.nonEmptyDir.header = Chosen directory is not empty
 main.createVault.nonEmptyDir.content = The selected directory already contains files (possibly hidden). A vault can only be created in an empty directory.
+unlock.label.mountPath = Mount Path
+unlock.label.mountPathButton = Apply
+settings.webdav.port.label = WebDAV Port
+settings.webdav.port.prompt = 0 \= Choose automatically
+settings.webdav.port.apply = Apply
+settings.webdav.prefGvfsScheme.label = WebDAV Scheme
+settings.volume.label = Mount-Methode *
+settings.volume.webdav = WebDAV
+settings.volume.fuse = FUSE
+unlock.successLabel.vaultCreated = Vault was successfully created.
+unlock.successLabel.passwordChanged = Password was successfully changed.
+unlock.successLabel.upgraded = Cryptomator was successfully upgraded.

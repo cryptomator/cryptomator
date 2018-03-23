@@ -54,8 +54,6 @@ unlocked.ioGraph.yAxis.label = ความเร็วอ่านเขีย�
 # settings.fxml
 settings.version.label = เวอร์ชั่น %s
 settings.checkForUpdates.label = ค้นหาอัพเดท
-settings.port.label = WebDAV Port
-settings.port.prompt = 0 \= เลือกอัตโนมัติ
 settings.requiresRestartLabel = * ต้องรีสตาร์ท Cryptomator ใหม่
 # tray icon
 tray.menu.open = เปิด
@@ -74,7 +72,6 @@ main.directoryList.remove.confirmation.header = คุณต้องการ�
 main.directoryList.remove.confirmation.content = กล่องข้อมูลแค่ถูกลบออกจากรายการ หากต้องการลบข้อมูล ต้องไปลบในที่อยู่ไฟล์ของคุณ
 upgrade.version3to4.msg = กล่องข้อมูลต้องการอัพเกรดเป็นเวอร์ชั่นใหม่\nชื่อโฟลเดอร์จะถูกอัพเดท\nกรุณารอการอัพเกรดให้เสร็จสิ้นก่อนเริ่มใช้งาน
 upgrade.version3to4.err.io = อัพเกรดล้มเหลวเนื่องจากข้อยกเว้น I/O ดูรายละเอียดได้ใน Log ไฟล์
-settings.prefGvfsScheme.label = WebDAV Scheme
 # upgrade.fxml
 upgrade.confirmation.label = ใช่ ฉันมั่นใจว่าอัพเกรดเสร็จเรียบร้อยแล้ว
 unlock.label.savePassword = เซฟรหัสผ่าน
@@ -89,7 +86,6 @@ upgrade.version3to4.title = อัพเกรดกล่องข้อมู�
 upgrade.version4to5.title = อัพเกรดกล่องข้อมูลเวอร์ชั่น 4 ไปยัง 5
 upgrade.version4to5.msg = กล่องข้อมูลนี้ต้องการอัพเกรดเป็นเวอร์ชั่นใหม่\nไฟล์เข้ารหัสจะได้รับการอัพเกรด\nกรุณารอการอัพเกรดให้เสร็จสิ้นก่อนเริ่มใช้งาน\n\nเพิ่มเติม\: วันที่ Modification ของไฟล์จะถูกเปลี่ยนเป็นเวลา ณ ปัจจุบัน
 upgrade.version4to5.err.io = อัพเกรดล้มเหลวเนื่องจากข้อยกเว้น I/O ดูรายละเอียดได้ใน Log ไฟล์
-settings.port.apply = ตกลง
 unlock.label.mountAfterUnlock = เมาท์ไดรฟ์
 unlock.label.revealAfterMount = ไปยังไดรฟ์
 unlocked.lock.force.confirmation.title = ล็อค %1$s ล้มเหลว
@@ -104,3 +100,15 @@ upgrade.version5toX.msg = กล่องข้อมูลต้องการ
 main.createVault.nonEmptyDir.title = การสร้างกล่องข้อมูลล้มเหลว
 main.createVault.nonEmptyDir.header = โฟลเดอร์ที่เลือกมีไฟล์อยู่
 main.createVault.nonEmptyDir.content = โฟลเดอที่เลือกมีไฟล์อยู่ (อาจจะซ่อนอยู่)\nกล่องข้อมูลสามารถสร้างได้จากโฟลเดอร์เปล่าเท่านั้น
+unlock.label.mountPath = Mount Path
+unlock.label.mountPathButton = Apply
+settings.webdav.port.label = WebDAV Port
+settings.webdav.port.prompt = 0 \= Choose automatically
+settings.webdav.port.apply = Apply
+settings.webdav.prefGvfsScheme.label = WebDAV Scheme
+settings.volume.label = Mount-Methode *
+settings.volume.webdav = WebDAV
+settings.volume.fuse = FUSE
+unlock.successLabel.vaultCreated = Vault was successfully created.
+unlock.successLabel.passwordChanged = Password was successfully changed.
+unlock.successLabel.upgraded = Cryptomator was successfully upgraded.

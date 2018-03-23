@@ -54,8 +54,6 @@ unlocked.ioGraph.yAxis.label = 처리량 (MiB/s)
 # settings.fxml
 settings.version.label = 버전 %s
 settings.checkForUpdates.label = 업데이트 확인
-settings.port.label = WebDAV 포트 *
-settings.port.prompt = 0 \= 자동으로 선택
 settings.requiresRestartLabel = * Cryptomator 재시작 필요
 # tray icon
 tray.menu.open = 열기
@@ -74,7 +72,6 @@ main.directoryList.remove.confirmation.header = 정말 이 보관함을 삭제�
 main.directoryList.remove.confirmation.content = 보관함이 목록에서만 제거되었습니다. 데이터를 완전히 제거하시려면, 사용자의 파일시스템이서 제거해 주시기 바랍니다.
 upgrade.version3to4.msg = 이 보관함은 새로운 형식으로 이전되어야 합니다. 암호화된 폴더 이름이 업데이트 될 것입니다. 진행하기 전에 동기화가 완료되었는지 확인하기 바랍니다.
 upgrade.version3to4.err.io = I/O 예외 문제로 마이그레이션이 실패하였습니다. 자세한 사항은 로그 파일을 확인하세요.
-settings.prefGvfsScheme.label = WebDAV 스키마
 # upgrade.fxml
 upgrade.confirmation.label = 네. 동기화가 완료되었음을 확인하였습니다.
 unlock.label.savePassword = 비밀번호 저장
@@ -89,7 +86,6 @@ upgrade.version3to4.title = 보관함 버전 3에서 4로 업그레이드
 upgrade.version4to5.title = 보관함 버전 4에서 5로 업그레이드
 upgrade.version4to5.msg = 이 보관함은 새로운 형식으로 이전되어야 합니다.\n암호화된 파일들은 업데이트 될 것입니다.\n진행하기 전에 동기화가 완료되었는지 확인해주세요.\n\n참고\: 모든 파일의  수정 날짜는 과정 진행 중에 현재 날짜/시간으로 바뀔 것입니다.
 upgrade.version4to5.err.io = I/O 예외에 의해 마이그레이션 실패. 자세한 사항은 로그 파일을 참조하세요.
-settings.port.apply = 적용
 unlock.label.mountAfterUnlock = 드라이브 마운트
 unlock.label.revealAfterMount = 드라이브 공개
 unlocked.lock.force.confirmation.title = %1$s 잠그기 실패
@@ -101,6 +97,18 @@ unlocked.moreOptions.mount = 드라이브 마운트
 unlocked.moreOptions.unmount = 드라이브 꺼내기
 upgrade.version5toX.title = 보관함 버전 업그레이드
 upgrade.version5toX.msg = 이 보관함은 새로운 버전으로 이전되어야 합니다.\n진행하기 전에 동기화가 완료되었는지 확인해주세요.
-main.createVault.nonEmptyDir.title = Creating vault failed
-main.createVault.nonEmptyDir.header = Chosen directory is not empty
-main.createVault.nonEmptyDir.content = The selected directory already contains files (possibly hidden). A vault can only be created in an empty directory.
+main.createVault.nonEmptyDir.title = 보관함 생성 실패
+main.createVault.nonEmptyDir.header = 선택된 디렉토리가 비어있지 않습니다
+main.createVault.nonEmptyDir.content = 선택된 디렉토리가 이미 파일을 포함하고 있습니다 (숨겨져 있을 수도 있습니다). 보관함은 비어있는 디렉토리에만 생성할 수 있습니다.
+unlock.label.mountPath = 경로 마운트
+unlock.label.mountPathButton = 적용
+settings.webdav.port.label = WebDAV 포트
+settings.webdav.port.prompt = 0 \= 자동으로 선택
+settings.webdav.port.apply = 적용
+settings.webdav.prefGvfsScheme.label = WebDAV 스킴
+settings.volume.label = 마운트-방법 *
+settings.volume.webdav = WebDAV
+settings.volume.fuse = FUSE
+unlock.successLabel.vaultCreated = Vault was successfully created.
+unlock.successLabel.passwordChanged = Password was successfully changed.
+unlock.successLabel.upgraded = Cryptomator was successfully upgraded.

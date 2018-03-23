@@ -56,8 +56,6 @@ unlocked.ioGraph.yAxis.label = Rendimiento (MiB/s)
 # settings.fxml
 settings.version.label = Versión %s
 settings.checkForUpdates.label = Comprobar actualizaciones
-settings.port.label = Puerto WebDAV
-settings.port.prompt = 0 \= Elegir automáticamente
 settings.requiresRestartLabel = * Cryptomator necesita reiniciarse
 # tray icon
 tray.menu.open = Abrir
@@ -76,8 +74,6 @@ main.directoryList.remove.confirmation.header = ¿Quiere de realmente eliminar e
 main.directoryList.remove.confirmation.content = La caja fuerte solo se elimina de la lista. Para borrarla permanente elimine los datos de su sistema de archivos.
 upgrade.version3to4.msg = Este caja fuerte se debe migrar a un formato más moderno.\nLos nombres de las carpetas cifradas se actualizarán.\nAsegúrese de que la sincronización ha terminado antes de continuar.
 upgrade.version3to4.err.io = Error en la migración debido a una excepción de E/S. Consulte el archivo de registro para más información.
-# or esequema WEBDAV but I think sistema sounds better
-settings.prefGvfsScheme.label = Esquema de WebDAV
 # upgrade.fxml
 upgrade.confirmation.label = Sí, me he asegurado de que la sincronización ha terminado
 unlock.label.savePassword = Guardar contraseña
@@ -92,7 +88,6 @@ upgrade.version3to4.title = Actualizar caja fuerte de versión 3 a 4
 upgrade.version4to5.title = Actualizar caja fuerte de versión 4 a 5
 upgrade.version4to5.msg = Esta caja fuerte tiene que ser migrada a un formato más moderno.\nLos archivos cifrados se actualizarán.\nAsegúrese de que la sincronización ha terminado antes de iniciar el proceso.\n\nNota\: las fechas de modificación de todos los archivos, se cambiarán a la fecha actual.
 upgrade.version4to5.err.io = Error en la migración debido a una excepción E/S. Consulte el archivo de registro para más información.
-settings.port.apply = Aplicar
 unlock.label.mountAfterUnlock = Montar unidad
 unlock.label.revealAfterMount = Revelar unidad
 unlocked.lock.force.confirmation.title = Error al bloquear %1$s
@@ -107,3 +102,15 @@ upgrade.version5toX.msg = Esta caja fuerte debe ser migrada a un formato más mo
 main.createVault.nonEmptyDir.title = Creating vault failed
 main.createVault.nonEmptyDir.header = Chosen directory is not empty
 main.createVault.nonEmptyDir.content = The selected directory already contains files (possibly hidden). A vault can only be created in an empty directory.
+unlock.label.mountPath = Mount Path
+unlock.label.mountPathButton = Apply
+settings.webdav.port.label = WebDAV Port
+settings.webdav.port.prompt = 0 \= Choose automatically
+settings.webdav.port.apply = Apply
+settings.webdav.prefGvfsScheme.label = WebDAV Scheme
+settings.volume.label = Mount-Methode *
+settings.volume.webdav = WebDAV
+settings.volume.fuse = FUSE
+unlock.successLabel.vaultCreated = Vault was successfully created.
+unlock.successLabel.passwordChanged = Password was successfully changed.
+unlock.successLabel.upgraded = Cryptomator was successfully upgraded.

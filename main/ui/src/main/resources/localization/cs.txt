@@ -1,0 +1,116 @@
+app.name = Cryptomator
+# main.fxml
+main.emptyListInstructions = Trezor přidáte kliknutím sem
+main.directoryList.contextMenu.remove = Odstranit ze seznamu
+main.directoryList.contextMenu.changePassword = Změnit heslo
+main.addDirectory.contextMenu.new = Vytvořit nový trezor
+main.addDirectory.contextMenu.open = Otevřít existující trezor
+# welcome.fxml
+welcome.checkForUpdates.label.currentlyChecking = Hledání aktualizací...
+welcome.newVersionMessage = Ke stažení je verze %1$s.\nNyní je nainstalovaná %2$s.
+# initialize.fxml
+initialize.label.password = Heslo
+initialize.label.retypePassword = Zopakování hesla
+initialize.button.ok = Vytvořit trezor
+initialize.messageLabel.alreadyInitialized = Trezor je už připravený
+initialize.messageLabel.initializationFailed = Trezor se nepodařilo připravit. Podrobnosti naleznete v souboru se záznamem událostí (log).
+# notfound.fxml
+notfound.label = Trezor nebyl nalezen. Možná byl přesunut?
+# upgrade.fxml
+upgrade.button = Přechod na novější verzi trezoru
+upgrade.version3dropBundleExtension.msg = Tento trezor je třeba aktualizovat na novější formát.\n„%1$s“ bude přejmenováno na „%2$s“.\nNež budete pokračovat ověřte, že synchronizace byla dokončena.
+upgrade.version3dropBundleExtension.err.alreadyExists = Automatický převod se nezdařil.\n„%s“ už existuje.
+# unlock.fxml
+unlock.label.password = Heslo
+unlock.label.mountName = Název jednotky
+unlock.label.winDriveLetter = Písmeno jednotky
+unlock.label.downloadsPageLink = Všechny verze Cryptomator
+unlock.label.advancedHeading = Pokročilé volby
+unlock.button.unlock = Odemknout trezor
+unlock.button.advancedOptions.show = Více možností
+unlock.button.advancedOptions.hide = Méně možností
+unlock.choicebox.winDriveLetter.auto = Přiřadit automaticky
+unlock.errorMessage.wrongPassword = Chybné heslo
+unlock.errorMessage.unsupportedVersion.vaultOlderThanSoftware = Nepodporovaná verze trezoru. Byl vytvořen ve starším Cryptomator.
+unlock.errorMessage.unsupportedVersion.softwareOlderThanVault = Nepodporovaná verze trezoru. Byl vytvořen v novějším Cryptomator.
+unlock.messageLabel.startServerFailed = Spuštění WebDAV serveru se nezdařílo.
+# change_password.fxml
+changePassword.label.oldPassword = Původní heslo
+changePassword.label.newPassword = Nové heslo
+changePassword.label.retypePassword = Zopakujte heslo
+changePassword.label.downloadsPageLink = Všechny verze Cryptomator
+changePassword.button.change = Změnit heslo
+changePassword.errorMessage.wrongPassword = Chybné heslo
+changePassword.errorMessage.decryptionFailed = Nepodařilo se rozšifrovat
+# unlocked.fxml
+unlocked.button.lock = Uzamknout trezor
+unlocked.moreOptions.reveal = Odkrýt jednotku
+unlocked.moreOptions.copyUrl = Zkopírovat WebDAV odkaz
+unlocked.label.revealFailed = Vykonání příkazu se nezdařilo
+unlocked.label.unmountFailed = Odpojení jednotky se nezdařilo
+unlocked.label.statsEncrypted = zašifrováno
+unlocked.label.statsDecrypted = rozšifrováno
+unlocked.ioGraph.yAxis.label = Propustnost (MiB/s)
+# settings.fxml
+settings.version.label = Verze %s
+settings.checkForUpdates.label = Zjistit případné aktualizace
+settings.requiresRestartLabel = * Vyžaduje restart Cryptomator
+# tray icon
+tray.menu.open = Otevřít
+tray.menu.quit = Ukončit
+tray.infoMsg.title = Stále ještě spuštěné
+tray.infoMsg.msg = Cryptomator je pořád ještě spuštěný. Ukončete ho přes ikonu v oznamovací oblasti.
+tray.infoMsg.msg.osx = Cryptomator je pořád ještě spuštěný. Ukončete ho z ikony v liště nabídek.
+initialize.messageLabel.passwordStrength.0 = Velmi slabé
+initialize.messageLabel.passwordStrength.1 = Slabé
+initialize.messageLabel.passwordStrength.2 = Dobré
+initialize.messageLabel.passwordStrength.3 = Silné
+# Easter egg for Czech users.
+initialize.messageLabel.passwordStrength.4 = Velmi silné
+initialize.label.doNotForget = DŮLEŽITÉ\: Pokud heslo ztratíte/zapomenete, nenávratně přijdete o přístup k datům\!
+main.directoryList.remove.confirmation.title = Odebrat trezor
+main.directoryList.remove.confirmation.header = Opravdu chcete tento trezor odebrat?
+main.directoryList.remove.confirmation.content = Trezor bude pouze odebrán ze seznamu v Cryptomator. Končené odstranění provedete až smazáním jeho složky na souborovém systému.
+upgrade.version3to4.msg = Tento trezor je třeba aktualizovat na novější formát.\nNázvy šifrovaných složek budou aktualizovány.\nNež budete pokračovat ověřte, že byla dokončena synchronizace.
+upgrade.version3to4.err.io = Převod se nezdařil kvůli výjimce na vst./výst. Podrobnosti naleznete v souboru se záznamem událostí (log).
+# upgrade.fxml
+upgrade.confirmation.label = Ano, je ověřeno, že synchronizace byla dokončena
+unlock.label.savePassword = Uložit heslo
+unlock.errorMessage.unauthenticVersionMac = Nedaří se ověřit MAC funkci verze.
+unlocked.label.mountFailed = Připojení jednotky se nezdařilo
+unlock.savePassword.delete.confirmation.title = Smazat uložené heslo
+unlock.savePassword.delete.confirmation.header = Opravdu chcete smazat uložené heslo pro tento trezor?
+unlock.savePassword.delete.confirmation.content = Uložené heslo k tomuto trezoru bude okamžitě vymazáno ze systémové klíčenky. Pokud ho tam budete chtít znovu uložit, bude třeba trezor odemknout se zapnutou volbou „Uložit heslo“.
+settings.debugMode.label = Ladící režim *
+# Extension of what please? File, protocol, aplication extension for example? And bundle of what with what? Thanks :)
+upgrade.version3dropBundleExtension.title = Přechod z verze 3 trezoru na novější (odebrat příp. .cryptomator a registraci bundle v macOS)
+upgrade.version3to4.title = Aktualizace trezoru z verze 3 na 4
+upgrade.version4to5.title = Aktualizace trezoru z verze 4 na 5
+upgrade.version4to5.msg = Tento trezor je třeba aktualizovat na novější formát.\nZašifrované soubory budou aktualizovány.\nNež budete pokračovat ověřte, že synchronizace byla dokončena.\n\nPozn.\: Datum úpravy bude v rámci toho u všech dotčených souborů změněn na aktuální datum a čas.
+upgrade.version4to5.err.io = Převod se nezdařil kvůli chybě na vstupu nebo výstupu. Podrobnosti naleznete v souboru se záznamem událostí (log).
+unlock.label.mountAfterUnlock = Připojit (mount) jednotku
+unlock.label.revealAfterMount = Odkrýt jednotku
+unlocked.lock.force.confirmation.title = Zamykání %1$s se nezdařilo
+unlocked.lock.force.confirmation.header = Chcete vynutit uzamčení?
+unlocked.lock.force.confirmation.content = Toto může být způsobeno tím, že ostatní aplikace stále ještě přistupují k souborům v trezoru nebo došlo k nějakému jinému problému.\n\nMůže se ovšem stát, že aplikace které stáje ještě pracují se soubory z trezoru to nemusí ustát a může dojít ke ztrátě ještě neuložených dat.
+unlock.label.unlockAfterStartup = Automatické odemknutí při spuštění (experimentální)
+unlock.errorMessage.unlockFailed = Odemknutí se nezdařilo. Podrobnosti naleznete v souboru se záznamem událostí (log).
+unlocked.moreOptions.mount = Připojit jednotku
+unlocked.moreOptions.unmount = Odpojit jednotku
+upgrade.version5toX.title = Aktualizace verze trezoru
+upgrade.version5toX.msg = Tento trezor je třeba aktualizovat na novější formát.\nNež budete pokračovat ověřte, že byla dokončena synchronizace.
+main.createVault.nonEmptyDir.title = Vytvoření trezoru se nezdařilo
+main.createVault.nonEmptyDir.header = Zvolená složka není prázdná
+main.createVault.nonEmptyDir.content = Zvolená složka už obsahuje soubory (možná skryté). Trezor je možné vytvořit pouze v prázdné složce.
+unlock.label.mountPath = Mount Path
+unlock.label.mountPathButton = Apply
+settings.webdav.port.label = WebDAV Port
+settings.webdav.port.prompt = 0 \= Choose automatically
+settings.webdav.port.apply = Apply
+settings.webdav.prefGvfsScheme.label = WebDAV Scheme
+settings.volume.label = Mount-Methode *
+settings.volume.webdav = WebDAV
+settings.volume.fuse = FUSE
+unlock.successLabel.vaultCreated = Vault was successfully created.
+unlock.successLabel.passwordChanged = Password was successfully changed.
+unlock.successLabel.upgraded = Cryptomator was successfully upgraded.
