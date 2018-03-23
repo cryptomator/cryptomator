@@ -111,7 +111,7 @@ public class WebDavVolume implements Volume {
 	}
 
 	public synchronized String getMountUri() {
-		return servlet.getServletRootUri().toString();
+		return servlet.getServletRootUri().toString() + "/";
 	}
 
 	/**
