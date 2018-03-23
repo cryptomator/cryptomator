@@ -84,6 +84,9 @@ unlock.errorMessage.unsupportedVersion.vaultOlderThanSoftware=Unsupported vault.
 unlock.errorMessage.unsupportedVersion.softwareOlderThanVault=Unsupported vault. This vault has been created with a newer version of Cryptomator.
 unlock.errorMessage.unauthenticVersionMac=Could not authenticate version MAC.
 unlock.messageLabel.startServerFailed=Starting WebDAV server failed.
+unlock.successLabel.vaultCreated=Vault was successfully created.
+unlock.successLabel.passwordChanged=Password was successfully changed.
+unlock.successLabel.upgraded=Cryptomator was successfully upgraded.
 
 # change_password.fxml
 changePassword.label.oldPassword=Old Password
