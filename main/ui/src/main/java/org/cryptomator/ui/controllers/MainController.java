@@ -172,6 +172,7 @@ public class MainController implements ViewController {
 		vaultList.setItems(vaults);
 		vaultList.setOnKeyReleased(this::didPressKeyOnList);
 		vaultList.setCellFactory(this::createDirecoryListCell);
+		root.setOnKeyReleased(this::didPressKeyOnRoot);
 		activeController.set(viewControllerLoader.load("/fxml/welcome.fxml"));
 		selectedVault.bind(vaultList.getSelectionModel().selectedItemProperty());
 		removeVaultButton.disableProperty().bind(canEditSelectedVault.not());
@@ -406,6 +407,20 @@ public class MainController implements ViewController {
 	private void didPressKeyOnList(KeyEvent e) {
 		if (e.getCode() == KeyCode.ENTER || e.getCode() == KeyCode.SPACE) {
 			activeController.get().focus();
+		}
+	}
+
+	private void didPressKeyOnRoot(KeyEvent event) {
+		if ((event.isMetaDown() || event.isControlDown()) && event.getCode().isDigitKey()) {
+			int digit = Integer.valueOf(event.getText());
+			switch (digit) {
+				case 0:
+					showWelcomeView();
+					return;
+				default:
+					vaultList.getSelectionModel().select(digit - 1);
+					return;
+			}
 		}
 	}
 
