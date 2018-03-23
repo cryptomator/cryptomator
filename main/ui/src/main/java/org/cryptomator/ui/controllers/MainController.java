@@ -170,6 +170,7 @@ public class MainController implements ViewController {
 	@Override
 	public void initialize() {
 		vaultList.setItems(vaults);
+		vaultList.getSelectionModel().clearSelection();
 		vaultList.setOnKeyReleased(this::didPressKeyOnList);
 		vaultList.setCellFactory(this::createDirecoryListCell);
 		root.setOnKeyReleased(this::didPressKeyOnRoot);
@@ -414,12 +415,16 @@ public class MainController implements ViewController {
 		if ((event.isMetaDown() || event.isControlDown()) && event.getCode().isDigitKey()) {
 			int digit = Integer.valueOf(event.getText());
 			switch (digit) {
-				case 0:
+				case 0: {
+					vaultList.getSelectionModel().clearSelection();
 					showWelcomeView();
 					return;
-				default:
+				}
+				default: {
 					vaultList.getSelectionModel().select(digit - 1);
+					activeController.get().focus();
 					return;
+				}
 			}
 		}
 	}
