@@ -6,17 +6,25 @@ import org.cryptomator.cryptofs.CryptoFileSystem;
 
 import org.cryptomator.frontend.fuse.mount.EnvironmentVariables;
 import org.cryptomator.frontend.fuse.mount.FuseMount;
-import org.cryptomator.frontend.fuse.mount.MountFactory;
+import org.cryptomator.frontend.fuse.mount.FuseMountFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import java.io.IOException;
+import java.nio.file.DirectoryNotEmptyException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
 @VaultModule.PerVault
 public class FuseVolume implements Volume {
 
 	private static final Logger LOG = LoggerFactory.getLogger(FuseVolume.class);
+
+	/**
+	 * TODO: dont use fixed Strings and rather set them in some system environment variables in the cryptomator installer and load those!
+	 */
 	private static final String DEFAULT_MOUNTROOTPATH_MAC = System.getProperty("user.home") + "/Library/Application Support/Cryptomator";
 	private static final String DEFAULT_MOUNTROOTPATH_LINUX = System.getProperty("user.home") + "/.Cryptomator";
 
@@ -25,19 +33,49 @@ public class FuseVolume implements Volume {
 	private final WindowsDriveLetters windowsDriveLetters;
 
 	private CryptoFileSystem cfs;
+	private Path mountPath;
+	private boolean extraDirCreated;
 
 	@Inject
 	public FuseVolume(VaultSettings vaultSettings, WindowsDriveLetters windowsDriveLetters) {
 		this.vaultSettings = vaultSettings;
 		this.windowsDriveLetters = windowsDriveLetters;
-		this.fuseMnt = MountFactory.createMountObject();
+		this.fuseMnt = FuseMountFactory.createMountObject();
+		this.extraDirCreated = false;
 	}
 
 	@Override
-	public void prepare(CryptoFileSystem fs) {
+	public void prepare(CryptoFileSystem fs) throws IOException {
 		this.cfs = fs;
-		if (!(vaultSettings.individualMountPath().isNotNull().get() || SystemUtils.IS_OS_WINDOWS)) {
-			fuseMnt.useExtraMountDir();
+		String mountPath;
+		if (SystemUtils.IS_OS_WINDOWS) {
+			//windows case
+			if (vaultSettings.winDriveLetter().get() != null) {
+				// specific drive letter selected
+				mountPath = vaultSettings.winDriveLetter().get() + ":\\";
+			} else {
+				// auto assign drive letter
+				mountPath = windowsDriveLetters.getAvailableDriveLetters().iterator().next() + ":\\";
+			}
+		} else if (vaultSettings.individualMountPath().get() != null) {
+			//specific path given
+			mountPath = vaultSettings.individualMountPath().get();
+		} else {
+			//choose default path & create extra directory
+			mountPath = createDirIfNotExist(SystemUtils.IS_OS_MAC ? DEFAULT_MOUNTROOTPATH_MAC : DEFAULT_MOUNTROOTPATH_LINUX,
+					vaultSettings.mountName().get());
+			extraDirCreated = true;
+		}
+		this.mountPath = Paths.get(mountPath).toAbsolutePath();
+	}
+
+	private String createDirIfNotExist(String prefix, String dirName) throws IOException {
+		Path p = Paths.get(prefix, dirName + vaultSettings.getId());
+		if (Files.isDirectory(p) && !Files.newDirectoryStream(p).iterator().hasNext()) {
+			throw new DirectoryNotEmptyException("Mount point is not empty.");
+		} else {
+			Files.createDirectory(p);
+			return p.toString();
 		}
 	}
 
@@ -45,31 +83,12 @@ public class FuseVolume implements Volume {
 	public void mount() throws CommandFailedException {
 		try {
 			EnvironmentVariables envVars = EnvironmentVariables.create()
-					.withMountName(vaultSettings.mountName().getValue() + "_ID-" + vaultSettings.getId())
-					.withMountPath(chooseMountRootPath())
+					.withMountName(vaultSettings.mountName().getValue())
+					.withMountPath(mountPath.toString())
 					.build();
 			fuseMnt.mount(cfs.getPath("/"), envVars);
 		} catch (Exception e) {
 			throw new CommandFailedException("Unable to mount Filesystem", e);
-		}
-	}
-
-	private String chooseMountRootPath() {
-		if (SystemUtils.IS_OS_WINDOWS) {
-			//windows case
-			if (vaultSettings.winDriveLetter().get() != null) {
-				// specific drive letter selected
-				return vaultSettings.winDriveLetter().getValue() + ":\\";
-			} else {
-				// auto assign drive letter selected
-				return windowsDriveLetters.getAvailableDriveLetters().iterator().next() + ":\\";
-			}
-		} else if (vaultSettings.individualMountPath().isNotNull().get()) {
-			//specific path given
-			return vaultSettings.individualMountPath().getValue();
-		} else {
-			//choose default path
-			return SystemUtils.IS_OS_MAC ? DEFAULT_MOUNTROOTPATH_MAC : DEFAULT_MOUNTROOTPATH_LINUX;
 		}
 	}
 
@@ -107,10 +126,12 @@ public class FuseVolume implements Volume {
 
 	@Override
 	public void stop() {
-		try {
-			fuseMnt.cleanUp();
-		} catch (org.cryptomator.frontend.fuse.mount.CommandFailedException e) {
-			LOG.warn(e.getMessage());
+		if (extraDirCreated) {
+			try {
+				Files.delete(mountPath);
+			} catch (IOException e) {
+				LOG.warn("Could not delete mounting directory:" + e.getMessage());
+			}
 		}
 	}
 

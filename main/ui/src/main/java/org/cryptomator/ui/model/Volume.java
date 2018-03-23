@@ -2,12 +2,14 @@ package org.cryptomator.ui.model;
 
 import org.cryptomator.cryptofs.CryptoFileSystem;
 
+import java.io.IOException;
+
 /**
  * Takes a Volume and usess it to mount an unlocked vault
  */
 public interface Volume {
 
-	void prepare(CryptoFileSystem fs);
+	void prepare(CryptoFileSystem fs) throws IOException;
 
 	void mount() throws CommandFailedException;
 
