@@ -33,9 +33,8 @@ after_success:
 - jdk_switcher use oraclejdk8
 - curl -o ~/codacy-coverage-reporter-assembly-latest.jar https://oss.sonatype.org/service/local/repositories/releases/content/com/codacy/codacy-coverage-reporter/2.0.1/codacy-coverage-reporter-2.0.1-assembly.jar
 - $JAVA_HOME/bin/java -cp ~/codacy-coverage-reporter-assembly-latest.jar com.codacy.CodacyCoverageReporter -l Java -r main/jacoco-report/target/site/jacoco-aggregate/jacoco.xml
-before_deploy:
-- jdk_switcher use oraclejdk9
-- |
+before_deploy: |
+  jdk_switcher use oraclejdk9
   if [ -n $TRAVIS_TAG ]; then
     mvn -fmain/pom.xml versions:set -DnewVersion=$TRAVIS_TAG
   else
@@ -45,7 +44,7 @@ before_deploy:
     git push -f gh continuous
     git remote remove gh
   fi
-- mvn -fmain/pom.xml -Prelease package -DskipTests
+  mvn -fmain/pom.xml -Prelease package -DskipTests
 deploy:
   provider: releases # CONTINUOUS
   prerelease: true
