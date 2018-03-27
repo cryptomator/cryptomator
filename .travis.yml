@@ -50,7 +50,7 @@ deploy:
 - provider: releases # CONTINUOUS
   prerelease: true
   api-key: $GITHUB_API_KEY
-  tag_name: continuous
+  target_commitish: $TRAVIS_COMMIT
   overwrite: true
   file_glob: true
   file:
