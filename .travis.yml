@@ -5,6 +5,10 @@ jdk:
 branches:
   except:
   - continuous # To avoid infinite loops, as this tag is created by this Travis config
+addons:
+  apt:
+    packages:
+    - jq
 cache:
   directories:
   - $HOME/.m2
@@ -36,10 +40,15 @@ after_success:
 before_deploy:
 - jdk_switcher use oraclejdk9
 - |
+  CONTINUOUS_RELEASE_URL=`curl -s https://api.github.com/repos/cryptomator/cryptomator/releases/tags/continuous | jq -re '.url'`
+  if [ $? -eq 0 ]; then
+    curl -u cryptobot:$GITHUB_API_KEY -X DELETE $CONTINUOUS_RELEASE_URL
+  fi
+- |
   if [ -n "$TRAVIS_TAG" ]; then
     mvn -fmain/pom.xml org.codehaus.mojo:versions-maven-plugin:set -DnewVersion=$TRAVIS_TAG
   else
-    mvn -fmain/pom.xml org.codehaus.mojo:versions-maven-plugin:set -DnewVersion=SNAPSHOT-$TRAVIS_COMMIT
+    mvn -fmain/pom.xml org.codehaus.mojo:versions-maven-plugin:set -DnewVersion=SNAPSHOT-$(date +'%FT%T')
     git tag -f continuous
     git remote add gh https://cryptobot:${GITHUB_API_KEY}@github.com/cryptomator/cryptomator.git
     git push -f gh continuous
@@ -50,7 +59,7 @@ deploy:
 - provider: releases # CONTINUOUS
   prerelease: true
   api-key: $GITHUB_API_KEY
-  target_commitish: $TRAVIS_COMMIT
+  tag_name: continuous
   overwrite: true
   file_glob: true
   file:
