@@ -40,14 +40,17 @@ after_success:
 before_deploy:
 - jdk_switcher use oraclejdk9
 - |
-  CONTINUOUS_RELEASE_URL=`curl -s https://api.github.com/repos/cryptomator/cryptomator/releases/tags/continuous | jq -re '.url'`
-  if [ $? -eq 0 ]; then
-    curl -u cryptobot:$GITHUB_API_KEY -X DELETE $CONTINUOUS_RELEASE_URL
+  if [[ $TRAVIS_BRANCH == "develop" ]] && [[ $TRAVIS_PULL_REQUEST == "false" ]]; then
+    CONTINUOUS_RELEASE_URL=`curl -s https://api.github.com/repos/cryptomator/cryptomator/releases/tags/continuous | jq -re '.url'`
+    echo "Existing continuous release: ${CONTINUOUS_RELEASE_URL}"
+    if [[ $CONTINUOUS_RELEASE_URL == http* ]]; then
+      curl -u cryptobot:$GITHUB_API_KEY -X DELETE $CONTINUOUS_RELEASE_URL
+    fi
   fi
 - |
-  if [ -n "$TRAVIS_TAG" ]; then
+  if [[ -n "$TRAVIS_TAG" ]]; then
     mvn -fmain/pom.xml org.codehaus.mojo:versions-maven-plugin:set -DnewVersion=$TRAVIS_TAG
-  else
+  elif [[ $TRAVIS_BRANCH == "develop" ]] && [[ $TRAVIS_PULL_REQUEST == "false" ]]
     mvn -fmain/pom.xml org.codehaus.mojo:versions-maven-plugin:set -DnewVersion=SNAPSHOT-$(echo $TRAVIS_COMMIT | head -c7)
     git tag -f continuous
     git remote add gh https://cryptobot:${GITHUB_API_KEY}@github.com/cryptomator/cryptomator.git
