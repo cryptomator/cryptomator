@@ -48,7 +48,7 @@ before_deploy:
   if [ -n "$TRAVIS_TAG" ]; then
     mvn -fmain/pom.xml org.codehaus.mojo:versions-maven-plugin:set -DnewVersion=$TRAVIS_TAG
   else
-    mvn -fmain/pom.xml org.codehaus.mojo:versions-maven-plugin:set -DnewVersion=SNAPSHOT-$(date +'%FT%T')
+    mvn -fmain/pom.xml org.codehaus.mojo:versions-maven-plugin:set -DnewVersion=SNAPSHOT-$(date +'%Y%m%d-%H%M%S')
     git tag -f continuous
     git remote add gh https://cryptobot:${GITHUB_API_KEY}@github.com/cryptomator/cryptomator.git
     git push -f gh continuous
