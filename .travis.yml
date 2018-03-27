@@ -41,11 +41,11 @@ before_deploy:
   else
     mvn -fmain/pom.xml org.codehaus.mojo:versions-maven-plugin:set -DnewVersion=SNAPSHOT-$TRAVIS_COMMIT
     git tag -f continuous
-    git remote add gh https://cryptobot:${GITHUB_API_KEY}@github.com/cryptomator/cryptomator.git &2>/dev/null
+    git remote add gh https://cryptobot:${GITHUB_API_KEY}@github.com/cryptomator/cryptomator.git
     git push -f gh continuous
     git remote remove gh
   fi
-- mvn -fmain/pom.xml -Prelease package -DskipTests
+- mvn -fmain/pom.xml clean package -Prelease -DskipTests
 deploy:
 - provider: releases # CONTINUOUS
   prerelease: true
