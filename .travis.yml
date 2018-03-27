@@ -4,7 +4,7 @@ jdk:
 - oraclejdk9
 branches:
   except:
-    - continuous # To avoid infinite loops, as this tag is created by this Travis config
+  - continuous # To avoid infinite loops, as this tag is created by this Travis config
 cache:
   directories:
   - $HOME/.m2
@@ -46,7 +46,7 @@ before_deploy: |
   fi
   mvn -fmain/pom.xml -Prelease package -DskipTests
 deploy:
-  provider: releases # CONTINUOUS
+- provider: releases # CONTINUOUS
   prerelease: true
   api-key: $GITHUB_API_KEY
   tag_name: continuous
