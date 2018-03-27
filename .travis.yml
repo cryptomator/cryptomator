@@ -33,18 +33,19 @@ after_success:
 - jdk_switcher use oraclejdk8
 - curl -o ~/codacy-coverage-reporter-assembly-latest.jar https://oss.sonatype.org/service/local/repositories/releases/content/com/codacy/codacy-coverage-reporter/2.0.1/codacy-coverage-reporter-2.0.1-assembly.jar
 - $JAVA_HOME/bin/java -cp ~/codacy-coverage-reporter-assembly-latest.jar com.codacy.CodacyCoverageReporter -l Java -r main/jacoco-report/target/site/jacoco-aggregate/jacoco.xml
-before_deploy: |
-  jdk_switcher use oraclejdk9
+before_deploy:
+- jdk_switcher use oraclejdk9
+- |
   if [ -n $TRAVIS_TAG ]; then
-    mvn -fmain/pom.xml versions:set -DnewVersion=$TRAVIS_TAG
+    mvn -fmain/pom.xml org.codehaus.mojo:versions-maven-plugin:2.5:set -DnewVersion=$TRAVIS_TAG
   else
-    mvn -fmain/pom.xml versions:set -DnewVersion=SNAPSHOT-$TRAVIS_COMMIT
+    mvn -fmain/pom.xml org.codehaus.mojo:versions-maven-plugin:2.5:set -DnewVersion=SNAPSHOT-$TRAVIS_COMMIT
     git tag -f continuous
     git remote add gh https://cryptobot:${GITHUB_API_KEY}@github.com/cryptomator/cryptomator.git &2>/dev/null
     git push -f gh continuous
     git remote remove gh
   fi
-  mvn -fmain/pom.xml -Prelease package -DskipTests
+- mvn -fmain/pom.xml -Prelease package -DskipTests
 deploy:
 - provider: releases # CONTINUOUS
   prerelease: true
@@ -53,8 +54,8 @@ deploy:
   overwrite: true
   file_glob: true
   file:
-    - "main/uber-jar/target/Cryptomator-*.jar"
-    - "main/ant-kit/target/antkit.tar.gz"
+  - "main/uber-jar/target/Cryptomator-*.jar"
+  - "main/ant-kit/target/antkit.tar.gz"
   skip_cleanup: true
   name: Cryptomator continuous build
   body: Automatically built on $(date +'%F %T %Z').
@@ -66,8 +67,8 @@ deploy:
   prerelease: false
   api_key: $GITHUB_API_KEY
   file:
-    - "main/uber-jar/target/Cryptomator-$TRAVIS_TAG.jar"
-    - "main/ant-kit/target/antkit.tar.gz"
+  - "main/uber-jar/target/Cryptomator-$TRAVIS_TAG.jar"
+  - "main/ant-kit/target/antkit.tar.gz"
   skip_cleanup: true
   on:
     repo: cryptomator/cryptomator
