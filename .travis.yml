@@ -2,6 +2,9 @@ language: java
 sudo: false
 jdk:
 - oraclejdk9
+branches:
+  except:
+    - continuous # To avoid infinite loops, as this tag is created by this Travis config
 cache:
   directories:
   - $HOME/.m2
@@ -10,6 +13,7 @@ env:
     - secure: "IfYURwZaDWuBDvyn47n0k1Zod/IQw1FF+CS5nnV08Q+NfC3vGGJMwV8m59XnbfwnWGxwvCaAbk4qP6s6+ijgZNKkvgfFMo3rfTok5zt43bIqgaFOANYV+OC/1c59gYD6ZUxhW5iNgMgU3qdsRtJuwSmfkVv/jKyLGfAbS4kN8BA=" # COVERITY_SCAN_TOKEN
     - secure: "lV9OwUbHMrMpLUH1CY+Z4puLDdFXytudyPlG1eGRsesdpuG6KM3uQVz6uAtf6lrU8DRbMM/T7ML+PmvQ4UoPPYLdLxESLLBat2qUPOIVBOhTSlCc7I0DmGy04CSvkeMy8dPaQC0ukgNiR7zwoNzfcpGRN/U9S8tziDruuHoZSrg=" # BINTRAY_API_KEY
     - secure: "oWFgRTVP6lyTa7qVxlvkpm20MtVc3BtmsNXQJS6bfg2A0o/iCQMNx7OD59BaafCLGRKvCcJVESiC8FlSylVMS7CDSyYu0gg70NUiIuHp4NBM5inFWYCy/PdQsCTzr5uvNG+rMFQpMFRaCV0FrfM3tLondcVkhsHL68l93Xoexx4=" # CODACY_PROJECT_TOKEN
+    - secure: "cHpsjK67VHJZTWRQBIlSmHPW/CfiLbdWPqw2g3SYGZxYBqNGjmSi6MxevzZEjeUTG0vgKV8cXeHBczQkyIMcG3LYF5/oAB5BinJPr47dV55aNKdPWu7CVcBzthT5s6Wnv/C9n7E2HIQrHvdsXTeJ6f5Gnf9ZqBv0AncLSxHUEBw=" #GITHUB_API_KEY
 addons:
   apt:
     packages:
@@ -31,12 +35,37 @@ after_success:
 - $JAVA_HOME/bin/java -cp ~/codacy-coverage-reporter-assembly-latest.jar com.codacy.CodacyCoverageReporter -l Java -r main/jacoco-report/target/site/jacoco-aggregate/jacoco.xml
 before_deploy:
 - jdk_switcher use oraclejdk9
+- |
+  if [ -n $TRAVIS_TAG ]; then
+    mvn -fmain/pom.xml versions:set -DnewVersion=$TRAVIS_TAG
+  else
+    mvn -fmain/pom.xml versions:set -DnewVersion=SNAPSHOT-$TRAVIS_COMMIT
+    git tag -f continuous
+    git remote add gh https://cryptobot:${GITHUB_API_KEY}@github.com/cryptomator/cryptomator.git &2>/dev/null
+    git push -f gh continuous
+    git remote remove gh
+  fi
 - mvn -fmain/pom.xml -Prelease package -DskipTests
 deploy:
-- provider: releases
+  provider: releases # CONTINUOUS
+  prerelease: true
+  api-key: $GITHUB_API_KEY
+  tag_name: continuous
+  overwrite: true
+  file_glob: true
+  file:
+    - "main/uber-jar/target/Cryptomator-*.jar"
+    - "main/ant-kit/target/antkit.tar.gz"
+  skip_cleanup: true
+  name: Cryptomator continuous build
+  body: Automatically built on $(date +'%F %T %Z').
+  on:
+    repo: cryptomator/cryptomator
+    branch: develop
+    condition: $TRAVIS_TAG = ''
+- provider: releases # RELEASE
   prerelease: false
-  api_key:
-    secure: "ZjE1j93v3qbPIe2YbmhS319aCbMdLQw0HuymmluTurxXsZtn9D4t2+eTr99vBVxGRuB5lzzGezPR5zjk5W7iHF7xhwrawXrFzr2rPJWzWFt0aM+Ry2njU1ROTGGXGTbv4anWeBlgMxLEInTAy/9ytOGNJlec83yc0THpOY2wxnk="
+  api_key: $GITHUB_API_KEY
   file:
     - "main/uber-jar/target/Cryptomator-$TRAVIS_TAG.jar"
     - "main/ant-kit/target/antkit.tar.gz"
