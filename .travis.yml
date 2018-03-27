@@ -25,8 +25,8 @@ addons:
     build_command: "mvn -fmain/pom.xml clean test -DskipTests"
     branch_pattern: release.*
 install:
-- curl -o $HOME/.m2/settings.xml https://gist.githubusercontent.com/cryptobot/cf5fbd909c4782aaeeeb7c7f4a1a43da/raw/082261a990b96dcb3e9a3ddb96fc4c2e493f62c0/settings.xml
-- mvn -fmain/pom.xml clean install -DskipTests dependency:go-offline -Pcoverage,release # "clean install" needed until we can exclude artifacts currently in the reactor, see https://maven.apache.org/plugins/maven-dependency-plugin/go-offline-mojo.html#excludeReactor and https://issues.apache.org/jira/browse/MDEP-568
+- curl -o $HOME/.m2/settings.xml https://gist.githubusercontent.com/cryptobot/cf5fbd909c4782aaeeeb7c7f4a1a43da/raw/213340478055c3a6c1f820f062bd23b277337372/settings.xml
+- mvn -fmain/pom.xml clean install -DskipTests org.codehaus.mojo:versions-maven-plugin:help dependency:go-offline -Pcoverage,release # "clean install" needed until we can exclude artifacts currently in the reactor, see https://maven.apache.org/plugins/maven-dependency-plugin/go-offline-mojo.html#excludeReactor and https://issues.apache.org/jira/browse/MDEP-568
 script:
 - mvn --update-snapshots -fmain/pom.xml clean test jacoco:report verify -Pcoverage
 after_success:
@@ -37,9 +37,9 @@ before_deploy:
 - jdk_switcher use oraclejdk9
 - |
   if [ -n $TRAVIS_TAG ]; then
-    mvn -fmain/pom.xml org.codehaus.mojo:versions-maven-plugin:2.5:set -DnewVersion=$TRAVIS_TAG
+    mvn -fmain/pom.xml org.codehaus.mojo:versions-maven-plugin:set -DnewVersion=$TRAVIS_TAG
   else
-    mvn -fmain/pom.xml org.codehaus.mojo:versions-maven-plugin:2.5:set -DnewVersion=SNAPSHOT-$TRAVIS_COMMIT
+    mvn -fmain/pom.xml org.codehaus.mojo:versions-maven-plugin:set -DnewVersion=SNAPSHOT-$TRAVIS_COMMIT
     git tag -f continuous
     git remote add gh https://cryptobot:${GITHUB_API_KEY}@github.com/cryptomator/cryptomator.git &2>/dev/null
     git push -f gh continuous
