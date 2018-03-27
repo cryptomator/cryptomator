@@ -5,10 +5,6 @@ jdk:
 branches:
   except:
   - continuous # To avoid infinite loops, as this tag is created by this Travis config
-addons:
-  apt:
-    packages:
-    - jq
 cache:
   directories:
   - $HOME/.m2
