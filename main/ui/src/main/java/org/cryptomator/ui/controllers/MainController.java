@@ -194,6 +194,7 @@ public class MainController implements ViewController {
 	public void initStage(Stage stage) {
 		stage.setScene(new Scene(getRoot()));
 		stage.sizeToScene();
+		stage.setTitle(localization.getString("app.name")); // set once before bind to avoid display bugs with Linux window managers
 		stage.titleProperty().bind(windowTitle());
 		stage.setResizable(false);
 		loadFont("/css/ionicons.ttf");
@@ -203,9 +204,10 @@ public class MainController implements ViewController {
 			subs = subs.and(EasyBind.includeWhen(mainWindow.getScene().getRoot().getStyleClass(), INACTIVE_WINDOW_STYLE_CLASS, mainWindow.focusedProperty().not()));
 			Application.setUserAgentStylesheet(getClass().getResource("/css/mac_theme.css").toString());
 		} else if (SystemUtils.IS_OS_LINUX) {
+			stage.getIcons().add(new Image(getClass().getResourceAsStream("/window_icon_512.png")));
 			Application.setUserAgentStylesheet(getClass().getResource("/css/linux_theme.css").toString());
 		} else if (SystemUtils.IS_OS_WINDOWS) {
-			stage.getIcons().add(new Image(getClass().getResourceAsStream("/window_icon.png")));
+			stage.getIcons().add(new Image(getClass().getResourceAsStream("/window_icon_32.png")));
 			Application.setUserAgentStylesheet(getClass().getResource("/css/win_theme.css").toString());
 		}
 		exitUtil.initExitHandler(this::gracefulShutdown);
