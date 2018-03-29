@@ -30,7 +30,7 @@ deploy:
 - provider: releases
   prerelease: false
   api_key:
-    secure: "V8zf5OLBFDvcZvJdJ0OQKMLCo7EmwVemUvQ1k3S3nK4w0k+1+mbLj5+CZofDIAvRWu/X1PkCjSKRaQ3TliRrl487EX4UMpdrdGxC87VsF/XOrRKmXYztJ3HfXJ9CyFOw9W4R4EQ6iI5je2m9YlAMrCxCeXBEmKm6b2fiayMZ+Vg="
+    secure: "d06x5z/a0GGPJWASlPn1m2qNUeIIMhdCeSW/fnzo8YtX1qNj+d5mZQe2HSRMItKYYqgt6hnwst0YngYKrGQ/Sg3vy9BxVzoJm04MDmBkDNfHNTMhcx0euFAgRsfkyFs/CVRBNW1MPOg8BTDtyKoknIuCl2FPIKouP2QHO+CBYYY="
   file:
     - "main/uber-jar/target/Cryptomator-$TRAVIS_TAG.jar"
     - "main/ant-kit/target/antkit.tar.gz"
