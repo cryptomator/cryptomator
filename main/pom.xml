@@ -24,9 +24,9 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
 		<!-- dependency versions -->
-		<cryptomator.cryptolib.version>1.1.7</cryptomator.cryptolib.version>
+		<cryptomator.cryptolib.version>1.2.0</cryptomator.cryptolib.version>
 		<cryptomator.cryptofs.version>1.5.0</cryptomator.cryptofs.version>
-		<cryptomator.webdav.version>1.0.3</cryptomator.webdav.version>
+		<cryptomator.webdav.version>1.0.4</cryptomator.webdav.version>
 		<cryptomator.jni.version>1.0.2</cryptomator.jni.version>
 		
 		<commons-io.version>2.5</commons-io.version>
