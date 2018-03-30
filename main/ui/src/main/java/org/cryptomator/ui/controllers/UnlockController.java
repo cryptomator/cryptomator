@@ -123,6 +123,9 @@ public class UnlockController implements ViewController {
 	private ChoiceBox<Character> winDriveLetter;
 
 	@FXML
+	private CheckBox useOwnMountPath;
+
+	@FXML
 	private HBox mountPathBox;
 
 	@FXML
@@ -163,13 +166,18 @@ public class UnlockController implements ViewController {
 		savePassword.setDisable(!keychainAccess.isPresent());
 		unlockAfterStartup.disableProperty().bind(savePassword.disabledProperty().or(savePassword.selectedProperty().not()));
 
-		mountPathBox.managedProperty().bind(mountPathLabel.visibleProperty());
-		mountPath.managedProperty().bind(mountPathLabel.visibleProperty());
-		changeMountPathButton.managedProperty().bind(mountPathLabel.visibleProperty());
+		mountPathLabel.setVisible(false);
+		mountPathBox.visibleProperty().bind(mountPathLabel.visibleProperty());
+		mountPathBox.managedProperty().bind(mountPathLabel.managedProperty());
+		mountPath.visibleProperty().bind(mountPathLabel.visibleProperty());
+		mountPath.managedProperty().bind(mountPathLabel.managedProperty());
+		changeMountPathButton.visibleProperty().bind(mountPathLabel.visibleProperty());
+		changeMountPathButton.managedProperty().bind(mountPathLabel.managedProperty());
 
 		if (SystemUtils.IS_OS_WINDOWS) {
 			winDriveLetter.setConverter(new WinDriveLetterLabelConverter());
-			mountPathLabel.setVisible(false);
+			useOwnMountPath.setVisible(false);
+			useOwnMountPath.setManaged(false);
 			mountPathLabel.setManaged(false);
 			//dirty cheat
 			mountPathBox.setMouseTransparent(true);
@@ -178,8 +186,9 @@ public class UnlockController implements ViewController {
 			winDriveLetterLabel.setManaged(false);
 			winDriveLetter.setVisible(false);
 			winDriveLetter.setManaged(false);
-			if(VolumeImpl.WEBDAV.equals(settings.volumeImpl().get())){
-				mountPathLabel.setVisible(false);
+			if (VolumeImpl.WEBDAV.equals(settings.volumeImpl().get())) {
+				useOwnMountPath.setVisible(false);
+				useOwnMountPath.setManaged(false);
 				mountPathLabel.setManaged(false);
 			}
 		}
@@ -243,15 +252,18 @@ public class UnlockController implements ViewController {
 		unlockAfterStartup.setSelected(savePassword.isSelected() && vaultSettings.unlockAfterStartup().get());
 		mountAfterUnlock.setSelected(vaultSettings.mountAfterUnlock().get());
 		revealAfterMount.setSelected(vaultSettings.revealAfterMount().get());
+		useOwnMountPath.setSelected(vaultSettings.usesIndividualMountPath().get());
 
 		vaultSubs = vaultSubs.and(EasyBind.subscribe(unlockAfterStartup.selectedProperty(), vaultSettings.unlockAfterStartup()::set));
 		vaultSubs = vaultSubs.and(EasyBind.subscribe(mountAfterUnlock.selectedProperty(), vaultSettings.mountAfterUnlock()::set));
 		vaultSubs = vaultSubs.and(EasyBind.subscribe(revealAfterMount.selectedProperty(), vaultSettings.revealAfterMount()::set));
+		vaultSubs = vaultSubs.and(EasyBind.subscribe(useOwnMountPath.selectedProperty(), vaultSettings.usesIndividualMountPath()::set));
 
 		changeMountPathButton.visibleProperty().bind(
-		        vaultSettings.individualMountPath().isNotEqualTo(mountPath.textProperty())
+				vaultSettings.individualMountPath().isNotEqualTo(mountPath.textProperty())
 		);
 		mountPath.textProperty().setValue(vaultSettings.individualMountPath().getValueSafe());
+		mountPathLabel.visibleProperty().bind(useOwnMountPath.selectedProperty());
 
 	}
 

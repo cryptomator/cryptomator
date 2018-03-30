@@ -27,9 +27,9 @@ class VaultSettingsJsonAdapter {
 		out.name("unlockAfterStartup").value(value.unlockAfterStartup().get());
 		out.name("mountAfterUnlock").value(value.mountAfterUnlock().get());
 		out.name("revealAfterMount").value(value.revealAfterMount().get());
-		if(value.individualMountPath().isNotEmpty().get()){
-			out.name("individualMountPath").value(value.individualMountPath().get());
-		}
+		out.name("usesIndividualMountPath").value(value.usesIndividualMountPath().get());
+		//TODO: should this always be written? ( because it could contain metadata, which the user does not want to save!)
+		out.name("individualMountPath").value(value.individualMountPath().get());
 		out.endObject();
 	}
 
@@ -42,6 +42,7 @@ class VaultSettingsJsonAdapter {
 		boolean unlockAfterStartup = VaultSettings.DEFAULT_UNLOCK_AFTER_STARTUP;
 		boolean mountAfterUnlock = VaultSettings.DEFAULT_MOUNT_AFTER_UNLOCK;
 		boolean revealAfterMount = VaultSettings.DEFAULT_REAVEAL_AFTER_MOUNT;
+		boolean usesIndividualMountPath = VaultSettings.DEFAULT_USES_INDIVIDUAL_MOUNTPATH;
 
 		in.beginObject();
 		while (in.hasNext()) {
@@ -68,6 +69,9 @@ class VaultSettingsJsonAdapter {
 				case "revealAfterMount":
 					revealAfterMount = in.nextBoolean();
 					break;
+				case "usesIndividualMountPath":
+					usesIndividualMountPath = in.nextBoolean();
+					break;
 				case "individualMountPath":
 					individualMountPath = in.nextString();
 					break;
@@ -85,6 +89,7 @@ class VaultSettingsJsonAdapter {
 		vaultSettings.unlockAfterStartup().set(unlockAfterStartup);
 		vaultSettings.mountAfterUnlock().set(mountAfterUnlock);
 		vaultSettings.revealAfterMount().set(revealAfterMount);
+		vaultSettings.usesIndividualMountPath().set(usesIndividualMountPath);
 		vaultSettings.individualMountPath().set(individualMountPath);
 		return vaultSettings;
 	}

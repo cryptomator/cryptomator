@@ -57,7 +57,7 @@ public class FuseVolume implements Volume {
 				// auto assign drive letter
 				mountPath = windowsDriveLetters.getAvailableDriveLetters().iterator().next() + ":\\";
 			}
-		} else if (vaultSettings.individualMountPath().get() != null) {
+		} else if (vaultSettings.usesIndividualMountPath().get()) {
 			//specific path given
 			mountPath = vaultSettings.individualMountPath().get();
 		} else {
