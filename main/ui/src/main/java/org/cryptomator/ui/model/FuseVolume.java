@@ -1,21 +1,22 @@
 package org.cryptomator.ui.model;
 
-import org.apache.commons.lang3.SystemUtils;
-import org.cryptomator.common.settings.VaultSettings;
-import org.cryptomator.cryptofs.CryptoFileSystem;
-
-import org.cryptomator.frontend.fuse.mount.EnvironmentVariables;
-import org.cryptomator.frontend.fuse.mount.FuseMount;
-import org.cryptomator.frontend.fuse.mount.FuseMountFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.inject.Inject;
 import java.io.IOException;
 import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+
+import javax.inject.Inject;
+
+import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.common.settings.VaultSettings;
+import org.cryptomator.cryptofs.CryptoFileSystem;
+import org.cryptomator.frontend.fuse.mount.EnvironmentVariables;
+import org.cryptomator.frontend.fuse.mount.FuseMountFactory;
+import org.cryptomator.frontend.fuse.mount.FuseNotSupportedException;
+import org.cryptomator.frontend.fuse.mount.Mount;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @VaultModule.PerVault
 public class FuseVolume implements Volume {
@@ -28,10 +29,10 @@ public class FuseVolume implements Volume {
 	private static final String DEFAULT_MOUNTROOTPATH_MAC = System.getProperty("user.home") + "/Library/Application Support/Cryptomator";
 	private static final String DEFAULT_MOUNTROOTPATH_LINUX = System.getProperty("user.home") + "/.Cryptomator";
 
-	private final FuseMount fuseMnt;
 	private final VaultSettings vaultSettings;
 	private final WindowsDriveLetters windowsDriveLetters;
 
+	private Mount fuseMnt;
 	private CryptoFileSystem cfs;
 	private Path mountPath;
 	private boolean extraDirCreated;
@@ -40,12 +41,11 @@ public class FuseVolume implements Volume {
 	public FuseVolume(VaultSettings vaultSettings, WindowsDriveLetters windowsDriveLetters) {
 		this.vaultSettings = vaultSettings;
 		this.windowsDriveLetters = windowsDriveLetters;
-		this.fuseMnt = FuseMountFactory.createMountObject();
 		this.extraDirCreated = false;
 	}
 
 	@Override
-	public void prepare(CryptoFileSystem fs) throws IOException {
+	public void prepare(CryptoFileSystem fs) throws IOException, FuseNotSupportedException {
 		this.cfs = fs;
 		String mountPath;
 		if (SystemUtils.IS_OS_WINDOWS) {
@@ -62,8 +62,7 @@ public class FuseVolume implements Volume {
 			mountPath = vaultSettings.individualMountPath().get();
 		} else {
 			//choose default path & create extra directory
-			mountPath = createDirIfNotExist(SystemUtils.IS_OS_MAC ? DEFAULT_MOUNTROOTPATH_MAC : DEFAULT_MOUNTROOTPATH_LINUX,
-					vaultSettings.mountName().get());
+			mountPath = createDirIfNotExist(SystemUtils.IS_OS_MAC ? DEFAULT_MOUNTROOTPATH_MAC : DEFAULT_MOUNTROOTPATH_LINUX, vaultSettings.mountName().get());
 			extraDirCreated = true;
 		}
 		this.mountPath = Paths.get(mountPath).toAbsolutePath();
@@ -84,10 +83,10 @@ public class FuseVolume implements Volume {
 		try {
 			EnvironmentVariables envVars = EnvironmentVariables.create()
 					.withMountName(vaultSettings.mountName().getValue())
-					.withMountPath(mountPath.toString())
+					.withMountPath(mountPath)
 					.build();
-			fuseMnt.mount(cfs.getPath("/"), envVars);
-		} catch (Exception e) {
+			this.fuseMnt = FuseMountFactory.getMounter().mount(cfs.getPath("/"), envVars);
+		} catch (org.cryptomator.frontend.fuse.mount.CommandFailedException e) {
 			throw new CommandFailedException("Unable to mount Filesystem", e);
 		}
 	}
@@ -95,7 +94,7 @@ public class FuseVolume implements Volume {
 	@Override
 	public void reveal() throws CommandFailedException {
 		try {
-			fuseMnt.reveal();
+			fuseMnt.revealInFileManager();
 		} catch (org.cryptomator.frontend.fuse.mount.CommandFailedException e) {
 			LOG.info("Revealing the vault in file manger failed: " + e.getMessage());
 			throw new CommandFailedException(e);
@@ -104,24 +103,16 @@ public class FuseVolume implements Volume {
 
 	@Override
 	public synchronized void unmount() throws CommandFailedException {
-		if (cfs.getStats().pollBytesRead() == 0 && cfs.getStats().pollBytesWritten() == 0) {
-			unmountRaw();
-		} else {
-			throw new CommandFailedException("Pending read or write operations.");
+		try {
+			fuseMnt.close();
+		} catch (org.cryptomator.frontend.fuse.mount.CommandFailedException e) {
+			throw new CommandFailedException(e);
 		}
 	}
 
 	@Override
 	public synchronized void unmountForced() throws CommandFailedException {
-		this.unmountRaw();
-	}
-
-	private synchronized void unmountRaw() throws CommandFailedException {
-		try {
-			fuseMnt.unmount();
-		} catch (org.cryptomator.frontend.fuse.mount.CommandFailedException e) {
-			throw new CommandFailedException(e);
-		}
+		unmount();
 	}
 
 	@Override
@@ -137,22 +128,17 @@ public class FuseVolume implements Volume {
 
 	@Override
 	public String getMountUri() {
-		return Paths.get(fuseMnt.getMountPath()).toUri().toString();
+		return "";
 	}
 
-	/**
-	 * TODO: change this to a real implementation
-	 *
-	 * @return
-	 */
 	@Override
 	public boolean isSupported() {
-		return true;
+		return FuseMountFactory.isFuseSupported();
 	}
 
 	@Override
 	public boolean supportsForcedUnmount() {
-		return true;
+		return false;
 	}
 
 }

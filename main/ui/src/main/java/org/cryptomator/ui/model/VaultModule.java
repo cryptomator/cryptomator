@@ -46,10 +46,15 @@ public class VaultModule {
 	public Volume provideNioAdpater(Settings settings, WebDavVolume webDavVolume, FuseVolume fuseVolume) {
 		VolumeImpl impl = settings.volumeImpl().get();
 		switch (impl) {
+			case FUSE:
+				if (fuseVolume.isSupported()) {
+					return fuseVolume;
+				} else {
+					settings.volumeImpl().set(VolumeImpl.WEBDAV);
+					// fallthrough to WEBDAV
+				}
 			case WEBDAV:
 				return webDavVolume;
-			case FUSE:
-				return fuseVolume;
 			default:
 				throw new IllegalStateException("Unsupported NioAdapter: " + impl);
 		}

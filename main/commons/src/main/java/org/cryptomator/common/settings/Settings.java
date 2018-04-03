@@ -32,7 +32,7 @@ public class Settings {
 	public static final int DEFAULT_NUM_TRAY_NOTIFICATIONS = 3;
 	public static final String DEFAULT_GVFS_SCHEME = "dav";
 	public static final boolean DEFAULT_DEBUG_MODE = false;
-	public static final VolumeImpl DEFAULT_VOLUME_IMPL = VolumeImpl.WEBDAV;
+	public static final VolumeImpl DEFAULT_VOLUME_IMPL = VolumeImpl.FUSE;
 
 	private final ObservableList<VaultSettings> directories = FXCollections.observableArrayList(VaultSettings::observables);
 	private final BooleanProperty checkForUpdates = new SimpleBooleanProperty(DEFAULT_CHECK_FOR_UDPATES);
