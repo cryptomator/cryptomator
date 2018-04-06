@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.cryptomator</groupId>
 		<artifactId>main</artifactId>
-		<version>1.3.5</version>
+		<version>1.4.0-beta1</version>
 	</parent>
 	<artifactId>commons</artifactId>
 	<name>Cryptomator Commons</name>
@@ -33,15 +33,6 @@
 		<dependency>
 			<groupId>com.google.dagger</groupId>
 			<artifactId>dagger</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.google.dagger</groupId>
-			<artifactId>dagger-compiler</artifactId>
-		</dependency>
-		
-		<dependency>
-			<groupId>com.google.dagger</groupId>
-			<artifactId>dagger-compiler</artifactId>
 		</dependency>
 
 		<!-- Logging -->

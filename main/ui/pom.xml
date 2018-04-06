@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.cryptomator</groupId>
 		<artifactId>main</artifactId>
-		<version>1.3.5</version>
+		<version>1.4.0-beta1</version>
 	</parent>
 	<artifactId>ui</artifactId>
 	<name>Cryptomator GUI</name>
@@ -30,7 +30,11 @@
 			<groupId>org.cryptomator</groupId>
 			<artifactId>keychain</artifactId>
 		</dependency>
-		
+		<dependency>
+			<groupId>org.cryptomator</groupId>
+			<artifactId>fuse-nio-adapter</artifactId>
+		</dependency>
+
 		<!-- CryptoLib -->
 		<dependency>
 			<groupId>org.cryptomator</groupId>
@@ -62,19 +66,11 @@
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpclient</artifactId>
-		</dependency>
 
 		<!-- DI -->
 		<dependency>
 			<groupId>com.google.dagger</groupId>
 			<artifactId>dagger</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.google.dagger</groupId>
-			<artifactId>dagger-compiler</artifactId>
 		</dependency>
 
 		<!-- Zxcvbn -->

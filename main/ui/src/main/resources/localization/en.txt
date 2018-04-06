@@ -67,6 +67,9 @@ unlock.label.mountName=Drive Name
 unlock.label.unlockAfterStartup=Auto-Unlock on Start (Experimental)
 unlock.label.revealAfterMount=Reveal Drive
 unlock.label.winDriveLetter=Drive Letter
+unlock.label.useOwnMountPath=Use own Mount point
+unlock.label.mountPath=Mount Path
+unlock.label.mountPathButton=Apply
 unlock.label.downloadsPageLink=All Cryptomator versions
 unlock.label.advancedHeading=Advanced Options
 unlock.button.unlock=Unlock Vault
@@ -82,6 +85,9 @@ unlock.errorMessage.unsupportedVersion.vaultOlderThanSoftware=Unsupported vault.
 unlock.errorMessage.unsupportedVersion.softwareOlderThanVault=Unsupported vault. This vault has been created with a newer version of Cryptomator.
 unlock.errorMessage.unauthenticVersionMac=Could not authenticate version MAC.
 unlock.messageLabel.startServerFailed=Starting WebDAV server failed.
+unlock.successLabel.vaultCreated=Vault was successfully created.
+unlock.successLabel.passwordChanged=Password was successfully changed.
+unlock.successLabel.upgraded=Cryptomator was successfully upgraded.
 
 # change_password.fxml
 changePassword.label.oldPassword=Old Password
@@ -97,7 +103,7 @@ unlocked.button.lock=Lock Vault
 unlocked.moreOptions.mount=Mount Drive
 unlocked.moreOptions.unmount=Eject Drive
 unlocked.moreOptions.reveal=Reveal Drive
-unlocked.moreOptions.copyUrl=Copy WebDAV URL
+unlocked.moreOptions.copyUrl=Copy Filesystem URL
 unlocked.label.mountFailed=Connecting drive failed
 unlocked.label.revealFailed=Command failed
 unlocked.label.unmountFailed=Ejecting drive failed
@@ -111,12 +117,15 @@ unlocked.lock.force.confirmation.content=This may be because other programs are 
 # settings.fxml
 settings.version.label=Version %s
 settings.checkForUpdates.label=Check for Updates
-settings.port.label=WebDAV Port
-settings.port.prompt=0 = Choose automatically
-settings.port.apply=Apply
-settings.prefGvfsScheme.label=WebDAV Scheme
+settings.webdav.port.label=WebDAV Port
+settings.webdav.port.prompt=0 = Choose automatically
+settings.webdav.port.apply=Apply
+settings.webdav.prefGvfsScheme.label=WebDAV Scheme
 settings.debugMode.label=Debug Mode *
 settings.requiresRestartLabel=* Cryptomator needs to restart
+settings.volume.label= Mount-Methode *
+settings.volume.webdav=WebDAV
+settings.volume.fuse=FUSE
 
 # tray icon
 tray.menu.open=Open

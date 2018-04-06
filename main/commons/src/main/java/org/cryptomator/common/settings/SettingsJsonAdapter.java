@@ -33,6 +33,7 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 		out.name("numTrayNotifications").value(value.numTrayNotifications().get());
 		out.name("preferredGvfsScheme").value(value.preferredGvfsScheme().get());
 		out.name("debugMode").value(value.debugMode().get());
+		out.name("volumeImpl").value(value.volumeImpl().get().name());
 		out.endObject();
 	}
 
@@ -52,32 +53,43 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 		while (in.hasNext()) {
 			String name = in.nextName();
 			switch (name) {
-			case "directories":
-				settings.getDirectories().addAll(readVaultSettingsArray(in));
-				break;
-			case "checkForUpdatesEnabled":
-				settings.checkForUpdates().set(in.nextBoolean());
-				break;
-			case "port":
-				settings.port().set(in.nextInt());
-				break;
-			case "numTrayNotifications":
-				settings.numTrayNotifications().set(in.nextInt());
-				break;
-			case "preferredGvfsScheme":
-				settings.preferredGvfsScheme().set(in.nextString());
-				break;
-			case "debugMode":
-				settings.debugMode().set(in.nextBoolean());
-				break;
-			default:
-				LOG.warn("Unsupported vault setting found in JSON: " + name);
-				in.skipValue();
+				case "directories":
+					settings.getDirectories().addAll(readVaultSettingsArray(in));
+					break;
+				case "checkForUpdatesEnabled":
+					settings.checkForUpdates().set(in.nextBoolean());
+					break;
+				case "port":
+					settings.port().set(in.nextInt());
+					break;
+				case "numTrayNotifications":
+					settings.numTrayNotifications().set(in.nextInt());
+					break;
+				case "preferredGvfsScheme":
+					settings.preferredGvfsScheme().set(in.nextString());
+					break;
+				case "debugMode":
+					settings.debugMode().set(in.nextBoolean());
+					break;
+				case "volumeImpl":
+					settings.volumeImpl().set(parseNioAdapterName(in.nextString()));
+					break;
+				default:
+					LOG.warn("Unsupported vault setting found in JSON: " + name);
+					in.skipValue();
 			}
 		}
 		in.endObject();
 
 		return settings;
+	}
+
+	private VolumeImpl parseNioAdapterName(String nioAdapterName) {
+		try {
+			return VolumeImpl.valueOf(nioAdapterName);
+		} catch (IllegalArgumentException e) {
+			return Settings.DEFAULT_VOLUME_IMPL;
+		}
 	}
 
 	private List<VaultSettings> readVaultSettingsArray(JsonReader in) throws IOException {

@@ -54,8 +54,6 @@ unlocked.ioGraph.yAxis.label = Durchsatz (MiB/s)
 # settings.fxml
 settings.version.label = Version %s
 settings.checkForUpdates.label = Auf Updates prüfen
-settings.port.label = WebDAV Port *
-settings.port.prompt = 0 \= Automatisch wählen
 settings.requiresRestartLabel = * benötigt Neustart von Cryptomator
 # tray icon
 tray.menu.open = Öffnen
@@ -74,7 +72,6 @@ main.directoryList.remove.confirmation.header = Möchten Sie diesen Tresor wirkl
 main.directoryList.remove.confirmation.content = Dieser Tresor wird nur aus der Liste entfernt. Um den Tresor unwiderruflich zu löschen, entfernen Sie bitte den Tresor aus Ihrem Dateisystem.
 upgrade.version3to4.msg = Dieser Tresor muss auf ein neueres Format aktualisiert werden.\nVerschlüsselte Ordnernamen werden dabei aktualisiert.\nStellen Sie bitte sicher, dass derzeit keine Synchronisation stattfindet.
 upgrade.version3to4.err.io = Migration aufgrund eines I/O-Fehlers fehlgeschlagen.\nWeitere Informationen in der Log-Datei.
-settings.prefGvfsScheme.label = WebDAV Schema
 # upgrade.fxml
 upgrade.confirmation.label = Ja, die Synchronisation ist abgeschlossen
 unlock.label.savePassword = Passwort speichern
@@ -89,7 +86,6 @@ upgrade.version3to4.title = Upgrade Tresor-Version 3 zu 4
 upgrade.version4to5.title = Upgrade Tresor-Version 4 zu 5
 upgrade.version4to5.msg = Dieser Tresor muss auf ein neueres Format aktualisiert werden.\nVerschlüsselte Dateien werden dabei aktualisiert.\nStellen Sie sicher, dass keine Synchronisation stattfindet, bevor Sie fortfahren.\n\nHinweis\: Beim Upgrade wird das Änderungsdatum aller Dateien auf das aktuelle Datum geändert.
 upgrade.version4to5.err.io = Migration aufgrund eines I/O-Fehlers fehlgeschlagen.\nWeitere Informationen in der Log-Datei.
-settings.port.apply = Anwenden
 unlock.label.mountAfterUnlock = Laufwerk verbinden
 unlock.label.revealAfterMount = Laufwerk anzeigen
 unlocked.lock.force.confirmation.title = Sperren von %1$s fehlgeschlagen
@@ -104,3 +100,15 @@ upgrade.version5toX.msg = Dieser Tresor muss auf ein neueres Format aktualisiert
 main.createVault.nonEmptyDir.title = Erstellung des Tresors fehlgeschlagen
 main.createVault.nonEmptyDir.header = Ausgewählter Ordner ist nicht leer
 main.createVault.nonEmptyDir.content = Der ausgewählte Ordner enthält bereits Dateien (möglicherweise unsichtbar). Ein Tresor kann nur innerhalb eines leeren Ordners erstellt werden.
+unlock.label.mountPath = Verzeichnis
+unlock.label.mountPathButton = Anwenden
+settings.webdav.port.label = WebDAV Port
+settings.webdav.port.prompt = 0 \= automatische Auswahl
+settings.webdav.port.apply = Anwenden
+settings.webdav.prefGvfsScheme.label = WebDAV URL Schema
+settings.volume.label = Laufwerkseinbindung
+settings.volume.webdav = WebDAV
+settings.volume.fuse = FUSE
+unlock.successLabel.vaultCreated = Vault was successfully created.
+unlock.successLabel.passwordChanged = Password was successfully changed.
+unlock.successLabel.upgraded = Cryptomator was successfully upgraded.

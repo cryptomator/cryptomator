@@ -12,7 +12,7 @@ welcome.newVersionMessage = バージョン %1$s がダウンロード可能で�
 initialize.label.password = パスワード
 initialize.label.retypePassword = パスワードの再入力
 initialize.button.ok = 金庫を作成
-initialize.messageLabel.alreadyInitialized = 金庫は既に初期化されています。
+initialize.messageLabel.alreadyInitialized = 金庫は既に初期化されています
 initialize.messageLabel.initializationFailed = 金庫の初期化ができませんでした。詳細はログファイルをご覧ください。
 # notfound.fxml
 notfound.label = 金庫が見つかりません。移動しましたか?
@@ -31,8 +31,8 @@ unlock.button.advancedOptions.show = オプションを表示
 unlock.button.advancedOptions.hide = オプションを非表示
 unlock.choicebox.winDriveLetter.auto = 自動的に割り当てる
 unlock.errorMessage.wrongPassword = パスワードが無効です
-unlock.errorMessage.unsupportedVersion.vaultOlderThanSoftware = サポートされない金庫です。この金庫は古いバージョンの Cryptomator から作成されました。
-unlock.errorMessage.unsupportedVersion.softwareOlderThanVault = サポートされない金庫です。この金庫は新しいバージョンの Cryptomator から作成されました。
+unlock.errorMessage.unsupportedVersion.vaultOlderThanSoftware = サポートされない金庫です。この金庫は古いバージョンの Cryptomator を使用して作成されました。
+unlock.errorMessage.unsupportedVersion.softwareOlderThanVault = サポートされない金庫です。この金庫は新しいバージョンの Cryptomator を使用して作成されました。
 unlock.messageLabel.startServerFailed = WebDAV サーバーの起動に失敗しました。
 # change_password.fxml
 changePassword.label.oldPassword = 古いパスワード
@@ -54,8 +54,6 @@ unlocked.ioGraph.yAxis.label = スループット (MiB/s)
 # settings.fxml
 settings.version.label = バージョン %s
 settings.checkForUpdates.label = 最新版のチェック
-settings.port.label = WebDAV ポート
-settings.port.prompt = 0 \= 自動的に選択
 settings.requiresRestartLabel = *Cryptomatorの再起動が必要
 # tray icon
 tray.menu.open = 開く
@@ -74,7 +72,6 @@ main.directoryList.remove.confirmation.header = この金庫を本当に削除�
 main.directoryList.remove.confirmation.content = 金庫はリストのみで削除されます。完全に削除するには、ファイルシステムからファイルを削除してください。
 upgrade.version3to4.msg = この金庫は新しいフォーマットに移行する必要があります。\n暗号化されたフォルダの名前は更新されます。\n続行する前に同期が完了していることをご確認ください。
 upgrade.version3to4.err.io = I/O の例外で移行に失敗しました。詳細はログをご確認ください。
-settings.prefGvfsScheme.label = WebDAV スキーム
 # upgrade.fxml
 upgrade.confirmation.label = はい、同期が完了していることを確認しました。
 unlock.label.savePassword = パスワードを保存
@@ -89,7 +86,6 @@ upgrade.version3to4.title = 金庫をバージョン 3 から 4 にアップグ�
 upgrade.version4to5.title = 金庫をバージョン 4 から 5 にアップグレード
 upgrade.version4to5.msg = この金庫は新しいフォーマットに移行する必要があります。\n暗号化されたファイルは更新されます。\n続行する前に同期が完了していることをご確認ください。\n\n注意：すべてのファイルの変更日は、現在の日付・時刻に変わります。
 upgrade.version4to5.err.io = I/O の例外で移行に失敗しました。詳細はログをご確認ください。
-settings.port.apply = 適用
 unlock.label.mountAfterUnlock = ドライブをマウント
 unlock.label.revealAfterMount = ドライブの表示
 unlocked.lock.force.confirmation.title = %1$s の施錠に失敗しました
@@ -101,6 +97,18 @@ unlocked.moreOptions.mount = ドライブのマウント
 unlocked.moreOptions.unmount = ドライブの取り出し
 upgrade.version5toX.title = 金庫のバージョンをアップグレード
 upgrade.version5toX.msg = この金庫を新しいバージョンに移行する必要があります。\n進行する前に同期が完了していることをご確認ください。
-main.createVault.nonEmptyDir.title = Creating vault failed
-main.createVault.nonEmptyDir.header = Chosen directory is not empty
-main.createVault.nonEmptyDir.content = The selected directory already contains files (possibly hidden). A vault can only be created in an empty directory.
+main.createVault.nonEmptyDir.title = 金庫の作成が失敗しました
+main.createVault.nonEmptyDir.header = 空ではないディレクトリが選択されました
+main.createVault.nonEmptyDir.content = 選択されたディレクトリが既にファイルを含んでいます(隠れている可能性があります)。金庫は空のディレクトのみに作れます。
+unlock.label.mountPath = マウントパス
+unlock.label.mountPathButton = 適用
+settings.webdav.port.label = WebDAV ポート
+settings.webdav.port.prompt = 0 \= 自動的に選択
+settings.webdav.port.apply = 適用
+settings.webdav.prefGvfsScheme.label = WebDAV スキーム
+settings.volume.label = マウント方法 *
+settings.volume.webdav = WebDAV
+settings.volume.fuse = FUSE
+unlock.successLabel.vaultCreated = Vault was successfully created.
+unlock.successLabel.passwordChanged = Password was successfully changed.
+unlock.successLabel.upgraded = Cryptomator was successfully upgraded.

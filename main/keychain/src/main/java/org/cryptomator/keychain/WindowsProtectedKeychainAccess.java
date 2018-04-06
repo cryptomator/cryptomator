@@ -5,8 +5,6 @@
  *******************************************************************************/
 package org.cryptomator.keychain;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -31,12 +29,6 @@ import java.util.UUID;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.SystemUtils;
-import org.cryptomator.jni.WinDataProtection;
-import org.cryptomator.jni.WinFunctions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.common.io.BaseEncoding;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -49,6 +41,13 @@ import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 import com.google.gson.annotations.SerializedName;
 import com.google.gson.reflect.TypeToken;
+import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.jni.WinDataProtection;
+import org.cryptomator.jni.WinFunctions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 class WindowsProtectedKeychainAccess implements KeychainAccessStrategy {
 
@@ -57,19 +56,15 @@ class WindowsProtectedKeychainAccess implements KeychainAccessStrategy {
 			.registerTypeHierarchyAdapter(byte[].class, new ByteArrayJsonAdapter()) //
 			.disableHtmlEscaping().create();
 
-	private final WinDataProtection dataProtection;
+	private final Optional<WinFunctions> winFunctions;
 	private final Path keychainPath;
 	private Map<String, KeychainEntry> keychainEntries;
 
 	@Inject
 	public WindowsProtectedKeychainAccess(Optional<WinFunctions> winFunctions) {
-		if (winFunctions.isPresent()) {
-			this.dataProtection = winFunctions.get().dataProtection();
-		} else {
-			this.dataProtection = null;
-		}
+		this.winFunctions = winFunctions;
 		String keychainPathProperty = System.getProperty("cryptomator.keychainPath");
-		if (dataProtection != null && keychainPathProperty == null) {
+		if (keychainPathProperty == null) {
 			LOG.warn("Windows DataProtection module loaded, but no cryptomator.keychainPath property found.");
 		}
 		if (keychainPathProperty != null) {
@@ -82,6 +77,10 @@ class WindowsProtectedKeychainAccess implements KeychainAccessStrategy {
 		}
 	}
 
+	private WinDataProtection dataProtection() {
+		return winFunctions.orElseThrow(IllegalStateException::new).dataProtection();
+	}
+
 	@Override
 	public void storePassphrase(String key, CharSequence passphrase) {
 		loadKeychainEntriesIfNeeded();
@@ -90,7 +89,7 @@ class WindowsProtectedKeychainAccess implements KeychainAccessStrategy {
 		buf.get(cleartext);
 		KeychainEntry entry = new KeychainEntry();
 		entry.salt = generateSalt();
-		entry.ciphertext = dataProtection.protect(cleartext, entry.salt);
+		entry.ciphertext = dataProtection().protect(cleartext, entry.salt);
 		Arrays.fill(buf.array(), (byte) 0x00);
 		Arrays.fill(cleartext, (byte) 0x00);
 		keychainEntries.put(key, entry);
@@ -104,7 +103,7 @@ class WindowsProtectedKeychainAccess implements KeychainAccessStrategy {
 		if (entry == null) {
 			return null;
 		}
-		byte[] cleartext = dataProtection.unprotect(entry.ciphertext, entry.salt);
+		byte[] cleartext = dataProtection().unprotect(entry.ciphertext, entry.salt);
 		if (cleartext == null) {
 			return null;
 		}
@@ -125,7 +124,7 @@ class WindowsProtectedKeychainAccess implements KeychainAccessStrategy {
 
 	@Override
 	public boolean isSupported() {
-		return SystemUtils.IS_OS_WINDOWS && dataProtection != null && keychainPath != null;
+		return SystemUtils.IS_OS_WINDOWS && winFunctions.isPresent() && keychainPath != null;
 	}
 
 	private byte[] generateSalt() {

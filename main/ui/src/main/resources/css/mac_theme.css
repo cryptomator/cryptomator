@@ -434,6 +434,52 @@
     -fx-background-color: COLOR_TEXT_DISABLED;
 }
 
+/*******************************************************************************
+ *                                                                             *
+ * ChoiceBox                                                                   *
+ *                                                                             *
+ ******************************************************************************/
+
+.choice-box {
+	-fx-background-color: COLOR_HGRAD_BTN_BORDER, #FFFFFF;
+	-fx-background-insets: 0, 1;
+    -fx-background-radius: 4;
+    -fx-padding: 0 0 0 0.8em;
+    -fx-text-fill: COLOR_TEXT;
+    -fx-alignment: CENTER;
+	-fx-effect: dropshadow(one-pass-box, #DCDCDC, 0.0, 0.0, 0.0, 1.0);
+}
+
+.choice-box > .open-button {
+	-fx-background-insets: 0, 1 1 1 0;
+    -fx-background-radius: 0 4 4 0;
+	-fx-padding: 4 5 4 4;
+}
+.root.active-window .choice-box > .open-button {
+	-fx-background-color: COLOR_HGRAD_BTN_DEF_BORDER, COLOR_HGRAD_BTN_DEF_BACKGROUND;
+}
+.root.inactive-window .choice-box > .open-button {
+	-fx-background-color: COLOR_HGRAD_BTN_BORDER, #FFFFFF;
+}
+
+.choice-box > .open-button > .arrow {
+	-fx-shape: "M 0 5 L 4 0 L 8 5 L 6 5 L 4 2 L 2 5 Z   M 0 8 L 4 13 L 8 8 L 6 8 L 4 11 L 2 8 Z";
+	-fx-scale-shape: true;
+	-fx-min-width: 9px;
+	-fx-min-height: 13px;
+}
+.root.active-window .choice-box > .open-button > .arrow  {
+	-fx-background-color: #FFFFFF;
+}
+.root.inactive-window .choice-box > .open-button > .arrow  {
+	-fx-background-color: #444444;
+}
+
+.choice-box .context-menu {
+	-fx-background-color: COLOR_BORDER, #FFF;
+    -fx-background-insets: 0, 1;
+}
+
 /****************************************************************************
  *																			*
  * ProgressIndicator														*

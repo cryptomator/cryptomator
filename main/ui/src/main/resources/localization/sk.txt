@@ -57,8 +57,6 @@ unlocked.ioGraph.yAxis.label = Priepustnosť (MiB/s)
 # settings.fxml
 settings.version.label = Verzia %s
 settings.checkForUpdates.label = Skontrolovať aktualizácie
-settings.port.label = WebDAV Port *
-settings.port.prompt = 0 \= Vybrať automaticky
 settings.requiresRestartLabel = * Cryptomator vyžaduje reštart
 # tray icon
 tray.menu.open = Otvoriť
@@ -77,7 +75,6 @@ main.directoryList.remove.confirmation.header = Skutočne chcete odstrániť ten
 main.directoryList.remove.confirmation.content = Trezor bude odstránení zo zoznamu. Pre úplné zmazanie vymažte súbor s trezorom.
 upgrade.version3to4.msg = This vault needs to be migrated to a newer format.\nEncrypted folder names will be updated.\nPlease make sure synchronization has finished before proceeding.
 upgrade.version3to4.err.io = Migrácia zlyhala kvôli I/O Exception. Skontrolujte log pre viac detailov
-settings.prefGvfsScheme.label = WebDAV Schéma
 # upgrade.fxml
 upgrade.confirmation.label = Áno, som si istý že synchronizácia je hotová
 unlock.label.savePassword = Uložiť heslo
@@ -92,7 +89,6 @@ upgrade.version3to4.title = Vault Version 3 to 4 Upgrade
 upgrade.version4to5.title = Vault Version 4 to 5 Upgrade
 upgrade.version4to5.msg = This vault needs to be migrated to a newer format.\nEncrypted files will be updated.\nPlease make sure synchronization has finished before proceeding.\n\nNote\: Modification date of all files will be changed to the current date/time in the process.
 upgrade.version4to5.err.io = Migration failed due to an I/O Exception. See log file for details.
-settings.port.apply = Apply
 unlock.label.mountAfterUnlock = Mount Drive
 unlock.label.revealAfterMount = Reveal Drive
 unlocked.lock.force.confirmation.title = Locking of %1$s failed
@@ -107,3 +103,15 @@ upgrade.version5toX.msg = This vault needs to be migrated to a newer format.\nPl
 main.createVault.nonEmptyDir.title = Creating vault failed
 main.createVault.nonEmptyDir.header = Chosen directory is not empty
 main.createVault.nonEmptyDir.content = The selected directory already contains files (possibly hidden). A vault can only be created in an empty directory.
+unlock.label.mountPath = Mount Path
+unlock.label.mountPathButton = Apply
+settings.webdav.port.label = WebDAV Port
+settings.webdav.port.prompt = 0 \= Choose automatically
+settings.webdav.port.apply = Apply
+settings.webdav.prefGvfsScheme.label = WebDAV Scheme
+settings.volume.label = Mount-Methode *
+settings.volume.webdav = WebDAV
+settings.volume.fuse = FUSE
+unlock.successLabel.vaultCreated = Vault was successfully created.
+unlock.successLabel.passwordChanged = Password was successfully changed.
+unlock.successLabel.upgraded = Cryptomator was successfully upgraded.

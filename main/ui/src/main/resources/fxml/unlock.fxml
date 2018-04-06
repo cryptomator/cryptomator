@@ -47,6 +47,9 @@
 		</HBox>
 		
 		<!-- Row 3 -->
+		<Label fx:id="successMessage" cacheShape="true" cache="true" visible="true" GridPane.rowIndex="3" GridPane.columnIndex="0" GridPane.columnSpan="2"/>
+
+		<!-- Row 3 -->
 		<GridPane fx:id="advancedOptions" vgap="12.0" hgap="12.0" prefWidth="400.0" GridPane.rowIndex="3" GridPane.columnIndex="0" GridPane.columnSpan="2" visible="false" cacheShape="true" cache="true">
 			<padding>
 				<Insets top="24.0" />
@@ -83,9 +86,20 @@
 			<!-- Row 3.5 -->
 			<CheckBox GridPane.rowIndex="5" GridPane.columnIndex="0" GridPane.columnSpan="2" fx:id="revealAfterMount" text="%unlock.label.revealAfterMount" cacheShape="true" cache="true" />
 			
-			<!-- Row 3.6 -->
+			<!-- Row 3.6 Alt1 -->
 			<Label GridPane.rowIndex="6" GridPane.columnIndex="0" fx:id="winDriveLetterLabel" text="%unlock.label.winDriveLetter" cacheShape="true" cache="true" />
 			<ChoiceBox GridPane.rowIndex="6" GridPane.columnIndex="1" fx:id="winDriveLetter" GridPane.hgrow="ALWAYS" maxWidth="Infinity" cacheShape="true" cache="true" />
+
+			<!-- Row 3.6 Alt2 -->
+			<CheckBox GridPane.rowIndex="6" GridPane.columnIndex="0" fx:id="useOwnMountPath" text="%unlock.label.useOwnMountPath" cacheShape="true" cache="true" />
+
+			<Label GridPane.rowIndex="7" GridPane.columnIndex="0" fx:id="mountPathLabel" text="%unlock.label.mountPath" cacheShape="true" cache="true" />
+
+			<HBox GridPane.rowIndex="7" GridPane.columnIndex="1" fx:id="mountPathBox" spacing="6.0">
+				<TextField GridPane.rowIndex="7" GridPane.columnIndex="1" fx:id="mountPath"  cacheShape="true" cache="true" />
+				<Button text="%unlock.label.mountPathButton" fx:id="changeMountPathButton" onAction="#didClickchangeMountPathButton"/>
+			</HBox>
+
 		</GridPane>
 		
 		<!-- Row 4 -->

@@ -54,8 +54,6 @@ unlocked.ioGraph.yAxis.label = Throughput (MiB/s)
 # settings.fxml
 settings.version.label = Version %s
 settings.checkForUpdates.label = Tjek for opdateringer
-settings.port.label = WebDAV Port
-settings.port.prompt = 0 \= Vælg automatisk
 settings.requiresRestartLabel = * Cryptomator skal genstartes
 # tray icon
 tray.menu.open = Åbn
@@ -74,7 +72,6 @@ main.directoryList.remove.confirmation.header = Er du sikker på at du vil slett
 main.directoryList.remove.confirmation.content = Valgte Vault vil kun blive slettet fra listen. For at slette denne permanent, skal du slette filerne fra dit filsystem.
 upgrade.version3to4.msg = Denne Vault skal migreres til et nyere format.\nDe krypterede foldernavne vil blive opdateret.\nVent venligst til al synkronisering er gennemført, inden du fortsætter.
 upgrade.version3to4.err.io = Migrering fejlede pga. en I/O fejl. Se logfilen for yderligere detaljer.
-settings.prefGvfsScheme.label = WebDAV Scheme
 # upgrade.fxml
 upgrade.confirmation.label = Ja, jeg har sikret mig at al synkronisering er gennemført.
 unlock.label.savePassword = Gem adgangskode
@@ -89,7 +86,6 @@ upgrade.version3to4.title = Vault Version 3 til 4 Opgradering
 upgrade.version4to5.title = Vault Version 4 til 5 Opgradering
 upgrade.version4to5.msg = Denne Vault skal migreres til et nyere format.\nDe krypterede filer vil blive opdateret.\nVent venligst til al synkronisering er gennemført, inden du fortsætter.\n\nNote\: Denne proces vil påvirke ændringsdato og -tidspunkt for samtlige filer.
 upgrade.version4to5.err.io = Migrering fejlede pga. en I/O fejl. Se logfilen for yderligere detaljer.
-settings.port.apply = Gem
 unlock.label.mountAfterUnlock = Monter drev
 unlock.label.revealAfterMount = Vis drev
 unlocked.lock.force.confirmation.title = Locking of %1$s failed
@@ -104,3 +100,15 @@ upgrade.version5toX.msg = This vault needs to be migrated to a newer format.\nPl
 main.createVault.nonEmptyDir.title = Creating vault failed
 main.createVault.nonEmptyDir.header = Chosen directory is not empty
 main.createVault.nonEmptyDir.content = The selected directory already contains files (possibly hidden). A vault can only be created in an empty directory.
+unlock.label.mountPath = Mount Path
+unlock.label.mountPathButton = Apply
+settings.webdav.port.label = WebDAV Port
+settings.webdav.port.prompt = 0 \= Choose automatically
+settings.webdav.port.apply = Apply
+settings.webdav.prefGvfsScheme.label = WebDAV Scheme
+settings.volume.label = Mount-Methode *
+settings.volume.webdav = WebDAV
+settings.volume.fuse = FUSE
+unlock.successLabel.vaultCreated = Vault was successfully created.
+unlock.successLabel.passwordChanged = Password was successfully changed.
+unlock.successLabel.upgraded = Cryptomator was successfully upgraded.

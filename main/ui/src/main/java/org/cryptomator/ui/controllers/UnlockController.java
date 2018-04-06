@@ -2,13 +2,14 @@
  * Copyright (c) 2014, 2017 Sebastian Stenzel
  * All rights reserved.
  * This program and the accompanying materials are made available under the terms of the accompanying LICENSE file.
- * 
+ *
  * Contributors:
  *     Sebastian Stenzel - initial API and implementation
  ******************************************************************************/
 package org.cryptomator.ui.controllers;
 
 import java.io.IOException;
+import java.nio.file.*;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Objects;
@@ -16,8 +17,12 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
+import javafx.beans.binding.Bindings;
+import javafx.scene.layout.HBox;
 import org.apache.commons.lang3.CharUtils;
 import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.common.settings.VolumeImpl;
+import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.cryptolib.api.InvalidPassphraseException;
 import org.cryptomator.cryptolib.api.UnsupportedVaultFormatException;
@@ -72,17 +77,19 @@ public class UnlockController implements ViewController {
 	private final WindowsDriveLetters driveLetters;
 	private final ChangeListener<Character> driveLetterChangeListener = this::winDriveLetterDidChange;
 	private final Optional<KeychainAccess> keychainAccess;
+	private final Settings settings;
 	private Vault vault;
 	private Optional<UnlockListener> listener = Optional.empty();
 	private Subscription vaultSubs = Subscription.EMPTY;
 
 	@Inject
-	public UnlockController(Application app, Localization localization, AsyncTaskService asyncTaskService, WindowsDriveLetters driveLetters, Optional<KeychainAccess> keychainAccess) {
+	public UnlockController(Application app, Localization localization, AsyncTaskService asyncTaskService, WindowsDriveLetters driveLetters, Optional<KeychainAccess> keychainAccess, Settings settings) {
 		this.app = app;
 		this.localization = localization;
 		this.asyncTaskService = asyncTaskService;
 		this.driveLetters = driveLetters;
 		this.keychainAccess = keychainAccess;
+		this.settings = settings;
 	}
 
 	@FXML
@@ -93,6 +100,9 @@ public class UnlockController implements ViewController {
 
 	@FXML
 	private Button unlockButton;
+
+	@FXML
+	private Label successMessage;
 
 	@FXML
 	private CheckBox savePassword;
@@ -111,6 +121,21 @@ public class UnlockController implements ViewController {
 
 	@FXML
 	private ChoiceBox<Character> winDriveLetter;
+
+	@FXML
+	private CheckBox useOwnMountPath;
+
+	@FXML
+	private HBox mountPathBox;
+
+	@FXML
+	private Label mountPathLabel;
+
+	@FXML
+	private TextField mountPath;
+
+	@FXML
+	private Button changeMountPathButton;
 
 	@FXML
 	private ProgressIndicator progressIndicator;
@@ -140,14 +165,35 @@ public class UnlockController implements ViewController {
 		mountName.textProperty().addListener(this::mountNameDidChange);
 		savePassword.setDisable(!keychainAccess.isPresent());
 		unlockAfterStartup.disableProperty().bind(savePassword.disabledProperty().or(savePassword.selectedProperty().not()));
+
+		mountPathLabel.setVisible(false);
+		mountPathBox.visibleProperty().bind(mountPathLabel.visibleProperty());
+		mountPathBox.managedProperty().bind(mountPathLabel.managedProperty());
+		mountPath.visibleProperty().bind(mountPathLabel.visibleProperty());
+		mountPath.managedProperty().bind(mountPathLabel.managedProperty());
+		changeMountPathButton.visibleProperty().bind(mountPathLabel.visibleProperty());
+		changeMountPathButton.managedProperty().bind(mountPathLabel.managedProperty());
+
 		if (SystemUtils.IS_OS_WINDOWS) {
 			winDriveLetter.setConverter(new WinDriveLetterLabelConverter());
+			useOwnMountPath.setVisible(false);
+			useOwnMountPath.setManaged(false);
+			mountPathLabel.setManaged(false);
+			//dirty cheat
+			mountPathBox.setMouseTransparent(true);
 		} else {
 			winDriveLetterLabel.setVisible(false);
 			winDriveLetterLabel.setManaged(false);
 			winDriveLetter.setVisible(false);
 			winDriveLetter.setManaged(false);
+			if (VolumeImpl.WEBDAV.equals(settings.volumeImpl().get())) {
+				useOwnMountPath.setVisible(false);
+				useOwnMountPath.setManaged(false);
+				mountPathLabel.setManaged(false);
+			}
 		}
+		changeMountPathButton.disableProperty().bind(Bindings.createBooleanBinding(this::isDirVaild, mountPath.textProperty()).not());
+
 	}
 
 	@Override
@@ -160,7 +206,7 @@ public class UnlockController implements ViewController {
 		passwordField.requestFocus();
 	}
 
-	void setVault(Vault vault) {
+	void setVault(Vault vault, State state) {
 		vaultSubs.unsubscribe();
 		vaultSubs = Subscription.EMPTY;
 
@@ -175,6 +221,8 @@ public class UnlockController implements ViewController {
 		advancedOptions.setVisible(false);
 		advancedOptionsButton.setText(localization.getString("unlock.button.advancedOptions.show"));
 		progressIndicator.setVisible(false);
+		successMessage.setVisible(state.successMessage().isPresent());
+		state.successMessage().map(localization::getString).ifPresent(successMessage::setText);
 		if (SystemUtils.IS_OS_WINDOWS) {
 			winDriveLetter.valueProperty().removeListener(driveLetterChangeListener);
 			winDriveLetter.getItems().clear();
@@ -200,14 +248,23 @@ public class UnlockController implements ViewController {
 				Arrays.fill(storedPw, ' ');
 			}
 		}
-		VaultSettings settings = vault.getVaultSettings();
-		unlockAfterStartup.setSelected(savePassword.isSelected() && settings.unlockAfterStartup().get());
-		mountAfterUnlock.setSelected(settings.mountAfterUnlock().get());
-		revealAfterMount.setSelected(settings.revealAfterMount().get());
+		VaultSettings vaultSettings = vault.getVaultSettings();
+		unlockAfterStartup.setSelected(savePassword.isSelected() && vaultSettings.unlockAfterStartup().get());
+		mountAfterUnlock.setSelected(vaultSettings.mountAfterUnlock().get());
+		revealAfterMount.setSelected(vaultSettings.revealAfterMount().get());
+		useOwnMountPath.setSelected(vaultSettings.usesIndividualMountPath().get());
 
-		vaultSubs = vaultSubs.and(EasyBind.subscribe(unlockAfterStartup.selectedProperty(), settings.unlockAfterStartup()::set));
-		vaultSubs = vaultSubs.and(EasyBind.subscribe(mountAfterUnlock.selectedProperty(), settings.mountAfterUnlock()::set));
-		vaultSubs = vaultSubs.and(EasyBind.subscribe(revealAfterMount.selectedProperty(), settings.revealAfterMount()::set));
+		vaultSubs = vaultSubs.and(EasyBind.subscribe(unlockAfterStartup.selectedProperty(), vaultSettings.unlockAfterStartup()::set));
+		vaultSubs = vaultSubs.and(EasyBind.subscribe(mountAfterUnlock.selectedProperty(), vaultSettings.mountAfterUnlock()::set));
+		vaultSubs = vaultSubs.and(EasyBind.subscribe(revealAfterMount.selectedProperty(), vaultSettings.revealAfterMount()::set));
+		vaultSubs = vaultSubs.and(EasyBind.subscribe(useOwnMountPath.selectedProperty(), vaultSettings.usesIndividualMountPath()::set));
+
+		changeMountPathButton.visibleProperty().bind(
+				vaultSettings.individualMountPath().isNotEqualTo(mountPath.textProperty())
+		);
+		mountPath.textProperty().setValue(vaultSettings.individualMountPath().getValueSafe());
+		mountPathLabel.visibleProperty().bind(useOwnMountPath.selectedProperty());
+
 	}
 
 	// ****************************************
@@ -225,6 +282,7 @@ public class UnlockController implements ViewController {
 
 	@FXML
 	private void didClickAdvancedOptionsButton(ActionEvent event) {
+		successMessage.setVisible(false);
 		advancedOptions.setVisible(!advancedOptions.isVisible());
 		if (advancedOptions.isVisible()) {
 			advancedOptionsButton.setText(localization.getString("unlock.button.advancedOptions.hide"));
@@ -232,6 +290,28 @@ public class UnlockController implements ViewController {
 			advancedOptionsButton.setText(localization.getString("unlock.button.advancedOptions.show"));
 		}
 	}
+
+	@FXML
+	private void didClickchangeMountPathButton(ActionEvent event) {
+		assert isDirVaild();
+		vault.setMountPath(mountPath.getText());
+	}
+
+	private boolean isDirVaild() {
+		try {
+			if (!mountPath.textProperty().isEmpty().get()) {
+				Path p = Paths.get(mountPath.textProperty().get());
+				return Files.isDirectory(p) && Files.isReadable(p) && Files.isWritable(p) && Files.isExecutable(p);
+			} else {
+				return false;
+			}
+
+		} catch (InvalidPathException e) {
+			LOG.info("Invalid path");
+			return false;
+		}
+	}
+
 
 	private void filterAlphanumericKeyEvents(KeyEvent t) {
 		if (!Strings.isNullOrEmpty(t.getCharacter()) && !ALPHA_NUMERIC_MATCHER.matchesAllOf(t.getCharacter())) {
@@ -397,7 +477,28 @@ public class UnlockController implements ViewController {
 
 	@FunctionalInterface
 	interface UnlockListener {
+
 		void didUnlock(Vault vault);
+	}
+
+	/* state */
+
+	public enum State {
+		UNLOCKING(null),
+		INITIALIZED("unlock.successLabel.vaultCreated"),
+		PASSWORD_CHANGED("unlock.successLabel.passwordChanged"),
+		UPGRADED("unlock.successLabel.upgraded");
+
+		private Optional<String> successMessage;
+
+		State(String successMessage) {
+			this.successMessage = Optional.ofNullable(successMessage);
+		}
+
+		public Optional<String> successMessage() {
+			return successMessage;
+		}
+
 	}
 
 }

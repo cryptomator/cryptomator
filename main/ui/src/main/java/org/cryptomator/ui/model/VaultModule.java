@@ -12,6 +12,8 @@ import java.util.Objects;
 
 import javax.inject.Scope;
 
+import org.cryptomator.common.settings.VolumeImpl;
+import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VaultSettings;
 
 import dagger.Module;
@@ -36,6 +38,26 @@ public class VaultModule {
 	@Documented
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface PerVault {
+
+	}
+
+	@Provides
+	@PerVault
+	public Volume provideNioAdpater(Settings settings, WebDavVolume webDavVolume, FuseVolume fuseVolume) {
+		VolumeImpl impl = settings.volumeImpl().get();
+		switch (impl) {
+			case FUSE:
+				if (fuseVolume.isSupported()) {
+					return fuseVolume;
+				} else {
+					settings.volumeImpl().set(VolumeImpl.WEBDAV);
+					// fallthrough to WEBDAV
+				}
+			case WEBDAV:
+				return webDavVolume;
+			default:
+				throw new IllegalStateException("Unsupported NioAdapter: " + impl);
+		}
 	}
 
 }

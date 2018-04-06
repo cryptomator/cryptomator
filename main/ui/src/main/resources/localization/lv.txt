@@ -54,8 +54,6 @@ unlocked.ioGraph.yAxis.label = Caurlaidība (MiB/s)
 # settings.fxml
 settings.version.label = Versija %s
 settings.checkForUpdates.label = Meklēt atjauninājumus
-settings.port.label = WebDAV Ports *
-settings.port.prompt = 0 \= automātiski
 settings.requiresRestartLabel = * Cryptomator nepieciešams restarts
 # tray icon
 tray.menu.open = Atvērt
@@ -75,7 +73,6 @@ main.directoryList.remove.confirmation.header = Vai tiešām vēlie noņemt šo 
 main.directoryList.remove.confirmation.content = Glabātuve tiks noņemta tikai no saraksta. Lai to dzēstu pilnībā, lūdzu nodzēs to no datņu sistēmas.
 upgrade.version3to4.msg = Šī glabātuve ir jāmigrē uz jaunāku formāta versiju. Sifrētie mapju nosaukumi tiks atjaunināti. Pirms palaišanas lūdzu pārliecinies, ka ir pabeigusies sinhronizācija.
 upgrade.version3to4.err.io = Migrācija neizdevās dēļ I/O izņēmuma. Sīkākai informācijai skati žurnālu.
-settings.prefGvfsScheme.label = WebDAV shēma
 # upgrade.fxml
 upgrade.confirmation.label = Jā, esmu pārliecinājies, ka sinhronizācija ir pabeigta.
 unlock.label.savePassword = Saglabāt paroli
@@ -90,7 +87,6 @@ upgrade.version3to4.title = Glabātuves versijas 3 uz 4 atjauninājums
 upgrade.version4to5.title = Glabātuves versijas 4 uz 5 atjauninājums
 upgrade.version4to5.msg = Šo glabātuvi nepieciešams migrēt uz jaunāku versiju.\nŠifrētās datnes tiks atjauninātas.\nPirms apstiprini, pārliecinies, ka ir beigusies sinhronizācija.\n\nPiezīme\: Visām datnēm modificēšanas datums tiks izmainīts uz šodienas datumu.
 upgrade.version4to5.err.io = Migrācijas kļīda dēļ I/O izņēmuma. Sīkāku informāciju skaties žurnālā.
-settings.port.apply = Apply
 unlock.label.mountAfterUnlock = Mount Drive
 unlock.label.revealAfterMount = Reveal Drive
 unlocked.lock.force.confirmation.title = Locking of %1$s failed
@@ -105,3 +101,15 @@ upgrade.version5toX.msg = This vault needs to be migrated to a newer format.\nPl
 main.createVault.nonEmptyDir.title = Creating vault failed
 main.createVault.nonEmptyDir.header = Chosen directory is not empty
 main.createVault.nonEmptyDir.content = The selected directory already contains files (possibly hidden). A vault can only be created in an empty directory.
+unlock.label.mountPath = Mount Path
+unlock.label.mountPathButton = Apply
+settings.webdav.port.label = WebDAV Port
+settings.webdav.port.prompt = 0 \= Choose automatically
+settings.webdav.port.apply = Apply
+settings.webdav.prefGvfsScheme.label = WebDAV Scheme
+settings.volume.label = Mount-Methode *
+settings.volume.webdav = WebDAV
+settings.volume.fuse = FUSE
+unlock.successLabel.vaultCreated = Vault was successfully created.
+unlock.successLabel.passwordChanged = Password was successfully changed.
+unlock.successLabel.upgraded = Cryptomator was successfully upgraded.

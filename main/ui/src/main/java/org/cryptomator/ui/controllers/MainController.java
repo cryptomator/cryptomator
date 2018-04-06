@@ -9,8 +9,7 @@
  ******************************************************************************/
 package org.cryptomator.ui.controllers;
 
-import static org.cryptomator.ui.util.DialogBuilderUtil.buildErrorDialog;
-
+import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,25 +26,6 @@ import java.util.stream.Stream;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
-
-import org.apache.commons.lang3.SystemUtils;
-import org.cryptomator.common.settings.VaultSettings;
-import org.cryptomator.ui.ExitUtil;
-import org.cryptomator.ui.controls.DirectoryListCell;
-import org.cryptomator.ui.l10n.Localization;
-import org.cryptomator.ui.model.AutoUnlocker;
-import org.cryptomator.ui.model.UpgradeStrategies;
-import org.cryptomator.ui.model.UpgradeStrategy;
-import org.cryptomator.ui.model.Vault;
-import org.cryptomator.ui.model.VaultFactory;
-import org.cryptomator.ui.model.VaultList;
-import org.cryptomator.ui.util.DialogBuilderUtil;
-import org.cryptomator.ui.util.EawtApplicationWrapper;
-import org.fxmisc.easybind.EasyBind;
-import org.fxmisc.easybind.Subscription;
-import org.fxmisc.easybind.monadic.MonadicBinding;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -81,6 +61,25 @@ import javafx.scene.layout.Pane;
 import javafx.scene.text.Font;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.common.settings.VaultSettings;
+import org.cryptomator.ui.ExitUtil;
+import org.cryptomator.ui.controls.DirectoryListCell;
+import org.cryptomator.ui.l10n.Localization;
+import org.cryptomator.ui.model.AutoUnlocker;
+import org.cryptomator.ui.model.UpgradeStrategies;
+import org.cryptomator.ui.model.UpgradeStrategy;
+import org.cryptomator.ui.model.Vault;
+import org.cryptomator.ui.model.VaultFactory;
+import org.cryptomator.ui.model.VaultList;
+import org.cryptomator.ui.util.DialogBuilderUtil;
+import org.fxmisc.easybind.EasyBind;
+import org.fxmisc.easybind.Subscription;
+import org.fxmisc.easybind.monadic.MonadicBinding;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import static org.cryptomator.ui.util.DialogBuilderUtil.buildErrorDialog;
 
 @Singleton
 public class MainController implements ViewController {
@@ -129,11 +128,13 @@ public class MainController implements ViewController {
 		EasyBind.subscribe(areAllVaultsLocked, Platform::setImplicitExit);
 		autoUnlocker.unlockAllSilently();
 
-		EawtApplicationWrapper.getApplication().ifPresent(app -> {
-			app.setPreferencesHandler(() -> {
+		try {
+			Desktop.getDesktop().setPreferencesHandler(e -> {
 				Platform.runLater(this::toggleShowSettings);
 			});
-		});
+		} catch (UnsupportedOperationException e) {
+			LOG.info("Unable to setPreferencesHandler, probably not supported on this OS.");
+		}
 	}
 
 	@FXML
@@ -169,8 +170,10 @@ public class MainController implements ViewController {
 	@Override
 	public void initialize() {
 		vaultList.setItems(vaults);
+		vaultList.getSelectionModel().clearSelection();
 		vaultList.setOnKeyReleased(this::didPressKeyOnList);
 		vaultList.setCellFactory(this::createDirecoryListCell);
+		root.setOnKeyReleased(this::didPressKeyOnRoot);
 		activeController.set(viewControllerLoader.load("/fxml/welcome.fxml"));
 		selectedVault.bind(vaultList.getSelectionModel().selectedItemProperty());
 		removeVaultButton.disableProperty().bind(canEditSelectedVault.not());
@@ -191,6 +194,7 @@ public class MainController implements ViewController {
 	public void initStage(Stage stage) {
 		stage.setScene(new Scene(getRoot()));
 		stage.sizeToScene();
+		stage.setTitle(localization.getString("app.name")); // set once before bind to avoid display bugs with Linux window managers
 		stage.titleProperty().bind(windowTitle());
 		stage.setResizable(false);
 		loadFont("/css/ionicons.ttf");
@@ -200,9 +204,10 @@ public class MainController implements ViewController {
 			subs = subs.and(EasyBind.includeWhen(mainWindow.getScene().getRoot().getStyleClass(), INACTIVE_WINDOW_STYLE_CLASS, mainWindow.focusedProperty().not()));
 			Application.setUserAgentStylesheet(getClass().getResource("/css/mac_theme.css").toString());
 		} else if (SystemUtils.IS_OS_LINUX) {
+			stage.getIcons().add(new Image(getClass().getResourceAsStream("/window_icon_512.png")));
 			Application.setUserAgentStylesheet(getClass().getResource("/css/linux_theme.css").toString());
 		} else if (SystemUtils.IS_OS_WINDOWS) {
-			stage.getIcons().add(new Image(getClass().getResourceAsStream("/window_icon.png")));
+			stage.getIcons().add(new Image(getClass().getResourceAsStream("/window_icon_32.png")));
 			Application.setUserAgentStylesheet(getClass().getResource("/css/win_theme.css").toString());
 		}
 		exitUtil.initExitHandler(this::gracefulShutdown);
@@ -396,7 +401,7 @@ public class MainController implements ViewController {
 		} else if (newValue.isValidVaultDirectory() && upgradeStrategyForSelectedVault.isPresent()) {
 			this.showUpgradeView();
 		} else if (newValue.isValidVaultDirectory()) {
-			this.showUnlockView();
+			this.showUnlockView(UnlockController.State.UNLOCKING);
 		} else {
 			this.showInitializeView();
 		}
@@ -405,6 +410,24 @@ public class MainController implements ViewController {
 	private void didPressKeyOnList(KeyEvent e) {
 		if (e.getCode() == KeyCode.ENTER || e.getCode() == KeyCode.SPACE) {
 			activeController.get().focus();
+		}
+	}
+
+	private void didPressKeyOnRoot(KeyEvent event) {
+		if ((event.isMetaDown() || event.isControlDown()) && event.getCode().isDigitKey()) {
+			int digit = Integer.valueOf(event.getText());
+			switch (digit) {
+				case 0: {
+					vaultList.getSelectionModel().clearSelection();
+					showWelcomeView();
+					return;
+				}
+				default: {
+					vaultList.getSelectionModel().select(digit - 1);
+					activeController.get().focus();
+					return;
+				}
+			}
 		}
 	}
 
@@ -446,7 +469,7 @@ public class MainController implements ViewController {
 	}
 
 	public void didInitialize() {
-		showUnlockView();
+		showUnlockView(UnlockController.State.INITIALIZED);
 		activeController.get().focus();
 	}
 
@@ -458,13 +481,13 @@ public class MainController implements ViewController {
 	}
 
 	public void didUpgrade() {
-		showUnlockView();
+		showUnlockView(UnlockController.State.UPGRADED);
 		activeController.get().focus();
 	}
 
-	private void showUnlockView() {
+	private void showUnlockView(UnlockController.State state) {
 		final UnlockController ctrl = viewControllerLoader.load("/fxml/unlock.fxml");
-		ctrl.setVault(selectedVault.get());
+		ctrl.setVault(selectedVault.get(), state);
 		ctrl.setListener(this::didUnlock);
 		activeController.set(ctrl);
 	}
@@ -486,7 +509,7 @@ public class MainController implements ViewController {
 
 	public void didLock(UnlockedController ctrl) {
 		unlockedVaults.remove(ctrl.getVault());
-		showUnlockView();
+		showUnlockView(UnlockController.State.UNLOCKING);
 		activeController.get().focus();
 	}
 
@@ -499,7 +522,7 @@ public class MainController implements ViewController {
 	}
 
 	public void didChangePassword() {
-		showUnlockView();
+		showUnlockView(UnlockController.State.PASSWORD_CHANGED);
 		activeController.get().focus();
 	}
 

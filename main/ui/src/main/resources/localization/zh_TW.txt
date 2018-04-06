@@ -54,8 +54,6 @@ unlocked.ioGraph.yAxis.label = 傳輸量 (MiB/s)
 # settings.fxml
 settings.version.label = 版本 %s
 settings.checkForUpdates.label = 檢查更新
-settings.port.label = WebDAV 埠號 *
-settings.port.prompt = 0 \= 自動選擇
 settings.requiresRestartLabel = * Cryptomator 需要更新 
 # tray icon
 tray.menu.open = 打開
@@ -74,7 +72,6 @@ main.directoryList.remove.confirmation.header = 你真的想要移除這個檔�
 main.directoryList.remove.confirmation.content = 這個檔案庫只會從清單中移除。如果要永久刪除，請從檔案系統中刪除。
 upgrade.version3to4.msg = 這個檔案庫需要被轉移到新的格式。\n加密的資料夾名稱將會被更新。\n在進行之前，請確認同步已完成。
 upgrade.version3to4.err.io = 由於 I/O 的例外，轉移失敗。取得詳細資訊，請查看日誌檔。
-settings.prefGvfsScheme.label = WebDAV 格式
 # upgrade.fxml
 upgrade.confirmation.label = 是的，請確認同步已完成。
 unlock.label.savePassword = 儲存密碼
@@ -89,7 +86,6 @@ upgrade.version3to4.title = 檔案庫版本 3 到 4 升級
 upgrade.version4to5.title = 檔案庫版本 4 到 5 升級
 upgrade.version4to5.msg = 這個檔案庫需要被遷移到新的格式。\n加密的檔案將會被更新。\n在處理前，請確保同步已經完成。\n\n註記：所有檔案的更改日期將會被變更為目前處理的日期/時間。
 upgrade.version4to5.err.io = 由於 I/O 異常導致遷移失敗。詳細請見日誌檔。
-settings.port.apply = 套用
 unlock.label.mountAfterUnlock = 掛載磁碟
 unlock.label.revealAfterMount = 打開磁碟
 unlocked.lock.force.confirmation.title = %1$s 鎖定失敗
@@ -104,3 +100,15 @@ upgrade.version5toX.msg = 這個檔案庫需要轉移到新的格式。\n進行�
 main.createVault.nonEmptyDir.title = Creating vault failed
 main.createVault.nonEmptyDir.header = Chosen directory is not empty
 main.createVault.nonEmptyDir.content = The selected directory already contains files (possibly hidden). A vault can only be created in an empty directory.
+unlock.label.mountPath = Mount Path
+unlock.label.mountPathButton = Apply
+settings.webdav.port.label = WebDAV Port
+settings.webdav.port.prompt = 0 \= Choose automatically
+settings.webdav.port.apply = Apply
+settings.webdav.prefGvfsScheme.label = WebDAV Scheme
+settings.volume.label = Mount-Methode *
+settings.volume.webdav = WebDAV
+settings.volume.fuse = FUSE
+unlock.successLabel.vaultCreated = Vault was successfully created.
+unlock.successLabel.passwordChanged = Password was successfully changed.
+unlock.successLabel.upgraded = Cryptomator was successfully upgraded.
