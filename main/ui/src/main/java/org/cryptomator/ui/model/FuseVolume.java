@@ -2,6 +2,7 @@ package org.cryptomator.ui.model;
 
 import java.io.IOException;
 import java.nio.file.DirectoryNotEmptyException;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -70,8 +71,16 @@ public class FuseVolume implements Volume {
 
 	private String createDirIfNotExist(String prefix, String dirName) throws IOException {
 		Path p = Paths.get(prefix, dirName + vaultSettings.getId());
-		if (Files.isDirectory(p) && !Files.newDirectoryStream(p).iterator().hasNext()) {
-			throw new DirectoryNotEmptyException("Mount point is not empty.");
+		if (Files.isDirectory(p)) {
+			try(DirectoryStream<Path> emptyCheck = Files.newDirectoryStream(p)){
+				if(emptyCheck.iterator().hasNext()){
+					throw new DirectoryNotEmptyException("Mount point is not empty.");
+				}
+				else {
+					LOG.info("Directory already exists and is empty. Using it as mount point.");
+					return p.toString();
+				}
+			}
 		} else {
 			Files.createDirectory(p);
 			return p.toString();
