@@ -36,7 +36,7 @@ public class WebDavVolume implements Volume {
 	}
 
 	@Override
-	public void prepare(CryptoFileSystem fs) {
+	public void mount(CryptoFileSystem fs) throws CommandFailedException {
 		if (server == null) {
 			server = serverProvider.get();
 		}
@@ -45,10 +45,10 @@ public class WebDavVolume implements Volume {
 		}
 		servlet = server.createWebDavServlet(fs.getPath("/"), vaultSettings.getId() + "/" + vaultSettings.mountName().get());
 		servlet.start();
+		mount();
 	}
 
-	@Override
-	public void mount() throws CommandFailedException {
+	private void mount() throws CommandFailedException {
 		if (servlet == null) {
 			throw new IllegalStateException("Mounting requires unlocked WebDAV servlet.");
 		}
@@ -82,11 +82,17 @@ public class WebDavVolume implements Volume {
 		} catch (Mounter.CommandFailedException e) {
 			throw new CommandFailedException(e);
 		}
+		cleanup();
 	}
 
 	@Override
-	public synchronized void unmountForced() {
-		mount.forced();
+	public synchronized void unmountForced() throws CommandFailedException {
+		try {
+			mount.forced().orElseThrow(IllegalStateException::new).unmount();
+		} catch (Mounter.CommandFailedException e) {
+			throw new CommandFailedException(e);
+		}
+		cleanup();
 	}
 
 	private String getLocalhostAliasOrNull() {
@@ -102,28 +108,19 @@ public class WebDavVolume implements Volume {
 		}
 	}
 
-	@Override
-	public void stop() {
+	private void cleanup() {
 		if (servlet != null) {
 			servlet.stop();
 		}
 
 	}
 
-	public synchronized String getMountUri() {
-		return servlet.getServletRootUri().toString() + "/";
-	}
-
-	/**
-	 * TODO: what to check wether it is implemented?
-	 *
-	 * @return
-	 */
 	@Override
 	public boolean isSupported() {
 		return true;
 	}
 
+	@Override
 	public boolean supportsForcedUnmount() {
 		return mount != null && mount.forced().isPresent();
 	}

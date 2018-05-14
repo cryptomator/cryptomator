@@ -20,16 +20,6 @@ import java.util.function.Predicate;
 
 import javax.inject.Inject;
 
-import org.cryptomator.common.LazyInitializer;
-import org.cryptomator.common.settings.Settings;
-import org.cryptomator.common.settings.VaultSettings;
-import org.cryptomator.cryptofs.CryptoFileSystem;
-import org.cryptomator.cryptofs.CryptoFileSystemProperties;
-import org.cryptomator.cryptofs.CryptoFileSystemProvider;
-import org.cryptomator.cryptolib.api.CryptoException;
-import org.cryptomator.cryptolib.api.InvalidPassphraseException;
-import org.cryptomator.ui.model.VaultModule.PerVault;
-
 import javafx.application.Platform;
 import javafx.beans.Observable;
 import javafx.beans.binding.Binding;
@@ -39,6 +29,15 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.StringProperty;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.common.LazyInitializer;
+import org.cryptomator.common.settings.Settings;
+import org.cryptomator.common.settings.VaultSettings;
+import org.cryptomator.cryptofs.CryptoFileSystem;
+import org.cryptomator.cryptofs.CryptoFileSystemProperties;
+import org.cryptomator.cryptofs.CryptoFileSystemProvider;
+import org.cryptomator.cryptolib.api.CryptoException;
+import org.cryptomator.cryptolib.api.InvalidPassphraseException;
+import org.cryptomator.ui.model.VaultModule.PerVault;
 import org.fxmisc.easybind.EasyBind;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,7 +58,7 @@ public class Vault {
 	private Volume volume;
 
 	public enum State {
-		LOCKED, UNLOCKED, MOUNTING, MOUNTED, UNMOUNTING
+		LOCKED, PROCESSING, UNLOCKED
 	}
 
 	@Inject
@@ -98,51 +97,33 @@ public class Vault {
 		CryptoFileSystemProvider.changePassphrase(getPath(), MASTERKEY_FILENAME, oldPassphrase, newPassphrase);
 	}
 
-	public synchronized void unlock(CharSequence passphrase) throws CryptoException, IOException {
+	public synchronized void unlock(CharSequence passphrase) throws CryptoException, IOException, CommandFailedException {
+		Platform.runLater(() -> {
+			state.set(State.PROCESSING);
+		});
 		CryptoFileSystem fs = getCryptoFileSystem(passphrase);
-		volume.prepare(fs);
+		volume.mount(fs);
 		Platform.runLater(() -> {
 			state.set(State.UNLOCKED);
 		});
 	}
 
-	public synchronized void mount() throws CommandFailedException {
+	public synchronized void lock(boolean forced) throws CommandFailedException {
 		Platform.runLater(() -> {
-			state.set(State.MOUNTING);
-		});
-		volume.mount();
-		Platform.runLater(() -> {
-			state.set(State.MOUNTED);
-		});
-	}
-
-	public synchronized void unmountForced() throws CommandFailedException {
-		unmount(true);
-	}
-
-	public synchronized void unmount() throws CommandFailedException {
-		unmount(false);
-	}
-
-	private synchronized void unmount(boolean forced) throws CommandFailedException {
-		Platform.runLater(() -> {
-			state.set(State.UNMOUNTING);
+			state.set(State.PROCESSING);
 		});
 		if (forced && volume.supportsForcedUnmount()) {
 			volume.unmountForced();
 		} else {
 			volume.unmount();
 		}
-		Platform.runLater(() -> {
-			state.set(State.UNLOCKED);
-		});
-	}
-
-	public synchronized void lock() throws IOException {
-		volume.stop();
 		CryptoFileSystem fs = cryptoFileSystem.getAndSet(null);
 		if (fs != null) {
-			fs.close();
+			try {
+				fs.close();
+			} catch (IOException e) {
+				LOG.error("Error closing file system.", e);
+			}
 		}
 		Platform.runLater(() -> {
 			state.set(State.LOCKED);
@@ -154,22 +135,17 @@ public class Vault {
 	 */
 	public void prepareForShutdown() {
 		try {
-			unmount();
+			lock(false);
 		} catch (CommandFailedException e) {
 			if (volume.supportsForcedUnmount()) {
 				try {
-					unmountForced();
+					lock(true);
 				} catch (CommandFailedException e1) {
-					LOG.warn("Failed to force unmount vault.");
+					LOG.warn("Failed to force lock vault.", e1);
 				}
 			} else {
-				LOG.warn("Failed to gracefully unmount vault.");
+				LOG.warn("Failed to gracefully lock vault.", e);
 			}
-		}
-		try {
-			lock();
-		} catch (Exception e) {
-			LOG.warn("Failed to lock vault.");
 		}
 	}
 
@@ -287,10 +263,6 @@ public class Vault {
 		} else {
 			vaultSettings.winDriveLetter().set(String.valueOf(winDriveLetter));
 		}
-	}
-
-	public String getFilesystemRootUrl() {
-		return volume.getMountUri();
 	}
 
 	public String getId() {

@@ -73,23 +73,11 @@ public class AutoUnlocker {
 		}
 		try {
 			vault.unlock(CharBuffer.wrap(storedPw));
-			mountSilently(vault);
-		} catch (IOException | CryptoException e) {
+			revealSilently(vault);
+		} catch (IOException | CryptoException | CommandFailedException e) {
 			LOG.error("Auto unlock failed.", e);
 		} finally {
 			Arrays.fill(storedPw, ' ');
-		}
-	}
-
-	private void mountSilently(Vault unlockedVault) {
-		if (!unlockedVault.getVaultSettings().mountAfterUnlock().get()) {
-			return;
-		}
-		try {
-			unlockedVault.mount();
-			revealSilently(unlockedVault);
-		} catch (CommandFailedException e) {
-			LOG.error("Auto unlock succeded, but mounting the drive failed.", e);
 		}
 	}
 

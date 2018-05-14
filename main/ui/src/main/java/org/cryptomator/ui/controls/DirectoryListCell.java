@@ -68,9 +68,7 @@ public class DirectoryListCell extends DraggableListCell<Vault> {
 		}
 		switch (state) {
 		case UNLOCKED:
-		case MOUNTED:
-		case MOUNTING:
-		case UNMOUNTING:
+		case PROCESSING:
 			return "\uf09c";
 		case LOCKED:
 		default:
@@ -84,9 +82,7 @@ public class DirectoryListCell extends DraggableListCell<Vault> {
 		}
 		switch (state) {
 		case UNLOCKED:
-		case MOUNTED:
-		case MOUNTING:
-		case UNMOUNTING:
+		case PROCESSING:
 			return UNLOCKED_ICON_COLOR;
 		case LOCKED:
 		default:

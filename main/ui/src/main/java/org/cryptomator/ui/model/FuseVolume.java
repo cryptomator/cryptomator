@@ -31,7 +31,6 @@ public class FuseVolume implements Volume {
 	private static final String DEFAULT_MOUNTROOTPATH_LINUX = System.getProperty("user.home") + "/.Cryptomator";
 
 	private final VaultSettings vaultSettings;
-	private final WindowsDriveLetters windowsDriveLetters;
 
 	private Mount fuseMnt;
 	private CryptoFileSystem cfs;
@@ -39,26 +38,16 @@ public class FuseVolume implements Volume {
 	private boolean extraDirCreated;
 
 	@Inject
-	public FuseVolume(VaultSettings vaultSettings, WindowsDriveLetters windowsDriveLetters) {
+	public FuseVolume(VaultSettings vaultSettings) {
 		this.vaultSettings = vaultSettings;
-		this.windowsDriveLetters = windowsDriveLetters;
 		this.extraDirCreated = false;
 	}
 
 	@Override
-	public void prepare(CryptoFileSystem fs) throws IOException, FuseNotSupportedException {
+	public void mount(CryptoFileSystem fs) throws IOException, FuseNotSupportedException, CommandFailedException {
 		this.cfs = fs;
 		String mountPath;
-		if (SystemUtils.IS_OS_WINDOWS) {
-			//windows case
-			if (vaultSettings.winDriveLetter().get() != null) {
-				// specific drive letter selected
-				mountPath = vaultSettings.winDriveLetter().get() + ":\\";
-			} else {
-				// auto assign drive letter
-				mountPath = windowsDriveLetters.getAvailableDriveLetters().iterator().next() + ":\\";
-			}
-		} else if (vaultSettings.usesIndividualMountPath().get()) {
+		if (vaultSettings.usesIndividualMountPath().get()) {
 			//specific path given
 			mountPath = vaultSettings.individualMountPath().get();
 		} else {
@@ -67,6 +56,7 @@ public class FuseVolume implements Volume {
 			extraDirCreated = true;
 		}
 		this.mountPath = Paths.get(mountPath).toAbsolutePath();
+		mount();
 	}
 
 	private String createDirIfNotExist(String prefix, String dirName) throws IOException {
@@ -87,8 +77,7 @@ public class FuseVolume implements Volume {
 		}
 	}
 
-	@Override
-	public void mount() throws CommandFailedException {
+	private void mount() throws CommandFailedException {
 		try {
 			EnvironmentVariables envVars = EnvironmentVariables.create()
 					.withMountName(vaultSettings.mountName().getValue())
@@ -117,15 +106,10 @@ public class FuseVolume implements Volume {
 		} catch (org.cryptomator.frontend.fuse.mount.CommandFailedException e) {
 			throw new CommandFailedException(e);
 		}
+		cleanup();
 	}
 
-	@Override
-	public synchronized void unmountForced() throws CommandFailedException {
-		unmount();
-	}
-
-	@Override
-	public void stop() {
+	private void cleanup() {
 		if (extraDirCreated) {
 			try {
 				Files.delete(mountPath);
@@ -136,18 +120,8 @@ public class FuseVolume implements Volume {
 	}
 
 	@Override
-	public String getMountUri() {
-		return "";
-	}
-
-	@Override
 	public boolean isSupported() {
-		return FuseMountFactory.isFuseSupported();
-	}
-
-	@Override
-	public boolean supportsForcedUnmount() {
-		return false;
+		return (SystemUtils.IS_OS_MAC_OSX || SystemUtils.IS_OS_LINUX) && FuseMountFactory.isFuseSupported();
 	}
 
 }

@@ -28,12 +28,6 @@
 	<fx:define>
 		<ContextMenu fx:id="moreOptionsMenu">
 			<items>
-				<MenuItem fx:id="mountVaultMenuItem" text="%unlocked.moreOptions.mount" onAction="#didClickMountVault">
-					<graphic><Label text="&#xf139;" styleClass="ionicons"/></graphic>
-				</MenuItem>
-				<MenuItem fx:id="unmountVaultMenuItem" text="%unlocked.moreOptions.unmount" onAction="#didClickUnmountVault">
-					<graphic><Label text="&#xf131;" styleClass="ionicons"/></graphic>
-				</MenuItem>
 				<MenuItem fx:id="revealVaultMenuItem" text="%unlocked.moreOptions.reveal" onAction="#didClickRevealVault">
 					<graphic><Label text="&#xf133;" styleClass="ionicons"/></graphic>
 				</MenuItem>

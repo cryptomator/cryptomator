@@ -108,9 +108,6 @@ public class UnlockController implements ViewController {
 	private CheckBox savePassword;
 
 	@FXML
-	private CheckBox mountAfterUnlock;
-
-	@FXML
 	private TextField mountName;
 
 	@FXML
@@ -159,8 +156,6 @@ public class UnlockController implements ViewController {
 	public void initialize() {
 		advancedOptions.managedProperty().bind(advancedOptions.visibleProperty());
 		unlockButton.disableProperty().bind(passwordField.textProperty().isEmpty());
-		mountName.disableProperty().bind(mountAfterUnlock.selectedProperty().not());
-		revealAfterMount.disableProperty().bind(mountAfterUnlock.selectedProperty().not());
 		mountName.addEventFilter(KeyEvent.KEY_TYPED, this::filterAlphanumericKeyEvents);
 		mountName.textProperty().addListener(this::mountNameDidChange);
 		savePassword.setDisable(!keychainAccess.isPresent());
@@ -250,12 +245,10 @@ public class UnlockController implements ViewController {
 		}
 		VaultSettings vaultSettings = vault.getVaultSettings();
 		unlockAfterStartup.setSelected(savePassword.isSelected() && vaultSettings.unlockAfterStartup().get());
-		mountAfterUnlock.setSelected(vaultSettings.mountAfterUnlock().get());
 		revealAfterMount.setSelected(vaultSettings.revealAfterMount().get());
 		useOwnMountPath.setSelected(vaultSettings.usesIndividualMountPath().get());
 
 		vaultSubs = vaultSubs.and(EasyBind.subscribe(unlockAfterStartup.selectedProperty(), vaultSettings.unlockAfterStartup()::set));
-		vaultSubs = vaultSubs.and(EasyBind.subscribe(mountAfterUnlock.selectedProperty(), vaultSettings.mountAfterUnlock()::set));
 		vaultSubs = vaultSubs.and(EasyBind.subscribe(revealAfterMount.selectedProperty(), vaultSettings.revealAfterMount()::set));
 		vaultSubs = vaultSubs.and(EasyBind.subscribe(useOwnMountPath.selectedProperty(), vaultSettings.usesIndividualMountPath()::set));
 

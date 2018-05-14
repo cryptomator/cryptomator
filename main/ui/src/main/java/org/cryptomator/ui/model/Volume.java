@@ -9,9 +9,18 @@ import java.io.IOException;
  */
 public interface Volume {
 
-	void prepare(CryptoFileSystem fs) throws IOException;
+	/**
+	 * Checks in constant time whether this volume type is supported on the system running Cryptomator.
+	 * @return true if this volume can be mounted
+	 */
+	boolean isSupported();
 
-	void mount() throws CommandFailedException;
+	/**
+	 *
+	 * @param fs
+	 * @throws IOException
+	 */
+	void mount(CryptoFileSystem fs) throws IOException, CommandFailedException;
 
 	default void reveal() throws CommandFailedException {
 		throw new CommandFailedException("Not implemented.");
@@ -19,20 +28,14 @@ public interface Volume {
 
 	void unmount() throws CommandFailedException;
 
-	default void unmountForced() throws CommandFailedException {
-		throw new CommandFailedException("Operation not supported.");
-	}
-
-	void stop();
-
-	String getMountUri();
-
-	default boolean isSupported() {
-		return false;
-	}
+	// optional forced unmounting:
 
 	default boolean supportsForcedUnmount() {
 		return false;
+	}
+
+	default void unmountForced() throws CommandFailedException {
+		throw new CommandFailedException("Operation not supported.");
 	}
 
 }

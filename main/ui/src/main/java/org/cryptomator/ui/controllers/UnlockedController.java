@@ -84,15 +84,6 @@ public class UnlockedController implements ViewController {
 	private ContextMenu moreOptionsMenu;
 
 	@FXML
-	private MenuItem mountVaultMenuItem;
-
-	@FXML
-	private MenuItem unmountVaultMenuItem;
-
-	@FXML
-	private MenuItem revealVaultMenuItem;
-
-	@FXML
 	private VBox root;
 
 	@Inject
@@ -103,10 +94,6 @@ public class UnlockedController implements ViewController {
 
 	@Override
 	public void initialize() {
-		mountVaultMenuItem.disableProperty().bind(vaultState.isEqualTo(Vault.State.UNLOCKED).not()); // enable when unlocked
-		unmountVaultMenuItem.disableProperty().bind(vaultState.isEqualTo(Vault.State.MOUNTED).not()); // enable when mounted
-		revealVaultMenuItem.disableProperty().bind(vaultState.isEqualTo(Vault.State.MOUNTED).not()); // enable when mounted
-
 		EasyBind.subscribe(vault, this::vaultChanged);
 		EasyBind.subscribe(moreOptionsMenu.showingProperty(), moreOptionsButton::setSelected);
 	}
@@ -121,10 +108,6 @@ public class UnlockedController implements ViewController {
 			return;
 		}
 
-		if (newVault.getState() == Vault.State.UNLOCKED && newVault.getVaultSettings().mountAfterUnlock().get()) {
-			mountVault(newVault);
-		}
-
 		// (re)start throughput statistics:
 		stopIoSampling();
 		startIoSampling();
@@ -132,74 +115,21 @@ public class UnlockedController implements ViewController {
 
 	@FXML
 	private void didClickLockVault(ActionEvent event) {
-		regularUnmountVault(this::lockVault);
+		regularLockVault(this::lockVaultSucceeded);
 	}
 
-	private void lockVault() {
-		try {
-			vault.get().lock();
-		} catch (ServerLifecycleException | IOException e) {
-			LOG.error("Lock failed", e);
-		}
+	private void lockVaultSucceeded() {
 		listener.ifPresent(listener -> listener.didLock(this));
 	}
 
-	@FXML
-	private void didClickMoreOptions(ActionEvent event) {
-		if (moreOptionsMenu.isShowing()) {
-			moreOptionsMenu.hide();
-		} else {
-			moreOptionsMenu.setAnchorLocation(AnchorLocation.CONTENT_TOP_RIGHT);
-			moreOptionsMenu.show(moreOptionsButton, Side.BOTTOM, moreOptionsButton.getWidth(), 0.0);
-		}
-	}
-
-	@FXML
-	public void didClickMountVault(ActionEvent event) {
-		mountVault(vault.get());
-	}
-
-	private void mountVault(Vault vault) {
+	private void regularLockVault(Runnable onSuccess) {
 		asyncTaskService.asyncTaskOf(() -> {
-			vault.mount();
-		}).onSuccess(() -> {
-			LOG.trace("Mount succeeded.");
-			messageLabel.setText(null);
-			if (vault.getVaultSettings().revealAfterMount().get()) {
-				revealVault(vault);
-			}
-		}).onError(CommandFailedException.class, e -> {
-			LOG.error("Mount failed.", e);
-			// TODO Markus Kreusch #393: hyperlink auf FAQ oder sowas?
-			messageLabel.setText(localization.getString("unlocked.label.mountFailed"));
-		}).run();
-	}
-
-	@FXML
-	public void didClickUnmountVault(ActionEvent event) {
-		regularUnmountVault(Runnables.doNothing());
-	}
-
-	private void regularUnmountVault(Runnable onSuccess) {
-		asyncTaskService.asyncTaskOf(() -> {
-			vault.get().unmount();
+			vault.get().lock(false);
 		}).onSuccess(() -> {
 			LOG.trace("Regular unmount succeeded.");
 			onSuccess.run();
 		}).onError(Exception.class, e -> {
 			onRegularUnmountVaultFailed(e, onSuccess);
-		}).run();
-	}
-
-	private void forcedUnmountVault(Runnable onSuccess) {
-		asyncTaskService.asyncTaskOf(() -> {
-			vault.get().unmountForced();
-		}).onSuccess(() -> {
-			LOG.trace("Forced unmount succeeded.");
-			onSuccess.run();
-		}).onError(Exception.class, e -> {
-			LOG.error("Forced unmount failed.", e);
-			messageLabel.setText(localization.getString("unlocked.label.unmountFailed"));
 		}).run();
 	}
 
@@ -214,13 +144,35 @@ public class UnlockedController implements ViewController {
 
 			Optional<ButtonType> choice = confirmDialog.showAndWait();
 			if (ButtonType.YES.equals(choice.get())) {
-				forcedUnmountVault(onSuccess);
+				forcedLockVault(onSuccess);
 			} else {
 				LOG.trace("Unmount cancelled.", e);
 			}
 		} else {
 			LOG.error("Regular unmount failed.", e);
 			messageLabel.setText(localization.getString("unlocked.label.unmountFailed"));
+		}
+	}
+
+	private void forcedLockVault(Runnable onSuccess) {
+		asyncTaskService.asyncTaskOf(() -> {
+			vault.get().lock(true);
+		}).onSuccess(() -> {
+			LOG.trace("Forced unmount succeeded.");
+			onSuccess.run();
+		}).onError(Exception.class, e -> {
+			LOG.error("Forced unmount failed.", e);
+			messageLabel.setText(localization.getString("unlocked.label.unmountFailed"));
+		}).run();
+	}
+
+	@FXML
+	private void didClickMoreOptions(ActionEvent event) {
+		if (moreOptionsMenu.isShowing()) {
+			moreOptionsMenu.hide();
+		} else {
+			moreOptionsMenu.setAnchorLocation(AnchorLocation.CONTENT_TOP_RIGHT);
+			moreOptionsMenu.show(moreOptionsButton, Side.BOTTOM, moreOptionsButton.getWidth(), 0.0);
 		}
 	}
 
