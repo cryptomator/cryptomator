@@ -103,7 +103,6 @@ unlocked.button.lock=Lock Vault
 unlocked.moreOptions.mount=Mount Drive
 unlocked.moreOptions.unmount=Eject Drive
 unlocked.moreOptions.reveal=Reveal Drive
-unlocked.moreOptions.copyUrl=Copy Filesystem URL
 unlocked.label.mountFailed=Connecting drive failed
 unlocked.label.revealFailed=Command failed
 unlocked.label.unmountFailed=Ejecting drive failed

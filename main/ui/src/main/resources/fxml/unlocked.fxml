@@ -37,9 +37,6 @@
 				<MenuItem fx:id="revealVaultMenuItem" text="%unlocked.moreOptions.reveal" onAction="#didClickRevealVault">
 					<graphic><Label text="&#xf133;" styleClass="ionicons"/></graphic>
 				</MenuItem>
-				<MenuItem text="%unlocked.moreOptions.copyUrl" onAction="#didClickCopyUrl">
-					<graphic><Label text="&#xf376;" styleClass="ionicons"/></graphic>
-				</MenuItem>
 			</items>
 		</ContextMenu>
 	</fx:define>
