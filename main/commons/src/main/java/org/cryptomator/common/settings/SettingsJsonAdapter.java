@@ -5,17 +5,16 @@
  *******************************************************************************/
 package org.cryptomator.common.settings;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 
@@ -28,6 +27,7 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 		out.beginObject();
 		out.name("directories");
 		writeVaultSettingsArray(out, value.getDirectories());
+		out.name("askedForUpdateCheck").value(value.askedForUpdateCheck().get());
 		out.name("checkForUpdatesEnabled").value(value.checkForUpdates().get());
 		out.name("port").value(value.port().get());
 		out.name("numTrayNotifications").value(value.numTrayNotifications().get());
@@ -55,6 +55,9 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 			switch (name) {
 				case "directories":
 					settings.getDirectories().addAll(readVaultSettingsArray(in));
+					break;
+				case "askedForUpdateCheck":
+					settings.askedForUpdateCheck().set(in.nextBoolean());
 					break;
 				case "checkForUpdatesEnabled":
 					settings.checkForUpdates().set(in.nextBoolean());
