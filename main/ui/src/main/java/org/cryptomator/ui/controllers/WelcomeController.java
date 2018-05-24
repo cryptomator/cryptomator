@@ -2,24 +2,11 @@
  * Copyright (c) 2014, 2017 Sebastian Stenzel
  * All rights reserved.
  * This program and the accompanying materials are made available under the terms of the accompanying LICENSE file.
- * 
+ *
  * Contributors:
  *     Sebastian Stenzel - initial API and implementation
  ******************************************************************************/
 package org.cryptomator.ui.controllers;
-
-import java.net.URI;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.time.Duration;
-import java.util.Comparator;
-import java.util.Map;
-import java.util.Optional;
-import java.util.ResourceBundle;
-
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Singleton;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -30,6 +17,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.Parent;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
@@ -43,6 +31,21 @@ import org.cryptomator.ui.l10n.Localization;
 import org.cryptomator.ui.util.AsyncTaskService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
+import java.net.URI;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.util.Comparator;
+import java.util.Map;
+import java.util.Optional;
+import java.util.ResourceBundle;
+import java.util.concurrent.TimeUnit;
+
+import static org.cryptomator.ui.util.DialogBuilderUtil.buildYesNoDialog;
 
 @Singleton
 public class WelcomeController implements ViewController {
@@ -58,7 +61,7 @@ public class WelcomeController implements ViewController {
 
 	@Inject
 	public WelcomeController(Application app, @Named("applicationVersion") Optional<String> applicationVersion, Localization localization, Settings settings, @Named("SemVer") Comparator<String> semVerComparator,
-			AsyncTaskService asyncTaskService) {
+							 AsyncTaskService asyncTaskService) {
 		this.app = app;
 		this.applicationVersion = applicationVersion;
 		this.localization = localization;
@@ -86,6 +89,8 @@ public class WelcomeController implements ViewController {
 	public void initialize(URL location, ResourceBundle resources) {
 		if (areUpdatesManagedExternally()) {
 			checkForUpdatesContainer.setVisible(false);
+		} else if (!settings.askedForUpdateCheck().get()) {
+			this.askForUpdateCheck();
 		} else if (settings.checkForUpdates().get()) {
 			this.checkForUpdates();
 		}
@@ -102,6 +107,23 @@ public class WelcomeController implements ViewController {
 
 	private boolean areUpdatesManagedExternally() {
 		return Boolean.parseBoolean(System.getProperty("cryptomator.updatesManagedExternally", "false"));
+	}
+
+	private void askForUpdateCheck() {
+		asyncTaskService.runDelayedOnUiThread(1, TimeUnit.SECONDS, () -> {
+			Optional<ButtonType> result = buildYesNoDialog(
+					localization.getString("welcome.askForUpdateCheck.dialog.title"),
+					localization.getString("welcome.askForUpdateCheck.dialog.header"),
+					localization.getString("welcome.askForUpdateCheck.dialog.content"),
+					ButtonType.YES).showAndWait();
+			if (result.isPresent()) {
+				settings.askedForUpdateCheck().set(true);
+				settings.checkForUpdates().set(result.get().equals(ButtonType.YES));
+			}
+			if (settings.checkForUpdates().get()) {
+				this.checkForUpdates();
+			}
+		});
 	}
 
 	private void checkForUpdates() {

@@ -11,6 +11,8 @@ package org.cryptomator.ui;
 import java.net.InetSocketAddress;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 import javax.inject.Named;
@@ -32,6 +34,8 @@ import org.fxmisc.easybind.EasyBind;
 @Module(includes = {ViewControllerModule.class, CommonsModule.class, KeychainModule.class}, subcomponents = {VaultComponent.class})
 public class UiModule {
 
+	private static final int NUM_BACKGROUND_THREADS = 4;
+
 	@Provides
 	@Singleton
 	Settings provideSettings(SettingsProvider settingsProvider) {
@@ -40,10 +44,22 @@ public class UiModule {
 
 	@Provides
 	@Singleton
-	ExecutorService provideExecutorService(@Named("shutdownTaskScheduler") Consumer<Runnable> shutdownTaskScheduler) {
-		ExecutorService executorService = Executors.newCachedThreadPool();
+	ScheduledExecutorService provideScheduledExecutorService(@Named("shutdownTaskScheduler") Consumer<Runnable> shutdownTaskScheduler) {
+		final AtomicInteger threadNumber = new AtomicInteger(1);
+		ScheduledExecutorService executorService = Executors.newScheduledThreadPool(NUM_BACKGROUND_THREADS, r -> {
+			Thread t = new Thread(r);
+			t.setName("Background Thread " + threadNumber.getAndIncrement());
+			t.setDaemon(true);
+			return t;
+		});
 		shutdownTaskScheduler.accept(executorService::shutdown);
 		return executorService;
+	}
+
+	@Provides
+	@Singleton
+	ExecutorService provideExecutorService(ScheduledExecutorService executorService) {
+		return executorService; // alias
 	}
 
 	@Provides

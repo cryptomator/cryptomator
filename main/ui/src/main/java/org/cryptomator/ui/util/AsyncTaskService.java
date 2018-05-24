@@ -7,34 +7,37 @@ package org.cryptomator.ui.util;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import javafx.application.Platform;
 import org.cryptomator.common.ConsumerThrowingException;
 import org.cryptomator.common.RunnableThrowingException;
 import org.cryptomator.common.SupplierThrowingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javafx.application.Platform;
+import static java.util.Objects.requireNonNull;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 @Singleton
 public class AsyncTaskService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(AsyncTaskService.class);
 
-	private final ExecutorService executor;
+	private final ScheduledExecutorService executor;
 
 	@Inject
-	public AsyncTaskService(ExecutorService executor) {
+	public AsyncTaskService(ScheduledExecutorService executor) {
 		this.executor = executor;
 	}
 
 	/**
 	 * Creates a new async task
-	 * 
+	 *
 	 * @param task Tasks to be invoked in a background thread.
 	 * @return The async task
 	 */
@@ -45,9 +48,13 @@ public class AsyncTaskService {
 		});
 	}
 
+	public void runDelayedOnUiThread(long duration, TimeUnit unit, RunnableThrowingException<?> task) {
+		asyncTaskOf(() -> null).onSuccess(task).runDelayedBy(duration, unit);
+	}
+
 	/**
 	 * Creates a new async task
-	 * 
+	 *
 	 * @param task Tasks to be invoked in a background thread.
 	 * @return The async task
 	 */
@@ -100,8 +107,17 @@ public class AsyncTaskService {
 
 		@Override
 		public void run() {
+			runDelayedBy(0, MILLISECONDS);
+		}
+
+		@Override
+		public void runDelayedBy(long duration, TimeUnit unit) {
+			requireNonNull(unit, "unit must not be null");
+			if (duration < 0) {
+				throw new IllegalArgumentException("duration must not be negative");
+			}
 			errorHandlers.add(ErrorHandler.LOGGING_HANDLER);
-			executor.execute(() -> logExceptions(() -> {
+			executor.schedule(() -> logExceptions(() -> {
 				try {
 					ResultType result = task.get();
 					Platform.runLater(() -> {
@@ -117,7 +133,7 @@ public class AsyncTaskService {
 				} finally {
 					Platform.runLater(toRunnableLoggingException(finallyHandler));
 				}
-			}));
+			}), duration, unit);
 		}
 
 		private ErrorHandler<Throwable> errorHandlerFor(Throwable e) {
@@ -214,6 +230,12 @@ public class AsyncTaskService {
 		 */
 		@Override
 		void run();
+
+		/**
+		 * Starts the async task delayed by {@code duration unit}
+		 */
+		void runDelayedBy(long duration, TimeUnit unit);
+
 	}
 
 }

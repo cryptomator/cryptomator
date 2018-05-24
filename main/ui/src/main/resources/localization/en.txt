@@ -23,6 +23,9 @@ main.createVault.nonEmptyDir.content=The selected directory already contains fil
 # welcome.fxml
 welcome.checkForUpdates.label.currentlyChecking=Checking for Updates...
 welcome.newVersionMessage=Version %1$s can be downloaded.\nThis is %2$s.
+welcome.askForUpdateCheck.dialog.title=Update check
+welcome.askForUpdateCheck.dialog.header=Enable the integrated update check?
+welcome.askForUpdateCheck.dialog.content=To check for updates, Cryptomator will fetch the current version from the Cryptomator servers and display a hint to you if a newer version is available.\n\nWe recommend to enable the update check to always be sure you have the newest version of Cryptomator, with all security patches, installed. If you do not enable the update check you may check and download the current version from https://cryptomator.org/downloads/.\n\nYou can change this at any time from within the settings.
 
 # initialize.fxml
 initialize.label.password=Password
