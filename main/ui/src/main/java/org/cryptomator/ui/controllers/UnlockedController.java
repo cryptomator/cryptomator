@@ -8,24 +8,9 @@
  ******************************************************************************/
 package org.cryptomator.ui.controllers;
 
-import static java.lang.String.format;
-
-import java.io.IOException;
 import java.util.Optional;
 
 import javax.inject.Inject;
-
-import org.cryptomator.frontend.webdav.ServerLifecycleException;
-import org.cryptomator.frontend.webdav.mount.Mounter.CommandFailedException;
-import org.cryptomator.ui.l10n.Localization;
-import org.cryptomator.ui.model.Vault;
-import org.cryptomator.ui.util.AsyncTaskService;
-import org.cryptomator.ui.util.DialogBuilderUtil;
-import org.fxmisc.easybind.EasyBind;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.common.util.concurrent.Runnables;
 
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
@@ -46,13 +31,20 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
-import javafx.scene.control.MenuItem;
 import javafx.scene.control.ToggleButton;
-import javafx.scene.input.Clipboard;
-import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.VBox;
 import javafx.stage.PopupWindow.AnchorLocation;
 import javafx.util.Duration;
+import org.cryptomator.frontend.webdav.mount.Mounter.CommandFailedException;
+import org.cryptomator.ui.l10n.Localization;
+import org.cryptomator.ui.model.Vault;
+import org.cryptomator.ui.util.AsyncTaskService;
+import org.cryptomator.ui.util.DialogBuilderUtil;
+import org.fxmisc.easybind.EasyBind;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import static java.lang.String.format;
 
 public class UnlockedController implements ViewController {
 
@@ -181,7 +173,7 @@ public class UnlockedController implements ViewController {
 		revealVault(vault.get());
 	}
 
-	private void revealVault(Vault vault) {
+	void revealVault(Vault vault) {
 		asyncTaskService.asyncTaskOf(() -> {
 			vault.reveal();
 		}).onSuccess(() -> {

@@ -395,7 +395,7 @@ public class MainController implements ViewController {
 			return;
 		}
 		if (newValue.getState() != Vault.State.LOCKED) {
-			this.showUnlockedView(newValue);
+			this.showUnlockedView(newValue, false);
 		} else if (!newValue.doesVaultDirectoryExist()) {
 			this.showNotFoundView();
 		} else if (newValue.isValidVaultDirectory() && upgradeStrategyForSelectedVault.isPresent()) {
@@ -494,16 +494,17 @@ public class MainController implements ViewController {
 
 	public void didUnlock(Vault vault) {
 		if (vault.equals(selectedVault.getValue())) {
-			this.showUnlockedView(vault);
+			this.showUnlockedView(vault, true);
 		}
 	}
 
-	private void showUnlockedView(Vault vault) {
-		final UnlockedController ctrl = unlockedVaults.computeIfAbsent(vault, k -> {
-			return viewControllerLoader.load("/fxml/unlocked.fxml");
-		});
+	private void showUnlockedView(Vault vault, boolean reveal) {
+		final UnlockedController ctrl = unlockedVaults.computeIfAbsent(vault, k -> viewControllerLoader.load("/fxml/unlocked.fxml"));
 		ctrl.setVault(vault);
 		ctrl.setListener(this::didLock);
+		if (reveal) {
+			ctrl.revealVault(vault);
+		}
 		activeController.set(ctrl);
 	}
 
