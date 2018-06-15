@@ -20,13 +20,11 @@ public interface Volume {
 	 * @param fs
 	 * @throws IOException
 	 */
-	void mount(CryptoFileSystem fs) throws IOException, CommandFailedException;
+	void mount(CryptoFileSystem fs) throws IOException, VolumeException;
 
-	default void reveal() throws CommandFailedException {
-		throw new CommandFailedException("Not implemented.");
-	}
+	void reveal() throws VolumeException;
 
-	void unmount() throws CommandFailedException;
+	void unmount() throws VolumeException;
 
 	// optional forced unmounting:
 
@@ -34,8 +32,27 @@ public interface Volume {
 		return false;
 	}
 
-	default void unmountForced() throws CommandFailedException {
-		throw new CommandFailedException("Operation not supported.");
+	default void unmountForced() throws VolumeException {
+		throw new VolumeException("Operation not supported.");
+	}
+
+	/**
+	 * Exception thrown when a volume-specific command such as mount/unmount/reveal failed.
+	 */
+	class VolumeException extends Exception {
+
+		public VolumeException(String message) {
+			super(message);
+		}
+
+		public VolumeException(Throwable cause) {
+			super(cause);
+		}
+
+		public VolumeException(String message, Throwable cause) {
+			super(message, cause);
+		}
+
 	}
 
 }

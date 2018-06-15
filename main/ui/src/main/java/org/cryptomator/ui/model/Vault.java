@@ -97,7 +97,7 @@ public class Vault {
 		CryptoFileSystemProvider.changePassphrase(getPath(), MASTERKEY_FILENAME, oldPassphrase, newPassphrase);
 	}
 
-	public synchronized void unlock(CharSequence passphrase) throws CryptoException, IOException, CommandFailedException {
+	public synchronized void unlock(CharSequence passphrase) throws CryptoException, IOException, Volume.VolumeException {
 		Platform.runLater(() -> {
 			state.set(State.PROCESSING);
 		});
@@ -108,7 +108,7 @@ public class Vault {
 		});
 	}
 
-	public synchronized void lock(boolean forced) throws CommandFailedException {
+	public synchronized void lock(boolean forced) throws Volume.VolumeException {
 		Platform.runLater(() -> {
 			state.set(State.PROCESSING);
 		});
@@ -136,11 +136,11 @@ public class Vault {
 	public void prepareForShutdown() {
 		try {
 			lock(false);
-		} catch (CommandFailedException e) {
+		} catch (Volume.VolumeException e) {
 			if (volume.supportsForcedUnmount()) {
 				try {
 					lock(true);
-				} catch (CommandFailedException e1) {
+				} catch (Volume.VolumeException e1) {
 					LOG.warn("Failed to force lock vault.", e1);
 				}
 			} else {
@@ -149,7 +149,7 @@ public class Vault {
 		}
 	}
 
-	public void reveal() throws CommandFailedException {
+	public void reveal() throws Volume.VolumeException {
 		volume.reveal();
 	}
 

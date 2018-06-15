@@ -12,6 +12,7 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.cryptofs.CryptoFileSystem;
+import org.cryptomator.frontend.fuse.mount.CommandFailedException;
 import org.cryptomator.frontend.fuse.mount.EnvironmentVariables;
 import org.cryptomator.frontend.fuse.mount.FuseMountFactory;
 import org.cryptomator.frontend.fuse.mount.FuseNotSupportedException;
@@ -44,7 +45,7 @@ public class FuseVolume implements Volume {
 	}
 
 	@Override
-	public void mount(CryptoFileSystem fs) throws IOException, FuseNotSupportedException, CommandFailedException {
+	public void mount(CryptoFileSystem fs) throws IOException, FuseNotSupportedException, VolumeException {
 		this.cfs = fs;
 		String mountPath;
 		if (vaultSettings.usesIndividualMountPath().get()) {
@@ -77,34 +78,34 @@ public class FuseVolume implements Volume {
 		}
 	}
 
-	private void mount() throws CommandFailedException {
+	private void mount() throws VolumeException {
 		try {
 			EnvironmentVariables envVars = EnvironmentVariables.create()
 					.withMountName(vaultSettings.mountName().getValue())
 					.withMountPath(mountPath)
 					.build();
 			this.fuseMnt = FuseMountFactory.getMounter().mount(cfs.getPath("/"), envVars);
-		} catch (org.cryptomator.frontend.fuse.mount.CommandFailedException e) {
-			throw new CommandFailedException("Unable to mount Filesystem", e);
+		} catch (CommandFailedException e) {
+			throw new VolumeException("Unable to mount Filesystem", e);
 		}
 	}
 
 	@Override
-	public void reveal() throws CommandFailedException {
+	public void reveal() throws VolumeException {
 		try {
 			fuseMnt.revealInFileManager();
-		} catch (org.cryptomator.frontend.fuse.mount.CommandFailedException e) {
+		} catch (CommandFailedException e) {
 			LOG.info("Revealing the vault in file manger failed: " + e.getMessage());
-			throw new CommandFailedException(e);
+			throw new VolumeException(e);
 		}
 	}
 
 	@Override
-	public synchronized void unmount() throws CommandFailedException {
+	public synchronized void unmount() throws VolumeException {
 		try {
 			fuseMnt.close();
-		} catch (org.cryptomator.frontend.fuse.mount.CommandFailedException e) {
-			throw new CommandFailedException(e);
+		} catch (CommandFailedException e) {
+			throw new VolumeException(e);
 		}
 		cleanup();
 	}

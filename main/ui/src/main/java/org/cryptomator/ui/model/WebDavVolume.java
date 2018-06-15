@@ -36,7 +36,7 @@ public class WebDavVolume implements Volume {
 	}
 
 	@Override
-	public void mount(CryptoFileSystem fs) throws CommandFailedException {
+	public void mount(CryptoFileSystem fs) throws VolumeException {
 		if (server == null) {
 			server = serverProvider.get();
 		}
@@ -48,7 +48,7 @@ public class WebDavVolume implements Volume {
 		mount();
 	}
 
-	private void mount() throws CommandFailedException {
+	private void mount() throws VolumeException {
 		if (servlet == null) {
 			throw new IllegalStateException("Mounting requires unlocked WebDAV servlet.");
 		}
@@ -61,36 +61,36 @@ public class WebDavVolume implements Volume {
 			this.mount = servlet.mount(mountParams); // might block this thread for a while
 		} catch (Mounter.CommandFailedException e) {
 			e.printStackTrace();
-			throw new CommandFailedException(e);
+			throw new VolumeException(e);
 		}
 	}
 
 	@Override
-	public void reveal() throws CommandFailedException {
+	public void reveal() throws VolumeException {
 		try {
 			mount.reveal();
 		} catch (Mounter.CommandFailedException e) {
 			e.printStackTrace();
-			throw new CommandFailedException(e);
+			throw new VolumeException(e);
 		}
 	}
 
 	@Override
-	public synchronized void unmount() throws CommandFailedException {
+	public synchronized void unmount() throws VolumeException {
 		try {
 			mount.unmount();
 		} catch (Mounter.CommandFailedException e) {
-			throw new CommandFailedException(e);
+			throw new VolumeException(e);
 		}
 		cleanup();
 	}
 
 	@Override
-	public synchronized void unmountForced() throws CommandFailedException {
+	public synchronized void unmountForced() throws VolumeException {
 		try {
 			mount.forced().orElseThrow(IllegalStateException::new).unmount();
 		} catch (Mounter.CommandFailedException e) {
-			throw new CommandFailedException(e);
+			throw new VolumeException(e);
 		}
 		cleanup();
 	}

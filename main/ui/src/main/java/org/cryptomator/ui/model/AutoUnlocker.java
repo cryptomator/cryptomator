@@ -74,7 +74,7 @@ public class AutoUnlocker {
 		try {
 			vault.unlock(CharBuffer.wrap(storedPw));
 			revealSilently(vault);
-		} catch (IOException | CryptoException | CommandFailedException e) {
+		} catch (IOException | CryptoException | Volume.VolumeException e) {
 			LOG.error("Auto unlock failed.", e);
 		} finally {
 			Arrays.fill(storedPw, ' ');
@@ -87,7 +87,7 @@ public class AutoUnlocker {
 		}
 		try {
 			mountedVault.reveal();
-		} catch (CommandFailedException e) {
+		} catch (Volume.VolumeException e) {
 			LOG.error("Auto unlock succeded, but revealing the drive failed.", e);
 		}
 	}
