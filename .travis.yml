@@ -14,6 +14,7 @@ env:
     - secure: "lV9OwUbHMrMpLUH1CY+Z4puLDdFXytudyPlG1eGRsesdpuG6KM3uQVz6uAtf6lrU8DRbMM/T7ML+PmvQ4UoPPYLdLxESLLBat2qUPOIVBOhTSlCc7I0DmGy04CSvkeMy8dPaQC0ukgNiR7zwoNzfcpGRN/U9S8tziDruuHoZSrg=" # BINTRAY_API_KEY
     - secure: "oWFgRTVP6lyTa7qVxlvkpm20MtVc3BtmsNXQJS6bfg2A0o/iCQMNx7OD59BaafCLGRKvCcJVESiC8FlSylVMS7CDSyYu0gg70NUiIuHp4NBM5inFWYCy/PdQsCTzr5uvNG+rMFQpMFRaCV0FrfM3tLondcVkhsHL68l93Xoexx4=" # CODACY_PROJECT_TOKEN
     - secure: "zJxgytA2Ks5Xzv+7kUaUq+EBFNQw9Qec63lcMJVuXVWczjL16nKW1EzzV515ag+OWL46z3lEPForDhufw0VtFnNmaX68jkO0mp01eLrHApc1llN2Y/U8GBXfNNazN4+Kom4H+z/AO+wJr8EsKMMUczCdQ3APgd9uVI0hzXw/Z3M=" # GITHUB_API_KEY
+    - secure: "PiH/o9MLOyPdjIwECIEfj3TuUxx7QB0CIs3o1WXjqb1PbDdHDbQyvswYit6xDw9NrJp/A+ov2k00jq+n+8fLTSd4AY21y5WiJN/ccCTWUuUiFhGxOyM37aeWAPAn4rUp7D7o8jLxEdpGZAfglIzaz+GCEQYxfV/w3FDwztViXgQ=" # GPG_PASSPHRASE
 addons:
   apt:
     packages:
@@ -58,6 +59,8 @@ before_deploy:
     git remote remove gh
   fi
 - mvn -fmain/pom.xml clean package -Prelease -DskipTests
+- gpg --import 34C80F11.gpg
+- gpg --detach-sign -a -u 34C80F11 --batch --passphrase ${GPG_PASSPHRASE} main/ant-kit/target/antkit.tar.gz
 deploy:
 - provider: releases # CONTINUOUS
   prerelease: true
@@ -68,6 +71,7 @@ deploy:
   file:
   - "main/uber-jar/target/Cryptomator-*.jar"
   - "main/ant-kit/target/antkit.tar.gz"
+  - "main/ant-kit/target/antkit.tar.gz.asc"
   skip_cleanup: true
   name: Cryptomator continuous build
   body: Automatically built on $(date +'%F %T %Z').
@@ -81,6 +85,7 @@ deploy:
   file:
   - "main/uber-jar/target/Cryptomator-$TRAVIS_TAG.jar"
   - "main/ant-kit/target/antkit.tar.gz"
+  - "main/ant-kit/target/antkit.tar.gz.asc"
   skip_cleanup: true
   on:
     repo: cryptomator/cryptomator
