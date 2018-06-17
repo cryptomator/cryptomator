@@ -249,9 +249,6 @@
 		</profile>
 		<profile>
 			<id>coverage</id>
-			<modules>
-				<module>jacoco-report</module>
-			</modules>
 			<build>
 				<plugins>
 					<plugin>
@@ -291,6 +288,12 @@
 							<id>prepare-agent</id>
 							<goals>
 								<goal>prepare-agent</goal>
+							</goals>
+						</execution>
+						<execution>
+							<id>report</id>
+							<goals>
+								<goal>report</goal>
 							</goals>
 						</execution>
 					</executions>
