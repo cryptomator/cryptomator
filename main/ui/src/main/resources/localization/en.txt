@@ -122,9 +122,10 @@ settings.webdav.port.apply=Apply
 settings.webdav.prefGvfsScheme.label=WebDAV Scheme
 settings.debugMode.label=Debug Mode *
 settings.requiresRestartLabel=* Cryptomator needs to restart
-settings.volume.label= Mount-Methode *
+settings.volume.label=Preferred Volume Type
 settings.volume.webdav=WebDAV
 settings.volume.fuse=FUSE
+settings.volume.dokany=Dokany
 
 # tray icon
 tray.menu.open=Open

@@ -78,9 +78,6 @@ public class SettingsController implements ViewController {
 	private ChoiceBox<String> prefGvfsScheme;
 
 	@FXML
-	private Label volumeLabel;
-
-	@FXML
 	private ChoiceBox<VolumeImpl> volume;
 
 	@FXML
@@ -98,7 +95,6 @@ public class SettingsController implements ViewController {
 		//NIOADAPTER
 		volume.getItems().addAll(getSupportedAdapters());
 		volume.setValue(settings.preferredVolumeImpl().get());
-		volume.setVisible(true);
 		volume.setConverter(new NioAdapterImplStringConverter());
 
 		//WEBDAV
@@ -131,9 +127,9 @@ public class SettingsController implements ViewController {
 		settings.debugMode().bind(debugModeCheckbox.selectedProperty());
 	}
 
-	//TODO: how to implement this?
 	private VolumeImpl[] getSupportedAdapters() {
-		return new VolumeImpl[]{VolumeImpl.FUSE, VolumeImpl.WEBDAV};
+		// TODO: filter depending on supported drivers
+		return VolumeImpl.values();
 	}
 
 	@Override

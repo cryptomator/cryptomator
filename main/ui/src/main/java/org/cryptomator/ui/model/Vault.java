@@ -19,6 +19,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 
 import javafx.application.Platform;
 import javafx.beans.Observable;
@@ -52,6 +53,7 @@ public class Vault {
 
 	private final Settings settings;
 	private final VaultSettings vaultSettings;
+	private final Provider<Volume> volumeProvider;
 	private final AtomicReference<CryptoFileSystem> cryptoFileSystem = new AtomicReference<>();
 	private final ObjectProperty<State> state = new SimpleObjectProperty<State>(State.LOCKED);
 
@@ -62,10 +64,10 @@ public class Vault {
 	}
 
 	@Inject
-	Vault(Settings settings, VaultSettings vaultSettings, Volume volume) {
+	Vault(Settings settings, VaultSettings vaultSettings, Provider<Volume> volumeProvider) {
 		this.settings = settings;
 		this.vaultSettings = vaultSettings;
-		this.volume = volume;
+		this.volumeProvider = volumeProvider;
 	}
 
 	// ******************************************************************************
@@ -102,6 +104,7 @@ public class Vault {
 			state.set(State.PROCESSING);
 		});
 		CryptoFileSystem fs = getCryptoFileSystem(passphrase);
+		volume = volumeProvider.get();
 		volume.mount(fs);
 		Platform.runLater(() -> {
 			state.set(State.UNLOCKED);

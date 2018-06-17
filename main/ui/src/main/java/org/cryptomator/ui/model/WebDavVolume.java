@@ -15,7 +15,6 @@ import javax.inject.Provider;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-@VaultModule.PerVault
 public class WebDavVolume implements Volume {
 
 	private static final String LOCALHOST_ALIAS = "cryptomator-vault";

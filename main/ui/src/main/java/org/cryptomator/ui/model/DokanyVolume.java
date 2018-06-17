@@ -8,7 +8,6 @@ import org.cryptomator.cryptofs.CryptoFileSystem;
 import org.cryptomator.frontend.dokany.Mount;
 import org.cryptomator.frontend.dokany.MountFactory;
 
-@VaultModule.PerVault
 public class DokanyVolume implements Volume {
 
 	private static final String FS_TYPE_NAME = "Cryptomator File System";

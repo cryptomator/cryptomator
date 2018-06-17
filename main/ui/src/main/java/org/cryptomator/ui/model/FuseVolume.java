@@ -20,7 +20,6 @@ import org.cryptomator.frontend.fuse.mount.Mount;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@VaultModule.PerVault
 public class FuseVolume implements Volume {
 
 	private static final Logger LOG = LoggerFactory.getLogger(FuseVolume.class);
@@ -34,7 +33,6 @@ public class FuseVolume implements Volume {
 	private final VaultSettings vaultSettings;
 
 	private Mount fuseMnt;
-	private CryptoFileSystem cfs;
 	private Path mountPath;
 	private boolean extraDirCreated;
 
@@ -46,7 +44,6 @@ public class FuseVolume implements Volume {
 
 	@Override
 	public void mount(CryptoFileSystem fs) throws IOException, FuseNotSupportedException, VolumeException {
-		this.cfs = fs;
 		String mountPath;
 		if (vaultSettings.usesIndividualMountPath().get()) {
 			//specific path given
@@ -57,7 +54,7 @@ public class FuseVolume implements Volume {
 			extraDirCreated = true;
 		}
 		this.mountPath = Paths.get(mountPath).toAbsolutePath();
-		mount();
+		mount(fs.getPath("/"));
 	}
 
 	private String createDirIfNotExist(String prefix, String dirName) throws IOException {
@@ -78,13 +75,13 @@ public class FuseVolume implements Volume {
 		}
 	}
 
-	private void mount() throws VolumeException {
+	private void mount(Path root) throws VolumeException {
 		try {
 			EnvironmentVariables envVars = EnvironmentVariables.create()
 					.withMountName(vaultSettings.mountName().getValue())
 					.withMountPath(mountPath)
 					.build();
-			this.fuseMnt = FuseMountFactory.getMounter().mount(cfs.getPath("/"), envVars);
+			this.fuseMnt = FuseMountFactory.getMounter().mount(root, envVars);
 		} catch (CommandFailedException e) {
 			throw new VolumeException("Unable to mount Filesystem", e);
 		}
