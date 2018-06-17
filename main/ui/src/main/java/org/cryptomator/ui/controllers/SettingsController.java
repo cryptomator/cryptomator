@@ -97,7 +97,7 @@ public class SettingsController implements ViewController {
 
 		//NIOADAPTER
 		volume.getItems().addAll(getSupportedAdapters());
-		volume.setValue(settings.volumeImpl().get());
+		volume.setValue(settings.preferredVolumeImpl().get());
 		volume.setVisible(true);
 		volume.setConverter(new NioAdapterImplStringConverter());
 
@@ -127,7 +127,7 @@ public class SettingsController implements ViewController {
 
 		settings.checkForUpdates().bind(checkForUpdatesCheckbox.selectedProperty());
 		settings.preferredGvfsScheme().bind(prefGvfsScheme.valueProperty());
-		settings.volumeImpl().bind(volume.valueProperty());
+		settings.preferredVolumeImpl().bind(volume.valueProperty());
 		settings.debugMode().bind(debugModeCheckbox.selectedProperty());
 	}
 

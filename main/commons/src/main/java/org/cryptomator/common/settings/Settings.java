@@ -26,7 +26,7 @@ public class Settings {
 	public static final int DEFAULT_NUM_TRAY_NOTIFICATIONS = 3;
 	public static final String DEFAULT_GVFS_SCHEME = "dav";
 	public static final boolean DEFAULT_DEBUG_MODE = false;
-	public static final VolumeImpl DEFAULT_VOLUME_IMPL = VolumeImpl.FUSE;
+	public static final VolumeImpl DEFAULT_PREFERRED_VOLUME_IMPL = System.getProperty("os.name").toLowerCase().contains("windows") ? VolumeImpl.DOKANY : VolumeImpl.FUSE;
 
 	private final ObservableList<VaultSettings> directories = FXCollections.observableArrayList(VaultSettings::observables);
 	private final BooleanProperty askedForUpdateCheck = new SimpleBooleanProperty(DEFAULT_ASKED_FOR_UPDATE_CHECK);
@@ -35,7 +35,7 @@ public class Settings {
 	private final IntegerProperty numTrayNotifications = new SimpleIntegerProperty(DEFAULT_NUM_TRAY_NOTIFICATIONS);
 	private final StringProperty preferredGvfsScheme = new SimpleStringProperty(DEFAULT_GVFS_SCHEME);
 	private final BooleanProperty debugMode = new SimpleBooleanProperty(DEFAULT_DEBUG_MODE);
-	private final ObjectProperty<VolumeImpl> volumeImpl = new SimpleObjectProperty<>(DEFAULT_VOLUME_IMPL);
+	private final ObjectProperty<VolumeImpl> preferredVolumeImpl = new SimpleObjectProperty<>(DEFAULT_PREFERRED_VOLUME_IMPL);
 
 	private Consumer<Settings> saveCmd;
 
@@ -50,7 +50,7 @@ public class Settings {
 		numTrayNotifications.addListener(this::somethingChanged);
 		preferredGvfsScheme.addListener(this::somethingChanged);
 		debugMode.addListener(this::somethingChanged);
-		volumeImpl.addListener(this::somethingChanged);
+		preferredVolumeImpl.addListener(this::somethingChanged);
 	}
 
 	void setSaveCmd(Consumer<Settings> saveCmd) {
@@ -97,8 +97,8 @@ public class Settings {
 		return debugMode;
 	}
 
-	public ObjectProperty<VolumeImpl> volumeImpl() {
-		return volumeImpl;
+	public ObjectProperty<VolumeImpl> preferredVolumeImpl() {
+		return preferredVolumeImpl;
 	}
 
 }

@@ -26,9 +26,10 @@
 		<!-- dependency versions -->
 		<cryptomator.cryptolib.version>1.2.0</cryptomator.cryptolib.version>
 		<cryptomator.cryptofs.version>1.5.2</cryptomator.cryptofs.version>
-		<cryptomator.webdav.version>1.0.4</cryptomator.webdav.version>
 		<cryptomator.jni.version>2.0.0</cryptomator.jni.version>
 		<cryptomator.fuse.version>0.1.5</cryptomator.fuse.version>
+		<cryptomator.dokany.version>0.1.0</cryptomator.dokany.version>
+		<cryptomator.webdav.version>1.0.4</cryptomator.webdav.version>
 
 		<commons-io.version>2.5</commons-io.version>
 		<commons-lang3.version>3.6</commons-lang3.version>
@@ -104,6 +105,11 @@
 				<groupId>org.cryptomator</groupId>
 				<artifactId>fuse-nio-adapter</artifactId>
 				<version>${cryptomator.fuse.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.cryptomator</groupId>
+				<artifactId>dokany-nio-adapter</artifactId>
+				<version>${cryptomator.dokany.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.cryptomator</groupId>

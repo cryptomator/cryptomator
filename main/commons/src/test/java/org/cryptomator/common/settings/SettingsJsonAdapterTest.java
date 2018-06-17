@@ -22,7 +22,7 @@ public class SettingsJsonAdapterTest {
 				+ "\"checkForUpdatesEnabled\": true,"//
 				+ "\"port\": 8080,"//
 				+ "\"numTrayNotifications\": 42,"//
-				+ "\"volumeImpl\": \"FUSE\"}";
+				+ "\"preferredVolumeImpl\": \"FUSE\"}";
 
 		Settings settings = adapter.fromJson(json);
 
@@ -31,7 +31,7 @@ public class SettingsJsonAdapterTest {
 		Assert.assertEquals(8080, settings.port().get());
 		Assert.assertEquals(42, settings.numTrayNotifications().get());
 		Assert.assertEquals("dav", settings.preferredGvfsScheme().get());
-		Assert.assertEquals(VolumeImpl.FUSE, settings.volumeImpl().get());
+		Assert.assertEquals(VolumeImpl.FUSE, settings.preferredVolumeImpl().get());
 	}
 
 }

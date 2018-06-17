@@ -181,7 +181,7 @@ public class UnlockController implements ViewController {
 			winDriveLetterLabel.setManaged(false);
 			winDriveLetter.setVisible(false);
 			winDriveLetter.setManaged(false);
-			if (VolumeImpl.WEBDAV.equals(settings.volumeImpl().get())) {
+			if (VolumeImpl.WEBDAV.equals(settings.preferredVolumeImpl().get())) {
 				useOwnMountPath.setVisible(false);
 				useOwnMountPath.setManaged(false);
 				mountPathLabel.setManaged(false);
