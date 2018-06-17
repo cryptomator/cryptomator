@@ -4,7 +4,8 @@ daysUntilStale: 60
 daysUntilClose: 7
 # Issues with these labels will never be considered stale
 exemptLabels:
-  - type:security-issue
+  - type:security-issue # never close automatically
+  - state:awaiting-response # handled by different bot
 # Set to true to ignore issues in a milestone (defaults to false)
 exemptMilestones: true
 # Label to use when marking an issue as stale
