@@ -28,21 +28,21 @@
 		<cryptomator.cryptofs.version>1.5.2</cryptomator.cryptofs.version>
 		<cryptomator.jni.version>2.0.0</cryptomator.jni.version>
 		<cryptomator.fuse.version>0.1.5</cryptomator.fuse.version>
-		<cryptomator.dokany.version>0.1.0</cryptomator.dokany.version>
+		<cryptomator.dokany.version>0.1.1</cryptomator.dokany.version>
 		<cryptomator.webdav.version>1.0.4</cryptomator.webdav.version>
 
 		<commons-io.version>2.5</commons-io.version>
 		<commons-lang3.version>3.6</commons-lang3.version>
 
 		<easybind.version>1.0.3</easybind.version>
-		
+
 		<guava.version>25.1-jre</guava.version>
 		<dagger.version>2.16</dagger.version>
 		<gson.version>2.8.5</gson.version>
-		
+
 		<slf4j.version>1.7.25</slf4j.version>
 		<logback.version>1.2.3</logback.version>
-		
+
 		<junit.version>4.12</junit.version>
 		<junit.hierarchicalrunner.version>4.12.1</junit.hierarchicalrunner.version>
 		<mockito.version>2.11.0</mockito.version>
