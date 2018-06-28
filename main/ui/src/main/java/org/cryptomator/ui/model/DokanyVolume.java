@@ -14,12 +14,14 @@ public class DokanyVolume implements Volume {
 
 	private final VaultSettings vaultSettings;
 	private final MountFactory mountFactory;
+	private final WindowsDriveLetters windowsDriveLetters;
 	private Mount mount;
 
 	@Inject
-	public DokanyVolume(VaultSettings vaultSettings, ExecutorService executorService) {
+	public DokanyVolume(VaultSettings vaultSettings, ExecutorService executorService, WindowsDriveLetters windowsDriveLetters) {
 		this.vaultSettings = vaultSettings;
 		this.mountFactory = new MountFactory(executorService);
+		this.windowsDriveLetters = windowsDriveLetters;
 	}
 
 
@@ -28,9 +30,21 @@ public class DokanyVolume implements Volume {
 		return MountFactory.isApplicable();
 	}
 
+	//TODO: Drive letter 'A' as mount point is invalid in dokany. maybe we should do already here something against it
 	@Override
-	public void mount(CryptoFileSystem fs) {
-		char driveLetter = vaultSettings.winDriveLetter().get().charAt(0);
+	public void mount(CryptoFileSystem fs) throws VolumeException {
+		char driveLetter;
+		if (!vaultSettings.winDriveLetter().getValueSafe().equals("")) {
+			driveLetter = vaultSettings.winDriveLetter().get().charAt(0);
+		} else {
+			//auto assign drive letter
+			//TODO: can we assume the we have at least one free drive letter?
+			if (!windowsDriveLetters.getAvailableDriveLetters().isEmpty()) {
+				driveLetter = windowsDriveLetters.getAvailableDriveLetters().iterator().next();
+			} else {
+				throw new VolumeException("No free drive letter available.");
+			}
+		}
 		String mountName = vaultSettings.mountName().get();
 		this.mount = mountFactory.mount(fs.getPath("/"), driveLetter, mountName, FS_TYPE_NAME);
 	}
