@@ -1,6 +1,7 @@
 package org.cryptomator.ui.model;
 
 import javax.inject.Inject;
+import java.util.Iterator;
 import java.util.concurrent.ExecutorService;
 
 import org.cryptomator.common.settings.VaultSettings;
@@ -39,8 +40,15 @@ public class DokanyVolume implements Volume {
 		} else {
 			//auto assign drive letter
 			//TODO: can we assume the we have at least one free drive letter?
-			if (!windowsDriveLetters.getAvailableDriveLetters().isEmpty()) {
-				driveLetter = windowsDriveLetters.getAvailableDriveLetters().iterator().next();
+
+			//this is a temporary fix for 'A' being an invalid drive letter
+			if(!windowsDriveLetters.getAvailableDriveLetters().isEmpty()){
+				Iterator<Character> winDriveLetterIt = windowsDriveLetters.getAvailableDriveLetters().iterator();
+				do{
+					driveLetter = winDriveLetterIt.next();
+				}while (winDriveLetterIt.hasNext() && driveLetter == 65);
+//			if (!windowsDriveLetters.getAvailableDriveLetters().isEmpty()) {
+//				driveLetter = windowsDriveLetters.getAvailableDriveLetters().iterator().next();
 			} else {
 				throw new VolumeException("No free drive letter available.");
 			}
