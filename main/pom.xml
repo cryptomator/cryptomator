@@ -28,7 +28,7 @@
 		<cryptomator.cryptofs.version>1.5.2</cryptomator.cryptofs.version>
 		<cryptomator.jni.version>2.0.0</cryptomator.jni.version>
 		<cryptomator.fuse.version>0.1.5</cryptomator.fuse.version>
-		<cryptomator.dokany.version>0.1.1</cryptomator.dokany.version>
+		<cryptomator.dokany.version>0.1.2</cryptomator.dokany.version>
 		<cryptomator.webdav.version>1.0.4</cryptomator.webdav.version>
 
 		<commons-io.version>2.5</commons-io.version>
