@@ -46,8 +46,7 @@ For more information on the security details visit [cryptomator.org](https://cry
 
 ### Dependencies
 
-* Java 8 (min. 8u51, we recommend to use the current version)
-* [JCE unlimited strength policy files](http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html) (needed for 256-bit keys)
+* Java 10 (min. 10.0.1, we recommend to use the current version)
 * Maven 3
 * Optional: OS-dependent build tools for native packaging (see [Windows](https://github.com/cryptomator/cryptomator-win), [OS X](https://github.com/cryptomator/cryptomator-osx), [Linux](https://github.com/cryptomator/builder-containers))
 
