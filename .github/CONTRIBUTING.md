@@ -4,7 +4,7 @@
 
 - Ensure you're running the latest version of Cryptomator.
 - Ensure the bug is related to the desktop version of Cryptomator. Bugs concerning the Cryptomator iOS and Android app can be reported on the [Cryptomator for iOS issues list](https://github.com/cryptomator/cryptomator-ios/issues) and [Cryptomator for Android issues list](https://github.com/cryptomator/cryptomator-android/issues) respectively.
-- Ensure the bug was not [already reported](https://github.com/cryptomator/cryptomator/issues). You can also check out our [FAQ](https://community.cryptomator.org/c/faq).
+- Ensure the bug was not [already reported](https://github.com/cryptomator/cryptomator/issues). You can also check out our [FAQ](https://community.cryptomator.org/c/kb/faq).
 - If you're unable to find an open issue addressing the problem, [submit a new one](https://github.com/cryptomator/cryptomator/issues/new).
 
 ## Did you write a patch that fixes a bug?
@@ -18,7 +18,7 @@
 
 ## Code of Conduct
 
-Help us keep Cryptomator open and inclusive. Please read and follow our [Code of Conduct](https://github.com/cryptomator/cryptomator/blob/develop/CODE_OF_CONDUCT.md).
+Help us keep Cryptomator open and inclusive. Please read and follow our [Code of Conduct](https://github.com/cryptomator/cryptomator/blob/develop/.github/CODE_OF_CONDUCT.md).
 
 ## Above all, thank you for your contributions
 
