@@ -53,6 +53,7 @@ public class ExitUtil {
 	private final Localization localization;
 	private final Settings settings;
 	private final Optional<MacFunctions> macFunctions;
+	private TrayIcon trayIcon;
 
 	@Inject
 	public ExitUtil(@Named("mainWindow") Stage mainWindow, Localization localization, Settings settings, Optional<MacFunctions> macFunctions) {
@@ -82,7 +83,7 @@ public class ExitUtil {
 	}
 
 	private void initTrayIconExitHandler(Runnable exitCommand) {
-		final TrayIcon trayIcon = createTrayIcon(exitCommand);
+		trayIcon = createTrayIcon(exitCommand);
 		try {
 			// double clicking tray icon should open Cryptomator
 			if (SystemUtils.IS_OS_WINDOWS) {
@@ -118,14 +119,7 @@ public class ExitUtil {
 		exitItem.addActionListener(e -> exitCommand.run());
 		popup.add(exitItem);
 
-		final Image image;
-		if (SystemUtils.IS_OS_MAC_OSX && isMacMenuBarDarkMode()) {
-			image = Toolkit.getDefaultToolkit().getImage(getClass().getResource("/tray_icon_mac_white.png"));
-		} else if (SystemUtils.IS_OS_MAC_OSX) {
-			image = Toolkit.getDefaultToolkit().getImage(getClass().getResource("/tray_icon_mac_black.png"));
-		} else {
-			image = Toolkit.getDefaultToolkit().getImage(getClass().getResource("/tray_icon.png"));
-		}
+		final Image image = getAppropriateTrayIconImage(true);
 
 		return new TrayIcon(image, localization.getString("app.name"), popup);
 	}
@@ -200,6 +194,25 @@ public class ExitUtil {
 			mainWindow.show();
 			mainWindow.requestFocus();
 		});
+	}
+
+	public void updateTrayIcon(boolean areAllVaultsLocked) {
+		if (trayIcon != null) {
+			Image image = getAppropriateTrayIconImage(areAllVaultsLocked);
+			trayIcon.setImage(image);
+		}
+	}
+
+	private Image getAppropriateTrayIconImage(boolean areAllVaultsLocked) {
+        String resourceName;
+		if (SystemUtils.IS_OS_MAC_OSX && isMacMenuBarDarkMode()) {
+            resourceName = areAllVaultsLocked ? "/tray_icon_mac_white.png" : "/tray_icon_unlocked_mac_white.png";
+		} else if (SystemUtils.IS_OS_MAC_OSX) {
+            resourceName = areAllVaultsLocked ? "/tray_icon_mac_black.png" : "/tray_icon_unlocked_mac_black.png";
+		} else {
+            resourceName = areAllVaultsLocked ? "/tray_icon.png" : "/tray_icon_unlocked.png";
+		}
+        return Toolkit.getDefaultToolkit().getImage(getClass().getResource(resourceName));
 	}
 
 }
