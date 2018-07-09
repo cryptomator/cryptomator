@@ -204,15 +204,15 @@ public class ExitUtil {
 	}
 
 	private Image getAppropriateTrayIconImage(boolean areAllVaultsLocked) {
-        String resourceName;
+		String resourceName;
 		if (SystemUtils.IS_OS_MAC_OSX && isMacMenuBarDarkMode()) {
-            resourceName = areAllVaultsLocked ? "/tray_icon_mac_white.png" : "/tray_icon_unlocked_mac_white.png";
+			resourceName = areAllVaultsLocked ? "/tray_icon_mac_white.png" : "/tray_icon_unlocked_mac_white.png";
 		} else if (SystemUtils.IS_OS_MAC_OSX) {
-            resourceName = areAllVaultsLocked ? "/tray_icon_mac_black.png" : "/tray_icon_unlocked_mac_black.png";
+			resourceName = areAllVaultsLocked ? "/tray_icon_mac_black.png" : "/tray_icon_unlocked_mac_black.png";
 		} else {
-            resourceName = areAllVaultsLocked ? "/tray_icon.png" : "/tray_icon_unlocked.png";
+			resourceName = areAllVaultsLocked ? "/tray_icon.png" : "/tray_icon_unlocked.png";
 		}
-        return Toolkit.getDefaultToolkit().getImage(getClass().getResource(resourceName));
+		return Toolkit.getDefaultToolkit().getImage(getClass().getResource(resourceName));
 	}
 
 }
