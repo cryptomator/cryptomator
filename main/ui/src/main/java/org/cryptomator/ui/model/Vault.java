@@ -100,15 +100,18 @@ public class Vault {
 	}
 
 	public synchronized void unlock(CharSequence passphrase) throws CryptoException, IOException, Volume.VolumeException {
-		Platform.runLater(() -> {
-			state.set(State.PROCESSING);
-		});
-		CryptoFileSystem fs = getCryptoFileSystem(passphrase);
-		volume = volumeProvider.get();
-		volume.mount(fs);
-		Platform.runLater(() -> {
-			state.set(State.UNLOCKED);
-		});
+		Platform.runLater(() -> state.set(State.PROCESSING));
+		try {
+			CryptoFileSystem fs = getCryptoFileSystem(passphrase);
+			volume = volumeProvider.get();
+			volume.mount(fs);
+			Platform.runLater(() -> {
+				state.set(State.UNLOCKED);
+			});
+		} catch (Exception e) {
+			Platform.runLater(() -> state.set(State.LOCKED));
+			throw e;
+		}
 	}
 
 	public synchronized void lock(boolean forced) throws Volume.VolumeException {
