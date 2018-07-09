@@ -38,6 +38,10 @@ public class DialogBuilderUtil {
 		return buildDialog(title, header, content, Alert.AlertType.CONFIRMATION, defaultButton, ButtonType.YES, ButtonType.NO);
 	}
 
+	public static Alert buildGracefulShutdownDialog(String title, String header, String content, ButtonType tryAgainButton, ButtonType forceShutdownButton) {
+		return buildDialog(title, header, content, Alert.AlertType.WARNING, tryAgainButton, tryAgainButton, forceShutdownButton);
+	}
+
 	private static Alert buildDialog(String title, String header, String content, Alert.AlertType type, ButtonType defaultButton, ButtonType... buttons) {
 		Text contentText = new Text(content);
 		contentText.setWrappingWidth(360.0);

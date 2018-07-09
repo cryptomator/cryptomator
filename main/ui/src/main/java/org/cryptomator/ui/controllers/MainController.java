@@ -216,7 +216,27 @@ public class MainController implements ViewController {
 
 	private void gracefulShutdown() {
 		vaults.filtered(Vault.NOT_LOCKED).forEach(Vault::prepareForShutdown);
-		Platform.runLater(Platform::exit);
+		if (!vaults.filtered(Vault.NOT_LOCKED).isEmpty()) {
+			ButtonType tryAgainButtonType = new ButtonType(
+					localization.getString("main.gracefulShutdown.button.tryAgain"));
+			ButtonType forceShutdownButtonType = new ButtonType(
+					localization.getString("main.gracefulShutdown.button.forceShutdown"));
+			Alert gracefulShutdownDialog = DialogBuilderUtil.buildGracefulShutdownDialog(
+					localization.getString("main.gracefulShutdown.dialog.title"),
+					localization.getString("main.gracefulShutdown.dialog.header"),
+					localization.getString("main.gracefulShutdown.dialog.content"),
+					tryAgainButtonType,
+					forceShutdownButtonType);
+
+			Optional<ButtonType> choice = gracefulShutdownDialog.showAndWait();
+			if (choice.isPresent()) {
+				if (tryAgainButtonType.equals(choice.get())) {
+					gracefulShutdown();
+				} else if (forceShutdownButtonType.equals(choice.get())) {
+					Platform.runLater(Platform::exit);
+				}
+			}
+		}
 	}
 
 	private void loadFont(String resourcePath) {
