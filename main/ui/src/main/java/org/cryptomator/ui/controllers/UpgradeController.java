@@ -5,19 +5,10 @@
  *******************************************************************************/
 package org.cryptomator.ui.controllers;
 
+import javax.inject.Inject;
 import java.util.Objects;
 import java.util.Optional;
-
-import javax.inject.Inject;
-
-import org.cryptomator.ui.controls.SecPasswordField;
-import org.cryptomator.ui.l10n.Localization;
-import org.cryptomator.ui.model.UpgradeStrategies;
-import org.cryptomator.ui.model.UpgradeStrategy;
-import org.cryptomator.ui.model.UpgradeStrategy.UpgradeFailedException;
-import org.cryptomator.ui.model.Vault;
-import org.cryptomator.ui.util.AsyncTaskService;
-import org.fxmisc.easybind.EasyBind;
+import java.util.concurrent.ExecutorService;
 
 import javafx.beans.binding.BooleanExpression;
 import javafx.beans.property.ObjectProperty;
@@ -30,19 +21,26 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.layout.GridPane;
+import org.cryptomator.ui.controls.SecPasswordField;
+import org.cryptomator.ui.model.UpgradeStrategies;
+import org.cryptomator.ui.model.UpgradeStrategy;
+import org.cryptomator.ui.model.UpgradeStrategy.UpgradeFailedException;
+import org.cryptomator.ui.model.Vault;
+import org.cryptomator.ui.util.Tasks;
+import org.fxmisc.easybind.EasyBind;
 
 public class UpgradeController implements ViewController {
 
 	private final ObjectProperty<UpgradeStrategy> strategy = new SimpleObjectProperty<>();
 	private final UpgradeStrategies strategies;
-	private final AsyncTaskService asyncTaskService;
+	private final ExecutorService executor;
 	private Optional<UpgradeListener> listener = Optional.empty();
 	private Vault vault;
 
 	@Inject
-	public UpgradeController(Localization localization, UpgradeStrategies strategies, AsyncTaskService asyncTaskService) {
+	public UpgradeController(UpgradeStrategies strategies, ExecutorService executor) {
 		this.strategies = strategies;
-		this.asyncTaskService = asyncTaskService;
+		this.executor = executor;
 	}
 
 	@FXML
@@ -122,8 +120,8 @@ public class UpgradeController implements ViewController {
 	private void upgrade(UpgradeStrategy instruction) {
 		passwordField.setDisable(true);
 		progressIndicator.setVisible(true);
-		asyncTaskService //
-				.asyncTaskOf(() -> {
+		Tasks //
+				.create(() -> {
 					if (!instruction.isApplicable(vault)) {
 						throw new IllegalStateException("No ugprade needed for " + vault.getPath());
 					}
@@ -137,7 +135,7 @@ public class UpgradeController implements ViewController {
 					progressIndicator.setVisible(false);
 					passwordField.setDisable(false);
 					passwordField.swipe();
-				}).run();
+				}).runOnce(executor);
 	}
 
 	private void showNextUpgrade() {

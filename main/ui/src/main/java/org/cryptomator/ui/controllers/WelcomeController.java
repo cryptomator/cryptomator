@@ -8,6 +8,20 @@
  ******************************************************************************/
 package org.cryptomator.ui.controllers;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
+import java.net.URI;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.util.Comparator;
+import java.util.Map;
+import java.util.Optional;
+import java.util.ResourceBundle;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
@@ -28,22 +42,9 @@ import jdk.incubator.http.HttpResponse;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.ui.l10n.Localization;
-import org.cryptomator.ui.util.AsyncTaskService;
+import org.cryptomator.ui.util.Tasks;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Singleton;
-import java.net.URI;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.time.Duration;
-import java.util.Comparator;
-import java.util.Map;
-import java.util.Optional;
-import java.util.ResourceBundle;
-import java.util.concurrent.TimeUnit;
 
 import static org.cryptomator.ui.util.DialogBuilderUtil.buildYesNoDialog;
 
@@ -57,17 +58,17 @@ public class WelcomeController implements ViewController {
 	private final Localization localization;
 	private final Settings settings;
 	private final Comparator<String> semVerComparator;
-	private final AsyncTaskService asyncTaskService;
+	private final ScheduledExecutorService executor;
 
 	@Inject
 	public WelcomeController(Application app, @Named("applicationVersion") Optional<String> applicationVersion, Localization localization, Settings settings, @Named("SemVer") Comparator<String> semVerComparator,
-							 AsyncTaskService asyncTaskService) {
+							 ScheduledExecutorService executor) {
 		this.app = app;
 		this.applicationVersion = applicationVersion;
 		this.localization = localization;
 		this.settings = settings;
 		this.semVerComparator = semVerComparator;
-		this.asyncTaskService = asyncTaskService;
+		this.executor = executor;
 	}
 
 	@FXML
@@ -110,7 +111,7 @@ public class WelcomeController implements ViewController {
 	}
 
 	private void askForUpdateCheck() {
-		asyncTaskService.runDelayedOnUiThread(1, TimeUnit.SECONDS, () -> {
+		Tasks.create(() -> {}).onSuccess(() -> {
 			Optional<ButtonType> result = buildYesNoDialog(
 					localization.getString("welcome.askForUpdateCheck.dialog.title"),
 					localization.getString("welcome.askForUpdateCheck.dialog.header"),
@@ -123,13 +124,13 @@ public class WelcomeController implements ViewController {
 			if (settings.checkForUpdates().get()) {
 				this.checkForUpdates();
 			}
-		});
+		}).scheduleOnce(executor, 1, TimeUnit.SECONDS);
 	}
 
 	private void checkForUpdates() {
 		checkForUpdatesStatus.setText(localization.getString("welcome.checkForUpdates.label.currentlyChecking"));
 		checkForUpdatesIndicator.setVisible(true);
-		asyncTaskService.asyncTaskOf(() -> {
+		Tasks.create(() -> {
 			String userAgent = String.format("Cryptomator VersionChecker/%s %s %s (%s)", applicationVersion.orElse("SNAPSHOT"), SystemUtils.OS_NAME, SystemUtils.OS_VERSION, SystemUtils.OS_ARCH);
 			HttpClient client = HttpClient.newHttpClient();
 			HttpRequest request = HttpRequest.newBuilder()
@@ -138,7 +139,8 @@ public class WelcomeController implements ViewController {
 					.header("User-Agent", userAgent)
 					.timeout(Duration.ofSeconds(5))
 					.build();
-			HttpResponse<String> response = client.send(request, HttpResponse.BodyHandler.asString(StandardCharsets.UTF_8));
+			return client.send(request, HttpResponse.BodyHandler.asString(StandardCharsets.UTF_8));
+		}).onSuccess(response -> {
 			if (response.statusCode() == 200) {
 				Gson gson = new GsonBuilder().setLenient().create();
 				Map<String, String> map = gson.fromJson(response.body(), new TypeToken<Map<String, String>>() {
@@ -147,13 +149,16 @@ public class WelcomeController implements ViewController {
 					this.compareVersions(map);
 				}
 			}
+		}).onError(Exception.class, e -> {
+			LOG.error("Error checking for updates", e);
 		}).andFinally(() -> {
 			checkForUpdatesStatus.setText("");
 			checkForUpdatesIndicator.setVisible(false);
-		}).run();
+		}).runOnce(executor);
 	}
 
 	private void compareVersions(final Map<String, String> latestVersions) {
+		assert Platform.isFxApplicationThread();
 		final String latestVersion;
 		if (SystemUtils.IS_OS_MAC_OSX) {
 			latestVersion = latestVersions.get("mac");
@@ -169,11 +174,9 @@ public class WelcomeController implements ViewController {
 		LOG.info("Current version: {}, lastest version: {}", currentVersion, latestVersion);
 		if (currentVersion != null && semVerComparator.compare(currentVersion, latestVersion) < 0) {
 			final String msg = String.format(localization.getString("welcome.newVersionMessage"), latestVersion, currentVersion);
-			Platform.runLater(() -> {
-				this.updateLink.setText(msg);
-				this.updateLink.setVisible(true);
-				this.updateLink.setDisable(false);
-			});
+			this.updateLink.setText(msg);
+			this.updateLink.setVisible(true);
+			this.updateLink.setDisable(false);
 		}
 	}
 

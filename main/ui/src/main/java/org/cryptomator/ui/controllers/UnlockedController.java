@@ -8,14 +8,13 @@
  ******************************************************************************/
 package org.cryptomator.ui.controllers;
 
-import java.util.Optional;
-
 import javax.inject.Inject;
+import java.util.Optional;
+import java.util.concurrent.ExecutorService;
 
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
-import javafx.beans.binding.ObjectExpression;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
@@ -35,11 +34,10 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.VBox;
 import javafx.stage.PopupWindow.AnchorLocation;
 import javafx.util.Duration;
-import org.cryptomator.frontend.webdav.mount.Mounter.CommandFailedException;
 import org.cryptomator.ui.l10n.Localization;
 import org.cryptomator.ui.model.Vault;
-import org.cryptomator.ui.util.AsyncTaskService;
 import org.cryptomator.ui.util.DialogBuilderUtil;
+import org.cryptomator.ui.util.Tasks;
 import org.fxmisc.easybind.EasyBind;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,9 +52,8 @@ public class UnlockedController implements ViewController {
 	private static final double IO_SAMPLING_INTERVAL = 0.25;
 
 	private final Localization localization;
-	private final AsyncTaskService asyncTaskService;
+	private final ExecutorService executor;
 	private final ObjectProperty<Vault> vault = new SimpleObjectProperty<>();
-	private final ObjectExpression<Vault.State> vaultState = ObjectExpression.objectExpression(EasyBind.select(vault).selectObject(Vault::stateProperty));
 	private Optional<LockListener> listener = Optional.empty();
 	private Timeline ioAnimation;
 
@@ -79,9 +76,9 @@ public class UnlockedController implements ViewController {
 	private VBox root;
 
 	@Inject
-	public UnlockedController(Localization localization, AsyncTaskService asyncTaskService) {
+	public UnlockedController(Localization localization, ExecutorService executor) {
 		this.localization = localization;
-		this.asyncTaskService = asyncTaskService;
+		this.executor = executor;
 	}
 
 	@Override
@@ -115,14 +112,14 @@ public class UnlockedController implements ViewController {
 	}
 
 	private void regularLockVault(Runnable onSuccess) {
-		asyncTaskService.asyncTaskOf(() -> {
+		Tasks.create(() -> {
 			vault.get().lock(false);
 		}).onSuccess(() -> {
 			LOG.trace("Regular unmount succeeded.");
 			onSuccess.run();
 		}).onError(Exception.class, e -> {
 			onRegularUnmountVaultFailed(e, onSuccess);
-		}).run();
+		}).runOnce(executor);
 	}
 
 	private void onRegularUnmountVaultFailed(Exception e, Runnable onSuccess) {
@@ -147,7 +144,7 @@ public class UnlockedController implements ViewController {
 	}
 
 	private void forcedLockVault(Runnable onSuccess) {
-		asyncTaskService.asyncTaskOf(() -> {
+		Tasks.create(() -> {
 			vault.get().lock(true);
 		}).onSuccess(() -> {
 			LOG.trace("Forced unmount succeeded.");
@@ -155,7 +152,7 @@ public class UnlockedController implements ViewController {
 		}).onError(Exception.class, e -> {
 			LOG.error("Forced unmount failed.", e);
 			messageLabel.setText(localization.getString("unlocked.label.unmountFailed"));
-		}).run();
+		}).runOnce(executor);
 	}
 
 	@FXML
@@ -174,15 +171,15 @@ public class UnlockedController implements ViewController {
 	}
 
 	void revealVault(Vault vault) {
-		asyncTaskService.asyncTaskOf(() -> {
+		Tasks.create(() -> {
 			vault.reveal();
 		}).onSuccess(() -> {
 			LOG.trace("Reveal succeeded.");
 			messageLabel.setText(null);
-		}).onError(CommandFailedException.class, e -> {
+		}).onError(Exception.class, e -> {
 			LOG.error("Reveal failed.", e);
 			messageLabel.setText(localization.getString("unlocked.label.revealFailed"));
-		}).run();
+		}).runOnce(executor);
 	}
 
 	// ****************************************
