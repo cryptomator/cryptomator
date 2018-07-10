@@ -21,27 +21,30 @@
 		</fx:jar>
 	</target>
 
-	<!-- Create Image package -->
+	<!-- Create Image -->
 	<target name="image" depends="create-jar">
+		<property environment="env"/>
+
 		<fx:deploy nativeBundles="image" outdir="antbuild" verbose="true">
 			<fx:application refid="Cryptomator" />
 			<fx:info title="Cryptomator" vendor="cryptomator.org" copyright="cryptomator.org" license="GPL" category="Utility"/>
 			<fx:platform j2se="9.0">
-				<fx:property name="logback.configurationFile" value="logback.xml" />
-				<fx:property name="cryptomator.settingsPath" value="~/.Cryptomator/settings.json" />
-				<fx:property name="cryptomator.ipcPortPath" value="~/.Cryptomator/ipcPort.bin" />
+				<fx:property name="logback.configurationFile" value="${env.antbuild.logback.configurationFile}" />
+				<fx:property name="cryptomator.settingsPath" value="${env.antbuild.cryptomator.settingsPath}" />
+				<fx:property name="cryptomator.ipcPortPath" value="${env.antbuild.cryptomator.ipcPortPath}" />
+				<fx:property name="cryptomator.keychainPath" value="${env.antbuild.cryptomator.keychainPath}"/>
 				<fx:jvmarg value="-Xss2m"/>
 				<fx:jvmarg value="-Xmx512m"/>
 				<fx:jvmarg value="--add-modules"/>
 				<fx:jvmarg value="jdk.incubator.httpclient"/>
 			</fx:platform>
 			<fx:resources>
-				<fx:fileset dir="." type="data" includes="logback.xml" />
 				<fx:fileset dir="antbuild" type="jar" includes="Cryptomator-${project.version}.jar" />
 				<fx:fileset dir="libs" type="jar" includes="*.jar" excludes="launcher-${project.version}.jar"/>
 			</fx:resources>
 			<fx:permissions elevated="false" />
 			<fx:preferences install="true" />
+			<fx:bundleArgument arg="dropinResourcesRoot" value="${env.antbuild.dropinResourcesRoot}"/>
 		</fx:deploy>
 	</target>
 	
