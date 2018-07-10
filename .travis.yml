@@ -60,7 +60,7 @@ before_deploy:
   fi
 - mvn -fmain/pom.xml clean package -Prelease -DskipTests
 - gpg --import 34C80F11.gpg
-- gpg --detach-sign -a -u 34C80F11 --batch --passphrase ${GPG_PASSPHRASE} main/ant-kit/target/antkit.tar.gz
+- gpg --detach-sign -a -u 34C80F11 --batch --passphrase ${GPG_PASSPHRASE} main/ant-kit/target/antkit.zip
 deploy:
 - provider: releases # CONTINUOUS
   prerelease: true
@@ -70,8 +70,8 @@ deploy:
   file_glob: true
   file:
   - "main/uber-jar/target/Cryptomator-*.jar"
-  - "main/ant-kit/target/antkit.tar.gz"
-  - "main/ant-kit/target/antkit.tar.gz.asc"
+  - "main/ant-kit/target/antkit.zip"
+  - "main/ant-kit/target/antkit.zip.asc"
   skip_cleanup: true
   name: Cryptomator continuous build
   body: Automatically built on $(date +'%F %T %Z').
@@ -84,8 +84,8 @@ deploy:
   api_key: $GITHUB_API_KEY
   file:
   - "main/uber-jar/target/Cryptomator-$TRAVIS_TAG.jar"
-  - "main/ant-kit/target/antkit.tar.gz"
-  - "main/ant-kit/target/antkit.tar.gz.asc"
+  - "main/ant-kit/target/antkit.zip"
+  - "main/ant-kit/target/antkit.zip.asc"
   skip_cleanup: true
   on:
     repo: cryptomator/cryptomator
