@@ -4,9 +4,14 @@
 	
 	<!-- Define application to build -->
 	<fx:application id="Cryptomator" name="Cryptomator" version="${project.version}" mainClass="org.cryptomator.launcher.Cryptomator" />
+
+	<!-- Print build environment properties -->
+	<target name="check-env">
+		<echoproperties/>
+	</target>
 	
 	<!-- Create main application jar -->
-	<target name="create-jar">
+	<target name="create-jar" depends="check-env">
 		<fx:jar destfile="antbuild/Cryptomator-${project.version}.jar">
 			<fx:application refid="Cryptomator" />
 			<fx:fileset dir="libs" includes="launcher-${project.version}.jar" />
@@ -23,16 +28,14 @@
 
 	<!-- Create Image -->
 	<target name="image" depends="create-jar">
-		<property environment="env"/>
-
 		<fx:deploy nativeBundles="image" outdir="antbuild" verbose="true">
 			<fx:application refid="Cryptomator" />
 			<fx:info title="Cryptomator" vendor="cryptomator.org" copyright="cryptomator.org" license="GPL" category="Utility"/>
 			<fx:platform j2se="9.0">
-				<fx:property name="logback.configurationFile" value="${env.antbuild.logback.configurationFile}" />
-				<fx:property name="cryptomator.settingsPath" value="${env.antbuild.cryptomator.settingsPath}" />
-				<fx:property name="cryptomator.ipcPortPath" value="${env.antbuild.cryptomator.ipcPortPath}" />
-				<fx:property name="cryptomator.keychainPath" value="${env.antbuild.cryptomator.keychainPath}"/>
+				<fx:property name="logback.configurationFile" value="\${antbuild.logback.configurationFile}" />
+				<fx:property name="cryptomator.settingsPath" value="\${antbuild.cryptomator.settingsPath}" />
+				<fx:property name="cryptomator.ipcPortPath" value="\${antbuild.cryptomator.ipcPortPath}" />
+				<fx:property name="cryptomator.keychainPath" value="\${antbuild.cryptomator.keychainPath}"/>
 				<fx:jvmarg value="-Xss2m"/>
 				<fx:jvmarg value="-Xmx512m"/>
 				<fx:jvmarg value="--add-modules"/>
@@ -44,7 +47,7 @@
 			</fx:resources>
 			<fx:permissions elevated="false" />
 			<fx:preferences install="true" />
-			<fx:bundleArgument arg="dropinResourcesRoot" value="${env.antbuild.dropinResourcesRoot}"/>
+			<fx:bundleArgument arg="dropinResourcesRoot" value="\${antbuild.dropinResourcesRoot}"/>
 		</fx:deploy>
 	</target>
 	
