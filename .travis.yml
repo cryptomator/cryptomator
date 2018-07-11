@@ -39,7 +39,7 @@ after_success:
 - $JAVA_HOME/bin/java -jar ~/codacy-coverage-reporter-assembly-latest.jar report -l Java -r main/launcher/target/site/jacoco/jacoco.xml --partial
 - $JAVA_HOME/bin/java -jar ~/codacy-coverage-reporter-assembly-latest.jar final
 before_deploy:
-- jdk_switcher use oraclejdk9
+- jdk_switcher use oraclejdk10
 - |
   if [[ $TRAVIS_BRANCH == "develop" ]] && [[ $TRAVIS_PULL_REQUEST == "false" ]]; then
     CONTINUOUS_RELEASE_URL=`curl -s https://api.github.com/repos/cryptomator/cryptomator/releases/tags/continuous | jq -re '.url'`
