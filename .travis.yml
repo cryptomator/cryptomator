@@ -30,16 +30,7 @@ install:
 - mvn -fmain/pom.xml clean install -DskipTests org.codehaus.mojo:versions-maven-plugin:help dependency:go-offline -Pcoverage,release # "clean install" needed until we can exclude artifacts currently in the reactor, see https://maven.apache.org/plugins/maven-dependency-plugin/go-offline-mojo.html#excludeReactor and https://issues.apache.org/jira/browse/MDEP-568
 script:
 - mvn --update-snapshots -fmain/pom.xml clean test verify -Pcoverage
-after_success:
-- jdk_switcher use oraclejdk8
-- curl -o ~/codacy-coverage-reporter-assembly-latest.jar https://oss.sonatype.org/service/local/repositories/releases/content/com/codacy/codacy-coverage-reporter/4.0.1/codacy-coverage-reporter-4.0.1-assembly.jar
-- $JAVA_HOME/bin/java -jar ~/codacy-coverage-reporter-assembly-latest.jar report -l Java -r main/commons/target/site/jacoco/jacoco.xml --partial
-- $JAVA_HOME/bin/java -jar ~/codacy-coverage-reporter-assembly-latest.jar report -l Java -r main/keychain/target/site/jacoco/jacoco.xml --partial
-- $JAVA_HOME/bin/java -jar ~/codacy-coverage-reporter-assembly-latest.jar report -l Java -r main/ui/target/site/jacoco/jacoco.xml --partial
-- $JAVA_HOME/bin/java -jar ~/codacy-coverage-reporter-assembly-latest.jar report -l Java -r main/launcher/target/site/jacoco/jacoco.xml --partial
-- $JAVA_HOME/bin/java -jar ~/codacy-coverage-reporter-assembly-latest.jar final
 before_deploy:
-- jdk_switcher use oraclejdk10
 - |
   if [[ $TRAVIS_BRANCH == "develop" ]] && [[ $TRAVIS_PULL_REQUEST == "false" ]]; then
     CONTINUOUS_RELEASE_URL=`curl -s https://api.github.com/repos/cryptomator/cryptomator/releases/tags/continuous | jq -re '.url'`
@@ -100,3 +91,11 @@ deploy:
   on:
     repo: cryptomator/cryptomator
     tags: true
+after_script:
+- jdk_switcher use oraclejdk8
+- curl -o ~/codacy-coverage-reporter-assembly-latest.jar https://oss.sonatype.org/service/local/repositories/releases/content/com/codacy/codacy-coverage-reporter/4.0.1/codacy-coverage-reporter-4.0.1-assembly.jar
+- $JAVA_HOME/bin/java -jar ~/codacy-coverage-reporter-assembly-latest.jar report -l Java -r main/commons/target/site/jacoco/jacoco.xml --partial
+- $JAVA_HOME/bin/java -jar ~/codacy-coverage-reporter-assembly-latest.jar report -l Java -r main/keychain/target/site/jacoco/jacoco.xml --partial
+- $JAVA_HOME/bin/java -jar ~/codacy-coverage-reporter-assembly-latest.jar report -l Java -r main/ui/target/site/jacoco/jacoco.xml --partial
+- $JAVA_HOME/bin/java -jar ~/codacy-coverage-reporter-assembly-latest.jar report -l Java -r main/launcher/target/site/jacoco/jacoco.xml --partial
+- $JAVA_HOME/bin/java -jar ~/codacy-coverage-reporter-assembly-latest.jar final
