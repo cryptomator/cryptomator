@@ -1,7 +1,7 @@
 language: java
 sudo: false
 jdk:
-- oraclejdk9
+- oraclejdk10
 branches:
   except:
   - continuous # To avoid infinite loops, as this tag is created by this Travis config

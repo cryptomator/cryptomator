@@ -31,7 +31,7 @@
 		<fx:deploy nativeBundles="image" outdir="antbuild" verbose="true">
 			<fx:application refid="Cryptomator" />
 			<fx:info title="Cryptomator" vendor="cryptomator.org" copyright="cryptomator.org" license="GPL" category="Utility"/>
-			<fx:platform j2se="9.0">
+			<fx:platform j2se="10">
 				<fx:property name="logback.configurationFile" value="\${antbuild.logback.configurationFile}" />
 				<fx:property name="cryptomator.settingsPath" value="\${antbuild.cryptomator.settingsPath}" />
 				<fx:property name="cryptomator.ipcPortPath" value="\${antbuild.cryptomator.ipcPortPath}" />
