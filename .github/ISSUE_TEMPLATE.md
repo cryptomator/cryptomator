@@ -4,8 +4,8 @@ Before creating a new issue make sure that you
 - searched existing (and closed) issues: https://github.com/cryptomator/cryptomator/issues
 - searched the knowledge base: https://community.cryptomator.org/c/kb
 - have read the support guide: https://github.com/cryptomator/cryptomator/blob/develop/SUPPORT.md
-- have read the contribution guide: https://github.com/cryptomator/cryptomator/blob/develop/CONTRIBUTING.md
-- have read the code of conduct: https://github.com/cryptomator/cryptomator/blob/develop/CODE_OF_CONDUCT.md
+- have read the contribution guide: https://github.com/cryptomator/cryptomator/blob/develop/.github/CONTRIBUTING.md
+- have read the code of conduct: https://github.com/cryptomator/cryptomator/blob/develop/.github/CODE_OF_CONDUCT.md
 
 ## Basic Info
 

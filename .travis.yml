@@ -1,7 +1,7 @@
 language: java
 sudo: false
 jdk:
-- oraclejdk9
+- oraclejdk10
 branches:
   except:
   - continuous # To avoid infinite loops, as this tag is created by this Travis config
@@ -14,6 +14,7 @@ env:
     - secure: "lV9OwUbHMrMpLUH1CY+Z4puLDdFXytudyPlG1eGRsesdpuG6KM3uQVz6uAtf6lrU8DRbMM/T7ML+PmvQ4UoPPYLdLxESLLBat2qUPOIVBOhTSlCc7I0DmGy04CSvkeMy8dPaQC0ukgNiR7zwoNzfcpGRN/U9S8tziDruuHoZSrg=" # BINTRAY_API_KEY
     - secure: "oWFgRTVP6lyTa7qVxlvkpm20MtVc3BtmsNXQJS6bfg2A0o/iCQMNx7OD59BaafCLGRKvCcJVESiC8FlSylVMS7CDSyYu0gg70NUiIuHp4NBM5inFWYCy/PdQsCTzr5uvNG+rMFQpMFRaCV0FrfM3tLondcVkhsHL68l93Xoexx4=" # CODACY_PROJECT_TOKEN
     - secure: "zJxgytA2Ks5Xzv+7kUaUq+EBFNQw9Qec63lcMJVuXVWczjL16nKW1EzzV515ag+OWL46z3lEPForDhufw0VtFnNmaX68jkO0mp01eLrHApc1llN2Y/U8GBXfNNazN4+Kom4H+z/AO+wJr8EsKMMUczCdQ3APgd9uVI0hzXw/Z3M=" # GITHUB_API_KEY
+    - secure: "PiH/o9MLOyPdjIwECIEfj3TuUxx7QB0CIs3o1WXjqb1PbDdHDbQyvswYit6xDw9NrJp/A+ov2k00jq+n+8fLTSd4AY21y5WiJN/ccCTWUuUiFhGxOyM37aeWAPAn4rUp7D7o8jLxEdpGZAfglIzaz+GCEQYxfV/w3FDwztViXgQ=" # GPG_PASSPHRASE
 addons:
   apt:
     packages:
@@ -28,13 +29,8 @@ install:
 - curl -o $HOME/.m2/settings.xml https://gist.githubusercontent.com/cryptobot/cf5fbd909c4782aaeeeb7c7f4a1a43da/raw/e60ee486e34ee0c79f89f947abe2c83b4290c6bb/settings.xml
 - mvn -fmain/pom.xml clean install -DskipTests org.codehaus.mojo:versions-maven-plugin:help dependency:go-offline -Pcoverage,release # "clean install" needed until we can exclude artifacts currently in the reactor, see https://maven.apache.org/plugins/maven-dependency-plugin/go-offline-mojo.html#excludeReactor and https://issues.apache.org/jira/browse/MDEP-568
 script:
-- mvn --update-snapshots -fmain/pom.xml clean test jacoco:report verify -Pcoverage
-after_success:
-- jdk_switcher use oraclejdk8
-- curl -o ~/codacy-coverage-reporter-assembly-latest.jar https://oss.sonatype.org/service/local/repositories/releases/content/com/codacy/codacy-coverage-reporter/2.0.1/codacy-coverage-reporter-2.0.1-assembly.jar
-- $JAVA_HOME/bin/java -cp ~/codacy-coverage-reporter-assembly-latest.jar com.codacy.CodacyCoverageReporter -l Java -r main/jacoco-report/target/site/jacoco-aggregate/jacoco.xml
+- mvn --update-snapshots -fmain/pom.xml clean test verify -Pcoverage
 before_deploy:
-- jdk_switcher use oraclejdk9
 - |
   if [[ $TRAVIS_BRANCH == "develop" ]] && [[ $TRAVIS_PULL_REQUEST == "false" ]]; then
     CONTINUOUS_RELEASE_URL=`curl -s https://api.github.com/repos/cryptomator/cryptomator/releases/tags/continuous | jq -re '.url'`
@@ -54,6 +50,8 @@ before_deploy:
     git remote remove gh
   fi
 - mvn -fmain/pom.xml clean package -Prelease -DskipTests
+- gpg --import 34C80F11.gpg
+- gpg --detach-sign -a -u 34C80F11 --batch --passphrase ${GPG_PASSPHRASE} main/ant-kit/target/antkit.zip
 deploy:
 - provider: releases # CONTINUOUS
   prerelease: true
@@ -63,7 +61,8 @@ deploy:
   file_glob: true
   file:
   - "main/uber-jar/target/Cryptomator-*.jar"
-  - "main/ant-kit/target/antkit.tar.gz"
+  - "main/ant-kit/target/antkit.zip"
+  - "main/ant-kit/target/antkit.zip.asc"
   skip_cleanup: true
   name: Cryptomator continuous build
   body: Automatically built on $(date +'%F %T %Z').
@@ -76,7 +75,8 @@ deploy:
   api_key: $GITHUB_API_KEY
   file:
   - "main/uber-jar/target/Cryptomator-$TRAVIS_TAG.jar"
-  - "main/ant-kit/target/antkit.tar.gz"
+  - "main/ant-kit/target/antkit.zip"
+  - "main/ant-kit/target/antkit.zip.asc"
   skip_cleanup: true
   on:
     repo: cryptomator/cryptomator
@@ -91,3 +91,11 @@ deploy:
   on:
     repo: cryptomator/cryptomator
     tags: true
+after_script:
+- jdk_switcher use oraclejdk8
+- curl -o ~/codacy-coverage-reporter-assembly-latest.jar https://oss.sonatype.org/service/local/repositories/releases/content/com/codacy/codacy-coverage-reporter/4.0.1/codacy-coverage-reporter-4.0.1-assembly.jar
+- $JAVA_HOME/bin/java -jar ~/codacy-coverage-reporter-assembly-latest.jar report -l Java -r main/commons/target/site/jacoco/jacoco.xml --partial
+- $JAVA_HOME/bin/java -jar ~/codacy-coverage-reporter-assembly-latest.jar report -l Java -r main/keychain/target/site/jacoco/jacoco.xml --partial
+- $JAVA_HOME/bin/java -jar ~/codacy-coverage-reporter-assembly-latest.jar report -l Java -r main/ui/target/site/jacoco/jacoco.xml --partial
+- $JAVA_HOME/bin/java -jar ~/codacy-coverage-reporter-assembly-latest.jar report -l Java -r main/launcher/target/site/jacoco/jacoco.xml --partial
+- $JAVA_HOME/bin/java -jar ~/codacy-coverage-reporter-assembly-latest.jar final

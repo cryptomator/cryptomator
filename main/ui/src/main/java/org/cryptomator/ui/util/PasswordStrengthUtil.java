@@ -28,6 +28,8 @@ import javafx.scene.paint.Color;
 @Singleton
 public class PasswordStrengthUtil {
 
+	private static final int PW_TRUNC_LEN = 100; // truncate very long passwords, since zxcvbn memory and runtime depends vastly on the length
+
 	private final Zxcvbn zxcvbn;
 	private final List<String> sanitizedInputs;
 	private final Localization localization;
@@ -43,10 +45,9 @@ public class PasswordStrengthUtil {
 	public int computeRate(String password) {
 		if (Strings.isNullOrEmpty(password)) {
 			return -1;
-		} else if (password.length() > 100) {
-			return 4; // assume this is strong. zxcvbn memory and runtime depends vastly on the password length
 		} else {
-			return zxcvbn.measure(password, sanitizedInputs).getScore();
+			int numCharsToRate = Math.min(PW_TRUNC_LEN, password.length());
+			return zxcvbn.measure(password.substring(0, numCharsToRate), sanitizedInputs).getScore();
 		}
 	}
 

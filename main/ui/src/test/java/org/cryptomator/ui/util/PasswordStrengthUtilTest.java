@@ -7,15 +7,14 @@ import org.mockito.Mockito;
 
 public class PasswordStrengthUtilTest {
 
-	@Test
-	public void testLongPasswordsWillBeRatedAsStrong() {
+	@Test(timeout = 5000)
+	public void testLongPasswords() {
 		PasswordStrengthUtil util = new PasswordStrengthUtil(Mockito.mock(Localization.class));
 		StringBuilder longPwBuilder = new StringBuilder();
-		for (int i = 0; i < 101; i++) {
+		for (int i = 0; i < 10000; i++) {
 			longPwBuilder.append('x');
 		}
-		int strength = util.computeRate(longPwBuilder.toString());
-		Assert.assertEquals(4, strength);
+		util.computeRate(longPwBuilder.toString());
 	}
 
 }

@@ -37,6 +37,8 @@ public class Cryptomator {
 			}
 		} catch (IOException e) {
 			LOG.error("Failed to initiate inter-process communication.", e);
+		} catch (Throwable e) {
+			LOG.error("Error during startup", e);
 		}
 		System.exit(0); // end remaining non-daemon threads.
 	}

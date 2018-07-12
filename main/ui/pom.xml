@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.cryptomator</groupId>
 		<artifactId>main</artifactId>
-		<version>1.4.0-beta1</version>
+		<version>1.4.0-beta2</version>
 	</parent>
 	<artifactId>ui</artifactId>
 	<name>Cryptomator GUI</name>
@@ -12,15 +12,16 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.cryptomator</groupId>
+			<artifactId>keychain</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.cryptomator</groupId>
 			<artifactId>commons</artifactId>
 		</dependency>
+
 		<dependency>
 			<groupId>org.cryptomator</groupId>
 			<artifactId>cryptofs</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.cryptomator</groupId>
-			<artifactId>webdav-nio-adapter</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.cryptomator</groupId>
@@ -28,11 +29,15 @@
 		</dependency>
 		<dependency>
 			<groupId>org.cryptomator</groupId>
-			<artifactId>keychain</artifactId>
+			<artifactId>fuse-nio-adapter</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.cryptomator</groupId>
-			<artifactId>fuse-nio-adapter</artifactId>
+			<artifactId>dokany-nio-adapter</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.cryptomator</groupId>
+			<artifactId>webdav-nio-adapter</artifactId>
 		</dependency>
 
 		<!-- CryptoLib -->

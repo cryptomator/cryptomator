@@ -9,30 +9,50 @@ import java.io.IOException;
  */
 public interface Volume {
 
-	void prepare(CryptoFileSystem fs) throws IOException;
+	/**
+	 * Checks in constant time whether this volume type is supported on the system running Cryptomator.
+	 * @return true if this volume can be mounted
+	 */
+	boolean isSupported();
 
-	void mount() throws CommandFailedException;
+	/**
+	 *
+	 * @param fs
+	 * @throws IOException
+	 */
+	void mount(CryptoFileSystem fs) throws IOException, VolumeException;
 
-	default void reveal() throws CommandFailedException {
-		throw new CommandFailedException("Not implemented.");
-	}
+	void reveal() throws VolumeException;
 
-	void unmount() throws CommandFailedException;
+	void unmount() throws VolumeException;
 
-	default void unmountForced() throws CommandFailedException {
-		throw new CommandFailedException("Operation not supported.");
-	}
-
-	void stop();
-
-	String getMountUri();
-
-	default boolean isSupported() {
-		return false;
-	}
+	// optional forced unmounting:
 
 	default boolean supportsForcedUnmount() {
 		return false;
+	}
+
+	default void unmountForced() throws VolumeException {
+		throw new VolumeException("Operation not supported.");
+	}
+
+	/**
+	 * Exception thrown when a volume-specific command such as mount/unmount/reveal failed.
+	 */
+	class VolumeException extends Exception {
+
+		public VolumeException(String message) {
+			super(message);
+		}
+
+		public VolumeException(Throwable cause) {
+			super(cause);
+		}
+
+		public VolumeException(String message, Throwable cause) {
+			super(message, cause);
+		}
+
 	}
 
 }

@@ -8,41 +8,21 @@
  ******************************************************************************/
 package org.cryptomator.ui.controllers;
 
-import java.io.IOException;
-import java.nio.file.*;
+import javax.inject.Inject;
+import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Objects;
 import java.util.Optional;
-
-import javax.inject.Inject;
-
-import javafx.beans.binding.Bindings;
-import javafx.scene.layout.HBox;
-import org.apache.commons.lang3.CharUtils;
-import org.apache.commons.lang3.SystemUtils;
-import org.cryptomator.common.settings.VolumeImpl;
-import org.cryptomator.common.settings.Settings;
-import org.cryptomator.common.settings.VaultSettings;
-import org.cryptomator.cryptolib.api.InvalidPassphraseException;
-import org.cryptomator.cryptolib.api.UnsupportedVaultFormatException;
-import org.cryptomator.frontend.webdav.ServerLifecycleException;
-import org.cryptomator.keychain.KeychainAccess;
-import org.cryptomator.ui.controls.SecPasswordField;
-import org.cryptomator.ui.l10n.Localization;
-import org.cryptomator.ui.model.Vault;
-import org.cryptomator.ui.model.WindowsDriveLetters;
-import org.cryptomator.ui.util.AsyncTaskService;
-import org.cryptomator.ui.util.DialogBuilderUtil;
-import org.fxmisc.easybind.EasyBind;
-import org.fxmisc.easybind.Subscription;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.concurrent.ExecutorService;
 
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Strings;
-
 import javafx.application.Application;
+import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -59,8 +39,28 @@ import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
 import javafx.util.StringConverter;
+import org.apache.commons.lang3.CharUtils;
+import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.common.settings.Settings;
+import org.cryptomator.common.settings.VaultSettings;
+import org.cryptomator.common.settings.VolumeImpl;
+import org.cryptomator.cryptolib.api.InvalidPassphraseException;
+import org.cryptomator.cryptolib.api.UnsupportedVaultFormatException;
+import org.cryptomator.frontend.webdav.ServerLifecycleException;
+import org.cryptomator.keychain.KeychainAccess;
+import org.cryptomator.ui.controls.SecPasswordField;
+import org.cryptomator.ui.l10n.Localization;
+import org.cryptomator.ui.model.Vault;
+import org.cryptomator.ui.model.WindowsDriveLetters;
+import org.cryptomator.ui.util.DialogBuilderUtil;
+import org.cryptomator.ui.util.Tasks;
+import org.fxmisc.easybind.EasyBind;
+import org.fxmisc.easybind.Subscription;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class UnlockController implements ViewController {
 
@@ -73,23 +73,23 @@ public class UnlockController implements ViewController {
 
 	private final Application app;
 	private final Localization localization;
-	private final AsyncTaskService asyncTaskService;
 	private final WindowsDriveLetters driveLetters;
 	private final ChangeListener<Character> driveLetterChangeListener = this::winDriveLetterDidChange;
 	private final Optional<KeychainAccess> keychainAccess;
 	private final Settings settings;
+	private final ExecutorService executor;
 	private Vault vault;
 	private Optional<UnlockListener> listener = Optional.empty();
 	private Subscription vaultSubs = Subscription.EMPTY;
 
 	@Inject
-	public UnlockController(Application app, Localization localization, AsyncTaskService asyncTaskService, WindowsDriveLetters driveLetters, Optional<KeychainAccess> keychainAccess, Settings settings) {
+	public UnlockController(Application app, Localization localization, WindowsDriveLetters driveLetters, Optional<KeychainAccess> keychainAccess, Settings settings, ExecutorService executor) {
 		this.app = app;
 		this.localization = localization;
-		this.asyncTaskService = asyncTaskService;
 		this.driveLetters = driveLetters;
 		this.keychainAccess = keychainAccess;
 		this.settings = settings;
+		this.executor = executor;
 	}
 
 	@FXML
@@ -106,9 +106,6 @@ public class UnlockController implements ViewController {
 
 	@FXML
 	private CheckBox savePassword;
-
-	@FXML
-	private CheckBox mountAfterUnlock;
 
 	@FXML
 	private TextField mountName;
@@ -159,8 +156,6 @@ public class UnlockController implements ViewController {
 	public void initialize() {
 		advancedOptions.managedProperty().bind(advancedOptions.visibleProperty());
 		unlockButton.disableProperty().bind(passwordField.textProperty().isEmpty());
-		mountName.disableProperty().bind(mountAfterUnlock.selectedProperty().not());
-		revealAfterMount.disableProperty().bind(mountAfterUnlock.selectedProperty().not());
 		mountName.addEventFilter(KeyEvent.KEY_TYPED, this::filterAlphanumericKeyEvents);
 		mountName.textProperty().addListener(this::mountNameDidChange);
 		savePassword.setDisable(!keychainAccess.isPresent());
@@ -186,7 +181,7 @@ public class UnlockController implements ViewController {
 			winDriveLetterLabel.setManaged(false);
 			winDriveLetter.setVisible(false);
 			winDriveLetter.setManaged(false);
-			if (VolumeImpl.WEBDAV.equals(settings.volumeImpl().get())) {
+			if (VolumeImpl.WEBDAV.equals(settings.preferredVolumeImpl().get())) {
 				useOwnMountPath.setVisible(false);
 				useOwnMountPath.setManaged(false);
 				mountPathLabel.setManaged(false);
@@ -250,12 +245,10 @@ public class UnlockController implements ViewController {
 		}
 		VaultSettings vaultSettings = vault.getVaultSettings();
 		unlockAfterStartup.setSelected(savePassword.isSelected() && vaultSettings.unlockAfterStartup().get());
-		mountAfterUnlock.setSelected(vaultSettings.mountAfterUnlock().get());
 		revealAfterMount.setSelected(vaultSettings.revealAfterMount().get());
 		useOwnMountPath.setSelected(vaultSettings.usesIndividualMountPath().get());
 
 		vaultSubs = vaultSubs.and(EasyBind.subscribe(unlockAfterStartup.selectedProperty(), vaultSettings.unlockAfterStartup()::set));
-		vaultSubs = vaultSubs.and(EasyBind.subscribe(mountAfterUnlock.selectedProperty(), vaultSettings.mountAfterUnlock()::set));
 		vaultSubs = vaultSubs.and(EasyBind.subscribe(revealAfterMount.selectedProperty(), vaultSettings.revealAfterMount()::set));
 		vaultSubs = vaultSubs.and(EasyBind.subscribe(useOwnMountPath.selectedProperty(), vaultSettings.usesIndividualMountPath()::set));
 
@@ -430,7 +423,7 @@ public class UnlockController implements ViewController {
 		progressIndicator.setVisible(true);
 
 		CharSequence password = passwordField.getCharacters();
-		asyncTaskService.asyncTaskOf(() -> {
+		Tasks.create(() -> {
 			vault.unlock(password);
 			if (keychainAccess.isPresent() && savePassword.isSelected()) {
 				keychainAccess.get().storePassphrase(vault.getId(), password);
@@ -457,16 +450,16 @@ public class UnlockController implements ViewController {
 		}).onError(ServerLifecycleException.class, e -> {
 			LOG.error("Unlock failed for technical reasons.", e);
 			messageText.setText(localization.getString("unlock.errorMessage.unlockFailed"));
-		}).onError(IOException.class, e -> {
-			LOG.error("Unlock failed for technical reasons.", e);
-			messageText.setText(localization.getString("unlock.errorMessage.unlockFailed"));
+		}).onError(Exception.class, e -> {
+				LOG.error("Unlock failed for technical reasons.", e);
+				messageText.setText(localization.getString("unlock.errorMessage.unlockFailed"));
 		}).andFinally(() -> {
 			if (!savePassword.isSelected()) {
 				passwordField.swipe();
 			}
 			advancedOptions.setDisable(false);
 			progressIndicator.setVisible(false);
-		}).run();
+		}).runOnce(executor);
 	}
 
 	/* callback */

@@ -23,6 +23,9 @@ main.createVault.nonEmptyDir.content=The selected directory already contains fil
 # welcome.fxml
 welcome.checkForUpdates.label.currentlyChecking=Checking for Updates...
 welcome.newVersionMessage=Version %1$s can be downloaded.\nThis is %2$s.
+welcome.askForUpdateCheck.dialog.title=Update check
+welcome.askForUpdateCheck.dialog.header=Enable the integrated update check?
+welcome.askForUpdateCheck.dialog.content=To check for updates, Cryptomator will fetch the current version from the Cryptomator servers and display a hint to you if a newer version is available.\n\nWe recommend to enable the update check to always be sure you have the newest version of Cryptomator, with all security patches, installed. If you do not enable the update check you may check and download the current version from https://cryptomator.org/downloads/.\n\nYou can change this at any time from within the settings.
 
 # initialize.fxml
 initialize.label.password=Password
@@ -62,7 +65,6 @@ upgrade.version5toX.msg=This vault needs to be migrated to a newer format.\nPlea
 # unlock.fxml
 unlock.label.password=Password
 unlock.label.savePassword=Save Password
-unlock.label.mountAfterUnlock=Mount Drive
 unlock.label.mountName=Drive Name
 unlock.label.unlockAfterStartup=Auto-Unlock on Start (Experimental)
 unlock.label.revealAfterMount=Reveal Drive
@@ -100,10 +102,7 @@ changePassword.errorMessage.decryptionFailed=Decryption failed
 
 # unlocked.fxml
 unlocked.button.lock=Lock Vault
-unlocked.moreOptions.mount=Mount Drive
-unlocked.moreOptions.unmount=Eject Drive
 unlocked.moreOptions.reveal=Reveal Drive
-unlocked.moreOptions.copyUrl=Copy Filesystem URL
 unlocked.label.mountFailed=Connecting drive failed
 unlocked.label.revealFailed=Command failed
 unlocked.label.unmountFailed=Ejecting drive failed
@@ -123,9 +122,10 @@ settings.webdav.port.apply=Apply
 settings.webdav.prefGvfsScheme.label=WebDAV Scheme
 settings.debugMode.label=Debug Mode *
 settings.requiresRestartLabel=* Cryptomator needs to restart
-settings.volume.label= Mount-Methode *
+settings.volume.label=Preferred Volume Type
 settings.volume.webdav=WebDAV
 settings.volume.fuse=FUSE
+settings.volume.dokany=Dokany
 
 # tray icon
 tray.menu.open=Open

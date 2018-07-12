@@ -2,24 +2,27 @@
  * Copyright (c) 2014, 2017 Sebastian Stenzel
  * All rights reserved.
  * This program and the accompanying materials are made available under the terms of the accompanying LICENSE file.
- * 
+ *
  * Contributors:
  *     Sebastian Stenzel - initial API and implementation
  ******************************************************************************/
 package org.cryptomator.ui.controllers;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
-
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Singleton;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -30,19 +33,19 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.Parent;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.layout.VBox;
-import jdk.incubator.http.HttpClient;
-import jdk.incubator.http.HttpRequest;
-import jdk.incubator.http.HttpResponse;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.ui.l10n.Localization;
-import org.cryptomator.ui.util.AsyncTaskService;
+import org.cryptomator.ui.util.Tasks;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static org.cryptomator.ui.util.DialogBuilderUtil.buildYesNoDialog;
 
 @Singleton
 public class WelcomeController implements ViewController {
@@ -54,17 +57,17 @@ public class WelcomeController implements ViewController {
 	private final Localization localization;
 	private final Settings settings;
 	private final Comparator<String> semVerComparator;
-	private final AsyncTaskService asyncTaskService;
+	private final ScheduledExecutorService executor;
 
 	@Inject
 	public WelcomeController(Application app, @Named("applicationVersion") Optional<String> applicationVersion, Localization localization, Settings settings, @Named("SemVer") Comparator<String> semVerComparator,
-			AsyncTaskService asyncTaskService) {
+							 ScheduledExecutorService executor) {
 		this.app = app;
 		this.applicationVersion = applicationVersion;
 		this.localization = localization;
 		this.settings = settings;
 		this.semVerComparator = semVerComparator;
-		this.asyncTaskService = asyncTaskService;
+		this.executor = executor;
 	}
 
 	@FXML
@@ -86,6 +89,8 @@ public class WelcomeController implements ViewController {
 	public void initialize(URL location, ResourceBundle resources) {
 		if (areUpdatesManagedExternally()) {
 			checkForUpdatesContainer.setVisible(false);
+		} else if (!settings.askedForUpdateCheck().get()) {
+			this.askForUpdateCheck();
 		} else if (settings.checkForUpdates().get()) {
 			this.checkForUpdates();
 		}
@@ -104,34 +109,63 @@ public class WelcomeController implements ViewController {
 		return Boolean.parseBoolean(System.getProperty("cryptomator.updatesManagedExternally", "false"));
 	}
 
+	private void askForUpdateCheck() {
+		Tasks.create(() -> {}).onSuccess(() -> {
+			Optional<ButtonType> result = buildYesNoDialog(
+					localization.getString("welcome.askForUpdateCheck.dialog.title"),
+					localization.getString("welcome.askForUpdateCheck.dialog.header"),
+					localization.getString("welcome.askForUpdateCheck.dialog.content"),
+					ButtonType.YES).showAndWait();
+			if (result.isPresent()) {
+				settings.askedForUpdateCheck().set(true);
+				settings.checkForUpdates().set(result.get().equals(ButtonType.YES));
+			}
+			if (settings.checkForUpdates().get()) {
+				this.checkForUpdates();
+			}
+		}).scheduleOnce(executor, 1, TimeUnit.SECONDS);
+	}
+
 	private void checkForUpdates() {
 		checkForUpdatesStatus.setText(localization.getString("welcome.checkForUpdates.label.currentlyChecking"));
 		checkForUpdatesIndicator.setVisible(true);
-		asyncTaskService.asyncTaskOf(() -> {
+		Tasks.create(() -> {
 			String userAgent = String.format("Cryptomator VersionChecker/%s %s %s (%s)", applicationVersion.orElse("SNAPSHOT"), SystemUtils.OS_NAME, SystemUtils.OS_VERSION, SystemUtils.OS_ARCH);
-			HttpClient client = HttpClient.newHttpClient();
-			HttpRequest request = HttpRequest.newBuilder()
-					.GET()
-					.uri(new URI("https://api.cryptomator.org/updates/latestVersion.json"))
-					.header("User-Agent", userAgent)
-					.timeout(Duration.ofSeconds(5))
-					.build();
-			HttpResponse<String> response = client.send(request, HttpResponse.BodyHandler.asString(StandardCharsets.UTF_8));
-			if (response.statusCode() == 200) {
+			URL url = URI.create("https://api.cryptomator.org/updates/latestVersion.json").toURL();
+			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+			conn.addRequestProperty("User-Agent", userAgent);
+			conn.connect();
+			try {
+				if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
+					return Optional.<byte[]>empty();
+				}
+				try (InputStream in = conn.getInputStream(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+					in.transferTo(out);
+					return Optional.of(out.toByteArray());
+				}
+			} finally {
+				conn.disconnect();
+			}
+		}).onSuccess(response -> {
+			response.ifPresent(bytes -> {
 				Gson gson = new GsonBuilder().setLenient().create();
-				Map<String, String> map = gson.fromJson(response.body(), new TypeToken<Map<String, String>>() {
+				String json = new String(bytes, StandardCharsets.UTF_8);
+				Map<String, String> map = gson.fromJson(json, new TypeToken<Map<String, String>>() {
 				}.getType());
 				if (map != null) {
 					this.compareVersions(map);
 				}
-			}
+			});
+		}).onError(Exception.class, e -> {
+			LOG.warn("Error checking for updates", e);
 		}).andFinally(() -> {
 			checkForUpdatesStatus.setText("");
 			checkForUpdatesIndicator.setVisible(false);
-		}).run();
+		}).runOnce(executor);
 	}
 
 	private void compareVersions(final Map<String, String> latestVersions) {
+		assert Platform.isFxApplicationThread();
 		final String latestVersion;
 		if (SystemUtils.IS_OS_MAC_OSX) {
 			latestVersion = latestVersions.get("mac");
@@ -147,11 +181,9 @@ public class WelcomeController implements ViewController {
 		LOG.info("Current version: {}, lastest version: {}", currentVersion, latestVersion);
 		if (currentVersion != null && semVerComparator.compare(currentVersion, latestVersion) < 0) {
 			final String msg = String.format(localization.getString("welcome.newVersionMessage"), latestVersion, currentVersion);
-			Platform.runLater(() -> {
-				this.updateLink.setText(msg);
-				this.updateLink.setVisible(true);
-				this.updateLink.setDisable(false);
-			});
+			this.updateLink.setText(msg);
+			this.updateLink.setVisible(true);
+			this.updateLink.setDisable(false);
 		}
 	}
 

@@ -18,10 +18,13 @@ import org.cryptomator.common.settings.VaultSettings;
 
 import dagger.Module;
 import dagger.Provides;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Module
 public class VaultModule {
 
+	private static final Logger LOG = LoggerFactory.getLogger(VaultModule.class);
 	private final VaultSettings vaultSettings;
 
 	public VaultModule(VaultSettings vaultSettings) {
@@ -42,21 +45,18 @@ public class VaultModule {
 	}
 
 	@Provides
-	@PerVault
-	public Volume provideNioAdpater(Settings settings, WebDavVolume webDavVolume, FuseVolume fuseVolume) {
-		VolumeImpl impl = settings.volumeImpl().get();
-		switch (impl) {
-			case FUSE:
-				if (fuseVolume.isSupported()) {
-					return fuseVolume;
-				} else {
-					settings.volumeImpl().set(VolumeImpl.WEBDAV);
-					// fallthrough to WEBDAV
-				}
-			case WEBDAV:
-				return webDavVolume;
-			default:
-				throw new IllegalStateException("Unsupported NioAdapter: " + impl);
+	public Volume provideVolume(Settings settings, WebDavVolume webDavVolume, FuseVolume fuseVolume, DokanyVolume dokanyVolume) {
+		VolumeImpl preferredImpl = settings.preferredVolumeImpl().get();
+		if (VolumeImpl.DOKANY == preferredImpl && dokanyVolume.isSupported()) {
+			return dokanyVolume;
+		} else if (VolumeImpl.FUSE == preferredImpl && fuseVolume.isSupported()) {
+			return fuseVolume;
+		} else {
+			if (VolumeImpl.WEBDAV != preferredImpl) {
+				LOG.warn("Using WebDAV, because {} is not supported.", preferredImpl.getDisplayName());
+			}
+			assert webDavVolume.isSupported();
+			return webDavVolume;
 		}
 	}
 

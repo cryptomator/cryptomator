@@ -15,7 +15,6 @@ import javax.inject.Provider;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-@VaultModule.PerVault
 public class WebDavVolume implements Volume {
 
 	private static final String LOCALHOST_ALIAS = "cryptomator-vault";
@@ -36,7 +35,7 @@ public class WebDavVolume implements Volume {
 	}
 
 	@Override
-	public void prepare(CryptoFileSystem fs) {
+	public void mount(CryptoFileSystem fs) throws VolumeException {
 		if (server == null) {
 			server = serverProvider.get();
 		}
@@ -45,10 +44,10 @@ public class WebDavVolume implements Volume {
 		}
 		servlet = server.createWebDavServlet(fs.getPath("/"), vaultSettings.getId() + "/" + vaultSettings.mountName().get());
 		servlet.start();
+		mount();
 	}
 
-	@Override
-	public void mount() throws CommandFailedException {
+	private void mount() throws VolumeException {
 		if (servlet == null) {
 			throw new IllegalStateException("Mounting requires unlocked WebDAV servlet.");
 		}
@@ -61,32 +60,38 @@ public class WebDavVolume implements Volume {
 			this.mount = servlet.mount(mountParams); // might block this thread for a while
 		} catch (Mounter.CommandFailedException e) {
 			e.printStackTrace();
-			throw new CommandFailedException(e);
+			throw new VolumeException(e);
 		}
 	}
 
 	@Override
-	public void reveal() throws CommandFailedException {
+	public void reveal() throws VolumeException {
 		try {
 			mount.reveal();
 		} catch (Mounter.CommandFailedException e) {
 			e.printStackTrace();
-			throw new CommandFailedException(e);
+			throw new VolumeException(e);
 		}
 	}
 
 	@Override
-	public synchronized void unmount() throws CommandFailedException {
+	public synchronized void unmount() throws VolumeException {
 		try {
 			mount.unmount();
 		} catch (Mounter.CommandFailedException e) {
-			throw new CommandFailedException(e);
+			throw new VolumeException(e);
 		}
+		cleanup();
 	}
 
 	@Override
-	public synchronized void unmountForced() {
-		mount.forced();
+	public synchronized void unmountForced() throws VolumeException {
+		try {
+			mount.forced().orElseThrow(IllegalStateException::new).unmount();
+		} catch (Mounter.CommandFailedException e) {
+			throw new VolumeException(e);
+		}
+		cleanup();
 	}
 
 	private String getLocalhostAliasOrNull() {
@@ -102,28 +107,19 @@ public class WebDavVolume implements Volume {
 		}
 	}
 
-	@Override
-	public void stop() {
+	private void cleanup() {
 		if (servlet != null) {
 			servlet.stop();
 		}
 
 	}
 
-	public synchronized String getMountUri() {
-		return servlet.getServletRootUri().toString() + "/";
-	}
-
-	/**
-	 * TODO: what to check wether it is implemented?
-	 *
-	 * @return
-	 */
 	@Override
 	public boolean isSupported() {
 		return true;
 	}
 
+	@Override
 	public boolean supportsForcedUnmount() {
 		return mount != null && mount.forced().isPresent();
 	}
