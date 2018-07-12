@@ -34,7 +34,7 @@ import org.fxmisc.easybind.EasyBind;
 @Module(includes = {ViewControllerModule.class, CommonsModule.class, KeychainModule.class}, subcomponents = {VaultComponent.class})
 public class UiModule {
 
-	private static final int NUM_BACKGROUND_THREADS = 4;
+	private static final int NUM_SCHEDULER_THREADS = 4;
 
 	@Provides
 	@Singleton
@@ -46,9 +46,9 @@ public class UiModule {
 	@Singleton
 	ScheduledExecutorService provideScheduledExecutorService(@Named("shutdownTaskScheduler") Consumer<Runnable> shutdownTaskScheduler) {
 		final AtomicInteger threadNumber = new AtomicInteger(1);
-		ScheduledExecutorService executorService = Executors.newScheduledThreadPool(NUM_BACKGROUND_THREADS, r -> {
+		ScheduledExecutorService executorService = Executors.newScheduledThreadPool(NUM_SCHEDULER_THREADS, r -> {
 			Thread t = new Thread(r);
-			t.setName("Background Thread " + threadNumber.getAndIncrement());
+			t.setName("Scheduler Thread " + threadNumber.getAndIncrement());
 			t.setDaemon(true);
 			return t;
 		});
@@ -58,8 +58,16 @@ public class UiModule {
 
 	@Provides
 	@Singleton
-	ExecutorService provideExecutorService(ScheduledExecutorService executorService) {
-		return executorService; // alias
+	ExecutorService provideExecutorService(@Named("shutdownTaskScheduler") Consumer<Runnable> shutdownTaskScheduler) {
+		final AtomicInteger threadNumber = new AtomicInteger(1);
+		ExecutorService executorService = Executors.newCachedThreadPool(r -> {
+			Thread t = new Thread(r);
+			t.setName("Background Thread " + threadNumber.getAndIncrement());
+			t.setDaemon(true);
+			return t;
+		});
+		shutdownTaskScheduler.accept(executorService::shutdown);
+		return executorService;
 	}
 
 	@Provides
