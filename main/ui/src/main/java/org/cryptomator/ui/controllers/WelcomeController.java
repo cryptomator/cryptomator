@@ -11,10 +11,12 @@ package org.cryptomator.ui.controllers;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.Optional;
@@ -36,9 +38,6 @@ import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.layout.VBox;
-import jdk.incubator.http.HttpClient;
-import jdk.incubator.http.HttpRequest;
-import jdk.incubator.http.HttpResponse;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.ui.l10n.Localization;
@@ -132,25 +131,33 @@ public class WelcomeController implements ViewController {
 		checkForUpdatesIndicator.setVisible(true);
 		Tasks.create(() -> {
 			String userAgent = String.format("Cryptomator VersionChecker/%s %s %s (%s)", applicationVersion.orElse("SNAPSHOT"), SystemUtils.OS_NAME, SystemUtils.OS_VERSION, SystemUtils.OS_ARCH);
-			HttpClient client = HttpClient.newHttpClient();
-			HttpRequest request = HttpRequest.newBuilder()
-					.GET()
-					.uri(new URI("https://api.cryptomator.org/updates/latestVersion.json"))
-					.header("User-Agent", userAgent)
-					.timeout(Duration.ofSeconds(5))
-					.build();
-			return client.send(request, HttpResponse.BodyHandler.asString(StandardCharsets.UTF_8));
+			URL url = URI.create("https://api.cryptomator.org/updates/latestVersion.json").toURL();
+			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+			conn.addRequestProperty("User-Agent", userAgent);
+			conn.connect();
+			try {
+				if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
+					return Optional.<byte[]>empty();
+				}
+				try (InputStream in = conn.getInputStream(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+					in.transferTo(out);
+					return Optional.of(out.toByteArray());
+				}
+			} finally {
+				conn.disconnect();
+			}
 		}).onSuccess(response -> {
-			if (response.statusCode() == 200) {
+			response.ifPresent(bytes -> {
 				Gson gson = new GsonBuilder().setLenient().create();
-				Map<String, String> map = gson.fromJson(response.body(), new TypeToken<Map<String, String>>() {
+				String json = new String(bytes, StandardCharsets.UTF_8);
+				Map<String, String> map = gson.fromJson(json, new TypeToken<Map<String, String>>() {
 				}.getType());
 				if (map != null) {
 					this.compareVersions(map);
 				}
-			}
+			});
 		}).onError(Exception.class, e -> {
-			LOG.error("Error checking for updates", e);
+			LOG.warn("Error checking for updates", e);
 		}).andFinally(() -> {
 			checkForUpdatesStatus.setText("");
 			checkForUpdatesIndicator.setVisible(false);

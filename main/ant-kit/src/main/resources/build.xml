@@ -38,8 +38,6 @@
 				<fx:property name="cryptomator.keychainPath" value="\${antbuild.cryptomator.keychainPath}"/>
 				<fx:jvmarg value="-Xss2m"/>
 				<fx:jvmarg value="-Xmx512m"/>
-				<fx:jvmarg value="--add-modules"/>
-				<fx:jvmarg value="jdk.incubator.httpclient"/>
 			</fx:platform>
 			<fx:resources>
 				<fx:fileset dir="antbuild" type="jar" includes="Cryptomator-${project.version}.jar" />
