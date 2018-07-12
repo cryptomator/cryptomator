@@ -495,7 +495,7 @@ public class MainController implements ViewController {
 
 	public void didUnlock(Vault vault) {
 		if (vault.equals(selectedVault.getValue())) {
-			this.showUnlockedView(vault, true);
+			this.showUnlockedView(vault, vault.getVaultSettings().revealAfterMount().getValue());
 		}
 	}
 
