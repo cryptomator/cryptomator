@@ -511,7 +511,9 @@ public class MainController implements ViewController {
 
 	public void didLock(UnlockedController ctrl) {
 		unlockedVaults.remove(ctrl.getVault());
-		showUnlockView(UnlockController.State.UNLOCKING);
+		if (ctrl.getVault().getId() == selectedVault.get().getId()) {
+			showUnlockView(UnlockController.State.UNLOCKING);
+		}
 		activeController.get().focus();
 	}
 
