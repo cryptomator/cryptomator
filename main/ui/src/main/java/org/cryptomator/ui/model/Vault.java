@@ -98,9 +98,12 @@ public class Vault {
 		CryptoFileSystemProvider.changePassphrase(getPath(), MASTERKEY_FILENAME, oldPassphrase, newPassphrase);
 	}
 
-	public synchronized void unlock(CharSequence passphrase) throws CryptoException, IOException, Volume.VolumeException {
+	public synchronized void unlock(CharSequence passphrase) throws InvalidSettingsException, CryptoException, IOException, Volume.VolumeException {
 		Platform.runLater(() -> state.set(State.PROCESSING));
 		try {
+			if (vaultSettings.usesIndividualMountPath().and(vaultSettings.individualMountPath().isEmpty()).get()) {
+				throw new InvalidSettingsException();
+			}
 			CryptoFileSystem fs = getCryptoFileSystem(passphrase);
 			volume = volumeProvider.get();
 			volume.mount(fs);
