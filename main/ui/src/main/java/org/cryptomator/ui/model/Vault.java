@@ -27,7 +27,6 @@ import javafx.beans.binding.Binding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.StringProperty;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.LazyInitializer;
@@ -239,11 +238,11 @@ public class Vault {
 		return vaultSettings.mountName().get();
 	}
 
-	public StringProperty getMountPathProperty() {
-		return vaultSettings.individualMountPath();
+	public String getIndividualMountPath() {
+		return vaultSettings.individualMountPath().getValueSafe();
 	}
 
-	public void setMountPath(String mountPath) {
+	public void setIndividualMountPath(String mountPath) {
 		vaultSettings.individualMountPath().set(mountPath);
 	}
 
