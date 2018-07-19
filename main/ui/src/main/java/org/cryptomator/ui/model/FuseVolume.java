@@ -118,7 +118,7 @@ public class FuseVolume implements Volume {
 
 	@Override
 	public boolean isSupported() {
-		return this.isSupportedStatic();
+		return FuseVolume.isSupportedStatic();
 	}
 
 	public static boolean isSupportedStatic() {

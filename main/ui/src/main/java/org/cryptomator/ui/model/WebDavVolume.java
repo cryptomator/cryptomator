@@ -116,7 +116,7 @@ public class WebDavVolume implements Volume {
 
 	@Override
 	public boolean isSupported() {
-		return this.isSupportedStatic();
+		return WebDavVolume.isSupportedStatic();
 	}
 
 	@Override
