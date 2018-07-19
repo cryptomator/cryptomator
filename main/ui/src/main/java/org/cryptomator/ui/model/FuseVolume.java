@@ -60,11 +60,10 @@ public class FuseVolume implements Volume {
 	private String createDirIfNotExist(String prefix, String dirName) throws IOException {
 		Path p = Paths.get(prefix, dirName + vaultSettings.getId());
 		if (Files.isDirectory(p)) {
-			try(DirectoryStream<Path> emptyCheck = Files.newDirectoryStream(p)){
-				if(emptyCheck.iterator().hasNext()){
+			try (DirectoryStream<Path> emptyCheck = Files.newDirectoryStream(p)) {
+				if (emptyCheck.iterator().hasNext()) {
 					throw new DirectoryNotEmptyException("Mount point is not empty.");
-				}
-				else {
+				} else {
 					LOG.info("Directory already exists and is empty. Using it as mount point.");
 					return p.toString();
 				}
@@ -119,6 +118,10 @@ public class FuseVolume implements Volume {
 
 	@Override
 	public boolean isSupported() {
+		return this.isSupportedStatic();
+	}
+
+	public static boolean isSupportedStatic() {
 		return (SystemUtils.IS_OS_MAC_OSX || SystemUtils.IS_OS_LINUX) && FuseMountFactory.isFuseSupported();
 	}
 

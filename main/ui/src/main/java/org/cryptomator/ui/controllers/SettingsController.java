@@ -33,6 +33,7 @@ import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.settings.VolumeImpl;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.ui.l10n.Localization;
+import org.cryptomator.ui.model.Volume;
 
 @Singleton
 public class SettingsController implements ViewController {
@@ -93,7 +94,7 @@ public class SettingsController implements ViewController {
 		checkForUpdatesCheckbox.setSelected(settings.checkForUpdates().get() && !areUpdatesManagedExternally());
 
 		//NIOADAPTER
-		volume.getItems().addAll(getSupportedAdapters());
+		volume.getItems().addAll(Volume.getCurrentSupportedAdapters());
 		volume.setValue(settings.preferredVolumeImpl().get());
 		volume.setConverter(new NioAdapterImplStringConverter());
 
@@ -125,11 +126,6 @@ public class SettingsController implements ViewController {
 		settings.preferredGvfsScheme().bind(prefGvfsScheme.valueProperty());
 		settings.preferredVolumeImpl().bind(volume.valueProperty());
 		settings.debugMode().bind(debugModeCheckbox.selectedProperty());
-	}
-
-	private VolumeImpl[] getSupportedAdapters() {
-		// TODO: filter depending on supported drivers
-		return VolumeImpl.values();
 	}
 
 	@Override

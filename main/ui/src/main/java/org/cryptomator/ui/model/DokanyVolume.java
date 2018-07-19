@@ -28,7 +28,7 @@ public class DokanyVolume implements Volume {
 
 	@Override
 	public boolean isSupported() {
-		return MountFactory.isApplicable();
+		return this.isSupportedStatic();
 	}
 
 	//TODO: Drive letter 'A' as mount point is invalid in dokany. maybe we should do already here something against it
@@ -42,11 +42,11 @@ public class DokanyVolume implements Volume {
 			//TODO: can we assume the we have at least one free drive letter?
 
 			//this is a temporary fix for 'A' being an invalid drive letter
-			if(!windowsDriveLetters.getAvailableDriveLetters().isEmpty()){
+			if (!windowsDriveLetters.getAvailableDriveLetters().isEmpty()) {
 				Iterator<Character> winDriveLetterIt = windowsDriveLetters.getAvailableDriveLetters().iterator();
-				do{
+				do {
 					driveLetter = winDriveLetterIt.next();
-				}while (winDriveLetterIt.hasNext() && driveLetter == 65);
+				} while (winDriveLetterIt.hasNext() && driveLetter == 65);
 //			if (!windowsDriveLetters.getAvailableDriveLetters().isEmpty()) {
 //				driveLetter = windowsDriveLetters.getAvailableDriveLetters().iterator().next();
 			} else {
@@ -68,5 +68,9 @@ public class DokanyVolume implements Volume {
 	@Override
 	public void unmount() {
 		mount.close();
+	}
+
+	public static boolean isSupportedStatic() {
+		return MountFactory.isApplicable();
 	}
 }

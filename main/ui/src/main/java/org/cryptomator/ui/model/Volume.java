@@ -1,8 +1,10 @@
 package org.cryptomator.ui.model;
 
+import org.cryptomator.common.settings.VolumeImpl;
 import org.cryptomator.cryptofs.CryptoFileSystem;
 
 import java.io.IOException;
+import java.util.stream.Stream;
 
 /**
  * Takes a Volume and usess it to mount an unlocked vault
@@ -11,12 +13,12 @@ public interface Volume {
 
 	/**
 	 * Checks in constant time whether this volume type is supported on the system running Cryptomator.
+	 *
 	 * @return true if this volume can be mounted
 	 */
 	boolean isSupported();
 
 	/**
-	 *
 	 * @param fs
 	 * @throws IOException
 	 */
@@ -34,6 +36,21 @@ public interface Volume {
 
 	default void unmountForced() throws VolumeException {
 		throw new VolumeException("Operation not supported.");
+	}
+
+	static VolumeImpl[] getCurrentSupportedAdapters() {
+		return Stream.of(VolumeImpl.values()).filter(impl -> {
+			switch (impl) {
+				case WEBDAV:
+					return WebDavVolume.isSupportedStatic();
+				case DOKANY:
+					return DokanyVolume.isSupportedStatic();
+				case FUSE:
+					return FuseVolume.isSupportedStatic();
+				default:
+					return false;//throw new IllegalStateException("Adapter not implemented.");
+			}
+		}).toArray(VolumeImpl[]::new);
 	}
 
 	/**
