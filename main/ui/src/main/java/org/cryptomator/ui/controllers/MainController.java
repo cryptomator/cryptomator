@@ -224,13 +224,13 @@ public class MainController implements ViewController {
 					forceShutdownButtonType, forceShutdownButtonType, tryAgainButtonType);
 
 			Optional<ButtonType> choice = gracefulShutdownDialog.showAndWait();
-			if (choice.isPresent()) {
-				if (tryAgainButtonType.equals(choice.get())) {
+			choice.ifPresent(btnType -> {
+				if (tryAgainButtonType.equals(btnType)) {
 					gracefulShutdown();
-				} else if (forceShutdownButtonType.equals(choice.get())) {
+				} else if (forceShutdownButtonType.equals(btnType)) {
 					Platform.runLater(Platform::exit);
 				}
-			}
+			});
 		}
 	}
 
