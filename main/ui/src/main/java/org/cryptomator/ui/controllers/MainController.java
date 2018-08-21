@@ -217,16 +217,11 @@ public class MainController implements ViewController {
 	private void gracefulShutdown() {
 		vaults.filtered(Vault.NOT_LOCKED).forEach(Vault::prepareForShutdown);
 		if (!vaults.filtered(Vault.NOT_LOCKED).isEmpty()) {
-			ButtonType tryAgainButtonType = new ButtonType(
-					localization.getString("main.gracefulShutdown.button.tryAgain"));
-			ButtonType forceShutdownButtonType = new ButtonType(
-					localization.getString("main.gracefulShutdown.button.forceShutdown"));
+			ButtonType tryAgainButtonType = new ButtonType(localization.getString("main.gracefulShutdown.button.tryAgain"));
+			ButtonType forceShutdownButtonType = new ButtonType(localization.getString("main.gracefulShutdown.button.forceShutdown"));
 			Alert gracefulShutdownDialog = DialogBuilderUtil.buildGracefulShutdownDialog(
-					localization.getString("main.gracefulShutdown.dialog.title"),
-					localization.getString("main.gracefulShutdown.dialog.header"),
-					localization.getString("main.gracefulShutdown.dialog.content"),
-					tryAgainButtonType,
-					forceShutdownButtonType);
+					localization.getString("main.gracefulShutdown.dialog.title"), localization.getString("main.gracefulShutdown.dialog.header"), localization.getString("main.gracefulShutdown.dialog.content"),
+					forceShutdownButtonType, forceShutdownButtonType, tryAgainButtonType);
 
 			Optional<ButtonType> choice = gracefulShutdownDialog.showAndWait();
 			if (choice.isPresent()) {
