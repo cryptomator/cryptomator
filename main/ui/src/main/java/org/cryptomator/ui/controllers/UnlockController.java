@@ -141,6 +141,9 @@ public class UnlockController implements ViewController {
 	@FXML
 	private CheckBox unlockAfterStartup;
 
+	@FXML
+	private CheckBox useReadOnlyMode;
+
 	@Override
 	public void initialize() {
 		advancedOptions.managedProperty().bind(advancedOptions.visibleProperty());
@@ -232,11 +235,12 @@ public class UnlockController implements ViewController {
 		unlockAfterStartup.setSelected(savePassword.isSelected() && vaultSettings.unlockAfterStartup().get());
 		revealAfterMount.setSelected(vaultSettings.revealAfterMount().get());
 		useOwnMountPath.setSelected(vaultSettings.usesIndividualMountPath().get());
+		useReadOnlyMode.setSelected(vaultSettings.usesReadOnlyMode().get());
 
 		vaultSubs = vaultSubs.and(EasyBind.subscribe(unlockAfterStartup.selectedProperty(), vaultSettings.unlockAfterStartup()::set));
 		vaultSubs = vaultSubs.and(EasyBind.subscribe(revealAfterMount.selectedProperty(), vaultSettings.revealAfterMount()::set));
 		vaultSubs = vaultSubs.and(EasyBind.subscribe(useOwnMountPath.selectedProperty(), vaultSettings.usesIndividualMountPath()::set));
-
+		vaultSubs = vaultSubs.and(EasyBind.subscribe(useReadOnlyMode.selectedProperty(), vaultSettings.usesReadOnlyMode()::set));
 
 		mountPath.textProperty().setValue(vaultSettings.individualMountPath().getValueSafe());
 
