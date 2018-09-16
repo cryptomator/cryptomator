@@ -36,6 +36,7 @@ public class MainApplication extends Application {
 		mainCtrl.initStage(primaryStage);
 
 		primaryStage.show();
+		primaryStage.sizeToScene();
 	}
 
 	@Override
