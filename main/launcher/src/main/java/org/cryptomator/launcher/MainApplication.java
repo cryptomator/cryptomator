@@ -23,7 +23,6 @@ public class MainApplication extends Application {
 	public void start(Stage primaryStage) throws Exception {
 		LOG.info("JavaFX application started.");
 		this.primaryStage = primaryStage;
-		setupFXMLClassLoader();
 
 		LauncherModule launcherModule = new LauncherModule(this, primaryStage);
 		LauncherComponent launcherComponent = DaggerLauncherComponent.builder() //
@@ -44,21 +43,6 @@ public class MainApplication extends Application {
 		assert primaryStage != null;
 		primaryStage.hide();
 		LOG.info("JavaFX application stopped.");
-	}
-
-	// fix discussed in https://github.com/cryptomator/cryptomator/pull/29
-	private void setupFXMLClassLoader() {
-		ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
-		FXMLLoader.setDefaultClassLoader(contextClassLoader);
-		Platform.runLater(() -> {
-			/*
-			 * This fixes a bug on OSX where the magic file open handler leads to no context class loader being set in the AppKit (event)
-			 * thread if the application is not started opening a file.
-			 */
-			if (Thread.currentThread().getContextClassLoader() == null) {
-				Thread.currentThread().setContextClassLoader(contextClassLoader);
-			}
-		});
 	}
 
 }
