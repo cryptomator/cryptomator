@@ -20,9 +20,11 @@ public class MainApplication extends Application {
 	private Stage primaryStage;
 
 	@Override
-	public void start(Stage primaryStage) throws Exception {
+	public void start(Stage primaryStage) {
 		LOG.info("JavaFX application started.");
 		this.primaryStage = primaryStage;
+		primaryStage.setMinWidth(652.0);
+		primaryStage.setMinHeight(440.0);
 
 		LauncherModule launcherModule = new LauncherModule(this, primaryStage);
 		LauncherComponent launcherComponent = DaggerLauncherComponent.builder() //
@@ -33,13 +35,11 @@ public class MainApplication extends Application {
 
 		MainController mainCtrl = launcherComponent.fxmlLoader().load("/fxml/main.fxml");
 		mainCtrl.initStage(primaryStage);
-
 		primaryStage.show();
-		primaryStage.sizeToScene();
 	}
 
 	@Override
-	public void stop() throws Exception {
+	public void stop() {
 		assert primaryStage != null;
 		primaryStage.hide();
 		LOG.info("JavaFX application stopped.");
