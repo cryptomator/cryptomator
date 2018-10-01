@@ -5,7 +5,7 @@ import java.util.Arrays;
 public enum VolumeImpl {
 	WEBDAV("WebDAV"),
 	FUSE("FUSE"),
-	DOKANY("DOKANY");
+	DOKANY("Dokany");
 
 	private String displayName;
 
