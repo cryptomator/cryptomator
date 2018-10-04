@@ -19,6 +19,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.control.Button?>
 
+<?import javafx.scene.Group?>
 <VBox fx:controller="org.cryptomator.ui.controllers.SettingsController" fx:id="root" prefWidth="400.0" alignment="TOP_CENTER" spacing="12.0" xmlns:fx="http://javafx.com/fxml" cacheShape="true" cache="true">
 	<Label VBox.vgrow="NEVER" fx:id="versionLabel" alignment="CENTER" cacheShape="true" cache="true" />
 	<GridPane VBox.vgrow="ALWAYS" vgap="12.0" hgap="12.0" cacheShape="true" cache="true">
@@ -44,22 +45,19 @@
 			<Label fx:id="volumeLabel" GridPane.rowIndex="2" GridPane.columnIndex="0" text="%settings.volume.label" cacheShape="true" cache="true" />
 			<ChoiceBox GridPane.rowIndex="2" GridPane.columnIndex="1" fx:id="volume" cacheShape="true" cache="true" />
 
+			<Group fx:id="webdavVolume">
+
+			</Group>
 			<!-- Row 3 Alt 1-->
-			<GridPane fx:id="webdavVolume" vgap="12.0" hgap="12.0" GridPane.rowIndex="3" GridPane.columnIndex="0" GridPane.columnSpan="2" visible="true" cacheShape="true" cache="true">
-				<Label fx:id="portFieldLabel" GridPane.rowIndex="3" GridPane.columnIndex="0" text="%settings.webdav.port.label" cacheShape="true" cache="true" />
-				<HBox GridPane.rowIndex="3" GridPane.columnIndex="1" spacing="6.0">
-					<TextField  fx:id="portField" cacheShape="true" cache="true" promptText="%settings.webdav.port.prompt" />
-					<Button text="%settings.webdav.port.apply" fx:id="changePortButton" onAction="#changePort"/>
-				</HBox>
+			<Label fx:id="portFieldLabel" GridPane.rowIndex="3" GridPane.columnIndex="0" text="%settings.webdav.port.label" cacheShape="true" cache="true" />
+			<HBox GridPane.rowIndex="3" GridPane.columnIndex="1" spacing="6.0">
+				<TextField  fx:id="portField" cacheShape="true" cache="true" promptText="%settings.webdav.port.prompt" />
+				<Button text="%settings.webdav.port.apply" fx:id="changePortButton" onAction="#changePort"/>
+			</HBox>
 
-				<!-- Row 4 -->
-				<Label GridPane.rowIndex="4" GridPane.columnIndex="0" fx:id="prefGvfsSchemeLabel" text="%settings.webdav.prefGvfsScheme.label" cacheShape="true" cache="true" />
-				<ChoiceBox GridPane.rowIndex="4" GridPane.columnIndex="1" fx:id="prefGvfsScheme" GridPane.hgrow="ALWAYS" maxWidth="Infinity" cacheShape="true" cache="true" />
-			</GridPane>
-
-			<!-- Row 3 Alt 2-->
-			<GridPane fx:id="fuseVolume" vgap="12.0" hgap="12.0" GridPane.rowIndex="3" GridPane.columnIndex="0" GridPane.columnSpan="2" visible="false" cacheShape="true" cache="true">
-			</GridPane>
+			<!-- Row 4 -->
+			<Label GridPane.rowIndex="4" GridPane.columnIndex="0" fx:id="prefGvfsSchemeLabel" text="%settings.webdav.prefGvfsScheme.label" cacheShape="true" cache="true" />
+			<ChoiceBox GridPane.rowIndex="4" GridPane.columnIndex="1" fx:id="prefGvfsScheme" GridPane.hgrow="ALWAYS" maxWidth="Infinity" cacheShape="true" cache="true" />
 
 		</children>
 	</GridPane>

@@ -19,6 +19,7 @@ import com.google.common.base.Strings;
 import javafx.beans.binding.Bindings;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.Group;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -55,10 +56,7 @@ public class SettingsController implements ViewController {
 	private CheckBox checkForUpdatesCheckbox;
 
 	@FXML
-	private GridPane webdavVolume;
-
-	@FXML
-	private GridPane fuseVolume;
+	private Group webdavVolume;
 
 	@FXML
 	private Label portFieldLabel;
@@ -115,10 +113,6 @@ public class SettingsController implements ViewController {
 		prefGvfsScheme.setValue(settings.preferredGvfsScheme().get());
 		prefGvfsSchemeLabel.setVisible(SystemUtils.IS_OS_LINUX);
 		prefGvfsScheme.setVisible(SystemUtils.IS_OS_LINUX);
-
-		//FUSE
-		fuseVolume.visibleProperty().bind(volume.valueProperty().isEqualTo(VolumeImpl.FUSE));
-		fuseVolume.managedProperty().bind(fuseVolume.visibleProperty());
 
 		debugModeCheckbox.setSelected(settings.debugMode().get());
 

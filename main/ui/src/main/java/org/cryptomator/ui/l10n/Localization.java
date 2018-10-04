@@ -64,7 +64,7 @@ public class Localization extends ResourceBundle {
 				LOG.debug("No localization found. Falling back to default language.");
 				localizationBundle = this.fallback;
 			}
-			this.localized = Objects.requireNonNull(localizationBundle);
+			this.localized = Objects.requireNonNull(this.fallback);
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
 		}
