@@ -8,12 +8,6 @@
  ******************************************************************************/
 package org.cryptomator.ui.controllers;
 
-import java.util.Optional;
-
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Singleton;
-
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Strings;
 import javafx.beans.binding.Bindings;
@@ -27,14 +21,18 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.util.StringConverter;
 import org.apache.commons.lang3.SystemUtils;
-import org.cryptomator.common.settings.VolumeImpl;
 import org.cryptomator.common.settings.Settings;
+import org.cryptomator.common.settings.VolumeImpl;
 import org.cryptomator.ui.l10n.Localization;
 import org.cryptomator.ui.model.Volume;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
+import java.util.Optional;
 
 @Singleton
 public class SettingsController implements ViewController {
@@ -50,13 +48,13 @@ public class SettingsController implements ViewController {
 		this.localization = localization;
 		this.settings = settings;
 		this.applicationVersion = applicationVersion;
+		this.webdavSettings = new Group();
 	}
 
 	@FXML
 	private CheckBox checkForUpdatesCheckbox;
 
-	@FXML
-	private Group webdavVolume;
+	private Group webdavSettings;
 
 	@FXML
 	private Label portFieldLabel;
@@ -97,13 +95,15 @@ public class SettingsController implements ViewController {
 		volume.setConverter(new NioAdapterImplStringConverter());
 
 		//WEBDAV
-		webdavVolume.visibleProperty().bind(volume.valueProperty().isEqualTo(VolumeImpl.WEBDAV));
-		webdavVolume.managedProperty().bind(webdavVolume.visibleProperty());
-		prefGvfsScheme.managedProperty().bind(webdavVolume.visibleProperty());
-		prefGvfsSchemeLabel.managedProperty().bind(webdavVolume.visibleProperty());
-		portFieldLabel.managedProperty().bind(webdavVolume.visibleProperty());
-		changePortButton.managedProperty().bind(webdavVolume.visibleProperty());
-		portField.managedProperty().bind(webdavVolume.visibleProperty());
+		webdavSettings.visibleProperty().bind(volume.valueProperty().isEqualTo(VolumeImpl.WEBDAV));
+		webdavSettings.managedProperty().bind(webdavSettings.visibleProperty());
+		prefGvfsScheme.managedProperty().bind(webdavSettings.visibleProperty());
+		prefGvfsSchemeLabel.managedProperty().bind(webdavSettings.visibleProperty());
+		portFieldLabel.managedProperty().bind(webdavSettings.visibleProperty());
+		portFieldLabel.visibleProperty().bind(webdavSettings.visibleProperty());
+		changePortButton.managedProperty().bind(webdavSettings.visibleProperty());
+		portField.managedProperty().bind(webdavSettings.visibleProperty());
+		portField.visibleProperty().bind(webdavSettings.visibleProperty());
 		portField.setText(String.valueOf(settings.port().intValue()));
 		portField.addEventFilter(KeyEvent.KEY_TYPED, this::filterNumericKeyEvents);
 		changePortButton.visibleProperty().bind(settings.port().asString().isNotEqualTo(portField.textProperty()));

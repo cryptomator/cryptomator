@@ -45,9 +45,6 @@
 			<Label fx:id="volumeLabel" GridPane.rowIndex="2" GridPane.columnIndex="0" text="%settings.volume.label" cacheShape="true" cache="true" />
 			<ChoiceBox GridPane.rowIndex="2" GridPane.columnIndex="1" fx:id="volume" cacheShape="true" cache="true" />
 
-			<Group fx:id="webdavVolume">
-
-			</Group>
 			<!-- Row 3 Alt 1-->
 			<Label fx:id="portFieldLabel" GridPane.rowIndex="3" GridPane.columnIndex="0" text="%settings.webdav.port.label" cacheShape="true" cache="true" />
 			<HBox GridPane.rowIndex="3" GridPane.columnIndex="1" spacing="6.0">
