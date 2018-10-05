@@ -10,6 +10,7 @@ package org.cryptomator.ui.controllers;
 
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Strings;
+import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -93,6 +94,7 @@ public class SettingsController implements ViewController {
 		volume.getItems().addAll(Volume.getCurrentSupportedAdapters());
 		volume.setValue(settings.preferredVolumeImpl().get());
 		volume.setConverter(new NioAdapterImplStringConverter());
+		volume.valueProperty().addListener(this::setVisibilityGvfsElements);
 
 		//WEBDAV
 		webdavSettings.visibleProperty().bind(volume.valueProperty().isEqualTo(VolumeImpl.WEBDAV));
@@ -155,6 +157,11 @@ public class SettingsController implements ViewController {
 		if (!Strings.isNullOrEmpty(t.getCharacter()) && !DIGITS_MATCHER.matchesAllOf(t.getCharacter())) {
 			t.consume();
 		}
+	}
+
+	private void setVisibilityGvfsElements(Observable obs, Object oldValue, Object newValue) {
+		prefGvfsSchemeLabel.setVisible(SystemUtils.IS_OS_LINUX && ((VolumeImpl) newValue).getDisplayName().equals("WebDAV"));
+		prefGvfsScheme.setVisible(SystemUtils.IS_OS_LINUX && ((VolumeImpl) newValue).getDisplayName().equals("WebDAV"));
 	}
 
 	private boolean areUpdatesManagedExternally() {
