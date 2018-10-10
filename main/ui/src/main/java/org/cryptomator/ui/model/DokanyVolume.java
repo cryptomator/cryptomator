@@ -1,6 +1,7 @@
 package org.cryptomator.ui.model;
 
 import javax.inject.Inject;
+import java.nio.file.Paths;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
@@ -9,6 +10,7 @@ import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.cryptofs.CryptoFileSystem;
 import org.cryptomator.frontend.dokany.Mount;
 import org.cryptomator.frontend.dokany.MountFactory;
+import org.cryptomator.frontend.dokany.MountFailedException;
 
 public class DokanyVolume implements Volume {
 
@@ -50,7 +52,11 @@ public class DokanyVolume implements Volume {
 			}
 		}
 		String mountName = vaultSettings.mountName().get();
-		this.mount = mountFactory.mount(fs.getPath("/"), driveLetter, mountName, FS_TYPE_NAME);
+		try {
+			this.mount = mountFactory.mount(fs.getPath("/"), Paths.get(driveLetter + ":\\") , mountName, FS_TYPE_NAME);
+		} catch (MountFailedException e) {
+			throw new VolumeException("Unable to mount Filesystem", e);
+		}
 	}
 
 	@Override
