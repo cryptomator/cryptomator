@@ -26,9 +26,9 @@ class VaultSettingsJsonAdapter {
 		out.name("winDriveLetter").value(value.winDriveLetter().get());
 		out.name("unlockAfterStartup").value(value.unlockAfterStartup().get());
 		out.name("revealAfterMount").value(value.revealAfterMount().get());
-		out.name("usesIndividualMountPath").value(value.usesIndividualMountPath().get());
-		//TODO: should this always be written? ( because it could contain metadata, which the user does not want to save!)
-		out.name("individualMountPath").value(value.individualMountPath().get());
+		out.name("usesCustomMountPathLinux").value(value.usesCustomMountPathLinux().get());
+		//TODO: should this always be written? ( because it could contain metadata, which the user may not want to save!)
+		out.name("customMountPathLinux").value(value.customMountPathLinux().get());
 		out.endObject();
 	}
 
@@ -40,7 +40,7 @@ class VaultSettingsJsonAdapter {
 		String winDriveLetter = null;
 		boolean unlockAfterStartup = VaultSettings.DEFAULT_UNLOCK_AFTER_STARTUP;
 		boolean revealAfterMount = VaultSettings.DEFAULT_REAVEAL_AFTER_MOUNT;
-		boolean usesIndividualMountPath = VaultSettings.DEFAULT_USES_INDIVIDUAL_MOUNTPATH;
+		boolean usesIndividualMountPath = VaultSettings.DEFAULT_USES_CUSTOM_MOUNTPATH;
 
 		in.beginObject();
 		while (in.hasNext()) {
@@ -64,10 +64,10 @@ class VaultSettingsJsonAdapter {
 				case "revealAfterMount":
 					revealAfterMount = in.nextBoolean();
 					break;
-				case "usesIndividualMountPath":
+				case "usesCustomMountPathLinux":
 					usesIndividualMountPath = in.nextBoolean();
 					break;
-				case "individualMountPath":
+				case "customMountPathLinux":
 					individualMountPath = in.nextString();
 					break;
 				default:
@@ -83,8 +83,8 @@ class VaultSettingsJsonAdapter {
 		vaultSettings.winDriveLetter().set(winDriveLetter);
 		vaultSettings.unlockAfterStartup().set(unlockAfterStartup);
 		vaultSettings.revealAfterMount().set(revealAfterMount);
-		vaultSettings.usesIndividualMountPath().set(usesIndividualMountPath);
-		vaultSettings.individualMountPath().set(individualMountPath);
+		vaultSettings.usesCustomMountPathLinux().set(usesIndividualMountPath);
+		vaultSettings.customMountPathLinux().set(individualMountPath);
 		return vaultSettings;
 	}
 

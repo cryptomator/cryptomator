@@ -231,14 +231,14 @@ public class UnlockController implements ViewController {
 		VaultSettings vaultSettings = vault.getVaultSettings();
 		unlockAfterStartup.setSelected(savePassword.isSelected() && vaultSettings.unlockAfterStartup().get());
 		revealAfterMount.setSelected(vaultSettings.revealAfterMount().get());
-		useOwnMountPath.setSelected(vaultSettings.usesIndividualMountPath().get());
+		useOwnMountPath.setSelected(vaultSettings.usesCustomMountPathLinux().get());
 
 		vaultSubs = vaultSubs.and(EasyBind.subscribe(unlockAfterStartup.selectedProperty(), vaultSettings.unlockAfterStartup()::set));
 		vaultSubs = vaultSubs.and(EasyBind.subscribe(revealAfterMount.selectedProperty(), vaultSettings.revealAfterMount()::set));
-		vaultSubs = vaultSubs.and(EasyBind.subscribe(useOwnMountPath.selectedProperty(), vaultSettings.usesIndividualMountPath()::set));
+		vaultSubs = vaultSubs.and(EasyBind.subscribe(useOwnMountPath.selectedProperty(), vaultSettings.usesCustomMountPathLinux()::set));
 
 
-		mountPath.textProperty().setValue(vaultSettings.individualMountPath().getValueSafe());
+		mountPath.textProperty().setValue(vaultSettings.customMountPathLinux().getValueSafe());
 
 	}
 
@@ -282,7 +282,7 @@ public class UnlockController implements ViewController {
 	}
 
 	private void mountPathDidChange(ObservableValue<? extends String> property, String oldValue, String newValue) {
-		vault.setIndividualMountPath(newValue);
+		vault.setCustomMountPath(newValue);
 	}
 
 	/**
