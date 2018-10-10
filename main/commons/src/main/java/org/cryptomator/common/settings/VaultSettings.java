@@ -132,6 +132,22 @@ public class VaultSettings {
 		return customMountPathLinux;
 	}
 
+	public BooleanProperty usesCustomMountPathMac() {
+		return usesCustomMountPathMac;
+	}
+
+	public StringProperty customMountPathMac() {
+		return customMountPathMac;
+	}
+
+	public BooleanProperty usesCustomMountPathWindows() {
+		return usesCustomMountPathWindows;
+	}
+
+	public StringProperty customMountPathWindows() {
+		return customMountPathWindows;
+	}
+
 	/* Hashcode/Equals */
 
 	@Override

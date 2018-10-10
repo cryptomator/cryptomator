@@ -29,6 +29,8 @@ class VaultSettingsJsonAdapter {
 		out.name("usesCustomMountPathLinux").value(value.usesCustomMountPathLinux().get());
 		//TODO: should this always be written? ( because it could contain metadata, which the user may not want to save!)
 		out.name("customMountPathLinux").value(value.customMountPathLinux().get());
+		out.name("customMountPathMac").value(value.customMountPathMac().get());
+		out.name("customMountPathWindows").value(value.customMountPathWindows().get());
 		out.endObject();
 	}
 
@@ -36,11 +38,15 @@ class VaultSettingsJsonAdapter {
 		String id = null;
 		String path = null;
 		String mountName = null;
-		String individualMountPath = null;
+		String individualMountPathLinux = null;
+		String individualMountPathMac = null;
+		String individualMountPathWindows = null;
 		String winDriveLetter = null;
 		boolean unlockAfterStartup = VaultSettings.DEFAULT_UNLOCK_AFTER_STARTUP;
 		boolean revealAfterMount = VaultSettings.DEFAULT_REAVEAL_AFTER_MOUNT;
-		boolean usesIndividualMountPath = VaultSettings.DEFAULT_USES_CUSTOM_MOUNTPATH;
+		boolean usesIndividualMountPathLinux = VaultSettings.DEFAULT_USES_CUSTOM_MOUNTPATH;
+		boolean usesIndividualMountPathMac = VaultSettings.DEFAULT_USES_CUSTOM_MOUNTPATH;
+		boolean usesIndividualMountPathWindows = VaultSettings.DEFAULT_USES_CUSTOM_MOUNTPATH;
 
 		in.beginObject();
 		while (in.hasNext()) {
@@ -65,10 +71,22 @@ class VaultSettingsJsonAdapter {
 					revealAfterMount = in.nextBoolean();
 					break;
 				case "usesCustomMountPathLinux":
-					usesIndividualMountPath = in.nextBoolean();
+					usesIndividualMountPathLinux = in.nextBoolean();
 					break;
 				case "customMountPathLinux":
-					individualMountPath = in.nextString();
+					individualMountPathLinux = in.nextString();
+					break;
+				case "usesCustomMountPathMac":
+					usesIndividualMountPathMac = in.nextBoolean();
+					break;
+				case "customMountPathMac":
+					individualMountPathMac = in.nextString();
+					break;
+				case "usesCustomMountPathWindows":
+					usesIndividualMountPathWindows = in.nextBoolean();
+					break;
+				case "customMountPathWindows":
+					individualMountPathWindows = in.nextString();
 					break;
 				default:
 					LOG.warn("Unsupported vault setting found in JSON: " + name);
@@ -83,8 +101,12 @@ class VaultSettingsJsonAdapter {
 		vaultSettings.winDriveLetter().set(winDriveLetter);
 		vaultSettings.unlockAfterStartup().set(unlockAfterStartup);
 		vaultSettings.revealAfterMount().set(revealAfterMount);
-		vaultSettings.usesCustomMountPathLinux().set(usesIndividualMountPath);
-		vaultSettings.customMountPathLinux().set(individualMountPath);
+		vaultSettings.usesCustomMountPathLinux().set(usesIndividualMountPathLinux);
+		vaultSettings.customMountPathLinux().set(individualMountPathLinux);
+		vaultSettings.usesCustomMountPathMac().set(usesIndividualMountPathMac);
+		vaultSettings.customMountPathMac().set(individualMountPathMac);
+		vaultSettings.usesCustomMountPathWindows().set(usesIndividualMountPathWindows);
+		vaultSettings.customMountPathWindows().set(individualMountPathWindows);
 		return vaultSettings;
 	}
 
