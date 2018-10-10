@@ -115,8 +115,6 @@ public class UnlockController implements ViewController {
 	@FXML
 	private ChoiceBox<Character> winDriveLetter;
 
-	private Group customMountPath;
-
 	@FXML
 	private CheckBox useCustomMountPath;
 
