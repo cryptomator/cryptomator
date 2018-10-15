@@ -5,14 +5,11 @@
  *******************************************************************************/
 package org.cryptomator.launcher;
 
+import javafx.application.Application;
+import javafx.stage.Stage;
 import org.cryptomator.ui.controllers.MainController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.fxml.FXMLLoader;
-import javafx.stage.Stage;
 
 public class MainApplication extends Application {
 
@@ -20,10 +17,11 @@ public class MainApplication extends Application {
 	private Stage primaryStage;
 
 	@Override
-	public void start(Stage primaryStage) throws Exception {
+	public void start(Stage primaryStage) {
 		LOG.info("JavaFX application started.");
 		this.primaryStage = primaryStage;
-		setupFXMLClassLoader();
+		primaryStage.setMinWidth(652.0);
+		primaryStage.setMinHeight(440.0);
 
 		LauncherModule launcherModule = new LauncherModule(this, primaryStage);
 		LauncherComponent launcherComponent = DaggerLauncherComponent.builder() //
@@ -34,30 +32,14 @@ public class MainApplication extends Application {
 
 		MainController mainCtrl = launcherComponent.fxmlLoader().load("/fxml/main.fxml");
 		mainCtrl.initStage(primaryStage);
-
 		primaryStage.show();
 	}
 
 	@Override
-	public void stop() throws Exception {
+	public void stop() {
 		assert primaryStage != null;
 		primaryStage.hide();
 		LOG.info("JavaFX application stopped.");
-	}
-
-	// fix discussed in https://github.com/cryptomator/cryptomator/pull/29
-	private void setupFXMLClassLoader() {
-		ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
-		FXMLLoader.setDefaultClassLoader(contextClassLoader);
-		Platform.runLater(() -> {
-			/*
-			 * This fixes a bug on OSX where the magic file open handler leads to no context class loader being set in the AppKit (event)
-			 * thread if the application is not started opening a file.
-			 */
-			if (Thread.currentThread().getContextClassLoader() == null) {
-				Thread.currentThread().setContextClassLoader(contextClassLoader);
-			}
-		});
 	}
 
 }

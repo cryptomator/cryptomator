@@ -8,17 +8,13 @@
  ******************************************************************************/
 package org.cryptomator.ui.controllers;
 
-import java.util.Optional;
-
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Singleton;
-
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Strings;
+import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.Group;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -26,13 +22,18 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.util.StringConverter;
 import org.apache.commons.lang3.SystemUtils;
-import org.cryptomator.common.settings.VolumeImpl;
 import org.cryptomator.common.settings.Settings;
+import org.cryptomator.common.settings.VolumeImpl;
 import org.cryptomator.ui.l10n.Localization;
+import org.cryptomator.ui.model.Volume;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
+import java.util.Optional;
 
 @Singleton
 public class SettingsController implements ViewController {
@@ -48,16 +49,13 @@ public class SettingsController implements ViewController {
 		this.localization = localization;
 		this.settings = settings;
 		this.applicationVersion = applicationVersion;
+		this.webdavSettings = new Group();
 	}
 
 	@FXML
 	private CheckBox checkForUpdatesCheckbox;
 
-	@FXML
-	private GridPane webdavVolume;
-
-	@FXML
-	private GridPane fuseVolume;
+	private Group webdavSettings;
 
 	@FXML
 	private Label portFieldLabel;
@@ -93,18 +91,21 @@ public class SettingsController implements ViewController {
 		checkForUpdatesCheckbox.setSelected(settings.checkForUpdates().get() && !areUpdatesManagedExternally());
 
 		//NIOADAPTER
-		volume.getItems().addAll(getSupportedAdapters());
+		volume.getItems().addAll(Volume.getCurrentSupportedAdapters());
 		volume.setValue(settings.preferredVolumeImpl().get());
 		volume.setConverter(new NioAdapterImplStringConverter());
+		volume.valueProperty().addListener(this::setVisibilityGvfsElements);
 
 		//WEBDAV
-		webdavVolume.visibleProperty().bind(volume.valueProperty().isEqualTo(VolumeImpl.WEBDAV));
-		webdavVolume.managedProperty().bind(webdavVolume.visibleProperty());
-		prefGvfsScheme.managedProperty().bind(webdavVolume.visibleProperty());
-		prefGvfsSchemeLabel.managedProperty().bind(webdavVolume.visibleProperty());
-		portFieldLabel.managedProperty().bind(webdavVolume.visibleProperty());
-		changePortButton.managedProperty().bind(webdavVolume.visibleProperty());
-		portField.managedProperty().bind(webdavVolume.visibleProperty());
+		webdavSettings.visibleProperty().bind(volume.valueProperty().isEqualTo(VolumeImpl.WEBDAV));
+		webdavSettings.managedProperty().bind(webdavSettings.visibleProperty());
+		prefGvfsScheme.managedProperty().bind(webdavSettings.visibleProperty());
+		prefGvfsSchemeLabel.managedProperty().bind(webdavSettings.visibleProperty());
+		portFieldLabel.managedProperty().bind(webdavSettings.visibleProperty());
+		portFieldLabel.visibleProperty().bind(webdavSettings.visibleProperty());
+		changePortButton.managedProperty().bind(webdavSettings.visibleProperty());
+		portField.managedProperty().bind(webdavSettings.visibleProperty());
+		portField.visibleProperty().bind(webdavSettings.visibleProperty());
 		portField.setText(String.valueOf(settings.port().intValue()));
 		portField.addEventFilter(KeyEvent.KEY_TYPED, this::filterNumericKeyEvents);
 		changePortButton.visibleProperty().bind(settings.port().asString().isNotEqualTo(portField.textProperty()));
@@ -115,21 +116,12 @@ public class SettingsController implements ViewController {
 		prefGvfsSchemeLabel.setVisible(SystemUtils.IS_OS_LINUX);
 		prefGvfsScheme.setVisible(SystemUtils.IS_OS_LINUX);
 
-		//FUSE
-		fuseVolume.visibleProperty().bind(volume.valueProperty().isEqualTo(VolumeImpl.FUSE));
-		fuseVolume.managedProperty().bind(fuseVolume.visibleProperty());
-
 		debugModeCheckbox.setSelected(settings.debugMode().get());
 
 		settings.checkForUpdates().bind(checkForUpdatesCheckbox.selectedProperty());
 		settings.preferredGvfsScheme().bind(prefGvfsScheme.valueProperty());
 		settings.preferredVolumeImpl().bind(volume.valueProperty());
 		settings.debugMode().bind(debugModeCheckbox.selectedProperty());
-	}
-
-	private VolumeImpl[] getSupportedAdapters() {
-		// TODO: filter depending on supported drivers
-		return VolumeImpl.values();
 	}
 
 	@Override
@@ -165,6 +157,11 @@ public class SettingsController implements ViewController {
 		if (!Strings.isNullOrEmpty(t.getCharacter()) && !DIGITS_MATCHER.matchesAllOf(t.getCharacter())) {
 			t.consume();
 		}
+	}
+
+	private void setVisibilityGvfsElements(Observable obs, Object oldValue, Object newValue) {
+		prefGvfsSchemeLabel.setVisible(SystemUtils.IS_OS_LINUX && ((VolumeImpl) newValue).getDisplayName().equals("WebDAV"));
+		prefGvfsScheme.setVisible(SystemUtils.IS_OS_LINUX && ((VolumeImpl) newValue).getDisplayName().equals("WebDAV"));
 	}
 
 	private boolean areUpdatesManagedExternally() {

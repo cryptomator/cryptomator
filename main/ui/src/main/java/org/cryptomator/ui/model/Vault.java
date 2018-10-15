@@ -27,7 +27,6 @@ import javafx.beans.binding.Binding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.StringProperty;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.LazyInitializer;
@@ -99,9 +98,12 @@ public class Vault {
 		CryptoFileSystemProvider.changePassphrase(getPath(), MASTERKEY_FILENAME, oldPassphrase, newPassphrase);
 	}
 
-	public synchronized void unlock(CharSequence passphrase) throws CryptoException, IOException, Volume.VolumeException {
+	public synchronized void unlock(CharSequence passphrase) throws InvalidSettingsException, CryptoException, IOException, Volume.VolumeException {
 		Platform.runLater(() -> state.set(State.PROCESSING));
 		try {
+			if (vaultSettings.usesIndividualMountPath().and(vaultSettings.individualMountPath().isEmpty()).get()) {
+				throw new InvalidSettingsException();
+			}
 			CryptoFileSystem fs = getCryptoFileSystem(passphrase);
 			volume = volumeProvider.get();
 			volume.mount(fs);
@@ -239,11 +241,11 @@ public class Vault {
 		return vaultSettings.mountName().get();
 	}
 
-	public StringProperty getMountPathProperty() {
-		return vaultSettings.individualMountPath();
+	public String getIndividualMountPath() {
+		return vaultSettings.individualMountPath().getValueSafe();
 	}
 
-	public void setMountPath(String mountPath) {
+	public void setIndividualMountPath(String mountPath) {
 		vaultSettings.individualMountPath().set(mountPath);
 	}
 

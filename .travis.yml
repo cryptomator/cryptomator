@@ -2,70 +2,49 @@ language: java
 sudo: false
 jdk:
 - oraclejdk10
-branches:
-  except:
-  - continuous # To avoid infinite loops, as this tag is created by this Travis config
 cache:
   directories:
   - $HOME/.m2
 env:
   global:
-    - secure: "IfYURwZaDWuBDvyn47n0k1Zod/IQw1FF+CS5nnV08Q+NfC3vGGJMwV8m59XnbfwnWGxwvCaAbk4qP6s6+ijgZNKkvgfFMo3rfTok5zt43bIqgaFOANYV+OC/1c59gYD6ZUxhW5iNgMgU3qdsRtJuwSmfkVv/jKyLGfAbS4kN8BA=" # COVERITY_SCAN_TOKEN
     - secure: "lV9OwUbHMrMpLUH1CY+Z4puLDdFXytudyPlG1eGRsesdpuG6KM3uQVz6uAtf6lrU8DRbMM/T7ML+PmvQ4UoPPYLdLxESLLBat2qUPOIVBOhTSlCc7I0DmGy04CSvkeMy8dPaQC0ukgNiR7zwoNzfcpGRN/U9S8tziDruuHoZSrg=" # BINTRAY_API_KEY
     - secure: "oWFgRTVP6lyTa7qVxlvkpm20MtVc3BtmsNXQJS6bfg2A0o/iCQMNx7OD59BaafCLGRKvCcJVESiC8FlSylVMS7CDSyYu0gg70NUiIuHp4NBM5inFWYCy/PdQsCTzr5uvNG+rMFQpMFRaCV0FrfM3tLondcVkhsHL68l93Xoexx4=" # CODACY_PROJECT_TOKEN
     - secure: "zJxgytA2Ks5Xzv+7kUaUq+EBFNQw9Qec63lcMJVuXVWczjL16nKW1EzzV515ag+OWL46z3lEPForDhufw0VtFnNmaX68jkO0mp01eLrHApc1llN2Y/U8GBXfNNazN4+Kom4H+z/AO+wJr8EsKMMUczCdQ3APgd9uVI0hzXw/Z3M=" # GITHUB_API_KEY
-    - secure: "PiH/o9MLOyPdjIwECIEfj3TuUxx7QB0CIs3o1WXjqb1PbDdHDbQyvswYit6xDw9NrJp/A+ov2k00jq+n+8fLTSd4AY21y5WiJN/ccCTWUuUiFhGxOyM37aeWAPAn4rUp7D7o8jLxEdpGZAfglIzaz+GCEQYxfV/w3FDwztViXgQ=" # GPG_PASSPHRASE
 addons:
   apt:
     packages:
     - haveged
-  coverity_scan:
-    project:
-      name: "cryptomator/cryptomator"
-    notification_email: sebastian.stenzel@cryptomator.org
-    build_command: "mvn -fmain/pom.xml clean test -DskipTests"
-    branch_pattern: release.*
 install:
 - curl -o $HOME/.m2/settings.xml https://gist.githubusercontent.com/cryptobot/cf5fbd909c4782aaeeeb7c7f4a1a43da/raw/e60ee486e34ee0c79f89f947abe2c83b4290c6bb/settings.xml
 - mvn -fmain/pom.xml clean install -DskipTests org.codehaus.mojo:versions-maven-plugin:help dependency:go-offline -Pcoverage,release # "clean install" needed until we can exclude artifacts currently in the reactor, see https://maven.apache.org/plugins/maven-dependency-plugin/go-offline-mojo.html#excludeReactor and https://issues.apache.org/jira/browse/MDEP-568
 script:
 - mvn --update-snapshots -fmain/pom.xml clean test verify -Pcoverage
+after_success:
+- curl -o ~/codacy-coverage-reporter.jar https://oss.sonatype.org/service/local/repositories/releases/content/com/codacy/codacy-coverage-reporter/4.0.2/codacy-coverage-reporter-4.0.2-assembly.jar
+- $JAVA_HOME/bin/java -jar ~/codacy-coverage-reporter.jar report -l Java -r main/commons/target/site/jacoco/jacoco.xml --partial
+- $JAVA_HOME/bin/java -jar ~/codacy-coverage-reporter.jar report -l Java -r main/keychain/target/site/jacoco/jacoco.xml --partial
+- $JAVA_HOME/bin/java -jar ~/codacy-coverage-reporter.jar report -l Java -r main/ui/target/site/jacoco/jacoco.xml --partial
+- $JAVA_HOME/bin/java -jar ~/codacy-coverage-reporter.jar report -l Java -r main/launcher/target/site/jacoco/jacoco.xml --partial
+- $JAVA_HOME/bin/java -jar ~/codacy-coverage-reporter.jar final
 before_deploy:
-- |
-  if [[ $TRAVIS_BRANCH == "develop" ]] && [[ $TRAVIS_PULL_REQUEST == "false" ]]; then
-    CONTINUOUS_RELEASE_URL=`curl -s https://api.github.com/repos/cryptomator/cryptomator/releases/tags/continuous | jq -re '.url'`
-    echo "Existing continuous release: ${CONTINUOUS_RELEASE_URL}"
-    if [[ $CONTINUOUS_RELEASE_URL == http* ]]; then
-      curl -u cryptobot:$GITHUB_API_KEY -X DELETE $CONTINUOUS_RELEASE_URL
-    fi
-  fi
 - |
   if [[ -n "$TRAVIS_TAG" ]]; then
     mvn -fmain/pom.xml org.codehaus.mojo:versions-maven-plugin:set -DnewVersion=$TRAVIS_TAG
   elif [[ $TRAVIS_BRANCH == "develop" ]] && [[ $TRAVIS_PULL_REQUEST == "false" ]]; then
     mvn -fmain/pom.xml org.codehaus.mojo:versions-maven-plugin:set -DnewVersion=SNAPSHOT-$(echo $TRAVIS_COMMIT | head -c7)
-    git tag -f continuous
-    git remote add gh https://cryptobot:${GITHUB_API_KEY}@github.com/cryptomator/cryptomator.git
-    git push -f gh continuous
-    git remote remove gh
   fi
 - mvn -fmain/pom.xml clean package -Prelease -DskipTests
-- gpg --import 34C80F11.gpg
-- gpg --detach-sign -a -u 34C80F11 --batch --passphrase ${GPG_PASSPHRASE} main/ant-kit/target/antkit.zip
 deploy:
-- provider: releases # CONTINUOUS
-  prerelease: true
-  api-key: $GITHUB_API_KEY
-  tag_name: continuous
-  overwrite: true
-  file_glob: true
-  file:
-  - "main/uber-jar/target/Cryptomator-*.jar"
-  - "main/ant-kit/target/antkit.zip"
-  - "main/ant-kit/target/antkit.zip.asc"
+- provider: script # SNAPSHOTS
   skip_cleanup: true
-  name: Cryptomator continuous build
-  body: Automatically built on $(date +'%F %T %Z').
+  script: >-
+    curl -T main/ant-kit/target/antkit.zip
+    -u cryptobot:${BINTRAY_API_KEY}
+    -H "X-Bintray-Package:ant-kit"
+    -H "X-Bintray-Version:continuous"
+    -H "X-Bintray-Override:1"
+    -H "X-Bintray-Publish:1"
+    https://api.bintray.com/content/cryptomator/cryptomator/antkit-continuous.zip
   on:
     repo: cryptomator/cryptomator
     branch: develop
@@ -75,27 +54,20 @@ deploy:
   api_key: $GITHUB_API_KEY
   file:
   - "main/uber-jar/target/Cryptomator-$TRAVIS_TAG.jar"
-  - "main/ant-kit/target/antkit.zip"
-  - "main/ant-kit/target/antkit.zip.asc"
   skip_cleanup: true
   on:
     repo: cryptomator/cryptomator
     tags: true
 - provider: script
-  script: "curl -X POST -u cryptobot:${BINTRAY_API_KEY} -H 'Content-Type: application/json' -d '{\"name\": \"${TRAVIS_TAG}\", \"vcs_tag\": \"${TRAVIS_TAG}\"}' https://api.bintray.com/packages/cryptomator/cryptomator/cryptomator-win/versions"
+  skip_cleanup: true
+  script: >-
+    curl -T main/ant-kit/target/antkit.zip
+    -u cryptobot:${BINTRAY_API_KEY}
+    -H "X-Bintray-Package:ant-kit"
+    -H "X-Bintray-Version:${TRAVIS_TAG}"
+    -H "X-Bintray-Override:1"
+    -H "X-Bintray-Publish:1"
+    https://api.bintray.com/content/cryptomator/cryptomator/antkit-${TRAVIS_TAG}.zip
   on:
     repo: cryptomator/cryptomator
     tags: true
-- provider: script
-  script: "curl -X POST -u cryptobot:${BINTRAY_API_KEY} -H 'Content-Type: application/json' -d '{\"name\": \"${TRAVIS_TAG}\", \"vcs_tag\": \"${TRAVIS_TAG}\"}' https://api.bintray.com/packages/cryptomator/cryptomator/cryptomator-osx/versions"
-  on:
-    repo: cryptomator/cryptomator
-    tags: true
-after_script:
-- jdk_switcher use oraclejdk8
-- curl -o ~/codacy-coverage-reporter-assembly-latest.jar https://oss.sonatype.org/service/local/repositories/releases/content/com/codacy/codacy-coverage-reporter/4.0.1/codacy-coverage-reporter-4.0.1-assembly.jar
-- $JAVA_HOME/bin/java -jar ~/codacy-coverage-reporter-assembly-latest.jar report -l Java -r main/commons/target/site/jacoco/jacoco.xml --partial
-- $JAVA_HOME/bin/java -jar ~/codacy-coverage-reporter-assembly-latest.jar report -l Java -r main/keychain/target/site/jacoco/jacoco.xml --partial
-- $JAVA_HOME/bin/java -jar ~/codacy-coverage-reporter-assembly-latest.jar report -l Java -r main/ui/target/site/jacoco/jacoco.xml --partial
-- $JAVA_HOME/bin/java -jar ~/codacy-coverage-reporter-assembly-latest.jar report -l Java -r main/launcher/target/site/jacoco/jacoco.xml --partial
-- $JAVA_HOME/bin/java -jar ~/codacy-coverage-reporter-assembly-latest.jar final

@@ -9,10 +9,6 @@
 package org.cryptomator.ui.controllers;
 
 import javax.inject.Inject;
-import java.nio.file.Files;
-import java.nio.file.InvalidPathException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Objects;
@@ -22,7 +18,6 @@ import java.util.concurrent.ExecutorService;
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Strings;
 import javafx.application.Application;
-import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -39,7 +34,6 @@ import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
 import javafx.util.StringConverter;
 import org.apache.commons.lang3.CharUtils;
@@ -51,6 +45,7 @@ import org.cryptomator.cryptolib.api.InvalidPassphraseException;
 import org.cryptomator.cryptolib.api.UnsupportedVaultFormatException;
 import org.cryptomator.frontend.webdav.ServerLifecycleException;
 import org.cryptomator.keychain.KeychainAccess;
+import org.cryptomator.ui.model.InvalidSettingsException;
 import org.cryptomator.ui.controls.SecPasswordField;
 import org.cryptomator.ui.l10n.Localization;
 import org.cryptomator.ui.model.Vault;
@@ -123,16 +118,10 @@ public class UnlockController implements ViewController {
 	private CheckBox useOwnMountPath;
 
 	@FXML
-	private HBox mountPathBox;
-
-	@FXML
 	private Label mountPathLabel;
 
 	@FXML
 	private TextField mountPath;
-
-	@FXML
-	private Button changeMountPathButton;
 
 	@FXML
 	private ProgressIndicator progressIndicator;
@@ -161,13 +150,10 @@ public class UnlockController implements ViewController {
 		savePassword.setDisable(!keychainAccess.isPresent());
 		unlockAfterStartup.disableProperty().bind(savePassword.disabledProperty().or(savePassword.selectedProperty().not()));
 
-		mountPathLabel.setVisible(false);
-		mountPathBox.visibleProperty().bind(mountPathLabel.visibleProperty());
-		mountPathBox.managedProperty().bind(mountPathLabel.managedProperty());
-		mountPath.visibleProperty().bind(mountPathLabel.visibleProperty());
-		mountPath.managedProperty().bind(mountPathLabel.managedProperty());
-		changeMountPathButton.visibleProperty().bind(mountPathLabel.visibleProperty());
-		changeMountPathButton.managedProperty().bind(mountPathLabel.managedProperty());
+		mountPathLabel.visibleProperty().bind(useOwnMountPath.selectedProperty());
+		mountPath.visibleProperty().bind(useOwnMountPath.selectedProperty());
+		mountPath.managedProperty().bind(useOwnMountPath.selectedProperty());
+		mountPath.textProperty().addListener(this::mountPathDidChange);
 
 		if (SystemUtils.IS_OS_WINDOWS) {
 			winDriveLetter.setConverter(new WinDriveLetterLabelConverter());
@@ -175,7 +161,7 @@ public class UnlockController implements ViewController {
 			useOwnMountPath.setManaged(false);
 			mountPathLabel.setManaged(false);
 			//dirty cheat
-			mountPathBox.setMouseTransparent(true);
+			mountPath.setMouseTransparent(true);
 		} else {
 			winDriveLetterLabel.setVisible(false);
 			winDriveLetterLabel.setManaged(false);
@@ -187,9 +173,8 @@ public class UnlockController implements ViewController {
 				mountPathLabel.setManaged(false);
 			}
 		}
-		changeMountPathButton.disableProperty().bind(Bindings.createBooleanBinding(this::isDirVaild, mountPath.textProperty()).not());
-
 	}
+
 
 	@Override
 	public Parent getRoot() {
@@ -252,11 +237,8 @@ public class UnlockController implements ViewController {
 		vaultSubs = vaultSubs.and(EasyBind.subscribe(revealAfterMount.selectedProperty(), vaultSettings.revealAfterMount()::set));
 		vaultSubs = vaultSubs.and(EasyBind.subscribe(useOwnMountPath.selectedProperty(), vaultSettings.usesIndividualMountPath()::set));
 
-		changeMountPathButton.visibleProperty().bind(
-				vaultSettings.individualMountPath().isNotEqualTo(mountPath.textProperty())
-		);
+
 		mountPath.textProperty().setValue(vaultSettings.individualMountPath().getValueSafe());
-		mountPathLabel.visibleProperty().bind(useOwnMountPath.selectedProperty());
 
 	}
 
@@ -284,28 +266,6 @@ public class UnlockController implements ViewController {
 		}
 	}
 
-	@FXML
-	private void didClickchangeMountPathButton(ActionEvent event) {
-		assert isDirVaild();
-		vault.setMountPath(mountPath.getText());
-	}
-
-	private boolean isDirVaild() {
-		try {
-			if (!mountPath.textProperty().isEmpty().get()) {
-				Path p = Paths.get(mountPath.textProperty().get());
-				return Files.isDirectory(p) && Files.isReadable(p) && Files.isWritable(p) && Files.isExecutable(p);
-			} else {
-				return false;
-			}
-
-		} catch (InvalidPathException e) {
-			LOG.info("Invalid path");
-			return false;
-		}
-	}
-
-
 	private void filterAlphanumericKeyEvents(KeyEvent t) {
 		if (!Strings.isNullOrEmpty(t.getCharacter()) && !ALPHA_NUMERIC_MATCHER.matchesAllOf(t.getCharacter())) {
 			t.consume();
@@ -319,6 +279,10 @@ public class UnlockController implements ViewController {
 		} else {
 			vault.setMountName(newValue);
 		}
+	}
+
+	private void mountPathDidChange(ObservableValue<? extends String> property, String oldValue, String newValue) {
+		vault.setIndividualMountPath(newValue);
 	}
 
 	/**
@@ -420,6 +384,7 @@ public class UnlockController implements ViewController {
 	@FXML
 	private void didClickUnlockButton(ActionEvent event) {
 		advancedOptions.setDisable(true);
+		advancedOptions.setVisible(false);
 		progressIndicator.setVisible(true);
 
 		CharSequence password = passwordField.getCharacters();
@@ -432,6 +397,10 @@ public class UnlockController implements ViewController {
 			messageText.setText(null);
 			downloadsPageLink.setVisible(false);
 			listener.ifPresent(lstnr -> lstnr.didUnlock(vault));
+		}).onError(InvalidSettingsException.class, e -> {
+			messageText.setText(localization.getString("unlock.errorMessage.invalidMountPath"));
+			advancedOptions.setVisible(true);
+			mountPath.setStyle("-fx-border-color: red;");
 		}).onError(InvalidPassphraseException.class, e -> {
 			messageText.setText(localization.getString("unlock.errorMessage.wrongPassword"));
 			passwordField.selectAll();
@@ -451,14 +420,17 @@ public class UnlockController implements ViewController {
 			LOG.error("Unlock failed for technical reasons.", e);
 			messageText.setText(localization.getString("unlock.errorMessage.unlockFailed"));
 		}).onError(Exception.class, e -> {
-				LOG.error("Unlock failed for technical reasons.", e);
-				messageText.setText(localization.getString("unlock.errorMessage.unlockFailed"));
+			LOG.error("Unlock failed for technical reasons.", e);
+			messageText.setText(localization.getString("unlock.errorMessage.unlockFailed"));
 		}).andFinally(() -> {
 			if (!savePassword.isSelected()) {
 				passwordField.swipe();
 			}
 			advancedOptions.setDisable(false);
 			progressIndicator.setVisible(false);
+			if (advancedOptions.isVisible()) { //dirty programming, but otherwise the focus is wrong
+				mountPath.requestFocus();
+			}
 		}).runOnce(executor);
 	}
 

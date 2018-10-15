@@ -116,11 +116,16 @@ public class WebDavVolume implements Volume {
 
 	@Override
 	public boolean isSupported() {
-		return true;
+		return WebDavVolume.isSupportedStatic();
 	}
 
 	@Override
 	public boolean supportsForcedUnmount() {
 		return mount != null && mount.forced().isPresent();
+	}
+
+
+	public static boolean isSupportedStatic() {
+		return true;
 	}
 }
