@@ -31,6 +31,8 @@
 		<cryptomator.dokany.version>1.0.0</cryptomator.dokany.version>
 		<cryptomator.webdav.version>1.0.5</cryptomator.webdav.version>
 
+		<javafx.version>11</javafx.version>
+
 		<commons-io.version>2.5</commons-io.version>
 		<commons-lang3.version>3.6</commons-lang3.version>
 
@@ -120,6 +122,18 @@
 				<groupId>org.cryptomator</groupId>
 				<artifactId>jni</artifactId>
 				<version>${cryptomator.jni.version}</version>
+			</dependency>
+
+			<!-- JavaFX -->
+			<dependency>
+			  <groupId>org.openjfx</groupId>
+			  <artifactId>javafx-controls</artifactId>
+			  <version>${javafx.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.openjfx</groupId>
+				<artifactId>javafx-fxml</artifactId>
+				<version>${javafx.version}</version>
 			</dependency>
 
 			<!-- Logging -->
@@ -317,9 +331,9 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.8.0</version>
 				<configuration>
-					<source>10</source>
-					<target>10</target>
-					<release>10</release>
+					<source>11</source>
+					<target>11</target>
+					<release>11</release>
 					<annotationProcessorPaths>
 						<path>
 							<groupId>com.google.dagger</groupId>

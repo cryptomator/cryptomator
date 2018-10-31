@@ -46,6 +46,16 @@
 			<artifactId>cryptolib</artifactId>
 		</dependency>
 		
+		<!-- JavaFx -->
+		<dependency>
+			<groupId>org.openjfx</groupId>
+			<artifactId>javafx-controls</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.openjfx</groupId>
+			<artifactId>javafx-fxml</artifactId>
+		</dependency>
+
 		<!-- EasyBind -->
 		<dependency>
 			<groupId>org.fxmisc.easybind</groupId>
