@@ -46,7 +46,7 @@ import org.cryptomator.cryptolib.api.UnsupportedVaultFormatException;
 import org.cryptomator.frontend.webdav.ServerLifecycleException;
 import org.cryptomator.keychain.KeychainAccess;
 import org.cryptomator.ui.model.InvalidSettingsException;
-import org.cryptomator.ui.controls.AutofilledSecPasswordFieldSkin;
+import org.cryptomator.ui.controls.AutoFilledSecPasswordFieldSkin;
 import org.cryptomator.ui.controls.SecPasswordField;
 import org.cryptomator.ui.l10n.Localization;
 import org.cryptomator.ui.model.Vault;
@@ -224,7 +224,7 @@ public class UnlockController implements ViewController {
 			char[] storedPw = keychainAccess.get().loadPassphrase(vault.getId());
 			if (storedPw != null) {
 				savePassword.setSelected(true);
-				new AutofilledSecPasswordFieldSkin(passwordField);
+				new AutoFilledSecPasswordFieldSkin(passwordField);
 				passwordField.setText(new String(storedPw));
 				passwordField.selectRange(storedPw.length, storedPw.length);
 				Arrays.fill(storedPw, ' ');
