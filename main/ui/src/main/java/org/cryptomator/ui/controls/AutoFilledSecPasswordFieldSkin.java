@@ -41,10 +41,10 @@ public class AutoFilledSecPasswordFieldSkin extends TextFieldSkin {
     @Override
     protected String maskText(String txt) {
         int n = AUTOFILLED_PASSWORD_MASK_LENGTH;
-        StringBuilder passwordBuilder = new StringBuilder(n);
+        StringBuilder maskBuilder = new StringBuilder(n);
         for (int i = 0; i < n; i++) {
-            passwordBuilder.append(BULLET);
+            maskBuilder.append(BULLET);
         }
-        return passwordBuilder.toString();
+        return maskBuilder.toString();
     }
 }
