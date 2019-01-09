@@ -5,16 +5,6 @@
  *******************************************************************************/
 package org.cryptomator.common.settings;
 
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
-import java.util.Base64;
-import java.util.Objects;
-import java.util.UUID;
-
-import org.apache.commons.lang3.StringUtils;
-import org.fxmisc.easybind.EasyBind;
-
 import javafx.beans.Observable;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
@@ -22,6 +12,15 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import org.apache.commons.lang3.StringUtils;
+import org.fxmisc.easybind.EasyBind;
+
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.util.Base64;
+import java.util.Objects;
+import java.util.UUID;
 
 public class VaultSettings {
 
@@ -35,12 +34,8 @@ public class VaultSettings {
 	private final StringProperty winDriveLetter = new SimpleStringProperty();
 	private final BooleanProperty unlockAfterStartup = new SimpleBooleanProperty(DEFAULT_UNLOCK_AFTER_STARTUP);
 	private final BooleanProperty revealAfterMount = new SimpleBooleanProperty(DEFAULT_REAVEAL_AFTER_MOUNT);
-	private final BooleanProperty usesCustomMountPathLinux = new SimpleBooleanProperty(DEFAULT_USES_CUSTOM_MOUNTPATH);
-	private final StringProperty customMountPathLinux = new SimpleStringProperty();
-	private final BooleanProperty usesCustomMountPathMac = new SimpleBooleanProperty(DEFAULT_USES_CUSTOM_MOUNTPATH);
-	private final StringProperty customMountPathMac = new SimpleStringProperty();
-	private final BooleanProperty usesCustomMountPathWindows = new SimpleBooleanProperty(DEFAULT_USES_CUSTOM_MOUNTPATH);
-	private final StringProperty customMountPathWindows = new SimpleStringProperty();
+	private final BooleanProperty usesCustomMountPath = new SimpleBooleanProperty(DEFAULT_USES_CUSTOM_MOUNTPATH);
+	private final StringProperty customMountPath = new SimpleStringProperty();
 
 	public VaultSettings(String id) {
 		this.id = Objects.requireNonNull(id);
@@ -49,7 +44,7 @@ public class VaultSettings {
 	}
 
 	Observable[] observables() {
-		return new Observable[]{path, mountName, winDriveLetter, unlockAfterStartup, revealAfterMount, usesCustomMountPathLinux, customMountPathLinux, usesCustomMountPathMac, customMountPathMac, usesCustomMountPathWindows, customMountPathWindows};
+		return new Observable[]{path, mountName, winDriveLetter, unlockAfterStartup, revealAfterMount, usesCustomMountPath, customMountPath};
 	}
 
 	private void deriveMountNameFromPath(Path path) {
@@ -124,28 +119,12 @@ public class VaultSettings {
 		return revealAfterMount;
 	}
 
-	public BooleanProperty usesCustomMountPathLinux() {
-		return usesCustomMountPathLinux;
+	public BooleanProperty usesCustomMountPath() {
+		return usesCustomMountPath;
 	}
 
-	public StringProperty customMountPathLinux() {
-		return customMountPathLinux;
-	}
-
-	public BooleanProperty usesCustomMountPathMac() {
-		return usesCustomMountPathMac;
-	}
-
-	public StringProperty customMountPathMac() {
-		return customMountPathMac;
-	}
-
-	public BooleanProperty usesCustomMountPathWindows() {
-		return usesCustomMountPathWindows;
-	}
-
-	public StringProperty customMountPathWindows() {
-		return customMountPathWindows;
+	public StringProperty customMountPath() {
+		return customMountPath;
 	}
 
 	/* Hashcode/Equals */

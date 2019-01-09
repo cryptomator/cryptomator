@@ -8,13 +8,6 @@
  ******************************************************************************/
 package org.cryptomator.ui.controllers;
 
-import javax.inject.Inject;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.concurrent.ExecutorService;
-
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Strings;
 import javafx.application.Application;
@@ -22,7 +15,6 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.Group;
 import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -46,9 +38,9 @@ import org.cryptomator.cryptolib.api.InvalidPassphraseException;
 import org.cryptomator.cryptolib.api.UnsupportedVaultFormatException;
 import org.cryptomator.frontend.webdav.ServerLifecycleException;
 import org.cryptomator.keychain.KeychainAccess;
-import org.cryptomator.ui.model.InvalidSettingsException;
 import org.cryptomator.ui.controls.SecPasswordField;
 import org.cryptomator.ui.l10n.Localization;
+import org.cryptomator.ui.model.InvalidSettingsException;
 import org.cryptomator.ui.model.Vault;
 import org.cryptomator.ui.model.WindowsDriveLetters;
 import org.cryptomator.ui.util.DialogBuilderUtil;
@@ -57,6 +49,13 @@ import org.fxmisc.easybind.EasyBind;
 import org.fxmisc.easybind.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.inject.Inject;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.ExecutorService;
 
 public class UnlockController implements ViewController {
 
@@ -233,22 +232,15 @@ public class UnlockController implements ViewController {
 		unlockAfterStartup.setSelected(savePassword.isSelected() && vaultSettings.unlockAfterStartup().get());
 		revealAfterMount.setSelected(vaultSettings.revealAfterMount().get());
 
+		if (!settings.preferredVolumeImpl().get().equals(VolumeImpl.WEBDAV)) {
+			useCustomMountPath.setSelected(vaultSettings.usesCustomMountPath().get());
+			customMountPathField.textProperty().setValue(vaultSettings.customMountPath().getValueSafe());
+		}
+
 		vaultSubs = vaultSubs.and(EasyBind.subscribe(unlockAfterStartup.selectedProperty(), vaultSettings.unlockAfterStartup()::set));
 		vaultSubs = vaultSubs.and(EasyBind.subscribe(revealAfterMount.selectedProperty(), vaultSettings.revealAfterMount()::set));
-		vaultSubs = vaultSubs.and(EasyBind.subscribe(useCustomMountPath.selectedProperty(), vaultSettings.usesCustomMountPathLinux()::set));
+		vaultSubs = vaultSubs.and(EasyBind.subscribe(useCustomMountPath.selectedProperty(), vaultSettings.usesCustomMountPath()::set));
 
-		if(!settings.preferredVolumeImpl().get().equals(VolumeImpl.WEBDAV)){
-			if(SystemUtils.IS_OS_WINDOWS){
-				useCustomMountPath.setSelected(vaultSettings.usesCustomMountPathWindows().get());
-				customMountPathField.textProperty().setValue(vaultSettings.customMountPathWindows().getValueSafe());
-			} else if (SystemUtils.IS_OS_MAC){
-				useCustomMountPath.setSelected(vaultSettings.usesCustomMountPathMac().get());
-				customMountPathField.textProperty().setValue(vaultSettings.customMountPathMac().getValueSafe());
-			} else {
-				useCustomMountPath.setSelected(vaultSettings.usesCustomMountPathLinux().get());
-				customMountPathField.textProperty().setValue(vaultSettings.customMountPathLinux().getValueSafe());
-			}
-		}
 	}
 
 	// ****************************************

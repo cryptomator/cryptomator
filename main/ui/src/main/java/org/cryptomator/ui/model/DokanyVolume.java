@@ -1,16 +1,14 @@
 package org.cryptomator.ui.model;
 
-import javax.inject.Inject;
-import java.nio.file.Paths;
-import java.util.Set;
-import java.util.concurrent.ExecutorService;
-
-import com.google.common.collect.Sets;
 import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.cryptofs.CryptoFileSystem;
 import org.cryptomator.frontend.dokany.Mount;
 import org.cryptomator.frontend.dokany.MountFactory;
 import org.cryptomator.frontend.dokany.MountFailedException;
+
+import javax.inject.Inject;
+import java.nio.file.Paths;
+import java.util.concurrent.ExecutorService;
 
 public class DokanyVolume implements Volume {
 
@@ -34,26 +32,24 @@ public class DokanyVolume implements Volume {
 		return DokanyVolume.isSupportedStatic();
 	}
 
-	//TODO: Drive letter 'A' as mount point is invalid in dokany. maybe we should do already here something against it
 	@Override
 	public void mount(CryptoFileSystem fs) throws VolumeException {
-		char driveLetter;
-		if (!vaultSettings.winDriveLetter().getValueSafe().equals("")) {
-			driveLetter = vaultSettings.winDriveLetter().get().charAt(0);
+		String mountPath;
+		if (vaultSettings.usesCustomMountPath().get()) {
+			mountPath = vaultSettings.customMountPath().get();
+		} else if (!vaultSettings.winDriveLetter().getValueSafe().equals("")) {
+			mountPath = vaultSettings.winDriveLetter().get().charAt(0) + ":\\";
 		} else {
 			//auto assign drive letter
 			if (!windowsDriveLetters.getAvailableDriveLetters().isEmpty()) {
-				//this is a temporary fix for 'A' being an invalid drive letter
-				Set<Character> availableLettersWithoutA = Sets.difference(windowsDriveLetters.getAvailableDriveLetters(), Set.of('A'));
-				driveLetter = availableLettersWithoutA.iterator().next();
-//				driveLetter = windowsDriveLetters.getAvailableDriveLetters().iterator().next();
+				mountPath = windowsDriveLetters.getAvailableDriveLetters().iterator().next() + ":\\";
 			} else {
 				throw new VolumeException("No free drive letter available.");
 			}
 		}
 		String mountName = vaultSettings.mountName().get();
 		try {
-			this.mount = mountFactory.mount(fs.getPath("/"), Paths.get(driveLetter + ":\\") , mountName, FS_TYPE_NAME);
+			this.mount = mountFactory.mount(fs.getPath("/"), Paths.get(mountPath), mountName, FS_TYPE_NAME);
 		} catch (MountFailedException e) {
 			throw new VolumeException("Unable to mount Filesystem", e);
 		}
