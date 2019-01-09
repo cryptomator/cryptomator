@@ -2,7 +2,7 @@
  * Copyright (c) 2014, 2017 Sebastian Stenzel
  * All rights reserved.
  * This program and the accompanying materials are made available under the terms of the accompanying LICENSE file.
- * 
+ *
  * Contributors:
  *     Sebastian Stenzel - initial API and implementation
  *     Jean-Noël Charon - confirmation dialog on vault removal
@@ -110,7 +110,7 @@ public class MainController implements ViewController {
 
 	@Inject
 	public MainController(@Named("mainWindow") Stage mainWindow, ExecutorService executorService, @Named("fileOpenRequests") BlockingQueue<Path> fileOpenRequests, ExitUtil exitUtil, Localization localization,
-			VaultFactory vaultFactoy, ViewControllerLoader viewControllerLoader, UpgradeStrategies upgradeStrategies, VaultList vaults, AutoUnlocker autoUnlocker) {
+						  VaultFactory vaultFactoy, ViewControllerLoader viewControllerLoader, UpgradeStrategies upgradeStrategies, VaultList vaults, AutoUnlocker autoUnlocker) {
 		this.mainWindow = mainWindow;
 		this.executorService = executorService;
 		this.fileOpenRequests = fileOpenRequests;
@@ -331,7 +331,7 @@ public class MainController implements ViewController {
 
 	/**
 	 * adds the given directory or selects it if it is already in the list of directories.
-	 * 
+	 *
 	 * @param path to a vault directory or masterkey file
 	 */
 	public void addVault(final Path path, boolean select) {
@@ -432,7 +432,13 @@ public class MainController implements ViewController {
 	}
 
 	private void didPressKeyOnRoot(KeyEvent event) {
-		if ((event.isMetaDown() || event.isControlDown()) && event.getCode().isDigitKey()) {
+		boolean triggered;
+		if (SystemUtils.IS_OS_MAC) {
+			triggered = event.isMetaDown();
+		} else {
+			triggered = event.isControlDown() && !event.isAltDown();
+		}
+		if (triggered && event.getCode().isDigitKey()) {
 			int digit = Integer.valueOf(event.getText());
 			switch (digit) {
 				case 0: {
