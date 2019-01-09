@@ -31,8 +31,8 @@
 		<cryptomator.dokany.version>1.0.0</cryptomator.dokany.version>
 		<cryptomator.webdav.version>1.0.5</cryptomator.webdav.version>
 
-		<commons-io.version>2.5</commons-io.version>
-		<commons-lang3.version>3.6</commons-lang3.version>
+		<commons-io.version>2.6</commons-io.version>
+		<commons-lang3.version>3.8.1</commons-lang3.version>
 
 		<easybind.version>1.0.3</easybind.version>
 
