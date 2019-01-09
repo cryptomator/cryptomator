@@ -232,6 +232,8 @@ public class MainController implements ViewController {
 					Platform.runLater(Platform::exit);
 				}
 			});
+		} else {
+			Platform.runLater(Platform::exit);
 		}
 	}
 

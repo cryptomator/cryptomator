@@ -5,14 +5,11 @@
  *******************************************************************************/
 package org.cryptomator.launcher;
 
+import javafx.application.Application;
+import javafx.stage.Stage;
 import org.cryptomator.ui.controllers.MainController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.fxml.FXMLLoader;
-import javafx.stage.Stage;
 
 public class MainApplication extends Application {
 
