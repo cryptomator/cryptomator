@@ -398,6 +398,7 @@ public class UnlockController implements ViewController {
 
 		CharSequence password = passwordField.getCharacters();
 		Tasks.create(() -> {
+			messageText.setText(localization.getString("unlock.pendingMessage.unlocking"));
 			vault.unlock(password);
 			if (keychainAccess.isPresent() && savePassword.isSelected()) {
 				keychainAccess.get().storePassphrase(vault.getId(), password);
