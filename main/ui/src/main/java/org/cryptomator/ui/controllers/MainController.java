@@ -222,7 +222,7 @@ public class MainController implements ViewController {
 			ButtonType forceShutdownButtonType = new ButtonType(localization.getString("main.gracefulShutdown.button.forceShutdown"));
 			Alert gracefulShutdownDialog = DialogBuilderUtil.buildGracefulShutdownDialog(
 					localization.getString("main.gracefulShutdown.dialog.title"), localization.getString("main.gracefulShutdown.dialog.header"), localization.getString("main.gracefulShutdown.dialog.content"),
-					forceShutdownButtonType, forceShutdownButtonType, tryAgainButtonType);
+					forceShutdownButtonType, ButtonType.CANCEL, forceShutdownButtonType, tryAgainButtonType);
 
 			Optional<ButtonType> choice = gracefulShutdownDialog.showAndWait();
 			choice.ifPresent(btnType -> {
@@ -230,6 +230,8 @@ public class MainController implements ViewController {
 					gracefulShutdown();
 				} else if (forceShutdownButtonType.equals(btnType)) {
 					Platform.runLater(Platform::exit);
+				} else {
+					return;
 				}
 			});
 		} else {
