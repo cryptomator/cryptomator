@@ -121,3 +121,4 @@ main.gracefulShutdown.dialog.header = Trezory v používání
 main.gracefulShutdown.dialog.content = Jeden nebo více trezorů je stále v používání ostatními programy. Ukončete je aby se Cryptomator mohl správně vypnout a zkuste to znovu.\n\nPokud to nezabere, Cryptomator je možné vypnout vynuceně, ale to může vést ke ztrátě dat a není proto doporučeno.
 main.gracefulShutdown.button.tryAgain = Zkusit znovu
 main.gracefulShutdown.button.forceShutdown = Vynutit vypnutí
+unlock.pendingMessage.unlocking = Unlocking vault...

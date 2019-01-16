@@ -119,3 +119,4 @@ main.gracefulShutdown.dialog.header = Portfel(e) w użyciu
 main.gracefulShutdown.dialog.content = Jedna lub więcej porfelii jest nadal używana przez inne programy. Zamknij je, aby umożliwić prawidłowe zamknięcie Cryptomator, a następnie spróbuj ponownie.\n\nJeśli to nie zadziała, Cryptomator może zamknąć na siłę, ale może to spowodować utratę danych i nie jest zalecane.
 main.gracefulShutdown.button.tryAgain = Spróbuj ponownie
 main.gracefulShutdown.button.forceShutdown = Wymuś zamknięcie
+unlock.pendingMessage.unlocking = Unlocking vault...

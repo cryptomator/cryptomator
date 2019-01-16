@@ -121,3 +121,4 @@ main.gracefulShutdown.dialog.header = Caja(s) Fuertes(s) en uso
 main.gracefulShutdown.dialog.content = Una o más cajas fuertes están siendo utilizadas por otros programas. Por favor ciérrelos para permitir a Cryptomator cerrarse adecuadamente, e intente de nuevo.\n\nSi esto no funciona, Cryptomator puede cerrarse forzosamente, pero esta vía puede provocar pérdida de información y no es recomendada.
 main.gracefulShutdown.button.tryAgain = Intente de nuevo
 main.gracefulShutdown.button.forceShutdown = Forzar apagado
+unlock.pendingMessage.unlocking = Unlocking vault...
