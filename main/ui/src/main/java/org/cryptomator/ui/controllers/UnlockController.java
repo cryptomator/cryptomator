@@ -155,6 +155,14 @@ public class UnlockController implements ViewController {
 		customMountPathField.visibleProperty().bind(useCustomMountPath.selectedProperty());
 		customMountPathField.managedProperty().bind(useCustomMountPath.selectedProperty());
 		customMountPathField.textProperty().addListener(this::mountPathDidChange);
+		winDriveLetter.setConverter(new WinDriveLetterLabelConverter());
+
+		if (!SystemUtils.IS_OS_WINDOWS) {
+			winDriveLetterLabel.setVisible(false);
+			winDriveLetterLabel.setManaged(false);
+			winDriveLetter.setVisible(false);
+			winDriveLetter.setManaged(false);
+		}
 
 		if (VolumeImpl.WEBDAV.equals(settings.preferredVolumeImpl().get())) {
 			useCustomMountPath.setVisible(false);
@@ -163,16 +171,10 @@ public class UnlockController implements ViewController {
 		} else {
 			useCustomMountPath.setVisible(true);
 			if (SystemUtils.IS_OS_WINDOWS) {
-				winDriveLetter.setConverter(new WinDriveLetterLabelConverter());
 				winDriveLetter.visibleProperty().bind(useCustomMountPath.selectedProperty().not());
 				winDriveLetter.managedProperty().bind(useCustomMountPath.selectedProperty().not());
 				winDriveLetterLabel.visibleProperty().bind(useCustomMountPath.selectedProperty().not());
 				winDriveLetterLabel.managedProperty().bind(useCustomMountPath.selectedProperty().not());
-			} else {
-				winDriveLetterLabel.setVisible(false);
-				winDriveLetterLabel.setManaged(false);
-				winDriveLetter.setVisible(false);
-				winDriveLetter.setManaged(false);
 			}
 		}
 	}
