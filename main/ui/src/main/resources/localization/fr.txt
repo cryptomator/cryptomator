@@ -122,3 +122,4 @@ main.gracefulShutdown.dialog.header = Coffre-fort est en cours d'utilisation.
 main.gracefulShutdown.dialog.content = Un ou plusieurs coffre-forts sont en cours d'utilisation par d'autres logiciels. S'il vous plait, fermer-les pour permettre à Cryptomator de finir proprement.\n\nSi ça ne marche pas, Cryptomator peut fermer par force, mais cela peut résulter d'une perte de vos fichiers (non recommandé).
 main.gracefulShutdown.button.tryAgain = Réessayez
 main.gracefulShutdown.button.forceShutdown = Arrêt forcé
+unlock.pendingMessage.unlocking = Unlocking vault...
