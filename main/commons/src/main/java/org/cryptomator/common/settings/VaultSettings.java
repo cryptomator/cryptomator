@@ -22,11 +22,15 @@ import java.util.Base64;
 import java.util.Objects;
 import java.util.UUID;
 
+/**
+ * The settings specific to a single vault.
+ * TODO: Change the name of individualMountPath and its derivatives to customMountPath
+ */
 public class VaultSettings {
 
 	public static final boolean DEFAULT_UNLOCK_AFTER_STARTUP = false;
 	public static final boolean DEFAULT_REAVEAL_AFTER_MOUNT = true;
-	public static final boolean DEFAULT_USES_CUSTOM_MOUNTPATH = false;
+	public static final boolean DEFAULT_USES_INDIVIDUAL_MOUNTPATH = false;
 
 	private final String id;
 	private final ObjectProperty<Path> path = new SimpleObjectProperty<>();
@@ -34,8 +38,8 @@ public class VaultSettings {
 	private final StringProperty winDriveLetter = new SimpleStringProperty();
 	private final BooleanProperty unlockAfterStartup = new SimpleBooleanProperty(DEFAULT_UNLOCK_AFTER_STARTUP);
 	private final BooleanProperty revealAfterMount = new SimpleBooleanProperty(DEFAULT_REAVEAL_AFTER_MOUNT);
-	private final BooleanProperty usesCustomMountPath = new SimpleBooleanProperty(DEFAULT_USES_CUSTOM_MOUNTPATH);
-	private final StringProperty customMountPath = new SimpleStringProperty();
+	private final BooleanProperty usesIndividualMountPath = new SimpleBooleanProperty(DEFAULT_USES_INDIVIDUAL_MOUNTPATH);
+	private final StringProperty individualMountPath = new SimpleStringProperty();
 
 	public VaultSettings(String id) {
 		this.id = Objects.requireNonNull(id);
@@ -44,7 +48,7 @@ public class VaultSettings {
 	}
 
 	Observable[] observables() {
-		return new Observable[]{path, mountName, winDriveLetter, unlockAfterStartup, revealAfterMount, usesCustomMountPath, customMountPath};
+		return new Observable[]{path, mountName, winDriveLetter, unlockAfterStartup, revealAfterMount, usesIndividualMountPath, individualMountPath};
 	}
 
 	private void deriveMountNameFromPath(Path path) {
@@ -119,12 +123,12 @@ public class VaultSettings {
 		return revealAfterMount;
 	}
 
-	public BooleanProperty usesCustomMountPath() {
-		return usesCustomMountPath;
+	public BooleanProperty usesIndividualMountPath() {
+		return usesIndividualMountPath;
 	}
 
-	public StringProperty customMountPath() {
-		return customMountPath;
+	public StringProperty individualMountPath() {
+		return individualMountPath;
 	}
 
 	/* Hashcode/Equals */

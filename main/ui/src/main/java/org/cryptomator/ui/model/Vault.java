@@ -100,7 +100,7 @@ public class Vault {
 	public synchronized void unlock(CharSequence passphrase) throws InvalidSettingsException, CryptoException, IOException, Volume.VolumeException {
 		Platform.runLater(() -> state.set(State.PROCESSING));
 		try {
-			if (vaultSettings.usesCustomMountPath().and(vaultSettings.customMountPath().isEmpty()).get()) {
+			if (vaultSettings.usesIndividualMountPath().and(vaultSettings.individualMountPath().isEmpty()).get()) {
 				throw new InvalidSettingsException();
 			}
 			CryptoFileSystem fs = getCryptoFileSystem(passphrase);
@@ -241,11 +241,11 @@ public class Vault {
 	}
 
 	public String getCustomMountPath() {
-		return vaultSettings.customMountPath().getValueSafe();
+		return vaultSettings.individualMountPath().getValueSafe();
 	}
 
 	public void setCustomMountPath(String mountPath) {
-		vaultSettings.customMountPath().set(mountPath);
+		vaultSettings.individualMountPath().set(mountPath);
 	}
 
 	public void setMountName(String mountName) throws IllegalArgumentException {

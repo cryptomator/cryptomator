@@ -25,8 +25,8 @@ class VaultSettingsJsonAdapter {
 		out.name("winDriveLetter").value(value.winDriveLetter().get());
 		out.name("unlockAfterStartup").value(value.unlockAfterStartup().get());
 		out.name("revealAfterMount").value(value.revealAfterMount().get());
-		out.name("usesCustomMountPath").value(value.usesCustomMountPath().get());
-		out.name("customMountPath").value(value.customMountPath().get());    //TODO: should this always be written? ( because it could contain metadata, which the user may not want to save!)
+		out.name("usesIndividualMountPath").value(value.usesIndividualMountPath().get());
+		out.name("individualMountPath").value(value.individualMountPath().get());    //TODO: should this always be written? ( because it could contain metadata, which the user may not want to save!)
 		out.endObject();
 	}
 
@@ -38,7 +38,7 @@ class VaultSettingsJsonAdapter {
 		String winDriveLetter = null;
 		boolean unlockAfterStartup = VaultSettings.DEFAULT_UNLOCK_AFTER_STARTUP;
 		boolean revealAfterMount = VaultSettings.DEFAULT_REAVEAL_AFTER_MOUNT;
-		boolean usesIndividualMountPath = VaultSettings.DEFAULT_USES_CUSTOM_MOUNTPATH;
+		boolean usesIndividualMountPath = VaultSettings.DEFAULT_USES_INDIVIDUAL_MOUNTPATH;
 
 		in.beginObject();
 		while (in.hasNext()) {
@@ -62,10 +62,10 @@ class VaultSettingsJsonAdapter {
 				case "revealAfterMount":
 					revealAfterMount = in.nextBoolean();
 					break;
-				case "usesCustomMountPath":
+				case "usesIndividualMountPath":
 					usesIndividualMountPath = in.nextBoolean();
 					break;
-				case "customMountPath":
+				case "individualMountPath":
 					individualMountPath = in.nextString();
 					break;
 				default:
@@ -81,8 +81,8 @@ class VaultSettingsJsonAdapter {
 		vaultSettings.winDriveLetter().set(winDriveLetter);
 		vaultSettings.unlockAfterStartup().set(unlockAfterStartup);
 		vaultSettings.revealAfterMount().set(revealAfterMount);
-		vaultSettings.usesCustomMountPath().set(usesIndividualMountPath);
-		vaultSettings.customMountPath().set(individualMountPath);
+		vaultSettings.usesIndividualMountPath().set(usesIndividualMountPath);
+		vaultSettings.individualMountPath().set(individualMountPath);
 		return vaultSettings;
 	}
 

@@ -233,13 +233,13 @@ public class UnlockController implements ViewController {
 		revealAfterMount.setSelected(vaultSettings.revealAfterMount().get());
 
 		if (!settings.preferredVolumeImpl().get().equals(VolumeImpl.WEBDAV)) {
-			useCustomMountPath.setSelected(vaultSettings.usesCustomMountPath().get());
-			customMountPathField.textProperty().setValue(vaultSettings.customMountPath().getValueSafe());
+			useCustomMountPath.setSelected(vaultSettings.usesIndividualMountPath().get());
+			customMountPathField.textProperty().setValue(vaultSettings.individualMountPath().getValueSafe());
 		}
 
 		vaultSubs = vaultSubs.and(EasyBind.subscribe(unlockAfterStartup.selectedProperty(), vaultSettings.unlockAfterStartup()::set));
 		vaultSubs = vaultSubs.and(EasyBind.subscribe(revealAfterMount.selectedProperty(), vaultSettings.revealAfterMount()::set));
-		vaultSubs = vaultSubs.and(EasyBind.subscribe(useCustomMountPath.selectedProperty(), vaultSettings.usesCustomMountPath()::set));
+		vaultSubs = vaultSubs.and(EasyBind.subscribe(useCustomMountPath.selectedProperty(), vaultSettings.usesIndividualMountPath()::set));
 
 	}
 

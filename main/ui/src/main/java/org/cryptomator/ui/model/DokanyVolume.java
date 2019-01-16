@@ -1,5 +1,6 @@
 package org.cryptomator.ui.model;
 
+import com.google.common.base.Strings;
 import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.cryptofs.CryptoFileSystem;
 import org.cryptomator.frontend.dokany.Mount;
@@ -35,9 +36,9 @@ public class DokanyVolume implements Volume {
 	@Override
 	public void mount(CryptoFileSystem fs) throws VolumeException {
 		String mountPath;
-		if (vaultSettings.usesCustomMountPath().get()) {
-			mountPath = vaultSettings.customMountPath().get();
-		} else if (!vaultSettings.winDriveLetter().getValueSafe().equals("")) {
+		if (vaultSettings.usesIndividualMountPath().get()) {
+			mountPath = vaultSettings.individualMountPath().get();
+		} else if (!Strings.isNullOrEmpty(vaultSettings.winDriveLetter().get())) {
 			mountPath = vaultSettings.winDriveLetter().get().charAt(0) + ":\\";
 		} else {
 			//auto assign drive letter
