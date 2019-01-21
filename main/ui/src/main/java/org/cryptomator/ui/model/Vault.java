@@ -8,19 +8,6 @@
  *******************************************************************************/
 package org.cryptomator.ui.model;
 
-import java.io.IOException;
-import java.nio.file.FileAlreadyExistsException;
-import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Objects;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Predicate;
-
-import javax.inject.Inject;
-import javax.inject.Provider;
-
 import javafx.application.Platform;
 import javafx.beans.Observable;
 import javafx.beans.binding.Binding;
@@ -41,6 +28,18 @@ import org.cryptomator.ui.model.VaultModule.PerVault;
 import org.fxmisc.easybind.EasyBind;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.inject.Inject;
+import javax.inject.Provider;
+import java.io.IOException;
+import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Predicate;
 
 @PerVault
 public class Vault {
@@ -241,11 +240,11 @@ public class Vault {
 		return vaultSettings.mountName().get();
 	}
 
-	public String getIndividualMountPath() {
+	public String getCustomMountPath() {
 		return vaultSettings.individualMountPath().getValueSafe();
 	}
 
-	public void setIndividualMountPath(String mountPath) {
+	public void setCustomMountPath(String mountPath) {
 		vaultSettings.individualMountPath().set(mountPath);
 	}
 

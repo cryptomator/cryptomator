@@ -120,3 +120,4 @@ main.gracefulShutdown.dialog.header = Vault(s) in use
 main.gracefulShutdown.dialog.content = One or more vaults are still in use by other programs. Please close them to allow Cryptomator to shut down properly, then try again.\n\nIf this doesn't work, Cryptomator can shut down forcefully, but this can incur data loss and is not recommended.
 main.gracefulShutdown.button.tryAgain = Try again
 main.gracefulShutdown.button.forceShutdown = Force shutdown
+unlock.pendingMessage.unlocking = Unlocking vault...

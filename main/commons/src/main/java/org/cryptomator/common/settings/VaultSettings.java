@@ -5,16 +5,6 @@
  *******************************************************************************/
 package org.cryptomator.common.settings;
 
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
-import java.util.Base64;
-import java.util.Objects;
-import java.util.UUID;
-
-import org.apache.commons.lang3.StringUtils;
-import org.fxmisc.easybind.EasyBind;
-
 import javafx.beans.Observable;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
@@ -22,7 +12,20 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import org.apache.commons.lang3.StringUtils;
+import org.fxmisc.easybind.EasyBind;
 
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.util.Base64;
+import java.util.Objects;
+import java.util.UUID;
+
+/**
+ * The settings specific to a single vault.
+ * TODO: Change the name of individualMountPath and its derivatives to customMountPath
+ */
 public class VaultSettings {
 
 	public static final boolean DEFAULT_UNLOCK_AFTER_STARTUP = false;
