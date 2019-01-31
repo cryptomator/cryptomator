@@ -40,7 +40,6 @@ import org.cryptomator.frontend.webdav.ServerLifecycleException;
 import org.cryptomator.keychain.KeychainAccess;
 import org.cryptomator.ui.controls.SecPasswordField;
 import org.cryptomator.ui.l10n.Localization;
-import org.cryptomator.ui.model.InvalidSettingsException;
 import org.cryptomator.ui.model.Vault;
 import org.cryptomator.ui.model.WindowsDriveLetters;
 import org.cryptomator.ui.util.DialogBuilderUtil;
@@ -51,6 +50,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import java.nio.file.DirectoryNotEmptyException;
+import java.nio.file.NotDirectoryException;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Objects;
@@ -401,10 +402,6 @@ public class UnlockController implements ViewController {
 			messageText.setText(null);
 			downloadsPageLink.setVisible(false);
 			listener.ifPresent(lstnr -> lstnr.didUnlock(vault));
-		}).onError(InvalidSettingsException.class, e -> {
-			messageText.setText(localization.getString("unlock.errorMessage.invalidMountPath"));
-			advancedOptions.setVisible(true);
-			customMountPathField.setStyle("-fx-border-color: red;");
 		}).onError(InvalidPassphraseException.class, e -> {
 			messageText.setText(localization.getString("unlock.errorMessage.wrongPassword"));
 			passwordField.selectAll();
@@ -423,6 +420,16 @@ public class UnlockController implements ViewController {
 		}).onError(ServerLifecycleException.class, e -> {
 			LOG.error("Unlock failed for technical reasons.", e);
 			messageText.setText(localization.getString("unlock.errorMessage.unlockFailed"));
+		}).onError(NotDirectoryException.class, e -> {
+			LOG.error("Mount point not a directory.", e);
+			advancedOptions.setVisible(true);
+			customMountPathField.setStyle("-fx-border-color: red;");
+			showUnlockFailedErrorDialog("unlock.failedDialog.content.mountPathNonExisting");
+		}).onError(DirectoryNotEmptyException.class, e -> {
+			LOG.error("Mount point not empty.", e);
+			advancedOptions.setVisible(true);
+			customMountPathField.setStyle("-fx-border-color: red;");
+			showUnlockFailedErrorDialog("unlock.failedDialog.content.mountPathNotEmpty");
 		}).onError(Exception.class, e -> {
 			LOG.error("Unlock failed for technical reasons.", e);
 			messageText.setText(localization.getString("unlock.errorMessage.unlockFailed"));
@@ -436,6 +443,14 @@ public class UnlockController implements ViewController {
 				customMountPathField.requestFocus();
 			}
 		}).runOnce(executor);
+	}
+
+	private void showUnlockFailedErrorDialog(String localizableContentKey) {
+		String title = localization.getString("unlock.failedDialog.title");
+		String header = localization.getString("unlock.failedDialog.header");
+		String content = localization.getString(localizableContentKey);
+		Alert alert = DialogBuilderUtil.buildErrorDialog(title, header, content, ButtonType.OK);
+		alert.show();
 	}
 
 	/* callback */

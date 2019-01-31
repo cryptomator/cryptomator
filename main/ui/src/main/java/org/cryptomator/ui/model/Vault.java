@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
+import java.nio.file.NotDirectoryException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
@@ -97,11 +98,11 @@ public class Vault {
 		CryptoFileSystemProvider.changePassphrase(getPath(), MASTERKEY_FILENAME, oldPassphrase, newPassphrase);
 	}
 
-	public synchronized void unlock(CharSequence passphrase) throws InvalidSettingsException, CryptoException, IOException, Volume.VolumeException {
+	public synchronized void unlock(CharSequence passphrase) throws CryptoException, IOException, Volume.VolumeException {
 		Platform.runLater(() -> state.set(State.PROCESSING));
 		try {
-			if (vaultSettings.usesIndividualMountPath().and(vaultSettings.individualMountPath().isEmpty()).get()) {
-				throw new InvalidSettingsException();
+			if (vaultSettings.usesIndividualMountPath().get() && vaultSettings.individualMountPath().get().isEmpty()) {
+				throw new NotDirectoryException("");
 			}
 			CryptoFileSystem fs = getCryptoFileSystem(passphrase);
 			volume = volumeProvider.get();

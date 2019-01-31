@@ -88,8 +88,6 @@ unlock.savePassword.delete.confirmation.content=The saved password of this vault
 unlock.choicebox.winDriveLetter.auto=Assign automatically
 unlock.pendingMessage.unlocking=Unlocking vault...
 unlock.errorMessage.wrongPassword=Wrong password
-unlock.errorMessage.wrongPassword=Wrong Password
-unlock.errorMessage.invalidMountPath=Use of custom mount path selected, but no path given.
 unlock.errorMessage.unlockFailed=Unlock failed. See log file for details.
 unlock.errorMessage.unsupportedVersion.vaultOlderThanSoftware=Unsupported vault. This vault has been created with an older version of Cryptomator.
 unlock.errorMessage.unsupportedVersion.softwareOlderThanVault=Unsupported vault. This vault has been created with a newer version of Cryptomator.
@@ -98,6 +96,12 @@ unlock.messageLabel.startServerFailed=Starting WebDAV server failed.
 unlock.successLabel.vaultCreated=Vault was successfully created.
 unlock.successLabel.passwordChanged=Password was successfully changed.
 unlock.successLabel.upgraded=Cryptomator was successfully upgraded.
+
+unlock.failedDialog.title=Unlock failed
+unlock.failedDialog.header=Unlock failed
+unlock.failedDialog.content.mountPathNonExisting=Mount point does not exist.
+unlock.failedDialog.content.mountPathNotEmpty=Mount point is not empty.
+
 
 # change_password.fxml
 changePassword.label.oldPassword=Old Password
