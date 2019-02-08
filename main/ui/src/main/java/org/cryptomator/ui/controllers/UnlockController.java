@@ -8,13 +8,6 @@
  ******************************************************************************/
 package org.cryptomator.ui.controllers;
 
-import javax.inject.Inject;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.concurrent.ExecutorService;
-
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Strings;
 import javafx.application.Application;
@@ -45,7 +38,6 @@ import org.cryptomator.cryptolib.api.InvalidPassphraseException;
 import org.cryptomator.cryptolib.api.UnsupportedVaultFormatException;
 import org.cryptomator.frontend.webdav.ServerLifecycleException;
 import org.cryptomator.keychain.KeychainAccess;
-import org.cryptomator.ui.model.InvalidSettingsException;
 import org.cryptomator.ui.controls.SecPasswordField;
 import org.cryptomator.ui.l10n.Localization;
 import org.cryptomator.ui.model.Vault;
@@ -56,6 +48,15 @@ import org.fxmisc.easybind.EasyBind;
 import org.fxmisc.easybind.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.inject.Inject;
+import java.nio.file.DirectoryNotEmptyException;
+import java.nio.file.NotDirectoryException;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.ExecutorService;
 
 public class UnlockController implements ViewController {
 
@@ -115,13 +116,13 @@ public class UnlockController implements ViewController {
 	private ChoiceBox<Character> winDriveLetter;
 
 	@FXML
-	private CheckBox useOwnMountPath;
+	private CheckBox useCustomMountPath;
 
 	@FXML
-	private Label mountPathLabel;
+	private Label customMountPathLabel;
 
 	@FXML
-	private TextField mountPath;
+	private TextField customMountPathField;
 
 	@FXML
 	private ProgressIndicator progressIndicator;
@@ -153,27 +154,31 @@ public class UnlockController implements ViewController {
 		savePassword.setDisable(!keychainAccess.isPresent());
 		unlockAfterStartup.disableProperty().bind(savePassword.disabledProperty().or(savePassword.selectedProperty().not()));
 
-		mountPathLabel.visibleProperty().bind(useOwnMountPath.selectedProperty());
-		mountPath.visibleProperty().bind(useOwnMountPath.selectedProperty());
-		mountPath.managedProperty().bind(useOwnMountPath.selectedProperty());
-		mountPath.textProperty().addListener(this::mountPathDidChange);
+		customMountPathLabel.visibleProperty().bind(useCustomMountPath.selectedProperty());
+		customMountPathLabel.managedProperty().bind(useCustomMountPath.selectedProperty());
+		customMountPathField.visibleProperty().bind(useCustomMountPath.selectedProperty());
+		customMountPathField.managedProperty().bind(useCustomMountPath.selectedProperty());
+		customMountPathField.textProperty().addListener(this::mountPathDidChange);
+		winDriveLetter.setConverter(new WinDriveLetterLabelConverter());
 
-		if (SystemUtils.IS_OS_WINDOWS) {
-			winDriveLetter.setConverter(new WinDriveLetterLabelConverter());
-			useOwnMountPath.setVisible(false);
-			useOwnMountPath.setManaged(false);
-			mountPathLabel.setManaged(false);
-			//dirty cheat
-			mountPath.setMouseTransparent(true);
-		} else {
+		if (!SystemUtils.IS_OS_WINDOWS) {
 			winDriveLetterLabel.setVisible(false);
 			winDriveLetterLabel.setManaged(false);
 			winDriveLetter.setVisible(false);
 			winDriveLetter.setManaged(false);
-			if (VolumeImpl.WEBDAV.equals(settings.preferredVolumeImpl().get())) {
-				useOwnMountPath.setVisible(false);
-				useOwnMountPath.setManaged(false);
-				mountPathLabel.setManaged(false);
+		}
+
+		if (VolumeImpl.WEBDAV.equals(settings.preferredVolumeImpl().get())) {
+			useCustomMountPath.setVisible(false);
+			useCustomMountPath.setManaged(false);
+			customMountPathField.setMouseTransparent(true);
+		} else {
+			useCustomMountPath.setVisible(true);
+			if (SystemUtils.IS_OS_WINDOWS) {
+				winDriveLetter.visibleProperty().bind(useCustomMountPath.selectedProperty().not());
+				winDriveLetter.managedProperty().bind(useCustomMountPath.selectedProperty().not());
+				winDriveLetterLabel.visibleProperty().bind(useCustomMountPath.selectedProperty().not());
+				winDriveLetterLabel.managedProperty().bind(useCustomMountPath.selectedProperty().not());
 			}
 		}
 	}
@@ -213,13 +218,11 @@ public class UnlockController implements ViewController {
 			winDriveLetter.getItems().addAll(driveLetters.getAvailableDriveLetters());
 			winDriveLetter.getItems().sort(new WinDriveLetterComparator());
 			winDriveLetter.valueProperty().addListener(driveLetterChangeListener);
+			chooseSelectedDriveLetter();
 		}
 		downloadsPageLink.setVisible(false);
 		messageText.setText(null);
 		mountName.setText(vault.getMountName());
-		if (SystemUtils.IS_OS_WINDOWS) {
-			chooseSelectedDriveLetter();
-		}
 		savePassword.setSelected(false);
 		// auto-fill pw from keychain:
 		if (keychainAccess.isPresent()) {
@@ -234,15 +237,17 @@ public class UnlockController implements ViewController {
 		VaultSettings vaultSettings = vault.getVaultSettings();
 		unlockAfterStartup.setSelected(savePassword.isSelected() && vaultSettings.unlockAfterStartup().get());
 		revealAfterMount.setSelected(vaultSettings.revealAfterMount().get());
-		useOwnMountPath.setSelected(vaultSettings.usesIndividualMountPath().get());
 		useReadOnlyMode.setSelected(vaultSettings.usesReadOnlyMode().get());
+
+		if (!settings.preferredVolumeImpl().get().equals(VolumeImpl.WEBDAV)) {
+			useCustomMountPath.setSelected(vaultSettings.usesIndividualMountPath().get());
+			customMountPathField.textProperty().setValue(vaultSettings.individualMountPath().getValueSafe());
+		}
 
 		vaultSubs = vaultSubs.and(EasyBind.subscribe(unlockAfterStartup.selectedProperty(), vaultSettings.unlockAfterStartup()::set));
 		vaultSubs = vaultSubs.and(EasyBind.subscribe(revealAfterMount.selectedProperty(), vaultSettings.revealAfterMount()::set));
-		vaultSubs = vaultSubs.and(EasyBind.subscribe(useOwnMountPath.selectedProperty(), vaultSettings.usesIndividualMountPath()::set));
+		vaultSubs = vaultSubs.and(EasyBind.subscribe(useCustomMountPath.selectedProperty(), vaultSettings.usesIndividualMountPath()::set));
 		vaultSubs = vaultSubs.and(EasyBind.subscribe(useReadOnlyMode.selectedProperty(), vaultSettings.usesReadOnlyMode()::set));
-
-		mountPath.textProperty().setValue(vaultSettings.individualMountPath().getValueSafe());
 
 	}
 
@@ -286,7 +291,7 @@ public class UnlockController implements ViewController {
 	}
 
 	private void mountPathDidChange(ObservableValue<? extends String> property, String oldValue, String newValue) {
-		vault.setIndividualMountPath(newValue);
+		vault.setCustomMountPath(newValue);
 	}
 
 	/**
@@ -393,6 +398,7 @@ public class UnlockController implements ViewController {
 
 		CharSequence password = passwordField.getCharacters();
 		Tasks.create(() -> {
+			messageText.setText(localization.getString("unlock.pendingMessage.unlocking"));
 			vault.unlock(password);
 			if (keychainAccess.isPresent() && savePassword.isSelected()) {
 				keychainAccess.get().storePassphrase(vault.getId(), password);
@@ -401,10 +407,6 @@ public class UnlockController implements ViewController {
 			messageText.setText(null);
 			downloadsPageLink.setVisible(false);
 			listener.ifPresent(lstnr -> lstnr.didUnlock(vault));
-		}).onError(InvalidSettingsException.class, e -> {
-			messageText.setText(localization.getString("unlock.errorMessage.invalidMountPath"));
-			advancedOptions.setVisible(true);
-			mountPath.setStyle("-fx-border-color: red;");
 		}).onError(InvalidPassphraseException.class, e -> {
 			messageText.setText(localization.getString("unlock.errorMessage.wrongPassword"));
 			passwordField.selectAll();
@@ -423,6 +425,16 @@ public class UnlockController implements ViewController {
 		}).onError(ServerLifecycleException.class, e -> {
 			LOG.error("Unlock failed for technical reasons.", e);
 			messageText.setText(localization.getString("unlock.errorMessage.unlockFailed"));
+		}).onError(NotDirectoryException.class, e -> {
+			LOG.error("Mount point not a directory.", e);
+			advancedOptions.setVisible(true);
+			customMountPathField.setStyle("-fx-border-color: red;");
+			showUnlockFailedErrorDialog("unlock.failedDialog.content.mountPathNonExisting");
+		}).onError(DirectoryNotEmptyException.class, e -> {
+			LOG.error("Mount point not empty.", e);
+			advancedOptions.setVisible(true);
+			customMountPathField.setStyle("-fx-border-color: red;");
+			showUnlockFailedErrorDialog("unlock.failedDialog.content.mountPathNotEmpty");
 		}).onError(Exception.class, e -> {
 			LOG.error("Unlock failed for technical reasons.", e);
 			messageText.setText(localization.getString("unlock.errorMessage.unlockFailed"));
@@ -433,9 +445,17 @@ public class UnlockController implements ViewController {
 			advancedOptions.setDisable(false);
 			progressIndicator.setVisible(false);
 			if (advancedOptions.isVisible()) { //dirty programming, but otherwise the focus is wrong
-				mountPath.requestFocus();
+				customMountPathField.requestFocus();
 			}
 		}).runOnce(executor);
+	}
+
+	private void showUnlockFailedErrorDialog(String localizableContentKey) {
+		String title = localization.getString("unlock.failedDialog.title");
+		String header = localization.getString("unlock.failedDialog.header");
+		String content = localization.getString(localizableContentKey);
+		Alert alert = DialogBuilderUtil.buildErrorDialog(title, header, content, ButtonType.OK);
+		alert.show();
 	}
 
 	/* callback */

@@ -30,7 +30,7 @@ welcome.checkForUpdates.label.currentlyChecking=Checking for Updates...
 welcome.newVersionMessage=Version %1$s can be downloaded.\nThis is %2$s.
 welcome.askForUpdateCheck.dialog.title=Update check
 welcome.askForUpdateCheck.dialog.header=Enable the integrated update check?
-welcome.askForUpdateCheck.dialog.content=To check for updates, Cryptomator will fetch the current version from the Cryptomator servers and display a hint to you if a newer version is available.\n\nWe recommend to enable the update check to always be sure you have the newest version of Cryptomator, with all security patches, installed. If you do not enable the update check you may check and download the current version from https://cryptomator.org/downloads/.\n\nYou can change this at any time from within the settings.
+welcome.askForUpdateCheck.dialog.content=Recommended: Enable the update check to always be sure you have the newest version of Cryptomator, with all security patches, installed.\n\nYou can change this from within the settings at any time.
 
 # initialize.fxml
 initialize.label.password=Password
@@ -75,7 +75,7 @@ unlock.label.unlockAfterStartup=Auto-Unlock on Start (Experimental)
 unlock.label.revealAfterMount=Reveal Drive
 unlock.label.useReadOnlyMode=Read-only
 unlock.label.winDriveLetter=Drive Letter
-unlock.label.useOwnMountPath=Use individual mount point
+unlock.label.useOwnMountPath=Use Custom Mount Point
 unlock.label.mountPath=Mount path
 unlock.label.mountPathButton=Apply
 unlock.label.downloadsPageLink=All Cryptomator versions
@@ -87,9 +87,8 @@ unlock.savePassword.delete.confirmation.title=Delete Saved Password
 unlock.savePassword.delete.confirmation.header=Do you really want to delete the saved password of this vault?
 unlock.savePassword.delete.confirmation.content=The saved password of this vault will be immediately deleted from your system keychain. If you'd like to save your password again, you'd have to unlock your vault with the "Save Password" option enabled.
 unlock.choicebox.winDriveLetter.auto=Assign automatically
+unlock.pendingMessage.unlocking=Unlocking vault...
 unlock.errorMessage.wrongPassword=Wrong password
-unlock.errorMessage.wrongPassword=Wrong Password
-unlock.errorMessage.invalidMountPath=Individual mount path is not set.
 unlock.errorMessage.unlockFailed=Unlock failed. See log file for details.
 unlock.errorMessage.unsupportedVersion.vaultOlderThanSoftware=Unsupported vault. This vault has been created with an older version of Cryptomator.
 unlock.errorMessage.unsupportedVersion.softwareOlderThanVault=Unsupported vault. This vault has been created with a newer version of Cryptomator.
@@ -98,6 +97,12 @@ unlock.messageLabel.startServerFailed=Starting WebDAV server failed.
 unlock.successLabel.vaultCreated=Vault was successfully created.
 unlock.successLabel.passwordChanged=Password was successfully changed.
 unlock.successLabel.upgraded=Cryptomator was successfully upgraded.
+
+unlock.failedDialog.title=Unlock failed
+unlock.failedDialog.header=Unlock failed
+unlock.failedDialog.content.mountPathNonExisting=Mount point does not exist.
+unlock.failedDialog.content.mountPathNotEmpty=Mount point is not empty.
+
 
 # change_password.fxml
 changePassword.label.oldPassword=Old Password

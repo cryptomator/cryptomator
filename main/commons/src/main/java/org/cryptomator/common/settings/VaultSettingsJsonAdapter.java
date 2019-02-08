@@ -5,14 +5,13 @@
  *******************************************************************************/
 package org.cryptomator.common.settings;
 
-import java.io.IOException;
-import java.nio.file.Paths;
-
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonWriter;
+import java.io.IOException;
+import java.nio.file.Paths;
 
 class VaultSettingsJsonAdapter {
 
@@ -27,8 +26,7 @@ class VaultSettingsJsonAdapter {
 		out.name("unlockAfterStartup").value(value.unlockAfterStartup().get());
 		out.name("revealAfterMount").value(value.revealAfterMount().get());
 		out.name("usesIndividualMountPath").value(value.usesIndividualMountPath().get());
-		//TODO: should this always be written? ( because it could contain metadata, which the user does not want to save!)
-		out.name("individualMountPath").value(value.individualMountPath().get());
+		out.name("individualMountPath").value(value.individualMountPath().get());    //TODO: should this always be written? ( because it could contain metadata, which the user may not want to save!)
 		out.name("usesReadOnlyMode").value(value.usesReadOnlyMode().get());
 		out.endObject();
 	}

@@ -22,11 +22,11 @@ import org.apache.commons.lang3.SystemUtils;
 @Singleton
 public final class WindowsDriveLetters {
 
-	private static final Set<Character> A_TO_Z;
+	private static final Set<Character> D_TO_Z;
 
 	static {
-		try (IntStream stream = IntStream.rangeClosed('A', 'Z')) {
-			A_TO_Z = stream.mapToObj(i -> (char) i).collect(Collectors.toSet());
+		try (IntStream stream = IntStream.rangeClosed('D', 'Z')) {
+			D_TO_Z = stream.mapToObj(i -> (char) i).collect(Collectors.toSet());
 		}
 	}
 
@@ -45,7 +45,7 @@ public final class WindowsDriveLetters {
 	public Set<Character> getAvailableDriveLetters() {
 		Set<Character> occupiedDriveLetters = getOccupiedDriveLetters();
 		Predicate<Character> isOccupiedDriveLetter = occupiedDriveLetters::contains;
-		return A_TO_Z.stream().filter(isOccupiedDriveLetter.negate()).collect(Collectors.toSet());
+		return D_TO_Z.stream().filter(isOccupiedDriveLetter.negate()).collect(Collectors.toSet());
 	}
 
 }

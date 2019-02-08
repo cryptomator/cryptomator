@@ -1,13 +1,13 @@
 language: java
 sudo: false
 jdk:
-- oraclejdk10
+- oraclejdk9
 cache:
   directories:
   - $HOME/.m2
 env:
   global:
-    - secure: "lV9OwUbHMrMpLUH1CY+Z4puLDdFXytudyPlG1eGRsesdpuG6KM3uQVz6uAtf6lrU8DRbMM/T7ML+PmvQ4UoPPYLdLxESLLBat2qUPOIVBOhTSlCc7I0DmGy04CSvkeMy8dPaQC0ukgNiR7zwoNzfcpGRN/U9S8tziDruuHoZSrg=" # BINTRAY_API_KEY
+    - secure: "HftEaabMmWn5GwKFKksUkOcelc3Mn7xazwAEy+4d4gL1+F8VhID/6DCK7nas+afUymWnxTano8Rv4Ci5MWryNkNkTH+FUPWmF3xWezc3hajSyS7RB92IZ8VPetl4Fo8UI1WwM5apDEaugalPxkIf8a7N+lpG5X/Gpumwzo3Be3w=" # BINTRAY_API_KEY
     - secure: "oWFgRTVP6lyTa7qVxlvkpm20MtVc3BtmsNXQJS6bfg2A0o/iCQMNx7OD59BaafCLGRKvCcJVESiC8FlSylVMS7CDSyYu0gg70NUiIuHp4NBM5inFWYCy/PdQsCTzr5uvNG+rMFQpMFRaCV0FrfM3tLondcVkhsHL68l93Xoexx4=" # CODACY_PROJECT_TOKEN
     - secure: "zJxgytA2Ks5Xzv+7kUaUq+EBFNQw9Qec63lcMJVuXVWczjL16nKW1EzzV515ag+OWL46z3lEPForDhufw0VtFnNmaX68jkO0mp01eLrHApc1llN2Y/U8GBXfNNazN4+Kom4H+z/AO+wJr8EsKMMUczCdQ3APgd9uVI0hzXw/Z3M=" # GITHUB_API_KEY
 addons:
