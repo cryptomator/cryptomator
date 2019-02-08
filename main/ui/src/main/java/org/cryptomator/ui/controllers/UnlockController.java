@@ -26,8 +26,12 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
+import javafx.stage.DirectoryChooser;
+import javafx.stage.Stage;
 import javafx.util.StringConverter;
 import org.apache.commons.lang3.CharUtils;
 import org.apache.commons.lang3.SystemUtils;
@@ -50,6 +54,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.inject.Named;
+import java.io.File;
 import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.NotDirectoryException;
 import java.util.Arrays;
@@ -68,6 +74,7 @@ public class UnlockController implements ViewController {
 			.precomputed();
 
 	private final Application app;
+	private final Stage mainWindow;
 	private final Localization localization;
 	private final WindowsDriveLetters driveLetters;
 	private final ChangeListener<Character> driveLetterChangeListener = this::winDriveLetterDidChange;
@@ -79,8 +86,9 @@ public class UnlockController implements ViewController {
 	private Subscription vaultSubs = Subscription.EMPTY;
 
 	@Inject
-	public UnlockController(Application app, Localization localization, WindowsDriveLetters driveLetters, Optional<KeychainAccess> keychainAccess, Settings settings, ExecutorService executor) {
+	public UnlockController(Application app, @Named("mainWindow") Stage mainWindow, Localization localization, WindowsDriveLetters driveLetters, Optional<KeychainAccess> keychainAccess, Settings settings, ExecutorService executor) {
 		this.app = app;
+		this.mainWindow = mainWindow;
 		this.localization = localization;
 		this.driveLetters = driveLetters;
 		this.keychainAccess = keychainAccess;
@@ -116,13 +124,13 @@ public class UnlockController implements ViewController {
 	private ChoiceBox<Character> winDriveLetter;
 
 	@FXML
-	private CheckBox useCustomMountPath;
+	private CheckBox useCustomMountPoint;
 
 	@FXML
-	private Label customMountPathLabel;
+	private HBox customMountPoint;
 
 	@FXML
-	private TextField customMountPathField;
+	private Label customMountPointField;
 
 	@FXML
 	private ProgressIndicator progressIndicator;
@@ -151,11 +159,8 @@ public class UnlockController implements ViewController {
 		savePassword.setDisable(!keychainAccess.isPresent());
 		unlockAfterStartup.disableProperty().bind(savePassword.disabledProperty().or(savePassword.selectedProperty().not()));
 
-		customMountPathLabel.visibleProperty().bind(useCustomMountPath.selectedProperty());
-		customMountPathLabel.managedProperty().bind(useCustomMountPath.selectedProperty());
-		customMountPathField.visibleProperty().bind(useCustomMountPath.selectedProperty());
-		customMountPathField.managedProperty().bind(useCustomMountPath.selectedProperty());
-		customMountPathField.textProperty().addListener(this::mountPathDidChange);
+		customMountPoint.visibleProperty().bind(useCustomMountPoint.selectedProperty());
+		customMountPoint.managedProperty().bind(useCustomMountPoint.selectedProperty());
 		winDriveLetter.setConverter(new WinDriveLetterLabelConverter());
 
 		if (!SystemUtils.IS_OS_WINDOWS) {
@@ -166,16 +171,17 @@ public class UnlockController implements ViewController {
 		}
 
 		if (VolumeImpl.WEBDAV.equals(settings.preferredVolumeImpl().get())) {
-			useCustomMountPath.setVisible(false);
-			useCustomMountPath.setManaged(false);
-			customMountPathField.setMouseTransparent(true);
+			useCustomMountPoint.setVisible(false);
+			useCustomMountPoint.setManaged(false);
+			customMountPoint.setVisible(false);
+			customMountPoint.setManaged(false);
 		} else {
-			useCustomMountPath.setVisible(true);
+			useCustomMountPoint.setVisible(true);
 			if (SystemUtils.IS_OS_WINDOWS) {
-				winDriveLetter.visibleProperty().bind(useCustomMountPath.selectedProperty().not());
-				winDriveLetter.managedProperty().bind(useCustomMountPath.selectedProperty().not());
-				winDriveLetterLabel.visibleProperty().bind(useCustomMountPath.selectedProperty().not());
-				winDriveLetterLabel.managedProperty().bind(useCustomMountPath.selectedProperty().not());
+				winDriveLetter.visibleProperty().bind(useCustomMountPoint.selectedProperty().not());
+				winDriveLetter.managedProperty().bind(useCustomMountPoint.selectedProperty().not());
+				winDriveLetterLabel.visibleProperty().bind(useCustomMountPoint.selectedProperty().not());
+				winDriveLetterLabel.managedProperty().bind(useCustomMountPoint.selectedProperty().not());
 			}
 		}
 	}
@@ -236,13 +242,13 @@ public class UnlockController implements ViewController {
 		revealAfterMount.setSelected(vaultSettings.revealAfterMount().get());
 
 		if (!settings.preferredVolumeImpl().get().equals(VolumeImpl.WEBDAV)) {
-			useCustomMountPath.setSelected(vaultSettings.usesIndividualMountPath().get());
-			customMountPathField.textProperty().setValue(vaultSettings.individualMountPath().getValueSafe());
+			useCustomMountPoint.setSelected(vaultSettings.usesIndividualMountPath().get());
+			customMountPointField.textProperty().setValue(vaultSettings.individualMountPath().getValueSafe());
 		}
 
 		vaultSubs = vaultSubs.and(EasyBind.subscribe(unlockAfterStartup.selectedProperty(), vaultSettings.unlockAfterStartup()::set));
 		vaultSubs = vaultSubs.and(EasyBind.subscribe(revealAfterMount.selectedProperty(), vaultSettings.revealAfterMount()::set));
-		vaultSubs = vaultSubs.and(EasyBind.subscribe(useCustomMountPath.selectedProperty(), vaultSettings.usesIndividualMountPath()::set));
+		vaultSubs = vaultSubs.and(EasyBind.subscribe(useCustomMountPoint.selectedProperty(), vaultSettings.usesIndividualMountPath()::set));
 
 	}
 
@@ -285,8 +291,13 @@ public class UnlockController implements ViewController {
 		}
 	}
 
-	private void mountPathDidChange(ObservableValue<? extends String> property, String oldValue, String newValue) {
-		vault.setCustomMountPath(newValue);
+	public void didClickChooseCustomMountPoint(ActionEvent actionEvent) {
+		DirectoryChooser dirChooser = new DirectoryChooser();
+		File file = dirChooser.showDialog(mainWindow);
+		if (file != null) {
+			customMountPointField.setText(file.toString());
+			vault.setCustomMountPath(file.toString());
+		}
 	}
 
 	/**
@@ -299,7 +310,7 @@ public class UnlockController implements ViewController {
 			if (letter == null) {
 				return localization.getString("unlock.choicebox.winDriveLetter.auto");
 			} else {
-				return Character.toString(letter) + ":";
+				return letter + ":";
 			}
 		}
 
@@ -417,20 +428,17 @@ public class UnlockController implements ViewController {
 			} else if (e.getDetectedVersion() == Integer.MAX_VALUE) {
 				messageText.setText(localization.getString("unlock.errorMessage.unauthenticVersionMac"));
 			}
-		}).onError(ServerLifecycleException.class, e -> {
-			LOG.error("Unlock failed for technical reasons.", e);
-			messageText.setText(localization.getString("unlock.errorMessage.unlockFailed"));
 		}).onError(NotDirectoryException.class, e -> {
-			LOG.error("Mount point not a directory.", e);
+			LOG.error("Unlock failed. Mount point not a directory: {}", e.getMessage());
 			advancedOptions.setVisible(true);
-			customMountPathField.setStyle("-fx-border-color: red;");
+			messageText.setText(null);
 			showUnlockFailedErrorDialog("unlock.failedDialog.content.mountPathNonExisting");
 		}).onError(DirectoryNotEmptyException.class, e -> {
-			LOG.error("Mount point not empty.", e);
+			LOG.error("Unlock failed. Mount point not empty: {}", e.getMessage());
 			advancedOptions.setVisible(true);
-			customMountPathField.setStyle("-fx-border-color: red;");
+			messageText.setText(null);
 			showUnlockFailedErrorDialog("unlock.failedDialog.content.mountPathNotEmpty");
-		}).onError(Exception.class, e -> {
+		}).onError(Exception.class, e -> { // including RuntimeExceptions
 			LOG.error("Unlock failed for technical reasons.", e);
 			messageText.setText(localization.getString("unlock.errorMessage.unlockFailed"));
 		}).andFinally(() -> {
@@ -439,9 +447,6 @@ public class UnlockController implements ViewController {
 			}
 			advancedOptions.setDisable(false);
 			progressIndicator.setVisible(false);
-			if (advancedOptions.isVisible()) { //dirty programming, but otherwise the focus is wrong
-				customMountPathField.requestFocus();
-			}
 		}).runOnce(executor);
 	}
 
