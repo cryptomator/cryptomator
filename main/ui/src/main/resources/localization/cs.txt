@@ -1,6 +1,6 @@
 app.name = Cryptomator
 # main.fxml
-main.emptyListInstructions = Trezor přidáte kliknutím sem
+main.emptyListInstructions = Trezor přidáte kliknutím zde\n
 main.directoryList.contextMenu.remove = Odstranit ze seznamu
 main.directoryList.contextMenu.changePassword = Změnit heslo
 main.addDirectory.contextMenu.new = Vytvořit nový trezor
@@ -116,3 +116,9 @@ welcome.askForUpdateCheck.dialog.header = Zjišťovat automaticky nové verze?
 welcome.askForUpdateCheck.dialog.content = Ke zjištění aktualizací, Cryptomator stáhne aktuální verzi z instalačních serverů a zobrazí nápovědu, když je k dispozici novější verze, než je nainstalovaná.\n\nDoporučujeme zapnout zjišťování aktualizací a zajistit tak, že vždy budete mít nejnovější verzi Cryptomator, se všemi opravami zabezpečení nainstalovanými. Pokud automatické zjišťování nezapnete, je možné ručně stahovat nejnovější verzi z https\://cryptomator.org/downloads/.\n\nToto nastavení je možné kdykoli změnit v nastavení aplikace.
 settings.volume.dokany = Dokany
 unlock.errorMessage.invalidMountPath = Individuální přípojný bod není nastaven
+main.gracefulShutdown.dialog.title = Zamčení trezorů se nezdařilo
+main.gracefulShutdown.dialog.header = Trezory v používání
+main.gracefulShutdown.dialog.content = Jeden nebo více trezorů je stále v používání ostatními programy. Ukončete je aby se Cryptomator mohl správně vypnout a zkuste to znovu.\n\nPokud to nezabere, Cryptomator je možné vypnout vynuceně, ale to může vést ke ztrátě dat a není proto doporučeno.
+main.gracefulShutdown.button.tryAgain = Zkusit znovu
+main.gracefulShutdown.button.forceShutdown = Vynutit vypnutí
+unlock.pendingMessage.unlocking = Odemykání trezoru…

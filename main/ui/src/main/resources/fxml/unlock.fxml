@@ -7,29 +7,25 @@
   Contributors:
       Sebastian Stenzel - initial API and implementation
 -->
-<?import java.net.URL?>
-<?import java.lang.String?>
-<?import org.cryptomator.ui.controls.SecPasswordField?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.Hyperlink?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ProgressIndicator?>
-<?import javafx.scene.control.CheckBox?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.layout.GridPane?>
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.layout.ColumnConstraints?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.text.TextFlow?>
-<?import javafx.scene.control.Hyperlink?>
-<?import javafx.scene.text.Text?>
-<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.control.Separator?>
-<?import javafx.scene.control.ChoiceBox?>
-
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Text?>
+<?import javafx.scene.text.TextFlow?>
+<?import org.cryptomator.ui.controls.SecPasswordField?>
 <GridPane fx:controller="org.cryptomator.ui.controllers.UnlockController" fx:id="root" vgap="12.0" hgap="12.0" prefWidth="400.0" xmlns:fx="http://javafx.com/fxml" cacheShape="true" cache="true">
 	<padding>
 		<Insets top="24.0" right="12.0" bottom="24.0" left="12.0" />
 	</padding>
-	
+
 	<columnConstraints>
 		<ColumnConstraints percentWidth="38.2"/>
 		<ColumnConstraints percentWidth="61.8"/>
@@ -45,7 +41,7 @@
 			<Button fx:id="advancedOptionsButton" text="%unlock.button.advancedOptions.show" prefWidth="150.0" onAction="#didClickAdvancedOptionsButton" cacheShape="true" cache="true" />
 			<Button fx:id="unlockButton" text="%unlock.button.unlock" defaultButton="true" prefWidth="150.0" onAction="#didClickUnlockButton" disable="true" cacheShape="true" cache="true" />
 		</HBox>
-		
+
 		<!-- Row 3 -->
 		<Label fx:id="successMessage" cacheShape="true" cache="true" visible="true" GridPane.rowIndex="3" GridPane.columnIndex="0" GridPane.columnSpan="2"/>
 
@@ -54,12 +50,12 @@
 			<padding>
 				<Insets top="24.0" />
 			</padding>
-			
+
 			<columnConstraints>
 				<ColumnConstraints percentWidth="38.2"/>
 				<ColumnConstraints percentWidth="61.8"/>
 			</columnConstraints>
-			
+
 			<!-- Row 3.0 -->
 			<Separator GridPane.rowIndex="0" GridPane.columnIndex="0" GridPane.columnSpan="2" cacheShape="true" cache="true"/>
 			<HBox alignment="CENTER" prefWidth="400.0" GridPane.rowIndex="0" GridPane.columnIndex="0" GridPane.columnSpan="2" cacheShape="true" cache="true">
@@ -69,49 +65,52 @@
 					</padding>
 				</Label>
 			</HBox>
-			
+
 			<!-- Row 3.1 -->
 			<CheckBox GridPane.rowIndex="1" GridPane.columnIndex="0" GridPane.columnSpan="2" fx:id="savePassword" text="%unlock.label.savePassword" onAction="#didClickSavePasswordCheckbox" cacheShape="true" cache="true" />
-			
+
 			<!-- Row 3.2 -->
 			<CheckBox GridPane.rowIndex="2" GridPane.columnIndex="0" GridPane.columnSpan="2" fx:id="unlockAfterStartup" text="%unlock.label.unlockAfterStartup" cacheShape="true" cache="true" />
 
 			<!-- Row 3.3 -->
 			<Label GridPane.rowIndex="3" GridPane.columnIndex="0" text="%unlock.label.mountName"  cacheShape="true" cache="true" />
 			<TextField GridPane.rowIndex="3" GridPane.columnIndex="1" fx:id="mountName" GridPane.hgrow="ALWAYS" maxWidth="Infinity" cacheShape="true" cache="true" />
-			
+
 			<!-- Row 3.4 -->
 			<CheckBox GridPane.rowIndex="4" GridPane.columnIndex="0" GridPane.columnSpan="2" fx:id="revealAfterMount" text="%unlock.label.revealAfterMount" cacheShape="true" cache="true" />
 
 			<!-- Row 3.5 -->
 			<CheckBox GridPane.rowIndex="5" GridPane.columnIndex="0" GridPane.columnSpan="2" fx:id="useReadOnlyMode" text="%unlock.label.useReadOnlyMode" cacheShape="true" cache="true" />
 
-			<!-- Row 3.6 Alt1 -->
-			<Label GridPane.rowIndex="6" GridPane.columnIndex="0" fx:id="winDriveLetterLabel" text="%unlock.label.winDriveLetter" cacheShape="true" cache="true" />
-			<ChoiceBox GridPane.rowIndex="6" GridPane.columnIndex="1" fx:id="winDriveLetter" GridPane.hgrow="ALWAYS" maxWidth="Infinity" cacheShape="true" cache="true" />
+			<!-- Row 3.6 -->
+			<CheckBox GridPane.rowIndex="6" GridPane.columnIndex="0" GridPane.columnSpan="2" fx:id="useCustomMountPoint" text="%unlock.label.useOwnMountPath" cacheShape="true" cache="true" />
 
-			<!-- Row 3.6 Alt2 -->
-			<CheckBox GridPane.rowIndex="6" GridPane.columnIndex="0" GridPane.columnSpan="2" fx:id="useOwnMountPath" text="%unlock.label.useOwnMountPath" cacheShape="true" cache="true" />
+			<!-- Row 3.7 Alt1 -->
+			<Label GridPane.rowIndex="7" GridPane.columnIndex="0" fx:id="winDriveLetterLabel" text="%unlock.label.winDriveLetter" cacheShape="true" cache="true" />
+			<ChoiceBox GridPane.rowIndex="7" GridPane.columnIndex="1" fx:id="winDriveLetter" GridPane.hgrow="ALWAYS" maxWidth="Infinity" cacheShape="true" cache="true" />
 
-			<Label GridPane.rowIndex="7" GridPane.columnIndex="0" fx:id="mountPathLabel" text="%unlock.label.mountPath" cacheShape="true" cache="true" />
-			<TextField GridPane.rowIndex="7" GridPane.columnIndex="1" fx:id="mountPath" GridPane.hgrow="ALWAYS" maxWidth="Infinity" cacheShape="true" cache="true" />
-
+			<!-- Row 3.7 Alt2 -->
+			<HBox fx:id="customMountPoint" GridPane.rowIndex="7" GridPane.columnIndex="0" GridPane.columnSpan="2" spacing="6">
+				<Label HBox.hgrow="NEVER" minWidth="-Infinity" text="%unlock.label.mountPath" cacheShape="true" cache="true" />
+				<Label HBox.hgrow="ALWAYS" fx:id="customMountPointField" textOverrun="LEADING_ELLIPSIS" cacheShape="true" cache="true" />
+				<Button HBox.hgrow="NEVER" minWidth="-Infinity" text="&#xf434;" styleClass="ionicons" onAction="#didClickChooseCustomMountPoint" focusTraversable="true" cacheShape="true" cache="true"/>
+			</HBox>
 		</GridPane>
-		
+
 		<!-- Row 4 -->
 		<TextFlow GridPane.rowIndex="4" GridPane.columnIndex="0" GridPane.columnSpan="2" cacheShape="true" cache="true">
 			<GridPane.margin>
 				<Insets top="24.0"/>
 			</GridPane.margin>
 			<children>
-				<Text fx:id="messageText" cache="true" />
 				<Hyperlink fx:id="downloadsPageLink" text="%unlock.label.downloadsPageLink" visible="false" onAction="#didClickDownloadsLink" cacheShape="true" cache="true" />
 			</children>
 		</TextFlow>
-		
-		<!-- Row 5-->
-		<ProgressIndicator progress="-1" fx:id="progressIndicator" GridPane.rowIndex="5" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.halignment="CENTER" cacheShape="true" cache="true" cacheHint="SPEED" />
+
+		<!-- Row 5 -->
+		<VBox GridPane.rowIndex="5" GridPane.columnIndex="0" GridPane.columnSpan="2" spacing="12.0" alignment="CENTER" cacheShape="true" cache="true">
+			<ProgressIndicator progress="-1" fx:id="progressIndicator" cacheShape="true" cache="true" cacheHint="SPEED" />
+			<Text fx:id="messageText" cache="true" />
+		</VBox>
 	</children>
 </GridPane>
-
-

@@ -5,8 +5,8 @@
  *******************************************************************************/
 package org.cryptomator.ui.model;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.io.IOException;
 import java.nio.file.FileVisitOption;
 import java.nio.file.FileVisitResult;
@@ -19,11 +19,7 @@ import java.util.EnumSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
-import org.apache.commons.codec.binary.Base32;
-import org.apache.commons.codec.binary.BaseNCodec;
+import com.google.common.io.BaseEncoding;
 import org.apache.commons.lang3.StringUtils;
 import org.cryptomator.cryptolib.Cryptors;
 import org.cryptomator.cryptolib.api.Cryptor;
@@ -31,6 +27,8 @@ import org.cryptomator.cryptolib.common.MessageDigestSupplier;
 import org.cryptomator.ui.l10n.Localization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * Contains the collective knowledge of all creatures who were alive during the development of vault format 3.
@@ -50,7 +48,7 @@ class UpgradeVersion3to4 extends UpgradeStrategy {
 	private static final String NEW_FOLDER_PREFIX = "0";
 
 	private final MessageDigest sha1 = MessageDigestSupplier.SHA1.get();
-	private final BaseNCodec base32 = new Base32();
+	private final BaseEncoding base32 = BaseEncoding.base32();
 
 	@Inject
 	public UpgradeVersion3to4(Localization localization) {
@@ -155,7 +153,7 @@ class UpgradeVersion3to4 extends UpgradeStrategy {
 			String oldLongName = new String(Files.readAllBytes(oldMetadataFile), UTF_8);
 			if (oldLongName.endsWith(OLD_FOLDER_SUFFIX)) {
 				String newLongName = NEW_FOLDER_PREFIX + StringUtils.removeEnd(oldLongName, OLD_FOLDER_SUFFIX);
-				String newCanonicalBase32 = base32.encodeAsString(sha1.digest(newLongName.getBytes(UTF_8)));
+				String newCanonicalBase32 = base32.encode(sha1.digest(newLongName.getBytes(UTF_8)));
 				String newCanonicalName = newCanonicalBase32 + LONG_FILENAME_EXT;
 				Path newMetadataFile = metadataDir.resolve(newCanonicalName.substring(0, 2)).resolve(newCanonicalName.substring(2, 4)).resolve(newCanonicalName);
 				String newName = newCanonicalBase32 + oldNameSuffix + LONG_FILENAME_EXT;
