@@ -39,7 +39,6 @@ public class FuseVolume implements Volume {
 	@Inject
 	public FuseVolume(VaultSettings vaultSettings) {
 		this.vaultSettings = vaultSettings;
-		this.createdTemporaryMountPoint = false;
 	}
 
 	@Override
@@ -48,10 +47,11 @@ public class FuseVolume implements Volume {
 			Path customMountPoint = Paths.get(vaultSettings.individualMountPath().get());
 			checkProvidedMountPoint(customMountPoint);
 			this.mountPoint = customMountPoint;
+			this.createdTemporaryMountPoint = false;
 			LOG.debug("Successfully checked custom mount point: {}", mountPoint);
 		} else {
 			this.mountPoint = createTemporaryMountPoint();
-			createdTemporaryMountPoint = true;
+			this.createdTemporaryMountPoint = true;
 			LOG.debug("Successfully created mount point: {}", mountPoint);
 		}
 		mount(fs.getPath("/"));
@@ -107,8 +107,25 @@ public class FuseVolume implements Volume {
 	}
 
 	@Override
+	public boolean supportsForcedUnmount() {
+		return true;
+	}
+
+	@Override
+	public synchronized void unmountForced() throws VolumeException {
+		try {
+			fuseMnt.unmountForced();
+			fuseMnt.close();
+		} catch (CommandFailedException e) {
+			throw new VolumeException(e);
+		}
+		deleteTemporaryMountPoint();
+	}
+
+	@Override
 	public synchronized void unmount() throws VolumeException {
 		try {
+			fuseMnt.unmount();
 			fuseMnt.close();
 		} catch (CommandFailedException e) {
 			throw new VolumeException(e);
