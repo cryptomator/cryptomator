@@ -6,13 +6,22 @@ import org.cryptomator.cryptofs.CryptoFileSystem;
 import org.cryptomator.frontend.dokany.Mount;
 import org.cryptomator.frontend.dokany.MountFactory;
 import org.cryptomator.frontend.dokany.MountFailedException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import java.io.IOException;
+import java.nio.file.DirectoryNotEmptyException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.NotDirectoryException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.concurrent.ExecutorService;
 
 public class DokanyVolume implements Volume {
+
+	private static final Logger LOG = LoggerFactory.getLogger(DokanyVolume.class);
 
 	private static final String FS_TYPE_NAME = "Cryptomator File System";
 
@@ -28,15 +37,14 @@ public class DokanyVolume implements Volume {
 		this.windowsDriveLetters = windowsDriveLetters;
 	}
 
-
 	@Override
 	public boolean isSupported() {
 		return DokanyVolume.isSupportedStatic();
 	}
 
 	@Override
-	public void mount(CryptoFileSystem fs) throws VolumeException {
-		Path mountPath = Paths.get(getMountPathString());
+	public void mount(CryptoFileSystem fs) throws VolumeException, IOException {
+		Path mountPath = getMountPoint();
 		String mountName = vaultSettings.mountName().get();
 		try {
 			this.mount = mountFactory.mount(fs.getPath("/"), mountPath, mountName, FS_TYPE_NAME);
@@ -45,20 +53,32 @@ public class DokanyVolume implements Volume {
 		}
 	}
 
-	private String getMountPathString() throws VolumeException {
+	private Path getMountPoint() throws VolumeException, IOException {
 		if (vaultSettings.usesIndividualMountPath().get()) {
-			return vaultSettings.individualMountPath().get();
+			Path customMountPoint = Paths.get(vaultSettings.individualMountPath().get());
+			checkProvidedMountPoint(customMountPoint);
+			return customMountPoint;
 		} else if (!Strings.isNullOrEmpty(vaultSettings.winDriveLetter().get())) {
-			return vaultSettings.winDriveLetter().get().charAt(0) + ":\\";
+			return Paths.get(vaultSettings.winDriveLetter().get().charAt(0) + ":\\");
 		} else {
 			//auto assign drive letter
 			if (!windowsDriveLetters.getAvailableDriveLetters().isEmpty()) {
-				return windowsDriveLetters.getAvailableDriveLetters().iterator().next() + ":\\";
+				return Paths.get(windowsDriveLetters.getAvailableDriveLetters().iterator().next() + ":\\");
 			} else {
 				throw new VolumeException("No free drive letter available.");
 			}
 		}
+	}
 
+	private void checkProvidedMountPoint(Path mountPoint) throws IOException {
+		if (!Files.isDirectory(mountPoint)) {
+			throw new NotDirectoryException(mountPoint.toString());
+		}
+		try (DirectoryStream<Path> ds = Files.newDirectoryStream(mountPoint)) {
+			if (ds.iterator().hasNext()) {
+				throw new DirectoryNotEmptyException(mountPoint.toString());
+			}
+		}
 	}
 
 	@Override
