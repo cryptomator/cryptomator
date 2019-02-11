@@ -150,6 +150,9 @@ public class UnlockController implements ViewController {
 	@FXML
 	private CheckBox unlockAfterStartup;
 
+	@FXML
+	private CheckBox useReadOnlyMode;
+
 	@Override
 	public void initialize() {
 		advancedOptions.managedProperty().bind(advancedOptions.visibleProperty());
@@ -240,7 +243,7 @@ public class UnlockController implements ViewController {
 		VaultSettings vaultSettings = vault.getVaultSettings();
 		unlockAfterStartup.setSelected(savePassword.isSelected() && vaultSettings.unlockAfterStartup().get());
 		revealAfterMount.setSelected(vaultSettings.revealAfterMount().get());
-
+		useReadOnlyMode.setSelected(vaultSettings.usesReadOnlyMode().get());
 		if (!settings.preferredVolumeImpl().get().equals(VolumeImpl.WEBDAV)) {
 			useCustomMountPoint.setSelected(vaultSettings.usesIndividualMountPath().get());
 			customMountPointField.textProperty().setValue(vaultSettings.individualMountPath().getValueSafe());
@@ -249,7 +252,7 @@ public class UnlockController implements ViewController {
 		vaultSubs = vaultSubs.and(EasyBind.subscribe(unlockAfterStartup.selectedProperty(), vaultSettings.unlockAfterStartup()::set));
 		vaultSubs = vaultSubs.and(EasyBind.subscribe(revealAfterMount.selectedProperty(), vaultSettings.revealAfterMount()::set));
 		vaultSubs = vaultSubs.and(EasyBind.subscribe(useCustomMountPoint.selectedProperty(), vaultSettings.usesIndividualMountPath()::set));
-
+		vaultSubs = vaultSubs.and(EasyBind.subscribe(useReadOnlyMode.selectedProperty(), vaultSettings.usesReadOnlyMode()::set));
 	}
 
 	// ****************************************

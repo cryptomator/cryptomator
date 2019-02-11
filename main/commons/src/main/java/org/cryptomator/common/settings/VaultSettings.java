@@ -31,6 +31,7 @@ public class VaultSettings {
 	public static final boolean DEFAULT_UNLOCK_AFTER_STARTUP = false;
 	public static final boolean DEFAULT_REAVEAL_AFTER_MOUNT = true;
 	public static final boolean DEFAULT_USES_INDIVIDUAL_MOUNTPATH = false;
+	public static final boolean DEFAULT_USES_READONLY_MODE = false;
 
 	private final String id;
 	private final ObjectProperty<Path> path = new SimpleObjectProperty<>();
@@ -40,6 +41,7 @@ public class VaultSettings {
 	private final BooleanProperty revealAfterMount = new SimpleBooleanProperty(DEFAULT_REAVEAL_AFTER_MOUNT);
 	private final BooleanProperty usesIndividualMountPath = new SimpleBooleanProperty(DEFAULT_USES_INDIVIDUAL_MOUNTPATH);
 	private final StringProperty individualMountPath = new SimpleStringProperty();
+	private final BooleanProperty usesReadOnlyMode = new SimpleBooleanProperty(DEFAULT_USES_READONLY_MODE);
 
 	public VaultSettings(String id) {
 		this.id = Objects.requireNonNull(id);
@@ -48,7 +50,7 @@ public class VaultSettings {
 	}
 
 	Observable[] observables() {
-		return new Observable[]{path, mountName, winDriveLetter, unlockAfterStartup, revealAfterMount, usesIndividualMountPath, individualMountPath};
+		return new Observable[]{path, mountName, winDriveLetter, unlockAfterStartup, revealAfterMount, usesIndividualMountPath, individualMountPath, usesReadOnlyMode};
 	}
 
 	private void deriveMountNameFromPath(Path path) {
@@ -129,6 +131,10 @@ public class VaultSettings {
 
 	public StringProperty individualMountPath() {
 		return individualMountPath;
+	}
+
+	public BooleanProperty usesReadOnlyMode() {
+		return usesReadOnlyMode;
 	}
 
 	/* Hashcode/Equals */
