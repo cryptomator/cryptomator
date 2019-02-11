@@ -49,6 +49,9 @@ public class DokanyVolume implements Volume {
 		try {
 			this.mount = mountFactory.mount(fs.getPath("/"), mountPath, mountName, FS_TYPE_NAME);
 		} catch (MountFailedException e) {
+			if (vaultSettings.usesIndividualMountPath().get()) {
+				LOG.warn("Failed to mount vault into {}. Is this directory currently accessed by another process (e.g. Windows Explorer)?", mountPath);
+			}
 			throw new VolumeException("Unable to mount Filesystem", e);
 		}
 	}
