@@ -5,6 +5,7 @@
  *******************************************************************************/
 package org.cryptomator.common.settings;
 
+import com.google.common.base.Strings;
 import javafx.beans.Observable;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
@@ -20,6 +21,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Base64;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -131,6 +133,14 @@ public class VaultSettings {
 
 	public StringProperty individualMountPath() {
 		return individualMountPath;
+	}
+
+	public Optional<String> getIndividualMountPath() {
+		if (usesIndividualMountPath.get()) {
+			return Optional.ofNullable(Strings.emptyToNull(individualMountPath.get()));
+		} else {
+			return Optional.empty();
+		}
 	}
 
 	public BooleanProperty usesReadOnlyMode() {

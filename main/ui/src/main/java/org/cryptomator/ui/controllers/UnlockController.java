@@ -246,10 +246,10 @@ public class UnlockController implements ViewController {
 		useReadOnlyMode.setSelected(vaultSettings.usesReadOnlyMode().get());
 		if (!settings.preferredVolumeImpl().get().equals(VolumeImpl.WEBDAV)) {
 			useCustomMountPoint.setSelected(vaultSettings.usesIndividualMountPath().get());
-			if (vaultSettings.individualMountPath().get() == null) {
-				customMountPointLabel.textProperty().setValue(localization.getString("unlock.label.chooseMountPath"));
+			if (Strings.isNullOrEmpty(vaultSettings.individualMountPath().get())) {
+				customMountPointLabel.setText(localization.getString("unlock.label.chooseMountPath"));
 			} else {
-				customMountPointLabel.textProperty().setValue(displayablePath(vaultSettings.individualMountPath().getValueSafe()));
+				customMountPointLabel.setText(displayablePath(vaultSettings.individualMountPath().getValueSafe()));
 			}
 		}
 

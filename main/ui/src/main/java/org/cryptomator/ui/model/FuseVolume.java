@@ -20,6 +20,7 @@ import java.nio.file.Files;
 import java.nio.file.NotDirectoryException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Optional;
 
 public class FuseVolume implements Volume {
 
@@ -43,8 +44,9 @@ public class FuseVolume implements Volume {
 
 	@Override
 	public void mount(CryptoFileSystem fs) throws IOException, FuseNotSupportedException, VolumeException {
-		if (vaultSettings.usesIndividualMountPath().get()) {
-			Path customMountPoint = Paths.get(vaultSettings.individualMountPath().get());
+		Optional<String> optionalCustomMountPoint = vaultSettings.getIndividualMountPath();
+		if (optionalCustomMountPoint.isPresent()) {
+			Path customMountPoint = Paths.get(optionalCustomMountPoint.get());
 			checkProvidedMountPoint(customMountPoint);
 			this.mountPoint = customMountPoint;
 			this.createdTemporaryMountPoint = false;

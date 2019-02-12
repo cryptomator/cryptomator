@@ -8,6 +8,7 @@
  *******************************************************************************/
 package org.cryptomator.ui.model;
 
+import com.google.common.base.Strings;
 import javafx.application.Platform;
 import javafx.beans.Observable;
 import javafx.beans.binding.Binding;
@@ -108,7 +109,7 @@ public class Vault {
 	public synchronized void unlock(CharSequence passphrase) throws CryptoException, IOException, Volume.VolumeException {
 		Platform.runLater(() -> state.set(State.PROCESSING));
 		try {
-			if (vaultSettings.usesIndividualMountPath().get() && vaultSettings.individualMountPath().get().isEmpty()) {
+			if (vaultSettings.usesIndividualMountPath().get() && Strings.isNullOrEmpty(vaultSettings.individualMountPath().get())) {
 				throw new NotDirectoryException("");
 			}
 			CryptoFileSystem fs = getCryptoFileSystem(passphrase);

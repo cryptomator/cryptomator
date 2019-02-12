@@ -17,6 +17,7 @@ import java.nio.file.Files;
 import java.nio.file.NotDirectoryException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
 public class DokanyVolume implements Volume {
@@ -49,7 +50,7 @@ public class DokanyVolume implements Volume {
 		try {
 			this.mount = mountFactory.mount(fs.getPath("/"), mountPath, mountName, FS_TYPE_NAME);
 		} catch (MountFailedException e) {
-			if (vaultSettings.usesIndividualMountPath().get()) {
+			if (vaultSettings.getIndividualMountPath().isPresent()) {
 				LOG.warn("Failed to mount vault into {}. Is this directory currently accessed by another process (e.g. Windows Explorer)?", mountPath);
 			}
 			throw new VolumeException("Unable to mount Filesystem", e);
@@ -57,8 +58,9 @@ public class DokanyVolume implements Volume {
 	}
 
 	private Path getMountPoint() throws VolumeException, IOException {
-		if (vaultSettings.usesIndividualMountPath().get()) {
-			Path customMountPoint = Paths.get(vaultSettings.individualMountPath().get());
+		Optional<String> optionalCustomMountPoint = vaultSettings.getIndividualMountPath();
+		if (optionalCustomMountPoint.isPresent()) {
+			Path customMountPoint = Paths.get(optionalCustomMountPoint.get());
 			checkProvidedMountPoint(customMountPoint);
 			return customMountPoint;
 		} else if (!Strings.isNullOrEmpty(vaultSettings.winDriveLetter().get())) {
