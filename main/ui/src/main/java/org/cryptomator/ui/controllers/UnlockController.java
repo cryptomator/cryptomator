@@ -235,7 +235,7 @@ public class UnlockController implements ViewController {
 			char[] storedPw = keychainAccess.get().loadPassphrase(vault.getId());
 			if (storedPw != null) {
 				savePassword.setSelected(true);
-				passwordField.setText(new String(storedPw));
+				passwordField.setPassword(storedPw);
 				passwordField.selectRange(storedPw.length, storedPw.length);
 				Arrays.fill(storedPw, ' ');
 			}
