@@ -236,7 +236,11 @@ public class UnlockController implements ViewController {
 		} else {
 			useCustomMountPoint.setVisible(true);
 			useCustomMountPoint.setSelected(vaultSettings.usesIndividualMountPath().get());
-			customMountPointLabel.setText(vaultSettings.getIndividualMountPath().orElse(localization.getString("unlock.label.chooseMountPath")));
+			if (Strings.isNullOrEmpty(vaultSettings.individualMountPath().get())) {
+				customMountPointLabel.setText(localization.getString("unlock.label.chooseMountPath"));
+			} else {
+				customMountPointLabel.setText(displayablePath(vaultSettings.individualMountPath().getValueSafe()));
+			}
 		}
 
 		// DOKANY-dependent controls:
