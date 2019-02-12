@@ -26,7 +26,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
@@ -40,7 +39,6 @@ import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.common.settings.VolumeImpl;
 import org.cryptomator.cryptolib.api.InvalidPassphraseException;
 import org.cryptomator.cryptolib.api.UnsupportedVaultFormatException;
-import org.cryptomator.frontend.webdav.ServerLifecycleException;
 import org.cryptomator.keychain.KeychainAccess;
 import org.cryptomator.ui.controls.SecPasswordField;
 import org.cryptomator.ui.l10n.Localization;
@@ -58,6 +56,8 @@ import javax.inject.Named;
 import java.io.File;
 import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.NotDirectoryException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Objects;
@@ -130,7 +130,7 @@ public class UnlockController implements ViewController {
 	private HBox customMountPoint;
 
 	@FXML
-	private Label customMountPointField;
+	private Label customMountPointLabel;
 
 	@FXML
 	private ProgressIndicator progressIndicator;
@@ -246,13 +246,29 @@ public class UnlockController implements ViewController {
 		useReadOnlyMode.setSelected(vaultSettings.usesReadOnlyMode().get());
 		if (!settings.preferredVolumeImpl().get().equals(VolumeImpl.WEBDAV)) {
 			useCustomMountPoint.setSelected(vaultSettings.usesIndividualMountPath().get());
-			customMountPointField.textProperty().setValue(vaultSettings.individualMountPath().getValueSafe());
+			if (vaultSettings.individualMountPath().get() == null) {
+				customMountPointLabel.textProperty().setValue(localization.getString("unlock.label.chooseMountPath"));
+			} else {
+				customMountPointLabel.textProperty().setValue(displayablePath(vaultSettings.individualMountPath().getValueSafe()));
+			}
 		}
 
 		vaultSubs = vaultSubs.and(EasyBind.subscribe(unlockAfterStartup.selectedProperty(), vaultSettings.unlockAfterStartup()::set));
 		vaultSubs = vaultSubs.and(EasyBind.subscribe(revealAfterMount.selectedProperty(), vaultSettings.revealAfterMount()::set));
 		vaultSubs = vaultSubs.and(EasyBind.subscribe(useCustomMountPoint.selectedProperty(), vaultSettings.usesIndividualMountPath()::set));
 		vaultSubs = vaultSubs.and(EasyBind.subscribe(useReadOnlyMode.selectedProperty(), vaultSettings.usesReadOnlyMode()::set));
+	}
+
+	private String displayablePath(String path) {
+		Path homeDir = Paths.get(SystemUtils.USER_HOME);
+		Path p = Paths.get(path);
+		if (p.startsWith(homeDir)) {
+			Path relativePath = homeDir.relativize(p);
+			String homePrefix = SystemUtils.IS_OS_WINDOWS ? "~\\" : "~/";
+			return homePrefix + relativePath.toString();
+		} else {
+			return p.toString();
+		}
 	}
 
 	// ****************************************
@@ -298,7 +314,7 @@ public class UnlockController implements ViewController {
 		DirectoryChooser dirChooser = new DirectoryChooser();
 		File file = dirChooser.showDialog(mainWindow);
 		if (file != null) {
-			customMountPointField.setText(file.toString());
+			customMountPointLabel.setText(displayablePath(file.toString()));
 			vault.setCustomMountPath(file.toString());
 		}
 	}
@@ -476,9 +492,9 @@ public class UnlockController implements ViewController {
 	/* state */
 
 	public enum State {
-		UNLOCKING(null),
-		INITIALIZED("unlock.successLabel.vaultCreated"),
-		PASSWORD_CHANGED("unlock.successLabel.passwordChanged"),
+		UNLOCKING(null), //
+		INITIALIZED("unlock.successLabel.vaultCreated"), //
+		PASSWORD_CHANGED("unlock.successLabel.passwordChanged"), //
 		UPGRADED("unlock.successLabel.upgraded");
 
 		private Optional<String> successMessage;

@@ -90,10 +90,12 @@
 			<ChoiceBox GridPane.rowIndex="7" GridPane.columnIndex="1" fx:id="winDriveLetter" GridPane.hgrow="ALWAYS" maxWidth="Infinity" cacheShape="true" cache="true" />
 
 			<!-- Row 3.7 Alt2 -->
-			<HBox fx:id="customMountPoint" GridPane.rowIndex="7" GridPane.columnIndex="0" GridPane.columnSpan="2" spacing="6">
-				<Label HBox.hgrow="NEVER" minWidth="-Infinity" text="%unlock.label.mountPath" cacheShape="true" cache="true" />
-				<Label HBox.hgrow="ALWAYS" fx:id="customMountPointField" textOverrun="LEADING_ELLIPSIS" cacheShape="true" cache="true" />
-				<Button HBox.hgrow="NEVER" minWidth="-Infinity" text="&#xf434;" styleClass="ionicons" onAction="#didClickChooseCustomMountPoint" focusTraversable="true" cacheShape="true" cache="true"/>
+			<HBox fx:id="customMountPoint" GridPane.rowIndex="7" GridPane.columnIndex="0" GridPane.columnSpan="2" spacing="6" alignment="BASELINE_LEFT" cacheShape="true" cache="true">
+				<padding>
+					<Insets left="20.0" />
+				</padding>
+				<Label HBox.hgrow="ALWAYS" fx:id="customMountPointLabel" textOverrun="LEADING_ELLIPSIS" cacheShape="true" cache="true" />
+				<Button HBox.hgrow="NEVER" minWidth="-Infinity" text="&#xf434;" styleClass="ionicons" onAction="#didClickChooseCustomMountPoint" focusTraversable="true" cacheShape="true" cache="true" />
 			</HBox>
 		</GridPane>
 
