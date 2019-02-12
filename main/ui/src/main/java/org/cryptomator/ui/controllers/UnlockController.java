@@ -172,21 +172,6 @@ public class UnlockController implements ViewController {
 			winDriveLetter.setVisible(false);
 			winDriveLetter.setManaged(false);
 		}
-
-		if (VolumeImpl.WEBDAV.equals(settings.preferredVolumeImpl().get())) {
-			useCustomMountPoint.setVisible(false);
-			useCustomMountPoint.setManaged(false);
-			customMountPoint.setVisible(false);
-			customMountPoint.setManaged(false);
-		} else {
-			useCustomMountPoint.setVisible(true);
-			if (SystemUtils.IS_OS_WINDOWS) {
-				winDriveLetter.visibleProperty().bind(useCustomMountPoint.selectedProperty().not());
-				winDriveLetter.managedProperty().bind(useCustomMountPoint.selectedProperty().not());
-				winDriveLetterLabel.visibleProperty().bind(useCustomMountPoint.selectedProperty().not());
-				winDriveLetterLabel.managedProperty().bind(useCustomMountPoint.selectedProperty().not());
-			}
-		}
 	}
 
 
@@ -243,14 +228,37 @@ public class UnlockController implements ViewController {
 		VaultSettings vaultSettings = vault.getVaultSettings();
 		unlockAfterStartup.setSelected(savePassword.isSelected() && vaultSettings.unlockAfterStartup().get());
 		revealAfterMount.setSelected(vaultSettings.revealAfterMount().get());
-		useReadOnlyMode.setSelected(vaultSettings.usesReadOnlyMode().get());
-		if (!settings.preferredVolumeImpl().get().equals(VolumeImpl.WEBDAV)) {
+
+		// WEBDAV-dependent controls:
+		if (VolumeImpl.WEBDAV.equals(settings.preferredVolumeImpl().get())) {
+			useCustomMountPoint.setVisible(false);
+			useCustomMountPoint.setManaged(false);
+		} else {
+			useCustomMountPoint.setVisible(true);
 			useCustomMountPoint.setSelected(vaultSettings.usesIndividualMountPath().get());
-			if (Strings.isNullOrEmpty(vaultSettings.individualMountPath().get())) {
-				customMountPointLabel.setText(localization.getString("unlock.label.chooseMountPath"));
-			} else {
-				customMountPointLabel.setText(displayablePath(vaultSettings.individualMountPath().getValueSafe()));
-			}
+			customMountPointLabel.setText(vaultSettings.getIndividualMountPath().orElse(localization.getString("unlock.label.chooseMountPath")));
+		}
+
+		// DOKANY-dependent controls:
+		if (VolumeImpl.DOKANY.equals(settings.preferredVolumeImpl().get())) {
+			winDriveLetter.visibleProperty().bind(useCustomMountPoint.selectedProperty().not());
+			winDriveLetter.managedProperty().bind(useCustomMountPoint.selectedProperty().not());
+			winDriveLetterLabel.visibleProperty().bind(useCustomMountPoint.selectedProperty().not());
+			winDriveLetterLabel.managedProperty().bind(useCustomMountPoint.selectedProperty().not());
+			// readonly not yet supported by dokany
+			useReadOnlyMode.setSelected(false);
+			useReadOnlyMode.setVisible(false);
+			useReadOnlyMode.setManaged(false);
+		} else {
+			useReadOnlyMode.setSelected(vaultSettings.usesReadOnlyMode().get());
+		}
+
+		// OS-dependent controls:
+		if (SystemUtils.IS_OS_WINDOWS) {
+			winDriveLetter.visibleProperty().bind(useCustomMountPoint.selectedProperty().not());
+			winDriveLetter.managedProperty().bind(useCustomMountPoint.selectedProperty().not());
+			winDriveLetterLabel.visibleProperty().bind(useCustomMountPoint.selectedProperty().not());
+			winDriveLetterLabel.managedProperty().bind(useCustomMountPoint.selectedProperty().not());
 		}
 
 		vaultSubs = vaultSubs.and(EasyBind.subscribe(unlockAfterStartup.selectedProperty(), vaultSettings.unlockAfterStartup()::set));
