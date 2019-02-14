@@ -7,31 +7,28 @@
   Contributors:
       Sebastian Stenzel - initial API and implementation
 -->
-<?import java.net.URL?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Hyperlink?>
-<?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.control.ProgressIndicator?>
-<?import javafx.scene.control.Button?>
 
 <VBox fx:controller="org.cryptomator.ui.controllers.WelcomeController" fx:id="root" prefWidth="400.0" prefHeight="400.0" spacing="24.0" alignment="CENTER" xmlns:fx="http://javafx.com/fxml" cacheShape="true" cache="true">
-	
+
 	<VBox fx:id="checkForUpdatesContainer" spacing="6.0" alignment="CENTER" cacheShape="true" cache="true" prefHeight="64.0">
 		<HBox alignment="CENTER" spacing="5.0" cacheShape="true" cache="true">
 			<Label fx:id="checkForUpdatesStatus" cacheShape="true" cache="true" />
-			<ProgressIndicator fx:id="checkForUpdatesIndicator" progress="-1" prefWidth="15.0" prefHeight="15.0" cacheShape="true" cache="true" cacheHint="SPEED" />
+			<ProgressIndicator fx:id="checkForUpdatesIndicator" progress="-1" prefWidth="15.0" prefHeight="15.0" visible="false" cacheShape="true" cache="true" cacheHint="SPEED" />
 		</HBox>
 		<Hyperlink wrapText="true" textAlignment="CENTER" fx:id="updateLink" onAction="#didClickUpdateLink" cacheShape="true" cache="true" disable="true" />
 	</VBox>
-	
+
 	<ImageView fitHeight="200.0" preserveRatio="true" smooth="true" cache="true" style="-fx-background-color: green;">
 		<Image url="/bot_welcome.png"/>
 	</ImageView>
-	
+
 	<VBox prefHeight="64.0"/>
 
 </VBox>

@@ -16,6 +16,7 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
+import javafx.beans.Observable;
 import org.cryptomator.cryptolib.api.InvalidPassphraseException;
 import org.cryptomator.cryptolib.api.UnsupportedVaultFormatException;
 import org.cryptomator.ui.controls.SecPasswordField;
@@ -48,7 +49,7 @@ public class ChangePasswordController implements ViewController {
 	private final Application app;
 	private final PasswordStrengthUtil strengthRater;
 	private final Localization localization;
-	private final IntegerProperty passwordStrength = new SimpleIntegerProperty(); // 0-4
+	private final IntegerProperty passwordStrength = new SimpleIntegerProperty(-1); // 0-4
 	private Optional<ChangePasswordListener> listener = Optional.empty();
 	private Vault vault;
 
@@ -100,11 +101,9 @@ public class ChangePasswordController implements ViewController {
 
 	@Override
 	public void initialize() {
-		BooleanBinding oldPasswordIsEmpty = oldPasswordField.textProperty().isEmpty();
-		BooleanBinding newPasswordIsEmpty = newPasswordField.textProperty().isEmpty();
-		BooleanBinding passwordsDiffer = newPasswordField.textProperty().isNotEqualTo(retypePasswordField.textProperty());
-		changePasswordButton.disableProperty().bind(oldPasswordIsEmpty.or(newPasswordIsEmpty.or(passwordsDiffer)));
-		passwordStrength.bind(EasyBind.map(newPasswordField.textProperty(), strengthRater::computeRate));
+		oldPasswordField.textProperty().addListener(this::passwordsChanged);
+		newPasswordField.textProperty().addListener(this::passwordsChanged);
+		retypePasswordField.textProperty().addListener(this::passwordsChanged);
 
 		passwordStrengthLevel0.backgroundProperty().bind(EasyBind.combine(passwordStrength, new SimpleIntegerProperty(0), strengthRater::getBackgroundWithStrengthColor));
 		passwordStrengthLevel1.backgroundProperty().bind(EasyBind.combine(passwordStrength, new SimpleIntegerProperty(1), strengthRater::getBackgroundWithStrengthColor));
@@ -112,6 +111,14 @@ public class ChangePasswordController implements ViewController {
 		passwordStrengthLevel3.backgroundProperty().bind(EasyBind.combine(passwordStrength, new SimpleIntegerProperty(3), strengthRater::getBackgroundWithStrengthColor));
 		passwordStrengthLevel4.backgroundProperty().bind(EasyBind.combine(passwordStrength, new SimpleIntegerProperty(4), strengthRater::getBackgroundWithStrengthColor));
 		passwordStrengthLabel.textProperty().bind(EasyBind.map(passwordStrength, strengthRater::getStrengthDescription));
+	}
+
+	private void passwordsChanged(Observable observable) {
+		boolean oldPasswordEmpty = oldPasswordField.getCharacters().length() == 0;
+		boolean newPasswordEmpty = newPasswordField.getCharacters().length() == 0;
+		boolean passwordsEqual = newPasswordField.getCharacters().equals(retypePasswordField.getCharacters());
+		changePasswordButton.setDisable(oldPasswordEmpty || newPasswordEmpty || !passwordsEqual);
+		passwordStrength.set(strengthRater.computeRate(newPasswordField.getCharacters().toString()));
 	}
 
 	@Override

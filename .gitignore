@@ -9,15 +9,13 @@
 .settings
 .project
 .classpath
+
+# Maven #
 target/
-test-output/
 
-# IntelliJ Settings Files #
-.idea/
-out/
-.idea_modules/
-*.iws
+# IntelliJ Settings Files (https://intellij-support.jetbrains.com/hc/en-us/articles/206544839-How-to-manage-projects-under-Version-Control-Systems) #
+.idea/**/workspace.xml
+.idea/**/tasks.xml
+.idea/dictionaries
+.idea/**/libraries/
 *.iml
-
-# Temporary file created by test launcher
-main/launcher/.ipcPort.tmp

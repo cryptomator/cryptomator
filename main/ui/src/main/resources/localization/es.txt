@@ -4,6 +4,7 @@ main.emptyListInstructions = Haga clic aquí para añadir una caja fuerte
 # should it be imperative?
 main.directoryList.contextMenu.remove = Eliminar de la lista
 main.directoryList.contextMenu.changePassword = Cambiar la contraseña
+# Fuzzy
 main.addDirectory.contextMenu.new = Crear una nueva caja fuerte
 main.addDirectory.contextMenu.open = Abrir una caja fuerte existente
 # welcome.fxml
@@ -98,8 +99,6 @@ upgrade.version5toX.msg = Esta caja fuerte debe ser migrada a un formato más mo
 main.createVault.nonEmptyDir.title = Error en la creación de la bóveda
 main.createVault.nonEmptyDir.header = El directorio elegido no está vacío
 main.createVault.nonEmptyDir.content = El directorio seleccionado ya contiene archivos (posiblemente ocultos). Una bóveda sólo puede crearse en un directorio vacío.
-unlock.label.mountPath = Punto de montaje
-unlock.label.mountPathButton = Aplicar
 settings.webdav.port.label = Puerto WebDAV
 settings.webdav.port.prompt = 0 \= Elige automáticamente
 settings.webdav.port.apply = Aplicar
@@ -115,9 +114,15 @@ welcome.askForUpdateCheck.dialog.title = Buscar actualización
 welcome.askForUpdateCheck.dialog.header = ¿Habilitar la búsqueda de actualizaciones automática?
 welcome.askForUpdateCheck.dialog.content = Para buscar actualizaciones, Cryptomator buscará la versión actual en los servidores de Cryptomator y le mostrará una sugerencia si hay una versión más nueva disponible.\n\nRecomendamos habilitar la comprobación de actualización para asegurarse siempre de que tiene instalada la versión más reciente de Cryptomator, con todos los parches de seguridad. Si no habilita la verificación de actualización, puede verificar y descargar la versión actual desde https\://cryptomator.org/downloads/.\n\nPuede cambiar esto en cualquier momento desde dentro de la configuración.
 settings.volume.dokany = Dokany
-unlock.errorMessage.invalidMountPath = La ruta individual de montaje no ha sido asignada.
 main.gracefulShutdown.dialog.title = No fue posible cerrar la(s) caja(s) fuerte(s)
 main.gracefulShutdown.dialog.header = Caja(s) Fuertes(s) en uso
 main.gracefulShutdown.dialog.content = Una o más cajas fuertes están siendo utilizadas por otros programas. Por favor ciérrelos para permitir a Cryptomator cerrarse adecuadamente, e intente de nuevo.\n\nSi esto no funciona, Cryptomator puede cerrarse forzosamente, pero esta vía puede provocar pérdida de información y no es recomendada.
 main.gracefulShutdown.button.tryAgain = Intente de nuevo
 main.gracefulShutdown.button.forceShutdown = Forzar apagado
+unlock.pendingMessage.unlocking = Desbloqueando la caja fuerte...
+unlock.failedDialog.title = Unlock failed
+unlock.failedDialog.header = Unlock failed
+unlock.failedDialog.content.mountPathNonExisting = Mount point does not exist.
+unlock.failedDialog.content.mountPathNotEmpty = Mount point is not empty.
+unlock.label.useReadOnlyMode = Read-Only
+unlock.label.chooseMountPath = Choose empty directory…

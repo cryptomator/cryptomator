@@ -25,11 +25,11 @@
 
 		<!-- dependency versions -->
 		<cryptomator.cryptolib.version>1.2.1</cryptomator.cryptolib.version>
-		<cryptomator.cryptofs.version>1.6.1</cryptomator.cryptofs.version>
+		<cryptomator.cryptofs.version>1.7.0</cryptomator.cryptofs.version>
 		<cryptomator.jni.version>2.0.0</cryptomator.jni.version>
-		<cryptomator.fuse.version>1.0.2</cryptomator.fuse.version>
-		<cryptomator.dokany.version>1.0.0</cryptomator.dokany.version>
-		<cryptomator.webdav.version>1.0.5</cryptomator.webdav.version>
+		<cryptomator.fuse.version>1.1.0</cryptomator.fuse.version>
+		<cryptomator.dokany.version>1.1.3</cryptomator.dokany.version>
+		<cryptomator.webdav.version>1.0.6</cryptomator.webdav.version>
 
 		<javafx.version>11</javafx.version>
 
@@ -39,7 +39,7 @@
 		<easybind.version>1.0.3</easybind.version>
 
 		<guava.version>27.0-jre</guava.version>
-		<dagger.version>2.19</dagger.version>
+		<dagger.version>2.20</dagger.version>
 		<gson.version>2.8.5</gson.version>
 
 		<slf4j.version>1.7.25</slf4j.version>
@@ -331,8 +331,6 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.8.0</version>
 				<configuration>
-					<source>11</source>
-					<target>11</target>
 					<release>11</release>
 					<annotationProcessorPaths>
 						<path>
