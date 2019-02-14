@@ -61,13 +61,39 @@ deploy:
 - provider: script
   skip_cleanup: true
   script: >-
-    curl -T main/ant-kit/target/antkit.zip
+    curl -T main/buildkit/target/buildkit-linux.zip
     -u cryptobot:${BINTRAY_API_KEY}
-    -H "X-Bintray-Package:ant-kit"
+    -H "X-Bintray-Package:buildkit"
     -H "X-Bintray-Version:${TRAVIS_TAG}"
     -H "X-Bintray-Override:1"
     -H "X-Bintray-Publish:1"
-    https://api.bintray.com/content/cryptomator/cryptomator/antkit-${TRAVIS_TAG}.zip
+    https://api.bintray.com/content/cryptomator/cryptomator/buildkit-linux-${TRAVIS_TAG}.zip
+  on:
+    repo: cryptomator/cryptomator
+    tags: true
+- provider: script
+  skip_cleanup: true
+  script: >-
+    curl -T main/buildkit/target/buildkit-mac.zip
+    -u cryptobot:${BINTRAY_API_KEY}
+    -H "X-Bintray-Package:buildkit"
+    -H "X-Bintray-Version:${TRAVIS_TAG}"
+    -H "X-Bintray-Override:1"
+    -H "X-Bintray-Publish:1"
+    https://api.bintray.com/content/cryptomator/cryptomator/buildkit-mac-${TRAVIS_TAG}.zip
+  on:
+    repo: cryptomator/cryptomator
+    tags: true
+- provider: script
+  skip_cleanup: true
+  script: >-
+    curl -T main/buildkit/target/buildkit-win.zip
+    -u cryptobot:${BINTRAY_API_KEY}
+    -H "X-Bintray-Package:buildkit"
+    -H "X-Bintray-Version:${TRAVIS_TAG}"
+    -H "X-Bintray-Override:1"
+    -H "X-Bintray-Publish:1"
+    https://api.bintray.com/content/cryptomator/cryptomator/buildkit-win-${TRAVIS_TAG}.zip
   on:
     repo: cryptomator/cryptomator
     tags: true
