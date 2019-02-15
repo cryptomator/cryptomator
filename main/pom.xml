@@ -268,7 +268,6 @@
 		<profile>
 			<id>release</id>
 			<modules>
-				<module>uber-jar</module>
 				<module>buildkit</module>
 			</modules>
 		</profile>

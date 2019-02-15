@@ -26,7 +26,6 @@
         <module name="commons" />
         <module name="keychain" />
         <module name="launcher" />
-        <module name="uber-jar" />
         <module name="ui" />
       </profile>
     </annotationProcessing>

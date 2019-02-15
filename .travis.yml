@@ -38,27 +38,46 @@ deploy:
 - provider: script # SNAPSHOTS
   skip_cleanup: true
   script: >-
-    curl -T main/ant-kit/target/antkit.zip
+    curl -T main/buildkit/target/buildkit-linux.zip
     -u cryptobot:${BINTRAY_API_KEY}
-    -H "X-Bintray-Package:ant-kit"
+    -H "X-Bintray-Package:buildkit"
     -H "X-Bintray-Version:continuous"
     -H "X-Bintray-Override:1"
     -H "X-Bintray-Publish:1"
-    https://api.bintray.com/content/cryptomator/cryptomator/antkit-continuous.zip
+    https://api.bintray.com/content/cryptomator/cryptomator/buildkit-linux-continuous.zip
   on:
     repo: cryptomator/cryptomator
     branch: develop
     condition: $TRAVIS_TAG = ''
-- provider: releases # RELEASE
-  prerelease: false
-  api_key: $GITHUB_API_KEY
-  file:
-  - "main/uber-jar/target/Cryptomator-$TRAVIS_TAG.jar"
+- provider: script
   skip_cleanup: true
+  script: >-
+    curl -T main/buildkit/target/buildkit-mac.zip
+    -u cryptobot:${BINTRAY_API_KEY}
+    -H "X-Bintray-Package:buildkit"
+    -H "X-Bintray-Version:continuous"
+    -H "X-Bintray-Override:1"
+    -H "X-Bintray-Publish:1"
+    https://api.bintray.com/content/cryptomator/cryptomator/buildkit-mac-continuous.zip
   on:
     repo: cryptomator/cryptomator
-    tags: true
+    branch: develop
+    condition: $TRAVIS_TAG = ''
 - provider: script
+  skip_cleanup: true
+  script: >-
+    curl -T main/buildkit/target/buildkit-win.zip
+    -u cryptobot:${BINTRAY_API_KEY}
+    -H "X-Bintray-Package:buildkit"
+    -H "X-Bintray-Version:continuous"
+    -H "X-Bintray-Override:1"
+    -H "X-Bintray-Publish:1"
+    https://api.bintray.com/content/cryptomator/cryptomator/buildkit-win-continuous.zip
+  on:
+    repo: cryptomator/cryptomator
+    branch: develop
+    condition: $TRAVIS_TAG = ''
+- provider: script # RELEASE
   skip_cleanup: true
   script: >-
     curl -T main/buildkit/target/buildkit-linux.zip
