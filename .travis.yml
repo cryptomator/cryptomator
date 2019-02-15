@@ -34,85 +34,21 @@ before_deploy:
     mvn -fmain/pom.xml org.codehaus.mojo:versions-maven-plugin:set -DnewVersion=SNAPSHOT-$(echo $TRAVIS_COMMIT | head -c7)
   fi
 - mvn -fmain/pom.xml clean package -Prelease -DskipTests
+- TODAY=`date +'%Y-%m-%d` envsubst '$TRAVIS_TAG $TODAY' < .travis-deploy-release.tmpl.json > .travis-deploy-release.json
+- cat .travis-deploy-release.json
 deploy:
-- provider: script # SNAPSHOTS
+- provider: bintray # SNAPSHOTS
+  file: .travis-deploy-snapshot.json
+  user: cryptobot
+  key: $BINTRAY_API_KEY
   skip_cleanup: true
-  script: >-
-    curl -T main/buildkit/target/buildkit-linux.zip
-    -u cryptobot:${BINTRAY_API_KEY}
-    -H "X-Bintray-Package:buildkit"
-    -H "X-Bintray-Version:continuous"
-    -H "X-Bintray-Override:1"
-    -H "X-Bintray-Publish:1"
-    https://api.bintray.com/content/cryptomator/cryptomator/buildkit-linux-continuous.zip
   on:
     repo: cryptomator/cryptomator
-    branch: develop
-    condition: $TRAVIS_TAG = ''
-- provider: script
+- provider: bintray # RELEASES
+  file: .travis-deploy-release.json
+  user: cryptobot
+  key: $BINTRAY_API_KEY
   skip_cleanup: true
-  script: >-
-    curl -T main/buildkit/target/buildkit-mac.zip
-    -u cryptobot:${BINTRAY_API_KEY}
-    -H "X-Bintray-Package:buildkit"
-    -H "X-Bintray-Version:continuous"
-    -H "X-Bintray-Override:1"
-    -H "X-Bintray-Publish:1"
-    https://api.bintray.com/content/cryptomator/cryptomator/buildkit-mac-continuous.zip
-  on:
-    repo: cryptomator/cryptomator
-    branch: develop
-    condition: $TRAVIS_TAG = ''
-- provider: script
-  skip_cleanup: true
-  script: >-
-    curl -T main/buildkit/target/buildkit-win.zip
-    -u cryptobot:${BINTRAY_API_KEY}
-    -H "X-Bintray-Package:buildkit"
-    -H "X-Bintray-Version:continuous"
-    -H "X-Bintray-Override:1"
-    -H "X-Bintray-Publish:1"
-    https://api.bintray.com/content/cryptomator/cryptomator/buildkit-win-continuous.zip
-  on:
-    repo: cryptomator/cryptomator
-    branch: develop
-    condition: $TRAVIS_TAG = ''
-- provider: script # RELEASE
-  skip_cleanup: true
-  script: >-
-    curl -T main/buildkit/target/buildkit-linux.zip
-    -u cryptobot:${BINTRAY_API_KEY}
-    -H "X-Bintray-Package:buildkit"
-    -H "X-Bintray-Version:${TRAVIS_TAG}"
-    -H "X-Bintray-Override:1"
-    -H "X-Bintray-Publish:1"
-    https://api.bintray.com/content/cryptomator/cryptomator/buildkit-linux-${TRAVIS_TAG}.zip
-  on:
-    repo: cryptomator/cryptomator
-    tags: true
-- provider: script
-  skip_cleanup: true
-  script: >-
-    curl -T main/buildkit/target/buildkit-mac.zip
-    -u cryptobot:${BINTRAY_API_KEY}
-    -H "X-Bintray-Package:buildkit"
-    -H "X-Bintray-Version:${TRAVIS_TAG}"
-    -H "X-Bintray-Override:1"
-    -H "X-Bintray-Publish:1"
-    https://api.bintray.com/content/cryptomator/cryptomator/buildkit-mac-${TRAVIS_TAG}.zip
-  on:
-    repo: cryptomator/cryptomator
-    tags: true
-- provider: script
-  skip_cleanup: true
-  script: >-
-    curl -T main/buildkit/target/buildkit-win.zip
-    -u cryptobot:${BINTRAY_API_KEY}
-    -H "X-Bintray-Package:buildkit"
-    -H "X-Bintray-Version:${TRAVIS_TAG}"
-    -H "X-Bintray-Override:1"
-    -H "X-Bintray-Publish:1"
-    https://api.bintray.com/content/cryptomator/cryptomator/buildkit-win-${TRAVIS_TAG}.zip
   on:
     repo: cryptomator/cryptomator
     tags: true

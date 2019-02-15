@@ -1,0 +1,15 @@
+{
+  "package": {
+	"name": "buildkit",
+	"repo": "cryptomator",
+	"subject": "cryptomator"
+  },
+  "version": {
+	"name": "snapshot"
+  },
+  "files":
+  [
+	{"includePattern": "main/buildkit/target/(buildkit-[a-z]+\\.deb)", "uploadPattern": "/$1"}
+  ],
+  "publish": true
+}
