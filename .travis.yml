@@ -35,7 +35,6 @@ before_deploy:
   fi
 - mvn -fmain/pom.xml clean package -Prelease -DskipTests
 - export TODAY=`date +'%Y-%m-%d'`; envsubst '$TRAVIS_TAG $TODAY' < .travis-deploy-release.tmpl.json > .travis-deploy-release.json
-- cat .travis-deploy-release.json
 deploy:
 - provider: bintray # SNAPSHOTS
   file: .travis-deploy-snapshot.json
