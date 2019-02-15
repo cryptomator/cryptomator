@@ -31,6 +31,8 @@
 		<cryptomator.dokany.version>1.1.3</cryptomator.dokany.version>
 		<cryptomator.webdav.version>1.0.7</cryptomator.webdav.version>
 
+		<javafx.version>11.0.2</javafx.version>
+
 		<commons-io.version>2.6</commons-io.version>
 		<commons-lang3.version>3.8.1</commons-lang3.version>
 
@@ -120,6 +122,23 @@
 				<groupId>org.cryptomator</groupId>
 				<artifactId>jni</artifactId>
 				<version>${cryptomator.jni.version}</version>
+			</dependency>
+
+			<!-- JavaFX -->
+			<dependency>
+				<groupId>org.openjfx</groupId>
+				<artifactId>javafx-base</artifactId>
+				<version>${javafx.version}</version>
+			</dependency>
+			<dependency>
+			  <groupId>org.openjfx</groupId>
+			  <artifactId>javafx-controls</artifactId>
+			  <version>${javafx.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.openjfx</groupId>
+				<artifactId>javafx-fxml</artifactId>
+				<version>${javafx.version}</version>
 			</dependency>
 
 			<!-- Logging -->
@@ -249,8 +268,7 @@
 		<profile>
 			<id>release</id>
 			<modules>
-				<module>uber-jar</module>
-				<module>ant-kit</module>
+				<module>buildkit</module>
 			</modules>
 		</profile>
 		<profile>
@@ -317,7 +335,7 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.8.0</version>
 				<configuration>
-					<release>9</release>
+					<release>11</release>
 					<annotationProcessorPaths>
 						<path>
 							<groupId>com.google.dagger</groupId>

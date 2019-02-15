@@ -1,7 +1,7 @@
 language: java
 sudo: false
 jdk:
-- oraclejdk9
+- openjdk11
 cache:
   directories:
   - $HOME/.m2
@@ -34,40 +34,22 @@ before_deploy:
     mvn -fmain/pom.xml org.codehaus.mojo:versions-maven-plugin:set -DnewVersion=SNAPSHOT-$(echo $TRAVIS_COMMIT | head -c7)
   fi
 - mvn -fmain/pom.xml clean package -Prelease -DskipTests
+- TODAY=`date +'%Y-%m-%d` envsubst '$TRAVIS_TAG $TODAY' < .travis-deploy-release.tmpl.json > .travis-deploy-release.json
+- cat .travis-deploy-release.json
 deploy:
-- provider: script # SNAPSHOTS
+- provider: bintray # SNAPSHOTS
+  file: .travis-deploy-snapshot.json
+  user: cryptobot
+  key: $BINTRAY_API_KEY
   skip_cleanup: true
-  script: >-
-    curl -T main/ant-kit/target/antkit.zip
-    -u cryptobot:${BINTRAY_API_KEY}
-    -H "X-Bintray-Package:ant-kit"
-    -H "X-Bintray-Version:continuous"
-    -H "X-Bintray-Override:1"
-    -H "X-Bintray-Publish:1"
-    https://api.bintray.com/content/cryptomator/cryptomator/antkit-continuous.zip
   on:
     repo: cryptomator/cryptomator
     branch: develop
-    condition: $TRAVIS_TAG = ''
-- provider: releases # RELEASE
-  prerelease: false
-  api_key: $GITHUB_API_KEY
-  file:
-  - "main/uber-jar/target/Cryptomator-$TRAVIS_TAG.jar"
+- provider: bintray # RELEASES
+  file: .travis-deploy-release.json
+  user: cryptobot
+  key: $BINTRAY_API_KEY
   skip_cleanup: true
-  on:
-    repo: cryptomator/cryptomator
-    tags: true
-- provider: script
-  skip_cleanup: true
-  script: >-
-    curl -T main/ant-kit/target/antkit.zip
-    -u cryptobot:${BINTRAY_API_KEY}
-    -H "X-Bintray-Package:ant-kit"
-    -H "X-Bintray-Version:${TRAVIS_TAG}"
-    -H "X-Bintray-Override:1"
-    -H "X-Bintray-Publish:1"
-    https://api.bintray.com/content/cryptomator/cryptomator/antkit-${TRAVIS_TAG}.zip
   on:
     repo: cryptomator/cryptomator
     tags: true

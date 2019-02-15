@@ -11,6 +11,12 @@
 	<description>Shared utilities</description>
 
 	<dependencies>
+		<!-- JavaFx -->
+		<dependency>
+			<groupId>org.openjfx</groupId>
+			<artifactId>javafx-base</artifactId>
+		</dependency>
+
 		<!-- Libs -->
 		<dependency>
 			<groupId>com.google.guava</groupId>
