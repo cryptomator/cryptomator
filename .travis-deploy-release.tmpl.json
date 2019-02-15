@@ -13,7 +13,7 @@
   },
   "files":
   [
-	{"includePattern": "main/buildkit/target/(buildkit-[a-z]+\\.deb)", "uploadPattern": "/$1"}
+	{"includePattern": "main/buildkit/target/(buildkit-[a-z]+\\.zip)", "uploadPattern": "/$1"}
   ],
   "publish": true
 }

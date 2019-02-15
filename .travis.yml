@@ -34,7 +34,7 @@ before_deploy:
     mvn -fmain/pom.xml org.codehaus.mojo:versions-maven-plugin:set -DnewVersion=SNAPSHOT-$(echo $TRAVIS_COMMIT | head -c7)
   fi
 - mvn -fmain/pom.xml clean package -Prelease -DskipTests
-- TODAY=`date +'%Y-%m-%d` envsubst '$TRAVIS_TAG $TODAY' < .travis-deploy-release.tmpl.json > .travis-deploy-release.json
+- TODAY=`date +'%Y-%m-%d'`; envsubst '$TRAVIS_TAG $TODAY' < .travis-deploy-release.tmpl.json > .travis-deploy-release.json
 - cat .travis-deploy-release.json
 deploy:
 - provider: bintray # SNAPSHOTS
