@@ -66,8 +66,8 @@ public class SecPasswordField extends PasswordField {
 	}
 
 	private void growContentIfNeeded() {
-		if (this.length > content.length) {
-			char[] newContent = new char[content.length + GROW_BUFFER_SIZE];
+		if (length > content.length) {
+			char[] newContent = new char[length + GROW_BUFFER_SIZE];
 			System.arraycopy(content, 0, newContent, 0, content.length);
 			swipe();
 			this.content = newContent;
