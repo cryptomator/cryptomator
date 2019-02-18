@@ -8,15 +8,14 @@
  *******************************************************************************/
 package org.cryptomator.ui.model;
 
+import org.cryptomator.common.FxApplicationScoped;
+import org.cryptomator.common.settings.VaultSettings;
+
+import javax.inject.Inject;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
-import org.cryptomator.common.settings.VaultSettings;
-
-@Singleton
+@FxApplicationScoped
 public class VaultFactory {
 
 	private final VaultComponent.Builder vaultComponentBuilder;
@@ -32,8 +31,7 @@ public class VaultFactory {
 	}
 
 	private Vault create(VaultSettings vaultSettings) {
-		VaultModule module = new VaultModule(vaultSettings);
-		VaultComponent comp = vaultComponentBuilder.vaultModule(module).build();
+		VaultComponent comp = vaultComponentBuilder.vaultSettings(vaultSettings).build();
 		return comp.vault();
 	}
 

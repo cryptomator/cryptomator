@@ -5,6 +5,15 @@
  *******************************************************************************/
 package org.cryptomator.ui.model;
 
+import org.cryptomator.common.FxApplicationScoped;
+import org.cryptomator.cryptolib.Cryptors;
+import org.cryptomator.cryptolib.api.Cryptor;
+import org.cryptomator.cryptolib.api.FileHeader;
+import org.cryptomator.ui.l10n.Localization;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.inject.Inject;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
@@ -18,21 +27,11 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.EnumSet;
 import java.util.regex.Pattern;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
-import org.cryptomator.cryptolib.Cryptors;
-import org.cryptomator.cryptolib.api.Cryptor;
-import org.cryptomator.cryptolib.api.FileHeader;
-import org.cryptomator.ui.l10n.Localization;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * Contains the collective knowledge of all creatures who were alive during the development of vault format 3.
  * This class uses no external classes from the crypto or shortening layer by purpose, so we don't need legacy code inside these.
  */
-@Singleton
+@FxApplicationScoped
 class UpgradeVersion4to5 extends UpgradeStrategy {
 
 	private static final Logger LOG = LoggerFactory.getLogger(UpgradeVersion4to5.class);

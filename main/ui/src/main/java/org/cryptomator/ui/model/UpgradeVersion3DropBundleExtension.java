@@ -5,23 +5,21 @@
  *******************************************************************************/
 package org.cryptomator.ui.model;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
+import javafx.application.Platform;
 import org.apache.commons.lang3.StringUtils;
+import org.cryptomator.common.FxApplicationScoped;
 import org.cryptomator.cryptolib.Cryptors;
 import org.cryptomator.cryptolib.api.Cryptor;
 import org.cryptomator.ui.l10n.Localization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javafx.application.Platform;
+import javax.inject.Inject;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
-@Singleton
+@FxApplicationScoped
 class UpgradeVersion3DropBundleExtension extends UpgradeStrategy {
 
 	private static final Logger LOG = LoggerFactory.getLogger(UpgradeVersion3DropBundleExtension.class);

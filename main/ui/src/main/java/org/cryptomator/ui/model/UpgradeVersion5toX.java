@@ -5,11 +5,7 @@
  *******************************************************************************/
 package org.cryptomator.ui.model;
 
-import java.io.IOException;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
+import org.cryptomator.common.FxApplicationScoped;
 import org.cryptomator.cryptofs.migration.Migrators;
 import org.cryptomator.cryptofs.migration.api.NoApplicableMigratorException;
 import org.cryptomator.cryptolib.Cryptors;
@@ -19,7 +15,10 @@ import org.cryptomator.ui.l10n.Localization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Singleton
+import javax.inject.Inject;
+import java.io.IOException;
+
+@FxApplicationScoped
 class UpgradeVersion5toX extends UpgradeStrategy {
 
 	private static final Logger LOG = LoggerFactory.getLogger(UpgradeVersion5toX.class);

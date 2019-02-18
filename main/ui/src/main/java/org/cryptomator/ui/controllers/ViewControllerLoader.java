@@ -5,20 +5,18 @@
  *******************************************************************************/
 package org.cryptomator.ui.controllers;
 
+import javafx.fxml.FXMLLoader;
+import org.cryptomator.common.FxApplicationScoped;
+import org.cryptomator.ui.l10n.Localization;
+
+import javax.inject.Inject;
+import javax.inject.Provider;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.util.Map;
 
-import javax.inject.Inject;
-import javax.inject.Provider;
-import javax.inject.Singleton;
-
-import org.cryptomator.ui.l10n.Localization;
-
-import javafx.fxml.FXMLLoader;
-
-@Singleton
+@FxApplicationScoped
 public class ViewControllerLoader {
 
 	private final Map<Class<? extends ViewController>, Provider<ViewController>> controllerProviders;

@@ -5,14 +5,14 @@
  *******************************************************************************/
 package org.cryptomator.ui.controllers;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
 import javafx.scene.layout.VBox;
+import org.cryptomator.common.FxApplicationScoped;
 
-@Singleton
+import javax.inject.Inject;
+
+@FxApplicationScoped
 public class NotFoundController implements ViewController {
 
 	@Inject

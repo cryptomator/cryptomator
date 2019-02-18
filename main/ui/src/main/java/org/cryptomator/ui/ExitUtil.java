@@ -9,6 +9,24 @@
  *******************************************************************************/
 package org.cryptomator.ui;
 
+import javafx.application.Platform;
+import javafx.stage.Stage;
+import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.common.FxApplicationScoped;
+import org.cryptomator.common.settings.Settings;
+import org.cryptomator.jni.JniException;
+import org.cryptomator.jni.MacApplicationUiState;
+import org.cryptomator.jni.MacFunctions;
+import org.cryptomator.ui.l10n.Localization;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
+import javax.swing.SwingUtilities;
 import java.awt.AWTException;
 import java.awt.Image;
 import java.awt.MenuItem;
@@ -24,27 +42,7 @@ import java.io.IOException;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Singleton;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
-import javax.swing.SwingUtilities;
-
-import org.apache.commons.lang3.SystemUtils;
-import org.cryptomator.common.settings.Settings;
-import org.cryptomator.jni.JniException;
-import org.cryptomator.jni.MacApplicationUiState;
-import org.cryptomator.jni.MacFunctions;
-import org.cryptomator.ui.l10n.Localization;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javafx.application.Platform;
-import javafx.stage.Stage;
-
-@Singleton
+@FxApplicationScoped
 public class ExitUtil {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ExitUtil.class);

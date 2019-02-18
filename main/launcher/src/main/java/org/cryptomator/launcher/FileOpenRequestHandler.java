@@ -7,6 +7,7 @@
 package org.cryptomator.launcher;
 
 import java.awt.Desktop;
+import java.awt.desktop.OpenFilesEvent;
 import java.io.File;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
@@ -17,20 +18,28 @@ import java.util.concurrent.BlockingQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
+
+@Singleton
 class FileOpenRequestHandler {
 
 	private static final Logger LOG = LoggerFactory.getLogger(FileOpenRequestHandler.class);
 	private final BlockingQueue<Path> fileOpenRequests;
 
-	public FileOpenRequestHandler(BlockingQueue<Path> fileOpenRequests) {
+	@Inject
+	public FileOpenRequestHandler(@Named("fileOpenRequests") BlockingQueue<Path> fileOpenRequests) {
 		this.fileOpenRequests = fileOpenRequests;
 		try {
-			Desktop.getDesktop().setOpenFileHandler(e -> {
-				e.getFiles().stream().map(File::toPath).forEach(fileOpenRequests::add);
-			});
+			Desktop.getDesktop().setOpenFileHandler(this::openFiles);
 		} catch (UnsupportedOperationException e) {
 			LOG.info("Unable to setOpenFileHandler, probably not supported on this OS.");
 		}
+	}
+
+	private void openFiles(final OpenFilesEvent evt) {
+		evt.getFiles().stream().map(File::toPath).forEach(fileOpenRequests::add);
 	}
 
 	public void handleLaunchArgs(String[] args) {

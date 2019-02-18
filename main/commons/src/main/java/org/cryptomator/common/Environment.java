@@ -1,6 +1,5 @@
 package org.cryptomator.common;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import org.slf4j.Logger;
@@ -30,7 +29,6 @@ public class Environment {
 		LOG.debug("cryptomator.settingsPath: {}", System.getProperty("cryptomator.settingsPath"));
 		LOG.debug("cryptomator.ipcPortPath: {}", System.getProperty("cryptomator.ipcPortPath"));
 		LOG.debug("cryptomator.keychainPath: {}", System.getProperty("cryptomator.ipcPortPath"));
-
 	}
 
 	public Stream<Path> getSettingsPath() {

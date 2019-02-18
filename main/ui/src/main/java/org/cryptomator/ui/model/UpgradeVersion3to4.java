@@ -5,8 +5,17 @@
  *******************************************************************************/
 package org.cryptomator.ui.model;
 
+import com.google.common.io.BaseEncoding;
+import org.apache.commons.lang3.StringUtils;
+import org.cryptomator.common.FxApplicationScoped;
+import org.cryptomator.cryptolib.Cryptors;
+import org.cryptomator.cryptolib.api.Cryptor;
+import org.cryptomator.cryptolib.common.MessageDigestSupplier;
+import org.cryptomator.ui.l10n.Localization;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.io.IOException;
 import java.nio.file.FileVisitOption;
 import java.nio.file.FileVisitResult;
@@ -19,22 +28,13 @@ import java.util.EnumSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.google.common.io.BaseEncoding;
-import org.apache.commons.lang3.StringUtils;
-import org.cryptomator.cryptolib.Cryptors;
-import org.cryptomator.cryptolib.api.Cryptor;
-import org.cryptomator.cryptolib.common.MessageDigestSupplier;
-import org.cryptomator.ui.l10n.Localization;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * Contains the collective knowledge of all creatures who were alive during the development of vault format 3.
  * This class uses no external classes from the crypto or shortening layer by purpose, so we don't need legacy code inside these.
  */
-@Singleton
+@FxApplicationScoped
 class UpgradeVersion3to4 extends UpgradeStrategy {
 
 	private static final Logger LOG = LoggerFactory.getLogger(UpgradeVersion3to4.class);

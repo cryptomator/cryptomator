@@ -5,6 +5,13 @@
  *******************************************************************************/
 package org.cryptomator.ui.model;
 
+import org.cryptomator.common.FxApplicationScoped;
+import org.cryptomator.cryptolib.api.CryptoException;
+import org.cryptomator.keychain.KeychainAccess;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.inject.Inject;
 import java.io.IOException;
 import java.nio.CharBuffer;
 import java.util.Arrays;
@@ -14,15 +21,7 @@ import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
-import org.cryptomator.cryptolib.api.CryptoException;
-import org.cryptomator.keychain.KeychainAccess;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-@Singleton
+@FxApplicationScoped
 public class AutoUnlocker {
 
 	private static final Logger LOG = LoggerFactory.getLogger(AutoUnlocker.class);

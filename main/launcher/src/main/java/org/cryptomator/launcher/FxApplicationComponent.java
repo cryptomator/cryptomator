@@ -5,19 +5,35 @@
  *******************************************************************************/
 package org.cryptomator.launcher;
 
-import javax.inject.Singleton;
-
+import dagger.BindsInstance;
+import dagger.Subcomponent;
+import javafx.application.Application;
+import javafx.stage.Stage;
+import org.cryptomator.common.FxApplicationScoped;
 import org.cryptomator.logging.DebugMode;
 import org.cryptomator.ui.controllers.ViewControllerLoader;
 
-import dagger.Component;
+import javax.inject.Named;
 
-@Singleton
-@Component(modules = LauncherModule.class)
-interface LauncherComponent {
+@FxApplicationScoped
+@Subcomponent(modules = FxApplicationModule.class)
+interface FxApplicationComponent {
 
 	ViewControllerLoader fxmlLoader();
 
 	DebugMode debugMode();
+
+	@Subcomponent.Builder
+	interface Builder {
+
+		@BindsInstance
+		Builder fxApplication(Application application);
+
+		@BindsInstance
+		Builder mainWindow(@Named("mainWindow") Stage mainWindow);
+
+		FxApplicationComponent build();
+
+	}
 
 }

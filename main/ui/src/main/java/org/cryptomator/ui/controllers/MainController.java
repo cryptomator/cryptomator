@@ -9,24 +9,6 @@
  ******************************************************************************/
 package org.cryptomator.ui.controllers;
 
-import java.awt.Desktop;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.stream.Stream;
-
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Singleton;
-
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.binding.Binding;
@@ -62,6 +44,7 @@ import javafx.scene.text.Font;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.common.FxApplicationScoped;
 import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.ui.ExitUtil;
 import org.cryptomator.ui.controls.DirectoryListCell;
@@ -79,9 +62,25 @@ import org.fxmisc.easybind.monadic.MonadicBinding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.awt.Desktop;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.stream.Stream;
+
 import static org.cryptomator.ui.util.DialogBuilderUtil.buildErrorDialog;
 
-@Singleton
+@FxApplicationScoped
 public class MainController implements ViewController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(MainController.class);

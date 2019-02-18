@@ -5,22 +5,20 @@
  *******************************************************************************/
 package org.cryptomator.logging;
 
-import static java.util.Arrays.asList;
-
-import java.util.Collection;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.LoggerContext;
+import org.cryptomator.common.FxApplicationScoped;
 import org.cryptomator.common.settings.Settings;
 import org.slf4j.ILoggerFactory;
 import org.slf4j.LoggerFactory;
 
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
-import ch.qos.logback.classic.LoggerContext;
+import javax.inject.Inject;
+import java.util.Collection;
 
-@Singleton
+import static java.util.Arrays.asList;
+
+@FxApplicationScoped
 public class DebugMode {
 
 	private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(DebugMode.class);

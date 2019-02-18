@@ -48,16 +48,12 @@ abstract class InterProcessCommunicator implements InterProcessCommunicationProt
 	public abstract boolean isServer();
 
 	/**
+	 * @param portFilePath Path to a file containing the IPC port
 	 * @param endpoint The server-side communication endpoint.
 	 * @return Either a client or a server communicator.
 	 * @throws IOException In case of communication errors.
 	 */
-	public static InterProcessCommunicator start(InterProcessCommunicationProtocol endpoint) throws IOException {
-		return start(getIpcPortPath(), endpoint);
-	}
-
-	// visible for testing
-	static InterProcessCommunicator start(Path portFilePath, InterProcessCommunicationProtocol endpoint) throws IOException {
+	public static InterProcessCommunicator start(Path portFilePath, InterProcessCommunicationProtocol endpoint) throws IOException {
 		System.setProperty("java.rmi.server.hostname", "localhost");
 		try {
 			// try to connect to existing server:
@@ -74,24 +70,6 @@ abstract class InterProcessCommunicator implements InterProcessCommunicationProt
 		ServerCommunicator server = new ServerCommunicator(endpoint, portFilePath);
 		LOG.debug("Server listening on port {}.", server.getPort());
 		return server;
-	}
-
-	private static Path getIpcPortPath() {
-		final String settingsPathProperty = System.getProperty("cryptomator.ipcPortPath");
-		if (settingsPathProperty == null) {
-			LOG.warn("System property cryptomator.ipcPortPath not set.");
-			return Paths.get(".ipcPort.tmp");
-		} else {
-			return Paths.get(replaceHomeDir(settingsPathProperty));
-		}
-	}
-
-	private static String replaceHomeDir(String path) {
-		if (path.startsWith("~/")) {
-			return SystemUtils.USER_HOME + path.substring(1);
-		} else {
-			return path;
-		}
 	}
 
 	public static class ClientCommunicator extends InterProcessCommunicator {
