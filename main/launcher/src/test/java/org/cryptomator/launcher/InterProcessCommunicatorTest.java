@@ -5,6 +5,11 @@
  *******************************************************************************/
 package org.cryptomator.launcher;
 
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
@@ -14,11 +19,6 @@ import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.spi.FileSystemProvider;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mockito;
 
 public class InterProcessCommunicatorTest {
 
@@ -30,7 +30,7 @@ public class InterProcessCommunicatorTest {
 	SeekableByteChannel portFileChannel = Mockito.mock(SeekableByteChannel.class);
 	AtomicInteger port = new AtomicInteger(-1);
 
-	@Before
+	@BeforeEach
 	public void setup() throws IOException {
 		Mockito.when(portFilePath.getFileSystem()).thenReturn(fs);
 		Mockito.when(portFilePath.toAbsolutePath()).thenReturn(portFilePath);
@@ -53,15 +53,17 @@ public class InterProcessCommunicatorTest {
 		});
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
+	@Test
 	public void testStartWithDummyPort1() throws IOException {
 		port.set(0);
 		InterProcessCommunicationProtocol protocol = Mockito.mock(InterProcessCommunicationProtocol.class);
 		try (InterProcessCommunicator result = InterProcessCommunicator.start(portFilePath, protocol)) {
-			Assert.assertTrue(result.isServer());
+			Assertions.assertTrue(result.isServer());
 			Mockito.verify(provider).createDirectory(portFileParentPath);
 			Mockito.verifyZeroInteractions(protocol);
-			result.handleLaunchArgs(new String[] {"foo"});
+			Assertions.assertThrows(UnsupportedOperationException.class, () -> {
+				result.handleLaunchArgs(new String[] {"foo"});
+			});
 		}
 	}
 
@@ -71,7 +73,7 @@ public class InterProcessCommunicatorTest {
 
 		InterProcessCommunicationProtocol protocol = Mockito.mock(InterProcessCommunicationProtocol.class);
 		try (InterProcessCommunicator result = InterProcessCommunicator.start(portFilePath, protocol)) {
-			Assert.assertTrue(result.isServer());
+			Assertions.assertTrue(result.isServer());
 			Mockito.verify(provider).createDirectory(portFileParentPath);
 			Mockito.verifyZeroInteractions(protocol);
 		}
@@ -82,14 +84,14 @@ public class InterProcessCommunicatorTest {
 		port.set(-1);
 		InterProcessCommunicationProtocol protocol = Mockito.mock(InterProcessCommunicationProtocol.class);
 		try (InterProcessCommunicator result1 = InterProcessCommunicator.start(portFilePath, protocol)) {
-			Assert.assertTrue(result1.isServer());
+			Assertions.assertTrue(result1.isServer());
 			Mockito.verify(provider, Mockito.times(1)).createDirectory(portFileParentPath);
 			Mockito.verifyZeroInteractions(protocol);
 
 			try (InterProcessCommunicator result2 = InterProcessCommunicator.start(portFilePath, null)) {
-				Assert.assertFalse(result2.isServer());
+				Assertions.assertFalse(result2.isServer());
 				Mockito.verify(provider, Mockito.times(1)).createDirectory(portFileParentPath);
-				Assert.assertNotSame(result1, result2);
+				Assertions.assertNotSame(result1, result2);
 
 				result2.handleLaunchArgs(new String[] {"foo"});
 				Mockito.verify(protocol).handleLaunchArgs(new String[] {"foo"});

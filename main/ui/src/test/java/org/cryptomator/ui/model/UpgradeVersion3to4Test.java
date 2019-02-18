@@ -1,24 +1,21 @@
 package org.cryptomator.ui.model;
 
+import com.google.common.jimfs.Configuration;
+import com.google.common.jimfs.Jimfs;
+import org.cryptomator.ui.l10n.Localization;
+import org.cryptomator.ui.l10n.LocalizationMock;
+import org.cryptomator.ui.model.UpgradeStrategy.UpgradeFailedException;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
-
-import org.cryptomator.ui.l10n.Localization;
-import org.cryptomator.ui.l10n.LocalizationMock;
-import org.cryptomator.ui.model.UpgradeStrategy.UpgradeFailedException;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.mockito.Mockito;
-
-import com.google.common.jimfs.Configuration;
-import com.google.common.jimfs.Jimfs;
 
 public class UpgradeVersion3to4Test {
 
@@ -33,8 +30,6 @@ public class UpgradeVersion3to4Test {
 			+ "  \"versionMac\": \"iUmRRHITuyJsJbVNqGNw+82YQ4A3Rma7j/y1v0DCVLA=\"" //
 			+ "}";
 
-	@Rule
-	public final ExpectedException thrown = ExpectedException.none();
 	private final UpgradeStrategy upgradeStrategy = new UpgradeVersion3to4(L10N);
 	private FileSystem fs;
 	private Path fsRoot;
@@ -42,7 +37,7 @@ public class UpgradeVersion3to4Test {
 	private Path dataDir;
 	private Path metadataDir;
 
-	@Before
+	@BeforeEach
 	public void setup() throws IOException {
 		fs = Jimfs.newFileSystem(Configuration.unix());
 		fsRoot = fs.getPath("/");
@@ -54,22 +49,23 @@ public class UpgradeVersion3to4Test {
 		Files.write(fsRoot.resolve("masterkey.cryptomator"), NULL_KEY_CONTENTS.getBytes(StandardCharsets.US_ASCII));
 	}
 
-	@After
+	@AfterEach
 	public void teardown() throws IOException {
 		fs.close();
 	}
 
 	@Test
 	public void upgradeFailsWithWrongPassword() throws UpgradeFailedException {
-		thrown.expect(UpgradeFailedException.class);
-		thrown.expectMessage("unlock.errorMessage.wrongPassword");
-		upgradeStrategy.upgrade(vault, "asdd");
+		UpgradeFailedException e = Assertions.assertThrows(UpgradeFailedException.class, () -> {
+			upgradeStrategy.upgrade(vault, "asdd");
+		});
+		Assertions.assertEquals("unlock.errorMessage.wrongPassword", e.getMessage());
 	}
 
 	@Test
 	public void upgradeCreatesBackup() throws UpgradeFailedException {
 		upgradeStrategy.upgrade(vault, "asd");
-		Assert.assertTrue(Files.exists(fsRoot.resolve("masterkey.cryptomator.bkup")));
+		Assertions.assertTrue(Files.exists(fsRoot.resolve("masterkey.cryptomator.bkup")));
 	}
 
 	@Test
@@ -81,8 +77,8 @@ public class UpgradeVersion3to4Test {
 
 		upgradeStrategy.upgrade(vault, "asd");
 		Path newFile = lvl2Dir.resolve("0ABCDEFGH");
-		Assert.assertTrue(Files.exists(newFile));
-		Assert.assertTrue(Files.notExists(oldFile));
+		Assertions.assertTrue(Files.exists(newFile));
+		Assertions.assertTrue(Files.notExists(oldFile));
 	}
 
 	@Test
@@ -94,8 +90,8 @@ public class UpgradeVersion3to4Test {
 
 		upgradeStrategy.upgrade(vault, "asd");
 		Path newFile = lvl2Dir.resolve("0ABCDEFGH (1)");
-		Assert.assertTrue(Files.exists(newFile));
-		Assert.assertTrue(Files.notExists(oldFile));
+		Assertions.assertTrue(Files.exists(newFile));
+		Assertions.assertTrue(Files.notExists(oldFile));
 	}
 
 	@Test
@@ -106,7 +102,7 @@ public class UpgradeVersion3to4Test {
 		Files.createFile(oldFile);
 
 		upgradeStrategy.upgrade(vault, "asd");
-		Assert.assertTrue(Files.exists(oldFile));
+		Assertions.assertTrue(Files.exists(oldFile));
 	}
 
 	@Test
@@ -123,9 +119,9 @@ public class UpgradeVersion3to4Test {
 		// hex2base32(sha1("0OPQRSTUVWXYZ====")) = DDLCFQ3ODTEAHEZJPHIJQRDHROB3K42G
 		Path newMetadataFile = metadataDir.resolve("DD/LC/DDLCFQ3ODTEAHEZJPHIJQRDHROB3K42G.lng");
 		Path newFile = lvl2Dir.resolve("DDLCFQ3ODTEAHEZJPHIJQRDHROB3K42G.lng");
-		Assert.assertTrue(Files.exists(newFile));
-		Assert.assertTrue(Files.exists(newMetadataFile));
-		Assert.assertTrue(Files.notExists(oldFile));
+		Assertions.assertTrue(Files.exists(newFile));
+		Assertions.assertTrue(Files.exists(newMetadataFile));
+		Assertions.assertTrue(Files.notExists(oldFile));
 	}
 
 	@Test
@@ -142,9 +138,9 @@ public class UpgradeVersion3to4Test {
 		// hex2base32(sha1("0OPQRSTUVWXYZ====")) = DDLCFQ3ODTEAHEZJPHIJQRDHROB3K42G
 		Path newMetadataFile = metadataDir.resolve("DD/LC/DDLCFQ3ODTEAHEZJPHIJQRDHROB3K42G.lng");
 		Path newFile = lvl2Dir.resolve("DDLCFQ3ODTEAHEZJPHIJQRDHROB3K42G (1).lng");
-		Assert.assertTrue(Files.exists(newFile));
-		Assert.assertTrue(Files.exists(newMetadataFile));
-		Assert.assertTrue(Files.notExists(oldFile));
+		Assertions.assertTrue(Files.exists(newFile));
+		Assertions.assertTrue(Files.exists(newMetadataFile));
+		Assertions.assertTrue(Files.notExists(oldFile));
 	}
 
 	@Test
@@ -158,7 +154,7 @@ public class UpgradeVersion3to4Test {
 		Files.write(oldMetadataFile, "OPQRSTUVWXYZ====".getBytes(StandardCharsets.UTF_8));
 
 		upgradeStrategy.upgrade(vault, "asd");
-		Assert.assertTrue(Files.exists(oldFile));
+		Assertions.assertTrue(Files.exists(oldFile));
 	}
 
 }

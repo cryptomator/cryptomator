@@ -8,6 +8,11 @@
  *******************************************************************************/
 package org.cryptomator.ui.l10n;
 
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -20,11 +25,6 @@ import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.junit.Assert;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class LocalizationTest {
 
@@ -54,7 +54,7 @@ public class LocalizationTest {
 			ResourceBundle lang = loadLanguage(RESOURCE_FOLDER_PATH + langFileName);
 			allGood &= allStringFormatSpecifiersMatchReferenceLanguage(ref, lang, langFileName);
 		}
-		Assert.assertTrue(allGood);
+		Assertions.assertTrue(allGood);
 	}
 
 	private boolean allStringFormatSpecifiersMatchReferenceLanguage(ResourceBundle ref, ResourceBundle lang, String langFileName) {

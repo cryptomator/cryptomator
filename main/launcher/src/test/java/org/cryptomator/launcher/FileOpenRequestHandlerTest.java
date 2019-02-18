@@ -5,6 +5,10 @@
  *******************************************************************************/
 package org.cryptomator.launcher;
 
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+
 import java.io.IOException;
 import java.nio.file.FileSystem;
 import java.nio.file.InvalidPathException;
@@ -13,10 +17,6 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.spi.FileSystemProvider;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-
-import org.junit.Assert;
-import org.junit.Test;
-import org.mockito.Mockito;
 
 public class FileOpenRequestHandlerTest {
 
@@ -37,8 +37,8 @@ public class FileOpenRequestHandlerTest {
 		FileOpenRequestHandler handler = new FileOpenRequestHandler(queue);
 		handler.handleLaunchArgs(fs, new String[] {"foo", "bar"});
 
-		Assert.assertEquals(p1, queue.poll());
-		Assert.assertEquals(p2, queue.poll());
+		Assertions.assertEquals(p1, queue.poll());
+		Assertions.assertEquals(p2, queue.poll());
 	}
 
 	@Test

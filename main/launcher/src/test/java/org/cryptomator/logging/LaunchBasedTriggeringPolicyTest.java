@@ -5,11 +5,11 @@
  *******************************************************************************/
 package org.cryptomator.logging;
 
-import java.io.File;
-
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+
+import java.io.File;
 
 public class LaunchBasedTriggeringPolicyTest {
 
@@ -21,15 +21,15 @@ public class LaunchBasedTriggeringPolicyTest {
 
 		// 1st invocation
 		boolean triggered = policy.isTriggeringEvent(activeFile, event);
-		Assert.assertTrue(triggered);
+		Assertions.assertTrue(triggered);
 
 		// 2nd invocation
 		triggered = policy.isTriggeringEvent(activeFile, event);
-		Assert.assertFalse(triggered);
+		Assertions.assertFalse(triggered);
 
 		// 3rd invocation
 		triggered = policy.isTriggeringEvent(activeFile, event);
-		Assert.assertFalse(triggered);
+		Assertions.assertFalse(triggered);
 
 		Mockito.verifyZeroInteractions(activeFile);
 		Mockito.verifyZeroInteractions(event);

@@ -5,32 +5,27 @@
  *******************************************************************************/
 package org.cryptomator.keychain;
 
+import org.cryptomator.jni.WinDataProtection;
+import org.cryptomator.jni.WinFunctions;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.mockito.stubbing.Answer;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
 
-import org.cryptomator.jni.WinDataProtection;
-import org.cryptomator.jni.WinFunctions;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.mockito.Mockito;
-import org.mockito.stubbing.Answer;
-
 public class WindowsProtectedKeychainAccessTest {
-
-	@Rule
-	public final ExpectedException thrown = ExpectedException.none();
 
 	private Path tmpFile;
 	private WindowsProtectedKeychainAccess keychain;
 
-	@Before
-	public void setup() throws IOException, ReflectiveOperationException {
+	@BeforeEach
+	public void setup() throws IOException {
 		tmpFile = Files.createTempFile("unit-tests", ".tmp");
 		System.setProperty("cryptomator.keychainPath", tmpFile.toAbsolutePath().normalize().toString());
 		WinFunctions winFunctions = Mockito.mock(WinFunctions.class);
@@ -42,7 +37,7 @@ public class WindowsProtectedKeychainAccessTest {
 		keychain = new WindowsProtectedKeychainAccess(Optional.of(winFunctions));
 	}
 
-	@After
+	@AfterEach
 	public void teardown() throws IOException {
 		Files.deleteIfExists(tmpFile);
 	}
@@ -55,11 +50,11 @@ public class WindowsProtectedKeychainAccessTest {
 		keychain.storePassphrase("myOtherPassword", storedPw2);
 		String loadedPw1 = new String(keychain.loadPassphrase("myPassword"));
 		String loadedPw2 = new String(keychain.loadPassphrase("myOtherPassword"));
-		Assert.assertEquals(storedPw1, loadedPw1);
-		Assert.assertEquals(storedPw2, loadedPw2);
+		Assertions.assertEquals(storedPw1, loadedPw1);
+		Assertions.assertEquals(storedPw2, loadedPw2);
 		keychain.deletePassphrase("myPassword");
-		Assert.assertNull(keychain.loadPassphrase("myPassword"));
-		Assert.assertNull(keychain.loadPassphrase("nonExistingPassword"));
+		Assertions.assertNull(keychain.loadPassphrase("myPassword"));
+		Assertions.assertNull(keychain.loadPassphrase("nonExistingPassword"));
 	}
 
 }
