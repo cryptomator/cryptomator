@@ -28,7 +28,7 @@ public class Environment {
 	public Environment() {
 		LOG.debug("cryptomator.settingsPath: {}", System.getProperty("cryptomator.settingsPath"));
 		LOG.debug("cryptomator.ipcPortPath: {}", System.getProperty("cryptomator.ipcPortPath"));
-		LOG.debug("cryptomator.keychainPath: {}", System.getProperty("cryptomator.ipcPortPath"));
+		LOG.debug("cryptomator.keychainPath: {}", System.getProperty("cryptomator.keychainPath"));
 	}
 
 	public Stream<Path> getSettingsPath() {

@@ -5,6 +5,11 @@
  *******************************************************************************/
 package org.cryptomator.launcher;
 
-public interface InterProcessCommunicationProtocol {
-	void handleLaunchArgs(String[] args);
+import java.rmi.Remote;
+import java.rmi.RemoteException;
+
+interface IpcProtocol extends Remote {
+
+	void handleLaunchArgs(String[] args) throws RemoteException;
+
 }
