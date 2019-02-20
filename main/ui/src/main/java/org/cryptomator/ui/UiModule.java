@@ -36,12 +36,6 @@ public class UiModule {
 
 	@Provides
 	@FxApplicationScoped
-	Settings provideSettings(SettingsProvider settingsProvider) {
-		return settingsProvider.get();
-	}
-
-	@Provides
-	@FxApplicationScoped
 	ScheduledExecutorService provideScheduledExecutorService(@Named("shutdownTaskScheduler") Consumer<Runnable> shutdownTaskScheduler) {
 		final AtomicInteger threadNumber = new AtomicInteger(1);
 		ScheduledExecutorService executorService = Executors.newScheduledThreadPool(NUM_SCHEDULER_THREADS, r -> {

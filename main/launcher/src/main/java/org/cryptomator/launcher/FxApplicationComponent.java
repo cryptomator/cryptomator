@@ -21,8 +21,6 @@ interface FxApplicationComponent {
 
 	ViewControllerLoader fxmlLoader();
 
-	DebugMode debugMode();
-
 	@Subcomponent.Builder
 	interface Builder {
 

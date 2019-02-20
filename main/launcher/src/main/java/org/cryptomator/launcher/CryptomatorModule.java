@@ -2,6 +2,8 @@ package org.cryptomator.launcher;
 
 import dagger.Module;
 import dagger.Provides;
+import org.cryptomator.common.settings.Settings;
+import org.cryptomator.common.settings.SettingsProvider;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -12,6 +14,12 @@ import java.util.concurrent.BlockingQueue;
 
 @Module
 class CryptomatorModule {
+
+	@Provides
+	@Singleton
+	Settings provideSettings(SettingsProvider settingsProvider) {
+		return settingsProvider.get();
+	}
 
 	@Provides
 	@Singleton

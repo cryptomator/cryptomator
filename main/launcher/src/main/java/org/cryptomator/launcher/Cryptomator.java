@@ -27,6 +27,7 @@ public class Cryptomator {
 			if (endpoint.isConnectedToRemote()) {
 				LOG.info("Found running application instance. Shutting down.");
 			} else {
+				CRYPTOMATOR_COMPONENT.debugMode().initialize();
 				CleanShutdownPerformer.registerShutdownHook();
 				Application.launch(MainApp.class, args);
 			}
@@ -43,12 +44,9 @@ public class Cryptomator {
 	// We need a separate FX Application class, until we can use the module system. See https://stackoverflow.com/q/54756176/4014509
 	public static class MainApp extends Application {
 
-		private Stage primaryStage;
-
 		@Override
 		public void start(Stage primaryStage) {
 			LOG.info("JavaFX application started.");
-			this.primaryStage = primaryStage;
 			primaryStage.setMinWidth(652.0);
 			primaryStage.setMinHeight(440.0);
 
@@ -57,8 +55,6 @@ public class Cryptomator {
 					.mainWindow(primaryStage) //
 					.build();
 
-			fxApplicationComponent.debugMode().initialize();
-
 			MainController mainCtrl = fxApplicationComponent.fxmlLoader().load("/fxml/main.fxml");
 			mainCtrl.initStage(primaryStage);
 			primaryStage.show();
@@ -66,8 +62,6 @@ public class Cryptomator {
 
 		@Override
 		public void stop() {
-			assert primaryStage != null;
-			primaryStage.hide();
 			LOG.info("JavaFX application stopped.");
 		}
 

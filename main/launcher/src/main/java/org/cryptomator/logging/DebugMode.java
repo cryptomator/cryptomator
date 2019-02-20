@@ -14,11 +14,12 @@ import org.slf4j.ILoggerFactory;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.Collection;
 
 import static java.util.Arrays.asList;
 
-@FxApplicationScoped
+@Singleton
 public class DebugMode {
 
 	private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(DebugMode.class);
