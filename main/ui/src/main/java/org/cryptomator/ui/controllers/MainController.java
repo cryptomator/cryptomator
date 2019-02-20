@@ -43,6 +43,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.text.Font;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.FxApplicationScoped;
 import org.cryptomator.common.settings.VaultSettings;
@@ -56,6 +57,7 @@ import org.cryptomator.ui.model.Vault;
 import org.cryptomator.ui.model.VaultFactory;
 import org.cryptomator.ui.model.VaultList;
 import org.cryptomator.ui.util.DialogBuilderUtil;
+import org.cryptomator.ui.util.Tasks;
 import org.fxmisc.easybind.EasyBind;
 import org.fxmisc.easybind.Subscription;
 import org.fxmisc.easybind.monadic.MonadicBinding;
@@ -247,22 +249,13 @@ public class MainController implements ViewController {
 	}
 
 	private void listenToFileOpenRequests(Stage stage) {
-		executorService.submit(() -> {
-			while (!Thread.interrupted()) {
-				try {
-					final Path path = fileOpenRequests.take();
-					Platform.runLater(() -> {
-						addVault(path, true);
-						stage.setIconified(false);
-						stage.show();
-						stage.toFront();
-						stage.requestFocus();
-					});
-				} catch (InterruptedException e) {
-					Thread.currentThread().interrupt();
-				}
-			}
-		});
+		Tasks.create(fileOpenRequests::take).onSuccess(path -> {
+			addVault(path, true);
+			stage.setIconified(false);
+			stage.show();
+			stage.toFront();
+			stage.requestFocus();
+		}).schedulePeriodically(executorService, Duration.ZERO, Duration.ZERO);
 	}
 
 	private ListCell<Vault> createDirecoryListCell(ListView<Vault> param) {
