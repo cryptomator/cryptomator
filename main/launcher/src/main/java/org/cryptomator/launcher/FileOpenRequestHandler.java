@@ -13,8 +13,13 @@ import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.Objects;
 import java.util.concurrent.BlockingQueue;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
+import org.cryptomator.ui.model.AppLaunchEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,11 +31,11 @@ import javax.inject.Singleton;
 class FileOpenRequestHandler {
 
 	private static final Logger LOG = LoggerFactory.getLogger(FileOpenRequestHandler.class);
-	private final BlockingQueue<Path> fileOpenRequests;
+	private final BlockingQueue<AppLaunchEvent> launchEventQueue;
 
 	@Inject
-	public FileOpenRequestHandler(@Named("fileOpenRequests") BlockingQueue<Path> fileOpenRequests) {
-		this.fileOpenRequests = fileOpenRequests;
+	public FileOpenRequestHandler(@Named("launchEventQueue") BlockingQueue<AppLaunchEvent> launchEventQueue) {
+		this.launchEventQueue = launchEventQueue;
 		try {
 			Desktop.getDesktop().setOpenFileHandler(this::openFiles);
 		} catch (UnsupportedOperationException e) {
@@ -39,7 +44,9 @@ class FileOpenRequestHandler {
 	}
 
 	private void openFiles(final OpenFilesEvent evt) {
-		evt.getFiles().stream().map(File::toPath).forEach(fileOpenRequests::add);
+		Stream<Path> pathsToOpen = evt.getFiles().stream().map(File::toPath);
+		AppLaunchEvent launchEvent = new AppLaunchEvent(pathsToOpen);
+		tryToEnqueueFileOpenRequest(launchEvent);
 	}
 
 	public void handleLaunchArgs(String[] args) {
@@ -48,19 +55,22 @@ class FileOpenRequestHandler {
 
 	// visible for testing
 	void handleLaunchArgs(FileSystem fs, String[] args) {
-		for (String arg : args) {
+		Stream<Path> pathsToOpen = Arrays.stream(args).map(str -> {
 			try {
-				Path path = fs.getPath(arg);
-				tryToEnqueueFileOpenRequest(path);
+				return fs.getPath(str);
 			} catch (InvalidPathException e) {
-				LOG.trace("{} not a valid path", arg);
+				LOG.trace("Argument not a valid path: {}", str);
+				return null;
 			}
-		}
+		}).filter(Objects::nonNull);
+		AppLaunchEvent launchEvent = new AppLaunchEvent(pathsToOpen);
+		tryToEnqueueFileOpenRequest(launchEvent);
 	}
 
-	private void tryToEnqueueFileOpenRequest(Path path) {
-		if (!fileOpenRequests.offer(path)) {
-			LOG.warn("{} could not be enqueued for opening.", path);
+
+	private void tryToEnqueueFileOpenRequest(AppLaunchEvent launchEvent) {
+		if (!launchEventQueue.offer(launchEvent)) {
+			LOG.warn("Could not enqueue application launch event.", launchEvent);
 		}
 	}
 

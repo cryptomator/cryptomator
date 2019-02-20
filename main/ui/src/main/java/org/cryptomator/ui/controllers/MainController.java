@@ -50,6 +50,7 @@ import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.ui.ExitUtil;
 import org.cryptomator.ui.controls.DirectoryListCell;
 import org.cryptomator.ui.l10n.Localization;
+import org.cryptomator.ui.model.AppLaunchEvent;
 import org.cryptomator.ui.model.AutoUnlocker;
 import org.cryptomator.ui.model.UpgradeStrategies;
 import org.cryptomator.ui.model.UpgradeStrategy;
@@ -93,7 +94,7 @@ public class MainController implements ViewController {
 	private final ExitUtil exitUtil;
 	private final Localization localization;
 	private final ExecutorService executorService;
-	private final BlockingQueue<Path> fileOpenRequests;
+	private final BlockingQueue<AppLaunchEvent> launchEventQueue;
 	private final VaultFactory vaultFactoy;
 	private final ViewControllerLoader viewControllerLoader;
 	private final ObjectProperty<ViewController> activeController = new SimpleObjectProperty<>();
@@ -110,11 +111,11 @@ public class MainController implements ViewController {
 	private Subscription subs = Subscription.EMPTY;
 
 	@Inject
-	public MainController(@Named("mainWindow") Stage mainWindow, ExecutorService executorService, @Named("fileOpenRequests") BlockingQueue<Path> fileOpenRequests, ExitUtil exitUtil, Localization localization,
+	public MainController(@Named("mainWindow") Stage mainWindow, ExecutorService executorService, @Named("launchEventQueue") BlockingQueue<AppLaunchEvent> launchEventQueue, ExitUtil exitUtil, Localization localization,
 						  VaultFactory vaultFactoy, ViewControllerLoader viewControllerLoader, UpgradeStrategies upgradeStrategies, VaultList vaults, AutoUnlocker autoUnlocker) {
 		this.mainWindow = mainWindow;
 		this.executorService = executorService;
-		this.fileOpenRequests = fileOpenRequests;
+		this.launchEventQueue = launchEventQueue;
 		this.exitUtil = exitUtil;
 		this.localization = localization;
 		this.vaultFactoy = vaultFactoy;
@@ -249,12 +250,12 @@ public class MainController implements ViewController {
 	}
 
 	private void listenToFileOpenRequests(Stage stage) {
-		Tasks.create(fileOpenRequests::take).onSuccess(path -> {
-			addVault(path, true);
+		Tasks.create(launchEventQueue::take).onSuccess(event -> {
 			stage.setIconified(false);
 			stage.show();
 			stage.toFront();
 			stage.requestFocus();
+			event.getPathsToOpen().forEach(path -> addVault(path, true));
 		}).schedulePeriodically(executorService, Duration.ZERO, Duration.ZERO);
 	}
 

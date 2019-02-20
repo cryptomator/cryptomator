@@ -4,10 +4,10 @@ import dagger.Module;
 import dagger.Provides;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.SettingsProvider;
+import org.cryptomator.ui.model.AppLaunchEvent;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
-import java.nio.file.Path;
 import java.util.Optional;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -23,8 +23,8 @@ class CryptomatorModule {
 
 	@Provides
 	@Singleton
-	@Named("fileOpenRequests")
-	BlockingQueue<Path> provideFileOpenRequests() {
+	@Named("launchEventQueue")
+	BlockingQueue<AppLaunchEvent> provideFileOpenRequests() {
 		return new ArrayBlockingQueue<>(10);
 	}
 
