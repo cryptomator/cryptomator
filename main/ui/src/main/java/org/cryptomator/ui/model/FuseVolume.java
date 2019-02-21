@@ -71,6 +71,7 @@ public class FuseVolume implements Volume {
 
 	private Path createTemporaryMountPoint() throws IOException {
 		Path parent = environment.getMountPointsDir().orElseThrow();
+		Files.createDirectories(parent);
 		String basename = vaultSettings.getId();
 		for (int i = 0; i < MAX_TMPMOUNTPOINT_CREATION_RETRIES; i++) {
 			try {
