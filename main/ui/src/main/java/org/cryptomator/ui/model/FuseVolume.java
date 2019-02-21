@@ -1,6 +1,7 @@
 package org.cryptomator.ui.model;
 
 import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.common.Environment;
 import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.cryptofs.CryptoFileSystem;
 import org.cryptomator.frontend.fuse.mount.CommandFailedException;
@@ -25,21 +26,19 @@ import java.util.Optional;
 public class FuseVolume implements Volume {
 
 	private static final Logger LOG = LoggerFactory.getLogger(FuseVolume.class);
-
-	// TODO: dont use fixed Strings and rather set them in some system environment variables in the cryptomator installer and load those!
-	private static final String DEFAULT_MOUNTROOTPATH_MAC = System.getProperty("user.home") + "/Library/Application Support/Cryptomator";
-	private static final String DEFAULT_MOUNTROOTPATH_LINUX = System.getProperty("user.home") + "/.Cryptomator";
 	private static final int MAX_TMPMOUNTPOINT_CREATION_RETRIES = 10;
 
 	private final VaultSettings vaultSettings;
+	private final Environment environment;
 
 	private Mount fuseMnt;
 	private Path mountPoint;
 	private boolean createdTemporaryMountPoint;
 
 	@Inject
-	public FuseVolume(VaultSettings vaultSettings) {
+	public FuseVolume(VaultSettings vaultSettings, Environment environment) {
 		this.vaultSettings = vaultSettings;
+		this.environment = environment;
 	}
 
 	@Override
@@ -71,7 +70,7 @@ public class FuseVolume implements Volume {
 	}
 
 	private Path createTemporaryMountPoint() throws IOException {
-		Path parent = Paths.get(SystemUtils.IS_OS_MAC ? DEFAULT_MOUNTROOTPATH_MAC : DEFAULT_MOUNTROOTPATH_LINUX);
+		Path parent = environment.getMountPointsDir().orElseThrow();
 		String basename = vaultSettings.getId();
 		for (int i = 0; i < MAX_TMPMOUNTPOINT_CREATION_RETRIES; i++) {
 			try {

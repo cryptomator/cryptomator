@@ -31,6 +31,7 @@ public class Environment {
 		LOG.debug("cryptomator.ipcPortPath: {}", System.getProperty("cryptomator.ipcPortPath"));
 		LOG.debug("cryptomator.keychainPath: {}", System.getProperty("cryptomator.keychainPath"));
 		LOG.debug("cryptomator.logDir: {}", System.getProperty("cryptomator.logDir"));
+		LOG.debug("cryptomator.mountPointsDir: {}", System.getProperty("cryptomator.mountPointsDir"));
 	}
 
 	public Stream<Path> getSettingsPath() {
@@ -49,6 +50,10 @@ public class Environment {
 		return getPath("cryptomator.logDir") //
 				.filter(Predicate.not(Path::isAbsolute)) // property must be a relative path
 				.map(ABSOLUTE_HOME_DIR::resolve); // resolve relative path against HOME
+	}
+
+	public Optional<Path> getMountPointsDir() {
+		return getPath("cryptomator.mountPointsDir").map(this::replaceHomeDir);
 	}
 
 
