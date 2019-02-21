@@ -19,6 +19,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.Optional;
@@ -86,8 +87,10 @@ public class SettingsProvider implements Provider<Settings> {
 			}
 			LOG.info("Settings loaded from {}", path);
 			return Stream.of(settings);
+		} catch (NoSuchFileException e) {
+			return Stream.empty();
 		} catch (IOException e) {
-			LOG.info("Failed to load settings, creating new one.");
+			LOG.warn("Exception while loading settings from " + path, e);
 			return Stream.empty();
 		}
 	}
