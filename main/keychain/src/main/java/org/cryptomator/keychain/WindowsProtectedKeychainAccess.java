@@ -5,30 +5,6 @@
  *******************************************************************************/
 package org.cryptomator.keychain;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Reader;
-import java.io.UncheckedIOException;
-import java.io.Writer;
-import java.lang.reflect.Type;
-import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
-import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
-
-import javax.inject.Inject;
-
 import com.google.common.io.BaseEncoding;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -42,10 +18,35 @@ import com.google.gson.JsonSerializer;
 import com.google.gson.annotations.SerializedName;
 import com.google.gson.reflect.TypeToken;
 import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.common.Environment;
 import org.cryptomator.jni.WinDataProtection;
 import org.cryptomator.jni.WinFunctions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.inject.Inject;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Reader;
+import java.io.UncheckedIOException;
+import java.io.Writer;
+import java.lang.reflect.Type;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -57,24 +58,13 @@ class WindowsProtectedKeychainAccess implements KeychainAccessStrategy {
 			.disableHtmlEscaping().create();
 
 	private final Optional<WinFunctions> winFunctions;
-	private final Path keychainPath;
+	private final List<Path> keychainPaths;
 	private Map<String, KeychainEntry> keychainEntries;
 
 	@Inject
-	public WindowsProtectedKeychainAccess(Optional<WinFunctions> winFunctions) {
+	public WindowsProtectedKeychainAccess(Optional<WinFunctions> winFunctions, Environment environment) {
 		this.winFunctions = winFunctions;
-		String keychainPathProperty = System.getProperty("cryptomator.keychainPath");
-		if (keychainPathProperty == null) {
-			LOG.warn("Windows DataProtection module loaded, but no cryptomator.keychainPath property found.");
-		}
-		if (keychainPathProperty != null) {
-			if (keychainPathProperty.startsWith("~/")) {
-				keychainPathProperty = SystemUtils.USER_HOME + keychainPathProperty.substring(1);
-			}
-			this.keychainPath = FileSystems.getDefault().getPath(keychainPathProperty);
-		} else {
-			this.keychainPath = null;
-		}
+		this.keychainPaths = environment.getKeychainPath().collect(Collectors.toList());
 	}
 
 	private WinDataProtection dataProtection() {
@@ -124,7 +114,7 @@ class WindowsProtectedKeychainAccess implements KeychainAccessStrategy {
 
 	@Override
 	public boolean isSupported() {
-		return SystemUtils.IS_OS_WINDOWS && winFunctions.isPresent() && keychainPath != null;
+		return SystemUtils.IS_OS_WINDOWS && winFunctions.isPresent() && !keychainPaths.isEmpty();
 	}
 
 	private byte[] generateSalt() {
@@ -138,30 +128,44 @@ class WindowsProtectedKeychainAccess implements KeychainAccessStrategy {
 
 	private void loadKeychainEntriesIfNeeded() {
 		if (keychainEntries == null) {
-			loadKeychainEntries();
-		}
-		assert keychainEntries != null;
-	}
-
-	private void loadKeychainEntries() {
-		Type type = new TypeToken<Map<String, KeychainEntry>>() {
-		}.getType();
-		try (InputStream in = Files.newInputStream(keychainPath, StandardOpenOption.READ); //
-				Reader reader = new InputStreamReader(in, UTF_8)) {
-			keychainEntries = GSON.fromJson(reader, type);
-		} catch (JsonParseException | NoSuchFileException e) {
-			LOG.info("Creating new keychain at path {}", keychainPath);
-		} catch (IOException e) {
-			throw new UncheckedIOException("Could not read keychain from path " + keychainPath, e);
+			for (Path keychainPath : keychainPaths) {
+				Optional<Map<String, KeychainEntry>> keychain = loadKeychainEntries(keychainPath);
+				if (keychain.isPresent()) {
+					keychainEntries = keychain.get();
+					break;
+				}
+			}
 		}
 		if (keychainEntries == null) {
+			LOG.info("Unable to load existing keychain file, creating new keychain.");
 			keychainEntries = new HashMap<>();
 		}
 	}
 
+	private Optional<Map<String, KeychainEntry>> loadKeychainEntries(Path keychainPath) {
+		LOG.debug("Attempting to load keychain from {}", keychainPath);
+		Type type = new TypeToken<Map<String, KeychainEntry>>() {
+		}.getType();
+		try (InputStream in = Files.newInputStream(keychainPath, StandardOpenOption.READ); //
+			 Reader reader = new InputStreamReader(in, UTF_8)) {
+			return Optional.of(GSON.fromJson(reader, type));
+		} catch (NoSuchFileException | JsonParseException e) {
+			return Optional.empty();
+		} catch (IOException e) {
+			throw new UncheckedIOException("Could not read keychain from path " + keychainPath, e);
+		}
+	}
+
 	private void saveKeychainEntries() {
+		if (keychainPaths.isEmpty()) {
+			throw new IllegalStateException("Can't save keychain if no keychain path is specified.");
+		}
+		saveKeychainEntries(keychainPaths.get(0));
+	}
+
+	private void saveKeychainEntries(Path keychainPath) {
 		try (OutputStream out = Files.newOutputStream(keychainPath, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING); //
-				Writer writer = new OutputStreamWriter(out, UTF_8)) {
+			 Writer writer = new OutputStreamWriter(out, UTF_8)) {
 			GSON.toJson(keychainEntries, writer);
 		} catch (IOException e) {
 			throw new UncheckedIOException("Could not read keychain from path " + keychainPath, e);
@@ -169,6 +173,7 @@ class WindowsProtectedKeychainAccess implements KeychainAccessStrategy {
 	}
 
 	private static class KeychainEntry {
+
 		@SerializedName("ciphertext")
 		byte[] ciphertext;
 		@SerializedName("salt")
