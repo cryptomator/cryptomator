@@ -1,6 +1,4 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE xml>
-<!-- log config used during unit tests and starts from IDE. For production please specify -Dlogback.configurationFile=/path/to/config -->
 <configuration>
 
 	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">

@@ -2,6 +2,7 @@ package org.cryptomator.common;
 
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -11,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @DisplayName("Environment Variables Test")
@@ -58,6 +60,27 @@ class EnvironmentTest {
 		List<Path> result = env.getKeychainPath().collect(Collectors.toList());
 		MatcherAssert.assertThat(result, Matchers.hasSize(1));
 		MatcherAssert.assertThat(result, Matchers.contains(Paths.get("/home/testuser/AppData/Roaming/Cryptomator/keychain.json")));
+	}
+
+	@Test
+	@DisplayName("cryptomator.logDir=/foo/bar")
+	public void testAbsoluteLogDir() {
+		System.setProperty("cryptomator.logDir", "/foo/bar");
+
+		Optional<Path> logDir = env.getLogDir();
+
+		Assertions.assertFalse(logDir.isPresent());
+	}
+
+	@Test
+	@DisplayName("cryptomator.logDir=foo/bar")
+	public void testRelativeLogDir() {
+		System.setProperty("cryptomator.logDir", "foo/bar");
+
+		Optional<Path> logDir = env.getLogDir();
+
+		Assertions.assertTrue(logDir.isPresent());
+		Assertions.assertEquals(Paths.get("/home/testuser/foo/bar"), logDir.get());
 	}
 
 	@Nested
