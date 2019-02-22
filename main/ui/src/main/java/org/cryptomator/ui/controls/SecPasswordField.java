@@ -15,6 +15,8 @@ import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
 
 import java.nio.CharBuffer;
+import java.text.Normalizer;
+import java.text.Normalizer.Form;
 import java.util.Arrays;
 
 /**
@@ -53,15 +55,38 @@ public class SecPasswordField extends PasswordField {
 		event.consume();
 	}
 
+	/**
+	 * Replaces a range of characters with the given text.
+	 * The text will be normalized to <a href="https://www.unicode.org/glossary/#normalization_form_c">NFC</a>.
+	 *
+	 * @param start The starting index in the range, inclusive. This must be &gt;= 0 and &lt; the end.
+	 * @param end The ending index in the range, exclusive. This is one-past the last character to
+	 * delete (consistent with the String manipulation methods). This must be &gt; the start,
+	 * and &lt;= the length of the text.
+	 * @param text The text that is to replace the range. This must not be null.
+	 * @implNote Internally calls {@link PasswordField#replaceText(int, int, String)} with a dummy String for visual purposes.
+	 */
 	@Override
 	public void replaceText(int start, int end, String text) {
+		String normalizedText = Normalizer.normalize(text, Form.NFC);
 		int removed = end - start;
-		int added = text.length();
-		this.length += added - removed;
-		growContentIfNeeded();
-		text.getChars(0, text.length(), content, start);
+		int added = normalizedText.length();
+		int delta = added - removed;
 
-		String placeholderString = Strings.repeat(PLACEHOLDER, text.length());
+		// ensure sufficient content buffer size
+		int oldLength = length;
+		this.length += delta;
+		growContentIfNeeded();
+
+		// shift existing content
+		if (delta != 0 && start < oldLength) {
+			System.arraycopy(content, end, content, end + delta, oldLength - end);
+		}
+
+		// copy new text to content buffer
+		normalizedText.getChars(0, normalizedText.length(), content, start);
+
+		String placeholderString = Strings.repeat(PLACEHOLDER, normalizedText.length());
 		super.replaceText(start, end, placeholderString);
 	}
 
@@ -69,7 +94,7 @@ public class SecPasswordField extends PasswordField {
 		if (length > content.length) {
 			char[] newContent = new char[length + GROW_BUFFER_SIZE];
 			System.arraycopy(content, 0, newContent, 0, content.length);
-			swipe();
+			swipe(content);
 			this.content = newContent;
 		}
 	}
@@ -80,6 +105,7 @@ public class SecPasswordField extends PasswordField {
 	 * @return A character sequence backed by the SecPasswordField's buffer (not a copy).
 	 * @implNote The CharSequence will not copy the backing char[].
 	 * Therefore any mutation to the SecPasswordField's content will mutate or eventually swipe the returned CharSequence.
+	 * @implSpec The CharSequence is usually in <a href="https://www.unicode.org/glossary/#normalization_form_c">NFC</a> representation (unless NFD-encoded char[] is set via {@link #setPassword(char[])}).
 	 * @see #swipe()
 	 */
 	@Override
@@ -87,6 +113,28 @@ public class SecPasswordField extends PasswordField {
 		return CharBuffer.wrap(content, 0, length);
 	}
 
+	/**
+	 * Convenience method wrapper for {@link #setPassword(char[])}.
+	 *
+	 * @param password
+	 * @see #setPassword(char[])
+	 */
+	public void setPassword(CharSequence password) {
+		char[] buf = new char[password.length()];
+		for (int i = 0; i < password.length(); i++) {
+			buf[i] = password.charAt(i);
+		}
+		setPassword(buf);
+		Arrays.fill(buf, SWIPE_CHAR);
+	}
+
+	/**
+	 * Directly sets the content of this password field to a copy of the given password.
+	 * No conversion whatsoever happens. If you want to normalize the unicode representation of the password,
+	 * do it before calling this method.
+	 *
+	 * @param password
+	 */
 	public void setPassword(char[] password) {
 		swipe();
 		content = Arrays.copyOf(password, password.length);
@@ -100,7 +148,12 @@ public class SecPasswordField extends PasswordField {
 	 * Destroys the stored password by overriding each character with a different character.
 	 */
 	public void swipe() {
-		Arrays.fill(content, SWIPE_CHAR);
+		swipe(content);
+		length = 0;
+	}
+
+	private void swipe(char[] buffer) {
+		Arrays.fill(buffer, SWIPE_CHAR);
 	}
 
 }

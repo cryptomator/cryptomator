@@ -221,6 +221,12 @@
 				<artifactId>hamcrest-all</artifactId>
 				<version>${hamcrest.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>org.openjfx</groupId>
+				<artifactId>javafx-swing</artifactId>
+				<version>${javafx.version}</version>
+				<scope>test</scope>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 

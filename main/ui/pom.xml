@@ -109,5 +109,10 @@
 			<version>1.1</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.openjfx</groupId>
+			<artifactId>javafx-swing</artifactId>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 </project>
