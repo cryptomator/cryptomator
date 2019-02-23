@@ -44,7 +44,6 @@
 
 		<slf4j.version>1.7.25</slf4j.version>
 		<logback.version>1.2.3</logback.version>
-		<janino.version>3.0.12</janino.version>
 
 		<junit.jupiter.version>5.4.0</junit.jupiter.version>
 		<mockito.version>2.24.0</mockito.version>
@@ -161,11 +160,6 @@
 				<groupId>ch.qos.logback</groupId>
 				<artifactId>logback-classic</artifactId>
 				<version>${logback.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.codehaus.janino</groupId>
-				<artifactId>janino</artifactId>
-				<version>${janino.version}</version>
 			</dependency>
 
 			<!-- Apache Commons -->

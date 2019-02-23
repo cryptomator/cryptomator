@@ -47,21 +47,17 @@ public class Environment {
 	}
 
 	public Optional<Path> getLogDir() {
-		return getPath("cryptomator.logDir") //
-				.filter(Predicate.not(Path::isAbsolute)) // property must be a relative path
-				.map(ABSOLUTE_HOME_DIR::resolve); // resolve relative path against HOME
+		return getPath("cryptomator.logDir").map(this::replaceHomeDir);
 	}
 
 	public Optional<Path> getMountPointsDir() {
 		return getPath("cryptomator.mountPointsDir").map(this::replaceHomeDir);
 	}
 
-
 	private Optional<Path> getPath(String propertyName) {
 		String value = System.getProperty(propertyName);
 		return Optional.ofNullable(value).map(Paths::get);
 	}
-
 
 	// visible for testing
 	Stream<Path> getPaths(String propertyName) {
