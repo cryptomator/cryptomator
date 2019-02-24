@@ -69,13 +69,13 @@ class EnvironmentTest {
 
 		Optional<Path> logDir = env.getLogDir();
 
-		Assertions.assertFalse(logDir.isPresent());
+		Assertions.assertTrue(logDir.isPresent());
 	}
 
 	@Test
 	@DisplayName("cryptomator.logDir=foo/bar")
 	public void testRelativeLogDir() {
-		System.setProperty("cryptomator.logDir", "foo/bar");
+		System.setProperty("cryptomator.logDir", "~/foo/bar");
 
 		Optional<Path> logDir = env.getLogDir();
 
