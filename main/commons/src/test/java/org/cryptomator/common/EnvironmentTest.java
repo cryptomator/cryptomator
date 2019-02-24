@@ -73,7 +73,7 @@ class EnvironmentTest {
 	}
 
 	@Test
-	@DisplayName("cryptomator.logDir=foo/bar")
+	@DisplayName("cryptomator.logDir=~/foo/bar")
 	public void testRelativeLogDir() {
 		System.setProperty("cryptomator.logDir", "~/foo/bar");
 
