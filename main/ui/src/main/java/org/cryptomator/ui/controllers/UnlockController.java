@@ -106,7 +106,7 @@ public class UnlockController implements ViewController {
 	private Button unlockButton;
 
 	@FXML
-	private Label successMessage;
+	private Text messageText;
 
 	@FXML
 	private CheckBox savePassword;
@@ -136,7 +136,7 @@ public class UnlockController implements ViewController {
 	private ProgressIndicator progressIndicator;
 
 	@FXML
-	private Text messageText;
+	private Text progressText;
 
 	@FXML
 	private Hyperlink downloadsPageLink;
@@ -200,8 +200,8 @@ public class UnlockController implements ViewController {
 		advancedOptions.setVisible(false);
 		advancedOptionsButton.setText(localization.getString("unlock.button.advancedOptions.show"));
 		progressIndicator.setVisible(false);
-		successMessage.setVisible(state.successMessage().isPresent());
-		state.successMessage().map(localization::getString).ifPresent(successMessage::setText);
+		progressText.setText(null);
+		state.successMessage().map(localization::getString).ifPresent(messageText::setText);
 		if (SystemUtils.IS_OS_WINDOWS) {
 			winDriveLetter.valueProperty().removeListener(driveLetterChangeListener);
 			winDriveLetter.getItems().clear();
@@ -212,7 +212,6 @@ public class UnlockController implements ViewController {
 			chooseSelectedDriveLetter();
 		}
 		downloadsPageLink.setVisible(false);
-		messageText.setText(null);
 		mountName.setText(vault.getMountName());
 		savePassword.setSelected(false);
 		// auto-fill pw from keychain:
@@ -298,7 +297,7 @@ public class UnlockController implements ViewController {
 
 	@FXML
 	private void didClickAdvancedOptionsButton(ActionEvent event) {
-		successMessage.setVisible(false);
+		messageText.setText(null);
 		advancedOptions.setVisible(!advancedOptions.isVisible());
 		if (advancedOptions.isVisible()) {
 			advancedOptionsButton.setText(localization.getString("unlock.button.advancedOptions.hide"));
@@ -431,11 +430,12 @@ public class UnlockController implements ViewController {
 	private void didClickUnlockButton(ActionEvent event) {
 		advancedOptions.setDisable(true);
 		advancedOptions.setVisible(false);
+		advancedOptionsButton.setText(localization.getString("unlock.button.advancedOptions.show"));
 		progressIndicator.setVisible(true);
 
 		CharSequence password = passwordField.getCharacters();
 		Tasks.create(() -> {
-			messageText.setText(localization.getString("unlock.pendingMessage.unlocking"));
+			progressText.setText(localization.getString("unlock.pendingMessage.unlocking"));
 			vault.unlock(password);
 			if (keychainAccess.isPresent() && savePassword.isSelected()) {
 				keychainAccess.get().storePassphrase(vault.getId(), password);
@@ -478,6 +478,7 @@ public class UnlockController implements ViewController {
 			}
 			advancedOptions.setDisable(false);
 			progressIndicator.setVisible(false);
+			progressText.setText(null);
 		}).runOnce(executor);
 	}
 
