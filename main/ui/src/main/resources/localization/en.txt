@@ -22,8 +22,8 @@ main.createVault.nonEmptyDir.content=The selected directory already contains fil
 main.gracefulShutdown.dialog.title=Locking vault(s) failed
 main.gracefulShutdown.dialog.header=Vault(s) in use
 main.gracefulShutdown.dialog.content=One or more vaults are still in use by other programs. Please close them to allow Cryptomator to shut down properly, then try again.\n\nIf this doesn't work, Cryptomator can shut down forcefully, but this can incur data loss and is not recommended.
-main.gracefulShutdown.button.tryAgain=Try again
-main.gracefulShutdown.button.forceShutdown=Force shutdown
+main.gracefulShutdown.button.tryAgain=Try Again
+main.gracefulShutdown.button.forceShutdown=Force Shutdown
 
 # welcome.fxml
 welcome.checkForUpdates.label.currentlyChecking=Checking for Updates...
@@ -92,10 +92,9 @@ unlock.errorMessage.unlockFailed=Unlock failed. See log file for details.
 unlock.errorMessage.unsupportedVersion.vaultOlderThanSoftware=Unsupported vault. This vault has been created with an older version of Cryptomator.
 unlock.errorMessage.unsupportedVersion.softwareOlderThanVault=Unsupported vault. This vault has been created with a newer version of Cryptomator.
 unlock.errorMessage.unauthenticVersionMac=Could not authenticate version MAC.
-unlock.messageLabel.startServerFailed=Starting WebDAV server failed.
 unlock.successLabel.vaultCreated=Vault was successfully created.
 unlock.successLabel.passwordChanged=Password was successfully changed.
-unlock.successLabel.upgraded=Cryptomator was successfully upgraded.
+unlock.successLabel.upgraded=Vault was successfully upgraded.
 
 unlock.failedDialog.title=Unlock failed
 unlock.failedDialog.header=Unlock failed
@@ -115,7 +114,6 @@ changePassword.errorMessage.decryptionFailed=Decryption failed
 # unlocked.fxml
 unlocked.button.lock=Lock Vault
 unlocked.moreOptions.reveal=Reveal Drive
-unlocked.label.mountFailed=Connecting drive failed
 unlocked.label.revealFailed=Command failed
 unlocked.label.unmountFailed=Ejecting drive failed
 unlocked.label.statsEncrypted=encrypted
