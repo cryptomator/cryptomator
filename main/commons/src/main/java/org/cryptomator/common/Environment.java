@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
@@ -27,11 +28,18 @@ public class Environment {
 
 	@Inject
 	public Environment() {
+		LOG.debug("user.language: {}", System.getProperty("user.language"));
+		LOG.debug("user.region: {}", System.getProperty("user.region"));
+		LOG.debug("logback.configurationFile: {}", System.getProperty("logback.configurationFile"));
 		LOG.debug("cryptomator.settingsPath: {}", System.getProperty("cryptomator.settingsPath"));
 		LOG.debug("cryptomator.ipcPortPath: {}", System.getProperty("cryptomator.ipcPortPath"));
 		LOG.debug("cryptomator.keychainPath: {}", System.getProperty("cryptomator.keychainPath"));
 		LOG.debug("cryptomator.logDir: {}", System.getProperty("cryptomator.logDir"));
 		LOG.debug("cryptomator.mountPointsDir: {}", System.getProperty("cryptomator.mountPointsDir"));
+	}
+
+	public boolean useCustomLogbackConfig() {
+		return getPath("logback.configurationFile").map(Files::exists).orElse(false);
 	}
 
 	public Stream<Path> getSettingsPath() {

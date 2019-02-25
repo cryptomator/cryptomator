@@ -120,29 +120,37 @@ public class LoggerModule {
 	@Singleton
 	@Named("initLogging")
 	Runnable provideLogbackInitializer(LoggerContext context, //
-										 @Named("stdoutAppender") Appender<ILoggingEvent> stdout, //
-										 @Named("upgradeAppender") Appender<ILoggingEvent> upgrade, //
-										 @Named("fileAppender") Appender<ILoggingEvent> file) {
-		return () -> {
-			context.reset();
+									   Environment environment, //
+									   @Named("stdoutAppender") Appender<ILoggingEvent> stdout, //
+									   @Named("upgradeAppender") Appender<ILoggingEvent> upgrade, //
+									   @Named("fileAppender") Appender<ILoggingEvent> file) {
+		if (environment.useCustomLogbackConfig()) {
+			return () -> {
+				Logger root = context.getLogger(Logger.ROOT_LOGGER_NAME);
+				root.info("Using external logback configuration file.");
+			};
+		} else {
+			return () -> {
+				context.reset();
 
-			// configure root logger:
-			Logger root = context.getLogger(Logger.ROOT_LOGGER_NAME);
-			root.setLevel(ROOT_LOG_LEVEL);
-			root.addAppender(stdout);
-			root.addAppender(file);
+				// configure root logger:
+				Logger root = context.getLogger(Logger.ROOT_LOGGER_NAME);
+				root.setLevel(ROOT_LOG_LEVEL);
+				root.addAppender(stdout);
+				root.addAppender(file);
 
-			// configure root logger:
-			Logger uprades = context.getLogger("org.cryptomator.ui.model");
-			uprades.setLevel(Level.DEBUG);
-			uprades.addAppender(stdout);
-			uprades.addAppender(upgrade);
+				// configure root logger:
+				Logger uprades = context.getLogger("org.cryptomator.ui.model");
+				uprades.setLevel(Level.DEBUG);
+				uprades.addAppender(stdout);
+				uprades.addAppender(upgrade);
 
-			// add shutdown hook
-			DelayingShutdownHook shutdownHook = new DelayingShutdownHook();
-			shutdownHook.setContext(context);
-			shutdownHook.setDelay(Duration.buildByMilliseconds(SHUTDOWN_DELAY_MS));
-		};
+				// add shutdown hook
+				DelayingShutdownHook shutdownHook = new DelayingShutdownHook();
+				shutdownHook.setContext(context);
+				shutdownHook.setDelay(Duration.buildByMilliseconds(SHUTDOWN_DELAY_MS));
+			};
+		}
 	}
 
 
