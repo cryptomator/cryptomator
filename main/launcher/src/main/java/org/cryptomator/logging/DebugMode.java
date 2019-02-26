@@ -8,73 +8,52 @@ package org.cryptomator.logging;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
-import org.cryptomator.common.FxApplicationScoped;
+import javafx.beans.value.ObservableValue;
 import org.cryptomator.common.settings.Settings;
-import org.slf4j.ILoggerFactory;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.util.Collection;
-
-import static java.util.Arrays.asList;
+import java.util.Map;
 
 @Singleton
 public class DebugMode {
 
 	private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(DebugMode.class);
 
-	private static final Collection<LoggerUpgrade> LOGGER_UPGRADES = asList( //
-			loggerUpgrade(org.slf4j.Logger.ROOT_LOGGER_NAME, Level.INFO), //
-			loggerUpgrade("org.cryptomator", Level.TRACE), //
-			loggerUpgrade("org.eclipse.jetty.server.HttpChannel", Level.DEBUG) //
-	);
-
 	private final Settings settings;
+	private final LoggerContext context;
 
 	@Inject
-	public DebugMode(Settings settings) {
+	public DebugMode(Settings settings, LoggerContext context) {
 		this.settings = settings;
+		this.context = context;
 	}
 
 	public void initialize() {
-		if (settings.debugMode().get()) {
-			enable();
-			LOG.debug("Debug mode initialized");
-		}
+		setLogLevels(settings.debugMode().get());
+		settings.debugMode().addListener(this::logLevelChanged);
 	}
 
-	private void enable() {
-		ILoggerFactory loggerFactory = LoggerFactory.getILoggerFactory();
-		if (loggerFactory instanceof LoggerContext) {
-			LoggerContext context = (LoggerContext) loggerFactory;
-			LOGGER_UPGRADES.forEach(loggerUpgrade -> loggerUpgrade.execute(context));
+	private void logLevelChanged(@SuppressWarnings("unused") ObservableValue<? extends Boolean> observable, @SuppressWarnings("unused") Boolean oldValue, Boolean newValue) {
+		setLogLevels(newValue);
+	}
+
+	private void setLogLevels(boolean debugMode) {
+		if (debugMode) {
+			setLogLevels(LoggerModule.DEBUG_LOG_LEVELS);
+			LOG.debug("Debug mode enabled");
 		} else {
-			LOG.warn("SLF4J not bound to Logback.");
+			LOG.debug("Debug mode disabled");
+			setLogLevels(LoggerModule.DEFAULT_LOG_LEVELS);
 		}
 	}
 
-	private static LoggerUpgrade loggerUpgrade(String loggerName, Level minLevel) {
-		return new LoggerUpgrade(loggerName, minLevel);
-	}
-
-	private static class LoggerUpgrade {
-
-		private final Level level;
-		private final String loggerName;
-
-		public LoggerUpgrade(String loggerName, Level minLevel) {
-			this.loggerName = loggerName;
-			this.level = minLevel;
+	private void setLogLevels(Map<String, Level> logLevels) {
+		for (Map.Entry<String, Level> loglevel : logLevels.entrySet()) {
+			Logger logger = context.getLogger(loglevel.getKey());
+			logger.setLevel(loglevel.getValue());
 		}
-
-		public void execute(LoggerContext context) {
-			Logger logger = context.getLogger(loggerName);
-			if (logger != null && logger.getEffectiveLevel().isGreaterOrEqual(level)) {
-				logger.setLevel(level);
-			}
-		}
-
 	}
 
 }

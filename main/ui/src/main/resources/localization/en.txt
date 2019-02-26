@@ -130,8 +130,7 @@ settings.webdav.port.label=WebDAV Port
 settings.webdav.port.prompt=0 = Choose automatically
 settings.webdav.port.apply=Apply
 settings.webdav.prefGvfsScheme.label=WebDAV Scheme
-settings.debugMode.label=Debug Mode *
-settings.requiresRestartLabel=* Cryptomator needs to restart
+settings.debugMode.label=Debug Mode
 settings.volume.label=Preferred Volume Type
 settings.volume.webdav=WebDAV
 settings.volume.fuse=FUSE

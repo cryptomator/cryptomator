@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import java.nio.file.Path;
+import java.util.Map;
 
 @Module
 public class LoggerModule {
@@ -32,8 +33,15 @@ public class LoggerModule {
 	private static final int LOGFILE_ROLLING_MIN = 1;
 	private static final int LOGFILE_ROLLING_MAX = 9;
 	private static final double SHUTDOWN_DELAY_MS = 100;
-	private static final Level ROOT_LOG_LEVEL = Level.INFO;
 	private static final String LOG_PATTERN = "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n";
+	static final Map<String, Level> DEFAULT_LOG_LEVELS = Map.of( //
+			Logger.ROOT_LOGGER_NAME, Level.INFO, //
+			"org.cryptomator", Level.INFO //
+	);
+	static final Map<String, Level> DEBUG_LOG_LEVELS = Map.of( //
+			Logger.ROOT_LOGGER_NAME, Level.INFO, //
+			"org.cryptomator", Level.TRACE //
+	);
 
 	@Provides
 	@Singleton
@@ -133,17 +141,21 @@ public class LoggerModule {
 			return () -> {
 				context.reset();
 
-				// configure root logger:
-				Logger root = context.getLogger(Logger.ROOT_LOGGER_NAME);
-				root.setLevel(ROOT_LOG_LEVEL);
-				root.addAppender(stdout);
-				root.addAppender(file);
+				// configure loggers:
+				for (Map.Entry<String, Level> loglevel : DEFAULT_LOG_LEVELS.entrySet()) {
+					Logger logger = context.getLogger(loglevel.getKey());
+					logger.setLevel(loglevel.getValue());
+					logger.setAdditive(false);
+					logger.addAppender(stdout);
+					logger.addAppender(file);
+				}
 
-				// configure root logger:
-				Logger uprades = context.getLogger("org.cryptomator.ui.model");
-				uprades.setLevel(Level.DEBUG);
-				uprades.addAppender(stdout);
-				uprades.addAppender(upgrade);
+				// configure upgrade logger:
+				Logger upgrades = context.getLogger("org.cryptomator.ui.model.upgrade");
+				upgrades.setLevel(Level.DEBUG);
+				upgrades.addAppender(stdout);
+				upgrades.addAppender(upgrade);
+				upgrades.setAdditive(false);
 
 				// add shutdown hook
 				DelayingShutdownHook shutdownHook = new DelayingShutdownHook();

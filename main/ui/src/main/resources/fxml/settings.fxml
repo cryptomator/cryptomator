@@ -56,5 +56,4 @@
 
 		</children>
 	</GridPane>
-	<Label VBox.vgrow="NEVER" text="%settings.requiresRestartLabel" alignment="CENTER" cacheShape="true" cache="true" />
 </VBox>			
