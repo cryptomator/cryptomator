@@ -1,10 +1,13 @@
-package org.cryptomator.ui.model;
+package org.cryptomator.ui.model.upgrade;
 
 import com.google.common.jimfs.Configuration;
 import com.google.common.jimfs.Jimfs;
 import org.cryptomator.ui.l10n.Localization;
 import org.cryptomator.ui.l10n.LocalizationMock;
-import org.cryptomator.ui.model.UpgradeStrategy.UpgradeFailedException;
+import org.cryptomator.ui.model.Vault;
+import org.cryptomator.ui.model.upgrade.UpgradeStrategy;
+import org.cryptomator.ui.model.upgrade.UpgradeStrategy.UpgradeFailedException;
+import org.cryptomator.ui.model.upgrade.UpgradeVersion3to4;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;

@@ -3,9 +3,10 @@
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the accompanying LICENSE file.
  *******************************************************************************/
-package org.cryptomator.ui.model;
+package org.cryptomator.ui.model.upgrade;
 
 import org.cryptomator.common.FxApplicationScoped;
+import org.cryptomator.ui.model.Vault;
 
 import javax.inject.Inject;
 import java.util.Arrays;

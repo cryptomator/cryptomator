@@ -3,7 +3,7 @@
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the accompanying LICENSE file.
  *******************************************************************************/
-package org.cryptomator.ui.model;
+package org.cryptomator.ui.model.upgrade;
 
 import org.cryptomator.common.FxApplicationScoped;
 import org.cryptomator.cryptofs.migration.Migrators;
@@ -12,6 +12,7 @@ import org.cryptomator.cryptolib.Cryptors;
 import org.cryptomator.cryptolib.api.Cryptor;
 import org.cryptomator.cryptolib.api.InvalidPassphraseException;
 import org.cryptomator.ui.l10n.Localization;
+import org.cryptomator.ui.model.Vault;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
