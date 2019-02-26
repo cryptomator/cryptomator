@@ -2,7 +2,7 @@
   <configuration default="false" name="Cryptomator macOS" type="Application" factoryName="Application">
     <option name="MAIN_CLASS_NAME" value="org.cryptomator.launcher.Cryptomator" />
     <module name="launcher" />
-    <option name="VM_PARAMETERS" value="-Duser.language=en -Dcryptomator.settingsPath=&quot;~/Library/Application Support/Cryptomator/settings.json&quot; -Dcryptomator.ipcPortPath=&quot;~/Library/Application Support/Cryptomator/ipcPort.bin&quot; -Dcryptomator.logDir=&quot;~/Library/Logs/Cryptomator&quot;" />
+    <option name="VM_PARAMETERS" value="-Duser.language=en -Dcryptomator.settingsPath=&quot;~/Library/Application Support/Cryptomator/settings.json&quot; -Dcryptomator.ipcPortPath=&quot;~/Library/Application Support/Cryptomator/ipcPort.bin&quot; -Dcryptomator.logDir=&quot;~/Library/Logs/Cryptomator&quot; -Dcryptomator.mountPointsDir=&quot;~/Library/Application Support/Cryptomator&quot;" />
     <option name="WORKING_DIRECTORY" value="$MAVEN_REPOSITORY$" />
     <extension name="coverage">
       <pattern>
