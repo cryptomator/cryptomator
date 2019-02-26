@@ -32,7 +32,6 @@ public class LoggerModule {
 	private static final String LOGFILE_ROLLING_PATTERN = "cryptomator%i.log";
 	private static final int LOGFILE_ROLLING_MIN = 1;
 	private static final int LOGFILE_ROLLING_MAX = 9;
-	private static final double SHUTDOWN_DELAY_MS = 100;
 	private static final String LOG_PATTERN = "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n";
 	static final Map<String, Level> DEFAULT_LOG_LEVELS = Map.of( //
 			Logger.ROOT_LOGGER_NAME, Level.INFO, //
@@ -45,7 +44,7 @@ public class LoggerModule {
 
 	@Provides
 	@Singleton
-	LoggerContext provideLoggerContext() {
+	static LoggerContext provideLoggerContext() {
 		ILoggerFactory loggerFactory = LoggerFactory.getILoggerFactory();
 		if (loggerFactory instanceof LoggerContext) {
 			return (LoggerContext) loggerFactory;
@@ -56,7 +55,7 @@ public class LoggerModule {
 
 	@Provides
 	@Singleton
-	PatternLayoutEncoder provideLayoutEncoder(LoggerContext context) {
+	static PatternLayoutEncoder provideLayoutEncoder(LoggerContext context) {
 		PatternLayoutEncoder ple = new PatternLayoutEncoder();
 		ple.setPattern(LOG_PATTERN);
 		ple.setContext(context);
@@ -67,7 +66,7 @@ public class LoggerModule {
 	@Provides
 	@Singleton
 	@Named("stdoutAppender")
-	Appender<ILoggingEvent> provideStdoutAppender(LoggerContext context, PatternLayoutEncoder encoder) {
+	static Appender<ILoggingEvent> provideStdoutAppender(LoggerContext context, PatternLayoutEncoder encoder) {
 		ConsoleAppender<ILoggingEvent> appender = new ConsoleAppender<>();
 		appender.setContext(context);
 		appender.setEncoder(encoder);
@@ -78,7 +77,7 @@ public class LoggerModule {
 	@Provides
 	@Singleton
 	@Named("fileAppender")
-	Appender<ILoggingEvent> provideFileAppender(LoggerContext context, PatternLayoutEncoder encoder, Environment environment) {
+	static Appender<ILoggingEvent> provideFileAppender(LoggerContext context, PatternLayoutEncoder encoder, Environment environment) {
 		if (environment.getLogDir().isPresent()) {
 			Path logDir = environment.getLogDir().get();
 			RollingFileAppender<ILoggingEvent> appender = new RollingFileAppender<>();
@@ -109,7 +108,7 @@ public class LoggerModule {
 	@Provides
 	@Singleton
 	@Named("upgradeAppender")
-	Appender<ILoggingEvent> provideUpgradeAppender(LoggerContext context, PatternLayoutEncoder encoder, Environment environment) {
+	static Appender<ILoggingEvent> provideUpgradeAppender(LoggerContext context, PatternLayoutEncoder encoder, Environment environment) {
 		if (environment.getLogDir().isPresent()) {
 			FileAppender<ILoggingEvent> appender = new FileAppender<>();
 			appender.setFile(environment.getLogDir().get().resolve(UPGRADE_FILENAME).toString());
@@ -121,47 +120,6 @@ public class LoggerModule {
 			NOPAppender appender = new NOPAppender<>();
 			appender.setContext(context);
 			return appender;
-		}
-	}
-
-	@Provides
-	@Singleton
-	@Named("initLogging")
-	Runnable provideLogbackInitializer(LoggerContext context, //
-									   Environment environment, //
-									   @Named("stdoutAppender") Appender<ILoggingEvent> stdout, //
-									   @Named("upgradeAppender") Appender<ILoggingEvent> upgrade, //
-									   @Named("fileAppender") Appender<ILoggingEvent> file) {
-		if (environment.useCustomLogbackConfig()) {
-			return () -> {
-				Logger root = context.getLogger(Logger.ROOT_LOGGER_NAME);
-				root.info("Using external logback configuration file.");
-			};
-		} else {
-			return () -> {
-				context.reset();
-
-				// configure loggers:
-				for (Map.Entry<String, Level> loglevel : DEFAULT_LOG_LEVELS.entrySet()) {
-					Logger logger = context.getLogger(loglevel.getKey());
-					logger.setLevel(loglevel.getValue());
-					logger.setAdditive(false);
-					logger.addAppender(stdout);
-					logger.addAppender(file);
-				}
-
-				// configure upgrade logger:
-				Logger upgrades = context.getLogger("org.cryptomator.ui.model.upgrade");
-				upgrades.setLevel(Level.DEBUG);
-				upgrades.addAppender(stdout);
-				upgrades.addAppender(upgrade);
-				upgrades.setAdditive(false);
-
-				// add shutdown hook
-				DelayingShutdownHook shutdownHook = new DelayingShutdownHook();
-				shutdownHook.setContext(context);
-				shutdownHook.setDelay(Duration.buildByMilliseconds(SHUTDOWN_DELAY_MS));
-			};
 		}
 	}
 

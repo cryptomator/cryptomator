@@ -5,8 +5,12 @@
  *******************************************************************************/
 package org.cryptomator.launcher;
 
+import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.stage.Stage;
 import org.cryptomator.common.FxApplicationScoped;
 import org.cryptomator.ui.UiModule;
 
@@ -14,13 +18,28 @@ import javax.inject.Named;
 import java.util.function.Consumer;
 
 @Module(includes = {UiModule.class})
-class FxApplicationModule {
+abstract class FxApplicationModule {
 
 	@Provides
 	@FxApplicationScoped
 	@Named("shutdownTaskScheduler")
-	Consumer<Runnable> provideShutdownTaskScheduler() {
+	static Consumer<Runnable> provideShutdownTaskScheduler() {
 		return CleanShutdownPerformer::scheduleShutdownTask;
 	}
+
+	@Provides
+	@FxApplicationScoped
+	@Named("mainWindow")
+	static Stage providePrimaryStage() {
+		Stage stage = new Stage();
+		stage.setMinWidth(652.0);
+		stage.setMinHeight(440.0);
+		return stage;
+	}
+
+	@Binds
+	@FxApplicationScoped
+	abstract Application bindApplication(FxApplication application);
+
 
 }

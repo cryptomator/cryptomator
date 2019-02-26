@@ -1,5 +1,6 @@
 package org.cryptomator.ui.controls;
 
+import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
@@ -22,10 +23,7 @@ class SecPasswordFieldTest {
 	static void initJavaFx() throws InterruptedException {
 		Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
 		final CountDownLatch latch = new CountDownLatch(1);
-		SwingUtilities.invokeLater(() -> {
-			new JFXPanel(); // initializes JavaFX environment
-			latch.countDown();
-		});
+		Platform.startup(latch::countDown);
 
 		if (!latch.await(5L, TimeUnit.SECONDS)) {
 			throw new ExceptionInInitializerError();

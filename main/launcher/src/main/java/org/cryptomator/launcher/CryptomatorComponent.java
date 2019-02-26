@@ -14,16 +14,8 @@ import java.util.Optional;
 @Component(modules = {CryptomatorModule.class, CommonsModule.class, LoggerModule.class})
 public interface CryptomatorComponent {
 
-	@Named("initLogging")
-	Runnable initLogging();
+	Cryptomator application();
 
-	DebugMode debugMode();
-
-	IpcFactory ipcFactory();
-
-	@Named("applicationVersion")
-	Optional<String> applicationVersion();
-
-	FxApplicationComponent.Builder fxApplicationComponent();
+	FxApplicationComponent fxApplicationComponent();
 
 }

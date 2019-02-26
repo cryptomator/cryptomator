@@ -11,27 +11,35 @@ import javax.inject.Singleton;
 import java.util.Optional;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CountDownLatch;
 
 @Module
 class CryptomatorModule {
 
 	@Provides
 	@Singleton
-	Settings provideSettings(SettingsProvider settingsProvider) {
+	@Named("shutdownLatch")
+	static CountDownLatch provideShutdownLatch() {
+		return new CountDownLatch(1);
+	}
+
+	@Provides
+	@Singleton
+	static Settings provideSettings(SettingsProvider settingsProvider) {
 		return settingsProvider.get();
 	}
 
 	@Provides
 	@Singleton
 	@Named("launchEventQueue")
-	BlockingQueue<AppLaunchEvent> provideFileOpenRequests() {
+	static BlockingQueue<AppLaunchEvent> provideFileOpenRequests() {
 		return new ArrayBlockingQueue<>(10);
 	}
 
 	@Provides
 	@Singleton
 	@Named("applicationVersion")
-	Optional<String> provideApplicationVersion() {
+	static Optional<String> provideApplicationVersion() {
 		return Optional.ofNullable(Cryptomator.class.getPackage().getImplementationVersion());
 	}
 
