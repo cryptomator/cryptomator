@@ -7,7 +7,7 @@
 
 app.name=Cryptomator
 
-ctrl.secPasswordField.nonPrintableChars=Password contains control characters. Recommendation: Remove them to ensure compatibility with other clients.
+ctrl.secPasswordField.nonPrintableChars=Password contains control characters.\nRecommendation: Remove them to ensure compatibility with other clients.
 ctrl.secPasswordField.capsLocked=Caps Lock is activated.
 
 # main.fxml

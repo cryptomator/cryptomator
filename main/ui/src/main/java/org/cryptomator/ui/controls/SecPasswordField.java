@@ -9,9 +9,9 @@
 package org.cryptomator.ui.controls;
 
 import com.google.common.base.Strings;
+import javafx.beans.NamedArg;
 import javafx.beans.Observable;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.control.OverrunStyle;
@@ -22,6 +22,9 @@ import javafx.scene.input.Dragboard;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.TransferMode;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 
 import java.awt.Toolkit;
 import java.nio.CharBuffer;
@@ -40,19 +43,31 @@ public class SecPasswordField extends PasswordField {
 	private static final int INITIAL_BUFFER_SIZE = 50;
 	private static final int GROW_BUFFER_SIZE = 50;
 	private static final String PLACEHOLDER = "*";
+	private static final double PADDING = 2.0;
+	private static final double INDICATOR_PADDING = 4.0;
+	private static final Color INDICATOR_COLOR = new Color(0.901, 0.494, 0.133, 1.0);
 
 	private final Tooltip tooltip = new Tooltip();
 	private final Label indicator = new Label();
-	private final StringProperty nonPrintableCharsWarning = new SimpleStringProperty();
-	private final StringProperty capslockWarning = new SimpleStringProperty();
+	private final String nonPrintableCharsWarning;
+	private final String capslockWarning;
 
 	private char[] content = new char[INITIAL_BUFFER_SIZE];
 	private int length = 0;
 
 	public SecPasswordField() {
+		this("", "");
+	}
+
+	public SecPasswordField(@NamedArg("nonPrintableCharsWarning") String nonPrintableCharsWarning, @NamedArg("capslockWarning") String capslockWarning) {
+		this.nonPrintableCharsWarning = nonPrintableCharsWarning;
+		this.capslockWarning = capslockWarning;
+		indicator.setPadding(new Insets(PADDING, INDICATOR_PADDING, PADDING, INDICATOR_PADDING));
 		indicator.setAlignment(Pos.CENTER_RIGHT);
 		indicator.setMouseTransparent(true);
 		indicator.setTextOverrun(OverrunStyle.CLIP);
+		indicator.setTextFill(INDICATOR_COLOR);
+		indicator.setFont(Font.font(indicator.getFont().getFamily(), 15.0));
 		this.getChildren().add(indicator);
 		this.setTooltip(tooltip);
 		this.addEventHandler(DragEvent.DRAG_OVER, this::handleDragOver);
@@ -64,9 +79,8 @@ public class SecPasswordField extends PasswordField {
 	@Override
 	protected void layoutChildren() {
 		super.layoutChildren();
-		indicator.resize(50.0, getHeight());
-		indicator.relocate(getWidth() - indicator.getWidth(), 0);
-		indicator.layout();
+		indicator.relocate(0.0, 0.0);
+		indicator.resize(getWidth(), getHeight());
 	}
 
 	private void handleDragOver(DragEvent event) {
@@ -100,20 +114,29 @@ public class SecPasswordField extends PasswordField {
 		StringBuilder indicatorSb = new StringBuilder();
 		if (containsNonPrintableCharacters()) {
 			indicatorSb.append('⚠');
-			tooltipSb.append(nonPrintableCharsWarning.get()).append('\n');
+			tooltipSb.append("- ").append(nonPrintableCharsWarning).append('\n');
 		}
 		// AWT code needed until https://bugs.openjdk.java.net/browse/JDK-8090882 is closed:
 		if (focused && Toolkit.getDefaultToolkit().getLockingKeyState(java.awt.event.KeyEvent.VK_CAPS_LOCK)) {
 			indicatorSb.append('⇪');
-			tooltipSb.append(capslockWarning.get()).append('\n');
+			tooltipSb.append("- ").append(capslockWarning).append('\n');
 		}
 		indicator.setText(indicatorSb.toString());
+		if (!indicator.getText().isEmpty()) {
+			setPadding(new Insets(PADDING, getIndicatorWidth(), PADDING, PADDING));
+		} else {
+			setPadding(new Insets(PADDING));
+		}
 		tooltip.setText(tooltipSb.toString());
 		if (tooltip.getText().isEmpty()) {
 			setTooltip(null);
 		} else {
 			setTooltip(tooltip);
 		}
+	}
+
+	private double getIndicatorWidth() {
+		return new Text(indicator.getText()).getLayoutBounds().getWidth() + INDICATOR_PADDING * 2.0;
 	}
 
 	/**
@@ -230,24 +253,6 @@ public class SecPasswordField extends PasswordField {
 
 	private void swipe(char[] buffer) {
 		Arrays.fill(buffer, SWIPE_CHAR);
-	}
-
-	/* Getter/Setter */
-
-	public void setNonPrintableCharsWarning(String value) {
-		nonPrintableCharsWarning.set(value);
-	}
-
-	public String getNonPrintableCharsWarning() {
-		return nonPrintableCharsWarning.get();
-	}
-
-	public void setCapslockWarning(String value) {
-		capslockWarning.set(value);
-	}
-
-	public String getCapslockWarning() {
-		return capslockWarning.get();
 	}
 
 }
