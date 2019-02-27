@@ -9,11 +9,21 @@
 package org.cryptomator.ui.controls;
 
 import com.google.common.base.Strings;
+import javafx.beans.Observable;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+import javafx.geometry.Pos;
+import javafx.scene.control.Label;
+import javafx.scene.control.OverrunStyle;
 import javafx.scene.control.PasswordField;
+import javafx.scene.control.Tooltip;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.TransferMode;
 
+import java.awt.Toolkit;
 import java.nio.CharBuffer;
 import java.text.Normalizer;
 import java.text.Normalizer.Form;
@@ -31,12 +41,32 @@ public class SecPasswordField extends PasswordField {
 	private static final int GROW_BUFFER_SIZE = 50;
 	private static final String PLACEHOLDER = "*";
 
+	private final Tooltip tooltip = new Tooltip();
+	private final Label indicator = new Label();
+	private final StringProperty nonPrintableCharsWarning = new SimpleStringProperty();
+	private final StringProperty capslockWarning = new SimpleStringProperty();
+
 	private char[] content = new char[INITIAL_BUFFER_SIZE];
 	private int length = 0;
 
 	public SecPasswordField() {
-		this.onDragOverProperty().set(this::handleDragOver);
-		this.onDragDroppedProperty().set(this::handleDragDropped);
+		indicator.setAlignment(Pos.CENTER_RIGHT);
+		indicator.setMouseTransparent(true);
+		indicator.setTextOverrun(OverrunStyle.CLIP);
+		this.getChildren().add(indicator);
+		this.setTooltip(tooltip);
+		this.addEventHandler(DragEvent.DRAG_OVER, this::handleDragOver);
+		this.addEventHandler(DragEvent.DRAG_DROPPED, this::handleDragDropped);
+		this.addEventHandler(KeyEvent.ANY, this::handleKeyEvent);
+		this.focusedProperty().addListener(this::focusedChanged);
+	}
+
+	@Override
+	protected void layoutChildren() {
+		super.layoutChildren();
+		indicator.resize(50.0, getHeight());
+		indicator.relocate(getWidth() - indicator.getWidth(), 0);
+		indicator.layout();
 	}
 
 	private void handleDragOver(DragEvent event) {
@@ -53,6 +83,50 @@ public class SecPasswordField extends PasswordField {
 			insertText(getCaretPosition(), dragboard.getString());
 		}
 		event.consume();
+	}
+
+	private void handleKeyEvent(KeyEvent e) {
+		if (e.getCode() == KeyCode.CAPS) {
+			updateVisualHints(true);
+		}
+	}
+
+	private void focusedChanged(@SuppressWarnings("unused") Observable observable) {
+		updateVisualHints(isFocused());
+	}
+
+	private void updateVisualHints(boolean focused) {
+		StringBuilder tooltipSb = new StringBuilder();
+		StringBuilder indicatorSb = new StringBuilder();
+		if (containsNonPrintableCharacters()) {
+			indicatorSb.append('⚠');
+			tooltipSb.append(nonPrintableCharsWarning.get()).append('\n');
+		}
+		// AWT code needed until https://bugs.openjdk.java.net/browse/JDK-8090882 is closed:
+		if (focused && Toolkit.getDefaultToolkit().getLockingKeyState(java.awt.event.KeyEvent.VK_CAPS_LOCK)) {
+			indicatorSb.append('⇪');
+			tooltipSb.append(capslockWarning.get()).append('\n');
+		}
+		indicator.setText(indicatorSb.toString());
+		tooltip.setText(tooltipSb.toString());
+		if (tooltip.getText().isEmpty()) {
+			setTooltip(null);
+		} else {
+			setTooltip(tooltip);
+		}
+	}
+
+	/**
+	 * @return <code>true</code> if any {@link Character#isISOControl(char) control character} is present in the current value of this password field.
+	 * @implNote runs in O(n)
+	 */
+	boolean containsNonPrintableCharacters() {
+		for (int i = 0; i < length; i++) {
+			if (Character.isISOControl(content[i])) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -86,6 +160,8 @@ public class SecPasswordField extends PasswordField {
 		// copy new text to content buffer
 		normalizedText.getChars(0, normalizedText.length(), content, start);
 
+		// trigger visual hints
+		updateVisualHints(true);
 		String placeholderString = Strings.repeat(PLACEHOLDER, normalizedText.length());
 		super.replaceText(start, end, placeholderString);
 	}
@@ -154,6 +230,24 @@ public class SecPasswordField extends PasswordField {
 
 	private void swipe(char[] buffer) {
 		Arrays.fill(buffer, SWIPE_CHAR);
+	}
+
+	/* Getter/Setter */
+
+	public void setNonPrintableCharsWarning(String value) {
+		nonPrintableCharsWarning.set(value);
+	}
+
+	public String getNonPrintableCharsWarning() {
+		return nonPrintableCharsWarning.get();
+	}
+
+	public void setCapslockWarning(String value) {
+		capslockWarning.set(value);
+	}
+
+	public String getCapslockWarning() {
+		return capslockWarning.get();
 	}
 
 }

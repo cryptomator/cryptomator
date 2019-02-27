@@ -152,7 +152,7 @@ class SecPasswordFieldTest {
 
 	@Test
 	@DisplayName("test swipe char[]")
-	public void swipe() {
+	public void testSwipe() {
 		pwField.appendText("topSecret");
 
 		CharSequence result1 = pwField.getCharacters();
@@ -161,6 +161,19 @@ class SecPasswordFieldTest {
 		CharSequence result2 = pwField.getCharacters();
 		Assertions.assertEquals("         ", result1.toString());
 		Assertions.assertEquals("", result2.toString());
+	}
+
+	@Test
+	@DisplayName("test control characters")
+	public void testControlCharacters() {
+		pwField.appendText("normal");
+		Assertions.assertFalse(pwField.containsNonPrintableCharacters());
+
+		pwField.appendText("\00\01\02");
+		Assertions.assertTrue(pwField.containsNonPrintableCharacters());
+
+		CharSequence result1 = pwField.getCharacters();
+		Assertions.assertEquals("normal\00\01\02", result1.toString());
 	}
 
 }
