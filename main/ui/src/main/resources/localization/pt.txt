@@ -33,7 +33,6 @@ unlock.choicebox.winDriveLetter.auto = Atribuir automaticamente
 unlock.errorMessage.wrongPassword = Senha incorreta
 unlock.errorMessage.unsupportedVersion.vaultOlderThanSoftware = Cofre não suportado. Esse cofre foi criado por uma versão mais antiga do Cryptomator.
 unlock.errorMessage.unsupportedVersion.softwareOlderThanVault = Cofre não suportado. Esse cofre foi criado por uma versão mais nova do Cryptomator.
-unlock.messageLabel.startServerFailed = Falha ao iniciar servidor WebDAV.
 # change_password.fxml
 changePassword.label.oldPassword = Senha antiga
 changePassword.label.newPassword = Senha Nova
@@ -53,7 +52,6 @@ unlocked.ioGraph.yAxis.label = Taxa de transferência (Mbps)
 # settings.fxml
 settings.version.label = Versão %s
 settings.checkForUpdates.label = Verificar por atualizações
-settings.requiresRestartLabel = * Cryptomator precisa ser reiniciado
 # tray icon
 tray.menu.open = Abrir
 tray.menu.quit = Sair
@@ -75,11 +73,10 @@ upgrade.version3to4.err.io = Falha na migração devido a um erro de E/S. Veja o
 upgrade.confirmation.label = Sim, tenho certeza de que a sincronização foi concluída
 unlock.label.savePassword = Salvar senha
 unlock.errorMessage.unauthenticVersionMac = Não foi possível autenticar a versão do MAC.
-unlocked.label.mountFailed = Falha ao conectar o drive
 unlock.savePassword.delete.confirmation.title = Apagar a senha armazenada
 unlock.savePassword.delete.confirmation.header = Você realmente quer apagar a senha armazenada deste cofre?
 unlock.savePassword.delete.confirmation.content = A senha deste cofre que se encontra armazenada será imediatamente apagada de seu sistema. Se você quiser novamente armazenar sua senha, abra o seu cofre com a opção "Armazenar Senha" habilitada.
-settings.debugMode.label = Modo de Debug *
+settings.debugMode.label = Modo de Debug
 upgrade.version3dropBundleExtension.title = Atualização para a versão 3 do cofre (Drop Bundle Extension)
 upgrade.version3to4.title = Atualização do cofre da versão 3 para 4
 upgrade.version4to5.title = Atualização do cofre da versão 4 para 5
@@ -123,3 +120,5 @@ unlock.failedDialog.content.mountPathNonExisting = Mount point does not exist.
 unlock.failedDialog.content.mountPathNotEmpty = Mount point is not empty.
 unlock.label.useReadOnlyMode = Read-Only
 unlock.label.chooseMountPath = Choose empty directory…
+ctrl.secPasswordField.nonPrintableChars = Password contains control characters.\nRecommendation\: Remove them to ensure compatibility with other clients.
+ctrl.secPasswordField.capsLocked = Caps Lock is activated.

@@ -35,7 +35,6 @@ unlock.choicebox.winDriveLetter.auto = Automatisch toekennen
 unlock.errorMessage.wrongPassword = Verkeerd wachtwoord
 unlock.errorMessage.unsupportedVersion.vaultOlderThanSoftware = Niet ondersteunde kluis. Deze kluis is gemaakt met een nieuwere versie van Cryptomator.
 unlock.errorMessage.unsupportedVersion.softwareOlderThanVault = Niet ondersteunde kluis. Deze kluis is gemaakt met een nieuwere versie van Cryptomator.
-unlock.messageLabel.startServerFailed = WebDAV server starten mislukt.
 # change_password.fxml
 changePassword.label.oldPassword = Huidig Wachtwoord
 changePassword.label.newPassword = Nieuw Wachtwoord
@@ -55,7 +54,6 @@ unlocked.ioGraph.yAxis.label = Doorvoer (MiB/s)
 # settings.fxml
 settings.version.label = Versie %s
 settings.checkForUpdates.label = Controleer op updates
-settings.requiresRestartLabel = * Cryptomator dient te worden herstart
 # tray icon
 tray.menu.open = Open
 tray.menu.quit = Afsluiten
@@ -77,11 +75,10 @@ upgrade.version3to4.err.io = I/O Exception\: migratie mislukt. Zie logbestand vo
 upgrade.confirmation.label = Ja, ik heb geverifieerd dat de synchronisatie voltooid is
 unlock.label.savePassword = Wachtwoord Opslaan
 unlock.errorMessage.unauthenticVersionMac = MAC authenticatie mislukt
-unlocked.label.mountFailed = Verbinden van schijf mislukt
 unlock.savePassword.delete.confirmation.title = Verwijder Opgeslagen Wachtwoord
 unlock.savePassword.delete.confirmation.header = Ben je zeker dat je het opgeslagen wachtwoord van deze kluis wilt verwijderen?
 unlock.savePassword.delete.confirmation.content = Het opgeslagen wachtwoord van deze kluis zal onmiddellijk verwijderd worden van je systeem sleutelhanger. Als je opnieuw je wachtwoord wilt opslaan, zal je je kluis moeten ontgrendelen met de optie "Sla wachtwoord op" aan.
-settings.debugMode.label = Debug Mode *
+settings.debugMode.label = Debug Mode
 upgrade.version3dropBundleExtension.title = Kluis Versie 3 Upgrade (Drop Bundel Extensie)
 upgrade.version3to4.title = Kluis Versie 3 naar 4 Upgrade
 upgrade.version4to5.title = Kluis Versie 4 naar 5 Upgrade
@@ -125,3 +122,5 @@ unlock.failedDialog.content.mountPathNonExisting = Mount point does not exist.
 unlock.failedDialog.content.mountPathNotEmpty = Mount point is not empty.
 unlock.label.useReadOnlyMode = Read-Only
 unlock.label.chooseMountPath = Choose empty directory…
+ctrl.secPasswordField.nonPrintableChars = Password contains control characters.\nRecommendation\: Remove them to ensure compatibility with other clients.
+ctrl.secPasswordField.capsLocked = Caps Lock is activated.

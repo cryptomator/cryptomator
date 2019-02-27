@@ -33,7 +33,6 @@ unlock.choicebox.winDriveLetter.auto = 自動的に割り当てる
 unlock.errorMessage.wrongPassword = パスワードが無効です
 unlock.errorMessage.unsupportedVersion.vaultOlderThanSoftware = サポートされない金庫です。この金庫は古いバージョンの Cryptomator を使用して作成されました。
 unlock.errorMessage.unsupportedVersion.softwareOlderThanVault = サポートされない金庫です。この金庫は新しいバージョンの Cryptomator を使用して作成されました。
-unlock.messageLabel.startServerFailed = WebDAV サーバーの起動に失敗しました。
 # change_password.fxml
 changePassword.label.oldPassword = 古いパスワード
 changePassword.label.newPassword = 新しいパスワード
@@ -53,7 +52,6 @@ unlocked.ioGraph.yAxis.label = スループット (MiB/s)
 # settings.fxml
 settings.version.label = バージョン %s
 settings.checkForUpdates.label = 最新版のチェック
-settings.requiresRestartLabel = *Cryptomatorの再起動が必要
 # tray icon
 tray.menu.open = 開く
 tray.menu.quit = 閉じる
@@ -75,11 +73,10 @@ upgrade.version3to4.err.io = I/O の例外で移行に失敗しました。詳�
 upgrade.confirmation.label = はい、同期が完了していることを確認しました。
 unlock.label.savePassword = パスワードを保存
 unlock.errorMessage.unauthenticVersionMac = MAC バージョンを認証できません。
-unlocked.label.mountFailed = ドライブの接続に失敗
 unlock.savePassword.delete.confirmation.title = 保存済みのパスワードを削除
 unlock.savePassword.delete.confirmation.header = 本当にこの金庫の保存済みパスワードを削除しますか?
 unlock.savePassword.delete.confirmation.content = この金庫の保存済みパスワードは、直ちにシステムのキーチェーンから削除されます。もう一度パスワードを保存するには、"Save Password" オプションを有効にして金庫を解錠する必要があります。
-settings.debugMode.label = デバッグモード *
+settings.debugMode.label = デバッグモード
 upgrade.version3dropBundleExtension.title = 金庫をバージョン 3 にアップグレード(Drop Bundle Extension)
 upgrade.version3to4.title = 金庫をバージョン 3 から 4 にアップグレード
 upgrade.version4to5.title = 金庫をバージョン 4 から 5 にアップグレード
@@ -123,3 +120,5 @@ unlock.failedDialog.content.mountPathNonExisting = マウントポイントが�
 unlock.failedDialog.content.mountPathNotEmpty = Mount point is not empty.
 unlock.label.useReadOnlyMode = Read-Only
 unlock.label.chooseMountPath = Choose empty directory…
+ctrl.secPasswordField.nonPrintableChars = Password contains control characters.\nRecommendation\: Remove them to ensure compatibility with other clients.
+ctrl.secPasswordField.capsLocked = Caps Lock is activated.

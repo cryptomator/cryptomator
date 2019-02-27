@@ -33,7 +33,6 @@ unlock.choicebox.winDriveLetter.auto = Přiřadit automaticky
 unlock.errorMessage.wrongPassword = Chybné heslo
 unlock.errorMessage.unsupportedVersion.vaultOlderThanSoftware = Nepodporovaná verze trezoru. Byl vytvořen ve starším Cryptomator.
 unlock.errorMessage.unsupportedVersion.softwareOlderThanVault = Nepodporovaná verze trezoru. Byl vytvořen v novějším Cryptomator.
-unlock.messageLabel.startServerFailed = Spuštění WebDAV serveru se nezdařílo.
 # change_password.fxml
 changePassword.label.oldPassword = Původní heslo
 changePassword.label.newPassword = Nové heslo
@@ -53,7 +52,6 @@ unlocked.ioGraph.yAxis.label = Propustnost (MiB/s)
 # settings.fxml
 settings.version.label = Verze %s
 settings.checkForUpdates.label = Zjistit případné aktualizace
-settings.requiresRestartLabel = * Vyžaduje restart Cryptomator
 # tray icon
 tray.menu.open = Otevřít
 tray.menu.quit = Ukončit
@@ -76,11 +74,10 @@ upgrade.version3to4.err.io = Převod se nezdařil kvůli výjimce na vst./výst.
 upgrade.confirmation.label = Ano, je ověřeno, že synchronizace byla dokončena
 unlock.label.savePassword = Uložit heslo
 unlock.errorMessage.unauthenticVersionMac = Nedaří se ověřit MAC funkci verze.
-unlocked.label.mountFailed = Připojení jednotky se nezdařilo
 unlock.savePassword.delete.confirmation.title = Smazat uložené heslo
 unlock.savePassword.delete.confirmation.header = Opravdu chcete smazat uložené heslo pro tento trezor?
 unlock.savePassword.delete.confirmation.content = Uložené heslo k tomuto trezoru bude okamžitě vymazáno ze systémové klíčenky. Pokud ho tam budete chtít znovu uložit, bude třeba trezor odemknout se zapnutou volbou „Uložit heslo“.
-settings.debugMode.label = Ladící režim *
+settings.debugMode.label = Ladící režim
 # Extension of what please? File, protocol, aplication extension for example? And bundle of what with what? Thanks :)
 upgrade.version3dropBundleExtension.title = Přechod z verze 3 trezoru na novější (odebrat příp. .cryptomator a registraci bundle v macOS)
 upgrade.version3to4.title = Aktualizace trezoru z verze 3 na 4
@@ -125,3 +122,5 @@ unlock.failedDialog.content.mountPathNonExisting = Mount point does not exist.
 unlock.failedDialog.content.mountPathNotEmpty = Mount point is not empty.
 unlock.label.useReadOnlyMode = Read-Only
 unlock.label.chooseMountPath = Choose empty directory…
+ctrl.secPasswordField.nonPrintableChars = Password contains control characters.\nRecommendation\: Remove them to ensure compatibility with other clients.
+ctrl.secPasswordField.capsLocked = Caps Lock is activated.
