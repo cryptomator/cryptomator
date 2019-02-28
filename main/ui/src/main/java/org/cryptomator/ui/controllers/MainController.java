@@ -213,7 +213,7 @@ public class MainController implements ViewController {
 			stage.getIcons().add(new Image(getClass().getResourceAsStream("/window_icon_32.png")));
 			Application.setUserAgentStylesheet(getClass().getResource("/css/win_theme.css").toString());
 		}
-		exitUtil.initExitHandler(this::gracefulShutdown);
+		exitUtil.initExitHandler(() -> Platform.runLater(this::gracefulShutdown));
 		listenToFileOpenRequests(stage);
 	}
 
