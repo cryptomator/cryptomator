@@ -8,6 +8,7 @@ package org.cryptomator.launcher;
 
 import java.awt.Desktop;
 import java.awt.desktop.OpenFilesEvent;
+import java.awt.desktop.QuitStrategy;
 import java.io.File;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
