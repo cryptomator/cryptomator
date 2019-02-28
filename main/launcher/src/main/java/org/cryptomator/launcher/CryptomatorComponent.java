@@ -16,6 +16,6 @@ public interface CryptomatorComponent {
 
 	Cryptomator application();
 
-	FxApplicationComponent fxApplicationComponent();
+	FxApplicationComponent.Builder fxApplicationComponent();
 
 }

@@ -18,13 +18,6 @@ class CryptomatorModule {
 
 	@Provides
 	@Singleton
-	@Named("shutdownLatch")
-	static CountDownLatch provideShutdownLatch() {
-		return new CountDownLatch(1);
-	}
-
-	@Provides
-	@Singleton
 	static Settings provideSettings(SettingsProvider settingsProvider) {
 		return settingsProvider.get();
 	}

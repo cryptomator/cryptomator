@@ -78,7 +78,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Stream;
 
@@ -100,7 +99,6 @@ public class MainController implements ViewController {
 	private final ViewControllerLoader viewControllerLoader;
 	private final ObjectProperty<ViewController> activeController = new SimpleObjectProperty<>();
 	private final ObservableList<Vault> vaults;
-	private final CountDownLatch shutdownLatch;
 	private final BooleanBinding areAllVaultsLocked;
 	private final ObjectProperty<Vault> selectedVault = new SimpleObjectProperty<>();
 	private final ObjectExpression<Vault.State> selectedVaultState = ObjectExpression.objectExpression(EasyBind.select(selectedVault).selectObject(Vault::stateProperty));
@@ -114,7 +112,7 @@ public class MainController implements ViewController {
 
 	@Inject
 	public MainController(@Named("mainWindow") Stage mainWindow, ExecutorService executorService, @Named("launchEventQueue") BlockingQueue<AppLaunchEvent> launchEventQueue, ExitUtil exitUtil, Localization localization,
-						  VaultFactory vaultFactoy, ViewControllerLoader viewControllerLoader, UpgradeStrategies upgradeStrategies, VaultList vaults, AutoUnlocker autoUnlocker, @Named("shutdownLatch") CountDownLatch shutdownLatch) {
+						  VaultFactory vaultFactoy, ViewControllerLoader viewControllerLoader, UpgradeStrategies upgradeStrategies, VaultList vaults, AutoUnlocker autoUnlocker) {
 		this.mainWindow = mainWindow;
 		this.executorService = executorService;
 		this.launchEventQueue = launchEventQueue;
@@ -123,7 +121,6 @@ public class MainController implements ViewController {
 		this.vaultFactoy = vaultFactoy;
 		this.viewControllerLoader = viewControllerLoader;
 		this.vaults = vaults;
-		this.shutdownLatch = shutdownLatch;
 
 		// derived bindings:
 		this.isShowingSettings = Bindings.equal(SettingsController.class, EasyBind.monadic(activeController).map(ViewController::getClass));
@@ -234,13 +231,13 @@ public class MainController implements ViewController {
 				if (tryAgainButtonType.equals(btnType)) {
 					gracefulShutdown();
 				} else if (forceShutdownButtonType.equals(btnType)) {
-					shutdownLatch.countDown();
+					Platform.runLater(Platform::exit);
 				} else {
 					return;
 				}
 			});
 		} else {
-			shutdownLatch.countDown();
+			Platform.runLater(Platform::exit);
 		}
 	}
 

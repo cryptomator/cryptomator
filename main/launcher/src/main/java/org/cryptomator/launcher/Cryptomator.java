@@ -5,10 +5,13 @@
  *******************************************************************************/
 package org.cryptomator.launcher;
 
+import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.stage.Stage;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.logging.DebugMode;
 import org.cryptomator.logging.LoggerConfiguration;
+import org.cryptomator.ui.controllers.MainController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,15 +34,13 @@ public class Cryptomator {
 	private final DebugMode debugMode;
 	private final IpcFactory ipcFactory;
 	private final Optional<String> applicationVersion;
-	private final CountDownLatch shutdownLatch;
 
 	@Inject
-	Cryptomator(LoggerConfiguration logConfig, DebugMode debugMode, IpcFactory ipcFactory, @Named("applicationVersion") Optional<String> applicationVersion, @Named("shutdownLatch") CountDownLatch shutdownLatch) {
+	Cryptomator(LoggerConfiguration logConfig, DebugMode debugMode, IpcFactory ipcFactory, @Named("applicationVersion") Optional<String> applicationVersion) {
 		this.logConfig = logConfig;
 		this.debugMode = debugMode;
 		this.ipcFactory = ipcFactory;
 		this.applicationVersion = applicationVersion;
-		this.shutdownLatch = shutdownLatch;
 	}
 
 	public static void main(String[] args) {
@@ -90,22 +91,43 @@ public class Cryptomator {
 
 	/**
 	 * Launches the JavaFX application and waits until shutdown is requested.
-	 *
-	 * @implNote This method blocks until {@link #shutdownLatch} reached zero.
 	 */
 	private void runGuiApplication() {
-		try {
-			debugMode.initialize();
-			CleanShutdownPerformer.registerShutdownHook();
-			Platform.startup(() -> {
-				assert Platform.isFxApplicationThread();
-				FxApplication app = CRYPTOMATOR_COMPONENT.fxApplicationComponent().application();
-				app.start();
-			});
-			shutdownLatch.await();
-		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
+		debugMode.initialize();
+		CleanShutdownPerformer.registerShutdownHook();
+		Application.launch(MainApp.class);
+//			Platform.startup(() -> {
+//				assert Platform.isFxApplicationThread();
+//				FxApplication app = CRYPTOMATOR_COMPONENT.fxApplicationComponent().application();
+//				app.start();
+//			});
+	}
+
+
+	// We need a separate FX Application class, until we can use the module system. See https://stackoverflow.com/q/54756176/4014509
+	public static class MainApp extends Application {
+
+		@Override
+		public void start(Stage primaryStage) {
+			LOG.info("JavaFX application started.");
+			primaryStage.setMinWidth(652.0);
+			primaryStage.setMinHeight(440.0);
+
+			FxApplicationComponent fxApplicationComponent = CRYPTOMATOR_COMPONENT.fxApplicationComponent() //
+					.fxApplication(this) //
+					.mainWindow(primaryStage) //
+					.build();
+
+			MainController mainCtrl = fxApplicationComponent.fxmlLoader().load("/fxml/main.fxml");
+			mainCtrl.initStage(primaryStage);
+			primaryStage.show();
 		}
+
+		@Override
+		public void stop() {
+			LOG.info("JavaFX application stopped.");
+		}
+
 	}
 
 }
