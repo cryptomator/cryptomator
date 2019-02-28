@@ -7,6 +7,9 @@
 
 app.name=Cryptomator
 
+ctrl.secPasswordField.nonPrintableChars=Password contains control characters.\nRecommendation: Remove them to ensure compatibility with other clients.
+ctrl.secPasswordField.capsLocked=Caps Lock is activated.
+
 # main.fxml
 main.emptyListInstructions=Click here to add a vault
 main.directoryList.contextMenu.remove=Remove from List

@@ -33,7 +33,6 @@ unlock.choicebox.winDriveLetter.auto = Assigner automatiquement
 unlock.errorMessage.wrongPassword = Mot de passe incorrect
 unlock.errorMessage.unsupportedVersion.vaultOlderThanSoftware = Coffre-fort non supporté. Ce coffre a été créé avec une ancienne version de Cryptomator.
 unlock.errorMessage.unsupportedVersion.softwareOlderThanVault = Coffre-fort non supporté. Ce coffre a été créé avec une version de Cryptomator plus récente.
-unlock.messageLabel.startServerFailed = Echec de démarrage du serveur WebDAV.
 # change_password.fxml
 changePassword.label.oldPassword = Ancien mot de passe
 changePassword.label.newPassword = Nouveau mot de passe
@@ -56,7 +55,6 @@ unlocked.ioGraph.yAxis.label = Débit (MiB/s)
 # settings.fxml
 settings.version.label = Version %s
 settings.checkForUpdates.label = Vérifier les mises à jour
-settings.requiresRestartLabel = * Redémarrage requis
 # tray icon
 tray.menu.open = Ouvrir
 tray.menu.quit = Quitter
@@ -78,11 +76,10 @@ upgrade.version3to4.err.io = La migration a échoué à cause d'une erreur d'ent
 upgrade.confirmation.label = Oui, je suis certain que la synchronisation est terminée
 unlock.label.savePassword = Se souvenir du mot de passe
 unlock.errorMessage.unauthenticVersionMac = Impossible d'authentifier la version MAC
-unlocked.label.mountFailed = Echec de connexion au lecteur
 unlock.savePassword.delete.confirmation.title = Supprimer le mot de passe sauvegardé
 unlock.savePassword.delete.confirmation.header = Voulez vous vraiment oublier le mot de passe de ce coffre-fort ?
 unlock.savePassword.delete.confirmation.content = Le mot de passe de ce coffre sera supprimé immédiatement du trousseau. Si vous voulez le sauvegarder à nouveau, vous devrez cocher la case "Se souvenir du mot de passe" lors du déverrouillage du coffre.
-settings.debugMode.label = Mode Débug *
+settings.debugMode.label = Mode Débug
 upgrade.version3dropBundleExtension.title = Mise à jour du coffre-fort (en version 3 extension "Drop Bundle")
 upgrade.version3to4.title = Mise à jour de la version du coffre-fort (v3 à v4)
 upgrade.version4to5.title = Mise à jour de la version du coffre-fort (v4 à v5)
@@ -126,3 +123,5 @@ unlock.failedDialog.content.mountPathNonExisting = Mount point does not exist.
 unlock.failedDialog.content.mountPathNotEmpty = Mount point is not empty.
 unlock.label.useReadOnlyMode = Read-Only
 unlock.label.chooseMountPath = Choose empty directory…
+ctrl.secPasswordField.nonPrintableChars = Password contains control characters.\nRecommendation\: Remove them to ensure compatibility with other clients.
+ctrl.secPasswordField.capsLocked = Caps Lock is activated.

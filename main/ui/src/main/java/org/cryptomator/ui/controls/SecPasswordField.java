@@ -9,11 +9,24 @@
 package org.cryptomator.ui.controls;
 
 import com.google.common.base.Strings;
+import javafx.beans.NamedArg;
+import javafx.beans.Observable;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.control.Label;
+import javafx.scene.control.OverrunStyle;
 import javafx.scene.control.PasswordField;
+import javafx.scene.control.Tooltip;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.TransferMode;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 
+import java.awt.Toolkit;
 import java.nio.CharBuffer;
 import java.text.Normalizer;
 import java.text.Normalizer.Form;
@@ -30,13 +43,44 @@ public class SecPasswordField extends PasswordField {
 	private static final int INITIAL_BUFFER_SIZE = 50;
 	private static final int GROW_BUFFER_SIZE = 50;
 	private static final String PLACEHOLDER = "*";
+	private static final double PADDING = 2.0;
+	private static final double INDICATOR_PADDING = 4.0;
+	private static final Color INDICATOR_COLOR = new Color(0.901, 0.494, 0.133, 1.0);
+
+	private final Tooltip tooltip = new Tooltip();
+	private final Label indicator = new Label();
+	private final String nonPrintableCharsWarning;
+	private final String capslockWarning;
 
 	private char[] content = new char[INITIAL_BUFFER_SIZE];
 	private int length = 0;
 
 	public SecPasswordField() {
-		this.onDragOverProperty().set(this::handleDragOver);
-		this.onDragDroppedProperty().set(this::handleDragDropped);
+		this("", "");
+	}
+
+	public SecPasswordField(@NamedArg("nonPrintableCharsWarning") String nonPrintableCharsWarning, @NamedArg("capslockWarning") String capslockWarning) {
+		this.nonPrintableCharsWarning = nonPrintableCharsWarning;
+		this.capslockWarning = capslockWarning;
+		indicator.setPadding(new Insets(PADDING, INDICATOR_PADDING, PADDING, INDICATOR_PADDING));
+		indicator.setAlignment(Pos.CENTER_RIGHT);
+		indicator.setMouseTransparent(true);
+		indicator.setTextOverrun(OverrunStyle.CLIP);
+		indicator.setTextFill(INDICATOR_COLOR);
+		indicator.setFont(Font.font(indicator.getFont().getFamily(), 15.0));
+		this.getChildren().add(indicator);
+		this.setTooltip(tooltip);
+		this.addEventHandler(DragEvent.DRAG_OVER, this::handleDragOver);
+		this.addEventHandler(DragEvent.DRAG_DROPPED, this::handleDragDropped);
+		this.addEventHandler(KeyEvent.ANY, this::handleKeyEvent);
+		this.focusedProperty().addListener(this::focusedChanged);
+	}
+
+	@Override
+	protected void layoutChildren() {
+		super.layoutChildren();
+		indicator.relocate(0.0, 0.0);
+		indicator.resize(getWidth(), getHeight());
 	}
 
 	private void handleDragOver(DragEvent event) {
@@ -53,6 +97,59 @@ public class SecPasswordField extends PasswordField {
 			insertText(getCaretPosition(), dragboard.getString());
 		}
 		event.consume();
+	}
+
+	private void handleKeyEvent(KeyEvent e) {
+		if (e.getCode() == KeyCode.CAPS) {
+			updateVisualHints(true);
+		}
+	}
+
+	private void focusedChanged(@SuppressWarnings("unused") Observable observable) {
+		updateVisualHints(isFocused());
+	}
+
+	private void updateVisualHints(boolean focused) {
+		StringBuilder tooltipSb = new StringBuilder();
+		StringBuilder indicatorSb = new StringBuilder();
+		if (containsNonPrintableCharacters()) {
+			indicatorSb.append('⚠');
+			tooltipSb.append("- ").append(nonPrintableCharsWarning).append('\n');
+		}
+		// AWT code needed until https://bugs.openjdk.java.net/browse/JDK-8090882 is closed:
+		if (focused && Toolkit.getDefaultToolkit().getLockingKeyState(java.awt.event.KeyEvent.VK_CAPS_LOCK)) {
+			indicatorSb.append('⇪');
+			tooltipSb.append("- ").append(capslockWarning).append('\n');
+		}
+		indicator.setText(indicatorSb.toString());
+		if (!indicator.getText().isEmpty()) {
+			setPadding(new Insets(PADDING, getIndicatorWidth(), PADDING, PADDING));
+		} else {
+			setPadding(new Insets(PADDING));
+		}
+		tooltip.setText(tooltipSb.toString());
+		if (tooltip.getText().isEmpty()) {
+			setTooltip(null);
+		} else {
+			setTooltip(tooltip);
+		}
+	}
+
+	private double getIndicatorWidth() {
+		return new Text(indicator.getText()).getLayoutBounds().getWidth() + INDICATOR_PADDING * 2.0;
+	}
+
+	/**
+	 * @return <code>true</code> if any {@link Character#isISOControl(char) control character} is present in the current value of this password field.
+	 * @implNote runs in O(n)
+	 */
+	boolean containsNonPrintableCharacters() {
+		for (int i = 0; i < length; i++) {
+			if (Character.isISOControl(content[i])) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -86,6 +183,8 @@ public class SecPasswordField extends PasswordField {
 		// copy new text to content buffer
 		normalizedText.getChars(0, normalizedText.length(), content, start);
 
+		// trigger visual hints
+		updateVisualHints(true);
 		String placeholderString = Strings.repeat(PLACEHOLDER, normalizedText.length());
 		super.replaceText(start, end, placeholderString);
 	}

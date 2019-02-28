@@ -35,7 +35,6 @@ unlock.choicebox.winDriveLetter.auto = Автоназначение
 unlock.errorMessage.wrongPassword = Неверный пароль
 unlock.errorMessage.unsupportedVersion.vaultOlderThanSoftware = Неподдерживаемое хранилище. Оно было создано в более старой версии Cryptomator.
 unlock.errorMessage.unsupportedVersion.softwareOlderThanVault = Неподдерживаемое хранилище. Оно было создано в более новой версии Cryptomator.
-unlock.messageLabel.startServerFailed = Ошибка запуска сервера WebDAV.
 # change_password.fxml
 changePassword.label.oldPassword = Старый пароль
 changePassword.label.newPassword = Новый пароль
@@ -56,7 +55,6 @@ unlocked.ioGraph.yAxis.label = Пропускная способность (Ми
 # settings.fxml
 settings.version.label = Версия %s
 settings.checkForUpdates.label = Проверка обновлений
-settings.requiresRestartLabel = * Требуется перезапуск Cryptomator
 # tray icon
 tray.menu.open = Открыть
 tray.menu.quit = Выход
@@ -79,12 +77,11 @@ upgrade.version3to4.err.io = Преобразование не выполнен�
 upgrade.confirmation.label = Да, синхронизация завершена
 unlock.label.savePassword = Сохранить пароль
 unlock.errorMessage.unauthenticVersionMac = Не удалось проверить подлинность версии MAC.
-unlocked.label.mountFailed = Ошибка подключения к диску
 # А как назвать эту правку? Пожалуйста, перестаньте портить перевод.
 unlock.savePassword.delete.confirmation.title = Удалить сохранённый пароль
 unlock.savePassword.delete.confirmation.header = Вы действительно хотите удалить сохранённый пароль этого хранилища?
 unlock.savePassword.delete.confirmation.content = Сохранённый пароль этого хранилища будет немедленно удалён из вашей системной связки ключей. Если вы снова захотите сохранить пароль, вам придётся разблокировать хранилище с включённым параметром "Сохранить пароль".
-settings.debugMode.label = Режим отладки *
+settings.debugMode.label = Режим отладки
 upgrade.version3dropBundleExtension.title = Обновление хранилища версии 3 (расширение пакета)
 upgrade.version3to4.title = Обновление хранилища с версии 3 на 4
 upgrade.version4to5.title = Обновление хранилища с версии 4 на 5
@@ -130,3 +127,5 @@ unlock.failedDialog.content.mountPathNonExisting = Точка монтирова
 unlock.failedDialog.content.mountPathNotEmpty = Точка монтирования не пуста
 unlock.label.useReadOnlyMode = Read-Only
 unlock.label.chooseMountPath = Choose empty directory…
+ctrl.secPasswordField.nonPrintableChars = Password contains control characters.\nRecommendation\: Remove them to ensure compatibility with other clients.
+ctrl.secPasswordField.capsLocked = Caps Lock is activated.

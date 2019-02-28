@@ -35,7 +35,6 @@ unlock.choicebox.winDriveLetter.auto = Asignar automáticamente
 unlock.errorMessage.wrongPassword = Contraseña incorrecta
 unlock.errorMessage.unsupportedVersion.vaultOlderThanSoftware = Caja fuerte no soportada. Esta caja se ha creado con una versión anterior de Cryptomator.
 unlock.errorMessage.unsupportedVersion.softwareOlderThanVault = Caja fuerte no soportada. Esta caja se ha creado con una versión más moderna de Cryptomator.
-unlock.messageLabel.startServerFailed = Error al iniciar el servidor de WebDAV.
 # change_password.fxml
 changePassword.label.oldPassword = Contraseña antigua
 # Can also use "current password" = "contraseña actual"
@@ -56,7 +55,6 @@ unlocked.ioGraph.yAxis.label = Rendimiento (MiB/s)
 # settings.fxml
 settings.version.label = Versión %s
 settings.checkForUpdates.label = Comprobar actualizaciones
-settings.requiresRestartLabel = * Cryptomator necesita reiniciarse
 # tray icon
 tray.menu.open = Abrir
 tray.menu.quit = Salir
@@ -78,11 +76,10 @@ upgrade.version3to4.err.io = Error en la migración debido a una excepción de E
 upgrade.confirmation.label = Sí, me he asegurado de que la sincronización ha terminado
 unlock.label.savePassword = Guardar contraseña
 unlock.errorMessage.unauthenticVersionMac = No se pudo autentificar la versión de MAC.
-unlocked.label.mountFailed = Error al montar la unidad
 unlock.savePassword.delete.confirmation.title = Borrar contraseña guardada
 unlock.savePassword.delete.confirmation.header = ¿Quiere realmente borrar la contraseña guardada de esta unidad?
 unlock.savePassword.delete.confirmation.content = La contraseña guardada de esta caja fuerte, será borrada inmediatamente del sistema de claves. Si quiere guardar su contraseña de nuevo, tiene que volver a desbloquear la caja fuerte marcando la opción de "Guardar contraseña".
-settings.debugMode.label = Modo depuración *
+settings.debugMode.label = Modo depuración
 upgrade.version3dropBundleExtension.title = Actualizar caja fuerte a la versión 3 (Drop Bundle Extension)
 upgrade.version3to4.title = Actualizar caja fuerte de versión 3 a 4
 upgrade.version4to5.title = Actualizar caja fuerte de versión 4 a 5
@@ -126,3 +123,5 @@ unlock.failedDialog.content.mountPathNonExisting = Mount point does not exist.
 unlock.failedDialog.content.mountPathNotEmpty = Mount point is not empty.
 unlock.label.useReadOnlyMode = Read-Only
 unlock.label.chooseMountPath = Choose empty directory…
+ctrl.secPasswordField.nonPrintableChars = Password contains control characters.\nRecommendation\: Remove them to ensure compatibility with other clients.
+ctrl.secPasswordField.capsLocked = Caps Lock is activated.

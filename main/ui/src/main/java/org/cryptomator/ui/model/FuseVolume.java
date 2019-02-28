@@ -27,6 +27,7 @@ public class FuseVolume implements Volume {
 
 	private static final Logger LOG = LoggerFactory.getLogger(FuseVolume.class);
 	private static final int MAX_TMPMOUNTPOINT_CREATION_RETRIES = 10;
+	private static final boolean IS_MAC = System.getProperty("os.name").toLowerCase().contains("mac");
 
 	private final VaultSettings vaultSettings;
 	private final Environment environment;
@@ -48,11 +49,9 @@ public class FuseVolume implements Volume {
 			Path customMountPoint = Paths.get(optionalCustomMountPoint.get());
 			checkProvidedMountPoint(customMountPoint);
 			this.mountPoint = customMountPoint;
-			this.createdTemporaryMountPoint = false;
 			LOG.debug("Successfully checked custom mount point: {}", mountPoint);
 		} else {
-			this.mountPoint = createTemporaryMountPoint();
-			this.createdTemporaryMountPoint = true;
+			this.mountPoint = prepareTemporaryMountPoint();
 			LOG.debug("Successfully created mount point: {}", mountPoint);
 		}
 		mount(fs.getPath("/"));
@@ -69,21 +68,31 @@ public class FuseVolume implements Volume {
 		}
 	}
 
-	private Path createTemporaryMountPoint() throws IOException {
+	private Path prepareTemporaryMountPoint() throws IOException, VolumeException {
+		Path mountPoint = chooseNonExistingTemporaryMountPoint();
+		// https://github.com/osxfuse/osxfuse/issues/306#issuecomment-245114592:
+		// In order to allow non-admin users to mount FUSE volumes in `/Volumes`,
+		// starting with version 3.5.0, FUSE will create non-existent mount points automatically.
+		if (IS_MAC && mountPoint.getParent().equals(Paths.get("/Volumes"))) {
+			return mountPoint;
+		} else {
+			Files.createDirectories(mountPoint);
+			this.createdTemporaryMountPoint = true;
+			return mountPoint;
+		}
+	}
+
+	private Path chooseNonExistingTemporaryMountPoint() throws VolumeException {
 		Path parent = environment.getMountPointsDir().orElseThrow();
-		Files.createDirectories(parent);
 		String basename = vaultSettings.getId();
 		for (int i = 0; i < MAX_TMPMOUNTPOINT_CREATION_RETRIES; i++) {
-			try {
-				Path mountPath = parent.resolve(basename + "_" + i);
-				Files.createDirectory(mountPath);
-				return mountPath;
-			} catch (FileAlreadyExistsException e) {
-				continue;
+			Path mountPoint = parent.resolve(basename + "_" + i);
+			if (Files.notExists(mountPoint)) {
+				return mountPoint;
 			}
 		}
-		LOG.error("Failed to create mount path at {}/{}_x. Giving up after {} attempts.", parent, basename, MAX_TMPMOUNTPOINT_CREATION_RETRIES);
-		throw new FileAlreadyExistsException(parent.toString() + "/" + basename);
+		LOG.error("Failed to find feasible mountpoint at {}/{}_x. Giving up after {} attempts.", parent, basename, MAX_TMPMOUNTPOINT_CREATION_RETRIES);
+		throw new VolumeException("Did not find feasible mount point.");
 	}
 
 	private void mount(Path root) throws VolumeException {
@@ -121,7 +130,7 @@ public class FuseVolume implements Volume {
 		} catch (CommandFailedException e) {
 			throw new VolumeException(e);
 		}
-		deleteTemporaryMountPoint();
+		cleanupTemporaryMountPoint();
 	}
 
 	@Override
@@ -132,10 +141,10 @@ public class FuseVolume implements Volume {
 		} catch (CommandFailedException e) {
 			throw new VolumeException(e);
 		}
-		deleteTemporaryMountPoint();
+		cleanupTemporaryMountPoint();
 	}
 
-	private void deleteTemporaryMountPoint() {
+	private void cleanupTemporaryMountPoint() {
 		if (createdTemporaryMountPoint) {
 			try {
 				Files.delete(mountPoint);

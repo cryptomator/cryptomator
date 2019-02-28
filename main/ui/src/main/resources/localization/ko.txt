@@ -33,7 +33,6 @@ unlock.choicebox.winDriveLetter.auto = 자동으로 할당
 unlock.errorMessage.wrongPassword = 잘못된 비밀번호
 unlock.errorMessage.unsupportedVersion.vaultOlderThanSoftware = 지원되지 않는 보관함. 이 보관함은 이전 버전의 Cryptomator에서 생성되었습니다.
 unlock.errorMessage.unsupportedVersion.softwareOlderThanVault = 지원되지 않는 보관함. 이 보관함은 상위 버전의 Cryptomator에서 생성되었습니다.
-unlock.messageLabel.startServerFailed = WedDAV 서버 시작 실패
 # change_password.fxml
 changePassword.label.oldPassword = 이전 비밀번호
 changePassword.label.newPassword = 새로운 비밀번호
@@ -53,7 +52,6 @@ unlocked.ioGraph.yAxis.label = 처리량 (MiB/s)
 # settings.fxml
 settings.version.label = 버전 %s
 settings.checkForUpdates.label = 업데이트 확인
-settings.requiresRestartLabel = * Cryptomator 재시작 필요
 # tray icon
 tray.menu.open = 열기
 tray.menu.quit = 종료
@@ -75,11 +73,10 @@ upgrade.version3to4.err.io = I/O 예외 문제로 마이그레이션이 실패�
 upgrade.confirmation.label = 네. 동기화가 완료되었음을 확인하였습니다.
 unlock.label.savePassword = 비밀번호 저장
 unlock.errorMessage.unauthenticVersionMac = 인증할 수 없는 버전의 MAC(Message Authentication Code)입니다
-unlocked.label.mountFailed = 드라이브 연결 실패
 unlock.savePassword.delete.confirmation.title = 저장된 비밀번호 삭제
 unlock.savePassword.delete.confirmation.header = 정말로 이 보관함의 저장된 비밀번호를 지우시겠습니까?
 unlock.savePassword.delete.confirmation.content = 이 보관함의 저장된 비밀번호는 당신의 시스템 키체인에서 즉시 삭제될 것입니다. 다시 비밀번호를 저장하고 싶으시다면, 보관함을 열 때 "비밀번호 저장" 옵션을 활성화해야 합니다
-settings.debugMode.label = 디버그 모드 *
+settings.debugMode.label = 디버그 모드
 upgrade.version3dropBundleExtension.title = 버전 3 보관함 업그레이드 (Drop Bundle Extension)
 upgrade.version3to4.title = 보관함 버전 3에서 4로 업그레이드
 upgrade.version4to5.title = 보관함 버전 4에서 5로 업그레이드
@@ -123,3 +120,5 @@ unlock.failedDialog.content.mountPathNonExisting = 마운트 지점이 존재하
 unlock.failedDialog.content.mountPathNotEmpty = 마운트 지점이 비어있지 않습니다.
 unlock.label.useReadOnlyMode = Read-Only
 unlock.label.chooseMountPath = Choose empty directory…
+ctrl.secPasswordField.nonPrintableChars = Password contains control characters.\nRecommendation\: Remove them to ensure compatibility with other clients.
+ctrl.secPasswordField.capsLocked = Caps Lock is activated.

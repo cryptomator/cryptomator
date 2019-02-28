@@ -36,11 +36,11 @@
 	<children>
 		<!-- Row 0 -->
 		<Label GridPane.rowIndex="0" GridPane.columnIndex="0" text="%initialize.label.password" cacheShape="true" cache="true" />
-		<SecPasswordField fx:id="passwordField" GridPane.rowIndex="0" GridPane.columnIndex="1" cacheShape="true" cache="true" />
+		<SecPasswordField fx:id="passwordField" capslockWarning="%ctrl.secPasswordField.capsLocked" nonPrintableCharsWarning="%ctrl.secPasswordField.nonPrintableChars" GridPane.rowIndex="0" GridPane.columnIndex="1" cacheShape="true" cache="true" />
 
 		<!-- Row 1 -->
 		<Label GridPane.rowIndex="1" GridPane.columnIndex="0" text="%initialize.label.retypePassword" cacheShape="true" cache="true" />
-		<SecPasswordField fx:id="retypePasswordField" GridPane.rowIndex="1" GridPane.columnIndex="1" cacheShape="true" cache="true" />
+		<SecPasswordField fx:id="retypePasswordField" capslockWarning="%ctrl.secPasswordField.capsLocked" nonPrintableCharsWarning="%ctrl.secPasswordField.nonPrintableChars" GridPane.rowIndex="1" GridPane.columnIndex="1" cacheShape="true" cache="true" />
 		
 		<!-- Row 2 -->
 		<VBox GridPane.columnIndex="1" GridPane.rowIndex="2" spacing="6.0">
