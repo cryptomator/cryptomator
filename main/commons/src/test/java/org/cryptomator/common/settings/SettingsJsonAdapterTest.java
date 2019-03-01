@@ -5,10 +5,10 @@
  *******************************************************************************/
 package org.cryptomator.common.settings;
 
-import java.io.IOException;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
-import org.junit.Assert;
-import org.junit.Test;
+import java.io.IOException;
 
 public class SettingsJsonAdapterTest {
 
@@ -26,12 +26,12 @@ public class SettingsJsonAdapterTest {
 
 		Settings settings = adapter.fromJson(json);
 
-		Assert.assertTrue(settings.checkForUpdates().get());
-		Assert.assertEquals(2, settings.getDirectories().size());
-		Assert.assertEquals(8080, settings.port().get());
-		Assert.assertEquals(42, settings.numTrayNotifications().get());
-		Assert.assertEquals("dav", settings.preferredGvfsScheme().get());
-		Assert.assertEquals(VolumeImpl.FUSE, settings.preferredVolumeImpl().get());
+		Assertions.assertTrue(settings.checkForUpdates().get());
+		Assertions.assertEquals(2, settings.getDirectories().size());
+		Assertions.assertEquals(8080, settings.port().get());
+		Assertions.assertEquals(42, settings.numTrayNotifications().get());
+		Assertions.assertEquals("dav", settings.preferredGvfsScheme().get());
+		Assertions.assertEquals(VolumeImpl.FUSE, settings.preferredVolumeImpl().get());
 	}
 
 }

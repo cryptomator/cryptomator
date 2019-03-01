@@ -25,6 +25,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.VBox;
 import javafx.util.StringConverter;
 import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.common.FxApplicationScoped;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VolumeImpl;
 import org.cryptomator.ui.l10n.Localization;
@@ -32,10 +33,9 @@ import org.cryptomator.ui.model.Volume;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.inject.Singleton;
 import java.util.Optional;
 
-@Singleton
+@FxApplicationScoped
 public class SettingsController implements ViewController {
 
 	private static final CharMatcher DIGITS_MATCHER = CharMatcher.inRange('0', '9');

@@ -5,11 +5,11 @@
  *******************************************************************************/
 package org.cryptomator.common.settings;
 
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+
 import java.io.IOException;
 import java.util.function.Consumer;
-
-import org.junit.Test;
-import org.mockito.Mockito;
 
 public class SettingsTest {
 

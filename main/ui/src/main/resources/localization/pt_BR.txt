@@ -33,7 +33,6 @@ unlock.choicebox.winDriveLetter.auto = Atribuir automaticamente
 unlock.errorMessage.wrongPassword = Senha errada
 unlock.errorMessage.unsupportedVersion.vaultOlderThanSoftware = Cofre não suportado. Esse Cofre foi criado em uma versão antiga do Cryptomator.
 unlock.errorMessage.unsupportedVersion.softwareOlderThanVault = Cofre não suportado. Esse Cofre foi criado em uma versão mais recente do Cryptomator.
-unlock.messageLabel.startServerFailed = A inicialização do servidor WebDAV falhou.
 # change_password.fxml
 changePassword.label.oldPassword = Senha antiga
 changePassword.label.newPassword = Nova senha
@@ -53,7 +52,6 @@ unlocked.ioGraph.yAxis.label = Transferência (Mbps)
 # settings.fxml
 settings.version.label = Versão %s
 settings.checkForUpdates.label = Procurar por atualizações
-settings.requiresRestartLabel = * O Cryptomator precisa ser reiniciado
 # tray icon
 tray.menu.open = Abrir
 tray.menu.quit = Sair
@@ -75,11 +73,10 @@ upgrade.version3to4.err.io = A migração falhou devido a uma falha de entrada e
 upgrade.confirmation.label = Sim, tenho certeza que a sincronização terminou
 unlock.label.savePassword = Salvar senha
 unlock.errorMessage.unauthenticVersionMac = Não foi possível autenticar a versão MAC
-unlocked.label.mountFailed = Conexão do volume falhou
 unlock.savePassword.delete.confirmation.title = Apaga senha salva
 unlock.savePassword.delete.confirmation.header = Você realmente quer apagar a senha salva para esse Cofre?
 unlock.savePassword.delete.confirmation.content = A senha salva para esse Cofre será imediatamente apagada. Para salvar a senha novamente destrave o Cofre com a opção "Salvar senha" ativada.
-settings.debugMode.label = Modo Debug *
+settings.debugMode.label = Modo Debug
 upgrade.version3dropBundleExtension.title = Atualização do Cofre v3 (Drop Bundle Extension)
 upgrade.version3to4.title = Atualização do Cofre v3 para v4
 upgrade.version4to5.title = Atualização do Cofre v4 para v5
@@ -123,3 +120,5 @@ unlock.failedDialog.content.mountPathNonExisting = Mount point does not exist.
 unlock.failedDialog.content.mountPathNotEmpty = Mount point is not empty.
 unlock.label.useReadOnlyMode = Read-Only
 unlock.label.chooseMountPath = Choose empty directory…
+ctrl.secPasswordField.nonPrintableChars = Password contains control characters.\nRecommendation\: Remove them to ensure compatibility with other clients.
+ctrl.secPasswordField.capsLocked = Caps Lock is activated.

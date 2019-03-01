@@ -34,7 +34,7 @@
 	<children>
 		<!-- Row 0 -->
 		<Label text="%unlock.label.password" GridPane.rowIndex="0" GridPane.columnIndex="0" cacheShape="true" cache="true" />
-		<SecPasswordField fx:id="passwordField" GridPane.rowIndex="0" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" maxWidth="Infinity" cacheShape="true" cache="true" />
+		<SecPasswordField fx:id="passwordField" capslockWarning="%ctrl.secPasswordField.capsLocked" nonPrintableCharsWarning="%ctrl.secPasswordField.nonPrintableChars" GridPane.rowIndex="0" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" maxWidth="Infinity" cacheShape="true" cache="true" />
 
 		<!-- Row 1 -->
 		<HBox GridPane.rowIndex="2" GridPane.columnIndex="0" GridPane.columnSpan="2" spacing="12.0" alignment="CENTER_RIGHT" cacheShape="true" cache="true">
@@ -43,7 +43,7 @@
 		</HBox>
 
 		<!-- Row 3 -->
-		<Label fx:id="successMessage" cacheShape="true" cache="true" visible="true" GridPane.rowIndex="3" GridPane.columnIndex="0" GridPane.columnSpan="2"/>
+		<Text fx:id="messageText" cache="true" visible="true" GridPane.rowIndex="3" GridPane.columnIndex="0" GridPane.columnSpan="2"/>
 
 		<!-- Row 3 -->
 		<GridPane fx:id="advancedOptions" vgap="12.0" hgap="12.0" prefWidth="400.0" GridPane.rowIndex="3" GridPane.columnIndex="0" GridPane.columnSpan="2" visible="false" cacheShape="true" cache="true">
@@ -112,7 +112,7 @@
 		<!-- Row 5 -->
 		<VBox GridPane.rowIndex="5" GridPane.columnIndex="0" GridPane.columnSpan="2" spacing="12.0" alignment="CENTER" cacheShape="true" cache="true">
 			<ProgressIndicator progress="-1" fx:id="progressIndicator" cacheShape="true" cache="true" cacheHint="SPEED" />
-			<Text fx:id="messageText" cache="true" />
+			<Text fx:id="progressText" cache="true" />
 		</VBox>
 	</children>
 </GridPane>

@@ -9,24 +9,6 @@
  ******************************************************************************/
 package org.cryptomator.ui.controllers;
 
-import java.awt.Desktop;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.stream.Stream;
-
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Singleton;
-
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.binding.Binding;
@@ -61,27 +43,47 @@ import javafx.scene.layout.Pane;
 import javafx.scene.text.Font;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.common.FxApplicationScoped;
 import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.ui.ExitUtil;
 import org.cryptomator.ui.controls.DirectoryListCell;
 import org.cryptomator.ui.l10n.Localization;
+import org.cryptomator.ui.model.AppLaunchEvent;
 import org.cryptomator.ui.model.AutoUnlocker;
-import org.cryptomator.ui.model.UpgradeStrategies;
-import org.cryptomator.ui.model.UpgradeStrategy;
+import org.cryptomator.ui.model.upgrade.UpgradeStrategies;
+import org.cryptomator.ui.model.upgrade.UpgradeStrategy;
 import org.cryptomator.ui.model.Vault;
 import org.cryptomator.ui.model.VaultFactory;
 import org.cryptomator.ui.model.VaultList;
 import org.cryptomator.ui.util.DialogBuilderUtil;
+import org.cryptomator.ui.util.Tasks;
 import org.fxmisc.easybind.EasyBind;
 import org.fxmisc.easybind.Subscription;
 import org.fxmisc.easybind.monadic.MonadicBinding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.awt.Desktop;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.stream.Stream;
+
 import static org.cryptomator.ui.util.DialogBuilderUtil.buildErrorDialog;
 
-@Singleton
+@FxApplicationScoped
 public class MainController implements ViewController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(MainController.class);
@@ -92,7 +94,7 @@ public class MainController implements ViewController {
 	private final ExitUtil exitUtil;
 	private final Localization localization;
 	private final ExecutorService executorService;
-	private final BlockingQueue<Path> fileOpenRequests;
+	private final BlockingQueue<AppLaunchEvent> launchEventQueue;
 	private final VaultFactory vaultFactoy;
 	private final ViewControllerLoader viewControllerLoader;
 	private final ObjectProperty<ViewController> activeController = new SimpleObjectProperty<>();
@@ -109,11 +111,11 @@ public class MainController implements ViewController {
 	private Subscription subs = Subscription.EMPTY;
 
 	@Inject
-	public MainController(@Named("mainWindow") Stage mainWindow, ExecutorService executorService, @Named("fileOpenRequests") BlockingQueue<Path> fileOpenRequests, ExitUtil exitUtil, Localization localization,
+	public MainController(@Named("mainWindow") Stage mainWindow, ExecutorService executorService, @Named("launchEventQueue") BlockingQueue<AppLaunchEvent> launchEventQueue, ExitUtil exitUtil, Localization localization,
 						  VaultFactory vaultFactoy, ViewControllerLoader viewControllerLoader, UpgradeStrategies upgradeStrategies, VaultList vaults, AutoUnlocker autoUnlocker) {
 		this.mainWindow = mainWindow;
 		this.executorService = executorService;
-		this.fileOpenRequests = fileOpenRequests;
+		this.launchEventQueue = launchEventQueue;
 		this.exitUtil = exitUtil;
 		this.localization = localization;
 		this.vaultFactoy = vaultFactoy;
@@ -211,7 +213,7 @@ public class MainController implements ViewController {
 			stage.getIcons().add(new Image(getClass().getResourceAsStream("/window_icon_32.png")));
 			Application.setUserAgentStylesheet(getClass().getResource("/css/win_theme.css").toString());
 		}
-		exitUtil.initExitHandler(this::gracefulShutdown);
+		exitUtil.initExitHandler(() -> Platform.runLater(this::gracefulShutdown));
 		listenToFileOpenRequests(stage);
 	}
 
@@ -248,22 +250,13 @@ public class MainController implements ViewController {
 	}
 
 	private void listenToFileOpenRequests(Stage stage) {
-		executorService.submit(() -> {
-			while (!Thread.interrupted()) {
-				try {
-					final Path path = fileOpenRequests.take();
-					Platform.runLater(() -> {
-						addVault(path, true);
-						stage.setIconified(false);
-						stage.show();
-						stage.toFront();
-						stage.requestFocus();
-					});
-				} catch (InterruptedException e) {
-					Thread.currentThread().interrupt();
-				}
-			}
-		});
+		Tasks.create(launchEventQueue::take).onSuccess(event -> {
+			stage.setIconified(false);
+			stage.show();
+			stage.toFront();
+			stage.requestFocus();
+			event.getPathsToOpen().forEach(path -> addVault(path, true));
+		}).schedulePeriodically(executorService, Duration.ZERO, Duration.ZERO);
 	}
 
 	private ListCell<Vault> createDirecoryListCell(ListView<Vault> param) {

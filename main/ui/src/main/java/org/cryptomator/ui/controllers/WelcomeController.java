@@ -8,22 +8,6 @@
  ******************************************************************************/
 package org.cryptomator.ui.controllers;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Singleton;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URI;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.util.Comparator;
-import java.util.Map;
-import java.util.Optional;
-import java.util.ResourceBundle;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
@@ -39,15 +23,31 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.layout.VBox;
 import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.common.FxApplicationScoped;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.ui.l10n.Localization;
 import org.cryptomator.ui.util.Tasks;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.Comparator;
+import java.util.Map;
+import java.util.Optional;
+import java.util.ResourceBundle;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 import static org.cryptomator.ui.util.DialogBuilderUtil.buildYesNoDialog;
 
-@Singleton
+@FxApplicationScoped
 public class WelcomeController implements ViewController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(WelcomeController.class);

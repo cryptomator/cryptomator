@@ -5,6 +5,11 @@
  *******************************************************************************/
 package org.cryptomator.ui.model;
 
+import org.apache.commons.lang3.CharUtils;
+import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.common.FxApplicationScoped;
+
+import javax.inject.Inject;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.util.Set;
@@ -13,13 +18,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
-import org.apache.commons.lang3.CharUtils;
-import org.apache.commons.lang3.SystemUtils;
-
-@Singleton
+@FxApplicationScoped
 public final class WindowsDriveLetters {
 
 	private static final Set<Character> D_TO_Z;

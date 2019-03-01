@@ -1,0 +1,17 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Cryptomator macOS" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="org.cryptomator.launcher.Cryptomator" />
+    <module name="launcher" />
+    <option name="VM_PARAMETERS" value="-Duser.language=en -Dcryptomator.settingsPath=&quot;~/Library/Application Support/Cryptomator/settings.json&quot; -Dcryptomator.ipcPortPath=&quot;~/Library/Application Support/Cryptomator/ipcPort.bin&quot; -Dcryptomator.logDir=&quot;~/Library/Logs/Cryptomator&quot; -Dcryptomator.mountPointsDir=&quot;/Volumes/&quot;" />
+    <option name="WORKING_DIRECTORY" value="$MAVEN_REPOSITORY$" />
+    <extension name="coverage">
+      <pattern>
+        <option name="PATTERN" value="org.cryptomator.launcher.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+    </extension>
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

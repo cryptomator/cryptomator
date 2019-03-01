@@ -4,13 +4,19 @@
 	<parent>
 		<groupId>org.cryptomator</groupId>
 		<artifactId>main</artifactId>
-		<version>1.4.5</version>
+		<version>1.4.6</version>
 	</parent>
 	<artifactId>commons</artifactId>
 	<name>Cryptomator Commons</name>
 	<description>Shared utilities</description>
 
 	<dependencies>
+		<!-- JavaFx -->
+		<dependency>
+			<groupId>org.openjfx</groupId>
+			<artifactId>javafx-base</artifactId>
+		</dependency>
+
 		<!-- Libs -->
 		<dependency>
 			<groupId>com.google.guava</groupId>

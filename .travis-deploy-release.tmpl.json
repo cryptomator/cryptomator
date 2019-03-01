@@ -1,0 +1,19 @@
+{
+  "package": {
+	"name": "buildkit",
+	"repo": "cryptomator",
+	"subject": "cryptomator"
+  },
+  "version": {
+	"name": "$TRAVIS_TAG",
+	"desc": "Cryptomator version $TRAVIS_TAG",
+	"released": "$TODAY",
+	"vcs_tag": "$TRAVIS_TAG",
+	"gpgSign": true
+  },
+  "files":
+  [
+	{"includePattern": "main/buildkit/target/(buildkit-[a-z]+\\.zip)", "uploadPattern": "/$TRAVIS_TAG/$1"}
+  ],
+  "publish": true
+}

@@ -33,7 +33,6 @@ unlock.choicebox.winDriveLetter.auto = Призначити автоматичн
 unlock.errorMessage.wrongPassword = Пароль невірний
 unlock.errorMessage.unsupportedVersion.vaultOlderThanSoftware = Сховище не підтримується. Воно було створене в старішій версії Cryptomator.
 unlock.errorMessage.unsupportedVersion.softwareOlderThanVault = Сховище не підтримується. Воно було створене в новішій версії Cryptomator.
-unlock.messageLabel.startServerFailed = Помилка запуску сервера WebDAV.
 # change_password.fxml
 changePassword.label.oldPassword = Старий пароль
 changePassword.label.newPassword = Новий пароль
@@ -53,7 +52,6 @@ unlocked.ioGraph.yAxis.label = Пропускна спроможність (Мі
 # settings.fxml
 settings.version.label = Версія %s
 settings.checkForUpdates.label = Перевірити оновлення
-settings.requiresRestartLabel = * Необхідне перезавантаження Cryptomator
 # tray icon
 tray.menu.open = Відкрити
 tray.menu.quit = Вихід
@@ -75,11 +73,10 @@ upgrade.version3to4.err.io = Перетворення невдале через 
 upgrade.confirmation.label = Так, я переконався, що синхронізація завершена
 unlock.label.savePassword = Зберегти пароль
 unlock.errorMessage.unauthenticVersionMac = Неможливо перевірити справжність версії MAC.
-unlocked.label.mountFailed = Не вдалося підключити диск
 unlock.savePassword.delete.confirmation.title = Видалити збережений пароль
 unlock.savePassword.delete.confirmation.header = Ви дійсно хочете видалити збережений пароль цього сховища?
 unlock.savePassword.delete.confirmation.content = Збережений пароль цього сховища буде негайно видалено з вашого системної в'язки ключів. Якщо ви хочете знову зберегти свій пароль, вам потрібно буде розблокувати свої сховище з опцією "Зберегти пароль".
-settings.debugMode.label = Режим налагодження *
+settings.debugMode.label = Режим налагодження
 upgrade.version3dropBundleExtension.title = Оновлення 3 версії сховища (Розширення пакету)
 upgrade.version3to4.title = Оновлення сховища з версії 3 на 4
 upgrade.version4to5.title = Оновлення сховища з версії 4 на 5
@@ -123,3 +120,5 @@ unlock.failedDialog.content.mountPathNonExisting = Mount point does not exist.
 unlock.failedDialog.content.mountPathNotEmpty = Mount point is not empty.
 unlock.label.useReadOnlyMode = Read-Only
 unlock.label.chooseMountPath = Choose empty directory…
+ctrl.secPasswordField.nonPrintableChars = Password contains control characters.\nRecommendation\: Remove them to ensure compatibility with other clients.
+ctrl.secPasswordField.capsLocked = Caps Lock is activated.

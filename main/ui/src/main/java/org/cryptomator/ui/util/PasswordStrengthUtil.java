@@ -8,24 +8,21 @@
  *******************************************************************************/
 package org.cryptomator.ui.util;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
-import org.cryptomator.ui.l10n.Localization;
-
 import com.google.common.base.Strings;
 import com.nulabinc.zxcvbn.Zxcvbn;
-
 import javafx.geometry.Insets;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.paint.Color;
+import org.cryptomator.common.FxApplicationScoped;
+import org.cryptomator.ui.l10n.Localization;
 
-@Singleton
+import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.List;
+
+@FxApplicationScoped
 public class PasswordStrengthUtil {
 
 	private static final int PW_TRUNC_LEN = 100; // truncate very long passwords, since zxcvbn memory and runtime depends vastly on the length

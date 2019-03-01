@@ -33,7 +33,6 @@ unlock.choicebox.winDriveLetter.auto = Przydziel automatycznie
 unlock.errorMessage.wrongPassword = Nieprawidłowe hasło
 unlock.errorMessage.unsupportedVersion.vaultOlderThanSoftware = Nieobsługiwana wersja portfela. Ten portfel został utworzony przez starszą wersję Cryptomatora.
 unlock.errorMessage.unsupportedVersion.softwareOlderThanVault = Nieobsługiwana wersja portfela. Ten portfel został utworzony przez nowszą wersję Cryptomatora.
-unlock.messageLabel.startServerFailed = Nie udało się uruchomić serwera WebDAV.
 # change_password.fxml
 changePassword.label.oldPassword = Stare Hasło
 changePassword.label.newPassword = Nowe Hasło
@@ -53,7 +52,6 @@ unlocked.ioGraph.yAxis.label = Wydajność (MiB/s)
 # settings.fxml
 settings.version.label = Wersja %s 
 settings.checkForUpdates.label = Sprawdź aktualizacje
-settings.requiresRestartLabel = * Cryptomator wymaga restartu
 # tray icon
 tray.menu.open = Otwórz
 tray.menu.quit = Wyjdź
@@ -75,11 +73,10 @@ upgrade.version3to4.err.io = Migracja nie powiodła się z powodu wyjątku I/O. 
 upgrade.confirmation.label = Tak, upewniłem się że synchronizacja plików została ukończona.
 unlock.label.savePassword = Zapisz Hasło
 unlock.errorMessage.unauthenticVersionMac = Nie udało się uwierzytelnić wersji MAC
-unlocked.label.mountFailed = Nie udało się połączyć z napędem
 unlock.savePassword.delete.confirmation.title = Usuń Zapisane Hasło
 unlock.savePassword.delete.confirmation.header = Czy na pewno chcesz usunąć zapisane hasło do tego portfela?
 unlock.savePassword.delete.confirmation.content = Zapisane hasło do tego portfela zostanie natychmiast usunięte z systemowego pęku kluczy. Jeśli chcesz ponownie zapisać hasło, musisz odblokować portfel z włączoną opcją "Zapisz hasło".
-settings.debugMode.label = Tryb Debugowania *
+settings.debugMode.label = Tryb Debugowania
 upgrade.version3dropBundleExtension.title = Aktualizacja portfela do wersji 3 (Drop Bundle Extension)
 upgrade.version3to4.title = Aktualizacja portfela z wersji 3 do 4
 upgrade.version4to5.title = Aktualizacja portfela z wersji 4 do 5
@@ -123,3 +120,5 @@ unlock.failedDialog.content.mountPathNonExisting = Mount point does not exist.
 unlock.failedDialog.content.mountPathNotEmpty = Mount point is not empty.
 unlock.label.useReadOnlyMode = Read-Only
 unlock.label.chooseMountPath = Choose empty directory…
+ctrl.secPasswordField.nonPrintableChars = Password contains control characters.\nRecommendation\: Remove them to ensure compatibility with other clients.
+ctrl.secPasswordField.capsLocked = Caps Lock is activated.

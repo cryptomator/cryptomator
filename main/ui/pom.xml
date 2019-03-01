@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.cryptomator</groupId>
 		<artifactId>main</artifactId>
-		<version>1.4.5</version>
+		<version>1.4.6</version>
 	</parent>
 	<artifactId>ui</artifactId>
 	<name>Cryptomator GUI</name>
@@ -46,6 +46,16 @@
 			<artifactId>cryptolib</artifactId>
 		</dependency>
 		
+		<!-- JavaFx -->
+		<dependency>
+			<groupId>org.openjfx</groupId>
+			<artifactId>javafx-controls</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.openjfx</groupId>
+			<artifactId>javafx-fxml</artifactId>
+		</dependency>
+
 		<!-- EasyBind -->
 		<dependency>
 			<groupId>org.fxmisc.easybind</groupId>
@@ -97,6 +107,11 @@
 			<groupId>com.google.jimfs</groupId>
 			<artifactId>jimfs</artifactId>
 			<version>1.1</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.openjfx</groupId>
+			<artifactId>javafx-swing</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

@@ -5,11 +5,10 @@
  *******************************************************************************/
 package org.cryptomator.keychain;
 
-import java.util.Optional;
+import dagger.Component;
 
 import javax.inject.Singleton;
-
-import dagger.Component;
+import java.util.Optional;
 
 @Singleton
 @Component(modules = KeychainModule.class)

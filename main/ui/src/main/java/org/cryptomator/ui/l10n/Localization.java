@@ -5,6 +5,13 @@
  *******************************************************************************/
 package org.cryptomator.ui.l10n;
 
+import com.google.common.collect.Sets;
+import org.apache.commons.lang3.StringUtils;
+import org.cryptomator.common.FxApplicationScoped;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.inject.Inject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -19,16 +26,7 @@ import java.util.Objects;
 import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.common.collect.Sets;
-
-@Singleton
+@FxApplicationScoped
 public class Localization extends ResourceBundle {
 
 	private static final Logger LOG = LoggerFactory.getLogger(Localization.class);
