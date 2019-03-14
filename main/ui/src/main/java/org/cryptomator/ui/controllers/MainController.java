@@ -220,12 +220,12 @@ public class MainController implements ViewController {
 	private void gracefulShutdown() {
 		vaults.filtered(Vault.NOT_LOCKED).forEach(Vault::prepareForShutdown);
 		if (!vaults.filtered(Vault.NOT_LOCKED).isEmpty()) {
+			mainWindow.show(); // to keep the application open
 			ButtonType tryAgainButtonType = new ButtonType(localization.getString("main.gracefulShutdown.button.tryAgain"));
 			ButtonType forceShutdownButtonType = new ButtonType(localization.getString("main.gracefulShutdown.button.forceShutdown"));
 			Alert gracefulShutdownDialog = DialogBuilderUtil.buildGracefulShutdownDialog(
 					localization.getString("main.gracefulShutdown.dialog.title"), localization.getString("main.gracefulShutdown.dialog.header"), localization.getString("main.gracefulShutdown.dialog.content"),
 					forceShutdownButtonType, ButtonType.CANCEL, forceShutdownButtonType, tryAgainButtonType);
-
 			Optional<ButtonType> choice = gracefulShutdownDialog.showAndWait();
 			choice.ifPresent(btnType -> {
 				if (tryAgainButtonType.equals(btnType)) {
@@ -233,7 +233,11 @@ public class MainController implements ViewController {
 				} else if (forceShutdownButtonType.equals(btnType)) {
 					Platform.runLater(Platform::exit);
 				} else {
-					return;
+					if (!vaults.filtered(Vault.NOT_LOCKED).isEmpty()) {
+						showUnlockedView(vaults.get(0), false); //if there are still unlocked vaults, show one of them
+					} else {
+						showUnlockView(UnlockController.State.UNLOCKING); //otherwise show any vault
+					}
 				}
 			});
 		} else {
