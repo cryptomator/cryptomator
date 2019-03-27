@@ -275,7 +275,7 @@ public class MainController implements ViewController {
 	// ****************************************
 
 	@FXML
-	private void didClickAddVault(ActionEvent event) {
+	private void didClickAddVault() {
 		if (addVaultContextMenu.isShowing()) {
 			addVaultContextMenu.hide();
 		} else {
@@ -284,7 +284,7 @@ public class MainController implements ViewController {
 	}
 
 	@FXML
-	private void didClickCreateNewVault(ActionEvent event) {
+	private void didClickCreateNewVault() {
 		final FileChooser fileChooser = new FileChooser();
 		final File file = fileChooser.showSaveDialog(mainWindow);
 		if (file == null) {
@@ -317,7 +317,7 @@ public class MainController implements ViewController {
 	}
 
 	@FXML
-	private void didClickAddExistingVaults(ActionEvent event) {
+	private void didClickAddExistingVaults() {
 		final FileChooser fileChooser = new FileChooser();
 		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Cryptomator Masterkey", "*.cryptomator"));
 		final List<File> files = fileChooser.showOpenMultipleDialog(mainWindow);
@@ -360,7 +360,7 @@ public class MainController implements ViewController {
 	}
 
 	@FXML
-	private void didClickRemoveSelectedEntry(ActionEvent e) {
+	private void didClickRemoveSelectedEntry() {
 		Alert confirmDialog = DialogBuilderUtil.buildConfirmationDialog( //
 				localization.getString("main.directoryList.remove.confirmation.title"), //
 				localization.getString("main.directoryList.remove.confirmation.header"), //
@@ -379,12 +379,12 @@ public class MainController implements ViewController {
 	}
 
 	@FXML
-	private void didClickChangePassword(ActionEvent e) {
+	private void didClickChangePassword() {
 		showChangePasswordView();
 	}
 
 	@FXML
-	private void didClickShowSettings(ActionEvent e) {
+	private void didClickShowSettings() {
 		toggleShowSettings();
 	}
 

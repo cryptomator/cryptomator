@@ -80,6 +80,7 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 				default:
 					LOG.warn("Unsupported vault setting found in JSON: " + name);
 					in.skipValue();
+					break;
 			}
 		}
 		in.endObject();
