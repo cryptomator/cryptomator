@@ -156,7 +156,7 @@ public class SettingsController implements ViewController {
 		}
 	}
 
-	private void setVisibilityGvfsElements(Observable obs, Object oldValue, Object newValue) {
+	private void setVisibilityGvfsElements(@SuppressWarnings("unused") Observable obs, @SuppressWarnings("unused")Object oldValue, Object newValue) {
 		prefGvfsSchemeLabel.setVisible(SystemUtils.IS_OS_LINUX && ((VolumeImpl) newValue).getDisplayName().equals("WebDAV"));
 		prefGvfsScheme.setVisible(SystemUtils.IS_OS_LINUX && ((VolumeImpl) newValue).getDisplayName().equals("WebDAV"));
 	}

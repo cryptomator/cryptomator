@@ -9,27 +9,9 @@
  *******************************************************************************/
 package org.cryptomator.ui.controllers;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.util.Objects;
-import java.util.Optional;
-
-import javax.inject.Inject;
-
-import javafx.beans.Observable;
-import org.cryptomator.cryptolib.api.InvalidPassphraseException;
-import org.cryptomator.cryptolib.api.UnsupportedVaultFormatException;
-import org.cryptomator.ui.controls.SecPasswordField;
-import org.cryptomator.ui.l10n.Localization;
-import org.cryptomator.ui.model.Vault;
-import org.cryptomator.ui.util.PasswordStrengthUtil;
-import org.fxmisc.easybind.EasyBind;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.beans.binding.BooleanBinding;
+import javafx.beans.Observable;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.event.ActionEvent;
@@ -41,6 +23,21 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Region;
 import javafx.scene.text.Text;
+import org.cryptomator.cryptolib.api.InvalidPassphraseException;
+import org.cryptomator.cryptolib.api.UnsupportedVaultFormatException;
+import org.cryptomator.ui.controls.SecPasswordField;
+import org.cryptomator.ui.l10n.Localization;
+import org.cryptomator.ui.model.Vault;
+import org.cryptomator.ui.util.PasswordStrengthUtil;
+import org.fxmisc.easybind.EasyBind;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.inject.Inject;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.util.Objects;
+import java.util.Optional;
 
 public class ChangePasswordController implements ViewController {
 
@@ -113,7 +110,7 @@ public class ChangePasswordController implements ViewController {
 		passwordStrengthLabel.textProperty().bind(EasyBind.map(passwordStrength, strengthRater::getStrengthDescription));
 	}
 
-	private void passwordsChanged(Observable observable) {
+	private void passwordsChanged(@SuppressWarnings("unused") Observable observable) {
 		boolean oldPasswordEmpty = oldPasswordField.getCharacters().length() == 0;
 		boolean newPasswordEmpty = newPasswordField.getCharacters().length() == 0;
 		boolean passwordsEqual = newPasswordField.getCharacters().equals(retypePasswordField.getCharacters());

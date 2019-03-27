@@ -8,10 +8,6 @@
  ******************************************************************************/
 package org.cryptomator.ui.controllers;
 
-import javax.inject.Inject;
-import java.util.Optional;
-import java.util.concurrent.ExecutorService;
-
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -41,6 +37,10 @@ import org.cryptomator.ui.util.Tasks;
 import org.fxmisc.easybind.EasyBind;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.inject.Inject;
+import java.util.Optional;
+import java.util.concurrent.ExecutorService;
 
 import static java.lang.String.format;
 
@@ -103,7 +103,7 @@ public class UnlockedController implements ViewController {
 	}
 
 	@FXML
-	private void didClickLockVault(ActionEvent event) {
+	private void didClickLockVault() {
 		regularLockVault(this::lockVaultSucceeded);
 	}
 
@@ -156,7 +156,7 @@ public class UnlockedController implements ViewController {
 	}
 
 	@FXML
-	private void didClickMoreOptions(ActionEvent event) {
+	private void didClickMoreOptions() {
 		if (moreOptionsMenu.isShowing()) {
 			moreOptionsMenu.hide();
 		} else {
@@ -166,7 +166,7 @@ public class UnlockedController implements ViewController {
 	}
 
 	@FXML
-	private void didClickRevealVault(ActionEvent event) {
+	private void didClickRevealVault() {
 		revealVault(vault.get());
 	}
 
