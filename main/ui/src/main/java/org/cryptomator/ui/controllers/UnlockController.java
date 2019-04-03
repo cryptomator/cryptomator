@@ -441,9 +441,10 @@ public class UnlockController implements ViewController {
 				keychainAccess.get().storePassphrase(vault.getId(), password);
 			}
 		}).onSuccess(() -> {
-			messageText.setText(null);
+			messageText.setText("");
 			downloadsPageLink.setVisible(false);
 			listener.ifPresent(lstnr -> lstnr.didUnlock(vault));
+			passwordField.swipe();
 		}).onError(InvalidPassphraseException.class, e -> {
 			messageText.setText(localization.getString("unlock.errorMessage.wrongPassword"));
 			passwordField.selectAll();
@@ -473,9 +474,6 @@ public class UnlockController implements ViewController {
 			LOG.error("Unlock failed for technical reasons.", e);
 			messageText.setText(localization.getString("unlock.errorMessage.unlockFailed"));
 		}).andFinally(() -> {
-			if (!savePassword.isSelected()) {
-				passwordField.swipe();
-			}
 			advancedOptions.setDisable(false);
 			progressIndicator.setVisible(false);
 			progressText.setText(null);
