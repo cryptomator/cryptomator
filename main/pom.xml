@@ -31,7 +31,7 @@
 		<cryptomator.dokany.version>1.1.6</cryptomator.dokany.version>
 		<cryptomator.webdav.version>1.0.9</cryptomator.webdav.version>
 
-		<javafx.version>11.0.2</javafx.version>
+		<javafx.version>12</javafx.version>
 
 		<commons-io.version>2.6</commons-io.version>
 		<commons-lang3.version>3.8.1</commons-lang3.version>
