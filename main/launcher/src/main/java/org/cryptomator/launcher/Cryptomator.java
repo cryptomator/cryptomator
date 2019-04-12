@@ -6,7 +6,6 @@
 package org.cryptomator.launcher;
 
 import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.stage.Stage;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.logging.DebugMode;
@@ -20,7 +19,6 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import java.io.IOException;
 import java.util.Optional;
-import java.util.concurrent.CountDownLatch;
 
 @Singleton
 public class Cryptomator {
@@ -56,51 +54,41 @@ public class Cryptomator {
 	private int run(String[] args) {
 		logConfig.init();
 		LOG.info("Starting Cryptomator {} on {} {} ({})", applicationVersion.orElse("SNAPSHOT"), SystemUtils.OS_NAME, SystemUtils.OS_VERSION, SystemUtils.OS_ARCH);
+		debugMode.initialize();
 
-		if (sendArgsToRunningInstance(args)) {
-			LOG.info("Found running application instance. Shutting down...");
-			return 0;
+		/*
+		 * Attempts to create an IPC connection to a running Cryptomator instance and sends it the given args.
+		 * If no external process could be reached, the args will be handled by the loopback IPC endpoint.
+		 */
+		try (IpcFactory.IpcEndpoint endpoint = ipcFactory.create()) {
+			endpoint.getRemote().handleLaunchArgs(args); // if we are the server, getRemote() returns self.
+			if (endpoint.isConnectedToRemote()) {
+				LOG.info("Found running application instance. Shutting down...");
+				return 2;
+			} else {
+				LOG.debug("Did not find running application instance. Launching GUI...");
+				return runGuiApplication();
+			}
+		} catch (IOException e) {
+			LOG.error("Failed to initiate inter-process communication.", e);
+			return runGuiApplication();
 		}
+	}
 
+	/**
+	 * Launches the JavaFX application and waits until shutdown is requested.
+	 * @return Nonzero exit code in case of an error.
+	 */
+	private int runGuiApplication() {
 		try {
-			runGuiApplication();
+			CleanShutdownPerformer.registerShutdownHook();
+			Application.launch(MainApp.class);
 			LOG.info("Shutting down...");
 			return 0;
 		} catch (Throwable e) {
 			LOG.error("Terminating due to error", e);
 			return 1;
 		}
-	}
-
-	/**
-	 * Attempts to create an IPC connection to a running Cryptomator instance and sends it the given args.
-	 * If no external process could be reached, the args will be handled by the loopback IPC endpoint.
-	 *
-	 * @param args Arguments to send to the instance (if possible)
-	 * @return <code>true</code> if a different process could be reached, <code>false</code> otherwise.
-	 */
-	private boolean sendArgsToRunningInstance(String[] args) {
-		try (IpcFactory.IpcEndpoint endpoint = ipcFactory.create()) {
-			endpoint.getRemote().handleLaunchArgs(args); // if we are the server, getRemote() returns self.
-			return endpoint.isConnectedToRemote();
-		} catch (IOException e) {
-			LOG.error("Failed to initiate inter-process communication.", e);
-			return false;
-		}
-	}
-
-	/**
-	 * Launches the JavaFX application and waits until shutdown is requested.
-	 */
-	private void runGuiApplication() {
-		debugMode.initialize();
-		CleanShutdownPerformer.registerShutdownHook();
-		Application.launch(MainApp.class);
-//			Platform.startup(() -> {
-//				assert Platform.isFxApplicationThread();
-//				FxApplication app = CRYPTOMATOR_COMPONENT.fxApplicationComponent().application();
-//				app.start();
-//			});
 	}
 
 

@@ -20,7 +20,6 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Side;
 import javafx.scene.Parent;
@@ -52,11 +51,11 @@ import org.cryptomator.ui.controls.DirectoryListCell;
 import org.cryptomator.ui.l10n.Localization;
 import org.cryptomator.ui.model.AppLaunchEvent;
 import org.cryptomator.ui.model.AutoUnlocker;
-import org.cryptomator.ui.model.upgrade.UpgradeStrategies;
-import org.cryptomator.ui.model.upgrade.UpgradeStrategy;
 import org.cryptomator.ui.model.Vault;
 import org.cryptomator.ui.model.VaultFactory;
 import org.cryptomator.ui.model.VaultList;
+import org.cryptomator.ui.model.upgrade.UpgradeStrategies;
+import org.cryptomator.ui.model.upgrade.UpgradeStrategy;
 import org.cryptomator.ui.util.DialogBuilderUtil;
 import org.cryptomator.ui.util.Tasks;
 import org.fxmisc.easybind.EasyBind;
@@ -220,12 +219,12 @@ public class MainController implements ViewController {
 	private void gracefulShutdown() {
 		vaults.filtered(Vault.NOT_LOCKED).forEach(Vault::prepareForShutdown);
 		if (!vaults.filtered(Vault.NOT_LOCKED).isEmpty()) {
+			mainWindow.show(); // to keep the application open
 			ButtonType tryAgainButtonType = new ButtonType(localization.getString("main.gracefulShutdown.button.tryAgain"));
 			ButtonType forceShutdownButtonType = new ButtonType(localization.getString("main.gracefulShutdown.button.forceShutdown"));
 			Alert gracefulShutdownDialog = DialogBuilderUtil.buildGracefulShutdownDialog(
 					localization.getString("main.gracefulShutdown.dialog.title"), localization.getString("main.gracefulShutdown.dialog.header"), localization.getString("main.gracefulShutdown.dialog.content"),
 					forceShutdownButtonType, ButtonType.CANCEL, forceShutdownButtonType, tryAgainButtonType);
-
 			Optional<ButtonType> choice = gracefulShutdownDialog.showAndWait();
 			choice.ifPresent(btnType -> {
 				if (tryAgainButtonType.equals(btnType)) {
@@ -233,7 +232,11 @@ public class MainController implements ViewController {
 				} else if (forceShutdownButtonType.equals(btnType)) {
 					Platform.runLater(Platform::exit);
 				} else {
-					return;
+					if (!vaults.filtered(Vault.NOT_LOCKED).isEmpty()) {
+						showUnlockedView(vaults.get(0), false); //if there are still unlocked vaults, show one of them
+					} else {
+						showUnlockView(UnlockController.State.UNLOCKING); //otherwise show any vault
+					}
 				}
 			});
 		} else {
@@ -271,7 +274,7 @@ public class MainController implements ViewController {
 	// ****************************************
 
 	@FXML
-	private void didClickAddVault(ActionEvent event) {
+	private void didClickAddVault() {
 		if (addVaultContextMenu.isShowing()) {
 			addVaultContextMenu.hide();
 		} else {
@@ -280,7 +283,7 @@ public class MainController implements ViewController {
 	}
 
 	@FXML
-	private void didClickCreateNewVault(ActionEvent event) {
+	private void didClickCreateNewVault() {
 		final FileChooser fileChooser = new FileChooser();
 		final File file = fileChooser.showSaveDialog(mainWindow);
 		if (file == null) {
@@ -313,7 +316,7 @@ public class MainController implements ViewController {
 	}
 
 	@FXML
-	private void didClickAddExistingVaults(ActionEvent event) {
+	private void didClickAddExistingVaults() {
 		final FileChooser fileChooser = new FileChooser();
 		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Cryptomator Masterkey", "*.cryptomator"));
 		final List<File> files = fileChooser.showOpenMultipleDialog(mainWindow);
@@ -356,7 +359,7 @@ public class MainController implements ViewController {
 	}
 
 	@FXML
-	private void didClickRemoveSelectedEntry(ActionEvent e) {
+	private void didClickRemoveSelectedEntry() {
 		Alert confirmDialog = DialogBuilderUtil.buildConfirmationDialog( //
 				localization.getString("main.directoryList.remove.confirmation.title"), //
 				localization.getString("main.directoryList.remove.confirmation.header"), //
@@ -375,12 +378,12 @@ public class MainController implements ViewController {
 	}
 
 	@FXML
-	private void didClickChangePassword(ActionEvent e) {
+	private void didClickChangePassword() {
 		showChangePasswordView();
 	}
 
 	@FXML
-	private void didClickShowSettings(ActionEvent e) {
+	private void didClickShowSettings() {
 		toggleShowSettings();
 	}
 

@@ -130,7 +130,7 @@ public class SettingsController implements ViewController {
 	}
 
 	@FXML
-	private void changePort(ActionEvent evt) {
+	private void changePort() {
 		assert isPortValid() : "Button must be disabled, if port is invalid.";
 		try {
 			int port = Integer.parseInt(portField.getText());
@@ -143,11 +143,8 @@ public class SettingsController implements ViewController {
 	private boolean isPortValid() {
 		try {
 			int port = Integer.parseInt(portField.getText());
-			if (port == 0 || port >= Settings.MIN_PORT && port <= Settings.MAX_PORT) {
-				return true;
-			} else {
-				return false;
-			}
+			return port == 0 // choose port automatically
+					|| port >= Settings.MIN_PORT && port <= Settings.MAX_PORT; // port within range
 		} catch (NumberFormatException e) {
 			return false;
 		}
@@ -159,7 +156,7 @@ public class SettingsController implements ViewController {
 		}
 	}
 
-	private void setVisibilityGvfsElements(Observable obs, Object oldValue, Object newValue) {
+	private void setVisibilityGvfsElements(@SuppressWarnings("unused") Observable obs, @SuppressWarnings("unused")Object oldValue, Object newValue) {
 		prefGvfsSchemeLabel.setVisible(SystemUtils.IS_OS_LINUX && ((VolumeImpl) newValue).getDisplayName().equals("WebDAV"));
 		prefGvfsScheme.setVisible(SystemUtils.IS_OS_LINUX && ((VolumeImpl) newValue).getDisplayName().equals("WebDAV"));
 	}

@@ -15,19 +15,17 @@ import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 public class WindowsProtectedKeychainAccessTest {
 
-	private Path keychainPath;
 	private WindowsProtectedKeychainAccess keychain;
 
 	@BeforeEach
-	public void setup(@TempDir Path tempDir) throws IOException {
-		keychainPath = tempDir.resolve("keychainfile.tmp");
+	public void setup(@TempDir Path tempDir) {
+		Path keychainPath = tempDir.resolve("keychainfile.tmp");
 		Environment env = Mockito.mock(Environment.class);
 		Mockito.when(env.getKeychainPath()).thenReturn(Stream.of(keychainPath));
 		WinFunctions winFunctions = Mockito.mock(WinFunctions.class);
@@ -40,7 +38,7 @@ public class WindowsProtectedKeychainAccessTest {
 	}
 
 	@Test
-	public void testStoreAndLoad() throws IOException {
+	public void testStoreAndLoad() {
 		String storedPw1 = "topSecret";
 		String storedPw2 = "bottomSecret";
 		keychain.storePassphrase("myPassword", storedPw1);

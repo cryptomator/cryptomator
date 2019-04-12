@@ -13,7 +13,6 @@ import com.google.common.base.Strings;
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
 import javafx.scene.control.Alert;
@@ -287,7 +286,7 @@ public class UnlockController implements ViewController {
 	// ****************************************
 
 	@FXML
-	public void didClickDownloadsLink(ActionEvent event) {
+	public void didClickDownloadsLink() {
 		app.getHostServices().showDocument("https://cryptomator.org/downloads/#allVersions");
 	}
 
@@ -296,7 +295,7 @@ public class UnlockController implements ViewController {
 	// ****************************************
 
 	@FXML
-	private void didClickAdvancedOptionsButton(ActionEvent event) {
+	private void didClickAdvancedOptionsButton() {
 		messageText.setText(null);
 		advancedOptions.setVisible(!advancedOptions.isVisible());
 		if (advancedOptions.isVisible()) {
@@ -312,7 +311,7 @@ public class UnlockController implements ViewController {
 		}
 	}
 
-	private void mountNameDidChange(ObservableValue<? extends String> property, String oldValue, String newValue) {
+	private void mountNameDidChange(@SuppressWarnings("unused") ObservableValue<? extends String> property, @SuppressWarnings("unused")String oldValue, String newValue) {
 		// newValue is guaranteed to be a-z0-9_, see #filterAlphanumericKeyEvents
 		if (newValue.isEmpty()) {
 			mountName.setText(vault.getMountName());
@@ -321,7 +320,8 @@ public class UnlockController implements ViewController {
 		}
 	}
 
-	public void didClickChooseCustomMountPoint(ActionEvent actionEvent) {
+	@FXML
+	public void didClickChooseCustomMountPoint() {
 		DirectoryChooser dirChooser = new DirectoryChooser();
 		File file = dirChooser.showDialog(mainWindow);
 		if (file != null) {
@@ -372,7 +372,7 @@ public class UnlockController implements ViewController {
 		}
 	}
 
-	private void winDriveLetterDidChange(ObservableValue<? extends Character> property, Character oldValue, Character newValue) {
+	private void winDriveLetterDidChange(@SuppressWarnings("unused") ObservableValue<? extends Character> property, @SuppressWarnings("unused") Character oldValue, Character newValue) {
 		vault.setWinDriveLetter(newValue);
 	}
 
@@ -396,7 +396,7 @@ public class UnlockController implements ViewController {
 	// ****************************************
 
 	@FXML
-	private void didClickSavePasswordCheckbox(ActionEvent event) {
+	private void didClickSavePasswordCheckbox() {
 		if (!savePassword.isSelected() && hasStoredPassword()) {
 			Alert confirmDialog = DialogBuilderUtil.buildConfirmationDialog( //
 					localization.getString("unlock.savePassword.delete.confirmation.title"), //
@@ -427,7 +427,7 @@ public class UnlockController implements ViewController {
 	// ****************************************
 
 	@FXML
-	private void didClickUnlockButton(ActionEvent event) {
+	private void didClickUnlockButton() {
 		advancedOptions.setDisable(true);
 		advancedOptions.setVisible(false);
 		advancedOptionsButton.setText(localization.getString("unlock.button.advancedOptions.show"));
@@ -441,9 +441,10 @@ public class UnlockController implements ViewController {
 				keychainAccess.get().storePassphrase(vault.getId(), password);
 			}
 		}).onSuccess(() -> {
-			messageText.setText(null);
+			messageText.setText("");
 			downloadsPageLink.setVisible(false);
 			listener.ifPresent(lstnr -> lstnr.didUnlock(vault));
+			passwordField.swipe();
 		}).onError(InvalidPassphraseException.class, e -> {
 			messageText.setText(localization.getString("unlock.errorMessage.wrongPassword"));
 			passwordField.selectAll();
@@ -473,9 +474,6 @@ public class UnlockController implements ViewController {
 			LOG.error("Unlock failed for technical reasons.", e);
 			messageText.setText(localization.getString("unlock.errorMessage.unlockFailed"));
 		}).andFinally(() -> {
-			if (!savePassword.isSelected()) {
-				passwordField.swipe();
-			}
 			advancedOptions.setDisable(false);
 			progressIndicator.setVisible(false);
 			progressText.setText(null);

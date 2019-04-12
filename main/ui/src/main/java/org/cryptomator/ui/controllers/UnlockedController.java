@@ -2,15 +2,11 @@
  * Copyright (c) 2014, 2017 Sebastian Stenzel
  * All rights reserved.
  * This program and the accompanying materials are made available under the terms of the accompanying LICENSE file.
- * 
+ *
  * Contributors:
  *     Sebastian Stenzel - initial API and implementation
  ******************************************************************************/
 package org.cryptomator.ui.controllers;
-
-import javax.inject.Inject;
-import java.util.Optional;
-import java.util.concurrent.ExecutorService;
 
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
@@ -42,6 +38,10 @@ import org.fxmisc.easybind.EasyBind;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Inject;
+import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+
 import static java.lang.String.format;
 
 public class UnlockedController implements ViewController {
@@ -49,7 +49,7 @@ public class UnlockedController implements ViewController {
 	private static final Logger LOG = LoggerFactory.getLogger(UnlockedController.class);
 
 	private static final int IO_SAMPLING_STEPS = 100;
-	private static final double IO_SAMPLING_INTERVAL = 0.25;
+	private static final double IO_SAMPLING_INTERVAL = 0.5;
 
 	private final Localization localization;
 	private final ExecutorService executor;
@@ -103,7 +103,7 @@ public class UnlockedController implements ViewController {
 	}
 
 	@FXML
-	private void didClickLockVault(ActionEvent event) {
+	private void didClickLockVault() {
 		regularLockVault(this::lockVaultSucceeded);
 	}
 
@@ -156,7 +156,7 @@ public class UnlockedController implements ViewController {
 	}
 
 	@FXML
-	private void didClickMoreOptions(ActionEvent event) {
+	private void didClickMoreOptions() {
 		if (moreOptionsMenu.isShowing()) {
 			moreOptionsMenu.hide();
 		} else {
@@ -166,7 +166,7 @@ public class UnlockedController implements ViewController {
 	}
 
 	@FXML
-	private void didClickRevealVault(ActionEvent event) {
+	private void didClickRevealVault() {
 		revealVault(vault.get());
 	}
 
@@ -211,43 +211,42 @@ public class UnlockedController implements ViewController {
 	private class IoSamplingAnimationHandler implements EventHandler<ActionEvent> {
 
 		private static final double BYTES_TO_MEGABYTES_FACTOR = 1.0 / IO_SAMPLING_INTERVAL / 1024.0 / 1024.0;
-		private static final double SMOOTHING_FACTOR = 0.3;
-		private static final long EFFECTIVELY_ZERO = 100000; // 100kb
 		private final Series<Number, Number> decryptedBytes;
 		private final Series<Number, Number> encryptedBytes;
-		private int step = 0;
-		private long oldDecBytes = 0;
-		private long oldEncBytes = 0;
 
 		public IoSamplingAnimationHandler(Series<Number, Number> decryptedBytes, Series<Number, Number> encryptedBytes) {
 			this.decryptedBytes = decryptedBytes;
 			this.encryptedBytes = encryptedBytes;
+
+			// initialize data once and change value of datapoints later:
+			for (int i = 0; i < IO_SAMPLING_STEPS; i++) {
+				decryptedBytes.getData().add(new Data<>(i, 0));
+				encryptedBytes.getData().add(new Data<>(i, 0));
+			}
+
+			xAxis.setLowerBound(0);
+			xAxis.setUpperBound(IO_SAMPLING_STEPS);
 		}
 
 		@Override
 		public void handle(ActionEvent event) {
-			step++;
+			// move all values one step:
+			for (int i = 0; i < IO_SAMPLING_STEPS - 1; i++) {
+				int j = i + 1;
+				Number tmp = decryptedBytes.getData().get(j).getYValue();
+				decryptedBytes.getData().get(i).setYValue(tmp);
 
+				tmp = encryptedBytes.getData().get(j).getYValue();
+				encryptedBytes.getData().get(i).setYValue(tmp);
+			}
+
+			// add latest value:
 			final long decBytes = vault.get().pollBytesRead();
-			final double smoothedDecBytes = oldDecBytes + SMOOTHING_FACTOR * (decBytes - oldDecBytes);
-			final double smoothedDecMb = smoothedDecBytes * BYTES_TO_MEGABYTES_FACTOR;
-			oldDecBytes = smoothedDecBytes > EFFECTIVELY_ZERO ? (long) smoothedDecBytes : 0l;
-			decryptedBytes.getData().add(new Data<Number, Number>(step, smoothedDecMb));
-			if (decryptedBytes.getData().size() > IO_SAMPLING_STEPS) {
-				decryptedBytes.getData().remove(0);
-			}
-
+			final double decMb = decBytes * BYTES_TO_MEGABYTES_FACTOR;
 			final long encBytes = vault.get().pollBytesWritten();
-			final double smoothedEncBytes = oldEncBytes + SMOOTHING_FACTOR * (encBytes - oldEncBytes);
-			final double smoothedEncMb = smoothedEncBytes * BYTES_TO_MEGABYTES_FACTOR;
-			oldEncBytes = smoothedEncBytes > EFFECTIVELY_ZERO ? (long) smoothedEncBytes : 0l;
-			encryptedBytes.getData().add(new Data<Number, Number>(step, smoothedEncMb));
-			if (encryptedBytes.getData().size() > IO_SAMPLING_STEPS) {
-				encryptedBytes.getData().remove(0);
-			}
-
-			xAxis.setLowerBound(step - IO_SAMPLING_STEPS);
-			xAxis.setUpperBound(step);
+			final double encMb = encBytes * BYTES_TO_MEGABYTES_FACTOR;
+			decryptedBytes.getData().get(IO_SAMPLING_STEPS - 1).setYValue(decMb);
+			encryptedBytes.getData().get(IO_SAMPLING_STEPS - 1).setYValue(encMb);
 		}
 	}
 
@@ -269,6 +268,7 @@ public class UnlockedController implements ViewController {
 
 	@FunctionalInterface
 	interface LockListener {
+
 		void didLock(UnlockedController ctrl);
 	}
 

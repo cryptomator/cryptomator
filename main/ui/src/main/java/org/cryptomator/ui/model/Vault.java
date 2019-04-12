@@ -18,7 +18,6 @@ import javafx.beans.property.SimpleObjectProperty;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.LazyInitializer;
-import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.cryptofs.CryptoFileSystem;
 import org.cryptomator.cryptofs.CryptoFileSystemProperties;
@@ -52,9 +51,7 @@ public class Vault {
 	public static final Predicate<Vault> NOT_LOCKED = hasState(State.LOCKED).negate();
 	private static final Logger LOG = LoggerFactory.getLogger(Vault.class);
 	private static final String MASTERKEY_FILENAME = "masterkey.cryptomator";
-	private static final String LOCALHOST_ALIAS = "cryptomator-vault";
 
-	private final Settings settings;
 	private final VaultSettings vaultSettings;
 	private final Provider<Volume> volumeProvider;
 	private final AtomicReference<CryptoFileSystem> cryptoFileSystem = new AtomicReference<>();
@@ -67,8 +64,7 @@ public class Vault {
 	}
 
 	@Inject
-	Vault(Settings settings, VaultSettings vaultSettings, Provider<Volume> volumeProvider) {
-		this.settings = settings;
+	Vault(VaultSettings vaultSettings, Provider<Volume> volumeProvider) {
 		this.vaultSettings = vaultSettings;
 		this.volumeProvider = volumeProvider;
 	}

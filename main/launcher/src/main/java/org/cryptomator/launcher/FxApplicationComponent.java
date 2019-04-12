@@ -10,7 +10,6 @@ import dagger.Subcomponent;
 import javafx.application.Application;
 import javafx.stage.Stage;
 import org.cryptomator.common.FxApplicationScoped;
-import org.cryptomator.logging.DebugMode;
 import org.cryptomator.ui.controllers.ViewControllerLoader;
 
 import javax.inject.Named;
