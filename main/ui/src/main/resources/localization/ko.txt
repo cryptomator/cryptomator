@@ -97,7 +97,7 @@ settings.webdav.port.label = WebDAV 포트
 settings.webdav.port.prompt = 0 \= 자동으로 선택
 settings.webdav.port.apply = 적용
 settings.webdav.prefGvfsScheme.label = WebDAV 스킴
-settings.volume.label = 마운트-방법 *
+settings.volume.label = 마운트-방법
 settings.volume.webdav = WebDAV
 settings.volume.fuse = FUSE
 unlock.successLabel.vaultCreated = 보관함이 성공적으로 생성되었습니다.

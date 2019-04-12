@@ -4,7 +4,6 @@ main.emptyListInstructions = Haga clic aquí para añadir una caja fuerte
 # should it be imperative?
 main.directoryList.contextMenu.remove = Eliminar de la lista
 main.directoryList.contextMenu.changePassword = Cambiar la contraseña
-# Fuzzy
 main.addDirectory.contextMenu.new = Crear una nueva caja fuerte
 main.addDirectory.contextMenu.open = Abrir una caja fuerte existente
 # welcome.fxml
@@ -100,7 +99,7 @@ settings.webdav.port.label = Puerto WebDAV
 settings.webdav.port.prompt = 0 \= Elige automáticamente
 settings.webdav.port.apply = Aplicar
 settings.webdav.prefGvfsScheme.label = Esquema de WebDAV
-settings.volume.label = Método de montaje *
+settings.volume.label = Método de montaje
 settings.volume.webdav = WebDAV
 settings.volume.fuse = FUSE
 unlock.successLabel.vaultCreated = La caja fuerte fue creada exitosamente.
@@ -117,11 +116,11 @@ main.gracefulShutdown.dialog.content = Una o más cajas fuertes están siendo ut
 main.gracefulShutdown.button.tryAgain = Intente de nuevo
 main.gracefulShutdown.button.forceShutdown = Forzar apagado
 unlock.pendingMessage.unlocking = Desbloqueando la caja fuerte...
-unlock.failedDialog.title = Unlock failed
-unlock.failedDialog.header = Unlock failed
-unlock.failedDialog.content.mountPathNonExisting = Mount point does not exist.
-unlock.failedDialog.content.mountPathNotEmpty = Mount point is not empty.
-unlock.label.useReadOnlyMode = Read-Only
-unlock.label.chooseMountPath = Choose empty directory…
-ctrl.secPasswordField.nonPrintableChars = Password contains control characters.\nRecommendation\: Remove them to ensure compatibility with other clients.
-ctrl.secPasswordField.capsLocked = Caps Lock is activated.
+unlock.failedDialog.title = Falló el desbloqueo
+unlock.failedDialog.header = Falló el desbloqueo
+unlock.failedDialog.content.mountPathNonExisting = El punto de montaje no existe.
+unlock.failedDialog.content.mountPathNotEmpty = El punto de montaje no está vacío.
+unlock.label.useReadOnlyMode = Sólo lectura
+unlock.label.chooseMountPath = Elija un directorio vacío...
+ctrl.secPasswordField.nonPrintableChars = La contraseña contiene caracteres de control.\nRecomendación\: elimínelos para asegurar la compatibilidad con otros clientes.
+ctrl.secPasswordField.capsLocked = Las mayúsculas están activadas.

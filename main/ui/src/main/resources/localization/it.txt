@@ -97,7 +97,7 @@ settings.webdav.port.label = WebDAV Port
 settings.webdav.port.prompt = 0 \= Scelta automatica
 settings.webdav.port.apply = Applica
 settings.webdav.prefGvfsScheme.label = WebDAV Scheme
-settings.volume.label = Mount-Methode *
+settings.volume.label = Mount-Methode
 settings.volume.webdav = WebDAV
 settings.volume.fuse = FUSE
 unlock.successLabel.vaultCreated = Vaul creato con successo.
