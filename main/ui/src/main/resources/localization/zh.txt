@@ -121,5 +121,5 @@ unlock.failedDialog.content.mountPathNonExisting = 挂载点不存在。
 unlock.failedDialog.content.mountPathNotEmpty = 挂载点非空。
 unlock.label.useReadOnlyMode = 只读
 unlock.label.chooseMountPath = 选择空目录...
-ctrl.secPasswordField.nonPrintableChars = Password contains control characters.\nRecommendation\: Remove them to ensure compatibility with other clients.
-ctrl.secPasswordField.capsLocked = Caps Lock is activated.
+ctrl.secPasswordField.nonPrintableChars = 密码包含控制字符。\n建议\:删除它们，以确保与其他客户机兼容。
+ctrl.secPasswordField.capsLocked = 大写锁定被激活
