@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.cryptomator</groupId>
 	<artifactId>main</artifactId>
-	<version>1.4.7</version>
+	<version>1.4.8</version>
 	<packaging>pom</packaging>
 	<name>Cryptomator</name>
 
@@ -25,10 +25,10 @@
 
 		<!-- dependency versions -->
 		<cryptomator.cryptolib.version>1.2.1</cryptomator.cryptolib.version>
-		<cryptomator.cryptofs.version>1.8.0</cryptomator.cryptofs.version>
+		<cryptomator.cryptofs.version>1.8.1</cryptomator.cryptofs.version>
 		<cryptomator.jni.version>2.0.0</cryptomator.jni.version>
 		<cryptomator.fuse.version>1.1.2</cryptomator.fuse.version>
-		<cryptomator.dokany.version>1.1.6</cryptomator.dokany.version>
+		<cryptomator.dokany.version>1.1.7</cryptomator.dokany.version>
 		<cryptomator.webdav.version>1.0.9</cryptomator.webdav.version>
 
 		<javafx.version>12</javafx.version>

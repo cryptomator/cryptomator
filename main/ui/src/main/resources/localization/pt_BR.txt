@@ -97,7 +97,7 @@ settings.webdav.port.label = WebDAV Porta
 settings.webdav.port.prompt = 0 \= Escolher automaticamente
 settings.webdav.port.apply = Aplicar
 settings.webdav.prefGvfsScheme.label = WebDAV Esquema
-settings.volume.label = Método de Montagem *
+settings.volume.label = Método de Montagem
 settings.volume.webdav = WebDAV
 settings.volume.fuse = FUSE
 unlock.successLabel.vaultCreated = Cofre foi criado com sucesso.

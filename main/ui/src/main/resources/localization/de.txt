@@ -97,7 +97,7 @@ settings.webdav.port.label = WebDAV-Port
 settings.webdav.port.prompt = 0 \= automatische Auswahl
 settings.webdav.port.apply = Anwenden
 settings.webdav.prefGvfsScheme.label = WebDAV URL Schema
-settings.volume.label = Laufwerkseinbindung *
+settings.volume.label = Laufwerkseinbindung
 settings.volume.webdav = WebDAV
 settings.volume.fuse = FUSE
 unlock.successLabel.vaultCreated = Der Tresor wurde erfolgreich erstellt.

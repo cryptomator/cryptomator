@@ -97,7 +97,7 @@ settings.webdav.port.label = Порт WebDAV
 settings.webdav.port.prompt = 0 \= автовибір
 settings.webdav.port.apply = Застосувати
 settings.webdav.prefGvfsScheme.label = Схема WebDAV\n
-settings.volume.label = Метод монтування*
+settings.volume.label = Метод монтування
 settings.volume.webdav = WebDAV
 settings.volume.fuse = FUSE
 unlock.successLabel.vaultCreated = Сховище успішно створено.
