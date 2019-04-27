@@ -1,3 +1,4 @@
+dist: xenial
 language: java
 sudo: false
 jdk:
