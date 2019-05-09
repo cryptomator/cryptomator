@@ -46,7 +46,7 @@ For more information on the security details visit [cryptomator.org](https://cry
 
 ### Dependencies
 
-* Java 10 (min. 10.0.1, we recommend to use the current version)
+* JDK 11 (we recommend to use the latest version)
 * Maven 3
 * Optional: OS-dependent build tools for native packaging (see [Windows](https://github.com/cryptomator/cryptomator-win), [OS X](https://github.com/cryptomator/cryptomator-osx), [Linux](https://github.com/cryptomator/builder-containers))
 
@@ -57,7 +57,7 @@ cd main
 mvn clean install -Prelease
 ```
 
-An executable jar file will be created inside `main/uber-jar/target`.
+This will build all the jars and bundle them together with their OS-specific dependencies under `main/buildkit/target`. This can now be used to build native packages.
 
 ## License
 
