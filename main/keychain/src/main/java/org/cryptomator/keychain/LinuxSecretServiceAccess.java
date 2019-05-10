@@ -1,7 +1,6 @@
 package org.cryptomator.keychain;
 
 import org.apache.commons.lang3.SystemUtils;
-import org.freedesktop.dbus.ObjectPath;
 import org.freedesktop.secret.simple.SimpleCollection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,31 +12,35 @@ import java.util.Map;
 
 public class LinuxSecretServiceAccess implements KeychainAccessStrategy {
 	private static final Logger LOG = LoggerFactory.getLogger(LinuxSecretServiceAccess.class);
-	private SimpleCollection gnomeLoginKeyring;
+	private SimpleCollection gnomeLoginKeyring = null;
 
 	@Inject
 	public LinuxSecretServiceAccess() {
-		gnomeLoginKeyring = new SimpleCollection();
+		try {
+			gnomeLoginKeyring = new SimpleCollection();
+		} catch (Exception e) {
+			// Accessing secret-service DBus API failed
+		}
 	}
 
 	@Override
 	public boolean isSupported() {
-		return SystemUtils.IS_OS_LINUX;
+		return SystemUtils.IS_OS_LINUX && gnomeLoginKeyring != null;
 	}
 
 	@Override
 	public void storePassphrase(String key, CharSequence passphrase) {
-		List<ObjectPath> list = gnomeLoginKeyring.getSecretByAttributes(createAttributes(key));
-		if (list.isEmpty()) {
-			gnomeLoginKeyring.createPassword("Cryptomator", passphrase, createAttributes(key));
+		List<String> list = gnomeLoginKeyring.getItems(createAttributes(key));
+		if (list == null) {
+			gnomeLoginKeyring.createItem("Cryptomator", passphrase, createAttributes(key));
 		}
 	}
 
 	@Override
 	public char[] loadPassphrase(String key) {
-		List<ObjectPath> list = gnomeLoginKeyring.getSecretByAttributes(createAttributes(key));
-		if (!list.isEmpty()) {
-			return gnomeLoginKeyring.getPassword(list.get(0).getPath());
+		List<String> list = gnomeLoginKeyring.getItems(createAttributes(key));
+		if (list != null) {
+			return gnomeLoginKeyring.getSecret(list.get(0));
 		} else {
 			return null;
 		}
@@ -45,9 +48,9 @@ public class LinuxSecretServiceAccess implements KeychainAccessStrategy {
 
 	@Override
 	public void deletePassphrase(String key) {
-		List<ObjectPath> list = gnomeLoginKeyring.getSecretByAttributes(createAttributes(key));
-		if (!list.isEmpty()) {
-			gnomeLoginKeyring.deletePassword(list.get(0).getPath());
+		List<String> list = gnomeLoginKeyring.getItems(createAttributes(key));
+		if (list != null) {
+			gnomeLoginKeyring.deleteItem(list.get(0));
 		}
 	}
 
