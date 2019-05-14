@@ -1,5 +1,6 @@
 package org.cryptomator.keychain;
 
+import com.google.common.base.Preconditions;
 import org.apache.commons.lang3.SystemUtils;
 import org.freedesktop.secret.simple.SimpleCollection;
 
@@ -7,37 +8,43 @@ import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class LinuxSecretServiceAccess implements KeychainAccessStrategy {
-	private SimpleCollection gnomeLoginKeyring = null;
+	private final Optional<SimpleCollection> gnomeLoginKeyring;
 
 	@Inject
 	public LinuxSecretServiceAccess() {
+		SimpleCollection keyring = null;
 		try {
-			gnomeLoginKeyring = new SimpleCollection();
+			keyring = new SimpleCollection();
 		} catch (Exception e) {
 			// Accessing secret-service DBus API failed
+		} finally {
+			gnomeLoginKeyring = Optional.ofNullable(keyring);
 		}
 	}
 
 	@Override
 	public boolean isSupported() {
-		return SystemUtils.IS_OS_LINUX && gnomeLoginKeyring != null;
+		return SystemUtils.IS_OS_LINUX && gnomeLoginKeyring.isPresent();
 	}
 
 	@Override
 	public void storePassphrase(String key, CharSequence passphrase) {
-		List<String> list = gnomeLoginKeyring.getItems(createAttributes(key));
+		Preconditions.checkState(gnomeLoginKeyring.isPresent());
+		List<String> list = gnomeLoginKeyring.get().getItems(createAttributes(key));
 		if (list == null) {
-			gnomeLoginKeyring.createItem("Cryptomator", passphrase, createAttributes(key));
+			gnomeLoginKeyring.get().createItem("Cryptomator", passphrase, createAttributes(key));
 		}
 	}
 
 	@Override
 	public char[] loadPassphrase(String key) {
-		List<String> list = gnomeLoginKeyring.getItems(createAttributes(key));
+		Preconditions.checkState(gnomeLoginKeyring.isPresent());
+		List<String> list = gnomeLoginKeyring.get().getItems(createAttributes(key));
 		if (list != null) {
-			return gnomeLoginKeyring.getSecret(list.get(0));
+			return gnomeLoginKeyring.get().getSecret(list.get(0));
 		} else {
 			return null;
 		}
@@ -45,9 +52,10 @@ public class LinuxSecretServiceAccess implements KeychainAccessStrategy {
 
 	@Override
 	public void deletePassphrase(String key) {
-		List<String> list = gnomeLoginKeyring.getItems(createAttributes(key));
+		Preconditions.checkState(gnomeLoginKeyring.isPresent());
+		List<String> list = gnomeLoginKeyring.get().getItems(createAttributes(key));
 		if (list != null) {
-			gnomeLoginKeyring.deleteItem(list.get(0));
+			gnomeLoginKeyring.get().deleteItem(list.get(0));
 		}
 	}
 
