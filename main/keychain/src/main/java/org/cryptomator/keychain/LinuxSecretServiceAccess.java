@@ -2,8 +2,6 @@ package org.cryptomator.keychain;
 
 import org.apache.commons.lang3.SystemUtils;
 import org.freedesktop.secret.simple.SimpleCollection;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.util.HashMap;
@@ -11,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 
 public class LinuxSecretServiceAccess implements KeychainAccessStrategy {
-	private static final Logger LOG = LoggerFactory.getLogger(LinuxSecretServiceAccess.class);
 	private SimpleCollection gnomeLoginKeyring = null;
 
 	@Inject
