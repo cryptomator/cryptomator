@@ -25,7 +25,7 @@
 
 		<!-- dependency versions -->
 		<cryptomator.cryptolib.version>1.2.1</cryptomator.cryptolib.version>
-		<cryptomator.cryptofs.version>1.8.3</cryptomator.cryptofs.version>
+		<cryptomator.cryptofs.version>1.8.5</cryptomator.cryptofs.version>
 		<cryptomator.jni.version>2.0.0</cryptomator.jni.version>
 		<cryptomator.fuse.version>1.1.2</cryptomator.fuse.version>
 		<cryptomator.dokany.version>1.1.8</cryptomator.dokany.version>
