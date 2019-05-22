@@ -1,0 +1,124 @@
+app.name = Cryptomator
+# main.fxml
+main.emptyListInstructions = Klicka här för att lägga till ett valv
+main.directoryList.contextMenu.remove = Ta bort från lista
+main.directoryList.contextMenu.changePassword = Ändra lösenord
+main.addDirectory.contextMenu.new = Skapa nytt valv
+main.addDirectory.contextMenu.open = Öppna befintligt valv
+# welcome.fxml
+welcome.checkForUpdates.label.currentlyChecking = Söker efter uppdateringar...
+welcome.newVersionMessage = Version %1$s kan hämtas.\nDetta är %2$s.
+# initialize.fxml
+initialize.label.password = Lösenord
+initialize.label.retypePassword = Upprepa lösenord
+initialize.button.ok = Skapa valv
+initialize.messageLabel.alreadyInitialized = Valv redan initialiserat
+initialize.messageLabel.initializationFailed = Kunde inte initiera valvet. Se loggfilen för detaljer.
+# notfound.fxml
+notfound.label = Valvet kunde inte hittas. Har det flyttats?
+# upgrade.fxml
+upgrade.button = Uppgradera valv
+upgrade.version3dropBundleExtension.msg = Detta valv måste migreras till ett nyare format.\n"%1$s" kommer att ändra namn till "%2$s".\nSe till att synkroniseringen är klar innan du fortsätter.
+upgrade.version3dropBundleExtension.err.alreadyExists = Automatisk migrering misslyckades.\n"%s" finns redan.
+# unlock.fxml
+unlock.label.password = Lösenord
+unlock.label.mountName = Enhetsnamn
+unlock.label.winDriveLetter = Enhetsbokstav
+unlock.label.downloadsPageLink = Alla Cryptomator versioner
+unlock.label.advancedHeading = Avancerade inställningar
+unlock.button.unlock = Lås upp valv
+unlock.button.advancedOptions.show = Fler inställningar
+unlock.button.advancedOptions.hide = Färre inställningar
+unlock.choicebox.winDriveLetter.auto = Tilldela automatiskt
+unlock.errorMessage.wrongPassword = Fel lösenord
+unlock.errorMessage.unsupportedVersion.vaultOlderThanSoftware = Valvet stöds inte. Detta valv har skapats med en äldre version av Cryptomator.
+unlock.errorMessage.unsupportedVersion.softwareOlderThanVault = Valvet stöds inte. Detta valv har skapats med en nyare version av Cryptomator.
+# change_password.fxml
+changePassword.label.oldPassword = Gammalt lösenord
+changePassword.label.newPassword = Nytt lösenord
+changePassword.label.retypePassword = Upprepa lösenord
+changePassword.label.downloadsPageLink = Alla Cryptomator versioner
+changePassword.button.change = Ändra lösenord
+changePassword.errorMessage.wrongPassword = Fel lösenord
+changePassword.errorMessage.decryptionFailed = Dekryptering misslyckades
+# unlocked.fxml
+unlocked.button.lock = Lås valv
+unlocked.moreOptions.reveal = Visa enheten
+unlocked.label.revealFailed = Operationen misslyckades
+unlocked.label.unmountFailed = Utmatning av enhet misslyckades
+unlocked.label.statsEncrypted = krypterad
+unlocked.label.statsDecrypted = dekrypterad
+unlocked.ioGraph.yAxis.label = Genomströmning (MiB/s)
+# settings.fxml
+settings.version.label = Version %s
+settings.checkForUpdates.label = Sök efter uppdateringar
+# tray icon
+tray.menu.open = Öppna
+tray.menu.quit = Stäng
+tray.infoMsg.title = Fortfarande aktiv
+tray.infoMsg.msg = Cryptomator är fortfarande aktiv. Avsluta det Avsluta det från verktygsfältsikonen.
+tray.infoMsg.msg.osx = Cryptomator är fortfarande aktiv. Avsluta det Avsluta det från menyfältsikonen.
+initialize.messageLabel.passwordStrength.0 = Mycket svagt
+initialize.messageLabel.passwordStrength.1 = Svagt
+initialize.messageLabel.passwordStrength.2 = Ganska bra
+initialize.messageLabel.passwordStrength.3 = Starkt
+initialize.messageLabel.passwordStrength.4 = Mycket starkt
+initialize.label.doNotForget = VIKTIGT\: Om du glömmer ditt lösenord kan du inte återställa din data.
+main.directoryList.remove.confirmation.title = Ta bort valv
+main.directoryList.remove.confirmation.header = Vill du verkligen ta bort det här valvet?
+main.directoryList.remove.confirmation.content = Valvet kommer endast att tas bort från listan. Ta bort valvet från ditt filsystem för att permanent radera det.
+upgrade.version3to4.msg = Denna valv måste migreras till ett nyare format.\nKrypterade mappnamn uppdateras.\nSe till att synkroniseringen är klar innan du fortsätter.
+upgrade.version3to4.err.io = Migrationen misslyckades på grund av ett I/O-undantag. Se loggfilen för detaljer.
+# upgrade.fxml
+upgrade.confirmation.label = Ja, jag har säkerställt att synkroniseringen är klar
+unlock.label.savePassword = Spara lösenord
+unlock.errorMessage.unauthenticVersionMac = Kunde inte verifiera MAC-versionen
+unlock.savePassword.delete.confirmation.title = Ta bort sparat lösenord
+unlock.savePassword.delete.confirmation.header = Vill du verkligen ta bort det sparade lösenordet för det här valvet?
+unlock.savePassword.delete.confirmation.content = Det sparade lösenordet för detta valv raderas omedelbart från systemnyckelringen. Om du vill spara ditt lösenord igen måste du låsa upp ditt valv med alternativet "Spara lösenord" aktiverat.
+settings.debugMode.label = Felsökningsläge
+upgrade.version3dropBundleExtension.title = Valv version 3-uppgradering (Bundle tillägget borttaget)
+upgrade.version3to4.title = Valv version 3 till 4 uppgradering
+upgrade.version4to5.title = Valv version 4 till 5 uppgradering
+upgrade.version4to5.msg = Detta valv måste migreras till ett nyare format.\nKrypterade filer uppdateras.\nSe till att synkroniseringen är klar innan du fortsätter.\n\nObs\! Ändringsdatum för alla filer ändras till aktuellt datum/tid i processen.
+upgrade.version4to5.err.io = Migreringen misslyckades på grund av ett I/O-undantag. Se loggfilen för detaljer.
+unlock.label.revealAfterMount = Avslöja enheten
+unlocked.lock.force.confirmation.title = Låsning av %1$s misslyckades
+unlocked.lock.force.confirmation.header = Vill du tvinga låsning?
+unlocked.lock.force.confirmation.content = Det kan bero på att andra program fortfarande har åtkomst till filer i valvet eller på att något annat problem uppstod. Program som fortfarande kommer åt filerna kanske inte fungerar korrekt och data som inte redan skrivits av dessa program kan gå förlorade.
+unlock.label.unlockAfterStartup = Automatisk upplåsning vid start (experimentell)
+unlock.errorMessage.unlockFailed = Upplåsningen misslyckades. Se loggfilen för mer information.
+upgrade.version5toX.title = Versionsuppgradering av valv
+upgrade.version5toX.msg = Detta valv måste migreras till ett nyare format.\nSe till att synkroniseringen är klar innan du fortsätter.
+main.createVault.nonEmptyDir.title = Valv skapande misslyckades
+main.createVault.nonEmptyDir.header = Vald mapp är inte tom
+main.createVault.nonEmptyDir.content = Den valda katalogen innehåller redan filer (eventuellt dolda). Ett valv kan bara skapas i en tom katalog.
+settings.webdav.port.label = WebDAV-port
+settings.webdav.port.prompt = 0 \= Välj automatiskt
+settings.webdav.port.apply = Tillämpa
+settings.webdav.prefGvfsScheme.label = WebDAV-schema
+settings.volume.label = Önskad volymtyp
+settings.volume.webdav = WebDAV
+settings.volume.fuse = FUSE
+unlock.successLabel.vaultCreated = Valv skapades.
+unlock.successLabel.passwordChanged = Lösenordet ändrades.
+unlock.successLabel.upgraded = Cryptomator uppdaterades
+unlock.label.useOwnMountPath = Använd anpassad monteringspunkt
+welcome.askForUpdateCheck.dialog.title = Uppdateringskontroll
+welcome.askForUpdateCheck.dialog.header = Aktivera den integrerade uppdateringskontrollen?
+welcome.askForUpdateCheck.dialog.content = För att söka efter uppdateringar hämtar Cryptomator den aktuella versionen från Cryptomator-servrarna och visar en ledtråd till dig om en nyare version är tillgänglig.\n\nVi rekommenderar att du aktiverar uppdateringskontrollen för att alltid vara säker på att du har den senaste versionen av Cryptomator, med alla säkerhetsåtgärder, installerad. Om du inte aktiverar uppdateringskontrollen kan du kontrollera och hämta den aktuella versionen från https\://cryptomator.org/downloads/.\n\nDu kan ändra detta när som helst inifrån inställningarna.
+settings.volume.dokany = Dokany
+main.gracefulShutdown.dialog.title = Valvlåsning misslyckades
+main.gracefulShutdown.dialog.header = Valv som används
+main.gracefulShutdown.dialog.content = Ett eller flera valv används fortfarande av andra program. Stäng dem för att tillåta Cryptomator att stänga av ordentligt och försök sedan igen.\n\nOm detta inte fungerar kan Cryptomator tvingas att stängas, men det kan medföra dataförlust och rekommenderas inte.
+main.gracefulShutdown.button.tryAgain = Försök igen
+main.gracefulShutdown.button.forceShutdown = Tvinga avstängning
+unlock.pendingMessage.unlocking = Låser upp valv...
+unlock.failedDialog.title = Valvet kunde inte låsas upp
+unlock.failedDialog.header = Upplåsningen misslyckades
+unlock.failedDialog.content.mountPathNonExisting = Monteringspunkten finns inte.
+unlock.failedDialog.content.mountPathNotEmpty = Monteringspunkten är inte tom.
+unlock.label.useReadOnlyMode = Skrivskyddad
+unlock.label.chooseMountPath = Välj tom mapp…
+ctrl.secPasswordField.nonPrintableChars = Lösenordet innehåller kontrolltecken.\nRekommendation\: Ta bort dem för att säkerställa kompatibilitet med andra klienter.
+ctrl.secPasswordField.capsLocked = Caps Lock är aktiverat.
