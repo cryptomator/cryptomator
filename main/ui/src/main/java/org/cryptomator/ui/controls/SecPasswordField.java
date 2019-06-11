@@ -249,6 +249,7 @@ public class SecPasswordField extends PasswordField {
 	public void swipe() {
 		swipe(content);
 		length = 0;
+		setText(null);
 	}
 
 	private void swipe(char[] buffer) {

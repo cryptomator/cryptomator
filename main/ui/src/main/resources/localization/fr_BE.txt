@@ -1,0 +1,124 @@
+app.name = Cryptomateur
+# main.fxml
+main.emptyListInstructions = Cliquez ici pour ajouter un coffre-fort
+main.directoryList.contextMenu.remove = Retirer de la liste
+main.directoryList.contextMenu.changePassword = Modifier le mot de passe
+main.addDirectory.contextMenu.new = Créer un nouveau coffre-fort
+main.addDirectory.contextMenu.open = Ouvrir un coffre-fort existant
+# welcome.fxml
+welcome.checkForUpdates.label.currentlyChecking = Vérification des mise à jour en cours ...
+welcome.newVersionMessage = La version %1$s peut être téléchargée.\nCeci est %2$s.
+# initialize.fxml
+initialize.label.password = Mot de passe
+initialize.label.retypePassword = Resaisir le mot de passe
+initialize.button.ok = Créer un coffre-fort
+initialize.messageLabel.alreadyInitialized = Coffre-fort déjà initialisé
+initialize.messageLabel.initializationFailed = Incapable d'initialiser le coffre-fort. Voir le fichier journal pour plus de détails.
+# notfound.fxml
+notfound.label = Le coffre-fort n'a pu être trouvé. A t-il été déplacé ?
+# upgrade.fxml
+upgrade.button = Mise à jour coffre-fort
+upgrade.version3dropBundleExtension.msg = Ce coffre-fort doit être migrer vers un format plus récent. "%1$s" sera renommé en "%2$s".\nVeuillez vous assurer que la synchronisation soit terminé avant de continuer.
+upgrade.version3dropBundleExtension.err.alreadyExists = La migration automatique a échouée.\n"%s" existe déjà.
+# unlock.fxml
+unlock.label.password = Mot de passe
+unlock.label.mountName = Nom du lecteur
+unlock.label.winDriveLetter = Lettre du lecteur
+unlock.label.downloadsPageLink = Toutes les version de Cryptomateur
+unlock.label.advancedHeading = Options avancées
+unlock.button.unlock = Déverrouiller le coffre-fort
+unlock.button.advancedOptions.show = Plus d'options
+unlock.button.advancedOptions.hide = Moins d'options
+unlock.choicebox.winDriveLetter.auto = Assigner automatiquement
+unlock.errorMessage.wrongPassword = Mauvais mot de passe
+unlock.errorMessage.unsupportedVersion.vaultOlderThanSoftware = Coffre-fort non pris en charge. Ce coffre-fort a été créé avec une ancienne version de Cryptomateur.
+unlock.errorMessage.unsupportedVersion.softwareOlderThanVault = Coffre-fort non pris en charge. Ce coffre-fort a été créé avec une version plus récente de Cryptomateur.
+# change_password.fxml
+changePassword.label.oldPassword = Ancient mot de passe
+changePassword.label.newPassword = Nouveau mot de passe
+changePassword.label.retypePassword = Resaisir mot de passe
+changePassword.label.downloadsPageLink = Toutes les versions de Cryptomateur
+changePassword.button.change = Modifier mot de passe
+changePassword.errorMessage.wrongPassword = Mauvais mot de passe
+changePassword.errorMessage.decryptionFailed = Le déchiffrement a échoué
+# unlocked.fxml
+unlocked.button.lock = Verrouiller coffre-fort
+unlocked.moreOptions.reveal = Dévoiler le lecteur
+unlocked.label.revealFailed = La commande a échoué
+unlocked.label.unmountFailed = L'éjection du lecteur a échoué
+unlocked.label.statsEncrypted = chiffré
+unlocked.label.statsDecrypted = déchiffré
+unlocked.ioGraph.yAxis.label = Débit (MiB/s)
+# settings.fxml
+settings.version.label = Version %s
+settings.checkForUpdates.label = Rechercher les mises à jour
+# tray icon
+tray.menu.open = Ouvrir
+tray.menu.quit = Quitter
+tray.infoMsg.title = Toujours en cours
+tray.infoMsg.msg = Crytomateur est encore actif. Quitter en utilisant de la zone de notification.
+tray.infoMsg.msg.osx = Crytomateur est encore actif. Quitter en utilisant le menu de la barre d'icone.
+initialize.messageLabel.passwordStrength.0 = Très faible
+initialize.messageLabel.passwordStrength.1 = Faible
+initialize.messageLabel.passwordStrength.2 = Bon
+initialize.messageLabel.passwordStrength.3 = Fort
+initialize.messageLabel.passwordStrength.4 = Très fort
+initialize.label.doNotForget = IMPROTANT \: Si vous oubliez votre mot de passe, il n'y a aucun moyen de récupérer vos données.
+main.directoryList.remove.confirmation.title = Retirer le coffre-fort
+main.directoryList.remove.confirmation.header = Voulez-vous vraiment retirer le coffre-fort ?
+main.directoryList.remove.confirmation.content = Ce coffre-fort sera seulement retirer de la liste. Pour le supprimer définitivement, veuillez le supprimer de votre système de fichiers.
+upgrade.version3to4.msg = Ce coffre-fort doit être migrer vers un format plus récent.\nLe nom des répertoires chiffrés sera mis à jour.\nVeuillez vous assurer que la synchronisation soit terminé avant de continuer.
+upgrade.version3to4.err.io = La migration a échoué à cause d'un Exception E/S. Voir le fichier journal pour plus de détails.
+# upgrade.fxml
+upgrade.confirmation.label = Oui, je me suis assuré que la synchronisation est terminé
+unlock.label.savePassword = Sauvegarder le mot de passe
+unlock.errorMessage.unauthenticVersionMac = Incapable d'authentifier la version MAC.
+unlock.savePassword.delete.confirmation.title = Supprimer le mot de passe sauvegardé
+unlock.savePassword.delete.confirmation.header = Etes-vous certain de vouloir supprimer le mot de passe sauvegardé pour ce coffre-fort ?
+unlock.savePassword.delete.confirmation.content = Le mot de passe sauvegardé pour ce coffre-fort sera supprimé immédiatement de votre trousseau système. Si vous voulez sauvegarder votre mot de passe de nouveau, vous devez déverrouiller votre coffre-fort avec l’option « Sauvegarder mot de passe » activée.
+settings.debugMode.label = Mode débogage
+upgrade.version3dropBundleExtension.title = Vault Version 3 Upgrade (Drop Bundle Extension)
+upgrade.version3to4.title = Mise à jour de la version 3 à 4 du coffre-fort
+upgrade.version4to5.title = Mise à jour de la version 4 à 5 du coffre-fort
+upgrade.version4to5.msg = Ce coffre-fort doit être migrer vers un format plus récent.\nLes fichiers chiffrés seront mis à jour.\nVeuillez vous assurer que la synchronisation soit terminé avant de continuer.\n\nNote \: Lors du processus les dates de modification des fichiers seront modifiés à la date/heure courante.
+upgrade.version4to5.err.io = La migration a échoué à cause d'un Exception E/S. Voir le fichier journal pour plus de détails.
+unlock.label.revealAfterMount = Révéler le lecteur
+unlocked.lock.force.confirmation.title = Le vérouillage de %1$s a échoué
+unlocked.lock.force.confirmation.header = Voulez-vous forcer le vérouillage ?
+unlocked.lock.force.confirmation.content = Ceci est peut-être dû au fait que d'autres programmes sont encore en train d'accéder aux fichiers dans le coffre-fort ou à cause d'un autre problème.\n\nLes programmes qui accèdent encore aux fichiers peuvent ne pas fonctionner correctement et les données non écrites par ces programmes peuvent être perdus.
+unlock.label.unlockAfterStartup = Déverouillage automatique au lancement (Expérimantal)
+unlock.errorMessage.unlockFailed = Déverouillage échoué. Voir le fichier journal pour plus de détails.
+upgrade.version5toX.title = Mise à jour de la version du coffre-fort
+upgrade.version5toX.msg = Ce coffre-fort doit être migrer vers un format plus récent.\nVeuillez vous assurer que la synchronisation soit terminé avant de continuer.
+main.createVault.nonEmptyDir.title = La création du coffre-fort a échoué
+main.createVault.nonEmptyDir.header = Le répertoire choisi n'est pas vide
+main.createVault.nonEmptyDir.content = Le répertoire sélectionné contient déjà des fichiers (peut-être cachés). Un coffre-fort ne peut être créé que dans un répertoire vide.
+settings.webdav.port.label = Port WebDAV
+settings.webdav.port.prompt = 0 \= Coisir automatiquement
+settings.webdav.port.apply = Appliquer
+settings.webdav.prefGvfsScheme.label = Schema WebDAV
+settings.volume.label = Type de volume préféré
+settings.volume.webdav = WebDAV
+settings.volume.fuse = FUSE
+unlock.successLabel.vaultCreated = Le coffre-fort a été créé avec succès.
+unlock.successLabel.passwordChanged = Mot de passe mis à jour avec succès.
+unlock.successLabel.upgraded = Cryptomateur a été mis à jour avec succès.
+unlock.label.useOwnMountPath = Utiliser point de montage personalisé
+welcome.askForUpdateCheck.dialog.title = Vérifier mise à jour
+welcome.askForUpdateCheck.dialog.header = Activer la vérification de mise à jour intégré ?
+welcome.askForUpdateCheck.dialog.content = Afin de vérifier les mises à jour, Crytomateur ira chercher la version courante sur les serveurs de Cryptomateur et affichera une indication si une version plus récente est disponible.\n\nNous reccommandons d'activer l'option de vérification des mises à jour afin de vous assurer de disposer de la version la plus récente de Cryptomateur avec tous les correctifs de sécurité installés. Si vous n'activez pas l'option de vérification des mises à jour, vous pouvez véridier et télécharger la version courante à partir de https\://cryptomator.org/downloads/.\n\nVous pouvez modifier cela à tout moment dans les paramètres.
+settings.volume.dokany = Dokany
+main.gracefulShutdown.dialog.title = Vérouillage de(s) coffre-fort(s) a échoué(s)
+main.gracefulShutdown.dialog.header = Coffre-fort(s) en cours d'utilisation
+main.gracefulShutdown.dialog.content = Un ou plusieurs coffre-forts sont en cours d'utilisation par d'autres programmes. Veuillez les fermer afin de permettre à Cryptomateur de se fermer correctement, puis essayez de nouveau.\n\nSi cela ne fonctionne pas, Cryptomateur peut se fermer de manière forcé, mais cela peut provoquer des pertes de données et n'est pas recommandé. 
+main.gracefulShutdown.button.tryAgain = Essayez de nouveau
+main.gracefulShutdown.button.forceShutdown = Fermeture forcée
+unlock.pendingMessage.unlocking = Unlocking vault...
+unlock.failedDialog.title = Unlock failed
+unlock.failedDialog.header = Unlock failed
+unlock.failedDialog.content.mountPathNonExisting = Mount point does not exist.
+unlock.failedDialog.content.mountPathNotEmpty = Mount point is not empty.
+unlock.label.useReadOnlyMode = Read-Only
+unlock.label.chooseMountPath = Choose empty directory…
+ctrl.secPasswordField.nonPrintableChars = Password contains control characters.\nRecommendation\: Remove them to ensure compatibility with other clients.
+ctrl.secPasswordField.capsLocked = Caps Lock is activated.
