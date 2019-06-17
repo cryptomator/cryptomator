@@ -20,6 +20,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Base64;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -44,6 +45,7 @@ public class VaultSettings {
 	private final BooleanProperty usesIndividualMountPath = new SimpleBooleanProperty(DEFAULT_USES_INDIVIDUAL_MOUNTPATH);
 	private final StringProperty individualMountPath = new SimpleStringProperty();
 	private final BooleanProperty usesReadOnlyMode = new SimpleBooleanProperty(DEFAULT_USES_READONLY_MODE);
+	private final ObjectProperty<List<String>> mountFlags = new SimpleObjectProperty<>(List.of());
 
 	public VaultSettings(String id) {
 		this.id = Objects.requireNonNull(id);
@@ -145,6 +147,10 @@ public class VaultSettings {
 
 	public BooleanProperty usesReadOnlyMode() {
 		return usesReadOnlyMode;
+	}
+
+	public ObjectProperty<List<String>> mountFlags() {
+		return mountFlags;
 	}
 
 	/* Hashcode/Equals */

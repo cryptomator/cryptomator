@@ -9,6 +9,7 @@ import org.cryptomator.frontend.fuse.mount.EnvironmentVariables;
 import org.cryptomator.frontend.fuse.mount.FuseMountFactory;
 import org.cryptomator.frontend.fuse.mount.FuseNotSupportedException;
 import org.cryptomator.frontend.fuse.mount.Mount;
+import org.cryptomator.frontend.fuse.mount.Mounter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,6 +21,7 @@ import java.nio.file.Files;
 import java.nio.file.NotDirectoryException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Optional;
 
 public class FuseVolume implements Volume {
@@ -96,13 +98,23 @@ public class FuseVolume implements Volume {
 
 	private void mount(Path root) throws VolumeException {
 		try {
+			Mounter mounter = FuseMountFactory.getMounter();
 			EnvironmentVariables envVars = EnvironmentVariables.create() //
-					.withMountName(vaultSettings.mountName().getValue()) //
-					.withMountPath(mountPoint) //
+					.withFlags(mountFlags(mounter))
+					.withMountPoint(mountPoint) //
 					.build();
-			this.fuseMnt = FuseMountFactory.getMounter().mount(root, envVars);
+			this.fuseMnt = mounter.mount(root, envVars);
 		} catch (CommandFailedException e) {
 			throw new VolumeException("Unable to mount Filesystem", e);
+		}
+	}
+
+	private String[] mountFlags(Mounter mounter) {
+		List<String> mountFlags = vaultSettings.mountFlags().get();
+		if (mountFlags.isEmpty()) {
+			return mounter.defaultMountFlags();
+		} else {
+			return mountFlags.toArray(String[]::new);
 		}
 	}
 
