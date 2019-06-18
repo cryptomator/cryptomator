@@ -35,9 +35,10 @@ public class VaultSettings {
 	public static final boolean DEFAULT_REAVEAL_AFTER_MOUNT = true;
 	public static final boolean DEFAULT_USES_INDIVIDUAL_MOUNTPATH = false;
 	public static final boolean DEFAULT_USES_READONLY_MODE = false;
+	public static final List<String> DEFAULT_MOUNT_FLAGS = List.of();
 
 	private final String id;
-	private final ObjectProperty<Path> path = new SimpleObjectProperty<>();
+	private final ObjectProperty<Path> path = new SimpleObjectProperty();
 	private final StringProperty mountName = new SimpleStringProperty();
 	private final StringProperty winDriveLetter = new SimpleStringProperty();
 	private final BooleanProperty unlockAfterStartup = new SimpleBooleanProperty(DEFAULT_UNLOCK_AFTER_STARTUP);
@@ -45,7 +46,7 @@ public class VaultSettings {
 	private final BooleanProperty usesIndividualMountPath = new SimpleBooleanProperty(DEFAULT_USES_INDIVIDUAL_MOUNTPATH);
 	private final StringProperty individualMountPath = new SimpleStringProperty();
 	private final BooleanProperty usesReadOnlyMode = new SimpleBooleanProperty(DEFAULT_USES_READONLY_MODE);
-	private final ObjectProperty<List<String>> mountFlags = new SimpleObjectProperty<>(List.of());
+	private final ObjectProperty<List<String>> mountFlags = new SimpleObjectProperty(DEFAULT_MOUNT_FLAGS);
 
 	public VaultSettings(String id) {
 		this.id = Objects.requireNonNull(id);

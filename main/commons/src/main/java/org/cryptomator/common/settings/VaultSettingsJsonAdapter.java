@@ -46,7 +46,7 @@ class VaultSettingsJsonAdapter {
 		boolean revealAfterMount = VaultSettings.DEFAULT_REAVEAL_AFTER_MOUNT;
 		boolean usesIndividualMountPath = VaultSettings.DEFAULT_USES_INDIVIDUAL_MOUNTPATH;
 		boolean usesReadOnlyMode = VaultSettings.DEFAULT_USES_READONLY_MODE;
-		List<String> mountFlags = null;
+		List<String> mountFlags = VaultSettings.DEFAULT_MOUNT_FLAGS;
 
 		in.beginObject();
 		while (in.hasNext()) {
