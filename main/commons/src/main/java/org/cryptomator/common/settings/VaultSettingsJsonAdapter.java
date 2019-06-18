@@ -6,15 +6,12 @@
 package org.cryptomator.common.settings;
 
 import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
 
 class VaultSettingsJsonAdapter {
 
@@ -31,8 +28,7 @@ class VaultSettingsJsonAdapter {
 		out.name("usesIndividualMountPath").value(value.usesIndividualMountPath().get());
 		out.name("individualMountPath").value(value.individualMountPath().get());
 		out.name("usesReadOnlyMode").value(value.usesReadOnlyMode().get());
-		out.name("mountFlags");
-		writeMountFlags(out, value.mountFlags().get());
+		out.name("mountFlags").value(value.mountFlags().get());
 		out.endObject();
 	}
 
@@ -46,7 +42,7 @@ class VaultSettingsJsonAdapter {
 		boolean revealAfterMount = VaultSettings.DEFAULT_REAVEAL_AFTER_MOUNT;
 		boolean usesIndividualMountPath = VaultSettings.DEFAULT_USES_INDIVIDUAL_MOUNTPATH;
 		boolean usesReadOnlyMode = VaultSettings.DEFAULT_USES_READONLY_MODE;
-		List<String> mountFlags = VaultSettings.DEFAULT_MOUNT_FLAGS;
+		String mountFlags = VaultSettings.DEFAULT_MOUNT_FLAGS;
 
 		in.beginObject();
 		while (in.hasNext()) {
@@ -80,7 +76,7 @@ class VaultSettingsJsonAdapter {
 					usesReadOnlyMode = in.nextBoolean();
 					break;
 				case "mountFlags":
-					mountFlags = readMountFlags(in);
+					mountFlags = in.nextString();
 					break;
 				default:
 					LOG.warn("Unsupported vault setting found in JSON: " + name);
@@ -101,24 +97,6 @@ class VaultSettingsJsonAdapter {
 		vaultSettings.usesReadOnlyMode().set(usesReadOnlyMode);
 		vaultSettings.mountFlags().set(mountFlags);
 		return vaultSettings;
-	}
-
-	private List<String> readMountFlags(JsonReader in) throws IOException {
-		List<String> result = new ArrayList<>();
-		in.beginArray();
-		while (!JsonToken.END_ARRAY.equals(in.peek())) {
-			result.add(in.nextString());
-		}
-		in.endArray();
-		return result;
-	}
-
-	private void writeMountFlags(JsonWriter out, List<String> flags) throws IOException {
-		out.beginArray();
-		for (String flag : flags) {
-			out.value(flag);
-		}
-		out.endArray();
 	}
 
 }
