@@ -1,5 +1,6 @@
 package org.cryptomator.ui.model;
 
+import com.google.common.base.Splitter;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.Environment;
 import org.cryptomator.common.settings.VaultSettings;
@@ -21,7 +22,6 @@ import java.nio.file.Files;
 import java.nio.file.NotDirectoryException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 import java.util.Optional;
 
 public class FuseVolume implements Volume {
@@ -44,7 +44,7 @@ public class FuseVolume implements Volume {
 	}
 
 	@Override
-	public void mount(CryptoFileSystem fs) throws IOException, FuseNotSupportedException, VolumeException {
+	public void mount(CryptoFileSystem fs, String mountFlags) throws IOException, FuseNotSupportedException, VolumeException {
 		Optional<String> optionalCustomMountPoint = vaultSettings.getIndividualMountPath();
 		if (optionalCustomMountPoint.isPresent()) {
 			Path customMountPoint = Paths.get(optionalCustomMountPoint.get());
@@ -55,7 +55,7 @@ public class FuseVolume implements Volume {
 			this.mountPoint = prepareTemporaryMountPoint();
 			LOG.debug("Successfully created mount point: {}", mountPoint);
 		}
-		mount(fs.getPath("/"));
+		mount(fs.getPath("/"), mountFlags);
 	}
 
 	private void checkProvidedMountPoint(Path mountPoint) throws IOException {
@@ -96,11 +96,11 @@ public class FuseVolume implements Volume {
 		throw new VolumeException("Did not find feasible mount point.");
 	}
 
-	private void mount(Path root) throws VolumeException {
+	private void mount(Path root, String mountFlags) throws VolumeException {
 		try {
 			Mounter mounter = FuseMountFactory.getMounter();
 			EnvironmentVariables envVars = EnvironmentVariables.create() //
-					.withFlags(mountFlags(mounter))
+					.withFlags(splitFlags(mountFlags))
 					.withMountPoint(mountPoint) //
 					.build();
 			this.fuseMnt = mounter.mount(root, envVars);
@@ -109,13 +109,8 @@ public class FuseVolume implements Volume {
 		}
 	}
 
-	private String[] mountFlags(Mounter mounter) {
-		List<String> mountFlags = vaultSettings.mountFlags().get();
-		if (mountFlags.isEmpty()) {
-			return mounter.defaultMountFlags();
-		} else {
-			return mountFlags.toArray(String[]::new);
-		}
+	private String[] splitFlags(String str) {
+		return Splitter.on(' ').splitToList(str).toArray(String[]::new);
 	}
 
 	@Override

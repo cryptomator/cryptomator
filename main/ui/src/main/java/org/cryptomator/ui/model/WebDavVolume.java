@@ -11,7 +11,6 @@ import org.cryptomator.frontend.webdav.servlet.WebDavServletController;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
-
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
@@ -35,7 +34,7 @@ public class WebDavVolume implements Volume {
 	}
 
 	@Override
-	public void mount(CryptoFileSystem fs) throws VolumeException {
+	public void mount(CryptoFileSystem fs, String mountFlags) throws VolumeException {
 		if (server == null) {
 			server = serverProvider.get();
 		}

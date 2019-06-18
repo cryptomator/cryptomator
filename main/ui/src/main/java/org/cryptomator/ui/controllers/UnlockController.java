@@ -11,6 +11,7 @@ package org.cryptomator.ui.controllers;
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Strings;
 import javafx.application.Application;
+import javafx.beans.Observable;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
@@ -27,6 +28,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
@@ -114,6 +116,12 @@ public class UnlockController implements ViewController {
 	private TextField mountName;
 
 	@FXML
+	private CheckBox useCustomMountFlags;
+
+	@FXML
+	private TextField mountFlags;
+
+	@FXML
 	private CheckBox revealAfterMount;
 
 	@FXML
@@ -135,16 +143,13 @@ public class UnlockController implements ViewController {
 	private ProgressIndicator progressIndicator;
 
 	@FXML
-	private Text progressText;
-
-	@FXML
 	private Hyperlink downloadsPageLink;
 
 	@FXML
-	private GridPane advancedOptions;
+	private VBox advancedOptions;
 
 	@FXML
-	private GridPane root;
+	private VBox root;
 
 	@FXML
 	private CheckBox unlockAfterStartup;
@@ -158,6 +163,9 @@ public class UnlockController implements ViewController {
 		unlockButton.disableProperty().bind(passwordField.textProperty().isEmpty());
 		mountName.addEventFilter(KeyEvent.KEY_TYPED, this::filterAlphanumericKeyEvents);
 		mountName.textProperty().addListener(this::mountNameDidChange);
+		useCustomMountFlags.selectedProperty().addListener(this::useCustomMountFlagsDidChange);
+		mountFlags.disableProperty().bind(useCustomMountFlags.selectedProperty().not());
+		mountFlags.textProperty().addListener(this::mountFlagsDidChange);
 		savePassword.setDisable(!keychainAccess.isPresent());
 		unlockAfterStartup.disableProperty().bind(savePassword.disabledProperty().or(savePassword.selectedProperty().not()));
 
@@ -172,7 +180,6 @@ public class UnlockController implements ViewController {
 			winDriveLetter.setManaged(false);
 		}
 	}
-
 
 	@Override
 	public Parent getRoot() {
@@ -199,7 +206,6 @@ public class UnlockController implements ViewController {
 		advancedOptions.setVisible(false);
 		advancedOptionsButton.setText(localization.getString("unlock.button.advancedOptions.show"));
 		progressIndicator.setVisible(false);
-		progressText.setText(null);
 		state.successMessage().map(localization::getString).ifPresent(messageText::setText);
 		if (SystemUtils.IS_OS_WINDOWS) {
 			winDriveLetter.valueProperty().removeListener(driveLetterChangeListener);
@@ -212,6 +218,8 @@ public class UnlockController implements ViewController {
 		}
 		downloadsPageLink.setVisible(false);
 		mountName.setText(vault.getMountName());
+		useCustomMountFlags.setSelected(vault.isHavingCustomMountFlags());
+		mountFlags.setText(vault.getMountFlags());
 		savePassword.setSelected(false);
 		// auto-fill pw from keychain:
 		if (keychainAccess.isPresent()) {
@@ -317,6 +325,23 @@ public class UnlockController implements ViewController {
 			mountName.setText(vault.getMountName());
 		} else {
 			vault.setMountName(newValue);
+		}
+		if (!useCustomMountFlags.isSelected()) {
+			mountFlags.setText(vault.getMountFlags()); // flags might depend on the volume name
+		}
+	}
+
+
+	private void useCustomMountFlagsDidChange(@SuppressWarnings("unused") ObservableValue<? extends Boolean> property, @SuppressWarnings("unused")Boolean oldValue, Boolean newValue) {
+		if (!newValue) {
+			vault.setMountFlags(VaultSettings.DEFAULT_MOUNT_FLAGS);
+			mountFlags.setText(vault.getMountFlags());
+		}
+	}
+
+	private void mountFlagsDidChange(@SuppressWarnings("unused") ObservableValue<? extends String> property, @SuppressWarnings("unused")String oldValue, String newValue) {
+		if (useCustomMountFlags.isSelected()) {
+			vault.setMountFlags(newValue);
 		}
 	}
 
@@ -435,7 +460,6 @@ public class UnlockController implements ViewController {
 
 		CharSequence password = passwordField.getCharacters();
 		Tasks.create(() -> {
-			progressText.setText(localization.getString("unlock.pendingMessage.unlocking"));
 			vault.unlock(password);
 			if (keychainAccess.isPresent() && savePassword.isSelected()) {
 				keychainAccess.get().storePassphrase(vault.getId(), password);
@@ -476,7 +500,6 @@ public class UnlockController implements ViewController {
 		}).andFinally(() -> {
 			advancedOptions.setDisable(false);
 			progressIndicator.setVisible(false);
-			progressText.setText(null);
 		}).runOnce(executor);
 	}
 
