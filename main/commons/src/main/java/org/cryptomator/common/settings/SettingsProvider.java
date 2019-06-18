@@ -10,6 +10,7 @@ package org.cryptomator.common.settings;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonParseException;
 import org.cryptomator.common.Environment;
 import org.cryptomator.common.LazyInitializer;
 import org.slf4j.Logger;
@@ -117,7 +118,7 @@ public class SettingsProvider implements Provider<Settings> {
 			}
 			Files.move(tmpPath, settingsPath, StandardCopyOption.REPLACE_EXISTING);
 			LOG.info("Settings saved to {}", settingsPath);
-		} catch (IOException e) {
+		} catch (IOException | JsonParseException e) {
 			LOG.error("Failed to save settings.", e);
 		}
 	}
