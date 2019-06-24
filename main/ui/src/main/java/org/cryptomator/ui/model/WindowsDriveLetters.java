@@ -8,6 +8,8 @@ package org.cryptomator.ui.model;
 import org.apache.commons.lang3.CharUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.FxApplicationScoped;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.nio.file.FileSystems;
@@ -21,6 +23,7 @@ import java.util.stream.StreamSupport;
 @FxApplicationScoped
 public final class WindowsDriveLetters {
 
+	private static final Logger LOG = LoggerFactory.getLogger(WindowsDriveLetters.class);
 	private static final Set<Character> D_TO_Z;
 
 	static {
@@ -35,10 +38,12 @@ public final class WindowsDriveLetters {
 
 	public Set<Character> getOccupiedDriveLetters() {
 		if (!SystemUtils.IS_OS_WINDOWS) {
-			throw new UnsupportedOperationException("This method is only defined for Windows file systems");
+			LOG.warn("Attempted to get occupied drive letters on non-Windows machine.");
+			return Set.of();
+		} else {
+			Iterable<Path> rootDirs = FileSystems.getDefault().getRootDirectories();
+			return StreamSupport.stream(rootDirs.spliterator(), false).map(Path::toString).map(CharUtils::toChar).map(Character::toUpperCase).collect(Collectors.toSet());
 		}
-		Iterable<Path> rootDirs = FileSystems.getDefault().getRootDirectories();
-		return StreamSupport.stream(rootDirs.spliterator(), false).map(Path::toString).map(CharUtils::toChar).map(Character::toUpperCase).collect(Collectors.toSet());
 	}
 
 	public Set<Character> getAvailableDriveLetters() {

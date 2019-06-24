@@ -25,7 +25,7 @@
 <VBox fx:controller="org.cryptomator.ui.controllers.UnlockController" fx:id="root" spacing="12" alignment="BOTTOM_CENTER" xmlns:fx="http://javafx.com/fxml" prefWidth="400">
 
 	<padding>
-		<Insets top="24"/>
+		<Insets top="24" right="12" bottom="24" left="12" />
 	</padding>
 
 	<!-- Password Field -->
@@ -35,14 +35,25 @@
 	</HBox>
 
 	<!-- Unlock Button / Advanced Options Button -->
-	<HBox spacing="12.0" alignment="CENTER_RIGHT">
+	<HBox spacing="12" alignment="CENTER_RIGHT">
 		<Button fx:id="advancedOptionsButton" text="%unlock.button.advancedOptions.show" prefWidth="150.0" onAction="#didClickAdvancedOptionsButton"/>
-		<Button fx:id="unlockButton" text="%unlock.button.unlock" defaultButton="true" prefWidth="150.0" onAction="#didClickUnlockButton" disable="true"/>
-		<ProgressIndicator progress="-1" fx:id="progressIndicator"/>
+		<Button fx:id="unlockButton" text="%unlock.button.unlock" defaultButton="true" prefWidth="150.0" onAction="#didClickUnlockButton" disable="true" contentDisplay="TEXT_ONLY">
+				<graphic>
+					<ProgressIndicator progress="-1" prefWidth="12" prefHeight="12"/>
+				</graphic>
+		</Button>
 	</HBox>
 
+	<!-- Status Text -->
+	<TextFlow prefWidth="400" textAlignment="LEFT">
+		<children>
+			<Text fx:id="messageText"/>
+			<Hyperlink fx:id="downloadsPageLink" text="%unlock.label.downloadsPageLink" managed="false" onAction="#didClickDownloadsLink"/>
+		</children>
+	</TextFlow>
+
 	<!-- Advanced Options -->
-	<VBox fx:id="advancedOptions" spacing="6" VBox.vgrow="ALWAYS" visible="false">
+	<VBox fx:id="advancedOptions" spacing="12" VBox.vgrow="ALWAYS" visible="false">
 
 		<Separator/>
 
@@ -81,17 +92,10 @@
 		</HBox>
 
 		<!-- Windows Drive Letter -->
-		<HBox spacing="12">
-			<Label fx:id="winDriveLetterLabel" text="%unlock.label.winDriveLetter"/>
-			<ChoiceBox fx:id="winDriveLetter" maxWidth="Infinity"/>
+		<HBox spacing="12" alignment="BASELINE_LEFT">
+			<CheckBox fx:id="useCustomWinDriveLetter" text="%unlock.label.winDriveLetter" onAction="#didClickCustomWinDriveLetterCheckbox"/>
+			<ChoiceBox fx:id="winDriveLetter" HBox.hgrow="NEVER" maxWidth="Infinity"/>
 		</HBox>
 	</VBox>
 
-	<!-- Status Text -->
-	<TextFlow>
-		<children>
-			<Text fx:id="messageText" visible="true"/>
-			<Hyperlink fx:id="downloadsPageLink" text="%unlock.label.downloadsPageLink" visible="false" onAction="#didClickDownloadsLink"/>
-		</children>
-	</TextFlow>
 </VBox>
