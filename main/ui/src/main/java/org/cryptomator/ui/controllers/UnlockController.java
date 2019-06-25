@@ -162,6 +162,7 @@ public class UnlockController implements ViewController {
 		unlockButton.disableProperty().bind(unlocking.or(passwordField.textProperty().isEmpty()));
 		mountName.addEventFilter(KeyEvent.KEY_TYPED, this::filterAlphanumericKeyEvents);
 		mountName.textProperty().addListener(this::mountNameDidChange);
+		useReadOnlyMode.selectedProperty().addListener(this::useReadOnlyDidChange);
 		useCustomMountFlags.selectedProperty().addListener(this::useCustomMountFlagsDidChange);
 		mountFlags.disableProperty().bind(useCustomMountFlags.selectedProperty().not());
 		mountFlags.textProperty().addListener(this::mountFlagsDidChange);
@@ -226,6 +227,7 @@ public class UnlockController implements ViewController {
 		VaultSettings vaultSettings = vault.getVaultSettings();
 		unlockAfterStartup.setSelected(savePassword.isSelected() && vaultSettings.unlockAfterStartup().get());
 		revealAfterMount.setSelected(vaultSettings.revealAfterMount().get());
+		useReadOnlyMode.setSelected(vaultSettings.usesReadOnlyMode().get());
 
 		// WEBDAV-dependent controls:
 		if (VolumeImpl.WEBDAV.equals(settings.preferredVolumeImpl().get())) {
@@ -241,15 +243,6 @@ public class UnlockController implements ViewController {
 			}
 		}
 
-		// DOKANY-dependent controls:
-		if (VolumeImpl.DOKANY.equals(settings.preferredVolumeImpl().get())) {
-			// readonly not yet supported by dokany
-			useReadOnlyMode.setSelected(false);
-			useReadOnlyMode.setVisible(false);
-			useReadOnlyMode.setManaged(false);
-		} else {
-			useReadOnlyMode.setSelected(vaultSettings.usesReadOnlyMode().get());
-		}
 
 		// OS-dependent controls:
 		if (SystemUtils.IS_OS_WINDOWS) {
@@ -324,7 +317,14 @@ public class UnlockController implements ViewController {
 			vault.setMountName(newValue);
 		}
 		if (!useCustomMountFlags.isSelected()) {
-			mountFlags.setText(vault.getMountFlags()); // flags might depend on the volume name
+			mountFlags.setText(vault.getMountFlags()); // update default flags
+		}
+	}
+
+	private void useReadOnlyDidChange(@SuppressWarnings("unused") ObservableValue<? extends Boolean> property, @SuppressWarnings("unused")Boolean oldValue, Boolean newValue) {
+		vault.getVaultSettings().usesReadOnlyMode().setValue(newValue);
+		if (!useCustomMountFlags.isSelected()) {
+			mountFlags.setText(vault.getMountFlags()); // update default flags
 		}
 	}
 

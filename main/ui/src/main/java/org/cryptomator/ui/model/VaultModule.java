@@ -60,46 +60,72 @@ public class VaultModule {
 		}
 	}
 
+	// see: https://github.com/osxfuse/osxfuse/wiki/Mount-options
 	private String getMacFuseDefaultMountFlags(Settings settings, VaultSettings vaultSettings) {
 		assert SystemUtils.IS_OS_MAC_OSX;
-		// see: https://github.com/osxfuse/osxfuse/wiki/Mount-options
+
+		StringBuilder flags = new StringBuilder();
+		if (vaultSettings.usesReadOnlyMode().get()) {
+			flags.append(" -ordonly");
+		}
+		flags.append(" -ovolname=").append(vaultSettings.mountName().get());
+		flags.append(" -oatomic_o_trunc");
+		flags.append(" -oauto_xattr");
+		flags.append(" -oauto_cache");
+		flags.append(" -omodules=iconv,from_code=UTF-8,to_code=UTF-8-MAC"); // show files names in Unicode NFD encoding
+		flags.append(" -onoappledouble"); // vastly impacts performance for some reason...
+		flags.append(" -odefault_permissions"); // let the kernel assume permissions based on file attributes etc
+
 		try {
 			Path userHome = Paths.get(System.getProperty("user.home"));
 			int uid = (int) Files.getAttribute(userHome, "unix:uid");
 			int gid = (int) Files.getAttribute(userHome, "unix:gid");
-			return "-ovolname=" + vaultSettings.mountName().get() // volume name
-					+ " -ouid=" + uid //
-					+ " -ogid=" + gid //
-					+ " -oatomic_o_trunc" //
-					+ " -oauto_xattr" //
-					+ " -oauto_cache" //
-					+ " -omodules=iconv,from_code=UTF-8,to_code=UTF-8-MAC" // show files names in Unicode NFD encoding
-					+ " -onoappledouble" // vastly impacts performance for some reason...
-					+ " -odefault_permissions"; // let the kernel assume permissions based on file attributes etc
+			flags.append(" -ouid=").append(uid);
+			flags.append(" -ogid=").append(gid);
 		} catch (IOException e) {
 			LOG.error("Could not read uid/gid from USER_HOME", e);
-			return "";
 		}
+
+		return flags.toString();
 	}
 
+	// see https://manpages.debian.org/testing/fuse/mount.fuse.8.en.html
 	private String getLinuxFuseDefaultMountFlags(Settings settings, VaultSettings vaultSettings) {
 		assert SystemUtils.IS_OS_LINUX;
+
+		StringBuilder flags = new StringBuilder();
+		if (vaultSettings.usesReadOnlyMode().get()) {
+			flags.append(" -oro");
+		}
+		flags.append(" -oauto_unmount");
+
 		try {
 			Path userHome = Paths.get(System.getProperty("user.home"));
 			int uid = (int) Files.getAttribute(userHome, "unix:uid");
 			int gid = (int) Files.getAttribute(userHome, "unix:gid");
-			return "-oauto_unmount" //
-					+ " -ouid=" + uid //
-					+ " -ogid=" + gid;
+			flags.append(" -ouid=").append(uid);
+			flags.append(" -ogid=").append(gid);
 		} catch (IOException e) {
 			LOG.error("Could not read uid/gid from USER_HOME", e);
-			return "";
 		}
+
+		return flags.toString();
 	}
 
+	// see https://github.com/cryptomator/dokany-nio-adapter/blob/develop/src/main/java/org/cryptomator/frontend/dokany/MountUtil.java#L30-L34
 	private String getDokanyDefaultMountFlags(Settings settings, VaultSettings vaultSettings) {
-		// TODO
-		return "--not-yet-supported";
+		assert SystemUtils.IS_OS_WINDOWS;
+
+		StringBuilder flags = new StringBuilder();
+		flags.append(" --options CURRENT_SESSION");
+		if (vaultSettings.usesReadOnlyMode().get()) {
+			flags.append(",WRITE_PROTECTION");
+		}
+		flags.append(" --threadCount 5");
+		flags.append(" --timeout 10000");
+		flags.append(" --allocation-unit-size 4096");
+		flags.append(" --sector-size 4096");
+		return flags.toString();
 	}
 
 }
