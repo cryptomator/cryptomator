@@ -39,7 +39,14 @@
 			<groupId>com.google.dagger</groupId>
 			<artifactId>dagger</artifactId>
 		</dependency>
-		
+
+		<!-- secret-service lib -->
+		<dependency>
+			<groupId>de.swiesend</groupId>
+			<artifactId>secret-service</artifactId>
+			<version>1.0.0-RC.3</version>
+		</dependency>
+
 		<!-- Logging -->
 		<dependency>
 			<groupId>org.slf4j</groupId>
