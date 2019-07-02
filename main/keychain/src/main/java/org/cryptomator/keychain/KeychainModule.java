@@ -31,8 +31,8 @@ public class KeychainModule {
 
 	@Provides
 	@ElementsIntoSet
-	Set<KeychainAccessStrategy> provideKeychainAccessStrategies(MacSystemKeychainAccess macKeychain, WindowsProtectedKeychainAccess winKeychain) {
-		return Sets.newHashSet(macKeychain, winKeychain);
+	Set<KeychainAccessStrategy> provideKeychainAccessStrategies(MacSystemKeychainAccess macKeychain, WindowsProtectedKeychainAccess winKeychain, LinuxSecretServiceAccess linKeychain) {
+		return Sets.newHashSet(macKeychain, winKeychain, linKeychain);
 	}
 
 	@Provides
