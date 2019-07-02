@@ -62,6 +62,7 @@
 						<configuration>
 							<outputDirectory>${project.build.directory}/libs</outputDirectory>
 							<excludeClassifiers>linux,mac,win</excludeClassifiers>
+							<excludeArtifactIds>dbus-java,secret-service,hkdf,java-utils</excludeArtifactIds>
 						</configuration>
 					</execution>
 					<execution>
@@ -74,6 +75,17 @@
 							<outputDirectory>${project.build.directory}/linux-libs</outputDirectory>
 							<includeGroupIds>org.openjfx</includeGroupIds>
 							<classifier>linux</classifier>
+						</configuration>
+					</execution>
+					<execution>
+						<id>copy-linux-secret-service</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>copy-dependencies</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.build.directory}/linux-libs</outputDirectory>
+							<includeArtifactIds>dbus-java,secret-service,hkdf,java-utils</includeArtifactIds>
 						</configuration>
 					</execution>
 					<execution>
