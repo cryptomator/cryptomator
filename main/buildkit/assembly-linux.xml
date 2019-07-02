@@ -28,12 +28,5 @@
 			</includes>
 			<outputDirectory>libs</outputDirectory>
 		</fileSet>
-		<fileSet>
-			<directory>target/linux-secret-service</directory>
-			<includes>
-				<include>*.jar</include>
-			</includes>
-			<outputDirectory>libs</outputDirectory>
-		</fileSet>
 	</fileSets>
 </assembly>

@@ -84,7 +84,7 @@
 							<goal>copy-dependencies</goal>
 						</goals>
 						<configuration>
-							<outputDirectory>${project.build.directory}/linux-secret-service</outputDirectory>
+							<outputDirectory>${project.build.directory}/linux-libs</outputDirectory>
 							<includeArtifactIds>dbus-java,secret-service,hkdf,java-utils</includeArtifactIds>
 						</configuration>
 					</execution>
