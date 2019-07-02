@@ -12,7 +12,7 @@ import com.google.common.collect.Sets;
 public class TestKeychainModule extends KeychainModule {
 
 	@Override
-	Set<KeychainAccessStrategy> provideKeychainAccessStrategies(MacSystemKeychainAccess macKeychain, WindowsProtectedKeychainAccess winKeychain) {
+	Set<KeychainAccessStrategy> provideKeychainAccessStrategies(MacSystemKeychainAccess macKeychain, WindowsProtectedKeychainAccess winKeychain, LinuxSecretServiceAccess linKeychain) {
 		return Sets.newHashSet(new MapKeychainAccess());
 	}
 
