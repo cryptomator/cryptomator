@@ -22,7 +22,7 @@ public interface Volume {
 	 * @param fs
 	 * @throws IOException
 	 */
-	void mount(CryptoFileSystem fs) throws IOException, VolumeException;
+	void mount(CryptoFileSystem fs, String mountFlags) throws IOException, VolumeException;
 
 	void reveal() throws VolumeException;
 

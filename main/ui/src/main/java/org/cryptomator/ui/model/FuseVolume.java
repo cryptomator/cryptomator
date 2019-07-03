@@ -1,5 +1,6 @@
 package org.cryptomator.ui.model;
 
+import com.google.common.base.Splitter;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.Environment;
 import org.cryptomator.common.settings.VaultSettings;
@@ -9,6 +10,7 @@ import org.cryptomator.frontend.fuse.mount.EnvironmentVariables;
 import org.cryptomator.frontend.fuse.mount.FuseMountFactory;
 import org.cryptomator.frontend.fuse.mount.FuseNotSupportedException;
 import org.cryptomator.frontend.fuse.mount.Mount;
+import org.cryptomator.frontend.fuse.mount.Mounter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +44,7 @@ public class FuseVolume implements Volume {
 	}
 
 	@Override
-	public void mount(CryptoFileSystem fs) throws IOException, FuseNotSupportedException, VolumeException {
+	public void mount(CryptoFileSystem fs, String mountFlags) throws IOException, FuseNotSupportedException, VolumeException {
 		Optional<String> optionalCustomMountPoint = vaultSettings.getIndividualMountPath();
 		if (optionalCustomMountPoint.isPresent()) {
 			Path customMountPoint = Paths.get(optionalCustomMountPoint.get());
@@ -53,7 +55,7 @@ public class FuseVolume implements Volume {
 			this.mountPoint = prepareTemporaryMountPoint();
 			LOG.debug("Successfully created mount point: {}", mountPoint);
 		}
-		mount(fs.getPath("/"));
+		mount(fs.getPath("/"), mountFlags);
 	}
 
 	private void checkProvidedMountPoint(Path mountPoint) throws IOException {
@@ -94,16 +96,21 @@ public class FuseVolume implements Volume {
 		throw new VolumeException("Did not find feasible mount point.");
 	}
 
-	private void mount(Path root) throws VolumeException {
+	private void mount(Path root, String mountFlags) throws VolumeException {
 		try {
+			Mounter mounter = FuseMountFactory.getMounter();
 			EnvironmentVariables envVars = EnvironmentVariables.create() //
-					.withMountName(vaultSettings.mountName().getValue()) //
-					.withMountPath(mountPoint) //
+					.withFlags(splitFlags(mountFlags))
+					.withMountPoint(mountPoint) //
 					.build();
-			this.fuseMnt = FuseMountFactory.getMounter().mount(root, envVars);
+			this.fuseMnt = mounter.mount(root, envVars);
 		} catch (CommandFailedException e) {
 			throw new VolumeException("Unable to mount Filesystem", e);
 		}
+	}
+
+	private String[] splitFlags(String str) {
+		return Splitter.on(' ').splitToList(str).toArray(String[]::new);
 	}
 
 	@Override

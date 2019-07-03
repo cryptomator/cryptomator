@@ -44,11 +44,11 @@ public class DokanyVolume implements Volume {
 	}
 
 	@Override
-	public void mount(CryptoFileSystem fs) throws VolumeException, IOException {
+	public void mount(CryptoFileSystem fs, String mountFlags) throws VolumeException, IOException {
 		Path mountPath = getMountPoint();
 		String mountName = vaultSettings.mountName().get();
 		try {
-			this.mount = mountFactory.mount(fs.getPath("/"), mountPath, mountName, FS_TYPE_NAME);
+			this.mount = mountFactory.mount(fs.getPath("/"), mountPath, mountName, FS_TYPE_NAME, mountFlags);
 		} catch (MountFailedException e) {
 			if (vaultSettings.getIndividualMountPath().isPresent()) {
 				LOG.warn("Failed to mount vault into {}. Is this directory currently accessed by another process (e.g. Windows Explorer)?", mountPath);

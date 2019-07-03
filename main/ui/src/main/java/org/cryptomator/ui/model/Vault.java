@@ -25,7 +25,6 @@ import org.cryptomator.cryptofs.CryptoFileSystemProperties.FileSystemFlags;
 import org.cryptomator.cryptofs.CryptoFileSystemProvider;
 import org.cryptomator.cryptolib.api.CryptoException;
 import org.cryptomator.cryptolib.api.InvalidPassphraseException;
-import org.cryptomator.ui.model.VaultModule.PerVault;
 import org.fxmisc.easybind.EasyBind;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +43,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 @PerVault
 public class Vault {
@@ -54,6 +54,7 @@ public class Vault {
 
 	private final VaultSettings vaultSettings;
 	private final Provider<Volume> volumeProvider;
+	private final Supplier<String> defaultMountFlags;
 	private final AtomicReference<CryptoFileSystem> cryptoFileSystem = new AtomicReference<>();
 	private final ObjectProperty<State> state = new SimpleObjectProperty<State>(State.LOCKED);
 
@@ -64,9 +65,10 @@ public class Vault {
 	}
 
 	@Inject
-	Vault(VaultSettings vaultSettings, Provider<Volume> volumeProvider) {
+	Vault(VaultSettings vaultSettings, Provider<Volume> volumeProvider, @DefaultMountFlags Supplier<String> defaultMountFlags) {
 		this.vaultSettings = vaultSettings;
 		this.volumeProvider = volumeProvider;
+		this.defaultMountFlags = defaultMountFlags;
 	}
 
 	// ******************************************************************************
@@ -110,7 +112,7 @@ public class Vault {
 			}
 			CryptoFileSystem fs = getCryptoFileSystem(passphrase);
 			volume = volumeProvider.get();
-			volume.mount(fs);
+			volume.mount(fs, getMountFlags());
 			Platform.runLater(() -> {
 				state.set(State.UNLOCKED);
 			});
@@ -241,10 +243,6 @@ public class Vault {
 		}
 	}
 
-	public String getMountName() {
-		return vaultSettings.mountName().get();
-	}
-
 	public String getCustomMountPath() {
 		return vaultSettings.individualMountPath().getValueSafe();
 	}
@@ -253,12 +251,33 @@ public class Vault {
 		vaultSettings.individualMountPath().set(mountPath);
 	}
 
+	public String getMountName() {
+		return vaultSettings.mountName().get();
+	}
+
 	public void setMountName(String mountName) throws IllegalArgumentException {
 		if (StringUtils.isBlank(mountName)) {
 			throw new IllegalArgumentException("mount name is empty");
 		} else {
 			vaultSettings.mountName().set(VaultSettings.normalizeMountName(mountName));
 		}
+	}
+
+	public boolean isHavingCustomMountFlags() {
+		return !Strings.isNullOrEmpty(vaultSettings.mountFlags().get());
+	}
+
+	public String getMountFlags() {
+		String mountFlags = vaultSettings.mountFlags().get();
+		if (Strings.isNullOrEmpty(mountFlags)) {
+			return defaultMountFlags.get();
+		} else {
+			return mountFlags;
+		}
+	}
+
+	public void setMountFlags(String mountFlags) {
+		vaultSettings.mountFlags().set(mountFlags);
 	}
 
 	public Character getWinDriveLetter() {

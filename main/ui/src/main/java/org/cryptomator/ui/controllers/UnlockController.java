@@ -11,6 +11,8 @@ package org.cryptomator.ui.controllers;
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Strings;
 import javafx.application.Application;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
@@ -20,13 +22,13 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
-import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
@@ -83,6 +85,7 @@ public class UnlockController implements ViewController {
 	private Vault vault;
 	private Optional<UnlockListener> listener = Optional.empty();
 	private Subscription vaultSubs = Subscription.EMPTY;
+	private BooleanProperty unlocking = new SimpleBooleanProperty();
 
 	@Inject
 	public UnlockController(Application app, @Named("mainWindow") Stage mainWindow, Localization localization, WindowsDriveLetters driveLetters, Optional<KeychainAccess> keychainAccess, Settings settings, ExecutorService executor) {
@@ -114,10 +117,16 @@ public class UnlockController implements ViewController {
 	private TextField mountName;
 
 	@FXML
+	private CheckBox useCustomMountFlags;
+
+	@FXML
+	private TextField mountFlags;
+
+	@FXML
 	private CheckBox revealAfterMount;
 
 	@FXML
-	private Label winDriveLetterLabel;
+	private CheckBox useCustomWinDriveLetter;
 
 	@FXML
 	private ChoiceBox<Character> winDriveLetter;
@@ -132,19 +141,13 @@ public class UnlockController implements ViewController {
 	private Label customMountPointLabel;
 
 	@FXML
-	private ProgressIndicator progressIndicator;
-
-	@FXML
-	private Text progressText;
-
-	@FXML
 	private Hyperlink downloadsPageLink;
 
 	@FXML
-	private GridPane advancedOptions;
+	private VBox advancedOptions;
 
 	@FXML
-	private GridPane root;
+	private VBox root;
 
 	@FXML
 	private CheckBox unlockAfterStartup;
@@ -155,24 +158,30 @@ public class UnlockController implements ViewController {
 	@Override
 	public void initialize() {
 		advancedOptions.managedProperty().bind(advancedOptions.visibleProperty());
-		unlockButton.disableProperty().bind(passwordField.textProperty().isEmpty());
+		advancedOptions.disableProperty().bind(unlocking);
+		unlockButton.disableProperty().bind(unlocking.or(passwordField.textProperty().isEmpty()));
 		mountName.addEventFilter(KeyEvent.KEY_TYPED, this::filterAlphanumericKeyEvents);
 		mountName.textProperty().addListener(this::mountNameDidChange);
+		useReadOnlyMode.selectedProperty().addListener(this::useReadOnlyDidChange);
+		useCustomMountFlags.selectedProperty().addListener(this::useCustomMountFlagsDidChange);
+		mountFlags.disableProperty().bind(useCustomMountFlags.selectedProperty().not());
+		mountFlags.textProperty().addListener(this::mountFlagsDidChange);
 		savePassword.setDisable(!keychainAccess.isPresent());
 		unlockAfterStartup.disableProperty().bind(savePassword.disabledProperty().or(savePassword.selectedProperty().not()));
+		downloadsPageLink.visibleProperty().bind(downloadsPageLink.managedProperty());
 
 		customMountPoint.visibleProperty().bind(useCustomMountPoint.selectedProperty());
 		customMountPoint.managedProperty().bind(useCustomMountPoint.selectedProperty());
 		winDriveLetter.setConverter(new WinDriveLetterLabelConverter());
+		winDriveLetter.disableProperty().bind(useCustomWinDriveLetter.selectedProperty().not());
 
 		if (!SystemUtils.IS_OS_WINDOWS) {
-			winDriveLetterLabel.setVisible(false);
-			winDriveLetterLabel.setManaged(false);
+			useCustomWinDriveLetter.setVisible(false);
+			useCustomWinDriveLetter.setManaged(false);
 			winDriveLetter.setVisible(false);
 			winDriveLetter.setManaged(false);
 		}
 	}
-
 
 	@Override
 	public Parent getRoot() {
@@ -198,20 +207,12 @@ public class UnlockController implements ViewController {
 		this.vault = vault;
 		advancedOptions.setVisible(false);
 		advancedOptionsButton.setText(localization.getString("unlock.button.advancedOptions.show"));
-		progressIndicator.setVisible(false);
-		progressText.setText(null);
+		unlockButton.setContentDisplay(ContentDisplay.TEXT_ONLY);
 		state.successMessage().map(localization::getString).ifPresent(messageText::setText);
-		if (SystemUtils.IS_OS_WINDOWS) {
-			winDriveLetter.valueProperty().removeListener(driveLetterChangeListener);
-			winDriveLetter.getItems().clear();
-			winDriveLetter.getItems().add(null);
-			winDriveLetter.getItems().addAll(driveLetters.getAvailableDriveLetters());
-			winDriveLetter.getItems().sort(new WinDriveLetterComparator());
-			winDriveLetter.valueProperty().addListener(driveLetterChangeListener);
-			chooseSelectedDriveLetter();
-		}
-		downloadsPageLink.setVisible(false);
+		downloadsPageLink.setManaged(false);
 		mountName.setText(vault.getMountName());
+		useCustomMountFlags.setSelected(vault.isHavingCustomMountFlags());
+		mountFlags.setText(vault.getMountFlags());
 		savePassword.setSelected(false);
 		// auto-fill pw from keychain:
 		if (keychainAccess.isPresent()) {
@@ -226,6 +227,7 @@ public class UnlockController implements ViewController {
 		VaultSettings vaultSettings = vault.getVaultSettings();
 		unlockAfterStartup.setSelected(savePassword.isSelected() && vaultSettings.unlockAfterStartup().get());
 		revealAfterMount.setSelected(vaultSettings.revealAfterMount().get());
+		useReadOnlyMode.setSelected(vaultSettings.usesReadOnlyMode().get());
 
 		// WEBDAV-dependent controls:
 		if (VolumeImpl.WEBDAV.equals(settings.preferredVolumeImpl().get())) {
@@ -241,26 +243,21 @@ public class UnlockController implements ViewController {
 			}
 		}
 
-		// DOKANY-dependent controls:
-		if (VolumeImpl.DOKANY.equals(settings.preferredVolumeImpl().get())) {
-			winDriveLetter.visibleProperty().bind(useCustomMountPoint.selectedProperty().not());
-			winDriveLetter.managedProperty().bind(useCustomMountPoint.selectedProperty().not());
-			winDriveLetterLabel.visibleProperty().bind(useCustomMountPoint.selectedProperty().not());
-			winDriveLetterLabel.managedProperty().bind(useCustomMountPoint.selectedProperty().not());
-			// readonly not yet supported by dokany
-			useReadOnlyMode.setSelected(false);
-			useReadOnlyMode.setVisible(false);
-			useReadOnlyMode.setManaged(false);
-		} else {
-			useReadOnlyMode.setSelected(vaultSettings.usesReadOnlyMode().get());
-		}
 
 		// OS-dependent controls:
 		if (SystemUtils.IS_OS_WINDOWS) {
+			winDriveLetter.valueProperty().removeListener(driveLetterChangeListener);
+			winDriveLetter.getItems().clear();
+			winDriveLetter.getItems().add(null);
+			winDriveLetter.getItems().addAll(driveLetters.getAvailableDriveLetters());
+			winDriveLetter.getItems().sort(new WinDriveLetterComparator());
+			winDriveLetter.valueProperty().addListener(driveLetterChangeListener);
+			chooseSelectedDriveLetter();
+			
 			winDriveLetter.visibleProperty().bind(useCustomMountPoint.selectedProperty().not());
 			winDriveLetter.managedProperty().bind(useCustomMountPoint.selectedProperty().not());
-			winDriveLetterLabel.visibleProperty().bind(useCustomMountPoint.selectedProperty().not());
-			winDriveLetterLabel.managedProperty().bind(useCustomMountPoint.selectedProperty().not());
+			useCustomWinDriveLetter.visibleProperty().bind(useCustomMountPoint.selectedProperty().not());
+			useCustomWinDriveLetter.managedProperty().bind(useCustomMountPoint.selectedProperty().not());
 		}
 
 		vaultSubs = vaultSubs.and(EasyBind.subscribe(unlockAfterStartup.selectedProperty(), vaultSettings.unlockAfterStartup()::set));
@@ -297,6 +294,7 @@ public class UnlockController implements ViewController {
 	@FXML
 	private void didClickAdvancedOptionsButton() {
 		messageText.setText(null);
+		downloadsPageLink.setManaged(false);
 		advancedOptions.setVisible(!advancedOptions.isVisible());
 		if (advancedOptions.isVisible()) {
 			advancedOptionsButton.setText(localization.getString("unlock.button.advancedOptions.hide"));
@@ -318,6 +316,30 @@ public class UnlockController implements ViewController {
 		} else {
 			vault.setMountName(newValue);
 		}
+		if (!useCustomMountFlags.isSelected()) {
+			mountFlags.setText(vault.getMountFlags()); // update default flags
+		}
+	}
+
+	private void useReadOnlyDidChange(@SuppressWarnings("unused") ObservableValue<? extends Boolean> property, @SuppressWarnings("unused")Boolean oldValue, Boolean newValue) {
+		vault.getVaultSettings().usesReadOnlyMode().setValue(newValue);
+		if (!useCustomMountFlags.isSelected()) {
+			mountFlags.setText(vault.getMountFlags()); // update default flags
+		}
+	}
+
+
+	private void useCustomMountFlagsDidChange(@SuppressWarnings("unused") ObservableValue<? extends Boolean> property, @SuppressWarnings("unused")Boolean oldValue, Boolean newValue) {
+		if (!newValue) {
+			vault.setMountFlags(VaultSettings.DEFAULT_MOUNT_FLAGS);
+			mountFlags.setText(vault.getMountFlags());
+		}
+	}
+
+	private void mountFlagsDidChange(@SuppressWarnings("unused") ObservableValue<? extends String> property, @SuppressWarnings("unused")String oldValue, String newValue) {
+		if (useCustomMountFlags.isSelected()) {
+			vault.setMountFlags(newValue);
+		}
 	}
 
 	@FXML
@@ -327,6 +349,13 @@ public class UnlockController implements ViewController {
 		if (file != null) {
 			customMountPointLabel.setText(displayablePath(file.toString()));
 			vault.setCustomMountPath(file.toString());
+		}
+	}
+
+	@FXML
+	public void didClickCustomWinDriveLetterCheckbox() {
+		if (!useCustomWinDriveLetter.isSelected()) {
+			winDriveLetter.setValue(null);
 		}
 	}
 
@@ -379,7 +408,7 @@ public class UnlockController implements ViewController {
 	private void chooseSelectedDriveLetter() {
 		assert SystemUtils.IS_OS_WINDOWS;
 		// if the vault prefers a drive letter, that is currently occupied, this is our last chance to reset this:
-		if (driveLetters.getOccupiedDriveLetters().contains(vault.getWinDriveLetter())) {
+		if (vault.getWinDriveLetter() != null && driveLetters.getOccupiedDriveLetters().contains(vault.getWinDriveLetter())) {
 			vault.setWinDriveLetter(null);
 		}
 		final Character letter = vault.getWinDriveLetter();
@@ -428,35 +457,34 @@ public class UnlockController implements ViewController {
 
 	@FXML
 	private void didClickUnlockButton() {
-		advancedOptions.setDisable(true);
-		advancedOptions.setVisible(false);
+		unlocking.set(true);
 		advancedOptionsButton.setText(localization.getString("unlock.button.advancedOptions.show"));
-		progressIndicator.setVisible(true);
+		unlockButton.setContentDisplay(ContentDisplay.LEFT);
 
 		CharSequence password = passwordField.getCharacters();
 		Tasks.create(() -> {
-			progressText.setText(localization.getString("unlock.pendingMessage.unlocking"));
 			vault.unlock(password);
 			if (keychainAccess.isPresent() && savePassword.isSelected()) {
 				keychainAccess.get().storePassphrase(vault.getId(), password);
 			}
 		}).onSuccess(() -> {
-			messageText.setText("");
-			downloadsPageLink.setVisible(false);
+			messageText.setText(null);
+			downloadsPageLink.setManaged(false);
 			listener.ifPresent(lstnr -> lstnr.didUnlock(vault));
 			passwordField.swipe();
 		}).onError(InvalidPassphraseException.class, e -> {
 			messageText.setText(localization.getString("unlock.errorMessage.wrongPassword"));
+			downloadsPageLink.setManaged(false);
 			passwordField.selectAll();
 			passwordField.requestFocus();
 		}).onError(UnsupportedVaultFormatException.class, e -> {
 			if (e.isVaultOlderThanSoftware()) {
 				// whitespace after localized text used as separator between text and hyperlink
 				messageText.setText(localization.getString("unlock.errorMessage.unsupportedVersion.vaultOlderThanSoftware") + " ");
-				downloadsPageLink.setVisible(true);
+				downloadsPageLink.setManaged(true);
 			} else if (e.isSoftwareOlderThanVault()) {
 				messageText.setText(localization.getString("unlock.errorMessage.unsupportedVersion.softwareOlderThanVault") + " ");
-				downloadsPageLink.setVisible(true);
+				downloadsPageLink.setManaged(true);
 			} else if (e.getDetectedVersion() == Integer.MAX_VALUE) {
 				messageText.setText(localization.getString("unlock.errorMessage.unauthenticVersionMac"));
 			}
@@ -464,19 +492,21 @@ public class UnlockController implements ViewController {
 			LOG.error("Unlock failed. Mount point not a directory: {}", e.getMessage());
 			advancedOptions.setVisible(true);
 			messageText.setText(null);
+			downloadsPageLink.setManaged(false);
 			showUnlockFailedErrorDialog("unlock.failedDialog.content.mountPathNonExisting");
 		}).onError(DirectoryNotEmptyException.class, e -> {
 			LOG.error("Unlock failed. Mount point not empty: {}", e.getMessage());
 			advancedOptions.setVisible(true);
 			messageText.setText(null);
+			downloadsPageLink.setManaged(false);
 			showUnlockFailedErrorDialog("unlock.failedDialog.content.mountPathNotEmpty");
 		}).onError(Exception.class, e -> { // including RuntimeExceptions
 			LOG.error("Unlock failed for technical reasons.", e);
 			messageText.setText(localization.getString("unlock.errorMessage.unlockFailed"));
+			downloadsPageLink.setManaged(false);
 		}).andFinally(() -> {
-			advancedOptions.setDisable(false);
-			progressIndicator.setVisible(false);
-			progressText.setText(null);
+			unlocking.set(false);
+			unlockButton.setContentDisplay(ContentDisplay.TEXT_ONLY);
 		}).runOnce(executor);
 	}
 
