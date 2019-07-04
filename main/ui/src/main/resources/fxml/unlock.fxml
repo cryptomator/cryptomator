@@ -77,12 +77,19 @@
 
 		<!-- Custom Mount Point -->
 		<CheckBox fx:id="useCustomMountPoint" text="%unlock.label.useOwnMountPath"/>
-		<HBox fx:id="customMountPoint" spacing="6" alignment="BASELINE_LEFT">
+		<HBox fx:id="customMountPoint" spacing="6" alignment="BASELINE_LEFT" >
 			<padding>
 				<Insets left="20.0"/>
+				<Insets bottom="-19.0"/>
 			</padding>
 			<Label HBox.hgrow="ALWAYS" fx:id="customMountPointLabel" textOverrun="LEADING_ELLIPSIS"/>
 			<Button HBox.hgrow="NEVER" minWidth="-Infinity" text="&#xf434;" styleClass="ionicons" onAction="#didClickChooseCustomMountPoint" focusTraversable="true"/>
+		</HBox>
+
+		<!-- Windows Drive Letter -->
+		<HBox spacing="12" alignment="BASELINE_LEFT">
+			<CheckBox fx:id="useCustomWinDriveLetter" text="%unlock.label.winDriveLetter" onAction="#didClickCustomWinDriveLetterCheckbox"/>
+			<ChoiceBox fx:id="winDriveLetter" HBox.hgrow="NEVER" maxWidth="Infinity"/>
 		</HBox>
 
 		<!-- Mount Flags -->
@@ -91,11 +98,6 @@
 			<TextField fx:id="mountFlags" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
 		</HBox>
 
-		<!-- Windows Drive Letter -->
-		<HBox spacing="12" alignment="BASELINE_LEFT">
-			<CheckBox fx:id="useCustomWinDriveLetter" text="%unlock.label.winDriveLetter" onAction="#didClickCustomWinDriveLetterCheckbox"/>
-			<ChoiceBox fx:id="winDriveLetter" HBox.hgrow="NEVER" maxWidth="Infinity"/>
-		</HBox>
 	</VBox>
 
 </VBox>
