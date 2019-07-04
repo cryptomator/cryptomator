@@ -33,7 +33,6 @@ import javafx.scene.text.Text;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
-import org.apache.commons.lang3.CharUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VaultSettings;
@@ -78,7 +77,7 @@ public class UnlockController implements ViewController {
 	private final Stage mainWindow;
 	private final Localization localization;
 	private final WindowsDriveLetters driveLetters;
-	private final ChangeListener<Character> driveLetterChangeListener = this::winDriveLetterDidChange;
+	private final ChangeListener<Path> driveLetterChangeListener = this::winDriveLetterDidChange;
 	private final Optional<KeychainAccess> keychainAccess;
 	private final Settings settings;
 	private final ExecutorService executor;
@@ -129,7 +128,7 @@ public class UnlockController implements ViewController {
 	private CheckBox useCustomWinDriveLetter;
 
 	@FXML
-	private ChoiceBox<Character> winDriveLetter;
+	private ChoiceBox<Path> winDriveLetter;
 
 	@FXML
 	private CheckBox useCustomMountPoint;
@@ -256,6 +255,7 @@ public class UnlockController implements ViewController {
 			
 			winDriveLetter.visibleProperty().bind(useCustomMountPoint.selectedProperty().not());
 			winDriveLetter.managedProperty().bind(useCustomMountPoint.selectedProperty().not());
+			useCustomWinDriveLetter.setSelected(!vaultSettings.usesIndividualMountPath().get());
 			useCustomWinDriveLetter.visibleProperty().bind(useCustomMountPoint.selectedProperty().not());
 			useCustomWinDriveLetter.managedProperty().bind(useCustomMountPoint.selectedProperty().not());
 		}
@@ -309,7 +309,7 @@ public class UnlockController implements ViewController {
 		}
 	}
 
-	private void mountNameDidChange(@SuppressWarnings("unused") ObservableValue<? extends String> property, @SuppressWarnings("unused")String oldValue, String newValue) {
+	private void mountNameDidChange(@SuppressWarnings("unused") ObservableValue<? extends String> property, @SuppressWarnings("unused") String oldValue, String newValue) {
 		// newValue is guaranteed to be a-z0-9_, see #filterAlphanumericKeyEvents
 		if (newValue.isEmpty()) {
 			mountName.setText(vault.getMountName());
@@ -321,7 +321,7 @@ public class UnlockController implements ViewController {
 		}
 	}
 
-	private void useReadOnlyDidChange(@SuppressWarnings("unused") ObservableValue<? extends Boolean> property, @SuppressWarnings("unused")Boolean oldValue, Boolean newValue) {
+	private void useReadOnlyDidChange(@SuppressWarnings("unused") ObservableValue<? extends Boolean> property, @SuppressWarnings("unused") Boolean oldValue, Boolean newValue) {
 		vault.getVaultSettings().usesReadOnlyMode().setValue(newValue);
 		if (!useCustomMountFlags.isSelected()) {
 			mountFlags.setText(vault.getMountFlags()); // update default flags
@@ -329,14 +329,14 @@ public class UnlockController implements ViewController {
 	}
 
 
-	private void useCustomMountFlagsDidChange(@SuppressWarnings("unused") ObservableValue<? extends Boolean> property, @SuppressWarnings("unused")Boolean oldValue, Boolean newValue) {
+	private void useCustomMountFlagsDidChange(@SuppressWarnings("unused") ObservableValue<? extends Boolean> property, @SuppressWarnings("unused") Boolean oldValue, Boolean newValue) {
 		if (!newValue) {
 			vault.setMountFlags(VaultSettings.DEFAULT_MOUNT_FLAGS);
 			mountFlags.setText(vault.getMountFlags());
 		}
 	}
 
-	private void mountFlagsDidChange(@SuppressWarnings("unused") ObservableValue<? extends String> property, @SuppressWarnings("unused")String oldValue, String newValue) {
+	private void mountFlagsDidChange(@SuppressWarnings("unused") ObservableValue<? extends String> property, @SuppressWarnings("unused") String oldValue, String newValue) {
 		if (useCustomMountFlags.isSelected()) {
 			vault.setMountFlags(newValue);
 		}
@@ -359,26 +359,33 @@ public class UnlockController implements ViewController {
 		}
 	}
 
+	@FXML
+	public void didClickCustomMountPointCheckbox() {
+		useCustomWinDriveLetter.setSelected(vault.getWinDriveLetter() != null);
+	}
+
 	/**
 	 * Converts 'C' to "C:" to translate between model and GUI.
 	 */
-	private class WinDriveLetterLabelConverter extends StringConverter<Character> {
+	private class WinDriveLetterLabelConverter extends StringConverter<Path> {
 
 		@Override
-		public String toString(Character letter) {
-			if (letter == null) {
+		public String toString(Path root) {
+			if (root == null) {
 				return localization.getString("unlock.choicebox.winDriveLetter.auto");
+			} else if (root.endsWith("occupied")) {
+				return root.getRoot().toString().substring(0, 1) + " (" + localization.getString("unlock.choicebox.winDriveLetter.occupied") + ")";
 			} else {
-				return letter + ":";
+				return root.toString().substring(0, 1);
 			}
 		}
 
 		@Override
-		public Character fromString(String string) {
+		public Path fromString(String string) {
 			if (localization.getString("unlock.choicebox.winDriveLetter.auto").equals(string)) {
 				return null;
 			} else {
-				return CharUtils.toCharacterObject(string);
+				return Path.of(string);
 			}
 		}
 
@@ -387,37 +394,41 @@ public class UnlockController implements ViewController {
 	/**
 	 * Natural sorting of ASCII letters, but <code>null</code> always on first, as this is "auto-assign".
 	 */
-	private static class WinDriveLetterComparator implements Comparator<Character> {
+	private static class WinDriveLetterComparator implements Comparator<Path> {
 
 		@Override
-		public int compare(Character c1, Character c2) {
+		public int compare(Path c1, Path c2) {
 			if (c1 == null) {
 				return -1;
 			} else if (c2 == null) {
 				return 1;
 			} else {
-				return c1 - c2;
+				return c1.compareTo(c2);
 			}
 		}
 	}
 
-	private void winDriveLetterDidChange(@SuppressWarnings("unused") ObservableValue<? extends Character> property, @SuppressWarnings("unused") Character oldValue, Character newValue) {
+	private void winDriveLetterDidChange(@SuppressWarnings("unused") ObservableValue<? extends Path> property, @SuppressWarnings("unused") Path oldValue, Path newValue) {
 		vault.setWinDriveLetter(newValue);
 	}
 
 	private void chooseSelectedDriveLetter() {
 		assert SystemUtils.IS_OS_WINDOWS;
 		// if the vault prefers a drive letter, that is currently occupied, this is our last chance to reset this:
-		if (vault.getWinDriveLetter() != null && driveLetters.getOccupiedDriveLetters().contains(vault.getWinDriveLetter())) {
-			vault.setWinDriveLetter(null);
-		}
-		final Character letter = vault.getWinDriveLetter();
-		if (letter == null) {
+		if (vault.getWinDriveLetter() != null) {
+			final Path pickedRoot = Path.of(vault.getWinDriveLetter() + ":\\");
+			if (driveLetters.getOccupiedDriveLetters().contains(pickedRoot)) {
+				Path alteredPath = pickedRoot.resolve("occupied");
+				this.winDriveLetter.getItems().add(alteredPath);
+				this.winDriveLetter.getSelectionModel().select(alteredPath);
+			} else {
+				this.winDriveLetter.getSelectionModel().select(pickedRoot);
+			}
+		} else {
 			// first option is known to be 'auto-assign' due to #WinDriveLetterComparator.
 			this.winDriveLetter.getSelectionModel().selectFirst();
-		} else {
-			this.winDriveLetter.getSelectionModel().select(letter);
 		}
+
 	}
 
 	// ****************************************

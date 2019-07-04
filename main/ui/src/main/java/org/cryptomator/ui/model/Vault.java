@@ -288,10 +288,11 @@ public class Vault {
 		}
 	}
 
-	public void setWinDriveLetter(Character winDriveLetter) {
-		if (winDriveLetter == null) {
+	public void setWinDriveLetter(Path root) {
+		if (root == null) {
 			vaultSettings.winDriveLetter().set(null);
 		} else {
+			char winDriveLetter = root.toString().charAt(0);
 			vaultSettings.winDriveLetter().set(String.valueOf(winDriveLetter));
 		}
 	}
