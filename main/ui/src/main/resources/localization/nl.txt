@@ -25,6 +25,7 @@ upgrade.version3dropBundleExtension.err.alreadyExists = Automatische migratie mi
 # unlock.fxml
 unlock.label.password = Wachtwoord
 unlock.label.mountName = Schijfnaam
+# Fuzzy
 unlock.label.winDriveLetter = Schijfletter
 unlock.label.downloadsPageLink = Alle Cryptomator versies
 unlock.label.advancedHeading = Geavanceerde Opties
@@ -105,6 +106,7 @@ settings.volume.fuse = STOP
 unlock.successLabel.vaultCreated = Kluis was succesvol gecreeerd
 unlock.successLabel.passwordChanged = Wachtwoord is succesvol aangepast
 unlock.successLabel.upgraded = Cryptomator succesvol vernieuwd.
+# Fuzzy
 unlock.label.useOwnMountPath = Gebruik een eigen koppelpunt
 welcome.askForUpdateCheck.dialog.title = Update check
 welcome.askForUpdateCheck.dialog.header = Geintegreerde update check aanzetten
@@ -124,3 +126,5 @@ unlock.label.useReadOnlyMode = Read-Only
 unlock.label.chooseMountPath = Choose empty directory…
 ctrl.secPasswordField.nonPrintableChars = Password contains control characters.\nRecommendation\: Remove them to ensure compatibility with other clients.
 ctrl.secPasswordField.capsLocked = Caps Lock is activated.
+unlock.label.useCustomMountFlags = Custom Mount Flags
+unlock.choicebox.winDriveLetter.occupied = occupied

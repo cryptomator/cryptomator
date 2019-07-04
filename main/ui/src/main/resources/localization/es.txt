@@ -24,6 +24,7 @@ upgrade.version3dropBundleExtension.err.alreadyExists = Error en la migración a
 # unlock.fxml
 unlock.label.password = Contraseña
 unlock.label.mountName = Nombre de la unidad
+# Fuzzy
 unlock.label.winDriveLetter = Letra de la unidad
 unlock.label.downloadsPageLink = Todas las versiones de Cryptomator
 unlock.label.advancedHeading = Opciones avanzadas
@@ -105,6 +106,7 @@ settings.volume.fuse = FUSE
 unlock.successLabel.vaultCreated = La caja fuerte fue creada exitosamente.
 unlock.successLabel.passwordChanged = La contraseña ha sido cambiada con éxito.
 unlock.successLabel.upgraded = Cryptomator fue actualizado exitosamente.
+# Fuzzy
 unlock.label.useOwnMountPath = Usar Punto de montaje propio
 welcome.askForUpdateCheck.dialog.title = Buscar actualización
 welcome.askForUpdateCheck.dialog.header = ¿Habilitar la búsqueda de actualizaciones automática?
@@ -124,3 +126,5 @@ unlock.label.useReadOnlyMode = Sólo lectura
 unlock.label.chooseMountPath = Elija un directorio vacío...
 ctrl.secPasswordField.nonPrintableChars = La contraseña contiene caracteres de control.\nRecomendación\: elimínelos para asegurar la compatibilidad con otros clientes.
 ctrl.secPasswordField.capsLocked = Las mayúsculas están activadas.
+unlock.label.useCustomMountFlags = Custom Mount Flags
+unlock.choicebox.winDriveLetter.occupied = occupied

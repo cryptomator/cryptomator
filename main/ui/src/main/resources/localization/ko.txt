@@ -23,6 +23,7 @@ upgrade.version3dropBundleExtension.err.alreadyExists = 자동 마이그레이�
 # unlock.fxml
 unlock.label.password = 비밀번호
 unlock.label.mountName = 드라이브 이름
+# Fuzzy
 unlock.label.winDriveLetter = 드라이브 문자
 unlock.label.downloadsPageLink = 모든 Cryptomator 버전
 unlock.label.advancedHeading = 고급 옵션
@@ -103,6 +104,7 @@ settings.volume.fuse = FUSE
 unlock.successLabel.vaultCreated = 보관함이 성공적으로 생성되었습니다.
 unlock.successLabel.passwordChanged = 비밀번호가 성공적으로 변경되었습니다.
 unlock.successLabel.upgraded = Cryptomator가 성공적으로 업그레이드 되었습니다.
+# Fuzzy
 unlock.label.useOwnMountPath = 커스텀 마운트 지점 사용
 welcome.askForUpdateCheck.dialog.title = 업데이트 확인
 welcome.askForUpdateCheck.dialog.header = 통합 업데이트 확인을 활성화 하겠습니까?
@@ -122,3 +124,5 @@ unlock.label.useReadOnlyMode = 읽기 전용
 unlock.label.chooseMountPath = 빈 디렉토리 선택
 ctrl.secPasswordField.nonPrintableChars = 패스워드에 특수문자가 포함되어 있습니다.\n권장사항 \: 다른 클라이언트와의 호환성을 보증하기 위해 해당하는 문자를 제거하시기 바랍니다.
 ctrl.secPasswordField.capsLocked = Caps Lock 키가 활성화 되어있습니다.
+unlock.label.useCustomMountFlags = Custom Mount Flags
+unlock.choicebox.winDriveLetter.occupied = occupied

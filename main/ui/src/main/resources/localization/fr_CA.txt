@@ -23,6 +23,7 @@ upgrade.version3dropBundleExtension.err.alreadyExists = La migration automatique
 # unlock.fxml
 unlock.label.password = Mot de passe
 unlock.label.mountName = Nom du lecteur
+# Fuzzy
 unlock.label.winDriveLetter = Lettre du lecteur
 unlock.label.downloadsPageLink = Toutes les versions de Cryptomator
 unlock.label.advancedHeading = Options avancées
@@ -103,6 +104,7 @@ settings.volume.fuse = FUSE
 unlock.successLabel.vaultCreated = Le coffre-fort a été créé avec succès.
 unlock.successLabel.passwordChanged = Le mot de passe a été changé avec succès.
 unlock.successLabel.upgraded = Cryptomator a été mis à niveau avec succès.
+# Fuzzy
 unlock.label.useOwnMountPath = Utiliser un point de montage personnalisé
 welcome.askForUpdateCheck.dialog.title = Vérification de la mise à jour
 welcome.askForUpdateCheck.dialog.header = Activer la vérification de mise à jour intégrée?
@@ -113,12 +115,14 @@ main.gracefulShutdown.dialog.header = Coffre en usage
 main.gracefulShutdown.dialog.content = Un ou plusieurs coffres sont encore utilisés par d'autres programmes. Veuillez les fermer pour permettre à Cryptomator de s’éteindre correctement, puis réessayez.\n\nSi cela ne fonctionne pas, Cryptomator peut s'arrêter de force, mais cela peut entraîner une perte de données et n'est pas recommandé.
 main.gracefulShutdown.button.tryAgain = Réessayer
 main.gracefulShutdown.button.forceShutdown = Forcer l'arrêt
-unlock.pendingMessage.unlocking = Unlocking vault...
-unlock.failedDialog.title = Unlock failed
-unlock.failedDialog.header = Unlock failed
+unlock.pendingMessage.unlocking = Déverrouillage du coffre-fort
+unlock.failedDialog.title = Échec du déverrouillage
+unlock.failedDialog.header = Échec du déverrouillage
 unlock.failedDialog.content.mountPathNonExisting = Mount point does not exist.
 unlock.failedDialog.content.mountPathNotEmpty = Mount point is not empty.
-unlock.label.useReadOnlyMode = Read-Only
+unlock.label.useReadOnlyMode = Lecture seulement 
 unlock.label.chooseMountPath = Choose empty directory…
-ctrl.secPasswordField.nonPrintableChars = Password contains control characters.\nRecommendation\: Remove them to ensure compatibility with other clients.
-ctrl.secPasswordField.capsLocked = Caps Lock is activated.
+ctrl.secPasswordField.nonPrintableChars = Le mot de passe contiens des caractères restreins.\nRecommandation\: Retirer les pour maintenir la comptabilité avec les autres clients
+ctrl.secPasswordField.capsLocked = Touche majuscule activée
+unlock.label.useCustomMountFlags = Custom Mount Flags
+unlock.choicebox.winDriveLetter.occupied = occupied

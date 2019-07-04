@@ -23,6 +23,7 @@ upgrade.version3dropBundleExtension.err.alreadyExists = 自动迁移失败。\n�
 # unlock.fxml
 unlock.label.password = 密码
 unlock.label.mountName = 驱动器名称
+# Fuzzy
 unlock.label.winDriveLetter = 驱动器盘符
 unlock.label.downloadsPageLink = 所有 Cryptomator 版本
 unlock.label.advancedHeading = 高级选项
@@ -104,6 +105,7 @@ settings.volume.fuse = FUSE
 unlock.successLabel.vaultCreated = 资料库成功创建
 unlock.successLabel.passwordChanged = 密码成功更改
 unlock.successLabel.upgraded = Cryptomator 成功升级
+# Fuzzy
 unlock.label.useOwnMountPath = 无效的挂载点
 welcome.askForUpdateCheck.dialog.title = 检查更新
 welcome.askForUpdateCheck.dialog.header = 启用更新检查？
@@ -123,3 +125,5 @@ unlock.label.useReadOnlyMode = 只读
 unlock.label.chooseMountPath = 选择空目录...
 ctrl.secPasswordField.nonPrintableChars = 密码包含控制字符。\n建议\:删除它们，以确保与其他客户机兼容。
 ctrl.secPasswordField.capsLocked = 大写锁定被激活
+unlock.label.useCustomMountFlags = Custom Mount Flags
+unlock.choicebox.winDriveLetter.occupied = occupied

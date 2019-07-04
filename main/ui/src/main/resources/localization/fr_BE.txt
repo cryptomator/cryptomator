@@ -23,6 +23,7 @@ upgrade.version3dropBundleExtension.err.alreadyExists = La migration automatique
 # unlock.fxml
 unlock.label.password = Mot de passe
 unlock.label.mountName = Nom du lecteur
+# Fuzzy
 unlock.label.winDriveLetter = Lettre du lecteur
 unlock.label.downloadsPageLink = Toutes les version de Cryptomateur
 unlock.label.advancedHeading = Options avancées
@@ -103,6 +104,7 @@ settings.volume.fuse = FUSE
 unlock.successLabel.vaultCreated = Le coffre-fort a été créé avec succès.
 unlock.successLabel.passwordChanged = Mot de passe mis à jour avec succès.
 unlock.successLabel.upgraded = Cryptomateur a été mis à jour avec succès.
+# Fuzzy
 unlock.label.useOwnMountPath = Utiliser point de montage personalisé
 welcome.askForUpdateCheck.dialog.title = Vérifier mise à jour
 welcome.askForUpdateCheck.dialog.header = Activer la vérification de mise à jour intégré ?
@@ -122,3 +124,5 @@ unlock.label.useReadOnlyMode = Read-Only
 unlock.label.chooseMountPath = Choose empty directory…
 ctrl.secPasswordField.nonPrintableChars = Password contains control characters.\nRecommendation\: Remove them to ensure compatibility with other clients.
 ctrl.secPasswordField.capsLocked = Caps Lock is activated.
+unlock.label.useCustomMountFlags = Custom Mount Flags
+unlock.choicebox.winDriveLetter.occupied = occupied

@@ -23,6 +23,7 @@ upgrade.version3dropBundleExtension.err.alreadyExists = 自動轉移失敗。\n"
 # unlock.fxml
 unlock.label.password = 密碼
 unlock.label.mountName = 磁碟名
+# Fuzzy
 unlock.label.winDriveLetter = 磁碟代號
 unlock.label.downloadsPageLink = 所有Cryptomator版本
 unlock.label.advancedHeading = 進階選項
@@ -103,7 +104,7 @@ settings.volume.fuse = FUSE
 unlock.successLabel.vaultCreated = Vault was successfully created.
 unlock.successLabel.passwordChanged = Password was successfully changed.
 unlock.successLabel.upgraded = Vault was successfully upgraded.
-unlock.label.useOwnMountPath = Use Custom Mount Point
+unlock.label.useOwnMountPath = Custom Mount Point
 welcome.askForUpdateCheck.dialog.title = Update check
 welcome.askForUpdateCheck.dialog.header = Enable the integrated update check?
 welcome.askForUpdateCheck.dialog.content = Recommended\: Enable the update check to always be sure you have the newest version of Cryptomator, with all security patches, installed.\n\nYou can change this from within the settings at any time.
@@ -122,3 +123,5 @@ unlock.label.useReadOnlyMode = Read-Only
 unlock.label.chooseMountPath = Choose empty directory…
 ctrl.secPasswordField.nonPrintableChars = Password contains control characters.\nRecommendation\: Remove them to ensure compatibility with other clients.
 ctrl.secPasswordField.capsLocked = Caps Lock is activated.
+unlock.label.useCustomMountFlags = Custom Mount Flags
+unlock.choicebox.winDriveLetter.occupied = occupied
