@@ -76,7 +76,7 @@
 		<CheckBox fx:id="useReadOnlyMode" text="%unlock.label.useReadOnlyMode"/>
 
 		<!-- Custom Mount Point -->
-		<CheckBox fx:id="useCustomMountPoint" text="%unlock.label.useOwnMountPath"/>
+		<CheckBox fx:id="useCustomMountPoint" text="%unlock.label.useOwnMountPath" onAction="#didClickCustomMountPointCheckbox"/>
 		<HBox fx:id="customMountPoint" spacing="6" alignment="BASELINE_LEFT" >
 			<padding>
 				<Insets left="20.0"/>

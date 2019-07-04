@@ -359,6 +359,11 @@ public class UnlockController implements ViewController {
 		}
 	}
 
+	@FXML
+	public void didClickCustomMountPointCheckbox() {
+		useCustomWinDriveLetter.setSelected(vault.getWinDriveLetter() != null);
+	}
+
 	/**
 	 * Converts 'C' to "C:" to translate between model and GUI.
 	 */
