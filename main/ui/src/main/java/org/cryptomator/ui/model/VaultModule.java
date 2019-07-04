@@ -121,7 +121,7 @@ public class VaultModule {
 		if (vaultSettings.usesReadOnlyMode().get()) {
 			flags.append(",WRITE_PROTECTION");
 		}
-		flags.append(" --threadCount 5");
+		flags.append(" --thread-count 5");
 		flags.append(" --timeout 10000");
 		flags.append(" --allocation-unit-size 4096");
 		flags.append(" --sector-size 4096");
