@@ -309,7 +309,7 @@ public class UnlockController implements ViewController {
 		}
 	}
 
-	private void mountNameDidChange(@SuppressWarnings("unused") ObservableValue<? extends String> property, @SuppressWarnings("unused")String oldValue, String newValue) {
+	private void mountNameDidChange(@SuppressWarnings("unused") ObservableValue<? extends String> property, @SuppressWarnings("unused") String oldValue, String newValue) {
 		// newValue is guaranteed to be a-z0-9_, see #filterAlphanumericKeyEvents
 		if (newValue.isEmpty()) {
 			mountName.setText(vault.getMountName());
@@ -321,7 +321,7 @@ public class UnlockController implements ViewController {
 		}
 	}
 
-	private void useReadOnlyDidChange(@SuppressWarnings("unused") ObservableValue<? extends Boolean> property, @SuppressWarnings("unused")Boolean oldValue, Boolean newValue) {
+	private void useReadOnlyDidChange(@SuppressWarnings("unused") ObservableValue<? extends Boolean> property, @SuppressWarnings("unused") Boolean oldValue, Boolean newValue) {
 		vault.getVaultSettings().usesReadOnlyMode().setValue(newValue);
 		if (!useCustomMountFlags.isSelected()) {
 			mountFlags.setText(vault.getMountFlags()); // update default flags
@@ -329,14 +329,14 @@ public class UnlockController implements ViewController {
 	}
 
 
-	private void useCustomMountFlagsDidChange(@SuppressWarnings("unused") ObservableValue<? extends Boolean> property, @SuppressWarnings("unused")Boolean oldValue, Boolean newValue) {
+	private void useCustomMountFlagsDidChange(@SuppressWarnings("unused") ObservableValue<? extends Boolean> property, @SuppressWarnings("unused") Boolean oldValue, Boolean newValue) {
 		if (!newValue) {
 			vault.setMountFlags(VaultSettings.DEFAULT_MOUNT_FLAGS);
 			mountFlags.setText(vault.getMountFlags());
 		}
 	}
 
-	private void mountFlagsDidChange(@SuppressWarnings("unused") ObservableValue<? extends String> property, @SuppressWarnings("unused")String oldValue, String newValue) {
+	private void mountFlagsDidChange(@SuppressWarnings("unused") ObservableValue<? extends String> property, @SuppressWarnings("unused") String oldValue, String newValue) {
 		if (useCustomMountFlags.isSelected()) {
 			vault.setMountFlags(newValue);
 		}
@@ -373,10 +373,10 @@ public class UnlockController implements ViewController {
 		public String toString(Path root) {
 			if (root == null) {
 				return localization.getString("unlock.choicebox.winDriveLetter.auto");
-			} else if(root.endsWith("occupied")){
-				return root.getRoot().toString().substring(0,1) +" ("+localization.getString("unlock.choicebox.winDriveLetter.occupied") +")";
+			} else if (root.endsWith("occupied")) {
+				return root.getRoot().toString().substring(0, 1) + " (" + localization.getString("unlock.choicebox.winDriveLetter.occupied") + ")";
 			} else {
-				return root.toString().substring(0,1);
+				return root.toString().substring(0, 1);
 			}
 		}
 
@@ -415,9 +415,9 @@ public class UnlockController implements ViewController {
 	private void chooseSelectedDriveLetter() {
 		assert SystemUtils.IS_OS_WINDOWS;
 		// if the vault prefers a drive letter, that is currently occupied, this is our last chance to reset this:
-		if(vault.getWinDriveLetter() != null){
-			final Path pickedRoot = Path.of(vault.getWinDriveLetter()+":\\");
-			if(driveLetters.getOccupiedDriveLetters().contains(pickedRoot)){
+		if (vault.getWinDriveLetter() != null) {
+			final Path pickedRoot = Path.of(vault.getWinDriveLetter() + ":\\");
+			if (driveLetters.getOccupiedDriveLetters().contains(pickedRoot)) {
 				Path alteredPath = pickedRoot.resolve("occupied");
 				this.winDriveLetter.getItems().add(alteredPath);
 				this.winDriveLetter.getSelectionModel().select(alteredPath);
