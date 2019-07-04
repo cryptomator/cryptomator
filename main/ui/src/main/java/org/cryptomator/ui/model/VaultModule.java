@@ -45,19 +45,21 @@ public class VaultModule {
 	@PerVault
 	@DefaultMountFlags
 	public Supplier<String> provideDefaultMountFlags(Settings settings, VaultSettings vaultSettings) {
-		VolumeImpl preferredImpl = settings.preferredVolumeImpl().get();
-		switch (preferredImpl) {
-			case FUSE:
-				if (SystemUtils.IS_OS_MAC_OSX) {
-					return () -> getMacFuseDefaultMountFlags(settings, vaultSettings);
-				} else if (SystemUtils.IS_OS_LINUX) {
-					return () -> getLinuxFuseDefaultMountFlags(settings, vaultSettings);
-				}
-			case DOKANY:
-				return () -> getDokanyDefaultMountFlags(settings, vaultSettings);
-			default:
-				return () -> "--flags-supported-on-FUSE-or-DOKANY-only";
-		}
+		return () -> {
+			VolumeImpl preferredImpl = settings.preferredVolumeImpl().get();
+			switch (preferredImpl) {
+				case FUSE:
+					if (SystemUtils.IS_OS_MAC_OSX) {
+						return getMacFuseDefaultMountFlags(settings, vaultSettings);
+					} else if (SystemUtils.IS_OS_LINUX) {
+						return getLinuxFuseDefaultMountFlags(settings, vaultSettings);
+					}
+				case DOKANY:
+					return getDokanyDefaultMountFlags(settings, vaultSettings);
+				default:
+					return "--flags-supported-on-FUSE-or-DOKANY-only";
+			}
+		};
 	}
 
 	// see: https://github.com/osxfuse/osxfuse/wiki/Mount-options
