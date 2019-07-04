@@ -64,11 +64,11 @@ public class DokanyVolume implements Volume {
 			checkProvidedMountPoint(customMountPoint);
 			return customMountPoint;
 		} else if (!Strings.isNullOrEmpty(vaultSettings.winDriveLetter().get())) {
-			return Paths.get(vaultSettings.winDriveLetter().get().charAt(0) + ":\\");
+			return Path.of(vaultSettings.winDriveLetter().get().charAt(0) + ":\\");
 		} else {
 			//auto assign drive letter
 			if (!windowsDriveLetters.getAvailableDriveLetters().isEmpty()) {
-				return Paths.get(windowsDriveLetters.getAvailableDriveLetters().iterator().next() + ":\\");
+				return windowsDriveLetters.getAvailableDriveLetters().iterator().next();
 			} else {
 				throw new VolumeException("No free drive letter available.");
 			}
