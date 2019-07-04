@@ -232,6 +232,10 @@ public class UnlockController implements ViewController {
 		if (VolumeImpl.WEBDAV.equals(settings.preferredVolumeImpl().get())) {
 			useCustomMountPoint.setVisible(false);
 			useCustomMountPoint.setManaged(false);
+			useCustomMountFlags.setVisible(false);
+			useCustomMountFlags.setManaged(false);
+			mountFlags.setVisible(false);
+			mountFlags.setManaged(false);
 		} else {
 			useCustomMountPoint.setVisible(true);
 			useCustomMountPoint.setSelected(vaultSettings.usesIndividualMountPath().get());
