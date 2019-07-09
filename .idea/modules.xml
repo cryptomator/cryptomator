@@ -3,7 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/Desktop.iml" filepath="$PROJECT_DIR$/.idea/Desktop.iml" />
-      <module fileurl="file://$PROJECT_DIR$/main/buildkit/buildkit.iml" filepath="$PROJECT_DIR$/main/buildkit/buildkit.iml" />
     </modules>
   </component>
 </project>
