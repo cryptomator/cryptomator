@@ -5,7 +5,7 @@
  *******************************************************************************/
 package org.cryptomator.ui.model.upgrade;
 
-import org.cryptomator.common.FxApplicationScoped;
+import org.cryptomator.ui.FxApplicationScoped;
 import org.cryptomator.cryptolib.Cryptors;
 import org.cryptomator.cryptolib.api.Cryptor;
 import org.cryptomator.cryptolib.api.FileHeader;

@@ -4,6 +4,7 @@ import dagger.Module;
 import dagger.Provides;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.SettingsProvider;
+import org.cryptomator.ui.FxApplicationScoped;
 import org.cryptomator.ui.model.AppLaunchEvent;
 
 import javax.inject.Named;
@@ -12,9 +13,24 @@ import java.util.Optional;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
+import java.util.function.Consumer;
 
 @Module
 class CryptomatorModule {
+
+	@Provides
+	@Singleton
+	@Named("shutdownTaskScheduler")
+	Consumer<Runnable> provideShutdownTaskScheduler(CleanShutdownPerformer shutdownPerformer) {
+		return shutdownPerformer::scheduleShutdownTask;
+	}
+
+	@Provides
+	@Singleton
+	@Named("shutdownLatch")
+	static CountDownLatch provideShutdownLatch() {
+		return new CountDownLatch(1);
+	}
 
 	@Provides
 	@Singleton

@@ -8,7 +8,7 @@
  *******************************************************************************/
 package org.cryptomator.ui.model;
 
-import org.cryptomator.common.FxApplicationScoped;
+import org.cryptomator.ui.FxApplicationScoped;
 import org.cryptomator.common.settings.VaultSettings;
 
 import javax.inject.Inject;

@@ -12,7 +12,6 @@ import dagger.Module;
 import dagger.Provides;
 import javafx.beans.binding.Binding;
 import org.apache.commons.lang3.SystemUtils;
-import org.cryptomator.common.FxApplicationScoped;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.frontend.webdav.WebDavServer;
 import org.cryptomator.keychain.KeychainModule;

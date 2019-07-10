@@ -5,7 +5,7 @@
  *******************************************************************************/
 package org.cryptomator.ui.model.upgrade;
 
-import org.cryptomator.common.FxApplicationScoped;
+import org.cryptomator.ui.FxApplicationScoped;
 import org.cryptomator.cryptofs.migration.Migrators;
 import org.cryptomator.cryptofs.migration.api.NoApplicableMigratorException;
 import org.cryptomator.cryptolib.Cryptors;

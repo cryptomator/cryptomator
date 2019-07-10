@@ -9,7 +9,7 @@ import com.google.common.collect.Lists;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.TransformationList;
-import org.cryptomator.common.FxApplicationScoped;
+import org.cryptomator.ui.FxApplicationScoped;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VaultSettings;
 

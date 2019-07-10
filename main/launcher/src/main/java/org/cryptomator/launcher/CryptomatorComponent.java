@@ -3,6 +3,7 @@ package org.cryptomator.launcher;
 import dagger.Component;
 import org.cryptomator.common.CommonsModule;
 import org.cryptomator.logging.LoggerModule;
+import org.cryptomator.ui.FxApplicationComponent;
 
 import javax.inject.Singleton;
 
@@ -12,6 +13,6 @@ public interface CryptomatorComponent {
 
 	Cryptomator application();
 
-	FxApplicationComponent.Builder fxApplicationComponent();
+	FxApplicationComponent fxApplicationComponent();
 
 }

@@ -5,7 +5,7 @@
  *******************************************************************************/
 package org.cryptomator.ui.model;
 
-import org.cryptomator.common.FxApplicationScoped;
+import org.cryptomator.ui.FxApplicationScoped;
 import org.cryptomator.cryptolib.api.CryptoException;
 import org.cryptomator.keychain.KeychainAccess;
 import org.slf4j.Logger;

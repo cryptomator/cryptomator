@@ -12,7 +12,6 @@ package org.cryptomator.ui;
 import javafx.application.Platform;
 import javafx.stage.Stage;
 import org.apache.commons.lang3.SystemUtils;
-import org.cryptomator.common.FxApplicationScoped;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.jni.JniException;
 import org.cryptomator.jni.MacApplicationUiState;

@@ -7,7 +7,7 @@ package org.cryptomator.ui.model.upgrade;
 
 import javafx.application.Platform;
 import org.apache.commons.lang3.StringUtils;
-import org.cryptomator.common.FxApplicationScoped;
+import org.cryptomator.ui.FxApplicationScoped;
 import org.cryptomator.cryptolib.Cryptors;
 import org.cryptomator.cryptolib.api.Cryptor;
 import org.cryptomator.ui.l10n.Localization;

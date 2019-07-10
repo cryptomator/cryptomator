@@ -1,4 +1,4 @@
-package org.cryptomator.common;
+package org.cryptomator.ui;
 
 import javax.inject.Scope;
 import java.lang.annotation.Documented;

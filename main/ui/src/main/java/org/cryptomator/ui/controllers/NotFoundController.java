@@ -8,7 +8,7 @@ package org.cryptomator.ui.controllers;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
 import javafx.scene.layout.VBox;
-import org.cryptomator.common.FxApplicationScoped;
+import org.cryptomator.ui.FxApplicationScoped;
 
 import javax.inject.Inject;
 
