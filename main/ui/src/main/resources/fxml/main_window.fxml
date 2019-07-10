@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<VBox xmlns="http://javafx.com/javafx"
+	  xmlns:fx="http://javafx.com/fxml"
+	  fx:controller="org.cryptomator.ui.mainwindow.MainWindowController">
+	<children>
+		<HBox fx:id="titleBar" alignment="CENTER_RIGHT" prefHeight="49.0" prefWidth="600.0" style="-fx-background-color: #79b01a;">
+			<padding>
+				<Insets bottom="6.0" left="6.0" right="6.0" top="6.0"/>
+			</padding>
+			<children>
+				<Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" style="-fx-background-color: none;" text="Button">
+					<graphic>
+						<FontAwesomeIconView fill="WHITE" glyphName="COGS"/>
+					</graphic>
+					<tooltip>
+						<Tooltip text="%main.settingsBtn.tooltip"/>
+					</tooltip>
+				</Button>
+				<Button contentDisplay="GRAPHIC_ONLY" layoutX="612.0" layoutY="16.0" mnemonicParsing="false" onAction="#close" style="-fx-background-color: none;" text="Button">
+					<graphic>
+						<FontAwesomeIconView fill="WHITE" glyphName="CLOSE"/>
+					</graphic>
+					<tooltip>
+						<Tooltip text="%main.closeBtn.tooltip"/>
+					</tooltip>
+				</Button>
+			</children>
+		</HBox>
+		<fx:include source="/fxml/vaultlist.fxml"/>
+	</children>
+</VBox>

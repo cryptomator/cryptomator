@@ -10,6 +10,7 @@ import dagger.Module;
 import dagger.Provides;
 import javafx.application.Application;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 
 import javax.inject.Named;
 
@@ -23,6 +24,7 @@ abstract class FxApplicationModule {
 		Stage stage = new Stage();
 		stage.setMinWidth(652.0);
 		stage.setMinHeight(440.0);
+		stage.initStyle(StageStyle.UNDECORATED);
 		return stage;
 	}
 

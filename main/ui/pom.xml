@@ -55,6 +55,10 @@
 			<groupId>org.openjfx</groupId>
 			<artifactId>javafx-fxml</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>de.jensd</groupId>
+			<artifactId>fontawesomefx-fontawesome</artifactId>
+		</dependency>
 
 		<!-- EasyBind -->
 		<dependency>
