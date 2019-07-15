@@ -18,6 +18,7 @@ public interface FxApplicationComponent {
 	default void start() {
 		Platform.startup(() -> {
 			assert Platform.isFxApplicationThread();
+			Application.setUserAgentStylesheet(getClass().getResource("/css/theme.css").toString());
 			application().start();
 		});
 	}
