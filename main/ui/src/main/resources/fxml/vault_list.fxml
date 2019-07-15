@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Arc?>
+<VBox xmlns="http://javafx.com/javafx"
+	  xmlns:fx="http://javafx.com/fxml"
+	  fx:controller="org.cryptomator.ui.mainwindow.VaultListController">
+	<StackPane VBox.vgrow="ALWAYS">
+		<ListView fx:id="vaultList" editable="true"/>
+		<AnchorPane fx:id="onboardingOverlay">
+			<HBox AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.bottomAnchor="100.0" alignment="BOTTOM_LEFT">
+				<Label textAlignment="CENTER" text="%vaultlist.emptyList.onboardingInstruction" wrapText="true"/>
+			</HBox>
+			<Arc AnchorPane.bottomAnchor="5.0" type="OPEN" centerX="-10.0" centerY="0.0" radiusY="100.0" radiusX="60.0" startAngle="0" length="-60.0" strokeWidth="1" stroke="BLACK" fill="TRANSPARENT"/>
+		</AnchorPane>
+	</StackPane>
+	<HBox VBox.vgrow="NEVER" spacing="6" alignment="CENTER_LEFT">
+		<padding>
+			<Insets bottom="6" left="6" right="6" top="6"/>
+		</padding>
+		<children>
+			<Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#didClickAddVault">
+				<graphic>
+					<FontAwesomeIconView glyphName="PLUS"/>
+				</graphic>
+				<tooltip>
+					<Tooltip text="Add Vault"/>
+				</tooltip>
+			</Button>
+			<Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#didClickRemoveVault">
+				<graphic>
+					<FontAwesomeIconView glyphName="MINUS"/>
+				</graphic>
+				<tooltip>
+					<Tooltip text="Remove vault"/>
+				</tooltip>
+			</Button>
+		</children>
+	</HBox>
+</VBox>

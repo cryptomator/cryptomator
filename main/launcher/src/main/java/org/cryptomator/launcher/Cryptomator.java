@@ -89,11 +89,7 @@ public class Cryptomator {
 	private int runGuiApplication() {
 		try {
 			shutdownPerformer.registerShutdownHook();
-			Platform.startup(() -> {
-				assert Platform.isFxApplicationThread();
-				FxApplication app = CRYPTOMATOR_COMPONENT.fxApplicationComponent().application();
-				app.start();
-			});
+			CRYPTOMATOR_COMPONENT.fxApplicationComponent().start();
 			shutdownLatch.await();
 			LOG.info("UI shut down");
 			return 0;

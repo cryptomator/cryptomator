@@ -23,14 +23,11 @@
           <entry name="$MAVEN_REPOSITORY$/com/google/errorprone/javac-shaded/9-dev-r4023-3/javac-shaded-9-dev-r4023-3.jar" />
           <entry name="$MAVEN_REPOSITORY$/javax/annotation/jsr250-api/1.0/jsr250-api-1.0.jar" />
         </processorPath>
-        <module name="commons" />
         <module name="keychain" />
         <module name="launcher" />
+        <module name="commons" />
         <module name="ui" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="buildkit" target="11" />
-    </bytecodeTargetLevel>
   </component>
 </project>

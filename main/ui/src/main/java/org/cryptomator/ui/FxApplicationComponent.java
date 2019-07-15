@@ -6,11 +6,20 @@
 package org.cryptomator.ui;
 
 import dagger.Subcomponent;
+import javafx.application.Application;
+import javafx.application.Platform;
 
 @FxApplicationScoped
 @Subcomponent(modules = FxApplicationModule.class)
 public interface FxApplicationComponent {
 
 	FxApplication application();
+	
+	default void start() {
+		Platform.startup(() -> {
+			assert Platform.isFxApplicationThread();
+			application().start();
+		});
+	}
 
 }
