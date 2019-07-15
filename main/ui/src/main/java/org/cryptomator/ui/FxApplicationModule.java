@@ -17,16 +17,7 @@ import javax.inject.Named;
 @Module(includes = {UiModule.class})
 abstract class FxApplicationModule {
 
-	@Provides
-	@FxApplicationScoped
-	@Named("mainWindow")
-	static Stage providePrimaryStage() {
-		Stage stage = new Stage();
-		stage.setMinWidth(652.0);
-		stage.setMinHeight(440.0);
-		stage.initStyle(StageStyle.UNDECORATED);
-		return stage;
-	}
+	
 
 	@Binds
 	@FxApplicationScoped

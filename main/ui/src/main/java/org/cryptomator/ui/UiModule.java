@@ -17,6 +17,7 @@ import org.cryptomator.frontend.webdav.WebDavServer;
 import org.cryptomator.keychain.KeychainModule;
 import org.cryptomator.ui.mainwindow.MainWindowModule;
 import org.cryptomator.ui.model.VaultComponent;
+import org.cryptomator.ui.preferences.PreferencesModule;
 import org.fxmisc.easybind.EasyBind;
 
 import javax.inject.Named;
@@ -27,7 +28,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
-@Module(includes = {KeychainModule.class, MainWindowModule.class}, subcomponents = {VaultComponent.class})
+@Module(includes = {KeychainModule.class, MainWindowModule.class, PreferencesModule.class}, subcomponents = {VaultComponent.class})
 public class UiModule {
 
 	private static final int NUM_SCHEDULER_THREADS = 4;

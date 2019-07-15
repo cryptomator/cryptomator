@@ -1,9 +1,10 @@
 package org.cryptomator.ui.mainwindow;
 
-import javafx.application.Application;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
+import org.cryptomator.ui.FxApplication;
 import org.cryptomator.ui.FxApplicationScoped;
 import org.cryptomator.ui.FxController;
 import org.slf4j.Logger;
@@ -20,6 +21,7 @@ public class MainWindowController implements FxController {
 
 	private final CountDownLatch shutdownLatch;
 	private final Stage mainWindow;
+	private final FxApplication application;
 
 	@FXML
 	public HBox titleBar;
@@ -28,9 +30,10 @@ public class MainWindowController implements FxController {
 	private double yOffset;
 
 	@Inject
-	public MainWindowController(@Named("shutdownLatch") CountDownLatch shutdownLatch, @Named("mainWindow") Stage mainWindow) {
+	public MainWindowController(@Named("shutdownLatch") CountDownLatch shutdownLatch, @MainWindow Stage mainWindow, FxApplication application) {
 		this.shutdownLatch = shutdownLatch;
 		this.mainWindow = mainWindow;
+		this.application = application;
 	}
 
 	@FXML
@@ -51,5 +54,10 @@ public class MainWindowController implements FxController {
 		mainWindow.close();
 		LOG.info("closed...");
 		shutdownLatch.countDown();
+	}
+
+	@FXML
+	public void showPreferences() {
+		application.showPreferencesWindow();
 	}
 }

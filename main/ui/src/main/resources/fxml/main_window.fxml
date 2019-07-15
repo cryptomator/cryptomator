@@ -15,7 +15,7 @@
 			<Insets bottom="6" left="12" right="12" top="6"/>
 		</padding>
 		<children>
-			<Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" style="-fx-background-color: none;">
+			<Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#showPreferences" style="-fx-background-color: none;">
 				<graphic>
 					<FontAwesomeIconView fill="WHITE" glyphName="COGS"/>
 				</graphic>

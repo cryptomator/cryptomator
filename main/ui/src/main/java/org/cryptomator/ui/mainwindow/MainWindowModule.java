@@ -7,6 +7,8 @@ import dagger.multibindings.IntoMap;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import org.cryptomator.ui.FxApplicationScoped;
 import org.cryptomator.ui.FxController;
 import org.cryptomator.ui.FxControllerKey;
@@ -33,8 +35,19 @@ public abstract class MainWindowModule {
 	
 	// ------------------
 
+	@Provides
+	@FxApplicationScoped
+	@MainWindow
+	static Stage providePrimaryStage() {
+		Stage stage = new Stage();
+		stage.setMinWidth(652.0);
+		stage.setMinHeight(440.0);
+		stage.initStyle(StageStyle.UNDECORATED);
+		return stage;
+	}
+
 	@Binds
-	abstract ObservableList<Vault> provideVaults(VaultList vaultList);
+	abstract ObservableList<Vault> bindVaultList(VaultList vaultList);
 
 	@Provides
 	@FxApplicationScoped
