@@ -7,6 +7,8 @@
 .root {
 	WHITE: #FFF;
 	PRIMARY_BG: #79B01A;
+	TEXT_FILL: #222;
+	CONTROL_BORDER: #79B01A;
 }
 
 
@@ -31,4 +33,89 @@
 	-fx-background-color: WHITE;
     -fx-padding: 0.2em 0.4em 0.2em 0.4em;
     -fx-font-size: 0.8em;
+}
+
+/*******************************************************************************
+ *                                                                             *
+ * Text Fields                                                                 *
+ *                                                                             *
+ ******************************************************************************/
+
+.text-input {
+    -fx-text-fill: TEXT_FILL;
+    -fx-prompt-text-fill: derive(TEXT_FILL, +50%);
+    -fx-background-color: CONTROL_BORDER, WHITE;
+    -fx-background-insets: 0, 1px;
+    -fx-cursor: text;
+	-fx-padding: 2px 4px 2px 4px;
+}
+
+/****************************************************************************
+ *																			*
+ * Buttons																	*
+ *																			*
+ ****************************************************************************/
+
+.button {
+	-fx-pref-height: 25px;
+	-fx-background-color: CONTROL_BORDER, WHITE;
+	-fx-background-insets: 0, 1px;
+	-fx-padding: 2px 4px 2px 4px;
+	-fx-text-fill: TEXT_FILL;
+	-fx-alignment: CENTER;
+}
+
+/*******************************************************************************
+ *                                                                             *
+ * Checkbox                                                                    *
+ *                                                                             *
+ ******************************************************************************/
+
+.check-box {
+    -fx-label-padding: 0 0 0 6px;
+    -fx-text-fill: TEXT_FILL;
+}
+.check-box > .box {
+    -fx-padding: 2px;
+    -fx-background-color: CONTROL_BORDER, WHITE;
+	-fx-background-insets: 0, 1px;
+}
+.check-box > .box > .mark {
+    -fx-background-color: transparent;
+    -fx-padding: 4px;
+    -fx-shape: "M-1,4, L-1,5.5 L3.5,8.5 L9,0 L9,-1 L7,-1 L3,6 L1,4 Z";
+}
+
+.check-box:selected > .box > .mark {
+    -fx-background-color: TEXT_FILL;
+}
+
+/*******************************************************************************
+ *                                                                             *
+ * Dropdown                                                                    *
+ *                                                                             *
+ ******************************************************************************/
+
+.choice-box {
+	-fx-background-color: CONTROL_BORDER, WHITE;
+	-fx-background-insets: 0, 1px;
+	-fx-background-radius: 0, 0;
+	-fx-padding: 2px 4px 2px 4px;
+	-fx-text-fill: TEXT_FILL;
+}
+
+.choice-box:focused {
+	-fx-background-color: derive(CONTROL_BORDER, -20%), WHITE;
+}
+
+.choice-box > .open-button > .arrow {
+	-fx-background-color: transparent, TEXT_FILL;
+	-fx-background-insets: 0 0 -1 0, 0;
+	-fx-padding: 2px 4px 2px 4px;
+	-fx-shape: "M 0 0 h 7 l -3.5 4 z";
+}
+
+.choice-box .context-menu {
+	-fx-background-color: CONTROL_BORDER, WHITE;
+    -fx-background-insets: 0, 1px;
 }
