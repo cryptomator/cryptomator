@@ -6,6 +6,7 @@
 <?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.SplitPane?>
 <VBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
 	  fx:controller="org.cryptomator.ui.mainwindow.MainWindowController"
@@ -33,8 +34,8 @@
 			</Button>
 		</children>
 	</HBox>
-	<HBox VBox.vgrow="ALWAYS">
-		<fx:include source="/fxml/vault_list.fxml" HBox.hgrow="ALWAYS"/>
-		<fx:include source="/fxml/vault_detail.fxml" HBox.hgrow="NEVER"/>
-	</HBox>
+	<SplitPane VBox.vgrow="ALWAYS" dividerPositions="0.33">
+		<fx:include source="/fxml/vault_list.fxml" SplitPane.resizableWithParent="false"/>
+		<fx:include source="/fxml/vault_detail.fxml" SplitPane.resizableWithParent="true"/>
+	</SplitPane>
 </VBox>
