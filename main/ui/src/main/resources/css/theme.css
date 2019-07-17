@@ -22,6 +22,20 @@
 	-fx-background-color: PRIMARY_BG;
 }
 
+/*******************************************************************************
+ *                                                                             *
+ * SplitPane                                                                   *
+ *                                                                             *
+ ******************************************************************************/
+
+.split-pane > .split-pane-divider {
+    -fx-padding: 0 2;
+}
+
+.split-pane:horizontal > .split-pane-divider {
+   -fx-background-color: CONTROL_BORDER, WHITE;
+   -fx-background-insets: 0, 0 1;
+}
 
 /*******************************************************************************
  *                                                                             *

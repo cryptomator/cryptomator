@@ -34,7 +34,7 @@
 			</Button>
 		</children>
 	</HBox>
-	<SplitPane VBox.vgrow="ALWAYS" dividerPositions="0.33">
+	<SplitPane VBox.vgrow="ALWAYS" dividerPositions="0.33" orientation="HORIZONTAL">
 		<fx:include source="/fxml/vault_list.fxml" SplitPane.resizableWithParent="false"/>
 		<fx:include source="/fxml/vault_detail.fxml" SplitPane.resizableWithParent="true"/>
 	</SplitPane>
