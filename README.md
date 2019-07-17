@@ -1,4 +1,4 @@
-![cryptomator](cryptomator.png)
+[![cryptomator](cryptomator.png)](https://cryptomator.org/)
 
 [![Build Status](https://travis-ci.org/cryptomator/cryptomator.svg?branch=master)](https://travis-ci.org/cryptomator/cryptomator)
 [![Known Vulnerabilities](https://snyk.io/test/github/cryptomator/cryptomator/badge.svg?targetFile=main%2Fpom.xml)](https://snyk.io/test/github/cryptomator/cryptomator?targetFile=main%2Fpom.xml)
@@ -17,7 +17,7 @@ Cryptomator is provided free of charge as an open-source project despite the hig
 
 ### Silver Sponsors
 
-![TheBestVPN](https://cryptomator.org/img/sponsors/thebestvpn.png)
+[![TheBestVPN](https://cryptomator.org/img/sponsors/thebestvpn.png)](https://thebestvpn.com/)
 
 ---
 
