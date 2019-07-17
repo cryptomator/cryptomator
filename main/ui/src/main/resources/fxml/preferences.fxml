@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.CheckBox?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.Button?>
-<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import org.cryptomator.ui.controls.NumericTextField?>
 <VBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
 	  fx:controller="org.cryptomator.ui.preferences.PreferencesController"
@@ -17,8 +17,6 @@
 		<Insets bottom="12" left="12" right="12" top="12"/>
 	</padding>
 	<children>
-		<Label text="TODO preferences..."/>
-
 		<CheckBox fx:id="checkForUpdatesCheckbox" text="%preferences.autoUpdateCheck"/>
 
 		<CheckBox fx:id="debugModeCheckbox" text="%preferences.debugLogging"/>
@@ -30,13 +28,13 @@
 
 		<HBox spacing="6" visible="${controller.showWebDavSettings}">
 			<Label text="TODO WebDAV Port"/>
-			<TextField fx:id="portField"/>
-			<Button text="TODO Apply" fx:id="changePortButton" />
+			<NumericTextField fx:id="webDavPortField"/>
+			<Button text="TODO Apply" fx:id="changeWebDavPortButton" onAction="#doChangeWebDavPort"/>
 		</HBox>
 
 		<HBox spacing="6" visible="${controller.showWebDavSettings}">
 			<Label text="TODO WebDAV Scheme"/>
-			<ChoiceBox fx:id="prefGvfsScheme" maxWidth="Infinity"/>
+			<ChoiceBox fx:id="webDavUrlSchemeChoiceBox" maxWidth="Infinity"/>
 		</HBox>
 	</children>
 </VBox>

@@ -52,7 +52,7 @@ public class WebDavVolume implements Volume {
 		}
 		MountParams mountParams = MountParams.create() //
 				.withWindowsDriveLetter(vaultSettings.winDriveLetter().get()) //
-				.withPreferredGvfsScheme(settings.preferredGvfsScheme().get())//
+				.withPreferredGvfsScheme(settings.preferredGvfsScheme().get().getPrefix())//
 				.withWebdavHostname(getLocalhostAliasOrNull()) //
 				.build();
 		try {

@@ -31,7 +31,7 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 		out.name("checkForUpdatesEnabled").value(value.checkForUpdates().get());
 		out.name("port").value(value.port().get());
 		out.name("numTrayNotifications").value(value.numTrayNotifications().get());
-		out.name("preferredGvfsScheme").value(value.preferredGvfsScheme().get());
+		out.name("preferredGvfsScheme").value(value.preferredGvfsScheme().get().name());
 		out.name("debugMode").value(value.debugMode().get());
 		out.name("preferredVolumeImpl").value(value.preferredVolumeImpl().get().name());
 		out.endObject();
@@ -69,7 +69,7 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 					settings.numTrayNotifications().set(in.nextInt());
 					break;
 				case "preferredGvfsScheme":
-					settings.preferredGvfsScheme().set(in.nextString());
+					settings.preferredGvfsScheme().set(parseWebDavUrlSchemePrefix(in.nextString()));
 					break;
 				case "debugMode":
 					settings.debugMode().set(in.nextBoolean());
@@ -90,9 +90,17 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 
 	private VolumeImpl parsePreferredVolumeImplName(String nioAdapterName) {
 		try {
-			return VolumeImpl.valueOf(nioAdapterName);
+			return VolumeImpl.valueOf(nioAdapterName.toUpperCase());
 		} catch (IllegalArgumentException e) {
 			return Settings.DEFAULT_PREFERRED_VOLUME_IMPL;
+		}
+	}
+
+	private WebDavUrlScheme parseWebDavUrlSchemePrefix(String webDavUrlSchemeName) {
+		try {
+			return WebDavUrlScheme.valueOf(webDavUrlSchemeName.toUpperCase());
+		} catch (IllegalArgumentException e) {
+			return Settings.DEFAULT_GVFS_SCHEME;
 		}
 	}
 

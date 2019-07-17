@@ -23,7 +23,7 @@ public class SettingsTest {
 		Mockito.verify(changeListener, Mockito.times(0)).accept(settings);
 
 		// first change (to property):
-		settings.preferredGvfsScheme().set("asd");
+		settings.preferredGvfsScheme().set(WebDavUrlScheme.DAV);
 		Mockito.verify(changeListener, Mockito.times(1)).accept(settings);
 
 		// second change (to list):

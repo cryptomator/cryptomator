@@ -7,17 +7,10 @@ package org.cryptomator.ui;
 
 import dagger.Binds;
 import dagger.Module;
-import dagger.Provides;
 import javafx.application.Application;
-import javafx.stage.Stage;
-import javafx.stage.StageStyle;
-
-import javax.inject.Named;
 
 @Module(includes = {UiModule.class})
 abstract class FxApplicationModule {
-
-	
 
 	@Binds
 	@FxApplicationScoped

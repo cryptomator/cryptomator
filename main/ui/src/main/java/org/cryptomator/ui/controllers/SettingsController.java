@@ -111,14 +111,14 @@ public class SettingsController implements ViewController {
 		changePortButton.disableProperty().bind(Bindings.createBooleanBinding(this::isPortValid, portField.textProperty()).not());
 		prefGvfsScheme.getItems().add("dav");
 		prefGvfsScheme.getItems().add("webdav");
-		prefGvfsScheme.setValue(settings.preferredGvfsScheme().get());
+		// prefGvfsScheme.setValue(settings.preferredGvfsScheme().get());
 		prefGvfsSchemeLabel.setVisible(SystemUtils.IS_OS_LINUX);
 		prefGvfsScheme.setVisible(SystemUtils.IS_OS_LINUX);
 
 		debugModeCheckbox.setSelected(settings.debugMode().get());
 
 		settings.checkForUpdates().bind(checkForUpdatesCheckbox.selectedProperty());
-		settings.preferredGvfsScheme().bind(prefGvfsScheme.valueProperty());
+		// settings.preferredGvfsScheme().bind(prefGvfsScheme.valueProperty());
 		settings.preferredVolumeImpl().bind(volume.valueProperty());
 		settings.debugMode().bind(debugModeCheckbox.selectedProperty());
 	}
