@@ -28,24 +28,22 @@ public class FxApplication extends Application {
 
 	public void start() {
 		LOG.trace("FxApplication.start()");
+
 		if (Desktop.getDesktop().isSupported(Desktop.Action.APP_PREFERENCES)) {
 			Desktop.getDesktop().setPreferencesHandler(this::handlePreferences);
 		}
 
-		start(null);
+		mainWindow.build().showMainWindow();
 	}
 
 	@Override
 	public void start(Stage stage) {
-		assert stage == null;
-
-		mainWindow.build().showMainWindow();
+		throw new UnsupportedOperationException("Use start() instead.");
 	}
 
 	private void handlePreferences(PreferencesEvent preferencesEvent) {
 		Platform.runLater(this::showPreferencesWindow);
 	}
-
 
 	public void showPreferencesWindow() {
 		preferencesWindow.build().showPreferencesWindow();
