@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <VBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
-	  fx:controller="org.cryptomator.ui.addvaultwizard.AddVaultWelcomeController"
+	  fx:controller="org.cryptomator.ui.addvaultwizard.ChooseExistingVaultController"
 	  prefHeight="400.0"
 	  prefWidth="600.0"
 	  alignment="CENTER">
@@ -15,12 +13,6 @@
 		<Insets top="12" right="12" bottom="12" left="12"/>
 	</padding>
 	<children>
-		<Label text="TODO new vault or existing vault?"/>
-
-		<HBox spacing="12">
-			<Button text="TODO new vault" onAction="#createNewVault"/>
-
-			<Button text="TODO existing vault" onAction="#chooseExistingVault"/>
-		</HBox>
+		<Label text="TODO existing!"/>
 	</children>
 </VBox>

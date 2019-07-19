@@ -49,6 +49,11 @@ public abstract class AddVaultModule {
 	@IntoMap
 	@FxControllerKey(AddVaultWelcomeController.class)
 	abstract FxController bindWelcomeController(AddVaultWelcomeController controller);
+
+	@Binds
+	@IntoMap
+	@FxControllerKey(ChooseExistingVaultController.class)
+	abstract FxController bindChooseExistingVaultController(ChooseExistingVaultController controller);
 	
 
 }
