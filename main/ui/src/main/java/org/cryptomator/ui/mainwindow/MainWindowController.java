@@ -29,7 +29,7 @@ public class MainWindowController implements FxController {
 	private double yOffset;
 
 	@Inject
-	public MainWindowController(@Named("shutdownLatch") CountDownLatch shutdownLatch, Stage window, FxApplication application) {
+	public MainWindowController(@Named("shutdownLatch") CountDownLatch shutdownLatch, @MainWindow Stage window, FxApplication application) {
 		this.shutdownLatch = shutdownLatch;
 		this.window = window;
 		this.application = application;

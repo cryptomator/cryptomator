@@ -17,12 +17,14 @@ import java.util.Map;
 public abstract class PreferencesModule {
 
 	@Provides
+	@PreferencesWindow
 	@PreferencesScoped
 	static FXMLLoaderFactory provideFxmlLoaderFactory(Map<Class<? extends FxController>, Provider<FxController>> factories) {
 		return new FXMLLoaderFactory(factories);
 	}
 
 	@Provides
+	@PreferencesWindow
 	@PreferencesScoped
 	static Stage provideStage() {
 		Stage stage = new Stage();

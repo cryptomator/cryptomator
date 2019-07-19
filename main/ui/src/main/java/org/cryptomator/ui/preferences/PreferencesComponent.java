@@ -6,32 +6,23 @@
 package org.cryptomator.ui.preferences;
 
 import dagger.Subcomponent;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.cryptomator.ui.common.FXMLLoaderFactory;
-import org.cryptomator.ui.mainwindow.MainWindowModule;
-
-import java.io.IOException;
-import java.io.UncheckedIOException;
 
 @PreferencesScoped
 @Subcomponent(modules = {PreferencesModule.class})
 public interface PreferencesComponent {
 
-	Stage preferencesWindow();
+	@PreferencesWindow
+	Stage window();
 
+	@PreferencesWindow
 	FXMLLoaderFactory fxmlLoaders();
 
 	default void showPreferencesWindow() {
-		try {
-			Parent root = fxmlLoaders().load("/fxml/preferences.fxml").getRoot();
-			Stage stage = preferencesWindow();
-			stage.setScene(new Scene(root));
-			stage.show();
-		} catch (IOException e) {
-			throw new UncheckedIOException("Failed to load main_window.fxml", e);
-		}
+		Stage stage = window();
+		fxmlLoaders().setScene("/fxml/preferences.fxml", stage);
+		stage.show();
 	}
 
 	@Subcomponent.Builder

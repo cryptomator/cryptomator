@@ -3,31 +3,33 @@
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the accompanying LICENSE file.
  *******************************************************************************/
-package org.cryptomator.ui.mainwindow;
+package org.cryptomator.ui.addvaultwizard;
 
 import dagger.Subcomponent;
 import javafx.stage.Stage;
 import org.cryptomator.ui.common.FXMLLoaderFactory;
 
-@MainWindowScoped
-@Subcomponent(modules = {MainWindowModule.class})
-public interface MainWindowComponent {
-	
-	@MainWindow
+@AddVaultWizardScoped
+@Subcomponent(modules = {AddVaultModule.class})
+public interface AddVaultWizardComponent {
+
+	@AddVaultWizard
 	Stage window();
 
-	@MainWindow
+	@AddVaultWizard
 	FXMLLoaderFactory fxmlLoaders();
-	
-	default void showMainWindow() {
+
+	default void showAddVaultWizard() {
 		Stage stage = window();
-		fxmlLoaders().setScene("/fxml/main_window.fxml", stage);
+		fxmlLoaders().setScene("/fxml/addvault_welcome.fxml", stage);
+		stage.sizeToScene();
 		stage.show();
 	}
 
 	@Subcomponent.Builder
 	interface Builder {
-		MainWindowComponent build();
+
+		AddVaultWizardComponent build();
 	}
 
 }

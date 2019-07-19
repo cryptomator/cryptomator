@@ -3,9 +3,9 @@ package org.cryptomator.ui.mainwindow;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.AnchorPane;
+import org.cryptomator.ui.addvaultwizard.AddVaultWizardComponent;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.model.Vault;
 
@@ -16,13 +16,15 @@ public class VaultListController implements FxController {
 
 	private final ObservableList<Vault> vaults;
 	private final ObjectProperty<Vault> selectedVault;
+	private final AddVaultWizardComponent.Builder addVaultWizard;
 	public ListView vaultList;
 	public AnchorPane onboardingOverlay;
 
 	@Inject
-	public VaultListController(ObservableList<Vault> vaults, ObjectProperty<Vault> selectedVault) {
+	VaultListController(ObservableList<Vault> vaults, ObjectProperty<Vault> selectedVault, AddVaultWizardComponent.Builder addVaultWizard) {
 		this.vaults = vaults;
 		this.selectedVault = selectedVault;
+		this.addVaultWizard = addVaultWizard;
 	}
 
 	public void initialize() {
@@ -31,9 +33,10 @@ public class VaultListController implements FxController {
 		selectedVault.bind(vaultList.getSelectionModel().selectedItemProperty());
 	}
 
-	public void didClickAddVault(ActionEvent actionEvent) {
+	public void didClickAddVault() {
+		addVaultWizard.build().showAddVaultWizard();
 	}
 
-	public void didClickRemoveVault(ActionEvent actionEvent) {
+	public void didClickRemoveVault() {
 	}
 }
