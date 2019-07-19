@@ -19,8 +19,6 @@ public class AddVaultWelcomeController implements FxController {
 	AddVaultWelcomeController(@AddVaultWizard Stage window, @AddVaultWizard FXMLLoaderFactory fxmlLoaders) {
 		this.window = window;
 		this.fxmlLoaders = fxmlLoaders;
-		
-		LOG.info("YOYOYO");
 	}
 
 	public void createNewVault() {
