@@ -1,12 +1,11 @@
 package org.cryptomator.ui.mainwindow;
 
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import org.cryptomator.ui.FxApplication;
 import org.cryptomator.ui.FxApplicationScoped;
-import org.cryptomator.ui.FxController;
+import org.cryptomator.ui.common.FxController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,13 +13,13 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import java.util.concurrent.CountDownLatch;
 
-@FxApplicationScoped
+@MainWindowScoped
 public class MainWindowController implements FxController {
-	
+
 	private static final Logger LOG = LoggerFactory.getLogger(MainWindowController.class);
 
 	private final CountDownLatch shutdownLatch;
-	private final Stage mainWindow;
+	private final Stage window;
 	private final FxApplication application;
 
 	@FXML
@@ -30,9 +29,9 @@ public class MainWindowController implements FxController {
 	private double yOffset;
 
 	@Inject
-	public MainWindowController(@Named("shutdownLatch") CountDownLatch shutdownLatch, @MainWindow Stage mainWindow, FxApplication application) {
+	public MainWindowController(@Named("shutdownLatch") CountDownLatch shutdownLatch, Stage window, FxApplication application) {
 		this.shutdownLatch = shutdownLatch;
-		this.mainWindow = mainWindow;
+		this.window = window;
 		this.application = application;
 	}
 
@@ -51,7 +50,7 @@ public class MainWindowController implements FxController {
 
 	@FXML
 	public void close() {
-		mainWindow.close();
+		window.close();
 		LOG.info("closed...");
 		shutdownLatch.countDown();
 	}

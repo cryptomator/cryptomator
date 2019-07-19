@@ -1,6 +1,7 @@
-package org.cryptomator.ui;
+package org.cryptomator.ui.common;
 
 import javafx.fxml.FXMLLoader;
+import org.cryptomator.ui.FxApplicationScoped;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -9,14 +10,12 @@ import java.io.InputStream;
 import java.util.Map;
 import java.util.ResourceBundle;
 
-@FxApplicationScoped
 public class FXMLLoaderFactory {
 
 	private final Map<Class<? extends FxController>, Provider<FxController>> factories;
 	private final ResourceBundle resourceBundle;
 
-	@Inject
-	FXMLLoaderFactory(Map<Class<? extends FxController>, Provider<FxController>> factories) {
+	public FXMLLoaderFactory(Map<Class<? extends FxController>, Provider<FxController>> factories) {
 		this.factories = factories;
 		this.resourceBundle = ResourceBundle.getBundle("i18n.strings");
 	}

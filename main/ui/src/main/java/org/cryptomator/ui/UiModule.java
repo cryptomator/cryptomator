@@ -11,13 +11,12 @@ package org.cryptomator.ui;
 import dagger.Module;
 import dagger.Provides;
 import javafx.beans.binding.Binding;
+import javafx.beans.binding.Bindings;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.frontend.webdav.WebDavServer;
 import org.cryptomator.keychain.KeychainModule;
-import org.cryptomator.ui.mainwindow.MainWindowModule;
 import org.cryptomator.ui.model.VaultComponent;
-import org.cryptomator.ui.preferences.PreferencesModule;
 import org.fxmisc.easybind.EasyBind;
 
 import javax.inject.Named;
@@ -28,7 +27,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
-@Module(includes = {KeychainModule.class, MainWindowModule.class, PreferencesModule.class}, subcomponents = {VaultComponent.class})
+@Module(includes = {KeychainModule.class}, subcomponents = {VaultComponent.class})
 public class UiModule {
 
 	private static final int NUM_SCHEDULER_THREADS = 4;
@@ -64,10 +63,10 @@ public class UiModule {
 	@Provides
 	@FxApplicationScoped
 	Binding<InetSocketAddress> provideServerSocketAddressBinding(Settings settings) {
-		return EasyBind.map(settings.port(), (Number port) -> {
+		return Bindings.createObjectBinding(() -> {
 			String host = SystemUtils.IS_OS_WINDOWS ? "127.0.0.1" : "localhost";
-			return InetSocketAddress.createUnresolved(host, port.intValue());
-		});
+			return InetSocketAddress.createUnresolved(host, settings.port().intValue());
+		}, settings.port());
 	}
 
 	@Provides

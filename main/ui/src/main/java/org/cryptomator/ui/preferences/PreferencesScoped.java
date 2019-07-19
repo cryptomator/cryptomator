@@ -1,13 +1,13 @@
-package org.cryptomator.ui.mainwindow;
+package org.cryptomator.ui.preferences;
 
-import javax.inject.Qualifier;
+import javax.inject.Scope;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-@Qualifier
+@Scope
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
-public @interface MainWindow {
+@interface PreferencesScoped {
 
 }

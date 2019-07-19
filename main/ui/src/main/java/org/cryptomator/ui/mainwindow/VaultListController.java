@@ -6,15 +6,14 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.AnchorPane;
-import org.cryptomator.ui.FxApplicationScoped;
-import org.cryptomator.ui.FxController;
+import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.model.Vault;
 
 import javax.inject.Inject;
 
-@FxApplicationScoped
+@MainWindowScoped
 public class VaultListController implements FxController {
-	
+
 	private final ObservableList<Vault> vaults;
 	private final ObjectProperty<Vault> selectedVault;
 	public ListView vaultList;

@@ -10,12 +10,12 @@ import javafx.util.StringConverter;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VolumeImpl;
 import org.cryptomator.common.settings.WebDavUrlScheme;
-import org.cryptomator.ui.FxController;
+import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.model.Volume;
 
 import javax.inject.Inject;
 
-@PreferencesWindow
+@PreferencesScoped
 public class PreferencesController implements FxController {
 	
 	private final Settings settings;

@@ -6,29 +6,38 @@ import dagger.Provides;
 import dagger.multibindings.IntoMap;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import org.cryptomator.ui.FxApplicationScoped;
-import org.cryptomator.ui.FxController;
-import org.cryptomator.ui.FxControllerKey;
-import org.cryptomator.ui.mainwindow.MainWindow;
+import org.cryptomator.ui.common.FXMLLoaderFactory;
+import org.cryptomator.ui.common.FxController;
+import org.cryptomator.ui.common.FxControllerKey;
+
+import javax.inject.Provider;
+import java.util.Map;
 
 @Module
 public abstract class PreferencesModule {
+
+	@Provides
+	@PreferencesScoped
+	static FXMLLoaderFactory provideFxmlLoaderFactory(Map<Class<? extends FxController>, Provider<FxController>> factories) {
+		return new FXMLLoaderFactory(factories);
+	}
+
+	@Provides
+	@PreferencesScoped
+	static Stage provideStage() {
+		Stage stage = new Stage();
+		stage.setMinWidth(400);
+		stage.setMinHeight(300);
+		stage.initModality(Modality.APPLICATION_MODAL);
+		return stage;
+	}
+
+	// ------------------
 
 	@Binds
 	@IntoMap
 	@FxControllerKey(PreferencesController.class)
 	abstract FxController bindPreferencesController(PreferencesController controller);
 
-	@Provides
-	@FxApplicationScoped
-	@PreferencesWindow
-	static Stage providePreferencesStage(@MainWindow Stage mainWindow) {
-		Stage stage = new Stage();
-		stage.setMinWidth(400);
-		stage.setMinHeight(300);
-		stage.initModality(Modality.APPLICATION_MODAL);
-		stage.initOwner(mainWindow);
-		return stage;
-	}
 
 }

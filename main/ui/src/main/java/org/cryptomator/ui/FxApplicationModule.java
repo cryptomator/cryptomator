@@ -7,13 +7,30 @@ package org.cryptomator.ui;
 
 import dagger.Binds;
 import dagger.Module;
+import dagger.Provides;
 import javafx.application.Application;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.ObservableList;
+import org.cryptomator.ui.mainwindow.MainWindowComponent;
+import org.cryptomator.ui.model.Vault;
+import org.cryptomator.ui.model.VaultList;
+import org.cryptomator.ui.preferences.PreferencesComponent;
 
-@Module(includes = {UiModule.class})
+@Module(includes = {UiModule.class}, subcomponents = {MainWindowComponent.class, PreferencesComponent.class})
 abstract class FxApplicationModule {
 
 	@Binds
 	@FxApplicationScoped
 	abstract Application provideApplication(FxApplication application);
+
+	@Binds
+	abstract ObservableList<Vault> bindVaultList(VaultList vaultList);
+
+	@Provides
+	@FxApplicationScoped
+	static ObjectProperty<Vault> provideSelectedVault() {
+		return new SimpleObjectProperty<>();
+	}
 
 }
