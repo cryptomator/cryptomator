@@ -1,25 +1,49 @@
 /*******************************************************************************
  *                                                                             *
- * COLORS                                                                      *
+ * Colors                                                                      *
  *                                                                             *
  ******************************************************************************/
- 
-.root {
-	WHITE: #FFF;
-	PRIMARY_BG: #79B01A;
-	TEXT_FILL: #222;
-	CONTROL_BORDER: #79B01A;
-}
 
+.root {
+	PRIMARY: #79B01A;
+	PRIMARY_BG: #70A11B;
+	GRAY_LIGHT_BG: #F7F7F7;
+	TEXT_FILL: #222;
+	CONTROL_BORDER: #CFCFCF;
+	CONTROL_ARMED: #E1E1E1;
+
+	-fx-background-color: GRAY_LIGHT_BG;
+    -fx-text-fill: TEXT_FILL;
+}
 
 /*******************************************************************************
  *                                                                             *
  * Main Window                                                                 *
  *                                                                             *
  ******************************************************************************/
- 
+
 .main-window .title {
 	-fx-background-color: PRIMARY_BG;
+}
+
+.main-window .title .label {
+	-fx-font-family: 'Dosis';
+	-fx-font-size: 21px;
+	-fx-font-style: normal;
+	-fx-font-weight: 700;
+	-fx-text-fill: white;
+}
+
+.main-window .title .button {
+	-fx-background-color: none;
+}
+
+.main-window .title .button .fa-icon {
+	-fx-fill: white;
+}
+
+.main-window .title .button:armed .fa-icon {
+	-fx-fill: CONTROL_ARMED;
 }
 
 /*******************************************************************************
@@ -29,12 +53,36 @@
  ******************************************************************************/
 
 .split-pane > .split-pane-divider {
-    -fx-padding: 0 2;
+	-fx-padding: 0px 1px;
 }
 
 .split-pane:horizontal > .split-pane-divider {
-   -fx-background-color: CONTROL_BORDER, WHITE;
-   -fx-background-insets: 0, 0 1;
+	-fx-background-color: GRAY_LIGHT_BG, CONTROL_BORDER;
+	-fx-background-insets: 0, 0 1 0 0;
+}
+
+/*******************************************************************************
+ *                                                                             *
+ * Vault List                                                                   *
+ *                                                                             *
+ ******************************************************************************/
+
+.list-view {
+    -fx-background-color: white;
+}
+
+.list-cell:selected {
+	-fx-background-color: CONTROL_ARMED;
+}
+
+.onboarding-overlay-arc {
+	-fx-stroke: black;
+	-fx-fill: transparent;
+}
+
+.toolbar-container {
+	-fx-border-color: CONTROL_BORDER transparent transparent transparent;
+	-fx-border-width: 1px 0 0 0;
 }
 
 /*******************************************************************************
@@ -44,9 +92,11 @@
  ******************************************************************************/
 
 .tooltip {
-	-fx-background-color: WHITE;
-    -fx-padding: 0.2em 0.4em 0.2em 0.4em;
-    -fx-font-size: 0.8em;
+	-fx-text-fill: TEXT_FILL;
+	-fx-font-size: 0.8em;
+	-fx-background-color: white;
+	-fx-padding: 0.2em 0.4em 0.2em 0.4em;
+	-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.5), 2, 0, 0, 0);
 }
 
 /*******************************************************************************
@@ -56,12 +106,13 @@
  ******************************************************************************/
 
 .text-input {
-    -fx-text-fill: TEXT_FILL;
-    -fx-prompt-text-fill: derive(TEXT_FILL, +50%);
-    -fx-background-color: CONTROL_BORDER, WHITE;
-    -fx-background-insets: 0, 1px;
-    -fx-cursor: text;
-	-fx-padding: 2px 4px 2px 4px;
+	-fx-cursor: text;
+	-fx-text-fill: TEXT_FILL;
+	-fx-prompt-text-fill: derive(TEXT_FILL, +50%);
+	-fx-background-color: CONTROL_BORDER, white;
+	-fx-background-insets: 0, 1px;
+	-fx-background-radius: 4px;
+	-fx-padding: 0.3em 0.5em 0.3em 0.5em;
 }
 
 /****************************************************************************
@@ -72,11 +123,16 @@
 
 .button {
 	-fx-pref-height: 25px;
-	-fx-background-color: CONTROL_BORDER, WHITE;
-	-fx-background-insets: 0, 1px;
-	-fx-padding: 2px 4px 2px 4px;
 	-fx-text-fill: TEXT_FILL;
 	-fx-alignment: CENTER;
+	-fx-background-color: CONTROL_BORDER, white;
+	-fx-background-insets: 0, 1px;
+	-fx-background-radius: 4px;
+	-fx-padding: 0.2em 0.4em 0.2em 0.4em;
+}
+
+.button:armed {
+	-fx-background-color: CONTROL_BORDER, CONTROL_ARMED;
 }
 
 /*******************************************************************************
@@ -86,22 +142,25 @@
  ******************************************************************************/
 
 .check-box {
-    -fx-label-padding: 0 0 0 6px;
-    -fx-text-fill: TEXT_FILL;
+	-fx-text-fill: TEXT_FILL;
+	-fx-label-padding: 0 0 0 6px;
 }
+
 .check-box > .box {
-    -fx-padding: 2px;
-    -fx-background-color: CONTROL_BORDER, WHITE;
+	-fx-background-color: CONTROL_BORDER, white;
 	-fx-background-insets: 0, 1px;
+	-fx-background-radius: 4px;
+	-fx-padding: 0.3em;
 }
+
 .check-box > .box > .mark {
-    -fx-background-color: transparent;
-    -fx-padding: 4px;
-    -fx-shape: "M-1,4, L-1,5.5 L3.5,8.5 L9,0 L9,-1 L7,-1 L3,6 L1,4 Z";
+	-fx-background-color: transparent;
+	-fx-padding: 0.4em;
+	-fx-shape: "M-1,4, L-1,5.5 L3.5,8.5 L9,0 L9,-1 L7,-1 L3,6 L1,4 Z";
 }
 
 .check-box:selected > .box > .mark {
-    -fx-background-color: TEXT_FILL;
+	-fx-background-color: TEXT_FILL;
 }
 
 /*******************************************************************************
@@ -111,25 +170,43 @@
  ******************************************************************************/
 
 .choice-box {
-	-fx-background-color: CONTROL_BORDER, WHITE;
-	-fx-background-insets: 0, 1px;
-	-fx-background-radius: 0, 0;
-	-fx-padding: 2px 4px 2px 4px;
 	-fx-text-fill: TEXT_FILL;
+	-fx-background-color: CONTROL_BORDER, white;
+	-fx-background-insets: 0, 1px;
+	-fx-background-radius: 4px;
+	-fx-padding: 0.3em 0.5em 0.3em 0.5em;
 }
 
 .choice-box:focused {
-	-fx-background-color: derive(CONTROL_BORDER, -20%), WHITE;
+	-fx-background-color: derive(CONTROL_BORDER, -20%), white;
+}
+
+.choice-box > .open-button {
+	-fx-padding: 0 0 0 0.3em;
 }
 
 .choice-box > .open-button > .arrow {
 	-fx-background-color: transparent, TEXT_FILL;
 	-fx-background-insets: 0 0 -1 0, 0;
-	-fx-padding: 2px 4px 2px 4px;
+	-fx-padding: 0.15em 0.3em 0.15em 0.3em;
 	-fx-shape: "M 0 0 h 7 l -3.5 4 z";
 }
 
 .choice-box .context-menu {
-	-fx-background-color: CONTROL_BORDER, WHITE;
-    -fx-background-insets: 0, 1px;
+	-fx-background-color: CONTROL_BORDER, white;
+	-fx-background-insets: 0, 1px;
+	-fx-background-radius: 4px;
+	-fx-padding: 0.2em 0 0.2em 0;
+}
+
+.context-menu {
+	-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 8, 0, 0, 0);
+}
+
+.menu-item {
+	-fx-padding: 0.2em 0.4em 0.2em 0.4em;
+}
+
+.menu-item:focused {
+	-fx-background-color: CONTROL_ARMED;
 }
