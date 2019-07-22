@@ -34,6 +34,7 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 		out.name("preferredGvfsScheme").value(value.preferredGvfsScheme().get().name());
 		out.name("debugMode").value(value.debugMode().get());
 		out.name("preferredVolumeImpl").value(value.preferredVolumeImpl().get().name());
+		out.name("theme").value(value.theme().get().name());
 		out.endObject();
 	}
 
@@ -77,6 +78,9 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 				case "preferredVolumeImpl":
 					settings.preferredVolumeImpl().set(parsePreferredVolumeImplName(in.nextString()));
 					break;
+				case "theme":
+					settings.theme().set(parseUiTheme(in.nextString()));
+					break;
 				default:
 					LOG.warn("Unsupported vault setting found in JSON: " + name);
 					in.skipValue();
@@ -92,6 +96,7 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 		try {
 			return VolumeImpl.valueOf(nioAdapterName.toUpperCase());
 		} catch (IllegalArgumentException e) {
+			LOG.warn("Invalid volume type {}. Defaulting to {}.", nioAdapterName, Settings.DEFAULT_PREFERRED_VOLUME_IMPL);
 			return Settings.DEFAULT_PREFERRED_VOLUME_IMPL;
 		}
 	}
@@ -100,7 +105,17 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 		try {
 			return WebDavUrlScheme.valueOf(webDavUrlSchemeName.toUpperCase());
 		} catch (IllegalArgumentException e) {
+			LOG.warn("Invalid volume type {}. Defaulting to {}.", webDavUrlSchemeName, Settings.DEFAULT_GVFS_SCHEME);
 			return Settings.DEFAULT_GVFS_SCHEME;
+		}
+	}
+
+	private UiTheme parseUiTheme(String uiThemeName) {
+		try {
+			return UiTheme.valueOf(uiThemeName.toUpperCase());
+		} catch (IllegalArgumentException e) {
+			LOG.warn("Invalid volume type {}. Defaulting to {}.", uiThemeName, Settings.DEFAULT_THEME);
+			return Settings.DEFAULT_THEME;
 		}
 	}
 

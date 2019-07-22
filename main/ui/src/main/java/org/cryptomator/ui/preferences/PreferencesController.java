@@ -8,6 +8,7 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextField;
 import javafx.util.StringConverter;
 import org.cryptomator.common.settings.Settings;
+import org.cryptomator.common.settings.UiTheme;
 import org.cryptomator.common.settings.VolumeImpl;
 import org.cryptomator.common.settings.WebDavUrlScheme;
 import org.cryptomator.ui.common.FxController;
@@ -20,6 +21,7 @@ public class PreferencesController implements FxController {
 	
 	private final Settings settings;
 	private final BooleanBinding showWebDavSettings;
+	public ChoiceBox<UiTheme> themeChoiceBox;
 	public CheckBox checkForUpdatesCheckbox;
 	public CheckBox debugModeCheckbox;
 	public ChoiceBox<VolumeImpl> volumeTypeChoicBox;
@@ -34,6 +36,10 @@ public class PreferencesController implements FxController {
 	}
 
 	public void initialize() {
+		themeChoiceBox.getItems().addAll(UiTheme.values());
+		themeChoiceBox.valueProperty().bindBidirectional(settings.theme());
+		themeChoiceBox.setConverter(new UiThemeConverter());
+
 		checkForUpdatesCheckbox.selectedProperty().bindBidirectional(settings.checkForUpdates());
 
 		debugModeCheckbox.selectedProperty().bindBidirectional(settings.debugMode());
@@ -76,6 +82,19 @@ public class PreferencesController implements FxController {
 	}
 
 	/* Helper classes */
+
+	private static class UiThemeConverter extends StringConverter<UiTheme> {
+
+		@Override
+		public String toString(UiTheme impl) {
+			return impl.getDisplayName();
+		}
+
+		@Override
+		public UiTheme fromString(String string) {
+			throw new UnsupportedOperationException();
+		}
+	}
 
 	private static class WebDavUrlSchemeConverter extends StringConverter<WebDavUrlScheme> {
 

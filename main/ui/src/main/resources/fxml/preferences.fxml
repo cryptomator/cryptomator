@@ -17,6 +17,11 @@
 		<Insets bottom="12" left="12" right="12" top="12"/>
 	</padding>
 	<children>
+		<HBox spacing="6" alignment="BASELINE_LEFT">
+			<Label text="%preferences.theme"/>
+			<ChoiceBox fx:id="themeChoiceBox"/>
+		</HBox>
+
 		<CheckBox fx:id="checkForUpdatesCheckbox" text="%preferences.autoUpdateCheck"/>
 
 		<CheckBox fx:id="debugModeCheckbox" text="%preferences.debugLogging"/>

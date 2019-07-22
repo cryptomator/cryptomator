@@ -8,10 +8,14 @@
  ******************************************************************************/
 package org.cryptomator.common.settings;
 
-import javafx.beans.property.*;
-import javafx.beans.value.ObservableValue;
+import javafx.beans.Observable;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 
 import java.util.function.Consumer;
@@ -25,6 +29,7 @@ public class Settings {
 	public static final int DEFAULT_PORT = 42427;
 	public static final int DEFAULT_NUM_TRAY_NOTIFICATIONS = 3;
 	public static final WebDavUrlScheme DEFAULT_GVFS_SCHEME = WebDavUrlScheme.DAV;
+	public static final UiTheme DEFAULT_THEME = UiTheme.LIGHT;
 	public static final boolean DEFAULT_DEBUG_MODE = false;
 	public static final VolumeImpl DEFAULT_PREFERRED_VOLUME_IMPL = System.getProperty("os.name").toLowerCase().contains("windows") ? VolumeImpl.DOKANY : VolumeImpl.FUSE;
 
@@ -36,6 +41,7 @@ public class Settings {
 	private final ObjectProperty<WebDavUrlScheme> preferredGvfsScheme = new SimpleObjectProperty<>(DEFAULT_GVFS_SCHEME);
 	private final BooleanProperty debugMode = new SimpleBooleanProperty(DEFAULT_DEBUG_MODE);
 	private final ObjectProperty<VolumeImpl> preferredVolumeImpl = new SimpleObjectProperty<>(DEFAULT_PREFERRED_VOLUME_IMPL);
+	private final ObjectProperty<UiTheme> theme = new SimpleObjectProperty<>(DEFAULT_THEME);
 
 	private Consumer<Settings> saveCmd;
 
@@ -43,7 +49,7 @@ public class Settings {
 	 * Package-private constructor; use {@link SettingsProvider}.
 	 */
 	Settings() {
-		directories.addListener((ListChangeListener.Change<? extends VaultSettings> change) -> this.save());
+		directories.addListener(this::somethingChanged);
 		askedForUpdateCheck.addListener(this::somethingChanged);
 		checkForUpdates.addListener(this::somethingChanged);
 		port.addListener(this::somethingChanged);
@@ -51,13 +57,14 @@ public class Settings {
 		preferredGvfsScheme.addListener(this::somethingChanged);
 		debugMode.addListener(this::somethingChanged);
 		preferredVolumeImpl.addListener(this::somethingChanged);
+		theme.addListener(this::somethingChanged);
 	}
 
 	void setSaveCmd(Consumer<Settings> saveCmd) {
 		this.saveCmd = saveCmd;
 	}
-
-	private void somethingChanged(ObservableValue<?> observable, Object oldValue, Object newValue) {
+	
+	private void somethingChanged(@SuppressWarnings("unused") Observable observable) {
 		this.save();
 	}
 
@@ -101,4 +108,7 @@ public class Settings {
 		return preferredVolumeImpl;
 	}
 
+	public ObjectProperty<UiTheme> theme() {
+		return theme;
+	}
 }
