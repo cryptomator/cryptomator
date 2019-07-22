@@ -1,6 +1,8 @@
 package org.cryptomator.ui.addvaultwizard;
 
 import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.cryptomator.ui.common.FXMLLoaderFactory;
@@ -16,6 +18,9 @@ public class ChooseExistingVaultController implements FxController {
 	private final FXMLLoaderFactory fxmlLoaders;
 	private final Stage window;
 
+	@FXML
+	public TextField textField;
+
 	@Inject
 	ChooseExistingVaultController(@AddVaultWizard Stage window, @AddVaultWizard FXMLLoaderFactory fxmlLoaders) {
 		this.window = window;
@@ -28,7 +33,7 @@ public class ChooseExistingVaultController implements FxController {
 		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Cryptomator Masterkey", "*.cryptomator"));
 		final File file = fileChooser.showOpenDialog(window);
 		if (file != null) {
-			window.setWidth(100);
+			textField.setText(file.getAbsolutePath());
 		}
 	}
 
