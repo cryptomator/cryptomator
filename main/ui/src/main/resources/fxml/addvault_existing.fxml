@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.VBox?>
 <VBox xmlns="http://javafx.com/javafx"
@@ -13,6 +14,9 @@
 		<Insets top="12" right="12" bottom="12" left="12"/>
 	</padding>
 	<children>
-		<Label text="TODO existing!"/>
+		<Label text="Open your existing vault by choosing its masterkey file:"/>
+		<Button text="file picker" onAction="#chooseFile"/>
+		<Button text="Back" onAction="#goBack"/>
+		<Button text="Open" onAction="#confirm"/>
 	</children>
 </VBox>
