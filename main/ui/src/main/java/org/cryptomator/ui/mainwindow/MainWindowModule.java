@@ -52,4 +52,9 @@ public abstract class MainWindowModule {
 	@FxControllerKey(VaultDetailController.class)
 	abstract FxController bindVaultDetailController(VaultDetailController controller);
 
+	@Binds
+	@IntoMap
+	@FxControllerKey(VaultListCellController.class)
+	abstract FxController bindVaultListCellController(VaultListCellController controller);
+
 }

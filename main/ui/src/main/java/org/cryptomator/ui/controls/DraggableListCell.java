@@ -30,7 +30,7 @@ import javafx.scene.layout.CornerRadii;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 
-class DraggableListCell<T> extends ListCell<T> {
+public class DraggableListCell<T> extends ListCell<T> {
 
 	private static final double DROP_LINE_WIDTH = 4.0;
 	private static final Paint DROP_LINE_COLOR = Color.gray(0.0, 0.6);

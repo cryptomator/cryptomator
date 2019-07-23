@@ -16,20 +16,23 @@ public class VaultListController implements FxController {
 
 	private final ObservableList<Vault> vaults;
 	private final ObjectProperty<Vault> selectedVault;
+	private final VaultListCellFactory cellFactory;
 	private final AddVaultWizardComponent.Builder addVaultWizard;
-	public ListView vaultList;
+	public ListView<Vault> vaultList;
 	public AnchorPane onboardingOverlay;
 
 	@Inject
-	VaultListController(ObservableList<Vault> vaults, ObjectProperty<Vault> selectedVault, AddVaultWizardComponent.Builder addVaultWizard) {
+	VaultListController(ObservableList<Vault> vaults, ObjectProperty<Vault> selectedVault, VaultListCellFactory cellFactory, AddVaultWizardComponent.Builder addVaultWizard) {
 		this.vaults = vaults;
 		this.selectedVault = selectedVault;
+		this.cellFactory = cellFactory;
 		this.addVaultWizard = addVaultWizard;
 	}
 
 	public void initialize() {
 		onboardingOverlay.visibleProperty().bind(Bindings.isEmpty(vaults));
 		vaultList.setItems(vaults);
+		vaultList.setCellFactory(cellFactory);
 		selectedVault.bind(vaultList.getSelectionModel().selectedItemProperty());
 	}
 
