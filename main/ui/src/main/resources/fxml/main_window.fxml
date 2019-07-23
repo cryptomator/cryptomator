@@ -44,7 +44,6 @@
 			<fx:include source="/fxml/vault_list.fxml" SplitPane.resizableWithParent="false"/>
 			<fx:include source="/fxml/vault_detail.fxml" SplitPane.resizableWithParent="true"/>
 		</SplitPane>
-		<!-- TODO: move style to css file and make this pretty: -->
-		<Region StackPane.alignment="BOTTOM_RIGHT" fx:id="resizer" prefWidth="10" prefHeight="10" maxWidth="-Infinity" maxHeight="-Infinity"  style="-fx-background-color: red; -fx-cursor: nw_resize;"/>
+		<Region styleClass="resizer" StackPane.alignment="BOTTOM_RIGHT" fx:id="resizer" prefWidth="10" prefHeight="10" maxWidth="-Infinity" maxHeight="-Infinity"/>
 	</StackPane>
 </VBox>

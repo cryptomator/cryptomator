@@ -48,6 +48,18 @@
 	-fx-fill: CONTROL_BG_ARMED;
 }
 
+.main-window .resizer {
+	-fx-background-color: linear-gradient(to bottom right,
+		GRAY_LIGHT_BG 40%,
+		CONTROL_BORDER_NORMAL 50%,
+		GRAY_LIGHT_BG 60%,
+		CONTROL_BORDER_NORMAL 70%,
+		GRAY_LIGHT_BG 80%,
+		CONTROL_BORDER_NORMAL 90%
+	);
+	-fx-cursor: nw_resize;
+}
+
 /*******************************************************************************
  *                                                                             *
  * SplitPane                                                                   *
