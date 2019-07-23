@@ -24,27 +24,22 @@
 			<Arc styleClass="onboarding-overlay-arc" AnchorPane.bottomAnchor="5.0" type="OPEN" centerX="-10.0" centerY="0.0" radiusY="100.0" radiusX="60.0" startAngle="0" length="-60.0" strokeWidth="1"/>
 		</AnchorPane>
 	</StackPane>
-	<HBox styleClass="toolbar-container" VBox.vgrow="NEVER" spacing="6" alignment="CENTER_LEFT">
-		<padding>
-			<Insets bottom="6" left="6" right="6" top="6"/>
-		</padding>
-		<children>
-			<Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#didClickAddVault">
-				<graphic>
-					<FontAwesomeIconView glyphName="PLUS"/>
-				</graphic>
-				<tooltip>
-					<Tooltip text="Add Vault"/>
-				</tooltip>
-			</Button>
-			<Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#didClickRemoveVault">
-				<graphic>
-					<FontAwesomeIconView glyphName="MINUS"/>
-				</graphic>
-				<tooltip>
-					<Tooltip text="Remove Vault"/>
-				</tooltip>
-			</Button>
-		</children>
+	<HBox styleClass="toolbar-container" VBox.vgrow="NEVER" alignment="CENTER_LEFT">
+		<Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#didClickAddVault">
+			<graphic>
+				<FontAwesomeIconView glyphName="PLUS"/>
+			</graphic>
+			<tooltip>
+				<Tooltip text="Add Vault"/>
+			</tooltip>
+		</Button>
+		<Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#didClickRemoveVault">
+			<graphic>
+				<FontAwesomeIconView glyphName="MINUS"/>
+			</graphic>
+			<tooltip>
+				<Tooltip text="Remove Vault"/>
+			</tooltip>
+		</Button>
 	</HBox>
 </VBox>

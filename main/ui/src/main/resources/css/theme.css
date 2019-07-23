@@ -85,6 +85,15 @@
 	-fx-border-width: 1px 0 0 0;
 }
 
+.toolbar-container .button {
+	-fx-pref-height: 30px;
+	-fx-pref-width: 30px;
+	-fx-background-color: transparent;
+	-fx-background-insets: 0;
+	-fx-border-color: transparent CONTROL_BORDER transparent transparent;
+    -fx-border-width: 1;
+}
+
 /*******************************************************************************
  *                                                                             *
  * Tooltip                                                                     *
