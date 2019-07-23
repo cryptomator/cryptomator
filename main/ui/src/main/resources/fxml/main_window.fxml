@@ -8,6 +8,7 @@
 <?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <VBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
@@ -38,8 +39,12 @@
 			</Button>
 		</children>
 	</HBox>
-	<SplitPane VBox.vgrow="ALWAYS" dividerPositions="0.33" orientation="HORIZONTAL">
-		<fx:include source="/fxml/vault_list.fxml" SplitPane.resizableWithParent="false"/>
-		<fx:include source="/fxml/vault_detail.fxml" SplitPane.resizableWithParent="true"/>
-	</SplitPane>
+	<StackPane VBox.vgrow="ALWAYS">
+		<SplitPane dividerPositions="0.33" orientation="HORIZONTAL">
+			<fx:include source="/fxml/vault_list.fxml" SplitPane.resizableWithParent="false"/>
+			<fx:include source="/fxml/vault_detail.fxml" SplitPane.resizableWithParent="true"/>
+		</SplitPane>
+		<!-- TODO: move style to css file and make this pretty: -->
+		<Region StackPane.alignment="BOTTOM_RIGHT" fx:id="resizer" prefWidth="10" prefHeight="10" maxWidth="-Infinity" maxHeight="-Infinity"  style="-fx-background-color: red; -fx-cursor: nw_resize;"/>
+	</StackPane>
 </VBox>

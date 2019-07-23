@@ -2,9 +2,9 @@ package org.cryptomator.ui.mainwindow;
 
 import javafx.fxml.FXML;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
 import javafx.stage.Stage;
 import org.cryptomator.ui.FxApplication;
-import org.cryptomator.ui.FxApplicationScoped;
 import org.cryptomator.ui.common.FxController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,10 +21,8 @@ public class MainWindowController implements FxController {
 	private final CountDownLatch shutdownLatch;
 	private final Stage window;
 	private final FxApplication application;
-
-	@FXML
 	public HBox titleBar;
-
+	public Region resizer;
 	private double xOffset;
 	private double yOffset;
 
@@ -43,8 +41,13 @@ public class MainWindowController implements FxController {
 			yOffset = event.getSceneY();
 		});
 		titleBar.setOnMouseDragged(event -> {
-			titleBar.getScene().getWindow().setX(event.getScreenX() - xOffset);
-			titleBar.getScene().getWindow().setY(event.getScreenY() - yOffset);
+			window.setX(event.getScreenX() - xOffset);
+			window.setY(event.getScreenY() - yOffset);
+		});
+		resizer.setOnMouseDragged(event -> {
+			// we know for a fact that window is borderless. i.e. the scene starts at 0/0 of the window.
+			window.setWidth(event.getSceneX());
+			window.setHeight(event.getSceneY());
 		});
 	}
 

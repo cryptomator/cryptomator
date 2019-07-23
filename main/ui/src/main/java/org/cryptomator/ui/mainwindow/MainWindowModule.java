@@ -29,8 +29,11 @@ public abstract class MainWindowModule {
 	@MainWindowScoped
 	static Stage provideStage() {
 		Stage stage = new Stage();
-		stage.setMinWidth(652.0);
-		stage.setMinHeight(440.0);
+		// TODO: min/max values chosen arbitrarily. We might wanna take a look at the user's resolution...
+		stage.setMinWidth(650);
+		stage.setMinHeight(440);
+		stage.setMaxWidth(1000);
+		stage.setMaxHeight(700);
 		stage.initStyle(StageStyle.UNDECORATED);
 		return stage;
 	}
