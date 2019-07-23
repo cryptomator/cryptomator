@@ -50,12 +50,14 @@
 
 .main-window .resizer {
 	-fx-background-color: linear-gradient(to bottom right,
-		GRAY_LIGHT_BG 40%,
-		CONTROL_BORDER_NORMAL 50%,
-		GRAY_LIGHT_BG 60%,
-		CONTROL_BORDER_NORMAL 70%,
-		GRAY_LIGHT_BG 80%,
-		CONTROL_BORDER_NORMAL 90%
+		transparent 50%,
+		CONTROL_BORDER_NORMAL 51%,
+		CONTROL_BORDER_NORMAL 60%,
+		transparent 61%,
+		transparent 70%,
+		CONTROL_BORDER_NORMAL 71%,
+		CONTROL_BORDER_NORMAL 80%,
+		transparent 81%
 	);
 	-fx-cursor: nw_resize;
 }
