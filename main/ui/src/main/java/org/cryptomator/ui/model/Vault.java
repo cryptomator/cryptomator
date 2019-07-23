@@ -12,6 +12,8 @@ import com.google.common.base.Strings;
 import javafx.application.Platform;
 import javafx.beans.Observable;
 import javafx.beans.binding.Binding;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.StringBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -51,12 +53,15 @@ public class Vault {
 	public static final Predicate<Vault> NOT_LOCKED = hasState(State.LOCKED).negate();
 	private static final Logger LOG = LoggerFactory.getLogger(Vault.class);
 	private static final String MASTERKEY_FILENAME = "masterkey.cryptomator";
+	private static final Path HOME_DIR = Paths.get(SystemUtils.USER_HOME);
 
 	private final VaultSettings vaultSettings;
 	private final Provider<Volume> volumeProvider;
 	private final Supplier<String> defaultMountFlags;
 	private final AtomicReference<CryptoFileSystem> cryptoFileSystem = new AtomicReference<>();
 	private final ObjectProperty<State> state = new SimpleObjectProperty<State>(State.LOCKED);
+	private final StringBinding displayableName;
+	private final StringBinding displayablePath;
 
 	private Volume volume;
 
@@ -69,6 +74,9 @@ public class Vault {
 		this.vaultSettings = vaultSettings;
 		this.volumeProvider = volumeProvider;
 		this.defaultMountFlags = defaultMountFlags;
+
+		this.displayableName = Bindings.createStringBinding(this::getDisplayableName, vaultSettings.path());
+		this.displayablePath = Bindings.createStringBinding(this::getDisplayablePath, vaultSettings.path());
 	}
 
 	// ******************************************************************************
@@ -167,23 +175,51 @@ public class Vault {
 		volume.reveal();
 	}
 
-	// ******************************************************************************
-	// Getter/Setter
-	// *******************************************************************************/
-
-	public State getState() {
-		return state.get();
-	}
-
-	public ReadOnlyObjectProperty<State> stateProperty() {
-		return state;
-	}
-
 	public static Predicate<Vault> hasState(State state) {
 		return vault -> {
 			return vault.getState() == state;
 		};
 	}
+
+	// ******************************************************************************
+	// Observable Properties
+	// *******************************************************************************
+
+	public ReadOnlyObjectProperty<State> stateProperty() {
+		return state;
+	}
+
+	public State getState() {
+		return state.get();
+	}
+	
+	public StringBinding displayableNameProperty() {
+		return displayableName;
+	}
+	
+	public String getDisplayableName() {
+		Path p = vaultSettings.path().get();
+		return p.getFileName().toString();
+	}
+
+	public StringBinding displayablePathProperty() {
+		return displayablePath;
+	}
+
+	public String getDisplayablePath() {
+		Path p = vaultSettings.path().get();
+		if (p.startsWith(HOME_DIR)) {
+			Path relativePath = HOME_DIR.relativize(p);
+			String homePrefix = SystemUtils.IS_OS_WINDOWS ? "~\\" : "~/";
+			return homePrefix + relativePath.toString();
+		} else {
+			return p.toString();
+		}
+	}
+
+	// ******************************************************************************
+	// Getter/Setter
+	// *******************************************************************************/
 
 	public Observable[] observables() {
 		return new Observable[]{state};
@@ -197,6 +233,10 @@ public class Vault {
 		return vaultSettings.path().getValue();
 	}
 
+	/**
+	 * @deprecated use displayablePathProperty() instead
+	 */
+	@Deprecated(forRemoval = true, since = "1.5.0")
 	public Binding<String> displayablePath() {
 		Path homeDir = Paths.get(SystemUtils.USER_HOME);
 		return EasyBind.map(vaultSettings.path(), p -> {
@@ -212,7 +252,9 @@ public class Vault {
 
 	/**
 	 * @return Directory name without preceeding path components and file extension
+	 * @deprecated use nameProperty() instead
 	 */
+	@Deprecated(forRemoval = true, since = "1.5.0")
 	public Binding<String> name() {
 		return EasyBind.map(vaultSettings.path(), Path::getFileName).map(Path::toString);
 	}

@@ -2,11 +2,24 @@
 
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.VBox?>
-<VBox xmlns="http://javafx.com/javafx"
+<?import javafx.scene.layout.HBox?>
+<?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
+<?import javafx.geometry.Insets?>
+<HBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
 	  fx:controller="org.cryptomator.ui.mainwindow.VaultListCellController"
-	  prefHeight="50.0" prefWidth="200.0">
-	
-	<Label text="${controller.vault}"/>
-
-</VBox>
+	  prefHeight="50.0"
+	  prefWidth="200.0"
+	  spacing="12"
+	  alignment="CENTER_LEFT">
+	<padding>
+		<Insets top="4" right="6" bottom="4" left="6"/>
+	</padding>
+	<children>
+		<FontAwesomeIconView glyphName="${controller.glyph}" HBox.hgrow="NEVER" glyphSize="20"/>
+		<VBox spacing="6" HBox.hgrow="ALWAYS">
+			<Label text="${controller.vault.displayableName}"/>
+			<Label text="${controller.vault.displayablePath}" textOverrun="CENTER_ELLIPSIS"/>
+		</VBox>
+	</children>
+</HBox>
