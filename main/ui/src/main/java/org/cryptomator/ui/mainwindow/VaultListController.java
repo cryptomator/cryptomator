@@ -41,7 +41,7 @@ public class VaultListController implements FxController {
 	}
 
 	public void didClickAddVault() {
-		addVaultWizard.build().showAddVaultWizard();
+		addVaultWizard.vaults(vaults).build().showAddVaultWizard();
 	}
 
 	public void didClickRemoveVault() {

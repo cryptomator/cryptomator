@@ -6,6 +6,7 @@ import dagger.Provides;
 import dagger.multibindings.IntoMap;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.ObservableList;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -13,6 +14,7 @@ import org.cryptomator.ui.common.FXMLLoaderFactory;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxControllerKey;
 import org.cryptomator.ui.mainwindow.MainWindow;
+import org.cryptomator.ui.model.Vault;
 
 import javax.inject.Provider;
 import java.nio.file.Path;
@@ -45,6 +47,12 @@ public abstract class AddVaultModule {
 	@AddVaultWizardScoped
 	static ObjectProperty<Path> provideVaultPath(){
 		return new SimpleObjectProperty<>();
+	}
+
+	@Provides
+	@AddVaultWizardScoped
+	static ObservableList<Vault> provideVaults(@AddVaultWizard ObservableList<Vault> vaults) {
+		return vaults;
 	}
 
 	// ------------------
