@@ -1,4 +1,4 @@
-![cryptomator](cryptomator.png)
+[![cryptomator](cryptomator.png)](https://cryptomator.org/)
 
 [![Build Status](https://travis-ci.org/cryptomator/cryptomator.svg?branch=master)](https://travis-ci.org/cryptomator/cryptomator)
 [![Known Vulnerabilities](https://snyk.io/test/github/cryptomator/cryptomator/badge.svg?targetFile=main%2Fpom.xml)](https://snyk.io/test/github/cryptomator/cryptomator?targetFile=main%2Fpom.xml)
@@ -8,7 +8,22 @@
 [![Latest Release](https://img.shields.io/github/release/cryptomator/cryptomator.svg)](https://github.com/cryptomator/cryptomator/releases/latest)
 [![Community](https://img.shields.io/badge/help-Community-orange.svg)](https://community.cryptomator.org)
 
-Multi-platform transparent client-side encryption of your files in the cloud.
+## Supporting Cryptomator
+
+Cryptomator is provided free of charge as an open-source project despite the high development effort and is therefore dependent on donations. If you are also interested in further development, we offer you the opportunity to support us:
+
+- [One-time or recurring donation via Cryptomator's website.](https://cryptomator.org/#donate)
+- [Become a sponsor via Cryptomator's sponsors website.](https://cryptomator.org/sponsors/)
+
+### Silver Sponsors
+
+[![TheBestVPN](https://cryptomator.org/img/sponsors/thebestvpn.png)](https://thebestvpn.com/)
+
+---
+
+## Introduction
+
+Cryptomator offers multi-platform transparent client-side encryption of your files in the cloud.
 
 Download native binaries of Cryptomator on [cryptomator.org](https://cryptomator.org/) or clone and build Cryptomator using Maven (instructions below).
 
