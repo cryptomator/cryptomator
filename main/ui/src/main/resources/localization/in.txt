@@ -23,6 +23,7 @@ upgrade.version3dropBundleExtension.err.alreadyExists = Migrasi otomatis gagal.\
 # unlock.fxml
 unlock.label.password = Kata Sandi
 unlock.label.mountName = Nama Drive
+# Fuzzy
 unlock.label.winDriveLetter = Abjad Drive
 unlock.label.downloadsPageLink = Semua versi Cryptomator
 unlock.label.advancedHeading = Opsi Lanjutan
@@ -103,6 +104,7 @@ settings.volume.fuse = FUSE
 unlock.successLabel.vaultCreated = Brankas berhasil dibuat.
 unlock.successLabel.passwordChanged = Kata sandi berhasil diubah.
 unlock.successLabel.upgraded = Cryptomator berhasil ditingkatkan.
+# Fuzzy
 unlock.label.useOwnMountPath = Gunakan Titik Kait Kustom
 welcome.askForUpdateCheck.dialog.title = Pemeriksaan pembaruan
 welcome.askForUpdateCheck.dialog.header = Aktifkan pemeriksaan pembaruan terintegrasi?
@@ -122,3 +124,5 @@ unlock.label.useReadOnlyMode = Hanya-Baca
 unlock.label.chooseMountPath = Pilih direktori kosong...
 ctrl.secPasswordField.nonPrintableChars = Kata sandi mengandung karakter kontrol.\nSaran\: Hapus karakter itu untuk memastikan kompatibilitas dengan klien lain.
 ctrl.secPasswordField.capsLocked = Caps Lock diaktifkan.
+unlock.label.useCustomMountFlags = Custom Mount Flags
+unlock.choicebox.winDriveLetter.occupied = occupied

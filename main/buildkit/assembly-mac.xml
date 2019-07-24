@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <assembly xmlns="http://maven.apache.org/ASSEMBLY/2.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/ASSEMBLY/2.0.0 http://maven.apache.org/xsd/assembly-2.0.0.xsd">
+		  xsi:schemaLocation="http://maven.apache.org/ASSEMBLY/2.0.0 http://maven.apache.org/xsd/assembly-2.0.0.xsd">
 	<id>tarball</id>
 	<includeBaseDirectory>false</includeBaseDirectory>
 	<formats>
@@ -13,6 +13,21 @@
 				<include>version.txt</include>
 			</includes>
 			<outputDirectory>libs</outputDirectory>
+		</fileSet>
+		<fileSet>
+			<directory>target/</directory>
+			<includes>
+				<include>LICENSE.txt</include>
+			</includes>
+			<outputDirectory></outputDirectory>
+		</fileSet>
+		<fileSet>
+			<directory>target/</directory>
+			<includes>
+				<include>launcher-mac.sh</include>
+			</includes>
+			<outputDirectory></outputDirectory>
+			<fileMode>0755</fileMode>
 		</fileSet>
 		<fileSet>
 			<directory>target/libs</directory>

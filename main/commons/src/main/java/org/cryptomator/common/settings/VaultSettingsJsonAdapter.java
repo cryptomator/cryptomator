@@ -26,8 +26,9 @@ class VaultSettingsJsonAdapter {
 		out.name("unlockAfterStartup").value(value.unlockAfterStartup().get());
 		out.name("revealAfterMount").value(value.revealAfterMount().get());
 		out.name("usesIndividualMountPath").value(value.usesIndividualMountPath().get());
-		out.name("individualMountPath").value(value.individualMountPath().get());    //TODO: should this always be written? ( because it could contain metadata, which the user may not want to save!)
+		out.name("individualMountPath").value(value.individualMountPath().get());
 		out.name("usesReadOnlyMode").value(value.usesReadOnlyMode().get());
+		out.name("mountFlags").value(value.mountFlags().get());
 		out.endObject();
 	}
 
@@ -41,6 +42,7 @@ class VaultSettingsJsonAdapter {
 		boolean revealAfterMount = VaultSettings.DEFAULT_REAVEAL_AFTER_MOUNT;
 		boolean usesIndividualMountPath = VaultSettings.DEFAULT_USES_INDIVIDUAL_MOUNTPATH;
 		boolean usesReadOnlyMode = VaultSettings.DEFAULT_USES_READONLY_MODE;
+		String mountFlags = VaultSettings.DEFAULT_MOUNT_FLAGS;
 
 		in.beginObject();
 		while (in.hasNext()) {
@@ -73,6 +75,9 @@ class VaultSettingsJsonAdapter {
 				case "usesReadOnlyMode":
 					usesReadOnlyMode = in.nextBoolean();
 					break;
+				case "mountFlags":
+					mountFlags = in.nextString();
+					break;
 				default:
 					LOG.warn("Unsupported vault setting found in JSON: " + name);
 					in.skipValue();
@@ -90,6 +95,7 @@ class VaultSettingsJsonAdapter {
 		vaultSettings.usesIndividualMountPath().set(usesIndividualMountPath);
 		vaultSettings.individualMountPath().set(individualMountPath);
 		vaultSettings.usesReadOnlyMode().set(usesReadOnlyMode);
+		vaultSettings.mountFlags().set(mountFlags);
 		return vaultSettings;
 	}
 

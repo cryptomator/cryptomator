@@ -53,3 +53,12 @@ deploy:
   on:
     repo: cryptomator/cryptomator
     tags: true
+- provider: releases
+  api_key: $GITHUB_API_KEY
+  file_glob: true
+  file:
+    - "main/buildkit/target/buildkit-*.zip"
+  skip_cleanup: true
+  on:
+    repo: cryptomator/cryptomator
+    tags: true

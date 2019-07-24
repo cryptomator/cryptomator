@@ -23,6 +23,7 @@ upgrade.version3dropBundleExtension.err.alreadyExists = Automātiskā migrācija
 # unlock.fxml
 unlock.label.password = Parole
 unlock.label.mountName = Diska nosaukums
+# Fuzzy
 unlock.label.winDriveLetter = Diska burts
 unlock.label.downloadsPageLink = Visas Cryptomator versijas
 unlock.label.advancedHeading = Papildus opcijas
@@ -104,6 +105,7 @@ settings.volume.fuse = FUSE
 unlock.successLabel.vaultCreated = Glabātuve tika veiksmīgi izveidota.
 unlock.successLabel.passwordChanged = Parole tika veiksmīgi nomainīta.
 unlock.successLabel.upgraded = Glabātuve tika veiksmīgi atjaunināta.
+# Fuzzy
 unlock.label.useOwnMountPath = Izmantot citu montēšanas vietu
 welcome.askForUpdateCheck.dialog.title = Atjauninājuma pārbaude
 welcome.askForUpdateCheck.dialog.header = Ieslēgt integrēto atjauninājumu pārbaudi?
@@ -123,3 +125,5 @@ unlock.label.useReadOnlyMode = Tikai lasīt
 unlock.label.chooseMountPath = Izvēlieties tukšu mapi...
 ctrl.secPasswordField.nonPrintableChars = Parole satur kontroles rakstzīmes.\nRekomentācija\: Noņemiet tās, lai nodrošinātu saderību ar citiem klientiem.
 ctrl.secPasswordField.capsLocked = Caps Lock ir aktivizēts.
+unlock.label.useCustomMountFlags = Custom Mount Flags
+unlock.choicebox.winDriveLetter.occupied = occupied

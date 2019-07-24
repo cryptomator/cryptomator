@@ -24,6 +24,7 @@ upgrade.version3dropBundleExtension.err.alreadyExists = Автоматическ
 # unlock.fxml
 unlock.label.password = Пароль
 unlock.label.mountName = Имя диска
+# Fuzzy
 unlock.label.winDriveLetter = Буква диска
 unlock.label.downloadsPageLink = Все версии Cryptomator
 # Дополнительные параметры
@@ -110,6 +111,7 @@ settings.volume.fuse = FUSE
 unlock.successLabel.vaultCreated = Хранилище успешно создано.
 unlock.successLabel.passwordChanged = Пароль успешно изменён.
 unlock.successLabel.upgraded = Обновление Cryptomator успешно выполнено.
+# Fuzzy
 unlock.label.useOwnMountPath = Своя точка монтирования
 welcome.askForUpdateCheck.dialog.title = Проверка обновлений
 welcome.askForUpdateCheck.dialog.header = Включить встроенную проверку обновлений?
@@ -129,3 +131,5 @@ unlock.label.useReadOnlyMode = Только для чтения
 unlock.label.chooseMountPath = Выберите пустую папку...
 ctrl.secPasswordField.nonPrintableChars = Пароль содержит управляющие символы.\nРекомендация\: Удалите их для совместимости с другими платформами.
 ctrl.secPasswordField.capsLocked = Caps Lock включен.
+unlock.label.useCustomMountFlags = Custom Mount Flags
+unlock.choicebox.winDriveLetter.occupied = occupied

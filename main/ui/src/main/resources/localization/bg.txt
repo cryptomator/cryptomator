@@ -23,6 +23,7 @@ upgrade.version3dropBundleExtension.err.alreadyExists = Автоматичнат
 # unlock.fxml
 unlock.label.password = Парола
 unlock.label.mountName = Име на диск
+# Fuzzy
 unlock.label.winDriveLetter = Инициали на диск
 unlock.label.downloadsPageLink = Всички версии на Криптоматор
 unlock.label.advancedHeading = Опции за напреднали
@@ -103,6 +104,7 @@ settings.volume.fuse = Предпазител
 unlock.successLabel.vaultCreated = Сейфът беше създаден успешно
 unlock.successLabel.passwordChanged = Паролата беше сменена успешно
 unlock.successLabel.upgraded = Криптоматор беше обновен
+# Fuzzy
 unlock.label.useOwnMountPath = Използвайте собствена точка за монтиране
 welcome.askForUpdateCheck.dialog.title = Update check
 welcome.askForUpdateCheck.dialog.header = Enable the integrated update check?
@@ -122,3 +124,5 @@ unlock.label.useReadOnlyMode = Read-Only
 unlock.label.chooseMountPath = Choose empty directory…
 ctrl.secPasswordField.nonPrintableChars = Password contains control characters.\nRecommendation\: Remove them to ensure compatibility with other clients.
 ctrl.secPasswordField.capsLocked = Caps Lock is activated.
+unlock.label.useCustomMountFlags = Custom Mount Flags
+unlock.choicebox.winDriveLetter.occupied = occupied

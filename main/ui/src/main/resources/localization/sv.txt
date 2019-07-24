@@ -23,6 +23,7 @@ upgrade.version3dropBundleExtension.err.alreadyExists = Automatisk migrering mis
 # unlock.fxml
 unlock.label.password = Lösenord
 unlock.label.mountName = Enhetsnamn
+# Fuzzy
 unlock.label.winDriveLetter = Enhetsbokstav
 unlock.label.downloadsPageLink = Alla Cryptomator versioner
 unlock.label.advancedHeading = Avancerade inställningar
@@ -103,6 +104,7 @@ settings.volume.fuse = FUSE
 unlock.successLabel.vaultCreated = Valv skapades.
 unlock.successLabel.passwordChanged = Lösenordet ändrades.
 unlock.successLabel.upgraded = Cryptomator uppdaterades
+# Fuzzy
 unlock.label.useOwnMountPath = Använd anpassad monteringspunkt
 welcome.askForUpdateCheck.dialog.title = Uppdateringskontroll
 welcome.askForUpdateCheck.dialog.header = Aktivera den integrerade uppdateringskontrollen?
@@ -122,3 +124,5 @@ unlock.label.useReadOnlyMode = Skrivskyddad
 unlock.label.chooseMountPath = Välj tom mapp…
 ctrl.secPasswordField.nonPrintableChars = Lösenordet innehåller kontrolltecken.\nRekommendation\: Ta bort dem för att säkerställa kompatibilitet med andra klienter.
 ctrl.secPasswordField.capsLocked = Caps Lock är aktiverat.
+unlock.label.useCustomMountFlags = Custom Mount Flags
+unlock.choicebox.winDriveLetter.occupied = occupied

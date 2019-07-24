@@ -7,7 +7,6 @@ package org.cryptomator.ui.model;
 
 import dagger.BindsInstance;
 import org.cryptomator.common.settings.VaultSettings;
-import org.cryptomator.ui.model.VaultModule.PerVault;
 
 import dagger.Subcomponent;
 

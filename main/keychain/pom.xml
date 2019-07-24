@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.cryptomator</groupId>
 		<artifactId>main</artifactId>
-		<version>1.4.11</version>
+		<version>1.4.12</version>
 	</parent>
 	<artifactId>keychain</artifactId>
 	<name>System Keychain Access</name>
@@ -39,7 +39,14 @@
 			<groupId>com.google.dagger</groupId>
 			<artifactId>dagger</artifactId>
 		</dependency>
-		
+
+		<!-- secret-service lib -->
+		<dependency>
+			<groupId>de.swiesend</groupId>
+			<artifactId>secret-service</artifactId>
+			<version>1.0.0-RC.3</version>
+		</dependency>
+
 		<!-- Logging -->
 		<dependency>
 			<groupId>org.slf4j</groupId>

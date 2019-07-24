@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.cryptomator</groupId>
 		<artifactId>main</artifactId>
-		<version>1.4.11</version>
+		<version>1.4.12</version>
 	</parent>
 	<artifactId>buildkit</artifactId>
 	<packaging>pom</packaging>
@@ -20,7 +20,7 @@
 
 	<build>
 		<plugins>
-			<!-- generate version.txt -->
+			<!-- copy resources -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-resources-plugin</artifactId>
@@ -39,6 +39,10 @@
 									<directory>${project.basedir}/src/main/resources</directory>
 									<includes>
 										<include>version.txt</include>
+										<include>launcher-mac.sh</include>
+										<include>launcher-linux.sh</include>
+										<include>launcher-win.bat</include>
+										<include>LICENSE.txt</include>
 									</includes>
 									<filtering>true</filtering>
 								</resource>
@@ -62,6 +66,7 @@
 						<configuration>
 							<outputDirectory>${project.build.directory}/libs</outputDirectory>
 							<excludeClassifiers>linux,mac,win</excludeClassifiers>
+							<excludeArtifactIds>dbus-java,secret-service,hkdf,java-utils</excludeArtifactIds>
 						</configuration>
 					</execution>
 					<execution>
@@ -74,6 +79,17 @@
 							<outputDirectory>${project.build.directory}/linux-libs</outputDirectory>
 							<includeGroupIds>org.openjfx</includeGroupIds>
 							<classifier>linux</classifier>
+						</configuration>
+					</execution>
+					<execution>
+						<id>copy-linux-secret-service</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>copy-dependencies</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.build.directory}/linux-libs</outputDirectory>
+							<includeArtifactIds>dbus-java,secret-service,hkdf,java-utils</includeArtifactIds>
 						</configuration>
 					</execution>
 					<execution>

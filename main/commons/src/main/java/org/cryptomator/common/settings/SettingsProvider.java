@@ -10,6 +10,7 @@ package org.cryptomator.common.settings;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonParseException;
 import org.cryptomator.common.Environment;
 import org.cryptomator.common.LazyInitializer;
 import org.slf4j.Logger;
@@ -29,6 +30,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.util.Optional;
 import java.util.concurrent.Executors;
@@ -109,12 +111,14 @@ public class SettingsProvider implements Provider<Settings> {
 		LOG.debug("Attempting to save settings to {}", settingsPath);
 		try {
 			Files.createDirectories(settingsPath.getParent());
-			try (OutputStream out = Files.newOutputStream(settingsPath, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING); //
-					Writer writer = new OutputStreamWriter(out, StandardCharsets.UTF_8)) {
+			Path tmpPath = settingsPath.resolveSibling(settingsPath.getFileName().toString() + ".tmp");
+			try (OutputStream out = Files.newOutputStream(tmpPath, StandardOpenOption.CREATE_NEW); //
+				 Writer writer = new OutputStreamWriter(out, StandardCharsets.UTF_8)) {
 				gson.toJson(settings, writer);
-				LOG.info("Settings saved to {}", settingsPath);
 			}
-		} catch (IOException e) {
+			Files.move(tmpPath, settingsPath, StandardCopyOption.REPLACE_EXISTING);
+			LOG.info("Settings saved to {}", settingsPath);
+		} catch (IOException | JsonParseException e) {
 			LOG.error("Failed to save settings.", e);
 		}
 	}

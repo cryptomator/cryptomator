@@ -23,6 +23,7 @@ upgrade.version3dropBundleExtension.err.alreadyExists = 自動移行が失敗し
 # unlock.fxml
 unlock.label.password = パスワード
 unlock.label.mountName = ドライブ名
+# Fuzzy
 unlock.label.winDriveLetter = ドライブ文字
 unlock.label.downloadsPageLink = すべての Cryptomator バージョン
 unlock.label.advancedHeading = 詳細オプション
@@ -102,7 +103,8 @@ settings.volume.webdav = WebDAV
 settings.volume.fuse = FUSE
 unlock.successLabel.vaultCreated = 金庫が正常に作成されました。
 unlock.successLabel.passwordChanged = パスワードが正常に変更されました。
-unlock.successLabel.upgraded = Cryptomator が正常にアップグレードされました。
+unlock.successLabel.upgraded = 金庫が正常にアップグレードされました。
+# Fuzzy
 unlock.label.useOwnMountPath = カスタムマウントポイントを使う
 welcome.askForUpdateCheck.dialog.title = アップデート確認
 welcome.askForUpdateCheck.dialog.header = 統合アップデート確認を有効にしますか？
@@ -122,3 +124,5 @@ unlock.label.useReadOnlyMode = 読み取り専用
 unlock.label.chooseMountPath = 空のディレクトリを選択...
 ctrl.secPasswordField.nonPrintableChars = パスワードに制御文字が含まれています。\n推奨事項\: 他のクライアントとの互換性のために、制御文字は削除してください。
 ctrl.secPasswordField.capsLocked = Caps Lock が有効です。
+unlock.label.useCustomMountFlags = Custom Mount Flags
+unlock.choicebox.winDriveLetter.occupied = occupied

@@ -23,6 +23,7 @@ upgrade.version3dropBundleExtension.err.alreadyExists = Otomatik taşıma sıras
 # unlock.fxml
 unlock.label.password = Şifre
 unlock.label.mountName = Sürücü Adı
+# Fuzzy
 unlock.label.winDriveLetter = Sürücü Konumu
 unlock.label.downloadsPageLink = Tüm Cryptomator sürümleri
 unlock.label.advancedHeading = Gelişmiş Seçenekler
@@ -103,6 +104,7 @@ settings.volume.fuse = FUSE
 unlock.successLabel.vaultCreated = Kasa başarıyla oluşturuldu.
 unlock.successLabel.passwordChanged = Şifre başarıyla değiştirildi.
 unlock.successLabel.upgraded = Kasa başarıyla yükseltildi.
+# Fuzzy
 unlock.label.useOwnMountPath = Özel Bağlantı Noktası Kullan
 welcome.askForUpdateCheck.dialog.title = Güncelleme kontrolü
 welcome.askForUpdateCheck.dialog.header = Entegre güncelleme kontrolü etkinleştirilsin mi?
@@ -122,3 +124,5 @@ unlock.label.useReadOnlyMode = Salt Okunur
 unlock.label.chooseMountPath = Boş klasör seçin...
 ctrl.secPasswordField.nonPrintableChars = Parola kontrol karakterlerini içeriyor.\nÖneri\: Diğer cihazlara uyumluluğu sağlamak için bunları kaldırın.
 ctrl.secPasswordField.capsLocked = Büyük Harf etkin.
+unlock.label.useCustomMountFlags = Custom Mount Flags
+unlock.choicebox.winDriveLetter.occupied = occupied

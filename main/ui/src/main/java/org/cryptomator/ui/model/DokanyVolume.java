@@ -44,11 +44,11 @@ public class DokanyVolume implements Volume {
 	}
 
 	@Override
-	public void mount(CryptoFileSystem fs) throws VolumeException, IOException {
+	public void mount(CryptoFileSystem fs, String mountFlags) throws VolumeException, IOException {
 		Path mountPath = getMountPoint();
 		String mountName = vaultSettings.mountName().get();
 		try {
-			this.mount = mountFactory.mount(fs.getPath("/"), mountPath, mountName, FS_TYPE_NAME);
+			this.mount = mountFactory.mount(fs.getPath("/"), mountPath, mountName, FS_TYPE_NAME, mountFlags.strip());
 		} catch (MountFailedException e) {
 			if (vaultSettings.getIndividualMountPath().isPresent()) {
 				LOG.warn("Failed to mount vault into {}. Is this directory currently accessed by another process (e.g. Windows Explorer)?", mountPath);
@@ -64,11 +64,11 @@ public class DokanyVolume implements Volume {
 			checkProvidedMountPoint(customMountPoint);
 			return customMountPoint;
 		} else if (!Strings.isNullOrEmpty(vaultSettings.winDriveLetter().get())) {
-			return Paths.get(vaultSettings.winDriveLetter().get().charAt(0) + ":\\");
+			return Path.of(vaultSettings.winDriveLetter().get().charAt(0) + ":\\");
 		} else {
 			//auto assign drive letter
 			if (!windowsDriveLetters.getAvailableDriveLetters().isEmpty()) {
-				return Paths.get(windowsDriveLetters.getAvailableDriveLetters().iterator().next() + ":\\");
+				return windowsDriveLetters.getAvailableDriveLetters().iterator().next();
 			} else {
 				throw new VolumeException("No free drive letter available.");
 			}

@@ -23,6 +23,7 @@ upgrade.version3dropBundleExtension.err.alreadyExists = Automatický převod se 
 # unlock.fxml
 unlock.label.password = Heslo
 unlock.label.mountName = Název jednotky
+# Fuzzy
 unlock.label.winDriveLetter = Písmeno jednotky
 unlock.label.downloadsPageLink = Všechny verze Cryptomator
 unlock.label.advancedHeading = Pokročilé volby
@@ -105,6 +106,7 @@ settings.volume.fuse = FUSE
 unlock.successLabel.vaultCreated = Trezor byl úspěšně vytvořen.
 unlock.successLabel.passwordChanged = Heslo bylo úspěšně změněno.
 unlock.successLabel.upgraded = Cryptomator byl úspěšně povýšen na novou verzi.
+# Fuzzy
 unlock.label.useOwnMountPath = Použít vlastní přípojný bod
 welcome.askForUpdateCheck.dialog.title = Zjišťování aktualizací
 welcome.askForUpdateCheck.dialog.header = Zjišťovat automaticky nové verze?
@@ -124,3 +126,5 @@ unlock.label.useReadOnlyMode = Pouze pro čtení
 unlock.label.chooseMountPath = Zvolte prázdnou složku…
 ctrl.secPasswordField.nonPrintableChars = Heslo obsahuje řídící znaky.\nDoporučení\: Odeberete je kvůli kompatibilitě s ostatními klienty.
 ctrl.secPasswordField.capsLocked = Je zapnutá klávesa Caps Lock.
+unlock.label.useCustomMountFlags = Custom Mount Flags
+unlock.choicebox.winDriveLetter.occupied = occupied
