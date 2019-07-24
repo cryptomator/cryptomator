@@ -2,11 +2,12 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ButtonBar?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
 <VBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
 	  fx:controller="org.cryptomator.ui.addvaultwizard.ChooseExistingVaultController"
@@ -24,10 +25,11 @@
 			<Button text="TODO filepicker" onAction="#chooseFile" HBox.hgrow="NEVER" prefWidth="120"/>
 		</HBox>
 		<Region VBox.vgrow="ALWAYS"/>
-		<HBox >
-			<Button text="TODO Back" onAction="#goBack" HBox.hgrow="NEVER" prefWidth="120"/>
-			<Region HBox.hgrow="ALWAYS"/>
-			<Button text="TODO Open" onAction="#confirm" HBox.hgrow="NEVER" prefWidth="120"/>
-		</HBox>
+		<ButtonBar buttonMinWidth="120" buttonOrder="B+I">
+			<buttons>
+				<Button text="TODO Back" ButtonBar.buttonData="BACK_PREVIOUS" onAction="#goBack"/>
+				<Button text="TODO Open" ButtonBar.buttonData="FINISH" onAction="#confirm" defaultButton="true"/>
+			</buttons>
+		</ButtonBar>
 	</children>
 </VBox>
