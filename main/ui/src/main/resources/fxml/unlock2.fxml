@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Text?>
+<?import javafx.scene.text.TextFlow?>
+<?import org.cryptomator.ui.controls.SecPasswordField?>
+<?import javafx.scene.control.ProgressIndicator?>
+<VBox xmlns="http://javafx.com/javafx"
+	  xmlns:fx="http://javafx.com/fxml"
+	  fx:controller="org.cryptomator.ui.unlock.UnlockController"
+	  minWidth="300"
+	  spacing="6">
+	<padding>
+		<Insets bottom="6.0" left="6.0" right="6.0" top="6.0"/>
+	</padding>
+	<children>
+		<TextFlow>
+			<Text text="TODO Enter Password for "/>
+			<Text text="${controller.vault.displayableName}"/>
+		</TextFlow>
+		<SecPasswordField fx:id="passwordField"/>
+		<HBox>
+			<Button text="TODO cancel" cancelButton="true" onAction="#cancel"/>
+			<Region HBox.hgrow="ALWAYS"/>
+			<Button text="TODO unlock" defaultButton="true" onAction="#unlock" contentDisplay="${controller.unlockButtonState}" disable="${passwordField.text.empty}">
+				<graphic>
+					<ProgressIndicator progress="-1" prefWidth="12" prefHeight="12"/>
+				</graphic>
+			</Button>
+		</HBox>
+	</children>
+</VBox>

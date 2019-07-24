@@ -3,6 +3,7 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.Button?>
 <VBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
 	  fx:controller="org.cryptomator.ui.mainwindow.VaultDetailController"
@@ -11,6 +12,9 @@
 		<Insets bottom="6.0" left="6.0" right="6.0" top="6.0"/>
 	</padding>
 	<children>
-		<Label text="${controller.vault}"/>
+		<Label text="${controller.vault.displayableName}"/>
+
+		<Button text="TODO unlock" onAction="#unlock" visible="${controller.vault.locked}"/>
+		<Button text="TODO lock" onAction="#lock" visible="${controller.vault.unlocked}"/>
 	</children>
 </VBox>

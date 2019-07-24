@@ -13,6 +13,7 @@ import javafx.application.Platform;
 import javafx.beans.Observable;
 import javafx.beans.binding.Binding;
 import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.StringBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
@@ -62,6 +63,8 @@ public class Vault {
 	private final ObjectProperty<State> state = new SimpleObjectProperty<State>(State.LOCKED);
 	private final StringBinding displayableName;
 	private final StringBinding displayablePath;
+	private final BooleanBinding locked;
+	private final BooleanBinding unlocked;
 
 	private Volume volume;
 
@@ -77,6 +80,8 @@ public class Vault {
 
 		this.displayableName = Bindings.createStringBinding(this::getDisplayableName, vaultSettings.path());
 		this.displayablePath = Bindings.createStringBinding(this::getDisplayablePath, vaultSettings.path());
+		this.locked = Bindings.createBooleanBinding(this::isLocked, state);
+		this.unlocked = Bindings.createBooleanBinding(this::isUnlocked, state);
 	}
 
 	// ******************************************************************************
@@ -192,11 +197,27 @@ public class Vault {
 	public State getState() {
 		return state.get();
 	}
-	
+
+	public BooleanBinding lockedProperty() {
+		return locked;
+	}
+
+	public boolean isLocked() {
+		return state.get() == State.LOCKED;
+	}
+
+	public BooleanBinding unlockedProperty() {
+		return unlocked;
+	}
+
+	public boolean isUnlocked() {
+		return state.get() == State.UNLOCKED;
+	}
+
 	public StringBinding displayableNameProperty() {
 		return displayableName;
 	}
-	
+
 	public String getDisplayableName() {
 		Path p = vaultSettings.path().get();
 		return p.getFileName().toString();
