@@ -2,7 +2,6 @@ package org.cryptomator.ui;
 
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.beans.Observable;
 import javafx.beans.value.ObservableValue;
 import javafx.stage.Stage;
 import org.cryptomator.common.settings.Settings;
@@ -34,7 +33,7 @@ public class FxApplication extends Application {
 
 	public void start() {
 		LOG.trace("FxApplication.start()");
-		
+
 		settings.theme().addListener(this::themeChanged);
 		loadSelectedStyleSheet(settings.theme().get());
 
@@ -66,15 +65,14 @@ public class FxApplication extends Application {
 		switch (theme) {
 			case CUSTOM:
 				// TODO
-				Application.setUserAgentStylesheet(getClass().getResource("/css/win_theme.css").toString());
+				Application.setUserAgentStylesheet(getClass().getResource("/css/mac_theme.css").toString());
 				break;
 			case DARK:
-				// TODO
-				Application.setUserAgentStylesheet(getClass().getResource("/css/mac_theme.css").toString());
+				Application.setUserAgentStylesheet(getClass().getResource("/css/dark_theme.css").toString());
 				break;
 			case LIGHT:
 			default:
-				Application.setUserAgentStylesheet(getClass().getResource("/css/theme.css").toString());
+				Application.setUserAgentStylesheet(getClass().getResource("/css/light_theme.css").toString());
 				break;
 		}
 	}

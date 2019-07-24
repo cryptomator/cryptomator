@@ -28,6 +28,7 @@ abstract class PreferencesModule {
 	@PreferencesScoped
 	static Stage provideStage() {
 		Stage stage = new Stage();
+		stage.setTitle("Preferences");
 		stage.setMinWidth(400);
 		stage.setMinHeight(300);
 		stage.initModality(Modality.APPLICATION_MODAL);

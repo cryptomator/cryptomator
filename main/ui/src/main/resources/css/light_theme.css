@@ -7,17 +7,29 @@
 .root {
 	PRIMARY: #79B01A;
 	PRIMARY_BG: #70A11B;
-	GRAY_LIGHT_BG: #F7F7F7;
+	MAIN_BG: #F7F7F7;
 	TEXT_FILL: #222;
 	TEXT_FILL_LIGHT: #7E7E7E;
 	CONTROL_BORDER_NORMAL: #CFCFCF;
 	CONTROL_BORDER_FOCUSED: #9E9E9E;
+	CONTROL_BG_NORMAL: #FFF;
 	CONTROL_BG_ARMED: #E1E1E1;
+	CONTROL_WHITE_BG_ARMED: #E1E1E1;
 	SCROLL_BAR_THUMB_NORMAL: #CFCFCF;
 	SCROLL_BAR_THUMB_HOVER: #B1B1B1;
 
-	-fx-background-color: GRAY_LIGHT_BG;
+	-fx-background-color: MAIN_BG;
     -fx-text-fill: TEXT_FILL;
+}
+
+/*******************************************************************************
+ *                                                                             *
+ * Labels                                                                      *
+ *                                                                             *
+ ******************************************************************************/
+
+.label {
+	-fx-text-fill: TEXT_FILL;
 }
 
 /*******************************************************************************
@@ -47,7 +59,7 @@
 }
 
 .main-window .title .button:armed .fa-icon {
-	-fx-fill: CONTROL_BG_ARMED;
+	-fx-fill: CONTROL_WHITE_BG_ARMED;
 }
 
 .main-window .resizer {
@@ -75,7 +87,7 @@
 }
 
 .split-pane:horizontal > .split-pane-divider {
-	-fx-background-color: GRAY_LIGHT_BG, CONTROL_BORDER_NORMAL;
+	-fx-background-color: MAIN_BG, CONTROL_BORDER_NORMAL;
 	-fx-background-insets: 0, 0 1 0 0;
 }
 
@@ -86,7 +98,7 @@
  ******************************************************************************/
 
 .list-view {
-    -fx-background-color: white;
+    -fx-background-color: CONTROL_BG_NORMAL;
 }
 
 .list-cell:selected {
@@ -97,17 +109,13 @@
 	-fx-fill: TEXT_FILL;
 }
 
-.list-cell .label {
-	-fx-text-fill: TEXT_FILL;
-}
-
 .list-cell .detail-label {
 	-fx-text-fill: TEXT_FILL_LIGHT;
 	-fx-font-size: 0.8em;
 }
 
 .onboarding-overlay-arc {
-	-fx-stroke: black;
+	-fx-stroke: TEXT_FILL;
 	-fx-fill: transparent;
 }
 
@@ -128,6 +136,10 @@
 
 .toolbar-container .button:armed {
 	-fx-background-color: CONTROL_BORDER_NORMAL, CONTROL_BG_ARMED;
+}
+
+.toolbar-container .button .fa-icon {
+	-fx-fill: TEXT_FILL;
 }
 
 /*******************************************************************************
@@ -165,7 +177,7 @@
 .tooltip {
 	-fx-text-fill: TEXT_FILL;
 	-fx-font-size: 0.8em;
-	-fx-background-color: white;
+	-fx-background-color: CONTROL_BG_NORMAL;
 	-fx-padding: 0.2em 0.4em 0.2em 0.4em;
 	-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.5), 2, 0, 0, 0);
 }
@@ -180,14 +192,14 @@
 	-fx-cursor: text;
 	-fx-text-fill: TEXT_FILL;
 	-fx-prompt-text-fill: TEXT_FILL_LIGHT;
-	-fx-background-color: CONTROL_BORDER_NORMAL, white;
+	-fx-background-color: CONTROL_BORDER_NORMAL, CONTROL_BG_NORMAL;
 	-fx-background-insets: 0, 1px;
 	-fx-background-radius: 4px;
 	-fx-padding: 0.3em 0.5em 0.3em 0.5em;
 }
 
 .text-input:focused {
-	-fx-background-color: CONTROL_BORDER_FOCUSED, white;
+	-fx-background-color: CONTROL_BORDER_FOCUSED, CONTROL_BG_NORMAL;
 }
 
 /*******************************************************************************
@@ -200,14 +212,14 @@
 	-fx-pref-height: 25px;
 	-fx-text-fill: TEXT_FILL;
 	-fx-alignment: CENTER;
-	-fx-background-color: CONTROL_BORDER_NORMAL, white;
+	-fx-background-color: CONTROL_BORDER_NORMAL, CONTROL_BG_NORMAL;
 	-fx-background-insets: 0, 1px;
 	-fx-background-radius: 4px;
 	-fx-padding: 0.2em 0.4em 0.2em 0.4em;
 }
 
 .button:focused {
-	-fx-background-color: CONTROL_BORDER_FOCUSED, white;
+	-fx-background-color: CONTROL_BORDER_FOCUSED, CONTROL_BG_NORMAL;
 }
 
 .button:armed {
@@ -226,14 +238,14 @@
 }
 
 .check-box > .box {
-	-fx-background-color: CONTROL_BORDER_NORMAL, white;
+	-fx-background-color: CONTROL_BORDER_NORMAL, CONTROL_BG_NORMAL;
 	-fx-background-insets: 0, 1px;
 	-fx-background-radius: 4px;
 	-fx-padding: 0.3em;
 }
 
 .check-box:focused > .box {
-	-fx-background-color: CONTROL_BORDER_FOCUSED, white;
+	-fx-background-color: CONTROL_BORDER_FOCUSED, CONTROL_BG_NORMAL;
 }
 
 .check-box > .box > .mark {
@@ -254,14 +266,14 @@
 
 .choice-box {
 	-fx-text-fill: TEXT_FILL;
-	-fx-background-color: CONTROL_BORDER_NORMAL, white;
+	-fx-background-color: CONTROL_BORDER_NORMAL, CONTROL_BG_NORMAL;
 	-fx-background-insets: 0, 1px;
 	-fx-background-radius: 4px;
 	-fx-padding: 0.3em 0.5em 0.3em 0.5em;
 }
 
 .choice-box:focused {
-	-fx-background-color: CONTROL_BORDER_FOCUSED, white;
+	-fx-background-color: CONTROL_BORDER_FOCUSED, CONTROL_BG_NORMAL;
 }
 
 .choice-box > .open-button {
@@ -276,7 +288,7 @@
 }
 
 .choice-box .context-menu {
-	-fx-background-color: CONTROL_BORDER_NORMAL, white;
+	-fx-background-color: CONTROL_BORDER_NORMAL, CONTROL_BG_NORMAL;
 	-fx-background-insets: 0, 1px;
 	-fx-background-radius: 4px;
 	-fx-padding: 0.2em 0 0.2em 0;
@@ -312,7 +324,7 @@
 
 .progress-indicator:indeterminate .segment {
 	-fx-background-color: rgb(95.0, 95.0, 98.0), rgb(122.0, 122.0, 125.0);
-	-fx-background-insets:0.0, 0.5;
+	-fx-background-insets: 0, 0.5;
 }
 
 .progress-indicator:indeterminate .segment0 {

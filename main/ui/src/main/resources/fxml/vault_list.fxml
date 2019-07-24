@@ -26,7 +26,7 @@
 	<HBox styleClass="toolbar-container" VBox.vgrow="NEVER" alignment="CENTER_LEFT">
 		<Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#didClickAddVault">
 			<graphic>
-				<FontAwesomeIconView glyphName="PLUS"/>
+				<FontAwesomeIconView styleClass="fa-icon" glyphName="PLUS"/>
 			</graphic>
 			<tooltip>
 				<Tooltip text="Add Vault"/>
@@ -34,7 +34,7 @@
 		</Button>
 		<Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#didClickRemoveVault">
 			<graphic>
-				<FontAwesomeIconView glyphName="MINUS"/>
+				<FontAwesomeIconView styleClass="fa-icon" glyphName="MINUS"/>
 			</graphic>
 			<tooltip>
 				<Tooltip text="Remove Vault"/>
