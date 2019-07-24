@@ -8,11 +8,15 @@ import javafx.scene.layout.AnchorPane;
 import org.cryptomator.ui.addvaultwizard.AddVaultWizardComponent;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.model.Vault;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 
 @MainWindowScoped
 public class VaultListController implements FxController {
+
+	private static final Logger LOG = LoggerFactory.getLogger(VaultListController.class);
 
 	private final ObservableList<Vault> vaults;
 	private final ObjectProperty<Vault> selectedVault;
@@ -41,5 +45,12 @@ public class VaultListController implements FxController {
 	}
 
 	public void didClickRemoveVault() {
+		//TODO: Dialogue
+		if(selectedVault.get() != null){
+			vaults.remove(selectedVault.get());
+			LOG.debug("Removing vault {}.",selectedVault.get().getDisplayableName());
+		} else{
+			LOG.debug("Cannot remove a vault if none is selected.");
+		}
 	}
 }
