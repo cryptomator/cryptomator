@@ -5,6 +5,8 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
 <VBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
 	  fx:controller="org.cryptomator.ui.addvaultwizard.ChooseExistingVaultController"
@@ -15,10 +17,17 @@
 		<Insets top="12" right="12" bottom="12" left="12"/>
 	</padding>
 	<children>
+		<Region VBox.vgrow="ALWAYS"/>
 		<Label text="%addvaultwizard.existing.instruction"/>
-		<TextField promptText="TODO" text="${controller.vaultPath}" disable="true"/>
-		<Button text="file picker" onAction="#chooseFile"/>
-		<Button text="Back" onAction="#goBack"/>
-		<Button text="Open" onAction="#confirm"/>
+		<HBox spacing="18">
+			<TextField promptText="TODO" text="${controller.vaultPath}" disable="true" HBox.hgrow="ALWAYS"/>
+			<Button text="TODO filepicker" onAction="#chooseFile" HBox.hgrow="NEVER" prefWidth="120"/>
+		</HBox>
+		<Region VBox.vgrow="ALWAYS"/>
+		<HBox >
+			<Button text="TODO Back" onAction="#goBack" HBox.hgrow="NEVER" prefWidth="120"/>
+			<Region HBox.hgrow="ALWAYS"/>
+			<Button text="TODO Open" onAction="#confirm" HBox.hgrow="NEVER" prefWidth="120"/>
+		</HBox>
 	</children>
 </VBox>
