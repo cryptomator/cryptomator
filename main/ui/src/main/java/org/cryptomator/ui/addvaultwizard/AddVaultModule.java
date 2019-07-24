@@ -4,6 +4,8 @@ import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoMap;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -18,6 +20,7 @@ import org.cryptomator.ui.mainwindow.VaultListController;
 
 import javax.inject.Named;
 import javax.inject.Provider;
+import java.nio.file.Path;
 import java.util.Map;
 
 @Module
@@ -41,6 +44,12 @@ public abstract class AddVaultModule {
 		stage.initModality(Modality.WINDOW_MODAL);
 		stage.initOwner(owner);
 		return stage;
+	}
+
+	@Provides
+	@AddVaultWizardScoped
+	static ObjectProperty<Path> provideVaultPath(){
+		return new SimpleObjectProperty<>();
 	}
 
 	// ------------------

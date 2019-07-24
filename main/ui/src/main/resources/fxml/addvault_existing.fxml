@@ -16,7 +16,7 @@
 	</padding>
 	<children>
 		<Label text="%addvaultwizard.existing.instruction"/>
-		<TextField fx:id="textField" text="path/to/masterkey.cryptomator" disable="true"/>
+		<TextField promptText="TODO" text="${controller.vaultPath}" disable="true"/>
 		<Button text="file picker" onAction="#chooseFile"/>
 		<Button text="Back" onAction="#goBack"/>
 		<Button text="Open" onAction="#confirm"/>

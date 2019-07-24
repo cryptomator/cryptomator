@@ -1,7 +1,7 @@
 package org.cryptomator.ui.addvaultwizard;
 
+import javafx.beans.property.ObjectProperty;
 import javafx.fxml.FXML;
-import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.cryptomator.ui.common.FXMLLoaderFactory;
@@ -9,19 +9,20 @@ import org.cryptomator.ui.common.FxController;
 
 import javax.inject.Inject;
 import java.io.File;
+import java.nio.file.Path;
 
 @AddVaultWizardScoped
 public class ChooseExistingVaultController implements FxController {
 
-	private final FXMLLoaderFactory fxmlLoaders;
 	private final Stage window;
-
-	public TextField textField;
+	private final FXMLLoaderFactory fxmlLoaders;
+	private final ObjectProperty<Path> vaultPath;
 
 	@Inject
-	ChooseExistingVaultController(@AddVaultWizard Stage window, @AddVaultWizard FXMLLoaderFactory fxmlLoaders) {
+	ChooseExistingVaultController(@AddVaultWizard Stage window, @AddVaultWizard FXMLLoaderFactory fxmlLoaders, ObjectProperty<Path> vaultPath) {
 		this.window = window;
 		this.fxmlLoaders = fxmlLoaders;
+		this.vaultPath = vaultPath;
 	}
 
 	@FXML
@@ -32,18 +33,28 @@ public class ChooseExistingVaultController implements FxController {
 		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Cryptomator Masterkey", "*.cryptomator"));
 		final File file = fileChooser.showOpenDialog(window);
 		if (file != null) {
-			textField.setText(file.getAbsolutePath());
+			vaultPath.setValue(file.toPath().toAbsolutePath());
 		}
 	}
 
 	@FXML
 	public void goBack() {
 		fxmlLoaders.setScene("/fxml/addvault_welcome.fxml", window);
-
 	}
 
 	@FXML
 	public void confirm() {
+		//TODO
 		window.close();
+	}
+
+	/* Getter/Setter */
+
+	public Path getVaultPath() {
+		return vaultPath.get();
+	}
+
+	public ObjectProperty<Path> vaultPathProperty() {
+		return vaultPath;
 	}
 }
