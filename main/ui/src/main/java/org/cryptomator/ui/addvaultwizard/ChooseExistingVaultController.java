@@ -1,6 +1,5 @@
 package org.cryptomator.ui.addvaultwizard;
 
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
@@ -10,7 +9,6 @@ import org.cryptomator.ui.common.FxController;
 
 import javax.inject.Inject;
 import java.io.File;
-import java.io.IOException;
 
 @AddVaultWizardScoped
 public class ChooseExistingVaultController implements FxController {
@@ -18,7 +16,6 @@ public class ChooseExistingVaultController implements FxController {
 	private final FXMLLoaderFactory fxmlLoaders;
 	private final Stage window;
 
-	@FXML
 	public TextField textField;
 
 	@Inject
@@ -27,8 +24,10 @@ public class ChooseExistingVaultController implements FxController {
 		this.fxmlLoaders = fxmlLoaders;
 	}
 
-	public void chooseFile(ActionEvent actionEvent) {
+	@FXML
+	public void chooseFile() {
 		FileChooser fileChooser = new FileChooser();
+		//TODO: Title is part of the localization. => inject resource bundle and get correct title
 		fileChooser.setTitle("Open Masterkey File");
 		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Cryptomator Masterkey", "*.cryptomator"));
 		final File file = fileChooser.showOpenDialog(window);
@@ -37,12 +36,14 @@ public class ChooseExistingVaultController implements FxController {
 		}
 	}
 
-	public void goBack(ActionEvent actionEvent) throws IOException {
+	@FXML
+	public void goBack() {
 		fxmlLoaders.setScene("/fxml/addvault_welcome.fxml", window);
 
 	}
 
-	public void confirm(ActionEvent actionEvent) {
+	@FXML
+	public void confirm() {
 		window.close();
 	}
 }
