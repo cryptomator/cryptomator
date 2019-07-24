@@ -88,7 +88,7 @@ public class VaultModule {
 			LOG.error("Could not read uid/gid from USER_HOME", e);
 		}
 
-		return flags.toString();
+		return flags.toString().strip();
 	}
 
 	// see https://manpages.debian.org/testing/fuse/mount.fuse.8.en.html
@@ -111,7 +111,7 @@ public class VaultModule {
 			LOG.error("Could not read uid/gid from USER_HOME", e);
 		}
 
-		return flags.toString();
+		return flags.toString().strip();
 	}
 
 	// see https://github.com/cryptomator/dokany-nio-adapter/blob/develop/src/main/java/org/cryptomator/frontend/dokany/MountUtil.java#L30-L34
@@ -127,7 +127,7 @@ public class VaultModule {
 		flags.append(" --timeout 10000");
 		flags.append(" --allocation-unit-size 4096");
 		flags.append(" --sector-size 4096");
-		return flags.toString();
+		return flags.toString().strip();
 	}
 
 }
