@@ -15,7 +15,7 @@
 		<Insets top="12" right="12" bottom="12" left="12"/>
 	</padding>
 	<children>
-		<Label text="Open your existing vault by choosing its masterkey file:"/>
+		<Label text="%addvaultwizard.existing.instruction"/>
 		<TextField fx:id="textField" text="path/to/masterkey.cryptomator" disable="true"/>
 		<Button text="file picker" onAction="#chooseFile"/>
 		<Button text="Back" onAction="#goBack"/>
