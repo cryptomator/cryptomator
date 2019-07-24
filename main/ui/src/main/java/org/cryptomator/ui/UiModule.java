@@ -46,6 +46,7 @@ public class UiModule {
 		return executorService;
 	}
 
+	// TODO @Binds abstract ExecutorService bindExecutorService(ScheduledExecutorService executor); ?
 	@Provides
 	@FxApplicationScoped
 	ExecutorService provideExecutorService(@Named("shutdownTaskScheduler") Consumer<Runnable> shutdownTaskScheduler) {

@@ -9,16 +9,11 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import javafx.stage.Window;
 import org.cryptomator.ui.common.FXMLLoaderFactory;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxControllerKey;
 import org.cryptomator.ui.mainwindow.MainWindow;
-import org.cryptomator.ui.mainwindow.MainWindowController;
-import org.cryptomator.ui.mainwindow.VaultDetailController;
-import org.cryptomator.ui.mainwindow.VaultListController;
 
-import javax.inject.Named;
 import javax.inject.Provider;
 import java.nio.file.Path;
 import java.util.Map;

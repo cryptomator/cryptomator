@@ -1,11 +1,11 @@
 package org.cryptomator.ui.mainwindow;
 
-import javafx.beans.binding.Bindings;
-import javafx.beans.binding.StringBinding;
+import javafx.beans.binding.Binding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.model.Vault;
+import org.fxmisc.easybind.EasyBind;
 
 import javax.inject.Inject;
 
@@ -13,39 +13,34 @@ import javax.inject.Inject;
 public class VaultListCellController implements FxController {
 
 	private final ObjectProperty<Vault> vault = new SimpleObjectProperty<>();
-	private final StringBinding glyph;
+	private final Binding<String> glyph;
 
 	@Inject
 	VaultListCellController() {
-		this.glyph = Bindings.createStringBinding(this::getGlyphForVault, vault);
+		this.glyph = EasyBind.select(vault).selectObject(Vault::stateProperty).map(this::getGlyphForVaultState).orElse("WARNING");
 	}
 
-	private String getGlyphForVault() {
-		Vault v = vault.get();
-		if (v == null) {
-			return "WARNING";
-		} else {
-			switch (v.getState()) {
-				case LOCKED:
-					return "LOCK";
-				case UNLOCKED:
-					return "UNLOCK";
-				case PROCESSING:
-					return "SPINNER";
-				default:
-					return "WARNING";
-			}
+	private String getGlyphForVaultState(Vault.State state) {
+		switch (state) {
+			case LOCKED:
+				return "LOCK";
+			case PROCESSING:
+				return "SPINNER";
+			case UNLOCKED:
+				return "UNLOCK";
+			default:
+				return "WARNING";
 		}
 	}
 
 	/* Getter/Setter */
 
-	public StringBinding glyphProperty() {
+	public Binding<String> glyphProperty() {
 		return glyph;
 	}
 
 	public String getGlyph() {
-		return glyph.get();
+		return glyph.getValue();
 	}
 
 	public ObjectProperty<Vault> vaultProperty() {
