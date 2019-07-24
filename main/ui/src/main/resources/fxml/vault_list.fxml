@@ -13,7 +13,7 @@
 <VBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
 	  fx:controller="org.cryptomator.ui.mainwindow.VaultListController"
-	  minWidth="200">
+	  minWidth="206">
 	<StackPane VBox.vgrow="ALWAYS">
 		<ListView fx:id="vaultList" editable="true"/>
 		<AnchorPane fx:id="onboardingOverlay">

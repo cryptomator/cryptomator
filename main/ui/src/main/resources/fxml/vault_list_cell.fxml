@@ -10,10 +10,10 @@
 	  fx:controller="org.cryptomator.ui.mainwindow.VaultListCellController"
 	  prefHeight="46.0"
 	  prefWidth="200.0"
-	  spacing="12"
+	  spacing="10"
 	  alignment="CENTER_LEFT">
 	<padding>
-		<Insets top="6" right="8" bottom="6" left="12"/>
+		<Insets top="6" right="8" bottom="6" left="10"/>
 	</padding>
 	<children>
 		<FontAwesomeIconView styleClass="lock-icon" glyphName="${controller.glyph}" HBox.hgrow="NEVER" glyphSize="16"/>
