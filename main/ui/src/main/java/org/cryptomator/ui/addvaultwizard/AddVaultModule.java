@@ -45,7 +45,7 @@ public abstract class AddVaultModule {
 
 	@Provides
 	@AddVaultWizardScoped
-	static ObjectProperty<Path> provideVaultPath(){
+	static ObjectProperty<Path> provideVaultPath() {
 		return new SimpleObjectProperty<>();
 	}
 
@@ -66,6 +66,6 @@ public abstract class AddVaultModule {
 	@IntoMap
 	@FxControllerKey(ChooseExistingVaultController.class)
 	abstract FxController bindChooseExistingVaultController(ChooseExistingVaultController controller);
-	
+
 
 }

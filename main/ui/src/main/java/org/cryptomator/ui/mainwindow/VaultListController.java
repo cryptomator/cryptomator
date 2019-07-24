@@ -46,10 +46,10 @@ public class VaultListController implements FxController {
 
 	public void didClickRemoveVault() {
 		//TODO: Dialogue
-		if(selectedVault.get() != null){
+		if (selectedVault.get() != null) {
 			vaults.remove(selectedVault.get());
-			LOG.debug("Removing vault {}.",selectedVault.get().getDisplayableName());
-		} else{
+			LOG.debug("Removing vault {}.", selectedVault.get().getDisplayableName());
+		} else {
 			LOG.debug("Cannot remove a vault if none is selected.");
 		}
 	}
