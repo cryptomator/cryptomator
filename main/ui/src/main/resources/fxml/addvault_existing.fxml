@@ -27,8 +27,8 @@
 		<Region VBox.vgrow="ALWAYS"/>
 		<ButtonBar buttonMinWidth="120" buttonOrder="B+I">
 			<buttons>
-				<Button text="TODO Back" ButtonBar.buttonData="BACK_PREVIOUS" onAction="#goBack"/>
-				<Button text="TODO Open" ButtonBar.buttonData="FINISH" onAction="#confirm" defaultButton="true"/>
+				<Button text="TODO Back" ButtonBar.buttonData="BACK_PREVIOUS" onAction="#back"/>
+				<Button text="TODO Open" ButtonBar.buttonData="FINISH" onAction="#finish" defaultButton="true"/>
 			</buttons>
 		</ButtonBar>
 	</children>

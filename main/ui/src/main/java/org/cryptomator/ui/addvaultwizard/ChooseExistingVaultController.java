@@ -46,12 +46,12 @@ public class ChooseExistingVaultController implements FxController {
 	}
 
 	@FXML
-	public void goBack() {
+	public void back() {
 		fxmlLoaders.setScene("/fxml/addvault_welcome.fxml", window);
 	}
 
 	@FXML
-	public void confirm() {
+	public void finish() {
 		//TODO: error handling & cannot unlock added vault
 		VaultSettings vaultSettings = VaultSettings.withRandomId();
 		vaultSettings.path().setValue(vaultPath.get());
