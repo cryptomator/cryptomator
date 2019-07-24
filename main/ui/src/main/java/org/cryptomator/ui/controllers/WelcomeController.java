@@ -26,7 +26,7 @@ import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.ui.FxApplicationScoped;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.ui.l10n.Localization;
-import org.cryptomator.ui.util.Tasks;
+import org.cryptomator.ui.common.Tasks;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

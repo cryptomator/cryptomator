@@ -45,7 +45,7 @@ import org.cryptomator.ui.l10n.Localization;
 import org.cryptomator.ui.model.Vault;
 import org.cryptomator.ui.model.WindowsDriveLetters;
 import org.cryptomator.ui.util.DialogBuilderUtil;
-import org.cryptomator.ui.util.Tasks;
+import org.cryptomator.ui.common.Tasks;
 import org.fxmisc.easybind.EasyBind;
 import org.fxmisc.easybind.Subscription;
 import org.slf4j.Logger;

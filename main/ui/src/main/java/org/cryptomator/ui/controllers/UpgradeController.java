@@ -26,7 +26,7 @@ import org.cryptomator.ui.model.upgrade.UpgradeStrategies;
 import org.cryptomator.ui.model.upgrade.UpgradeStrategy;
 import org.cryptomator.ui.model.upgrade.UpgradeStrategy.UpgradeFailedException;
 import org.cryptomator.ui.model.Vault;
-import org.cryptomator.ui.util.Tasks;
+import org.cryptomator.ui.common.Tasks;
 import org.fxmisc.easybind.EasyBind;
 
 public class UpgradeController implements ViewController {

@@ -57,7 +57,7 @@ import org.cryptomator.ui.model.VaultList;
 import org.cryptomator.ui.model.upgrade.UpgradeStrategies;
 import org.cryptomator.ui.model.upgrade.UpgradeStrategy;
 import org.cryptomator.ui.util.DialogBuilderUtil;
-import org.cryptomator.ui.util.Tasks;
+import org.cryptomator.ui.common.Tasks;
 import org.fxmisc.easybind.EasyBind;
 import org.fxmisc.easybind.Subscription;
 import org.fxmisc.easybind.monadic.MonadicBinding;
