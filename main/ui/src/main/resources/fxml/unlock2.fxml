@@ -9,6 +9,7 @@
 <?import javafx.scene.text.TextFlow?>
 <?import org.cryptomator.ui.controls.SecPasswordField?>
 <?import javafx.scene.control.ProgressIndicator?>
+<?import javafx.scene.control.CheckBox?>
 <VBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
 	  fx:controller="org.cryptomator.ui.unlock.UnlockController"
@@ -23,6 +24,7 @@
 			<Text text="${controller.vault.displayableName}"/>
 		</TextFlow>
 		<SecPasswordField fx:id="passwordField"/>
+		<CheckBox fx:id="savePassword" text="TODO save password" onAction="#didClickSavePasswordCheckbox"/>
 		<HBox>
 			<Button text="TODO cancel" cancelButton="true" onAction="#cancel"/>
 			<Region HBox.hgrow="ALWAYS"/>

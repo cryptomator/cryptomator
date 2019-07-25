@@ -2,22 +2,30 @@ package org.cryptomator.ui.unlock;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ObjectBinding;
-import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ContentDisplay;
 import javafx.stage.Stage;
+import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.cryptolib.api.InvalidPassphraseException;
 import org.cryptomator.cryptolib.api.UnsupportedVaultFormatException;
+import org.cryptomator.keychain.KeychainAccess;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.Tasks;
 import org.cryptomator.ui.controls.SecPasswordField;
 import org.cryptomator.ui.model.Vault;
+import org.cryptomator.ui.util.DialogBuilderUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.NotDirectoryException;
+import java.util.Arrays;
+import java.util.Optional;
+import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
 
 @UnlockScoped
@@ -26,17 +34,30 @@ public class UnlockController implements FxController {
 	private static final Logger LOG = LoggerFactory.getLogger(UnlockController.class);
 
 	private final Stage window;
-	private final ReadOnlyObjectProperty<Vault> vault;
+	private final Vault vault;
 	private final ExecutorService executor;
 	private final ObjectBinding<ContentDisplay> unlockButtonState;
+	private final Optional<KeychainAccess> keychainAccess;
+	private final ResourceBundle resourceBundle;
 	public SecPasswordField passwordField;
+	public CheckBox savePassword;
 
 	@Inject
-	public UnlockController(@UnlockWindow Stage window, @UnlockWindow ReadOnlyObjectProperty<Vault> vault, ExecutorService executor) {
+	public UnlockController(@UnlockWindow Stage window, @UnlockWindow Vault vault, ExecutorService executor, Optional<KeychainAccess> keychainAccess, ResourceBundle resourceBundle) {
 		this.window = window;
 		this.vault = vault;
 		this.executor = executor;
-		this.unlockButtonState = Bindings.createObjectBinding(this::getUnlockButtonState, vault.get().stateProperty());
+		this.unlockButtonState = Bindings.createObjectBinding(this::getUnlockButtonState, vault.stateProperty());
+		this.keychainAccess = keychainAccess;
+		this.resourceBundle = resourceBundle;
+	}
+
+	public void initialize() {
+		if (keychainAccess.isPresent()) {
+			loadStoredPassword();
+		} else {
+			savePassword.setDisable(true);
+		}
 	}
 
 	@FXML
@@ -49,13 +70,13 @@ public class UnlockController implements FxController {
 	public void unlock() {
 		CharSequence password = passwordField.getCharacters();
 		Tasks.create(() -> {
-			vault.get().unlock(password);
-//			if (keychainAccess.isPresent() && savePassword.isSelected()) {
-//				keychainAccess.get().storePassphrase(vault.getId(), password);
-//			}
+			vault.unlock(password);
+			if (keychainAccess.isPresent() && savePassword.isSelected()) {
+				keychainAccess.get().storePassphrase(vault.getId(), password);
+			}
 		}).onSuccess(() -> {
 			passwordField.swipe();
-			LOG.info("Unlock of '{}' succeeded.", vault.get().getDisplayableName());
+			LOG.info("Unlock of '{}' succeeded.", vault.getDisplayableName());
 			window.close();
 		}).onError(InvalidPassphraseException.class, e -> {
 			passwordField.selectAll();
@@ -74,14 +95,51 @@ public class UnlockController implements FxController {
 		}).runOnce(executor);
 	}
 
-	/* Getter/Setter */
+	/* Save Password */
 
-	public ReadOnlyObjectProperty<Vault> vaultProperty() {
-		return vault;
+	@FXML
+	private void didClickSavePasswordCheckbox() {
+		if (!savePassword.isSelected() && hasStoredPassword()) {
+			Alert confirmDialog = DialogBuilderUtil.buildConfirmationDialog( //
+					resourceBundle.getString("unlock.savePassword.delete.confirmation.title"), //
+					resourceBundle.getString("unlock.savePassword.delete.confirmation.header"), //
+					resourceBundle.getString("unlock.savePassword.delete.confirmation.content"), //
+					SystemUtils.IS_OS_MAC_OSX ? ButtonType.CANCEL : ButtonType.OK);
+			Optional<ButtonType> choice = confirmDialog.showAndWait();
+			if (ButtonType.OK.equals(choice.get())) {
+				keychainAccess.get().deletePassphrase(vault.getId());
+			} else if (ButtonType.CANCEL.equals(choice.get())) {
+				savePassword.setSelected(true);
+			}
+		}
 	}
 
+	private void loadStoredPassword() {
+		assert keychainAccess.isPresent();
+		char[] storedPw = keychainAccess.get().loadPassphrase(vault.getId());
+		if (storedPw != null) {
+			savePassword.setSelected(true);
+			passwordField.setPassword(storedPw);
+			passwordField.selectRange(storedPw.length, storedPw.length);
+			Arrays.fill(storedPw, ' ');
+		}
+	}
+
+	private boolean hasStoredPassword() {
+		assert keychainAccess.isPresent();
+		char[] storedPw = keychainAccess.get().loadPassphrase(vault.getId());
+		if (storedPw != null) {
+			Arrays.fill(storedPw, ' ');
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/* Getter/Setter */
+
 	public Vault getVault() {
-		return vault.get();
+		return vault;
 	}
 
 	public ObjectBinding<ContentDisplay> unlockButtonStateProperty() {
@@ -89,7 +147,7 @@ public class UnlockController implements FxController {
 	}
 
 	public ContentDisplay getUnlockButtonState() {
-		switch (vault.get().getState()) {
+		switch (vault.getState()) {
 			case PROCESSING:
 				return ContentDisplay.LEFT;
 			default:
