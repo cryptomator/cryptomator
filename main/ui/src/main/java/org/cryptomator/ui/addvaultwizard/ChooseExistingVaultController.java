@@ -14,6 +14,7 @@ import org.cryptomator.ui.model.VaultFactory;
 import javax.inject.Inject;
 import java.io.File;
 import java.nio.file.Path;
+import java.util.ResourceBundle;
 
 @AddVaultWizardScoped
 public class ChooseExistingVaultController implements FxController {
@@ -23,21 +24,22 @@ public class ChooseExistingVaultController implements FxController {
 	private final ObjectProperty<Path> vaultPath;
 	private final ObservableList<Vault> vaults;
 	private final VaultFactory vaultFactory;
+	private final ResourceBundle resourceBundle;
 
 	@Inject
-	ChooseExistingVaultController(@AddVaultWizard Stage window, @AddVaultWizard FXMLLoaderFactory fxmlLoaders, ObjectProperty<Path> vaultPath, ObservableList<Vault> vaults, VaultFactory vaultFactory) {
+	ChooseExistingVaultController(@AddVaultWizard Stage window, @AddVaultWizard FXMLLoaderFactory fxmlLoaders, ObjectProperty<Path> vaultPath, ObservableList<Vault> vaults, VaultFactory vaultFactory, ResourceBundle resourceBundle) {
 		this.window = window;
 		this.fxmlLoaders = fxmlLoaders;
 		this.vaultPath = vaultPath;
 		this.vaults = vaults;
 		this.vaultFactory = vaultFactory;
+		this.resourceBundle = resourceBundle;
 	}
 
 	@FXML
 	public void chooseFile() {
 		FileChooser fileChooser = new FileChooser();
-		//TODO: Title is part of the localization. => inject resource bundle and get correct title
-		fileChooser.setTitle("TODO Open Masterkey File");
+		fileChooser.setTitle(resourceBundle.getString("addvaultwizard.existing.filePickerTitle"));
 		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Cryptomator Masterkey", "*.cryptomator"));
 		final File file = fileChooser.showOpenDialog(window);
 		if (file != null) {
