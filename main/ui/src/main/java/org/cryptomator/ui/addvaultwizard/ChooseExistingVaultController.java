@@ -25,7 +25,7 @@ public class ChooseExistingVaultController implements FxController {
 	private final VaultFactory vaultFactory;
 
 	@Inject
-	ChooseExistingVaultController(@AddVaultWizard Stage window, @AddVaultWizard FXMLLoaderFactory fxmlLoaders, ObjectProperty<Path> vaultPath, @AddVaultWizard ObservableList<Vault> vaults, VaultFactory vaultFactory) {
+	ChooseExistingVaultController(@AddVaultWizard Stage window, @AddVaultWizard FXMLLoaderFactory fxmlLoaders, ObjectProperty<Path> vaultPath, ObservableList<Vault> vaults, VaultFactory vaultFactory) {
 		this.window = window;
 		this.fxmlLoaders = fxmlLoaders;
 		this.vaultPath = vaultPath;

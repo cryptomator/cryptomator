@@ -5,12 +5,9 @@
  *******************************************************************************/
 package org.cryptomator.ui.addvaultwizard;
 
-import dagger.BindsInstance;
 import dagger.Subcomponent;
-import javafx.collections.ObservableList;
 import javafx.stage.Stage;
 import org.cryptomator.ui.common.FXMLLoaderFactory;
-import org.cryptomator.ui.model.Vault;
 
 @AddVaultWizardScoped
 @Subcomponent(modules = {AddVaultModule.class})
@@ -31,9 +28,6 @@ public interface AddVaultWizardComponent {
 
 	@Subcomponent.Builder
 	interface Builder {
-
-		@BindsInstance
-		Builder vaults(@AddVaultWizard ObservableList<Vault> vaults);
 
 		AddVaultWizardComponent build();
 	}
