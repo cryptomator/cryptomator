@@ -114,6 +114,16 @@
 	-fx-font-size: 0.8em;
 }
 
+.list-cell.drop-above {
+	-fx-border-color: CONTROL_BG_ARMED transparent transparent transparent;
+	-fx-border-width: 3px 0 0 0;
+}
+
+.list-cell.drop-below {
+	-fx-border-color: transparent transparent CONTROL_BG_ARMED transparent;
+	-fx-border-width: 0 0 3px 0;
+}
+
 .onboarding-overlay-arc {
 	-fx-stroke: TEXT_FILL;
 	-fx-fill: transparent;

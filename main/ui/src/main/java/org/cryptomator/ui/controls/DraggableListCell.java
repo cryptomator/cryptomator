@@ -8,11 +8,8 @@
  *******************************************************************************/
 package org.cryptomator.ui.controls;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import javafx.geometry.Insets;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.control.ListCell;
 import javafx.scene.image.Image;
@@ -21,22 +18,17 @@ import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
-import javafx.scene.layout.Border;
-import javafx.scene.layout.BorderImage;
-import javafx.scene.layout.BorderStroke;
-import javafx.scene.layout.BorderStrokeStyle;
-import javafx.scene.layout.BorderWidths;
-import javafx.scene.layout.CornerRadii;
-import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
+import org.fxmisc.easybind.EasyBind;
+
+import java.util.List;
 
 public class DraggableListCell<T> extends ListCell<T> {
-
-	private static final double DROP_LINE_WIDTH = 4.0;
-	private static final Paint DROP_LINE_COLOR = Color.gray(0.0, 0.6);
-
-	private final List<BorderStroke> defaultBorderStrokes;
-	private final List<BorderImage> defaultBorderImages;
+	
+	private static final String DROP_ABOVE_CLASS = "drop-above";
+	private static final String DROP_BELOW_CLASS = "drop-below";
+	
+	private final BooleanProperty dropAbove = new SimpleBooleanProperty();
+	private final BooleanProperty dropBelow = new SimpleBooleanProperty();
 
 	public DraggableListCell() {
 		setOnDragDetected(this::onDragDetected);
@@ -45,19 +37,25 @@ public class DraggableListCell<T> extends ListCell<T> {
 		setOnDragExited(this::onDragExited);
 		setOnDragDropped(this::onDragDropped);
 		setOnDragDone(DragEvent::consume);
-		this.defaultBorderStrokes = this.getBorder() == null ? Collections.emptyList() : this.getBorder().getStrokes();
-		this.defaultBorderImages = this.getBorder() == null ? Collections.emptyList() : this.getBorder().getImages();
-	}
 
-	private Border createDropPositionBorder(double verticalCursorPosition) {
+		EasyBind.includeWhen(getStyleClass(), DROP_ABOVE_CLASS, dropAbove);
+		EasyBind.includeWhen(getStyleClass(), DROP_BELOW_CLASS, dropBelow);
+	}
+	
+	private void setDropPositionStyleClass(double verticalCursorPosition) {
 		boolean isUpperHalf = verticalCursorPosition < this.getHeight() / 2.0;
-		final double topBorder = isUpperHalf ? DROP_LINE_WIDTH : 0.0;
-		final double bottomBorder = !isUpperHalf ? DROP_LINE_WIDTH : 0.0;
-		final BorderWidths borderWidths = new BorderWidths(topBorder, 0.0, bottomBorder, 0.0);
-		final BorderStroke dragStroke = new BorderStroke(DROP_LINE_COLOR, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, borderWidths, Insets.EMPTY);
-		final List<BorderStroke> strokes = new ArrayList<BorderStroke>(defaultBorderStrokes);
-		strokes.add(0, dragStroke);
-		return new Border(strokes, defaultBorderImages);
+		if (isUpperHalf) {
+			this.dropAbove.set(true);
+			this.dropBelow.set(false);
+		} else {
+			this.dropAbove.set(false);
+			this.dropBelow.set(true);
+		}
+	}
+	
+	private void resetDropPositionStyleClasses() {
+		this.dropAbove.set(false);
+		this.dropBelow.set(false);
 	}
 
 	private void onDragDetected(MouseEvent event) {
@@ -82,7 +80,7 @@ public class DraggableListCell<T> extends ListCell<T> {
 
 		if (event.getGestureSource() instanceof DraggableListCell<?> && event.getGestureSource() != this && event.getDragboard().hasString()) {
 			event.acceptTransferModes(TransferMode.MOVE);
-			setBorder(createDropPositionBorder(event.getY()));
+			setDropPositionStyleClass(event.getY());
 		}
 
 		event.consume();
@@ -94,7 +92,7 @@ public class DraggableListCell<T> extends ListCell<T> {
 		}
 
 		if (event.getGestureSource() instanceof DraggableListCell<?> && event.getGestureSource() != this && event.getDragboard().hasString()) {
-			setBorder(createDropPositionBorder(event.getY()));
+			setDropPositionStyleClass(event.getY());
 		}
 	}
 
@@ -104,7 +102,7 @@ public class DraggableListCell<T> extends ListCell<T> {
 		}
 
 		if (event.getGestureSource() instanceof DraggableListCell<?> && event.getGestureSource() != this && event.getDragboard().hasString()) {
-			setBorder(new Border(defaultBorderStrokes, defaultBorderImages));
+			resetDropPositionStyleClasses();
 		}
 	}
 
