@@ -12,6 +12,7 @@ import org.cryptomator.ui.common.FxControllerKey;
 
 import javax.inject.Provider;
 import java.util.Map;
+import java.util.ResourceBundle;
 
 @Module
 abstract class PreferencesModule {
@@ -19,8 +20,8 @@ abstract class PreferencesModule {
 	@Provides
 	@PreferencesWindow
 	@PreferencesScoped
-	static FXMLLoaderFactory provideFxmlLoaderFactory(Map<Class<? extends FxController>, Provider<FxController>> factories) {
-		return new FXMLLoaderFactory(factories);
+	static FXMLLoaderFactory provideFxmlLoaderFactory(Map<Class<? extends FxController>, Provider<FxController>> factories, ResourceBundle resourceBundle) {
+		return new FXMLLoaderFactory(factories, resourceBundle);
 	}
 
 	@Provides

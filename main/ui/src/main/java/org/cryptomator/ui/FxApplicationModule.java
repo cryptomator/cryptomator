@@ -17,6 +17,8 @@ import org.cryptomator.ui.model.Vault;
 import org.cryptomator.ui.model.VaultList;
 import org.cryptomator.ui.preferences.PreferencesComponent;
 
+import java.util.ResourceBundle;
+
 @Module(includes = {UiModule.class}, subcomponents = {MainWindowComponent.class, PreferencesComponent.class})
 abstract class FxApplicationModule {
 
@@ -31,6 +33,12 @@ abstract class FxApplicationModule {
 	@FxApplicationScoped
 	static ObjectProperty<Vault> provideSelectedVault() {
 		return new SimpleObjectProperty<>();
+	}
+	
+	@Provides
+	@FxApplicationScoped
+	static ResourceBundle provideLocalization() {
+		return ResourceBundle.getBundle("i18n.strings");
 	}
 
 }

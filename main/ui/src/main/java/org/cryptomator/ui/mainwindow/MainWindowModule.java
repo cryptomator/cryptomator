@@ -14,6 +14,7 @@ import org.cryptomator.ui.unlock.UnlockComponent;
 
 import javax.inject.Provider;
 import java.util.Map;
+import java.util.ResourceBundle;
 
 @Module(subcomponents = {AddVaultWizardComponent.class, UnlockComponent.class})
 abstract class MainWindowModule {
@@ -21,8 +22,8 @@ abstract class MainWindowModule {
 	@Provides
 	@MainWindow
 	@MainWindowScoped
-	static FXMLLoaderFactory provideFxmlLoaderFactory(Map<Class<? extends FxController>, Provider<FxController>> factories) {
-		return new FXMLLoaderFactory(factories);
+	static FXMLLoaderFactory provideFxmlLoaderFactory(Map<Class<? extends FxController>, Provider<FxController>> factories, ResourceBundle resourceBundle) {
+		return new FXMLLoaderFactory(factories, resourceBundle);
 	}
 
 	@Provides

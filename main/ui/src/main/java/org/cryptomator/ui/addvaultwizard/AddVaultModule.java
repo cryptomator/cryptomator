@@ -19,6 +19,7 @@ import org.cryptomator.ui.model.Vault;
 import javax.inject.Provider;
 import java.nio.file.Path;
 import java.util.Map;
+import java.util.ResourceBundle;
 
 @Module
 public abstract class AddVaultModule {
@@ -26,8 +27,8 @@ public abstract class AddVaultModule {
 	@Provides
 	@AddVaultWizard
 	@AddVaultWizardScoped
-	static FXMLLoaderFactory provideFxmlLoaderFactory(Map<Class<? extends FxController>, Provider<FxController>> factories) {
-		return new FXMLLoaderFactory(factories);
+	static FXMLLoaderFactory provideFxmlLoaderFactory(Map<Class<? extends FxController>, Provider<FxController>> factories, ResourceBundle resourceBundle) {
+		return new FXMLLoaderFactory(factories, resourceBundle);
 	}
 
 	@Provides

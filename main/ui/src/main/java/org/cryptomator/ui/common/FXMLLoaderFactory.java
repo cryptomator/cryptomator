@@ -17,9 +17,9 @@ public class FXMLLoaderFactory {
 	private final Map<Class<? extends FxController>, Provider<FxController>> factories;
 	private final ResourceBundle resourceBundle;
 
-	public FXMLLoaderFactory(Map<Class<? extends FxController>, Provider<FxController>> factories) {
+	public FXMLLoaderFactory(Map<Class<? extends FxController>, Provider<FxController>> factories, ResourceBundle resourceBundle) {
 		this.factories = factories;
-		this.resourceBundle = ResourceBundle.getBundle("i18n.strings");
+		this.resourceBundle = resourceBundle;
 	}
 
 	/**

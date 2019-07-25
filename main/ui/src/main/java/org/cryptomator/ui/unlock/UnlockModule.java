@@ -15,6 +15,7 @@ import org.cryptomator.ui.model.Vault;
 
 import javax.inject.Provider;
 import java.util.Map;
+import java.util.ResourceBundle;
 
 @Module
 abstract class UnlockModule {
@@ -22,8 +23,8 @@ abstract class UnlockModule {
 	@Provides
 	@UnlockWindow
 	@UnlockScoped
-	static FXMLLoaderFactory provideFxmlLoaderFactory(Map<Class<? extends FxController>, Provider<FxController>> factories) {
-		return new FXMLLoaderFactory(factories);
+	static FXMLLoaderFactory provideFxmlLoaderFactory(Map<Class<? extends FxController>, Provider<FxController>> factories, ResourceBundle resourceBundle) {
+		return new FXMLLoaderFactory(factories, resourceBundle);
 	}
 
 	@Provides
