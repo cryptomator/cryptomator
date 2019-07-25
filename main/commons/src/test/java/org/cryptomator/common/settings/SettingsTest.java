@@ -8,22 +8,20 @@ package org.cryptomator.common.settings;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import java.io.IOException;
 import java.util.function.Consumer;
 
 public class SettingsTest {
 
 	@Test
-	public void testAutoSave() throws IOException {
-		@SuppressWarnings("unchecked")
-		Consumer<Settings> changeListener = Mockito.mock(Consumer.class);
+	public void testAutoSave() {
+		@SuppressWarnings("unchecked") Consumer<Settings> changeListener = Mockito.mock(Consumer.class);
 		Settings settings = new Settings();
 		settings.setSaveCmd(changeListener);
 		VaultSettings vaultSettings = VaultSettings.withRandomId();
 		Mockito.verify(changeListener, Mockito.times(0)).accept(settings);
 
 		// first change (to property):
-		settings.preferredGvfsScheme().set(WebDavUrlScheme.DAV);
+		settings.preferredGvfsScheme().set(WebDavUrlScheme.WEBDAV);
 		Mockito.verify(changeListener, Mockito.times(1)).accept(settings);
 
 		// second change (to list):

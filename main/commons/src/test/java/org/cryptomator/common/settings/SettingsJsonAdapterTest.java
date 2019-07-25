@@ -30,7 +30,7 @@ public class SettingsJsonAdapterTest {
 		Assertions.assertEquals(2, settings.getDirectories().size());
 		Assertions.assertEquals(8080, settings.port().get());
 		Assertions.assertEquals(42, settings.numTrayNotifications().get());
-		Assertions.assertEquals("dav", settings.preferredGvfsScheme().get());
+		Assertions.assertEquals(WebDavUrlScheme.DAV, settings.preferredGvfsScheme().get());
 		Assertions.assertEquals(VolumeImpl.FUSE, settings.preferredVolumeImpl().get());
 	}
 
