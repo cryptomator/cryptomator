@@ -101,9 +101,9 @@ public class UnlockController implements FxController {
 	private void didClickSavePasswordCheckbox() {
 		if (!savePassword.isSelected() && hasStoredPassword()) {
 			Alert confirmDialog = DialogBuilderUtil.buildConfirmationDialog( //
-					resourceBundle.getString("unlock.savePassword.delete.confirmation.title"), //
-					resourceBundle.getString("unlock.savePassword.delete.confirmation.header"), //
-					resourceBundle.getString("unlock.savePassword.delete.confirmation.content"), //
+					resourceBundle.getString("unlock.deleteSavedPasswordDialog.title"), //
+					resourceBundle.getString("unlock.deleteSavedPasswordDialog.header"), //
+					resourceBundle.getString("unlock.deleteSavedPasswordDialog.content"), //
 					SystemUtils.IS_OS_MAC_OSX ? ButtonType.CANCEL : ButtonType.OK);
 			Optional<ButtonType> choice = confirmDialog.showAndWait();
 			if (ButtonType.OK.equals(choice.get())) {

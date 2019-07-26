@@ -27,9 +27,9 @@ abstract class PreferencesModule {
 	@Provides
 	@PreferencesWindow
 	@PreferencesScoped
-	static Stage provideStage() {
+	static Stage provideStage(ResourceBundle resourceBundle) {
 		Stage stage = new Stage();
-		stage.setTitle("Preferences");
+		stage.setTitle(resourceBundle.getString("preferences.title"));
 		stage.setMinWidth(400);
 		stage.setMinHeight(300);
 		stage.initModality(Modality.APPLICATION_MODAL);
