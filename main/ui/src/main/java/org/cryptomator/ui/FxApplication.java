@@ -6,6 +6,8 @@ import javafx.beans.value.ObservableValue;
 import javafx.stage.Stage;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.UiTheme;
+import org.cryptomator.jni.MacApplicationUiAppearance;
+import org.cryptomator.jni.MacFunctions;
 import org.cryptomator.ui.mainwindow.MainWindowComponent;
 import org.cryptomator.ui.preferences.PreferencesComponent;
 import org.slf4j.Logger;
@@ -14,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import java.awt.Desktop;
 import java.awt.desktop.PreferencesEvent;
+import java.util.Optional;
 
 @FxApplicationScoped
 public class FxApplication extends Application {
@@ -23,12 +26,14 @@ public class FxApplication extends Application {
 	private final Settings settings;
 	private final MainWindowComponent.Builder mainWindow;
 	private final PreferencesComponent.Builder preferencesWindow;
+	private final Optional<MacFunctions> macFunctions;
 
 	@Inject
-	FxApplication(Settings settings, MainWindowComponent.Builder mainWindow, PreferencesComponent.Builder preferencesWindow) {
+	FxApplication(Settings settings, MainWindowComponent.Builder mainWindow, PreferencesComponent.Builder preferencesWindow, Optional<MacFunctions> macFunctions) {
 		this.settings = settings;
 		this.mainWindow = mainWindow;
 		this.preferencesWindow = preferencesWindow;
+		this.macFunctions = macFunctions;
 	}
 
 	public void start() {
@@ -69,10 +74,12 @@ public class FxApplication extends Application {
 				break;
 			case DARK:
 				Application.setUserAgentStylesheet(getClass().getResource("/css/dark_theme.css").toString());
+				macFunctions.map(MacFunctions::uiAppearance).ifPresent(MacApplicationUiAppearance::setToDarkAqua);
 				break;
 			case LIGHT:
 			default:
 				Application.setUserAgentStylesheet(getClass().getResource("/css/light_theme.css").toString());
+				macFunctions.map(MacFunctions::uiAppearance).ifPresent(MacApplicationUiAppearance::setToAqua);
 				break;
 		}
 	}
