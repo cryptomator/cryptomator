@@ -8,6 +8,8 @@ package org.cryptomator.ui.mainwindow;
 import dagger.Subcomponent;
 import javafx.stage.Stage;
 import org.cryptomator.ui.common.FXMLLoaderFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @MainWindowScoped
 @Subcomponent(modules = {MainWindowModule.class})

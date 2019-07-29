@@ -5,11 +5,10 @@
  *******************************************************************************/
 package org.cryptomator.launcher;
 
-import javafx.application.Platform;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.logging.DebugMode;
 import org.cryptomator.logging.LoggerConfiguration;
-import org.cryptomator.ui.FxApplication;
+import org.cryptomator.ui.traymenu.TrayMenuComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,15 +33,17 @@ public class Cryptomator {
 	private final Optional<String> applicationVersion;
 	private final CountDownLatch shutdownLatch;
 	private final CleanShutdownPerformer shutdownPerformer;
+	private final TrayMenuComponent.Builder trayComponent;
 
 	@Inject
-	Cryptomator(LoggerConfiguration logConfig, DebugMode debugMode, IpcFactory ipcFactory, @Named("applicationVersion") Optional<String> applicationVersion, @Named("shutdownLatch") CountDownLatch shutdownLatch, CleanShutdownPerformer shutdownPerformer) {
+	Cryptomator(LoggerConfiguration logConfig, DebugMode debugMode, IpcFactory ipcFactory, @Named("applicationVersion") Optional<String> applicationVersion, @Named("shutdownLatch") CountDownLatch shutdownLatch, CleanShutdownPerformer shutdownPerformer, TrayMenuComponent.Builder trayComponent) {
 		this.logConfig = logConfig;
 		this.debugMode = debugMode;
 		this.ipcFactory = ipcFactory;
 		this.applicationVersion = applicationVersion;
 		this.shutdownLatch = shutdownLatch;
 		this.shutdownPerformer = shutdownPerformer;
+		this.trayComponent = trayComponent;
 	}
 
 	public static void main(String[] args) {
@@ -89,7 +90,7 @@ public class Cryptomator {
 	private int runGuiApplication() {
 		try {
 			shutdownPerformer.registerShutdownHook();
-			CRYPTOMATOR_COMPONENT.fxApplicationComponent().start();
+			trayComponent.build().addIconToSystemTray();
 			shutdownLatch.await();
 			LOG.info("UI shut down");
 			return 0;

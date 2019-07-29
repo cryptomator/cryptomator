@@ -6,7 +6,7 @@
 package org.cryptomator.ui.controllers;
 
 import javafx.fxml.FXMLLoader;
-import org.cryptomator.ui.FxApplicationScoped;
+import org.cryptomator.ui.fxapp.FxApplicationScoped;
 import org.cryptomator.ui.l10n.Localization;
 
 import javax.inject.Inject;

@@ -23,7 +23,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.layout.VBox;
 import org.apache.commons.lang3.SystemUtils;
-import org.cryptomator.ui.FxApplicationScoped;
+import org.cryptomator.ui.fxapp.FxApplicationScoped;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.ui.l10n.Localization;
 import org.cryptomator.ui.common.Tasks;

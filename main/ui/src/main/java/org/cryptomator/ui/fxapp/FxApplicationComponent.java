@@ -3,22 +3,20 @@
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the accompanying LICENSE file.
  *******************************************************************************/
-package org.cryptomator.ui;
+package org.cryptomator.ui.fxapp;
 
 import dagger.Subcomponent;
-import javafx.application.Platform;
 
 @FxApplicationScoped
 @Subcomponent(modules = FxApplicationModule.class)
 public interface FxApplicationComponent {
 
 	FxApplication application();
-	
-	default void start() {
-		Platform.startup(() -> {
-			assert Platform.isFxApplicationThread();
-			application().start();
-		});
+
+	@Subcomponent.Builder
+	interface Builder {
+
+		FxApplicationComponent build();
 	}
 
 }

@@ -24,7 +24,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.VBox;
 import javafx.util.StringConverter;
 import org.apache.commons.lang3.SystemUtils;
-import org.cryptomator.ui.FxApplicationScoped;
+import org.cryptomator.ui.fxapp.FxApplicationScoped;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VolumeImpl;
 import org.cryptomator.ui.l10n.Localization;

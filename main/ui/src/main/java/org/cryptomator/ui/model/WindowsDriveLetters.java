@@ -6,11 +6,12 @@
 package org.cryptomator.ui.model;
 
 import org.apache.commons.lang3.SystemUtils;
-import org.cryptomator.ui.FxApplicationScoped;
+import org.cryptomator.ui.fxapp.FxApplicationScoped;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.util.Set;
@@ -19,7 +20,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
 
-@FxApplicationScoped
+@Singleton
 public final class WindowsDriveLetters {
 
 	private static final Logger LOG = LoggerFactory.getLogger(WindowsDriveLetters.class);

@@ -4,8 +4,10 @@ import dagger.Module;
 import dagger.Provides;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.SettingsProvider;
-import org.cryptomator.ui.FxApplicationScoped;
+import org.cryptomator.ui.UiModule;
 import org.cryptomator.ui.model.AppLaunchEvent;
+import org.cryptomator.ui.model.VaultComponent;
+import org.cryptomator.ui.traymenu.TrayMenuComponent;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -15,7 +17,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.function.Consumer;
 
-@Module
+@Module(includes = {UiModule.class}, subcomponents = {VaultComponent.class, TrayMenuComponent.class})
 class CryptomatorModule {
 
 	@Provides

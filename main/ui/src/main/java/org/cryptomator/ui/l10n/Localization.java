@@ -7,7 +7,7 @@ package org.cryptomator.ui.l10n;
 
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
-import org.cryptomator.ui.FxApplicationScoped;
+import org.cryptomator.ui.fxapp.FxApplicationScoped;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

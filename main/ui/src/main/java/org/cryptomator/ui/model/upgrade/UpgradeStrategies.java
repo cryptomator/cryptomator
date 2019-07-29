@@ -5,7 +5,7 @@
  *******************************************************************************/
 package org.cryptomator.ui.model.upgrade;
 
-import org.cryptomator.ui.FxApplicationScoped;
+import org.cryptomator.ui.fxapp.FxApplicationScoped;
 import org.cryptomator.ui.model.Vault;
 
 import javax.inject.Inject;

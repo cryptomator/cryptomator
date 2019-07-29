@@ -16,6 +16,7 @@ import org.cryptomator.common.settings.Settings;
 import org.cryptomator.jni.JniException;
 import org.cryptomator.jni.MacApplicationUiState;
 import org.cryptomator.jni.MacFunctions;
+import org.cryptomator.ui.fxapp.FxApplicationScoped;
 import org.cryptomator.ui.l10n.Localization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

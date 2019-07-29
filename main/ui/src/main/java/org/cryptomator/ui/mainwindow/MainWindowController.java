@@ -4,7 +4,7 @@ import javafx.fxml.FXML;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.stage.Stage;
-import org.cryptomator.ui.FxApplication;
+import org.cryptomator.ui.fxapp.FxApplication;
 import org.cryptomator.ui.common.FxController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +18,6 @@ public class MainWindowController implements FxController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(MainWindowController.class);
 
-	private final CountDownLatch shutdownLatch;
 	private final Stage window;
 	private final FxApplication application;
 	public HBox titleBar;
@@ -27,8 +26,7 @@ public class MainWindowController implements FxController {
 	private double yOffset;
 
 	@Inject
-	public MainWindowController(@Named("shutdownLatch") CountDownLatch shutdownLatch, @MainWindow Stage window, FxApplication application) {
-		this.shutdownLatch = shutdownLatch;
+	public MainWindowController(@MainWindow Stage window, FxApplication application) {
 		this.window = window;
 		this.application = application;
 	}
@@ -54,8 +52,6 @@ public class MainWindowController implements FxController {
 	@FXML
 	public void close() {
 		window.close();
-		LOG.info("closed...");
-		shutdownLatch.countDown();
 	}
 
 	@FXML

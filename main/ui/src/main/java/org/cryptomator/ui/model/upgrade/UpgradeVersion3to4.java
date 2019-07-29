@@ -7,7 +7,7 @@ package org.cryptomator.ui.model.upgrade;
 
 import com.google.common.io.BaseEncoding;
 import org.apache.commons.lang3.StringUtils;
-import org.cryptomator.ui.FxApplicationScoped;
+import org.cryptomator.ui.fxapp.FxApplicationScoped;
 import org.cryptomator.cryptolib.Cryptors;
 import org.cryptomator.cryptolib.api.Cryptor;
 import org.cryptomator.cryptolib.common.MessageDigestSupplier;

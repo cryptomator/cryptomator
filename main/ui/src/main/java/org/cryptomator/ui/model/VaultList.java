@@ -9,15 +9,15 @@ import com.google.common.collect.Lists;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.TransformationList;
-import org.cryptomator.ui.FxApplicationScoped;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VaultSettings;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.List;
 import java.util.stream.IntStream;
 
-@FxApplicationScoped
+@Singleton
 public class VaultList extends TransformationList<Vault, VaultSettings> {
 
 	private final VaultFactory vaultFactory;

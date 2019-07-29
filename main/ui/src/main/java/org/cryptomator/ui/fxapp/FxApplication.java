@@ -1,4 +1,4 @@
-package org.cryptomator.ui;
+package org.cryptomator.ui.fxapp;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -38,6 +38,7 @@ public class FxApplication extends Application {
 
 	public void start() {
 		LOG.trace("FxApplication.start()");
+		Platform.setImplicitExit(false);
 
 		settings.theme().addListener(this::themeChanged);
 		loadSelectedStyleSheet(settings.theme().get());
@@ -45,8 +46,6 @@ public class FxApplication extends Application {
 		if (Desktop.getDesktop().isSupported(Desktop.Action.APP_PREFERENCES)) {
 			Desktop.getDesktop().setPreferencesHandler(this::handlePreferences);
 		}
-
-		mainWindow.build().showMainWindow();
 	}
 
 	@Override
@@ -55,11 +54,19 @@ public class FxApplication extends Application {
 	}
 
 	private void handlePreferences(PreferencesEvent preferencesEvent) {
-		Platform.runLater(this::showPreferencesWindow);
+		showPreferencesWindow();
 	}
 
 	public void showPreferencesWindow() {
-		preferencesWindow.build().showPreferencesWindow();
+		Platform.runLater(() -> {
+			preferencesWindow.build().showPreferencesWindow();
+		});
+	}
+
+	public void showMainWindow() {
+		Platform.runLater(() -> {
+			mainWindow.build().showMainWindow();
+		});
 	}
 
 	private void themeChanged(@SuppressWarnings("unused") ObservableValue<? extends UiTheme> observable, @SuppressWarnings("unused") UiTheme oldValue, UiTheme newValue) {
