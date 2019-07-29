@@ -20,15 +20,17 @@ public class MainWindowController implements FxController {
 
 	private final Stage window;
 	private final FxApplication application;
+	private final boolean minimizeToSysTray;
 	public HBox titleBar;
 	public Region resizer;
 	private double xOffset;
 	private double yOffset;
 
 	@Inject
-	public MainWindowController(@MainWindow Stage window, FxApplication application) {
+	public MainWindowController(@MainWindow Stage window, FxApplication application, @Named("trayMenuSupported") boolean minimizeToSysTray) {
 		this.window = window;
 		this.application = application;
+		this.minimizeToSysTray = minimizeToSysTray;
 	}
 
 	@FXML
@@ -51,7 +53,11 @@ public class MainWindowController implements FxController {
 
 	@FXML
 	public void close() {
-		window.close();
+		if (minimizeToSysTray) {
+			window.close();
+		} else {
+			window.setIconified(true);
+		}
 	}
 
 	@FXML

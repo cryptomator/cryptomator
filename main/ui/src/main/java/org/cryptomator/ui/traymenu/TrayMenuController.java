@@ -57,11 +57,11 @@ class TrayMenuController {
 	}
 
 	private void showMainWindow(ActionEvent actionEvent) {
-		fxApplicationStarter.get().showMainWindow();
+		fxApplicationStarter.get(true).showMainWindow();
 	}
 
 	private void showPreferencesWindow(EventObject actionEvent) {
-		fxApplicationStarter.get().showPreferencesWindow();
+		fxApplicationStarter.get(true).showPreferencesWindow();
 	}
 
 	private void quitApplication(ActionEvent actionEvent) {

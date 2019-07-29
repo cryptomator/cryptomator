@@ -24,9 +24,9 @@ public class FxApplicationStarter {
 		this.future = new CompletableFuture<>();
 	}
 
-	public synchronized FxApplication get() {
+	public synchronized FxApplication get(boolean fromTrayMenu) {
 		if (!future.isDone()) {
-			start();
+			start(fromTrayMenu);
 		}
 		try {
 			return future.get();
@@ -38,12 +38,12 @@ public class FxApplicationStarter {
 		}
 	}
 
-	private void start() {
+	private void start(boolean fromTrayMenu) {
 		LOG.debug("Starting JavaFX runtime...");
 		Platform.startup(() -> {
 			assert Platform.isFxApplicationThread();
 			LOG.debug("JavaFX Runtime started.");
-			FxApplication app = fxAppComponent.build().application();
+			FxApplication app = fxAppComponent.trayMenuSupported(fromTrayMenu).build().application();
 			app.start();
 			future.complete(app);
 		});

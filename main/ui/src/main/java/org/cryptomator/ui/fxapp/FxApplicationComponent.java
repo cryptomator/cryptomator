@@ -5,7 +5,10 @@
  *******************************************************************************/
 package org.cryptomator.ui.fxapp;
 
+import dagger.BindsInstance;
 import dagger.Subcomponent;
+
+import javax.inject.Named;
 
 @FxApplicationScoped
 @Subcomponent(modules = FxApplicationModule.class)
@@ -15,6 +18,9 @@ public interface FxApplicationComponent {
 
 	@Subcomponent.Builder
 	interface Builder {
+		
+		@BindsInstance
+		Builder trayMenuSupported(@Named("trayMenuSupported") boolean trayMenuSupported);
 
 		FxApplicationComponent build();
 	}

@@ -15,11 +15,14 @@ public interface TrayMenuComponent {
 
 	TrayIconController trayIconController();
 
+	FxApplicationStarter fxAppStarter();
+
 	default void addIconToSystemTray() {
 		if (SystemTray.isSupported()) {
 			trayIconController().initializeTrayIcon();
 		} else {
-			// TODO what?
+			// show main window directly without any tray support:
+			fxAppStarter().get(false).showMainWindow();
 		}
 	}
 
