@@ -6,9 +6,13 @@
 package org.cryptomator.ui.unlock;
 
 import dagger.BindsInstance;
+import dagger.Lazy;
 import dagger.Subcomponent;
+import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.cryptomator.ui.common.FXMLLoaderFactory;
+import org.cryptomator.ui.common.FxmlFile;
+import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.model.Vault;
 
 @UnlockScoped
@@ -18,12 +22,12 @@ public interface UnlockComponent {
 	@UnlockWindow
 	Stage window();
 
-	@UnlockWindow
-	FXMLLoaderFactory fxmlLoaders();
+	@FxmlScene(FxmlFile.UNLOCK)
+	Lazy<Scene> scene();
 
 	default void showUnlockWindow() {
 		Stage stage = window();
-		fxmlLoaders().setScene("/fxml/unlock2.fxml", stage); // TODO rename fxml file
+		stage.setScene(scene().get());
 		stage.show();
 	}
 

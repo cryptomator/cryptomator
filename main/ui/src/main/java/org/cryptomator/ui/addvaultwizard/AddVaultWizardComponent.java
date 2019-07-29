@@ -5,9 +5,15 @@
  *******************************************************************************/
 package org.cryptomator.ui.addvaultwizard;
 
+import dagger.Lazy;
 import dagger.Subcomponent;
+import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.cryptomator.ui.common.FXMLLoaderFactory;
+import org.cryptomator.ui.common.FxmlFile;
+import org.cryptomator.ui.common.FxmlScene;
+
+import javax.inject.Named;
 
 @AddVaultWizardScoped
 @Subcomponent(modules = {AddVaultModule.class})
@@ -16,12 +22,12 @@ public interface AddVaultWizardComponent {
 	@AddVaultWizard
 	Stage window();
 
-	@AddVaultWizard
-	FXMLLoaderFactory fxmlLoaders();
+	@FxmlScene(FxmlFile.ADDVAULT_WELCOME)
+	Lazy<Scene> scene();
 
 	default void showAddVaultWizard() {
 		Stage stage = window();
-		fxmlLoaders().setScene("/fxml/addvault_welcome.fxml", stage);
+		stage.setScene(scene().get());
 		stage.sizeToScene();
 		stage.show();
 	}

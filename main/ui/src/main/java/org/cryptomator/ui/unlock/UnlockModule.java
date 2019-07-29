@@ -4,11 +4,14 @@ import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoMap;
+import javafx.scene.Scene;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.cryptomator.ui.common.FXMLLoaderFactory;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxControllerKey;
+import org.cryptomator.ui.common.FxmlFile;
+import org.cryptomator.ui.common.FxmlScene;
 
 import javax.inject.Provider;
 import java.util.Map;
@@ -33,6 +36,13 @@ abstract class UnlockModule {
 		stage.setMinHeight(200);
 		stage.initModality(Modality.APPLICATION_MODAL);
 		return stage;
+	}
+
+	@Provides
+	@FxmlScene(FxmlFile.UNLOCK)
+	@UnlockScoped
+	static Scene provideUnlockScene(@UnlockWindow FXMLLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene("/fxml/unlock2.fxml"); // TODO rename fxml file
 	}
 	
 	// ------------------

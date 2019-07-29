@@ -6,6 +6,7 @@
 package org.cryptomator.ui.fxapp;
 
 import dagger.Binds;
+import dagger.Lazy;
 import dagger.Module;
 import dagger.Provides;
 import javafx.application.Application;
@@ -27,6 +28,7 @@ abstract class FxApplicationModule {
 	@FxApplicationScoped
 	abstract Application provideApplication(FxApplication application);
 
+	// TODO move to commons...
 	@Binds
 	abstract ObservableList<Vault> bindVaultList(VaultList vaultList);
 
@@ -40,6 +42,16 @@ abstract class FxApplicationModule {
 	@FxApplicationScoped
 	static ResourceBundle provideLocalization() {
 		return ResourceBundle.getBundle("i18n.strings");
+	}
+	
+	@Provides
+	static MainWindowComponent provideMainWindowComponent(MainWindowComponent.Builder builder) {
+		return builder.build();
+	}
+
+	@Provides
+	static PreferencesComponent providePreferencesComponent(PreferencesComponent.Builder builder) {
+		return builder.build();
 	}
 
 }

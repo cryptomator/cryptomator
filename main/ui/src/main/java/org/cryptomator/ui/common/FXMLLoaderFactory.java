@@ -47,20 +47,19 @@ public class FXMLLoaderFactory {
 	}
 
 	/**
-	 * {@link #load(String) Loads} the FXML file and sets the given stage's scene to a new Scene containing the loaded ui.
+	 * {@link #load(String) Loads} the FXML file and creates a new Scene containing the loaded ui.
 	 * @param fxmlResourceName Name of the resource (as in {@link Class#getResource(String)}).
-	 * @param stage The stage which should get a new scene
 	 * @throws UncheckedIOException wrapping any IOException thrown by {@link #load(String)).
 	 */
-	public void setScene(String fxmlResourceName, Stage stage) throws UncheckedIOException {
+	public Scene createScene(String fxmlResourceName) {
 		final FXMLLoader loader;
 		try {
 			loader = load(fxmlResourceName);
 		} catch (IOException e) {
 			throw new UncheckedIOException("Failed to load " + fxmlResourceName, e);
-		}		Parent root = loader.getRoot();
-		Scene scene = new Scene(root);
-		stage.setScene(scene);
+		}
+		Parent root = loader.getRoot();
+		return new Scene(root);
 	}
 
 	private FxController constructController(Class<?> aClass) {

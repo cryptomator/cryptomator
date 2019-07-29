@@ -5,9 +5,13 @@
  *******************************************************************************/
 package org.cryptomator.ui.preferences;
 
+import dagger.Lazy;
 import dagger.Subcomponent;
+import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.cryptomator.ui.common.FXMLLoaderFactory;
+import org.cryptomator.ui.common.FxmlFile;
+import org.cryptomator.ui.common.FxmlScene;
 
 @PreferencesScoped
 @Subcomponent(modules = {PreferencesModule.class})
@@ -16,12 +20,12 @@ public interface PreferencesComponent {
 	@PreferencesWindow
 	Stage window();
 
-	@PreferencesWindow
-	FXMLLoaderFactory fxmlLoaders();
+	@FxmlScene(FxmlFile.PREFERENCES)
+	Lazy<Scene> scene();
 
 	default void showPreferencesWindow() {
 		Stage stage = window();
-		fxmlLoaders().setScene("/fxml/preferences.fxml", stage);
+		stage.setScene(scene().get());
 		stage.show();
 	}
 

@@ -1,19 +1,16 @@
 package org.cryptomator.ui.traymenu;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import javax.inject.Inject;
 import javax.inject.Named;
+import java.awt.Desktop;
 import java.awt.MenuItem;
 import java.awt.PopupMenu;
 import java.awt.event.ActionEvent;
+import java.util.EventObject;
 import java.util.concurrent.CountDownLatch;
 
 @TrayMenuScoped
-public class TrayMenuController {
-	
-	private static final Logger LOG = LoggerFactory.getLogger(TrayMenuController.class);
+class TrayMenuController {
 
 	private final FxApplicationStarter fxApplicationStarter;
 	private final CountDownLatch shutdownLatch;
@@ -25,7 +22,7 @@ public class TrayMenuController {
 		this.shutdownLatch = shutdownLatch;
 		this.menu = new PopupMenu();
 	}
-	
+
 	public PopupMenu getMenu() {
 		return menu;
 	}
@@ -33,25 +30,38 @@ public class TrayMenuController {
 	public void initTrayMenu() {
 		// TODO add listeners
 		rebuildMenu();
+		
+		// register preferences shortcut
+		if (Desktop.getDesktop().isSupported(Desktop.Action.APP_PREFERENCES)) {
+			Desktop.getDesktop().setPreferencesHandler(this::showPreferencesWindow);
+		}
 	}
-	
+
 	private void rebuildMenu() {
 		MenuItem showMainWindowItem = new MenuItem("TODO show");
 		showMainWindowItem.addActionListener(this::showMainWindow);
 		menu.add(showMainWindowItem);
-		
+
+		MenuItem showPreferencesItem = new MenuItem("TODO preferences");
+		showPreferencesItem.addActionListener(this::showPreferencesWindow);
+		menu.add(showPreferencesItem);
+
 		menu.addSeparator();
 		// foreach vault: add submenu
 		menu.addSeparator();
-		
+
 		MenuItem quitApplicationItem = new MenuItem("TODO quit");
 		quitApplicationItem.addActionListener(this::quitApplication);
 		menu.add(quitApplicationItem);
-		
+
 	}
 
 	private void showMainWindow(ActionEvent actionEvent) {
 		fxApplicationStarter.get().showMainWindow();
+	}
+
+	private void showPreferencesWindow(EventObject actionEvent) {
+		fxApplicationStarter.get().showPreferencesWindow();
 	}
 
 	private void quitApplication(ActionEvent actionEvent) {

@@ -5,30 +5,32 @@
  *******************************************************************************/
 package org.cryptomator.ui.mainwindow;
 
+import dagger.Lazy;
 import dagger.Subcomponent;
+import javafx.scene.Scene;
 import javafx.stage.Stage;
-import org.cryptomator.ui.common.FXMLLoaderFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.cryptomator.ui.common.FxmlFile;
+import org.cryptomator.ui.common.FxmlScene;
 
 @MainWindowScoped
 @Subcomponent(modules = {MainWindowModule.class})
 public interface MainWindowComponent {
-	
+
 	@MainWindow
 	Stage window();
 
-	@MainWindow
-	FXMLLoaderFactory fxmlLoaders();
-	
+	@FxmlScene(FxmlFile.MAIN_WINDOW)
+	Lazy<Scene> scene();
+
 	default void showMainWindow() {
 		Stage stage = window();
-		fxmlLoaders().setScene("/fxml/main_window.fxml", stage);
+		stage.setScene(scene().get());
 		stage.show();
 	}
 
 	@Subcomponent.Builder
 	interface Builder {
+
 		MainWindowComponent build();
 	}
 

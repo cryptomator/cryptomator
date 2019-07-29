@@ -1,24 +1,28 @@
 package org.cryptomator.ui.addvaultwizard;
 
+import dagger.Lazy;
+import javafx.scene.Scene;
 import javafx.stage.Stage;
-import org.cryptomator.ui.common.FXMLLoaderFactory;
 import org.cryptomator.ui.common.FxController;
+import org.cryptomator.ui.common.FxmlFile;
+import org.cryptomator.ui.common.FxmlScene;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 @AddVaultWizardScoped
 public class AddVaultWelcomeController implements FxController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(AddVaultWelcomeController.class);
 	private final Stage window;
-	private final FXMLLoaderFactory fxmlLoaders;
+	private final Lazy<Scene> chooseExistingVaultScene;
 
 	@Inject
-	AddVaultWelcomeController(@AddVaultWizard Stage window, @AddVaultWizard FXMLLoaderFactory fxmlLoaders) {
+	AddVaultWelcomeController(@AddVaultWizard Stage window, @FxmlScene(FxmlFile.ADDVAULT_EXISTING) Lazy<Scene> chooseExistingVaultScene) {
 		this.window = window;
-		this.fxmlLoaders = fxmlLoaders;
+		this.chooseExistingVaultScene = chooseExistingVaultScene;
 	}
 
 	public void createNewVault() {
@@ -28,6 +32,6 @@ public class AddVaultWelcomeController implements FxController {
 
 	public void chooseExistingVault() {
 		LOG.debug("AddVaultWelcomeController.chooseExistingVault()");
-		fxmlLoaders.setScene("/fxml/addvault_existing.fxml", window);
+		window.setScene(chooseExistingVaultScene.get());
 	}
 }

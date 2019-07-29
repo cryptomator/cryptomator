@@ -1,5 +1,6 @@
 package org.cryptomator.ui.fxapp;
 
+import dagger.Lazy;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.value.ObservableValue;
@@ -24,12 +25,12 @@ public class FxApplication extends Application {
 	private static final Logger LOG = LoggerFactory.getLogger(FxApplication.class);
 
 	private final Settings settings;
-	private final MainWindowComponent.Builder mainWindow;
-	private final PreferencesComponent.Builder preferencesWindow;
+	private final Lazy<MainWindowComponent> mainWindow;
+	private final Lazy<PreferencesComponent> preferencesWindow;
 	private final Optional<MacFunctions> macFunctions;
 
 	@Inject
-	FxApplication(Settings settings, MainWindowComponent.Builder mainWindow, PreferencesComponent.Builder preferencesWindow, Optional<MacFunctions> macFunctions) {
+	FxApplication(Settings settings, Lazy<MainWindowComponent> mainWindow, Lazy<PreferencesComponent> preferencesWindow, Optional<MacFunctions> macFunctions) {
 		this.settings = settings;
 		this.mainWindow = mainWindow;
 		this.preferencesWindow = preferencesWindow;
@@ -42,10 +43,6 @@ public class FxApplication extends Application {
 
 		settings.theme().addListener(this::themeChanged);
 		loadSelectedStyleSheet(settings.theme().get());
-
-		if (Desktop.getDesktop().isSupported(Desktop.Action.APP_PREFERENCES)) {
-			Desktop.getDesktop().setPreferencesHandler(this::handlePreferences);
-		}
 	}
 
 	@Override
@@ -53,19 +50,17 @@ public class FxApplication extends Application {
 		throw new UnsupportedOperationException("Use start() instead.");
 	}
 
-	private void handlePreferences(PreferencesEvent preferencesEvent) {
-		showPreferencesWindow();
-	}
-
 	public void showPreferencesWindow() {
 		Platform.runLater(() -> {
-			preferencesWindow.build().showPreferencesWindow();
+			preferencesWindow.get().showPreferencesWindow();
+			LOG.debug("Showing Preferences");
 		});
 	}
 
 	public void showMainWindow() {
 		Platform.runLater(() -> {
-			mainWindow.build().showMainWindow();
+			mainWindow.get().showMainWindow();
+			LOG.debug("Showing MainWindow");
 		});
 	}
 

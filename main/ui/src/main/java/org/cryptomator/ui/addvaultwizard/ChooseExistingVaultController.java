@@ -1,17 +1,22 @@
 package org.cryptomator.ui.addvaultwizard;
 
+import dagger.Lazy;
 import javafx.beans.property.ObjectProperty;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.Scene;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.ui.common.FXMLLoaderFactory;
 import org.cryptomator.ui.common.FxController;
+import org.cryptomator.ui.common.FxmlFile;
+import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.model.Vault;
 import org.cryptomator.ui.model.VaultFactory;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.ResourceBundle;
@@ -20,16 +25,16 @@ import java.util.ResourceBundle;
 public class ChooseExistingVaultController implements FxController {
 
 	private final Stage window;
-	private final FXMLLoaderFactory fxmlLoaders;
+	private final Lazy<Scene> welcomeScene;
 	private final ObjectProperty<Path> vaultPath;
 	private final ObservableList<Vault> vaults;
 	private final VaultFactory vaultFactory;
 	private final ResourceBundle resourceBundle;
 
 	@Inject
-	ChooseExistingVaultController(@AddVaultWizard Stage window, @AddVaultWizard FXMLLoaderFactory fxmlLoaders, ObjectProperty<Path> vaultPath, ObservableList<Vault> vaults, VaultFactory vaultFactory, ResourceBundle resourceBundle) {
+	ChooseExistingVaultController(@AddVaultWizard Stage window, @FxmlScene(FxmlFile.ADDVAULT_WELCOME) Lazy<Scene> welcomeScene, ObjectProperty<Path> vaultPath, ObservableList<Vault> vaults, VaultFactory vaultFactory, ResourceBundle resourceBundle) {
 		this.window = window;
-		this.fxmlLoaders = fxmlLoaders;
+		this.welcomeScene = welcomeScene;
 		this.vaultPath = vaultPath;
 		this.vaults = vaults;
 		this.vaultFactory = vaultFactory;
@@ -49,7 +54,7 @@ public class ChooseExistingVaultController implements FxController {
 
 	@FXML
 	public void back() {
-		fxmlLoaders.setScene("/fxml/addvault_welcome.fxml", window);
+		window.setScene(welcomeScene.get());
 	}
 
 	@FXML

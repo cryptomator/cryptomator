@@ -4,12 +4,15 @@ import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoMap;
+import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import org.cryptomator.ui.addvaultwizard.AddVaultWizardComponent;
 import org.cryptomator.ui.common.FXMLLoaderFactory;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxControllerKey;
+import org.cryptomator.ui.common.FxmlFile;
+import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.unlock.UnlockComponent;
 
 import javax.inject.Provider;
@@ -38,6 +41,13 @@ abstract class MainWindowModule {
 		stage.setMaxHeight(700);
 		stage.initStyle(StageStyle.UNDECORATED);
 		return stage;
+	}
+
+	@Provides
+	@FxmlScene(FxmlFile.MAIN_WINDOW)
+	@MainWindowScoped
+	static Scene provideMainScene(@MainWindow FXMLLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene("/fxml/main_window.fxml");
 	}
 
 	// ------------------

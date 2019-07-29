@@ -6,12 +6,15 @@ import dagger.Provides;
 import dagger.multibindings.IntoMap;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.scene.Scene;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import org.cryptomator.ui.common.FXMLLoaderFactory;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxControllerKey;
+import org.cryptomator.ui.common.FxmlFile;
+import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.mainwindow.MainWindow;
 
 import javax.inject.Provider;
@@ -46,6 +49,20 @@ public abstract class AddVaultModule {
 	@AddVaultWizardScoped
 	static ObjectProperty<Path> provideVaultPath() {
 		return new SimpleObjectProperty<>();
+	}
+
+	@Provides
+	@FxmlScene(FxmlFile.ADDVAULT_WELCOME)
+	@AddVaultWizardScoped
+	static Scene provideWelcomeScene(@AddVaultWizard FXMLLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene("/fxml/addvault_welcome.fxml");
+	}
+
+	@Provides
+	@FxmlScene(FxmlFile.ADDVAULT_EXISTING)
+	@AddVaultWizardScoped
+	static Scene provideChooseExistingVaultScene(@AddVaultWizard FXMLLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene("/fxml/addvault_existing.fxml");
 	}
 
 	// ------------------
