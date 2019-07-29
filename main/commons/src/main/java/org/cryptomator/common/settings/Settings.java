@@ -26,6 +26,7 @@ public class Settings {
 	public static final int MAX_PORT = 65535;
 	public static final boolean DEFAULT_ASKED_FOR_UPDATE_CHECK = false;
 	public static final boolean DEFAULT_CHECK_FOR_UDPATES = false;
+	public static final boolean DEFAULT_START_HIDDEN = false;
 	public static final int DEFAULT_PORT = 42427;
 	public static final int DEFAULT_NUM_TRAY_NOTIFICATIONS = 3;
 	public static final WebDavUrlScheme DEFAULT_GVFS_SCHEME = WebDavUrlScheme.DAV;
@@ -36,6 +37,7 @@ public class Settings {
 	private final ObservableList<VaultSettings> directories = FXCollections.observableArrayList(VaultSettings::observables);
 	private final BooleanProperty askedForUpdateCheck = new SimpleBooleanProperty(DEFAULT_ASKED_FOR_UPDATE_CHECK);
 	private final BooleanProperty checkForUpdates = new SimpleBooleanProperty(DEFAULT_CHECK_FOR_UDPATES);
+	private final BooleanProperty startHidden = new SimpleBooleanProperty(DEFAULT_START_HIDDEN);
 	private final IntegerProperty port = new SimpleIntegerProperty(DEFAULT_PORT);
 	private final IntegerProperty numTrayNotifications = new SimpleIntegerProperty(DEFAULT_NUM_TRAY_NOTIFICATIONS);
 	private final ObjectProperty<WebDavUrlScheme> preferredGvfsScheme = new SimpleObjectProperty<>(DEFAULT_GVFS_SCHEME);
@@ -52,6 +54,7 @@ public class Settings {
 		directories.addListener(this::somethingChanged);
 		askedForUpdateCheck.addListener(this::somethingChanged);
 		checkForUpdates.addListener(this::somethingChanged);
+		startHidden.addListener(this::somethingChanged);
 		port.addListener(this::somethingChanged);
 		numTrayNotifications.addListener(this::somethingChanged);
 		preferredGvfsScheme.addListener(this::somethingChanged);
@@ -86,6 +89,10 @@ public class Settings {
 
 	public BooleanProperty checkForUpdates() {
 		return checkForUpdates;
+	}
+	
+	public BooleanProperty startHidden() {
+		return startHidden;
 	}
 
 	public IntegerProperty port() {

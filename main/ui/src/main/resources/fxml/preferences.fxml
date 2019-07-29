@@ -22,6 +22,8 @@
 			<ChoiceBox fx:id="themeChoiceBox"/>
 		</HBox>
 
+		<CheckBox fx:id="startHiddenCheckbox" text="%preferences.startHidden"/>
+
 		<CheckBox fx:id="checkForUpdatesCheckbox" text="%preferences.autoUpdateCheck"/>
 
 		<CheckBox fx:id="debugModeCheckbox" text="%preferences.debugLogging"/>

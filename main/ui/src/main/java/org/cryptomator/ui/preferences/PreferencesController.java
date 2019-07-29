@@ -22,6 +22,7 @@ public class PreferencesController implements FxController {
 	private final Settings settings;
 	private final BooleanBinding showWebDavSettings;
 	public ChoiceBox<UiTheme> themeChoiceBox;
+	public CheckBox startHiddenCheckbox;
 	public CheckBox checkForUpdatesCheckbox;
 	public CheckBox debugModeCheckbox;
 	public ChoiceBox<VolumeImpl> volumeTypeChoicBox;
@@ -39,6 +40,8 @@ public class PreferencesController implements FxController {
 		themeChoiceBox.getItems().addAll(UiTheme.values());
 		themeChoiceBox.valueProperty().bindBidirectional(settings.theme());
 		themeChoiceBox.setConverter(new UiThemeConverter());
+
+		startHiddenCheckbox.selectedProperty().bindBidirectional(settings.startHidden());
 
 		checkForUpdatesCheckbox.selectedProperty().bindBidirectional(settings.checkForUpdates());
 

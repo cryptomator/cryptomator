@@ -1,5 +1,7 @@
 package org.cryptomator.ui.traymenu;
 
+import org.cryptomator.common.settings.Settings;
+
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.awt.Desktop;
@@ -14,12 +16,14 @@ class TrayMenuController {
 
 	private final FxApplicationStarter fxApplicationStarter;
 	private final CountDownLatch shutdownLatch;
+	private final Settings settings;
 	private final PopupMenu menu;
 
 	@Inject
-	TrayMenuController(FxApplicationStarter fxApplicationStarter, @Named("shutdownLatch") CountDownLatch shutdownLatch) {
+	TrayMenuController(FxApplicationStarter fxApplicationStarter, @Named("shutdownLatch") CountDownLatch shutdownLatch, Settings settings) {
 		this.fxApplicationStarter = fxApplicationStarter;
 		this.shutdownLatch = shutdownLatch;
+		this.settings = settings;
 		this.menu = new PopupMenu();
 	}
 
@@ -34,6 +38,11 @@ class TrayMenuController {
 		// register preferences shortcut
 		if (Desktop.getDesktop().isSupported(Desktop.Action.APP_PREFERENCES)) {
 			Desktop.getDesktop().setPreferencesHandler(this::showPreferencesWindow);
+		}
+		
+		// show window on start?
+		if (!settings.startHidden().get()) {
+			showMainWindow(null);
 		}
 	}
 

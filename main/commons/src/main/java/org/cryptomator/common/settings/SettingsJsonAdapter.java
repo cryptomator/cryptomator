@@ -29,6 +29,7 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 		writeVaultSettingsArray(out, value.getDirectories());
 		out.name("askedForUpdateCheck").value(value.askedForUpdateCheck().get());
 		out.name("checkForUpdatesEnabled").value(value.checkForUpdates().get());
+		out.name("startHidden").value(value.startHidden().get());
 		out.name("port").value(value.port().get());
 		out.name("numTrayNotifications").value(value.numTrayNotifications().get());
 		out.name("preferredGvfsScheme").value(value.preferredGvfsScheme().get().name());
@@ -62,6 +63,9 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 					break;
 				case "checkForUpdatesEnabled":
 					settings.checkForUpdates().set(in.nextBoolean());
+					break;
+				case "startHidden":
+					settings.startHidden().set(in.nextBoolean());
 					break;
 				case "port":
 					settings.port().set(in.nextInt());
