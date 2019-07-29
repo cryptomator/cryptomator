@@ -1,14 +1,15 @@
 package org.cryptomator.ui.addvaultwizard;
 
 import dagger.Lazy;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.cryptomator.common.settings.VaultSettings;
-import org.cryptomator.ui.common.FXMLLoaderFactory;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
@@ -16,7 +17,6 @@ import org.cryptomator.ui.model.Vault;
 import org.cryptomator.ui.model.VaultFactory;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.ResourceBundle;
@@ -28,6 +28,7 @@ public class ChooseExistingVaultController implements FxController {
 	private final Lazy<Scene> welcomeScene;
 	private final ObjectProperty<Path> vaultPath;
 	private final ObservableList<Vault> vaults;
+	private final BooleanProperty isVaultPathNull;
 	private final VaultFactory vaultFactory;
 	private final ResourceBundle resourceBundle;
 
@@ -39,6 +40,8 @@ public class ChooseExistingVaultController implements FxController {
 		this.vaults = vaults;
 		this.vaultFactory = vaultFactory;
 		this.resourceBundle = resourceBundle;
+		this.isVaultPathNull = new SimpleBooleanProperty();
+		isVaultPathNull.bind(vaultPath.isNull());
 	}
 
 	@FXML
@@ -75,4 +78,13 @@ public class ChooseExistingVaultController implements FxController {
 	public ObjectProperty<Path> vaultPathProperty() {
 		return vaultPath;
 	}
+
+	public boolean getIsVaultPathNull() {
+		return isVaultPathNull.get();
+	}
+
+	public BooleanProperty isVaultPathNullProperty() {
+		return isVaultPathNull;
+	}
+
 }

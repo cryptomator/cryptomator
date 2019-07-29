@@ -28,7 +28,7 @@
 		<ButtonBar buttonMinWidth="120" buttonOrder="B+I">
 			<buttons>
 				<Button text="TODO Back" ButtonBar.buttonData="BACK_PREVIOUS" onAction="#back"/>
-				<Button text="TODO Open" ButtonBar.buttonData="FINISH" onAction="#finish" defaultButton="true"/>
+				<Button text="TODO Open" ButtonBar.buttonData="FINISH" onAction="#finish" defaultButton="true" disable="${controller.isVaultPathNull}"/>
 			</buttons>
 		</ButtonBar>
 	</children>
