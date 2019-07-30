@@ -1,4 +1,4 @@
-package org.cryptomator.ui.model;
+package org.cryptomator.common.vaults;
 
 
 import org.cryptomator.common.settings.Settings;

@@ -22,7 +22,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Region;
 import org.cryptomator.ui.controls.SecPasswordField;
 import org.cryptomator.ui.l10n.Localization;
-import org.cryptomator.ui.model.Vault;
+import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.util.PasswordStrengthUtil;
 import org.fxmisc.easybind.EasyBind;
 import org.slf4j.Logger;

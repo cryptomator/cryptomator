@@ -5,6 +5,9 @@
  *******************************************************************************/
 package org.cryptomator.ui.model;
 
+import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.common.vaults.VaultList;
+import org.cryptomator.common.vaults.Volume;
 import org.cryptomator.ui.fxapp.FxApplicationScoped;
 import org.cryptomator.cryptolib.api.CryptoException;
 import org.cryptomator.keychain.KeychainAccess;
@@ -21,6 +24,7 @@ import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
+@Deprecated(forRemoval = true, since = "1.5.0")
 @FxApplicationScoped
 public class AutoUnlocker {
 

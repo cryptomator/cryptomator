@@ -10,10 +10,9 @@ import dagger.Lazy;
 import dagger.Subcomponent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import org.cryptomator.ui.common.FXMLLoaderFactory;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
-import org.cryptomator.ui.model.Vault;
+import org.cryptomator.common.vaults.Vault;
 
 @UnlockScoped
 @Subcomponent(modules = {UnlockModule.class})

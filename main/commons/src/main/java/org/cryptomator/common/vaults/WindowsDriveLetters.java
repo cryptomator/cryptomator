@@ -3,10 +3,9 @@
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the accompanying LICENSE file.
  *******************************************************************************/
-package org.cryptomator.ui.model;
+package org.cryptomator.common.vaults;
 
 import org.apache.commons.lang3.SystemUtils;
-import org.cryptomator.ui.fxapp.FxApplicationScoped;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

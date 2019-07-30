@@ -13,8 +13,8 @@ import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
-import org.cryptomator.ui.model.Vault;
-import org.cryptomator.ui.model.VaultFactory;
+import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.common.vaults.VaultFactory;
 
 import javax.inject.Inject;
 import java.io.File;

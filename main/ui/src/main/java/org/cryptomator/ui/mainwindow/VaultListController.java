@@ -7,7 +7,7 @@ import javafx.scene.control.ListView;
 import javafx.scene.layout.AnchorPane;
 import org.cryptomator.ui.addvaultwizard.AddVaultWizardComponent;
 import org.cryptomator.ui.common.FxController;
-import org.cryptomator.ui.model.Vault;
+import org.cryptomator.common.vaults.Vault;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

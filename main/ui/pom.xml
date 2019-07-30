@@ -18,29 +18,10 @@
 			<groupId>org.cryptomator</groupId>
 			<artifactId>commons</artifactId>
 		</dependency>
-
-		<dependency>
-			<groupId>org.cryptomator</groupId>
-			<artifactId>cryptofs</artifactId>
-		</dependency>
 		<dependency>
 			<groupId>org.cryptomator</groupId>
 			<artifactId>jni</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.cryptomator</groupId>
-			<artifactId>fuse-nio-adapter</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.cryptomator</groupId>
-			<artifactId>dokany-nio-adapter</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.cryptomator</groupId>
-			<artifactId>webdav-nio-adapter</artifactId>
-		</dependency>
-
-		<!-- CryptoLib -->
 		<dependency>
 			<groupId>org.cryptomator</groupId>
 			<artifactId>cryptolib</artifactId>
@@ -76,7 +57,7 @@
 			<artifactId>gson</artifactId>
 		</dependency>
 
-		<!-- apache commons -->
+		<!-- Apache Commons -->
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>

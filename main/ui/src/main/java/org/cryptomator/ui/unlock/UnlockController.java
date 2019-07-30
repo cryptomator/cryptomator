@@ -15,7 +15,7 @@ import org.cryptomator.keychain.KeychainAccess;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.Tasks;
 import org.cryptomator.ui.controls.SecPasswordField;
-import org.cryptomator.ui.model.Vault;
+import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.util.DialogBuilderUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,12 +69,14 @@ public class UnlockController implements FxController {
 	@FXML
 	public void unlock() {
 		CharSequence password = passwordField.getCharacters();
+		vault.setState(Vault.State.PROCESSING);
 		Tasks.create(() -> {
 			vault.unlock(password);
 			if (keychainAccess.isPresent() && savePassword.isSelected()) {
 				keychainAccess.get().storePassphrase(vault.getId(), password);
 			}
 		}).onSuccess(() -> {
+			vault.setState(Vault.State.UNLOCKED);
 			passwordField.swipe();
 			LOG.info("Unlock of '{}' succeeded.", vault.getDisplayableName());
 			window.close();
@@ -92,6 +94,10 @@ public class UnlockController implements FxController {
 		}).onError(Exception.class, e -> { // including RuntimeExceptions
 			LOG.error("Unlock failed for technical reasons.", e);
 			// TODO
+		}).andFinally(() -> {
+			if (!vault.isUnlocked()) {
+				vault.setState(Vault.State.LOCKED);
+			}
 		}).runOnce(executor);
 	}
 

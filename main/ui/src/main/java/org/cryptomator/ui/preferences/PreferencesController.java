@@ -12,7 +12,7 @@ import org.cryptomator.common.settings.UiTheme;
 import org.cryptomator.common.settings.VolumeImpl;
 import org.cryptomator.common.settings.WebDavUrlScheme;
 import org.cryptomator.ui.common.FxController;
-import org.cryptomator.ui.model.Volume;
+import org.cryptomator.common.vaults.Volume;
 
 import javax.inject.Inject;
 

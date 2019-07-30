@@ -8,7 +8,7 @@ import javafx.scene.control.ListView;
 import javafx.util.Callback;
 import org.cryptomator.ui.common.FXMLLoaderFactory;
 import org.cryptomator.ui.controls.DraggableListCell;
-import org.cryptomator.ui.model.Vault;
+import org.cryptomator.common.vaults.Vault;
 
 import javax.inject.Inject;
 import java.io.IOException;

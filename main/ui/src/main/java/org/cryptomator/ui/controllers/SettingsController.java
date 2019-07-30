@@ -28,7 +28,7 @@ import org.cryptomator.ui.fxapp.FxApplicationScoped;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VolumeImpl;
 import org.cryptomator.ui.l10n.Localization;
-import org.cryptomator.ui.model.Volume;
+import org.cryptomator.common.vaults.Volume;
 
 import javax.inject.Inject;
 import javax.inject.Named;

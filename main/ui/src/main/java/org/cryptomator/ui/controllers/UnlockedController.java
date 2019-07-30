@@ -31,7 +31,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.PopupWindow.AnchorLocation;
 import javafx.util.Duration;
 import org.cryptomator.ui.l10n.Localization;
-import org.cryptomator.ui.model.Vault;
+import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.util.DialogBuilderUtil;
 import org.cryptomator.ui.common.Tasks;
 import org.fxmisc.easybind.EasyBind;

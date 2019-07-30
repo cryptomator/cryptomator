@@ -25,7 +25,7 @@ import org.cryptomator.ui.controls.SecPasswordField;
 import org.cryptomator.ui.model.upgrade.UpgradeStrategies;
 import org.cryptomator.ui.model.upgrade.UpgradeStrategy;
 import org.cryptomator.ui.model.upgrade.UpgradeStrategy.UpgradeFailedException;
-import org.cryptomator.ui.model.Vault;
+import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.Tasks;
 import org.fxmisc.easybind.EasyBind;
 

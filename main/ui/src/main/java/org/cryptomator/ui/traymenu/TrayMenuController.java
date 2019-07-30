@@ -3,7 +3,7 @@ package org.cryptomator.ui.traymenu;
 import javafx.beans.Observable;
 import javafx.collections.ObservableList;
 import org.cryptomator.common.settings.Settings;
-import org.cryptomator.ui.model.Vault;
+import org.cryptomator.common.vaults.Vault;
 
 import javax.inject.Inject;
 import javax.inject.Named;

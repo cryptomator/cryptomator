@@ -8,7 +8,7 @@
  *******************************************************************************/
 package org.cryptomator.ui.controls;
 
-import org.cryptomator.ui.model.Vault;
+import org.cryptomator.common.vaults.Vault;
 import org.fxmisc.easybind.EasyBind;
 
 import javafx.beans.binding.ObjectExpression;

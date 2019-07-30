@@ -4,9 +4,7 @@ import dagger.Module;
 import dagger.Provides;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.SettingsProvider;
-import org.cryptomator.ui.UiModule;
 import org.cryptomator.ui.model.AppLaunchEvent;
-import org.cryptomator.ui.model.VaultComponent;
 import org.cryptomator.ui.traymenu.TrayMenuComponent;
 
 import javax.inject.Named;
@@ -17,7 +15,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.function.Consumer;
 
-@Module(includes = {UiModule.class}, subcomponents = {VaultComponent.class, TrayMenuComponent.class})
+@Module(subcomponents = {TrayMenuComponent.class})
 class CryptomatorModule {
 
 	@Provides
@@ -32,12 +30,6 @@ class CryptomatorModule {
 	@Named("shutdownLatch")
 	static CountDownLatch provideShutdownLatch() {
 		return new CountDownLatch(1);
-	}
-
-	@Provides
-	@Singleton
-	static Settings provideSettings(SettingsProvider settingsProvider) {
-		return settingsProvider.get();
 	}
 
 	@Provides

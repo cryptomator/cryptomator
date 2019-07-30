@@ -6,10 +6,9 @@
  * Contributors:
  *     Sebastian Stenzel - initial API and implementation
  *******************************************************************************/
-package org.cryptomator.ui.model;
+package org.cryptomator.common.vaults;
 
 import com.google.common.base.Strings;
-import javafx.application.Platform;
 import javafx.beans.Observable;
 import javafx.beans.binding.Binding;
 import javafx.beans.binding.Bindings;
@@ -118,27 +117,15 @@ public class Vault {
 	}
 
 	public synchronized void unlock(CharSequence passphrase) throws CryptoException, IOException, Volume.VolumeException {
-		Platform.runLater(() -> state.set(State.PROCESSING));
-		try {
-			if (vaultSettings.usesIndividualMountPath().get() && Strings.isNullOrEmpty(vaultSettings.individualMountPath().get())) {
-				throw new NotDirectoryException("");
-			}
-			CryptoFileSystem fs = getCryptoFileSystem(passphrase);
-			volume = volumeProvider.get();
-			volume.mount(fs, getMountFlags());
-			Platform.runLater(() -> {
-				state.set(State.UNLOCKED);
-			});
-		} catch (Exception e) {
-			Platform.runLater(() -> state.set(State.LOCKED));
-			throw e;
+		if (vaultSettings.usesIndividualMountPath().get() && Strings.isNullOrEmpty(vaultSettings.individualMountPath().get())) {
+			throw new NotDirectoryException("");
 		}
+		CryptoFileSystem fs = getCryptoFileSystem(passphrase);
+		volume = volumeProvider.get();
+		volume.mount(fs, getMountFlags());
 	}
 
 	public synchronized void lock(boolean forced) throws Volume.VolumeException {
-		Platform.runLater(() -> {
-			state.set(State.PROCESSING);
-		});
 		if (forced && volume.supportsForcedUnmount()) {
 			volume.unmountForced();
 		} else {
@@ -152,9 +139,6 @@ public class Vault {
 				LOG.error("Error closing file system.", e);
 			}
 		}
-		Platform.runLater(() -> {
-			state.set(State.LOCKED);
-		});
 	}
 
 	/**
@@ -190,12 +174,16 @@ public class Vault {
 	// Observable Properties
 	// *******************************************************************************
 
-	public ReadOnlyObjectProperty<State> stateProperty() {
+	public ObjectProperty<State> stateProperty() {
 		return state;
 	}
 
 	public State getState() {
 		return state.get();
+	}
+	
+	public void setState(State value) {
+		state.setValue(value);
 	}
 
 	public BooleanBinding lockedProperty() {

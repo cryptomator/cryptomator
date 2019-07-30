@@ -11,7 +11,7 @@ import org.cryptomator.ui.fxapp.FxApplicationScoped;
 import org.cryptomator.cryptolib.Cryptors;
 import org.cryptomator.cryptolib.api.Cryptor;
 import org.cryptomator.ui.l10n.Localization;
-import org.cryptomator.ui.model.Vault;
+import org.cryptomator.common.vaults.Vault;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -4,7 +4,7 @@ import javafx.beans.binding.Binding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import org.cryptomator.ui.common.FxController;
-import org.cryptomator.ui.model.Vault;
+import org.cryptomator.common.vaults.Vault;
 import org.fxmisc.easybind.EasyBind;
 
 import javax.inject.Inject;

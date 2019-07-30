@@ -27,7 +27,7 @@ import org.cryptomator.cryptolib.api.InvalidPassphraseException;
 import org.cryptomator.cryptolib.api.UnsupportedVaultFormatException;
 import org.cryptomator.ui.controls.SecPasswordField;
 import org.cryptomator.ui.l10n.Localization;
-import org.cryptomator.ui.model.Vault;
+import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.util.PasswordStrengthUtil;
 import org.fxmisc.easybind.EasyBind;
 import org.slf4j.Logger;

@@ -3,7 +3,7 @@
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the accompanying LICENSE file.
  *******************************************************************************/
-package org.cryptomator.ui.model;
+package org.cryptomator.common.vaults;
 
 import dagger.Module;
 import dagger.Provides;

@@ -5,7 +5,7 @@ import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.fxml.FXML;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.Tasks;
-import org.cryptomator.ui.model.Vault;
+import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.unlock.UnlockComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,11 +44,14 @@ public class VaultDetailController implements FxController {
 
 	@FXML
 	public void lock() {
+		vault.get().setState(Vault.State.PROCESSING);
 		Tasks.create(() -> {
 			vault.get().lock(false);
 		}).onSuccess(() -> {
 			LOG.trace("Regular unmount succeeded.");
+			vault.get().setState(Vault.State.LOCKED);
 		}).onError(Exception.class, e -> {
+			vault.get().setState(Vault.State.UNLOCKED);
 			// TODO
 		}).runOnce(executor);
 	}
