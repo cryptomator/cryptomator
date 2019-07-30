@@ -8,15 +8,19 @@
  *******************************************************************************/
 package org.cryptomator.ui;
 
+import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import javafx.beans.binding.Binding;
 import javafx.beans.binding.Bindings;
+import javafx.collections.ObservableList;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.frontend.webdav.WebDavServer;
 import org.cryptomator.keychain.KeychainModule;
 import org.cryptomator.ui.fxapp.FxApplicationScoped;
+import org.cryptomator.ui.model.Vault;
+import org.cryptomator.ui.model.VaultList;
 import org.fxmisc.easybind.EasyBind;
 
 import javax.inject.Named;
@@ -31,13 +35,17 @@ import java.util.function.Consumer;
 // TODO move to common...
 @Deprecated(forRemoval = true, since = "1.5.0")
 @Module(includes = {KeychainModule.class})
-public class UiModule {
+public abstract class UiModule {
 
 	private static final int NUM_SCHEDULER_THREADS = 4;
 
+	@Binds
+	@Singleton
+	abstract ObservableList<Vault> bindVaultList(VaultList vaultList);
+
 	@Provides
 	@Singleton
-	ScheduledExecutorService provideScheduledExecutorService(@Named("shutdownTaskScheduler") Consumer<Runnable> shutdownTaskScheduler) {
+	static ScheduledExecutorService provideScheduledExecutorService(@Named("shutdownTaskScheduler") Consumer<Runnable> shutdownTaskScheduler) {
 		final AtomicInteger threadNumber = new AtomicInteger(1);
 		ScheduledExecutorService executorService = Executors.newScheduledThreadPool(NUM_SCHEDULER_THREADS, r -> {
 			Thread t = new Thread(r);
@@ -52,7 +60,7 @@ public class UiModule {
 	// TODO @Binds abstract ExecutorService bindExecutorService(ScheduledExecutorService executor); ?
 	@Provides
 	@Singleton
-	ExecutorService provideExecutorService(@Named("shutdownTaskScheduler") Consumer<Runnable> shutdownTaskScheduler) {
+	static ExecutorService provideExecutorService(@Named("shutdownTaskScheduler") Consumer<Runnable> shutdownTaskScheduler) {
 		final AtomicInteger threadNumber = new AtomicInteger(1);
 		ExecutorService executorService = Executors.newCachedThreadPool(r -> {
 			Thread t = new Thread(r);
@@ -66,7 +74,7 @@ public class UiModule {
 
 	@Provides
 	@Singleton
-	Binding<InetSocketAddress> provideServerSocketAddressBinding(Settings settings) {
+	static Binding<InetSocketAddress> provideServerSocketAddressBinding(Settings settings) {
 		return Bindings.createObjectBinding(() -> {
 			String host = SystemUtils.IS_OS_WINDOWS ? "127.0.0.1" : "localhost";
 			return InetSocketAddress.createUnresolved(host, settings.port().intValue());
@@ -75,7 +83,7 @@ public class UiModule {
 
 	@Provides
 	@Singleton
-	WebDavServer provideWebDavServer(Binding<InetSocketAddress> serverSocketAddressBinding) {
+	static WebDavServer provideWebDavServer(Binding<InetSocketAddress> serverSocketAddressBinding) {
 		WebDavServer server = WebDavServer.create();
 		// no need to unsubscribe eventually, because server is a singleton
 		EasyBind.subscribe(serverSocketAddressBinding, server::bind);

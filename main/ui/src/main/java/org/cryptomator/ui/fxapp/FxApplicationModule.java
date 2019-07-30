@@ -28,10 +28,6 @@ abstract class FxApplicationModule {
 	@FxApplicationScoped
 	abstract Application provideApplication(FxApplication application);
 
-	// TODO move to commons...
-	@Binds
-	abstract ObservableList<Vault> bindVaultList(VaultList vaultList);
-
 	@Provides
 	@FxApplicationScoped
 	static ObjectProperty<Vault> provideSelectedVault() {

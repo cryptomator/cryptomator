@@ -1,6 +1,9 @@
 package org.cryptomator.ui.traymenu;
 
+import javafx.beans.Observable;
+import javafx.collections.ObservableList;
 import org.cryptomator.common.settings.Settings;
+import org.cryptomator.ui.model.Vault;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -17,13 +20,15 @@ class TrayMenuController {
 	private final FxApplicationStarter fxApplicationStarter;
 	private final CountDownLatch shutdownLatch;
 	private final Settings settings;
+	private final ObservableList<Vault> vaults;
 	private final PopupMenu menu;
 
 	@Inject
-	TrayMenuController(FxApplicationStarter fxApplicationStarter, @Named("shutdownLatch") CountDownLatch shutdownLatch, Settings settings) {
+	TrayMenuController(FxApplicationStarter fxApplicationStarter, @Named("shutdownLatch") CountDownLatch shutdownLatch, Settings settings, ObservableList<Vault> vaults) {
 		this.fxApplicationStarter = fxApplicationStarter;
 		this.shutdownLatch = shutdownLatch;
 		this.settings = settings;
+		this.vaults = vaults;
 		this.menu = new PopupMenu();
 	}
 
@@ -32,7 +37,8 @@ class TrayMenuController {
 	}
 
 	public void initTrayMenu() {
-		// TODO add listeners
+		vaults.addListener(this::vaultListChanged);
+		
 		rebuildMenu();
 		
 		// register preferences shortcut
@@ -46,7 +52,13 @@ class TrayMenuController {
 		}
 	}
 
+	private void vaultListChanged(Observable observable) {
+		rebuildMenu();
+	}
+
 	private void rebuildMenu() {
+		menu.removeAll();
+		
 		MenuItem showMainWindowItem = new MenuItem("TODO show");
 		showMainWindowItem.addActionListener(this::showMainWindow);
 		menu.add(showMainWindowItem);
@@ -56,7 +68,11 @@ class TrayMenuController {
 		menu.add(showPreferencesItem);
 
 		menu.addSeparator();
-		// foreach vault: add submenu
+		for (Vault v : vaults) {
+			// TODO what do we want to do with these? lock/unlock? reveal? submenu?
+			MenuItem vaultItem = new MenuItem(v.getDisplayableName());
+			menu.add(vaultItem);
+		}
 		menu.addSeparator();
 
 		MenuItem quitApplicationItem = new MenuItem("TODO quit");
