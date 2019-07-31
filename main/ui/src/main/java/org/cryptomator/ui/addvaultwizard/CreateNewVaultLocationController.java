@@ -19,9 +19,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ResourceBundle;
 
-/**
- * TODO: Add trim() filter to vaultName
- */
 @AddVaultWizardScoped
 public class CreateNewVaultLocationController implements FxController {
 
