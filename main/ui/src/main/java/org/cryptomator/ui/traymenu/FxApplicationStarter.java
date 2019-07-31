@@ -38,7 +38,7 @@ public class FxApplicationStarter {
 
 	private void start(boolean fromTrayMenu) {
 		executor.submit(() -> {
-			LOG.info("Starting JavaFX runtime...");
+			LOG.debug("Starting JavaFX runtime...");
 			Platform.startup(() -> {
 				assert Platform.isFxApplicationThread();
 				LOG.info("JavaFX Runtime started.");

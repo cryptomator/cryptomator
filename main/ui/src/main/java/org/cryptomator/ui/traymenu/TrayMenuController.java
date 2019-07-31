@@ -5,8 +5,6 @@ import javafx.collections.ObservableList;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.fxapp.FxApplication;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -19,8 +17,6 @@ import java.util.concurrent.CountDownLatch;
 
 @TrayMenuScoped
 class TrayMenuController {
-	
-	private static final Logger LOG = LoggerFactory.getLogger(TrayMenuController.class);
 
 	private final FxApplicationStarter fxApplicationStarter;
 	private final CountDownLatch shutdownLatch;
@@ -43,14 +39,14 @@ class TrayMenuController {
 
 	public void initTrayMenu() {
 		vaults.addListener(this::vaultListChanged);
-		
+
 		rebuildMenu();
-		
+
 		// register preferences shortcut
 		if (Desktop.getDesktop().isSupported(Desktop.Action.APP_PREFERENCES)) {
 			Desktop.getDesktop().setPreferencesHandler(this::showPreferencesWindow);
 		}
-		
+
 		// show window on start?
 		if (!settings.startHidden().get()) {
 			showMainWindow(null);
@@ -63,7 +59,7 @@ class TrayMenuController {
 
 	private void rebuildMenu() {
 		menu.removeAll();
-		
+
 		MenuItem showMainWindowItem = new MenuItem("TODO show");
 		showMainWindowItem.addActionListener(this::showMainWindow);
 		menu.add(showMainWindowItem);

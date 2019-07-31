@@ -33,7 +33,7 @@ public class TrayIconController {
 
 		try {
 			SystemTray.getSystemTray().add(trayIcon);
-			LOG.info("initialized tray icon");
+			LOG.debug("initialized tray icon");
 		} catch (AWTException e) {
 			LOG.error("Error adding tray icon", e);
 		}
