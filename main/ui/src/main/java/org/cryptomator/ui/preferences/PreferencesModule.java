@@ -35,7 +35,6 @@ abstract class PreferencesModule {
 		stage.setTitle(resourceBundle.getString("preferences.title"));
 		stage.setMinWidth(400);
 		stage.setMinHeight(300);
-		stage.initModality(Modality.APPLICATION_MODAL);
 		return stage;
 	}
 

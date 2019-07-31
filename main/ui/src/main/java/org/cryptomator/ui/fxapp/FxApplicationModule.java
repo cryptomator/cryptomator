@@ -19,7 +19,7 @@ import org.cryptomator.ui.unlock.UnlockComponent;
 
 import java.util.ResourceBundle;
 
-@Module(includes = {KeychainModule.class}, subcomponents = {MainWindowComponent.class, PreferencesComponent.class, UnlockComponent.class})
+@Module(includes = {KeychainModule.class, UpdateCheckerModule.class}, subcomponents = {MainWindowComponent.class, PreferencesComponent.class, UnlockComponent.class})
 abstract class FxApplicationModule {
 
 	@Binds
@@ -31,13 +31,13 @@ abstract class FxApplicationModule {
 	static ObjectProperty<Vault> provideSelectedVault() {
 		return new SimpleObjectProperty<>();
 	}
-	
+
 	@Provides
 	@FxApplicationScoped
 	static ResourceBundle provideLocalization() {
 		return ResourceBundle.getBundle("i18n.strings");
 	}
-	
+
 	@Provides
 	static MainWindowComponent provideMainWindowComponent(MainWindowComponent.Builder builder) {
 		return builder.build();

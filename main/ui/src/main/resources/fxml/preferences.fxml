@@ -11,7 +11,7 @@
 <VBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
 	  fx:controller="org.cryptomator.ui.preferences.PreferencesController"
-	  styleClass="main-window"
+	  styleClass="preferences-window"
 	  spacing="6">
 	<padding>
 		<Insets bottom="12" left="12" right="12" top="12"/>
