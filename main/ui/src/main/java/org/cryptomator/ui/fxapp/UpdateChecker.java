@@ -1,8 +1,10 @@
 package org.cryptomator.ui.fxapp;
 
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.concurrent.ScheduledService;
+import javafx.concurrent.Worker;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.util.Duration;
 import org.cryptomator.common.settings.Settings;
@@ -36,13 +38,14 @@ public class UpdateChecker {
 
 	public void startCheckingForUpdates(Duration initialDelay) {
 		updateCheckerService.setDelay(initialDelay);
+		updateCheckerService.setOnRunning(this::checkStarted);
 		updateCheckerService.setOnSucceeded(this::checkSucceeded);
 		updateCheckerService.setOnFailed(this::checkFailed);
 		updateCheckerService.restart();
 	}
 
-	public ReadOnlyStringProperty latestVersionProperty() {
-		return latestVersionProperty;
+	private void checkStarted(WorkerStateEvent event) {
+		LOG.debug("Checking for updates...");
 	}
 
 	private void checkSucceeded(WorkerStateEvent event) {
@@ -51,8 +54,8 @@ public class UpdateChecker {
 		LOG.info("Current version: {}, lastest version: {}", currentVersion, latestVersion);
 
 		// TODO settings.lastVersionCheck = Instant.now()
-		if (currentVersion != null && semVerComparator.compare(currentVersion, latestVersion) < 0) {
-			// update is available!
+		if (currentVersion == null || semVerComparator.compare(currentVersion, latestVersion) < 0) {
+			// update is available
 			latestVersionProperty.set(latestVersion);
 		} else {
 			latestVersionProperty.set(null);
@@ -61,6 +64,16 @@ public class UpdateChecker {
 
 	private void checkFailed(WorkerStateEvent event) {
 		LOG.warn("Error checking for updates", event.getSource().getException());
+	}
+	
+	/* Observable Properties */
+
+	public BooleanBinding checkingForUpdatesProperty() {
+		return updateCheckerService.stateProperty().isEqualTo(Worker.State.RUNNING);
+	}
+
+	public ReadOnlyStringProperty latestVersionProperty() {
+		return latestVersionProperty;
 	}
 
 }

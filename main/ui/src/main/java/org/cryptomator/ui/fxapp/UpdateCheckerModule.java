@@ -10,6 +10,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Task;
+import javafx.concurrent.Worker;
 import javafx.util.Duration;
 import org.apache.commons.lang3.SystemUtils;
 
@@ -25,13 +26,6 @@ public abstract class UpdateCheckerModule {
 
 	private static final URI LATEST_VERSION_URI = URI.create("https://api.cryptomator.org/updates/latestVersion.json");
 	private static final Duration UPDATE_CHECK_INTERVAL = Duration.hours(3);
-
-	@Provides
-	@Named("checkingForUpdates")
-	@FxApplicationScoped
-	static ReadOnlyBooleanProperty provideCheckingForUpdates(ScheduledService<String> updateCheckerService) {
-		return updateCheckerService.runningProperty();
-	}
 
 	@Provides
 	@Named("latestVersion")
