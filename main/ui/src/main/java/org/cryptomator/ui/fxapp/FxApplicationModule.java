@@ -11,14 +11,15 @@ import dagger.Provides;
 import javafx.application.Application;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.keychain.KeychainModule;
 import org.cryptomator.ui.mainwindow.MainWindowComponent;
-import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.preferences.PreferencesComponent;
+import org.cryptomator.ui.unlock.UnlockComponent;
 
 import java.util.ResourceBundle;
 
-@Module(includes = {KeychainModule.class}, subcomponents = {MainWindowComponent.class, PreferencesComponent.class})
+@Module(includes = {KeychainModule.class}, subcomponents = {MainWindowComponent.class, PreferencesComponent.class, UnlockComponent.class})
 abstract class FxApplicationModule {
 
 	@Binds
