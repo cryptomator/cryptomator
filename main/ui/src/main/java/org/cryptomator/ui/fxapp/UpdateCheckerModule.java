@@ -2,6 +2,10 @@ package org.cryptomator.ui.fxapp;
 
 import dagger.Module;
 import dagger.Provides;
+import javafx.beans.binding.BooleanBinding;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ReadOnlyBooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.concurrent.ScheduledService;
@@ -23,6 +27,13 @@ public abstract class UpdateCheckerModule {
 	private static final Duration UPDATE_CHECK_INTERVAL = Duration.hours(3);
 
 	@Provides
+	@Named("checkingForUpdates")
+	@FxApplicationScoped
+	static ReadOnlyBooleanProperty provideCheckingForUpdates(ScheduledService<String> updateCheckerService) {
+		return updateCheckerService.runningProperty();
+	}
+
+	@Provides
 	@Named("latestVersion")
 	@FxApplicationScoped
 	static StringProperty provideLatestVersion() {
@@ -41,8 +52,7 @@ public abstract class UpdateCheckerModule {
 		String userAgent = String.format("Cryptomator VersionChecker/%s %s %s (%s)", applicationVersion.orElse("SNAPSHOT"), SystemUtils.OS_NAME, SystemUtils.OS_VERSION, SystemUtils.OS_ARCH);
 		return HttpRequest.newBuilder() //
 				.uri(LATEST_VERSION_URI) //
-				.header("User-Agent", userAgent)
-				.build();
+				.header("User-Agent", userAgent).build();
 	}
 
 	@Provides

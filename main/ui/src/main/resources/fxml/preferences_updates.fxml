@@ -3,6 +3,8 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.ProgressIndicator?>
+<?import javafx.scene.control.Button?>
 <VBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
 	  fx:controller="org.cryptomator.ui.preferences.UpdatesPreferencesController"
@@ -12,5 +14,11 @@
 	</padding>
 	<children>
 		<CheckBox fx:id="checkForUpdatesCheckbox" text="%preferences.autoUpdateCheck"/>
+
+		<Button text="TODO check now!" defaultButton="true" onAction="#checkNow" contentDisplay="${controller.checkForUpdatesButtonState}">
+			<graphic>
+				<ProgressIndicator progress="-1" prefWidth="12" prefHeight="12"/>
+			</graphic>
+		</Button>
 	</children>
 </VBox>
