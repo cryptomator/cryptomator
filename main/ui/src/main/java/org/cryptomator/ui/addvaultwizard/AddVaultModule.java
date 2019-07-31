@@ -76,10 +76,17 @@ public abstract class AddVaultModule {
 	@Provides
 	@FxmlScene(FxmlFile.ADDVAULT_NEW_NAME)
 	@AddVaultWizardScoped
-	static Scene provideCreateNewVaultScene(@AddVaultWizard FXMLLoaderFactory fxmlLoaders) {
+	static Scene provideCreateNewVaultNameScene(@AddVaultWizard FXMLLoaderFactory fxmlLoaders) {
 		return fxmlLoaders.createScene("/fxml/addvault_new_name.fxml");
-
 	}
+
+	@Provides
+	@FxmlScene(FxmlFile.ADDVAULT_NEW_LOCATION)
+	@AddVaultWizardScoped
+	static Scene provideCreateNewVaultLocationScene(@AddVaultWizard FXMLLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene("/fxml/addvault_new_location.fxml");
+	}
+
 	// ------------------
 
 	@Binds
@@ -97,5 +104,9 @@ public abstract class AddVaultModule {
 	@FxControllerKey(CreateNewVaultNameController.class)
 	abstract FxController bindCreateNewVaultNameController(CreateNewVaultNameController controller);
 
+	@Binds
+	@IntoMap
+	@FxControllerKey(CreateNewVaultLocationController.class)
+	abstract FxController bindCreateNewVaultLocationController(CreateNewVaultLocationController controller);
 
 }
