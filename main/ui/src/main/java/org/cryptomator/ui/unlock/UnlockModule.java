@@ -44,13 +44,26 @@ abstract class UnlockModule {
 	static Scene provideUnlockScene(@UnlockWindow FXMLLoaderFactory fxmlLoaders) {
 		return fxmlLoaders.createScene("/fxml/unlock2.fxml"); // TODO rename fxml file
 	}
-	
+
+	@Provides
+	@FxmlScene(FxmlFile.UNLOCK_SUCCESS)
+	@UnlockScoped
+	static Scene provideUnlockSuccessScene(@UnlockWindow FXMLLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene("/fxml/unlock_success.fxml");
+	}
+
+
 	// ------------------
 
 	@Binds
 	@IntoMap
 	@FxControllerKey(UnlockController.class)
 	abstract FxController bindUnlockController(UnlockController controller);
+
+	@Binds
+	@IntoMap
+	@FxControllerKey(UnlockSuccessController.class)
+	abstract FxController bindUnlockSuccessController(UnlockSuccessController controller);
 
 
 }
