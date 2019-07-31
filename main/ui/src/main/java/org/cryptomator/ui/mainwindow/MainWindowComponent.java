@@ -26,6 +26,7 @@ public interface MainWindowComponent {
 		Stage stage = window();
 		stage.setScene(scene().get());
 		stage.show();
+		stage.requestFocus();
 	}
 
 	@Subcomponent.Builder

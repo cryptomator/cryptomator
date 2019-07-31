@@ -27,6 +27,7 @@ public interface PreferencesComponent {
 		Stage stage = window();
 		stage.setScene(scene().get());
 		stage.show();
+		stage.requestFocus();
 	}
 
 	@Subcomponent.Builder
