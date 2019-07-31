@@ -4,17 +4,18 @@
 <?import javafx.scene.control.TabPane?>
 <TabPane xmlns="http://javafx.com/javafx"
 		 xmlns:fx="http://javafx.com/fxml"
+		 fx:id="tabPane"
 		 fx:controller="org.cryptomator.ui.preferences.PreferencesController"
 		 side="TOP"
 		 tabClosingPolicy="UNAVAILABLE"
 		 tabDragPolicy="FIXED">
 	<tabs>
-		<Tab text="TODO General">
+		<Tab fx:id="generalTab" text="TODO General">
 			<content>
 				<fx:include source="/fxml/preferences_general.fxml"/>
 			</content>
 		</Tab>
-		<Tab text="TODO Updates">
+		<Tab fx:id="updatesTab" text="TODO Updates">
 			<content>
 				<fx:include source="/fxml/preferences_updates.fxml"/>
 			</content>
