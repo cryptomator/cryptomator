@@ -6,6 +6,8 @@ import dagger.Provides;
 import dagger.multibindings.IntoMap;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.scene.Scene;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -52,6 +54,12 @@ public abstract class AddVaultModule {
 	}
 
 	@Provides
+	@AddVaultWizardScoped
+	static StringProperty provideVaultName() {
+		return new SimpleStringProperty("");
+	}
+
+	@Provides
 	@FxmlScene(FxmlFile.ADDVAULT_WELCOME)
 	@AddVaultWizardScoped
 	static Scene provideWelcomeScene(@AddVaultWizard FXMLLoaderFactory fxmlLoaders) {
@@ -65,6 +73,13 @@ public abstract class AddVaultModule {
 		return fxmlLoaders.createScene("/fxml/addvault_existing.fxml");
 	}
 
+	@Provides
+	@FxmlScene(FxmlFile.ADDVAULT_NEW)
+	@AddVaultWizardScoped
+	static Scene provideCreateNewVaultScene(@AddVaultWizard FXMLLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene("/fxml/addvault_new.fxml");
+
+	}
 	// ------------------
 
 	@Binds
@@ -76,6 +91,11 @@ public abstract class AddVaultModule {
 	@IntoMap
 	@FxControllerKey(ChooseExistingVaultController.class)
 	abstract FxController bindChooseExistingVaultController(ChooseExistingVaultController controller);
+
+	@Binds
+	@IntoMap
+	@FxControllerKey(CreateNewVaultController.class)
+	abstract FxController bindCreateNewVaultController(CreateNewVaultController controller);
 
 
 }

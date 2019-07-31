@@ -10,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 
 @AddVaultWizardScoped
 public class AddVaultWelcomeController implements FxController {
@@ -18,16 +17,18 @@ public class AddVaultWelcomeController implements FxController {
 	private static final Logger LOG = LoggerFactory.getLogger(AddVaultWelcomeController.class);
 	private final Stage window;
 	private final Lazy<Scene> chooseExistingVaultScene;
+	private final Lazy<Scene> createNewVaultScene;
 
 	@Inject
-	AddVaultWelcomeController(@AddVaultWizard Stage window, @FxmlScene(FxmlFile.ADDVAULT_EXISTING) Lazy<Scene> chooseExistingVaultScene) {
+	AddVaultWelcomeController(@AddVaultWizard Stage window, @FxmlScene(FxmlFile.ADDVAULT_EXISTING) Lazy<Scene> chooseExistingVaultScene, @FxmlScene(FxmlFile.ADDVAULT_NEW) Lazy<Scene> createNewVaultScene) {
 		this.window = window;
 		this.chooseExistingVaultScene = chooseExistingVaultScene;
+		this.createNewVaultScene = createNewVaultScene;
 	}
 
 	public void createNewVault() {
 		LOG.debug("AddVaultWelcomeController.createNewVault()");
-		// fxmlLoaders.setScene("/fxml/addvault_new.fxml", window);
+		window.setScene(createNewVaultScene.get());
 	}
 
 	public void chooseExistingVault() {
