@@ -6,6 +6,7 @@
 package org.cryptomator.ui.traymenu;
 
 import dagger.Subcomponent;
+import org.cryptomator.ui.fxapp.FxApplication;
 
 import java.awt.SystemTray;
 
@@ -22,7 +23,7 @@ public interface TrayMenuComponent {
 			trayIconController().initializeTrayIcon();
 		} else {
 			// show main window directly without any tray support:
-			fxAppStarter().get(false).showMainWindow();
+			fxAppStarter().get(false).thenAccept(FxApplication::showMainWindow);
 		}
 	}
 

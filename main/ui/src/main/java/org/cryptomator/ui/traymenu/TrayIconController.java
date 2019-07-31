@@ -30,8 +30,6 @@ public class TrayIconController {
 	
 	public void initializeTrayIcon() {
 		settings.theme().addListener(this::themeChanged);
-		
-		trayMenuController.initTrayMenu();
 
 		try {
 			SystemTray.getSystemTray().add(trayIcon);
@@ -39,6 +37,8 @@ public class TrayIconController {
 		} catch (AWTException e) {
 			LOG.error("Error adding tray icon", e);
 		}
+		
+		trayMenuController.initTrayMenu();
 	}
 
 	private void themeChanged(@SuppressWarnings("unused") Observable observable) {

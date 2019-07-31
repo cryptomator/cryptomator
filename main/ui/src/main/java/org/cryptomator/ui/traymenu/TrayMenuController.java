@@ -4,6 +4,9 @@ import javafx.beans.Observable;
 import javafx.collections.ObservableList;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.ui.fxapp.FxApplication;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -16,6 +19,8 @@ import java.util.concurrent.CountDownLatch;
 
 @TrayMenuScoped
 class TrayMenuController {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(TrayMenuController.class);
 
 	private final FxApplicationStarter fxApplicationStarter;
 	private final CountDownLatch shutdownLatch;
@@ -48,7 +53,6 @@ class TrayMenuController {
 		
 		// show window on start?
 		if (!settings.startHidden().get()) {
-			// TODO: schedule async to not delay tray menu initialization
 			showMainWindow(null);
 		}
 	}
@@ -83,11 +87,11 @@ class TrayMenuController {
 	}
 
 	private void showMainWindow(ActionEvent actionEvent) {
-		fxApplicationStarter.get(true).showMainWindow();
+		fxApplicationStarter.get(true).thenAccept(FxApplication::showMainWindow);
 	}
 
 	private void showPreferencesWindow(EventObject actionEvent) {
-		fxApplicationStarter.get(true).showPreferencesWindow();
+		fxApplicationStarter.get(true).thenAccept(FxApplication::showPreferencesWindow);
 	}
 
 	private void quitApplication(ActionEvent actionEvent) {

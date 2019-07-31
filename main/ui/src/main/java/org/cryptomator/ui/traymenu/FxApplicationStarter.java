@@ -8,44 +8,44 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 
 @TrayMenuScoped
 public class FxApplicationStarter {
-	
+
 	private static final Logger LOG = LoggerFactory.getLogger(FxApplicationStarter.class);
 
-	private final CompletableFuture<FxApplication> future;
 	private final FxApplicationComponent.Builder fxAppComponent;
+	private final ExecutorService executor;
+	private final CompletableFuture<FxApplication> future;
 
 	@Inject
-	public FxApplicationStarter(FxApplicationComponent.Builder fxAppComponent) {
+	public FxApplicationStarter(FxApplicationComponent.Builder fxAppComponent, ExecutorService executor) {
 		this.fxAppComponent = fxAppComponent;
+		this.executor = executor;
 		this.future = new CompletableFuture<>();
 	}
 
-	public synchronized FxApplication get(boolean fromTrayMenu) {
+	public synchronized CompletionStage<FxApplication> get(boolean fromTrayMenu) {
 		if (!future.isDone()) {
 			start(fromTrayMenu);
 		}
-		try {
-			return future.get();
-		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
-			throw new IllegalStateException("Interrupted while waiting for FxApplication startup.", e);
-		} catch (ExecutionException e) {
-			throw new IllegalStateException("FxApplication startup failed.", e);
-		}
+		return future;
 	}
 
 	private void start(boolean fromTrayMenu) {
-		LOG.debug("Starting JavaFX runtime...");
-		Platform.startup(() -> {
-			assert Platform.isFxApplicationThread();
-			LOG.debug("JavaFX Runtime started.");
-			FxApplication app = fxAppComponent.trayMenuSupported(fromTrayMenu).build().application();
-			app.start();
-			future.complete(app);
+		executor.submit(() -> {
+			LOG.info("Starting JavaFX runtime...");
+			Platform.startup(() -> {
+				assert Platform.isFxApplicationThread();
+				LOG.info("JavaFX Runtime started.");
+				FxApplication app = fxAppComponent.trayMenuSupported(fromTrayMenu).build().application();
+				app.start();
+				future.complete(app);
+			});
 		});
 	}
 
