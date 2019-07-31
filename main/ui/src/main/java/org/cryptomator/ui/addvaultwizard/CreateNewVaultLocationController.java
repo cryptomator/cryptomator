@@ -24,6 +24,7 @@ public class CreateNewVaultLocationController implements FxController {
 
 	private final Stage window;
 	private final Lazy<Scene> previousScene;
+	private final Lazy<Scene> nextScene;
 	private final ObjectProperty<Path> vaultPath;
 	private final BooleanBinding vaultPathIsNull;
 	private final StringProperty vaultName;
@@ -31,9 +32,10 @@ public class CreateNewVaultLocationController implements FxController {
 
 	//TODO: add parameter for next window
 	@Inject
-	CreateNewVaultLocationController(@AddVaultWizard Stage window, @FxmlScene(FxmlFile.ADDVAULT_NEW_NAME) Lazy<Scene> previousScene, ObjectProperty<Path> vaultPath, StringProperty vaultName, ResourceBundle resourceBundle) {
+	CreateNewVaultLocationController(@AddVaultWizard Stage window, @FxmlScene(FxmlFile.ADDVAULT_NEW_NAME) Lazy<Scene> previousScene, @FxmlScene(FxmlFile.ADDVAULT_NEW_PASSWORD) Lazy<Scene> nextScene, ObjectProperty<Path> vaultPath, StringProperty vaultName, ResourceBundle resourceBundle) {
 		this.window = window;
 		this.previousScene = previousScene;
+		this.nextScene = nextScene;
 		this.vaultPath = vaultPath;
 		this.vaultName = vaultName;
 		this.resourceBundle = resourceBundle;
@@ -49,7 +51,7 @@ public class CreateNewVaultLocationController implements FxController {
 	public void next() {
 		//TODO: what if there exists already a vault?
 		if (hasFullAccessToLocation()) {
-			window.close();
+			window.setScene(nextScene.get());
 		} else {
 			//TODO error handling
 		}
