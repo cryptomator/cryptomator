@@ -48,6 +48,7 @@ class TrayMenuController {
 		
 		// show window on start?
 		if (!settings.startHidden().get()) {
+			// TODO: schedule async to not delay tray menu initialization
 			showMainWindow(null);
 		}
 	}

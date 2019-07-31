@@ -1,11 +1,14 @@
 package org.cryptomator.ui.mainwindow;
 
+import javafx.beans.binding.BooleanBinding;
 import javafx.fxml.FXML;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import org.cryptomator.ui.fxapp.FxApplication;
 import org.cryptomator.ui.common.FxController;
+import org.cryptomator.ui.fxapp.UpdateChecker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,20 +20,25 @@ import java.util.concurrent.CountDownLatch;
 public class MainWindowController implements FxController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(MainWindowController.class);
+	private static final Duration CHECK_FOR_UPDATES_DELAY = Duration.seconds(5);
 
 	private final Stage window;
 	private final FxApplication application;
 	private final boolean minimizeToSysTray;
+	private final UpdateChecker updateChecker;
+	private final BooleanBinding updateAvailable;
 	public HBox titleBar;
 	public Region resizer;
 	private double xOffset;
 	private double yOffset;
 
 	@Inject
-	public MainWindowController(@MainWindow Stage window, FxApplication application, @Named("trayMenuSupported") boolean minimizeToSysTray) {
+	public MainWindowController(@MainWindow Stage window, FxApplication application, @Named("trayMenuSupported") boolean minimizeToSysTray, UpdateChecker updateChecker) {
 		this.window = window;
 		this.application = application;
 		this.minimizeToSysTray = minimizeToSysTray;
+		this.updateChecker = updateChecker;
+		this.updateAvailable = updateChecker.latestVersionProperty().isNotNull();
 	}
 
 	@FXML
@@ -49,6 +57,7 @@ public class MainWindowController implements FxController {
 			window.setWidth(event.getSceneX());
 			window.setHeight(event.getSceneY());
 		});
+		updateChecker.startCheckingForUpdates(CHECK_FOR_UPDATES_DELAY);
 	}
 
 	@FXML
@@ -63,5 +72,15 @@ public class MainWindowController implements FxController {
 	@FXML
 	public void showPreferences() {
 		application.showPreferencesWindow();
+	}
+
+	/* Getter/Setter */
+
+	public BooleanBinding updateAvailableProperty() {
+		return updateAvailable;
+	}
+
+	public boolean isUpdateAvailable() {
+		return updateAvailable.get();
 	}
 }
