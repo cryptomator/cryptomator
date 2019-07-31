@@ -92,6 +92,33 @@
 
 /*******************************************************************************
  *                                                                             *
+ * TabPane                                                                     *
+ *                                                                             *
+ ******************************************************************************/
+
+.tab-pane {
+	-fx-tab-min-height: 24;
+}
+.tab-pane > .tab-header-area {
+	-fx-padding: 6px 12px 0 12px;
+	-fx-background-color: CONTROL_BORDER_FOCUSED, MAIN_BG;
+    -fx-background-insets: 0, 0 0 1 0;
+}
+.tab-pane > .tab-header-area > .headers-region > .tab {
+	-fx-text-fill: TEXT_FILL;
+	-fx-alignment: CENTER;
+	-fx-background-color: CONTROL_BORDER_NORMAL, CONTROL_BORDER_FOCUSED, MAIN_BG;
+	-fx-background-insets: 0, 1px 1px 0 1px, 1px;
+	-fx-background-radius: 4px 4px 0 0;
+	-fx-padding: 0.2em 0.4em 0.2em 0.4em;
+}
+.tab-pane > .tab-header-area > .headers-region > .tab:selected {
+	-fx-background-color: CONTROL_BORDER_FOCUSED, MAIN_BG;
+	-fx-background-insets: 0, 1px 1px 0 1px;
+}
+
+/*******************************************************************************
+ *                                                                             *
  * SplitPane                                                                   *
  *                                                                             *
  ******************************************************************************/

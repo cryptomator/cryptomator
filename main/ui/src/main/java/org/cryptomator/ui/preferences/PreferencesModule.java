@@ -5,7 +5,6 @@ import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoMap;
 import javafx.scene.Scene;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.cryptomator.ui.common.FXMLLoaderFactory;
 import org.cryptomator.ui.common.FxController;
@@ -52,5 +51,14 @@ abstract class PreferencesModule {
 	@FxControllerKey(PreferencesController.class)
 	abstract FxController bindPreferencesController(PreferencesController controller);
 
+	@Binds
+	@IntoMap
+	@FxControllerKey(GeneralPreferencesController.class)
+	abstract FxController bindGeneralPreferencesController(GeneralPreferencesController controller);
+
+	@Binds
+	@IntoMap
+	@FxControllerKey(UpdatesPreferencesController.class)
+	abstract FxController bindUpdatesPreferencesController(UpdatesPreferencesController controller);
 
 }

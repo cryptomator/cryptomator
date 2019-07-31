@@ -1,0 +1,125 @@
+package org.cryptomator.ui.preferences;
+
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.TextField;
+import javafx.util.StringConverter;
+import org.cryptomator.common.settings.Settings;
+import org.cryptomator.common.settings.UiTheme;
+import org.cryptomator.common.settings.VolumeImpl;
+import org.cryptomator.common.settings.WebDavUrlScheme;
+import org.cryptomator.common.vaults.Volume;
+import org.cryptomator.ui.common.FxController;
+
+import javax.inject.Inject;
+
+@PreferencesScoped
+public class GeneralPreferencesController implements FxController {
+
+	private final Settings settings;
+	private final BooleanBinding showWebDavSettings;
+	public ChoiceBox<UiTheme> themeChoiceBox;
+	public CheckBox startHiddenCheckbox;
+	public CheckBox debugModeCheckbox;
+	public ChoiceBox<VolumeImpl> volumeTypeChoicBox;
+	public TextField webDavPortField;
+	public Button changeWebDavPortButton;
+	public ChoiceBox<WebDavUrlScheme> webDavUrlSchemeChoiceBox;
+
+	@Inject
+	GeneralPreferencesController(Settings settings) {
+		this.settings = settings;
+		this.showWebDavSettings = Bindings.equal(settings.preferredVolumeImpl(), VolumeImpl.WEBDAV);
+	}
+
+	public void initialize() {
+		themeChoiceBox.getItems().addAll(UiTheme.values());
+		themeChoiceBox.valueProperty().bindBidirectional(settings.theme());
+		themeChoiceBox.setConverter(new UiThemeConverter());
+
+		startHiddenCheckbox.selectedProperty().bindBidirectional(settings.startHidden());
+
+		debugModeCheckbox.selectedProperty().bindBidirectional(settings.debugMode());
+
+		volumeTypeChoicBox.getItems().addAll(Volume.getCurrentSupportedAdapters());
+		volumeTypeChoicBox.valueProperty().bindBidirectional(settings.preferredVolumeImpl());
+		volumeTypeChoicBox.setConverter(new VolumeImplConverter());
+
+		webDavPortField.setText(String.valueOf(settings.port().get()));
+		changeWebDavPortButton.visibleProperty().bind(settings.port().asString().isNotEqualTo(webDavPortField.textProperty()));
+		changeWebDavPortButton.disableProperty().bind(Bindings.createBooleanBinding(this::validateWebDavPort, webDavPortField.textProperty()).not());
+
+		webDavUrlSchemeChoiceBox.getItems().addAll(WebDavUrlScheme.values());
+		webDavUrlSchemeChoiceBox.valueProperty().bindBidirectional(settings.preferredGvfsScheme());
+		webDavUrlSchemeChoiceBox.setConverter(new WebDavUrlSchemeConverter());
+	}
+
+	private boolean validateWebDavPort() {
+		try {
+			int port = Integer.parseInt(webDavPortField.getText());
+			return port == 0 // choose port automatically
+					|| port >= Settings.MIN_PORT && port <= Settings.MAX_PORT; // port within range
+		} catch (NumberFormatException e) {
+			return false;
+		}
+	}
+
+	public void doChangeWebDavPort() {
+		settings.port().set(Integer.parseInt(webDavPortField.getText()));
+	}
+
+	/* Property Getters */
+
+	public BooleanBinding showWebDavSettingsProperty() {
+		return showWebDavSettings;
+	}
+
+	public Boolean getShowWebDavSettings() {
+		return showWebDavSettings.get();
+	}
+
+	/* Helper classes */
+
+	private static class UiThemeConverter extends StringConverter<UiTheme> {
+
+		@Override
+		public String toString(UiTheme impl) {
+			return impl.getDisplayName();
+		}
+
+		@Override
+		public UiTheme fromString(String string) {
+			throw new UnsupportedOperationException();
+		}
+	}
+
+	private static class WebDavUrlSchemeConverter extends StringConverter<WebDavUrlScheme> {
+
+		@Override
+		public String toString(WebDavUrlScheme scheme) {
+			return scheme.getDisplayName();
+		}
+
+		@Override
+		public WebDavUrlScheme fromString(String string) {
+			throw new UnsupportedOperationException();
+		}
+	}
+
+	private static class VolumeImplConverter extends StringConverter<VolumeImpl> {
+
+		@Override
+		public String toString(VolumeImpl impl) {
+			return impl.getDisplayName();
+		}
+
+		@Override
+		public VolumeImpl fromString(String string) {
+			throw new UnsupportedOperationException();
+		}
+	}
+
+}
