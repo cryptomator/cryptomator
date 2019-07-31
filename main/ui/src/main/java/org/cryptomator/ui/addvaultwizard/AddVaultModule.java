@@ -74,10 +74,10 @@ public abstract class AddVaultModule {
 	}
 
 	@Provides
-	@FxmlScene(FxmlFile.ADDVAULT_NEW)
+	@FxmlScene(FxmlFile.ADDVAULT_NEW_NAME)
 	@AddVaultWizardScoped
 	static Scene provideCreateNewVaultScene(@AddVaultWizard FXMLLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene("/fxml/addvault_new.fxml");
+		return fxmlLoaders.createScene("/fxml/addvault_new_name.fxml");
 
 	}
 	// ------------------
@@ -94,8 +94,8 @@ public abstract class AddVaultModule {
 
 	@Binds
 	@IntoMap
-	@FxControllerKey(CreateNewVaultController.class)
-	abstract FxController bindCreateNewVaultController(CreateNewVaultController controller);
+	@FxControllerKey(CreateNewVaultNameController.class)
+	abstract FxController bindCreateNewVaultNameController(CreateNewVaultNameController controller);
 
 
 }

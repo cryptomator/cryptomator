@@ -21,7 +21,7 @@ import java.util.ResourceBundle;
  * TODO: Add trim() filter to vaultName
  */
 @AddVaultWizardScoped
-public class CreateNewVaultController implements FxController {
+public class CreateNewVaultNameController implements FxController {
 
 	public TextField textField;
 	private final Stage window;
@@ -30,7 +30,7 @@ public class CreateNewVaultController implements FxController {
 	private final ResourceBundle resourceBundle;
 
 	@Inject
-	CreateNewVaultController(@AddVaultWizard Stage window, @FxmlScene(FxmlFile.ADDVAULT_WELCOME) Lazy<Scene> welcomeScene, StringProperty vaultName, ResourceBundle resourceBundle) {
+	CreateNewVaultNameController(@AddVaultWizard Stage window, @FxmlScene(FxmlFile.ADDVAULT_WELCOME) Lazy<Scene> welcomeScene, StringProperty vaultName, ResourceBundle resourceBundle) {
 		this.window = window;
 		this.welcomeScene = welcomeScene;
 		this.vaultName = vaultName;
@@ -57,7 +57,7 @@ public class CreateNewVaultController implements FxController {
 	}
 
 	/**
-	 * Checks if {@link CreateNewVaultController#vaultName}is a valid directory name in the OS by creating and deleting a directory with the giving name in the temporary section of the OS
+	 * Checks if {@link CreateNewVaultNameController#vaultName}is a valid directory name in the OS by creating and deleting a directory with the giving name in the temporary section of the OS
 	 * TODO: Logging
 	 *
 	 * @return true, if a directory with the name already exists or can be created
