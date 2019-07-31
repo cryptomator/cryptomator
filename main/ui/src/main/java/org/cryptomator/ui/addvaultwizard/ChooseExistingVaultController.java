@@ -1,20 +1,19 @@
 package org.cryptomator.ui.addvaultwizard;
 
 import dagger.Lazy;
-import javafx.beans.property.BooleanProperty;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.cryptomator.common.settings.VaultSettings;
+import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.common.vaults.VaultFactory;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
-import org.cryptomator.common.vaults.Vault;
-import org.cryptomator.common.vaults.VaultFactory;
 
 import javax.inject.Inject;
 import java.io.File;
@@ -28,7 +27,7 @@ public class ChooseExistingVaultController implements FxController {
 	private final Lazy<Scene> welcomeScene;
 	private final ObjectProperty<Path> vaultPath;
 	private final ObservableList<Vault> vaults;
-	private final BooleanProperty isVaultPathNull;
+	private final BooleanBinding vaultPathIsNull;
 	private final VaultFactory vaultFactory;
 	private final ResourceBundle resourceBundle;
 
@@ -40,8 +39,7 @@ public class ChooseExistingVaultController implements FxController {
 		this.vaults = vaults;
 		this.vaultFactory = vaultFactory;
 		this.resourceBundle = resourceBundle;
-		this.isVaultPathNull = new SimpleBooleanProperty();
-		isVaultPathNull.bind(vaultPath.isNull());
+		this.vaultPathIsNull = vaultPath.isNull();
 	}
 
 	@FXML
@@ -79,12 +77,12 @@ public class ChooseExistingVaultController implements FxController {
 		return vaultPath;
 	}
 
-	public boolean getIsVaultPathNull() {
-		return isVaultPathNull.get();
+	public boolean isVaultPathIsNull() {
+		return vaultPathIsNull.get();
 	}
 
-	public BooleanProperty isVaultPathNullProperty() {
-		return isVaultPathNull;
+	public BooleanBinding vaultPathIsNullProperty() {
+		return vaultPathIsNull;
 	}
 
 }
