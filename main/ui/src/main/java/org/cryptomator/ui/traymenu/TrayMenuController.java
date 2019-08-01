@@ -9,6 +9,7 @@ import org.cryptomator.ui.fxapp.FxApplication;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.awt.Desktop;
+import java.awt.Menu;
 import java.awt.MenuItem;
 import java.awt.PopupMenu;
 import java.awt.event.ActionEvent;
@@ -53,7 +54,7 @@ class TrayMenuController {
 		}
 	}
 
-	private void vaultListChanged(Observable observable) {
+	private void vaultListChanged(@SuppressWarnings("unused") Observable observable) {
 		rebuildMenu();
 	}
 
@@ -70,27 +71,48 @@ class TrayMenuController {
 
 		menu.addSeparator();
 		for (Vault v : vaults) {
-			// TODO what do we want to do with these? lock/unlock? reveal? submenu?
-			MenuItem vaultItem = new MenuItem(v.getDisplayableName());
-			menu.add(vaultItem);
+			MenuItem submenu = buildSubmenu(v);
+			menu.add(submenu);
 		}
 		menu.addSeparator();
 
 		MenuItem quitApplicationItem = new MenuItem("TODO quit");
 		quitApplicationItem.addActionListener(this::quitApplication);
 		menu.add(quitApplicationItem);
-
 	}
 
-	private void showMainWindow(ActionEvent actionEvent) {
+	private Menu buildSubmenu(Vault vault) {
+		Menu submenu = new Menu(vault.getDisplayableName());
+		vault.stateProperty().addListener(observable -> rebuildSubmenu(submenu, vault));
+		rebuildSubmenu(submenu, vault);
+		return submenu;
+	}
+
+	private void rebuildSubmenu(Menu submenu, Vault vault) {
+		submenu.removeAll();
+
+		// TODO add action listeners
+		if (vault.isLocked()) {
+			MenuItem unlockItem = new MenuItem("TODO unlock");
+			submenu.add(unlockItem);
+		} else if (vault.isUnlocked()) {
+			MenuItem lockItem = new MenuItem("TODO lock");
+			submenu.add(lockItem);
+
+			MenuItem revealItem = new MenuItem("TODO reveal");
+			submenu.add(revealItem);
+		}
+	}
+
+	void showMainWindow(@SuppressWarnings("unused") ActionEvent actionEvent) {
 		fxApplicationStarter.get(true).thenAccept(FxApplication::showMainWindow);
 	}
 
-	private void showPreferencesWindow(EventObject actionEvent) {
+	void showPreferencesWindow(@SuppressWarnings("unused") EventObject actionEvent) {
 		fxApplicationStarter.get(true).thenAccept(FxApplication::showPreferencesWindow);
 	}
 
-	private void quitApplication(ActionEvent actionEvent) {
+	void quitApplication(@SuppressWarnings("unused") ActionEvent actionEvent) {
 		shutdownLatch.countDown();
 	}
 }
