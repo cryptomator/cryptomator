@@ -24,6 +24,7 @@ public abstract class UpdateCheckerModule {
 
 	private static final URI LATEST_VERSION_URI = URI.create("https://api.cryptomator.org/updates/latestVersion.json");
 	private static final Duration UPDATE_CHECK_INTERVAL = Duration.hours(3);
+	private static final Duration DISABLED_UPDATE_CHECK_INTERVAL = Duration.hours(100000); // Duration.INDEFINITE leads to overflows...
 
 	@Provides
 	@Named("latestVersion")
@@ -56,7 +57,7 @@ public abstract class UpdateCheckerModule {
 	@Named("checkForUpdatesInterval")
 	@FxApplicationScoped
 	static ObjectBinding<Duration> provideCheckForUpdateInterval(Settings settings) {
-		return Bindings.when(settings.checkForUpdates()).then(UPDATE_CHECK_INTERVAL).otherwise(Duration.INDEFINITE);
+		return Bindings.when(settings.checkForUpdates()).then(UPDATE_CHECK_INTERVAL).otherwise(DISABLED_UPDATE_CHECK_INTERVAL);
 	}
 
 	@Provides
