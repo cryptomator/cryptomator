@@ -13,8 +13,10 @@ import java.awt.Menu;
 import java.awt.MenuItem;
 import java.awt.PopupMenu;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.EventObject;
 import java.util.concurrent.CountDownLatch;
+import java.util.function.Consumer;
 
 @TrayMenuScoped
 class TrayMenuController {
@@ -94,6 +96,7 @@ class TrayMenuController {
 		// TODO add action listeners
 		if (vault.isLocked()) {
 			MenuItem unlockItem = new MenuItem("TODO unlock");
+			unlockItem.addActionListener(createActionListenerForVault(vault, this::unlockVault));
 			submenu.add(unlockItem);
 		} else if (vault.isUnlocked()) {
 			MenuItem lockItem = new MenuItem("TODO lock");
@@ -102,6 +105,14 @@ class TrayMenuController {
 			MenuItem revealItem = new MenuItem("TODO reveal");
 			submenu.add(revealItem);
 		}
+	}
+
+	private ActionListener createActionListenerForVault(Vault vault, Consumer<Vault> consumer) {
+		return actionEvent -> consumer.accept(vault);
+	}
+
+	private void unlockVault(Vault vault) {
+		fxApplicationStarter.get(true).thenAccept(app -> app.showUnlockWindow(vault));
 	}
 
 	void showMainWindow(@SuppressWarnings("unused") ActionEvent actionEvent) {

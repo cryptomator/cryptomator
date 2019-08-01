@@ -7,10 +7,12 @@ import javafx.beans.value.ObservableValue;
 import javafx.stage.Stage;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.UiTheme;
+import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.jni.MacApplicationUiAppearance;
 import org.cryptomator.jni.MacFunctions;
 import org.cryptomator.ui.mainwindow.MainWindowComponent;
 import org.cryptomator.ui.preferences.PreferencesComponent;
+import org.cryptomator.ui.unlock.UnlockComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,13 +29,15 @@ public class FxApplication extends Application {
 	private final Settings settings;
 	private final Lazy<MainWindowComponent> mainWindow;
 	private final Lazy<PreferencesComponent> preferencesWindow;
+	private final UnlockComponent.Builder unlockWindowBuilder;
 	private final Optional<MacFunctions> macFunctions;
 
 	@Inject
-	FxApplication(Settings settings, Lazy<MainWindowComponent> mainWindow, Lazy<PreferencesComponent> preferencesWindow, Optional<MacFunctions> macFunctions) {
+	FxApplication(Settings settings, Lazy<MainWindowComponent> mainWindow, Lazy<PreferencesComponent> preferencesWindow, UnlockComponent.Builder unlockWindowBuilder, Optional<MacFunctions> macFunctions) {
 		this.settings = settings;
 		this.mainWindow = mainWindow;
 		this.preferencesWindow = preferencesWindow;
+		this.unlockWindowBuilder = unlockWindowBuilder;
 		this.macFunctions = macFunctions;
 	}
 
@@ -61,6 +65,13 @@ public class FxApplication extends Application {
 		Platform.runLater(() -> {
 			mainWindow.get().showMainWindow();
 			LOG.debug("Showing MainWindow");
+		});
+	}
+
+	public void showUnlockWindow(Vault vault) {
+		Platform.runLater(() -> {
+			unlockWindowBuilder.vault(vault).build().showUnlockWindow();
+			LOG.debug("Showing UnlockWindow for {}", vault.getDisplayableName());
 		});
 	}
 
