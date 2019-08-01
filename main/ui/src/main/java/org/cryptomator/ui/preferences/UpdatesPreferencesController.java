@@ -39,7 +39,7 @@ public class UpdatesPreferencesController implements FxController {
 
 	@FXML
 	public void checkNow() {
-		updateChecker.startCheckingForUpdates(Duration.ZERO);
+		updateChecker.checkForUpdatesNow();
 	}
 
 	/* Observable Properties */

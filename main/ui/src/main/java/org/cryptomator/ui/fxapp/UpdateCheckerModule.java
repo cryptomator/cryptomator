@@ -2,17 +2,15 @@ package org.cryptomator.ui.fxapp;
 
 import dagger.Module;
 import dagger.Provides;
-import javafx.beans.binding.BooleanBinding;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.ReadOnlyBooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Task;
-import javafx.concurrent.Worker;
 import javafx.util.Duration;
 import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.common.settings.Settings;
 
 import javax.inject.Named;
 import java.net.URI;
@@ -36,22 +34,34 @@ public abstract class UpdateCheckerModule {
 
 	@Provides
 	@FxApplicationScoped
-	static HttpClient providesHttpClient() {
+	static HttpClient provideHttpClient() {
 		return HttpClient.newHttpClient();
 	}
 
 	@Provides
 	@FxApplicationScoped
-	static HttpRequest providesCheckForUpdatesRequest(@Named("applicationVersion") Optional<String> applicationVersion) {
-		String userAgent = String.format("Cryptomator VersionChecker/%s %s %s (%s)", applicationVersion.orElse("SNAPSHOT"), SystemUtils.OS_NAME, SystemUtils.OS_VERSION, SystemUtils.OS_ARCH);
+	static HttpRequest provideCheckForUpdatesRequest(@Named("applicationVersion") Optional<String> applicationVersion) {
+		String userAgent = String.format("Cryptomator VersionChecker/%s %s %s (%s)", //
+				applicationVersion.orElse("SNAPSHOT"), //
+				SystemUtils.OS_NAME, //
+				SystemUtils.OS_VERSION, //
+				SystemUtils.OS_ARCH); //
 		return HttpRequest.newBuilder() //
 				.uri(LATEST_VERSION_URI) //
-				.header("User-Agent", userAgent).build();
+				.header("User-Agent", userAgent) //
+				.build();
+	}
+
+	@Provides
+	@Named("checkForUpdatesInterval")
+	@FxApplicationScoped
+	static ObjectBinding<Duration> provideCheckForUpdateInterval(Settings settings) {
+		return Bindings.when(settings.checkForUpdates()).then(UPDATE_CHECK_INTERVAL).otherwise(Duration.INDEFINITE);
 	}
 
 	@Provides
 	@FxApplicationScoped
-	static ScheduledService<String> provideCheckForUpdatesService(ExecutorService executor, HttpClient httpClient, HttpRequest checkForUpdatesRequest) {
+	static ScheduledService<String> provideCheckForUpdatesService(ExecutorService executor, HttpClient httpClient, HttpRequest checkForUpdatesRequest, @Named("checkForUpdatesInterval") ObjectBinding<Duration> period) {
 		ScheduledService<String> service = new ScheduledService<>() {
 			@Override
 			protected Task<String> createTask() {
@@ -59,7 +69,7 @@ public abstract class UpdateCheckerModule {
 			}
 		};
 		service.setExecutor(executor);
-		service.setPeriod(UPDATE_CHECK_INTERVAL);
+		service.periodProperty().bind(period);
 		return service;
 	}
 

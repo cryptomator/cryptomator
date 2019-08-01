@@ -20,7 +20,6 @@ import java.util.concurrent.CountDownLatch;
 public class MainWindowController implements FxController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(MainWindowController.class);
-	private static final Duration CHECK_FOR_UPDATES_DELAY = Duration.seconds(5);
 
 	private final Stage window;
 	private final FxApplication application;
@@ -57,7 +56,7 @@ public class MainWindowController implements FxController {
 			window.setWidth(event.getSceneX());
 			window.setHeight(event.getSceneY());
 		});
-		updateChecker.startCheckingForUpdates(CHECK_FOR_UPDATES_DELAY);
+		updateChecker.automaticallyCheckForUpdatesIfEnabled();
 	}
 
 	@FXML

@@ -20,6 +20,7 @@ import java.util.Optional;
 public class UpdateChecker {
 
 	private static final Logger LOG = LoggerFactory.getLogger(UpdateChecker.class);
+	private static final Duration AUTOCHECK_DELAY = Duration.seconds(5);
 
 	private final Settings settings;
 	private final Optional<String> applicationVersion;
@@ -36,7 +37,17 @@ public class UpdateChecker {
 		this.updateCheckerService = updateCheckerService;
 	}
 
-	public void startCheckingForUpdates(Duration initialDelay) {
+	public void automaticallyCheckForUpdatesIfEnabled() {
+		if (settings.checkForUpdates().get()) {
+			startCheckingForUpdates(AUTOCHECK_DELAY);
+		}
+	}
+
+	public void checkForUpdatesNow() {
+		startCheckingForUpdates(Duration.ZERO);
+	}
+
+	private void startCheckingForUpdates(Duration initialDelay) {
 		updateCheckerService.setDelay(initialDelay);
 		updateCheckerService.setOnRunning(this::checkStarted);
 		updateCheckerService.setOnSucceeded(this::checkSucceeded);
