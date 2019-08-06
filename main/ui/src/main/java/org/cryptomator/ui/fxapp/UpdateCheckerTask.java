@@ -31,7 +31,7 @@ public class UpdateCheckerTask extends Task<String> {
 	}
 
 	@Override
-	protected String call() throws Exception {
+	protected String call() throws IOException, InterruptedException {
 		HttpResponse<InputStream> response = httpClient.send(checkForUpdatesRequest, HttpResponse.BodyHandlers.ofInputStream());
 		if (response.statusCode() == 200) {
 			return processBody(response);
