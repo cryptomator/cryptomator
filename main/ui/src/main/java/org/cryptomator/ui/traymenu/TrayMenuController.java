@@ -1,10 +1,13 @@
 package org.cryptomator.ui.traymenu;
 
 import javafx.beans.Observable;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
 import javafx.collections.ObservableList;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.fxapp.FxApplication;
+import org.fxmisc.easybind.EasyBind;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -12,6 +15,8 @@ import java.awt.Desktop;
 import java.awt.Menu;
 import java.awt.MenuItem;
 import java.awt.PopupMenu;
+import java.awt.desktop.QuitEvent;
+import java.awt.desktop.QuitResponse;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.EventObject;
@@ -26,6 +31,7 @@ class TrayMenuController {
 	private final Settings settings;
 	private final ObservableList<Vault> vaults;
 	private final PopupMenu menu;
+	private final BooleanBinding allLocked;
 
 	@Inject
 	TrayMenuController(FxApplicationStarter fxApplicationStarter, @Named("shutdownLatch") CountDownLatch shutdownLatch, Settings settings, ObservableList<Vault> vaults) {
@@ -34,6 +40,7 @@ class TrayMenuController {
 		this.settings = settings;
 		this.vaults = vaults;
 		this.menu = new PopupMenu();
+		this.allLocked = Bindings.isEmpty(vaults.filtered(Vault::isUnlocked)); // TODO better use Vault::isNotLocked ;)
 	}
 
 	public PopupMenu getMenu() {
@@ -48,6 +55,11 @@ class TrayMenuController {
 		// register preferences shortcut
 		if (Desktop.getDesktop().isSupported(Desktop.Action.APP_PREFERENCES)) {
 			Desktop.getDesktop().setPreferencesHandler(this::showPreferencesWindow);
+		}
+
+		// register preferences shortcut
+		if (Desktop.getDesktop().isSupported(Desktop.Action.APP_QUIT_HANDLER)) {
+			Desktop.getDesktop().setQuitHandler(this::handleQuitRequest);
 		}
 
 		// show window on start?
@@ -111,14 +123,32 @@ class TrayMenuController {
 	}
 
 	void showMainWindow(@SuppressWarnings("unused") ActionEvent actionEvent) {
-		fxApplicationStarter.get(true).thenAccept(FxApplication::showMainWindow);
+		fxApplicationStarter.get(true).thenAccept(app -> app.showMainWindow());
 	}
 
-	void showPreferencesWindow(@SuppressWarnings("unused") EventObject actionEvent) {
+	private void showPreferencesWindow(@SuppressWarnings("unused") EventObject actionEvent) {
 		fxApplicationStarter.get(true).thenAccept(FxApplication::showPreferencesWindow);
 	}
 
-	void quitApplication(@SuppressWarnings("unused") ActionEvent actionEvent) {
-		shutdownLatch.countDown();
+	private void handleQuitRequest(EventObject e, QuitResponse response) {
+		if (allLocked.get()) {
+			response.performQuit(); // really?
+		} else {
+			fxApplicationStarter.get(true).thenAccept(app -> app.showQuitWindow(response));
+		}
+	}
+
+	private void quitApplication(EventObject actionEvent) {
+		handleQuitRequest(actionEvent, new QuitResponse() {
+			@Override
+			public void performQuit() {
+				shutdownLatch.countDown();
+			}
+
+			@Override
+			public void cancelQuit() {
+				// no-op
+			}
+		});
 	}
 }

@@ -15,11 +15,12 @@ import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.keychain.KeychainModule;
 import org.cryptomator.ui.mainwindow.MainWindowComponent;
 import org.cryptomator.ui.preferences.PreferencesComponent;
+import org.cryptomator.ui.quit.QuitComponent;
 import org.cryptomator.ui.unlock.UnlockComponent;
 
 import java.util.ResourceBundle;
 
-@Module(includes = {KeychainModule.class, UpdateCheckerModule.class}, subcomponents = {MainWindowComponent.class, PreferencesComponent.class, UnlockComponent.class})
+@Module(includes = {KeychainModule.class, UpdateCheckerModule.class}, subcomponents = {MainWindowComponent.class, PreferencesComponent.class, UnlockComponent.class, QuitComponent.class})
 abstract class FxApplicationModule {
 
 	@Binds

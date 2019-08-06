@@ -8,6 +8,7 @@ public enum FxmlFile {
 	ADDVAULT_NEW_LOCATION("/fxml/addvault_new_location.fxml"), //
 	ADDVAULT_NEW_PASSWORD("/fxml/addvault_new_password.fxml"), //
 	PREFERENCES("/fxml/preferences.fxml"), //
+	QUIT("/fxml/quit.fxml"),
 	UNLOCK("/fxml/unlock2.fxml"), // TODO rename
 	UNLOCK_SUCCESS("/fxml/unlock_success.fxml"),
 	VAULT_OPTIONS("/fxml/vault_options.fxml");
