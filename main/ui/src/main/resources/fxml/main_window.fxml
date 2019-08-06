@@ -10,7 +10,6 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.shape.Circle?>
 <VBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
 	  fx:controller="org.cryptomator.ui.mainwindow.MainWindowController"
@@ -26,8 +25,7 @@
 				<graphic>
 					<StackPane>
 						<FontAwesomeIconView styleClass="fa-icon" glyphName="COGS"/>
-						<!-- TODO style: -->
-						<Circle visible="${controller.updateAvailable}" StackPane.alignment="TOP_RIGHT" styleClass="update-indicator" fill="red" radius="4"/>
+						<Region styleClass="update-indicator" visible="${controller.updateAvailable}" StackPane.alignment="TOP_RIGHT" prefWidth="10" prefHeight="10" maxWidth="-Infinity" maxHeight="-Infinity"/>
 					</StackPane>
 				</graphic>
 				<tooltip>

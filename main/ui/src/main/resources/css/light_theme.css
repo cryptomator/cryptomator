@@ -17,6 +17,7 @@
 	CONTROL_WHITE_BG_ARMED: #E1E1E1;
 	SCROLL_BAR_THUMB_NORMAL: #CFCFCF;
 	SCROLL_BAR_THUMB_HOVER: #B1B1B1;
+	INDICATOR_BG: #E74C3C;
 
 	-fx-background-color: MAIN_BG;
 	-fx-text-fill: TEXT_FILL;
@@ -78,6 +79,13 @@
 		transparent 81%
 	);
 	-fx-cursor: nw_resize;
+}
+
+.main-window .update-indicator {
+	-fx-background-color: PRIMARY_BG, INDICATOR_BG;
+	-fx-background-insets: 0, 1px;
+	-fx-background-radius: 5px, 4px;
+	-fx-translate-x: 4px;
 }
 
 /*******************************************************************************
