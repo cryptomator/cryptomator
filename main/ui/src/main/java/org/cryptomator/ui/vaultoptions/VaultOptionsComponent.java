@@ -35,7 +35,7 @@ public interface VaultOptionsComponent {
 	interface Builder {
 
 		@BindsInstance
-		VaultOptionsComponent.Builder vault(@VaultOptionsWindow Vault vault);
+		Builder vault(@VaultOptionsWindow Vault vault);
 
 		VaultOptionsComponent build();
 	}
