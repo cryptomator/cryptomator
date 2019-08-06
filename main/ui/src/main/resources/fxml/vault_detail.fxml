@@ -16,5 +16,6 @@
 
 		<Button text="TODO unlock" onAction="#unlock" visible="${controller.vault.locked}"/>
 		<Button text="TODO lock" onAction="#lock" visible="${controller.vault.unlocked}"/>
+		<Button text="TODO options" onAction="#showVaultOptions" visible="${controller.vault.locked}"/>
 	</children>
 </VBox>

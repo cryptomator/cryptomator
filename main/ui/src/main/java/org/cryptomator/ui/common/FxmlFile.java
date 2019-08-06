@@ -9,7 +9,8 @@ public enum FxmlFile {
 	ADDVAULT_NEW_PASSWORD("/fxml/addvault_new_password.fxml"), //
 	PREFERENCES("/fxml/preferences.fxml"), //
 	UNLOCK("/fxml/unlock2.fxml"), // TODO rename
-	UNLOCK_SUCCESS("/fxml/unlock_success.fxml");
+	UNLOCK_SUCCESS("/fxml/unlock_success.fxml"),
+	VAULT_OPTIONS("/fxml/vault_options.fxml");
 
 	private final String filename;
 

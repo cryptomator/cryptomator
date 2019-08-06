@@ -13,12 +13,13 @@ import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxControllerKey;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
+import org.cryptomator.ui.vaultoptions.VaultOptionsComponent;
 
 import javax.inject.Provider;
 import java.util.Map;
 import java.util.ResourceBundle;
 
-@Module(subcomponents = {AddVaultWizardComponent.class})
+@Module(subcomponents = {AddVaultWizardComponent.class, VaultOptionsComponent.class})
 abstract class MainWindowModule {
 
 	@Provides
