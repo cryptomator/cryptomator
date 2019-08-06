@@ -85,14 +85,7 @@ class TrayMenuController {
 
 	private Menu buildSubmenu(Vault vault) {
 		Menu submenu = new Menu(vault.getDisplayableName());
-		vault.stateProperty().addListener(observable -> rebuildSubmenu(submenu, vault));
-		rebuildSubmenu(submenu, vault);
-		return submenu;
-	}
-
-	private void rebuildSubmenu(Menu submenu, Vault vault) {
-		submenu.removeAll();
-
+		
 		// TODO add action listeners
 		if (vault.isLocked()) {
 			MenuItem unlockItem = new MenuItem("TODO unlock");
@@ -105,6 +98,8 @@ class TrayMenuController {
 			MenuItem revealItem = new MenuItem("TODO reveal");
 			submenu.add(revealItem);
 		}
+		
+		return submenu;
 	}
 
 	private ActionListener createActionListenerForVault(Vault vault, Consumer<Vault> consumer) {

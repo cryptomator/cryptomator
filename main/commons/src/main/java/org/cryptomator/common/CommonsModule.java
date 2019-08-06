@@ -10,6 +10,7 @@ import dagger.Module;
 import dagger.Provides;
 import javafx.beans.binding.Binding;
 import javafx.beans.binding.Bindings;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.settings.Settings;
@@ -48,9 +49,11 @@ public abstract class CommonsModule {
 		return settingsProvider.get();
 	}
 
-	@Binds
+	@Provides
 	@Singleton
-	abstract ObservableList<Vault> bindVaultList(VaultList vaultList);
+	static ObservableList<Vault> provideVaultList(VaultList vaultList) {
+		return FXCollections.observableList(vaultList, Vault::observables);
+	}
 
 	@Provides
 	@Singleton
