@@ -23,8 +23,7 @@
 		<HBox>
 			<Button text="TODO cancel" cancelButton="true" onAction="#cancel"/>
 			<Region HBox.hgrow="ALWAYS"/>
-			<Button text="TODO force quit" cancelButton="true" onAction="#forceQuit"/>
-			<Button text="TODO lock and quit" defaultButton="true" onAction="#quit" contentDisplay="${controller.quitButtonState}">
+			<Button text="TODO lock and quit" defaultButton="true" onAction="#lockAndQuit" fx:id="lockAndQuitButton" contentDisplay="TEXT_ONLY">
 				<graphic>
 					<ProgressIndicator progress="-1" prefWidth="12" prefHeight="12"/>
 				</graphic>
