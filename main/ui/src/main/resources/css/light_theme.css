@@ -14,6 +14,8 @@
 	CONTROL_BORDER_FOCUSED: #9E9E9E;
 	CONTROL_BG_NORMAL: #FFF;
 	CONTROL_BG_ARMED: #E1E1E1;
+	CONTROL_PRIMARY_BG_NORMAL: #70A11B;
+	CONTROL_PRIMARY_BG_ARMED: #598016;
 	CONTROL_WHITE_BG_ARMED: #E1E1E1;
 	SCROLL_BAR_THUMB_NORMAL: #CFCFCF;
 	SCROLL_BAR_THUMB_HOVER: #B1B1B1;
@@ -289,6 +291,19 @@
 
 .button:armed {
 	-fx-background-color: CONTROL_BORDER_NORMAL, CONTROL_BG_ARMED;
+}
+
+.button:default {
+	-fx-text-fill: white;
+	-fx-background-color: CONTROL_BORDER_NORMAL, CONTROL_PRIMARY_BG_NORMAL;
+}
+
+.button:default:focused {
+	-fx-background-color: CONTROL_BORDER_FOCUSED, CONTROL_PRIMARY_BG_NORMAL;
+}
+
+.button:default:armed {
+	-fx-background-color: CONTROL_BORDER_NORMAL, CONTROL_PRIMARY_BG_ARMED;
 }
 
 /*******************************************************************************
