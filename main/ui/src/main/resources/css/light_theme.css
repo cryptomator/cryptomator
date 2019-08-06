@@ -19,7 +19,7 @@
 	SCROLL_BAR_THUMB_HOVER: #B1B1B1;
 
 	-fx-background-color: MAIN_BG;
-    -fx-text-fill: TEXT_FILL;
+	-fx-text-fill: TEXT_FILL;
 }
 
 /*******************************************************************************
@@ -97,24 +97,30 @@
  ******************************************************************************/
 
 .tab-pane {
-	-fx-tab-min-height: 24;
+	-fx-tab-min-height: 2em;
 }
+
 .tab-pane > .tab-header-area {
 	-fx-padding: 6px 12px 0 12px;
 	-fx-background-color: CONTROL_BORDER_FOCUSED, MAIN_BG;
-    -fx-background-insets: 0, 0 0 1 0;
+	-fx-background-insets: 0, 0 0 1px 0;
 }
+
 .tab-pane > .tab-header-area > .headers-region > .tab {
-	-fx-text-fill: TEXT_FILL;
-	-fx-alignment: CENTER;
-	-fx-background-color: CONTROL_BORDER_NORMAL, CONTROL_BORDER_FOCUSED, MAIN_BG;
-	-fx-background-insets: 0, 1px 1px 0 1px, 1px;
+	-fx-background-color: CONTROL_BORDER_NORMAL, MAIN_BG;
+	-fx-background-insets: 0 0 1px 0, 1px;
 	-fx-background-radius: 4px 4px 0 0;
 	-fx-padding: 0.2em 0.4em 0.2em 0.4em;
 }
+
 .tab-pane > .tab-header-area > .headers-region > .tab:selected {
 	-fx-background-color: CONTROL_BORDER_FOCUSED, MAIN_BG;
 	-fx-background-insets: 0, 1px 1px 0 1px;
+}
+
+.tab-pane > .tab-header-area > .headers-region > .tab > .tab-container > .tab-label {
+	-fx-text-fill: TEXT_FILL;
+	-fx-alignment: CENTER;
 }
 
 /*******************************************************************************
@@ -139,7 +145,7 @@
  ******************************************************************************/
 
 .list-view {
-    -fx-background-color: CONTROL_BG_NORMAL;
+	-fx-background-color: CONTROL_BG_NORMAL;
 }
 
 .list-cell:selected {
@@ -182,7 +188,7 @@
 	-fx-background-insets: 0;
 	-fx-background-radius: 0;
 	-fx-border-color: transparent CONTROL_BORDER_NORMAL transparent transparent;
-    -fx-border-width: 1;
+	-fx-border-width: 1;
 }
 
 .toolbar-container .button:armed {
