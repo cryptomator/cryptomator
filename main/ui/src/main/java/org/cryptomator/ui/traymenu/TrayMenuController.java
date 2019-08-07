@@ -57,7 +57,7 @@ class TrayMenuController {
 			Desktop.getDesktop().setPreferencesHandler(this::showPreferencesWindow);
 		}
 
-		// register preferences shortcut
+		// register quit handler
 		if (Desktop.getDesktop().isSupported(Desktop.Action.APP_QUIT_HANDLER)) {
 			Desktop.getDesktop().setQuitHandler(this::handleQuitRequest);
 		}
