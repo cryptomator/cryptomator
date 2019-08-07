@@ -15,7 +15,6 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.StringBinding;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
@@ -45,7 +44,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 
 @PerVault
 public class Vault {
@@ -57,7 +55,7 @@ public class Vault {
 
 	private final VaultSettings vaultSettings;
 	private final Provider<Volume> volumeProvider;
-	private final Supplier<String> defaultMountFlags;
+	private final StringBinding defaultMountFlags;
 	private final AtomicReference<CryptoFileSystem> cryptoFileSystem = new AtomicReference<>();
 	private final ObjectProperty<State> state = new SimpleObjectProperty<State>(State.LOCKED);
 	private final StringBinding displayableName;
@@ -72,7 +70,7 @@ public class Vault {
 	}
 
 	@Inject
-	Vault(VaultSettings vaultSettings, Provider<Volume> volumeProvider, @DefaultMountFlags Supplier<String> defaultMountFlags) {
+	Vault(VaultSettings vaultSettings, Provider<Volume> volumeProvider, @DefaultMountFlags StringBinding defaultMountFlags) {
 		this.vaultSettings = vaultSettings;
 		this.volumeProvider = volumeProvider;
 		this.defaultMountFlags = defaultMountFlags;
@@ -122,7 +120,7 @@ public class Vault {
 		}
 		CryptoFileSystem fs = getCryptoFileSystem(passphrase);
 		volume = volumeProvider.get();
-		volume.mount(fs, getMountFlags());
+		volume.mount(fs, getEffectiveMountFlags());
 	}
 
 	public synchronized void lock(boolean forced) throws Volume.VolumeException {
@@ -318,16 +316,24 @@ public class Vault {
 		return !Strings.isNullOrEmpty(vaultSettings.mountFlags().get());
 	}
 
-	public String getMountFlags() {
+	public StringBinding defaultMountFlagsProperty() {
+		return defaultMountFlags;
+	}
+
+	public String getDefaultMountFlags() {
+		return defaultMountFlags.get();
+	}
+
+	public String getEffectiveMountFlags() {
 		String mountFlags = vaultSettings.mountFlags().get();
 		if (Strings.isNullOrEmpty(mountFlags)) {
-			return defaultMountFlags.get();
+			return getDefaultMountFlags();
 		} else {
 			return mountFlags;
 		}
 	}
 
-	public void setMountFlags(String mountFlags) {
+	public void setCustomMountFlags(String mountFlags) {
 		vaultSettings.mountFlags().set(mountFlags);
 	}
 

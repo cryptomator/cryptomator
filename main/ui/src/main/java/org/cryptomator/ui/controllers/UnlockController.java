@@ -211,7 +211,7 @@ public class UnlockController implements ViewController {
 		downloadsPageLink.setManaged(false);
 		mountName.setText(vault.getMountName());
 		useCustomMountFlags.setSelected(vault.isHavingCustomMountFlags());
-		mountFlags.setText(vault.getMountFlags());
+		mountFlags.setText(vault.getEffectiveMountFlags());
 		savePassword.setSelected(false);
 		// auto-fill pw from keychain:
 		if (keychainAccess.isPresent()) {
@@ -321,28 +321,28 @@ public class UnlockController implements ViewController {
 			vault.setMountName(newValue);
 		}
 		if (!useCustomMountFlags.isSelected()) {
-			mountFlags.setText(vault.getMountFlags()); // update default flags
+			mountFlags.setText(vault.getEffectiveMountFlags()); // update default flags
 		}
 	}
 
 	private void useReadOnlyDidChange(@SuppressWarnings("unused") ObservableValue<? extends Boolean> property, @SuppressWarnings("unused") Boolean oldValue, Boolean newValue) {
 		vault.getVaultSettings().usesReadOnlyMode().setValue(newValue);
 		if (!useCustomMountFlags.isSelected()) {
-			mountFlags.setText(vault.getMountFlags()); // update default flags
+			mountFlags.setText(vault.getEffectiveMountFlags()); // update default flags
 		}
 	}
 
 
 	private void useCustomMountFlagsDidChange(@SuppressWarnings("unused") ObservableValue<? extends Boolean> property, @SuppressWarnings("unused") Boolean oldValue, Boolean newValue) {
 		if (!newValue) {
-			vault.setMountFlags(VaultSettings.DEFAULT_MOUNT_FLAGS);
-			mountFlags.setText(vault.getMountFlags());
+			vault.setCustomMountFlags(VaultSettings.DEFAULT_MOUNT_FLAGS);
+			mountFlags.setText(vault.getEffectiveMountFlags());
 		}
 	}
 
 	private void mountFlagsDidChange(@SuppressWarnings("unused") ObservableValue<? extends String> property, @SuppressWarnings("unused") String oldValue, String newValue) {
 		if (useCustomMountFlags.isSelected()) {
-			vault.setMountFlags(newValue);
+			vault.setCustomMountFlags(newValue);
 		}
 	}
 

@@ -7,6 +7,13 @@ package org.cryptomator.common.vaults;
 
 import dagger.Module;
 import dagger.Provides;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
+import javafx.beans.binding.StringBinding;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ReadOnlyBooleanProperty;
+import javafx.beans.property.ReadOnlyBooleanWrapper;
+import javafx.beans.property.StringProperty;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VaultSettings;
@@ -44,90 +51,95 @@ public class VaultModule {
 	@Provides
 	@PerVault
 	@DefaultMountFlags
-	public Supplier<String> provideDefaultMountFlags(Settings settings, VaultSettings vaultSettings) {
-		return () -> {
-			VolumeImpl preferredImpl = settings.preferredVolumeImpl().get();
-			switch (preferredImpl) {
-				case FUSE:
-					if (SystemUtils.IS_OS_MAC_OSX) {
-						return getMacFuseDefaultMountFlags(settings, vaultSettings);
-					} else if (SystemUtils.IS_OS_LINUX) {
-						return getLinuxFuseDefaultMountFlags(settings, vaultSettings);
-					}
-				case DOKANY:
-					return getDokanyDefaultMountFlags(settings, vaultSettings);
-				default:
-					return "--flags-supported-on-FUSE-or-DOKANY-only";
-			}
-		};
+	public StringBinding provideDefaultMountFlags(Settings settings, VaultSettings vaultSettings) {
+		BooleanBinding isMacFuse = new ReadOnlyBooleanWrapper(SystemUtils.IS_OS_MAC_OSX).and(settings.preferredVolumeImpl().isEqualTo(VolumeImpl.FUSE));
+		BooleanBinding isLinuxFuse = new ReadOnlyBooleanWrapper(SystemUtils.IS_OS_LINUX).and(settings.preferredVolumeImpl().isEqualTo(VolumeImpl.FUSE));
+		BooleanBinding isWinDokany = new ReadOnlyBooleanWrapper(SystemUtils.IS_OS_WINDOWS).and(settings.preferredVolumeImpl().isEqualTo(VolumeImpl.DOKANY));
+
+		return Bindings.when(isMacFuse) // IF isMacFuse
+				.then(getMacFuseDefaultMountFlags(vaultSettings)) //
+				.otherwise(Bindings.when(isLinuxFuse) // ELSE IF isLinuxFuse
+						.then(getLinuxFuseDefaultMountFlags(vaultSettings)) //
+						.otherwise(Bindings.when(isWinDokany) // ELSE IF isWinDokany
+								.then(getDokanyDefaultMountFlags(vaultSettings)) //
+								.otherwise("--flags-supported-on-FUSE-or-DOKANY-only") // ELSE
+						) //
+				);
 	}
 
 	// see: https://github.com/osxfuse/osxfuse/wiki/Mount-options
-	private String getMacFuseDefaultMountFlags(Settings settings, VaultSettings vaultSettings) {
+	private StringBinding getMacFuseDefaultMountFlags(VaultSettings vaultSettings) {
 		assert SystemUtils.IS_OS_MAC_OSX;
+		StringProperty mountName = vaultSettings.mountName();
+		BooleanProperty readOnly = vaultSettings.usesReadOnlyMode();
+		return Bindings.createStringBinding(() -> {
+			StringBuilder flags = new StringBuilder();
+			if (readOnly.get()) {
+				flags.append(" -ordonly");
+			}
+			flags.append(" -ovolname=").append(mountName.get());
+			flags.append(" -oatomic_o_trunc");
+			flags.append(" -oauto_xattr");
+			flags.append(" -oauto_cache");
+			flags.append(" -omodules=iconv,from_code=UTF-8,to_code=UTF-8-MAC"); // show files names in Unicode NFD encoding
+			flags.append(" -onoappledouble"); // vastly impacts performance for some reason...
+			flags.append(" -odefault_permissions"); // let the kernel assume permissions based on file attributes etc
 
-		StringBuilder flags = new StringBuilder();
-		if (vaultSettings.usesReadOnlyMode().get()) {
-			flags.append(" -ordonly");
-		}
-		flags.append(" -ovolname=").append(vaultSettings.mountName().get());
-		flags.append(" -oatomic_o_trunc");
-		flags.append(" -oauto_xattr");
-		flags.append(" -oauto_cache");
-		flags.append(" -omodules=iconv,from_code=UTF-8,to_code=UTF-8-MAC"); // show files names in Unicode NFD encoding
-		flags.append(" -onoappledouble"); // vastly impacts performance for some reason...
-		flags.append(" -odefault_permissions"); // let the kernel assume permissions based on file attributes etc
+			try {
+				Path userHome = Paths.get(System.getProperty("user.home"));
+				int uid = (int) Files.getAttribute(userHome, "unix:uid");
+				int gid = (int) Files.getAttribute(userHome, "unix:gid");
+				flags.append(" -ouid=").append(uid);
+				flags.append(" -ogid=").append(gid);
+			} catch (IOException e) {
+				LOG.error("Could not read uid/gid from USER_HOME", e);
+			}
 
-		try {
-			Path userHome = Paths.get(System.getProperty("user.home"));
-			int uid = (int) Files.getAttribute(userHome, "unix:uid");
-			int gid = (int) Files.getAttribute(userHome, "unix:gid");
-			flags.append(" -ouid=").append(uid);
-			flags.append(" -ogid=").append(gid);
-		} catch (IOException e) {
-			LOG.error("Could not read uid/gid from USER_HOME", e);
-		}
-
-		return flags.toString().strip();
+			return flags.toString().strip();
+		}, mountName, readOnly);
 	}
 
 	// see https://manpages.debian.org/testing/fuse/mount.fuse.8.en.html
-	private String getLinuxFuseDefaultMountFlags(Settings settings, VaultSettings vaultSettings) {
+	private StringBinding getLinuxFuseDefaultMountFlags(VaultSettings vaultSettings) {
 		assert SystemUtils.IS_OS_LINUX;
+		BooleanProperty readOnly = vaultSettings.usesReadOnlyMode();
+		return Bindings.createStringBinding(() -> {
+			StringBuilder flags = new StringBuilder();
+			if (readOnly.get()) {
+				flags.append(" -oro");
+			}
+			flags.append(" -oauto_unmount");
 
-		StringBuilder flags = new StringBuilder();
-		if (vaultSettings.usesReadOnlyMode().get()) {
-			flags.append(" -oro");
-		}
-		flags.append(" -oauto_unmount");
+			try {
+				Path userHome = Paths.get(System.getProperty("user.home"));
+				int uid = (int) Files.getAttribute(userHome, "unix:uid");
+				int gid = (int) Files.getAttribute(userHome, "unix:gid");
+				flags.append(" -ouid=").append(uid);
+				flags.append(" -ogid=").append(gid);
+			} catch (IOException e) {
+				LOG.error("Could not read uid/gid from USER_HOME", e);
+			}
 
-		try {
-			Path userHome = Paths.get(System.getProperty("user.home"));
-			int uid = (int) Files.getAttribute(userHome, "unix:uid");
-			int gid = (int) Files.getAttribute(userHome, "unix:gid");
-			flags.append(" -ouid=").append(uid);
-			flags.append(" -ogid=").append(gid);
-		} catch (IOException e) {
-			LOG.error("Could not read uid/gid from USER_HOME", e);
-		}
-
-		return flags.toString().strip();
+			return flags.toString().strip();
+		}, readOnly);
 	}
 
 	// see https://github.com/cryptomator/dokany-nio-adapter/blob/develop/src/main/java/org/cryptomator/frontend/dokany/MountUtil.java#L30-L34
-	private String getDokanyDefaultMountFlags(Settings settings, VaultSettings vaultSettings) {
+	private StringBinding getDokanyDefaultMountFlags(VaultSettings vaultSettings) {
 		assert SystemUtils.IS_OS_WINDOWS;
-
-		StringBuilder flags = new StringBuilder();
-		flags.append(" --options CURRENT_SESSION");
-		if (vaultSettings.usesReadOnlyMode().get()) {
-			flags.append(",WRITE_PROTECTION");
-		}
-		flags.append(" --thread-count 5");
-		flags.append(" --timeout 10000");
-		flags.append(" --allocation-unit-size 4096");
-		flags.append(" --sector-size 4096");
-		return flags.toString().strip();
+		BooleanProperty readOnly = vaultSettings.usesReadOnlyMode();
+		return Bindings.createStringBinding(() -> {
+			StringBuilder flags = new StringBuilder();
+			flags.append(" --options CURRENT_SESSION");
+			if (readOnly.get()) {
+				flags.append(",WRITE_PROTECTION");
+			}
+			flags.append(" --thread-count 5");
+			flags.append(" --timeout 10000");
+			flags.append(" --allocation-unit-size 4096");
+			flags.append(" --sector-size 4096");
+			return flags.toString().strip();
+		}, readOnly);
 	}
 
 }
