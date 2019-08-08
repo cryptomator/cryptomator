@@ -9,17 +9,27 @@
 	PRIMARY_BG: #70A11B;
 	MAIN_BG: #F7F7F7;
 	TEXT_FILL: #222;
-	TEXT_FILL_LIGHT: #7E7E7E;
+	TEXT_FILL_SECONDARY: #7E7E7E;
+	TEXT_FILL_WHITE: white;
+	TEXT_FILL_WHITE_SECONDARY: #B1B1B1;
 	CONTROL_BORDER_NORMAL: #CFCFCF;
 	CONTROL_BORDER_FOCUSED: #9E9E9E;
+	CONTROL_BORDER_DISABLED: #E1E1E1;
 	CONTROL_BG_NORMAL: #FFF;
 	CONTROL_BG_ARMED: #E1E1E1;
+	CONTROL_BG_DISABLED: #F7F7F7;
+	CONTROL_PRIMARY_BORDER_NORMAL: #598016;
+	CONTROL_PRIMARY_BORDER_FOCUSED: #425E10;
+	CONTROL_PRIMARY_BORDER_DISABLED: #688040;
 	CONTROL_PRIMARY_BG_NORMAL: #70A11B;
 	CONTROL_PRIMARY_BG_ARMED: #598016;
+	CONTROL_PRIMARY_BG_DISABLED: #83A150;
 	CONTROL_WHITE_BG_ARMED: #E1E1E1;
 	SCROLL_BAR_THUMB_NORMAL: #CFCFCF;
 	SCROLL_BAR_THUMB_HOVER: #B1B1B1;
 	INDICATOR_BG: #E74C3C;
+	PROGRESS_INDICATOR_BEGIN: #515151;
+	PROGRESS_INDICATOR_END: #7E7E7E;
 
 	-fx-background-color: MAIN_BG;
 	-fx-text-fill: TEXT_FILL;
@@ -167,7 +177,7 @@
 }
 
 .list-cell .detail-label {
-	-fx-text-fill: TEXT_FILL_LIGHT;
+	-fx-text-fill: TEXT_FILL_SECONDARY;
 	-fx-font-size: 0.8em;
 }
 
@@ -258,7 +268,7 @@
 .text-input {
 	-fx-cursor: text;
 	-fx-text-fill: TEXT_FILL;
-	-fx-prompt-text-fill: TEXT_FILL_LIGHT;
+	-fx-prompt-text-fill: TEXT_FILL_SECONDARY;
 	-fx-background-color: CONTROL_BORDER_NORMAL, CONTROL_BG_NORMAL;
 	-fx-background-insets: 0, 1px;
 	-fx-background-radius: 4px;
@@ -267,6 +277,11 @@
 
 .text-input:focused {
 	-fx-background-color: CONTROL_BORDER_FOCUSED, CONTROL_BG_NORMAL;
+}
+
+.text-input:disabled {
+	-fx-text-fill: TEXT_FILL_SECONDARY;
+	-fx-background-color: CONTROL_BORDER_DISABLED, CONTROL_BG_DISABLED;
 }
 
 /*******************************************************************************
@@ -293,17 +308,27 @@
 	-fx-background-color: CONTROL_BORDER_NORMAL, CONTROL_BG_ARMED;
 }
 
+.button:disabled {
+	-fx-text-fill: TEXT_FILL_SECONDARY;
+	-fx-background-color: CONTROL_BORDER_DISABLED, CONTROL_BG_DISABLED;
+}
+
 .button:default {
-	-fx-text-fill: white;
-	-fx-background-color: CONTROL_BORDER_NORMAL, CONTROL_PRIMARY_BG_NORMAL;
+	-fx-text-fill: TEXT_FILL_WHITE;
+	-fx-background-color: CONTROL_PRIMARY_BORDER_NORMAL, CONTROL_PRIMARY_BG_NORMAL;
 }
 
 .button:default:focused {
-	-fx-background-color: CONTROL_BORDER_FOCUSED, CONTROL_PRIMARY_BG_NORMAL;
+	-fx-background-color: CONTROL_PRIMARY_BORDER_FOCUSED, CONTROL_PRIMARY_BG_NORMAL;
 }
 
 .button:default:armed {
-	-fx-background-color: CONTROL_BORDER_NORMAL, CONTROL_PRIMARY_BG_ARMED;
+	-fx-background-color: CONTROL_PRIMARY_BORDER_NORMAL, CONTROL_PRIMARY_BG_ARMED;
+}
+
+.button:default:disabled {
+	-fx-text-fill: TEXT_FILL_WHITE_SECONDARY;
+	-fx-background-color: CONTROL_PRIMARY_BORDER_DISABLED, CONTROL_PRIMARY_BG_DISABLED;
 }
 
 /*******************************************************************************
@@ -403,7 +428,7 @@
 }
 
 .progress-indicator:indeterminate .segment {
-	-fx-background-color: rgb(95.0, 95.0, 98.0), rgb(122.0, 122.0, 125.0);
+	-fx-background-color: PROGRESS_INDICATOR_BEGIN, PROGRESS_INDICATOR_END;
 	-fx-background-insets: 0, 0.5;
 }
 
