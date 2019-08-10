@@ -16,7 +16,9 @@ public class LinuxSecretServiceAccess implements KeychainAccessStrategy {
 
 	@Override
 	public boolean isSupported() {
-		return SystemUtils.IS_OS_LINUX && LinuxKeychainTester.getSecretService().isPresent();
+		return SystemUtils.IS_OS_LINUX
+				&& LinuxKeychainTester.getSecretService().isPresent()
+				&& !gnomeLoginKeyring.get().isDbusProblem();
 	}
 
 	@Override

@@ -6,4 +6,6 @@ public interface GnomeKeyringAccess {
 	public char[] loadPassword(String key);
 
 	public void deletePassword(String key);
+
+	public boolean isDbusProblem();
 }
