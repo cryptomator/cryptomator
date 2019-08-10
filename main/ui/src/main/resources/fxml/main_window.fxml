@@ -14,7 +14,7 @@
 	  xmlns:fx="http://javafx.com/fxml"
 	  fx:controller="org.cryptomator.ui.mainwindow.MainWindowController"
 	  styleClass="main-window">
-	<HBox styleClass="title" fx:id="titleBar" alignment="CENTER" minHeight="50" maxHeight="50" VBox.vgrow="NEVER" spacing="12">
+	<HBox styleClass="title" fx:id="titleBar" alignment="CENTER" minHeight="50" maxHeight="50" VBox.vgrow="NEVER" spacing="6">
 		<padding>
 			<Insets bottom="6" left="12" right="12" top="6"/>
 		</padding>
