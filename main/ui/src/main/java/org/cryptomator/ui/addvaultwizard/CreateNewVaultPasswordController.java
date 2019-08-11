@@ -1,12 +1,12 @@
 package org.cryptomator.ui.addvaultwizard;
 
 import dagger.Lazy;
-import javafx.beans.Observable;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.stage.Stage;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultFactory;
@@ -30,6 +30,7 @@ public class CreateNewVaultPasswordController implements FxController {
 	private final VaultFactory vaultFactory;
 	private final ResourceBundle resourceBundle;
 
+	public Button finishButton;
 	public SecPasswordField passwordField;
 	public SecPasswordField retypeField;
 
@@ -42,20 +43,11 @@ public class CreateNewVaultPasswordController implements FxController {
 		this.vaults = vaults;
 		this.vaultFactory = vaultFactory;
 		this.resourceBundle = resourceBundle;
-
 	}
 
 	@FXML
 	public void initialize() {
-		passwordField.textProperty().addListener(this::passwordsChanged);
-		retypeField.textProperty().addListener(this::passwordsChanged);
-	}
-
-	private boolean passwordsChanged(@SuppressWarnings("unused") Observable observable) {
-		boolean passwordsEmpty = passwordField.getCharacters().length() == 0;
-		boolean passwordsEqual = passwordField.getCharacters().equals(retypeField.getCharacters());
-		//passwordStrength.set(strengthRater.computeRate(passwordField.getCharacters().toString()));
-		return (!passwordsEmpty) && passwordsEqual;
+		finishButton.disableProperty().bind(passwordField.textProperty().isEmpty().or(passwordField.textProperty().isEqualTo(retypeField.textProperty()).not()));
 	}
 
 	@FXML
