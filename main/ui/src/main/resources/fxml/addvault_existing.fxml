@@ -21,14 +21,14 @@
 		<Region VBox.vgrow="ALWAYS"/>
 		<Label text="%addvaultwizard.existing.instruction"/>
 		<HBox spacing="18">
-			<TextField promptText="TODO" text="${controller.vaultPath}" disable="true" HBox.hgrow="ALWAYS"/>
-			<Button text="TODO filepicker" onAction="#chooseFile" HBox.hgrow="NEVER" prefWidth="120"/>
+			<TextField promptText="%addvaultwizard.existing.promptText" text="${controller.vaultPath}" disable="true" HBox.hgrow="ALWAYS"/>
+			<Button text="%addvaultwizard.existing.filePickerButton" onAction="#chooseFile" HBox.hgrow="NEVER" prefWidth="120"/>
 		</HBox>
 		<Region VBox.vgrow="ALWAYS"/>
 		<ButtonBar buttonMinWidth="120" buttonOrder="B+I">
 			<buttons>
-				<Button text="TODO Back" ButtonBar.buttonData="BACK_PREVIOUS" onAction="#back"/>
-				<Button text="TODO Open" ButtonBar.buttonData="FINISH" onAction="#finish" defaultButton="true" disable="${controller.vaultPathIsNull}"/>
+				<Button text="%generic.button.back" ButtonBar.buttonData="BACK_PREVIOUS" onAction="#back"/>
+				<Button text="%generic.button.open" ButtonBar.buttonData="FINISH" onAction="#finish" defaultButton="true" disable="${controller.vaultPathIsNull}"/>
 			</buttons>
 		</ButtonBar>
 	</children>
