@@ -59,7 +59,7 @@ public class CreateNewVaultNameController implements FxController {
 	}
 
 	/**
-	 * Checks if {@link CreateNewVaultNameController#vaultName}is a valid directory name in the OS by creating and deleting a directory with the giving name in the temporary section of the OS
+	 * Checks if {@link CreateNewVaultNameController#vaultName}is a valid directory name in the OS by creating and deleting a directory with the given name in the temporary section of the OS
 	 * TODO: Logging
 	 *
 	 * @return true, if a directory with the name already exists or can be created
