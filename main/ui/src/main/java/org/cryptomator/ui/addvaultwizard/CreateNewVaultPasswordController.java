@@ -1,12 +1,17 @@
 package org.cryptomator.ui.addvaultwizard;
 
 import dagger.Lazy;
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.layout.Region;
 import javafx.stage.Stage;
 import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.common.vaults.Vault;
@@ -15,6 +20,8 @@ import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.controls.SecPasswordField;
+import org.cryptomator.ui.util.PasswordStrengthUtil;
+import org.fxmisc.easybind.EasyBind;
 
 import javax.inject.Inject;
 import java.io.IOException;
@@ -32,13 +39,21 @@ public class CreateNewVaultPasswordController implements FxController {
 	private final ObservableList<Vault> vaults;
 	private final VaultFactory vaultFactory;
 	private final ResourceBundle resourceBundle;
+	private final PasswordStrengthUtil strengthRater;
+	private final IntegerProperty passwordStrength;
 
 	public Button finishButton;
 	public SecPasswordField passwordField;
 	public SecPasswordField retypeField;
+	public Region passwordStrengthLevel0;
+	public Region passwordStrengthLevel1;
+	public Region passwordStrengthLevel2;
+	public Region passwordStrengthLevel3;
+	public Region passwordStrengthLevel4;
+	public Label passwordStrengthLabel;
 
 	@Inject
-	CreateNewVaultPasswordController(@AddVaultWizard Stage window, @FxmlScene(FxmlFile.ADDVAULT_NEW_LOCATION) Lazy<Scene> previousScene, StringProperty vaultName, ObjectProperty<Path> vaultPath, ObservableList<Vault> vaults, VaultFactory vaultFactory, ResourceBundle resourceBundle) {
+	CreateNewVaultPasswordController(@AddVaultWizard Stage window, @FxmlScene(FxmlFile.ADDVAULT_NEW_LOCATION) Lazy<Scene> previousScene, StringProperty vaultName, ObjectProperty<Path> vaultPath, ObservableList<Vault> vaults, VaultFactory vaultFactory, ResourceBundle resourceBundle, PasswordStrengthUtil strengthRater) {
 		this.window = window;
 		this.previousScene = previousScene;
 		this.vaultName = vaultName;
@@ -46,11 +61,28 @@ public class CreateNewVaultPasswordController implements FxController {
 		this.vaults = vaults;
 		this.vaultFactory = vaultFactory;
 		this.resourceBundle = resourceBundle;
+		this.strengthRater = strengthRater;
+		this.passwordStrength = new SimpleIntegerProperty(-1);
 	}
 
 	@FXML
 	public void initialize() {
-		finishButton.disableProperty().bind(passwordField.textProperty().isEmpty().or(passwordField.textProperty().isEqualTo(retypeField.textProperty()).not()));
+		//binds the actual strength value to the rating of the password util
+		passwordStrength.bind(
+				Bindings.createIntegerBinding(() -> strengthRater.computeRate(passwordField.getCharacters().toString()), passwordField.textProperty())
+		);
+		//disable the finish button when passwords do not match or one is empty
+		finishButton.disableProperty().bind(
+				passwordField.textProperty().isEmpty()
+						.or(Bindings.createBooleanBinding(() -> CharSequence.compare(passwordField.getCharacters(),retypeField.getCharacters()) != 0,passwordField.textProperty(), retypeField.textProperty()))
+		);
+		//bindsings for the password strength indicator
+		passwordStrengthLevel0.backgroundProperty().bind(EasyBind.combine(passwordStrength, new SimpleIntegerProperty(0), strengthRater::getBackgroundWithStrengthColor));
+		passwordStrengthLevel1.backgroundProperty().bind(EasyBind.combine(passwordStrength, new SimpleIntegerProperty(1), strengthRater::getBackgroundWithStrengthColor));
+		passwordStrengthLevel2.backgroundProperty().bind(EasyBind.combine(passwordStrength, new SimpleIntegerProperty(2), strengthRater::getBackgroundWithStrengthColor));
+		passwordStrengthLevel3.backgroundProperty().bind(EasyBind.combine(passwordStrength, new SimpleIntegerProperty(3), strengthRater::getBackgroundWithStrengthColor));
+		passwordStrengthLevel4.backgroundProperty().bind(EasyBind.combine(passwordStrength, new SimpleIntegerProperty(4), strengthRater::getBackgroundWithStrengthColor));
+		passwordStrengthLabel.textProperty().bind(EasyBind.map(passwordStrength, strengthRater::getStrengthDescription));
 	}
 
 	@FXML
