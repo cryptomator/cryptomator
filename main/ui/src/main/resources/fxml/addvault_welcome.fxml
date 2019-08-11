@@ -15,12 +15,12 @@
 		<Insets top="12" right="12" bottom="12" left="12"/>
 	</padding>
 	<children>
-		<Label text="TODO new vault or existing vault?"/>
+		<Label text="%addvaultwizard.welcome.instruction"/>
 
 		<HBox spacing="12">
-			<Button text="TODO new vault" onAction="#createNewVault"/>
+			<Button text="%addvaultwizard.welcome.newButton" onAction="#createNewVault"/>
 
-			<Button text="TODO existing vault" onAction="#chooseExistingVault"/>
+			<Button text="%addvaultwizard.welcome.existingButton" onAction="#chooseExistingVault"/>
 		</HBox>
 	</children>
 </VBox>
