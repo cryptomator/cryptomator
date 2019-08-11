@@ -8,6 +8,7 @@ import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.stage.Stage;
+import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultFactory;
 import org.cryptomator.ui.common.FxController;
@@ -16,6 +17,8 @@ import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.controls.SecPasswordField;
 
 import javax.inject.Inject;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ResourceBundle;
 
@@ -57,10 +60,19 @@ public class CreateNewVaultPasswordController implements FxController {
 
 	@FXML
 	public void finish() {
-		//VaultSettings vaultSettings = VaultSettings.withRandomId();
-		//vaultSettings.path().setValue(vaultPath.get().resolve(vaultName.get()));
-		//vaults.add(vaultFactory.get(vaultSettings));
-		window.close();
+		VaultSettings vaultSettings = VaultSettings.withRandomId();
+		vaultSettings.path().setValue(vaultPath.get().resolve(vaultName.get()));
+		Vault newVault = vaultFactory.get(vaultSettings);
+		try {
+			//TODO: why is creating the directory not part of the creation process?
+			Files.createDirectory(vaultSettings.path().get());
+			newVault.create(passwordField.getCharacters());
+			vaults.add(newVault);
+			window.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+			//TODO
+		}
 	}
 
 	/* Getter/Setter */
