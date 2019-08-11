@@ -16,24 +16,25 @@ import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.paint.Color;
 import org.cryptomator.ui.fxapp.FxApplicationScoped;
-import org.cryptomator.ui.l10n.Localization;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ResourceBundle;
 
 @FxApplicationScoped
 public class PasswordStrengthUtil {
 
 	private static final int PW_TRUNC_LEN = 100; // truncate very long passwords, since zxcvbn memory and runtime depends vastly on the length
+	private static final String RESSOURCE_PREFIX = "passwordStrength.messageLabel.";
 
 	private final Zxcvbn zxcvbn;
 	private final List<String> sanitizedInputs;
-	private final Localization localization;
+	private final ResourceBundle resourceBundle;
 
 	@Inject
-	public PasswordStrengthUtil(Localization localization) {
-		this.localization = localization;
+	public PasswordStrengthUtil(ResourceBundle resourceBundle) {
+		this.resourceBundle = resourceBundle;
 		this.zxcvbn = new Zxcvbn();
 		this.sanitizedInputs = new ArrayList<>();
 		this.sanitizedInputs.add("cryptomator");
@@ -50,18 +51,18 @@ public class PasswordStrengthUtil {
 
 	public Color getStrengthColor(Number score) {
 		switch (score.intValue()) {
-		case 0:
-			return Color.web("#e74c3c");
-		case 1:
-			return Color.web("#e67e22");
-		case 2:
-			return Color.web("#f1c40f");
-		case 3:
-			return Color.web("#40d47e");
-		case 4:
-			return Color.web("#27ae60");
-		default:
-			return Color.web("#ffffff", 0.5);
+			case 0:
+				return Color.web("#e74c3c");
+			case 1:
+				return Color.web("#e67e22");
+			case 2:
+				return Color.web("#f1c40f");
+			case 3:
+				return Color.web("#40d47e");
+			case 4:
+				return Color.web("#27ae60");
+			default:
+				return Color.web("#ffffff", 0.5);
 		}
 	}
 
@@ -76,9 +77,8 @@ public class PasswordStrengthUtil {
 	}
 
 	public String getStrengthDescription(Number score) {
-		String key = "initialize.messageLabel.passwordStrength." + score.intValue();
-		if (localization.containsKey(key)) {
-			return localization.getString(key);
+		if (resourceBundle.containsKey(RESSOURCE_PREFIX + score.intValue())) {
+			return resourceBundle.getString("passwordStrength.messageLabel." + score.intValue());
 		} else {
 			return "";
 		}
