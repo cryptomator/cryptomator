@@ -8,6 +8,7 @@ package org.cryptomator.ui.model;
 import org.cryptomator.common.FxApplicationScoped;
 import org.cryptomator.cryptolib.api.CryptoException;
 import org.cryptomator.keychain.KeychainAccess;
+import org.cryptomator.keychain.KeychainAccessException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,15 +66,16 @@ public class AutoUnlocker {
 	}
 
 	private void unlockSilently(Vault vault) {
-		char[] storedPw = keychainAccess.get().loadPassphrase(vault.getId());
-		if (storedPw == null) {
-			LOG.warn("No passphrase stored in keychain for vault registered for auto unlocking: {}", vault.getPath());
-			return;
-		}
+		char[] storedPw = new char[0];
 		try {
+			storedPw = keychainAccess.get().loadPassphrase(vault.getId());
+			if (storedPw == null) {
+				LOG.warn("No passphrase stored in keychain for vault registered for auto unlocking: {}", vault.getPath());
+				return;
+			}
 			vault.unlock(CharBuffer.wrap(storedPw));
 			revealSilently(vault);
-		} catch (IOException | CryptoException | Volume.VolumeException e) {
+		} catch (IOException | CryptoException | Volume.VolumeException | KeychainAccessException e) {
 			LOG.error("Auto unlock failed.", e);
 		} finally {
 			Arrays.fill(storedPw, ' ');
