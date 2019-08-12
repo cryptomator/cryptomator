@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class LinuxSecretServiceKeychainAccessImpl implements KeychainAccessStrategy {
+class LinuxSecretServiceKeychainAccessImpl implements KeychainAccessStrategy {
 
 	@Override
 	public boolean isSupported() {
