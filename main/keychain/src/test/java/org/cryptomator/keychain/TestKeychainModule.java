@@ -10,7 +10,7 @@ import java.util.Set;
 public class TestKeychainModule extends KeychainModule {
 
 	@Override
-	Set<KeychainAccessStrategy> provideKeychainAccessStrategies(MacSystemKeychainAccess macKeychain, WindowsProtectedKeychainAccess winKeychain, LinuxSecretServiceAccess linKeychain) {
+	Set<KeychainAccessStrategy> provideKeychainAccessStrategies(MacSystemKeychainAccess macKeychain, WindowsProtectedKeychainAccess winKeychain, LinuxSecretServiceKeychainAccess linKeychain) {
 		return Set.of(new MapKeychainAccess());
 	}
 

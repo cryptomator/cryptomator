@@ -13,7 +13,7 @@ import java.util.Optional;
 public class KeychainModuleTest {
 
 	@Test
-	public void testGetKeychain() {
+	public void testGetKeychain() throws KeychainAccessException {
 		Optional<KeychainAccess> keychainAccess = DaggerTestKeychainComponent.builder().keychainModule(new TestKeychainModule()).build().keychainAccess();
 		Assertions.assertTrue(keychainAccess.isPresent());
 		Assertions.assertTrue(keychainAccess.get() instanceof MapKeychainAccess);
