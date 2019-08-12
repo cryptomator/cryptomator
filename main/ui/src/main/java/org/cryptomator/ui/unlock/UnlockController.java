@@ -18,6 +18,7 @@ import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.cryptolib.api.InvalidPassphraseException;
 import org.cryptomator.cryptolib.api.UnsupportedVaultFormatException;
 import org.cryptomator.keychain.KeychainAccess;
+import org.cryptomator.keychain.KeychainAccessException;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
@@ -126,7 +127,11 @@ public class UnlockController implements FxController {
 					SystemUtils.IS_OS_MAC_OSX ? ButtonType.CANCEL : ButtonType.OK);
 			Optional<ButtonType> choice = confirmDialog.showAndWait();
 			if (ButtonType.OK.equals(choice.get())) {
-				keychainAccess.get().deletePassphrase(vault.getId());
+				try {
+					keychainAccess.get().deletePassphrase(vault.getId());
+				} catch (KeychainAccessException e) {
+					LOG.error("Failed to remove entry from system keychain.", e);
+				}
 			} else if (ButtonType.CANCEL.equals(choice.get())) {
 				savePassword.setSelected(true);
 			}
@@ -135,23 +140,30 @@ public class UnlockController implements FxController {
 
 	private void loadStoredPassword() {
 		assert keychainAccess.isPresent();
-		char[] storedPw = keychainAccess.get().loadPassphrase(vault.getId());
-		if (storedPw != null) {
-			savePassword.setSelected(true);
-			passwordField.setPassword(storedPw);
-			passwordField.selectRange(storedPw.length, storedPw.length);
+		char[] storedPw = new char[0];
+		try {
+			storedPw = keychainAccess.get().loadPassphrase(vault.getId());
+			if (storedPw != null) {
+				savePassword.setSelected(true);
+				passwordField.setPassword(storedPw);
+				passwordField.selectRange(storedPw.length, storedPw.length);
+			}
+		} catch (KeychainAccessException e) {
+			LOG.error("Failed to load entry from system keychain.", e);
+		} finally {
 			Arrays.fill(storedPw, ' ');
 		}
 	}
 
 	private boolean hasStoredPassword() {
-		assert keychainAccess.isPresent();
-		char[] storedPw = keychainAccess.get().loadPassphrase(vault.getId());
-		if (storedPw != null) {
-			Arrays.fill(storedPw, ' ');
-			return true;
-		} else {
+		char[] storedPw = new char[0];
+		try {
+			storedPw = keychainAccess.get().loadPassphrase(vault.getId());
+			return storedPw.length != 0;
+		} catch (KeychainAccessException e) {
 			return false;
+		} finally {
+			Arrays.fill(storedPw, ' ');
 		}
 	}
 
