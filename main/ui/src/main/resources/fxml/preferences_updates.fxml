@@ -15,14 +15,14 @@
 		<Insets bottom="12" left="12" right="12" top="12"/>
 	</padding>
 	<children>
-		<CheckBox fx:id="checkForUpdatesCheckbox" text="%preferences.autoUpdateCheck"/>
+		<CheckBox fx:id="checkForUpdatesCheckbox" text="%preferences.updates.autoUpdateCheck"/>
 
-		<Button text="TODO check now!" defaultButton="true" onAction="#checkNow" contentDisplay="${controller.checkForUpdatesButtonState}">
+		<Button text="%preferences.updates.checkNowBtn" defaultButton="true" onAction="#checkNow" contentDisplay="${controller.checkForUpdatesButtonState}">
 			<graphic>
 				<ProgressIndicator progress="-1" prefWidth="12" prefHeight="12"/>
 			</graphic>
 		</Button>
-		
+
 		<TextFlow styleClass="text-flow" visible="${controller.updateAvailable}" textAlignment="CENTER">
 			<Text text="TODO Update to version "/>
 			<Text text="${controller.latestVersion}"/>

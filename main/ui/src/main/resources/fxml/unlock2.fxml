@@ -5,7 +5,6 @@
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.ProgressIndicator?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Text?>
 <?import javafx.scene.text.TextFlow?>
@@ -14,21 +13,23 @@
 	  xmlns:fx="http://javafx.com/fxml"
 	  fx:controller="org.cryptomator.ui.unlock.UnlockController"
 	  minWidth="300"
+	  maxWidth="300"
 	  spacing="6">
 	<padding>
 		<Insets bottom="6.0" left="6.0" right="6.0" top="6.0"/>
 	</padding>
 	<children>
 		<TextFlow styleClass="text-flow">
-			<Text text="TODO Enter Password for "/>
+			<Text text="%unlock.passwordPrompt"/>
+			<Text text=" &quot;"/>
 			<Text text="${controller.vault.displayableName}"/>
+			<Text text="&quot;"/>
 		</TextFlow>
 		<SecPasswordField fx:id="passwordField"/>
-		<CheckBox fx:id="savePassword" text="TODO save password" onAction="#didClickSavePasswordCheckbox"/>
-		<HBox>
-			<Button text="TODO cancel" cancelButton="true" onAction="#cancel"/>
-			<Region HBox.hgrow="ALWAYS"/>
-			<Button text="TODO unlock" defaultButton="true" onAction="#unlock" contentDisplay="${controller.unlockButtonState}" disable="${controller.unlockButtonDisabled}">
+		<CheckBox fx:id="savePassword" text="%unlock.savePassword" onAction="#didClickSavePasswordCheckbox"/>
+		<HBox alignment="CENTER_RIGHT" spacing="6">
+			<Button text="%generic.button.cancel" cancelButton="true" onAction="#cancel"/>
+			<Button text="%unlock.unlockBtn" defaultButton="true" onAction="#unlock" contentDisplay="${controller.unlockButtonState}" disable="${controller.unlockButtonDisabled}">
 				<graphic>
 					<ProgressIndicator progress="-1" prefWidth="12" prefHeight="12"/>
 				</graphic>

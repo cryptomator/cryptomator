@@ -71,6 +71,7 @@
 	-fx-pref-height: 30px;
 	-fx-pref-width: 30px;
 	-fx-background-color: none;
+	-fx-padding: 0;
 }
 
 .main-window .title .button .fa-icon {
@@ -108,7 +109,8 @@
 	-fx-background-color: PRIMARY_BG, INDICATOR_BG;
 	-fx-background-insets: 0, 1px;
 	-fx-background-radius: 5px, 4px;
-	-fx-translate-x: 4px;
+	-fx-translate-x: -1px;
+	-fx-translate-y: 1px;
 }
 
 /*******************************************************************************
@@ -141,7 +143,7 @@
 	-fx-background-color: CONTROL_BORDER_NORMAL, MAIN_BG;
 	-fx-background-insets: 0 0 1px 0, 1px;
 	-fx-background-radius: 4px 4px 0 0;
-	-fx-padding: 0.2em 0.4em 0.2em 0.4em;
+	-fx-padding: 0.2em 1em 0.2em 1em;
 }
 
 .tab-pane > .tab-header-area > .headers-region > .tab:selected {
@@ -219,12 +221,13 @@
 
 .toolbar-container .button {
 	-fx-pref-height: 30px;
-	-fx-pref-width: 30px;
+	-fx-pref-width: 31px;
 	-fx-background-color: transparent;
 	-fx-background-insets: 0;
 	-fx-background-radius: 0;
 	-fx-border-color: transparent CONTROL_BORDER_NORMAL transparent transparent;
-	-fx-border-width: 1;
+	-fx-border-width: 0 1px 0 0;
+	-fx-padding: 0;
 }
 
 .toolbar-container .button:focused {
@@ -318,7 +321,7 @@
 	-fx-background-color: CONTROL_BORDER_NORMAL, CONTROL_BG_NORMAL;
 	-fx-background-insets: 0, 1px;
 	-fx-background-radius: 4px;
-	-fx-padding: 0.2em 0.4em 0.2em 0.4em;
+	-fx-padding: 0.2em 1em 0.2em 1em;
 }
 
 .button:focused {

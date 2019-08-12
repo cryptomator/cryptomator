@@ -10,12 +10,12 @@
 		 tabClosingPolicy="UNAVAILABLE"
 		 tabDragPolicy="FIXED">
 	<tabs>
-		<Tab fx:id="generalTab" text="TODO General">
+		<Tab fx:id="generalTab" text="%preferences.general">
 			<content>
 				<fx:include source="/fxml/preferences_general.fxml"/>
 			</content>
 		</Tab>
-		<Tab fx:id="updatesTab" text="TODO Updates">
+		<Tab fx:id="updatesTab" text="%preferences.updates">
 			<content>
 				<fx:include source="/fxml/preferences_updates.fxml"/>
 			</content>

@@ -17,16 +17,16 @@
 	</padding>
 	<children>
 		<HBox spacing="6" alignment="BASELINE_LEFT">
-			<Label text="%preferences.theme"/>
+			<Label text="%preferences.general.theme"/>
 			<ChoiceBox fx:id="themeChoiceBox"/>
 		</HBox>
 
-		<CheckBox fx:id="startHiddenCheckbox" text="%preferences.startHidden"/>
+		<CheckBox fx:id="startHiddenCheckbox" text="%preferences.general.startHidden"/>
 
-		<CheckBox fx:id="debugModeCheckbox" text="%preferences.debugLogging"/>
+		<CheckBox fx:id="debugModeCheckbox" text="%preferences.general.debugLogging"/>
 
 		<HBox spacing="6" alignment="BASELINE_LEFT">
-			<Label text="%preferences.volumeType"/>
+			<Label text="%preferences.general.volumeType"/>
 			<ChoiceBox fx:id="volumeTypeChoicBox"/>
 		</HBox>
 

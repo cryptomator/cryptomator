@@ -30,10 +30,10 @@ abstract class UnlockModule {
 	@Provides
 	@UnlockWindow
 	@UnlockScoped
-	static Stage provideStage() {
+	static Stage provideStage(ResourceBundle resourceBundle) {
 		Stage stage = new Stage();
-		stage.setMinWidth(300);
-		stage.setMinHeight(200);
+		stage.setTitle(resourceBundle.getString("unlock.title"));
+		stage.setResizable(false);
 		stage.initModality(Modality.APPLICATION_MODAL);
 		return stage;
 	}
