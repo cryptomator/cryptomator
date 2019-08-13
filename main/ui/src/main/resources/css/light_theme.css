@@ -364,6 +364,7 @@
 .check-box {
 	-fx-text-fill: TEXT_FILL;
 	-fx-label-padding: 0 0 0 6px;
+	-fx-padding: 4px;
 }
 
 .check-box > .box {
@@ -396,6 +397,7 @@
 .radio-button {
 	-fx-text-fill: TEXT_FILL;
 	-fx-label-padding: 0 0 0 6px;
+	-fx-padding: 4px;
 }
 .radio-button > .radio {
 	-fx-border-color: CONTROL_BORDER_NORMAL;
