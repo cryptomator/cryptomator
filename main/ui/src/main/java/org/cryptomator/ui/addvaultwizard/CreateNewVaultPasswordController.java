@@ -2,6 +2,7 @@ package org.cryptomator.ui.addvaultwizard;
 
 import dagger.Lazy;
 import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -11,7 +12,9 @@ import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
+import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.common.vaults.Vault;
@@ -51,6 +54,10 @@ public class CreateNewVaultPasswordController implements FxController {
 	public Region passwordStrengthLevel3;
 	public Region passwordStrengthLevel4;
 	public Label passwordStrengthLabel;
+	public HBox passwordMatchBox;
+	public Rectangle checkmark;
+	public Rectangle cross;
+	public Label passwordMatchLabel;
 
 	@Inject
 	CreateNewVaultPasswordController(@AddVaultWizard Stage window, @FxmlScene(FxmlFile.ADDVAULT_NEW_LOCATION) Lazy<Scene> previousScene, StringProperty vaultName, ObjectProperty<Path> vaultPath, ObservableList<Vault> vaults, VaultFactory vaultFactory, ResourceBundle resourceBundle, PasswordStrengthUtil strengthRater) {
@@ -68,14 +75,18 @@ public class CreateNewVaultPasswordController implements FxController {
 	@FXML
 	public void initialize() {
 		//binds the actual strength value to the rating of the password util
-		passwordStrength.bind(
-				Bindings.createIntegerBinding(() -> strengthRater.computeRate(passwordField.getCharacters().toString()), passwordField.textProperty())
-		);
+		passwordStrength.bind(Bindings.createIntegerBinding(() -> strengthRater.computeRate(passwordField.getCharacters().toString()), passwordField.textProperty()));
+		//binding indicating if the passwords not match
+		BooleanBinding passwordsMatch = Bindings.createBooleanBinding(() -> CharSequence.compare(passwordField.getCharacters(), retypeField.getCharacters()) == 0, passwordField.textProperty(), retypeField.textProperty());
+		BooleanBinding retypteFieldNotEmpty = retypeField.textProperty().isNotEmpty();
 		//disable the finish button when passwords do not match or one is empty
-		finishButton.disableProperty().bind(
-				passwordField.textProperty().isEmpty()
-						.or(Bindings.createBooleanBinding(() -> CharSequence.compare(passwordField.getCharacters(),retypeField.getCharacters()) != 0,passwordField.textProperty(), retypeField.textProperty()))
-		);
+		finishButton.disableProperty().bind(retypteFieldNotEmpty.not().or(passwordsMatch.not()));
+		//make match indicator invisible when passwords do not match or one is empty
+		passwordMatchBox.visibleProperty().bind(retypteFieldNotEmpty);
+		checkmark.visibleProperty().bind(passwordsMatch.and(retypteFieldNotEmpty));
+		cross.visibleProperty().bind(passwordsMatch.not().and(retypteFieldNotEmpty));
+		passwordMatchLabel.textProperty().bind(Bindings.when(passwordsMatch.and(retypteFieldNotEmpty)).then(resourceBundle.getString("addvaultwizard.new.passwordsMatch")).otherwise(resourceBundle.getString("addvaultwizard.new.passwordsDoNotMatch")));
+
 		//bindsings for the password strength indicator
 		passwordStrengthLevel0.backgroundProperty().bind(EasyBind.combine(passwordStrength, new SimpleIntegerProperty(0), strengthRater::getBackgroundWithStrengthColor));
 		passwordStrengthLevel1.backgroundProperty().bind(EasyBind.combine(passwordStrength, new SimpleIntegerProperty(1), strengthRater::getBackgroundWithStrengthColor));
