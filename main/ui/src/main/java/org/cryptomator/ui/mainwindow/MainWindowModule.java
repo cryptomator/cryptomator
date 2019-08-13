@@ -5,6 +5,9 @@ import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoMap;
 import javafx.scene.Scene;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import org.cryptomator.ui.addvaultwizard.AddVaultWizardComponent;
@@ -46,8 +49,16 @@ abstract class MainWindowModule {
 	@Provides
 	@FxmlScene(FxmlFile.MAIN_WINDOW)
 	@MainWindowScoped
-	static Scene provideMainScene(@MainWindow FXMLLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene("/fxml/main_window.fxml");
+	static Scene provideMainScene(@MainWindow FXMLLoaderFactory fxmlLoaders, MainWindowController mainWindowController, VaultListController vaultListController) {
+		Scene scene = fxmlLoaders.createScene("/fxml/main_window.fxml");
+
+		// still not perfect... cant't we have a global menubar via the AWT tray app?
+		KeyCombination cmdN = new KeyCodeCombination(KeyCode.N, KeyCombination.SHORTCUT_DOWN);
+		KeyCombination cmdW = new KeyCodeCombination(KeyCode.W, KeyCombination.SHORTCUT_DOWN);
+		scene.getAccelerators().put(cmdN, vaultListController::didClickAddVault);
+		scene.getAccelerators().put(cmdW, mainWindowController::close);
+
+		return scene;
 	}
 
 	// ------------------

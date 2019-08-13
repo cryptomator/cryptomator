@@ -4,9 +4,6 @@ import javafx.beans.binding.BooleanBinding;
 import javafx.fxml.FXML;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyCodeCombination;
-import javafx.scene.input.KeyCombination;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import org.cryptomator.ui.common.FxController;
@@ -34,13 +31,10 @@ public class PreferencesController implements FxController {
 		window.setOnShowing(this::windowWillAppear);
 	}
 
-	private void windowWillAppear(WindowEvent windowEvent) {
+	private void windowWillAppear(@SuppressWarnings("unused") WindowEvent windowEvent) {
 		if (updateAvailable.get()) {
 			tabPane.getSelectionModel().select(updatesTab);
 		}
-
-		KeyCombination cmdW = new KeyCodeCombination(KeyCode.W, KeyCombination.SHORTCUT_DOWN);
-		window.getScene().getAccelerators().put(cmdW, window::close);
 	}
 
 }
