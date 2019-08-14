@@ -364,6 +364,7 @@
 .check-box {
 	-fx-text-fill: TEXT_FILL;
 	-fx-label-padding: 0 0 0 6px;
+	-fx-padding: 4px;
 }
 
 .check-box > .box {
@@ -384,6 +385,40 @@
 }
 
 .check-box:selected > .box > .mark {
+	-fx-background-color: TEXT_FILL;
+}
+
+/*******************************************************************************
+ *                                                                             *
+ * RadioButton                                                                 *
+ *                                                                             *
+ ******************************************************************************/
+
+.radio-button {
+	-fx-text-fill: TEXT_FILL;
+	-fx-label-padding: 0 0 0 6px;
+	-fx-padding: 4px;
+}
+.radio-button > .radio {
+	-fx-border-color: CONTROL_BORDER_NORMAL;
+	-fx-border-radius: 1em; /* large value to make sure this remains circular */
+	-fx-background-color: CONTROL_BG_NORMAL;
+	-fx-background-radius: 1em;
+	-fx-padding: 4px; /* padding from outside edge to the inner black dot */
+}
+.radio-button:focused > .radio {
+	-fx-border-color: CONTROL_BORDER_FOCUSED;
+}
+.text-input:disabled > .radio {
+	-fx-border-color: CONTROL_BORDER_DISABLED;
+	-fx-background-color: CONTROL_BG_DISABLED;
+}
+.radio-button > .radio > .dot {
+	-fx-background-color: transparent;
+	-fx-background-radius: 1.0em; /* large value to make sure this remains circular */
+	-fx-padding: 3px; /* radius of the inner black dot when selected */
+}
+.radio-button:selected > .radio > .dot {
 	-fx-background-color: TEXT_FILL;
 }
 

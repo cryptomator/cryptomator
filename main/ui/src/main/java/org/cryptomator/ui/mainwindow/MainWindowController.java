@@ -5,16 +5,14 @@ import javafx.fxml.FXML;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.stage.Stage;
-import javafx.util.Duration;
-import org.cryptomator.ui.fxapp.FxApplication;
 import org.cryptomator.ui.common.FxController;
+import org.cryptomator.ui.fxapp.FxApplication;
 import org.cryptomator.ui.fxapp.UpdateChecker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import java.util.concurrent.CountDownLatch;
 
 @MainWindowScoped
 public class MainWindowController implements FxController {

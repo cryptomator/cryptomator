@@ -5,6 +5,9 @@ import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoMap;
 import javafx.scene.Scene;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -48,8 +51,13 @@ abstract class VaultOptionsModule {
 	@Provides
 	@FxmlScene(FxmlFile.VAULT_OPTIONS)
 	@VaultOptionsScoped
-	static Scene provideVaultOptionsScene(@VaultOptionsWindow FXMLLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene("/fxml/vault_options.fxml");
+	static Scene provideVaultOptionsScene(@VaultOptionsWindow FXMLLoaderFactory fxmlLoaders, @VaultOptionsWindow Stage window) {
+		Scene scene = fxmlLoaders.createScene("/fxml/vault_options.fxml");
+
+		KeyCombination cmdW = new KeyCodeCombination(KeyCode.W, KeyCombination.SHORTCUT_DOWN);
+		scene.getAccelerators().put(cmdW, window::close);
+
+		return scene;
 	}
 
 	// ------------------
