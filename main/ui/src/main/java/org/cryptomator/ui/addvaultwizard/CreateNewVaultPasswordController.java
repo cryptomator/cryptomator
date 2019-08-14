@@ -47,7 +47,7 @@ public class CreateNewVaultPasswordController implements FxController {
 
 	public Button finishButton;
 	public SecPasswordField passwordField;
-	public SecPasswordField retypeField;
+	public SecPasswordField reenterField;
 	public Region passwordStrengthLevel0;
 	public Region passwordStrengthLevel1;
 	public Region passwordStrengthLevel2;
@@ -77,15 +77,15 @@ public class CreateNewVaultPasswordController implements FxController {
 		//binds the actual strength value to the rating of the password util
 		passwordStrength.bind(Bindings.createIntegerBinding(() -> strengthRater.computeRate(passwordField.getCharacters().toString()), passwordField.textProperty()));
 		//binding indicating if the passwords not match
-		BooleanBinding passwordsMatch = Bindings.createBooleanBinding(() -> CharSequence.compare(passwordField.getCharacters(), retypeField.getCharacters()) == 0, passwordField.textProperty(), retypeField.textProperty());
-		BooleanBinding retypteFieldNotEmpty = retypeField.textProperty().isNotEmpty();
+		BooleanBinding passwordsMatch = Bindings.createBooleanBinding(() -> CharSequence.compare(passwordField.getCharacters(), reenterField.getCharacters()) == 0, passwordField.textProperty(), reenterField.textProperty());
+		BooleanBinding reenterFieldNotEmpty = reenterField.textProperty().isNotEmpty();
 		//disable the finish button when passwords do not match or one is empty
-		finishButton.disableProperty().bind(retypteFieldNotEmpty.not().or(passwordsMatch.not()));
+		finishButton.disableProperty().bind(reenterFieldNotEmpty.not().or(passwordsMatch.not()));
 		//make match indicator invisible when passwords do not match or one is empty
-		passwordMatchBox.visibleProperty().bind(retypteFieldNotEmpty);
-		checkmark.visibleProperty().bind(passwordsMatch.and(retypteFieldNotEmpty));
-		cross.visibleProperty().bind(passwordsMatch.not().and(retypteFieldNotEmpty));
-		passwordMatchLabel.textProperty().bind(Bindings.when(passwordsMatch.and(retypteFieldNotEmpty)).then(resourceBundle.getString("addvaultwizard.new.passwordsMatch")).otherwise(resourceBundle.getString("addvaultwizard.new.passwordsDoNotMatch")));
+		passwordMatchBox.visibleProperty().bind(reenterFieldNotEmpty);
+		checkmark.visibleProperty().bind(passwordsMatch.and(reenterFieldNotEmpty));
+		cross.visibleProperty().bind(passwordsMatch.not().and(reenterFieldNotEmpty));
+		passwordMatchLabel.textProperty().bind(Bindings.when(passwordsMatch.and(reenterFieldNotEmpty)).then(resourceBundle.getString("addvaultwizard.new.passwordsMatch")).otherwise(resourceBundle.getString("addvaultwizard.new.passwordsDoNotMatch")));
 
 		//bindsings for the password strength indicator
 		passwordStrengthLevel0.backgroundProperty().bind(EasyBind.combine(passwordStrength, new SimpleIntegerProperty(0), strengthRater::getBackgroundWithStrengthColor));
