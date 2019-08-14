@@ -11,6 +11,7 @@ import javafx.scene.input.KeyCombination;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import org.cryptomator.ui.addvaultwizard.AddVaultWizardComponent;
+import org.cryptomator.ui.changepassword.ChangePasswordComponent;
 import org.cryptomator.ui.common.FXMLLoaderFactory;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxControllerKey;
@@ -22,7 +23,7 @@ import javax.inject.Provider;
 import java.util.Map;
 import java.util.ResourceBundle;
 
-@Module(subcomponents = {AddVaultWizardComponent.class, VaultOptionsComponent.class})
+@Module(subcomponents = {AddVaultWizardComponent.class, VaultOptionsComponent.class, ChangePasswordComponent.class})
 abstract class MainWindowModule {
 
 	@Provides

@@ -4,6 +4,7 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.fxml.FXML;
 import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.ui.changepassword.ChangePasswordComponent;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.Tasks;
 import org.cryptomator.ui.fxapp.FxApplication;
@@ -23,13 +24,15 @@ public class VaultDetailController implements FxController {
 	private final ExecutorService executor;
 	private final FxApplication application;
 	private final VaultOptionsComponent.Builder vaultOptionsWindow;
+	private final ChangePasswordComponent.Builder changePasswordWindow;
 
 	@Inject
-	VaultDetailController(ObjectProperty<Vault> vault, ExecutorService executor, FxApplication application, VaultOptionsComponent.Builder vaultOptionsWindow) {
+	VaultDetailController(ObjectProperty<Vault> vault, ExecutorService executor, FxApplication application, VaultOptionsComponent.Builder vaultOptionsWindow, ChangePasswordComponent.Builder changePasswordWindow) {
 		this.vault = vault;
 		this.executor = executor;
 		this.application = application;
 		this.vaultOptionsWindow = vaultOptionsWindow;
+		this.changePasswordWindow = changePasswordWindow;
 	}
 
 	@FXML
@@ -50,10 +53,15 @@ public class VaultDetailController implements FxController {
 			// TODO
 		}).runOnce(executor);
 	}
-	
+
 	@FXML
 	public void showVaultOptions() {
 		vaultOptionsWindow.vault(vault.get()).build().showVaultOptionsWindow();
+	}
+
+	@FXML
+	public void changePassword() {
+		changePasswordWindow.vault(vault.get()).build().showChangePasswordWindow();
 	}
 
 	/* Observable Properties */
@@ -65,5 +73,5 @@ public class VaultDetailController implements FxController {
 	public Vault getVault() {
 		return vault.get();
 	}
-	
+
 }
