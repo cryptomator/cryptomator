@@ -35,6 +35,10 @@
 	-fx-text-fill: TEXT_FILL;
 }
 
+.fa-icon {
+	-fx-fill: TEXT_FILL;
+}
+
 /*******************************************************************************
  *                                                                             *
  * Labels                                                                      *
@@ -237,10 +241,6 @@
 
 .toolbar-container .button:armed {
 	-fx-background-color: CONTROL_BG_ARMED;
-}
-
-.toolbar-container .button .fa-icon {
-	-fx-fill: TEXT_FILL;
 }
 
 /*******************************************************************************
