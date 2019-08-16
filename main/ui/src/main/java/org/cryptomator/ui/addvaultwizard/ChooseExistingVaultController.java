@@ -1,7 +1,6 @@
 package org.cryptomator.ui.addvaultwizard;
 
 import dagger.Lazy;
-import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -27,7 +26,6 @@ public class ChooseExistingVaultController implements FxController {
 	private final Lazy<Scene> welcomeScene;
 	private final ObjectProperty<Path> vaultPath;
 	private final ObservableList<Vault> vaults;
-	private final BooleanBinding vaultPathIsNull;
 	private final VaultFactory vaultFactory;
 	private final ResourceBundle resourceBundle;
 
@@ -39,18 +37,6 @@ public class ChooseExistingVaultController implements FxController {
 		this.vaults = vaults;
 		this.vaultFactory = vaultFactory;
 		this.resourceBundle = resourceBundle;
-		this.vaultPathIsNull = vaultPath.isNull();
-	}
-
-	@FXML
-	public void chooseFile() {
-		FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle(resourceBundle.getString("addvaultwizard.existing.filePickerTitle"));
-		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Cryptomator Masterkey", "*.cryptomator"));
-		final File file = fileChooser.showOpenDialog(window);
-		if (file != null) {
-			vaultPath.setValue(file.toPath().toAbsolutePath().getParent());
-		}
 	}
 
 	@FXML
@@ -59,30 +45,20 @@ public class ChooseExistingVaultController implements FxController {
 	}
 
 	@FXML
-	public void finish() {
+	public void chooseFileAndFinish() {
 		//TODO: error handling & cannot unlock added vault
-		VaultSettings vaultSettings = VaultSettings.withRandomId();
-		vaultSettings.path().setValue(vaultPath.get());
-		vaults.add(vaultFactory.get(vaultSettings));
-		window.close();
-	}
-
-	/* Getter/Setter */
-
-	public Path getVaultPath() {
-		return vaultPath.get();
-	}
-
-	public ObjectProperty<Path> vaultPathProperty() {
-		return vaultPath;
-	}
-
-	public boolean isVaultPathIsNull() {
-		return vaultPathIsNull.get();
-	}
-
-	public BooleanBinding vaultPathIsNullProperty() {
-		return vaultPathIsNull;
+		FileChooser fileChooser = new FileChooser();
+		fileChooser.setTitle(resourceBundle.getString("addvaultwizard.existing.filePickerTitle"));
+		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Cryptomator Masterkey", "*.cryptomator"));
+		final File file = fileChooser.showOpenDialog(window);
+		if (file != null) {
+			vaultPath.setValue(file.toPath().toAbsolutePath().getParent());
+			VaultSettings vaultSettings = VaultSettings.withRandomId();
+			vaultSettings.path().setValue(vaultPath.get());
+			vaults.add(vaultFactory.get(vaultSettings));
+			//TODO: error handling?
+			window.close();
+		}
 	}
 
 }
