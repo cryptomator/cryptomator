@@ -18,7 +18,7 @@
 	</padding>
 	<children>
 		<Region VBox.vgrow="ALWAYS"/>
-		<Label text="%addvaultwizard.new.nameInstruction"/>
+		<Label text="%addvaultwizard.new.nameInstruction" labelFor="$textField"/>
 		<TextField fx:id="textField" promptText="%addvaultwizard.new.namePrompt" HBox.hgrow="ALWAYS"/>
 		<Region VBox.vgrow="ALWAYS"/>
 		<ButtonBar buttonMinWidth="120" buttonOrder="B+X">

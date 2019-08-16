@@ -17,12 +17,12 @@
 	</padding>
 	<children>
 		<Region VBox.vgrow="ALWAYS"/>
-		<Label text="%addvaultwizard.existing.instruction"/>
+		<Label text="%addvaultwizard.existing.instruction" labelFor="$finishButton"/>
 		<Region VBox.vgrow="ALWAYS"/>
 		<ButtonBar buttonMinWidth="120" buttonOrder="B+I">
 			<buttons>
 				<Button text="%generic.button.back" ButtonBar.buttonData="BACK_PREVIOUS" onAction="#back"/>
-				<Button text="Choose..." ButtonBar.buttonData="FINISH" onAction="#chooseFileAndFinish" defaultButton="true"/>
+				<Button fx:id="finishButton" text="Choose..." ButtonBar.buttonData="FINISH" onAction="#chooseFileAndFinish" defaultButton="true"/>
 			</buttons>
 		</ButtonBar>
 	</children>
