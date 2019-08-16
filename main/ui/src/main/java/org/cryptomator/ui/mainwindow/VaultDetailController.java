@@ -1,5 +1,6 @@
 package org.cryptomator.ui.mainwindow;
 
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.fxml.FXML;
@@ -21,6 +22,7 @@ public class VaultDetailController implements FxController {
 	private static final Logger LOG = LoggerFactory.getLogger(VaultDetailController.class);
 
 	private final ReadOnlyObjectProperty<Vault> vault;
+	private final BooleanBinding anyVaultSelected;
 	private final ExecutorService executor;
 	private final FxApplication application;
 	private final VaultOptionsComponent.Builder vaultOptionsWindow;
@@ -33,6 +35,7 @@ public class VaultDetailController implements FxController {
 		this.application = application;
 		this.vaultOptionsWindow = vaultOptionsWindow;
 		this.changePasswordWindow = changePasswordWindow;
+		this.anyVaultSelected = vault.isNotNull();
 	}
 
 	@FXML
@@ -72,6 +75,14 @@ public class VaultDetailController implements FxController {
 
 	public Vault getVault() {
 		return vault.get();
+	}
+
+	public BooleanBinding anyVaultSelectedProperty() {
+		return anyVaultSelected;
+	}
+
+	public boolean isAnyVaultSelected() {
+		return anyVaultSelected.get();
 	}
 
 }

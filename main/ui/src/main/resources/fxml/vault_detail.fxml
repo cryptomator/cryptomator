@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Text?>
 <?import javafx.scene.text.TextFlow?>
 <VBox xmlns="http://javafx.com/javafx"
@@ -14,18 +14,23 @@
 	</padding>
 	<children>
 		<!--TODO: add caption style class -->
-		<Text text="${controller.vault.displayableName}" />
-		<TextFlow><!--TODO: add visibility of the textflows -->
-			<Text text="%vaultDetail.info.storageLocation" />
+		<Text text="${controller.vault.displayableName}"/>
+		<TextFlow visible="${controller.anyVaultSelected}"><!--TODO: add visibility of the textflows -->
+			<Text text="%vaultDetail.info.storageLocation"/>
+			<Text text="&quot;"/>
 			<Text text="${controller.vault.displayablePath}"/>
+			<Text text="&quot;"/>
 		</TextFlow>
-		<TextFlow>
-			<Text text="%vaultDetail.info.accessLocation" />
+		<TextFlow visible="${controller.anyVaultSelected}">
+			<Text text="%vaultDetail.info.accessLocation"/>
+			<Text text="&quot;"/>
 			<Text text="${controller.vault.customMountPath}"/>
+			<Text text="&quot;"/>
 		</TextFlow>
-		<TextFlow>
-			<Text text="%vaultDetail.info.currentState" />
-			<Text text="${controller.vault.locked}"/>
+		<TextFlow visible="${controller.anyVaultSelected}">
+			<Text text="%vaultDetail.info.currentState"/>
+			<Text text="LOCKED" visible="${controller.vault.locked}" managed="${controller.vault.locked}"/><!-- hacky but working -->
+			<Text text="UNLOCKED" visible="${controller.vault.unlocked}" managed="${controller.vault.unlocked}"/>
 		</TextFlow>
 
 		<Button text="TODO unlock" onAction="#unlock" visible="${controller.vault.locked}" defaultButton="${controller.vault.locked}"/>
