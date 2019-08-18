@@ -9,6 +9,8 @@ interface KeychainAccessStrategy extends KeychainAccess {
 
 	/**
 	 * @return <code>true</code> if this KeychainAccessStrategy works on the current machine.
+	 * @implNote This method must not throw any exceptions and should fail fast
+	 * returning <code>false</code> if it can't determine availability of the checked strategy
 	 */
 	boolean isSupported();
 

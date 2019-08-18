@@ -14,7 +14,7 @@ class LinuxSecretServiceKeychainAccessImpl implements KeychainAccessStrategy {
 		try (@SuppressWarnings("unused") SimpleCollection keyring = new SimpleCollection()) {
 			// seems like we're able to access the keyring.
 			return true;
-		} catch (IOException e) {
+		} catch (IOException | RuntimeException e) {
 			return false;
 		}
 	}
