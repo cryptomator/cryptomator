@@ -4,8 +4,8 @@ import javafx.beans.binding.BooleanBinding;
 import javafx.fxml.FXML;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
-import javafx.scene.text.Font;
 import javafx.stage.Stage;
+import org.cryptomator.ui.common.FontLoader;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.fxapp.FxApplication;
 import org.cryptomator.ui.fxapp.UpdateChecker;
@@ -14,8 +14,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import java.io.IOException;
-import java.io.InputStream;
 
 @MainWindowScoped
 public class MainWindowController implements FxController {
@@ -63,14 +61,9 @@ public class MainWindowController implements FxController {
 	}
 
 	private void loadFont(String resourcePath) {
-		try (InputStream in = getClass().getResourceAsStream(resourcePath)) {
-			Font font = Font.loadFont(in, 12.0);
-			if (font == null) {
-				LOG.warn("Error loading font from path: " + resourcePath);
-			} else {
-				LOG.debug("Loaded font {}", font.getFamily());
-			}
-		} catch (IOException e) {
+		try {
+			FontLoader.load(resourcePath);
+		} catch (FontLoader.FontLoaderException e) {
 			LOG.warn("Error loading font from path: " + resourcePath, e);
 		}
 	}

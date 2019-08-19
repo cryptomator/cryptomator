@@ -1,6 +1,5 @@
 package org.cryptomator.ui.controls;
 
-import com.google.common.base.Preconditions;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -8,11 +7,10 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import org.cryptomator.ui.common.FontLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.UncheckedIOException;
 
 /**
@@ -30,15 +28,9 @@ public class FontAwesome5IconView extends Text {
 	private DoubleProperty glyphSize = new SimpleDoubleProperty(this, "glyphSize", DEFAULT_GLYPH_SIZE);
 
 	static {
-		try (InputStream in = FontAwesome5IconView.class.getResourceAsStream(FONT_PATH)) {
-			Preconditions.checkNotNull(in, "Resource not found: " + FONT_PATH);
-			FONT = Font.loadFont(in, DEFAULT_GLYPH_SIZE);
-			if (FONT != null) {
-				LOG.debug("Loaded family: {}", FONT.getFamily());
-			} else {
-				throw new IllegalStateException("Failed to load font.");
-			}
-		} catch (IOException e) {
+		try {
+			FONT = FontLoader.load(FONT_PATH);
+		} catch (FontLoader.FontLoaderException e) {
 			throw new UncheckedIOException(e);
 		}
 	}
