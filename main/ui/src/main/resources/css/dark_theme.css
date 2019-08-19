@@ -187,7 +187,7 @@
 
 .list-view:focused .list-cell:selected {
 	-fx-background-color: CONTROL_BORDER_FOCUSED, CONTROL_BG_ARMED;
-	-fx-background-insets: 0, 1px;
+	-fx-background-insets: 0, 0 2px;
 }
 
 .list-cell:selected {
