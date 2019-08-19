@@ -8,8 +8,6 @@ import javafx.beans.value.ObservableValue;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import org.cryptomator.ui.common.FontLoader;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.UncheckedIOException;
 
@@ -18,7 +16,6 @@ import java.io.UncheckedIOException;
  */
 public class FontAwesome5IconView extends Text {
 
-	private static final Logger LOG = LoggerFactory.getLogger(FontAwesome5IconView.class);
 	private static final FontAwesome5Icon DEFAULT_GLYPH = FontAwesome5Icon.ANCHOR;
 	private static final double DEFAULT_GLYPH_SIZE = 12.0;
 	private static final String FONT_PATH = "/css/fontawesome5-pro-solid.otf";
