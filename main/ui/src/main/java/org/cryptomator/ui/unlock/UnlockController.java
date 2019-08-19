@@ -140,7 +140,7 @@ public class UnlockController implements FxController {
 
 	private void loadStoredPassword() {
 		assert keychainAccess.isPresent();
-		char[] storedPw = new char[0];
+		char[] storedPw = null;
 		try {
 			storedPw = keychainAccess.get().loadPassphrase(vault.getId());
 			if (storedPw != null) {
@@ -151,19 +151,23 @@ public class UnlockController implements FxController {
 		} catch (KeychainAccessException e) {
 			LOG.error("Failed to load entry from system keychain.", e);
 		} finally {
-			Arrays.fill(storedPw, ' ');
+			if (storedPw != null) {
+				Arrays.fill(storedPw, ' ');
+			}
 		}
 	}
 
 	private boolean hasStoredPassword() {
-		char[] storedPw = new char[0];
+		char[] storedPw = null;
 		try {
 			storedPw = keychainAccess.get().loadPassphrase(vault.getId());
-			return storedPw.length != 0;
+			return storedPw != null;
 		} catch (KeychainAccessException e) {
 			return false;
 		} finally {
-			Arrays.fill(storedPw, ' ');
+			if (storedPw != null) {
+				Arrays.fill(storedPw, ' ');
+			}
 		}
 	}
 
