@@ -186,12 +186,28 @@
 }
 
 .list-view:focused .list-cell:selected {
-	-fx-background-color: CONTROL_BORDER_FOCUSED, CONTROL_BG_ARMED;
+	-fx-background-color: CONTROL_PRIMARY_BG_NORMAL, #f3f5f0; /* TODO define constant */
 	-fx-background-insets: 0, 0 2px;
 }
 
 .list-cell:selected {
-	-fx-background-color: CONTROL_BG_ARMED;
+	-fx-background-color: #f3f5f0; /* TODO define constant */
+}
+
+.list-cell .glyph-icon {
+	-fx-fill: TEXT_FILL_SECONDARY;
+}
+
+.list-cell:selected .glyph-icon {
+	-fx-fill: CONTROL_PRIMARY_BG_NORMAL;
+}
+
+.list-cell:selected .header-label {
+	-fx-text-fill: CONTROL_PRIMARY_BG_NORMAL;
+}
+
+.list-cell .header-label {
+	-fx-font-size: 1.0em;
 }
 
 .list-cell .detail-label {

@@ -186,12 +186,28 @@
 }
 
 .list-view:focused .list-cell:selected {
-	-fx-background-color: CONTROL_BORDER_FOCUSED, CONTROL_BG_ARMED;
+	-fx-background-color: PRIMARY, CONTROL_BG_ARMED;
 	-fx-background-insets: 0, 0 2px;
 }
 
 .list-cell:selected {
 	-fx-background-color: CONTROL_BG_ARMED;
+}
+
+.list-cell .glyph-icon {
+	-fx-fill: TEXT_FILL_SECONDARY;
+}
+
+.list-cell:selected .glyph-icon {
+	-fx-fill: PRIMARY;
+}
+
+.list-cell:selected .header-label {
+	-fx-text-fill: PRIMARY;
+}
+
+.list-cell .header-label {
+	-fx-font-size: 1.0em;
 }
 
 .list-cell .detail-label {
