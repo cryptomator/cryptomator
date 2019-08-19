@@ -2,7 +2,7 @@
 
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
-<?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
+<?import org.cryptomator.ui.controls.FontAwesome5IconView?>
 <TabPane xmlns="http://javafx.com/javafx"
 		 xmlns:fx="http://javafx.com/fxml"
 		 fx:id="tabPane"
@@ -13,7 +13,7 @@
 	<tabs>
 		<Tab fx:id="generalTab" text="%preferences.general">
 			<graphic>
-				<FontAwesomeIconView styleClass="fa-icon" glyphName="COGS"/>
+				<FontAwesome5IconView glyph="COGS"/>
 			</graphic>
 			<content>
 				<fx:include source="/fxml/preferences_general.fxml"/>
@@ -21,7 +21,7 @@
 		</Tab>
 		<Tab fx:id="updatesTab" text="%preferences.updates">
 			<graphic>
-				<FontAwesomeIconView styleClass="fa-icon" glyphName="REFRESH"/>
+				<FontAwesome5IconView glyph="SYNC"/>
 			</graphic>
 			<content>
 				<fx:include source="/fxml/preferences_updates.fxml"/>
@@ -29,7 +29,7 @@
 		</Tab>
 		<Tab fx:id="volumeTab" text="%preferences.volume">
 			<graphic>
-				<FontAwesomeIconView styleClass="fa-icon" glyphName="HDD_ALT"/>
+				<FontAwesome5IconView glyph="HDD"/>
 			</graphic>
 			<content>
 				<fx:include source="/fxml/preferences_volume.fxml"/>

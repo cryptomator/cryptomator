@@ -35,7 +35,7 @@
 	-fx-text-fill: TEXT_FILL;
 }
 
-.fa-icon {
+.glyph-icon {
 	-fx-fill: TEXT_FILL;
 }
 
@@ -78,7 +78,7 @@
 	-fx-padding: 0;
 }
 
-.main-window .title .button .fa-icon {
+.main-window .title .button .glyph-icon {
 	-fx-fill: white;
 }
 
@@ -91,7 +91,7 @@
 	-fx-background-color: none;
 }
 
-.main-window .title .button:armed .fa-icon {
+.main-window .title .button:armed .glyph-icon {
 	-fx-fill: CONTROL_WHITE_BG_ARMED;
 }
 
@@ -192,10 +192,6 @@
 
 .list-cell:selected {
 	-fx-background-color: CONTROL_BG_ARMED;
-}
-
-.list-cell .lock-icon {
-	-fx-fill: TEXT_FILL;
 }
 
 .list-cell .detail-label {

@@ -32,7 +32,6 @@
 		<cryptomator.webdav.version>1.0.10</cryptomator.webdav.version>
 
 		<javafx.version>12</javafx.version>
-		<fontawesomefx.version>4.7.0-9.1.2</fontawesomefx.version>
 
 		<commons-io.version>2.6</commons-io.version>
 		<commons-lang3.version>3.8.1</commons-lang3.version>
@@ -52,16 +51,6 @@
 	</properties>
 
 	<repositories>
-		<repository>
-			<id>ossrh-snapshots</id>
-			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
-			<releases>
-				<enabled>false</enabled>
-			</releases>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</repository>
 		<repository>
 			<id>jcenter</id>
 			<url>http://jcenter.bintray.com</url>
@@ -139,11 +128,6 @@
 				<groupId>org.openjfx</groupId>
 				<artifactId>javafx-fxml</artifactId>
 				<version>${javafx.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>de.jensd</groupId>
-				<artifactId>fontawesomefx-fontawesome</artifactId>
-				<version>${fontawesomefx.version}</version>
 			</dependency>
 
 			<!-- Logging -->

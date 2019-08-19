@@ -5,6 +5,7 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.ui.controls.FontAwesome5Icon;
 import org.fxmisc.easybind.EasyBind;
 
 import javax.inject.Inject;
@@ -13,33 +14,33 @@ import javax.inject.Inject;
 public class VaultListCellController implements FxController {
 
 	private final ObjectProperty<Vault> vault = new SimpleObjectProperty<>();
-	private final Binding<String> glyph;
+	private final Binding<FontAwesome5Icon> glyph;
 
 	@Inject
 	VaultListCellController() {
-		this.glyph = EasyBind.select(vault).selectObject(Vault::stateProperty).map(this::getGlyphForVaultState).orElse("WARNING");
+		this.glyph = EasyBind.select(vault).selectObject(Vault::stateProperty).map(this::getGlyphForVaultState).orElse(FontAwesome5Icon.EXCLAMATION_TRIANGLE);
 	}
 
-	private String getGlyphForVaultState(Vault.State state) {
+	private FontAwesome5Icon getGlyphForVaultState(Vault.State state) {
 		switch (state) {
 			case LOCKED:
-				return "LOCK";
+				return FontAwesome5Icon.LOCK_ALT;
 			case PROCESSING:
-				return "SPINNER";
+				return FontAwesome5Icon.SPINNER;
 			case UNLOCKED:
-				return "UNLOCK";
+				return FontAwesome5Icon.LOCK_OPEN_ALT;
 			default:
-				return "WARNING";
+				return FontAwesome5Icon.EXCLAMATION_TRIANGLE;
 		}
 	}
 
 	/* Getter/Setter */
 
-	public Binding<String> glyphProperty() {
+	public Binding<FontAwesome5Icon> glyphProperty() {
 		return glyph;
 	}
 
-	public String getGlyph() {
+	public FontAwesome5Icon getGlyph() {
 		return glyph.getValue();
 	}
 
