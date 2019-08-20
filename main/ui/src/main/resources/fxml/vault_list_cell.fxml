@@ -16,7 +16,9 @@
 		<Insets top="12" right="6" bottom="12" left="12"/>
 	</padding>
 	<children>
-		<FontAwesome5IconView glyph="${controller.glyph}" HBox.hgrow="NEVER" glyphSize="18"/>
+		<VBox alignment="CENTER" minWidth="20.0">
+			<FontAwesome5IconView glyph="${controller.glyph}" HBox.hgrow="NEVER" glyphSize="16"/>
+		</VBox>
 		<VBox spacing="4" HBox.hgrow="ALWAYS">
 			<Label styleClass="header-label" text="${controller.vault.displayableName}"/>
 			<Label styleClass="detail-label" text="${controller.vault.displayablePath}" textOverrun="CENTER_ELLIPSIS"/>

@@ -6,9 +6,11 @@
 
 .root {
 	PRIMARY: #79B01A;
+	SECONDARY: #626262;
 	PRIMARY_BG: #598016;
 	MAIN_BG: #3B3B3B;
 	TEXT_FILL: #F7F7F7;
+	TEXT_FILL_PRIMARY: #79B01A;
 	TEXT_FILL_SECONDARY: #9E9E9E;
 	TEXT_FILL_WHITE: white;
 	TEXT_FILL_WHITE_SECONDARY: #7E7E7E;
@@ -24,6 +26,7 @@
 	CONTROL_PRIMARY_BG_NORMAL: #598016;
 	CONTROL_PRIMARY_BG_ARMED: #70A11B;
 	CONTROL_PRIMARY_BG_DISABLED: #4D5E2F;
+	CONTROL_PRIMARY_LIGHT_BG_NORMAL: #3A3B39;
 	CONTROL_WHITE_BG_ARMED: #E1E1E1;
 	SCROLL_BAR_THUMB_NORMAL: #626262;
 	SCROLL_BAR_THUMB_HOVER: #7E7E7E;
@@ -186,24 +189,16 @@
 }
 
 .list-view:focused .list-cell:selected {
-	-fx-background-color: PRIMARY, CONTROL_BG_ARMED;
-	-fx-background-insets: 0, 0 2px;
+	-fx-background-color: PRIMARY_BG, CONTROL_PRIMARY_LIGHT_BG_NORMAL;
+	-fx-background-insets: 0, 0 0 0 3px;
 }
 
 .list-cell:selected {
-	-fx-background-color: CONTROL_BG_ARMED;
+	-fx-background-color: CONTROL_PRIMARY_LIGHT_BG_NORMAL;
 }
 
 .list-cell .glyph-icon {
-	-fx-fill: TEXT_FILL_SECONDARY;
-}
-
-.list-cell:selected .glyph-icon {
-	-fx-fill: PRIMARY;
-}
-
-.list-cell:selected .header-label {
-	-fx-text-fill: PRIMARY;
+	-fx-fill: SECONDARY;
 }
 
 .list-cell .header-label {
@@ -213,6 +208,14 @@
 .list-cell .detail-label {
 	-fx-text-fill: TEXT_FILL_SECONDARY;
 	-fx-font-size: 0.8em;
+}
+
+.list-cell:selected .glyph-icon {
+	-fx-fill: PRIMARY;
+}
+
+.list-cell:selected .header-label {
+	-fx-text-fill: TEXT_FILL_PRIMARY;
 }
 
 .list-cell.drop-above {

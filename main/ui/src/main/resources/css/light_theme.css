@@ -6,9 +6,11 @@
 
 .root {
 	PRIMARY: #79B01A;
+	SECONDARY: #9E9E9E;
 	PRIMARY_BG: #70A11B;
 	MAIN_BG: #F7F7F7;
 	TEXT_FILL: #222;
+	TEXT_FILL_PRIMARY: #6B9B17;
 	TEXT_FILL_SECONDARY: #7E7E7E;
 	TEXT_FILL_WHITE: white;
 	TEXT_FILL_WHITE_SECONDARY: #B1B1B1;
@@ -24,6 +26,7 @@
 	CONTROL_PRIMARY_BG_NORMAL: #70A11B;
 	CONTROL_PRIMARY_BG_ARMED: #598016;
 	CONTROL_PRIMARY_BG_DISABLED: #83A150;
+	CONTROL_PRIMARY_LIGHT_BG_NORMAL: #F6F7F2;
 	CONTROL_WHITE_BG_ARMED: #E1E1E1;
 	SCROLL_BAR_THUMB_NORMAL: #CFCFCF;
 	SCROLL_BAR_THUMB_HOVER: #B1B1B1;
@@ -186,24 +189,16 @@
 }
 
 .list-view:focused .list-cell:selected {
-	-fx-background-color: CONTROL_PRIMARY_BG_NORMAL, #f3f5f0; /* TODO define constant */
-	-fx-background-insets: 0, 0 2px;
+	-fx-background-color: PRIMARY_BG, CONTROL_PRIMARY_LIGHT_BG_NORMAL;
+	-fx-background-insets: 0, 0 0 0 3px;
 }
 
 .list-cell:selected {
-	-fx-background-color: #f3f5f0; /* TODO define constant */
+	-fx-background-color: CONTROL_PRIMARY_LIGHT_BG_NORMAL;
 }
 
 .list-cell .glyph-icon {
-	-fx-fill: TEXT_FILL_SECONDARY;
-}
-
-.list-cell:selected .glyph-icon {
-	-fx-fill: CONTROL_PRIMARY_BG_NORMAL;
-}
-
-.list-cell:selected .header-label {
-	-fx-text-fill: CONTROL_PRIMARY_BG_NORMAL;
+	-fx-fill: SECONDARY;
 }
 
 .list-cell .header-label {
@@ -213,6 +208,14 @@
 .list-cell .detail-label {
 	-fx-text-fill: TEXT_FILL_SECONDARY;
 	-fx-font-size: 0.8em;
+}
+
+.list-cell:selected .glyph-icon {
+	-fx-fill: PRIMARY;
+}
+
+.list-cell:selected .header-label {
+	-fx-text-fill: TEXT_FILL_PRIMARY;
 }
 
 .list-cell.drop-above {
