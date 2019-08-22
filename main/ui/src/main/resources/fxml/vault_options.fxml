@@ -11,7 +11,7 @@
 		 tabClosingPolicy="UNAVAILABLE"
 		 tabDragPolicy="FIXED">
 	<tabs>
-		<Tab fx:id="generalTab" text="TODO General">
+		<Tab fx:id="generalTab" text="%vaultOptions.general">
 			<graphic>
 				<FontAwesome5IconView glyph="COGS"/>
 			</graphic>
@@ -19,7 +19,7 @@
 				<fx:include source="/fxml/vault_options_general.fxml"/>
 			</content>
 		</Tab>
-		<Tab fx:id="mountTab" text="TODO Mounting">
+		<Tab fx:id="mountTab" text="%vaultOptions.mount">
 			<graphic>
 				<FontAwesome5IconView glyph="HDD"/>
 			</graphic>

@@ -1,5 +1,6 @@
 package org.cryptomator.ui.mainwindow;
 
+import javafx.beans.binding.Binding;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
@@ -8,8 +9,10 @@ import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.changepassword.ChangePasswordComponent;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.Tasks;
+import org.cryptomator.ui.controls.FontAwesome5Icon;
 import org.cryptomator.ui.fxapp.FxApplication;
 import org.cryptomator.ui.vaultoptions.VaultOptionsComponent;
+import org.fxmisc.easybind.EasyBind;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,6 +25,7 @@ public class VaultDetailController implements FxController {
 	private static final Logger LOG = LoggerFactory.getLogger(VaultDetailController.class);
 
 	private final ReadOnlyObjectProperty<Vault> vault;
+	private final Binding<FontAwesome5Icon> glyph;
 	private final BooleanBinding anyVaultSelected;
 	private final ExecutorService executor;
 	private final FxApplication application;
@@ -31,11 +35,25 @@ public class VaultDetailController implements FxController {
 	@Inject
 	VaultDetailController(ObjectProperty<Vault> vault, ExecutorService executor, FxApplication application, VaultOptionsComponent.Builder vaultOptionsWindow, ChangePasswordComponent.Builder changePasswordWindow) {
 		this.vault = vault;
+		this.glyph = EasyBind.select(vault).selectObject(Vault::stateProperty).map(this::getGlyphForVaultState).orElse(FontAwesome5Icon.EXCLAMATION_TRIANGLE);
 		this.executor = executor;
 		this.application = application;
 		this.vaultOptionsWindow = vaultOptionsWindow;
 		this.changePasswordWindow = changePasswordWindow;
 		this.anyVaultSelected = vault.isNotNull();
+	}
+
+	private FontAwesome5Icon getGlyphForVaultState(Vault.State state) {
+		switch (state) {
+			case LOCKED:
+				return FontAwesome5Icon.LOCK_ALT;
+			case PROCESSING:
+				return FontAwesome5Icon.SPINNER;
+			case UNLOCKED:
+				return FontAwesome5Icon.LOCK_OPEN_ALT;
+			default:
+				return FontAwesome5Icon.EXCLAMATION_TRIANGLE;
+		}
 	}
 
 	@FXML
@@ -75,6 +93,14 @@ public class VaultDetailController implements FxController {
 
 	public Vault getVault() {
 		return vault.get();
+	}
+
+	public Binding<FontAwesome5Icon> glyphProperty() {
+		return glyph;
+	}
+
+	public FontAwesome5Icon getGlyph() {
+		return glyph.getValue();
 	}
 
 	public BooleanBinding anyVaultSelectedProperty() {

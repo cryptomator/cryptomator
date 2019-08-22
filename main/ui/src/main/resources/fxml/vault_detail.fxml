@@ -3,40 +3,58 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Text?>
-<?import javafx.scene.text.TextFlow?>
+<?import org.cryptomator.ui.controls.FontAwesome5IconView?>
 <VBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
 	  fx:controller="org.cryptomator.ui.mainwindow.VaultDetailController"
-	  minWidth="300">
+	  styleClass="vault-detail"
+	  minWidth="300"
+	  spacing="12">
 	<padding>
-		<Insets bottom="6.0" left="6.0" right="6.0" top="6.0"/>
+		<Insets bottom="12.0" left="12.0" right="12.0" top="12.0"/>
 	</padding>
 	<children>
-		<!--TODO: add caption style class -->
-		<Label text="${controller.vault.displayableName}"/>
-		<TextFlow styleClass="text-flow" visible="${controller.anyVaultSelected}"><!--TODO: add visibility of the textflows -->
-			<Text text="%vaultDetail.info.storageLocation"/>
-			<Text text="&quot;"/>
-			<Text text="${controller.vault.displayablePath}"/>
-			<Text text="&quot;"/>
-		</TextFlow>
-		<TextFlow styleClass="text-flow" visible="${controller.anyVaultSelected}">
-			<Text text="%vaultDetail.info.accessLocation"/>
-			<Text text="&quot;"/>
-			<Text text="${controller.vault.customMountPath}"/>
-			<Text text="&quot;"/>
-		</TextFlow>
-		<TextFlow styleClass="text-flow" visible="${controller.anyVaultSelected}">
-			<Text text="%vaultDetail.info.currentState"/>
-			<Text text="LOCKED" visible="${controller.vault.locked}" managed="${controller.vault.locked}"/><!-- hacky but working -->
-			<Text text="UNLOCKED" visible="${controller.vault.unlocked}" managed="${controller.vault.unlocked}"/>
-		</TextFlow>
+		<HBox alignment="BOTTOM_LEFT" spacing="6" visible="${controller.anyVaultSelected}">
+			<padding>
+				<Insets left="6"/>
+			</padding>
+			<children>
+				<VBox alignment="CENTER" minWidth="22.5">
+					<FontAwesome5IconView styleClass="vault-status-icon" glyph="${controller.glyph}" HBox.hgrow="NEVER" glyphSize="18"/>
+				</VBox>
+				<Label styleClass="vault-name" text="${controller.vault.displayableName}"/>
+				<Region HBox.hgrow="ALWAYS"/>
+				<Button text="%vaultDetail.optionsBtn" onAction="#showVaultOptions" visible="${controller.vault.locked}" managed="${controller.vault.locked}">
+					<graphic>
+						<FontAwesome5IconView glyph="COGS"/>
+					</graphic>
+				</Button>
+			</children>
+		</HBox>
+		<VBox styleClass="list-group" visible="${controller.anyVaultSelected}">
+			<VBox styleClass="list-group-item">
+				<Label styleClass="list-group-item-heading" text="storage location"/>
+				<Label text="${controller.vault.displayablePath}"/>
+			</VBox>
+			<Region styleClass="list-group-separator" visible="${controller.vault.unlocked}" managed="${controller.vault.unlocked}"/>
+			<VBox styleClass="list-group-item" visible="${controller.vault.unlocked}" managed="${controller.vault.unlocked}">
+				<Label styleClass="list-group-item-heading" text="access location" visible="${controller.vault.unlocked}"/>
+				<Label text="${controller.vault.customMountPath}"/>
+			</VBox>
+		</VBox>
 
-		<Button text="TODO unlock" onAction="#unlock" visible="${controller.vault.locked}" defaultButton="${controller.vault.locked}"/>
-		<Button text="TODO lock" onAction="#lock" visible="${controller.vault.unlocked}" defaultButton="${controller.vault.unlocked}"/>
-		<Button text="TODO options" onAction="#showVaultOptions" visible="${controller.vault.locked}"/>
-		<Button text="TODO change password" onAction="#changePassword" visible="${controller.vault.locked}"/>
+		<Button styleClass="button-large" text="%vaultDetail.unlockBtn" onAction="#unlock" visible="${controller.vault.locked}" managed="${controller.vault.locked}" defaultButton="${controller.vault.locked}">
+			<graphic>
+				<FontAwesome5IconView glyph="LOCK_OPEN_ALT" glyphSize="15"/>
+			</graphic>
+		</Button>
+		<Button styleClass="button-large" text="%vaultDetail.lockBtn" onAction="#lock" visible="${controller.vault.unlocked}" managed="${controller.vault.unlocked}" defaultButton="${controller.vault.unlocked}">
+			<graphic>
+				<FontAwesome5IconView glyph="LOCK_ALT" glyphSize="15"/>
+			</graphic>
+		</Button>
 	</children>
 </VBox>
