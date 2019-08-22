@@ -300,31 +300,35 @@
 	-fx-font-size: 2em;
 }
 
-.list-group-item-heading {
+.vault-detail .vault-path {
 	-fx-text-fill: TEXT_FILL_SECONDARY;
-	-fx-font-size: 0.8em;
 }
 
 /*******************************************************************************
  *                                                                             *
- * List Group                                                                  *
+ * Button Group                                                                *
  *                                                                             *
  ******************************************************************************/
 
-.list-group {
+.button-group {
 	-fx-background-color: CONTROL_BORDER_NORMAL, CONTROL_BG_NORMAL;
 	-fx-background-insets: 0, 1px;
 	-fx-background-radius: 4px;
-}
-
-.list-group-item {
 	-fx-padding: 1em;
 	-fx-spacing: 0.25em;
 }
 
-.list-group-separator {
-	-fx-background-color: CONTROL_BORDER_NORMAL;
-	-fx-pref-height: 1px;
+.button-group:hover {
+	-fx-background-color: CONTROL_BORDER_NORMAL, CONTROL_PRIMARY_LIGHT_BG_NORMAL;
+}
+
+.button-group-heading {
+	-fx-text-fill: TEXT_FILL_SECONDARY;
+	-fx-font-size: 0.8em;
+}
+
+.button-group-action {
+	-fx-text-fill: TEXT_FILL_PRIMARY;
 }
 
 /*******************************************************************************
