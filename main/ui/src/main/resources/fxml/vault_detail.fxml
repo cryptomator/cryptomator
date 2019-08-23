@@ -3,9 +3,10 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import org.cryptomator.ui.controls.FontAwesome5IconView?>
 <VBox xmlns="http://javafx.com/javafx"
@@ -15,48 +16,80 @@
 	  minWidth="300"
 	  spacing="12">
 	<padding>
-		<Insets bottom="12.0" left="12.0" right="12.0" top="12.0"/>
+		<Insets bottom="12" left="12" right="12" top="12"/>
 	</padding>
 	<children>
-		<HBox alignment="BOTTOM_LEFT" spacing="12" visible="${controller.anyVaultSelected}">
+		<HBox alignment="CENTER_RIGHT">
 			<padding>
-				<Insets left="6"/>
+				<Insets left="12" right="12" top="6"/>
 			</padding>
 			<children>
-				<VBox alignment="CENTER" minWidth="22.5">
-					<FontAwesome5IconView styleClass="vault-status-icon" glyph="${controller.glyph}" HBox.hgrow="NEVER" glyphSize="18"/>
-				</VBox>
-				<VBox spacing="6">
-					<Label styleClass="vault-name" text="${controller.vault.displayableName}"/>
-					<Label styleClass="vault-path" text="${controller.vault.displayablePath}" textOverrun="CENTER_ELLIPSIS"/>
+				<Label styleClass="badge,badge-pill,badge-secondary" text="%vaultDetail.lockedStatus" visible="${controller.vault.locked}" managed="${controller.vault.locked}"/>
+				<Label styleClass="badge,badge-pill,badge-secondary" text="…" visible="${controller.vault.processing}" managed="${controller.vault.processing}"/>
+				<Label styleClass="badge,badge-pill,badge-primary" text="%vaultDetail.unlockedStatus" visible="${controller.vault.unlocked}" managed="${controller.vault.unlocked}"/>
+			</children>
+		</HBox>
+		<HBox spacing="12" visible="${controller.anyVaultSelected}">
+			<padding>
+				<Insets left="12" right="12"/>
+			</padding>
+			<children>
+				<StackPane alignment="CENTER">
+					<FontAwesome5IconView styleClass="vault-status-circle" glyph="CIRCLE" HBox.hgrow="NEVER" glyphSize="32"/>
+					<FontAwesome5IconView styleClass="vault-status-icon" glyph="${controller.glyph}" HBox.hgrow="NEVER" glyphSize="16"/>
+				</StackPane>
+				<VBox spacing="4" HBox.hgrow="ALWAYS">
+					<Label styleClass="vault-name" text="${controller.vault.displayableName}">
+						<tooltip>
+							<Tooltip text="${controller.vault.displayableName}"/>
+						</tooltip>
+					</Label>
+					<Label styleClass="vault-path" text="${controller.vault.displayablePath}" textOverrun="CENTER_ELLIPSIS">
+						<tooltip>
+							<Tooltip text="${controller.vault.displayablePath}"/>
+						</tooltip>
+					</Label>
 				</VBox>
 			</children>
 		</HBox>
-		<HBox styleClass="button-group" alignment="CENTER" visible="${controller.vault.unlocked}" managed="${controller.vault.unlocked}">
-			<VBox>
-				<Label styleClass="button-group-heading" text="%vaultDetail.accessLocation" visible="${controller.vault.unlocked}"/>
-				<Label text="${controller.vault.customMountPath}"/>
-			</VBox>
-			<Region HBox.hgrow="ALWAYS"/>
-			<Label styleClass="button-group-action" text="TODO REVEAL"/>
-		</HBox>
-
-		<FlowPane rowValignment="BOTTOM" hgap="6" vgap="6" visible="${controller.vault.locked}" managed="${controller.vault.locked}">
+		<VBox visible="${controller.vault.unlocked}" managed="${controller.vault.unlocked}">
+			<HBox styleClass="button-group,first" alignment="CENTER">
+				<VBox styleClass="button-group-labels">
+					<Label styleClass="button-group-heading" text="%vaultDetail.accessLocation"/>
+					<Label text="${controller.vault.customMountPath}"/>
+				</VBox>
+				<Region HBox.hgrow="ALWAYS"/>
+				<Label styleClass="button-group-action" text="TODO REVEAL"/>
+			</HBox>
+			<Region styleClass="button-group-separator"/>
+			<HBox styleClass="button-group,last" alignment="CENTER">
+				<VBox styleClass="button-group-labels">
+					<Label styleClass="button-group-heading" text="example heading"/>
+					<Label text="example text"/>
+				</VBox>
+				<Region HBox.hgrow="ALWAYS"/>
+				<Label styleClass="button-group-action" text="EXAMPLE ACTION"/>
+			</HBox>
+		</VBox>
+		<Region prefHeight="24"/>
+		<HBox alignment="CENTER" spacing="6" visible="${controller.vault.locked}" managed="${controller.vault.locked}">
 			<Button styleClass="button-large" text="%vaultDetail.unlockBtn" onAction="#unlock" defaultButton="${controller.vault.locked}">
 				<graphic>
 					<FontAwesome5IconView glyph="LOCK_OPEN_ALT" glyphSize="15"/>
 				</graphic>
 			</Button>
-			<Button text="%vaultDetail.optionsBtn" onAction="#showVaultOptions">
+			<Button styleClass="button-large" onAction="#showVaultOptions">
 				<graphic>
-					<FontAwesome5IconView glyph="COGS"/>
+					<FontAwesome5IconView glyph="COG" glyphSize="15"/>
 				</graphic>
 			</Button>
-		</FlowPane>
-		<Button styleClass="button-large" text="%vaultDetail.lockBtn" onAction="#lock" visible="${controller.vault.unlocked}" managed="${controller.vault.unlocked}" defaultButton="${controller.vault.unlocked}">
-			<graphic>
-				<FontAwesome5IconView glyph="LOCK_ALT" glyphSize="15"/>
-			</graphic>
-		</Button>
+		</HBox>
+		<VBox alignment="CENTER" spacing="6" visible="${controller.vault.unlocked}" managed="${controller.vault.unlocked}">
+			<Button styleClass="button-large" text="%vaultDetail.lockBtn" onAction="#lock" defaultButton="${controller.vault.unlocked}">
+				<graphic>
+					<FontAwesome5IconView glyph="LOCK_ALT" glyphSize="15"/>
+				</graphic>
+			</Button>
+		</VBox>
 	</children>
 </VBox>

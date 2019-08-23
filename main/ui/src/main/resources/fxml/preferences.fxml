@@ -13,18 +13,10 @@
 	<tabs>
 		<Tab fx:id="generalTab" text="%preferences.general">
 			<graphic>
-				<FontAwesome5IconView glyph="COGS"/>
+				<FontAwesome5IconView glyph="WRENCH"/>
 			</graphic>
 			<content>
 				<fx:include source="/fxml/preferences_general.fxml"/>
-			</content>
-		</Tab>
-		<Tab fx:id="updatesTab" text="%preferences.updates">
-			<graphic>
-				<FontAwesome5IconView glyph="SYNC"/>
-			</graphic>
-			<content>
-				<fx:include source="/fxml/preferences_updates.fxml"/>
 			</content>
 		</Tab>
 		<Tab fx:id="volumeTab" text="%preferences.volume">
@@ -33,6 +25,14 @@
 			</graphic>
 			<content>
 				<fx:include source="/fxml/preferences_volume.fxml"/>
+			</content>
+		</Tab>
+		<Tab fx:id="updatesTab" text="%preferences.updates">
+			<graphic>
+				<FontAwesome5IconView glyph="SYNC"/>
+			</graphic>
+			<content>
+				<fx:include source="/fxml/preferences_updates.fxml"/>
 			</content>
 		</Tab>
 	</tabs>

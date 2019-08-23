@@ -85,15 +85,6 @@
 	-fx-fill: white;
 }
 
-.main-window .title .button:focused {
-	-fx-background-color: white, PRIMARY_BG;
-	-fx-background-insets: 0, 1px;
-}
-
-.main-window .title .button:armed {
-	-fx-background-color: none;
-}
-
 .main-window .title .button:armed .glyph-icon {
 	-fx-fill: CONTROL_WHITE_BG_ARMED;
 }
@@ -161,6 +152,14 @@
 .tab-pane > .tab-header-area > .headers-region > .tab > .tab-container > .tab-label {
 	-fx-text-fill: TEXT_FILL;
 	-fx-alignment: CENTER;
+}
+
+.tab-pane > .tab-header-area > .headers-region > .tab .glyph-icon {
+	-fx-fill: SECONDARY;
+}
+
+.tab-pane > .tab-header-area > .headers-region > .tab:selected .glyph-icon {
+	-fx-fill: TEXT_FILL;
 }
 
 /*******************************************************************************
@@ -292,12 +291,16 @@
  *                                                                             *
  ******************************************************************************/
 
-.vault-detail .vault-status-icon {
+.vault-detail .vault-status-circle {
 	-fx-fill: SECONDARY;
 }
 
+.vault-detail .vault-status-icon {
+	-fx-fill: MAIN_BG;
+}
+
 .vault-detail .vault-name {
-	-fx-font-size: 2em;
+	-fx-font-size: 1.5em;
 }
 
 .vault-detail .vault-path {
@@ -306,20 +309,58 @@
 
 /*******************************************************************************
  *                                                                             *
- * Button Group                                                                *
+ * Badge                                                                       *
+ *                                                                             *
+ ******************************************************************************/
+
+.badge {
+	-fx-font-size: 0.8em;
+	-fx-background-radius: 4px;
+	-fx-padding: 0.2em 0.4em 0.2em 0.4em;
+}
+
+.badge-pill {
+	-fx-background-radius: 1em;
+}
+
+.badge-primary {
+	-fx-text-fill: TEXT_FILL_WHITE;
+	-fx-background-color: PRIMARY;
+}
+
+.badge-secondary {
+	-fx-text-fill: TEXT_FILL_WHITE;
+	-fx-background-color: SECONDARY;
+}
+
+/*******************************************************************************
+ *                                                                             *
+ * ButtonGroup                                                                 *
  *                                                                             *
  ******************************************************************************/
 
 .button-group {
 	-fx-background-color: CONTROL_BORDER_NORMAL, CONTROL_BG_NORMAL;
-	-fx-background-insets: 0, 1px;
-	-fx-background-radius: 4px;
+	-fx-background-insets: 0, 0 1px 0 1px;
 	-fx-padding: 1em;
-	-fx-spacing: 0.25em;
+}
+
+.button-group.first {
+	-fx-background-insets: 0, 1px 1px 0 1px;
+	-fx-background-radius: 4px 4px 0 0;
+}
+
+.button-group.last {
+	-fx-background-insets: 0, 0 1px 1px 1px;
+	-fx-background-radius: 0 0 4px 4px;
 }
 
 .button-group:hover {
 	-fx-background-color: CONTROL_BORDER_NORMAL, CONTROL_PRIMARY_LIGHT_BG_NORMAL;
+}
+
+.button-group-labels {
+	-fx-spacing: 0.25em;
 }
 
 .button-group-heading {
@@ -329,6 +370,11 @@
 
 .button-group-action {
 	-fx-text-fill: TEXT_FILL_PRIMARY;
+}
+
+.button-group-separator {
+	-fx-background-color: CONTROL_BORDER_NORMAL;
+	-fx-pref-height: 1px;
 }
 
 /*******************************************************************************
@@ -422,20 +468,21 @@
 }
 
 .button-large {
+	-fx-graphic-text-gap: 6px;
 	-fx-font-size: 1.25em;
-	-fx-padding: 0.25em 1.25em 0.25em 1.25em;
+	-fx-padding: 0.5em 1.25em 0.5em 1.25em;
 }
 
 /*******************************************************************************
  *                                                                             *
- * Checkbox                                                                    *
+ * CheckBox                                                                    *
  *                                                                             *
  ******************************************************************************/
 
 .check-box {
 	-fx-text-fill: TEXT_FILL;
 	-fx-label-padding: 0 0 0 6px;
-	-fx-padding: 4px;
+	-fx-padding: 4px 0 4px 0;
 }
 
 .check-box > .box {
@@ -468,7 +515,7 @@
 .radio-button {
 	-fx-text-fill: TEXT_FILL;
 	-fx-label-padding: 0 0 0 6px;
-	-fx-padding: 4px;
+	-fx-padding: 4px 0 4px 0;
 }
 
 .radio-button > .radio {
@@ -476,7 +523,7 @@
 	-fx-border-radius: 1em; /* large value to make sure this remains circular */
 	-fx-background-color: CONTROL_BG_NORMAL;
 	-fx-background-radius: 1em;
-	-fx-padding: 4px; /* padding from outside edge to the inner black dot */
+	-fx-padding: 0.3em; /* padding from outside edge to the inner black dot */
 }
 
 .radio-button:focused > .radio {
@@ -490,8 +537,8 @@
 
 .radio-button > .radio > .dot {
 	-fx-background-color: transparent;
-	-fx-background-radius: 1.0em; /* large value to make sure this remains circular */
-	-fx-padding: 3px; /* radius of the inner black dot when selected */
+	-fx-background-radius: 1em; /* large value to make sure this remains circular */
+	-fx-padding: 0.2em; /* radius of the inner black dot when selected */
 }
 
 .radio-button:selected > .radio > .dot {

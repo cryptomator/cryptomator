@@ -21,7 +21,7 @@
 		<children>
 			<Label text="Cryptomator"/>
 			<Region HBox.hgrow="ALWAYS"/>
-			<Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#showPreferences">
+			<Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#showPreferences" focusTraversable="false">
 				<graphic>
 					<StackPane>
 						<FontAwesome5IconView glyph="COGS"/>
@@ -29,10 +29,10 @@
 					</StackPane>
 				</graphic>
 				<tooltip>
-					<Tooltip text="%main.settingsBtn.tooltip"/>
+					<Tooltip text="%main.preferencesBtn.tooltip"/>
 				</tooltip>
 			</Button>
-			<Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#close">
+			<Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#close" focusTraversable="false">
 				<graphic>
 					<FontAwesome5IconView glyph="TIMES"/>
 				</graphic>

@@ -61,6 +61,7 @@ public class Vault {
 	private final StringBinding displayableName;
 	private final StringBinding displayablePath;
 	private final BooleanBinding locked;
+	private final BooleanBinding processing;
 	private final BooleanBinding unlocked;
 
 	private Volume volume;
@@ -78,6 +79,7 @@ public class Vault {
 		this.displayableName = Bindings.createStringBinding(this::getDisplayableName, vaultSettings.path());
 		this.displayablePath = Bindings.createStringBinding(this::getDisplayablePath, vaultSettings.path());
 		this.locked = Bindings.createBooleanBinding(this::isLocked, state);
+		this.processing = Bindings.createBooleanBinding(this::isProcessing, state);
 		this.unlocked = Bindings.createBooleanBinding(this::isUnlocked, state);
 	}
 
@@ -179,7 +181,7 @@ public class Vault {
 	public State getState() {
 		return state.get();
 	}
-	
+
 	public void setState(State value) {
 		state.setValue(value);
 	}
@@ -190,6 +192,14 @@ public class Vault {
 
 	public boolean isLocked() {
 		return state.get() == State.LOCKED;
+	}
+
+	public BooleanBinding processingProperty() {
+		return processing;
+	}
+
+	public boolean isProcessing() {
+		return state.get() == State.PROCESSING;
 	}
 
 	public BooleanBinding unlockedProperty() {

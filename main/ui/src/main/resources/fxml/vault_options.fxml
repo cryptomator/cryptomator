@@ -13,7 +13,7 @@
 	<tabs>
 		<Tab fx:id="generalTab" text="%vaultOptions.general">
 			<graphic>
-				<FontAwesome5IconView glyph="COGS"/>
+				<FontAwesome5IconView glyph="WRENCH"/>
 			</graphic>
 			<content>
 				<fx:include source="/fxml/vault_options_general.fxml"/>

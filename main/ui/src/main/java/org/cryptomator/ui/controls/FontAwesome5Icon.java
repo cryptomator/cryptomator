@@ -5,6 +5,8 @@ package org.cryptomator.ui.controls;
  */
 public enum FontAwesome5Icon {
 	ANCHOR("\uF13D"), //
+	CIRCLE("\uF111"), //
+	COG("\uF013"), //
 	COGS("\uF085"), //
 	EXCLAMATION_TRIANGLE("\uF071"), //
 	FOLDER_OPEN("\uF07C"), //
@@ -16,6 +18,7 @@ public enum FontAwesome5Icon {
 	SPINNER("\uF110"), //
 	SYNC("\uF021"), //
 	TIMES("\uF00D"), //
+	WRENCH("\uF0AD"), //
 	;
 
 	private final String unicode;
