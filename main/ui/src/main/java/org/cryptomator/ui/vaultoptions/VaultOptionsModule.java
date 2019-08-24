@@ -39,9 +39,7 @@ abstract class VaultOptionsModule {
 	static Stage provideStage(@MainWindow Stage owner, @VaultOptionsWindow Vault vault, ResourceBundle resourceBundle) {
 		Stage stage = new Stage();
 		stage.setTitle(vault.getDisplayableName());
-		// stage.setTitle(resourceBundle.getString("vaultOptions.title"));
-		stage.setMinWidth(400);
-		stage.setMinHeight(300);
+		stage.setResizable(false);
 		stage.initStyle(StageStyle.DECORATED);
 		stage.initModality(Modality.WINDOW_MODAL);
 		stage.initOwner(owner);

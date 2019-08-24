@@ -7,7 +7,7 @@
 		 xmlns:fx="http://javafx.com/fxml"
 		 fx:id="tabPane"
 		 fx:controller="org.cryptomator.ui.vaultoptions.VaultOptionsController"
-		 side="TOP"
+		 minWidth="400"
 		 tabClosingPolicy="UNAVAILABLE"
 		 tabDragPolicy="FIXED">
 	<tabs>

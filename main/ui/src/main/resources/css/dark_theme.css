@@ -579,6 +579,7 @@
 	-fx-background-insets: 0, 1px;
 	-fx-background-radius: 4px;
 	-fx-padding: 0.2em 0 0.2em 0;
+	-fx-translate-x: -1.4em;
 }
 
 .context-menu {
@@ -590,7 +591,22 @@
 }
 
 .menu-item:focused {
-	-fx-background-color: CONTROL_BG_ARMED;
+	-fx-background-color: transparent, CONTROL_BG_ARMED;
+	-fx-background-insets: 0, 0 1px 0 1px;
+}
+
+.menu-item > .left-container {
+	-fx-padding: 0.5em 0.25em 0.5em 0.5em;
+}
+
+.menu-item > .label {
+    -fx-padding: 1px 0.5em 1px 0.5em;
+}
+
+.radio-menu-item:checked > .left-container > .radio {
+	-fx-background-color: TEXT_FILL;
+	-fx-shape: "M-1,4, L-1,5.5 L3.5,8.5 L9,0 L9,-1 L7,-1 L3,6 L1,4 Z";
+	-fx-scale-shape: false;
 }
 
 /*******************************************************************************

@@ -35,8 +35,7 @@ abstract class PreferencesModule {
 	static Stage provideStage(ResourceBundle resourceBundle) {
 		Stage stage = new Stage();
 		stage.setTitle(resourceBundle.getString("preferences.title"));
-		stage.setMinWidth(400);
-		stage.setMinHeight(300);
+		stage.setResizable(false);
 		return stage;
 	}
 
