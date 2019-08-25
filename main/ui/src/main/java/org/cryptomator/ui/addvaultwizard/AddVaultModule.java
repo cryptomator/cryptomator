@@ -37,10 +37,10 @@ public abstract class AddVaultModule {
 	@Provides
 	@AddVaultWizard
 	@AddVaultWizardScoped
-	static Stage provideStage(@MainWindow Stage owner) {
+	static Stage provideStage(@MainWindow Stage owner, ResourceBundle resourceBundle) {
 		Stage stage = new Stage();
-		stage.setMinWidth(500);
-		stage.setMinHeight(500);
+		stage.setTitle(resourceBundle.getString("addvaultwizard.title"));
+		stage.setResizable(false);
 		stage.initStyle(StageStyle.DECORATED);
 		stage.initModality(Modality.WINDOW_MODAL);
 		stage.initOwner(owner);

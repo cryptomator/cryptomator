@@ -9,20 +9,24 @@
 <VBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
 	  fx:controller="org.cryptomator.ui.addvaultwizard.ChooseExistingVaultController"
-	  prefHeight="400.0"
 	  prefWidth="600.0"
+	  prefHeight="400.0"
+	  spacing="12.0"
 	  alignment="CENTER">
 	<padding>
 		<Insets top="12" right="12" bottom="12" left="12"/>
 	</padding>
 	<children>
 		<Region VBox.vgrow="ALWAYS"/>
+
 		<Label text="%addvaultwizard.existing.instruction" labelFor="$finishButton"/>
+
 		<Region VBox.vgrow="ALWAYS"/>
+
 		<ButtonBar buttonMinWidth="120" buttonOrder="B+I">
 			<buttons>
 				<Button text="%generic.button.back" ButtonBar.buttonData="BACK_PREVIOUS" onAction="#back"/>
-				<Button fx:id="finishButton" text="Choose..." ButtonBar.buttonData="FINISH" onAction="#chooseFileAndFinish" defaultButton="true"/>
+				<Button fx:id="finishButton" text="%addvaultwizard.existing.chooseBtn" ButtonBar.buttonData="FINISH" onAction="#chooseFileAndFinish" defaultButton="true"/>
 			</buttons>
 		</ButtonBar>
 	</children>

@@ -14,9 +14,10 @@
 <VBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
 	  fx:controller="org.cryptomator.ui.addvaultwizard.CreateNewVaultLocationController"
-	  prefHeight="400.0" prefWidth="600.0"
-	  alignment="CENTER_LEFT"
-	  spacing="6">
+	  prefWidth="600.0"
+	  prefHeight="400.0"
+	  spacing="12.0"
+	  alignment="CENTER_LEFT">
 	<fx:define>
 		<ToggleGroup fx:id="predefinedLocationToggler"/>
 	</fx:define>
@@ -25,24 +26,26 @@
 	</padding>
 	<children>
 		<Region VBox.vgrow="ALWAYS"/>
+
 		<Label wrapText="true" text="%addvaultwizard.new.locationInstruction"/>
 
-		<Region prefHeight="24" VBox.vgrow="NEVER"/>
+		<VBox spacing="6">
+			<RadioButton fx:id="dropboxRadioButton" toggleGroup="${predefinedLocationToggler}" text="Dropbox" visible="${controller.locationPresets.foundDropbox}"/>
+			<RadioButton fx:id="gdriveRadioButton" toggleGroup="${predefinedLocationToggler}" text="Google Drive" visible="${controller.locationPresets.foundGdrive}"/>
+			<HBox spacing="12" alignment="CENTER_LEFT">
+				<RadioButton fx:id="customRadioButton" toggleGroup="${predefinedLocationToggler}" text="%addvaultwizard.new.directoryPickerLabel"/>
+				<Button contentDisplay="LEFT" text="%addvaultwizard.new.directoryPickerButton" onAction="#chooseCustomVaultPath" disable="${controller.usePresetPath}">
+					<graphic>
+						<FontAwesome5IconView glyph="FOLDER_OPEN"/>
+					</graphic>
+				</Button>
+			</HBox>
+		</VBox>
 
-		<RadioButton fx:id="dropboxRadioButton" toggleGroup="${predefinedLocationToggler}" text="TODO dropbox" visible="${controller.locationPresets.foundDropbox}"/>
-		<RadioButton fx:id="gdriveRadioButton" toggleGroup="${predefinedLocationToggler}" text="TODO google drive" visible="${controller.locationPresets.foundGdrive}"/>
-		<HBox spacing="12" alignment="CENTER_LEFT">
-			<RadioButton fx:id="customRadioButton" toggleGroup="${predefinedLocationToggler}" text="TODO custom location"/>
-			<Button contentDisplay="LEFT" text="%addvaultwizard.new.directoryPickerButton" onAction="#chooseCustomVaultPath" disable="${controller.usePresetPath}">
-				<graphic>
-					<FontAwesome5IconView glyph="FOLDER_OPEN"/>
-				</graphic>
-			</Button>
-		</HBox>
+		<Region VBox.vgrow="NEVER"/>
 
-		<Region prefHeight="24" VBox.vgrow="NEVER"/>
-
-		<TextField promptText="%addvaultwizard.new.locationPrompt" text="${controller.vaultPath}" disable="true" HBox.hgrow="ALWAYS"/>
+		<Label text="%addvaultwizard.new.locationLabel" labelFor="$locationTextField"/>
+		<TextField fx:id="locationTextField" promptText="%addvaultwizard.new.locationPrompt" text="${controller.vaultPath}" disable="true" HBox.hgrow="ALWAYS"/>
 
 		<Region VBox.vgrow="ALWAYS"/>
 

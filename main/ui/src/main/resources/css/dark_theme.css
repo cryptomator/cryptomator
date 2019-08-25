@@ -38,10 +38,6 @@
     -fx-text-fill: TEXT_FILL;
 }
 
-.glyph-icon {
-	-fx-fill: TEXT_FILL;
-}
-
 /*******************************************************************************
  *                                                                             *
  * Labels                                                                      *
@@ -52,8 +48,26 @@
 	-fx-text-fill: TEXT_FILL;
 }
 
+.label-secondary {
+	-fx-text-fill: TEXT_FILL_SECONDARY;
+}
+
 .text-flow > * {
 	-fx-fill: TEXT_FILL;
+}
+
+/*******************************************************************************
+ *                                                                             *
+ * Glyph Icons                                                                 *
+ *                                                                             *
+ ******************************************************************************/
+
+.glyph-icon {
+	-fx-fill: TEXT_FILL;
+}
+
+.glyph-icon-secondary {
+	-fx-fill: TEXT_FILL_SECONDARY;
 }
 
 /*******************************************************************************
@@ -461,6 +475,10 @@
 .button:default:disabled {
 	-fx-text-fill: TEXT_FILL_WHITE_SECONDARY;
 	-fx-background-color: CONTROL_PRIMARY_BORDER_DISABLED, CONTROL_PRIMARY_BG_DISABLED;
+}
+
+.button:disabled .glyph-icon {
+	-fx-fill: TEXT_FILL_SECONDARY;
 }
 
 .button:default .glyph-icon {
