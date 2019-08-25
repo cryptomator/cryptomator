@@ -22,7 +22,7 @@
 		<ToggleGroup fx:id="predefinedLocationToggler"/>
 	</fx:define>
 	<padding>
-		<Insets top="12" right="12" bottom="12" left="12"/>
+		<Insets top="24" right="24" bottom="24" left="24"/>
 	</padding>
 	<children>
 		<Region VBox.vgrow="ALWAYS"/>

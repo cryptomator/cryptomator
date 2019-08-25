@@ -16,7 +16,7 @@
 	  spacing="12.0"
 	  alignment="TOP_CENTER">
 	<padding>
-		<Insets top="12" right="12" bottom="12" left="12"/>
+		<Insets top="24" right="24" bottom="24" left="24"/>
 	</padding>
 	<children>
 		<Region prefHeight="48" VBox.vgrow="NEVER"/>
@@ -25,7 +25,7 @@
 			<Image url="/bot_welcome.png"/>
 		</ImageView>
 
-		<Region prefHeight="24" VBox.vgrow="NEVER"/>
+		<Region prefHeight="12" VBox.vgrow="NEVER"/>
 
 		<HBox alignment="CENTER" spacing="6">
 			<Button styleClass="button-large" text="%addvaultwizard.welcome.newButton" onAction="#createNewVault">
