@@ -27,7 +27,11 @@
 			<groupId>org.cryptomator</groupId>
 			<artifactId>webdav-nio-adapter</artifactId>
 		</dependency>
-		
+		<dependency>
+			<groupId>org.cryptomator</groupId>
+			<artifactId>jni</artifactId>
+		</dependency>
+
 		<!-- JavaFx -->
 		<dependency>
 			<groupId>org.openjfx</groupId>

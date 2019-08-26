@@ -5,29 +5,17 @@
  *******************************************************************************/
 package org.cryptomator.keychain;
 
-import java.util.Optional;
-import java.util.Set;
-
 import com.google.common.collect.Sets;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.ElementsIntoSet;
-import org.cryptomator.jni.JniFunctions;
-import org.cryptomator.jni.MacFunctions;
-import org.cryptomator.jni.WinFunctions;
+import org.cryptomator.common.JniModule;
 
-@Module
+import java.util.Optional;
+import java.util.Set;
+
+@Module(includes = {JniModule.class})
 public class KeychainModule {
-
-	@Provides
-	Optional<MacFunctions> provideOptionalMacFunctions() {
-		return JniFunctions.macFunctions();
-	}
-
-	@Provides
-	Optional<WinFunctions> provideOptionalWinFunctions() {
-		return JniFunctions.winFunctions();
-	}
 
 	@Provides
 	@ElementsIntoSet

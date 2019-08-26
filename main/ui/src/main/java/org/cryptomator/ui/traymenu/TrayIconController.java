@@ -10,9 +10,6 @@ import javax.inject.Inject;
 import java.awt.AWTException;
 import java.awt.SystemTray;
 import java.awt.TrayIcon;
-import java.awt.event.ActionEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 
 @TrayMenuScoped
 public class TrayIconController {
@@ -23,6 +20,7 @@ public class TrayIconController {
 	private final TrayImageFactory imageFactory;
 	private final TrayMenuController trayMenuController;
 	private final TrayIcon trayIcon;
+	//	private final Optional<MacFunctions> macFunctions;
 
 	@Inject
 	TrayIconController(Settings settings, TrayImageFactory imageFactory, TrayMenuController trayMenuController) {
@@ -30,9 +28,11 @@ public class TrayIconController {
 		this.trayMenuController = trayMenuController;
 		this.imageFactory = imageFactory;
 		this.trayIcon = new TrayIcon(imageFactory.loadImage(), "Cryptomator", trayMenuController.getMenu());
+//		this.macFunctions = macFunctions;
 	}
 
 	public void initializeTrayIcon() {
+//		macFunctions.map(MacFunctions::uiAppearance).ifPresent(uiAppearance -> uiAppearance.addListener(this::macInterfaceThemeChanged));
 		settings.theme().addListener(this::themeChanged);
 
 		if (SystemUtils.IS_OS_WINDOWS) {
@@ -50,6 +50,7 @@ public class TrayIconController {
 		trayMenuController.initTrayMenu();
 	}
 
+	//	public void macInterfaceThemeChanged() {
 	private void themeChanged(@SuppressWarnings("unused") Observable observable) {
 		trayIcon.setImage(imageFactory.loadImage());
 	}
