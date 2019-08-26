@@ -15,14 +15,14 @@
 		<Insets bottom="12" left="12" right="12" top="12"/>
 	</padding>
 	<children>
-		<HBox spacing="12" alignment="BASELINE_LEFT">
+		<HBox spacing="6" alignment="BASELINE_LEFT">
 			<Label text="%vaultOptions.mount.driveName"/>
 			<AlphanumericTextField fx:id="driveName"/>
 		</HBox>
 
 		<CheckBox fx:id="readOnlyCheckbox" text="%vaultOptions.mount.readonly"/>
 
-		<HBox spacing="12" alignment="BASELINE_LEFT">
+		<HBox spacing="6" alignment="BASELINE_LEFT">
 			<CheckBox fx:id="customMountFlagsCheckbox" text="%vaultOptions.mount.customMountFlags" onAction="#toggleUseCustomMountFlags"/>
 			<TextField fx:id="mountFlags" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
 		</HBox>

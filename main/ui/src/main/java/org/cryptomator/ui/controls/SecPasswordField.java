@@ -69,7 +69,6 @@ public class SecPasswordField extends PasswordField {
 		indicator.setTextFill(INDICATOR_COLOR);
 		indicator.setFont(Font.font(indicator.getFont().getFamily(), 15.0));
 		this.getChildren().add(indicator);
-		this.setTooltip(tooltip);
 		this.addEventHandler(DragEvent.DRAG_OVER, this::handleDragOver);
 		this.addEventHandler(DragEvent.DRAG_DROPPED, this::handleDragDropped);
 		this.addEventHandler(KeyEvent.ANY, this::handleKeyEvent);

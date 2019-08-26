@@ -6,6 +6,7 @@ import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
@@ -14,6 +15,7 @@ import javafx.stage.Stage;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.cryptolib.api.InvalidPassphraseException;
 import org.cryptomator.ui.common.FxController;
+import org.cryptomator.ui.controls.FontAwesome5IconView;
 import org.cryptomator.ui.controls.SecPasswordField;
 import org.cryptomator.ui.util.PasswordStrengthUtil;
 import org.fxmisc.easybind.EasyBind;
@@ -45,9 +47,10 @@ public class ChangePasswordController implements FxController {
 	public Region passwordStrengthLevel4;
 	public Label passwordStrengthLabel;
 	public HBox passwordMatchBox;
-	public Rectangle checkmark;
-	public Rectangle cross;
+	public FontAwesome5IconView checkmark;
+	public FontAwesome5IconView cross;
 	public Label passwordMatchLabel;
+	public CheckBox finalConfirmationCheckbox;
 	public Button finishButton;
 
 	@Inject
@@ -67,12 +70,14 @@ public class ChangePasswordController implements FxController {
 		BooleanBinding passwordsMatch = Bindings.createBooleanBinding(() -> CharSequence.compare(newPasswordField.getCharacters(), reenterPasswordField.getCharacters()) == 0, newPasswordField.textProperty(), reenterPasswordField.textProperty());
 		BooleanBinding reenterFieldNotEmpty = reenterPasswordField.textProperty().isNotEmpty();
 		//disable the finish button when passwords do not match or one is empty
-		finishButton.disableProperty().bind(reenterFieldNotEmpty.not().or(passwordsMatch.not()));
+		finishButton.disableProperty().bind(reenterFieldNotEmpty.not().or(passwordsMatch.not()).or(finalConfirmationCheckbox.selectedProperty().not()));
 		//make match indicator invisible when passwords do not match or one is empty
 		passwordMatchBox.visibleProperty().bind(reenterFieldNotEmpty);
 		checkmark.visibleProperty().bind(passwordsMatch.and(reenterFieldNotEmpty));
+		checkmark.managedProperty().bind(checkmark.visibleProperty());
 		cross.visibleProperty().bind(passwordsMatch.not().and(reenterFieldNotEmpty));
-		passwordMatchLabel.textProperty().bind(Bindings.when(passwordsMatch.and(reenterFieldNotEmpty)).then(resourceBundle.getString("addvaultwizard.new.passwordsMatch")).otherwise(resourceBundle.getString("addvaultwizard.new.passwordsDoNotMatch")));
+		cross.managedProperty().bind(cross.visibleProperty());
+		passwordMatchLabel.textProperty().bind(Bindings.when(passwordsMatch.and(reenterFieldNotEmpty)).then(resourceBundle.getString("changepassword.passwordsMatch")).otherwise(resourceBundle.getString("changepassword.passwordsDoNotMatch")));
 
 		//bindsings for the password strength indicator
 		passwordStrengthLevel0.backgroundProperty().bind(EasyBind.combine(passwordStrength, new SimpleIntegerProperty(0), strengthRater::getBackgroundWithStrengthColor));
