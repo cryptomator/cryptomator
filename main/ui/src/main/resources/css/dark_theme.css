@@ -51,6 +51,12 @@
 	INDICATOR_BG: #C74234;
 	PROGRESS_INDICATOR_BEGIN: #CFCFCF;
 	PROGRESS_INDICATOR_END: #9E9E9E;
+	PASSWORD_STRENGTH_INDICATOR_BG: #FFF;
+	PASSWORD_STRENGTH_INDICATOR_BG_STRENGTH_0: #E74C3C;
+	PASSWORD_STRENGTH_INDICATOR_BG_STRENGTH_1: #E67E22;
+	PASSWORD_STRENGTH_INDICATOR_BG_STRENGTH_2: #F1C40F;
+	PASSWORD_STRENGTH_INDICATOR_BG_STRENGTH_3: #40F47E;
+	PASSWORD_STRENGTH_INDICATOR_BG_STRENGTH_4: #27AE60;
 
 	-fx-background-color: MAIN_BG;
     -fx-text-fill: TEXT_FILL;
@@ -142,16 +148,6 @@
 	-fx-background-radius: 6px, 5px, 4px;
 	-fx-translate-x: -1px;
 	-fx-translate-y: 1px;
-}
-
-/*******************************************************************************
- *                                                                             *
- * Preferences Window                                                          *
- *                                                                             *
- ******************************************************************************/
-
-.preferences-window {
-
 }
 
 /*******************************************************************************
@@ -349,7 +345,7 @@
  ******************************************************************************/
 
 .badge {
-	-fx-font-family: 'Open Sans SemiBold';
+	-fx-font-family: 'Open Sans Bold';
 	-fx-font-size: 0.8em;
 	-fx-background-radius: 4px;
 	-fx-padding: 0.2em 0.4em 0.2em 0.4em;
@@ -376,27 +372,27 @@
  ******************************************************************************/
 
 .password-strength-indicator .segment {
-	-fx-background-color: #ffffff;
+	-fx-background-color: PASSWORD_STRENGTH_INDICATOR_BG;
 }
 
 .password-strength-indicator.strength-0 .segment.active {
-	-fx-background-color: #e74c3c;
+	-fx-background-color: PASSWORD_STRENGTH_INDICATOR_BG_STRENGTH_0;
 }
 
 .password-strength-indicator.strength-1 .segment.active {
-	-fx-background-color: #e67e22;
+	-fx-background-color: PASSWORD_STRENGTH_INDICATOR_BG_STRENGTH_1;
 }
 
 .password-strength-indicator.strength-2 .segment.active {
-	-fx-background-color: #f1c40f;
+	-fx-background-color: PASSWORD_STRENGTH_INDICATOR_BG_STRENGTH_2;
 }
 
 .password-strength-indicator.strength-3 .segment.active {
-	-fx-background-color: #40d47e;
+	-fx-background-color: PASSWORD_STRENGTH_INDICATOR_BG_STRENGTH_3;
 }
 
 .password-strength-indicator.strength-4 .segment.active {
-	-fx-background-color: #27ae60;
+	-fx-background-color: PASSWORD_STRENGTH_INDICATOR_BG_STRENGTH_4;
 }
 
 /*******************************************************************************
