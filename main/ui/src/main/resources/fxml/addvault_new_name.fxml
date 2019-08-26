@@ -8,6 +8,9 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.TextFlow?>
+<?import javafx.scene.text.Text?>
+<?import org.cryptomator.ui.controls.FontAwesome5IconView?>
 <VBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
 	  fx:controller="org.cryptomator.ui.addvaultwizard.CreateNewVaultNameController"
@@ -23,13 +26,17 @@
 
 		<Label text="%addvaultwizard.new.nameInstruction" labelFor="$textField"/>
 		<TextField fx:id="textField" promptText="%addvaultwizard.new.namePrompt" HBox.hgrow="ALWAYS"/>
+		<TextFlow styleClass="text-flow" visible="${controller.showWarning}" prefHeight="22">
+			<FontAwesome5IconView glyph="EXCLAMATION_TRIANGLE"/>
+			<Text text="${controller.warningText}"/>
+		</TextFlow>
 
 		<Region VBox.vgrow="ALWAYS"/>
 
 		<ButtonBar buttonMinWidth="120" buttonOrder="B+X">
 			<buttons>
 				<Button text="%generic.button.back" ButtonBar.buttonData="BACK_PREVIOUS" onAction="#back"/>
-				<Button text="%generic.button.next" ButtonBar.buttonData="NEXT_FORWARD" onAction="#next" defaultButton="true" disable="${controller.vaultName.empty}"/>
+				<Button text="%generic.button.next" ButtonBar.buttonData="NEXT_FORWARD" onAction="#next" defaultButton="true" disable="${controller.invalidVaultName}"/>
 			</buttons>
 		</ButtonBar>
 	</children>

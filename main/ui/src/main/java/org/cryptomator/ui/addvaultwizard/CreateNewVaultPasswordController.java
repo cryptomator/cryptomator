@@ -26,15 +26,20 @@ import org.cryptomator.ui.controls.FontAwesome5IconView;
 import org.cryptomator.ui.controls.SecPasswordField;
 import org.cryptomator.ui.util.PasswordStrengthUtil;
 import org.fxmisc.easybind.EasyBind;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.io.IOException;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ResourceBundle;
 
 @AddVaultWizardScoped
 public class CreateNewVaultPasswordController implements FxController {
+
+	private static final Logger LOG = LoggerFactory.getLogger(CreateNewVaultPasswordController.class);
 
 	private final Stage window;
 	private final Lazy<Scene> previousScene;
@@ -108,17 +113,24 @@ public class CreateNewVaultPasswordController implements FxController {
 	@FXML
 	public void finish() {
 		VaultSettings vaultSettings = VaultSettings.withRandomId();
-		vaultSettings.path().setValue(vaultPath.get().resolve(vaultName.get()));
+		vaultSettings.path().setValue(vaultPath.get());
 		Vault newVault = vaultFactory.get(vaultSettings);
 		try {
-			//TODO: why is creating the directory not part of the creation process?
 			Files.createDirectory(vaultSettings.path().get());
+		} catch (FileAlreadyExistsException e) {
+			// TODO show specific error screen
+			LOG.error("", e);
+		} catch (IOException e) {
+			// TODO show generic error screen
+			LOG.error("", e);
+		}
+		try {
 			newVault.create(passwordField.getCharacters());
 			vaults.add(newVault);
 			window.close();
 		} catch (IOException e) {
-			e.printStackTrace();
-			//TODO
+			// TODO show generic error screen
+			LOG.error("", e);
 		}
 	}
 

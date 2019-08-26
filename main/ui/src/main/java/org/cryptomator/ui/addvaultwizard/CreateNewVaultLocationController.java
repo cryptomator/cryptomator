@@ -1,10 +1,13 @@
 package org.cryptomator.ui.addvaultwizard;
 
 import dagger.Lazy;
+import javafx.beans.Observable;
+import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
@@ -38,14 +41,16 @@ public class CreateNewVaultLocationController implements FxController {
 	private static final Path DEFAULT_CUSTOM_VAULT_PATH = Paths.get(System.getProperty("user.home"));
 
 	private final Stage window;
-	private final Lazy<Scene> previousScene;
-	private final Lazy<Scene> nextScene;
+	private final Lazy<Scene> chooseNameScene;
+	private final Lazy<Scene> choosePasswordScene;
 	private final LocationPresets locationPresets;
 	private final ObjectProperty<Path> vaultPath;
-	private final BooleanBinding vaultPathIsNull;
 	private final StringProperty vaultName;
 	private final ResourceBundle resourceBundle;
+	private final BooleanBinding validVaultPath;
+	private final BooleanBinding invalidVaultPath;
 	private final BooleanProperty usePresetPath;
+	private final StringProperty warningText;
 
 	private Path customVaultPath = DEFAULT_CUSTOM_VAULT_PATH;
 	public ToggleGroup predefinedLocationToggler;
@@ -53,25 +58,38 @@ public class CreateNewVaultLocationController implements FxController {
 	public RadioButton gdriveRadioButton;
 	public RadioButton customRadioButton;
 
-	//TODO: add parameter for next window
-
 	@Inject
-	CreateNewVaultLocationController(@AddVaultWizard Stage window, @FxmlScene(FxmlFile.ADDVAULT_NEW_NAME) Lazy<Scene> previousScene, @FxmlScene(FxmlFile.ADDVAULT_NEW_PASSWORD) Lazy<Scene> nextScene, LocationPresets locationPresets, ObjectProperty<Path> vaultPath, StringProperty vaultName, ResourceBundle resourceBundle) {
+	CreateNewVaultLocationController(@AddVaultWizard Stage window, @FxmlScene(FxmlFile.ADDVAULT_NEW_NAME) Lazy<Scene> chooseNameScene, @FxmlScene(FxmlFile.ADDVAULT_NEW_PASSWORD) Lazy<Scene> choosePasswordScene, LocationPresets locationPresets, ObjectProperty<Path> vaultPath, StringProperty vaultName, ResourceBundle resourceBundle) {
 		this.window = window;
-		this.previousScene = previousScene;
-		this.nextScene = nextScene;
+		this.chooseNameScene = chooseNameScene;
+		this.choosePasswordScene = choosePasswordScene;
 		this.locationPresets = locationPresets;
 		this.vaultPath = vaultPath;
 		this.vaultName = vaultName;
 		this.resourceBundle = resourceBundle;
-		this.vaultPathIsNull = vaultPath.isNull();
+		this.validVaultPath = Bindings.createBooleanBinding(this::isValidVaultPath, vaultPath);
+		this.invalidVaultPath = validVaultPath.not();
 		this.usePresetPath = new SimpleBooleanProperty();
+		this.warningText = new SimpleStringProperty();
+	}
+
+	private boolean isValidVaultPath() {
+		return vaultPath.get() != null && Files.notExists(vaultPath.get());
 	}
 
 	@FXML
 	public void initialize() {
 		predefinedLocationToggler.selectedToggleProperty().addListener(this::togglePredefinedLocation);
 		usePresetPath.bind(predefinedLocationToggler.selectedToggleProperty().isNotEqualTo(customRadioButton));
+		vaultPath.addListener(this::vaultPathDidChange);
+	}
+
+	private void vaultPathDidChange(@SuppressWarnings("unused") ObservableValue<? extends Path> observable, @SuppressWarnings("unused") Path oldValue, Path newValue) {
+		if (!Files.notExists(newValue)) {
+			warningText.set(resourceBundle.getString("addvaultwizard.new.fileAlreadyExists"));
+		} else {
+			warningText.set(null);
+		}
 	}
 
 	private void togglePredefinedLocation(@SuppressWarnings("unused") ObservableValue<? extends Toggle> observable, @SuppressWarnings("unused") Toggle oldValue, Toggle newValue) {
@@ -86,7 +104,7 @@ public class CreateNewVaultLocationController implements FxController {
 
 	@FXML
 	public void back() {
-		window.setScene(previousScene.get());
+		window.setScene(chooseNameScene.get());
 	}
 
 	@FXML
@@ -96,10 +114,10 @@ public class CreateNewVaultLocationController implements FxController {
 			assert Files.isDirectory(vaultPath.get().getParent());
 			Path createdDir = Files.createDirectory(vaultPath.get());
 			Files.delete(createdDir); // assert: dir exists and is empty
-			window.setScene(nextScene.get());
+			window.setScene(choosePasswordScene.get());
 		} catch (FileAlreadyExistsException e) {
 			LOG.warn("Can not use already existing vault path: {}", vaultPath.get());
-			// TODO show specific error text "vault can not be created at this path because some object already exists"
+			warningText.set(resourceBundle.getString("addvaultwizard.new.fileAlreadyExists"));
 		} catch (NoSuchFileException | DirectoryNotEmptyException e) {
 			LOG.error("Failed to delete recently created directory.", e);
 			// TODO show generic error text for unexpected exception
@@ -131,12 +149,12 @@ public class CreateNewVaultLocationController implements FxController {
 		return vaultPath;
 	}
 
-	public boolean isVaultPathIsNull() {
-		return vaultPathIsNull.get();
+	public BooleanBinding invalidVaultPathProperty() {
+		return invalidVaultPath;
 	}
 
-	public BooleanBinding vaultPathIsNullProperty() {
-		return vaultPathIsNull;
+	public Boolean getInvalidVaultPath() {
+		return invalidVaultPath.get();
 	}
 
 	public LocationPresets getLocationPresets() {
@@ -149,5 +167,21 @@ public class CreateNewVaultLocationController implements FxController {
 
 	public boolean getUsePresetPath() {
 		return usePresetPath.get();
+	}
+
+	public StringProperty warningTextProperty() {
+		return warningText;
+	}
+
+	public String getWarningText() {
+		return warningText.get();
+	}
+
+	public BooleanBinding showWarningProperty() {
+		return warningText.isNotEmpty();
+	}
+
+	public boolean isShowWarning() {
+		return showWarningProperty().get();
 	}
 }
