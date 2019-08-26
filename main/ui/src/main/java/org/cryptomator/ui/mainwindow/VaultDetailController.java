@@ -4,8 +4,11 @@ import javafx.beans.binding.Binding;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.input.MouseEvent;
 import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.common.vaults.Volume;
 import org.cryptomator.ui.changepassword.ChangePasswordComponent;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.Tasks;
@@ -85,6 +88,20 @@ public class VaultDetailController implements FxController {
 		changePasswordWindow.vault(vault.get()).build().showChangePasswordWindow();
 	}
 
+	@FXML
+	public void revealStorageLocation(ActionEvent actionEvent) {
+		application.getHostServices().showDocument(vault.get().getPath().toUri().toString());
+	}
+
+	@FXML
+	public void revealAccessLocation(MouseEvent mouseEvent) {
+		try {
+			vault.get().reveal();
+		} catch (Volume.VolumeException e) {
+			LOG.error("Failed to reveal vault.", e);
+		}
+	}
+
 	/* Observable Properties */
 
 	public ReadOnlyObjectProperty<Vault> vaultProperty() {
@@ -110,5 +127,4 @@ public class VaultDetailController implements FxController {
 	public boolean isAnyVaultSelected() {
 		return anyVaultSelected.get();
 	}
-
 }
