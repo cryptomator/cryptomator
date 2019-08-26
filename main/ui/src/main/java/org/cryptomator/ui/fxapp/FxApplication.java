@@ -8,7 +8,6 @@ import javafx.stage.Stage;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.UiTheme;
 import org.cryptomator.common.vaults.Vault;
-import org.cryptomator.jni.MacApplicationUiAppearance;
 import org.cryptomator.jni.MacFunctions;
 import org.cryptomator.ui.mainwindow.MainWindowComponent;
 import org.cryptomator.ui.preferences.PreferencesComponent;
@@ -96,12 +95,12 @@ public class FxApplication extends Application {
 				break;
 			case DARK:
 				Application.setUserAgentStylesheet(getClass().getResource("/css/dark_theme.css").toString());
-				macFunctions.map(MacFunctions::uiAppearance).ifPresent(MacApplicationUiAppearance::setToDarkAqua);
+				//macFunctions.map(MacFunctions::uiAppearance).ifPresent(JniException.ignore(MacApplicationUiAppearance::setToDarkAqua));
 				break;
 			case LIGHT:
 			default:
 				Application.setUserAgentStylesheet(getClass().getResource("/css/light_theme.css").toString());
-				macFunctions.map(MacFunctions::uiAppearance).ifPresent(MacApplicationUiAppearance::setToAqua);
+				//macFunctions.map(MacFunctions::uiAppearance).ifPresent(JniException.ignore(MacApplicationUiAppearance::setToDarkAqua));
 				break;
 		}
 	}
