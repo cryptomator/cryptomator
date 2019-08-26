@@ -1,8 +1,6 @@
 package org.cryptomator.ui.traymenu;
 
-import javafx.beans.Observable;
 import org.apache.commons.lang3.SystemUtils;
-import org.cryptomator.common.settings.Settings;
 import org.cryptomator.jni.JniException;
 import org.cryptomator.jni.MacApplicationUiState;
 import org.cryptomator.jni.MacFunctions;
@@ -20,15 +18,13 @@ public class TrayIconController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(TrayIconController.class);
 
-	private final Settings settings;
 	private final TrayImageFactory imageFactory;
 	private final TrayMenuController trayMenuController;
 	private final TrayIcon trayIcon;
 	private final Optional<MacFunctions> macFunctions;
 
 	@Inject
-	TrayIconController(Settings settings, TrayImageFactory imageFactory, TrayMenuController trayMenuController, Optional<MacFunctions> macFunctions) {
-		this.settings = settings;
+	TrayIconController(TrayImageFactory imageFactory, TrayMenuController trayMenuController, Optional<MacFunctions> macFunctions) {
 		this.trayMenuController = trayMenuController;
 		this.imageFactory = imageFactory;
 		this.trayIcon = new TrayIcon(imageFactory.loadImage(), "Cryptomator", trayMenuController.getMenu());
@@ -36,8 +32,7 @@ public class TrayIconController {
 	}
 
 	public void initializeTrayIcon() {
-//		macFunctions.map(MacFunctions::uiAppearance).ifPresent(uiAppearance -> uiAppearance.addListener(this::macInterfaceThemeChanged));
-		settings.theme().addListener(this::themeChanged);
+		macFunctions.map(MacFunctions::uiAppearance).ifPresent(uiAppearance -> uiAppearance.addListener(this::macInterfaceThemeChanged));
 
 		if (SystemUtils.IS_OS_WINDOWS) {
 			// TODO: test on windows: is this a double click?
@@ -56,8 +51,7 @@ public class TrayIconController {
 		trayMenuController.initTrayMenu();
 	}
 
-	//	public void macInterfaceThemeChanged() {
-	private void themeChanged(@SuppressWarnings("unused") Observable observable) {
+	public void macInterfaceThemeChanged() {
 		trayIcon.setImage(imageFactory.loadImage());
 	}
 
