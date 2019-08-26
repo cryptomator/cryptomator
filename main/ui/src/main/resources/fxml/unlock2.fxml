@@ -4,11 +4,11 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.ProgressIndicator?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Text?>
 <?import javafx.scene.text.TextFlow?>
 <?import org.cryptomator.ui.controls.SecPasswordField?>
-<?import javafx.scene.control.ButtonBar?>
 <VBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
 	  fx:controller="org.cryptomator.ui.unlock.UnlockController"
@@ -27,15 +27,13 @@
 		</TextFlow>
 		<SecPasswordField fx:id="passwordField"/>
 		<CheckBox fx:id="savePassword" text="%unlock.savePassword" onAction="#didClickSavePasswordCheckbox"/>
-		<ButtonBar buttonOrder="+CI">
-			<buttons>
-				<Button text="%generic.button.cancel" ButtonBar.buttonData="CANCEL_CLOSE" cancelButton="true" onAction="#cancel"/>
-				<Button text="%unlock.unlockBtn" defaultButton="true" ButtonBar.buttonData="FINISH" onAction="#unlock" contentDisplay="${controller.unlockButtonState}" disable="${controller.unlockButtonDisabled}">
-					<graphic>
-						<ProgressIndicator progress="-1" prefWidth="12" prefHeight="12"/>
-					</graphic>
-				</Button>
-			</buttons>
-		</ButtonBar>
+		<HBox alignment="CENTER_RIGHT" spacing="9">
+			<Button text="%generic.button.cancel" cancelButton="true" onAction="#cancel"/>
+			<Button text="%unlock.unlockBtn" defaultButton="true" onAction="#unlock" contentDisplay="${controller.unlockButtonState}" disable="${controller.unlockButtonDisabled}">
+				<graphic>
+					<ProgressIndicator progress="-1" prefWidth="12" prefHeight="12"/>
+				</graphic>
+			</Button>
+		</HBox>
 	</children>
 </VBox>

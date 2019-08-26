@@ -75,7 +75,7 @@
 
 		<Region prefHeight="24" VBox.vgrow="NEVER"/>
 
-		<HBox alignment="CENTER" spacing="12" visible="${controller.vault.locked}" managed="${controller.vault.locked}">
+		<HBox alignment="CENTER" spacing="9" visible="${controller.vault.locked}" managed="${controller.vault.locked}">
 			<Button styleClass="button-large" text="%vaultDetail.unlockBtn" onAction="#unlock" defaultButton="${controller.vault.locked}">
 				<graphic>
 					<FontAwesome5IconView glyph="LOCK_OPEN_ALT" glyphSize="15"/>
@@ -87,7 +87,7 @@
 				</graphic>
 			</Button>
 		</HBox>
-		<VBox alignment="CENTER" spacing="12" visible="${controller.vault.unlocked}" managed="${controller.vault.unlocked}">
+		<VBox alignment="CENTER" spacing="9" visible="${controller.vault.unlocked}" managed="${controller.vault.unlocked}">
 			<Button styleClass="button-large" text="%vaultDetail.lockBtn" onAction="#lock" defaultButton="${controller.vault.unlocked}">
 				<graphic>
 					<FontAwesome5IconView glyph="LOCK_ALT" glyphSize="15"/>
