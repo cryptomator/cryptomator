@@ -39,6 +39,7 @@
 									<directory>${project.basedir}/src/main/resources</directory>
 									<includes>
 										<include>version.txt</include>
+										<include>ffi-version.txt</include>
 										<include>launcher-mac.sh</include>
 										<include>launcher-linux.sh</include>
 										<include>launcher-win.bat</include>
