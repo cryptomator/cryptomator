@@ -3,6 +3,9 @@ package org.cryptomator.ui.traymenu;
 import javafx.beans.Observable;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.settings.Settings;
+import org.cryptomator.jni.JniException;
+import org.cryptomator.jni.MacApplicationUiState;
+import org.cryptomator.jni.MacFunctions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,6 +13,7 @@ import javax.inject.Inject;
 import java.awt.AWTException;
 import java.awt.SystemTray;
 import java.awt.TrayIcon;
+import java.util.Optional;
 
 @TrayMenuScoped
 public class TrayIconController {
@@ -20,15 +24,15 @@ public class TrayIconController {
 	private final TrayImageFactory imageFactory;
 	private final TrayMenuController trayMenuController;
 	private final TrayIcon trayIcon;
-	//	private final Optional<MacFunctions> macFunctions;
+	private final Optional<MacFunctions> macFunctions;
 
 	@Inject
-	TrayIconController(Settings settings, TrayImageFactory imageFactory, TrayMenuController trayMenuController) {
+	TrayIconController(Settings settings, TrayImageFactory imageFactory, TrayMenuController trayMenuController, Optional<MacFunctions> macFunctions) {
 		this.settings = settings;
 		this.trayMenuController = trayMenuController;
 		this.imageFactory = imageFactory;
 		this.trayIcon = new TrayIcon(imageFactory.loadImage(), "Cryptomator", trayMenuController.getMenu());
-//		this.macFunctions = macFunctions;
+		this.macFunctions = macFunctions;
 	}
 
 	public void initializeTrayIcon() {
@@ -38,6 +42,8 @@ public class TrayIconController {
 		if (SystemUtils.IS_OS_WINDOWS) {
 			// TODO: test on windows: is this a double click?
 			trayIcon.addActionListener(trayMenuController::showMainWindow);
+		} else if (SystemUtils.IS_OS_MAC) {
+			macFunctions.map(MacFunctions::uiState).ifPresent(JniException.ignore(MacApplicationUiState::transformToAgentApplication));
 		}
 
 		try {

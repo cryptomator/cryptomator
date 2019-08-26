@@ -25,11 +25,12 @@ public interface QuitComponent {
 	@FxmlScene(FxmlFile.QUIT)
 	Lazy<Scene> scene();
 
-	default void showQuitWindow() {
+	default Stage showQuitWindow() {
 		Stage stage = window();
 		stage.setScene(scene().get());
 		stage.show();
 		stage.requestFocus();
+		return stage;
 	}
 
 	@Subcomponent.Builder

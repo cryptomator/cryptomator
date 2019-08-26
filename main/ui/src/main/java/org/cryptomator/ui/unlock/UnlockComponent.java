@@ -24,10 +24,11 @@ public interface UnlockComponent {
 	@FxmlScene(FxmlFile.UNLOCK)
 	Lazy<Scene> scene();
 
-	default void showUnlockWindow() {
+	default Stage showUnlockWindow() {
 		Stage stage = window();
 		stage.setScene(scene().get());
 		stage.show();
+		return stage;
 	}
 
 	@Subcomponent.Builder

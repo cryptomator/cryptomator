@@ -3,11 +3,16 @@ package org.cryptomator.ui.fxapp;
 import dagger.Lazy;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableSet;
 import javafx.stage.Stage;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.UiTheme;
 import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.jni.MacApplicationUiState;
 import org.cryptomator.jni.MacFunctions;
 import org.cryptomator.ui.mainwindow.MainWindowComponent;
 import org.cryptomator.ui.preferences.PreferencesComponent;
@@ -31,6 +36,8 @@ public class FxApplication extends Application {
 	private final UnlockComponent.Builder unlockWindowBuilder;
 	private final QuitComponent.Builder quitWindowBuilder;
 	private final Optional<MacFunctions> macFunctions;
+	private final ObservableSet<Stage> visibleStages = FXCollections.observableSet();
+	private final BooleanBinding hasVisibleStages = Bindings.isNotEmpty(visibleStages);
 
 	@Inject
 	FxApplication(Settings settings, Lazy<MainWindowComponent> mainWindow, Lazy<PreferencesComponent> preferencesWindow, UnlockComponent.Builder unlockWindowBuilder, QuitComponent.Builder quitWindowBuilder, Optional<MacFunctions> macFunctions) {
@@ -46,6 +53,8 @@ public class FxApplication extends Application {
 		LOG.trace("FxApplication.start()");
 		Platform.setImplicitExit(false);
 
+		hasVisibleStages.addListener(this::hasVisibleStagesChanged);
+
 		settings.theme().addListener(this::themeChanged);
 		loadSelectedStyleSheet(settings.theme().get());
 	}
@@ -55,30 +64,47 @@ public class FxApplication extends Application {
 		throw new UnsupportedOperationException("Use start() instead.");
 	}
 
+	private void addVisibleStage(Stage stage) {
+		visibleStages.add(stage);
+		stage.setOnHidden(evt -> visibleStages.remove(stage));
+	}
+
+	private void hasVisibleStagesChanged(@SuppressWarnings("unused") ObservableValue<? extends Boolean> observableValue, @SuppressWarnings("unused") boolean oldValue, boolean newValue) {
+		if (newValue) {
+			macFunctions.map(MacFunctions::uiState).ifPresent(MacApplicationUiState::transformToForegroundApplication);
+		} else {
+			macFunctions.map(MacFunctions::uiState).ifPresent(MacApplicationUiState::transformToAgentApplication);
+		}
+	}
+
 	public void showPreferencesWindow() {
 		Platform.runLater(() -> {
-			preferencesWindow.get().showPreferencesWindow();
+			Stage stage = preferencesWindow.get().showPreferencesWindow();
+			addVisibleStage(stage);
 			LOG.debug("Showing Preferences");
 		});
 	}
 
 	public void showMainWindow() {
 		Platform.runLater(() -> {
-			mainWindow.get().showMainWindow();
+			Stage stage = mainWindow.get().showMainWindow();
+			addVisibleStage(stage);
 			LOG.debug("Showing MainWindow");
 		});
 	}
 
 	public void showUnlockWindow(Vault vault) {
 		Platform.runLater(() -> {
-			unlockWindowBuilder.vault(vault).build().showUnlockWindow();
+			Stage stage = unlockWindowBuilder.vault(vault).build().showUnlockWindow();
+			addVisibleStage(stage);
 			LOG.debug("Showing UnlockWindow for {}", vault.getDisplayableName());
 		});
 	}
 
 	public void showQuitWindow(QuitResponse response) {
 		Platform.runLater(() -> {
-			quitWindowBuilder.quitResponse(response).build().showQuitWindow();
+			Stage stage = quitWindowBuilder.quitResponse(response).build().showQuitWindow();
+			addVisibleStage(stage);
 			LOG.debug("Showing QuitWindow");
 		});
 	}

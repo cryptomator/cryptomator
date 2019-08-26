@@ -22,11 +22,12 @@ public interface MainWindowComponent {
 	@FxmlScene(FxmlFile.MAIN_WINDOW)
 	Lazy<Scene> scene();
 
-	default void showMainWindow() {
+	default Stage showMainWindow() {
 		Stage stage = window();
 		stage.setScene(scene().get());
 		stage.show();
 		stage.requestFocus();
+		return stage;
 	}
 
 	@Subcomponent.Builder

@@ -23,11 +23,12 @@ public interface PreferencesComponent {
 	@FxmlScene(FxmlFile.PREFERENCES)
 	Lazy<Scene> scene();
 
-	default void showPreferencesWindow() {
+	default Stage showPreferencesWindow() {
 		Stage stage = window();
 		stage.setScene(scene().get());
 		stage.show();
 		stage.requestFocus();
+		return stage;
 	}
 
 	@Subcomponent.Builder
