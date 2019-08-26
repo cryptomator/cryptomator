@@ -1,6 +1,24 @@
 /*******************************************************************************
  *                                                                             *
- * Colors                                                                      *
+ * Fonts                                                                       *
+ *                                                                             *
+ ******************************************************************************/
+
+@font-face {
+	src: url('opensans-regular.ttf');
+}
+
+@font-face {
+	src: url('opensans-semibold.ttf');
+}
+
+@font-face {
+	src: url('opensans-bold.ttf');
+}
+
+/*******************************************************************************
+ *                                                                             *
+ * Root Styling & Colors                                                       *
  *                                                                             *
  ******************************************************************************/
 
@@ -36,6 +54,7 @@
 
 	-fx-background-color: MAIN_BG;
 	-fx-text-fill: TEXT_FILL;
+	-fx-font-family: 'Open Sans';
 }
 
 /*******************************************************************************
@@ -215,6 +234,7 @@
 }
 
 .list-cell .header-label {
+	-fx-font-family: 'Open Sans SemiBold';
 	-fx-font-size: 1.0em;
 }
 
@@ -314,6 +334,7 @@
 }
 
 .vault-detail .vault-name {
+	-fx-font-family: 'Open Sans SemiBold';
 	-fx-font-size: 1.5em;
 }
 
@@ -328,6 +349,7 @@
  ******************************************************************************/
 
 .badge {
+	-fx-font-family: 'Open Sans Bold';
 	-fx-font-size: 0.8em;
 	-fx-background-radius: 4px;
 	-fx-padding: 0.2em 0.4em 0.2em 0.4em;
