@@ -349,6 +349,36 @@
 
 /*******************************************************************************
  *                                                                             *
+ * Password Strength Indicator                                                 *
+ *                                                                             *
+ ******************************************************************************/
+
+.password-strength-indicator .segment {
+	-fx-background-color: #ffffff;
+}
+
+.password-strength-indicator.strength-0 .segment.active {
+	-fx-background-color: #e74c3c;
+}
+
+.password-strength-indicator.strength-1 .segment.active {
+	-fx-background-color: #e67e22;
+}
+
+.password-strength-indicator.strength-2 .segment.active {
+	-fx-background-color: #f1c40f;
+}
+
+.password-strength-indicator.strength-3 .segment.active {
+	-fx-background-color: #40d47e;
+}
+
+.password-strength-indicator.strength-4 .segment.active {
+	-fx-background-color: #27ae60;
+}
+
+/*******************************************************************************
+ *                                                                             *
  * ButtonGroup                                                                 *
  *                                                                             *
  ******************************************************************************/

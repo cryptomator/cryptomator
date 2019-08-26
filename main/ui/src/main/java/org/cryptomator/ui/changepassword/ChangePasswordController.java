@@ -9,8 +9,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Region;
-import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.cryptolib.api.InvalidPassphraseException;
@@ -40,11 +38,6 @@ public class ChangePasswordController implements FxController {
 	public SecPasswordField oldPasswordField;
 	public SecPasswordField newPasswordField;
 	public SecPasswordField reenterPasswordField;
-	public Region passwordStrengthLevel0;
-	public Region passwordStrengthLevel1;
-	public Region passwordStrengthLevel2;
-	public Region passwordStrengthLevel3;
-	public Region passwordStrengthLevel4;
 	public Label passwordStrengthLabel;
 	public HBox passwordMatchBox;
 	public FontAwesome5IconView checkmark;
@@ -79,14 +72,7 @@ public class ChangePasswordController implements FxController {
 		cross.managedProperty().bind(cross.visibleProperty());
 		passwordMatchLabel.textProperty().bind(Bindings.when(passwordsMatch.and(reenterFieldNotEmpty)).then(resourceBundle.getString("changepassword.passwordsMatch")).otherwise(resourceBundle.getString("changepassword.passwordsDoNotMatch")));
 
-		//bindsings for the password strength indicator
-		passwordStrengthLevel0.backgroundProperty().bind(EasyBind.combine(passwordStrength, new SimpleIntegerProperty(0), strengthRater::getBackgroundWithStrengthColor));
-		passwordStrengthLevel1.backgroundProperty().bind(EasyBind.combine(passwordStrength, new SimpleIntegerProperty(1), strengthRater::getBackgroundWithStrengthColor));
-		passwordStrengthLevel2.backgroundProperty().bind(EasyBind.combine(passwordStrength, new SimpleIntegerProperty(2), strengthRater::getBackgroundWithStrengthColor));
-		passwordStrengthLevel3.backgroundProperty().bind(EasyBind.combine(passwordStrength, new SimpleIntegerProperty(3), strengthRater::getBackgroundWithStrengthColor));
-		passwordStrengthLevel4.backgroundProperty().bind(EasyBind.combine(passwordStrength, new SimpleIntegerProperty(4), strengthRater::getBackgroundWithStrengthColor));
 		passwordStrengthLabel.textProperty().bind(EasyBind.map(passwordStrength, strengthRater::getStrengthDescription));
-
 	}
 
 	@FXML
@@ -109,10 +95,18 @@ public class ChangePasswordController implements FxController {
 			LOG.info("Wrong old password.");
 		}
 	}
+
 	/* Getter/Setter */
 
 	public Vault getVault() {
 		return vault;
 	}
 
+	public IntegerProperty passwordStrengthProperty() {
+		return passwordStrength;
+	}
+
+	public int getPasswordStrength() {
+		return passwordStrength.get();
+	}
 }

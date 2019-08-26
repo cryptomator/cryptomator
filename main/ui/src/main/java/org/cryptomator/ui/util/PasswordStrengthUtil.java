@@ -49,6 +49,7 @@ public class PasswordStrengthUtil {
 		}
 	}
 
+	@Deprecated
 	public Color getStrengthColor(Number score) {
 		switch (score.intValue()) {
 			case 0:
@@ -66,12 +67,14 @@ public class PasswordStrengthUtil {
 		}
 	}
 
+	@Deprecated
 	public Background getBackgroundWithStrengthColor(Number score) {
 		Color c = this.getStrengthColor(score);
 		BackgroundFill fill = new BackgroundFill(c, CornerRadii.EMPTY, Insets.EMPTY);
 		return new Background(fill);
 	}
 
+	@Deprecated
 	public Background getBackgroundWithStrengthColor(Number score, Number threshold) {
 		return score.intValue() >= threshold.intValue() ? getBackgroundWithStrengthColor(score) : getBackgroundWithStrengthColor(-1);
 	}

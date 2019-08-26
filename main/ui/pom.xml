@@ -73,7 +73,7 @@
 		<dependency>
 			<groupId>com.nulab-inc</groupId>
 			<artifactId>zxcvbn</artifactId>
-			<version>1.2.2</version>
+			<version>1.2.7</version>
 		</dependency>
 		
 		<!-- Logging -->

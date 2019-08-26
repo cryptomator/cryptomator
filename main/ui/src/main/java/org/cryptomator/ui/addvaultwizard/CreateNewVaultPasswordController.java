@@ -54,11 +54,6 @@ public class CreateNewVaultPasswordController implements FxController {
 	public Button finishButton;
 	public SecPasswordField passwordField;
 	public SecPasswordField reenterField;
-	public Region passwordStrengthLevel0;
-	public Region passwordStrengthLevel1;
-	public Region passwordStrengthLevel2;
-	public Region passwordStrengthLevel3;
-	public Region passwordStrengthLevel4;
 	public Label passwordStrengthLabel;
 	public HBox passwordMatchBox;
 	public FontAwesome5IconView checkmark;
@@ -97,11 +92,6 @@ public class CreateNewVaultPasswordController implements FxController {
 		passwordMatchLabel.textProperty().bind(Bindings.when(passwordsMatch.and(reenterFieldNotEmpty)).then(resourceBundle.getString("addvaultwizard.new.passwordsMatch")).otherwise(resourceBundle.getString("addvaultwizard.new.passwordsDoNotMatch")));
 
 		//bindsings for the password strength indicator
-		passwordStrengthLevel0.backgroundProperty().bind(EasyBind.combine(passwordStrength, new SimpleIntegerProperty(0), strengthRater::getBackgroundWithStrengthColor));
-		passwordStrengthLevel1.backgroundProperty().bind(EasyBind.combine(passwordStrength, new SimpleIntegerProperty(1), strengthRater::getBackgroundWithStrengthColor));
-		passwordStrengthLevel2.backgroundProperty().bind(EasyBind.combine(passwordStrength, new SimpleIntegerProperty(2), strengthRater::getBackgroundWithStrengthColor));
-		passwordStrengthLevel3.backgroundProperty().bind(EasyBind.combine(passwordStrength, new SimpleIntegerProperty(3), strengthRater::getBackgroundWithStrengthColor));
-		passwordStrengthLevel4.backgroundProperty().bind(EasyBind.combine(passwordStrength, new SimpleIntegerProperty(4), strengthRater::getBackgroundWithStrengthColor));
 		passwordStrengthLabel.textProperty().bind(EasyBind.map(passwordStrength, strengthRater::getStrengthDescription));
 	}
 
@@ -144,4 +134,11 @@ public class CreateNewVaultPasswordController implements FxController {
 		return vaultName;
 	}
 
+	public IntegerProperty passwordStrengthProperty() {
+		return passwordStrength;
+	}
+
+	public int getPasswordStrength() {
+		return passwordStrength.get();
+	}
 }
