@@ -100,8 +100,7 @@ public class FuseVolume implements Volume {
 		try {
 			Mounter mounter = FuseMountFactory.getMounter();
 			EnvironmentVariables envVars = EnvironmentVariables.create() //
-					.withFlags(splitFlags(mountFlags))
-					.withMountPoint(mountPoint) //
+					.withFlags(splitFlags(mountFlags)).withMountPoint(mountPoint) //
 					.build();
 			this.fuseMnt = mounter.mount(root, envVars);
 		} catch (CommandFailedException e) {
@@ -164,6 +163,11 @@ public class FuseVolume implements Volume {
 	@Override
 	public boolean isSupported() {
 		return FuseVolume.isSupportedStatic();
+	}
+
+	@Override
+	public Optional<Path> getMountPointSafe() {
+		return Optional.ofNullable(mountPoint);
 	}
 
 	public static boolean isSupportedStatic() {

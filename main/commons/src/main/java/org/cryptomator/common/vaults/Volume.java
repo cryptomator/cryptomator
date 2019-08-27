@@ -4,6 +4,8 @@ import org.cryptomator.common.settings.VolumeImpl;
 import org.cryptomator.cryptofs.CryptoFileSystem;
 
 import java.io.IOException;
+import java.nio.file.Path;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 /**
@@ -27,6 +29,8 @@ public interface Volume {
 	void reveal() throws VolumeException;
 
 	void unmount() throws VolumeException;
+
+	Optional<Path> getMountPointSafe();
 
 	// optional forced unmounting:
 

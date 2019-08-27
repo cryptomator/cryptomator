@@ -30,6 +30,7 @@ public class DokanyVolume implements Volume {
 	private final MountFactory mountFactory;
 	private final WindowsDriveLetters windowsDriveLetters;
 	private Mount mount;
+	private Path mountPoint;
 
 	@Inject
 	public DokanyVolume(VaultSettings vaultSettings, ExecutorService executorService, WindowsDriveLetters windowsDriveLetters) {
@@ -45,19 +46,19 @@ public class DokanyVolume implements Volume {
 
 	@Override
 	public void mount(CryptoFileSystem fs, String mountFlags) throws VolumeException, IOException {
-		Path mountPath = getMountPoint();
+		this.mountPoint = determineMountPoint();
 		String mountName = vaultSettings.mountName().get();
 		try {
-			this.mount = mountFactory.mount(fs.getPath("/"), mountPath, mountName, FS_TYPE_NAME, mountFlags.strip());
+			this.mount = mountFactory.mount(fs.getPath("/"), mountPoint, mountName, FS_TYPE_NAME, mountFlags.strip());
 		} catch (MountFailedException e) {
 			if (vaultSettings.getIndividualMountPath().isPresent()) {
-				LOG.warn("Failed to mount vault into {}. Is this directory currently accessed by another process (e.g. Windows Explorer)?", mountPath);
+				LOG.warn("Failed to mount vault into {}. Is this directory currently accessed by another process (e.g. Windows Explorer)?", mountPoint);
 			}
 			throw new VolumeException("Unable to mount Filesystem", e);
 		}
 	}
 
-	private Path getMountPoint() throws VolumeException, IOException {
+	private Path determineMountPoint() throws VolumeException, IOException {
 		Optional<String> optionalCustomMountPoint = vaultSettings.getIndividualMountPath();
 		if (optionalCustomMountPoint.isPresent()) {
 			Path customMountPoint = Paths.get(optionalCustomMountPoint.get());
@@ -97,6 +98,11 @@ public class DokanyVolume implements Volume {
 	@Override
 	public void unmount() {
 		mount.close();
+	}
+
+	@Override
+	public Optional<Path> getMountPointSafe() {
+		return Optional.ofNullable(mountPoint);
 	}
 
 	public static boolean isSupportedStatic() {

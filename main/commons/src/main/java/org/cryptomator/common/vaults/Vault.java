@@ -58,6 +58,7 @@ public class Vault {
 	private final StringBinding defaultMountFlags;
 	private final AtomicReference<CryptoFileSystem> cryptoFileSystem = new AtomicReference<>();
 	private final ObjectProperty<State> state = new SimpleObjectProperty<State>(State.LOCKED);
+	private final ObjectProperty<Path> accessPoint = new SimpleObjectProperty<>(Path.of(""));
 	private final StringBinding displayableName;
 	private final StringBinding displayablePath;
 	private final BooleanBinding locked;
@@ -81,6 +82,7 @@ public class Vault {
 		this.locked = Bindings.createBooleanBinding(this::isLocked, state);
 		this.processing = Bindings.createBooleanBinding(this::isProcessing, state);
 		this.unlocked = Bindings.createBooleanBinding(this::isUnlocked, state);
+		this.state.addListener(this::setAccessPoint);
 	}
 
 	// ******************************************************************************
@@ -217,6 +219,22 @@ public class Vault {
 	public String getDisplayableName() {
 		Path p = vaultSettings.path().get();
 		return p.getFileName().toString();
+	}
+
+	public ObjectProperty<Path> accessPointProperty() {
+		return accessPoint;
+	}
+
+	public Path getAccessPoint() {
+		return accessPoint.get();
+	}
+
+	private void setAccessPoint(Observable obs) {
+		if (this.getState() == State.UNLOCKED) {
+			accessPoint.setValue(volume.getMountPointSafe().get());
+		} else {
+			accessPoint.setValue(Path.of(""));
+		}
 	}
 
 	public StringBinding displayablePathProperty() {

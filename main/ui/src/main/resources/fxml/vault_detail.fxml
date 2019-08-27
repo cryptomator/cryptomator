@@ -57,7 +57,7 @@
 			<HBox styleClass="button-group,first" alignment="CENTER" onMouseClicked="#revealAccessLocation">
 				<VBox styleClass="button-group-labels">
 					<Label styleClass="button-group-heading" text="%vaultDetail.accessLocation"/>
-					<Label text="${controller.vault.customMountPath}"/>
+					<Label text="${controller.vault.accessPoint}"/>
 				</VBox>
 				<Region HBox.hgrow="ALWAYS"/>
 				<Label styleClass="button-group-action" text="TODO REVEAL"/>

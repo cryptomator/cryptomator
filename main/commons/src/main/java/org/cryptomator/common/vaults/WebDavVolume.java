@@ -13,6 +13,8 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.nio.file.Path;
+import java.util.Optional;
 
 public class WebDavVolume implements Volume {
 
@@ -25,6 +27,7 @@ public class WebDavVolume implements Volume {
 	private WebDavServer server;
 	private WebDavServletController servlet;
 	private Mounter.Mount mount;
+	private Path mountPoint;
 
 	@Inject
 	public WebDavVolume(Provider<WebDavServer> serverProvider, VaultSettings vaultSettings, Settings settings) {
@@ -91,6 +94,11 @@ public class WebDavVolume implements Volume {
 			throw new VolumeException(e);
 		}
 		cleanup();
+	}
+
+	@Override
+	public Optional<Path> getMountPointSafe() {
+		return Optional.ofNullable(mountPoint);
 	}
 
 	private String getLocalhostAliasOrNull() {
