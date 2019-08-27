@@ -9,7 +9,7 @@
 <VBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
 	  fx:controller="org.cryptomator.ui.addvaultwizard.ChooseExistingVaultController"
-	  prefWidth="600.0"
+	  prefWidth="400.0"
 	  prefHeight="400.0"
 	  spacing="12.0"
 	  alignment="CENTER">

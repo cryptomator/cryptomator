@@ -4,14 +4,13 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 <?import org.cryptomator.ui.controls.FontAwesome5IconView?>
 <VBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
 	  fx:controller="org.cryptomator.ui.addvaultwizard.AddVaultWelcomeController"
-	  prefWidth="600.0"
+	  prefWidth="400.0"
 	  prefHeight="400.0"
 	  spacing="12.0"
 	  alignment="TOP_CENTER">
@@ -19,7 +18,7 @@
 		<Insets top="24" right="24" bottom="24" left="24"/>
 	</padding>
 	<children>
-		<Region prefHeight="48" VBox.vgrow="NEVER"/>
+		<Region prefHeight="24" VBox.vgrow="NEVER"/>
 
 		<ImageView fitHeight="128.0" preserveRatio="true" smooth="true" cache="true">
 			<Image url="/bot_welcome.png"/>
@@ -27,7 +26,7 @@
 
 		<Region prefHeight="12" VBox.vgrow="NEVER"/>
 
-		<FlowPane alignment="CENTER" hgap="9" vgap="9">
+		<VBox alignment="CENTER" spacing="9">
 			<Button styleClass="button-large" text="%addvaultwizard.welcome.newButton" onAction="#createNewVault">
 				<graphic>
 					<FontAwesome5IconView glyph="PLUS" glyphSize="15"/>
@@ -38,6 +37,6 @@
 					<FontAwesome5IconView glyph="SEARCH" glyphSize="15"/>
 				</graphic>
 			</Button>
-		</FlowPane>
+		</VBox>
 	</children>
 </VBox>
