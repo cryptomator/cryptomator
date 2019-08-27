@@ -27,10 +27,12 @@ public class MountOptionsController implements FxController {
 		driveName.textProperty().bindBidirectional(vault.getVaultSettings().mountName());
 		readOnlyCheckbox.selectedProperty().bindBidirectional(vault.getVaultSettings().usesReadOnlyMode());
 		mountFlags.disableProperty().bind(customMountFlagsCheckbox.selectedProperty().not());
+		readOnlyCheckbox.disableProperty().bind(customMountFlagsCheckbox.selectedProperty());
 
 		customMountFlagsCheckbox.setSelected(vault.isHavingCustomMountFlags());
 		if (vault.isHavingCustomMountFlags()) {
 			mountFlags.textProperty().bindBidirectional(vault.getVaultSettings().mountFlags());
+			readOnlyCheckbox.setSelected(false); // to prevent invalid states
 		} else {
 			mountFlags.textProperty().bind(vault.defaultMountFlagsProperty());
 		}
@@ -39,6 +41,7 @@ public class MountOptionsController implements FxController {
 	@FXML
 	public void toggleUseCustomMountFlags() {
 		if (customMountFlagsCheckbox.isSelected()) {
+			readOnlyCheckbox.setSelected(false); // to prevent invalid states
 			mountFlags.textProperty().unbind();
 			vault.setCustomMountFlags(vault.defaultMountFlagsProperty().get());
 			mountFlags.textProperty().bindBidirectional(vault.getVaultSettings().mountFlags());
