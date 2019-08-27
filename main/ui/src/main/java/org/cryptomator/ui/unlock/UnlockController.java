@@ -15,6 +15,7 @@ import javafx.scene.control.ContentDisplay;
 import javafx.stage.Stage;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.cryptolib.api.InvalidPassphraseException;
 import org.cryptomator.cryptolib.api.UnsupportedVaultFormatException;
 import org.cryptomator.keychain.KeychainAccess;
@@ -70,7 +71,7 @@ public class UnlockController implements FxController {
 		} else {
 			savePassword.setDisable(true);
 		}
-		unlockButtonDisabled.bind(vault.stateProperty().isNotEqualTo(Vault.State.LOCKED).or(passwordField.textProperty().isEmpty()));
+		unlockButtonDisabled.bind(vault.stateProperty().isNotEqualTo(VaultState.LOCKED).or(passwordField.textProperty().isEmpty()));
 	}
 
 	@FXML
@@ -83,14 +84,14 @@ public class UnlockController implements FxController {
 	public void unlock() {
 		LOG.trace("UnlockController.unlock()");
 		CharSequence password = passwordField.getCharacters();
-		vault.setState(Vault.State.PROCESSING);
+		vault.setState(VaultState.PROCESSING);
 		Tasks.create(() -> {
 			vault.unlock(password);
 			if (keychainAccess.isPresent() && savePassword.isSelected()) {
 				keychainAccess.get().storePassphrase(vault.getId(), password);
 			}
 		}).onSuccess(() -> {
-			vault.setState(Vault.State.UNLOCKED);
+			vault.setState(VaultState.UNLOCKED);
 			passwordField.swipe();
 			LOG.info("Unlock of '{}' succeeded.", vault.getDisplayableName());
 			window.setScene(successScene.get());
@@ -110,7 +111,7 @@ public class UnlockController implements FxController {
 			// TODO
 		}).andFinally(() -> {
 			if (!vault.isUnlocked()) {
-				vault.setState(Vault.State.LOCKED);
+				vault.setState(VaultState.LOCKED);
 			}
 		}).runOnce(executor);
 	}

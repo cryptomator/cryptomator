@@ -9,6 +9,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ContentDisplay;
 import javafx.stage.Stage;
 import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.common.vaults.Volume;
 import org.cryptomator.ui.common.FxController;
 import org.slf4j.Logger;
@@ -83,7 +84,7 @@ public class QuitController implements FxController {
 			}
 		};
 		task.setOnSucceeded(evt -> {
-			vault.setState(Vault.State.LOCKED);
+			vault.setState(VaultState.LOCKED);
 		});
 		task.setOnFailed(evt -> {
 			LOG.warn("Failed to lock vault", vault);

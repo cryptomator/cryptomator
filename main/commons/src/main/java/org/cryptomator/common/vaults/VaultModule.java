@@ -8,18 +8,18 @@ package org.cryptomator.common.vaults;
 import dagger.Module;
 import dagger.Provides;
 import javafx.beans.binding.Bindings;
-import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.StringBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
-import javafx.beans.property.ReadOnlyBooleanWrapper;
 import javafx.beans.property.ReadOnlyStringProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.StringProperty;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.common.settings.VolumeImpl;
+import org.cryptomator.cryptofs.CryptoFileSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,11 +27,24 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Module
 public class VaultModule {
 
 	private static final Logger LOG = LoggerFactory.getLogger(VaultModule.class);
+
+	@Provides
+	@PerVault
+	public AtomicReference<CryptoFileSystem> provideCryptoFileSystemReference() {
+		return new AtomicReference<>();
+	}
+
+	@Provides
+	@PerVault
+	public ObjectProperty<VaultState> provideVaultState() {
+		return new SimpleObjectProperty<>(VaultState.LOCKED);
+	}
 
 	@Provides
 	public Volume provideVolume(Settings settings, WebDavVolume webDavVolume, FuseVolume fuseVolume, DokanyVolume dokanyVolume) {

@@ -9,6 +9,7 @@
 package org.cryptomator.ui.controls;
 
 import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.common.vaults.VaultState;
 import org.fxmisc.easybind.EasyBind;
 
 import javafx.beans.binding.ObjectExpression;
@@ -35,7 +36,7 @@ public class DirectoryListCell extends DraggableListCell<Vault> {
 	private ContextMenu vaultContextMenu;
 
 	public DirectoryListCell() {
-		ObjectExpression<Vault.State> vaultState = ObjectExpression.objectExpression(EasyBind.select(itemProperty()).selectObject(Vault::stateProperty));
+		ObjectExpression<VaultState> vaultState = ObjectExpression.objectExpression(EasyBind.select(itemProperty()).selectObject(Vault::stateProperty));
 
 		hbox.setAlignment(Pos.CENTER_LEFT);
 		hbox.setPrefWidth(1);
@@ -62,7 +63,7 @@ public class DirectoryListCell extends DraggableListCell<Vault> {
 		setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
 	}
 
-	private String getStatusIconText(Vault.State state) {
+	private String getStatusIconText(VaultState state) {
 		if (state == null) {
 			return "";
 		}
@@ -76,7 +77,7 @@ public class DirectoryListCell extends DraggableListCell<Vault> {
 		}
 	}
 
-	private Paint getStatusIconColor(Vault.State state, Paint lockedValue) {
+	private Paint getStatusIconColor(VaultState state, Paint lockedValue) {
 		if (state == null) {
 			return lockedValue;
 		}
@@ -90,8 +91,8 @@ public class DirectoryListCell extends DraggableListCell<Vault> {
 		}
 	}
 
-	private ContextMenu getContextMenu(Vault.State state) {
-		if (state == Vault.State.LOCKED) {
+	private ContextMenu getContextMenu(VaultState state) {
+		if (state == VaultState.LOCKED) {
 			return vaultContextMenu;
 		} else {
 			return null;

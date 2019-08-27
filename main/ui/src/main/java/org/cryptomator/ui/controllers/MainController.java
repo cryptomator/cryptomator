@@ -44,6 +44,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.ui.fxapp.FxApplicationScoped;
 import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.ui.ExitUtil;
@@ -100,9 +101,9 @@ public class MainController implements ViewController {
 	private final ObservableList<Vault> vaults;
 	private final BooleanBinding areAllVaultsLocked;
 	private final ObjectProperty<Vault> selectedVault = new SimpleObjectProperty<>();
-	private final ObjectExpression<Vault.State> selectedVaultState = ObjectExpression.objectExpression(EasyBind.select(selectedVault).selectObject(Vault::stateProperty));
+	private final ObjectExpression<VaultState> selectedVaultState = ObjectExpression.objectExpression(EasyBind.select(selectedVault).selectObject(Vault::stateProperty));
 	private final BooleanExpression isSelectedVaultValid = BooleanExpression.booleanExpression(EasyBind.monadic(selectedVault).map(Vault::isValidVaultDirectory).orElse(false));
-	private final BooleanExpression canEditSelectedVault = selectedVaultState.isEqualTo(Vault.State.LOCKED);
+	private final BooleanExpression canEditSelectedVault = selectedVaultState.isEqualTo(VaultState.LOCKED);
 	private final MonadicBinding<UpgradeStrategy> upgradeStrategyForSelectedVault;
 	private final BooleanBinding isShowingSettings;
 	private final Map<Vault, UnlockedController> unlockedVaults = new HashMap<>();
@@ -410,7 +411,7 @@ public class MainController implements ViewController {
 		if (newValue == null) {
 			return;
 		}
-		if (newValue.getState() != Vault.State.LOCKED) {
+		if (newValue.getState() != VaultState.LOCKED) {
 			this.showUnlockedView(newValue, false);
 		} else if (!newValue.doesVaultDirectoryExist()) {
 			this.showNotFoundView();

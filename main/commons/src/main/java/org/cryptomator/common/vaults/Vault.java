@@ -48,7 +48,7 @@ import java.util.function.Predicate;
 @PerVault
 public class Vault {
 
-	public static final Predicate<Vault> NOT_LOCKED = hasState(State.LOCKED).negate();
+	public static final Predicate<Vault> NOT_LOCKED = hasState(VaultState.LOCKED).negate();
 	private static final Logger LOG = LoggerFactory.getLogger(Vault.class);
 	private static final String MASTERKEY_FILENAME = "masterkey.cryptomator";
 	private static final Path HOME_DIR = Paths.get(SystemUtils.USER_HOME);
@@ -56,8 +56,9 @@ public class Vault {
 	private final VaultSettings vaultSettings;
 	private final Provider<Volume> volumeProvider;
 	private final StringBinding defaultMountFlags;
-	private final AtomicReference<CryptoFileSystem> cryptoFileSystem = new AtomicReference<>();
-	private final ObjectProperty<State> state = new SimpleObjectProperty<State>(State.LOCKED);
+	private final AtomicReference<CryptoFileSystem> cryptoFileSystem;
+	private final ObjectProperty<VaultState> state ;
+	private final VaultStats stats;
 	private final ObjectProperty<Path> accessPoint = new SimpleObjectProperty<>(Path.of(""));
 	private final StringBinding displayableName;
 	private final StringBinding displayablePath;
@@ -67,16 +68,14 @@ public class Vault {
 
 	private Volume volume;
 
-	public enum State {
-		LOCKED, PROCESSING, UNLOCKED
-	}
-
 	@Inject
-	Vault(VaultSettings vaultSettings, Provider<Volume> volumeProvider, @DefaultMountFlags StringBinding defaultMountFlags) {
+	Vault(VaultSettings vaultSettings, Provider<Volume> volumeProvider, @DefaultMountFlags StringBinding defaultMountFlags, AtomicReference<CryptoFileSystem> cryptoFileSystem, ObjectProperty<VaultState> state, VaultStats stats) {
 		this.vaultSettings = vaultSettings;
 		this.volumeProvider = volumeProvider;
 		this.defaultMountFlags = defaultMountFlags;
-
+		this.cryptoFileSystem = cryptoFileSystem;
+		this.state = state;
+		this.stats = stats;
 		this.displayableName = Bindings.createStringBinding(this::getDisplayableName, vaultSettings.path());
 		this.displayablePath = Bindings.createStringBinding(this::getDisplayablePath, vaultSettings.path());
 		this.locked = Bindings.createBooleanBinding(this::isLocked, state);
@@ -166,7 +165,7 @@ public class Vault {
 		volume.reveal();
 	}
 
-	public static Predicate<Vault> hasState(State state) {
+	public static Predicate<Vault> hasState(VaultState state) {
 		return vault -> {
 			return vault.getState() == state;
 		};
@@ -176,15 +175,15 @@ public class Vault {
 	// Observable Properties
 	// *******************************************************************************
 
-	public ObjectProperty<State> stateProperty() {
+	public ObjectProperty<VaultState> stateProperty() {
 		return state;
 	}
 
-	public State getState() {
+	public VaultState getState() {
 		return state.get();
 	}
 
-	public void setState(State value) {
+	public void setState(VaultState value) {
 		state.setValue(value);
 	}
 
@@ -193,7 +192,7 @@ public class Vault {
 	}
 
 	public boolean isLocked() {
-		return state.get() == State.LOCKED;
+		return state.get() == VaultState.LOCKED;
 	}
 
 	public BooleanBinding processingProperty() {
@@ -201,7 +200,7 @@ public class Vault {
 	}
 
 	public boolean isProcessing() {
-		return state.get() == State.PROCESSING;
+		return state.get() == VaultState.PROCESSING;
 	}
 
 	public BooleanBinding unlockedProperty() {
@@ -209,7 +208,7 @@ public class Vault {
 	}
 
 	public boolean isUnlocked() {
-		return state.get() == State.UNLOCKED;
+		return state.get() == VaultState.UNLOCKED;
 	}
 
 	public StringBinding displayableNameProperty() {
@@ -230,7 +229,7 @@ public class Vault {
 	}
 
 	private void setAccessPoint(Observable obs) {
-		if (this.getState() == State.UNLOCKED) {
+		if (this.getState() == VaultState.UNLOCKED) {
 			accessPoint.setValue(volume.getMountPointSafe().get());
 		} else {
 			accessPoint.setValue(Path.of(""));
@@ -255,6 +254,10 @@ public class Vault {
 	// ******************************************************************************
 	// Getter/Setter
 	// *******************************************************************************/
+
+	public VaultStats getStats() {
+		return stats;
+	}
 
 	public Observable[] observables() {
 		return new Observable[]{state};

@@ -62,15 +62,21 @@
 				<Region HBox.hgrow="ALWAYS"/>
 				<Label styleClass="button-group-action" text="TODO REVEAL"/>
 			</HBox>
-			<Region styleClass="button-group-separator"/>
-			<HBox styleClass="button-group,last" alignment="CENTER">
-				<VBox styleClass="button-group-labels">
-					<Label styleClass="button-group-heading" text="example heading"/>
-					<Label text="example text"/>
+			<HBox styleClass="button-group,last" spacing="24" alignment="CENTER">
+				<VBox styleClass="button-group-labels" HBox.hgrow="ALWAYS">
+					<Label styleClass="button-group-heading" text="TODO Read"/>
+					<Label text="${controller.vault.stats.bytesPerSecondRead}"/>
 				</VBox>
+				<VBox styleClass="button-group-labels" HBox.hgrow="ALWAYS">
+					<Label styleClass="button-group-heading" text="TODO Written"/>
+					<Label text="${controller.vault.stats.bytesPerSecondWritten}"/>
+				</VBox>
+				<!-- Future use:
 				<Region HBox.hgrow="ALWAYS"/>
-				<Label styleClass="button-group-action" text="EXAMPLE ACTION"/>
+				<Label styleClass="button-group-action" text="SHOW CHART"/>
+				-->
 			</HBox>
+			<Region styleClass="button-group-separator"/>
 		</VBox>
 
 		<Region prefHeight="24" VBox.vgrow="NEVER"/>

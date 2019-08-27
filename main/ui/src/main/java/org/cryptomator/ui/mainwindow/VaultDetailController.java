@@ -8,6 +8,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.input.MouseEvent;
 import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.common.vaults.Volume;
 import org.cryptomator.ui.changepassword.ChangePasswordComponent;
 import org.cryptomator.ui.common.FxController;
@@ -46,7 +47,7 @@ public class VaultDetailController implements FxController {
 		this.anyVaultSelected = vault.isNotNull();
 	}
 
-	private FontAwesome5Icon getGlyphForVaultState(Vault.State state) {
+	private FontAwesome5Icon getGlyphForVaultState(VaultState state) {
 		switch (state) {
 			case LOCKED:
 				return FontAwesome5Icon.LOCK_ALT;
@@ -67,14 +68,14 @@ public class VaultDetailController implements FxController {
 	@FXML
 	public void lock() {
 		Vault v = vault.get();
-		v.setState(Vault.State.PROCESSING);
+		v.setState(VaultState.PROCESSING);
 		Tasks.create(() -> {
 			v.lock(false);
 		}).onSuccess(() -> {
 			LOG.trace("Regular unmount succeeded.");
-			v.setState(Vault.State.LOCKED);
+			v.setState(VaultState.LOCKED);
 		}).onError(Exception.class, e -> {
-			v.setState(Vault.State.UNLOCKED);
+			v.setState(VaultState.UNLOCKED);
 			// TODO
 		}).runOnce(executor);
 	}
