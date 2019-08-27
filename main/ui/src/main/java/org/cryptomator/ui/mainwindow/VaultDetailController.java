@@ -66,14 +66,15 @@ public class VaultDetailController implements FxController {
 
 	@FXML
 	public void lock() {
-		vault.get().setState(Vault.State.PROCESSING);
+		Vault v = vault.get();
+		v.setState(Vault.State.PROCESSING);
 		Tasks.create(() -> {
-			vault.get().lock(false);
+			v.lock(false);
 		}).onSuccess(() -> {
 			LOG.trace("Regular unmount succeeded.");
-			vault.get().setState(Vault.State.LOCKED);
+			v.setState(Vault.State.LOCKED);
 		}).onError(Exception.class, e -> {
-			vault.get().setState(Vault.State.UNLOCKED);
+			v.setState(Vault.State.UNLOCKED);
 			// TODO
 		}).runOnce(executor);
 	}
