@@ -4,9 +4,12 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ProgressIndicator?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Text?>
 <?import javafx.scene.text.TextFlow?>
+<?import org.cryptomator.ui.controls.FontAwesome5IconView?>
 <VBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
 	  fx:controller="org.cryptomator.ui.unlock.UnlockSuccessController"
@@ -17,11 +20,23 @@
 		<Insets bottom="12.0" left="12.0" right="12.0" top="12.0"/>
 	</padding>
 	<children>
-		<TextFlow styleClass="text-flow">
+		<Region VBox.vgrow="NEVER"/>
+
+		<StackPane alignment="CENTER">
+			<FontAwesome5IconView styleClass="glyph-icon-primary" glyph="CIRCLE" HBox.hgrow="NEVER" glyphSize="64"/>
+			<FontAwesome5IconView styleClass="glyph-icon-main-bg" glyph="CHECK" HBox.hgrow="NEVER" glyphSize="32"/>
+		</StackPane>
+
+		<Region VBox.vgrow="NEVER"/>
+
+		<TextFlow styleClass="text-flow" textAlignment="CENTER">
 			<Text text="TODO Unlocked &quot;"/>
 			<Text text="${controller.vault.displayableName}"/>
 			<Text text="&quot; successfully! Your vault is now accessible at &quot;TODO&quot;."/>
 		</TextFlow>
+
+		<Region VBox.vgrow="NEVER"/>
+
 		<HBox alignment="CENTER_RIGHT" spacing="9">
 			<Button text="%generic.button.done" cancelButton="true" onAction="#close"/>
 			<Button text="%unlock.success.reveal" defaultButton="true" onAction="#revealAndClose" contentDisplay="${controller.revealButtonState}">

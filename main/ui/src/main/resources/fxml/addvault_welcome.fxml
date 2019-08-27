@@ -4,7 +4,7 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 <?import org.cryptomator.ui.controls.FontAwesome5IconView?>
@@ -27,7 +27,7 @@
 
 		<Region prefHeight="12" VBox.vgrow="NEVER"/>
 
-		<HBox alignment="CENTER" spacing="6">
+		<FlowPane alignment="CENTER" hgap="9" vgap="9">
 			<Button styleClass="button-large" text="%addvaultwizard.welcome.newButton" onAction="#createNewVault">
 				<graphic>
 					<FontAwesome5IconView glyph="PLUS" glyphSize="15"/>
@@ -38,6 +38,6 @@
 					<FontAwesome5IconView glyph="SEARCH" glyphSize="15"/>
 				</graphic>
 			</Button>
-		</HBox>
+		</FlowPane>
 	</children>
 </VBox>

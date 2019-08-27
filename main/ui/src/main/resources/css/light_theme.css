@@ -91,6 +91,14 @@
 	-fx-fill: TEXT_FILL;
 }
 
+.glyph-icon-main-bg {
+	-fx-fill: MAIN_BG;
+}
+
+.glyph-icon-primary {
+	-fx-fill: TEXT_FILL_PRIMARY;
+}
+
 .glyph-icon-secondary {
 	-fx-fill: TEXT_FILL_SECONDARY;
 }
@@ -320,14 +328,6 @@
  * Vault Detail                                                                *
  *                                                                             *
  ******************************************************************************/
-
-.vault-detail .vault-status-circle {
-	-fx-fill: SECONDARY;
-}
-
-.vault-detail .vault-status-icon {
-	-fx-fill: MAIN_BG;
-}
 
 .vault-detail .vault-name {
 	-fx-font-family: 'Open Sans SemiBold';
