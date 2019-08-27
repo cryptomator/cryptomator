@@ -36,6 +36,7 @@
 	CONTROL_BORDER_FOCUSED: #9E9E9E;
 	CONTROL_BORDER_DISABLED: #515151;
 	CONTROL_BG_NORMAL: #222;
+	CONTROL_BG_HOVER: #3B3B3B;
 	CONTROL_BG_ARMED: #515151;
 	CONTROL_BG_DISABLED: #3B3B3B;
 	CONTROL_PRIMARY_BORDER_NORMAL: #70A11B;
@@ -335,7 +336,12 @@
 }
 
 .vault-detail .vault-path {
+	-fx-content-display: text-only;
 	-fx-text-fill: TEXT_FILL_SECONDARY;
+}
+
+.vault-detail .vault-path:hover {
+	-fx-content-display: right;
 }
 
 /*******************************************************************************
@@ -404,7 +410,6 @@
 .button-group {
 	-fx-background-color: CONTROL_BORDER_NORMAL, CONTROL_BG_NORMAL;
 	-fx-background-insets: 0, 0 1px 0 1px;
-	-fx-padding: 1em;
 }
 
 .button-group.first {
@@ -418,10 +423,24 @@
 }
 
 .button-group:hover {
-	-fx-background-color: CONTROL_BORDER_NORMAL, CONTROL_PRIMARY_LIGHT_BG_NORMAL;
+	-fx-background-color: CONTROL_BORDER_NORMAL, CONTROL_BG_HOVER;
+}
+
+.button-group:hover:focused {
+	-fx-background-color: CONTROL_BORDER_FOCUSED, CONTROL_BG_HOVER;
+}
+
+.button-group:hover:armed {
+	-fx-background-color: CONTROL_BORDER_NORMAL, CONTROL_BG_ARMED;
+}
+
+.button-group:hover .button-group-action {
+	visibility: visible;
+	managed: true;
 }
 
 .button-group-labels {
+	-fx-padding: 0.5em 0 0.5em 0;
 	-fx-spacing: 0.25em;
 }
 
@@ -431,7 +450,10 @@
 }
 
 .button-group-action {
+	visibility: collapse;
+	managed: false;
 	-fx-text-fill: TEXT_FILL_PRIMARY;
+	-fx-font-family: 'Open Sans Bold';
 }
 
 .button-group-separator {
@@ -534,9 +556,19 @@
 }
 
 .button-large {
-	-fx-graphic-text-gap: 6px;
+	-fx-graphic-text-gap: 9px;
 	-fx-font-size: 1.25em;
-	-fx-padding: 0.5em 1.25em 0.5em 1.25em;
+	-fx-padding: 0.6em 1.25em 0.6em 1.25em;
+}
+
+/*******************************************************************************
+ *                                                                             *
+ * Buttons                                                                     *
+ *                                                                             *
+ ******************************************************************************/
+
+.hyperlink {
+	-fx-text-fill: TEXT_FILL;
 }
 
 /*******************************************************************************

@@ -10,6 +10,7 @@ public enum FontAwesome5Icon {
 	COG("\uF013"), //
 	COGS("\uF085"), //
 	EXCLAMATION_TRIANGLE("\uF071"), //
+	EYE("\uF06E"), //
 	FOLDER_OPEN("\uF07C"), //
 	HDD("\uF0A0"), //
 	LOCK_ALT("\uF30D"), //

@@ -45,7 +45,7 @@ public class VaultStats {
 			case UNLOCKED:
 				assert fs.get() != null;
 				LOG.debug("start recording stats");
-				updateService.start();
+				updateService.restart();
 				break;
 			case LOCKED:
 				LOG.debug("stop recording stats");

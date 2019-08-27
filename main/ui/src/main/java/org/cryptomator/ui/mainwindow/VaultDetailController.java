@@ -6,7 +6,6 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.input.MouseEvent;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.common.vaults.Volume;
@@ -96,7 +95,7 @@ public class VaultDetailController implements FxController {
 	}
 
 	@FXML
-	public void revealAccessLocation(MouseEvent mouseEvent) {
+	public void revealAccessLocation(ActionEvent actionEvent) {
 		try {
 			vault.get().reveal();
 		} catch (Volume.VolumeException e) {
