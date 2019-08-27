@@ -10,6 +10,7 @@ public enum FxmlFile {
 	MAIN_WINDOW("/fxml/main_window.fxml"), //
 	PREFERENCES("/fxml/preferences.fxml"), //
 	QUIT("/fxml/quit.fxml"),
+	REMOVE_VAULT("/fxml/remove_vault.fxml"), //
 	UNLOCK("/fxml/unlock2.fxml"), // TODO rename
 	UNLOCK_SUCCESS("/fxml/unlock_success.fxml"),
 	VAULT_OPTIONS("/fxml/vault_options.fxml");

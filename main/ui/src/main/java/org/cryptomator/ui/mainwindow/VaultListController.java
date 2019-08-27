@@ -5,9 +5,10 @@ import javafx.beans.property.ObjectProperty;
 import javafx.collections.ObservableList;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.AnchorPane;
+import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.addvaultwizard.AddVaultWizardComponent;
 import org.cryptomator.ui.common.FxController;
-import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.ui.removevault.RemoveVaultComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,15 +23,17 @@ public class VaultListController implements FxController {
 	private final ObjectProperty<Vault> selectedVault;
 	private final VaultListCellFactory cellFactory;
 	private final AddVaultWizardComponent.Builder addVaultWizard;
+	private final RemoveVaultComponent.Builder removeVault;
 	public ListView<Vault> vaultList;
 	public AnchorPane onboardingOverlay;
 
 	@Inject
-	VaultListController(ObservableList<Vault> vaults, ObjectProperty<Vault> selectedVault, VaultListCellFactory cellFactory, AddVaultWizardComponent.Builder addVaultWizard) {
+	VaultListController(ObservableList<Vault> vaults, ObjectProperty<Vault> selectedVault, VaultListCellFactory cellFactory, AddVaultWizardComponent.Builder addVaultWizard, RemoveVaultComponent.Builder removeVault) {
 		this.vaults = vaults;
 		this.selectedVault = selectedVault;
 		this.cellFactory = cellFactory;
 		this.addVaultWizard = addVaultWizard;
+		this.removeVault = removeVault;
 	}
 
 	public void initialize() {
@@ -45,10 +48,9 @@ public class VaultListController implements FxController {
 	}
 
 	public void didClickRemoveVault() {
-		//TODO: Dialogue
-		if (selectedVault.get() != null) {
-			vaults.remove(selectedVault.get());
-			LOG.debug("Removing vault {}.", selectedVault.get().getDisplayableName());
+		Vault v = selectedVault.get();
+		if (v != null) {
+			removeVault.vault(v).build().showRemoveVault();
 		} else {
 			LOG.debug("Cannot remove a vault if none is selected.");
 		}
