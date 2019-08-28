@@ -16,7 +16,7 @@
 	</padding>
 	<children>
 		<HBox spacing="6" alignment="CENTER_LEFT">
-			<Label text="%preferences.general.volumeType"/>
+			<Label text="%preferences.volume.type"/>
 			<ChoiceBox fx:id="volumeTypeChoicBox"/>
 		</HBox>
 
