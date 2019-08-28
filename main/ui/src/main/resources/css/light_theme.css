@@ -34,7 +34,7 @@
 	GREEN_8: #D7E7BA;
 	GREEN_9: #F3F5F0;
 
-	GRAY_0: #222;
+	GRAY_0: #222222;
 	GRAY_1: #3B3B3B;
 	GRAY_2: #515151;
 	GRAY_3: #626262;
@@ -45,15 +45,13 @@
 	GRAY_8: #E1E1E1;
 	GRAY_9: #F7F7F7;
 
-	PRIMARY: GREEN_5;
-	SECONDARY: GRAY_5;
 	PRIMARY_BG: GREEN_5;
+	SECONDARY_BG: GRAY_5;
 	MAIN_BG: GRAY_9;
 	TEXT_FILL: GRAY_0;
 	TEXT_FILL_PRIMARY: GREEN_4;
 	TEXT_FILL_SECONDARY: GRAY_4;
 	TEXT_FILL_WHITE: white;
-	TEXT_FILL_WHITE_SECONDARY: GRAY_5;
 	CONTROL_BORDER_NORMAL: GRAY_7;
 	CONTROL_BORDER_FOCUSED: GRAY_5;
 	CONTROL_BORDER_DISABLED: GRAY_8;
@@ -119,11 +117,11 @@
 }
 
 .glyph-icon-primary {
-	-fx-fill: TEXT_FILL_PRIMARY;
+	-fx-fill: PRIMARY_BG;
 }
 
 .glyph-icon-secondary {
-	-fx-fill: TEXT_FILL_SECONDARY;
+	-fx-fill: SECONDARY_BG;
 }
 
 /*******************************************************************************
@@ -215,7 +213,7 @@
 }
 
 .tab-pane > .tab-header-area > .headers-region > .tab .glyph-icon {
-	-fx-fill: SECONDARY;
+	-fx-fill: SECONDARY_BG;
 }
 
 .tab-pane > .tab-header-area > .headers-region > .tab:selected .glyph-icon {
@@ -257,7 +255,7 @@
 }
 
 .list-cell .glyph-icon {
-	-fx-fill: SECONDARY;
+	-fx-fill: SECONDARY_BG;
 }
 
 .list-cell .header-label {
@@ -271,7 +269,7 @@
 }
 
 .list-cell:selected .glyph-icon {
-	-fx-fill: PRIMARY;
+	-fx-fill: PRIMARY_BG;
 }
 
 .list-cell:selected .header-label {
@@ -385,12 +383,12 @@
 
 .badge-primary {
 	-fx-text-fill: TEXT_FILL_WHITE;
-	-fx-background-color: PRIMARY;
+	-fx-background-color: PRIMARY_BG;
 }
 
 .badge-secondary {
 	-fx-text-fill: TEXT_FILL_WHITE;
-	-fx-background-color: SECONDARY;
+	-fx-background-color: SECONDARY_BG;
 }
 
 /*******************************************************************************
@@ -546,11 +544,6 @@
 	-fx-background-color: CONTROL_BORDER_NORMAL, CONTROL_BG_ARMED;
 }
 
-.button:disabled {
-	-fx-text-fill: TEXT_FILL_SECONDARY;
-	-fx-background-color: CONTROL_BORDER_DISABLED, CONTROL_BG_DISABLED;
-}
-
 .button:default {
 	-fx-text-fill: TEXT_FILL_WHITE;
 	-fx-background-color: CONTROL_PRIMARY_BORDER_NORMAL, CONTROL_PRIMARY_BG_NORMAL;
@@ -564,9 +557,10 @@
 	-fx-background-color: CONTROL_PRIMARY_BORDER_NORMAL, CONTROL_PRIMARY_BG_ARMED;
 }
 
+.button:disabled,
 .button:default:disabled {
-	-fx-text-fill: TEXT_FILL_WHITE_SECONDARY;
-	-fx-background-color: CONTROL_PRIMARY_BORDER_DISABLED, CONTROL_PRIMARY_BG_DISABLED;
+	-fx-text-fill: TEXT_FILL_SECONDARY;
+	-fx-background-color: CONTROL_BORDER_DISABLED, CONTROL_BG_DISABLED;
 }
 
 .button:disabled .glyph-icon {
