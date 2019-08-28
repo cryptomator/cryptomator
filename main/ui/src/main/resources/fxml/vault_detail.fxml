@@ -37,9 +37,9 @@
 							</tooltip>
 						</Label>
 						<Region HBox.hgrow="ALWAYS"/>
-						<Label styleClass="badge,badge-pill,badge-secondary" text="%vaultDetail.lockedStatus" minWidth="-Infinity" visible="${controller.vault.locked}" managed="${controller.vault.locked}"/>
+						<Label styleClass="badge,badge-pill,badge-secondary" text="%main.vaultDetail.lockedStatus" minWidth="-Infinity" visible="${controller.vault.locked}" managed="${controller.vault.locked}"/>
 						<Label styleClass="badge,badge-pill,badge-secondary" text="…" minWidth="-Infinity" visible="${controller.vault.processing}" managed="${controller.vault.processing}"/>
-						<Label styleClass="badge,badge-pill,badge-primary" text="%vaultDetail.unlockedStatus" minWidth="-Infinity" visible="${controller.vault.unlocked}" managed="${controller.vault.unlocked}"/>
+						<Label styleClass="badge,badge-pill,badge-primary" text="%main.vaultDetail.unlockedStatus" minWidth="-Infinity" visible="${controller.vault.unlocked}" managed="${controller.vault.unlocked}"/>
 					</HBox>
 					<Hyperlink styleClass="vault-path" text="${controller.vault.displayablePath}" textOverrun="CENTER_ELLIPSIS" onAction="#revealStorageLocation">
 						<graphic>
@@ -58,11 +58,11 @@
 				<graphic>
 					<HBox alignment="CENTER">
 						<VBox styleClass="button-group-labels">
-							<Label styleClass="button-group-heading" text="%vaultDetail.accessLocation"/>
+							<Label styleClass="button-group-heading" text="%main.vaultDetail.accessLocation"/>
 							<Label text="${controller.vault.accessPoint}"/>
 						</VBox>
 						<Region HBox.hgrow="ALWAYS"/>
-						<Label styleClass="button-group-action" text="%vaultDetail.revealAccessLocation" minWidth="-Infinity"/>
+						<Label styleClass="button-group-action" text="%main.vaultDetail.revealAccessLocation" minWidth="-Infinity"/>
 					</HBox>
 				</graphic>
 			</Button>
@@ -71,15 +71,15 @@
 				<graphic>
 					<HBox alignment="CENTER" spacing="24">
 						<VBox styleClass="button-group-labels" HBox.hgrow="ALWAYS">
-							<Label styleClass="button-group-heading" text="%vaultDetail.bytesPerSecondRead"/>
 							<Label text="${controller.vault.stats.bytesPerSecondRead}"/>
+							<Label styleClass="button-group-heading" text="%main.vaultDetail.bytesPerSecondRead"/>
 						</VBox>
 						<VBox styleClass="button-group-labels" HBox.hgrow="ALWAYS">
-							<Label styleClass="button-group-heading" text="%vaultDetail.bytesPerSecondWritten"/>
 							<Label text="${controller.vault.stats.bytesPerSecondWritten}"/>
+							<Label styleClass="button-group-heading" text="%main.vaultDetail.bytesPerSecondWritten"/>
 						</VBox>
 						<Region HBox.hgrow="ALWAYS"/>
-						<Label styleClass="button-group-action" text="%vaultDetail.showChart" minWidth="-Infinity"/>
+						<Label styleClass="button-group-action" text="%main.vaultDetail.showChart" minWidth="-Infinity"/>
 					</HBox>
 				</graphic>
 			</Button>
@@ -88,19 +88,19 @@
 		<Region prefHeight="12" VBox.vgrow="NEVER"/>
 
 		<VBox alignment="CENTER" spacing="12" visible="${controller.vault.locked}" managed="${controller.vault.locked}">
-			<Button styleClass="button-large" text="%vaultDetail.unlockBtn" minWidth="120" onAction="#unlock" defaultButton="${controller.vault.locked}">
+			<Button styleClass="button-large" text="%main.vaultDetail.unlockBtn" minWidth="120" onAction="#unlock" defaultButton="${controller.vault.locked}">
 				<graphic>
 					<FontAwesome5IconView glyph="LOCK_OPEN_ALT" glyphSize="15"/>
 				</graphic>
 			</Button>
-			<Hyperlink text="%vaultDetail.optionsBtn" onAction="#showVaultOptions">
+			<Hyperlink text="%main.vaultDetail.optionsBtn" onAction="#showVaultOptions">
 				<graphic>
 					<FontAwesome5IconView glyph="COG"/>
 				</graphic>
 			</Hyperlink>
 		</VBox>
 		<VBox alignment="CENTER" spacing="12" visible="${controller.vault.unlocked}" managed="${controller.vault.unlocked}">
-			<Button styleClass="button-large" text="%vaultDetail.lockBtn" minWidth="120" onAction="#lock">
+			<Button styleClass="button-large" text="%main.vaultDetail.lockBtn" minWidth="120" onAction="#lock">
 				<graphic>
 					<FontAwesome5IconView glyph="LOCK_ALT" glyphSize="15"/>
 				</graphic>
