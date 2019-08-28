@@ -8,19 +8,24 @@
 <?import javafx.scene.layout.VBox?>
 <?import org.cryptomator.ui.controls.FormattedLabel?>
 <?import org.cryptomator.ui.controls.SecPasswordField?>
+<?import javafx.scene.layout.Region?>
 <VBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
 	  fx:controller="org.cryptomator.ui.unlock.UnlockController"
-	  minWidth="300"
-	  maxWidth="300"
+	  minWidth="350"
+	  maxWidth="350"
+	  minHeight="150"
 	  spacing="6">
 	<padding>
 		<Insets bottom="12.0" left="12.0" right="12.0" top="12.0"/>
 	</padding>
 	<children>
-		<FormattedLabel format="%unlock.passwordPrompt" arg1="${controller.vault.displayableName}" />
+		<FormattedLabel format="%unlock.passwordPrompt" arg1="${controller.vault.displayableName}"/>
 		<SecPasswordField fx:id="passwordField"/>
 		<CheckBox fx:id="savePassword" text="%unlock.savePassword" onAction="#didClickSavePasswordCheckbox"/>
+
+		<Region VBox.vgrow="ALWAYS"/>
+
 		<HBox alignment="CENTER_RIGHT" spacing="9">
 			<Button text="%generic.button.cancel" cancelButton="true" onAction="#cancel"/>
 			<Button text="%unlock.unlockBtn" defaultButton="true" onAction="#unlock" contentDisplay="${controller.unlockButtonState}" disable="${controller.unlockButtonDisabled}">
