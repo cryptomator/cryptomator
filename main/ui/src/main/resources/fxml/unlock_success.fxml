@@ -9,42 +9,39 @@
 <?import javafx.scene.layout.VBox?>
 <?import org.cryptomator.ui.controls.FontAwesome5IconView?>
 <?import org.cryptomator.ui.controls.FormattedLabel?>
-<HBox xmlns="http://javafx.com/javafx"
+<?import javafx.scene.shape.Circle?>
+<VBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
 	  fx:controller="org.cryptomator.ui.unlock.UnlockSuccessController"
 	  minWidth="350"
 	  maxWidth="350"
 	  minHeight="150"
-	  spacing="12"
-	  alignment="CENTER_LEFT">
+	  spacing="12">
 	<padding>
-		<Insets bottom="12.0" left="12.0" right="12.0" top="12.0"/>
+		<Insets bottom="12.0" left="12.0" right="12.0" top="24.0"/>
 	</padding>
 	<children>
-		<StackPane alignment="CENTER" HBox.hgrow="NEVER">
-			<VBox.margin>
-				<Insets topRightBottomLeft="24"/>
-			</VBox.margin>
-			<FontAwesome5IconView styleClass="glyph-icon-primary" glyph="CIRCLE" glyphSize="64"/>
-			<FontAwesome5IconView styleClass="glyph-icon-main-bg" glyph="CHECK" glyphSize="32"/>
-		</StackPane>
+		<HBox spacing="24">
+			<StackPane alignment="CENTER" HBox.hgrow="NEVER">
+				<VBox.margin>
+					<Insets topRightBottomLeft="12"/>
+				</VBox.margin>
+				<Circle styleClass="glyph-icon-primary" radius="24"/>
+				<FontAwesome5IconView styleClass="glyph-icon-main-bg" glyph="CHECK" glyphSize="24"/>
+			</StackPane>
 
-		<VBox spacing="12" HBox.hgrow="ALWAYS">
-			<padding>
-				<Insets top="24"/>
-			</padding>
-			<FormattedLabel format="%unlock.success.message" arg1="${controller.vault.displayableName}" wrapText="true" textAlignment="CENTER"/>
+			<FormattedLabel format="%unlock.success.message" arg1="${controller.vault.displayableName}" wrapText="true" textAlignment="LEFT" HBox.hgrow="ALWAYS"/>
+		</HBox>
 
-			<Region VBox.vgrow="ALWAYS"/>
+		<Region VBox.vgrow="ALWAYS"/>
 
-			<HBox alignment="CENTER_RIGHT" spacing="9">
-				<Button text="%generic.button.done" cancelButton="true" onAction="#close"/>
-				<Button text="%unlock.success.reveal" defaultButton="true" onAction="#revealAndClose" contentDisplay="${controller.revealButtonState}">
-					<graphic>
-						<ProgressIndicator progress="-1" prefWidth="12" prefHeight="12"/>
-					</graphic>
-				</Button>
-			</HBox>
-		</VBox>
+		<HBox alignment="CENTER_RIGHT" spacing="9">
+			<Button text="%generic.button.done" cancelButton="true" onAction="#close"/>
+			<Button text="%unlock.success.reveal" defaultButton="true" onAction="#revealAndClose" contentDisplay="${controller.revealButtonState}">
+				<graphic>
+					<ProgressIndicator progress="-1" prefWidth="12" prefHeight="12"/>
+				</graphic>
+			</Button>
+		</HBox>
 	</children>
-</HBox>
+</VBox>
