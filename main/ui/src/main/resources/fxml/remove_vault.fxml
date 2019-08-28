@@ -7,6 +7,7 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Circle?>
 <?import org.cryptomator.ui.controls.FontAwesome5IconView?>
 <VBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
@@ -25,7 +26,7 @@
 			<VBox.margin>
 				<Insets topRightBottomLeft="24"/>
 			</VBox.margin>
-			<FontAwesome5IconView styleClass="glyph-icon-primary" glyph="CIRCLE" glyphSize="64"/>
+			<Circle styleClass="glyph-icon-primary" radius="32"/>
 			<FontAwesome5IconView styleClass="glyph-icon-main-bg" glyph="QUESTION" glyphSize="32"/>
 		</StackPane>
 		<Label text="%removeVault.information" wrapText="true" labelFor="$confirmButton"/>

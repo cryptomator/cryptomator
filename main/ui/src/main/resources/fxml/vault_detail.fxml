@@ -11,6 +11,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import org.cryptomator.ui.controls.FontAwesome5IconView?>
 <?import org.cryptomator.ui.controls.ThrougputLabel?>
+<?import javafx.scene.shape.Circle?>
 <VBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
 	  fx:controller="org.cryptomator.ui.mainwindow.VaultDetailController"
@@ -27,7 +28,7 @@
 			</padding>
 			<children>
 				<StackPane alignment="CENTER">
-					<FontAwesome5IconView styleClass="glyph-icon-secondary" glyph="CIRCLE" HBox.hgrow="NEVER" glyphSize="32"/>
+					<Circle styleClass="glyph-icon-primary" radius="16"/>
 					<FontAwesome5IconView styleClass="glyph-icon-main-bg" glyph="${controller.glyph}" HBox.hgrow="NEVER" glyphSize="16"/>
 				</StackPane>
 				<VBox spacing="4" HBox.hgrow="ALWAYS">
