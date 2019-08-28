@@ -23,9 +23,7 @@ import org.cryptomator.ui.unlock.UnlockComponent;
 import javax.inject.Named;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UncheckedIOException;
 import java.util.Optional;
-import java.util.ResourceBundle;
 
 @Module(includes = {KeychainModule.class, UpdateCheckerModule.class}, subcomponents = {MainWindowComponent.class, PreferencesComponent.class, UnlockComponent.class, QuitComponent.class})
 abstract class FxApplicationModule {
@@ -38,12 +36,6 @@ abstract class FxApplicationModule {
 	@FxApplicationScoped
 	static ObjectProperty<Vault> provideSelectedVault() {
 		return new SimpleObjectProperty<>();
-	}
-
-	@Provides
-	@FxApplicationScoped
-	static ResourceBundle provideLocalization() {
-		return ResourceBundle.getBundle("i18n.strings");
 	}
 
 	@Provides

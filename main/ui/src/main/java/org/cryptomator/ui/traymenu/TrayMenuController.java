@@ -20,12 +20,14 @@ import java.awt.desktop.QuitResponse;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.EventObject;
+import java.util.ResourceBundle;
 import java.util.concurrent.CountDownLatch;
 import java.util.function.Consumer;
 
 @TrayMenuScoped
 class TrayMenuController {
 
+	private final ResourceBundle resourceBundle;
 	private final FxApplicationStarter fxApplicationStarter;
 	private final CountDownLatch shutdownLatch;
 	private final Settings settings;
@@ -34,7 +36,8 @@ class TrayMenuController {
 	private final BooleanBinding allLocked;
 
 	@Inject
-	TrayMenuController(FxApplicationStarter fxApplicationStarter, @Named("shutdownLatch") CountDownLatch shutdownLatch, Settings settings, ObservableList<Vault> vaults) {
+	TrayMenuController(ResourceBundle resourceBundle, FxApplicationStarter fxApplicationStarter, @Named("shutdownLatch") CountDownLatch shutdownLatch, Settings settings, ObservableList<Vault> vaults) {
+		this.resourceBundle = resourceBundle;
 		this.fxApplicationStarter = fxApplicationStarter;
 		this.shutdownLatch = shutdownLatch;
 		this.settings = settings;
@@ -75,11 +78,11 @@ class TrayMenuController {
 	private void rebuildMenu() {
 		menu.removeAll();
 
-		MenuItem showMainWindowItem = new MenuItem("TODO show");
+		MenuItem showMainWindowItem = new MenuItem(resourceBundle.getString("traymenu.showMainWindow"));
 		showMainWindowItem.addActionListener(this::showMainWindow);
 		menu.add(showMainWindowItem);
 
-		MenuItem showPreferencesItem = new MenuItem("TODO preferences");
+		MenuItem showPreferencesItem = new MenuItem(resourceBundle.getString("traymenu.showPreferencesWindow"));
 		showPreferencesItem.addActionListener(this::showPreferencesWindow);
 		menu.add(showPreferencesItem);
 
@@ -90,7 +93,7 @@ class TrayMenuController {
 		}
 		menu.addSeparator();
 
-		MenuItem quitApplicationItem = new MenuItem("TODO quit");
+		MenuItem quitApplicationItem = new MenuItem(resourceBundle.getString("traymenu.quitApplication"));
 		quitApplicationItem.addActionListener(this::quitApplication);
 		menu.add(quitApplicationItem);
 	}
@@ -100,14 +103,14 @@ class TrayMenuController {
 		
 		// TODO add action listeners
 		if (vault.isLocked()) {
-			MenuItem unlockItem = new MenuItem("TODO unlock");
+			MenuItem unlockItem = new MenuItem(resourceBundle.getString("traymenu.vault.unlock"));
 			unlockItem.addActionListener(createActionListenerForVault(vault, this::unlockVault));
 			submenu.add(unlockItem);
 		} else if (vault.isUnlocked()) {
-			MenuItem lockItem = new MenuItem("TODO lock");
+			MenuItem lockItem = new MenuItem(resourceBundle.getString("traymenu.vault.lock"));
 			submenu.add(lockItem);
 
-			MenuItem revealItem = new MenuItem("TODO reveal");
+			MenuItem revealItem = new MenuItem(resourceBundle.getString("traymenu.vault.reveal"));
 			submenu.add(revealItem);
 		}
 		
