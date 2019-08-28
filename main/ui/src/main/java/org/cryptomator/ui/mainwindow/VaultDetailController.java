@@ -9,7 +9,6 @@ import javafx.fxml.FXML;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.common.vaults.Volume;
-import org.cryptomator.ui.changepassword.ChangePasswordComponent;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.Tasks;
 import org.cryptomator.ui.controls.FontAwesome5Icon;
@@ -33,16 +32,14 @@ public class VaultDetailController implements FxController {
 	private final ExecutorService executor;
 	private final FxApplication application;
 	private final VaultOptionsComponent.Builder vaultOptionsWindow;
-	private final ChangePasswordComponent.Builder changePasswordWindow;
 
 	@Inject
-	VaultDetailController(ObjectProperty<Vault> vault, ExecutorService executor, FxApplication application, VaultOptionsComponent.Builder vaultOptionsWindow, ChangePasswordComponent.Builder changePasswordWindow) {
+	VaultDetailController(ObjectProperty<Vault> vault, ExecutorService executor, FxApplication application, VaultOptionsComponent.Builder vaultOptionsWindow) {
 		this.vault = vault;
 		this.glyph = EasyBind.select(vault).selectObject(Vault::stateProperty).map(this::getGlyphForVaultState).orElse(FontAwesome5Icon.EXCLAMATION_TRIANGLE);
 		this.executor = executor;
 		this.application = application;
 		this.vaultOptionsWindow = vaultOptionsWindow;
-		this.changePasswordWindow = changePasswordWindow;
 		this.anyVaultSelected = vault.isNotNull();
 	}
 
@@ -82,11 +79,6 @@ public class VaultDetailController implements FxController {
 	@FXML
 	public void showVaultOptions() {
 		vaultOptionsWindow.vault(vault.get()).build().showVaultOptionsWindow();
-	}
-
-	@FXML
-	public void changePassword() {
-		changePasswordWindow.vault(vault.get()).build().showChangePasswordWindow();
 	}
 
 	@FXML
