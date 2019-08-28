@@ -2,6 +2,7 @@ package org.cryptomator.ui.mainwindow;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.AnchorPane;
@@ -41,6 +42,13 @@ public class VaultListController implements FxController {
 		vaultList.setItems(vaults);
 		vaultList.setCellFactory(cellFactory);
 		selectedVault.bind(vaultList.getSelectionModel().selectedItemProperty());
+		vaults.addListener((ListChangeListener.Change<? extends Vault> c) -> { // not threadsafe, but we can only add one vault at a time
+			while (c.next()) {
+				if (c.wasAdded()) {
+					vaultList.getSelectionModel().selectLast();
+				}
+			}
+		});
 	}
 
 	public void didClickAddVault() {
