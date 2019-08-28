@@ -19,7 +19,7 @@
 	<children>
 		<Region VBox.vgrow="ALWAYS"/>
 
-		<Label text="%addvaultwizard.existing.instruction" labelFor="$finishButton"/>
+		<Label text="%addvaultwizard.existing.instruction" wrapText="true" labelFor="$finishButton"/>
 
 		<Region VBox.vgrow="ALWAYS"/>
 
