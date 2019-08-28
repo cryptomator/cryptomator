@@ -5,6 +5,7 @@ import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoMap;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
@@ -20,8 +21,10 @@ import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.removevault.RemoveVaultComponent;
 import org.cryptomator.ui.vaultoptions.VaultOptionsComponent;
 
+import javax.inject.Named;
 import javax.inject.Provider;
 import java.util.Map;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 @Module(subcomponents = {AddVaultWizardComponent.class, RemoveVaultComponent.class, VaultOptionsComponent.class, ChangePasswordComponent.class})
@@ -37,7 +40,7 @@ abstract class MainWindowModule {
 	@Provides
 	@MainWindow
 	@MainWindowScoped
-	static Stage provideStage() {
+	static Stage provideStage(@Named("windowIcon") Optional<Image> windowIcon) {
 		Stage stage = new Stage();
 		// TODO: min/max values chosen arbitrarily. We might wanna take a look at the user's resolution...
 		stage.setMinWidth(650);
@@ -45,6 +48,7 @@ abstract class MainWindowModule {
 		stage.setMaxWidth(1000);
 		stage.setMaxHeight(700);
 		stage.initStyle(StageStyle.UNDECORATED);
+		windowIcon.ifPresent(stage.getIcons()::add);
 		return stage;
 	}
 
