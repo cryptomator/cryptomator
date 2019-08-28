@@ -5,6 +5,7 @@ import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoMap;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.cryptomator.ui.common.FXMLLoaderFactory;
@@ -14,8 +15,10 @@ import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.unlock.UnlockController;
 
+import javax.inject.Named;
 import javax.inject.Provider;
 import java.util.Map;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 @Module
@@ -31,11 +34,12 @@ abstract class QuitModule {
 	@Provides
 	@QuitWindow
 	@QuitScoped
-	static Stage provideStage() {
+	static Stage provideStage(@Named("windowIcon") Optional<Image> windowIcon) {
 		Stage stage = new Stage();
 		stage.setMinWidth(300);
 		stage.setMinHeight(200);
 		stage.initModality(Modality.APPLICATION_MODAL);
+		windowIcon.ifPresent(stage.getIcons()::add);
 		return stage;
 	}
 

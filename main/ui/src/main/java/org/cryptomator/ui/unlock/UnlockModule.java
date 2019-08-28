@@ -5,6 +5,7 @@ import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoMap;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.cryptomator.ui.common.FXMLLoaderFactory;
@@ -13,8 +14,10 @@ import org.cryptomator.ui.common.FxControllerKey;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 
+import javax.inject.Named;
 import javax.inject.Provider;
 import java.util.Map;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 @Module
@@ -30,11 +33,12 @@ abstract class UnlockModule {
 	@Provides
 	@UnlockWindow
 	@UnlockScoped
-	static Stage provideStage(ResourceBundle resourceBundle) {
+	static Stage provideStage(ResourceBundle resourceBundle, @Named("windowIcon") Optional<Image> windowIcon) {
 		Stage stage = new Stage();
 		stage.setTitle(resourceBundle.getString("unlock.title"));
 		stage.setResizable(false);
 		stage.initModality(Modality.APPLICATION_MODAL);
+		windowIcon.ifPresent(stage.getIcons()::add);
 		return stage;
 	}
 

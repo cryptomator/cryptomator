@@ -9,6 +9,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -19,9 +20,11 @@ import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.mainwindow.MainWindow;
 
+import javax.inject.Named;
 import javax.inject.Provider;
 import java.nio.file.Path;
 import java.util.Map;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 @Module
@@ -37,13 +40,14 @@ public abstract class AddVaultModule {
 	@Provides
 	@AddVaultWizard
 	@AddVaultWizardScoped
-	static Stage provideStage(@MainWindow Stage owner, ResourceBundle resourceBundle) {
+	static Stage provideStage(@MainWindow Stage owner, ResourceBundle resourceBundle, @Named("windowIcon") Optional<Image> windowIcon) {
 		Stage stage = new Stage();
 		stage.setTitle(resourceBundle.getString("addvaultwizard.title"));
 		stage.setResizable(false);
 		stage.initStyle(StageStyle.DECORATED);
 		stage.initModality(Modality.WINDOW_MODAL);
 		stage.initOwner(owner);
+		windowIcon.ifPresent(stage.getIcons()::add);
 		return stage;
 	}
 
