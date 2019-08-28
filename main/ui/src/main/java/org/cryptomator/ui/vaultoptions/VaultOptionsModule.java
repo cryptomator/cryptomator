@@ -5,6 +5,7 @@ import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoMap;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
@@ -20,8 +21,10 @@ import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.mainwindow.MainWindow;
 
+import javax.inject.Named;
 import javax.inject.Provider;
 import java.util.Map;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 @Module(subcomponents = {ChangePasswordComponent.class})
@@ -37,13 +40,14 @@ abstract class VaultOptionsModule {
 	@Provides
 	@VaultOptionsWindow
 	@VaultOptionsScoped
-	static Stage provideStage(@MainWindow Stage owner, @VaultOptionsWindow Vault vault, ResourceBundle resourceBundle) {
+	static Stage provideStage(@MainWindow Stage owner, @VaultOptionsWindow Vault vault, ResourceBundle resourceBundle, @Named("windowIcon") Optional<Image> windowIcon) {
 		Stage stage = new Stage();
 		stage.setTitle(vault.getDisplayableName());
 		stage.setResizable(false);
 		stage.initStyle(StageStyle.DECORATED);
 		stage.initModality(Modality.WINDOW_MODAL);
 		stage.initOwner(owner);
+		windowIcon.ifPresent(stage.getIcons()::add);
 		return stage;
 	}
 
