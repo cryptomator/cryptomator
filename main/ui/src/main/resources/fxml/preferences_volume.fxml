@@ -26,7 +26,7 @@
 			<Button text="%generic.button.apply" fx:id="changeWebDavPortButton" onAction="#doChangeWebDavPort"/>
 		</HBox>
 
-		<HBox spacing="6" alignment="CENTER_LEFT" visible="${controller.showWebDavSettings}">
+		<HBox spacing="6" alignment="CENTER_LEFT" visible="${controller.showWebDavScheme}">
 			<Label text="%preferences.volume.webdav.scheme"/>
 			<ChoiceBox fx:id="webDavUrlSchemeChoiceBox" maxWidth="Infinity"/>
 		</HBox>

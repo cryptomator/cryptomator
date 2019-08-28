@@ -2,10 +2,12 @@ package org.cryptomator.ui.preferences;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextField;
 import javafx.util.StringConverter;
+import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VolumeImpl;
 import org.cryptomator.common.settings.WebDavUrlScheme;
@@ -19,6 +21,7 @@ public class VolumePreferencesController implements FxController {
 
 	private final Settings settings;
 	private final BooleanBinding showWebDavSettings;
+	private final BooleanBinding showWebDavScheme;
 	public ChoiceBox<VolumeImpl> volumeTypeChoicBox;
 	public TextField webDavPortField;
 	public Button changeWebDavPortButton;
@@ -28,6 +31,7 @@ public class VolumePreferencesController implements FxController {
 	VolumePreferencesController(Settings settings) {
 		this.settings = settings;
 		this.showWebDavSettings = Bindings.equal(settings.preferredVolumeImpl(), VolumeImpl.WEBDAV);
+		this.showWebDavScheme = showWebDavSettings.and(new SimpleBooleanProperty(SystemUtils.IS_OS_LINUX)); //TODO: remove SystemUtils
 	}
 
 	public void initialize() {
@@ -66,6 +70,14 @@ public class VolumePreferencesController implements FxController {
 
 	public Boolean getShowWebDavSettings() {
 		return showWebDavSettings.get();
+	}
+
+	public BooleanBinding showWebDavSchemeProperty() {
+		return showWebDavScheme;
+	}
+
+	public Boolean getShowWebDavScheme() {
+		return showWebDavScheme.get();
 	}
 
 	/* Helper classes */
