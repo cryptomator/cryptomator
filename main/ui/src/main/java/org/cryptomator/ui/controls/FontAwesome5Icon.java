@@ -17,6 +17,7 @@ public enum FontAwesome5Icon {
 	LOCK_OPEN_ALT("\uF3C2"), //
 	MINUS("\uF068"), //
 	PLUS("\uF067"), //
+	QUESTION("\uF128"), //
 	SEARCH("\uF002"), //
 	SPINNER("\uF110"), //
 	SYNC("\uF021"), //

@@ -5,12 +5,14 @@
 <?import javafx.scene.control.ButtonBar?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import org.cryptomator.ui.controls.FontAwesome5IconView?>
 <VBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
 	  fx:controller="org.cryptomator.ui.removevault.RemoveVaultController"
 	  prefWidth="400.0"
-	  prefHeight="400.0"
+	  prefHeight="350.0"
 	  spacing="12.0"
 	  alignment="TOP_CENTER">
 	<padding>
@@ -19,7 +21,14 @@
 	<children>
 		<Region prefHeight="24" VBox.vgrow="NEVER"/>
 
-		<Label text="%removeVault.information" labelFor="$confirmButton"/>
+		<StackPane alignment="CENTER">
+			<VBox.margin>
+				<Insets topRightBottomLeft="24"/>
+			</VBox.margin>
+			<FontAwesome5IconView styleClass="glyph-icon-primary" glyph="CIRCLE" glyphSize="64"/>
+			<FontAwesome5IconView styleClass="glyph-icon-main-bg" glyph="QUESTION" glyphSize="32"/>
+		</StackPane>
+		<Label text="%removeVault.information" wrapText="true" labelFor="$confirmButton"/>
 
 		<Region VBox.vgrow="ALWAYS"/>
 
