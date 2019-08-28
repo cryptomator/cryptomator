@@ -37,7 +37,7 @@ abstract class QuitModule {
 	static Stage provideStage(@Named("windowIcon") Optional<Image> windowIcon) {
 		Stage stage = new Stage();
 		stage.setMinWidth(300);
-		stage.setMinHeight(200);
+		stage.setMinHeight(100);
 		stage.initModality(Modality.APPLICATION_MODAL);
 		windowIcon.ifPresent(stage.getIcons()::add);
 		return stage;

@@ -83,6 +83,9 @@ public class QuitController implements FxController {
 				return null;
 			}
 		};
+		task.setOnScheduled(evt -> {
+			vault.setState(VaultState.PROCESSING);
+		});
 		task.setOnSucceeded(evt -> {
 			vault.setState(VaultState.LOCKED);
 		});
