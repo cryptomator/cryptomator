@@ -13,6 +13,7 @@ import javafx.scene.image.Image;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.FXMLLoaderFactory;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxControllerKey;
@@ -64,6 +65,15 @@ public abstract class AddVaultModule {
 	}
 
 	@Provides
+	@AddVaultWizard
+	@AddVaultWizardScoped
+	static ObjectProperty<Vault> provideVault() {
+		return new SimpleObjectProperty<>();
+	}
+
+	// ------------------
+
+	@Provides
 	@FxmlScene(FxmlFile.ADDVAULT_WELCOME)
 	@AddVaultWizardScoped
 	static Scene provideWelcomeScene(@AddVaultWizard FXMLLoaderFactory fxmlLoaders) {
@@ -98,6 +108,13 @@ public abstract class AddVaultModule {
 		return fxmlLoaders.createScene("/fxml/addvault_new_password.fxml");
 	}
 
+	@Provides
+	@FxmlScene(FxmlFile.ADDVAULT_SUCCESS)
+	@AddVaultWizardScoped
+	static Scene provideCreateNewVaultSuccessScene(@AddVaultWizard FXMLLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene("/fxml/addvault_success.fxml");
+	}
+
 	// ------------------
 
 	@Binds
@@ -124,4 +141,9 @@ public abstract class AddVaultModule {
 	@IntoMap
 	@FxControllerKey(CreateNewVaultPasswordController.class)
 	abstract FxController bindCreateNewVaultPasswordController(CreateNewVaultPasswordController controller);
+
+	@Binds
+	@IntoMap
+	@FxControllerKey(AddVaultSuccessController.class)
+	abstract FxController bindAddVaultSuccessController(AddVaultSuccessController controller);
 }

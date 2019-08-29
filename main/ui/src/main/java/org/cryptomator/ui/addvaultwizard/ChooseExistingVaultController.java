@@ -24,17 +24,21 @@ public class ChooseExistingVaultController implements FxController {
 
 	private final Stage window;
 	private final Lazy<Scene> welcomeScene;
+	private final Lazy<Scene> successScene;
 	private final ObjectProperty<Path> vaultPath;
 	private final ObservableList<Vault> vaults;
+	private final ObjectProperty<Vault> vault;
 	private final VaultFactory vaultFactory;
 	private final ResourceBundle resourceBundle;
 
 	@Inject
-	ChooseExistingVaultController(@AddVaultWizard Stage window, @FxmlScene(FxmlFile.ADDVAULT_WELCOME) Lazy<Scene> welcomeScene, ObjectProperty<Path> vaultPath, ObservableList<Vault> vaults, VaultFactory vaultFactory, ResourceBundle resourceBundle) {
+	ChooseExistingVaultController(@AddVaultWizard Stage window, @FxmlScene(FxmlFile.ADDVAULT_WELCOME) Lazy<Scene> welcomeScene, @FxmlScene(FxmlFile.ADDVAULT_SUCCESS) Lazy<Scene> successScene, ObjectProperty<Path> vaultPath, ObservableList<Vault> vaults, @AddVaultWizard ObjectProperty<Vault> vault, VaultFactory vaultFactory, ResourceBundle resourceBundle) {
 		this.window = window;
 		this.welcomeScene = welcomeScene;
+		this.successScene = successScene;
 		this.vaultPath = vaultPath;
 		this.vaults = vaults;
+		this.vault = vault;
 		this.vaultFactory = vaultFactory;
 		this.resourceBundle = resourceBundle;
 	}
@@ -45,7 +49,7 @@ public class ChooseExistingVaultController implements FxController {
 	}
 
 	@FXML
-	public void chooseFileAndFinish() {
+	public void chooseFileAndNext() {
 		//TODO: error handling & cannot unlock added vault
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(resourceBundle.getString("addvaultwizard.existing.filePickerTitle"));
@@ -55,9 +59,11 @@ public class ChooseExistingVaultController implements FxController {
 			vaultPath.setValue(file.toPath().toAbsolutePath().getParent());
 			VaultSettings vaultSettings = VaultSettings.withRandomId();
 			vaultSettings.path().setValue(vaultPath.get());
-			vaults.add(vaultFactory.get(vaultSettings));
+			Vault newVault = vaultFactory.get(vaultSettings);
+			vaults.add(newVault);
+			vault.set(newVault);
 			//TODO: error handling?
-			window.close();
+			window.setScene(successScene.get());
 		}
 	}
 

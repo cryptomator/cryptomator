@@ -23,10 +23,10 @@
 
 		<Region VBox.vgrow="ALWAYS"/>
 
-		<ButtonBar buttonMinWidth="120" buttonOrder="B+I">
+		<ButtonBar buttonMinWidth="120" buttonOrder="B+X">
 			<buttons>
 				<Button text="%generic.button.back" ButtonBar.buttonData="BACK_PREVIOUS" onAction="#back"/>
-				<Button fx:id="finishButton" text="%addvaultwizard.existing.chooseBtn" ButtonBar.buttonData="FINISH" onAction="#chooseFileAndFinish" defaultButton="true"/>
+				<Button fx:id="finishButton" text="%addvaultwizard.existing.chooseBtn" ButtonBar.buttonData="NEXT_FORWARD" onAction="#chooseFileAndNext" defaultButton="true"/>
 			</buttons>
 		</ButtonBar>
 	</children>

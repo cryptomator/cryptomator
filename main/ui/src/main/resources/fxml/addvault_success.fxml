@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Circle?>
+<?import org.cryptomator.ui.controls.FontAwesome5IconView?>
+<?import org.cryptomator.ui.controls.FormattedLabel?>
+<?import javafx.scene.control.ButtonBar?>
+<VBox xmlns="http://javafx.com/javafx"
+	  xmlns:fx="http://javafx.com/fxml"
+	  fx:controller="org.cryptomator.ui.addvaultwizard.AddVaultSuccessController"
+	  prefWidth="400.0"
+	  prefHeight="400.0"
+	  spacing="12.0"
+	  alignment="TOP_CENTER">
+	<padding>
+		<Insets top="24" right="24" bottom="24" left="24"/>
+	</padding>
+	<children>
+		<StackPane alignment="CENTER" HBox.hgrow="NEVER">
+			<VBox.margin>
+				<Insets topRightBottomLeft="24"/>
+			</VBox.margin>
+			<Circle styleClass="glyph-icon-primary" radius="36"/>
+			<FontAwesome5IconView styleClass="glyph-icon-main-bg" glyph="CHECK" glyphSize="36"/>
+		</StackPane>
+
+		<FormattedLabel format="%addvaultwizard.success.nextStepsInstructions" arg1="${controller.vault.displayableName}" wrapText="true" textAlignment="LEFT" HBox.hgrow="ALWAYS"/>
+
+		<Region VBox.vgrow="ALWAYS"/>
+
+		<ButtonBar buttonMinWidth="120" buttonOrder="+UI">
+			<buttons>
+				<Button text="%addvaultwizard.success.unlockNow" ButtonBar.buttonData="OTHER" onAction="#unlockAndClose"/>
+				<Button text="%generic.button.done" ButtonBar.buttonData="FINISH" onAction="#close" defaultButton="true"/>
+			</buttons>
+		</ButtonBar>
+	</children>
+</VBox>

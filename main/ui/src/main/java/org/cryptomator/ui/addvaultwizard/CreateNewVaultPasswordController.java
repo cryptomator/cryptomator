@@ -14,7 +14,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Region;
 import javafx.stage.Stage;
 import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.common.vaults.Vault;
@@ -42,10 +41,12 @@ public class CreateNewVaultPasswordController implements FxController {
 	private static final Logger LOG = LoggerFactory.getLogger(CreateNewVaultPasswordController.class);
 
 	private final Stage window;
-	private final Lazy<Scene> previousScene;
+	private final Lazy<Scene> chooseLocationScene;
+	private final Lazy<Scene> successScene;
 	private final StringProperty vaultName;
 	private final ObjectProperty<Path> vaultPath;
 	private final ObservableList<Vault> vaults;
+	private final ObjectProperty<Vault> vault;
 	private final VaultFactory vaultFactory;
 	private final ResourceBundle resourceBundle;
 	private final PasswordStrengthUtil strengthRater;
@@ -62,12 +63,14 @@ public class CreateNewVaultPasswordController implements FxController {
 	public CheckBox finalConfirmationCheckbox;
 
 	@Inject
-	CreateNewVaultPasswordController(@AddVaultWizard Stage window, @FxmlScene(FxmlFile.ADDVAULT_NEW_LOCATION) Lazy<Scene> previousScene, StringProperty vaultName, ObjectProperty<Path> vaultPath, ObservableList<Vault> vaults, VaultFactory vaultFactory, ResourceBundle resourceBundle, PasswordStrengthUtil strengthRater) {
+	CreateNewVaultPasswordController(@AddVaultWizard Stage window, @FxmlScene(FxmlFile.ADDVAULT_NEW_LOCATION) Lazy<Scene> chooseLocationScene, @FxmlScene(FxmlFile.ADDVAULT_SUCCESS) Lazy<Scene> successScene, StringProperty vaultName, ObjectProperty<Path> vaultPath, ObservableList<Vault> vaults, @AddVaultWizard ObjectProperty<Vault> vault, VaultFactory vaultFactory, ResourceBundle resourceBundle, PasswordStrengthUtil strengthRater) {
 		this.window = window;
-		this.previousScene = previousScene;
+		this.chooseLocationScene = chooseLocationScene;
+		this.successScene = successScene;
 		this.vaultName = vaultName;
 		this.vaultPath = vaultPath;
 		this.vaults = vaults;
+		this.vault = vault;
 		this.vaultFactory = vaultFactory;
 		this.resourceBundle = resourceBundle;
 		this.strengthRater = strengthRater;
@@ -97,11 +100,11 @@ public class CreateNewVaultPasswordController implements FxController {
 
 	@FXML
 	public void back() {
-		window.setScene(previousScene.get());
+		window.setScene(chooseLocationScene.get());
 	}
 
 	@FXML
-	public void finish() {
+	public void next() {
 		VaultSettings vaultSettings = VaultSettings.withRandomId();
 		vaultSettings.path().setValue(vaultPath.get());
 		Vault newVault = vaultFactory.get(vaultSettings);
@@ -116,8 +119,10 @@ public class CreateNewVaultPasswordController implements FxController {
 		}
 		try {
 			newVault.create(passwordField.getCharacters());
+			LOG.info("Created new vault at path {}", vaultPath.get());
+			vault.set(newVault);
 			vaults.add(newVault);
-			window.close();
+			window.setScene(successScene.get());
 		} catch (IOException e) {
 			// TODO show generic error screen
 			LOG.error("", e);

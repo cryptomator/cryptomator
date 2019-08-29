@@ -18,13 +18,14 @@
 		<Insets top="24" right="24" bottom="24" left="24"/>
 	</padding>
 	<children>
-		<Region prefHeight="24" VBox.vgrow="NEVER"/>
-
-		<ImageView fitHeight="128.0" preserveRatio="true" smooth="true" cache="true">
+		<ImageView VBox.vgrow="ALWAYS" fitHeight="128.0" preserveRatio="true" smooth="true" cache="true">
+			<VBox.margin>
+				<Insets top="24"/>
+			</VBox.margin>
 			<Image url="/bot_welcome.png"/>
 		</ImageView>
 
-		<Region prefHeight="12" VBox.vgrow="NEVER"/>
+		<Region VBox.vgrow="ALWAYS"/>
 
 		<VBox alignment="CENTER" spacing="9">
 			<Button styleClass="button-large" text="%addvaultwizard.welcome.newButton" onAction="#createNewVault">
