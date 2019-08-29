@@ -40,7 +40,7 @@ class TrayMenuController {
 		this.settings = settings;
 		this.vaults = vaults;
 		this.menu = new PopupMenu();
-		this.allVaultsAreLocked = new AtomicBoolean();
+		this.allVaultsAreLocked = new AtomicBoolean(true);
 	}
 
 	public PopupMenu getMenu() {
