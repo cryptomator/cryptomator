@@ -30,9 +30,13 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.channels.WritableByteChannel;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.ResourceBundle;
 
 @AddVaultWizardScoped
@@ -50,6 +54,7 @@ public class CreateNewVaultPasswordController implements FxController {
 	private final VaultFactory vaultFactory;
 	private final ResourceBundle resourceBundle;
 	private final PasswordStrengthUtil strengthRater;
+	private final ReadmeGenerator readmeGenerator;
 	private final IntegerProperty passwordStrength;
 
 	public Button finishButton;
@@ -63,7 +68,7 @@ public class CreateNewVaultPasswordController implements FxController {
 	public CheckBox finalConfirmationCheckbox;
 
 	@Inject
-	CreateNewVaultPasswordController(@AddVaultWizard Stage window, @FxmlScene(FxmlFile.ADDVAULT_NEW_LOCATION) Lazy<Scene> chooseLocationScene, @FxmlScene(FxmlFile.ADDVAULT_SUCCESS) Lazy<Scene> successScene, StringProperty vaultName, ObjectProperty<Path> vaultPath, ObservableList<Vault> vaults, @AddVaultWizard ObjectProperty<Vault> vault, VaultFactory vaultFactory, ResourceBundle resourceBundle, PasswordStrengthUtil strengthRater) {
+	CreateNewVaultPasswordController(@AddVaultWizard Stage window, @FxmlScene(FxmlFile.ADDVAULT_NEW_LOCATION) Lazy<Scene> chooseLocationScene, @FxmlScene(FxmlFile.ADDVAULT_SUCCESS) Lazy<Scene> successScene, StringProperty vaultName, ObjectProperty<Path> vaultPath, ObservableList<Vault> vaults, @AddVaultWizard ObjectProperty<Vault> vault, VaultFactory vaultFactory, ResourceBundle resourceBundle, PasswordStrengthUtil strengthRater, ReadmeGenerator readmeGenerator) {
 		this.window = window;
 		this.chooseLocationScene = chooseLocationScene;
 		this.successScene = successScene;
@@ -74,6 +79,7 @@ public class CreateNewVaultPasswordController implements FxController {
 		this.vaultFactory = vaultFactory;
 		this.resourceBundle = resourceBundle;
 		this.strengthRater = strengthRater;
+		this.readmeGenerator = readmeGenerator;
 		this.passwordStrength = new SimpleIntegerProperty(-1);
 	}
 
@@ -120,6 +126,13 @@ public class CreateNewVaultPasswordController implements FxController {
 		try {
 			newVault.create(passwordField.getCharacters());
 			LOG.info("Created new vault at path {}", vaultPath.get());
+			String readmeFileName = resourceBundle.getString("addvault.new.readme.storageLocation.fileName");
+			Path readmeFile = vaultPath.get().resolve(readmeFileName);
+			try (WritableByteChannel ch = Files.newByteChannel(readmeFile, StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE)) {
+				ByteBuffer buf = StandardCharsets.US_ASCII.encode(readmeGenerator.createVaultStorageLocationReadmeRtf());
+				ch.write(buf);
+			}
+			LOG.info("Created readme file {}", readmeFile);
 			vault.set(newVault);
 			vaults.add(newVault);
 			window.setScene(successScene.get());
