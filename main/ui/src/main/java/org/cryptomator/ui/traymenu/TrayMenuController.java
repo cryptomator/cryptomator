@@ -1,10 +1,13 @@
 package org.cryptomator.ui.traymenu;
 
+import javafx.application.Platform;
 import javafx.beans.Observable;
 import javafx.collections.ObservableList;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.fxapp.FxApplication;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -23,6 +26,8 @@ import java.util.function.Consumer;
 
 @TrayMenuScoped
 class TrayMenuController {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(TrayMenuController.class);
 
 	private final ResourceBundle resourceBundle;
 	private final FxApplicationStarter fxApplicationStarter;
@@ -69,8 +74,12 @@ class TrayMenuController {
 	}
 
 	private void vaultListChanged(@SuppressWarnings("unused") Observable observable) {
+		assert Platform.isFxApplicationThread();
 		rebuildMenu();
-		allVaultsAreLocked.set(vaults.stream().allMatch(Vault::isLocked));
+		boolean allLocked = vaults.stream().allMatch(Vault::isLocked);
+		// TODO remove logging
+		LOG.warn("allLocked: {}", allLocked);
+		allVaultsAreLocked.set(allLocked);
 	}
 
 	private void rebuildMenu() {

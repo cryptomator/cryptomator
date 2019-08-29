@@ -54,7 +54,6 @@ import org.cryptomator.ui.model.AppLaunchEvent;
 import org.cryptomator.ui.model.AutoUnlocker;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultFactory;
-import org.cryptomator.common.vaults.VaultList;
 import org.cryptomator.ui.model.upgrade.UpgradeStrategies;
 import org.cryptomator.ui.model.upgrade.UpgradeStrategy;
 import org.cryptomator.ui.util.DialogBuilderUtil;
@@ -112,7 +111,7 @@ public class MainController implements ViewController {
 
 	@Inject
 	public MainController(@Named("mainWindow") Stage mainWindow, ExecutorService executorService, @Named("launchEventQueue") BlockingQueue<AppLaunchEvent> launchEventQueue, ExitUtil exitUtil, Localization localization,
-						  VaultFactory vaultFactoy, ViewControllerLoader viewControllerLoader, UpgradeStrategies upgradeStrategies, VaultList vaults, AutoUnlocker autoUnlocker) {
+						  VaultFactory vaultFactoy, ViewControllerLoader viewControllerLoader, UpgradeStrategies upgradeStrategies, ObservableList<Vault> vaults, AutoUnlocker autoUnlocker) {
 		this.mainWindow = mainWindow;
 		this.executorService = executorService;
 		this.launchEventQueue = launchEventQueue;

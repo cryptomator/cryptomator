@@ -57,7 +57,7 @@ public class Vault {
 	private final Provider<Volume> volumeProvider;
 	private final StringBinding defaultMountFlags;
 	private final AtomicReference<CryptoFileSystem> cryptoFileSystem;
-	private final ObjectProperty<VaultState> state ;
+	private final ObjectProperty<VaultState> state;
 	private final VaultStats stats;
 	private final ObjectProperty<Path> accessPoint = new SimpleObjectProperty<>(Path.of(""));
 	private final StringBinding displayableName;

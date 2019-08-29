@@ -5,13 +5,13 @@
  *******************************************************************************/
 package org.cryptomator.ui.model;
 
+import javafx.collections.ObservableList;
 import org.cryptomator.common.vaults.Vault;
-import org.cryptomator.common.vaults.VaultList;
 import org.cryptomator.common.vaults.Volume;
-import org.cryptomator.ui.fxapp.FxApplicationScoped;
 import org.cryptomator.cryptolib.api.CryptoException;
 import org.cryptomator.keychain.KeychainAccess;
 import org.cryptomator.keychain.KeychainAccessException;
+import org.cryptomator.ui.fxapp.FxApplicationScoped;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,11 +33,11 @@ public class AutoUnlocker {
 	private static final int NAP_TIME_MILLIS = 500;
 
 	private final Optional<KeychainAccess> keychainAccess;
-	private final VaultList vaults;
+	private final ObservableList<Vault> vaults;
 	private final ExecutorService executor;
 
 	@Inject
-	public AutoUnlocker(Optional<KeychainAccess> keychainAccess, VaultList vaults, ExecutorService executor) {
+	public AutoUnlocker(Optional<KeychainAccess> keychainAccess, ObservableList<Vault> vaults, ExecutorService executor) {
 		this.keychainAccess = keychainAccess;
 		this.vaults = vaults;
 		this.executor = executor;

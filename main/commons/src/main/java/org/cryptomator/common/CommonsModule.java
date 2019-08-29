@@ -15,9 +15,11 @@ import javafx.collections.ObservableList;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.SettingsProvider;
+import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultComponent;
-import org.cryptomator.common.vaults.VaultList;
+import org.cryptomator.common.vaults.VaultFactory;
+import org.cryptomator.common.vaults.VaultListChangeListener;
 import org.cryptomator.frontend.webdav.WebDavServer;
 import org.fxmisc.easybind.EasyBind;
 
@@ -51,8 +53,14 @@ public abstract class CommonsModule {
 
 	@Provides
 	@Singleton
-	static ObservableList<Vault> provideVaultList(VaultList vaultList) {
-		return FXCollections.observableList(vaultList, Vault::observables);
+	static ObservableList<Vault> provideVaultList(Settings settings, VaultFactory vaultFactory) {
+		ObservableList<Vault> list = FXCollections.observableArrayList(Vault::observables);
+		for (VaultSettings s : settings.getDirectories()) {
+			Vault v = vaultFactory.get(s);
+			list.add(v);
+		}
+		list.addListener(new VaultListChangeListener(settings.getDirectories()));
+		return list;
 	}
 
 	@Provides
