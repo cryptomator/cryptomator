@@ -6,6 +6,8 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
 <VBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
 	  fx:controller="org.cryptomator.ui.addvaultwizard.ChooseExistingVaultController"
@@ -17,7 +19,12 @@
 		<Insets top="24" right="24" bottom="24" left="24"/>
 	</padding>
 	<children>
-		<Region VBox.vgrow="ALWAYS"/>
+		<ImageView VBox.vgrow="ALWAYS" fitHeight="200.0" preserveRatio="true" smooth="true" cache="true">
+			<VBox.margin>
+				<Insets top="24"/>
+			</VBox.margin>
+			<Image url="/choose_existing_vault.png"/> <!-- TODO replace mockup -->
+		</ImageView>
 
 		<Label text="%addvaultwizard.existing.instruction" wrapText="true" labelFor="$finishButton"/>
 

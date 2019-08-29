@@ -28,14 +28,14 @@
 		<Region VBox.vgrow="ALWAYS"/>
 
 		<VBox alignment="CENTER" spacing="9">
-			<Button styleClass="button-large" text="%addvaultwizard.welcome.newButton" onAction="#createNewVault">
+			<Button styleClass="button-large" text="%addvaultwizard.welcome.newButton" onAction="#createNewVault" prefWidth="Infinity">
 				<graphic>
 					<FontAwesome5IconView glyph="PLUS" glyphSize="15"/>
 				</graphic>
 			</Button>
-			<Button styleClass="button-large" text="%addvaultwizard.welcome.existingButton" onAction="#chooseExistingVault">
+			<Button styleClass="button-large" text="%addvaultwizard.welcome.existingButton" onAction="#chooseExistingVault" prefWidth="Infinity">
 				<graphic>
-					<FontAwesome5IconView glyph="SEARCH" glyphSize="15"/>
+					<FontAwesome5IconView glyph="FOLDER_OPEN" glyphSize="15"/>
 				</graphic>
 			</Button>
 		</VBox>

@@ -27,8 +27,6 @@
 		<Insets top="24" right="24" bottom="24" left="24"/>
 	</padding>
 	<children>
-		<Region VBox.vgrow="ALWAYS"/>
-
 		<Label wrapText="true" text="%addvaultwizard.new.locationInstruction"/>
 
 		<VBox spacing="6">
@@ -44,7 +42,7 @@
 			</HBox>
 		</VBox>
 
-		<Region VBox.vgrow="NEVER"/>
+		<Region VBox.vgrow="ALWAYS"/>
 
 		<Label text="%addvaultwizard.new.locationLabel" labelFor="$locationTextField"/>
 		<TextField fx:id="locationTextField" promptText="%addvaultwizard.new.locationPrompt" text="${controller.vaultPath}" disable="true" HBox.hgrow="ALWAYS"/>
