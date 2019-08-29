@@ -1,13 +1,10 @@
 package org.cryptomator.ui.traymenu;
 
 import javafx.beans.Observable;
-import javafx.beans.binding.Bindings;
-import javafx.beans.binding.BooleanBinding;
 import javafx.collections.ObservableList;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.fxapp.FxApplication;
-import org.fxmisc.easybind.EasyBind;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -15,13 +12,13 @@ import java.awt.Desktop;
 import java.awt.Menu;
 import java.awt.MenuItem;
 import java.awt.PopupMenu;
-import java.awt.desktop.QuitEvent;
 import java.awt.desktop.QuitResponse;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.EventObject;
 import java.util.ResourceBundle;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 @TrayMenuScoped
@@ -33,7 +30,7 @@ class TrayMenuController {
 	private final Settings settings;
 	private final ObservableList<Vault> vaults;
 	private final PopupMenu menu;
-	private final BooleanBinding allLocked;
+	private final AtomicBoolean allVaultsAreLocked;
 
 	@Inject
 	TrayMenuController(ResourceBundle resourceBundle, FxApplicationStarter fxApplicationStarter, @Named("shutdownLatch") CountDownLatch shutdownLatch, Settings settings, ObservableList<Vault> vaults) {
@@ -43,7 +40,7 @@ class TrayMenuController {
 		this.settings = settings;
 		this.vaults = vaults;
 		this.menu = new PopupMenu();
-		this.allLocked = Bindings.isEmpty(vaults.filtered(Vault::isUnlocked)); // TODO better use Vault::isNotLocked ;)
+		this.allVaultsAreLocked = new AtomicBoolean();
 	}
 
 	public PopupMenu getMenu() {
@@ -73,6 +70,7 @@ class TrayMenuController {
 
 	private void vaultListChanged(@SuppressWarnings("unused") Observable observable) {
 		rebuildMenu();
+		allVaultsAreLocked.set(vaults.stream().allMatch(Vault::isLocked));
 	}
 
 	private void rebuildMenu() {
@@ -100,7 +98,7 @@ class TrayMenuController {
 
 	private Menu buildSubmenu(Vault vault) {
 		Menu submenu = new Menu(vault.getDisplayableName());
-		
+
 		// TODO add action listeners
 		if (vault.isLocked()) {
 			MenuItem unlockItem = new MenuItem(resourceBundle.getString("traymenu.vault.unlock"));
@@ -113,7 +111,7 @@ class TrayMenuController {
 			MenuItem revealItem = new MenuItem(resourceBundle.getString("traymenu.vault.reveal"));
 			submenu.add(revealItem);
 		}
-		
+
 		return submenu;
 	}
 
@@ -134,7 +132,7 @@ class TrayMenuController {
 	}
 
 	private void handleQuitRequest(EventObject e, QuitResponse response) {
-		if (allLocked.get()) {
+		if (allVaultsAreLocked.get()) {
 			response.performQuit(); // really?
 		} else {
 			fxApplicationStarter.get(true).thenAccept(app -> app.showQuitWindow(response));
