@@ -18,7 +18,7 @@ public enum FontAwesome5Icon {
 	MINUS("\uF068"), //
 	PLUS("\uF067"), //
 	QUESTION("\uF128"), //
-	SEARCH("\uF002"), //
+	SPARKLES("\uF890"), //
 	SPINNER("\uF110"), //
 	SYNC("\uF021"), //
 	TIMES("\uF00D"), //
