@@ -2,18 +2,18 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ButtonBar?>
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.ProgressIndicator?>
-<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 <?import org.cryptomator.ui.controls.FormattedLabel?>
 <?import org.cryptomator.ui.controls.SecPasswordField?>
-<?import javafx.scene.layout.Region?>
 <VBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
 	  fx:controller="org.cryptomator.ui.unlock.UnlockController"
-	  minWidth="350"
-	  maxWidth="350"
+	  minWidth="450"
+	  maxWidth="450"
 	  minHeight="150"
 	  spacing="6">
 	<padding>
@@ -26,13 +26,15 @@
 
 		<Region VBox.vgrow="ALWAYS"/>
 
-		<HBox alignment="CENTER_RIGHT" spacing="9">
-			<Button text="%generic.button.cancel" cancelButton="true" onAction="#cancel"/>
-			<Button text="%unlock.unlockBtn" defaultButton="true" onAction="#unlock" contentDisplay="${controller.unlockButtonState}" disable="${controller.unlockButtonDisabled}">
-				<graphic>
-					<ProgressIndicator progress="-1" prefWidth="12" prefHeight="12"/>
-				</graphic>
-			</Button>
-		</HBox>
+		<ButtonBar buttonMinWidth="120" buttonOrder="+CI">
+			<buttons>
+				<Button text="%generic.button.cancel" ButtonBar.buttonData="CANCEL_CLOSE" cancelButton="true" onAction="#cancel"/>
+				<Button text="%unlock.unlockBtn" ButtonBar.buttonData="FINISH" defaultButton="true" onAction="#unlock" contentDisplay="${controller.unlockButtonState}" disable="${controller.unlockButtonDisabled}">
+					<graphic>
+						<ProgressIndicator progress="-1" prefWidth="12" prefHeight="12"/>
+					</graphic>
+				</Button>
+			</buttons>
+		</ButtonBar>
 	</children>
 </VBox>
