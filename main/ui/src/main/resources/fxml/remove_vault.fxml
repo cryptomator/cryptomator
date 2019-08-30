@@ -27,7 +27,7 @@
 					<Insets topRightBottomLeft="12"/>
 				</VBox.margin>
 				<Circle styleClass="glyph-icon-primary" radius="24"/>
-				<FontAwesome5IconView styleClass="glyph-icon-main-bg" glyph="QUESTION" glyphSize="24"/>
+				<FontAwesome5IconView styleClass="glyph-icon-white" glyph="QUESTION" glyphSize="24"/>
 			</StackPane>
 
 			<Label text="%removeVault.information" wrapText="true" textAlignment="LEFT" HBox.hgrow="ALWAYS"/>

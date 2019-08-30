@@ -26,7 +26,7 @@
 				<Insets topRightBottomLeft="24"/>
 			</VBox.margin>
 			<Circle styleClass="glyph-icon-primary" radius="36"/>
-			<FontAwesome5IconView styleClass="glyph-icon-main-bg" glyph="CHECK" glyphSize="36"/>
+			<FontAwesome5IconView styleClass="glyph-icon-white" glyph="CHECK" glyphSize="36"/>
 		</StackPane>
 
 		<FormattedLabel format="%addvaultwizard.success.nextStepsInstructions" arg1="${controller.vault.displayableName}" wrapText="true" textAlignment="LEFT" HBox.hgrow="ALWAYS"/>

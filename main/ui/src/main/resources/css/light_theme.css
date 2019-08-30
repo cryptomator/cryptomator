@@ -112,8 +112,8 @@
 	-fx-fill: TEXT_FILL;
 }
 
-.glyph-icon-main-bg {
-	-fx-fill: MAIN_BG;
+.glyph-icon-white {
+	-fx-fill: white;
 }
 
 .glyph-icon-primary {

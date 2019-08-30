@@ -28,7 +28,7 @@
 					<Insets topRightBottomLeft="12"/>
 				</VBox.margin>
 				<Circle styleClass="glyph-icon-primary" radius="24"/>
-				<FontAwesome5IconView styleClass="glyph-icon-main-bg" glyph="CHECK" glyphSize="24"/>
+				<FontAwesome5IconView styleClass="glyph-icon-white" glyph="CHECK" glyphSize="24"/>
 			</StackPane>
 
 			<FormattedLabel format="%unlock.success.message" arg1="${controller.vault.displayableName}" wrapText="true" textAlignment="LEFT" HBox.hgrow="ALWAYS"/>
