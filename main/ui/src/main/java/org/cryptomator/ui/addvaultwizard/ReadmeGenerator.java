@@ -27,6 +27,14 @@ public class ReadmeGenerator {
 				String.format(resourceBundle.getString("addvault.new.readme.storageLocation.4"), HELP_URL)  //
 		));
 	}
+	
+	public String createVaultAccessLocationReadmeRtf() {
+		return createDocument(List.of( //
+				resourceBundle.getString("addvault.new.readme.accessLocation.1"), //
+				resourceBundle.getString("addvault.new.readme.accessLocation.2"), //
+				resourceBundle.getString("addvault.new.readme.accessLocation.3")  //
+		));
+	}
 
 	// visible for testing
 	String createDocument(Iterable<String> paragraphs) {
