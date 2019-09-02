@@ -9,9 +9,9 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Circle?>
 <?import org.cryptomator.ui.controls.FontAwesome5IconView?>
 <?import org.cryptomator.ui.controls.ThrougputLabel?>
-<?import javafx.scene.shape.Circle?>
 <VBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
 	  fx:controller="org.cryptomator.ui.mainwindow.VaultDetailController"
@@ -74,11 +74,13 @@
 					<HBox alignment="CENTER" spacing="24">
 						<VBox styleClass="button-group-labels" HBox.hgrow="ALWAYS">
 							<Label styleClass="button-group-heading" text="%main.vaultDetail.bytesPerSecondRead"/>
-							<ThrougputLabel idleFormat="%main.vaultDetail.throughput.idle" kibsFormat="%main.vaultDetail.throughput.kbps" mibsFormat="%main.vaultDetail.throughput.mbps" bytesPerSecond="${controller.vault.stats.bytesPerSecondRead}"/>
+							<ThrougputLabel idleFormat="%main.vaultDetail.throughput.idle" kibsFormat="%main.vaultDetail.throughput.kbps" mibsFormat="%main.vaultDetail.throughput.mbps"
+											bytesPerSecond="${controller.vault.stats.bytesPerSecondRead}"/>
 						</VBox>
 						<VBox styleClass="button-group-labels" HBox.hgrow="ALWAYS">
 							<Label styleClass="button-group-heading" text="%main.vaultDetail.bytesPerSecondWritten"/>
-							<ThrougputLabel idleFormat="%main.vaultDetail.throughput.idle" kibsFormat="%main.vaultDetail.throughput.kbps" mibsFormat="%main.vaultDetail.throughput.mbps" bytesPerSecond="${controller.vault.stats.bytesPerSecondWritten}"/>
+							<ThrougputLabel idleFormat="%main.vaultDetail.throughput.idle" kibsFormat="%main.vaultDetail.throughput.kbps" mibsFormat="%main.vaultDetail.throughput.mbps"
+											bytesPerSecond="${controller.vault.stats.bytesPerSecondWritten}"/>
 						</VBox>
 						<Region HBox.hgrow="ALWAYS"/>
 						<Label styleClass="button-group-action" text="%main.vaultDetail.showChart" minWidth="-Infinity"/>
@@ -92,7 +94,7 @@
 		<VBox alignment="CENTER" spacing="12" visible="${controller.vault.locked}" managed="${controller.vault.locked}">
 			<Button styleClass="button-large" text="%main.vaultDetail.unlockBtn" minWidth="120" onAction="#unlock" defaultButton="${controller.vault.locked}">
 				<graphic>
-					<FontAwesome5IconView glyph="LOCK_OPEN_ALT" glyphSize="15"/>
+					<FontAwesome5IconView glyph="KEY" glyphSize="15"/>
 				</graphic>
 			</Button>
 			<Hyperlink text="%main.vaultDetail.optionsBtn" onAction="#showVaultOptions">
@@ -104,7 +106,7 @@
 		<VBox alignment="CENTER" spacing="12" visible="${controller.vault.unlocked}" managed="${controller.vault.unlocked}">
 			<Button styleClass="button-large" text="%main.vaultDetail.lockBtn" minWidth="120" onAction="#lock">
 				<graphic>
-					<FontAwesome5IconView glyph="LOCK_ALT" glyphSize="15"/>
+					<FontAwesome5IconView glyph="KEY" glyphSize="15"/>
 				</graphic>
 			</Button>
 		</VBox>
