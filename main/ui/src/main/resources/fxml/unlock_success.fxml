@@ -31,7 +31,7 @@
 				<FontAwesome5IconView styleClass="glyph-icon-white" glyph="CHECK" glyphSize="24"/>
 			</StackPane>
 
-			<FormattedLabel format="%unlock.success.message" arg1="${controller.vault.displayableName}" wrapText="true" textAlignment="LEFT" HBox.hgrow="ALWAYS"/>
+			<FormattedLabel format="%unlock.success.message" arg1="${controller.vault.displayableName}" wrapText="true" HBox.hgrow="ALWAYS"/>
 		</HBox>
 
 		<Region VBox.vgrow="ALWAYS"/>

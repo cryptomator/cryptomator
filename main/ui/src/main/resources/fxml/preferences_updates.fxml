@@ -23,7 +23,7 @@
 				</graphic>
 			</Button>
 
-			<FormattedLabel format="%preferences.updates.updateAvailable" arg1="${controller.latestVersion}" textAlignment="CENTER" visible="${controller.updateAvailable}"/>
+			<FormattedLabel format="%preferences.updates.updateAvailable" arg1="${controller.latestVersion}" textAlignment="CENTER" wrapText="true" visible="${controller.updateAvailable}"/>
 		</VBox>
 	</children>
 </VBox>
