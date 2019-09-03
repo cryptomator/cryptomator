@@ -19,75 +19,36 @@
 	  minWidth="300"
 	  spacing="12">
 	<padding>
-		<Insets bottom="12" left="12" right="12" top="12"/>
+		<Insets topRightBottomLeft="24"/>
 	</padding>
 	<children>
 		<HBox spacing="12" visible="${controller.anyVaultSelected}">
-			<padding>
-				<Insets bottom="12" left="12" right="12" top="12"/>
-			</padding>
-			<children>
-				<StackPane alignment="CENTER">
-					<Circle styleClass="glyph-icon-primary" radius="16"/>
-					<FontAwesome5IconView styleClass="glyph-icon-white" glyph="${controller.glyph}" HBox.hgrow="NEVER" glyphSize="16"/>
-				</StackPane>
-				<VBox spacing="4" HBox.hgrow="ALWAYS">
-					<HBox spacing="12">
-						<Label styleClass="vault-name" text="${controller.vault.displayableName}">
-							<tooltip>
-								<Tooltip text="${controller.vault.displayableName}"/>
-							</tooltip>
-						</Label>
-						<Region HBox.hgrow="ALWAYS"/>
-						<Label styleClass="badge,badge-pill,badge-secondary" text="%main.vaultDetail.lockedStatus" minWidth="-Infinity" visible="${controller.vault.locked}" managed="${controller.vault.locked}"/>
-						<Label styleClass="badge,badge-pill,badge-secondary" text="…" minWidth="-Infinity" visible="${controller.vault.processing}" managed="${controller.vault.processing}"/>
-						<Label styleClass="badge,badge-pill,badge-primary" text="%main.vaultDetail.unlockedStatus" minWidth="-Infinity" visible="${controller.vault.unlocked}" managed="${controller.vault.unlocked}"/>
-					</HBox>
-					<Hyperlink styleClass="vault-path" text="${controller.vault.displayablePath}" textOverrun="CENTER_ELLIPSIS" onAction="#revealStorageLocation">
-						<graphic>
-							<FontAwesome5IconView styleClass="glyph-icon-secondary" glyph="EYE"/>
-						</graphic>
+			<StackPane alignment="CENTER">
+				<Circle styleClass="glyph-icon-primary" radius="16"/>
+				<FontAwesome5IconView styleClass="glyph-icon-white" glyph="${controller.glyph}" HBox.hgrow="NEVER" glyphSize="16"/>
+			</StackPane>
+			<VBox spacing="4" HBox.hgrow="ALWAYS">
+				<HBox spacing="12">
+					<Label styleClass="label-large" text="${controller.vault.displayableName}">
 						<tooltip>
-							<Tooltip text="${controller.vault.displayablePath}"/>
+							<Tooltip text="${controller.vault.displayableName}"/>
 						</tooltip>
-					</Hyperlink>
-				</VBox>
-			</children>
+					</Label>
+					<Region HBox.hgrow="ALWAYS"/>
+					<Label styleClass="badge,badge-pill,badge-secondary" text="%main.vaultDetail.lockedStatus" minWidth="-Infinity" visible="${controller.vault.locked}" managed="${controller.vault.locked}"/>
+					<Label styleClass="badge,badge-pill,badge-secondary" text="…" minWidth="-Infinity" visible="${controller.vault.processing}" managed="${controller.vault.processing}"/>
+					<Label styleClass="badge,badge-pill,badge-primary" text="%main.vaultDetail.unlockedStatus" minWidth="-Infinity" visible="${controller.vault.unlocked}" managed="${controller.vault.unlocked}"/>
+				</HBox>
+				<Hyperlink styleClass="hyperlink-secondary,hyperlink-hover-icon" text="${controller.vault.displayablePath}" textOverrun="CENTER_ELLIPSIS" onAction="#revealStorageLocation">
+					<graphic>
+						<FontAwesome5IconView styleClass="glyph-icon-secondary" glyph="EYE"/>
+					</graphic>
+					<tooltip>
+						<Tooltip text="${controller.vault.displayablePath}"/>
+					</tooltip>
+				</Hyperlink>
+			</VBox>
 		</HBox>
-
-		<VBox visible="${controller.vault.unlocked}" managed="${controller.vault.unlocked}">
-			<Button styleClass="button-group,first" prefWidth="Infinity" contentDisplay="GRAPHIC_ONLY" onAction="#revealAccessLocation">
-				<graphic>
-					<HBox alignment="CENTER">
-						<VBox styleClass="button-group-labels">
-							<Label styleClass="button-group-heading" text="%main.vaultDetail.accessLocation"/>
-							<Label text="${controller.vault.accessPoint}"/>
-						</VBox>
-						<Region HBox.hgrow="ALWAYS"/>
-						<Label styleClass="button-group-action" text="%main.vaultDetail.revealAccessLocation" minWidth="-Infinity"/>
-					</HBox>
-				</graphic>
-			</Button>
-			<Region styleClass="button-group-separator"/>
-			<Button styleClass="button-group,last" prefWidth="Infinity" contentDisplay="GRAPHIC_ONLY">
-				<graphic>
-					<HBox alignment="CENTER" spacing="24">
-						<VBox styleClass="button-group-labels" HBox.hgrow="ALWAYS">
-							<Label styleClass="button-group-heading" text="%main.vaultDetail.bytesPerSecondRead"/>
-							<ThrougputLabel idleFormat="%main.vaultDetail.throughput.idle" kibsFormat="%main.vaultDetail.throughput.kbps" mibsFormat="%main.vaultDetail.throughput.mbps"
-											bytesPerSecond="${controller.vault.stats.bytesPerSecondRead}"/>
-						</VBox>
-						<VBox styleClass="button-group-labels" HBox.hgrow="ALWAYS">
-							<Label styleClass="button-group-heading" text="%main.vaultDetail.bytesPerSecondWritten"/>
-							<ThrougputLabel idleFormat="%main.vaultDetail.throughput.idle" kibsFormat="%main.vaultDetail.throughput.kbps" mibsFormat="%main.vaultDetail.throughput.mbps"
-											bytesPerSecond="${controller.vault.stats.bytesPerSecondWritten}"/>
-						</VBox>
-						<Region HBox.hgrow="ALWAYS"/>
-						<Label styleClass="button-group-action" text="%main.vaultDetail.showChart" minWidth="-Infinity"/>
-					</HBox>
-				</graphic>
-			</Button>
-		</VBox>
 
 		<Region prefHeight="12" VBox.vgrow="NEVER"/>
 
@@ -104,11 +65,35 @@
 			</Hyperlink>
 		</VBox>
 		<VBox alignment="CENTER" spacing="12" visible="${controller.vault.unlocked}" managed="${controller.vault.unlocked}">
-			<Button styleClass="button-large" text="%main.vaultDetail.lockBtn" minWidth="120" onAction="#lock">
+			<VBox alignment="CENTER" spacing="6">
+				<Label styleClass="label-secondary" text="%main.vaultDetail.accessLocation"/>
+				<Label text="${controller.vault.accessPoint}"/>
+			</VBox>
+			<Button styleClass="button-large" text="%main.vaultDetail.revealBtn" minWidth="120" onAction="#revealAccessLocation" defaultButton="${controller.vault.unlocked}">
 				<graphic>
-					<FontAwesome5IconView glyph="KEY" glyphSize="15"/>
+					<FontAwesome5IconView glyph="EYE" glyphSize="15"/>
 				</graphic>
 			</Button>
+			<Button text="%main.vaultDetail.lockBtn" minWidth="120" onAction="#lock">
+				<graphic>
+					<FontAwesome5IconView glyph="KEY"/>
+				</graphic>
+			</Button>
+		</VBox>
+
+		<Region VBox.vgrow="ALWAYS"/>
+
+		<VBox spacing="6" visible="${controller.vault.unlocked}" managed="${controller.vault.unlocked}">
+			<HBox alignment="CENTER_RIGHT" spacing="6">
+				<Label styleClass="label-small" text="%main.vaultDetail.bytesPerSecondRead"/>
+				<ThrougputLabel styleClass="label-small" alignment="CENTER_RIGHT" minWidth="60" idleFormat="%main.vaultDetail.throughput.idle" kibsFormat="%main.vaultDetail.throughput.kbps"
+								mibsFormat="%main.vaultDetail.throughput.mbps" bytesPerSecond="${controller.vault.stats.bytesPerSecondRead}"/>
+			</HBox>
+			<HBox alignment="CENTER_RIGHT" spacing="6">
+				<Label styleClass="label-small" text="%main.vaultDetail.bytesPerSecondWritten"/>
+				<ThrougputLabel styleClass="label-small" alignment="CENTER_RIGHT" minWidth="60" idleFormat="%main.vaultDetail.throughput.idle" kibsFormat="%main.vaultDetail.throughput.kbps"
+								mibsFormat="%main.vaultDetail.throughput.mbps" bytesPerSecond="${controller.vault.stats.bytesPerSecondWritten}"/>
+			</HBox>
 		</VBox>
 	</children>
 </VBox>
