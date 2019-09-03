@@ -65,10 +65,12 @@
 			</Hyperlink>
 		</VBox>
 		<VBox alignment="CENTER" spacing="9" visible="${controller.vault.unlocked}" managed="${controller.vault.unlocked}">
-			<VBox alignment="CENTER" spacing="6">
-				<Label styleClass="label-secondary" text="%main.vaultDetail.accessLocation"/>
-				<Label text="${controller.vault.accessPoint}"/>
-			</VBox>
+			<Label styleClass="label-large" text="%main.vaultDetail.accessLocation"/>
+			<FontAwesome5IconView styleClass="glyph-icon-secondary" glyph="HDD" glyphSize="32"/>
+			<Label styleClass="label-secondary" text="${controller.vault.accessPoint}"/>
+
+			<Region prefHeight="12" VBox.vgrow="NEVER"/>
+
 			<Button styleClass="button-large" text="%main.vaultDetail.revealBtn" minWidth="120" onAction="#revealAccessLocation" defaultButton="${controller.vault.unlocked}">
 				<graphic>
 					<FontAwesome5IconView glyph="EYE" glyphSize="15"/>
