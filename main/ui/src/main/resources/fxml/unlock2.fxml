@@ -5,36 +5,37 @@
 <?import javafx.scene.control.ButtonBar?>
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.ProgressIndicator?>
-<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 <?import org.cryptomator.ui.controls.FormattedLabel?>
 <?import org.cryptomator.ui.controls.SecPasswordField?>
 <VBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
 	  fx:controller="org.cryptomator.ui.unlock.UnlockController"
-	  minWidth="450"
-	  maxWidth="450"
-	  minHeight="150"
-	  spacing="6">
+	  minWidth="400"
+	  maxWidth="400"
+	  minHeight="144"
+	  spacing="12">
 	<padding>
-		<Insets bottom="12.0" left="12.0" right="12.0" top="12.0"/>
+		<Insets topRightBottomLeft="12"/>
 	</padding>
 	<children>
-		<FormattedLabel format="%unlock.passwordPrompt" arg1="${controller.vault.displayableName}" wrapText="true"/>
-		<SecPasswordField fx:id="passwordField"/>
-		<CheckBox fx:id="savePassword" text="%unlock.savePassword" onAction="#didClickSavePasswordCheckbox"/>
+		<VBox spacing="6">
+			<FormattedLabel format="%unlock.passwordPrompt" arg1="${controller.vault.displayableName}" wrapText="true"/>
+			<SecPasswordField fx:id="passwordField"/>
+			<CheckBox fx:id="savePassword" text="%unlock.savePassword" onAction="#didClickSavePasswordCheckbox"/>
+		</VBox>
 
-		<Region VBox.vgrow="ALWAYS"/>
-
-		<ButtonBar buttonMinWidth="120" buttonOrder="+CI">
-			<buttons>
-				<Button text="%generic.button.cancel" ButtonBar.buttonData="CANCEL_CLOSE" cancelButton="true" onAction="#cancel"/>
-				<Button text="%unlock.unlockBtn" ButtonBar.buttonData="FINISH" defaultButton="true" onAction="#unlock" contentDisplay="${controller.unlockButtonState}" disable="${controller.unlockButtonDisabled}">
-					<graphic>
-						<ProgressIndicator progress="-1" prefWidth="12" prefHeight="12"/>
-					</graphic>
-				</Button>
-			</buttons>
-		</ButtonBar>
+		<VBox alignment="BOTTOM_CENTER" VBox.vgrow="ALWAYS">
+			<ButtonBar buttonMinWidth="120" buttonOrder="+CI">
+				<buttons>
+					<Button text="%generic.button.cancel" ButtonBar.buttonData="CANCEL_CLOSE" cancelButton="true" onAction="#cancel"/>
+					<Button text="%unlock.unlockBtn" ButtonBar.buttonData="FINISH" defaultButton="true" onAction="#unlock" contentDisplay="${controller.unlockButtonState}" disable="${controller.unlockButtonDisabled}">
+						<graphic>
+							<ProgressIndicator progress="-1" prefWidth="12" prefHeight="12"/>
+						</graphic>
+					</Button>
+				</buttons>
+			</ButtonBar>
+		</VBox>
 	</children>
 </VBox>

@@ -12,7 +12,7 @@
 	  fx:controller="org.cryptomator.ui.preferences.VolumePreferencesController"
 	  spacing="6">
 	<padding>
-		<Insets bottom="12" left="12" right="12" top="12"/>
+		<Insets topRightBottomLeft="12"/>
 	</padding>
 	<children>
 		<HBox spacing="6" alignment="CENTER_LEFT">

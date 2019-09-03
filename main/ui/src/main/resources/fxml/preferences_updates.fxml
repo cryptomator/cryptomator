@@ -11,7 +11,7 @@
 	  fx:controller="org.cryptomator.ui.preferences.UpdatesPreferencesController"
 	  spacing="6">
 	<padding>
-		<Insets bottom="12" left="12" right="12" top="12"/>
+		<Insets topRightBottomLeft="12"/>
 	</padding>
 	<children>
 		<CheckBox fx:id="checkForUpdatesCheckbox" text="%preferences.updates.autoUpdateCheck"/>

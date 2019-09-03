@@ -5,7 +5,6 @@
 <?import javafx.scene.control.ButtonBar?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Circle?>
@@ -13,33 +12,29 @@
 <VBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
 	  fx:controller="org.cryptomator.ui.removevault.RemoveVaultController"
-	  minWidth="450"
-	  maxWidth="450"
-	  minHeight="150"
+	  minWidth="400"
+	  maxWidth="400"
+	  minHeight="144"
 	  spacing="12">
 	<padding>
-		<Insets bottom="12.0" left="12.0" right="12.0" top="24.0"/>
+		<Insets topRightBottomLeft="12"/>
 	</padding>
 	<children>
-		<HBox spacing="24">
+		<HBox spacing="12" alignment="CENTER_LEFT" VBox.vgrow="ALWAYS">
 			<StackPane alignment="CENTER" HBox.hgrow="NEVER">
-				<VBox.margin>
-					<Insets topRightBottomLeft="12"/>
-				</VBox.margin>
-				<Circle styleClass="glyph-icon-primary" radius="24"/>
+				<Circle styleClass="glyph-icon-orange" radius="24"/>
 				<FontAwesome5IconView styleClass="glyph-icon-white" glyph="QUESTION" glyphSize="24"/>
 			</StackPane>
-
 			<Label text="%removeVault.information" wrapText="true" textAlignment="LEFT" HBox.hgrow="ALWAYS"/>
 		</HBox>
 
-		<Region VBox.vgrow="ALWAYS"/>
-
-		<ButtonBar buttonMinWidth="120" buttonOrder="+CI">
-			<buttons>
-				<Button text="%generic.button.cancel" ButtonBar.buttonData="CANCEL_CLOSE" cancelButton="true" onAction="#close"/>
-				<Button text="%generic.button.confirm" ButtonBar.buttonData="FINISH" defaultButton="true" onAction="#finish"/>
-			</buttons>
-		</ButtonBar>
+		<VBox alignment="BOTTOM_CENTER" VBox.vgrow="ALWAYS">
+			<ButtonBar buttonMinWidth="120" buttonOrder="+CI">
+				<buttons>
+					<Button text="%generic.button.cancel" ButtonBar.buttonData="CANCEL_CLOSE" defaultButton="true" cancelButton="true" onAction="#close"/>
+					<Button text="%removeVault.confirmBtn" ButtonBar.buttonData="FINISH" onAction="#finish"/>
+				</buttons>
+			</ButtonBar>
+		</VBox>
 	</children>
 </VBox>

@@ -8,15 +8,15 @@
 <HBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
 	  fx:controller="org.cryptomator.ui.mainwindow.VaultListCellController"
-	  prefHeight="60.0"
-	  prefWidth="200.0"
+	  prefHeight="60"
+	  prefWidth="200"
 	  spacing="12"
 	  alignment="CENTER_LEFT">
 	<padding>
-		<Insets top="12" right="6" bottom="12" left="12"/>
+		<Insets topRightBottomLeft="12"/>
 	</padding>
 	<children>
-		<VBox alignment="CENTER" minWidth="20.0">
+		<VBox alignment="CENTER" minWidth="20">
 			<FontAwesome5IconView glyph="${controller.glyph}" HBox.hgrow="NEVER" glyphSize="16"/>
 		</VBox>
 		<VBox spacing="4" HBox.hgrow="ALWAYS">

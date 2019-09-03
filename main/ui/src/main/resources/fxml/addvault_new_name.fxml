@@ -14,22 +14,24 @@
 <VBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
 	  fx:controller="org.cryptomator.ui.addvaultwizard.CreateNewVaultNameController"
-	  prefWidth="400.0"
-	  prefHeight="400.0"
-	  spacing="12.0"
+	  prefWidth="400"
+	  prefHeight="400"
+	  spacing="12"
 	  alignment="CENTER_LEFT">
 	<padding>
-		<Insets top="24" right="24" bottom="24" left="24"/>
+		<Insets topRightBottomLeft="24"/>
 	</padding>
 	<children>
 		<Region VBox.vgrow="ALWAYS"/>
 
-		<Label text="%addvaultwizard.new.nameInstruction" labelFor="$textField"/>
-		<TextField fx:id="textField" promptText="%addvaultwizard.new.namePrompt" HBox.hgrow="ALWAYS"/>
-		<TextFlow styleClass="text-flow" visible="${controller.showWarning}" prefHeight="22">
-			<FontAwesome5IconView glyph="EXCLAMATION_TRIANGLE"/>
-			<Text text="${controller.warningText}"/>
-		</TextFlow>
+		<VBox spacing="6">
+			<Label text="%addvaultwizard.new.nameInstruction" labelFor="$textField"/>
+			<TextField fx:id="textField" promptText="%addvaultwizard.new.namePrompt" HBox.hgrow="ALWAYS"/>
+			<TextFlow styleClass="text-flow" visible="${controller.showWarning}" prefHeight="22">
+				<FontAwesome5IconView glyph="EXCLAMATION_TRIANGLE"/>
+				<Text text="${controller.warningText}"/>
+			</TextFlow>
+		</VBox>
 
 		<Region VBox.vgrow="ALWAYS"/>
 

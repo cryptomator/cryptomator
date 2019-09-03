@@ -17,10 +17,10 @@
 	<StackPane VBox.vgrow="ALWAYS">
 		<ListView fx:id="vaultList" editable="true"/>
 		<AnchorPane fx:id="onboardingOverlay">
-			<HBox AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.bottomAnchor="100.0" alignment="BOTTOM_LEFT">
+			<HBox AnchorPane.leftAnchor="10" AnchorPane.rightAnchor="10" AnchorPane.bottomAnchor="100" alignment="BOTTOM_LEFT">
 				<Label textAlignment="CENTER" text="%main.vaultlist.emptyList.onboardingInstruction" wrapText="true"/>
 			</HBox>
-			<Arc styleClass="onboarding-overlay-arc" AnchorPane.bottomAnchor="5.0" type="OPEN" centerX="-10.0" centerY="0.0" radiusY="100.0" radiusX="60.0" startAngle="0" length="-60.0" strokeWidth="1"/>
+			<Arc styleClass="onboarding-overlay-arc" AnchorPane.bottomAnchor="5" type="OPEN" centerX="-10" centerY="0" radiusY="100" radiusX="60" startAngle="0" length="-60" strokeWidth="1"/>
 		</AnchorPane>
 	</StackPane>
 	<HBox styleClass="toolbar-container" VBox.vgrow="NEVER" alignment="CENTER_LEFT">

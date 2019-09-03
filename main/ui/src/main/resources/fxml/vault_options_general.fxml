@@ -8,7 +8,7 @@
 	  fx:controller="org.cryptomator.ui.vaultoptions.GeneralVaultOptionsController"
 	  spacing="6">
 	<padding>
-		<Insets bottom="12" left="12" right="12" top="12"/>
+		<Insets topRightBottomLeft="12"/>
 	</padding>
 	<children>
 		<Button text="%vaultOptions.general.changePasswordBtn" onAction="#changePassword"/>

@@ -52,7 +52,7 @@
 
 		<Region prefHeight="12" VBox.vgrow="NEVER"/>
 
-		<VBox alignment="CENTER" spacing="12" visible="${controller.vault.locked}" managed="${controller.vault.locked}">
+		<VBox alignment="CENTER" spacing="9" visible="${controller.vault.locked}" managed="${controller.vault.locked}">
 			<Button styleClass="button-large" text="%main.vaultDetail.unlockBtn" minWidth="120" onAction="#unlock" defaultButton="${controller.vault.locked}">
 				<graphic>
 					<FontAwesome5IconView glyph="KEY" glyphSize="15"/>
@@ -64,7 +64,7 @@
 				</graphic>
 			</Hyperlink>
 		</VBox>
-		<VBox alignment="CENTER" spacing="12" visible="${controller.vault.unlocked}" managed="${controller.vault.unlocked}">
+		<VBox alignment="CENTER" spacing="9" visible="${controller.vault.unlocked}" managed="${controller.vault.unlocked}">
 			<VBox alignment="CENTER" spacing="6">
 				<Label styleClass="label-secondary" text="%main.vaultDetail.accessLocation"/>
 				<Label text="${controller.vault.accessPoint}"/>

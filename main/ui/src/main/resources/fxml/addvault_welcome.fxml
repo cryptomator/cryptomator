@@ -10,18 +10,17 @@
 <VBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
 	  fx:controller="org.cryptomator.ui.addvaultwizard.AddVaultWelcomeController"
-	  prefWidth="400.0"
-	  prefHeight="400.0"
-	  spacing="12.0"
+	  prefWidth="400"
+	  prefHeight="400"
+	  spacing="12"
 	  alignment="TOP_CENTER">
 	<padding>
-		<Insets top="24" right="24" bottom="24" left="24"/>
+		<Insets topRightBottomLeft="24"/>
 	</padding>
 	<children>
-		<ImageView VBox.vgrow="ALWAYS" fitHeight="128.0" preserveRatio="true" smooth="true" cache="true">
-			<VBox.margin>
-				<Insets top="24"/>
-			</VBox.margin>
+		<Region VBox.vgrow="ALWAYS"/>
+
+		<ImageView VBox.vgrow="ALWAYS" fitHeight="128" preserveRatio="true" smooth="true" cache="true">
 			<Image url="/bot_welcome.png"/>
 		</ImageView>
 
@@ -39,5 +38,7 @@
 				</graphic>
 			</Button>
 		</VBox>
+
+		<Region VBox.vgrow="ALWAYS"/>
 	</children>
 </VBox>
