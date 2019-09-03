@@ -441,6 +441,7 @@
 .text-input {
 	-fx-cursor: text;
 	-fx-text-fill: TEXT_FILL;
+	-fx-highlight-fill: PRIMARY_BG;
 	-fx-prompt-text-fill: TEXT_FILL_SECONDARY;
 	-fx-background-color: CONTROL_BORDER_NORMAL, CONTROL_BG_NORMAL;
 	-fx-background-insets: 0, 1px;
