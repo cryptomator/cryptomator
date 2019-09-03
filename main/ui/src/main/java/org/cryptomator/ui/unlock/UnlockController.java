@@ -1,11 +1,15 @@
 package org.cryptomator.ui.unlock;
 
 import dagger.Lazy;
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Timeline;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.WritableValue;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -13,6 +17,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ContentDisplay;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
@@ -96,6 +101,7 @@ public class UnlockController implements FxController {
 			LOG.info("Unlock of '{}' succeeded.", vault.getDisplayableName());
 			window.setScene(successScene.get());
 		}).onError(InvalidPassphraseException.class, e -> {
+			shakeWindow();
 			passwordField.selectAll();
 			passwordField.requestFocus();
 		}).onError(UnsupportedVaultFormatException.class, e -> {
@@ -170,6 +176,33 @@ public class UnlockController implements FxController {
 				Arrays.fill(storedPw, ' ');
 			}
 		}
+	}
+
+	/* Animations */
+
+	private void shakeWindow() {
+		WritableValue<Double> writableWindowX = new WritableValue<>() {
+			@Override
+			public Double getValue() {
+				return window.getX();
+			}
+
+			@Override
+			public void setValue(Double value) {
+				window.setX(value);
+			}
+		};
+		Timeline timeline = new Timeline( //
+				new KeyFrame(Duration.ZERO, new KeyValue(writableWindowX, window.getX())), //
+				new KeyFrame(new Duration(100), new KeyValue(writableWindowX, window.getX() - 22.0)), //
+				new KeyFrame(new Duration(200), new KeyValue(writableWindowX, window.getX() + 18.0)), //
+				new KeyFrame(new Duration(300), new KeyValue(writableWindowX, window.getX() - 14.0)), //
+				new KeyFrame(new Duration(400), new KeyValue(writableWindowX, window.getX() + 10.0)), //
+				new KeyFrame(new Duration(500), new KeyValue(writableWindowX, window.getX() - 6.0)), //
+				new KeyFrame(new Duration(600), new KeyValue(writableWindowX, window.getX() + 2.0)), //
+				new KeyFrame(new Duration(700), new KeyValue(writableWindowX, window.getX())) //
+		);
+		timeline.play();
 	}
 
 	/* Getter/Setter */
