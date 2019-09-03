@@ -549,6 +549,10 @@
 	-fx-padding: 4px 0 4px 0;
 }
 
+.check-box:disabled {
+	-fx-text-fill: TEXT_FILL_SECONDARY;
+}
+
 .check-box > .box {
 	-fx-background-color: CONTROL_BORDER_NORMAL, CONTROL_BG_NORMAL;
 	-fx-background-insets: 0, 1px;
@@ -558,6 +562,10 @@
 
 .check-box:focused > .box {
 	-fx-background-color: CONTROL_BORDER_FOCUSED, CONTROL_BG_NORMAL;
+}
+
+.check-box:disabled > .box {
+	-fx-background-color: CONTROL_BORDER_DISABLED, CONTROL_BG_DISABLED;
 }
 
 .check-box > .box > .mark {
