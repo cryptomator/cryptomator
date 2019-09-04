@@ -1,6 +1,7 @@
 package org.cryptomator.ui.mainwindow;
 
 import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -22,6 +23,7 @@ public class VaultListController implements FxController {
 
 	private final ObservableList<Vault> vaults;
 	private final ObjectProperty<Vault> selectedVault;
+	private final BooleanBinding noVaultSelected;
 	private final VaultListCellFactory cellFactory;
 	private final AddVaultWizardComponent.Builder addVaultWizard;
 	private final RemoveVaultComponent.Builder removeVault;
@@ -35,6 +37,7 @@ public class VaultListController implements FxController {
 		this.cellFactory = cellFactory;
 		this.addVaultWizard = addVaultWizard;
 		this.removeVault = removeVault;
+		this.noVaultSelected = selectedVault.isNull();
 	}
 
 	public void initialize() {
@@ -62,5 +65,15 @@ public class VaultListController implements FxController {
 		} else {
 			LOG.debug("Cannot remove a vault if none is selected.");
 		}
+	}
+
+	// Getter and Setter
+
+	public BooleanBinding noVaultSelectedProperty() {
+		return noVaultSelected;
+	}
+
+	public boolean isNoVaultSelected() {
+		return noVaultSelected.get();
 	}
 }
