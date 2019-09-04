@@ -8,8 +8,6 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Text?>
-<?import javafx.scene.text.TextFlow?>
 <?import org.cryptomator.ui.controls.FontAwesome5IconView?>
 <VBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
@@ -27,10 +25,11 @@
 		<VBox spacing="6">
 			<Label text="%addvaultwizard.new.nameInstruction" labelFor="$textField"/>
 			<TextField fx:id="textField" promptText="%addvaultwizard.new.namePrompt" HBox.hgrow="ALWAYS"/>
-			<TextFlow styleClass="text-flow" visible="${controller.showWarning}" prefHeight="22">
-				<FontAwesome5IconView glyph="EXCLAMATION_TRIANGLE"/>
-				<Text text="${controller.warningText}"/>
-			</TextFlow>
+			<Label text="${controller.warningText}" wrapText="true" visible="${controller.showWarning}">
+				<graphic>
+					<FontAwesome5IconView glyph="EXCLAMATION_TRIANGLE"/>
+				</graphic>
+			</Label>
 		</VBox>
 
 		<Region VBox.vgrow="ALWAYS"/>

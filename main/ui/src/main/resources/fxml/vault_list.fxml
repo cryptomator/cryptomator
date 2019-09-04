@@ -35,7 +35,7 @@
 	</StackPane>
 	<Button styleClass="toolbar-button" text="%main.vaultlist.addVaultBtn" onAction="#didClickAddVault" alignment="BASELINE_CENTER" maxWidth="Infinity" mnemonicParsing="false">
 		<graphic>
-			<FontAwesome5IconView glyph="PLUS" glyphSize="15"/>
+			<FontAwesome5IconView glyph="PLUS"/>
 		</graphic>
 	</Button>
 </VBox>
