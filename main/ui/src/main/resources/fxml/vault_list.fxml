@@ -18,8 +18,7 @@
 	<StackPane VBox.vgrow="ALWAYS">
 		<ListView fx:id="vaultList" editable="true">
 			<contextMenu>
-				<ContextMenu fx:id="test">
-					<!-- TODO: add style class to contextmenu & its entries -->
+				<ContextMenu>
 					<items>
 						<MenuItem text="%main.vaultlist.contextMenu.add" onAction="#didClickAddVault"/>
 						<MenuItem text="%main.vaultlist.contextMenu.remove" onAction="#didClickRemoveVault" disable="${controller.noVaultSelected}"/>
