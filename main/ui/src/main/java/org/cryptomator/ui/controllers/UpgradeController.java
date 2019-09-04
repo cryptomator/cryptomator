@@ -21,7 +21,7 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.layout.GridPane;
-import org.cryptomator.ui.controls.SecPasswordField;
+import org.cryptomator.ui.controls.SecurePasswordField;
 import org.cryptomator.ui.model.upgrade.UpgradeStrategies;
 import org.cryptomator.ui.model.upgrade.UpgradeStrategy;
 import org.cryptomator.ui.model.upgrade.UpgradeStrategy.UpgradeFailedException;
@@ -50,7 +50,7 @@ public class UpgradeController implements ViewController {
 	private Label upgradeMsgLabel;
 
 	@FXML
-	private SecPasswordField passwordField;
+	private SecurePasswordField passwordField;
 
 	@FXML
 	private CheckBox confirmationCheckbox;

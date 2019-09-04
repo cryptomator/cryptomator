@@ -455,6 +455,15 @@
 	-fx-background-color: CONTROL_BORDER_DISABLED, CONTROL_BG_DISABLED;
 }
 
+.nice-secure-password-field .secure-password-field {
+	-fx-padding: 0.3em 48px 0.3em 0.5em;
+}
+
+.nice-secure-password-field .icons {
+	-fx-width: 42px;
+	-fx-padding: 4px 6px 4px 0;
+}
+
 /*******************************************************************************
  *                                                                             *
  * Buttons                                                                     *

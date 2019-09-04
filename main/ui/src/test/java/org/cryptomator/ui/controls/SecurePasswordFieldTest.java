@@ -12,9 +12,9 @@ import java.awt.GraphicsEnvironment;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-class SecPasswordFieldTest {
+class SecurePasswordFieldTest {
 
-	private SecPasswordField pwField = new SecPasswordField();
+	private SecurePasswordField pwField = new SecurePasswordField();
 
 	@BeforeAll
 	static void initJavaFx() throws InterruptedException {

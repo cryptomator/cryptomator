@@ -7,7 +7,7 @@
 <?import javafx.scene.control.ProgressIndicator?>
 <?import javafx.scene.layout.VBox?>
 <?import org.cryptomator.ui.controls.FormattedLabel?>
-<?import org.cryptomator.ui.controls.SecPasswordField?>
+<?import org.cryptomator.ui.controls.NiceSecurePasswordField?>
 <VBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
 	  fx:controller="org.cryptomator.ui.unlock.UnlockController"
@@ -21,7 +21,7 @@
 	<children>
 		<VBox spacing="6">
 			<FormattedLabel format="%unlock.passwordPrompt" arg1="${controller.vault.displayableName}" wrapText="true"/>
-			<SecPasswordField fx:id="passwordField"/>
+			<NiceSecurePasswordField fx:id="passwordField"/>
 			<CheckBox fx:id="savePassword" text="%unlock.savePassword" onAction="#didClickSavePasswordCheckbox"/>
 		</VBox>
 

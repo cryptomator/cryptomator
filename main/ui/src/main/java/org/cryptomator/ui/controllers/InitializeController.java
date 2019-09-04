@@ -20,7 +20,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Region;
-import org.cryptomator.ui.controls.SecPasswordField;
+import org.cryptomator.ui.controls.SecurePasswordField;
 import org.cryptomator.ui.l10n.Localization;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.util.PasswordStrengthUtil;
@@ -51,10 +51,10 @@ public class InitializeController implements ViewController {
 	}
 
 	@FXML
-	private SecPasswordField passwordField;
+	private SecurePasswordField passwordField;
 
 	@FXML
-	private SecPasswordField retypePasswordField;
+	private SecurePasswordField retypePasswordField;
 
 	@FXML
 	private Button okButton;

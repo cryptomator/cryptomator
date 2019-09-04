@@ -14,7 +14,7 @@ import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.cryptolib.api.InvalidPassphraseException;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.controls.FontAwesome5IconView;
-import org.cryptomator.ui.controls.SecPasswordField;
+import org.cryptomator.ui.controls.NiceSecurePasswordField;
 import org.cryptomator.ui.util.PasswordStrengthUtil;
 import org.fxmisc.easybind.EasyBind;
 import org.slf4j.Logger;
@@ -35,9 +35,9 @@ public class ChangePasswordController implements FxController {
 	private final PasswordStrengthUtil strengthRater;
 	private final IntegerProperty passwordStrength;
 
-	public SecPasswordField oldPasswordField;
-	public SecPasswordField newPasswordField;
-	public SecPasswordField reenterPasswordField;
+	public NiceSecurePasswordField oldPasswordField;
+	public NiceSecurePasswordField newPasswordField;
+	public NiceSecurePasswordField reenterPasswordField;
 	public Label passwordStrengthLabel;
 	public HBox passwordMatchBox;
 	public FontAwesome5IconView checkmark;
@@ -71,7 +71,6 @@ public class ChangePasswordController implements FxController {
 		cross.visibleProperty().bind(passwordsMatch.not().and(reenterFieldNotEmpty));
 		cross.managedProperty().bind(cross.visibleProperty());
 		passwordMatchLabel.textProperty().bind(Bindings.when(passwordsMatch.and(reenterFieldNotEmpty)).then(resourceBundle.getString("changepassword.passwordsMatch")).otherwise(resourceBundle.getString("changepassword.passwordsDoNotMatch")));
-
 		passwordStrengthLabel.textProperty().bind(EasyBind.map(passwordStrength, strengthRater::getStrengthDescription));
 	}
 

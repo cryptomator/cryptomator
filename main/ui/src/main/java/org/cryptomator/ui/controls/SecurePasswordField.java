@@ -11,20 +11,19 @@ package org.cryptomator.ui.controls;
 import com.google.common.base.Strings;
 import javafx.beans.NamedArg;
 import javafx.beans.Observable;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.scene.control.Label;
-import javafx.scene.control.OverrunStyle;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ReadOnlyBooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.scene.AccessibleAttribute;
+import javafx.scene.AccessibleRole;
+import javafx.scene.control.IndexRange;
 import javafx.scene.control.PasswordField;
-import javafx.scene.control.Tooltip;
+import javafx.scene.control.TextField;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.TransferMode;
-import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
-import javafx.scene.text.Text;
 
 import java.awt.Toolkit;
 import java.nio.CharBuffer;
@@ -33,53 +32,54 @@ import java.text.Normalizer.Form;
 import java.util.Arrays;
 
 /**
- * Patched PasswordField that doesn't create String copies of the password in memory. Instead the password is stored in a char[] that can be swiped.
+ * Patched PasswordField that doesn't create String copies of the password in memory (unless explicitly revealed). Instead the password is stored in a char[] that can be swiped.
  *
  * @implNote Since {@link #setText(String)} is final, we can not override its behaviour. For that reason you should not use the {@link #textProperty()} for anything else than display purposes.
  */
-public class SecPasswordField extends PasswordField {
+public class SecurePasswordField extends TextField {
 
 	private static final char SWIPE_CHAR = ' ';
 	private static final int INITIAL_BUFFER_SIZE = 50;
 	private static final int GROW_BUFFER_SIZE = 50;
-	private static final String PLACEHOLDER = "*";
-	private static final double PADDING = 2.0;
-	private static final double INDICATOR_PADDING = 4.0;
-	private static final Color INDICATOR_COLOR = new Color(0.901, 0.494, 0.133, 1.0);
+	private static final String DEFAULT_PLACEHOLDER = "●";
+	private static final String STYLE_CLASS = "secure-password-field";
 
-	private final Tooltip tooltip = new Tooltip();
-	private final Label indicator = new Label();
-	private final String nonPrintableCharsWarning;
-	private final String capslockWarning;
+	private final String placeholderChar;
+	private final BooleanProperty capsLocked = new SimpleBooleanProperty();
+	private final BooleanProperty containingNonPrintableChars = new SimpleBooleanProperty();
+	private final BooleanProperty revealPassword = new SimpleBooleanProperty();
 
 	private char[] content = new char[INITIAL_BUFFER_SIZE];
 	private int length = 0;
 
-	public SecPasswordField() {
-		this("", "");
+	public SecurePasswordField() {
+		this(DEFAULT_PLACEHOLDER);
 	}
 
-	public SecPasswordField(@NamedArg("nonPrintableCharsWarning") String nonPrintableCharsWarning, @NamedArg("capslockWarning") String capslockWarning) {
-		this.nonPrintableCharsWarning = nonPrintableCharsWarning;
-		this.capslockWarning = capslockWarning;
-		indicator.setPadding(new Insets(PADDING, INDICATOR_PADDING, PADDING, INDICATOR_PADDING));
-		indicator.setAlignment(Pos.CENTER_RIGHT);
-		indicator.setMouseTransparent(true);
-		indicator.setTextOverrun(OverrunStyle.CLIP);
-		indicator.setTextFill(INDICATOR_COLOR);
-		indicator.setFont(Font.font(indicator.getFont().getFamily(), 15.0));
-		this.getChildren().add(indicator);
+	public SecurePasswordField(@NamedArg("placeholderChar") String placeholderChar) {
+		this.getStyleClass().add(STYLE_CLASS);
+		this.placeholderChar = placeholderChar;
+		this.setAccessibleRole(AccessibleRole.PASSWORD_FIELD);
 		this.addEventHandler(DragEvent.DRAG_OVER, this::handleDragOver);
 		this.addEventHandler(DragEvent.DRAG_DROPPED, this::handleDragDropped);
 		this.addEventHandler(KeyEvent.ANY, this::handleKeyEvent);
+		this.revealPasswordProperty().addListener(this::revealPasswordChanged);
 		this.focusedProperty().addListener(this::focusedChanged);
 	}
 
-	@Override
-	protected void layoutChildren() {
-		super.layoutChildren();
-		indicator.relocate(0.0, 0.0);
-		indicator.resize(getWidth(), getHeight());
+	public void cut() {
+	}
+
+	public void copy() {
+	}
+
+	public Object queryAccessibleAttribute(AccessibleAttribute attribute, Object... parameters) {
+		switch(attribute) {
+			case TEXT:
+				return null;
+			default:
+				return super.queryAccessibleAttribute(attribute, parameters);
+		}
 	}
 
 	private void handleDragOver(DragEvent event) {
@@ -100,42 +100,32 @@ public class SecPasswordField extends PasswordField {
 
 	private void handleKeyEvent(KeyEvent e) {
 		if (e.getCode() == KeyCode.CAPS) {
-			updateVisualHints(true);
+			updateCapsLocked();
 		}
+	}
+
+	private void revealPasswordChanged(@SuppressWarnings("unused") Observable observable) {
+		IndexRange selection = getSelection();
+		if (isRevealPassword()) {
+			super.setText(this.getCharacters().toString());
+		} else {
+			String placeholderText = Strings.repeat(placeholderChar, length);
+			super.setText(placeholderText);
+		}
+		selectRange(selection.getStart(), selection.getEnd());
 	}
 
 	private void focusedChanged(@SuppressWarnings("unused") Observable observable) {
-		updateVisualHints(isFocused());
+		updateCapsLocked();
 	}
 
-	private void updateVisualHints(boolean focused) {
-		StringBuilder tooltipSb = new StringBuilder();
-		StringBuilder indicatorSb = new StringBuilder();
-		if (containsNonPrintableCharacters()) {
-			indicatorSb.append('⚠');
-			tooltipSb.append("- ").append(nonPrintableCharsWarning).append('\n');
-		}
+	private void updateCapsLocked() {
 		// AWT code needed until https://bugs.openjdk.java.net/browse/JDK-8090882 is closed:
-		if (focused && Toolkit.getDefaultToolkit().getLockingKeyState(java.awt.event.KeyEvent.VK_CAPS_LOCK)) {
-			indicatorSb.append('⇪');
-			tooltipSb.append("- ").append(capslockWarning).append('\n');
-		}
-		indicator.setText(indicatorSb.toString());
-		if (!indicator.getText().isEmpty()) {
-			setPadding(new Insets(PADDING, getIndicatorWidth(), PADDING, PADDING));
-		} else {
-			setPadding(new Insets(PADDING));
-		}
-		tooltip.setText(tooltipSb.toString());
-		if (tooltip.getText().isEmpty()) {
-			setTooltip(null);
-		} else {
-			setTooltip(tooltip);
-		}
+		capsLocked.set(isFocused() && Toolkit.getDefaultToolkit().getLockingKeyState(java.awt.event.KeyEvent.VK_CAPS_LOCK));
 	}
 
-	private double getIndicatorWidth() {
-		return new Text(indicator.getText()).getLayoutBounds().getWidth() + INDICATOR_PADDING * 2.0;
+	private void updateContainingNonPrintableChars() {
+		containingNonPrintableChars.set(containsNonPrintableCharacters());
 	}
 
 	/**
@@ -144,7 +134,7 @@ public class SecPasswordField extends PasswordField {
 	 */
 	boolean containsNonPrintableCharacters() {
 		for (int i = 0; i < length; i++) {
-			if (Character.isISOControl(content[i])) {
+			if (Character.isDigit(content[i])) {
 				return true;
 			}
 		}
@@ -183,9 +173,13 @@ public class SecPasswordField extends PasswordField {
 		normalizedText.getChars(0, normalizedText.length(), content, start);
 
 		// trigger visual hints
-		updateVisualHints(true);
-		String placeholderString = Strings.repeat(PLACEHOLDER, normalizedText.length());
-		super.replaceText(start, end, placeholderString);
+		updateContainingNonPrintableChars();
+		if (isRevealPassword()) {
+			super.replaceText(start, end, text);
+		} else {
+			String placeholderString = Strings.repeat(placeholderChar, normalizedText.length());
+			super.replaceText(start, end, placeholderString);
+		}
 	}
 
 	private void growContentIfNeeded() {
@@ -200,9 +194,9 @@ public class SecPasswordField extends PasswordField {
 	/**
 	 * Creates a CharSequence by wrapping the password characters.
 	 *
-	 * @return A character sequence backed by the SecPasswordField's buffer (not a copy).
+	 * @return A character sequence backed by the SecurePasswordField's buffer (not a copy).
 	 * @implNote The CharSequence will not copy the backing char[].
-	 * Therefore any mutation to the SecPasswordField's content will mutate or eventually swipe the returned CharSequence.
+	 * Therefore any mutation to the SecurePasswordField's content will mutate or eventually swipe the returned CharSequence.
 	 * @implSpec The CharSequence is usually in <a href="https://www.unicode.org/glossary/#normalization_form_c">NFC</a> representation (unless NFD-encoded char[] is set via {@link #setPassword(char[])}).
 	 * @see #swipe()
 	 */
@@ -238,7 +232,7 @@ public class SecPasswordField extends PasswordField {
 		content = Arrays.copyOf(password, password.length);
 		length = password.length;
 
-		String placeholderString = Strings.repeat(PLACEHOLDER, password.length);
+		String placeholderString = Strings.repeat(placeholderChar, password.length);
 		setText(placeholderString);
 	}
 
@@ -255,4 +249,33 @@ public class SecPasswordField extends PasswordField {
 		Arrays.fill(buffer, SWIPE_CHAR);
 	}
 
+	/* Observable Properties */
+
+	public ReadOnlyBooleanProperty capsLockedProperty() {
+		return capsLocked;
+	}
+
+	public boolean isCapsLocked() {
+		return capsLocked.get();
+	}
+
+	public ReadOnlyBooleanProperty containingNonPrintableCharsProperty() {
+		return containingNonPrintableChars;
+	}
+
+	public boolean isContainingNonPrintableChars() {
+		return containingNonPrintableChars.get();
+	}
+
+	public BooleanProperty revealPasswordProperty() {
+		return revealPassword;
+	}
+
+	public boolean isRevealPassword() {
+		return revealPassword.get();
+	}
+
+	public void setRevealPassword(boolean revealPassword) {
+		this.revealPassword.set(revealPassword);
+	}
 }

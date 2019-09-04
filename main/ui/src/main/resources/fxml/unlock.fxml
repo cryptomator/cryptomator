@@ -21,7 +21,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Text?>
 <?import javafx.scene.text.TextFlow?>
-<?import org.cryptomator.ui.controls.SecPasswordField?>
+<?import org.cryptomator.ui.controls.SecurePasswordField?>
 <VBox fx:controller="org.cryptomator.ui.controllers.UnlockController" fx:id="root" spacing="12" alignment="BOTTOM_CENTER" xmlns:fx="http://javafx.com/fxml" prefWidth="400">
 
 	<padding>
@@ -31,7 +31,7 @@
 	<!-- Password Field -->
 	<HBox spacing="12" alignment="BASELINE_LEFT">
 		<Label text="%unlock.label.password" HBox.hgrow="NEVER"/>
-		<SecPasswordField fx:id="passwordField" capslockWarning="%ctrl.secPasswordField.capsLocked" nonPrintableCharsWarning="%ctrl.secPasswordField.nonPrintableChars" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+		<SecurePasswordField fx:id="passwordField" capslockWarning="%ctrl.secPasswordField.capsLocked" nonPrintableCharsWarning="%ctrl.secPasswordField.nonPrintableChars" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
 	</HBox>
 
 	<!-- Unlock Button / Advanced Options Button -->

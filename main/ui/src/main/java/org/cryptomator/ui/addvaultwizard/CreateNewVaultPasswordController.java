@@ -28,7 +28,7 @@ import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.Tasks;
 import org.cryptomator.ui.controls.FontAwesome5IconView;
-import org.cryptomator.ui.controls.SecPasswordField;
+import org.cryptomator.ui.controls.NiceSecurePasswordField;
 import org.cryptomator.ui.util.PasswordStrengthUtil;
 import org.fxmisc.easybind.EasyBind;
 import org.slf4j.Logger;
@@ -71,8 +71,8 @@ public class CreateNewVaultPasswordController implements FxController {
 	private final BooleanProperty readyToCreateVault;
 	private final ObjectBinding<ContentDisplay> createVaultButtonState;
 
-	public SecPasswordField passwordField;
-	public SecPasswordField reenterField;
+	public NiceSecurePasswordField passwordField;
+	public NiceSecurePasswordField reenterField;
 	public Label passwordStrengthLabel;
 	public HBox passwordMatchBox;
 	public FontAwesome5IconView checkmark;

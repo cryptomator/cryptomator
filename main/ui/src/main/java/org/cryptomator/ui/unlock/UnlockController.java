@@ -29,7 +29,8 @@ import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.Tasks;
-import org.cryptomator.ui.controls.SecPasswordField;
+import org.cryptomator.ui.controls.NiceSecurePasswordField;
+import org.cryptomator.ui.controls.SecurePasswordField;
 import org.cryptomator.ui.util.DialogBuilderUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,7 +56,7 @@ public class UnlockController implements FxController {
 	private final ResourceBundle resourceBundle;
 	private final Lazy<Scene> successScene;
 	private final BooleanProperty unlockButtonDisabled;
-	public SecPasswordField passwordField;
+	public NiceSecurePasswordField passwordField;
 	public CheckBox savePassword;
 
 	@Inject
