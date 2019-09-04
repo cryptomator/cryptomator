@@ -14,7 +14,8 @@ public enum FxmlFile {
 	REMOVE_VAULT("/fxml/remove_vault.fxml"), //
 	UNLOCK("/fxml/unlock2.fxml"), // TODO rename
 	UNLOCK_SUCCESS("/fxml/unlock_success.fxml"), //
-	VAULT_OPTIONS("/fxml/vault_options.fxml");
+	VAULT_OPTIONS("/fxml/vault_options.fxml"), //
+	WRONGFILEALERT("/fxml/wrongfilealert.fxml");
 
 	private final String filename;
 

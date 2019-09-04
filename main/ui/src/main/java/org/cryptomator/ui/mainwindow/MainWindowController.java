@@ -1,19 +1,27 @@
 package org.cryptomator.ui.mainwindow;
 
 import javafx.beans.binding.BooleanBinding;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import org.cryptomator.common.settings.VaultSettings;
+import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.common.vaults.VaultFactory;
 import org.cryptomator.ui.common.FontLoader;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.fxapp.FxApplication;
 import org.cryptomator.ui.fxapp.UpdateChecker;
+import org.cryptomator.ui.wrongfilealert.WrongFileAlertComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import java.io.File;
 
 @MainWindowScoped
 public class MainWindowController implements FxController {
@@ -26,18 +34,26 @@ public class MainWindowController implements FxController {
 	private final boolean minimizeToSysTray;
 	private final UpdateChecker updateChecker;
 	private final BooleanBinding updateAvailable;
+	private final ObservableList<Vault> vaults;
+	private final VaultFactory vaultFactory;
+	private final WrongFileAlertComponent.Builder wrongFileAlert;
 	public HBox titleBar;
+	public VBox dragAndDropRegion;
+	public VBox dragNDropIndicator;
 	public Region resizer;
 	private double xOffset;
 	private double yOffset;
 
 	@Inject
-	public MainWindowController(@MainWindow Stage window, FxApplication application, @Named("trayMenuSupported") boolean minimizeToSysTray, UpdateChecker updateChecker) {
+	public MainWindowController(@MainWindow Stage window, FxApplication application, @Named("trayMenuSupported") boolean minimizeToSysTray, UpdateChecker updateChecker, ObservableList<Vault> vaults, VaultFactory vaultFactory, WrongFileAlertComponent.Builder wrongFileAlert) {
 		this.window = window;
 		this.application = application;
 		this.minimizeToSysTray = minimizeToSysTray;
 		this.updateChecker = updateChecker;
 		this.updateAvailable = updateChecker.latestVersionProperty().isNotNull();
+		this.vaults = vaults;
+		this.vaultFactory = vaultFactory;
+		this.wrongFileAlert = wrongFileAlert;
 	}
 
 	@FXML
@@ -58,6 +74,40 @@ public class MainWindowController implements FxController {
 			window.setHeight(event.getSceneY());
 		});
 		updateChecker.automaticallyCheckForUpdatesIfEnabled();
+		dragNDropIndicator.setVisible(false);
+		dragAndDropRegion.setOnDragOver(event -> {
+			if (event.getGestureSource() != dragAndDropRegion && event.getDragboard().hasFiles()) {
+				/* allow for both copying and moving, whatever user chooses */
+				event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
+				dragNDropIndicator.setVisible(true);
+			}
+			event.consume();
+		});
+		dragAndDropRegion.setOnDragExited(event -> dragNDropIndicator.setVisible(false));
+		dragAndDropRegion.setOnDragDropped(event -> {
+			if (event.getGestureSource() != dragAndDropRegion && event.getDragboard().hasFiles()) {
+				/* allow for both copying and moving, whatever user chooses */
+				event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
+				File dropped = event.getDragboard().getFiles().get(0);
+				if (dropped.getName().endsWith(".cryptomator")) {
+					addVault(dropped);
+				} else {
+					wrongFileAlert.build().showWrongFileAlertWindow();
+				}
+			}
+			event.consume();
+		});
+
+	}
+
+	private void addVault(final File dropped) {
+		if (dropped != null) {
+			VaultSettings vaultSettings = VaultSettings.withRandomId();
+			vaultSettings.path().setValue(dropped.toPath().toAbsolutePath().getParent());
+			Vault newVault = vaultFactory.get(vaultSettings);
+			vaults.add(newVault);
+			//TODO: error handling?
+		}
 	}
 
 	private void loadFont(String resourcePath) {

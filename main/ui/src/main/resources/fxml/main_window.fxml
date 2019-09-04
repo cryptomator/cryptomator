@@ -10,8 +10,10 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import org.cryptomator.ui.controls.FontAwesome5IconView?>
+<?import javafx.scene.shape.Rectangle?>
 <VBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
+	  fx:id="dragAndDropRegion"
 	  fx:controller="org.cryptomator.ui.mainwindow.MainWindowController"
 	  styleClass="main-window">
 	<HBox styleClass="title" fx:id="titleBar" alignment="CENTER" minHeight="50" maxHeight="50" VBox.vgrow="NEVER" spacing="6">
@@ -48,5 +50,11 @@
 			<fx:include source="/fxml/vault_detail.fxml" SplitPane.resizableWithParent="true"/>
 		</SplitPane>
 		<Region styleClass="resizer" StackPane.alignment="BOTTOM_RIGHT" fx:id="resizer" prefWidth="10" prefHeight="10" maxWidth="-Infinity" maxHeight="-Infinity"/>
+		<VBox fx:id="dragNDropIndicator" >
+			<padding>
+				<Insets topRightBottomLeft="20"/>
+			</padding>
+			<Rectangle fill="red" stroke="black" height="200" width="200" />
+		</VBox>
 	</StackPane>
 </VBox>

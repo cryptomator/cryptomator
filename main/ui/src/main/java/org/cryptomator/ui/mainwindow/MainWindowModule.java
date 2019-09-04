@@ -19,6 +19,7 @@ import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.removevault.RemoveVaultComponent;
 import org.cryptomator.ui.vaultoptions.VaultOptionsComponent;
+import org.cryptomator.ui.wrongfilealert.WrongFileAlertComponent;
 
 import javax.inject.Named;
 import javax.inject.Provider;
@@ -26,7 +27,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
-@Module(subcomponents = {AddVaultWizardComponent.class, RemoveVaultComponent.class, VaultOptionsComponent.class})
+@Module(subcomponents = {AddVaultWizardComponent.class, RemoveVaultComponent.class, VaultOptionsComponent.class, WrongFileAlertComponent.class})
 abstract class MainWindowModule {
 
 	@Provides
@@ -87,5 +88,7 @@ abstract class MainWindowModule {
 	@IntoMap
 	@FxControllerKey(VaultListCellController.class)
 	abstract FxController bindVaultListCellController(VaultListCellController controller);
+
+
 
 }
