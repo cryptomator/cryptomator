@@ -12,6 +12,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Arc?>
 <?import org.cryptomator.ui.controls.FontAwesome5IconView?>
+<?import java.lang.Double?>
 <VBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
 	  fx:controller="org.cryptomator.ui.mainwindow.VaultListController"
@@ -35,22 +36,17 @@
 			<Arc styleClass="onboarding-overlay-arc" AnchorPane.bottomAnchor="5" type="OPEN" centerX="-10" centerY="0" radiusY="100" radiusX="60" startAngle="0" length="-60" strokeWidth="1"/>
 		</AnchorPane>
 	</StackPane>
-	<HBox styleClass="toolbar-container" VBox.vgrow="NEVER" alignment="CENTER_LEFT">
-		<Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#didClickAddVault">
+	<HBox HBox.hgrow="ALWAYS" alignment="CENTER">
+		<Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#didClickAddVault" HBox.hgrow="ALWAYS" alignment="BASELINE_CENTER" minHeight="60">
 			<graphic>
-				<FontAwesome5IconView glyph="PLUS"/>
+				<FontAwesome5IconView glyph="PLUS" glyphSize="15"/>
 			</graphic>
 			<tooltip>
-				<Tooltip text="Add Vault"/>
+				<Tooltip text="%main.vaultlist.addVaultBtn.tooltip"/>
 			</tooltip>
-		</Button>
-		<Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#didClickRemoveVault">
-			<graphic>
-				<FontAwesome5IconView glyph="MINUS"/>
-			</graphic>
-			<tooltip>
-				<Tooltip text="Remove Vault"/>
-			</tooltip>
+			<maxWidth>
+				<Double fx:constant="MAX_VALUE"/>
+			</maxWidth>
 		</Button>
 	</HBox>
 </VBox>
