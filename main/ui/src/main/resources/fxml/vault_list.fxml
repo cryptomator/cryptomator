@@ -11,6 +11,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Arc?>
+<?import javafx.scene.text.Font?>
 <?import org.cryptomator.ui.controls.FontAwesome5IconView?>
 <?import java.lang.Double?>
 <VBox xmlns="http://javafx.com/javafx"
@@ -37,7 +38,8 @@
 		</AnchorPane>
 	</StackPane>
 	<HBox HBox.hgrow="ALWAYS" alignment="CENTER">
-		<Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#didClickAddVault" HBox.hgrow="ALWAYS" alignment="BASELINE_CENTER" minHeight="60">
+		<Button contentDisplay="LEFT" mnemonicParsing="false" onAction="#didClickAddVault" HBox.hgrow="ALWAYS" alignment="BASELINE_CENTER" minHeight="60" text="%main.vaultlist.addVaultBtn.text">
+			<Font size="30"/>
 			<graphic>
 				<FontAwesome5IconView glyph="PLUS" glyphSize="15"/>
 			</graphic>
