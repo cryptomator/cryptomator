@@ -45,8 +45,8 @@ abstract class RemoveVaultModule {
 	@Provides
 	@FxmlScene(FxmlFile.REMOVE_VAULT)
 	@RemoveVaultScoped
-	static Scene provideUnlockScene(@RemoveVault FXMLLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene("/fxml/remove_vault.fxml"); // TODO rename fxml file
+	static Scene provideRemoveVaultScene(@RemoveVault FXMLLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene("/fxml/remove_vault.fxml");
 	}
 
 	// ------------------
