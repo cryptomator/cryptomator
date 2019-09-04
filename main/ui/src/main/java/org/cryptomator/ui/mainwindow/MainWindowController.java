@@ -1,6 +1,7 @@
 package org.cryptomator.ui.mainwindow;
 
 import javafx.beans.binding.BooleanBinding;
+import javafx.beans.binding.IntegerBinding;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.input.TransferMode;
@@ -97,7 +98,6 @@ public class MainWindowController implements FxController {
 			}
 			event.consume();
 		});
-
 	}
 
 	private void addVault(final File dropped) {

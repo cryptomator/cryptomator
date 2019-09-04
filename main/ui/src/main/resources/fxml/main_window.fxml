@@ -9,8 +9,8 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
-<?import org.cryptomator.ui.controls.FontAwesome5IconView?>
 <?import javafx.scene.shape.Rectangle?>
+<?import org.cryptomator.ui.controls.FontAwesome5IconView?>
 <VBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
 	  fx:id="dragAndDropRegion"
@@ -50,11 +50,12 @@
 			<fx:include source="/fxml/vault_detail.fxml" SplitPane.resizableWithParent="true"/>
 		</SplitPane>
 		<Region styleClass="resizer" StackPane.alignment="BOTTOM_RIGHT" fx:id="resizer" prefWidth="10" prefHeight="10" maxWidth="-Infinity" maxHeight="-Infinity"/>
-		<VBox fx:id="dragNDropIndicator" >
+		<VBox fx:id="dragNDropIndicator">
 			<padding>
 				<Insets topRightBottomLeft="20"/>
 			</padding>
-			<Rectangle fill="red" stroke="black" height="200" width="200" />
+			<Rectangle arcHeight="4" arcWidth="4" fill="gainsboro" strokeType="CENTERED" strokeWidth="3" strokeDashArray="20, 20" strokeLineJoin="ROUND" stroke="black" height="${dragAndDropRegion.height - 90}"
+					   width="${dragAndDropRegion.width - 40}"/>
 		</VBox>
 	</StackPane>
 </VBox>
