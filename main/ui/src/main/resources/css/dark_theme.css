@@ -677,12 +677,20 @@
 	-fx-background-insets: 0, 0 1px 0 1px;
 }
 
+.menu-item:disabled {
+	-fx-background-color: transparent;
+}
+
 .menu-item > .left-container {
 	-fx-padding: 0.5em 0.25em 0.5em 0.5em;
 }
 
 .menu-item > .label {
     -fx-padding: 1px 0.5em 1px 0.5em;
+}
+
+.menu-item:disabled > .label {
+	-fx-text-fill: TEXT_FILL_SECONDARY;
 }
 
 .radio-menu-item:checked > .left-container > .radio {
