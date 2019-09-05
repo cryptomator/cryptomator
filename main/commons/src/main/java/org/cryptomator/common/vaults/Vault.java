@@ -13,6 +13,7 @@ import javafx.beans.Observable;
 import javafx.beans.binding.Binding;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
+import javafx.beans.binding.ObjectBinding;
 import javafx.beans.binding.StringBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -59,12 +60,12 @@ public class Vault {
 	private final AtomicReference<CryptoFileSystem> cryptoFileSystem;
 	private final ObjectProperty<VaultState> state;
 	private final VaultStats stats;
-	private final ObjectProperty<Path> accessPoint = new SimpleObjectProperty<>(Path.of(""));
 	private final StringBinding displayableName;
 	private final StringBinding displayablePath;
 	private final BooleanBinding locked;
 	private final BooleanBinding processing;
 	private final BooleanBinding unlocked;
+	private final ObjectBinding<Path> accessPoint;
 
 	private Volume volume;
 
@@ -81,7 +82,7 @@ public class Vault {
 		this.locked = Bindings.createBooleanBinding(this::isLocked, state);
 		this.processing = Bindings.createBooleanBinding(this::isProcessing, state);
 		this.unlocked = Bindings.createBooleanBinding(this::isUnlocked, state);
-		this.state.addListener(this::setAccessPoint);
+		this.accessPoint = Bindings.createObjectBinding(this::getAccessPoint, state);
 	}
 
 	// ******************************************************************************
@@ -220,19 +221,16 @@ public class Vault {
 		return p.getFileName().toString();
 	}
 
-	public ObjectProperty<Path> accessPointProperty() {
+	public ObjectBinding<Path> accessPointProperty() {
 		return accessPoint;
 	}
 
 	public Path getAccessPoint() {
-		return accessPoint.get();
-	}
-
-	private void setAccessPoint(Observable obs) {
-		if (this.getState() == VaultState.UNLOCKED) {
-			accessPoint.setValue(volume.getMountPointSafe().get());
+		if (state.get() == VaultState.UNLOCKED) {
+			assert volume != null;
+			return volume.getMountPoint().orElse(Path.of(""));
 		} else {
-			accessPoint.setValue(Path.of(""));
+			return Path.of("");
 		}
 	}
 

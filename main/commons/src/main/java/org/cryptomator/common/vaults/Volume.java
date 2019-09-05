@@ -30,7 +30,7 @@ public interface Volume {
 
 	void unmount() throws VolumeException;
 
-	Optional<Path> getMountPointSafe();
+	Optional<Path> getMountPoint();
 
 	// optional forced unmounting:
 

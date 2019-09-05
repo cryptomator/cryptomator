@@ -166,7 +166,7 @@ public class FuseVolume implements Volume {
 	}
 
 	@Override
-	public Optional<Path> getMountPointSafe() {
+	public Optional<Path> getMountPoint() {
 		return Optional.ofNullable(mountPoint);
 	}
 

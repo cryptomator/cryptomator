@@ -97,7 +97,7 @@ public class WebDavVolume implements Volume {
 	}
 
 	@Override
-	public Optional<Path> getMountPointSafe() {
+	public Optional<Path> getMountPoint() {
 		return Optional.ofNullable(mountPoint);
 	}
 
