@@ -72,6 +72,7 @@ public class VaultDetailController implements FxController {
 			v.setState(VaultState.LOCKED);
 		}).onError(Exception.class, e -> {
 			v.setState(VaultState.UNLOCKED);
+			LOG.error("Regular unmount failed.", e);
 			// TODO
 		}).runOnce(executor);
 	}
