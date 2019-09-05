@@ -23,7 +23,7 @@
 	<children>
 		<HBox spacing="12" alignment="CENTER_LEFT" VBox.vgrow="ALWAYS">
 			<StackPane alignment="CENTER" HBox.hgrow="NEVER">
-				<Circle styleClass="glyph-icon-orange" radius="24"/>
+				<Circle styleClass="glyph-icon-primary" radius="24"/>
 				<FontAwesome5IconView styleClass="glyph-icon-white" glyph="QUESTION" glyphSize="24"/>
 			</StackPane>
 			<Label text="%quit.prompt" wrapText="true" textAlignment="LEFT" HBox.hgrow="ALWAYS"/>
