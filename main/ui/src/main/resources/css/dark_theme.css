@@ -511,6 +511,10 @@
 	-fx-fill: TEXT_FILL_WHITE;
 }
 
+.button:default .label {
+	-fx-text-fill: TEXT_FILL_WHITE;
+}
+
 .button-large {
 	-fx-font-size: 1.25em;
 	-fx-padding: 0.6em 1.5em 0.6em 1.5em;
