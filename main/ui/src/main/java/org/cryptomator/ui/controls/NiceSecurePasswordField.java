@@ -63,6 +63,11 @@ public class NiceSecurePasswordField extends StackPane {
 
 	/* Passthrough */
 
+	@Override
+	public void requestFocus() {
+		passwordField.requestFocus();
+	}
+
 	public StringProperty textProperty() {
 		return passwordField.textProperty();
 	}
