@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Hyperlink?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Tooltip?>
@@ -11,7 +10,6 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Circle?>
 <?import org.cryptomator.ui.controls.FontAwesome5IconView?>
-<?import org.cryptomator.ui.controls.ThrougputLabel?>
 <VBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
 	  fx:controller="org.cryptomator.ui.mainwindow.VaultDetailController"
@@ -52,61 +50,8 @@
 
 		<Region prefHeight="12" VBox.vgrow="NEVER"/>
 
-		<VBox alignment="CENTER" spacing="9" visible="${controller.vault.locked}" managed="${controller.vault.locked}">
-			<Button styleClass="button-large" text="%main.vaultDetail.unlockBtn" minWidth="120" onAction="#unlock" defaultButton="${controller.vault.locked}">
-				<graphic>
-					<FontAwesome5IconView glyph="KEY" glyphSize="15"/>
-				</graphic>
-			</Button>
-			<Hyperlink text="%main.vaultDetail.optionsBtn" onAction="#showVaultOptions">
-				<graphic>
-					<FontAwesome5IconView glyph="COG"/>
-				</graphic>
-			</Hyperlink>
-		</VBox>
-		<VBox alignment="CENTER" spacing="9" visible="${controller.vault.unlocked}" managed="${controller.vault.unlocked}">
-			<Label text="%main.vaultDetail.accessLocation"/>
-			<Button styleClass="button-large" contentDisplay="GRAPHIC_ONLY" minWidth="120" onAction="#revealAccessLocation" defaultButton="${controller.vault.unlocked}">
-				<graphic>
-					<HBox spacing="12" alignment="CENTER">
-						<FontAwesome5IconView glyph="HDD" glyphSize="24"/>
-						<VBox spacing="4" alignment="CENTER_LEFT">
-							<Label text="%main.vaultDetail.revealBtn"/>
-							<Label styleClass="label-small" text="${controller.vault.accessPoint}" textOverrun="CENTER_ELLIPSIS"/>
-						</VBox>
-					</HBox>
-				</graphic>
-				<tooltip>
-					<Tooltip text="${controller.vault.accessPoint}"/>
-				</tooltip>
-			</Button>
-			<Button text="%main.vaultDetail.lockBtn" minWidth="120" onAction="#lock">
-				<graphic>
-					<FontAwesome5IconView glyph="KEY"/>
-				</graphic>
-			</Button>
-		</VBox>
-
-		<!-- TODO we might want to split this fxml file into one file per vault state -->
-		<Button styleClass="button-large" text="TODO Upgrade Vault" minWidth="120" onAction="#showVaultMigrator" visible="${controller.vault.needsMigration}">
-			<graphic>
-				<FontAwesome5IconView glyph="FILE_IMPORT" glyphSize="15"/>
-			</graphic>
-		</Button>
-
-		<Region VBox.vgrow="ALWAYS"/>
-
-		<VBox spacing="6" visible="${controller.vault.unlocked}" managed="${controller.vault.unlocked}">
-			<HBox alignment="CENTER_RIGHT" spacing="6">
-				<Label styleClass="label-small" text="%main.vaultDetail.bytesPerSecondRead"/>
-				<ThrougputLabel styleClass="label-small" alignment="CENTER_RIGHT" minWidth="60" idleFormat="%main.vaultDetail.throughput.idle" kibsFormat="%main.vaultDetail.throughput.kbps"
-								mibsFormat="%main.vaultDetail.throughput.mbps" bytesPerSecond="${controller.vault.stats.bytesPerSecondRead}"/>
-			</HBox>
-			<HBox alignment="CENTER_RIGHT" spacing="6">
-				<Label styleClass="label-small" text="%main.vaultDetail.bytesPerSecondWritten"/>
-				<ThrougputLabel styleClass="label-small" alignment="CENTER_RIGHT" minWidth="60" idleFormat="%main.vaultDetail.throughput.idle" kibsFormat="%main.vaultDetail.throughput.kbps"
-								mibsFormat="%main.vaultDetail.throughput.mbps" bytesPerSecond="${controller.vault.stats.bytesPerSecondWritten}"/>
-			</HBox>
-		</VBox>
+		<fx:include VBox.vgrow="ALWAYS" source="vault_detail_locked.fxml" visible="${controller.vault.locked}" managed="${controller.vault.locked}"/>
+		<fx:include VBox.vgrow="ALWAYS" source="vault_detail_unlocked.fxml" visible="${controller.vault.unlocked}" managed="${controller.vault.unlocked}"/>
+		<fx:include VBox.vgrow="ALWAYS" source="vault_detail_needsmigration.fxml" visible="${controller.vault.needsMigration}" managed="${controller.vault.needsMigration}"/>
 	</children>
 </VBox>

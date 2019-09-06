@@ -87,6 +87,21 @@ abstract class MainWindowModule {
 
 	@Binds
 	@IntoMap
+	@FxControllerKey(VaultDetailLockedController.class)
+	abstract FxController bindVaultDetailLockedController(VaultDetailLockedController controller);
+
+	@Binds
+	@IntoMap
+	@FxControllerKey(VaultDetailUnlockedController.class)
+	abstract FxController bindVaultDetailUnlockedController(VaultDetailUnlockedController controller);
+
+	@Binds
+	@IntoMap
+	@FxControllerKey(VaultDetailNeedsMigrationController.class)
+	abstract FxController bindVaultDetailNeedsMigrationController(VaultDetailNeedsMigrationController controller);
+
+	@Binds
+	@IntoMap
 	@FxControllerKey(VaultListCellController.class)
 	abstract FxController bindVaultListCellController(VaultListCellController controller);
 

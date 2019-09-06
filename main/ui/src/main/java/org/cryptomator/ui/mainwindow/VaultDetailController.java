@@ -4,46 +4,30 @@ import javafx.beans.binding.Binding;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
-import org.cryptomator.common.vaults.Volume;
 import org.cryptomator.ui.common.FxController;
-import org.cryptomator.ui.common.Tasks;
 import org.cryptomator.ui.controls.FontAwesome5Icon;
 import org.cryptomator.ui.fxapp.FxApplication;
-import org.cryptomator.ui.migration.MigrationComponent;
-import org.cryptomator.ui.vaultoptions.VaultOptionsComponent;
 import org.fxmisc.easybind.EasyBind;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import java.util.concurrent.ExecutorService;
 
 @MainWindowScoped
 public class VaultDetailController implements FxController {
 
-	private static final Logger LOG = LoggerFactory.getLogger(VaultDetailController.class);
-
 	private final ReadOnlyObjectProperty<Vault> vault;
+	private final FxApplication application;
 	private final Binding<FontAwesome5Icon> glyph;
 	private final BooleanBinding anyVaultSelected;
-	private final ExecutorService executor;
-	private final FxApplication application;
-	private final VaultOptionsComponent.Builder vaultOptionsWindow;
-	private final MigrationComponent.Builder vaultMigrationWindow;
 
 	@Inject
-	VaultDetailController(ObjectProperty<Vault> vault, ExecutorService executor, FxApplication application, VaultOptionsComponent.Builder vaultOptionsWindow, MigrationComponent.Builder vaultMigrationWindow) {
+	VaultDetailController(ObjectProperty<Vault> vault, FxApplication application) {
 		this.vault = vault;
-		this.glyph = EasyBind.select(vault).selectObject(Vault::stateProperty).map(this::getGlyphForVaultState).orElse(FontAwesome5Icon.EXCLAMATION_TRIANGLE);
-		this.executor = executor;
 		this.application = application;
-		this.vaultOptionsWindow = vaultOptionsWindow;
+		this.glyph = EasyBind.select(vault).selectObject(Vault::stateProperty).map(this::getGlyphForVaultState).orElse(FontAwesome5Icon.EXCLAMATION_TRIANGLE);
 		this.anyVaultSelected = vault.isNotNull();
-		this.vaultMigrationWindow = vaultMigrationWindow;
 	}
 
 	private FontAwesome5Icon getGlyphForVaultState(VaultState state) {
@@ -60,48 +44,8 @@ public class VaultDetailController implements FxController {
 	}
 
 	@FXML
-	public void unlock() {
-		application.showUnlockWindow(vault.get());
-	}
-
-	@FXML
-	public void lock() {
-		Vault v = vault.get();
-		v.setState(VaultState.PROCESSING);
-		Tasks.create(() -> {
-			v.lock(false);
-		}).onSuccess(() -> {
-			LOG.trace("Regular unmount succeeded.");
-			v.setState(VaultState.LOCKED);
-		}).onError(Exception.class, e -> {
-			v.setState(VaultState.UNLOCKED);
-			LOG.error("Regular unmount failed.", e);
-			// TODO
-		}).runOnce(executor);
-	}
-
-	@FXML
-	public void showVaultOptions() {
-		vaultOptionsWindow.vault(vault.get()).build().showVaultOptionsWindow();
-	}
-
-	@FXML
-	public void showVaultMigrator() {
-		vaultMigrationWindow.vault(vault.get()).build().showMigrationWindow();
-	}
-
-	@FXML
 	public void revealStorageLocation() {
 		application.getHostServices().showDocument(vault.get().getPath().toUri().toString());
-	}
-
-	@FXML
-	public void revealAccessLocation() {
-		try {
-			vault.get().reveal();
-		} catch (Volume.VolumeException e) {
-			LOG.error("Failed to reveal vault.", e);
-		}
 	}
 
 	/* Observable Properties */
