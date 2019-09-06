@@ -15,7 +15,7 @@
 	  fx:controller="org.cryptomator.ui.unlock.UnlockSuccessController"
 	  minWidth="400"
 	  maxWidth="400"
-	  minHeight="144"
+	  minHeight="145"
 	  spacing="12">
 	<padding>
 		<Insets topRightBottomLeft="12"/>
