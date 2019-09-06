@@ -23,6 +23,7 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Region;
 import javafx.scene.text.Text;
+import org.cryptomator.cryptofs.CryptoFileSystemProvider;
 import org.cryptomator.cryptolib.api.InvalidPassphraseException;
 import org.cryptomator.cryptolib.api.UnsupportedVaultFormatException;
 import org.cryptomator.ui.controls.SecurePasswordField;
@@ -42,6 +43,7 @@ import java.util.Optional;
 public class ChangePasswordController implements ViewController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ChangePasswordController.class);
+	private static final String MASTERKEY_FILENAME = "masterkey.cryptomator";
 
 	private final Application app;
 	private final PasswordStrengthUtil strengthRater;
@@ -153,7 +155,7 @@ public class ChangePasswordController implements ViewController {
 	private void didClickChangePasswordButton(ActionEvent event) {
 		downloadsPageLink.setVisible(false);
 		try {
-			vault.changePassphrase(oldPasswordField.getCharacters(), newPasswordField.getCharacters());
+			CryptoFileSystemProvider.changePassphrase(vault.getPath(), MASTERKEY_FILENAME, oldPasswordField.getCharacters(), newPasswordField.getCharacters());
 			messageText.setText(null);
 			listener.ifPresent(this::invokeListenerLater);
 		} catch (InvalidPassphraseException e) {

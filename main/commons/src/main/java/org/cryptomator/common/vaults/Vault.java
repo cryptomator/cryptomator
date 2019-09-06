@@ -41,14 +41,17 @@ import java.nio.file.NotDirectoryException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 
 @PerVault
 public class Vault {
 
+	@Deprecated(forRemoval = true, since = "1.5.0")
 	public static final Predicate<Vault> NOT_LOCKED = hasState(VaultState.LOCKED).negate();
 	private static final Logger LOG = LoggerFactory.getLogger(Vault.class);
 	private static final String MASTERKEY_FILENAME = "masterkey.cryptomator";
@@ -67,7 +70,7 @@ public class Vault {
 	private final BooleanBinding unlocked;
 	private final ObjectBinding<Path> accessPoint;
 
-	private Volume volume;
+	private volatile Volume volume;
 
 	@Inject
 	Vault(VaultSettings vaultSettings, Provider<Volume> volumeProvider, @DefaultMountFlags StringBinding defaultMountFlags, AtomicReference<CryptoFileSystem> cryptoFileSystem, ObjectProperty<VaultState> state, VaultStats stats) {
@@ -94,7 +97,7 @@ public class Vault {
 	}
 
 	private CryptoFileSystem unlockCryptoFileSystem(CharSequence passphrase) throws NoSuchFileException, IOException, InvalidPassphraseException, CryptoException {
-		List<FileSystemFlags> flags = new ArrayList<>();
+		Set<FileSystemFlags> flags = EnumSet.noneOf(FileSystemFlags.class);
 		if (vaultSettings.usesReadOnlyMode().get()) {
 			flags.add(FileSystemFlags.READONLY);
 		}
@@ -106,6 +109,7 @@ public class Vault {
 		return CryptoFileSystemProvider.newFileSystem(getPath(), fsProps);
 	}
 
+	@Deprecated(forRemoval = true, since = "1.5.0")
 	public void create(CharSequence passphrase) throws IOException {
 		if (!isValidVaultDirectory()) {
 			CryptoFileSystemProvider.initialize(getPath(), MASTERKEY_FILENAME, passphrase);
@@ -114,6 +118,7 @@ public class Vault {
 		}
 	}
 
+	@Deprecated(forRemoval = true, since = "1.5.0")
 	public void changePassphrase(CharSequence oldPassphrase, CharSequence newPassphrase) throws IOException, InvalidPassphraseException {
 		CryptoFileSystemProvider.changePassphrase(getPath(), MASTERKEY_FILENAME, oldPassphrase, newPassphrase);
 	}
@@ -146,6 +151,7 @@ public class Vault {
 	/**
 	 * Ejects any mounted drives and locks this vault. no-op if this vault is currently locked.
 	 */
+	@Deprecated(forRemoval = true, since = "1.5.0")
 	public void prepareForShutdown() {
 		try {
 			lock(false);
@@ -165,11 +171,9 @@ public class Vault {
 	public void reveal() throws Volume.VolumeException {
 		volume.reveal();
 	}
-
-	public static Predicate<Vault> hasState(VaultState state) {
-		return vault -> {
-			return vault.getState() == state;
-		};
+	
+	private static Predicate<Vault> hasState(VaultState state) {
+		return vault -> vault.getState() == state;
 	}
 
 	// ******************************************************************************
@@ -295,14 +299,17 @@ public class Vault {
 		return EasyBind.map(vaultSettings.path(), Path::getFileName).map(Path::toString);
 	}
 
+	@Deprecated(forRemoval = true, since = "1.5.0")
 	public boolean doesVaultDirectoryExist() {
 		return Files.isDirectory(getPath());
 	}
 
+	@Deprecated(forRemoval = true, since = "1.5.0")
 	public boolean isValidVaultDirectory() {
 		return CryptoFileSystemProvider.containsVault(getPath(), MASTERKEY_FILENAME);
 	}
 
+	@Deprecated(forRemoval = true, since = "1.5.0")
 	public long pollBytesRead() {
 		CryptoFileSystem fs = cryptoFileSystem.get();
 		if (fs != null) {
@@ -312,6 +319,7 @@ public class Vault {
 		}
 	}
 
+	@Deprecated(forRemoval = true, since = "1.5.0")
 	public long pollBytesWritten() {
 		CryptoFileSystem fs = cryptoFileSystem.get();
 		if (fs != null) {
@@ -321,18 +329,22 @@ public class Vault {
 		}
 	}
 
+	@Deprecated(forRemoval = true, since = "1.5.0")
 	public String getCustomMountPath() {
 		return vaultSettings.individualMountPath().getValueSafe();
 	}
 
+	@Deprecated(forRemoval = true, since = "1.5.0")
 	public void setCustomMountPath(String mountPath) {
 		vaultSettings.individualMountPath().set(mountPath);
 	}
 
+	@Deprecated(forRemoval = true, since = "1.5.0")
 	public String getMountName() {
 		return vaultSettings.mountName().get();
 	}
 
+	@Deprecated(forRemoval = true, since = "1.5.0")
 	public void setMountName(String mountName) throws IllegalArgumentException {
 		if (StringUtils.isBlank(mountName)) {
 			throw new IllegalArgumentException("mount name is empty");
@@ -366,6 +378,7 @@ public class Vault {
 		vaultSettings.mountFlags().set(mountFlags);
 	}
 
+	@Deprecated(forRemoval = true, since = "1.5.0")
 	public Character getWinDriveLetter() {
 		if (vaultSettings.winDriveLetter().get() == null) {
 			return null;
@@ -374,6 +387,7 @@ public class Vault {
 		}
 	}
 
+	@Deprecated(forRemoval = true, since = "1.5.0")
 	public void setWinDriveLetter(Path root) {
 		if (root == null) {
 			vaultSettings.winDriveLetter().set(null);
