@@ -5,6 +5,7 @@ import javafx.beans.Observable;
 import javafx.collections.ObservableList;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.ui.fxapp.FxApplication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,8 +19,10 @@ import java.awt.PopupMenu;
 import java.awt.desktop.QuitResponse;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.EnumSet;
 import java.util.EventObject;
 import java.util.ResourceBundle;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
@@ -35,7 +38,7 @@ class TrayMenuController {
 	private final Settings settings;
 	private final ObservableList<Vault> vaults;
 	private final PopupMenu menu;
-	private final AtomicBoolean allVaultsAreLocked;
+	private final AtomicBoolean allowSuddenTermination;
 
 	@Inject
 	TrayMenuController(ResourceBundle resourceBundle, FxApplicationStarter fxApplicationStarter, @Named("shutdownLatch") CountDownLatch shutdownLatch, Settings settings, ObservableList<Vault> vaults) {
@@ -45,7 +48,7 @@ class TrayMenuController {
 		this.settings = settings;
 		this.vaults = vaults;
 		this.menu = new PopupMenu();
-		this.allVaultsAreLocked = new AtomicBoolean(true);
+		this.allowSuddenTermination = new AtomicBoolean(true);
 	}
 
 	public PopupMenu getMenu() {
@@ -76,10 +79,16 @@ class TrayMenuController {
 	private void vaultListChanged(@SuppressWarnings("unused") Observable observable) {
 		assert Platform.isFxApplicationThread();
 		rebuildMenu();
-		boolean allLocked = vaults.stream().allMatch(Vault::isLocked);
-		// TODO remove logging
-		LOG.warn("allLocked: {}", allLocked);
-		allVaultsAreLocked.set(allLocked);
+		Set<VaultState> statesAllowingTermination = EnumSet.of(VaultState.LOCKED, VaultState.NEEDS_MIGRATION, VaultState.MISSING, VaultState.ERROR);
+		boolean allVaultsAllowTermination = vaults.stream().map(Vault::getState).allMatch(statesAllowingTermination::contains);
+		allowSuddenTermination.set(allVaultsAllowTermination);
+		if (Desktop.getDesktop().isSupported(Desktop.Action.APP_SUDDEN_TERMINATION)) {
+			if (allVaultsAllowTermination) {
+				Desktop.getDesktop().enableSuddenTermination();
+			} else {
+				Desktop.getDesktop().disableSuddenTermination();
+			}
+		}
 	}
 
 	private void rebuildMenu() {
@@ -141,7 +150,7 @@ class TrayMenuController {
 	}
 
 	private void handleQuitRequest(EventObject e, QuitResponse response) {
-		if (allVaultsAreLocked.get()) {
+		if (allowSuddenTermination.get()) {
 			response.performQuit(); // really?
 		} else {
 			fxApplicationStarter.get(true).thenAccept(app -> app.showQuitWindow(response));
