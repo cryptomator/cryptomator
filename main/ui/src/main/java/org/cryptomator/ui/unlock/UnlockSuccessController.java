@@ -1,7 +1,9 @@
 package org.cryptomator.ui.unlock;
 
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.control.ContentDisplay;
 import javafx.stage.Stage;
@@ -24,6 +26,7 @@ public class UnlockSuccessController implements FxController {
 	private final Vault vault;
 	private final ExecutorService executor;
 	private final ObjectProperty<ContentDisplay> revealButtonState;
+	private final BooleanProperty revealButtonDisabled;
 
 	@Inject
 	public UnlockSuccessController(@UnlockWindow Stage window, @UnlockWindow Vault vault, ExecutorService executor) {
@@ -31,6 +34,7 @@ public class UnlockSuccessController implements FxController {
 		this.vault = vault;
 		this.executor = executor;
 		this.revealButtonState = new SimpleObjectProperty<>(ContentDisplay.TEXT_ONLY);
+		this.revealButtonDisabled = new SimpleBooleanProperty();
 	}
 
 
@@ -42,6 +46,7 @@ public class UnlockSuccessController implements FxController {
 	public void revealAndClose() {
 		LOG.trace("UnlockSuccessController.revealAndClose()");
 		revealButtonState.set(ContentDisplay.LEFT);
+		revealButtonDisabled.set(true);
 		Tasks.create(() -> {
 			vault.reveal();
 		}).onSuccess(() -> {
@@ -51,6 +56,7 @@ public class UnlockSuccessController implements FxController {
 			LOG.warn("Reveal failed.", e);
 		}).andFinally(() -> {
 			revealButtonState.set(ContentDisplay.TEXT_ONLY);
+			revealButtonDisabled.set(false);
 		}).runOnce(executor);
 	}
 
@@ -66,6 +72,14 @@ public class UnlockSuccessController implements FxController {
 
 	public ContentDisplay getRevealButtonState() {
 		return revealButtonState.get();
+	}
+
+	public BooleanProperty revealButtonDisabledProperty() {
+		return revealButtonDisabled;
+	}
+
+	public boolean isRevealButtonDisabled() {
+		return revealButtonDisabled.get();
 	}
 
 }
