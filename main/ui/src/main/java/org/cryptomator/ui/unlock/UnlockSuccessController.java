@@ -5,6 +5,7 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.fxml.FXML;
 import javafx.scene.control.ContentDisplay;
 import javafx.stage.Stage;
 import org.cryptomator.common.vaults.Vault;
@@ -37,12 +38,13 @@ public class UnlockSuccessController implements FxController {
 		this.revealButtonDisabled = new SimpleBooleanProperty();
 	}
 
-
+	@FXML
 	public void close() {
 		LOG.trace("UnlockSuccessController.close()");
 		window.close();
 	}
 
+	@FXML
 	public void revealAndClose() {
 		LOG.trace("UnlockSuccessController.revealAndClose()");
 		revealButtonState.set(ContentDisplay.LEFT);

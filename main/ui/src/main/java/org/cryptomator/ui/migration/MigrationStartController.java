@@ -16,13 +16,13 @@ public class MigrationStartController implements FxController {
 
 	private final Stage window;
 	private final Vault vault;
-	private final Lazy<Scene> successScene;
+	private final Lazy<Scene> runMigrationScene;
 
 	@Inject
-	public MigrationStartController(@MigrationWindow Stage window, @MigrationWindow Vault vault, @FxmlScene(FxmlFile.MIGRATION_START) Lazy<Scene> successScene) {
+	public MigrationStartController(@MigrationWindow Stage window, @MigrationWindow Vault vault, @FxmlScene(FxmlFile.MIGRATION_RUN) Lazy<Scene> runMigrationScene) {
 		this.window = window;
 		this.vault = vault;
-		this.successScene = successScene;
+		this.runMigrationScene = runMigrationScene;
 	}
 
 	public void initialize() {
@@ -35,7 +35,7 @@ public class MigrationStartController implements FxController {
 
 	@FXML
 	public void proceed() {
-
+		window.setScene(runMigrationScene.get());
 	}
 
 	/* Getter/Setter */
