@@ -6,6 +6,9 @@ import dagger.Provides;
 import dagger.multibindings.IntoMap;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.cryptomator.ui.common.FXMLLoaderFactory;
@@ -45,15 +48,25 @@ abstract class UnlockModule {
 	@Provides
 	@FxmlScene(FxmlFile.UNLOCK)
 	@UnlockScoped
-	static Scene provideUnlockScene(@UnlockWindow FXMLLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene("/fxml/unlock2.fxml"); // TODO rename fxml file
+	static Scene provideUnlockScene(@UnlockWindow FXMLLoaderFactory fxmlLoaders, @UnlockWindow Stage window) {
+		Scene scene = fxmlLoaders.createScene("/fxml/unlock2.fxml"); // TODO rename fxml file
+
+		KeyCombination cmdW = new KeyCodeCombination(KeyCode.W, KeyCombination.SHORTCUT_DOWN);
+		scene.getAccelerators().put(cmdW, window::close);
+
+		return scene;
 	}
 
 	@Provides
 	@FxmlScene(FxmlFile.UNLOCK_SUCCESS)
 	@UnlockScoped
-	static Scene provideUnlockSuccessScene(@UnlockWindow FXMLLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene("/fxml/unlock_success.fxml");
+	static Scene provideUnlockSuccessScene(@UnlockWindow FXMLLoaderFactory fxmlLoaders, @UnlockWindow Stage window) {
+		Scene scene = fxmlLoaders.createScene("/fxml/unlock_success.fxml");
+
+		KeyCombination cmdW = new KeyCodeCombination(KeyCode.W, KeyCombination.SHORTCUT_DOWN);
+		scene.getAccelerators().put(cmdW, window::close);
+
+		return scene;
 	}
 
 

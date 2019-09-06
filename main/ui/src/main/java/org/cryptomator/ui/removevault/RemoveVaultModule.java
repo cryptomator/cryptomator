@@ -6,6 +6,9 @@ import dagger.Provides;
 import dagger.multibindings.IntoMap;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.cryptomator.ui.common.FXMLLoaderFactory;
@@ -45,8 +48,13 @@ abstract class RemoveVaultModule {
 	@Provides
 	@FxmlScene(FxmlFile.REMOVE_VAULT)
 	@RemoveVaultScoped
-	static Scene provideRemoveVaultScene(@RemoveVault FXMLLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene("/fxml/remove_vault.fxml");
+	static Scene provideRemoveVaultScene(@RemoveVault FXMLLoaderFactory fxmlLoaders, @RemoveVault Stage window) {
+		Scene scene = fxmlLoaders.createScene("/fxml/remove_vault.fxml");
+
+		KeyCombination cmdW = new KeyCodeCombination(KeyCode.W, KeyCombination.SHORTCUT_DOWN);
+		scene.getAccelerators().put(cmdW, window::close);
+
+		return scene;
 	}
 
 	// ------------------

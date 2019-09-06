@@ -6,6 +6,9 @@ import dagger.Provides;
 import dagger.multibindings.IntoMap;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.cryptomator.ui.common.FXMLLoaderFactory;
@@ -45,8 +48,13 @@ abstract class WrongFileAlertModule {
 	@Provides
 	@FxmlScene(FxmlFile.WRONGFILEALERT)
 	@WrongFileAlertScoped
-	static Scene provideWrongFileAlertScene(@WrongFileAlert FXMLLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene("/fxml/wrongfilealert.fxml"); // TODO rename fxml file
+	static Scene provideWrongFileAlertScene(@WrongFileAlert FXMLLoaderFactory fxmlLoaders, @WrongFileAlert Stage window) {
+		Scene scene = fxmlLoaders.createScene("/fxml/wrongfilealert.fxml"); // TODO rename fxml file
+
+		KeyCombination cmdW = new KeyCodeCombination(KeyCode.W, KeyCombination.SHORTCUT_DOWN);
+		scene.getAccelerators().put(cmdW, window::close);
+
+		return scene;
 	}
 
 	// ------------------

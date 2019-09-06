@@ -6,6 +6,9 @@ import dagger.Provides;
 import dagger.multibindings.IntoMap;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.cryptomator.ui.common.FXMLLoaderFactory;
@@ -13,7 +16,6 @@ import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxControllerKey;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
-import org.cryptomator.ui.unlock.UnlockController;
 
 import javax.inject.Named;
 import javax.inject.Provider;
@@ -46,8 +48,13 @@ abstract class QuitModule {
 	@Provides
 	@FxmlScene(FxmlFile.QUIT)
 	@QuitScoped
-	static Scene provideUnlockScene(@QuitWindow FXMLLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene("/fxml/quit.fxml");
+	static Scene provideUnlockScene(@QuitWindow FXMLLoaderFactory fxmlLoaders, @QuitWindow Stage window) {
+		Scene scene = fxmlLoaders.createScene("/fxml/quit.fxml");
+
+		KeyCombination cmdW = new KeyCodeCombination(KeyCode.W, KeyCombination.SHORTCUT_DOWN);
+		scene.getAccelerators().put(cmdW, window::close);
+
+		return scene;
 	}
 
 	// ------------------

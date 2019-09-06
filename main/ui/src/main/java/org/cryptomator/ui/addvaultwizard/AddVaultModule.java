@@ -10,6 +10,9 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -76,43 +79,73 @@ public abstract class AddVaultModule {
 	@Provides
 	@FxmlScene(FxmlFile.ADDVAULT_WELCOME)
 	@AddVaultWizardScoped
-	static Scene provideWelcomeScene(@AddVaultWizard FXMLLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene("/fxml/addvault_welcome.fxml");
+	static Scene provideWelcomeScene(@AddVaultWizard FXMLLoaderFactory fxmlLoaders, @AddVaultWizard Stage window) {
+		Scene scene = fxmlLoaders.createScene("/fxml/addvault_welcome.fxml");
+
+		KeyCombination cmdW = new KeyCodeCombination(KeyCode.W, KeyCombination.SHORTCUT_DOWN);
+		scene.getAccelerators().put(cmdW, window::close);
+
+		return scene;
 	}
 
 	@Provides
 	@FxmlScene(FxmlFile.ADDVAULT_EXISTING)
 	@AddVaultWizardScoped
-	static Scene provideChooseExistingVaultScene(@AddVaultWizard FXMLLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene("/fxml/addvault_existing.fxml");
+	static Scene provideChooseExistingVaultScene(@AddVaultWizard FXMLLoaderFactory fxmlLoaders, @AddVaultWizard Stage window) {
+		Scene scene = fxmlLoaders.createScene("/fxml/addvault_existing.fxml");
+
+		KeyCombination cmdW = new KeyCodeCombination(KeyCode.W, KeyCombination.SHORTCUT_DOWN);
+		scene.getAccelerators().put(cmdW, window::close);
+
+		return scene;
 	}
 
 	@Provides
 	@FxmlScene(FxmlFile.ADDVAULT_NEW_NAME)
 	@AddVaultWizardScoped
-	static Scene provideCreateNewVaultNameScene(@AddVaultWizard FXMLLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene("/fxml/addvault_new_name.fxml");
+	static Scene provideCreateNewVaultNameScene(@AddVaultWizard FXMLLoaderFactory fxmlLoaders, @AddVaultWizard Stage window) {
+		Scene scene = fxmlLoaders.createScene("/fxml/addvault_new_name.fxml");
+
+		KeyCombination cmdW = new KeyCodeCombination(KeyCode.W, KeyCombination.SHORTCUT_DOWN);
+		scene.getAccelerators().put(cmdW, window::close);
+
+		return scene;
 	}
 
 	@Provides
 	@FxmlScene(FxmlFile.ADDVAULT_NEW_LOCATION)
 	@AddVaultWizardScoped
-	static Scene provideCreateNewVaultLocationScene(@AddVaultWizard FXMLLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene("/fxml/addvault_new_location.fxml");
+	static Scene provideCreateNewVaultLocationScene(@AddVaultWizard FXMLLoaderFactory fxmlLoaders, @AddVaultWizard Stage window) {
+		Scene scene = fxmlLoaders.createScene("/fxml/addvault_new_location.fxml");
+
+		KeyCombination cmdW = new KeyCodeCombination(KeyCode.W, KeyCombination.SHORTCUT_DOWN);
+		scene.getAccelerators().put(cmdW, window::close);
+
+		return scene;
 	}
 
 	@Provides
 	@FxmlScene(FxmlFile.ADDVAULT_NEW_PASSWORD)
 	@AddVaultWizardScoped
-	static Scene provideCreateNewVaultPasswordScene(@AddVaultWizard FXMLLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene("/fxml/addvault_new_password.fxml");
+	static Scene provideCreateNewVaultPasswordScene(@AddVaultWizard FXMLLoaderFactory fxmlLoaders, @AddVaultWizard Stage window) {
+		Scene scene = fxmlLoaders.createScene("/fxml/addvault_new_password.fxml");
+
+		KeyCombination cmdW = new KeyCodeCombination(KeyCode.W, KeyCombination.SHORTCUT_DOWN);
+		scene.getAccelerators().put(cmdW, window::close);
+
+		return scene;
 	}
 
 	@Provides
 	@FxmlScene(FxmlFile.ADDVAULT_SUCCESS)
 	@AddVaultWizardScoped
-	static Scene provideCreateNewVaultSuccessScene(@AddVaultWizard FXMLLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene("/fxml/addvault_success.fxml");
+	static Scene provideCreateNewVaultSuccessScene(@AddVaultWizard FXMLLoaderFactory fxmlLoaders, @AddVaultWizard Stage window) {
+		Scene scene = fxmlLoaders.createScene("/fxml/addvault_success.fxml");
+
+		KeyCombination cmdW = new KeyCodeCombination(KeyCode.W, KeyCombination.SHORTCUT_DOWN);
+		scene.getAccelerators().put(cmdW, window::close);
+
+		return scene;
 	}
 
 	// ------------------
