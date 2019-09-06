@@ -52,7 +52,7 @@ import static java.nio.charset.StandardCharsets.US_ASCII;
 public class CreateNewVaultPasswordController implements FxController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(CreateNewVaultPasswordController.class);
-	private static final String MASTERKEY_FILENAME = "masterkey.cryptomator";
+	private static final String MASTERKEY_FILENAME = "masterkey.cryptomator"; // TODO: deduplicate constant declared in multiple classes
 
 	private final Stage window;
 	private final Lazy<Scene> chooseLocationScene;

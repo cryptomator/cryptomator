@@ -22,6 +22,9 @@ public interface VaultComponent {
 		@BindsInstance
 		Builder vaultSettings(VaultSettings vaultSettings);
 
+		@BindsInstance
+		Builder initialVaultState(VaultState vaultState);
+
 		VaultComponent build();
 	}
 

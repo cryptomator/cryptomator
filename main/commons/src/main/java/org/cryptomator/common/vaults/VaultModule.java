@@ -42,8 +42,8 @@ public class VaultModule {
 
 	@Provides
 	@PerVault
-	public ObjectProperty<VaultState> provideVaultState() {
-		return new SimpleObjectProperty<>(VaultState.LOCKED);
+	public ObjectProperty<VaultState> provideVaultState(VaultState initialState) {
+		return new SimpleObjectProperty<>(initialState);
 	}
 
 	@Provides

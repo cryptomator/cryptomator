@@ -24,6 +24,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 
+@Deprecated(forRemoval = true, since = "1.5.0")
 public class DirectoryListCell extends DraggableListCell<Vault> {
 
 	private static final Color UNLOCKED_ICON_COLOR = new Color(0.901, 0.494, 0.133, 1.0);

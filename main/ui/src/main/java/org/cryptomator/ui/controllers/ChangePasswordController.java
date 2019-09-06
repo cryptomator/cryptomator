@@ -43,7 +43,7 @@ import java.util.Optional;
 public class ChangePasswordController implements ViewController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ChangePasswordController.class);
-	private static final String MASTERKEY_FILENAME = "masterkey.cryptomator";
+	private static final String MASTERKEY_FILENAME = "masterkey.cryptomator"; // TODO: deduplicate constant declared in multiple classes
 
 	private final Application app;
 	private final PasswordStrengthUtil strengthRater;

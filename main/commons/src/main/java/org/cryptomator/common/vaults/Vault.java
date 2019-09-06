@@ -54,7 +54,7 @@ public class Vault {
 	@Deprecated(forRemoval = true, since = "1.5.0")
 	public static final Predicate<Vault> NOT_LOCKED = hasState(VaultState.LOCKED).negate();
 	private static final Logger LOG = LoggerFactory.getLogger(Vault.class);
-	private static final String MASTERKEY_FILENAME = "masterkey.cryptomator";
+	private static final String MASTERKEY_FILENAME = "masterkey.cryptomator"; // TODO: deduplicate constant declared in multiple classes
 	private static final Path HOME_DIR = Paths.get(SystemUtils.USER_HOME);
 
 	private final VaultSettings vaultSettings;
