@@ -15,7 +15,7 @@
 	  fx:controller="org.cryptomator.ui.mainwindow.VaultDetailController"
 	  styleClass="vault-detail"
 	  minWidth="300"
-	  spacing="12">
+	  spacing="36">
 	<padding>
 		<Insets topRightBottomLeft="24"/>
 	</padding>
@@ -47,8 +47,6 @@
 				</Hyperlink>
 			</VBox>
 		</HBox>
-
-		<Region prefHeight="12" VBox.vgrow="NEVER"/>
 
 		<fx:include VBox.vgrow="ALWAYS" source="vault_detail_locked.fxml" visible="${controller.vault.locked}" managed="${controller.vault.locked}"/>
 		<fx:include VBox.vgrow="ALWAYS" source="vault_detail_unlocked.fxml" visible="${controller.vault.unlocked}" managed="${controller.vault.unlocked}"/>
