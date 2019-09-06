@@ -9,6 +9,7 @@ public enum FxmlFile {
 	ADDVAULT_SUCCESS("/fxml/addvault_success.fxml"), //
 	CHANGEPASSWORD("/fxml/changepassword.fxml"), //
 	MAIN_WINDOW("/fxml/main_window.fxml"), //
+	MIGRATION_START("/fxml/migration_start.fxml"), //
 	PREFERENCES("/fxml/preferences.fxml"), //
 	QUIT("/fxml/quit.fxml"), //
 	REMOVE_VAULT("/fxml/remove_vault.fxml"), //

@@ -13,6 +13,7 @@ import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.Tasks;
 import org.cryptomator.ui.controls.FontAwesome5Icon;
 import org.cryptomator.ui.fxapp.FxApplication;
+import org.cryptomator.ui.migration.MigrationComponent;
 import org.cryptomator.ui.vaultoptions.VaultOptionsComponent;
 import org.fxmisc.easybind.EasyBind;
 import org.slf4j.Logger;
@@ -32,15 +33,17 @@ public class VaultDetailController implements FxController {
 	private final ExecutorService executor;
 	private final FxApplication application;
 	private final VaultOptionsComponent.Builder vaultOptionsWindow;
+	private final MigrationComponent.Builder vaultMigrationWindow;
 
 	@Inject
-	VaultDetailController(ObjectProperty<Vault> vault, ExecutorService executor, FxApplication application, VaultOptionsComponent.Builder vaultOptionsWindow) {
+	VaultDetailController(ObjectProperty<Vault> vault, ExecutorService executor, FxApplication application, VaultOptionsComponent.Builder vaultOptionsWindow, MigrationComponent.Builder vaultMigrationWindow) {
 		this.vault = vault;
 		this.glyph = EasyBind.select(vault).selectObject(Vault::stateProperty).map(this::getGlyphForVaultState).orElse(FontAwesome5Icon.EXCLAMATION_TRIANGLE);
 		this.executor = executor;
 		this.application = application;
 		this.vaultOptionsWindow = vaultOptionsWindow;
 		this.anyVaultSelected = vault.isNotNull();
+		this.vaultMigrationWindow = vaultMigrationWindow;
 	}
 
 	private FontAwesome5Icon getGlyphForVaultState(VaultState state) {
@@ -83,12 +86,17 @@ public class VaultDetailController implements FxController {
 	}
 
 	@FXML
-	public void revealStorageLocation(ActionEvent actionEvent) {
+	public void showVaultMigrator() {
+		vaultMigrationWindow.vault(vault.get()).build().showMigrationWindow();
+	}
+
+	@FXML
+	public void revealStorageLocation() {
 		application.getHostServices().showDocument(vault.get().getPath().toUri().toString());
 	}
 
 	@FXML
-	public void revealAccessLocation(ActionEvent actionEvent) {
+	public void revealAccessLocation() {
 		try {
 			vault.get().reveal();
 		} catch (Volume.VolumeException e) {

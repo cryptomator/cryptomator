@@ -12,6 +12,7 @@ public enum FontAwesome5Icon {
 	EXCLAMATION_TRIANGLE("\uF071"), //
 	EYE("\uF06E"), //
 	EYE_SLASH("\uF070"), //
+	FILE_IMPORT("\uF56F"), //
 	FOLDER_OPEN("\uF07C"), //
 	HDD("\uF0A0"), //
 	KEY("\uF084"), //

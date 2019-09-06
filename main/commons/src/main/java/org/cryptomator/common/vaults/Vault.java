@@ -68,6 +68,7 @@ public class Vault {
 	private final BooleanBinding locked;
 	private final BooleanBinding processing;
 	private final BooleanBinding unlocked;
+	private final BooleanBinding needsMigration;
 	private final ObjectBinding<Path> accessPoint;
 
 	private volatile Volume volume;
@@ -85,6 +86,7 @@ public class Vault {
 		this.locked = Bindings.createBooleanBinding(this::isLocked, state);
 		this.processing = Bindings.createBooleanBinding(this::isProcessing, state);
 		this.unlocked = Bindings.createBooleanBinding(this::isUnlocked, state);
+		this.needsMigration = Bindings.createBooleanBinding(this::isNeedsMigration, state);
 		this.accessPoint = Bindings.createObjectBinding(this::getAccessPoint, state);
 	}
 
@@ -214,6 +216,14 @@ public class Vault {
 
 	public boolean isUnlocked() {
 		return state.get() == VaultState.UNLOCKED;
+	}
+	
+	public BooleanBinding needsMigrationProperty() {
+		return needsMigration;
+	}
+	
+	public boolean isNeedsMigration() {
+		return state.get() == VaultState.NEEDS_MIGRATION;
 	}
 
 	public StringBinding displayableNameProperty() {

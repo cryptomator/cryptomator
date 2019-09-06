@@ -87,6 +87,13 @@
 			</Button>
 		</VBox>
 
+		<!-- TODO we might want to split this fxml file into one file per vault state -->
+		<Button styleClass="button-large" text="TODO Upgrade Vault" minWidth="120" onAction="#showVaultMigrator" visible="${controller.vault.needsMigration}">
+			<graphic>
+				<FontAwesome5IconView glyph="FILE_IMPORT" glyphSize="15"/>
+			</graphic>
+		</Button>
+
 		<Region VBox.vgrow="ALWAYS"/>
 
 		<VBox spacing="6" visible="${controller.vault.unlocked}" managed="${controller.vault.unlocked}">
