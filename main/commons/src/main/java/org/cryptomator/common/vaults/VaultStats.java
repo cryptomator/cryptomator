@@ -47,11 +47,9 @@ public class VaultStats {
 				LOG.debug("start recording stats");
 				updateService.restart();
 				break;
-			case LOCKED:
+			default:
 				LOG.debug("stop recording stats");
 				updateService.cancel();
-				break;
-			default:
 				break;
 		}
 	}
