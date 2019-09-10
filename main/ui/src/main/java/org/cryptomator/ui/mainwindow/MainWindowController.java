@@ -1,11 +1,11 @@
 package org.cryptomator.ui.mainwindow;
 
 import javafx.beans.binding.BooleanBinding;
-import javafx.beans.binding.IntegerBinding;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -39,8 +39,8 @@ public class MainWindowController implements FxController {
 	private final VaultFactory vaultFactory;
 	private final WrongFileAlertComponent.Builder wrongFileAlert;
 	public HBox titleBar;
-	public VBox dragAndDropRegion;
-	public VBox dragNDropIndicator;
+	public VBox root;
+	public Pane dragAndDropIndicator;
 	public Region resizer;
 	private double xOffset;
 	private double yOffset;
@@ -75,18 +75,18 @@ public class MainWindowController implements FxController {
 			window.setHeight(event.getSceneY());
 		});
 		updateChecker.automaticallyCheckForUpdatesIfEnabled();
-		dragNDropIndicator.setVisible(false);
-		dragAndDropRegion.setOnDragOver(event -> {
-			if (event.getGestureSource() != dragAndDropRegion && event.getDragboard().hasFiles()) {
+		dragAndDropIndicator.setVisible(false);
+		root.setOnDragOver(event -> {
+			if (event.getGestureSource() != root && event.getDragboard().hasFiles()) {
 				/* allow for both copying and moving, whatever user chooses */
 				event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
-				dragNDropIndicator.setVisible(true);
+				dragAndDropIndicator.setVisible(true);
 			}
 			event.consume();
 		});
-		dragAndDropRegion.setOnDragExited(event -> dragNDropIndicator.setVisible(false));
-		dragAndDropRegion.setOnDragDropped(event -> {
-			if (event.getGestureSource() != dragAndDropRegion && event.getDragboard().hasFiles()) {
+		root.setOnDragExited(event -> dragAndDropIndicator.setVisible(false));
+		root.setOnDragDropped(event -> {
+			if (event.getGestureSource() != root && event.getDragboard().hasFiles()) {
 				/* allow for both copying and moving, whatever user chooses */
 				event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
 				File dropped = event.getDragboard().getFiles().get(0);
