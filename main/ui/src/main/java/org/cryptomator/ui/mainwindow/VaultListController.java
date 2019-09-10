@@ -5,8 +5,8 @@ import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.fxml.FXML;
 import javafx.scene.control.ListView;
-import javafx.scene.layout.AnchorPane;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.addvaultwizard.AddVaultWizardComponent;
 import org.cryptomator.ui.common.FxController;
@@ -23,12 +23,12 @@ public class VaultListController implements FxController {
 
 	private final ObservableList<Vault> vaults;
 	private final ObjectProperty<Vault> selectedVault;
-	private final BooleanBinding noVaultSelected;
 	private final VaultListCellFactory cellFactory;
 	private final AddVaultWizardComponent.Builder addVaultWizard;
 	private final RemoveVaultComponent.Builder removeVault;
+	private final BooleanBinding noVaultSelected;
+	private final BooleanBinding emptyVaultList;
 	public ListView<Vault> vaultList;
-	public AnchorPane onboardingOverlay;
 
 	@Inject
 	VaultListController(ObservableList<Vault> vaults, ObjectProperty<Vault> selectedVault, VaultListCellFactory cellFactory, AddVaultWizardComponent.Builder addVaultWizard, RemoveVaultComponent.Builder removeVault) {
@@ -38,10 +38,10 @@ public class VaultListController implements FxController {
 		this.addVaultWizard = addVaultWizard;
 		this.removeVault = removeVault;
 		this.noVaultSelected = selectedVault.isNull();
+		this.emptyVaultList = Bindings.isEmpty(vaults);
 	}
 
 	public void initialize() {
-		onboardingOverlay.visibleProperty().bind(Bindings.isEmpty(vaults));
 		vaultList.setItems(vaults);
 		vaultList.setCellFactory(cellFactory);
 		selectedVault.bind(vaultList.getSelectionModel().selectedItemProperty());
@@ -54,10 +54,12 @@ public class VaultListController implements FxController {
 		});
 	}
 
+	@FXML
 	public void didClickAddVault() {
 		addVaultWizard.build().showAddVaultWizard();
 	}
 
+	@FXML
 	public void didClickRemoveVault() {
 		Vault v = selectedVault.get();
 		if (v != null) {
@@ -68,6 +70,14 @@ public class VaultListController implements FxController {
 	}
 
 	// Getter and Setter
+
+	public BooleanBinding emptyVaultListProperty() {
+		return emptyVaultList;
+	}
+
+	public boolean isEmptyVaultList() {
+		return emptyVaultList.get();
+	}
 
 	public BooleanBinding noVaultSelectedProperty() {
 		return noVaultSelected;

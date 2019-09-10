@@ -20,13 +20,12 @@
 			<contextMenu>
 				<ContextMenu>
 					<items>
-						<MenuItem text="%main.vaultlist.contextMenu.add" onAction="#didClickAddVault"/>
 						<MenuItem text="%main.vaultlist.contextMenu.remove" onAction="#didClickRemoveVault" disable="${controller.noVaultSelected}"/>
 					</items>
 				</ContextMenu>
 			</contextMenu>
 		</ListView>
-		<AnchorPane fx:id="onboardingOverlay">
+		<AnchorPane visible="${controller.emptyVaultList}">
 			<HBox AnchorPane.leftAnchor="10" AnchorPane.rightAnchor="10" AnchorPane.bottomAnchor="100" alignment="BOTTOM_LEFT">
 				<Label textAlignment="CENTER" text="%main.vaultlist.emptyList.onboardingInstruction" wrapText="true"/>
 			</HBox>
