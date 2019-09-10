@@ -23,6 +23,10 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Collection;
+import java.util.stream.Collectors;
 
 @MainWindowScoped
 public class MainWindowController implements FxController {
@@ -89,25 +93,33 @@ public class MainWindowController implements FxController {
 			if (event.getGestureSource() != root && event.getDragboard().hasFiles()) {
 				/* allow for both copying and moving, whatever user chooses */
 				event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
-				File dropped = event.getDragboard().getFiles().get(0);
-				if (dropped.getName().endsWith(".cryptomator")) {
-					addVault(dropped);
-				} else {
+				Collection<Path> vaultPaths = event.getDragboard().getFiles().stream().map(File::toPath).filter(this::isVaultPath).collect(Collectors.toSet());
+				if (vaultPaths.isEmpty()) {
 					wrongFileAlert.build().showWrongFileAlertWindow();
+				} else {
+					vaultPaths.forEach(this::addVault);
 				}
 			}
 			event.consume();
 		});
 	}
 
-	private void addVault(final File dropped) {
-		if (dropped != null) {
-			VaultSettings vaultSettings = VaultSettings.withRandomId();
-			vaultSettings.path().setValue(dropped.toPath().toAbsolutePath().getParent());
-			Vault newVault = vaultFactory.get(vaultSettings);
-			vaults.add(newVault);
-			//TODO: error handling?
+	private boolean isVaultPath(Path path) {
+		if (path.getFileName().toString().endsWith(".cryptomator")) {
+			return true;
+		} else if (Files.exists(path.resolve("masterkey.cryptomator"))) {
+			return true;
+		} else {
+			return false;
 		}
+	}
+
+	private void addVault(Path pathToVault) {
+		VaultSettings vaultSettings = VaultSettings.withRandomId();
+		vaultSettings.path().setValue(pathToVault);
+		Vault newVault = vaultFactory.get(vaultSettings);
+		vaults.add(newVault);
+		//TODO: error handling?
 	}
 
 	private void loadFont(String resourcePath) {
