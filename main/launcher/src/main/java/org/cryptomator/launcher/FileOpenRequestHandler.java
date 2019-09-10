@@ -34,10 +34,8 @@ class FileOpenRequestHandler {
 	@Inject
 	public FileOpenRequestHandler(@Named("launchEventQueue") BlockingQueue<AppLaunchEvent> launchEventQueue) {
 		this.launchEventQueue = launchEventQueue;
-		try {
+		if (Desktop.getDesktop().isSupported(Desktop.Action.APP_OPEN_FILE)) {
 			Desktop.getDesktop().setOpenFileHandler(this::openFiles);
-		} catch (UnsupportedOperationException e) {
-			LOG.info("Unable to setOpenFileHandler, probably not supported on this OS.");
 		}
 	}
 

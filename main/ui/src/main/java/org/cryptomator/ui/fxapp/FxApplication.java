@@ -26,6 +26,8 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import java.awt.desktop.QuitResponse;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 @FxApplicationScoped
 public class FxApplication extends Application {
@@ -87,12 +89,15 @@ public class FxApplication extends Application {
 		});
 	}
 
-	public void showMainWindow() {
+	public CompletionStage<Stage> showMainWindow() {
+		CompletableFuture<Stage> future = new CompletableFuture<>();
 		Platform.runLater(() -> {
 			Stage stage = mainWindow.get().showMainWindow();
 			addVisibleStage(stage);
 			LOG.debug("Showing MainWindow");
+			future.complete(stage);
 		});
+		return future;
 	}
 
 	public void showUnlockWindow(Vault vault) {

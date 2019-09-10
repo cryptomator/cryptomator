@@ -7,6 +7,7 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.ListView;
+import javafx.stage.Stage;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.addvaultwizard.AddVaultWizardComponent;
 import org.cryptomator.ui.common.FxController;
@@ -21,6 +22,7 @@ public class VaultListController implements FxController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(VaultListController.class);
 
+	private final Stage window;
 	private final ObservableList<Vault> vaults;
 	private final ObjectProperty<Vault> selectedVault;
 	private final VaultListCellFactory cellFactory;
@@ -31,7 +33,8 @@ public class VaultListController implements FxController {
 	public ListView<Vault> vaultList;
 
 	@Inject
-	VaultListController(ObservableList<Vault> vaults, ObjectProperty<Vault> selectedVault, VaultListCellFactory cellFactory, AddVaultWizardComponent.Builder addVaultWizard, RemoveVaultComponent.Builder removeVault) {
+	VaultListController(@MainWindow Stage window, ObservableList<Vault> vaults, ObjectProperty<Vault> selectedVault, VaultListCellFactory cellFactory, AddVaultWizardComponent.Builder addVaultWizard, RemoveVaultComponent.Builder removeVault) {
+		this.window = window;
 		this.vaults = vaults;
 		this.selectedVault = selectedVault;
 		this.cellFactory = cellFactory;
@@ -48,7 +51,12 @@ public class VaultListController implements FxController {
 		vaults.addListener((ListChangeListener.Change<? extends Vault> c) -> { // not threadsafe, but we can only add one vault at a time
 			while (c.next()) {
 				if (c.wasAdded()) {
-					vaultList.getSelectionModel().selectLast();
+					Vault anyAddedVault = c.getAddedSubList().get(0);
+					vaultList.getSelectionModel().select(anyAddedVault);
+					window.setIconified(false);
+					window.show();
+					window.toFront();
+					window.requestFocus();
 				}
 			}
 		});
