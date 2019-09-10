@@ -29,8 +29,9 @@ import java.util.function.Consumer;
 
 @TrayMenuScoped
 class TrayMenuController {
-	
+
 	private static final Logger LOG = LoggerFactory.getLogger(TrayMenuController.class);
+	public static final Set<VaultState> STATES_ALLOWING_TERMINATION = EnumSet.of(VaultState.LOCKED, VaultState.NEEDS_MIGRATION, VaultState.MISSING, VaultState.ERROR);
 
 	private final ResourceBundle resourceBundle;
 	private final FxApplicationStarter fxApplicationStarter;
@@ -70,6 +71,11 @@ class TrayMenuController {
 			Desktop.getDesktop().setQuitHandler(this::handleQuitRequest);
 		}
 
+		// allow sudden termination
+		if (Desktop.getDesktop().isSupported(Desktop.Action.APP_SUDDEN_TERMINATION)) {
+			Desktop.getDesktop().enableSuddenTermination();
+		}
+
 		// show window on start?
 		if (!settings.startHidden().get()) {
 			showMainWindow(null);
@@ -79,14 +85,15 @@ class TrayMenuController {
 	private void vaultListChanged(@SuppressWarnings("unused") Observable observable) {
 		assert Platform.isFxApplicationThread();
 		rebuildMenu();
-		Set<VaultState> statesAllowingTermination = EnumSet.of(VaultState.LOCKED, VaultState.NEEDS_MIGRATION, VaultState.MISSING, VaultState.ERROR);
-		boolean allVaultsAllowTermination = vaults.stream().map(Vault::getState).allMatch(statesAllowingTermination::contains);
-		allowSuddenTermination.set(allVaultsAllowTermination);
-		if (Desktop.getDesktop().isSupported(Desktop.Action.APP_SUDDEN_TERMINATION)) {
+		boolean allVaultsAllowTermination = vaults.stream().map(Vault::getState).allMatch(STATES_ALLOWING_TERMINATION::contains);
+		boolean suddenTerminationChanged = allowSuddenTermination.compareAndSet(!allVaultsAllowTermination, allVaultsAllowTermination);
+		if (suddenTerminationChanged && Desktop.getDesktop().isSupported(Desktop.Action.APP_SUDDEN_TERMINATION)) {
 			if (allVaultsAllowTermination) {
 				Desktop.getDesktop().enableSuddenTermination();
+				LOG.debug("sudden termination enabled");
 			} else {
 				Desktop.getDesktop().disableSuddenTermination();
+				LOG.debug("sudden termination disabled");
 			}
 		}
 	}
@@ -117,16 +124,17 @@ class TrayMenuController {
 	private Menu buildSubmenu(Vault vault) {
 		Menu submenu = new Menu(vault.getDisplayableName());
 
-		// TODO add action listeners
 		if (vault.isLocked()) {
 			MenuItem unlockItem = new MenuItem(resourceBundle.getString("traymenu.vault.unlock"));
 			unlockItem.addActionListener(createActionListenerForVault(vault, this::unlockVault));
 			submenu.add(unlockItem);
 		} else if (vault.isUnlocked()) {
 			MenuItem lockItem = new MenuItem(resourceBundle.getString("traymenu.vault.lock"));
+			lockItem.setEnabled(false); // TODO add action listener
 			submenu.add(lockItem);
 
 			MenuItem revealItem = new MenuItem(resourceBundle.getString("traymenu.vault.reveal"));
+			revealItem.setEnabled(false); // TODO add action listener
 			submenu.add(revealItem);
 		}
 
