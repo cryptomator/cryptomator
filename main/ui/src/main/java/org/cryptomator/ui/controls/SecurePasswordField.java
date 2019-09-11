@@ -134,7 +134,7 @@ public class SecurePasswordField extends TextField {
 	 */
 	boolean containsNonPrintableCharacters() {
 		for (int i = 0; i < length; i++) {
-			if (Character.isDigit(content[i])) {
+			if (Character.isISOControl(content[i])) {
 				return true;
 			}
 		}
