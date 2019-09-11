@@ -1,4 +1,4 @@
-package org.cryptomator.ui.traymenu;
+package org.cryptomator.ui.launcher;
 
 import javafx.application.Platform;
 import org.cryptomator.ui.fxapp.FxApplication;
@@ -7,11 +7,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutorService;
 
-@TrayMenuScoped
+@Singleton
 public class FxApplicationStarter {
 
 	private static final Logger LOG = LoggerFactory.getLogger(FxApplicationStarter.class);
@@ -27,20 +28,20 @@ public class FxApplicationStarter {
 		this.future = new CompletableFuture<>();
 	}
 
-	public synchronized CompletionStage<FxApplication> get(boolean fromTrayMenu) {
+	public synchronized CompletionStage<FxApplication> get(boolean hasTrayIcon) {
 		if (!future.isDone()) {
-			start(fromTrayMenu);
+			start(hasTrayIcon);
 		}
 		return future;
 	}
 
-	private void start(boolean fromTrayMenu) {
+	private void start(boolean hasTrayIcon) {
 		executor.submit(() -> {
 			LOG.debug("Starting JavaFX runtime...");
 			Platform.startup(() -> {
 				assert Platform.isFxApplicationThread();
 				LOG.info("JavaFX Runtime started.");
-				FxApplication app = fxAppComponent.trayMenuSupported(fromTrayMenu).build().application();
+				FxApplication app = fxAppComponent.trayMenuSupported(hasTrayIcon).build().application();
 				app.start();
 				future.complete(app);
 			});

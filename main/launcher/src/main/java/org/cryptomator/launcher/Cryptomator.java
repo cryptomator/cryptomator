@@ -8,7 +8,7 @@ package org.cryptomator.launcher;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.logging.DebugMode;
 import org.cryptomator.logging.LoggerConfiguration;
-import org.cryptomator.ui.traymenu.TrayMenuComponent;
+import org.cryptomator.ui.launcher.UiLauncher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,17 +33,17 @@ public class Cryptomator {
 	private final Optional<String> applicationVersion;
 	private final CountDownLatch shutdownLatch;
 	private final CleanShutdownPerformer shutdownPerformer;
-	private final TrayMenuComponent.Builder trayComponent;
+	private final UiLauncher uiLauncher;
 
 	@Inject
-	Cryptomator(LoggerConfiguration logConfig, DebugMode debugMode, IpcFactory ipcFactory, @Named("applicationVersion") Optional<String> applicationVersion, @Named("shutdownLatch") CountDownLatch shutdownLatch, CleanShutdownPerformer shutdownPerformer, TrayMenuComponent.Builder trayComponent) {
+	Cryptomator(LoggerConfiguration logConfig, DebugMode debugMode, IpcFactory ipcFactory, @Named("applicationVersion") Optional<String> applicationVersion, @Named("shutdownLatch") CountDownLatch shutdownLatch, CleanShutdownPerformer shutdownPerformer, UiLauncher uiLauncher) {
 		this.logConfig = logConfig;
 		this.debugMode = debugMode;
 		this.ipcFactory = ipcFactory;
 		this.applicationVersion = applicationVersion;
 		this.shutdownLatch = shutdownLatch;
 		this.shutdownPerformer = shutdownPerformer;
-		this.trayComponent = trayComponent;
+		this.uiLauncher = uiLauncher;
 	}
 
 	public static void main(String[] args) {
@@ -69,6 +69,7 @@ public class Cryptomator {
 		try (IpcFactory.IpcEndpoint endpoint = ipcFactory.create()) {
 			endpoint.getRemote().handleLaunchArgs(args); // if we are the server, getRemote() returns self.
 			if (endpoint.isConnectedToRemote()) {
+				endpoint.getRemote().revealRunningApp();
 				LOG.info("Found running application instance. Shutting down...");
 				return 2;
 			} else {
@@ -90,7 +91,7 @@ public class Cryptomator {
 	private int runGuiApplication() {
 		try {
 			shutdownPerformer.registerShutdownHook();
-			trayComponent.build().addIconToSystemTray();
+			uiLauncher.launch();
 			shutdownLatch.await();
 			LOG.info("UI shut down");
 			return 0;

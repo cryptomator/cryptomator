@@ -2,20 +2,14 @@ package org.cryptomator.launcher;
 
 import dagger.Module;
 import dagger.Provides;
-import org.cryptomator.common.settings.Settings;
-import org.cryptomator.common.settings.SettingsProvider;
-import org.cryptomator.ui.model.AppLaunchEvent;
-import org.cryptomator.ui.traymenu.TrayMenuComponent;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
 import java.util.Optional;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.function.Consumer;
 
-@Module(subcomponents = {TrayMenuComponent.class})
+@Module
 class CryptomatorModule {
 
 	@Provides
@@ -30,13 +24,6 @@ class CryptomatorModule {
 	@Named("shutdownLatch")
 	static CountDownLatch provideShutdownLatch() {
 		return new CountDownLatch(1);
-	}
-
-	@Provides
-	@Singleton
-	@Named("launchEventQueue")
-	static BlockingQueue<AppLaunchEvent> provideFileOpenRequests() {
-		return new ArrayBlockingQueue<>(10);
 	}
 
 	@Provides

@@ -10,6 +10,8 @@ import java.rmi.RemoteException;
 
 interface IpcProtocol extends Remote {
 
-	void handleLaunchArgs(String[] args) throws RemoteException;
+	void revealRunningApp() throws RemoteException;
+
+	void handleLaunchArgs(String... args) throws RemoteException;
 
 }

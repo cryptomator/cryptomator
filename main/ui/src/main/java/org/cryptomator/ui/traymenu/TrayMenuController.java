@@ -7,6 +7,7 @@ import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.ui.fxapp.FxApplication;
+import org.cryptomator.ui.launcher.FxApplicationStarter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,11 +75,6 @@ class TrayMenuController {
 		// allow sudden termination
 		if (Desktop.getDesktop().isSupported(Desktop.Action.APP_SUDDEN_TERMINATION)) {
 			Desktop.getDesktop().enableSuddenTermination();
-		}
-
-		// show window on start?
-		if (!settings.startHidden().get()) {
-			showMainWindow(null);
 		}
 	}
 

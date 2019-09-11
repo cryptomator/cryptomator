@@ -6,25 +6,18 @@
 package org.cryptomator.ui.traymenu;
 
 import dagger.Subcomponent;
-import org.cryptomator.ui.fxapp.FxApplication;
 
 import java.awt.SystemTray;
 
 @TrayMenuScoped
-@Subcomponent(modules = {TrayMenuModule.class})
+@Subcomponent
 public interface TrayMenuComponent {
 
 	TrayIconController trayIconController();
 
-	FxApplicationStarter fxAppStarter();
-
 	default void addIconToSystemTray() {
-		if (SystemTray.isSupported()) {
-			trayIconController().initializeTrayIcon();
-		} else {
-			// show main window directly without any tray support:
-			fxAppStarter().get(false).thenAccept(FxApplication::showMainWindow);
-		}
+		assert SystemTray.isSupported();
+		trayIconController().initializeTrayIcon();
 	}
 
 	@Subcomponent.Builder

@@ -50,7 +50,7 @@ import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.ui.ExitUtil;
 import org.cryptomator.ui.controls.DirectoryListCell;
 import org.cryptomator.ui.l10n.Localization;
-import org.cryptomator.ui.model.AppLaunchEvent;
+import org.cryptomator.ui.launcher.AppLaunchEvent;
 import org.cryptomator.ui.model.AutoUnlocker;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultFactory;

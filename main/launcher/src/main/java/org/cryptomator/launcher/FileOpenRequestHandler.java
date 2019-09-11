@@ -6,7 +6,7 @@
  *******************************************************************************/
 package org.cryptomator.launcher;
 
-import org.cryptomator.ui.model.AppLaunchEvent;
+import org.cryptomator.ui.launcher.AppLaunchEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,9 +39,9 @@ class FileOpenRequestHandler {
 		}
 	}
 
-	private void openFiles(final OpenFilesEvent evt) {
+	private void openFiles(OpenFilesEvent evt) {
 		Stream<Path> pathsToOpen = evt.getFiles().stream().map(File::toPath);
-		AppLaunchEvent launchEvent = new AppLaunchEvent(pathsToOpen);
+		AppLaunchEvent launchEvent = new AppLaunchEvent(AppLaunchEvent.EventType.OPEN_FILE, pathsToOpen);
 		tryToEnqueueFileOpenRequest(launchEvent);
 	}
 
@@ -59,7 +59,7 @@ class FileOpenRequestHandler {
 				return null;
 			}
 		}).filter(Objects::nonNull);
-		AppLaunchEvent launchEvent = new AppLaunchEvent(pathsToOpen);
+		AppLaunchEvent launchEvent = new AppLaunchEvent(AppLaunchEvent.EventType.OPEN_FILE, pathsToOpen);
 		tryToEnqueueFileOpenRequest(launchEvent);
 	}
 

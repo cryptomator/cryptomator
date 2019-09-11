@@ -89,15 +89,12 @@ public class FxApplication extends Application {
 		});
 	}
 
-	public CompletionStage<Stage> showMainWindow() {
-		CompletableFuture<Stage> future = new CompletableFuture<>();
+	public void showMainWindow() {
 		Platform.runLater(() -> {
 			Stage stage = mainWindow.get().showMainWindow();
 			addVisibleStage(stage);
 			LOG.debug("Showing MainWindow");
-			future.complete(stage);
 		});
-		return future;
 	}
 
 	public void showUnlockWindow(Vault vault) {
