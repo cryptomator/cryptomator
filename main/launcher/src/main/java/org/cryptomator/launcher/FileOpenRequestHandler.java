@@ -34,7 +34,7 @@ class FileOpenRequestHandler {
 	@Inject
 	public FileOpenRequestHandler(@Named("launchEventQueue") BlockingQueue<AppLaunchEvent> launchEventQueue) {
 		this.launchEventQueue = launchEventQueue;
-		if (Desktop.getDesktop().isSupported(Desktop.Action.APP_OPEN_FILE)) {
+		if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.APP_OPEN_FILE)) {
 			Desktop.getDesktop().setOpenFileHandler(this::openFiles);
 		}
 	}
