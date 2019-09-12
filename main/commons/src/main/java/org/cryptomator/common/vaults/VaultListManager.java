@@ -8,6 +8,9 @@
  *******************************************************************************/
 package org.cryptomator.common.vaults;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.cryptofs.CryptoFileSystemProvider;
 import org.cryptomator.cryptofs.migration.Migrators;
@@ -15,25 +18,56 @@ import org.cryptomator.cryptofs.migration.Migrators;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.IOException;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import java.util.Collection;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Singleton
-public class VaultFactory {
+public class VaultListManager {
 	
 	private static final String MASTERKEY_FILENAME = "masterkey.cryptomator"; // TODO: deduplicate constant declared in multiple classes
 
 	private final VaultComponent.Builder vaultComponentBuilder;
-	private final ConcurrentMap<VaultSettings, Vault> vaults = new ConcurrentHashMap<>();
+	private final ObservableList<Vault> vaultList;
 
 	@Inject
-	public VaultFactory(VaultComponent.Builder vaultComponentBuilder) {
+	public VaultListManager(VaultComponent.Builder vaultComponentBuilder, Settings settings) {
 		this.vaultComponentBuilder = vaultComponentBuilder;
+		this.vaultList = FXCollections.observableArrayList(Vault::observables);
+		
+		addAll(settings.getDirectories());
+		vaultList.addListener(new VaultListChangeListener(settings.getDirectories()));
 	}
 
-	public Vault get(VaultSettings vaultSettings) {
-		return vaults.computeIfAbsent(vaultSettings, this::create);
+	public ObservableList<Vault> getVaultList() {
+		return vaultList;
+	}
+
+	public Vault add(Path pathToVault) throws NoSuchFileException {
+		if (!CryptoFileSystemProvider.containsVault(pathToVault, MASTERKEY_FILENAME)) {
+			throw new NoSuchFileException(pathToVault.toString(), null, "Not a vault directory");
+		}
+		Optional<Vault> alreadyExistingVault = get(pathToVault);
+		if (alreadyExistingVault.isPresent()) {
+			return alreadyExistingVault.get();
+		} else {
+			VaultSettings vaultSettings = VaultSettings.withRandomId();
+			vaultSettings.path().set(pathToVault);
+			Vault newVault = create(vaultSettings);
+			vaultList.add(newVault);
+			return newVault;
+		}
+	}
+	
+	private void addAll(Collection<VaultSettings> vaultSettings) {
+		Collection<Vault> vaults = vaultSettings.stream().map(this::create).collect(Collectors.toList());
+		vaultList.addAll(vaults);
+	}
+	
+	private Optional<Vault> get(Path vaultPath) {
+		return vaultList.stream().filter(v -> v.getPath().equals(vaultPath)).findAny();
 	}
 
 	private Vault create(VaultSettings vaultSettings) {

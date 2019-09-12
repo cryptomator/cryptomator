@@ -1,7 +1,6 @@
 package org.cryptomator.ui.mainwindow;
 
 import javafx.beans.binding.BooleanBinding;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.HBox;
@@ -9,9 +8,8 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.common.vaults.Vault;
-import org.cryptomator.common.vaults.VaultFactory;
+import org.cryptomator.common.vaults.VaultListManager;
 import org.cryptomator.ui.common.FontLoader;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.fxapp.FxApplication;
@@ -24,23 +22,26 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.File;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @MainWindowScoped
 public class MainWindowController implements FxController {
 
 	private static final String TITLE_FONT = "/css/dosis-bold.ttf";
 	private static final Logger LOG = LoggerFactory.getLogger(MainWindowController.class);
+	private static final String MASTERKEY_FILENAME = "masterkey.cryptomator"; // TODO: deduplicate constant declared in multiple classes
 
 	private final Stage window;
 	private final FxApplication application;
 	private final boolean minimizeToSysTray;
 	private final UpdateChecker updateChecker;
 	private final BooleanBinding updateAvailable;
-	private final ObservableList<Vault> vaults;
-	private final VaultFactory vaultFactory;
+	private final VaultListManager vaultListManager;
 	private final WrongFileAlertComponent.Builder wrongFileAlert;
 	public HBox titleBar;
 	public VBox root;
@@ -50,14 +51,13 @@ public class MainWindowController implements FxController {
 	private double yOffset;
 
 	@Inject
-	public MainWindowController(@MainWindow Stage window, FxApplication application, @Named("trayMenuSupported") boolean minimizeToSysTray, UpdateChecker updateChecker, ObservableList<Vault> vaults, VaultFactory vaultFactory, WrongFileAlertComponent.Builder wrongFileAlert) {
+	public MainWindowController(@MainWindow Stage window, FxApplication application, @Named("trayMenuSupported") boolean minimizeToSysTray, UpdateChecker updateChecker, VaultListManager vaultListManager, WrongFileAlertComponent.Builder wrongFileAlert) {
 		this.window = window;
 		this.application = application;
 		this.minimizeToSysTray = minimizeToSysTray;
 		this.updateChecker = updateChecker;
 		this.updateAvailable = updateChecker.latestVersionProperty().isNotNull();
-		this.vaults = vaults;
-		this.vaultFactory = vaultFactory;
+		this.vaultListManager = vaultListManager;
 		this.wrongFileAlert = wrongFileAlert;
 	}
 
@@ -93,33 +93,26 @@ public class MainWindowController implements FxController {
 			if (event.getGestureSource() != root && event.getDragboard().hasFiles()) {
 				/* allow for both copying and moving, whatever user chooses */
 				event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
-				Collection<Path> vaultPaths = event.getDragboard().getFiles().stream().map(File::toPath).filter(this::isVaultPath).collect(Collectors.toSet());
+				Collection<Vault> vaultPaths = event.getDragboard().getFiles().stream().map(File::toPath).flatMap(this::addVault).collect(Collectors.toSet());
 				if (vaultPaths.isEmpty()) {
 					wrongFileAlert.build().showWrongFileAlertWindow();
-				} else {
-					vaultPaths.forEach(this::addVault);
 				}
 			}
 			event.consume();
 		});
 	}
 
-	private boolean isVaultPath(Path path) {
-		if (path.getFileName().toString().endsWith(".cryptomator")) {
-			return true;
-		} else if (Files.exists(path.resolve("masterkey.cryptomator"))) {
-			return true;
-		} else {
-			return false;
+	private Stream<Vault> addVault(Path pathToVault) {
+		try {
+			if (pathToVault.getFileName().toString().equals(MASTERKEY_FILENAME)) {
+				return Stream.of(vaultListManager.add(pathToVault.getParent()));
+			} else {
+				return Stream.of(vaultListManager.add(pathToVault));
+			}
+		} catch (NoSuchFileException e) {
+			LOG.debug("Not a vault: {}", pathToVault);
 		}
-	}
-
-	private void addVault(Path pathToVault) {
-		VaultSettings vaultSettings = VaultSettings.withRandomId();
-		vaultSettings.path().setValue(pathToVault);
-		Vault newVault = vaultFactory.get(vaultSettings);
-		vaults.add(newVault);
-		//TODO: error handling?
+		return Stream.empty();
 	}
 
 	private void loadFont(String resourcePath) {

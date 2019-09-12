@@ -56,7 +56,7 @@ public class VaultListController implements FxController {
 					window.setIconified(false);
 					window.show();
 					window.toFront();
-					window.requestFocus();
+					window.requestFocus(); // TODO: this beeps on macOS if there is a modal child window...
 				}
 			}
 		});

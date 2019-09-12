@@ -46,14 +46,13 @@ import javafx.util.Duration;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.ui.fxapp.FxApplicationScoped;
-import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.ui.ExitUtil;
 import org.cryptomator.ui.controls.DirectoryListCell;
 import org.cryptomator.ui.l10n.Localization;
 import org.cryptomator.ui.launcher.AppLaunchEvent;
 import org.cryptomator.ui.model.AutoUnlocker;
 import org.cryptomator.common.vaults.Vault;
-import org.cryptomator.common.vaults.VaultFactory;
+import org.cryptomator.common.vaults.VaultListManager;
 import org.cryptomator.ui.model.upgrade.UpgradeStrategies;
 import org.cryptomator.ui.model.upgrade.UpgradeStrategy;
 import org.cryptomator.ui.util.DialogBuilderUtil;
@@ -70,7 +69,9 @@ import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
@@ -94,7 +95,7 @@ public class MainController implements ViewController {
 	private final Localization localization;
 	private final ExecutorService executorService;
 	private final BlockingQueue<AppLaunchEvent> launchEventQueue;
-	private final VaultFactory vaultFactoy;
+	private final VaultListManager vaultFactoy;
 	private final ViewControllerLoader viewControllerLoader;
 	private final ObjectProperty<ViewController> activeController = new SimpleObjectProperty<>();
 	private final ObservableList<Vault> vaults;
@@ -111,7 +112,7 @@ public class MainController implements ViewController {
 
 	@Inject
 	public MainController(@Named("mainWindow") Stage mainWindow, ExecutorService executorService, @Named("launchEventQueue") BlockingQueue<AppLaunchEvent> launchEventQueue, ExitUtil exitUtil, Localization localization,
-						  VaultFactory vaultFactoy, ViewControllerLoader viewControllerLoader, UpgradeStrategies upgradeStrategies, ObservableList<Vault> vaults, AutoUnlocker autoUnlocker) {
+						  VaultListManager vaultFactoy, ViewControllerLoader viewControllerLoader, UpgradeStrategies upgradeStrategies, ObservableList<Vault> vaults, AutoUnlocker autoUnlocker) {
 		this.mainWindow = mainWindow;
 		this.executorService = executorService;
 		this.launchEventQueue = launchEventQueue;
@@ -344,9 +345,11 @@ public class MainController implements ViewController {
 		}
 
 		final Vault vault = vaults.stream().filter(v -> v.getPath().equals(vaultPath)).findAny().orElseGet(() -> {
-			VaultSettings vaultSettings = VaultSettings.withRandomId();
-			vaultSettings.path().set(vaultPath);
-			return vaultFactoy.get(vaultSettings);
+			try {
+				return vaultFactoy.add(vaultPath);
+			} catch (NoSuchFileException e) {
+				throw new UncheckedIOException(e);
+			}
 		});
 
 		if (!vaults.contains(vault)) {

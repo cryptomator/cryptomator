@@ -10,7 +10,6 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.StringProperty;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.CheckBox;
@@ -18,9 +17,8 @@ import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
-import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.common.vaults.Vault;
-import org.cryptomator.common.vaults.VaultFactory;
+import org.cryptomator.common.vaults.VaultListManager;
 import org.cryptomator.cryptofs.CryptoFileSystemProperties;
 import org.cryptomator.cryptofs.CryptoFileSystemProvider;
 import org.cryptomator.ui.common.FxController;
@@ -36,10 +34,12 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.channels.WritableByteChannel;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.Collections;
@@ -60,9 +60,8 @@ public class CreateNewVaultPasswordController implements FxController {
 	private final ExecutorService executor;
 	private final StringProperty vaultName;
 	private final ObjectProperty<Path> vaultPath;
-	private final ObservableList<Vault> vaults;
 	private final ObjectProperty<Vault> vault;
-	private final VaultFactory vaultFactory;
+	private final VaultListManager vaultListManager;
 	private final ResourceBundle resourceBundle;
 	private final PasswordStrengthUtil strengthRater;
 	private final ReadmeGenerator readmeGenerator;
@@ -81,16 +80,15 @@ public class CreateNewVaultPasswordController implements FxController {
 	public CheckBox finalConfirmationCheckbox;
 
 	@Inject
-	CreateNewVaultPasswordController(@AddVaultWizard Stage window, @FxmlScene(FxmlFile.ADDVAULT_NEW_LOCATION) Lazy<Scene> chooseLocationScene, @FxmlScene(FxmlFile.ADDVAULT_SUCCESS) Lazy<Scene> successScene, ExecutorService executor, StringProperty vaultName, ObjectProperty<Path> vaultPath, ObservableList<Vault> vaults, @AddVaultWizard ObjectProperty<Vault> vault, VaultFactory vaultFactory, ResourceBundle resourceBundle, PasswordStrengthUtil strengthRater, ReadmeGenerator readmeGenerator) {
+	CreateNewVaultPasswordController(@AddVaultWizard Stage window, @FxmlScene(FxmlFile.ADDVAULT_NEW_LOCATION) Lazy<Scene> chooseLocationScene, @FxmlScene(FxmlFile.ADDVAULT_SUCCESS) Lazy<Scene> successScene, ExecutorService executor, StringProperty vaultName, ObjectProperty<Path> vaultPath, @AddVaultWizard ObjectProperty<Vault> vault, VaultListManager vaultListManager, ResourceBundle resourceBundle, PasswordStrengthUtil strengthRater, ReadmeGenerator readmeGenerator) {
 		this.window = window;
 		this.chooseLocationScene = chooseLocationScene;
 		this.successScene = successScene;
 		this.executor = executor;
 		this.vaultName = vaultName;
 		this.vaultPath = vaultPath;
-		this.vaults = vaults;
 		this.vault = vault;
-		this.vaultFactory = vaultFactory;
+		this.vaultListManager = vaultListManager;
 		this.resourceBundle = resourceBundle;
 		this.strengthRater = strengthRater;
 		this.readmeGenerator = readmeGenerator;
@@ -127,8 +125,10 @@ public class CreateNewVaultPasswordController implements FxController {
 
 	@FXML
 	public void next() {
+		Path pathToVault = vaultPath.get();
+		
 		try {
-			Files.createDirectory(vaultPath.get());
+			Files.createDirectory(pathToVault);
 		} catch (FileAlreadyExistsException e) {
 			LOG.error("Vault dir already exists.", e);
 			window.setScene(chooseLocationScene.get());
@@ -139,14 +139,9 @@ public class CreateNewVaultPasswordController implements FxController {
 
 		processing.set(true);
 		Tasks.create(() -> {
-			initializeVault(vaultPath.get(), passwordField.getCharacters());
+			initializeVault(pathToVault, passwordField.getCharacters());
 		}).onSuccess(() -> {
-			VaultSettings vaultSettings = VaultSettings.withRandomId();
-			vaultSettings.path().setValue(vaultPath.get());
-			Vault newVault = vaultFactory.get(vaultSettings);
-			vault.set(newVault);
-			vaults.add(newVault);
-			window.setScene(successScene.get());
+			initializationSucceeded(pathToVault);
 		}).onError(IOException.class, e -> {
 			// TODO show generic error screen
 			LOG.error("", e);
@@ -174,6 +169,16 @@ public class CreateNewVaultPasswordController implements FxController {
 			ch.write(US_ASCII.encode(readmeGenerator.createVaultStorageLocationReadmeRtf()));
 		}
 		LOG.info("Created vault at {}", path);
+	}
+	
+	private void initializationSucceeded(Path pathToVault) {
+		try {
+			Vault newVault = vaultListManager.add(pathToVault);
+			vault.set(newVault);
+			window.setScene(successScene.get());
+		} catch (NoSuchFileException e) {
+			throw new UncheckedIOException(e);
+		}
 	}
 
 	/* Getter/Setter */

@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 /**
  * This listener makes sure to reflect any changes to the vault list back to the settings.
  */
-public class VaultListChangeListener implements ListChangeListener<Vault> {
+class VaultListChangeListener implements ListChangeListener<Vault> {
 
 	private final ObservableList<VaultSettings> vaultSettingsList;
 
