@@ -1,8 +1,6 @@
 package org.cryptomator.ui.traymenu;
 
 import org.apache.commons.lang3.SystemUtils;
-import org.cryptomator.jni.JniException;
-import org.cryptomator.jni.MacApplicationUiState;
 import org.cryptomator.jni.MacFunctions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,8 +35,6 @@ public class TrayIconController {
 		if (SystemUtils.IS_OS_WINDOWS) {
 			// TODO: test on windows: is this a double click?
 			trayIcon.addActionListener(trayMenuController::showMainWindow);
-		} else if (SystemUtils.IS_OS_MAC) {
-			macFunctions.map(MacFunctions::uiState).ifPresent(JniException.ignore(MacApplicationUiState::transformToAgentApplication));
 		}
 
 		try {
