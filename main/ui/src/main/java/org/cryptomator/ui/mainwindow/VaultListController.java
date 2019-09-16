@@ -48,7 +48,7 @@ public class VaultListController implements FxController {
 		vaultList.setItems(vaults);
 		vaultList.setCellFactory(cellFactory);
 		selectedVault.bind(vaultList.getSelectionModel().selectedItemProperty());
-		vaults.addListener((ListChangeListener.Change<? extends Vault> c) -> { // not threadsafe, but we can only add one vault at a time
+		vaults.addListener((ListChangeListener.Change<? extends Vault> c) -> {
 			while (c.next()) {
 				if (c.wasAdded()) {
 					Vault anyAddedVault = c.getAddedSubList().get(0);
