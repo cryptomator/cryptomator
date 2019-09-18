@@ -51,11 +51,13 @@ public class UpdateChecker {
 	}
 
 	private void startCheckingForUpdates(Duration initialDelay) {
+		updateCheckerService.cancel();
+		updateCheckerService.reset();
 		updateCheckerService.setDelay(initialDelay);
 		updateCheckerService.setOnRunning(this::checkStarted);
 		updateCheckerService.setOnSucceeded(this::checkSucceeded);
 		updateCheckerService.setOnFailed(this::checkFailed);
-		updateCheckerService.restart();
+		updateCheckerService.start();
 	}
 
 	private void checkStarted(WorkerStateEvent event) {
