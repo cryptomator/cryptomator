@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import org.cryptomator.ui.controls.FontAwesome5IconView?>
+<HBox xmlns="http://javafx.com/javafx"
+	  xmlns:fx="http://javafx.com/fxml"
+	  fx:controller="org.cryptomator.ui.mainwindow.VaultListCellController"
+	  prefHeight="60"
+	  prefWidth="200"
+	  spacing="12"
+	  alignment="CENTER_LEFT">
+	<padding>
+		<Insets topRightBottomLeft="12"/>
+	</padding>
+	<children>
+		<VBox alignment="CENTER" minWidth="20">
+			<FontAwesome5IconView glyph="${controller.glyph}" HBox.hgrow="NEVER" glyphSize="16"/>
+		</VBox>
+		<VBox spacing="4" HBox.hgrow="ALWAYS">
+			<Label styleClass="header-label" text="${controller.vault.displayableName}"/>
+			<Label styleClass="detail-label" text="${controller.vault.displayablePath}" textOverrun="CENTER_ELLIPSIS"/>
+		</VBox>
+	</children>
+</HBox>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Circle?>
+<?import org.cryptomator.ui.controls.FontAwesome5IconView?>
+<VBox xmlns="http://javafx.com/javafx"
+	  xmlns:fx="http://javafx.com/fxml"
+	  fx:controller="org.cryptomator.ui.mainwindow.VaultDetailController"
+	  styleClass="vault-detail"
+	  minWidth="300"
+	  spacing="36">
+	<padding>
+		<Insets topRightBottomLeft="24"/>
+	</padding>
+	<children>
+		<HBox spacing="12" visible="${controller.anyVaultSelected}">
+			<StackPane alignment="CENTER">
+				<Circle styleClass="glyph-icon-primary" radius="16"/>
+				<FontAwesome5IconView styleClass="glyph-icon-white" glyph="${controller.glyph}" HBox.hgrow="NEVER" glyphSize="16"/>
+			</StackPane>
+			<VBox spacing="4" HBox.hgrow="ALWAYS">
+				<HBox spacing="12">
+					<Label styleClass="label-large" text="${controller.vault.displayableName}">
+						<tooltip>
+							<Tooltip text="${controller.vault.displayableName}"/>
+						</tooltip>
+					</Label>
+					<Region HBox.hgrow="ALWAYS"/>
+					<Label styleClass="badge,badge-pill,badge-secondary" text="%main.vaultDetail.lockedStatus" minWidth="-Infinity" visible="${controller.vault.locked}" managed="${controller.vault.locked}"/>
+					<Label styleClass="badge,badge-pill,badge-secondary" text="…" minWidth="-Infinity" visible="${controller.vault.processing}" managed="${controller.vault.processing}"/>
+					<Label styleClass="badge,badge-pill,badge-primary" text="%main.vaultDetail.unlockedStatus" minWidth="-Infinity" visible="${controller.vault.unlocked}" managed="${controller.vault.unlocked}"/>
+				</HBox>
+				<Hyperlink styleClass="hyperlink-secondary,hyperlink-hover-icon" text="${controller.vault.displayablePath}" textOverrun="CENTER_ELLIPSIS" onAction="#revealStorageLocation">
+					<graphic>
+						<FontAwesome5IconView styleClass="glyph-icon-secondary" glyph="EYE"/>
+					</graphic>
+					<tooltip>
+						<Tooltip text="${controller.vault.displayablePath}"/>
+					</tooltip>
+				</Hyperlink>
+			</VBox>
+		</HBox>
+
+		<fx:include VBox.vgrow="ALWAYS" source="vault_detail_locked.fxml" visible="${controller.vault.locked}" managed="${controller.vault.locked}"/>
+		<fx:include VBox.vgrow="ALWAYS" source="vault_detail_unlocked.fxml" visible="${controller.vault.unlocked}" managed="${controller.vault.unlocked}"/>
+		<fx:include VBox.vgrow="ALWAYS" source="vault_detail_needsmigration.fxml" visible="${controller.vault.needsMigration}" managed="${controller.vault.needsMigration}"/>
+	</children>
+</VBox>

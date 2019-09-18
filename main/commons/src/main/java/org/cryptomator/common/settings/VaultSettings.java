@@ -6,6 +6,7 @@
 package org.cryptomator.common.settings;
 
 import com.google.common.base.Strings;
+import com.google.common.io.BaseEncoding;
 import javafx.beans.Observable;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
@@ -23,6 +24,7 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Random;
 import java.util.UUID;
 
 /**
@@ -36,6 +38,8 @@ public class VaultSettings {
 	public static final boolean DEFAULT_USES_INDIVIDUAL_MOUNTPATH = false;
 	public static final boolean DEFAULT_USES_READONLY_MODE = false;
 	public static final String DEFAULT_MOUNT_FLAGS = "";
+	
+	private static final Random RNG = new Random(); 
 
 	private final String id;
 	private final ObjectProperty<Path> path = new SimpleObjectProperty();
@@ -69,20 +73,9 @@ public class VaultSettings {
 	}
 
 	private static String generateId() {
-		return asBase64String(nineBytesFrom(UUID.randomUUID()));
-	}
-
-	private static String asBase64String(byte[] bytes) {
-		byte[] base64Bytes = Base64.getUrlEncoder().encode(bytes);
-		return new String(base64Bytes, StandardCharsets.US_ASCII);
-	}
-
-	private static byte[] nineBytesFrom(UUID uuid) {
-		ByteBuffer uuidBuffer = ByteBuffer.allocate(9);
-		uuidBuffer.putLong(uuid.getMostSignificantBits());
-		uuidBuffer.put((byte) (uuid.getLeastSignificantBits() & 0xFF));
-		uuidBuffer.flip();
-		return uuidBuffer.array();
+		byte[] randomBytes = new byte[9];
+		RNG.nextBytes(randomBytes);
+		return BaseEncoding.base64Url().encode(randomBytes);
 	}
 
 	public static String normalizeMountName(String mountName) {

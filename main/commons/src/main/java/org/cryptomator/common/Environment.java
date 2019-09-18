@@ -28,6 +28,7 @@ public class Environment {
 
 	@Inject
 	public Environment() {
+		LOG.debug("java.library.path: {}", System.getProperty("java.library.path"));
 		LOG.debug("user.language: {}", System.getProperty("user.language"));
 		LOG.debug("user.region: {}", System.getProperty("user.region"));
 		LOG.debug("logback.configurationFile: {}", System.getProperty("logback.configurationFile"));

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ButtonBar?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Circle?>
+<?import org.cryptomator.ui.controls.FontAwesome5IconView?>
+<?import org.cryptomator.ui.controls.FormattedLabel?>
+<VBox xmlns="http://javafx.com/javafx"
+	  xmlns:fx="http://javafx.com/fxml"
+	  fx:controller="org.cryptomator.ui.migration.MigrationSuccessController"
+	  minWidth="400"
+	  maxWidth="400"
+	  minHeight="145"
+	  spacing="12">
+	<padding>
+		<Insets topRightBottomLeft="12"/>
+	</padding>
+	<children>
+		<HBox spacing="12" alignment="CENTER_LEFT" VBox.vgrow="ALWAYS">
+			<StackPane alignment="CENTER" HBox.hgrow="NEVER">
+				<Circle styleClass="glyph-icon-primary" radius="24"/>
+				<FontAwesome5IconView styleClass="glyph-icon-white" glyph="CHECK" glyphSize="24"/>
+			</StackPane>
+			<FormattedLabel format="%migration.success.nextStepsInstructions" arg1="${controller.vault.displayableName}" wrapText="true" HBox.hgrow="ALWAYS"/>
+		</HBox>
+
+		<VBox alignment="BOTTOM_CENTER" VBox.vgrow="ALWAYS">
+			<ButtonBar buttonMinWidth="120" buttonOrder="+CI">
+				<buttons>
+					<Button text="%generic.button.done" ButtonBar.buttonData="CANCEL_CLOSE" cancelButton="true" onAction="#close"/>
+					<Button text="%migration.success.unlockNow" ButtonBar.buttonData="FINISH" onAction="#unlockAndClose" defaultButton="true"/>
+				</buttons>
+			</ButtonBar>
+		</VBox>
+	</children>
+</VBox>

@@ -23,11 +23,7 @@
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.cryptomator</groupId>
-			<artifactId>jni</artifactId>
-		</dependency>
-		
+
 		<!-- Google -->
 		<dependency>
 			<groupId>com.google.guava</groupId>

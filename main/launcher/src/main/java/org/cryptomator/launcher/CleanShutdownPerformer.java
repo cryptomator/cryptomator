@@ -11,30 +11,38 @@ import java.util.concurrent.ConcurrentMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+@Singleton
 class CleanShutdownPerformer extends Thread {
 
 	private static final Logger LOG = LoggerFactory.getLogger(CleanShutdownPerformer.class);
-	static final ConcurrentMap<Runnable, Boolean> SHUTDOWN_TASKS = new ConcurrentHashMap<>();
+	private final ConcurrentMap<Runnable, Boolean> tasks = new ConcurrentHashMap<>();
+
+	@Inject
+	CleanShutdownPerformer() {
+		super(null, null, "ShutdownTasks", 0);
+	}
 
 	@Override
 	public void run() {
 		LOG.debug("Running graceful shutdown tasks...");
-		SHUTDOWN_TASKS.keySet().forEach(r -> {
+		tasks.keySet().forEach(r -> {
 			try {
 				r.run();
 			} catch (RuntimeException e) {
 				LOG.error("Exception while shutting down.", e);
 			}
 		});
-		SHUTDOWN_TASKS.clear();
-		LOG.info("Goodbye.");
+		tasks.clear();
 	}
 
-	static void scheduleShutdownTask(Runnable task) {
-		SHUTDOWN_TASKS.put(task, Boolean.TRUE);
+	void scheduleShutdownTask(Runnable task) {
+		tasks.put(task, Boolean.TRUE);
 	}
 
-	static void registerShutdownHook() {
-		Runtime.getRuntime().addShutdownHook(new CleanShutdownPerformer());
+	void registerShutdownHook() {
+		Runtime.getRuntime().addShutdownHook(this);
 	}
 }

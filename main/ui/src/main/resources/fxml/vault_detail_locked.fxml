@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.layout.VBox?>
+<?import org.cryptomator.ui.controls.FontAwesome5IconView?>
+<VBox xmlns="http://javafx.com/javafx"
+	  xmlns:fx="http://javafx.com/fxml"
+	  fx:controller="org.cryptomator.ui.mainwindow.VaultDetailLockedController"
+	  alignment="TOP_CENTER"
+	  spacing="9">
+	<padding>
+		<Insets topRightBottomLeft="24"/>
+	</padding>
+	<children>
+		<Button styleClass="button-large" text="%main.vaultDetail.unlockBtn" minWidth="120" onAction="#unlock" defaultButton="${controller.vault.locked}">
+			<graphic>
+				<FontAwesome5IconView glyph="KEY" glyphSize="15"/>
+			</graphic>
+		</Button>
+		<Hyperlink text="%main.vaultDetail.optionsBtn" onAction="#showVaultOptions">
+			<graphic>
+				<FontAwesome5IconView glyph="COG"/>
+			</graphic>
+		</Hyperlink>
+	</children>
+</VBox>
