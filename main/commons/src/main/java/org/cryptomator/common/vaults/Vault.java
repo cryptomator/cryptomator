@@ -50,9 +50,7 @@ import java.util.function.Predicate;
 
 @PerVault
 public class Vault {
-
-	@Deprecated(forRemoval = true, since = "1.5.0")
-	public static final Predicate<Vault> NOT_LOCKED = hasState(VaultState.LOCKED).negate();
+	
 	private static final Logger LOG = LoggerFactory.getLogger(Vault.class);
 	private static final String MASTERKEY_FILENAME = "masterkey.cryptomator"; // TODO: deduplicate constant declared in multiple classes
 	private static final Path HOME_DIR = Paths.get(SystemUtils.USER_HOME);
@@ -111,20 +109,6 @@ public class Vault {
 		return CryptoFileSystemProvider.newFileSystem(getPath(), fsProps);
 	}
 
-	@Deprecated(forRemoval = true, since = "1.5.0")
-	public void create(CharSequence passphrase) throws IOException {
-		if (!isValidVaultDirectory()) {
-			CryptoFileSystemProvider.initialize(getPath(), MASTERKEY_FILENAME, passphrase);
-		} else {
-			throw new FileAlreadyExistsException(getPath().toString());
-		}
-	}
-
-	@Deprecated(forRemoval = true, since = "1.5.0")
-	public void changePassphrase(CharSequence oldPassphrase, CharSequence newPassphrase) throws IOException, InvalidPassphraseException {
-		CryptoFileSystemProvider.changePassphrase(getPath(), MASTERKEY_FILENAME, oldPassphrase, newPassphrase);
-	}
-
 	public synchronized void unlock(CharSequence passphrase) throws CryptoException, IOException, Volume.VolumeException {
 		if (vaultSettings.usesIndividualMountPath().get() && Strings.isNullOrEmpty(vaultSettings.individualMountPath().get())) {
 			throw new NotDirectoryException("");
@@ -150,32 +134,8 @@ public class Vault {
 		}
 	}
 
-	/**
-	 * Ejects any mounted drives and locks this vault. no-op if this vault is currently locked.
-	 */
-	@Deprecated(forRemoval = true, since = "1.5.0")
-	public void prepareForShutdown() {
-		try {
-			lock(false);
-		} catch (Volume.VolumeException e) {
-			if (volume.supportsForcedUnmount()) {
-				try {
-					lock(true);
-				} catch (Volume.VolumeException e1) {
-					LOG.warn("Failed to force lock vault.", e1);
-				}
-			} else {
-				LOG.warn("Failed to gracefully lock vault.", e);
-			}
-		}
-	}
-
 	public void reveal() throws Volume.VolumeException {
 		volume.reveal();
-	}
-	
-	private static Predicate<Vault> hasState(VaultState state) {
-		return vault -> vault.getState() == state;
 	}
 
 	// ******************************************************************************
@@ -283,86 +243,6 @@ public class Vault {
 		return vaultSettings.path().getValue();
 	}
 
-	/**
-	 * @deprecated use displayablePathProperty() instead
-	 */
-	@Deprecated(forRemoval = true, since = "1.5.0")
-	public Binding<String> displayablePath() {
-		Path homeDir = Paths.get(SystemUtils.USER_HOME);
-		return EasyBind.map(vaultSettings.path(), p -> {
-			if (p.startsWith(homeDir)) {
-				Path relativePath = homeDir.relativize(p);
-				String homePrefix = SystemUtils.IS_OS_WINDOWS ? "~\\" : "~/";
-				return homePrefix + relativePath.toString();
-			} else {
-				return p.toString();
-			}
-		});
-	}
-
-	/**
-	 * @return Directory name without preceeding path components and file extension
-	 * @deprecated use nameProperty() instead
-	 */
-	@Deprecated(forRemoval = true, since = "1.5.0")
-	public Binding<String> name() {
-		return EasyBind.map(vaultSettings.path(), Path::getFileName).map(Path::toString);
-	}
-
-	@Deprecated(forRemoval = true, since = "1.5.0")
-	public boolean doesVaultDirectoryExist() {
-		return Files.isDirectory(getPath());
-	}
-
-	@Deprecated(forRemoval = true, since = "1.5.0")
-	public boolean isValidVaultDirectory() {
-		return CryptoFileSystemProvider.containsVault(getPath(), MASTERKEY_FILENAME);
-	}
-
-	@Deprecated(forRemoval = true, since = "1.5.0")
-	public long pollBytesRead() {
-		CryptoFileSystem fs = cryptoFileSystem.get();
-		if (fs != null) {
-			return fs.getStats().pollBytesRead();
-		} else {
-			return 0l;
-		}
-	}
-
-	@Deprecated(forRemoval = true, since = "1.5.0")
-	public long pollBytesWritten() {
-		CryptoFileSystem fs = cryptoFileSystem.get();
-		if (fs != null) {
-			return fs.getStats().pollBytesWritten();
-		} else {
-			return 0l;
-		}
-	}
-
-	@Deprecated(forRemoval = true, since = "1.5.0")
-	public String getCustomMountPath() {
-		return vaultSettings.individualMountPath().getValueSafe();
-	}
-
-	@Deprecated(forRemoval = true, since = "1.5.0")
-	public void setCustomMountPath(String mountPath) {
-		vaultSettings.individualMountPath().set(mountPath);
-	}
-
-	@Deprecated(forRemoval = true, since = "1.5.0")
-	public String getMountName() {
-		return vaultSettings.mountName().get();
-	}
-
-	@Deprecated(forRemoval = true, since = "1.5.0")
-	public void setMountName(String mountName) throws IllegalArgumentException {
-		if (StringUtils.isBlank(mountName)) {
-			throw new IllegalArgumentException("mount name is empty");
-		} else {
-			vaultSettings.mountName().set(VaultSettings.normalizeMountName(mountName));
-		}
-	}
-
 	public boolean isHavingCustomMountFlags() {
 		return !Strings.isNullOrEmpty(vaultSettings.mountFlags().get());
 	}
@@ -386,25 +266,6 @@ public class Vault {
 
 	public void setCustomMountFlags(String mountFlags) {
 		vaultSettings.mountFlags().set(mountFlags);
-	}
-
-	@Deprecated(forRemoval = true, since = "1.5.0")
-	public Character getWinDriveLetter() {
-		if (vaultSettings.winDriveLetter().get() == null) {
-			return null;
-		} else {
-			return vaultSettings.winDriveLetter().get().charAt(0);
-		}
-	}
-
-	@Deprecated(forRemoval = true, since = "1.5.0")
-	public void setWinDriveLetter(Path root) {
-		if (root == null) {
-			vaultSettings.winDriveLetter().set(null);
-		} else {
-			char winDriveLetter = root.toString().charAt(0);
-			vaultSettings.winDriveLetter().set(String.valueOf(winDriveLetter));
-		}
 	}
 
 	public String getId() {

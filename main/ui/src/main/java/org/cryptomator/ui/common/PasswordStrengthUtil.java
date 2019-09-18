@@ -6,15 +6,10 @@
  * Contributors:
  *     Jean-Noël Charon - initial API and implementation
  *******************************************************************************/
-package org.cryptomator.ui.util;
+package org.cryptomator.ui.common;
 
 import com.google.common.base.Strings;
 import com.nulabinc.zxcvbn.Zxcvbn;
-import javafx.geometry.Insets;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.CornerRadii;
-import javafx.scene.paint.Color;
 import org.cryptomator.ui.fxapp.FxApplicationScoped;
 
 import javax.inject.Inject;
@@ -47,36 +42,6 @@ public class PasswordStrengthUtil {
 			int numCharsToRate = Math.min(PW_TRUNC_LEN, password.length());
 			return zxcvbn.measure(password.substring(0, numCharsToRate), sanitizedInputs).getScore();
 		}
-	}
-
-	@Deprecated
-	public Color getStrengthColor(Number score) {
-		switch (score.intValue()) {
-			case 0:
-				return Color.web("#e74c3c");
-			case 1:
-				return Color.web("#e67e22");
-			case 2:
-				return Color.web("#f1c40f");
-			case 3:
-				return Color.web("#40d47e");
-			case 4:
-				return Color.web("#27ae60");
-			default:
-				return Color.web("#ffffff", 0.5);
-		}
-	}
-
-	@Deprecated
-	public Background getBackgroundWithStrengthColor(Number score) {
-		Color c = this.getStrengthColor(score);
-		BackgroundFill fill = new BackgroundFill(c, CornerRadii.EMPTY, Insets.EMPTY);
-		return new Background(fill);
-	}
-
-	@Deprecated
-	public Background getBackgroundWithStrengthColor(Number score, Number threshold) {
-		return score.intValue() >= threshold.intValue() ? getBackgroundWithStrengthColor(score) : getBackgroundWithStrengthColor(-1);
 	}
 
 	public String getStrengthDescription(Number score) {

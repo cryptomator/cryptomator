@@ -27,7 +27,7 @@ import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.Tasks;
 import org.cryptomator.ui.controls.FontAwesome5IconView;
 import org.cryptomator.ui.controls.NiceSecurePasswordField;
-import org.cryptomator.ui.util.PasswordStrengthUtil;
+import org.cryptomator.ui.common.PasswordStrengthUtil;
 import org.fxmisc.easybind.EasyBind;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -11,11 +11,12 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.cryptofs.CryptoFileSystemProvider;
 import org.cryptomator.cryptolib.api.InvalidPassphraseException;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.controls.FontAwesome5IconView;
 import org.cryptomator.ui.controls.NiceSecurePasswordField;
-import org.cryptomator.ui.util.PasswordStrengthUtil;
+import org.cryptomator.ui.common.PasswordStrengthUtil;
 import org.fxmisc.easybind.EasyBind;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +29,7 @@ import java.util.ResourceBundle;
 public class ChangePasswordController implements FxController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ChangePasswordController.class);
+	private static final String MASTERKEY_FILENAME = "masterkey.cryptomator"; // TODO: deduplicate constant declared in multiple classes
 
 	private final Stage window;
 	private final Vault vault;
@@ -82,7 +84,7 @@ public class ChangePasswordController implements FxController {
 	@FXML
 	public void finish() {
 		try {
-			vault.changePassphrase(oldPasswordField.getCharacters(), newPasswordField.getCharacters());
+			CryptoFileSystemProvider.changePassphrase(vault.getPath(), MASTERKEY_FILENAME, oldPasswordField.getCharacters(), newPasswordField.getCharacters());
 			LOG.info("Successful changed password for {}", vault.getDisplayableName());
 			window.close();
 		} catch (IOException e) {

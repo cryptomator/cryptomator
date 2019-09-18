@@ -36,7 +36,6 @@ import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.NotDirectoryException;
 import java.util.Arrays;
 import java.util.Optional;
-import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
 
 @UnlockScoped
@@ -49,7 +48,6 @@ public class UnlockController implements FxController {
 	private final ExecutorService executor;
 	private final ObjectBinding<ContentDisplay> unlockButtonState;
 	private final Optional<KeychainAccess> keychainAccess;
-	private final ResourceBundle resourceBundle;
 	private final Lazy<Scene> successScene;
 	private final ForgetPasswordComponent.Builder forgetPassword;
 	private final BooleanProperty unlockButtonDisabled;
@@ -57,13 +55,12 @@ public class UnlockController implements FxController {
 	public CheckBox savePassword;
 
 	@Inject
-	public UnlockController(@UnlockWindow Stage window, @UnlockWindow Vault vault, ExecutorService executor, Optional<KeychainAccess> keychainAccess, ResourceBundle resourceBundle, @FxmlScene(FxmlFile.UNLOCK_SUCCESS) Lazy<Scene> successScene, ForgetPasswordComponent.Builder forgetPassword) {
+	public UnlockController(@UnlockWindow Stage window, @UnlockWindow Vault vault, ExecutorService executor, Optional<KeychainAccess> keychainAccess, @FxmlScene(FxmlFile.UNLOCK_SUCCESS) Lazy<Scene> successScene, ForgetPasswordComponent.Builder forgetPassword) {
 		this.window = window;
 		this.vault = vault;
 		this.executor = executor;
 		this.unlockButtonState = Bindings.createObjectBinding(this::getUnlockButtonState, vault.stateProperty());
 		this.keychainAccess = keychainAccess;
-		this.resourceBundle = resourceBundle;
 		this.successScene = successScene;
 		this.forgetPassword = forgetPassword;
 		this.unlockButtonDisabled = new SimpleBooleanProperty();
@@ -126,7 +123,7 @@ public class UnlockController implements FxController {
 	@FXML
 	private void didClickSavePasswordCheckbox() {
 		if (!savePassword.isSelected() && hasStoredPassword()) {
-			forgetPassword.vault(vault).build().showForgetPassword().thenAccept(forgotten -> savePassword.setSelected(!forgotten));
+			forgetPassword.vault(vault).owner(window).build().showForgetPassword().thenAccept(forgotten -> savePassword.setSelected(!forgotten));
 		}
 	}
 

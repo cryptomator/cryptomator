@@ -31,5 +31,7 @@
 				<TextField fx:id="mountFlags" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
 			</children>
 		</HBox>
+		
+		<!-- TODO windows drive letter, see https://github.com/cryptomator/cryptomator/blob/1.4.16/main/ui/src/main/java/org/cryptomator/ui/model/Vault.java#L283-L298 -->
 	</children>
 </VBox>

@@ -65,6 +65,7 @@ public class QuitController implements FxController {
 			lockAndQuitButton.setDisable(false);
 			lockAndQuitButton.setContentDisplay(ContentDisplay.TEXT_ONLY);
 			// TODO: show force lock or force quit scene (and DO NOT cancelQuit() here!)
+			// see https://github.com/cryptomator/cryptomator/blob/1.4.16/main/ui/src/main/java/org/cryptomator/ui/model/Vault.java#L151-L163
 			response.cancelQuit();
 		});
 		lockAllService.start();
