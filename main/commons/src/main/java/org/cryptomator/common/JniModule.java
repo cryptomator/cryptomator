@@ -11,17 +11,20 @@ import org.cryptomator.jni.JniFunctions;
 import org.cryptomator.jni.MacFunctions;
 import org.cryptomator.jni.WinFunctions;
 
+import javax.inject.Singleton;
 import java.util.Optional;
 
 @Module
 public class JniModule {
 
 	@Provides
+	@Singleton
 	Optional<MacFunctions> provideOptionalMacFunctions() {
 		return JniFunctions.macFunctions();
 	}
 
 	@Provides
+	@Singleton
 	Optional<WinFunctions> provideOptionalWinFunctions() {
 		return JniFunctions.winFunctions();
 	}
