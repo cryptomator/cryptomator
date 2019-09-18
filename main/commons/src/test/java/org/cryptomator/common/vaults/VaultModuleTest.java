@@ -14,7 +14,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
+import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mockito;
+
+import java.nio.file.Path;
 
 public class VaultModuleTest {
 
@@ -24,9 +27,10 @@ public class VaultModuleTest {
 	private final VaultModule module = new VaultModule();
 
 	@BeforeEach
-	public void setup() {
+	public void setup(@TempDir Path tmpDir) {
 		Mockito.when(vaultSettings.mountName()).thenReturn(new SimpleStringProperty("TEST"));
 		Mockito.when(vaultSettings.usesReadOnlyMode()).thenReturn(new SimpleBooleanProperty(true));
+		System.setProperty("user.home", tmpDir.toString());
 	}
 
 	@Test
