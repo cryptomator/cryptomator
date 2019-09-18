@@ -7,7 +7,6 @@ import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ContentDisplay;
-import javafx.util.Duration;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.fxapp.UpdateChecker;
@@ -21,6 +20,7 @@ public class UpdatesPreferencesController implements FxController {
 	private final UpdateChecker updateChecker;
 	private final ObjectBinding<ContentDisplay> checkForUpdatesButtonState;
 	private final ReadOnlyStringProperty latestVersion;
+	private final ReadOnlyStringProperty currentVersion;
 	private final BooleanBinding updateAvailable;
 	public CheckBox checkForUpdatesCheckbox;
 
@@ -31,6 +31,7 @@ public class UpdatesPreferencesController implements FxController {
 		this.checkForUpdatesButtonState = Bindings.when(updateChecker.checkingForUpdatesProperty()).then(ContentDisplay.LEFT).otherwise(ContentDisplay.TEXT_ONLY);
 		this.latestVersion = updateChecker.latestVersionProperty();
 		this.updateAvailable = latestVersion.isNotNull();
+		this.currentVersion = updateChecker.currentVersionProperty();
 	}
 
 	public void initialize() {
@@ -58,6 +59,14 @@ public class UpdatesPreferencesController implements FxController {
 
 	public String getLatestVersion() {
 		return latestVersion.get();
+	}
+
+	public ReadOnlyStringProperty currentVersionProperty() {
+		return currentVersion;
+	}
+
+	public String getCurrentVersion() {
+		return currentVersion.get();
 	}
 
 	public BooleanBinding updateAvailableProperty() {

@@ -14,6 +14,8 @@
 		<Insets topRightBottomLeft="12"/>
 	</padding>
 	<children>
+		<FormattedLabel format="%preferences.updates.currentVersion" arg1="${controller.currentVersion}" textAlignment="CENTER" wrapText="true"/>
+
 		<CheckBox fx:id="checkForUpdatesCheckbox" text="%preferences.updates.autoUpdateCheck"/>
 
 		<VBox alignment="CENTER" spacing="6">

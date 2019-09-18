@@ -2,6 +2,7 @@ package org.cryptomator.ui.fxapp;
 
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ReadOnlyStringProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Worker;
@@ -24,6 +25,7 @@ public class UpdateChecker {
 
 	private final Settings settings;
 	private final Optional<String> applicationVersion;
+	private final StringProperty currentVersionProperty;
 	private final StringProperty latestVersionProperty;
 	private final Comparator<String> semVerComparator;
 	private final ScheduledService<String> updateCheckerService;
@@ -35,6 +37,7 @@ public class UpdateChecker {
 		this.latestVersionProperty = latestVersionProperty;
 		this.semVerComparator = semVerComparator;
 		this.updateCheckerService = updateCheckerService;
+		this.currentVersionProperty = new SimpleStringProperty(applicationVersion.orElse("SNAPSHOT"));
 	}
 
 	public void automaticallyCheckForUpdatesIfEnabled() {
@@ -85,6 +88,10 @@ public class UpdateChecker {
 
 	public ReadOnlyStringProperty latestVersionProperty() {
 		return latestVersionProperty;
+	}
+
+	public ReadOnlyStringProperty currentVersionProperty() {
+		return currentVersionProperty;
 	}
 
 }
