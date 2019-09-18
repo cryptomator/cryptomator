@@ -16,6 +16,7 @@ import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxControllerKey;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
+import org.cryptomator.ui.forgetPassword.ForgetPasswordComponent;
 
 import javax.inject.Named;
 import javax.inject.Provider;
@@ -23,7 +24,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
-@Module
+@Module(subcomponents={ForgetPasswordComponent.class})
 abstract class UnlockModule {
 
 	@Provides

@@ -12,13 +12,10 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.WritableValue;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ContentDisplay;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.cryptolib.api.InvalidPassphraseException;
@@ -30,8 +27,7 @@ import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.Tasks;
 import org.cryptomator.ui.controls.NiceSecurePasswordField;
-import org.cryptomator.ui.controls.SecurePasswordField;
-import org.cryptomator.ui.util.DialogBuilderUtil;
+import org.cryptomator.ui.forgetPassword.ForgetPasswordComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,12 +51,13 @@ public class UnlockController implements FxController {
 	private final Optional<KeychainAccess> keychainAccess;
 	private final ResourceBundle resourceBundle;
 	private final Lazy<Scene> successScene;
+	private final ForgetPasswordComponent.Builder forgetPassword;
 	private final BooleanProperty unlockButtonDisabled;
 	public NiceSecurePasswordField passwordField;
 	public CheckBox savePassword;
 
 	@Inject
-	public UnlockController(@UnlockWindow Stage window, @UnlockWindow Vault vault, ExecutorService executor, Optional<KeychainAccess> keychainAccess, ResourceBundle resourceBundle, @FxmlScene(FxmlFile.UNLOCK_SUCCESS) Lazy<Scene> successScene) {
+	public UnlockController(@UnlockWindow Stage window, @UnlockWindow Vault vault, ExecutorService executor, Optional<KeychainAccess> keychainAccess, ResourceBundle resourceBundle, @FxmlScene(FxmlFile.UNLOCK_SUCCESS) Lazy<Scene> successScene, ForgetPasswordComponent.Builder forgetPassword) {
 		this.window = window;
 		this.vault = vault;
 		this.executor = executor;
@@ -68,6 +65,7 @@ public class UnlockController implements FxController {
 		this.keychainAccess = keychainAccess;
 		this.resourceBundle = resourceBundle;
 		this.successScene = successScene;
+		this.forgetPassword = forgetPassword;
 		this.unlockButtonDisabled = new SimpleBooleanProperty();
 	}
 
@@ -128,21 +126,7 @@ public class UnlockController implements FxController {
 	@FXML
 	private void didClickSavePasswordCheckbox() {
 		if (!savePassword.isSelected() && hasStoredPassword()) {
-			Alert confirmDialog = DialogBuilderUtil.buildConfirmationDialog( //
-					resourceBundle.getString("unlock.deleteSavedPasswordDialog.title"), //
-					resourceBundle.getString("unlock.deleteSavedPasswordDialog.header"), //
-					resourceBundle.getString("unlock.deleteSavedPasswordDialog.content"), //
-					SystemUtils.IS_OS_MAC_OSX ? ButtonType.CANCEL : ButtonType.OK);
-			Optional<ButtonType> choice = confirmDialog.showAndWait();
-			if (ButtonType.OK.equals(choice.get())) {
-				try {
-					keychainAccess.get().deletePassphrase(vault.getId());
-				} catch (KeychainAccessException e) {
-					LOG.error("Failed to remove entry from system keychain.", e);
-				}
-			} else if (ButtonType.CANCEL.equals(choice.get())) {
-				savePassword.setSelected(true);
-			}
+			forgetPassword.vault(vault).build().showForgetPassword().thenAccept(forgotten -> savePassword.setSelected(!forgotten));
 		}
 	}
 
