@@ -119,10 +119,10 @@ public class FxApplication extends Application {
 
 	private void loadSelectedStyleSheet(UiTheme theme) {
 		switch (theme) {
-			case CUSTOM:
-				// TODO
-				Application.setUserAgentStylesheet(getClass().getResource("/css/mac_theme.css").toString());
-				break;
+//			case CUSTOM:
+//				// TODO
+//				Application.setUserAgentStylesheet(getClass().getResource("/css/mac_theme.css").toString());
+//				break;
 			case DARK:
 				Application.setUserAgentStylesheet(getClass().getResource("/css/dark_theme.css").toString());
 				macFunctions.map(MacFunctions::uiAppearance).ifPresent(JniException.ignore(MacApplicationUiAppearance::setToDarkAqua));
