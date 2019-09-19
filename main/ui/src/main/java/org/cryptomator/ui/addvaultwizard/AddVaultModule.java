@@ -52,7 +52,6 @@ public abstract class AddVaultModule {
 		Stage stage = new Stage();
 		stage.setTitle(resourceBundle.getString("addvaultwizard.title"));
 		stage.setResizable(false);
-		stage.initStyle(StageStyle.DECORATED);
 		stage.initModality(Modality.WINDOW_MODAL);
 		stage.initOwner(owner);
 		stage.sceneProperty().addListener(observable -> {

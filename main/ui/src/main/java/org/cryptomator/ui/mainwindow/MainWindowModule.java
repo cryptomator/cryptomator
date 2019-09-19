@@ -42,14 +42,13 @@ abstract class MainWindowModule {
 	@MainWindow
 	@MainWindowScoped
 	static Stage provideStage(@Named("windowIcon") Optional<Image> windowIcon) {
-		Stage stage = new Stage();
+		Stage stage = new Stage(StageStyle.UNDECORATED);
 		// TODO: min/max values chosen arbitrarily. We might wanna take a look at the user's resolution...
 		stage.setMinWidth(650);
 		stage.setMinHeight(440);
 		stage.setMaxWidth(1000);
 		stage.setMaxHeight(700);
 		stage.setTitle("Cryptomator");
-		stage.initStyle(StageStyle.UNDECORATED);
 		windowIcon.ifPresent(stage.getIcons()::add);
 		return stage;
 	}

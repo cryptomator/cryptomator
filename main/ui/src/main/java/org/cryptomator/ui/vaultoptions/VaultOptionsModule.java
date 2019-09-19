@@ -44,7 +44,6 @@ abstract class VaultOptionsModule {
 		Stage stage = new Stage();
 		stage.setTitle(vault.getDisplayableName());
 		stage.setResizable(false);
-		stage.initStyle(StageStyle.DECORATED);
 		stage.initModality(Modality.WINDOW_MODAL);
 		stage.initOwner(owner);
 		windowIcon.ifPresent(stage.getIcons()::add);
