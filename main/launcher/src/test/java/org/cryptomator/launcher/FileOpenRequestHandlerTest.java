@@ -5,7 +5,7 @@
  *******************************************************************************/
 package org.cryptomator.launcher;
 
-import org.cryptomator.ui.model.AppLaunchEvent;
+import org.cryptomator.ui.launcher.AppLaunchEvent;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.Assertions;
@@ -64,7 +64,7 @@ public class FileOpenRequestHandlerTest {
 	@Test
 	@DisplayName("./cryptomator.exe foo (with full event queue)")
 	public void testOpenArgsWithFullQueue() throws IOException {
-		queue.add(new AppLaunchEvent(Stream.empty()));
+		queue.add(new AppLaunchEvent(AppLaunchEvent.EventType.OPEN_FILE, Stream.empty()));
 		Assumptions.assumeTrue(queue.remainingCapacity() == 0);
 
 		inTest.handleLaunchArgs(new String[]{"foo"});

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import org.cryptomator.ui.controls.NumericTextField?>
+<VBox xmlns="http://javafx.com/javafx"
+	  xmlns:fx="http://javafx.com/fxml"
+	  fx:controller="org.cryptomator.ui.preferences.VolumePreferencesController"
+	  spacing="6">
+	<padding>
+		<Insets topRightBottomLeft="12"/>
+	</padding>
+	<children>
+		<HBox spacing="6" alignment="CENTER_LEFT">
+			<Label text="%preferences.volume.type"/>
+			<ChoiceBox fx:id="volumeTypeChoicBox"/>
+		</HBox>
+
+		<HBox spacing="6" alignment="CENTER_LEFT" visible="${controller.showWebDavSettings}">
+			<Label text="%preferences.volume.webdav.port"/>
+			<NumericTextField fx:id="webDavPortField"/>
+			<Button text="%generic.button.apply" fx:id="changeWebDavPortButton" onAction="#doChangeWebDavPort"/>
+		</HBox>
+
+		<HBox spacing="6" alignment="CENTER_LEFT" visible="${controller.showWebDavScheme}">
+			<Label text="%preferences.volume.webdav.scheme"/>
+			<ChoiceBox fx:id="webDavUrlSchemeChoiceBox" maxWidth="Infinity"/>
+		</HBox>
+	</children>
+</VBox>

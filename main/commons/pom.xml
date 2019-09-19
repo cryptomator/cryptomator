@@ -4,35 +4,64 @@
 	<parent>
 		<groupId>org.cryptomator</groupId>
 		<artifactId>main</artifactId>
-		<version>1.4.16</version>
+		<version>1.5.0-alpha1</version>
 	</parent>
 	<artifactId>commons</artifactId>
 	<name>Cryptomator Commons</name>
 	<description>Shared utilities</description>
 
 	<dependencies>
+		<dependency>
+			<groupId>org.cryptomator</groupId>
+			<artifactId>cryptofs</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.cryptomator</groupId>
+			<artifactId>fuse-nio-adapter</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.cryptomator</groupId>
+			<artifactId>dokany-nio-adapter</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.cryptomator</groupId>
+			<artifactId>webdav-nio-adapter</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.cryptomator</groupId>
+			<artifactId>jni</artifactId>
+		</dependency>
+
 		<!-- JavaFx -->
 		<dependency>
 			<groupId>org.openjfx</groupId>
 			<artifactId>javafx-base</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.openjfx</groupId>
+			<artifactId>javafx-graphics</artifactId>
+		</dependency>
 
-		<!-- Libs -->
+		<!-- EasyBind -->
+		<dependency>
+			<groupId>org.fxmisc.easybind</groupId>
+			<artifactId>easybind</artifactId>
+		</dependency>
+
+		<!-- Google -->
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-lang3</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
 		</dependency>
+
+		<!-- Apache Commons -->
 		<dependency>
-			<groupId>org.fxmisc.easybind</groupId>
-			<artifactId>easybind</artifactId>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
 		</dependency>
 
 		<!-- DI -->

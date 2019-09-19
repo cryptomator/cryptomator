@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ButtonBar?>
+<?import javafx.scene.control.ProgressIndicator?>
+<?import javafx.scene.layout.VBox?>
+<?import org.cryptomator.ui.controls.FormattedLabel?>
+<?import org.cryptomator.ui.controls.NiceSecurePasswordField?>
+<VBox xmlns="http://javafx.com/javafx"
+	  xmlns:fx="http://javafx.com/fxml"
+	  fx:controller="org.cryptomator.ui.migration.MigrationRunController"
+	  minWidth="400"
+	  maxWidth="400"
+	  minHeight="145"
+	  spacing="12">
+	<padding>
+		<Insets topRightBottomLeft="12"/>
+	</padding>
+	<children>
+		<VBox spacing="6">
+			<FormattedLabel format="%migration.run.enterPassword" arg1="${controller.vault.displayableName}" wrapText="true"/>
+			<NiceSecurePasswordField fx:id="passwordField"/>
+		</VBox>
+
+		<VBox alignment="BOTTOM_CENTER" VBox.vgrow="ALWAYS">
+			<ButtonBar buttonMinWidth="120" buttonOrder="B+X">
+				<buttons>
+					<Button text="%generic.button.back" ButtonBar.buttonData="BACK_PREVIOUS" cancelButton="true" onAction="#back"/>
+					<Button text="%migration.run.startMigrationBtn" ButtonBar.buttonData="NEXT_FORWARD" defaultButton="true" onAction="#migrate" contentDisplay="${controller.migrateButtonContentDisplay}"
+							disable="${controller.migrationButtonDisabled}">
+						<graphic>
+							<ProgressIndicator progress="-1" prefWidth="12" prefHeight="12"/>
+						</graphic>
+					</Button>
+				</buttons>
+			</ButtonBar>
+		</VBox>
+	</children>
+</VBox>

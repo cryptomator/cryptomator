@@ -5,12 +5,10 @@
  *******************************************************************************/
 package org.cryptomator.launcher;
 
-import javafx.application.Application;
-import javafx.stage.Stage;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.logging.DebugMode;
 import org.cryptomator.logging.LoggerConfiguration;
-import org.cryptomator.ui.controllers.MainController;
+import org.cryptomator.ui.launcher.UiLauncher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,6 +17,7 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import java.io.IOException;
 import java.util.Optional;
+import java.util.concurrent.CountDownLatch;
 
 @Singleton
 public class Cryptomator {
@@ -32,13 +31,19 @@ public class Cryptomator {
 	private final DebugMode debugMode;
 	private final IpcFactory ipcFactory;
 	private final Optional<String> applicationVersion;
+	private final CountDownLatch shutdownLatch;
+	private final CleanShutdownPerformer shutdownPerformer;
+	private final UiLauncher uiLauncher;
 
 	@Inject
-	Cryptomator(LoggerConfiguration logConfig, DebugMode debugMode, IpcFactory ipcFactory, @Named("applicationVersion") Optional<String> applicationVersion) {
+	Cryptomator(LoggerConfiguration logConfig, DebugMode debugMode, IpcFactory ipcFactory, @Named("applicationVersion") Optional<String> applicationVersion, @Named("shutdownLatch") CountDownLatch shutdownLatch, CleanShutdownPerformer shutdownPerformer, UiLauncher uiLauncher) {
 		this.logConfig = logConfig;
 		this.debugMode = debugMode;
 		this.ipcFactory = ipcFactory;
 		this.applicationVersion = applicationVersion;
+		this.shutdownLatch = shutdownLatch;
+		this.shutdownPerformer = shutdownPerformer;
+		this.uiLauncher = uiLauncher;
 	}
 
 	public static void main(String[] args) {
@@ -48,6 +53,7 @@ public class Cryptomator {
 
 	/**
 	 * Main entry point of the application launcher.
+	 *
 	 * @param args The arguments passed to this program via {@link #main(String[])}.
 	 * @return Nonzero exit code in case of an error.
 	 */
@@ -63,6 +69,7 @@ public class Cryptomator {
 		try (IpcFactory.IpcEndpoint endpoint = ipcFactory.create()) {
 			endpoint.getRemote().handleLaunchArgs(args); // if we are the server, getRemote() returns self.
 			if (endpoint.isConnectedToRemote()) {
+				endpoint.getRemote().revealRunningApp();
 				LOG.info("Found running application instance. Shutting down...");
 				return 2;
 			} else {
@@ -77,45 +84,22 @@ public class Cryptomator {
 
 	/**
 	 * Launches the JavaFX application and waits until shutdown is requested.
+	 *
 	 * @return Nonzero exit code in case of an error.
+	 * @implNote This method blocks until {@link #shutdownLatch} reached zero.
 	 */
 	private int runGuiApplication() {
 		try {
-			CleanShutdownPerformer.registerShutdownHook();
-			Application.launch(MainApp.class);
-			LOG.info("Shutting down...");
+			shutdownPerformer.registerShutdownHook();
+			uiLauncher.launch();
+			shutdownLatch.await();
+			LOG.info("UI shut down");
 			return 0;
-		} catch (Throwable e) {
-			LOG.error("Terminating due to error", e);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
 			return 1;
 		}
 	}
 
-
-	// We need a separate FX Application class, until we can use the module system. See https://stackoverflow.com/q/54756176/4014509
-	public static class MainApp extends Application {
-
-		@Override
-		public void start(Stage primaryStage) {
-			LOG.info("JavaFX application started.");
-			primaryStage.setMinWidth(652.0);
-			primaryStage.setMinHeight(440.0);
-
-			FxApplicationComponent fxApplicationComponent = CRYPTOMATOR_COMPONENT.fxApplicationComponent() //
-					.fxApplication(this) //
-					.mainWindow(primaryStage) //
-					.build();
-
-			MainController mainCtrl = fxApplicationComponent.fxmlLoader().load("/fxml/main.fxml");
-			mainCtrl.initStage(primaryStage);
-			primaryStage.show();
-		}
-
-		@Override
-		public void stop() {
-			LOG.info("JavaFX application stopped.");
-		}
-
-	}
 
 }

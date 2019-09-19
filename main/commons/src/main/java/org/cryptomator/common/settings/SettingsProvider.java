@@ -17,7 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 import javax.inject.Singleton;
 import java.io.IOException;
 import java.io.InputStream;
@@ -38,10 +37,11 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 @Singleton
-public class SettingsProvider implements Provider<Settings> {
+public class SettingsProvider implements Supplier<Settings> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(SettingsProvider.class);
 	private static final long SAVE_DELAY_MS = 1000;

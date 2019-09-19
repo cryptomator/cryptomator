@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ContextMenu?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Arc?>
+<?import org.cryptomator.ui.controls.FontAwesome5IconView?>
+<VBox xmlns="http://javafx.com/javafx"
+	  xmlns:fx="http://javafx.com/fxml"
+	  fx:controller="org.cryptomator.ui.mainwindow.VaultListController"
+	  minWidth="206">
+	<StackPane VBox.vgrow="ALWAYS">
+		<ListView fx:id="vaultList" editable="true">
+			<contextMenu>
+				<ContextMenu>
+					<items>
+						<MenuItem text="%main.vaultlist.contextMenu.remove" onAction="#didClickRemoveVault" disable="${controller.noVaultSelected}"/>
+					</items>
+				</ContextMenu>
+			</contextMenu>
+		</ListView>
+		<AnchorPane visible="${controller.emptyVaultList}">
+			<HBox AnchorPane.leftAnchor="10" AnchorPane.rightAnchor="10" AnchorPane.bottomAnchor="100" alignment="BOTTOM_LEFT">
+				<Label textAlignment="CENTER" text="%main.vaultlist.emptyList.onboardingInstruction" wrapText="true"/>
+			</HBox>
+			<Arc styleClass="onboarding-overlay-arc" AnchorPane.bottomAnchor="5" type="OPEN" centerX="-10" centerY="0" radiusY="100" radiusX="60" startAngle="0" length="-60" strokeWidth="1"/>
+		</AnchorPane>
+	</StackPane>
+	<Button styleClass="toolbar-button" text="%main.vaultlist.addVaultBtn" onAction="#didClickAddVault" alignment="BASELINE_CENTER" maxWidth="Infinity" mnemonicParsing="false">
+		<graphic>
+			<FontAwesome5IconView glyph="PLUS"/>
+		</graphic>
+	</Button>
+</VBox>

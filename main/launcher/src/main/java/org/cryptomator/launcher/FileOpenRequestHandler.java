@@ -6,7 +6,7 @@
  *******************************************************************************/
 package org.cryptomator.launcher;
 
-import org.cryptomator.ui.model.AppLaunchEvent;
+import org.cryptomator.ui.launcher.AppLaunchEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,16 +34,14 @@ class FileOpenRequestHandler {
 	@Inject
 	public FileOpenRequestHandler(@Named("launchEventQueue") BlockingQueue<AppLaunchEvent> launchEventQueue) {
 		this.launchEventQueue = launchEventQueue;
-		try {
+		if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.APP_OPEN_FILE)) {
 			Desktop.getDesktop().setOpenFileHandler(this::openFiles);
-		} catch (UnsupportedOperationException e) {
-			LOG.info("Unable to setOpenFileHandler, probably not supported on this OS.");
 		}
 	}
 
-	private void openFiles(final OpenFilesEvent evt) {
+	private void openFiles(OpenFilesEvent evt) {
 		Stream<Path> pathsToOpen = evt.getFiles().stream().map(File::toPath);
-		AppLaunchEvent launchEvent = new AppLaunchEvent(pathsToOpen);
+		AppLaunchEvent launchEvent = new AppLaunchEvent(AppLaunchEvent.EventType.OPEN_FILE, pathsToOpen);
 		tryToEnqueueFileOpenRequest(launchEvent);
 	}
 
@@ -61,7 +59,7 @@ class FileOpenRequestHandler {
 				return null;
 			}
 		}).filter(Objects::nonNull);
-		AppLaunchEvent launchEvent = new AppLaunchEvent(pathsToOpen);
+		AppLaunchEvent launchEvent = new AppLaunchEvent(AppLaunchEvent.EventType.OPEN_FILE, pathsToOpen);
 		tryToEnqueueFileOpenRequest(launchEvent);
 	}
 

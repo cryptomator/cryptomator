@@ -29,11 +29,13 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 		writeVaultSettingsArray(out, value.getDirectories());
 		out.name("askedForUpdateCheck").value(value.askedForUpdateCheck().get());
 		out.name("checkForUpdatesEnabled").value(value.checkForUpdates().get());
+		out.name("startHidden").value(value.startHidden().get());
 		out.name("port").value(value.port().get());
 		out.name("numTrayNotifications").value(value.numTrayNotifications().get());
-		out.name("preferredGvfsScheme").value(value.preferredGvfsScheme().get());
+		out.name("preferredGvfsScheme").value(value.preferredGvfsScheme().get().name());
 		out.name("debugMode").value(value.debugMode().get());
 		out.name("preferredVolumeImpl").value(value.preferredVolumeImpl().get().name());
+		out.name("theme").value(value.theme().get().name());
 		out.endObject();
 	}
 
@@ -62,6 +64,9 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 				case "checkForUpdatesEnabled":
 					settings.checkForUpdates().set(in.nextBoolean());
 					break;
+				case "startHidden":
+					settings.startHidden().set(in.nextBoolean());
+					break;
 				case "port":
 					settings.port().set(in.nextInt());
 					break;
@@ -69,13 +74,16 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 					settings.numTrayNotifications().set(in.nextInt());
 					break;
 				case "preferredGvfsScheme":
-					settings.preferredGvfsScheme().set(in.nextString());
+					settings.preferredGvfsScheme().set(parseWebDavUrlSchemePrefix(in.nextString()));
 					break;
 				case "debugMode":
 					settings.debugMode().set(in.nextBoolean());
 					break;
 				case "preferredVolumeImpl":
 					settings.preferredVolumeImpl().set(parsePreferredVolumeImplName(in.nextString()));
+					break;
+				case "theme":
+					settings.theme().set(parseUiTheme(in.nextString()));
 					break;
 				default:
 					LOG.warn("Unsupported vault setting found in JSON: " + name);
@@ -90,9 +98,28 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 
 	private VolumeImpl parsePreferredVolumeImplName(String nioAdapterName) {
 		try {
-			return VolumeImpl.valueOf(nioAdapterName);
+			return VolumeImpl.valueOf(nioAdapterName.toUpperCase());
 		} catch (IllegalArgumentException e) {
+			LOG.warn("Invalid volume type {}. Defaulting to {}.", nioAdapterName, Settings.DEFAULT_PREFERRED_VOLUME_IMPL);
 			return Settings.DEFAULT_PREFERRED_VOLUME_IMPL;
+		}
+	}
+
+	private WebDavUrlScheme parseWebDavUrlSchemePrefix(String webDavUrlSchemeName) {
+		try {
+			return WebDavUrlScheme.valueOf(webDavUrlSchemeName.toUpperCase());
+		} catch (IllegalArgumentException e) {
+			LOG.warn("Invalid volume type {}. Defaulting to {}.", webDavUrlSchemeName, Settings.DEFAULT_GVFS_SCHEME);
+			return Settings.DEFAULT_GVFS_SCHEME;
+		}
+	}
+
+	private UiTheme parseUiTheme(String uiThemeName) {
+		try {
+			return UiTheme.valueOf(uiThemeName.toUpperCase());
+		} catch (IllegalArgumentException e) {
+			LOG.warn("Invalid volume type {}. Defaulting to {}.", uiThemeName, Settings.DEFAULT_THEME);
+			return Settings.DEFAULT_THEME;
 		}
 	}
 

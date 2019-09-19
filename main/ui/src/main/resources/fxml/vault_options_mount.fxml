@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import org.cryptomator.ui.controls.AlphanumericTextField?>
+<VBox xmlns="http://javafx.com/javafx"
+	  xmlns:fx="http://javafx.com/fxml"
+	  fx:controller="org.cryptomator.ui.vaultoptions.MountOptionsController"
+	  spacing="6">
+	<padding>
+		<Insets topRightBottomLeft="12"/>
+	</padding>
+	<children>
+		<HBox spacing="6" alignment="CENTER_LEFT">
+			<Label text="%vaultOptions.mount.driveName"/>
+			<AlphanumericTextField fx:id="driveName"/>
+		</HBox>
+
+		<CheckBox fx:id="readOnlyCheckbox" text="%vaultOptions.mount.readonly"/>
+
+		<CheckBox fx:id="customMountFlagsCheckbox" text="%vaultOptions.mount.customMountFlags" onAction="#toggleUseCustomMountFlags"/>
+		<HBox>
+			<padding>
+				<Insets left="25"/>
+			</padding>
+			<children>
+				<TextField fx:id="mountFlags" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+			</children>
+		</HBox>
+		
+		<!-- TODO windows drive letter, see https://github.com/cryptomator/cryptomator/blob/1.4.16/main/ui/src/main/java/org/cryptomator/ui/model/Vault.java#L283-L298 -->
+	</children>
+</VBox>

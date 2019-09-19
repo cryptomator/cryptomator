@@ -8,10 +8,14 @@
  ******************************************************************************/
 package org.cryptomator.common.settings;
 
-import javafx.beans.property.*;
-import javafx.beans.value.ObservableValue;
+import javafx.beans.Observable;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 
 import java.util.function.Consumer;
@@ -22,20 +26,24 @@ public class Settings {
 	public static final int MAX_PORT = 65535;
 	public static final boolean DEFAULT_ASKED_FOR_UPDATE_CHECK = false;
 	public static final boolean DEFAULT_CHECK_FOR_UDPATES = false;
+	public static final boolean DEFAULT_START_HIDDEN = false;
 	public static final int DEFAULT_PORT = 42427;
 	public static final int DEFAULT_NUM_TRAY_NOTIFICATIONS = 3;
-	public static final String DEFAULT_GVFS_SCHEME = "dav";
+	public static final WebDavUrlScheme DEFAULT_GVFS_SCHEME = WebDavUrlScheme.DAV;
+	public static final UiTheme DEFAULT_THEME = UiTheme.LIGHT;
 	public static final boolean DEFAULT_DEBUG_MODE = false;
 	public static final VolumeImpl DEFAULT_PREFERRED_VOLUME_IMPL = System.getProperty("os.name").toLowerCase().contains("windows") ? VolumeImpl.DOKANY : VolumeImpl.FUSE;
 
 	private final ObservableList<VaultSettings> directories = FXCollections.observableArrayList(VaultSettings::observables);
 	private final BooleanProperty askedForUpdateCheck = new SimpleBooleanProperty(DEFAULT_ASKED_FOR_UPDATE_CHECK);
 	private final BooleanProperty checkForUpdates = new SimpleBooleanProperty(DEFAULT_CHECK_FOR_UDPATES);
+	private final BooleanProperty startHidden = new SimpleBooleanProperty(DEFAULT_START_HIDDEN);
 	private final IntegerProperty port = new SimpleIntegerProperty(DEFAULT_PORT);
 	private final IntegerProperty numTrayNotifications = new SimpleIntegerProperty(DEFAULT_NUM_TRAY_NOTIFICATIONS);
-	private final StringProperty preferredGvfsScheme = new SimpleStringProperty(DEFAULT_GVFS_SCHEME);
+	private final ObjectProperty<WebDavUrlScheme> preferredGvfsScheme = new SimpleObjectProperty<>(DEFAULT_GVFS_SCHEME);
 	private final BooleanProperty debugMode = new SimpleBooleanProperty(DEFAULT_DEBUG_MODE);
 	private final ObjectProperty<VolumeImpl> preferredVolumeImpl = new SimpleObjectProperty<>(DEFAULT_PREFERRED_VOLUME_IMPL);
+	private final ObjectProperty<UiTheme> theme = new SimpleObjectProperty<>(DEFAULT_THEME);
 
 	private Consumer<Settings> saveCmd;
 
@@ -43,21 +51,23 @@ public class Settings {
 	 * Package-private constructor; use {@link SettingsProvider}.
 	 */
 	Settings() {
-		directories.addListener((ListChangeListener.Change<? extends VaultSettings> change) -> this.save());
+		directories.addListener(this::somethingChanged);
 		askedForUpdateCheck.addListener(this::somethingChanged);
 		checkForUpdates.addListener(this::somethingChanged);
+		startHidden.addListener(this::somethingChanged);
 		port.addListener(this::somethingChanged);
 		numTrayNotifications.addListener(this::somethingChanged);
 		preferredGvfsScheme.addListener(this::somethingChanged);
 		debugMode.addListener(this::somethingChanged);
 		preferredVolumeImpl.addListener(this::somethingChanged);
+		theme.addListener(this::somethingChanged);
 	}
 
 	void setSaveCmd(Consumer<Settings> saveCmd) {
 		this.saveCmd = saveCmd;
 	}
-
-	private void somethingChanged(ObservableValue<?> observable, Object oldValue, Object newValue) {
+	
+	private void somethingChanged(@SuppressWarnings("unused") Observable observable) {
 		this.save();
 	}
 
@@ -80,6 +90,10 @@ public class Settings {
 	public BooleanProperty checkForUpdates() {
 		return checkForUpdates;
 	}
+	
+	public BooleanProperty startHidden() {
+		return startHidden;
+	}
 
 	public IntegerProperty port() {
 		return port;
@@ -89,7 +103,7 @@ public class Settings {
 		return numTrayNotifications;
 	}
 
-	public StringProperty preferredGvfsScheme() {
+	public ObjectProperty<WebDavUrlScheme> preferredGvfsScheme() {
 		return preferredGvfsScheme;
 	}
 
@@ -101,4 +115,7 @@ public class Settings {
 		return preferredVolumeImpl;
 	}
 
+	public ObjectProperty<UiTheme> theme() {
+		return theme;
+	}
 }
