@@ -2,8 +2,8 @@ package org.cryptomator.common.settings;
 
 public enum UiTheme {
 	LIGHT("Light"),
-	DARK("Dark"),
-	CUSTOM("Custom (%s)");
+	DARK("Dark");
+	// CUSTOM("Custom (%s)");
 
 	private String displayName;
 
