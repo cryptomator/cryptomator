@@ -48,6 +48,7 @@ abstract class MainWindowModule {
 		stage.setMinHeight(440);
 		stage.setMaxWidth(1000);
 		stage.setMaxHeight(700);
+		stage.setTitle("Cryptomator");
 		stage.initStyle(StageStyle.UNDECORATED);
 		windowIcon.ifPresent(stage.getIcons()::add);
 		return stage;
