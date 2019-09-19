@@ -11,7 +11,7 @@ public class WrongFileAlertController implements FxController {
 	private final Stage window;
 
 	@Inject
-	public WrongFileAlertController(@WrongFileAlert Stage window) {
+	public WrongFileAlertController(@WrongFileAlertWindow Stage window) {
 		this.window = window;
 	}
 

@@ -28,14 +28,14 @@ import java.util.ResourceBundle;
 abstract class RemoveVaultModule {
 
 	@Provides
-	@RemoveVault
+	@RemoveVaultWindow
 	@RemoveVaultScoped
 	static FXMLLoaderFactory provideFxmlLoaderFactory(Map<Class<? extends FxController>, Provider<FxController>> factories, ResourceBundle resourceBundle) {
 		return new FXMLLoaderFactory(factories, resourceBundle);
 	}
 
 	@Provides
-	@RemoveVault
+	@RemoveVaultWindow
 	@RemoveVaultScoped
 	static Stage provideStage(@MainWindow Stage owner,  ResourceBundle resourceBundle, @Named("windowIcon") Optional<Image> windowIcon) {
 		Stage stage = new Stage();
@@ -50,7 +50,7 @@ abstract class RemoveVaultModule {
 	@Provides
 	@FxmlScene(FxmlFile.REMOVE_VAULT)
 	@RemoveVaultScoped
-	static Scene provideRemoveVaultScene(@RemoveVault FXMLLoaderFactory fxmlLoaders, @RemoveVault Stage window) {
+	static Scene provideRemoveVaultScene(@RemoveVaultWindow FXMLLoaderFactory fxmlLoaders, @RemoveVaultWindow Stage window) {
 		Scene scene = fxmlLoaders.createScene("/fxml/remove_vault.fxml");
 
 		KeyCombination cmdW = new KeyCodeCombination(KeyCode.W, KeyCombination.SHORTCUT_DOWN);

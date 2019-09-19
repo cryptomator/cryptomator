@@ -9,6 +9,8 @@ import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 
+import javax.inject.Named;
+
 @ChangePasswordScoped
 @Subcomponent(modules = {ChangePasswordModule.class})
 public interface ChangePasswordComponent {
@@ -30,6 +32,9 @@ public interface ChangePasswordComponent {
 
 		@BindsInstance
 		Builder vault(@ChangePasswordWindow Vault vault);
+
+		@BindsInstance
+		Builder owner(@Named("changePasswordOwner") Stage owner);
 
 		ChangePasswordComponent build();
 	}

@@ -11,7 +11,7 @@ import org.cryptomator.ui.common.FxmlScene;
 @Subcomponent(modules = {WrongFileAlertModule.class})
 public interface WrongFileAlertComponent {
 
-	@WrongFileAlert
+	@WrongFileAlertWindow
 	Stage window();
 
 	@FxmlScene(FxmlFile.WRONGFILEALERT)

@@ -17,10 +17,10 @@ import java.util.concurrent.CompletableFuture;
 @Subcomponent(modules = {ForgetPasswordModule.class})
 public interface ForgetPasswordComponent {
 
-	@ForgetPassword
+	@ForgetPasswordWindow
 	ReadOnlyBooleanProperty confirmedProperty();
 
-	@ForgetPassword
+	@ForgetPasswordWindow
 	Stage window();
 
 	@FxmlScene(FxmlFile.FORGET_PASSWORD)
@@ -40,7 +40,7 @@ public interface ForgetPasswordComponent {
 	interface Builder {
 
 		@BindsInstance
-		Builder vault(@ForgetPassword Vault vault);
+		Builder vault(@ForgetPasswordWindow Vault vault);
 
 		@BindsInstance
 		Builder owner(@Named("forgetPasswordOwner") Stage owner);

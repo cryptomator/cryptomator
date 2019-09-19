@@ -16,7 +16,7 @@ import org.cryptomator.ui.common.FxmlScene;
 @Subcomponent(modules = {AddVaultModule.class})
 public interface AddVaultWizardComponent {
 
-	@AddVaultWizard
+	@AddVaultWizardWindow
 	Stage window();
 
 	@FxmlScene(FxmlFile.ADDVAULT_WELCOME)

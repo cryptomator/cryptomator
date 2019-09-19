@@ -24,7 +24,7 @@ public class ForgetPasswordController implements FxController {
 	private final BooleanProperty confirmedResult;
 
 	@Inject
-	public ForgetPasswordController(@ForgetPassword Stage window, @ForgetPassword Vault vault, Optional<KeychainAccess> keychainAccess, @ForgetPassword BooleanProperty confirmedResult) {
+	public ForgetPasswordController(@ForgetPasswordWindow Stage window, @ForgetPasswordWindow Vault vault, Optional<KeychainAccess> keychainAccess, @ForgetPasswordWindow BooleanProperty confirmedResult) {
 		this.window = window;
 		this.vault = vault;
 		this.keychainAccess = keychainAccess;

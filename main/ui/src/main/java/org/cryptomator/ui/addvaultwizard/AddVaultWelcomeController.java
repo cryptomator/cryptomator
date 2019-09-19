@@ -20,7 +20,7 @@ public class AddVaultWelcomeController implements FxController {
 	private final Lazy<Scene> createNewVaultScene;
 
 	@Inject
-	AddVaultWelcomeController(@AddVaultWizard Stage window, @FxmlScene(FxmlFile.ADDVAULT_EXISTING) Lazy<Scene> chooseExistingVaultScene, @FxmlScene(FxmlFile.ADDVAULT_NEW_NAME) Lazy<Scene> createNewVaultScene) {
+	AddVaultWelcomeController(@AddVaultWizardWindow Stage window, @FxmlScene(FxmlFile.ADDVAULT_EXISTING) Lazy<Scene> chooseExistingVaultScene, @FxmlScene(FxmlFile.ADDVAULT_NEW_NAME) Lazy<Scene> createNewVaultScene) {
 		this.window = window;
 		this.chooseExistingVaultScene = chooseExistingVaultScene;
 		this.createNewVaultScene = createNewVaultScene;

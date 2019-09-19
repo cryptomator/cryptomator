@@ -27,14 +27,14 @@ import java.util.ResourceBundle;
 abstract class ForgetPasswordModule {
 
 	@Provides
-	@ForgetPassword
+	@ForgetPasswordWindow
 	@ForgetPasswordScoped
 	static FXMLLoaderFactory provideFxmlLoaderFactory(Map<Class<? extends FxController>, Provider<FxController>> factories, ResourceBundle resourceBundle) {
 		return new FXMLLoaderFactory(factories, resourceBundle);
 	}
 
 	@Provides
-	@ForgetPassword
+	@ForgetPasswordWindow
 	@ForgetPasswordScoped
 	static Stage provideStage(ResourceBundle resourceBundle, @Named("windowIcon") Optional<Image> windowIcon, @Named("forgetPasswordOwner") Stage owner) {
 		Stage stage = new Stage();
@@ -49,21 +49,21 @@ abstract class ForgetPasswordModule {
 	@Provides
 	@FxmlScene(FxmlFile.FORGET_PASSWORD)
 	@ForgetPasswordScoped
-	static Scene provideForgetPasswordScene(@ForgetPassword FXMLLoaderFactory fxmlLoaders, @ForgetPassword Stage window) {
+	static Scene provideForgetPasswordScene(@ForgetPasswordWindow FXMLLoaderFactory fxmlLoaders, @ForgetPasswordWindow Stage window) {
 		return fxmlLoaders.createScene("/fxml/forget_password.fxml");
 	}
 
 	@Provides
-	@ForgetPassword
+	@ForgetPasswordWindow
 	@ForgetPasswordScoped
 	static BooleanProperty provideConfirmedProperty() {
 		return new SimpleBooleanProperty(false);
 	}
 
 	@Binds
-	@ForgetPassword
+	@ForgetPasswordWindow
 	@ForgetPasswordScoped
-	abstract ReadOnlyBooleanProperty bindReadOnlyConfirmedProperty(@ForgetPassword BooleanProperty confirmedProperty);
+	abstract ReadOnlyBooleanProperty bindReadOnlyConfirmedProperty(@ForgetPasswordWindow BooleanProperty confirmedProperty);
 
 	// ------------------
 

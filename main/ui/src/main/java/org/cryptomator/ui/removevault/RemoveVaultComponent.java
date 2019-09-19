@@ -13,7 +13,7 @@ import org.cryptomator.ui.common.FxmlScene;
 @Subcomponent(modules = {RemoveVaultModule.class})
 public interface RemoveVaultComponent {
 
-	@RemoveVault
+	@RemoveVaultWindow
 	Stage window();
 
 	@FxmlScene(FxmlFile.REMOVE_VAULT)
@@ -30,7 +30,7 @@ public interface RemoveVaultComponent {
 	interface Builder {
 
 		@BindsInstance
-		Builder vault(@RemoveVault Vault vault);
+		Builder vault(@RemoveVaultWindow Vault vault);
 
 		RemoveVaultComponent build();
 	}

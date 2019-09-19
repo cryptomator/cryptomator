@@ -13,7 +13,6 @@ import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxControllerKey;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
-import org.cryptomator.ui.vaultoptions.VaultOptionsWindow;
 
 import javax.inject.Named;
 import javax.inject.Provider;
@@ -34,7 +33,7 @@ abstract class ChangePasswordModule {
 	@Provides
 	@ChangePasswordWindow
 	@ChangePasswordScoped
-	static Stage provideStage(@VaultOptionsWindow Stage owner, ResourceBundle resourceBundle, @Named("windowIcon") Optional<Image> windowIcon) {
+	static Stage provideStage(@Named("changePasswordOwner") Stage owner, ResourceBundle resourceBundle, @Named("windowIcon") Optional<Image> windowIcon) {
 		Stage stage = new Stage();
 		stage.setTitle(resourceBundle.getString("changepassword.title"));
 		stage.setResizable(false);

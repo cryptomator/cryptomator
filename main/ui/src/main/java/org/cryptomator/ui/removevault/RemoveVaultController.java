@@ -20,7 +20,7 @@ public class RemoveVaultController implements FxController {
 	private final ObservableList<Vault> vaults;
 
 	@Inject
-	public RemoveVaultController(@RemoveVault Stage window, @RemoveVault Vault vault, ObservableList<Vault> vaults) {
+	public RemoveVaultController(@RemoveVaultWindow Stage window, @RemoveVaultWindow Vault vault, ObservableList<Vault> vaults) {
 		this.window = window;
 		this.vault = vault;
 		this.vaults = vaults;

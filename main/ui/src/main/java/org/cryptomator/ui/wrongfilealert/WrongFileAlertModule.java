@@ -27,14 +27,14 @@ import java.util.ResourceBundle;
 abstract class WrongFileAlertModule {
 
 	@Provides
-	@WrongFileAlert
+	@WrongFileAlertWindow
 	@WrongFileAlertScoped
 	static FXMLLoaderFactory provideFxmlLoaderFactory(Map<Class<? extends FxController>, Provider<FxController>> factories, ResourceBundle resourceBundle) {
 		return new FXMLLoaderFactory(factories, resourceBundle);
 	}
 
 	@Provides
-	@WrongFileAlert
+	@WrongFileAlertWindow
 	@WrongFileAlertScoped
 	static Stage provideStage(ResourceBundle resourceBundle, @Named("windowIcon") Optional<Image> windowIcon) {
 		Stage stage = new Stage();
@@ -48,7 +48,7 @@ abstract class WrongFileAlertModule {
 	@Provides
 	@FxmlScene(FxmlFile.WRONGFILEALERT)
 	@WrongFileAlertScoped
-	static Scene provideWrongFileAlertScene(@WrongFileAlert FXMLLoaderFactory fxmlLoaders, @WrongFileAlert Stage window) {
+	static Scene provideWrongFileAlertScene(@WrongFileAlertWindow FXMLLoaderFactory fxmlLoaders, @WrongFileAlertWindow Stage window) {
 		Scene scene = fxmlLoaders.createScene("/fxml/wrongfilealert.fxml"); // TODO rename fxml file
 
 		KeyCombination cmdW = new KeyCodeCombination(KeyCode.W, KeyCombination.SHORTCUT_DOWN);
