@@ -50,7 +50,7 @@ abstract class UnlockModule {
 	@FxmlScene(FxmlFile.UNLOCK)
 	@UnlockScoped
 	static Scene provideUnlockScene(@UnlockWindow FXMLLoaderFactory fxmlLoaders, @UnlockWindow Stage window) {
-		Scene scene = fxmlLoaders.createScene("/fxml/unlock2.fxml"); // TODO rename fxml file
+		Scene scene = fxmlLoaders.createScene("/fxml/unlock.fxml");
 
 		KeyCombination cmdW = new KeyCodeCombination(KeyCode.W, KeyCombination.SHORTCUT_DOWN);
 		scene.getAccelerators().put(cmdW, window::close);

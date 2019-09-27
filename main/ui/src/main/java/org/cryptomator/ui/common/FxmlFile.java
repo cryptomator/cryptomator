@@ -16,7 +16,7 @@ public enum FxmlFile {
 	PREFERENCES("/fxml/preferences.fxml"), //
 	QUIT("/fxml/quit.fxml"), //
 	REMOVE_VAULT("/fxml/remove_vault.fxml"), //
-	UNLOCK("/fxml/unlock2.fxml"), // TODO rename
+	UNLOCK("/fxml/unlock.fxml"),
 	UNLOCK_SUCCESS("/fxml/unlock_success.fxml"), //
 	VAULT_OPTIONS("/fxml/vault_options.fxml"), //
 	WRONGFILEALERT("/fxml/wrongfilealert.fxml");
