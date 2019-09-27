@@ -12,5 +12,6 @@
 	</padding>
 	<children>
 		<Button text="%vaultOptions.general.changePasswordBtn" onAction="#changePassword"/>
+		<Button text="TODO show recovery key" onAction="#showRecoveryKey"/>
 	</children>
 </VBox>

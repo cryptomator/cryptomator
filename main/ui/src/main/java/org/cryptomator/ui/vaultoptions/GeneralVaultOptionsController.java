@@ -5,6 +5,7 @@ import javafx.stage.Stage;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.changepassword.ChangePasswordComponent;
 import org.cryptomator.ui.common.FxController;
+import org.cryptomator.ui.recoverykey.RecoveryKeyComponent;
 
 import javax.inject.Inject;
 
@@ -14,17 +15,24 @@ public class GeneralVaultOptionsController implements FxController {
 	private final Vault vault;
 	private final Stage window;
 	private final ChangePasswordComponent.Builder changePasswordWindow;
+	private final RecoveryKeyComponent.Builder recoveryKeyWindow;
 
 	@Inject
-	GeneralVaultOptionsController(@VaultOptionsWindow Vault vault, @VaultOptionsWindow Stage window, ChangePasswordComponent.Builder changePasswordWindow) {
+	GeneralVaultOptionsController(@VaultOptionsWindow Vault vault, @VaultOptionsWindow Stage window, ChangePasswordComponent.Builder changePasswordWindow, RecoveryKeyComponent.Builder recoveryKeyWindow) {
 		this.vault = vault;
 		this.window = window;
 		this.changePasswordWindow = changePasswordWindow;
+		this.recoveryKeyWindow = recoveryKeyWindow;
 	}
 
 	@FXML
 	public void changePassword() {
 		changePasswordWindow.vault(vault).owner(window).build().showChangePasswordWindow();
+	}
+
+	@FXML
+	public void showRecoveryKey() {
+		recoveryKeyWindow.vault(vault).owner(window).build().showRecoveryKeyCreationWindow();
 	}
 
 }

@@ -22,10 +22,6 @@
 			<groupId>org.cryptomator</groupId>
 			<artifactId>jni</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.cryptomator</groupId>
-			<artifactId>cryptolib</artifactId>
-		</dependency>
 		
 		<!-- JavaFx -->
 		<dependency>

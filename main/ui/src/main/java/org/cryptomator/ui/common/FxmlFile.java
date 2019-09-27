@@ -15,6 +15,7 @@ public enum FxmlFile {
 	MIGRATION_SUCCESS("/fxml/migration_success.fxml"), //
 	PREFERENCES("/fxml/preferences.fxml"), //
 	QUIT("/fxml/quit.fxml"), //
+	RECOVERYKEY_CREATE("/fxml/recoverykey_create.fxml"), //
 	REMOVE_VAULT("/fxml/remove_vault.fxml"), //
 	UNLOCK("/fxml/unlock.fxml"),
 	UNLOCK_SUCCESS("/fxml/unlock_success.fxml"), //

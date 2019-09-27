@@ -1,4 +1,4 @@
-package org.cryptomator.ui.keyrecovery;
+package org.cryptomator.ui.recoverykey;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;

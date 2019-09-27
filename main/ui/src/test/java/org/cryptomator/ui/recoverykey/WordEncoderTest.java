@@ -1,4 +1,4 @@
-package org.cryptomator.ui.keyrecovery;
+package org.cryptomator.ui.recoverykey;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;

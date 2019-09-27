@@ -24,8 +24,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
 		<!-- dependency versions -->
-		<cryptomator.cryptolib.version>1.2.2</cryptomator.cryptolib.version>
-		<cryptomator.cryptofs.version>1.9.0-beta1</cryptomator.cryptofs.version>
+		<cryptomator.cryptofs.version>1.9.0-beta2</cryptomator.cryptofs.version>
 		<cryptomator.jni.version>2.2.1</cryptomator.jni.version>
 		<cryptomator.fuse.version>1.2.0</cryptomator.fuse.version>
 		<cryptomator.dokany.version>1.1.11</cryptomator.dokany.version>
@@ -82,11 +81,6 @@
 			</dependency>
 
 			<!-- Cryptomator Libs -->
-			<dependency>
-				<groupId>org.cryptomator</groupId>
-				<artifactId>cryptolib</artifactId>
-				<version>${cryptomator.cryptolib.version}</version>
-			</dependency>
 			<dependency>
 				<groupId>org.cryptomator</groupId>
 				<artifactId>cryptofs</artifactId>

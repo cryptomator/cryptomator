@@ -76,6 +76,10 @@ public class NiceSecurePasswordField extends StackPane {
 		return passwordField.getCharacters();
 	}
 
+	public void setPassword(CharSequence password) {
+		passwordField.setPassword(password);
+	}
+
 	public void setPassword(char[] password) {
 		passwordField.setPassword(password);
 	}
