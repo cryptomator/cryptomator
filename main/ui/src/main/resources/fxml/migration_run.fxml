@@ -23,6 +23,9 @@
 			<NiceSecurePasswordField fx:id="passwordField"/>
 		</VBox>
 
+		<!-- TODO add a progress bar... -->
+		<FormattedLabel format="progress: %.3f" arg1="${controller.migrationProgress}"/>
+
 		<VBox alignment="BOTTOM_CENTER" VBox.vgrow="ALWAYS">
 			<ButtonBar buttonMinWidth="120" buttonOrder="B+X">
 				<buttons>
