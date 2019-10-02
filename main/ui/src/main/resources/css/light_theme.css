@@ -16,6 +16,10 @@
 	src: url('opensans-bold.ttf');
 }
 
+@font-face {
+	src: url('dosis-bold.ttf');
+}
+
 /*******************************************************************************
  *                                                                             *
  * Root Styling & Colors                                                       *
