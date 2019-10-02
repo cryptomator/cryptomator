@@ -1,5 +1,6 @@
 package org.cryptomator.ui.common;
 
+import com.google.common.base.Splitter;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -9,6 +10,8 @@ import javax.inject.Provider;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 
@@ -34,6 +37,7 @@ public class FXMLLoaderFactory {
 
 	/**
 	 * Loads the FXML given fxml resource in a new FXMLLoader instance.
+	 *
 	 * @param fxmlResourceName Name of the resource (as in {@link Class#getResource(String)}).
 	 * @return The FXMLLoader used to load the file
 	 * @throws IOException if an error occurs while loading the FXML file
@@ -48,6 +52,7 @@ public class FXMLLoaderFactory {
 
 	/**
 	 * {@link #load(String) Loads} the FXML file and creates a new Scene containing the loaded ui.
+	 *
 	 * @param fxmlResourceName Name of the resource (as in {@link Class#getResource(String)}).
 	 * @throws UncheckedIOException wrapping any IOException thrown by {@link #load(String)).
 	 */
@@ -59,6 +64,8 @@ public class FXMLLoaderFactory {
 			throw new UncheckedIOException("Failed to load " + fxmlResourceName, e);
 		}
 		Parent root = loader.getRoot();
+		List<String> addtionalStyleSheets = Splitter.on(',').omitEmptyStrings().splitToList(resourceBundle.getString("additionalStyleSheets"));
+		addtionalStyleSheets.forEach(styleSheet -> root.getStylesheets().add("/css/" + styleSheet));
 		return new Scene(root);
 	}
 
