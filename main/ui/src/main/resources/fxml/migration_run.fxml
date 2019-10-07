@@ -3,6 +3,7 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ButtonBar?>
+<?import javafx.scene.control.ProgressBar?>
 <?import javafx.scene.control.ProgressIndicator?>
 <?import javafx.scene.layout.VBox?>
 <?import org.cryptomator.ui.controls.FormattedLabel?>
@@ -23,7 +24,7 @@
 			<NiceSecurePasswordField fx:id="passwordField"/>
 		</VBox>
 
-		<!-- TODO add a progress bar... -->
+		<ProgressBar progress="${controller.migrationProgress}" prefWidth="Infinity"/>
 		<FormattedLabel format="progress: %.3f" arg1="${controller.migrationProgress}"/>
 
 		<VBox alignment="BOTTOM_CENTER" VBox.vgrow="ALWAYS">

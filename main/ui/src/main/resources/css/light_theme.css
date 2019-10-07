@@ -80,6 +80,7 @@
 	INDICATOR_BG: RED_5;
 	PROGRESS_INDICATOR_BEGIN: GRAY_2;
 	PROGRESS_INDICATOR_END: GRAY_4;
+	PROGRESS_BAR_BG: GRAY_8;
 	PASSWORD_STRENGTH_INDICATOR_BG: GRAY_5;
 	PASSWORD_STRENGTH_INDICATOR_BG_STRENGTH_0: RED_5;
 	PASSWORD_STRENGTH_INDICATOR_BG_STRENGTH_1: ORANGE_5;
@@ -779,4 +780,32 @@
 
 .progress-indicator:indeterminate .segment11 {
 	-fx-shape:"m 14.321262,6.5816808 c -0.824944,0.3797564 -0.10368,1.8484772 0.718513,1.3544717 L 18.786514,5.9486042 C 19.644992,5.4932031 18.92648,4.1387308 18.068001,4.5941315 z";
+}
+
+/*******************************************************************************
+ *                                                                             *
+ * ProgressBar                                                                 *
+ *                                                                             *
+ ******************************************************************************/
+
+.progress-bar {
+	-fx-indeterminate-bar-length: 100;
+	-fx-indeterminate-bar-escape: true;
+	-fx-indeterminate-bar-flip: true;
+	-fx-indeterminate-bar-animation-time: 2;
+}
+
+.progress-bar > .bar {
+	-fx-background-color: CONTROL_PRIMARY_BG_NORMAL;
+	-fx-background-radius: 4px;
+	-fx-padding: 0.5em;
+}
+
+.progress-bar:indeterminate > .bar {
+	-fx-background-color: linear-gradient(to left, transparent, CONTROL_PRIMARY_BG_NORMAL);
+}
+
+.progress-bar > .track {
+	-fx-background-color: PROGRESS_BAR_BG;
+	-fx-background-radius: 4px;
 }
