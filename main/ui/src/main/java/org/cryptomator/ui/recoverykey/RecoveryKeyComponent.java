@@ -37,9 +37,6 @@ public interface RecoveryKeyComponent {
 		Builder vault(@RecoveryKeyWindow Vault vault);
 
 		@BindsInstance
-		Builder password(@Nullable CharSequence password);
-
-		@BindsInstance
 		Builder owner(@Named("keyRecoveryOwner") Stage owner);
 
 		RecoveryKeyComponent build();

@@ -4,6 +4,8 @@ import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoMap;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Modality;
@@ -43,6 +45,15 @@ abstract class RecoveryKeyModule {
 		windowIcon.ifPresent(stage.getIcons()::add);
 		return stage;
 	}
+	
+	@Provides
+	@RecoveryKeyWindow
+	@RecoveryKeyScoped
+	static StringProperty provideRecoveryKeyProperty() {
+		return new SimpleStringProperty();
+	}
+	
+	// ------------------
 
 	@Provides
 	@FxmlScene(FxmlFile.RECOVERYKEY_CREATE)
@@ -51,10 +62,23 @@ abstract class RecoveryKeyModule {
 		return fxmlLoaders.createScene("/fxml/recoverykey_create.fxml");
 	}
 
+	@Provides
+	@FxmlScene(FxmlFile.RECOVERYKEY_DISPLAY)
+	@RecoveryKeyScoped
+	static Scene provideRecoveryKeyDisplayScene(@RecoveryKeyWindow FXMLLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene("/fxml/recoverykey_display.fxml");
+	}
+
 	// ------------------
 
 	@Binds
 	@IntoMap
 	@FxControllerKey(RecoveryKeyCreationController.class)
 	abstract FxController bindRecoveryKeyCreationController(RecoveryKeyCreationController controller);
+
+	@Binds
+	@IntoMap
+	@FxControllerKey(RecoveryKeyDisplayController.class)
+	abstract FxController bindRecoveryKeyDisplayController(RecoveryKeyDisplayController controller);
+	
 }
