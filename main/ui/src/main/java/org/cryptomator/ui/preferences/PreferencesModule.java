@@ -6,10 +6,8 @@ import dagger.Provides;
 import dagger.multibindings.IntoMap;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyCodeCombination;
-import javafx.scene.input.KeyCombination;
 import javafx.stage.Stage;
+import org.cryptomator.ui.common.DefaultSceneFactory;
 import org.cryptomator.ui.common.FXMLLoaderFactory;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxControllerKey;
@@ -28,8 +26,8 @@ abstract class PreferencesModule {
 	@Provides
 	@PreferencesWindow
 	@PreferencesScoped
-	static FXMLLoaderFactory provideFxmlLoaderFactory(Map<Class<? extends FxController>, Provider<FxController>> factories, ResourceBundle resourceBundle) {
-		return new FXMLLoaderFactory(factories, resourceBundle);
+	static FXMLLoaderFactory provideFxmlLoaderFactory(Map<Class<? extends FxController>, Provider<FxController>> factories, DefaultSceneFactory sceneFactory, ResourceBundle resourceBundle) {
+		return new FXMLLoaderFactory(factories, sceneFactory, resourceBundle);
 	}
 
 	@Provides
@@ -46,13 +44,8 @@ abstract class PreferencesModule {
 	@Provides
 	@FxmlScene(FxmlFile.PREFERENCES)
 	@PreferencesScoped
-	static Scene providePreferencesScene(@PreferencesWindow FXMLLoaderFactory fxmlLoaders, @PreferencesWindow Stage window) {
-		Scene scene = fxmlLoaders.createScene("/fxml/preferences.fxml");
-
-		KeyCombination cmdW = new KeyCodeCombination(KeyCode.W, KeyCombination.SHORTCUT_DOWN);
-		scene.getAccelerators().put(cmdW, window::close);
-
-		return scene;
+	static Scene providePreferencesScene(@PreferencesWindow FXMLLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene("/fxml/preferences.fxml");
 	}
 
 	// ------------------

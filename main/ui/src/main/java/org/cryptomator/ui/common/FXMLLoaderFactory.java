@@ -4,24 +4,25 @@ import com.google.common.base.Splitter;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.stage.Stage;
 
 import javax.inject.Provider;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.function.Function;
 
 public class FXMLLoaderFactory {
 
-	private final Map<Class<? extends FxController>, Provider<FxController>> factories;
+	private final Map<Class<? extends FxController>, Provider<FxController>> controllerFactories;
+	private final Function<Parent, Scene> sceneFactory;
 	private final ResourceBundle resourceBundle;
 
-	public FXMLLoaderFactory(Map<Class<? extends FxController>, Provider<FxController>> factories, ResourceBundle resourceBundle) {
-		this.factories = factories;
+	public FXMLLoaderFactory(Map<Class<? extends FxController>, Provider<FxController>> controllerFactories, Function<Parent, Scene> sceneFactory, ResourceBundle resourceBundle) {
+		this.controllerFactories = controllerFactories;
+		this.sceneFactory = sceneFactory;
 		this.resourceBundle = resourceBundle;
 	}
 
@@ -66,14 +67,14 @@ public class FXMLLoaderFactory {
 		Parent root = loader.getRoot();
 		List<String> addtionalStyleSheets = Splitter.on(',').omitEmptyStrings().splitToList(resourceBundle.getString("additionalStyleSheets"));
 		addtionalStyleSheets.forEach(styleSheet -> root.getStylesheets().add("/css/" + styleSheet));
-		return new Scene(root);
+		return sceneFactory.apply(root);
 	}
 
 	private FxController constructController(Class<?> aClass) {
-		if (!factories.containsKey(aClass)) {
+		if (!controllerFactories.containsKey(aClass)) {
 			throw new IllegalArgumentException("ViewController not registered: " + aClass);
 		} else {
-			return factories.get(aClass).get();
+			return controllerFactories.get(aClass).get();
 		}
 	}
 }

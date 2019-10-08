@@ -19,6 +19,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.ui.common.DefaultSceneFactory;
 import org.cryptomator.ui.common.FXMLLoaderFactory;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxControllerKey;
@@ -40,22 +41,19 @@ public abstract class AddVaultModule {
 	@Provides
 	@AddVaultWizardWindow
 	@AddVaultWizardScoped
-	static FXMLLoaderFactory provideFxmlLoaderFactory(Map<Class<? extends FxController>, Provider<FxController>> factories, ResourceBundle resourceBundle) {
-		return new FXMLLoaderFactory(factories, resourceBundle);
+	static FXMLLoaderFactory provideFxmlLoaderFactory(Map<Class<? extends FxController>, Provider<FxController>> factories, DefaultSceneFactory sceneFactory, ResourceBundle resourceBundle) {
+		return new FXMLLoaderFactory(factories, sceneFactory, resourceBundle);
 	}
 
 	@Provides
 	@AddVaultWizardWindow
 	@AddVaultWizardScoped
-	static Stage provideStage(@MainWindow Stage owner, ResourceBundle resourceBundle, @Named("windowIcon") Optional<Image> windowIcon, @AddVaultWizardWindow Lazy<Map<KeyCodeCombination, Runnable>> accelerators) {
+	static Stage provideStage(@MainWindow Stage owner, ResourceBundle resourceBundle, @Named("windowIcon") Optional<Image> windowIcon) {
 		Stage stage = new Stage();
 		stage.setTitle(resourceBundle.getString("addvaultwizard.title"));
 		stage.setResizable(false);
 		stage.initModality(Modality.WINDOW_MODAL);
 		stage.initOwner(owner);
-		stage.sceneProperty().addListener(observable -> {
-			stage.getScene().getAccelerators().putAll(accelerators.get());
-		});
 		windowIcon.ifPresent(stage.getIcons()::add);
 		return stage;
 	}
@@ -82,69 +80,44 @@ public abstract class AddVaultModule {
 	// ------------------
 
 	@Provides
-	@AddVaultWizardWindow
-	@AddVaultWizardScoped
-	static Map<KeyCodeCombination, Runnable> provideDefaultAccellerators(@AddVaultWizardWindow Set<Map.Entry<KeyCombination, Runnable>> accelerators) {
-		return Map.ofEntries(accelerators.toArray(Map.Entry[]::new));
-	}
-
-	@Provides
-	@IntoSet
-	@AddVaultWizardWindow
-	static Map.Entry<KeyCombination, Runnable> provideCloseWindowShortcut(@AddVaultWizardWindow Stage window) {
-		if (SystemUtils.IS_OS_WINDOWS) {
-			return Map.entry(new KeyCodeCombination(KeyCode.F4, KeyCombination.ALT_DOWN), window::close);
-		} else {
-			return Map.entry(new KeyCodeCombination(KeyCode.W, KeyCombination.SHORTCUT_DOWN), window::close);
-		}
-	}
-
-	// ------------------
-
-	@Provides
 	@FxmlScene(FxmlFile.ADDVAULT_WELCOME)
 	@AddVaultWizardScoped
-	static Scene provideWelcomeScene(@AddVaultWizardWindow FXMLLoaderFactory fxmlLoaders, @AddVaultWizardWindow Stage window) {
-		Scene scene = fxmlLoaders.createScene("/fxml/addvault_welcome.fxml");
-
-		KeyCombination cmdW = new KeyCodeCombination(KeyCode.W, KeyCombination.SHORTCUT_DOWN);
-		scene.getAccelerators().put(cmdW, window::close);
-
-		return scene;
+	static Scene provideWelcomeScene(@AddVaultWizardWindow FXMLLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene("/fxml/addvault_welcome.fxml");
 	}
 
 	@Provides
 	@FxmlScene(FxmlFile.ADDVAULT_EXISTING)
 	@AddVaultWizardScoped
-	static Scene provideChooseExistingVaultScene(@AddVaultWizardWindow FXMLLoaderFactory fxmlLoaders, @AddVaultWizardWindow Stage window) {
+	static Scene provideChooseExistingVaultScene(@AddVaultWizardWindow FXMLLoaderFactory fxmlLoaders) {
 		return fxmlLoaders.createScene("/fxml/addvault_existing.fxml");
 	}
 
 	@Provides
 	@FxmlScene(FxmlFile.ADDVAULT_NEW_NAME)
 	@AddVaultWizardScoped
-	static Scene provideCreateNewVaultNameScene(@AddVaultWizardWindow FXMLLoaderFactory fxmlLoaders, @AddVaultWizardWindow Stage window) {
+	static Scene provideCreateNewVaultNameScene(@AddVaultWizardWindow FXMLLoaderFactory fxmlLoaders) {
 		return fxmlLoaders.createScene("/fxml/addvault_new_name.fxml");
 	}
 
 	@Provides
 	@FxmlScene(FxmlFile.ADDVAULT_NEW_LOCATION)
 	@AddVaultWizardScoped
-	static Scene provideCreateNewVaultLocationScene(@AddVaultWizardWindow FXMLLoaderFactory fxmlLoaders, @AddVaultWizardWindow Stage window) {
+	static Scene provideCreateNewVaultLocationScene(@AddVaultWizardWindow FXMLLoaderFactory fxmlLoaders) {
 		return fxmlLoaders.createScene("/fxml/addvault_new_location.fxml");
 	}
 
 	@Provides
 	@FxmlScene(FxmlFile.ADDVAULT_NEW_PASSWORD)
 	@AddVaultWizardScoped
-	static Scene provideCreateNewVaultPasswordScene(@AddVaultWizardWindow FXMLLoaderFactory fxmlLoaders, @AddVaultWizardWindow Stage window) {
+	static Scene provideCreateNewVaultPasswordScene(@AddVaultWizardWindow FXMLLoaderFactory fxmlLoaders) {
 		return fxmlLoaders.createScene("/fxml/addvault_new_password.fxml");
 	}
 
 	@Provides
 	@FxmlScene(FxmlFile.ADDVAULT_SUCCESS)
 	@AddVaultWizardScoped
-	static Scene provideCreateNewVaultSuccessScene(@AddVaultWizardWindow FXMLLoaderFactory fxmlLoaders, @AddVaultWizardWindow Stage window) {
+	static Scene provideCreateNewVaultSuccessScene(@AddVaultWizardWindow FXMLLoaderFactory fxmlLoaders) {
 		return fxmlLoaders.createScene("/fxml/addvault_success.fxml");
 	}
 

@@ -6,11 +6,9 @@ import dagger.Provides;
 import dagger.multibindings.IntoMap;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyCodeCombination;
-import javafx.scene.input.KeyCombination;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import org.cryptomator.ui.common.DefaultSceneFactory;
 import org.cryptomator.ui.common.FXMLLoaderFactory;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxControllerKey;
@@ -24,14 +22,14 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
-@Module(subcomponents={ForgetPasswordComponent.class})
+@Module(subcomponents = {ForgetPasswordComponent.class})
 abstract class UnlockModule {
 
 	@Provides
 	@UnlockWindow
 	@UnlockScoped
-	static FXMLLoaderFactory provideFxmlLoaderFactory(Map<Class<? extends FxController>, Provider<FxController>> factories, ResourceBundle resourceBundle) {
-		return new FXMLLoaderFactory(factories, resourceBundle);
+	static FXMLLoaderFactory provideFxmlLoaderFactory(Map<Class<? extends FxController>, Provider<FxController>> factories, DefaultSceneFactory sceneFactory, ResourceBundle resourceBundle) {
+		return new FXMLLoaderFactory(factories, sceneFactory, resourceBundle);
 	}
 
 	@Provides
@@ -49,25 +47,15 @@ abstract class UnlockModule {
 	@Provides
 	@FxmlScene(FxmlFile.UNLOCK)
 	@UnlockScoped
-	static Scene provideUnlockScene(@UnlockWindow FXMLLoaderFactory fxmlLoaders, @UnlockWindow Stage window) {
-		Scene scene = fxmlLoaders.createScene("/fxml/unlock.fxml");
-
-		KeyCombination cmdW = new KeyCodeCombination(KeyCode.W, KeyCombination.SHORTCUT_DOWN);
-		scene.getAccelerators().put(cmdW, window::close);
-
-		return scene;
+	static Scene provideUnlockScene(@UnlockWindow FXMLLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene("/fxml/unlock.fxml");
 	}
 
 	@Provides
 	@FxmlScene(FxmlFile.UNLOCK_SUCCESS)
 	@UnlockScoped
-	static Scene provideUnlockSuccessScene(@UnlockWindow FXMLLoaderFactory fxmlLoaders, @UnlockWindow Stage window) {
-		Scene scene = fxmlLoaders.createScene("/fxml/unlock_success.fxml");
-
-		KeyCombination cmdW = new KeyCodeCombination(KeyCode.W, KeyCombination.SHORTCUT_DOWN);
-		scene.getAccelerators().put(cmdW, window::close);
-
-		return scene;
+	static Scene provideUnlockSuccessScene(@UnlockWindow FXMLLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene("/fxml/unlock_success.fxml");
 	}
 
 

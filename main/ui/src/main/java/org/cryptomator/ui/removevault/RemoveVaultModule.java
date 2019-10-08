@@ -11,6 +11,7 @@ import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import org.cryptomator.ui.common.DefaultSceneFactory;
 import org.cryptomator.ui.common.FXMLLoaderFactory;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxControllerKey;
@@ -30,8 +31,8 @@ abstract class RemoveVaultModule {
 	@Provides
 	@RemoveVaultWindow
 	@RemoveVaultScoped
-	static FXMLLoaderFactory provideFxmlLoaderFactory(Map<Class<? extends FxController>, Provider<FxController>> factories, ResourceBundle resourceBundle) {
-		return new FXMLLoaderFactory(factories, resourceBundle);
+	static FXMLLoaderFactory provideFxmlLoaderFactory(Map<Class<? extends FxController>, Provider<FxController>> factories, DefaultSceneFactory sceneFactory, ResourceBundle resourceBundle) {
+		return new FXMLLoaderFactory(factories, sceneFactory, resourceBundle);
 	}
 
 	@Provides
@@ -50,13 +51,8 @@ abstract class RemoveVaultModule {
 	@Provides
 	@FxmlScene(FxmlFile.REMOVE_VAULT)
 	@RemoveVaultScoped
-	static Scene provideRemoveVaultScene(@RemoveVaultWindow FXMLLoaderFactory fxmlLoaders, @RemoveVaultWindow Stage window) {
-		Scene scene = fxmlLoaders.createScene("/fxml/remove_vault.fxml");
-
-		KeyCombination cmdW = new KeyCodeCombination(KeyCode.W, KeyCombination.SHORTCUT_DOWN);
-		scene.getAccelerators().put(cmdW, window::close);
-
-		return scene;
+	static Scene provideRemoveVaultScene(@RemoveVaultWindow FXMLLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene("/fxml/remove_vault.fxml");
 	}
 
 	// ------------------

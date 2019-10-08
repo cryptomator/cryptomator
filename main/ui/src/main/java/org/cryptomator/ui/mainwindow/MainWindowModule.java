@@ -12,6 +12,7 @@ import javafx.scene.input.KeyCombination;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import org.cryptomator.ui.addvaultwizard.AddVaultWizardComponent;
+import org.cryptomator.ui.common.DefaultSceneFactory;
 import org.cryptomator.ui.common.FXMLLoaderFactory;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxControllerKey;
@@ -34,8 +35,8 @@ abstract class MainWindowModule {
 	@Provides
 	@MainWindow
 	@MainWindowScoped
-	static FXMLLoaderFactory provideFxmlLoaderFactory(Map<Class<? extends FxController>, Provider<FxController>> factories, ResourceBundle resourceBundle) {
-		return new FXMLLoaderFactory(factories, resourceBundle);
+	static FXMLLoaderFactory provideFxmlLoaderFactory(Map<Class<? extends FxController>, Provider<FxController>> factories, MainWindowSceneFactory sceneFactory, ResourceBundle resourceBundle) {
+		return new FXMLLoaderFactory(factories, sceneFactory, resourceBundle);
 	}
 
 	@Provides
@@ -57,15 +58,7 @@ abstract class MainWindowModule {
 	@FxmlScene(FxmlFile.MAIN_WINDOW)
 	@MainWindowScoped
 	static Scene provideMainScene(@MainWindow FXMLLoaderFactory fxmlLoaders, MainWindowController mainWindowController, VaultListController vaultListController) {
-		Scene scene = fxmlLoaders.createScene("/fxml/main_window.fxml");
-
-		// still not perfect... cant't we have a global menubar via the AWT tray app?
-		KeyCombination cmdN = new KeyCodeCombination(KeyCode.N, KeyCombination.SHORTCUT_DOWN);
-		KeyCombination cmdW = new KeyCodeCombination(KeyCode.W, KeyCombination.SHORTCUT_DOWN);
-		scene.getAccelerators().put(cmdN, vaultListController::didClickAddVault);
-		scene.getAccelerators().put(cmdW, mainWindowController::close);
-
-		return scene;
+		return fxmlLoaders.createScene("/fxml/main_window.fxml");
 	}
 
 	// ------------------
