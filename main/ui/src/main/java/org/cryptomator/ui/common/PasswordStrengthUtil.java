@@ -31,8 +31,7 @@ public class PasswordStrengthUtil {
 	public PasswordStrengthUtil(ResourceBundle resourceBundle) {
 		this.resourceBundle = resourceBundle;
 		this.zxcvbn = new Zxcvbn();
-		this.sanitizedInputs = new ArrayList<>();
-		this.sanitizedInputs.add("cryptomator");
+		this.sanitizedInputs = List.of("cryptomator");
 	}
 
 	public int computeRate(String password) {
