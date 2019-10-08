@@ -24,23 +24,22 @@ import java.util.concurrent.ExecutorService;
 public class RecoveryKeyCreationController implements FxController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(RecoveryKeyCreationController.class);
-	private static final String MASTERKEY_FILENAME = "masterkey.cryptomator"; // TODO: deduplicate constant declared in multiple classes
 
 	private final Stage window;
 	private final Vault vault;
 	private final ExecutorService executor;
 	private final CharSequence prefilledPassword;
-	private final WordEncoder wordEncoder;
+	private final RecoveryKeyFactory recoveryKeyFactory;
 	private final StringProperty recoveryKey;
 	public NiceSecurePasswordField passwordField;
 
 	@Inject
-	public RecoveryKeyCreationController(@RecoveryKeyWindow Stage window, @RecoveryKeyWindow Vault vault, ExecutorService executor, @Nullable CharSequence prefilledPassword) {
+	public RecoveryKeyCreationController(@RecoveryKeyWindow Stage window, @RecoveryKeyWindow Vault vault, RecoveryKeyFactory recoveryKeyFactory, ExecutorService executor, @Nullable CharSequence prefilledPassword) {
 		this.window = window;
 		this.vault = vault;
 		this.executor = executor;
 		this.prefilledPassword = prefilledPassword;
-		this.wordEncoder = new WordEncoder();
+		this.recoveryKeyFactory = recoveryKeyFactory;
 		this.recoveryKey = new SimpleStringProperty();
 	}
 	
@@ -54,17 +53,7 @@ public class RecoveryKeyCreationController implements FxController {
 	@FXML
 	public void createRecoveryKey() {
 		Tasks.create(() -> {
-			byte[] rawKey = CryptoFileSystemProvider.exportRawKey(vault.getPath(), MASTERKEY_FILENAME, new byte[0], passwordField.getCharacters());
-			assert rawKey.length == 64;
-			byte[] paddedKey = Arrays.copyOf(rawKey, 66);
-			// TODO add two-byte CRC
-
-			try {
-				return wordEncoder.encodePadded(paddedKey);
-			} finally {
-				Arrays.fill(rawKey, (byte) 0x00);
-				Arrays.fill(paddedKey, (byte) 0x00);
-			}
+			return recoveryKeyFactory.createRecoveryKey(vault.getPath(), passwordField.getCharacters());
 		}).onSuccess(result -> {
 			recoveryKey.set(result);
 		}).onError(IOException.class, e -> {

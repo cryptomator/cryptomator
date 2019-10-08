@@ -3,6 +3,8 @@ package org.cryptomator.ui.recoverykey;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,16 +16,19 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+@Singleton
 class WordEncoder {
 
+	private static final String DEFAULT_WORD_FILE = "/i18n/4096words_en.txt";
 	private static final int WORD_COUNT = 4096;
 	private static final char DELIMITER = ' ';
 	
 	private final List<String> words;
 	private final Map<String, Integer> indices;
 	
+	@Inject
 	public WordEncoder() {
-		this("/i18n/4096words_en.txt");
+		this(DEFAULT_WORD_FILE);
 	}
 	
 	public WordEncoder(String wordFile) {
