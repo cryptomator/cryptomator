@@ -6,6 +6,7 @@ public enum FxmlFile {
 	ADDVAULT_NEW_NAME("/fxml/addvault_new_name.fxml"), //
 	ADDVAULT_NEW_LOCATION("/fxml/addvault_new_location.fxml"), //
 	ADDVAULT_NEW_PASSWORD("/fxml/addvault_new_password.fxml"), //
+	ADDVAULT_NEW_RECOVERYKEY("/fxml/addvault_new_recoverykey.fxml"), //
 	ADDVAULT_SUCCESS("/fxml/addvault_success.fxml"), //
 	CHANGEPASSWORD("/fxml/changepassword.fxml"), //
 	FORGET_PASSWORD("/fxml/forget_password.fxml"), //

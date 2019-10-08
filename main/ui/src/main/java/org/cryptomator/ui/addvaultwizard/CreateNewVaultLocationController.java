@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.DirectoryNotEmptyException;
@@ -58,7 +59,7 @@ public class CreateNewVaultLocationController implements FxController {
 	public RadioButton customRadioButton;
 
 	@Inject
-	CreateNewVaultLocationController(@AddVaultWizardWindow Stage window, @FxmlScene(FxmlFile.ADDVAULT_NEW_NAME) Lazy<Scene> chooseNameScene, @FxmlScene(FxmlFile.ADDVAULT_NEW_PASSWORD) Lazy<Scene> choosePasswordScene, LocationPresets locationPresets, ObjectProperty<Path> vaultPath, StringProperty vaultName, ResourceBundle resourceBundle) {
+	CreateNewVaultLocationController(@AddVaultWizardWindow Stage window, @FxmlScene(FxmlFile.ADDVAULT_NEW_NAME) Lazy<Scene> chooseNameScene, @FxmlScene(FxmlFile.ADDVAULT_NEW_PASSWORD) Lazy<Scene> choosePasswordScene, LocationPresets locationPresets, ObjectProperty<Path> vaultPath, @Named("vaultName") StringProperty vaultName, ResourceBundle resourceBundle) {
 		this.window = window;
 		this.chooseNameScene = chooseNameScene;
 		this.choosePasswordScene = choosePasswordScene;

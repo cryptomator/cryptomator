@@ -65,6 +65,7 @@ public abstract class AddVaultModule {
 	}
 
 	@Provides
+	@Named("vaultName")
 	@AddVaultWizardScoped
 	static StringProperty provideVaultName() {
 		return new SimpleStringProperty("");
@@ -75,6 +76,13 @@ public abstract class AddVaultModule {
 	@AddVaultWizardScoped
 	static ObjectProperty<Vault> provideVault() {
 		return new SimpleObjectProperty<>();
+	}
+
+	@Provides
+	@Named("recoveryKey")
+	@AddVaultWizardScoped
+	static StringProperty provideRecoveryKey() {
+		return new SimpleStringProperty();
 	}
 
 	// ------------------
@@ -115,6 +123,13 @@ public abstract class AddVaultModule {
 	}
 
 	@Provides
+	@FxmlScene(FxmlFile.ADDVAULT_NEW_RECOVERYKEY)
+	@AddVaultWizardScoped
+	static Scene provideCreateNewVaultRecoveryKeyScene(@AddVaultWizardWindow FXMLLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene("/fxml/addvault_new_recoverykey.fxml");
+	}
+
+	@Provides
 	@FxmlScene(FxmlFile.ADDVAULT_SUCCESS)
 	@AddVaultWizardScoped
 	static Scene provideCreateNewVaultSuccessScene(@AddVaultWizardWindow FXMLLoaderFactory fxmlLoaders) {
@@ -152,4 +167,9 @@ public abstract class AddVaultModule {
 	@IntoMap
 	@FxControllerKey(AddVaultSuccessController.class)
 	abstract FxController bindAddVaultSuccessController(AddVaultSuccessController controller);
+
+	@Binds
+	@IntoMap
+	@FxControllerKey(CreateNewVaultRecoveryKeyController.class)
+	abstract FxController bindCreateNewVaultRecoveryKeyController(CreateNewVaultRecoveryKeyController controller);
 }

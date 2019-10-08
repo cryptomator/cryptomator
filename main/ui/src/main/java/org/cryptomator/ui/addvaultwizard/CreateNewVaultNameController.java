@@ -16,6 +16,7 @@ import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import java.nio.file.Path;
 import java.util.ResourceBundle;
 import java.util.regex.Pattern;
@@ -36,7 +37,7 @@ public class CreateNewVaultNameController implements FxController {
 	private final StringBinding warningText;
 
 	@Inject
-	CreateNewVaultNameController(@AddVaultWizardWindow Stage window, @FxmlScene(FxmlFile.ADDVAULT_WELCOME) Lazy<Scene> welcomeScene, @FxmlScene(FxmlFile.ADDVAULT_NEW_LOCATION) Lazy<Scene> chooseLocationScene, ObjectProperty<Path> vaultPath, StringProperty vaultName, ResourceBundle resourceBundle) {
+	CreateNewVaultNameController(@AddVaultWizardWindow Stage window, @FxmlScene(FxmlFile.ADDVAULT_WELCOME) Lazy<Scene> welcomeScene, @FxmlScene(FxmlFile.ADDVAULT_NEW_LOCATION) Lazy<Scene> chooseLocationScene, ObjectProperty<Path> vaultPath, @Named("vaultName") StringProperty vaultName, ResourceBundle resourceBundle) {
 		this.window = window;
 		this.welcomeScene = welcomeScene;
 		this.chooseLocationScene = chooseLocationScene;
