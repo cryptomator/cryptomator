@@ -63,4 +63,9 @@ public class RecoveryKeyCreationController implements FxController {
 		window.close();
 	}
 
+	/* Getter/Setter */
+
+	public Vault getVault() {
+		return vault;
+	}
 }

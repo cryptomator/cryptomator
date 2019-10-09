@@ -5,6 +5,7 @@
 <?import javafx.scene.control.ButtonBar?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+<?import org.cryptomator.ui.controls.FormattedLabel?>
 <?import org.cryptomator.ui.controls.NiceSecurePasswordField?>
 <VBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
@@ -18,7 +19,10 @@
 		<Insets topRightBottomLeft="12"/>
 	</padding>
 	<children>
-		<NiceSecurePasswordField fx:id="passwordField" HBox.hgrow="ALWAYS"/>
+		<VBox spacing="6">
+			<FormattedLabel format="%recoveryKey.enterPassword.prompt" arg1="${controller.vault.displayableName}" wrapText="true"/>
+			<NiceSecurePasswordField fx:id="passwordField" HBox.hgrow="ALWAYS"/>
+		</VBox>
 
 		<VBox alignment="BOTTOM_CENTER" VBox.vgrow="ALWAYS">
 			<ButtonBar buttonMinWidth="120" buttonOrder="C+X">

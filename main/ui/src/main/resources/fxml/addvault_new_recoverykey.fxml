@@ -5,7 +5,7 @@
 <?import javafx.scene.control.ButtonBar?>
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.TextArea?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 <VBox xmlns="http://javafx.com/javafx"
@@ -23,8 +23,7 @@
 
 		<Label text="%addvaultwizard.new.recoveryKeyInstruction" wrapText="true"/>
 
-		<!-- TODO use TextArea instead -->
-		<TextField editable="false" text="${controller.recoveryKey}"/>
+		<TextArea editable="false" text="${controller.recoveryKey}" wrapText="true"/>
 
 		<CheckBox fx:id="finalConfirmationCheckbox" text="%addvaultwizard.new.recoveryKeySavedCheckbox" wrapText="true"/>
 

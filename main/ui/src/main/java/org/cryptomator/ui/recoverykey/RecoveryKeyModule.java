@@ -38,7 +38,7 @@ abstract class RecoveryKeyModule {
 	@RecoveryKeyScoped
 	static Stage provideStage(ResourceBundle resourceBundle, @Named("windowIcon") Optional<Image> windowIcon, @Named("keyRecoveryOwner") Stage owner) {
 		Stage stage = new Stage();
-		stage.setTitle("TODO keyRecovery.title"); // TODO localize
+		stage.setTitle(resourceBundle.getString("recoveryKey.title"));
 		stage.setResizable(false);
 		stage.initModality(Modality.WINDOW_MODAL);
 		stage.initOwner(owner);

@@ -9,6 +9,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Circle?>
 <?import org.cryptomator.ui.controls.FontAwesome5IconView?>
+<?import org.cryptomator.ui.controls.FormattedLabel?>
 <VBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
 	  fx:controller="org.cryptomator.ui.recoverykey.RecoveryKeyDisplayController"
@@ -27,9 +28,11 @@
 				<Circle styleClass="glyph-icon-primary" radius="24"/>
 				<FontAwesome5IconView styleClass="glyph-icon-white" glyph="CHECK" glyphSize="24"/>
 			</StackPane>
-			
-			<!-- TODO use TextArea instead -->
-			<TextArea editable="false" text="${controller.recoveryKey}" wrapText="true"  HBox.hgrow="ALWAYS"/>
+
+			<VBox spacing="6" HBox.hgrow="ALWAYS">
+				<FormattedLabel format="%recoveryKey.display.message" arg1="${controller.vault.displayableName}" wrapText="true" VBox.vgrow="NEVER"/>
+				<TextArea editable="false" text="${controller.recoveryKey}" wrapText="true" VBox.vgrow="ALWAYS"/>
+			</VBox>
 		</HBox>
 
 		<VBox alignment="BOTTOM_CENTER" VBox.vgrow="ALWAYS">
