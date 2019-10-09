@@ -1,11 +1,16 @@
 package org.cryptomator.ui.recoverykey;
 
 import dagger.Lazy;
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Timeline;
 import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.beans.value.WritableValue;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.cryptolib.api.InvalidPassphraseException;
 import org.cryptomator.ui.common.FxController;
@@ -54,13 +59,40 @@ public class RecoveryKeyCreationController implements FxController {
 		}).onError(IOException.class, e -> {
 			LOG.error("Creation of recovery key failed.", e);
 		}).onError(InvalidPassphraseException.class, e -> {
-			// TODO shake animation? :D
+			shakeWindow();
 		}).runOnce(executor);
 	}
 
 	@FXML
 	public void close() {
 		window.close();
+	}
+
+	/* Animations */
+
+	private void shakeWindow() {
+		WritableValue<Double> writableWindowX = new WritableValue<>() {
+			@Override
+			public Double getValue() {
+				return window.getX();
+			}
+
+			@Override
+			public void setValue(Double value) {
+				window.setX(value);
+			}
+		};
+		Timeline timeline = new Timeline( //
+				new KeyFrame(Duration.ZERO, new KeyValue(writableWindowX, window.getX())), //
+				new KeyFrame(new Duration(100), new KeyValue(writableWindowX, window.getX() - 22.0)), //
+				new KeyFrame(new Duration(200), new KeyValue(writableWindowX, window.getX() + 18.0)), //
+				new KeyFrame(new Duration(300), new KeyValue(writableWindowX, window.getX() - 14.0)), //
+				new KeyFrame(new Duration(400), new KeyValue(writableWindowX, window.getX() + 10.0)), //
+				new KeyFrame(new Duration(500), new KeyValue(writableWindowX, window.getX() - 6.0)), //
+				new KeyFrame(new Duration(600), new KeyValue(writableWindowX, window.getX() + 2.0)), //
+				new KeyFrame(new Duration(700), new KeyValue(writableWindowX, window.getX())) //
+		);
+		timeline.play();
 	}
 
 	/* Getter/Setter */
