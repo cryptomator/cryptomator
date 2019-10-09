@@ -3,7 +3,7 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ButtonBar?>
-<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.TextArea?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
@@ -15,6 +15,7 @@
 	  minWidth="400"
 	  maxWidth="400"
 	  minHeight="145"
+	  maxHeight="180"
 	  spacing="12"
 	  alignment="TOP_CENTER">
 	<padding>
@@ -28,7 +29,7 @@
 			</StackPane>
 			
 			<!-- TODO use TextArea instead -->
-			<TextField editable="false" text="${controller.recoveryKey}" HBox.hgrow="ALWAYS"/>
+			<TextArea editable="false" text="${controller.recoveryKey}" wrapText="true"  HBox.hgrow="ALWAYS"/>
 		</HBox>
 
 		<VBox alignment="BOTTOM_CENTER" VBox.vgrow="ALWAYS">
