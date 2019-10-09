@@ -24,9 +24,13 @@ public enum FxmlFile {
 	VAULT_OPTIONS("/fxml/vault_options.fxml"), //
 	WRONGFILEALERT("/fxml/wrongfilealert.fxml");
 
-	private final String filename;
+	private final String ressourcePathString;
 
-	FxmlFile(String filename) {
-		this.filename = filename;
+	FxmlFile(String ressourcePathString) {
+		this.ressourcePathString = ressourcePathString;
+	}
+
+	public String getRessourcePathString(){
+		return ressourcePathString;
 	}
 }
