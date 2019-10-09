@@ -26,10 +26,8 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ResourceBundle;
@@ -116,14 +114,12 @@ public class CreateNewVaultLocationController implements FxController {
 			Files.delete(createdDir); // assert: dir exists and is empty
 			window.setScene(choosePasswordScene.get());
 		} catch (FileAlreadyExistsException e) {
-			LOG.warn("Can not use already existing vault path: {}", vaultPath.get());
+			LOG.warn("Can not use already existing vault path {}", vaultPath.get());
 			warningText.set(resourceBundle.getString("addvaultwizard.new.fileAlreadyExists"));
-		} catch (NoSuchFileException | DirectoryNotEmptyException e) {
-			LOG.error("Failed to delete recently created directory.", e);
-			// TODO show generic error text for unexpected exception
 		} catch (IOException e) {
 			LOG.warn("Can not create vault at path: {}", vaultPath.get());
-			// TODO show generic error text for unexpected exception
+			LOG.warn("Thrown Exception:", e);
+			warningText.set(resourceBundle.getString("addvaultwizard.new.ioException"));
 		}
 	}
 
