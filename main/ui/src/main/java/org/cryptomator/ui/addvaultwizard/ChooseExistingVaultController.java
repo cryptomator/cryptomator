@@ -28,16 +28,18 @@ public class ChooseExistingVaultController implements FxController {
 	private final Stage window;
 	private final Lazy<Scene> welcomeScene;
 	private final Lazy<Scene> successScene;
+	private final Lazy<Scene> errorScene;
 	private final ObjectProperty<Path> vaultPath;
 	private final ObjectProperty<Vault> vault;
 	private final VaultListManager vaultListManager;
 	private final ResourceBundle resourceBundle;
 
 	@Inject
-	ChooseExistingVaultController(@AddVaultWizardWindow Stage window, @FxmlScene(FxmlFile.ADDVAULT_WELCOME) Lazy<Scene> welcomeScene, @FxmlScene(FxmlFile.ADDVAULT_SUCCESS) Lazy<Scene> successScene, ObjectProperty<Path> vaultPath, @AddVaultWizardWindow ObjectProperty<Vault> vault, VaultListManager vaultListManager, ResourceBundle resourceBundle) {
+	ChooseExistingVaultController(@AddVaultWizardWindow Stage window, @FxmlScene(FxmlFile.ADDVAULT_WELCOME) Lazy<Scene> welcomeScene, @FxmlScene(FxmlFile.ADDVAULT_SUCCESS) Lazy<Scene> successScene, @FxmlScene(FxmlFile.ADDVAULT_EXISTING_ERROR) Lazy<Scene> errorScene, ObjectProperty<Path> vaultPath, @AddVaultWizardWindow ObjectProperty<Vault> vault, VaultListManager vaultListManager, ResourceBundle resourceBundle) {
 		this.window = window;
 		this.welcomeScene = welcomeScene;
 		this.successScene = successScene;
+		this.errorScene = errorScene;
 		this.vaultPath = vaultPath;
 		this.vault = vault;
 		this.vaultListManager = vaultListManager;
@@ -51,20 +53,19 @@ public class ChooseExistingVaultController implements FxController {
 
 	@FXML
 	public void chooseFileAndNext() {
-		//TODO: error handling & cannot unlock added vault
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(resourceBundle.getString("addvaultwizard.existing.filePickerTitle"));
 		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Cryptomator Masterkey", "*.cryptomator"));
-		File file = fileChooser.showOpenDialog(window);
-		if (file != null) {
-			vaultPath.setValue(file.toPath().toAbsolutePath().getParent());
+		File masterkeyFile = fileChooser.showOpenDialog(window);
+		if (masterkeyFile != null) {
+			vaultPath.setValue(masterkeyFile.toPath().toAbsolutePath().getParent());
 			try {
 				Vault newVault = vaultListManager.add(vaultPath.get());
 				vault.set(newVault);
 				window.setScene(successScene.get());
 			} catch (NoSuchFileException e) {
-				LOG.error("Nope", e);
-				// TODO
+				LOG.error("Failed to open existing vault.", e);
+				window.setScene(errorScene.get());
 			}
 		}
 	}
