@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 
+//TODO: Add check if a vault in the list is invalid and add notification & controller
 @MainWindowScoped
 public class VaultListController implements FxController {
 
