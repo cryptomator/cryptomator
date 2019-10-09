@@ -25,34 +25,41 @@ class RecoveryKeyFactoryTest {
 	}
 
 	@Test
-	@DisplayName("validateRecoveryKey() with garbage input")
+	@DisplayName("validateRecoveryKey() with odd number of words")
+	public void testValidateValidateRecoveryKeyWithOddNumberOfWords() {
+		boolean result = inTest.validateRecoveryKey("pathway");
+		Assertions.assertFalse(result);
+	}
+
+	@Test
+	@DisplayName("validateRecoveryKey() with words not in dictionary")
 	public void testValidateValidateRecoveryKeyWithGarbageInput() {
-		boolean result = inTest.validateRecoveryKey("löl");
+		boolean result = inTest.validateRecoveryKey("Backpfeifengesicht Schweinehund"); // according to le internet these are typical German words
 		Assertions.assertFalse(result);
 	}
 
 	@Test
 	@DisplayName("validateRecoveryKey() with too short input")
 	public void testValidateValidateRecoveryKeyWithTooShortInput() {
-		boolean result = inTest.validateRecoveryKey("them circumstances");
+		boolean result = inTest.validateRecoveryKey("pathway lift");
 		Assertions.assertFalse(result);
 	}
 
 	@Test
-	@DisplayName("validateRecoveryKey() with invalid crc32/16")
+	@DisplayName("validateRecoveryKey() with invalid checksum")
 	public void testValidateValidateRecoveryKeyWithInvalidCrc() {
-		boolean result = inTest.validateRecoveryKey("them circumstances conduct providing have gesture aged extraordinary generally silently" +
-				" beasts rights sit country highest career wrought silently liberal altogether capacity David conscious word issue" +
-				" ancient directed solitary how spain look smile see won't although dying obtain vol with c. asleep along listen circumstances");
+		boolean result = inTest.validateRecoveryKey("pathway lift abuse plenty export texture gentleman landscape beyond ceiling around leaf cafe" +
+				" charity border breakdown victory surely computer cat linger restrict infer crowd live computer true written amazed investor boot" +
+				" depth left theory snow whereby terminal weekly reject happiness circuit partial cup wrong");
 		Assertions.assertFalse(result);
 	}
 	
 	@Test
-	@DisplayName("validateRecoveryKey() with valid key")
+	@DisplayName("validateRecoveryKey() with valid input")
 	public void testValidateValidateRecoveryKeyWithValidKey() {
-		boolean result = inTest.validateRecoveryKey("them circumstances conduct providing have gesture aged extraordinary generally silently" +
-				" beasts rights sit country highest career wrought silently liberal altogether capacity David conscious word issue" +
-				" ancient directed solitary how spain look smile see won't although dying obtain vol with c. asleep along listen riding");
+		boolean result = inTest.validateRecoveryKey("pathway lift abuse plenty export texture gentleman landscape beyond ceiling around leaf cafe" +
+				" charity border breakdown victory surely computer cat linger restrict infer crowd live computer true written amazed investor boot" +
+				" depth left theory snow whereby terminal weekly reject happiness circuit partial cup ad");
 		Assertions.assertTrue(result);
 	}
 
