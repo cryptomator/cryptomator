@@ -26,8 +26,6 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import java.awt.desktop.QuitResponse;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 
 @FxApplicationScoped
 public class FxApplication extends Application {

@@ -12,7 +12,6 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
-import javafx.scene.control.CheckBox;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
@@ -28,11 +27,13 @@ import org.cryptomator.ui.common.Tasks;
 import org.cryptomator.ui.controls.FontAwesome5IconView;
 import org.cryptomator.ui.controls.NiceSecurePasswordField;
 import org.cryptomator.ui.common.PasswordStrengthUtil;
+import org.cryptomator.ui.recoverykey.RecoveryKeyFactory;
 import org.fxmisc.easybind.EasyBind;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.channels.WritableByteChannel;
@@ -56,11 +57,13 @@ public class CreateNewVaultPasswordController implements FxController {
 
 	private final Stage window;
 	private final Lazy<Scene> chooseLocationScene;
-	private final Lazy<Scene> successScene;
+	private final Lazy<Scene> recoveryKeyScene;
 	private final ExecutorService executor;
-	private final StringProperty vaultName;
-	private final ObjectProperty<Path> vaultPath;
-	private final ObjectProperty<Vault> vault;
+	private final RecoveryKeyFactory recoveryKeyFactory;
+	private final StringProperty vaultNameProperty;
+	private final ObjectProperty<Path> vaultPathProperty;
+	private final ObjectProperty<Vault> vaultProperty;
+	private final StringProperty recoveryKeyProperty;
 	private final VaultListManager vaultListManager;
 	private final ResourceBundle resourceBundle;
 	private final PasswordStrengthUtil strengthRater;
@@ -77,17 +80,18 @@ public class CreateNewVaultPasswordController implements FxController {
 	public FontAwesome5IconView checkmark;
 	public FontAwesome5IconView cross;
 	public Label passwordMatchLabel;
-	public CheckBox finalConfirmationCheckbox;
 
 	@Inject
-	CreateNewVaultPasswordController(@AddVaultWizardWindow Stage window, @FxmlScene(FxmlFile.ADDVAULT_NEW_LOCATION) Lazy<Scene> chooseLocationScene, @FxmlScene(FxmlFile.ADDVAULT_SUCCESS) Lazy<Scene> successScene, ExecutorService executor, StringProperty vaultName, ObjectProperty<Path> vaultPath, @AddVaultWizardWindow ObjectProperty<Vault> vault, VaultListManager vaultListManager, ResourceBundle resourceBundle, PasswordStrengthUtil strengthRater, ReadmeGenerator readmeGenerator) {
+	CreateNewVaultPasswordController(@AddVaultWizardWindow Stage window, @FxmlScene(FxmlFile.ADDVAULT_NEW_LOCATION) Lazy<Scene> chooseLocationScene, @FxmlScene(FxmlFile.ADDVAULT_NEW_RECOVERYKEY) Lazy<Scene> recoveryKeyScene, ExecutorService executor, RecoveryKeyFactory recoveryKeyFactory, @Named("vaultName") StringProperty vaultName, ObjectProperty<Path> vaultPath, @AddVaultWizardWindow ObjectProperty<Vault> vault, @Named("recoveryKey") StringProperty recoveryKey, VaultListManager vaultListManager, ResourceBundle resourceBundle, PasswordStrengthUtil strengthRater, ReadmeGenerator readmeGenerator) {
 		this.window = window;
 		this.chooseLocationScene = chooseLocationScene;
-		this.successScene = successScene;
+		this.recoveryKeyScene = recoveryKeyScene;
 		this.executor = executor;
-		this.vaultName = vaultName;
-		this.vaultPath = vaultPath;
-		this.vault = vault;
+		this.recoveryKeyFactory = recoveryKeyFactory;
+		this.vaultNameProperty = vaultName;
+		this.vaultPathProperty = vaultPath;
+		this.vaultProperty = vault;
+		this.recoveryKeyProperty = recoveryKey;
 		this.vaultListManager = vaultListManager;
 		this.resourceBundle = resourceBundle;
 		this.strengthRater = strengthRater;
@@ -105,7 +109,7 @@ public class CreateNewVaultPasswordController implements FxController {
 		//binding indicating if the passwords not match
 		BooleanBinding passwordsMatch = Bindings.createBooleanBinding(() -> CharSequence.compare(passwordField.getCharacters(), reenterField.getCharacters()) == 0, passwordField.textProperty(), reenterField.textProperty());
 		BooleanBinding reenterFieldNotEmpty = reenterField.textProperty().isNotEmpty();
-		readyToCreateVault.bind(reenterFieldNotEmpty.and(passwordsMatch).and(finalConfirmationCheckbox.selectedProperty()).and(processing.not()));
+		readyToCreateVault.bind(reenterFieldNotEmpty.and(passwordsMatch).and(processing.not()));
 		//make match indicator invisible when passwords do not match or one is empty
 		passwordMatchBox.visibleProperty().bind(reenterFieldNotEmpty);
 		checkmark.visibleProperty().bind(passwordsMatch.and(reenterFieldNotEmpty));
@@ -125,7 +129,7 @@ public class CreateNewVaultPasswordController implements FxController {
 
 	@FXML
 	public void next() {
-		Path pathToVault = vaultPath.get();
+		Path pathToVault = vaultPathProperty.get();
 		
 		try {
 			Files.createDirectory(pathToVault);
@@ -140,8 +144,9 @@ public class CreateNewVaultPasswordController implements FxController {
 		processing.set(true);
 		Tasks.create(() -> {
 			initializeVault(pathToVault, passwordField.getCharacters());
-		}).onSuccess(() -> {
-			initializationSucceeded(pathToVault);
+			return recoveryKeyFactory.createRecoveryKey(pathToVault, passwordField.getCharacters());
+		}).onSuccess(recoveryKey -> {
+			initializationSucceeded(pathToVault, recoveryKey);
 		}).onError(IOException.class, e -> {
 			// TODO show generic error screen
 			LOG.error("", e);
@@ -171,11 +176,12 @@ public class CreateNewVaultPasswordController implements FxController {
 		LOG.info("Created vault at {}", path);
 	}
 	
-	private void initializationSucceeded(Path pathToVault) {
+	private void initializationSucceeded(Path pathToVault, String recoveryKey) {
 		try {
 			Vault newVault = vaultListManager.add(pathToVault);
-			vault.set(newVault);
-			window.setScene(successScene.get());
+			vaultProperty.set(newVault);
+			recoveryKeyProperty.set(recoveryKey);
+			window.setScene(recoveryKeyScene.get());
 		} catch (NoSuchFileException e) {
 			throw new UncheckedIOException(e);
 		}
@@ -184,11 +190,11 @@ public class CreateNewVaultPasswordController implements FxController {
 	/* Getter/Setter */
 
 	public String getVaultName() {
-		return vaultName.get();
+		return vaultNameProperty.get();
 	}
 
 	public StringProperty vaultNameProperty() {
-		return vaultName;
+		return vaultNameProperty;
 	}
 
 	public IntegerProperty passwordStrengthProperty() {

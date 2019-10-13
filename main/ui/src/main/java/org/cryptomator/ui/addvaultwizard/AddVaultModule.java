@@ -1,24 +1,19 @@
 package org.cryptomator.ui.addvaultwizard;
 
 import dagger.Binds;
-import dagger.Lazy;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoMap;
-import dagger.multibindings.IntoSet;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyCodeCombination;
-import javafx.scene.input.KeyCombination;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.ui.common.DefaultSceneFactory;
 import org.cryptomator.ui.common.FXMLLoaderFactory;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxControllerKey;
@@ -32,7 +27,6 @@ import java.nio.file.Path;
 import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
-import java.util.Set;
 
 @Module
 public abstract class AddVaultModule {
@@ -40,22 +34,19 @@ public abstract class AddVaultModule {
 	@Provides
 	@AddVaultWizardWindow
 	@AddVaultWizardScoped
-	static FXMLLoaderFactory provideFxmlLoaderFactory(Map<Class<? extends FxController>, Provider<FxController>> factories, ResourceBundle resourceBundle) {
-		return new FXMLLoaderFactory(factories, resourceBundle);
+	static FXMLLoaderFactory provideFxmlLoaderFactory(Map<Class<? extends FxController>, Provider<FxController>> factories, DefaultSceneFactory sceneFactory, ResourceBundle resourceBundle) {
+		return new FXMLLoaderFactory(factories, sceneFactory, resourceBundle);
 	}
 
 	@Provides
 	@AddVaultWizardWindow
 	@AddVaultWizardScoped
-	static Stage provideStage(@MainWindow Stage owner, ResourceBundle resourceBundle, @Named("windowIcon") Optional<Image> windowIcon, @AddVaultWizardWindow Lazy<Map<KeyCodeCombination, Runnable>> accelerators) {
+	static Stage provideStage(@MainWindow Stage owner, ResourceBundle resourceBundle, @Named("windowIcon") Optional<Image> windowIcon) {
 		Stage stage = new Stage();
 		stage.setTitle(resourceBundle.getString("addvaultwizard.title"));
 		stage.setResizable(false);
 		stage.initModality(Modality.WINDOW_MODAL);
 		stage.initOwner(owner);
-		stage.sceneProperty().addListener(observable -> {
-			stage.getScene().getAccelerators().putAll(accelerators.get());
-		});
 		windowIcon.ifPresent(stage.getIcons()::add);
 		return stage;
 	}
@@ -67,6 +58,7 @@ public abstract class AddVaultModule {
 	}
 
 	@Provides
+	@Named("vaultName")
 	@AddVaultWizardScoped
 	static StringProperty provideVaultName() {
 		return new SimpleStringProperty("");
@@ -79,24 +71,11 @@ public abstract class AddVaultModule {
 		return new SimpleObjectProperty<>();
 	}
 
-	// ------------------
-
 	@Provides
-	@AddVaultWizardWindow
+	@Named("recoveryKey")
 	@AddVaultWizardScoped
-	static Map<KeyCodeCombination, Runnable> provideDefaultAccellerators(@AddVaultWizardWindow Set<Map.Entry<KeyCombination, Runnable>> accelerators) {
-		return Map.ofEntries(accelerators.toArray(Map.Entry[]::new));
-	}
-
-	@Provides
-	@IntoSet
-	@AddVaultWizardWindow
-	static Map.Entry<KeyCombination, Runnable> provideCloseWindowShortcut(@AddVaultWizardWindow Stage window) {
-		if (SystemUtils.IS_OS_WINDOWS) {
-			return Map.entry(new KeyCodeCombination(KeyCode.F4, KeyCombination.ALT_DOWN), window::close);
-		} else {
-			return Map.entry(new KeyCodeCombination(KeyCode.W, KeyCombination.SHORTCUT_DOWN), window::close);
-		}
+	static StringProperty provideRecoveryKey() {
+		return new SimpleStringProperty();
 	}
 
 	// ------------------
@@ -104,48 +83,57 @@ public abstract class AddVaultModule {
 	@Provides
 	@FxmlScene(FxmlFile.ADDVAULT_WELCOME)
 	@AddVaultWizardScoped
-	static Scene provideWelcomeScene(@AddVaultWizardWindow FXMLLoaderFactory fxmlLoaders, @AddVaultWizardWindow Stage window) {
-		Scene scene = fxmlLoaders.createScene("/fxml/addvault_welcome.fxml");
-
-		KeyCombination cmdW = new KeyCodeCombination(KeyCode.W, KeyCombination.SHORTCUT_DOWN);
-		scene.getAccelerators().put(cmdW, window::close);
-
-		return scene;
+	static Scene provideWelcomeScene(@AddVaultWizardWindow FXMLLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.ADDVAULT_WELCOME.getRessourcePathString());
 	}
 
 	@Provides
 	@FxmlScene(FxmlFile.ADDVAULT_EXISTING)
 	@AddVaultWizardScoped
-	static Scene provideChooseExistingVaultScene(@AddVaultWizardWindow FXMLLoaderFactory fxmlLoaders, @AddVaultWizardWindow Stage window) {
-		return fxmlLoaders.createScene("/fxml/addvault_existing.fxml");
+	static Scene provideChooseExistingVaultScene(@AddVaultWizardWindow FXMLLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.ADDVAULT_EXISTING.getRessourcePathString());
+	}
+
+	@Provides
+	@FxmlScene(FxmlFile.ADDVAULT_EXISTING_ERROR)
+	@AddVaultWizardScoped
+	static Scene provideChooseExistingVaultErrorScene(@AddVaultWizardWindow FXMLLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.ADDVAULT_EXISTING_ERROR.getRessourcePathString());
 	}
 
 	@Provides
 	@FxmlScene(FxmlFile.ADDVAULT_NEW_NAME)
 	@AddVaultWizardScoped
-	static Scene provideCreateNewVaultNameScene(@AddVaultWizardWindow FXMLLoaderFactory fxmlLoaders, @AddVaultWizardWindow Stage window) {
-		return fxmlLoaders.createScene("/fxml/addvault_new_name.fxml");
+	static Scene provideCreateNewVaultNameScene(@AddVaultWizardWindow FXMLLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.ADDVAULT_NEW_NAME.getRessourcePathString());
 	}
 
 	@Provides
 	@FxmlScene(FxmlFile.ADDVAULT_NEW_LOCATION)
 	@AddVaultWizardScoped
-	static Scene provideCreateNewVaultLocationScene(@AddVaultWizardWindow FXMLLoaderFactory fxmlLoaders, @AddVaultWizardWindow Stage window) {
-		return fxmlLoaders.createScene("/fxml/addvault_new_location.fxml");
+	static Scene provideCreateNewVaultLocationScene(@AddVaultWizardWindow FXMLLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.ADDVAULT_NEW_LOCATION.getRessourcePathString());
 	}
 
 	@Provides
 	@FxmlScene(FxmlFile.ADDVAULT_NEW_PASSWORD)
 	@AddVaultWizardScoped
-	static Scene provideCreateNewVaultPasswordScene(@AddVaultWizardWindow FXMLLoaderFactory fxmlLoaders, @AddVaultWizardWindow Stage window) {
-		return fxmlLoaders.createScene("/fxml/addvault_new_password.fxml");
+	static Scene provideCreateNewVaultPasswordScene(@AddVaultWizardWindow FXMLLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.ADDVAULT_NEW_PASSWORD.getRessourcePathString());
+	}
+
+	@Provides
+	@FxmlScene(FxmlFile.ADDVAULT_NEW_RECOVERYKEY)
+	@AddVaultWizardScoped
+	static Scene provideCreateNewVaultRecoveryKeyScene(@AddVaultWizardWindow FXMLLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.ADDVAULT_NEW_RECOVERYKEY.getRessourcePathString());
 	}
 
 	@Provides
 	@FxmlScene(FxmlFile.ADDVAULT_SUCCESS)
 	@AddVaultWizardScoped
-	static Scene provideCreateNewVaultSuccessScene(@AddVaultWizardWindow FXMLLoaderFactory fxmlLoaders, @AddVaultWizardWindow Stage window) {
-		return fxmlLoaders.createScene("/fxml/addvault_success.fxml");
+	static Scene provideCreateNewVaultSuccessScene(@AddVaultWizardWindow FXMLLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.ADDVAULT_SUCCESS.getRessourcePathString());
 	}
 
 	// ------------------
@@ -159,6 +147,11 @@ public abstract class AddVaultModule {
 	@IntoMap
 	@FxControllerKey(ChooseExistingVaultController.class)
 	abstract FxController bindChooseExistingVaultController(ChooseExistingVaultController controller);
+
+	@Binds
+	@IntoMap
+	@FxControllerKey(AddVaultFailureExisitingController.class)
+	abstract FxController bindAddVaultFailureExistingController(AddVaultFailureExisitingController controller);
 
 	@Binds
 	@IntoMap
@@ -179,4 +172,9 @@ public abstract class AddVaultModule {
 	@IntoMap
 	@FxControllerKey(AddVaultSuccessController.class)
 	abstract FxController bindAddVaultSuccessController(AddVaultSuccessController controller);
+
+	@Binds
+	@IntoMap
+	@FxControllerKey(CreateNewVaultRecoveryKeyController.class)
+	abstract FxController bindCreateNewVaultRecoveryKeyController(CreateNewVaultRecoveryKeyController controller);
 }

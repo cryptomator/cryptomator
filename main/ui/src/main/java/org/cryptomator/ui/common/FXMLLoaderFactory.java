@@ -1,24 +1,28 @@
 package org.cryptomator.ui.common;
 
+import com.google.common.base.Splitter;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.stage.Stage;
 
 import javax.inject.Provider;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
+import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.function.Function;
 
 public class FXMLLoaderFactory {
 
-	private final Map<Class<? extends FxController>, Provider<FxController>> factories;
+	private final Map<Class<? extends FxController>, Provider<FxController>> controllerFactories;
+	private final Function<Parent, Scene> sceneFactory;
 	private final ResourceBundle resourceBundle;
 
-	public FXMLLoaderFactory(Map<Class<? extends FxController>, Provider<FxController>> factories, ResourceBundle resourceBundle) {
-		this.factories = factories;
+	public FXMLLoaderFactory(Map<Class<? extends FxController>, Provider<FxController>> controllerFactories, Function<Parent, Scene> sceneFactory, ResourceBundle resourceBundle) {
+		this.controllerFactories = controllerFactories;
+		this.sceneFactory = sceneFactory;
 		this.resourceBundle = resourceBundle;
 	}
 
@@ -34,6 +38,7 @@ public class FXMLLoaderFactory {
 
 	/**
 	 * Loads the FXML given fxml resource in a new FXMLLoader instance.
+	 *
 	 * @param fxmlResourceName Name of the resource (as in {@link Class#getResource(String)}).
 	 * @return The FXMLLoader used to load the file
 	 * @throws IOException if an error occurs while loading the FXML file
@@ -48,6 +53,7 @@ public class FXMLLoaderFactory {
 
 	/**
 	 * {@link #load(String) Loads} the FXML file and creates a new Scene containing the loaded ui.
+	 *
 	 * @param fxmlResourceName Name of the resource (as in {@link Class#getResource(String)}).
 	 * @throws UncheckedIOException wrapping any IOException thrown by {@link #load(String)).
 	 */
@@ -59,14 +65,16 @@ public class FXMLLoaderFactory {
 			throw new UncheckedIOException("Failed to load " + fxmlResourceName, e);
 		}
 		Parent root = loader.getRoot();
-		return new Scene(root);
+		List<String> addtionalStyleSheets = Splitter.on(',').omitEmptyStrings().splitToList(resourceBundle.getString("additionalStyleSheets"));
+		addtionalStyleSheets.forEach(styleSheet -> root.getStylesheets().add("/css/" + styleSheet));
+		return sceneFactory.apply(root);
 	}
 
 	private FxController constructController(Class<?> aClass) {
-		if (!factories.containsKey(aClass)) {
+		if (!controllerFactories.containsKey(aClass)) {
 			throw new IllegalArgumentException("ViewController not registered: " + aClass);
 		} else {
-			return factories.get(aClass).get();
+			return controllerFactories.get(aClass).get();
 		}
 	}
 }

@@ -9,6 +9,7 @@ public enum FontAwesome5Icon {
 	CHECK("\uF00C"), //
 	COG("\uF013"), //
 	COGS("\uF085"), //
+	EXCLAMATION("\uF12A"),
 	EXCLAMATION_TRIANGLE("\uF071"), //
 	EYE("\uF06E"), //
 	EYE_SLASH("\uF070"), //

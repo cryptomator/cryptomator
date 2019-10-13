@@ -2,7 +2,6 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.layout.VBox?>
 <?import org.cryptomator.ui.controls.FontAwesome5IconView?>
-<?import javafx.scene.control.Label?>
 <VBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
 	  fx:controller="org.cryptomator.ui.mainwindow.VaultDetailNeedsMigrationController"
@@ -12,9 +11,7 @@
 		<Insets topRightBottomLeft="24"/>
 	</padding>
 	<children>
-		<!-- TODO -->
-		<Label text="Migration disabled during Alpha"/>
-		<Button styleClass="button-large" text="TODO Upgrade Vault" minWidth="120" onAction="#showVaultMigrator" disable="true">
+		<Button styleClass="button-large" text="TODO Upgrade Vault" minWidth="120" onAction="#showVaultMigrator">
 			<graphic>
 				<FontAwesome5IconView glyph="FILE_IMPORT" glyphSize="15"/>
 			</graphic>

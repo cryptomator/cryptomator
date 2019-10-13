@@ -11,6 +11,7 @@ import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import org.cryptomator.ui.common.DefaultSceneFactory;
 import org.cryptomator.ui.common.FXMLLoaderFactory;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxControllerKey;
@@ -29,8 +30,8 @@ abstract class ForgetPasswordModule {
 	@Provides
 	@ForgetPasswordWindow
 	@ForgetPasswordScoped
-	static FXMLLoaderFactory provideFxmlLoaderFactory(Map<Class<? extends FxController>, Provider<FxController>> factories, ResourceBundle resourceBundle) {
-		return new FXMLLoaderFactory(factories, resourceBundle);
+	static FXMLLoaderFactory provideFxmlLoaderFactory(Map<Class<? extends FxController>, Provider<FxController>> factories, DefaultSceneFactory sceneFactory, ResourceBundle resourceBundle) {
+		return new FXMLLoaderFactory(factories, sceneFactory, resourceBundle);
 	}
 
 	@Provides
@@ -47,13 +48,6 @@ abstract class ForgetPasswordModule {
 	}
 
 	@Provides
-	@FxmlScene(FxmlFile.FORGET_PASSWORD)
-	@ForgetPasswordScoped
-	static Scene provideForgetPasswordScene(@ForgetPasswordWindow FXMLLoaderFactory fxmlLoaders, @ForgetPasswordWindow Stage window) {
-		return fxmlLoaders.createScene("/fxml/forget_password.fxml");
-	}
-
-	@Provides
 	@ForgetPasswordWindow
 	@ForgetPasswordScoped
 	static BooleanProperty provideConfirmedProperty() {
@@ -64,6 +58,15 @@ abstract class ForgetPasswordModule {
 	@ForgetPasswordWindow
 	@ForgetPasswordScoped
 	abstract ReadOnlyBooleanProperty bindReadOnlyConfirmedProperty(@ForgetPasswordWindow BooleanProperty confirmedProperty);
+	
+	// ------------------
+
+	@Provides
+	@FxmlScene(FxmlFile.FORGET_PASSWORD)
+	@ForgetPasswordScoped
+	static Scene provideForgetPasswordScene(@ForgetPasswordWindow FXMLLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene("/fxml/forget_password.fxml");
+	}
 
 	// ------------------
 

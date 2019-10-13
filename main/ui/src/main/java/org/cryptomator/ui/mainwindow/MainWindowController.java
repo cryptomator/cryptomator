@@ -10,7 +10,6 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultListManager;
-import org.cryptomator.ui.common.FontLoader;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.fxapp.FxApplication;
 import org.cryptomator.ui.fxapp.UpdateChecker;
@@ -21,18 +20,15 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.File;
-import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.Collection;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @MainWindowScoped
 public class MainWindowController implements FxController {
 
-	private static final String TITLE_FONT = "/css/dosis-bold.ttf";
 	private static final Logger LOG = LoggerFactory.getLogger(MainWindowController.class);
 	private static final String MASTERKEY_FILENAME = "masterkey.cryptomator"; // TODO: deduplicate constant declared in multiple classes
 
@@ -64,7 +60,6 @@ public class MainWindowController implements FxController {
 	@FXML
 	public void initialize() {
 		LOG.debug("init MainWindowController");
-		loadFont(TITLE_FONT);
 		titleBar.setOnMousePressed(event -> {
 			xOffset = event.getSceneX();
 			yOffset = event.getSceneY();
@@ -113,14 +108,6 @@ public class MainWindowController implements FxController {
 			LOG.debug("Not a vault: {}", pathToVault);
 		}
 		return Stream.empty();
-	}
-
-	private void loadFont(String resourcePath) {
-		try {
-			FontLoader.load(resourcePath);
-		} catch (FontLoader.FontLoaderException e) {
-			LOG.warn("Error loading font from path: " + resourcePath, e);
-		}
 	}
 
 	@FXML

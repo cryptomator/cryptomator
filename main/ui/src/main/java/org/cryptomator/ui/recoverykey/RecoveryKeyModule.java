@@ -1,0 +1,84 @@
+package org.cryptomator.ui.recoverykey;
+
+import dagger.Binds;
+import dagger.Module;
+import dagger.Provides;
+import dagger.multibindings.IntoMap;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+import javafx.scene.Scene;
+import javafx.scene.image.Image;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import org.cryptomator.ui.common.DefaultSceneFactory;
+import org.cryptomator.ui.common.FXMLLoaderFactory;
+import org.cryptomator.ui.common.FxController;
+import org.cryptomator.ui.common.FxControllerKey;
+import org.cryptomator.ui.common.FxmlFile;
+import org.cryptomator.ui.common.FxmlScene;
+
+import javax.inject.Named;
+import javax.inject.Provider;
+import java.util.Map;
+import java.util.Optional;
+import java.util.ResourceBundle;
+
+@Module
+abstract class RecoveryKeyModule {
+
+	@Provides
+	@RecoveryKeyWindow
+	@RecoveryKeyScoped
+	static FXMLLoaderFactory provideFxmlLoaderFactory(Map<Class<? extends FxController>, Provider<FxController>> factories, DefaultSceneFactory sceneFactory, ResourceBundle resourceBundle) {
+		return new FXMLLoaderFactory(factories, sceneFactory, resourceBundle);
+	}
+
+	@Provides
+	@RecoveryKeyWindow
+	@RecoveryKeyScoped
+	static Stage provideStage(ResourceBundle resourceBundle, @Named("windowIcon") Optional<Image> windowIcon, @Named("keyRecoveryOwner") Stage owner) {
+		Stage stage = new Stage();
+		stage.setTitle(resourceBundle.getString("recoveryKey.title"));
+		stage.setResizable(false);
+		stage.initModality(Modality.WINDOW_MODAL);
+		stage.initOwner(owner);
+		windowIcon.ifPresent(stage.getIcons()::add);
+		return stage;
+	}
+	
+	@Provides
+	@RecoveryKeyWindow
+	@RecoveryKeyScoped
+	static StringProperty provideRecoveryKeyProperty() {
+		return new SimpleStringProperty();
+	}
+	
+	// ------------------
+
+	@Provides
+	@FxmlScene(FxmlFile.RECOVERYKEY_CREATE)
+	@RecoveryKeyScoped
+	static Scene provideRecoveryKeyCreationScene(@RecoveryKeyWindow FXMLLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene("/fxml/recoverykey_create.fxml");
+	}
+
+	@Provides
+	@FxmlScene(FxmlFile.RECOVERYKEY_DISPLAY)
+	@RecoveryKeyScoped
+	static Scene provideRecoveryKeyDisplayScene(@RecoveryKeyWindow FXMLLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene("/fxml/recoverykey_display.fxml");
+	}
+
+	// ------------------
+
+	@Binds
+	@IntoMap
+	@FxControllerKey(RecoveryKeyCreationController.class)
+	abstract FxController bindRecoveryKeyCreationController(RecoveryKeyCreationController controller);
+
+	@Binds
+	@IntoMap
+	@FxControllerKey(RecoveryKeyDisplayController.class)
+	abstract FxController bindRecoveryKeyDisplayController(RecoveryKeyDisplayController controller);
+	
+}

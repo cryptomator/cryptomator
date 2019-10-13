@@ -67,6 +67,10 @@ public class NiceSecurePasswordField extends StackPane {
 	public void requestFocus() {
 		passwordField.requestFocus();
 	}
+	
+	public String getText() {
+		return passwordField.getText();
+	}
 
 	public StringProperty textProperty() {
 		return passwordField.textProperty();
@@ -74,6 +78,10 @@ public class NiceSecurePasswordField extends StackPane {
 
 	public CharSequence getCharacters() {
 		return passwordField.getCharacters();
+	}
+
+	public void setPassword(CharSequence password) {
+		passwordField.setPassword(password);
 	}
 
 	public void setPassword(char[] password) {

@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.cryptomator</groupId>
 		<artifactId>main</artifactId>
-		<version>1.5.0-alpha1</version>
+		<version>1.5.0-alpha2</version>
 	</parent>
 	<artifactId>keychain</artifactId>
 	<name>System Keychain Access</name>

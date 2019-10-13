@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 
+//TODO: Add check if a vault in the list is invalid and add notification & controller
 @MainWindowScoped
 public class VaultListController implements FxController {
 
@@ -53,10 +54,6 @@ public class VaultListController implements FxController {
 				if (c.wasAdded()) {
 					Vault anyAddedVault = c.getAddedSubList().get(0);
 					vaultList.getSelectionModel().select(anyAddedVault);
-					window.setIconified(false);
-					window.show();
-					window.toFront();
-					window.requestFocus(); // TODO: this beeps on macOS if there is a modal child window...
 				}
 			}
 		});

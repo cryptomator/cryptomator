@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.cryptomator</groupId>
 	<artifactId>main</artifactId>
-	<version>1.5.0-alpha1</version>
+	<version>1.5.0-alpha2</version>
 	<packaging>pom</packaging>
 	<name>Cryptomator</name>
 
@@ -24,14 +24,13 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
 		<!-- dependency versions -->
-		<cryptomator.cryptolib.version>1.2.2</cryptomator.cryptolib.version>
-		<cryptomator.cryptofs.version>1.9.0-beta1</cryptomator.cryptofs.version>
+		<cryptomator.cryptofs.version>1.9.0-beta4</cryptomator.cryptofs.version>
 		<cryptomator.jni.version>2.2.1</cryptomator.jni.version>
 		<cryptomator.fuse.version>1.2.0</cryptomator.fuse.version>
 		<cryptomator.dokany.version>1.1.11</cryptomator.dokany.version>
 		<cryptomator.webdav.version>1.0.10</cryptomator.webdav.version>
 
-		<javafx.version>12</javafx.version>
+		<javafx.version>13</javafx.version>
 
 		<commons-io.version>2.6</commons-io.version>
 		<commons-lang3.version>3.8.1</commons-lang3.version>
@@ -82,11 +81,6 @@
 			</dependency>
 
 			<!-- Cryptomator Libs -->
-			<dependency>
-				<groupId>org.cryptomator</groupId>
-				<artifactId>cryptolib</artifactId>
-				<version>${cryptomator.cryptolib.version}</version>
-			</dependency>
 			<dependency>
 				<groupId>org.cryptomator</groupId>
 				<artifactId>cryptofs</artifactId>
