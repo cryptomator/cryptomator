@@ -24,7 +24,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
 		<!-- dependency versions -->
-		<cryptomator.cryptofs.version>1.9.0-beta3</cryptomator.cryptofs.version>
+		<cryptomator.cryptofs.version>1.9.0-beta4</cryptomator.cryptofs.version>
 		<cryptomator.jni.version>2.2.1</cryptomator.jni.version>
 		<cryptomator.fuse.version>1.2.0</cryptomator.fuse.version>
 		<cryptomator.dokany.version>1.1.11</cryptomator.dokany.version>
