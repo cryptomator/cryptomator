@@ -130,7 +130,7 @@ public class MountOptionsController implements FxController {
 
 	private File chooseDirectory() {
 		DirectoryChooser directoryChooser = new DirectoryChooser();
-		directoryChooser.setTitle(resourceBundle.getString("TODO"));
+		directoryChooser.setTitle(resourceBundle.getString("vaultOptions.mount.winDirChooser"));
 		try {
 			directoryChooser.setInitialDirectory(Path.of(System.getProperty("user.home")).toFile());
 		} catch (Exception e) {
@@ -150,7 +150,7 @@ public class MountOptionsController implements FxController {
 				//TODO: none drive letter is selected
 				return "";
 			} else if (root.endsWith("occupied")) {
-				return root.getRoot().toString().substring(0, 1) + " (" + resourceBundle.getString("TODO") + ")";
+				return root.getRoot().toString().substring(0, 1) + " (" + resourceBundle.getString("vaultOptions.mount.winDriveLetterOccupied") + ")";
 			} else {
 				return root.toString().substring(0, 1);
 			}
@@ -158,11 +158,7 @@ public class MountOptionsController implements FxController {
 
 		@Override
 		public Path fromString(String string) {
-			if (resourceBundle.getString("TODO").equals(string)) {
-				return null;
-			} else {
-				return Path.of(string);
-			}
+			return Path.of(string);
 		}
 
 	}
