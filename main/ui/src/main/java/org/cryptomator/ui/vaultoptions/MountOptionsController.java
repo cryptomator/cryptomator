@@ -3,6 +3,7 @@ package org.cryptomator.ui.vaultoptions;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
@@ -72,6 +73,8 @@ public class MountOptionsController implements FxController {
 
 		toggleGroup.getToggles().addAll(automaticDriveLetter, specificDriveLetter, specificDirectory);
 		initDriveLetterSelection();
+
+		//TODO: set the toggleGroup correctly at init
 	}
 
 	private void initDriveLetterSelection() {
@@ -215,6 +218,14 @@ public class MountOptionsController implements FxController {
 
 	public boolean getAdapterIsDokan() {
 		return adapterIsDokan.get();
+	}
+
+	public StringProperty customMountPathProperty(){
+		return vault.getVaultSettings().individualMountPath();
+	}
+
+	public String getCustomMountPath(){
+		return vault.getVaultSettings().individualMountPath().get();
 	}
 
 }

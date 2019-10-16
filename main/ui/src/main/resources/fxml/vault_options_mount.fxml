@@ -50,7 +50,7 @@
 				<Insets left="25"/>
 			</padding>
 			<children>
-				<TextField fx:id="mntDir" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+				<TextField fx:id="mntDir" text="${controller.customMountPath}" HBox.hgrow="ALWAYS" maxWidth="Infinity" disable="true"/>
 			</children>
 		</HBox>
 	</children>
