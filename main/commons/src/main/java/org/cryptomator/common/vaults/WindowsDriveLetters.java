@@ -23,11 +23,11 @@ import java.util.stream.StreamSupport;
 public final class WindowsDriveLetters {
 
 	private static final Logger LOG = LoggerFactory.getLogger(WindowsDriveLetters.class);
-	private static final Set<Path> D_TO_Z;
+	private static final Set<Path> A_TO_Z;
 
 	static {
-		try (IntStream stream = IntStream.rangeClosed('D', 'Z')) {
-			D_TO_Z = stream.mapToObj(i -> Path.of(((char) i)+":\\")).collect(Collectors.toSet());
+		try (IntStream stream = IntStream.rangeClosed('A', 'Z')) {
+			A_TO_Z = stream.mapToObj(i -> Path.of(((char) i)+":\\")).collect(Collectors.toSet());
 		}
 	}
 
@@ -48,7 +48,7 @@ public final class WindowsDriveLetters {
 	public Set<Path> getAvailableDriveLetters() {
 		Set<Path> occupiedDriveLetters = getOccupiedDriveLetters();
 		Predicate<Path> isOccupiedDriveLetter = occupiedDriveLetters::contains;
-		return D_TO_Z.stream().filter(isOccupiedDriveLetter.negate()).collect(Collectors.toSet());
+		return A_TO_Z.stream().filter(isOccupiedDriveLetter.negate()).collect(Collectors.toSet());
 	}
 
 }
