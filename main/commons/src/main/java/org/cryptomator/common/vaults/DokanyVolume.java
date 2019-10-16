@@ -71,6 +71,7 @@ public class DokanyVolume implements Volume {
 			if (!windowsDriveLetters.getAvailableDriveLetters().isEmpty()) {
 				return windowsDriveLetters.getAvailableDriveLetters().iterator().next();
 			} else {
+				//TODO: Error Handling
 				throw new VolumeException("No free drive letter available.");
 			}
 		}
