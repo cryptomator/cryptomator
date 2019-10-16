@@ -3,14 +3,13 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.ChoiceBox?>
-<?import javafx.scene.control.Hyperlink?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.RadioButton?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Text?>
 <?import org.cryptomator.ui.controls.AlphanumericTextField?>
-<?import org.cryptomator.ui.controls.FontAwesome5IconView?>
 <VBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
 	  fx:controller="org.cryptomator.ui.vaultoptions.MountOptionsController"
@@ -37,17 +36,16 @@
 		</HBox>
 
 		<!-- TODO windows drive letter, see https://github.com/cryptomator/cryptomator/blob/1.4.16/main/ui/src/main/java/org/cryptomator/ui/model/Vault.java#L283-L298 -->
-		<!-- TODO maybe change label to text because you cannot interact with the hbox -->
-		<Label text="Mount Point"/>
-		<RadioButton fx:id="automaticDriveLetter" text="Automatically pick free drive letter" visible="${controller.osIsWindows}" managed="${controller.adapterIsDokan}" onAction="#changeMountPointForWindows"/>
+		<Text text="TODO Mount Point"/>
+		<RadioButton fx:id="automaticDriveLetter" text="TODO Automatically pick free drive letter" visible="${controller.osIsWindows}" managed="${controller.adapterIsDokan}" onAction="#changeMountPointForWindows"/>
 		<HBox spacing="6">
 			<children>
-				<RadioButton fx:id="specificDriveLetter" text="Choose specific drive letter" visible="${controller.osIsWindows}" managed="${controller.adapterIsDokan}" onAction="#changeMountPointForWindows"/>
-				<ChoiceBox fx:id="DriveLetterSelection" disable="${!specificDriveLetter.selected}"/>
+				<RadioButton fx:id="specificDriveLetter" text="TODO Choose specific drive letter" visible="${controller.osIsWindows}" managed="${controller.adapterIsDokan}" onAction="#changeMountPointForWindows"/>
+				<ChoiceBox fx:id="driveLetterSelection" disable="${!specificDriveLetter.selected}"/>
 			</children>
 		</HBox>
-		<RadioButton fx:id="specificDirectory" text="Choose empty directory" visible="${controller.adapterIsDokan}" managed="${controller.adapterIsDokan}" onAction="#changeMountPointForWindows"/>
-		<HBox visible="${specificDirectory.selected}" >
+		<RadioButton fx:id="specificDirectory" text="TODO Choose empty directory" visible="${controller.adapterIsDokan}" managed="${controller.adapterIsDokan}" onAction="#changeMountPointForWindows"/>
+		<HBox visible="${specificDirectory.selected}">
 			<padding>
 				<Insets left="25"/>
 			</padding>
