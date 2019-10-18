@@ -69,7 +69,7 @@ public class DokanyVolume implements Volume {
 		} else {
 			//auto assign drive letter
 			if (!windowsDriveLetters.getAvailableDriveLetters().isEmpty()) {
-				return windowsDriveLetters.getAvailableDriveLetters().iterator().next();
+				return Path.of(windowsDriveLetters.getAvailableDriveLetters().iterator().next() + ":\\");
 			} else {
 				//TODO: Error Handling
 				throw new VolumeException("No free drive letter available.");

@@ -1,14 +1,18 @@
 package org.cryptomator.ui.vaultoptions;
 
+import com.google.common.base.Strings;
+import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.StringProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleGroup;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
@@ -23,7 +27,6 @@ import org.cryptomator.ui.common.FxController;
 import javax.inject.Inject;
 import java.io.File;
 import java.nio.file.Path;
-import java.util.Comparator;
 import java.util.ResourceBundle;
 import java.util.Set;
 
@@ -36,15 +39,15 @@ public class MountOptionsController implements FxController {
 	private final BooleanBinding adapterIsDokan;
 	private final WindowsDriveLetters windowsDriveLetters;
 	private final ResourceBundle resourceBundle;
-	private final ToggleGroup toggleGroup;
 	public TextField driveName;
 	public CheckBox readOnlyCheckbox;
 	public CheckBox customMountFlagsCheckbox;
 	public TextField mountFlags;
-	public RadioButton automaticDriveLetter;
-	public RadioButton specificDriveLetter;
-	public RadioButton specificDirectory;
-	public ChoiceBox<Path> driveLetterSelection;
+	public ToggleGroup mountPoint;
+	public RadioButton mountPointAuto;
+	public RadioButton mountPointWinDriveLetter;
+	public RadioButton mountPointCustomDir;
+	public ChoiceBox<String> driveLetterSelection;
 
 	@Inject
 	MountOptionsController(@VaultOptionsWindow Stage window, @VaultOptionsWindow Vault vault, Settings settings, WindowsDriveLetters windowsDriveLetters, ResourceBundle resourceBundle) {
@@ -53,16 +56,18 @@ public class MountOptionsController implements FxController {
 		this.adapterIsDokan = settings.preferredVolumeImpl().isEqualTo(VolumeImpl.DOKANY);
 		this.windowsDriveLetters = windowsDriveLetters;
 		this.resourceBundle = resourceBundle;
-		this.toggleGroup = new ToggleGroup();
 	}
 
 	@FXML
 	public void initialize() {
 		driveName.textProperty().bindBidirectional(vault.getVaultSettings().mountName());
+
+		// readonly:
 		readOnlyCheckbox.selectedProperty().bindBidirectional(vault.getVaultSettings().usesReadOnlyMode());
-		mountFlags.disableProperty().bind(customMountFlagsCheckbox.selectedProperty().not());
 		readOnlyCheckbox.disableProperty().bind(customMountFlagsCheckbox.selectedProperty());
 
+		// custom mount flags:
+		mountFlags.disableProperty().bind(customMountFlagsCheckbox.selectedProperty().not());
 		customMountFlagsCheckbox.setSelected(vault.isHavingCustomMountFlags());
 		if (vault.isHavingCustomMountFlags()) {
 			mountFlags.textProperty().bindBidirectional(vault.getVaultSettings().mountFlags());
@@ -71,20 +76,24 @@ public class MountOptionsController implements FxController {
 			mountFlags.textProperty().bind(vault.defaultMountFlagsProperty());
 		}
 
-		toggleGroup.getToggles().addAll(automaticDriveLetter, specificDriveLetter, specificDirectory);
-		initDriveLetterSelection();
-
-		//TODO: set the toggleGroup correctly at init
-	}
-
-	private void initDriveLetterSelection() {
-		driveLetterSelection.setConverter(new WinDriveLetterLabelConverter());
-		Set<Path> freeLetters = windowsDriveLetters.getAvailableDriveLetters();
-		driveLetterSelection.getItems().addAll(freeLetters);
-		driveLetterSelection.getItems().sort(new WinDriveLetterComparator());
-		chooseSelectedDriveLetter();
-		//TODO: check if we should write only the letter or the path to the settings!!
-		driveLetterSelection.getSelectionModel().selectedItemProperty().addListener(p -> vault.getVaultSettings().winDriveLetter().set(p.toString()));
+		// mount point options:
+		mountPoint.selectedToggleProperty().addListener(this::toggleMountPoint);
+		driveLetterSelection.getItems().addAll(windowsDriveLetters.getAllDriveLetters());
+		driveLetterSelection.setConverter(new WinDriveLetterLabelConverter(windowsDriveLetters));
+		driveLetterSelection.setValue(vault.getVaultSettings().winDriveLetter().get());
+		vault.getVaultSettings().usesIndividualMountPath().bind(mountPoint.selectedToggleProperty().isEqualTo(mountPointCustomDir));
+		vault.getVaultSettings().winDriveLetter().bind( //
+				Bindings.when(mountPoint.selectedToggleProperty().isEqualTo(mountPointWinDriveLetter)) //
+						.then(driveLetterSelection.getSelectionModel().selectedItemProperty()) //
+						.otherwise((String) null) //
+		);
+		if (vault.getVaultSettings().usesIndividualMountPath().get()) {
+			mountPoint.selectToggle(mountPointCustomDir);
+		} else if (!Strings.isNullOrEmpty(vault.getVaultSettings().winDriveLetter().get())) {
+			mountPoint.selectToggle(mountPointWinDriveLetter);
+		} else {
+			mountPoint.selectToggle(mountPointAuto);
+		}
 	}
 
 	@FXML
@@ -102,36 +111,7 @@ public class MountOptionsController implements FxController {
 	}
 
 	@FXML
-	public void changeMountPointForWindows() {
-		assert osIsWindows.get();
-		if (specificDriveLetter.isSelected()) {
-			vault.getVaultSettings().usesIndividualMountPath().set(true);
-			vault.getVaultSettings().winDriveLetter().set(driveLetterSelection.getSelectionModel().getSelectedItem().toString());
-			vault.getVaultSettings().individualMountPath().set(null);
-		} else if (specificDirectory.isSelected()) {
-			final File file = chooseDirectory();
-			if (file != null) {
-				//TODO: should we check wether the directory is empty or not?
-				vault.getVaultSettings().usesIndividualMountPath().set(true);
-				vault.getVaultSettings().individualMountPath().set(file.getAbsolutePath());
-				vault.getVaultSettings().winDriveLetter().set(null);
-			} else {
-				//NO-OP
-				//TODO: deduplicate code
-				toggleGroup.selectToggle(automaticDriveLetter);
-				vault.getVaultSettings().usesIndividualMountPath().set(false);
-				vault.getVaultSettings().winDriveLetter().set(null);
-				vault.getVaultSettings().individualMountPath().set(null);
-			}
-		} else {
-			//set property
-			vault.getVaultSettings().usesIndividualMountPath().set(false);
-			vault.getVaultSettings().winDriveLetter().set(null);
-			vault.getVaultSettings().individualMountPath().set(null);
-		}
-	}
-
-	private File chooseDirectory() {
+	private void chooseCustomMountPoint() {
 		DirectoryChooser directoryChooser = new DirectoryChooser();
 		directoryChooser.setTitle(resourceBundle.getString("vaultOptions.mount.winDirChooser"));
 		try {
@@ -139,65 +119,43 @@ public class MountOptionsController implements FxController {
 		} catch (Exception e) {
 			//NO-OP
 		}
-		return directoryChooser.showDialog(window);
+		File file = directoryChooser.showDialog(window);
+		if (file != null) {
+			vault.getVaultSettings().individualMountPath().set(file.getAbsolutePath());
+		} else {
+			vault.getVaultSettings().individualMountPath().set(null);
+		}
+	}
+
+	private void toggleMountPoint(@SuppressWarnings("unused") ObservableValue<? extends Toggle> observable, @SuppressWarnings("unused") Toggle oldValue, Toggle newValue) {
+		if (mountPointCustomDir.equals(newValue) && Strings.isNullOrEmpty(vault.getVaultSettings().individualMountPath().get())) {
+			chooseCustomMountPoint();
+		}
 	}
 
 	/**
 	 * Converts 'C' to "C:" to translate between model and GUI.
 	 */
-	private class WinDriveLetterLabelConverter extends StringConverter<Path> {
+	private static class WinDriveLetterLabelConverter extends StringConverter<String> {
+
+		private final Set<String> occupiedDriveLetters;
+
+		WinDriveLetterLabelConverter(WindowsDriveLetters windowsDriveLetters) {
+			this.occupiedDriveLetters = windowsDriveLetters.getOccupiedDriveLetters();
+		}
 
 		@Override
-		public String toString(Path root) {
-			if (root == null) {
-				//TODO: none drive letter is selected
-				return "";
-			} else if (root.endsWith("occupied")) {
-				return root.getRoot().toString().substring(0, 1) + " (" + resourceBundle.getString("vaultOptions.mount.winDriveLetterOccupied") + ")";
+		public String toString(String driveLetter) {
+			if (occupiedDriveLetters.contains(driveLetter)) {
+				return driveLetter + ": (occupied)"; // TODO localize?
 			} else {
-				return root.toString().substring(0, 1);
+				return driveLetter + ":";
 			}
 		}
 
 		@Override
-		public Path fromString(String string) {
-			return Path.of(string);
-		}
-
-	}
-
-	/**
-	 * Natural sorting of ASCII letters, but <code>null</code> always on first, as this is "auto-assign".
-	 */
-	private static class WinDriveLetterComparator implements Comparator<Path> {
-
-		@Override
-		public int compare(Path c1, Path c2) {
-			if (c1 == null) {
-				return -1;
-			} else if (c2 == null) {
-				return 1;
-			} else {
-				return c1.compareTo(c2);
-			}
-		}
-	}
-
-	private void chooseSelectedDriveLetter() {
-		assert SystemUtils.IS_OS_WINDOWS;
-		// if the vault prefers a drive letter, that is currently occupied, this is our last chance to reset this:
-		if (vault.getVaultSettings().winDriveLetter().isNotEmpty().get()) {
-			final Path pickedRoot = Path.of(vault.getVaultSettings().winDriveLetter().get());
-			if (windowsDriveLetters.getOccupiedDriveLetters().contains(pickedRoot)) {
-				Path alteredPath = pickedRoot.resolve("occupied");
-				driveLetterSelection.getItems().add(alteredPath);
-				driveLetterSelection.getSelectionModel().select(alteredPath);
-			} else {
-				driveLetterSelection.getSelectionModel().select(pickedRoot);
-			}
-		} else {
-			// first option is known to be 'auto-assign' due to #WinDriveLetterComparator.
-			driveLetterSelection.getSelectionModel().selectFirst();
+		public String fromString(String string) {
+			throw new UnsupportedOperationException();
 		}
 
 	}
@@ -220,11 +178,11 @@ public class MountOptionsController implements FxController {
 		return adapterIsDokan.get();
 	}
 
-	public StringProperty customMountPathProperty(){
+	public StringProperty customMountPathProperty() {
 		return vault.getVaultSettings().individualMountPath();
 	}
 
-	public String getCustomMountPath(){
+	public String getCustomMountPath() {
 		return vault.getVaultSettings().individualMountPath().get();
 	}
 
