@@ -8,6 +8,7 @@ import javafx.scene.input.KeyCombination;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.common.settings.Settings;
 import org.cryptomator.ui.fxapp.FxApplicationScoped;
 
 import javax.inject.Inject;
@@ -19,14 +20,23 @@ public class DefaultSceneFactory implements Function<Parent, Scene> {
 	protected static final KeyCodeCombination ALT_F4 = new KeyCodeCombination(KeyCode.F4, KeyCombination.ALT_DOWN);
 	protected static final KeyCodeCombination SHORTCUT_W = new KeyCodeCombination(KeyCode.W, KeyCombination.SHORTCUT_DOWN);
 
+	protected final Settings settings;
+
 	@Inject
-	public DefaultSceneFactory() {}
+	public DefaultSceneFactory(Settings settings) {
+		this.settings = settings;
+	}
 
 	@Override
 	public Scene apply(Parent root) {
 		Scene scene = new Scene(root);
+		configureRoot(root);
 		configureScene(scene);
 		return scene;
+	}
+
+	protected void configureRoot(Parent root) {
+		root.nodeOrientationProperty().bind(settings.userInterfaceOrientation());
 	}
 
 	protected void configureScene(Scene scene) {

@@ -6,10 +6,15 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.ToggleGroup?>
 <VBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
 	  fx:controller="org.cryptomator.ui.preferences.GeneralPreferencesController"
 	  spacing="6">
+	<fx:define>
+		<ToggleGroup fx:id="nodeOrientation"/>
+	</fx:define>
 	<padding>
 		<Insets topRightBottomLeft="12"/>
 	</padding>
@@ -17,6 +22,12 @@
 		<HBox spacing="6" alignment="CENTER_LEFT">
 			<Label text="%preferences.general.theme"/>
 			<ChoiceBox fx:id="themeChoiceBox"/>
+		</HBox>
+		
+		<HBox spacing="6" alignment="CENTER_LEFT">
+			<Label text="Interface Orientation" HBox.hgrow="NEVER"/>
+			<RadioButton fx:id="nodeOrientationLtr" text="Left to Right" alignment="CENTER_LEFT" toggleGroup="${nodeOrientation}"/>
+			<RadioButton fx:id="nodeOrientationRtl" text="Right to Left" alignment="CENTER_RIGHT" toggleGroup="${nodeOrientation}"/>
 		</HBox>
 
 		<CheckBox fx:id="startHiddenCheckbox" text="%preferences.general.startHidden"/>

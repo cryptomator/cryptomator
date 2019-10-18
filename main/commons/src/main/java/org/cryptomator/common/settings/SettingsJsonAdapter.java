@@ -9,6 +9,7 @@ import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
+import javafx.geometry.NodeOrientation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,6 +37,7 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 		out.name("debugMode").value(value.debugMode().get());
 		out.name("preferredVolumeImpl").value(value.preferredVolumeImpl().get().name());
 		out.name("theme").value(value.theme().get().name());
+		out.name("uiOrientation").value(value.userInterfaceOrientation().get().name());
 		out.endObject();
 	}
 
@@ -85,6 +87,9 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 				case "theme":
 					settings.theme().set(parseUiTheme(in.nextString()));
 					break;
+				case "uiOrientation":
+					settings.userInterfaceOrientation().set(parseUiOrientation(in.nextString()));
+					break;
 				default:
 					LOG.warn("Unsupported vault setting found in JSON: " + name);
 					in.skipValue();
@@ -109,7 +114,7 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 		try {
 			return WebDavUrlScheme.valueOf(webDavUrlSchemeName.toUpperCase());
 		} catch (IllegalArgumentException e) {
-			LOG.warn("Invalid volume type {}. Defaulting to {}.", webDavUrlSchemeName, Settings.DEFAULT_GVFS_SCHEME);
+			LOG.warn("Invalid WebDAV url scheme {}. Defaulting to {}.", webDavUrlSchemeName, Settings.DEFAULT_GVFS_SCHEME);
 			return Settings.DEFAULT_GVFS_SCHEME;
 		}
 	}
@@ -118,8 +123,17 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 		try {
 			return UiTheme.valueOf(uiThemeName.toUpperCase());
 		} catch (IllegalArgumentException e) {
-			LOG.warn("Invalid volume type {}. Defaulting to {}.", uiThemeName, Settings.DEFAULT_THEME);
+			LOG.warn("Invalid ui theme {}. Defaulting to {}.", uiThemeName, Settings.DEFAULT_THEME);
 			return Settings.DEFAULT_THEME;
+		}
+	}
+
+	private NodeOrientation parseUiOrientation(String uiOrientationName) {
+		try {
+			return NodeOrientation.valueOf(uiOrientationName.toUpperCase());
+		} catch (IllegalArgumentException e) {
+			LOG.warn("Invalid ui orientation {}. Defaulting to {}.", uiOrientationName, Settings.DEFAULT_USER_INTERFACE_ORIENTATION);
+			return Settings.DEFAULT_USER_INTERFACE_ORIENTATION;
 		}
 	}
 
