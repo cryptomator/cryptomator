@@ -42,7 +42,7 @@
 		</HBox>
 		
 		<Text text="TODO Mount Point"/>
-		<RadioButton toggleGroup="${mountPoint}" fx:id="mountPointAuto" text="TODO Automatically pick free drive letter"/>
+		<RadioButton toggleGroup="${mountPoint}" fx:id="mountPointAuto" text="TODO Automatically pick a suitable location"/>
 		<HBox spacing="6" visible="${controller.osIsWindows}" managed="${controller.osIsWindows}">
 			<RadioButton toggleGroup="${mountPoint}" fx:id="mountPointWinDriveLetter" text="TODO Choose specific drive letter"/>
 			<ChoiceBox fx:id="driveLetterSelection" disable="${!mountPointWinDriveLetter.selected}"/>
@@ -54,7 +54,7 @@
 			</padding>
 			<children>
 				<TextField text="${controller.customMountPath}" HBox.hgrow="ALWAYS" maxWidth="Infinity" disable="true"/>
-				<Button text="TODO select" onAction="#chooseCustomMountPoint" contentDisplay="LEFT">
+				<Button text="TODO change" onAction="#chooseCustomMountPoint" contentDisplay="LEFT">
 					<graphic>
 						<FontAwesome5IconView glyph="FOLDER_OPEN" glyphSize="15"/>
 					</graphic>
