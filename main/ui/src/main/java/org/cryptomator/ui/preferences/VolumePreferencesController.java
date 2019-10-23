@@ -16,6 +16,9 @@ import org.cryptomator.ui.common.FxController;
 
 import javax.inject.Inject;
 
+/**
+ * TODO: if WebDAV is selected under Windows, show warning that specific mount options (like selecting a directory as mount point) are _not_ supported
+ */
 @PreferencesScoped
 public class VolumePreferencesController implements FxController {
 

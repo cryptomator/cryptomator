@@ -30,13 +30,16 @@ import java.nio.file.Path;
 import java.util.ResourceBundle;
 import java.util.Set;
 
+/**
+ * TODO: if WebDav is selected on a windows system, custom mount directory is _not_ supported. This is currently not indicated/shown/etc in the ui
+ */
 @VaultOptionsScoped
 public class MountOptionsController implements FxController {
 
 	private final Stage window;
 	private final Vault vault;
 	private final BooleanProperty osIsWindows = new SimpleBooleanProperty(SystemUtils.IS_OS_WINDOWS);
-	private final BooleanBinding adapterIsDokan;
+	private final BooleanBinding webDavAndWindows;
 	private final WindowsDriveLetters windowsDriveLetters;
 	private final ResourceBundle resourceBundle;
 	public TextField driveName;
@@ -53,7 +56,7 @@ public class MountOptionsController implements FxController {
 	MountOptionsController(@VaultOptionsWindow Stage window, @VaultOptionsWindow Vault vault, Settings settings, WindowsDriveLetters windowsDriveLetters, ResourceBundle resourceBundle) {
 		this.window = window;
 		this.vault = vault;
-		this.adapterIsDokan = settings.preferredVolumeImpl().isEqualTo(VolumeImpl.DOKANY);
+		this.webDavAndWindows = settings.preferredVolumeImpl().isEqualTo(VolumeImpl.WEBDAV).and(osIsWindows);
 		this.windowsDriveLetters = windowsDriveLetters;
 		this.resourceBundle = resourceBundle;
 	}
@@ -170,12 +173,12 @@ public class MountOptionsController implements FxController {
 		return osIsWindows.get();
 	}
 
-	public BooleanBinding adapterIsDokanProperty() {
-		return adapterIsDokan;
+	public BooleanBinding webDavAndWindowsProperty() {
+		return webDavAndWindows;
 	}
 
-	public boolean getAdapterIsDokan() {
-		return adapterIsDokan.get();
+	public boolean isWebDavAndWindows() {
+		return webDavAndWindows.get();
 	}
 
 	public StringProperty customMountPathProperty() {
