@@ -45,7 +45,7 @@ public final class WindowsDriveLetters {
 			return Set.of();
 		} else {
 			Iterable<Path> rootDirs = FileSystems.getDefault().getRootDirectories();
-			return StreamSupport.stream(rootDirs.spliterator(), false).map(Path::toString).collect(Collectors.toSet());
+			return StreamSupport.stream(rootDirs.spliterator(), false).map(p -> p.toString().substring(0,1)).collect(Collectors.toSet());
 		}
 	}
 
