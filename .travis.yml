@@ -22,7 +22,7 @@ before_script:
 - |
   if [[ -n "$TRAVIS_TAG" ]]; then
     mvn -fmain/pom.xml org.codehaus.mojo:versions-maven-plugin:set -DnewVersion=$TRAVIS_TAG
-  elif [[ $TRAVIS_BRANCH == "develop" ]] && [[ $TRAVIS_PULL_REQUEST == "false" ]]; then
+  else
     mvn -fmain/pom.xml org.codehaus.mojo:versions-maven-plugin:set -DnewVersion=SNAPSHOT-$(echo $TRAVIS_COMMIT | head -c7)
   fi
 script:
