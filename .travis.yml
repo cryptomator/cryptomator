@@ -1,4 +1,4 @@
-dist: xenial
+dist: bionic
 language: java
 sudo: false
 jdk:
@@ -17,24 +17,25 @@ addons:
     - haveged
 install:
 - curl -o $HOME/.m2/settings.xml https://gist.githubusercontent.com/cryptobot/cf5fbd909c4782aaeeeb7c7f4a1a43da/raw/e60ee486e34ee0c79f89f947abe2c83b4290c6bb/settings.xml
-- mvn -fmain/pom.xml clean install -DskipTests org.codehaus.mojo:versions-maven-plugin:help dependency:go-offline -Pcoverage,release # "clean install" needed until we can exclude artifacts currently in the reactor, see https://maven.apache.org/plugins/maven-dependency-plugin/go-offline-mojo.html#excludeReactor and https://issues.apache.org/jira/browse/MDEP-568
+- mvn -fmain/pom.xml clean install -DskipTests -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN org.codehaus.mojo:versions-maven-plugin:help dependency:go-offline -Pcoverage,release # "clean install" needed until we can exclude artifacts currently in the reactor, see https://maven.apache.org/plugins/maven-dependency-plugin/go-offline-mojo.html#excludeReactor and https://issues.apache.org/jira/browse/MDEP-568
+before_script:
+- |
+  if [[ -n "$TRAVIS_TAG" ]]; then
+    mvn -fmain/pom.xml org.codehaus.mojo:versions-maven-plugin:set -DnewVersion=$TRAVIS_TAG
+  else
+    mvn -fmain/pom.xml org.codehaus.mojo:versions-maven-plugin:set -DnewVersion=SNAPSHOT-$(echo $TRAVIS_COMMIT | head -c7)
+  fi
 script:
 - mvn --update-snapshots -fmain/pom.xml clean test verify -Pcoverage
 after_success:
-- curl -o ~/codacy-coverage-reporter.jar https://oss.sonatype.org/service/local/repositories/releases/content/com/codacy/codacy-coverage-reporter/4.0.2/codacy-coverage-reporter-4.0.2-assembly.jar
+- curl -o ~/codacy-coverage-reporter.jar https://oss.sonatype.org/service/local/repositories/releases/content/com/codacy/codacy-coverage-reporter/6.0.7/codacy-coverage-reporter-6.0.7-assembly.jar
 - $JAVA_HOME/bin/java -jar ~/codacy-coverage-reporter.jar report -l Java -r main/commons/target/site/jacoco/jacoco.xml --partial
 - $JAVA_HOME/bin/java -jar ~/codacy-coverage-reporter.jar report -l Java -r main/keychain/target/site/jacoco/jacoco.xml --partial
 - $JAVA_HOME/bin/java -jar ~/codacy-coverage-reporter.jar report -l Java -r main/ui/target/site/jacoco/jacoco.xml --partial
 - $JAVA_HOME/bin/java -jar ~/codacy-coverage-reporter.jar report -l Java -r main/launcher/target/site/jacoco/jacoco.xml --partial
 - $JAVA_HOME/bin/java -jar ~/codacy-coverage-reporter.jar final
 before_deploy:
-- |
-  if [[ -n "$TRAVIS_TAG" ]]; then
-    mvn -fmain/pom.xml org.codehaus.mojo:versions-maven-plugin:set -DnewVersion=$TRAVIS_TAG
-  elif [[ $TRAVIS_BRANCH == "develop" ]] && [[ $TRAVIS_PULL_REQUEST == "false" ]]; then
-    mvn -fmain/pom.xml org.codehaus.mojo:versions-maven-plugin:set -DnewVersion=SNAPSHOT-$(echo $TRAVIS_COMMIT | head -c7)
-  fi
-- mvn -fmain/pom.xml clean package -Prelease -DskipTests
+- mvn -fmain/pom.xml package -Prelease -DskipTests
 - export TODAY=`date +'%Y-%m-%d'`; envsubst '$TRAVIS_TAG $TODAY' < .travis-deploy-release.tmpl.json > .travis-deploy-release.json
 deploy:
 - provider: bintray # SNAPSHOTS
