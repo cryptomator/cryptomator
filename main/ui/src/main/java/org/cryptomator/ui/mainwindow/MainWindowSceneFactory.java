@@ -7,6 +7,7 @@ import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.stage.Stage;
 import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.common.settings.Settings;
 import org.cryptomator.ui.common.DefaultSceneFactory;
 
 import javax.inject.Inject;
@@ -20,7 +21,8 @@ public class MainWindowSceneFactory extends DefaultSceneFactory {
 	private final Lazy<VaultListController> vaultListController;
 
 	@Inject
-	public MainWindowSceneFactory(Lazy<MainWindowController> mainWindowController, Lazy<VaultListController> vaultListController) {
+	public MainWindowSceneFactory(Settings settings, Lazy<MainWindowController> mainWindowController, Lazy<VaultListController> vaultListController) {
+		super(settings);
 		this.mainWindowController = mainWindowController;
 		this.vaultListController = vaultListController;
 	}

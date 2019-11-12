@@ -1,16 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.RadioButton?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleGroup?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Text?>
 <?import org.cryptomator.ui.controls.AlphanumericTextField?>
+<?import org.cryptomator.ui.controls.FontAwesome5IconView?>
 <VBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
 	  fx:controller="org.cryptomator.ui.vaultoptions.MountOptionsController"
 	  spacing="6">
+	<fx:define>
+		<ToggleGroup fx:id="mountPoint"/>
+	</fx:define>
 	<padding>
 		<Insets topRightBottomLeft="12"/>
 	</padding>
@@ -32,6 +41,26 @@
 			</children>
 		</HBox>
 		
-		<!-- TODO windows drive letter, see https://github.com/cryptomator/cryptomator/blob/1.4.16/main/ui/src/main/java/org/cryptomator/ui/model/Vault.java#L283-L298 -->
+		<Text text="TODO Mount Point"/>
+		<RadioButton toggleGroup="${mountPoint}" fx:id="mountPointAuto" text="TODO Automatically pick a suitable location"/>
+		<HBox spacing="6" visible="${controller.osIsWindows}" managed="${controller.osIsWindows}">
+			<RadioButton toggleGroup="${mountPoint}" fx:id="mountPointWinDriveLetter" text="TODO Choose specific drive letter"/>
+			<ChoiceBox fx:id="driveLetterSelection" disable="${!mountPointWinDriveLetter.selected}"/>
+		</HBox>
+		<RadioButton toggleGroup="${mountPoint}" fx:id="mountPointCustomDir" text="TODO Choose empty directory"/>
+		<HBox visible="${mountPointCustomDir.selected}">
+			<padding>
+				<Insets left="24"/>
+			</padding>
+			<children>
+				<TextField text="${controller.customMountPath}" HBox.hgrow="ALWAYS" maxWidth="Infinity" disable="true"/>
+				<Button text="TODO change" onAction="#chooseCustomMountPoint" contentDisplay="LEFT">
+					<graphic>
+						<FontAwesome5IconView glyph="FOLDER_OPEN" glyphSize="15"/>
+					</graphic>
+				</Button>
+			</children>
+		</HBox>
 	</children>
+
 </VBox>

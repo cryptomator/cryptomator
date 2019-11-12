@@ -2,6 +2,7 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.layout.VBox?>
 <?import org.cryptomator.ui.controls.FontAwesome5IconView?>
+<?import javafx.scene.control.Label?>
 <VBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
 	  fx:controller="org.cryptomator.ui.mainwindow.VaultDetailNeedsMigrationController"
@@ -11,7 +12,8 @@
 		<Insets topRightBottomLeft="24"/>
 	</padding>
 	<children>
-		<Button styleClass="button-large" text="TODO Upgrade Vault" minWidth="120" onAction="#showVaultMigrator">
+		<Label text="%main.vaultDetail.migratePrompt" wrapText="true"/>
+		<Button styleClass="button-large" text="%main.vaultDetail.migrateButton" minWidth="120" onAction="#showVaultMigrator">
 			<graphic>
 				<FontAwesome5IconView glyph="FILE_IMPORT" glyphSize="15"/>
 			</graphic>

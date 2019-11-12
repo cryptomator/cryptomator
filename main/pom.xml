@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.cryptomator</groupId>
 	<artifactId>main</artifactId>
-	<version>1.5.0-alpha2</version>
+	<version>1.5.0-beta1</version>
 	<packaging>pom</packaging>
 	<name>Cryptomator</name>
 
@@ -24,29 +24,28 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
 		<!-- dependency versions -->
-		<cryptomator.cryptofs.version>1.9.0-beta4</cryptomator.cryptofs.version>
+		<cryptomator.cryptofs.version>1.9.0-rc2</cryptomator.cryptofs.version>
 		<cryptomator.jni.version>2.2.1</cryptomator.jni.version>
-		<cryptomator.fuse.version>1.2.0</cryptomator.fuse.version>
+		<cryptomator.fuse.version>1.2.1</cryptomator.fuse.version>
 		<cryptomator.dokany.version>1.1.11</cryptomator.dokany.version>
 		<cryptomator.webdav.version>1.0.10</cryptomator.webdav.version>
 
-		<javafx.version>13</javafx.version>
+		<javafx.version>13.0.1</javafx.version>
 
-		<commons-io.version>2.6</commons-io.version>
-		<commons-lang3.version>3.8.1</commons-lang3.version>
+		<commons-lang3.version>3.9</commons-lang3.version>
 
 		<easybind.version>1.0.3</easybind.version>
 
-		<guava.version>27.1-jre</guava.version>
-		<dagger.version>2.22.1</dagger.version>
-		<gson.version>2.8.5</gson.version>
+		<guava.version>28.1-jre</guava.version>
+		<dagger.version>2.25.2</dagger.version>
+		<gson.version>2.8.6</gson.version>
 
-		<slf4j.version>1.7.26</slf4j.version>
+		<slf4j.version>1.7.29</slf4j.version>
 		<logback.version>1.2.3</logback.version>
 
-		<junit.jupiter.version>5.4.2</junit.jupiter.version>
-		<mockito.version>2.27.0</mockito.version>
-		<hamcrest.version>2.1</hamcrest.version>
+		<junit.jupiter.version>5.5.2</junit.jupiter.version>
+		<mockito.version>3.1.0</mockito.version>
+		<hamcrest.version>2.2</hamcrest.version>
 	</properties>
 
 	<repositories>
@@ -152,11 +151,6 @@
 			</dependency>
 
 			<!-- Apache Commons -->
-			<dependency>
-				<groupId>commons-io</groupId>
-				<artifactId>commons-io</artifactId>
-				<version>${commons-io.version}</version>
-			</dependency>
 			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-lang3</artifactId>
@@ -267,7 +261,7 @@
 			<plugins>
 				<plugin>
 					<artifactId>maven-dependency-plugin</artifactId>
-					<version>3.1.0</version>
+					<version>3.1.1</version>
 					<executions>
 						<execution>
 							<id>copy-libs</id>
@@ -296,7 +290,7 @@
 				<plugin>
 					<groupId>org.jacoco</groupId>
 					<artifactId>jacoco-maven-plugin</artifactId>
-					<version>0.8.2</version>
+					<version>0.8.5</version>
 					<executions>
 						<execution>
 							<id>prepare-agent</id>
@@ -323,7 +317,7 @@
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.8.0</version>
+				<version>3.8.1</version>
 				<configuration>
 					<release>11</release>
 					<annotationProcessorPaths>
@@ -338,7 +332,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.22.1</version>
+				<version>2.22.2</version>
 			</plugin>
 		</plugins>
 	</build>
