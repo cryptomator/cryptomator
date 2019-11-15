@@ -70,4 +70,9 @@ abstract class PreferencesModule {
 	@FxControllerKey(VolumePreferencesController.class)
 	abstract FxController bindVolumePreferencesController(VolumePreferencesController controller);
 
+	@Binds
+	@IntoMap
+	@FxControllerKey(RegistrationPreferencesController.class)
+	abstract FxController bindRegistrationPreferencesController(RegistrationPreferencesController controller);
+
 }

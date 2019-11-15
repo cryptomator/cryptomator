@@ -1,4 +1,4 @@
-package org.cryptomator.ui.preferences;
+package org.cryptomator.common;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
@@ -9,6 +9,7 @@ import com.google.common.io.BaseEncoding;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.inject.Singleton;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
@@ -17,6 +18,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Optional;
 
+@Singleton
 public class LicenseChecker {
 
 	private final JWTVerifier verifier;

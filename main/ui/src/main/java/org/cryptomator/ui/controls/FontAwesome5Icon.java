@@ -15,17 +15,18 @@ public enum FontAwesome5Icon {
 	EYE_SLASH("\uF070"), //
 	FILE_IMPORT("\uF56F"), //
 	FOLDER_OPEN("\uF07C"), //
+	HEART("\uF004"), //
 	HDD("\uF0A0"), //
 	KEY("\uF084"), //
 	LOCK_ALT("\uF30D"), //
 	LOCK_OPEN_ALT("\uF3C2"), //
-	MINUS("\uF068"), //
 	PLUS("\uF067"), //
 	QUESTION("\uF128"), //
 	SPARKLES("\uF890"), //
 	SPINNER("\uF110"), //
 	SYNC("\uF021"), //
 	TIMES("\uF00D"), //
+	USER_CHECK("\uf4fc"), //
 	WRENCH("\uF0AD"), //
 	;
 

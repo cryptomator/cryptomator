@@ -1,6 +1,7 @@
-package org.cryptomator.ui.preferences;
+package org.cryptomator.common;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
+import org.cryptomator.common.LicenseChecker;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

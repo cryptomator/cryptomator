@@ -37,6 +37,17 @@ public abstract class CommonsModule {
 
 	@Provides
 	@Singleton
+	@Named("licensePublicKey")
+	static String provideLicensePublicKey() {
+		// TODO replace
+		return "MIGbMBAGByqGSM49AgEGBSuBBAAjA4GGAAQBgc4HZz+/fBbC7lmEww0AO3NK9wVZ" //
+				+ "PDZ0VEnsaUFLEYpTzb90nITtJUcPUbvOsdZIZ1Q8fnbquAYgxXL5UgHMoywAib47" //
+				+ "6MkyyYgPk0BXZq3mq4zImTRNuaU9slj9TVJ3ScT3L1bXwVuPJDzpr5GOFpaj+WwM" //
+				+ "Al8G7CqwoJOsW7Kddns=";
+	}
+
+	@Provides
+	@Singleton
 	@Named("SemVer")
 	static Comparator<String> providesSemVerComparator() {
 		return new SemVerComparator();

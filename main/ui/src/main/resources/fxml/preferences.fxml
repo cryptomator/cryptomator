@@ -35,5 +35,13 @@
 				<fx:include source="/fxml/preferences_updates.fxml"/>
 			</content>
 		</Tab>
+		<Tab fx:id="registrationTab" text="%preferences.registration">
+			<graphic>
+				<FontAwesome5IconView glyph="USER_CHECK"/>
+			</graphic>
+			<content>
+				<fx:include source="/fxml/preferences_registration.fxml"/>
+			</content>
+		</Tab>
 	</tabs>
 </TabPane>

@@ -17,7 +17,6 @@ public class PreferencesController implements FxController {
 	private final Stage window;
 	private final BooleanBinding updateAvailable;
 	public TabPane tabPane;
-	public Tab generalTab;
 	public Tab updatesTab;
 
 	@Inject

@@ -15,6 +15,8 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.NodeOrientation;
@@ -35,6 +37,7 @@ public class Settings {
 	public static final VolumeImpl DEFAULT_PREFERRED_VOLUME_IMPL = System.getProperty("os.name").toLowerCase().contains("windows") ? VolumeImpl.DOKANY : VolumeImpl.FUSE;
 	public static final UiTheme DEFAULT_THEME = UiTheme.LIGHT;
 	public static final NodeOrientation DEFAULT_USER_INTERFACE_ORIENTATION = NodeOrientation.LEFT_TO_RIGHT;
+	private static final String DEFAULT_LICENSE_KEY = "";
 
 	private final ObservableList<VaultSettings> directories = FXCollections.observableArrayList(VaultSettings::observables);
 	private final BooleanProperty askedForUpdateCheck = new SimpleBooleanProperty(DEFAULT_ASKED_FOR_UPDATE_CHECK);
@@ -47,6 +50,7 @@ public class Settings {
 	private final ObjectProperty<VolumeImpl> preferredVolumeImpl = new SimpleObjectProperty<>(DEFAULT_PREFERRED_VOLUME_IMPL);
 	private final ObjectProperty<UiTheme> theme = new SimpleObjectProperty<>(DEFAULT_THEME);
 	private final ObjectProperty<NodeOrientation> userInterfaceOrientation = new SimpleObjectProperty<>(DEFAULT_USER_INTERFACE_ORIENTATION);
+	private final StringProperty licenseKey = new SimpleStringProperty(DEFAULT_LICENSE_KEY);
 
 	private Consumer<Settings> saveCmd;
 
@@ -125,5 +129,9 @@ public class Settings {
 
 	public ObjectProperty<NodeOrientation> userInterfaceOrientation() {
 		return userInterfaceOrientation;
+	}
+
+	public StringProperty licenseKey() {
+		return licenseKey;
 	}
 }
