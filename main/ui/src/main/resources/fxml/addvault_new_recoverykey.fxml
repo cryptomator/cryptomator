@@ -23,7 +23,7 @@
 
 		<Label text="%addvaultwizard.new.recoveryKeyInstruction" wrapText="true"/>
 
-		<TextArea editable="false" text="${controller.recoveryKey}" wrapText="true"/>
+		<TextArea editable="false" text="${controller.recoveryKey}" wrapText="true" prefRowCount="6"/>
 
 		<CheckBox fx:id="finalConfirmationCheckbox" text="%addvaultwizard.new.recoveryKeySavedCheckbox" wrapText="true"/>
 
