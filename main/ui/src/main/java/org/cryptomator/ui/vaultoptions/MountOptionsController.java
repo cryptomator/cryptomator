@@ -116,7 +116,7 @@ public class MountOptionsController implements FxController {
 	@FXML
 	private void chooseCustomMountPoint() {
 		DirectoryChooser directoryChooser = new DirectoryChooser();
-		directoryChooser.setTitle(resourceBundle.getString("vaultOptions.mount.winDirChooser"));
+		directoryChooser.setTitle(resourceBundle.getString("vaultOptions.mount.mountPoint.directoryPickerTitle"));
 		try {
 			directoryChooser.setInitialDirectory(Path.of(System.getProperty("user.home")).toFile());
 		} catch (Exception e) {

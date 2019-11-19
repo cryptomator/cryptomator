@@ -10,7 +10,6 @@
 <?import javafx.scene.control.ToggleGroup?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Text?>
 <?import org.cryptomator.ui.controls.AlphanumericTextField?>
 <?import org.cryptomator.ui.controls.FontAwesome5IconView?>
 <VBox xmlns="http://javafx.com/javafx"
@@ -32,35 +31,36 @@
 		<CheckBox fx:id="readOnlyCheckbox" text="%vaultOptions.mount.readonly"/>
 
 		<CheckBox fx:id="customMountFlagsCheckbox" text="%vaultOptions.mount.customMountFlags" onAction="#toggleUseCustomMountFlags"/>
-		<HBox>
-			<padding>
-				<Insets left="25"/>
-			</padding>
-			<children>
-				<TextField fx:id="mountFlags" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
-			</children>
-		</HBox>
-		
-		<Text text="TODO Mount Point"/>
-		<RadioButton toggleGroup="${mountPoint}" fx:id="mountPointAuto" text="TODO Automatically pick a suitable location"/>
+
+		<TextField fx:id="mountFlags" HBox.hgrow="ALWAYS" maxWidth="Infinity">
+			<VBox.margin>
+				<Insets left="24"/>
+			</VBox.margin>
+		</TextField>
+
+		<Label text="%vaultOptions.mount.mountPoint">
+			<VBox.margin>
+				<Insets top="9"/>
+			</VBox.margin>
+		</Label>
+		<RadioButton toggleGroup="${mountPoint}" fx:id="mountPointAuto" text="%vaultOptions.mount.mountPoint.auto"/>
 		<HBox spacing="6" visible="${controller.osIsWindows}" managed="${controller.osIsWindows}">
-			<RadioButton toggleGroup="${mountPoint}" fx:id="mountPointWinDriveLetter" text="TODO Choose specific drive letter"/>
+			<RadioButton toggleGroup="${mountPoint}" fx:id="mountPointWinDriveLetter" text="%vaultOptions.mount.mountPoint.driveLetter"/>
 			<ChoiceBox fx:id="driveLetterSelection" disable="${!mountPointWinDriveLetter.selected}"/>
 		</HBox>
-		<RadioButton toggleGroup="${mountPoint}" fx:id="mountPointCustomDir" text="TODO Choose empty directory"/>
-		<HBox visible="${mountPointCustomDir.selected}">
-			<padding>
-				<Insets left="24"/>
-			</padding>
-			<children>
-				<TextField text="${controller.customMountPath}" HBox.hgrow="ALWAYS" maxWidth="Infinity" disable="true"/>
-				<Button text="TODO change" onAction="#chooseCustomMountPoint" contentDisplay="LEFT">
-					<graphic>
-						<FontAwesome5IconView glyph="FOLDER_OPEN" glyphSize="15"/>
-					</graphic>
-				</Button>
-			</children>
+		<HBox spacing="6" alignment="CENTER_LEFT">
+			<RadioButton toggleGroup="${mountPoint}" fx:id="mountPointCustomDir" text="%vaultOptions.mount.mountPoint.custom"/>
+			<Button text="%vaultOptions.mount.mountPoint.directoryPickerButton" onAction="#chooseCustomMountPoint" contentDisplay="LEFT" disable="${!mountPointCustomDir.selected}">
+				<graphic>
+					<FontAwesome5IconView glyph="FOLDER_OPEN" glyphSize="15"/>
+				</graphic>
+			</Button>
 		</HBox>
+		<TextField text="${controller.customMountPath}" visible="${mountPointCustomDir.selected}" maxWidth="Infinity" disable="true">
+			<VBox.margin>
+				<Insets left="24"/>
+			</VBox.margin>
+		</TextField>
 	</children>
 
 </VBox>
