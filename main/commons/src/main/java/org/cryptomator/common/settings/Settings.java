@@ -69,6 +69,7 @@ public class Settings {
 		preferredVolumeImpl.addListener(this::somethingChanged);
 		theme.addListener(this::somethingChanged);
 		userInterfaceOrientation.addListener(this::somethingChanged);
+		licenseKey.addListener(this::somethingChanged);
 	}
 
 	void setSaveCmd(Consumer<Settings> saveCmd) {

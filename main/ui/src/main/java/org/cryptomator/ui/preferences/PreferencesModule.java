@@ -72,7 +72,7 @@ abstract class PreferencesModule {
 
 	@Binds
 	@IntoMap
-	@FxControllerKey(RegistrationPreferencesController.class)
-	abstract FxController bindRegistrationPreferencesController(RegistrationPreferencesController controller);
+	@FxControllerKey(LicenseKeyPreferencesController.class)
+	abstract FxController bindLicenseKeyPreferencesController(LicenseKeyPreferencesController controller);
 
 }

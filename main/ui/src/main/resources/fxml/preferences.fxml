@@ -7,7 +7,9 @@
 		 xmlns:fx="http://javafx.com/fxml"
 		 fx:id="tabPane"
 		 fx:controller="org.cryptomator.ui.preferences.PreferencesController"
-		 minWidth="400"
+		 minWidth="-Infinity"
+		 maxWidth="-Infinity"
+		 prefWidth="500"
 		 tabClosingPolicy="UNAVAILABLE"
 		 tabDragPolicy="FIXED">
 	<tabs>
@@ -35,12 +37,12 @@
 				<fx:include source="/fxml/preferences_updates.fxml"/>
 			</content>
 		</Tab>
-		<Tab fx:id="registrationTab" text="%preferences.registration">
+		<Tab fx:id="donationKeyTab" text="%preferences.donationKey">
 			<graphic>
-				<FontAwesome5IconView glyph="USER_CHECK"/>
+				<FontAwesome5IconView glyph="HEART"/>
 			</graphic>
 			<content>
-				<fx:include source="/fxml/preferences_registration.fxml"/>
+				<fx:include source="/fxml/preferences_donationkey.fxml"/>
 			</content>
 		</Tab>
 	</tabs>
