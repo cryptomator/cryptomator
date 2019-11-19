@@ -672,7 +672,6 @@
  ******************************************************************************/
 
 .choice-box {
-	-fx-text-fill: TEXT_FILL;
 	-fx-background-color: CONTROL_BORDER_NORMAL, CONTROL_BG_NORMAL;
 	-fx-background-insets: 0, 1px;
 	-fx-background-radius: 4px;
@@ -681,6 +680,18 @@
 
 .choice-box:focused {
 	-fx-background-color: CONTROL_BORDER_FOCUSED, CONTROL_BG_NORMAL;
+}
+
+.choice-box:disabled {
+	-fx-background-color: CONTROL_BORDER_DISABLED, CONTROL_BG_DISABLED;
+}
+
+.choice-box > .label {
+	-fx-text-fill: TEXT_FILL;
+}
+
+.choice-box:disabled > .label {
+	-fx-text-fill: TEXT_FILL_SECONDARY;
 }
 
 .choice-box > .open-button {
@@ -692,6 +703,10 @@
 	-fx-background-insets: 0 0 -1 0, 0;
 	-fx-padding: 0.15em 0.3em 0.15em 0.3em;
 	-fx-shape: "M 0 0 h 7 l -3.5 4 z";
+}
+
+.choice-box:disabled > .open-button > .arrow {
+	-fx-background-color: transparent, TEXT_FILL_SECONDARY;
 }
 
 .choice-box .context-menu {
