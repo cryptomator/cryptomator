@@ -18,6 +18,7 @@ import org.cryptomator.jni.MacApplicationUiState;
 import org.cryptomator.jni.MacFunctions;
 import org.cryptomator.ui.mainwindow.MainWindowComponent;
 import org.cryptomator.ui.preferences.PreferencesComponent;
+import org.cryptomator.ui.preferences.SelectedPreferencesTab;
 import org.cryptomator.ui.quit.QuitComponent;
 import org.cryptomator.ui.unlock.UnlockComponent;
 import org.slf4j.Logger;
@@ -79,9 +80,9 @@ public class FxApplication extends Application {
 		}
 	}
 
-	public void showPreferencesWindow() {
+	public void showPreferencesWindow(SelectedPreferencesTab selectedTab) {
 		Platform.runLater(() -> {
-			Stage stage = preferencesWindow.get().showPreferencesWindow();
+			Stage stage = preferencesWindow.get().showPreferencesWindow(selectedTab);
 			addVisibleStage(stage);
 			LOG.debug("Showing Preferences");
 		});

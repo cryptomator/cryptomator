@@ -8,6 +8,7 @@ import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.ui.fxapp.FxApplication;
 import org.cryptomator.ui.launcher.FxApplicationStarter;
+import org.cryptomator.ui.preferences.SelectedPreferencesTab;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -150,7 +151,7 @@ class TrayMenuController {
 	}
 
 	private void showPreferencesWindow(@SuppressWarnings("unused") EventObject actionEvent) {
-		fxApplicationStarter.get(true).thenAccept(FxApplication::showPreferencesWindow);
+		fxApplicationStarter.get(true).thenAccept(app -> app.showPreferencesWindow(SelectedPreferencesTab.ANY));
 	}
 
 	private void handleQuitRequest(EventObject e, QuitResponse response) {

@@ -22,10 +22,21 @@
 		<children>
 			<Label text="Cryptomator"/>
 			<Region HBox.hgrow="ALWAYS"/>
+			<Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#showDonationKeyPreferences" focusTraversable="false" visible="${!controller.licenseHolder.validLicense}">
+				<graphic>
+					<StackPane>
+						<FontAwesome5IconView glyph="EXCLAMATION_CIRCLE" glyphSize="16"/>
+						<Region styleClass="update-indicator" StackPane.alignment="TOP_RIGHT" prefWidth="10" prefHeight="10" maxWidth="-Infinity" maxHeight="-Infinity"/>
+					</StackPane>
+				</graphic>
+				<tooltip>
+					<Tooltip text="%main.donationKeyMissing.tooltip"/>
+				</tooltip>
+			</Button>
 			<Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#showPreferences" focusTraversable="false">
 				<graphic>
 					<StackPane>
-						<FontAwesome5IconView glyph="COGS"/>
+						<FontAwesome5IconView glyph="COGS" glyphSize="16"/>
 						<Region styleClass="update-indicator" visible="${controller.updateAvailable}" StackPane.alignment="TOP_RIGHT" prefWidth="10" prefHeight="10" maxWidth="-Infinity" maxHeight="-Infinity"/>
 					</StackPane>
 				</graphic>
@@ -35,7 +46,7 @@
 			</Button>
 			<Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#close" focusTraversable="false">
 				<graphic>
-					<FontAwesome5IconView glyph="TIMES"/>
+					<FontAwesome5IconView glyph="TIMES" glyphSize="16"/>
 				</graphic>
 				<tooltip>
 					<Tooltip text="%main.closeBtn.tooltip"/>
