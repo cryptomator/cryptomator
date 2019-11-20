@@ -201,6 +201,16 @@
 	-fx-translate-y: 1px;
 }
 
+.main-window .drag-n-drop-indicator {
+	-fx-border-color: INDICATOR_BG;
+	-fx-border-width: 3px;
+}
+
+.main-window .drag-n-drop-indicator .drag-n-drop-header {
+	-fx-background-color: INDICATOR_BG;
+	-fx-padding: 3px;
+}
+
 /*******************************************************************************
  *                                                                             *
  * TabPane                                                                     *

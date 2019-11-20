@@ -1,14 +1,15 @@
 package org.cryptomator.ui.mainwindow;
 
 import javafx.beans.binding.BooleanBinding;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
+import javafx.scene.input.DragEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultListManager;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.fxapp.FxApplication;
@@ -20,11 +21,11 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.File;
+import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
-import java.util.Collection;
+import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @MainWindowScoped
 public class MainWindowController implements FxController {
@@ -39,9 +40,10 @@ public class MainWindowController implements FxController {
 	private final BooleanBinding updateAvailable;
 	private final VaultListManager vaultListManager;
 	private final WrongFileAlertComponent.Builder wrongFileAlert;
+	private final BooleanProperty draggingOver = new SimpleBooleanProperty();
+	private final BooleanProperty draggingVaultOver = new SimpleBooleanProperty();
 	public HBox titleBar;
 	public VBox root;
-	public Pane dragAndDropIndicator;
 	public Region resizer;
 	private double xOffset;
 	private double yOffset;
@@ -74,40 +76,53 @@ public class MainWindowController implements FxController {
 			window.setHeight(event.getSceneY());
 		});
 		updateChecker.automaticallyCheckForUpdatesIfEnabled();
-		dragAndDropIndicator.setVisible(false);
-		root.setOnDragOver(event -> {
-			if (event.getGestureSource() != root && event.getDragboard().hasFiles()) {
-				/* allow for both copying and moving, whatever user chooses */
-				event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
-				dragAndDropIndicator.setVisible(true);
-			}
-			event.consume();
-		});
-		root.setOnDragExited(event -> dragAndDropIndicator.setVisible(false));
-		root.setOnDragDropped(event -> {
-			if (event.getGestureSource() != root && event.getDragboard().hasFiles()) {
-				/* allow for both copying and moving, whatever user chooses */
-				event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
-				Collection<Vault> vaultPaths = event.getDragboard().getFiles().stream().map(File::toPath).flatMap(this::addVault).collect(Collectors.toSet());
-				if (vaultPaths.isEmpty()) {
-					wrongFileAlert.build().showWrongFileAlertWindow();
-				}
-			}
-			event.consume();
-		});
+		root.setOnDragEntered(this::handleDragEvent);
+		root.setOnDragOver(this::handleDragEvent);
+		root.setOnDragDropped(this::handleDragEvent);
+		root.setOnDragExited(this::handleDragEvent);
 	}
 
-	private Stream<Vault> addVault(Path pathToVault) {
+	private void handleDragEvent(DragEvent event) {
+		if (DragEvent.DRAG_ENTERED.equals(event.getEventType()) && event.getGestureSource() == null) {
+			draggingOver.set(true);
+		} else if (DragEvent.DRAG_OVER.equals(event.getEventType()) && event.getGestureSource() == null && event.getDragboard().hasFiles()) {
+			event.acceptTransferModes(TransferMode.ANY);
+			draggingVaultOver.set(event.getDragboard().getFiles().stream().map(File::toPath).anyMatch(this::containsVault));
+		} else if (DragEvent.DRAG_DROPPED.equals(event.getEventType()) && event.getGestureSource() == null && event.getDragboard().hasFiles()) {
+			Set<Path> vaultPaths = event.getDragboard().getFiles().stream().map(File::toPath).filter(this::containsVault).collect(Collectors.toSet());
+			if (vaultPaths.isEmpty()) {
+				wrongFileAlert.build().showWrongFileAlertWindow();
+			} else {
+				vaultPaths.forEach(this::addVault);
+			}
+			event.setDropCompleted(!vaultPaths.isEmpty());
+			event.consume();
+		} else if (DragEvent.DRAG_EXITED.equals(event.getEventType())) {
+			draggingOver.set(false);
+			draggingVaultOver.set(false);
+		}
+	}
+
+	private boolean containsVault(Path path) {
+		if (path.getFileName().toString().equals(MASTERKEY_FILENAME)) {
+			return true;
+		} else if (Files.isDirectory(path) && Files.exists(path.resolve(MASTERKEY_FILENAME))) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	private void addVault(Path pathToVault) {
 		try {
 			if (pathToVault.getFileName().toString().equals(MASTERKEY_FILENAME)) {
-				return Stream.of(vaultListManager.add(pathToVault.getParent()));
+				vaultListManager.add(pathToVault.getParent());
 			} else {
-				return Stream.of(vaultListManager.add(pathToVault));
+				vaultListManager.add(pathToVault);
 			}
 		} catch (NoSuchFileException e) {
 			LOG.debug("Not a vault: {}", pathToVault);
 		}
-		return Stream.empty();
 	}
 
 	@FXML
@@ -132,5 +147,21 @@ public class MainWindowController implements FxController {
 
 	public boolean isUpdateAvailable() {
 		return updateAvailable.get();
+	}
+
+	public BooleanProperty draggingOverProperty() {
+		return draggingOver;
+	}
+
+	public boolean isDraggingOver() {
+		return draggingOver.get();
+	}
+
+	public BooleanProperty draggingVaultOverProperty() {
+		return draggingVaultOver;
+	}
+
+	public boolean isDraggingVaultOver() {
+		return draggingVaultOver.get();
 	}
 }
