@@ -10,7 +10,7 @@ import org.cryptomator.ui.common.FxController;
 import javax.inject.Inject;
 
 @PreferencesScoped
-public class LicenseKeyPreferencesController implements FxController {
+public class DonationKeyPreferencesController implements FxController {
 	
 	private static final String DONATION_URI = "https://cryptomator.org/#donate";
 
@@ -19,7 +19,7 @@ public class LicenseKeyPreferencesController implements FxController {
 	public TextArea donationKeyField;
 
 	@Inject
-	LicenseKeyPreferencesController(Application application, LicenseHolder licenseHolder) {
+	DonationKeyPreferencesController(Application application, LicenseHolder licenseHolder) {
 		this.application = application;
 		this.licenseHolder = licenseHolder;
 	}
