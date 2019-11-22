@@ -23,21 +23,19 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 
-@RecoveryKeyScoped
 public class RecoveryKeyDisplayController implements FxController {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(RecoveryKeyDisplayController.class);
 
 	private final Stage window;
-	private final Vault vault;
-	private final StringProperty recoveryKeyProperty;
+	private final String vaultName;
+	private final String recoveryKey;
 	private final ReadOnlyBooleanProperty printerSupported;
-
-	@Inject
-	public RecoveryKeyDisplayController(@RecoveryKeyWindow Stage window, @RecoveryKeyWindow Vault vault, @RecoveryKeyWindow StringProperty recoveryKey) {
+	
+	public RecoveryKeyDisplayController(Stage window, String vaultName, String recoveryKey) {
 		this.window = window;
-		this.vault = vault;
-		this.recoveryKeyProperty = recoveryKey;
+		this.vaultName = vaultName;
+		this.recoveryKey = recoveryKey;
 		this.printerSupported = new SimpleBooleanProperty(Printer.getDefaultPrinter() != null);
 	}
 
@@ -49,11 +47,11 @@ public class RecoveryKeyDisplayController implements FxController {
 		if (job != null && job.showPrintDialog(window)) {
 			PageLayout pageLayout = job.getJobSettings().getPageLayout();
 
-			Text heading = new Text("Cryptomator Recovery Key\n" + vault.getDisplayableName() + "\n");
+			Text heading = new Text("Cryptomator Recovery Key\n" + vaultName + "\n");
 			heading.setFont(Font.font("serif", FontWeight.BOLD, 20));
 			heading.setFontSmoothingType(FontSmoothingType.LCD);
 
-			Text key = new Text(recoveryKeyProperty.get());
+			Text key = new Text(recoveryKey);
 			key.setFont(Font.font("serif", FontWeight.NORMAL, 16));
 			key.setFontSmoothingType(FontSmoothingType.GRAY);
 
@@ -76,7 +74,7 @@ public class RecoveryKeyDisplayController implements FxController {
 	@FXML
 	public void copyRecoveryKey() {
 		ClipboardContent clipboardContent = new ClipboardContent();
-		clipboardContent.putString(recoveryKeyProperty.get());
+		clipboardContent.putString(recoveryKey);
 		Clipboard.getSystemClipboard().setContent(clipboardContent);
 		LOG.info("Recovery key copied to clipboard.");
 	}
@@ -88,10 +86,6 @@ public class RecoveryKeyDisplayController implements FxController {
 
 	/* Getter/Setter */
 
-	public Vault getVault() {
-		return vault;
-	}
-
 	public ReadOnlyBooleanProperty printerSupportedProperty() {
 		return printerSupported;
 	}
@@ -100,11 +94,11 @@ public class RecoveryKeyDisplayController implements FxController {
 		return printerSupported.get();
 	}
 
-	public ReadOnlyStringProperty recoveryKeyProperty() {
-		return recoveryKeyProperty;
+	public String getRecoveryKey() {
+		return recoveryKey;
 	}
 
-	public String getRecoveryKey() {
-		return recoveryKeyProperty.get();
+	public String getVaultName() {
+		return vaultName;
 	}
 }

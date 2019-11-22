@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ButtonBar?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.Region?>
+<VBox xmlns="http://javafx.com/javafx"
+	  xmlns:fx="http://javafx.com/fxml"
+	  fx:controller="org.cryptomator.ui.recoverykey.RecoveryKeySuccessController"
+	  minWidth="400"
+	  maxWidth="400"
+	  minHeight="145"
+	  spacing="12"
+	  alignment="TOP_CENTER">
+	<padding>
+		<Insets topRightBottomLeft="12"/>
+	</padding>
+	<children>
+		<fx:include source="/fxml/recoverykey_display.fxml"/>
+
+		<Region VBox.vgrow="ALWAYS"/>
+
+		<VBox alignment="BOTTOM_CENTER" VBox.vgrow="ALWAYS">
+			<ButtonBar buttonMinWidth="120" buttonOrder="+C">
+				<buttons>
+					<Button text="%generic.button.done" ButtonBar.buttonData="CANCEL_CLOSE" cancelButton="true" onAction="#close"/>
+				</buttons>
+			</ButtonBar>
+		</VBox>
+	</children>
+</VBox>

@@ -20,6 +20,7 @@ import org.cryptomator.ui.common.FxControllerKey;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.mainwindow.MainWindow;
+import org.cryptomator.ui.recoverykey.RecoveryKeyDisplayController;
 
 import javax.inject.Named;
 import javax.inject.Provider;
@@ -170,11 +171,18 @@ public abstract class AddVaultModule {
 
 	@Binds
 	@IntoMap
-	@FxControllerKey(AddVaultSuccessController.class)
-	abstract FxController bindAddVaultSuccessController(AddVaultSuccessController controller);
+	@FxControllerKey(CreateNewVaultRecoveryKeyController.class)
+	abstract FxController bindCreateNewVaultRecoveryKeyController(CreateNewVaultRecoveryKeyController controller);
+
+	@Provides
+	@IntoMap
+	@FxControllerKey(RecoveryKeyDisplayController.class)
+	static FxController provideRecoveryKeyDisplayController(@AddVaultWizardWindow Stage window, @Named("vaultName") StringProperty vaultName, @Named("recoveryKey") StringProperty recoveryKey) {
+		return new RecoveryKeyDisplayController(window, vaultName.get(), recoveryKey.get());
+	}
 
 	@Binds
 	@IntoMap
-	@FxControllerKey(CreateNewVaultRecoveryKeyController.class)
-	abstract FxController bindCreateNewVaultRecoveryKeyController(CreateNewVaultRecoveryKeyController controller);
+	@FxControllerKey(AddVaultSuccessController.class)
+	abstract FxController bindAddVaultSuccessController(AddVaultSuccessController controller);
 }
