@@ -1,9 +1,5 @@
 package org.cryptomator.ui.recoverykey;
 
-import javafx.beans.property.ReadOnlyBooleanProperty;
-import javafx.beans.property.ReadOnlyStringProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
 import javafx.print.PageLayout;
 import javafx.print.Printer;
@@ -16,12 +12,9 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
-import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.FxController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.inject.Inject;
 
 public class RecoveryKeyDisplayController implements FxController {
 	
@@ -30,13 +23,11 @@ public class RecoveryKeyDisplayController implements FxController {
 	private final Stage window;
 	private final String vaultName;
 	private final String recoveryKey;
-	private final ReadOnlyBooleanProperty printerSupported;
 	
 	public RecoveryKeyDisplayController(Stage window, String vaultName, String recoveryKey) {
 		this.window = window;
 		this.vaultName = vaultName;
 		this.recoveryKey = recoveryKey;
-		this.printerSupported = new SimpleBooleanProperty(Printer.getDefaultPrinter() != null);
 	}
 
 	@FXML
@@ -86,12 +77,8 @@ public class RecoveryKeyDisplayController implements FxController {
 
 	/* Getter/Setter */
 
-	public ReadOnlyBooleanProperty printerSupportedProperty() {
-		return printerSupported;
-	}
-
 	public boolean isPrinterSupported() {
-		return printerSupported.get();
+		return Printer.getDefaultPrinter() != null;
 	}
 
 	public String getRecoveryKey() {
