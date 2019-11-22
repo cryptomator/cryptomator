@@ -31,14 +31,28 @@
 
 			<VBox spacing="6" HBox.hgrow="ALWAYS">
 				<FormattedLabel format="%recoveryKey.display.message" arg1="${controller.vault.displayableName}" wrapText="true" VBox.vgrow="NEVER"/>
-				<TextArea editable="false" text="${controller.recoveryKey}" wrapText="true" VBox.vgrow="ALWAYS"/>
+				<TextArea editable="false" text="${controller.recoveryKey}" wrapText="true" VBox.vgrow="ALWAYS" prefRowCount="4"/>
 			</VBox>
 		</HBox>
 
 		<VBox alignment="BOTTOM_CENTER" VBox.vgrow="ALWAYS">
-			<ButtonBar buttonMinWidth="120" buttonOrder="+C">
+			<ButtonBar buttonMinWidth="100" buttonOrder="+UC">
 				<buttons>
-					<Button text="%generic.button.done" ButtonBar.buttonData="CANCEL_CLOSE" cancelButton="true" onAction="#close"/>
+					<Button text="%generic.button.print" ButtonBar.buttonData="OTHER" onAction="#printRecoveryKey" visible="${controller.printerSupported}">
+						<graphic>
+							<FontAwesome5IconView glyph="PRINT"/>
+						</graphic>
+					</Button>
+					<Button text="%generic.button.copy" ButtonBar.buttonData="OTHER" onAction="#copyRecoveryKey">
+						<graphic>
+							<FontAwesome5IconView glyph="COPY"/>
+						</graphic>
+					</Button>
+					<Button text="%generic.button.done" ButtonBar.buttonData="CANCEL_CLOSE" cancelButton="true" onAction="#close">
+						<graphic>
+							<FontAwesome5IconView glyph="CHECK"/>
+						</graphic>
+					</Button>
 				</buttons>
 			</ButtonBar>
 		</VBox>

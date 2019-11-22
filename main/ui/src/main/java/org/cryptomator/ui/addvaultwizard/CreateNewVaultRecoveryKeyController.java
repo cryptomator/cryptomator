@@ -1,10 +1,12 @@
 package org.cryptomator.ui.addvaultwizard;
 
 import dagger.Lazy;
+import javafx.beans.property.ReadOnlyBooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
 import javafx.print.PageLayout;
-import javafx.print.PrintQuality;
+import javafx.print.Printer;
 import javafx.print.PrinterJob;
 import javafx.scene.Scene;
 import javafx.scene.control.TextArea;
@@ -33,6 +35,7 @@ public class CreateNewVaultRecoveryKeyController implements FxController {
 	private final Lazy<Scene> successScene;
 	private final StringProperty recoveryKeyProperty;
 	private final StringProperty vaultName;
+	private final ReadOnlyBooleanProperty printerSupported;
 	public TextArea textarea;
 
 	@Inject
@@ -41,11 +44,13 @@ public class CreateNewVaultRecoveryKeyController implements FxController {
 		this.successScene = successScene;
 		this.recoveryKeyProperty = recoveryKey;
 		this.vaultName = vaultName;
+		this.printerSupported = new SimpleBooleanProperty(Printer.getDefaultPrinter() != null);
 	}
 
 	@FXML
 	public void printRecoveryKey() {
 		// TODO localize
+		
 		PrinterJob job = PrinterJob.createPrinterJob();
 		if (job != null && job.showPrintDialog(window)) {
 			PageLayout pageLayout = job.getJobSettings().getPageLayout();
@@ -88,6 +93,14 @@ public class CreateNewVaultRecoveryKeyController implements FxController {
 	}
 
 	/* Getter/Setter */
+
+	public ReadOnlyBooleanProperty printerSupportedProperty() {
+		return printerSupported;
+	}
+
+	public boolean isPrinterSupported() {
+		return printerSupported.get();
+	}
 
 	public String getRecoveryKey() {
 		return recoveryKeyProperty.get();

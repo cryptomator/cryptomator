@@ -9,6 +9,7 @@ public enum FontAwesome5Icon {
 	CHECK("\uF00C"), //
 	COG("\uF013"), //
 	COGS("\uF085"), //
+	COPY("\uF0C5"), //
 	EXCLAMATION("\uF12A"),
 	EXCLAMATION_CIRCLE("\uF06A"), //
 	EXCLAMATION_TRIANGLE("\uF071"), //
@@ -24,6 +25,7 @@ public enum FontAwesome5Icon {
 	LOCK_ALT("\uF30D"), //
 	LOCK_OPEN_ALT("\uF3C2"), //
 	PLUS("\uF067"), //
+	PRINT("\uF02F"), //
 	QUESTION("\uF128"), //
 	SPARKLES("\uF890"), //
 	SPINNER("\uF110"), //
