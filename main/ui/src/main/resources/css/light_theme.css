@@ -117,6 +117,10 @@
 	-fx-font-size: 0.8em;
 }
 
+.label-extra-small {
+	-fx-font-size: 0.64em;
+}
+
 .text-flow > * {
 	-fx-fill: TEXT_FILL;
 }
