@@ -1,14 +1,18 @@
 package org.cryptomator.ui.mainwindow;
 
+import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.ListView;
 import javafx.stage.Stage;
 import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.common.vaults.VaultListManager;
+import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.ui.addvaultwizard.AddVaultWizardComponent;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.removevault.RemoveVaultComponent;
@@ -23,7 +27,6 @@ public class VaultListController implements FxController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(VaultListController.class);
 
-	private final Stage window;
 	private final ObservableList<Vault> vaults;
 	private final ObjectProperty<Vault> selectedVault;
 	private final VaultListCellFactory cellFactory;
@@ -34,8 +37,7 @@ public class VaultListController implements FxController {
 	public ListView<Vault> vaultList;
 
 	@Inject
-	VaultListController(@MainWindow Stage window, ObservableList<Vault> vaults, ObjectProperty<Vault> selectedVault, VaultListCellFactory cellFactory, AddVaultWizardComponent.Builder addVaultWizard, RemoveVaultComponent.Builder removeVault) {
-		this.window = window;
+	VaultListController(ObservableList<Vault> vaults, ObjectProperty<Vault> selectedVault, VaultListCellFactory cellFactory, AddVaultWizardComponent.Builder addVaultWizard, RemoveVaultComponent.Builder removeVault) {
 		this.vaults = vaults;
 		this.selectedVault = selectedVault;
 		this.cellFactory = cellFactory;
@@ -43,6 +45,7 @@ public class VaultListController implements FxController {
 		this.removeVault = removeVault;
 		this.noVaultSelected = selectedVault.isNull();
 		this.emptyVaultList = Bindings.isEmpty(vaults);
+		selectedVault.addListener(this::selectedVaultDidChange);
 	}
 
 	public void initialize() {
@@ -57,6 +60,23 @@ public class VaultListController implements FxController {
 				}
 			}
 		});
+	}
+
+	private void selectedVaultDidChange(@SuppressWarnings("unused") ObservableValue<? extends Vault> observableValue, @SuppressWarnings("unused") Vault oldValue, Vault newValue) {
+		VaultState reportedState = newValue.getState();
+		switch (reportedState) {
+			case LOCKED:
+			case NEEDS_MIGRATION:
+			case MISSING:
+				VaultState determinedState = VaultListManager.determineVaultState(newValue.getPath());
+				newValue.setState(determinedState);
+				break;
+			case ERROR:
+			case UNLOCKED:
+			case PROCESSING:
+			default:
+				// no-op
+		}
 	}
 
 	@FXML

@@ -76,7 +76,7 @@ public class VaultListManager {
 		return comp.vault();
 	}
 
-	private VaultState determineVaultState(Path pathToVault) {
+	public static VaultState determineVaultState(Path pathToVault) {
 		try {
 			if (!CryptoFileSystemProvider.containsVault(pathToVault, MASTERKEY_FILENAME)) {
 				return VaultState.MISSING;
