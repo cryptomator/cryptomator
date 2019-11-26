@@ -10,6 +10,7 @@
 		 minWidth="-Infinity"
 		 maxWidth="-Infinity"
 		 prefWidth="500"
+		 tabMinWidth="60"
 		 tabClosingPolicy="UNAVAILABLE"
 		 tabDragPolicy="FIXED">
 	<tabs>

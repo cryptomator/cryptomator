@@ -223,34 +223,36 @@
 }
 
 .tab-pane > .tab-header-area {
-	-fx-padding: 6px 12px 0 12px;
-	-fx-background-color: CONTROL_BORDER_FOCUSED, MAIN_BG;
-	-fx-background-insets: 0, 0 0 1px 0;
+	-fx-padding: 0 12px;
+	-fx-background-color: CONTROL_BORDER_NORMAL, CONTROL_BG_NORMAL;
+	-fx-background-insets: 0, 0 0 3px 0;
 }
 
-.tab-pane > .tab-header-area > .headers-region > .tab {
-	-fx-background-color: CONTROL_BORDER_NORMAL, MAIN_BG;
-	-fx-background-insets: 0 0 1px 0, 1px;
-	-fx-background-radius: 4px 4px 0 0;
-	-fx-padding: 0.2em 1em 0.2em 1em;
+.tab-pane .tab {
+	-fx-background-color: CONTROL_BORDER_NORMAL, CONTROL_BG_NORMAL;
+	-fx-background-insets: 0, 0 0 3px 0;
+	-fx-padding: 6px 12px;
 }
 
-.tab-pane > .tab-header-area > .headers-region > .tab:selected {
-	-fx-background-color: CONTROL_BORDER_FOCUSED, MAIN_BG;
-	-fx-background-insets: 0, 1px 1px 0 1px;
+.tab-pane .tab:selected {
+	-fx-background-color: PRIMARY_BG, CONTROL_PRIMARY_LIGHT_BG_NORMAL;
 }
 
-.tab-pane > .tab-header-area > .headers-region > .tab > .tab-container > .tab-label {
-	-fx-text-fill: TEXT_FILL;
+.tab-pane .tab .tab-label {
+	-fx-text-fill: SECONDARY_BG;
 	-fx-alignment: CENTER;
 }
 
-.tab-pane > .tab-header-area > .headers-region > .tab .glyph-icon {
+.tab-pane .tab .glyph-icon {
 	-fx-fill: SECONDARY_BG;
 }
 
-.tab-pane > .tab-header-area > .headers-region > .tab:selected .glyph-icon {
-	-fx-fill: TEXT_FILL;
+.tab-pane .tab:selected .glyph-icon {
+	-fx-fill: PRIMARY_BG;
+}
+
+.tab-pane .tab:selected .tab-label {
+	-fx-text-fill: TEXT_FILL_PRIMARY;
 }
 
 /*******************************************************************************
