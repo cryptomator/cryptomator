@@ -51,6 +51,7 @@ public class UnlockController implements FxController {
 	private final ObjectBinding<ContentDisplay> unlockButtonState;
 	private final Optional<KeychainAccess> keychainAccess;
 	private final Lazy<Scene> successScene;
+	private final Lazy<Scene> invalidMountPointScene;
 	private final Lazy<Scene> genericErrorScene;
 	private final ObjectProperty<Exception> genericErrorCause;
 	private final ForgetPasswordComponent.Builder forgetPassword;
@@ -59,13 +60,14 @@ public class UnlockController implements FxController {
 	public CheckBox savePassword;
 
 	@Inject
-	public UnlockController(@UnlockWindow Stage window, @UnlockWindow Vault vault, ExecutorService executor, Optional<KeychainAccess> keychainAccess, @FxmlScene(FxmlFile.UNLOCK_SUCCESS) Lazy<Scene> successScene, @FxmlScene(FxmlFile.UNLOCK_GENERIC_ERROR) Lazy<Scene> genericErrorScene, @Named("genericErrorCause") ObjectProperty<Exception> genericErrorCause, ForgetPasswordComponent.Builder forgetPassword) {
+	public UnlockController(@UnlockWindow Stage window, @UnlockWindow Vault vault, ExecutorService executor, Optional<KeychainAccess> keychainAccess, @FxmlScene(FxmlFile.UNLOCK_SUCCESS) Lazy<Scene> successScene, @FxmlScene(FxmlFile.UNLOCK_INVALID_MOUNT_POINT) Lazy<Scene> invalidMountPointScene, @FxmlScene(FxmlFile.UNLOCK_GENERIC_ERROR) Lazy<Scene> genericErrorScene, @Named("genericErrorCause") ObjectProperty<Exception> genericErrorCause, ForgetPasswordComponent.Builder forgetPassword) {
 		this.window = window;
 		this.vault = vault;
 		this.executor = executor;
 		this.unlockButtonState = Bindings.createObjectBinding(this::getUnlockButtonState, vault.stateProperty());
 		this.keychainAccess = keychainAccess;
 		this.successScene = successScene;
+		this.invalidMountPointScene = invalidMountPointScene;
 		this.genericErrorScene = genericErrorScene;
 		this.genericErrorCause = genericErrorCause;
 		this.forgetPassword = forgetPassword;
@@ -106,14 +108,12 @@ public class UnlockController implements FxController {
 			shakeWindow();
 			passwordField.selectAll();
 			passwordField.requestFocus();
-		}).onError(UnsupportedVaultFormatException.class, e -> {
-			// TODO
 		}).onError(NotDirectoryException.class, e -> {
 			LOG.error("Unlock failed. Mount point not a directory: {}", e.getMessage());
-			// TODO
+			window.setScene(invalidMountPointScene.get());
 		}).onError(DirectoryNotEmptyException.class, e -> {
 			LOG.error("Unlock failed. Mount point not empty: {}", e.getMessage());
-			// TODO
+			window.setScene(invalidMountPointScene.get());
 		}).onError(Exception.class, e -> { // including RuntimeExceptions
 			LOG.error("Unlock failed for technical reasons.", e);
 			genericErrorCause.set(e);

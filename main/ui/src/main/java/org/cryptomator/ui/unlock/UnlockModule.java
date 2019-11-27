@@ -69,6 +69,14 @@ abstract class UnlockModule {
 	}
 
 	@Provides
+	@FxmlScene(FxmlFile.UNLOCK_INVALID_MOUNT_POINT)
+	@UnlockScoped
+	static Scene provideInvalidMountPointScene(@UnlockWindow FXMLLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene("/fxml/unlock_invalid_mount_point.fxml");
+	}
+
+
+	@Provides
 	@FxmlScene(FxmlFile.UNLOCK_GENERIC_ERROR)
 	@UnlockScoped
 	static Scene provideGenericErrorScene(@UnlockWindow FXMLLoaderFactory fxmlLoaders) {
@@ -87,6 +95,11 @@ abstract class UnlockModule {
 	@IntoMap
 	@FxControllerKey(UnlockSuccessController.class)
 	abstract FxController bindUnlockSuccessController(UnlockSuccessController controller);
+
+	@Binds
+	@IntoMap
+	@FxControllerKey(UnlockInvalidMountPointController.class)
+	abstract FxController bindUnlockInvalidMountPointController(UnlockInvalidMountPointController controller);
 
 	@Binds
 	@IntoMap
