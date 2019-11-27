@@ -11,7 +11,7 @@
 <?import org.cryptomator.ui.controls.FormattedLabel?>
 <VBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
-	  fx:controller="org.cryptomator.ui.addvaultwizard.AddVaultFailureExisitingController"
+	  fx:controller="org.cryptomator.ui.addvaultwizard.AddVaultFailureExistingController"
 	  minWidth="450"
 	  maxWidth="450"
 	  minHeight="145"

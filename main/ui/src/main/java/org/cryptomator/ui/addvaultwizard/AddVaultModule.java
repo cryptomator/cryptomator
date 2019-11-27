@@ -151,8 +151,8 @@ public abstract class AddVaultModule {
 
 	@Binds
 	@IntoMap
-	@FxControllerKey(AddVaultFailureExisitingController.class)
-	abstract FxController bindAddVaultFailureExistingController(AddVaultFailureExisitingController controller);
+	@FxControllerKey(AddVaultFailureExistingController.class)
+	abstract FxController bindAddVaultFailureExistingController(AddVaultFailureExistingController controller);
 
 	@Binds
 	@IntoMap
