@@ -7,6 +7,7 @@ import javafx.animation.Timeline;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.WritableValue;
@@ -32,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.NotDirectoryException;
 import java.util.Arrays;
@@ -49,19 +51,23 @@ public class UnlockController implements FxController {
 	private final ObjectBinding<ContentDisplay> unlockButtonState;
 	private final Optional<KeychainAccess> keychainAccess;
 	private final Lazy<Scene> successScene;
+	private final Lazy<Scene> genericErrorScene;
+	private final ObjectProperty<Exception> genericErrorCause;
 	private final ForgetPasswordComponent.Builder forgetPassword;
 	private final BooleanProperty unlockButtonDisabled;
 	public NiceSecurePasswordField passwordField;
 	public CheckBox savePassword;
 
 	@Inject
-	public UnlockController(@UnlockWindow Stage window, @UnlockWindow Vault vault, ExecutorService executor, Optional<KeychainAccess> keychainAccess, @FxmlScene(FxmlFile.UNLOCK_SUCCESS) Lazy<Scene> successScene, ForgetPasswordComponent.Builder forgetPassword) {
+	public UnlockController(@UnlockWindow Stage window, @UnlockWindow Vault vault, ExecutorService executor, Optional<KeychainAccess> keychainAccess, @FxmlScene(FxmlFile.UNLOCK_SUCCESS) Lazy<Scene> successScene, @FxmlScene(FxmlFile.UNLOCK_GENERIC_ERROR) Lazy<Scene> genericErrorScene, @Named("genericErrorCause") ObjectProperty<Exception> genericErrorCause, ForgetPasswordComponent.Builder forgetPassword) {
 		this.window = window;
 		this.vault = vault;
 		this.executor = executor;
 		this.unlockButtonState = Bindings.createObjectBinding(this::getUnlockButtonState, vault.stateProperty());
 		this.keychainAccess = keychainAccess;
 		this.successScene = successScene;
+		this.genericErrorScene = genericErrorScene;
+		this.genericErrorCause = genericErrorCause;
 		this.forgetPassword = forgetPassword;
 		this.unlockButtonDisabled = new SimpleBooleanProperty();
 	}
@@ -110,7 +116,8 @@ public class UnlockController implements FxController {
 			// TODO
 		}).onError(Exception.class, e -> { // including RuntimeExceptions
 			LOG.error("Unlock failed for technical reasons.", e);
-			// TODO
+			genericErrorCause.set(e);
+			window.setScene(genericErrorScene.get());
 		}).andFinally(() -> {
 			if (!vault.isUnlocked()) {
 				vault.setState(VaultState.LOCKED);

@@ -21,6 +21,7 @@ public enum FxmlFile {
 	RECOVERYKEY_SUCCESS("/fxml/recoverykey_success.fxml"), //
 	REMOVE_VAULT("/fxml/remove_vault.fxml"), //
 	UNLOCK("/fxml/unlock.fxml"),
+	UNLOCK_GENERIC_ERROR("/fxml/unlock_generic_error.fxml"), //
 	UNLOCK_SUCCESS("/fxml/unlock_success.fxml"), //
 	VAULT_OPTIONS("/fxml/vault_options.fxml"), //
 	WRONGFILEALERT("/fxml/wrongfilealert.fxml");
