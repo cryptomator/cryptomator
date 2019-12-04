@@ -3,9 +3,11 @@ package org.cryptomator.ui.traymenu;
 import javafx.application.Platform;
 import javafx.beans.Observable;
 import javafx.collections.ObservableList;
+import org.cryptomator.common.ShutdownHook;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
+import org.cryptomator.common.vaults.Volume;
 import org.cryptomator.ui.fxapp.FxApplication;
 import org.cryptomator.ui.launcher.FxApplicationStarter;
 import org.cryptomator.ui.preferences.SelectedPreferencesTab;
@@ -38,17 +40,17 @@ class TrayMenuController {
 	private final ResourceBundle resourceBundle;
 	private final FxApplicationStarter fxApplicationStarter;
 	private final CountDownLatch shutdownLatch;
-	private final Settings settings;
+	private final ShutdownHook shutdownHook;
 	private final ObservableList<Vault> vaults;
 	private final PopupMenu menu;
 	private final AtomicBoolean allowSuddenTermination;
 
 	@Inject
-	TrayMenuController(ResourceBundle resourceBundle, FxApplicationStarter fxApplicationStarter, @Named("shutdownLatch") CountDownLatch shutdownLatch, Settings settings, ObservableList<Vault> vaults) {
+	TrayMenuController(ResourceBundle resourceBundle, FxApplicationStarter fxApplicationStarter, @Named("shutdownLatch") CountDownLatch shutdownLatch, ShutdownHook shutdownHook, ObservableList<Vault> vaults) {
 		this.resourceBundle = resourceBundle;
 		this.fxApplicationStarter = fxApplicationStarter;
 		this.shutdownLatch = shutdownLatch;
-		this.settings = settings;
+		this.shutdownHook = shutdownHook;
 		this.vaults = vaults;
 		this.menu = new PopupMenu();
 		this.allowSuddenTermination = new AtomicBoolean(true);
@@ -72,6 +74,7 @@ class TrayMenuController {
 		if (Desktop.getDesktop().isSupported(Desktop.Action.APP_QUIT_HANDLER)) {
 			Desktop.getDesktop().setQuitHandler(this::handleQuitRequest);
 		}
+		shutdownHook.runOnShutdown(this::forceUnmountRemainingVaults);
 
 		// allow sudden termination
 		if (Desktop.getDesktop().isSupported(Desktop.Action.APP_SUDDEN_TERMINATION)) {
@@ -174,5 +177,17 @@ class TrayMenuController {
 				// no-op
 			}
 		});
+	}
+
+	private void forceUnmountRemainingVaults() {
+		for (Vault vault : vaults) {
+			if (vault.isUnlocked()) {
+				try {
+					vault.lock(true);
+				} catch (Volume.VolumeException e) {
+					LOG.error("Failed to unmount vault " + vault.getPath(), e);
+				}
+			}
+		}
 	}
 }

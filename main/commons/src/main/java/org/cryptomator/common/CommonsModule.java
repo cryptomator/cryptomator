@@ -67,7 +67,7 @@ public abstract class CommonsModule {
 
 	@Provides
 	@Singleton
-	static ScheduledExecutorService provideScheduledExecutorService(@Named("shutdownTaskScheduler") Consumer<Runnable> shutdownTaskScheduler) {
+	static ScheduledExecutorService provideScheduledExecutorService(ShutdownHook shutdownHook) {
 		final AtomicInteger threadNumber = new AtomicInteger(1);
 		ScheduledExecutorService executorService = Executors.newScheduledThreadPool(NUM_SCHEDULER_THREADS, r -> {
 			Thread t = new Thread(r);
@@ -75,7 +75,7 @@ public abstract class CommonsModule {
 			t.setDaemon(true);
 			return t;
 		});
-		shutdownTaskScheduler.accept(executorService::shutdown);
+		shutdownHook.runOnShutdown(executorService::shutdown);
 		return executorService;
 	}
 

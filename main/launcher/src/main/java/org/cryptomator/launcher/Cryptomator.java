@@ -32,17 +32,15 @@ public class Cryptomator {
 	private final IpcFactory ipcFactory;
 	private final Optional<String> applicationVersion;
 	private final CountDownLatch shutdownLatch;
-	private final CleanShutdownPerformer shutdownPerformer;
 	private final UiLauncher uiLauncher;
 
 	@Inject
-	Cryptomator(LoggerConfiguration logConfig, DebugMode debugMode, IpcFactory ipcFactory, @Named("applicationVersion") Optional<String> applicationVersion, @Named("shutdownLatch") CountDownLatch shutdownLatch, CleanShutdownPerformer shutdownPerformer, UiLauncher uiLauncher) {
+	Cryptomator(LoggerConfiguration logConfig, DebugMode debugMode, IpcFactory ipcFactory, @Named("applicationVersion") Optional<String> applicationVersion, @Named("shutdownLatch") CountDownLatch shutdownLatch, UiLauncher uiLauncher) {
 		this.logConfig = logConfig;
 		this.debugMode = debugMode;
 		this.ipcFactory = ipcFactory;
 		this.applicationVersion = applicationVersion;
 		this.shutdownLatch = shutdownLatch;
-		this.shutdownPerformer = shutdownPerformer;
 		this.uiLauncher = uiLauncher;
 	}
 
@@ -90,7 +88,6 @@ public class Cryptomator {
 	 */
 	private int runGuiApplication() {
 		try {
-			shutdownPerformer.registerShutdownHook();
 			uiLauncher.launch();
 			shutdownLatch.await();
 			LOG.info("UI shut down");
