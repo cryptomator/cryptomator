@@ -130,7 +130,7 @@ class TrayMenuController {
 			submenu.add(unlockItem);
 		} else if (vault.isUnlocked()) {
 			MenuItem lockItem = new MenuItem(resourceBundle.getString("traymenu.vault.lock"));
-			lockItem.setEnabled(false); // TODO add action listener
+			lockItem.addActionListener(createActionListenerForVault(vault, this::lockVault));
 			submenu.add(lockItem);
 
 			MenuItem revealItem = new MenuItem(resourceBundle.getString("traymenu.vault.reveal"));
@@ -147,6 +147,10 @@ class TrayMenuController {
 
 	private void unlockVault(Vault vault) {
 		fxApplicationStarter.get(true).thenAccept(app -> app.showUnlockWindow(vault));
+	}
+
+	private void lockVault(Vault vault) {
+		fxApplicationStarter.get(true).thenAccept(app -> app.getVaultService().lock(vault, false));
 	}
 
 	void showMainWindow(@SuppressWarnings("unused") ActionEvent actionEvent) {

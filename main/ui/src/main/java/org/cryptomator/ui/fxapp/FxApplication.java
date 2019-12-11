@@ -16,6 +16,7 @@ import org.cryptomator.jni.JniException;
 import org.cryptomator.jni.MacApplicationUiAppearance;
 import org.cryptomator.jni.MacApplicationUiState;
 import org.cryptomator.jni.MacFunctions;
+import org.cryptomator.ui.common.VaultService;
 import org.cryptomator.ui.mainwindow.MainWindowComponent;
 import org.cryptomator.ui.preferences.PreferencesComponent;
 import org.cryptomator.ui.preferences.SelectedPreferencesTab;
@@ -39,17 +40,19 @@ public class FxApplication extends Application {
 	private final UnlockComponent.Builder unlockWindowBuilder;
 	private final QuitComponent.Builder quitWindowBuilder;
 	private final Optional<MacFunctions> macFunctions;
+	private final VaultService vaultService;
 	private final ObservableSet<Stage> visibleStages = FXCollections.observableSet();
 	private final BooleanBinding hasVisibleStages = Bindings.isNotEmpty(visibleStages);
 
 	@Inject
-	FxApplication(Settings settings, Lazy<MainWindowComponent> mainWindow, Lazy<PreferencesComponent> preferencesWindow, UnlockComponent.Builder unlockWindowBuilder, QuitComponent.Builder quitWindowBuilder, Optional<MacFunctions> macFunctions) {
+	FxApplication(Settings settings, Lazy<MainWindowComponent> mainWindow, Lazy<PreferencesComponent> preferencesWindow, UnlockComponent.Builder unlockWindowBuilder, QuitComponent.Builder quitWindowBuilder, Optional<MacFunctions> macFunctions, VaultService vaultService) {
 		this.settings = settings;
 		this.mainWindow = mainWindow;
 		this.preferencesWindow = preferencesWindow;
 		this.unlockWindowBuilder = unlockWindowBuilder;
 		this.quitWindowBuilder = quitWindowBuilder;
 		this.macFunctions = macFunctions;
+		this.vaultService = vaultService;
 	}
 
 	public void start() {
@@ -110,6 +113,10 @@ public class FxApplication extends Application {
 			addVisibleStage(stage);
 			LOG.debug("Showing QuitWindow");
 		});
+	}
+
+	public VaultService getVaultService() {
+		return vaultService;
 	}
 
 	private void themeChanged(@SuppressWarnings("unused") ObservableValue<? extends UiTheme> observable, @SuppressWarnings("unused") UiTheme oldValue, UiTheme newValue) {
