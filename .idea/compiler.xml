@@ -31,10 +31,10 @@
           <entry name="$MAVEN_REPOSITORY$/org/jetbrains/annotations/13.0/annotations-13.0.jar" />
           <entry name="$MAVEN_REPOSITORY$/org/jetbrains/kotlinx/kotlinx-metadata-jvm/0.1.0/kotlinx-metadata-jvm-0.1.0.jar" />
         </processorPath>
-        <module name="commons" />
         <module name="keychain" />
-        <module name="ui" />
         <module name="launcher" />
+        <module name="commons" />
+        <module name="ui" />
       </profile>
     </annotationProcessing>
   </component>

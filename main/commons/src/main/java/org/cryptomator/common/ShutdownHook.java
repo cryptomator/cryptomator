@@ -12,15 +12,18 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.PriorityBlockingQueue;
 
 @Singleton
 public class ShutdownHook extends Thread {
 
+	private static final int PRIO_VERY_LAST = Integer.MIN_VALUE;
+	public static final int PRIO_LAST = PRIO_VERY_LAST + 1;
+	public static final int PRIO_DEFAULT = 0;
+	public static final int PRIO_FIRST = Integer.MAX_VALUE;
 	private static final Logger LOG = LoggerFactory.getLogger(ShutdownHook.class);
-	private static final Runnable POISON = Runnables.doNothing();
-	
-	private final Queue<Runnable> tasks = new ConcurrentLinkedQueue<>();
+	private static final OrderedTask POISON = new OrderedTask(PRIO_VERY_LAST, Runnables.doNothing());
+	private final Queue<OrderedTask> tasks = new PriorityBlockingQueue<>();
 
 	@Inject
 	ShutdownHook() {
@@ -43,8 +46,51 @@ public class ShutdownHook extends Thread {
 		}
 	}
 
+	/**
+	 * Schedules a task to be run during shutdown with default order
+	 *
+	 * @param task The task to be scheduled
+	 */
 	public void runOnShutdown(Runnable task) {
-		tasks.add(task);
+		runOnShutdown(PRIO_DEFAULT, task);
 	}
-	
+
+	/**
+	 * Schedules a task to be run with the given priority
+	 *
+	 * @param priority Tasks with high priority will be run before task with lower priority
+	 * @param task The task to be scheduled
+	 */
+	public void runOnShutdown(int priority, Runnable task) {
+		tasks.add(new OrderedTask(priority, task));
+	}
+
+	private static class OrderedTask implements Comparable<OrderedTask>, Runnable {
+
+		private final int priority;
+		private final Runnable task;
+
+		public OrderedTask(int priority, Runnable task) {
+			this.priority = priority;
+			this.task = task;
+		}
+
+		@Override
+		public int compareTo(OrderedTask other) {
+			// overflow-safe signum impl:
+			if (this.priority > other.priority) {
+				return -1; // higher prio -> this before other
+			} else if (this.priority < other.priority) {
+				return +1; // lower prio -> other before this
+			} else {
+				return 0; // same prio
+			}
+		}
+
+		@Override
+		public void run() {
+			task.run();
+		}
+	}
+
 }
