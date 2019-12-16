@@ -134,7 +134,7 @@ class TrayMenuController {
 			submenu.add(lockItem);
 
 			MenuItem revealItem = new MenuItem(resourceBundle.getString("traymenu.vault.reveal"));
-			revealItem.setEnabled(false); // TODO add action listener
+			revealItem.addActionListener(createActionListenerForVault(vault, this::revealVault));
 			submenu.add(revealItem);
 		}
 
@@ -151,6 +151,10 @@ class TrayMenuController {
 
 	private void lockVault(Vault vault) {
 		fxApplicationStarter.get(true).thenAccept(app -> app.getVaultService().lock(vault, false));
+	}
+
+	private void revealVault(Vault vault) {
+		fxApplicationStarter.get(true).thenAccept(app -> app.getVaultService().reveal(vault));
 	}
 
 	void showMainWindow(@SuppressWarnings("unused") ActionEvent actionEvent) {
