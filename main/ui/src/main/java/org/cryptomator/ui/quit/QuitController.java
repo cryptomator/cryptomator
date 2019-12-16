@@ -1,7 +1,7 @@
 package org.cryptomator.ui.quit;
 
 import javafx.collections.ObservableList;
-import javafx.concurrent.Service;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContentDisplay;
@@ -14,7 +14,9 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.awt.desktop.QuitResponse;
-import java.util.List;
+import java.util.Collection;
+import java.util.concurrent.ExecutorService;
+import java.util.stream.Collectors;
 
 @QuitScoped
 public class QuitController implements FxController {
@@ -24,14 +26,16 @@ public class QuitController implements FxController {
 	private final Stage window;
 	private final QuitResponse response;
 	private final ObservableList<Vault> unlockedVaults;
+	private final ExecutorService executorService;
 	private final VaultService vaultService;
 	public Button lockAndQuitButton;
 
 	@Inject
-	QuitController(@QuitWindow Stage window, QuitResponse response, ObservableList<Vault> vaults, VaultService vaultService) {
+	QuitController(@QuitWindow Stage window, QuitResponse response, ObservableList<Vault> vaults, ExecutorService executorService, VaultService vaultService) {
 		this.window = window;
 		this.response = response;
 		this.unlockedVaults = vaults.filtered(Vault::isUnlocked);
+		this.executorService = executorService;
 		this.vaultService = vaultService;
 	}
 
@@ -47,24 +51,23 @@ public class QuitController implements FxController {
 		lockAndQuitButton.setDisable(true);
 		lockAndQuitButton.setContentDisplay(ContentDisplay.LEFT);
 
-		Service<Vault> lockAllService = vaultService.createLockAllService(unlockedVaults, false);
-
-		lockAllService.setOnSucceeded(evt -> {
-			LOG.info("Locked {}", lockAllService.getValue().getDisplayableName());
+		Task<Collection<Vault>> lockAllTask = vaultService.createLockAllTask(unlockedVaults, false);
+		lockAllTask.setOnSucceeded(evt -> {
+			LOG.info("Locked {}", lockAllTask.getValue().stream().map(Vault::getDisplayableName).collect(Collectors.joining(", ")));
 			if (unlockedVaults.isEmpty()) {
 				window.close();
 				response.performQuit();
 			}
 		});
-		lockAllService.setOnFailed(evt -> {
-			LOG.warn("Locking failed", lockAllService.getException());
+		lockAllTask.setOnFailed(evt -> {
+			LOG.warn("Locking failed", lockAllTask.getException());
 			lockAndQuitButton.setDisable(false);
 			lockAndQuitButton.setContentDisplay(ContentDisplay.TEXT_ONLY);
 			// TODO: show force lock or force quit scene (and DO NOT cancelQuit() here!)
 			// see https://github.com/cryptomator/cryptomator/blob/1.4.16/main/ui/src/main/java/org/cryptomator/ui/model/Vault.java#L151-L163
 			response.cancelQuit();
 		});
-		lockAllService.start();
+		executorService.execute(lockAllTask);
 	}
 
 }

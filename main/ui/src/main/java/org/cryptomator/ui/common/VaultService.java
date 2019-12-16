@@ -1,9 +1,5 @@
 package org.cryptomator.ui.common;
 
-import com.google.common.collect.ImmutableList;
-import javafx.application.Platform;
-import javafx.concurrent.ScheduledService;
-import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
@@ -13,9 +9,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
+import java.util.stream.Collectors;
 
 @FxApplicationScoped
 public class VaultService {
@@ -75,36 +75,24 @@ public class VaultService {
 	 * @param forced Whether to attempt a forced lock
 	 */
 	public void lockAll(Collection<Vault> vaults, boolean forced) {
-		Service<Vault> service = createLockAllService(vaults, forced);
-		service.setOnSucceeded(evt -> LOG.info("Locked {}", service.getValue().getDisplayableName()));
-		service.setOnFailed(evt -> LOG.error("Failed to lock vault", evt.getSource().getException()));
-		service.start();
+		executorService.execute(createLockAllTask(vaults, forced));
 	}
 
 	/**
-	 * Creates but doesn't start a lock-all service that can be run on a background thread.
+	 * Creates but doesn't start a lock-all task.
 	 *
 	 * @param vaults The list of vaults to be locked
 	 * @param forced Whether to attempt a forced lock
-	 * @return Service that tries to lock all given vaults and cancels itself automatically when done
+	 * @return Meta-Task that waits until all vaults are locked or fails after the first failure of a subtask
 	 */
-	public Service<Vault> createLockAllService(Collection<Vault> vaults, boolean forced) {
-		Iterator<Vault> iter = ImmutableList.copyOf(vaults).iterator();
-		ScheduledService<Vault> service = new ScheduledService<>() {
-
-			@Override
-			protected Task<Vault> createTask() {
-				assert Platform.isFxApplicationThread();
-				if (iter.hasNext()) {
-					return new LockVaultTask(iter.next(), forced);
-				} else {
-					cancel();
-					return new IllegalStateTask("This task should never be executed.");
-				}
-			}
-		};
-		service.setExecutor(executorService);
-		return service;
+	public Task<Collection<Vault>> createLockAllTask(Collection<Vault> vaults, boolean forced) {
+		List<Task<Vault>> lockTasks = vaults.stream().map(v -> new LockVaultTask(v, forced)).collect(Collectors.toUnmodifiableList());
+		lockTasks.forEach(executorService::execute);
+		Task<Collection<Vault>> task = new WaitForTasksTask(lockTasks);
+		String vaultNames = vaults.stream().map(Vault::getDisplayableName).collect(Collectors.joining(", "));
+		task.setOnSucceeded(evt -> LOG.info("Locked {}", vaultNames));
+		task.setOnFailed(evt -> LOG.error("Failed to lock vaults " + vaultNames, evt.getSource().getException()));
+		return task;
 	}
 
 	private static class RevealVaultTask extends Task<Vault> {
@@ -122,6 +110,38 @@ public class VaultService {
 		protected Vault call() throws Volume.VolumeException {
 			vault.reveal();
 			return vault;
+		}
+	}
+
+	/**
+	 * A task that waits for completion of multiple other tasks
+	 */
+	private static class WaitForTasksTask extends Task<Collection<Vault>> {
+
+		private final Collection<Task<Vault>> startedTasks;
+
+		public WaitForTasksTask(Collection<Task<Vault>> tasks) {
+			this.startedTasks = List.copyOf(tasks);
+		}
+
+		@Override
+		protected Collection<Vault> call() throws Exception {
+			Iterator<Task<Vault>> remainingTasks = startedTasks.iterator();
+			Collection<Vault> completed = new ArrayList<>();
+			try {
+				// wait for all tasks:
+				while (remainingTasks.hasNext()) {
+					Vault lockedVault = remainingTasks.next().get();
+					completed.add(lockedVault);
+				}
+			} catch (ExecutionException e) {
+				// cancel all remaining:
+				while (remainingTasks.hasNext()) {
+					remainingTasks.next().cancel(true);
+				}
+				throw e;
+			}
+			return List.copyOf(completed);
 		}
 	}
 
@@ -165,24 +185,6 @@ public class VaultService {
 
 	}
 
-	/**
-	 * A task that throws an IllegalStateException
-	 */
-	private static class IllegalStateTask<V> extends Task<V> {
 
-		private final String message;
-
-		/**
-		 * @param message The message of the IllegalStateException
-		 */
-		public IllegalStateTask(String message) {
-			this.message = message;
-		}
-
-		@Override
-		protected V call() throws IllegalStateException {
-			throw new IllegalStateException(message);
-		}
-	}
 
 }
