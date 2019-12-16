@@ -47,15 +47,17 @@ public class QuitController implements FxController {
 		lockAndQuitButton.setDisable(true);
 		lockAndQuitButton.setContentDisplay(ContentDisplay.LEFT);
 
-		Service<Void> lockAllService = vaultService.createLockAllService(List.copyOf(unlockedVaults), false);
+		Service<Vault> lockAllService = vaultService.createLockAllService(unlockedVaults, false);
 
 		lockAllService.setOnSucceeded(evt -> {
+			LOG.info("Locked {}", lockAllService.getValue().getDisplayableName());
 			if (unlockedVaults.isEmpty()) {
 				window.close();
 				response.performQuit();
 			}
 		});
 		lockAllService.setOnFailed(evt -> {
+			LOG.warn("Locking failed", lockAllService.getException());
 			lockAndQuitButton.setDisable(false);
 			lockAndQuitButton.setContentDisplay(ContentDisplay.TEXT_ONLY);
 			// TODO: show force lock or force quit scene (and DO NOT cancelQuit() here!)

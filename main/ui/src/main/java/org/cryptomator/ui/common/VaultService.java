@@ -1,5 +1,6 @@
 package org.cryptomator.ui.common;
 
+import com.google.common.collect.ImmutableList;
 import javafx.application.Platform;
 import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Service;
@@ -35,40 +36,38 @@ public class VaultService {
 	 * @param forced Whether to attempt a forced lock
 	 */
 	public void lock(Vault vault, boolean forced) {
-		Task<Void> task = createLockTask(vault, forced);
+		Task<Vault> task = new LockVaultTask(vault, forced);
 		task.setOnSucceeded(evt -> LOG.info("Locked {}", vault.getDisplayableName()));
-		task.setOnFailed(evt -> LOG.error("Failed to lock vault " + vault.getDisplayableName(), evt.getSource().getException()));
+		task.setOnFailed(evt -> LOG.error("Failed to lock ", evt.getSource().getException()));
 		executorService.execute(task);
 	}
 
 	public void lockAll(Collection<Vault> vaults, boolean forced) {
-		Service<Void> service = createLockAllService(vaults, forced);
+		Service<Vault> service = createLockAllService(vaults, forced);
+		service.setOnSucceeded(evt -> LOG.info("Locked {}", service.getValue().getDisplayableName()));
 		service.setOnFailed(evt -> LOG.error("Failed to lock vault", evt.getSource().getException()));
-		service.setExecutor(executorService);
 		service.start();
 	}
 
 	/**
 	 * Creates but doesn't start a lock-all service that can be run on a background thread.
 	 *
-	 * @param vaults The list of vaults to be locked. Must not be concurrently modified
+	 * @param vaults The list of vaults to be locked
 	 * @param forced Whether to attempt a forced lock
-	 * @return Service that tries to lock all given vaults
+	 * @return Service that tries to lock all given vaults and cancels itself automatically when done
 	 */
-	public Service<Void> createLockAllService(Collection<Vault> vaults, boolean forced) {
-		Iterator<Vault> iter = vaults.iterator();
-		ScheduledService<Void> service = new ScheduledService<>() {
+	public Service<Vault> createLockAllService(Collection<Vault> vaults, boolean forced) {
+		Iterator<Vault> iter = ImmutableList.copyOf(vaults).iterator();
+		ScheduledService<Vault> service = new ScheduledService<>() {
 
 			@Override
-			protected Task<Void> createTask() {
+			protected Task<Vault> createTask() {
 				assert Platform.isFxApplicationThread();
 				if (iter.hasNext()) {
-					return createLockTask(iter.next(), forced);
+					return new LockVaultTask(iter.next(), forced);
 				} else {
-					// This should be unreachable code, since iter is only accessed on the FX App Thread.
-					// But if quitting the application takes longer for any reason, this service should shut down properly
-					reset();
-					return createNoopTask();
+					cancel();
+					return new IllegalStateTask("This task should never be executed.");
 				}
 			}
 		};
@@ -77,44 +76,63 @@ public class VaultService {
 	}
 
 	/**
-	 * Creates but doesn't start a lock task that can be run on a background thread.
-	 *
-	 * @param vault The vault to lock
-	 * @param forced Whether to attempt a forced lock
-	 * @return Task that tries to lock the given vault
+	 * A task that locks a vault
 	 */
-	public Task<Void> createLockTask(Vault vault, boolean forced) {
-		return new Task<>() {
-			@Override
-			protected Void call() throws Volume.VolumeException {
-				vault.lock(forced);
-				return null;
-			}
+	private static class LockVaultTask extends Task<Vault> {
 
-			@Override
-			protected void scheduled() {
-				vault.setState(VaultState.PROCESSING);
-			}
+		private final Vault vault;
+		private final boolean forced;
 
-			@Override
-			protected void succeeded() {
-				vault.setState(VaultState.LOCKED);
-			}
+		/**
+		 * @param vault The vault to lock
+		 * @param forced Whether to attempt a forced lock
+		 */
+		public LockVaultTask(Vault vault, boolean forced) {
+			this.vault = vault;
+			this.forced = forced;
+		}
 
-			@Override
-			protected void failed() {
-				vault.setState(VaultState.UNLOCKED);
-			}
-		};
+		@Override
+		protected Vault call() throws Volume.VolumeException {
+			vault.lock(forced);
+			return vault;
+		}
+
+		@Override
+		protected void scheduled() {
+			vault.setState(VaultState.PROCESSING);
+		}
+
+		@Override
+		protected void succeeded() {
+			vault.setState(VaultState.LOCKED);
+		}
+
+		@Override
+		protected void failed() {
+			vault.setState(VaultState.UNLOCKED);
+		}
+
 	}
 
-	private Task<Void> createNoopTask() {
-		return new Task<>() {
-			@Override
-			protected Void call() {
-				return null;
-			}
-		};
+	/**
+	 * A task that throws an IllegalStateException
+	 */
+	private static class IllegalStateTask<V> extends Task<V> {
+
+		private final String message;
+
+		/**
+		 * @param message The message of the IllegalStateException
+		 */
+		public IllegalStateTask(String message) {
+			this.message = message;
+		}
+
+		@Override
+		protected V call() throws IllegalStateException {
+			throw new IllegalStateException(message);
+		}
 	}
 
 }
