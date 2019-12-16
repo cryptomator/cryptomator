@@ -116,6 +116,11 @@ class TrayMenuController {
 		}
 		menu.addSeparator();
 
+		MenuItem lockAllItem = new MenuItem(resourceBundle.getString("traymenu.lockAllVaults"));
+		lockAllItem.addActionListener(this::lockAllVaults);
+		lockAllItem.setEnabled(!vaults.filtered(Vault::isUnlocked).isEmpty());
+		menu.add(lockAllItem);
+
 		MenuItem quitApplicationItem = new MenuItem(resourceBundle.getString("traymenu.quitApplication"));
 		quitApplicationItem.addActionListener(this::quitApplication);
 		menu.add(quitApplicationItem);
@@ -151,6 +156,10 @@ class TrayMenuController {
 
 	private void lockVault(Vault vault) {
 		fxApplicationStarter.get(true).thenAccept(app -> app.getVaultService().lock(vault, false));
+	}
+
+	private void lockAllVaults(ActionEvent actionEvent) {
+		fxApplicationStarter.get(true).thenAccept(app -> app.getVaultService().lockAll(vaults.filtered(Vault::isUnlocked), false));
 	}
 
 	private void revealVault(Vault vault) {
