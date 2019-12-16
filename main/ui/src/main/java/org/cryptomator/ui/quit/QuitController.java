@@ -14,9 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.awt.desktop.QuitResponse;
-import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
 
 @QuitScoped
 public class QuitController implements FxController {
@@ -26,16 +24,14 @@ public class QuitController implements FxController {
 	private final Stage window;
 	private final QuitResponse response;
 	private final ObservableList<Vault> unlockedVaults;
-	private final ExecutorService executor;
 	private final VaultService vaultService;
 	public Button lockAndQuitButton;
 
 	@Inject
-	QuitController(@QuitWindow Stage window, QuitResponse response, ObservableList<Vault> vaults, ExecutorService executor, VaultService vaultService) {
+	QuitController(@QuitWindow Stage window, QuitResponse response, ObservableList<Vault> vaults, VaultService vaultService) {
 		this.window = window;
 		this.response = response;
 		this.unlockedVaults = vaults.filtered(Vault::isUnlocked);
-		this.executor = executor;
 		this.vaultService = vaultService;
 	}
 
