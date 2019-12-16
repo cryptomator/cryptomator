@@ -57,7 +57,7 @@ public class VaultService {
 	 */
 	public Service<Void> createLockAllService(Collection<Vault> vaults, boolean forced) {
 		Iterator<Vault> iter = vaults.iterator();
-		return new ScheduledService<>() {
+		ScheduledService<Void> service = new ScheduledService<>() {
 
 			@Override
 			protected Task<Void> createTask() {
@@ -72,6 +72,8 @@ public class VaultService {
 				}
 			}
 		};
+		service.setExecutor(executorService);
+		return service;
 	}
 
 	/**
