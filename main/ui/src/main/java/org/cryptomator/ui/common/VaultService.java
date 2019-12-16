@@ -29,6 +29,22 @@ public class VaultService {
 		this.executorService = executorService;
 	}
 
+	public void reveal(Vault vault) {
+		executorService.execute(createRevealTask(vault));
+	}
+
+	/**
+	 * Creates but doesn't start a reveal task.
+	 *
+	 * @param vault The vault to reveal
+	 */
+	public Task<Vault> createRevealTask(Vault vault) {
+		Task<Vault> task = new RevealVaultTask(vault);
+		task.setOnSucceeded(evt -> LOG.info("Revealed {}", vault.getDisplayableName()));
+		task.setOnFailed(evt -> LOG.error("Failed to reveal " + vault.getDisplayableName(), evt.getSource().getException()));
+		return task;
+	}
+
 	/**
 	 * Locks a vault in a background thread.
 	 *
@@ -36,12 +52,28 @@ public class VaultService {
 	 * @param forced Whether to attempt a forced lock
 	 */
 	public void lock(Vault vault, boolean forced) {
-		Task<Vault> task = new LockVaultTask(vault, forced);
-		task.setOnSucceeded(evt -> LOG.info("Locked {}", vault.getDisplayableName()));
-		task.setOnFailed(evt -> LOG.error("Failed to lock ", evt.getSource().getException()));
-		executorService.execute(task);
+		executorService.execute(createLockTask(vault, forced));
 	}
 
+	/**
+	 * Creates but doesn't start a lock task.
+	 *
+	 * @param vault The vault to lock
+	 * @param forced Whether to attempt a forced lock
+	 */
+	public Task<Vault> createLockTask(Vault vault, boolean forced) {
+		Task<Vault> task = new LockVaultTask(vault, forced);
+		task.setOnSucceeded(evt -> LOG.info("Locked {}", vault.getDisplayableName()));
+		task.setOnFailed(evt -> LOG.error("Failed to lock " + vault.getDisplayableName(), evt.getSource().getException()));
+		return task;
+	}
+
+	/**
+	 * Locks all given vaults in a background thread.
+	 *
+	 * @param vaults The vaults to lock
+	 * @param forced Whether to attempt a forced lock
+	 */
 	public void lockAll(Collection<Vault> vaults, boolean forced) {
 		Service<Vault> service = createLockAllService(vaults, forced);
 		service.setOnSucceeded(evt -> LOG.info("Locked {}", service.getValue().getDisplayableName()));
@@ -73,6 +105,24 @@ public class VaultService {
 		};
 		service.setExecutor(executorService);
 		return service;
+	}
+
+	private static class RevealVaultTask extends Task<Vault> {
+
+		private final Vault vault;
+
+		/**
+		 * @param vault The vault to lock
+		 */
+		public RevealVaultTask(Vault vault) {
+			this.vault = vault;
+		}
+
+		@Override
+		protected Vault call() throws Volume.VolumeException {
+			vault.reveal();
+			return vault;
+		}
 	}
 
 	/**
