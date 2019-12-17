@@ -3,6 +3,7 @@ package org.cryptomator.ui.changepassword;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -22,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import java.io.IOException;
 import java.util.ResourceBundle;
 
@@ -33,47 +35,24 @@ public class ChangePasswordController implements FxController {
 
 	private final Stage window;
 	private final Vault vault;
-	private final ResourceBundle resourceBundle;
-	private final PasswordStrengthUtil strengthRater;
-	private final IntegerProperty passwordStrength;
+	private final ObjectProperty<CharSequence> newPassword;
 
 	public NiceSecurePasswordField oldPasswordField;
-	public NiceSecurePasswordField newPasswordField;
-	public NiceSecurePasswordField reenterPasswordField;
-	public Label passwordStrengthLabel;
-	public HBox passwordMatchBox;
-	public FontAwesome5IconView checkmark;
-	public FontAwesome5IconView cross;
-	public Label passwordMatchLabel;
 	public CheckBox finalConfirmationCheckbox;
 	public Button finishButton;
 
 	@Inject
-	public ChangePasswordController(@ChangePasswordWindow Stage window, @ChangePasswordWindow Vault vault, ResourceBundle resourceBundle, PasswordStrengthUtil strengthRater) {
+	public ChangePasswordController(@ChangePasswordWindow Stage window, @ChangePasswordWindow Vault vault, @Named("newPassword") ObjectProperty<CharSequence> newPassword) {
 		this.window = window;
 		this.vault = vault;
-		this.resourceBundle = resourceBundle;
-		this.strengthRater = strengthRater;
-		this.passwordStrength = new SimpleIntegerProperty(-1);
+		this.newPassword = newPassword;
 	}
 
 	@FXML
 	public void initialize() {
-		//binds the actual strength value to the rating of the password util
-		passwordStrength.bind(Bindings.createIntegerBinding(() -> strengthRater.computeRate(newPasswordField.getCharacters().toString()), newPasswordField.textProperty()));
-		//binding indicating if the passwords not match
-		BooleanBinding passwordsMatch = Bindings.createBooleanBinding(() -> CharSequence.compare(newPasswordField.getCharacters(), reenterPasswordField.getCharacters()) == 0, newPasswordField.textProperty(), reenterPasswordField.textProperty());
-		BooleanBinding reenterFieldNotEmpty = reenterPasswordField.textProperty().isNotEmpty();
-		//disable the finish button when passwords do not match or one is empty
-		finishButton.disableProperty().bind(reenterFieldNotEmpty.not().or(passwordsMatch.not()).or(finalConfirmationCheckbox.selectedProperty().not()));
-		//make match indicator invisible when passwords do not match or one is empty
-		passwordMatchBox.visibleProperty().bind(reenterFieldNotEmpty);
-		checkmark.visibleProperty().bind(passwordsMatch.and(reenterFieldNotEmpty));
-		checkmark.managedProperty().bind(checkmark.visibleProperty());
-		cross.visibleProperty().bind(passwordsMatch.not().and(reenterFieldNotEmpty));
-		cross.managedProperty().bind(cross.visibleProperty());
-		passwordMatchLabel.textProperty().bind(Bindings.when(passwordsMatch.and(reenterFieldNotEmpty)).then(resourceBundle.getString("changepassword.passwordsMatch")).otherwise(resourceBundle.getString("changepassword.passwordsDoNotMatch")));
-		passwordStrengthLabel.textProperty().bind(EasyBind.map(passwordStrength, strengthRater::getStrengthDescription));
+		BooleanBinding hasNotConfirmedCheckbox = finalConfirmationCheckbox.selectedProperty().not();
+		BooleanBinding isInvalidNewPassword = Bindings.createBooleanBinding(() -> newPassword.get() == null || newPassword.get().length() == 0, newPassword); 
+		finishButton.disableProperty().bind(hasNotConfirmedCheckbox.or(isInvalidNewPassword));
 	}
 
 	@FXML
@@ -84,15 +63,15 @@ public class ChangePasswordController implements FxController {
 	@FXML
 	public void finish() {
 		try {
-			CryptoFileSystemProvider.changePassphrase(vault.getPath(), MASTERKEY_FILENAME, oldPasswordField.getCharacters(), newPasswordField.getCharacters());
+			CryptoFileSystemProvider.changePassphrase(vault.getPath(), MASTERKEY_FILENAME, oldPasswordField.getCharacters(), newPassword.get());
 			LOG.info("Successful changed password for {}", vault.getDisplayableName());
 			window.close();
 		} catch (IOException e) {
-			//TODO
+			// TODO show generic error screen
 			LOG.error("IO error occured during password change. Unable to perform operation.", e);
 			e.printStackTrace();
 		} catch (InvalidPassphraseException e) {
-			//TODO
+			// TODO shake
 			LOG.info("Wrong old password.");
 		}
 	}
@@ -102,12 +81,5 @@ public class ChangePasswordController implements FxController {
 	public Vault getVault() {
 		return vault;
 	}
-
-	public IntegerProperty passwordStrengthProperty() {
-		return passwordStrength;
-	}
-
-	public int getPasswordStrength() {
-		return passwordStrength.get();
-	}
+	
 }

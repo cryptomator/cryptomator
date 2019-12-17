@@ -5,18 +5,14 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.ContentDisplay;
-import javafx.scene.control.Label;
 import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleGroup;
-import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultListManager;
@@ -26,11 +22,7 @@ import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.Tasks;
-import org.cryptomator.ui.controls.FontAwesome5IconView;
-import org.cryptomator.ui.controls.NiceSecurePasswordField;
-import org.cryptomator.ui.common.PasswordStrengthUtil;
 import org.cryptomator.ui.recoverykey.RecoveryKeyFactory;
-import org.fxmisc.easybind.EasyBind;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,26 +61,18 @@ public class CreateNewVaultPasswordController implements FxController {
 	private final StringProperty recoveryKeyProperty;
 	private final VaultListManager vaultListManager;
 	private final ResourceBundle resourceBundle;
-	private final PasswordStrengthUtil strengthRater;
+	private final ObjectProperty<CharSequence> password;
 	private final ReadmeGenerator readmeGenerator;
-	private final IntegerProperty passwordStrength;
 	private final BooleanProperty processing;
 	private final BooleanProperty readyToCreateVault;
 	private final ObjectBinding<ContentDisplay> createVaultButtonState;
 
-	public NiceSecurePasswordField passwordField;
-	public NiceSecurePasswordField reenterField;
-	public Label passwordStrengthLabel;
-	public HBox passwordMatchBox;
-	public FontAwesome5IconView checkmark;
-	public FontAwesome5IconView cross;
-	public Label passwordMatchLabel;
 	public ToggleGroup recoveryKeyChoice;
 	public Toggle showRecoveryKey;
 	public Toggle skipRecoveryKey;
 
 	@Inject
-	CreateNewVaultPasswordController(@AddVaultWizardWindow Stage window, @FxmlScene(FxmlFile.ADDVAULT_NEW_LOCATION) Lazy<Scene> chooseLocationScene, @FxmlScene(FxmlFile.ADDVAULT_NEW_RECOVERYKEY) Lazy<Scene> recoveryKeyScene, @FxmlScene(FxmlFile.ADDVAULT_SUCCESS) Lazy<Scene> successScene, ExecutorService executor, RecoveryKeyFactory recoveryKeyFactory, @Named("vaultName") StringProperty vaultName, ObjectProperty<Path> vaultPath, @AddVaultWizardWindow ObjectProperty<Vault> vault, @Named("recoveryKey") StringProperty recoveryKey, VaultListManager vaultListManager, ResourceBundle resourceBundle, PasswordStrengthUtil strengthRater, ReadmeGenerator readmeGenerator) {
+	CreateNewVaultPasswordController(@AddVaultWizardWindow Stage window, @FxmlScene(FxmlFile.ADDVAULT_NEW_LOCATION) Lazy<Scene> chooseLocationScene, @FxmlScene(FxmlFile.ADDVAULT_NEW_RECOVERYKEY) Lazy<Scene> recoveryKeyScene, @FxmlScene(FxmlFile.ADDVAULT_SUCCESS) Lazy<Scene> successScene, ExecutorService executor, RecoveryKeyFactory recoveryKeyFactory, @Named("vaultName") StringProperty vaultName, ObjectProperty<Path> vaultPath, @AddVaultWizardWindow ObjectProperty<Vault> vault, @Named("recoveryKey") StringProperty recoveryKey, VaultListManager vaultListManager, ResourceBundle resourceBundle, @Named("newPassword") ObjectProperty<CharSequence> password, ReadmeGenerator readmeGenerator) {
 		this.window = window;
 		this.chooseLocationScene = chooseLocationScene;
 		this.recoveryKeyScene = recoveryKeyScene;
@@ -101,9 +85,8 @@ public class CreateNewVaultPasswordController implements FxController {
 		this.recoveryKeyProperty = recoveryKey;
 		this.vaultListManager = vaultListManager;
 		this.resourceBundle = resourceBundle;
-		this.strengthRater = strengthRater;
+		this.password = password;
 		this.readmeGenerator = readmeGenerator;
-		this.passwordStrength = new SimpleIntegerProperty(-1);
 		this.processing = new SimpleBooleanProperty();
 		this.readyToCreateVault = new SimpleBooleanProperty();
 		this.createVaultButtonState = Bindings.createObjectBinding(this::getCreateVaultButtonState, processing);
@@ -111,24 +94,8 @@ public class CreateNewVaultPasswordController implements FxController {
 
 	@FXML
 	public void initialize() {
-		// binds the actual strength value to the rating of the password util
-		passwordStrength.bind(Bindings.createIntegerBinding(() -> strengthRater.computeRate(passwordField.getCharacters().toString()), passwordField.textProperty()));
-		// binding indicating if the passwords not match
-		BooleanBinding passwordsMatch = Bindings.createBooleanBinding(() -> CharSequence.compare(passwordField.getCharacters(), reenterField.getCharacters()) == 0, passwordField.textProperty(), reenterField.textProperty());
-		BooleanBinding reenterFieldNotEmpty = reenterField.textProperty().isNotEmpty();
-		readyToCreateVault.bind(reenterFieldNotEmpty.and(passwordsMatch).and(recoveryKeyChoice.selectedToggleProperty().isNotNull()).and(processing.not()));
-		// make match indicator invisible when passwords do not match or one is empty
-		passwordMatchBox.visibleProperty().bind(reenterFieldNotEmpty);
-		checkmark.visibleProperty().bind(passwordsMatch.and(reenterFieldNotEmpty));
-		checkmark.managedProperty().bind(checkmark.visibleProperty());
-		cross.visibleProperty().bind(passwordsMatch.not().and(reenterFieldNotEmpty));
-		cross.managedProperty().bind(cross.visibleProperty());
-		passwordMatchLabel.textProperty().bind(Bindings.when(passwordsMatch.and(reenterFieldNotEmpty)).then(resourceBundle.getString("addvaultwizard.new.passwordsMatch")).otherwise(resourceBundle.getString("addvaultwizard.new.passwordsDoNotMatch")));
-		// bindsings for the password strength indicator
-		passwordStrengthLabel.textProperty().bind(EasyBind.map(passwordStrength, strengthRater::getStrengthDescription));
-		// reset radiobuttons on password change
-		passwordField.textProperty().addListener(evt -> recoveryKeyChoice.selectToggle(null));
-		reenterField.textProperty().addListener(evt -> recoveryKeyChoice.selectToggle(null));
+		BooleanBinding isValidNewPassword = Bindings.createBooleanBinding(() -> password.get() != null && password.get().length() > 0, password);
+		readyToCreateVault.bind(isValidNewPassword.and(recoveryKeyChoice.selectedToggleProperty().isNotNull()).and(processing.not()));
 	}
 
 	@FXML
@@ -139,7 +106,7 @@ public class CreateNewVaultPasswordController implements FxController {
 	@FXML
 	public void next() {
 		Path pathToVault = vaultPathProperty.get();
-		
+
 		try {
 			Files.createDirectory(pathToVault);
 		} catch (FileAlreadyExistsException e) {
@@ -149,7 +116,7 @@ public class CreateNewVaultPasswordController implements FxController {
 			// TODO show generic error screen
 			LOG.error("", e);
 		}
-		
+
 		if (showRecoveryKey.equals(recoveryKeyChoice.getSelectedToggle())) {
 			showRecoveryKeyScene();
 		} else if (skipRecoveryKey.equals(recoveryKeyChoice.getSelectedToggle())) {
@@ -163,8 +130,8 @@ public class CreateNewVaultPasswordController implements FxController {
 		Path pathToVault = vaultPathProperty.get();
 		processing.set(true);
 		Tasks.create(() -> {
-			initializeVault(pathToVault, passwordField.getCharacters());
-			return recoveryKeyFactory.createRecoveryKey(pathToVault, passwordField.getCharacters());
+			initializeVault(pathToVault, password.get());
+			return recoveryKeyFactory.createRecoveryKey(pathToVault, password.get());
 		}).onSuccess(recoveryKey -> {
 			initializationSucceeded(pathToVault);
 			recoveryKeyProperty.set(recoveryKey);
@@ -181,7 +148,7 @@ public class CreateNewVaultPasswordController implements FxController {
 		Path pathToVault = vaultPathProperty.get();
 		processing.set(true);
 		Tasks.create(() -> {
-			initializeVault(pathToVault, passwordField.getCharacters());
+			initializeVault(pathToVault, password.get());
 		}).onSuccess(() -> {
 			initializationSucceeded(pathToVault);
 			window.setScene(successScene.get());
@@ -213,7 +180,7 @@ public class CreateNewVaultPasswordController implements FxController {
 		}
 		LOG.info("Created vault at {}", path);
 	}
-	
+
 	private void initializationSucceeded(Path pathToVault) {
 		try {
 			Vault newVault = vaultListManager.add(pathToVault);
@@ -231,14 +198,6 @@ public class CreateNewVaultPasswordController implements FxController {
 
 	public StringProperty vaultNameProperty() {
 		return vaultNameProperty;
-	}
-
-	public IntegerProperty passwordStrengthProperty() {
-		return passwordStrength;
-	}
-
-	public int getPasswordStrength() {
-		return passwordStrength.get();
 	}
 
 	public BooleanProperty readyToCreateVaultProperty() {
