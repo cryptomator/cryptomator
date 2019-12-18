@@ -8,12 +8,10 @@
  *******************************************************************************/
 package org.cryptomator.ui.common;
 
-import com.google.common.base.Strings;
 import com.nulabinc.zxcvbn.Zxcvbn;
 import org.cryptomator.ui.fxapp.FxApplicationScoped;
 
 import javax.inject.Inject;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -34,12 +32,12 @@ public class PasswordStrengthUtil {
 		this.sanitizedInputs = List.of("cryptomator");
 	}
 
-	public int computeRate(String password) {
-		if (Strings.isNullOrEmpty(password)) {
+	public int computeRate(CharSequence password) {
+		if (password == null || password.length() == 0) {
 			return -1;
 		} else {
 			int numCharsToRate = Math.min(PW_TRUNC_LEN, password.length());
-			return zxcvbn.measure(password.substring(0, numCharsToRate), sanitizedInputs).getScore();
+			return zxcvbn.measure(password.subSequence(0, numCharsToRate), sanitizedInputs).getScore();
 		}
 	}
 
