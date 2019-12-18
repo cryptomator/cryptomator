@@ -1,5 +1,7 @@
 package org.cryptomator.ui.preferences;
 
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.NodeOrientation;
 import javafx.scene.control.CheckBox;
@@ -15,12 +17,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import java.awt.SystemTray;
 
 @PreferencesScoped
 public class GeneralPreferencesController implements FxController {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(GeneralPreferencesController.class);
 
+	private final BooleanProperty systemTraySupported = new SimpleBooleanProperty(SystemTray.isSupported());
 	private final Settings settings;
 	public ChoiceBox<UiTheme> themeChoiceBox;
 	public CheckBox startHiddenCheckbox;

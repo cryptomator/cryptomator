@@ -30,7 +30,7 @@
 			<RadioButton fx:id="nodeOrientationRtl" text="Right to Left" alignment="CENTER_RIGHT" toggleGroup="${nodeOrientation}"/>
 		</HBox>
 
-		<CheckBox fx:id="startHiddenCheckbox" text="%preferences.general.startHidden"/>
+		<CheckBox fx:id="startHiddenCheckbox" text="%preferences.general.startHidden" visible="${controller.systemTraySupported}" managed="${controller.systemTraySupported}"/>
 
 		<CheckBox fx:id="debugModeCheckbox" text="%preferences.general.debugLogging"/>
 	</children>
