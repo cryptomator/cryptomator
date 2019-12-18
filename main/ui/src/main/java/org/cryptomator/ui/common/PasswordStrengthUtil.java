@@ -34,6 +34,10 @@ public class PasswordStrengthUtil {
 		this.zxcvbn = new Zxcvbn();
 	}
 
+	public boolean fulfillsMinimumRequirements(CharSequence password) {
+		return password.length() >= minPwLength;
+	}
+
 	public int computeRate(CharSequence password) {
 		if (password == null || password.length() < minPwLength) {
 			return -1;

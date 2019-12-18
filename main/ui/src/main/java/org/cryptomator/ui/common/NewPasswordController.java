@@ -50,7 +50,7 @@ public class NewPasswordController implements FxController {
 	}
 
 	private void passwordsDidChange(@SuppressWarnings("unused") Observable observable) {
-		if (hasSamePasswordInBothFields()) {
+		if (hasSamePasswordInBothFields() && strengthRater.fulfillsMinimumRequirements(passwordField.getCharacters())) {
 			password.set(passwordField.getCharacters());
 		} else {
 			password.set("");
