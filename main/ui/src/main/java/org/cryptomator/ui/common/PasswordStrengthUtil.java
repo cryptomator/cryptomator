@@ -43,7 +43,7 @@ public class PasswordStrengthUtil {
 			return -1;
 		} else {
 			int numCharsToRate = Math.min(PW_TRUNC_LEN, password.length());
-			return zxcvbn.measure(password.subSequence(0, numCharsToRate), SANITIZED_INPUTS).getScore();
+			return zxcvbn.measure(password.subSequence(0, numCharsToRate).toString(), SANITIZED_INPUTS).getScore();
 		}
 	}
 
