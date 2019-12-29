@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 @PreferencesScoped
 public class GeneralPreferencesController implements FxController {
@@ -22,6 +23,7 @@ public class GeneralPreferencesController implements FxController {
 	private static final Logger LOG = LoggerFactory.getLogger(GeneralPreferencesController.class);
 
 	private final Settings settings;
+	private final boolean trayMenuSupported;
 	public ChoiceBox<UiTheme> themeChoiceBox;
 	public CheckBox startHiddenCheckbox;
 	public CheckBox debugModeCheckbox;
@@ -30,8 +32,9 @@ public class GeneralPreferencesController implements FxController {
 	public RadioButton nodeOrientationRtl;
 
 	@Inject
-	GeneralPreferencesController(Settings settings) {
+	GeneralPreferencesController(Settings settings, @Named("trayMenuSupported") boolean trayMenuSupported) {
 		this.settings = settings;
+		this.trayMenuSupported = trayMenuSupported;
 	}
 
 	public void initialize() {
@@ -46,6 +49,10 @@ public class GeneralPreferencesController implements FxController {
 		nodeOrientation.selectedToggleProperty().addListener(this::toggleNodeOrientation);
 		nodeOrientationLtr.setSelected(settings.userInterfaceOrientation().get() == NodeOrientation.LEFT_TO_RIGHT);
 		nodeOrientationRtl.setSelected(settings.userInterfaceOrientation().get() == NodeOrientation.RIGHT_TO_LEFT);
+	}
+
+	public boolean isTrayMenuSupported() {
+		return this.trayMenuSupported;
 	}
 
 	private void toggleNodeOrientation(@SuppressWarnings("unused") ObservableValue<? extends Toggle> observable, @SuppressWarnings("unused") Toggle oldValue, Toggle newValue) {
