@@ -46,9 +46,9 @@ public class GeneralPreferencesController implements FxController {
 
 		debugModeCheckbox.selectedProperty().bindBidirectional(settings.debugMode());
 
-		nodeOrientation.selectedToggleProperty().addListener(this::toggleNodeOrientation);
 		nodeOrientationLtr.setSelected(settings.userInterfaceOrientation().get() == NodeOrientation.LEFT_TO_RIGHT);
 		nodeOrientationRtl.setSelected(settings.userInterfaceOrientation().get() == NodeOrientation.RIGHT_TO_LEFT);
+		nodeOrientation.selectedToggleProperty().addListener(this::toggleNodeOrientation);
 	}
 
 	public boolean isTrayMenuSupported() {
