@@ -1,6 +1,7 @@
 package org.cryptomator.ui.preferences;
 
 import javafx.beans.value.ObservableValue;
+import javafx.fxml.FXML;
 import javafx.geometry.NodeOrientation;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
@@ -19,7 +20,7 @@ import javax.inject.Named;
 
 @PreferencesScoped
 public class GeneralPreferencesController implements FxController {
-	
+
 	private static final Logger LOG = LoggerFactory.getLogger(GeneralPreferencesController.class);
 
 	private final Settings settings;
@@ -37,6 +38,7 @@ public class GeneralPreferencesController implements FxController {
 		this.trayMenuSupported = trayMenuSupported;
 	}
 
+	@FXML
 	public void initialize() {
 		themeChoiceBox.getItems().addAll(UiTheme.values());
 		themeChoiceBox.valueProperty().bindBidirectional(settings.theme());
