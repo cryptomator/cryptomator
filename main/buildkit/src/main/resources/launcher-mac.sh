@@ -1,6 +1,6 @@
 #!/bin/sh
 java \
-	-cp "libs/*" \
+	-cp "libs/*;mac-libs/*" \
 	-Dcryptomator.settingsPath="~/Library/Application Support/Cryptomator/settings.json" \
 	-Dcryptomator.ipcPortPath="~/Library/Application Support/Cryptomator/ipcPort.bin" \
 	-Dcryptomator.logDir="~/Library/Logs/Cryptomator" \
