@@ -22,7 +22,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
-@Module
+@Module(includes = {AutoStartModule.class})
 abstract class PreferencesModule {
 
 	@Provides

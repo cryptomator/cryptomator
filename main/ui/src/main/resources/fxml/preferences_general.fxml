@@ -33,5 +33,7 @@
 		<CheckBox fx:id="startHiddenCheckbox" text="%preferences.general.startHidden" visible="${controller.trayMenuSupported}" managed="${controller.trayMenuSupported}"/>
 
 		<CheckBox fx:id="debugModeCheckbox" text="%preferences.general.debugLogging"/>
+
+		<CheckBox fx:id="autoStartCheckbox" text="%preferences.general.autoStart" visible="${controller.autoStartSupported}" managed="${controller.autoStartSupported}"/>
 	</children>
 </VBox>

@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import java.util.Optional;
 
 @PreferencesScoped
 public class GeneralPreferencesController implements FxController {
@@ -25,17 +26,20 @@ public class GeneralPreferencesController implements FxController {
 
 	private final Settings settings;
 	private final boolean trayMenuSupported;
+	private final Optional<AutoStartStrategy> autoStartStrategy;
 	public ChoiceBox<UiTheme> themeChoiceBox;
 	public CheckBox startHiddenCheckbox;
 	public CheckBox debugModeCheckbox;
+	public CheckBox autoStartCheckbox;
 	public ToggleGroup nodeOrientation;
 	public RadioButton nodeOrientationLtr;
 	public RadioButton nodeOrientationRtl;
 
 	@Inject
-	GeneralPreferencesController(Settings settings, @Named("trayMenuSupported") boolean trayMenuSupported) {
+	GeneralPreferencesController(Settings settings, @Named("trayMenuSupported") boolean trayMenuSupported, Optional<AutoStartStrategy> autoStartStrategy) {
 		this.settings = settings;
 		this.trayMenuSupported = trayMenuSupported;
+		this.autoStartStrategy = autoStartStrategy;
 	}
 
 	@FXML
@@ -48,6 +52,9 @@ public class GeneralPreferencesController implements FxController {
 
 		debugModeCheckbox.selectedProperty().bindBidirectional(settings.debugMode());
 
+		autoStartCheckbox.setSelected(this.isAutoStartEnabled());
+		autoStartCheckbox.selectedProperty().addListener(this::toggleAutoStart);
+
 		nodeOrientationLtr.setSelected(settings.userInterfaceOrientation().get() == NodeOrientation.LEFT_TO_RIGHT);
 		nodeOrientationRtl.setSelected(settings.userInterfaceOrientation().get() == NodeOrientation.RIGHT_TO_LEFT);
 		nodeOrientation.selectedToggleProperty().addListener(this::toggleNodeOrientation);
@@ -55,6 +62,24 @@ public class GeneralPreferencesController implements FxController {
 
 	public boolean isTrayMenuSupported() {
 		return this.trayMenuSupported;
+	}
+
+	public boolean isAutoStartSupported() {
+		return autoStartStrategy.isPresent();
+	}
+
+	private boolean isAutoStartEnabled() {
+		return autoStartStrategy.map(AutoStartStrategy::isAutoStartEnabled).orElse(false);
+	}
+
+	private void toggleAutoStart(@SuppressWarnings("unused") ObservableValue<? extends Boolean> observable, @SuppressWarnings("unused") boolean oldValue, boolean newValue) {
+		autoStartStrategy.ifPresent(autoStart -> {
+			if (newValue) {
+				autoStart.enableAutoStart();
+			} else {
+				autoStart.disableAutoStart();
+			}
+		});
 	}
 
 	private void toggleNodeOrientation(@SuppressWarnings("unused") ObservableValue<? extends Toggle> observable, @SuppressWarnings("unused") Toggle oldValue, Toggle newValue) {
