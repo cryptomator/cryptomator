@@ -25,9 +25,9 @@
 		</HBox>
 		
 		<HBox spacing="6" alignment="CENTER_LEFT">
-			<Label text="Interface Orientation" HBox.hgrow="NEVER"/>
-			<RadioButton fx:id="nodeOrientationLtr" text="Left to Right" alignment="CENTER_LEFT" toggleGroup="${nodeOrientation}"/>
-			<RadioButton fx:id="nodeOrientationRtl" text="Right to Left" alignment="CENTER_RIGHT" toggleGroup="${nodeOrientation}"/>
+			<Label text="%preferences.general.interfaceOrientation" HBox.hgrow="NEVER"/>
+			<RadioButton fx:id="nodeOrientationLtr" text="%preferences.general.interfaceOrientation.ltr" alignment="CENTER_LEFT" toggleGroup="${nodeOrientation}"/>
+			<RadioButton fx:id="nodeOrientationRtl" text="%preferences.general.interfaceOrientation.rtl" alignment="CENTER_RIGHT" toggleGroup="${nodeOrientation}"/>
 		</HBox>
 
 		<CheckBox fx:id="startHiddenCheckbox" text="%preferences.general.startHidden" visible="${controller.trayMenuSupported}" managed="${controller.trayMenuSupported}"/>
