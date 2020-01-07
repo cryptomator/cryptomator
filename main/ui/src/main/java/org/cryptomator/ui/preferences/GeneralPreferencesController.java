@@ -1,6 +1,8 @@
 package org.cryptomator.ui.preferences;
 
+import javafx.application.Platform;
 import javafx.beans.value.ObservableValue;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.geometry.NodeOrientation;
 import javafx.scene.control.CheckBox;
@@ -18,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
 
 @PreferencesScoped
 public class GeneralPreferencesController implements FxController {
@@ -27,6 +30,7 @@ public class GeneralPreferencesController implements FxController {
 	private final Settings settings;
 	private final boolean trayMenuSupported;
 	private final Optional<AutoStartStrategy> autoStartStrategy;
+	private final ExecutorService executor;
 	public ChoiceBox<UiTheme> themeChoiceBox;
 	public CheckBox startHiddenCheckbox;
 	public CheckBox debugModeCheckbox;
@@ -36,10 +40,11 @@ public class GeneralPreferencesController implements FxController {
 	public RadioButton nodeOrientationRtl;
 
 	@Inject
-	GeneralPreferencesController(Settings settings, @Named("trayMenuSupported") boolean trayMenuSupported, Optional<AutoStartStrategy> autoStartStrategy) {
+	GeneralPreferencesController(Settings settings, @Named("trayMenuSupported") boolean trayMenuSupported, Optional<AutoStartStrategy> autoStartStrategy, ExecutorService executor) {
 		this.settings = settings;
 		this.trayMenuSupported = trayMenuSupported;
 		this.autoStartStrategy = autoStartStrategy;
+		this.executor = executor;
 	}
 
 	@FXML
@@ -52,8 +57,11 @@ public class GeneralPreferencesController implements FxController {
 
 		debugModeCheckbox.selectedProperty().bindBidirectional(settings.debugMode());
 
-		autoStartCheckbox.setSelected(this.isAutoStartEnabled());
-		autoStartCheckbox.selectedProperty().addListener(this::toggleAutoStart);
+		autoStartStrategy.ifPresent(autoStart -> {
+			autoStart.isAutoStartEnabled().thenAccept(enabled -> {
+				Platform.runLater(() -> autoStartCheckbox.setSelected(enabled));
+			});
+		});
 
 		nodeOrientationLtr.setSelected(settings.userInterfaceOrientation().get() == NodeOrientation.LEFT_TO_RIGHT);
 		nodeOrientationRtl.setSelected(settings.userInterfaceOrientation().get() == NodeOrientation.RIGHT_TO_LEFT);
@@ -68,20 +76,6 @@ public class GeneralPreferencesController implements FxController {
 		return autoStartStrategy.isPresent();
 	}
 
-	private boolean isAutoStartEnabled() {
-		return autoStartStrategy.map(AutoStartStrategy::isAutoStartEnabled).orElse(false);
-	}
-
-	private void toggleAutoStart(@SuppressWarnings("unused") ObservableValue<? extends Boolean> observable, @SuppressWarnings("unused") boolean oldValue, boolean newValue) {
-		autoStartStrategy.ifPresent(autoStart -> {
-			if (newValue) {
-				autoStart.enableAutoStart();
-			} else {
-				autoStart.disableAutoStart();
-			}
-		});
-	}
-
 	private void toggleNodeOrientation(@SuppressWarnings("unused") ObservableValue<? extends Toggle> observable, @SuppressWarnings("unused") Toggle oldValue, Toggle newValue) {
 		if (nodeOrientationLtr.equals(newValue)) {
 			settings.userInterfaceOrientation().set(NodeOrientation.LEFT_TO_RIGHT);
@@ -90,6 +84,16 @@ public class GeneralPreferencesController implements FxController {
 		} else {
 			LOG.warn("Unexpected toggle option {}", newValue);
 		}
+	}
+
+	@FXML
+	public void toggleAutoStart() {
+		autoStartStrategy.ifPresent(autoStart -> {
+			boolean enableAutoStart = autoStartCheckbox.isSelected();
+			Task<Void> toggleTask = new ToggleAutoStartTask(autoStart, enableAutoStart);
+			toggleTask.setOnFailed(evt -> autoStartCheckbox.setSelected(!enableAutoStart)); // restore previous state
+			executor.execute(toggleTask);
+		});
 	}
 
 	/* Helper classes */
@@ -104,6 +108,27 @@ public class GeneralPreferencesController implements FxController {
 		@Override
 		public UiTheme fromString(String string) {
 			throw new UnsupportedOperationException();
+		}
+	}
+
+	private static class ToggleAutoStartTask extends Task<Void> {
+
+		private final AutoStartStrategy autoStart;
+		private final boolean enable;
+
+		public ToggleAutoStartTask(AutoStartStrategy autoStart, boolean enable) {
+			this.autoStart = autoStart;
+			this.enable = enable;
+		}
+
+		@Override
+		protected Void call() throws Exception {
+			if (enable) {
+				autoStart.enableAutoStart();
+			} else {
+				autoStart.disableAutoStart();
+			}
+			return null;
 		}
 	}
 

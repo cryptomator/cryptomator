@@ -34,6 +34,6 @@
 
 		<CheckBox fx:id="debugModeCheckbox" text="%preferences.general.debugLogging"/>
 
-		<CheckBox fx:id="autoStartCheckbox" text="%preferences.general.autoStart" visible="${controller.autoStartSupported}" managed="${controller.autoStartSupported}"/>
+		<CheckBox fx:id="autoStartCheckbox" text="%preferences.general.autoStart" visible="${controller.autoStartSupported}" managed="${controller.autoStartSupported}" onAction="#toggleAutoStart"/>
 	</children>
 </VBox>

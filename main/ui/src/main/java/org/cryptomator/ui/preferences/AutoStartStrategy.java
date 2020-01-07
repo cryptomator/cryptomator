@@ -1,10 +1,24 @@
 package org.cryptomator.ui.preferences;
 
+import java.util.concurrent.CompletionStage;
+
 public interface AutoStartStrategy {
 
-	boolean isAutoStartEnabled();
+	CompletionStage<Boolean> isAutoStartEnabled();
 
-	void enableAutoStart();
+	void enableAutoStart() throws TogglingAutoStartFailedException;
 
-	void disableAutoStart();
+	void disableAutoStart() throws TogglingAutoStartFailedException;
+
+	class TogglingAutoStartFailedException extends Exception {
+
+		public TogglingAutoStartFailedException(String message) {
+			super(message);
+		}
+
+		public TogglingAutoStartFailedException(String message, Throwable cause) {
+			super(message, cause);
+		}
+		
+	}
 }
