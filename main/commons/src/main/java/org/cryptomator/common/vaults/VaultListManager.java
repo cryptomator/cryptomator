@@ -18,6 +18,7 @@ import org.cryptomator.cryptofs.migration.Migrators;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.Collection;
@@ -67,7 +68,13 @@ public class VaultListManager {
 	}
 	
 	private Optional<Vault> get(Path vaultPath) {
-		return vaultList.stream().filter(v -> v.getPath().equals(vaultPath)).findAny();
+		return vaultList.stream().filter(v -> {
+			try {
+				return Files.isSameFile(vaultPath, v.getPath());
+			} catch (IOException e) {
+				return false;
+			}
+		}).findAny();
 	}
 
 	private Vault create(VaultSettings vaultSettings) {
