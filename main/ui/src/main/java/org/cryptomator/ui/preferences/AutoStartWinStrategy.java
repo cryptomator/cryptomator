@@ -28,7 +28,7 @@ class AutoStartWinStrategy implements AutoStartStrategy {
 			Process proc = regQuery.start();
 			return proc.onExit().thenApply(p -> p.exitValue() == 0);
 		} catch (IOException e) {
-			LOG.warn("Failed to query registry value {}{}", HKCU_AUTOSTART_KEY, AUTOSTART_VALUE);
+			LOG.warn("Failed to query {} from registry key {}", AUTOSTART_VALUE, HKCU_AUTOSTART_KEY);
 			return CompletableFuture.completedFuture(false);
 		}
 	}
@@ -45,7 +45,7 @@ class AutoStartWinStrategy implements AutoStartStrategy {
 			Process proc = regAdd.start();
 			boolean finishedInTime = waitForProcess(proc, 5, TimeUnit.SECONDS);
 			if (finishedInTime) {
-				LOG.debug("Added registry value {}{}.", HKCU_AUTOSTART_KEY, AUTOSTART_VALUE);
+				LOG.debug("Added {} to registry key {}.", AUTOSTART_VALUE, HKCU_AUTOSTART_KEY);
 			} else {
 				throw new TogglingAutoStartFailedException("Adding registry value failed.");
 			}
@@ -64,7 +64,7 @@ class AutoStartWinStrategy implements AutoStartStrategy {
 			Process proc = regRemove.start();
 			boolean finishedInTime = waitForProcess(proc, 5, TimeUnit.SECONDS);
 			if (finishedInTime) {
-				LOG.debug("Removed registry value {}{}.", HKCU_AUTOSTART_KEY, AUTOSTART_VALUE);
+				LOG.debug("Removed {} from registry key {}.", AUTOSTART_VALUE, HKCU_AUTOSTART_KEY);
 			} else {
 				throw new TogglingAutoStartFailedException("Removing registry value failed.");
 			}
