@@ -52,8 +52,10 @@ public class CreateNewVaultLocationController implements FxController {
 
 	private Path customVaultPath = DEFAULT_CUSTOM_VAULT_PATH;
 	public ToggleGroup predefinedLocationToggler;
+	public RadioButton iclouddriveRadioButton;
 	public RadioButton dropboxRadioButton;
 	public RadioButton gdriveRadioButton;
+	public RadioButton onedriveRadioButton;
 	public RadioButton customRadioButton;
 
 	@Inject
@@ -91,10 +93,14 @@ public class CreateNewVaultLocationController implements FxController {
 	}
 
 	private void togglePredefinedLocation(@SuppressWarnings("unused") ObservableValue<? extends Toggle> observable, @SuppressWarnings("unused") Toggle oldValue, Toggle newValue) {
-		if (dropboxRadioButton.equals(newValue)) {
+		if (iclouddriveRadioButton.equals(newValue)) {
+			vaultPath.set(locationPresets.getIclouddriveLocation().resolve(vaultName.get()));
+		} else if (dropboxRadioButton.equals(newValue)) {
 			vaultPath.set(locationPresets.getDropboxLocation().resolve(vaultName.get()));
 		} else if (gdriveRadioButton.equals(newValue)) {
 			vaultPath.set(locationPresets.getGdriveLocation().resolve(vaultName.get()));
+		} else if (onedriveRadioButton.equals(newValue)) {
+			vaultPath.set(locationPresets.getOnedriveLocation().resolve(vaultName.get()));
 		} else if (customRadioButton.equals(newValue)) {
 			vaultPath.set(customVaultPath.resolve(vaultName.get()));
 		}
