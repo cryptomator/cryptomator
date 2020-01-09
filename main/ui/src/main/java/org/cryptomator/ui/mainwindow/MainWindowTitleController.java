@@ -30,22 +30,18 @@ public class MainWindowTitleController implements FxController {
 	private final UpdateChecker updateChecker;
 	private final BooleanBinding updateAvailable;
 	private final LicenseHolder licenseHolder;
-	private final VaultListManager vaultListManager;
-	private final WrongFileAlertComponent.Builder wrongFileAlert;
 
 	private double xOffset;
 	private double yOffset;
 
 	@Inject
-	MainWindowTitleController(@MainWindow Stage window, FxApplication application, @Named("trayMenuSupported") boolean minimizeToSysTray, UpdateChecker updateChecker, LicenseHolder licenseHolder, VaultListManager vaultListManager, WrongFileAlertComponent.Builder wrongFileAlert) {
+	MainWindowTitleController(@MainWindow Stage window, FxApplication application, @Named("trayMenuSupported") boolean minimizeToSysTray, UpdateChecker updateChecker, LicenseHolder licenseHolder) {
 		this.window = window;
 		this.application = application;
 		this.minimizeToSysTray = minimizeToSysTray;
 		this.updateChecker = updateChecker;
 		this.updateAvailable = updateChecker.latestVersionProperty().isNotNull();
 		this.licenseHolder = licenseHolder;
-		this.vaultListManager = vaultListManager;
-		this.wrongFileAlert = wrongFileAlert;
 	}
 
 	@FXML
