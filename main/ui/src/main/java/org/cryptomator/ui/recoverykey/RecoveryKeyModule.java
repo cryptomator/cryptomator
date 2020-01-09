@@ -10,6 +10,7 @@ import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.DefaultSceneFactory;
 import org.cryptomator.ui.common.FXMLLoaderFactory;
 import org.cryptomator.ui.common.FxController;
@@ -63,10 +64,10 @@ abstract class RecoveryKeyModule {
 	}
 
 	@Provides
-	@FxmlScene(FxmlFile.RECOVERYKEY_DISPLAY)
+	@FxmlScene(FxmlFile.RECOVERYKEY_SUCCESS)
 	@RecoveryKeyScoped
-	static Scene provideRecoveryKeyDisplayScene(@RecoveryKeyWindow FXMLLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene("/fxml/recoverykey_display.fxml");
+	static Scene provideRecoveryKeySuccessScene(@RecoveryKeyWindow FXMLLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene("/fxml/recoverykey_success.fxml");
 	}
 
 	// ------------------
@@ -76,9 +77,16 @@ abstract class RecoveryKeyModule {
 	@FxControllerKey(RecoveryKeyCreationController.class)
 	abstract FxController bindRecoveryKeyCreationController(RecoveryKeyCreationController controller);
 
-	@Binds
+	@Provides
 	@IntoMap
 	@FxControllerKey(RecoveryKeyDisplayController.class)
-	abstract FxController bindRecoveryKeyDisplayController(RecoveryKeyDisplayController controller);
+	static FxController provideRecoveryKeyDisplayController(@RecoveryKeyWindow Stage window, @RecoveryKeyWindow Vault vault, @RecoveryKeyWindow StringProperty recoveryKey) {
+		return new RecoveryKeyDisplayController(window, vault.getDisplayableName(), recoveryKey.get());
+	}
+
+	@Binds
+	@IntoMap
+	@FxControllerKey(RecoveryKeySuccessController.class)
+	abstract FxController bindRecoveryKeySuccessController(RecoveryKeySuccessController controller);
 	
 }

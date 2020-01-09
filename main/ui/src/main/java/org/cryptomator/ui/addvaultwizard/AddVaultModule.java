@@ -19,7 +19,10 @@ import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxControllerKey;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
+import org.cryptomator.ui.common.NewPasswordController;
+import org.cryptomator.ui.common.PasswordStrengthUtil;
 import org.cryptomator.ui.mainwindow.MainWindow;
+import org.cryptomator.ui.recoverykey.RecoveryKeyDisplayController;
 
 import javax.inject.Named;
 import javax.inject.Provider;
@@ -30,6 +33,13 @@ import java.util.ResourceBundle;
 
 @Module
 public abstract class AddVaultModule {
+
+	@Provides
+	@AddVaultWizardScoped
+	@Named("newPassword")
+	static ObjectProperty<CharSequence> provideNewPasswordProperty() {
+		return new SimpleObjectProperty<>("");
+	}
 
 	@Provides
 	@AddVaultWizardWindow
@@ -150,8 +160,8 @@ public abstract class AddVaultModule {
 
 	@Binds
 	@IntoMap
-	@FxControllerKey(AddVaultFailureExisitingController.class)
-	abstract FxController bindAddVaultFailureExistingController(AddVaultFailureExisitingController controller);
+	@FxControllerKey(AddVaultFailureExistingController.class)
+	abstract FxController bindAddVaultFailureExistingController(AddVaultFailureExistingController controller);
 
 	@Binds
 	@IntoMap
@@ -168,13 +178,27 @@ public abstract class AddVaultModule {
 	@FxControllerKey(CreateNewVaultPasswordController.class)
 	abstract FxController bindCreateNewVaultPasswordController(CreateNewVaultPasswordController controller);
 
-	@Binds
+	@Provides
 	@IntoMap
-	@FxControllerKey(AddVaultSuccessController.class)
-	abstract FxController bindAddVaultSuccessController(AddVaultSuccessController controller);
+	@FxControllerKey(NewPasswordController.class)
+	static FxController provideNewPasswordController(ResourceBundle resourceBundle, PasswordStrengthUtil strengthRater, @Named("newPassword") ObjectProperty<CharSequence> password) {
+		return new NewPasswordController(resourceBundle, strengthRater, password);
+	}
 
 	@Binds
 	@IntoMap
 	@FxControllerKey(CreateNewVaultRecoveryKeyController.class)
 	abstract FxController bindCreateNewVaultRecoveryKeyController(CreateNewVaultRecoveryKeyController controller);
+
+	@Provides
+	@IntoMap
+	@FxControllerKey(RecoveryKeyDisplayController.class)
+	static FxController provideRecoveryKeyDisplayController(@AddVaultWizardWindow Stage window, @Named("vaultName") StringProperty vaultName, @Named("recoveryKey") StringProperty recoveryKey) {
+		return new RecoveryKeyDisplayController(window, vaultName.get(), recoveryKey.get());
+	}
+
+	@Binds
+	@IntoMap
+	@FxControllerKey(AddVaultSuccessController.class)
+	abstract FxController bindAddVaultSuccessController(AddVaultSuccessController controller);
 }

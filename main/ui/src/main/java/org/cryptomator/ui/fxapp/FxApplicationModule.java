@@ -5,8 +5,10 @@
  *******************************************************************************/
 package org.cryptomator.ui.fxapp;
 
+import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
+import javafx.application.Application;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.image.Image;
@@ -44,6 +46,9 @@ abstract class FxApplicationModule {
 			return Optional.empty();
 		}
 	}
+	
+	@Binds
+	abstract Application bindApplication(FxApplication application);
 
 	@Provides
 	static MainWindowComponent provideMainWindowComponent(MainWindowComponent.Builder builder) {

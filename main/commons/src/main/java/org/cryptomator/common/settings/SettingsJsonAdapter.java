@@ -38,6 +38,7 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 		out.name("preferredVolumeImpl").value(value.preferredVolumeImpl().get().name());
 		out.name("theme").value(value.theme().get().name());
 		out.name("uiOrientation").value(value.userInterfaceOrientation().get().name());
+		out.name("licenseKey").value(value.licenseKey().get());
 		out.endObject();
 	}
 
@@ -89,6 +90,9 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 					break;
 				case "uiOrientation":
 					settings.userInterfaceOrientation().set(parseUiOrientation(in.nextString()));
+					break;
+				case "licenseKey":
+					settings.licenseKey().set(in.nextString());
 					break;
 				default:
 					LOG.warn("Unsupported vault setting found in JSON: " + name);

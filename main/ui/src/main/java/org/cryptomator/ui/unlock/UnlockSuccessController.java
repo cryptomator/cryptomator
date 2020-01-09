@@ -5,13 +5,13 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.ContentDisplay;
 import javafx.stage.Stage;
 import org.cryptomator.common.vaults.Vault;
-import org.cryptomator.cryptolib.api.InvalidPassphraseException;
 import org.cryptomator.ui.common.FxController;
-import org.cryptomator.ui.common.Tasks;
+import org.cryptomator.ui.common.VaultService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,14 +26,16 @@ public class UnlockSuccessController implements FxController {
 	private final Stage window;
 	private final Vault vault;
 	private final ExecutorService executor;
+	private final VaultService vaultService;
 	private final ObjectProperty<ContentDisplay> revealButtonState;
 	private final BooleanProperty revealButtonDisabled;
 
 	@Inject
-	public UnlockSuccessController(@UnlockWindow Stage window, @UnlockWindow Vault vault, ExecutorService executor) {
+	public UnlockSuccessController(@UnlockWindow Stage window, @UnlockWindow Vault vault, ExecutorService executor, VaultService vaultService) {
 		this.window = window;
 		this.vault = vault;
 		this.executor = executor;
+		this.vaultService = vaultService;
 		this.revealButtonState = new SimpleObjectProperty<>(ContentDisplay.TEXT_ONLY);
 		this.revealButtonDisabled = new SimpleBooleanProperty();
 	}
@@ -49,17 +51,19 @@ public class UnlockSuccessController implements FxController {
 		LOG.trace("UnlockSuccessController.revealAndClose()");
 		revealButtonState.set(ContentDisplay.LEFT);
 		revealButtonDisabled.set(true);
-		Tasks.create(() -> {
-			vault.reveal();
-		}).onSuccess(() -> {
-			window.close();
-		}).onError(InvalidPassphraseException.class, e -> {
-			// TODO
-			LOG.warn("Reveal failed.", e);
-		}).andFinally(() -> {
+
+		Task<Vault> revealTask = vaultService.createRevealTask(vault);
+		revealTask.setOnSucceeded(evt -> {
 			revealButtonState.set(ContentDisplay.TEXT_ONLY);
 			revealButtonDisabled.set(false);
-		}).runOnce(executor);
+			window.close();
+		});
+		revealTask.setOnFailed(evt -> {
+			LOG.warn("Reveal failed.", revealTask.getException());
+			revealButtonState.set(ContentDisplay.TEXT_ONLY);
+			revealButtonDisabled.set(false);
+		});
+		executor.execute(revealTask);
 	}
 
 	/* Getter/Setter */

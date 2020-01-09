@@ -25,6 +25,7 @@ public class Environment {
 	private static final Path RELATIVE_HOME_DIR = Paths.get("~");
 	private static final Path ABSOLUTE_HOME_DIR = Paths.get(USER_HOME);
 	private static final char PATH_LIST_SEP = ':';
+	private static final int DEFAULT_MIN_PW_LENGTH = 8;
 
 	@Inject
 	public Environment() {
@@ -37,6 +38,7 @@ public class Environment {
 		LOG.debug("cryptomator.keychainPath: {}", System.getProperty("cryptomator.keychainPath"));
 		LOG.debug("cryptomator.logDir: {}", System.getProperty("cryptomator.logDir"));
 		LOG.debug("cryptomator.mountPointsDir: {}", System.getProperty("cryptomator.mountPointsDir"));
+		LOG.debug("cryptomator.minPwLength: {}", System.getProperty("cryptomator.minPwLength"));
 	}
 
 	public boolean useCustomLogbackConfig() {
@@ -61,6 +63,19 @@ public class Environment {
 
 	public Optional<Path> getMountPointsDir() {
 		return getPath("cryptomator.mountPointsDir").map(this::replaceHomeDir);
+	}
+
+	public int getMinPwLength() {
+		return getInt("cryptomator.minPwLength", DEFAULT_MIN_PW_LENGTH);
+	}
+
+	private int getInt(String propertyName, int defaultValue) {
+		String value = System.getProperty(propertyName);
+		try {
+			return Integer.parseInt(value);
+		} catch (NumberFormatException e) { // includes "null" values
+			return defaultValue;
+		}
 	}
 
 	private Optional<Path> getPath(String propertyName) {

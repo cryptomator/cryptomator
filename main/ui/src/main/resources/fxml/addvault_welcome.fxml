@@ -10,8 +10,8 @@
 <VBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
 	  fx:controller="org.cryptomator.ui.addvaultwizard.AddVaultWelcomeController"
-	  prefWidth="400"
-	  prefHeight="400"
+	  prefWidth="450"
+	  prefHeight="450"
 	  spacing="12"
 	  alignment="TOP_CENTER">
 	<padding>

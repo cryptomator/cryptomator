@@ -4,6 +4,8 @@ import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoMap;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
@@ -20,8 +22,14 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
-@Module
+@Module(includes = {AutoStartModule.class})
 abstract class PreferencesModule {
+
+	@Provides
+	@PreferencesScoped
+	static ObjectProperty<SelectedPreferencesTab> provideSelectedTabProperty() {
+		return new SimpleObjectProperty<>(SelectedPreferencesTab.ANY);
+	}
 
 	@Provides
 	@PreferencesWindow
@@ -69,5 +77,10 @@ abstract class PreferencesModule {
 	@IntoMap
 	@FxControllerKey(VolumePreferencesController.class)
 	abstract FxController bindVolumePreferencesController(VolumePreferencesController controller);
+
+	@Binds
+	@IntoMap
+	@FxControllerKey(DonationKeyPreferencesController.class)
+	abstract FxController bindDonationKeyPreferencesController(DonationKeyPreferencesController controller);
 
 }

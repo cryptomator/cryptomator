@@ -78,6 +78,7 @@
 	SCROLL_BAR_THUMB_NORMAL: GRAY_3;
 	SCROLL_BAR_THUMB_HOVER: GRAY_4;
 	INDICATOR_BG: RED_5;
+	DRAG_N_DROP_INDICATOR_BG: GRAY_3;
 	PROGRESS_INDICATOR_BEGIN: GRAY_7;
 	PROGRESS_INDICATOR_END: GRAY_5;
 	PROGRESS_BAR_BG: GRAY_2;
@@ -114,6 +115,10 @@
 
 .label-small {
 	-fx-font-size: 0.8em;
+}
+
+.label-extra-small {
+	-fx-font-size: 0.64em;
 }
 
 .text-flow > * {
@@ -179,26 +184,22 @@
 	-fx-fill: CONTROL_WHITE_BG_ARMED;
 }
 
-.main-window .resizer {
-	-fx-background-color: linear-gradient(to bottom right,
-		transparent 50%,
-		CONTROL_BORDER_NORMAL 51%,
-		CONTROL_BORDER_NORMAL 60%,
-		transparent 61%,
-		transparent 70%,
-		CONTROL_BORDER_NORMAL 71%,
-		CONTROL_BORDER_NORMAL 80%,
-		transparent 81%
-	);
-	-fx-cursor: nw_resize;
-}
-
 .main-window .update-indicator {
 	-fx-background-color: PRIMARY_BG, white, INDICATOR_BG;
 	-fx-background-insets: 0, 1px, 2px;
 	-fx-background-radius: 6px, 5px, 4px;
 	-fx-translate-x: -1px;
 	-fx-translate-y: 1px;
+}
+
+.main-window .drag-n-drop-indicator {
+	-fx-border-color: DRAG_N_DROP_INDICATOR_BG;
+	-fx-border-width: 3px;
+}
+
+.main-window .drag-n-drop-indicator .drag-n-drop-header {
+	-fx-background-color: DRAG_N_DROP_INDICATOR_BG;
+	-fx-padding: 3px;
 }
 
 /*******************************************************************************
@@ -212,34 +213,36 @@
 }
 
 .tab-pane > .tab-header-area {
-	-fx-padding: 6px 12px 0 12px;
-	-fx-background-color: CONTROL_BORDER_FOCUSED, MAIN_BG;
-	-fx-background-insets: 0, 0 0 1px 0;
+	-fx-padding: 0 12px;
+	-fx-background-color: CONTROL_BORDER_NORMAL, CONTROL_BG_NORMAL;
+	-fx-background-insets: 0, 0 0 3px 0;
 }
 
-.tab-pane > .tab-header-area > .headers-region > .tab {
-	-fx-background-color: CONTROL_BORDER_NORMAL, MAIN_BG;
-	-fx-background-insets: 0 0 1px 0, 1px;
-	-fx-background-radius: 4px 4px 0 0;
-	-fx-padding: 0.2em 1em 0.2em 1em;
+.tab-pane .tab {
+	-fx-background-color: CONTROL_BORDER_NORMAL, CONTROL_BG_NORMAL;
+	-fx-background-insets: 0, 0 0 3px 0;
+	-fx-padding: 6px 12px;
 }
 
-.tab-pane > .tab-header-area > .headers-region > .tab:selected {
-	-fx-background-color: CONTROL_BORDER_FOCUSED, MAIN_BG;
-	-fx-background-insets: 0, 1px 1px 0 1px;
+.tab-pane .tab:selected {
+	-fx-background-color: PRIMARY_BG, CONTROL_PRIMARY_LIGHT_BG_NORMAL;
 }
 
-.tab-pane > .tab-header-area > .headers-region > .tab > .tab-container > .tab-label {
-	-fx-text-fill: TEXT_FILL;
+.tab-pane .tab .tab-label {
+	-fx-text-fill: SECONDARY_BG;
 	-fx-alignment: CENTER;
 }
 
-.tab-pane > .tab-header-area > .headers-region > .tab .glyph-icon {
+.tab-pane .tab .glyph-icon {
 	-fx-fill: SECONDARY_BG;
 }
 
-.tab-pane > .tab-header-area > .headers-region > .tab:selected .glyph-icon {
-	-fx-fill: TEXT_FILL;
+.tab-pane .tab:selected .glyph-icon {
+	-fx-fill: PRIMARY_BG;
+}
+
+.tab-pane .tab:selected .tab-label {
+	-fx-text-fill: TEXT_FILL_PRIMARY;
 }
 
 /*******************************************************************************
@@ -672,7 +675,6 @@
  ******************************************************************************/
 
 .choice-box {
-	-fx-text-fill: TEXT_FILL;
 	-fx-background-color: CONTROL_BORDER_NORMAL, CONTROL_BG_NORMAL;
 	-fx-background-insets: 0, 1px;
 	-fx-background-radius: 4px;
@@ -681,6 +683,18 @@
 
 .choice-box:focused {
 	-fx-background-color: CONTROL_BORDER_FOCUSED, CONTROL_BG_NORMAL;
+}
+
+.choice-box:disabled {
+	-fx-background-color: CONTROL_BORDER_DISABLED, CONTROL_BG_DISABLED;
+}
+
+.choice-box > .label {
+	-fx-text-fill: TEXT_FILL;
+}
+
+.choice-box:disabled > .label {
+	-fx-text-fill: TEXT_FILL_SECONDARY;
 }
 
 .choice-box > .open-button {
@@ -692,6 +706,10 @@
 	-fx-background-insets: 0 0 -1 0, 0;
 	-fx-padding: 0.15em 0.3em 0.15em 0.3em;
 	-fx-shape: "M 0 0 h 7 l -3.5 4 z";
+}
+
+.choice-box:disabled > .open-button > .arrow {
+	-fx-background-color: transparent, TEXT_FILL_SECONDARY;
 }
 
 .choice-box .context-menu {

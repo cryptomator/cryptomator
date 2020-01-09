@@ -7,9 +7,9 @@ package org.cryptomator.ui.preferences;
 
 import dagger.Lazy;
 import dagger.Subcomponent;
+import javafx.beans.property.ObjectProperty;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import org.cryptomator.ui.common.FXMLLoaderFactory;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 
@@ -23,7 +23,10 @@ public interface PreferencesComponent {
 	@FxmlScene(FxmlFile.PREFERENCES)
 	Lazy<Scene> scene();
 
-	default Stage showPreferencesWindow() {
+	ObjectProperty<SelectedPreferencesTab> selectedTabProperty();
+
+	default Stage showPreferencesWindow(SelectedPreferencesTab selectedTab) {
+		selectedTabProperty().set(selectedTab);
 		Stage stage = window();
 		stage.setScene(scene().get());
 		stage.show();

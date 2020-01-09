@@ -4,53 +4,32 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.fxml.FXML;
 import org.cryptomator.common.vaults.Vault;
-import org.cryptomator.common.vaults.VaultState;
-import org.cryptomator.common.vaults.Volume;
 import org.cryptomator.ui.common.FxController;
-import org.cryptomator.ui.common.Tasks;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.cryptomator.ui.common.VaultService;
 
 import javax.inject.Inject;
-import java.util.concurrent.ExecutorService;
 
 @MainWindowScoped
 public class VaultDetailUnlockedController implements FxController {
 
-	private static final Logger LOG = LoggerFactory.getLogger(VaultDetailUnlockedController.class);
-
 	private final ReadOnlyObjectProperty<Vault> vault;
-	private final ExecutorService executor;
+	private final VaultService vaultService;
 
 	@Inject
-	public VaultDetailUnlockedController(ObjectProperty<Vault> vault, ExecutorService executor) {
+	public VaultDetailUnlockedController(ObjectProperty<Vault> vault, VaultService vaultService) {
 		this.vault = vault;
-		this.executor = executor;
+		this.vaultService = vaultService;
 	}
 
 	@FXML
 	public void revealAccessLocation() {
-		try {
-			vault.get().reveal();
-		} catch (Volume.VolumeException e) {
-			LOG.error("Failed to reveal vault.", e);
-		}
+		vaultService.reveal(vault.get());
 	}
 
 	@FXML
 	public void lock() {
-		Vault v = vault.get();
-		v.setState(VaultState.PROCESSING);
-		Tasks.create(() -> {
-			v.lock(false);
-		}).onSuccess(() -> {
-			LOG.trace("Regular unmount succeeded.");
-			v.setState(VaultState.LOCKED);
-		}).onError(Exception.class, e -> {
-			v.setState(VaultState.UNLOCKED);
-			LOG.error("Regular unmount failed.", e);
-			// TODO
-		}).runOnce(executor);
+		vaultService.lock(vault.get(), false);
+		// TODO count lock attempts, and allow forced lock
 	}
 
 	/* Getter/Setter */

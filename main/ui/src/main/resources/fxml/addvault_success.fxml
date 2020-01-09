@@ -13,8 +13,8 @@
 <VBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
 	  fx:controller="org.cryptomator.ui.addvaultwizard.AddVaultSuccessController"
-	  prefWidth="400"
-	  prefHeight="400"
+	  prefWidth="450"
+	  prefHeight="450"
 	  spacing="12"
 	  alignment="TOP_CENTER">
 	<padding>
@@ -36,8 +36,8 @@
 
 		<ButtonBar buttonMinWidth="120" buttonOrder="+IU">
 			<buttons>
-				<Button text="%generic.button.done" ButtonBar.buttonData="FINISH" onAction="#close"/>
-				<Button text="%addvaultwizard.success.unlockNow" ButtonBar.buttonData="OTHER" onAction="#unlockAndClose" defaultButton="true"/>
+				<Button text="%generic.button.done" ButtonBar.buttonData="FINISH" onAction="#close" defaultButton="${!controller.vault.locked}"/>
+				<Button text="%addvaultwizard.success.unlockNow" ButtonBar.buttonData="OTHER" onAction="#unlockAndClose" defaultButton="${controller.vault.locked}" visible="${controller.vault.locked}"/>
 			</buttons>
 		</ButtonBar>
 	</children>

@@ -14,8 +14,8 @@
 <VBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
 	  fx:controller="org.cryptomator.ui.addvaultwizard.CreateNewVaultLocationController"
-	  prefWidth="400"
-	  prefHeight="400"
+	  prefWidth="450"
+	  prefHeight="450"
 	  spacing="12"
 	  alignment="CENTER_LEFT">
 	<fx:define>
@@ -29,8 +29,10 @@
 
 		<VBox spacing="6">
 			<Label wrapText="true" text="%addvaultwizard.new.locationInstruction"/>
+			<RadioButton fx:id="iclouddriveRadioButton" toggleGroup="${predefinedLocationToggler}" text="iCloud Drive" visible="${controller.locationPresets.foundIclouddrive}" managed="${controller.locationPresets.foundIclouddrive}"/>
 			<RadioButton fx:id="dropboxRadioButton" toggleGroup="${predefinedLocationToggler}" text="Dropbox" visible="${controller.locationPresets.foundDropbox}" managed="${controller.locationPresets.foundDropbox}"/>
 			<RadioButton fx:id="gdriveRadioButton" toggleGroup="${predefinedLocationToggler}" text="Google Drive" visible="${controller.locationPresets.foundGdrive}" managed="${controller.locationPresets.foundGdrive}"/>
+			<RadioButton fx:id="onedriveRadioButton" toggleGroup="${predefinedLocationToggler}" text="OneDrive" visible="${controller.locationPresets.foundOnedrive}" managed="${controller.locationPresets.foundOnedrive}"/>
 			<HBox spacing="12" alignment="CENTER_LEFT">
 				<RadioButton fx:id="customRadioButton" toggleGroup="${predefinedLocationToggler}" text="%addvaultwizard.new.directoryPickerLabel"/>
 				<Button contentDisplay="LEFT" text="%addvaultwizard.new.directoryPickerButton" onAction="#chooseCustomVaultPath" disable="${controller.usePresetPath}">

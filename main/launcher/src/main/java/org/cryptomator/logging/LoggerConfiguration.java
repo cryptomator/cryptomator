@@ -5,9 +5,8 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
-import ch.qos.logback.core.hook.DelayingShutdownHook;
-import ch.qos.logback.core.util.Duration;
 import org.cryptomator.common.Environment;
+import org.cryptomator.common.ShutdownHook;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -16,26 +15,27 @@ import java.util.Map;
 
 @Singleton
 public class LoggerConfiguration {
-
-	private static final double SHUTDOWN_DELAY_MS = 100;
-
+	
 	private final LoggerContext context;
 	private final Environment environment;
 	private final Appender<ILoggingEvent> stdout;
 	private final Appender<ILoggingEvent> upgrade;
 	private final Appender<ILoggingEvent> file;
+	private final ShutdownHook shutdownHook;
 
 	@Inject
 	LoggerConfiguration(LoggerContext context, //
 						Environment environment, //
 						@Named("stdoutAppender") Appender<ILoggingEvent> stdout, //
 						@Named("upgradeAppender") Appender<ILoggingEvent> upgrade, //
-						@Named("fileAppender") Appender<ILoggingEvent> file) {
+						@Named("fileAppender") Appender<ILoggingEvent> file, //
+						ShutdownHook shutdownHook) {
 		this.context = context;
 		this.environment = environment;
 		this.stdout = stdout;
 		this.upgrade = upgrade;
 		this.file = file;
+		this.shutdownHook = shutdownHook;
 	}
 
 	public void init() {
@@ -62,9 +62,7 @@ public class LoggerConfiguration {
 			upgrades.setAdditive(false);
 
 			// add shutdown hook
-			DelayingShutdownHook shutdownHook = new DelayingShutdownHook();
-			shutdownHook.setContext(context);
-			shutdownHook.setDelay(Duration.buildByMilliseconds(SHUTDOWN_DELAY_MS));
+			shutdownHook.runOnShutdown(ShutdownHook.PRIO_LAST, context::stop);
 		}
 	}
 

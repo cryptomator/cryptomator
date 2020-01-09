@@ -89,7 +89,7 @@ public class NiceSecurePasswordField extends StackPane {
 	}
 
 	public void swipe() {
-		passwordField.swipe();;
+		passwordField.swipe();
 	}
 
 	public void selectAll() {

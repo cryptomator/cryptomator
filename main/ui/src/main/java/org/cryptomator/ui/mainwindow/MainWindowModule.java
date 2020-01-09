@@ -70,6 +70,16 @@ abstract class MainWindowModule {
 
 	@Binds
 	@IntoMap
+	@FxControllerKey(MainWindowTitleController.class)
+	abstract FxController bindMainWindowTitleController(MainWindowTitleController controller);
+
+	@Binds
+	@IntoMap
+	@FxControllerKey(ResizeController.class)
+	abstract FxController bindResizeController(ResizeController controller);
+
+	@Binds
+	@IntoMap
 	@FxControllerKey(VaultListController.class)
 	abstract FxController bindVaultListController(VaultListController controller);
 

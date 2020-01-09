@@ -15,14 +15,14 @@ import javax.inject.Inject;
 import java.nio.file.Path;
 
 @AddVaultWizardScoped
-public class AddVaultFailureExisitingController implements FxController {
+public class AddVaultFailureExistingController implements FxController {
 
 	private final Stage window;
 	private final Lazy<Scene> previousScene;
 	private final StringBinding vaultName;
 
 	@Inject
-	AddVaultFailureExisitingController(@AddVaultWizardWindow Stage window, @FxmlScene(FxmlFile.ADDVAULT_EXISTING) Lazy<Scene> previousScene, ObjectProperty<Path> pathOfFailedVault){
+	AddVaultFailureExistingController(@AddVaultWizardWindow Stage window, @FxmlScene(FxmlFile.ADDVAULT_EXISTING) Lazy<Scene> previousScene, ObjectProperty<Path> pathOfFailedVault){
 		this.window = window;
 		this.previousScene = previousScene;
 		this.vaultName = Bindings.createStringBinding(() -> pathOfFailedVault.get().getFileName().toString(),pathOfFailedVault);

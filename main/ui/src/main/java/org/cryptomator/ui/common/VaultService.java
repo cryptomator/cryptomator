@@ -1,0 +1,190 @@
+package org.cryptomator.ui.common;
+
+import javafx.concurrent.Task;
+import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.common.vaults.VaultState;
+import org.cryptomator.common.vaults.Volume;
+import org.cryptomator.ui.fxapp.FxApplicationScoped;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.stream.Collectors;
+
+@FxApplicationScoped
+public class VaultService {
+
+	private static final Logger LOG = LoggerFactory.getLogger(VaultService.class);
+
+	private final ExecutorService executorService;
+
+	@Inject
+	public VaultService(ExecutorService executorService) {
+		this.executorService = executorService;
+	}
+
+	public void reveal(Vault vault) {
+		executorService.execute(createRevealTask(vault));
+	}
+
+	/**
+	 * Creates but doesn't start a reveal task.
+	 *
+	 * @param vault The vault to reveal
+	 */
+	public Task<Vault> createRevealTask(Vault vault) {
+		Task<Vault> task = new RevealVaultTask(vault);
+		task.setOnSucceeded(evt -> LOG.info("Revealed {}", vault.getDisplayableName()));
+		task.setOnFailed(evt -> LOG.error("Failed to reveal " + vault.getDisplayableName(), evt.getSource().getException()));
+		return task;
+	}
+
+	/**
+	 * Locks a vault in a background thread.
+	 *
+	 * @param vault The vault to lock
+	 * @param forced Whether to attempt a forced lock
+	 */
+	public void lock(Vault vault, boolean forced) {
+		executorService.execute(createLockTask(vault, forced));
+	}
+
+	/**
+	 * Creates but doesn't start a lock task.
+	 *
+	 * @param vault The vault to lock
+	 * @param forced Whether to attempt a forced lock
+	 */
+	public Task<Vault> createLockTask(Vault vault, boolean forced) {
+		Task<Vault> task = new LockVaultTask(vault, forced);
+		task.setOnSucceeded(evt -> LOG.info("Locked {}", vault.getDisplayableName()));
+		task.setOnFailed(evt -> LOG.error("Failed to lock " + vault.getDisplayableName(), evt.getSource().getException()));
+		return task;
+	}
+
+	/**
+	 * Locks all given vaults in a background thread.
+	 *
+	 * @param vaults The vaults to lock
+	 * @param forced Whether to attempt a forced lock
+	 */
+	public void lockAll(Collection<Vault> vaults, boolean forced) {
+		executorService.execute(createLockAllTask(vaults, forced));
+	}
+
+	/**
+	 * Creates but doesn't start a lock-all task.
+	 *
+	 * @param vaults The list of vaults to be locked
+	 * @param forced Whether to attempt a forced lock
+	 * @return Meta-Task that waits until all vaults are locked or fails after the first failure of a subtask
+	 */
+	public Task<Collection<Vault>> createLockAllTask(Collection<Vault> vaults, boolean forced) {
+		List<Task<Vault>> lockTasks = vaults.stream().map(v -> new LockVaultTask(v, forced)).collect(Collectors.toUnmodifiableList());
+		lockTasks.forEach(executorService::execute);
+		Task<Collection<Vault>> task = new WaitForTasksTask(lockTasks);
+		String vaultNames = vaults.stream().map(Vault::getDisplayableName).collect(Collectors.joining(", "));
+		task.setOnSucceeded(evt -> LOG.info("Locked {}", vaultNames));
+		task.setOnFailed(evt -> LOG.error("Failed to lock vaults " + vaultNames, evt.getSource().getException()));
+		return task;
+	}
+
+	private static class RevealVaultTask extends Task<Vault> {
+
+		private final Vault vault;
+
+		/**
+		 * @param vault The vault to lock
+		 */
+		public RevealVaultTask(Vault vault) {
+			this.vault = vault;
+		}
+
+		@Override
+		protected Vault call() throws Volume.VolumeException {
+			vault.reveal();
+			return vault;
+		}
+	}
+
+	/**
+	 * A task that waits for completion of multiple other tasks
+	 */
+	private static class WaitForTasksTask extends Task<Collection<Vault>> {
+
+		private final Collection<Task<Vault>> startedTasks;
+
+		public WaitForTasksTask(Collection<Task<Vault>> tasks) {
+			this.startedTasks = List.copyOf(tasks);
+		}
+
+		@Override
+		protected Collection<Vault> call() throws Exception {
+			Iterator<Task<Vault>> remainingTasks = startedTasks.iterator();
+			Collection<Vault> completed = new ArrayList<>();
+			try {
+				// wait for all tasks:
+				while (remainingTasks.hasNext()) {
+					Vault lockedVault = remainingTasks.next().get();
+					completed.add(lockedVault);
+				}
+			} catch (ExecutionException e) {
+				// cancel all remaining:
+				while (remainingTasks.hasNext()) {
+					remainingTasks.next().cancel(true);
+				}
+				throw e;
+			}
+			return List.copyOf(completed);
+		}
+	}
+
+	/**
+	 * A task that locks a vault
+	 */
+	private static class LockVaultTask extends Task<Vault> {
+
+		private final Vault vault;
+		private final boolean forced;
+
+		/**
+		 * @param vault The vault to lock
+		 * @param forced Whether to attempt a forced lock
+		 */
+		public LockVaultTask(Vault vault, boolean forced) {
+			this.vault = vault;
+			this.forced = forced;
+		}
+
+		@Override
+		protected Vault call() throws Volume.VolumeException {
+			vault.lock(forced);
+			return vault;
+		}
+
+		@Override
+		protected void scheduled() {
+			vault.setState(VaultState.PROCESSING);
+		}
+
+		@Override
+		protected void succeeded() {
+			vault.setState(VaultState.LOCKED);
+		}
+
+		@Override
+		protected void failed() {
+			vault.setState(VaultState.UNLOCKED);
+		}
+
+	}
+
+
+
+}

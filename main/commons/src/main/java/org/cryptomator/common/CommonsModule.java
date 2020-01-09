@@ -28,12 +28,22 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
 
 @Module(subcomponents = {VaultComponent.class})
 public abstract class CommonsModule {
 
 	private static final int NUM_SCHEDULER_THREADS = 4;
+
+	@Provides
+	@Singleton
+	@Named("licensePublicKey")
+	static String provideLicensePublicKey() {
+		// in PEM format without the dash-escaped begin/end lines
+		return "MIGbMBAGByqGSM49AgEGBSuBBAAjA4GGAAQB7NfnqiZbg2KTmoflmZ71PbXru7oW" //
+				+ "fmnV2yv3eDjlDfGruBrqz9TtXBZV/eYWt31xu1osIqaT12lKBvZ511aaAkIBeOEV" //
+				+ "gwcBIlJr6kUw7NKzeJt7r2rrsOyQoOG2nWc/Of/NBqA3mIZRHk5Aq1YupFdD26QE" //
+				+ "r0DzRyj4ixPIt38CQB8=";
+	}
 
 	@Provides
 	@Singleton
@@ -56,7 +66,7 @@ public abstract class CommonsModule {
 
 	@Provides
 	@Singleton
-	static ScheduledExecutorService provideScheduledExecutorService(@Named("shutdownTaskScheduler") Consumer<Runnable> shutdownTaskScheduler) {
+	static ScheduledExecutorService provideScheduledExecutorService(ShutdownHook shutdownHook) {
 		final AtomicInteger threadNumber = new AtomicInteger(1);
 		ScheduledExecutorService executorService = Executors.newScheduledThreadPool(NUM_SCHEDULER_THREADS, r -> {
 			Thread t = new Thread(r);
@@ -64,7 +74,7 @@ public abstract class CommonsModule {
 			t.setDaemon(true);
 			return t;
 		});
-		shutdownTaskScheduler.accept(executorService::shutdown);
+		shutdownHook.runOnShutdown(executorService::shutdown);
 		return executorService;
 	}
 

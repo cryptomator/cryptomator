@@ -1,46 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ButtonBar?>
+<?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextArea?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.shape.Circle?>
 <?import org.cryptomator.ui.controls.FontAwesome5IconView?>
 <?import org.cryptomator.ui.controls.FormattedLabel?>
 <VBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
 	  fx:controller="org.cryptomator.ui.recoverykey.RecoveryKeyDisplayController"
-	  minWidth="400"
-	  maxWidth="400"
-	  minHeight="145"
-	  maxHeight="180"
+	  minWidth="350"
+	  minHeight="280"
 	  spacing="12"
-	  alignment="TOP_CENTER">
-	<padding>
-		<Insets topRightBottomLeft="12"/>
-	</padding>
+	  alignment="TOP_LEFT">
 	<children>
-		<HBox spacing="12" alignment="CENTER_LEFT" VBox.vgrow="ALWAYS">
-			<StackPane alignment="CENTER" HBox.hgrow="NEVER">
-				<Circle styleClass="glyph-icon-primary" radius="24"/>
-				<FontAwesome5IconView styleClass="glyph-icon-white" glyph="CHECK" glyphSize="24"/>
-			</StackPane>
+		<FormattedLabel format="%recoveryKey.display.message" arg1="${controller.vaultName}" wrapText="true"/>
 
-			<VBox spacing="6" HBox.hgrow="ALWAYS">
-				<FormattedLabel format="%recoveryKey.display.message" arg1="${controller.vault.displayableName}" wrapText="true" VBox.vgrow="NEVER"/>
-				<TextArea editable="false" text="${controller.recoveryKey}" wrapText="true" VBox.vgrow="ALWAYS"/>
-			</VBox>
-		</HBox>
+		<TextArea editable="false" text="${controller.recoveryKey}" wrapText="true" prefRowCount="4" fx:id="textarea"/>
+		<ButtonBar buttonMinWidth="120" buttonOrder="+R">
+			<buttons>
+				<Button text="%generic.button.print" ButtonBar.buttonData="RIGHT" onAction="#printRecoveryKey" visible="${controller.printerSupported}">
+					<graphic>
+						<FontAwesome5IconView glyph="PRINT"/>
+					</graphic>
+				</Button>
+				<Button text="%generic.button.copy" ButtonBar.buttonData="RIGHT" onAction="#copyRecoveryKey">
+					<graphic>
+						<FontAwesome5IconView glyph="COPY"/>
+					</graphic>
+				</Button>
+			</buttons>
+		</ButtonBar>
 
-		<VBox alignment="BOTTOM_CENTER" VBox.vgrow="ALWAYS">
-			<ButtonBar buttonMinWidth="120" buttonOrder="+C">
-				<buttons>
-					<Button text="%generic.button.done" ButtonBar.buttonData="CANCEL_CLOSE" cancelButton="true" onAction="#close"/>
-				</buttons>
-			</ButtonBar>
-		</VBox>
+		<Region VBox.vgrow="ALWAYS"/>
+
+		<Label text="%recoveryKey.display.StorageHints" wrapText="true"/>
 	</children>
 </VBox>

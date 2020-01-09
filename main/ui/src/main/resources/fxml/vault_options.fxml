@@ -8,6 +8,7 @@
 		 fx:id="tabPane"
 		 fx:controller="org.cryptomator.ui.vaultoptions.VaultOptionsController"
 		 minWidth="400"
+		 tabMinWidth="60"
 		 tabClosingPolicy="UNAVAILABLE"
 		 tabDragPolicy="FIXED">
 	<tabs>

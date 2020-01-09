@@ -8,12 +8,11 @@
  *******************************************************************************/
 package org.cryptomator.ui.common;
 
-import com.google.common.base.Strings;
 import com.nulabinc.zxcvbn.Zxcvbn;
+import org.cryptomator.common.Environment;
 import org.cryptomator.ui.fxapp.FxApplicationScoped;
 
 import javax.inject.Inject;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -22,30 +21,37 @@ public class PasswordStrengthUtil {
 
 	private static final int PW_TRUNC_LEN = 100; // truncate very long passwords, since zxcvbn memory and runtime depends vastly on the length
 	private static final String RESSOURCE_PREFIX = "passwordStrength.messageLabel.";
+	private static final List<String> SANITIZED_INPUTS = List.of("cryptomator");
 
-	private final Zxcvbn zxcvbn;
-	private final List<String> sanitizedInputs;
 	private final ResourceBundle resourceBundle;
+	private final int minPwLength;
+	private final Zxcvbn zxcvbn;
 
 	@Inject
-	public PasswordStrengthUtil(ResourceBundle resourceBundle) {
+	public PasswordStrengthUtil(ResourceBundle resourceBundle, Environment environment) {
 		this.resourceBundle = resourceBundle;
+		this.minPwLength = environment.getMinPwLength();
 		this.zxcvbn = new Zxcvbn();
-		this.sanitizedInputs = List.of("cryptomator");
 	}
 
-	public int computeRate(String password) {
-		if (Strings.isNullOrEmpty(password)) {
+	public boolean fulfillsMinimumRequirements(CharSequence password) {
+		return password.length() >= minPwLength;
+	}
+
+	public int computeRate(CharSequence password) {
+		if (password == null || password.length() < minPwLength) {
 			return -1;
 		} else {
 			int numCharsToRate = Math.min(PW_TRUNC_LEN, password.length());
-			return zxcvbn.measure(password.substring(0, numCharsToRate), sanitizedInputs).getScore();
+			return zxcvbn.measure(password.subSequence(0, numCharsToRate), SANITIZED_INPUTS).getScore();
 		}
 	}
 
 	public String getStrengthDescription(Number score) {
-		if (resourceBundle.containsKey(RESSOURCE_PREFIX + score.intValue())) {
-			return resourceBundle.getString("passwordStrength.messageLabel." + score.intValue());
+		if (score.intValue() == -1) {
+			return String.format(resourceBundle.getString(RESSOURCE_PREFIX + "tooShort"), minPwLength);
+		} else if (resourceBundle.containsKey(RESSOURCE_PREFIX + score.intValue())) {
+			return resourceBundle.getString(RESSOURCE_PREFIX + score.intValue());
 		} else {
 			return "";
 		}

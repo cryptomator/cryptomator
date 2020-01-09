@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.cryptomator</groupId>
 		<artifactId>main</artifactId>
-		<version>1.5.0-beta1</version>
+		<version>1.5.0-beta2</version>
 	</parent>
 	<artifactId>commons</artifactId>
 	<name>Cryptomator Commons</name>
@@ -46,6 +46,12 @@
 		<dependency>
 			<groupId>org.fxmisc.easybind</groupId>
 			<artifactId>easybind</artifactId>
+		</dependency>
+
+		<!-- JWT -->
+		<dependency>
+			<groupId>com.auth0</groupId>
+			<artifactId>java-jwt</artifactId>
 		</dependency>
 
 		<!-- Google -->

@@ -9,55 +9,32 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.shape.Rectangle?>
 <?import org.cryptomator.ui.controls.FontAwesome5IconView?>
-<?import javafx.scene.layout.Pane?>
-<VBox xmlns="http://javafx.com/javafx"
-	  xmlns:fx="http://javafx.com/fxml"
-	  fx:id="root"
-	  fx:controller="org.cryptomator.ui.mainwindow.MainWindowController"
-	  styleClass="main-window">
-	<HBox styleClass="title" fx:id="titleBar" alignment="CENTER" minHeight="50" maxHeight="50" VBox.vgrow="NEVER" spacing="6">
-		<padding>
-			<Insets bottom="6" left="12" right="12" top="6"/>
-		</padding>
-		<children>
-			<Label text="Cryptomator"/>
-			<Region HBox.hgrow="ALWAYS"/>
-			<Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#showPreferences" focusTraversable="false">
-				<graphic>
-					<StackPane>
-						<FontAwesome5IconView glyph="COGS"/>
-						<Region styleClass="update-indicator" visible="${controller.updateAvailable}" StackPane.alignment="TOP_RIGHT" prefWidth="10" prefHeight="10" maxWidth="-Infinity" maxHeight="-Infinity"/>
-					</StackPane>
-				</graphic>
-				<tooltip>
-					<Tooltip text="%main.preferencesBtn.tooltip"/>
-				</tooltip>
-			</Button>
-			<Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#close" focusTraversable="false">
-				<graphic>
-					<FontAwesome5IconView glyph="TIMES"/>
-				</graphic>
-				<tooltip>
-					<Tooltip text="%main.closeBtn.tooltip"/>
-				</tooltip>
-			</Button>
-		</children>
-	</HBox>
-	<StackPane VBox.vgrow="ALWAYS">
-		<SplitPane dividerPositions="0.33" orientation="HORIZONTAL">
-			<fx:include source="/fxml/vault_list.fxml" SplitPane.resizableWithParent="false"/>
-			<fx:include source="/fxml/vault_detail.fxml" SplitPane.resizableWithParent="true"/>
-		</SplitPane>
-		<Region styleClass="resizer" StackPane.alignment="BOTTOM_RIGHT" fx:id="resizer" prefWidth="10" prefHeight="10" maxWidth="-Infinity" maxHeight="-Infinity"/>
-		<!-- TODO: use css instead of adding a Rectangle: -->
-		<Pane fx:id="dragAndDropIndicator">
-			<StackPane.margin>
-				<Insets topRightBottomLeft="24"/>
-			</StackPane.margin>
-			<Rectangle arcHeight="4" arcWidth="4" fill="gainsboro" strokeType="CENTERED" strokeWidth="3" strokeDashArray="20, 20" strokeLineJoin="ROUND" stroke="black" height="${dragAndDropIndicator.height}"
-					   width="${dragAndDropIndicator.width}"/>
-		</Pane>
-	</StackPane>
-</VBox>
+<StackPane xmlns="http://javafx.com/javafx"
+		   xmlns:fx="http://javafx.com/fxml"
+		   fx:id="root"
+		   fx:controller="org.cryptomator.ui.mainwindow.MainWindowController"
+		   styleClass="main-window">
+	<VBox>
+		<fx:include source="/fxml/main_window_title.fxml" VBox.vgrow="NEVER" />
+		<StackPane VBox.vgrow="ALWAYS">
+			<SplitPane dividerPositions="0.33" orientation="HORIZONTAL">
+				<fx:include source="/fxml/vault_list.fxml" SplitPane.resizableWithParent="false"/>
+				<fx:include source="/fxml/vault_detail.fxml" SplitPane.resizableWithParent="true"/>
+			</SplitPane>
+
+			<VBox styleClass="drag-n-drop-indicator" visible="${controller.draggingOver}" alignment="TOP_CENTER">
+				<HBox visible="${!controller.draggingVaultOver}" managed="${!controller.draggingVaultOver}" spacing="6" styleClass="drag-n-drop-header" alignment="CENTER" VBox.vgrow="NEVER">
+					<FontAwesome5IconView glyph="EXCLAMATION_TRIANGLE"/>
+					<Label text="%main.dropZone.unknownDragboardContent"/>
+				</HBox>
+				<HBox visible="${controller.draggingVaultOver}" managed="${controller.draggingVaultOver}" spacing="6" styleClass="drag-n-drop-header" alignment="CENTER" VBox.vgrow="NEVER">
+					<FontAwesome5IconView glyph="CHECK"/>
+					<Label text="%main.dropZone.dropVault"/>
+				</HBox>
+				<Region VBox.vgrow="ALWAYS"/>
+			</VBox>
+		</StackPane>
+	</VBox>
+	<fx:include source="/fxml/main_window_resize.fxml"/>
+</StackPane>

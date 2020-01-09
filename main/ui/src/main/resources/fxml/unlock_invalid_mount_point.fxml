@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ButtonBar?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Circle?>
+<?import org.cryptomator.ui.controls.FontAwesome5IconView?>
+<?import org.cryptomator.ui.controls.FormattedLabel?>
+<VBox xmlns="http://javafx.com/javafx"
+	  xmlns:fx="http://javafx.com/fxml"
+	  fx:controller="org.cryptomator.ui.unlock.UnlockInvalidMountPointController"
+	  minWidth="400"
+	  maxWidth="400"
+	  minHeight="145"
+	  spacing="12">
+	<padding>
+		<Insets topRightBottomLeft="12"/>
+	</padding>
+	<children>
+		<HBox spacing="12" VBox.vgrow="ALWAYS">
+			<StackPane alignment="CENTER" HBox.hgrow="NEVER">
+				<Circle styleClass="glyph-icon-primary" radius="24"/>
+				<FontAwesome5IconView styleClass="glyph-icon-white" glyph="EXCLAMATION" glyphSize="24"/>
+			</StackPane>
+			<VBox spacing="6" HBox.hgrow="ALWAYS">
+				<FormattedLabel format="%unlock.error.invalidMountPoint" arg1="${controller.mountPoint}" wrapText="true"/>
+			</VBox>
+		</HBox>
+
+		<Region VBox.vgrow="ALWAYS"/>
+
+		<VBox alignment="BOTTOM_CENTER" VBox.vgrow="ALWAYS">
+			<ButtonBar buttonMinWidth="120" buttonOrder="B+U">
+				<buttons>
+					<Button text="%generic.button.back" ButtonBar.buttonData="BACK_PREVIOUS" cancelButton="true" onAction="#back"/>
+					<Region ButtonBar.buttonData="OTHER"/>
+				</buttons>
+			</ButtonBar>
+		</VBox>
+	</children>
+</VBox>
