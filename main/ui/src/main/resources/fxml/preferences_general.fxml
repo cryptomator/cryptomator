@@ -21,7 +21,7 @@
 	<children>
 		<HBox spacing="6" alignment="CENTER_LEFT">
 			<Label text="%preferences.general.theme"/>
-			<ChoiceBox fx:id="themeChoiceBox"/>
+			<ChoiceBox fx:id="themeChoiceBox" disable="${!controller.licenseHolder.validLicense}"/>
 		</HBox>
 		
 		<HBox spacing="6" alignment="CENTER_LEFT">

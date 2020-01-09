@@ -9,6 +9,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableSet;
 import javafx.stage.Stage;
+import org.cryptomator.common.LicenseHolder;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.UiTheme;
 import org.cryptomator.common.vaults.Vault;
@@ -41,11 +42,12 @@ public class FxApplication extends Application {
 	private final QuitComponent.Builder quitWindowBuilder;
 	private final Optional<MacFunctions> macFunctions;
 	private final VaultService vaultService;
+	private final LicenseHolder licenseHolder;
 	private final ObservableSet<Stage> visibleStages = FXCollections.observableSet();
 	private final BooleanBinding hasVisibleStages = Bindings.isNotEmpty(visibleStages);
 
 	@Inject
-	FxApplication(Settings settings, Lazy<MainWindowComponent> mainWindow, Lazy<PreferencesComponent> preferencesWindow, UnlockComponent.Builder unlockWindowBuilder, QuitComponent.Builder quitWindowBuilder, Optional<MacFunctions> macFunctions, VaultService vaultService) {
+	FxApplication(Settings settings, Lazy<MainWindowComponent> mainWindow, Lazy<PreferencesComponent> preferencesWindow, UnlockComponent.Builder unlockWindowBuilder, QuitComponent.Builder quitWindowBuilder, Optional<MacFunctions> macFunctions, VaultService vaultService, LicenseHolder licenseHolder) {
 		this.settings = settings;
 		this.mainWindow = mainWindow;
 		this.preferencesWindow = preferencesWindow;
@@ -53,6 +55,7 @@ public class FxApplication extends Application {
 		this.quitWindowBuilder = quitWindowBuilder;
 		this.macFunctions = macFunctions;
 		this.vaultService = vaultService;
+		this.licenseHolder = licenseHolder;
 	}
 
 	public void start() {
@@ -123,7 +126,8 @@ public class FxApplication extends Application {
 		loadSelectedStyleSheet(newValue);
 	}
 
-	private void loadSelectedStyleSheet(UiTheme theme) {
+	private void loadSelectedStyleSheet(UiTheme desiredTheme) {
+		UiTheme theme = licenseHolder.isValidLicense() ? desiredTheme : UiTheme.LIGHT;
 		switch (theme) {
 //			case CUSTOM:
 //				// TODO

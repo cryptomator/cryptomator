@@ -11,6 +11,7 @@ import javafx.scene.control.RadioButton;
 import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleGroup;
 import javafx.util.StringConverter;
+import org.cryptomator.common.LicenseHolder;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.UiTheme;
 import org.cryptomator.ui.common.FxController;
@@ -30,6 +31,7 @@ public class GeneralPreferencesController implements FxController {
 	private final Settings settings;
 	private final boolean trayMenuSupported;
 	private final Optional<AutoStartStrategy> autoStartStrategy;
+	private final LicenseHolder licenseHolder;
 	private final ExecutorService executor;
 	public ChoiceBox<UiTheme> themeChoiceBox;
 	public CheckBox startHiddenCheckbox;
@@ -40,10 +42,11 @@ public class GeneralPreferencesController implements FxController {
 	public RadioButton nodeOrientationRtl;
 
 	@Inject
-	GeneralPreferencesController(Settings settings, @Named("trayMenuSupported") boolean trayMenuSupported, Optional<AutoStartStrategy> autoStartStrategy, ExecutorService executor) {
+	GeneralPreferencesController(Settings settings, @Named("trayMenuSupported") boolean trayMenuSupported, Optional<AutoStartStrategy> autoStartStrategy, LicenseHolder licenseHolder, ExecutorService executor) {
 		this.settings = settings;
 		this.trayMenuSupported = trayMenuSupported;
 		this.autoStartStrategy = autoStartStrategy;
+		this.licenseHolder = licenseHolder;
 		this.executor = executor;
 	}
 
@@ -94,6 +97,10 @@ public class GeneralPreferencesController implements FxController {
 			toggleTask.setOnFailed(evt -> autoStartCheckbox.setSelected(!enableAutoStart)); // restore previous state
 			executor.execute(toggleTask);
 		});
+	}
+
+	public LicenseHolder getLicenseHolder() {
+		return licenseHolder;
 	}
 
 	/* Helper classes */
