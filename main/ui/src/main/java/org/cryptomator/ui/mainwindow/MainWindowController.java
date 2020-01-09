@@ -7,8 +7,7 @@ import javafx.fxml.FXML;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Region;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import org.cryptomator.common.LicenseHolder;
 import org.cryptomator.common.vaults.VaultListManager;
@@ -46,8 +45,7 @@ public class MainWindowController implements FxController {
 	private final BooleanProperty draggingOver = new SimpleBooleanProperty();
 	private final BooleanProperty draggingVaultOver = new SimpleBooleanProperty();
 	public HBox titleBar;
-	public VBox root;
-	public Region resizer;
+	public StackPane root;
 	private double xOffset;
 	private double yOffset;
 
@@ -73,11 +71,6 @@ public class MainWindowController implements FxController {
 		titleBar.setOnMouseDragged(event -> {
 			window.setX(event.getScreenX() - xOffset);
 			window.setY(event.getScreenY() - yOffset);
-		});
-		resizer.setOnMouseDragged(event -> {
-			// we know for a fact that window is borderless. i.e. the scene starts at 0/0 of the window.
-			window.setWidth(event.getSceneX());
-			window.setHeight(event.getSceneY());
 		});
 		updateChecker.automaticallyCheckForUpdatesIfEnabled();
 		root.setOnDragEntered(this::handleDragEvent);

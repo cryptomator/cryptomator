@@ -184,20 +184,6 @@
 	-fx-fill: CONTROL_WHITE_BG_ARMED;
 }
 
-.main-window .resizer {
-	-fx-background-color: linear-gradient(to bottom right,
-		transparent 50%,
-		CONTROL_BORDER_NORMAL 51%,
-		CONTROL_BORDER_NORMAL 60%,
-		transparent 61%,
-		transparent 70%,
-		CONTROL_BORDER_NORMAL 71%,
-		CONTROL_BORDER_NORMAL 80%,
-		transparent 81%
-	);
-	-fx-cursor: nw_resize;
-}
-
 .main-window .update-indicator {
 	-fx-background-color: PRIMARY_BG, white, INDICATOR_BG;
 	-fx-background-insets: 0, 1px, 2px;

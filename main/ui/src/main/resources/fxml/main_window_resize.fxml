@@ -1,0 +1,17 @@
+<?import javafx.scene.Cursor?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.Region?>
+<AnchorPane xmlns="http://javafx.com/javafx"
+			xmlns:fx="http://javafx.com/fxml"
+			fx:controller="org.cryptomator.ui.mainwindow.ResizeController"
+			nodeOrientation="LEFT_TO_RIGHT"
+			pickOnBounds="false">
+	<fx:define>
+		<Cursor fx:id="nwResize" fx:constant="NW_RESIZE"/>
+		<Cursor fx:id="neResize" fx:constant="NE_RESIZE"/>
+	</fx:define>
+	<Region fx:id="tlResizer" cursor="${nwResize}" prefWidth="10" prefHeight="10" maxWidth="-Infinity" maxHeight="-Infinity" AnchorPane.topAnchor="0" AnchorPane.leftAnchor="0"/>
+	<Region fx:id="trResizer" cursor="${neResize}" prefWidth="10" prefHeight="10" maxWidth="-Infinity" maxHeight="-Infinity" AnchorPane.topAnchor="0" AnchorPane.rightAnchor="0"/>
+	<Region fx:id="blResizer" cursor="${neResize}" prefWidth="10" prefHeight="10" maxWidth="-Infinity" maxHeight="-Infinity" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0"/>
+	<Region fx:id="brResizer" cursor="${nwResize}" prefWidth="10" prefHeight="10" maxWidth="-Infinity" maxHeight="-Infinity" AnchorPane.bottomAnchor="0" AnchorPane.rightAnchor="0"/>
+</AnchorPane>
