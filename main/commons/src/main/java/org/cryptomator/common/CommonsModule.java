@@ -28,7 +28,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
 
 @Module(subcomponents = {VaultComponent.class})
 public abstract class CommonsModule {
@@ -39,11 +38,11 @@ public abstract class CommonsModule {
 	@Singleton
 	@Named("licensePublicKey")
 	static String provideLicensePublicKey() {
-		// TODO replace
-		return "MIGbMBAGByqGSM49AgEGBSuBBAAjA4GGAAQBgc4HZz+/fBbC7lmEww0AO3NK9wVZ" //
-				+ "PDZ0VEnsaUFLEYpTzb90nITtJUcPUbvOsdZIZ1Q8fnbquAYgxXL5UgHMoywAib47" //
-				+ "6MkyyYgPk0BXZq3mq4zImTRNuaU9slj9TVJ3ScT3L1bXwVuPJDzpr5GOFpaj+WwM" //
-				+ "Al8G7CqwoJOsW7Kddns=";
+		// in PEM format without the dash-escaped begin/end lines
+		return "MIGbMBAGByqGSM49AgEGBSuBBAAjA4GGAAQB7NfnqiZbg2KTmoflmZ71PbXru7oW" //
+				+ "fmnV2yv3eDjlDfGruBrqz9TtXBZV/eYWt31xu1osIqaT12lKBvZ511aaAkIBeOEV" //
+				+ "gwcBIlJr6kUw7NKzeJt7r2rrsOyQoOG2nWc/Of/NBqA3mIZRHk5Aq1YupFdD26QE" //
+				+ "r0DzRyj4ixPIt38CQB8=";
 	}
 
 	@Provides
