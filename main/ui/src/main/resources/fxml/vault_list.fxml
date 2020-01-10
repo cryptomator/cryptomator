@@ -24,7 +24,7 @@
 				</ContextMenu>
 			</contextMenu>
 		</ListView>
-		<VBox spacing="6" alignment="CENTER">
+		<VBox visible="${controller.emptyVaultList}" spacing="6" alignment="CENTER">
 			<Region VBox.vgrow="ALWAYS"/>
 			<Label VBox.vgrow="NEVER" text="%main.vaultlist.emptyList.onboardingInstruction" wrapText="true"/>
 			<Arc VBox.vgrow="NEVER" styleClass="onboarding-overlay-arc" type="OPEN" centerX="50" centerY="0" radiusY="100" radiusX="50" startAngle="0" length="-60" strokeWidth="1"/>
