@@ -21,8 +21,8 @@ import org.cryptomator.ui.mainwindow.MainWindow;
 
 import javax.inject.Named;
 import javax.inject.Provider;
+import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.ResourceBundle;
 
 @Module
@@ -38,13 +38,13 @@ abstract class RemoveVaultModule {
 	@Provides
 	@RemoveVaultWindow
 	@RemoveVaultScoped
-	static Stage provideStage(@MainWindow Stage owner,  ResourceBundle resourceBundle, @Named("windowIcon") Optional<Image> windowIcon) {
+	static Stage provideStage(@MainWindow Stage owner,  ResourceBundle resourceBundle, @Named("windowIcons") List<Image> windowIcons) {
 		Stage stage = new Stage();
 		stage.setTitle(resourceBundle.getString("removeVault.title"));
 		stage.setResizable(false);
 		stage.initModality(Modality.WINDOW_MODAL);
 		stage.initOwner(owner);
-		windowIcon.ifPresent(stage.getIcons()::add);
+		stage.getIcons().addAll(windowIcons);
 		return stage;
 	}
 

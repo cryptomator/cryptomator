@@ -22,6 +22,8 @@ import org.cryptomator.ui.unlock.UnlockComponent;
 import javax.inject.Named;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Module(includes = {UpdateCheckerModule.class}, subcomponents = {MainWindowComponent.class, PreferencesComponent.class, UnlockComponent.class, QuitComponent.class})
@@ -34,17 +36,17 @@ abstract class FxApplicationModule {
 	}
 
 	@Provides
-	@Named("windowIcon")
+	@Named("windowIcons")
 	@FxApplicationScoped
-	static Optional<Image> provideWindowIcon() {
+	static List<Image> provideWindowIcons() {
 		if (SystemUtils.IS_OS_MAC) {
-			return Optional.empty();
+			return new ArrayList<>();
 		}
-		try (InputStream in = FxApplicationModule.class.getResourceAsStream("/window_icon_32.png")) { // TODO: use some higher res depending on display?
-			return Optional.of(new Image(in));
-		} catch (IOException e) {
-			return Optional.empty();
-		}
+
+		ArrayList<Image> icons = new ArrayList<>();
+		icons.add(new Image(FxApplicationModule.class.getResourceAsStream("/window_icon_32.png")));
+		icons.add(new Image(FxApplicationModule.class.getResourceAsStream("/window_icon_512.png")));
+		return icons;
 	}
 	
 	@Binds

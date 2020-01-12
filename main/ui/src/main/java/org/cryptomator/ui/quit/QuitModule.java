@@ -20,8 +20,8 @@ import org.cryptomator.ui.common.FxmlScene;
 
 import javax.inject.Named;
 import javax.inject.Provider;
+import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.ResourceBundle;
 
 @Module
@@ -37,12 +37,12 @@ abstract class QuitModule {
 	@Provides
 	@QuitWindow
 	@QuitScoped
-	static Stage provideStage(@Named("windowIcon") Optional<Image> windowIcon) {
+	static Stage provideStage(@Named("windowIcons") List<Image> windowIcons) {
 		Stage stage = new Stage();
 		stage.setMinWidth(300);
 		stage.setMinHeight(100);
 		stage.initModality(Modality.APPLICATION_MODAL);
-		windowIcon.ifPresent(stage.getIcons()::add);
+		stage.getIcons().addAll(windowIcons);
 		return stage;
 	}
 
