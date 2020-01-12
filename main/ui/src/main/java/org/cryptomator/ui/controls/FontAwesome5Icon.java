@@ -33,6 +33,7 @@ public enum FontAwesome5Icon {
 	TIMES("\uF00D"), //
 	USER_CROWN("\uF6A4"), //
 	WRENCH("\uF0AD"), //
+	WINDOW_MINIMIZE("\uF2D1"), //
 	;
 
 	private final String unicode;

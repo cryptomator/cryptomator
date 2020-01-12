@@ -3,16 +3,21 @@ package org.cryptomator.ui.fxapp;
 import dagger.Lazy;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.collections.ObservableSet;
 import javafx.stage.Stage;
 import org.cryptomator.common.LicenseHolder;
+import org.cryptomator.common.ShutdownHook;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.UiTheme;
 import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.common.vaults.VaultState;
+import org.cryptomator.common.vaults.Volume;
 import org.cryptomator.jni.JniException;
 import org.cryptomator.jni.MacApplicationUiAppearance;
 import org.cryptomator.jni.MacApplicationUiState;
@@ -27,13 +32,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.inject.Named;
+import java.awt.Desktop;
 import java.awt.desktop.QuitResponse;
+import java.util.EnumSet;
+import java.util.EventObject;
 import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @FxApplicationScoped
 public class FxApplication extends Application {
 
 	private static final Logger LOG = LoggerFactory.getLogger(FxApplication.class);
+	private static final Set<VaultState> STATES_ALLOWING_TERMINATION = EnumSet.of(VaultState.LOCKED, VaultState.NEEDS_MIGRATION, VaultState.MISSING, VaultState.ERROR);
 
 	private final Settings settings;
 	private final Lazy<MainWindowComponent> mainWindow;
@@ -45,9 +58,13 @@ public class FxApplication extends Application {
 	private final LicenseHolder licenseHolder;
 	private final ObservableSet<Stage> visibleStages = FXCollections.observableSet();
 	private final BooleanBinding hasVisibleStages = Bindings.isNotEmpty(visibleStages);
+	private final AtomicBoolean allowSuddenTermination;
+	private final CountDownLatch shutdownLatch;
+	private final ShutdownHook shutdownHook;
+	private final ObservableList<Vault> vaults;
 
 	@Inject
-	FxApplication(Settings settings, Lazy<MainWindowComponent> mainWindow, Lazy<PreferencesComponent> preferencesWindow, UnlockComponent.Builder unlockWindowBuilder, QuitComponent.Builder quitWindowBuilder, Optional<MacFunctions> macFunctions, VaultService vaultService, LicenseHolder licenseHolder) {
+	FxApplication(Settings settings, Lazy<MainWindowComponent> mainWindow, Lazy<PreferencesComponent> preferencesWindow, UnlockComponent.Builder unlockWindowBuilder, QuitComponent.Builder quitWindowBuilder, Optional<MacFunctions> macFunctions, VaultService vaultService, LicenseHolder licenseHolder, ObservableList<Vault> vaults, @Named("shutdownLatch") CountDownLatch shutdownLatch, ShutdownHook shutdownHook) {
 		this.settings = settings;
 		this.mainWindow = mainWindow;
 		this.preferencesWindow = preferencesWindow;
@@ -56,6 +73,10 @@ public class FxApplication extends Application {
 		this.macFunctions = macFunctions;
 		this.vaultService = vaultService;
 		this.licenseHolder = licenseHolder;
+		this.vaults = vaults;
+		this.shutdownLatch = shutdownLatch;
+		this.shutdownHook = shutdownHook;
+		this.allowSuddenTermination = new AtomicBoolean(true);
 	}
 
 	public void start() {
@@ -66,6 +87,25 @@ public class FxApplication extends Application {
 
 		settings.theme().addListener(this::themeChanged);
 		loadSelectedStyleSheet(settings.theme().get());
+
+		vaults.addListener(this::vaultsChanged);
+
+		shutdownHook.runOnShutdown(this::forceUnmountRemainingVaults);
+
+		// register preferences shortcut
+		if (Desktop.getDesktop().isSupported(Desktop.Action.APP_PREFERENCES)) {
+			Desktop.getDesktop().setPreferencesHandler(this::showPreferencesWindow);
+		}
+
+		// register quit handler
+		if (Desktop.getDesktop().isSupported(Desktop.Action.APP_QUIT_HANDLER)) {
+			Desktop.getDesktop().setQuitHandler(this::handleQuitRequest);
+		}
+
+		// allow sudden termination
+		if (Desktop.getDesktop().isSupported(Desktop.Action.APP_SUDDEN_TERMINATION)) {
+			Desktop.getDesktop().enableSuddenTermination();
+		}
 	}
 
 	@Override
@@ -86,7 +126,7 @@ public class FxApplication extends Application {
 		}
 	}
 
-	public void showPreferencesWindow(SelectedPreferencesTab selectedTab) {
+	public void showPreferencesTab(SelectedPreferencesTab selectedTab) {
 		Platform.runLater(() -> {
 			Stage stage = preferencesWindow.get().showPreferencesWindow(selectedTab);
 			addVisibleStage(stage);
@@ -110,7 +150,7 @@ public class FxApplication extends Application {
 		});
 	}
 
-	public void showQuitWindow(QuitResponse response) {
+	private void showQuitWindow(@SuppressWarnings("unused") EventObject actionEvent, QuitResponse response) {
 		Platform.runLater(() -> {
 			Stage stage = quitWindowBuilder.quitResponse(response).build().showQuitWindow();
 			addVisibleStage(stage);
@@ -145,4 +185,55 @@ public class FxApplication extends Application {
 		}
 	}
 
+	public void quitApplication() {
+		handleQuitRequest(null, new QuitResponse() {
+			@Override
+			public void performQuit() {
+				shutdownLatch.countDown();
+			}
+
+			@Override
+			public void cancelQuit() {
+				// no-op
+			}
+		});
+	}
+
+	private void showPreferencesWindow(@SuppressWarnings("unused") EventObject actionEvent) {
+		showPreferencesTab(SelectedPreferencesTab.ANY);
+	}
+
+	private void handleQuitRequest(EventObject e, QuitResponse response) {
+		if (allowSuddenTermination.get()) {
+			response.performQuit(); // really?
+		} else {
+			showQuitWindow(e, response);
+		}
+	}
+
+	private void vaultsChanged(@SuppressWarnings("unused") Observable observable) {
+		boolean allVaultsAllowTermination = vaults.stream().map(Vault::getState).allMatch(STATES_ALLOWING_TERMINATION::contains);
+		boolean suddenTerminationChanged = allowSuddenTermination.compareAndSet(!allVaultsAllowTermination, allVaultsAllowTermination);
+		if (suddenTerminationChanged && Desktop.getDesktop().isSupported(Desktop.Action.APP_SUDDEN_TERMINATION)) {
+			if (allVaultsAllowTermination) {
+				Desktop.getDesktop().enableSuddenTermination();
+				LOG.debug("sudden termination enabled");
+			} else {
+				Desktop.getDesktop().disableSuddenTermination();
+				LOG.debug("sudden termination disabled");
+			}
+		}
+	}
+
+	private void forceUnmountRemainingVaults() {
+		for (Vault vault : vaults) {
+			if (vault.isUnlocked()) {
+				try {
+					vault.lock(true);
+				} catch (Volume.VolumeException e) {
+					LOG.error("Failed to unmount vault " + vault.getPath(), e);
+				}
+			}
+		}
+	}
 }

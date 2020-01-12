@@ -5,12 +5,10 @@ import javafx.fxml.FXML;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import org.cryptomator.common.LicenseHolder;
-import org.cryptomator.common.vaults.VaultListManager;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.fxapp.FxApplication;
 import org.cryptomator.ui.fxapp.UpdateChecker;
 import org.cryptomator.ui.preferences.SelectedPreferencesTab;
-import org.cryptomator.ui.wrongfilealert.WrongFileAlertComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,18 +61,23 @@ public class MainWindowTitleController implements FxController {
 		if (minimizeToSysTray) {
 			window.close();
 		} else {
-			window.setIconified(true);
+			application.quitApplication();
 		}
 	}
 
 	@FXML
+	public void minimize() {
+		window.setIconified(true);
+	}
+
+	@FXML
 	public void showPreferences() {
-		application.showPreferencesWindow(SelectedPreferencesTab.ANY);
+		application.showPreferencesTab(SelectedPreferencesTab.ANY);
 	}
 
 	@FXML
 	public void showDonationKeyPreferences() {
-		application.showPreferencesWindow(SelectedPreferencesTab.DONATION_KEY);
+		application.showPreferencesTab(SelectedPreferencesTab.DONATION_KEY);
 	}
 
 	/* Getter/Setter */
@@ -91,5 +94,7 @@ public class MainWindowTitleController implements FxController {
 		return updateAvailable.get();
 	}
 
-
+	public boolean isMinimizeToSysTray() {
+		return minimizeToSysTray;
+	}
 }
