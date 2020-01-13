@@ -22,9 +22,8 @@ import org.cryptomator.ui.unlock.UnlockComponent;
 import javax.inject.Named;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 @Module(includes = {UpdateCheckerModule.class}, subcomponents = {MainWindowComponent.class, PreferencesComponent.class, UnlockComponent.class, QuitComponent.class})
 abstract class FxApplicationModule {
@@ -40,15 +39,22 @@ abstract class FxApplicationModule {
 	@FxApplicationScoped
 	static List<Image> provideWindowIcons() {
 		if (SystemUtils.IS_OS_MAC) {
-			return new ArrayList<>();
+			return Collections.emptyList();
 		}
 
-		ArrayList<Image> icons = new ArrayList<>();
-		icons.add(new Image(FxApplicationModule.class.getResourceAsStream("/window_icon_32.png")));
-		icons.add(new Image(FxApplicationModule.class.getResourceAsStream("/window_icon_512.png")));
-		return icons;
+		try {
+			return List.of(createImageFromResource("/window_icon_32.png"), createImageFromResource("/window_icon_512.png"));
+		} catch (IOException e) {
+			return Collections.emptyList();
+		}
 	}
-	
+
+	private static Image createImageFromResource(String resourceName) throws IOException {
+		try (InputStream in = FxApplicationModule.class.getResourceAsStream(resourceName)) {
+			return new Image(in);
+		}
+	}
+
 	@Binds
 	abstract Application bindApplication(FxApplication application);
 
