@@ -5,15 +5,19 @@ import javafx.fxml.FXML;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import org.cryptomator.common.LicenseHolder;
+import org.cryptomator.common.vaults.VaultListManager;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.fxapp.FxApplication;
 import org.cryptomator.ui.fxapp.UpdateChecker;
 import org.cryptomator.ui.preferences.SelectedPreferencesTab;
+import org.cryptomator.ui.wrongfilealert.WrongFileAlertComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import java.awt.desktop.QuitResponse;
+import java.util.concurrent.CountDownLatch;
 
 @MainWindowScoped
 public class MainWindowTitleController implements FxController {
@@ -24,6 +28,7 @@ public class MainWindowTitleController implements FxController {
 
 	private final Stage window;
 	private final FxApplication application;
+	private final CountDownLatch shutdownLatch;
 	private final boolean minimizeToSysTray;
 	private final UpdateChecker updateChecker;
 	private final BooleanBinding updateAvailable;
@@ -33,9 +38,10 @@ public class MainWindowTitleController implements FxController {
 	private double yOffset;
 
 	@Inject
-	MainWindowTitleController(@MainWindow Stage window, FxApplication application, @Named("trayMenuSupported") boolean minimizeToSysTray, UpdateChecker updateChecker, LicenseHolder licenseHolder) {
+	MainWindowTitleController(@MainWindow Stage window, FxApplication application, @Named("shutdownLatch") CountDownLatch shutdownLatch, @Named("trayMenuSupported") boolean minimizeToSysTray, UpdateChecker updateChecker, LicenseHolder licenseHolder) {
 		this.window = window;
 		this.application = application;
+		this.shutdownLatch = shutdownLatch;
 		this.minimizeToSysTray = minimizeToSysTray;
 		this.updateChecker = updateChecker;
 		this.updateAvailable = updateChecker.latestVersionProperty().isNotNull();
@@ -61,8 +67,22 @@ public class MainWindowTitleController implements FxController {
 		if (minimizeToSysTray) {
 			window.close();
 		} else {
-			application.quitApplication();
+			quitApplication();
 		}
+	}
+
+	private void quitApplication() {
+		application.showQuitWindow(new QuitResponse() {
+			@Override
+			public void performQuit() {
+				shutdownLatch.countDown();
+			}
+
+			@Override
+			public void cancelQuit() {
+				// no-op
+			}
+		});
 	}
 
 	@FXML
@@ -72,12 +92,12 @@ public class MainWindowTitleController implements FxController {
 
 	@FXML
 	public void showPreferences() {
-		application.showPreferencesTab(SelectedPreferencesTab.ANY);
+		application.showPreferencesWindow(SelectedPreferencesTab.ANY);
 	}
 
 	@FXML
 	public void showDonationKeyPreferences() {
-		application.showPreferencesTab(SelectedPreferencesTab.DONATION_KEY);
+		application.showPreferencesWindow(SelectedPreferencesTab.DONATION_KEY);
 	}
 
 	/* Getter/Setter */
