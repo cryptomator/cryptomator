@@ -57,6 +57,9 @@ public class MainWindowTitleController implements FxController {
 			window.setX(event.getScreenX() - xOffset);
 			window.setY(event.getScreenY() - yOffset);
 		});
+		window.setOnCloseRequest(event -> {
+			close();
+		});
 	}
 
 	@FXML
