@@ -9,7 +9,7 @@
 
 	<organization>
 		<name>cryptomator.org</name>
-		<url>http://cryptomator.org</url>
+		<url>https://cryptomator.org</url>
 	</organization>
 
 	<developers>
@@ -50,7 +50,7 @@
 	<repositories>
 		<repository>
 			<id>jcenter</id>
-			<url>http://jcenter.bintray.com</url>
+			<url>https://jcenter.bintray.com</url>
 		</repository>
 	</repositories>
 
