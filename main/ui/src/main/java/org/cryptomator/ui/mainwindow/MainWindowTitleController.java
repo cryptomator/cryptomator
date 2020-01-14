@@ -59,6 +59,7 @@ public class MainWindowTitleController implements FxController {
 		});
 		window.setOnCloseRequest(event -> {
 			close();
+			event.consume();
 		});
 	}
 
