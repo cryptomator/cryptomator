@@ -22,6 +22,7 @@ import org.cryptomator.ui.unlock.UnlockComponent;
 import javax.inject.Named;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.util.Collections;
 import java.util.List;
 
@@ -43,9 +44,12 @@ abstract class FxApplicationModule {
 		}
 
 		try {
-			return List.of(createImageFromResource("/window_icon_32.png"), createImageFromResource("/window_icon_512.png"));
+			return List.of( //
+					createImageFromResource("/window_icon_32.png"), //
+					createImageFromResource("/window_icon_512.png") //
+			);
 		} catch (IOException e) {
-			return Collections.emptyList();
+			throw new UncheckedIOException("Failed to load embedded resource.", e);
 		}
 	}
 
