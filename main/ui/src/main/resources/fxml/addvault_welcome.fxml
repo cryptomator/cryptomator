@@ -29,7 +29,7 @@
 		<VBox alignment="CENTER" spacing="9">
 			<Button styleClass="button-large" text="%addvaultwizard.welcome.newButton" onAction="#createNewVault" prefWidth="Infinity">
 				<graphic>
-					<FontAwesome5IconView glyph="SPARKLES" glyphSize="15"/>
+					<FontAwesome5IconView glyph="MAGIC" glyphSize="15"/>
 				</graphic>
 			</Button>
 			<Button styleClass="button-large" text="%addvaultwizard.welcome.existingButton" onAction="#chooseExistingVault" prefWidth="Infinity">

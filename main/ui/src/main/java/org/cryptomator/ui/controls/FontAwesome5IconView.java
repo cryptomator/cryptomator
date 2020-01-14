@@ -18,7 +18,7 @@ public class FontAwesome5IconView extends Text {
 
 	private static final FontAwesome5Icon DEFAULT_GLYPH = FontAwesome5Icon.ANCHOR;
 	private static final double DEFAULT_GLYPH_SIZE = 12.0;
-	private static final String FONT_PATH = "/css/fontawesome5-pro-solid.otf";
+	private static final String FONT_PATH = "/css/fontawesome5-free-solid.otf";
 	private static final Font FONT;
 
 	private ObjectProperty<FontAwesome5Icon> glyph = new SimpleObjectProperty<>(this, "glyph", DEFAULT_GLYPH);

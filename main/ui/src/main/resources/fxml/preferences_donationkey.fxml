@@ -22,7 +22,7 @@
 			<HBox spacing="12" alignment="CENTER_LEFT" visible="${controller.licenseHolder.validLicense}">
 				<StackPane alignment="CENTER" HBox.hgrow="NEVER">
 					<Circle styleClass="glyph-icon-primary" radius="24"/>
-					<FontAwesome5IconView styleClass="glyph-icon-white" glyph="USER_CROWN" glyphSize="24"/>
+					<FontAwesome5IconView styleClass="glyph-icon-white" glyph="CROWN" glyphSize="24"/>
 				</StackPane>
 				<FormattedLabel format="%preferences.donationKey.registeredFor" arg1="${controller.licenseHolder.licenseSubject}" wrapText="true"/>
 			</HBox>
