@@ -21,8 +21,8 @@ import org.cryptomator.ui.forgetPassword.ForgetPasswordComponent;
 
 import javax.inject.Named;
 import javax.inject.Provider;
+import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.ResourceBundle;
 
 @Module(subcomponents = {ForgetPasswordComponent.class})
@@ -38,12 +38,12 @@ abstract class UnlockModule {
 	@Provides
 	@UnlockWindow
 	@UnlockScoped
-	static Stage provideStage(ResourceBundle resourceBundle, @Named("windowIcon") Optional<Image> windowIcon) {
+	static Stage provideStage(ResourceBundle resourceBundle, @Named("windowIcons") List<Image> windowIcons) {
 		Stage stage = new Stage();
 		stage.setTitle(resourceBundle.getString("unlock.title"));
 		stage.setResizable(false);
 		stage.initModality(Modality.APPLICATION_MODAL);
-		windowIcon.ifPresent(stage.getIcons()::add);
+		stage.getIcons().addAll(windowIcons);
 		return stage;
 	}
 

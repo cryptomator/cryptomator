@@ -25,8 +25,8 @@ import org.cryptomator.ui.wrongfilealert.WrongFileAlertComponent;
 
 import javax.inject.Named;
 import javax.inject.Provider;
+import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.ResourceBundle;
 
 @Module(subcomponents = {AddVaultWizardComponent.class, MigrationComponent.class, RemoveVaultComponent.class, VaultOptionsComponent.class, WrongFileAlertComponent.class})
@@ -42,7 +42,7 @@ abstract class MainWindowModule {
 	@Provides
 	@MainWindow
 	@MainWindowScoped
-	static Stage provideStage(@Named("windowIcon") Optional<Image> windowIcon) {
+	static Stage provideStage(@Named("windowIcons") List<Image> windowIcons) {
 		Stage stage = new Stage(StageStyle.UNDECORATED);
 		// TODO: min/max values chosen arbitrarily. We might wanna take a look at the user's resolution...
 		stage.setMinWidth(650);
@@ -50,7 +50,7 @@ abstract class MainWindowModule {
 		stage.setMaxWidth(1000);
 		stage.setMaxHeight(700);
 		stage.setTitle("Cryptomator");
-		windowIcon.ifPresent(stage.getIcons()::add);
+		stage.getIcons().addAll(windowIcons);
 		return stage;
 	}
 

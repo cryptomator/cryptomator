@@ -17,8 +17,8 @@ import org.cryptomator.ui.common.FxmlScene;
 
 import javax.inject.Named;
 import javax.inject.Provider;
+import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.ResourceBundle;
 
 @Module
@@ -34,12 +34,12 @@ abstract class WrongFileAlertModule {
 	@Provides
 	@WrongFileAlertWindow
 	@WrongFileAlertScoped
-	static Stage provideStage(ResourceBundle resourceBundle, @Named("windowIcon") Optional<Image> windowIcon) {
+	static Stage provideStage(ResourceBundle resourceBundle, @Named("windowIcons") List<Image> windowIcons) {
 		Stage stage = new Stage();
 		stage.setTitle(resourceBundle.getString("wrongFileAlert.title"));
 		stage.setResizable(false);
 		stage.initModality(Modality.WINDOW_MODAL);
-		windowIcon.ifPresent(stage.getIcons()::add);
+		stage.getIcons().addAll(windowIcons);
 		return stage;
 	}
 
