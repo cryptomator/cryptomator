@@ -16,6 +16,8 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import java.awt.desktop.QuitResponse;
+import java.util.concurrent.CountDownLatch;
 
 @MainWindowScoped
 public class MainWindowTitleController implements FxController {
@@ -26,6 +28,7 @@ public class MainWindowTitleController implements FxController {
 
 	private final Stage window;
 	private final FxApplication application;
+	private final CountDownLatch shutdownLatch;
 	private final boolean minimizeToSysTray;
 	private final UpdateChecker updateChecker;
 	private final BooleanBinding updateAvailable;
@@ -35,9 +38,10 @@ public class MainWindowTitleController implements FxController {
 	private double yOffset;
 
 	@Inject
-	MainWindowTitleController(@MainWindow Stage window, FxApplication application, @Named("trayMenuSupported") boolean minimizeToSysTray, UpdateChecker updateChecker, LicenseHolder licenseHolder) {
+	MainWindowTitleController(@MainWindow Stage window, FxApplication application, @Named("shutdownLatch") CountDownLatch shutdownLatch, @Named("trayMenuSupported") boolean minimizeToSysTray, UpdateChecker updateChecker, LicenseHolder licenseHolder) {
 		this.window = window;
 		this.application = application;
+		this.shutdownLatch = shutdownLatch;
 		this.minimizeToSysTray = minimizeToSysTray;
 		this.updateChecker = updateChecker;
 		this.updateAvailable = updateChecker.latestVersionProperty().isNotNull();
@@ -63,8 +67,27 @@ public class MainWindowTitleController implements FxController {
 		if (minimizeToSysTray) {
 			window.close();
 		} else {
-			window.setIconified(true);
+			quitApplication();
 		}
+	}
+
+	private void quitApplication() {
+		application.showQuitWindow(new QuitResponse() {
+			@Override
+			public void performQuit() {
+				shutdownLatch.countDown();
+			}
+
+			@Override
+			public void cancelQuit() {
+				// no-op
+			}
+		});
+	}
+
+	@FXML
+	public void minimize() {
+		window.setIconified(true);
 	}
 
 	@FXML
@@ -91,5 +114,7 @@ public class MainWindowTitleController implements FxController {
 		return updateAvailable.get();
 	}
 
-
+	public boolean isMinimizeToSysTray() {
+		return minimizeToSysTray;
+	}
 }

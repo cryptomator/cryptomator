@@ -43,6 +43,14 @@
 				<Tooltip text="%main.preferencesBtn.tooltip"/>
 			</tooltip>
 		</Button>
+		<Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#minimize" focusTraversable="false" visible="${!controller.minimizeToSysTray}" managed="${!controller.minimizeToSysTray}">
+			<graphic>
+				<FontAwesome5IconView glyph="WINDOW_MINIMIZE" glyphSize="12"/>
+			</graphic>
+			<tooltip>
+				<Tooltip text="%main.minimizeBtn.tooltip"/>
+			</tooltip>
+		</Button>
 		<Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#close" focusTraversable="false">
 			<graphic>
 				<FontAwesome5IconView glyph="TIMES" glyphSize="16"/>
