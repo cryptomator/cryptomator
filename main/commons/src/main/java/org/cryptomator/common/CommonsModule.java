@@ -5,7 +5,6 @@
  *******************************************************************************/
 package org.cryptomator.common;
 
-import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import javafx.beans.binding.Binding;
@@ -19,6 +18,8 @@ import org.cryptomator.common.vaults.VaultComponent;
 import org.cryptomator.common.vaults.VaultListManager;
 import org.cryptomator.frontend.webdav.WebDavServer;
 import org.fxmisc.easybind.EasyBind;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -27,12 +28,18 @@ import java.util.Comparator;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Module(subcomponents = {VaultComponent.class})
 public abstract class CommonsModule {
 
-	private static final int NUM_SCHEDULER_THREADS = 4;
+	private static final Logger LOG = LoggerFactory.getLogger(CommonsModule.class);
+	private static final int NUM_SCHEDULER_THREADS = 2;
+	private static final int NUM_CORE_BG_THREADS = 6;
+	private static final long BG_THREAD_KEEPALIVE_SECONDS = 60l;
 
 	@Provides
 	@Singleton
@@ -69,18 +76,38 @@ public abstract class CommonsModule {
 	static ScheduledExecutorService provideScheduledExecutorService(ShutdownHook shutdownHook) {
 		final AtomicInteger threadNumber = new AtomicInteger(1);
 		ScheduledExecutorService executorService = Executors.newScheduledThreadPool(NUM_SCHEDULER_THREADS, r -> {
+			String name = String.format("App Scheduled Executor %02d", threadNumber.getAndIncrement());
 			Thread t = new Thread(r);
-			t.setName("Background Thread " + threadNumber.getAndIncrement());
+			t.setName(name);
+			t.setUncaughtExceptionHandler(CommonsModule::handleUncaughtExceptionInBackgroundThread);
 			t.setDaemon(true);
+			LOG.debug("Starting {}", t.getName());
 			return t;
 		});
 		shutdownHook.runOnShutdown(executorService::shutdown);
 		return executorService;
 	}
 
-	@Binds
+	@Provides
 	@Singleton
-	abstract ExecutorService bindExecutorService(ScheduledExecutorService executor);
+	static ExecutorService provideExecutorService(ShutdownHook shutdownHook) {
+		final AtomicInteger threadNumber = new AtomicInteger(1);
+		ExecutorService executorService = new ThreadPoolExecutor(NUM_CORE_BG_THREADS, Integer.MAX_VALUE, BG_THREAD_KEEPALIVE_SECONDS, TimeUnit.SECONDS, new SynchronousQueue<>(), r -> {
+			String name = String.format("App Background Thread %03d", threadNumber.getAndIncrement());
+			Thread t = new Thread(r);
+			t.setName(name);
+			t.setUncaughtExceptionHandler(CommonsModule::handleUncaughtExceptionInBackgroundThread);
+			t.setDaemon(true);
+			LOG.debug("Starting {}", t.getName());
+			return t;
+		});
+		shutdownHook.runOnShutdown(executorService::shutdown);
+		return executorService;
+	}
+
+	private static void handleUncaughtExceptionInBackgroundThread(Thread thread, Throwable throwable) {
+		LOG.error("Uncaught exception in " + thread.getName(), throwable);
+	}
 
 	@Provides
 	@Singleton

@@ -32,7 +32,6 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.util.Optional;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -46,16 +45,17 @@ public class SettingsProvider implements Supplier<Settings> {
 	private static final Logger LOG = LoggerFactory.getLogger(SettingsProvider.class);
 	private static final long SAVE_DELAY_MS = 1000;
 
-	private final ScheduledExecutorService saveScheduler = Executors.newSingleThreadScheduledExecutor();
 	private final AtomicReference<ScheduledFuture<?>> scheduledSaveCmd = new AtomicReference<>();
 	private final AtomicReference<Settings> settings = new AtomicReference<>();
 	private final SettingsJsonAdapter settingsJsonAdapter = new SettingsJsonAdapter();
 	private final Environment env;
+	private final ScheduledExecutorService scheduler;
 	private final Gson gson;
 
 	@Inject
-	public SettingsProvider(Environment env) {
+	public SettingsProvider(Environment env, ScheduledExecutorService scheduler) {
 		this.env = env;
+		this.scheduler = scheduler;
 		this.gson = new GsonBuilder() //
 				.setPrettyPrinting().setLenient().disableHtmlEscaping() //
 				.registerTypeAdapter(Settings.class, settingsJsonAdapter) //
@@ -98,7 +98,7 @@ public class SettingsProvider implements Supplier<Settings> {
 		final Optional<Path> settingsPath = env.getSettingsPath().findFirst(); // alway save to preferred (first) path
 		settingsPath.ifPresent(path -> {
 			Runnable saveCommand = () -> this.save(settings, path);
-			ScheduledFuture<?> scheduledTask = saveScheduler.schedule(saveCommand, SAVE_DELAY_MS, TimeUnit.MILLISECONDS);
+			ScheduledFuture<?> scheduledTask = scheduler.schedule(saveCommand, SAVE_DELAY_MS, TimeUnit.MILLISECONDS);
 			ScheduledFuture<?> previouslyScheduledTask = scheduledSaveCmd.getAndSet(scheduledTask);
 			if (previouslyScheduledTask != null) {
 				previouslyScheduledTask.cancel(false);
