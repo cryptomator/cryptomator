@@ -39,7 +39,7 @@
 				</HBox>
 				<Hyperlink styleClass="hyperlink-secondary,hyperlink-hover-icon" text="${controller.vault.displayablePath}" textOverrun="CENTER_ELLIPSIS" onAction="#revealStorageLocation">
 					<graphic>
-						<FontAwesome5IconView styleClass="glyph-icon-secondary" glyph="EYE"/>
+						<FontAwesome5IconView styleClass="glyph-icon-muted" glyph="EYE"/>
 					</graphic>
 					<tooltip>
 						<Tooltip text="${controller.vault.displayablePath}"/>
