@@ -19,6 +19,7 @@ public enum FxmlFile {
 	QUIT("/fxml/quit.fxml"), //
 	RECOVERYKEY_CREATE("/fxml/recoverykey_create.fxml"), //
 	RECOVERYKEY_SUCCESS("/fxml/recoverykey_success.fxml"), //
+	RECOVER_VAULT("/fxml/recovervault.fxml"),// TODO
 	REMOVE_VAULT("/fxml/remove_vault.fxml"), //
 	UNLOCK("/fxml/unlock.fxml"),
 	UNLOCK_GENERIC_ERROR("/fxml/unlock_generic_error.fxml"), //
