@@ -8,11 +8,11 @@ public class StackTraceController implements FxController {
 
 	private final String stackTrace;
 
-	public StackTraceController(Exception cause) {
+	public StackTraceController(Throwable cause) {
 		this.stackTrace = provideStackTrace(cause);
 	}
 
-	static String provideStackTrace(Exception cause) {
+	static String provideStackTrace(Throwable cause) {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		cause.printStackTrace(new PrintStream(baos));
 		return baos.toString(StandardCharsets.UTF_8);

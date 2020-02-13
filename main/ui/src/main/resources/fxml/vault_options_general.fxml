@@ -15,6 +15,6 @@
 		<Button text="%vaultOptions.general.changePasswordBtn" onAction="#changePassword"/>
 		<Button text="%vaultOptions.general.showRecoveryKeyBtn" onAction="#showRecoveryKey"/>
 		<Button text="TODO recoverVault" onAction="#showRecoverVaultDialogue"/>
-		<CheckBox text="TODO unlock after startup" fx:id="unlockOnStartupCheckbox"/>
+		<CheckBox text="%vaultOptions.general.unlockAfterStartup" fx:id="unlockOnStartupCheckbox"/>
 	</children>
 </VBox>

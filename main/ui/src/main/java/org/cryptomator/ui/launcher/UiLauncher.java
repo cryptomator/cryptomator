@@ -1,6 +1,8 @@
 package org.cryptomator.ui.launcher;
 
+import javafx.collections.ObservableList;
 import org.cryptomator.common.settings.Settings;
+import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.jni.JniException;
 import org.cryptomator.jni.MacApplicationUiState;
 import org.cryptomator.jni.MacFunctions;
@@ -13,9 +15,8 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.awt.Desktop;
 import java.awt.SystemTray;
-import java.awt.desktop.AppReopenedEvent;
 import java.awt.desktop.AppReopenedListener;
-import java.awt.desktop.SystemEventListener;
+import java.util.Collection;
 import java.util.Optional;
 
 @Singleton
@@ -24,19 +25,19 @@ public class UiLauncher {
 	private static final Logger LOG = LoggerFactory.getLogger(UiLauncher.class);
 
 	private final Settings settings;
+	private final ObservableList<Vault> vaults;
 	private final TrayMenuComponent.Builder trayComponent;
 	private final FxApplicationStarter fxApplicationStarter;
 	private final AppLaunchEventHandler launchEventHandler;
-	private final AutoUnlocker autoUnlocker;
 	private final Optional<MacFunctions> macFunctions;
 
 	@Inject
-	public UiLauncher(Settings settings, TrayMenuComponent.Builder trayComponent, FxApplicationStarter fxApplicationStarter, AppLaunchEventHandler launchEventHandler, AutoUnlocker autoUnlocker, Optional<MacFunctions> macFunctions) {
+	public UiLauncher(Settings settings, ObservableList<Vault> vaults, TrayMenuComponent.Builder trayComponent, FxApplicationStarter fxApplicationStarter, AppLaunchEventHandler launchEventHandler, Optional<MacFunctions> macFunctions) {
 		this.settings = settings;
+		this.vaults = vaults;
 		this.trayComponent = trayComponent;
 		this.fxApplicationStarter = fxApplicationStarter;
 		this.launchEventHandler = launchEventHandler;
-		this.autoUnlocker = autoUnlocker;
 		this.macFunctions = macFunctions;
 	}
 
@@ -59,9 +60,12 @@ public class UiLauncher {
 
 		// register app reopen listener
 		Desktop.getDesktop().addAppEventListener((AppReopenedListener) e -> showMainWindowAsync(hasTrayIcon));
-		
-		// auto unlock - no shit!
-		autoUnlocker.autoUnlock();
+
+		// auto unlock
+		Collection<Vault> vaultsWithAutoUnlockEnabled = vaults.filtered(v -> v.getVaultSettings().unlockAfterStartup().get());
+		if (!vaultsWithAutoUnlockEnabled.isEmpty()) {
+			fxApplicationStarter.get(hasTrayIcon).thenAccept(app -> app.getVaultService().attemptAutoUnlock(vaultsWithAutoUnlockEnabled));
+		}
 
 		launchEventHandler.startHandlingLaunchEvents(hasTrayIcon);
 	}

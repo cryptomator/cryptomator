@@ -50,7 +50,7 @@ abstract class UnlockModule {
 	@Provides
 	@Named("genericErrorCause")
 	@UnlockScoped
-	static ObjectProperty<Exception> provideGenericErrorCause() {
+	static ObjectProperty<Throwable> provideGenericErrorCause() {
 		return new SimpleObjectProperty<>();
 	}
 
@@ -109,7 +109,7 @@ abstract class UnlockModule {
 	@Provides
 	@IntoMap
 	@FxControllerKey(StackTraceController.class)
-	static FxController provideStackTraceController(@Named("genericErrorCause") ObjectProperty<Exception> errorCause) {
+	static FxController provideStackTraceController(@Named("genericErrorCause") ObjectProperty<Throwable> errorCause) {
 		return new StackTraceController(errorCause.get());
 	}
 
