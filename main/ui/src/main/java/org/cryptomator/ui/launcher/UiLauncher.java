@@ -48,7 +48,7 @@ public class UiLauncher {
 		}
 
 		// show window on start?
-		if (settings.startHidden().get()) {
+		if (hasTrayIcon && settings.startHidden().get()) {
 			LOG.debug("Hiding application...");
 			macFunctions.map(MacFunctions::uiState).ifPresent(JniException.ignore(MacApplicationUiState::transformToAgentApplication));
 		} else {
