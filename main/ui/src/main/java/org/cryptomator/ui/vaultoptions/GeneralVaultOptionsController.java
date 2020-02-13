@@ -1,6 +1,7 @@
 package org.cryptomator.ui.vaultoptions;
 
 import javafx.fxml.FXML;
+import javafx.scene.control.CheckBox;
 import javafx.stage.Stage;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.changepassword.ChangePasswordComponent;
@@ -18,6 +19,7 @@ public class GeneralVaultOptionsController implements FxController {
 	private final ChangePasswordComponent.Builder changePasswordWindow;
 	private final RecoveryKeyComponent.Builder recoveryKeyWindow;
 	private final RecoverVaultComponent.Builder recoverVaultWindow;
+	public CheckBox unlockOnStartupCheckbox;
 
 	@Inject
 	GeneralVaultOptionsController(@VaultOptionsWindow Vault vault, @VaultOptionsWindow Stage window, ChangePasswordComponent.Builder changePasswordWindow, RecoveryKeyComponent.Builder recoveryKeyWindow, RecoverVaultComponent.Builder recoverVaultWindow) {
@@ -26,6 +28,11 @@ public class GeneralVaultOptionsController implements FxController {
 		this.changePasswordWindow = changePasswordWindow;
 		this.recoveryKeyWindow = recoveryKeyWindow;
 		this.recoverVaultWindow = recoverVaultWindow;
+	}
+	
+	@FXML
+	public void initialize() {
+		unlockOnStartupCheckbox.selectedProperty().bindBidirectional(vault.getVaultSettings().unlockAfterStartup());
 	}
 
 	@FXML
@@ -42,5 +49,4 @@ public class GeneralVaultOptionsController implements FxController {
 	public void showRecoverVaultDialogue(){
 		recoverVaultWindow.vault(vault).owner(window).build().showRecoverVaultWindow();
 	}
-
 }

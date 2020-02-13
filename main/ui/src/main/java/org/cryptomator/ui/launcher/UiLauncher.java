@@ -27,14 +27,16 @@ public class UiLauncher {
 	private final TrayMenuComponent.Builder trayComponent;
 	private final FxApplicationStarter fxApplicationStarter;
 	private final AppLaunchEventHandler launchEventHandler;
+	private final AutoUnlocker autoUnlocker;
 	private final Optional<MacFunctions> macFunctions;
 
 	@Inject
-	public UiLauncher(Settings settings, TrayMenuComponent.Builder trayComponent, FxApplicationStarter fxApplicationStarter, AppLaunchEventHandler launchEventHandler, Optional<MacFunctions> macFunctions) {
+	public UiLauncher(Settings settings, TrayMenuComponent.Builder trayComponent, FxApplicationStarter fxApplicationStarter, AppLaunchEventHandler launchEventHandler, AutoUnlocker autoUnlocker, Optional<MacFunctions> macFunctions) {
 		this.settings = settings;
 		this.trayComponent = trayComponent;
 		this.fxApplicationStarter = fxApplicationStarter;
 		this.launchEventHandler = launchEventHandler;
+		this.autoUnlocker = autoUnlocker;
 		this.macFunctions = macFunctions;
 	}
 
@@ -57,6 +59,9 @@ public class UiLauncher {
 
 		// register app reopen listener
 		Desktop.getDesktop().addAppEventListener((AppReopenedListener) e -> showMainWindowAsync(hasTrayIcon));
+		
+		// auto unlock - no shit!
+		autoUnlocker.autoUnlock();
 
 		launchEventHandler.startHandlingLaunchEvents(hasTrayIcon);
 	}

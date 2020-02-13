@@ -11,6 +11,7 @@ import dagger.Provides;
 import dagger.multibindings.ElementsIntoSet;
 import org.cryptomator.common.JniModule;
 
+import javax.inject.Singleton;
 import java.util.Optional;
 import java.util.Set;
 
@@ -24,6 +25,7 @@ public class KeychainModule {
 	}
 
 	@Provides
+	@Singleton
 	public Optional<KeychainAccess> provideSupportedKeychain(Set<KeychainAccessStrategy> keychainAccessStrategies) {
 		return keychainAccessStrategies.stream().filter(KeychainAccessStrategy::isSupported).map(KeychainAccess.class::cast).findFirst();
 	}
