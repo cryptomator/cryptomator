@@ -21,8 +21,10 @@ import java.nio.file.FileSystems;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Objects;
 import java.util.concurrent.BlockingQueue;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Singleton
@@ -40,7 +42,7 @@ class FileOpenRequestHandler {
 	}
 
 	private void openFiles(OpenFilesEvent evt) {
-		Stream<Path> pathsToOpen = evt.getFiles().stream().map(File::toPath);
+		Collection<Path> pathsToOpen = evt.getFiles().stream().map(File::toPath).collect(Collectors.toList());
 		AppLaunchEvent launchEvent = new AppLaunchEvent(AppLaunchEvent.EventType.OPEN_FILE, pathsToOpen);
 		tryToEnqueueFileOpenRequest(launchEvent);
 	}
@@ -51,16 +53,18 @@ class FileOpenRequestHandler {
 
 	// visible for testing
 	void handleLaunchArgs(FileSystem fs, String[] args) {
-		Stream<Path> pathsToOpen = Arrays.stream(args).map(str -> {
+		Collection<Path> pathsToOpen = Arrays.stream(args).map(str -> {
 			try {
 				return fs.getPath(str);
 			} catch (InvalidPathException e) {
 				LOG.trace("Argument not a valid path: {}", str);
 				return null;
 			}
-		}).filter(Objects::nonNull);
-		AppLaunchEvent launchEvent = new AppLaunchEvent(AppLaunchEvent.EventType.OPEN_FILE, pathsToOpen);
-		tryToEnqueueFileOpenRequest(launchEvent);
+		}).filter(Objects::nonNull).collect(Collectors.toList());
+		if (!pathsToOpen.isEmpty()) {
+			AppLaunchEvent launchEvent = new AppLaunchEvent(AppLaunchEvent.EventType.OPEN_FILE, pathsToOpen);
+			tryToEnqueueFileOpenRequest(launchEvent);
+		}
 	}
 
 

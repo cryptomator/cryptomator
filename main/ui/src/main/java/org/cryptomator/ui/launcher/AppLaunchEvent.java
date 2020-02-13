@@ -1,16 +1,17 @@
 package org.cryptomator.ui.launcher;
 
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.stream.Stream;
 
 public class AppLaunchEvent {
 
-	private final Stream<Path> pathsToOpen;
 	private final EventType type;
+	private final Collection<Path> pathsToOpen;
 
 	public enum EventType {REVEAL_APP, OPEN_FILE}
 
-	public AppLaunchEvent(EventType type, Stream<Path> pathsToOpen) {
+	public AppLaunchEvent(EventType type, Collection<Path> pathsToOpen) {
 		this.type = type;
 		this.pathsToOpen = pathsToOpen;
 	}
@@ -19,7 +20,7 @@ public class AppLaunchEvent {
 		return type;
 	}
 
-	public Stream<Path> getPathsToOpen() {
+	public Collection<Path> getPathsToOpen() {
 		return pathsToOpen;
 	}
 }

@@ -15,6 +15,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import java.awt.Desktop;
+import java.awt.EventQueue;
 import java.awt.desktop.QuitResponse;
 import java.util.EnumSet;
 import java.util.EventObject;
@@ -31,14 +32,14 @@ public class AppLifecycleListener {
 	private final FxApplicationStarter fxApplicationStarter;
 	private final CountDownLatch shutdownLatch;
 	private final ObservableList<Vault> vaults;
-	private final AtomicBoolean allowSuddenTermination;
+	private final AtomicBoolean allowQuitWithoutPrompt;
 
 	@Inject
 	AppLifecycleListener(FxApplicationStarter fxApplicationStarter, @Named("shutdownLatch") CountDownLatch shutdownLatch, ShutdownHook shutdownHook, ObservableList<Vault> vaults) {
 		this.fxApplicationStarter = fxApplicationStarter;
 		this.shutdownLatch = shutdownLatch;
 		this.vaults = vaults;
-		this.allowSuddenTermination = new AtomicBoolean(true);
+		this.allowQuitWithoutPrompt = new AtomicBoolean(true);
 		vaults.addListener(this::vaultListChanged);
 
 		// register preferences shortcut
@@ -51,11 +52,6 @@ public class AppLifecycleListener {
 			Desktop.getDesktop().setQuitHandler(this::handleQuitRequest);
 		}
 
-		// allow sudden termination
-		if (Desktop.getDesktop().isSupported(Desktop.Action.APP_SUDDEN_TERMINATION)) {
-			Desktop.getDesktop().enableSuddenTermination();
-		}
-
 		shutdownHook.runOnShutdown(this::forceUnmountRemainingVaults);
 	}
 
@@ -66,7 +62,7 @@ public class AppLifecycleListener {
 		handleQuitRequest(null, new QuitResponse() {
 			@Override
 			public void performQuit() {
-				shutdownLatch.countDown();
+				System.exit(0);
 			}
 
 			@Override
@@ -76,31 +72,42 @@ public class AppLifecycleListener {
 		});
 	}
 
+	private void handleQuitRequest(@SuppressWarnings("unused") EventObject e, QuitResponse response) {
+		QuitResponse decoratedQuitResponse = decorateQuitResponse(response);
+		if (allowQuitWithoutPrompt.get()) {
+			decoratedQuitResponse.performQuit();
+		} else {
+			fxApplicationStarter.get(true).thenAccept(app -> app.showQuitWindow(decoratedQuitResponse));
+		}
+	}
+
+	private QuitResponse decorateQuitResponse(QuitResponse originalQuitResponse) {
+		return new QuitResponse() {
+			@Override
+			public void performQuit() {
+				Platform.exit(); // will be no-op, if JavaFX never started.
+				shutdownLatch.countDown(); // main thread is waiting for this latch
+				EventQueue.invokeLater(originalQuitResponse::performQuit); // this will eventually call System.exit(0)
+			}
+
+			@Override
+			public void cancelQuit() {
+				originalQuitResponse.cancelQuit();
+			}
+		};
+	}
+
 	private void vaultListChanged(@SuppressWarnings("unused") Observable observable) {
 		assert Platform.isFxApplicationThread();
 		boolean allVaultsAllowTermination = vaults.stream().map(Vault::getState).allMatch(STATES_ALLOWING_TERMINATION::contains);
-		boolean suddenTerminationChanged = allowSuddenTermination.compareAndSet(!allVaultsAllowTermination, allVaultsAllowTermination);
-		if (suddenTerminationChanged && Desktop.getDesktop().isSupported(Desktop.Action.APP_SUDDEN_TERMINATION)) {
-			if (allVaultsAllowTermination) {
-				Desktop.getDesktop().enableSuddenTermination();
-				LOG.debug("sudden termination enabled");
-			} else {
-				Desktop.getDesktop().disableSuddenTermination();
-				LOG.debug("sudden termination disabled");
-			}
+		boolean suddenTerminationChanged = allowQuitWithoutPrompt.compareAndSet(!allVaultsAllowTermination, allVaultsAllowTermination);
+		if (suddenTerminationChanged) {
+			LOG.debug("Allow quitting without prompt: {}", allVaultsAllowTermination);
 		}
 	}
 
 	private void showPreferencesWindow(@SuppressWarnings("unused") EventObject actionEvent) {
 		fxApplicationStarter.get(true).thenAccept(app -> app.showPreferencesWindow(SelectedPreferencesTab.ANY));
-	}
-
-	private void handleQuitRequest(@SuppressWarnings("unused") EventObject e, QuitResponse response) {
-		if (allowSuddenTermination.get()) {
-			response.performQuit(); // really?
-		} else {
-			fxApplicationStarter.get(true).thenAccept(app -> app.showQuitWindow(response));
-		}
 	}
 
 	private void forceUnmountRemainingVaults() {

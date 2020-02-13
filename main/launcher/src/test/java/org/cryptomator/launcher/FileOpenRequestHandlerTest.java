@@ -15,16 +15,14 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import java.io.IOException;
 import java.nio.file.FileSystem;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class FileOpenRequestHandlerTest {
 
@@ -39,32 +37,30 @@ public class FileOpenRequestHandlerTest {
 
 	@Test
 	@DisplayName("./cryptomator.exe foo bar")
-	public void testOpenArgsWithCorrectPaths() throws IOException {
+	public void testOpenArgsWithCorrectPaths() {
 		inTest.handleLaunchArgs(new String[]{"foo", "bar"});
 
 		AppLaunchEvent evt = queue.poll();
 		Assertions.assertNotNull(evt);
-		List<Path> paths = evt.getPathsToOpen().collect(Collectors.toList());
+		Collection<Path> paths = evt.getPathsToOpen();
 		MatcherAssert.assertThat(paths, CoreMatchers.hasItems(Paths.get("foo"), Paths.get("bar")));
 	}
 
 	@Test
 	@DisplayName("./cryptomator.exe foo (with 'foo' being an invalid path)")
-	public void testOpenArgsWithIncorrectPaths() throws IOException {
+	public void testOpenArgsWithIncorrectPaths() {
 		FileSystem fs = Mockito.mock(FileSystem.class);
 		Mockito.when(fs.getPath("foo")).thenThrow(new InvalidPathException("foo", "foo is not a path"));
 		inTest.handleLaunchArgs(fs, new String[]{"foo"});
 
 		AppLaunchEvent evt = queue.poll();
-		Assertions.assertNotNull(evt);
-		List<Path> paths = evt.getPathsToOpen().collect(Collectors.toList());
-		Assertions.assertTrue(paths.isEmpty());
+		Assertions.assertNull(evt);
 	}
 
 	@Test
 	@DisplayName("./cryptomator.exe foo (with full event queue)")
-	public void testOpenArgsWithFullQueue() throws IOException {
-		queue.add(new AppLaunchEvent(AppLaunchEvent.EventType.OPEN_FILE, Stream.empty()));
+	public void testOpenArgsWithFullQueue() {
+		queue.add(new AppLaunchEvent(AppLaunchEvent.EventType.OPEN_FILE, Collections.emptyList()));
 		Assumptions.assumeTrue(queue.remainingCapacity() == 0);
 
 		inTest.handleLaunchArgs(new String[]{"foo"});

@@ -5,7 +5,6 @@
  *******************************************************************************/
 package org.cryptomator.launcher;
 
-import javafx.application.Platform;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.logging.DebugMode;
 import org.cryptomator.logging.LoggerConfiguration;
@@ -91,7 +90,6 @@ public class Cryptomator {
 		try {
 			uiLauncher.launch();
 			shutdownLatch.await();
-			Platform.exit();
 			LOG.info("UI shut down");
 			return 0;
 		} catch (InterruptedException e) {
