@@ -31,7 +31,7 @@
 		<cryptomator.webdav.version>1.0.10</cryptomator.webdav.version>
 
 		<!-- 3rd party dependencies -->
-		<javafx.version>13.0.1</javafx.version>
+		<javafx.version>14-ea+8</javafx.version>
 		<commons-lang3.version>3.9</commons-lang3.version>
 		<jwt.version>3.8.3</jwt.version>
 		<easybind.version>1.0.3</easybind.version>
