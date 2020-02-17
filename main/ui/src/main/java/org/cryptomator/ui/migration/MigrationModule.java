@@ -10,6 +10,7 @@ import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import org.cryptomator.cryptofs.common.FileSystemCapabilityChecker;
 import org.cryptomator.ui.common.DefaultSceneFactory;
 import org.cryptomator.ui.common.FXMLLoaderFactory;
 import org.cryptomator.ui.common.FxController;
@@ -56,6 +57,13 @@ abstract class MigrationModule {
 	}
 
 	@Provides
+	@Named("capabilityErrorCause")
+	@MigrationScoped
+	static ObjectProperty<FileSystemCapabilityChecker.Capability> provideCapabilityErrorCause() {
+		return new SimpleObjectProperty<>();
+	}
+
+	@Provides
 	@FxmlScene(FxmlFile.MIGRATION_START)
 	@MigrationScoped
 	static Scene provideMigrationStartScene(@MigrationWindow FXMLLoaderFactory fxmlLoaders) {
@@ -77,11 +85,19 @@ abstract class MigrationModule {
 	}
 
 	@Provides
+	@FxmlScene(FxmlFile.MIGRATION_CAPABILITY_ERROR)
+	@MigrationScoped
+	static Scene provideMigrationCapabilityErrorScene(@MigrationWindow FXMLLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene("/fxml/migration_capability_error.fxml");
+	}
+
+	@Provides
 	@FxmlScene(FxmlFile.MIGRATION_GENERIC_ERROR)
 	@MigrationScoped
 	static Scene provideMigrationGenericErrorScene(@MigrationWindow FXMLLoaderFactory fxmlLoaders) {
 		return fxmlLoaders.createScene("/fxml/migration_generic_error.fxml");
 	}
+
 
 	// ------------------
 
@@ -99,6 +115,11 @@ abstract class MigrationModule {
 	@IntoMap
 	@FxControllerKey(MigrationSuccessController.class)
 	abstract FxController bindMigrationSuccessController(MigrationSuccessController controller);
+
+	@Binds
+	@IntoMap
+	@FxControllerKey(MigrationCapabilityErrorController.class)
+	abstract FxController bindMigrationCapabilityErrorController(MigrationCapabilityErrorController controller);
 
 	@Binds
 	@IntoMap

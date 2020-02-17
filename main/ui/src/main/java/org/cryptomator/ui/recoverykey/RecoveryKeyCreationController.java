@@ -1,16 +1,10 @@
 package org.cryptomator.ui.recoverykey;
 
 import dagger.Lazy;
-import javafx.animation.KeyFrame;
-import javafx.animation.KeyValue;
-import javafx.animation.Timeline;
-import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.beans.value.WritableValue;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import javafx.util.Duration;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.cryptolib.api.InvalidPassphraseException;
 import org.cryptomator.ui.common.Animations;
@@ -22,7 +16,6 @@ import org.cryptomator.ui.controls.NiceSecurePasswordField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
 import javax.inject.Inject;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
