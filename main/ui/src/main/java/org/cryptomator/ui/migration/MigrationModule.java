@@ -4,6 +4,8 @@ import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoMap;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Modality;
@@ -14,6 +16,7 @@ import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxControllerKey;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
+import org.cryptomator.ui.common.StackTraceController;
 import org.cryptomator.ui.mainwindow.MainWindow;
 
 import javax.inject.Named;
@@ -46,6 +49,13 @@ abstract class MigrationModule {
 	}
 
 	@Provides
+	@Named("genericErrorCause")
+	@MigrationScoped
+	static ObjectProperty<Throwable> provideGenericErrorCause() {
+		return new SimpleObjectProperty<>();
+	}
+
+	@Provides
 	@FxmlScene(FxmlFile.MIGRATION_START)
 	@MigrationScoped
 	static Scene provideMigrationStartScene(@MigrationWindow FXMLLoaderFactory fxmlLoaders) {
@@ -66,6 +76,13 @@ abstract class MigrationModule {
 		return fxmlLoaders.createScene("/fxml/migration_success.fxml");
 	}
 
+	@Provides
+	@FxmlScene(FxmlFile.MIGRATION_GENERIC_ERROR)
+	@MigrationScoped
+	static Scene provideMigrationGenericErrorScene(@MigrationWindow FXMLLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene("/fxml/migration_generic_error.fxml");
+	}
+
 	// ------------------
 
 	@Binds
@@ -82,5 +99,17 @@ abstract class MigrationModule {
 	@IntoMap
 	@FxControllerKey(MigrationSuccessController.class)
 	abstract FxController bindMigrationSuccessController(MigrationSuccessController controller);
+
+	@Binds
+	@IntoMap
+	@FxControllerKey(MigrationGenericErrorController.class)
+	abstract FxController bindMigrationGenericErrorController(MigrationGenericErrorController controller);
+
+	@Provides
+	@IntoMap
+	@FxControllerKey(StackTraceController.class)
+	static FxController provideStackTraceController(@Named("genericErrorCause") ObjectProperty<Throwable> errorCause) {
+		return new StackTraceController(errorCause.get());
+	}
 
 }

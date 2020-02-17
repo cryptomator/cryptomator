@@ -4,10 +4,12 @@ import dagger.Lazy;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -21,6 +23,7 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
+import org.cryptomator.cryptofs.common.FileSystemCapabilityChecker;
 import org.cryptomator.cryptofs.migration.Migrators;
 import org.cryptomator.cryptofs.migration.api.MigrationProgressListener;
 import org.cryptomator.cryptofs.migration.api.NoApplicableMigratorException;
@@ -36,44 +39,52 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 @MigrationScoped
 public class MigrationRunController implements FxController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(MigrationRunController.class);
 	private static final String MASTERKEY_FILENAME = "masterkey.cryptomator"; // TODO: deduplicate constant declared in multiple classes
-	private static final Duration MIGRATION_PROGRESS_UPDATE_INTERVAL = Duration.millis(25);
+	private static final long MIGRATION_PROGRESS_UPDATE_MILLIS = 50;
 
 	private final Stage window;
 	private final Vault vault;
 	private final ExecutorService executor;
+	private final ScheduledExecutorService scheduler;
 	private final Optional<KeychainAccess> keychainAccess;
+	private final ObjectProperty<Throwable> errorCause;
 	private final Lazy<Scene> startScene;
 	private final Lazy<Scene> successScene;
 	private final ObjectBinding<ContentDisplay> migrateButtonContentDisplay;
+	private final Lazy<Scene> genericErrorScene;
 	private final BooleanProperty migrationButtonDisabled;
 	private final DoubleProperty migrationProgress;
-	private final ScheduledService<Double> migrationProgressObservationService;
 	private volatile double volatileMigrationProgress = -1.0;
 	public NiceSecurePasswordField passwordField;
 
 	@Inject
-	public MigrationRunController(@MigrationWindow Stage window, @MigrationWindow Vault vault, ExecutorService executor, Optional<KeychainAccess> keychainAccess, @FxmlScene(FxmlFile.MIGRATION_START) Lazy<Scene> startScene, @FxmlScene(FxmlFile.MIGRATION_SUCCESS) Lazy<Scene> successScene) {
+	public MigrationRunController(@MigrationWindow Stage window, @MigrationWindow Vault vault, ExecutorService executor, ScheduledExecutorService scheduler, Optional<KeychainAccess> keychainAccess, @Named("genericErrorCause") ObjectProperty<Throwable> errorCause, @FxmlScene(FxmlFile.MIGRATION_START) Lazy<Scene> startScene, @FxmlScene(FxmlFile.MIGRATION_SUCCESS) Lazy<Scene> successScene, @FxmlScene(FxmlFile.MIGRATION_GENERIC_ERROR) Lazy<Scene> genericErrorScene) {
 		this.window = window;
 		this.vault = vault;
 		this.executor = executor;
+		this.scheduler = scheduler;
 		this.keychainAccess = keychainAccess;
+		this.errorCause = errorCause;
 		this.startScene = startScene;
 		this.successScene = successScene;
 		this.migrateButtonContentDisplay = Bindings.createObjectBinding(this::getMigrateButtonContentDisplay, vault.stateProperty());
+		this.genericErrorScene = genericErrorScene;
 		this.migrationButtonDisabled = new SimpleBooleanProperty();
 		this.migrationProgress = new SimpleDoubleProperty(volatileMigrationProgress);
-		this.migrationProgressObservationService = new MigrationProgressObservationService();
-		migrationProgressObservationService.setExecutor(executor);
-		migrationProgressObservationService.setPeriod(MIGRATION_PROGRESS_UPDATE_INTERVAL);
 	}
 
 	public void initialize() {
@@ -93,7 +104,11 @@ public class MigrationRunController implements FxController {
 		LOG.info("Migrating vault {}", vault.getPath());
 		CharSequence password = passwordField.getCharacters();
 		vault.setState(VaultState.PROCESSING);
-		migrationProgressObservationService.start();
+		ScheduledFuture<?> progressSyncTask = scheduler.scheduleAtFixedRate(() -> {
+			Platform.runLater(() -> {
+				migrationProgress.set(volatileMigrationProgress);
+			});
+		}, 0, MIGRATION_PROGRESS_UPDATE_MILLIS, TimeUnit.MILLISECONDS);
 		Tasks.create(() -> {
 			Migrators migrators = Migrators.get();
 			migrators.migrate(vault.getPath(), MASTERKEY_FILENAME, password, this::migrationProgressChanged);
@@ -118,11 +133,11 @@ public class MigrationRunController implements FxController {
 			// TODO show specific error screen
 		}).onError(Exception.class, e -> { // including RuntimeExceptions
 			LOG.error("Migration failed for technical reasons.", e);
-			vault.setState(VaultState.ERROR);
-			// TODO show generic error screen
+			vault.setState(VaultState.NEEDS_MIGRATION);
+			errorCause.set(e);
+			window.setScene(genericErrorScene.get());
 		}).andFinally(() -> {
-			migrationProgressObservationService.cancel();
-			migrationProgressObservationService.reset();
+			progressSyncTask.cancel(true);
 		}).runOnce(executor);
 	}
 
@@ -158,27 +173,6 @@ public class MigrationRunController implements FxController {
 			if (storedPw != null) {
 				Arrays.fill(storedPw, ' ');
 			}
-		}
-	}
-
-	// Sets migrationProgress to volatileMigrationProgress at its configured interval
-	private class MigrationProgressObservationService extends ScheduledService<Double> {
-
-		@Override
-		protected Task<Double> createTask() {
-			return new Task<>() {
-				@Override
-				protected Double call() {
-					return volatileMigrationProgress;
-				}
-			};
-		}
-
-		@Override
-		protected void succeeded() {
-			assert getValue() != null;
-			migrationProgress.set(getValue());
-			super.succeeded();
 		}
 	}
 

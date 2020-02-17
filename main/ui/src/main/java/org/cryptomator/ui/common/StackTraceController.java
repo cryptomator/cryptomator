@@ -12,7 +12,7 @@ public class StackTraceController implements FxController {
 		this.stackTrace = provideStackTrace(cause);
 	}
 
-	static String provideStackTrace(Throwable cause) {
+	private static String provideStackTrace(Throwable cause) {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		cause.printStackTrace(new PrintStream(baos));
 		return baos.toString(StandardCharsets.UTF_8);
