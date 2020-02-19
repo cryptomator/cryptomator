@@ -17,7 +17,6 @@ import org.cryptomator.ui.common.FxControllerKey;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.mainwindow.MainWindow;
-import org.cryptomator.ui.recovervault.RecoverVaultComponent;
 import org.cryptomator.ui.recoverykey.RecoveryKeyComponent;
 
 import javax.inject.Named;
@@ -26,7 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 
-@Module(subcomponents = {ChangePasswordComponent.class, RecoveryKeyComponent.class, RecoverVaultComponent.class})
+@Module(subcomponents = {ChangePasswordComponent.class, RecoveryKeyComponent.class})
 abstract class VaultOptionsModule {
 
 	@Provides

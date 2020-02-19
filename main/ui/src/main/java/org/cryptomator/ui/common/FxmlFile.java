@@ -20,6 +20,7 @@ public enum FxmlFile {
 	PREFERENCES("/fxml/preferences.fxml"), //
 	QUIT("/fxml/quit.fxml"), //
 	RECOVERYKEY_CREATE("/fxml/recoverykey_create.fxml"), //
+	RECOVERYKEY_RECOVER("/fxml/recoverykey_recover.fxml"), //
 	RECOVERYKEY_SUCCESS("/fxml/recoverykey_success.fxml"), //
 	RECOVER_VAULT("/fxml/recovervault.fxml"),// TODO
 	REMOVE_VAULT("/fxml/remove_vault.fxml"), //

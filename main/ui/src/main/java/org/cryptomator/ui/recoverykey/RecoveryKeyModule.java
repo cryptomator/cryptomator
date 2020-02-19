@@ -70,6 +70,13 @@ abstract class RecoveryKeyModule {
 		return fxmlLoaders.createScene("/fxml/recoverykey_success.fxml");
 	}
 
+	@Provides
+	@FxmlScene(FxmlFile.RECOVERYKEY_RECOVER)
+	@RecoveryKeyScoped
+	static Scene provideRecoveryKeyRecoverScene(@RecoveryKeyWindow FXMLLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene("/fxml/recoverykey_recover.fxml");
+	}
+
 	// ------------------
 
 	@Binds
@@ -83,6 +90,11 @@ abstract class RecoveryKeyModule {
 	static FxController provideRecoveryKeyDisplayController(@RecoveryKeyWindow Stage window, @RecoveryKeyWindow Vault vault, @RecoveryKeyWindow StringProperty recoveryKey) {
 		return new RecoveryKeyDisplayController(window, vault.getDisplayableName(), recoveryKey.get());
 	}
+
+	@Binds
+	@IntoMap
+	@FxControllerKey(RecoveryKeyRecoverController.class)
+	abstract FxController provideRecoveryKeyRecoverController(RecoveryKeyRecoverController controller);
 
 	@Binds
 	@IntoMap

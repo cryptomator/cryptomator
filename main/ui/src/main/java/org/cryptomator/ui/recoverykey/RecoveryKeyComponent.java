@@ -21,11 +21,21 @@ public interface RecoveryKeyComponent {
 	Stage window();
 
 	@FxmlScene(FxmlFile.RECOVERYKEY_CREATE)
-	Lazy<Scene> scene();
+	Lazy<Scene> creationScene();
+
+	@FxmlScene(FxmlFile.RECOVERYKEY_RECOVER)
+	Lazy<Scene> recoverScene();
 
 	default void showRecoveryKeyCreationWindow() {
 		Stage stage = window();
-		stage.setScene(scene().get());
+		stage.setScene(creationScene().get());
+		stage.sizeToScene();
+		stage.show();
+	}
+
+	default void showRecoveryKeyRecoverWindow() {
+		Stage stage = window();
+		stage.setScene(recoverScene().get());
 		stage.sizeToScene();
 		stage.show();
 	}
