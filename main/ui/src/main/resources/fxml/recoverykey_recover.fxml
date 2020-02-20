@@ -9,7 +9,6 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
 <?import org.cryptomator.ui.controls.FontAwesome5IconView?>
-<?import javafx.scene.control.TextFormatter?>
 <VBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
 	  fx:controller="org.cryptomator.ui.recoverykey.RecoveryKeyRecoverController"

@@ -16,6 +16,7 @@ import java.util.Collection;
 public class RecoveryKeyFactory {
 
 	private static final String MASTERKEY_FILENAME = "masterkey.cryptomator"; // TODO: deduplicate constant declared in multiple classes
+	private static final byte[] PEPPER = new byte[0];
 	
 	private final WordEncoder wordEncoder;
 	
@@ -37,7 +38,7 @@ public class RecoveryKeyFactory {
 	 * @apiNote This is a long-running operation and should be invoked in a background thread
 	 */
 	public String createRecoveryKey(Path vaultPath, CharSequence password) throws IOException, InvalidPassphraseException {
-		byte[] rawKey = CryptoFileSystemProvider.exportRawKey(vaultPath, MASTERKEY_FILENAME, new byte[0], password);
+		byte[] rawKey = CryptoFileSystemProvider.exportRawKey(vaultPath, MASTERKEY_FILENAME, PEPPER, password);
 		try {
 			return createRecoveryKey(rawKey);
 		} finally {
@@ -59,25 +60,52 @@ public class RecoveryKeyFactory {
 	}
 
 	/**
+	 * Creates a completely new masterkey using a recovery key.
+	 * @param vaultPath Path to the storage location of a vault
+	 * @param recoveryKey A recovery key for this vault
+	 * @param newPassword The new password used to encrypt the keys
+	 * @throws IOException If the masterkey file could not be written
+	 * @throws IllegalArgumentException If the recoveryKey is invalid
+	 * @apiNote This is a long-running operation and should be invoked in a background thread
+	 */
+	public void resetPasswordWithRecoveryKey(Path vaultPath, String recoveryKey, CharSequence newPassword) throws IOException, IllegalArgumentException {
+		final byte[] rawKey = decodeRecoveryKey(recoveryKey);
+		try {
+			CryptoFileSystemProvider.restoreRawKey(vaultPath, MASTERKEY_FILENAME, rawKey, PEPPER, newPassword);
+		} finally {
+			Arrays.fill(rawKey, (byte) 0x00);
+		}
+	}
+
+	/**
 	 * Checks whether a String is a syntactically correct recovery key with a valid checksum
 	 * @param recoveryKey A word sequence which might be a recovery key
 	 * @return <code>true</code> if this seems to be a legitimate recovery key
 	 */
 	public boolean validateRecoveryKey(String recoveryKey) {
-		final byte[] paddedKey;
 		try {
-			paddedKey = wordEncoder.decode(recoveryKey);
+			byte[] key = decodeRecoveryKey(recoveryKey);
+			Arrays.fill(key, (byte) 0x00);
+			return true;
 		} catch (IllegalArgumentException e) {
 			return false;
 		}
-		if (paddedKey.length != 66) {
-			return false;
+	}
+	
+	private byte[] decodeRecoveryKey(String recoveryKey) throws IllegalArgumentException {
+		byte[] paddedKey = new byte[0];
+		try {
+			paddedKey = wordEncoder.decode(recoveryKey);
+			Preconditions.checkArgument(paddedKey.length == 66, "Recovery key doesn't consist of 66 bytes.");
+			byte[] rawKey = Arrays.copyOf(paddedKey, 64);
+			byte[] expectedCrc16 = Arrays.copyOfRange(paddedKey, 64, 66);
+			byte[] actualCrc32 = Hashing.crc32().hashBytes(rawKey).asBytes();
+			byte[] actualCrc16 = Arrays.copyOf(actualCrc32, 2);
+			Preconditions.checkArgument(Arrays.equals(expectedCrc16, actualCrc16), "Recovery key has invalid CRC.");
+			return rawKey;
+		} finally {
+			Arrays.fill(paddedKey, (byte) 0x00);
 		}
-		byte[] rawKey = Arrays.copyOf(paddedKey, 64);
-		byte[] expectedCrc16 = Arrays.copyOfRange(paddedKey, 64, 66);
-		byte[] actualCrc32 = Hashing.crc32().hashBytes(rawKey).asBytes();
-		byte[] actualCrc16 = Arrays.copyOf(actualCrc32, 2);
-		return Arrays.equals(expectedCrc16, actualCrc16);
 	}
 
 }

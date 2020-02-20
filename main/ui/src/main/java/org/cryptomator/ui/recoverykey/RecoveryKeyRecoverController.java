@@ -2,10 +2,12 @@ package org.cryptomator.ui.recoverykey;
 
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Strings;
+import dagger.Lazy;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
+import javafx.scene.Scene;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextFormatter;
 import javafx.scene.input.KeyCode;
@@ -13,6 +15,8 @@ import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.FxController;
+import org.cryptomator.ui.common.FxmlFile;
+import org.cryptomator.ui.common.FxmlScene;
 
 import javax.inject.Inject;
 import java.util.Optional;
@@ -27,17 +31,19 @@ public class RecoveryKeyRecoverController implements FxController {
 	private final StringProperty recoveryKey;
 	private final RecoveryKeyFactory recoveryKeyFactory;
 	private final BooleanBinding validRecoveryKey;
+	private final Lazy<Scene> resetPasswordScene;
 	private final AutoCompleter autoCompleter;
 
 	public TextArea textarea;
 
 	@Inject
-	public RecoveryKeyRecoverController(@RecoveryKeyWindow Stage window, @RecoveryKeyWindow Vault vault, @RecoveryKeyWindow StringProperty recoveryKey, RecoveryKeyFactory recoveryKeyFactory) {
+	public RecoveryKeyRecoverController(@RecoveryKeyWindow Stage window, @RecoveryKeyWindow Vault vault, @RecoveryKeyWindow StringProperty recoveryKey, RecoveryKeyFactory recoveryKeyFactory, @FxmlScene(FxmlFile.RECOVERYKEY_RESET_PASSWORD) Lazy<Scene> resetPasswordScene) {
 		this.window = window;
 		this.vault = vault;
 		this.recoveryKey = recoveryKey;
 		this.recoveryKeyFactory = recoveryKeyFactory;
 		this.validRecoveryKey = Bindings.createBooleanBinding(this::isValidRecoveryKey, recoveryKey);
+		this.resetPasswordScene = resetPasswordScene;
 		this.autoCompleter = new AutoCompleter(recoveryKeyFactory.getDictionary());
 	}
 
@@ -72,9 +78,11 @@ public class RecoveryKeyRecoverController implements FxController {
 
 	@FXML
 	public void onKeyPressed(KeyEvent keyEvent) {
-		if (keyEvent.getCode() == KeyCode.TAB) {
+		if (keyEvent.getCode() == KeyCode.TAB && textarea.getAnchor() > textarea.getCaretPosition()) {
 			// apply autocompletion:
-			textarea.positionCaret(textarea.getAnchor());
+			int pos = textarea.getAnchor();
+			textarea.insertText(pos, " ");
+			textarea.positionCaret(pos + 1);
 		}
 	}
 
@@ -85,7 +93,7 @@ public class RecoveryKeyRecoverController implements FxController {
 
 	@FXML
 	public void recover() {
-		recoveryKeyFactory.validateRecoveryKey(textarea.getText());
+		window.setScene(resetPasswordScene.get());
 	}
 
 	/* Getter/Setter */
