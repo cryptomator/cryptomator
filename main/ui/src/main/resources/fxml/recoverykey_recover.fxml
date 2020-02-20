@@ -7,6 +7,9 @@
 <?import javafx.scene.layout.VBox?>
 <?import org.cryptomator.ui.controls.FormattedLabel?>
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import org.cryptomator.ui.controls.FontAwesome5IconView?>
+<?import javafx.scene.control.TextFormatter?>
 <VBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
 	  fx:controller="org.cryptomator.ui.recoverykey.RecoveryKeyRecoverController"
@@ -14,14 +17,20 @@
 	  maxWidth="400"
 	  minHeight="145"
 	  spacing="12"
-	  alignment="TOP_LEFT">
+	  alignment="TOP_CENTER">
 	<padding>
 		<Insets topRightBottomLeft="12"/>
 	</padding>
 	<children>
-		<FormattedLabel format="TODO Enter your revoery key for &quot;%s&quot;:" arg1="${controller.vault.displayableName}" wrapText="true"/>
+		<FormattedLabel format="TODO Enter your recovery key for &quot;%s&quot;:" arg1="${controller.vault.displayableName}" wrapText="true"/>
 
-		<TextArea wrapText="true" prefRowCount="4" fx:id="textarea"/>
+		<TextArea wrapText="true" prefRowCount="4" fx:id="textarea" textFormatter="${controller.recoveryKeyTextFormatter}" onKeyPressed="#onKeyPressed"/>
+		
+		<Label text="TODO This is a valid recovery key" graphicTextGap="6" contentDisplay="LEFT" visible="${controller.validRecoveryKey}">
+			<graphic>
+				<FontAwesome5IconView glyph="CHECK"/>
+			</graphic>
+		</Label>
 
 		<Region VBox.vgrow="ALWAYS"/>
 

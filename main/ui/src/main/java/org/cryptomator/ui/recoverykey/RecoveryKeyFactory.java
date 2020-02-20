@@ -10,6 +10,7 @@ import javax.inject.Singleton;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.Collection;
 
 @Singleton
 public class RecoveryKeyFactory {
@@ -21,6 +22,10 @@ public class RecoveryKeyFactory {
 	@Inject
 	public RecoveryKeyFactory(WordEncoder wordEncoder) {
 		this.wordEncoder = wordEncoder;
+	}
+	
+	public Collection<String> getDictionary() {
+		return wordEncoder.getWords();
 	}
 
 	/**
