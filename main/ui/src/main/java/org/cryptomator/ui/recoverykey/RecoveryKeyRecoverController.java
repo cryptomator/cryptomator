@@ -62,9 +62,9 @@ public class RecoveryKeyRecoverController implements FxController {
 			String currentWord = text.substring(beginOfWord, caretPos);
 			Optional<String> suggestion = autoCompleter.autocomplete(currentWord);
 			if (suggestion.isPresent()) {
-				String completion = suggestion.get().substring(currentWord.length() - 1);
-				change.setText(completion);
-				change.setAnchor(caretPos + completion.length() - 1);
+				String completion = suggestion.get().substring(currentWord.length());
+				change.setText(change.getText() + completion);
+				change.setAnchor(caretPos + completion.length());
 			}
 		}
 		return change;
@@ -86,7 +86,6 @@ public class RecoveryKeyRecoverController implements FxController {
 	@FXML
 	public void recover() {
 		recoveryKeyFactory.validateRecoveryKey(textarea.getText());
-
 	}
 
 	/* Getter/Setter */
