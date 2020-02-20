@@ -106,8 +106,8 @@ abstract class RecoveryKeyModule {
 	@Provides
 	@IntoMap
 	@FxControllerKey(RecoveryKeyDisplayController.class)
-	static FxController provideRecoveryKeyDisplayController(@RecoveryKeyWindow Stage window, @RecoveryKeyWindow Vault vault, @RecoveryKeyWindow StringProperty recoveryKey) {
-		return new RecoveryKeyDisplayController(window, vault.getDisplayableName(), recoveryKey.get());
+	static FxController provideRecoveryKeyDisplayController(@RecoveryKeyWindow Stage window, @RecoveryKeyWindow Vault vault, @RecoveryKeyWindow StringProperty recoveryKey, ResourceBundle localization) {
+		return new RecoveryKeyDisplayController(window, vault.getDisplayableName(), recoveryKey.get(), localization);
 	}
 
 	@Binds

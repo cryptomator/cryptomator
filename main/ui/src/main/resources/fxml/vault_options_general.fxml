@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.layout.VBox?>
 <VBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
 	  fx:controller="org.cryptomator.ui.vaultoptions.GeneralVaultOptionsController"
@@ -12,9 +11,6 @@
 		<Insets topRightBottomLeft="12"/>
 	</padding>
 	<children>
-		<Button text="%vaultOptions.general.changePasswordBtn" onAction="#changePassword"/>
-		<Button text="%vaultOptions.general.showRecoveryKeyBtn" onAction="#showRecoveryKey"/>
-		<Button text="TODO recoverVault" onAction="#showRecoverVaultDialogue"/>
 		<CheckBox text="%vaultOptions.general.unlockAfterStartup" fx:id="unlockOnStartupCheckbox"/>
 	</children>
 </VBox>

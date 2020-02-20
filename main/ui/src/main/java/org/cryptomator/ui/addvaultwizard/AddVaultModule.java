@@ -193,8 +193,8 @@ public abstract class AddVaultModule {
 	@Provides
 	@IntoMap
 	@FxControllerKey(RecoveryKeyDisplayController.class)
-	static FxController provideRecoveryKeyDisplayController(@AddVaultWizardWindow Stage window, @Named("vaultName") StringProperty vaultName, @Named("recoveryKey") StringProperty recoveryKey) {
-		return new RecoveryKeyDisplayController(window, vaultName.get(), recoveryKey.get());
+	static FxController provideRecoveryKeyDisplayController(@AddVaultWizardWindow Stage window, @Named("vaultName") StringProperty vaultName, @Named("recoveryKey") StringProperty recoveryKey, ResourceBundle localization) {
+		return new RecoveryKeyDisplayController(window, vaultName.get(), recoveryKey.get(), localization);
 	}
 
 	@Binds

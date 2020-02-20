@@ -26,7 +26,7 @@
 						<FontAwesome5IconView glyph="PRINT"/>
 					</graphic>
 				</Button>
-				<Button text="%generic.button.copy" ButtonBar.buttonData="RIGHT" onAction="#copyRecoveryKey">
+				<Button fx:id="copyButton" text="%generic.button.copy" ButtonBar.buttonData="RIGHT" onAction="#copyRecoveryKey">
 					<graphic>
 						<FontAwesome5IconView glyph="COPY"/>
 					</graphic>

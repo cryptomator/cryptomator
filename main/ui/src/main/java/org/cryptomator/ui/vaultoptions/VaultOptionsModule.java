@@ -41,7 +41,9 @@ abstract class VaultOptionsModule {
 	static Stage provideStage(@MainWindow Stage owner, @VaultOptionsWindow Vault vault, ResourceBundle resourceBundle, @Named("windowIcons") List<Image> windowIcons) {
 		Stage stage = new Stage();
 		stage.setTitle(vault.getDisplayableName());
-		stage.setResizable(false);
+		stage.setResizable(true);
+		stage.setMinWidth(400);
+		stage.setMinHeight(300);
 		stage.initModality(Modality.WINDOW_MODAL);
 		stage.initOwner(owner);
 		stage.getIcons().addAll(windowIcons);
@@ -71,5 +73,10 @@ abstract class VaultOptionsModule {
 	@IntoMap
 	@FxControllerKey(MountOptionsController.class)
 	abstract FxController bindMountOptionsController(MountOptionsController controller);
+
+	@Binds
+	@IntoMap
+	@FxControllerKey(MasterkeyOptionsController.class)
+	abstract FxController bindMasterkeyOptionsController(MasterkeyOptionsController controller);
 
 }
