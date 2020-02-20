@@ -16,7 +16,7 @@
 		<Insets topRightBottomLeft="12"/>
 	</padding>
 	<children>
-		<Button text="%vaultOptions.general.changePasswordBtn" onAction="#changePassword" contentDisplay="LEFT">
+		<Button text="%vaultOptions.masterkey.changePasswordBtn" onAction="#changePassword" contentDisplay="LEFT">
 			<graphic>
 				<FontAwesome5IconView glyph="KEY"/>
 			</graphic>
@@ -26,7 +26,7 @@
 		
 		<Label maxWidth="-Infinity" text="%vaultOptions.masterkey.recoveryKeyExpanation" wrapText="true"/>
 		<HBox spacing="6" alignment="CENTER">
-			<Button text="%vaultOptions.general.showRecoveryKeyBtn" onAction="#showRecoveryKey" contentDisplay="LEFT">
+			<Button text="%vaultOptions.masterkey.showRecoveryKeyBtn" onAction="#showRecoveryKey" contentDisplay="LEFT">
 				<graphic>
 					<FontAwesome5IconView glyph="EYE"/>
 				</graphic>
