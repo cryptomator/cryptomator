@@ -17,7 +17,7 @@
 }
 
 @font-face {
-	src: url('dosis-bold.ttf');
+	src: url('quicksand-bold.ttf');
 }
 
 /*******************************************************************************
@@ -153,8 +153,8 @@
 }
 
 .main-window .title .label {
-	-fx-font-family: 'Dosis';
-	-fx-font-size: 21px;
+	-fx-font-family: 'Quicksand';
+	-fx-font-size: 16px;
 	-fx-font-style: normal;
 	-fx-font-weight: 700;
 	-fx-text-fill: TITLE_TEXT_FILL;

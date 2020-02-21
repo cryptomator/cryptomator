@@ -19,7 +19,7 @@
 		<Insets bottom="6" left="12" right="12" top="6"/>
 	</padding>
 	<children>
-		<Label text="Cryptomator"/>
+		<Label text="CRYPTOMATOR"/>
 		<Region HBox.hgrow="ALWAYS"/>
 		<Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#showDonationKeyPreferences" focusTraversable="false" visible="${!controller.licenseHolder.validLicense}">
 			<graphic>
