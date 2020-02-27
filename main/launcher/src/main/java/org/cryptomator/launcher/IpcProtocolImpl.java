@@ -8,6 +8,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.concurrent.BlockingQueue;
 import java.util.stream.Stream;
 
@@ -27,7 +28,7 @@ class IpcProtocolImpl implements IpcProtocol {
 
 	@Override
 	public void revealRunningApp() {
-		launchEventQueue.add(new AppLaunchEvent(AppLaunchEvent.EventType.REVEAL_APP, Stream.empty()));
+		launchEventQueue.add(new AppLaunchEvent(AppLaunchEvent.EventType.REVEAL_APP, Collections.emptyList()));
 	}
 
 	@Override

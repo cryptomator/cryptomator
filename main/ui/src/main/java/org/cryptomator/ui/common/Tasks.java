@@ -73,21 +73,21 @@ public class Tasks {
 			return new TaskImpl<>(callable, successHandler, errorHandlers, finallyHandler);
 		}
 
-		public Task<T> runOnce(ExecutorService executorService) {
+		public Task<T> runOnce(ExecutorService executor) {
 			Task<T> task = build();
-			executorService.submit(task);
+			executor.submit(task);
 			return task;
 		}
 
-		public Task<T> scheduleOnce(ScheduledExecutorService executorService, long delay, TimeUnit unit) {
+		public Task<T> scheduleOnce(ScheduledExecutorService scheduler, long delay, TimeUnit unit) {
 			Task<T> task = build();
-			executorService.schedule(task, delay, unit);
+			scheduler.schedule(task, delay, unit);
 			return task;
 		}
 
-		public ScheduledService<T> schedulePeriodically(ExecutorService executorService, Duration initialDelay, Duration period) {
+		public ScheduledService<T> schedulePeriodically(ExecutorService executor, Duration initialDelay, Duration period) {
 			ScheduledService<T> service = new RestartingService<>(this::build);
-			service.setExecutor(executorService);
+			service.setExecutor(executor);
 			service.setDelay(initialDelay);
 			service.setPeriod(period);
 			Platform.runLater(service::start);

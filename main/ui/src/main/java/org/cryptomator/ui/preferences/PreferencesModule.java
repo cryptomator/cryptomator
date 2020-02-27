@@ -18,8 +18,8 @@ import org.cryptomator.ui.common.FxmlScene;
 
 import javax.inject.Named;
 import javax.inject.Provider;
+import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.ResourceBundle;
 
 @Module(includes = {AutoStartModule.class})
@@ -41,11 +41,11 @@ abstract class PreferencesModule {
 	@Provides
 	@PreferencesWindow
 	@PreferencesScoped
-	static Stage provideStage(ResourceBundle resourceBundle, @Named("windowIcon") Optional<Image> windowIcon) {
+	static Stage provideStage(ResourceBundle resourceBundle, @Named("windowIcons") List<Image> windowIcons) {
 		Stage stage = new Stage();
 		stage.setTitle(resourceBundle.getString("preferences.title"));
 		stage.setResizable(false);
-		windowIcon.ifPresent(stage.getIcons()::add);
+		stage.getIcons().addAll(windowIcons);
 		return stage;
 	}
 

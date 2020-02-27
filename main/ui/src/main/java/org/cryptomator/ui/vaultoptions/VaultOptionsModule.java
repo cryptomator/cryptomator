@@ -21,8 +21,8 @@ import org.cryptomator.ui.recoverykey.RecoveryKeyComponent;
 
 import javax.inject.Named;
 import javax.inject.Provider;
+import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.ResourceBundle;
 
 @Module(subcomponents = {ChangePasswordComponent.class, RecoveryKeyComponent.class})
@@ -38,13 +38,15 @@ abstract class VaultOptionsModule {
 	@Provides
 	@VaultOptionsWindow
 	@VaultOptionsScoped
-	static Stage provideStage(@MainWindow Stage owner, @VaultOptionsWindow Vault vault, ResourceBundle resourceBundle, @Named("windowIcon") Optional<Image> windowIcon) {
+	static Stage provideStage(@MainWindow Stage owner, @VaultOptionsWindow Vault vault, ResourceBundle resourceBundle, @Named("windowIcons") List<Image> windowIcons) {
 		Stage stage = new Stage();
 		stage.setTitle(vault.getDisplayableName());
-		stage.setResizable(false);
+		stage.setResizable(true);
+		stage.setMinWidth(400);
+		stage.setMinHeight(300);
 		stage.initModality(Modality.WINDOW_MODAL);
 		stage.initOwner(owner);
-		windowIcon.ifPresent(stage.getIcons()::add);
+		stage.getIcons().addAll(windowIcons);
 		return stage;
 	}
 
@@ -71,5 +73,10 @@ abstract class VaultOptionsModule {
 	@IntoMap
 	@FxControllerKey(MountOptionsController.class)
 	abstract FxController bindMountOptionsController(MountOptionsController controller);
+
+	@Binds
+	@IntoMap
+	@FxControllerKey(MasterkeyOptionsController.class)
+	abstract FxController bindMasterkeyOptionsController(MasterkeyOptionsController controller);
 
 }

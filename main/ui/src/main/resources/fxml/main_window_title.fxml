@@ -1,11 +1,11 @@
-<?import javafx.scene.layout.StackPane?>
-<?import org.cryptomator.ui.controls.FontAwesome5IconView?>
-<?import javafx.scene.layout.Region?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.Button?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import org.cryptomator.ui.controls.FontAwesome5IconView?>
 <HBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
 	  fx:id="titleBar"
@@ -19,13 +19,13 @@
 		<Insets bottom="6" left="12" right="12" top="6"/>
 	</padding>
 	<children>
-		<Label text="Cryptomator"/>
+		<Label text="CRYPTOMATOR"/>
 		<Region HBox.hgrow="ALWAYS"/>
 		<Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#showDonationKeyPreferences" focusTraversable="false" visible="${!controller.licenseHolder.validLicense}">
 			<graphic>
 				<StackPane>
 					<FontAwesome5IconView glyph="EXCLAMATION_CIRCLE" glyphSize="16"/>
-					<Region styleClass="update-indicator" StackPane.alignment="TOP_RIGHT" prefWidth="10" prefHeight="10" maxWidth="-Infinity" maxHeight="-Infinity"/>
+					<Region styleClass="update-indicator" StackPane.alignment="TOP_RIGHT" prefWidth="12" prefHeight="12" maxWidth="-Infinity" maxHeight="-Infinity"/>
 				</StackPane>
 			</graphic>
 			<tooltip>
@@ -36,11 +36,19 @@
 			<graphic>
 				<StackPane>
 					<FontAwesome5IconView glyph="COGS" glyphSize="16"/>
-					<Region styleClass="update-indicator" visible="${controller.updateAvailable}" StackPane.alignment="TOP_RIGHT" prefWidth="10" prefHeight="10" maxWidth="-Infinity" maxHeight="-Infinity"/>
+					<Region styleClass="update-indicator" visible="${controller.updateAvailable}" StackPane.alignment="TOP_RIGHT" prefWidth="12" prefHeight="12" maxWidth="-Infinity" maxHeight="-Infinity"/>
 				</StackPane>
 			</graphic>
 			<tooltip>
 				<Tooltip text="%main.preferencesBtn.tooltip"/>
+			</tooltip>
+		</Button>
+		<Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#minimize" focusTraversable="false" visible="${!controller.minimizeToSysTray}" managed="${!controller.minimizeToSysTray}">
+			<graphic>
+				<FontAwesome5IconView glyph="WINDOW_MINIMIZE" glyphSize="12"/>
+			</graphic>
+			<tooltip>
+				<Tooltip text="%main.minimizeBtn.tooltip"/>
 			</tooltip>
 		</Button>
 		<Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#close" focusTraversable="false">

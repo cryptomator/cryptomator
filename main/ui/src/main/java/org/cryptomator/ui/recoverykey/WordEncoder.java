@@ -2,6 +2,7 @@ package org.cryptomator.ui.recoverykey;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
+import com.google.common.base.Strings;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -11,6 +12,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -29,6 +31,10 @@ class WordEncoder {
 	@Inject
 	public WordEncoder() {
 		this(DEFAULT_WORD_FILE);
+	}
+	
+	public List<String> getWords() {
+		return words;
 	}
 	
 	public WordEncoder(String wordFile) {
@@ -78,7 +84,7 @@ class WordEncoder {
 	 * @throws IllegalArgumentException If the encoded string doesn't consist of a multiple of two words or one of the words is unknown to this encoder.
 	 */
 	public byte[] decode(String encoded) {
-		List<String> splitted = Splitter.on(DELIMITER).omitEmptyStrings().splitToList(encoded);
+		List<String> splitted = Splitter.on(DELIMITER).omitEmptyStrings().splitToList(Strings.nullToEmpty(encoded));
 		Preconditions.checkArgument(splitted.size() % 2 == 0, "%s needs to be a multiple of two words", encoded);
 		byte[] result = new byte[splitted.size() / 2 * 3];
 		for (int i = 0; i < splitted.size(); i+=2) {

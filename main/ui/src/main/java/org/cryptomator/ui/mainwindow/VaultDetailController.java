@@ -33,11 +33,11 @@ public class VaultDetailController implements FxController {
 	private FontAwesome5Icon getGlyphForVaultState(VaultState state) {
 		switch (state) {
 			case LOCKED:
-				return FontAwesome5Icon.LOCK_ALT;
+				return FontAwesome5Icon.LOCK;
 			case PROCESSING:
 				return FontAwesome5Icon.SPINNER;
 			case UNLOCKED:
-				return FontAwesome5Icon.LOCK_OPEN_ALT;
+				return FontAwesome5Icon.LOCK_OPEN;
 			default:
 				return FontAwesome5Icon.EXCLAMATION_TRIANGLE;
 		}

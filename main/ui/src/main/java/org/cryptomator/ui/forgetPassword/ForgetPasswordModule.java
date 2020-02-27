@@ -20,8 +20,8 @@ import org.cryptomator.ui.common.FxmlScene;
 
 import javax.inject.Named;
 import javax.inject.Provider;
+import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.ResourceBundle;
 
 @Module
@@ -37,13 +37,13 @@ abstract class ForgetPasswordModule {
 	@Provides
 	@ForgetPasswordWindow
 	@ForgetPasswordScoped
-	static Stage provideStage(ResourceBundle resourceBundle, @Named("windowIcon") Optional<Image> windowIcon, @Named("forgetPasswordOwner") Stage owner) {
+	static Stage provideStage(ResourceBundle resourceBundle, @Named("windowIcons") List<Image> windowIcons, @Named("forgetPasswordOwner") Stage owner) {
 		Stage stage = new Stage();
 		stage.setTitle(resourceBundle.getString("forgetPassword.title"));
 		stage.setResizable(false);
 		stage.initModality(Modality.WINDOW_MODAL);
 		stage.initOwner(owner);
-		windowIcon.ifPresent(stage.getIcons()::add);
+		stage.getIcons().addAll(windowIcons);
 		return stage;
 	}
 

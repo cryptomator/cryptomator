@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.layout.VBox?>
+<?import org.cryptomator.ui.controls.FontAwesome5IconView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.Region?>
+<VBox xmlns="http://javafx.com/javafx"
+	  xmlns:fx="http://javafx.com/fxml"
+	  fx:controller="org.cryptomator.ui.vaultoptions.MasterkeyOptionsController"
+	  spacing="6"
+	  alignment="TOP_CENTER">
+	<padding>
+		<Insets topRightBottomLeft="12"/>
+	</padding>
+	<children>
+		<Button text="%vaultOptions.masterkey.changePasswordBtn" onAction="#changePassword" contentDisplay="LEFT">
+			<graphic>
+				<FontAwesome5IconView glyph="KEY"/>
+			</graphic>
+		</Button>
+		
+		<Region VBox.vgrow="ALWAYS"/>
+		
+		<Label maxWidth="-Infinity" text="%vaultOptions.masterkey.recoveryKeyExpanation" wrapText="true"/>
+		<HBox spacing="6" alignment="CENTER">
+			<Button text="%vaultOptions.masterkey.showRecoveryKeyBtn" onAction="#showRecoveryKey" contentDisplay="LEFT">
+				<graphic>
+					<FontAwesome5IconView glyph="EYE"/>
+				</graphic>
+			</Button>
+			<Button text="%vaultOptions.masterkey.recoverPasswordBtn" onAction="#showRecoverVaultDialogue" contentDisplay="LEFT">
+				<graphic>
+					<FontAwesome5IconView glyph="SYNC"/>
+				</graphic>
+			</Button>
+		</HBox>
+
+		<Region VBox.vgrow="ALWAYS"/>
+	</children>
+</VBox>

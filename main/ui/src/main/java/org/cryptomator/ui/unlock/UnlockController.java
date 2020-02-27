@@ -1,32 +1,28 @@
 package org.cryptomator.ui.unlock;
 
 import dagger.Lazy;
-import javafx.animation.KeyFrame;
-import javafx.animation.KeyValue;
-import javafx.animation.Timeline;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.value.WritableValue;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ContentDisplay;
 import javafx.stage.Stage;
-import javafx.util.Duration;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.cryptolib.api.InvalidPassphraseException;
-import org.cryptomator.cryptolib.api.UnsupportedVaultFormatException;
 import org.cryptomator.keychain.KeychainAccess;
 import org.cryptomator.keychain.KeychainAccessException;
+import org.cryptomator.ui.common.Animations;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
-import org.cryptomator.ui.common.Tasks;
+import org.cryptomator.ui.common.VaultService;
 import org.cryptomator.ui.controls.NiceSecurePasswordField;
 import org.cryptomator.ui.forgetPassword.ForgetPasswordComponent;
 import org.slf4j.Logger;
@@ -50,22 +46,24 @@ public class UnlockController implements FxController {
 	private final ExecutorService executor;
 	private final ObjectBinding<ContentDisplay> unlockButtonState;
 	private final Optional<KeychainAccess> keychainAccess;
+	private final VaultService vaultService;
 	private final Lazy<Scene> successScene;
 	private final Lazy<Scene> invalidMountPointScene;
 	private final Lazy<Scene> genericErrorScene;
-	private final ObjectProperty<Exception> genericErrorCause;
+	private final ObjectProperty<Throwable> genericErrorCause;
 	private final ForgetPasswordComponent.Builder forgetPassword;
 	private final BooleanProperty unlockButtonDisabled;
 	public NiceSecurePasswordField passwordField;
 	public CheckBox savePassword;
 
 	@Inject
-	public UnlockController(@UnlockWindow Stage window, @UnlockWindow Vault vault, ExecutorService executor, Optional<KeychainAccess> keychainAccess, @FxmlScene(FxmlFile.UNLOCK_SUCCESS) Lazy<Scene> successScene, @FxmlScene(FxmlFile.UNLOCK_INVALID_MOUNT_POINT) Lazy<Scene> invalidMountPointScene, @FxmlScene(FxmlFile.UNLOCK_GENERIC_ERROR) Lazy<Scene> genericErrorScene, @Named("genericErrorCause") ObjectProperty<Exception> genericErrorCause, ForgetPasswordComponent.Builder forgetPassword) {
+	public UnlockController(@UnlockWindow Stage window, @UnlockWindow Vault vault, ExecutorService executor, Optional<KeychainAccess> keychainAccess, VaultService vaultService, @FxmlScene(FxmlFile.UNLOCK_SUCCESS) Lazy<Scene> successScene, @FxmlScene(FxmlFile.UNLOCK_INVALID_MOUNT_POINT) Lazy<Scene> invalidMountPointScene, @FxmlScene(FxmlFile.UNLOCK_GENERIC_ERROR) Lazy<Scene> genericErrorScene, @Named("genericErrorCause") ObjectProperty<Throwable> genericErrorCause, ForgetPasswordComponent.Builder forgetPassword) {
 		this.window = window;
 		this.vault = vault;
 		this.executor = executor;
 		this.unlockButtonState = Bindings.createObjectBinding(this::getUnlockButtonState, vault.stateProperty());
 		this.keychainAccess = keychainAccess;
+		this.vaultService = vaultService;
 		this.successScene = successScene;
 		this.invalidMountPointScene = invalidMountPointScene;
 		this.genericErrorScene = genericErrorScene;
@@ -93,36 +91,36 @@ public class UnlockController implements FxController {
 	public void unlock() {
 		LOG.trace("UnlockController.unlock()");
 		CharSequence password = passwordField.getCharacters();
-		vault.setState(VaultState.PROCESSING);
-		Tasks.create(() -> {
-			vault.unlock(password);
+		
+		Task<Vault> task = vaultService.createUnlockTask(vault, password);
+		task.setOnSucceeded(event -> {
 			if (keychainAccess.isPresent() && savePassword.isSelected()) {
-				keychainAccess.get().storePassphrase(vault.getId(), password);
+				try {
+					keychainAccess.get().storePassphrase(vault.getId(), password);
+				} catch (KeychainAccessException e) {
+					LOG.error("Failed to store passphrase in system keychain.", e);
+				}
 			}
-		}).onSuccess(() -> {
-			vault.setState(VaultState.UNLOCKED);
 			passwordField.swipe();
 			LOG.info("Unlock of '{}' succeeded.", vault.getDisplayableName());
 			window.setScene(successScene.get());
-		}).onError(InvalidPassphraseException.class, e -> {
-			shakeWindow();
-			passwordField.selectAll();
-			passwordField.requestFocus();
-		}).onError(NotDirectoryException.class, e -> {
-			LOG.error("Unlock failed. Mount point not a directory: {}", e.getMessage());
-			window.setScene(invalidMountPointScene.get());
-		}).onError(DirectoryNotEmptyException.class, e -> {
-			LOG.error("Unlock failed. Mount point not empty: {}", e.getMessage());
-			window.setScene(invalidMountPointScene.get());
-		}).onError(Exception.class, e -> { // including RuntimeExceptions
-			LOG.error("Unlock failed for technical reasons.", e);
-			genericErrorCause.set(e);
-			window.setScene(genericErrorScene.get());
-		}).andFinally(() -> {
-			if (!vault.isUnlocked()) {
-				vault.setState(VaultState.LOCKED);
+		});
+		task.setOnFailed(event -> {
+			if (task.getException() instanceof InvalidPassphraseException) {
+				Animations.createShakeWindowAnimation(window).play();
+				passwordField.selectAll();
+				passwordField.requestFocus();
+			} else if (task.getException() instanceof NotDirectoryException
+				|| task.getException() instanceof DirectoryNotEmptyException) {
+				LOG.error("Unlock failed. Mount point not an empty directory: {}", task.getException().getMessage());
+				window.setScene(invalidMountPointScene.get());
+			} else {
+				LOG.error("Unlock failed for technical reasons.", task.getException());
+				genericErrorCause.set(task.getException());
+				window.setScene(genericErrorScene.get());
 			}
-		}).runOnce(executor);
+		});
+		executor.execute(task);
 	}
 
 	/* Save Password */
@@ -165,33 +163,6 @@ public class UnlockController implements FxController {
 				Arrays.fill(storedPw, ' ');
 			}
 		}
-	}
-
-	/* Animations */
-
-	private void shakeWindow() {
-		WritableValue<Double> writableWindowX = new WritableValue<>() {
-			@Override
-			public Double getValue() {
-				return window.getX();
-			}
-
-			@Override
-			public void setValue(Double value) {
-				window.setX(value);
-			}
-		};
-		Timeline timeline = new Timeline( //
-				new KeyFrame(Duration.ZERO, new KeyValue(writableWindowX, window.getX())), //
-				new KeyFrame(new Duration(100), new KeyValue(writableWindowX, window.getX() - 22.0)), //
-				new KeyFrame(new Duration(200), new KeyValue(writableWindowX, window.getX() + 18.0)), //
-				new KeyFrame(new Duration(300), new KeyValue(writableWindowX, window.getX() - 14.0)), //
-				new KeyFrame(new Duration(400), new KeyValue(writableWindowX, window.getX() + 10.0)), //
-				new KeyFrame(new Duration(500), new KeyValue(writableWindowX, window.getX() - 6.0)), //
-				new KeyFrame(new Duration(600), new KeyValue(writableWindowX, window.getX() + 2.0)), //
-				new KeyFrame(new Duration(700), new KeyValue(writableWindowX, window.getX())) //
-		);
-		timeline.play();
 	}
 
 	/* Getter/Setter */

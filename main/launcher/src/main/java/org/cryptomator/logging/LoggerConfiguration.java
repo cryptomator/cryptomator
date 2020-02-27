@@ -55,10 +55,11 @@ public class LoggerConfiguration {
 			}
 
 			// configure upgrade logger:
-			Logger upgrades = context.getLogger("org.cryptomator.ui.model.upgrade");
+			Logger upgrades = context.getLogger("org.cryptomator.cryptofs.migration");
 			upgrades.setLevel(Level.DEBUG);
 			upgrades.addAppender(stdout);
 			upgrades.addAppender(upgrade);
+			upgrades.addAppender(file);
 			upgrades.setAdditive(false);
 
 			// add shutdown hook

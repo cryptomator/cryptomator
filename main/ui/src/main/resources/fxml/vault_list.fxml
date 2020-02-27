@@ -5,8 +5,7 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.MenuItem?>
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Arc?>
@@ -25,12 +24,11 @@
 				</ContextMenu>
 			</contextMenu>
 		</ListView>
-		<AnchorPane visible="${controller.emptyVaultList}">
-			<HBox AnchorPane.leftAnchor="10" AnchorPane.rightAnchor="10" AnchorPane.bottomAnchor="100" alignment="BOTTOM_LEFT">
-				<Label textAlignment="CENTER" text="%main.vaultlist.emptyList.onboardingInstruction" wrapText="true"/>
-			</HBox>
-			<Arc styleClass="onboarding-overlay-arc" AnchorPane.bottomAnchor="5" type="OPEN" centerX="-10" centerY="0" radiusY="100" radiusX="60" startAngle="0" length="-60" strokeWidth="1"/>
-		</AnchorPane>
+		<VBox visible="${controller.emptyVaultList}" spacing="6" alignment="CENTER">
+			<Region VBox.vgrow="ALWAYS"/>
+			<Label VBox.vgrow="NEVER" text="%main.vaultlist.emptyList.onboardingInstruction" wrapText="true"/>
+			<Arc VBox.vgrow="NEVER" styleClass="onboarding-overlay-arc" type="OPEN" centerX="50" centerY="0" radiusY="100" radiusX="50" startAngle="0" length="-60" strokeWidth="1"/>
+		</VBox>
 	</StackPane>
 	<Button styleClass="toolbar-button" text="%main.vaultlist.addVaultBtn" onAction="#didClickAddVault" alignment="BASELINE_CENTER" maxWidth="Infinity">
 		<graphic>

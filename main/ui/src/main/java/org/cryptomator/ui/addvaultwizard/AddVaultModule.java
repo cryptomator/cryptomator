@@ -27,8 +27,8 @@ import org.cryptomator.ui.recoverykey.RecoveryKeyDisplayController;
 import javax.inject.Named;
 import javax.inject.Provider;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.ResourceBundle;
 
 @Module
@@ -51,13 +51,13 @@ public abstract class AddVaultModule {
 	@Provides
 	@AddVaultWizardWindow
 	@AddVaultWizardScoped
-	static Stage provideStage(@MainWindow Stage owner, ResourceBundle resourceBundle, @Named("windowIcon") Optional<Image> windowIcon) {
+	static Stage provideStage(@MainWindow Stage owner, ResourceBundle resourceBundle, @Named("windowIcons") List<Image> windowIcons) {
 		Stage stage = new Stage();
 		stage.setTitle(resourceBundle.getString("addvaultwizard.title"));
 		stage.setResizable(false);
 		stage.initModality(Modality.WINDOW_MODAL);
 		stage.initOwner(owner);
-		windowIcon.ifPresent(stage.getIcons()::add);
+		stage.getIcons().addAll(windowIcons);
 		return stage;
 	}
 
@@ -193,8 +193,8 @@ public abstract class AddVaultModule {
 	@Provides
 	@IntoMap
 	@FxControllerKey(RecoveryKeyDisplayController.class)
-	static FxController provideRecoveryKeyDisplayController(@AddVaultWizardWindow Stage window, @Named("vaultName") StringProperty vaultName, @Named("recoveryKey") StringProperty recoveryKey) {
-		return new RecoveryKeyDisplayController(window, vaultName.get(), recoveryKey.get());
+	static FxController provideRecoveryKeyDisplayController(@AddVaultWizardWindow Stage window, @Named("vaultName") StringProperty vaultName, @Named("recoveryKey") StringProperty recoveryKey, ResourceBundle localization) {
+		return new RecoveryKeyDisplayController(window, vaultName.get(), recoveryKey.get(), localization);
 	}
 
 	@Binds

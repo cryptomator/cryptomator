@@ -22,7 +22,9 @@ import org.cryptomator.ui.unlock.UnlockComponent;
 import javax.inject.Named;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Optional;
+import java.io.UncheckedIOException;
+import java.util.Collections;
+import java.util.List;
 
 @Module(includes = {UpdateCheckerModule.class}, subcomponents = {MainWindowComponent.class, PreferencesComponent.class, UnlockComponent.class, QuitComponent.class})
 abstract class FxApplicationModule {
@@ -34,19 +36,29 @@ abstract class FxApplicationModule {
 	}
 
 	@Provides
-	@Named("windowIcon")
+	@Named("windowIcons")
 	@FxApplicationScoped
-	static Optional<Image> provideWindowIcon() {
+	static List<Image> provideWindowIcons() {
 		if (SystemUtils.IS_OS_MAC) {
-			return Optional.empty();
+			return Collections.emptyList();
 		}
-		try (InputStream in = FxApplicationModule.class.getResourceAsStream("/window_icon_32.png")) { // TODO: use some higher res depending on display?
-			return Optional.of(new Image(in));
+
+		try {
+			return List.of( //
+					createImageFromResource("/window_icon_32.png"), //
+					createImageFromResource("/window_icon_512.png") //
+			);
 		} catch (IOException e) {
-			return Optional.empty();
+			throw new UncheckedIOException("Failed to load embedded resource.", e);
 		}
 	}
-	
+
+	private static Image createImageFromResource(String resourceName) throws IOException {
+		try (InputStream in = FxApplicationModule.class.getResourceAsStream(resourceName)) {
+			return new Image(in);
+		}
+	}
+
 	@Binds
 	abstract Application bindApplication(FxApplication application);
 

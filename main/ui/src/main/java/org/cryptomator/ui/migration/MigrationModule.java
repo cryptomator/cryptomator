@@ -4,22 +4,26 @@ import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoMap;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import org.cryptomator.cryptofs.common.FileSystemCapabilityChecker;
 import org.cryptomator.ui.common.DefaultSceneFactory;
 import org.cryptomator.ui.common.FXMLLoaderFactory;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxControllerKey;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
+import org.cryptomator.ui.common.StackTraceController;
 import org.cryptomator.ui.mainwindow.MainWindow;
 
 import javax.inject.Named;
 import javax.inject.Provider;
+import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.ResourceBundle;
 
 @Module
@@ -35,14 +39,28 @@ abstract class MigrationModule {
 	@Provides
 	@MigrationWindow
 	@MigrationScoped
-	static Stage provideStage(@MainWindow Stage owner, ResourceBundle resourceBundle, @Named("windowIcon") Optional<Image> windowIcon) {
+	static Stage provideStage(@MainWindow Stage owner, ResourceBundle resourceBundle, @Named("windowIcons") List<Image> windowIcons) {
 		Stage stage = new Stage();
 		stage.setTitle(resourceBundle.getString("migration.title"));
 		stage.setResizable(false);
 		stage.initModality(Modality.WINDOW_MODAL);
 		stage.initOwner(owner);
-		windowIcon.ifPresent(stage.getIcons()::add);
+		stage.getIcons().addAll(windowIcons);
 		return stage;
+	}
+
+	@Provides
+	@Named("genericErrorCause")
+	@MigrationScoped
+	static ObjectProperty<Throwable> provideGenericErrorCause() {
+		return new SimpleObjectProperty<>();
+	}
+
+	@Provides
+	@Named("capabilityErrorCause")
+	@MigrationScoped
+	static ObjectProperty<FileSystemCapabilityChecker.Capability> provideCapabilityErrorCause() {
+		return new SimpleObjectProperty<>();
 	}
 
 	@Provides
@@ -66,6 +84,21 @@ abstract class MigrationModule {
 		return fxmlLoaders.createScene("/fxml/migration_success.fxml");
 	}
 
+	@Provides
+	@FxmlScene(FxmlFile.MIGRATION_CAPABILITY_ERROR)
+	@MigrationScoped
+	static Scene provideMigrationCapabilityErrorScene(@MigrationWindow FXMLLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene("/fxml/migration_capability_error.fxml");
+	}
+
+	@Provides
+	@FxmlScene(FxmlFile.MIGRATION_GENERIC_ERROR)
+	@MigrationScoped
+	static Scene provideMigrationGenericErrorScene(@MigrationWindow FXMLLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene("/fxml/migration_generic_error.fxml");
+	}
+
+
 	// ------------------
 
 	@Binds
@@ -82,5 +115,22 @@ abstract class MigrationModule {
 	@IntoMap
 	@FxControllerKey(MigrationSuccessController.class)
 	abstract FxController bindMigrationSuccessController(MigrationSuccessController controller);
+
+	@Binds
+	@IntoMap
+	@FxControllerKey(MigrationCapabilityErrorController.class)
+	abstract FxController bindMigrationCapabilityErrorController(MigrationCapabilityErrorController controller);
+
+	@Binds
+	@IntoMap
+	@FxControllerKey(MigrationGenericErrorController.class)
+	abstract FxController bindMigrationGenericErrorController(MigrationGenericErrorController controller);
+
+	@Provides
+	@IntoMap
+	@FxControllerKey(StackTraceController.class)
+	static FxController provideStackTraceController(@Named("genericErrorCause") ObjectProperty<Throwable> errorCause) {
+		return new StackTraceController(errorCause.get());
+	}
 
 }

@@ -5,12 +5,13 @@ package org.cryptomator.ui.controls;
  */
 public enum FontAwesome5Icon {
 	ANCHOR("\uF13D"), //
-	ARROW_ALT_UP("\uF357"), //
+	ARROW_UP("\uF062"), //
 	CHECK("\uF00C"), //
 	COG("\uF013"), //
 	COGS("\uF085"), //
 	COPY("\uF0C5"), //
-	EXCLAMATION("\uF12A"),
+	CROWN("\uF521"), //
+	EXCLAMATION("\uF12A"), //
 	EXCLAMATION_CIRCLE("\uF06A"), //
 	EXCLAMATION_TRIANGLE("\uF071"), //
 	EYE("\uF06E"), //
@@ -22,17 +23,17 @@ public enum FontAwesome5Icon {
 	HDD("\uF0A0"), //
 	KEY("\uF084"), //
 	LINK("\uF0C1"), //
-	LOCK_ALT("\uF30D"), //
-	LOCK_OPEN_ALT("\uF3C2"), //
+	LOCK("\uF023"), //
+	LOCK_OPEN("\uF3C1"), //
+	MAGIC("\uF0D0"), //
 	PLUS("\uF067"), //
 	PRINT("\uF02F"), //
 	QUESTION("\uF128"), //
-	SPARKLES("\uF890"), //
 	SPINNER("\uF110"), //
 	SYNC("\uF021"), //
 	TIMES("\uF00D"), //
-	USER_CROWN("\uF6A4"), //
 	WRENCH("\uF0AD"), //
+	WINDOW_MINIMIZE("\uF2D1"), //
 	;
 
 	private final String unicode;

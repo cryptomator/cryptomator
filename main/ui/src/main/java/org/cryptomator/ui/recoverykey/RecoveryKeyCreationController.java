@@ -1,27 +1,21 @@
 package org.cryptomator.ui.recoverykey;
 
 import dagger.Lazy;
-import javafx.animation.KeyFrame;
-import javafx.animation.KeyValue;
-import javafx.animation.Timeline;
-import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.beans.value.WritableValue;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import javafx.util.Duration;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.cryptolib.api.InvalidPassphraseException;
+import org.cryptomator.ui.common.Animations;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
-import org.cryptomator.ui.common.Tasks;
 import org.cryptomator.ui.controls.NiceSecurePasswordField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
 import javax.inject.Inject;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
@@ -48,19 +42,26 @@ public class RecoveryKeyCreationController implements FxController {
 		this.recoveryKeyFactory = recoveryKeyFactory;
 		this.recoveryKeyProperty = recoveryKey;
 	}
-	
+
 	@FXML
 	public void createRecoveryKey() {
-		Tasks.create(() -> {
-			return recoveryKeyFactory.createRecoveryKey(vault.getPath(), passwordField.getCharacters());
-		}).onSuccess(result -> {
-			recoveryKeyProperty.set(result);
+		Task<String> task = new RecoveryKeyCreationTask();
+		task.setOnScheduled(event -> {
+			LOG.debug("Creating recovery key for {}.", vault.getDisplayablePath());
+		});
+		task.setOnSucceeded(event -> {
+			String recoveryKey = task.getValue();
+			recoveryKeyProperty.set(recoveryKey);
 			window.setScene(successScene.get());
-		}).onError(IOException.class, e -> {
-			LOG.error("Creation of recovery key failed.", e);
-		}).onError(InvalidPassphraseException.class, e -> {
-			shakeWindow();
-		}).runOnce(executor);
+		});
+		task.setOnFailed(event -> {
+			if (task.getException() instanceof InvalidPassphraseException) {
+				Animations.createShakeWindowAnimation(window).play();
+			} else {
+				LOG.error("Creation of recovery key failed.", task.getException());
+			}
+		});
+		executor.submit(task);
 	}
 
 	@FXML
@@ -68,31 +69,13 @@ public class RecoveryKeyCreationController implements FxController {
 		window.close();
 	}
 
-	/* Animations */
+	private class RecoveryKeyCreationTask extends Task<String> {
 
-	private void shakeWindow() {
-		WritableValue<Double> writableWindowX = new WritableValue<>() {
-			@Override
-			public Double getValue() {
-				return window.getX();
-			}
+		@Override
+		protected String call() throws IOException {
+			return recoveryKeyFactory.createRecoveryKey(vault.getPath(), passwordField.getCharacters());
+		}
 
-			@Override
-			public void setValue(Double value) {
-				window.setX(value);
-			}
-		};
-		Timeline timeline = new Timeline( //
-				new KeyFrame(Duration.ZERO, new KeyValue(writableWindowX, window.getX())), //
-				new KeyFrame(new Duration(100), new KeyValue(writableWindowX, window.getX() - 22.0)), //
-				new KeyFrame(new Duration(200), new KeyValue(writableWindowX, window.getX() + 18.0)), //
-				new KeyFrame(new Duration(300), new KeyValue(writableWindowX, window.getX() - 14.0)), //
-				new KeyFrame(new Duration(400), new KeyValue(writableWindowX, window.getX() + 10.0)), //
-				new KeyFrame(new Duration(500), new KeyValue(writableWindowX, window.getX() - 6.0)), //
-				new KeyFrame(new Duration(600), new KeyValue(writableWindowX, window.getX() + 2.0)), //
-				new KeyFrame(new Duration(700), new KeyValue(writableWindowX, window.getX())) //
-		);
-		timeline.play();
 	}
 
 	/* Getter/Setter */

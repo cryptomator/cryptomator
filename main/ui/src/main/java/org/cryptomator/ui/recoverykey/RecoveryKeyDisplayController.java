@@ -4,6 +4,7 @@ import javafx.fxml.FXML;
 import javafx.print.PageLayout;
 import javafx.print.Printer;
 import javafx.print.PrinterJob;
+import javafx.scene.control.Button;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.text.Font;
@@ -16,6 +17,8 @@ import org.cryptomator.ui.common.FxController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ResourceBundle;
+
 public class RecoveryKeyDisplayController implements FxController {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(RecoveryKeyDisplayController.class);
@@ -23,11 +26,14 @@ public class RecoveryKeyDisplayController implements FxController {
 	private final Stage window;
 	private final String vaultName;
 	private final String recoveryKey;
-	
-	public RecoveryKeyDisplayController(Stage window, String vaultName, String recoveryKey) {
+	private final ResourceBundle localization;
+	public Button copyButton;
+
+	public RecoveryKeyDisplayController(Stage window, String vaultName, String recoveryKey, ResourceBundle localization) {
 		this.window = window;
 		this.vaultName = vaultName;
 		this.recoveryKey = recoveryKey;
+		this.localization = localization;
 	}
 
 	@FXML
@@ -68,6 +74,8 @@ public class RecoveryKeyDisplayController implements FxController {
 		clipboardContent.putString(recoveryKey);
 		Clipboard.getSystemClipboard().setContent(clipboardContent);
 		LOG.info("Recovery key copied to clipboard.");
+
+		copyButton.setText(localization.getString("generic.button.copied"));
 	}
 
 	@FXML

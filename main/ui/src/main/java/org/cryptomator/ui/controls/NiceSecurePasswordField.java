@@ -32,7 +32,7 @@ public class NiceSecurePasswordField extends StackPane {
 		iconContainer.getStyleClass().add(ICONS_STLYE_CLASS);
 		StackPane.setAlignment(iconContainer, Pos.CENTER_RIGHT);
 
-		capsLockedIcon.setGlyph(FontAwesome5Icon.ARROW_ALT_UP);
+		capsLockedIcon.setGlyph(FontAwesome5Icon.ARROW_UP);
 		capsLockedIcon.setGlyphSize(ICON_SIZE);
 		capsLockedIcon.visibleProperty().bind(passwordField.capsLockedProperty());
 		capsLockedIcon.managedProperty().bind(passwordField.capsLockedProperty());

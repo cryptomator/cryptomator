@@ -4,6 +4,8 @@ import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoMap;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.scene.Scene;
@@ -17,11 +19,13 @@ import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxControllerKey;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
+import org.cryptomator.ui.common.NewPasswordController;
+import org.cryptomator.ui.common.PasswordStrengthUtil;
 
 import javax.inject.Named;
 import javax.inject.Provider;
+import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.ResourceBundle;
 
 @Module
@@ -37,13 +41,13 @@ abstract class RecoveryKeyModule {
 	@Provides
 	@RecoveryKeyWindow
 	@RecoveryKeyScoped
-	static Stage provideStage(ResourceBundle resourceBundle, @Named("windowIcon") Optional<Image> windowIcon, @Named("keyRecoveryOwner") Stage owner) {
+	static Stage provideStage(ResourceBundle resourceBundle, @Named("windowIcons") List<Image> windowIcons, @Named("keyRecoveryOwner") Stage owner) {
 		Stage stage = new Stage();
 		stage.setTitle(resourceBundle.getString("recoveryKey.title"));
 		stage.setResizable(false);
 		stage.initModality(Modality.WINDOW_MODAL);
 		stage.initOwner(owner);
-		windowIcon.ifPresent(stage.getIcons()::add);
+		stage.getIcons().addAll(windowIcons);
 		return stage;
 	}
 	
@@ -53,7 +57,15 @@ abstract class RecoveryKeyModule {
 	static StringProperty provideRecoveryKeyProperty() {
 		return new SimpleStringProperty();
 	}
-	
+
+	@Provides
+	@RecoveryKeyScoped
+	@Named("newPassword")
+	static ObjectProperty<CharSequence> provideNewPasswordProperty() {
+		return new SimpleObjectProperty<>("");
+	}
+
+
 	// ------------------
 
 	@Provides
@@ -70,6 +82,20 @@ abstract class RecoveryKeyModule {
 		return fxmlLoaders.createScene("/fxml/recoverykey_success.fxml");
 	}
 
+	@Provides
+	@FxmlScene(FxmlFile.RECOVERYKEY_RECOVER)
+	@RecoveryKeyScoped
+	static Scene provideRecoveryKeyRecoverScene(@RecoveryKeyWindow FXMLLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene("/fxml/recoverykey_recover.fxml");
+	}
+
+	@Provides
+	@FxmlScene(FxmlFile.RECOVERYKEY_RESET_PASSWORD)
+	@RecoveryKeyScoped
+	static Scene provideRecoveryKeyResetPasswordScene(@RecoveryKeyWindow FXMLLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene("/fxml/recoverykey_reset_password.fxml");
+	}
+
 	// ------------------
 
 	@Binds
@@ -80,13 +106,30 @@ abstract class RecoveryKeyModule {
 	@Provides
 	@IntoMap
 	@FxControllerKey(RecoveryKeyDisplayController.class)
-	static FxController provideRecoveryKeyDisplayController(@RecoveryKeyWindow Stage window, @RecoveryKeyWindow Vault vault, @RecoveryKeyWindow StringProperty recoveryKey) {
-		return new RecoveryKeyDisplayController(window, vault.getDisplayableName(), recoveryKey.get());
+	static FxController provideRecoveryKeyDisplayController(@RecoveryKeyWindow Stage window, @RecoveryKeyWindow Vault vault, @RecoveryKeyWindow StringProperty recoveryKey, ResourceBundle localization) {
+		return new RecoveryKeyDisplayController(window, vault.getDisplayableName(), recoveryKey.get(), localization);
 	}
+
+	@Binds
+	@IntoMap
+	@FxControllerKey(RecoveryKeyRecoverController.class)
+	abstract FxController provideRecoveryKeyRecoverController(RecoveryKeyRecoverController controller);
 
 	@Binds
 	@IntoMap
 	@FxControllerKey(RecoveryKeySuccessController.class)
 	abstract FxController bindRecoveryKeySuccessController(RecoveryKeySuccessController controller);
+
+	@Binds
+	@IntoMap
+	@FxControllerKey(RecoveryKeyResetPasswordController.class)
+	abstract FxController bindRecoveryKeyResetPasswordController(RecoveryKeyResetPasswordController controller);
+
+	@Provides
+	@IntoMap
+	@FxControllerKey(NewPasswordController.class)
+	static FxController provideNewPasswordController(ResourceBundle resourceBundle, PasswordStrengthUtil strengthRater, @Named("newPassword") ObjectProperty<CharSequence> password) {
+		return new NewPasswordController(resourceBundle, strengthRater, password);
+	}
 	
 }

@@ -12,12 +12,16 @@ public enum FxmlFile {
 	CHANGEPASSWORD("/fxml/changepassword.fxml"), //
 	FORGET_PASSWORD("/fxml/forget_password.fxml"), //
 	MAIN_WINDOW("/fxml/main_window.fxml"), //
+	MIGRATION_CAPABILITY_ERROR("/fxml/migration_capability_error.fxml"), //
+	MIGRATION_GENERIC_ERROR("/fxml/migration_generic_error.fxml"), //
 	MIGRATION_RUN("/fxml/migration_run.fxml"), //
 	MIGRATION_START("/fxml/migration_start.fxml"), //
 	MIGRATION_SUCCESS("/fxml/migration_success.fxml"), //
 	PREFERENCES("/fxml/preferences.fxml"), //
 	QUIT("/fxml/quit.fxml"), //
 	RECOVERYKEY_CREATE("/fxml/recoverykey_create.fxml"), //
+	RECOVERYKEY_RECOVER("/fxml/recoverykey_recover.fxml"), //
+	RECOVERYKEY_RESET_PASSWORD("/fxml/recoverykey_reset_password.fxml"), //
 	RECOVERYKEY_SUCCESS("/fxml/recoverykey_success.fxml"), //
 	REMOVE_VAULT("/fxml/remove_vault.fxml"), //
 	UNLOCK("/fxml/unlock.fxml"),

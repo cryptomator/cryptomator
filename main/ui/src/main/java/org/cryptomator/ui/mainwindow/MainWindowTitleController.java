@@ -5,12 +5,11 @@ import javafx.fxml.FXML;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import org.cryptomator.common.LicenseHolder;
-import org.cryptomator.common.vaults.VaultListManager;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.fxapp.FxApplication;
 import org.cryptomator.ui.fxapp.UpdateChecker;
+import org.cryptomator.ui.launcher.AppLifecycleListener;
 import org.cryptomator.ui.preferences.SelectedPreferencesTab;
-import org.cryptomator.ui.wrongfilealert.WrongFileAlertComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,6 +23,7 @@ public class MainWindowTitleController implements FxController {
 
 	public HBox titleBar;
 
+	private final AppLifecycleListener appLifecycle;
 	private final Stage window;
 	private final FxApplication application;
 	private final boolean minimizeToSysTray;
@@ -35,7 +35,8 @@ public class MainWindowTitleController implements FxController {
 	private double yOffset;
 
 	@Inject
-	MainWindowTitleController(@MainWindow Stage window, FxApplication application, @Named("trayMenuSupported") boolean minimizeToSysTray, UpdateChecker updateChecker, LicenseHolder licenseHolder) {
+	MainWindowTitleController(AppLifecycleListener appLifecycle, @MainWindow Stage window, FxApplication application, @Named("trayMenuSupported") boolean minimizeToSysTray, UpdateChecker updateChecker, LicenseHolder licenseHolder) {
+		this.appLifecycle = appLifecycle;
 		this.window = window;
 		this.application = application;
 		this.minimizeToSysTray = minimizeToSysTray;
@@ -56,6 +57,10 @@ public class MainWindowTitleController implements FxController {
 			window.setX(event.getScreenX() - xOffset);
 			window.setY(event.getScreenY() - yOffset);
 		});
+		window.setOnCloseRequest(event -> {
+			close();
+			event.consume();
+		});
 	}
 
 	@FXML
@@ -63,8 +68,13 @@ public class MainWindowTitleController implements FxController {
 		if (minimizeToSysTray) {
 			window.close();
 		} else {
-			window.setIconified(true);
+			appLifecycle.quit();
 		}
+	}
+
+	@FXML
+	public void minimize() {
+		window.setIconified(true);
 	}
 
 	@FXML
@@ -91,5 +101,7 @@ public class MainWindowTitleController implements FxController {
 		return updateAvailable.get();
 	}
 
-
+	public boolean isMinimizeToSysTray() {
+		return minimizeToSysTray;
+	}
 }

@@ -41,7 +41,6 @@ public final class WindowsDriveLetters {
 
 	public Set<String> getOccupiedDriveLetters() {
 		if (!SystemUtils.IS_OS_WINDOWS) {
-			LOG.warn("Attempted to get occupied drive letters on non-Windows machine.");
 			return Set.of();
 		} else {
 			Iterable<Path> rootDirs = FileSystems.getDefault().getRootDirectories();

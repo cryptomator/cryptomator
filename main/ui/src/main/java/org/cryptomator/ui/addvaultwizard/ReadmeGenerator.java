@@ -10,7 +10,7 @@ public class ReadmeGenerator {
 	// specs: https://web.archive.org/web/20190708132914/http://www.kleinlercher.at/tools/Windows_Protocols/Word2007RTFSpec9.pdf
 	private static final String RTF_HEADER = "{\\rtf1\\fbidis\\ansi\\uc0\\fs32\n";
 	private static final String RTF_FOOTER = "}";
-	private static final String HELP_URL = "{\\field{\\*\\fldinst HYPERLINK \"http://www.google.com/\"}{\\fldrslt google.com}}";
+	private static final String HELP_URL = "{\\field{\\*\\fldinst HYPERLINK \"http://docs.cryptoamtor.org/\"}{\\fldrslt docs.cryptoamtor.org}}";
 
 	private final ResourceBundle resourceBundle;
 
