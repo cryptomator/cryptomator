@@ -62,20 +62,10 @@ public class VaultService {
 		if (!keychain.isPresent()) {
 			LOG.debug("No system keychain found. Unable to auto unlock without saved passwords.");
 		} else {
-			for (Vault vault : vaults) {
-				attemptAutoUnlock(vault, keychain.get());
-			}
+			List<Task<Vault>> unlockTasks = vaults.stream().map(v -> createAutoUnlockTask(v, keychain.get())).collect(Collectors.toList());
+			Task<Collection<Vault>> runSequentiallyTask = new RunSequentiallyTask(unlockTasks);
+			executorService.execute(runSequentiallyTask);
 		}
-	}
-
-	/**
-	 * Unlocks a vault in a background thread using a stored passphrase
-	 *
-	 * @param vault The vault to unlock
-	 * @param keychainAccess The system keychain holding the passphrase for the vault
-	 */
-	public void attemptAutoUnlock(Vault vault, KeychainAccess keychainAccess) {
-		executorService.execute(createAutoUnlockTask(vault, keychainAccess));
 	}
 
 	/**
@@ -199,14 +189,14 @@ public class VaultService {
 		}
 
 		@Override
-		protected Collection<Vault> call() throws Exception {
+		protected Collection<Vault> call() throws ExecutionException, InterruptedException {
 			Iterator<Task<Vault>> remainingTasks = startedTasks.iterator();
 			Collection<Vault> completed = new ArrayList<>();
 			try {
 				// wait for all tasks:
 				while (remainingTasks.hasNext()) {
-					Vault lockedVault = remainingTasks.next().get();
-					completed.add(lockedVault);
+					Vault done = remainingTasks.next().get();
+					completed.add(done);
 				}
 			} catch (ExecutionException e) {
 				// cancel all remaining:
@@ -215,7 +205,30 @@ public class VaultService {
 				}
 				throw e;
 			}
-			return List.copyOf(completed);
+			return completed;
+		}
+	}
+
+	/**
+	 * A task that runs a list of tasks in their given order
+	 */
+	private static class RunSequentiallyTask extends Task<Collection<Vault>> {
+
+		private final List<Task<Vault>> tasks;
+
+		public RunSequentiallyTask(List<Task<Vault>> tasks) {
+			this.tasks = List.copyOf(tasks);
+		}
+
+		@Override
+		protected List<Vault> call() throws ExecutionException, InterruptedException {
+			List<Vault> completed = new ArrayList<>();
+			for (Task<Vault> task : tasks) {
+				task.run();
+				Vault done = task.get();
+				completed.add(done);
+			}
+			return completed;
 		}
 	}
 
