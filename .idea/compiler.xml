@@ -32,9 +32,9 @@
           <entry name="$MAVEN_REPOSITORY$/org/jetbrains/kotlinx/kotlinx-metadata-jvm/0.1.0/kotlinx-metadata-jvm-0.1.0.jar" />
         </processorPath>
         <module name="keychain" />
+        <module name="launcher" />
         <module name="commons" />
         <module name="ui" />
-        <module name="launcher" />
       </profile>
     </annotationProcessing>
   </component>

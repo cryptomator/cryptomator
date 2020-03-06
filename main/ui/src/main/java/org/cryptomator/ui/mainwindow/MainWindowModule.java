@@ -97,6 +97,11 @@ abstract class MainWindowModule {
 	@IntoMap
 	@FxControllerKey(VaultDetailUnlockedController.class)
 	abstract FxController bindVaultDetailUnlockedController(VaultDetailUnlockedController controller);
+	
+	@Binds
+	@IntoMap
+	@FxControllerKey(VaultDetailMissingVaultController.class)
+	abstract FxController bindVaultDetailMissingVaultController(VaultDetailMissingVaultController controller);
 
 	@Binds
 	@IntoMap

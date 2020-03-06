@@ -50,6 +50,7 @@
 
 		<fx:include VBox.vgrow="ALWAYS" source="vault_detail_locked.fxml" visible="${controller.vault.locked}" managed="${controller.vault.locked}"/>
 		<fx:include VBox.vgrow="ALWAYS" source="vault_detail_unlocked.fxml" visible="${controller.vault.unlocked}" managed="${controller.vault.unlocked}"/>
+		<fx:include VBox.vgrow="ALWAYS" source="vault_detail_missing.fxml" visible="${controller.vault.missing}" managed="${controller.vault.missing}"/>
 		<fx:include VBox.vgrow="ALWAYS" source="vault_detail_needsmigration.fxml" visible="${controller.vault.needsMigration}" managed="${controller.vault.needsMigration}"/>
 	</children>
 </VBox>

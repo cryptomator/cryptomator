@@ -1,0 +1,28 @@
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Circle?>
+<?import org.cryptomator.ui.controls.FontAwesome5IconView?>
+<VBox xmlns="http://javafx.com/javafx"
+	  xmlns:fx="http://javafx.com/fxml"
+	  fx:controller="org.cryptomator.ui.mainwindow.VaultDetailMissingVaultController"
+	  alignment="TOP_CENTER"
+	  spacing="9">
+	<padding>
+		<Insets topRightBottomLeft="24"/>
+	</padding>
+	<children>
+		<StackPane alignment="CENTER">
+			<Circle styleClass="glyph-icon-primary" radius="48"/>
+			<FontAwesome5IconView styleClass="glyph-icon-white" glyph="FILE" glyphSize="48"/>
+			<FontAwesome5IconView styleClass="glyph-icon-primary" glyph="SEARCH" glyphSize="24">
+				<StackPane.margin>
+					<Insets top="12"/>
+				</StackPane.margin>
+			</FontAwesome5IconView>
+		</StackPane>
+
+		<Label text="%main.vaultDetail.missing.info" wrapText="true"/>
+	</children>
+</VBox>

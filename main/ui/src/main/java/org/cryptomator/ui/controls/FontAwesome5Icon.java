@@ -16,6 +16,7 @@ public enum FontAwesome5Icon {
 	EXCLAMATION_TRIANGLE("\uF071"), //
 	EYE("\uF06E"), //
 	EYE_SLASH("\uF070"), //
+	FILE("\uF15B"), //
 	FILE_IMPORT("\uF56F"), //
 	FOLDER_OPEN("\uF07C"), //
 	HAND_HOLDING_HEART("\uF4BE"), //
@@ -29,6 +30,7 @@ public enum FontAwesome5Icon {
 	PLUS("\uF067"), //
 	PRINT("\uF02F"), //
 	QUESTION("\uF128"), //
+	SEARCH("\uF002"), //
 	SPINNER("\uF110"), //
 	SYNC("\uF021"), //
 	TIMES("\uF00D"), //
