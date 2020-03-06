@@ -43,7 +43,7 @@ public class ReadmeGenerator {
 	
 	public String createVaultAccessLocationReadmeRtf() {
 		return createDocument(List.of( //
-				resourceBundle.getString("addvault.new.readme.accessLocation.1"), //
+				String.format(HEADING,resourceBundle.getString("addvault.new.readme.accessLocation.1")), //
 				resourceBundle.getString("addvault.new.readme.accessLocation.2"), //
 				resourceBundle.getString("addvault.new.readme.accessLocation.3")  //
 		));
