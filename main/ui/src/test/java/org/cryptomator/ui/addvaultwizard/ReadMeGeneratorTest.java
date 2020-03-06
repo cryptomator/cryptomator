@@ -37,9 +37,9 @@ public class ReadMeGeneratorTest {
 		String result = readmeGenerator.createDocument(paragraphs);
 
 		MatcherAssert.assertThat(result, CoreMatchers.startsWith("{\\rtf1\\fbidis\\ansi\\uc0\\fs32"));
-		MatcherAssert.assertThat(result, CoreMatchers.containsString("\\par {\\sa80 Dear User,}"));
-		MatcherAssert.assertThat(result, CoreMatchers.containsString("\\par {\\sa80 \\b please don't touch the \"d\" directory.}"));
-		MatcherAssert.assertThat(result, CoreMatchers.containsString("\\par {\\sa80 Thank you for your cooperation \\u55357\\u56841}"));
+		MatcherAssert.assertThat(result, CoreMatchers.containsString("{\\sa80 Dear User,}\\par"));
+		MatcherAssert.assertThat(result, CoreMatchers.containsString("{\\sa80 \\b please don't touch the \"d\" directory.}\\par "));
+		MatcherAssert.assertThat(result, CoreMatchers.containsString("{\\sa80 Thank you for your cooperation \\u55357\\u56841}\\par"));
 		MatcherAssert.assertThat(result, CoreMatchers.endsWith("}"));
 	}
 

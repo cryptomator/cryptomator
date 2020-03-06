@@ -10,21 +10,34 @@ public class ReadmeGenerator {
 	// specs: https://web.archive.org/web/20190708132914/http://www.kleinlercher.at/tools/Windows_Protocols/Word2007RTFSpec9.pdf
 	private static final String RTF_HEADER = "{\\rtf1\\fbidis\\ansi\\uc0\\fs32\n";
 	private static final String RTF_FOOTER = "}";
-	private static final String HELP_URL = "{\\field{\\*\\fldinst HYPERLINK \"http://docs.cryptoamtor.org/\"}{\\fldrslt docs.cryptoamtor.org}}";
+	private static final String HEADING = "\\fs40\\qc %s";
+	private static final String EMPTY_PAR = "";
+	private static final String DONT_PAR = "\\b %s";
+	private static final String IDENT_PAR = "    %s";
+	private static final String HELP_URL = "{\\field{\\*\\fldinst HYPERLINK \"http://docs.cryptoamtor.org/\"}{\\fldrslt http://docs.cryptoamtor.org}}";
 
 	private final ResourceBundle resourceBundle;
 
 	@Inject
-	public ReadmeGenerator(ResourceBundle resourceBundle){
+	public ReadmeGenerator(ResourceBundle resourceBundle) {
 		this.resourceBundle = resourceBundle;
 	}
 	
 	public String createVaultStorageLocationReadmeRtf() {
 		return createDocument(List.of( //
-				resourceBundle.getString("addvault.new.readme.storageLocation.1"), //
+				String.format(HEADING, resourceBundle.getString("addvault.new.readme.storageLocation.1")), //
 				resourceBundle.getString("addvault.new.readme.storageLocation.2"), //
-				resourceBundle.getString("addvault.new.readme.storageLocation.3"),  //
-				String.format(resourceBundle.getString("addvault.new.readme.storageLocation.4"), HELP_URL)  //
+				EMPTY_PAR, //
+				String.format(DONT_PAR, resourceBundle.getString("addvault.new.readme.storageLocation.3")),  //
+				String.format(IDENT_PAR, resourceBundle.getString("addvault.new.readme.storageLocation.4")),  //
+				String.format(IDENT_PAR, resourceBundle.getString("addvault.new.readme.storageLocation.5")),  //
+				EMPTY_PAR, //
+				resourceBundle.getString("addvault.new.readme.storageLocation.6"),  //
+				String.format(IDENT_PAR, resourceBundle.getString("addvault.new.readme.storageLocation.7")),  //
+				String.format(IDENT_PAR, resourceBundle.getString("addvault.new.readme.storageLocation.8")),  //
+				String.format(IDENT_PAR, resourceBundle.getString("addvault.new.readme.storageLocation.9")),  //
+				EMPTY_PAR, //
+				String.format(resourceBundle.getString("addvault.new.readme.storageLocation.10"), HELP_URL)  //
 		));
 	}
 	
@@ -40,9 +53,9 @@ public class ReadmeGenerator {
 	String createDocument(Iterable<String> paragraphs) {
 		StringBuilder sb = new StringBuilder(RTF_HEADER);
 		for (String p : paragraphs) {
-			sb.append("\\par {\\sa80 ");
+			sb.append("{\\sa80 ");
 			appendEscaped(sb, p);
-			sb.append("}\n");
+			sb.append("}\\par \n");
 		}
 		sb.append(RTF_FOOTER);
 		return sb.toString();
