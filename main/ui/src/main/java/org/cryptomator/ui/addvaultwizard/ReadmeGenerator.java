@@ -45,7 +45,10 @@ public class ReadmeGenerator {
 		return createDocument(List.of( //
 				String.format(HEADING,resourceBundle.getString("addvault.new.readme.accessLocation.1")), //
 				resourceBundle.getString("addvault.new.readme.accessLocation.2"), //
-				resourceBundle.getString("addvault.new.readme.accessLocation.3")  //
+				EMPTY_PAR, //
+				resourceBundle.getString("addvault.new.readme.accessLocation.3"), //
+				EMPTY_PAR, //
+				resourceBundle.getString("addvault.new.readme.accessLocation.4")
 		));
 	}
 
