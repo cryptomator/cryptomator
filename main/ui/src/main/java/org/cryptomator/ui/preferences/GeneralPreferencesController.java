@@ -1,6 +1,7 @@
 package org.cryptomator.ui.preferences;
 
 import javafx.application.Platform;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
@@ -31,6 +32,7 @@ public class GeneralPreferencesController implements FxController {
 	private final Settings settings;
 	private final boolean trayMenuSupported;
 	private final Optional<AutoStartStrategy> autoStartStrategy;
+	private final ObjectProperty<SelectedPreferencesTab> selectedTabProperty;
 	private final LicenseHolder licenseHolder;
 	private final ExecutorService executor;
 	public ChoiceBox<UiTheme> themeChoiceBox;
@@ -42,10 +44,11 @@ public class GeneralPreferencesController implements FxController {
 	public RadioButton nodeOrientationRtl;
 
 	@Inject
-	GeneralPreferencesController(Settings settings, @Named("trayMenuSupported") boolean trayMenuSupported, Optional<AutoStartStrategy> autoStartStrategy, LicenseHolder licenseHolder, ExecutorService executor) {
+	GeneralPreferencesController(Settings settings, @Named("trayMenuSupported") boolean trayMenuSupported, Optional<AutoStartStrategy> autoStartStrategy, ObjectProperty<SelectedPreferencesTab> selectedTabProperty, LicenseHolder licenseHolder, ExecutorService executor) {
 		this.settings = settings;
 		this.trayMenuSupported = trayMenuSupported;
 		this.autoStartStrategy = autoStartStrategy;
+		this.selectedTabProperty = selectedTabProperty;
 		this.licenseHolder = licenseHolder;
 		this.executor = executor;
 	}
@@ -101,6 +104,12 @@ public class GeneralPreferencesController implements FxController {
 
 	public LicenseHolder getLicenseHolder() {
 		return licenseHolder;
+	}
+
+
+	@FXML
+	public void showDonationTab() {
+		selectedTabProperty.set(SelectedPreferencesTab.DONATION_KEY);
 	}
 
 	/* Helper classes */

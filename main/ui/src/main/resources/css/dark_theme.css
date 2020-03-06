@@ -567,6 +567,10 @@
 	-fx-graphic-text-gap: 6px;
 }
 
+.hyperlink.hyperlink-underline {
+	-fx-underline: true;
+}
+
 .hyperlink.hyperlink-secondary {
 	-fx-text-fill: TEXT_FILL_MUTED;
 }

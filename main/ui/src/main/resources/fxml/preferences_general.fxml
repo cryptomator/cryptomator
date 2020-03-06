@@ -3,11 +3,12 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.Hyperlink?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.control.RadioButton?>
 <?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
 <VBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
 	  fx:controller="org.cryptomator.ui.preferences.GeneralPreferencesController"
@@ -22,8 +23,9 @@
 		<HBox spacing="6" alignment="CENTER_LEFT">
 			<Label text="%preferences.general.theme"/>
 			<ChoiceBox fx:id="themeChoiceBox" disable="${!controller.licenseHolder.validLicense}"/>
+			<Hyperlink styleClass="hyperlink-underline,hyperlink-secondary" text="%preferences.general.unlockThemes" onAction="#showDonationTab" visible="${!controller.licenseHolder.validLicense}" managed="${!controller.licenseHolder.validLicense}"/>
 		</HBox>
-		
+
 		<HBox spacing="6" alignment="CENTER_LEFT">
 			<Label text="%preferences.general.interfaceOrientation" HBox.hgrow="NEVER"/>
 			<RadioButton fx:id="nodeOrientationLtr" text="%preferences.general.interfaceOrientation.ltr" alignment="CENTER_LEFT" toggleGroup="${nodeOrientation}"/>

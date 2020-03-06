@@ -14,7 +14,7 @@
 		 tabClosingPolicy="UNAVAILABLE"
 		 tabDragPolicy="FIXED">
 	<tabs>
-		<Tab fx:id="generalTab" text="%preferences.general">
+		<Tab fx:id="generalTab" id="GENERAL" text="%preferences.general">
 			<graphic>
 				<FontAwesome5IconView glyph="WRENCH"/>
 			</graphic>
@@ -22,7 +22,7 @@
 				<fx:include source="/fxml/preferences_general.fxml"/>
 			</content>
 		</Tab>
-		<Tab fx:id="volumeTab" text="%preferences.volume">
+		<Tab fx:id="volumeTab" id="VOLUME" text="%preferences.volume">
 			<graphic>
 				<FontAwesome5IconView glyph="HDD"/>
 			</graphic>
@@ -30,7 +30,7 @@
 				<fx:include source="/fxml/preferences_volume.fxml"/>
 			</content>
 		</Tab>
-		<Tab fx:id="updatesTab" text="%preferences.updates">
+		<Tab fx:id="updatesTab" id="UPDATES" text="%preferences.updates">
 			<graphic>
 				<FontAwesome5IconView glyph="SYNC"/>
 			</graphic>
@@ -38,7 +38,7 @@
 				<fx:include source="/fxml/preferences_updates.fxml"/>
 			</content>
 		</Tab>
-		<Tab fx:id="donationKeyTab" text="%preferences.donationKey">
+		<Tab fx:id="donationKeyTab" id="DONATION_KEY" text="%preferences.donationKey">
 			<graphic>
 				<FontAwesome5IconView glyph="HEART"/>
 			</graphic>
