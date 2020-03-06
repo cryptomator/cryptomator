@@ -67,7 +67,7 @@ public class RecoveryKeyResetPasswordController implements FxController {
 		});
 		task.setOnFailed(event -> {
 			// TODO show generic error screen
-			LOG.error("Creation of recovery key failed.", task.getException());
+			LOG.error("Resetting password failed.", task.getException());
 		});
 		executor.submit(task);
 	}
