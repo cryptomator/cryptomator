@@ -16,7 +16,7 @@ addons:
     packages:
     - haveged
 install:
-- curl -o $HOME/.m2/settings.xml https://gist.githubusercontent.com/cryptobot/cf5fbd909c4782aaeeeb7c7f4a1a43da/raw/e60ee486e34ee0c79f89f947abe2c83b4290c6bb/settings.xml
+# - curl -o $HOME/.m2/settings.xml https://gist.githubusercontent.com/cryptobot/cf5fbd909c4782aaeeeb7c7f4a1a43da/raw/e60ee486e34ee0c79f89f947abe2c83b4290c6bb/settings.xml
 - mvn -fmain/pom.xml clean install -DskipTests -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN org.codehaus.mojo:versions-maven-plugin:help dependency:go-offline -Pcoverage,release # "clean install" needed until we can exclude artifacts currently in the reactor, see https://maven.apache.org/plugins/maven-dependency-plugin/go-offline-mojo.html#excludeReactor and https://issues.apache.org/jira/browse/MDEP-568
 before_script:
 - |
