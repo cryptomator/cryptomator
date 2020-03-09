@@ -1,14 +1,14 @@
 package org.cryptomator.ui.common;
 
 public enum FxmlFile {
-	ADDVAULT_WELCOME("/fxml/addvault_welcome.fxml"), //
 	ADDVAULT_EXISTING("/fxml/addvault_existing.fxml"), //
-	ADDVAULT_EXISTING_ERROR("/fxml/addvault_existing_error.fxml"),
+	ADDVAULT_GENERIC_ERROR("/fxml/addvault_generic_error.fxml"),
 	ADDVAULT_NEW_NAME("/fxml/addvault_new_name.fxml"), //
 	ADDVAULT_NEW_LOCATION("/fxml/addvault_new_location.fxml"), //
 	ADDVAULT_NEW_PASSWORD("/fxml/addvault_new_password.fxml"), //
 	ADDVAULT_NEW_RECOVERYKEY("/fxml/addvault_new_recoverykey.fxml"), //
 	ADDVAULT_SUCCESS("/fxml/addvault_success.fxml"), //
+	ADDVAULT_WELCOME("/fxml/addvault_welcome.fxml"), //
 	CHANGEPASSWORD("/fxml/changepassword.fxml"), //
 	FORGET_PASSWORD("/fxml/forget_password.fxml"), //
 	MAIN_WINDOW("/fxml/main_window.fxml"), //

@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import java.io.File;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
@@ -28,18 +29,20 @@ public class ChooseExistingVaultController implements FxController {
 	private final Stage window;
 	private final Lazy<Scene> welcomeScene;
 	private final Lazy<Scene> successScene;
-	private final Lazy<Scene> errorScene;
+	private final Lazy<Scene> genericErrorScene;
+	private final ObjectProperty<Throwable> genericErrorCause;
 	private final ObjectProperty<Path> vaultPath;
 	private final ObjectProperty<Vault> vault;
 	private final VaultListManager vaultListManager;
 	private final ResourceBundle resourceBundle;
 
 	@Inject
-	ChooseExistingVaultController(@AddVaultWizardWindow Stage window, @FxmlScene(FxmlFile.ADDVAULT_WELCOME) Lazy<Scene> welcomeScene, @FxmlScene(FxmlFile.ADDVAULT_SUCCESS) Lazy<Scene> successScene, @FxmlScene(FxmlFile.ADDVAULT_EXISTING_ERROR) Lazy<Scene> errorScene, ObjectProperty<Path> vaultPath, @AddVaultWizardWindow ObjectProperty<Vault> vault, VaultListManager vaultListManager, ResourceBundle resourceBundle) {
+	ChooseExistingVaultController(@AddVaultWizardWindow Stage window, @FxmlScene(FxmlFile.ADDVAULT_WELCOME) Lazy<Scene> welcomeScene, @FxmlScene(FxmlFile.ADDVAULT_SUCCESS) Lazy<Scene> successScene, @FxmlScene(FxmlFile.ADDVAULT_GENERIC_ERROR) Lazy<Scene> genericErrorScene, @Named("genericErrorCause") ObjectProperty<Throwable> genericErrorCause, ObjectProperty<Path> vaultPath, @AddVaultWizardWindow ObjectProperty<Vault> vault, VaultListManager vaultListManager, ResourceBundle resourceBundle) {
 		this.window = window;
 		this.welcomeScene = welcomeScene;
 		this.successScene = successScene;
-		this.errorScene = errorScene;
+		this.genericErrorScene = genericErrorScene;
+		this.genericErrorCause = genericErrorCause;
 		this.vaultPath = vaultPath;
 		this.vault = vault;
 		this.vaultListManager = vaultListManager;
@@ -65,7 +68,8 @@ public class ChooseExistingVaultController implements FxController {
 				window.setScene(successScene.get());
 			} catch (NoSuchFileException e) {
 				LOG.error("Failed to open existing vault.", e);
-				window.setScene(errorScene.get());
+				genericErrorCause.set(e);
+				window.setScene(genericErrorScene.get());
 			}
 		}
 	}
