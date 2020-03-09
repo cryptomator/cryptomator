@@ -38,13 +38,12 @@ public class RecoveryKeyDisplayController implements FxController {
 
 	@FXML
 	public void printRecoveryKey() {
-		// TODO localize
-
 		PrinterJob job = PrinterJob.createPrinterJob();
 		if (job != null && job.showPrintDialog(window)) {
 			PageLayout pageLayout = job.getJobSettings().getPageLayout();
-
-			Text heading = new Text("Cryptomator Recovery Key\n" + vaultName + "\n");
+			
+			String headingText = String.format(localization.getString("recoveryKey.printout.heading"), vaultName);
+			Text heading = new Text(headingText);
 			heading.setFont(Font.font("serif", FontWeight.BOLD, 20));
 			heading.setFontSmoothingType(FontSmoothingType.LCD);
 
