@@ -1,6 +1,5 @@
 package org.cryptomator.ui.mainwindow;
 
-import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ObjectProperty;
@@ -9,7 +8,6 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.ListView;
-import javafx.stage.Stage;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultListManager;
 import org.cryptomator.common.vaults.VaultState;
@@ -21,7 +19,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 
-//TODO: Add check if a vault in the list is invalid and add notification & controller
 @MainWindowScoped
 public class VaultListController implements FxController {
 
@@ -63,6 +60,9 @@ public class VaultListController implements FxController {
 	}
 
 	private void selectedVaultDidChange(@SuppressWarnings("unused") ObservableValue<? extends Vault> observableValue, @SuppressWarnings("unused") Vault oldValue, Vault newValue) {
+		if (newValue == null) {
+			return;
+		}
 		VaultState reportedState = newValue.getState();
 		switch (reportedState) {
 			case LOCKED:
