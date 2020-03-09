@@ -14,11 +14,12 @@ import java.nio.file.Path;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 
+import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
+
 @Singleton
 class AppLaunchEventHandler {
 
 	private static final Logger LOG = LoggerFactory.getLogger(AppLaunchEventHandler.class);
-	private static final String MASTERKEY_FILENAME = "masterkey.cryptomator"; // TODO: deduplicate constant declared in multiple classes
 
 	private final BlockingQueue<AppLaunchEvent> launchEventQueue;
 	private final ExecutorService executorService;

@@ -40,11 +40,12 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
+
 @MigrationScoped
 public class MigrationRunController implements FxController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(MigrationRunController.class);
-	private static final String MASTERKEY_FILENAME = "masterkey.cryptomator"; // TODO: deduplicate constant declared in multiple classes
 	private static final long MIGRATION_PROGRESS_UPDATE_MILLIS = 50;
 
 	private final Stage window;

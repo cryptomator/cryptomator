@@ -69,7 +69,6 @@ public class UpdateChecker {
 		String latestVersion = updateCheckerService.getValue();
 		LOG.info("Current version: {}, lastest version: {}", currentVersion, latestVersion);
 
-		// TODO settings.lastVersionCheck = Instant.now()
 		if (currentVersion == null || semVerComparator.compare(currentVersion, latestVersion) < 0) {
 			// update is available
 			latestVersionProperty.set(latestVersion);

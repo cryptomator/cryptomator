@@ -48,11 +48,12 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 
+import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
+
 @PerVault
 public class Vault {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(Vault.class);
-	private static final String MASTERKEY_FILENAME = "masterkey.cryptomator"; // TODO: deduplicate constant declared in multiple classes
 	private static final Path HOME_DIR = Paths.get(SystemUtils.USER_HOME);
 
 	private final VaultSettings vaultSettings;

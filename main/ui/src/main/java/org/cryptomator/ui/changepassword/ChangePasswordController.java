@@ -28,11 +28,12 @@ import javax.inject.Named;
 import java.io.IOException;
 import java.util.ResourceBundle;
 
+import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
+
 @ChangePasswordScoped
 public class ChangePasswordController implements FxController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ChangePasswordController.class);
-	private static final String MASTERKEY_FILENAME = "masterkey.cryptomator"; // TODO: deduplicate constant declared in multiple classes
 
 	private final Stage window;
 	private final Vault vault;

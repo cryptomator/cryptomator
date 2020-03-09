@@ -20,11 +20,12 @@ import java.nio.file.Path;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
+
 @MainWindowScoped
 public class MainWindowController implements FxController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(MainWindowController.class);
-	private static final String MASTERKEY_FILENAME = "masterkey.cryptomator"; // TODO: deduplicate constant declared in multiple classes
 
 	private final VaultListManager vaultListManager;
 	private final WrongFileAlertComponent.Builder wrongFileAlert;

@@ -12,10 +12,11 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collection;
 
+import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
+
 @Singleton
 public class RecoveryKeyFactory {
 
-	private static final String MASTERKEY_FILENAME = "masterkey.cryptomator"; // TODO: deduplicate constant declared in multiple classes
 	private static final byte[] PEPPER = new byte[0];
 	
 	private final WordEncoder wordEncoder;

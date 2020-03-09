@@ -33,7 +33,6 @@ public class TrayIconController {
 		macFunctions.map(MacFunctions::uiAppearance).ifPresent(uiAppearance -> uiAppearance.addListener(this::macInterfaceThemeChanged));
 
 		if (SystemUtils.IS_OS_WINDOWS) {
-			// TODO: test on windows: is this a double click?
 			trayIcon.addActionListener(trayMenuController::showMainWindow);
 		}
 
