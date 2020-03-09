@@ -13,7 +13,7 @@
 	  minWidth="300"
 	  spacing="12">
 	<children>
-		<HBox spacing="12" VBox.vgrow="ALWAYS">
+		<HBox spacing="12" VBox.vgrow="NEVER">
 			<StackPane alignment="CENTER" HBox.hgrow="NEVER">
 				<Circle styleClass="glyph-icon-primary" radius="24"/>
 				<FontAwesome5IconView styleClass="glyph-icon-white" glyph="EXCLAMATION" glyphSize="24"/>
@@ -24,6 +24,6 @@
 			</VBox>
 		</HBox>
 
-		<TextArea text="${controller.stackTrace}" prefRowCount="5" editable="false"/>
+		<TextArea VBox.vgrow="ALWAYS" text="${controller.stackTrace}" prefRowCount="5" editable="false"/>
 	</children>
 </VBox>

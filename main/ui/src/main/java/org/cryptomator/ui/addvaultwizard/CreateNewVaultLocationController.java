@@ -41,6 +41,8 @@ public class CreateNewVaultLocationController implements FxController {
 	private final Stage window;
 	private final Lazy<Scene> chooseNameScene;
 	private final Lazy<Scene> choosePasswordScene;
+	private final Lazy<Scene> genericErrorScene;
+	private final ObjectProperty<Throwable> genericErrorCause;
 	private final LocationPresets locationPresets;
 	private final ObjectProperty<Path> vaultPath;
 	private final StringProperty vaultName;
@@ -59,10 +61,12 @@ public class CreateNewVaultLocationController implements FxController {
 	public RadioButton customRadioButton;
 
 	@Inject
-	CreateNewVaultLocationController(@AddVaultWizardWindow Stage window, @FxmlScene(FxmlFile.ADDVAULT_NEW_NAME) Lazy<Scene> chooseNameScene, @FxmlScene(FxmlFile.ADDVAULT_NEW_PASSWORD) Lazy<Scene> choosePasswordScene, LocationPresets locationPresets, ObjectProperty<Path> vaultPath, @Named("vaultName") StringProperty vaultName, ResourceBundle resourceBundle) {
+	CreateNewVaultLocationController(@AddVaultWizardWindow Stage window, @FxmlScene(FxmlFile.ADDVAULT_NEW_NAME) Lazy<Scene> chooseNameScene, @FxmlScene(FxmlFile.ADDVAULT_NEW_PASSWORD) Lazy<Scene> choosePasswordScene, @FxmlScene(FxmlFile.ADDVAULT_GENERIC_ERROR) Lazy<Scene> genericErrorScene, @Named("genericErrorCause") ObjectProperty<Throwable> genericErrorCause, LocationPresets locationPresets, ObjectProperty<Path> vaultPath, @Named("vaultName") StringProperty vaultName, ResourceBundle resourceBundle) {
 		this.window = window;
 		this.chooseNameScene = chooseNameScene;
 		this.choosePasswordScene = choosePasswordScene;
+		this.genericErrorScene = genericErrorScene;
+		this.genericErrorCause = genericErrorCause;
 		this.locationPresets = locationPresets;
 		this.vaultPath = vaultPath;
 		this.vaultName = vaultName;
@@ -123,9 +127,9 @@ public class CreateNewVaultLocationController implements FxController {
 			LOG.warn("Can not use already existing vault path {}", vaultPath.get());
 			warningText.set(resourceBundle.getString("addvaultwizard.new.fileAlreadyExists"));
 		} catch (IOException e) {
-			LOG.warn("Can not create vault at path: {}", vaultPath.get());
-			LOG.warn("Thrown Exception:", e);
-			warningText.set(resourceBundle.getString("addvaultwizard.new.ioException"));
+			LOG.error("Failed to create and delete directory at chosen vault path.", e);
+			genericErrorCause.set(e);
+			window.setScene(genericErrorScene.get());
 		}
 	}
 

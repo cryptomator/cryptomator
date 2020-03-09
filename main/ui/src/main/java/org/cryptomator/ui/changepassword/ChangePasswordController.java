@@ -71,7 +71,6 @@ public class ChangePasswordController implements FxController {
 		} catch (IOException e) {
 			// TODO show generic error screen
 			LOG.error("IO error occured during password change. Unable to perform operation.", e);
-			e.printStackTrace();
 		} catch (InvalidPassphraseException e) {
 			Animations.createShakeWindowAnimation(window).play();
 			oldPasswordField.selectAll();

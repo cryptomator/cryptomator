@@ -53,6 +53,9 @@ public class CreateNewVaultPasswordController implements FxController {
 	private final Lazy<Scene> chooseLocationScene;
 	private final Lazy<Scene> recoveryKeyScene;
 	private final Lazy<Scene> successScene;
+	private final Lazy<Scene> genericErrorScene;
+	private final ObjectProperty<Throwable> genericErrorCause;
+	private final ObjectProperty<Scene> genericErrorReturnScene;
 	private final ExecutorService executor;
 	private final RecoveryKeyFactory recoveryKeyFactory;
 	private final StringProperty vaultNameProperty;
@@ -72,11 +75,14 @@ public class CreateNewVaultPasswordController implements FxController {
 	public Toggle skipRecoveryKey;
 
 	@Inject
-	CreateNewVaultPasswordController(@AddVaultWizardWindow Stage window, @FxmlScene(FxmlFile.ADDVAULT_NEW_LOCATION) Lazy<Scene> chooseLocationScene, @FxmlScene(FxmlFile.ADDVAULT_NEW_RECOVERYKEY) Lazy<Scene> recoveryKeyScene, @FxmlScene(FxmlFile.ADDVAULT_SUCCESS) Lazy<Scene> successScene, ExecutorService executor, RecoveryKeyFactory recoveryKeyFactory, @Named("vaultName") StringProperty vaultName, ObjectProperty<Path> vaultPath, @AddVaultWizardWindow ObjectProperty<Vault> vault, @Named("recoveryKey") StringProperty recoveryKey, VaultListManager vaultListManager, ResourceBundle resourceBundle, @Named("newPassword") ObjectProperty<CharSequence> password, ReadmeGenerator readmeGenerator) {
+	CreateNewVaultPasswordController(@AddVaultWizardWindow Stage window, @FxmlScene(FxmlFile.ADDVAULT_NEW_LOCATION) Lazy<Scene> chooseLocationScene, @FxmlScene(FxmlFile.ADDVAULT_NEW_RECOVERYKEY) Lazy<Scene> recoveryKeyScene, @FxmlScene(FxmlFile.ADDVAULT_SUCCESS) Lazy<Scene> successScene, @FxmlScene(FxmlFile.ADDVAULT_GENERIC_ERROR) Lazy<Scene> genericErrorScene, @Named("genericErrorCause") ObjectProperty<Throwable> genericErrorCause, @Named("genericErrorReturnScene") ObjectProperty<Scene> genericErrorReturnScene, ExecutorService executor, RecoveryKeyFactory recoveryKeyFactory, @Named("vaultName") StringProperty vaultName, ObjectProperty<Path> vaultPath, @AddVaultWizardWindow ObjectProperty<Vault> vault, @Named("recoveryKey") StringProperty recoveryKey, VaultListManager vaultListManager, ResourceBundle resourceBundle, @Named("newPassword") ObjectProperty<CharSequence> password, ReadmeGenerator readmeGenerator) {
 		this.window = window;
 		this.chooseLocationScene = chooseLocationScene;
 		this.recoveryKeyScene = recoveryKeyScene;
 		this.successScene = successScene;
+		this.genericErrorScene = genericErrorScene;
+		this.genericErrorCause = genericErrorCause;
+		this.genericErrorReturnScene = genericErrorReturnScene;
 		this.executor = executor;
 		this.recoveryKeyFactory = recoveryKeyFactory;
 		this.vaultNameProperty = vaultName;
@@ -109,12 +115,12 @@ public class CreateNewVaultPasswordController implements FxController {
 
 		try {
 			Files.createDirectory(pathToVault);
-		} catch (FileAlreadyExistsException e) {
-			LOG.error("Vault dir already exists.", e);
-			window.setScene(chooseLocationScene.get());
 		} catch (IOException e) {
-			// TODO show generic error screen
-			LOG.error("", e);
+			LOG.error("Failed to create vault directory.", e);
+			genericErrorReturnScene.set(window.getScene());
+			genericErrorCause.set(e);
+			window.setScene(genericErrorScene.get());
+			return;
 		}
 
 		if (showRecoveryKey.equals(recoveryKeyChoice.getSelectedToggle())) {
@@ -137,8 +143,10 @@ public class CreateNewVaultPasswordController implements FxController {
 			recoveryKeyProperty.set(recoveryKey);
 			window.setScene(recoveryKeyScene.get());
 		}).onError(IOException.class, e -> {
-			// TODO show generic error screen
-			LOG.error("", e);
+			LOG.error("Failed to initialize vault.", e);
+			genericErrorReturnScene.set(window.getScene());
+			genericErrorCause.set(e);
+			window.setScene(genericErrorScene.get());
 		}).andFinally(() -> {
 			processing.set(false);
 		}).runOnce(executor);
@@ -153,8 +161,10 @@ public class CreateNewVaultPasswordController implements FxController {
 			initializationSucceeded(pathToVault);
 			window.setScene(successScene.get());
 		}).onError(IOException.class, e -> {
-			// TODO show generic error screen
-			LOG.error("", e);
+			LOG.error("Failed to initialize vault.", e);
+			genericErrorReturnScene.set(window.getScene());
+			genericErrorCause.set(e);
+			window.setScene(genericErrorScene.get());
 		}).andFinally(() -> {
 			processing.set(false);
 		}).runOnce(executor);
