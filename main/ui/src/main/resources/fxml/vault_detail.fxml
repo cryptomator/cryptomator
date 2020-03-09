@@ -13,14 +13,13 @@
 <VBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
 	  fx:controller="org.cryptomator.ui.mainwindow.VaultDetailController"
-	  styleClass="vault-detail"
 	  minWidth="300"
 	  spacing="36">
 	<padding>
 		<Insets topRightBottomLeft="24"/>
 	</padding>
 	<children>
-		<HBox spacing="12" visible="${controller.anyVaultSelected}">
+		<HBox spacing="12" visible="${controller.anyVaultSelected}" managed="${controller.anyVaultSelected}">
 			<StackPane alignment="CENTER">
 				<Circle styleClass="glyph-icon-primary" radius="16"/>
 				<FontAwesome5IconView styleClass="glyph-icon-white" glyph="${controller.glyph}" HBox.hgrow="NEVER" glyphSize="16"/>
@@ -48,6 +47,7 @@
 			</VBox>
 		</HBox>
 
+		<fx:include VBox.vgrow="ALWAYS" source="vault_detail_welcome.fxml" visible="${!controller.anyVaultSelected}" managed="${!controller.anyVaultSelected}"/>
 		<fx:include VBox.vgrow="ALWAYS" source="vault_detail_locked.fxml" visible="${controller.vault.locked}" managed="${controller.vault.locked}"/>
 		<fx:include VBox.vgrow="ALWAYS" source="vault_detail_unlocked.fxml" visible="${controller.vault.unlocked}" managed="${controller.vault.unlocked}"/>
 		<fx:include VBox.vgrow="ALWAYS" source="vault_detail_missing.fxml" visible="${controller.vault.missing}" managed="${controller.vault.missing}"/>
