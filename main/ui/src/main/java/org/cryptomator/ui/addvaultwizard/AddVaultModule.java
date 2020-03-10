@@ -21,7 +21,6 @@ import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.NewPasswordController;
 import org.cryptomator.ui.common.PasswordStrengthUtil;
-import org.cryptomator.ui.common.StackTraceController;
 import org.cryptomator.ui.mainwindow.MainWindow;
 import org.cryptomator.ui.recoverykey.RecoveryKeyDisplayController;
 
@@ -60,20 +59,6 @@ public abstract class AddVaultModule {
 		stage.initOwner(owner);
 		stage.getIcons().addAll(windowIcons);
 		return stage;
-	}
-
-	@Provides
-	@Named("genericErrorCause")
-	@AddVaultWizardScoped
-	static ObjectProperty<Throwable> provideGenericErrorCause() {
-		return new SimpleObjectProperty<>();
-	}
-
-	@Provides
-	@Named("genericErrorReturnScene")
-	@AddVaultWizardScoped
-	static ObjectProperty<Scene> provideGenericErrorReturnScene() {
-		return new SimpleObjectProperty<>();
 	}
 
 	@Provides
@@ -118,14 +103,7 @@ public abstract class AddVaultModule {
 	static Scene provideChooseExistingVaultScene(@AddVaultWizardWindow FXMLLoaderFactory fxmlLoaders) {
 		return fxmlLoaders.createScene(FxmlFile.ADDVAULT_EXISTING.getRessourcePathString());
 	}
-
-	@Provides
-	@FxmlScene(FxmlFile.ADDVAULT_GENERIC_ERROR)
-	@AddVaultWizardScoped
-	static Scene provideGenericErrorScene(@AddVaultWizardWindow FXMLLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene(FxmlFile.ADDVAULT_GENERIC_ERROR.getRessourcePathString());
-	}
-
+	
 	@Provides
 	@FxmlScene(FxmlFile.ADDVAULT_NEW_NAME)
 	@AddVaultWizardScoped
@@ -211,16 +189,5 @@ public abstract class AddVaultModule {
 	@IntoMap
 	@FxControllerKey(AddVaultSuccessController.class)
 	abstract FxController bindAddVaultSuccessController(AddVaultSuccessController controller);
-
-	@Binds
-	@IntoMap
-	@FxControllerKey(AddVaultGenericErrorController.class)
-	abstract FxController bindAddVaultGenericErrorController(AddVaultGenericErrorController controller);
-
-	@Provides
-	@IntoMap
-	@FxControllerKey(StackTraceController.class)
-	static FxController provideStackTraceController(@Named("genericErrorCause") ObjectProperty<Throwable> errorCause) {
-		return new StackTraceController(errorCause.get());
-	}
+	
 }

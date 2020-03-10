@@ -14,6 +14,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.image.Image;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.ui.common.ErrorComponent;
 import org.cryptomator.ui.mainwindow.MainWindowComponent;
 import org.cryptomator.ui.preferences.PreferencesComponent;
 import org.cryptomator.ui.quit.QuitComponent;
@@ -26,7 +27,7 @@ import java.io.UncheckedIOException;
 import java.util.Collections;
 import java.util.List;
 
-@Module(includes = {UpdateCheckerModule.class}, subcomponents = {MainWindowComponent.class, PreferencesComponent.class, UnlockComponent.class, QuitComponent.class})
+@Module(includes = {UpdateCheckerModule.class}, subcomponents = {MainWindowComponent.class, PreferencesComponent.class, UnlockComponent.class, QuitComponent.class, ErrorComponent.class})
 abstract class FxApplicationModule {
 
 	@Provides

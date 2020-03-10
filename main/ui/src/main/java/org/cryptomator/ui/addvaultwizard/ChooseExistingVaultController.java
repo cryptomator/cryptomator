@@ -8,6 +8,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultListManager;
+import org.cryptomator.ui.common.ErrorComponent;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
@@ -29,20 +30,18 @@ public class ChooseExistingVaultController implements FxController {
 	private final Stage window;
 	private final Lazy<Scene> welcomeScene;
 	private final Lazy<Scene> successScene;
-	private final Lazy<Scene> genericErrorScene;
-	private final ObjectProperty<Throwable> genericErrorCause;
+	private final ErrorComponent.Builder errorComponent;
 	private final ObjectProperty<Path> vaultPath;
 	private final ObjectProperty<Vault> vault;
 	private final VaultListManager vaultListManager;
 	private final ResourceBundle resourceBundle;
 
 	@Inject
-	ChooseExistingVaultController(@AddVaultWizardWindow Stage window, @FxmlScene(FxmlFile.ADDVAULT_WELCOME) Lazy<Scene> welcomeScene, @FxmlScene(FxmlFile.ADDVAULT_SUCCESS) Lazy<Scene> successScene, @FxmlScene(FxmlFile.ADDVAULT_GENERIC_ERROR) Lazy<Scene> genericErrorScene, @Named("genericErrorCause") ObjectProperty<Throwable> genericErrorCause, ObjectProperty<Path> vaultPath, @AddVaultWizardWindow ObjectProperty<Vault> vault, VaultListManager vaultListManager, ResourceBundle resourceBundle) {
+	ChooseExistingVaultController(@AddVaultWizardWindow Stage window, @FxmlScene(FxmlFile.ADDVAULT_WELCOME) Lazy<Scene> welcomeScene, @FxmlScene(FxmlFile.ADDVAULT_SUCCESS) Lazy<Scene> successScene, ErrorComponent.Builder errorComponent, ObjectProperty<Path> vaultPath, @AddVaultWizardWindow ObjectProperty<Vault> vault, VaultListManager vaultListManager, ResourceBundle resourceBundle) {
 		this.window = window;
 		this.welcomeScene = welcomeScene;
 		this.successScene = successScene;
-		this.genericErrorScene = genericErrorScene;
-		this.genericErrorCause = genericErrorCause;
+		this.errorComponent = errorComponent;
 		this.vaultPath = vaultPath;
 		this.vault = vault;
 		this.vaultListManager = vaultListManager;
@@ -68,8 +67,7 @@ public class ChooseExistingVaultController implements FxController {
 				window.setScene(successScene.get());
 			} catch (NoSuchFileException e) {
 				LOG.error("Failed to open existing vault.", e);
-				genericErrorCause.set(e);
-				window.setScene(genericErrorScene.get());
+				errorComponent.cause(e).window(window).returnToScene(window.getScene()).build().showErrorScene();
 			}
 		}
 	}

@@ -23,6 +23,7 @@ import org.cryptomator.cryptolib.api.InvalidPassphraseException;
 import org.cryptomator.keychain.KeychainAccess;
 import org.cryptomator.keychain.KeychainAccessException;
 import org.cryptomator.ui.common.Animations;
+import org.cryptomator.ui.common.ErrorComponent;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
@@ -54,31 +55,29 @@ public class MigrationRunController implements FxController {
 	private final ScheduledExecutorService scheduler;
 	private final Optional<KeychainAccess> keychainAccess;
 	private final ObjectProperty<FileSystemCapabilityChecker.Capability> missingCapability;
-	private final ObjectProperty<Throwable> errorCause;
+	private final ErrorComponent.Builder errorComponent;
 	private final Lazy<Scene> startScene;
 	private final Lazy<Scene> successScene;
 	private final ObjectBinding<ContentDisplay> migrateButtonContentDisplay;
 	private final Lazy<Scene> capabilityErrorScene;
-	private final Lazy<Scene> genericErrorScene;
 	private final BooleanProperty migrationButtonDisabled;
 	private final DoubleProperty migrationProgress;
 	private volatile double volatileMigrationProgress = -1.0;
 	public NiceSecurePasswordField passwordField;
 
 	@Inject
-	public MigrationRunController(@MigrationWindow Stage window, @MigrationWindow Vault vault, ExecutorService executor, ScheduledExecutorService scheduler, Optional<KeychainAccess> keychainAccess, @Named("capabilityErrorCause") ObjectProperty<FileSystemCapabilityChecker.Capability> missingCapability, @Named("genericErrorCause") ObjectProperty<Throwable> errorCause, @FxmlScene(FxmlFile.MIGRATION_START) Lazy<Scene> startScene, @FxmlScene(FxmlFile.MIGRATION_SUCCESS) Lazy<Scene> successScene, @FxmlScene(FxmlFile.MIGRATION_CAPABILITY_ERROR) Lazy<Scene> capabilityErrorScene, @FxmlScene(FxmlFile.MIGRATION_GENERIC_ERROR) Lazy<Scene> genericErrorScene) {
+	public MigrationRunController(@MigrationWindow Stage window, @MigrationWindow Vault vault, ExecutorService executor, ScheduledExecutorService scheduler, Optional<KeychainAccess> keychainAccess, @Named("capabilityErrorCause") ObjectProperty<FileSystemCapabilityChecker.Capability> missingCapability, @FxmlScene(FxmlFile.MIGRATION_START) Lazy<Scene> startScene, @FxmlScene(FxmlFile.MIGRATION_SUCCESS) Lazy<Scene> successScene, @FxmlScene(FxmlFile.MIGRATION_CAPABILITY_ERROR) Lazy<Scene> capabilityErrorScene, ErrorComponent.Builder errorComponent) {
 		this.window = window;
 		this.vault = vault;
 		this.executor = executor;
 		this.scheduler = scheduler;
 		this.keychainAccess = keychainAccess;
 		this.missingCapability = missingCapability;
-		this.errorCause = errorCause;
+		this.errorComponent = errorComponent;
 		this.startScene = startScene;
 		this.successScene = successScene;
 		this.migrateButtonContentDisplay = Bindings.createObjectBinding(this::getMigrateButtonContentDisplay, vault.stateProperty());
 		this.capabilityErrorScene = capabilityErrorScene;
-		this.genericErrorScene = genericErrorScene;
 		this.migrationButtonDisabled = new SimpleBooleanProperty();
 		this.migrationProgress = new SimpleDoubleProperty(volatileMigrationProgress);
 	}
@@ -132,8 +131,7 @@ public class MigrationRunController implements FxController {
 		}).onError(Exception.class, e -> { // including RuntimeExceptions
 			LOG.error("Migration failed for technical reasons.", e);
 			vault.setState(VaultState.NEEDS_MIGRATION);
-			errorCause.set(e);
-			window.setScene(genericErrorScene.get());
+			errorComponent.cause(e).window(window).returnToScene(startScene.get()).build().showErrorScene();
 		}).andFinally(() -> {
 			progressSyncTask.cancel(true);
 		}).runOnce(executor);

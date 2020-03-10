@@ -19,6 +19,7 @@ import org.cryptomator.cryptolib.api.InvalidPassphraseException;
 import org.cryptomator.keychain.KeychainAccess;
 import org.cryptomator.keychain.KeychainAccessException;
 import org.cryptomator.ui.common.Animations;
+import org.cryptomator.ui.common.ErrorComponent;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
@@ -49,15 +50,14 @@ public class UnlockController implements FxController {
 	private final VaultService vaultService;
 	private final Lazy<Scene> successScene;
 	private final Lazy<Scene> invalidMountPointScene;
-	private final Lazy<Scene> genericErrorScene;
-	private final ObjectProperty<Throwable> genericErrorCause;
+	private final ErrorComponent.Builder errorComponent;
 	private final ForgetPasswordComponent.Builder forgetPassword;
 	private final BooleanProperty unlockButtonDisabled;
 	public NiceSecurePasswordField passwordField;
 	public CheckBox savePassword;
 
 	@Inject
-	public UnlockController(@UnlockWindow Stage window, @UnlockWindow Vault vault, ExecutorService executor, Optional<KeychainAccess> keychainAccess, VaultService vaultService, @FxmlScene(FxmlFile.UNLOCK_SUCCESS) Lazy<Scene> successScene, @FxmlScene(FxmlFile.UNLOCK_INVALID_MOUNT_POINT) Lazy<Scene> invalidMountPointScene, @FxmlScene(FxmlFile.UNLOCK_GENERIC_ERROR) Lazy<Scene> genericErrorScene, @Named("genericErrorCause") ObjectProperty<Throwable> genericErrorCause, ForgetPasswordComponent.Builder forgetPassword) {
+	public UnlockController(@UnlockWindow Stage window, @UnlockWindow Vault vault, ExecutorService executor, Optional<KeychainAccess> keychainAccess, VaultService vaultService, @FxmlScene(FxmlFile.UNLOCK_SUCCESS) Lazy<Scene> successScene, @FxmlScene(FxmlFile.UNLOCK_INVALID_MOUNT_POINT) Lazy<Scene> invalidMountPointScene, ErrorComponent.Builder errorComponent, ForgetPasswordComponent.Builder forgetPassword) {
 		this.window = window;
 		this.vault = vault;
 		this.executor = executor;
@@ -66,8 +66,7 @@ public class UnlockController implements FxController {
 		this.vaultService = vaultService;
 		this.successScene = successScene;
 		this.invalidMountPointScene = invalidMountPointScene;
-		this.genericErrorScene = genericErrorScene;
-		this.genericErrorCause = genericErrorCause;
+		this.errorComponent = errorComponent;
 		this.forgetPassword = forgetPassword;
 		this.unlockButtonDisabled = new SimpleBooleanProperty();
 	}
@@ -116,8 +115,7 @@ public class UnlockController implements FxController {
 				window.setScene(invalidMountPointScene.get());
 			} else {
 				LOG.error("Unlock failed for technical reasons.", task.getException());
-				genericErrorCause.set(task.getException());
-				window.setScene(genericErrorScene.get());
+				errorComponent.cause(task.getException()).window(window).returnToScene(window.getScene()).build().showErrorScene();
 			}
 		});
 		executor.execute(task);

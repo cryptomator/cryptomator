@@ -16,6 +16,7 @@ import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleGroup;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
+import org.cryptomator.ui.common.ErrorComponent;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
@@ -41,8 +42,7 @@ public class CreateNewVaultLocationController implements FxController {
 	private final Stage window;
 	private final Lazy<Scene> chooseNameScene;
 	private final Lazy<Scene> choosePasswordScene;
-	private final Lazy<Scene> genericErrorScene;
-	private final ObjectProperty<Throwable> genericErrorCause;
+	private final ErrorComponent.Builder errorComponent;
 	private final LocationPresets locationPresets;
 	private final ObjectProperty<Path> vaultPath;
 	private final StringProperty vaultName;
@@ -61,12 +61,11 @@ public class CreateNewVaultLocationController implements FxController {
 	public RadioButton customRadioButton;
 
 	@Inject
-	CreateNewVaultLocationController(@AddVaultWizardWindow Stage window, @FxmlScene(FxmlFile.ADDVAULT_NEW_NAME) Lazy<Scene> chooseNameScene, @FxmlScene(FxmlFile.ADDVAULT_NEW_PASSWORD) Lazy<Scene> choosePasswordScene, @FxmlScene(FxmlFile.ADDVAULT_GENERIC_ERROR) Lazy<Scene> genericErrorScene, @Named("genericErrorCause") ObjectProperty<Throwable> genericErrorCause, LocationPresets locationPresets, ObjectProperty<Path> vaultPath, @Named("vaultName") StringProperty vaultName, ResourceBundle resourceBundle) {
+	CreateNewVaultLocationController(@AddVaultWizardWindow Stage window, @FxmlScene(FxmlFile.ADDVAULT_NEW_NAME) Lazy<Scene> chooseNameScene, @FxmlScene(FxmlFile.ADDVAULT_NEW_PASSWORD) Lazy<Scene> choosePasswordScene, ErrorComponent.Builder errorComponent, LocationPresets locationPresets, ObjectProperty<Path> vaultPath, @Named("vaultName") StringProperty vaultName, ResourceBundle resourceBundle) {
 		this.window = window;
 		this.chooseNameScene = chooseNameScene;
 		this.choosePasswordScene = choosePasswordScene;
-		this.genericErrorScene = genericErrorScene;
-		this.genericErrorCause = genericErrorCause;
+		this.errorComponent = errorComponent;
 		this.locationPresets = locationPresets;
 		this.vaultPath = vaultPath;
 		this.vaultName = vaultName;
@@ -128,8 +127,7 @@ public class CreateNewVaultLocationController implements FxController {
 			warningText.set(resourceBundle.getString("addvaultwizard.new.fileAlreadyExists"));
 		} catch (IOException e) {
 			LOG.error("Failed to create and delete directory at chosen vault path.", e);
-			genericErrorCause.set(e);
-			window.setScene(genericErrorScene.get());
+			errorComponent.cause(e).window(window).returnToScene(window.getScene()).build().showErrorScene();
 		}
 	}
 
