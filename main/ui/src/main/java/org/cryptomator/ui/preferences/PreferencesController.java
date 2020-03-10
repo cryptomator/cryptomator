@@ -27,6 +27,7 @@ public class PreferencesController implements FxController {
 	public Tab volumeTab;
 	public Tab updatesTab;
 	public Tab donationKeyTab;
+	public Tab aboutTab;
 
 	@Inject
 	public PreferencesController(@PreferencesWindow Stage window, ObjectProperty<SelectedPreferencesTab> selectedTabProperty, UpdateChecker updateChecker) {
@@ -57,6 +58,8 @@ public class PreferencesController implements FxController {
 				return donationKeyTab;
 			case GENERAL:
 				return generalTab;
+			case ABOUT:
+				return aboutTab;
 			case ANY:
 			default:
 				return updateAvailable.get() ? updatesTab : generalTab;
