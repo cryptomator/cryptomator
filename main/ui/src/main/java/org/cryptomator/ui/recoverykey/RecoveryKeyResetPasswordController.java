@@ -12,6 +12,7 @@ import javafx.stage.Stage;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.cryptolib.api.InvalidPassphraseException;
 import org.cryptomator.ui.common.Animations;
+import org.cryptomator.ui.common.ErrorComponent;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
@@ -36,9 +37,10 @@ public class RecoveryKeyResetPasswordController implements FxController {
 	private final ObjectProperty<CharSequence> newPassword;
 	private final Lazy<Scene> recoverScene;
 	private final BooleanBinding invalidNewPassword;
+	private final ErrorComponent.Builder errorComponent;
 
 	@Inject
-	public RecoveryKeyResetPasswordController(@RecoveryKeyWindow Stage window, @RecoveryKeyWindow Vault vault, RecoveryKeyFactory recoveryKeyFactory, ExecutorService executor, @RecoveryKeyWindow StringProperty recoveryKey, @Named("newPassword")ObjectProperty<CharSequence> newPassword, @FxmlScene(FxmlFile.RECOVERYKEY_RECOVER) Lazy<Scene> recoverScene) {
+	public RecoveryKeyResetPasswordController(@RecoveryKeyWindow Stage window, @RecoveryKeyWindow Vault vault, RecoveryKeyFactory recoveryKeyFactory, ExecutorService executor, @RecoveryKeyWindow StringProperty recoveryKey, @Named("newPassword")ObjectProperty<CharSequence> newPassword, @FxmlScene(FxmlFile.RECOVERYKEY_RECOVER) Lazy<Scene> recoverScene, ErrorComponent.Builder errorComponent) {
 		this.window = window;
 		this.vault = vault;
 		this.recoveryKeyFactory = recoveryKeyFactory;
@@ -47,6 +49,7 @@ public class RecoveryKeyResetPasswordController implements FxController {
 		this.newPassword = newPassword;
 		this.recoverScene = recoverScene;
 		this.invalidNewPassword = Bindings.createBooleanBinding(this::isInvalidNewPassword, newPassword);
+		this.errorComponent = errorComponent;
 	}
 
 	@FXML
@@ -66,8 +69,8 @@ public class RecoveryKeyResetPasswordController implements FxController {
 			window.close();
 		});
 		task.setOnFailed(event -> {
-			// TODO show generic error screen
 			LOG.error("Resetting password failed.", task.getException());
+			errorComponent.cause(task.getException()).window(window).returnToScene(recoverScene.get()).build().showErrorScene();
 		});
 		executor.submit(task);
 	}

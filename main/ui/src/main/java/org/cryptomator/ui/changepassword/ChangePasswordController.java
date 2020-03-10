@@ -15,6 +15,7 @@ import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.cryptofs.CryptoFileSystemProvider;
 import org.cryptomator.cryptolib.api.InvalidPassphraseException;
 import org.cryptomator.ui.common.Animations;
+import org.cryptomator.ui.common.ErrorComponent;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.controls.FontAwesome5IconView;
 import org.cryptomator.ui.controls.NiceSecurePasswordField;
@@ -38,16 +39,18 @@ public class ChangePasswordController implements FxController {
 	private final Stage window;
 	private final Vault vault;
 	private final ObjectProperty<CharSequence> newPassword;
+	private final ErrorComponent.Builder errorComponent;
 
 	public NiceSecurePasswordField oldPasswordField;
 	public CheckBox finalConfirmationCheckbox;
 	public Button finishButton;
 
 	@Inject
-	public ChangePasswordController(@ChangePasswordWindow Stage window, @ChangePasswordWindow Vault vault, @Named("newPassword") ObjectProperty<CharSequence> newPassword) {
+	public ChangePasswordController(@ChangePasswordWindow Stage window, @ChangePasswordWindow Vault vault, @Named("newPassword") ObjectProperty<CharSequence> newPassword, ErrorComponent.Builder errorComponent) {
 		this.window = window;
 		this.vault = vault;
 		this.newPassword = newPassword;
+		this.errorComponent = errorComponent;
 	}
 
 	@FXML
@@ -69,8 +72,8 @@ public class ChangePasswordController implements FxController {
 			LOG.info("Successful changed password for {}", vault.getDisplayableName());
 			window.close();
 		} catch (IOException e) {
-			// TODO show generic error screen
 			LOG.error("IO error occured during password change. Unable to perform operation.", e);
+			errorComponent.cause(e).window(window).returnToScene(window.getScene()).build().showErrorScene();
 		} catch (InvalidPassphraseException e) {
 			Animations.createShakeWindowAnimation(window).play();
 			oldPasswordField.selectAll();
