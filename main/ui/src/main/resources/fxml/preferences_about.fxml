@@ -11,22 +11,21 @@
 <VBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
 	  fx:controller="org.cryptomator.ui.preferences.AboutController"
-	  spacing="12"
-	  alignment="TOP_CENTER">
+	  spacing="18">
 	<padding>
 		<Insets topRightBottomLeft="12"/>
 	</padding>
 	<children>
-		<HBox spacing="12" VBox.vgrow="NEVER" alignment="TOP_LEFT">
+		<HBox spacing="12" VBox.vgrow="NEVER">
 			<ImageView VBox.vgrow="ALWAYS" fitHeight="64" preserveRatio="true" smooth="true" cache="true">
 				<Image url="/bot.png"/>
 			</ImageView>
-			<VBox HBox.hgrow="ALWAYS">
+			<VBox spacing="3" HBox.hgrow="ALWAYS" alignment="CENTER_LEFT">
 				<FormattedLabel styleClass="label-large" format="Cryptomator %s" arg1="${controller.applicationVersion}"/>
-				<Label text="© 2016 - 2020 Skymatic GmbH"/>
+				<Label text="© 2016 – 2020 Skymatic GmbH"/>
 			</VBox>
 		</HBox>
 
-		<TextArea text="${controller.thirdPartyLicenseText}" editable="false" />
+		<TextArea text="${controller.thirdPartyLicenseText}" editable="false"/>
 	</children>
 </VBox>
