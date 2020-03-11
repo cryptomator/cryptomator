@@ -22,6 +22,7 @@ public enum FontAwesome5Icon {
 	HAND_HOLDING_HEART("\uF4BE"), //
 	HEART("\uF004"), //
 	HDD("\uF0A0"), //
+	INFO("\uF129"), //
 	INFO_CIRCLE("\uF05A"), //
 	KEY("\uF084"), //
 	LINK("\uF0C1"), //
