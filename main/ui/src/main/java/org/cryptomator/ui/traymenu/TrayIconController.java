@@ -32,6 +32,7 @@ public class TrayIconController {
 	public void initializeTrayIcon() {
 		macFunctions.map(MacFunctions::uiAppearance).ifPresent(uiAppearance -> uiAppearance.addListener(this::macInterfaceThemeChanged));
 
+		trayIcon.setImageAutoSize(true);
 		if (SystemUtils.IS_OS_WINDOWS) {
 			trayIcon.addActionListener(trayMenuController::showMainWindow);
 		}
