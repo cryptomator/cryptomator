@@ -28,7 +28,7 @@ before_script:
 script:
 - mvn --update-snapshots -fmain/pom.xml clean test verify -Pcoverage
 after_success:
-- curl -o ~/codacy-coverage-reporter.jar https://oss.sonatype.org/service/local/repositories/releases/content/com/codacy/codacy-coverage-reporter/6.0.7/codacy-coverage-reporter-6.0.7-assembly.jar
+- curl -o ~/codacy-coverage-reporter.jar https://repo.maven.apache.org/maven2/com/codacy/codacy-coverage-reporter/7.1.0/codacy-coverage-reporter-7.1.0-assembly.jar
 - $JAVA_HOME/bin/java -jar ~/codacy-coverage-reporter.jar report -l Java -r main/commons/target/site/jacoco/jacoco.xml --partial
 - $JAVA_HOME/bin/java -jar ~/codacy-coverage-reporter.jar report -l Java -r main/keychain/target/site/jacoco/jacoco.xml --partial
 - $JAVA_HOME/bin/java -jar ~/codacy-coverage-reporter.jar report -l Java -r main/ui/target/site/jacoco/jacoco.xml --partial
