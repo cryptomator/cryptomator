@@ -20,7 +20,7 @@
 	  maxWidth="-Infinity"
 	  minWidth="-Infinity"
 	  minHeight="-Infinity"
-	  spacing="36"
+	  spacing="24"
 	  alignment="CENTER">
 	<padding>
 		<Insets topRightBottomLeft="24"/>
@@ -37,17 +37,17 @@
 			</VBox>
 		</HBox>
 
-		<ImageView VBox.vgrow="ALWAYS" fitWidth="500" preserveRatio="true" smooth="true" cache="true" image="${controller.screenshot}"/>
+		<ImageView VBox.vgrow="ALWAYS" fitWidth="550" preserveRatio="true" smooth="true" cache="true" image="${controller.screenshot}"/>
 
 		<VBox spacing="6" alignment="CENTER_LEFT" VBox.vgrow="ALWAYS">
-			<Label text="%wrongFileAlert.instruction.0" wrapText="true" />
+			<Label text="%wrongFileAlert.instruction.0" wrapText="true"/>
 			<VBox alignment="CENTER_LEFT" VBox.vgrow="ALWAYS" spacing="6">
 				<padding>
 					<Insets left="12"/>
 				</padding>
-				<Label text="%wrongFileAlert.instruction.1" wrapText="true" />
-				<Label text="%wrongFileAlert.instruction.2" wrapText="true" />
-				<Label text="%wrongFileAlert.instruction.3" wrapText="true" />
+				<Label text="%wrongFileAlert.instruction.1" wrapText="true"/>
+				<Label text="%wrongFileAlert.instruction.2" wrapText="true"/>
+				<Label text="%wrongFileAlert.instruction.3" wrapText="true"/>
 			</VBox>
 			<TextFlow>
 				<Text text="%wrongFileAlert.link"/>

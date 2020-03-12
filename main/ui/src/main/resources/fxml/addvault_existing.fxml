@@ -12,17 +12,13 @@
 	  fx:controller="org.cryptomator.ui.addvaultwizard.ChooseExistingVaultController"
 	  prefWidth="450"
 	  prefHeight="450"
-	  spacing="12"
+	  spacing="24"
 	  alignment="CENTER">
 	<padding>
 		<Insets topRightBottomLeft="24"/>
 	</padding>
 	<children>
-		<ImageView VBox.vgrow="ALWAYS" fitWidth="400" preserveRatio="true" smooth="true" image="${controller.screenshot}">
-			<VBox.margin>
-				<Insets top="24"/>
-			</VBox.margin>
-		</ImageView>
+		<ImageView VBox.vgrow="ALWAYS" fitWidth="400" preserveRatio="true" smooth="true" image="${controller.screenshot}"/>
 
 		<Label text="%addvaultwizard.existing.instruction" wrapText="true" labelFor="$finishButton"/>
 
