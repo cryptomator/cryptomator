@@ -4,7 +4,6 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ButtonBar?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
@@ -19,11 +18,10 @@
 		<Insets topRightBottomLeft="24"/>
 	</padding>
 	<children>
-		<ImageView VBox.vgrow="ALWAYS" fitHeight="200" preserveRatio="true" smooth="true" cache="true">
+		<ImageView VBox.vgrow="ALWAYS" fitWidth="400" preserveRatio="true" smooth="true" image="${controller.screenshot}">
 			<VBox.margin>
 				<Insets top="24"/>
 			</VBox.margin>
-			<Image url="/choose_existing_vault.png"/> <!-- TODO replace mockup -->
 		</ImageView>
 
 		<Label text="%addvaultwizard.existing.instruction" wrapText="true" labelFor="$finishButton"/>

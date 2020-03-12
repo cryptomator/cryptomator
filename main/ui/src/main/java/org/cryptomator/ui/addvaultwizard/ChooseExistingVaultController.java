@@ -4,8 +4,10 @@ import dagger.Lazy;
 import javafx.beans.property.ObjectProperty;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultListManager;
 import org.cryptomator.ui.common.ErrorComponent;
@@ -18,6 +20,9 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.ResourceBundle;
@@ -36,6 +41,8 @@ public class ChooseExistingVaultController implements FxController {
 	private final VaultListManager vaultListManager;
 	private final ResourceBundle resourceBundle;
 
+	private Image screenshot;
+
 	@Inject
 	ChooseExistingVaultController(@AddVaultWizardWindow Stage window, @FxmlScene(FxmlFile.ADDVAULT_WELCOME) Lazy<Scene> welcomeScene, @FxmlScene(FxmlFile.ADDVAULT_SUCCESS) Lazy<Scene> successScene, ErrorComponent.Builder errorComponent, ObjectProperty<Path> vaultPath, @AddVaultWizardWindow ObjectProperty<Vault> vault, VaultListManager vaultListManager, ResourceBundle resourceBundle) {
 		this.window = window;
@@ -46,6 +53,16 @@ public class ChooseExistingVaultController implements FxController {
 		this.vault = vault;
 		this.vaultListManager = vaultListManager;
 		this.resourceBundle = resourceBundle;
+	}
+
+	@FXML
+	public void initialize() {
+		final String resource = SystemUtils.IS_OS_MAC ? "/select-masterkey-mac.png" : "/select-masterkey-win.png";
+		try (InputStream in = getClass().getResourceAsStream(resource)) {
+			this.screenshot = new Image(in);
+		} catch (IOException e) {
+			throw new UncheckedIOException(e);
+		}
 	}
 
 	@FXML
@@ -70,6 +87,12 @@ public class ChooseExistingVaultController implements FxController {
 				errorComponent.cause(e).window(window).returnToScene(window.getScene()).build().showErrorScene();
 			}
 		}
+	}
+
+	/* Getter */
+
+	public Image getScreenshot() {
+		return screenshot;
 	}
 
 }

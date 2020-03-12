@@ -20,12 +20,25 @@ public class WrongFileAlertController implements FxController {
 	private final Application app;
 	private final Stage window;
 
+	private Image screenshot;
+
 	@Inject
 	public WrongFileAlertController(@WrongFileAlertWindow Stage window, Application app) {
 		this.window = window;
 		this.app = app;
 	}
 
+	@FXML
+	public void initialize() {
+		final String resource = SystemUtils.IS_OS_MAC ? "/vault-volume-mac.png" : "/vault-volume-win.png";
+		try (InputStream in = getClass().getResourceAsStream(resource)) {
+			this.screenshot = new Image(in);
+		} catch (IOException e) {
+			throw new UncheckedIOException(e);
+		}
+	}
+
+	@FXML
 	public void close() {
 		window.close();
 	}
@@ -38,11 +51,6 @@ public class WrongFileAlertController implements FxController {
 	/* Getter */
 
 	public Image getScreenshot() {
-		final String resource = SystemUtils.IS_OS_MAC ? "/vault-volume-mac.png" : "/vault-volume-win.png";
-		try (InputStream in = getClass().getResourceAsStream(resource)) {
-			return new Image(in);
-		} catch (IOException e) {
-			throw new UncheckedIOException(e);
-		}
+		return screenshot;
 	}
 }
