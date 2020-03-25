@@ -25,7 +25,7 @@ Cryptomator uses ${dependencyMap?size} third-party dependencies under the follow
 	<#if projects?size &gt; 0>
 	${license}:
 	<#list projects as project>
-		• ${artifactFormat(project)}
+		- ${artifactFormat(project)}
 	</#list>
 	</#if>
 </#list>
