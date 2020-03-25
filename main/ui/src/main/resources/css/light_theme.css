@@ -148,6 +148,12 @@
  *                                                                             *
  ******************************************************************************/
 
+/* windows needs an explicit border: */
+.main-window.os-windows {
+	-fx-border-color: TITLE_BG;
+	-fx-border-width: 1px;
+}
+
 .main-window .title {
 	-fx-background-color: TITLE_BG;
 }

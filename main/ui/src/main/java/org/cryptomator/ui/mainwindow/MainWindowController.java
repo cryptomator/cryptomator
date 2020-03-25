@@ -6,6 +6,7 @@ import javafx.fxml.FXML;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.StackPane;
+import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.vaults.VaultListManager;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.wrongfilealert.WrongFileAlertComponent;
@@ -46,6 +47,9 @@ public class MainWindowController implements FxController {
 		root.setOnDragOver(this::handleDragEvent);
 		root.setOnDragDropped(this::handleDragEvent);
 		root.setOnDragExited(this::handleDragEvent);
+		if (SystemUtils.IS_OS_WINDOWS) {
+			root.getStyleClass().add("os-windows");
+		}
 	}
 
 	private void handleDragEvent(DragEvent event) {
