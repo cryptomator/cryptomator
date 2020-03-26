@@ -51,6 +51,7 @@
 	YELLOW_5: #F1C40F;
 
 	MAIN_BG: GRAY_9;
+	MUTED_BG: GRAY_5;
 	TEXT_FILL: GRAY_0;
 	TEXT_FILL_HIGHLIGHTED: PRIMARY;
 	TEXT_FILL_MUTED: GRAY_5;
@@ -95,7 +96,7 @@
 	-fx-text-fill: TEXT_FILL;
 }
 
-.label-secondary {
+.label-muted {
 	-fx-text-fill: TEXT_FILL_MUTED;
 }
 
@@ -379,9 +380,9 @@
 	-fx-background-color: PRIMARY;
 }
 
-.badge-secondary {
+.badge-muted {
 	-fx-text-fill: white;
-	-fx-background-color: SECONDARY;
+	-fx-background-color: MUTED_BG;
 }
 
 /*******************************************************************************
@@ -576,7 +577,7 @@
 	-fx-underline: true;
 }
 
-.hyperlink.hyperlink-secondary {
+.hyperlink.hyperlink-muted {
 	-fx-text-fill: TEXT_FILL_MUTED;
 }
 

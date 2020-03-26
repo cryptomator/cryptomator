@@ -32,11 +32,11 @@
 						</tooltip>
 					</Label>
 					<Region HBox.hgrow="ALWAYS"/>
-					<Label styleClass="badge,badge-pill,badge-secondary" text="%main.vaultDetail.lockedStatus" minWidth="-Infinity" visible="${controller.vault.locked}" managed="${controller.vault.locked}"/>
-					<Label styleClass="badge,badge-pill,badge-secondary" text="…" minWidth="-Infinity" visible="${controller.vault.processing}" managed="${controller.vault.processing}"/>
+					<Label styleClass="badge,badge-pill,badge-muted" text="%main.vaultDetail.lockedStatus" minWidth="-Infinity" visible="${controller.vault.locked}" managed="${controller.vault.locked}"/>
+					<Label styleClass="badge,badge-pill,badge-muted" text="…" minWidth="-Infinity" visible="${controller.vault.processing}" managed="${controller.vault.processing}"/>
 					<Label styleClass="badge,badge-pill,badge-primary" text="%main.vaultDetail.unlockedStatus" minWidth="-Infinity" visible="${controller.vault.unlocked}" managed="${controller.vault.unlocked}"/>
 				</HBox>
-				<Hyperlink styleClass="hyperlink-secondary,hyperlink-hover-icon" text="${controller.vault.displayablePath}" textOverrun="CENTER_ELLIPSIS" onAction="#revealStorageLocation">
+				<Hyperlink styleClass="hyperlink-muted,hyperlink-hover-icon" text="${controller.vault.displayablePath}" textOverrun="CENTER_ELLIPSIS" onAction="#revealStorageLocation">
 					<graphic>
 						<FontAwesome5IconView styleClass="glyph-icon-muted" glyph="EYE"/>
 					</graphic>
