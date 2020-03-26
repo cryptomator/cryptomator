@@ -23,7 +23,7 @@
 		<HBox spacing="6" alignment="CENTER_LEFT">
 			<Label text="%preferences.general.theme"/>
 			<ChoiceBox fx:id="themeChoiceBox" disable="${!controller.licenseHolder.validLicense}"/>
-			<Hyperlink styleClass="hyperlink-underline,hyperlink-secondary" text="%preferences.general.unlockThemes" onAction="#showDonationTab" visible="${!controller.licenseHolder.validLicense}" managed="${!controller.licenseHolder.validLicense}"/>
+			<Hyperlink styleClass="hyperlink-underline,hyperlink-muted" text="%preferences.general.unlockThemes" onAction="#showDonationTab" visible="${!controller.licenseHolder.validLicense}" managed="${!controller.licenseHolder.validLicense}"/>
 		</HBox>
 
 		<HBox spacing="6" alignment="CENTER_LEFT">
