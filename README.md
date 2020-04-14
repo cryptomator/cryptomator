@@ -15,6 +15,10 @@ Cryptomator is provided free of charge as an open-source project despite the hig
 - [One-time or recurring donation via Cryptomator's website.](https://cryptomator.org/#donate)
 - [Become a sponsor via Cryptomator's sponsors website.](https://cryptomator.org/sponsors/)
 
+### Gold Sponsors
+
+[<img src="https://cryptomator.org/img/sponsors/geewhiz.svg" alt="gee-whiz" height="96">](https://www.gee-whiz.de/)
+
 ### Silver Sponsors
 
 [![TheBestVPN](https://cryptomator.org/img/sponsors/thebestvpn.png)](https://thebestvpn.com/)
