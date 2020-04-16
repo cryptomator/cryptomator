@@ -72,7 +72,7 @@ Cryptomator uses 49 third-party dependencies under the following licenses:
 		- Java Native Access (net.java.dev.jna:jna:5.1.0 - https://github.com/java-native-access/jna)
 		- Java Native Access Platform (net.java.dev.jna:jna-platform:5.1.0 - https://github.com/java-native-access/jna)
 	MIT License:
-		- java jwt (com.auth0:java-jwt:3.10.0 - https://github.com/auth0/java-jwt)
+		- java jwt (com.auth0:java-jwt:3.10.2 - https://github.com/auth0/java-jwt)
 		- java-utils (com.github.hypfvieh:java-utils:1.0.5 - https://github.com/hypfvieh/java-utils)
 		- jnr-x86asm (com.github.jnr:jnr-x86asm:1.0.2 - http://github.com/jnr/jnr-x86asm)
 		- jnr-fuse (com.github.serceman:jnr-fuse:0.5.4 - no url defined)
@@ -85,4 +85,4 @@ Cryptomator uses 49 third-party dependencies under the following licenses:
 
 Cryptomator uses other third-party assets under the following licenses:
 	SIL OFL 1.1 License:
-		• Font Awesome 5.12.0 (https://fontawesome.com/)
+		- Font Awesome 5.12.0 (https://fontawesome.com/)
