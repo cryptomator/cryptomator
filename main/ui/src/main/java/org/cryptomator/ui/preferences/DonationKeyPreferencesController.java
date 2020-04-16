@@ -12,7 +12,7 @@ import javax.inject.Inject;
 @PreferencesScoped
 public class DonationKeyPreferencesController implements FxController {
 	
-	private static final String DONATION_URI = "https://store.cryptomator.org/desktop";
+	private static final String DONATION_URI = "https://cryptomator.org/store/desktop/";
 
 	private final Application application;
 	private final LicenseHolder licenseHolder;
