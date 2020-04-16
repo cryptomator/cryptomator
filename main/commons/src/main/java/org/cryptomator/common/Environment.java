@@ -39,6 +39,7 @@ public class Environment {
 		LOG.debug("cryptomator.logDir: {}", System.getProperty("cryptomator.logDir"));
 		LOG.debug("cryptomator.mountPointsDir: {}", System.getProperty("cryptomator.mountPointsDir"));
 		LOG.debug("cryptomator.minPwLength: {}", System.getProperty("cryptomator.minPwLength"));
+		LOG.debug("cryptomator.buildNumber: {}", System.getProperty("cryptomator.buildNumber"));
 	}
 
 	public boolean useCustomLogbackConfig() {
@@ -65,6 +66,10 @@ public class Environment {
 		return getPath("cryptomator.mountPointsDir").map(this::replaceHomeDir);
 	}
 
+	public Optional<String> getBuildNumber() {
+		return Optional.ofNullable(System.getProperty("cryptomator.buildNumber"));
+	}
+
 	public int getMinPwLength() {
 		return getInt("cryptomator.minPwLength", DEFAULT_MIN_PW_LENGTH);
 	}
@@ -82,8 +87,8 @@ public class Environment {
 		String value = System.getProperty(propertyName);
 		return Optional.ofNullable(value).map(Paths::get);
 	}
-
 	// visible for testing
+
 	Stream<Path> getPaths(String propertyName) {
 		Stream<String> rawSettingsPaths = getRawList(propertyName, PATH_LIST_SEP);
 		return rawSettingsPaths.filter(Predicate.not(Strings::isNullOrEmpty)).map(Paths::get).map(this::replaceHomeDir);
@@ -107,5 +112,4 @@ public class Environment {
 			return StreamSupport.stream(spliter, false);
 		}
 	}
-
 }

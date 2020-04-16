@@ -16,7 +16,7 @@ import javax.inject.Inject;
 public class WelcomeController implements FxController {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(WelcomeController.class);
-	private static final String GETTING_STARTED_URI = "https://docs.cryptomator.org/en/latest/desktop/basic-concepts/";
+	private static final String GETTING_STARTED_URI = "https://docs.cryptomator.org/en/1.5/desktop/getting-started/";
 
 	private final Application application;
 	private final BooleanBinding noVaultPresent;

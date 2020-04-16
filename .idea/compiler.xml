@@ -7,10 +7,10 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="false">
-          <entry name="$MAVEN_REPOSITORY$/com/google/dagger/dagger-compiler/2.26/dagger-compiler-2.26.jar" />
-          <entry name="$MAVEN_REPOSITORY$/com/google/dagger/dagger/2.26/dagger-2.26.jar" />
+          <entry name="$MAVEN_REPOSITORY$/com/google/dagger/dagger-compiler/2.27/dagger-compiler-2.27.jar" />
+          <entry name="$MAVEN_REPOSITORY$/com/google/dagger/dagger/2.27/dagger-2.27.jar" />
           <entry name="$MAVEN_REPOSITORY$/javax/inject/javax.inject/1/javax.inject-1.jar" />
-          <entry name="$MAVEN_REPOSITORY$/com/google/dagger/dagger-producers/2.26/dagger-producers-2.26.jar" />
+          <entry name="$MAVEN_REPOSITORY$/com/google/dagger/dagger-producers/2.27/dagger-producers-2.27.jar" />
           <entry name="$MAVEN_REPOSITORY$/com/google/guava/failureaccess/1.0.1/failureaccess-1.0.1.jar" />
           <entry name="$MAVEN_REPOSITORY$/com/google/guava/guava/27.1-jre/guava-27.1-jre.jar" />
           <entry name="$MAVEN_REPOSITORY$/com/google/guava/listenablefuture/9999.0-empty-to-avoid-conflict-with-guava/listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar" />
@@ -20,7 +20,7 @@
           <entry name="$MAVEN_REPOSITORY$/com/google/j2objc/j2objc-annotations/1.1/j2objc-annotations-1.1.jar" />
           <entry name="$MAVEN_REPOSITORY$/org/codehaus/mojo/animal-sniffer-annotations/1.17/animal-sniffer-annotations-1.17.jar" />
           <entry name="$MAVEN_REPOSITORY$/org/checkerframework/checker-compat-qual/2.5.3/checker-compat-qual-2.5.3.jar" />
-          <entry name="$MAVEN_REPOSITORY$/com/google/dagger/dagger-spi/2.26/dagger-spi-2.26.jar" />
+          <entry name="$MAVEN_REPOSITORY$/com/google/dagger/dagger-spi/2.27/dagger-spi-2.27.jar" />
           <entry name="$MAVEN_REPOSITORY$/com/squareup/javapoet/1.11.1/javapoet-1.11.1.jar" />
           <entry name="$MAVEN_REPOSITORY$/com/google/googlejavaformat/google-java-format/1.5/google-java-format-1.5.jar" />
           <entry name="$MAVEN_REPOSITORY$/com/google/errorprone/javac-shaded/9-dev-r4023-3/javac-shaded-9-dev-r4023-3.jar" />
@@ -32,9 +32,9 @@
           <entry name="$MAVEN_REPOSITORY$/org/jetbrains/kotlinx/kotlinx-metadata-jvm/0.1.0/kotlinx-metadata-jvm-0.1.0.jar" />
         </processorPath>
         <module name="keychain" />
-        <module name="launcher" />
         <module name="commons" />
         <module name="ui" />
+        <module name="launcher" />
       </profile>
     </annotationProcessing>
   </component>

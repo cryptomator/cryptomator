@@ -25,11 +25,11 @@ Cryptomator uses ${dependencyMap?size} third-party dependencies under the follow
 	<#if projects?size &gt; 0>
 	${license}:
 	<#list projects as project>
-		• ${artifactFormat(project)}
+		- ${artifactFormat(project)}
 	</#list>
 	</#if>
 </#list>
 
 Cryptomator uses other third-party assets under the following licenses:
 	SIL OFL 1.1 License:
-		• Font Awesome 5.12.0 (https://fontawesome.com/)
+		- Font Awesome 5.12.0 (https://fontawesome.com/)

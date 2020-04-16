@@ -1,6 +1,7 @@
 package org.cryptomator.ui.preferences;
 
 import com.google.common.io.CharStreams;
+import org.cryptomator.common.Environment;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.fxapp.UpdateChecker;
 import org.slf4j.Logger;
@@ -13,18 +14,20 @@ import java.io.InputStreamReader;
 
 @PreferencesScoped
 public class AboutController implements FxController {
-	
+
 	private static final Logger LOG = LoggerFactory.getLogger(AboutController.class);
-	
+
 	private final String thirdPartyLicenseText;
 	private final String applicationVersion;
 
 	@Inject
-	AboutController(UpdateChecker updateChecker) {
+	AboutController(UpdateChecker updateChecker, Environment environment) {
 		this.thirdPartyLicenseText = loadThirdPartyLicenseFile();
-		this.applicationVersion = updateChecker.currentVersionProperty().get();
+		StringBuilder sb = new StringBuilder(updateChecker.currentVersionProperty().get());
+		environment.getBuildNumber().ifPresent(s -> sb.append(" (").append(s).append(')'));
+		this.applicationVersion = sb.toString();
 	}
-	
+
 	private static String loadThirdPartyLicenseFile() {
 		try (InputStream in = AboutController.class.getResourceAsStream("/license/THIRD-PARTY.txt")) {
 			return CharStreams.toString(new InputStreamReader(in));
@@ -33,7 +36,7 @@ public class AboutController implements FxController {
 			return "";
 		}
 	}
-	
+
 	/* Getter */
 
 	public String getThirdPartyLicenseText() {
