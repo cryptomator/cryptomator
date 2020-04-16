@@ -25,4 +25,9 @@ public enum SelectedPreferencesTab {
 	 * Show donation key tab
 	 */
 	DONATION_KEY,
+
+	/**
+	 * Show about tab
+	 */
+	ABOUT,
 }

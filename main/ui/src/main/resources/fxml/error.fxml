@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ButtonBar?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.shape.Circle?>
+<?import org.cryptomator.ui.controls.FontAwesome5IconView?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<VBox xmlns="http://javafx.com/javafx"
+	  xmlns:fx="http://javafx.com/fxml"
+	  fx:controller="org.cryptomator.ui.common.ErrorController"
+	  prefWidth="450"
+	  prefHeight="450"
+	  spacing="12"
+	  alignment="TOP_CENTER">
+	<padding>
+		<Insets topRightBottomLeft="24"/>
+	</padding>
+	<children>
+		<HBox spacing="12" VBox.vgrow="NEVER">
+			<StackPane alignment="CENTER" HBox.hgrow="NEVER">
+				<Circle styleClass="glyph-icon-primary" radius="24"/>
+				<FontAwesome5IconView styleClass="glyph-icon-white" glyph="EXCLAMATION" glyphSize="24"/>
+			</StackPane>
+			<VBox spacing="6" HBox.hgrow="ALWAYS">
+				<Label text="%generic.error.title" wrapText="true"/>
+				<Label text="%generic.error.instruction" wrapText="true"/>
+			</VBox>
+		</HBox>
+
+		<TextArea VBox.vgrow="ALWAYS" text="${controller.stackTrace}" prefRowCount="5" editable="false"/>
+
+		<ButtonBar buttonMinWidth="120" buttonOrder="B+C">
+			<buttons>
+				<Button text="%generic.button.back" ButtonBar.buttonData="BACK_PREVIOUS" onAction="#back" visible="${controller.previousScenePresent}"/>
+				<Button text="%generic.button.cancel" ButtonBar.buttonData="CANCEL_CLOSE" onAction="#close" />
+			</buttons>
+		</ButtonBar>
+	</children>
+</VBox>

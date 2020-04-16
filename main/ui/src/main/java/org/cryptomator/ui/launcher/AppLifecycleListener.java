@@ -16,6 +16,7 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import java.awt.Desktop;
 import java.awt.EventQueue;
+import java.awt.desktop.AboutEvent;
 import java.awt.desktop.QuitResponse;
 import java.util.EnumSet;
 import java.util.EventObject;
@@ -45,6 +46,11 @@ public class AppLifecycleListener {
 		// register preferences shortcut
 		if (Desktop.getDesktop().isSupported(Desktop.Action.APP_PREFERENCES)) {
 			Desktop.getDesktop().setPreferencesHandler(this::showPreferencesWindow);
+		}
+
+		// register preferences shortcut
+		if (Desktop.getDesktop().isSupported(Desktop.Action.APP_ABOUT)) {
+			Desktop.getDesktop().setAboutHandler(this::showAboutWindow);
 		}
 
 		// register quit handler
@@ -108,6 +114,10 @@ public class AppLifecycleListener {
 
 	private void showPreferencesWindow(@SuppressWarnings("unused") EventObject actionEvent) {
 		fxApplicationStarter.get(true).thenAccept(app -> app.showPreferencesWindow(SelectedPreferencesTab.ANY));
+	}
+
+	private void showAboutWindow(@SuppressWarnings("unused") AboutEvent aboutEvent) {
+		fxApplicationStarter.get(true).thenAccept(app -> app.showPreferencesWindow(SelectedPreferencesTab.ABOUT));
 	}
 
 	private void forceUnmountRemainingVaults() {

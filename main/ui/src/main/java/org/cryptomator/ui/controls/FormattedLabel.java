@@ -12,7 +12,7 @@ public class FormattedLabel extends Label {
 
 	private final StringProperty format = new SimpleStringProperty("");
 	private final ObjectProperty<Object> arg1 = new SimpleObjectProperty<>();
-	// TODO: add arg2, arg3, ... on demand
+	// add arg2, arg3, ... on demand
 
 	public FormattedLabel() {
 		textProperty().bind(createStringBinding());

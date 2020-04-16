@@ -1,0 +1,45 @@
+package org.cryptomator.ui.common;
+
+import dagger.Binds;
+import dagger.Module;
+import dagger.Provides;
+import dagger.multibindings.IntoMap;
+import javafx.scene.Scene;
+
+import javax.inject.Named;
+import javax.inject.Provider;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
+import java.util.Map;
+import java.util.ResourceBundle;
+
+@Module
+abstract class ErrorModule {
+
+	@Provides
+	static FXMLLoaderFactory provideFxmlLoaderFactory(Map<Class<? extends FxController>, Provider<FxController>> factories, DefaultSceneFactory sceneFactory, ResourceBundle resourceBundle) {
+		return new FXMLLoaderFactory(factories, sceneFactory, resourceBundle);
+	}
+	
+	@Provides
+	@Named("stackTrace")
+	static String provideStackTrace(Throwable cause) {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		cause.printStackTrace(new PrintStream(baos));
+		return baos.toString(StandardCharsets.UTF_8);
+	}
+
+	@Binds
+	@IntoMap
+	@FxControllerKey(ErrorController.class)
+	abstract FxController bindErrorController(ErrorController controller);
+
+	@Provides
+	@FxmlScene(FxmlFile.ERROR)
+	static Scene provideErrorScene(FXMLLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.ERROR.getRessourcePathString());
+	}
+
+
+}

@@ -10,14 +10,10 @@ package org.cryptomator.common.vaults;
 
 import com.google.common.base.Strings;
 import javafx.beans.Observable;
-import javafx.beans.binding.Binding;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
-import javafx.beans.binding.ObjectBinding;
 import javafx.beans.binding.StringBinding;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.LazyInitializer;
 import org.cryptomator.common.settings.VaultSettings;
@@ -27,32 +23,27 @@ import org.cryptomator.cryptofs.CryptoFileSystemProperties.FileSystemFlags;
 import org.cryptomator.cryptofs.CryptoFileSystemProvider;
 import org.cryptomator.cryptolib.api.CryptoException;
 import org.cryptomator.cryptolib.api.InvalidPassphraseException;
-import org.fxmisc.easybind.EasyBind;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
 import java.io.IOException;
-import java.nio.file.FileAlreadyExistsException;
-import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.NotDirectoryException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.EnumSet;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Predicate;
+
+import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
 
 @PerVault
 public class Vault {
-	
+
 	private static final Logger LOG = LoggerFactory.getLogger(Vault.class);
-	private static final String MASTERKEY_FILENAME = "masterkey.cryptomator"; // TODO: deduplicate constant declared in multiple classes
 	private static final Path HOME_DIR = Paths.get(SystemUtils.USER_HOME);
 
 	private final VaultSettings vaultSettings;
@@ -66,8 +57,10 @@ public class Vault {
 	private final BooleanBinding locked;
 	private final BooleanBinding processing;
 	private final BooleanBinding unlocked;
+	private final BooleanBinding missing;
 	private final BooleanBinding needsMigration;
-	private final ObjectBinding<Path> accessPoint;
+	private final StringBinding accessPoint;
+	private final BooleanBinding accessPointPresent;
 
 	private volatile Volume volume;
 
@@ -84,8 +77,10 @@ public class Vault {
 		this.locked = Bindings.createBooleanBinding(this::isLocked, state);
 		this.processing = Bindings.createBooleanBinding(this::isProcessing, state);
 		this.unlocked = Bindings.createBooleanBinding(this::isUnlocked, state);
+		this.missing = Bindings.createBooleanBinding(this::isMissing, state);
 		this.needsMigration = Bindings.createBooleanBinding(this::isNeedsMigration, state);
-		this.accessPoint = Bindings.createObjectBinding(this::getAccessPoint, state);
+		this.accessPoint = Bindings.createStringBinding(this::getAccessPoint, state);
+		this.accessPointPresent = this.accessPoint.isNotEmpty();
 	}
 
 	// ******************************************************************************
@@ -177,11 +172,19 @@ public class Vault {
 	public boolean isUnlocked() {
 		return state.get() == VaultState.UNLOCKED;
 	}
-	
+
+	public BooleanBinding missingProperty() {
+		return missing;
+	}
+
+	public boolean isMissing() {
+		return state.get() == VaultState.MISSING;
+	}
+
 	public BooleanBinding needsMigrationProperty() {
 		return needsMigration;
 	}
-	
+
 	public boolean isNeedsMigration() {
 		return state.get() == VaultState.NEEDS_MIGRATION;
 	}
@@ -195,17 +198,25 @@ public class Vault {
 		return p.getFileName().toString();
 	}
 
-	public ObjectBinding<Path> accessPointProperty() {
+	public StringBinding accessPointProperty() {
 		return accessPoint;
 	}
 
-	public Path getAccessPoint() {
+	public String getAccessPoint() {
 		if (state.get() == VaultState.UNLOCKED) {
 			assert volume != null;
-			return volume.getMountPoint().orElse(Path.of(""));
+			return volume.getMountPoint().orElse(Path.of("")).toString();
 		} else {
-			return Path.of("");
+			return "";
 		}
+	}
+
+	public BooleanBinding accessPointPresentProperty() {
+		return accessPointPresent;
+	}
+
+	public boolean isAccessPointPresent() {
+		return accessPointPresent.get();
 	}
 
 	public StringBinding displayablePathProperty() {

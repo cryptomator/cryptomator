@@ -87,6 +87,11 @@ abstract class MainWindowModule {
 	@IntoMap
 	@FxControllerKey(VaultDetailController.class)
 	abstract FxController bindVaultDetailController(VaultDetailController controller);
+	
+	@Binds
+	@IntoMap
+	@FxControllerKey(WelcomeController.class)
+	abstract FxController bindWelcomeController(WelcomeController controller);
 
 	@Binds
 	@IntoMap
@@ -97,6 +102,11 @@ abstract class MainWindowModule {
 	@IntoMap
 	@FxControllerKey(VaultDetailUnlockedController.class)
 	abstract FxController bindVaultDetailUnlockedController(VaultDetailUnlockedController controller);
+	
+	@Binds
+	@IntoMap
+	@FxControllerKey(VaultDetailMissingVaultController.class)
+	abstract FxController bindVaultDetailMissingVaultController(VaultDetailMissingVaultController controller);
 
 	@Binds
 	@IntoMap

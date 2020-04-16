@@ -1,6 +1,5 @@
 package org.cryptomator.ui.common;
 
-import com.google.common.base.Splitter;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -9,7 +8,6 @@ import javax.inject.Provider;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
-import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.function.Function;
@@ -65,8 +63,9 @@ public class FXMLLoaderFactory {
 			throw new UncheckedIOException("Failed to load " + fxmlResourceName, e);
 		}
 		Parent root = loader.getRoot();
-		List<String> addtionalStyleSheets = Splitter.on(',').omitEmptyStrings().splitToList(resourceBundle.getString("additionalStyleSheets"));
-		addtionalStyleSheets.forEach(styleSheet -> root.getStylesheets().add("/css/" + styleSheet));
+		// TODO: discuss if we can remove language-specific stylesheets
+		// List<String> addtionalStyleSheets = Splitter.on(',').omitEmptyStrings().splitToList(resourceBundle.getString("additionalStyleSheets"));
+		// addtionalStyleSheets.forEach(styleSheet -> root.getStylesheets().add("/css/" + styleSheet));
 		return sceneFactory.apply(root);
 	}
 

@@ -51,6 +51,7 @@
 	YELLOW_5: #F1C40F;
 
 	MAIN_BG: GRAY_1;
+	MUTED_BG: GRAY_3;
 	TEXT_FILL: GRAY_9;
 	TEXT_FILL_HIGHLIGHTED: PRIMARY;
 	TEXT_FILL_MUTED: GRAY_5;
@@ -95,7 +96,7 @@
 	-fx-text-fill: TEXT_FILL;
 }
 
-.label-secondary {
+.label-muted {
 	-fx-text-fill: TEXT_FILL_MUTED;
 }
 
@@ -147,6 +148,12 @@
  * Main Window                                                                 *
  *                                                                             *
  ******************************************************************************/
+
+/* windows needs an explicit border: */
+.main-window.os-windows {
+	-fx-border-color: TITLE_BG;
+	-fx-border-width: 1px;
+}
 
 .main-window .title {
 	-fx-background-color: CONTROL_BORDER_NORMAL, TITLE_BG;
@@ -374,9 +381,9 @@
 	-fx-background-color: PRIMARY;
 }
 
-.badge-secondary {
+.badge-muted {
 	-fx-text-fill: white;
-	-fx-background-color: SECONDARY;
+	-fx-background-color: MUTED_BG;
 }
 
 /*******************************************************************************
@@ -567,7 +574,11 @@
 	-fx-graphic-text-gap: 6px;
 }
 
-.hyperlink.hyperlink-secondary {
+.hyperlink.hyperlink-underline {
+	-fx-underline: true;
+}
+
+.hyperlink.hyperlink-muted {
 	-fx-text-fill: TEXT_FILL_MUTED;
 }
 

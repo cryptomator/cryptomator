@@ -4,8 +4,6 @@ import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoMap;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Modality;
@@ -16,7 +14,6 @@ import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxControllerKey;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
-import org.cryptomator.ui.common.StackTraceController;
 import org.cryptomator.ui.forgetPassword.ForgetPasswordComponent;
 
 import javax.inject.Named;
@@ -48,13 +45,6 @@ abstract class UnlockModule {
 	}
 
 	@Provides
-	@Named("genericErrorCause")
-	@UnlockScoped
-	static ObjectProperty<Throwable> provideGenericErrorCause() {
-		return new SimpleObjectProperty<>();
-	}
-
-	@Provides
 	@FxmlScene(FxmlFile.UNLOCK)
 	@UnlockScoped
 	static Scene provideUnlockScene(@UnlockWindow FXMLLoaderFactory fxmlLoaders) {
@@ -75,15 +65,6 @@ abstract class UnlockModule {
 		return fxmlLoaders.createScene("/fxml/unlock_invalid_mount_point.fxml");
 	}
 
-
-	@Provides
-	@FxmlScene(FxmlFile.UNLOCK_GENERIC_ERROR)
-	@UnlockScoped
-	static Scene provideGenericErrorScene(@UnlockWindow FXMLLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene("/fxml/unlock_generic_error.fxml");
-	}
-
-
 	// ------------------
 
 	@Binds
@@ -100,18 +81,5 @@ abstract class UnlockModule {
 	@IntoMap
 	@FxControllerKey(UnlockInvalidMountPointController.class)
 	abstract FxController bindUnlockInvalidMountPointController(UnlockInvalidMountPointController controller);
-
-	@Binds
-	@IntoMap
-	@FxControllerKey(UnlockGenericErrorController.class)
-	abstract FxController bindUnlockGenericErrorController(UnlockGenericErrorController controller);
-
-	@Provides
-	@IntoMap
-	@FxControllerKey(StackTraceController.class)
-	static FxController provideStackTraceController(@Named("genericErrorCause") ObjectProperty<Throwable> errorCause) {
-		return new StackTraceController(errorCause.get());
-	}
-
 
 }

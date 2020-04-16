@@ -14,6 +14,8 @@ import javafx.stage.Stage;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.cryptofs.CryptoFileSystemProvider;
 import org.cryptomator.cryptolib.api.InvalidPassphraseException;
+import org.cryptomator.ui.common.Animations;
+import org.cryptomator.ui.common.ErrorComponent;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.controls.FontAwesome5IconView;
 import org.cryptomator.ui.controls.NiceSecurePasswordField;
@@ -27,25 +29,28 @@ import javax.inject.Named;
 import java.io.IOException;
 import java.util.ResourceBundle;
 
+import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
+
 @ChangePasswordScoped
 public class ChangePasswordController implements FxController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ChangePasswordController.class);
-	private static final String MASTERKEY_FILENAME = "masterkey.cryptomator"; // TODO: deduplicate constant declared in multiple classes
 
 	private final Stage window;
 	private final Vault vault;
 	private final ObjectProperty<CharSequence> newPassword;
+	private final ErrorComponent.Builder errorComponent;
 
 	public NiceSecurePasswordField oldPasswordField;
 	public CheckBox finalConfirmationCheckbox;
 	public Button finishButton;
 
 	@Inject
-	public ChangePasswordController(@ChangePasswordWindow Stage window, @ChangePasswordWindow Vault vault, @Named("newPassword") ObjectProperty<CharSequence> newPassword) {
+	public ChangePasswordController(@ChangePasswordWindow Stage window, @ChangePasswordWindow Vault vault, @Named("newPassword") ObjectProperty<CharSequence> newPassword, ErrorComponent.Builder errorComponent) {
 		this.window = window;
 		this.vault = vault;
 		this.newPassword = newPassword;
+		this.errorComponent = errorComponent;
 	}
 
 	@FXML
@@ -67,12 +72,12 @@ public class ChangePasswordController implements FxController {
 			LOG.info("Successful changed password for {}", vault.getDisplayableName());
 			window.close();
 		} catch (IOException e) {
-			// TODO show generic error screen
 			LOG.error("IO error occured during password change. Unable to perform operation.", e);
-			e.printStackTrace();
+			errorComponent.cause(e).window(window).returnToScene(window.getScene()).build().showErrorScene();
 		} catch (InvalidPassphraseException e) {
-			// TODO shake
-			LOG.info("Wrong old password.");
+			Animations.createShakeWindowAnimation(window).play();
+			oldPasswordField.selectAll();
+			oldPasswordField.requestFocus();
 		}
 	}
 

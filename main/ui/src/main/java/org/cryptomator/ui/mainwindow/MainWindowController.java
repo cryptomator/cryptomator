@@ -6,6 +6,7 @@ import javafx.fxml.FXML;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.StackPane;
+import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.vaults.VaultListManager;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.wrongfilealert.WrongFileAlertComponent;
@@ -20,11 +21,12 @@ import java.nio.file.Path;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
+
 @MainWindowScoped
 public class MainWindowController implements FxController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(MainWindowController.class);
-	private static final String MASTERKEY_FILENAME = "masterkey.cryptomator"; // TODO: deduplicate constant declared in multiple classes
 
 	private final VaultListManager vaultListManager;
 	private final WrongFileAlertComponent.Builder wrongFileAlert;
@@ -45,6 +47,9 @@ public class MainWindowController implements FxController {
 		root.setOnDragOver(this::handleDragEvent);
 		root.setOnDragDropped(this::handleDragEvent);
 		root.setOnDragExited(this::handleDragEvent);
+		if (SystemUtils.IS_OS_WINDOWS) {
+			root.getStyleClass().add("os-windows");
+		}
 	}
 
 	private void handleDragEvent(DragEvent event) {

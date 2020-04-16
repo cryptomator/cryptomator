@@ -83,4 +83,9 @@ abstract class PreferencesModule {
 	@FxControllerKey(DonationKeyPreferencesController.class)
 	abstract FxController bindDonationKeyPreferencesController(DonationKeyPreferencesController controller);
 
+	@Binds
+	@IntoMap
+	@FxControllerKey(AboutController.class)
+	abstract FxController bindAboutController(AboutController controller);
+
 }

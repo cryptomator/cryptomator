@@ -1,9 +1,7 @@
 package org.cryptomator.ui.preferences;
 
-import javafx.beans.Observable;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
@@ -11,11 +9,15 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.fxapp.UpdateChecker;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 
 @PreferencesScoped
 public class PreferencesController implements FxController {
+
+	private static final Logger LOG = LoggerFactory.getLogger(PreferencesController.class);
 
 	private final Stage window;
 	private final ObjectProperty<SelectedPreferencesTab> selectedTabProperty;
@@ -25,6 +27,7 @@ public class PreferencesController implements FxController {
 	public Tab volumeTab;
 	public Tab updatesTab;
 	public Tab donationKeyTab;
+	public Tab aboutTab;
 
 	@Inject
 	public PreferencesController(@PreferencesWindow Stage window, ObjectProperty<SelectedPreferencesTab> selectedTabProperty, UpdateChecker updateChecker) {
@@ -37,6 +40,7 @@ public class PreferencesController implements FxController {
 	public void initialize() {
 		window.setOnShowing(this::windowWillAppear);
 		selectedTabProperty.addListener(observable -> this.selectChosenTab());
+		tabPane.getSelectionModel().selectedItemProperty().addListener(observable -> this.selectedTabChanged());
 	}
 
 	private void selectChosenTab() {
@@ -54,9 +58,21 @@ public class PreferencesController implements FxController {
 				return donationKeyTab;
 			case GENERAL:
 				return generalTab;
+			case ABOUT:
+				return aboutTab;
 			case ANY:
 			default:
 				return updateAvailable.get() ? updatesTab : generalTab;
+		}
+	}
+
+	private void selectedTabChanged() {
+		Tab selectedTab = tabPane.getSelectionModel().getSelectedItem();
+		try {
+			SelectedPreferencesTab selectedPreferencesTab = SelectedPreferencesTab.valueOf(selectedTab.getId());
+			selectedTabProperty.set(selectedPreferencesTab);
+		} catch (IllegalArgumentException e) {
+			LOG.error("Unknown preferences tab id: {}", selectedTab.getId());
 		}
 	}
 

@@ -17,7 +17,6 @@ import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxControllerKey;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
-import org.cryptomator.ui.common.StackTraceController;
 import org.cryptomator.ui.mainwindow.MainWindow;
 
 import javax.inject.Named;
@@ -48,14 +47,7 @@ abstract class MigrationModule {
 		stage.getIcons().addAll(windowIcons);
 		return stage;
 	}
-
-	@Provides
-	@Named("genericErrorCause")
-	@MigrationScoped
-	static ObjectProperty<Throwable> provideGenericErrorCause() {
-		return new SimpleObjectProperty<>();
-	}
-
+	
 	@Provides
 	@Named("capabilityErrorCause")
 	@MigrationScoped
@@ -91,14 +83,6 @@ abstract class MigrationModule {
 		return fxmlLoaders.createScene("/fxml/migration_capability_error.fxml");
 	}
 
-	@Provides
-	@FxmlScene(FxmlFile.MIGRATION_GENERIC_ERROR)
-	@MigrationScoped
-	static Scene provideMigrationGenericErrorScene(@MigrationWindow FXMLLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene("/fxml/migration_generic_error.fxml");
-	}
-
-
 	// ------------------
 
 	@Binds
@@ -120,17 +104,5 @@ abstract class MigrationModule {
 	@IntoMap
 	@FxControllerKey(MigrationCapabilityErrorController.class)
 	abstract FxController bindMigrationCapabilityErrorController(MigrationCapabilityErrorController controller);
-
-	@Binds
-	@IntoMap
-	@FxControllerKey(MigrationGenericErrorController.class)
-	abstract FxController bindMigrationGenericErrorController(MigrationGenericErrorController controller);
-
-	@Provides
-	@IntoMap
-	@FxControllerKey(StackTraceController.class)
-	static FxController provideStackTraceController(@Named("genericErrorCause") ObjectProperty<Throwable> errorCause) {
-		return new StackTraceController(errorCause.get());
-	}
-
+	
 }

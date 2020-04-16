@@ -25,11 +25,11 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
+
 @Singleton
 public class VaultListManager {
 	
-	private static final String MASTERKEY_FILENAME = "masterkey.cryptomator"; // TODO: deduplicate constant declared in multiple classes
-
 	private final VaultComponent.Builder vaultComponentBuilder;
 	private final ObservableList<Vault> vaultList;
 

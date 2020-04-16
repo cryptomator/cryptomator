@@ -16,11 +16,14 @@ public enum FontAwesome5Icon {
 	EXCLAMATION_TRIANGLE("\uF071"), //
 	EYE("\uF06E"), //
 	EYE_SLASH("\uF070"), //
+	FILE("\uF15B"), //
 	FILE_IMPORT("\uF56F"), //
 	FOLDER_OPEN("\uF07C"), //
 	HAND_HOLDING_HEART("\uF4BE"), //
 	HEART("\uF004"), //
 	HDD("\uF0A0"), //
+	INFO("\uF129"), //
+	INFO_CIRCLE("\uF05A"), //
 	KEY("\uF084"), //
 	LINK("\uF0C1"), //
 	LOCK("\uF023"), //
@@ -29,6 +32,7 @@ public enum FontAwesome5Icon {
 	PLUS("\uF067"), //
 	PRINT("\uF02F"), //
 	QUESTION("\uF128"), //
+	SEARCH("\uF002"), //
 	SPINNER("\uF110"), //
 	SYNC("\uF021"), //
 	TIMES("\uF00D"), //

@@ -4,10 +4,13 @@ import dagger.Lazy;
 import javafx.beans.property.ObjectProperty;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultListManager;
+import org.cryptomator.ui.common.ErrorComponent;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
@@ -15,7 +18,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.ResourceBundle;
@@ -28,22 +35,34 @@ public class ChooseExistingVaultController implements FxController {
 	private final Stage window;
 	private final Lazy<Scene> welcomeScene;
 	private final Lazy<Scene> successScene;
-	private final Lazy<Scene> errorScene;
+	private final ErrorComponent.Builder errorComponent;
 	private final ObjectProperty<Path> vaultPath;
 	private final ObjectProperty<Vault> vault;
 	private final VaultListManager vaultListManager;
 	private final ResourceBundle resourceBundle;
 
+	private Image screenshot;
+
 	@Inject
-	ChooseExistingVaultController(@AddVaultWizardWindow Stage window, @FxmlScene(FxmlFile.ADDVAULT_WELCOME) Lazy<Scene> welcomeScene, @FxmlScene(FxmlFile.ADDVAULT_SUCCESS) Lazy<Scene> successScene, @FxmlScene(FxmlFile.ADDVAULT_EXISTING_ERROR) Lazy<Scene> errorScene, ObjectProperty<Path> vaultPath, @AddVaultWizardWindow ObjectProperty<Vault> vault, VaultListManager vaultListManager, ResourceBundle resourceBundle) {
+	ChooseExistingVaultController(@AddVaultWizardWindow Stage window, @FxmlScene(FxmlFile.ADDVAULT_WELCOME) Lazy<Scene> welcomeScene, @FxmlScene(FxmlFile.ADDVAULT_SUCCESS) Lazy<Scene> successScene, ErrorComponent.Builder errorComponent, ObjectProperty<Path> vaultPath, @AddVaultWizardWindow ObjectProperty<Vault> vault, VaultListManager vaultListManager, ResourceBundle resourceBundle) {
 		this.window = window;
 		this.welcomeScene = welcomeScene;
 		this.successScene = successScene;
-		this.errorScene = errorScene;
+		this.errorComponent = errorComponent;
 		this.vaultPath = vaultPath;
 		this.vault = vault;
 		this.vaultListManager = vaultListManager;
 		this.resourceBundle = resourceBundle;
+	}
+
+	@FXML
+	public void initialize() {
+		final String resource = SystemUtils.IS_OS_MAC ? "/select-masterkey-mac.png" : "/select-masterkey-win.png";
+		try (InputStream in = getClass().getResourceAsStream(resource)) {
+			this.screenshot = new Image(in);
+		} catch (IOException e) {
+			throw new UncheckedIOException(e);
+		}
 	}
 
 	@FXML
@@ -65,9 +84,15 @@ public class ChooseExistingVaultController implements FxController {
 				window.setScene(successScene.get());
 			} catch (NoSuchFileException e) {
 				LOG.error("Failed to open existing vault.", e);
-				window.setScene(errorScene.get());
+				errorComponent.cause(e).window(window).returnToScene(window.getScene()).build().showErrorScene();
 			}
 		}
+	}
+
+	/* Getter */
+
+	public Image getScreenshot() {
+		return screenshot;
 	}
 
 }

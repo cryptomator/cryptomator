@@ -1,5 +1,6 @@
 package org.cryptomator.ui.preferences;
 
+import javafx.application.Application;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.ObjectBinding;
@@ -16,6 +17,9 @@ import javax.inject.Inject;
 @PreferencesScoped
 public class UpdatesPreferencesController implements FxController {
 
+	private static final String DOWNLOADS_URI = "https://cryptomator.org/downloads";
+	
+	private final Application application;
 	private final Settings settings;
 	private final UpdateChecker updateChecker;
 	private final ObjectBinding<ContentDisplay> checkForUpdatesButtonState;
@@ -25,7 +29,8 @@ public class UpdatesPreferencesController implements FxController {
 	public CheckBox checkForUpdatesCheckbox;
 
 	@Inject
-	UpdatesPreferencesController(Settings settings, UpdateChecker updateChecker) {
+	UpdatesPreferencesController(Application application, Settings settings, UpdateChecker updateChecker) {
+		this.application = application;
 		this.settings = settings;
 		this.updateChecker = updateChecker;
 		this.checkForUpdatesButtonState = Bindings.when(updateChecker.checkingForUpdatesProperty()).then(ContentDisplay.LEFT).otherwise(ContentDisplay.TEXT_ONLY);
@@ -41,6 +46,11 @@ public class UpdatesPreferencesController implements FxController {
 	@FXML
 	public void checkNow() {
 		updateChecker.checkForUpdatesNow();
+	}
+
+	@FXML
+	public void visitDownloadsPage() {
+		application.getHostServices().showDocument(DOWNLOADS_URI);
 	}
 
 	/* Observable Properties */

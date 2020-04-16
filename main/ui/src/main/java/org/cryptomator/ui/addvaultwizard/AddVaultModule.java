@@ -103,14 +103,7 @@ public abstract class AddVaultModule {
 	static Scene provideChooseExistingVaultScene(@AddVaultWizardWindow FXMLLoaderFactory fxmlLoaders) {
 		return fxmlLoaders.createScene(FxmlFile.ADDVAULT_EXISTING.getRessourcePathString());
 	}
-
-	@Provides
-	@FxmlScene(FxmlFile.ADDVAULT_EXISTING_ERROR)
-	@AddVaultWizardScoped
-	static Scene provideChooseExistingVaultErrorScene(@AddVaultWizardWindow FXMLLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene(FxmlFile.ADDVAULT_EXISTING_ERROR.getRessourcePathString());
-	}
-
+	
 	@Provides
 	@FxmlScene(FxmlFile.ADDVAULT_NEW_NAME)
 	@AddVaultWizardScoped
@@ -160,11 +153,6 @@ public abstract class AddVaultModule {
 
 	@Binds
 	@IntoMap
-	@FxControllerKey(AddVaultFailureExistingController.class)
-	abstract FxController bindAddVaultFailureExistingController(AddVaultFailureExistingController controller);
-
-	@Binds
-	@IntoMap
 	@FxControllerKey(CreateNewVaultNameController.class)
 	abstract FxController bindCreateNewVaultNameController(CreateNewVaultNameController controller);
 
@@ -201,4 +189,5 @@ public abstract class AddVaultModule {
 	@IntoMap
 	@FxControllerKey(AddVaultSuccessController.class)
 	abstract FxController bindAddVaultSuccessController(AddVaultSuccessController controller);
+	
 }
