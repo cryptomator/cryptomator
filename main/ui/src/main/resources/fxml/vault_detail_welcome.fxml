@@ -13,8 +13,8 @@
 		<ImageView VBox.vgrow="ALWAYS" fitHeight="128" preserveRatio="true" smooth="true" cache="true">
 			<Image url="/bot.png"/>
 		</ImageView>
-		
-		<TextFlow prefWidth="-Infinity" visible="${controller.noVaultPresent}" managed="${controller.noVaultPresent}">
+
+		<TextFlow styleClass="text-flow" prefWidth="-Infinity" visible="${controller.noVaultPresent}" managed="${controller.noVaultPresent}">
 			<Text text="%main.vaultDetail.welcomeOnboarding"/>
 			<Text text=" "/>
 			<Hyperlink text="docs.cryptomator.org" styleClass="hyperlink-underline" onAction="#visitGettingStartedGuide"/>
