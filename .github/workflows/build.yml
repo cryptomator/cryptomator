@@ -26,10 +26,15 @@ jobs:
             ${{ runner.os }}-maven-
       - name: Build with Maven
         run: mvn -B package --file main/pom.xml -Pcoverage,release
-      - name: Run codacy-coverage-reporter
-        uses: codacy/codacy-coverage-reporter-action@master
-        with:
-          project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
+      - name: Run Codacy Coverage Reporter
+        run: |
+          curl -o ~/codacy-coverage-reporter.jar https://repo.maven.apache.org/maven2/com/codacy/codacy-coverage-reporter/7.1.0/codacy-coverage-reporter-7.1.0-assembly.jar
+          $JAVA_HOME/bin/java -jar ~/codacy-coverage-reporter.jar report -l Java -r main/commons/target/site/jacoco/jacoco.xml --partial
+          $JAVA_HOME/bin/java -jar ~/codacy-coverage-reporter.jar report -l Java -r main/keychain/target/site/jacoco/jacoco.xml --partial
+          $JAVA_HOME/bin/java -jar ~/codacy-coverage-reporter.jar report -l Java -r main/ui/target/site/jacoco/jacoco.xml --partial
+          $JAVA_HOME/bin/java -jar ~/codacy-coverage-reporter.jar report -l Java -r main/launcher/target/site/jacoco/jacoco.xml --partial
+          $JAVA_HOME/bin/java -jar ~/codacy-coverage-reporter.jar final
+
 #      - name: Uploads the build artifacts
 #        uses: actions/upload-artifact@v1
 #        with:
