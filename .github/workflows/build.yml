@@ -34,6 +34,8 @@ jobs:
           $JAVA_HOME/bin/java -jar ~/codacy-coverage-reporter.jar report -l Java -r main/ui/target/site/jacoco/jacoco.xml --partial
           $JAVA_HOME/bin/java -jar ~/codacy-coverage-reporter.jar report -l Java -r main/launcher/target/site/jacoco/jacoco.xml --partial
           $JAVA_HOME/bin/java -jar ~/codacy-coverage-reporter.jar final
+        env:
+          CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
 
 #      - name: Uploads the build artifacts
 #        uses: actions/upload-artifact@v1
