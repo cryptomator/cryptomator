@@ -14,6 +14,8 @@ import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.cryptofs.CryptoFileSystemProvider;
 import org.cryptomator.cryptofs.migration.Migrators;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -29,6 +31,8 @@ import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
 
 @Singleton
 public class VaultListManager {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(VaultListManager.class);
 	
 	private final VaultComponent.Builder vaultComponentBuilder;
 	private final ObservableList<Vault> vaultList;
@@ -93,6 +97,7 @@ public class VaultListManager {
 				return VaultState.LOCKED;
 			}
 		} catch (IOException e) {
+			LOG.warn("Could not determine vault state of " + pathToVault + " due to unexpected exception.", e);
 			return VaultState.ERROR;
 		}
 	}
