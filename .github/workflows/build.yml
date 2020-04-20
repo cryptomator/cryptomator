@@ -18,7 +18,7 @@ jobs:
       - uses: actions/cache@v1
         with:
           path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ GITHUB_SHA }}
+          key: ${{ runner.os }}-maven-${{ github.run_id }}
           restore-keys: |
             ${{ runner.os }}-maven-
       - name: Build with Maven
@@ -46,7 +46,7 @@ jobs:
       - uses: actions/cache@v1
         with:
           path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ GITHUB_SHA }}
+          key: ${{ runner.os }}-maven-${{ github.run_id }}
       - name: Build with Maven
         run: mvn -B package -DskipTests --file main/pom.xml --resume-from=buildkit -Prelease
       - name: Upload buildkit-linux.zip
