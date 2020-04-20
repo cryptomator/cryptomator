@@ -1,31 +1,28 @@
 # This workflow will build a Java project with Maven
 # For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
 
-name: Java CI with Maven
+name: Build
 
 on:
   [push]
 
-jobs:
-  build:
-
+jobs: 
+  test:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v2
       - name: Set up JDK 14
         uses: actions/setup-java@v1
         with:
           java-version: 14
-      - name: Restore Maven Cache
-        uses: actions/cache@v1
+      - uses: actions/cache@v1
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-maven-
       - name: Build with Maven
-        run: mvn -B verify --file main/pom.xml -Pcoverage,release
+        run: mvn -B install --file main/pom.xml -Pcoverage
       - name: Run Codacy Coverage Reporter
         run: |
           curl -o ~/codacy-coverage-reporter.jar https://repo.maven.apache.org/maven2/com/codacy/codacy-coverage-reporter/7.1.0/codacy-coverage-reporter-7.1.0-assembly.jar
@@ -36,6 +33,26 @@ jobs:
           $JAVA_HOME/bin/java -jar ~/codacy-coverage-reporter.jar final
         env:
           CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
+          
+  assemble-build-kit:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up JDK 14
+        uses: actions/setup-java@v1
+        with:
+          java-version: 14
+      - uses: actions/cache@v1
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+      - name: Build with Maven
+        run: mvn -B compile -DskipTests --file main/pom.xml --resume-from=buildkit -Prelease
+
+
 
 #      - name: Uploads the build artifacts
 #        uses: actions/upload-artifact@v1
