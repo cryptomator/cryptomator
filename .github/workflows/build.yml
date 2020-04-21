@@ -19,6 +19,9 @@ jobs:
           key: ${{ runner.os }}-maven-${{ github.run_id }}
           restore-keys: |
             ${{ runner.os }}-maven-
+      - name: Ensure to use tagged version
+        run: mvn versions:set --file main/pom.xml -DnewVersion=${GITHUB_REF##*/} # use shell parameter expansion to strip of 'refs/tags'
+        if: startsWith(github.ref, 'refs/tags/')
       - name: Build with Maven
         run: mvn -B install --file main/pom.xml -Pcoverage
       - name: Run Codacy Coverage Reporter
@@ -46,6 +49,9 @@ jobs:
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ github.run_id }}
+      - name: Ensure to use tagged version
+        run: mvn versions:set --file main/pom.xml -DnewVersion=${GITHUB_REF##*/} # use shell parameter expansion to strip of 'refs/tags'
+        if: startsWith(github.ref, 'refs/tags/')
       - name: Build with Maven
         run: mvn -B package -DskipTests --file main/pom.xml --resume-from=buildkit -Prelease
       - name: Upload buildkit-linux.zip
