@@ -6,13 +6,9 @@ import dagger.Provides;
 import dagger.multibindings.IntoMap;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyCodeCombination;
-import javafx.scene.input.KeyCombination;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import org.cryptomator.ui.addvaultwizard.AddVaultWizardComponent;
-import org.cryptomator.ui.common.DefaultSceneFactory;
 import org.cryptomator.ui.common.FXMLLoaderFactory;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxControllerKey;
@@ -87,7 +83,7 @@ abstract class MainWindowModule {
 	@IntoMap
 	@FxControllerKey(VaultDetailController.class)
 	abstract FxController bindVaultDetailController(VaultDetailController controller);
-	
+
 	@Binds
 	@IntoMap
 	@FxControllerKey(WelcomeController.class)
@@ -102,7 +98,7 @@ abstract class MainWindowModule {
 	@IntoMap
 	@FxControllerKey(VaultDetailUnlockedController.class)
 	abstract FxController bindVaultDetailUnlockedController(VaultDetailUnlockedController controller);
-	
+
 	@Binds
 	@IntoMap
 	@FxControllerKey(VaultDetailMissingVaultController.class)
@@ -115,9 +111,13 @@ abstract class MainWindowModule {
 
 	@Binds
 	@IntoMap
+	@FxControllerKey(VaultDetailUnknownErrorController.class)
+	abstract FxController bindVaultDetailUnknownErrorController(VaultDetailUnknownErrorController controller);
+
+	@Binds
+	@IntoMap
 	@FxControllerKey(VaultListCellController.class)
 	abstract FxController bindVaultListCellController(VaultListCellController controller);
-
 
 
 }

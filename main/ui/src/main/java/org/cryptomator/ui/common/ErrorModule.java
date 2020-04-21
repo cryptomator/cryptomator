@@ -21,10 +21,11 @@ abstract class ErrorModule {
 	static FXMLLoaderFactory provideFxmlLoaderFactory(Map<Class<? extends FxController>, Provider<FxController>> factories, DefaultSceneFactory sceneFactory, ResourceBundle resourceBundle) {
 		return new FXMLLoaderFactory(factories, sceneFactory, resourceBundle);
 	}
-	
+
 	@Provides
 	@Named("stackTrace")
 	static String provideStackTrace(Throwable cause) {
+		// TODO deduplicate VaultDetailUnknownErrorController.java
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		cause.printStackTrace(new PrintStream(baos));
 		return baos.toString(StandardCharsets.UTF_8);
