@@ -10,6 +10,9 @@ import org.cryptomator.common.settings.VaultSettings;
 
 import dagger.Subcomponent;
 
+import javax.annotation.Nullable;
+import javax.inject.Named;
+
 @PerVault
 @Subcomponent(modules = {VaultModule.class})
 public interface VaultComponent {
@@ -24,6 +27,9 @@ public interface VaultComponent {
 
 		@BindsInstance
 		Builder initialVaultState(VaultState vaultState);
+
+		@BindsInstance
+		Builder initialErrorCause(@Nullable @Named("lastKnownException") Exception initialErrorCause);
 
 		VaultComponent build();
 	}

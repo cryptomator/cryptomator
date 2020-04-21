@@ -27,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Provider;
 import java.io.IOException;
 import java.nio.file.NoSuchFileException;
@@ -51,6 +52,7 @@ public class Vault {
 	private final StringBinding defaultMountFlags;
 	private final AtomicReference<CryptoFileSystem> cryptoFileSystem;
 	private final ObjectProperty<VaultState> state;
+	private final ObjectProperty<Exception> lastKnownException;
 	private final VaultStats stats;
 	private final StringBinding displayableName;
 	private final StringBinding displayablePath;
@@ -59,18 +61,20 @@ public class Vault {
 	private final BooleanBinding unlocked;
 	private final BooleanBinding missing;
 	private final BooleanBinding needsMigration;
+	private final BooleanBinding unknownError;
 	private final StringBinding accessPoint;
 	private final BooleanBinding accessPointPresent;
 
 	private volatile Volume volume;
 
 	@Inject
-	Vault(VaultSettings vaultSettings, Provider<Volume> volumeProvider, @DefaultMountFlags StringBinding defaultMountFlags, AtomicReference<CryptoFileSystem> cryptoFileSystem, ObjectProperty<VaultState> state, VaultStats stats) {
+	Vault(VaultSettings vaultSettings, Provider<Volume> volumeProvider, @DefaultMountFlags StringBinding defaultMountFlags, AtomicReference<CryptoFileSystem> cryptoFileSystem, ObjectProperty<VaultState> state, @Named("lastKnownException") ObjectProperty<Exception> lastKnownException, VaultStats stats) {
 		this.vaultSettings = vaultSettings;
 		this.volumeProvider = volumeProvider;
 		this.defaultMountFlags = defaultMountFlags;
 		this.cryptoFileSystem = cryptoFileSystem;
 		this.state = state;
+		this.lastKnownException = lastKnownException;
 		this.stats = stats;
 		this.displayableName = Bindings.createStringBinding(this::getDisplayableName, vaultSettings.path());
 		this.displayablePath = Bindings.createStringBinding(this::getDisplayablePath, vaultSettings.path());
@@ -79,6 +83,7 @@ public class Vault {
 		this.unlocked = Bindings.createBooleanBinding(this::isUnlocked, state);
 		this.missing = Bindings.createBooleanBinding(this::isMissing, state);
 		this.needsMigration = Bindings.createBooleanBinding(this::isNeedsMigration, state);
+		this.unknownError = Bindings.createBooleanBinding(this::isUnknownError, state);
 		this.accessPoint = Bindings.createStringBinding(this::getAccessPoint, state);
 		this.accessPointPresent = this.accessPoint.isNotEmpty();
 	}
@@ -149,6 +154,18 @@ public class Vault {
 		state.setValue(value);
 	}
 
+	public ObjectProperty<Exception> lastKnownExceptionProperty() {
+		return lastKnownException;
+	}
+
+	public Exception getLastKnownException() {
+		return lastKnownException.get();
+	}
+
+	public void setLastKnownException(Exception e) {
+		lastKnownException.setValue(e);
+	}
+
 	public BooleanBinding lockedProperty() {
 		return locked;
 	}
@@ -187,6 +204,14 @@ public class Vault {
 
 	public boolean isNeedsMigration() {
 		return state.get() == VaultState.NEEDS_MIGRATION;
+	}
+
+	public BooleanBinding unknownErrorProperty() {
+		return unknownError;
+	}
+
+	public boolean isUnknownError() {
+		return state.get() == VaultState.ERROR;
 	}
 
 	public StringBinding displayableNameProperty() {

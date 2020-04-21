@@ -49,7 +49,7 @@
 				<Label text="%wrongFileAlert.instruction.2" wrapText="true"/>
 				<Label text="%wrongFileAlert.instruction.3" wrapText="true"/>
 			</VBox>
-			<TextFlow>
+			<TextFlow styleClass="text-flow">
 				<Text text="%wrongFileAlert.link"/>
 				<Text text=" "/>
 				<Hyperlink styleClass="hyperlink-underline" text="docs.cryptomator.org" onAction="#openDocumentation"/>

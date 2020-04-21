@@ -1,0 +1,15 @@
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.VBox?>
+<VBox xmlns="http://javafx.com/javafx"
+	  xmlns:fx="http://javafx.com/fxml"
+	  fx:controller="org.cryptomator.ui.mainwindow.VaultDetailUnknownErrorController"
+	  alignment="CENTER"
+	  spacing="24">
+	<children>
+		<Label text="%generic.error.title" wrapText="true"/>
+		<Label text="%generic.error.instruction" wrapText="true"/>
+
+		<TextArea VBox.vgrow="ALWAYS" text="${controller.stackTrace}" prefRowCount="5" editable="false"/>
+	</children>
+</VBox>

@@ -10,7 +10,9 @@ package org.cryptomator.common.settings;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
+import com.google.gson.JsonParser;
 import org.cryptomator.common.Environment;
 import org.cryptomator.common.LazyInitializer;
 import org.slf4j.Logger;
@@ -77,12 +79,15 @@ public class SettingsProvider implements Supplier<Settings> {
 		LOG.debug("Attempting to load settings from {}", path);
 		try (InputStream in = Files.newInputStream(path, StandardOpenOption.READ); //
 			 Reader reader = new InputStreamReader(in, StandardCharsets.UTF_8)) {
-			Settings settings = gson.fromJson(reader, Settings.class);
-			if (settings == null) {
-				throw new IOException("Unexpected EOF");
+			JsonElement json = JsonParser.parseReader(reader);
+			if (json.isJsonObject()) {
+				Settings settings = gson.fromJson(json, Settings.class);
+				LOG.info("Settings loaded from {}", path);
+				return Stream.of(settings);
+			} else {
+				LOG.warn("Invalid json file {}", path);
+				return Stream.empty();
 			}
-			LOG.info("Settings loaded from {}", path);
-			return Stream.of(settings);
 		} catch (NoSuchFileException e) {
 			return Stream.empty();
 		} catch (IOException e) {

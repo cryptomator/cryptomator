@@ -4,7 +4,6 @@ import dagger.Lazy;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.concurrent.Task;
@@ -30,7 +29,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.NotDirectoryException;
 import java.util.Arrays;
@@ -90,9 +88,11 @@ public class UnlockController implements FxController {
 	public void unlock() {
 		LOG.trace("UnlockController.unlock()");
 		CharSequence password = passwordField.getCharacters();
-		
+
 		Task<Vault> task = vaultService.createUnlockTask(vault, password);
+		passwordField.setDisable(true);
 		task.setOnSucceeded(event -> {
+			passwordField.setDisable(false);
 			if (keychainAccess.isPresent() && savePassword.isSelected()) {
 				try {
 					keychainAccess.get().storePassphrase(vault.getId(), password);
@@ -105,12 +105,12 @@ public class UnlockController implements FxController {
 			window.setScene(successScene.get());
 		});
 		task.setOnFailed(event -> {
+			passwordField.setDisable(false);
 			if (task.getException() instanceof InvalidPassphraseException) {
 				Animations.createShakeWindowAnimation(window).play();
 				passwordField.selectAll();
 				passwordField.requestFocus();
-			} else if (task.getException() instanceof NotDirectoryException
-				|| task.getException() instanceof DirectoryNotEmptyException) {
+			} else if (task.getException() instanceof NotDirectoryException || task.getException() instanceof DirectoryNotEmptyException) {
 				LOG.error("Unlock failed. Mount point not an empty directory: {}", task.getException().getMessage());
 				window.setScene(invalidMountPointScene.get());
 			} else {

@@ -23,6 +23,8 @@ import org.cryptomator.cryptofs.CryptoFileSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
+import javax.inject.Named;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -45,6 +47,14 @@ public class VaultModule {
 	public ObjectProperty<VaultState> provideVaultState(VaultState initialState) {
 		return new SimpleObjectProperty<>(initialState);
 	}
+
+	@Provides
+	@Named("lastKnownException")
+	@PerVault
+	public ObjectProperty<Exception> provideLastKnownException(@Named("lastKnownException") @Nullable Exception initialErrorCause) {
+		return new SimpleObjectProperty<>(initialErrorCause);
+	}
+
 
 	@Provides
 	public Volume provideVolume(Settings settings, WebDavVolume webDavVolume, FuseVolume fuseVolume, DokanyVolume dokanyVolume) {
