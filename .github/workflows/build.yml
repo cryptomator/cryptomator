@@ -68,7 +68,7 @@ jobs:
     name: Draft a Release on GitHub Releases
     runs-on: ubuntu-latest
     needs: assemble-build-kit
-    # if: startsWith(github.ref, 'refs/tags/')
+    if: startsWith(github.ref, 'refs/tags/')
     steps:
       - name: Download buildkit-linux.zip
         uses: actions/download-artifact@v1
@@ -123,36 +123,3 @@ jobs:
           asset_path: buildkit-win.zip
           asset_name: buildkit-win.zip
           asset_content_type: application/zip
-
-  bintray-release:
-    name: Upload Release Artifacts to Bintray
-    runs-on: ubuntu-latest
-    needs: assemble-build-kit
-    # if...
-    steps:
-      - name: Download buildkit-linux.zip
-        uses: actions/download-artifact@v1
-        with:
-          name: buildkit-linux.zip
-          path: .
-      - name: Download buildkit-mac.zip
-        uses: actions/download-artifact@v1
-        with:
-          name: buildkit-mac.zip
-          path: .
-      - name: Download buildkit-win.zip
-        uses: actions/download-artifact@v1
-        with:
-          name: buildkit-win.zip
-          path: .
-      - name: Upload buildkit-win.zip
-        env:
-          BINTRAY_API_KEY: ${{ secrets.BINTRAY_API_KEY }}
-        run: |
-          curl -T buildkit-win.zip
-          -u cryptobot:${BINTRAY_API_KEY}
-          -H "X-Bintray-Package:buildkit"
-          -H "X-Bintray-Version:snapshot"
-          -H "X-Bintray-Override:1"
-          -H "X-Bintray-Publish:1"
-          https://api.bintray.com/content/cryptomator/cryptomator/snapshot/buildkit-win.zip
