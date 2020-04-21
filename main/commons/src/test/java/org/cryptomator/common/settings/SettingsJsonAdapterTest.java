@@ -7,6 +7,8 @@ package org.cryptomator.common.settings;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.IOException;
 
@@ -32,6 +34,18 @@ public class SettingsJsonAdapterTest {
 		Assertions.assertEquals(42, settings.numTrayNotifications().get());
 		Assertions.assertEquals(WebDavUrlScheme.DAV, settings.preferredGvfsScheme().get());
 		Assertions.assertEquals(VolumeImpl.FUSE, settings.preferredVolumeImpl().get());
+	}
+
+	@ParameterizedTest(name = "fromJson() should throw IOException for input: {0}")
+	@ValueSource(strings = {
+			"",
+			"<html>",
+			"{invalidjson}"
+	})
+	public void testDeserializeMalformed(String input) {
+		Assertions.assertThrows(IOException.class, () -> {
+			adapter.fromJson(input);
+		});
 	}
 
 }
