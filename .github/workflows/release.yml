@@ -58,9 +58,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ github.ref }}
-          release_name: ${{ github.ref }}
-          body: |
-            TODO
           draft: true
           prerelease: true
       - name: Upload buildkit-linux.zip to GitHub Releases
@@ -69,7 +66,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: main/buildkit/target/buildkit-linux.zip
+          asset_path: buildkit-linux.zip
           asset_name: buildkit-linux.zip
           asset_content_type: application/zip
       - name: Upload buildkit-mac.zip to GitHub Releases
@@ -78,7 +75,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: main/buildkit/target/buildkit-mac.zip
+          asset_path: buildkit-mac.zip
           asset_name: buildkit-mac.zip
           asset_content_type: application/zip
       - name: Upload buildkit-win.zip to GitHub Releases
@@ -87,7 +84,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: main/buildkit/target/buildkit-win.zip
+          asset_path: buildkit-win.zip
           asset_name: buildkit-win.zip
           asset_content_type: application/zip
      
