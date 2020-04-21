@@ -99,6 +99,7 @@ public class MigrationRunController implements FxController {
 		LOG.info("Migrating vault {}", vault.getPath());
 		CharSequence password = passwordField.getCharacters();
 		vault.setState(VaultState.PROCESSING);
+		passwordField.setDisable(true);
 		ScheduledFuture<?> progressSyncTask = scheduler.scheduleAtFixedRate(() -> {
 			Platform.runLater(() -> {
 				migrationProgress.set(volatileMigrationProgress);
@@ -120,6 +121,7 @@ public class MigrationRunController implements FxController {
 			}
 		}).onError(InvalidPassphraseException.class, e -> {
 			Animations.createShakeWindowAnimation(window).play();
+			passwordField.setDisable(false);
 			passwordField.selectAll();
 			passwordField.requestFocus();
 			vault.setState(VaultState.NEEDS_MIGRATION);
@@ -133,6 +135,7 @@ public class MigrationRunController implements FxController {
 			vault.setState(VaultState.NEEDS_MIGRATION);
 			errorComponent.cause(e).window(window).returnToScene(startScene.get()).build().showErrorScene();
 		}).andFinally(() -> {
+			passwordField.setDisable(false);
 			progressSyncTask.cancel(true);
 		}).runOnce(executor);
 	}

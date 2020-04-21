@@ -1,5 +1,6 @@
 package org.cryptomator.ui.controls;
 
+import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.StringProperty;
 import javafx.geometry.Pos;
@@ -55,10 +56,15 @@ public class NiceSecurePasswordField extends StackPane {
 		passwordField.revealPasswordProperty().bind(revealPasswordButton.selectedProperty());
 
 		getChildren().addAll(passwordField, iconContainer);
+		disabledProperty().addListener(this::disabledChanged);
 	}
 
 	private FontAwesome5Icon getRevealPasswordGlyph() {
 		return revealPasswordButton.isSelected() ? FontAwesome5Icon.EYE_SLASH : FontAwesome5Icon.EYE;
+	}
+
+	private void disabledChanged(@SuppressWarnings("unused") Observable observable) {
+		revealPasswordButton.setSelected(false);
 	}
 
 	/* Passthrough */
@@ -67,7 +73,7 @@ public class NiceSecurePasswordField extends StackPane {
 	public void requestFocus() {
 		passwordField.requestFocus();
 	}
-	
+
 	public String getText() {
 		return passwordField.getText();
 	}
