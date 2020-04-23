@@ -49,21 +49,14 @@ public class PreferencesController implements FxController {
 	}
 
 	private Tab getTabToSelect(SelectedPreferencesTab selectedTab) {
-		switch (selectedTab) {
-			case UPDATES:
-				return updatesTab;
-			case VOLUME:
-				return volumeTab;
-			case DONATION_KEY:
-				return donationKeyTab;
-			case GENERAL:
-				return generalTab;
-			case ABOUT:
-				return aboutTab;
-			case ANY:
-			default:
-				return updateAvailable.get() ? updatesTab : generalTab;
-		}
+		return switch (selectedTab) {
+			case UPDATES -> updatesTab;
+			case VOLUME -> volumeTab;
+			case DONATION_KEY -> donationKeyTab;
+			case GENERAL -> generalTab;
+			case ABOUT -> aboutTab;
+			case ANY -> updateAvailable.get() ? updatesTab : generalTab;
+		};
 	}
 
 	private void selectedTabChanged() {

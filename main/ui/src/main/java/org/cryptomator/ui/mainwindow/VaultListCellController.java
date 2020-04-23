@@ -3,9 +3,9 @@ package org.cryptomator.ui.mainwindow;
 import javafx.beans.binding.Binding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.ui.common.FxController;
-import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.controls.FontAwesome5Icon;
 import org.fxmisc.easybind.EasyBind;
 
@@ -23,16 +23,12 @@ public class VaultListCellController implements FxController {
 	}
 
 	private FontAwesome5Icon getGlyphForVaultState(VaultState state) {
-		switch (state) {
-			case LOCKED:
-				return FontAwesome5Icon.LOCK;
-			case PROCESSING:
-				return FontAwesome5Icon.SPINNER;
-			case UNLOCKED:
-				return FontAwesome5Icon.LOCK_OPEN;
-			default:
-				return FontAwesome5Icon.EXCLAMATION_TRIANGLE;
-		}
+		return switch (state) {
+			case LOCKED -> FontAwesome5Icon.LOCK;
+			case PROCESSING -> FontAwesome5Icon.SPINNER;
+			case UNLOCKED -> FontAwesome5Icon.LOCK_OPEN;
+			case NEEDS_MIGRATION, MISSING, ERROR -> FontAwesome5Icon.EXCLAMATION_TRIANGLE;
+		};
 	}
 
 	/* Getter/Setter */

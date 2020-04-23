@@ -174,12 +174,10 @@ public class UnlockController implements FxController {
 	}
 
 	public ContentDisplay getUnlockButtonState() {
-		switch (vault.getState()) {
-			case PROCESSING:
-				return ContentDisplay.LEFT;
-			default:
-				return ContentDisplay.TEXT_ONLY;
-		}
+		return switch (vault.getState()) {
+			case PROCESSING -> ContentDisplay.LEFT;
+			default -> ContentDisplay.TEXT_ONLY;
+		};
 	}
 
 	public ReadOnlyBooleanProperty unlockButtonDisabledProperty() {
