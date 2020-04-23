@@ -74,12 +74,10 @@ public class SecurePasswordField extends TextField {
 	}
 
 	public Object queryAccessibleAttribute(AccessibleAttribute attribute, Object... parameters) {
-		switch(attribute) {
-			case TEXT:
-				return null;
-			default:
-				return super.queryAccessibleAttribute(attribute, parameters);
-		}
+		return switch (attribute) {
+			case TEXT -> null;
+			default -> super.queryAccessibleAttribute(attribute, parameters);
+		};
 	}
 
 	private void handleDragOver(DragEvent event) {
