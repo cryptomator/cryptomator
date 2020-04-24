@@ -45,7 +45,7 @@ public class SecurePasswordField extends TextField {
 	private static final int GROW_BUFFER_SIZE = 50;
 	private static final String DEFAULT_PLACEHOLDER = "●";
 	private static final String STYLE_CLASS = "secure-password-field";
-    private static final KeyCodeCombination SHORTCUT_BACKSPACE = new KeyCodeCombination(KeyCode.BACK_SPACE, KeyCombination.SHORTCUT_DOWN);
+	private static final KeyCodeCombination SHORTCUT_BACKSPACE = new KeyCodeCombination(KeyCode.BACK_SPACE, KeyCombination.SHORTCUT_DOWN);
 
 	private final String placeholderChar;
 	private final BooleanProperty capsLocked = new SimpleBooleanProperty();
@@ -103,9 +103,9 @@ public class SecurePasswordField extends TextField {
 		if (e.getCode() == KeyCode.CAPS) {
 			updateCapsLocked();
 		}
-        if (SHORTCUT_BACKSPACE.match(e)) {
-            swipe();
-        }
+		if (SHORTCUT_BACKSPACE.match(e)) {
+			swipe();
+		}
 	}
 
 	private void revealPasswordChanged(@SuppressWarnings("unused") Observable observable) {
