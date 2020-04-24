@@ -7,8 +7,6 @@ package org.cryptomator.common.vaults;
 
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.SystemUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -22,12 +20,11 @@ import java.util.stream.StreamSupport;
 @Singleton
 public final class WindowsDriveLetters {
 
-	private static final Logger LOG = LoggerFactory.getLogger(WindowsDriveLetters.class);
-	private static final Set<String> A_TO_Z;
+	private static final Set<String> C_TO_Z;
 
 	static {
-		try (IntStream stream = IntStream.rangeClosed('A', 'Z')) {
-			A_TO_Z = stream.mapToObj(i -> String.valueOf((char) i)).collect(Collectors.toSet());
+		try (IntStream stream = IntStream.rangeClosed('C', 'Z')) {
+			C_TO_Z = stream.mapToObj(i -> String.valueOf((char) i)).collect(Collectors.toSet());
 		}
 	}
 
@@ -36,7 +33,7 @@ public final class WindowsDriveLetters {
 	}
 
 	public Set<String> getAllDriveLetters() {
-		return A_TO_Z;
+		return C_TO_Z;
 	}
 
 	public Set<String> getOccupiedDriveLetters() {
@@ -44,12 +41,12 @@ public final class WindowsDriveLetters {
 			return Set.of();
 		} else {
 			Iterable<Path> rootDirs = FileSystems.getDefault().getRootDirectories();
-			return StreamSupport.stream(rootDirs.spliterator(), false).map(p -> p.toString().substring(0,1)).collect(Collectors.toSet());
+			return StreamSupport.stream(rootDirs.spliterator(), false).map(p -> p.toString().substring(0, 1)).collect(Collectors.toSet());
 		}
 	}
 
 	public Set<String> getAvailableDriveLetters() {
-		return Sets.difference(A_TO_Z, getOccupiedDriveLetters());
+		return Sets.difference(C_TO_Z, getOccupiedDriveLetters());
 	}
 
 }
