@@ -102,8 +102,7 @@ public class SecurePasswordField extends TextField {
 	private void handleKeyEvent(KeyEvent e) {
 		if (e.getCode() == KeyCode.CAPS) {
 			updateCapsLocked();
-		}
-		if (SHORTCUT_BACKSPACE.match(e)) {
+		} else if (SHORTCUT_BACKSPACE.match(e)) {
 			swipe();
 		}
 	}
