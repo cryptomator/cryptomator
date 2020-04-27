@@ -83,6 +83,13 @@ abstract class MigrationModule {
 		return fxmlLoaders.createScene("/fxml/migration_capability_error.fxml");
 	}
 
+	@Provides
+	@FxmlScene(FxmlFile.MIGRATION_IMPOSSIBLE)
+	@MigrationScoped
+	static Scene provideMigrationImpossibleScene(@MigrationWindow FXMLLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene("/fxml/migration_impossible.fxml");
+	}
+
 	// ------------------
 
 	@Binds
@@ -104,5 +111,9 @@ abstract class MigrationModule {
 	@IntoMap
 	@FxControllerKey(MigrationCapabilityErrorController.class)
 	abstract FxController bindMigrationCapabilityErrorController(MigrationCapabilityErrorController controller);
-	
+
+	@Binds
+	@IntoMap
+	@FxControllerKey(MigrationImpossibleController.class)
+	abstract FxController bindMigrationImpossibleController(MigrationImpossibleController controller);
 }
