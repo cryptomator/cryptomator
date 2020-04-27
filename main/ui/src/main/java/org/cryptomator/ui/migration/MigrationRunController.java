@@ -18,6 +18,7 @@ import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.cryptofs.common.FileSystemCapabilityChecker;
 import org.cryptomator.cryptofs.migration.Migrators;
+import org.cryptomator.cryptofs.migration.api.MigrationContinuationListener;
 import org.cryptomator.cryptofs.migration.api.MigrationProgressListener;
 import org.cryptomator.cryptolib.api.InvalidPassphraseException;
 import org.cryptomator.keychain.KeychainAccess;
@@ -107,7 +108,7 @@ public class MigrationRunController implements FxController {
 		}, 0, MIGRATION_PROGRESS_UPDATE_MILLIS, TimeUnit.MILLISECONDS);
 		Tasks.create(() -> {
 			Migrators migrators = Migrators.get();
-			migrators.migrate(vault.getPath(), MASTERKEY_FILENAME, password, this::migrationProgressChanged);
+			migrators.migrate(vault.getPath(), MASTERKEY_FILENAME, password, this::migrationProgressChanged, this::migrationRequiresInput);
 			return migrators.needsMigration(vault.getPath(), MASTERKEY_FILENAME);
 		}).onSuccess(needsAnotherMigration -> {
 			if (needsAnotherMigration) {
@@ -147,6 +148,13 @@ public class MigrationRunController implements FxController {
 			case MIGRATING -> progress;
 			case FINALIZING -> 1.0;
 		};
+	}
+
+	private MigrationContinuationListener.ContinuationResult migrationRequiresInput(MigrationContinuationListener.ContinuationEvent event){
+		//TODO: creating a new scene seems a little over the top, maybe stick to this scene
+		// my suggestion is to make this quick and dirty by setting some elements unmanaged and invisible and afterwards activate them again
+		// otherwise: We need a more abstract runController which has two subviews (run and halted), see mainWindow for example
+		return MigrationContinuationListener.ContinuationResult.PROCEED;
 	}
 
 	private void loadStoredPassword() {
