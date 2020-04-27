@@ -10,6 +10,8 @@ import javax.inject.Inject;
 
 public class MigrationImpossibleController implements FxController {
 
+	private static final String HELP_URI = "https://community.cryptomator.org/TODO";
+
 	private final FxApplication fxApplication;
 	private final Stage window;
 	private final Vault vault;
@@ -26,10 +28,19 @@ public class MigrationImpossibleController implements FxController {
 		window.close();
 	}
 
+	@FXML
+	public void getMigrationHelp() {
+		fxApplication.getHostServices().showDocument(HELP_URI);
+	}
+
 	/* Getter/Setters */
 
 	public Vault getVault() {
 		return vault;
+	}
+
+	public String getHelpUri() {
+		return HELP_URI;
 	}
 
 }
