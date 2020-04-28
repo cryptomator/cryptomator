@@ -51,15 +51,16 @@ public class VaultListManager {
 	}
 
 	public Vault add(Path pathToVault) throws NoSuchFileException {
-		if (!CryptoFileSystemProvider.containsVault(pathToVault, MASTERKEY_FILENAME)) {
-			throw new NoSuchFileException(pathToVault.toString(), null, "Not a vault directory");
+		Path normalizedPathToVault = pathToVault.normalize().toAbsolutePath();
+		if (!CryptoFileSystemProvider.containsVault(normalizedPathToVault, MASTERKEY_FILENAME)) {
+			throw new NoSuchFileException(normalizedPathToVault.toString(), null, "Not a vault directory");
 		}
-		Optional<Vault> alreadyExistingVault = get(pathToVault);
+		Optional<Vault> alreadyExistingVault = get(normalizedPathToVault);
 		if (alreadyExistingVault.isPresent()) {
 			return alreadyExistingVault.get();
 		} else {
 			VaultSettings vaultSettings = VaultSettings.withRandomId();
-			vaultSettings.path().set(pathToVault);
+			vaultSettings.path().set(normalizedPathToVault);
 			Vault newVault = create(vaultSettings);
 			vaultList.add(newVault);
 			return newVault;
@@ -72,13 +73,11 @@ public class VaultListManager {
 	}
 
 	private Optional<Vault> get(Path vaultPath) {
-		return vaultList.stream().filter(v -> {
-			try {
-				return Files.isSameFile(vaultPath, v.getPath());
-			} catch (IOException e) {
-				return false;
-			}
-		}).findAny();
+		assert vaultPath.isAbsolute();
+		assert vaultPath.normalize().equals(vaultPath);
+		return vaultList.stream() //
+				.filter(v -> vaultPath.equals(v.getPath())) //
+				.findAny();
 	}
 
 	private Vault create(VaultSettings vaultSettings) {
