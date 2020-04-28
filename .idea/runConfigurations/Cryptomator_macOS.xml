@@ -1,5 +1,8 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Cryptomator macOS" type="Application" factoryName="Application">
+    <envs>
+      <env name="LD_LIBRARY_PATH" value="/usr/local/lib" />
+    </envs>
     <option name="MAIN_CLASS_NAME" value="org.cryptomator.launcher.Cryptomator" />
     <module name="launcher" />
     <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />

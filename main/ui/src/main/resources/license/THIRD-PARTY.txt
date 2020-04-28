@@ -11,7 +11,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see http://www.gnu.org/licenses/.
 
-Cryptomator uses 49 third-party dependencies under the following licenses:
+Cryptomator uses 50 third-party dependencies under the following licenses:
 	Apache License v2.0:
 		- HKDF-RFC5869 (at.favre.lib:hkdf:1.0.2 - https://github.com/patrickfav/hkdf)
 		- jffi (com.github.jnr:jffi:1.2.23 - http://github.com/jnr/jffi)
@@ -32,15 +32,16 @@ Cryptomator uses 49 third-party dependencies under the following licenses:
 		- Java Native Access (net.java.dev.jna:jna:5.1.0 - https://github.com/java-native-access/jna)
 		- Java Native Access Platform (net.java.dev.jna:jna-platform:5.1.0 - https://github.com/java-native-access/jna)
 		- Apache Commons Lang (org.apache.commons:commons-lang3:3.9 - http://commons.apache.org/proper/commons-lang/)
-		- Jackrabbit WebDAV Library (org.apache.jackrabbit:jackrabbit-webdav:2.19.0 - http://jackrabbit.apache.org/jackrabbit-webdav/)
-		- Jetty :: Http Utility (org.eclipse.jetty:jetty-http:9.4.17.v20190418 - http://www.eclipse.org/jetty)
-		- Jetty :: IO Utility (org.eclipse.jetty:jetty-io:9.4.17.v20190418 - http://www.eclipse.org/jetty)
-		- Jetty :: Security (org.eclipse.jetty:jetty-security:9.4.17.v20190418 - http://www.eclipse.org/jetty)
-		- Jetty :: Server Core (org.eclipse.jetty:jetty-server:9.4.17.v20190418 - http://www.eclipse.org/jetty)
-		- Jetty :: Servlet Handling (org.eclipse.jetty:jetty-servlet:9.4.17.v20190418 - http://www.eclipse.org/jetty)
-		- Jetty :: Utilities (org.eclipse.jetty:jetty-util:9.4.17.v20190418 - http://www.eclipse.org/jetty)
-		- Jetty :: Webapp Application Support (org.eclipse.jetty:jetty-webapp:9.4.17.v20190418 - http://www.eclipse.org/jetty)
-		- Jetty :: XML utilities (org.eclipse.jetty:jetty-xml:9.4.17.v20190418 - http://www.eclipse.org/jetty)
+		- Apache HttpCore (org.apache.httpcomponents:httpcore:4.4.13 - http://hc.apache.org/httpcomponents-core-ga)
+		- Jackrabbit WebDAV Library (org.apache.jackrabbit:jackrabbit-webdav:2.21.0 - http://jackrabbit.apache.org/jackrabbit-webdav/)
+		- Jetty :: Http Utility (org.eclipse.jetty:jetty-http:9.4.28.v20200408 - http://www.eclipse.org/jetty)
+		- Jetty :: IO Utility (org.eclipse.jetty:jetty-io:9.4.28.v20200408 - http://www.eclipse.org/jetty)
+		- Jetty :: Security (org.eclipse.jetty:jetty-security:9.4.28.v20200408 - http://www.eclipse.org/jetty)
+		- Jetty :: Server Core (org.eclipse.jetty:jetty-server:9.4.28.v20200408 - http://www.eclipse.org/jetty)
+		- Jetty :: Servlet Handling (org.eclipse.jetty:jetty-servlet:9.4.28.v20200408 - http://www.eclipse.org/jetty)
+		- Jetty :: Utilities (org.eclipse.jetty:jetty-util:9.4.28.v20200408 - http://www.eclipse.org/jetty)
+		- Jetty :: Webapp Application Support (org.eclipse.jetty:jetty-webapp:9.4.28.v20200408 - http://www.eclipse.org/jetty)
+		- Jetty :: XML utilities (org.eclipse.jetty:jetty-xml:9.4.28.v20200408 - http://www.eclipse.org/jetty)
 	BSD:
 		- asm (org.ow2.asm:asm:7.1 - http://asm.ow2.org/)
 		- asm-analysis (org.ow2.asm:asm-analysis:7.1 - http://asm.ow2.org/)
@@ -48,14 +49,14 @@ Cryptomator uses 49 third-party dependencies under the following licenses:
 		- asm-tree (org.ow2.asm:asm-tree:7.1 - http://asm.ow2.org/)
 		- asm-util (org.ow2.asm:asm-util:7.1 - http://asm.ow2.org/)
 	Eclipse Public License - Version 1.0:
-		- Jetty :: Http Utility (org.eclipse.jetty:jetty-http:9.4.17.v20190418 - http://www.eclipse.org/jetty)
-		- Jetty :: IO Utility (org.eclipse.jetty:jetty-io:9.4.17.v20190418 - http://www.eclipse.org/jetty)
-		- Jetty :: Security (org.eclipse.jetty:jetty-security:9.4.17.v20190418 - http://www.eclipse.org/jetty)
-		- Jetty :: Server Core (org.eclipse.jetty:jetty-server:9.4.17.v20190418 - http://www.eclipse.org/jetty)
-		- Jetty :: Servlet Handling (org.eclipse.jetty:jetty-servlet:9.4.17.v20190418 - http://www.eclipse.org/jetty)
-		- Jetty :: Utilities (org.eclipse.jetty:jetty-util:9.4.17.v20190418 - http://www.eclipse.org/jetty)
-		- Jetty :: Webapp Application Support (org.eclipse.jetty:jetty-webapp:9.4.17.v20190418 - http://www.eclipse.org/jetty)
-		- Jetty :: XML utilities (org.eclipse.jetty:jetty-xml:9.4.17.v20190418 - http://www.eclipse.org/jetty)
+		- Jetty :: Http Utility (org.eclipse.jetty:jetty-http:9.4.28.v20200408 - http://www.eclipse.org/jetty)
+		- Jetty :: IO Utility (org.eclipse.jetty:jetty-io:9.4.28.v20200408 - http://www.eclipse.org/jetty)
+		- Jetty :: Security (org.eclipse.jetty:jetty-security:9.4.28.v20200408 - http://www.eclipse.org/jetty)
+		- Jetty :: Server Core (org.eclipse.jetty:jetty-server:9.4.28.v20200408 - http://www.eclipse.org/jetty)
+		- Jetty :: Servlet Handling (org.eclipse.jetty:jetty-servlet:9.4.28.v20200408 - http://www.eclipse.org/jetty)
+		- Jetty :: Utilities (org.eclipse.jetty:jetty-util:9.4.28.v20200408 - http://www.eclipse.org/jetty)
+		- Jetty :: Webapp Application Support (org.eclipse.jetty:jetty-webapp:9.4.28.v20200408 - http://www.eclipse.org/jetty)
+		- Jetty :: XML utilities (org.eclipse.jetty:jetty-xml:9.4.28.v20200408 - http://www.eclipse.org/jetty)
 	Eclipse Public License - v 2.0:
 		- jnr-posix (com.github.jnr:jnr-posix:3.0.54 - http://nexus.sonatype.org/oss-repository-hosting.html/jnr-posix)
 	GPLv2:
