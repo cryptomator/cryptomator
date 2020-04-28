@@ -22,7 +22,7 @@
 		<VBox spacing="6">
 			<FormattedLabel format="%unlock.passwordPrompt" arg1="${controller.vault.displayableName}" wrapText="true"/>
 			<NiceSecurePasswordField fx:id="passwordField"/>
-			<CheckBox fx:id="savePassword" text="%unlock.savePassword" onAction="#didClickSavePasswordCheckbox"/>
+			<CheckBox fx:id="savePassword" text="%unlock.savePassword" onAction="#didClickSavePasswordCheckbox" disable="${controller.vault.processing}" visible="${controller.keychainAccessAvailable}"/>
 		</VBox>
 
 		<VBox alignment="BOTTOM_CENTER" VBox.vgrow="ALWAYS">
