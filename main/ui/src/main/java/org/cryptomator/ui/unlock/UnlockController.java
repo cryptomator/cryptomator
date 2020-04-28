@@ -91,8 +91,10 @@ public class UnlockController implements FxController {
 
 		Task<Vault> task = vaultService.createUnlockTask(vault, password);
 		passwordField.setDisable(true);
+		savePassword.setDisable(true);
 		task.setOnSucceeded(event -> {
 			passwordField.setDisable(false);
+			savePassword.setDisable(!keychainAccess.isPresent());
 			if (keychainAccess.isPresent() && savePassword.isSelected()) {
 				try {
 					keychainAccess.get().storePassphrase(vault.getId(), password);
@@ -106,6 +108,7 @@ public class UnlockController implements FxController {
 		});
 		task.setOnFailed(event -> {
 			passwordField.setDisable(false);
+			savePassword.setDisable(!keychainAccess.isPresent());
 			if (task.getException() instanceof InvalidPassphraseException) {
 				Animations.createShakeWindowAnimation(window).play();
 				passwordField.selectAll();
