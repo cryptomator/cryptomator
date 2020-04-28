@@ -135,8 +135,8 @@ public class MigrationRunController implements FxController {
 			vault.setState(VaultState.NEEDS_MIGRATION);
 			missingCapability.set(e.getMissingCapability());
 			window.setScene(capabilityErrorScene.get());
-		}).onError(FileNameTooLongException.class, e -> { // including RuntimeExceptions
-			LOG.error("Migration failed for because the storage device does not support long filenames.", e);
+		}).onError(FileNameTooLongException.class, e -> {
+			LOG.error("Migration failed because the underlying file system does not support long filenames.", e);
 			vault.setState(VaultState.NEEDS_MIGRATION);
 			errorComponent.cause(e).window(window).returnToScene(startScene.get()).build().showErrorScene();
 			window.setScene(impossibleScene.get());
