@@ -32,7 +32,6 @@
 		<VBox spacing="12">
 			<Label styleClass="label-large" text="%migration.impossible.heading"/>
 			<Label text="%migration.impossible.reason" wrapText="true" HBox.hgrow="ALWAYS"/>
-			<Label text="%migration.impossible.nextStepsInstructions" wrapText="true" HBox.hgrow="ALWAYS"/>
 			<TextFlow>
 				<Text text="%migration.impossible.moreInfo"/>
 				<Hyperlink text="${controller.helpUri}" onAction="#getMigrationHelp"/>
