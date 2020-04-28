@@ -29,12 +29,14 @@
 			<Circle styleClass="glyph-icon-red" radius="24"/>
 			<FontAwesome5IconView styleClass="glyph-icon-white" glyph="TIMES" glyphSize="24"/>
 		</StackPane>
-		<VBox spacing="12">
+		<VBox spacing="6">
 			<Label styleClass="label-large" text="%migration.impossible.heading"/>
 			<Label text="%migration.impossible.reason" wrapText="true" HBox.hgrow="ALWAYS"/>
 			<TextFlow>
 				<Text text="%migration.impossible.moreInfo"/>
-				<Hyperlink text="${controller.helpUri}" onAction="#getMigrationHelp"/>
+				<Text text=" "/>
+				<Hyperlink styleClass="hyperlink-underline" text="docs.cryptomator.org" wrapText="true" onAction="#getMigrationHelp"/>
+				<Text text="."/>
 			</TextFlow>
 		</VBox>
 	</HBox>

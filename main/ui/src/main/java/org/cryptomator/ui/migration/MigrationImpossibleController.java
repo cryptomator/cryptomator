@@ -10,7 +10,7 @@ import javax.inject.Inject;
 
 public class MigrationImpossibleController implements FxController {
 
-	private static final String HELP_URI = "https://docs.cryptomator.org/en/latest/help/manual-migration";
+	private static final String HELP_URI = "https://docs.cryptomator.org/en/1.5/help/manual-migration/";
 
 	private final FxApplication fxApplication;
 	private final Stage window;
