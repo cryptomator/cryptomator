@@ -21,6 +21,8 @@ import org.cryptomator.cryptofs.CryptoFileSystem;
 import org.cryptomator.cryptofs.CryptoFileSystemProperties;
 import org.cryptomator.cryptofs.CryptoFileSystemProperties.FileSystemFlags;
 import org.cryptomator.cryptofs.CryptoFileSystemProvider;
+import org.cryptomator.cryptofs.common.Constants;
+import org.cryptomator.cryptofs.common.FileSystemCapabilityChecker;
 import org.cryptomator.cryptolib.api.CryptoException;
 import org.cryptomator.cryptolib.api.InvalidPassphraseException;
 import org.slf4j.Logger;
@@ -101,10 +103,19 @@ public class Vault {
 		if (vaultSettings.usesReadOnlyMode().get()) {
 			flags.add(FileSystemFlags.READONLY);
 		}
+		if (vaultSettings.filenameLengthLimit().get() == -1) {
+			LOG.debug("Determining file name length limitations...");
+			int limit = new FileSystemCapabilityChecker().determineSupportedFileNameLength(getPath());
+			vaultSettings.filenameLengthLimit().set(limit);
+			LOG.info("Storing file name length limit of {}", limit);
+		}
+		assert vaultSettings.filenameLengthLimit().get() > 0;
 		CryptoFileSystemProperties fsProps = CryptoFileSystemProperties.cryptoFileSystemProperties() //
 				.withPassphrase(passphrase) //
 				.withFlags(flags) //
 				.withMasterkeyFilename(MASTERKEY_FILENAME) //
+				.withMaxPathLength(vaultSettings.filenameLengthLimit().get() + Constants.MAX_ADDITIONAL_PATH_LENGTH) //
+				.withMaxNameLength(vaultSettings.filenameLengthLimit().get()) //
 				.build();
 		return CryptoFileSystemProvider.newFileSystem(getPath(), fsProps);
 	}

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ButtonBar?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Circle?>
+<?import javafx.scene.text.Text?>
+<?import javafx.scene.text.TextFlow?>
+<?import org.cryptomator.ui.controls.FontAwesome5IconView?>
+<VBox xmlns="http://javafx.com/javafx"
+	  xmlns:fx="http://javafx.com/fxml"
+	  fx:controller="org.cryptomator.ui.migration.MigrationImpossibleController"
+	  minWidth="400"
+	  maxWidth="400"
+	  minHeight="145"
+	  spacing="12">
+	<padding>
+		<Insets topRightBottomLeft="12"/>
+	</padding>
+
+	<HBox spacing="12" alignment="CENTER_LEFT" VBox.vgrow="ALWAYS">
+		<StackPane alignment="CENTER" HBox.hgrow="NEVER">
+			<Circle styleClass="glyph-icon-red" radius="24"/>
+			<FontAwesome5IconView styleClass="glyph-icon-white" glyph="TIMES" glyphSize="24"/>
+		</StackPane>
+		<VBox spacing="6">
+			<Label styleClass="label-large" text="%migration.impossible.heading"/>
+			<Label text="%migration.impossible.reason" wrapText="true" HBox.hgrow="ALWAYS"/>
+			<TextFlow>
+				<Text text="%migration.impossible.moreInfo"/>
+				<Text text=" "/>
+				<Hyperlink styleClass="hyperlink-underline" text="docs.cryptomator.org" wrapText="true" onAction="#getMigrationHelp"/>
+				<Text text="."/>
+			</TextFlow>
+		</VBox>
+	</HBox>
+
+	<VBox alignment="BOTTOM_CENTER" VBox.vgrow="ALWAYS">
+		<ButtonBar buttonMinWidth="120" buttonOrder="+C">
+			<buttons>
+				<!-- Button text="Try again" ButtonBar.buttonData="to do" onAction="#retry" / also add button to button bar order-->
+				<Button text="%generic.button.close" ButtonBar.buttonData="CANCEL_CLOSE" cancelButton="true" onAction="#close"/>
+			</buttons>
+		</ButtonBar>
+	</VBox>
+</VBox>

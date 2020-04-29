@@ -16,8 +16,10 @@ import javafx.scene.control.ContentDisplay;
 import javafx.stage.Stage;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
+import org.cryptomator.cryptofs.FileNameTooLongException;
 import org.cryptomator.cryptofs.common.FileSystemCapabilityChecker;
 import org.cryptomator.cryptofs.migration.Migrators;
+import org.cryptomator.cryptofs.migration.api.MigrationContinuationListener;
 import org.cryptomator.cryptofs.migration.api.MigrationProgressListener;
 import org.cryptomator.cryptolib.api.InvalidPassphraseException;
 import org.cryptomator.keychain.KeychainAccess;
@@ -58,6 +60,7 @@ public class MigrationRunController implements FxController {
 	private final ErrorComponent.Builder errorComponent;
 	private final Lazy<Scene> startScene;
 	private final Lazy<Scene> successScene;
+	private final Lazy<Scene> impossibleScene;
 	private final ObjectBinding<ContentDisplay> migrateButtonContentDisplay;
 	private final Lazy<Scene> capabilityErrorScene;
 	private final BooleanProperty migrationButtonDisabled;
@@ -66,7 +69,8 @@ public class MigrationRunController implements FxController {
 	public NiceSecurePasswordField passwordField;
 
 	@Inject
-	public MigrationRunController(@MigrationWindow Stage window, @MigrationWindow Vault vault, ExecutorService executor, ScheduledExecutorService scheduler, Optional<KeychainAccess> keychainAccess, @Named("capabilityErrorCause") ObjectProperty<FileSystemCapabilityChecker.Capability> missingCapability, @FxmlScene(FxmlFile.MIGRATION_START) Lazy<Scene> startScene, @FxmlScene(FxmlFile.MIGRATION_SUCCESS) Lazy<Scene> successScene, @FxmlScene(FxmlFile.MIGRATION_CAPABILITY_ERROR) Lazy<Scene> capabilityErrorScene, ErrorComponent.Builder errorComponent) {
+	public MigrationRunController(@MigrationWindow Stage window, @MigrationWindow Vault vault, ExecutorService executor, ScheduledExecutorService scheduler, Optional<KeychainAccess> keychainAccess, @Named("capabilityErrorCause") ObjectProperty<FileSystemCapabilityChecker.Capability> missingCapability, @FxmlScene(FxmlFile.MIGRATION_START) Lazy<Scene> startScene, @FxmlScene(FxmlFile.MIGRATION_SUCCESS) Lazy<Scene> successScene, @FxmlScene(FxmlFile.MIGRATION_CAPABILITY_ERROR) Lazy<Scene> capabilityErrorScene, @FxmlScene(FxmlFile.MIGRATION_IMPOSSIBLE) Lazy<Scene> impossibleScene, ErrorComponent.Builder errorComponent) {
+
 		this.window = window;
 		this.vault = vault;
 		this.executor = executor;
@@ -80,6 +84,7 @@ public class MigrationRunController implements FxController {
 		this.capabilityErrorScene = capabilityErrorScene;
 		this.migrationButtonDisabled = new SimpleBooleanProperty();
 		this.migrationProgress = new SimpleDoubleProperty(volatileMigrationProgress);
+		this.impossibleScene = impossibleScene;
 	}
 
 	public void initialize() {
@@ -107,7 +112,7 @@ public class MigrationRunController implements FxController {
 		}, 0, MIGRATION_PROGRESS_UPDATE_MILLIS, TimeUnit.MILLISECONDS);
 		Tasks.create(() -> {
 			Migrators migrators = Migrators.get();
-			migrators.migrate(vault.getPath(), MASTERKEY_FILENAME, password, this::migrationProgressChanged);
+			migrators.migrate(vault.getPath(), MASTERKEY_FILENAME, password, this::migrationProgressChanged, this::migrationRequiresInput);
 			return migrators.needsMigration(vault.getPath(), MASTERKEY_FILENAME);
 		}).onSuccess(needsAnotherMigration -> {
 			if (needsAnotherMigration) {
@@ -127,9 +132,14 @@ public class MigrationRunController implements FxController {
 			vault.setState(VaultState.NEEDS_MIGRATION);
 		}).onError(FileSystemCapabilityChecker.MissingCapabilityException.class, e -> {
 			LOG.error("Underlying file system not supported.", e);
-			vault.setState(VaultState.ERROR);
+			vault.setState(VaultState.NEEDS_MIGRATION);
 			missingCapability.set(e.getMissingCapability());
 			window.setScene(capabilityErrorScene.get());
+		}).onError(FileNameTooLongException.class, e -> {
+			LOG.error("Migration failed because the underlying file system does not support long filenames.", e);
+			vault.setState(VaultState.NEEDS_MIGRATION);
+			errorComponent.cause(e).window(window).returnToScene(startScene.get()).build().showErrorScene();
+			window.setScene(impossibleScene.get());
 		}).onError(Exception.class, e -> { // including RuntimeExceptions
 			LOG.error("Migration failed for technical reasons.", e);
 			vault.setState(VaultState.NEEDS_MIGRATION);
@@ -147,6 +157,13 @@ public class MigrationRunController implements FxController {
 			case MIGRATING -> progress;
 			case FINALIZING -> 1.0;
 		};
+	}
+
+	private MigrationContinuationListener.ContinuationResult migrationRequiresInput(MigrationContinuationListener.ContinuationEvent event) {
+		//TODO: creating a new scene seems a little over the top, maybe stick to this scene
+		// my suggestion is to make this quick and dirty by setting some elements unmanaged and invisible and afterwards activate them again
+		// otherwise: We need a more abstract runController which has two subviews (run and halted), see mainWindow for example
+		return MigrationContinuationListener.ContinuationResult.PROCEED;
 	}
 
 	private void loadStoredPassword() {

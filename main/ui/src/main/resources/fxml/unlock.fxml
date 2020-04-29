@@ -22,13 +22,13 @@
 		<VBox spacing="6">
 			<FormattedLabel format="%unlock.passwordPrompt" arg1="${controller.vault.displayableName}" wrapText="true"/>
 			<NiceSecurePasswordField fx:id="passwordField"/>
-			<CheckBox fx:id="savePassword" text="%unlock.savePassword" onAction="#didClickSavePasswordCheckbox"/>
+			<CheckBox fx:id="savePassword" text="%unlock.savePassword" onAction="#didClickSavePasswordCheckbox" disable="${controller.vault.processing}" visible="${controller.keychainAccessAvailable}"/>
 		</VBox>
 
 		<VBox alignment="BOTTOM_CENTER" VBox.vgrow="ALWAYS">
 			<ButtonBar buttonMinWidth="120" buttonOrder="+CI">
 				<buttons>
-					<Button text="%generic.button.cancel" ButtonBar.buttonData="CANCEL_CLOSE" cancelButton="true" onAction="#cancel"/>
+					<Button text="%generic.button.cancel" ButtonBar.buttonData="CANCEL_CLOSE" cancelButton="true" onAction="#cancel" disable="${controller.vault.processing}"/>
 					<Button text="%unlock.unlockBtn" ButtonBar.buttonData="FINISH" defaultButton="true" onAction="#unlock" contentDisplay="${controller.unlockButtonState}" disable="${controller.unlockButtonDisabled}">
 						<graphic>
 							<ProgressIndicator progress="-1" prefWidth="12" prefHeight="12"/>

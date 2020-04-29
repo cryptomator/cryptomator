@@ -73,7 +73,7 @@ public class UnlockController implements FxController {
 		if (keychainAccess.isPresent()) {
 			loadStoredPassword();
 		} else {
-			savePassword.setDisable(true);
+			savePassword.setSelected(false);
 		}
 		unlockButtonDisabled.bind(vault.stateProperty().isNotEqualTo(VaultState.LOCKED).or(passwordField.textProperty().isEmpty()));
 	}
@@ -186,5 +186,9 @@ public class UnlockController implements FxController {
 
 	public boolean isUnlockButtonDisabled() {
 		return unlockButtonDisabled.get();
+	}
+
+	public boolean isKeychainAccessAvailable() {
+		return keychainAccess.isPresent();
 	}
 }
