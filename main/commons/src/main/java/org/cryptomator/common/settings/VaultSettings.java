@@ -19,15 +19,10 @@ import javafx.beans.property.StringProperty;
 import org.apache.commons.lang3.StringUtils;
 import org.fxmisc.easybind.EasyBind;
 
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.util.Base64;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
-import java.util.UUID;
 
 /**
  * The settings specific to a single vault.
@@ -40,7 +35,7 @@ public class VaultSettings {
 	public static final boolean DEFAULT_USES_INDIVIDUAL_MOUNTPATH = false;
 	public static final boolean DEFAULT_USES_READONLY_MODE = false;
 	public static final String DEFAULT_MOUNT_FLAGS = "";
-	public static final int DEFAULT_PATH_LENGTH_LIMITATION = -1;
+	public static final int DEFAULT_FILENAME_LENGTH_LIMIT = -1;
 	
 	private static final Random RNG = new Random(); 
 
@@ -54,7 +49,7 @@ public class VaultSettings {
 	private final StringProperty individualMountPath = new SimpleStringProperty();
 	private final BooleanProperty usesReadOnlyMode = new SimpleBooleanProperty(DEFAULT_USES_READONLY_MODE);
 	private final StringProperty mountFlags = new SimpleStringProperty(DEFAULT_MOUNT_FLAGS);
-	private final IntegerProperty pathLengthLimitation = new SimpleIntegerProperty(DEFAULT_PATH_LENGTH_LIMITATION);
+	private final IntegerProperty filenameLengthLimit = new SimpleIntegerProperty(DEFAULT_FILENAME_LENGTH_LIMIT);
 
 	public VaultSettings(String id) {
 		this.id = Objects.requireNonNull(id);
@@ -63,7 +58,7 @@ public class VaultSettings {
 	}
 
 	Observable[] observables() {
-		return new Observable[]{path, mountName, winDriveLetter, unlockAfterStartup, revealAfterMount, usesIndividualMountPath, individualMountPath, usesReadOnlyMode, mountFlags, pathLengthLimitation};
+		return new Observable[]{path, mountName, winDriveLetter, unlockAfterStartup, revealAfterMount, usesIndividualMountPath, individualMountPath, usesReadOnlyMode, mountFlags, filenameLengthLimit};
 	}
 
 	private void deriveMountNameFromPath(Path path) {
@@ -151,8 +146,8 @@ public class VaultSettings {
 		return mountFlags;
 	}
 	
-	public IntegerProperty pathLengthLimitation() {
-		return pathLengthLimitation;
+	public IntegerProperty filenameLengthLimit() {
+		return filenameLengthLimit;
 	}
 
 	/* Hashcode/Equals */
