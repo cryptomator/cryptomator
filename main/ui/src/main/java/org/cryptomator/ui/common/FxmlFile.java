@@ -13,6 +13,7 @@ public enum FxmlFile {
 	FORGET_PASSWORD("/fxml/forget_password.fxml"), //
 	MAIN_WINDOW("/fxml/main_window.fxml"), //
 	MIGRATION_CAPABILITY_ERROR("/fxml/migration_capability_error.fxml"), //
+	MIGRATION_IMPOSSIBLE("/fxml/migration_impossible.fxml"),
 	MIGRATION_RUN("/fxml/migration_run.fxml"), //
 	MIGRATION_START("/fxml/migration_start.fxml"), //
 	MIGRATION_SUCCESS("/fxml/migration_success.fxml"), //

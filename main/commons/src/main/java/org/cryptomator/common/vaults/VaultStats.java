@@ -41,16 +41,13 @@ public class VaultStats {
 	}
 
 	private void vaultStateChanged(@SuppressWarnings("unused") Observable observable) {
-		switch (state.get()) {
-			case UNLOCKED:
-				assert fs.get() != null;
-				LOG.debug("start recording stats");
-				updateService.restart();
-				break;
-			default:
-				LOG.debug("stop recording stats");
-				updateService.cancel();
-				break;
+		if (VaultState.UNLOCKED.equals(state.get())) {
+			assert fs.get() != null;
+			LOG.debug("start recording stats");
+			updateService.restart();
+		} else {
+			LOG.debug("stop recording stats");
+			updateService.cancel();
 		}
 	}
 

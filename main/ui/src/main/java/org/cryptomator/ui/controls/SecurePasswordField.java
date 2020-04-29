@@ -22,6 +22,8 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.TransferMode;
 
@@ -43,6 +45,7 @@ public class SecurePasswordField extends TextField {
 	private static final int GROW_BUFFER_SIZE = 50;
 	private static final String DEFAULT_PLACEHOLDER = "●";
 	private static final String STYLE_CLASS = "secure-password-field";
+	private static final KeyCodeCombination SHORTCUT_BACKSPACE = new KeyCodeCombination(KeyCode.BACK_SPACE, KeyCombination.SHORTCUT_DOWN);
 
 	private final String placeholderChar;
 	private final BooleanProperty capsLocked = new SimpleBooleanProperty();
@@ -74,12 +77,10 @@ public class SecurePasswordField extends TextField {
 	}
 
 	public Object queryAccessibleAttribute(AccessibleAttribute attribute, Object... parameters) {
-		switch(attribute) {
-			case TEXT:
-				return null;
-			default:
-				return super.queryAccessibleAttribute(attribute, parameters);
-		}
+		return switch (attribute) {
+			case TEXT -> null;
+			default -> super.queryAccessibleAttribute(attribute, parameters);
+		};
 	}
 
 	private void handleDragOver(DragEvent event) {
@@ -101,6 +102,8 @@ public class SecurePasswordField extends TextField {
 	private void handleKeyEvent(KeyEvent e) {
 		if (e.getCode() == KeyCode.CAPS) {
 			updateCapsLocked();
+		} else if (SHORTCUT_BACKSPACE.match(e)) {
+			swipe();
 		}
 	}
 

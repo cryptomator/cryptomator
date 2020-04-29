@@ -73,7 +73,7 @@ public class UnlockController implements FxController {
 		if (keychainAccess.isPresent()) {
 			loadStoredPassword();
 		} else {
-			savePassword.setDisable(true);
+			savePassword.setSelected(false);
 		}
 		unlockButtonDisabled.bind(vault.stateProperty().isNotEqualTo(VaultState.LOCKED).or(passwordField.textProperty().isEmpty()));
 	}
@@ -174,12 +174,10 @@ public class UnlockController implements FxController {
 	}
 
 	public ContentDisplay getUnlockButtonState() {
-		switch (vault.getState()) {
-			case PROCESSING:
-				return ContentDisplay.LEFT;
-			default:
-				return ContentDisplay.TEXT_ONLY;
-		}
+		return switch (vault.getState()) {
+			case PROCESSING -> ContentDisplay.LEFT;
+			default -> ContentDisplay.TEXT_ONLY;
+		};
 	}
 
 	public ReadOnlyBooleanProperty unlockButtonDisabledProperty() {
@@ -188,5 +186,9 @@ public class UnlockController implements FxController {
 
 	public boolean isUnlockButtonDisabled() {
 		return unlockButtonDisabled.get();
+	}
+
+	public boolean isKeychainAccessAvailable() {
+		return keychainAccess.isPresent();
 	}
 }

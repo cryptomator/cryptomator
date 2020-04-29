@@ -43,17 +43,10 @@ public interface Volume {
 	}
 
 	static VolumeImpl[] getCurrentSupportedAdapters() {
-		return Stream.of(VolumeImpl.values()).filter(impl -> {
-			switch (impl) {
-				case WEBDAV:
-					return WebDavVolume.isSupportedStatic();
-				case DOKANY:
-					return DokanyVolume.isSupportedStatic();
-				case FUSE:
-					return FuseVolume.isSupportedStatic();
-				default:
-					return false;//throw new IllegalStateException("Adapter not implemented.");
-			}
+		return Stream.of(VolumeImpl.values()).filter(impl -> switch (impl) {
+			case WEBDAV -> WebDavVolume.isSupportedStatic();
+			case DOKANY -> DokanyVolume.isSupportedStatic();
+			case FUSE -> FuseVolume.isSupportedStatic();
 		}).toArray(VolumeImpl[]::new);
 	}
 

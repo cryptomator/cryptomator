@@ -29,6 +29,7 @@ class VaultSettingsJsonAdapter {
 		out.name("individualMountPath").value(value.individualMountPath().get());
 		out.name("usesReadOnlyMode").value(value.usesReadOnlyMode().get());
 		out.name("mountFlags").value(value.mountFlags().get());
+		out.name("filenameLengthLimit").value(value.filenameLengthLimit().get());
 		out.endObject();
 	}
 
@@ -43,6 +44,7 @@ class VaultSettingsJsonAdapter {
 		boolean usesIndividualMountPath = VaultSettings.DEFAULT_USES_INDIVIDUAL_MOUNTPATH;
 		boolean usesReadOnlyMode = VaultSettings.DEFAULT_USES_READONLY_MODE;
 		String mountFlags = VaultSettings.DEFAULT_MOUNT_FLAGS;
+		int filenameLengthLimit = VaultSettings.DEFAULT_FILENAME_LENGTH_LIMIT;
 
 		in.beginObject();
 		while (in.hasNext()) {
@@ -78,6 +80,9 @@ class VaultSettingsJsonAdapter {
 				case "mountFlags":
 					mountFlags = in.nextString();
 					break;
+				case "filenameLengthLimit":
+					filenameLengthLimit = in.nextInt();
+					break;
 				default:
 					LOG.warn("Unsupported vault setting found in JSON: " + name);
 					in.skipValue();
@@ -96,6 +101,7 @@ class VaultSettingsJsonAdapter {
 		vaultSettings.individualMountPath().set(individualMountPath);
 		vaultSettings.usesReadOnlyMode().set(usesReadOnlyMode);
 		vaultSettings.mountFlags().set(mountFlags);
+		vaultSettings.filenameLengthLimit().set(filenameLengthLimit);
 		return vaultSettings;
 	}
 

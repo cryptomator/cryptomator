@@ -66,9 +66,7 @@ public class VaultListController implements FxController {
 		}
 		VaultState reportedState = newValue.getState();
 		switch (reportedState) {
-			case LOCKED:
-			case NEEDS_MIGRATION:
-			case MISSING:
+			case LOCKED, NEEDS_MIGRATION, MISSING:
 				try {
 					VaultState determinedState = VaultListManager.determineVaultState(newValue.getPath());
 					newValue.setState(determinedState);
@@ -78,11 +76,8 @@ public class VaultListController implements FxController {
 					newValue.setLastKnownException(e);
 				}
 				break;
-			case ERROR:
-			case UNLOCKED:
-			case PROCESSING:
-			default:
-				// no-op
+			case ERROR, UNLOCKED, PROCESSING:
+				break; // no-op
 		}
 	}
 

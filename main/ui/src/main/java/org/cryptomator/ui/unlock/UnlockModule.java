@@ -8,6 +8,7 @@ import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.DefaultSceneFactory;
 import org.cryptomator.ui.common.FXMLLoaderFactory;
 import org.cryptomator.ui.common.FxController;
@@ -35,9 +36,9 @@ abstract class UnlockModule {
 	@Provides
 	@UnlockWindow
 	@UnlockScoped
-	static Stage provideStage(ResourceBundle resourceBundle, @Named("windowIcons") List<Image> windowIcons) {
+	static Stage provideStage(@UnlockWindow Vault vault, @Named("windowIcons") List<Image> windowIcons) {
 		Stage stage = new Stage();
-		stage.setTitle(resourceBundle.getString("unlock.title"));
+		stage.setTitle(vault.getDisplayableName());
 		stage.setResizable(false);
 		stage.initModality(Modality.APPLICATION_MODAL);
 		stage.getIcons().addAll(windowIcons);

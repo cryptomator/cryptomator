@@ -29,12 +29,10 @@ class TrayImageFactory {
 		MacApplicationUiInterfaceStyle interfaceStyle = macFunctions.map(MacFunctions::uiAppearance) //
 				.map(MacApplicationUiAppearance::getCurrentInterfaceStyle) //
 				.orElse(MacApplicationUiInterfaceStyle.LIGHT);
-		switch (interfaceStyle) {
-			case DARK:
-				return "/tray_icon_mac_white.png";
-			default:
-				return "/tray_icon_mac_black.png";
-		}
+		return switch (interfaceStyle) {
+			case DARK -> "/tray_icon_mac_white.png";
+			case LIGHT -> "/tray_icon_mac_black.png";
+		};
 	}
 
 	private String getWinOrLinuxResourceName() {
