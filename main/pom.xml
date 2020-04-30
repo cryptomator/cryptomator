@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.cryptomator</groupId>
 	<artifactId>main</artifactId>
-	<version>1.5.2</version>
+	<version>1.5.3</version>
 	<packaging>pom</packaging>
 	<name>Cryptomator</name>
 
@@ -24,7 +24,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
 		<!-- cryptomator dependencies -->
-		<cryptomator.cryptofs.version>1.9.9</cryptomator.cryptofs.version>
+		<cryptomator.cryptofs.version>1.9.10</cryptomator.cryptofs.version>
 		<cryptomator.jni.version>2.2.2</cryptomator.jni.version>
 		<cryptomator.fuse.version>1.2.3</cryptomator.fuse.version>
 		<cryptomator.dokany.version>1.1.14</cryptomator.dokany.version>
@@ -79,6 +79,11 @@
 			</dependency>
 
 			<!-- Cryptomator Libs -->
+			<dependency>
+				<groupId>org.cryptomator</groupId>
+				<artifactId>siv-mode</artifactId>
+				<version>1.4.0</version>
+			</dependency>
 			<dependency>
 				<groupId>org.cryptomator</groupId>
 				<artifactId>cryptofs</artifactId>

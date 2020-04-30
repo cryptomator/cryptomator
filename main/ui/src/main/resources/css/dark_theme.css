@@ -631,6 +631,10 @@
 	-fx-background-color: TEXT_FILL;
 }
 
+.check-box:selected:disabled > .box > .mark {
+	-fx-background-color: TEXT_FILL_MUTED;
+}
+
 /*******************************************************************************
  *                                                                             *
  * RadioButton                                                                 *

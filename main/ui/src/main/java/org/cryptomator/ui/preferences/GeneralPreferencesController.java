@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.util.Optional;
+import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
 
 @PreferencesScoped
@@ -35,6 +36,7 @@ public class GeneralPreferencesController implements FxController {
 	private final ObjectProperty<SelectedPreferencesTab> selectedTabProperty;
 	private final LicenseHolder licenseHolder;
 	private final ExecutorService executor;
+	private final ResourceBundle resourceBundle;
 	public ChoiceBox<UiTheme> themeChoiceBox;
 	public CheckBox startHiddenCheckbox;
 	public CheckBox debugModeCheckbox;
@@ -44,20 +46,21 @@ public class GeneralPreferencesController implements FxController {
 	public RadioButton nodeOrientationRtl;
 
 	@Inject
-	GeneralPreferencesController(Settings settings, @Named("trayMenuSupported") boolean trayMenuSupported, Optional<AutoStartStrategy> autoStartStrategy, ObjectProperty<SelectedPreferencesTab> selectedTabProperty, LicenseHolder licenseHolder, ExecutorService executor) {
+	GeneralPreferencesController(Settings settings, @Named("trayMenuSupported") boolean trayMenuSupported, Optional<AutoStartStrategy> autoStartStrategy, ObjectProperty<SelectedPreferencesTab> selectedTabProperty, LicenseHolder licenseHolder, ExecutorService executor, ResourceBundle resourceBundle) {
 		this.settings = settings;
 		this.trayMenuSupported = trayMenuSupported;
 		this.autoStartStrategy = autoStartStrategy;
 		this.selectedTabProperty = selectedTabProperty;
 		this.licenseHolder = licenseHolder;
 		this.executor = executor;
+		this.resourceBundle = resourceBundle;
 	}
 
 	@FXML
 	public void initialize() {
 		themeChoiceBox.getItems().addAll(UiTheme.values());
 		themeChoiceBox.valueProperty().bindBidirectional(settings.theme());
-		themeChoiceBox.setConverter(new UiThemeConverter());
+		themeChoiceBox.setConverter(new UiThemeConverter(resourceBundle));
 
 		startHiddenCheckbox.selectedProperty().bindBidirectional(settings.startHidden());
 
@@ -116,9 +119,15 @@ public class GeneralPreferencesController implements FxController {
 
 	private static class UiThemeConverter extends StringConverter<UiTheme> {
 
+		private final ResourceBundle resourceBundle;
+
+		UiThemeConverter(ResourceBundle resourceBundle) {
+			this.resourceBundle = resourceBundle;
+		}
+
 		@Override
 		public String toString(UiTheme impl) {
-			return impl.getDisplayName();
+			return resourceBundle.getString(impl.getDisplayName());
 		}
 
 		@Override

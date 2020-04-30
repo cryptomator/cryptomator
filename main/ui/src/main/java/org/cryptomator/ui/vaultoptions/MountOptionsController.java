@@ -82,7 +82,7 @@ public class MountOptionsController implements FxController {
 		// mount point options:
 		mountPoint.selectedToggleProperty().addListener(this::toggleMountPoint);
 		driveLetterSelection.getItems().addAll(windowsDriveLetters.getAllDriveLetters());
-		driveLetterSelection.setConverter(new WinDriveLetterLabelConverter(windowsDriveLetters));
+		driveLetterSelection.setConverter(new WinDriveLetterLabelConverter(windowsDriveLetters, resourceBundle));
 		driveLetterSelection.setValue(vault.getVaultSettings().winDriveLetter().get());
 
 		if (vault.getVaultSettings().usesIndividualMountPath().get()) {
@@ -144,15 +144,17 @@ public class MountOptionsController implements FxController {
 	private static class WinDriveLetterLabelConverter extends StringConverter<String> {
 
 		private final Set<String> occupiedDriveLetters;
+		private final ResourceBundle resourceBundle;
 
-		WinDriveLetterLabelConverter(WindowsDriveLetters windowsDriveLetters) {
+		WinDriveLetterLabelConverter(WindowsDriveLetters windowsDriveLetters, ResourceBundle resourceBundle) {
 			this.occupiedDriveLetters = windowsDriveLetters.getOccupiedDriveLetters();
+			this.resourceBundle = resourceBundle;
 		}
 
 		@Override
 		public String toString(String driveLetter) {
 			if (occupiedDriveLetters.contains(driveLetter)) {
-				return driveLetter + ": (occupied)"; // TODO localize?
+				return driveLetter + ": (" + resourceBundle.getString("vaultOptions.mount.winDriveLetterOccupied") + ")";
 			} else {
 				return driveLetter + ":";
 			}
