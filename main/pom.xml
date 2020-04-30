@@ -81,6 +81,11 @@
 			<!-- Cryptomator Libs -->
 			<dependency>
 				<groupId>org.cryptomator</groupId>
+				<artifactId>siv-mode</artifactId>
+				<version>1.4.0</version>
+			</dependency>
+			<dependency>
+				<groupId>org.cryptomator</groupId>
 				<artifactId>cryptofs</artifactId>
 				<version>${cryptomator.cryptofs.version}</version>
 			</dependency>
