@@ -5,7 +5,6 @@ import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import org.cryptomator.common.settings.WhenUnlocked;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.common.vaults.Volume;
@@ -18,6 +17,7 @@ import org.cryptomator.ui.common.ErrorComponent;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.UserInteractionLock;
+import org.cryptomator.ui.common.VaultService;
 import org.cryptomator.ui.unlock.UnlockModule.PasswordEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,6 +46,7 @@ public class UnlockWorkflow extends Task<Boolean> {
 
 	private final Stage window;
 	private final Vault vault;
+	private final VaultService vaultService;
 	private final AtomicReference<char[]> password;
 	private final AtomicBoolean savePassword;
 	private final Optional<char[]> savedPassword;
@@ -57,9 +58,10 @@ public class UnlockWorkflow extends Task<Boolean> {
 	private final ErrorComponent.Builder errorComponent;
 
 	@Inject
-	UnlockWorkflow(@UnlockWindow Stage window, @UnlockWindow Vault vault, AtomicReference<char[]> password, @Named("savePassword") AtomicBoolean savePassword, @Named("savedPassword") Optional<char[]> savedPassword, UserInteractionLock<PasswordEntry> passwordEntryLock, Optional<KeychainAccess> keychain, @FxmlScene(FxmlFile.UNLOCK) Lazy<Scene> unlockScene, @FxmlScene(FxmlFile.UNLOCK_SUCCESS) Lazy<Scene> successScene, @FxmlScene(FxmlFile.UNLOCK_INVALID_MOUNT_POINT) Lazy<Scene> invalidMountPointScene, ErrorComponent.Builder errorComponent) {
+	UnlockWorkflow(@UnlockWindow Stage window, @UnlockWindow Vault vault, VaultService vaultService, AtomicReference<char[]> password, @Named("savePassword") AtomicBoolean savePassword, @Named("savedPassword") Optional<char[]> savedPassword, UserInteractionLock<PasswordEntry> passwordEntryLock, Optional<KeychainAccess> keychain, @FxmlScene(FxmlFile.UNLOCK) Lazy<Scene> unlockScene, @FxmlScene(FxmlFile.UNLOCK_SUCCESS) Lazy<Scene> successScene, @FxmlScene(FxmlFile.UNLOCK_INVALID_MOUNT_POINT) Lazy<Scene> invalidMountPointScene, ErrorComponent.Builder errorComponent) {
 		this.window = window;
 		this.vault = vault;
+		this.vaultService = vaultService;
 		this.password = password;
 		this.savePassword = savePassword;
 		this.savedPassword = savedPassword;
@@ -117,16 +119,18 @@ public class UnlockWorkflow extends Task<Boolean> {
 		return passwordEntryLock.awaitInteraction();
 	}
 
-	private void handleSuccess() {
+	private void handleSuccess() throws Volume.VolumeException {
 		LOG.info("Unlock of '{}' succeeded.", vault.getDisplayableName());
 		if (savePassword.get()) {
 			savePasswordToSystemkeychain();
 		}
-		if (vault.getVaultSettings().actionAfterUnlock().get() == WhenUnlocked.ASK) {
-			Platform.runLater(() -> {
+		switch (vault.getVaultSettings().actionAfterUnlock().get()) {
+			case ASK -> Platform.runLater(() -> {
 				window.setScene(successScene.get());
 				window.show();
 			});
+			case REVEAL -> vaultService.reveal(vault);
+			case IGNORE -> {}
 		}
 	}
 
