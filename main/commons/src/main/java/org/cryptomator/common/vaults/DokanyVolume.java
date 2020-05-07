@@ -51,7 +51,7 @@ public class DokanyVolume implements Volume {
 		try {
 			this.mount = mountFactory.mount(fs.getPath("/"), mountPoint, mountName, FS_TYPE_NAME, mountFlags.strip());
 		} catch (MountFailedException e) {
-			if (vaultSettings.getIndividualMountPath().isPresent()) {
+			if (vaultSettings.getCustomMountPath().isPresent()) {
 				LOG.warn("Failed to mount vault into {}. Is this directory currently accessed by another process (e.g. Windows Explorer)?", mountPoint);
 			}
 			throw new VolumeException("Unable to mount Filesystem", e);
@@ -59,7 +59,7 @@ public class DokanyVolume implements Volume {
 	}
 
 	private Path determineMountPoint() throws VolumeException, IOException {
-		Optional<String> optionalCustomMountPoint = vaultSettings.getIndividualMountPath();
+		Optional<String> optionalCustomMountPoint = vaultSettings.getCustomMountPath();
 		if (optionalCustomMountPoint.isPresent()) {
 			Path customMountPoint = Paths.get(optionalCustomMountPoint.get());
 			checkProvidedMountPoint(customMountPoint);

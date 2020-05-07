@@ -121,7 +121,7 @@ public class Vault {
 	}
 
 	public synchronized void unlock(CharSequence passphrase) throws CryptoException, IOException, Volume.VolumeException {
-		if (vaultSettings.usesIndividualMountPath().get() && Strings.isNullOrEmpty(vaultSettings.individualMountPath().get())) {
+		if (vaultSettings.useCustomMountPath().get() && Strings.isNullOrEmpty(vaultSettings.customMountPath().get())) {
 			throw new NotDirectoryException("");
 		}
 		CryptoFileSystem fs = getCryptoFileSystem(passphrase);

@@ -25,8 +25,8 @@ class VaultSettingsJsonAdapter {
 		out.name("winDriveLetter").value(value.winDriveLetter().get());
 		out.name("unlockAfterStartup").value(value.unlockAfterStartup().get());
 		out.name("revealAfterMount").value(value.revealAfterMount().get());
-		out.name("usesIndividualMountPath").value(value.usesIndividualMountPath().get());
-		out.name("individualMountPath").value(value.individualMountPath().get());
+		out.name("useCustomMountPath").value(value.useCustomMountPath().get());
+		out.name("customMountPath").value(value.customMountPath().get());
 		out.name("usesReadOnlyMode").value(value.usesReadOnlyMode().get());
 		out.name("mountFlags").value(value.mountFlags().get());
 		out.name("filenameLengthLimit").value(value.filenameLengthLimit().get());
@@ -37,11 +37,11 @@ class VaultSettingsJsonAdapter {
 		String id = null;
 		String path = null;
 		String mountName = null;
-		String individualMountPath = null;
+		String customMountPath = null;
 		String winDriveLetter = null;
 		boolean unlockAfterStartup = VaultSettings.DEFAULT_UNLOCK_AFTER_STARTUP;
 		boolean revealAfterMount = VaultSettings.DEFAULT_REAVEAL_AFTER_MOUNT;
-		boolean usesIndividualMountPath = VaultSettings.DEFAULT_USES_INDIVIDUAL_MOUNTPATH;
+		boolean useCustomMountPath = VaultSettings.DEFAULT_USES_INDIVIDUAL_MOUNTPATH;
 		boolean usesReadOnlyMode = VaultSettings.DEFAULT_USES_READONLY_MODE;
 		String mountFlags = VaultSettings.DEFAULT_MOUNT_FLAGS;
 		int filenameLengthLimit = VaultSettings.DEFAULT_FILENAME_LENGTH_LIMIT;
@@ -69,10 +69,12 @@ class VaultSettingsJsonAdapter {
 					revealAfterMount = in.nextBoolean();
 					break;
 				case "usesIndividualMountPath":
-					usesIndividualMountPath = in.nextBoolean();
+				case "useCustomMountPath":
+					useCustomMountPath = in.nextBoolean();
 					break;
 				case "individualMountPath":
-					individualMountPath = in.nextString();
+				case "customMountPath":
+					customMountPath = in.nextString();
 					break;
 				case "usesReadOnlyMode":
 					usesReadOnlyMode = in.nextBoolean();
@@ -97,8 +99,8 @@ class VaultSettingsJsonAdapter {
 		vaultSettings.winDriveLetter().set(winDriveLetter);
 		vaultSettings.unlockAfterStartup().set(unlockAfterStartup);
 		vaultSettings.revealAfterMount().set(revealAfterMount);
-		vaultSettings.usesIndividualMountPath().set(usesIndividualMountPath);
-		vaultSettings.individualMountPath().set(individualMountPath);
+		vaultSettings.useCustomMountPath().set(useCustomMountPath);
+		vaultSettings.customMountPath().set(customMountPath);
 		vaultSettings.usesReadOnlyMode().set(usesReadOnlyMode);
 		vaultSettings.mountFlags().set(mountFlags);
 		vaultSettings.filenameLengthLimit().set(filenameLengthLimit);

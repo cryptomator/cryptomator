@@ -26,7 +26,6 @@ import java.util.Random;
 
 /**
  * The settings specific to a single vault.
- * TODO: Change the name of individualMountPath and its derivatives to customMountPath
  */
 public class VaultSettings {
 
@@ -45,8 +44,8 @@ public class VaultSettings {
 	private final StringProperty winDriveLetter = new SimpleStringProperty();
 	private final BooleanProperty unlockAfterStartup = new SimpleBooleanProperty(DEFAULT_UNLOCK_AFTER_STARTUP);
 	private final BooleanProperty revealAfterMount = new SimpleBooleanProperty(DEFAULT_REAVEAL_AFTER_MOUNT);
-	private final BooleanProperty usesIndividualMountPath = new SimpleBooleanProperty(DEFAULT_USES_INDIVIDUAL_MOUNTPATH);
-	private final StringProperty individualMountPath = new SimpleStringProperty();
+	private final BooleanProperty useCustomMountPath = new SimpleBooleanProperty(DEFAULT_USES_INDIVIDUAL_MOUNTPATH);
+	private final StringProperty customMountPath = new SimpleStringProperty();
 	private final BooleanProperty usesReadOnlyMode = new SimpleBooleanProperty(DEFAULT_USES_READONLY_MODE);
 	private final StringProperty mountFlags = new SimpleStringProperty(DEFAULT_MOUNT_FLAGS);
 	private final IntegerProperty filenameLengthLimit = new SimpleIntegerProperty(DEFAULT_FILENAME_LENGTH_LIMIT);
@@ -122,17 +121,17 @@ public class VaultSettings {
 		return revealAfterMount;
 	}
 
-	public BooleanProperty usesIndividualMountPath() {
-		return usesIndividualMountPath;
+	public BooleanProperty useCustomMountPath() {
+		return useCustomMountPath;
 	}
 
-	public StringProperty individualMountPath() {
-		return individualMountPath;
+	public StringProperty customMountPath() {
+		return customMountPath;
 	}
 
-	public Optional<String> getIndividualMountPath() {
-		if (usesIndividualMountPath.get()) {
-			return Optional.ofNullable(Strings.emptyToNull(individualMountPath.get()));
+	public Optional<String> getCustomMountPath() {
+		if (useCustomMountPath.get()) {
+			return Optional.ofNullable(Strings.emptyToNull(customMountPath.get()));
 		} else {
 			return Optional.empty();
 		}
