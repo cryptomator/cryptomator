@@ -27,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 import java.awt.desktop.QuitResponse;
 import java.util.Optional;
 
@@ -38,20 +39,20 @@ public class FxApplication extends Application {
 	private final Settings settings;
 	private final Lazy<MainWindowComponent> mainWindow;
 	private final Lazy<PreferencesComponent> preferencesWindow;
-	private final UnlockComponent.Builder unlockWindowBuilder;
-	private final QuitComponent.Builder quitWindowBuilder;
+	private final Provider<UnlockComponent.Builder> unlockWindowBuilderProvider;
+	private final Provider<QuitComponent.Builder> quitWindowBuilderProvider;
 	private final Optional<MacFunctions> macFunctions;
 	private final VaultService vaultService;
 	private final LicenseHolder licenseHolder;
 	private final BooleanBinding hasVisibleStages;
 
 	@Inject
-	FxApplication(Settings settings, Lazy<MainWindowComponent> mainWindow, Lazy<PreferencesComponent> preferencesWindow, UnlockComponent.Builder unlockWindowBuilder, QuitComponent.Builder quitWindowBuilder, Optional<MacFunctions> macFunctions, VaultService vaultService, LicenseHolder licenseHolder, ObservableSet<Stage> visibleStages) {
+	FxApplication(Settings settings, Lazy<MainWindowComponent> mainWindow, Lazy<PreferencesComponent> preferencesWindow, Provider<UnlockComponent.Builder> unlockWindowBuilderProvider, Provider<QuitComponent.Builder> quitWindowBuilderProvider, Optional<MacFunctions> macFunctions, VaultService vaultService, LicenseHolder licenseHolder, ObservableSet<Stage> visibleStages) {
 		this.settings = settings;
 		this.mainWindow = mainWindow;
 		this.preferencesWindow = preferencesWindow;
-		this.unlockWindowBuilder = unlockWindowBuilder;
-		this.quitWindowBuilder = quitWindowBuilder;
+		this.unlockWindowBuilderProvider = unlockWindowBuilderProvider;
+		this.quitWindowBuilderProvider = quitWindowBuilderProvider;
 		this.macFunctions = macFunctions;
 		this.vaultService = vaultService;
 		this.licenseHolder = licenseHolder;
@@ -95,16 +96,16 @@ public class FxApplication extends Application {
 		});
 	}
 
-	public void showUnlockWindow(Vault vault) {
+	public void startUnlockWorkflow(Vault vault) {
 		Platform.runLater(() -> {
-			unlockWindowBuilder.vault(vault).build().showUnlockWindow();
+			unlockWindowBuilderProvider.get().vault(vault).build().startUnlockWorkflow();
 			LOG.debug("Showing UnlockWindow for {}", vault.getDisplayableName());
 		});
 	}
 
 	public void showQuitWindow(QuitResponse response) {
 		Platform.runLater(() -> {
-			quitWindowBuilder.quitResponse(response).build().showQuitWindow();
+			quitWindowBuilderProvider.get().quitResponse(response).build().showQuitWindow();
 			LOG.debug("Showing QuitWindow");
 		});
 	}

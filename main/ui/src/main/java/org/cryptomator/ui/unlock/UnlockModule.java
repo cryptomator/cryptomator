@@ -9,6 +9,8 @@ import javafx.scene.image.Image;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.keychain.KeychainAccess;
+import org.cryptomator.keychain.KeychainAccessException;
 import org.cryptomator.ui.common.DefaultSceneFactory;
 import org.cryptomator.ui.common.FXMLLoaderFactory;
 import org.cryptomator.ui.common.FxController;
@@ -16,16 +18,63 @@ import org.cryptomator.ui.common.FxControllerKey;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.StageFactory;
+import org.cryptomator.ui.common.UserInteractionLock;
 import org.cryptomator.ui.forgetPassword.ForgetPasswordComponent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Named;
 import javax.inject.Provider;
+import java.nio.CharBuffer;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 @Module(subcomponents = {ForgetPasswordComponent.class})
 abstract class UnlockModule {
+
+	private static final Logger LOG = LoggerFactory.getLogger(UnlockModule.class);
+
+	public enum PasswordEntry {PASSWORD_ENTERED, CANCELED}
+
+	@Provides
+	@UnlockScoped
+	static UserInteractionLock<PasswordEntry> providePasswordEntryLock() {
+		return new UserInteractionLock<>(null);
+	}
+
+	@Provides
+	@Named("savedPassword")
+	@UnlockScoped
+	static Optional<char[]> provideStoredPassword(Optional<KeychainAccess> keychainAccess, @UnlockWindow Vault vault) {
+		return keychainAccess.map(k -> {
+			try {
+				return k.loadPassphrase(vault.getId());
+			} catch (KeychainAccessException e) {
+				LOG.error("Failed to load entry from system keychain.", e);
+				return null;
+			}
+		});
+	}
+	
+	@Provides
+	@UnlockScoped
+	static AtomicReference<char[]> providePassword(@Named("savedPassword") Optional<char[]> storedPassword) {
+		return new AtomicReference(storedPassword.orElse(null));
+	}
+
+	@Provides
+	@Named("savePassword")
+	@UnlockScoped
+	static AtomicBoolean provideSavePasswordFlag(@Named("savedPassword") Optional<char[]> storedPassword) {
+		return new AtomicBoolean(storedPassword.isPresent());
+	}
 
 	@Provides
 	@UnlockWindow

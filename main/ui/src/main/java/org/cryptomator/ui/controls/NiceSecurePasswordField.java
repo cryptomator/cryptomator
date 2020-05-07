@@ -94,8 +94,8 @@ public class NiceSecurePasswordField extends StackPane {
 		passwordField.setPassword(password);
 	}
 
-	public void swipe() {
-		passwordField.swipe();
+	public void wipe() {
+		passwordField.wipe();
 	}
 
 	public void selectAll() {

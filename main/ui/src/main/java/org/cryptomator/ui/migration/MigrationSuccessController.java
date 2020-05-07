@@ -1,8 +1,5 @@
 package org.cryptomator.ui.migration;
 
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.ReadOnlyObjectProperty;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.stage.Stage;
 import org.cryptomator.common.vaults.Vault;
@@ -28,7 +25,7 @@ public class MigrationSuccessController implements FxController {
 	@FXML
 	public void unlockAndClose() {
 		close();
-		fxApplication.showUnlockWindow(vault);
+		fxApplication.startUnlockWorkflow(vault);
 	}
 
 	@FXML
