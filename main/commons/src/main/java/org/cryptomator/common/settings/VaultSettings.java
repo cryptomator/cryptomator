@@ -35,6 +35,7 @@ public class VaultSettings {
 	public static final boolean DEFAULT_USES_READONLY_MODE = false;
 	public static final String DEFAULT_MOUNT_FLAGS = "";
 	public static final int DEFAULT_FILENAME_LENGTH_LIMIT = -1;
+	public static final WhenUnlocked DEFAULT_ACTION_AFTER_UNLOCK = WhenUnlocked.ASK;
 	
 	private static final Random RNG = new Random(); 
 
@@ -49,6 +50,7 @@ public class VaultSettings {
 	private final BooleanProperty usesReadOnlyMode = new SimpleBooleanProperty(DEFAULT_USES_READONLY_MODE);
 	private final StringProperty mountFlags = new SimpleStringProperty(DEFAULT_MOUNT_FLAGS);
 	private final IntegerProperty filenameLengthLimit = new SimpleIntegerProperty(DEFAULT_FILENAME_LENGTH_LIMIT);
+	private final ObjectProperty<WhenUnlocked> actionAfterUnlock = new SimpleObjectProperty<>(DEFAULT_ACTION_AFTER_UNLOCK);
 
 	public VaultSettings(String id) {
 		this.id = Objects.requireNonNull(id);
@@ -57,7 +59,7 @@ public class VaultSettings {
 	}
 
 	Observable[] observables() {
-		return new Observable[]{path, mountName, winDriveLetter, unlockAfterStartup, revealAfterMount, usesIndividualMountPath, individualMountPath, usesReadOnlyMode, mountFlags, filenameLengthLimit};
+		return new Observable[]{path, mountName, winDriveLetter, unlockAfterStartup, revealAfterMount, useCustomMountPath, customMountPath, usesReadOnlyMode, mountFlags, filenameLengthLimit, actionAfterUnlock};
 	}
 
 	private void deriveMountNameFromPath(Path path) {
@@ -147,6 +149,14 @@ public class VaultSettings {
 	
 	public IntegerProperty filenameLengthLimit() {
 		return filenameLengthLimit;
+	}
+
+	public ObjectProperty<WhenUnlocked> actionAfterUnlock() {
+		return actionAfterUnlock;
+	}
+
+	public WhenUnlocked getActionAfterUnlock() {
+		return actionAfterUnlock.get();
 	}
 
 	/* Hashcode/Equals */

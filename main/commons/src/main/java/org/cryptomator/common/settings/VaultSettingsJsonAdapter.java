@@ -30,6 +30,7 @@ class VaultSettingsJsonAdapter {
 		out.name("usesReadOnlyMode").value(value.usesReadOnlyMode().get());
 		out.name("mountFlags").value(value.mountFlags().get());
 		out.name("filenameLengthLimit").value(value.filenameLengthLimit().get());
+		out.name("actionAfterUnlock").value(value.actionAfterUnlock().get().name());
 		out.endObject();
 	}
 
@@ -45,6 +46,7 @@ class VaultSettingsJsonAdapter {
 		boolean usesReadOnlyMode = VaultSettings.DEFAULT_USES_READONLY_MODE;
 		String mountFlags = VaultSettings.DEFAULT_MOUNT_FLAGS;
 		int filenameLengthLimit = VaultSettings.DEFAULT_FILENAME_LENGTH_LIMIT;
+		WhenUnlocked actionAfterUnlock = VaultSettings.DEFAULT_ACTION_AFTER_UNLOCK;
 
 		in.beginObject();
 		while (in.hasNext()) {
@@ -85,6 +87,9 @@ class VaultSettingsJsonAdapter {
 				case "filenameLengthLimit":
 					filenameLengthLimit = in.nextInt();
 					break;
+				case "actionAfterUnlock":
+					actionAfterUnlock = parseActionAfterUnlock(in.nextString());
+					break;
 				default:
 					LOG.warn("Unsupported vault setting found in JSON: " + name);
 					in.skipValue();
@@ -104,7 +109,17 @@ class VaultSettingsJsonAdapter {
 		vaultSettings.usesReadOnlyMode().set(usesReadOnlyMode);
 		vaultSettings.mountFlags().set(mountFlags);
 		vaultSettings.filenameLengthLimit().set(filenameLengthLimit);
+		vaultSettings.actionAfterUnlock().set(actionAfterUnlock);
 		return vaultSettings;
+	}
+
+	private WhenUnlocked parseActionAfterUnlock(String actionAfterUnlockName) {
+		try {
+			return WhenUnlocked.valueOf(actionAfterUnlockName.toUpperCase());
+		} catch (IllegalArgumentException e) {
+			LOG.warn("Invalid action after unlock {}. Defaulting to {}.", actionAfterUnlockName, VaultSettings.DEFAULT_ACTION_AFTER_UNLOCK);
+			return VaultSettings.DEFAULT_ACTION_AFTER_UNLOCK;
+		}
 	}
 
 }

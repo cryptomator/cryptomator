@@ -5,6 +5,7 @@ import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import org.cryptomator.common.settings.WhenUnlocked;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.common.vaults.Volume;
@@ -121,9 +122,12 @@ public class UnlockWorkflow extends Task<Boolean> {
 		if (savePassword.get()) {
 			savePasswordToSystemkeychain();
 		}
-		Platform.runLater(() -> {
-			window.setScene(successScene.get()); // TODO only if enabled (see issue #1083)
-		});
+		if (vault.getVaultSettings().actionAfterUnlock().get() == WhenUnlocked.ASK) {
+			Platform.runLater(() -> {
+				window.setScene(successScene.get());
+				window.show();
+			});
+		}
 	}
 
 	private void savePasswordToSystemkeychain() {
