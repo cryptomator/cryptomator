@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -78,11 +79,14 @@ public class UnlockController implements FxController {
 	public void unlock() {
 		LOG.trace("UnlockController.unlock()");
 		CharSequence pwFieldContents = passwordField.getCharacters();
-		char[] pw = new char[pwFieldContents.length()];
+		char[] newPw = new char[pwFieldContents.length()];
 		for (int i = 0; i < pwFieldContents.length(); i++) {
-			pw[i] = pwFieldContents.charAt(i);
+			newPw[i] = pwFieldContents.charAt(i);
 		}
-		password.set(pw);
+		char[] oldPw = password.getAndSet(newPw);
+		if (oldPw != null) {
+			Arrays.fill(oldPw, ' ');
+		}
 		passwordEntryLock.interacted(UnlockModule.PasswordEntry.PASSWORD_ENTERED);
 	}
 
