@@ -21,6 +21,7 @@ import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.NewPasswordController;
 import org.cryptomator.ui.common.PasswordStrengthUtil;
+import org.cryptomator.ui.common.StageFactory;
 import org.cryptomator.ui.mainwindow.MainWindow;
 import org.cryptomator.ui.recoverykey.RecoveryKeyDisplayController;
 
@@ -51,13 +52,12 @@ public abstract class AddVaultModule {
 	@Provides
 	@AddVaultWizardWindow
 	@AddVaultWizardScoped
-	static Stage provideStage(@MainWindow Stage owner, ResourceBundle resourceBundle, @Named("windowIcons") List<Image> windowIcons) {
-		Stage stage = new Stage();
+	static Stage provideStage(StageFactory factory, @MainWindow Stage owner, ResourceBundle resourceBundle) {
+		Stage stage = factory.create();
 		stage.setTitle(resourceBundle.getString("addvaultwizard.title"));
 		stage.setResizable(false);
 		stage.initModality(Modality.WINDOW_MODAL);
 		stage.initOwner(owner);
-		stage.getIcons().addAll(windowIcons);
 		return stage;
 	}
 

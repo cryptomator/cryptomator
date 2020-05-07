@@ -14,6 +14,7 @@ import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxControllerKey;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
+import org.cryptomator.ui.common.StageFactory;
 import org.cryptomator.ui.migration.MigrationComponent;
 import org.cryptomator.ui.removevault.RemoveVaultComponent;
 import org.cryptomator.ui.vaultoptions.VaultOptionsComponent;
@@ -38,15 +39,14 @@ abstract class MainWindowModule {
 	@Provides
 	@MainWindow
 	@MainWindowScoped
-	static Stage provideStage(@Named("windowIcons") List<Image> windowIcons) {
-		Stage stage = new Stage(StageStyle.UNDECORATED);
+	static Stage provideStage(StageFactory factory) {
+		Stage stage = factory.create(StageStyle.UNDECORATED);
 		// TODO: min/max values chosen arbitrarily. We might wanna take a look at the user's resolution...
 		stage.setMinWidth(650);
 		stage.setMinHeight(440);
 		stage.setMaxWidth(1000);
 		stage.setMaxHeight(700);
 		stage.setTitle("Cryptomator");
-		stage.getIcons().addAll(windowIcons);
 		return stage;
 	}
 

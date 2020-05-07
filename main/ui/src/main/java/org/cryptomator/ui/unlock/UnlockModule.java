@@ -15,6 +15,7 @@ import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxControllerKey;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
+import org.cryptomator.ui.common.StageFactory;
 import org.cryptomator.ui.forgetPassword.ForgetPasswordComponent;
 
 import javax.inject.Named;
@@ -36,12 +37,11 @@ abstract class UnlockModule {
 	@Provides
 	@UnlockWindow
 	@UnlockScoped
-	static Stage provideStage(@UnlockWindow Vault vault, @Named("windowIcons") List<Image> windowIcons) {
-		Stage stage = new Stage();
+	static Stage provideStage(StageFactory factory, @UnlockWindow Vault vault) {
+		Stage stage = factory.create();
 		stage.setTitle(vault.getDisplayableName());
 		stage.setResizable(false);
 		stage.initModality(Modality.APPLICATION_MODAL);
-		stage.getIcons().addAll(windowIcons);
 		return stage;
 	}
 
