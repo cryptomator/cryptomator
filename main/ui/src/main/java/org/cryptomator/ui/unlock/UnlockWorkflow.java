@@ -119,7 +119,7 @@ public class UnlockWorkflow extends Task<Boolean> {
 		return passwordEntryLock.awaitInteraction();
 	}
 
-	private void handleSuccess() throws Volume.VolumeException {
+	private void handleSuccess() {
 		LOG.info("Unlock of '{}' succeeded.", vault.getDisplayableName());
 		if (savePassword.get()) {
 			savePasswordToSystemkeychain();
