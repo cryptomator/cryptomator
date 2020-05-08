@@ -14,6 +14,7 @@ import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxControllerKey;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
+import org.cryptomator.ui.common.StageFactory;
 import org.cryptomator.ui.mainwindow.MainWindow;
 
 import javax.inject.Named;
@@ -35,13 +36,12 @@ abstract class WrongFileAlertModule {
 	@Provides
 	@WrongFileAlertWindow
 	@WrongFileAlertScoped
-	static Stage provideStage(@MainWindow Stage mainWindow, ResourceBundle resourceBundle, @Named("windowIcons") List<Image> windowIcons) {
-		Stage stage = new Stage();
+	static Stage provideStage(StageFactory factory, @MainWindow Stage mainWindow, ResourceBundle resourceBundle) {
+		Stage stage = factory.create();
 		stage.setTitle(resourceBundle.getString("wrongFileAlert.title"));
 		stage.setResizable(false);
 		stage.initOwner(mainWindow);
 		stage.initModality(Modality.WINDOW_MODAL);
-		stage.getIcons().addAll(windowIcons);
 		return stage;
 	}
 

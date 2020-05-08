@@ -33,7 +33,7 @@ public class UnlockInvalidMountPointController implements FxController {
 	/* Getter/Setter */
 
 	public String getMountPoint() {
-		return vault.getVaultSettings().getIndividualMountPath().orElse("AUTO");
+		return vault.getVaultSettings().getCustomMountPath().orElse("AUTO");
 	}
 
 }

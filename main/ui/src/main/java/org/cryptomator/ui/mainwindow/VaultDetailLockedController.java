@@ -26,7 +26,7 @@ public class VaultDetailLockedController implements FxController {
 
 	@FXML
 	public void unlock() {
-		application.showUnlockWindow(vault.get());
+		application.startUnlockWorkflow(vault.get());
 	}
 
 	@FXML

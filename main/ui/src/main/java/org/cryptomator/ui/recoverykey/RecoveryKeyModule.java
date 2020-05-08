@@ -21,6 +21,7 @@ import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.NewPasswordController;
 import org.cryptomator.ui.common.PasswordStrengthUtil;
+import org.cryptomator.ui.common.StageFactory;
 
 import javax.inject.Named;
 import javax.inject.Provider;
@@ -41,13 +42,12 @@ abstract class RecoveryKeyModule {
 	@Provides
 	@RecoveryKeyWindow
 	@RecoveryKeyScoped
-	static Stage provideStage(ResourceBundle resourceBundle, @Named("windowIcons") List<Image> windowIcons, @Named("keyRecoveryOwner") Stage owner) {
-		Stage stage = new Stage();
+	static Stage provideStage(StageFactory factory, ResourceBundle resourceBundle, @Named("keyRecoveryOwner") Stage owner) {
+		Stage stage = factory.create();
 		stage.setTitle(resourceBundle.getString("recoveryKey.title"));
 		stage.setResizable(false);
 		stage.initModality(Modality.WINDOW_MODAL);
 		stage.initOwner(owner);
-		stage.getIcons().addAll(windowIcons);
 		return stage;
 	}
 	

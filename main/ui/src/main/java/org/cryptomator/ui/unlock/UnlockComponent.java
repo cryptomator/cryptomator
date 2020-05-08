@@ -14,21 +14,23 @@ import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.common.vaults.Vault;
 
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
+
 @UnlockScoped
 @Subcomponent(modules = {UnlockModule.class})
 public interface UnlockComponent {
 
-	@UnlockWindow
-	Stage window();
+	ExecutorService defaultExecutorService();
 
-	@FxmlScene(FxmlFile.UNLOCK)
-	Lazy<Scene> scene();
-
-	default Stage showUnlockWindow() {
-		Stage stage = window();
-		stage.setScene(scene().get());
-		stage.show();
-		return stage;
+	UnlockWorkflow unlockWorkflow();
+	
+	default Future<Boolean> startUnlockWorkflow() {
+		UnlockWorkflow workflow = unlockWorkflow();
+		defaultExecutorService().submit(workflow);
+		return workflow;
 	}
 
 	@Subcomponent.Builder

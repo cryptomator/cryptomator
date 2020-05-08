@@ -45,7 +45,7 @@ public class FuseVolume implements Volume {
 
 	@Override
 	public void mount(CryptoFileSystem fs, String mountFlags) throws IOException, FuseNotSupportedException, VolumeException {
-		Optional<String> optionalCustomMountPoint = vaultSettings.getIndividualMountPath();
+		Optional<String> optionalCustomMountPoint = vaultSettings.getCustomMountPath();
 		if (optionalCustomMountPoint.isPresent()) {
 			Path customMountPoint = Paths.get(optionalCustomMountPoint.get());
 			checkProvidedMountPoint(customMountPoint);

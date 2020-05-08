@@ -17,6 +17,7 @@ import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxControllerKey;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
+import org.cryptomator.ui.common.StageFactory;
 
 import javax.inject.Named;
 import javax.inject.Provider;
@@ -37,12 +38,11 @@ abstract class QuitModule {
 	@Provides
 	@QuitWindow
 	@QuitScoped
-	static Stage provideStage(@Named("windowIcons") List<Image> windowIcons) {
-		Stage stage = new Stage();
+	static Stage provideStage(StageFactory factory) {
+		Stage stage = factory.create();
 		stage.setMinWidth(300);
 		stage.setMinHeight(100);
 		stage.initModality(Modality.APPLICATION_MODAL);
-		stage.getIcons().addAll(windowIcons);
 		return stage;
 	}
 

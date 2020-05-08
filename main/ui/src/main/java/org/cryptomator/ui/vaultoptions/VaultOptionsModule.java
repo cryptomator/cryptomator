@@ -16,6 +16,7 @@ import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxControllerKey;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
+import org.cryptomator.ui.common.StageFactory;
 import org.cryptomator.ui.mainwindow.MainWindow;
 import org.cryptomator.ui.recoverykey.RecoveryKeyComponent;
 
@@ -38,15 +39,14 @@ abstract class VaultOptionsModule {
 	@Provides
 	@VaultOptionsWindow
 	@VaultOptionsScoped
-	static Stage provideStage(@MainWindow Stage owner, @VaultOptionsWindow Vault vault, ResourceBundle resourceBundle, @Named("windowIcons") List<Image> windowIcons) {
-		Stage stage = new Stage();
+	static Stage provideStage(StageFactory factory, @MainWindow Stage owner, @VaultOptionsWindow Vault vault) {
+		Stage stage = factory.create();
 		stage.setTitle(vault.getDisplayableName());
 		stage.setResizable(true);
 		stage.setMinWidth(400);
 		stage.setMinHeight(300);
 		stage.initModality(Modality.WINDOW_MODAL);
 		stage.initOwner(owner);
-		stage.getIcons().addAll(windowIcons);
 		return stage;
 	}
 

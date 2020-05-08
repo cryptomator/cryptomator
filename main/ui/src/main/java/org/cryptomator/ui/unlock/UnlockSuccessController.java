@@ -7,8 +7,10 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ContentDisplay;
 import javafx.stage.Stage;
+import org.cryptomator.common.settings.WhenUnlocked;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.VaultService;
@@ -29,6 +31,8 @@ public class UnlockSuccessController implements FxController {
 	private final VaultService vaultService;
 	private final ObjectProperty<ContentDisplay> revealButtonState;
 	private final BooleanProperty revealButtonDisabled;
+	
+	public CheckBox rememberChoiceCheckbox;
 
 	@Inject
 	public UnlockSuccessController(@UnlockWindow Stage window, @UnlockWindow Vault vault, ExecutorService executor, VaultService vaultService) {
@@ -44,6 +48,9 @@ public class UnlockSuccessController implements FxController {
 	public void close() {
 		LOG.trace("UnlockSuccessController.close()");
 		window.close();
+		if (rememberChoiceCheckbox.isSelected()) {
+			vault.getVaultSettings().actionAfterUnlock().setValue(WhenUnlocked.IGNORE);
+		}
 	}
 
 	@FXML
@@ -64,6 +71,9 @@ public class UnlockSuccessController implements FxController {
 			revealButtonDisabled.set(false);
 		});
 		executor.execute(revealTask);
+		if (rememberChoiceCheckbox.isSelected()) {
+			vault.getVaultSettings().actionAfterUnlock().setValue(WhenUnlocked.REVEAL);
+		}
 	}
 
 	/* Getter/Setter */

@@ -40,7 +40,7 @@ import java.util.Arrays;
  */
 public class SecurePasswordField extends TextField {
 
-	private static final char SWIPE_CHAR = ' ';
+	private static final char WIPE_CHAR = ' ';
 	private static final int INITIAL_BUFFER_SIZE = 50;
 	private static final int GROW_BUFFER_SIZE = 50;
 	private static final String DEFAULT_PLACEHOLDER = "●";
@@ -103,7 +103,7 @@ public class SecurePasswordField extends TextField {
 		if (e.getCode() == KeyCode.CAPS) {
 			updateCapsLocked();
 		} else if (SHORTCUT_BACKSPACE.match(e)) {
-			swipe();
+			wipe();
 		}
 	}
 
@@ -189,7 +189,7 @@ public class SecurePasswordField extends TextField {
 		if (length > content.length) {
 			char[] newContent = new char[length + GROW_BUFFER_SIZE];
 			System.arraycopy(content, 0, newContent, 0, content.length);
-			swipe(content);
+			wipe(content);
 			this.content = newContent;
 		}
 	}
@@ -201,7 +201,7 @@ public class SecurePasswordField extends TextField {
 	 * @implNote The CharSequence will not copy the backing char[].
 	 * Therefore any mutation to the SecurePasswordField's content will mutate or eventually swipe the returned CharSequence.
 	 * @implSpec The CharSequence is usually in <a href="https://www.unicode.org/glossary/#normalization_form_c">NFC</a> representation (unless NFD-encoded char[] is set via {@link #setPassword(char[])}).
-	 * @see #swipe()
+	 * @see #wipe()
 	 */
 	@Override
 	public CharSequence getCharacters() {
@@ -220,7 +220,7 @@ public class SecurePasswordField extends TextField {
 			buf[i] = password.charAt(i);
 		}
 		setPassword(buf);
-		Arrays.fill(buf, SWIPE_CHAR);
+		Arrays.fill(buf, WIPE_CHAR);
 	}
 
 	/**
@@ -231,7 +231,7 @@ public class SecurePasswordField extends TextField {
 	 * @param password
 	 */
 	public void setPassword(char[] password) {
-		swipe();
+		wipe();
 		content = Arrays.copyOf(password, password.length);
 		length = password.length;
 
@@ -242,14 +242,14 @@ public class SecurePasswordField extends TextField {
 	/**
 	 * Destroys the stored password by overriding each character with a different character.
 	 */
-	public void swipe() {
-		swipe(content);
+	public void wipe() {
+		wipe(content);
 		length = 0;
 		setText(null);
 	}
 
-	private void swipe(char[] buffer) {
-		Arrays.fill(buffer, SWIPE_CHAR);
+	private void wipe(char[] buffer) {
+		Arrays.fill(buffer, WIPE_CHAR);
 	}
 
 	/* Observable Properties */
