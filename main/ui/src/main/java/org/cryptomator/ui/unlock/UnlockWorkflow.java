@@ -100,6 +100,10 @@ public class UnlockWorkflow extends Task<Boolean> {
 		while (proceed) {
 			try {
 				vault.unlock(CharBuffer.wrap(password.get()));
+				Platform.runLater(() -> {
+					window.setScene(unlockScene.get());
+					window.close();
+				});
 				return true;
 			} catch (InvalidPassphraseException e) {
 				proceed = askForPassword(true) == PasswordEntry.PASSWORD_ENTERED;
