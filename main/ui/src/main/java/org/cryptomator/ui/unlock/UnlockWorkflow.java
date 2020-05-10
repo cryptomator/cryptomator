@@ -100,10 +100,6 @@ public class UnlockWorkflow extends Task<Boolean> {
 		while (proceed) {
 			try {
 				vault.unlock(CharBuffer.wrap(password.get()));
-				Platform.runLater(() -> {
-					window.setScene(unlockScene.get());
-					window.close();
-				});
 				return true;
 			} catch (InvalidPassphraseException e) {
 				proceed = askForPassword(true) == PasswordEntry.PASSWORD_ENTERED;
@@ -133,8 +129,20 @@ public class UnlockWorkflow extends Task<Boolean> {
 				window.setScene(successScene.get());
 				window.show();
 			});
-			case REVEAL -> vaultService.reveal(vault);
-			case IGNORE -> {}
+			case REVEAL -> {
+				Platform.runLater(() -> {
+					window.setScene(unlockScene.get());
+					window.close();
+				});
+
+				vaultService.reveal(vault);
+			}
+			case IGNORE -> {
+				Platform.runLater(() -> {
+					window.setScene(unlockScene.get());
+					window.close();
+				});
+			}
 		}
 	}
 
