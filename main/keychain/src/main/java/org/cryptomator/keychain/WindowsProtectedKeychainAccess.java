@@ -113,6 +113,11 @@ class WindowsProtectedKeychainAccess implements KeychainAccessStrategy {
 	}
 
 	@Override
+	public void changePassphrase(String key, CharSequence passphrase) throws KeychainAccessException {
+		storePassphrase(key, passphrase);
+	}
+
+	@Override
 	public boolean isSupported() {
 		return SystemUtils.IS_OS_WINDOWS && winFunctions.isPresent() && !keychainPaths.isEmpty();
 	}
