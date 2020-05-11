@@ -121,15 +121,14 @@ public class FxApplication extends Application {
 	private void loadSelectedStyleSheet(UiTheme desiredTheme) {
 		UiTheme theme = licenseHolder.isValidLicense() ? desiredTheme : UiTheme.LIGHT;
 		switch (theme) {
-			case DARK:
+			case DARK -> {
 				Application.setUserAgentStylesheet(getClass().getResource("/css/dark_theme.css").toString());
 				macFunctions.map(MacFunctions::uiAppearance).ifPresent(JniException.ignore(MacApplicationUiAppearance::setToDarkAqua));
-				break;
-			case LIGHT:
-			default:
+			}
+			case LIGHT -> {
 				Application.setUserAgentStylesheet(getClass().getResource("/css/light_theme.css").toString());
 				macFunctions.map(MacFunctions::uiAppearance).ifPresent(JniException.ignore(MacApplicationUiAppearance::setToAqua));
-				break;
+			}
 		}
 	}
 

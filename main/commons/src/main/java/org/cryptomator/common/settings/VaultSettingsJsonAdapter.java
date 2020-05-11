@@ -52,48 +52,22 @@ class VaultSettingsJsonAdapter {
 		while (in.hasNext()) {
 			String name = in.nextName();
 			switch (name) {
-				case "id":
-					id = in.nextString();
-					break;
-				case "path":
-					path = in.nextString();
-					break;
-				case "mountName":
-					mountName = in.nextString();
-					break;
-				case "winDriveLetter":
-					winDriveLetter = in.nextString();
-					break;
-				case "unlockAfterStartup":
-					unlockAfterStartup = in.nextBoolean();
-					break;
-				case "revealAfterMount":
-					revealAfterMount = in.nextBoolean();
-					break;
-				case "usesIndividualMountPath":
-				case "useCustomMountPath":
-					useCustomMountPath = in.nextBoolean();
-					break;
-				case "individualMountPath":
-				case "customMountPath":
-					customMountPath = in.nextString();
-					break;
-				case "usesReadOnlyMode":
-					usesReadOnlyMode = in.nextBoolean();
-					break;
-				case "mountFlags":
-					mountFlags = in.nextString();
-					break;
-				case "filenameLengthLimit":
-					filenameLengthLimit = in.nextInt();
-					break;
-				case "actionAfterUnlock":
-					actionAfterUnlock = parseActionAfterUnlock(in.nextString());
-					break;
-				default:
+				case "id" -> id = in.nextString();
+				case "path" -> path = in.nextString();
+				case "mountName" -> mountName = in.nextString();
+				case "winDriveLetter" -> winDriveLetter = in.nextString();
+				case "unlockAfterStartup" -> unlockAfterStartup = in.nextBoolean();
+				case "revealAfterMount" -> revealAfterMount = in.nextBoolean();
+				case "usesIndividualMountPath", "useCustomMountPath" -> useCustomMountPath = in.nextBoolean();
+				case "individualMountPath", "customMountPath" -> customMountPath = in.nextString();
+				case "usesReadOnlyMode" -> usesReadOnlyMode = in.nextBoolean();
+				case "mountFlags" -> mountFlags = in.nextString();
+				case "filenameLengthLimit" -> filenameLengthLimit = in.nextInt();
+				case "actionAfterUnlock" -> actionAfterUnlock = parseActionAfterUnlock(in.nextString());
+				default -> {
 					LOG.warn("Unsupported vault setting found in JSON: " + name);
 					in.skipValue();
-					break;
+				}
 			}
 		}
 		in.endObject();
