@@ -1,12 +1,17 @@
 package org.cryptomator.ui.mainwindow;
 
+import javafx.beans.Observable;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.StackPane;
+import javafx.stage.Stage;
 import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultListManager;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.wrongfilealert.WrongFileAlertComponent;
@@ -28,15 +33,19 @@ public class MainWindowController implements FxController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(MainWindowController.class);
 
+	private final Stage window;
 	private final VaultListManager vaultListManager;
+	private final ReadOnlyObjectProperty<Vault> selectedVault;
 	private final WrongFileAlertComponent.Builder wrongFileAlert;
 	private final BooleanProperty draggingOver = new SimpleBooleanProperty();
 	private final BooleanProperty draggingVaultOver = new SimpleBooleanProperty();
 	public StackPane root;
 
 	@Inject
-	public MainWindowController(VaultListManager vaultListManager, WrongFileAlertComponent.Builder wrongFileAlert) {
+	public MainWindowController(@MainWindow Stage window, VaultListManager vaultListManager, ObjectProperty<Vault> selectedVault, WrongFileAlertComponent.Builder wrongFileAlert) {
+		this.window = window;
 		this.vaultListManager = vaultListManager;
+		this.selectedVault = selectedVault;
 		this.wrongFileAlert = wrongFileAlert;
 	}
 
@@ -49,6 +58,14 @@ public class MainWindowController implements FxController {
 		root.setOnDragExited(this::handleDragEvent);
 		if (SystemUtils.IS_OS_WINDOWS) {
 			root.getStyleClass().add("os-windows");
+		}
+		window.focusedProperty().addListener(this::mainWindowFocusChanged);
+	}
+
+	private void mainWindowFocusChanged(Observable observable) {
+		var v = selectedVault.get();
+		if (v != null) {
+			VaultListManager.redetermineVaultState(v);
 		}
 	}
 

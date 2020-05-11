@@ -64,20 +64,7 @@ public class VaultListController implements FxController {
 		if (newValue == null) {
 			return;
 		}
-		VaultState reportedState = newValue.getState();
-		switch (reportedState) {
-			case LOCKED, NEEDS_MIGRATION, MISSING -> {
-				try {
-					VaultState determinedState = VaultListManager.determineVaultState(newValue.getPath());
-					newValue.setState(determinedState);
-				} catch (IOException e) {
-					LOG.warn("Failed to determine vault state for " + newValue.getPath(), e);
-					newValue.setState(VaultState.ERROR);
-					newValue.setLastKnownException(e);
-				}
-			}
-			case ERROR, UNLOCKED, PROCESSING -> {}
-		}
+		VaultListManager.redetermineVaultState(newValue);
 	}
 
 	@FXML

@@ -92,8 +92,27 @@ public class VaultListManager {
 		}
 		return compBuilder.build().vault();
 	}
+	
+	public static VaultState redetermineVaultState(Vault vault) {
+		VaultState previousState = vault.getState();
+		return switch (previousState) {
+			case LOCKED, NEEDS_MIGRATION, MISSING -> {
+				try {
+					VaultState determinedState = determineVaultState(vault.getPath());
+					vault.setState(determinedState);
+					yield determinedState;
+				} catch (IOException e) {
+					LOG.warn("Failed to determine vault state for " + vault.getPath(), e);
+					vault.setState(VaultState.ERROR);
+					vault.setLastKnownException(e);
+					yield VaultState.ERROR;
+				}
+			}
+			case ERROR, UNLOCKED, PROCESSING -> previousState;
+		};
+	}
 
-	public static VaultState determineVaultState(Path pathToVault) throws IOException {
+	private static VaultState determineVaultState(Path pathToVault) throws IOException {
 		if (!CryptoFileSystemProvider.containsVault(pathToVault, MASTERKEY_FILENAME)) {
 			return VaultState.MISSING;
 		} else if (Migrators.get().needsMigration(pathToVault, MASTERKEY_FILENAME)) {
