@@ -36,12 +36,6 @@ abstract class FxApplicationModule {
 
 	@Provides
 	@FxApplicationScoped
-	static ObjectProperty<Vault> provideSelectedVault() {
-		return new SimpleObjectProperty<>();
-	}
-
-	@Provides
-	@FxApplicationScoped
 	static ObservableSet<Stage> provideVisibleStages() {
 		return FXCollections.observableSet();
 	}
