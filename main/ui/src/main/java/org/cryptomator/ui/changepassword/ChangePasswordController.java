@@ -67,7 +67,7 @@ public class ChangePasswordController implements FxController {
 	public void finish() {
 		try {
 			CryptoFileSystemProvider.changePassphrase(vault.getPath(), MASTERKEY_FILENAME, oldPasswordField.getCharacters(), newPassword.get());
-			LOG.info("Successful changed password for {}", vault.getDisplayableName());
+			LOG.info("Successfully changed password for {}", vault.getDisplayableName());
 			window.close();
 			updatePasswordInSystemkeychain();
 		} catch (IOException e) {
@@ -84,7 +84,7 @@ public class ChangePasswordController implements FxController {
 		if (keychain.isPresent()) {
 			try {
 				keychain.get().changePassphrase(vault.getId(), CharBuffer.wrap(newPassword.get()));
-				LOG.info("Successful updated in password in system keychain for {}", vault.getDisplayableName());
+				LOG.info("Successfully updated password in system keychain for {}", vault.getDisplayableName());
 			} catch (KeychainAccessException e) {
 				LOG.error("Failed to update password in system keychain.", e);
 			}
