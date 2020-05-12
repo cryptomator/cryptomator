@@ -48,4 +48,9 @@ public class LinuxSecretServiceKeychainAccess implements KeychainAccessStrategy 
 	public void deletePassphrase(String key) throws KeychainAccessException {
 		delegate.orElseThrow(IllegalStateException::new).deletePassphrase(key);
 	}
+
+	@Override
+	public void changePassphrase(String key, CharSequence passphrase) throws KeychainAccessException {
+		delegate.orElseThrow(IllegalStateException::new).changePassphrase(key, passphrase);
+	}
 }

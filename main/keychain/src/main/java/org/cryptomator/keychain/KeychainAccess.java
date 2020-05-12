@@ -28,4 +28,11 @@ public interface KeychainAccess {
 	 */
 	void deletePassphrase(String key) throws KeychainAccessException;
 
+	/**
+	 * Updates a passphrase with a given key.
+	 *
+	 * @param key Unique key previously used while {@link #storePassphrase(String, CharSequence) storing a passphrase}.
+	 * @param passphrase The secret to be updated in this keychain.
+	 */
+	void changePassphrase(String key, CharSequence passphrase) throws KeychainAccessException;
 }

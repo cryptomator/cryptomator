@@ -9,6 +9,8 @@ import java.util.Map;
 
 class LinuxSecretServiceKeychainAccessImpl implements KeychainAccessStrategy {
 
+	private final String LABEL_FOR_SECRET_IN_KEYRING = "Cryptomator";
+
 	@Override
 	public boolean isSupported() {
 		try (@SuppressWarnings("unused") SimpleCollection keyring = new SimpleCollection()) {
@@ -24,7 +26,7 @@ class LinuxSecretServiceKeychainAccessImpl implements KeychainAccessStrategy {
 		try (SimpleCollection keyring = new SimpleCollection()) {
 			List<String> list = keyring.getItems(createAttributes(key));
 			if (list == null) {
-				keyring.createItem("Cryptomator", passphrase, createAttributes(key));
+				keyring.createItem(LABEL_FOR_SECRET_IN_KEYRING, passphrase, createAttributes(key));
 			}
 		} catch (IOException e) {
 			throw new KeychainAccessException(e);
@@ -51,6 +53,18 @@ class LinuxSecretServiceKeychainAccessImpl implements KeychainAccessStrategy {
 			List<String> list = keyring.getItems(createAttributes(key));
 			if (list != null) {
 				keyring.deleteItem(list.get(0));
+			}
+		} catch (IOException e) {
+			throw new KeychainAccessException(e);
+		}
+	}
+
+	@Override
+	public void changePassphrase(String key, CharSequence passphrase) throws KeychainAccessException {
+		try (SimpleCollection keyring = new SimpleCollection()) {
+			List<String> list = keyring.getItems(createAttributes(key));
+			if (list != null) {
+				keyring.updateItem(list.get(0), LABEL_FOR_SECRET_IN_KEYRING, passphrase, createAttributes(key));
 			}
 		} catch (IOException e) {
 			throw new KeychainAccessException(e);
