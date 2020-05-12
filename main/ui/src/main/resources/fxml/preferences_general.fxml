@@ -34,7 +34,10 @@
 
 		<CheckBox fx:id="startHiddenCheckbox" text="%preferences.general.startHidden" visible="${controller.trayMenuSupported}" managed="${controller.trayMenuSupported}"/>
 
-		<CheckBox fx:id="debugModeCheckbox" text="%preferences.general.debugLogging"/>
+		<HBox spacing="6" alignment="CENTER_LEFT">
+			<CheckBox fx:id="debugModeCheckbox" text="%preferences.general.debugLogging"/>
+			<Hyperlink styleClass="hyperlink-underline" text="%preferences.general.debugDirectory" onAction="#showLogfileDirectory"/>
+		</HBox>
 
 		<CheckBox fx:id="autoStartCheckbox" text="%preferences.general.autoStart" visible="${controller.autoStartSupported}" managed="${controller.autoStartSupported}" onAction="#toggleAutoStart"/>
 	</children>

@@ -12,9 +12,11 @@ import javafx.scene.control.RadioButton;
 import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleGroup;
 import javafx.util.StringConverter;
+import javafx.application.Application;
 import org.cryptomator.common.LicenseHolder;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.UiTheme;
+import org.cryptomator.common.Environment;
 import org.cryptomator.ui.common.FxController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,6 +39,8 @@ public class GeneralPreferencesController implements FxController {
 	private final LicenseHolder licenseHolder;
 	private final ExecutorService executor;
 	private final ResourceBundle resourceBundle;
+	private final Application application;
+	private final Environment environment;
 	public ChoiceBox<UiTheme> themeChoiceBox;
 	public CheckBox startHiddenCheckbox;
 	public CheckBox debugModeCheckbox;
@@ -46,7 +50,7 @@ public class GeneralPreferencesController implements FxController {
 	public RadioButton nodeOrientationRtl;
 
 	@Inject
-	GeneralPreferencesController(Settings settings, @Named("trayMenuSupported") boolean trayMenuSupported, Optional<AutoStartStrategy> autoStartStrategy, ObjectProperty<SelectedPreferencesTab> selectedTabProperty, LicenseHolder licenseHolder, ExecutorService executor, ResourceBundle resourceBundle) {
+	GeneralPreferencesController(Settings settings, @Named("trayMenuSupported") boolean trayMenuSupported, Optional<AutoStartStrategy> autoStartStrategy, ObjectProperty<SelectedPreferencesTab> selectedTabProperty, LicenseHolder licenseHolder, ExecutorService executor, ResourceBundle resourceBundle, Application application, Environment environment) {
 		this.settings = settings;
 		this.trayMenuSupported = trayMenuSupported;
 		this.autoStartStrategy = autoStartStrategy;
@@ -54,6 +58,8 @@ public class GeneralPreferencesController implements FxController {
 		this.licenseHolder = licenseHolder;
 		this.executor = executor;
 		this.resourceBundle = resourceBundle;
+		this.application = application;
+		this.environment = environment;
 	}
 
 	@FXML
@@ -113,6 +119,11 @@ public class GeneralPreferencesController implements FxController {
 	@FXML
 	public void showDonationTab() {
 		selectedTabProperty.set(SelectedPreferencesTab.DONATION_KEY);
+	}
+
+	@FXML
+	public void showLogfileDirectory(){
+		environment.getLogDir().ifPresent(logDirPath -> application.getHostServices().showDocument(logDirPath.toUri().toString()));
 	}
 
 	/* Helper classes */
