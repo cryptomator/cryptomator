@@ -52,19 +52,13 @@ class AppLaunchEventHandler {
 
 	private void handleLaunchEvent(boolean hasTrayIcon, AppLaunchEvent event) {
 		switch (event.getType()) {
-			case REVEAL_APP:
-				fxApplicationStarter.get(hasTrayIcon).thenAccept(FxApplication::showMainWindow);
-				break;
-			case OPEN_FILE:
-				fxApplicationStarter.get(hasTrayIcon).thenRun(() -> {
+			case REVEAL_APP -> fxApplicationStarter.get(hasTrayIcon).thenAccept(FxApplication::showMainWindow);
+			case OPEN_FILE -> fxApplicationStarter.get(hasTrayIcon).thenRun(() -> {
 					Platform.runLater(() -> {
 						event.getPathsToOpen().forEach(this::addVault);
 					});
 				});
-				break;
-			default:
-				LOG.warn("Unsupported event type: {}", event.getType());
-				break;
+			default -> LOG.warn("Unsupported event type: {}", event.getType());
 		}
 	}
 

@@ -85,7 +85,7 @@ public class MountOptionsController implements FxController {
 		driveLetterSelection.setConverter(new WinDriveLetterLabelConverter(windowsDriveLetters, resourceBundle));
 		driveLetterSelection.setValue(vault.getVaultSettings().winDriveLetter().get());
 
-		if (vault.getVaultSettings().usesIndividualMountPath().get()) {
+		if (vault.getVaultSettings().useCustomMountPath().get()) {
 			mountPoint.selectToggle(mountPointCustomDir);
 		} else if (!Strings.isNullOrEmpty(vault.getVaultSettings().winDriveLetter().get())) {
 			mountPoint.selectToggle(mountPointWinDriveLetter);
@@ -93,7 +93,7 @@ public class MountOptionsController implements FxController {
 			mountPoint.selectToggle(mountPointAuto);
 		}
 
-		vault.getVaultSettings().usesIndividualMountPath().bind(mountPoint.selectedToggleProperty().isEqualTo(mountPointCustomDir));
+		vault.getVaultSettings().useCustomMountPath().bind(mountPoint.selectedToggleProperty().isEqualTo(mountPointCustomDir));
 		vault.getVaultSettings().winDriveLetter().bind( //
 				Bindings.when(mountPoint.selectedToggleProperty().isEqualTo(mountPointWinDriveLetter)) //
 						.then(driveLetterSelection.getSelectionModel().selectedItemProperty()) //
@@ -126,14 +126,14 @@ public class MountOptionsController implements FxController {
 		}
 		File file = directoryChooser.showDialog(window);
 		if (file != null) {
-			vault.getVaultSettings().individualMountPath().set(file.getAbsolutePath());
+			vault.getVaultSettings().customMountPath().set(file.getAbsolutePath());
 		} else {
-			vault.getVaultSettings().individualMountPath().set(null);
+			vault.getVaultSettings().customMountPath().set(null);
 		}
 	}
 
 	private void toggleMountPoint(@SuppressWarnings("unused") ObservableValue<? extends Toggle> observable, @SuppressWarnings("unused") Toggle oldValue, Toggle newValue) {
-		if (mountPointCustomDir.equals(newValue) && Strings.isNullOrEmpty(vault.getVaultSettings().individualMountPath().get())) {
+		if (mountPointCustomDir.equals(newValue) && Strings.isNullOrEmpty(vault.getVaultSettings().customMountPath().get())) {
 			chooseCustomMountPoint();
 		}
 	}
@@ -186,11 +186,11 @@ public class MountOptionsController implements FxController {
 	}
 
 	public StringProperty customMountPathProperty() {
-		return vault.getVaultSettings().individualMountPath();
+		return vault.getVaultSettings().customMountPath();
 	}
 
 	public String getCustomMountPath() {
-		return vault.getVaultSettings().individualMountPath().get();
+		return vault.getVaultSettings().customMountPath().get();
 	}
 
 }

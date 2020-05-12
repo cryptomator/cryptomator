@@ -3,6 +3,9 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.Label?>
 <VBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
 	  fx:controller="org.cryptomator.ui.vaultoptions.GeneralVaultOptionsController"
@@ -12,5 +15,10 @@
 	</padding>
 	<children>
 		<CheckBox text="%vaultOptions.general.unlockAfterStartup" fx:id="unlockOnStartupCheckbox"/>
+
+		<HBox spacing="6" alignment="CENTER_LEFT">
+			<Label text="%vaultOptions.general.actionAfterUnlock"/>
+			<ChoiceBox fx:id="actionAfterUnlockChoiceBox"/>
+		</HBox>
 	</children>
 </VBox>

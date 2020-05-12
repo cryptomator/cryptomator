@@ -103,7 +103,7 @@ class TrayMenuController {
 	}
 
 	private void unlockVault(Vault vault) {
-		fxApplicationStarter.get(true).thenAccept(app -> app.showUnlockWindow(vault));
+		fxApplicationStarter.get(true).thenAccept(app -> app.startUnlockWorkflow(vault));
 	}
 
 	private void lockVault(Vault vault) {

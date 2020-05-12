@@ -16,7 +16,6 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.nio.file.Paths;
-import java.util.Arrays;
 
 public class VaultSettingsJsonAdapterTest {
 
@@ -32,7 +31,7 @@ public class VaultSettingsJsonAdapterTest {
 		Assertions.assertEquals(Paths.get("/foo/bar"), vaultSettings.path().get());
 		Assertions.assertEquals("test", vaultSettings.mountName().get());
 		Assertions.assertEquals("X", vaultSettings.winDriveLetter().get());
-		Assertions.assertEquals("/home/test/crypto", vaultSettings.individualMountPath().get());
+		Assertions.assertEquals("/home/test/crypto", vaultSettings.customMountPath().get());
 		Assertions.assertEquals("--foo --bar", vaultSettings.mountFlags().get());
 
 

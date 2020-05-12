@@ -32,6 +32,12 @@ class MapKeychainAccess implements KeychainAccessStrategy {
 	}
 
 	@Override
+	public void changePassphrase(String key, CharSequence passphrase) {
+		map.get(key);
+		storePassphrase(key, passphrase);
+	}
+
+	@Override
 	public boolean isSupported() {
 		return true;
 	}

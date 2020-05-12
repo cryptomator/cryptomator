@@ -27,7 +27,7 @@ public class AddVaultSuccessController implements FxController {
 	@FXML
 	public void unlockAndClose() {
 		close();
-		fxApplication.showUnlockWindow(vault.get());
+		fxApplication.startUnlockWorkflow(vault.get());
 	}
 
 	@FXML

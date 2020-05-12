@@ -152,7 +152,7 @@ class SecurePasswordFieldTest {
 
 		CharSequence result1 = pwField.getCharacters();
 		Assertions.assertEquals("topSecret", result1.toString());
-		pwField.swipe();
+		pwField.wipe();
 		CharSequence result2 = pwField.getCharacters();
 		Assertions.assertEquals("         ", result1.toString());
 		Assertions.assertEquals("", result2.toString());

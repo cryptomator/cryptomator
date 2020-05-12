@@ -4,16 +4,21 @@ import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoMap;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.addvaultwizard.AddVaultWizardComponent;
 import org.cryptomator.ui.common.FXMLLoaderFactory;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxControllerKey;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
+import org.cryptomator.ui.common.StageFactory;
+import org.cryptomator.ui.fxapp.FxApplicationScoped;
 import org.cryptomator.ui.migration.MigrationComponent;
 import org.cryptomator.ui.removevault.RemoveVaultComponent;
 import org.cryptomator.ui.vaultoptions.VaultOptionsComponent;
@@ -29,6 +34,12 @@ import java.util.ResourceBundle;
 abstract class MainWindowModule {
 
 	@Provides
+	@MainWindowScoped
+	static ObjectProperty<Vault> provideSelectedVault() {
+		return new SimpleObjectProperty<>();
+	}
+
+	@Provides
 	@MainWindow
 	@MainWindowScoped
 	static FXMLLoaderFactory provideFxmlLoaderFactory(Map<Class<? extends FxController>, Provider<FxController>> factories, MainWindowSceneFactory sceneFactory, ResourceBundle resourceBundle) {
@@ -38,22 +49,21 @@ abstract class MainWindowModule {
 	@Provides
 	@MainWindow
 	@MainWindowScoped
-	static Stage provideStage(@Named("windowIcons") List<Image> windowIcons) {
-		Stage stage = new Stage(StageStyle.UNDECORATED);
+	static Stage provideStage(StageFactory factory) {
+		Stage stage = factory.create(StageStyle.UNDECORATED);
 		// TODO: min/max values chosen arbitrarily. We might wanna take a look at the user's resolution...
 		stage.setMinWidth(650);
 		stage.setMinHeight(440);
 		stage.setMaxWidth(1000);
 		stage.setMaxHeight(700);
 		stage.setTitle("Cryptomator");
-		stage.getIcons().addAll(windowIcons);
 		return stage;
 	}
 
 	@Provides
 	@FxmlScene(FxmlFile.MAIN_WINDOW)
 	@MainWindowScoped
-	static Scene provideMainScene(@MainWindow FXMLLoaderFactory fxmlLoaders, MainWindowController mainWindowController, VaultListController vaultListController) {
+	static Scene provideMainScene(@MainWindow FXMLLoaderFactory fxmlLoaders) {
 		return fxmlLoaders.createScene("/fxml/main_window.fxml");
 	}
 

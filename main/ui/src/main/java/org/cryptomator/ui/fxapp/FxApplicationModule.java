@@ -11,10 +11,14 @@ import dagger.Provides;
 import javafx.application.Application;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableSet;
 import javafx.scene.image.Image;
+import javafx.stage.Stage;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.ErrorComponent;
+import org.cryptomator.ui.common.StageFactory;
 import org.cryptomator.ui.mainwindow.MainWindowComponent;
 import org.cryptomator.ui.preferences.PreferencesComponent;
 import org.cryptomator.ui.quit.QuitComponent;
@@ -32,8 +36,8 @@ abstract class FxApplicationModule {
 
 	@Provides
 	@FxApplicationScoped
-	static ObjectProperty<Vault> provideSelectedVault() {
-		return new SimpleObjectProperty<>();
+	static ObservableSet<Stage> provideVisibleStages() {
+		return FXCollections.observableSet();
 	}
 
 	@Provides
@@ -43,7 +47,6 @@ abstract class FxApplicationModule {
 		if (SystemUtils.IS_OS_MAC) {
 			return Collections.emptyList();
 		}
-
 		try {
 			return List.of( //
 					createImageFromResource("/window_icon_32.png"), //
@@ -52,6 +55,21 @@ abstract class FxApplicationModule {
 		} catch (IOException e) {
 			throw new UncheckedIOException("Failed to load embedded resource.", e);
 		}
+	}
+	
+	@Provides
+	@FxApplicationScoped
+	static StageFactory provideStageFactory(@Named("windowIcons") List<Image> windowIcons, ObservableSet<Stage> visibleStages) {
+		return new StageFactory(stage -> {
+			stage.getIcons().addAll(windowIcons);
+			stage.showingProperty().addListener((observableValue, wasShowing, isShowing) -> {
+				if (isShowing) {
+					visibleStages.add(stage);
+				} else {
+					visibleStages.remove(stage);
+				}
+			});
+		});
 	}
 
 	private static Image createImageFromResource(String resourceName) throws IOException {

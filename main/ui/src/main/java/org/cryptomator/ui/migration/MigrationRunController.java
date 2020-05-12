@@ -121,7 +121,7 @@ public class MigrationRunController implements FxController {
 			} else {
 				LOG.info("Migration of '{}' succeeded.", vault.getDisplayableName());
 				vault.setState(VaultState.LOCKED);
-				passwordField.swipe();
+				passwordField.wipe();
 				window.setScene(successScene.get());
 			}
 		}).onError(InvalidPassphraseException.class, e -> {

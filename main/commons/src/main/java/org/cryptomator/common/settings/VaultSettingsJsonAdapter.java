@@ -25,11 +25,12 @@ class VaultSettingsJsonAdapter {
 		out.name("winDriveLetter").value(value.winDriveLetter().get());
 		out.name("unlockAfterStartup").value(value.unlockAfterStartup().get());
 		out.name("revealAfterMount").value(value.revealAfterMount().get());
-		out.name("usesIndividualMountPath").value(value.usesIndividualMountPath().get());
-		out.name("individualMountPath").value(value.individualMountPath().get());
+		out.name("useCustomMountPath").value(value.useCustomMountPath().get());
+		out.name("customMountPath").value(value.customMountPath().get());
 		out.name("usesReadOnlyMode").value(value.usesReadOnlyMode().get());
 		out.name("mountFlags").value(value.mountFlags().get());
 		out.name("filenameLengthLimit").value(value.filenameLengthLimit().get());
+		out.name("actionAfterUnlock").value(value.actionAfterUnlock().get().name());
 		out.endObject();
 	}
 
@@ -37,56 +38,36 @@ class VaultSettingsJsonAdapter {
 		String id = null;
 		String path = null;
 		String mountName = null;
-		String individualMountPath = null;
+		String customMountPath = null;
 		String winDriveLetter = null;
 		boolean unlockAfterStartup = VaultSettings.DEFAULT_UNLOCK_AFTER_STARTUP;
 		boolean revealAfterMount = VaultSettings.DEFAULT_REAVEAL_AFTER_MOUNT;
-		boolean usesIndividualMountPath = VaultSettings.DEFAULT_USES_INDIVIDUAL_MOUNTPATH;
+		boolean useCustomMountPath = VaultSettings.DEFAULT_USES_INDIVIDUAL_MOUNTPATH;
 		boolean usesReadOnlyMode = VaultSettings.DEFAULT_USES_READONLY_MODE;
 		String mountFlags = VaultSettings.DEFAULT_MOUNT_FLAGS;
 		int filenameLengthLimit = VaultSettings.DEFAULT_FILENAME_LENGTH_LIMIT;
+		WhenUnlocked actionAfterUnlock = VaultSettings.DEFAULT_ACTION_AFTER_UNLOCK;
 
 		in.beginObject();
 		while (in.hasNext()) {
 			String name = in.nextName();
 			switch (name) {
-				case "id":
-					id = in.nextString();
-					break;
-				case "path":
-					path = in.nextString();
-					break;
-				case "mountName":
-					mountName = in.nextString();
-					break;
-				case "winDriveLetter":
-					winDriveLetter = in.nextString();
-					break;
-				case "unlockAfterStartup":
-					unlockAfterStartup = in.nextBoolean();
-					break;
-				case "revealAfterMount":
-					revealAfterMount = in.nextBoolean();
-					break;
-				case "usesIndividualMountPath":
-					usesIndividualMountPath = in.nextBoolean();
-					break;
-				case "individualMountPath":
-					individualMountPath = in.nextString();
-					break;
-				case "usesReadOnlyMode":
-					usesReadOnlyMode = in.nextBoolean();
-					break;
-				case "mountFlags":
-					mountFlags = in.nextString();
-					break;
-				case "filenameLengthLimit":
-					filenameLengthLimit = in.nextInt();
-					break;
-				default:
+				case "id" -> id = in.nextString();
+				case "path" -> path = in.nextString();
+				case "mountName" -> mountName = in.nextString();
+				case "winDriveLetter" -> winDriveLetter = in.nextString();
+				case "unlockAfterStartup" -> unlockAfterStartup = in.nextBoolean();
+				case "revealAfterMount" -> revealAfterMount = in.nextBoolean();
+				case "usesIndividualMountPath", "useCustomMountPath" -> useCustomMountPath = in.nextBoolean();
+				case "individualMountPath", "customMountPath" -> customMountPath = in.nextString();
+				case "usesReadOnlyMode" -> usesReadOnlyMode = in.nextBoolean();
+				case "mountFlags" -> mountFlags = in.nextString();
+				case "filenameLengthLimit" -> filenameLengthLimit = in.nextInt();
+				case "actionAfterUnlock" -> actionAfterUnlock = parseActionAfterUnlock(in.nextString());
+				default -> {
 					LOG.warn("Unsupported vault setting found in JSON: " + name);
 					in.skipValue();
-					break;
+				}
 			}
 		}
 		in.endObject();
@@ -97,12 +78,22 @@ class VaultSettingsJsonAdapter {
 		vaultSettings.winDriveLetter().set(winDriveLetter);
 		vaultSettings.unlockAfterStartup().set(unlockAfterStartup);
 		vaultSettings.revealAfterMount().set(revealAfterMount);
-		vaultSettings.usesIndividualMountPath().set(usesIndividualMountPath);
-		vaultSettings.individualMountPath().set(individualMountPath);
+		vaultSettings.useCustomMountPath().set(useCustomMountPath);
+		vaultSettings.customMountPath().set(customMountPath);
 		vaultSettings.usesReadOnlyMode().set(usesReadOnlyMode);
 		vaultSettings.mountFlags().set(mountFlags);
 		vaultSettings.filenameLengthLimit().set(filenameLengthLimit);
+		vaultSettings.actionAfterUnlock().set(actionAfterUnlock);
 		return vaultSettings;
+	}
+
+	private WhenUnlocked parseActionAfterUnlock(String actionAfterUnlockName) {
+		try {
+			return WhenUnlocked.valueOf(actionAfterUnlockName.toUpperCase());
+		} catch (IllegalArgumentException e) {
+			LOG.warn("Invalid action after unlock {}. Defaulting to {}.", actionAfterUnlockName, VaultSettings.DEFAULT_ACTION_AFTER_UNLOCK);
+			return VaultSettings.DEFAULT_ACTION_AFTER_UNLOCK;
+		}
 	}
 
 }

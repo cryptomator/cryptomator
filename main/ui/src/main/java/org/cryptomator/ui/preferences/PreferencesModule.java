@@ -15,6 +15,7 @@ import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxControllerKey;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
+import org.cryptomator.ui.common.StageFactory;
 
 import javax.inject.Named;
 import javax.inject.Provider;
@@ -41,11 +42,10 @@ abstract class PreferencesModule {
 	@Provides
 	@PreferencesWindow
 	@PreferencesScoped
-	static Stage provideStage(ResourceBundle resourceBundle, @Named("windowIcons") List<Image> windowIcons) {
-		Stage stage = new Stage();
+	static Stage provideStage(StageFactory factory, ResourceBundle resourceBundle) {
+		Stage stage = factory.create();
 		stage.setTitle(resourceBundle.getString("preferences.title"));
 		stage.setResizable(false);
-		stage.getIcons().addAll(windowIcons);
 		return stage;
 	}
 

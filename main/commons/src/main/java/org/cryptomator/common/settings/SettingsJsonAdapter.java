@@ -58,46 +58,22 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 		while (in.hasNext()) {
 			String name = in.nextName();
 			switch (name) {
-				case "directories":
-					settings.getDirectories().addAll(readVaultSettingsArray(in));
-					break;
-				case "askedForUpdateCheck":
-					settings.askedForUpdateCheck().set(in.nextBoolean());
-					break;
-				case "checkForUpdatesEnabled":
-					settings.checkForUpdates().set(in.nextBoolean());
-					break;
-				case "startHidden":
-					settings.startHidden().set(in.nextBoolean());
-					break;
-				case "port":
-					settings.port().set(in.nextInt());
-					break;
-				case "numTrayNotifications":
-					settings.numTrayNotifications().set(in.nextInt());
-					break;
-				case "preferredGvfsScheme":
-					settings.preferredGvfsScheme().set(parseWebDavUrlSchemePrefix(in.nextString()));
-					break;
-				case "debugMode":
-					settings.debugMode().set(in.nextBoolean());
-					break;
-				case "preferredVolumeImpl":
-					settings.preferredVolumeImpl().set(parsePreferredVolumeImplName(in.nextString()));
-					break;
-				case "theme":
-					settings.theme().set(parseUiTheme(in.nextString()));
-					break;
-				case "uiOrientation":
-					settings.userInterfaceOrientation().set(parseUiOrientation(in.nextString()));
-					break;
-				case "licenseKey":
-					settings.licenseKey().set(in.nextString());
-					break;
-				default:
+				case "directories" -> settings.getDirectories().addAll(readVaultSettingsArray(in));
+				case "askedForUpdateCheck" -> settings.askedForUpdateCheck().set(in.nextBoolean());
+				case "checkForUpdatesEnabled" -> settings.checkForUpdates().set(in.nextBoolean());
+				case "startHidden" -> settings.startHidden().set(in.nextBoolean());
+				case "port" -> settings.port().set(in.nextInt());
+				case "numTrayNotifications" -> settings.numTrayNotifications().set(in.nextInt());
+				case "preferredGvfsScheme" -> settings.preferredGvfsScheme().set(parseWebDavUrlSchemePrefix(in.nextString()));
+				case "debugMode" -> settings.debugMode().set(in.nextBoolean());
+				case "preferredVolumeImpl" -> settings.preferredVolumeImpl().set(parsePreferredVolumeImplName(in.nextString()));
+				case "theme" -> settings.theme().set(parseUiTheme(in.nextString()));
+				case "uiOrientation" -> settings.userInterfaceOrientation().set(parseUiOrientation(in.nextString()));
+				case "licenseKey" -> settings.licenseKey().set(in.nextString());
+				default -> {
 					LOG.warn("Unsupported vault setting found in JSON: " + name);
 					in.skipValue();
-					break;
+				}
 			}
 		}
 		in.endObject();
