@@ -129,8 +129,11 @@ public class UnlockWorkflow extends Task<Boolean> {
 				window.setScene(successScene.get());
 				window.show();
 			});
-			case REVEAL -> vaultService.reveal(vault);
-			case IGNORE -> {}
+			case REVEAL -> {
+				Platform.runLater(window::close);
+				vaultService.reveal(vault);
+			}
+			case IGNORE -> Platform.runLater(window::close);
 		}
 	}
 
