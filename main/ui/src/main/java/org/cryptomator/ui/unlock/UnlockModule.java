@@ -5,12 +5,11 @@ import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoMap;
 import javafx.scene.Scene;
-import javafx.scene.image.Image;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.cryptomator.common.vaults.Vault;
-import org.cryptomator.keychain.KeychainAccess;
 import org.cryptomator.keychain.KeychainAccessException;
+import org.cryptomator.keychain.KeychainManager;
 import org.cryptomator.ui.common.DefaultSceneFactory;
 import org.cryptomator.ui.common.FXMLLoaderFactory;
 import org.cryptomator.ui.common.FxController;
@@ -25,16 +24,11 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Named;
 import javax.inject.Provider;
-import java.nio.CharBuffer;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 @Module(subcomponents = {ForgetPasswordComponent.class})
 abstract class UnlockModule {
@@ -52,8 +46,8 @@ abstract class UnlockModule {
 	@Provides
 	@Named("savedPassword")
 	@UnlockScoped
-	static Optional<char[]> provideStoredPassword(Optional<KeychainAccess> keychainAccess, @UnlockWindow Vault vault) {
-		return keychainAccess.map(k -> {
+	static Optional<char[]> provideStoredPassword(Optional<KeychainManager> keychain, @UnlockWindow Vault vault) {
+		return keychain.map(k -> {
 			try {
 				return k.loadPassphrase(vault.getId());
 			} catch (KeychainAccessException e) {

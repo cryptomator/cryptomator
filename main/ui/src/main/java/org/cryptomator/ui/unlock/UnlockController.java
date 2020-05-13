@@ -11,7 +11,7 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.ContentDisplay;
 import javafx.stage.Stage;
 import org.cryptomator.common.vaults.Vault;
-import org.cryptomator.keychain.KeychainAccess;
+import org.cryptomator.keychain.KeychainManager;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.UserInteractionLock;
 import org.cryptomator.ui.controls.NiceSecurePasswordField;
@@ -38,7 +38,7 @@ public class UnlockController implements FxController {
 	private final Optional<char[]> savedPassword;
 	private final UserInteractionLock<UnlockModule.PasswordEntry> passwordEntryLock;
 	private final ForgetPasswordComponent.Builder forgetPassword;
-	private final Optional<KeychainAccess> keychainAccess;
+	private final Optional<KeychainManager> keychain;
 	private final ObjectBinding<ContentDisplay> unlockButtonContentDisplay;
 	private final BooleanBinding userInteractionDisabled;
 	private final BooleanProperty unlockButtonDisabled;
@@ -46,7 +46,7 @@ public class UnlockController implements FxController {
 	public CheckBox savePasswordCheckbox;
 
 	@Inject
-	public UnlockController(@UnlockWindow Stage window, @UnlockWindow Vault vault, AtomicReference<char[]> password, @Named("savePassword") AtomicBoolean savePassword, @Named("savedPassword") Optional<char[]> savedPassword, UserInteractionLock<UnlockModule.PasswordEntry> passwordEntryLock, ForgetPasswordComponent.Builder forgetPassword, Optional<KeychainAccess> keychainAccess) {
+	public UnlockController(@UnlockWindow Stage window, @UnlockWindow Vault vault, AtomicReference<char[]> password, @Named("savePassword") AtomicBoolean savePassword, @Named("savedPassword") Optional<char[]> savedPassword, UserInteractionLock<UnlockModule.PasswordEntry> passwordEntryLock, ForgetPasswordComponent.Builder forgetPassword, Optional<KeychainManager> keychain) {
 		this.window = window;
 		this.vault = vault;
 		this.password = password;
@@ -54,7 +54,7 @@ public class UnlockController implements FxController {
 		this.savedPassword = savedPassword;
 		this.passwordEntryLock = passwordEntryLock;
 		this.forgetPassword = forgetPassword;
-		this.keychainAccess = keychainAccess;
+		this.keychain = keychain;
 		this.unlockButtonContentDisplay = Bindings.createObjectBinding(this::getUnlockButtonContentDisplay, passwordEntryLock.awaitingInteraction());
 		this.userInteractionDisabled = passwordEntryLock.awaitingInteraction().not();
 		this.unlockButtonDisabled = new SimpleBooleanProperty();
@@ -131,6 +131,6 @@ public class UnlockController implements FxController {
 	}
 
 	public boolean isKeychainAccessAvailable() {
-		return keychainAccess.isPresent();
+		return keychain.isPresent();
 	}
 }
