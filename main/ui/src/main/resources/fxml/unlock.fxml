@@ -5,6 +5,10 @@
 <?import javafx.scene.control.ButtonBar?>
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.ProgressIndicator?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import org.cryptomator.ui.controls.FormattedLabel?>
 <?import org.cryptomator.ui.controls.NiceSecurePasswordField?>
@@ -19,11 +23,34 @@
 		<Insets topRightBottomLeft="12"/>
 	</padding>
 	<children>
-		<VBox spacing="6">
-			<FormattedLabel format="%unlock.passwordPrompt" arg1="${controller.vault.displayableName}" wrapText="true"/>
-			<NiceSecurePasswordField fx:id="passwordField" disable="${controller.userInteractionDisabled}"/>
-			<CheckBox fx:id="savePasswordCheckbox" text="%unlock.savePassword" onAction="#didClickSavePasswordCheckbox" disable="${controller.userInteractionDisabled}" visible="${controller.keychainAccessAvailable}"/>
-		</VBox>
+		<HBox spacing="12" VBox.vgrow="ALWAYS">
+			<StackPane alignment="CENTER" HBox.hgrow="NEVER">
+				<ImageView VBox.vgrow="ALWAYS" fitWidth="64" preserveRatio="true" smooth="true" cache="true" fx:id="face" visible="false">
+					<Image url="/img/bot/face.png"/>
+				</ImageView>
+
+				<ImageView VBox.vgrow="ALWAYS" fitWidth="64" preserveRatio="true" smooth="true" cache="true" fx:id="leftArm" visible="false">
+					<Image url="/img/bot/arm-l.png"/>
+				</ImageView>
+
+				<ImageView VBox.vgrow="ALWAYS" fitWidth="64" preserveRatio="true" smooth="true" cache="true" fx:id="rightArm" visible="false">
+					<Image url="/img/bot/arm-r.png"/>
+				</ImageView>
+
+				<ImageView VBox.vgrow="ALWAYS" fitWidth="64" preserveRatio="true" smooth="true" cache="true" fx:id="legs" visible="false">
+					<Image url="/img/bot/legs.png"/>
+				</ImageView>
+
+				<ImageView VBox.vgrow="ALWAYS" fitWidth="64" preserveRatio="true" smooth="true" cache="true" fx:id="body">
+					<Image url="/img/bot/body.png"/>
+				</ImageView>
+			</StackPane>
+			<VBox spacing="6" HBox.hgrow="ALWAYS">
+				<FormattedLabel format="%unlock.passwordPrompt" arg1="${controller.vault.displayableName}" wrapText="true"/>
+				<NiceSecurePasswordField fx:id="passwordField" disable="${controller.userInteractionDisabled}"/>
+				<CheckBox fx:id="savePasswordCheckbox" text="%unlock.savePassword" onAction="#didClickSavePasswordCheckbox" disable="${controller.userInteractionDisabled}" visible="${controller.keychainAccessAvailable}"/>
+			</VBox>
+		</HBox>
 
 		<VBox alignment="BOTTOM_CENTER" VBox.vgrow="ALWAYS">
 			<ButtonBar buttonMinWidth="120" buttonOrder="+CI">
