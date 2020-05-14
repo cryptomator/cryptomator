@@ -30,7 +30,7 @@ public class WrongFileAlertController implements FxController {
 
 	@FXML
 	public void initialize() {
-		final String resource = SystemUtils.IS_OS_MAC ? "/vault-volume-mac.png" : "/vault-volume-win.png";
+		final String resource = SystemUtils.IS_OS_MAC ? "/img/vault-volume-mac.png" : "/img/vault-volume-win.png";
 		try (InputStream in = getClass().getResourceAsStream(resource)) {
 			this.screenshot = new Image(in);
 		} catch (IOException e) {

@@ -9,14 +9,11 @@ import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import javafx.application.Application;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableSet;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import org.apache.commons.lang3.SystemUtils;
-import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.ErrorComponent;
 import org.cryptomator.ui.common.StageFactory;
 import org.cryptomator.ui.mainwindow.MainWindowComponent;
@@ -49,8 +46,8 @@ abstract class FxApplicationModule {
 		}
 		try {
 			return List.of( //
-					createImageFromResource("/window_icon_32.png"), //
-					createImageFromResource("/window_icon_512.png") //
+					createImageFromResource("/img/window_icon_32.png"), //
+					createImageFromResource("/img/window_icon_512.png") //
 			);
 		} catch (IOException e) {
 			throw new UncheckedIOException("Failed to load embedded resource.", e);
