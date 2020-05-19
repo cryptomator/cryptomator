@@ -62,16 +62,20 @@ public class UiLauncher {
 		Desktop.getDesktop().addAppEventListener((AppReopenedListener) e -> showMainWindowAsync(hasTrayIcon));
 
 		// auto unlock
-		Collection<Vault> vaultsWithAutoUnlockEnabled = vaults.filtered(v -> v.getVaultSettings().unlockAfterStartup().get());
-		if (!vaultsWithAutoUnlockEnabled.isEmpty()) {
+		Collection<Vault> vaultsToAutoUnlock = vaults.filtered(this::shouldAttemptAutoUnlock);
+		if (!vaultsToAutoUnlock.isEmpty()) {
 			fxApplicationStarter.get(hasTrayIcon).thenAccept(app -> {
-				for (Vault vault : vaultsWithAutoUnlockEnabled){
+				for (Vault vault : vaultsToAutoUnlock){
 					app.startUnlockWorkflow(vault);
 				}
 			});
 		}
 
 		launchEventHandler.startHandlingLaunchEvents(hasTrayIcon);
+	}
+	
+	private boolean shouldAttemptAutoUnlock(Vault vault) {
+		return vault.isLocked() && vault.getVaultSettings().unlockAfterStartup().get();
 	}
 
 	private void showMainWindowAsync(boolean hasTrayIcon) {
