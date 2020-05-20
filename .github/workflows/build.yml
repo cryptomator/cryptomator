@@ -28,7 +28,7 @@ jobs:
       - name: Export the pom project version to the job environment and save it as an ouput of this job
         id: setversion
         run: |
-          v=$(mvn help:evaluate "-Dexpression=project.version" -q -DforceStdout)
+          v=$(mvn help:evaluate "-Dexpression=project.version" --file main/pom.xml -q -DforceStdout)
           echo "::set-env name=BUILD_VERSION::${v}"
           echo "::set-output name=version::${v}"
       - name: Build and Test
