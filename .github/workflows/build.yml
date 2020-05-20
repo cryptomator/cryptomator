@@ -7,6 +7,10 @@ jobs:
   build:
     name: Build and Test
     runs-on: ubuntu-latest
+    outputs:
+      artifact-version: ${{ steps.setversion.outputs.version }}
+    env:
+      BUILD_VERSION: SNAPSHOT
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-java@v1
@@ -21,6 +25,12 @@ jobs:
       - name: Ensure to use tagged version
         run: mvn versions:set --file main/pom.xml -DnewVersion=${GITHUB_REF##*/} # use shell parameter expansion to strip of 'refs/tags'
         if: startsWith(github.ref, 'refs/tags/')
+      - name: Export the pom project version to the job environment and save it as an ouput of this job
+        id: setversion
+        run: |
+          v=$(mvn help:evaluate "-Dexpression=project.version" -q -DforceStdout)
+          echo "::set-env name=BUILD_VERSION::${v}"
+          echo "::set-output name=version::${v}"
       - name: Build and Test
         run: mvn -B install --file main/pom.xml -Pcoverage
       - name: Run Codacy Coverage Reporter
@@ -38,17 +48,17 @@ jobs:
       - name: Upload buildkit-linux.zip
         uses: actions/upload-artifact@v1
         with:
-          name: buildkit-linux.zip
+          name: buildkit-linux-${{ BUILD_VERSION }}.zip
           path: main/buildkit/target/buildkit-linux.zip
       - name: Upload buildkit-mac.zip
         uses: actions/upload-artifact@v1
         with:
-          name: buildkit-mac.zip
+          name: buildkit-mac-${{ BUILD_VERSION }}.zip
           path: main/buildkit/target/buildkit-mac.zip
       - name: Upload buildkit-win.zip
         uses: actions/upload-artifact@v1
         with:
-          name: buildkit-win.zip
+          name: buildkit-win-${{ BUILD_VERSION }}.zip
           path: main/buildkit/target/buildkit-win.zip
           
   release:
@@ -56,21 +66,25 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     if: startsWith(github.ref, 'refs/tags/')
+    env:
+      WIN_ARTIFACT: buildkit-win-${{ needs.build.outputs.artifact-version }}.zip
+      MAC_ARTIFACT: buildkit-mac-${{ needs.build.outputs.artifact-version }}.zip
+      LINUX_ARTIFACT: buildkit-linux-${{ needs.build.outputs.artifact-version }}.zip
     steps:
       - name: Download buildkit-linux.zip
         uses: actions/download-artifact@v1
         with:
-          name: buildkit-linux.zip
+          name: ${{ env.LINUX_ARTIFACT }}
           path: .
       - name: Download buildkit-mac.zip
         uses: actions/download-artifact@v1
         with:
-          name: buildkit-mac.zip
+          name: ${{ env.MAC_ARTIFACT}}
           path: .
       - name: Download buildkit-win.zip
         uses: actions/download-artifact@v1
         with:
-          name: buildkit-win.zip
+          name: ${{ env.WIN_ARTIFACT }}
           path: .
       - name: Create Release
         id: create_release
@@ -84,30 +98,30 @@ jobs:
             :construction: Work in Progress
           draft: true
           prerelease: false
-      - name: Upload buildkit-linux.zip to GitHub Releases
+      - name: Upload ${{ LINUX_ARTIFACT }} to GitHub Releases
         uses: actions/upload-release-asset@v1.0.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: buildkit-linux.zip
-          asset_name: buildkit-linux.zip
+          asset_path: ${{ LINUX_ARTIFACT }}
+          asset_name: ${{ LINUX_ARTIFACT }}
           asset_content_type: application/zip
-      - name: Upload buildkit-mac.zip to GitHub Releases
+      - name: Upload ${{ env.MAC_ARTIFACT }} to GitHub Releases
         uses: actions/upload-release-asset@v1.0.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: buildkit-mac.zip
-          asset_name: buildkit-mac.zip
+          asset_path: ${{ env.MAC_ARTIFACT }}
+          asset_name: ${{ env.MAC_ARTIFACT }}
           asset_content_type: application/zip
-      - name: Upload buildkit-win.zip to GitHub Releases
+      - name: Upload ${{ env.WIN_ARTIFACT }} to GitHub Releases
         uses: actions/upload-release-asset@v1.0.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: buildkit-win.zip
-          asset_name: buildkit-win.zip
+          asset_path: ${{ env.WIN_ARTIFACT }}
+          asset_name: ${{ env.WIN_ARTIFACT }}
           asset_content_type: application/zip
