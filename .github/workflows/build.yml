@@ -45,20 +45,20 @@ jobs:
           CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
       - name: Assemble Buildkit
         run: mvn -B package -DskipTests --file main/pom.xml --resume-from=buildkit -Prelease
-      - name: Upload buildkit-linux.zip
+      - name: Upload buildkit-linux-${{ env.BUILD_VERSION }}.zip
         uses: actions/upload-artifact@v1
         with:
-          name: buildkit-linux-${{ BUILD_VERSION }}.zip
+          name: buildkit-linux-${{ env.BUILD_VERSION }}.zip
           path: main/buildkit/target/buildkit-linux.zip
-      - name: Upload buildkit-mac.zip
+      - name: Upload buildkit-mac-${{ env.BUILD_VERSION }}.zip
         uses: actions/upload-artifact@v1
         with:
-          name: buildkit-mac-${{ BUILD_VERSION }}.zip
+          name: buildkit-mac-${{ env.BUILD_VERSION }}.zip
           path: main/buildkit/target/buildkit-mac.zip
-      - name: Upload buildkit-win.zip
+      - name: Upload buildkit-win-${{ env.BUILD_VERSION }}.zip
         uses: actions/upload-artifact@v1
         with:
-          name: buildkit-win-${{ BUILD_VERSION }}.zip
+          name: buildkit-win-${{ env.BUILD_VERSION }}.zip
           path: main/buildkit/target/buildkit-win.zip
           
   release:
