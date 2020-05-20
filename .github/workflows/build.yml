@@ -98,14 +98,14 @@ jobs:
             :construction: Work in Progress
           draft: true
           prerelease: false
-      - name: Upload ${{ LINUX_ARTIFACT }} to GitHub Releases
+      - name: Upload ${{ env.LINUX_ARTIFACT }} to GitHub Releases
         uses: actions/upload-release-asset@v1.0.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{ LINUX_ARTIFACT }}
-          asset_name: ${{ LINUX_ARTIFACT }}
+          asset_path: ${{ env.LINUX_ARTIFACT }}
+          asset_name: ${{ env.LINUX_ARTIFACT }}
           asset_content_type: application/zip
       - name: Upload ${{ env.MAC_ARTIFACT }} to GitHub Releases
         uses: actions/upload-release-asset@v1.0.1
