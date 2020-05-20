@@ -5,6 +5,9 @@
 <?import javafx.scene.control.Hyperlink?>
 <?import javafx.scene.layout.VBox?>
 <?import org.cryptomator.ui.controls.FontAwesome5IconView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.Region?>
 <VBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
 	  fx:controller="org.cryptomator.ui.mainwindow.VaultDetailLockedController"
@@ -14,7 +17,12 @@
 		<Insets topRightBottomLeft="24"/>
 	</padding>
 	<children>
-		<Button styleClass="button-large" text="%main.vaultDetail.unlockBtn" minWidth="120" onAction="#unlock" defaultButton="${controller.vault.locked}">
+		<Button styleClass="button-large" text="%main.vaultDetail.unlockBtn" minWidth="120" onAction="#unlock" defaultButton="${controller.vault.locked}"  visible="${!controller.passwordSaved}" managed="${!controller.passwordSaved}">
+			<graphic>
+				<FontAwesome5IconView glyph="KEY" glyphSize="15"/>
+			</graphic>
+		</Button>
+		<Button styleClass="button-large" text="%main.vaultDetail.unlockNowBtn" minWidth="120" onAction="#unlock" defaultButton="${controller.vault.locked}" visible="${controller.passwordSaved}" managed="${controller.passwordSaved}">
 			<graphic>
 				<FontAwesome5IconView glyph="KEY" glyphSize="15"/>
 			</graphic>
@@ -24,5 +32,9 @@
 				<FontAwesome5IconView glyph="COG"/>
 			</graphic>
 		</Hyperlink>
+		<Region VBox.vgrow="ALWAYS"/>
+		<HBox alignment="CENTER_RIGHT" spacing="6">
+			<Label styleClass="label-small" text="%main.vaultDetail.passwordSavedInKeychain" visible="${controller.passwordSaved}"/>
+		</HBox>
 	</children>
 </VBox>
