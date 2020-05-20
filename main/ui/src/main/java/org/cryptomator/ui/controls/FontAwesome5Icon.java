@@ -26,6 +26,7 @@ public enum FontAwesome5Icon {
 	INFO_CIRCLE("\uF05A"), //
 	KEY("\uF084"), //
 	LINK("\uF0C1"), //
+	UNLINK("\uf127"),
 	LOCK("\uF023"), //
 	LOCK_OPEN("\uF3C1"), //
 	MAGIC("\uF0D0"), //
