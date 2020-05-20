@@ -56,7 +56,7 @@
 				</graphic>
 			</Button>
 		</HBox>
-		<TextField text="${controller.customMountPath}" visible="${mountPointCustomDir.selected}" maxWidth="Infinity" disable="true">
+		<TextField text="${controller.customMountPath}" visible="${mountPointCustomDir.selected}" maxWidth="Infinity" disable="true" managed="${!controller.webDavAndWindows}">
 			<VBox.margin>
 				<Insets left="24"/>
 			</VBox.margin>
