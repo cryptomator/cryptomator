@@ -48,7 +48,6 @@ public class CreateNewVaultLocationController implements FxController {
 	private final StringProperty vaultName;
 	private final ResourceBundle resourceBundle;
 	private final BooleanBinding validVaultPath;
-	private final BooleanBinding invalidVaultPath;
 	private final BooleanProperty usePresetPath;
 	private final StringProperty warningText;
 
@@ -71,7 +70,6 @@ public class CreateNewVaultLocationController implements FxController {
 		this.vaultName = vaultName;
 		this.resourceBundle = resourceBundle;
 		this.validVaultPath = Bindings.createBooleanBinding(this::isValidVaultPath, vaultPath);
-		this.invalidVaultPath = validVaultPath.not();
 		this.usePresetPath = new SimpleBooleanProperty();
 		this.warningText = new SimpleStringProperty();
 	}
@@ -153,12 +151,12 @@ public class CreateNewVaultLocationController implements FxController {
 		return vaultPath;
 	}
 
-	public BooleanBinding invalidVaultPathProperty() {
-		return invalidVaultPath;
+	public BooleanBinding validVaultPathProperty() {
+		return validVaultPath;
 	}
 
-	public Boolean getInvalidVaultPath() {
-		return invalidVaultPath.get();
+	public Boolean getValidVaultPath() {
+		return validVaultPath.get();
 	}
 
 	public LocationPresets getLocationPresets() {
