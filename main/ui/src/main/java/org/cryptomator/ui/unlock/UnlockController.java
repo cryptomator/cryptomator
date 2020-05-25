@@ -74,6 +74,7 @@ public class UnlockController implements FxController {
 		this.unlockButtonContentDisplay = Bindings.createObjectBinding(this::getUnlockButtonContentDisplay, passwordEntryLock.awaitingInteraction());
 		this.userInteractionDisabled = passwordEntryLock.awaitingInteraction().not();
 		this.unlockButtonDisabled = new SimpleBooleanProperty();
+		this.window.setOnCloseRequest(windowEvent -> close());
 	}
 
 	@FXML
@@ -123,12 +124,18 @@ public class UnlockController implements FxController {
 		passwordEntryLock.awaitingInteraction().addListener(observable -> stopUnlockAnimation());
 	}
 
+
 	@FXML
 	public void cancel() {
 		LOG.debug("Unlock canceled by user.");
+		close();
+	}
+
+	private void close() {
 		window.close();
 		passwordEntryLock.interacted(UnlockModule.PasswordEntry.CANCELED);
 	}
+
 
 	@FXML
 	public void unlock() {
