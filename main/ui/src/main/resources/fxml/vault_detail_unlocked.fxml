@@ -36,13 +36,13 @@
 	<Region VBox.vgrow="ALWAYS"/>
 
 	<HBox alignment="CENTER_RIGHT" spacing="6">
-		<Label styleClass="label-small" text="%main.vaultDetail.bytesPerSecondRead"/>
-		<ThrougputLabel styleClass="label-small" alignment="CENTER_RIGHT" minWidth="60" idleFormat="%main.vaultDetail.throughput.idle" kibsFormat="%main.vaultDetail.throughput.kbps"
+		<Label styleClass="label-small,label-muted" text="%main.vaultDetail.bytesPerSecondRead"/>
+		<ThrougputLabel styleClass="label-small,label-muted" alignment="CENTER_RIGHT" minWidth="60" idleFormat="%main.vaultDetail.throughput.idle" kibsFormat="%main.vaultDetail.throughput.kbps"
 						mibsFormat="%main.vaultDetail.throughput.mbps" bytesPerSecond="${controller.vault.stats.bytesPerSecondRead}"/>
 	</HBox>
 	<HBox alignment="CENTER_RIGHT" spacing="6">
-		<Label styleClass="label-small" text="%main.vaultDetail.bytesPerSecondWritten"/>
-		<ThrougputLabel styleClass="label-small" alignment="CENTER_RIGHT" minWidth="60" idleFormat="%main.vaultDetail.throughput.idle" kibsFormat="%main.vaultDetail.throughput.kbps"
+		<Label styleClass="label-small,label-muted" text="%main.vaultDetail.bytesPerSecondWritten"/>
+		<ThrougputLabel styleClass="label-small,label-muted" alignment="CENTER_RIGHT" minWidth="60" idleFormat="%main.vaultDetail.throughput.idle" kibsFormat="%main.vaultDetail.throughput.kbps"
 						mibsFormat="%main.vaultDetail.throughput.mbps" bytesPerSecond="${controller.vault.stats.bytesPerSecondWritten}"/>
 	</HBox>
 </VBox>
