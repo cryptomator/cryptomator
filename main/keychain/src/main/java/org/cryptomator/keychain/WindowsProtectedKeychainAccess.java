@@ -115,8 +115,11 @@ class WindowsProtectedKeychainAccess implements KeychainAccessStrategy {
 	}
 
 	@Override
-	public void changePassphrase(String key, CharSequence passphrase) throws KeychainAccessException {
-		storePassphrase(key, passphrase);
+	public void changePassphrase(String key, CharSequence passphrase) {
+		loadKeychainEntriesIfNeeded();
+		if (keychainEntries.remove(key) != null) {
+			storePassphrase(key, passphrase);
+		}
 	}
 
 	@Override

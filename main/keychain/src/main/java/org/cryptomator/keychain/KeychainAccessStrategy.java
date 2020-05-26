@@ -29,7 +29,7 @@ interface KeychainAccessStrategy {
 	void deletePassphrase(String key) throws KeychainAccessException;
 
 	/**
-	 * Updates a passphrase with a given key.
+	 * Updates a passphrase with a given key. Noop, if there is no item for the given key.
 	 *
 	 * @param key Unique key previously used while {@link #storePassphrase(String, CharSequence) storing a passphrase}.
 	 * @param passphrase The secret to be updated in this keychain.

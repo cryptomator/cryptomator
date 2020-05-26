@@ -49,8 +49,10 @@ class MacSystemKeychainAccess implements KeychainAccessStrategy {
 	}
 
 	@Override
-	public void changePassphrase(String key, CharSequence passphrase) throws KeychainAccessException {
-		storePassphrase(key, passphrase);
+	public void changePassphrase(String key, CharSequence passphrase) {
+		if (keychain().deletePassword(key)) {
+			keychain().storePassword(key, passphrase);
+		}
 	}
 
 }
