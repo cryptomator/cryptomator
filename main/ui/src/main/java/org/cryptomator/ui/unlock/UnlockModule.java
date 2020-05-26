@@ -56,7 +56,7 @@ abstract class UnlockModule {
 			}
 		});
 	}
-	
+
 	@Provides
 	@UnlockScoped
 	static AtomicReference<char[]> providePassword(@Named("savedPassword") Optional<char[]> storedPassword) {
@@ -80,11 +80,16 @@ abstract class UnlockModule {
 	@Provides
 	@UnlockWindow
 	@UnlockScoped
-	static Stage provideStage(StageFactory factory, @UnlockWindow Vault vault) {
+	static Stage provideStage(StageFactory factory, @UnlockWindow Vault vault, @Named("unlockWindowOwner") Optional<Stage> owner) {
 		Stage stage = factory.create();
 		stage.setTitle(vault.getDisplayableName());
 		stage.setResizable(false);
-		stage.initModality(Modality.APPLICATION_MODAL);
+		if (owner.isPresent()) {
+			stage.initOwner(owner.get());
+			stage.initModality(Modality.WINDOW_MODAL);
+		} else {
+			stage.initModality(Modality.APPLICATION_MODAL);
+		}
 		return stage;
 	}
 

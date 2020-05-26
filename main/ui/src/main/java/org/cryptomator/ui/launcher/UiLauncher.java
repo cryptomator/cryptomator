@@ -65,15 +65,15 @@ public class UiLauncher {
 		Collection<Vault> vaultsToAutoUnlock = vaults.filtered(this::shouldAttemptAutoUnlock);
 		if (!vaultsToAutoUnlock.isEmpty()) {
 			fxApplicationStarter.get(hasTrayIcon).thenAccept(app -> {
-				for (Vault vault : vaultsToAutoUnlock){
-					app.startUnlockWorkflow(vault);
+				for (Vault vault : vaultsToAutoUnlock) {
+					app.startUnlockWorkflow(vault, Optional.empty());
 				}
 			});
 		}
 
 		launchEventHandler.startHandlingLaunchEvents(hasTrayIcon);
 	}
-	
+
 	private boolean shouldAttemptAutoUnlock(Vault vault) {
 		return vault.isLocked() && vault.getVaultSettings().unlockAfterStartup().get();
 	}
