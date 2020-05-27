@@ -14,7 +14,7 @@
 	  xmlns:fx="http://javafx.com/fxml"
 	  fx:controller="org.cryptomator.ui.mainwindow.VaultDetailController"
 	  minWidth="300"
-	  spacing="36">
+	  spacing="60">
 	<padding>
 		<Insets topRightBottomLeft="24"/>
 	</padding>

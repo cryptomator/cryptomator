@@ -5,10 +5,10 @@
  *******************************************************************************/
 package org.cryptomator.keychain;
 
-import com.google.common.collect.Sets;
+import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
-import dagger.multibindings.ElementsIntoSet;
+import dagger.multibindings.IntoSet;
 import org.cryptomator.common.JniModule;
 
 import javax.inject.Singleton;
@@ -16,18 +16,30 @@ import java.util.Optional;
 import java.util.Set;
 
 @Module(includes = {JniModule.class})
-public class KeychainModule {
+public abstract class KeychainModule {
 
-	@Provides
-	@ElementsIntoSet
-	Set<KeychainAccessStrategy> provideKeychainAccessStrategies(MacSystemKeychainAccess macKeychain, WindowsProtectedKeychainAccess winKeychain, LinuxSecretServiceKeychainAccess linKeychain) {
-		return Sets.newHashSet(macKeychain, winKeychain, linKeychain);
-	}
+	@Binds
+	@IntoSet
+	abstract KeychainAccessStrategy bindMacSystemKeychainAccess(MacSystemKeychainAccess keychainAccessStrategy);
+
+	@Binds
+	@IntoSet
+	abstract KeychainAccessStrategy bindWindowsProtectedKeychainAccess(WindowsProtectedKeychainAccess keychainAccessStrategy);
+	
+	@Binds
+	@IntoSet
+	abstract KeychainAccessStrategy bindLinuxSecretServiceKeychainAccess(LinuxSecretServiceKeychainAccess keychainAccessStrategy);
 
 	@Provides
 	@Singleton
-	public Optional<KeychainAccess> provideSupportedKeychain(Set<KeychainAccessStrategy> keychainAccessStrategies) {
-		return keychainAccessStrategies.stream().filter(KeychainAccessStrategy::isSupported).map(KeychainAccess.class::cast).findFirst();
+	static Optional<KeychainAccessStrategy> provideSupportedKeychain(Set<KeychainAccessStrategy> keychainAccessStrategies) {
+		return keychainAccessStrategies.stream().filter(KeychainAccessStrategy::isSupported).findFirst();
+	}
+	
+	@Provides
+	@Singleton
+	public static Optional<KeychainManager> provideKeychainManager(Optional<KeychainAccessStrategy> keychainAccess) {
+		return keychainAccess.map(KeychainManager::new);
 	}
 
 }

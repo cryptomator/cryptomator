@@ -11,7 +11,7 @@
 	  spacing="24">
 	<children>
 		<ImageView VBox.vgrow="ALWAYS" fitHeight="128" preserveRatio="true" smooth="true" cache="true">
-			<Image url="/bot.png"/>
+			<Image url="/img/bot/bot.png"/>
 		</ImageView>
 
 		<TextFlow styleClass="text-flow" prefWidth="-Infinity" visible="${controller.noVaultPresent}" managed="${controller.noVaultPresent}">

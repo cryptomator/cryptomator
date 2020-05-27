@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.cryptomator</groupId>
 		<artifactId>main</artifactId>
-		<version>1.5.4</version>
+		<version>1.5.5</version>
 	</parent>
 	<artifactId>keychain</artifactId>
 	<name>System Keychain Access</name>
@@ -15,16 +15,27 @@
 			<artifactId>commons</artifactId>
 		</dependency>
 
+		<!-- JavaFx -->
+		<dependency>
+			<groupId>org.openjfx</groupId>
+			<artifactId>javafx-base</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.openjfx</groupId>
+			<artifactId>javafx-graphics</artifactId>
+		</dependency>
+		
+		<!-- Apache -->
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
 		</dependency>
+
+		<!-- Google -->
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
 		</dependency>
-
-		<!-- Google -->
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>

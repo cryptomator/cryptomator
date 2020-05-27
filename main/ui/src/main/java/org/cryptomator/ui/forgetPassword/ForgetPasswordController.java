@@ -4,8 +4,8 @@ import javafx.beans.property.BooleanProperty;
 import javafx.fxml.FXML;
 import javafx.stage.Stage;
 import org.cryptomator.common.vaults.Vault;
-import org.cryptomator.keychain.KeychainAccess;
 import org.cryptomator.keychain.KeychainAccessException;
+import org.cryptomator.keychain.KeychainManager;
 import org.cryptomator.ui.common.FxController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,14 +20,14 @@ public class ForgetPasswordController implements FxController {
 
 	private final Stage window;
 	private final Vault vault;
-	private final Optional<KeychainAccess> keychainAccess;
+	private final Optional<KeychainManager> keychain;
 	private final BooleanProperty confirmedResult;
 
 	@Inject
-	public ForgetPasswordController(@ForgetPasswordWindow Stage window, @ForgetPasswordWindow Vault vault, Optional<KeychainAccess> keychainAccess, @ForgetPasswordWindow BooleanProperty confirmedResult) {
+	public ForgetPasswordController(@ForgetPasswordWindow Stage window, @ForgetPasswordWindow Vault vault, Optional<KeychainManager> keychain, @ForgetPasswordWindow BooleanProperty confirmedResult) {
 		this.window = window;
 		this.vault = vault;
-		this.keychainAccess = keychainAccess;
+		this.keychain = keychain;
 		this.confirmedResult = confirmedResult;
 	}
 
@@ -38,9 +38,9 @@ public class ForgetPasswordController implements FxController {
 
 	@FXML
 	public void finish() {
-		if (keychainAccess.isPresent()) {
+		if (keychain.isPresent()) {
 			try {
-				keychainAccess.get().deletePassphrase(vault.getId());
+				keychain.get().deletePassphrase(vault.getId());
 				LOG.debug("Forgot password for vault {}.", vault.getDisplayableName());
 				confirmedResult.setValue(true);
 			} catch (KeychainAccessException e) {

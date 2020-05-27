@@ -29,6 +29,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ResourceBundle;
@@ -48,7 +49,6 @@ public class CreateNewVaultLocationController implements FxController {
 	private final StringProperty vaultName;
 	private final ResourceBundle resourceBundle;
 	private final BooleanBinding validVaultPath;
-	private final BooleanBinding invalidVaultPath;
 	private final BooleanProperty usePresetPath;
 	private final StringProperty warningText;
 
@@ -71,7 +71,6 @@ public class CreateNewVaultLocationController implements FxController {
 		this.vaultName = vaultName;
 		this.resourceBundle = resourceBundle;
 		this.validVaultPath = Bindings.createBooleanBinding(this::isValidVaultPath, vaultPath);
-		this.invalidVaultPath = validVaultPath.not();
 		this.usePresetPath = new SimpleBooleanProperty();
 		this.warningText = new SimpleStringProperty();
 	}
@@ -125,6 +124,9 @@ public class CreateNewVaultLocationController implements FxController {
 		} catch (FileAlreadyExistsException e) {
 			LOG.warn("Can not use already existing vault path {}", vaultPath.get());
 			warningText.set(resourceBundle.getString("addvaultwizard.new.fileAlreadyExists"));
+		} catch (NoSuchFileException e) {
+			LOG.warn("At least one path component does not exist of path {}", vaultPath.get());
+			warningText.set(resourceBundle.getString("addvaultwizard.new.locationDoesNotExist"));
 		} catch (IOException e) {
 			LOG.error("Failed to create and delete directory at chosen vault path.", e);
 			errorComponent.cause(e).window(window).returnToScene(window.getScene()).build().showErrorScene();
@@ -135,7 +137,11 @@ public class CreateNewVaultLocationController implements FxController {
 	public void chooseCustomVaultPath() {
 		DirectoryChooser directoryChooser = new DirectoryChooser();
 		directoryChooser.setTitle(resourceBundle.getString("addvaultwizard.new.directoryPickerTitle"));
-		directoryChooser.setInitialDirectory(customVaultPath.toFile());
+		if (Files.exists(customVaultPath)) {
+			directoryChooser.setInitialDirectory(customVaultPath.toFile());
+		} else {
+			directoryChooser.setInitialDirectory(DEFAULT_CUSTOM_VAULT_PATH.toFile());
+		}
 		final File file = directoryChooser.showDialog(window);
 		if (file != null) {
 			customVaultPath = file.toPath().toAbsolutePath();
@@ -153,12 +159,12 @@ public class CreateNewVaultLocationController implements FxController {
 		return vaultPath;
 	}
 
-	public BooleanBinding invalidVaultPathProperty() {
-		return invalidVaultPath;
+	public BooleanBinding validVaultPathProperty() {
+		return validVaultPath;
 	}
 
-	public Boolean getInvalidVaultPath() {
-		return invalidVaultPath.get();
+	public Boolean getValidVaultPath() {
+		return validVaultPath.get();
 	}
 
 	public LocationPresets getLocationPresets() {

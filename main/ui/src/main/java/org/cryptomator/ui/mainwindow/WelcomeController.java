@@ -42,4 +42,5 @@ public class WelcomeController implements FxController {
 	public boolean isNoVaultPresent() {
 		return noVaultPresent.get();
 	}
+	
 }

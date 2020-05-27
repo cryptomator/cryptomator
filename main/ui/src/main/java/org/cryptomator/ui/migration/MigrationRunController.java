@@ -22,8 +22,8 @@ import org.cryptomator.cryptofs.migration.Migrators;
 import org.cryptomator.cryptofs.migration.api.MigrationContinuationListener;
 import org.cryptomator.cryptofs.migration.api.MigrationProgressListener;
 import org.cryptomator.cryptolib.api.InvalidPassphraseException;
-import org.cryptomator.keychain.KeychainAccess;
 import org.cryptomator.keychain.KeychainAccessException;
+import org.cryptomator.keychain.KeychainManager;
 import org.cryptomator.ui.common.Animations;
 import org.cryptomator.ui.common.ErrorComponent;
 import org.cryptomator.ui.common.FxController;
@@ -55,7 +55,7 @@ public class MigrationRunController implements FxController {
 	private final Vault vault;
 	private final ExecutorService executor;
 	private final ScheduledExecutorService scheduler;
-	private final Optional<KeychainAccess> keychainAccess;
+	private final Optional<KeychainManager> keychain;
 	private final ObjectProperty<FileSystemCapabilityChecker.Capability> missingCapability;
 	private final ErrorComponent.Builder errorComponent;
 	private final Lazy<Scene> startScene;
@@ -69,13 +69,13 @@ public class MigrationRunController implements FxController {
 	public NiceSecurePasswordField passwordField;
 
 	@Inject
-	public MigrationRunController(@MigrationWindow Stage window, @MigrationWindow Vault vault, ExecutorService executor, ScheduledExecutorService scheduler, Optional<KeychainAccess> keychainAccess, @Named("capabilityErrorCause") ObjectProperty<FileSystemCapabilityChecker.Capability> missingCapability, @FxmlScene(FxmlFile.MIGRATION_START) Lazy<Scene> startScene, @FxmlScene(FxmlFile.MIGRATION_SUCCESS) Lazy<Scene> successScene, @FxmlScene(FxmlFile.MIGRATION_CAPABILITY_ERROR) Lazy<Scene> capabilityErrorScene, @FxmlScene(FxmlFile.MIGRATION_IMPOSSIBLE) Lazy<Scene> impossibleScene, ErrorComponent.Builder errorComponent) {
+	public MigrationRunController(@MigrationWindow Stage window, @MigrationWindow Vault vault, ExecutorService executor, ScheduledExecutorService scheduler, Optional<KeychainManager> keychain, @Named("capabilityErrorCause") ObjectProperty<FileSystemCapabilityChecker.Capability> missingCapability, @FxmlScene(FxmlFile.MIGRATION_START) Lazy<Scene> startScene, @FxmlScene(FxmlFile.MIGRATION_SUCCESS) Lazy<Scene> successScene, @FxmlScene(FxmlFile.MIGRATION_CAPABILITY_ERROR) Lazy<Scene> capabilityErrorScene, @FxmlScene(FxmlFile.MIGRATION_IMPOSSIBLE) Lazy<Scene> impossibleScene, ErrorComponent.Builder errorComponent) {
 
 		this.window = window;
 		this.vault = vault;
 		this.executor = executor;
 		this.scheduler = scheduler;
-		this.keychainAccess = keychainAccess;
+		this.keychain = keychain;
 		this.missingCapability = missingCapability;
 		this.errorComponent = errorComponent;
 		this.startScene = startScene;
@@ -88,7 +88,7 @@ public class MigrationRunController implements FxController {
 	}
 
 	public void initialize() {
-		if (keychainAccess.isPresent()) {
+		if (keychain.isPresent()) {
 			loadStoredPassword();
 		}
 		migrationButtonDisabled.bind(vault.stateProperty().isNotEqualTo(VaultState.NEEDS_MIGRATION).or(passwordField.textProperty().isEmpty()));
@@ -167,10 +167,10 @@ public class MigrationRunController implements FxController {
 	}
 
 	private void loadStoredPassword() {
-		assert keychainAccess.isPresent();
+		assert keychain.isPresent();
 		char[] storedPw = null;
 		try {
-			storedPw = keychainAccess.get().loadPassphrase(vault.getId());
+			storedPw = keychain.get().loadPassphrase(vault.getId());
 			if (storedPw != null) {
 				passwordField.setPassword(storedPw);
 				passwordField.selectRange(storedPw.length, storedPw.length);

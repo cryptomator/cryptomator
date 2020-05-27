@@ -18,7 +18,7 @@
 	<children>
 		<HBox spacing="12" VBox.vgrow="NEVER">
 			<ImageView VBox.vgrow="ALWAYS" fitHeight="64" preserveRatio="true" smooth="true" cache="true">
-				<Image url="/bot.png"/>
+				<Image url="/img/bot/bot.png"/>
 			</ImageView>
 			<VBox spacing="3" HBox.hgrow="ALWAYS" alignment="CENTER_LEFT">
 				<FormattedLabel styleClass="label-large" format="Cryptomator %s" arg1="${controller.applicationVersion}"/>

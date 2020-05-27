@@ -18,7 +18,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -57,7 +56,7 @@ public class ChooseExistingVaultController implements FxController {
 
 	@FXML
 	public void initialize() {
-		final String resource = SystemUtils.IS_OS_MAC ? "/select-masterkey-mac.png" : "/select-masterkey-win.png";
+		final String resource = SystemUtils.IS_OS_MAC ? "/img/select-masterkey-mac.png" : "/img/select-masterkey-win.png";
 		try (InputStream in = getClass().getResourceAsStream(resource)) {
 			this.screenshot = new Image(in);
 		} catch (IOException e) {

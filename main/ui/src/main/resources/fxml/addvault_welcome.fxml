@@ -21,7 +21,7 @@
 		<Region VBox.vgrow="ALWAYS"/>
 
 		<ImageView VBox.vgrow="ALWAYS" fitHeight="128" preserveRatio="true" smooth="true" cache="true">
-			<Image url="/bot.png"/>
+			<Image url="/img/bot/bot.png"/>
 		</ImageView>
 
 		<Region VBox.vgrow="ALWAYS"/>

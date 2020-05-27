@@ -1,16 +1,12 @@
-<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.VBox?>
 <?import org.cryptomator.ui.controls.FontAwesome5IconView?>
-<?import javafx.scene.control.Label?>
 <VBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
 	  fx:controller="org.cryptomator.ui.mainwindow.VaultDetailNeedsMigrationController"
 	  alignment="TOP_CENTER"
 	  spacing="9">
-	<padding>
-		<Insets topRightBottomLeft="24"/>
-	</padding>
 	<children>
 		<Label text="%main.vaultDetail.migratePrompt" wrapText="true"/>
 		<Button styleClass="button-large" text="%main.vaultDetail.migrateButton" minWidth="120" onAction="#showVaultMigrator">

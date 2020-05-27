@@ -4,16 +4,13 @@ import javafx.concurrent.Task;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.common.vaults.Volume;
-import org.cryptomator.cryptolib.api.InvalidPassphraseException;
-import org.cryptomator.keychain.KeychainAccess;
+import org.cryptomator.keychain.KeychainManager;
 import org.cryptomator.ui.fxapp.FxApplicationScoped;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import java.nio.CharBuffer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -28,10 +25,10 @@ public class VaultService {
 	private static final Logger LOG = LoggerFactory.getLogger(VaultService.class);
 
 	private final ExecutorService executorService;
-	private final Optional<KeychainAccess> keychain;
+	private final Optional<KeychainManager> keychain;
 
 	@Inject
-	public VaultService(ExecutorService executorService, Optional<KeychainAccess> keychain) {
+	public VaultService(ExecutorService executorService, Optional<KeychainManager> keychain) {
 		this.executorService = executorService;
 		this.keychain = keychain;
 	}

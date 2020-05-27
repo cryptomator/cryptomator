@@ -16,28 +16,33 @@
 		<Insets topRightBottomLeft="12"/>
 	</padding>
 	<children>
-		<Button text="%vaultOptions.masterkey.changePasswordBtn" onAction="#changePassword" contentDisplay="LEFT">
-			<graphic>
-				<FontAwesome5IconView glyph="KEY"/>
-			</graphic>
-		</Button>
-		
+		<VBox spacing="6" alignment="CENTER">
+			<Button text="%vaultOptions.masterkey.changePasswordBtn" onAction="#changePassword" contentDisplay="LEFT" maxWidth="Infinity">
+				<graphic>
+					<FontAwesome5IconView glyph="KEY"/>
+				</graphic>
+			</Button>
+			<Button text="%vaultOptions.masterkey.forgetSavedPasswordBtn" onAction="#removePasswordFromKeychain" contentDisplay="LEFT" maxWidth="Infinity" visible="${controller.passwordSaved}"
+					managed="${controller.passwordSaved}">
+				<graphic>
+					<FontAwesome5IconView glyph="UNLINK"/>
+				</graphic>
+			</Button>
+		</VBox>
 		<Region VBox.vgrow="ALWAYS"/>
-		
 		<Label maxWidth="-Infinity" text="%vaultOptions.masterkey.recoveryKeyExpanation" wrapText="true"/>
-		<HBox spacing="6" alignment="CENTER">
-			<Button text="%vaultOptions.masterkey.showRecoveryKeyBtn" onAction="#showRecoveryKey" contentDisplay="LEFT">
+		<VBox spacing="6" alignment="CENTER">
+			<Button text="%vaultOptions.masterkey.showRecoveryKeyBtn" onAction="#showRecoveryKey" contentDisplay="LEFT" maxWidth="Infinity">
 				<graphic>
 					<FontAwesome5IconView glyph="EYE"/>
 				</graphic>
 			</Button>
-			<Button text="%vaultOptions.masterkey.recoverPasswordBtn" onAction="#showRecoverVaultDialogue" contentDisplay="LEFT">
+			<Button text="%vaultOptions.masterkey.recoverPasswordBtn" onAction="#showRecoverVaultDialogue" contentDisplay="LEFT" maxWidth="Infinity">
 				<graphic>
 					<FontAwesome5IconView glyph="SYNC"/>
 				</graphic>
 			</Button>
-		</HBox>
-
+		</VBox>
 		<Region VBox.vgrow="ALWAYS"/>
 	</children>
 </VBox>

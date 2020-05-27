@@ -96,9 +96,9 @@ public class FxApplication extends Application {
 		});
 	}
 
-	public void startUnlockWorkflow(Vault vault) {
+	public void startUnlockWorkflow(Vault vault, Optional<Stage> owner) {
 		Platform.runLater(() -> {
-			unlockWindowBuilderProvider.get().vault(vault).build().startUnlockWorkflow();
+			unlockWindowBuilderProvider.get().vault(vault).owner(owner).build().startUnlockWorkflow();
 			LOG.debug("Showing UnlockWindow for {}", vault.getDisplayableName());
 		});
 	}

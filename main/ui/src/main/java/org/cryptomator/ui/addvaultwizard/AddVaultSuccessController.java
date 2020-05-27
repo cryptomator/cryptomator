@@ -9,6 +9,7 @@ import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.fxapp.FxApplication;
 
 import javax.inject.Inject;
+import java.util.Optional;
 
 @AddVaultWizardScoped
 public class AddVaultSuccessController implements FxController {
@@ -27,7 +28,7 @@ public class AddVaultSuccessController implements FxController {
 	@FXML
 	public void unlockAndClose() {
 		close();
-		fxApplication.startUnlockWorkflow(vault.get());
+		fxApplication.startUnlockWorkflow(vault.get(), Optional.of(window));
 	}
 
 	@FXML

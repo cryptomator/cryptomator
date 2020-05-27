@@ -15,6 +15,7 @@ import java.awt.PopupMenu;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.EventObject;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
 
@@ -103,7 +104,7 @@ class TrayMenuController {
 	}
 
 	private void unlockVault(Vault vault) {
-		fxApplicationStarter.get(true).thenAccept(app -> app.startUnlockWorkflow(vault));
+		fxApplicationStarter.get(true).thenAccept(app -> app.startUnlockWorkflow(vault, Optional.empty()));
 	}
 
 	private void lockVault(Vault vault) {

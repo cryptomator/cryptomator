@@ -9,9 +9,6 @@
 	  fx:controller="org.cryptomator.ui.mainwindow.VaultDetailMissingVaultController"
 	  alignment="TOP_CENTER"
 	  spacing="9">
-	<padding>
-		<Insets topRightBottomLeft="24"/>
-	</padding>
 	<children>
 		<StackPane alignment="CENTER">
 			<Circle styleClass="glyph-icon-primary" radius="48"/>
