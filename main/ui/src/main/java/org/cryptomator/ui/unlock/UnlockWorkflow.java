@@ -95,7 +95,7 @@ public class UnlockWorkflow extends Task<Boolean> {
 			wipePassword(savedPassword.orElse(null));
 		}
 	}
-	
+
 	private boolean attemptUnlock() throws InterruptedException, IOException, Volume.VolumeException {
 		boolean proceed = password.get() != null || askForPassword(false) == PasswordEntry.PASSWORD_ENTERED;
 		while (proceed) {
@@ -117,7 +117,9 @@ public class UnlockWorkflow extends Task<Boolean> {
 			if (owner != null) {
 				window.setX(owner.getX() + (owner.getWidth() - window.getWidth()) / 2);
 				window.setY(owner.getY() + (owner.getHeight() - window.getHeight()) / 2);
-			} else window.centerOnScreen();
+			} else {
+				window.centerOnScreen();
+			}
 			if (animateShake) {
 				Animations.createShakeWindowAnimation(window).play();
 			}

@@ -31,7 +31,7 @@ public class UnlockSuccessController implements FxController {
 	private final VaultService vaultService;
 	private final ObjectProperty<ContentDisplay> revealButtonState;
 	private final BooleanProperty revealButtonDisabled;
-	
+
 	public CheckBox rememberChoiceCheckbox;
 
 	@Inject
