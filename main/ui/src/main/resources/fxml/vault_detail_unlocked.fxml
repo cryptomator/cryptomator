@@ -45,4 +45,5 @@
 		<ThrougputLabel styleClass="label-small,label-muted" alignment="CENTER_RIGHT" minWidth="60" idleFormat="%main.vaultDetail.throughput.idle" kibsFormat="%main.vaultDetail.throughput.kbps"
 						mibsFormat="%main.vaultDetail.throughput.mbps" bytesPerSecond="${controller.vault.stats.bytesPerSecondWritten}"/>
 	</HBox>
+	<Button styleClass="button-large" text="View statistics string" minWidth="120" onAction="#showVaultStatistics"/>
 </VBox>

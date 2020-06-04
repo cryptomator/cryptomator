@@ -6,6 +6,7 @@ import javafx.fxml.FXML;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.VaultService;
+import org.cryptomator.ui.vaultstatistics.VaultStatisticsComponent;
 
 import javax.inject.Inject;
 
@@ -14,11 +15,13 @@ public class VaultDetailUnlockedController implements FxController {
 
 	private final ReadOnlyObjectProperty<Vault> vault;
 	private final VaultService vaultService;
+	private final VaultStatisticsComponent.Builder vaultStatisticsWindow;
 
 	@Inject
-	public VaultDetailUnlockedController(ObjectProperty<Vault> vault, VaultService vaultService) {
+	public VaultDetailUnlockedController(ObjectProperty<Vault> vault, VaultService vaultService, VaultStatisticsComponent.Builder vaultStatisticsWindow) {
 		this.vault = vault;
 		this.vaultService = vaultService;
+		this.vaultStatisticsWindow = vaultStatisticsWindow;
 	}
 
 	@FXML
@@ -30,6 +33,11 @@ public class VaultDetailUnlockedController implements FxController {
 	public void lock() {
 		vaultService.lock(vault.get(), false);
 		// TODO count lock attempts, and allow forced lock
+	}
+
+	@FXML
+	public void showVaultStatistics() {
+		vaultStatisticsWindow.vault(vault.get()).build().showVaultStatisticsWindow();
 	}
 
 	/* Getter/Setter */
