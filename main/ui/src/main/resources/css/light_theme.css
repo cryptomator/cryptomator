@@ -868,3 +868,37 @@
 	-fx-background-color: PROGRESS_BAR_BG;
 	-fx-background-radius: 4px;
 }
+/*******************************************************************************
+ *                                                                             *
+ * Vault Statistics                                                                *
+ *                                                                             *
+ ******************************************************************************/
+.chart-plot-background {
+	-fx-background-color: #F7F7F7;
+}
+.chart-vertical-grid-lines {
+	-fx-stroke: #49B04A;
+}
+.chart-horizontal-grid-lines {
+	-fx-stroke: #49B04A;
+}
+.chart-alternative-row-fill {
+	-fx-fill: #E1E1E1;
+	-fx-stroke: transparent;
+	-fx-stroke-width: 0;
+}
+.default-color0.chart-series-line { -fx-stroke: #2D4D2E; }
+.default-color1.chart-series-line { -fx-stroke: #66CC68 ; }
+
+.chart-legend {
+	-fx-background-color:  transparent;
+	-fx-padding: 20px;
+}
+
+.chart-legend-item-symbol{
+	-fx-background-radius: 0;
+}
+
+.chart-legend-item{
+	-fx-text-fill: #191970;
+}

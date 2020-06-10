@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.chart.LineChart?>
+<?import javafx.scene.chart.NumberAxis?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.Cursor?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import org.cryptomator.ui.controls.ThrougputLabel?>
@@ -20,4 +23,19 @@
 		<ThrougputLabel styleClass="label-small,label-muted" alignment="CENTER_RIGHT" minWidth="60" idleFormat="%main.vaultDetail.throughput.idle" kibsFormat="%main.vaultDetail.throughput.kbps"
 						mibsFormat="%main.vaultDetail.throughput.mbps" bytesPerSecond="${controller.vault.stats.bytesPerSecondWritten}"/>
 	</HBox>
+
+	<LineChart
+			styleClass="chart-plot-background, chart-vertical-grid-lines, chart-horizontal-grid-lines, chart-alternative-row-fill, default-color0.chart-series-line, default-color1.chart-series-line, default-color2.chart-series-line, chart-legend, chart-legend-item-symbol, chart-legend-item"
+			fx:id="lineGraph" createSymbols="true" legendVisible="true" prefHeight="372.0" prefWidth="423.0" visible="true" animated="false" horizontalGridLinesVisible="true" verticalGridLinesVisible="true"
+			title="%vaultstatistics.throughputTitle">
+		<xAxis>
+			<NumberAxis autoRanging="true" lowerBound="0" side="BOTTOM" tickUnit="1" upperBound="10" label="%vaultstatistics.xAxisTimeLabel"/>
+		</xAxis>
+		<yAxis>
+			<NumberAxis autoRanging="true" lowerBound="0" side="LEFT" tickUnit="1024" upperBound="100" label="%vaultstatistics.yAxisTimeLabel"/>
+		</yAxis>
+		<cursor>
+			<Cursor fx:constant="DEFAULT"/>
+		</cursor>
+	</LineChart>
 </VBox>

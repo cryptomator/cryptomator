@@ -35,9 +35,9 @@ abstract class VaultStatisticsModule {
 	@VaultStatisticsScoped
 	static Stage provideStage(StageFactory factory, @MainWindow Stage owner, ResourceBundle resourceBundle) {
 		Stage stage = factory.create();
-		stage.setTitle(resourceBundle.getString("removeVault.title"));
+		stage.setTitle(resourceBundle.getString("vaultstatistics.title"));
 		stage.setResizable(false);
-		stage.initModality(Modality.APPLICATION_MODAL);
+		stage.initModality(Modality.NONE);
 		stage.initOwner(owner);
 		return stage;
 	}
