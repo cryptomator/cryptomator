@@ -51,6 +51,7 @@ public class VaultStatisticsController implements FxController {
 	@FXML
 	public void initialize() {
 		window.setTitle(window.getTitle() + " - " + vault.get().getDisplayableName());
+		lineGraph.getData().addAll(writeData, readData);
 	}
 
 	public Vault getVault() {
@@ -64,8 +65,5 @@ public class VaultStatisticsController implements FxController {
 		}
 		readData.getData().add(new XYChart.Data<Double, Double>((System.currentTimeMillis() - timeAtStartOfTracking) / 1000.0, ((getVault().getStats().bytesPerSecondReadProperty().get()) / 1024.0)));
 		writeData.getData().add(new XYChart.Data<Double, Double>((System.currentTimeMillis() - timeAtStartOfTracking) / 1000.0, ((getVault().getStats().bytesPerSecondWrittenProperty().get()) / 1024.0)));
-		lineGraph.getData().addAll(writeData, readData);
-		//TODO
-		//Exception in thread "JavaFX Application Thread" java.lang.IllegalArgumentException: Duplicate series added
 	}
 }
