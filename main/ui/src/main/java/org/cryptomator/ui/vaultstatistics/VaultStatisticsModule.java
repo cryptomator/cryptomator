@@ -19,6 +19,7 @@ import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.StageFactory;
 
 import javax.inject.Provider;
+import java.lang.ref.WeakReference;
 import java.util.Map;
 import java.util.ResourceBundle;
 
@@ -39,11 +40,15 @@ abstract class VaultStatisticsModule {
 		Stage stage = factory.create();
 		stage.setTitle(String.format(resourceBundle.getString("vaultstatistics.title"), vault.getDisplayableName()));
 		stage.setResizable(false);
+		var weakStage = new WeakReference<>(stage);
 		vault.stateProperty().addListener(new ChangeListener<>() {
 			@Override
 			public void changed(ObservableValue<? extends VaultState> observable, VaultState oldValue, VaultState newValue) {
 				if (newValue != VaultState.UNLOCKED) {
-					stage.hide();
+					Stage stage = weakStage.get();
+					if (stage != null) {
+						stage.hide();
+					}
 					observable.removeListener(this);
 				}
 			}
