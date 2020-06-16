@@ -8,6 +8,7 @@ import javafx.animation.Timeline;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.ObjectBinding;
+import javafx.beans.binding.StringBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -23,6 +24,7 @@ import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.keychain.KeychainManager;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.UserInteractionLock;
+import org.cryptomator.ui.common.WeakBindings;
 import org.cryptomator.ui.controls.NiceSecurePasswordField;
 import org.cryptomator.ui.forgetPassword.ForgetPasswordComponent;
 import org.slf4j.Logger;
@@ -51,7 +53,8 @@ public class UnlockController implements FxController {
 	private final ObjectBinding<ContentDisplay> unlockButtonContentDisplay;
 	private final BooleanBinding userInteractionDisabled;
 	private final BooleanProperty unlockButtonDisabled;
-	
+	private final StringBinding vaultName;
+
 	public NiceSecurePasswordField passwordField;
 	public CheckBox savePasswordCheckbox;
 	public ImageView face;
@@ -74,6 +77,7 @@ public class UnlockController implements FxController {
 		this.unlockButtonContentDisplay = Bindings.createObjectBinding(this::getUnlockButtonContentDisplay, passwordEntryLock.awaitingInteraction());
 		this.userInteractionDisabled = passwordEntryLock.awaitingInteraction().not();
 		this.unlockButtonDisabled = new SimpleBooleanProperty();
+		this.vaultName = WeakBindings.bindString(vault.displayableNameProperty());
 		this.window.setOnCloseRequest(windowEvent -> cancel());
 	}
 
@@ -177,8 +181,12 @@ public class UnlockController implements FxController {
 
 	/* Getter/Setter */
 
-	public Vault getVault() {
-		return vault;
+	public String getVaultName() {
+		return vaultName.get();
+	}
+	
+	public StringBinding vaultNameProperty() {
+		return vaultName;
 	}
 
 	public ObjectBinding<ContentDisplay> unlockButtonContentDisplayProperty() {
