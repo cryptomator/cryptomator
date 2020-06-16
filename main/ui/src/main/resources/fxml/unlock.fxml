@@ -46,7 +46,7 @@
 				</ImageView>
 			</StackPane>
 			<VBox spacing="6" HBox.hgrow="ALWAYS">
-				<FormattedLabel format="%unlock.passwordPrompt" arg1="${controller.vault.displayableName}" wrapText="true"/>
+				<FormattedLabel format="%unlock.passwordPrompt" arg1="${controller.vaultName}" wrapText="true"/>
 				<NiceSecurePasswordField fx:id="passwordField" disable="${controller.userInteractionDisabled}"/>
 				<CheckBox fx:id="savePasswordCheckbox" text="%unlock.savePassword" onAction="#didClickSavePasswordCheckbox" disable="${controller.userInteractionDisabled}" visible="${controller.keychainAccessAvailable}"/>
 			</VBox>
