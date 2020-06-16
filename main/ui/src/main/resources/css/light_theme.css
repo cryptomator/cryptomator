@@ -870,25 +870,44 @@
 }
 /*******************************************************************************
  *                                                                             *
- * Vault Statistics                                                                *
+ * I/O Statistics                                                              *
  *                                                                             *
  ******************************************************************************/
-.chart-plot-background {
-	-fx-background-color: #F7F7F7;
+.chart {
+	-fx-padding: 10px;
 }
-.chart-vertical-grid-lines {
-	-fx-stroke: #49B04A;
+
+.chart-plot-background {
+	-fx-background-color: MAIN_BG;
+	-fx-padding: 20px;
+}
+/*
+.default-color0.chart-line-symbol { -fx-background-color: #00FFFF; }
+.default-color1.chart-line-symbol { -fx-background-color: #00FF00; }
+*/
+/* content */
+
+.chart-content {
+	-fx-padding: 10px;
 }
 .chart-horizontal-grid-lines {
-	-fx-stroke: #49B04A;
+	-fx-stroke: #000000;
+}
+.chart-vertical-zero-line,
+.chart-horizontal-zero-line {
+	-fx-stroke: #000000;
+}
+.chart-series-line {
+	-fx-stroke-width: 2px;
 }
 .chart-alternative-row-fill {
 	-fx-fill: #E1E1E1;
 	-fx-stroke: transparent;
 	-fx-stroke-width: 0;
 }
-.default-color0.chart-series-line { -fx-stroke: #2D4D2E; }
-.default-color1.chart-series-line { -fx-stroke: #66CC68 ; }
+
+.default-color0.chart-series-line { -fx-stroke: #FF0000; }
+.default-color1.chart-series-line { -fx-stroke: #00FF00 ; }
 
 .chart-legend {
 	-fx-background-color:  transparent;
@@ -896,9 +915,9 @@
 }
 
 .chart-legend-item-symbol{
-	-fx-background-radius: 0;
+	-fx-background-radius: 10;
 }
 
 .chart-legend-item{
-	-fx-text-fill: #191970;
+	-fx-text-fill: #000000;
 }

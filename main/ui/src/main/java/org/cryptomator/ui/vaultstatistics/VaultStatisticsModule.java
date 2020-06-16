@@ -4,9 +4,12 @@ import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoMap;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.scene.Scene;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
+import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.ui.common.DefaultSceneFactory;
 import org.cryptomator.ui.common.FXMLLoaderFactory;
 import org.cryptomator.ui.common.FxController;
@@ -14,7 +17,6 @@ import org.cryptomator.ui.common.FxControllerKey;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.StageFactory;
-import org.cryptomator.ui.mainwindow.MainWindow;
 
 import javax.inject.Provider;
 import java.util.Map;
@@ -33,12 +35,19 @@ abstract class VaultStatisticsModule {
 	@Provides
 	@VaultStatisticsWindow
 	@VaultStatisticsScoped
-	static Stage provideStage(StageFactory factory, @MainWindow Stage owner, ResourceBundle resourceBundle) {
+	static Stage provideStage(StageFactory factory, ResourceBundle resourceBundle, @VaultStatisticsWindow Vault vault) {
 		Stage stage = factory.create();
-		stage.setTitle(resourceBundle.getString("vaultstatistics.title"));
+		stage.setTitle(String.format(resourceBundle.getString("vaultstatistics.title"), vault.getDisplayableName()));
 		stage.setResizable(false);
-		stage.initModality(Modality.NONE);
-		stage.initOwner(owner);
+		vault.stateProperty().addListener(new ChangeListener<>() {
+			@Override
+			public void changed(ObservableValue<? extends VaultState> observable, VaultState oldValue, VaultState newValue) {
+				if (newValue != VaultState.UNLOCKED) {
+					stage.hide();
+					observable.removeListener(this);
+				}
+			}
+		});
 		return stage;
 	}
 

@@ -25,14 +25,13 @@
 	</HBox>
 
 	<LineChart
-			styleClass="chart-plot-background, chart-vertical-grid-lines, chart-horizontal-grid-lines, chart-alternative-row-fill, default-color0.chart-series-line, default-color1.chart-series-line, default-color2.chart-series-line, chart-legend, chart-legend-item-symbol, chart-legend-item"
-			fx:id="lineGraph" createSymbols="true" legendVisible="true" prefHeight="372.0" prefWidth="423.0" visible="true" animated="false" horizontalGridLinesVisible="true" verticalGridLinesVisible="true"
-			title="%vaultstatistics.throughputTitle">
+			styleClass="chart-plot-background, chart-alternative-row-fill, default-color2.chart-series-line"
+			fx:id="lineGraph" createSymbols="true" legendVisible="true" prefHeight="372.0" prefWidth="423.0" visible="true" animated="false" title="%vaultstatistics.throughputTitle" verticalZeroLineVisible="true" verticalGridLinesVisible="false" horizontalGridLinesVisible="true">
 		<xAxis>
-			<NumberAxis autoRanging="true" lowerBound="0" side="BOTTOM" tickUnit="1" upperBound="10" label="%vaultstatistics.xAxisTimeLabel"/>
+			<NumberAxis autoRanging="false" lowerBound="0" side="BOTTOM" tickUnit="5" upperBound="100" label="%vaultstatistics.xAxisTimeLabel"/>
 		</xAxis>
 		<yAxis>
-			<NumberAxis autoRanging="true" lowerBound="0" side="LEFT" tickUnit="1024" upperBound="100" label="%vaultstatistics.yAxisTimeLabel"/>
+			<NumberAxis autoRanging="true" lowerBound="0" side="LEFT" tickUnit="1024" upperBound="100" label="%vaultstatistics.yAxisThroughputLabel" forceZeroInRange="true"/>
 		</yAxis>
 		<cursor>
 			<Cursor fx:constant="DEFAULT"/>

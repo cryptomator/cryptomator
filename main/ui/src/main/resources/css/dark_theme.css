@@ -869,3 +869,56 @@
 	-fx-background-color: PROGRESS_BAR_BG;
 	-fx-background-radius: 4px;
 }
+/*******************************************************************************
+ *                                                                             *
+ * I/O Statistics                                                              *
+ *                                                                             *
+ ******************************************************************************/
+.chart {
+	-fx-padding: 10px;
+}
+
+.chart-plot-background {
+	-fx-background-color: MAIN_BG;
+	-fx-padding: 20px;
+}
+/*
+.default-color0.chart-line-symbol { -fx-background-color: #00FFFF; }
+.default-color1.chart-line-symbol { -fx-background-color: #00FF00; }
+*/
+/* content */
+
+.chart-content {
+	-fx-padding: 10px;
+}
+.chart-horizontal-grid-lines {
+	-fx-stroke: #FFFFFF;
+}
+.chart-vertical-zero-line,
+.chart-horizontal-zero-line {
+	-fx-stroke: #FFFFFF;
+}
+.chart-series-line {
+	-fx-stroke-width: 2px;
+}
+.chart-alternative-row-fill {
+	-fx-fill: #E1E1E1;
+	-fx-stroke: transparent;
+	-fx-stroke-width: 0;
+}
+
+.default-color0.chart-series-line { -fx-stroke: #FF0000; }
+.default-color1.chart-series-line { -fx-stroke: #00FF00 ; }
+
+.chart-legend {
+	-fx-background-color:  transparent;
+	-fx-padding: 20px;
+}
+
+.chart-legend-item-symbol{
+	-fx-background-radius: 10;
+}
+
+.chart-legend-item{
+	-fx-text-fill: #FFFFFF;
+}
