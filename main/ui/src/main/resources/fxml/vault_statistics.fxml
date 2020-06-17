@@ -12,21 +12,8 @@
 	  fx:controller="org.cryptomator.ui.vaultstatistics.VaultStatisticsController"
 	  prefHeight="400.0" prefWidth="600.0">
 
-
-	<HBox alignment="CENTER_RIGHT" spacing="6">
-		<Label styleClass="label-small,label-muted" text="%main.vaultDetail.bytesPerSecondRead"/>
-		<ThrougputLabel styleClass="label-small,label-muted" alignment="CENTER_RIGHT" minWidth="60" idleFormat="%main.vaultDetail.throughput.idle" kibsFormat="%main.vaultDetail.throughput.kbps"
-						mibsFormat="%main.vaultDetail.throughput.mbps" bytesPerSecond="${controller.bpsRead}"/>
-	</HBox>
-	<HBox alignment="CENTER_RIGHT" spacing="6">
-		<Label styleClass="label-small,label-muted" text="%main.vaultDetail.bytesPerSecondWritten"/>
-		<ThrougputLabel styleClass="label-small,label-muted" alignment="CENTER_RIGHT" minWidth="60" idleFormat="%main.vaultDetail.throughput.idle" kibsFormat="%main.vaultDetail.throughput.kbps"
-						mibsFormat="%main.vaultDetail.throughput.mbps" bytesPerSecond="${controller.bpsWritten}"/>
-	</HBox>
-
-	<LineChart
-			styleClass="chart-plot-background, chart-alternative-row-fill, default-color2.chart-series-line"
-			fx:id="lineGraph" createSymbols="true" legendVisible="true" prefHeight="372.0" prefWidth="423.0" visible="true" animated="false" title="%vaultstatistics.throughputTitle" verticalZeroLineVisible="true" verticalGridLinesVisible="false" horizontalGridLinesVisible="true">
+	<LineChart fx:id="lineGraph" VBox.vgrow="ALWAYS" createSymbols="false" legendVisible="true" prefHeight="372.0" prefWidth="423.0" visible="true" animated="false"
+			   title="%vaultstatistics.throughputTitle" verticalZeroLineVisible="true" verticalGridLinesVisible="false" horizontalGridLinesVisible="true">
 		<xAxis>
 			<NumberAxis autoRanging="false" lowerBound="0" side="BOTTOM" tickUnit="5" upperBound="100" label="%vaultstatistics.xAxisTimeLabel"/>
 		</xAxis>
@@ -37,4 +24,14 @@
 			<Cursor fx:constant="DEFAULT"/>
 		</cursor>
 	</LineChart>
+	<HBox alignment="CENTER_RIGHT" spacing="6">
+		<Label styleClass="label-small,label-muted" text="%main.vaultDetail.bytesPerSecondRead"/>
+		<ThrougputLabel styleClass="label-small,label-muted" alignment="CENTER_RIGHT" minWidth="60" idleFormat="%main.vaultDetail.throughput.idle" kibsFormat="%main.vaultDetail.throughput.kbps"
+						mibsFormat="%main.vaultDetail.throughput.mbps" bytesPerSecond="${controller.bpsRead}"/>
+	</HBox>
+	<HBox alignment="CENTER_RIGHT" spacing="6">
+		<Label styleClass="label-small,label-muted" text="%main.vaultDetail.bytesPerSecondWritten"/>
+		<ThrougputLabel styleClass="label-small,label-muted" alignment="CENTER_RIGHT" minWidth="60" idleFormat="%main.vaultDetail.throughput.idle" kibsFormat="%main.vaultDetail.throughput.kbps"
+						mibsFormat="%main.vaultDetail.throughput.mbps" bytesPerSecond="${controller.bpsWritten}"/>
+	</HBox>
 </VBox>

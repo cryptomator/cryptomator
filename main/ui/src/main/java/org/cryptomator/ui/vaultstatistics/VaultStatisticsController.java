@@ -18,6 +18,7 @@ import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.WeakBindings;
 
 import javax.inject.Inject;
+import java.util.ResourceBundle;
 
 @VaultStatisticsScoped
 public class VaultStatisticsController implements FxController {
@@ -35,17 +36,15 @@ public class VaultStatisticsController implements FxController {
 	public LineChart<Number, Number> lineGraph;
 
 	@Inject
-	public VaultStatisticsController(@VaultStatisticsWindow Stage window, @VaultStatisticsWindow Vault vault) {
+	public VaultStatisticsController(@VaultStatisticsWindow Stage window, @VaultStatisticsWindow Vault vault, ResourceBundle resourceBundle) {
 		this.stats = vault.getStats();
 		this.bpsRead = WeakBindings.bindLong(stats.bytesPerSecondReadProperty());
 		this.bpsWritten = WeakBindings.bindLong(stats.bytesPerSecondWrittenProperty());
 
 		this.readData = new Series<>();
-		readData.setName("Read Data"); // For Legend
-		//TODO Add Name to strings.properties
+		readData.setName(resourceBundle.getString("vaultstatistics.readDataLabel"));
 		this.writeData = new Series<>();
-		writeData.setName("Write Data");
-		//TODO Add Name to strings.properties
+		writeData.setName(resourceBundle.getString("vaultstatistics.writtenDataLabel"));
 
 		this.ioAnimation = new Timeline(); //TODO Research better timer
 		ioAnimation.getKeyFrames().add(new KeyFrame(Duration.seconds(IO_SAMPLING_INTERVAL), new IoSamplingAnimationHandler(readData, writeData)));
