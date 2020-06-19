@@ -34,9 +34,10 @@ public class VaultSettings {
 	public static final boolean DEFAULT_USES_INDIVIDUAL_MOUNTPATH = false;
 	public static final boolean DEFAULT_USES_READONLY_MODE = false;
 	public static final String DEFAULT_MOUNT_FLAGS = "";
+	public static final String DEFAULT_MOUNT_NAME = "Vault";
 	public static final int DEFAULT_FILENAME_LENGTH_LIMIT = -1;
 	public static final WhenUnlocked DEFAULT_ACTION_AFTER_UNLOCK = WhenUnlocked.ASK;
-	
+
 	private static final Random RNG = new Random(); 
 
 	private final String id;
@@ -55,16 +56,20 @@ public class VaultSettings {
 	public VaultSettings(String id) {
 		this.id = Objects.requireNonNull(id);
 
-		EasyBind.subscribe(path, this::deriveMountNameFromPath);
+		EasyBind.subscribe(path, this::deriveMountNameFromPathOrUseDefault);
 	}
 
 	Observable[] observables() {
 		return new Observable[]{path, mountName, winDriveLetter, unlockAfterStartup, revealAfterMount, useCustomMountPath, customMountPath, usesReadOnlyMode, mountFlags, filenameLengthLimit, actionAfterUnlock};
 	}
 
-	private void deriveMountNameFromPath(Path path) {
-		if (path != null && StringUtils.isBlank(mountName.get())) {
-			mountName.set(normalizeMountName(path.getFileName().toString()));
+	private void deriveMountNameFromPathOrUseDefault(Path path) {
+		if (StringUtils.isBlank(mountName.get())) {
+			if (path != null && path.getFileName() != null) {
+				mountName.set(normalizeMountName(path.getFileName().toString()));
+			} else {
+				mountName.set(DEFAULT_MOUNT_NAME);
+			}
 		}
 	}
 
