@@ -9,10 +9,9 @@ import ch.qos.logback.core.Appender;
 import ch.qos.logback.core.ConsoleAppender;
 import ch.qos.logback.core.FileAppender;
 import ch.qos.logback.core.helpers.NOPAppender;
-import ch.qos.logback.core.hook.DelayingShutdownHook;
 import ch.qos.logback.core.rolling.FixedWindowRollingPolicy;
 import ch.qos.logback.core.rolling.RollingFileAppender;
-import ch.qos.logback.core.util.Duration;
+import ch.qos.logback.core.util.FileSize;
 import dagger.Module;
 import dagger.Provides;
 import org.cryptomator.common.Environment;
@@ -33,6 +32,8 @@ public class LoggerModule {
 	private static final int LOGFILE_ROLLING_MIN = 1;
 	private static final int LOGFILE_ROLLING_MAX = 9;
 	private static final String LOG_PATTERN = "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n";
+	private static final String LOG_MAX_SIZE = "100mb";
+
 	static final Map<String, Level> DEFAULT_LOG_LEVELS = Map.of( //
 			Logger.ROOT_LOGGER_NAME, Level.INFO, //
 			"org.cryptomator", Level.INFO //
@@ -84,7 +85,7 @@ public class LoggerModule {
 			appender.setContext(context);
 			appender.setFile(logDir.resolve(LOGFILE_NAME).toString());
 			appender.setEncoder(encoder);
-			LaunchBasedTriggeringPolicy triggeringPolicy = new LaunchBasedTriggeringPolicy();
+			LaunchAndSizeBasedTriggerinPolicy triggeringPolicy = new LaunchAndSizeBasedTriggerinPolicy(FileSize.valueOf(LOG_MAX_SIZE));
 			triggeringPolicy.setContext(context);
 			triggeringPolicy.start();
 			appender.setTriggeringPolicy(triggeringPolicy);
