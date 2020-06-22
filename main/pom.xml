@@ -24,7 +24,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
 		<!-- cryptomator dependencies -->
-		<cryptomator.cryptofs.version>1.9.11</cryptomator.cryptofs.version>
+		<cryptomator.cryptofs.version>1.9.12</cryptomator.cryptofs.version>
 		<cryptomator.jni.version>2.2.2</cryptomator.jni.version>
 		<cryptomator.fuse.version>1.2.3</cryptomator.fuse.version>
 		<cryptomator.dokany.version>1.1.15</cryptomator.dokany.version>
@@ -32,18 +32,18 @@
 
 		<!-- 3rd party dependencies -->
 		<javafx.version>14</javafx.version>
-		<commons-lang3.version>3.9</commons-lang3.version>
+		<commons-lang3.version>3.10</commons-lang3.version>
 		<secret-service.version>1.0.0</secret-service.version>
-		<jwt.version>3.10.2</jwt.version>
+		<jwt.version>3.10.3</jwt.version>
 		<easybind.version>1.0.3</easybind.version>
-		<guava.version>28.2-jre</guava.version>
-		<dagger.version>2.27</dagger.version>
+		<guava.version>29.0-jre</guava.version>
+		<dagger.version>2.22</dagger.version>
 		<gson.version>2.8.6</gson.version>
 		<slf4j.version>1.7.30</slf4j.version>
 		<logback.version>1.2.3</logback.version>
 
 		<!-- test dependencies -->
-		<junit.jupiter.version>5.6.1</junit.jupiter.version>
+		<junit.jupiter.version>5.6.2</junit.jupiter.version>
 		<mockito.version>3.3.3</mockito.version>
 		<hamcrest.version>2.2</hamcrest.version>
 	</properties>
