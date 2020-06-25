@@ -20,7 +20,7 @@ import org.cryptomator.ui.common.StageFactory;
 import org.cryptomator.ui.migration.MigrationComponent;
 import org.cryptomator.ui.removevault.RemoveVaultComponent;
 import org.cryptomator.ui.vaultoptions.VaultOptionsComponent;
-import org.cryptomator.ui.vaultstatistics.VaultStatisticsComponent;
+import org.cryptomator.ui.stats.VaultStatisticsComponent;
 import org.cryptomator.ui.wrongfilealert.WrongFileAlertComponent;
 
 import javax.inject.Provider;

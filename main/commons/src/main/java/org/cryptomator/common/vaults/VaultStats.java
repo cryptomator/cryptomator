@@ -2,9 +2,12 @@ package org.cryptomator.common.vaults;
 
 import javafx.application.Platform;
 import javafx.beans.Observable;
+import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.LongProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleLongProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Task;
 import javafx.util.Duration;
@@ -28,6 +31,7 @@ public class VaultStats {
 	private final ScheduledService<Optional<CryptoFileSystemStats>> updateService;
 	private final LongProperty bytesPerSecondRead = new SimpleLongProperty();
 	private final LongProperty bytesPerSecondWritten = new SimpleLongProperty();
+	private final DoubleProperty cacheHitRate = new SimpleDoubleProperty();
 
 	@Inject
 	VaultStats(AtomicReference<CryptoFileSystem> fs, ObjectProperty<VaultState> state, ExecutorService executor) {
@@ -55,6 +59,17 @@ public class VaultStats {
 		assert Platform.isFxApplicationThread();
 		bytesPerSecondRead.set(stats.map(CryptoFileSystemStats::pollBytesRead).orElse(0l));
 		bytesPerSecondWritten.set(stats.map(CryptoFileSystemStats::pollBytesWritten).orElse(0l));
+		cacheHitRate.set(stats.map(this::getCacheHitRate).orElse(0.0));
+	}
+	
+	private double getCacheHitRate(CryptoFileSystemStats stats) {
+		long accesses = stats.pollChunkCacheAccesses();
+		long hits = stats.pollChunkCacheHits();
+		if (accesses == 0) {
+			return 0.0;
+		} else {
+			return hits / (double) accesses;
+		}
 	}
 
 	private class UpdateStatsService extends ScheduledService<Optional<CryptoFileSystemStats>> {
@@ -94,4 +109,13 @@ public class VaultStats {
 	public long getBytesPerSecondWritten() {
 		return bytesPerSecondWritten.get();
 	}
+
+	public DoubleProperty cacheHitRateProperty() {
+		return cacheHitRate;
+	}
+
+	public double getCacheHitRate() {
+		return cacheHitRate.get();
+	}
+	
 }

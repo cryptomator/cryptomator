@@ -1,5 +1,6 @@
 package org.cryptomator.ui.common;
 
+import javafx.beans.binding.DoubleBinding;
 import javafx.beans.binding.LongBinding;
 import javafx.beans.binding.StringBinding;
 import javafx.beans.value.ObservableObjectValue;
@@ -46,6 +47,25 @@ public final class WeakBindings {
 			@Override
 			protected long computeValue() {
 				return observable.getValue().longValue();
+			}
+		};
+	}
+
+	/**
+	 * Create a new DoubleBinding that listens to changes from the given observable without being strongly referenced by it.
+	 *
+	 * @param observable The observable
+	 * @return a DoubleBinding weakly referenced from the given observable
+	 */
+	public static DoubleBinding bindDouble(ObservableValue<Number> observable) {
+		return new DoubleBinding() {
+			{
+				bind(observable);
+			}
+
+			@Override
+			protected double computeValue() {
+				return observable.getValue().doubleValue();
 			}
 		};
 	}

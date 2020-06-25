@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.AreaChart?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.Cursor?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Arc?>
+<?import org.cryptomator.ui.controls.FormattedLabel?>
+<?import org.cryptomator.ui.controls.ThrougputLabel?>
+<?import javafx.scene.Group?>
+<HBox xmlns="http://javafx.com/javafx"
+	  xmlns:fx="http://javafx.com/fxml"
+	  fx:controller="org.cryptomator.ui.stats.VaultStatisticsController"
+	  prefWidth="600.0" spacing="12">
+	<padding>
+		<Insets topRightBottomLeft="12"/>
+	</padding>
+	
+	<!-- Caching -->
+	<VBox prefWidth="200" prefHeight="200">
+		<StackPane>
+			<Group>
+				<Arc styleClass="cache-arc-background" centerX="100" centerY="100" radiusX="100" radiusY="100" startAngle="225" length="-270"/>
+				<Arc styleClass="cache-arc-foreground" centerX="100" centerY="100" radiusX="100" radiusY="100" startAngle="225" length="${controller.cacheHitDregrees}"/>
+			</Group>
+			<VBox StackPane.alignment="CENTER" alignment="CENTER">
+				<FormattedLabel styleClass="label-large" format="\%1.0f %%" arg1="${controller.cacheHitPercentage}" />
+				<Label text="%stats.cacheHitRate" />
+			</VBox>
+		</StackPane>
+	</VBox>
+
+	<!-- Read -->
+	<VBox prefWidth="200" prefHeight="200">
+		<HBox spacing="12">
+			<Label text="%stats.readDataLabel"/>
+			<ThrougputLabel styleClass="label-large" alignment="CENTER_RIGHT" minWidth="60" idleFormat="%main.vaultDetail.throughput.idle" kibsFormat="%main.vaultDetail.throughput.kbps"
+						mibsFormat="%main.vaultDetail.throughput.mbps" bytesPerSecond="${controller.bpsRead}"/>
+		</HBox>
+		<AreaChart fx:id="readChart" styleClass="io-stats" createSymbols="false" animated="false">
+			<xAxis>
+				<NumberAxis fx:id="readChartXAxis" styleClass="io-stats" autoRanging="false" forceZeroInRange="false" side="BOTTOM"/>
+			</xAxis>
+			<yAxis>
+				<NumberAxis fx:id="readChartYAxis" styleClass="io-stats" autoRanging="false" forceZeroInRange="true" side="LEFT" tickUnit="Infinity"/>
+			</yAxis>
+			<cursor>
+				<Cursor fx:constant="DEFAULT"/>
+			</cursor>
+		</AreaChart>
+	</VBox>
+
+	<!-- Write -->
+	<VBox prefWidth="200" prefHeight="200">
+		<HBox>
+			<Label text="%stats.writtenDataLabel"/>
+			<ThrougputLabel styleClass="label-large" alignment="CENTER_RIGHT" minWidth="60" idleFormat="%main.vaultDetail.throughput.idle" kibsFormat="%main.vaultDetail.throughput.kbps"
+							mibsFormat="%main.vaultDetail.throughput.mbps" bytesPerSecond="${controller.bpsWritten}"/>
+		</HBox>
+		<AreaChart fx:id="writeChart" styleClass="io-stats" createSymbols="false" animated="false">
+			<xAxis>
+				<NumberAxis fx:id="writeChartXAxis" styleClass="io-stats" autoRanging="false" forceZeroInRange="false" side="BOTTOM"/>
+			</xAxis>
+			<yAxis>
+				<NumberAxis fx:id="writeChartYAxis" styleClass="io-stats" autoRanging="false" forceZeroInRange="true" side="LEFT" tickUnit="Infinity"/>
+			</yAxis>
+			<cursor>
+				<Cursor fx:constant="DEFAULT"/>
+			</cursor>
+		</AreaChart>
+	</VBox>
+	
+</HBox>

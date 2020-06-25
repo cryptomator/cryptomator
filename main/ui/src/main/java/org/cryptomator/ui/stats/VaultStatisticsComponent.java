@@ -1,4 +1,4 @@
-package org.cryptomator.ui.vaultstatistics;
+package org.cryptomator.ui.stats;
 
 import dagger.BindsInstance;
 import dagger.Lazy;

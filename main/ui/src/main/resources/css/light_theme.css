@@ -884,48 +884,52 @@
 
 /* content */
 
-.chart-content {
+
+.cache-arc-background {
+	-fx-fill: transparent;
+	-fx-stroke: MUTED_BG;
+	-fx-stroke-type: centered;
+	-fx-stroke-width: 12;
+	-fx-stroke-line-cap: butt;
+}
+
+.cache-arc-foreground {
+	-fx-fill: transparent;
+	-fx-stroke: PRIMARY;
+	-fx-stroke-type: centered;
+	-fx-stroke-width: 12;
+	-fx-stroke-line-cap: butt;
+}
+
+.chart.io-stats {
 	-fx-padding: 10px;
-	-fx-text-fill: TEXT_FILL;
-	-fx-tick-label-fill: GRAY_3;
-	-fx-minor-tick-visible: false
+	-fx-horizontal-grid-lines-visible: false;
+	-fx-horizontal-zero-line-visible: false;
+	-fx-vertical-grid-lines-visible: false;
+	-fx-vertical-zero-line-visible: false;
 }
-.chart-horizontal-grid-lines {
-	-fx-stroke: PRIMARY_D2;
+
+.axis.io-stats {
+	-fx-tick-mark-visible: false;
+	-fx-minor-tick-visible: false;
+	-fx-tick-labels-visible: false;
 }
+
+.chart-plot-background {
+	-fx-background-color: transparent;
+}
+
 .chart-vertical-zero-line,
-.chart-horizontal-zero-line {
-	-fx-stroke: PRIMARY_D2;
-}
-.chart-series-line {
-	-fx-stroke-width: 2px;
-}
+.chart-horizontal-zero-line,
 .chart-alternative-row-fill {
-	-fx-fill: GRAY_8;
 	-fx-stroke: transparent;
 	-fx-stroke-width: 0;
 }
-.axis {
-	-fx-tick-label-fill: TEXT_FILL;
-	-fx-tick-length: 20;
-	-fx-minor-tick-length: 10;
-}
-.axis-label {
-	-fx-text-fill: TEXT_FILL;
-}
-.default-color0.chart-series-line { -fx-stroke: PRIMARY; }
-.default-color1.chart-series-line { -fx-stroke: RED_5 ; }
 
-/* legend */
-
-.chart-legend {
-	-fx-text-fill: TEXT_FILL;
-	-fx-background-color: transparent;
-	-fx-padding: 0.4em;
+.default-color0.chart-series-area-line {
+	-fx-stroke: PRIMARY;
 }
-.chart-line-symbol {
-	-fx-background-radius: 5px;
-	-fx-padding: 5px;
+.default-color0.chart-series-area-fill {
+	-fx-fill: linear-gradient(to bottom, PRIMARY, transparent);
+	-fx-stroke: transparent;
 }
-.default-color0.chart-line-symbol { -fx-background-color: PRIMARY; }
-.default-color1.chart-line-symbol { -fx-background-color: RED_5; }

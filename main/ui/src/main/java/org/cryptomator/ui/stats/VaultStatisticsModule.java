@@ -1,4 +1,4 @@
-package org.cryptomator.ui.vaultstatistics;
+package org.cryptomator.ui.stats;
 
 import dagger.Binds;
 import dagger.Module;
@@ -38,7 +38,7 @@ abstract class VaultStatisticsModule {
 	@VaultStatisticsScoped
 	static Stage provideStage(StageFactory factory, ResourceBundle resourceBundle, @VaultStatisticsWindow Vault vault) {
 		Stage stage = factory.create();
-		stage.setTitle(String.format(resourceBundle.getString("vaultstatistics.title"), vault.getDisplayableName()));
+		stage.setTitle(String.format(resourceBundle.getString("stats.title"), vault.getDisplayableName()));
 		stage.setResizable(false);
 		var weakStage = new WeakReference<>(stage);
 		vault.stateProperty().addListener(new ChangeListener<>() {
@@ -60,7 +60,7 @@ abstract class VaultStatisticsModule {
 	@FxmlScene(FxmlFile.VAULT_STATISTICS)
 	@VaultStatisticsScoped
 	static Scene provideVaultStatisticsScene(@VaultStatisticsWindow FXMLLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene("/fxml/vault_statistics.fxml");
+		return fxmlLoaders.createScene("/fxml/stats.fxml");
 	}
 
 	// ------------------

@@ -6,7 +6,7 @@ import javafx.fxml.FXML;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.VaultService;
-import org.cryptomator.ui.vaultstatistics.VaultStatisticsComponent;
+import org.cryptomator.ui.stats.VaultStatisticsComponent;
 
 import javax.inject.Inject;
 

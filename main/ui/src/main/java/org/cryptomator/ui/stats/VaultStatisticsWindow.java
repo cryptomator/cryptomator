@@ -1,4 +1,4 @@
-package org.cryptomator.ui.vaultstatistics;
+package org.cryptomator.ui.stats;
 
 import javax.inject.Qualifier;
 import java.lang.annotation.Documented;
