@@ -4,6 +4,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Circle?>
 <?import org.cryptomator.ui.controls.FontAwesome5IconView?>
+<?import javafx.scene.control.Button?>
 <VBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
 	  fx:controller="org.cryptomator.ui.mainwindow.VaultDetailMissingVaultController"
@@ -19,7 +20,11 @@
 				</StackPane.margin>
 			</FontAwesome5IconView>
 		</StackPane>
-
 		<Label text="%main.vaultDetail.missing.info" wrapText="true"/>
+		<Button text="%main.vaultDetail.missing.refresh" minWidth="120">
+			<graphic>
+				<FontAwesome5IconView glyph="REDO"/>
+			</graphic>
+		</Button>
 	</children>
 </VBox>
