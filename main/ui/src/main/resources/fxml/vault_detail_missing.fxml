@@ -21,7 +21,7 @@
 			</FontAwesome5IconView>
 		</StackPane>
 		<Label text="%main.vaultDetail.missing.info" wrapText="true"/>
-		<Button text="%main.vaultDetail.missing.refresh" minWidth="120">
+		<Button text="%main.vaultDetail.missing.recheck" minWidth="120" onAction="#recheck">
 			<graphic>
 				<FontAwesome5IconView glyph="REDO"/>
 			</graphic>
