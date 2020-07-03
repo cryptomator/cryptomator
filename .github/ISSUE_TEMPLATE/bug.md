@@ -23,7 +23,7 @@ Of course, we also expect you to search for existing similar issues first! ;) ht
 
 * Operating system and version: [Windows/macOS/Linux + Version]
 * Cryptomator version: [Shown in the settings]
-* Drive: [Dokany/FUSE/WebDAV]
+* Volume type: [Dokany/FUSE/WebDAV, shown in the settings]
 
 ### Steps to Reproduce
 
