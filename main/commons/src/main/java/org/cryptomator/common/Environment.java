@@ -40,6 +40,7 @@ public class Environment {
 		LOG.debug("cryptomator.mountPointsDir: {}", System.getProperty("cryptomator.mountPointsDir"));
 		LOG.debug("cryptomator.minPwLength: {}", System.getProperty("cryptomator.minPwLength"));
 		LOG.debug("cryptomator.buildNumber: {}", System.getProperty("cryptomator.buildNumber"));
+		LOG.debug("cryptomator.binaryPath: {}", System.getProperty("cryptomator.binaryPath"));
 	}
 
 	public boolean useCustomLogbackConfig() {
@@ -73,6 +74,8 @@ public class Environment {
 	public int getMinPwLength() {
 		return getInt("cryptomator.minPwLength", DEFAULT_MIN_PW_LENGTH);
 	}
+
+	public Optional<Path> getBinaryPath() { return getPath("cryptomator.binaryPath"); }
 
 	private int getInt(String propertyName, int defaultValue) {
 		String value = System.getProperty(propertyName);
