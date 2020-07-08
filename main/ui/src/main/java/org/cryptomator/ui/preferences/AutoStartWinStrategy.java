@@ -48,9 +48,10 @@ class AutoStartWinStrategy implements AutoStartStrategy {
 		try {
 			Process proc = regAdd.start();
 			boolean finishedInTime = waitForProcess(proc, 5, TimeUnit.SECONDS);
-			if (finishedInTime) {
+			if (finishedInTime && proc.exitValue() == 0) {
 				LOG.debug("Added {} to registry key {}.", AUTOSTART_VALUE, HKCU_AUTOSTART_KEY);
 			} else {
+				LOG.debug("Registry could not be edited. Error code was {}.", proc.exitValue());
 				addShortcutOfAppToAutostartFolder();
 				throw new TogglingAutoStartFailedException("Adding registry value failed.");
 			}
@@ -69,9 +70,10 @@ class AutoStartWinStrategy implements AutoStartStrategy {
 		try {
 			Process proc = regRemove.start();
 			boolean finishedInTime = waitForProcess(proc, 5, TimeUnit.SECONDS);
-			if (finishedInTime) {
+			if (finishedInTime && proc.exitValue() == 0) {
 				LOG.debug("Removed {} from registry key {}.", AUTOSTART_VALUE, HKCU_AUTOSTART_KEY);
 			} else {
+				LOG.debug("Registry could not be edited. Error code was {}.", proc.exitValue());
 				removeShortcutOfAppFromAutostartFolder();
 				throw new TogglingAutoStartFailedException("Removing registry value failed.");
 			}
@@ -96,7 +98,7 @@ class AutoStartWinStrategy implements AutoStartStrategy {
 		return finishedInTime;
 	}
 
-	private void addShortcutOfAppToAutostartFolder() throws TogglingAutoStartWithPowershellFailedException{
+	private void addShortcutOfAppToAutostartFolder() throws TogglingAutoStartWithPowershellFailedException {
 		String startmenueDirectory = System.getProperty("user.home") + WINDOWS_START_MENU_FOLDER + "\\Cryptomator.lnk";
 		String cryptomator = env.getBinaryPath().get().toString();
 		String createShortcutCommand = "$s=(New-Object -COM WScript.Shell).CreateShortcut('" + startmenueDirectory + "');$s.TargetPath='" + cryptomator + "';$s.Save();";
@@ -108,7 +110,7 @@ class AutoStartWinStrategy implements AutoStartStrategy {
 		}
 	}
 
-	private void removeShortcutOfAppFromAutostartFolder() throws TogglingAutoStartWithPowershellFailedException{
+	private void removeShortcutOfAppFromAutostartFolder() throws TogglingAutoStartWithPowershellFailedException {
 		String startmenueDirectory = System.getProperty("user.home") + WINDOWS_START_MENU_FOLDER + "\\Cryptomator.lnk";
 		ProcessBuilder shortcutRemove = new ProcessBuilder("cmd", "/c del \"" + startmenueDirectory + "\"");
 		try {
