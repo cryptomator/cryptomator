@@ -9,7 +9,6 @@ import javafx.stage.Window;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.common.vaults.Volume;
-import org.cryptomator.cryptolib.api.CryptoException;
 import org.cryptomator.cryptolib.api.InvalidPassphraseException;
 import org.cryptomator.keychain.KeychainAccessException;
 import org.cryptomator.keychain.KeychainManager;
@@ -87,7 +86,7 @@ public class UnlockWorkflow extends Task<Boolean> {
 		} catch (NotDirectoryException | DirectoryNotEmptyException e) {
 			handleInvalidMountPoint(e);
 			throw e; // rethrow to trigger correct exception handling in Task
-		} catch (CryptoException | Volume.VolumeException | IOException e) {
+		} catch (Exception e) {
 			handleGenericError(e);
 			throw e; // rethrow to trigger correct exception handling in Task
 		} finally {
