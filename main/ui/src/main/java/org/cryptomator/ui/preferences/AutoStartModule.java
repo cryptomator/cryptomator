@@ -18,7 +18,7 @@ abstract class AutoStartModule {
 			return Optional.of(new AutoStartMacStrategy(macFunctions.get()));
 		} else if (SystemUtils.IS_OS_WINDOWS) {
 			Optional<String> exeName = ProcessHandle.current().info().command();
-			return exeName.map(x -> new AutoStartWinStrategy(x, env));
+			return exeName.map(AutoStartWinStrategy::new);
 		} else {
 			return Optional.empty();
 		}

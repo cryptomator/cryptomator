@@ -17,11 +17,9 @@ class AutoStartWinStrategy implements AutoStartStrategy {
 	private static final String AUTOSTART_VALUE = "Cryptomator";
 	private final String exePath;
 	private static final String WINDOWS_START_MENU_FOLDER = "\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs";
-	private Environment env;
 
-	public AutoStartWinStrategy(String exePath, Environment env) {
+	public AutoStartWinStrategy(String exePath) {
 		this.exePath = exePath;
-		this.env = env;
 	}
 
 	@Override
@@ -99,9 +97,8 @@ class AutoStartWinStrategy implements AutoStartStrategy {
 	}
 
 	private void addShortcutOfAppToAutostartFolder() throws TogglingAutoStartWithPowershellFailedException {
-		String startmenueDirectory = System.getProperty("user.home") + WINDOWS_START_MENU_FOLDER + "\\Cryptomator.lnk";
-		String cryptomator = env.getBinaryPath().get().toString();
-		String createShortcutCommand = "$s=(New-Object -COM WScript.Shell).CreateShortcut('" + startmenueDirectory + "');$s.TargetPath='" + cryptomator + "';$s.Save();";
+		String startMenuDirectory = System.getProperty("user.home") + WINDOWS_START_MENU_FOLDER + "\\Cryptomator.lnk";
+		String createShortcutCommand = "$s=(New-Object -COM WScript.Shell).CreateShortcut('" + startMenuDirectory + "');$s.TargetPath='" + exePath + "';$s.Save();";
 		ProcessBuilder shortcutAdd = new ProcessBuilder("cmd", "/c", "Start powershell " + createShortcutCommand);
 		try {
 			shortcutAdd.start();
@@ -111,8 +108,8 @@ class AutoStartWinStrategy implements AutoStartStrategy {
 	}
 
 	private void removeShortcutOfAppFromAutostartFolder() throws TogglingAutoStartWithPowershellFailedException {
-		String startmenueDirectory = System.getProperty("user.home") + WINDOWS_START_MENU_FOLDER + "\\Cryptomator.lnk";
-		ProcessBuilder shortcutRemove = new ProcessBuilder("cmd", "/c del \"" + startmenueDirectory + "\"");
+		String startMenuDirectory = System.getProperty("user.home") + WINDOWS_START_MENU_FOLDER + "\\Cryptomator.lnk";
+		ProcessBuilder shortcutRemove = new ProcessBuilder("cmd", "/c del \"" + startMenuDirectory + "\"");
 		try {
 			shortcutRemove.start();
 		} catch (IOException e) {
