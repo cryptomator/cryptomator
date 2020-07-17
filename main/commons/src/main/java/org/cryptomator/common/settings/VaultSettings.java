@@ -38,7 +38,7 @@ public class VaultSettings {
 	public static final int DEFAULT_FILENAME_LENGTH_LIMIT = -1;
 	public static final WhenUnlocked DEFAULT_ACTION_AFTER_UNLOCK = WhenUnlocked.ASK;
 
-	private static final Random RNG = new Random(); 
+	private static final Random RNG = new Random();
 
 	private final String id;
 	private final ObjectProperty<Path> path = new SimpleObjectProperty();
@@ -70,9 +70,9 @@ public class VaultSettings {
 		if (!mountNameSet && dirnameExists) {
 			mountName.set(normalizeMountName(newPath.getFileName().toString()));
 		} else if (!mountNameSet && !dirnameExists) {
-			mountName.set(DEFAULT_MOUNT_NAME+id);
-		}else if (mountNameSet && dirnameExists) {
-			if(mountName.get().equals(DEFAULT_MOUNT_NAME+id)){
+			mountName.set(DEFAULT_MOUNT_NAME + id);
+		} else if (mountNameSet && dirnameExists) {
+			if (mountName.get().equals(DEFAULT_MOUNT_NAME + id)) {
 				//this is okay, since this function is only executed if the path changes (aka, the vault is created or added)
 				mountName.set(newPath.getFileName().toString());
 			}
@@ -157,7 +157,7 @@ public class VaultSettings {
 	public StringProperty mountFlags() {
 		return mountFlags;
 	}
-	
+
 	public IntegerProperty filenameLengthLimit() {
 		return filenameLengthLimit;
 	}
