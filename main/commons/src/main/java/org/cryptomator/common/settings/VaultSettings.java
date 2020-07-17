@@ -63,12 +63,18 @@ public class VaultSettings {
 		return new Observable[]{path, mountName, winDriveLetter, unlockAfterStartup, revealAfterMount, useCustomMountPath, customMountPath, usesReadOnlyMode, mountFlags, filenameLengthLimit, actionAfterUnlock};
 	}
 
-	private void deriveMountNameFromPathOrUseDefault(Path path) {
-		if (StringUtils.isBlank(mountName.get())) {
-			if (path != null && path.getFileName() != null) {
-				mountName.set(normalizeMountName(path.getFileName().toString()));
-			} else {
-				mountName.set(DEFAULT_MOUNT_NAME);
+	private void deriveMountNameFromPathOrUseDefault(Path newPath) {
+		final boolean mountNameSet = !StringUtils.isBlank(mountName.get());
+		final boolean dirnameExists = (newPath != null) && (newPath.getFileName() != null);
+
+		if (!mountNameSet && dirnameExists) {
+			mountName.set(normalizeMountName(newPath.getFileName().toString()));
+		} else if (!mountNameSet && !dirnameExists) {
+			mountName.set(DEFAULT_MOUNT_NAME+id);
+		}else if (mountNameSet && dirnameExists) {
+			if(mountName.get().equals(DEFAULT_MOUNT_NAME+id)){
+				//this is okay, since this function is only executed if the path changes (aka, the vault is created or added)
+				mountName.set(newPath.getFileName().toString());
 			}
 		}
 	}
