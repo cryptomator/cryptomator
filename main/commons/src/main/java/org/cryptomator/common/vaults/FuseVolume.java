@@ -171,7 +171,7 @@ public class FuseVolume implements Volume {
 	}
 
 	public static boolean isSupportedStatic() {
-		return (SystemUtils.IS_OS_MAC_OSX || SystemUtils.IS_OS_LINUX) && FuseMountFactory.isFuseSupported();
+		return (SystemUtils.IS_OS_MAC_OSX || SystemUtils.IS_OS_LINUX || SystemUtils.IS_OS_WINDOWS) && FuseMountFactory.isFuseSupported();
 	}
 
 }

@@ -86,6 +86,8 @@ public class VaultModule {
 				return getMacFuseDefaultMountFlags(mountName, readOnly);
 			} else if (v == VolumeImpl.FUSE && SystemUtils.IS_OS_LINUX) {
 				return getLinuxFuseDefaultMountFlags(readOnly);
+			} else if (v == VolumeImpl.FUSE && SystemUtils.IS_OS_WINDOWS) {
+				return getWindowsFuseDefaultMountFlags(mountName, readOnly);
 			} else if (v == VolumeImpl.DOKANY && SystemUtils.IS_OS_WINDOWS) {
 				return getDokanyDefaultMountFlags(readOnly);
 			} else {
@@ -140,6 +142,25 @@ public class VaultModule {
 		} catch (IOException e) {
 			LOG.error("Could not read uid/gid from USER_HOME", e);
 		}
+
+		return flags.toString().strip();
+	}
+
+	// see https://github.com/billziss-gh/winfsp/blob/5d0b10d0b643652c00ebb4704dc2bb28e7244973/src/dll/fuse/fuse_main.c#L53-L62 for syntax guide
+	// see https://github.com/billziss-gh/winfsp/blob/5d0b10d0b643652c00ebb4704dc2bb28e7244973/src/dll/fuse/fuse.c#L295-L319 for options (-o <...>)
+	// see https://github.com/billziss-gh/winfsp/wiki/Frequently-Asked-Questions/5ba00e4be4f5e938eaae6ef1500b331de12dee77 (FUSE 4.) on why the given defaults were choosen
+	private String getWindowsFuseDefaultMountFlags(ReadOnlyStringProperty mountName, ReadOnlyBooleanProperty readOnly) {
+		assert SystemUtils.IS_OS_WINDOWS;
+		StringBuilder flags = new StringBuilder();
+
+		//WinFSP has no explicit "readonly"-option, nut not setting the group/user-id has the same effect, tho.
+		//So for the time being not setting them is the way to go...
+		if (!readOnly.get()) {
+			flags.append(" -ouid=-1");
+			flags.append(" -ogid=-1");
+		}
+		flags.append(" -ovolname=").append(mountName.get());
+		flags.append(" -oThreadCount=").append(5);
 
 		return flags.toString().strip();
 	}
