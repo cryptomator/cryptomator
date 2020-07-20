@@ -5,6 +5,7 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
+import javafx.beans.binding.IntegerBinding;
 import javafx.beans.binding.LongBinding;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -40,6 +41,10 @@ public class VaultStatisticsController implements FxController {
 	private final DoubleBinding cacheHitRate;
 	private final DoubleBinding cacheHitDregrees;
 	private final DoubleBinding cacheHitPercentage;
+	/*private final IntegerBinding filesRead;
+	private final IntegerBinding filesWritten;*/
+	private final LongBinding bpsEncrypted;
+	private final LongBinding bpsDecrypted;
 
 	public AreaChart<Number, Number> readChart;
 	public AreaChart<Number, Number> writeChart;
@@ -58,6 +63,10 @@ public class VaultStatisticsController implements FxController {
 		this.cacheHitRate = WeakBindings.bindDouble(stats.cacheHitRateProperty());
 		this.cacheHitDregrees = cacheHitRate.multiply(-270);
 		this.cacheHitPercentage = cacheHitRate.multiply(100);
+		/*this.filesRead = WeakBindings.bindInterger();
+		this.filesWritten = WeakBindings.bindInterger();*/
+		this.bpsEncrypted = WeakBindings.bindLong(stats.bytesPerSecondEncryptedProperty());
+		this.bpsDecrypted = WeakBindings.bindLong(stats.bytesPerSecondDecryptedProperty());
 
 		this.ioAnimation = new Timeline(); //TODO Research better timer
 		ioAnimation.getKeyFrames().add(new KeyFrame(Duration.seconds(IO_SAMPLING_INTERVAL), new IoSamplingAnimationHandler(readData, writeData)));
@@ -156,5 +165,21 @@ public class VaultStatisticsController implements FxController {
 
 	public double getCacheHitDregrees() {
 		return cacheHitDregrees.get();
+	}
+
+	public LongBinding bpsEncryptedProperty() {
+		return bpsEncrypted;
+	}
+
+	public long getBpsEncrypted() {
+		return bpsEncrypted.get();
+	}
+
+	public LongBinding bpsDecryptedProperty() {
+		return bpsDecrypted;
+	}
+
+	public long getBpsDecrypted() {
+		return bpsDecrypted.get();
 	}
 }

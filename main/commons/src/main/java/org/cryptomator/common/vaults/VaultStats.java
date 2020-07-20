@@ -3,9 +3,11 @@ package org.cryptomator.common.vaults;
 import javafx.application.Platform;
 import javafx.beans.Observable;
 import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.LongProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.ScheduledService;
@@ -31,7 +33,11 @@ public class VaultStats {
 	private final ScheduledService<Optional<CryptoFileSystemStats>> updateService;
 	private final LongProperty bytesPerSecondRead = new SimpleLongProperty();
 	private final LongProperty bytesPerSecondWritten = new SimpleLongProperty();
+	private final LongProperty bytesPerSecondEncrypted = new SimpleLongProperty();
+	private final LongProperty bytesPerSecondDecrypted = new SimpleLongProperty();
 	private final DoubleProperty cacheHitRate = new SimpleDoubleProperty();
+	//private final IntegerProperty filesRead = new SimpleIntegerProperty();
+	//private final IntegerProperty filesWritten = new SimpleIntegerProperty();
 
 	@Inject
 	VaultStats(AtomicReference<CryptoFileSystem> fs, ObjectProperty<VaultState> state, ExecutorService executor) {
@@ -60,6 +66,8 @@ public class VaultStats {
 		bytesPerSecondRead.set(stats.map(CryptoFileSystemStats::pollBytesRead).orElse(0l));
 		bytesPerSecondWritten.set(stats.map(CryptoFileSystemStats::pollBytesWritten).orElse(0l));
 		cacheHitRate.set(stats.map(this::getCacheHitRate).orElse(0.0));
+		bytesPerSecondDecrypted.set(stats.map(CryptoFileSystemStats::pollBytesDecrypted).orElse(0l));
+		bytesPerSecondEncrypted.set(stats.map(CryptoFileSystemStats::pollBytesEncrypted).orElse(0l));
 	}
 	
 	private double getCacheHitRate(CryptoFileSystemStats stats) {
@@ -110,6 +118,22 @@ public class VaultStats {
 		return bytesPerSecondWritten.get();
 	}
 
+	public LongProperty bytesPerSecondEncryptedProperty() {
+		return bytesPerSecondEncrypted;
+	}
+
+	public long getBytesPerSecondEnrypted() {
+		return bytesPerSecondEncrypted.get();
+	}
+
+	public LongProperty bytesPerSecondDecryptedProperty() {
+		return bytesPerSecondDecrypted;
+	}
+
+	public long getBytesPerSecondDecrypted() {
+		return bytesPerSecondDecrypted.get();
+	}
+
 	public DoubleProperty cacheHitRateProperty() {
 		return cacheHitRate;
 	}
@@ -117,5 +141,6 @@ public class VaultStats {
 	public double getCacheHitRate() {
 		return cacheHitRate.get();
 	}
-	
+
+
 }

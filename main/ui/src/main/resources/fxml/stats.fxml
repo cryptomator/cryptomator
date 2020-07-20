@@ -19,7 +19,7 @@
 	<padding>
 		<Insets topRightBottomLeft="12"/>
 	</padding>
-	
+
 	<!-- Caching -->
 	<VBox prefWidth="200" prefHeight="200">
 		<StackPane>
@@ -28,18 +28,18 @@
 				<Arc styleClass="cache-arc-foreground" centerX="100" centerY="100" radiusX="100" radiusY="100" startAngle="225" length="${controller.cacheHitDregrees}"/>
 			</Group>
 			<VBox StackPane.alignment="CENTER" alignment="CENTER">
-				<FormattedLabel styleClass="label-large" format="\%1.0f %%" arg1="${controller.cacheHitPercentage}" />
-				<Label text="%stats.cacheHitRate" />
+				<FormattedLabel styleClass="label-large" format="\%1.0f %%" arg1="${controller.cacheHitPercentage}"/>
+				<Label text="%stats.cacheHitRate"/>
 			</VBox>
 		</StackPane>
 	</VBox>
 
 	<!-- Read -->
-	<VBox prefWidth="200" prefHeight="200">
-		<HBox spacing="12">
-			<Label text="%stats.readDataLabel"/>
+	<VBox prefWidth="300" prefHeight="200">
+		<HBox spacing="12" alignment="CENTER">
+			<Label styleClass="label-large" text="%stats.readDataLabel"/>
 			<ThrougputLabel styleClass="label-large" alignment="CENTER_RIGHT" minWidth="60" idleFormat="%main.vaultDetail.throughput.idle" kibsFormat="%main.vaultDetail.throughput.kbps"
-						mibsFormat="%main.vaultDetail.throughput.mbps" bytesPerSecond="${controller.bpsRead}"/>
+							mibsFormat="%main.vaultDetail.throughput.mbps" bytesPerSecond="${controller.bpsRead}"/>
 		</HBox>
 		<AreaChart fx:id="readChart" styleClass="io-stats" createSymbols="false" animated="false">
 			<xAxis>
@@ -52,12 +52,18 @@
 				<Cursor fx:constant="DEFAULT"/>
 			</cursor>
 		</AreaChart>
+		<VBox spacing="12" alignment="CENTER">
+			<FormattedLabel styleClass="label-large" alignment="CENTER_RIGHT" minWidth="60" format="%stats.totalMiB" arg1="${controller.bpsRead}"/>
+			<!-- <FormattedLabel styleClass="label-large" alignment="CENTER_LEFT" minWidth="60" format="%stats.totalReads" arg1="${controller.}"/> -->
+			<!--<FormattedLabel styleClass="label-large" alignment="CENTER_RIGHT" minWidth="60" format="%stats.totalMiB" arg1="${controller.bpsEncrypted}"/>-->
+
+		</VBox>
 	</VBox>
 
 	<!-- Write -->
 	<VBox prefWidth="200" prefHeight="200">
-		<HBox>
-			<Label text="%stats.writtenDataLabel"/>
+		<HBox alignment="CENTER">
+			<Label styleClass="label-large" text="%stats.writtenDataLabel"/>
 			<ThrougputLabel styleClass="label-large" alignment="CENTER_RIGHT" minWidth="60" idleFormat="%main.vaultDetail.throughput.idle" kibsFormat="%main.vaultDetail.throughput.kbps"
 							mibsFormat="%main.vaultDetail.throughput.mbps" bytesPerSecond="${controller.bpsWritten}"/>
 		</HBox>
@@ -72,6 +78,10 @@
 				<Cursor fx:constant="DEFAULT"/>
 			</cursor>
 		</AreaChart>
+		<VBox spacing="12" alignment="CENTER">
+			<FormattedLabel styleClass="label-large" alignment="CENTER_RIGHT" minWidth="60" format="%stats.totalMiB" arg1="${controller.bpsWritten}"/>
+			<!-- <FormattedLabel styleClass="label-large" alignment="CENTER_LEFT" minWidth="60" format="%stats.totalWrites" arg1="${controller.}"/> -->
+		</VBox>
+
 	</VBox>
-	
 </HBox>
