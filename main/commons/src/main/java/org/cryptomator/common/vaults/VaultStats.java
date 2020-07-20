@@ -3,13 +3,10 @@ package org.cryptomator.common.vaults;
 import javafx.application.Platform;
 import javafx.beans.Observable;
 import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.LongProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleLongProperty;
-import javafx.beans.value.ObservableValue;
 import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Task;
 import javafx.util.Duration;
@@ -36,6 +33,10 @@ public class VaultStats {
 	private final LongProperty bytesPerSecondEncrypted = new SimpleLongProperty();
 	private final LongProperty bytesPerSecondDecrypted = new SimpleLongProperty();
 	private final DoubleProperty cacheHitRate = new SimpleDoubleProperty();
+	private final LongProperty toalBytesRead = new SimpleLongProperty();
+	private final LongProperty toalBytesWritten = new SimpleLongProperty();
+	private final LongProperty totalBytesEncrypted = new SimpleLongProperty();
+	private final LongProperty totalBytesDecrypted = new SimpleLongProperty();
 	//private final IntegerProperty filesRead = new SimpleIntegerProperty();
 	//private final IntegerProperty filesWritten = new SimpleIntegerProperty();
 
@@ -68,8 +69,13 @@ public class VaultStats {
 		cacheHitRate.set(stats.map(this::getCacheHitRate).orElse(0.0));
 		bytesPerSecondDecrypted.set(stats.map(CryptoFileSystemStats::pollBytesDecrypted).orElse(0l));
 		bytesPerSecondEncrypted.set(stats.map(CryptoFileSystemStats::pollBytesEncrypted).orElse(0l));
+		toalBytesRead.set(stats.map(CryptoFileSystemStats::pollBytesRead).orElse(0l) + toalBytesRead.get());
+		toalBytesWritten.set(stats.map(CryptoFileSystemStats::pollBytesWritten).orElse(0l) + toalBytesWritten.get());
+		totalBytesEncrypted.set(stats.map(CryptoFileSystemStats::pollBytesEncrypted).orElse(0l) + totalBytesEncrypted.get());
+		totalBytesDecrypted.set(stats.map(CryptoFileSystemStats::pollBytesDecrypted).orElse(0l) + totalBytesDecrypted.get());
+
 	}
-	
+
 	private double getCacheHitRate(CryptoFileSystemStats stats) {
 		long accesses = stats.pollChunkCacheAccesses();
 		long hits = stats.pollChunkCacheHits();
@@ -141,6 +147,22 @@ public class VaultStats {
 	public double getCacheHitRate() {
 		return cacheHitRate.get();
 	}
+
+	public LongProperty toalBytesReadProperty() {return toalBytesRead;}
+
+	public long getTotalBytesRead() { return toalBytesRead.get();}
+
+	public LongProperty toalBytesWrittenProperty() {return toalBytesWritten;}
+
+	public long getTotalBytesWritten() { return toalBytesWritten.get();}
+
+	public LongProperty totalBytesEncryptedProperty() {return totalBytesEncrypted;}
+
+	public long getTotalBytesEncrypted() { return totalBytesEncrypted.get();}
+
+	public LongProperty totalBytesDecryptedProperty() {return totalBytesDecrypted;}
+
+	public long getTotalBytesDecrypted() { return totalBytesDecrypted.get();}
 
 
 }
