@@ -12,10 +12,11 @@
 <?import org.cryptomator.ui.controls.FormattedLabel?>
 <?import org.cryptomator.ui.controls.ThrougputLabel?>
 <?import javafx.scene.Group?>
+<?import org.cryptomator.ui.controls.DataLabel?>
 <HBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
 	  fx:controller="org.cryptomator.ui.stats.VaultStatisticsController"
-	  prefWidth="600.0" spacing="12">
+	  prefWidth="1000.0" spacing="12">
 	<padding>
 		<Insets topRightBottomLeft="12"/>
 	</padding>
@@ -35,7 +36,7 @@
 	</VBox>
 
 	<!-- Read -->
-	<VBox prefWidth="300" prefHeight="200">
+	<VBox prefWidth="400" prefHeight="200">
 		<HBox spacing="12" alignment="CENTER">
 			<Label styleClass="label-large" text="%stats.readDataLabel"/>
 			<ThrougputLabel styleClass="label-large" alignment="CENTER_RIGHT" minWidth="60" idleFormat="%main.vaultDetail.throughput.idle" kibsFormat="%main.vaultDetail.throughput.kbps"
@@ -53,15 +54,26 @@
 			</cursor>
 		</AreaChart>
 		<VBox spacing="12" alignment="CENTER">
-			<FormattedLabel styleClass="label-large" alignment="CENTER_RIGHT" minWidth="60" format="%stats.totalMiB" arg1="${controller.bpsRead}"/>
-			<!-- <FormattedLabel styleClass="label-large" alignment="CENTER_LEFT" minWidth="60" format="%stats.totalReads" arg1="${controller.}"/> -->
-			<!--<FormattedLabel styleClass="label-large" alignment="CENTER_RIGHT" minWidth="60" format="%stats.totalMiB" arg1="${controller.bpsEncrypted}"/>-->
+			<HBox alignment="CENTER">
+				<Label styleClass="label-large" text="%stats.totalMiBRead"/>
+				<DataLabel styleClass="label-large" alignment="CENTER_RIGHT" minWidth="60" byteFormat="%stats.data.bytes" kibFormat="%stats.data.kiB" mibFormat="%stats.data.miB" gibFormat="%stats.data.giB"
+						   dataInBytes="${controller.totalBytesRead}"/>
+			</HBox>
+			<HBox alignment="CENTER">
+				<Label styleClass="label-large" text="%stats.totalMiBDecrypted"/>
+				<DataLabel styleClass="label-large" alignment="CENTER_RIGHT" minWidth="60"  byteFormat="%stats.data.bytes" kibFormat="%stats.data.kiB" mibFormat="%stats.data.miB" gibFormat="%stats.data.giB"
+						   dataInBytes="${controller.totalBytesDecrypted}"/>
+			</HBox>
 
+			<!--
+			<FormattedLabel styleClass="label-large" alignment="CENTER_RIGHT" minWidth="60" format="%stats.totalMiBRead" arg1="${controller.totalBytesRead}"/>
+			<FormattedLabel styleClass="label-large" alignment="CENTER_RIGHT" minWidth="60" format="%stats.totalMiBDecrypted" arg1="${controller.totalBytesDecrypted}"/>
+			-->
 		</VBox>
 	</VBox>
 
 	<!-- Write -->
-	<VBox prefWidth="200" prefHeight="200">
+	<VBox prefWidth="400" prefHeight="200">
 		<HBox alignment="CENTER">
 			<Label styleClass="label-large" text="%stats.writtenDataLabel"/>
 			<ThrougputLabel styleClass="label-large" alignment="CENTER_RIGHT" minWidth="60" idleFormat="%main.vaultDetail.throughput.idle" kibsFormat="%main.vaultDetail.throughput.kbps"
@@ -79,8 +91,16 @@
 			</cursor>
 		</AreaChart>
 		<VBox spacing="12" alignment="CENTER">
-			<FormattedLabel styleClass="label-large" alignment="CENTER_RIGHT" minWidth="60" format="%stats.totalMiB" arg1="${controller.bpsWritten}"/>
-			<!-- <FormattedLabel styleClass="label-large" alignment="CENTER_LEFT" minWidth="60" format="%stats.totalWrites" arg1="${controller.}"/> -->
+			<HBox alignment="CENTER">
+				<Label styleClass="label-large" text="%stats.totalMiBWritten"/>
+				<DataLabel styleClass="label-large" alignment="CENTER_RIGHT" minWidth="60" byteFormat="%stats.data.bytes" kibFormat="%stats.data.kiB" mibFormat="%stats.data.miB" gibFormat="%stats.data.giB"
+						   dataInBytes="${controller.totalBytesWritten}"/>
+			</HBox>
+			<HBox alignment="CENTER">
+				<Label styleClass="label-large" text="%stats.totalMiBEncrypted"/>
+				<DataLabel styleClass="label-large" alignment="CENTER_RIGHT" minWidth="60" byteFormat="%stats.data.bytes" kibFormat="%stats.data.kiB" mibFormat="%stats.data.miB" gibFormat="%stats.data.giB"
+						   dataInBytes="${controller.totalBytesEncrypted}"/>
+			</HBox>
 		</VBox>
 
 	</VBox>

@@ -3,15 +3,13 @@ package org.cryptomator.ui.stats;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
-import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
-import javafx.beans.binding.IntegerBinding;
 import javafx.beans.binding.LongBinding;
+import javafx.beans.property.LongProperty;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.chart.AreaChart;
-import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart.Data;
 import javafx.scene.chart.XYChart.Series;
@@ -41,6 +39,10 @@ public class VaultStatisticsController implements FxController {
 	private final DoubleBinding cacheHitRate;
 	private final DoubleBinding cacheHitDregrees;
 	private final DoubleBinding cacheHitPercentage;
+	private final LongBinding totalBytesRead;
+	private final LongBinding totalBytesWritten;
+	private final LongBinding totalBytesEncrypted;
+	private final LongBinding totalBytesDecrypted;
 	/*private final IntegerBinding filesRead;
 	private final IntegerBinding filesWritten;*/
 	private final LongBinding bpsEncrypted;
@@ -63,6 +65,10 @@ public class VaultStatisticsController implements FxController {
 		this.cacheHitRate = WeakBindings.bindDouble(stats.cacheHitRateProperty());
 		this.cacheHitDregrees = cacheHitRate.multiply(-270);
 		this.cacheHitPercentage = cacheHitRate.multiply(100);
+		this.totalBytesRead = WeakBindings.bindLong(stats.toalBytesReadProperty());
+		this.totalBytesWritten = WeakBindings.bindLong(stats.toalBytesWrittenProperty());
+		this.totalBytesDecrypted = WeakBindings.bindLong(stats.totalBytesDecryptedProperty());
+		this.totalBytesEncrypted = WeakBindings.bindLong(stats.totalBytesEncryptedProperty());
 		/*this.filesRead = WeakBindings.bindInterger();
 		this.filesWritten = WeakBindings.bindInterger();*/
 		this.bpsEncrypted = WeakBindings.bindLong(stats.bytesPerSecondEncryptedProperty());
@@ -89,7 +95,7 @@ public class VaultStatisticsController implements FxController {
 	private class IoSamplingAnimationHandler implements EventHandler<ActionEvent> {
 
 		private static final double BYTES_TO_MEGABYTES_FACTOR = 1.0 / IO_SAMPLING_INTERVAL / 1024.0 / 1024.0;
-		
+
 		private long step = IO_SAMPLING_STEPS;
 		private final Series<Number, Number> decryptedBytesRead;
 		private final Series<Number, Number> encryptedBytesWrite;
@@ -114,7 +120,7 @@ public class VaultStatisticsController implements FxController {
 
 			maxBuf[(int) currentStep % IO_SAMPLING_STEPS] = Math.max(decBytes, encBytes);
 			long allTimeMax = Arrays.stream(maxBuf).max().orElse(0l);
-			
+
 			// remove oldest value:
 			decryptedBytesRead.getData().remove(0);
 			encryptedBytesWrite.getData().remove(0);
@@ -122,7 +128,7 @@ public class VaultStatisticsController implements FxController {
 			// add latest value:
 			decryptedBytesRead.getData().add(new Data<>(currentStep, decBytes));
 			encryptedBytesWrite.getData().add(new Data<>(currentStep, encBytes));
-			
+
 			// adjust ranges:
 			readChartXAxis.setLowerBound(currentStep - IO_SAMPLING_STEPS);
 			readChartXAxis.setUpperBound(currentStep);
@@ -155,9 +161,7 @@ public class VaultStatisticsController implements FxController {
 		return cacheHitPercentage;
 	}
 
-	public double getCacheHitPercentage() {
-		return cacheHitPercentage.get();
-	}
+	public double getCacheHitPercentage() { return cacheHitPercentage.get(); }
 
 	public DoubleBinding cacheHitDregreesProperty() {
 		return cacheHitDregrees;
@@ -166,6 +170,22 @@ public class VaultStatisticsController implements FxController {
 	public double getCacheHitDregrees() {
 		return cacheHitDregrees.get();
 	}
+
+	public LongBinding totalBytesReadProperty() { return totalBytesRead;}
+
+	public long getTotalBytesRead() { return totalBytesRead.get();}
+
+	public LongBinding totalBytesWrittenProperty() { return totalBytesWritten;}
+
+	public long getTotalBytesWritten() { return totalBytesWritten.get();}
+
+	public LongBinding totalBytesEncryptedProperty() {return totalBytesEncrypted;}
+
+	public long getTotalBytesEncrypted() { return totalBytesEncrypted.get();}
+
+	public LongBinding totalBytesDecryptedProperty() {return totalBytesDecrypted;}
+
+	public long getTotalBytesDecrypted() { return totalBytesDecrypted.get();}
 
 	public LongBinding bpsEncryptedProperty() {
 		return bpsEncrypted;
