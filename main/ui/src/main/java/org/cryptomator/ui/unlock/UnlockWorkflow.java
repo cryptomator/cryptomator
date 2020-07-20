@@ -27,6 +27,7 @@ import javax.inject.Named;
 import java.io.IOException;
 import java.nio.CharBuffer;
 import java.nio.file.DirectoryNotEmptyException;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.FileSystemException;
 import java.nio.file.NotDirectoryException;
 import java.util.Arrays;
@@ -83,7 +84,7 @@ public class UnlockWorkflow extends Task<Boolean> {
 				cancel(false); // set Tasks state to cancelled
 				return false;
 			}
-		} catch (NotDirectoryException | DirectoryNotEmptyException e) {
+		} catch (FileAlreadyExistsException | NotDirectoryException | DirectoryNotEmptyException e) {
 			handleInvalidMountPoint(e);
 			throw e; // rethrow to trigger correct exception handling in Task
 		} catch (Exception e) {

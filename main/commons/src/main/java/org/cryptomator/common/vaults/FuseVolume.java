@@ -18,7 +18,9 @@ import javax.inject.Inject;
 import java.io.IOException;
 import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.DirectoryStream;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.NotDirectoryException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -59,6 +61,18 @@ public class FuseVolume implements Volume {
 	}
 
 	private void checkProvidedMountPoint(Path mountPoint) throws IOException {
+		//On Windows the target folder MUST NOT exist...
+		if (SystemUtils.IS_OS_WINDOWS) {
+			//We must use #notExists() here because notExists =/= !exists (see docs)
+			if (Files.notExists(mountPoint, LinkOption.NOFOLLOW_LINKS)) {
+				//File really doesn't exist
+				return;
+			}
+			//File exists OR can't be determined
+			throw new FileAlreadyExistsException(mountPoint.toString());
+		}
+
+		//... on Mac and Linux it's the opposite
 		if (!Files.isDirectory(mountPoint)) {
 			throw new NotDirectoryException(mountPoint.toString());
 		}
