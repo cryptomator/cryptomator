@@ -101,6 +101,11 @@ public class WebDavVolume implements Volume {
 		return Optional.ofNullable(mountPoint);
 	}
 
+	@Override
+	public MountPointRequirement getMountPointRequirement() {
+		return MountPointRequirement.NONE;
+	}
+
 	private String getLocalhostAliasOrNull() {
 		try {
 			InetAddress alias = InetAddress.getByName(LOCALHOST_ALIAS);

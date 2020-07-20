@@ -106,6 +106,11 @@ public class DokanyVolume implements Volume {
 		return Optional.ofNullable(mountPoint);
 	}
 
+	@Override
+	public MountPointRequirement getMountPointRequirement() {
+		return MountPointRequirement.EMPTY_MOUNT_POINT;
+	}
+
 	public static boolean isSupportedStatic() {
 		return MountFactory.isApplicable();
 	}

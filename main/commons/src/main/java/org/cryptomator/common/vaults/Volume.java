@@ -32,6 +32,8 @@ public interface Volume {
 
 	Optional<Path> getMountPoint();
 
+	MountPointRequirement getMountPointRequirement();
+
 	// optional forced unmounting:
 
 	default boolean supportsForcedUnmount() {

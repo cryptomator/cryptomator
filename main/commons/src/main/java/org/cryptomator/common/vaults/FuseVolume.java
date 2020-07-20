@@ -182,6 +182,11 @@ public class FuseVolume implements Volume {
 		return Optional.ofNullable(mountPoint);
 	}
 
+	@Override
+	public MountPointRequirement getMountPointRequirement() {
+		return SystemUtils.IS_OS_WINDOWS ? MountPointRequirement.PARENT_NO_MOUNT_POINT : MountPointRequirement.EMPTY_MOUNT_POINT;
+	}
+
 	public static boolean isSupportedStatic() {
 		return FuseMountFactory.isFuseSupported();
 	}
