@@ -74,13 +74,11 @@ public class FuseVolume implements Volume {
 		// https://github.com/osxfuse/osxfuse/issues/306#issuecomment-245114592:
 		// In order to allow non-admin users to mount FUSE volumes in `/Volumes`,
 		// starting with version 3.5.0, FUSE will create non-existent mount points automatically.
-		if (IS_MAC && mountPoint.getParent().equals(Paths.get("/Volumes"))) {
-			return mountPoint;
-		} else {
+		if (!(IS_MAC && mountPoint.getParent().equals(Paths.get("/Volumes")))) {
 			Files.createDirectories(mountPoint);
 			this.createdTemporaryMountPoint = true;
-			return mountPoint;
 		}
+		return mountPoint;
 	}
 
 	private Path chooseNonExistingTemporaryMountPoint() throws VolumeException {
