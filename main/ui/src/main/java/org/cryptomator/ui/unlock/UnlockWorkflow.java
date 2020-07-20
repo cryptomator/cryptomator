@@ -6,6 +6,7 @@ import javafx.concurrent.Task;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.stage.Window;
+import org.cryptomator.common.vaults.MountPointRequirement;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.common.vaults.Volume;
@@ -156,7 +157,15 @@ public class UnlockWorkflow extends Task<Boolean> {
 	}
 
 	private void handleInvalidMountPoint(FileSystemException e) {
-		LOG.error("Unlock failed. Mount point not an empty directory: {}", e.getMessage());
+		MountPointRequirement requirement = vault.getMountPointRequirement();
+		assert requirement != MountPointRequirement.NONE; //An invalid MountPoint with no required MountPoint doesn't seem sensible
+
+		if (requirement == MountPointRequirement.EMPTY_MOUNT_POINT) {
+			LOG.error("Unlock failed. Mount point not an empty directory or doesn't exist: {}", e.getMessage());
+		} else {
+			LOG.error("Unlock failed. Mount point/folder already exists or parent folder doesn't exist: {}", e.getMessage());
+		}
+
 		Platform.runLater(() -> {
 			window.setScene(invalidMountPointScene.get());
 		});

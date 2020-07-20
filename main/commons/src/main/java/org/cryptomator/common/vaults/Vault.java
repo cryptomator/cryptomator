@@ -319,6 +319,10 @@ public class Vault {
 		return vaultSettings.getId();
 	}
 
+	public MountPointRequirement getMountPointRequirement() {
+		return volume.getMountPointRequirement();
+	}
+
 	// ******************************************************************************
 	// Hashcode / Equals
 	// *******************************************************************************/

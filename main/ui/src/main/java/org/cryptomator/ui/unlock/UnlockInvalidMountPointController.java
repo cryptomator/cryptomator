@@ -4,6 +4,7 @@ import dagger.Lazy;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import org.cryptomator.common.vaults.MountPointRequirement;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxmlFile;
@@ -34,6 +35,13 @@ public class UnlockInvalidMountPointController implements FxController {
 
 	public String getMountPoint() {
 		return vault.getVaultSettings().getCustomMountPath().orElse("AUTO");
+	}
+
+	public boolean getMustExist() {
+		MountPointRequirement requirement = vault.getMountPointRequirement();
+		assert requirement != MountPointRequirement.NONE; //An invalid MountPoint with no required MountPoint doesn't seem sensible
+
+		return requirement == MountPointRequirement.EMPTY_MOUNT_POINT;
 	}
 
 }
