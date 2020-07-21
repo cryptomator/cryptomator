@@ -43,8 +43,8 @@ public class VaultStatisticsController implements FxController {
 	private final LongBinding totalBytesWritten;
 	private final LongBinding totalBytesEncrypted;
 	private final LongBinding totalBytesDecrypted;
-	/*private final IntegerBinding filesRead;
-	private final IntegerBinding filesWritten;*/
+	private final LongBinding filesRead;
+	private final LongBinding filesWritten;
 	private final LongBinding bpsEncrypted;
 	private final LongBinding bpsDecrypted;
 
@@ -69,8 +69,8 @@ public class VaultStatisticsController implements FxController {
 		this.totalBytesWritten = WeakBindings.bindLong(stats.toalBytesWrittenProperty());
 		this.totalBytesDecrypted = WeakBindings.bindLong(stats.totalBytesDecryptedProperty());
 		this.totalBytesEncrypted = WeakBindings.bindLong(stats.totalBytesEncryptedProperty());
-		/*this.filesRead = WeakBindings.bindInterger();
-		this.filesWritten = WeakBindings.bindInterger();*/
+		this.filesRead = WeakBindings.bindLong(stats.filesRead());
+		this.filesWritten = WeakBindings.bindLong(stats.filesWritten());
 		this.bpsEncrypted = WeakBindings.bindLong(stats.bytesPerSecondEncryptedProperty());
 		this.bpsDecrypted = WeakBindings.bindLong(stats.bytesPerSecondDecryptedProperty());
 
@@ -202,4 +202,12 @@ public class VaultStatisticsController implements FxController {
 	public long getBpsDecrypted() {
 		return bpsDecrypted.get();
 	}
+
+	public LongBinding filesReadProperty() { return filesRead;}
+
+	public long getFilesRead() { return filesRead.get();}
+
+	public LongBinding filesWrittenProperty() {return filesWritten;}
+
+	public long getFilesWritten() {return filesWritten.get();}
 }

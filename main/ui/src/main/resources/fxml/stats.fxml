@@ -61,15 +61,13 @@
 			</HBox>
 			<HBox alignment="CENTER">
 				<Label styleClass="label-large" text="%stats.totalMiBDecrypted"/>
-				<DataLabel styleClass="label-large" alignment="CENTER_RIGHT" minWidth="60"  byteFormat="%stats.data.bytes" kibFormat="%stats.data.kiB" mibFormat="%stats.data.miB" gibFormat="%stats.data.giB"
+				<DataLabel styleClass="label-large" alignment="CENTER_RIGHT" minWidth="60" byteFormat="%stats.data.bytes" kibFormat="%stats.data.kiB" mibFormat="%stats.data.miB" gibFormat="%stats.data.giB"
 						   dataInBytes="${controller.totalBytesDecrypted}"/>
 			</HBox>
+			<FormattedLabel styleClass="label-large" alignment="CENTER_RIGHT" minWidth="60" format="%stats.totalReads" arg1="${controller.filesRead}"/>
 
-			<!--
-			<FormattedLabel styleClass="label-large" alignment="CENTER_RIGHT" minWidth="60" format="%stats.totalMiBRead" arg1="${controller.totalBytesRead}"/>
-			<FormattedLabel styleClass="label-large" alignment="CENTER_RIGHT" minWidth="60" format="%stats.totalMiBDecrypted" arg1="${controller.totalBytesDecrypted}"/>
-			-->
 		</VBox>
+
 	</VBox>
 
 	<!-- Write -->
@@ -101,6 +99,8 @@
 				<DataLabel styleClass="label-large" alignment="CENTER_RIGHT" minWidth="60" byteFormat="%stats.data.bytes" kibFormat="%stats.data.kiB" mibFormat="%stats.data.miB" gibFormat="%stats.data.giB"
 						   dataInBytes="${controller.totalBytesEncrypted}"/>
 			</HBox>
+			<FormattedLabel styleClass="label-large" alignment="CENTER_RIGHT" minWidth="60" format="%stats.totalWrites" arg1="${controller.filesWritten}"/>
+
 		</VBox>
 
 	</VBox>

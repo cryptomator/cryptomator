@@ -37,8 +37,8 @@ public class VaultStats {
 	private final LongProperty toalBytesWritten = new SimpleLongProperty();
 	private final LongProperty totalBytesEncrypted = new SimpleLongProperty();
 	private final LongProperty totalBytesDecrypted = new SimpleLongProperty();
-	//private final IntegerProperty filesRead = new SimpleIntegerProperty();
-	//private final IntegerProperty filesWritten = new SimpleIntegerProperty();
+	private final LongProperty filesRead = new SimpleLongProperty();
+	private final LongProperty filesWritten = new SimpleLongProperty();
 
 	@Inject
 	VaultStats(AtomicReference<CryptoFileSystem> fs, ObjectProperty<VaultState> state, ExecutorService executor) {
@@ -69,10 +69,12 @@ public class VaultStats {
 		cacheHitRate.set(stats.map(this::getCacheHitRate).orElse(0.0));
 		bytesPerSecondDecrypted.set(stats.map(CryptoFileSystemStats::pollBytesDecrypted).orElse(0l));
 		bytesPerSecondEncrypted.set(stats.map(CryptoFileSystemStats::pollBytesEncrypted).orElse(0l));
-		toalBytesRead.set(stats.map(CryptoFileSystemStats::pollBytesRead).orElse(0l) + toalBytesRead.get());
-		toalBytesWritten.set(stats.map(CryptoFileSystemStats::pollBytesWritten).orElse(0l) + toalBytesWritten.get());
-		totalBytesEncrypted.set(stats.map(CryptoFileSystemStats::pollBytesEncrypted).orElse(0l) + totalBytesEncrypted.get());
-		totalBytesDecrypted.set(stats.map(CryptoFileSystemStats::pollBytesDecrypted).orElse(0l) + totalBytesDecrypted.get());
+		toalBytesRead.set(stats.map(CryptoFileSystemStats::pollTotalBytesRead).orElse(0l));
+		toalBytesWritten.set(stats.map(CryptoFileSystemStats::pollTotalBytesWritten).orElse(0l));
+		totalBytesEncrypted.set(stats.map(CryptoFileSystemStats::pollTotalBytesEncrypted).orElse(0l));
+		totalBytesDecrypted.set(stats.map(CryptoFileSystemStats::pollTotalBytesDecrypted).orElse(0l));
+		filesRead.set(stats.map(CryptoFileSystemStats::pollAmountOfFilesRead).orElse(0l));
+		filesWritten.set(stats.map(CryptoFileSystemStats::pollAmountOfFilesWritten).orElse(0l));
 
 	}
 
@@ -140,9 +142,7 @@ public class VaultStats {
 		return bytesPerSecondDecrypted.get();
 	}
 
-	public DoubleProperty cacheHitRateProperty() {
-		return cacheHitRate;
-	}
+	public DoubleProperty cacheHitRateProperty() { return cacheHitRate; }
 
 	public double getCacheHitRate() {
 		return cacheHitRate.get();
@@ -164,5 +164,11 @@ public class VaultStats {
 
 	public long getTotalBytesDecrypted() { return totalBytesDecrypted.get();}
 
+	public LongProperty filesRead() { return filesRead;}
 
+	public long getFilesRead() { return filesRead.get();}
+
+	public LongProperty filesWritten() {return filesWritten;}
+
+	public long getFilesWritten() {return filesWritten.get();}
 }
