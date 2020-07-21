@@ -64,17 +64,17 @@ public class VaultStats {
 
 	private void updateStats(Optional<CryptoFileSystemStats> stats) {
 		assert Platform.isFxApplicationThread();
-		bytesPerSecondRead.set(stats.map(CryptoFileSystemStats::pollBytesRead).orElse(0l));
-		bytesPerSecondWritten.set(stats.map(CryptoFileSystemStats::pollBytesWritten).orElse(0l));
+		bytesPerSecondRead.set(stats.map(CryptoFileSystemStats::pollBytesRead).orElse(0L));
+		bytesPerSecondWritten.set(stats.map(CryptoFileSystemStats::pollBytesWritten).orElse(0L));
 		cacheHitRate.set(stats.map(this::getCacheHitRate).orElse(0.0));
-		bytesPerSecondDecrypted.set(stats.map(CryptoFileSystemStats::pollBytesDecrypted).orElse(0l));
-		bytesPerSecondEncrypted.set(stats.map(CryptoFileSystemStats::pollBytesEncrypted).orElse(0l));
-		toalBytesRead.set(stats.map(CryptoFileSystemStats::pollTotalBytesRead).orElse(0l));
-		toalBytesWritten.set(stats.map(CryptoFileSystemStats::pollTotalBytesWritten).orElse(0l));
-		totalBytesEncrypted.set(stats.map(CryptoFileSystemStats::pollTotalBytesEncrypted).orElse(0l));
-		totalBytesDecrypted.set(stats.map(CryptoFileSystemStats::pollTotalBytesDecrypted).orElse(0l));
-		filesRead.set(stats.map(CryptoFileSystemStats::pollAmountOfFilesRead).orElse(0l));
-		filesWritten.set(stats.map(CryptoFileSystemStats::pollAmountOfFilesWritten).orElse(0l));
+		bytesPerSecondDecrypted.set(stats.map(CryptoFileSystemStats::pollBytesDecrypted).orElse(0L));
+		bytesPerSecondEncrypted.set(stats.map(CryptoFileSystemStats::pollBytesEncrypted).orElse(0L));
+		toalBytesRead.set(stats.map(CryptoFileSystemStats::pollTotalBytesRead).orElse(0L));
+		toalBytesWritten.set(stats.map(CryptoFileSystemStats::pollTotalBytesWritten).orElse(0L));
+		totalBytesEncrypted.set(stats.map(CryptoFileSystemStats::pollTotalBytesEncrypted).orElse(0L));
+		totalBytesDecrypted.set(stats.map(CryptoFileSystemStats::pollTotalBytesDecrypted).orElse(0L));
+		filesRead.set(stats.map(CryptoFileSystemStats::pollAmountOfAccessesRead).orElse(0L));
+		filesWritten.set(stats.map(CryptoFileSystemStats::pollAmountOfAccessesWritten).orElse(0L));
 
 	}
 
