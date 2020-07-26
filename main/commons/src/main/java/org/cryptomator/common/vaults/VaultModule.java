@@ -155,12 +155,15 @@ public class VaultModule {
 
 		//WinFSP has no explicit "readonly"-option, nut not setting the group/user-id has the same effect, tho.
 		//So for the time being not setting them is the way to go...
+		//See: https://github.com/billziss-gh/winfsp/issues/319
 		if (!readOnly.get()) {
 			flags.append(" -ouid=-1");
 			flags.append(" -ogid=-1");
 		}
 		flags.append(" -ovolname=").append(mountName.get());
-		flags.append(" -oThreadCount=").append(5);
+		//Dokany requires this option to be set, WinFSP doesn't seem to share this peculiarity,
+		//but the option exists. Let's keep this here in case we need it.
+//		flags.append(" -oThreadCount=").append(5);
 
 		return flags.toString().strip();
 	}

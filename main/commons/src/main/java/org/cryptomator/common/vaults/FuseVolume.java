@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.DirectoryStream;
@@ -30,7 +31,6 @@ public class FuseVolume implements Volume {
 
 	private static final Logger LOG = LoggerFactory.getLogger(FuseVolume.class);
 	private static final int MAX_TMPMOUNTPOINT_CREATION_RETRIES = 10;
-	private static final boolean IS_MAC = System.getProperty("os.name").toLowerCase().contains("mac");
 
 	private final VaultSettings vaultSettings;
 	private final Environment environment;
@@ -62,6 +62,7 @@ public class FuseVolume implements Volume {
 
 	private void checkProvidedMountPoint(Path mountPoint) throws IOException {
 		//On Windows the target folder MUST NOT exist...
+		//https://github.com/billziss-gh/winfsp/issues/320
 		if (SystemUtils.IS_OS_WINDOWS) {
 			//We must use #notExists() here because notExists =/= !exists (see docs)
 			if (Files.notExists(mountPoint, LinkOption.NOFOLLOW_LINKS)) {
@@ -88,7 +89,14 @@ public class FuseVolume implements Volume {
 		// https://github.com/osxfuse/osxfuse/issues/306#issuecomment-245114592:
 		// In order to allow non-admin users to mount FUSE volumes in `/Volumes`,
 		// starting with version 3.5.0, FUSE will create non-existent mount points automatically.
-		if (!(IS_MAC && mountPoint.getParent().equals(Paths.get("/Volumes")))) {
+		if (SystemUtils.IS_OS_MAC && mountPoint.getParent().equals(Paths.get("/Volumes"))) {
+			return mountPoint;
+		}
+
+		//WinFSP needs the parent, but the acutal Mount Point must not exist...
+		if (SystemUtils.IS_OS_WINDOWS) {
+			Files.createDirectories(mountPoint.getParent());
+		} else {
 			Files.createDirectories(mountPoint);
 			this.createdTemporaryMountPoint = true;
 		}
@@ -104,7 +112,7 @@ public class FuseVolume implements Volume {
 				return mountPoint;
 			}
 		}
-		LOG.error("Failed to find feasible mountpoint at {}/{}_x. Giving up after {} attempts.", parent, basename, MAX_TMPMOUNTPOINT_CREATION_RETRIES);
+		LOG.error("Failed to find feasible mountpoint at {}{}{}_x. Giving up after {} attempts.", parent, File.separator, basename, MAX_TMPMOUNTPOINT_CREATION_RETRIES);
 		throw new VolumeException("Did not find feasible mount point.");
 	}
 
