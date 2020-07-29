@@ -1,6 +1,7 @@
 package org.cryptomator.common.vaults;
 
 import com.google.common.base.Splitter;
+import com.google.common.base.Strings;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.Environment;
 import org.cryptomator.common.settings.VaultSettings;
@@ -34,30 +35,54 @@ public class FuseVolume implements Volume {
 
 	private final VaultSettings vaultSettings;
 	private final Environment environment;
+	private final WindowsDriveLetters windowsDriveLetters;
 
 	private Mount fuseMnt;
 	private Path mountPoint;
 	private boolean createdTemporaryMountPoint;
 
 	@Inject
-	public FuseVolume(VaultSettings vaultSettings, Environment environment) {
+	public FuseVolume(VaultSettings vaultSettings, Environment environment, WindowsDriveLetters windowsDriveLetters) {
 		this.vaultSettings = vaultSettings;
 		this.environment = environment;
+		this.windowsDriveLetters = windowsDriveLetters;
 	}
 
 	@Override
 	public void mount(CryptoFileSystem fs, String mountFlags) throws IOException, FuseNotSupportedException, VolumeException {
-		Optional<String> optionalCustomMountPoint = vaultSettings.getCustomMountPath();
-		if (optionalCustomMountPoint.isPresent()) {
-			Path customMountPoint = Paths.get(optionalCustomMountPoint.get());
-			checkProvidedMountPoint(customMountPoint);
-			this.mountPoint = customMountPoint;
-			LOG.debug("Successfully checked custom mount point: {}", mountPoint);
-		} else {
-			this.mountPoint = prepareTemporaryMountPoint();
-			LOG.debug("Successfully created mount point: {}", mountPoint);
-		}
+		this.mountPoint = determineMountPoint();
+
 		mount(fs.getPath("/"), mountFlags);
+	}
+
+	private Path determineMountPoint() throws IOException, VolumeException {
+		Path mountPoint;
+		Optional<String> optionalCustomMountPoint = vaultSettings.getCustomMountPath();
+		//Is there a custom mountpoint?
+		if (optionalCustomMountPoint.isPresent()) {
+			mountPoint = Paths.get(optionalCustomMountPoint.get());
+			checkProvidedMountPoint(mountPoint);
+			LOG.debug("Successfully checked custom mount point: {}", this.mountPoint);
+			return mountPoint;
+		}
+		//No custom mounpoint -> Are we on Windows?
+		if (SystemUtils.IS_OS_WINDOWS) {
+			//Is there a chosen Driveletter?
+			if (!Strings.isNullOrEmpty(vaultSettings.winDriveLetter().get())) {
+				mountPoint = Path.of(vaultSettings.winDriveLetter().get().charAt(0) + ":\\");
+				return mountPoint;
+			}
+
+			mountPoint = windowsDriveLetters.getAvailableDriveLetterPath().orElseThrow(() -> {
+				//TODO: Error Handling/Fallback (replace Exception with Flow to folderbased?)
+				return new VolumeException("No free drive letter available.");
+			});
+			return mountPoint;
+		}
+		//Nothing worked so far or we are not using Windows - Choose and prepare a folder
+		mountPoint = prepareTemporaryMountPoint();
+		LOG.debug("Successfully created mount point: {}", mountPoint);
+		return mountPoint;
 	}
 
 	private void checkProvidedMountPoint(Path mountPoint) throws IOException {

@@ -68,12 +68,10 @@ public class DokanyVolume implements Volume {
 			return Path.of(vaultSettings.winDriveLetter().get().charAt(0) + ":\\");
 		} else {
 			//auto assign drive letter
-			if (!windowsDriveLetters.getAvailableDriveLetters().isEmpty()) {
-				return Path.of(windowsDriveLetters.getAvailableDriveLetters().iterator().next() + ":\\");
-			} else {
-				//TODO: Error Handling
-				throw new VolumeException("No free drive letter available.");
-			}
+			return windowsDriveLetters.getAvailableDriveLetterPath().orElseThrow(() -> {
+				//TODO: Error Handling/Fallback (See: FUSE)
+				return new VolumeException("No free drive letter available.");
+			});
 		}
 	}
 
