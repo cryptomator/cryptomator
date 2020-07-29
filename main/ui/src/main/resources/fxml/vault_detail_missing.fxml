@@ -26,5 +26,16 @@
 				<FontAwesome5IconView glyph="REDO"/>
 			</graphic>
 		</Button>
+		<Button text="%main.vaultDetail.missing.changeLocation" minWidth="120" onAction="#changeLocation">
+			<graphic>
+				<FontAwesome5IconView glyph="EDIT"/>
+			</graphic>
+		</Button>
+		<Button text="%main.vaultDetail.missing.remove" minWidth="120" onAction="#didClickRemoveVault">
+			<graphic>
+				<FontAwesome5IconView glyph="TRASH"/>
+			</graphic>
+		</Button>
+
 	</children>
 </VBox>
