@@ -1,6 +1,7 @@
 package org.cryptomator.common.vaults;
 
 import com.google.common.base.Strings;
+import org.cryptomator.common.Environment;
 import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.cryptofs.CryptoFileSystem;
 import org.cryptomator.frontend.dokany.Mount;
@@ -10,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.DirectoryStream;
@@ -23,18 +25,22 @@ import java.util.concurrent.ExecutorService;
 public class DokanyVolume implements Volume {
 
 	private static final Logger LOG = LoggerFactory.getLogger(DokanyVolume.class);
+	private static final int MAX_TMPMOUNTPOINT_CREATION_RETRIES = 10;
 
 	private static final String FS_TYPE_NAME = "Cryptomator File System";
 
 	private final VaultSettings vaultSettings;
 	private final MountFactory mountFactory;
+	private final Environment environment;
 	private final WindowsDriveLetters windowsDriveLetters;
 	private Mount mount;
 	private Path mountPoint;
+	private boolean createdTemporaryMountPoint;
 
 	@Inject
-	public DokanyVolume(VaultSettings vaultSettings, ExecutorService executorService, WindowsDriveLetters windowsDriveLetters) {
+	public DokanyVolume(VaultSettings vaultSettings, Environment environment, ExecutorService executorService, WindowsDriveLetters windowsDriveLetters) {
 		this.vaultSettings = vaultSettings;
+		this.environment = environment;
 		this.mountFactory = new MountFactory(executorService);
 		this.windowsDriveLetters = windowsDriveLetters;
 	}
@@ -64,15 +70,21 @@ public class DokanyVolume implements Volume {
 			Path customMountPoint = Paths.get(optionalCustomMountPoint.get());
 			checkProvidedMountPoint(customMountPoint);
 			return customMountPoint;
-		} else if (!Strings.isNullOrEmpty(vaultSettings.winDriveLetter().get())) {
-			return Path.of(vaultSettings.winDriveLetter().get().charAt(0) + ":\\");
-		} else {
-			//auto assign drive letter
-			return windowsDriveLetters.getAvailableDriveLetterPath().orElseThrow(() -> {
-				//TODO: Error Handling/Fallback (See: FUSE)
-				return new VolumeException("No free drive letter available.");
-			});
 		}
+		if (!Strings.isNullOrEmpty(vaultSettings.winDriveLetter().get())) {
+			return Path.of(vaultSettings.winDriveLetter().get().charAt(0) + ":\\");
+		}
+
+		//auto assign drive letter
+		Optional<Path> optionalDriveLetter = windowsDriveLetters.getAvailableDriveLetterPath();
+		if (optionalDriveLetter.isPresent()) {
+			return optionalDriveLetter.get();
+		}
+
+		//Nothing has worked so far -> Choose and prepare a folder
+		mountPoint = prepareTemporaryMountPoint();
+		LOG.debug("Successfully created mount point: {}", mountPoint);
+		return mountPoint;
 	}
 
 	private void checkProvidedMountPoint(Path mountPoint) throws IOException {
@@ -86,6 +98,28 @@ public class DokanyVolume implements Volume {
 		}
 	}
 
+	private Path chooseNonExistingTemporaryMountPoint() throws VolumeException {
+		Path parent = environment.getMountPointsDir().orElseThrow();
+		String basename = vaultSettings.getId(); //FIXME
+		for (int i = 0; i < MAX_TMPMOUNTPOINT_CREATION_RETRIES; i++) {
+			Path mountPoint = parent.resolve(basename + "_" + i);
+			if (Files.notExists(mountPoint)) {
+				return mountPoint;
+			}
+		}
+		LOG.error("Failed to find feasible mountpoint at {}{}{}_x. Giving up after {} attempts.", parent, File.separator, basename, MAX_TMPMOUNTPOINT_CREATION_RETRIES);
+		throw new VolumeException("Did not find feasible mount point.");
+	}
+
+	private Path prepareTemporaryMountPoint() throws IOException, VolumeException {
+		Path mountPoint = chooseNonExistingTemporaryMountPoint();
+
+		Files.createDirectories(mountPoint);
+		this.createdTemporaryMountPoint = true;
+
+		return mountPoint;
+	}
+
 	@Override
 	public void reveal() throws VolumeException {
 		boolean success = mount.reveal();
@@ -97,6 +131,18 @@ public class DokanyVolume implements Volume {
 	@Override
 	public void unmount() {
 		mount.close();
+		cleanupTemporaryMountPoint();
+	}
+
+	private void cleanupTemporaryMountPoint() {
+		if (createdTemporaryMountPoint) {
+			try {
+				Files.delete(mountPoint);
+				LOG.debug("Successfully deleted mount point: {}", mountPoint);
+			} catch (IOException e) {
+				LOG.warn("Could not delete mount point: {}", e.getMessage());
+			}
+		}
 	}
 
 	@Override

@@ -73,13 +73,15 @@ public class FuseVolume implements Volume {
 				return mountPoint;
 			}
 
-			mountPoint = windowsDriveLetters.getAvailableDriveLetterPath().orElseThrow(() -> {
-				//TODO: Error Handling/Fallback (replace Exception with Flow to folderbased?)
-				return new VolumeException("No free drive letter available.");
-			});
-			return mountPoint;
+			//No chosen Driveltter -> Is there a free Driveletter?
+			Optional<Path> optionalDriveLetter = windowsDriveLetters.getAvailableDriveLetterPath();
+			if(optionalDriveLetter.isPresent()) {
+				mountPoint = optionalDriveLetter.get();
+				return mountPoint;
+			}
+			//No free or chosen Driveletter -> Continue below
 		}
-		//Nothing worked so far or we are not using Windows - Choose and prepare a folder
+		//Nothing has worked so far -> Choose and prepare a folder
 		mountPoint = prepareTemporaryMountPoint();
 		LOG.debug("Successfully created mount point: {}", mountPoint);
 		return mountPoint;
@@ -130,7 +132,7 @@ public class FuseVolume implements Volume {
 
 	private Path chooseNonExistingTemporaryMountPoint() throws VolumeException {
 		Path parent = environment.getMountPointsDir().orElseThrow();
-		String basename = vaultSettings.getId();
+		String basename = vaultSettings.getId(); //FIXME
 		for (int i = 0; i < MAX_TMPMOUNTPOINT_CREATION_RETRIES; i++) {
 			Path mountPoint = parent.resolve(basename + "_" + i);
 			if (Files.notExists(mountPoint)) {
