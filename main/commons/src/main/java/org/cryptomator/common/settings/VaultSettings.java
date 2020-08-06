@@ -70,7 +70,7 @@ public class VaultSettings {
 		if (!mountNameSet && dirnameExists) {
 			mountName.set(normalizeMountName(newPath.getFileName().toString()));
 		} else if (!mountNameSet && !dirnameExists) {
-			mountName.set(DEFAULT_MOUNT_NAME + id);
+			mountName.set(DEFAULT_MOUNT_NAME + " " +  id);
 		} else if (mountNameSet && dirnameExists) {
 			if (mountName.get().equals(DEFAULT_MOUNT_NAME + id)) {
 				//this is okay, since this function is only executed if the path changes (aka, the vault is created or added)
