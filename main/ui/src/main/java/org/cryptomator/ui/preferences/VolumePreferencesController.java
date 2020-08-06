@@ -3,7 +3,6 @@ package org.cryptomator.ui.preferences;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextField;
@@ -40,9 +39,8 @@ public class VolumePreferencesController implements FxController {
 
 	public void initialize() {
 		volumeTypeChoiceBox.getItems().addAll(Volume.getCurrentSupportedAdapters());
-		//If the in the settings specified preferredVolumeImplementation isn't available, overwrite the settings to use the default VolumeImpl.WEBDAV
 		if (!volumeTypeChoiceBox.getItems().contains(settings.preferredVolumeImpl().get())) {
-			settings.preferredVolumeImpl().bind(new SimpleObjectProperty<>(VolumeImpl.WEBDAV));
+			settings.preferredVolumeImpl().set(VolumeImpl.WEBDAV);
 		}
 		volumeTypeChoiceBox.valueProperty().bindBidirectional(settings.preferredVolumeImpl());
 		volumeTypeChoiceBox.setConverter(new VolumeImplConverter());
