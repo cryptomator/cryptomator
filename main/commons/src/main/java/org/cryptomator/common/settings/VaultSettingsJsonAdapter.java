@@ -21,7 +21,7 @@ class VaultSettingsJsonAdapter {
 		out.beginObject();
 		out.name("id").value(value.getId());
 		out.name("path").value(value.path().get().toString());
-		out.name("mountName").value(value.mountName().get());
+		out.name("mountName").value(value.displayName().get());
 		out.name("winDriveLetter").value(value.winDriveLetter().get());
 		out.name("unlockAfterStartup").value(value.unlockAfterStartup().get());
 		out.name("revealAfterMount").value(value.revealAfterMount().get());
@@ -73,7 +73,7 @@ class VaultSettingsJsonAdapter {
 		in.endObject();
 
 		VaultSettings vaultSettings = (id == null) ? VaultSettings.withRandomId() : new VaultSettings(id);
-		vaultSettings.mountName().set(mountName);
+		vaultSettings.displayName().set(mountName);
 		vaultSettings.path().set(Paths.get(path));
 		vaultSettings.winDriveLetter().set(winDriveLetter);
 		vaultSettings.unlockAfterStartup().set(unlockAfterStartup);

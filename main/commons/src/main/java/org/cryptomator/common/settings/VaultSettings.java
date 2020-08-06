@@ -42,7 +42,7 @@ public class VaultSettings {
 
 	private final String id;
 	private final ObjectProperty<Path> path = new SimpleObjectProperty();
-	private final StringProperty mountName = new SimpleStringProperty();
+	private final StringProperty displayName = new SimpleStringProperty();
 	private final StringProperty winDriveLetter = new SimpleStringProperty();
 	private final BooleanProperty unlockAfterStartup = new SimpleBooleanProperty(DEFAULT_UNLOCK_AFTER_STARTUP);
 	private final BooleanProperty revealAfterMount = new SimpleBooleanProperty(DEFAULT_REAVEAL_AFTER_MOUNT);
@@ -56,25 +56,25 @@ public class VaultSettings {
 	public VaultSettings(String id) {
 		this.id = Objects.requireNonNull(id);
 
-		EasyBind.subscribe(path, this::deriveMountNameFromPathOrUseDefault);
+		EasyBind.subscribe(path, this::deriveDisplayNameFromPathOrUseDefault);
 	}
 
 	Observable[] observables() {
-		return new Observable[]{path, mountName, winDriveLetter, unlockAfterStartup, revealAfterMount, useCustomMountPath, customMountPath, usesReadOnlyMode, mountFlags, filenameLengthLimit, actionAfterUnlock};
+		return new Observable[]{path, displayName, winDriveLetter, unlockAfterStartup, revealAfterMount, useCustomMountPath, customMountPath, usesReadOnlyMode, mountFlags, filenameLengthLimit, actionAfterUnlock};
 	}
 
-	private void deriveMountNameFromPathOrUseDefault(Path newPath) {
-		final boolean mountNameSet = !StringUtils.isBlank(mountName.get());
+	private void deriveDisplayNameFromPathOrUseDefault(Path newPath) {
+		final boolean mountNameSet = !StringUtils.isBlank(displayName.get());
 		final boolean dirnameExists = (newPath != null) && (newPath.getFileName() != null);
 
 		if (!mountNameSet && dirnameExists) {
-			mountName.set(normalizeMountName(newPath.getFileName().toString()));
+			displayName.set(normalizeMountName(newPath.getFileName().toString()));
 		} else if (!mountNameSet && !dirnameExists) {
-			mountName.set(DEFAULT_MOUNT_NAME + " " +  id);
+			displayName.set(DEFAULT_MOUNT_NAME + " " +  id);
 		} else if (mountNameSet && dirnameExists) {
-			if (mountName.get().equals(DEFAULT_MOUNT_NAME + id)) {
+			if (displayName.get().equals(DEFAULT_MOUNT_NAME + id)) {
 				//this is okay, since this function is only executed if the path changes (aka, the vault is created or added)
-				mountName.set(newPath.getFileName().toString());
+				displayName.set(newPath.getFileName().toString());
 			}
 		}
 	}
@@ -118,8 +118,8 @@ public class VaultSettings {
 		return path;
 	}
 
-	public StringProperty mountName() {
-		return mountName;
+	public StringProperty displayName() {
+		return displayName;
 	}
 
 	public StringProperty winDriveLetter() {

@@ -63,7 +63,7 @@ public class MountOptionsController implements FxController {
 
 	@FXML
 	public void initialize() {
-		driveName.textProperty().bindBidirectional(vault.getVaultSettings().mountName());
+		driveName.textProperty().bindBidirectional(vault.getVaultSettings().displayName());
 
 		// readonly:
 		readOnlyCheckbox.selectedProperty().bindBidirectional(vault.getVaultSettings().usesReadOnlyMode());

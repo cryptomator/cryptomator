@@ -47,7 +47,7 @@ public class DokanyVolume implements Volume {
 	@Override
 	public void mount(CryptoFileSystem fs, String mountFlags) throws VolumeException, IOException {
 		this.mountPoint = determineMountPoint();
-		String mountName = vaultSettings.mountName().get();
+		String mountName = vaultSettings.displayName().get();
 		try {
 			this.mount = mountFactory.mount(fs.getPath("/"), mountPoint, mountName, FS_TYPE_NAME, mountFlags.strip());
 		} catch (MountFailedException e) {

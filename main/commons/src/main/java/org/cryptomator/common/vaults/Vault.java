@@ -78,7 +78,7 @@ public class Vault {
 		this.state = state;
 		this.lastKnownException = lastKnownException;
 		this.stats = stats;
-		this.displayableName = Bindings.createStringBinding(this::getDisplayableName, vaultSettings.mountName());
+		this.displayableName = Bindings.createStringBinding(this::getDisplayableName, vaultSettings.displayName());
 		this.displayablePath = Bindings.createStringBinding(this::getDisplayablePath, vaultSettings.path());
 		this.locked = Bindings.createBooleanBinding(this::isLocked, state);
 		this.processing = Bindings.createBooleanBinding(this::isProcessing, state);
@@ -230,7 +230,7 @@ public class Vault {
 	}
 
 	public String getDisplayableName() {
-		return vaultSettings.mountName().get();
+		return vaultSettings.displayName().get();
 	}
 
 	public StringBinding accessPointProperty() {

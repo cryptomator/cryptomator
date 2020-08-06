@@ -28,7 +28,7 @@ public class VaultModuleTest {
 
 	@BeforeEach
 	public void setup(@TempDir Path tmpDir) {
-		Mockito.when(vaultSettings.mountName()).thenReturn(new SimpleStringProperty("TEST"));
+		Mockito.when(vaultSettings.displayName()).thenReturn(new SimpleStringProperty("TEST"));
 		Mockito.when(vaultSettings.usesReadOnlyMode()).thenReturn(new SimpleBooleanProperty(true));
 		System.setProperty("user.home", tmpDir.toString());
 	}
