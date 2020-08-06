@@ -23,11 +23,6 @@
 		<Insets topRightBottomLeft="12"/>
 	</padding>
 	<children>
-		<HBox spacing="6" alignment="CENTER_LEFT">
-			<Label text="%vaultOptions.mount.driveName"/>
-			<AlphanumericTextField fx:id="driveName"/>
-		</HBox>
-
 		<CheckBox fx:id="readOnlyCheckbox" text="%vaultOptions.mount.readonly"/>
 
 		<CheckBox fx:id="customMountFlagsCheckbox" text="%vaultOptions.mount.customMountFlags" onAction="#toggleUseCustomMountFlags" visible="${!controller.webDavAndWindows}" managed="${!controller.webDavAndWindows}"/>
