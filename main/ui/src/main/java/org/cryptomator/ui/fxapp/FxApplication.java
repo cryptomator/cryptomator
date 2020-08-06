@@ -6,7 +6,6 @@ import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableSet;
 import javafx.stage.Stage;
 import org.cryptomator.common.LicenseHolder;
@@ -45,6 +44,8 @@ public class FxApplication extends Application {
 	private final VaultService vaultService;
 	private final LicenseHolder licenseHolder;
 	private final BooleanBinding hasVisibleStages;
+
+	private Optional<String> macApperanceObserverIdentifier = Optional.empty();
 
 	@Inject
 	FxApplication(Settings settings, Lazy<MainWindowComponent> mainWindow, Lazy<PreferencesComponent> preferencesWindow, Provider<UnlockComponent.Builder> unlockWindowBuilderProvider, Provider<QuitComponent.Builder> quitWindowBuilderProvider, Optional<MacFunctions> macFunctions, VaultService vaultService, LicenseHolder licenseHolder, ObservableSet<Stage> visibleStages) {
@@ -115,21 +116,44 @@ public class FxApplication extends Application {
 	}
 
 	private void themeChanged(@SuppressWarnings("unused") ObservableValue<? extends UiTheme> observable, @SuppressWarnings("unused") UiTheme oldValue, UiTheme newValue) {
+		if (macApperanceObserverIdentifier.isPresent()) {
+			macFunctions.map(MacFunctions::uiAppearance).ifPresent(uiAppearance -> uiAppearance.removeListener(macApperanceObserverIdentifier.get()));
+			macApperanceObserverIdentifier = Optional.empty();
+		}
 		loadSelectedStyleSheet(newValue);
 	}
 
 	private void loadSelectedStyleSheet(UiTheme desiredTheme) {
 		UiTheme theme = licenseHolder.isValidLicense() ? desiredTheme : UiTheme.LIGHT;
 		switch (theme) {
-			case DARK -> {
-				Application.setUserAgentStylesheet(getClass().getResource("/css/dark_theme.css").toString());
-				macFunctions.map(MacFunctions::uiAppearance).ifPresent(JniException.ignore(MacApplicationUiAppearance::setToDarkAqua));
-			}
-			case LIGHT -> {
-				Application.setUserAgentStylesheet(getClass().getResource("/css/light_theme.css").toString());
-				macFunctions.map(MacFunctions::uiAppearance).ifPresent(JniException.ignore(MacApplicationUiAppearance::setToAqua));
+			case LIGHT -> setToLightTheme();
+			case DARK -> setToDarkTheme();
+			case AUTOMATIC -> {
+				macFunctions.map(MacFunctions::uiAppearance).ifPresent(uiAppearance -> {
+					macApperanceObserverIdentifier = Optional.of(uiAppearance.addListener(this::macInterfaceThemeChanged));
+				});
+				macInterfaceThemeChanged();
 			}
 		}
+	}
+
+	private void macInterfaceThemeChanged() {
+		macFunctions.map(MacFunctions::uiAppearance).ifPresent(uiAppearance -> {
+			switch (uiAppearance.getCurrentInterfaceStyle()) {
+				case LIGHT -> setToLightTheme();
+				case DARK -> setToDarkTheme();
+			}
+		});
+	}
+
+	private void setToLightTheme() {
+		Application.setUserAgentStylesheet(getClass().getResource("/css/light_theme.css").toString());
+		macFunctions.map(MacFunctions::uiAppearance).ifPresent(JniException.ignore(MacApplicationUiAppearance::setToAqua));
+	}
+
+	private void setToDarkTheme() {
+		Application.setUserAgentStylesheet(getClass().getResource("/css/dark_theme.css").toString());
+		macFunctions.map(MacFunctions::uiAppearance).ifPresent(JniException.ignore(MacApplicationUiAppearance::setToDarkAqua));
 	}
 
 }

@@ -1,5 +1,6 @@
 package org.cryptomator.ui.preferences;
 
+import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ObservableValue;
@@ -12,11 +13,10 @@ import javafx.scene.control.RadioButton;
 import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleGroup;
 import javafx.util.StringConverter;
-import javafx.application.Application;
+import org.cryptomator.common.Environment;
 import org.cryptomator.common.LicenseHolder;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.UiTheme;
-import org.cryptomator.common.Environment;
 import org.cryptomator.ui.common.FxController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,7 +64,10 @@ public class GeneralPreferencesController implements FxController {
 
 	@FXML
 	public void initialize() {
-		themeChoiceBox.getItems().addAll(UiTheme.values());
+		themeChoiceBox.getItems().addAll(UiTheme.applicableValues());
+		if (!themeChoiceBox.getItems().contains(settings.theme().get())) {
+			settings.theme().set(UiTheme.LIGHT);
+		}
 		themeChoiceBox.valueProperty().bindBidirectional(settings.theme());
 		themeChoiceBox.setConverter(new UiThemeConverter(resourceBundle));
 
@@ -122,7 +125,7 @@ public class GeneralPreferencesController implements FxController {
 	}
 
 	@FXML
-	public void showLogfileDirectory(){
+	public void showLogfileDirectory() {
 		environment.getLogDir().ifPresent(logDirPath -> application.getHostServices().showDocument(logDirPath.toUri().toString()));
 	}
 
