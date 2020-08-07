@@ -24,7 +24,7 @@
 			<groupId>org.openjfx</groupId>
 			<artifactId>javafx-graphics</artifactId>
 		</dependency>
-		
+
 		<!-- Apache -->
 		<dependency>
 			<groupId>org.apache.commons</groupId>
@@ -51,6 +51,12 @@
 		<dependency>
 			<groupId>de.swiesend</groupId>
 			<artifactId>secret-service</artifactId>
+		</dependency>
+
+		<!-- kdewallet lib -->
+		<dependency>
+			<groupId>org.purejava</groupId>
+			<artifactId>kdewallet</artifactId>
 		</dependency>
 
 		<!-- Logging -->
