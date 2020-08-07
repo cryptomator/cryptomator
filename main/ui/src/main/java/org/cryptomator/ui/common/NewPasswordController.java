@@ -26,6 +26,7 @@ public class NewPasswordController implements FxController {
 	public Label passwordStrengthLabel;
 	public Label passwordMatchLabel;
 	public FontAwesome5IconView checkmark;
+	public FontAwesome5IconView warning;
 	public FontAwesome5IconView cross;
 
 	public NewPasswordController(ResourceBundle resourceBundle, PasswordStrengthUtil strengthRater, ObjectProperty<CharSequence> password) {
@@ -36,17 +37,31 @@ public class NewPasswordController implements FxController {
 
 	@FXML
 	public void initialize() {
+		passwordStrength.bind(Bindings.createIntegerBinding(() -> strengthRater.computeRate(passwordField.getCharacters()), passwordField.textProperty()));
+
+		passwordStrengthLabel.graphicProperty().bind(Bindings.createObjectBinding(this::getIconViewForPasswordStrengthLabel, passwordField.textProperty(), passwordStrength));
+		passwordStrengthLabel.textProperty().bind(EasyBind.map(passwordStrength, strengthRater::getStrengthDescription));
+
 		BooleanBinding passwordsMatch = Bindings.createBooleanBinding(this::hasSamePasswordInBothFields, passwordField.textProperty(), reenterField.textProperty());
 		BooleanBinding reenterFieldNotEmpty = reenterField.textProperty().isNotEmpty();
-		passwordStrength.bind(Bindings.createIntegerBinding(() -> strengthRater.computeRate(passwordField.getCharacters()), passwordField.textProperty()));
-		passwordStrengthLabel.textProperty().bind(EasyBind.map(passwordStrength, strengthRater::getStrengthDescription));
-		
 		passwordMatchLabel.visibleProperty().bind(reenterFieldNotEmpty);
 		passwordMatchLabel.graphicProperty().bind(Bindings.when(passwordsMatch.and(reenterFieldNotEmpty)).then(checkmark).otherwise(cross));
 		passwordMatchLabel.textProperty().bind(Bindings.when(passwordsMatch.and(reenterFieldNotEmpty)).then(resourceBundle.getString("newPassword.passwordsMatch")).otherwise(resourceBundle.getString("newPassword.passwordsDoNotMatch")));
 
 		passwordField.textProperty().addListener(this::passwordsDidChange);
 		reenterField.textProperty().addListener(this::passwordsDidChange);
+	}
+
+	private FontAwesome5IconView getIconViewForPasswordStrengthLabel() {
+		if (passwordField.getCharacters().length() == 0) {
+			return null;
+		} else if (passwordStrength.intValue() <= -1) {
+			return cross;
+		} else if (passwordStrength.intValue() < 3) {
+			return warning;
+		} else {
+			return checkmark;
+		}
 	}
 
 	private void passwordsDidChange(@SuppressWarnings("unused") Observable observable) {
