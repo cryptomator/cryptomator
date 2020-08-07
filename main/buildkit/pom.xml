@@ -67,7 +67,7 @@
 						<configuration>
 							<outputDirectory>${project.build.directory}/libs</outputDirectory>
 							<excludeClassifiers>linux,mac,win</excludeClassifiers>
-							<excludeArtifactIds>dbus-java,secret-service,hkdf,java-utils</excludeArtifactIds>
+							<excludeArtifactIds>dbus-java,secret-service,kdewallet,hkdf,java-utils</excludeArtifactIds>
 						</configuration>
 					</execution>
 					<execution>
@@ -83,14 +83,14 @@
 						</configuration>
 					</execution>
 					<execution>
-						<id>copy-linux-secret-service</id>
+						<id>copy-linux-system-keychain-access</id>
 						<phase>prepare-package</phase>
 						<goals>
 							<goal>copy-dependencies</goal>
 						</goals>
 						<configuration>
 							<outputDirectory>${project.build.directory}/linux-libs</outputDirectory>
-							<includeArtifactIds>dbus-java,secret-service,hkdf,java-utils</includeArtifactIds>
+							<includeArtifactIds>dbus-java,secret-service,kdewallet,hkdf,java-utils</includeArtifactIds>
 						</configuration>
 					</execution>
 					<execution>
