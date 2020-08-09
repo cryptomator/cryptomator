@@ -34,7 +34,7 @@
 		<javafx.version>14</javafx.version>
 		<commons-lang3.version>3.10</commons-lang3.version>
 		<secret-service.version>1.0.0</secret-service.version>
-		<kdewallet.version>1.0.0</kdewallet.version>
+		<kdewallet.version>1.0.1</kdewallet.version>
 		<jwt.version>3.10.3</jwt.version>
 		<easybind.version>1.0.3</easybind.version>
 		<guava.version>29.0-jre</guava.version>
