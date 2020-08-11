@@ -6,6 +6,7 @@
 package org.cryptomator.common.vaults;
 
 import dagger.BindsInstance;
+import org.cryptomator.common.mountpoint.MountPointChooserModule;
 import org.cryptomator.common.settings.VaultSettings;
 
 import dagger.Subcomponent;
@@ -14,7 +15,7 @@ import javax.annotation.Nullable;
 import javax.inject.Named;
 
 @PerVault
-@Subcomponent(modules = {VaultModule.class})
+@Subcomponent(modules = {VaultModule.class, MountPointChooserModule.class})
 public interface VaultComponent {
 
 	Vault vault();
