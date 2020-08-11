@@ -53,6 +53,7 @@ abstract class VaultStatisticsModule {
 				}
 			}
 		});
+		stage.setOnCloseRequest(windowEvent -> vault.showingStatsProperty().setValue(false));
 		return stage;
 	}
 

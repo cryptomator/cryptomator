@@ -1,5 +1,6 @@
 package org.cryptomator.ui.mainwindow;
 
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.fxml.FXML;
@@ -37,7 +38,12 @@ public class VaultDetailUnlockedController implements FxController {
 
 	@FXML
 	public void showVaultStatistics() {
-		vaultStatisticsWindow.vault(vault.get()).build().showVaultStatisticsWindow();
+		//vaultStatisticsWindow.build()
+		BooleanProperty showingStats = vault.get().showingStatsProperty();
+		if (!showingStats.get()) {
+			vaultStatisticsWindow.vault(vault.get()).build().showVaultStatisticsWindow();
+			showingStats.setValue(true);
+		}
 	}
 
 	/* Getter/Setter */
