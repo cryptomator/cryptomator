@@ -104,7 +104,9 @@ public interface MountPointChooser {
 	 *
 	 * @param mountPoint the Mountpoint chosen by {@link #chooseMountPoint()}
 	 * @return a boolean flag; true if cleanup is needed, false otherwise
-	 * @throws InvalidMountPointException
+	 * @throws InvalidMountPointException if the preparation fails
+	 * @see #chooseMountPoint()
+	 * @see #cleanup(Path)
 	 */
 	default boolean prepare(Path mountPoint) throws InvalidMountPointException {
 		return false; //NO-OP
@@ -119,6 +121,7 @@ public interface MountPointChooser {
 	 * Exceptions in this method should be handled gracefully.
 	 *
 	 * @param mountPoint the Mountpoint that was prepared by {@link #prepare(Path)}
+	 * @see #prepare(Path)
 	 */
 	default void cleanup(Path mountPoint) {
 		//NO-OP
