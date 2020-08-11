@@ -5,6 +5,7 @@
  *******************************************************************************/
 package org.cryptomator.common.vaults;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.SystemUtils;
 
@@ -25,7 +26,7 @@ public final class WindowsDriveLetters {
 
 	static {
 		try (IntStream stream = IntStream.rangeClosed('C', 'Z')) {
-			C_TO_Z = stream.mapToObj(i -> String.valueOf((char) i)).collect(Collectors.toUnmodifiableSet());
+			C_TO_Z = stream.mapToObj(i -> String.valueOf((char) i)).collect(ImmutableSet.toImmutableSet());
 		}
 	}
 
@@ -51,7 +52,7 @@ public final class WindowsDriveLetters {
 	}
 
 	public Optional<String> getAvailableDriveLetter() {
-		return getAvailableDriveLetters().stream().findAny();
+		return getAvailableDriveLetters().stream().findFirst();
 	}
 
 	public Optional<Path> getAvailableDriveLetterPath() {
