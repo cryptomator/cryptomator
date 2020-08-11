@@ -8,6 +8,8 @@ package org.cryptomator.common.settings;
 import com.google.common.base.Strings;
 import com.google.common.io.BaseEncoding;
 import javafx.beans.Observable;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.StringBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
@@ -53,8 +55,11 @@ public class VaultSettings {
 	private final IntegerProperty filenameLengthLimit = new SimpleIntegerProperty(DEFAULT_FILENAME_LENGTH_LIMIT);
 	private final ObjectProperty<WhenUnlocked> actionAfterUnlock = new SimpleObjectProperty<>(DEFAULT_ACTION_AFTER_UNLOCK);
 
+	private final StringBinding mountName;
+
 	public VaultSettings(String id) {
 		this.id = Objects.requireNonNull(id);
+		this.mountName = Bindings.createStringBinding(this::normalizeDisplayName, displayName);
 
 		EasyBind.subscribe(path, this::deriveDisplayNameFromPathOrUseDefault);
 	}
@@ -66,13 +71,14 @@ public class VaultSettings {
 	private void deriveDisplayNameFromPathOrUseDefault(Path newPath) {
 		final boolean mountNameSet = !StringUtils.isBlank(displayName.get());
 		final boolean dirnameExists = (newPath != null) && (newPath.getFileName() != null);
+		final String defaultPattern = DEFAULT_MOUNT_NAME + " " + id;
 
 		if (!mountNameSet && dirnameExists) {
-			displayName.set(normalizeMountName(newPath.getFileName().toString()));
+			displayName.set(newPath.getFileName().toString());
 		} else if (!mountNameSet && !dirnameExists) {
-			displayName.set(DEFAULT_MOUNT_NAME + " " +  id);
+			displayName.set(defaultPattern);
 		} else if (mountNameSet && dirnameExists) {
-			if (displayName.get().equals(DEFAULT_MOUNT_NAME + id)) {
+			if (displayName.get().equals(defaultPattern)) {
 				//this is okay, since this function is only executed if the path changes (aka, the vault is created or added)
 				displayName.set(newPath.getFileName().toString());
 			}
@@ -89,8 +95,9 @@ public class VaultSettings {
 		return BaseEncoding.base64Url().encode(randomBytes);
 	}
 
-	public static String normalizeMountName(String mountName) {
-		String normalizedMountName = StringUtils.stripAccents(mountName);
+	//visible for testing
+	String normalizeDisplayName() {
+		String normalizedMountName = StringUtils.stripAccents(displayName.get());
 		StringBuilder builder = new StringBuilder();
 		for (char c : normalizedMountName.toCharArray()) {
 			if (Character.isWhitespace(c)) {
@@ -120,6 +127,10 @@ public class VaultSettings {
 
 	public StringProperty displayName() {
 		return displayName;
+	}
+
+	public StringBinding mountName() {
+		return mountName;
 	}
 
 	public StringProperty winDriveLetter() {

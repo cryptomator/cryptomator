@@ -44,7 +44,7 @@ public class WebDavVolume implements Volume {
 		if (!server.isRunning()) {
 			server.start();
 		}
-		servlet = server.createWebDavServlet(fs.getPath("/"), vaultSettings.getId() + "/" + vaultSettings.displayName().get());
+		servlet = server.createWebDavServlet(fs.getPath("/"), vaultSettings.getId() + "/" + vaultSettings.mountName().get());
 		servlet.start();
 		mount();
 	}
@@ -98,7 +98,7 @@ public class WebDavVolume implements Volume {
 
 	@Override
 	public Optional<Path> getMountPoint() {
-		return Optional.ofNullable(mountPoint);
+		return Optional.ofNullable(mountPoint); //TODO
 	}
 
 	private String getLocalhostAliasOrNull() {

@@ -15,12 +15,19 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class VaultSettingsTest {
 
 	@Test
-	public void testNormalize() throws Exception {
-		assertEquals("_", VaultSettings.normalizeMountName(" "));
-		assertEquals("a", VaultSettings.normalizeMountName("ä"));
-		assertEquals("C", VaultSettings.normalizeMountName("Ĉ"));
-		assertEquals("_", VaultSettings.normalizeMountName(":"));
-		assertEquals("_", VaultSettings.normalizeMountName("汉语"));
+	public void testNormalize() {
+		VaultSettings settings = new VaultSettings("id");
+		settings.displayName().setValue(" ");
+		assertEquals("_", settings.normalizeDisplayName());
+
+		settings.displayName().setValue("ä");
+		assertEquals("a", settings.normalizeDisplayName());
+		settings.displayName().setValue("Ĉ");
+		assertEquals("C", settings.normalizeDisplayName());
+		settings.displayName().setValue(":");
+		assertEquals("_", settings.normalizeDisplayName());
+		settings.displayName().setValue("汉语");
+		assertEquals("_", settings.normalizeDisplayName());
 	}
 
 }
