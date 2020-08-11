@@ -17,6 +17,7 @@ import javafx.beans.property.ObjectProperty;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.LazyInitializer;
 import org.cryptomator.common.settings.VaultSettings;
+import org.cryptomator.common.vaults.Volume.VolumeException;
 import org.cryptomator.cryptofs.CryptoFileSystem;
 import org.cryptomator.cryptofs.CryptoFileSystemProperties;
 import org.cryptomator.cryptofs.CryptoFileSystemProperties.FileSystemFlags;
@@ -120,7 +121,7 @@ public class Vault {
 		return CryptoFileSystemProvider.newFileSystem(getPath(), fsProps);
 	}
 
-	public synchronized void unlock(CharSequence passphrase) throws CryptoException, IOException, Volume.VolumeException {
+	public synchronized void unlock(CharSequence passphrase) throws CryptoException, IOException, VolumeException {
 		if (vaultSettings.useCustomMountPath().get() && Strings.isNullOrEmpty(vaultSettings.customMountPath().get())) {
 			throw new NotDirectoryException("");
 		}
@@ -129,7 +130,7 @@ public class Vault {
 		volume.mount(fs, getEffectiveMountFlags());
 	}
 
-	public synchronized void lock(boolean forced) throws Volume.VolumeException {
+	public synchronized void lock(boolean forced) throws VolumeException {
 		if (forced && volume.supportsForcedUnmount()) {
 			volume.unmountForced();
 		} else {
@@ -145,7 +146,7 @@ public class Vault {
 		}
 	}
 
-	public void reveal() throws Volume.VolumeException {
+	public void reveal() throws VolumeException {
 		volume.reveal();
 	}
 

@@ -120,6 +120,14 @@ public class VaultSettings {
 		return winDriveLetter;
 	}
 
+	public Optional<String> getWinDriveLetter() {
+		String current = this.winDriveLetter.get();
+		if (!Strings.isNullOrEmpty(current)) {
+			return Optional.of(current);
+		}
+		return Optional.empty();
+	}
+
 	public BooleanProperty unlockAfterStartup() {
 		return unlockAfterStartup;
 	}
