@@ -73,6 +73,16 @@ public class TemporaryMountPointChooser implements MountPointChooser {
 		}
 	}
 
+	@Override
+	public void cleanup(Path mountPoint) {
+		try {
+			Files.delete(mountPoint);
+			LOG.debug("Successfully deleted mount point: {}", mountPoint);
+		} catch (IOException e) {
+			LOG.warn("Could not delete mount point: {}", e.getMessage());
+		}
+	}
+
 	private InvalidMountPointException wrapAsIMPE(Exception exception) {
 		return new InvalidMountPointException(exception);
 	}
