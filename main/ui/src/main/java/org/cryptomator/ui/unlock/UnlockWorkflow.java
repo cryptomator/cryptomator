@@ -6,10 +6,11 @@ import javafx.concurrent.Task;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.stage.Window;
+import org.cryptomator.common.mountpoint.InvalidMountPointException;
 import org.cryptomator.common.vaults.MountPointRequirement;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
-import org.cryptomator.common.vaults.Volume;
+import org.cryptomator.common.vaults.Volume.VolumeException;
 import org.cryptomator.cryptolib.api.InvalidPassphraseException;
 import org.cryptomator.keychain.KeychainAccessException;
 import org.cryptomator.keychain.KeychainManager;
@@ -28,8 +29,6 @@ import javax.inject.Named;
 import java.io.IOException;
 import java.nio.CharBuffer;
 import java.nio.file.DirectoryNotEmptyException;
-import java.nio.file.FileAlreadyExistsException;
-import java.nio.file.FileSystemException;
 import java.nio.file.NotDirectoryException;
 import java.util.Arrays;
 import java.util.Optional;
@@ -76,7 +75,7 @@ public class UnlockWorkflow extends Task<Boolean> {
 	}
 
 	@Override
-	protected Boolean call() throws InterruptedException, IOException, Volume.VolumeException {
+	protected Boolean call() throws InterruptedException, IOException, VolumeException, InvalidMountPointException {
 		try {
 			if (attemptUnlock()) {
 				handleSuccess();
@@ -85,7 +84,11 @@ public class UnlockWorkflow extends Task<Boolean> {
 				cancel(false); // set Tasks state to cancelled
 				return false;
 			}
-		} catch (FileAlreadyExistsException | NotDirectoryException | DirectoryNotEmptyException e) {
+		} catch (NotDirectoryException | DirectoryNotEmptyException thrown) {
+			InvalidMountPointException e = new InvalidMountPointException(thrown);
+			handleInvalidMountPoint(e);
+			throw e; // rethrow to trigger correct exception handling in Task
+		} catch (InvalidMountPointException e) {
 			handleInvalidMountPoint(e);
 			throw e; // rethrow to trigger correct exception handling in Task
 		} catch (Exception e) {
@@ -97,7 +100,7 @@ public class UnlockWorkflow extends Task<Boolean> {
 		}
 	}
 
-	private boolean attemptUnlock() throws InterruptedException, IOException, Volume.VolumeException {
+	private boolean attemptUnlock() throws InterruptedException, IOException, VolumeException, InvalidMountPointException {
 		boolean proceed = password.get() != null || askForPassword(false) == PasswordEntry.PASSWORD_ENTERED;
 		while (proceed) {
 			try {
@@ -156,7 +159,7 @@ public class UnlockWorkflow extends Task<Boolean> {
 		}
 	}
 
-	private void handleInvalidMountPoint(FileSystemException e) {
+	private void handleInvalidMountPoint(InvalidMountPointException e) {
 		MountPointRequirement requirement = vault.getMountPointRequirement();
 		assert requirement != MountPointRequirement.NONE; //An invalid MountPoint with no required MountPoint doesn't seem sensible
 

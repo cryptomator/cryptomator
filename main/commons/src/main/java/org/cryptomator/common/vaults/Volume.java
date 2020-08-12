@@ -1,5 +1,6 @@
 package org.cryptomator.common.vaults;
 
+import org.cryptomator.common.mountpoint.InvalidMountPointException;
 import org.cryptomator.common.settings.VolumeImpl;
 import org.cryptomator.cryptofs.CryptoFileSystem;
 
@@ -24,7 +25,7 @@ public interface Volume {
 	 * @param fs
 	 * @throws IOException
 	 */
-	void mount(CryptoFileSystem fs, String mountFlags) throws IOException, VolumeException;
+	void mount(CryptoFileSystem fs, String mountFlags) throws IOException, VolumeException, InvalidMountPointException;
 
 	void reveal() throws VolumeException;
 

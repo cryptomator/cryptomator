@@ -16,6 +16,7 @@ import javafx.beans.binding.StringBinding;
 import javafx.beans.property.ObjectProperty;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.LazyInitializer;
+import org.cryptomator.common.mountpoint.InvalidMountPointException;
 import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.common.vaults.Volume.VolumeException;
 import org.cryptomator.cryptofs.CryptoFileSystem;
@@ -121,7 +122,7 @@ public class Vault {
 		return CryptoFileSystemProvider.newFileSystem(getPath(), fsProps);
 	}
 
-	public synchronized void unlock(CharSequence passphrase) throws CryptoException, IOException, VolumeException {
+	public synchronized void unlock(CharSequence passphrase) throws CryptoException, IOException, VolumeException, InvalidMountPointException {
 		if (vaultSettings.useCustomMountPath().get() && Strings.isNullOrEmpty(vaultSettings.customMountPath().get())) {
 			throw new NotDirectoryException("");
 		}

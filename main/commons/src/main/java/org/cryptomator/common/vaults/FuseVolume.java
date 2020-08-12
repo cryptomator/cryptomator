@@ -1,10 +1,11 @@
 package org.cryptomator.common.vaults;
 
+import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
-import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableSet;
 import org.apache.commons.lang3.SystemUtils;
-import org.cryptomator.common.Environment;
-import org.cryptomator.common.settings.VaultSettings;
+import org.cryptomator.common.mountpoint.InvalidMountPointException;
+import org.cryptomator.common.mountpoint.MountPointChooser;
 import org.cryptomator.cryptofs.CryptoFileSystem;
 import org.cryptomator.frontend.fuse.mount.CommandFailedException;
 import org.cryptomator.frontend.fuse.mount.EnvironmentVariables;
@@ -16,131 +17,51 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.DirectoryNotEmptyException;
-import java.nio.file.DirectoryStream;
-import java.nio.file.FileAlreadyExistsException;
-import java.nio.file.Files;
-import java.nio.file.LinkOption;
-import java.nio.file.NotDirectoryException;
+import javax.inject.Named;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Optional;
+import java.util.Set;
 
 public class FuseVolume implements Volume {
 
 	private static final Logger LOG = LoggerFactory.getLogger(FuseVolume.class);
-	private static final int MAX_TMPMOUNTPOINT_CREATION_RETRIES = 10;
 
-	private final VaultSettings vaultSettings;
-	private final Environment environment;
-	private final WindowsDriveLetters windowsDriveLetters;
+	private final Set<MountPointChooser> choosers;
 
 	private Mount fuseMnt;
 	private Path mountPoint;
-	private boolean createdTemporaryMountPoint;
+
+	//Cleanup
+	private boolean cleanupRequired;
+	private MountPointChooser usedChooser;
 
 	@Inject
-	public FuseVolume(VaultSettings vaultSettings, Environment environment, WindowsDriveLetters windowsDriveLetters) {
-		this.vaultSettings = vaultSettings;
-		this.environment = environment;
-		this.windowsDriveLetters = windowsDriveLetters;
+	public FuseVolume(@Named("orderedValidMountPointChoosers") Set<MountPointChooser> choosers) {
+		this.choosers = choosers;
 	}
 
 	@Override
-	public void mount(CryptoFileSystem fs, String mountFlags) throws IOException, FuseNotSupportedException, VolumeException {
+	public void mount(CryptoFileSystem fs, String mountFlags) throws InvalidMountPointException, FuseNotSupportedException, VolumeException {
 		this.mountPoint = determineMountPoint();
 
 		mount(fs.getPath("/"), mountFlags);
 	}
 
-	private Path determineMountPoint() throws IOException, VolumeException {
-		Path mountPoint;
-		Optional<String> optionalCustomMountPoint = vaultSettings.getCustomMountPath();
-		//Is there a custom mountpoint?
-		if (optionalCustomMountPoint.isPresent()) {
-			mountPoint = Paths.get(optionalCustomMountPoint.get());
-			checkProvidedMountPoint(mountPoint);
-			LOG.debug("Successfully checked custom mount point: {}", this.mountPoint);
-			return mountPoint;
-		}
-		//No custom mounpoint -> Are we on Windows?
-		if (SystemUtils.IS_OS_WINDOWS) {
-			//Is there a chosen Driveletter?
-			if (!Strings.isNullOrEmpty(vaultSettings.winDriveLetter().get())) {
-				mountPoint = Path.of(vaultSettings.winDriveLetter().get().charAt(0) + ":\\");
-				return mountPoint;
+	private Path determineMountPoint() throws InvalidMountPointException {
+		for (MountPointChooser chooser : this.choosers) {
+			Optional<Path> chosenPath = chooser.chooseMountPoint();
+			if (chosenPath.isEmpty()) {
+				//Chooser was applicable, but couldn't find a feasible mountpoint
+				continue;
 			}
-
-			//No chosen Driveltter -> Is there a free Driveletter?
-			Optional<Path> optionalDriveLetter = windowsDriveLetters.getAvailableDriveLetterPath();
-			if(optionalDriveLetter.isPresent()) {
-				mountPoint = optionalDriveLetter.get();
-				return mountPoint;
-			}
-			//No free or chosen Driveletter -> Continue below
+			this.cleanupRequired = chooser.prepare(chosenPath.get()); //Fail entirely if an Exception occurs
+			this.usedChooser = chooser;
+			return chosenPath.get();
 		}
-		//Nothing has worked so far -> Choose and prepare a folder
-		mountPoint = prepareTemporaryMountPoint();
-		LOG.debug("Successfully created mount point: {}", mountPoint);
-		return mountPoint;
-	}
-
-	private void checkProvidedMountPoint(Path mountPoint) throws IOException {
-		//On Windows the target folder MUST NOT exist...
-		//https://github.com/billziss-gh/winfsp/issues/320
-		if (SystemUtils.IS_OS_WINDOWS) {
-			//We must use #notExists() here because notExists =/= !exists (see docs)
-			if (Files.notExists(mountPoint, LinkOption.NOFOLLOW_LINKS)) {
-				//File really doesn't exist
-				return;
-			}
-			//File exists OR can't be determined
-			throw new FileAlreadyExistsException(mountPoint.toString());
-		}
-
-		//... on Mac and Linux it's the opposite
-		if (!Files.isDirectory(mountPoint)) {
-			throw new NotDirectoryException(mountPoint.toString());
-		}
-		try (DirectoryStream<Path> ds = Files.newDirectoryStream(mountPoint)) {
-			if (ds.iterator().hasNext()) {
-				throw new DirectoryNotEmptyException(mountPoint.toString());
-			}
-		}
-	}
-
-	private Path prepareTemporaryMountPoint() throws IOException, VolumeException {
-		Path mountPoint = chooseNonExistingTemporaryMountPoint();
-		// https://github.com/osxfuse/osxfuse/issues/306#issuecomment-245114592:
-		// In order to allow non-admin users to mount FUSE volumes in `/Volumes`,
-		// starting with version 3.5.0, FUSE will create non-existent mount points automatically.
-		if (SystemUtils.IS_OS_MAC && mountPoint.getParent().equals(Paths.get("/Volumes"))) {
-			return mountPoint;
-		}
-
-		//WinFSP needs the parent, but the acutal Mount Point must not exist...
-		if (SystemUtils.IS_OS_WINDOWS) {
-			Files.createDirectories(mountPoint.getParent());
-		} else {
-			Files.createDirectories(mountPoint);
-			this.createdTemporaryMountPoint = true;
-		}
-		return mountPoint;
-	}
-
-	private Path chooseNonExistingTemporaryMountPoint() throws VolumeException {
-		Path parent = environment.getMountPointsDir().orElseThrow();
-		String basename = vaultSettings.getId(); //FIXME
-		for (int i = 0; i < MAX_TMPMOUNTPOINT_CREATION_RETRIES; i++) {
-			Path mountPoint = parent.resolve(basename + "_" + i);
-			if (Files.notExists(mountPoint)) {
-				return mountPoint;
-			}
-		}
-		LOG.error("Failed to find feasible mountpoint at {}{}{}_x. Giving up after {} attempts.", parent, File.separator, basename, MAX_TMPMOUNTPOINT_CREATION_RETRIES);
-		throw new VolumeException("Did not find feasible mount point.");
+		String tried = Joiner.on(", ").join(this.choosers.stream()
+				.map((mpc) -> mpc.getClass().getTypeName())
+				.collect(ImmutableSet.toImmutableSet()));
+		throw new InvalidMountPointException(String.format("No feasible MountPoint found! Tried %s", tried));
 	}
 
 	private void mount(Path root, String mountFlags) throws VolumeException {
@@ -182,7 +103,7 @@ public class FuseVolume implements Volume {
 		} catch (CommandFailedException e) {
 			throw new VolumeException(e);
 		}
-		cleanupTemporaryMountPoint();
+		cleanupMountPoint();
 	}
 
 	@Override
@@ -193,17 +114,12 @@ public class FuseVolume implements Volume {
 		} catch (CommandFailedException e) {
 			throw new VolumeException(e);
 		}
-		cleanupTemporaryMountPoint();
+		cleanupMountPoint();
 	}
 
-	private void cleanupTemporaryMountPoint() {
-		if (createdTemporaryMountPoint) {
-			try {
-				Files.delete(mountPoint);
-				LOG.debug("Successfully deleted mount point: {}", mountPoint);
-			} catch (IOException e) {
-				LOG.warn("Could not delete mount point: {}", e.getMessage());
-			}
+	private void cleanupMountPoint() {
+		if (this.cleanupRequired) {
+			this.usedChooser.cleanup(this.mountPoint);
 		}
 	}
 

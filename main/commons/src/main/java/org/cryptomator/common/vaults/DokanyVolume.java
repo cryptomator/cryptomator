@@ -1,7 +1,9 @@
 package org.cryptomator.common.vaults;
 
-import com.google.common.base.Strings;
-import org.cryptomator.common.Environment;
+import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableSet;
+import org.cryptomator.common.mountpoint.InvalidMountPointException;
+import org.cryptomator.common.mountpoint.MountPointChooser;
 import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.cryptofs.CryptoFileSystem;
 import org.cryptomator.frontend.dokany.Mount;
@@ -11,15 +13,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.DirectoryNotEmptyException;
-import java.nio.file.DirectoryStream;
-import java.nio.file.Files;
-import java.nio.file.NotDirectoryException;
+import javax.inject.Named;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
 public class DokanyVolume implements Volume {
@@ -31,18 +28,21 @@ public class DokanyVolume implements Volume {
 
 	private final VaultSettings vaultSettings;
 	private final MountFactory mountFactory;
-	private final Environment environment;
-	private final WindowsDriveLetters windowsDriveLetters;
+
+	private final Set<MountPointChooser> choosers;
+
 	private Mount mount;
 	private Path mountPoint;
-	private boolean createdTemporaryMountPoint;
+
+	//Cleanup
+	private boolean cleanupRequired;
+	private MountPointChooser usedChooser;
 
 	@Inject
-	public DokanyVolume(VaultSettings vaultSettings, Environment environment, ExecutorService executorService, WindowsDriveLetters windowsDriveLetters) {
+	public DokanyVolume(VaultSettings vaultSettings, ExecutorService executorService, @Named("orderedValidMountPointChoosers") Set<MountPointChooser> choosers) {
 		this.vaultSettings = vaultSettings;
-		this.environment = environment;
 		this.mountFactory = new MountFactory(executorService);
-		this.windowsDriveLetters = windowsDriveLetters;
+		this.choosers = choosers;
 	}
 
 	@Override
@@ -51,7 +51,7 @@ public class DokanyVolume implements Volume {
 	}
 
 	@Override
-	public void mount(CryptoFileSystem fs, String mountFlags) throws VolumeException, IOException {
+	public void mount(CryptoFileSystem fs, String mountFlags) throws InvalidMountPointException, VolumeException {
 		this.mountPoint = determineMountPoint();
 		String mountName = vaultSettings.mountName().get();
 		try {
@@ -64,60 +64,21 @@ public class DokanyVolume implements Volume {
 		}
 	}
 
-	private Path determineMountPoint() throws VolumeException, IOException {
-		Optional<String> optionalCustomMountPoint = vaultSettings.getCustomMountPath();
-		if (optionalCustomMountPoint.isPresent()) {
-			Path customMountPoint = Paths.get(optionalCustomMountPoint.get());
-			checkProvidedMountPoint(customMountPoint);
-			return customMountPoint;
-		}
-		if (!Strings.isNullOrEmpty(vaultSettings.winDriveLetter().get())) {
-			return Path.of(vaultSettings.winDriveLetter().get().charAt(0) + ":\\");
-		}
-
-		//auto assign drive letter
-		Optional<Path> optionalDriveLetter = windowsDriveLetters.getAvailableDriveLetterPath();
-		if (optionalDriveLetter.isPresent()) {
-			return optionalDriveLetter.get();
-		}
-
-		//Nothing has worked so far -> Choose and prepare a folder
-		mountPoint = prepareTemporaryMountPoint();
-		LOG.debug("Successfully created mount point: {}", mountPoint);
-		return mountPoint;
-	}
-
-	private void checkProvidedMountPoint(Path mountPoint) throws IOException {
-		if (!Files.isDirectory(mountPoint)) {
-			throw new NotDirectoryException(mountPoint.toString());
-		}
-		try (DirectoryStream<Path> ds = Files.newDirectoryStream(mountPoint)) {
-			if (ds.iterator().hasNext()) {
-				throw new DirectoryNotEmptyException(mountPoint.toString());
+	private Path determineMountPoint() throws InvalidMountPointException {
+		for (MountPointChooser chooser : this.choosers) {
+			Optional<Path> chosenPath = chooser.chooseMountPoint();
+			if (chosenPath.isEmpty()) {
+				//Chooser was applicable, but couldn't find a feasible mountpoint
+				continue;
 			}
+			this.cleanupRequired = chooser.prepare(chosenPath.get()); //Fail entirely if an Exception occurs
+			this.usedChooser = chooser;
+			return chosenPath.get();
 		}
-	}
-
-	private Path chooseNonExistingTemporaryMountPoint() throws VolumeException {
-		Path parent = environment.getMountPointsDir().orElseThrow();
-		String basename = vaultSettings.getId(); //FIXME
-		for (int i = 0; i < MAX_TMPMOUNTPOINT_CREATION_RETRIES; i++) {
-			Path mountPoint = parent.resolve(basename + "_" + i);
-			if (Files.notExists(mountPoint)) {
-				return mountPoint;
-			}
-		}
-		LOG.error("Failed to find feasible mountpoint at {}{}{}_x. Giving up after {} attempts.", parent, File.separator, basename, MAX_TMPMOUNTPOINT_CREATION_RETRIES);
-		throw new VolumeException("Did not find feasible mount point.");
-	}
-
-	private Path prepareTemporaryMountPoint() throws IOException, VolumeException {
-		Path mountPoint = chooseNonExistingTemporaryMountPoint();
-
-		Files.createDirectories(mountPoint);
-		this.createdTemporaryMountPoint = true;
-
-		return mountPoint;
+		String tried = Joiner.on(", ").join(this.choosers.stream()
+				.map((mpc) -> mpc.getClass().getTypeName())
+				.collect(ImmutableSet.toImmutableSet()));
+		throw new InvalidMountPointException(String.format("No feasible MountPoint found! Tried %s", tried));
 	}
 
 	@Override
@@ -131,17 +92,12 @@ public class DokanyVolume implements Volume {
 	@Override
 	public void unmount() {
 		mount.close();
-		cleanupTemporaryMountPoint();
+		cleanupMountPoint();
 	}
 
-	private void cleanupTemporaryMountPoint() {
-		if (createdTemporaryMountPoint) {
-			try {
-				Files.delete(mountPoint);
-				LOG.debug("Successfully deleted mount point: {}", mountPoint);
-			} catch (IOException e) {
-				LOG.warn("Could not delete mount point: {}", e.getMessage());
-			}
+	private void cleanupMountPoint() {
+		if (this.cleanupRequired) {
+			this.usedChooser.cleanup(this.mountPoint);
 		}
 	}
 
