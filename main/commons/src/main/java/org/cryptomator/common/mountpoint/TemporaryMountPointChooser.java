@@ -6,6 +6,7 @@ import org.cryptomator.common.vaults.Vault;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -45,6 +46,7 @@ public class TemporaryMountPointChooser implements MountPointChooser {
 				return Optional.of(mountPoint);
 			}
 		}
+		LOG.error("Failed to find feasible mountpoint at {}{}{}_x. Giving up after {} attempts.", parent, File.separator, basename, MAX_TMPMOUNTPOINT_CREATION_RETRIES);
 		return Optional.empty();
 	}
 
@@ -61,10 +63,12 @@ public class TemporaryMountPointChooser implements MountPointChooser {
 			//WinFSP needs the parent, but the actual Mountpoint must not exist...
 			if (SystemUtils.IS_OS_WINDOWS) {
 				Files.createDirectories(mountPoint.getParent());
+				LOG.debug("Successfully created folder for mount point: {}", mountPoint);
 				return false;
 			} else {
 				//For Linux and Mac the actual Mountpoint must exist
 				Files.createDirectories(mountPoint);
+				LOG.debug("Successfully created mount point: {}", mountPoint);
 				return true;
 			}
 		} catch (IOException exception) {
