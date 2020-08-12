@@ -1,7 +1,6 @@
 package org.cryptomator.common.mountpoint;
 
 import org.apache.commons.lang3.SystemUtils;
-import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.common.vaults.Vault;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,16 +20,16 @@ public class CustomMountPointChooser implements MountPointChooser {
 
 	private static final Logger LOG = LoggerFactory.getLogger(CustomMountPointChooser.class);
 
-	private final VaultSettings vaultSettings;
+	private final Vault vault;
 
 	public CustomMountPointChooser(Vault vault) {
-		this.vaultSettings = vault.getVaultSettings();
+		this.vault = vault;
 	}
 
 	@Override
 	public Optional<Path> chooseMountPoint() {
 		//VaultSettings#getCustomMountPath already checks whether the saved custom mountpoint should be used
-		return this.vaultSettings.getCustomMountPath().map(Paths::get);
+		return this.vault.getVaultSettings().getCustomMountPath().map(Paths::get);
 	}
 
 	@Override
