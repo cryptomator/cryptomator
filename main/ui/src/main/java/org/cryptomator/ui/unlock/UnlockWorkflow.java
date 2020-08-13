@@ -162,6 +162,7 @@ public class UnlockWorkflow extends Task<Boolean> {
 	private void handleInvalidMountPoint(InvalidMountPointException e) {
 		MountPointRequirement requirement = vault.getMountPointRequirement();
 		assert requirement != MountPointRequirement.NONE; //An invalid MountPoint with no required MountPoint doesn't seem sensible
+		assert requirement != MountPointRequirement.PARENT_OPT_MOUNT_POINT; //Not implemented anywhere (yet)
 
 		if (requirement == MountPointRequirement.EMPTY_MOUNT_POINT) {
 			LOG.error("Unlock failed. Mount point not an empty directory or doesn't exist: {}", e.getMessage());
@@ -174,7 +175,7 @@ public class UnlockWorkflow extends Task<Boolean> {
 		});
 	}
 
-	private void handleGenericError(Exception e) {
+	private void handleGenericError(Throwable e) {
 		LOG.error("Unlock failed for technical reasons.", e);
 		Platform.runLater(() -> {
 			errorComponent.cause(e).window(window).returnToScene(window.getScene()).build().showErrorScene();

@@ -46,6 +46,10 @@ public class CustomMountPointChooser implements MountPointChooser {
 			//This the case on Windows when using FUSE
 			//See https://github.com/billziss-gh/winfsp/issues/320
 
+			Path parent = mountPoint.getParent();
+			if (!Files.isDirectory(parent)) {
+				throw wrapAsIMPE(new NotDirectoryException(parent.toString()));
+			}
 			//We must use #notExists() here because notExists =/= !exists (see docs)
 			if (!Files.notExists(mountPoint, LinkOption.NOFOLLOW_LINKS)) {
 				//File exists OR can't be determined

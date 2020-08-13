@@ -22,7 +22,6 @@ import java.util.concurrent.ExecutorService;
 public class DokanyVolume implements Volume {
 
 	private static final Logger LOG = LoggerFactory.getLogger(DokanyVolume.class);
-	private static final int MAX_TMPMOUNTPOINT_CREATION_RETRIES = 10;
 
 	private static final String FS_TYPE_NAME = "Cryptomator File System";
 
