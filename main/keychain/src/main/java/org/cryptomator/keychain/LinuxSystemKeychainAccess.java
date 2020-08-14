@@ -23,11 +23,11 @@ public class LinuxSystemKeychainAccess implements KeychainAccessStrategy {
 	}
 
 	private static Optional<KeychainAccessStrategy> constructKeychainAccess() {
-		try { // is kwallet or gnome-keyring installed?
-			Class<?> clazz = Class.forName("org.cryptomator.keychain.LinuxKDEWalletKeychainAccessImpl");
+		try { // is gnome-keyring or kwallet installed?
+			Class<?> clazz = Class.forName("org.cryptomator.keychain.LinuxSecretServiceKeychainAccessImpl");
 			KeychainAccessStrategy instance = (KeychainAccessStrategy) clazz.getDeclaredConstructor().newInstance();
 			if (instance.isSupported()) return Optional.of(instance);
-			clazz = Class.forName("org.cryptomator.keychain.LinuxSecretServiceKeychainAccessImpl");
+			clazz = Class.forName("org.cryptomator.keychain.LinuxKDEWalletKeychainAccessImpl");
 			instance = (KeychainAccessStrategy) clazz.getDeclaredConstructor().newInstance();
 			return Optional.of(instance);
 		} catch (Exception e) {
