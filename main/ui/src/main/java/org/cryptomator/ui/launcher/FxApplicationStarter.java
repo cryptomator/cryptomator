@@ -11,6 +11,7 @@ import javax.inject.Singleton;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Singleton
 public class FxApplicationStarter {
@@ -19,17 +20,19 @@ public class FxApplicationStarter {
 
 	private final FxApplicationComponent.Builder fxAppComponent;
 	private final ExecutorService executor;
+	private final AtomicBoolean started;
 	private final CompletableFuture<FxApplication> future;
 
 	@Inject
 	public FxApplicationStarter(FxApplicationComponent.Builder fxAppComponent, ExecutorService executor) {
 		this.fxAppComponent = fxAppComponent;
 		this.executor = executor;
+		this.started = new AtomicBoolean();
 		this.future = new CompletableFuture<>();
 	}
 
-	public synchronized CompletionStage<FxApplication> get(boolean hasTrayIcon) {
-		if (!future.isDone()) {
+	public CompletionStage<FxApplication> get(boolean hasTrayIcon) {
+		if (!started.getAndSet(true)) {
 			start(hasTrayIcon);
 		}
 		return future;

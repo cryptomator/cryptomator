@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.cryptomator</groupId>
 	<artifactId>main</artifactId>
-	<version>1.5.6</version>
+	<version>1.5.7</version>
 	<packaging>pom</packaging>
 	<name>Cryptomator</name>
 
@@ -25,14 +25,14 @@
 
 		<!-- cryptomator dependencies -->
 		<cryptomator.cryptofs.version>1.9.12</cryptomator.cryptofs.version>
-		<cryptomator.jni.version>2.2.2</cryptomator.jni.version>
+		<cryptomator.jni.version>2.2.3</cryptomator.jni.version>
 		<cryptomator.fuse.version>1.2.3</cryptomator.fuse.version>
 		<cryptomator.dokany.version>1.1.15</cryptomator.dokany.version>
 		<cryptomator.webdav.version>1.0.11</cryptomator.webdav.version>
 
 		<!-- 3rd party dependencies -->
 		<javafx.version>14</javafx.version>
-		<commons-lang3.version>3.10</commons-lang3.version>
+		<commons-lang3.version>3.11</commons-lang3.version>
 		<secret-service.version>1.0.0</secret-service.version>
 		<jwt.version>3.10.3</jwt.version>
 		<easybind.version>1.0.3</easybind.version>
@@ -168,7 +168,7 @@
 				<artifactId>secret-service</artifactId>
 				<version>${secret-service.version}</version>
 			</dependency>
-			
+
 			<!-- JWT -->
 			<dependency>
 				<groupId>com.auth0</groupId>

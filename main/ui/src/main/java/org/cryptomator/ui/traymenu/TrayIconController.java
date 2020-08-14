@@ -47,7 +47,7 @@ public class TrayIconController {
 		trayMenuController.initTrayMenu();
 	}
 
-	public void macInterfaceThemeChanged() {
+	private void macInterfaceThemeChanged() {
 		trayIcon.setImage(imageFactory.loadImage());
 	}
 
