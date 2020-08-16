@@ -29,6 +29,7 @@ import javax.inject.Named;
 import java.io.IOException;
 import java.nio.CharBuffer;
 import java.nio.file.DirectoryNotEmptyException;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.NotDirectoryException;
 import java.util.Arrays;
 import java.util.Optional;
@@ -84,10 +85,6 @@ public class UnlockWorkflow extends Task<Boolean> {
 				cancel(false); // set Tasks state to cancelled
 				return false;
 			}
-		} catch (NotDirectoryException | DirectoryNotEmptyException thrown) {
-			InvalidMountPointException e = new InvalidMountPointException(thrown);
-			handleInvalidMountPoint(e);
-			throw e; // rethrow to trigger correct exception handling in Task
 		} catch (InvalidMountPointException e) {
 			handleInvalidMountPoint(e);
 			throw e; // rethrow to trigger correct exception handling in Task
@@ -159,17 +156,49 @@ public class UnlockWorkflow extends Task<Boolean> {
 		}
 	}
 
-	private void handleInvalidMountPoint(InvalidMountPointException e) {
+	private void handleInvalidMountPoint(InvalidMountPointException impExc) {
 		MountPointRequirement requirement = vault.getMountPointRequirement();
 		assert requirement != MountPointRequirement.NONE; //An invalid MountPoint with no required MountPoint doesn't seem sensible
 		assert requirement != MountPointRequirement.PARENT_OPT_MOUNT_POINT; //Not implemented anywhere (yet)
 
-		if (requirement == MountPointRequirement.EMPTY_MOUNT_POINT) {
-			LOG.error("Unlock failed. Mount point not an empty directory or doesn't exist: {}", e.getMessage());
-		} else {
-			LOG.error("Unlock failed. Mount point/folder already exists or parent folder doesn't exist: {}", e.getMessage());
+		Throwable cause = impExc.getCause();
+		//Cause is either null (cause the IMPE was thrown directly, e.g. because no MPC succeeded)
+		//or the cause was not an Exception (but some other kind of Throwable)
+		//Either way: Handle as generic error
+		if(!(cause instanceof Exception)) {
+			handleGenericError(impExc);
+			return;
 		}
 
+		//From here on handle the cause, not the caught exception
+		if(cause instanceof NotDirectoryException) {
+			if(requirement == MountPointRequirement.PARENT_NO_MOUNT_POINT) {
+				LOG.error("Unlock failed. Parent folder is missing: {}", cause.getMessage());
+			} else {
+				LOG.error("Unlock failed. Mountpoint doesn't exist (needs to be a folder): {}", cause.getMessage());
+			}
+			showInvalidMountPointScene();
+			return;
+		}
+
+		if(cause instanceof FileAlreadyExistsException) {
+			LOG.error("Unlock failed. Mountpoint already exists: {}", cause.getMessage());
+			showInvalidMountPointScene();
+			return;
+		}
+
+		if(cause instanceof DirectoryNotEmptyException) {
+			LOG.error("Unlock failed. Mountpoint not an empty directory: {}", cause.getMessage());
+			showInvalidMountPointScene();
+			return;
+		}
+
+		//Everything else (especially IOException) results in a generic error
+		//This must be done after the other exceptions because they extend IOException...
+		handleGenericError(cause);
+	}
+
+	private void showInvalidMountPointScene() {
 		Platform.runLater(() -> {
 			window.setScene(invalidMountPointScene.get());
 		});

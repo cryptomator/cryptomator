@@ -35,7 +35,6 @@ import javax.inject.Named;
 import javax.inject.Provider;
 import java.io.IOException;
 import java.nio.file.NoSuchFileException;
-import java.nio.file.NotDirectoryException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.EnumSet;
@@ -123,9 +122,6 @@ public class Vault {
 	}
 
 	public synchronized void unlock(CharSequence passphrase) throws CryptoException, IOException, VolumeException, InvalidMountPointException {
-		if (vaultSettings.useCustomMountPath().get() && Strings.isNullOrEmpty(vaultSettings.customMountPath().get())) {
-			throw new NotDirectoryException("");
-		}
 		CryptoFileSystem fs = getCryptoFileSystem(passphrase);
 		volume = volumeProvider.get();
 		volume.mount(fs, getEffectiveMountFlags());
