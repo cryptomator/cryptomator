@@ -39,7 +39,7 @@ public class TemporaryMountPointChooser implements MountPointChooser {
 	public Optional<Path> chooseMountPoint() {
 		//Shouldn't throw, but let's keep #orElseThrow in case we made a mistake and the check in #isApplicable failed
 		Path parent = this.environment.getMountPointsDir().orElseThrow();
-		String basename = this.vault.getVaultSettings().getId();
+		String basename = this.vault.getVaultSettings().mountName().get();
 		for (int i = 0; i < MAX_TMPMOUNTPOINT_CREATION_RETRIES; i++) {
 			Path mountPoint = parent.resolve(basename + "_" + i);
 			if (Files.notExists(mountPoint)) {
