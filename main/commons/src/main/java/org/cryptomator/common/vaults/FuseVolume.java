@@ -24,18 +24,12 @@ public class FuseVolume extends AbstractVolume {
 
 	private static final Logger LOG = LoggerFactory.getLogger(FuseVolume.class);
 
-	private final Set<MountPointChooser> choosers;
-
 	private Mount fuseMnt;
 	private Path mountPoint;
 
-	//Cleanup
-	private boolean cleanupRequired;
-	private MountPointChooser usedChooser;
-
 	@Inject
 	public FuseVolume(@Named("orderedValidMountPointChoosers") Set<MountPointChooser> choosers) {
-		this.choosers = choosers;
+		super(choosers);
 	}
 
 	@Override
@@ -96,12 +90,6 @@ public class FuseVolume extends AbstractVolume {
 			throw new VolumeException(e);
 		}
 		cleanupMountPoint();
-	}
-
-	private void cleanupMountPoint() {
-		if (this.cleanupRequired) {
-			this.usedChooser.cleanup(this.mountPoint);
-		}
 	}
 
 	@Override

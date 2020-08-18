@@ -26,20 +26,14 @@ public class DokanyVolume extends AbstractVolume {
 	private final VaultSettings vaultSettings;
 	private final MountFactory mountFactory;
 
-	private final Set<MountPointChooser> choosers;
-
 	private Mount mount;
 	private Path mountPoint;
 
-	//Cleanup
-	private boolean cleanupRequired;
-	private MountPointChooser usedChooser;
-
 	@Inject
 	public DokanyVolume(VaultSettings vaultSettings, ExecutorService executorService, @Named("orderedValidMountPointChoosers") Set<MountPointChooser> choosers) {
+		super(choosers);
 		this.vaultSettings = vaultSettings;
 		this.mountFactory = new MountFactory(executorService);
-		this.choosers = choosers;
 	}
 
 	@Override
@@ -68,12 +62,6 @@ public class DokanyVolume extends AbstractVolume {
 	public void unmount() {
 		mount.close();
 		cleanupMountPoint();
-	}
-
-	private void cleanupMountPoint() {
-		if (this.cleanupRequired) {
-			this.usedChooser.cleanup(this.mountPoint);
-		}
 	}
 
 	@Override

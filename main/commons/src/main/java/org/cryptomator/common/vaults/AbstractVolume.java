@@ -4,13 +4,26 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
 import org.cryptomator.common.mountpoint.InvalidMountPointException;
 import org.cryptomator.common.mountpoint.MountPointChooser;
-import org.cryptomator.cryptofs.CryptoFileSystem;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Optional;
+import java.util.Set;
 
 public abstract class AbstractVolume implements Volume {
+
+	private static final Logger LOG = LoggerFactory.getLogger(AbstractVolume.class);
+
+	private final Set<MountPointChooser> choosers;
+
+	//Cleanup
+	private boolean cleanupRequired;
+	private MountPointChooser usedChooser;
+
+	public AbstractVolume(Set<MountPointChooser> choosers) {
+		this.choosers = choosers;
+	}
 
 	public Path determineMountPoint() throws InvalidMountPointException {
 		for (MountPointChooser chooser : this.choosers) {
@@ -25,5 +38,11 @@ public abstract class AbstractVolume implements Volume {
 		}
 		String tried = Joiner.on(", ").join(this.choosers.stream().map((mpc) -> mpc.getClass().getTypeName()).collect(ImmutableSet.toImmutableSet()));
 		throw new InvalidMountPointException(String.format("No feasible MountPoint found! Tried %s", tried));
+	}
+
+	public void cleanupMountPoint() {
+		if (this.cleanupRequired) {
+			this.usedChooser.cleanup(this.mountPoint);
+		}
 	}
 }
