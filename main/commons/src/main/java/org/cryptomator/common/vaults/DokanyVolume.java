@@ -12,8 +12,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import java.nio.file.Path;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
@@ -27,7 +25,6 @@ public class DokanyVolume extends AbstractVolume {
 	private final MountFactory mountFactory;
 
 	private Mount mount;
-	private Path mountPoint;
 
 	@Inject
 	public DokanyVolume(VaultSettings vaultSettings, ExecutorService executorService, @Named("orderedValidMountPointChoosers") Set<MountPointChooser> choosers) {
@@ -67,11 +64,6 @@ public class DokanyVolume extends AbstractVolume {
 	@Override
 	public boolean isSupported() {
 		return DokanyVolume.isSupportedStatic();
-	}
-
-	@Override
-	public Optional<Path> getMountPoint() {
-		return Optional.ofNullable(mountPoint);
 	}
 
 	@Override

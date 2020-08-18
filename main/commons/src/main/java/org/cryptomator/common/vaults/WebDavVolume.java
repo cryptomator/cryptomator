@@ -27,7 +27,6 @@ public class WebDavVolume implements Volume {
 	private WebDavServer server;
 	private WebDavServletController servlet;
 	private Mounter.Mount mount;
-	private Path mountPoint;
 
 	@Inject
 	public WebDavVolume(Provider<WebDavServer> serverProvider, VaultSettings vaultSettings, Settings settings) {
@@ -98,7 +97,7 @@ public class WebDavVolume implements Volume {
 
 	@Override
 	public Optional<Path> getMountPoint() {
-		return Optional.ofNullable(mountPoint);
+		return Optional.empty();
 	}
 
 	@Override

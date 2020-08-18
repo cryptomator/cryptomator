@@ -17,15 +17,13 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.nio.file.Path;
-import java.util.Optional;
 import java.util.Set;
 
 public class FuseVolume extends AbstractVolume {
 
 	private static final Logger LOG = LoggerFactory.getLogger(FuseVolume.class);
 
-	private Mount fuseMnt;
-	private Path mountPoint;
+	private Mount mount;
 
 	@Inject
 	public FuseVolume(@Named("orderedValidMountPointChoosers") Set<MountPointChooser> choosers) {
@@ -45,7 +43,7 @@ public class FuseVolume extends AbstractVolume {
 			EnvironmentVariables envVars = EnvironmentVariables.create() //
 					.withFlags(splitFlags(mountFlags)).withMountPoint(mountPoint) //
 					.build();
-			this.fuseMnt = mounter.mount(root, envVars);
+			this.mount = mounter.mount(root, envVars);
 		} catch (CommandFailedException | FuseNotSupportedException e) {
 			throw new VolumeException("Unable to mount Filesystem", e);
 		}
@@ -58,7 +56,7 @@ public class FuseVolume extends AbstractVolume {
 	@Override
 	public void reveal() throws VolumeException {
 		try {
-			fuseMnt.revealInFileManager();
+			mount.revealInFileManager();
 		} catch (CommandFailedException e) {
 			LOG.debug("Revealing the vault in file manger failed: " + e.getMessage());
 			throw new VolumeException(e);
@@ -73,8 +71,8 @@ public class FuseVolume extends AbstractVolume {
 	@Override
 	public synchronized void unmountForced() throws VolumeException {
 		try {
-			fuseMnt.unmountForced();
-			fuseMnt.close();
+			mount.unmountForced();
+			mount.close();
 		} catch (CommandFailedException e) {
 			throw new VolumeException(e);
 		}
@@ -84,8 +82,8 @@ public class FuseVolume extends AbstractVolume {
 	@Override
 	public synchronized void unmount() throws VolumeException {
 		try {
-			fuseMnt.unmount();
-			fuseMnt.close();
+			mount.unmount();
+			mount.close();
 		} catch (CommandFailedException e) {
 			throw new VolumeException(e);
 		}
@@ -95,11 +93,6 @@ public class FuseVolume extends AbstractVolume {
 	@Override
 	public boolean isSupported() {
 		return FuseVolume.isSupportedStatic();
-	}
-
-	@Override
-	public Optional<Path> getMountPoint() {
-		return Optional.ofNullable(mountPoint);
 	}
 
 	@Override
