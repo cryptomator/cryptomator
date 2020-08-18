@@ -41,7 +41,7 @@ public class FuseVolume implements Volume {
 	}
 
 	@Override
-	public void mount(CryptoFileSystem fs, String mountFlags) throws InvalidMountPointException, FuseNotSupportedException, VolumeException {
+	public void mount(CryptoFileSystem fs, String mountFlags) throws InvalidMountPointException, VolumeException {
 		this.mountPoint = determineMountPoint();
 
 		mount(fs.getPath("/"), mountFlags);
@@ -71,7 +71,7 @@ public class FuseVolume implements Volume {
 					.withFlags(splitFlags(mountFlags)).withMountPoint(mountPoint) //
 					.build();
 			this.fuseMnt = mounter.mount(root, envVars);
-		} catch (CommandFailedException e) {
+		} catch (CommandFailedException | FuseNotSupportedException e) {
 			throw new VolumeException("Unable to mount Filesystem", e);
 		}
 	}
