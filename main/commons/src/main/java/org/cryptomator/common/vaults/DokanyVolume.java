@@ -1,7 +1,5 @@
 package org.cryptomator.common.vaults;
 
-import com.google.common.base.Joiner;
-import com.google.common.collect.ImmutableSet;
 import org.cryptomator.common.mountpoint.InvalidMountPointException;
 import org.cryptomator.common.mountpoint.MountPointChooser;
 import org.cryptomator.common.settings.VaultSettings;
@@ -19,7 +17,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
-public class DokanyVolume implements Volume {
+public class DokanyVolume extends AbstractVolume {
 
 	private static final Logger LOG = LoggerFactory.getLogger(DokanyVolume.class);
 
@@ -45,11 +43,6 @@ public class DokanyVolume implements Volume {
 	}
 
 	@Override
-	public boolean isSupported() {
-		return DokanyVolume.isSupportedStatic();
-	}
-
-	@Override
 	public void mount(CryptoFileSystem fs, String mountFlags) throws InvalidMountPointException, VolumeException {
 		this.mountPoint = determineMountPoint();
 		String mountName = vaultSettings.mountName().get();
@@ -61,23 +54,6 @@ public class DokanyVolume implements Volume {
 			}
 			throw new VolumeException("Unable to mount Filesystem", e);
 		}
-	}
-
-	private Path determineMountPoint() throws InvalidMountPointException {
-		for (MountPointChooser chooser : this.choosers) {
-			Optional<Path> chosenPath = chooser.chooseMountPoint();
-			if (chosenPath.isEmpty()) {
-				//Chooser was applicable, but couldn't find a feasible mountpoint
-				continue;
-			}
-			this.cleanupRequired = chooser.prepare(chosenPath.get()); //Fail entirely if an Exception occurs
-			this.usedChooser = chooser;
-			return chosenPath.get();
-		}
-		String tried = Joiner.on(", ").join(this.choosers.stream()
-				.map((mpc) -> mpc.getClass().getTypeName())
-				.collect(ImmutableSet.toImmutableSet()));
-		throw new InvalidMountPointException(String.format("No feasible MountPoint found! Tried %s", tried));
 	}
 
 	@Override
@@ -98,6 +74,11 @@ public class DokanyVolume implements Volume {
 		if (this.cleanupRequired) {
 			this.usedChooser.cleanup(this.mountPoint);
 		}
+	}
+
+	@Override
+	public boolean isSupported() {
+		return DokanyVolume.isSupportedStatic();
 	}
 
 	@Override

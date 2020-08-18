@@ -1,8 +1,6 @@
 package org.cryptomator.common.vaults;
 
-import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
-import com.google.common.collect.ImmutableSet;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.mountpoint.InvalidMountPointException;
 import org.cryptomator.common.mountpoint.MountPointChooser;
@@ -22,7 +20,7 @@ import java.nio.file.Path;
 import java.util.Optional;
 import java.util.Set;
 
-public class FuseVolume implements Volume {
+public class FuseVolume extends AbstractVolume {
 
 	private static final Logger LOG = LoggerFactory.getLogger(FuseVolume.class);
 
@@ -45,23 +43,6 @@ public class FuseVolume implements Volume {
 		this.mountPoint = determineMountPoint();
 
 		mount(fs.getPath("/"), mountFlags);
-	}
-
-	private Path determineMountPoint() throws InvalidMountPointException {
-		for (MountPointChooser chooser : this.choosers) {
-			Optional<Path> chosenPath = chooser.chooseMountPoint();
-			if (chosenPath.isEmpty()) {
-				//Chooser was applicable, but couldn't find a feasible mountpoint
-				continue;
-			}
-			this.cleanupRequired = chooser.prepare(chosenPath.get()); //Fail entirely if an Exception occurs
-			this.usedChooser = chooser;
-			return chosenPath.get();
-		}
-		String tried = Joiner.on(", ").join(this.choosers.stream()
-				.map((mpc) -> mpc.getClass().getTypeName())
-				.collect(ImmutableSet.toImmutableSet()));
-		throw new InvalidMountPointException(String.format("No feasible MountPoint found! Tried %s", tried));
 	}
 
 	private void mount(Path root, String mountFlags) throws VolumeException {
