@@ -18,6 +18,7 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
 import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.common.Environment;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VolumeImpl;
 import org.cryptomator.common.vaults.Vault;
@@ -57,15 +58,14 @@ public class MountOptionsController implements FxController {
 	private final BooleanBinding fuseAndWindows;
 
 	@Inject
-	MountOptionsController(@VaultOptionsWindow Stage window, @VaultOptionsWindow Vault vault, Settings settings, WindowsDriveLetters windowsDriveLetters, ResourceBundle resourceBundle) {
+	MountOptionsController(@VaultOptionsWindow Stage window, @VaultOptionsWindow Vault vault, Settings settings, WindowsDriveLetters windowsDriveLetters, ResourceBundle resourceBundle, Environment environment) {
 		this.window = window;
 		this.vault = vault;
 		this.webDavAndWindows = settings.preferredVolumeImpl().isEqualTo(VolumeImpl.WEBDAV).and(osIsWindows);
 		this.windowsDriveLetters = windowsDriveLetters;
 		this.resourceBundle = resourceBundle;
 
-		System.out.println(Boolean.getBoolean("fuse.experimental"));
-		this.fuseAndWindows = settings.preferredVolumeImpl().isEqualTo(VolumeImpl.FUSE).and(osIsWindows).and(new SimpleBooleanProperty(!Boolean.getBoolean("fuse.experimental")));
+		this.fuseAndWindows = settings.preferredVolumeImpl().isEqualTo(VolumeImpl.FUSE).and(osIsWindows).and(new SimpleBooleanProperty(!environment.useExperimentalFuse()));
 	}
 
 	@FXML
