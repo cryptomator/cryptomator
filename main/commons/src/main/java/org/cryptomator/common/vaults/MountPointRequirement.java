@@ -22,15 +22,7 @@ public enum MountPointRequirement {
 	PARENT_OPT_MOUNT_POINT,
 
 	/**
-	 * The actual Mountpoint must exist, must be empty and the parent must exist aswell.
+	 * The actual Mountpoint must exist and must be empty.
 	 */
 	EMPTY_MOUNT_POINT;
-
-//	/**
-//	 * The actual Mountpoint must exist and may contain files.
-//	 */
-//	MOUNT_POINT;
-
-
-
 }
