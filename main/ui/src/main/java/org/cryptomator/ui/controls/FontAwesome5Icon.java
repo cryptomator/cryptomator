@@ -6,11 +6,13 @@ package org.cryptomator.ui.controls;
 public enum FontAwesome5Icon {
 	ANCHOR("\uF13D"), //
 	ARROW_UP("\uF062"), //
+	BUG("\uF188"), //
 	CHECK("\uF00C"), //
 	COG("\uF013"), //
 	COGS("\uF085"), //
 	COPY("\uF0C5"), //
 	CROWN("\uF521"), //
+	EDIT("\uF044"), //
 	EXCLAMATION("\uF12A"), //
 	EXCLAMATION_CIRCLE("\uF06A"), //
 	EXCLAMATION_TRIANGLE("\uF071"), //
@@ -37,6 +39,7 @@ public enum FontAwesome5Icon {
 	SPINNER("\uF110"), //
 	SYNC("\uF021"), //
 	TIMES("\uF00D"), //
+	TRASH("\uF1F8"), //
 	UNLINK("\uf127"), //
 	WRENCH("\uF0AD"), //
 	WINDOW_MINIMIZE("\uF2D1"), //

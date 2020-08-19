@@ -32,6 +32,14 @@
 				<Tooltip text="%main.donationKeyMissing.tooltip"/>
 			</tooltip>
 		</Button>
+		<Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#showGeneralPreferences" focusTraversable="false" visible="${controller.debugModeEnabled}">
+			<graphic>
+				<FontAwesome5IconView glyph="BUG" glyphSize="16"/>
+			</graphic>
+			<tooltip>
+				<Tooltip text="%main.debugModeEnabled.tooltip"/>
+			</tooltip>
+		</Button>
 		<Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#showPreferences" focusTraversable="false">
 			<graphic>
 				<StackPane>

@@ -5,23 +5,27 @@ import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextArea;
 import org.cryptomator.common.LicenseHolder;
+import org.cryptomator.common.settings.Settings;
+import org.cryptomator.common.settings.UiTheme;
 import org.cryptomator.ui.common.FxController;
 
 import javax.inject.Inject;
 
 @PreferencesScoped
 public class DonationKeyPreferencesController implements FxController {
-	
+
 	private static final String DONATION_URI = "https://store.cryptomator.org/desktop";
 
 	private final Application application;
 	private final LicenseHolder licenseHolder;
+	private final Settings settings;
 	public TextArea donationKeyField;
 
 	@Inject
-	DonationKeyPreferencesController(Application application, LicenseHolder licenseHolder) {
+	DonationKeyPreferencesController(Application application, LicenseHolder licenseHolder, Settings settings) {
 		this.application = application;
 		this.licenseHolder = licenseHolder;
+		this.settings = settings;
 	}
 
 	@FXML
@@ -32,6 +36,9 @@ public class DonationKeyPreferencesController implements FxController {
 
 	private void registrationKeyChanged(@SuppressWarnings("unused") ObservableValue<? extends String> observable, @SuppressWarnings("unused") String oldValue, String newValue) {
 		licenseHolder.validateAndStoreLicense(newValue);
+		if (!licenseHolder.isValidLicense()) {
+			settings.theme().set(UiTheme.LIGHT);
+		}
 	}
 
 	@FXML

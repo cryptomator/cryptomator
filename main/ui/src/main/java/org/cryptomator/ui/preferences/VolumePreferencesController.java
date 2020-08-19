@@ -25,7 +25,7 @@ public class VolumePreferencesController implements FxController {
 	private final Settings settings;
 	private final BooleanBinding showWebDavSettings;
 	private final BooleanBinding showWebDavScheme;
-	public ChoiceBox<VolumeImpl> volumeTypeChoicBox;
+	public ChoiceBox<VolumeImpl> volumeTypeChoiceBox;
 	public TextField webDavPortField;
 	public Button changeWebDavPortButton;
 	public ChoiceBox<WebDavUrlScheme> webDavUrlSchemeChoiceBox;
@@ -38,9 +38,12 @@ public class VolumePreferencesController implements FxController {
 	}
 
 	public void initialize() {
-		volumeTypeChoicBox.getItems().addAll(Volume.getCurrentSupportedAdapters());
-		volumeTypeChoicBox.valueProperty().bindBidirectional(settings.preferredVolumeImpl());
-		volumeTypeChoicBox.setConverter(new VolumeImplConverter());
+		volumeTypeChoiceBox.getItems().addAll(Volume.getCurrentSupportedAdapters());
+		if (!volumeTypeChoiceBox.getItems().contains(settings.preferredVolumeImpl().get())) {
+			settings.preferredVolumeImpl().set(VolumeImpl.WEBDAV);
+		}
+		volumeTypeChoiceBox.valueProperty().bindBidirectional(settings.preferredVolumeImpl());
+		volumeTypeChoiceBox.setConverter(new VolumeImplConverter());
 
 		webDavPortField.setText(String.valueOf(settings.port().get()));
 		changeWebDavPortButton.visibleProperty().bind(settings.port().asString().isNotEqualTo(webDavPortField.textProperty()));

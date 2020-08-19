@@ -53,9 +53,10 @@ public class ChangePasswordController implements FxController {
 
 	@FXML
 	public void initialize() {
-		BooleanBinding hasNotConfirmedCheckbox = finalConfirmationCheckbox.selectedProperty().not();
-		BooleanBinding isInvalidNewPassword = Bindings.createBooleanBinding(() -> newPassword.get() == null || newPassword.get().length() == 0, newPassword); 
-		finishButton.disableProperty().bind(hasNotConfirmedCheckbox.or(isInvalidNewPassword));
+		BooleanBinding checkboxNotConfirmed = finalConfirmationCheckbox.selectedProperty().not();
+		BooleanBinding oldPasswordFieldEmpty = oldPasswordField.textProperty().isEmpty();
+		BooleanBinding newPasswordInvalid = Bindings.createBooleanBinding(() -> newPassword.get() == null || newPassword.get().length() == 0, newPassword);
+		finishButton.disableProperty().bind(checkboxNotConfirmed.or(oldPasswordFieldEmpty).or(newPasswordInvalid));
 	}
 
 	@FXML
@@ -96,5 +97,5 @@ public class ChangePasswordController implements FxController {
 	public Vault getVault() {
 		return vault;
 	}
-	
+
 }

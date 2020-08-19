@@ -17,7 +17,7 @@
 	<children>
 		<HBox spacing="6" alignment="CENTER_LEFT">
 			<Label text="%preferences.volume.type"/>
-			<ChoiceBox fx:id="volumeTypeChoicBox"/>
+			<ChoiceBox fx:id="volumeTypeChoiceBox"/>
 		</HBox>
 
 		<HBox spacing="6" alignment="CENTER_LEFT" visible="${controller.showWebDavSettings}">
