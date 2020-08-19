@@ -28,6 +28,9 @@ class LinuxSecretServiceKeychainAccessImpl implements KeychainAccessStrategy {
 			if (list == null) {
 				keyring.createItem(LABEL_FOR_SECRET_IN_KEYRING, passphrase, createAttributes(key));
 			}
+			else {
+				changePassphrase(key, passphrase);
+			}
 		} catch (IOException e) {
 			throw new KeychainAccessException(e);
 		}
