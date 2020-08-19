@@ -36,6 +36,9 @@
       <indentOptions>
         <option name="USE_TAB_CHARACTER" value="true" />
       </indentOptions>
+      <arrangement>
+        <rules />
+      </arrangement>
     </codeStyleSettings>
     <codeStyleSettings language="JSON">
       <indentOptions>
