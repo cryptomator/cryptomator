@@ -67,7 +67,7 @@ public class CustomMountPointChooser implements MountPointChooser {
 					throw new InvalidMountPointException(new DirectoryNotEmptyException(mountPoint.toString()));
 				}
 			} catch (IOException exception) {
-				throw new InvalidMountPointException(exception);
+				throw new InvalidMountPointException("IOException while checking folder content", exception);
 			}
 		}
 		LOG.debug("Successfully checked custom mount point: {}", mountPoint);

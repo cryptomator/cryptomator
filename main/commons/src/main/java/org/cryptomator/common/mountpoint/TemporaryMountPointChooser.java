@@ -72,7 +72,7 @@ public class TemporaryMountPointChooser implements MountPointChooser {
 				return true;
 			}
 		} catch (IOException exception) {
-			throw new InvalidMountPointException(exception);
+			throw new InvalidMountPointException("IOException while preparing mountpoint", exception);
 		}
 	}
 
