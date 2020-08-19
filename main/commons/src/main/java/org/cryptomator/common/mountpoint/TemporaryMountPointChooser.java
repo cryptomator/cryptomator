@@ -72,7 +72,7 @@ public class TemporaryMountPointChooser implements MountPointChooser {
 				return true;
 			}
 		} catch (IOException exception) {
-			throw wrapAsIMPE(exception);
+			throw new InvalidMountPointException(exception);
 		}
 	}
 
@@ -84,9 +84,5 @@ public class TemporaryMountPointChooser implements MountPointChooser {
 		} catch (IOException e) {
 			LOG.warn("Could not delete mount point: {}", e.getMessage());
 		}
-	}
-
-	private InvalidMountPointException wrapAsIMPE(Exception exception) {
-		return new InvalidMountPointException(exception);
 	}
 }

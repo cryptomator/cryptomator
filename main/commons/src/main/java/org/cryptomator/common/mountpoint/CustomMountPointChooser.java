@@ -48,33 +48,29 @@ public class CustomMountPointChooser implements MountPointChooser {
 
 			Path parent = mountPoint.getParent();
 			if (!Files.isDirectory(parent)) {
-				throw wrapAsIMPE(new NotDirectoryException(parent.toString()));
+				throw new InvalidMountPointException(new NotDirectoryException(parent.toString()));
 			}
 			//We must use #notExists() here because notExists =/= !exists (see docs)
 			if (!Files.notExists(mountPoint, LinkOption.NOFOLLOW_LINKS)) {
 				//File exists OR can't be determined
-				throw wrapAsIMPE(new FileAlreadyExistsException(mountPoint.toString()));
+				throw new InvalidMountPointException(new FileAlreadyExistsException(mountPoint.toString()));
 			}
 		} else if(requirement == MountPointRequirement.EMPTY_MOUNT_POINT) {
 			//This is the case for Windows when using Dokany
 			//and for Linux and Mac
 
 			if (!Files.isDirectory(mountPoint)) {
-				throw wrapAsIMPE(new NotDirectoryException(mountPoint.toString()));
+				throw new InvalidMountPointException(new NotDirectoryException(mountPoint.toString()));
 			}
 			try (DirectoryStream<Path> ds = Files.newDirectoryStream(mountPoint)) {
 				if (ds.iterator().hasNext()) {
-					throw wrapAsIMPE(new DirectoryNotEmptyException(mountPoint.toString()));
+					throw new InvalidMountPointException(new DirectoryNotEmptyException(mountPoint.toString()));
 				}
 			} catch (IOException exception) {
-				throw wrapAsIMPE(exception);
+				throw new InvalidMountPointException(exception);
 			}
 		}
 		LOG.debug("Successfully checked custom mount point: {}", mountPoint);
 		return false;
-	}
-
-	private InvalidMountPointException wrapAsIMPE(Exception exception) {
-		return new InvalidMountPointException(exception);
 	}
 }
