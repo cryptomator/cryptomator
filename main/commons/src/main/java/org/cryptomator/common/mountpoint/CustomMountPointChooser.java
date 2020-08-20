@@ -1,6 +1,5 @@
 package org.cryptomator.common.mountpoint;
 
-import org.cryptomator.common.vaults.MountPointRequirement;
 import org.cryptomator.common.vaults.Vault;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,44 +40,49 @@ public class CustomMountPointChooser implements MountPointChooser {
 
 	@Override
 	public boolean prepare(Path mountPoint) throws InvalidMountPointException {
-		MountPointRequirement requirement = this.vault.getMountPointRequirement();
-		//Requirement "NONE" doesn't make any sense here.
-		//No need to prepare/verify a Mountpoint without requiring one...
-		assert requirement != MountPointRequirement.NONE;
-
-		//Not implemented anywhere (yet)
-		assert requirement != MountPointRequirement.PARENT_OPT_MOUNT_POINT;
-
-		if(requirement == MountPointRequirement.PARENT_NO_MOUNT_POINT) {
-			//This the case on Windows when using FUSE
-			//See https://github.com/billziss-gh/winfsp/issues/320
-
-			Path parent = mountPoint.getParent();
-			if (!Files.isDirectory(parent)) {
-				throw new InvalidMountPointException(new NotDirectoryException(parent.toString()));
+		switch (this.vault.getMountPointRequirement()) {
+			case PARENT_NO_MOUNT_POINT -> prepareParentNoMountPoint(mountPoint);
+			case EMPTY_MOUNT_POINT -> prepareEmptyMountPoint(mountPoint);
+			case NONE -> {
+				//Requirement "NONE" doesn't make any sense here.
+				//No need to prepare/verify a Mountpoint without requiring one...
+				assert false : "Illegal MountPointRequirement";
 			}
-			//We must use #notExists() here because notExists =/= !exists (see docs)
-			if (!Files.notExists(mountPoint, LinkOption.NOFOLLOW_LINKS)) {
-				//File exists OR can't be determined
-				throw new InvalidMountPointException(new FileAlreadyExistsException(mountPoint.toString()));
-			}
-		} else if(requirement == MountPointRequirement.EMPTY_MOUNT_POINT) {
-			//This is the case for Windows when using Dokany
-			//and for Linux and Mac
-
-			if (!Files.isDirectory(mountPoint)) {
-				throw new InvalidMountPointException(new NotDirectoryException(mountPoint.toString()));
-			}
-			try (DirectoryStream<Path> ds = Files.newDirectoryStream(mountPoint)) {
-				if (ds.iterator().hasNext()) {
-					throw new InvalidMountPointException(new DirectoryNotEmptyException(mountPoint.toString()));
-				}
-			} catch (IOException exception) {
-				throw new InvalidMountPointException("IOException while checking folder content", exception);
+			default -> {
+				//Currently the case for "PARENT_OPT_MOUNT_POINT"
+				assert false : "Not implemented";
 			}
 		}
 		LOG.debug("Successfully checked custom mount point: {}", mountPoint);
 		return false;
+	}
+
+	private void prepareParentNoMountPoint(Path mountPoint) throws InvalidMountPointException {
+		//This the case on Windows when using FUSE
+		//See https://github.com/billziss-gh/winfsp/issues/320
+		Path parent = mountPoint.getParent();
+		if (!Files.isDirectory(parent)) {
+			throw new InvalidMountPointException(new NotDirectoryException(parent.toString()));
+		}
+		//We must use #notExists() here because notExists =/= !exists (see docs)
+		if (!Files.notExists(mountPoint, LinkOption.NOFOLLOW_LINKS)) {
+			//File exists OR can't be determined
+			throw new InvalidMountPointException(new FileAlreadyExistsException(mountPoint.toString()));
+		}
+	}
+
+	private void prepareEmptyMountPoint(Path mountPoint) throws InvalidMountPointException {
+		//This is the case for Windows when using Dokany and for Linux and Mac
+		if (!Files.isDirectory(mountPoint)) {
+			throw new InvalidMountPointException(new NotDirectoryException(mountPoint.toString()));
+		}
+		try (DirectoryStream<Path> ds = Files.newDirectoryStream(mountPoint)) {
+			if (ds.iterator().hasNext()) {
+				throw new InvalidMountPointException(new DirectoryNotEmptyException(mountPoint.toString()));
+			}
+		} catch (IOException exception) {
+			throw new InvalidMountPointException("IOException while checking folder content", exception);
+		}
 	}
 
 	@Override
