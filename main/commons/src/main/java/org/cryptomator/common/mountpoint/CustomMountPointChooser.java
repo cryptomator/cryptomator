@@ -18,12 +18,19 @@ import java.util.Optional;
 
 public class CustomMountPointChooser implements MountPointChooser {
 
+	public static final int POSITION = 0;
+
 	private static final Logger LOG = LoggerFactory.getLogger(CustomMountPointChooser.class);
 
 	private final Vault vault;
 
 	public CustomMountPointChooser(Vault vault) {
 		this.vault = vault;
+	}
+
+	@Override
+	public boolean isApplicable() {
+		return true;
 	}
 
 	@Override
@@ -72,5 +79,10 @@ public class CustomMountPointChooser implements MountPointChooser {
 		}
 		LOG.debug("Successfully checked custom mount point: {}", mountPoint);
 		return false;
+	}
+
+	@Override
+	public int getPosition() {
+		return POSITION;
 	}
 }

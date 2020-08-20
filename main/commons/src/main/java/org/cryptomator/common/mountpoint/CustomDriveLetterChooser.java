@@ -9,6 +9,8 @@ import java.util.Optional;
 
 public class CustomDriveLetterChooser implements MountPointChooser {
 
+	public static final int POSITION = 100;
+
 	private final Vault vault;
 
 	public CustomDriveLetterChooser(Vault vault) {
@@ -23,5 +25,10 @@ public class CustomDriveLetterChooser implements MountPointChooser {
 	@Override
 	public Optional<Path> chooseMountPoint() {
 		return this.vault.getVaultSettings().getWinDriveLetter().map(letter -> letter.charAt(0) + ":\\").map(Paths::get);
+	}
+
+	@Override
+	public int getPosition() {
+		return POSITION;
 	}
 }

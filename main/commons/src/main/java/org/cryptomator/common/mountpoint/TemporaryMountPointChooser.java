@@ -15,6 +15,8 @@ import java.util.Optional;
 
 public class TemporaryMountPointChooser implements MountPointChooser {
 
+	public static final int POSITION = 300;
+
 	private static final Logger LOG = LoggerFactory.getLogger(TemporaryMountPointChooser.class);
 	private static final int MAX_TMPMOUNTPOINT_CREATION_RETRIES = 10;
 
@@ -84,5 +86,10 @@ public class TemporaryMountPointChooser implements MountPointChooser {
 		} catch (IOException e) {
 			LOG.warn("Could not delete mount point: {}", e.getMessage());
 		}
+	}
+
+	@Override
+	public int getPosition() {
+		return POSITION;
 	}
 }

@@ -8,6 +8,8 @@ import java.util.Optional;
 
 public class AvailableDriveLetterChooser implements MountPointChooser {
 
+	private static final int POSITION = 200;
+
 	private final WindowsDriveLetters windowsDriveLetters;
 
 	public AvailableDriveLetterChooser(WindowsDriveLetters windowsDriveLetters) {
@@ -22,5 +24,10 @@ public class AvailableDriveLetterChooser implements MountPointChooser {
 	@Override
 	public Optional<Path> chooseMountPoint() {
 		return this.windowsDriveLetters.getAvailableDriveLetterPath();
+	}
+
+	@Override
+	public int getPosition() {
+		return POSITION;
 	}
 }

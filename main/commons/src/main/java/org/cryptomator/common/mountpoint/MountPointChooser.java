@@ -1,65 +1,63 @@
 package org.cryptomator.common.mountpoint;
 
-import dagger.MapKey;
 import org.cryptomator.common.vaults.Volume;
 
 import java.nio.file.Path;
 import java.util.Optional;
-import java.util.Set;
+import java.util.SortedSet;
 
 /**
  * Base interface for the Mountpoint-Choosing-Operation that results in the choice and
  * preparation of a Mountpoint or an exception otherwise.<br>
  * <p>All <i>MountPointChoosers (MPCs)</i> need to implement this class and must be added to
- * the pool of possible MPCs by {@link MountPointChooserModule MountPointChooserModule.}
- * The MountPointChooserModule requires all {@link dagger.Provides Providermethods} to
- * be annotated with the {@link PhaseKey @PhaseKey-Annotation} and a <b>unique</b> Phase to
- * allow the Module to sort them according to the phases' {@link Phase#getTiming()} timing.}
- * The timing must be defined by the developer to reflect a useful execution order.
+ * the pool of possible MPCs by the {@link MountPointChooserModule MountPointChooserModule.}
+ * The MountPointChooserModule will sort them according to their {@link #getPosition() position.}
+ * The position must be defined by the developer to reflect a useful execution order;
+ * the order of execution of MPCs with equal position is undefined.
  *
- * <p><b>Phase-Uniqueness:</b> Phases must be unique, meaning that they must not be used
- * to annotate more than <i>one</i> Providermethod. Define a new phase for each additional
- * MPC that is added to the Module. Timings can be reused; the order of Phases with equal
- * timing among themselves is undefined.
+ * <p>MPCs are executed by a {@link Volume} in ascedning order of their position to find
+ * and prepare a suitable Mountpoint for the Volume. The Volume has access to a
+ * {@link SortedSet} of MPCs in this specific order, that is provided by the Module.
+ * The Set only contains Choosers that were deemed {@link #isApplicable() applicable}
+ * by the Module.
  *
- * <p>MPCs are executed by a {@link Volume} in the order of their phase's timing to find
- * and prepare a suitable Mountpoint for the Volume. The Volume only has access to a {@link Set}
- * of MPCs in this specific order, that is provided by the Module; the according Phases and exact
- * timings are inaccessible to the Volume. The Set only contains Choosers that were deemed
- * {@link #isApplicable() applicable} by the Module.
+ * <p>At execution of a MPC {@link #chooseMountPoint()} is called to choose a Mountpoint
+ * according to the MPC's <i>strategy.</i> The <i>strategy</i> can involve reading configs,
+ * searching the filesystem, processing user-input or similar operations.
+ * If {@code #chooseMountPoint()} returns a non-null path (everthing but
+ * {@linkplain Optional#empty()}) the MPC's {@link #prepare(Path)}-Method is called and the
+ * MountPoint is verfied and/or prepared. In this case <i>no other MPC's will be called for
+ * this Volume, even if {@code #prepare(Path)} fails.</i>
  *
- * <p>At execution of a MPC {@link #chooseMountPoint()} and then {@link #prepare(Path)} are called
- * by the Volume. If {@code #chooseMountPoint()} yields no result, the next MPC is executed
- * without first calling the {@code #prepare(Path)}-Method of the current MPC.
+ * <p>If {@code #chooseMountPoint()} yields no result, the next MPC is executed
+ * <i>without</i> first calling the {@code #prepare(Path)}-Method of the current MPC.
  * This is repeated until<br>
  * <ul>
  *     <li><b>either</b> a Mountpoint is returned by {@code #chooseMountPoint()}
- *     and {@code #prepare(Path)} succeeds or fails</li>
+ *     and {@code #prepare(Path)} succeeds or fails, ending the entire operation</li>
  *     <li><b>or</b> no MPC remains and an {@link InvalidMountPointException} is thrown.</li>
  * </ul>
- * If the {@code #prepare(Path)}-Method of a MPC fails the entire Mountpoint-Choosing-Operation
+ * If the {@code #prepare(Path)}-Method of a MPC fails, the entire Mountpoint-Choosing-Operation
  * is aborted and the method should do all necessary cleanup before throwing the exception.
  * If the preparation succeeds {@link #cleanup(Path)} can be used after unmount to do any
  * remaining cleanup.
  */
-public interface MountPointChooser {
+public interface MountPointChooser extends Comparable<MountPointChooser> {
 
 	/**
 	 * Called by the {@link MountPointChooserModule} to determine whether this MountPointChooser is
 	 * applicable for the given Systemconfiguration.
 	 *
-	 * <p>The result of this method defaults to true. Developers should override this method to
+	 * <p>Developers should override this method to
 	 * check for Systemconfigurations that are unsuitable for this MPC.
 	 *
 	 * @return a boolean flag; true if applicable, else false.
 	 * @see #chooseMountPoint()
 	 */
-	default boolean isApplicable() {
-		return true; //Usually most of the choosers should be applicable
-	}
+	boolean isApplicable();
 
 	/**
-	 * Called by a {@link Volume} to do choose a Mountpoint according to the
+	 * Called by a {@link Volume} to choose a Mountpoint according to the
 	 * MountPointChoosers strategy.
 	 *
 	 * <p>This method is only called for MPCs that were deemed {@link #isApplicable() applicable}
@@ -128,43 +126,32 @@ public interface MountPointChooser {
 	}
 
 	/**
-	 * The phases of the existing {@link MountPointChooser MountPointChoosers.}
-	 * <p>The {@code Phases} of the MPCs are attached to them in the
-	 * {@link MountPointChooserModule} by annotating them with the
-	 * {@link PhaseKey @PhaseKey-Annotation.}
-	 * <p>Each MPC must have a <b>unique</b> Phase that allows the Module to sort
-	 * the MPCs according to their phases' {@link Phase#getTiming()} timing.}
-	 * The timing must be defined by the developer to reflect a useful execution order.
+	 * Called by the {@link MountPointChooserModule} to sort the available MPCs
+	 * and determine their execution order.
+	 * The position must be defined by the developer to reflect a useful execution order.
+	 * MPCs with lower positions will be placed at lower indices in the resulting
+	 * {@link SortedSet} and will be executed with higher probability.
+	 * The order of execution of MPCs with equal position is undefined.
 	 *
-	 * <p><b>Phase-Uniqueness:</b> Phases must be unique, meaning that they must not be used
-	 * to annotate more than <i>one</i> Providermethod. Define a new phase for each additional
-	 * MPC that is added to the Module. Timings can be reused; the order of Phases with equal
-	 * timings among themselves is undefined.
+	 * @return the position of this MPC.
 	 */
-	enum Phase {
+	int getPosition();
 
-		CUSTOM_MOUNTPOINT(0),
-
-		CUSTOM_DRIVELETTER(1),
-
-		AVAILABLE_DRIVELETTER(2),
-
-		TEMPORARY_MOUNTPOINT(3);
-
-		private final int timing;
-
-		Phase(int timing) {
-			this.timing = timing;
-		}
-
-		public int getTiming() {
-			return timing;
-		}
-	}
-
-	@MapKey
-	@interface PhaseKey {
-
-		Phase value();
+	/**
+	 * Called by the {@link MountPointChooserModule} to determine the execution order
+	 * of the registered MPCs. <b>Implementations usually should not override this
+	 * method.</b> This default implementation sorts the MPCs in ascending order
+	 * of their {@link #getPosition() position.}<br>
+	 * <br>
+	 * <b>Original description:</b>
+	 * <p>{@inheritDoc}
+	 *
+	 * @implNote This default implementation sorts the MPCs in ascending order
+	 * of their {@link #getPosition() position.}
+	 */
+	@Override
+	default int compareTo(MountPointChooser other) {
+		//Sort by position (ascending order)
+		return Integer.compare(this.getPosition(), other.getPosition());
 	}
 }
