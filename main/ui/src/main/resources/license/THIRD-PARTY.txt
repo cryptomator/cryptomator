@@ -84,7 +84,7 @@ Cryptomator uses 52 third-party dependencies under the following licenses:
 		- Checker Qual (org.checkerframework:checker-qual:2.11.1 - https://checkerframework.org)
 		- SLF4J API Module (org.slf4j:slf4j-api:1.7.30 - http://www.slf4j.org)
 	The BSD 2-Clause License:
-		- EasyBind (org.fxmisc.easybind:easybind:1.0.3 - http://www.fxmisc.org/easybind/)
+		- EasyBind (com.tobiasdiez:easybind:2.1.0 - https://github.com/tobiasdiez/EasyBind)
 
 Cryptomator uses other third-party assets under the following licenses:
 	SIL OFL 1.1 License:
