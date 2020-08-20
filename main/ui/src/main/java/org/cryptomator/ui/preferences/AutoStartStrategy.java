@@ -21,11 +21,4 @@ public interface AutoStartStrategy {
 		}
 		
 	}
-	class TogglingAutoStartWithPowershellFailedException extends TogglingAutoStartFailedException {
-
-		public TogglingAutoStartWithPowershellFailedException(String message, Throwable cause) {
-			super(message, cause);
-		}
-
-	}
 }
