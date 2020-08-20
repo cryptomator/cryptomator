@@ -17,11 +17,14 @@ import java.util.concurrent.TimeUnit;
  * <p>
  * Two strategies are implemented for this feature, the first uses the registry and the second one the autostart folder.
  * <p>
- * To check if it is enabled at all, both locations are checked.
- * To enable it, first the registry is tried and only on failure the autostart folder is used.
- * To disable it, first it is determined, which strategies must be used and in the second step those are executed.
+ * The registry strategy checks/add/removes at the registry key {@value HKCU_AUTOSTART_KEY} an entry for Cryptomator.
+ * The folder strategy checks/add/removes at the location {@value WINDOWS_START_MENU_ENTRY}.
+ * <p>
+ * To check if the feature is active, both strategies are applied.
+ * To enable the feature, first the registry is tried and only on failure the autostart folder is used.
+ * To disable it, first it is determined by an internal state, which strategies must be used and in the second step those are executed.
  *
- * @apiNote This class is not thread safe, hence it should be avoided to be used simultaniously by the same threads.
+ * @apiNote This class is not thread safe, hence it should be avoided to call its methods simultaniously by different threads.
  */
 class AutoStartWinStrategy implements AutoStartStrategy {
 
@@ -32,34 +35,34 @@ class AutoStartWinStrategy implements AutoStartStrategy {
 
 	private final String exePath;
 
-	private boolean activatedOverFolder;
-	private boolean activatedOverRegistry;
+	private boolean activatedUsingFolder;
+	private boolean activatedUsingRegistry;
 
 	public AutoStartWinStrategy(String exePath) {
 		this.exePath = exePath;
-		this.activatedOverFolder = false;
-		this.activatedOverRegistry = false;
+		this.activatedUsingFolder = false;
+		this.activatedUsingRegistry = false;
 	}
 
 	@Override
 	public CompletionStage<Boolean> isAutoStartEnabled() {
-		return isAutoStartEnabledOverRegistry().thenCombine(isAutoStartEnabledOverFolder(), (bReg, bFolder) -> bReg || bFolder);
+		return isAutoStartEnabledUsingRegistry().thenCombine(isAutoStartEnabledUsingFolder(), (bReg, bFolder) -> bReg || bFolder);
 	}
 
-	private CompletableFuture<Boolean> isAutoStartEnabledOverFolder() {
+	private CompletableFuture<Boolean> isAutoStartEnabledUsingFolder() {
 		Path autoStartEntry = Path.of(System.getProperty("user.home") + WINDOWS_START_MENU_ENTRY);
-		this.activatedOverFolder = Files.exists(autoStartEntry);
-		return CompletableFuture.completedFuture(activatedOverFolder);
+		this.activatedUsingFolder = Files.exists(autoStartEntry);
+		return CompletableFuture.completedFuture(activatedUsingFolder);
 	}
 
-	private CompletableFuture<Boolean> isAutoStartEnabledOverRegistry() {
+	private CompletableFuture<Boolean> isAutoStartEnabledUsingRegistry() {
 		ProcessBuilder regQuery = new ProcessBuilder("reg", "query", HKCU_AUTOSTART_KEY, //
 				"/v", AUTOSTART_VALUE);
 		try {
 			Process proc = regQuery.start();
 			return proc.onExit().thenApply(p -> {
-				this.activatedOverRegistry = p.exitValue() == 0;
-				return activatedOverRegistry;
+				this.activatedUsingRegistry = p.exitValue() == 0;
+				return activatedUsingRegistry;
 			});
 		} catch (IOException e) {
 			LOG.debug("Failed to query {} from registry key {}", AUTOSTART_VALUE, HKCU_AUTOSTART_KEY);
@@ -70,19 +73,19 @@ class AutoStartWinStrategy implements AutoStartStrategy {
 	@Override
 	public void enableAutoStart() throws TogglingAutoStartFailedException {
 		try {
-			enableAutoStartOverRegistry().thenAccept((Void v) -> this.activatedOverRegistry = true).exceptionallyCompose(e -> {
+			enableAutoStartUsingRegistry().thenAccept((Void v) -> this.activatedUsingRegistry = true).exceptionallyCompose(e -> {
 				LOG.debug("Falling back to using autostart folder.");
-				return this.enableAutoStartOverFolder();
-			}).thenAccept((Void v) -> this.activatedOverFolder = true).get();
+				return this.enableAutoStartUsingFolder();
+			}).thenAccept((Void v) -> this.activatedUsingFolder = true).get();
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 			throw new TogglingAutoStartFailedException("Execution of enabling auto start setting was interrupted.");
 		} catch (ExecutionException e) {
-			throw new TogglingAutoStartFailedException("Enabling auto start failed both over registry and auto start folder.");
+			throw new TogglingAutoStartFailedException("Enabling auto start failed both using registry and auto start folder.");
 		}
 	}
 
-	private CompletableFuture<Void> enableAutoStartOverRegistry() {
+	private CompletableFuture<Void> enableAutoStartUsingRegistry() {
 		ProcessBuilder regAdd = new ProcessBuilder("reg", "add", HKCU_AUTOSTART_KEY, //
 				"/v", AUTOSTART_VALUE, //
 				"/t", "REG_SZ", //
@@ -103,7 +106,7 @@ class AutoStartWinStrategy implements AutoStartStrategy {
 		}
 	}
 
-	private CompletableFuture<Void> enableAutoStartOverFolder() {
+	private CompletableFuture<Void> enableAutoStartUsingFolder() {
 		String autoStartFolderEntry = System.getProperty("user.home") + WINDOWS_START_MENU_ENTRY;
 		String createShortcutCommand = "$s=(New-Object -COM WScript.Shell).CreateShortcut('" + autoStartFolderEntry + "');$s.TargetPath='" + exePath + "';$s.Save();";
 		ProcessBuilder shortcutAdd = new ProcessBuilder("cmd", "/c", "Start powershell " + createShortcutCommand);
@@ -125,28 +128,28 @@ class AutoStartWinStrategy implements AutoStartStrategy {
 
 	@Override
 	public void disableAutoStart() throws TogglingAutoStartFailedException {
-		if (activatedOverRegistry) {
-			disableAutoStartOverRegistry().whenComplete((voit, ex) -> {
+		if (activatedUsingRegistry) {
+			disableAutoStartUsingRegistry().whenComplete((voit, ex) -> {
 				if (ex == null) {
-					this.activatedOverRegistry = false;
+					this.activatedUsingRegistry = false;
 				}
 			});
 		}
 
-		if (activatedOverFolder) {
-			disableAutoStartOverFolder().whenComplete((voit, ex) -> {
+		if (activatedUsingFolder) {
+			disableAutoStartUsingFolder().whenComplete((voit, ex) -> {
 				if (ex == null) {
-					this.activatedOverFolder = false;
+					this.activatedUsingFolder = false;
 				}
 			});
 		}
 
-		if (activatedOverRegistry || activatedOverFolder) {
-			throw new TogglingAutoStartFailedException("Disabling auto start failed both over registry and auto start folder.");
+		if (activatedUsingRegistry || activatedUsingFolder) {
+			throw new TogglingAutoStartFailedException("Disabling auto start failed both using registry and auto start folder.");
 		}
 	}
 
-	public CompletableFuture<Void> disableAutoStartOverRegistry() {
+	public CompletableFuture<Void> disableAutoStartUsingRegistry() {
 		ProcessBuilder regRemove = new ProcessBuilder("reg", "delete", HKCU_AUTOSTART_KEY, //
 				"/v", AUTOSTART_VALUE, //
 				"/f");
@@ -165,7 +168,7 @@ class AutoStartWinStrategy implements AutoStartStrategy {
 		}
 	}
 
-	private CompletableFuture<Void> disableAutoStartOverFolder() {
+	private CompletableFuture<Void> disableAutoStartUsingFolder() {
 		try {
 			Files.delete(Path.of(WINDOWS_START_MENU_ENTRY));
 			LOG.debug("Successfully deleted {}.", WINDOWS_START_MENU_ENTRY);
@@ -194,7 +197,7 @@ class AutoStartWinStrategy implements AutoStartStrategy {
 		return finishedInTime;
 	}
 
-	public class SystemCommandException extends RuntimeException {
+	private class SystemCommandException extends RuntimeException {
 
 		public SystemCommandException(String msg) {
 			super(msg);
