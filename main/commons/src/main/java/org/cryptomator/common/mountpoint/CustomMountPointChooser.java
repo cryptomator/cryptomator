@@ -46,11 +46,11 @@ public class CustomMountPointChooser implements MountPointChooser {
 			case NONE -> {
 				//Requirement "NONE" doesn't make any sense here.
 				//No need to prepare/verify a Mountpoint without requiring one...
-				assert false : "Illegal MountPointRequirement";
+				throw new InvalidMountPointException(new IllegalStateException("Illegal MountPointRequirement"));
 			}
 			default -> {
 				//Currently the case for "PARENT_OPT_MOUNT_POINT"
-				assert false : "Not implemented";
+				throw new InvalidMountPointException(new IllegalStateException("Not implemented"));
 			}
 		}
 		LOG.debug("Successfully checked custom mount point: {}", mountPoint);
