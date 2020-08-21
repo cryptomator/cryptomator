@@ -20,11 +20,11 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Optional;
+import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
@@ -35,11 +35,13 @@ public class VaultListManager {
 	private static final Logger LOG = LoggerFactory.getLogger(VaultListManager.class);
 
 	private final VaultComponent.Builder vaultComponentBuilder;
+	private final ResourceBundle resourceBundle;
 	private final ObservableList<Vault> vaultList;
 
 	@Inject
-	public VaultListManager(VaultComponent.Builder vaultComponentBuilder, Settings settings) {
+	public VaultListManager(VaultComponent.Builder vaultComponentBuilder, ResourceBundle resourceBundle, Settings settings) {
 		this.vaultComponentBuilder = vaultComponentBuilder;
+		this.resourceBundle = resourceBundle;
 		this.vaultList = FXCollections.observableArrayList(Vault::observables);
 
 		addAll(settings.getDirectories());
@@ -59,12 +61,21 @@ public class VaultListManager {
 		if (alreadyExistingVault.isPresent()) {
 			return alreadyExistingVault.get();
 		} else {
-			VaultSettings vaultSettings = VaultSettings.withRandomId();
-			vaultSettings.path().set(normalizedPathToVault);
-			Vault newVault = create(vaultSettings);
+			Vault newVault = create(newVaultSettings(normalizedPathToVault));
 			vaultList.add(newVault);
 			return newVault;
 		}
+	}
+
+	private VaultSettings newVaultSettings(Path path) {
+		VaultSettings vaultSettings = VaultSettings.withRandomId();
+		vaultSettings.path().set(path);
+		if (path.getFileName() != null) {
+			vaultSettings.displayName().set(path.getFileName().toString());
+		} else {
+			vaultSettings.displayName().set(resourceBundle.getString("defaults.vault.vaultName"));
+		}
+		return vaultSettings;
 	}
 
 	private void addAll(Collection<VaultSettings> vaultSettings) {
@@ -92,7 +103,7 @@ public class VaultListManager {
 		}
 		return compBuilder.build().vault();
 	}
-	
+
 	public static VaultState redetermineVaultState(Vault vault) {
 		VaultState previousState = vault.getState();
 		return switch (previousState) {

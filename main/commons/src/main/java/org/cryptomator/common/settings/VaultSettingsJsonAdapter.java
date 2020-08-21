@@ -37,7 +37,7 @@ class VaultSettingsJsonAdapter {
 	public VaultSettings read(JsonReader in) throws IOException {
 		String id = null;
 		String path = null;
-		String mountName = null;
+		String displayName = null;
 		String customMountPath = null;
 		String winDriveLetter = null;
 		boolean unlockAfterStartup = VaultSettings.DEFAULT_UNLOCK_AFTER_STARTUP;
@@ -54,7 +54,7 @@ class VaultSettingsJsonAdapter {
 			switch (name) {
 				case "id" -> id = in.nextString();
 				case "path" -> path = in.nextString();
-				case "mountName" -> mountName = in.nextString();
+				case "mountName" -> displayName = in.nextString(); //YES, this is correct (legacy reasons)
 				case "winDriveLetter" -> winDriveLetter = in.nextString();
 				case "unlockAfterStartup" -> unlockAfterStartup = in.nextBoolean();
 				case "revealAfterMount" -> revealAfterMount = in.nextBoolean();
@@ -73,7 +73,7 @@ class VaultSettingsJsonAdapter {
 		in.endObject();
 
 		VaultSettings vaultSettings = (id == null) ? VaultSettings.withRandomId() : new VaultSettings(id);
-		vaultSettings.displayName().set(mountName);
+		vaultSettings.displayName().set(displayName);
 		vaultSettings.path().set(Paths.get(path));
 		vaultSettings.winDriveLetter().set(winDriveLetter);
 		vaultSettings.unlockAfterStartup().set(unlockAfterStartup);

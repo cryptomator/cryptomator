@@ -19,7 +19,6 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import org.apache.commons.lang3.StringUtils;
-import org.fxmisc.easybind.EasyBind;
 
 import java.nio.file.Path;
 import java.util.Objects;
@@ -60,29 +59,10 @@ public class VaultSettings {
 	public VaultSettings(String id) {
 		this.id = Objects.requireNonNull(id);
 		this.mountName = Bindings.createStringBinding(this::normalizeDisplayName, displayName);
-
-		EasyBind.subscribe(path, this::deriveDisplayNameFromPathOrUseDefault);
 	}
 
 	Observable[] observables() {
 		return new Observable[]{path, displayName, winDriveLetter, unlockAfterStartup, revealAfterMount, useCustomMountPath, customMountPath, usesReadOnlyMode, mountFlags, filenameLengthLimit, actionAfterUnlock};
-	}
-
-	private void deriveDisplayNameFromPathOrUseDefault(Path newPath) {
-		final boolean mountNameSet = !StringUtils.isBlank(displayName.get());
-		final boolean dirnameExists = (newPath != null) && (newPath.getFileName() != null);
-		final String defaultPattern = DEFAULT_MOUNT_NAME + " " + id;
-
-		if (!mountNameSet && dirnameExists) {
-			displayName.set(newPath.getFileName().toString());
-		} else if (!mountNameSet && !dirnameExists) {
-			displayName.set(defaultPattern);
-		} else if (mountNameSet && dirnameExists) {
-			if (displayName.get().equals(defaultPattern)) {
-				//this is okay, since this function is only executed if the path changes (aka, the vault is created or added)
-				displayName.set(newPath.getFileName().toString());
-			}
-		}
 	}
 
 	public static VaultSettings withRandomId() {
