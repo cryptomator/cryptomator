@@ -1,12 +1,12 @@
 package org.cryptomator.ui.controls;
 
+import com.tobiasdiez.easybind.EasyBind;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
-import org.fxmisc.easybind.EasyBind;
 
 public class PasswordStrengthIndicator extends HBox {
 

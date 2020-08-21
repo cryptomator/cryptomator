@@ -1,5 +1,6 @@
 package org.cryptomator.ui.common;
 
+import com.tobiasdiez.easybind.EasyBind;
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
@@ -10,7 +11,6 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import org.cryptomator.ui.controls.FontAwesome5IconView;
 import org.cryptomator.ui.controls.NiceSecurePasswordField;
-import org.fxmisc.easybind.EasyBind;
 
 import java.util.ResourceBundle;
 

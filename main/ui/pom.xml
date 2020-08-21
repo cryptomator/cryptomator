@@ -35,7 +35,7 @@
 
 		<!-- EasyBind -->
 		<dependency>
-			<groupId>org.fxmisc.easybind</groupId>
+			<groupId>com.tobiasdiez</groupId>
 			<artifactId>easybind</artifactId>
 		</dependency>
 

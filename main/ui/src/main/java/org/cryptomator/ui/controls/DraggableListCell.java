@@ -8,6 +8,7 @@
  *******************************************************************************/
 package org.cryptomator.ui.controls;
 
+import com.tobiasdiez.easybind.EasyBind;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.scene.SnapshotParameters;
@@ -18,7 +19,6 @@ import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
-import org.fxmisc.easybind.EasyBind;
 
 import java.util.List;
 
