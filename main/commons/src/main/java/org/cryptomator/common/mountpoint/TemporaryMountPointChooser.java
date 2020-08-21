@@ -15,7 +15,7 @@ import java.util.Optional;
 
 public class TemporaryMountPointChooser implements MountPointChooser {
 
-	public static final int POSITION = 300;
+	public static final int PRIORITY = 300;
 
 	private static final Logger LOG = LoggerFactory.getLogger(TemporaryMountPointChooser.class);
 	private static final int MAX_TMPMOUNTPOINT_CREATION_RETRIES = 10;
@@ -89,7 +89,7 @@ public class TemporaryMountPointChooser implements MountPointChooser {
 	}
 
 	@Override
-	public int getPosition() {
-		return POSITION;
+	public int getPriority() {
+		return PRIORITY;
 	}
 }

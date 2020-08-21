@@ -9,7 +9,7 @@ import java.util.Optional;
 
 public class CustomDriveLetterChooser implements MountPointChooser {
 
-	public static final int POSITION = 100;
+	public static final int PRIORITY = 100;
 
 	private final Vault vault;
 
@@ -28,7 +28,7 @@ public class CustomDriveLetterChooser implements MountPointChooser {
 	}
 
 	@Override
-	public int getPosition() {
-		return POSITION;
+	public int getPriority() {
+		return PRIORITY;
 	}
 }

@@ -11,11 +11,11 @@ import java.util.SortedSet;
  * preparation of a Mountpoint or an exception otherwise.<br>
  * <p>All <i>MountPointChoosers (MPCs)</i> need to implement this class and must be added to
  * the pool of possible MPCs by the {@link MountPointChooserModule MountPointChooserModule.}
- * The MountPointChooserModule will sort them according to their {@link #getPosition() position.}
- * The position must be defined by the developer to reflect a useful execution order;
- * the order of execution of MPCs with equal position is undefined.
+ * The MountPointChooserModule will sort them according to their {@link #getPriority() priority.}
+ * The priority must be defined by the developer to reflect a useful execution order;
+ * the order of execution of MPCs with equal priority is undefined.
  *
- * <p>MPCs are executed by a {@link Volume} in ascedning order of their position to find
+ * <p>MPCs are executed by a {@link Volume} in ascedning order of their priority to find
  * and prepare a suitable Mountpoint for the Volume. The Volume has access to a
  * {@link SortedSet} of MPCs in this specific order, that is provided by the Module.
  * The Set only contains Choosers that were deemed {@link #isApplicable() applicable}
@@ -128,30 +128,30 @@ public interface MountPointChooser extends Comparable<MountPointChooser> {
 	/**
 	 * Called by the {@link MountPointChooserModule} to sort the available MPCs
 	 * and determine their execution order.
-	 * The position must be defined by the developer to reflect a useful execution order.
-	 * MPCs with lower positions will be placed at lower indices in the resulting
+	 * The priority must be defined by the developer to reflect a useful execution order.
+	 * MPCs with lower priorities will be placed at lower indices in the resulting
 	 * {@link SortedSet} and will be executed with higher probability.
-	 * The order of execution of MPCs with equal position is undefined.
+	 * The order of execution of MPCs with equal priority is undefined.
 	 *
-	 * @return the position of this MPC.
+	 * @return the priority of this MPC.
 	 */
-	int getPosition();
+	int getPriority();
 
 	/**
 	 * Called by the {@link MountPointChooserModule} to determine the execution order
 	 * of the registered MPCs. <b>Implementations usually should not override this
 	 * method.</b> This default implementation sorts the MPCs in ascending order
-	 * of their {@link #getPosition() position.}<br>
+	 * of their {@link #getPriority() priority.}<br>
 	 * <br>
 	 * <b>Original description:</b>
 	 * <p>{@inheritDoc}
 	 *
 	 * @implNote This default implementation sorts the MPCs in ascending order
-	 * of their {@link #getPosition() position.}
+	 * of their {@link #getPriority() priority.}
 	 */
 	@Override
 	default int compareTo(MountPointChooser other) {
-		//Sort by position (ascending order)
-		return Integer.compare(this.getPosition(), other.getPosition());
+		//Sort by priority (ascending order)
+		return Integer.compare(this.getPriority(), other.getPriority());
 	}
 }

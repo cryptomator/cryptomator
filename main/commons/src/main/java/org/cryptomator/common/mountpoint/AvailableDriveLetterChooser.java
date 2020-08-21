@@ -8,7 +8,7 @@ import java.util.Optional;
 
 public class AvailableDriveLetterChooser implements MountPointChooser {
 
-	private static final int POSITION = 200;
+	public static final int PRIORITY = 200;
 
 	private final WindowsDriveLetters windowsDriveLetters;
 
@@ -27,7 +27,7 @@ public class AvailableDriveLetterChooser implements MountPointChooser {
 	}
 
 	@Override
-	public int getPosition() {
-		return POSITION;
+	public int getPriority() {
+		return PRIORITY;
 	}
 }

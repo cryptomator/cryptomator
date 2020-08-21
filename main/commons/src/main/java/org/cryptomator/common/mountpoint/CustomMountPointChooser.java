@@ -17,7 +17,7 @@ import java.util.Optional;
 
 public class CustomMountPointChooser implements MountPointChooser {
 
-	public static final int POSITION = 0;
+	public static final int PRIORITY = 0;
 
 	private static final Logger LOG = LoggerFactory.getLogger(CustomMountPointChooser.class);
 
@@ -86,7 +86,7 @@ public class CustomMountPointChooser implements MountPointChooser {
 	}
 
 	@Override
-	public int getPosition() {
-		return POSITION;
+	public int getPriority() {
+		return PRIORITY;
 	}
 }
