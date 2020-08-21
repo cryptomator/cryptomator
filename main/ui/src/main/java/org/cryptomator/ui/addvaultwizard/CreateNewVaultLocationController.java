@@ -1,5 +1,6 @@
 package org.cryptomator.ui.addvaultwizard;
 
+import com.tobiasdiez.easybind.EasyBind;
 import dagger.Lazy;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
@@ -83,11 +84,11 @@ public class CreateNewVaultLocationController implements FxController {
 	public void initialize() {
 		predefinedLocationToggler.selectedToggleProperty().addListener(this::togglePredefinedLocation);
 		usePresetPath.bind(predefinedLocationToggler.selectedToggleProperty().isNotEqualTo(customRadioButton));
-		vaultPath.addListener(this::vaultPathDidChange);
+		EasyBind.subscribe(vaultPath, this::vaultPathDidChange);
 	}
 
-	private void vaultPathDidChange(@SuppressWarnings("unused") ObservableValue<? extends Path> observable, @SuppressWarnings("unused") Path oldValue, Path newValue) {
-		if (!Files.notExists(newValue)) {
+	private void vaultPathDidChange(Path newValue) {
+		if ( newValue != null && !Files.notExists(newValue)) {
 			warningText.set(resourceBundle.getString("addvaultwizard.new.fileAlreadyExists"));
 		} else {
 			warningText.set(null);

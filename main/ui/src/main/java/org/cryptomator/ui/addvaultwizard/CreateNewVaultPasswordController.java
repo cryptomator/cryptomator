@@ -32,7 +32,6 @@ import javax.inject.Named;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.channels.WritableByteChannel;
-import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
