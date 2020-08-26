@@ -98,7 +98,7 @@ class AutoStartWinStrategy implements AutoStartStrategy {
 				LOG.debug("Added {} to registry key {}.", AUTOSTART_VALUE, HKCU_AUTOSTART_KEY);
 				return CompletableFuture.completedFuture(null);
 			} else {
-				throw new IOException("Process existed with error code " + proc.exitValue());
+				throw new IOException("Process exited with error code " + proc.exitValue());
 			}
 		} catch (IOException e) {
 			LOG.debug("Registry could not be edited to set auto start.", e);
@@ -117,7 +117,7 @@ class AutoStartWinStrategy implements AutoStartStrategy {
 				LOG.debug("Created file {} for auto start.", autoStartFolderEntry);
 				return CompletableFuture.completedFuture(null);
 			} else {
-				throw new IOException("Process existed with error code " + proc.exitValue());
+				throw new IOException("Process exited with error code " + proc.exitValue());
 			}
 		} catch (IOException e) {
 			LOG.debug("Adding entry to auto start folder failed.", e);
@@ -145,7 +145,7 @@ class AutoStartWinStrategy implements AutoStartStrategy {
 		}
 
 		if (activatedUsingRegistry || activatedUsingFolder) {
-			throw new TogglingAutoStartFailedException("Disabling auto start failed both using registry and auto start folder.");
+			throw new TogglingAutoStartFailedException("Disabling auto start failed using registry and/or auto start folder.");
 		}
 	}
 
@@ -160,7 +160,7 @@ class AutoStartWinStrategy implements AutoStartStrategy {
 				LOG.debug("Removed {} from registry key {}.", AUTOSTART_VALUE, HKCU_AUTOSTART_KEY);
 				return CompletableFuture.completedFuture(null);
 			} else {
-				throw new IOException("Process existed with error code " + proc.exitValue());
+				throw new IOException("Process exited with error code " + proc.exitValue());
 			}
 		} catch (IOException e) {
 			LOG.debug("Registry could not be edited to remove auto start.", e);
