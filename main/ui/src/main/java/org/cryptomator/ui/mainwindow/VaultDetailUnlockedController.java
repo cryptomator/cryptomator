@@ -1,6 +1,8 @@
 package org.cryptomator.ui.mainwindow;
 
-import javafx.beans.property.BooleanProperty;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.fxml.FXML;
@@ -16,13 +18,20 @@ public class VaultDetailUnlockedController implements FxController {
 
 	private final ReadOnlyObjectProperty<Vault> vault;
 	private final VaultService vaultService;
+	private final LoadingCache<Vault, VaultStatisticsComponent> vaultStatisticsWindows;
 	private final VaultStatisticsComponent.Builder vaultStatisticsWindow;
 
 	@Inject
 	public VaultDetailUnlockedController(ObjectProperty<Vault> vault, VaultService vaultService, VaultStatisticsComponent.Builder vaultStatisticsWindow) {
 		this.vault = vault;
 		this.vaultService = vaultService;
+		this.vaultStatisticsWindows = CacheBuilder.newBuilder().build(CacheLoader.from(this::provideVaultStatisticsComponent));
+		//TODO make the binding a weak Binding via weakValues
 		this.vaultStatisticsWindow = vaultStatisticsWindow;
+	}
+
+	private VaultStatisticsComponent provideVaultStatisticsComponent(Vault vault) {
+		return vaultStatisticsWindow.vault(vault).build();
 	}
 
 	@FXML
@@ -38,12 +47,7 @@ public class VaultDetailUnlockedController implements FxController {
 
 	@FXML
 	public void showVaultStatistics() {
-		//vaultStatisticsWindow.build()
-		BooleanProperty showingStats = vault.get().showingStatsProperty();
-		if (!showingStats.get()) {
-			vaultStatisticsWindow.vault(vault.get()).build().showVaultStatisticsWindow();
-			showingStats.setValue(true);
-		}
+		vaultStatisticsWindows.getUnchecked(vault.get()).showVaultStatisticsWindow();
 	}
 
 	/* Getter/Setter */

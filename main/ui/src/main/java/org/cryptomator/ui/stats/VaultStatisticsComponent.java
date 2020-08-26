@@ -24,6 +24,7 @@ public interface VaultStatisticsComponent {
 		stage.setScene(scene().get());
 		stage.sizeToScene();
 		stage.show();
+		stage.requestFocus();
 	}
 
 	@Subcomponent.Builder
