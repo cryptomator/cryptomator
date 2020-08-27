@@ -8,26 +8,19 @@
  *******************************************************************************/
 package org.cryptomator.common.settings;
 
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class VaultSettingsTest {
 
-	@Test
-	public void testNormalize() {
+	@ParameterizedTest
+	@CsvSource({"a a,a_a", "ä,a", "Ĉ,C", ":,_", "汉语,_"})
+	public void testNormalize(String test, String expected) {
 		VaultSettings settings = new VaultSettings("id");
-		settings.displayName().setValue(" ");
-		assertEquals("_", settings.normalizeDisplayName());
-
-		settings.displayName().setValue("ä");
-		assertEquals("a", settings.normalizeDisplayName());
-		settings.displayName().setValue("Ĉ");
-		assertEquals("C", settings.normalizeDisplayName());
-		settings.displayName().setValue(":");
-		assertEquals("_", settings.normalizeDisplayName());
-		settings.displayName().setValue("汉语");
-		assertEquals("_", settings.normalizeDisplayName());
+		settings.displayName().setValue(test);
+		assertEquals(expected, settings.normalizeDisplayName());
 	}
 
 }
