@@ -5,6 +5,7 @@
  *******************************************************************************/
 package org.cryptomator.common.settings;
 
+import com.google.common.base.Strings;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import org.slf4j.Logger;
@@ -21,7 +22,7 @@ class VaultSettingsJsonAdapter {
 		out.beginObject();
 		out.name("id").value(value.getId());
 		out.name("path").value(value.path().get().toString());
-		out.name("mountName").value(value.displayName().get());
+		out.name("displayName").value(value.displayName().get());
 		out.name("winDriveLetter").value(value.winDriveLetter().get());
 		out.name("unlockAfterStartup").value(value.unlockAfterStartup().get());
 		out.name("revealAfterMount").value(value.revealAfterMount().get());
@@ -37,6 +38,7 @@ class VaultSettingsJsonAdapter {
 	public VaultSettings read(JsonReader in) throws IOException {
 		String id = null;
 		String path = null;
+		String mountName = null; //see https://github.com/cryptomator/cryptomator/pull/1318
 		String displayName = null;
 		String customMountPath = null;
 		String winDriveLetter = null;
@@ -54,7 +56,8 @@ class VaultSettingsJsonAdapter {
 			switch (name) {
 				case "id" -> id = in.nextString();
 				case "path" -> path = in.nextString();
-				case "mountName" -> displayName = in.nextString(); //YES, this is correct (legacy reasons)
+				case "mountName" -> mountName = in.nextString(); //see https://github.com/cryptomator/cryptomator/pull/1318
+				case "displayName" -> displayName = in.nextString();
 				case "winDriveLetter" -> winDriveLetter = in.nextString();
 				case "unlockAfterStartup" -> unlockAfterStartup = in.nextBoolean();
 				case "revealAfterMount" -> revealAfterMount = in.nextBoolean();
@@ -73,7 +76,11 @@ class VaultSettingsJsonAdapter {
 		in.endObject();
 
 		VaultSettings vaultSettings = (id == null) ? VaultSettings.withRandomId() : new VaultSettings(id);
-		vaultSettings.displayName().set(displayName);
+		if(Strings.isNullOrEmpty(displayName)){ //see https://github.com/cryptomator/cryptomator/pull/1318
+			vaultSettings.displayName().set(mountName);
+		} else {
+			vaultSettings.displayName().set(displayName);
+		}
 		vaultSettings.path().set(Paths.get(path));
 		vaultSettings.winDriveLetter().set(winDriveLetter);
 		vaultSettings.unlockAfterStartup().set(unlockAfterStartup);
