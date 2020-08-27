@@ -6,7 +6,6 @@ import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableSet;
 import javafx.stage.Stage;
 import org.cryptomator.common.LicenseHolder;
@@ -99,7 +98,7 @@ public class FxApplication extends Application {
 	public void startUnlockWorkflow(Vault vault, Optional<Stage> owner) {
 		Platform.runLater(() -> {
 			unlockWindowBuilderProvider.get().vault(vault).owner(owner).build().startUnlockWorkflow();
-			LOG.debug("Showing UnlockWindow for {}", vault.getDisplayableName());
+			LOG.debug("Showing UnlockWindow for {}", vault.getDisplayName());
 		});
 	}
 
