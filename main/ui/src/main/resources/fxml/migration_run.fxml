@@ -21,7 +21,7 @@
 	</padding>
 	<children>
 		<VBox spacing="6" visible="${!controller.vault.processing}" managed="${!controller.vault.processing}">
-			<FormattedLabel format="%migration.run.enterPassword" arg1="${controller.vault.displayableName}" wrapText="true"/>
+			<FormattedLabel format="%migration.run.enterPassword" arg1="${controller.vault.displayName}" wrapText="true"/>
 			<NiceSecurePasswordField fx:id="passwordField"/>
 		</VBox>
 

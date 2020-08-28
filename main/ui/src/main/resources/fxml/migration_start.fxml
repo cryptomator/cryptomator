@@ -28,7 +28,7 @@
 			</StackPane>
 
 			<VBox spacing="6" HBox.hgrow="ALWAYS">
-				<FormattedLabel format="%migration.start.prompt" arg1="${controller.vault.displayableName}" wrapText="true" />
+				<FormattedLabel format="%migration.start.prompt" arg1="${controller.vault.displayName}" wrapText="true" />
 				<CheckBox fx:id="confirmSyncDone" text="%migration.start.confirm"/>
 			</VBox>
 		</HBox>

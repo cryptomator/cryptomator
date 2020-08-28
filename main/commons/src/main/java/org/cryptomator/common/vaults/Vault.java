@@ -56,7 +56,7 @@ public class Vault {
 	private final ObjectProperty<VaultState> state;
 	private final ObjectProperty<Exception> lastKnownException;
 	private final VaultStats stats;
-	private final StringBinding displayableName;
+	private final StringBinding displayName;
 	private final StringBinding displayablePath;
 	private final BooleanBinding locked;
 	private final BooleanBinding processing;
@@ -78,7 +78,7 @@ public class Vault {
 		this.state = state;
 		this.lastKnownException = lastKnownException;
 		this.stats = stats;
-		this.displayableName = Bindings.createStringBinding(this::getDisplayableName, vaultSettings.path());
+		this.displayName = Bindings.createStringBinding(this::getDisplayName, vaultSettings.displayName());
 		this.displayablePath = Bindings.createStringBinding(this::getDisplayablePath, vaultSettings.path());
 		this.locked = Bindings.createBooleanBinding(this::isLocked, state);
 		this.processing = Bindings.createBooleanBinding(this::isProcessing, state);
@@ -225,13 +225,12 @@ public class Vault {
 		return state.get() == VaultState.ERROR;
 	}
 
-	public StringBinding displayableNameProperty() {
-		return displayableName;
+	public StringBinding displayNameProperty() {
+		return displayName;
 	}
 
-	public String getDisplayableName() {
-		Path p = vaultSettings.path().get();
-		return p.getFileName().toString();
+	public String getDisplayName() {
+		return vaultSettings.displayName().get();
 	}
 
 	public StringBinding accessPointProperty() {

@@ -20,7 +20,7 @@
 	</padding>
 	<children>
 		<VBox spacing="6">
-			<FormattedLabel format="%recoveryKey.enterPassword.prompt" arg1="${controller.vault.displayableName}" wrapText="true"/>
+			<FormattedLabel format="%recoveryKey.enterPassword.prompt" arg1="${controller.vault.displayName}" wrapText="true"/>
 			<NiceSecurePasswordField fx:id="passwordField" HBox.hgrow="ALWAYS"/>
 		</VBox>
 

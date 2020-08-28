@@ -128,7 +128,7 @@ public class UnlockWorkflow extends Task<Boolean> {
 	}
 
 	private void handleSuccess() {
-		LOG.info("Unlock of '{}' succeeded.", vault.getDisplayableName());
+		LOG.info("Unlock of '{}' succeeded.", vault.getDisplayName());
 		if (savePassword.get()) {
 			savePasswordToSystemkeychain();
 		}

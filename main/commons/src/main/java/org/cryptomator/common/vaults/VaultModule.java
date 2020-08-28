@@ -77,7 +77,7 @@ public class VaultModule {
 	@DefaultMountFlags
 	public StringBinding provideDefaultMountFlags(Settings settings, VaultSettings vaultSettings) {
 		ObjectProperty<VolumeImpl> preferredVolumeImpl = settings.preferredVolumeImpl();
-		StringProperty mountName = vaultSettings.mountName();
+		StringProperty mountName = vaultSettings.displayName();
 		BooleanProperty readOnly = vaultSettings.usesReadOnlyMode();
 
 		return Bindings.createStringBinding(() -> {

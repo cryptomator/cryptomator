@@ -34,7 +34,7 @@ public class RemoveVaultController implements FxController {
 	@FXML
 	public void finish() {
 		vaults.remove(vault);
-		LOG.debug("Removing vault {}.", vault.getDisplayableName());
+		LOG.debug("Removing vault {}.", vault.getDisplayName());
 		window.close();
 	}
 }
