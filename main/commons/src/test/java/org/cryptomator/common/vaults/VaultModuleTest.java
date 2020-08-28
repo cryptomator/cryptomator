@@ -1,5 +1,6 @@
 package org.cryptomator.common.vaults;
 
+import javafx.beans.binding.Bindings;
 import javafx.beans.binding.StringBinding;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -27,12 +28,7 @@ public class VaultModuleTest {
 
 	@BeforeEach
 	public void setup(@TempDir Path tmpDir) {
-		Mockito.when(vaultSettings.mountName()).thenReturn(new StringBinding() {
-			@Override
-			protected String computeValue() {
-				return "TEST";
-			}
-		});
+		Mockito.when(vaultSettings.mountName()).thenReturn(Bindings.createStringBinding(() -> "TEST"));
 		Mockito.when(vaultSettings.usesReadOnlyMode()).thenReturn(new SimpleBooleanProperty(true));
 		System.setProperty("user.home", tmpDir.toString());
 	}
