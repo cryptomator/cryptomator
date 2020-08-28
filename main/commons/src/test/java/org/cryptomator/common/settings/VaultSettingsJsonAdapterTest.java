@@ -23,7 +23,7 @@ public class VaultSettingsJsonAdapterTest {
 
 	@Test
 	public void testDeserialize() throws IOException {
-		String json = "{\"id\": \"foo\", \"path\": \"/foo/bar\", \"mountName\": \"test\", \"winDriveLetter\": \"X\", \"shouldBeIgnored\": true, \"individualMountPath\": \"/home/test/crypto\", \"mountFlags\":\"--foo --bar\"}";
+		String json = "{\"id\": \"foo\", \"path\": \"/foo/bar\", \"displayName\": \"test\", \"winDriveLetter\": \"X\", \"shouldBeIgnored\": true, \"individualMountPath\": \"/home/test/crypto\", \"mountFlags\":\"--foo --bar\"}";
 		JsonReader jsonReader = new JsonReader(new StringReader(json));
 
 		VaultSettings vaultSettings = adapter.read(jsonReader);
@@ -55,7 +55,7 @@ public class VaultSettingsJsonAdapterTest {
 		} else {
 			MatcherAssert.assertThat(result, CoreMatchers.containsString("\"path\":\"/foo/bar\""));
 		}
-		MatcherAssert.assertThat(result, CoreMatchers.containsString("\"mountName\":\"mountyMcMountFace\""));
+		MatcherAssert.assertThat(result, CoreMatchers.containsString("\"displayName\":\"mountyMcMountFace\""));
 		MatcherAssert.assertThat(result, CoreMatchers.containsString("\"mountFlags\":\"--foo --bar\""));
 	}
 
