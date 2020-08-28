@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.cryptomator</groupId>
 		<artifactId>main</artifactId>
-		<version>1.5.7</version>
+		<version>1.5.8</version>
 	</parent>
 	<artifactId>buildkit</artifactId>
 	<packaging>pom</packaging>
