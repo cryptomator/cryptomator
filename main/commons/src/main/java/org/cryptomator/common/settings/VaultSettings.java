@@ -35,7 +35,6 @@ public class VaultSettings {
 	public static final boolean DEFAULT_USES_INDIVIDUAL_MOUNTPATH = false;
 	public static final boolean DEFAULT_USES_READONLY_MODE = false;
 	public static final String DEFAULT_MOUNT_FLAGS = "";
-	public static final String DEFAULT_MOUNT_NAME = "Vault";
 	public static final int DEFAULT_FILENAME_LENGTH_LIMIT = -1;
 	public static final WhenUnlocked DEFAULT_ACTION_AFTER_UNLOCK = WhenUnlocked.ASK;
 

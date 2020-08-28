@@ -5,7 +5,6 @@
  *******************************************************************************/
 package org.cryptomator.common.settings;
 
-import com.google.common.base.Strings;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import org.slf4j.Logger;
@@ -76,10 +75,10 @@ class VaultSettingsJsonAdapter {
 		in.endObject();
 
 		VaultSettings vaultSettings = (id == null) ? VaultSettings.withRandomId() : new VaultSettings(id);
-		if(Strings.isNullOrEmpty(displayName)){ //see https://github.com/cryptomator/cryptomator/pull/1318
-			vaultSettings.displayName().set(mountName);
-		} else {
+		if (displayName != null) { //see https://github.com/cryptomator/cryptomator/pull/1318
 			vaultSettings.displayName().set(displayName);
+		} else {
+			vaultSettings.displayName().set(mountName);
 		}
 		vaultSettings.path().set(Paths.get(path));
 		vaultSettings.winDriveLetter().set(winDriveLetter);

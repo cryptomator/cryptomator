@@ -35,13 +35,13 @@ public class VaultListManager {
 	private static final Logger LOG = LoggerFactory.getLogger(VaultListManager.class);
 
 	private final VaultComponent.Builder vaultComponentBuilder;
-	private final ResourceBundle resourceBundle;
 	private final ObservableList<Vault> vaultList;
+	private final String defaultVaultName;
 
 	@Inject
 	public VaultListManager(VaultComponent.Builder vaultComponentBuilder, ResourceBundle resourceBundle, Settings settings) {
 		this.vaultComponentBuilder = vaultComponentBuilder;
-		this.resourceBundle = resourceBundle;
+		this.defaultVaultName = resourceBundle.getString("defaults.vault.vaultName");
 		this.vaultList = FXCollections.observableArrayList(Vault::observables);
 
 		addAll(settings.getDirectories());
@@ -73,7 +73,7 @@ public class VaultListManager {
 		if (path.getFileName() != null) {
 			vaultSettings.displayName().set(path.getFileName().toString());
 		} else {
-			vaultSettings.displayName().set(resourceBundle.getString("defaults.vault.vaultName"));
+			vaultSettings.displayName().set(defaultVaultName);
 		}
 		return vaultSettings;
 	}
