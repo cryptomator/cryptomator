@@ -12,9 +12,7 @@ import javafx.beans.binding.StringBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
-import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.StringProperty;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VaultSettings;
@@ -77,7 +75,7 @@ public class VaultModule {
 	@DefaultMountFlags
 	public StringBinding provideDefaultMountFlags(Settings settings, VaultSettings vaultSettings) {
 		ObjectProperty<VolumeImpl> preferredVolumeImpl = settings.preferredVolumeImpl();
-		StringProperty mountName = vaultSettings.mountName();
+		StringBinding mountName = vaultSettings.mountName();
 		BooleanProperty readOnly = vaultSettings.usesReadOnlyMode();
 
 		return Bindings.createStringBinding(() -> {
@@ -95,7 +93,7 @@ public class VaultModule {
 	}
 
 	// see: https://github.com/osxfuse/osxfuse/wiki/Mount-options
-	private String getMacFuseDefaultMountFlags(ReadOnlyStringProperty mountName, ReadOnlyBooleanProperty readOnly) {
+	private String getMacFuseDefaultMountFlags(StringBinding mountName, ReadOnlyBooleanProperty readOnly) {
 		assert SystemUtils.IS_OS_MAC_OSX;
 		StringBuilder flags = new StringBuilder();
 		if (readOnly.get()) {

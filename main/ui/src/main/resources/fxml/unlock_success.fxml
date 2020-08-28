@@ -28,7 +28,7 @@
 				<FontAwesome5IconView styleClass="glyph-icon-white" glyph="CHECK" glyphSize="24"/>
 			</StackPane>
 			<VBox spacing="6">
-				<FormattedLabel format="%unlock.success.message" arg1="${controller.vault.displayableName}" wrapText="true" HBox.hgrow="ALWAYS"/>
+				<FormattedLabel format="%unlock.success.message" arg1="${controller.vault.displayName}" wrapText="true" HBox.hgrow="ALWAYS"/>
 				<CheckBox text="%unlock.success.rememberChoice" fx:id="rememberChoiceCheckbox"/>
 			</VBox>
 		</HBox>
