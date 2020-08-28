@@ -30,7 +30,7 @@
 
 		<Region VBox.vgrow="ALWAYS"/>
 
-		<FormattedLabel format="%addvaultwizard.success.nextStepsInstructions" arg1="${controller.vault.displayableName}" wrapText="true" HBox.hgrow="ALWAYS"/>
+		<FormattedLabel format="%addvaultwizard.success.nextStepsInstructions" arg1="${controller.vault.displayName}" wrapText="true" HBox.hgrow="ALWAYS"/>
 
 		<Region VBox.vgrow="ALWAYS"/>
 

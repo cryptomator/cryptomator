@@ -82,7 +82,7 @@ abstract class UnlockModule {
 	@UnlockScoped
 	static Stage provideStage(StageFactory factory, @UnlockWindow Vault vault, @Named("unlockWindowOwner") Optional<Stage> owner) {
 		Stage stage = factory.create();
-		stage.setTitle(vault.getDisplayableName());
+		stage.setTitle(vault.getDisplayName());
 		stage.setResizable(false);
 		if (owner.isPresent()) {
 			stage.initOwner(owner.get());

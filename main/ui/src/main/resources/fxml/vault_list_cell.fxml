@@ -20,7 +20,7 @@
 			<FontAwesome5IconView glyph="${controller.glyph}" HBox.hgrow="NEVER" glyphSize="16"/>
 		</VBox>
 		<VBox spacing="4" HBox.hgrow="ALWAYS">
-			<Label styleClass="header-label" text="${controller.vault.displayableName}"/>
+			<Label styleClass="header-label" text="${controller.vault.displayName}"/>
 			<Label styleClass="detail-label" text="${controller.vault.displayablePath}" textOverrun="CENTER_ELLIPSIS"/>
 		</VBox>
 	</children>
