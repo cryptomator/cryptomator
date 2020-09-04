@@ -1,5 +1,6 @@
 package org.cryptomator.ui.mainwindow;
 
+import com.tobiasdiez.easybind.EasyBind;
 import javafx.beans.binding.BooleanExpression;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
@@ -11,7 +12,6 @@ import org.cryptomator.keychain.KeychainManager;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.fxapp.FxApplication;
 import org.cryptomator.ui.vaultoptions.VaultOptionsComponent;
-import org.fxmisc.easybind.EasyBind;
 
 import javax.inject.Inject;
 import java.util.Optional;

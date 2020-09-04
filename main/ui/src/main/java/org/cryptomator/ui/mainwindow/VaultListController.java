@@ -1,16 +1,15 @@
 package org.cryptomator.ui.mainwindow;
 
+import com.tobiasdiez.easybind.EasyBind;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.ListView;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultListManager;
-import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.ui.addvaultwizard.AddVaultWizardComponent;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.removevault.RemoveVaultComponent;
@@ -18,7 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import java.io.IOException;
 
 @MainWindowScoped
 public class VaultListController implements FxController {
@@ -43,7 +41,7 @@ public class VaultListController implements FxController {
 		this.removeVault = removeVault;
 		this.noVaultSelected = selectedVault.isNull();
 		this.emptyVaultList = Bindings.isEmpty(vaults);
-		selectedVault.addListener(this::selectedVaultDidChange);
+		EasyBind.subscribe(selectedVault, this::selectedVaultDidChange);
 	}
 
 	public void initialize() {
@@ -60,11 +58,10 @@ public class VaultListController implements FxController {
 		});
 	}
 
-	private void selectedVaultDidChange(@SuppressWarnings("unused") ObservableValue<? extends Vault> observableValue, @SuppressWarnings("unused") Vault oldValue, Vault newValue) {
-		if (newValue == null) {
-			return;
+	private void selectedVaultDidChange(Vault newValue) {
+		if (newValue != null) {
+			VaultListManager.redetermineVaultState(newValue);
 		}
-		VaultListManager.redetermineVaultState(newValue);
 	}
 
 	@FXML

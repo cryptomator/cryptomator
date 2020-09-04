@@ -7,7 +7,10 @@ package org.cryptomator.common.settings;
 
 import com.google.common.base.Strings;
 import com.google.common.io.BaseEncoding;
+import com.tobiasdiez.easybind.EasyBind;
 import javafx.beans.Observable;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.StringBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
@@ -17,7 +20,6 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import org.apache.commons.lang3.StringUtils;
-import org.fxmisc.easybind.EasyBind;
 
 import java.nio.file.Path;
 import java.util.Objects;
@@ -34,7 +36,6 @@ public class VaultSettings {
 	public static final boolean DEFAULT_USES_INDIVIDUAL_MOUNTPATH = false;
 	public static final boolean DEFAULT_USES_READONLY_MODE = false;
 	public static final String DEFAULT_MOUNT_FLAGS = "";
-	public static final String DEFAULT_MOUNT_NAME = "Vault";
 	public static final int DEFAULT_FILENAME_LENGTH_LIMIT = -1;
 	public static final WhenUnlocked DEFAULT_ACTION_AFTER_UNLOCK = WhenUnlocked.ASK;
 
@@ -42,7 +43,7 @@ public class VaultSettings {
 
 	private final String id;
 	private final ObjectProperty<Path> path = new SimpleObjectProperty();
-	private final StringProperty mountName = new SimpleStringProperty();
+	private final StringProperty displayName = new SimpleStringProperty();
 	private final StringProperty winDriveLetter = new SimpleStringProperty();
 	private final BooleanProperty unlockAfterStartup = new SimpleBooleanProperty(DEFAULT_UNLOCK_AFTER_STARTUP);
 	private final BooleanProperty revealAfterMount = new SimpleBooleanProperty(DEFAULT_REAVEAL_AFTER_MOUNT);
@@ -53,30 +54,15 @@ public class VaultSettings {
 	private final IntegerProperty filenameLengthLimit = new SimpleIntegerProperty(DEFAULT_FILENAME_LENGTH_LIMIT);
 	private final ObjectProperty<WhenUnlocked> actionAfterUnlock = new SimpleObjectProperty<>(DEFAULT_ACTION_AFTER_UNLOCK);
 
+	private final StringBinding mountName;
+
 	public VaultSettings(String id) {
 		this.id = Objects.requireNonNull(id);
-
-		EasyBind.subscribe(path, this::deriveMountNameFromPathOrUseDefault);
+		this.mountName = Bindings.createStringBinding(this::normalizeDisplayName, displayName);
 	}
 
 	Observable[] observables() {
-		return new Observable[]{path, mountName, winDriveLetter, unlockAfterStartup, revealAfterMount, useCustomMountPath, customMountPath, usesReadOnlyMode, mountFlags, filenameLengthLimit, actionAfterUnlock};
-	}
-
-	private void deriveMountNameFromPathOrUseDefault(Path newPath) {
-		final boolean mountNameSet = !StringUtils.isBlank(mountName.get());
-		final boolean dirnameExists = (newPath != null) && (newPath.getFileName() != null);
-
-		if (!mountNameSet && dirnameExists) {
-			mountName.set(normalizeMountName(newPath.getFileName().toString()));
-		} else if (!mountNameSet && !dirnameExists) {
-			mountName.set(DEFAULT_MOUNT_NAME + id);
-		} else if (mountNameSet && dirnameExists) {
-			if (mountName.get().equals(DEFAULT_MOUNT_NAME + id)) {
-				//this is okay, since this function is only executed if the path changes (aka, the vault is created or added)
-				mountName.set(newPath.getFileName().toString());
-			}
-		}
+		return new Observable[]{path, displayName, winDriveLetter, unlockAfterStartup, revealAfterMount, useCustomMountPath, customMountPath, usesReadOnlyMode, mountFlags, filenameLengthLimit, actionAfterUnlock};
 	}
 
 	public static VaultSettings withRandomId() {
@@ -89,8 +75,9 @@ public class VaultSettings {
 		return BaseEncoding.base64Url().encode(randomBytes);
 	}
 
-	public static String normalizeMountName(String mountName) {
-		String normalizedMountName = StringUtils.stripAccents(mountName);
+	//visible for testing
+	String normalizeDisplayName() {
+		String normalizedMountName = StringUtils.stripAccents(displayName.get());
 		StringBuilder builder = new StringBuilder();
 		for (char c : normalizedMountName.toCharArray()) {
 			if (Character.isWhitespace(c)) {
@@ -118,7 +105,11 @@ public class VaultSettings {
 		return path;
 	}
 
-	public StringProperty mountName() {
+	public StringProperty displayName() {
+		return displayName;
+	}
+
+	public StringBinding mountName() {
 		return mountName;
 	}
 

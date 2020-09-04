@@ -1,5 +1,6 @@
 package org.cryptomator.ui.mainwindow;
 
+import com.tobiasdiez.easybind.EasyBind;
 import javafx.beans.binding.Binding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -7,7 +8,6 @@ import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.controls.FontAwesome5Icon;
-import org.fxmisc.easybind.EasyBind;
 
 import javax.inject.Inject;
 
@@ -19,16 +19,22 @@ public class VaultListCellController implements FxController {
 
 	@Inject
 	VaultListCellController() {
-		this.glyph = EasyBind.select(vault).selectObject(Vault::stateProperty).map(this::getGlyphForVaultState).orElse(FontAwesome5Icon.EXCLAMATION_TRIANGLE);
+		this.glyph = EasyBind.select(vault) //
+				.selectObject(Vault::stateProperty) //
+				.map(this::getGlyphForVaultState);
 	}
 
 	private FontAwesome5Icon getGlyphForVaultState(VaultState state) {
-		return switch (state) {
-			case LOCKED -> FontAwesome5Icon.LOCK;
-			case PROCESSING -> FontAwesome5Icon.SPINNER;
-			case UNLOCKED -> FontAwesome5Icon.LOCK_OPEN;
-			case NEEDS_MIGRATION, MISSING, ERROR -> FontAwesome5Icon.EXCLAMATION_TRIANGLE;
-		};
+		if(state != null){
+			return switch (state) {
+				case LOCKED -> FontAwesome5Icon.LOCK;
+				case PROCESSING -> FontAwesome5Icon.SPINNER;
+				case UNLOCKED -> FontAwesome5Icon.LOCK_OPEN;
+				case NEEDS_MIGRATION, MISSING, ERROR -> FontAwesome5Icon.EXCLAMATION_TRIANGLE;
+			};
+		} else {
+			return FontAwesome5Icon.EXCLAMATION_TRIANGLE;
+		}
 	}
 
 	/* Getter/Setter */

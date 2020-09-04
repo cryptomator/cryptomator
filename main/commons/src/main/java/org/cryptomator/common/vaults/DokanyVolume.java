@@ -36,9 +36,9 @@ public class DokanyVolume extends AbstractVolume {
 	@Override
 	public void mount(CryptoFileSystem fs, String mountFlags) throws InvalidMountPointException, VolumeException {
 		this.mountPoint = determineMountPoint();
-		String mountName = vaultSettings.mountName().get();
+		String mountName = vaultSettings.displayName().get();
 		try {
-			this.mount = mountFactory.mount(fs.getPath("/"), mountPoint, mountName, FS_TYPE_NAME, mountFlags.strip());
+			this.mount = mountFactory.mount(fs.getPath("/"), mountPoint, vaultSettings.mountName().get(), FS_TYPE_NAME, mountFlags.strip());
 		} catch (MountFailedException e) {
 			if (vaultSettings.getCustomMountPath().isPresent()) {
 				LOG.warn("Failed to mount vault into {}. Is this directory currently accessed by another process (e.g. Windows Explorer)?", mountPoint);

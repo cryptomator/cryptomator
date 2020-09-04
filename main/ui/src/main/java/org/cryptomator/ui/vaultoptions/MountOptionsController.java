@@ -43,7 +43,6 @@ public class MountOptionsController implements FxController {
 	private final BooleanBinding webDavAndWindows;
 	private final WindowsDriveLetters windowsDriveLetters;
 	private final ResourceBundle resourceBundle;
-	public TextField driveName;
 	public CheckBox readOnlyCheckbox;
 	public CheckBox customMountFlagsCheckbox;
 	public TextField mountFlags;
@@ -70,7 +69,6 @@ public class MountOptionsController implements FxController {
 
 	@FXML
 	public void initialize() {
-		driveName.textProperty().bindBidirectional(vault.getVaultSettings().mountName());
 
 		// readonly:
 		readOnlyCheckbox.selectedProperty().bindBidirectional(vault.getVaultSettings().usesReadOnlyMode());

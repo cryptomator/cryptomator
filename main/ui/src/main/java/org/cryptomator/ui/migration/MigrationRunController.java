@@ -116,10 +116,10 @@ public class MigrationRunController implements FxController {
 			return migrators.needsMigration(vault.getPath(), MASTERKEY_FILENAME);
 		}).onSuccess(needsAnotherMigration -> {
 			if (needsAnotherMigration) {
-				LOG.info("Migration of '{}' succeeded, but another migration is required.", vault.getDisplayableName());
+				LOG.info("Migration of '{}' succeeded, but another migration is required.", vault.getDisplayName());
 				vault.setState(VaultState.NEEDS_MIGRATION);
 			} else {
-				LOG.info("Migration of '{}' succeeded.", vault.getDisplayableName());
+				LOG.info("Migration of '{}' succeeded.", vault.getDisplayName());
 				vault.setState(VaultState.LOCKED);
 				passwordField.wipe();
 				window.setScene(successScene.get());

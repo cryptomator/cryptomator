@@ -28,7 +28,7 @@ public abstract class KeychainModule {
 	
 	@Binds
 	@IntoSet
-	abstract KeychainAccessStrategy bindLinuxSecretServiceKeychainAccess(LinuxSecretServiceKeychainAccess keychainAccessStrategy);
+	abstract KeychainAccessStrategy bindLinuxSystemKeychainAccess(LinuxSystemKeychainAccess keychainAccessStrategy);
 
 	@Provides
 	@Singleton

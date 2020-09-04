@@ -1,5 +1,6 @@
 package org.cryptomator.ui.fxapp;
 
+import com.tobiasdiez.easybind.EasyBind;
 import dagger.Lazy;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -64,7 +65,7 @@ public class FxApplication extends Application {
 		LOG.trace("FxApplication.start()");
 		Platform.setImplicitExit(false);
 
-		hasVisibleStages.addListener(this::hasVisibleStagesChanged);
+		EasyBind.subscribe(hasVisibleStages, this::hasVisibleStagesChanged);
 
 		settings.theme().addListener(this::themeChanged);
 		loadSelectedStyleSheet(settings.theme().get());
@@ -75,7 +76,7 @@ public class FxApplication extends Application {
 		throw new UnsupportedOperationException("Use start() instead.");
 	}
 
-	private void hasVisibleStagesChanged(@SuppressWarnings("unused") ObservableValue<? extends Boolean> observableValue, @SuppressWarnings("unused") boolean oldValue, boolean newValue) {
+	private void hasVisibleStagesChanged(boolean newValue) {
 		if (newValue) {
 			macFunctions.map(MacFunctions::uiState).ifPresent(MacApplicationUiState::transformToForegroundApplication);
 		} else {
@@ -100,7 +101,7 @@ public class FxApplication extends Application {
 	public void startUnlockWorkflow(Vault vault, Optional<Stage> owner) {
 		Platform.runLater(() -> {
 			unlockWindowBuilderProvider.get().vault(vault).owner(owner).build().startUnlockWorkflow();
-			LOG.debug("Showing UnlockWindow for {}", vault.getDisplayableName());
+			LOG.debug("Showing UnlockWindow for {}", vault.getDisplayName());
 		});
 	}
 

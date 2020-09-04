@@ -23,13 +23,13 @@ public class VaultSettingsJsonAdapterTest {
 
 	@Test
 	public void testDeserialize() throws IOException {
-		String json = "{\"id\": \"foo\", \"path\": \"/foo/bar\", \"mountName\": \"test\", \"winDriveLetter\": \"X\", \"shouldBeIgnored\": true, \"individualMountPath\": \"/home/test/crypto\", \"mountFlags\":\"--foo --bar\"}";
+		String json = "{\"id\": \"foo\", \"path\": \"/foo/bar\", \"displayName\": \"test\", \"winDriveLetter\": \"X\", \"shouldBeIgnored\": true, \"individualMountPath\": \"/home/test/crypto\", \"mountFlags\":\"--foo --bar\"}";
 		JsonReader jsonReader = new JsonReader(new StringReader(json));
 
 		VaultSettings vaultSettings = adapter.read(jsonReader);
 		Assertions.assertEquals("foo", vaultSettings.getId());
 		Assertions.assertEquals(Paths.get("/foo/bar"), vaultSettings.path().get());
-		Assertions.assertEquals("test", vaultSettings.mountName().get());
+		Assertions.assertEquals("test", vaultSettings.displayName().get());
 		Assertions.assertEquals("X", vaultSettings.winDriveLetter().get());
 		Assertions.assertEquals("/home/test/crypto", vaultSettings.customMountPath().get());
 		Assertions.assertEquals("--foo --bar", vaultSettings.mountFlags().get());
@@ -41,7 +41,7 @@ public class VaultSettingsJsonAdapterTest {
 	public void testSerialize() throws IOException {
 		VaultSettings vaultSettings = new VaultSettings("test");
 		vaultSettings.path().set(Paths.get("/foo/bar"));
-		vaultSettings.mountName().set("mountyMcMountFace");
+		vaultSettings.displayName().set("mountyMcMountFace");
 		vaultSettings.mountFlags().set("--foo --bar");
 
 		StringWriter buf = new StringWriter();
@@ -55,7 +55,7 @@ public class VaultSettingsJsonAdapterTest {
 		} else {
 			MatcherAssert.assertThat(result, CoreMatchers.containsString("\"path\":\"/foo/bar\""));
 		}
-		MatcherAssert.assertThat(result, CoreMatchers.containsString("\"mountName\":\"mountyMcMountFace\""));
+		MatcherAssert.assertThat(result, CoreMatchers.containsString("\"displayName\":\"mountyMcMountFace\""));
 		MatcherAssert.assertThat(result, CoreMatchers.containsString("\"mountFlags\":\"--foo --bar\""));
 	}
 
