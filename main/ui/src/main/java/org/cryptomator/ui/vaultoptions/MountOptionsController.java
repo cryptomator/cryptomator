@@ -54,7 +54,7 @@ public class MountOptionsController implements FxController {
 
 	//FUSE + Windows -> Disable some (experimental) features for the user because they are unstable
 	//Use argument Dfuse.experimental="true" to override
-	private final BooleanBinding fuseAndWindows;
+	private final BooleanBinding restrictToStableFuseOnWindows;
 
 	@Inject
 	MountOptionsController(@VaultOptionsWindow Stage window, @VaultOptionsWindow Vault vault, Settings settings, WindowsDriveLetters windowsDriveLetters, ResourceBundle resourceBundle, Environment environment) {
@@ -64,7 +64,8 @@ public class MountOptionsController implements FxController {
 		this.windowsDriveLetters = windowsDriveLetters;
 		this.resourceBundle = resourceBundle;
 
-		this.fuseAndWindows = settings.preferredVolumeImpl().isEqualTo(VolumeImpl.FUSE).and(osIsWindows).and(new SimpleBooleanProperty(!environment.useExperimentalFuse()));
+		BooleanBinding isFuseOnWindows = settings.preferredVolumeImpl().isEqualTo(VolumeImpl.FUSE).and(osIsWindows);
+		this.restrictToStableFuseOnWindows = isFuseOnWindows.and(new SimpleBooleanProperty(!environment.useExperimentalFuse())); //Is FUSE on Win and is NOT experimental fuse enabled
 	}
 
 	@FXML
@@ -72,10 +73,10 @@ public class MountOptionsController implements FxController {
 
 		// readonly:
 		readOnlyCheckbox.selectedProperty().bindBidirectional(vault.getVaultSettings().usesReadOnlyMode());
-		if(isFuseAndWindows()) {
+		if(getRestrictToStableFuseOnWindows()) {
 			readOnlyCheckbox.setSelected(false); // to prevent invalid states
 		}
-		readOnlyCheckbox.disableProperty().bind(customMountFlagsCheckbox.selectedProperty().or(fuseAndWindows));
+		readOnlyCheckbox.disableProperty().bind(customMountFlagsCheckbox.selectedProperty().or(restrictToStableFuseOnWindows));
 
 		// custom mount flags:
 		mountFlags.disableProperty().bind(customMountFlagsCheckbox.selectedProperty().not());
@@ -93,7 +94,7 @@ public class MountOptionsController implements FxController {
 		driveLetterSelection.setConverter(new WinDriveLetterLabelConverter(windowsDriveLetters, resourceBundle));
 		driveLetterSelection.setValue(vault.getVaultSettings().winDriveLetter().get());
 
-		if (vault.getVaultSettings().useCustomMountPath().get() && !isFuseAndWindows() /* to prevent invalid states */) {
+		if (vault.getVaultSettings().useCustomMountPath().get() && !getRestrictToStableFuseOnWindows() /* to prevent invalid states */) {
 			mountPoint.selectToggle(mountPointCustomDir);
 		} else if (!Strings.isNullOrEmpty(vault.getVaultSettings().winDriveLetter().get())) {
 			mountPoint.selectToggle(mountPointWinDriveLetter);
@@ -201,8 +202,8 @@ public class MountOptionsController implements FxController {
 		return vault.getVaultSettings().customMountPath().get();
 	}
 
-	public Boolean isFuseAndWindows() {
-		return fuseAndWindows.get();
+	public Boolean getRestrictToStableFuseOnWindows() {
+		return restrictToStableFuseOnWindows.get();
 	}
 
 }
