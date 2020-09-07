@@ -1,8 +1,9 @@
 package org.cryptomator.common.mountpoint;
 
 import org.apache.commons.lang3.SystemUtils;
-import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.common.settings.VaultSettings;
 
+import javax.inject.Inject;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
@@ -11,10 +12,11 @@ public class CustomDriveLetterChooser implements MountPointChooser {
 
 	public static final int PRIORITY = 100;
 
-	private final Vault vault;
+	private final VaultSettings vaultSettings;
 
-	public CustomDriveLetterChooser(Vault vault) {
-		this.vault = vault;
+	@Inject
+	public CustomDriveLetterChooser(VaultSettings vaultSettings) {
+		this.vaultSettings = vaultSettings;
 	}
 
 	@Override
@@ -24,7 +26,7 @@ public class CustomDriveLetterChooser implements MountPointChooser {
 
 	@Override
 	public Optional<Path> chooseMountPoint() {
-		return this.vault.getVaultSettings().getWinDriveLetter().map(letter -> letter.charAt(0) + ":\\").map(Paths::get);
+		return this.vaultSettings.getWinDriveLetter().map(letter -> letter.charAt(0) + ":\\").map(Paths::get);
 	}
 
 	@Override

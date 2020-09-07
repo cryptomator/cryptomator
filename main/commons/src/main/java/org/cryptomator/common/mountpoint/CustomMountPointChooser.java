@@ -4,6 +4,7 @@ import org.cryptomator.common.vaults.Vault;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Inject;
 import java.io.IOException;
 import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.DirectoryStream;
@@ -23,6 +24,7 @@ public class CustomMountPointChooser implements MountPointChooser {
 
 	private final Vault vault;
 
+	@Inject
 	public CustomMountPointChooser(Vault vault) {
 		this.vault = vault;
 	}

@@ -3,6 +3,7 @@ package org.cryptomator.common.mountpoint;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.vaults.WindowsDriveLetters;
 
+import javax.inject.Inject;
 import java.nio.file.Path;
 import java.util.Optional;
 
@@ -12,6 +13,7 @@ public class AvailableDriveLetterChooser implements MountPointChooser {
 
 	private final WindowsDriveLetters windowsDriveLetters;
 
+	@Inject
 	public AvailableDriveLetterChooser(WindowsDriveLetters windowsDriveLetters) {
 		this.windowsDriveLetters = windowsDriveLetters;
 	}

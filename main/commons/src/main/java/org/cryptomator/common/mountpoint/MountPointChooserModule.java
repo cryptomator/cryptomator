@@ -1,13 +1,11 @@
 package org.cryptomator.common.mountpoint;
 
 import com.google.common.collect.ImmutableSet;
+import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoSet;
-import org.cryptomator.common.Environment;
 import org.cryptomator.common.vaults.PerVault;
-import org.cryptomator.common.vaults.Vault;
-import org.cryptomator.common.vaults.WindowsDriveLetters;
 
 import javax.inject.Named;
 import java.util.Set;
@@ -21,33 +19,25 @@ import java.util.Set;
 @Module
 public abstract class MountPointChooserModule {
 
-	@Provides
+	@Binds
 	@IntoSet
 	@PerVault
-	public static MountPointChooser provideCustomMountPointChooser(Vault vault) {
-		return new CustomMountPointChooser(vault);
-	}
+	public abstract MountPointChooser bindCustomMountPointChooser(CustomMountPointChooser chooser);
 
-	@Provides
+	@Binds
 	@IntoSet
 	@PerVault
-	public static MountPointChooser provideCustomDriveLetterChooser(Vault vault) {
-		return new CustomDriveLetterChooser(vault);
-	}
+	public abstract MountPointChooser bindCustomDriveLetterChooser(CustomDriveLetterChooser chooser);
 
-	@Provides
+	@Binds
 	@IntoSet
 	@PerVault
-	public static MountPointChooser provideAvailableDriveLetterChooser(WindowsDriveLetters windowsDriveLetters) {
-		return new AvailableDriveLetterChooser(windowsDriveLetters);
-	}
+	public abstract MountPointChooser bindAvailableDriveLetterChooser(AvailableDriveLetterChooser chooser);
 
-	@Provides
+	@Binds
 	@IntoSet
 	@PerVault
-	public static MountPointChooser provideTemporaryMountPointChooser(Vault vault, Environment environment) {
-		return new TemporaryMountPointChooser(vault, environment);
-	}
+	public abstract MountPointChooser bindTemporaryMountPointChooser(TemporaryMountPointChooser chooser);
 
 	@Provides
 	@PerVault
