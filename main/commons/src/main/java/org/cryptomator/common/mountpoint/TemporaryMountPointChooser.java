@@ -41,17 +41,19 @@ public class TemporaryMountPointChooser implements MountPointChooser {
 
 	@Override
 	public Optional<Path> chooseMountPoint() {
-		//Shouldn't throw, but let's keep #orElseThrow in case we made a mistake and the check in #isApplicable failed
-		Path parent = this.environment.getMountPointsDir().orElseThrow();
+		return this.environment.getMountPointsDir().map(this::choose);
+	}
+
+	private Path choose(Path parent) {
 		String basename = this.vaultSettings.mountName().get();
 		for (int i = 0; i < MAX_TMPMOUNTPOINT_CREATION_RETRIES; i++) {
 			Path mountPoint = parent.resolve(basename + "_" + i);
 			if (Files.notExists(mountPoint)) {
-				return Optional.of(mountPoint);
+				return mountPoint;
 			}
 		}
 		LOG.error("Failed to find feasible mountpoint at {}{}{}_x. Giving up after {} attempts.", parent, File.separator, basename, MAX_TMPMOUNTPOINT_CREATION_RETRIES);
-		return Optional.empty();
+		return null;
 	}
 
 	@Override
