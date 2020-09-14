@@ -22,7 +22,7 @@ public class LinuxKDEWalletKeychainAccessImpl implements KeychainAccessStrategy 
         try {
             connection = DBusConnection.getConnection(DBusConnection.DBusBusType.SESSION);
         } catch (DBusException e) {
-            e.printStackTrace();
+            log.error(e.toString(), e.getCause());
         }
     }
 
@@ -32,7 +32,7 @@ public class LinuxKDEWalletKeychainAccessImpl implements KeychainAccessStrategy 
             wallet = new KDEWallet(connection);
             return wallet.isEnabled();
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.toString(), e.getCause());
             return false;
         }
     }
