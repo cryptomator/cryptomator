@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 
 public class LinuxKDEWalletKeychainAccessImpl implements KeychainAccessStrategy {
 
-    private final Logger log = LoggerFactory.getLogger(LinuxKDEWalletKeychainAccessImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(LinuxKDEWalletKeychainAccessImpl.class);
 
     private final String FOLDER_NAME = "Cryptomator";
     private final String APP_NAME = "Cryptomator";
@@ -22,7 +22,7 @@ public class LinuxKDEWalletKeychainAccessImpl implements KeychainAccessStrategy 
         try {
             connection = DBusConnection.getConnection(DBusConnection.DBusBusType.SESSION);
         } catch (DBusException e) {
-            log.error(e.toString(), e.getCause());
+            LOG.error(e.toString(), e.getCause());
         }
     }
 
@@ -32,7 +32,7 @@ public class LinuxKDEWalletKeychainAccessImpl implements KeychainAccessStrategy 
             wallet = new KDEWallet(connection);
             return wallet.isEnabled();
         } catch (Exception e) {
-            log.error(e.toString(), e.getCause());
+            LOG.error(e.toString(), e.getCause());
             return false;
         }
     }
@@ -44,12 +44,12 @@ public class LinuxKDEWalletKeychainAccessImpl implements KeychainAccessStrategy 
                     !(wallet.hasEntry(handle, FOLDER_NAME, key, APP_NAME)
                             && wallet.entryType(handle, FOLDER_NAME, key, APP_NAME) == 1)
                     && wallet.writePassword(handle, FOLDER_NAME, key, passphrase.toString(), APP_NAME) == 0) {
-                log.debug("Passphrase successfully stored.");
+                LOG.debug("Passphrase successfully stored.");
             } else {
-                log.debug("Passphrase was not stored.");
+                LOG.debug("Passphrase was not stored.");
             }
         } catch (Exception e) {
-            log.error(e.toString(), e.getCause());
+            LOG.error(e.toString(), e.getCause());
             throw new KeychainAccessException(e);
         }
     }
@@ -60,9 +60,9 @@ public class LinuxKDEWalletKeychainAccessImpl implements KeychainAccessStrategy 
         try {
             if (walletIsOpen()) {
                 password = wallet.readPassword(handle, FOLDER_NAME, key, APP_NAME);
-                log.debug("loadPassphrase: wallet is open.");
+                LOG.debug("loadPassphrase: wallet is open.");
             } else {
-                log.debug("loadPassphrase: wallet is closed.");
+                LOG.debug("loadPassphrase: wallet is closed.");
             }
             return (password.equals("")) ? null : password.toCharArray();
         } catch (Exception e) {
@@ -77,9 +77,9 @@ public class LinuxKDEWalletKeychainAccessImpl implements KeychainAccessStrategy 
                     && wallet.hasEntry(handle, FOLDER_NAME, key, APP_NAME)
                     && wallet.entryType(handle, FOLDER_NAME, key, APP_NAME) == 1
                     && wallet.removeEntry(handle, FOLDER_NAME, key, APP_NAME) == 0) {
-                log.debug("Passphrase successfully deleted.");
+                LOG.debug("Passphrase successfully deleted.");
             } else {
-                log.debug("Passphrase was not deleted.");
+                LOG.debug("Passphrase was not deleted.");
             }
         } catch (Exception e) {
             throw new KeychainAccessException(e);
@@ -93,9 +93,9 @@ public class LinuxKDEWalletKeychainAccessImpl implements KeychainAccessStrategy 
                     && wallet.hasEntry(handle, FOLDER_NAME, key, APP_NAME)
                     && wallet.entryType(handle, FOLDER_NAME, key, APP_NAME) == 1
                     && wallet.writePassword(handle, FOLDER_NAME, key, passphrase.toString(), APP_NAME) == 0) {
-                log.debug("Passphrase successfully changed.");
+                LOG.debug("Passphrase successfully changed.");
             } else {
-                log.debug("Passphrase could not be changed.");
+                LOG.debug("Passphrase could not be changed.");
             }
         } catch (Exception e) {
             throw new KeychainAccessException(e);
@@ -112,7 +112,7 @@ public class LinuxKDEWalletKeychainAccessImpl implements KeychainAccessStrategy 
             wallet.openAsync(Static.DEFAULT_WALLET, 0, APP_NAME, false);
             wallet.getSignalHandler().await(KWallet.walletAsyncOpened.class, Static.ObjectPaths.KWALLETD5, () -> null);
             handle = wallet.getSignalHandler().getLastHandledSignal(KWallet.walletAsyncOpened.class, Static.ObjectPaths.KWALLETD5).handle;
-            log.debug("Wallet successfully initialized.");
+            LOG.debug("Wallet successfully initialized.");
             return handle != -1;
         } catch (Exception e) {
             throw new KeychainAccessException(e);
