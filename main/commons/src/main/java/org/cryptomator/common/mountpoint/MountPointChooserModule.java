@@ -1,6 +1,6 @@
 package org.cryptomator.common.mountpoint;
 
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSortedSet;
 import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
@@ -8,7 +8,9 @@ import dagger.multibindings.IntoSet;
 import org.cryptomator.common.vaults.PerVault;
 
 import javax.inject.Named;
+import java.util.Comparator;
 import java.util.Set;
+import java.util.SortedSet;
 
 /**
  * Dagger-Module for {@link MountPointChooser MountPointChoosers.}<br>
@@ -42,8 +44,8 @@ public abstract class MountPointChooserModule {
 	@Provides
 	@PerVault
 	@Named("orderedValidMountPointChoosers")
-	public static Set<MountPointChooser> provideOrderedValidMountPointChoosers(Set<MountPointChooser> choosers) {
-		//Sorted Set
-		return choosers.stream().sorted().filter(MountPointChooser::isApplicable).collect(ImmutableSet.toImmutableSet());
+	public static SortedSet<MountPointChooser> provideOrderedValidMountPointChoosers(Set<MountPointChooser> choosers) {
+		//The natural order is defined by MountPointChooser#compareTo
+		return choosers.stream().filter(MountPointChooser::isApplicable).collect(ImmutableSortedSet.toImmutableSortedSet(Comparator.naturalOrder()));
 	}
 }

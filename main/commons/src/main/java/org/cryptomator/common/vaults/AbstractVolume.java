@@ -7,11 +7,11 @@ import org.cryptomator.common.mountpoint.MountPointChooser;
 
 import java.nio.file.Path;
 import java.util.Optional;
-import java.util.Set;
+import java.util.SortedSet;
 
 public abstract class AbstractVolume implements Volume {
 
-	private final Set<MountPointChooser> choosers;
+	private final SortedSet<MountPointChooser> choosers;
 
 	protected Path mountPoint;
 
@@ -19,7 +19,7 @@ public abstract class AbstractVolume implements Volume {
 	private boolean cleanupRequired;
 	private MountPointChooser usedChooser;
 
-	public AbstractVolume(Set<MountPointChooser> choosers) {
+	public AbstractVolume(SortedSet<MountPointChooser> choosers) {
 		this.choosers = choosers;
 	}
 
@@ -34,6 +34,8 @@ public abstract class AbstractVolume implements Volume {
 			this.usedChooser = chooser;
 			return chosenPath.get();
 		}
+		//SortedSet#stream() should return a sorted stream (that's what it's docs and the docs of #spliterator() say, even if they are not 100% clear for me.)
+		//We want to keep that order, that's why we use ImmutableSet#toImmutableSet() to collect (even if it doesn't implement SortedSet, it's docs promise use encounter ordering.)
 		String tried = Joiner.on(", ").join(this.choosers.stream().map((mpc) -> mpc.getClass().getTypeName()).collect(ImmutableSet.toImmutableSet()));
 		throw new InvalidMountPointException(String.format("No feasible MountPoint found! Tried %s", tried));
 	}

@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.nio.file.Path;
-import java.util.Set;
+import java.util.SortedSet;
 
 public class FuseVolume extends AbstractVolume {
 
@@ -26,7 +26,7 @@ public class FuseVolume extends AbstractVolume {
 	private Mount mount;
 
 	@Inject
-	public FuseVolume(@Named("orderedValidMountPointChoosers") Set<MountPointChooser> choosers) {
+	public FuseVolume(@Named("orderedValidMountPointChoosers") SortedSet<MountPointChooser> choosers) {
 		super(choosers);
 	}
 

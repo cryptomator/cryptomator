@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import java.util.Set;
+import java.util.SortedSet;
 import java.util.concurrent.ExecutorService;
 
 public class DokanyVolume extends AbstractVolume {
@@ -27,7 +27,7 @@ public class DokanyVolume extends AbstractVolume {
 	private Mount mount;
 
 	@Inject
-	public DokanyVolume(VaultSettings vaultSettings, ExecutorService executorService, @Named("orderedValidMountPointChoosers") Set<MountPointChooser> choosers) {
+	public DokanyVolume(VaultSettings vaultSettings, ExecutorService executorService, @Named("orderedValidMountPointChoosers") SortedSet<MountPointChooser> choosers) {
 		super(choosers);
 		this.vaultSettings = vaultSettings;
 		this.mountFactory = new MountFactory(executorService);
