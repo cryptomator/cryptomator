@@ -389,6 +389,16 @@
 	-fx-background-color: MUTED_BG;
 }
 
+/* Note: These values below are kinda random such that it looks ok. I'm pretty sure there is room for improvement. Additionally, fx-text-fill does not work*/
+.badge-debug {
+	-fx-font-family: 'Open Sans Bold';
+	-fx-font-size: 1.0em;
+	-fx-background-radius: 8px;
+	-fx-padding: 0.3em 0.55em 0.3em 0.55em;
+	-fx-background-color: RED_5;
+	-fx-background-radius: 2em;
+}
+
 /*******************************************************************************
  *                                                                             *
  * Password Strength Indicator                                                 *
