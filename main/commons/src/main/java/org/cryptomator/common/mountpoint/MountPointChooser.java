@@ -1,5 +1,6 @@
 package org.cryptomator.common.mountpoint;
 
+import org.apache.commons.lang3.Validate;
 import org.cryptomator.common.vaults.Volume;
 
 import java.nio.file.Path;
@@ -147,11 +148,31 @@ public interface MountPointChooser extends Comparable<MountPointChooser> {
 	 * <p>{@inheritDoc}
 	 *
 	 * @implNote This default implementation sorts the MPCs in ascending order
-	 * of their {@link #getPriority() priority.}
+	 * of their {@link #getPriority() priority.} It depends on a correct implementation
+	 * of {@link #hashCode()} and {@link #equals(Object)} for the compared objects.
+	 * For this implementation "the least required correct implementation" maps
+	 * the following relationship correctly:<br>
+	 * If the objects {@code a} and {@code b} are {@code equal} as determined by
+	 * {@code #equals(Object)} then the {@code hashCodes} as determined by {@code #hashCode()}
+	 * of {@code a} and {@code b} must be equal. If the objects are {@code not equal}
+	 * then the {@code hashCodes} must be different.<br>
+	 * The default implementations of those two methods are sufficient.
+	 * @see Object#hashCode()
+	 * @see Object#equals(Object)
 	 */
 	@Override
 	default int compareTo(MountPointChooser other) {
-		//Sort by priority (ascending order)
-		return Integer.compare(this.getPriority(), other.getPriority());
+		Validate.notNull(other, "Other must not be null!");
+
+		//Try to compare by priority and sort in ascending order.
+		//1) Compare the priorities.
+		//2) If the result of the comparison is 0 because the priorities are equal,
+		//   we consider this a failure. In this case sort by hashCode (step 3).
+		//   Else return the result of the comparison.
+		//3) Return the result of the comparison of the hashCodes:
+		//   Either 0 (because they are equal and that's why they had the same priority)
+		//   or a non-null int (because they only share the priority).
+		int compResult = /* 1 */ Integer.compare(this.getPriority(), other.getPriority());
+		return compResult != 0 ? /* 2 */ compResult : /* 3 */ Integer.compare(this.hashCode(), other.hashCode());
 	}
 }
