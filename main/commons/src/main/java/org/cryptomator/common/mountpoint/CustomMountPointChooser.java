@@ -1,6 +1,7 @@
 package org.cryptomator.common.mountpoint;
 
 import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.common.vaults.Volume;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,18 +31,18 @@ public class CustomMountPointChooser implements MountPointChooser {
 	}
 
 	@Override
-	public boolean isApplicable() {
+	public boolean isApplicable(Volume caller) {
 		return true;
 	}
 
 	@Override
-	public Optional<Path> chooseMountPoint() {
+	public Optional<Path> chooseMountPoint(Volume caller) {
 		//VaultSettings#getCustomMountPath already checks whether the saved custom mountpoint should be used
 		return this.vault.getVaultSettings().getCustomMountPath().map(Paths::get);
 	}
 
 	@Override
-	public boolean prepare(Path mountPoint) throws InvalidMountPointException {
+	public boolean prepare(Volume caller, Path mountPoint) throws InvalidMountPointException {
 		switch (this.vault.getMountPointRequirement()) {
 			case PARENT_NO_MOUNT_POINT -> prepareParentNoMountPoint(mountPoint);
 			case EMPTY_MOUNT_POINT -> prepareEmptyMountPoint(mountPoint);

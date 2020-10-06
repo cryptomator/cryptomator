@@ -26,7 +26,7 @@ public class FuseVolume extends AbstractVolume {
 	private Mount mount;
 
 	@Inject
-	public FuseVolume(@Named("orderedValidMountPointChoosers") SortedSet<MountPointChooser> choosers) {
+	public FuseVolume(@Named("orderedMountPointChoosers") SortedSet<MountPointChooser> choosers) {
 		super(choosers);
 	}
 

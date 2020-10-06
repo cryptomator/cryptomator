@@ -1,6 +1,7 @@
 package org.cryptomator.common.mountpoint;
 
 import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.common.vaults.Volume;
 import org.cryptomator.common.vaults.WindowsDriveLetters;
 
 import javax.inject.Inject;
@@ -19,12 +20,12 @@ public class AvailableDriveLetterChooser implements MountPointChooser {
 	}
 
 	@Override
-	public boolean isApplicable() {
+	public boolean isApplicable(Volume caller) {
 		return SystemUtils.IS_OS_WINDOWS;
 	}
 
 	@Override
-	public Optional<Path> chooseMountPoint() {
+	public Optional<Path> chooseMountPoint(Volume caller) {
 		return this.windowsDriveLetters.getAvailableDriveLetterPath();
 	}
 
