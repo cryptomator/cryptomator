@@ -82,7 +82,7 @@ Cryptomator uses 53 third-party dependencies under the following licenses:
 		- zxcvbn4j (com.nulab-inc:zxcvbn:1.3.0 - https://github.com/nulab/zxcvbn4j)
 		- secret-service (de.swiesend:secret-service:1.1.0 - https://github.com/swiesend/secret-service)
 		- Checker Qual (org.checkerframework:checker-qual:2.11.1 - https://checkerframework.org)
-		- kdewallet (org.purejava:kdewallet:1.0.1 - https://github.com/purejava/kdewallet)
+		- kdewallet (org.purejava:kdewallet:1.1.1 - https://github.com/purejava/kdewallet)
 		- SLF4J API Module (org.slf4j:slf4j-api:1.7.30 - http://www.slf4j.org)
 	The BSD 2-Clause License:
 		- EasyBind (com.tobiasdiez:easybind:2.1.0 - https://github.com/tobiasdiez/EasyBind)

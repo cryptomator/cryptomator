@@ -18,11 +18,12 @@ public class LinuxKDEWalletKeychainAccessImpl implements KeychainAccessStrategy 
     private KDEWallet wallet;
     private int handle = -1;
 
-    public LinuxKDEWalletKeychainAccessImpl() {
+    public LinuxKDEWalletKeychainAccessImpl() throws KeychainAccessException {
         try {
             connection = DBusConnection.getConnection(DBusConnection.DBusBusType.SESSION);
         } catch (DBusException e) {
-            LOG.error(e.toString(), e.getCause());
+            LOG.error("Connecting to D-Bus failed:", e);
+            throw new KeychainAccessException(e);
         }
     }
 
@@ -32,7 +33,7 @@ public class LinuxKDEWalletKeychainAccessImpl implements KeychainAccessStrategy 
             wallet = new KDEWallet(connection);
             return wallet.isEnabled();
         } catch (Exception e) {
-            LOG.error(e.toString(), e.getCause());
+            LOG.error("A KDEWallet could not be created:", e);
             return false;
         }
     }
@@ -49,7 +50,7 @@ public class LinuxKDEWalletKeychainAccessImpl implements KeychainAccessStrategy 
                 LOG.debug("Passphrase was not stored.");
             }
         } catch (Exception e) {
-            LOG.error(e.toString(), e.getCause());
+            LOG.error("Storing the passphrase failed:", e);
             throw new KeychainAccessException(e);
         }
     }
@@ -66,6 +67,7 @@ public class LinuxKDEWalletKeychainAccessImpl implements KeychainAccessStrategy 
             }
             return (password.equals("")) ? null : password.toCharArray();
         } catch (Exception e) {
+            LOG.error("Loading the passphrase failed:", e);
             throw new KeychainAccessException(e);
         }
     }
@@ -82,6 +84,7 @@ public class LinuxKDEWalletKeychainAccessImpl implements KeychainAccessStrategy 
                 LOG.debug("Passphrase was not deleted.");
             }
         } catch (Exception e) {
+            LOG.error("Deleting the passphrase failed:", e);
             throw new KeychainAccessException(e);
         }
     }
@@ -98,6 +101,7 @@ public class LinuxKDEWalletKeychainAccessImpl implements KeychainAccessStrategy 
                 LOG.debug("Passphrase could not be changed.");
             }
         } catch (Exception e) {
+            LOG.error("Changing the passphrase failed:", e);
             throw new KeychainAccessException(e);
         }
     }
@@ -115,6 +119,7 @@ public class LinuxKDEWalletKeychainAccessImpl implements KeychainAccessStrategy 
             LOG.debug("Wallet successfully initialized.");
             return handle != -1;
         } catch (Exception e) {
+            LOG.error("Asynchronous opening the wallet failed:", e);
             throw new KeychainAccessException(e);
         }
     }
