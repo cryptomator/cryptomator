@@ -38,7 +38,7 @@ public class UnlockInvalidMountPointController implements FxController {
 	}
 
 	public boolean getMustExist() {
-		MountPointRequirement requirement = vault.getMountPointRequirement();
+		MountPointRequirement requirement = vault.getVolume().orElseThrow(() -> new IllegalStateException("Invalid Mountpoint without a Volume?!")).getMountPointRequirement();
 		assert requirement != MountPointRequirement.NONE; //An invalid MountPoint with no required MountPoint doesn't seem sensible
 		assert requirement != MountPointRequirement.PARENT_OPT_MOUNT_POINT; //Not implemented anywhere (yet)
 

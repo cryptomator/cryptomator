@@ -1,6 +1,9 @@
 package org.cryptomator.common.mountpoint;
 
-import org.cryptomator.common.vaults.Vault;
+import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.common.Environment;
+import org.cryptomator.common.settings.VaultSettings;
+import org.cryptomator.common.settings.VolumeImpl;
 import org.cryptomator.common.vaults.Volume;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,27 +26,30 @@ public class CustomMountPointChooser implements MountPointChooser {
 
 	private static final Logger LOG = LoggerFactory.getLogger(CustomMountPointChooser.class);
 
-	private final Vault vault;
+	private final VaultSettings vaultSettings;
+	private final Environment environment;
 
 	@Inject
-	public CustomMountPointChooser(Vault vault) {
-		this.vault = vault;
+	public CustomMountPointChooser(VaultSettings vaultSettings, Environment environment) {
+		this.vaultSettings = vaultSettings;
+		this.environment = environment;
 	}
 
 	@Override
 	public boolean isApplicable(Volume caller) {
-		return true;
+		//Disable if useExperimentalFuse is required (Win + Fuse), but set to false
+		return caller.getImplementationType() != VolumeImpl.FUSE || !SystemUtils.IS_OS_WINDOWS || environment.useExperimentalFuse();
 	}
 
 	@Override
 	public Optional<Path> chooseMountPoint(Volume caller) {
 		//VaultSettings#getCustomMountPath already checks whether the saved custom mountpoint should be used
-		return this.vault.getVaultSettings().getCustomMountPath().map(Paths::get);
+		return this.vaultSettings.getCustomMountPath().map(Paths::get);
 	}
 
 	@Override
 	public boolean prepare(Volume caller, Path mountPoint) throws InvalidMountPointException {
-		switch (this.vault.getMountPointRequirement()) {
+		switch (caller.getMountPointRequirement()) {
 			case PARENT_NO_MOUNT_POINT -> prepareParentNoMountPoint(mountPoint);
 			case EMPTY_MOUNT_POINT -> prepareEmptyMountPoint(mountPoint);
 			case NONE -> {

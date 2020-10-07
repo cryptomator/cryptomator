@@ -157,7 +157,7 @@ public class UnlockWorkflow extends Task<Boolean> {
 	}
 
 	private void handleInvalidMountPoint(InvalidMountPointException impExc) {
-		MountPointRequirement requirement = vault.getMountPointRequirement();
+		MountPointRequirement requirement = vault.getVolume().orElseThrow(() -> new IllegalStateException("Invalid Mountpoint without a Volume?!", impExc)).getMountPointRequirement();
 		assert requirement != MountPointRequirement.NONE; //An invalid MountPoint with no required MountPoint doesn't seem sensible
 		assert requirement != MountPointRequirement.PARENT_OPT_MOUNT_POINT; //Not implemented anywhere (yet)
 
@@ -165,14 +165,14 @@ public class UnlockWorkflow extends Task<Boolean> {
 		//Cause is either null (cause the IMPE was thrown directly, e.g. because no MPC succeeded)
 		//or the cause was not an Exception (but some other kind of Throwable)
 		//Either way: Handle as generic error
-		if(!(cause instanceof Exception)) {
+		if (!(cause instanceof Exception)) {
 			handleGenericError(impExc);
 			return;
 		}
 
 		//From here on handle the cause, not the caught exception
-		if(cause instanceof NotDirectoryException) {
-			if(requirement == MountPointRequirement.PARENT_NO_MOUNT_POINT) {
+		if (cause instanceof NotDirectoryException) {
+			if (requirement == MountPointRequirement.PARENT_NO_MOUNT_POINT) {
 				LOG.error("Unlock failed. Parent folder is missing: {}", cause.getMessage());
 			} else {
 				LOG.error("Unlock failed. Mountpoint doesn't exist (needs to be a folder): {}", cause.getMessage());
@@ -181,13 +181,13 @@ public class UnlockWorkflow extends Task<Boolean> {
 			return;
 		}
 
-		if(cause instanceof FileAlreadyExistsException) {
+		if (cause instanceof FileAlreadyExistsException) {
 			LOG.error("Unlock failed. Mountpoint already exists: {}", cause.getMessage());
 			showInvalidMountPointScene();
 			return;
 		}
 
-		if(cause instanceof DirectoryNotEmptyException) {
+		if (cause instanceof DirectoryNotEmptyException) {
 			LOG.error("Unlock failed. Mountpoint not an empty directory: {}", cause.getMessage());
 			showInvalidMountPointScene();
 			return;

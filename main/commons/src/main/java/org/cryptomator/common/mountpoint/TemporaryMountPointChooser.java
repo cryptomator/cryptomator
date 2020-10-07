@@ -67,16 +67,26 @@ public class TemporaryMountPointChooser implements MountPointChooser {
 		}
 
 		try {
-			//WinFSP needs the parent, but the actual Mountpoint must not exist...
-			if (SystemUtils.IS_OS_WINDOWS) {
-				Files.createDirectories(mountPoint.getParent());
-				LOG.debug("Successfully created folder for mount point: {}", mountPoint);
-				return false;
-			} else {
-				//For Linux and Mac the actual Mountpoint must exist
-				Files.createDirectories(mountPoint);
-				LOG.debug("Successfully created mount point: {}", mountPoint);
-				return true;
+			switch (caller.getMountPointRequirement()) {
+				case PARENT_NO_MOUNT_POINT -> {
+					Files.createDirectories(mountPoint.getParent());
+					LOG.debug("Successfully created folder for mount point: {}", mountPoint);
+					return false;
+				}
+				case EMPTY_MOUNT_POINT -> {
+					Files.createDirectories(mountPoint);
+					LOG.debug("Successfully created mount point: {}", mountPoint);
+					return true;
+				}
+				case NONE -> {
+					//Requirement "NONE" doesn't make any sense here.
+					//No need to prepare/verify a Mountpoint without requiring one...
+					throw new InvalidMountPointException(new IllegalStateException("Illegal MountPointRequirement"));
+				}
+				default -> {
+					//Currently the case for "PARENT_OPT_MOUNT_POINT"
+					throw new InvalidMountPointException(new IllegalStateException("Not implemented"));
+				}
 			}
 		} catch (IOException exception) {
 			throw new InvalidMountPointException("IOException while preparing mountpoint", exception);

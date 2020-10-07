@@ -39,6 +39,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.EnumSet;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -316,8 +317,8 @@ public class Vault {
 		return vaultSettings.getId();
 	}
 
-	public MountPointRequirement getMountPointRequirement() {
-		return volume.getMountPointRequirement();
+	public Optional<Volume> getVolume() {
+		return Optional.ofNullable(this.volume);
 	}
 
 	// ******************************************************************************
