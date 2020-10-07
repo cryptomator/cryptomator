@@ -2,6 +2,7 @@ package org.cryptomator.common.vaults;
 
 import com.google.common.base.Strings;
 import org.cryptomator.common.settings.VaultSettings;
+import org.cryptomator.common.settings.VolumeImpl;
 import org.cryptomator.cryptofs.CryptoFileSystem;
 import org.cryptomator.frontend.dokany.Mount;
 import org.cryptomator.frontend.dokany.MountFactory;
@@ -42,6 +43,11 @@ public class DokanyVolume implements Volume {
 	@Override
 	public boolean isSupported() {
 		return DokanyVolume.isSupportedStatic();
+	}
+
+	@Override
+	public VolumeImpl getImplementationType() {
+		return VolumeImpl.DOKANY;
 	}
 
 	@Override

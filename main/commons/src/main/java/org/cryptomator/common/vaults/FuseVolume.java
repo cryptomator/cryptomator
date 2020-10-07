@@ -4,6 +4,7 @@ import com.google.common.base.Splitter;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.Environment;
 import org.cryptomator.common.settings.VaultSettings;
+import org.cryptomator.common.settings.VolumeImpl;
 import org.cryptomator.cryptofs.CryptoFileSystem;
 import org.cryptomator.frontend.fuse.mount.CommandFailedException;
 import org.cryptomator.frontend.fuse.mount.EnvironmentVariables;
@@ -163,6 +164,11 @@ public class FuseVolume implements Volume {
 	@Override
 	public boolean isSupported() {
 		return FuseVolume.isSupportedStatic();
+	}
+
+	@Override
+	public VolumeImpl getImplementationType() {
+		return VolumeImpl.FUSE;
 	}
 
 	@Override
