@@ -1,6 +1,6 @@
 package org.cryptomator.common.mountpoint;
 
-import org.apache.commons.lang3.Validate;
+import com.google.common.base.Preconditions;
 import org.cryptomator.common.vaults.Volume;
 
 import java.nio.file.Path;
@@ -169,7 +169,7 @@ public interface MountPointChooser extends Comparable<MountPointChooser> {
 	 */
 	@Override
 	default int compareTo(MountPointChooser other) {
-		Validate.notNull(other, "Other must not be null!");
+		Preconditions.checkNotNull(other, "Other must not be null!");
 
 		//Try to compare by priority and sort in ascending order.
 		//1) Compare the priorities.
