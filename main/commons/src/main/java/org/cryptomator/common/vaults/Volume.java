@@ -22,6 +22,12 @@ public interface Volume {
 	boolean isSupported();
 
 	/**
+	 * Gets the coresponding enum type of the {@link VolumeImpl volume implementation ("VolumeImpl")} that is implemented by this Volume.
+	 * @return the type of implementation as defined by the {@link VolumeImpl VolumeImpl enum}
+	 */
+	VolumeImpl getImplementationType();
+
+	/**
 	 * @param fs
 	 * @throws IOException
 	 */

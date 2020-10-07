@@ -3,6 +3,7 @@ package org.cryptomator.common.vaults;
 import org.cryptomator.common.mountpoint.InvalidMountPointException;
 import org.cryptomator.common.mountpoint.MountPointChooser;
 import org.cryptomator.common.settings.VaultSettings;
+import org.cryptomator.common.settings.VolumeImpl;
 import org.cryptomator.cryptofs.CryptoFileSystem;
 import org.cryptomator.frontend.dokany.Mount;
 import org.cryptomator.frontend.dokany.MountFactory;
@@ -31,6 +32,11 @@ public class DokanyVolume extends AbstractVolume {
 		super(choosers);
 		this.vaultSettings = vaultSettings;
 		this.mountFactory = new MountFactory(executorService);
+	}
+
+	@Override
+	public VolumeImpl getImplementationType() {
+		return VolumeImpl.DOKANY;
 	}
 
 	@Override
