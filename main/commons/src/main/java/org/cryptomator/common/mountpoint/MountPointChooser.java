@@ -1,5 +1,6 @@
 package org.cryptomator.common.mountpoint;
 
+import com.google.common.base.Preconditions;
 import org.cryptomator.common.vaults.Volume;
 
 import java.nio.file.Path;
@@ -12,8 +13,9 @@ import java.util.SortedSet;
  * <p>All <i>MountPointChoosers (MPCs)</i> need to implement this class and must be added to
  * the pool of possible MPCs by the {@link MountPointChooserModule MountPointChooserModule.}
  * The MountPointChooserModule will sort them according to their {@link #getPriority() priority.}
- * The priority must be defined by the developer to reflect a useful execution order;
- * the order of execution of MPCs with equal priority is undefined.
+ * The priority must be defined by the developer to reflect a useful execution order.<br>
+ * A specific priority <b>must not</b> be assigned to more than one MPC at a time;
+ * the result of having two MPCs with equal priority is undefined.
  *
  * <p>MPCs are executed by a {@link Volume} in ascending order of their priority
  * (smaller priorities are tried first) to find and prepare a suitable mountpoint for the volume.
@@ -138,8 +140,9 @@ public interface MountPointChooser extends Comparable<MountPointChooser> {
 	 * and determine their execution order.
 	 * The priority must be defined by the developer to reflect a useful execution order.
 	 * MPCs with lower priorities will be placed at lower indices in the resulting
-	 * {@link SortedSet} and will be executed with higher probability.
-	 * The order of execution of MPCs with equal priority is undefined.
+	 * {@link SortedSet} and will be executed with higher probability.<br>
+	 * A specific priority <b>must not</b> be assigned to more than one MPC at a time;
+	 * the result of having two MPCs with equal priority is undefined.
 	 *
 	 * @return the priority of this MPC.
 	 */
@@ -158,6 +161,8 @@ public interface MountPointChooser extends Comparable<MountPointChooser> {
 	 */
 	@Override
 	default int compareTo(MountPointChooser other) {
+		Preconditions.checkNotNull(other, "Other must not be null!");
+
 		//Sort by priority (ascending order)
 		return Integer.compare(this.getPriority(), other.getPriority());
 	}
