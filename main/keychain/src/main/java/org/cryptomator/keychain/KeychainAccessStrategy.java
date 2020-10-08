@@ -5,7 +5,7 @@
  *******************************************************************************/
 package org.cryptomator.keychain;
 
-public interface KeychainAccessStrategy {
+interface KeychainAccessStrategy {
 
 	/**
 	 * Associates a passphrase with a given key.
