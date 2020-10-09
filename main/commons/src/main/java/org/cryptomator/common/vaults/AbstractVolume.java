@@ -44,7 +44,7 @@ public abstract class AbstractVolume implements Volume {
 		//SortedSet#stream() should return a sorted stream (that's what it's docs and the docs of #spliterator() say, even if they are not 100% clear for me.)
 		//We want to keep that order, that's why we use ImmutableSet#toImmutableSet() to collect (even if it doesn't implement SortedSet, it's docs promise use encounter ordering.)
 		String checked = Joiner.on(", ").join(checkedChoosers.stream().map((mpc) -> mpc.getClass().getTypeName()).collect(ImmutableSet.toImmutableSet()));
-		throw new InvalidMountPointException(String.format("No feasible MountPoint found! Checked %s", checked));
+		throw new InvalidMountPointException(String.format("No feasible MountPoint found! Checked %s", checked.isBlank() ? "<No applicable MPC>" : checked));
 	}
 
 	protected void cleanupMountPoint() {
