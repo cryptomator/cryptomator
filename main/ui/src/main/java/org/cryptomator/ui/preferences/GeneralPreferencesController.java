@@ -13,16 +13,21 @@ import javafx.scene.control.RadioButton;
 import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleGroup;
 import javafx.util.StringConverter;
+import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.Environment;
 import org.cryptomator.common.LicenseHolder;
+import org.cryptomator.common.settings.PwBackend;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.UiTheme;
+import org.cryptomator.keychain.KeychainAccessStrategy;
+import org.cryptomator.keychain.LinuxSystemKeychainAccess;
 import org.cryptomator.ui.common.FxController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import java.util.EnumSet;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
@@ -38,10 +43,13 @@ public class GeneralPreferencesController implements FxController {
 	private final ObjectProperty<SelectedPreferencesTab> selectedTabProperty;
 	private final LicenseHolder licenseHolder;
 	private final ExecutorService executor;
-	private final ResourceBundle resourceBundle;
+	private final ResourceBundle resourceBundleUiTheme;
+	private final ResourceBundle resourceBundlePwBackend;
 	private final Application application;
 	private final Environment environment;
+	private Optional<KeychainAccessStrategy> keychain;
 	public ChoiceBox<UiTheme> themeChoiceBox;
+	public ChoiceBox<PwBackend> pwBackendChoiceBox;
 	public CheckBox startHiddenCheckbox;
 	public CheckBox debugModeCheckbox;
 	public CheckBox autoStartCheckbox;
@@ -50,14 +58,16 @@ public class GeneralPreferencesController implements FxController {
 	public RadioButton nodeOrientationRtl;
 
 	@Inject
-	GeneralPreferencesController(Settings settings, @Named("trayMenuSupported") boolean trayMenuSupported, Optional<AutoStartStrategy> autoStartStrategy, ObjectProperty<SelectedPreferencesTab> selectedTabProperty, LicenseHolder licenseHolder, ExecutorService executor, ResourceBundle resourceBundle, Application application, Environment environment) {
+	GeneralPreferencesController(Settings settings, @Named("trayMenuSupported") boolean trayMenuSupported, Optional<AutoStartStrategy> autoStartStrategy, Optional<KeychainAccessStrategy> keychain, ObjectProperty<SelectedPreferencesTab> selectedTabProperty, LicenseHolder licenseHolder, ExecutorService executor, ResourceBundle resourceBundleUiTheme, ResourceBundle resourceBundlePwBackend, Application application, Environment environment) {
 		this.settings = settings;
 		this.trayMenuSupported = trayMenuSupported;
 		this.autoStartStrategy = autoStartStrategy;
+		this.keychain = keychain;
 		this.selectedTabProperty = selectedTabProperty;
 		this.licenseHolder = licenseHolder;
 		this.executor = executor;
-		this.resourceBundle = resourceBundle;
+		this.resourceBundleUiTheme = resourceBundleUiTheme;
+		this.resourceBundlePwBackend = resourceBundlePwBackend;
 		this.application = application;
 		this.environment = environment;
 	}
@@ -69,7 +79,7 @@ public class GeneralPreferencesController implements FxController {
 			settings.theme().set(UiTheme.LIGHT);
 		}
 		themeChoiceBox.valueProperty().bindBidirectional(settings.theme());
-		themeChoiceBox.setConverter(new UiThemeConverter(resourceBundle));
+		themeChoiceBox.setConverter(new UiThemeConverter(resourceBundleUiTheme));
 
 		startHiddenCheckbox.selectedProperty().bindBidirectional(settings.startHidden());
 
@@ -84,6 +94,11 @@ public class GeneralPreferencesController implements FxController {
 		nodeOrientationLtr.setSelected(settings.userInterfaceOrientation().get() == NodeOrientation.LEFT_TO_RIGHT);
 		nodeOrientationRtl.setSelected(settings.userInterfaceOrientation().get() == NodeOrientation.RIGHT_TO_LEFT);
 		nodeOrientation.selectedToggleProperty().addListener(this::toggleNodeOrientation);
+
+		pwBackendChoiceBox.getItems().addAll(getAvailableBackends());
+		pwBackendChoiceBox.setValue(LinuxSystemKeychainAccess.getBackendActivated());
+		pwBackendChoiceBox.setConverter(new PwBackendConverter(resourceBundlePwBackend));
+		pwBackendChoiceBox.valueProperty().bindBidirectional(settings.pwBackend());
 	}
 
 	public boolean isTrayMenuSupported() {
@@ -150,6 +165,25 @@ public class GeneralPreferencesController implements FxController {
 		}
 	}
 
+	private static class PwBackendConverter extends StringConverter<PwBackend> {
+
+		private final ResourceBundle resourceBundle;
+
+		PwBackendConverter(ResourceBundle resourceBundle) {
+			this.resourceBundle = resourceBundle;
+		}
+
+		@Override
+		public String toString(PwBackend impl) {
+			return resourceBundle.getString(impl.getDisplayName());
+		}
+
+		@Override
+		public PwBackend fromString(String string) {
+			throw new UnsupportedOperationException();
+		}
+	}
+
 	private static class ToggleAutoStartTask extends Task<Void> {
 
 		private final AutoStartStrategy autoStart;
@@ -171,4 +205,12 @@ public class GeneralPreferencesController implements FxController {
 		}
 	}
 
+	private PwBackend[] getAvailableBackends() {
+		if (SystemUtils.IS_OS_LINUX && keychain.isPresent()) {
+			EnumSet<PwBackend> backends = LinuxSystemKeychainAccess.getAvailablePwBackends();
+			return backends.size() > 0 ? backends.toArray(PwBackend[]::new) : new PwBackend[]{};
+		} else {
+			return new PwBackend[]{};
+		}
+	}
 }
