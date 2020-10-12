@@ -69,13 +69,20 @@ public class TemporaryMountPointChooser implements MountPointChooser {
 		try {
 			switch (caller.getMountPointRequirement()) {
 				case PARENT_NO_MOUNT_POINT -> {
-					Files.createDirectories(mountPoint.getParent());
-					LOG.debug("Successfully created folder for mount point: {}", mountPoint);
+					//Create everything up to the parent (but not the actual mountpoint)
+					Path parent = mountPoint.getParent();
+					Files.createDirectories(parent);
+
+					//Get the name of the parent directory (#getFileName())
+					//or just use the parent if the name is null (that's the case if parent is the root)
+					Path parentName = parent.getFileName() != null ? parent.getFileName() : parent;
+					LOG.debug("Successfully created/checked parent folder (\"{}\") for mount point: {}", parentName, mountPoint);
 					return false;
 				}
 				case EMPTY_MOUNT_POINT -> {
+					//Create everything up to the mountpoint (including the actual mountpoint)
 					Files.createDirectories(mountPoint);
-					LOG.debug("Successfully created mount point: {}", mountPoint);
+					LOG.debug("Successfully created/checked mount point: {}", mountPoint);
 					return true;
 				}
 				case NONE -> {

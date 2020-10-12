@@ -12,6 +12,7 @@ import org.cryptomator.ui.common.FxmlScene;
 
 import javax.inject.Inject;
 
+//At the current point in time only the CustomMountPointChooser may cause this window to be shown.
 @UnlockScoped
 public class UnlockInvalidMountPointController implements FxController {
 
