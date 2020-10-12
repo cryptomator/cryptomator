@@ -24,7 +24,7 @@ public class DokanyVolume implements Volume {
 
 	private static final Logger LOG = LoggerFactory.getLogger(DokanyVolume.class);
 
-	private static final String FS_TYPE_NAME = "Cryptomator File System";
+	private static final String FS_TYPE_NAME = "CryptomatorFS";
 
 	private final VaultSettings vaultSettings;
 	private final MountFactory mountFactory;
