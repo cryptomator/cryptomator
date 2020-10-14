@@ -6,10 +6,11 @@ import javafx.concurrent.Task;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.stage.Window;
+import org.cryptomator.common.mountpoint.InvalidMountPointException;
+import org.cryptomator.common.vaults.MountPointRequirement;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
-import org.cryptomator.common.vaults.Volume;
-import org.cryptomator.cryptolib.api.CryptoException;
+import org.cryptomator.common.vaults.Volume.VolumeException;
 import org.cryptomator.cryptolib.api.InvalidPassphraseException;
 import org.cryptomator.keychain.KeychainAccessException;
 import org.cryptomator.keychain.KeychainManager;
@@ -28,7 +29,7 @@ import javax.inject.Named;
 import java.io.IOException;
 import java.nio.CharBuffer;
 import java.nio.file.DirectoryNotEmptyException;
-import java.nio.file.FileSystemException;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.NotDirectoryException;
 import java.util.Arrays;
 import java.util.Optional;
@@ -75,7 +76,7 @@ public class UnlockWorkflow extends Task<Boolean> {
 	}
 
 	@Override
-	protected Boolean call() throws InterruptedException, IOException, Volume.VolumeException {
+	protected Boolean call() throws InterruptedException, IOException, VolumeException, InvalidMountPointException {
 		try {
 			if (attemptUnlock()) {
 				handleSuccess();
@@ -84,10 +85,10 @@ public class UnlockWorkflow extends Task<Boolean> {
 				cancel(false); // set Tasks state to cancelled
 				return false;
 			}
-		} catch (NotDirectoryException | DirectoryNotEmptyException e) {
+		} catch (InvalidMountPointException e) {
 			handleInvalidMountPoint(e);
 			throw e; // rethrow to trigger correct exception handling in Task
-		} catch (CryptoException | Volume.VolumeException | IOException e) {
+		} catch (Exception e) {
 			handleGenericError(e);
 			throw e; // rethrow to trigger correct exception handling in Task
 		} finally {
@@ -96,7 +97,7 @@ public class UnlockWorkflow extends Task<Boolean> {
 		}
 	}
 
-	private boolean attemptUnlock() throws InterruptedException, IOException, Volume.VolumeException {
+	private boolean attemptUnlock() throws InterruptedException, IOException, VolumeException, InvalidMountPointException {
 		boolean proceed = password.get() != null || askForPassword(false) == PasswordEntry.PASSWORD_ENTERED;
 		while (proceed) {
 			try {
@@ -155,14 +156,55 @@ public class UnlockWorkflow extends Task<Boolean> {
 		}
 	}
 
-	private void handleInvalidMountPoint(FileSystemException e) {
-		LOG.error("Unlock failed. Mount point not an empty directory: {}", e.getMessage());
+	private void handleInvalidMountPoint(InvalidMountPointException impExc) {
+		MountPointRequirement requirement = vault.getVolume().orElseThrow(() -> new IllegalStateException("Invalid Mountpoint without a Volume?!", impExc)).getMountPointRequirement();
+		assert requirement != MountPointRequirement.NONE; //An invalid MountPoint with no required MountPoint doesn't seem sensible
+		assert requirement != MountPointRequirement.PARENT_OPT_MOUNT_POINT; //Not implemented anywhere (yet)
+
+		Throwable cause = impExc.getCause();
+		//Cause is either null (cause the IMPE was thrown directly, e.g. because no MPC succeeded)
+		//or the cause was not an Exception (but some other kind of Throwable)
+		//Either way: Handle as generic error
+		if (!(cause instanceof Exception)) {
+			handleGenericError(impExc);
+			return;
+		}
+
+		//From here on handle the cause, not the caught exception
+		if (cause instanceof NotDirectoryException) {
+			if (requirement == MountPointRequirement.PARENT_NO_MOUNT_POINT) {
+				LOG.error("Unlock failed. Parent folder is missing: {}", cause.getMessage());
+			} else {
+				LOG.error("Unlock failed. Mountpoint doesn't exist (needs to be a folder): {}", cause.getMessage());
+			}
+			showInvalidMountPointScene();
+			return;
+		}
+
+		if (cause instanceof FileAlreadyExistsException) {
+			LOG.error("Unlock failed. Mountpoint already exists: {}", cause.getMessage());
+			showInvalidMountPointScene();
+			return;
+		}
+
+		if (cause instanceof DirectoryNotEmptyException) {
+			LOG.error("Unlock failed. Mountpoint not an empty directory: {}", cause.getMessage());
+			showInvalidMountPointScene();
+			return;
+		}
+
+		//Everything else (especially IOException) results in a generic error
+		//This must be done after the other exceptions because they extend IOException...
+		handleGenericError(cause);
+	}
+
+	private void showInvalidMountPointScene() {
 		Platform.runLater(() -> {
 			window.setScene(invalidMountPointScene.get());
 		});
 	}
 
-	private void handleGenericError(Exception e) {
+	private void handleGenericError(Throwable e) {
 		LOG.error("Unlock failed for technical reasons.", e);
 		Platform.runLater(() -> {
 			errorComponent.cause(e).window(window).returnToScene(window.getScene()).build().showErrorScene();

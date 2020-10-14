@@ -44,7 +44,7 @@
 			<ChoiceBox fx:id="driveLetterSelection" disable="${!mountPointWinDriveLetter.selected}"/>
 		</HBox>
 		<HBox spacing="6" alignment="CENTER_LEFT" visible="${!controller.webDavAndWindows}" managed="${!controller.webDavAndWindows}">
-			<RadioButton toggleGroup="${mountPoint}" fx:id="mountPointCustomDir" text="%vaultOptions.mount.mountPoint.custom"/>
+			<RadioButton toggleGroup="${mountPoint}" fx:id="mountPointCustomDir" text="%vaultOptions.mount.mountPoint.custom" disable="${controller.restrictToStableFuseOnWindows}"/>
 			<Button text="%vaultOptions.mount.mountPoint.directoryPickerButton" onAction="#chooseCustomMountPoint" contentDisplay="LEFT" disable="${!mountPointCustomDir.selected}">
 				<graphic>
 					<FontAwesome5IconView glyph="FOLDER_OPEN" glyphSize="15"/>

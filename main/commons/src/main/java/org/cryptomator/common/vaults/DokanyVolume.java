@@ -1,7 +1,9 @@
 package org.cryptomator.common.vaults;
 
-import com.google.common.base.Strings;
+import org.cryptomator.common.mountpoint.InvalidMountPointException;
+import org.cryptomator.common.mountpoint.MountPointChooser;
 import org.cryptomator.common.settings.VaultSettings;
+import org.cryptomator.common.settings.VolumeImpl;
 import org.cryptomator.cryptofs.CryptoFileSystem;
 import org.cryptomator.frontend.dokany.Mount;
 import org.cryptomator.frontend.dokany.MountFactory;
@@ -10,17 +12,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import java.io.IOException;
-import java.nio.file.DirectoryNotEmptyException;
-import java.nio.file.DirectoryStream;
-import java.nio.file.Files;
-import java.nio.file.NotDirectoryException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Optional;
+import javax.inject.Named;
+import java.util.SortedSet;
 import java.util.concurrent.ExecutorService;
 
-public class DokanyVolume implements Volume {
+public class DokanyVolume extends AbstractVolume {
 
 	private static final Logger LOG = LoggerFactory.getLogger(DokanyVolume.class);
 
@@ -28,24 +24,23 @@ public class DokanyVolume implements Volume {
 
 	private final VaultSettings vaultSettings;
 	private final MountFactory mountFactory;
-	private final WindowsDriveLetters windowsDriveLetters;
+
 	private Mount mount;
-	private Path mountPoint;
 
 	@Inject
-	public DokanyVolume(VaultSettings vaultSettings, ExecutorService executorService, WindowsDriveLetters windowsDriveLetters) {
+	public DokanyVolume(VaultSettings vaultSettings, ExecutorService executorService, @Named("orderedMountPointChoosers") SortedSet<MountPointChooser> choosers) {
+		super(choosers);
 		this.vaultSettings = vaultSettings;
 		this.mountFactory = new MountFactory(executorService);
-		this.windowsDriveLetters = windowsDriveLetters;
 	}
 
 	@Override
-	public boolean isSupported() {
-		return DokanyVolume.isSupportedStatic();
+	public VolumeImpl getImplementationType() {
+		return VolumeImpl.DOKANY;
 	}
 
 	@Override
-	public void mount(CryptoFileSystem fs, String mountFlags) throws VolumeException, IOException {
+	public void mount(CryptoFileSystem fs, String mountFlags) throws InvalidMountPointException, VolumeException {
 		this.mountPoint = determineMountPoint();
 		String mountName = vaultSettings.displayName().get();
 		try {
@@ -55,36 +50,6 @@ public class DokanyVolume implements Volume {
 				LOG.warn("Failed to mount vault into {}. Is this directory currently accessed by another process (e.g. Windows Explorer)?", mountPoint);
 			}
 			throw new VolumeException("Unable to mount Filesystem", e);
-		}
-	}
-
-	private Path determineMountPoint() throws VolumeException, IOException {
-		Optional<String> optionalCustomMountPoint = vaultSettings.getCustomMountPath();
-		if (optionalCustomMountPoint.isPresent()) {
-			Path customMountPoint = Paths.get(optionalCustomMountPoint.get());
-			checkProvidedMountPoint(customMountPoint);
-			return customMountPoint;
-		} else if (!Strings.isNullOrEmpty(vaultSettings.winDriveLetter().get())) {
-			return Path.of(vaultSettings.winDriveLetter().get().charAt(0) + ":\\");
-		} else {
-			//auto assign drive letter
-			if (!windowsDriveLetters.getAvailableDriveLetters().isEmpty()) {
-				return Path.of(windowsDriveLetters.getAvailableDriveLetters().iterator().next() + ":\\");
-			} else {
-				//TODO: Error Handling
-				throw new VolumeException("No free drive letter available.");
-			}
-		}
-	}
-
-	private void checkProvidedMountPoint(Path mountPoint) throws IOException {
-		if (!Files.isDirectory(mountPoint)) {
-			throw new NotDirectoryException(mountPoint.toString());
-		}
-		try (DirectoryStream<Path> ds = Files.newDirectoryStream(mountPoint)) {
-			if (ds.iterator().hasNext()) {
-				throw new DirectoryNotEmptyException(mountPoint.toString());
-			}
 		}
 	}
 
@@ -99,11 +64,17 @@ public class DokanyVolume implements Volume {
 	@Override
 	public void unmount() {
 		mount.close();
+		cleanupMountPoint();
 	}
 
 	@Override
-	public Optional<Path> getMountPoint() {
-		return Optional.ofNullable(mountPoint);
+	public boolean isSupported() {
+		return DokanyVolume.isSupportedStatic();
+	}
+
+	@Override
+	public MountPointRequirement getMountPointRequirement() {
+		return MountPointRequirement.EMPTY_MOUNT_POINT;
 	}
 
 	public static boolean isSupportedStatic() {
