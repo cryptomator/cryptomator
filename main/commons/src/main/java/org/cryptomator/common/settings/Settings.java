@@ -36,7 +36,7 @@ public class Settings {
 	public static final boolean DEFAULT_DEBUG_MODE = false;
 	public static final VolumeImpl DEFAULT_PREFERRED_VOLUME_IMPL = System.getProperty("os.name").toLowerCase().contains("windows") ? VolumeImpl.DOKANY : VolumeImpl.FUSE;
 	public static final UiTheme DEFAULT_THEME = UiTheme.LIGHT;
-	public static final PwBackend DEFAULT_PW_BACKEND = PwBackend.GNOME;
+	public static final KeychainBackend DEFAULT_KEYCHAIN_BACKEND = KeychainBackend.defaultBackend();
 	public static final NodeOrientation DEFAULT_USER_INTERFACE_ORIENTATION = NodeOrientation.LEFT_TO_RIGHT;
 	private static final String DEFAULT_LICENSE_KEY = "";
 
@@ -50,7 +50,7 @@ public class Settings {
 	private final BooleanProperty debugMode = new SimpleBooleanProperty(DEFAULT_DEBUG_MODE);
 	private final ObjectProperty<VolumeImpl> preferredVolumeImpl = new SimpleObjectProperty<>(DEFAULT_PREFERRED_VOLUME_IMPL);
 	private final ObjectProperty<UiTheme> theme = new SimpleObjectProperty<>(DEFAULT_THEME);
-	private final ObjectProperty<PwBackend> pwBackend = new SimpleObjectProperty<>(DEFAULT_PW_BACKEND);
+	private final ObjectProperty<KeychainBackend> keychainBackend = new SimpleObjectProperty<>(DEFAULT_KEYCHAIN_BACKEND);
 	private final ObjectProperty<NodeOrientation> userInterfaceOrientation = new SimpleObjectProperty<>(DEFAULT_USER_INTERFACE_ORIENTATION);
 	private final StringProperty licenseKey = new SimpleStringProperty(DEFAULT_LICENSE_KEY);
 
@@ -70,7 +70,7 @@ public class Settings {
 		debugMode.addListener(this::somethingChanged);
 		preferredVolumeImpl.addListener(this::somethingChanged);
 		theme.addListener(this::somethingChanged);
-		pwBackend.addListener(this::somethingChanged);
+		keychainBackend.addListener(this::somethingChanged);
 		userInterfaceOrientation.addListener(this::somethingChanged);
 		licenseKey.addListener(this::somethingChanged);
 	}
@@ -131,7 +131,7 @@ public class Settings {
 		return theme;
 	}
 
-	public ObjectProperty<PwBackend> pwBackend() { return pwBackend; }
+	public ObjectProperty<KeychainBackend> keychainBackend() { return keychainBackend; }
 
 	public ObjectProperty<NodeOrientation> userInterfaceOrientation() {
 		return userInterfaceOrientation;

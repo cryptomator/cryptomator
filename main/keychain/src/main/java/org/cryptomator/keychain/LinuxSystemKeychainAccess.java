@@ -2,7 +2,7 @@ package org.cryptomator.keychain;
 
 import javafx.beans.property.ObjectProperty;
 import org.apache.commons.lang3.SystemUtils;
-import org.cryptomator.common.settings.PwBackend;
+import org.cryptomator.common.settings.KeychainBackend;
 import org.cryptomator.common.settings.Settings;
 
 import javax.inject.Inject;
@@ -21,8 +21,8 @@ public class LinuxSystemKeychainAccess implements KeychainAccessStrategy {
 	// as on Linux the are two possible password backends available:
 	private final Optional<KeychainAccessStrategy> delegate;
 	private final Settings settings;
-	private static EnumSet<PwBackend> availablePwBackends = EnumSet.noneOf(PwBackend.class);
-	private static PwBackend backendActivated = null;
+	private static EnumSet<KeychainBackend> availableKeychainBackends = EnumSet.noneOf(KeychainBackend.class);
+	private static KeychainBackend backendActivated = null;
 	private static boolean isGnomeKeyringAvailable;
 	private static boolean isKdeWalletAvailable;
 
@@ -36,29 +36,29 @@ public class LinuxSystemKeychainAccess implements KeychainAccessStrategy {
 		try { // find out which backends are available
 			KeychainAccessStrategy gnomeKeyring = new LinuxSecretServiceKeychainAccessImpl();
 			if (gnomeKeyring.isSupported()) {
-				LinuxSystemKeychainAccess.availablePwBackends.add(PwBackend.GNOME);
+				LinuxSystemKeychainAccess.availableKeychainBackends.add(KeychainBackend.GNOME);
 				LinuxSystemKeychainAccess.isGnomeKeyringAvailable = true;
 			}
 			KeychainAccessStrategy kdeWallet = new LinuxKDEWalletKeychainAccessImpl();
 			if (kdeWallet.isSupported()) {
-				LinuxSystemKeychainAccess.availablePwBackends.add(PwBackend.KDE);
+				LinuxSystemKeychainAccess.availableKeychainBackends.add(KeychainBackend.KDE);
 				LinuxSystemKeychainAccess.isKdeWalletAvailable = true;
 			}
 
 			// load password backend setting as the preferred backend
-			ObjectProperty<PwBackend> pwSetting =  settings.pwBackend();
+			ObjectProperty<KeychainBackend> pwSetting =  settings.keychainBackend();
 
 			// check for GNOME keyring first, as this gets precedence over
 			// KDE wallet as the former was implemented first
-			if (isGnomeKeyringAvailable && pwSetting.get().equals(PwBackend.GNOME)) {
-					pwSetting.setValue(PwBackend.GNOME);
-					LinuxSystemKeychainAccess.backendActivated = PwBackend.GNOME;
+			if (isGnomeKeyringAvailable && pwSetting.get().equals(KeychainBackend.GNOME)) {
+					pwSetting.setValue(KeychainBackend.GNOME);
+					LinuxSystemKeychainAccess.backendActivated = KeychainBackend.GNOME;
 					return Optional.of(gnomeKeyring);
 			}
 
-			if (isKdeWalletAvailable && pwSetting.get().equals(PwBackend.KDE)) {
-					pwSetting.setValue(PwBackend.KDE);
-					LinuxSystemKeychainAccess.backendActivated = PwBackend.KDE;
+			if (isKdeWalletAvailable && pwSetting.get().equals(KeychainBackend.KDE)) {
+					pwSetting.setValue(KeychainBackend.KDE);
+					LinuxSystemKeychainAccess.backendActivated = KeychainBackend.KDE;
 					return Optional.of(kdeWallet);
 			}
 			return Optional.empty();
@@ -69,11 +69,11 @@ public class LinuxSystemKeychainAccess implements KeychainAccessStrategy {
 
 	/* Getter/Setter */
 
-	public static EnumSet<PwBackend> getAvailablePwBackends() {
-		return availablePwBackends;
+	public static EnumSet<KeychainBackend> getAvailableKeychainBackends() {
+		return availableKeychainBackends;
 	}
 
-	public static PwBackend getBackendActivated() {
+	public static KeychainBackend getBackendActivated() {
 		return backendActivated;
 	}
 

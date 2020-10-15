@@ -38,7 +38,7 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 		out.name("preferredVolumeImpl").value(value.preferredVolumeImpl().get().name());
 		out.name("theme").value(value.theme().get().name());
 		out.name("uiOrientation").value(value.userInterfaceOrientation().get().name());
-		out.name("pwBackend").value(value.pwBackend().get().name());
+		out.name("keychainBackend").value(value.keychainBackend().get().name());
 		out.name("licenseKey").value(value.licenseKey().get());
 		out.endObject();
 	}
@@ -70,7 +70,7 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 				case "preferredVolumeImpl" -> settings.preferredVolumeImpl().set(parsePreferredVolumeImplName(in.nextString()));
 				case "theme" -> settings.theme().set(parseUiTheme(in.nextString()));
 				case "uiOrientation" -> settings.userInterfaceOrientation().set(parseUiOrientation(in.nextString()));
-				case "pwBackend" -> settings.pwBackend().set(parsePwBackend(in.nextString()));
+				case "keychainBackend" -> settings.keychainBackend().set(parseKeychainBackend(in.nextString()));
 				case "licenseKey" -> settings.licenseKey().set(in.nextString());
 				default -> {
 					LOG.warn("Unsupported vault setting found in JSON: " + name);
@@ -110,12 +110,12 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 		}
 	}
 
-	private PwBackend parsePwBackend(String backendName) {
+	private KeychainBackend parseKeychainBackend(String backendName) {
 		try {
-			return PwBackend.valueOf(backendName.toUpperCase());
+			return KeychainBackend.valueOf(backendName.toUpperCase());
 		} catch (IllegalArgumentException e) {
-			LOG.warn("Invalid password backend {}. Defaulting to {}.", backendName, Settings.DEFAULT_PW_BACKEND);
-			return Settings.DEFAULT_PW_BACKEND;
+			LOG.warn("Invalid keychain backend {}. Defaulting to {}.", backendName, Settings.DEFAULT_KEYCHAIN_BACKEND);
+			return Settings.DEFAULT_KEYCHAIN_BACKEND;
 		}
 	}
 

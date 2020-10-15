@@ -16,7 +16,7 @@ import javafx.util.StringConverter;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.Environment;
 import org.cryptomator.common.LicenseHolder;
-import org.cryptomator.common.settings.PwBackend;
+import org.cryptomator.common.settings.KeychainBackend;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.UiTheme;
 import org.cryptomator.keychain.KeychainAccessStrategy;
@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -44,12 +45,12 @@ public class GeneralPreferencesController implements FxController {
 	private final LicenseHolder licenseHolder;
 	private final ExecutorService executor;
 	private final ResourceBundle resourceBundleUiTheme;
-	private final ResourceBundle resourceBundlePwBackend;
+	private final ResourceBundle resourceBundleKcBackend;
 	private final Application application;
 	private final Environment environment;
 	private Optional<KeychainAccessStrategy> keychain;
 	public ChoiceBox<UiTheme> themeChoiceBox;
-	public ChoiceBox<PwBackend> pwBackendChoiceBox;
+	public ChoiceBox<KeychainBackend> keychainBackendChoiceBox;
 	public CheckBox startHiddenCheckbox;
 	public CheckBox debugModeCheckbox;
 	public CheckBox autoStartCheckbox;
@@ -58,7 +59,7 @@ public class GeneralPreferencesController implements FxController {
 	public RadioButton nodeOrientationRtl;
 
 	@Inject
-	GeneralPreferencesController(Settings settings, @Named("trayMenuSupported") boolean trayMenuSupported, Optional<AutoStartStrategy> autoStartStrategy, Optional<KeychainAccessStrategy> keychain, ObjectProperty<SelectedPreferencesTab> selectedTabProperty, LicenseHolder licenseHolder, ExecutorService executor, ResourceBundle resourceBundleUiTheme, ResourceBundle resourceBundlePwBackend, Application application, Environment environment) {
+	GeneralPreferencesController(Settings settings, @Named("trayMenuSupported") boolean trayMenuSupported, Optional<AutoStartStrategy> autoStartStrategy, Optional<KeychainAccessStrategy> keychain, ObjectProperty<SelectedPreferencesTab> selectedTabProperty, LicenseHolder licenseHolder, ExecutorService executor, ResourceBundle resourceBundleUiTheme, ResourceBundle resourceBundleKcBackend, Application application, Environment environment) {
 		this.settings = settings;
 		this.trayMenuSupported = trayMenuSupported;
 		this.autoStartStrategy = autoStartStrategy;
@@ -67,7 +68,7 @@ public class GeneralPreferencesController implements FxController {
 		this.licenseHolder = licenseHolder;
 		this.executor = executor;
 		this.resourceBundleUiTheme = resourceBundleUiTheme;
-		this.resourceBundlePwBackend = resourceBundlePwBackend;
+		this.resourceBundleKcBackend = resourceBundleKcBackend;
 		this.application = application;
 		this.environment = environment;
 	}
@@ -95,10 +96,9 @@ public class GeneralPreferencesController implements FxController {
 		nodeOrientationRtl.setSelected(settings.userInterfaceOrientation().get() == NodeOrientation.RIGHT_TO_LEFT);
 		nodeOrientation.selectedToggleProperty().addListener(this::toggleNodeOrientation);
 
-		pwBackendChoiceBox.getItems().addAll(getAvailableBackends());
-		pwBackendChoiceBox.setValue(LinuxSystemKeychainAccess.getBackendActivated());
-		pwBackendChoiceBox.setConverter(new PwBackendConverter(resourceBundlePwBackend));
-		pwBackendChoiceBox.valueProperty().bindBidirectional(settings.pwBackend());
+		keychainBackendChoiceBox.getItems().addAll(getAvailableBackends());
+		keychainBackendChoiceBox.setConverter(new KeychainBackendConverter(resourceBundleKcBackend));
+		keychainBackendChoiceBox.valueProperty().bindBidirectional(settings.keychainBackend());
 	}
 
 	public boolean isTrayMenuSupported() {
@@ -165,21 +165,21 @@ public class GeneralPreferencesController implements FxController {
 		}
 	}
 
-	private static class PwBackendConverter extends StringConverter<PwBackend> {
+	private static class KeychainBackendConverter extends StringConverter<KeychainBackend> {
 
 		private final ResourceBundle resourceBundle;
 
-		PwBackendConverter(ResourceBundle resourceBundle) {
+		KeychainBackendConverter(ResourceBundle resourceBundle) {
 			this.resourceBundle = resourceBundle;
 		}
 
 		@Override
-		public String toString(PwBackend impl) {
+		public String toString(KeychainBackend impl) {
 			return resourceBundle.getString(impl.getDisplayName());
 		}
 
 		@Override
-		public PwBackend fromString(String string) {
+		public KeychainBackend fromString(String string) {
 			throw new UnsupportedOperationException();
 		}
 	}
@@ -205,12 +205,19 @@ public class GeneralPreferencesController implements FxController {
 		}
 	}
 
-	private PwBackend[] getAvailableBackends() {
-		if (SystemUtils.IS_OS_LINUX && keychain.isPresent()) {
-			EnumSet<PwBackend> backends = LinuxSystemKeychainAccess.getAvailablePwBackends();
-			return backends.size() > 0 ? backends.toArray(PwBackend[]::new) : new PwBackend[]{};
-		} else {
-			return new PwBackend[]{};
+	private KeychainBackend[] getAvailableBackends() {
+		if (!keychain.isPresent()) {
+			return new KeychainBackend[]{};
 		}
+		if (SystemUtils.IS_OS_LINUX) {
+			EnumSet<KeychainBackend> backends = LinuxSystemKeychainAccess.getAvailableKeychainBackends();
+			keychainBackendChoiceBox.setValue(LinuxSystemKeychainAccess.getBackendActivated());
+			return backends.size() > 0 ? backends.toArray(KeychainBackend[]::new) : new KeychainBackend[]{};
+		}
+		if (SystemUtils.IS_OS_MAC || SystemUtils.IS_OS_WINDOWS) {
+			keychainBackendChoiceBox.setValue(Arrays.stream(KeychainBackend.supportedBackends()).findFirst().orElseThrow(IllegalStateException::new));
+			return KeychainBackend.supportedBackends();
+		}
+		return new KeychainBackend[]{};
 	}
 }
