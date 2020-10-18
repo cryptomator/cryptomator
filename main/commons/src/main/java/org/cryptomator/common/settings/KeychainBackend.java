@@ -13,6 +13,7 @@ public enum KeychainBackend {
 	public static KeychainBackend[] supportedBackends() {
 		return Arrays.stream(values()).filter(KeychainBackend::isSupported).toArray(KeychainBackend[]::new);
 	}
+
 	public static KeychainBackend defaultBackend() {
 		if (SystemUtils.IS_OS_LINUX) {
 			return KeychainBackend.GNOME;
@@ -32,6 +33,7 @@ public enum KeychainBackend {
 	public String getDisplayName() {
 		return configName;
 	}
+
 	public boolean isSupported() { return isSupported; }
 
 }
