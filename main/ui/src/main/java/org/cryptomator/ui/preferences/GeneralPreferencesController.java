@@ -44,8 +44,7 @@ public class GeneralPreferencesController implements FxController {
 	private final ObjectProperty<SelectedPreferencesTab> selectedTabProperty;
 	private final LicenseHolder licenseHolder;
 	private final ExecutorService executor;
-	private final ResourceBundle resourceBundleUiTheme;
-	private final ResourceBundle resourceBundleKcBackend;
+	private final ResourceBundle resourceBundle;
 	private final Application application;
 	private final Environment environment;
 	private Optional<KeychainAccessStrategy> keychain;
@@ -59,7 +58,7 @@ public class GeneralPreferencesController implements FxController {
 	public RadioButton nodeOrientationRtl;
 
 	@Inject
-	GeneralPreferencesController(Settings settings, @Named("trayMenuSupported") boolean trayMenuSupported, Optional<AutoStartStrategy> autoStartStrategy, Optional<KeychainAccessStrategy> keychain, ObjectProperty<SelectedPreferencesTab> selectedTabProperty, LicenseHolder licenseHolder, ExecutorService executor, ResourceBundle resourceBundleUiTheme, ResourceBundle resourceBundleKcBackend, Application application, Environment environment) {
+	GeneralPreferencesController(Settings settings, @Named("trayMenuSupported") boolean trayMenuSupported, Optional<AutoStartStrategy> autoStartStrategy, Optional<KeychainAccessStrategy> keychain, ObjectProperty<SelectedPreferencesTab> selectedTabProperty, LicenseHolder licenseHolder, ExecutorService executor, ResourceBundle resourceBundle, Application application, Environment environment) {
 		this.settings = settings;
 		this.trayMenuSupported = trayMenuSupported;
 		this.autoStartStrategy = autoStartStrategy;
@@ -67,8 +66,7 @@ public class GeneralPreferencesController implements FxController {
 		this.selectedTabProperty = selectedTabProperty;
 		this.licenseHolder = licenseHolder;
 		this.executor = executor;
-		this.resourceBundleUiTheme = resourceBundleUiTheme;
-		this.resourceBundleKcBackend = resourceBundleKcBackend;
+		this.resourceBundle = resourceBundle;
 		this.application = application;
 		this.environment = environment;
 	}
@@ -80,7 +78,7 @@ public class GeneralPreferencesController implements FxController {
 			settings.theme().set(UiTheme.LIGHT);
 		}
 		themeChoiceBox.valueProperty().bindBidirectional(settings.theme());
-		themeChoiceBox.setConverter(new UiThemeConverter(resourceBundleUiTheme));
+		themeChoiceBox.setConverter(new UiThemeConverter(resourceBundle));
 
 		startHiddenCheckbox.selectedProperty().bindBidirectional(settings.startHidden());
 
@@ -97,7 +95,7 @@ public class GeneralPreferencesController implements FxController {
 		nodeOrientation.selectedToggleProperty().addListener(this::toggleNodeOrientation);
 
 		keychainBackendChoiceBox.getItems().addAll(getAvailableBackends());
-		keychainBackendChoiceBox.setConverter(new KeychainBackendConverter(resourceBundleKcBackend));
+		keychainBackendChoiceBox.setConverter(new KeychainBackendConverter(resourceBundle));
 		keychainBackendChoiceBox.valueProperty().bindBidirectional(settings.keychainBackend());
 	}
 
