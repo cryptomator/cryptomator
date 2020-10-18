@@ -95,6 +95,12 @@ public class GeneralPreferencesController implements FxController {
 		nodeOrientation.selectedToggleProperty().addListener(this::toggleNodeOrientation);
 
 		keychainBackendChoiceBox.getItems().addAll(getAvailableBackends());
+		if (keychain.isPresent() && SystemUtils.IS_OS_LINUX) {
+			keychainBackendChoiceBox.setValue(LinuxSystemKeychainAccess.getBackendActivated());
+		}
+		if (keychain.isPresent() && (SystemUtils.IS_OS_MAC || SystemUtils.IS_OS_WINDOWS)) {
+			keychainBackendChoiceBox.setValue(Arrays.stream(KeychainBackend.supportedBackends()).findFirst().orElseThrow(IllegalStateException::new));
+		}
 		keychainBackendChoiceBox.setConverter(new KeychainBackendConverter(resourceBundle));
 		keychainBackendChoiceBox.valueProperty().bindBidirectional(settings.keychainBackend());
 	}
@@ -209,11 +215,9 @@ public class GeneralPreferencesController implements FxController {
 		}
 		if (SystemUtils.IS_OS_LINUX) {
 			EnumSet<KeychainBackend> backends = LinuxSystemKeychainAccess.getAvailableKeychainBackends();
-			keychainBackendChoiceBox.setValue(LinuxSystemKeychainAccess.getBackendActivated());
 			return backends.size() > 0 ? backends.toArray(KeychainBackend[]::new) : new KeychainBackend[]{};
 		}
 		if (SystemUtils.IS_OS_MAC || SystemUtils.IS_OS_WINDOWS) {
-			keychainBackendChoiceBox.setValue(Arrays.stream(KeychainBackend.supportedBackends()).findFirst().orElseThrow(IllegalStateException::new));
 			return KeychainBackend.supportedBackends();
 		}
 		return new KeychainBackend[]{};
