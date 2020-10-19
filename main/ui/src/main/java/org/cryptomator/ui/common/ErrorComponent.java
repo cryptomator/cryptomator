@@ -20,21 +20,21 @@ public interface ErrorComponent {
 		stage.setScene(scene());
 		stage.show();
 	}
-	
+
 	@Subcomponent.Builder
 	interface Builder {
-		
+
 		@BindsInstance
 		Builder cause(Throwable cause);
-		
+
 		@BindsInstance
 		Builder window(Stage window);
-		
+
 		@BindsInstance
 		Builder returnToScene(@Nullable Scene previousScene);
 
 		ErrorComponent build();
-		
+
 	}
 
 }

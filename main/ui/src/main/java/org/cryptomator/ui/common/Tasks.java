@@ -5,6 +5,13 @@
  *******************************************************************************/
 package org.cryptomator.ui.common;
 
+import javafx.application.Platform;
+import javafx.concurrent.ScheduledService;
+import javafx.concurrent.Task;
+import javafx.util.Duration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -14,16 +21,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import javafx.application.Platform;
-import javafx.concurrent.ScheduledService;
-import javafx.concurrent.Task;
-import javafx.util.Duration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public class Tasks {
 
 	private static final Logger LOG = LoggerFactory.getLogger(Tasks.class);
+
 	public static <T> TaskBuilder<T> create(Callable<T> callable) {
 		return new TaskBuilder<>(callable);
 	}
