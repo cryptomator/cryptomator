@@ -17,8 +17,8 @@ import java.util.Optional;
 @Singleton
 public class LinuxSystemKeychainAccess implements KeychainAccessStrategy {
 
-	// the actual implementation is hidden in this delegate object,
-	// as on Linux the are two possible password backends available:
+	// the actual implementation is hidden in this delegate objects which are loaded via reflection,
+	// as it depends on libraries that aren't necessarily available:
 	private final Optional<KeychainAccessStrategy> delegate;
 	private final Settings settings;
 	private static EnumSet<KeychainBackend> availableKeychainBackends = EnumSet.noneOf(KeychainBackend.class);
@@ -34,12 +34,14 @@ public class LinuxSystemKeychainAccess implements KeychainAccessStrategy {
 
 	private Optional<KeychainAccessStrategy> constructKeychainAccess() {
 		try { // find out which backends are available
-			KeychainAccessStrategy gnomeKeyring = new LinuxSecretServiceKeychainAccessImpl();
+			Class<?> clazz = Class.forName("org.cryptomator.keychain.LinuxSecretServiceKeychainAccessImpl");
+			KeychainAccessStrategy gnomeKeyring = (KeychainAccessStrategy) clazz.getDeclaredConstructor().newInstance();
 			if (gnomeKeyring.isSupported()) {
 				LinuxSystemKeychainAccess.availableKeychainBackends.add(KeychainBackend.GNOME);
 				LinuxSystemKeychainAccess.isGnomeKeyringAvailable = true;
 			}
-			KeychainAccessStrategy kdeWallet = new LinuxKDEWalletKeychainAccessImpl();
+			clazz = Class.forName("org.cryptomator.keychain.LinuxKDEWalletKeychainAccessImpl");
+			KeychainAccessStrategy kdeWallet = (KeychainAccessStrategy) clazz.getDeclaredConstructor().newInstance();
 			if (kdeWallet.isSupported()) {
 				LinuxSystemKeychainAccess.availableKeychainBackends.add(KeychainBackend.KDE);
 				LinuxSystemKeychainAccess.isKdeWalletAvailable = true;
