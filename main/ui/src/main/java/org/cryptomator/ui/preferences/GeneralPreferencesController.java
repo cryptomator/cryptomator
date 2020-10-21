@@ -215,7 +215,7 @@ public class GeneralPreferencesController implements FxController {
 		}
 		if (SystemUtils.IS_OS_LINUX) {
 			EnumSet<KeychainBackend> backends = LinuxSystemKeychainAccess.getAvailableKeychainBackends();
-			return backends.size() > 0 ? backends.toArray(KeychainBackend[]::new) : new KeychainBackend[]{};
+			return backends.toArray(KeychainBackend[]::new);
 		}
 		if (SystemUtils.IS_OS_MAC || SystemUtils.IS_OS_WINDOWS) {
 			return KeychainBackend.supportedBackends();
