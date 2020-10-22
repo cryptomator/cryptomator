@@ -73,6 +73,20 @@ public class UnlockWorkflow extends Task<Boolean> {
 		this.successScene = successScene;
 		this.invalidMountPointScene = invalidMountPointScene;
 		this.errorComponent = errorComponent;
+
+		setOnScheduled(event -> vault.setState(VaultState.PROCESSING));
+		setOnSucceeded(event -> vault.setState(VaultState.UNLOCKED));
+		setOnCancelled(event -> vault.setState(VaultState.LOCKED));
+
+		setOnFailed(event -> {
+			vault.setState(VaultState.LOCKED);
+			Throwable throwable = event.getSource().getException();
+			if (throwable instanceof InvalidMountPointException) {
+				handleInvalidMountPoint((InvalidMountPointException) throwable);
+			} else {
+				handleGenericError(throwable);
+			}
+		});
 	}
 
 	@Override
@@ -85,12 +99,6 @@ public class UnlockWorkflow extends Task<Boolean> {
 				cancel(false); // set Tasks state to cancelled
 				return false;
 			}
-		} catch (InvalidMountPointException e) {
-			handleInvalidMountPoint(e);
-			throw e; // rethrow to trigger correct exception handling in Task
-		} catch (Exception e) {
-			handleGenericError(e);
-			throw e; // rethrow to trigger correct exception handling in Task
 		} finally {
 			wipePassword(password.get());
 			wipePassword(savedPassword.orElse(null));
@@ -216,25 +224,4 @@ public class UnlockWorkflow extends Task<Boolean> {
 			Arrays.fill(pw, ' ');
 		}
 	}
-
-	@Override
-	protected void scheduled() {
-		vault.setState(VaultState.PROCESSING);
-	}
-
-	@Override
-	protected void succeeded() {
-		vault.setState(VaultState.UNLOCKED);
-	}
-
-	@Override
-	protected void failed() {
-		vault.setState(VaultState.LOCKED);
-	}
-
-	@Override
-	protected void cancelled() {
-		vault.setState(VaultState.LOCKED);
-	}
-
 }
