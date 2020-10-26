@@ -44,8 +44,8 @@ public class VaultService {
 	 */
 	public Task<Vault> createRevealTask(Vault vault) {
 		Task<Vault> task = new RevealVaultTask(vault);
-		task.setOnSucceeded(evt -> LOG.info("Revealed {}", vault.getDisplayableName()));
-		task.setOnFailed(evt -> LOG.error("Failed to reveal " + vault.getDisplayableName(), evt.getSource().getException()));
+		task.setOnSucceeded(evt -> LOG.info("Revealed {}", vault.getDisplayName()));
+		task.setOnFailed(evt -> LOG.error("Failed to reveal " + vault.getDisplayName(), evt.getSource().getException()));
 		return task;
 	}
 
@@ -68,8 +68,8 @@ public class VaultService {
 	 */
 	public Task<Vault> createLockTask(Vault vault, boolean forced) {
 		Task<Vault> task = new LockVaultTask(vault, forced);
-		task.setOnSucceeded(evt -> LOG.info("Locked {}", vault.getDisplayableName()));
-		task.setOnFailed(evt -> LOG.error("Failed to lock " + vault.getDisplayableName(), evt.getSource().getException()));
+		task.setOnSucceeded(evt -> LOG.info("Locked {}", vault.getDisplayName()));
+		task.setOnFailed(evt -> LOG.error("Failed to lock " + vault.getDisplayName(), evt.getSource().getException()));
 		return task;
 	}
 
@@ -94,7 +94,7 @@ public class VaultService {
 		List<Task<Vault>> lockTasks = vaults.stream().map(v -> new LockVaultTask(v, forced)).collect(Collectors.toUnmodifiableList());
 		lockTasks.forEach(executorService::execute);
 		Task<Collection<Vault>> task = new WaitForTasksTask(lockTasks);
-		String vaultNames = vaults.stream().map(Vault::getDisplayableName).collect(Collectors.joining(", "));
+		String vaultNames = vaults.stream().map(Vault::getDisplayName).collect(Collectors.joining(", "));
 		task.setOnSucceeded(evt -> LOG.info("Locked {}", vaultNames));
 		task.setOnFailed(evt -> LOG.error("Failed to lock vaults " + vaultNames, evt.getSource().getException()));
 		return task;

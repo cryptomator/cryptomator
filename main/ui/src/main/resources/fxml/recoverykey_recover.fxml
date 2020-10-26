@@ -21,7 +21,7 @@
 		<Insets topRightBottomLeft="12"/>
 	</padding>
 	<children>
-		<FormattedLabel format="%recoveryKey.recover.prompt" arg1="${controller.vault.displayableName}" wrapText="true"/>
+		<FormattedLabel format="%recoveryKey.recover.prompt" arg1="${controller.vault.displayName}" wrapText="true"/>
 
 		<TextArea wrapText="true" prefRowCount="4" fx:id="textarea" textFormatter="${controller.recoveryKeyTextFormatter}" onKeyPressed="#onKeyPressed"/>
 		

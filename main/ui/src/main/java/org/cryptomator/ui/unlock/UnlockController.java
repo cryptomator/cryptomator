@@ -77,7 +77,7 @@ public class UnlockController implements FxController {
 		this.unlockButtonContentDisplay = Bindings.createObjectBinding(this::getUnlockButtonContentDisplay, passwordEntryLock.awaitingInteraction());
 		this.userInteractionDisabled = passwordEntryLock.awaitingInteraction().not();
 		this.unlockButtonDisabled = new SimpleBooleanProperty();
-		this.vaultName = WeakBindings.bindString(vault.displayableNameProperty());
+		this.vaultName = WeakBindings.bindString(vault.displayNameProperty());
 		this.window.setOnCloseRequest(windowEvent -> cancel());
 	}
 

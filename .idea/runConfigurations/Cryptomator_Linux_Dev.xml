@@ -1,0 +1,10 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Cryptomator Linux Dev" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="org.cryptomator.launcher.Cryptomator" />
+    <module name="launcher" />
+    <option name="VM_PARAMETERS" value="-Djdk.gtk.version=2 -Duser.language=en -Dcryptomator.settingsPath=&quot;~/.config/Cryptomator-Dev/settings.json&quot; -Dcryptomator.ipcPortPath=&quot;~/.config/Cryptomator-Dev/ipcPort.bin&quot; -Dcryptomator.logDir=&quot;~/.local/share/Cryptomator-Dev/logs&quot; -Dcryptomator.mountPointsDir=&quot;~/.local/share/Cryptomator-Dev/mnt&quot; -Dfuse.experimental=&quot;true&quot; -Xss20m -Xmx512m" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

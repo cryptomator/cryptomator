@@ -1,5 +1,6 @@
 package org.cryptomator.ui.common;
 
+import com.tobiasdiez.easybind.EasyBind;
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
@@ -10,7 +11,6 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import org.cryptomator.ui.controls.FontAwesome5IconView;
 import org.cryptomator.ui.controls.NiceSecurePasswordField;
-import org.fxmisc.easybind.EasyBind;
 
 import java.util.ResourceBundle;
 
@@ -24,10 +24,12 @@ public class NewPasswordController implements FxController {
 	public NiceSecurePasswordField passwordField;
 	public NiceSecurePasswordField reenterField;
 	public Label passwordStrengthLabel;
+	public FontAwesome5IconView passwordStrengthCheckmark;
+	public FontAwesome5IconView passwordStrengthWarning;
+	public FontAwesome5IconView passwordStrengthCross;
 	public Label passwordMatchLabel;
-	public FontAwesome5IconView checkmark;
-	public FontAwesome5IconView warning;
-	public FontAwesome5IconView cross;
+	public FontAwesome5IconView passwordMatchCheckmark;
+	public FontAwesome5IconView passwordMatchCross;
 
 	public NewPasswordController(ResourceBundle resourceBundle, PasswordStrengthUtil strengthRater, ObjectProperty<CharSequence> password) {
 		this.resourceBundle = resourceBundle;
@@ -45,7 +47,7 @@ public class NewPasswordController implements FxController {
 		BooleanBinding passwordsMatch = Bindings.createBooleanBinding(this::hasSamePasswordInBothFields, passwordField.textProperty(), reenterField.textProperty());
 		BooleanBinding reenterFieldNotEmpty = reenterField.textProperty().isNotEmpty();
 		passwordMatchLabel.visibleProperty().bind(reenterFieldNotEmpty);
-		passwordMatchLabel.graphicProperty().bind(Bindings.when(passwordsMatch.and(reenterFieldNotEmpty)).then(checkmark).otherwise(cross));
+		passwordMatchLabel.graphicProperty().bind(Bindings.when(passwordsMatch.and(reenterFieldNotEmpty)).then(passwordMatchCheckmark).otherwise(passwordMatchCross));
 		passwordMatchLabel.textProperty().bind(Bindings.when(passwordsMatch.and(reenterFieldNotEmpty)).then(resourceBundle.getString("newPassword.passwordsMatch")).otherwise(resourceBundle.getString("newPassword.passwordsDoNotMatch")));
 
 		passwordField.textProperty().addListener(this::passwordsDidChange);
@@ -56,11 +58,11 @@ public class NewPasswordController implements FxController {
 		if (passwordField.getCharacters().length() == 0) {
 			return null;
 		} else if (passwordStrength.intValue() <= -1) {
-			return cross;
+			return passwordStrengthCross;
 		} else if (passwordStrength.intValue() < 3) {
-			return warning;
+			return passwordStrengthWarning;
 		} else {
-			return checkmark;
+			return passwordStrengthCheckmark;
 		}
 	}
 

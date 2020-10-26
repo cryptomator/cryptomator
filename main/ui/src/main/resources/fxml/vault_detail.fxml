@@ -26,9 +26,9 @@
 			</StackPane>
 			<VBox spacing="4" HBox.hgrow="ALWAYS">
 				<HBox spacing="12">
-					<Label styleClass="label-large" text="${controller.vault.displayableName}">
+					<Label styleClass="label-large" text="${controller.vault.displayName}">
 						<tooltip>
-							<Tooltip text="${controller.vault.displayableName}"/>
+							<Tooltip text="${controller.vault.displayName}"/>
 						</tooltip>
 					</Label>
 					<Region HBox.hgrow="ALWAYS"/>

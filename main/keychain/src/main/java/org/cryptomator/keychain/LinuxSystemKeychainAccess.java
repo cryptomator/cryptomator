@@ -7,24 +7,28 @@ import javax.inject.Singleton;
 import java.util.Optional;
 
 /**
- * A facade to LinuxSecretServiceKeychainAccessImpl that doesn't depend on libraries that are unavailable on Mac and Windows.
+ * A facade to LinuxSecretServiceKeychainAccessImpl and LinuxKDEWalletKeychainAccessImpl
+ * that depend on libraries that are unavailable on Mac and Windows.
  */
 @Singleton
-public class LinuxSecretServiceKeychainAccess implements KeychainAccessStrategy {
+public class LinuxSystemKeychainAccess implements KeychainAccessStrategy {
 
-	// the actual implementation is hidden in this delegate object which is loaded via reflection,
+	// the actual implementation is hidden in this delegate objects which are loaded via reflection,
 	// as it depends on libraries that aren't necessarily available:
 	private final Optional<KeychainAccessStrategy> delegate;
 
 	@Inject
-	public LinuxSecretServiceKeychainAccess() {
-		this.delegate = constructGnomeKeyringKeychainAccess();
+	public LinuxSystemKeychainAccess() {
+		this.delegate = constructKeychainAccess();
 	}
 
-	private static Optional<KeychainAccessStrategy> constructGnomeKeyringKeychainAccess() {
-		try {
+	private static Optional<KeychainAccessStrategy> constructKeychainAccess() {
+		try { // is gnome-keyring or kwallet installed?
 			Class<?> clazz = Class.forName("org.cryptomator.keychain.LinuxSecretServiceKeychainAccessImpl");
 			KeychainAccessStrategy instance = (KeychainAccessStrategy) clazz.getDeclaredConstructor().newInstance();
+			if (instance.isSupported()) return Optional.of(instance);
+			clazz = Class.forName("org.cryptomator.keychain.LinuxKDEWalletKeychainAccessImpl");
+			instance = (KeychainAccessStrategy) clazz.getDeclaredConstructor().newInstance();
 			return Optional.of(instance);
 		} catch (Exception e) {
 			return Optional.empty();

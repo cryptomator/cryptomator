@@ -2,10 +2,11 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.CheckBox?>
-<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.control.ChoiceBox?>
-<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
 <VBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
 	  fx:controller="org.cryptomator.ui.vaultoptions.GeneralVaultOptionsController"
@@ -14,6 +15,11 @@
 		<Insets topRightBottomLeft="12"/>
 	</padding>
 	<children>
+		<HBox spacing="6" alignment="CENTER_LEFT">
+			<Label text="%vaultOptions.general.vaultName"/>
+			<TextField fx:id="vaultName"/>
+		</HBox>
+
 		<CheckBox text="%vaultOptions.general.unlockAfterStartup" fx:id="unlockOnStartupCheckbox"/>
 
 		<HBox spacing="6" alignment="CENTER_LEFT">

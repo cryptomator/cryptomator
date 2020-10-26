@@ -27,7 +27,8 @@
 				<FontAwesome5IconView styleClass="glyph-icon-white" glyph="EXCLAMATION" glyphSize="24"/>
 			</StackPane>
 			<VBox spacing="6" HBox.hgrow="ALWAYS">
-				<FormattedLabel format="%unlock.error.invalidMountPoint" arg1="${controller.mountPoint}" wrapText="true"/>
+				<FormattedLabel visible="${controller.mustExist}" managed="${controller.mustExist}" format="%unlock.error.invalidMountPoint.notExisting" arg1="${controller.mountPoint}" wrapText="true"/>
+				<FormattedLabel visible="${!controller.mustExist}" managed="${!controller.mustExist}" format="%unlock.error.invalidMountPoint.existing" arg1="${controller.mountPoint}" wrapText="true"/>
 			</VBox>
 		</HBox>
 

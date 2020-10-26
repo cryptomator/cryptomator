@@ -53,7 +53,7 @@ public class QuitController implements FxController {
 
 		Task<Collection<Vault>> lockAllTask = vaultService.createLockAllTask(unlockedVaults, false);
 		lockAllTask.setOnSucceeded(evt -> {
-			LOG.info("Locked {}", lockAllTask.getValue().stream().map(Vault::getDisplayableName).collect(Collectors.joining(", ")));
+			LOG.info("Locked {}", lockAllTask.getValue().stream().map(Vault::getDisplayName).collect(Collectors.joining(", ")));
 			if (unlockedVaults.isEmpty()) {
 				window.close();
 				response.performQuit();

@@ -5,6 +5,7 @@
  *******************************************************************************/
 package org.cryptomator.common;
 
+import com.tobiasdiez.easybind.EasyBind;
 import dagger.Module;
 import dagger.Provides;
 import javafx.beans.binding.Binding;
@@ -17,7 +18,6 @@ import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultComponent;
 import org.cryptomator.common.vaults.VaultListManager;
 import org.cryptomator.frontend.webdav.WebDavServer;
-import org.fxmisc.easybind.EasyBind;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

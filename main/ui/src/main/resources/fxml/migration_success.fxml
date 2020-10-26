@@ -25,7 +25,7 @@
 				<Circle styleClass="glyph-icon-primary" radius="24"/>
 				<FontAwesome5IconView styleClass="glyph-icon-white" glyph="CHECK" glyphSize="24"/>
 			</StackPane>
-			<FormattedLabel format="%migration.success.nextStepsInstructions" arg1="${controller.vault.displayableName}" wrapText="true" HBox.hgrow="ALWAYS"/>
+			<FormattedLabel format="%migration.success.nextStepsInstructions" arg1="${controller.vault.displayName}" wrapText="true" HBox.hgrow="ALWAYS"/>
 		</HBox>
 
 		<VBox alignment="BOTTOM_CENTER" VBox.vgrow="ALWAYS">

@@ -1,4 +1,5 @@
 #!/bin/sh
+cd $(dirname $0)
 java \
 	-cp "libs/*" \
 	-Dcryptomator.settingsPath="~/.config/Cryptomator/settings.json" \

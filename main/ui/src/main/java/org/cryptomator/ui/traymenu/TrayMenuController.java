@@ -80,7 +80,7 @@ class TrayMenuController {
 	}
 
 	private Menu buildSubmenu(Vault vault) {
-		Menu submenu = new Menu(vault.getDisplayableName());
+		Menu submenu = new Menu(vault.getDisplayName());
 
 		if (vault.isLocked()) {
 			MenuItem unlockItem = new MenuItem(resourceBundle.getString("traymenu.vault.unlock"));

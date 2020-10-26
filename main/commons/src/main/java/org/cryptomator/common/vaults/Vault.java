@@ -16,7 +16,9 @@ import javafx.beans.binding.StringBinding;
 import javafx.beans.property.ObjectProperty;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.LazyInitializer;
+import org.cryptomator.common.mountpoint.InvalidMountPointException;
 import org.cryptomator.common.settings.VaultSettings;
+import org.cryptomator.common.vaults.Volume.VolumeException;
 import org.cryptomator.cryptofs.CryptoFileSystem;
 import org.cryptomator.cryptofs.CryptoFileSystemProperties;
 import org.cryptomator.cryptofs.CryptoFileSystemProperties.FileSystemFlags;
@@ -33,11 +35,11 @@ import javax.inject.Named;
 import javax.inject.Provider;
 import java.io.IOException;
 import java.nio.file.NoSuchFileException;
-import java.nio.file.NotDirectoryException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.EnumSet;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -56,7 +58,7 @@ public class Vault {
 	private final ObjectProperty<VaultState> state;
 	private final ObjectProperty<Exception> lastKnownException;
 	private final VaultStats stats;
-	private final StringBinding displayableName;
+	private final StringBinding displayName;
 	private final StringBinding displayablePath;
 	private final BooleanBinding locked;
 	private final BooleanBinding processing;
@@ -78,7 +80,7 @@ public class Vault {
 		this.state = state;
 		this.lastKnownException = lastKnownException;
 		this.stats = stats;
-		this.displayableName = Bindings.createStringBinding(this::getDisplayableName, vaultSettings.path());
+		this.displayName = Bindings.createStringBinding(this::getDisplayName, vaultSettings.displayName());
 		this.displayablePath = Bindings.createStringBinding(this::getDisplayablePath, vaultSettings.path());
 		this.locked = Bindings.createBooleanBinding(this::isLocked, state);
 		this.processing = Bindings.createBooleanBinding(this::isProcessing, state);
@@ -120,16 +122,13 @@ public class Vault {
 		return CryptoFileSystemProvider.newFileSystem(getPath(), fsProps);
 	}
 
-	public synchronized void unlock(CharSequence passphrase) throws CryptoException, IOException, Volume.VolumeException {
-		if (vaultSettings.useCustomMountPath().get() && Strings.isNullOrEmpty(vaultSettings.customMountPath().get())) {
-			throw new NotDirectoryException("");
-		}
+	public synchronized void unlock(CharSequence passphrase) throws CryptoException, IOException, VolumeException, InvalidMountPointException {
 		CryptoFileSystem fs = getCryptoFileSystem(passphrase);
 		volume = volumeProvider.get();
 		volume.mount(fs, getEffectiveMountFlags());
 	}
 
-	public synchronized void lock(boolean forced) throws Volume.VolumeException {
+	public synchronized void lock(boolean forced) throws VolumeException {
 		if (forced && volume.supportsForcedUnmount()) {
 			volume.unmountForced();
 		} else {
@@ -145,7 +144,7 @@ public class Vault {
 		}
 	}
 
-	public void reveal() throws Volume.VolumeException {
+	public void reveal() throws VolumeException {
 		volume.reveal();
 	}
 
@@ -225,13 +224,12 @@ public class Vault {
 		return state.get() == VaultState.ERROR;
 	}
 
-	public StringBinding displayableNameProperty() {
-		return displayableName;
+	public StringBinding displayNameProperty() {
+		return displayName;
 	}
 
-	public String getDisplayableName() {
-		Path p = vaultSettings.path().get();
-		return p.getFileName().toString();
+	public String getDisplayName() {
+		return vaultSettings.displayName().get();
 	}
 
 	public StringBinding accessPointProperty() {
@@ -317,6 +315,10 @@ public class Vault {
 
 	public String getId() {
 		return vaultSettings.getId();
+	}
+
+	public Optional<Volume> getVolume() {
+		return Optional.ofNullable(this.volume);
 	}
 
 	// ******************************************************************************

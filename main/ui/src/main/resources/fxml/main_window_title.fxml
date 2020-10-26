@@ -1,5 +1,6 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Hyperlink?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.HBox?>
@@ -20,7 +21,17 @@
 	</padding>
 	<children>
 		<Label text="CRYPTOMATOR"/>
+
 		<Region HBox.hgrow="ALWAYS"/>
+
+		<Hyperlink onAction="#showGeneralPreferences" focusTraversable="false" visible="${controller.debugModeEnabled}" styleClass="badge-debug" text="DEBUG MODE" textFill="white">
+			<tooltip>
+				<Tooltip text="%main.debugModeEnabled.tooltip"/>
+			</tooltip>
+		</Hyperlink>
+
+		<Region HBox.hgrow="ALWAYS"/>
+
 		<Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#showDonationKeyPreferences" focusTraversable="false" visible="${!controller.licenseHolder.validLicense}">
 			<graphic>
 				<StackPane>
@@ -30,14 +41,6 @@
 			</graphic>
 			<tooltip>
 				<Tooltip text="%main.donationKeyMissing.tooltip"/>
-			</tooltip>
-		</Button>
-		<Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#showGeneralPreferences" focusTraversable="false" visible="${controller.debugModeEnabled}">
-			<graphic>
-				<FontAwesome5IconView glyph="BUG" glyphSize="16"/>
-			</graphic>
-			<tooltip>
-				<Tooltip text="%main.debugModeEnabled.tooltip"/>
 			</tooltip>
 		</Button>
 		<Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#showPreferences" focusTraversable="false">

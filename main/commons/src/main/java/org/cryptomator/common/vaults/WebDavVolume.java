@@ -3,6 +3,7 @@ package org.cryptomator.common.vaults;
 
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VaultSettings;
+import org.cryptomator.common.settings.VolumeImpl;
 import org.cryptomator.cryptofs.CryptoFileSystem;
 import org.cryptomator.frontend.webdav.WebDavServer;
 import org.cryptomator.frontend.webdav.mount.MountParams;
@@ -98,7 +99,12 @@ public class WebDavVolume implements Volume {
 
 	@Override
 	public Optional<Path> getMountPoint() {
-		return Optional.ofNullable(mountPoint);
+		return Optional.ofNullable(mountPoint); //TODO
+	}
+
+	@Override
+	public MountPointRequirement getMountPointRequirement() {
+		return MountPointRequirement.NONE;
 	}
 
 	private String getLocalhostAliasOrNull() {
@@ -124,6 +130,11 @@ public class WebDavVolume implements Volume {
 	@Override
 	public boolean isSupported() {
 		return WebDavVolume.isSupportedStatic();
+	}
+
+	@Override
+	public VolumeImpl getImplementationType() {
+		return VolumeImpl.WEBDAV;
 	}
 
 	@Override

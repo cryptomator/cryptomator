@@ -1,10 +1,10 @@
 package org.cryptomator.ui.mainwindow;
 
+import com.tobiasdiez.easybind.EasyBind;
 import javafx.beans.binding.Binding;
 import javafx.beans.property.ObjectProperty;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.FxController;
-import org.fxmisc.easybind.EasyBind;
 
 import javax.inject.Inject;
 import java.io.ByteArrayOutputStream;
@@ -18,14 +18,20 @@ public class VaultDetailUnknownErrorController implements FxController {
 
 	@Inject
 	public VaultDetailUnknownErrorController(ObjectProperty<Vault> vault) {
-		this.stackTrace = EasyBind.select(vault).selectObject(Vault::lastKnownExceptionProperty).map(this::provideStackTrace).orElse("");
+		this.stackTrace = EasyBind.select(vault) //
+				.selectObject(Vault::lastKnownExceptionProperty) //
+				.map(this::provideStackTrace);
 	}
 
 	private String provideStackTrace(Throwable cause) {
 		// TODO deduplicate ErrorModule.java
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		cause.printStackTrace(new PrintStream(baos));
-		return baos.toString(StandardCharsets.UTF_8);
+		if (cause != null) {
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			cause.printStackTrace(new PrintStream(baos));
+			return baos.toString(StandardCharsets.UTF_8);
+		} else {
+			return "";
+		}
 	}
 
 	/* Getter/Setter */

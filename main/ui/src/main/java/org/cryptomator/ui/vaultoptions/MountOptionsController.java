@@ -18,6 +18,7 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
 import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.common.Environment;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VolumeImpl;
 import org.cryptomator.common.vaults.Vault;
@@ -42,7 +43,6 @@ public class MountOptionsController implements FxController {
 	private final BooleanBinding webDavAndWindows;
 	private final WindowsDriveLetters windowsDriveLetters;
 	private final ResourceBundle resourceBundle;
-	public TextField driveName;
 	public CheckBox readOnlyCheckbox;
 	public CheckBox customMountFlagsCheckbox;
 	public TextField mountFlags;
@@ -52,22 +52,31 @@ public class MountOptionsController implements FxController {
 	public RadioButton mountPointCustomDir;
 	public ChoiceBox<String> driveLetterSelection;
 
+	//FUSE + Windows -> Disable some (experimental) features for the user because they are unstable
+	//Use argument Dfuse.experimental="true" to override
+	private final BooleanBinding restrictToStableFuseOnWindows;
+
 	@Inject
-	MountOptionsController(@VaultOptionsWindow Stage window, @VaultOptionsWindow Vault vault, Settings settings, WindowsDriveLetters windowsDriveLetters, ResourceBundle resourceBundle) {
+	MountOptionsController(@VaultOptionsWindow Stage window, @VaultOptionsWindow Vault vault, Settings settings, WindowsDriveLetters windowsDriveLetters, ResourceBundle resourceBundle, Environment environment) {
 		this.window = window;
 		this.vault = vault;
 		this.webDavAndWindows = settings.preferredVolumeImpl().isEqualTo(VolumeImpl.WEBDAV).and(osIsWindows);
 		this.windowsDriveLetters = windowsDriveLetters;
 		this.resourceBundle = resourceBundle;
+
+		BooleanBinding isFuseOnWindows = settings.preferredVolumeImpl().isEqualTo(VolumeImpl.FUSE).and(osIsWindows);
+		this.restrictToStableFuseOnWindows = isFuseOnWindows.and(new SimpleBooleanProperty(!environment.useExperimentalFuse())); //Is FUSE on Win and is NOT experimental fuse enabled
 	}
 
 	@FXML
 	public void initialize() {
-		driveName.textProperty().bindBidirectional(vault.getVaultSettings().mountName());
 
 		// readonly:
 		readOnlyCheckbox.selectedProperty().bindBidirectional(vault.getVaultSettings().usesReadOnlyMode());
-		readOnlyCheckbox.disableProperty().bind(customMountFlagsCheckbox.selectedProperty());
+		if(getRestrictToStableFuseOnWindows()) {
+			readOnlyCheckbox.setSelected(false); // to prevent invalid states
+		}
+		readOnlyCheckbox.disableProperty().bind(customMountFlagsCheckbox.selectedProperty().or(restrictToStableFuseOnWindows));
 
 		// custom mount flags:
 		mountFlags.disableProperty().bind(customMountFlagsCheckbox.selectedProperty().not());
@@ -85,7 +94,7 @@ public class MountOptionsController implements FxController {
 		driveLetterSelection.setConverter(new WinDriveLetterLabelConverter(windowsDriveLetters, resourceBundle));
 		driveLetterSelection.setValue(vault.getVaultSettings().winDriveLetter().get());
 
-		if (vault.getVaultSettings().useCustomMountPath().get()) {
+		if (vault.getVaultSettings().useCustomMountPath().get() && !getRestrictToStableFuseOnWindows() /* to prevent invalid states */) {
 			mountPoint.selectToggle(mountPointCustomDir);
 		} else if (!Strings.isNullOrEmpty(vault.getVaultSettings().winDriveLetter().get())) {
 			mountPoint.selectToggle(mountPointWinDriveLetter);
@@ -191,6 +200,10 @@ public class MountOptionsController implements FxController {
 
 	public String getCustomMountPath() {
 		return vault.getVaultSettings().customMountPath().get();
+	}
+
+	public Boolean getRestrictToStableFuseOnWindows() {
+		return restrictToStableFuseOnWindows.get();
 	}
 
 }
