@@ -36,6 +36,7 @@ public class VaultStats {
 		this.updateService = new UpdateStatsService();
 		updateService.setExecutor(executor);
 		updateService.setPeriod(Duration.seconds(1));
+		updateService.setOnFailed(event -> LOG.error("Error in UpdateStateService.", event.getSource().getException()));
 
 		state.addListener(this::vaultStateChanged);
 	}
