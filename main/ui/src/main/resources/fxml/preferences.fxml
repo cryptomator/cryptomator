@@ -3,8 +3,8 @@
 <?import org.cryptomator.ui.controls.FontAwesome5IconView?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
-<TabPane xmlns="http://javafx.com/javafx"
-		 xmlns:fx="http://javafx.com/fxml"
+<TabPane xmlns:fx="http://javafx.com/fxml"
+		 xmlns="http://javafx.com/javafx"
 		 fx:id="tabPane"
 		 fx:controller="org.cryptomator.ui.preferences.PreferencesController"
 		 minWidth="-Infinity"
