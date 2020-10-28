@@ -174,6 +174,8 @@ public class Tasks {
 
 		RestartingService(Supplier<Task<T>> taskFactory) {
 			this.taskFactory = taskFactory;
+
+			setOnFailed(event -> LOG.error("Failed to execute service", getException()));
 		}
 
 		@Override

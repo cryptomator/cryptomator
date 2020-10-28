@@ -108,6 +108,8 @@ public class VaultService {
 		 */
 		public RevealVaultTask(Vault vault) {
 			this.vault = vault;
+
+			setOnFailed(evt -> LOG.error("Failed to reveal " + vault.getDisplayName(), getException()));
 		}
 
 		@Override
@@ -126,6 +128,8 @@ public class VaultService {
 
 		public WaitForTasksTask(Collection<Task<Vault>> tasks) {
 			this.startedTasks = List.copyOf(tasks);
+
+			setOnFailed(event -> LOG.error("Failed to lock multiple vaults", getException()));
 		}
 
 		@Override

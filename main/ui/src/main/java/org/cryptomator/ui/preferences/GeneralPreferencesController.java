@@ -161,6 +161,8 @@ public class GeneralPreferencesController implements FxController {
 		public ToggleAutoStartTask(AutoStartStrategy autoStart, boolean enable) {
 			this.autoStart = autoStart;
 			this.enable = enable;
+
+			setOnFailed(event -> LOG.error("Failed to toggle Autostart", getException()));
 		}
 
 		@Override
