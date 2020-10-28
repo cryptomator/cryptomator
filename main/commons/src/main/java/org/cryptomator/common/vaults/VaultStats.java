@@ -36,7 +36,6 @@ public class VaultStats {
 		this.updateService = new UpdateStatsService();
 		updateService.setExecutor(executor);
 		updateService.setPeriod(Duration.seconds(1));
-		updateService.setOnFailed(event -> LOG.error("Error in UpdateStateService.", event.getSource().getException()));
 
 		state.addListener(this::vaultStateChanged);
 	}
@@ -59,6 +58,10 @@ public class VaultStats {
 	}
 
 	private class UpdateStatsService extends ScheduledService<Optional<CryptoFileSystemStats>> {
+
+		private UpdateStatsService() {
+			setOnFailed(event -> LOG.error("Error in UpdateStateService.", getException()));
+		}
 
 		@Override
 		protected Task<Optional<CryptoFileSystemStats>> createTask() {
