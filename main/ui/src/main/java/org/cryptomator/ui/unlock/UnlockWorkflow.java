@@ -74,12 +74,7 @@ public class UnlockWorkflow extends Task<Boolean> {
 		this.invalidMountPointScene = invalidMountPointScene;
 		this.errorComponent = errorComponent;
 
-		setOnScheduled(event -> vault.setState(VaultState.PROCESSING));
-		setOnSucceeded(event -> vault.setState(VaultState.UNLOCKED));
-		setOnCancelled(event -> vault.setState(VaultState.LOCKED));
-
 		setOnFailed(event -> {
-			vault.setState(VaultState.LOCKED);
 			Throwable throwable = event.getSource().getException();
 			if (throwable instanceof InvalidMountPointException) {
 				handleInvalidMountPoint((InvalidMountPointException) throwable);
@@ -224,4 +219,25 @@ public class UnlockWorkflow extends Task<Boolean> {
 			Arrays.fill(pw, ' ');
 		}
 	}
+
+	@Override
+	protected void scheduled() {
+		vault.setState(VaultState.PROCESSING);
+	}
+
+	@Override
+	protected void succeeded() {
+		vault.setState(VaultState.UNLOCKED);
+	}
+
+	@Override
+	protected void failed() {
+		vault.setState(VaultState.LOCKED);
+	}
+
+	@Override
+	protected void cancelled() {
+		vault.setState(VaultState.LOCKED);
+	}
+
 }
