@@ -14,6 +14,17 @@
       <option name="PACKAGES_TO_USE_IMPORT_ON_DEMAND">
         <value />
       </option>
+      <option name="IMPORT_LAYOUT_TABLE">
+        <value>
+          <package name="" withSubpackages="true" static="false" />
+          <emptyLine />
+          <package name="javax" withSubpackages="true" static="false" />
+          <package name="javafx" withSubpackages="true" static="false" />
+          <package name="java" withSubpackages="true" static="false" />
+          <emptyLine />
+          <package name="" withSubpackages="true" static="true" />
+        </value>
+      </option>
       <option name="JD_ALIGN_PARAM_COMMENTS" value="false" />
       <option name="JD_ALIGN_EXCEPTION_COMMENTS" value="false" />
     </JavaCodeStyleSettings>
