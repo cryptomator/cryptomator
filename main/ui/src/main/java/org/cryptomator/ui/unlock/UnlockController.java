@@ -124,7 +124,7 @@ public class UnlockController implements FxController {
 				new KeyFrame(Duration.millis(800), legsExtendedY, legsExtendedX, faceHidden),
 				new KeyFrame(Duration.millis(1000), faceVisible)
 		);
-		
+
 		passwordEntryLock.awaitingInteraction().addListener(observable -> stopUnlockAnimation());
 	}
 

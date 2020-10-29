@@ -20,16 +20,16 @@ along with this program.  If not, see http://www.gnu.org/licenses/.
 
 Cryptomator uses ${dependencyMap?size} third-party dependencies under the following licenses:
 <#list licenseMap as e>
-	<#assign license = e.getKey()/>
-	<#assign projects = e.getValue()/>
-	<#if projects?size &gt; 0>
-	${license}:
-	<#list projects as project>
-		- ${artifactFormat(project)}
-	</#list>
-	</#if>
+    <#assign license = e.getKey()/>
+    <#assign projects = e.getValue()/>
+    <#if projects?size &gt; 0>
+        ${license}:
+        <#list projects as project>
+			- ${artifactFormat(project)}
+        </#list>
+    </#if>
 </#list>
 
 Cryptomator uses other third-party assets under the following licenses:
-	SIL OFL 1.1 License:
-		- Font Awesome 5.12.0 (https://fontawesome.com/)
+SIL OFL 1.1 License:
+- Font Awesome 5.12.0 (https://fontawesome.com/)
