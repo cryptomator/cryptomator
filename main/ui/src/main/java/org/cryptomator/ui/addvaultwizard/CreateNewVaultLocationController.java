@@ -88,7 +88,7 @@ public class CreateNewVaultLocationController implements FxController {
 	}
 
 	private void vaultPathDidChange(Path newValue) {
-		if ( newValue != null && !Files.notExists(newValue)) {
+		if (newValue != null && !Files.notExists(newValue)) {
 			warningText.set(resourceBundle.getString("addvaultwizard.new.fileAlreadyExists"));
 		} else {
 			warningText.set(null);

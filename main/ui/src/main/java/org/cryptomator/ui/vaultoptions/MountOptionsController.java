@@ -73,7 +73,7 @@ public class MountOptionsController implements FxController {
 
 		// readonly:
 		readOnlyCheckbox.selectedProperty().bindBidirectional(vault.getVaultSettings().usesReadOnlyMode());
-		if(getRestrictToStableFuseOnWindows()) {
+		if (getRestrictToStableFuseOnWindows()) {
 			readOnlyCheckbox.setSelected(false); // to prevent invalid states
 		}
 		readOnlyCheckbox.disableProperty().bind(customMountFlagsCheckbox.selectedProperty().or(restrictToStableFuseOnWindows));

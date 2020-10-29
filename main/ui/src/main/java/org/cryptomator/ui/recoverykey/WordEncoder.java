@@ -59,10 +59,10 @@ class WordEncoder {
 	public String encodePadded(byte[] input) {
 		Preconditions.checkArgument(input.length % 3 == 0, "input needs to be padded to a multipe of three");
 		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < input.length; i+=3) {
+		for (int i = 0; i < input.length; i += 3) {
 			byte b1 = input[i];
-			byte b2 = input[i+1];
-			byte b3 = input[i+2];
+			byte b2 = input[i + 1];
+			byte b3 = input[i + 2];
 			int firstWordIndex = (0xFF0 & (b1 << 4)) + (0x00F & (b2 >> 4)); // 0xFFF000
 			int secondWordIndex = (0xF00 & (b2 << 8)) + (0x0FF & b3); // 0x000FFF
 			assert firstWordIndex < WORD_COUNT;
@@ -86,9 +86,9 @@ class WordEncoder {
 		List<String> splitted = Splitter.on(DELIMITER).omitEmptyStrings().splitToList(Strings.nullToEmpty(encoded));
 		Preconditions.checkArgument(splitted.size() % 2 == 0, "%s needs to be a multiple of two words", encoded);
 		byte[] result = new byte[splitted.size() / 2 * 3];
-		for (int i = 0; i < splitted.size(); i+=2) {
+		for (int i = 0; i < splitted.size(); i += 2) {
 			String w1 = splitted.get(i);
-			String w2 = splitted.get(i+1);
+			String w2 = splitted.get(i + 1);
 			int firstWordIndex = indices.getOrDefault(w1, -1);
 			int secondWordIndex = indices.getOrDefault(w2, -1);
 			Preconditions.checkArgument(firstWordIndex != -1, "%s not in dictionary", w1);
@@ -96,9 +96,9 @@ class WordEncoder {
 			byte b1 = (byte) (0xFF & (firstWordIndex >> 4));
 			byte b2 = (byte) ((0xF0 & (firstWordIndex << 4)) + (0x0F & (secondWordIndex >> 8)));
 			byte b3 = (byte) (0xFF & secondWordIndex);
-			result[i/2*3] = b1;
-			result[i/2*3+1] = b2;
-			result[i/2*3+2] = b3;
+			result[i / 2 * 3] = b1;
+			result[i / 2 * 3 + 1] = b2;
+			result[i / 2 * 3 + 2] = b3;
 		}
 		return result;
 	}

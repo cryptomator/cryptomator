@@ -20,7 +20,7 @@ class VaultListChangeListener implements ListChangeListener<Vault> {
 
 	@Override
 	public void onChanged(Change<? extends Vault> c) {
-		while(c.next()) {
+		while (c.next()) {
 			if (c.wasAdded()) {
 				List<VaultSettings> addedSettings = c.getAddedSubList().stream().map(Vault::getVaultSettings).collect(Collectors.toList());
 				vaultSettingsList.addAll(c.getFrom(), addedSettings);
