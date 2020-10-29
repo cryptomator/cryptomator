@@ -71,6 +71,10 @@ public class RecoveryKeyCreationController implements FxController {
 
 	private class RecoveryKeyCreationTask extends Task<String> {
 
+		private RecoveryKeyCreationTask() {
+			setOnFailed(event -> LOG.error("Failed to create recovery key", getException()));
+		}
+
 		@Override
 		protected String call() throws IOException {
 			return recoveryKeyFactory.createRecoveryKey(vault.getPath(), passwordField.getCharacters());
