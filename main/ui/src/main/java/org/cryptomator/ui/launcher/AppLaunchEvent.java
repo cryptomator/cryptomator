@@ -8,7 +8,10 @@ public class AppLaunchEvent {
 	private final EventType type;
 	private final Collection<Path> pathsToOpen;
 
-	public enum EventType {REVEAL_APP, OPEN_FILE}
+	public enum EventType {
+		REVEAL_APP,
+		OPEN_FILE
+	}
 
 	public AppLaunchEvent(EventType type, Collection<Path> pathsToOpen) {
 		this.type = type;

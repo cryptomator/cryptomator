@@ -35,7 +35,10 @@ abstract class UnlockModule {
 
 	private static final Logger LOG = LoggerFactory.getLogger(UnlockModule.class);
 
-	public enum PasswordEntry {PASSWORD_ENTERED, CANCELED}
+	public enum PasswordEntry {
+		PASSWORD_ENTERED,
+		CANCELED
+	}
 
 	@Provides
 	@UnlockScoped
