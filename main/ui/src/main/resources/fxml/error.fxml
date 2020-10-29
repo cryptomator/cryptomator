@@ -37,7 +37,7 @@
 		<ButtonBar buttonMinWidth="120" buttonOrder="B+C">
 			<buttons>
 				<Button text="%generic.button.back" ButtonBar.buttonData="BACK_PREVIOUS" onAction="#back" visible="${controller.previousScenePresent}"/>
-				<Button text="%generic.button.cancel" ButtonBar.buttonData="CANCEL_CLOSE" onAction="#close" />
+				<Button text="%generic.button.cancel" ButtonBar.buttonData="CANCEL_CLOSE" onAction="#close"/>
 			</buttons>
 		</ButtonBar>
 	</children>

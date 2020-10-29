@@ -13,7 +13,7 @@
 		   fx:controller="org.cryptomator.ui.mainwindow.MainWindowController"
 		   styleClass="main-window">
 	<VBox>
-		<fx:include source="/fxml/main_window_title.fxml" VBox.vgrow="NEVER" />
+		<fx:include source="/fxml/main_window_title.fxml" VBox.vgrow="NEVER"/>
 		<StackPane VBox.vgrow="ALWAYS">
 			<SplitPane dividerPositions="0.33" orientation="HORIZONTAL">
 				<fx:include source="/fxml/vault_list.fxml" SplitPane.resizableWithParent="false"/>
