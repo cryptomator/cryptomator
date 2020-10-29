@@ -73,6 +73,15 @@ public class UnlockWorkflow extends Task<Boolean> {
 		this.successScene = successScene;
 		this.invalidMountPointScene = invalidMountPointScene;
 		this.errorComponent = errorComponent;
+
+		setOnFailed(event -> {
+			Throwable throwable = event.getSource().getException();
+			if (throwable instanceof InvalidMountPointException) {
+				handleInvalidMountPoint((InvalidMountPointException) throwable);
+			} else {
+				handleGenericError(throwable);
+			}
+		});
 	}
 
 	@Override
@@ -85,12 +94,6 @@ public class UnlockWorkflow extends Task<Boolean> {
 				cancel(false); // set Tasks state to cancelled
 				return false;
 			}
-		} catch (InvalidMountPointException e) {
-			handleInvalidMountPoint(e);
-			throw e; // rethrow to trigger correct exception handling in Task
-		} catch (Exception e) {
-			handleGenericError(e);
-			throw e; // rethrow to trigger correct exception handling in Task
 		} finally {
 			wipePassword(password.get());
 			wipePassword(savedPassword.orElse(null));

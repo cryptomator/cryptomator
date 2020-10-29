@@ -69,7 +69,6 @@ public class VaultService {
 	public Task<Vault> createLockTask(Vault vault, boolean forced) {
 		Task<Vault> task = new LockVaultTask(vault, forced);
 		task.setOnSucceeded(evt -> LOG.info("Locked {}", vault.getDisplayName()));
-		task.setOnFailed(evt -> LOG.error("Failed to lock " + vault.getDisplayName(), evt.getSource().getException()));
 		return task;
 	}
 
@@ -109,6 +108,8 @@ public class VaultService {
 		 */
 		public RevealVaultTask(Vault vault) {
 			this.vault = vault;
+
+			setOnFailed(evt -> LOG.error("Failed to reveal " + vault.getDisplayName(), getException()));
 		}
 
 		@Override
@@ -127,6 +128,8 @@ public class VaultService {
 
 		public WaitForTasksTask(Collection<Task<Vault>> tasks) {
 			this.startedTasks = List.copyOf(tasks);
+
+			setOnFailed(event -> LOG.error("Failed to lock multiple vaults", getException()));
 		}
 
 		@Override
@@ -165,6 +168,8 @@ public class VaultService {
 		public LockVaultTask(Vault vault, boolean forced) {
 			this.vault = vault;
 			this.forced = forced;
+
+			setOnFailed(event -> LOG.error("Failed to lock " + vault.getDisplayName(), event.getSource().getException()));
 		}
 
 		@Override

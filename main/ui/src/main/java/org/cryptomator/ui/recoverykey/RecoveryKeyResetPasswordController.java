@@ -77,6 +77,10 @@ public class RecoveryKeyResetPasswordController implements FxController {
 
 	private class ResetPasswordTask extends Task<Void> {
 
+		private ResetPasswordTask() {
+			setOnFailed(event -> LOG.error("Failed to reset password", getException()));
+		}
+
 		@Override
 		protected Void call() throws IOException, IllegalArgumentException {
 			recoveryKeyFactory.resetPasswordWithRecoveryKey(vault.getPath(), recoveryKey.get(), newPassword.get());

@@ -59,6 +59,10 @@ public class VaultStats {
 
 	private class UpdateStatsService extends ScheduledService<Optional<CryptoFileSystemStats>> {
 
+		private UpdateStatsService() {
+			setOnFailed(event -> LOG.error("Error in UpdateStateService.", getException()));
+		}
+
 		@Override
 		protected Task<Optional<CryptoFileSystemStats>> createTask() {
 			return new Task<>() {

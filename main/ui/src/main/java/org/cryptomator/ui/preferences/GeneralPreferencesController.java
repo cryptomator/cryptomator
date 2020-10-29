@@ -109,7 +109,10 @@ public class GeneralPreferencesController implements FxController {
 		autoStartStrategy.ifPresent(autoStart -> {
 			boolean enableAutoStart = autoStartCheckbox.isSelected();
 			Task<Void> toggleTask = new ToggleAutoStartTask(autoStart, enableAutoStart);
-			toggleTask.setOnFailed(evt -> autoStartCheckbox.setSelected(!enableAutoStart)); // restore previous state
+			toggleTask.setOnFailed(event -> {
+				autoStartCheckbox.setSelected(!enableAutoStart); // restore previous state
+				LOG.error("Failed to toggle autostart.", event.getSource().getException());
+			});
 			executor.execute(toggleTask);
 		});
 	}
@@ -158,6 +161,8 @@ public class GeneralPreferencesController implements FxController {
 		public ToggleAutoStartTask(AutoStartStrategy autoStart, boolean enable) {
 			this.autoStart = autoStart;
 			this.enable = enable;
+
+			setOnFailed(event -> LOG.error("Failed to toggle Autostart", getException()));
 		}
 
 		@Override
