@@ -116,13 +116,13 @@ public class UnlockController implements FxController {
 		var faceVisible = new KeyValue(face.opacityProperty(), 1.0, Interpolator.LINEAR);
 		face.setOpacity(0);
 
-		unlockAnimation = new Timeline(
-				new KeyFrame(Duration.ZERO, leftArmRetracted, leftArmHorizontal, rightArmRetracted, rightArmHorizontal, legsRetractedY, legsRetractedX, faceHidden),
-				new KeyFrame(Duration.millis(200), leftArmExtended, leftArmHorizontal, rightArmRetracted, rightArmHorizontal),
-				new KeyFrame(Duration.millis(400), leftArmExtended, leftArmHanging, rightArmExtended, rightArmHorizontal),
-				new KeyFrame(Duration.millis(600), leftArmExtended, leftArmHanging, rightArmExtended, rightArmHanging),
-				new KeyFrame(Duration.millis(800), legsExtendedY, legsExtendedX, faceHidden),
-				new KeyFrame(Duration.millis(1000), faceVisible)
+		unlockAnimation = new Timeline( //
+				new KeyFrame(Duration.ZERO, leftArmRetracted, leftArmHorizontal, rightArmRetracted, rightArmHorizontal, legsRetractedY, legsRetractedX, faceHidden), //
+				new KeyFrame(Duration.millis(200), leftArmExtended, leftArmHorizontal, rightArmRetracted, rightArmHorizontal), //
+				new KeyFrame(Duration.millis(400), leftArmExtended, leftArmHanging, rightArmExtended, rightArmHorizontal), //
+				new KeyFrame(Duration.millis(600), leftArmExtended, leftArmHanging, rightArmExtended, rightArmHanging), //
+				new KeyFrame(Duration.millis(800), legsExtendedY, legsExtendedX, faceHidden), //
+				new KeyFrame(Duration.millis(1000), faceVisible) //
 		);
 
 		passwordEntryLock.awaitingInteraction().addListener(observable -> stopUnlockAnimation());

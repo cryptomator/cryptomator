@@ -41,9 +41,9 @@ public class LinuxKDEWalletKeychainAccessImpl implements KeychainAccessStrategy 
 	@Override
 	public void storePassphrase(String key, CharSequence passphrase) throws KeychainAccessException {
 		try {
-			if (walletIsOpen() &&
-					!(wallet.hasEntry(handle, FOLDER_NAME, key, APP_NAME)
-							&& wallet.entryType(handle, FOLDER_NAME, key, APP_NAME) == 1)
+			if (walletIsOpen() && //
+					!(wallet.hasEntry(handle, FOLDER_NAME, key, APP_NAME) //
+							&& wallet.entryType(handle, FOLDER_NAME, key, APP_NAME) == 1) //
 					&& wallet.writePassword(handle, FOLDER_NAME, key, passphrase.toString(), APP_NAME) == 0) {
 				LOG.debug("Passphrase successfully stored.");
 			} else {
@@ -75,9 +75,9 @@ public class LinuxKDEWalletKeychainAccessImpl implements KeychainAccessStrategy 
 	@Override
 	public void deletePassphrase(String key) throws KeychainAccessException {
 		try {
-			if (walletIsOpen()
-					&& wallet.hasEntry(handle, FOLDER_NAME, key, APP_NAME)
-					&& wallet.entryType(handle, FOLDER_NAME, key, APP_NAME) == 1
+			if (walletIsOpen() //
+					&& wallet.hasEntry(handle, FOLDER_NAME, key, APP_NAME) //
+					&& wallet.entryType(handle, FOLDER_NAME, key, APP_NAME) == 1 //
 					&& wallet.removeEntry(handle, FOLDER_NAME, key, APP_NAME) == 0) {
 				LOG.debug("Passphrase successfully deleted.");
 			} else {
@@ -92,9 +92,9 @@ public class LinuxKDEWalletKeychainAccessImpl implements KeychainAccessStrategy 
 	@Override
 	public void changePassphrase(String key, CharSequence passphrase) throws KeychainAccessException {
 		try {
-			if (walletIsOpen()
-					&& wallet.hasEntry(handle, FOLDER_NAME, key, APP_NAME)
-					&& wallet.entryType(handle, FOLDER_NAME, key, APP_NAME) == 1
+			if (walletIsOpen() //
+					&& wallet.hasEntry(handle, FOLDER_NAME, key, APP_NAME) //
+					&& wallet.entryType(handle, FOLDER_NAME, key, APP_NAME) == 1 //
 					&& wallet.writePassword(handle, FOLDER_NAME, key, passphrase.toString(), APP_NAME) == 0) {
 				LOG.debug("Passphrase successfully changed.");
 			} else {
