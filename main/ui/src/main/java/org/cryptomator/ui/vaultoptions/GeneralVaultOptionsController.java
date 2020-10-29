@@ -38,7 +38,7 @@ public class GeneralVaultOptionsController implements FxController {
 	}
 
 	private static class WhenUnlockedConverter extends StringConverter<WhenUnlocked> {
-		
+
 		private final ResourceBundle resourceBundle;
 
 		public WhenUnlockedConverter(ResourceBundle resourceBundle) {

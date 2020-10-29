@@ -45,7 +45,7 @@ abstract class MigrationModule {
 		stage.initOwner(owner);
 		return stage;
 	}
-	
+
 	@Provides
 	@Named("capabilityErrorCause")
 	@MigrationScoped

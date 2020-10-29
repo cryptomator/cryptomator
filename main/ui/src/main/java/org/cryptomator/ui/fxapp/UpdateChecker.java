@@ -80,7 +80,7 @@ public class UpdateChecker {
 	private void checkFailed(WorkerStateEvent event) {
 		LOG.warn("Error checking for updates", event.getSource().getException());
 	}
-	
+
 	/* Observable Properties */
 
 	public BooleanBinding checkingForUpdatesProperty() {

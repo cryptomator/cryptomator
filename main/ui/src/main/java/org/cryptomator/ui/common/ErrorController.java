@@ -33,7 +33,7 @@ public class ErrorController implements FxController {
 	}
 
 	/* Getter/Setter */
-	
+
 	public boolean isPreviousScenePresent() {
 		return previousScene != null;
 	}

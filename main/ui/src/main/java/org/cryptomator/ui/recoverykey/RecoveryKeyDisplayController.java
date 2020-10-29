@@ -20,7 +20,7 @@ import javafx.stage.Stage;
 import java.util.ResourceBundle;
 
 public class RecoveryKeyDisplayController implements FxController {
-	
+
 	private static final Logger LOG = LoggerFactory.getLogger(RecoveryKeyDisplayController.class);
 
 	private final Stage window;
@@ -41,7 +41,7 @@ public class RecoveryKeyDisplayController implements FxController {
 		PrinterJob job = PrinterJob.createPrinterJob();
 		if (job != null && job.showPrintDialog(window)) {
 			PageLayout pageLayout = job.getJobSettings().getPageLayout();
-			
+
 			String headingText = String.format(localization.getString("recoveryKey.printout.heading"), vaultName);
 			Text heading = new Text(headingText);
 			heading.setFont(Font.font("serif", FontWeight.BOLD, 20));

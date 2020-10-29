@@ -14,7 +14,7 @@ import javafx.fxml.FXML;
 
 @MainWindowScoped
 public class WelcomeController implements FxController {
-	
+
 	private static final Logger LOG = LoggerFactory.getLogger(WelcomeController.class);
 	private static final String GETTING_STARTED_URI = "https://docs.cryptomator.org/en/1.5/desktop/getting-started/";
 
@@ -42,5 +42,5 @@ public class WelcomeController implements FxController {
 	public boolean isNoVaultPresent() {
 		return noVaultPresent.get();
 	}
-	
+
 }

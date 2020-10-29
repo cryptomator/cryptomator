@@ -77,7 +77,7 @@ public class KeychainManager implements KeychainAccessStrategy {
 			}
 		}
 	}
-	
+
 	private void setPassphraseStored(String key, boolean value) {
 		BooleanProperty property = passphraseStoredProperties.getIfPresent(key);
 		if (property != null) {
@@ -99,7 +99,7 @@ public class KeychainManager implements KeychainAccessStrategy {
 	 *
 	 * @param key The key to look up
 	 * @return An observable property which is <code>true</code> when it almost certain that a password for <code>key</code> is stored.
-	 * @see #isPassphraseStored(String) 
+	 * @see #isPassphraseStored(String)
 	 */
 	public ReadOnlyBooleanProperty getPassphraseStoredProperty(String key) {
 		return passphraseStoredProperties.getUnchecked(key);

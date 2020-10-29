@@ -23,19 +23,19 @@ class WordEncoder {
 	private static final String DEFAULT_WORD_FILE = "/i18n/4096words_en.txt";
 	private static final int WORD_COUNT = 4096;
 	private static final char DELIMITER = ' ';
-	
+
 	private final List<String> words;
 	private final Map<String, Integer> indices;
-	
+
 	@Inject
 	public WordEncoder() {
 		this(DEFAULT_WORD_FILE);
 	}
-	
+
 	public List<String> getWords() {
 		return words;
 	}
-	
+
 	public WordEncoder(String wordFile) {
 		try (InputStream in = getClass().getResourceAsStream(wordFile); //
 			 Reader reader = new InputStreamReader(in, StandardCharsets.US_ASCII.newDecoder()); //
@@ -52,6 +52,7 @@ class WordEncoder {
 
 	/**
 	 * Encodes the given input as a sequence of words.
+	 *
 	 * @param input A multiple of three bytes
 	 * @return A String that can be {@link #decode(String) decoded} to the input again.
 	 * @throws IllegalArgumentException If input is not a multiple of three bytes
@@ -78,6 +79,7 @@ class WordEncoder {
 
 	/**
 	 * Decodes a String that has previously been {@link #encodePadded(byte[]) encoded} to a word sequence.
+	 *
 	 * @param encoded The word sequence
 	 * @return Decoded bytes
 	 * @throws IllegalArgumentException If the encoded string doesn't consist of a multiple of two words or one of the words is unknown to this encoder.
@@ -102,6 +104,6 @@ class WordEncoder {
 		}
 		return result;
 	}
-	
+
 
 }

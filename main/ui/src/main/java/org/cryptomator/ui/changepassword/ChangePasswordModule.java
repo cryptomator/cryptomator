@@ -26,7 +26,7 @@ import java.util.ResourceBundle;
 
 @Module
 abstract class ChangePasswordModule {
-	
+
 	@Provides
 	@ChangePasswordScoped
 	@Named("newPassword")
@@ -67,7 +67,7 @@ abstract class ChangePasswordModule {
 	@IntoMap
 	@FxControllerKey(ChangePasswordController.class)
 	abstract FxController bindUnlockController(ChangePasswordController controller);
-	
+
 	@Provides
 	@IntoMap
 	@FxControllerKey(NewPasswordController.class)

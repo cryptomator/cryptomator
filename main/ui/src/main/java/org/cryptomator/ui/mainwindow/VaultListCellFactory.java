@@ -33,7 +33,7 @@ public class VaultListCellFactory implements Callback<ListView<Vault>, ListCell<
 			throw new UncheckedIOException("Failed to load /fxml/vault_list_cell.fxml.", e);
 		}
 	}
-	
+
 	private static class Cell extends DraggableListCell<Vault> {
 
 		private final Parent node;

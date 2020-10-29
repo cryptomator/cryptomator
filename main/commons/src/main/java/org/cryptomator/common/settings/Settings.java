@@ -74,7 +74,7 @@ public class Settings {
 	void setSaveCmd(Consumer<Settings> saveCmd) {
 		this.saveCmd = saveCmd;
 	}
-	
+
 	private void somethingChanged(@SuppressWarnings("unused") Observable observable) {
 		this.save();
 	}
@@ -98,7 +98,7 @@ public class Settings {
 	public BooleanProperty checkForUpdates() {
 		return checkForUpdates;
 	}
-	
+
 	public BooleanProperty startHidden() {
 		return startHidden;
 	}

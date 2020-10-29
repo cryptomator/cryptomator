@@ -56,7 +56,7 @@ abstract class ForgetPasswordModule {
 	@ForgetPasswordWindow
 	@ForgetPasswordScoped
 	abstract ReadOnlyBooleanProperty bindReadOnlyConfirmedProperty(@ForgetPasswordWindow BooleanProperty confirmedProperty);
-	
+
 	// ------------------
 
 	@Provides

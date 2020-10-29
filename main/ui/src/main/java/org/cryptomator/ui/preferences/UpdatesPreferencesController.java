@@ -18,7 +18,7 @@ import javafx.scene.control.ContentDisplay;
 public class UpdatesPreferencesController implements FxController {
 
 	private static final String DOWNLOADS_URI = "https://cryptomator.org/downloads";
-	
+
 	private final Application application;
 	private final Settings settings;
 	private final UpdateChecker updateChecker;

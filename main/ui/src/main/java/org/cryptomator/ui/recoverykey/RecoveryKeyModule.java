@@ -48,7 +48,7 @@ abstract class RecoveryKeyModule {
 		stage.initOwner(owner);
 		return stage;
 	}
-	
+
 	@Provides
 	@RecoveryKeyWindow
 	@RecoveryKeyScoped
@@ -129,5 +129,5 @@ abstract class RecoveryKeyModule {
 	static FxController provideNewPasswordController(ResourceBundle resourceBundle, PasswordStrengthUtil strengthRater, @Named("newPassword") ObjectProperty<CharSequence> password) {
 		return new NewPasswordController(resourceBundle, strengthRater, password);
 	}
-	
+
 }

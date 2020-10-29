@@ -88,7 +88,7 @@ public class UnlockController implements FxController {
 			passwordField.setPassword(password.get());
 		}
 		unlockButtonDisabled.bind(userInteractionDisabled.or(passwordField.textProperty().isEmpty()));
-		
+
 		var leftArmTranslation = new Translate(24, 0);
 		var leftArmRotation = new Rotate(60, 16, 30, 0);
 		var leftArmRetracted = new KeyValue(leftArmTranslation.xProperty(), 24);
@@ -152,7 +152,7 @@ public class UnlockController implements FxController {
 		passwordEntryLock.interacted(UnlockModule.PasswordEntry.PASSWORD_ENTERED);
 		startUnlockAnimation();
 	}
-	
+
 	private void startUnlockAnimation() {
 		leftArm.setVisible(true);
 		rightArm.setVisible(true);
@@ -184,7 +184,7 @@ public class UnlockController implements FxController {
 	public String getVaultName() {
 		return vaultName.get();
 	}
-	
+
 	public StringBinding vaultNameProperty() {
 		return vaultName;
 	}

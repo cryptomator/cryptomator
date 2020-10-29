@@ -29,7 +29,7 @@
 					<ProgressIndicator progress="-1" prefWidth="12" prefHeight="12"/>
 				</graphic>
 			</Button>
-			
+
 			<Hyperlink text="${linkLabel.value}" onAction="#visitDownloadsPage" textAlignment="CENTER" wrapText="true" styleClass="hyperlink-underline" visible="${controller.updateAvailable}"/>
 		</VBox>
 	</children>

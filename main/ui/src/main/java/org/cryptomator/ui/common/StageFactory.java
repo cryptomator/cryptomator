@@ -11,11 +11,11 @@ public class StageFactory {
 	public StageFactory(Consumer<Stage> initializer) {
 		this.initializer = initializer;
 	}
-	
+
 	public Stage create() {
 		return create(StageStyle.DECORATED);
 	}
-	
+
 	public Stage create(StageStyle stageStyle) {
 		Stage stage = new Stage(stageStyle);
 		initializer.accept(stage);

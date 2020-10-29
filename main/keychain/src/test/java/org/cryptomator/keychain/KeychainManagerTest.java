@@ -14,14 +14,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 
 class KeychainManagerTest {
-	
+
 	@Test
 	public void testStoreAndLoad() throws KeychainAccessException {
 		KeychainManager keychainManager = new KeychainManager(new MapKeychainAccess());
 		keychainManager.storePassphrase("test", "asd");
 		Assertions.assertArrayEquals("asd".toCharArray(), keychainManager.loadPassphrase("test"));
 	}
-	
+
 	@Nested
 	public static class WhenObservingProperties {
 
@@ -31,15 +31,15 @@ class KeychainManagerTest {
 			Platform.startup(latch::countDown);
 			latch.await(5, TimeUnit.SECONDS);
 		}
-		
+
 		@Test
 		public void testPropertyChangesWhenStoringPassword() throws KeychainAccessException, InterruptedException {
 			KeychainManager keychainManager = new KeychainManager(new MapKeychainAccess());
 			ReadOnlyBooleanProperty property = keychainManager.getPassphraseStoredProperty("test");
 			Assertions.assertEquals(false, property.get());
-			
+
 			keychainManager.storePassphrase("test", "bar");
-			
+
 			AtomicBoolean result = new AtomicBoolean(false);
 			CountDownLatch latch = new CountDownLatch(1);
 			Platform.runLater(() -> {
@@ -49,7 +49,7 @@ class KeychainManagerTest {
 			latch.await(1, TimeUnit.SECONDS);
 			Assertions.assertEquals(true, result.get());
 		}
-		
+
 	}
 
 }

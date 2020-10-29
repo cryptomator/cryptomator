@@ -14,7 +14,7 @@ class RecoveryKeyFactoryTest {
 
 	private WordEncoder wordEncoder = new WordEncoder();
 	private RecoveryKeyFactory inTest = new RecoveryKeyFactory(wordEncoder);
-	
+
 	@Test
 	@DisplayName("createRecoveryKey() creates 44 words")
 	public void testCreateRecoveryKey(@TempDir Path pathToVault) throws IOException {
@@ -53,7 +53,7 @@ class RecoveryKeyFactoryTest {
 				" depth left theory snow whereby terminal weekly reject happiness circuit partial cup wrong");
 		Assertions.assertFalse(result);
 	}
-	
+
 	@Test
 	@DisplayName("validateRecoveryKey() with valid input")
 	public void testValidateValidateRecoveryKeyWithValidKey() {

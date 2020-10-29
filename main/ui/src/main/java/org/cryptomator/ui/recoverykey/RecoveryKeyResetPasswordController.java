@@ -24,7 +24,7 @@ import java.util.concurrent.ExecutorService;
 
 @RecoveryKeyScoped
 public class RecoveryKeyResetPasswordController implements FxController {
-	
+
 	private static final Logger LOG = LoggerFactory.getLogger(RecoveryKeyResetPasswordController.class);
 
 	private final Stage window;
@@ -82,7 +82,7 @@ public class RecoveryKeyResetPasswordController implements FxController {
 		}
 
 	}
-	
+
 	/* Getter/Setter */
 
 	public BooleanBinding invalidNewPasswordProperty() {

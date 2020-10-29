@@ -53,7 +53,7 @@ abstract class FxApplicationModule {
 			throw new UncheckedIOException("Failed to load embedded resource.", e);
 		}
 	}
-	
+
 	@Provides
 	@FxApplicationScoped
 	static StageFactory provideStageFactory(@Named("windowIcons") List<Image> windowIcons, ObservableSet<Stage> visibleStages) {

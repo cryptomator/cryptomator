@@ -23,10 +23,10 @@ import javafx.scene.input.TransferMode;
 import java.util.List;
 
 public class DraggableListCell<T> extends ListCell<T> {
-	
+
 	private static final String DROP_ABOVE_CLASS = "drop-above";
 	private static final String DROP_BELOW_CLASS = "drop-below";
-	
+
 	private final BooleanProperty dropAbove = new SimpleBooleanProperty();
 	private final BooleanProperty dropBelow = new SimpleBooleanProperty();
 
@@ -41,7 +41,7 @@ public class DraggableListCell<T> extends ListCell<T> {
 		EasyBind.includeWhen(getStyleClass(), DROP_ABOVE_CLASS, dropAbove);
 		EasyBind.includeWhen(getStyleClass(), DROP_BELOW_CLASS, dropBelow);
 	}
-	
+
 	private void setDropPositionStyleClass(double verticalCursorPosition) {
 		boolean isUpperHalf = verticalCursorPosition < this.getHeight() / 2.0;
 		if (isUpperHalf) {
@@ -52,7 +52,7 @@ public class DraggableListCell<T> extends ListCell<T> {
 			this.dropBelow.set(true);
 		}
 	}
-	
+
 	private void resetDropPositionStyleClasses() {
 		this.dropAbove.set(false);
 		this.dropBelow.set(false);
