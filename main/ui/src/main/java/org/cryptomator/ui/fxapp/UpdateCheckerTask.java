@@ -4,9 +4,9 @@ import com.google.common.io.ByteStreams;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import javafx.concurrent.Task;
 import org.apache.commons.lang3.SystemUtils;
 
+import javafx.concurrent.Task;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;

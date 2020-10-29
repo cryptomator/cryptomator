@@ -9,7 +9,6 @@ import org.cryptomator.ui.traymenu.TrayMenuComponent;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
-import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;

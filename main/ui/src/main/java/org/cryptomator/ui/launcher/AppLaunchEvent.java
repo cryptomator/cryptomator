@@ -2,7 +2,6 @@ package org.cryptomator.ui.launcher;
 
 import java.nio.file.Path;
 import java.util.Collection;
-import java.util.stream.Stream;
 
 public class AppLaunchEvent {
 

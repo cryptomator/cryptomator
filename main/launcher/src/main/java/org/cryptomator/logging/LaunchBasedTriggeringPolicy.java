@@ -5,10 +5,10 @@
  *******************************************************************************/
 package org.cryptomator.logging;
 
+import ch.qos.logback.core.rolling.TriggeringPolicyBase;
+
 import java.io.File;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import ch.qos.logback.core.rolling.TriggeringPolicyBase;
 
 /**
  * Triggers a roll-over on the first log event, so each launched application instance will rotate the log.

@@ -1,6 +1,7 @@
 package org.cryptomator.ui.controls;
 
 import com.tobiasdiez.easybind.EasyBind;
+
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;

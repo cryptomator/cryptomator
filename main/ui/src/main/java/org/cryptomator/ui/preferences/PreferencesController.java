@@ -1,5 +1,11 @@
 package org.cryptomator.ui.preferences;
 
+import org.cryptomator.ui.common.FxController;
+import org.cryptomator.ui.fxapp.UpdateChecker;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.inject.Inject;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.fxml.FXML;
@@ -7,12 +13,6 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-import org.cryptomator.ui.common.FxController;
-import org.cryptomator.ui.fxapp.UpdateChecker;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.inject.Inject;
 
 @PreferencesScoped
 public class PreferencesController implements FxController {

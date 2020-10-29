@@ -1,16 +1,16 @@
 package org.cryptomator.ui.mainwindow;
 
 import dagger.Lazy;
-import javafx.scene.Scene;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyCodeCombination;
-import javafx.scene.input.KeyCombination;
-import javafx.stage.Stage;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.ui.common.DefaultSceneFactory;
 
 import javax.inject.Inject;
+import javafx.scene.Scene;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
+import javafx.stage.Stage;
 
 @MainWindowScoped
 public class MainWindowSceneFactory extends DefaultSceneFactory {

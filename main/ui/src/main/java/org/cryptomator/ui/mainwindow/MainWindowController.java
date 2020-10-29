@@ -1,5 +1,14 @@
 package org.cryptomator.ui.mainwindow;
 
+import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.common.vaults.VaultListManager;
+import org.cryptomator.ui.common.FxController;
+import org.cryptomator.ui.wrongfilealert.WrongFileAlertComponent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.inject.Inject;
 import javafx.beans.Observable;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
@@ -10,15 +19,6 @@ import javafx.scene.input.DragEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
-import org.apache.commons.lang3.SystemUtils;
-import org.cryptomator.common.vaults.Vault;
-import org.cryptomator.common.vaults.VaultListManager;
-import org.cryptomator.ui.common.FxController;
-import org.cryptomator.ui.wrongfilealert.WrongFileAlertComponent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.inject.Inject;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;

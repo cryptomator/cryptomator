@@ -2,7 +2,6 @@ package org.cryptomator.ui.controls;
 
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
-
 import java.util.regex.Pattern;
 
 public class AlphanumericTextField extends TextField {

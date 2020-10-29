@@ -1,6 +1,5 @@
 package org.cryptomator.ui.launcher;
 
-import javafx.application.Platform;
 import org.cryptomator.common.vaults.VaultListManager;
 import org.cryptomator.ui.fxapp.FxApplication;
 import org.slf4j.Logger;
@@ -9,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
+import javafx.application.Platform;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.concurrent.BlockingQueue;

@@ -1,10 +1,10 @@
 package org.cryptomator.ui.recoverykey;
 
-import javafx.fxml.FXML;
-import javafx.stage.Stage;
 import org.cryptomator.ui.common.FxController;
 
 import javax.inject.Inject;
+import javafx.fxml.FXML;
+import javafx.stage.Stage;
 
 @RecoveryKeyScoped
 public class RecoveryKeySuccessController implements FxController {

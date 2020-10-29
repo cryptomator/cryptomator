@@ -7,7 +7,8 @@ package org.cryptomator.common.settings;
 
 import com.google.common.base.Strings;
 import com.google.common.io.BaseEncoding;
-import com.tobiasdiez.easybind.EasyBind;
+import org.apache.commons.lang3.StringUtils;
+
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.StringBinding;
@@ -19,8 +20,6 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import org.apache.commons.lang3.StringUtils;
-
 import java.nio.file.Path;
 import java.util.Objects;
 import java.util.Optional;

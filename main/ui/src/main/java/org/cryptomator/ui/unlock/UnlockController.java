@@ -1,5 +1,17 @@
 package org.cryptomator.ui.unlock;
 
+import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.keychain.KeychainManager;
+import org.cryptomator.ui.common.FxController;
+import org.cryptomator.ui.common.UserInteractionLock;
+import org.cryptomator.ui.common.WeakBindings;
+import org.cryptomator.ui.controls.NiceSecurePasswordField;
+import org.cryptomator.ui.forgetPassword.ForgetPasswordComponent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.inject.Inject;
+import javax.inject.Named;
 import javafx.animation.Animation;
 import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
@@ -20,18 +32,6 @@ import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Translate;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import org.cryptomator.common.vaults.Vault;
-import org.cryptomator.keychain.KeychainManager;
-import org.cryptomator.ui.common.FxController;
-import org.cryptomator.ui.common.UserInteractionLock;
-import org.cryptomator.ui.common.WeakBindings;
-import org.cryptomator.ui.controls.NiceSecurePasswordField;
-import org.cryptomator.ui.forgetPassword.ForgetPasswordComponent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.inject.Inject;
-import javax.inject.Named;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;

@@ -1,6 +1,5 @@
 package org.cryptomator.ui.launcher;
 
-import javafx.collections.ObservableList;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.jni.JniException;
@@ -13,6 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javafx.collections.ObservableList;
 import java.awt.Desktop;
 import java.awt.SystemTray;
 import java.awt.desktop.AppReopenedListener;

@@ -25,7 +25,6 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.concurrent.BlockingQueue;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Singleton
 class FileOpenRequestHandler {

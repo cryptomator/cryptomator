@@ -1,12 +1,11 @@
 package org.cryptomator.ui.common;
 
-import javafx.fxml.FXML;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
-
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Named;
+import javafx.fxml.FXML;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
 
 public class ErrorController implements FxController {
 

@@ -1,13 +1,13 @@
 package org.cryptomator.keychain;
 
 
-import javafx.application.Platform;
-import javafx.beans.property.ReadOnlyBooleanProperty;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import javafx.application.Platform;
+import javafx.beans.property.ReadOnlyBooleanProperty;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;

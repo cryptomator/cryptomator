@@ -1,5 +1,9 @@
 package org.cryptomator.ui.recoverykey;
 
+import org.cryptomator.ui.common.FxController;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javafx.fxml.FXML;
 import javafx.print.PageLayout;
 import javafx.print.Printer;
@@ -13,10 +17,6 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
-import org.cryptomator.ui.common.FxController;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.ResourceBundle;
 
 public class RecoveryKeyDisplayController implements FxController {

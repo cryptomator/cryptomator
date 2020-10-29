@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import org.cryptomator.ui.controls.FontAwesome5IconView?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
-<?import org.cryptomator.ui.controls.FontAwesome5IconView?>
 <TabPane xmlns="http://javafx.com/javafx"
 		 xmlns:fx="http://javafx.com/fxml"
 		 fx:id="tabPane"

@@ -5,14 +5,13 @@
  *******************************************************************************/
 package org.cryptomator.keychain;
 
-import java.util.Optional;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.jni.MacFunctions;
 import org.cryptomator.jni.MacKeychainAccess;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import java.util.Optional;
 
 @Singleton
 class MacSystemKeychainAccess implements KeychainAccessStrategy {

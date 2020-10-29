@@ -7,10 +7,10 @@ package org.cryptomator.ui.unlock;
 
 import dagger.BindsInstance;
 import dagger.Subcomponent;
-import javafx.stage.Stage;
 import org.cryptomator.common.vaults.Vault;
 
 import javax.inject.Named;
+import javafx.stage.Stage;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;

@@ -1,5 +1,15 @@
 package org.cryptomator.ui.preferences;
 
+import org.cryptomator.common.Environment;
+import org.cryptomator.common.LicenseHolder;
+import org.cryptomator.common.settings.Settings;
+import org.cryptomator.common.settings.UiTheme;
+import org.cryptomator.ui.common.FxController;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.inject.Inject;
+import javax.inject.Named;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
@@ -13,16 +23,6 @@ import javafx.scene.control.RadioButton;
 import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleGroup;
 import javafx.util.StringConverter;
-import org.cryptomator.common.Environment;
-import org.cryptomator.common.LicenseHolder;
-import org.cryptomator.common.settings.Settings;
-import org.cryptomator.common.settings.UiTheme;
-import org.cryptomator.ui.common.FxController;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.inject.Inject;
-import javax.inject.Named;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;

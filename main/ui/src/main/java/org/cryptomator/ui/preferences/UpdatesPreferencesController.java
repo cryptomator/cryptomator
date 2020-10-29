@@ -1,5 +1,10 @@
 package org.cryptomator.ui.preferences;
 
+import org.cryptomator.common.settings.Settings;
+import org.cryptomator.ui.common.FxController;
+import org.cryptomator.ui.fxapp.UpdateChecker;
+
+import javax.inject.Inject;
 import javafx.application.Application;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
@@ -8,11 +13,6 @@ import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ContentDisplay;
-import org.cryptomator.common.settings.Settings;
-import org.cryptomator.ui.common.FxController;
-import org.cryptomator.ui.fxapp.UpdateChecker;
-
-import javax.inject.Inject;
 
 @PreferencesScoped
 public class UpdatesPreferencesController implements FxController {

@@ -1,15 +1,15 @@
 package org.cryptomator.ui.migration;
 
 import dagger.Lazy;
-import javafx.fxml.FXML;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 
 import javax.inject.Inject;
+import javafx.fxml.FXML;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
 
 @MigrationScoped
 public class MigrationStartController implements FxController {

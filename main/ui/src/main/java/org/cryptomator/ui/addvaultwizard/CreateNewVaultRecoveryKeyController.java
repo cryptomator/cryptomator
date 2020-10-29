@@ -1,14 +1,14 @@
 package org.cryptomator.ui.addvaultwizard;
 
 import dagger.Lazy;
-import javafx.fxml.FXML;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 
 import javax.inject.Inject;
+import javafx.fxml.FXML;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
 
 public class CreateNewVaultRecoveryKeyController implements FxController {
 

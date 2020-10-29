@@ -2,7 +2,6 @@ package org.cryptomator.ui.common;
 
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-
 import java.util.function.Consumer;
 
 public class StageFactory {

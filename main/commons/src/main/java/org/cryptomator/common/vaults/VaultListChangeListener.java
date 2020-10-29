@@ -1,9 +1,9 @@
 package org.cryptomator.common.vaults;
 
-import javafx.collections.ListChangeListener;
-import javafx.collections.ObservableList;
 import org.cryptomator.common.settings.VaultSettings;
 
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 import java.util.List;
 import java.util.stream.Collectors;
 

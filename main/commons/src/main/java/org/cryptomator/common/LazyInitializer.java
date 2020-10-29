@@ -5,11 +5,11 @@
  *******************************************************************************/
 package org.cryptomator.common;
 
+import com.google.common.base.Throwables;
+
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
-
-import com.google.common.base.Throwables;
 
 public final class LazyInitializer {
 

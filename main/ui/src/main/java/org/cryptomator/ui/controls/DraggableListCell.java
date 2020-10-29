@@ -9,6 +9,7 @@
 package org.cryptomator.ui.controls;
 
 import com.tobiasdiez.easybind.EasyBind;
+
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.scene.SnapshotParameters;
@@ -19,7 +20,6 @@ import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
-
 import java.util.List;
 
 public class DraggableListCell<T> extends ListCell<T> {
