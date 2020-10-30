@@ -48,8 +48,7 @@
 			<VBox spacing="6" HBox.hgrow="ALWAYS">
 				<FormattedLabel format="%unlock.passwordPrompt" arg1="${controller.vaultName}" wrapText="true"/>
 				<NiceSecurePasswordField fx:id="passwordField" disable="${controller.userInteractionDisabled}"/>
-				<CheckBox fx:id="savePasswordCheckbox" text="%unlock.savePassword" onAction="#didClickSavePasswordCheckbox" disable="${controller.userInteractionDisabled}"
-						  visible="${controller.keychainAccessAvailable}"/>
+				<CheckBox fx:id="savePasswordCheckbox" text="%unlock.savePassword" onAction="#didClickSavePasswordCheckbox" disable="${controller.userInteractionDisabled}" visible="${controller.keychainAccessAvailable}"/>
 			</VBox>
 		</HBox>
 
@@ -57,8 +56,7 @@
 			<ButtonBar buttonMinWidth="120" buttonOrder="+CI">
 				<buttons>
 					<Button text="%generic.button.cancel" ButtonBar.buttonData="CANCEL_CLOSE" cancelButton="true" onAction="#cancel" disable="${controller.userInteractionDisabled}"/>
-					<Button text="%unlock.unlockBtn" ButtonBar.buttonData="FINISH" defaultButton="true" onAction="#unlock" contentDisplay="${controller.unlockButtonContentDisplay}"
-							disable="${controller.unlockButtonDisabled}">
+					<Button text="%unlock.unlockBtn" ButtonBar.buttonData="FINISH" defaultButton="true" onAction="#unlock" contentDisplay="${controller.unlockButtonContentDisplay}" disable="${controller.unlockButtonDisabled}">
 						<graphic>
 							<ProgressIndicator progress="-1" prefWidth="12" prefHeight="12"/>
 						</graphic>
