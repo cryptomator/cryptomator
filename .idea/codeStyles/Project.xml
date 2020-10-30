@@ -31,6 +31,9 @@
     <Properties>
       <option name="KEEP_BLANK_LINES" value="true" />
     </Properties>
+    <XML>
+      <option name="XML_ATTRIBUTE_WRAP" value="0" />
+    </XML>
     <codeStyleSettings language="CSS">
       <indentOptions>
         <option name="USE_TAB_CHARACTER" value="true" />
