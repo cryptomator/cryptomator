@@ -70,11 +70,6 @@
 			</dependency>
 			<dependency>
 				<groupId>org.cryptomator</groupId>
-				<artifactId>keychain</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.cryptomator</groupId>
 				<artifactId>ui</artifactId>
 				<version>${project.version}</version>
 			</dependency>
@@ -187,18 +182,6 @@
 				<version>${commons-lang3.version}</version>
 			</dependency>
 
-			<!-- Linux System Keychain -->
-			<dependency> <!-- deprecated: will be replaced by integrations-api -->
-				<groupId>de.swiesend</groupId>
-				<artifactId>secret-service</artifactId>
-				<version>${secret-service.version}</version>
-			</dependency>
-			<dependency> <!-- deprecated: will be replaced by integrations-api -->
-				<groupId>org.purejava</groupId>
-				<artifactId>kdewallet</artifactId>
-				<version>${kdewallet.version}</version>
-			</dependency>
-
 			<!-- JWT -->
 			<dependency>
 				<groupId>com.auth0</groupId>
@@ -280,7 +263,6 @@
 
 	<modules>
 		<module>commons</module>
-		<module>keychain</module>
 		<module>ui</module>
 		<module>launcher</module>
 	</modules>

@@ -8,6 +8,8 @@ import org.cryptomator.integrations.keychain.KeychainAccessProvider;
 import javax.inject.Singleton;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ObjectBinding;
+import javafx.beans.binding.ObjectExpression;
+import javafx.beans.value.ObservableValue;
 import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -29,7 +31,7 @@ public class KeychainModule {
 
 	@Provides
 	@Singleton
-	static ObjectBinding<KeychainAccessProvider> provideKeychainAccessProvider(Settings settings, Set<KeychainAccessProvider> providers) {
+	static ObjectExpression<KeychainAccessProvider> provideKeychainAccessProvider(Settings settings, Set<KeychainAccessProvider> providers) {
 		return Bindings.createObjectBinding(() -> {
 			var selectedProviderClass = settings.keychainBackend().get().getProviderClass();
 			var selectedProvider = providers.stream().filter(provider -> provider.getClass().getName().equals(selectedProviderClass)).findAny();

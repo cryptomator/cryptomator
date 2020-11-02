@@ -1,14 +1,11 @@
 package org.cryptomator.ui.preferences;
 
-import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.Environment;
 import org.cryptomator.common.LicenseHolder;
 import org.cryptomator.common.settings.KeychainBackend;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.UiTheme;
 import org.cryptomator.integrations.keychain.KeychainAccessProvider;
-import org.cryptomator.keychain.KeychainAccessStrategy;
-import org.cryptomator.keychain.LinuxSystemKeychainAccess;
 import org.cryptomator.ui.common.FxController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,9 +25,7 @@ import javafx.scene.control.RadioButton;
 import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleGroup;
 import javafx.util.StringConverter;
-
 import java.util.Arrays;
-import java.util.EnumSet;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.Set;
