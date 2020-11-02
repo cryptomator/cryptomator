@@ -3,8 +3,6 @@ package org.cryptomator.common.mountpoint;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.Environment;
 import org.cryptomator.common.settings.VaultSettings;
-import org.cryptomator.common.settings.VolumeImpl;
-import org.cryptomator.common.vaults.MountPointRequirement;
 import org.cryptomator.common.vaults.Volume;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,12 +10,9 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
-import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Optional;
 
 public class TemporaryMountPointChooser implements MountPointChooser {
@@ -47,53 +42,19 @@ public class TemporaryMountPointChooser implements MountPointChooser {
 
 	@Override
 	public Optional<Path> chooseMountPoint(Volume caller) {
-		return this.environment.getMountPointsDir().map(p -> choose(p, caller));
+		return this.environment.getMountPointsDir().map(this::choose);
 	}
 
-	private Path choose(Path parent, Volume caller) {
-		String basename = this.vaultSettings.mountName().get(); //TODO: this is a normalized name, but if we mount into a folder we do not need to normalize
+	private Path choose(Path parent) {
+		String basename = this.vaultSettings.mountName().get();
 		for (int i = 0; i < MAX_TMPMOUNTPOINT_CREATION_RETRIES; i++) {
 			Path mountPoint = parent.resolve(basename + "_" + i);
-			if (Files.notExists(mountPoint, LinkOption.NOFOLLOW_LINKS)) { //let's be explicit
+			if (Files.notExists(mountPoint)) {
 				return mountPoint;
-			} else {
-				try {
-					removeLeftOvers(mountPoint, caller);
-					return mountPoint;
-				} catch (IOException e) {
-					//NO-OP, try next
-				}
 			}
 		}
 		LOG.error("Failed to find feasible mountpoint at {}{}{}_x. Giving up after {} attempts.", parent, File.separator, basename, MAX_TMPMOUNTPOINT_CREATION_RETRIES);
 		return null;
-	}
-
-	//see https://github.com/cryptomator/cryptomator/issues/1013 and https://github.com/cryptomator/cryptomator/issues/1061
-	private void removeLeftOvers(Path mountPoint, Volume caller) throws IOException {
-		if (!Files.isDirectory(mountPoint, LinkOption.NOFOLLOW_LINKS)) {
-			throw new IOException(); //if not a directory, we do not touch it
-		}
-
-		if (VolumeImpl.DOKANY.equals(caller.getImplementationType())) {
-			try {
-				var attrTarget = Files.readAttributes(mountPoint, BasicFileAttributes.class); //we follow the link and see if it exists
-			} catch (IOException e) {
-				Files.delete(mountPoint); //broken link file, we delete it
-				return;
-			}
-		} else if (VolumeImpl.FUSE.equals(caller.getImplementationType())) {
-			try (DirectoryStream<Path> ds = Files.newDirectoryStream(mountPoint)) {
-				if (!ds.iterator().hasNext()) {
-					if (caller.getMountPointRequirement().equals(MountPointRequirement.PARENT_NO_MOUNT_POINT)) {
-						Files.delete(mountPoint);
-					}
-					return;
-				}
-			}
-		}
-
-		throw new IOException(); //in the default we do not touch anything
 	}
 
 	@Override
