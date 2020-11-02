@@ -1,5 +1,7 @@
 package org.cryptomator.ui.launcher;
 
+import org.cryptomator.common.Environment;
+import org.cryptomator.common.mountpoint.UnregularUnmountCleaner;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.jni.JniException;
@@ -30,15 +32,17 @@ public class UiLauncher {
 	private final FxApplicationStarter fxApplicationStarter;
 	private final AppLaunchEventHandler launchEventHandler;
 	private final Optional<MacFunctions> macFunctions;
+	private final Environment env;
 
 	@Inject
-	public UiLauncher(Settings settings, ObservableList<Vault> vaults, TrayMenuComponent.Builder trayComponent, FxApplicationStarter fxApplicationStarter, AppLaunchEventHandler launchEventHandler, Optional<MacFunctions> macFunctions) {
+	public UiLauncher(Settings settings, ObservableList<Vault> vaults, TrayMenuComponent.Builder trayComponent, FxApplicationStarter fxApplicationStarter, AppLaunchEventHandler launchEventHandler, Optional<MacFunctions> macFunctions, Environment env) {
 		this.settings = settings;
 		this.vaults = vaults;
 		this.trayComponent = trayComponent;
 		this.fxApplicationStarter = fxApplicationStarter;
 		this.launchEventHandler = launchEventHandler;
 		this.macFunctions = macFunctions;
+		this.env = env;
 	}
 
 	public void launch() {
@@ -60,6 +64,10 @@ public class UiLauncher {
 
 		// register app reopen listener
 		Desktop.getDesktop().addAppEventListener((AppReopenedListener) e -> showMainWindowAsync(hasTrayIcon));
+
+		//clean leftovers of not-regularly unmounted vaults
+		//see https://github.com/cryptomator/cryptomator/issues/1013 and https://github.com/cryptomator/cryptomator/issues/1061
+		env.getMountPointsDir().ifPresent(UnregularUnmountCleaner::removeUnregularUnmountDebris);
 
 		// auto unlock
 		Collection<Vault> vaultsToAutoUnlock = vaults.filtered(this::shouldAttemptAutoUnlock);
