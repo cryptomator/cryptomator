@@ -37,10 +37,10 @@ public class SettingsJsonAdapterTest {
 	}
 
 	@ParameterizedTest(name = "fromJson() should throw IOException for input: {0}")
-	@ValueSource(strings = {
-			"",
-			"<html>",
-			"{invalidjson}"
+	@ValueSource(strings = { //
+			"", //
+			"<html>", //
+			"{invalidjson}" //
 	})
 	public void testDeserializeMalformed(String input) {
 		Assertions.assertThrows(IOException.class, () -> {

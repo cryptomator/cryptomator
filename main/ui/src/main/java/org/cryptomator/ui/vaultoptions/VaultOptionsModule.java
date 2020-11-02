@@ -4,9 +4,6 @@ import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoMap;
-import javafx.scene.Scene;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.changepassword.ChangePasswordComponent;
 import org.cryptomator.ui.common.DefaultSceneFactory;
@@ -20,6 +17,9 @@ import org.cryptomator.ui.mainwindow.MainWindow;
 import org.cryptomator.ui.recoverykey.RecoveryKeyComponent;
 
 import javax.inject.Provider;
+import javafx.scene.Scene;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import java.util.Map;
 import java.util.ResourceBundle;
 

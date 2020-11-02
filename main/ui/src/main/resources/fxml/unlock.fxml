@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import org.cryptomator.ui.controls.FormattedLabel?>
+<?import org.cryptomator.ui.controls.NiceSecurePasswordField?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ButtonBar?>
@@ -10,10 +12,8 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
-<?import org.cryptomator.ui.controls.FormattedLabel?>
-<?import org.cryptomator.ui.controls.NiceSecurePasswordField?>
-<VBox xmlns="http://javafx.com/javafx"
-	  xmlns:fx="http://javafx.com/fxml"
+<VBox xmlns:fx="http://javafx.com/fxml"
+	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.unlock.UnlockController"
 	  minWidth="400"
 	  maxWidth="400"

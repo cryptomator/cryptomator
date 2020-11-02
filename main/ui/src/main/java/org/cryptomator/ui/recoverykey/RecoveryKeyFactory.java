@@ -18,14 +18,14 @@ import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
 public class RecoveryKeyFactory {
 
 	private static final byte[] PEPPER = new byte[0];
-	
+
 	private final WordEncoder wordEncoder;
-	
+
 	@Inject
 	public RecoveryKeyFactory(WordEncoder wordEncoder) {
 		this.wordEncoder = wordEncoder;
 	}
-	
+
 	public Collection<String> getDictionary() {
 		return wordEncoder.getWords();
 	}
@@ -62,6 +62,7 @@ public class RecoveryKeyFactory {
 
 	/**
 	 * Creates a completely new masterkey using a recovery key.
+	 *
 	 * @param vaultPath Path to the storage location of a vault
 	 * @param recoveryKey A recovery key for this vault
 	 * @param newPassword The new password used to encrypt the keys
@@ -80,6 +81,7 @@ public class RecoveryKeyFactory {
 
 	/**
 	 * Checks whether a String is a syntactically correct recovery key with a valid checksum
+	 *
 	 * @param recoveryKey A word sequence which might be a recovery key
 	 * @return <code>true</code> if this seems to be a legitimate recovery key
 	 */
@@ -92,7 +94,7 @@ public class RecoveryKeyFactory {
 			return false;
 		}
 	}
-	
+
 	private byte[] decodeRecoveryKey(String recoveryKey) throws IllegalArgumentException {
 		byte[] paddedKey = new byte[0];
 		try {

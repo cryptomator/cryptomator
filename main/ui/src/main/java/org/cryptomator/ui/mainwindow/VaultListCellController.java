@@ -1,15 +1,15 @@
 package org.cryptomator.ui.mainwindow;
 
 import com.tobiasdiez.easybind.EasyBind;
-import javafx.beans.binding.Binding;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.controls.FontAwesome5Icon;
 
 import javax.inject.Inject;
+import javafx.beans.binding.Binding;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 
 // unscoped because each cell needs its own controller
 public class VaultListCellController implements FxController {
@@ -25,7 +25,7 @@ public class VaultListCellController implements FxController {
 	}
 
 	private FontAwesome5Icon getGlyphForVaultState(VaultState state) {
-		if(state != null){
+		if (state != null) {
 			return switch (state) {
 				case LOCKED -> FontAwesome5Icon.LOCK;
 				case PROCESSING -> FontAwesome5Icon.SPINNER;

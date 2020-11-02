@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import org.cryptomator.ui.controls.FontAwesome5IconView?>
+<?import org.cryptomator.ui.controls.FormattedLabel?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ButtonBar?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
-<?import org.cryptomator.ui.controls.FontAwesome5IconView?>
-<?import org.cryptomator.ui.controls.FormattedLabel?>
-<VBox xmlns="http://javafx.com/javafx"
-	  xmlns:fx="http://javafx.com/fxml"
+<VBox xmlns:fx="http://javafx.com/fxml"
+	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.recoverykey.RecoveryKeyDisplayController"
 	  minWidth="350"
 	  minHeight="280"

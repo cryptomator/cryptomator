@@ -2,6 +2,12 @@ package org.cryptomator.ui.fxapp;
 
 import dagger.Module;
 import dagger.Provides;
+import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.common.settings.Settings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.inject.Named;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.SimpleStringProperty;
@@ -9,12 +15,6 @@ import javafx.beans.property.StringProperty;
 import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Task;
 import javafx.util.Duration;
-import org.apache.commons.lang3.SystemUtils;
-import org.cryptomator.common.settings.Settings;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.inject.Named;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;

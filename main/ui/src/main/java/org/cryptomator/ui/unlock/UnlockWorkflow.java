@@ -1,11 +1,6 @@
 package org.cryptomator.ui.unlock;
 
 import dagger.Lazy;
-import javafx.application.Platform;
-import javafx.concurrent.Task;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
-import javafx.stage.Window;
 import org.cryptomator.common.mountpoint.InvalidMountPointException;
 import org.cryptomator.common.vaults.MountPointRequirement;
 import org.cryptomator.common.vaults.Vault;
@@ -26,6 +21,11 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javafx.application.Platform;
+import javafx.concurrent.Task;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
+import javafx.stage.Window;
 import java.io.IOException;
 import java.nio.CharBuffer;
 import java.nio.file.DirectoryNotEmptyException;

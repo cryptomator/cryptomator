@@ -7,11 +7,12 @@ package org.cryptomator.ui.preferences;
 
 import dagger.Lazy;
 import dagger.Subcomponent;
+import org.cryptomator.ui.common.FxmlFile;
+import org.cryptomator.ui.common.FxmlScene;
+
 import javafx.beans.property.ObjectProperty;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import org.cryptomator.ui.common.FxmlFile;
-import org.cryptomator.ui.common.FxmlScene;
 
 @PreferencesScoped
 @Subcomponent(modules = {PreferencesModule.class})

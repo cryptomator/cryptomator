@@ -8,9 +8,9 @@
  *******************************************************************************/
 package org.cryptomator.common;
 
-import java.util.Comparator;
-
 import org.apache.commons.lang3.StringUtils;
+
+import java.util.Comparator;
 
 /**
  * Compares version strings according to <a href="http://semver.org/spec/v2.0.0.html">SemVer 2.0.0</a>.

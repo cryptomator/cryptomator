@@ -1,8 +1,6 @@
 package org.cryptomator.ui.addvaultwizard;
 
 import dagger.Lazy;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
@@ -10,6 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
 
 @AddVaultWizardScoped
 public class AddVaultWelcomeController implements FxController {

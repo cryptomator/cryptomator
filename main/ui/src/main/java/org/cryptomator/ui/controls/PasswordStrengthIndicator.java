@@ -1,6 +1,7 @@
 package org.cryptomator.ui.controls;
 
 import com.tobiasdiez.easybind.EasyBind;
+
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -75,11 +76,11 @@ public class PasswordStrengthIndicator extends HBox {
 		return strength;
 	}
 
-	public void setStrength(int strength) {
-		this.strength.set(strength);
-	}
-
 	public int getStrength() {
 		return strength.get();
+	}
+
+	public void setStrength(int strength) {
+		this.strength.set(strength);
 	}
 }

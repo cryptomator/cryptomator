@@ -1,6 +1,15 @@
 package org.cryptomator.ui.vaultoptions;
 
 import com.google.common.base.Strings;
+import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.common.Environment;
+import org.cryptomator.common.settings.Settings;
+import org.cryptomator.common.settings.VolumeImpl;
+import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.common.vaults.WindowsDriveLetters;
+import org.cryptomator.ui.common.FxController;
+
+import javax.inject.Inject;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
@@ -17,15 +26,6 @@ import javafx.scene.control.ToggleGroup;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
-import org.apache.commons.lang3.SystemUtils;
-import org.cryptomator.common.Environment;
-import org.cryptomator.common.settings.Settings;
-import org.cryptomator.common.settings.VolumeImpl;
-import org.cryptomator.common.vaults.Vault;
-import org.cryptomator.common.vaults.WindowsDriveLetters;
-import org.cryptomator.ui.common.FxController;
-
-import javax.inject.Inject;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.ResourceBundle;
@@ -73,7 +73,7 @@ public class MountOptionsController implements FxController {
 
 		// readonly:
 		readOnlyCheckbox.selectedProperty().bindBidirectional(vault.getVaultSettings().usesReadOnlyMode());
-		if(getRestrictToStableFuseOnWindows()) {
+		if (getRestrictToStableFuseOnWindows()) {
 			readOnlyCheckbox.setSelected(false); // to prevent invalid states
 		}
 		readOnlyCheckbox.disableProperty().bind(customMountFlagsCheckbox.selectedProperty().or(restrictToStableFuseOnWindows));

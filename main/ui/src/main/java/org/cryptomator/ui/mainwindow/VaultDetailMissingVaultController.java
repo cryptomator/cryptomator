@@ -1,15 +1,15 @@
 package org.cryptomator.ui.mainwindow;
 
-import javafx.beans.property.ObjectProperty;
-import javafx.fxml.FXML;
-import javafx.stage.FileChooser;
-import javafx.stage.Stage;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultListManager;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.removevault.RemoveVaultComponent;
 
 import javax.inject.Inject;
+import javafx.beans.property.ObjectProperty;
+import javafx.fxml.FXML;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import java.io.File;
 import java.util.ResourceBundle;
 

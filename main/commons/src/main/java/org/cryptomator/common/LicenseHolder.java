@@ -1,15 +1,15 @@
 package org.cryptomator.common;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
+import org.cryptomator.common.settings.Settings;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.StringBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import org.cryptomator.common.settings.Settings;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.util.Optional;
 
 @Singleton

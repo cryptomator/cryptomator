@@ -1,6 +1,5 @@
 package org.cryptomator.ui.common;
 
-import javafx.concurrent.Task;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.common.vaults.Volume;
@@ -10,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javafx.concurrent.Task;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;

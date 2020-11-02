@@ -1,12 +1,12 @@
 package org.cryptomator.ui.mainwindow;
 
 import com.tobiasdiez.easybind.EasyBind;
-import javafx.beans.binding.Binding;
-import javafx.beans.property.ObjectProperty;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.FxController;
 
 import javax.inject.Inject;
+import javafx.beans.binding.Binding;
+import javafx.beans.property.ObjectProperty;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;

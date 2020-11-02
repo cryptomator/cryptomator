@@ -2,10 +2,10 @@ package org.cryptomator.ui.common;
 
 import dagger.BindsInstance;
 import dagger.Subcomponent;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
 
 import javax.annotation.Nullable;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
 
 @Subcomponent(modules = {ErrorModule.class})
 public interface ErrorComponent {

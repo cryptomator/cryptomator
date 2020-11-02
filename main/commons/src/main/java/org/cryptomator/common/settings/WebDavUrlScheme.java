@@ -7,7 +7,8 @@ public enum WebDavUrlScheme {
 	private final String prefix;
 	private final String displayName;
 
-	WebDavUrlScheme(String prefix, String displayName) {this.prefix = prefix;
+	WebDavUrlScheme(String prefix, String displayName) {
+		this.prefix = prefix;
 		this.displayName = displayName;
 	}
 

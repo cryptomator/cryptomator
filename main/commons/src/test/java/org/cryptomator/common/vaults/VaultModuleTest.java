@@ -1,9 +1,5 @@
 package org.cryptomator.common.vaults;
 
-import javafx.beans.binding.Bindings;
-import javafx.beans.binding.StringBinding;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.common.settings.VolumeImpl;
@@ -17,6 +13,10 @@ import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mockito;
 
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.StringBinding;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import java.nio.file.Path;
 
 public class VaultModuleTest {

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.cryptomator</groupId>
@@ -22,7 +22,7 @@
 			<groupId>org.cryptomator</groupId>
 			<artifactId>jni</artifactId>
 		</dependency>
-		
+
 		<!-- JavaFx -->
 		<dependency>
 			<groupId>org.openjfx</groupId>
@@ -67,14 +67,14 @@
 			<artifactId>zxcvbn</artifactId>
 			<version>1.3.0</version>
 		</dependency>
-		
+
 		<!-- Logging -->
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-simple</artifactId>
 			<scope>test</scope>
 		</dependency>
-		
+
 		<!-- Testing -->
 		<dependency>
 			<groupId>com.google.jimfs</groupId>
@@ -88,7 +88,7 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
-	
+
 	<build>
 		<plugins>
 			<plugin>

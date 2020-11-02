@@ -2,6 +2,15 @@ package org.cryptomator.ui.addvaultwizard;
 
 import com.tobiasdiez.easybind.EasyBind;
 import dagger.Lazy;
+import org.cryptomator.ui.common.ErrorComponent;
+import org.cryptomator.ui.common.FxController;
+import org.cryptomator.ui.common.FxmlFile;
+import org.cryptomator.ui.common.FxmlScene;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.inject.Inject;
+import javax.inject.Named;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
@@ -17,15 +26,6 @@ import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleGroup;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
-import org.cryptomator.ui.common.ErrorComponent;
-import org.cryptomator.ui.common.FxController;
-import org.cryptomator.ui.common.FxmlFile;
-import org.cryptomator.ui.common.FxmlScene;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.inject.Inject;
-import javax.inject.Named;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileAlreadyExistsException;
@@ -88,7 +88,7 @@ public class CreateNewVaultLocationController implements FxController {
 	}
 
 	private void vaultPathDidChange(Path newValue) {
-		if ( newValue != null && !Files.notExists(newValue)) {
+		if (newValue != null && !Files.notExists(newValue)) {
 			warningText.set(resourceBundle.getString("addvaultwizard.new.fileAlreadyExists"));
 		} else {
 			warningText.set(null);

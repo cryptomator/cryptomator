@@ -27,7 +27,7 @@ public abstract class AbstractVolume implements Volume {
 	protected Path determineMountPoint() throws InvalidMountPointException {
 		SortedSet<MountPointChooser> checkedChoosers = new TreeSet<>(); //Natural order
 		for (MountPointChooser chooser : this.choosers) {
-			if(!chooser.isApplicable(this)) {
+			if (!chooser.isApplicable(this)) {
 				continue;
 			}
 

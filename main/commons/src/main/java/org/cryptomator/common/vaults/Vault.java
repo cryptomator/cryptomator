@@ -9,11 +9,6 @@
 package org.cryptomator.common.vaults;
 
 import com.google.common.base.Strings;
-import javafx.beans.Observable;
-import javafx.beans.binding.Bindings;
-import javafx.beans.binding.BooleanBinding;
-import javafx.beans.binding.StringBinding;
-import javafx.beans.property.ObjectProperty;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.LazyInitializer;
 import org.cryptomator.common.mountpoint.InvalidMountPointException;
@@ -33,6 +28,11 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
+import javafx.beans.Observable;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
+import javafx.beans.binding.StringBinding;
+import javafx.beans.property.ObjectProperty;
 import java.io.IOException;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;

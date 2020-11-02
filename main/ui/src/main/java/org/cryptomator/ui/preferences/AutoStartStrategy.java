@@ -19,6 +19,6 @@ public interface AutoStartStrategy {
 		public TogglingAutoStartFailedException(String message, Throwable cause) {
 			super(message, cause);
 		}
-		
+
 	}
 }

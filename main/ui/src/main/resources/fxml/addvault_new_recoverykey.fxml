@@ -5,8 +5,8 @@
 <?import javafx.scene.control.ButtonBar?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
-<VBox xmlns="http://javafx.com/javafx"
-	  xmlns:fx="http://javafx.com/fxml"
+<VBox xmlns:fx="http://javafx.com/fxml"
+	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.addvaultwizard.CreateNewVaultRecoveryKeyController"
 	  prefWidth="450"
 	  prefHeight="450"

@@ -4,9 +4,6 @@ import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoMap;
-import javafx.scene.Scene;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.keychain.KeychainAccessException;
 import org.cryptomator.keychain.KeychainManager;
@@ -24,6 +21,9 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Named;
 import javax.inject.Provider;
+import javafx.scene.Scene;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -35,7 +35,10 @@ abstract class UnlockModule {
 
 	private static final Logger LOG = LoggerFactory.getLogger(UnlockModule.class);
 
-	public enum PasswordEntry {PASSWORD_ENTERED, CANCELED}
+	public enum PasswordEntry {
+		PASSWORD_ENTERED,
+		CANCELED
+	}
 
 	@Provides
 	@UnlockScoped

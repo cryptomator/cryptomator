@@ -20,7 +20,6 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.NodeOrientation;
-
 import java.util.function.Consumer;
 
 public class Settings {
@@ -78,7 +77,7 @@ public class Settings {
 	void setSaveCmd(Consumer<Settings> saveCmd) {
 		this.saveCmd = saveCmd;
 	}
-	
+
 	private void somethingChanged(@SuppressWarnings("unused") Observable observable) {
 		this.save();
 	}
@@ -102,7 +101,7 @@ public class Settings {
 	public BooleanProperty checkForUpdates() {
 		return checkForUpdates;
 	}
-	
+
 	public BooleanProperty startHidden() {
 		return startHidden;
 	}

@@ -14,7 +14,7 @@ class RecoveryKeyFactoryTest {
 
 	private WordEncoder wordEncoder = new WordEncoder();
 	private RecoveryKeyFactory inTest = new RecoveryKeyFactory(wordEncoder);
-	
+
 	@Test
 	@DisplayName("createRecoveryKey() creates 44 words")
 	public void testCreateRecoveryKey(@TempDir Path pathToVault) throws IOException {
@@ -48,18 +48,18 @@ class RecoveryKeyFactoryTest {
 	@Test
 	@DisplayName("validateRecoveryKey() with invalid checksum")
 	public void testValidateValidateRecoveryKeyWithInvalidCrc() {
-		boolean result = inTest.validateRecoveryKey("pathway lift abuse plenty export texture gentleman landscape beyond ceiling around leaf cafe" +
-				" charity border breakdown victory surely computer cat linger restrict infer crowd live computer true written amazed investor boot" +
-				" depth left theory snow whereby terminal weekly reject happiness circuit partial cup wrong");
+		boolean result = inTest.validateRecoveryKey("pathway lift abuse plenty export texture gentleman landscape beyond ceiling around leaf cafe" //
+				+ " charity border breakdown victory surely computer cat linger restrict infer crowd live computer true written amazed investor boot" //
+				+ " depth left theory snow whereby terminal weekly reject happiness circuit partial cup wrong");
 		Assertions.assertFalse(result);
 	}
-	
+
 	@Test
 	@DisplayName("validateRecoveryKey() with valid input")
 	public void testValidateValidateRecoveryKeyWithValidKey() {
-		boolean result = inTest.validateRecoveryKey("pathway lift abuse plenty export texture gentleman landscape beyond ceiling around leaf cafe" +
-				" charity border breakdown victory surely computer cat linger restrict infer crowd live computer true written amazed investor boot" +
-				" depth left theory snow whereby terminal weekly reject happiness circuit partial cup ad");
+		boolean result = inTest.validateRecoveryKey("pathway lift abuse plenty export texture gentleman landscape beyond ceiling around leaf cafe" //
+				+ " charity border breakdown victory surely computer cat linger restrict infer crowd live computer true written amazed investor boot" //
+				+ " depth left theory snow whereby terminal weekly reject happiness circuit partial cup ad");
 		Assertions.assertTrue(result);
 	}
 

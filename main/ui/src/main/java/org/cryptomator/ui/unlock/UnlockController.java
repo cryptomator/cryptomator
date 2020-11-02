@@ -1,5 +1,17 @@
 package org.cryptomator.ui.unlock;
 
+import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.keychain.KeychainManager;
+import org.cryptomator.ui.common.FxController;
+import org.cryptomator.ui.common.UserInteractionLock;
+import org.cryptomator.ui.common.WeakBindings;
+import org.cryptomator.ui.controls.NiceSecurePasswordField;
+import org.cryptomator.ui.forgetPassword.ForgetPasswordComponent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.inject.Inject;
+import javax.inject.Named;
 import javafx.animation.Animation;
 import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
@@ -20,18 +32,6 @@ import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Translate;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import org.cryptomator.common.vaults.Vault;
-import org.cryptomator.keychain.KeychainManager;
-import org.cryptomator.ui.common.FxController;
-import org.cryptomator.ui.common.UserInteractionLock;
-import org.cryptomator.ui.common.WeakBindings;
-import org.cryptomator.ui.controls.NiceSecurePasswordField;
-import org.cryptomator.ui.forgetPassword.ForgetPasswordComponent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.inject.Inject;
-import javax.inject.Named;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -88,7 +88,7 @@ public class UnlockController implements FxController {
 			passwordField.setPassword(password.get());
 		}
 		unlockButtonDisabled.bind(userInteractionDisabled.or(passwordField.textProperty().isEmpty()));
-		
+
 		var leftArmTranslation = new Translate(24, 0);
 		var leftArmRotation = new Rotate(60, 16, 30, 0);
 		var leftArmRetracted = new KeyValue(leftArmTranslation.xProperty(), 24);
@@ -116,15 +116,15 @@ public class UnlockController implements FxController {
 		var faceVisible = new KeyValue(face.opacityProperty(), 1.0, Interpolator.LINEAR);
 		face.setOpacity(0);
 
-		unlockAnimation = new Timeline(
-				new KeyFrame(Duration.ZERO, leftArmRetracted, leftArmHorizontal, rightArmRetracted, rightArmHorizontal, legsRetractedY, legsRetractedX, faceHidden),
-				new KeyFrame(Duration.millis(200), leftArmExtended, leftArmHorizontal, rightArmRetracted, rightArmHorizontal),
-				new KeyFrame(Duration.millis(400), leftArmExtended, leftArmHanging, rightArmExtended, rightArmHorizontal),
-				new KeyFrame(Duration.millis(600), leftArmExtended, leftArmHanging, rightArmExtended, rightArmHanging),
-				new KeyFrame(Duration.millis(800), legsExtendedY, legsExtendedX, faceHidden),
-				new KeyFrame(Duration.millis(1000), faceVisible)
+		unlockAnimation = new Timeline( //
+				new KeyFrame(Duration.ZERO, leftArmRetracted, leftArmHorizontal, rightArmRetracted, rightArmHorizontal, legsRetractedY, legsRetractedX, faceHidden), //
+				new KeyFrame(Duration.millis(200), leftArmExtended, leftArmHorizontal, rightArmRetracted, rightArmHorizontal), //
+				new KeyFrame(Duration.millis(400), leftArmExtended, leftArmHanging, rightArmExtended, rightArmHorizontal), //
+				new KeyFrame(Duration.millis(600), leftArmExtended, leftArmHanging, rightArmExtended, rightArmHanging), //
+				new KeyFrame(Duration.millis(800), legsExtendedY, legsExtendedX, faceHidden), //
+				new KeyFrame(Duration.millis(1000), faceVisible) //
 		);
-		
+
 		passwordEntryLock.awaitingInteraction().addListener(observable -> stopUnlockAnimation());
 	}
 
@@ -152,7 +152,7 @@ public class UnlockController implements FxController {
 		passwordEntryLock.interacted(UnlockModule.PasswordEntry.PASSWORD_ENTERED);
 		startUnlockAnimation();
 	}
-	
+
 	private void startUnlockAnimation() {
 		leftArm.setVisible(true);
 		rightArm.setVisible(true);
@@ -184,7 +184,7 @@ public class UnlockController implements FxController {
 	public String getVaultName() {
 		return vaultName.get();
 	}
-	
+
 	public StringBinding vaultNameProperty() {
 		return vaultName;
 	}

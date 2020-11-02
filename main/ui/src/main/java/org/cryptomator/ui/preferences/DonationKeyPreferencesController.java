@@ -1,15 +1,15 @@
 package org.cryptomator.ui.preferences;
 
-import javafx.application.Application;
-import javafx.beans.value.ObservableValue;
-import javafx.fxml.FXML;
-import javafx.scene.control.TextArea;
 import org.cryptomator.common.LicenseHolder;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.UiTheme;
 import org.cryptomator.ui.common.FxController;
 
 import javax.inject.Inject;
+import javafx.application.Application;
+import javafx.beans.value.ObservableValue;
+import javafx.fxml.FXML;
+import javafx.scene.control.TextArea;
 
 @PreferencesScoped
 public class DonationKeyPreferencesController implements FxController {

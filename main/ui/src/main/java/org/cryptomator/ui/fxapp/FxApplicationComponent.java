@@ -18,7 +18,7 @@ public interface FxApplicationComponent {
 
 	@Subcomponent.Builder
 	interface Builder {
-		
+
 		@BindsInstance
 		Builder trayMenuSupported(@Named("trayMenuSupported") boolean trayMenuSupported);
 

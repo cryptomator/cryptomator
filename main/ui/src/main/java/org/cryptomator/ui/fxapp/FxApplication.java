@@ -2,13 +2,6 @@ package org.cryptomator.ui.fxapp;
 
 import com.tobiasdiez.easybind.EasyBind;
 import dagger.Lazy;
-import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.beans.binding.Bindings;
-import javafx.beans.binding.BooleanBinding;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.ObservableSet;
-import javafx.stage.Stage;
 import org.cryptomator.common.LicenseHolder;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.UiTheme;
@@ -28,6 +21,13 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableSet;
+import javafx.stage.Stage;
 import java.awt.desktop.QuitResponse;
 import java.util.Optional;
 

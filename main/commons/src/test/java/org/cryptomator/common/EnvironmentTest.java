@@ -37,7 +37,7 @@ class EnvironmentTest {
 
 		List<Path> result = env.getSettingsPath().collect(Collectors.toList());
 		MatcherAssert.assertThat(result, Matchers.hasSize(2));
-		MatcherAssert.assertThat(result, Matchers.contains(Paths.get("/home/testuser/.config/Cryptomator/settings.json"),
+		MatcherAssert.assertThat(result, Matchers.contains(Paths.get("/home/testuser/.config/Cryptomator/settings.json"), //
 				Paths.get("/home/testuser/.Cryptomator/settings.json")));
 	}
 
@@ -48,7 +48,7 @@ class EnvironmentTest {
 
 		List<Path> result = env.getIpcPortPath().collect(Collectors.toList());
 		MatcherAssert.assertThat(result, Matchers.hasSize(2));
-		MatcherAssert.assertThat(result, Matchers.contains(Paths.get("/home/testuser/.config/Cryptomator/ipcPort.bin"),
+		MatcherAssert.assertThat(result, Matchers.contains(Paths.get("/home/testuser/.config/Cryptomator/ipcPort.bin"), //
 				Paths.get("/home/testuser/.Cryptomator/ipcPort.bin")));
 	}
 
@@ -123,8 +123,8 @@ class EnvironmentTest {
 			List<Path> result = env.getPaths("test.path.property").collect(Collectors.toList());
 
 			MatcherAssert.assertThat(result, Matchers.hasSize(3));
-			MatcherAssert.assertThat(result, Matchers.contains(Paths.get("/home/testuser/test"),
-					Paths.get("/home/testuser/test2"),
+			MatcherAssert.assertThat(result, Matchers.contains(Paths.get("/home/testuser/test"), //
+					Paths.get("/home/testuser/test2"), //
 					Paths.get("/foo/bar/test")));
 		}
 

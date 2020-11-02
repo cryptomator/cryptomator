@@ -1,14 +1,14 @@
 package org.cryptomator.ui.traymenu;
 
-import javafx.application.Platform;
-import javafx.beans.Observable;
-import javafx.collections.ObservableList;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.launcher.AppLifecycleListener;
 import org.cryptomator.ui.launcher.FxApplicationStarter;
 import org.cryptomator.ui.preferences.SelectedPreferencesTab;
 
 import javax.inject.Inject;
+import javafx.application.Platform;
+import javafx.beans.Observable;
+import javafx.collections.ObservableList;
 import java.awt.Menu;
 import java.awt.MenuItem;
 import java.awt.PopupMenu;

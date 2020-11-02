@@ -7,12 +7,6 @@ package org.cryptomator.common.vaults;
 
 import dagger.Module;
 import dagger.Provides;
-import javafx.beans.binding.Bindings;
-import javafx.beans.binding.StringBinding;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.ReadOnlyBooleanProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VaultSettings;
@@ -23,6 +17,12 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import javax.inject.Named;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.StringBinding;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;

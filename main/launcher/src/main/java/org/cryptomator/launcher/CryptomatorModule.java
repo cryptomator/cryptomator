@@ -10,7 +10,7 @@ import java.util.concurrent.CountDownLatch;
 
 @Module
 class CryptomatorModule {
-	
+
 	@Provides
 	@Singleton
 	@Named("shutdownLatch")

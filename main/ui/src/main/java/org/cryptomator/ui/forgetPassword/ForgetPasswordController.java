@@ -1,8 +1,5 @@
 package org.cryptomator.ui.forgetPassword;
 
-import javafx.beans.property.BooleanProperty;
-import javafx.fxml.FXML;
-import javafx.stage.Stage;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.keychain.KeychainAccessException;
 import org.cryptomator.keychain.KeychainManager;
@@ -11,6 +8,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javafx.beans.property.BooleanProperty;
+import javafx.fxml.FXML;
+import javafx.stage.Stage;
 import java.util.Optional;
 
 @ForgetPasswordScoped

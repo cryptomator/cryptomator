@@ -1,12 +1,5 @@
 package org.cryptomator.ui.changepassword;
 
-import javafx.beans.binding.Bindings;
-import javafx.beans.binding.BooleanBinding;
-import javafx.beans.property.ObjectProperty;
-import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.stage.Stage;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.cryptofs.CryptoFileSystemProvider;
 import org.cryptomator.cryptolib.api.InvalidPassphraseException;
@@ -21,6 +14,13 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
+import javafx.beans.property.ObjectProperty;
+import javafx.fxml.FXML;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.stage.Stage;
 import java.io.IOException;
 import java.nio.CharBuffer;
 import java.util.Optional;

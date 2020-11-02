@@ -25,7 +25,7 @@ public abstract class KeychainModule {
 	@Binds
 	@IntoSet
 	abstract KeychainAccessStrategy bindWindowsProtectedKeychainAccess(WindowsProtectedKeychainAccess keychainAccessStrategy);
-	
+
 	@Binds
 	@IntoSet
 	abstract KeychainAccessStrategy bindLinuxSystemKeychainAccess(LinuxSystemKeychainAccess keychainAccessStrategy);
@@ -35,7 +35,7 @@ public abstract class KeychainModule {
 	static Optional<KeychainAccessStrategy> provideSupportedKeychain(Set<KeychainAccessStrategy> keychainAccessStrategies) {
 		return keychainAccessStrategies.stream().filter(KeychainAccessStrategy::isSupported).findFirst();
 	}
-	
+
 	@Provides
 	@Singleton
 	public static Optional<KeychainManager> provideKeychainManager(Optional<KeychainAccessStrategy> keychainAccess) {

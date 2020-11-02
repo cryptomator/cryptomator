@@ -1,13 +1,6 @@
 package org.cryptomator.ui.migration;
 
 import dagger.Lazy;
-import javafx.beans.binding.Bindings;
-import javafx.beans.binding.StringBinding;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.ReadOnlyObjectProperty;
-import javafx.fxml.FXML;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
 import org.cryptomator.cryptofs.common.FileSystemCapabilityChecker;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxmlFile;
@@ -15,6 +8,13 @@ import org.cryptomator.ui.common.FxmlScene;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.StringBinding;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.fxml.FXML;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
 import java.util.ResourceBundle;
 
 @MigrationScoped

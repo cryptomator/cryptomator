@@ -9,6 +9,7 @@
 package org.cryptomator.ui.controls;
 
 import com.google.common.base.Strings;
+
 import javafx.beans.NamedArg;
 import javafx.beans.Observable;
 import javafx.beans.property.BooleanProperty;
@@ -26,7 +27,6 @@ import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.TransferMode;
-
 import java.awt.Toolkit;
 import java.nio.CharBuffer;
 import java.text.Normalizer;

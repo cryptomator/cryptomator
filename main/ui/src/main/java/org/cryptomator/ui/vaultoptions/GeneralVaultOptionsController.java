@@ -1,16 +1,15 @@
 package org.cryptomator.ui.vaultoptions;
 
-import javafx.fxml.FXML;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.TextField;
-import javafx.util.StringConverter;
-import org.cryptomator.common.settings.UiTheme;
 import org.cryptomator.common.settings.WhenUnlocked;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.FxController;
 
 import javax.inject.Inject;
+import javafx.fxml.FXML;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.TextField;
+import javafx.util.StringConverter;
 import java.util.ResourceBundle;
 
 @VaultOptionsScoped
@@ -39,7 +38,7 @@ public class GeneralVaultOptionsController implements FxController {
 	}
 
 	private static class WhenUnlockedConverter extends StringConverter<WhenUnlocked> {
-		
+
 		private final ResourceBundle resourceBundle;
 
 		public WhenUnlockedConverter(ResourceBundle resourceBundle) {

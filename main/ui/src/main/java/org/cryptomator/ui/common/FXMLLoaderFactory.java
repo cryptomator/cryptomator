@@ -1,10 +1,9 @@
 package org.cryptomator.ui.common;
 
+import javax.inject.Provider;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-
-import javax.inject.Provider;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;

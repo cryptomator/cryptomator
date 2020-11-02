@@ -1,12 +1,12 @@
 package org.cryptomator.ui.mainwindow;
 
+import org.cryptomator.ui.common.FxController;
+
+import javax.inject.Inject;
 import javafx.fxml.FXML;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Region;
 import javafx.stage.Stage;
-import org.cryptomator.ui.common.FxController;
-
-import javax.inject.Inject;
 
 @MainWindow
 public class ResizeController implements FxController {

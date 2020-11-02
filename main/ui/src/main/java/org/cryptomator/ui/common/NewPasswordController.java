@@ -1,6 +1,9 @@
 package org.cryptomator.ui.common;
 
 import com.tobiasdiez.easybind.EasyBind;
+import org.cryptomator.ui.controls.FontAwesome5IconView;
+import org.cryptomator.ui.controls.NiceSecurePasswordField;
+
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
@@ -9,9 +12,6 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
-import org.cryptomator.ui.controls.FontAwesome5IconView;
-import org.cryptomator.ui.controls.NiceSecurePasswordField;
-
 import java.util.ResourceBundle;
 
 public class NewPasswordController implements FxController {

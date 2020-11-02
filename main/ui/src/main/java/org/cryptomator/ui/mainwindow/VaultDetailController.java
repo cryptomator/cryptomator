@@ -1,11 +1,6 @@
 package org.cryptomator.ui.mainwindow;
 
 import com.tobiasdiez.easybind.EasyBind;
-import javafx.beans.binding.Binding;
-import javafx.beans.binding.BooleanBinding;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.ReadOnlyObjectProperty;
-import javafx.fxml.FXML;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.ui.common.FxController;
@@ -13,6 +8,11 @@ import org.cryptomator.ui.controls.FontAwesome5Icon;
 import org.cryptomator.ui.fxapp.FxApplication;
 
 import javax.inject.Inject;
+import javafx.beans.binding.Binding;
+import javafx.beans.binding.BooleanBinding;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.fxml.FXML;
 
 @MainWindowScoped
 public class VaultDetailController implements FxController {

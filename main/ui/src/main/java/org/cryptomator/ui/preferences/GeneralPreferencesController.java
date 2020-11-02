@@ -1,18 +1,5 @@
 package org.cryptomator.ui.preferences;
 
-import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.value.ObservableValue;
-import javafx.concurrent.Task;
-import javafx.fxml.FXML;
-import javafx.geometry.NodeOrientation;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.RadioButton;
-import javafx.scene.control.Toggle;
-import javafx.scene.control.ToggleGroup;
-import javafx.util.StringConverter;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.Environment;
 import org.cryptomator.common.LicenseHolder;
@@ -27,6 +14,20 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.value.ObservableValue;
+import javafx.concurrent.Task;
+import javafx.fxml.FXML;
+import javafx.geometry.NodeOrientation;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.RadioButton;
+import javafx.scene.control.Toggle;
+import javafx.scene.control.ToggleGroup;
+import javafx.util.StringConverter;
+
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Optional;

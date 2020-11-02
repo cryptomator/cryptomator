@@ -4,10 +4,10 @@ import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoMap;
-import javafx.scene.Scene;
 
 import javax.inject.Named;
 import javax.inject.Provider;
+import javafx.scene.Scene;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;

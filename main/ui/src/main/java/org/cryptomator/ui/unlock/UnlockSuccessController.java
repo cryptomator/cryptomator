@@ -1,5 +1,13 @@
 package org.cryptomator.ui.unlock;
 
+import org.cryptomator.common.settings.WhenUnlocked;
+import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.ui.common.FxController;
+import org.cryptomator.ui.common.VaultService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.inject.Inject;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
@@ -10,14 +18,6 @@ import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ContentDisplay;
 import javafx.stage.Stage;
-import org.cryptomator.common.settings.WhenUnlocked;
-import org.cryptomator.common.vaults.Vault;
-import org.cryptomator.ui.common.FxController;
-import org.cryptomator.ui.common.VaultService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.inject.Inject;
 import java.util.concurrent.ExecutorService;
 
 @UnlockScoped

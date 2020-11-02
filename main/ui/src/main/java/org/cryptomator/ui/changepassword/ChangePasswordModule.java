@@ -4,12 +4,6 @@ import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoMap;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.scene.Scene;
-import javafx.scene.image.Image;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
 import org.cryptomator.ui.common.DefaultSceneFactory;
 import org.cryptomator.ui.common.FXMLLoaderFactory;
 import org.cryptomator.ui.common.FxController;
@@ -22,14 +16,17 @@ import org.cryptomator.ui.common.StageFactory;
 
 import javax.inject.Named;
 import javax.inject.Provider;
-import java.nio.CharBuffer;
-import java.util.List;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.scene.Scene;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import java.util.Map;
 import java.util.ResourceBundle;
 
 @Module
 abstract class ChangePasswordModule {
-	
+
 	@Provides
 	@ChangePasswordScoped
 	@Named("newPassword")
@@ -70,7 +67,7 @@ abstract class ChangePasswordModule {
 	@IntoMap
 	@FxControllerKey(ChangePasswordController.class)
 	abstract FxController bindUnlockController(ChangePasswordController controller);
-	
+
 	@Provides
 	@IntoMap
 	@FxControllerKey(NewPasswordController.class)
