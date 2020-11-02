@@ -39,6 +39,11 @@
 			<Hyperlink styleClass="hyperlink-underline" text="%preferences.general.debugDirectory" onAction="#showLogfileDirectory"/>
 		</HBox>
 
+		<HBox spacing="6" alignment="CENTER_LEFT">
+			<Label text="%preferences.general.keychainBackend"/>
+			<ChoiceBox fx:id="keychainBackendChoiceBox"/>
+		</HBox>
+
 		<CheckBox fx:id="autoStartCheckbox" text="%preferences.general.autoStart" visible="${controller.autoStartSupported}" managed="${controller.autoStartSupported}" onAction="#toggleAutoStart"/>
 	</children>
 </VBox>

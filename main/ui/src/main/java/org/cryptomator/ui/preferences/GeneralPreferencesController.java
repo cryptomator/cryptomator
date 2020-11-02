@@ -13,16 +13,22 @@ import javafx.scene.control.RadioButton;
 import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleGroup;
 import javafx.util.StringConverter;
+import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.Environment;
 import org.cryptomator.common.LicenseHolder;
+import org.cryptomator.common.settings.KeychainBackend;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.UiTheme;
+import org.cryptomator.keychain.KeychainAccessStrategy;
+import org.cryptomator.keychain.LinuxSystemKeychainAccess;
 import org.cryptomator.ui.common.FxController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
@@ -41,7 +47,9 @@ public class GeneralPreferencesController implements FxController {
 	private final ResourceBundle resourceBundle;
 	private final Application application;
 	private final Environment environment;
+	private Optional<KeychainAccessStrategy> keychain;
 	public ChoiceBox<UiTheme> themeChoiceBox;
+	public ChoiceBox<KeychainBackend> keychainBackendChoiceBox;
 	public CheckBox startHiddenCheckbox;
 	public CheckBox debugModeCheckbox;
 	public CheckBox autoStartCheckbox;
@@ -50,10 +58,11 @@ public class GeneralPreferencesController implements FxController {
 	public RadioButton nodeOrientationRtl;
 
 	@Inject
-	GeneralPreferencesController(Settings settings, @Named("trayMenuSupported") boolean trayMenuSupported, Optional<AutoStartStrategy> autoStartStrategy, ObjectProperty<SelectedPreferencesTab> selectedTabProperty, LicenseHolder licenseHolder, ExecutorService executor, ResourceBundle resourceBundle, Application application, Environment environment) {
+	GeneralPreferencesController(Settings settings, @Named("trayMenuSupported") boolean trayMenuSupported, Optional<AutoStartStrategy> autoStartStrategy, Optional<KeychainAccessStrategy> keychain, ObjectProperty<SelectedPreferencesTab> selectedTabProperty, LicenseHolder licenseHolder, ExecutorService executor, ResourceBundle resourceBundle, Application application, Environment environment) {
 		this.settings = settings;
 		this.trayMenuSupported = trayMenuSupported;
 		this.autoStartStrategy = autoStartStrategy;
+		this.keychain = keychain;
 		this.selectedTabProperty = selectedTabProperty;
 		this.licenseHolder = licenseHolder;
 		this.executor = executor;
@@ -84,6 +93,16 @@ public class GeneralPreferencesController implements FxController {
 		nodeOrientationLtr.setSelected(settings.userInterfaceOrientation().get() == NodeOrientation.LEFT_TO_RIGHT);
 		nodeOrientationRtl.setSelected(settings.userInterfaceOrientation().get() == NodeOrientation.RIGHT_TO_LEFT);
 		nodeOrientation.selectedToggleProperty().addListener(this::toggleNodeOrientation);
+
+		keychainBackendChoiceBox.getItems().addAll(getAvailableBackends());
+		if (keychain.isPresent() && SystemUtils.IS_OS_LINUX) {
+			keychainBackendChoiceBox.setValue(LinuxSystemKeychainAccess.getBackendActivated());
+		}
+		if (keychain.isPresent() && (SystemUtils.IS_OS_MAC || SystemUtils.IS_OS_WINDOWS)) {
+			keychainBackendChoiceBox.setValue(Arrays.stream(KeychainBackend.supportedBackends()).findFirst().orElseThrow(IllegalStateException::new));
+		}
+		keychainBackendChoiceBox.setConverter(new KeychainBackendConverter(resourceBundle));
+		keychainBackendChoiceBox.valueProperty().bindBidirectional(settings.keychainBackend());
 	}
 
 	public boolean isTrayMenuSupported() {
@@ -153,6 +172,25 @@ public class GeneralPreferencesController implements FxController {
 		}
 	}
 
+	private static class KeychainBackendConverter extends StringConverter<KeychainBackend> {
+
+		private final ResourceBundle resourceBundle;
+
+		KeychainBackendConverter(ResourceBundle resourceBundle) {
+			this.resourceBundle = resourceBundle;
+		}
+
+		@Override
+		public String toString(KeychainBackend impl) {
+			return resourceBundle.getString(impl.getDisplayName());
+		}
+
+		@Override
+		public KeychainBackend fromString(String string) {
+			throw new UnsupportedOperationException();
+		}
+	}
+
 	private static class ToggleAutoStartTask extends Task<Void> {
 
 		private final AutoStartStrategy autoStart;
@@ -176,4 +214,17 @@ public class GeneralPreferencesController implements FxController {
 		}
 	}
 
+	private KeychainBackend[] getAvailableBackends() {
+		if (!keychain.isPresent()) {
+			return new KeychainBackend[]{};
+		}
+		if (SystemUtils.IS_OS_LINUX) {
+			EnumSet<KeychainBackend> backends = LinuxSystemKeychainAccess.getAvailableKeychainBackends();
+			return backends.toArray(KeychainBackend[]::new);
+		}
+		if (SystemUtils.IS_OS_MAC || SystemUtils.IS_OS_WINDOWS) {
+			return KeychainBackend.supportedBackends();
+		}
+		return new KeychainBackend[]{};
+	}
 }
