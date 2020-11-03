@@ -7,7 +7,6 @@ jobs:
   build:
     name: Build and Test
     runs-on: ubuntu-latest
-    #This check is case insensitive
     if: "!contains(github.event.head_commit.message, '[ci skip]') && !contains(github.event.head_commit.message, '[skip ci]')"
     steps:
       - uses: actions/checkout@v2
@@ -34,18 +33,22 @@ jobs:
           $JAVA_HOME/bin/java -jar ~/codacy-coverage-reporter.jar final
         env:
           CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
-      - name: Assemble Buildkit
-        run: mvn -B package -DskipTests --file main/pom.xml --resume-from=buildkit -Prelease
+      - name: Assemble buildkit-linux.zip
+        run: mvn -B clean package -DskipTests --file main/pom.xml --resume-from=buildkit -Prelease,linux
       - name: Upload buildkit-linux.zip
         uses: actions/upload-artifact@v1
         with:
           name: buildkit-linux.zip
           path: main/buildkit/target/buildkit-linux.zip
+      - name: Assemble buildkit-mac.zip
+        run: mvn -B clean package -DskipTests --file main/pom.xml --resume-from=buildkit -Prelease,mac
       - name: Upload buildkit-mac.zip
         uses: actions/upload-artifact@v1
         with:
           name: buildkit-mac.zip
           path: main/buildkit/target/buildkit-mac.zip
+      - name: Assemble buildkit-win.zip
+        run: mvn -B clean package -DskipTests --file main/pom.xml --resume-from=buildkit -Prelease,win
       - name: Upload buildkit-win.zip
         uses: actions/upload-artifact@v1
         with:

@@ -291,6 +291,9 @@
 				<os>
 					<family>mac</family>
 				</os>
+				<property>
+					<name>idea.version</name>
+				</property>
 			</activation>
 			<dependencies>
 				<dependency>
@@ -306,6 +309,9 @@
 					<family>unix</family>
 					<name>Linux</name>
 				</os>
+				<property>
+					<name>idea.version</name>
+				</property>
 			</activation>
 			<dependencies>
 				<dependency>
@@ -320,6 +326,9 @@
 				<os>
 					<family>windows</family>
 				</os>
+				<property>
+					<name>idea.version</name>
+				</property>
 			</activation>
 			<dependencies>
 				<dependency>
@@ -334,20 +343,29 @@
 		<pluginManagement>
 			<plugins>
 				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>3.8.1</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-resources-plugin</artifactId>
+					<version>3.2.0</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-dependency-plugin</artifactId>
 					<version>3.1.2</version>
-					<executions>
-						<execution>
-							<id>copy-libs</id>
-							<goals>
-								<goal>copy-dependencies</goal>
-							</goals>
-							<configuration>
-								<outputDirectory>${project.build.directory}/libs</outputDirectory>
-								<includeScope>runtime</includeScope>
-							</configuration>
-						</execution>
-					</executions>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-assembly-plugin</artifactId>
+					<version>3.3.0</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-surefire-plugin</artifactId>
+					<version>2.22.2</version>
 				</plugin>
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
@@ -397,7 +415,6 @@
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.8.1</version>
 				<configuration>
 					<release>14</release>
 					<annotationProcessorPaths>
@@ -412,7 +429,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.22.2</version>
 			</plugin>
 		</plugins>
 	</build>
