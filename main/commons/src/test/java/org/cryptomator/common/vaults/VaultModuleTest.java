@@ -17,6 +17,7 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.binding.StringBinding;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
 import java.nio.file.Path;
 
 public class VaultModuleTest {
@@ -30,6 +31,7 @@ public class VaultModuleTest {
 	public void setup(@TempDir Path tmpDir) {
 		Mockito.when(vaultSettings.normalizedDisplayName()).thenReturn(Bindings.createStringBinding(() -> "TEST"));
 		Mockito.when(vaultSettings.usesReadOnlyMode()).thenReturn(new SimpleBooleanProperty(true));
+		Mockito.when(vaultSettings.displayName()).thenReturn(new SimpleStringProperty("Vault"));
 		System.setProperty("user.home", tmpDir.toString());
 	}
 
