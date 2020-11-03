@@ -38,21 +38,21 @@ jobs:
       - name: Upload buildkit-linux.zip
         uses: actions/upload-artifact@v1
         with:
-          name: buildkit-linux.zip
+          name: buildkit-linux
           path: main/buildkit/target/buildkit-linux.zip
       - name: Assemble buildkit-mac.zip
         run: mvn -B clean package -DskipTests --file main/pom.xml --resume-from=buildkit -Prelease,mac
       - name: Upload buildkit-mac.zip
         uses: actions/upload-artifact@v1
         with:
-          name: buildkit-mac.zip
+          name: buildkit-mac
           path: main/buildkit/target/buildkit-mac.zip
       - name: Assemble buildkit-win.zip
-        run: mvn -B clean package -DskipTests --file main/pom.xml --resume-from=buildkit -Prelease,win
+        run: mvn -B clean package -DskipTests --file main/pom.xml --resume-from=buildkit -Prelease,windows
       - name: Upload buildkit-win.zip
         uses: actions/upload-artifact@v1
         with:
-          name: buildkit-win.zip
+          name: buildkit-win
           path: main/buildkit/target/buildkit-win.zip
           
   release:

@@ -131,7 +131,7 @@
 		</profile>
 
 		<profile>
-			<id>win</id>
+			<id>windows</id>
 			<build>
 				<plugins>
 					<plugin>
