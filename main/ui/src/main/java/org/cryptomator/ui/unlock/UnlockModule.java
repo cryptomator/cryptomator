@@ -50,7 +50,7 @@ abstract class UnlockModule {
 	@Named("savedPassword")
 	@UnlockScoped
 	static Optional<char[]> provideStoredPassword(KeychainManager keychain, @UnlockWindow Vault vault) {
-		if (keychain.isSupported()) {
+		if (!keychain.isSupported()) {
 			return Optional.empty();
 		} else {
 			try {
