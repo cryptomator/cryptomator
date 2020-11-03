@@ -53,11 +53,11 @@ public class VaultSettings {
 	private final IntegerProperty filenameLengthLimit = new SimpleIntegerProperty(DEFAULT_FILENAME_LENGTH_LIMIT);
 	private final ObjectProperty<WhenUnlocked> actionAfterUnlock = new SimpleObjectProperty<>(DEFAULT_ACTION_AFTER_UNLOCK);
 
-	private final StringBinding mountName;
+	private final StringBinding normalizedDisplayName;
 
 	public VaultSettings(String id) {
 		this.id = Objects.requireNonNull(id);
-		this.mountName = Bindings.createStringBinding(this::normalizeDisplayName, displayName);
+		this.normalizedDisplayName = Bindings.createStringBinding(this::normalizeDisplayName, displayName);
 	}
 
 	Observable[] observables() {
@@ -108,8 +108,8 @@ public class VaultSettings {
 		return displayName;
 	}
 
-	public StringBinding mountName() {
-		return mountName;
+	public StringBinding normalizedDisplayName() {
+		return normalizedDisplayName;
 	}
 
 	public StringProperty winDriveLetter() {

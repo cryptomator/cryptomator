@@ -45,7 +45,7 @@ public class WebDavVolume implements Volume {
 		if (!server.isRunning()) {
 			server.start();
 		}
-		servlet = server.createWebDavServlet(fs.getPath("/"), vaultSettings.getId() + "/" + vaultSettings.mountName().get());
+		servlet = server.createWebDavServlet(fs.getPath("/"), vaultSettings.getId() + "/" + vaultSettings.normalizedDisplayName().get());
 		servlet.start();
 		mount();
 	}
