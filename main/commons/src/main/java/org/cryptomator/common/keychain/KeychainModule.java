@@ -7,9 +7,7 @@ import org.cryptomator.integrations.keychain.KeychainAccessProvider;
 
 import javax.inject.Singleton;
 import javafx.beans.binding.Bindings;
-import javafx.beans.binding.ObjectBinding;
 import javafx.beans.binding.ObjectExpression;
-import javafx.beans.value.ObservableValue;
 import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -26,7 +24,10 @@ public class KeychainModule {
 	@Provides
 	@Singleton
 	static Set<KeychainAccessProvider> provideSupportedKeychainAccessProviders(Set<ServiceLoader.Provider<KeychainAccessProvider>> availableFactories) {
-		return availableFactories.stream().map(ServiceLoader.Provider::get).collect(Collectors.toUnmodifiableSet());
+		return availableFactories.stream() //
+				.map(ServiceLoader.Provider::get) //
+				.filter(KeychainAccessProvider::isSupported) //
+				.collect(Collectors.toUnmodifiableSet());
 	}
 
 	@Provides
