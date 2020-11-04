@@ -19,7 +19,7 @@ import java.util.Arrays;
 public class KeychainManager implements KeychainAccessProvider {
 
 	private final ObjectExpression<KeychainAccessProvider> keychain;
-	private LoadingCache<String, BooleanProperty> passphraseStoredProperties;
+	private final LoadingCache<String, BooleanProperty> passphraseStoredProperties;
 
 	@Inject
 	KeychainManager(ObjectExpression<KeychainAccessProvider> selectedKeychain) {
