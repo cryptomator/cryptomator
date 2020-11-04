@@ -5,8 +5,6 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import org.cryptomator.integrations.keychain.KeychainAccessException;
 import org.cryptomator.integrations.keychain.KeychainAccessProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -19,8 +17,6 @@ import java.util.Arrays;
 
 @Singleton
 public class KeychainManager implements KeychainAccessProvider {
-
-	private static final Logger LOG = LoggerFactory.getLogger(KeychainManager.class);
 
 	private final ObjectExpression<KeychainAccessProvider> keychain;
 	private LoadingCache<String, BooleanProperty> passphraseStoredProperties;
@@ -99,7 +95,6 @@ public class KeychainManager implements KeychainAccessProvider {
 			if (Platform.isFxApplicationThread()) {
 				property.set(value);
 			} else {
-				LOG.warn("");
 				Platform.runLater(() -> property.set(value));
 			}
 		}
