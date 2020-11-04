@@ -66,6 +66,7 @@
 						<configuration>
 							<includeScope>runtime</includeScope>
 							<outputDirectory>${project.build.directory}/libs</outputDirectory>
+							<excludeClassifiers>linux,mac,win</excludeClassifiers>
 						</configuration>
 					</execution>
 				</executions>
@@ -98,6 +99,24 @@
 							</execution>
 						</executions>
 					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-dependency-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>copy-linux-libs</id>
+								<phase>prepare-package</phase>
+								<goals>
+									<goal>copy-dependencies</goal>
+								</goals>
+								<configuration>
+									<outputDirectory>${project.build.directory}/libs</outputDirectory>
+									<includeGroupIds>org.openjfx</includeGroupIds>
+									<classifier>linux</classifier>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
 				</plugins>
 			</build>
 		</profile>
@@ -126,6 +145,24 @@
 							</execution>
 						</executions>
 					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-dependency-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>copy-mac-libs</id>
+								<phase>prepare-package</phase>
+								<goals>
+									<goal>copy-dependencies</goal>
+								</goals>
+								<configuration>
+									<outputDirectory>${project.build.directory}/libs</outputDirectory>
+									<includeGroupIds>org.openjfx</includeGroupIds>
+									<classifier>mac</classifier>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
 				</plugins>
 			</build>
 		</profile>
@@ -150,6 +187,24 @@
 									</descriptors>
 									<appendAssemblyId>false</appendAssemblyId>
 									<finalName>buildkit-win</finalName>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-dependency-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>copy-win-libs</id>
+								<phase>prepare-package</phase>
+								<goals>
+									<goal>copy-dependencies</goal>
+								</goals>
+								<configuration>
+									<outputDirectory>${project.build.directory}/libs</outputDirectory>
+									<includeGroupIds>org.openjfx</includeGroupIds>
+									<classifier>win</classifier>
 								</configuration>
 							</execution>
 						</executions>
