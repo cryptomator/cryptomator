@@ -7,7 +7,6 @@ package org.cryptomator.common.settings;
 
 import com.google.common.base.Strings;
 import com.google.common.io.BaseEncoding;
-import org.apache.commons.lang3.StringUtils;
 
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
@@ -24,6 +23,8 @@ import java.nio.file.Path;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * The settings specific to a single vault.
@@ -76,20 +77,18 @@ public class VaultSettings {
 
 	//visible for testing
 	String normalizeDisplayName() {
-		String normalizedMountName = StringUtils.stripAccents(displayName.get());
 		StringBuilder builder = new StringBuilder();
-		for (char c : normalizedMountName.toCharArray()) {
-			if (Character.isWhitespace(c)) {
-				if (builder.length() == 0 || builder.charAt(builder.length() - 1) != '_') {
-					builder.append('_');
+		Set<Integer> notAllowedCharacters = "<>:\"/\\|?*".chars().boxed().collect(Collectors.toUnmodifiableSet());
+		if (displayName.isEmpty().get() || displayName.getValueSafe().equals(".") || displayName.getValueSafe().equals("..")) {
+			builder.append("_");
+		} else {
+			displayName.get().codePoints().forEach(codePoint -> {
+				if (Character.isDefined(codePoint) && !Character.isIdentifierIgnorable(codePoint) && !notAllowedCharacters.contains(codePoint)) {
+					builder.appendCodePoint(codePoint);
+				} else {
+					builder.append("_");
 				}
-			} else if (c < 127 && Character.isLetterOrDigit(c)) {
-				builder.append(c);
-			} else {
-				if (builder.length() == 0 || builder.charAt(builder.length() - 1) != '_') {
-					builder.append('_');
-				}
-			}
+			});
 		}
 		return builder.toString();
 	}
