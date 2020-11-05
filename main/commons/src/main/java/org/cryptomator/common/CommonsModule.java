@@ -9,6 +9,7 @@ import com.tobiasdiez.easybind.EasyBind;
 import dagger.Module;
 import dagger.Provides;
 import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.common.keychain.KeychainModule;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.SettingsProvider;
 import org.cryptomator.common.vaults.Vault;
@@ -33,7 +34,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-@Module(subcomponents = {VaultComponent.class})
+@Module(subcomponents = {VaultComponent.class}, includes = {KeychainModule.class})
 public abstract class CommonsModule {
 
 	private static final Logger LOG = LoggerFactory.getLogger(CommonsModule.class);

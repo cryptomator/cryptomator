@@ -1,13 +1,11 @@
 package org.cryptomator.ui.preferences;
 
-import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.Environment;
 import org.cryptomator.common.LicenseHolder;
 import org.cryptomator.common.settings.KeychainBackend;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.UiTheme;
-import org.cryptomator.keychain.KeychainAccessStrategy;
-import org.cryptomator.keychain.LinuxSystemKeychainAccess;
+import org.cryptomator.integrations.keychain.KeychainAccessProvider;
 import org.cryptomator.ui.common.FxController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,12 +25,12 @@ import javafx.scene.control.RadioButton;
 import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleGroup;
 import javafx.util.StringConverter;
-
 import java.util.Arrays;
-import java.util.EnumSet;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
+import java.util.stream.Collectors;
 
 @PreferencesScoped
 public class GeneralPreferencesController implements FxController {
@@ -48,7 +46,7 @@ public class GeneralPreferencesController implements FxController {
 	private final ResourceBundle resourceBundle;
 	private final Application application;
 	private final Environment environment;
-	private Optional<KeychainAccessStrategy> keychain;
+	private final Set<KeychainAccessProvider> keychainAccessProviders;
 	public ChoiceBox<UiTheme> themeChoiceBox;
 	public ChoiceBox<KeychainBackend> keychainBackendChoiceBox;
 	public CheckBox startHiddenCheckbox;
@@ -59,11 +57,11 @@ public class GeneralPreferencesController implements FxController {
 	public RadioButton nodeOrientationRtl;
 
 	@Inject
-	GeneralPreferencesController(Settings settings, @Named("trayMenuSupported") boolean trayMenuSupported, Optional<AutoStartStrategy> autoStartStrategy, Optional<KeychainAccessStrategy> keychain, ObjectProperty<SelectedPreferencesTab> selectedTabProperty, LicenseHolder licenseHolder, ExecutorService executor, ResourceBundle resourceBundle, Application application, Environment environment) {
+	GeneralPreferencesController(Settings settings, @Named("trayMenuSupported") boolean trayMenuSupported, Optional<AutoStartStrategy> autoStartStrategy, Set<KeychainAccessProvider> keychainAccessProviders, ObjectProperty<SelectedPreferencesTab> selectedTabProperty, LicenseHolder licenseHolder, ExecutorService executor, ResourceBundle resourceBundle, Application application, Environment environment) {
 		this.settings = settings;
 		this.trayMenuSupported = trayMenuSupported;
 		this.autoStartStrategy = autoStartStrategy;
-		this.keychain = keychain;
+		this.keychainAccessProviders = keychainAccessProviders;
 		this.selectedTabProperty = selectedTabProperty;
 		this.licenseHolder = licenseHolder;
 		this.executor = executor;
@@ -96,14 +94,13 @@ public class GeneralPreferencesController implements FxController {
 		nodeOrientation.selectedToggleProperty().addListener(this::toggleNodeOrientation);
 
 		keychainBackendChoiceBox.getItems().addAll(getAvailableBackends());
-		if (keychain.isPresent() && SystemUtils.IS_OS_LINUX) {
-			keychainBackendChoiceBox.setValue(LinuxSystemKeychainAccess.getBackendActivated());
-		}
-		if (keychain.isPresent() && (SystemUtils.IS_OS_MAC || SystemUtils.IS_OS_WINDOWS)) {
-			keychainBackendChoiceBox.setValue(Arrays.stream(KeychainBackend.supportedBackends()).findFirst().orElseThrow(IllegalStateException::new));
-		}
 		keychainBackendChoiceBox.setConverter(new KeychainBackendConverter(resourceBundle));
 		keychainBackendChoiceBox.valueProperty().bindBidirectional(settings.keychainBackend());
+	}
+
+	private KeychainBackend[] getAvailableBackends() {
+		var namesOfAvailableProviders = keychainAccessProviders.stream().map(KeychainAccessProvider::getClass).map(Class::getName).collect(Collectors.toUnmodifiableSet());
+		return Arrays.stream(KeychainBackend.values()).filter(value -> namesOfAvailableProviders.contains(value.getProviderClass())).toArray(KeychainBackend[]::new);
 	}
 
 	public boolean isTrayMenuSupported() {
@@ -183,7 +180,7 @@ public class GeneralPreferencesController implements FxController {
 
 		@Override
 		public String toString(KeychainBackend impl) {
-			return resourceBundle.getString(impl.getDisplayName());
+			return resourceBundle.getString("preferences.general.keychainBackend." + impl.getProviderClass());
 		}
 
 		@Override
@@ -215,17 +212,4 @@ public class GeneralPreferencesController implements FxController {
 		}
 	}
 
-	private KeychainBackend[] getAvailableBackends() {
-		if (!keychain.isPresent()) {
-			return new KeychainBackend[]{};
-		}
-		if (SystemUtils.IS_OS_LINUX) {
-			EnumSet<KeychainBackend> backends = LinuxSystemKeychainAccess.getAvailableKeychainBackends();
-			return backends.toArray(KeychainBackend[]::new);
-		}
-		if (SystemUtils.IS_OS_MAC || SystemUtils.IS_OS_WINDOWS) {
-			return KeychainBackend.supportedBackends();
-		}
-		return new KeychainBackend[]{};
-	}
 }

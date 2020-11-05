@@ -15,6 +15,7 @@ import javax.inject.Singleton;
 import java.util.Optional;
 
 @Module
+@Deprecated
 public class JniModule {
 
 	@Provides

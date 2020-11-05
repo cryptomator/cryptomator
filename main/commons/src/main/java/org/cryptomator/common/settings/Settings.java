@@ -8,6 +8,8 @@
  ******************************************************************************/
 package org.cryptomator.common.settings;
 
+import org.apache.commons.lang3.SystemUtils;
+
 import javafx.beans.Observable;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
@@ -33,9 +35,9 @@ public class Settings {
 	public static final int DEFAULT_NUM_TRAY_NOTIFICATIONS = 3;
 	public static final WebDavUrlScheme DEFAULT_GVFS_SCHEME = WebDavUrlScheme.DAV;
 	public static final boolean DEFAULT_DEBUG_MODE = false;
-	public static final VolumeImpl DEFAULT_PREFERRED_VOLUME_IMPL = System.getProperty("os.name").toLowerCase().contains("windows") ? VolumeImpl.DOKANY : VolumeImpl.FUSE;
+	public static final VolumeImpl DEFAULT_PREFERRED_VOLUME_IMPL = SystemUtils.IS_OS_WINDOWS ? VolumeImpl.DOKANY : VolumeImpl.FUSE;
 	public static final UiTheme DEFAULT_THEME = UiTheme.LIGHT;
-	public static final KeychainBackend DEFAULT_KEYCHAIN_BACKEND = KeychainBackend.defaultBackend();
+	public static final KeychainBackend DEFAULT_KEYCHAIN_BACKEND = SystemUtils.IS_OS_WINDOWS ? KeychainBackend.WIN_SYSTEM_KEYCHAIN : SystemUtils.IS_OS_MAC ? KeychainBackend.MAC_SYSTEM_KEYCHAIN : KeychainBackend.GNOME;
 	public static final NodeOrientation DEFAULT_USER_INTERFACE_ORIENTATION = NodeOrientation.LEFT_TO_RIGHT;
 	private static final String DEFAULT_LICENSE_KEY = "";
 
