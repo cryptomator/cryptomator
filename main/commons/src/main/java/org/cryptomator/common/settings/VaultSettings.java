@@ -79,18 +79,25 @@ public class VaultSettings {
 	String normalizeDisplayName() {
 		StringBuilder builder = new StringBuilder();
 		Set<Integer> notAllowedCharacters = "<>:\"/\\|?*".chars().boxed().collect(Collectors.toUnmodifiableSet());
+
 		if (displayName.isEmpty().get() || displayName.getValueSafe().equals(".") || displayName.getValueSafe().equals("..")) {
-			builder.append("_");
-		} else {
-			displayName.get().codePoints().forEach(codePoint -> {
-				if (Character.isDefined(codePoint) && !Character.isIdentifierIgnorable(codePoint) && !notAllowedCharacters.contains(codePoint)) {
-					builder.appendCodePoint(codePoint);
-				} else {
-					builder.append("_");
-				}
-			});
+			return builder.append("_").toString();
 		}
-		return builder.toString();
+
+		displayName.get().codePoints().forEach(codePoint -> {
+			if (Character.isDefined(codePoint) && !Character.isIdentifierIgnorable(codePoint) && !notAllowedCharacters.contains(codePoint)) {
+				builder.appendCodePoint(Character.isWhitespace(codePoint) || Character.isSpaceChar(codePoint) ? 0x020 : codePoint);
+			} else {
+				builder.append("_");
+			}
+		});
+
+		String result = builder.toString();
+		if (!result.isBlank()) {
+			return result;
+		} else {
+			return "_";
+		}
 	}
 
 	/* Getter/Setter */
