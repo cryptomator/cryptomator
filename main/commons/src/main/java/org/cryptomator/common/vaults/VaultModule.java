@@ -23,7 +23,6 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.StringProperty;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -76,7 +75,7 @@ public class VaultModule {
 	@DefaultMountFlags
 	public StringBinding provideDefaultMountFlags(Settings settings, VaultSettings vaultSettings) {
 		ObjectProperty<VolumeImpl> preferredVolumeImpl = settings.preferredVolumeImpl();
-		StringProperty mountName = vaultSettings.displayName();
+		StringBinding mountName = vaultSettings.mountName();
 		BooleanProperty readOnly = vaultSettings.usesReadOnlyMode();
 
 		return Bindings.createStringBinding(() -> {
@@ -96,7 +95,7 @@ public class VaultModule {
 	}
 
 	// see: https://github.com/osxfuse/osxfuse/wiki/Mount-options
-	private String getMacFuseDefaultMountFlags(StringProperty mountName, ReadOnlyBooleanProperty readOnly) {
+	private String getMacFuseDefaultMountFlags(StringBinding mountName, ReadOnlyBooleanProperty readOnly) {
 		assert SystemUtils.IS_OS_MAC_OSX;
 		StringBuilder flags = new StringBuilder();
 		if (readOnly.get()) {
@@ -148,7 +147,7 @@ public class VaultModule {
 	// see https://github.com/billziss-gh/winfsp/blob/5d0b10d0b643652c00ebb4704dc2bb28e7244973/src/dll/fuse/fuse_main.c#L53-L62 for syntax guide
 	// see https://github.com/billziss-gh/winfsp/blob/5d0b10d0b643652c00ebb4704dc2bb28e7244973/src/dll/fuse/fuse.c#L295-L319 for options (-o <...>)
 	// see https://github.com/billziss-gh/winfsp/wiki/Frequently-Asked-Questions/5ba00e4be4f5e938eaae6ef1500b331de12dee77 (FUSE 4.) on why the given defaults were choosen
-	private String getWindowsFuseDefaultMountFlags(StringProperty mountName, ReadOnlyBooleanProperty readOnly) {
+	private String getWindowsFuseDefaultMountFlags(StringBinding mountName, ReadOnlyBooleanProperty readOnly) {
 		assert SystemUtils.IS_OS_WINDOWS;
 		StringBuilder flags = new StringBuilder();
 

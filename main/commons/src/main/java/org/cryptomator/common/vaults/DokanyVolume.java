@@ -44,7 +44,7 @@ public class DokanyVolume extends AbstractVolume {
 		this.mountPoint = determineMountPoint();
 		String mountName = vaultSettings.displayName().get();
 		try {
-			this.mount = mountFactory.mount(fs.getPath("/"), mountPoint, vaultSettings.displayName().get(), FS_TYPE_NAME, mountFlags.strip());
+			this.mount = mountFactory.mount(fs.getPath("/"), mountPoint, vaultSettings.mountName().get(), FS_TYPE_NAME, mountFlags.strip());
 		} catch (MountFailedException e) {
 			if (vaultSettings.getCustomMountPath().isPresent()) {
 				LOG.warn("Failed to mount vault into {}. Is this directory currently accessed by another process (e.g. Windows Explorer)?", mountPoint);

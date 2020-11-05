@@ -29,7 +29,7 @@ public class VaultModuleTest {
 
 	@BeforeEach
 	public void setup(@TempDir Path tmpDir) {
-		Mockito.when(vaultSettings.normalizedDisplayName()).thenReturn(Bindings.createStringBinding(() -> "TEST"));
+		Mockito.when(vaultSettings.mountName()).thenReturn(Bindings.createStringBinding(() -> "TEST"));
 		Mockito.when(vaultSettings.usesReadOnlyMode()).thenReturn(new SimpleBooleanProperty(true));
 		Mockito.when(vaultSettings.displayName()).thenReturn(new SimpleStringProperty("Vault"));
 		System.setProperty("user.home", tmpDir.toString());
