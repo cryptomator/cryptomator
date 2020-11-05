@@ -1,6 +1,5 @@
 package org.cryptomator.ui.preferences;
 
-import dagger.Lazy;
 import org.cryptomator.common.Environment;
 import org.cryptomator.common.LicenseHolder;
 import org.cryptomator.common.settings.KeychainBackend;
@@ -9,8 +8,6 @@ import org.cryptomator.common.settings.UiTheme;
 import org.cryptomator.integrations.keychain.KeychainAccessProvider;
 import org.cryptomator.ui.common.ErrorComponent;
 import org.cryptomator.ui.common.FxController;
-import org.cryptomator.ui.common.FxmlFile;
-import org.cryptomator.ui.common.FxmlScene;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,7 +20,6 @@ import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.geometry.NodeOrientation;
-import javafx.scene.Scene;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.RadioButton;
@@ -54,7 +50,6 @@ public class GeneralPreferencesController implements FxController {
 	private final Application application;
 	private final Environment environment;
 	private final Set<KeychainAccessProvider> keychainAccessProviders;
-	private final Lazy<Scene> preferencesScene;
 	private final ErrorComponent.Builder errorComponent;
 	public ChoiceBox<UiTheme> themeChoiceBox;
 	public ChoiceBox<KeychainBackend> keychainBackendChoiceBox;
@@ -66,7 +61,7 @@ public class GeneralPreferencesController implements FxController {
 	public RadioButton nodeOrientationRtl;
 
 	@Inject
-	GeneralPreferencesController(@PreferencesWindow Stage window, Settings settings, @Named("trayMenuSupported") boolean trayMenuSupported, Optional<AutoStartStrategy> autoStartStrategy, Set<KeychainAccessProvider> keychainAccessProviders, ObjectProperty<SelectedPreferencesTab> selectedTabProperty, LicenseHolder licenseHolder, ExecutorService executor, ResourceBundle resourceBundle, Application application, Environment environment, @FxmlScene(FxmlFile.PREFERENCES) Lazy<Scene> preferencesScene, ErrorComponent.Builder errorComponent) {
+	GeneralPreferencesController(@PreferencesWindow Stage window, Settings settings, @Named("trayMenuSupported") boolean trayMenuSupported, Optional<AutoStartStrategy> autoStartStrategy, Set<KeychainAccessProvider> keychainAccessProviders, ObjectProperty<SelectedPreferencesTab> selectedTabProperty, LicenseHolder licenseHolder, ExecutorService executor, ResourceBundle resourceBundle, Application application, Environment environment, ErrorComponent.Builder errorComponent) {
 		this.window = window;
 		this.settings = settings;
 		this.trayMenuSupported = trayMenuSupported;
@@ -78,7 +73,6 @@ public class GeneralPreferencesController implements FxController {
 		this.resourceBundle = resourceBundle;
 		this.application = application;
 		this.environment = environment;
-		this.preferencesScene = preferencesScene;
 		this.errorComponent = errorComponent;
 	}
 
@@ -141,7 +135,7 @@ public class GeneralPreferencesController implements FxController {
 			toggleTask.setOnFailed(event -> {
 				autoStartCheckbox.setSelected(!enableAutoStart); // restore previous state
 				LOG.error("Failed to toggle autostart.", event.getSource().getException());
-				errorComponent.cause(event.getSource().getException()).window(window).returnToScene(preferencesScene.get()).build().showErrorScene();
+				errorComponent.cause(event.getSource().getException()).window(window).returnToScene(window.getScene()).build().showErrorScene();
 			});
 			executor.execute(toggleTask);
 		});
