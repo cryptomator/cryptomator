@@ -16,6 +16,8 @@ import javafx.collections.ObservableList;
 import java.awt.Desktop;
 import java.awt.SystemTray;
 import java.awt.desktop.AppReopenedListener;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.util.Collection;
 import java.util.Optional;
 
@@ -65,7 +67,7 @@ public class UiLauncher {
 
 		//clean leftovers of not-regularly unmounted vaults
 		//see https://github.com/cryptomator/cryptomator/issues/1013 and https://github.com/cryptomator/cryptomator/issues/1061
-		env.getMountPointsDir().ifPresent(IrregularUnmountCleaner::removeUnregularUnmountDebris);
+		env.getMountPointsDir().filter(path -> Files.exists(path, LinkOption.NOFOLLOW_LINKS)).ifPresent(IrregularUnmountCleaner::removeUnregularUnmountDebris);
 
 		// auto unlock
 		Collection<Vault> vaultsToAutoUnlock = vaults.filtered(this::shouldAttemptAutoUnlock);
