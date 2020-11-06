@@ -4,6 +4,7 @@ import dagger.BindsInstance;
 import dagger.Subcomponent;
 
 import javax.annotation.Nullable;
+import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
@@ -16,6 +17,14 @@ public interface ErrorComponent {
 	Scene scene();
 
 	default void showErrorScene() {
+		if (Platform.isFxApplicationThread()) {
+			show();
+		} else {
+			Platform.runLater(this::show);
+		}
+	}
+
+	private void show() {
 		Stage stage = window();
 		stage.setScene(scene());
 		stage.show();
