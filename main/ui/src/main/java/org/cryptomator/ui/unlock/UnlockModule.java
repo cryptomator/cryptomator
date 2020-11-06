@@ -4,9 +4,9 @@ import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoMap;
+import org.cryptomator.common.keychain.KeychainManager;
 import org.cryptomator.common.vaults.Vault;
-import org.cryptomator.keychain.KeychainAccessException;
-import org.cryptomator.keychain.KeychainManager;
+import org.cryptomator.integrations.keychain.KeychainAccessException;
 import org.cryptomator.ui.common.DefaultSceneFactory;
 import org.cryptomator.ui.common.FXMLLoaderFactory;
 import org.cryptomator.ui.common.FxController;
@@ -49,15 +49,17 @@ abstract class UnlockModule {
 	@Provides
 	@Named("savedPassword")
 	@UnlockScoped
-	static Optional<char[]> provideStoredPassword(Optional<KeychainManager> keychain, @UnlockWindow Vault vault) {
-		return keychain.map(k -> {
+	static Optional<char[]> provideStoredPassword(KeychainManager keychain, @UnlockWindow Vault vault) {
+		if (!keychain.isSupported()) {
+			return Optional.empty();
+		} else {
 			try {
-				return k.loadPassphrase(vault.getId());
+				return Optional.ofNullable(keychain.loadPassphrase(vault.getId()));
 			} catch (KeychainAccessException e) {
 				LOG.error("Failed to load entry from system keychain.", e);
-				return null;
+				return Optional.empty();
 			}
-		});
+		}
 	}
 
 	@Provides

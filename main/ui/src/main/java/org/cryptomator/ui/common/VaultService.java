@@ -3,7 +3,6 @@ package org.cryptomator.ui.common;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.common.vaults.Volume;
-import org.cryptomator.keychain.KeychainManager;
 import org.cryptomator.ui.fxapp.FxApplicationScoped;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +13,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
@@ -25,12 +23,10 @@ public class VaultService {
 	private static final Logger LOG = LoggerFactory.getLogger(VaultService.class);
 
 	private final ExecutorService executorService;
-	private final Optional<KeychainManager> keychain;
 
 	@Inject
-	public VaultService(ExecutorService executorService, Optional<KeychainManager> keychain) {
+	public VaultService(ExecutorService executorService) {
 		this.executorService = executorService;
-		this.keychain = keychain;
 	}
 
 	public void reveal(Vault vault) {

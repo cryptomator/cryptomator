@@ -2,6 +2,7 @@ package org.cryptomator.ui.preferences;
 
 import java.util.concurrent.CompletionStage;
 
+@Deprecated
 public interface AutoStartStrategy {
 
 	CompletionStage<Boolean> isAutoStartEnabled();

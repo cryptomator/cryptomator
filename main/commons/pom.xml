@@ -29,7 +29,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.cryptomator</groupId>
-			<artifactId>jni</artifactId>
+			<artifactId>integrations-api</artifactId>
 		</dependency>
 
 		<!-- JavaFx -->

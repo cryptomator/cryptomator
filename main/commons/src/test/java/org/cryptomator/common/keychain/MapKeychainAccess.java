@@ -3,12 +3,14 @@
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the accompanying LICENSE file.
  *******************************************************************************/
-package org.cryptomator.keychain;
+package org.cryptomator.common.keychain;
+
+import org.cryptomator.integrations.keychain.KeychainAccessProvider;
 
 import java.util.HashMap;
 import java.util.Map;
 
-class MapKeychainAccess implements KeychainAccessStrategy {
+class MapKeychainAccess implements KeychainAccessProvider {
 
 	private final Map<String, char[]> map = new HashMap<>();
 

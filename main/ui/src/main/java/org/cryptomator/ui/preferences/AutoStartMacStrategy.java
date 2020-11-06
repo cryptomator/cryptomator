@@ -1,42 +1,45 @@
 package org.cryptomator.ui.preferences;
 
-import org.cryptomator.jni.MacFunctions;
+import org.cryptomator.integrations.autostart.AutoStartProvider;
+import org.cryptomator.integrations.autostart.ToggleAutoStartFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
+@Deprecated
 class AutoStartMacStrategy implements AutoStartStrategy {
 
 	private static final Logger LOG = LoggerFactory.getLogger(AutoStartMacStrategy.class);
 
-	private final MacFunctions macFunctions;
+	private final AutoStartProvider autoStartProvider;
 
-	public AutoStartMacStrategy(MacFunctions macFunctions) {
-		this.macFunctions = macFunctions;
+	public AutoStartMacStrategy(AutoStartProvider autoStartProvider) {
+		this.autoStartProvider = autoStartProvider;
 	}
 
 	@Override
 	public CompletionStage<Boolean> isAutoStartEnabled() {
-		boolean enabled = macFunctions.launchServices().isLoginItemEnabled();
-		return CompletableFuture.completedFuture(enabled);
+		return CompletableFuture.completedFuture(autoStartProvider.isEnabled());
 	}
 
 	@Override
 	public void enableAutoStart() throws TogglingAutoStartFailedException {
-		if (macFunctions.launchServices().enableLoginItem()) {
+		try {
+			autoStartProvider.enable();
 			LOG.debug("Added login item.");
-		} else {
+		} catch (ToggleAutoStartFailedException e) {
 			throw new TogglingAutoStartFailedException("Failed to add login item.");
 		}
 	}
 
 	@Override
 	public void disableAutoStart() throws TogglingAutoStartFailedException {
-		if (macFunctions.launchServices().disableLoginItem()) {
+		try {
+			autoStartProvider.disable();
 			LOG.debug("Removed login item.");
-		} else {
+		} catch (ToggleAutoStartFailedException e) {
 			throw new TogglingAutoStartFailedException("Failed to remove login item.");
 		}
 	}

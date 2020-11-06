@@ -12,15 +12,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.cryptomator</groupId>
-			<artifactId>keychain</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.cryptomator</groupId>
 			<artifactId>commons</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.cryptomator</groupId>
-			<artifactId>jni</artifactId>
 		</dependency>
 
 		<!-- JavaFx -->

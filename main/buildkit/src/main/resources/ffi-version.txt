@@ -1,1 +1,0 @@
-${cryptomator.jni.version}

@@ -4,9 +4,7 @@ import org.cryptomator.common.Environment;
 import org.cryptomator.common.mountpoint.IrregularUnmountCleaner;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.vaults.Vault;
-import org.cryptomator.jni.JniException;
-import org.cryptomator.jni.MacApplicationUiState;
-import org.cryptomator.jni.MacFunctions;
+import org.cryptomator.integrations.tray.TrayIntegrationProvider;
 import org.cryptomator.ui.fxapp.FxApplication;
 import org.cryptomator.ui.traymenu.TrayMenuComponent;
 import org.slf4j.Logger;
@@ -31,18 +29,18 @@ public class UiLauncher {
 	private final TrayMenuComponent.Builder trayComponent;
 	private final FxApplicationStarter fxApplicationStarter;
 	private final AppLaunchEventHandler launchEventHandler;
-	private final Optional<MacFunctions> macFunctions;
-	private final Environment env;
+  private final Optional<TrayIntegrationProvider> trayIntegration;
+  private final Environment env;
 
 	@Inject
-	public UiLauncher(Settings settings, ObservableList<Vault> vaults, TrayMenuComponent.Builder trayComponent, FxApplicationStarter fxApplicationStarter, AppLaunchEventHandler launchEventHandler, Optional<MacFunctions> macFunctions, Environment env) {
+	public UiLauncher(Settings settings, ObservableList<Vault> vaults, TrayMenuComponent.Builder trayComponent, FxApplicationStarter fxApplicationStarter, AppLaunchEventHandler launchEventHandler, Optional<TrayIntegrationProvider> trayIntegration, Environment env) {
 		this.settings = settings;
 		this.vaults = vaults;
 		this.trayComponent = trayComponent;
 		this.fxApplicationStarter = fxApplicationStarter;
 		this.launchEventHandler = launchEventHandler;
-		this.macFunctions = macFunctions;
-		this.env = env;
+    this.trayIntegration = trayIntegration;
+    this.env = env;
 	}
 
 	public void launch() {
@@ -57,7 +55,7 @@ public class UiLauncher {
 		// show window on start?
 		if (hasTrayIcon && settings.startHidden().get()) {
 			LOG.debug("Hiding application...");
-			macFunctions.map(MacFunctions::uiState).ifPresent(JniException.ignore(MacApplicationUiState::transformToAgentApplication));
+			trayIntegration.ifPresent(TrayIntegrationProvider::minimizedToTray);
 		} else {
 			showMainWindowAsync(hasTrayIcon);
 		}

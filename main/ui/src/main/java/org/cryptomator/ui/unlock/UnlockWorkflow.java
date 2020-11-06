@@ -1,14 +1,14 @@
 package org.cryptomator.ui.unlock;
 
 import dagger.Lazy;
+import org.cryptomator.common.keychain.KeychainManager;
 import org.cryptomator.common.mountpoint.InvalidMountPointException;
 import org.cryptomator.common.vaults.MountPointRequirement;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.common.vaults.Volume.VolumeException;
 import org.cryptomator.cryptolib.api.InvalidPassphraseException;
-import org.cryptomator.keychain.KeychainAccessException;
-import org.cryptomator.keychain.KeychainManager;
+import org.cryptomator.integrations.keychain.KeychainAccessException;
 import org.cryptomator.ui.common.Animations;
 import org.cryptomator.ui.common.ErrorComponent;
 import org.cryptomator.ui.common.FxmlFile;
@@ -53,14 +53,14 @@ public class UnlockWorkflow extends Task<Boolean> {
 	private final AtomicBoolean savePassword;
 	private final Optional<char[]> savedPassword;
 	private final UserInteractionLock<PasswordEntry> passwordEntryLock;
-	private final Optional<KeychainManager> keychain;
+	private final KeychainManager keychain;
 	private final Lazy<Scene> unlockScene;
 	private final Lazy<Scene> successScene;
 	private final Lazy<Scene> invalidMountPointScene;
 	private final ErrorComponent.Builder errorComponent;
 
 	@Inject
-	UnlockWorkflow(@UnlockWindow Stage window, @UnlockWindow Vault vault, VaultService vaultService, AtomicReference<char[]> password, @Named("savePassword") AtomicBoolean savePassword, @Named("savedPassword") Optional<char[]> savedPassword, UserInteractionLock<PasswordEntry> passwordEntryLock, Optional<KeychainManager> keychain, @FxmlScene(FxmlFile.UNLOCK) Lazy<Scene> unlockScene, @FxmlScene(FxmlFile.UNLOCK_SUCCESS) Lazy<Scene> successScene, @FxmlScene(FxmlFile.UNLOCK_INVALID_MOUNT_POINT) Lazy<Scene> invalidMountPointScene, ErrorComponent.Builder errorComponent) {
+	UnlockWorkflow(@UnlockWindow Stage window, @UnlockWindow Vault vault, VaultService vaultService, AtomicReference<char[]> password, @Named("savePassword") AtomicBoolean savePassword, @Named("savedPassword") Optional<char[]> savedPassword, UserInteractionLock<PasswordEntry> passwordEntryLock, KeychainManager keychain, @FxmlScene(FxmlFile.UNLOCK) Lazy<Scene> unlockScene, @FxmlScene(FxmlFile.UNLOCK_SUCCESS) Lazy<Scene> successScene, @FxmlScene(FxmlFile.UNLOCK_INVALID_MOUNT_POINT) Lazy<Scene> invalidMountPointScene, ErrorComponent.Builder errorComponent) {
 		this.window = window;
 		this.vault = vault;
 		this.vaultService = vaultService;
@@ -150,9 +150,9 @@ public class UnlockWorkflow extends Task<Boolean> {
 	}
 
 	private void savePasswordToSystemkeychain() {
-		if (keychain.isPresent()) {
+		if (keychain.isSupported()) {
 			try {
-				keychain.get().storePassphrase(vault.getId(), CharBuffer.wrap(password.get()));
+				keychain.storePassphrase(vault.getId(), CharBuffer.wrap(password.get()));
 			} catch (KeychainAccessException e) {
 				LOG.error("Failed to store passphrase in system keychain.", e);
 			}

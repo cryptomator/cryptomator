@@ -17,13 +17,6 @@
 		<fileSet>
 			<directory>target/</directory>
 			<includes>
-				<include>ffi-version.txt</include>
-			</includes>
-			<outputDirectory>libs</outputDirectory>
-		</fileSet>
-		<fileSet>
-			<directory>target/</directory>
-			<includes>
 				<include>LICENSE.txt</include>
 			</includes>
 			<outputDirectory></outputDirectory>
@@ -38,13 +31,6 @@
 		</fileSet>
 		<fileSet>
 			<directory>target/libs</directory>
-			<includes>
-				<include>*.jar</include>
-			</includes>
-			<outputDirectory>libs</outputDirectory>
-		</fileSet>
-		<fileSet>
-			<directory>target/mac-libs</directory>
 			<includes>
 				<include>*.jar</include>
 			</includes>

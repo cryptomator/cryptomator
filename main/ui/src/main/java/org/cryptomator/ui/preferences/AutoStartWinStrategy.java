@@ -25,7 +25,9 @@ import java.util.concurrent.TimeUnit;
  * To disable it, first it is determined by an internal state, which strategies must be used and in the second step those are executed.
  *
  * @apiNote This class is not thread safe, hence it should be avoided to call its methods simultaniously by different threads.
+ * @deprecated To be moved to integration-win project
  */
+@Deprecated
 class AutoStartWinStrategy implements AutoStartStrategy {
 
 	private static final Logger LOG = LoggerFactory.getLogger(AutoStartWinStrategy.class);

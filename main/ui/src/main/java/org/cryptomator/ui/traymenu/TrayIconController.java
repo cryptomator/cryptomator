@@ -1,7 +1,9 @@
 package org.cryptomator.ui.traymenu;
 
 import org.apache.commons.lang3.SystemUtils;
-import org.cryptomator.jni.MacFunctions;
+import org.cryptomator.integrations.uiappearance.Theme;
+import org.cryptomator.integrations.uiappearance.UiAppearanceException;
+import org.cryptomator.integrations.uiappearance.UiAppearanceProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,20 +19,26 @@ public class TrayIconController {
 	private static final Logger LOG = LoggerFactory.getLogger(TrayIconController.class);
 
 	private final TrayImageFactory imageFactory;
+	private final Optional<UiAppearanceProvider> appearanceProvider;
 	private final TrayMenuController trayMenuController;
 	private final TrayIcon trayIcon;
-	private final Optional<MacFunctions> macFunctions;
 
 	@Inject
-	TrayIconController(TrayImageFactory imageFactory, TrayMenuController trayMenuController, Optional<MacFunctions> macFunctions) {
+	TrayIconController(TrayImageFactory imageFactory, TrayMenuController trayMenuController, Optional<UiAppearanceProvider> appearanceProvider) {
 		this.trayMenuController = trayMenuController;
 		this.imageFactory = imageFactory;
+		this.appearanceProvider = appearanceProvider;
 		this.trayIcon = new TrayIcon(imageFactory.loadImage(), "Cryptomator", trayMenuController.getMenu());
-		this.macFunctions = macFunctions;
 	}
 
 	public void initializeTrayIcon() {
-		macFunctions.map(MacFunctions::uiAppearance).ifPresent(uiAppearance -> uiAppearance.addListener(this::macInterfaceThemeChanged));
+		appearanceProvider.ifPresent(appearanceProvider -> {
+			try {
+				appearanceProvider.addListener(this::systemInterfaceThemeChanged);
+			} catch (UiAppearanceException e) {
+				LOG.error("Failed to enable automatic tray icon theme switching.");
+			}
+		});
 
 		trayIcon.setImageAutoSize(true);
 		if (SystemUtils.IS_OS_WINDOWS) {
@@ -47,8 +55,8 @@ public class TrayIconController {
 		trayMenuController.initTrayMenu();
 	}
 
-	private void macInterfaceThemeChanged() {
-		trayIcon.setImage(imageFactory.loadImage());
+	private void systemInterfaceThemeChanged(Theme theme) {
+		trayIcon.setImage(imageFactory.loadImage()); // TODO refactor "theme" is re-queried in loadImage()
 	}
 
 }
