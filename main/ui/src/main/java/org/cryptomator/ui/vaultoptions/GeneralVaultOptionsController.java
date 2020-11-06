@@ -1,16 +1,15 @@
 package org.cryptomator.ui.vaultoptions;
 
-import com.google.common.base.Strings;
 import org.cryptomator.common.settings.WhenUnlocked;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.FxController;
 
 import javax.inject.Inject;
-import javafx.beans.Observable;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TextFormatter;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
 import java.util.ResourceBundle;
@@ -37,26 +36,19 @@ public class GeneralVaultOptionsController implements FxController {
 
 	@FXML
 	public void initialize() {
-		vaultName.textProperty().set(vault.getVaultSettings().displayName().get());
-		vaultName.focusedProperty().addListener(this::checkTrimAndTuncateVaultName);
+		vaultName.textProperty().bindBidirectional(vault.getVaultSettings().displayName());
+		vaultName.setTextFormatter(new TextFormatter<>(this::checkVaultNameLength));
 		unlockOnStartupCheckbox.selectedProperty().bindBidirectional(vault.getVaultSettings().unlockAfterStartup());
 		actionAfterUnlockChoiceBox.getItems().addAll(WhenUnlocked.values());
 		actionAfterUnlockChoiceBox.valueProperty().bindBidirectional(vault.getVaultSettings().actionAfterUnlock());
 		actionAfterUnlockChoiceBox.setConverter(new WhenUnlockedConverter(resourceBundle));
 	}
 
-	private void checkTrimAndTuncateVaultName(Observable observable, Boolean oldValue, Boolean newValue) {
-		if (!vaultName.isFocused()) { //only check if TextField loses focus
-			String currentContent = vaultName.getText().trim();
-			if (!Strings.isNullOrEmpty(currentContent)) {
-				if (currentContent.length() > 50) {
-					currentContent = currentContent.substring(0, VAULTNAME_TRUNCATE_THRESHOLD);
-				}
-				vaultName.textProperty().set(currentContent);
-				vault.getVaultSettings().displayName().setValue(currentContent);
-			} else {
-				vaultName.textProperty().set(vault.getVaultSettings().displayName().get());
-			}
+	private TextFormatter.Change checkVaultNameLength(TextFormatter.Change change) {
+		if (change.isContentChange() && change.getControlNewText().length() > VAULTNAME_TRUNCATE_THRESHOLD) {
+			return null; // reject any change that would lead to a text exceeding threshold
+		} else {
+			return change;
 		}
 	}
 
