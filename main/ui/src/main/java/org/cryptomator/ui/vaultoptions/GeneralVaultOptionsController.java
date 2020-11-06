@@ -5,6 +5,7 @@ import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.FxController;
 
 import javax.inject.Inject;
+import javafx.beans.Observable;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
@@ -36,12 +37,20 @@ public class GeneralVaultOptionsController implements FxController {
 
 	@FXML
 	public void initialize() {
-		vaultName.textProperty().bindBidirectional(vault.getVaultSettings().displayName());
+		vaultName.textProperty().set(vault.getVaultSettings().displayName().get());
+		vaultName.focusedProperty().addListener(this::checkTrimAndTuncateVaultName);
 		vaultName.setTextFormatter(new TextFormatter<>(this::checkVaultNameLength));
 		unlockOnStartupCheckbox.selectedProperty().bindBidirectional(vault.getVaultSettings().unlockAfterStartup());
 		actionAfterUnlockChoiceBox.getItems().addAll(WhenUnlocked.values());
 		actionAfterUnlockChoiceBox.valueProperty().bindBidirectional(vault.getVaultSettings().actionAfterUnlock());
 		actionAfterUnlockChoiceBox.setConverter(new WhenUnlockedConverter(resourceBundle));
+	}
+
+	private void checkTrimAndTuncateVaultName(Observable observable, Boolean wasFocussed, Boolean isFocussed) {
+		if (!isFocussed) {
+			var trimmed = vaultName.getText().trim();
+			vault.getVaultSettings().displayName().set(trimmed);
+		}
 	}
 
 	private TextFormatter.Change checkVaultNameLength(TextFormatter.Change change) {
