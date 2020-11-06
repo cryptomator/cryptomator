@@ -3,6 +3,7 @@
 <?import org.cryptomator.ui.controls.FontAwesome5IconView?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <HBox xmlns:fx="http://javafx.com/fxml"
@@ -21,7 +22,11 @@
 		</VBox>
 		<VBox spacing="4" HBox.hgrow="ALWAYS">
 			<Label styleClass="header-label" text="${controller.vault.displayName}"/>
-			<Label styleClass="detail-label" text="${controller.vault.displayablePath}" textOverrun="CENTER_ELLIPSIS"/>
+			<Label styleClass="detail-label" text="${controller.vault.displayablePath}" textOverrun="CENTER_ELLIPSIS">
+				<tooltip>
+					<Tooltip text="${controller.vault.displayablePath}"/>
+				</tooltip>
+			</Label>
 		</VBox>
 	</children>
 </HBox>
