@@ -3,9 +3,7 @@ package org.cryptomator.ui.preferences;
 import dagger.Module;
 import dagger.Provides;
 import org.apache.commons.lang3.SystemUtils;
-import org.cryptomator.common.Environment;
 import org.cryptomator.integrations.autostart.AutoStartProvider;
-import org.cryptomator.jni.MacFunctions;
 
 import java.util.Optional;
 

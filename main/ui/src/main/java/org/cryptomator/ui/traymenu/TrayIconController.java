@@ -4,7 +4,6 @@ import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.integrations.uiappearance.Theme;
 import org.cryptomator.integrations.uiappearance.UiAppearanceException;
 import org.cryptomator.integrations.uiappearance.UiAppearanceProvider;
-import org.cryptomator.jni.MacFunctions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

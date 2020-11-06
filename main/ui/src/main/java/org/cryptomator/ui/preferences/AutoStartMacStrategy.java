@@ -2,7 +2,6 @@ package org.cryptomator.ui.preferences;
 
 import org.cryptomator.integrations.autostart.AutoStartProvider;
 import org.cryptomator.integrations.autostart.ToggleAutoStartFailedException;
-import org.cryptomator.jni.MacFunctions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
