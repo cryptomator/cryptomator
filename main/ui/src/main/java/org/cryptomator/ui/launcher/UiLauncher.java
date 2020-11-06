@@ -1,7 +1,7 @@
 package org.cryptomator.ui.launcher;
 
 import org.cryptomator.common.Environment;
-import org.cryptomator.common.mountpoint.UnregularUnmountCleaner;
+import org.cryptomator.common.mountpoint.IrregularUnmountCleaner;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.jni.JniException;
@@ -67,7 +67,7 @@ public class UiLauncher {
 
 		//clean leftovers of not-regularly unmounted vaults
 		//see https://github.com/cryptomator/cryptomator/issues/1013 and https://github.com/cryptomator/cryptomator/issues/1061
-		env.getMountPointsDir().ifPresent(UnregularUnmountCleaner::removeUnregularUnmountDebris);
+		env.getMountPointsDir().ifPresent(IrregularUnmountCleaner::removeUnregularUnmountDebris);
 
 		// auto unlock
 		Collection<Vault> vaultsToAutoUnlock = vaults.filtered(this::shouldAttemptAutoUnlock);
