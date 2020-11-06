@@ -2,7 +2,6 @@ package org.cryptomator.ui.launcher;
 
 import dagger.Module;
 import dagger.Provides;
-import org.cryptomator.common.JniModule;
 import org.cryptomator.integrations.autostart.AutoStartProvider;
 import org.cryptomator.integrations.tray.TrayIntegrationProvider;
 import org.cryptomator.integrations.uiappearance.UiAppearanceProvider;
@@ -17,7 +16,7 @@ import java.util.ServiceLoader;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-@Module(includes = {JniModule.class}, subcomponents = {TrayMenuComponent.class, FxApplicationComponent.class})
+@Module(subcomponents = {TrayMenuComponent.class, FxApplicationComponent.class})
 public abstract class UiLauncherModule {
 
 	@Provides

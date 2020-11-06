@@ -73,7 +73,9 @@ For more information on the security details visit [cryptomator.org](https://doc
 
 ```
 cd main
-mvn clean install -Prelease
+mvn clean install -Prelease,windows
+# or mvn clean install -Prelease,mac
+# or mvn clean install -Prelease,linux
 ```
 
 This will build all the jars and bundle them together with their OS-specific dependencies under `main/buildkit/target`. This can now be used to build native packages.

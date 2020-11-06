@@ -29,7 +29,6 @@
 		<cryptomator.integrations.win.version>0.1.0-beta1</cryptomator.integrations.win.version>
 		<cryptomator.integrations.mac.version>0.1.0-beta3</cryptomator.integrations.mac.version>
 		<cryptomator.integrations.linux.version>0.1.0-beta1</cryptomator.integrations.linux.version>
-		<cryptomator.jni.version>2.2.3</cryptomator.jni.version>
 		<cryptomator.fuse.version>1.2.5</cryptomator.fuse.version>
 		<cryptomator.dokany.version>1.1.15</cryptomator.dokany.version>
 		<cryptomator.webdav.version>1.0.12</cryptomator.webdav.version>
@@ -124,11 +123,6 @@
 				<groupId>org.cryptomator</groupId>
 				<artifactId>integrations-linux</artifactId>
 				<version>${cryptomator.integrations.linux.version}</version>
-			</dependency>
-			<dependency> <!-- deprecated: will be replaced by integrations-api -->
-				<groupId>org.cryptomator</groupId>
-				<artifactId>jni</artifactId>
-				<version>${cryptomator.jni.version}</version>
 			</dependency>
 
 			<!-- JavaFX -->
