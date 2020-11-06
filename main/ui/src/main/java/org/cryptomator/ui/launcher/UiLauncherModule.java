@@ -3,9 +3,9 @@ package org.cryptomator.ui.launcher;
 import dagger.Module;
 import dagger.Provides;
 import org.cryptomator.common.JniModule;
+import org.cryptomator.integrations.tray.TrayIntegrationProvider;
 import org.cryptomator.integrations.uiappearance.UiAppearanceProvider;
 import org.cryptomator.ui.fxapp.FxApplicationComponent;
-import org.cryptomator.ui.fxapp.FxApplicationScoped;
 import org.cryptomator.ui.traymenu.TrayMenuComponent;
 
 import javax.inject.Named;
@@ -23,6 +23,12 @@ public abstract class UiLauncherModule {
 	@Singleton
 	static Optional<UiAppearanceProvider> provideAppearanceProvider() {
 		return ServiceLoader.load(UiAppearanceProvider.class).findFirst();
+	}
+
+	@Provides
+	@Singleton
+	static Optional<TrayIntegrationProvider> provideTrayIntegrationProvider() {
+		return ServiceLoader.load(TrayIntegrationProvider.class).findFirst();
 	}
 
 	@Provides

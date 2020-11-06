@@ -6,12 +6,11 @@ import org.cryptomator.common.LicenseHolder;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.UiTheme;
 import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.integrations.tray.TrayIntegrationProvider;
 import org.cryptomator.integrations.uiappearance.Theme;
 import org.cryptomator.integrations.uiappearance.UiAppearanceException;
 import org.cryptomator.integrations.uiappearance.UiAppearanceListener;
 import org.cryptomator.integrations.uiappearance.UiAppearanceProvider;
-import org.cryptomator.jni.MacApplicationUiState;
-import org.cryptomator.jni.MacFunctions;
 import org.cryptomator.ui.common.VaultService;
 import org.cryptomator.ui.mainwindow.MainWindowComponent;
 import org.cryptomator.ui.preferences.PreferencesComponent;
@@ -43,7 +42,7 @@ public class FxApplication extends Application {
 	private final Lazy<PreferencesComponent> preferencesWindow;
 	private final Provider<UnlockComponent.Builder> unlockWindowBuilderProvider;
 	private final Provider<QuitComponent.Builder> quitWindowBuilderProvider;
-	private final Optional<MacFunctions> macFunctions;
+	private final Optional<TrayIntegrationProvider> trayIntegration;
 	private final Optional<UiAppearanceProvider> appearanceProvider;
 	private final VaultService vaultService;
 	private final LicenseHolder licenseHolder;
@@ -51,13 +50,13 @@ public class FxApplication extends Application {
 	private final UiAppearanceListener systemInterfaceThemeListener = this::systemInterfaceThemeChanged;
 
 	@Inject
-	FxApplication(Settings settings, Lazy<MainWindowComponent> mainWindow, Lazy<PreferencesComponent> preferencesWindow, Provider<UnlockComponent.Builder> unlockWindowBuilderProvider, Provider<QuitComponent.Builder> quitWindowBuilderProvider, Optional<MacFunctions> macFunctions, Optional<UiAppearanceProvider> appearanceProvider, VaultService vaultService, LicenseHolder licenseHolder, ObservableSet<Stage> visibleStages) {
+	FxApplication(Settings settings, Lazy<MainWindowComponent> mainWindow, Lazy<PreferencesComponent> preferencesWindow, Provider<UnlockComponent.Builder> unlockWindowBuilderProvider, Provider<QuitComponent.Builder> quitWindowBuilderProvider, Optional<TrayIntegrationProvider> trayIntegration, Optional<UiAppearanceProvider> appearanceProvider, VaultService vaultService, LicenseHolder licenseHolder, ObservableSet<Stage> visibleStages) {
 		this.settings = settings;
 		this.mainWindow = mainWindow;
 		this.preferencesWindow = preferencesWindow;
 		this.unlockWindowBuilderProvider = unlockWindowBuilderProvider;
 		this.quitWindowBuilderProvider = quitWindowBuilderProvider;
-		this.macFunctions = macFunctions;
+		this.trayIntegration = trayIntegration;
 		this.appearanceProvider = appearanceProvider;
 		this.vaultService = vaultService;
 		this.licenseHolder = licenseHolder;
@@ -81,9 +80,9 @@ public class FxApplication extends Application {
 
 	private void hasVisibleStagesChanged(boolean newValue) {
 		if (newValue) {
-			macFunctions.map(MacFunctions::uiState).ifPresent(MacApplicationUiState::transformToForegroundApplication);
+			trayIntegration.ifPresent(TrayIntegrationProvider::restoredFromTray);
 		} else {
-			macFunctions.map(MacFunctions::uiState).ifPresent(MacApplicationUiState::transformToAgentApplication);
+			trayIntegration.ifPresent(TrayIntegrationProvider::minimizedToTray);
 		}
 	}
 
