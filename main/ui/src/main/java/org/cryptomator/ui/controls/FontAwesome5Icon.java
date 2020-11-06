@@ -39,7 +39,6 @@ public enum FontAwesome5Icon {
 	SPINNER("\uF110"), //
 	SYNC("\uF021"), //
 	TIMES("\uF00D"), //
-	TIMES_CIRCLE("\uF057"), //
 	TRASH("\uF1F8"), //
 	UNLINK("\uf127"), //
 	WRENCH("\uF0AD"), //
