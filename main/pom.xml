@@ -28,7 +28,7 @@
 		<cryptomator.integrations.version>0.1.6</cryptomator.integrations.version>
 		<cryptomator.integrations.win.version>0.1.0-beta1</cryptomator.integrations.win.version>
 		<cryptomator.integrations.mac.version>0.1.0-beta3</cryptomator.integrations.mac.version>
-		<cryptomator.integrations.linux.version>0.1.0-beta1</cryptomator.integrations.linux.version>
+		<cryptomator.integrations.linux.version>0.1.0-beta2</cryptomator.integrations.linux.version>
 		<cryptomator.fuse.version>1.2.5</cryptomator.fuse.version>
 		<cryptomator.dokany.version>1.2.0</cryptomator.dokany.version>
 		<cryptomator.webdav.version>1.0.12</cryptomator.webdav.version>
@@ -36,7 +36,6 @@
 		<!-- 3rd party dependencies -->
 		<javafx.version>14</javafx.version>
 		<commons-lang3.version>3.11</commons-lang3.version>
-		<secret-service.version>1.1.0</secret-service.version>
 		<kdewallet.version>1.1.1</kdewallet.version>
 		<jwt.version>3.10.3</jwt.version>
 		<easybind.version>2.1.0</easybind.version>
