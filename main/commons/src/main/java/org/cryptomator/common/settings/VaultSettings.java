@@ -5,6 +5,7 @@
  *******************************************************************************/
 package org.cryptomator.common.settings;
 
+import com.google.common.base.CharMatcher;
 import com.google.common.base.Strings;
 import com.google.common.io.BaseEncoding;
 
@@ -77,27 +78,16 @@ public class VaultSettings {
 
 	//visible for testing
 	String normalizeDisplayName() {
-		StringBuilder builder = new StringBuilder();
-		Set<Integer> notAllowedCharacters = "<>:\"/\\|?*".chars().boxed().collect(Collectors.toUnmodifiableSet());
-
-		if (displayName.isEmpty().get() || displayName.getValueSafe().equals(".") || displayName.getValueSafe().equals("..")) {
-			return builder.append("_").toString();
-		}
-
-		displayName.get().codePoints().forEach(codePoint -> {
-			if (Character.isDefined(codePoint) && !Character.isIdentifierIgnorable(codePoint) && !notAllowedCharacters.contains(codePoint)) {
-				builder.appendCodePoint(Character.isWhitespace(codePoint) || Character.isSpaceChar(codePoint) ? 0x020 : codePoint);
-			} else {
-				builder.append("_");
-			}
-		});
-
-		String result = builder.toString();
-		if (!result.isBlank()) {
-			return result;
-		} else {
+		var original = displayName.getValueSafe();
+		if (original.isBlank() || ".".equals(original) || "..".equals(original)) {
 			return "_";
 		}
+
+		// replace whitespaces (tabs, linebreaks, ...) by simple space (0x20)
+		var withoutFancyWhitespaces = CharMatcher.whitespace().collapseFrom(original, ' ');
+
+		// replace control chars as well as chars that aren't allowed in file names on standard file systems by underscore
+		return CharMatcher.anyOf("<>:\"/\\|?*").or(CharMatcher.javaIsoControl()).collapseFrom(withoutFancyWhitespaces, '_');
 	}
 
 	/* Getter/Setter */
