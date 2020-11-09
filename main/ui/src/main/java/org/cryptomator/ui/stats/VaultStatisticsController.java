@@ -1,11 +1,16 @@
 package org.cryptomator.ui.stats;
 
+import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.common.vaults.VaultStats;
+import org.cryptomator.ui.common.FxController;
+import org.cryptomator.ui.common.WeakBindings;
+
+import javax.inject.Inject;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.beans.binding.DoubleBinding;
 import javafx.beans.binding.LongBinding;
-import javafx.beans.property.LongProperty;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -15,14 +20,7 @@ import javafx.scene.chart.XYChart.Data;
 import javafx.scene.chart.XYChart.Series;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import org.cryptomator.common.vaults.Vault;
-import org.cryptomator.common.vaults.VaultStats;
-import org.cryptomator.ui.common.FxController;
-import org.cryptomator.ui.common.WeakBindings;
-
-import javax.inject.Inject;
 import java.util.Arrays;
-import java.util.ResourceBundle;
 
 @VaultStatisticsScoped
 public class VaultStatisticsController implements FxController {
@@ -56,7 +54,7 @@ public class VaultStatisticsController implements FxController {
 	public NumberAxis writeChartYAxis;
 
 	@Inject
-	public VaultStatisticsController(@VaultStatisticsWindow Stage window, @VaultStatisticsWindow Vault vault, ResourceBundle resourceBundle) {
+	public VaultStatisticsController(@VaultStatisticsWindow Stage window, @VaultStatisticsWindow Vault vault) {
 		this.stats = vault.getStats();
 		this.readData = new Series<>();
 		this.writeData = new Series<>();
@@ -93,8 +91,6 @@ public class VaultStatisticsController implements FxController {
 	}
 
 	private class IoSamplingAnimationHandler implements EventHandler<ActionEvent> {
-
-		private static final double BYTES_TO_MEGABYTES_FACTOR = 1.0 / IO_SAMPLING_INTERVAL / 1024.0 / 1024.0;
 
 		private long step = IO_SAMPLING_STEPS;
 		private final Series<Number, Number> decryptedBytesRead;
