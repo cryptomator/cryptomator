@@ -162,7 +162,9 @@ public class MountOptionsController implements FxController {
 
 		@Override
 		public String toString(String driveLetter) {
-			if (occupiedDriveLetters.contains(driveLetter)) {
+			if (Strings.isNullOrEmpty(driveLetter)) {
+				return "";
+			} else if (occupiedDriveLetters.contains(driveLetter)) {
 				return driveLetter + ": (" + resourceBundle.getString("vaultOptions.mount.winDriveLetterOccupied") + ")";
 			} else {
 				return driveLetter + ":";
