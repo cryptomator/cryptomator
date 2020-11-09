@@ -38,7 +38,7 @@ abstract class VaultStatisticsModule {
 	@VaultStatisticsScoped
 	static Stage provideStage(StageFactory factory, ResourceBundle resourceBundle, @VaultStatisticsWindow Vault vault) {
 		Stage stage = factory.create();
-		stage.setTitle(String.format(resourceBundle.getString("stats.title"), vault.getDisplayableName()));
+		stage.setTitle(String.format(resourceBundle.getString("stats.title"), vault.getDisplayName()));
 		stage.setResizable(false);
 		var weakStage = new WeakReference<>(stage);
 		vault.stateProperty().addListener(new ChangeListener<>() {
