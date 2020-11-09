@@ -32,7 +32,9 @@ import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.StringBinding;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import java.io.IOException;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
@@ -68,6 +70,7 @@ public class Vault {
 	private final BooleanBinding unknownError;
 	private final StringBinding accessPoint;
 	private final BooleanBinding accessPointPresent;
+	private final BooleanProperty showingStats;
 
 	private volatile Volume volume;
 
@@ -90,6 +93,7 @@ public class Vault {
 		this.unknownError = Bindings.createBooleanBinding(this::isUnknownError, state);
 		this.accessPoint = Bindings.createStringBinding(this::getAccessPoint, state);
 		this.accessPointPresent = this.accessPoint.isNotEmpty();
+		this.showingStats = new SimpleBooleanProperty(false);
 	}
 
 	// ******************************************************************************
@@ -267,6 +271,15 @@ public class Vault {
 			return p.toString();
 		}
 	}
+
+	public BooleanProperty showingStatsProperty() {
+		return showingStats;
+	}
+
+	public boolean isShowingStats() {
+		return accessPointPresent.get();
+	}
+
 
 	// ******************************************************************************
 	// Getter/Setter
