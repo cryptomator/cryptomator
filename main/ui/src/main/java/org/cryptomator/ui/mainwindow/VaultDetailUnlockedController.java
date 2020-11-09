@@ -18,20 +18,19 @@ public class VaultDetailUnlockedController implements FxController {
 
 	private final ReadOnlyObjectProperty<Vault> vault;
 	private final VaultService vaultService;
-	private final LoadingCache<Vault, VaultStatisticsComponent> vaultStatisticsWindows;
-	private final VaultStatisticsComponent.Builder vaultStatisticsWindow;
+	private final LoadingCache<Vault, VaultStatisticsComponent> vaultStats;
+	private final VaultStatisticsComponent.Builder vaultStatsBuilder;
 
 	@Inject
-	public VaultDetailUnlockedController(ObjectProperty<Vault> vault, VaultService vaultService, VaultStatisticsComponent.Builder vaultStatisticsWindow) {
+	public VaultDetailUnlockedController(ObjectProperty<Vault> vault, VaultService vaultService, VaultStatisticsComponent.Builder vaultStatsBuilder) {
 		this.vault = vault;
 		this.vaultService = vaultService;
-		this.vaultStatisticsWindows = CacheBuilder.newBuilder().build(CacheLoader.from(this::provideVaultStatisticsComponent));
-		//TODO make the binding a weak Binding via weakValues
-		this.vaultStatisticsWindow = vaultStatisticsWindow;
+		this.vaultStats = CacheBuilder.newBuilder().weakValues().build(CacheLoader.from(this::buildVaultStats));
+		this.vaultStatsBuilder = vaultStatsBuilder;
 	}
 
-	private VaultStatisticsComponent provideVaultStatisticsComponent(Vault vault) {
-		return vaultStatisticsWindow.vault(vault).build();
+	private VaultStatisticsComponent buildVaultStats(Vault vault) {
+		return vaultStatsBuilder.vault(vault).build();
 	}
 
 	@FXML
@@ -47,7 +46,7 @@ public class VaultDetailUnlockedController implements FxController {
 
 	@FXML
 	public void showVaultStatistics() {
-		vaultStatisticsWindows.getUnchecked(vault.get()).showVaultStatisticsWindow();
+		vaultStats.getUnchecked(vault.get()).showVaultStatisticsWindow();
 	}
 
 	/* Getter/Setter */

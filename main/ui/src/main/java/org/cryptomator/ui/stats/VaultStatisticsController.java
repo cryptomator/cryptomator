@@ -28,6 +28,7 @@ public class VaultStatisticsController implements FxController {
 	private static final int IO_SAMPLING_STEPS = 30;
 	private static final double IO_SAMPLING_INTERVAL = 1;
 
+	private final VaultStatisticsComponent component; // keep a strong reference to the component (see component's javadoc)
 	private final VaultStats stats;
 	private final Series<Number, Number> readData;
 	private final Series<Number, Number> writeData;
@@ -54,7 +55,8 @@ public class VaultStatisticsController implements FxController {
 	public NumberAxis writeChartYAxis;
 
 	@Inject
-	public VaultStatisticsController(@VaultStatisticsWindow Stage window, @VaultStatisticsWindow Vault vault) {
+	public VaultStatisticsController(VaultStatisticsComponent component, @VaultStatisticsWindow Stage window, @VaultStatisticsWindow Vault vault) {
+		this.component = component;
 		this.stats = vault.getStats();
 		this.readData = new Series<>();
 		this.writeData = new Series<>();
@@ -77,11 +79,10 @@ public class VaultStatisticsController implements FxController {
 		ioAnimation.setCycleCount(Animation.INDEFINITE);
 		ioAnimation.play();
 
-		// make sure to stop animating,
+		// make sure to stop animating while window is closed
 		// otherwise a global timer (GC root) will keep a strong reference to animation
-		window.setOnHiding(evt -> {
-			ioAnimation.stop();
-		});
+		window.setOnHiding(evt -> ioAnimation.stop());
+		window.setOnShowing(evt -> ioAnimation.play());
 	}
 
 	@FXML
