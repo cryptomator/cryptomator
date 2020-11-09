@@ -37,7 +37,7 @@ public class VaultStatisticsController implements FxController {
 	private final LongBinding bpsRead;
 	private final LongBinding bpsWritten;
 	private final DoubleBinding cacheHitRate;
-	private final DoubleBinding cacheHitDregrees;
+	private final DoubleBinding cacheHitDegrees;
 	private final DoubleBinding cacheHitPercentage;
 	private final LongBinding totalBytesRead;
 	private final LongBinding totalBytesWritten;
@@ -63,7 +63,7 @@ public class VaultStatisticsController implements FxController {
 		this.bpsRead = WeakBindings.bindLong(stats.bytesPerSecondReadProperty());
 		this.bpsWritten = WeakBindings.bindLong(stats.bytesPerSecondWrittenProperty());
 		this.cacheHitRate = WeakBindings.bindDouble(stats.cacheHitRateProperty());
-		this.cacheHitDregrees = cacheHitRate.multiply(-270);
+		this.cacheHitDegrees = cacheHitRate.multiply(-270);
 		this.cacheHitPercentage = cacheHitRate.multiply(100);
 		this.totalBytesRead = WeakBindings.bindLong(stats.toalBytesReadProperty());
 		this.totalBytesWritten = WeakBindings.bindLong(stats.toalBytesWrittenProperty());
@@ -163,12 +163,12 @@ public class VaultStatisticsController implements FxController {
 
 	public double getCacheHitPercentage() { return cacheHitPercentage.get(); }
 
-	public DoubleBinding cacheHitDregreesProperty() {
-		return cacheHitDregrees;
+	public DoubleBinding cacheHitDegreesProperty() {
+		return cacheHitDegrees;
 	}
 
-	public double getCacheHitDregrees() {
-		return cacheHitDregrees.get();
+	public double getCacheHitDegrees() {
+		return cacheHitDegrees.get();
 	}
 
 	public LongBinding totalBytesReadProperty() { return totalBytesRead;}

@@ -26,7 +26,7 @@
 		<StackPane>
 			<Group>
 				<Arc styleClass="cache-arc-background" centerX="100" centerY="100" radiusX="100" radiusY="100" startAngle="225" length="-270"/>
-				<Arc styleClass="cache-arc-foreground" centerX="100" centerY="100" radiusX="100" radiusY="100" startAngle="225" length="${controller.cacheHitDregrees}"/>
+				<Arc styleClass="cache-arc-foreground" centerX="100" centerY="100" radiusX="100" radiusY="100" startAngle="225" length="${controller.cacheHitDegrees}"/>
 			</Group>
 			<VBox StackPane.alignment="CENTER" alignment="CENTER">
 				<FormattedLabel styleClass="label-large" format="\%1.0f %%" arg1="${controller.cacheHitPercentage}"/>
