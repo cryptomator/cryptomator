@@ -8,6 +8,8 @@
  ******************************************************************************/
 package org.cryptomator.common.settings;
 
+import org.apache.commons.lang3.SystemUtils;
+
 import javafx.beans.Observable;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
@@ -20,7 +22,6 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.NodeOrientation;
-
 import java.util.function.Consumer;
 
 public class Settings {
@@ -34,8 +35,9 @@ public class Settings {
 	public static final int DEFAULT_NUM_TRAY_NOTIFICATIONS = 3;
 	public static final WebDavUrlScheme DEFAULT_GVFS_SCHEME = WebDavUrlScheme.DAV;
 	public static final boolean DEFAULT_DEBUG_MODE = false;
-	public static final VolumeImpl DEFAULT_PREFERRED_VOLUME_IMPL = System.getProperty("os.name").toLowerCase().contains("windows") ? VolumeImpl.DOKANY : VolumeImpl.FUSE;
+	public static final VolumeImpl DEFAULT_PREFERRED_VOLUME_IMPL = SystemUtils.IS_OS_WINDOWS ? VolumeImpl.DOKANY : VolumeImpl.FUSE;
 	public static final UiTheme DEFAULT_THEME = UiTheme.LIGHT;
+	public static final KeychainBackend DEFAULT_KEYCHAIN_BACKEND = SystemUtils.IS_OS_WINDOWS ? KeychainBackend.WIN_SYSTEM_KEYCHAIN : SystemUtils.IS_OS_MAC ? KeychainBackend.MAC_SYSTEM_KEYCHAIN : KeychainBackend.GNOME;
 	public static final NodeOrientation DEFAULT_USER_INTERFACE_ORIENTATION = NodeOrientation.LEFT_TO_RIGHT;
 	private static final String DEFAULT_LICENSE_KEY = "";
 
@@ -49,6 +51,7 @@ public class Settings {
 	private final BooleanProperty debugMode = new SimpleBooleanProperty(DEFAULT_DEBUG_MODE);
 	private final ObjectProperty<VolumeImpl> preferredVolumeImpl = new SimpleObjectProperty<>(DEFAULT_PREFERRED_VOLUME_IMPL);
 	private final ObjectProperty<UiTheme> theme = new SimpleObjectProperty<>(DEFAULT_THEME);
+	private final ObjectProperty<KeychainBackend> keychainBackend = new SimpleObjectProperty<>(DEFAULT_KEYCHAIN_BACKEND);
 	private final ObjectProperty<NodeOrientation> userInterfaceOrientation = new SimpleObjectProperty<>(DEFAULT_USER_INTERFACE_ORIENTATION);
 	private final StringProperty licenseKey = new SimpleStringProperty(DEFAULT_LICENSE_KEY);
 
@@ -68,6 +71,7 @@ public class Settings {
 		debugMode.addListener(this::somethingChanged);
 		preferredVolumeImpl.addListener(this::somethingChanged);
 		theme.addListener(this::somethingChanged);
+		keychainBackend.addListener(this::somethingChanged);
 		userInterfaceOrientation.addListener(this::somethingChanged);
 		licenseKey.addListener(this::somethingChanged);
 	}
@@ -75,7 +79,7 @@ public class Settings {
 	void setSaveCmd(Consumer<Settings> saveCmd) {
 		this.saveCmd = saveCmd;
 	}
-	
+
 	private void somethingChanged(@SuppressWarnings("unused") Observable observable) {
 		this.save();
 	}
@@ -99,7 +103,7 @@ public class Settings {
 	public BooleanProperty checkForUpdates() {
 		return checkForUpdates;
 	}
-	
+
 	public BooleanProperty startHidden() {
 		return startHidden;
 	}
@@ -127,6 +131,8 @@ public class Settings {
 	public ObjectProperty<UiTheme> theme() {
 		return theme;
 	}
+
+	public ObjectProperty<KeychainBackend> keychainBackend() { return keychainBackend; }
 
 	public ObjectProperty<NodeOrientation> userInterfaceOrientation() {
 		return userInterfaceOrientation;

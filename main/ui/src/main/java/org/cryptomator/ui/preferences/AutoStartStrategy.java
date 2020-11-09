@@ -2,6 +2,7 @@ package org.cryptomator.ui.preferences;
 
 import java.util.concurrent.CompletionStage;
 
+@Deprecated
 public interface AutoStartStrategy {
 
 	CompletionStage<Boolean> isAutoStartEnabled();
@@ -19,6 +20,6 @@ public interface AutoStartStrategy {
 		public TogglingAutoStartFailedException(String message, Throwable cause) {
 			super(message, cause);
 		}
-		
+
 	}
 }

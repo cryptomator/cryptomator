@@ -1,11 +1,5 @@
 package org.cryptomator.ui.quit;
 
-import javafx.collections.ObservableList;
-import javafx.concurrent.Task;
-import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.ContentDisplay;
-import javafx.stage.Stage;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.VaultService;
@@ -13,6 +7,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
+import javafx.fxml.FXML;
+import javafx.scene.control.Button;
+import javafx.scene.control.ContentDisplay;
+import javafx.stage.Stage;
 import java.awt.desktop.QuitResponse;
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
@@ -53,7 +53,7 @@ public class QuitController implements FxController {
 
 		Task<Collection<Vault>> lockAllTask = vaultService.createLockAllTask(unlockedVaults, false);
 		lockAllTask.setOnSucceeded(evt -> {
-			LOG.info("Locked {}", lockAllTask.getValue().stream().map(Vault::getDisplayableName).collect(Collectors.joining(", ")));
+			LOG.info("Locked {}", lockAllTask.getValue().stream().map(Vault::getDisplayName).collect(Collectors.joining(", ")));
 			if (unlockedVaults.isEmpty()) {
 				window.close();
 				response.performQuit();

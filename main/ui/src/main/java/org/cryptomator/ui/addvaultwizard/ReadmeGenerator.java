@@ -6,7 +6,7 @@ import java.util.ResourceBundle;
 
 @AddVaultWizardScoped
 public class ReadmeGenerator {
-	
+
 	// specs: https://web.archive.org/web/20190708132914/http://www.kleinlercher.at/tools/Windows_Protocols/Word2007RTFSpec9.pdf
 	private static final String RTF_HEADER = "{\\rtf1\\fbidis\\ansi\\uc0\\fs32\n";
 	private static final String RTF_FOOTER = "}";
@@ -22,7 +22,7 @@ public class ReadmeGenerator {
 	public ReadmeGenerator(ResourceBundle resourceBundle) {
 		this.resourceBundle = resourceBundle;
 	}
-	
+
 	public String createVaultStorageLocationReadmeRtf() {
 		return createDocument(List.of( //
 				String.format(HEADING, resourceBundle.getString("addvault.new.readme.storageLocation.1")), //
@@ -40,16 +40,15 @@ public class ReadmeGenerator {
 				String.format(resourceBundle.getString("addvault.new.readme.storageLocation.10"), HELP_URL)  //
 		));
 	}
-	
+
 	public String createVaultAccessLocationReadmeRtf() {
 		return createDocument(List.of( //
-				String.format(HEADING,resourceBundle.getString("addvault.new.readme.accessLocation.1")), //
+				String.format(HEADING, resourceBundle.getString("addvault.new.readme.accessLocation.1")), //
 				resourceBundle.getString("addvault.new.readme.accessLocation.2"), //
 				EMPTY_PAR, //
 				resourceBundle.getString("addvault.new.readme.accessLocation.3"), //
 				EMPTY_PAR, //
-				resourceBundle.getString("addvault.new.readme.accessLocation.4")
-		));
+				resourceBundle.getString("addvault.new.readme.accessLocation.4")));
 	}
 
 	// visible for testing
@@ -63,14 +62,14 @@ public class ReadmeGenerator {
 		sb.append(RTF_FOOTER);
 		return sb.toString();
 	}
-	
+
 	// visible for testing
 	String escapeNonAsciiChars(CharSequence input) {
 		StringBuilder sb = new StringBuilder();
 		appendEscaped(sb, input);
 		return sb.toString();
 	}
-	
+
 	private void appendEscaped(StringBuilder sb, CharSequence input) {
 		input.chars().forEachOrdered(c -> {
 			if (c < 128) {
@@ -80,7 +79,6 @@ public class ReadmeGenerator {
 			}
 		});
 	}
-	
-	
+
 
 }

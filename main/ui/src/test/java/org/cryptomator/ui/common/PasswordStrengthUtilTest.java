@@ -20,7 +20,7 @@ public class PasswordStrengthUtilTest {
 			util.computeRate(longPw);
 		});
 	}
-	
+
 	@Test
 	@Disabled("waiting on upstream fix") // https://github.com/nulab/zxcvbn4j/issues/54
 	public void testIssue979() {

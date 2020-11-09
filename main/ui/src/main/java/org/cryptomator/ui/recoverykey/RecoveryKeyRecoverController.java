@@ -3,6 +3,12 @@ package org.cryptomator.ui.recoverykey;
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Strings;
 import dagger.Lazy;
+import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.ui.common.FxController;
+import org.cryptomator.ui.common.FxmlFile;
+import org.cryptomator.ui.common.FxmlScene;
+
+import javax.inject.Inject;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.StringProperty;
@@ -13,12 +19,6 @@ import javafx.scene.control.TextFormatter;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
-import org.cryptomator.common.vaults.Vault;
-import org.cryptomator.ui.common.FxController;
-import org.cryptomator.ui.common.FxmlFile;
-import org.cryptomator.ui.common.FxmlScene;
-
-import javax.inject.Inject;
 import java.util.Optional;
 
 @RecoveryKeyScoped

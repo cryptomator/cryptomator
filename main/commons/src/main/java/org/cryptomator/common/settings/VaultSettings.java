@@ -7,7 +7,11 @@ package org.cryptomator.common.settings;
 
 import com.google.common.base.Strings;
 import com.google.common.io.BaseEncoding;
+import org.apache.commons.lang3.StringUtils;
+
 import javafx.beans.Observable;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.StringBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
@@ -16,9 +20,6 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import org.apache.commons.lang3.StringUtils;
-import org.fxmisc.easybind.EasyBind;
-
 import java.nio.file.Path;
 import java.util.Objects;
 import java.util.Optional;
@@ -34,15 +35,14 @@ public class VaultSettings {
 	public static final boolean DEFAULT_USES_INDIVIDUAL_MOUNTPATH = false;
 	public static final boolean DEFAULT_USES_READONLY_MODE = false;
 	public static final String DEFAULT_MOUNT_FLAGS = "";
-	public static final String DEFAULT_MOUNT_NAME = "Vault";
 	public static final int DEFAULT_FILENAME_LENGTH_LIMIT = -1;
 	public static final WhenUnlocked DEFAULT_ACTION_AFTER_UNLOCK = WhenUnlocked.ASK;
 
-	private static final Random RNG = new Random(); 
+	private static final Random RNG = new Random();
 
 	private final String id;
 	private final ObjectProperty<Path> path = new SimpleObjectProperty();
-	private final StringProperty mountName = new SimpleStringProperty();
+	private final StringProperty displayName = new SimpleStringProperty();
 	private final StringProperty winDriveLetter = new SimpleStringProperty();
 	private final BooleanProperty unlockAfterStartup = new SimpleBooleanProperty(DEFAULT_UNLOCK_AFTER_STARTUP);
 	private final BooleanProperty revealAfterMount = new SimpleBooleanProperty(DEFAULT_REAVEAL_AFTER_MOUNT);
@@ -53,24 +53,15 @@ public class VaultSettings {
 	private final IntegerProperty filenameLengthLimit = new SimpleIntegerProperty(DEFAULT_FILENAME_LENGTH_LIMIT);
 	private final ObjectProperty<WhenUnlocked> actionAfterUnlock = new SimpleObjectProperty<>(DEFAULT_ACTION_AFTER_UNLOCK);
 
+	private final StringBinding mountName;
+
 	public VaultSettings(String id) {
 		this.id = Objects.requireNonNull(id);
-
-		EasyBind.subscribe(path, this::deriveMountNameFromPathOrUseDefault);
+		this.mountName = Bindings.createStringBinding(this::normalizeDisplayName, displayName);
 	}
 
 	Observable[] observables() {
-		return new Observable[]{path, mountName, winDriveLetter, unlockAfterStartup, revealAfterMount, useCustomMountPath, customMountPath, usesReadOnlyMode, mountFlags, filenameLengthLimit, actionAfterUnlock};
-	}
-
-	private void deriveMountNameFromPathOrUseDefault(Path path) {
-		if (StringUtils.isBlank(mountName.get())) {
-			if (path != null && path.getFileName() != null) {
-				mountName.set(normalizeMountName(path.getFileName().toString()));
-			} else {
-				mountName.set(DEFAULT_MOUNT_NAME);
-			}
-		}
+		return new Observable[]{path, displayName, winDriveLetter, unlockAfterStartup, revealAfterMount, useCustomMountPath, customMountPath, usesReadOnlyMode, mountFlags, filenameLengthLimit, actionAfterUnlock};
 	}
 
 	public static VaultSettings withRandomId() {
@@ -83,8 +74,9 @@ public class VaultSettings {
 		return BaseEncoding.base64Url().encode(randomBytes);
 	}
 
-	public static String normalizeMountName(String mountName) {
-		String normalizedMountName = StringUtils.stripAccents(mountName);
+	//visible for testing
+	String normalizeDisplayName() {
+		String normalizedMountName = StringUtils.stripAccents(displayName.get());
 		StringBuilder builder = new StringBuilder();
 		for (char c : normalizedMountName.toCharArray()) {
 			if (Character.isWhitespace(c)) {
@@ -112,12 +104,24 @@ public class VaultSettings {
 		return path;
 	}
 
-	public StringProperty mountName() {
+	public StringProperty displayName() {
+		return displayName;
+	}
+
+	public StringBinding mountName() {
 		return mountName;
 	}
 
 	public StringProperty winDriveLetter() {
 		return winDriveLetter;
+	}
+
+	public Optional<String> getWinDriveLetter() {
+		String current = this.winDriveLetter.get();
+		if (!Strings.isNullOrEmpty(current)) {
+			return Optional.of(current);
+		}
+		return Optional.empty();
 	}
 
 	public BooleanProperty unlockAfterStartup() {
@@ -151,7 +155,7 @@ public class VaultSettings {
 	public StringProperty mountFlags() {
 		return mountFlags;
 	}
-	
+
 	public IntegerProperty filenameLengthLimit() {
 		return filenameLengthLimit;
 	}

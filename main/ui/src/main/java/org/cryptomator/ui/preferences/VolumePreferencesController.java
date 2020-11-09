@@ -1,12 +1,5 @@
 package org.cryptomator.ui.preferences;
 
-import javafx.beans.binding.Bindings;
-import javafx.beans.binding.BooleanBinding;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.scene.control.Button;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.TextField;
-import javafx.util.StringConverter;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VolumeImpl;
@@ -15,6 +8,13 @@ import org.cryptomator.common.vaults.Volume;
 import org.cryptomator.ui.common.FxController;
 
 import javax.inject.Inject;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.TextField;
+import javafx.util.StringConverter;
 
 /**
  * TODO: if WebDAV is selected under Windows, show warning that specific mount options (like selecting a directory as mount point) are _not_ supported
@@ -25,7 +25,7 @@ public class VolumePreferencesController implements FxController {
 	private final Settings settings;
 	private final BooleanBinding showWebDavSettings;
 	private final BooleanBinding showWebDavScheme;
-	public ChoiceBox<VolumeImpl> volumeTypeChoicBox;
+	public ChoiceBox<VolumeImpl> volumeTypeChoiceBox;
 	public TextField webDavPortField;
 	public Button changeWebDavPortButton;
 	public ChoiceBox<WebDavUrlScheme> webDavUrlSchemeChoiceBox;
@@ -38,9 +38,12 @@ public class VolumePreferencesController implements FxController {
 	}
 
 	public void initialize() {
-		volumeTypeChoicBox.getItems().addAll(Volume.getCurrentSupportedAdapters());
-		volumeTypeChoicBox.valueProperty().bindBidirectional(settings.preferredVolumeImpl());
-		volumeTypeChoicBox.setConverter(new VolumeImplConverter());
+		volumeTypeChoiceBox.getItems().addAll(Volume.getCurrentSupportedAdapters());
+		if (!volumeTypeChoiceBox.getItems().contains(settings.preferredVolumeImpl().get())) {
+			settings.preferredVolumeImpl().set(VolumeImpl.WEBDAV);
+		}
+		volumeTypeChoiceBox.valueProperty().bindBidirectional(settings.preferredVolumeImpl());
+		volumeTypeChoiceBox.setConverter(new VolumeImplConverter());
 
 		webDavPortField.setText(String.valueOf(settings.port().get()));
 		changeWebDavPortButton.visibleProperty().bind(settings.port().asString().isNotEqualTo(webDavPortField.textProperty()));

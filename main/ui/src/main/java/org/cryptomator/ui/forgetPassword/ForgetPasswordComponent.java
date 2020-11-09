@@ -3,14 +3,14 @@ package org.cryptomator.ui.forgetPassword;
 import dagger.BindsInstance;
 import dagger.Lazy;
 import dagger.Subcomponent;
-import javafx.beans.property.ReadOnlyBooleanProperty;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 
 import javax.inject.Named;
+import javafx.beans.property.ReadOnlyBooleanProperty;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
 import java.util.concurrent.CompletableFuture;
 
 @ForgetPasswordScoped

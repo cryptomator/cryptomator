@@ -3,15 +3,15 @@ package org.cryptomator.ui.mainwindow;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.ReadOnlyObjectProperty;
-import javafx.fxml.FXML;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.VaultService;
 import org.cryptomator.ui.stats.VaultStatisticsComponent;
 
 import javax.inject.Inject;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.fxml.FXML;
 
 @MainWindowScoped
 public class VaultDetailUnlockedController implements FxController {

@@ -1,20 +1,20 @@
 package org.cryptomator.ui.mainwindow;
 
-import javafx.application.Application;
-import javafx.beans.binding.Bindings;
-import javafx.beans.binding.BooleanBinding;
-import javafx.collections.ObservableList;
-import javafx.fxml.FXML;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.FxController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javafx.application.Application;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
+import javafx.collections.ObservableList;
+import javafx.fxml.FXML;
 
 @MainWindowScoped
 public class WelcomeController implements FxController {
-	
+
 	private static final Logger LOG = LoggerFactory.getLogger(WelcomeController.class);
 	private static final String GETTING_STARTED_URI = "https://docs.cryptomator.org/en/1.5/desktop/getting-started/";
 
@@ -42,5 +42,5 @@ public class WelcomeController implements FxController {
 	public boolean isNoVaultPresent() {
 		return noVaultPresent.get();
 	}
-	
+
 }

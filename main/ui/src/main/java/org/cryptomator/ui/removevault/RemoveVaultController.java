@@ -1,14 +1,14 @@
 package org.cryptomator.ui.removevault;
 
-import javafx.collections.ObservableList;
-import javafx.fxml.FXML;
-import javafx.stage.Stage;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.FxController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javafx.collections.ObservableList;
+import javafx.fxml.FXML;
+import javafx.stage.Stage;
 
 @RemoveVaultScoped
 public class RemoveVaultController implements FxController {
@@ -34,7 +34,7 @@ public class RemoveVaultController implements FxController {
 	@FXML
 	public void finish() {
 		vaults.remove(vault);
-		LOG.debug("Removing vault {}.", vault.getDisplayableName());
+		LOG.debug("Removing vault {}.", vault.getDisplayName());
 		window.close();
 	}
 }

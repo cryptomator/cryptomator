@@ -2,6 +2,12 @@ package org.cryptomator.ui.fxapp;
 
 import dagger.Module;
 import dagger.Provides;
+import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.common.settings.Settings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.inject.Named;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.SimpleStringProperty;
@@ -9,10 +15,6 @@ import javafx.beans.property.StringProperty;
 import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Task;
 import javafx.util.Duration;
-import org.apache.commons.lang3.SystemUtils;
-import org.cryptomator.common.settings.Settings;
-
-import javax.inject.Named;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -21,6 +23,8 @@ import java.util.concurrent.ExecutorService;
 
 @Module
 public abstract class UpdateCheckerModule {
+
+	private static final Logger LOG = LoggerFactory.getLogger(UpdateCheckerModule.class);
 
 	private static final URI LATEST_VERSION_URI = URI.create("https://api.cryptomator.org/updates/latestVersion.json");
 	private static final Duration UPDATE_CHECK_INTERVAL = Duration.hours(3);
@@ -69,6 +73,7 @@ public abstract class UpdateCheckerModule {
 				return new UpdateCheckerTask(httpClient, checkForUpdatesRequest);
 			}
 		};
+		service.setOnFailed(event -> LOG.error("Failed to execute update service", service.getException()));
 		service.setExecutor(executor);
 		service.periodProperty().bind(period);
 		return service;

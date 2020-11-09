@@ -21,7 +21,7 @@ class VaultSettingsJsonAdapter {
 		out.beginObject();
 		out.name("id").value(value.getId());
 		out.name("path").value(value.path().get().toString());
-		out.name("mountName").value(value.mountName().get());
+		out.name("displayName").value(value.displayName().get());
 		out.name("winDriveLetter").value(value.winDriveLetter().get());
 		out.name("unlockAfterStartup").value(value.unlockAfterStartup().get());
 		out.name("revealAfterMount").value(value.revealAfterMount().get());
@@ -37,7 +37,8 @@ class VaultSettingsJsonAdapter {
 	public VaultSettings read(JsonReader in) throws IOException {
 		String id = null;
 		String path = null;
-		String mountName = null;
+		String mountName = null; //see https://github.com/cryptomator/cryptomator/pull/1318
+		String displayName = null;
 		String customMountPath = null;
 		String winDriveLetter = null;
 		boolean unlockAfterStartup = VaultSettings.DEFAULT_UNLOCK_AFTER_STARTUP;
@@ -54,7 +55,8 @@ class VaultSettingsJsonAdapter {
 			switch (name) {
 				case "id" -> id = in.nextString();
 				case "path" -> path = in.nextString();
-				case "mountName" -> mountName = in.nextString();
+				case "mountName" -> mountName = in.nextString(); //see https://github.com/cryptomator/cryptomator/pull/1318
+				case "displayName" -> displayName = in.nextString();
 				case "winDriveLetter" -> winDriveLetter = in.nextString();
 				case "unlockAfterStartup" -> unlockAfterStartup = in.nextBoolean();
 				case "revealAfterMount" -> revealAfterMount = in.nextBoolean();
@@ -73,7 +75,11 @@ class VaultSettingsJsonAdapter {
 		in.endObject();
 
 		VaultSettings vaultSettings = (id == null) ? VaultSettings.withRandomId() : new VaultSettings(id);
-		vaultSettings.mountName().set(mountName);
+		if (displayName != null) { //see https://github.com/cryptomator/cryptomator/pull/1318
+			vaultSettings.displayName().set(displayName);
+		} else {
+			vaultSettings.displayName().set(mountName);
+		}
 		vaultSettings.path().set(Paths.get(path));
 		vaultSettings.winDriveLetter().set(winDriveLetter);
 		vaultSettings.unlockAfterStartup().set(unlockAfterStartup);

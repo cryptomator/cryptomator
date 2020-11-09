@@ -1,60 +1,71 @@
-package org.cryptomator.keychain;
+package org.cryptomator.common.keychain;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import org.cryptomator.integrations.keychain.KeychainAccessException;
+import org.cryptomator.integrations.keychain.KeychainAccessProvider;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import javafx.application.Platform;
+import javafx.beans.binding.ObjectExpression;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.Arrays;
 
-public class KeychainManager implements KeychainAccessStrategy {
+@Singleton
+public class KeychainManager implements KeychainAccessProvider {
 
-	private static final Logger LOG = LoggerFactory.getLogger(KeychainManager.class);
+	private final ObjectExpression<KeychainAccessProvider> keychain;
+	private final LoadingCache<String, BooleanProperty> passphraseStoredProperties;
 
-	private final KeychainAccessStrategy keychain;
-	private LoadingCache<String, BooleanProperty> passphraseStoredProperties;
-
-	KeychainManager(KeychainAccessStrategy keychain) {
-		assert keychain.isSupported();
-		this.keychain = keychain;
+	@Inject
+	KeychainManager(ObjectExpression<KeychainAccessProvider> selectedKeychain) {
+		this.keychain = selectedKeychain;
 		this.passphraseStoredProperties = CacheBuilder.newBuilder() //
 				.weakValues() //
 				.build(CacheLoader.from(this::createStoredPassphraseProperty));
+		keychain.addListener(ignored -> passphraseStoredProperties.invalidateAll());
+	}
+
+	private KeychainAccessProvider getKeychainOrFail() throws KeychainAccessException {
+		var result = keychain.getValue();
+		if (result == null) {
+			throw new NoKeychainAccessProviderException();
+		}
+		return result;
 	}
 
 	@Override
 	public void storePassphrase(String key, CharSequence passphrase) throws KeychainAccessException {
-		keychain.storePassphrase(key, passphrase);
+		getKeychainOrFail().storePassphrase(key, passphrase);
 		setPassphraseStored(key, true);
 	}
 
 	@Override
 	public char[] loadPassphrase(String key) throws KeychainAccessException {
-		char[] passphrase = keychain.loadPassphrase(key);
+		char[] passphrase = getKeychainOrFail().loadPassphrase(key);
 		setPassphraseStored(key, passphrase != null);
 		return passphrase;
 	}
 
 	@Override
 	public void deletePassphrase(String key) throws KeychainAccessException {
-		keychain.deletePassphrase(key);
+		getKeychainOrFail().deletePassphrase(key);
 		setPassphraseStored(key, false);
 	}
 
 	@Override
 	public void changePassphrase(String key, CharSequence passphrase) throws KeychainAccessException {
-		keychain.changePassphrase(key, passphrase);
+		getKeychainOrFail().changePassphrase(key, passphrase);
 		setPassphraseStored(key, true);
 	}
 
 	@Override
 	public boolean isSupported() {
-		return true;
+		return keychain.getValue() != null;
 	}
 
 	/**
@@ -69,7 +80,7 @@ public class KeychainManager implements KeychainAccessStrategy {
 	public boolean isPassphraseStored(String key) throws KeychainAccessException {
 		char[] storedPw = null;
 		try {
-			storedPw = keychain.loadPassphrase(key);
+			storedPw = getKeychainOrFail().loadPassphrase(key);
 			return storedPw != null;
 		} finally {
 			if (storedPw != null) {
@@ -77,14 +88,13 @@ public class KeychainManager implements KeychainAccessStrategy {
 			}
 		}
 	}
-	
+
 	private void setPassphraseStored(String key, boolean value) {
 		BooleanProperty property = passphraseStoredProperties.getIfPresent(key);
 		if (property != null) {
 			if (Platform.isFxApplicationThread()) {
 				property.set(value);
 			} else {
-				LOG.warn("");
 				Platform.runLater(() -> property.set(value));
 			}
 		}
@@ -99,7 +109,7 @@ public class KeychainManager implements KeychainAccessStrategy {
 	 *
 	 * @param key The key to look up
 	 * @return An observable property which is <code>true</code> when it almost certain that a password for <code>key</code> is stored.
-	 * @see #isPassphraseStored(String) 
+	 * @see #isPassphraseStored(String)
 	 */
 	public ReadOnlyBooleanProperty getPassphraseStoredProperty(String key) {
 		return passphraseStoredProperties.getUnchecked(key);
@@ -107,7 +117,6 @@ public class KeychainManager implements KeychainAccessStrategy {
 
 	private BooleanProperty createStoredPassphraseProperty(String key) {
 		try {
-			LOG.warn("LOAD"); // TODO remove
 			return new SimpleBooleanProperty(isPassphraseStored(key));
 		} catch (KeychainAccessException e) {
 			return new SimpleBooleanProperty(false);

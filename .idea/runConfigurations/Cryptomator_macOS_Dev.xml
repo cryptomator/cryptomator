@@ -1,0 +1,13 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Cryptomator macOS Dev" type="Application" factoryName="Application">
+    <envs>
+      <env name="LD_LIBRARY_PATH" value="/usr/local/lib" />
+    </envs>
+    <option name="MAIN_CLASS_NAME" value="org.cryptomator.launcher.Cryptomator" />
+    <module name="launcher" />
+    <option name="VM_PARAMETERS" value="-Duser.language=en -Dcryptomator.settingsPath=&quot;~/Library/Application Support/Cryptomator-Dev/settings.json&quot; -Dcryptomator.ipcPortPath=&quot;~/Library/Application Support/Cryptomator-Dev/ipcPort.bin&quot; -Dcryptomator.logDir=&quot;~/Library/Logs/Cryptomator-Dev&quot; -Dcryptomator.mountPointsDir=&quot;/Volumes/&quot; -Dfuse.experimental=&quot;true&quot; -Xss2m -Xmx512m -ea" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

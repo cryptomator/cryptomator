@@ -1,5 +1,11 @@
 package org.cryptomator.common.vaults;
 
+import org.cryptomator.cryptofs.CryptoFileSystem;
+import org.cryptomator.cryptofs.CryptoFileSystemStats;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.inject.Inject;
 import javafx.application.Platform;
 import javafx.beans.Observable;
 import javafx.beans.property.DoubleProperty;
@@ -10,12 +16,6 @@ import javafx.beans.property.SimpleLongProperty;
 import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Task;
 import javafx.util.Duration;
-import org.cryptomator.cryptofs.CryptoFileSystem;
-import org.cryptomator.cryptofs.CryptoFileSystemStats;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.inject.Inject;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
@@ -89,6 +89,10 @@ public class VaultStats {
 	}
 
 	private class UpdateStatsService extends ScheduledService<Optional<CryptoFileSystemStats>> {
+
+		private UpdateStatsService() {
+			setOnFailed(event -> LOG.error("Error in UpdateStateService.", getException()));
+		}
 
 		@Override
 		protected Task<Optional<CryptoFileSystemStats>> createTask() {

@@ -8,12 +8,12 @@ package org.cryptomator.logging;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
-import javafx.beans.value.ObservableValue;
 import org.cryptomator.common.settings.Settings;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javafx.beans.value.ObservableValue;
 import java.util.Map;
 
 @Singleton

@@ -4,14 +4,6 @@ import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoMap;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
-import javafx.scene.Scene;
-import javafx.scene.image.Image;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.DefaultSceneFactory;
 import org.cryptomator.ui.common.FXMLLoaderFactory;
@@ -25,7 +17,13 @@ import org.cryptomator.ui.common.StageFactory;
 
 import javax.inject.Named;
 import javax.inject.Provider;
-import java.util.List;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+import javafx.scene.Scene;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import java.util.Map;
 import java.util.ResourceBundle;
 
@@ -50,7 +48,7 @@ abstract class RecoveryKeyModule {
 		stage.initOwner(owner);
 		return stage;
 	}
-	
+
 	@Provides
 	@RecoveryKeyWindow
 	@RecoveryKeyScoped
@@ -107,7 +105,7 @@ abstract class RecoveryKeyModule {
 	@IntoMap
 	@FxControllerKey(RecoveryKeyDisplayController.class)
 	static FxController provideRecoveryKeyDisplayController(@RecoveryKeyWindow Stage window, @RecoveryKeyWindow Vault vault, @RecoveryKeyWindow StringProperty recoveryKey, ResourceBundle localization) {
-		return new RecoveryKeyDisplayController(window, vault.getDisplayableName(), recoveryKey.get(), localization);
+		return new RecoveryKeyDisplayController(window, vault.getDisplayName(), recoveryKey.get(), localization);
 	}
 
 	@Binds
@@ -131,5 +129,5 @@ abstract class RecoveryKeyModule {
 	static FxController provideNewPasswordController(ResourceBundle resourceBundle, PasswordStrengthUtil strengthRater, @Named("newPassword") ObjectProperty<CharSequence> password) {
 		return new NewPasswordController(resourceBundle, strengthRater, password);
 	}
-	
+
 }

@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import org.cryptomator.ui.controls.FontAwesome5IconView?>
+<?import org.cryptomator.ui.controls.FormattedLabel?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ButtonBar?>
@@ -8,10 +10,8 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Circle?>
-<?import org.cryptomator.ui.controls.FontAwesome5IconView?>
-<?import org.cryptomator.ui.controls.FormattedLabel?>
-<VBox xmlns="http://javafx.com/javafx"
-	  xmlns:fx="http://javafx.com/fxml"
+<VBox xmlns:fx="http://javafx.com/fxml"
+	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.unlock.UnlockInvalidMountPointController"
 	  minWidth="400"
 	  maxWidth="400"
@@ -27,7 +27,8 @@
 				<FontAwesome5IconView styleClass="glyph-icon-white" glyph="EXCLAMATION" glyphSize="24"/>
 			</StackPane>
 			<VBox spacing="6" HBox.hgrow="ALWAYS">
-				<FormattedLabel format="%unlock.error.invalidMountPoint" arg1="${controller.mountPoint}" wrapText="true"/>
+				<FormattedLabel visible="${controller.mustExist}" managed="${controller.mustExist}" format="%unlock.error.invalidMountPoint.notExisting" arg1="${controller.mountPoint}" wrapText="true"/>
+				<FormattedLabel visible="${!controller.mustExist}" managed="${!controller.mustExist}" format="%unlock.error.invalidMountPoint.existing" arg1="${controller.mountPoint}" wrapText="true"/>
 			</VBox>
 		</HBox>
 

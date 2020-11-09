@@ -1,6 +1,12 @@
 package org.cryptomator.ui.addvaultwizard;
 
 import dagger.Lazy;
+import org.cryptomator.ui.common.FxController;
+import org.cryptomator.ui.common.FxmlFile;
+import org.cryptomator.ui.common.FxmlScene;
+
+import javax.inject.Inject;
+import javax.inject.Named;
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
@@ -11,12 +17,6 @@ import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
-import org.cryptomator.ui.common.FxController;
-import org.cryptomator.ui.common.FxmlFile;
-import org.cryptomator.ui.common.FxmlScene;
-
-import javax.inject.Inject;
-import javax.inject.Named;
 import java.nio.file.Path;
 import java.util.ResourceBundle;
 import java.util.regex.Pattern;

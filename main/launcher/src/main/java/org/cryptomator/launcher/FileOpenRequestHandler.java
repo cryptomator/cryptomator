@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright (c) 2017 Skymatic UG (haftungsbeschränkt).
  * All rights reserved.
- * 
+ *
  * This class is licensed under the LGPL 3.0 (https://www.gnu.org/licenses/lgpl-3.0.de.html).
  *******************************************************************************/
 package org.cryptomator.launcher;
@@ -25,7 +25,6 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.concurrent.BlockingQueue;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Singleton
 class FileOpenRequestHandler {

@@ -1,13 +1,13 @@
 package org.cryptomator.ui.mainwindow;
 
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.ReadOnlyObjectProperty;
-import javafx.fxml.FXML;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.migration.MigrationComponent;
 
 import javax.inject.Inject;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.fxml.FXML;
 
 @MainWindowScoped
 public class VaultDetailNeedsMigrationController implements FxController {

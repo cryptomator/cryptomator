@@ -2,7 +2,7 @@ package org.cryptomator.common.vaults;
 
 public enum VaultState {
 	/**
-	 * No vault found at the provided path 
+	 * No vault found at the provided path
 	 */
 	MISSING,
 

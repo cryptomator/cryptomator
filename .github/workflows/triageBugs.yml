@@ -1,0 +1,25 @@
+name: Bug Report Triage
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  closeTemplateViolation:
+    name: Close bug reports that violate the issue template
+    runs-on: ubuntu-latest
+    steps:
+      - if: |
+          contains(github.event.issue.labels.*.name, 'type:bug')
+          && (
+            !contains(github.event.issue.body, '<!-- oooooo -->')
+            || !contains(github.event.issue.body, '### Description')
+          )
+        name: Close Issue
+        uses: peter-evans/close-issue@v1
+        with:
+          comment: |
+            This bug report did ignore our issue template. 😞
+            Auto-closing this issue, since it is most likely not useful.
+
+            _This decision was made by a bot. If you think the bot is wrong, let us know and we'll reopen this issue._

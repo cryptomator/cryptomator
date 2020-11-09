@@ -7,6 +7,7 @@ jobs:
   build:
     name: Build and Test
     runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, '[ci skip]') && !contains(github.event.head_commit.message, '[skip ci]')"
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-java@v1
@@ -27,28 +28,31 @@ jobs:
         run: |
           curl -o ~/codacy-coverage-reporter.jar https://repo.maven.apache.org/maven2/com/codacy/codacy-coverage-reporter/7.1.0/codacy-coverage-reporter-7.1.0-assembly.jar
           $JAVA_HOME/bin/java -jar ~/codacy-coverage-reporter.jar report -l Java -r main/commons/target/site/jacoco/jacoco.xml --partial
-          $JAVA_HOME/bin/java -jar ~/codacy-coverage-reporter.jar report -l Java -r main/keychain/target/site/jacoco/jacoco.xml --partial
           $JAVA_HOME/bin/java -jar ~/codacy-coverage-reporter.jar report -l Java -r main/ui/target/site/jacoco/jacoco.xml --partial
           $JAVA_HOME/bin/java -jar ~/codacy-coverage-reporter.jar report -l Java -r main/launcher/target/site/jacoco/jacoco.xml --partial
           $JAVA_HOME/bin/java -jar ~/codacy-coverage-reporter.jar final
         env:
           CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
-      - name: Assemble Buildkit
-        run: mvn -B package -DskipTests --file main/pom.xml --resume-from=buildkit -Prelease
+      - name: Assemble buildkit-linux.zip
+        run: mvn -B clean package -DskipTests --file main/pom.xml --resume-from=buildkit -Prelease,linux
       - name: Upload buildkit-linux.zip
         uses: actions/upload-artifact@v1
         with:
-          name: buildkit-linux.zip
+          name: buildkit-linux
           path: main/buildkit/target/buildkit-linux.zip
+      - name: Assemble buildkit-mac.zip
+        run: mvn -B clean package -DskipTests --file main/pom.xml --resume-from=buildkit -Prelease,mac
       - name: Upload buildkit-mac.zip
         uses: actions/upload-artifact@v1
         with:
-          name: buildkit-mac.zip
+          name: buildkit-mac
           path: main/buildkit/target/buildkit-mac.zip
+      - name: Assemble buildkit-win.zip
+        run: mvn -B clean package -DskipTests --file main/pom.xml --resume-from=buildkit -Prelease,windows
       - name: Upload buildkit-win.zip
         uses: actions/upload-artifact@v1
         with:
-          name: buildkit-win.zip
+          name: buildkit-win
           path: main/buildkit/target/buildkit-win.zip
           
   release:

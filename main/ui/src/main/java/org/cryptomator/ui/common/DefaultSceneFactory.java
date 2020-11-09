@@ -1,5 +1,10 @@
 package org.cryptomator.ui.common;
 
+import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.common.settings.Settings;
+import org.cryptomator.ui.fxapp.FxApplicationScoped;
+
+import javax.inject.Inject;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
@@ -7,11 +12,6 @@ import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.stage.Stage;
 import javafx.stage.Window;
-import org.apache.commons.lang3.SystemUtils;
-import org.cryptomator.common.settings.Settings;
-import org.cryptomator.ui.fxapp.FxApplicationScoped;
-
-import javax.inject.Inject;
 import java.util.function.Function;
 
 @FxApplicationScoped

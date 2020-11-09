@@ -6,4 +6,5 @@
 package org.cryptomator.ui.common;
 
 public interface FxController {
+
 }

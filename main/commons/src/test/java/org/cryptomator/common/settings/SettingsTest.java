@@ -29,7 +29,7 @@ public class SettingsTest {
 		Mockito.verify(changeListener, Mockito.times(2)).accept(settings);
 
 		// third change (to property of list item):
-		vaultSettings.mountName().set("asd");
+		vaultSettings.displayName().set("asd");
 		Mockito.verify(changeListener, Mockito.times(3)).accept(settings);
 	}
 

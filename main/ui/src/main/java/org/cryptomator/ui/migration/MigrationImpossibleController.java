@@ -1,12 +1,12 @@
 package org.cryptomator.ui.migration;
 
-import javafx.fxml.FXML;
-import javafx.stage.Stage;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.fxapp.FxApplication;
 
 import javax.inject.Inject;
+import javafx.fxml.FXML;
+import javafx.stage.Stage;
 
 public class MigrationImpossibleController implements FxController {
 

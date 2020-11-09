@@ -8,11 +8,6 @@ package org.cryptomator.ui.fxapp;
 import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
-import javafx.application.Application;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableSet;
-import javafx.scene.image.Image;
-import javafx.stage.Stage;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.ui.common.ErrorComponent;
 import org.cryptomator.ui.common.StageFactory;
@@ -22,6 +17,11 @@ import org.cryptomator.ui.quit.QuitComponent;
 import org.cryptomator.ui.unlock.UnlockComponent;
 
 import javax.inject.Named;
+import javafx.application.Application;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableSet;
+import javafx.scene.image.Image;
+import javafx.stage.Stage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
@@ -53,7 +53,7 @@ abstract class FxApplicationModule {
 			throw new UncheckedIOException("Failed to load embedded resource.", e);
 		}
 	}
-	
+
 	@Provides
 	@FxApplicationScoped
 	static StageFactory provideStageFactory(@Named("windowIcons") List<Image> windowIcons, ObservableSet<Stage> visibleStages) {

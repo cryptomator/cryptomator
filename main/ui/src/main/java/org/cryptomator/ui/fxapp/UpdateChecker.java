@@ -1,5 +1,11 @@
 package org.cryptomator.ui.fxapp;
 
+import org.cryptomator.common.settings.Settings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.inject.Inject;
+import javax.inject.Named;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -8,12 +14,6 @@ import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Worker;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.util.Duration;
-import org.cryptomator.common.settings.Settings;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.inject.Inject;
-import javax.inject.Named;
 import java.util.Comparator;
 import java.util.Optional;
 
@@ -80,7 +80,7 @@ public class UpdateChecker {
 	private void checkFailed(WorkerStateEvent event) {
 		LOG.warn("Error checking for updates", event.getSource().getException());
 	}
-	
+
 	/* Observable Properties */
 
 	public BooleanBinding checkingForUpdatesProperty() {
