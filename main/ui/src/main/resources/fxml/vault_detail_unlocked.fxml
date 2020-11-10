@@ -34,5 +34,21 @@
 	</Button>
 
 	<Region VBox.vgrow="ALWAYS"/>
-	<Button styleClass="button-large" text="%main.vaultDetail.stats" minWidth="120" onAction="#showVaultStatistics"/>
+
+	<HBox alignment="BOTTOM_RIGHT">
+		<Button text="%main.vaultDetail.stats" minWidth="120" onAction="#showVaultStatistics" contentDisplay="BOTTOM">
+			<graphic>
+				<VBox spacing="6">
+					<HBox alignment="CENTER_RIGHT" spacing="6">
+						<Label styleClass="label-small,label-muted" text="%main.vaultDetail.bytesPerSecondRead"/>
+						<ThrougputLabel styleClass="label-small,label-muted" alignment="CENTER_RIGHT" minWidth="60" idleFormat="%main.vaultDetail.throughput.idle" kibsFormat="%main.vaultDetail.throughput.kbps" mibsFormat="%main.vaultDetail.throughput.mbps" bytesPerSecond="${controller.vault.stats.bytesPerSecondRead}"/>
+					</HBox>
+					<HBox alignment="CENTER_RIGHT" spacing="6">
+						<Label styleClass="label-small,label-muted" text="%main.vaultDetail.bytesPerSecondWritten"/>
+						<ThrougputLabel styleClass="label-small,label-muted" alignment="CENTER_RIGHT" minWidth="60" idleFormat="%main.vaultDetail.throughput.idle" kibsFormat="%main.vaultDetail.throughput.kbps" mibsFormat="%main.vaultDetail.throughput.mbps" bytesPerSecond="${controller.vault.stats.bytesPerSecondWritten}"/>
+					</HBox>
+				</VBox>
+			</graphic>
+		</Button>
+	</HBox>
 </VBox>
