@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class VaultSettingsTest {
 
 	@ParameterizedTest
-	@CsvSource({"a a,a_a", "ä,a", "Ĉ,C", ":,_", "汉语,_"})
+	@CsvSource({"a\u000Fa,a_a", ": \\,_ _", "汉语,汉语", "..,_", "a\ta,a\u0020a", "\t\n\r,_"})
 	public void testNormalize(String test, String expected) {
 		VaultSettings settings = new VaultSettings("id");
 		settings.displayName().setValue(test);

@@ -1,5 +1,7 @@
 package org.cryptomator.ui.launcher;
 
+import org.cryptomator.common.Environment;
+import org.cryptomator.common.mountpoint.IrregularUnmountCleaner;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.integrations.tray.TrayIntegrationProvider;
@@ -14,6 +16,8 @@ import javafx.collections.ObservableList;
 import java.awt.Desktop;
 import java.awt.SystemTray;
 import java.awt.desktop.AppReopenedListener;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.util.Collection;
 import java.util.Optional;
 
@@ -28,15 +32,17 @@ public class UiLauncher {
 	private final FxApplicationStarter fxApplicationStarter;
 	private final AppLaunchEventHandler launchEventHandler;
 	private final Optional<TrayIntegrationProvider> trayIntegration;
+	private final Environment env;
 
 	@Inject
-	public UiLauncher(Settings settings, ObservableList<Vault> vaults, TrayMenuComponent.Builder trayComponent, FxApplicationStarter fxApplicationStarter, AppLaunchEventHandler launchEventHandler, Optional<TrayIntegrationProvider> trayIntegration) {
+	public UiLauncher(Settings settings, ObservableList<Vault> vaults, TrayMenuComponent.Builder trayComponent, FxApplicationStarter fxApplicationStarter, AppLaunchEventHandler launchEventHandler, Optional<TrayIntegrationProvider> trayIntegration, Environment env) {
 		this.settings = settings;
 		this.vaults = vaults;
 		this.trayComponent = trayComponent;
 		this.fxApplicationStarter = fxApplicationStarter;
 		this.launchEventHandler = launchEventHandler;
 		this.trayIntegration = trayIntegration;
+		this.env = env;
 	}
 
 	public void launch() {
@@ -58,6 +64,10 @@ public class UiLauncher {
 
 		// register app reopen listener
 		Desktop.getDesktop().addAppEventListener((AppReopenedListener) e -> showMainWindowAsync(hasTrayIcon));
+
+		//clean leftovers of not-regularly unmounted vaults
+		//see https://github.com/cryptomator/cryptomator/issues/1013 and https://github.com/cryptomator/cryptomator/issues/1061
+		env.getMountPointsDir().filter(path -> Files.exists(path, LinkOption.NOFOLLOW_LINKS)).ifPresent(IrregularUnmountCleaner::removeIrregularUnmountDebris);
 
 		// auto unlock
 		Collection<Vault> vaultsToAutoUnlock = vaults.filtered(this::shouldAttemptAutoUnlock);

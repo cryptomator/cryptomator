@@ -10,6 +10,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Circle?>
+<?import javafx.scene.text.Text?>
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.unlock.UnlockInvalidMountPointController"
@@ -23,10 +24,11 @@
 	<children>
 		<HBox spacing="12" VBox.vgrow="ALWAYS">
 			<StackPane alignment="CENTER" HBox.hgrow="NEVER">
-				<Circle styleClass="glyph-icon-primary" radius="24"/>
-				<FontAwesome5IconView styleClass="glyph-icon-white" glyph="EXCLAMATION" glyphSize="24"/>
+				<Circle styleClass="glyph-icon-red" radius="24"/>
+				<FontAwesome5IconView styleClass="glyph-icon-white" glyph="TIMES" glyphSize="24"/>
 			</StackPane>
 			<VBox spacing="6" HBox.hgrow="ALWAYS">
+				<Text text="%unlock.error.heading" styleClass="label-large"/>
 				<FormattedLabel visible="${controller.mustExist}" managed="${controller.mustExist}" format="%unlock.error.invalidMountPoint.notExisting" arg1="${controller.mountPoint}" wrapText="true"/>
 				<FormattedLabel visible="${!controller.mustExist}" managed="${!controller.mustExist}" format="%unlock.error.invalidMountPoint.existing" arg1="${controller.mountPoint}" wrapText="true"/>
 			</VBox>

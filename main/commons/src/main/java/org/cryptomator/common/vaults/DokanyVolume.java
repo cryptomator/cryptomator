@@ -42,7 +42,7 @@ public class DokanyVolume extends AbstractVolume {
 	@Override
 	public void mount(CryptoFileSystem fs, String mountFlags) throws InvalidMountPointException, VolumeException {
 		this.mountPoint = determineMountPoint();
-		String mountName = vaultSettings.displayName().get();
+		String mountName = vaultSettings.mountName().get();
 		try {
 			this.mount = mountFactory.mount(fs.getPath("/"), mountPoint, vaultSettings.mountName().get(), FS_TYPE_NAME, mountFlags.strip());
 		} catch (MountFailedException e) {
