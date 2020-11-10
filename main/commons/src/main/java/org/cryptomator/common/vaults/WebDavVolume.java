@@ -1,6 +1,7 @@
 package org.cryptomator.common.vaults;
 
 
+import com.google.common.base.CharMatcher;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.common.settings.VolumeImpl;
@@ -45,7 +46,9 @@ public class WebDavVolume implements Volume {
 		if (!server.isRunning()) {
 			server.start();
 		}
-		servlet = server.createWebDavServlet(fs.getPath("/"), vaultSettings.getId() + "/" + vaultSettings.mountName().get());
+		CharMatcher acceptable = CharMatcher.inRange('0', '9').or(CharMatcher.inRange('A', 'Z')).or(CharMatcher.inRange('a', 'z'));
+		String urlConformMountName = acceptable.negate().collapseFrom(vaultSettings.mountName().get(), '_');
+		servlet = server.createWebDavServlet(fs.getPath("/"), vaultSettings.getId() + "/" + urlConformMountName);
 		servlet.start();
 		mount();
 	}
