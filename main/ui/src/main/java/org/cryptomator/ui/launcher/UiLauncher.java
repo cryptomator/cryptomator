@@ -31,8 +31,8 @@ public class UiLauncher {
 	private final TrayMenuComponent.Builder trayComponent;
 	private final FxApplicationStarter fxApplicationStarter;
 	private final AppLaunchEventHandler launchEventHandler;
-  private final Optional<TrayIntegrationProvider> trayIntegration;
-  private final Environment env;
+	private final Optional<TrayIntegrationProvider> trayIntegration;
+	private final Environment env;
 
 	@Inject
 	public UiLauncher(Settings settings, ObservableList<Vault> vaults, TrayMenuComponent.Builder trayComponent, FxApplicationStarter fxApplicationStarter, AppLaunchEventHandler launchEventHandler, Optional<TrayIntegrationProvider> trayIntegration, Environment env) {
@@ -41,8 +41,8 @@ public class UiLauncher {
 		this.trayComponent = trayComponent;
 		this.fxApplicationStarter = fxApplicationStarter;
 		this.launchEventHandler = launchEventHandler;
-    this.trayIntegration = trayIntegration;
-    this.env = env;
+		this.trayIntegration = trayIntegration;
+		this.env = env;
 	}
 
 	public void launch() {
@@ -67,7 +67,7 @@ public class UiLauncher {
 
 		//clean leftovers of not-regularly unmounted vaults
 		//see https://github.com/cryptomator/cryptomator/issues/1013 and https://github.com/cryptomator/cryptomator/issues/1061
-		env.getMountPointsDir().filter(path -> Files.exists(path, LinkOption.NOFOLLOW_LINKS)).ifPresent(IrregularUnmountCleaner::removeUnregularUnmountDebris);
+		env.getMountPointsDir().filter(path -> Files.exists(path, LinkOption.NOFOLLOW_LINKS)).ifPresent(IrregularUnmountCleaner::removeIrregularUnmountDebris);
 
 		// auto unlock
 		Collection<Vault> vaultsToAutoUnlock = vaults.filtered(this::shouldAttemptAutoUnlock);

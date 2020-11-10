@@ -14,7 +14,7 @@ public class IrregularUnmountCleaner {
 
 	public static Logger LOG = LoggerFactory.getLogger(IrregularUnmountCleaner.class);
 
-	public static void removeUnregularUnmountDebris(Path dirContainingMountPoints) {
+	public static void removeIrregularUnmountDebris(Path dirContainingMountPoints) {
 		IOException cleanupFailed = new IOException("Cleanup failed");
 
 		try {

@@ -38,7 +38,7 @@ public class GeneralVaultOptionsController implements FxController {
 	@FXML
 	public void initialize() {
 		vaultName.textProperty().set(vault.getVaultSettings().displayName().get());
-		vaultName.focusedProperty().addListener(this::checkTrimAndTuncateVaultName);
+		vaultName.focusedProperty().addListener(this::trimVaultNameOnFocusLoss);
 		vaultName.setTextFormatter(new TextFormatter<>(this::checkVaultNameLength));
 		unlockOnStartupCheckbox.selectedProperty().bindBidirectional(vault.getVaultSettings().unlockAfterStartup());
 		actionAfterUnlockChoiceBox.getItems().addAll(WhenUnlocked.values());
@@ -46,7 +46,7 @@ public class GeneralVaultOptionsController implements FxController {
 		actionAfterUnlockChoiceBox.setConverter(new WhenUnlockedConverter(resourceBundle));
 	}
 
-	private void checkTrimAndTuncateVaultName(Observable observable, Boolean wasFocussed, Boolean isFocussed) {
+	private void trimVaultNameOnFocusLoss(Observable observable, Boolean wasFocussed, Boolean isFocussed) {
 		if (!isFocussed) {
 			var trimmed = vaultName.getText().trim();
 			vault.getVaultSettings().displayName().set(trimmed);
