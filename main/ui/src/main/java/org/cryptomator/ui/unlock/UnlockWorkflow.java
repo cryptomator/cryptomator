@@ -209,9 +209,7 @@ public class UnlockWorkflow extends Task<Boolean> {
 
 	private void handleGenericError(Throwable e) {
 		LOG.error("Unlock failed for technical reasons.", e);
-		Platform.runLater(() -> {
-			errorComponent.cause(e).window(window).returnToScene(window.getScene()).build().showErrorScene();
-		});
+		errorComponent.cause(e).window(window).returnToScene(window.getScene()).build().showErrorScene();
 	}
 
 	private void wipePassword(char[] pw) {

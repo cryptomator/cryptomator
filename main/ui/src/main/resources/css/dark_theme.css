@@ -884,3 +884,57 @@
 	-fx-background-color: PROGRESS_BAR_BG;
 	-fx-background-radius: 4px;
 }
+/*******************************************************************************
+ *                                                                             *
+ * I/O Statistics                                                              *
+ *                                                                             *
+ ******************************************************************************/
+
+.cache-arc-background {
+	-fx-fill: transparent;
+	-fx-stroke: MUTED_BG;
+	-fx-stroke-type: centered;
+	-fx-stroke-width: 12;
+	-fx-stroke-line-cap: butt;
+}
+
+.cache-arc-foreground {
+	-fx-fill: transparent;
+	-fx-stroke: PRIMARY;
+	-fx-stroke-type: centered;
+	-fx-stroke-width: 12;
+	-fx-stroke-line-cap: butt;
+}
+
+.chart.io-stats {
+	-fx-padding: 10px;
+	-fx-horizontal-grid-lines-visible: false;
+	-fx-horizontal-zero-line-visible: false;
+	-fx-vertical-grid-lines-visible: false;
+	-fx-vertical-zero-line-visible: false;
+}
+
+.axis.io-stats {
+	-fx-tick-mark-visible: false;
+	-fx-minor-tick-visible: false;
+	-fx-tick-labels-visible: false;
+}
+
+.chart-plot-background {
+	-fx-background-color: transparent;
+}
+
+.chart-vertical-zero-line,
+.chart-horizontal-zero-line,
+.chart-alternative-row-fill {
+	-fx-stroke: transparent;
+	-fx-stroke-width: 0;
+}
+
+.default-color0.chart-series-area-line {
+	-fx-stroke: PRIMARY;
+}
+.default-color0.chart-series-area-fill {
+	-fx-fill: linear-gradient(to bottom, PRIMARY, transparent);
+	-fx-stroke: transparent;
+}

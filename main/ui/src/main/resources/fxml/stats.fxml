@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import org.cryptomator.ui.controls.DataLabel?>
+<?import org.cryptomator.ui.controls.FormattedLabel?>
+<?import org.cryptomator.ui.controls.ThrougputLabel?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.AreaChart?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.Cursor?>
+<?import javafx.scene.Group?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Arc?>
+<HBox xmlns="http://javafx.com/javafx"
+	  xmlns:fx="http://javafx.com/fxml"
+	  fx:controller="org.cryptomator.ui.stats.VaultStatisticsController"
+	  prefWidth="800.0" spacing="12">
+	<padding>
+		<Insets topRightBottomLeft="12"/>
+	</padding>
+
+	<!-- Caching -->
+	<VBox prefWidth="200" prefHeight="200">
+		<StackPane>
+			<Group>
+				<Arc styleClass="cache-arc-background" centerX="100" centerY="100" radiusX="100" radiusY="100" startAngle="225" length="-270"/>
+				<Arc styleClass="cache-arc-foreground" centerX="100" centerY="100" radiusX="100" radiusY="100" startAngle="225" length="${controller.cacheHitDegrees}"/>
+			</Group>
+			<VBox StackPane.alignment="CENTER" alignment="CENTER">
+				<FormattedLabel styleClass="label-large" format="\%1.0f %%" arg1="${controller.cacheHitPercentage}"/>
+				<Label text="%stats.cacheHitRate"/>
+			</VBox>
+		</StackPane>
+	</VBox>
+
+	<!-- Read -->
+	<VBox prefWidth="300" prefHeight="300" spacing="6" alignment="CENTER">
+		<ThrougputLabel styleClass="label-large" idleFormat="%stats.read.throughput.idle" kibsFormat="%stats.read.throughput.kibs" mibsFormat="%stats.read.throughput.mibs" bytesPerSecond="${controller.bpsRead}"/>
+		<AreaChart fx:id="readChart" styleClass="io-stats" createSymbols="false" animated="false">
+			<xAxis>
+				<NumberAxis fx:id="readChartXAxis" styleClass="io-stats" autoRanging="false" forceZeroInRange="false" side="BOTTOM"/>
+			</xAxis>
+			<yAxis>
+				<NumberAxis fx:id="readChartYAxis" styleClass="io-stats" autoRanging="false" forceZeroInRange="true" side="LEFT" tickUnit="Infinity"/>
+			</yAxis>
+			<cursor>
+				<Cursor fx:constant="DEFAULT"/>
+			</cursor>
+		</AreaChart>
+		<DataLabel byteFormat="%stats.read.total.data.none" kibFormat="%stats.read.total.data.kib" mibFormat="%stats.read.total.data.mib" gibFormat="%stats.read.total.data.gib" dataInBytes="${controller.totalBytesRead}"/>
+		<DataLabel byteFormat="%stats.decr.total.data.none" kibFormat="%stats.decr.total.data.kib" mibFormat="%stats.decr.total.data.mib" gibFormat="%stats.decr.total.data.gib" dataInBytes="${controller.totalBytesDecrypted}"/>
+		<FormattedLabel format="%stats.read.accessCount" arg1="${controller.filesRead}"/>
+	</VBox>
+
+	<!-- Write -->
+	<VBox prefWidth="300" prefHeight="300" spacing="6" alignment="CENTER">
+		<ThrougputLabel styleClass="label-large" idleFormat="%stats.write.throughput.idle" kibsFormat="%stats.write.throughput.kibs" mibsFormat="%stats.write.throughput.mibs" bytesPerSecond="${controller.bpsWritten}"/>
+		<AreaChart fx:id="writeChart" styleClass="io-stats" createSymbols="false" animated="false">
+			<xAxis>
+				<NumberAxis fx:id="writeChartXAxis" styleClass="io-stats" autoRanging="false" forceZeroInRange="false" side="BOTTOM"/>
+			</xAxis>
+			<yAxis>
+				<NumberAxis fx:id="writeChartYAxis" styleClass="io-stats" autoRanging="false" forceZeroInRange="true" side="LEFT" tickUnit="Infinity"/>
+			</yAxis>
+			<cursor>
+				<Cursor fx:constant="DEFAULT"/>
+			</cursor>
+		</AreaChart>
+		<DataLabel byteFormat="%stats.write.total.data.none" kibFormat="%stats.write.total.data.kib" mibFormat="%stats.write.total.data.mib" gibFormat="%stats.write.total.data.gib" dataInBytes="${controller.totalBytesWritten}"/>
+		<DataLabel byteFormat="%stats.encr.total.data.none" kibFormat="%stats.encr.total.data.kib" mibFormat="%stats.encr.total.data.mib" gibFormat="%stats.encr.total.data.gib" dataInBytes="${controller.totalBytesEncrypted}"/>
+		<FormattedLabel format="%stats.write.accessCount" arg1="${controller.filesWritten}"/>
+	</VBox>
+</HBox>
