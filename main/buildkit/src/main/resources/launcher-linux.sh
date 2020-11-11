@@ -7,6 +7,6 @@ java \
 	-Dcryptomator.logDir="~/.local/share/Cryptomator/logs" \
 	-Dcryptomator.mountPointsDir="~/.local/share/Cryptomator/mnt" \
 	-Djdk.gtk.version=2 \
-	-Xss20m \
+	-Xss2m \
 	-Xmx512m \
 	org.cryptomator.launcher.Cryptomator
