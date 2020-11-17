@@ -7,10 +7,11 @@ package org.cryptomator.ui.mainwindow;
 
 import dagger.Lazy;
 import dagger.Subcomponent;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
+
+import javafx.scene.Scene;
+import javafx.stage.Stage;
 
 @MainWindowScoped
 @Subcomponent(modules = {MainWindowModule.class})

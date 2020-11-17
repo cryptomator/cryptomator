@@ -37,10 +37,10 @@ public class AutoCompleter {
 
 	/**
 	 * Find the index of the first word in {@link #dictionary} that starts with a given prefix.
-	 * 
+	 * <p>
 	 * This method performs an "unsuccessful" binary search (it doesn't return when encountering an exact match).
 	 * Instead it continues searching in the left half (which includes the exact match) until only one element is left.
-	 * 
+	 * <p>
 	 * If the dictionary doesn't contain a word "left" of the given prefix, this method returns an invalid index, though.
 	 *
 	 * @param begin Index of first element (inclusive)

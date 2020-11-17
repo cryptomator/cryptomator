@@ -1,13 +1,13 @@
 package org.cryptomator.ui.wrongfilealert;
 
-import javafx.application.Application;
-import javafx.fxml.FXML;
-import javafx.scene.image.Image;
-import javafx.stage.Stage;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.ui.common.FxController;
 
 import javax.inject.Inject;
+import javafx.application.Application;
+import javafx.fxml.FXML;
+import javafx.scene.image.Image;
+import javafx.stage.Stage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;

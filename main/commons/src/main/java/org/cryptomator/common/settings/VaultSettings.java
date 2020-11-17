@@ -5,8 +5,10 @@
  *******************************************************************************/
 package org.cryptomator.common.settings;
 
+import com.google.common.base.CharMatcher;
 import com.google.common.base.Strings;
 import com.google.common.io.BaseEncoding;
+
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.StringBinding;
@@ -18,12 +20,12 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import org.apache.commons.lang3.StringUtils;
-
 import java.nio.file.Path;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * The settings specific to a single vault.
@@ -76,22 +78,16 @@ public class VaultSettings {
 
 	//visible for testing
 	String normalizeDisplayName() {
-		String normalizedMountName = StringUtils.stripAccents(displayName.get());
-		StringBuilder builder = new StringBuilder();
-		for (char c : normalizedMountName.toCharArray()) {
-			if (Character.isWhitespace(c)) {
-				if (builder.length() == 0 || builder.charAt(builder.length() - 1) != '_') {
-					builder.append('_');
-				}
-			} else if (c < 127 && Character.isLetterOrDigit(c)) {
-				builder.append(c);
-			} else {
-				if (builder.length() == 0 || builder.charAt(builder.length() - 1) != '_') {
-					builder.append('_');
-				}
-			}
+		var original = displayName.getValueSafe();
+		if (original.isBlank() || ".".equals(original) || "..".equals(original)) {
+			return "_";
 		}
-		return builder.toString();
+
+		// replace whitespaces (tabs, linebreaks, ...) by simple space (0x20)
+		var withoutFancyWhitespaces = CharMatcher.whitespace().collapseFrom(original, ' ');
+
+		// replace control chars as well as chars that aren't allowed in file names on standard file systems by underscore
+		return CharMatcher.anyOf("<>:\"/\\|?*").or(CharMatcher.javaIsoControl()).collapseFrom(withoutFancyWhitespaces, '_');
 	}
 
 	/* Getter/Setter */
@@ -114,6 +110,14 @@ public class VaultSettings {
 
 	public StringProperty winDriveLetter() {
 		return winDriveLetter;
+	}
+
+	public Optional<String> getWinDriveLetter() {
+		String current = this.winDriveLetter.get();
+		if (!Strings.isNullOrEmpty(current)) {
+			return Optional.of(current);
+		}
+		return Optional.empty();
 	}
 
 	public BooleanProperty unlockAfterStartup() {

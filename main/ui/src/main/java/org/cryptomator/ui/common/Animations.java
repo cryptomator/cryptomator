@@ -8,7 +8,7 @@ import javafx.stage.Window;
 import javafx.util.Duration;
 
 public class Animations {
-	
+
 	public static Timeline createShakeWindowAnimation(Window window) {
 		WritableValue<Double> writableWindowX = new WritableValue<>() {
 			@Override

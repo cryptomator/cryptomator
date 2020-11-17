@@ -10,8 +10,8 @@ import javafx.scene.control.Label;
 
 public class ThrougputLabel extends Label {
 
-	private static final long kibsThreshold = 1l << 7; // 0.128 kiB/s
-	private static final long mibsThreshold = 1l << 19; // 0.512 MiB/s
+	private static final long KIBS_THRESHOLD = 1l << 7; // 0.128 kiB/s
+	private static final long MIBS_THRESHOLD = 1l << 19; // 0.512 MiB/s
 
 	private final StringProperty idleFormat = new SimpleStringProperty("-");
 	private final StringProperty kibsFormat = new SimpleStringProperty("%.3f");
@@ -22,18 +22,17 @@ public class ThrougputLabel extends Label {
 		textProperty().bind(createStringBinding());
 	}
 
-
 	protected StringBinding createStringBinding() {
 		return Bindings.createStringBinding(this::updateText, kibsFormat, mibsFormat, bytesPerSecond);
 	}
 
 	private String updateText() {
 		long bps = bytesPerSecond.get();
-		if (bps > mibsThreshold) {
-			double mibs = ((double) bytesPerSecond.get()) / 1024.0 / 1024.0;
+		if (bps > MIBS_THRESHOLD) {
+			double mibs = ((double) bps) / 1024.0 / 1024.0;
 			return String.format(mibsFormat.get(), mibs);
-		} else if (bps > kibsThreshold) {
-			double kibs = ((double) bytesPerSecond.get()) / 1024.0;
+		} else if (bps > KIBS_THRESHOLD) {
+			double kibs = ((double) bps) / 1024.0;
 			return String.format(kibsFormat.get(), kibs);
 		} else {
 			return String.format(idleFormat.get(), bps);

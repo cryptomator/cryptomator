@@ -19,5 +19,6 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Retention(RUNTIME)
 @MapKey
 public @interface FxControllerKey {
+
 	Class<? extends FxController> value();
 }

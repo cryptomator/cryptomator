@@ -13,7 +13,7 @@ public class FormattedString {
 	private final ObjectProperty<Object> arg1 = new SimpleObjectProperty<>();
 	// add arg2, arg3, ... on demand
 	private final StringBinding value;
-	
+
 	public FormattedString() {
 		this.value = Bindings.createStringBinding(this::computeValue, format, arg1);
 	}

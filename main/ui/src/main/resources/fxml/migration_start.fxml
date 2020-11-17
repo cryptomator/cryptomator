@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import org.cryptomator.ui.controls.FontAwesome5IconView?>
+<?import org.cryptomator.ui.controls.FormattedLabel?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ButtonBar?>
@@ -8,10 +10,8 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Circle?>
-<?import org.cryptomator.ui.controls.FontAwesome5IconView?>
-<?import org.cryptomator.ui.controls.FormattedLabel?>
-<VBox xmlns="http://javafx.com/javafx"
-	  xmlns:fx="http://javafx.com/fxml"
+<VBox xmlns:fx="http://javafx.com/fxml"
+	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.migration.MigrationStartController"
 	  minWidth="400"
 	  maxWidth="400"
@@ -28,7 +28,7 @@
 			</StackPane>
 
 			<VBox spacing="6" HBox.hgrow="ALWAYS">
-				<FormattedLabel format="%migration.start.prompt" arg1="${controller.vault.displayName}" wrapText="true" />
+				<FormattedLabel format="%migration.start.prompt" arg1="${controller.vault.displayName}" wrapText="true"/>
 				<CheckBox fx:id="confirmSyncDone" text="%migration.start.confirm"/>
 			</VBox>
 		</HBox>

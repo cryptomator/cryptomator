@@ -1,14 +1,14 @@
 package org.cryptomator.ui.addvaultwizard;
 
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.ReadOnlyObjectProperty;
-import javafx.fxml.FXML;
-import javafx.stage.Stage;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.fxapp.FxApplication;
 
 import javax.inject.Inject;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.fxml.FXML;
+import javafx.stage.Stage;
 import java.util.Optional;
 
 @AddVaultWizardScoped

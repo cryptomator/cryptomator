@@ -1,8 +1,5 @@
 package org.cryptomator.ui.launcher;
 
-import javafx.application.Platform;
-import javafx.beans.Observable;
-import javafx.collections.ObservableList;
 import org.cryptomator.common.ShutdownHook;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
@@ -14,6 +11,9 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
+import javafx.application.Platform;
+import javafx.beans.Observable;
+import javafx.collections.ObservableList;
 import java.awt.Desktop;
 import java.awt.EventQueue;
 import java.awt.desktop.AboutEvent;

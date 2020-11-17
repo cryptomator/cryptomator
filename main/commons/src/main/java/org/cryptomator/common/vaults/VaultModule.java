@@ -7,12 +7,6 @@ package org.cryptomator.common.vaults;
 
 import dagger.Module;
 import dagger.Provides;
-import javafx.beans.binding.Bindings;
-import javafx.beans.binding.StringBinding;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.ReadOnlyBooleanProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VaultSettings;
@@ -23,6 +17,12 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import javax.inject.Named;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.StringBinding;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -84,6 +84,8 @@ public class VaultModule {
 				return getMacFuseDefaultMountFlags(mountName, readOnly);
 			} else if (v == VolumeImpl.FUSE && SystemUtils.IS_OS_LINUX) {
 				return getLinuxFuseDefaultMountFlags(readOnly);
+			} else if (v == VolumeImpl.FUSE && SystemUtils.IS_OS_WINDOWS) {
+				return getWindowsFuseDefaultMountFlags(mountName, readOnly);
 			} else if (v == VolumeImpl.DOKANY && SystemUtils.IS_OS_WINDOWS) {
 				return getDokanyDefaultMountFlags(readOnly);
 			} else {
@@ -138,6 +140,28 @@ public class VaultModule {
 		} catch (IOException e) {
 			LOG.error("Could not read uid/gid from USER_HOME", e);
 		}
+
+		return flags.toString().strip();
+	}
+
+	// see https://github.com/billziss-gh/winfsp/blob/5d0b10d0b643652c00ebb4704dc2bb28e7244973/src/dll/fuse/fuse_main.c#L53-L62 for syntax guide
+	// see https://github.com/billziss-gh/winfsp/blob/5d0b10d0b643652c00ebb4704dc2bb28e7244973/src/dll/fuse/fuse.c#L295-L319 for options (-o <...>)
+	// see https://github.com/billziss-gh/winfsp/wiki/Frequently-Asked-Questions/5ba00e4be4f5e938eaae6ef1500b331de12dee77 (FUSE 4.) on why the given defaults were choosen
+	private String getWindowsFuseDefaultMountFlags(StringBinding mountName, ReadOnlyBooleanProperty readOnly) {
+		assert SystemUtils.IS_OS_WINDOWS;
+		StringBuilder flags = new StringBuilder();
+
+		//WinFSP has no explicit "readonly"-option, nut not setting the group/user-id has the same effect, tho.
+		//So for the time being not setting them is the way to go...
+		//See: https://github.com/billziss-gh/winfsp/issues/319
+		if (!readOnly.get()) {
+			flags.append(" -ouid=-1");
+			flags.append(" -ogid=-1");
+		}
+		flags.append(" -ovolname=").append(mountName.get());
+		//Dokany requires this option to be set, WinFSP doesn't seem to share this peculiarity,
+		//but the option exists. Let's keep this here in case we need it.
+//		flags.append(" -oThreadCount=").append(5);
 
 		return flags.toString().strip();
 	}

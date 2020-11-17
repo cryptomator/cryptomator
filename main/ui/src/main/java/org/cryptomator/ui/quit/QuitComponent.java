@@ -8,11 +8,11 @@ package org.cryptomator.ui.quit;
 import dagger.BindsInstance;
 import dagger.Lazy;
 import dagger.Subcomponent;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 
+import javafx.scene.Scene;
+import javafx.stage.Stage;
 import java.awt.desktop.QuitResponse;
 
 @QuitScoped

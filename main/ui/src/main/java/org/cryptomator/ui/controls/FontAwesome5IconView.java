@@ -1,5 +1,7 @@
 package org.cryptomator.ui.controls;
 
+import org.cryptomator.ui.common.FontLoader;
+
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -7,8 +9,6 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
-import org.cryptomator.ui.common.FontLoader;
-
 import java.io.UncheckedIOException;
 
 /**
@@ -55,23 +55,23 @@ public class FontAwesome5IconView extends Text {
 		return glyph;
 	}
 
-	public void setGlyph(FontAwesome5Icon glyph) {
-		this.glyph.set(glyph == null ? DEFAULT_GLYPH : glyph);
-	}
-
 	public FontAwesome5Icon getGlyph() {
 		return glyph.get();
+	}
+
+	public void setGlyph(FontAwesome5Icon glyph) {
+		this.glyph.set(glyph == null ? DEFAULT_GLYPH : glyph);
 	}
 
 	public DoubleProperty glyphSizeProperty() {
 		return glyphSize;
 	}
 
-	public void setGlyphSize(double glyphSize) {
-		this.glyphSize.set(glyphSize);
-	}
-
 	public double getGlyphSize() {
 		return glyphSize.get();
+	}
+
+	public void setGlyphSize(double glyphSize) {
+		this.glyphSize.set(glyphSize);
 	}
 }

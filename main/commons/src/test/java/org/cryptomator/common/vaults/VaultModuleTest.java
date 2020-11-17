@@ -1,9 +1,5 @@
 package org.cryptomator.common.vaults;
 
-import javafx.beans.binding.Bindings;
-import javafx.beans.binding.StringBinding;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.common.settings.VolumeImpl;
@@ -17,6 +13,11 @@ import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mockito;
 
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.StringBinding;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
 import java.nio.file.Path;
 
 public class VaultModuleTest {
@@ -30,6 +31,7 @@ public class VaultModuleTest {
 	public void setup(@TempDir Path tmpDir) {
 		Mockito.when(vaultSettings.mountName()).thenReturn(Bindings.createStringBinding(() -> "TEST"));
 		Mockito.when(vaultSettings.usesReadOnlyMode()).thenReturn(new SimpleBooleanProperty(true));
+		Mockito.when(vaultSettings.displayName()).thenReturn(new SimpleStringProperty("Vault"));
 		System.setProperty("user.home", tmpDir.toString());
 	}
 

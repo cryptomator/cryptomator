@@ -1,9 +1,9 @@
 package org.cryptomator.common.vaults;
 
-import javafx.collections.ListChangeListener;
-import javafx.collections.ObservableList;
 import org.cryptomator.common.settings.VaultSettings;
 
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,7 +20,7 @@ class VaultListChangeListener implements ListChangeListener<Vault> {
 
 	@Override
 	public void onChanged(Change<? extends Vault> c) {
-		while(c.next()) {
+		while (c.next()) {
 			if (c.wasAdded()) {
 				List<VaultSettings> addedSettings = c.getAddedSubList().stream().map(Vault::getVaultSettings).collect(Collectors.toList());
 				vaultSettingsList.addAll(c.getFrom(), addedSettings);

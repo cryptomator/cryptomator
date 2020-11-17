@@ -1,17 +1,7 @@
 package org.cryptomator.ui.recoverykey;
 
 import dagger.Lazy;
-import javafx.beans.binding.Bindings;
-import javafx.beans.binding.BooleanBinding;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.StringProperty;
-import javafx.concurrent.Task;
-import javafx.fxml.FXML;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
 import org.cryptomator.common.vaults.Vault;
-import org.cryptomator.cryptolib.api.InvalidPassphraseException;
-import org.cryptomator.ui.common.Animations;
 import org.cryptomator.ui.common.ErrorComponent;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxmlFile;
@@ -21,12 +11,20 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.StringProperty;
+import javafx.concurrent.Task;
+import javafx.fxml.FXML;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 
 @RecoveryKeyScoped
 public class RecoveryKeyResetPasswordController implements FxController {
-	
+
 	private static final Logger LOG = LoggerFactory.getLogger(RecoveryKeyResetPasswordController.class);
 
 	private final Stage window;
@@ -40,7 +38,7 @@ public class RecoveryKeyResetPasswordController implements FxController {
 	private final ErrorComponent.Builder errorComponent;
 
 	@Inject
-	public RecoveryKeyResetPasswordController(@RecoveryKeyWindow Stage window, @RecoveryKeyWindow Vault vault, RecoveryKeyFactory recoveryKeyFactory, ExecutorService executor, @RecoveryKeyWindow StringProperty recoveryKey, @Named("newPassword")ObjectProperty<CharSequence> newPassword, @FxmlScene(FxmlFile.RECOVERYKEY_RECOVER) Lazy<Scene> recoverScene, ErrorComponent.Builder errorComponent) {
+	public RecoveryKeyResetPasswordController(@RecoveryKeyWindow Stage window, @RecoveryKeyWindow Vault vault, RecoveryKeyFactory recoveryKeyFactory, ExecutorService executor, @RecoveryKeyWindow StringProperty recoveryKey, @Named("newPassword") ObjectProperty<CharSequence> newPassword, @FxmlScene(FxmlFile.RECOVERYKEY_RECOVER) Lazy<Scene> recoverScene, ErrorComponent.Builder errorComponent) {
 		this.window = window;
 		this.vault = vault;
 		this.recoveryKeyFactory = recoveryKeyFactory;
@@ -77,6 +75,10 @@ public class RecoveryKeyResetPasswordController implements FxController {
 
 	private class ResetPasswordTask extends Task<Void> {
 
+		private ResetPasswordTask() {
+			setOnFailed(event -> LOG.error("Failed to reset password", getException()));
+		}
+
 		@Override
 		protected Void call() throws IOException, IllegalArgumentException {
 			recoveryKeyFactory.resetPasswordWithRecoveryKey(vault.getPath(), recoveryKey.get(), newPassword.get());
@@ -84,7 +86,7 @@ public class RecoveryKeyResetPasswordController implements FxController {
 		}
 
 	}
-	
+
 	/* Getter/Setter */
 
 	public BooleanBinding invalidNewPasswordProperty() {

@@ -1,20 +1,18 @@
 package org.cryptomator.ui.common;
 
-import javafx.concurrent.Task;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.common.vaults.Volume;
-import org.cryptomator.keychain.KeychainManager;
 import org.cryptomator.ui.fxapp.FxApplicationScoped;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javafx.concurrent.Task;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
@@ -25,12 +23,10 @@ public class VaultService {
 	private static final Logger LOG = LoggerFactory.getLogger(VaultService.class);
 
 	private final ExecutorService executorService;
-	private final Optional<KeychainManager> keychain;
 
 	@Inject
-	public VaultService(ExecutorService executorService, Optional<KeychainManager> keychain) {
+	public VaultService(ExecutorService executorService) {
 		this.executorService = executorService;
-		this.keychain = keychain;
 	}
 
 	public void reveal(Vault vault) {
@@ -69,7 +65,6 @@ public class VaultService {
 	public Task<Vault> createLockTask(Vault vault, boolean forced) {
 		Task<Vault> task = new LockVaultTask(vault, forced);
 		task.setOnSucceeded(evt -> LOG.info("Locked {}", vault.getDisplayName()));
-		task.setOnFailed(evt -> LOG.error("Failed to lock " + vault.getDisplayName(), evt.getSource().getException()));
 		return task;
 	}
 
@@ -109,6 +104,8 @@ public class VaultService {
 		 */
 		public RevealVaultTask(Vault vault) {
 			this.vault = vault;
+
+			setOnFailed(evt -> LOG.error("Failed to reveal " + vault.getDisplayName(), getException()));
 		}
 
 		@Override
@@ -127,6 +124,8 @@ public class VaultService {
 
 		public WaitForTasksTask(Collection<Task<Vault>> tasks) {
 			this.startedTasks = List.copyOf(tasks);
+
+			setOnFailed(event -> LOG.error("Failed to lock multiple vaults", getException()));
 		}
 
 		@Override
@@ -165,6 +164,8 @@ public class VaultService {
 		public LockVaultTask(Vault vault, boolean forced) {
 			this.vault = vault;
 			this.forced = forced;
+
+			setOnFailed(event -> LOG.error("Failed to lock " + vault.getDisplayName(), event.getSource().getException()));
 		}
 
 		@Override

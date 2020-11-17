@@ -190,7 +190,7 @@
 	-fx-background-color: white, RED_5;
 	-fx-background-insets: 1px, 2px;
 	-fx-background-radius: 6px, 5px;
-	-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 2, 0, 0, 0);
+	-fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.8), 2, 0, 0, 0);
 }
 
 .main-window .drag-n-drop-indicator {
@@ -389,6 +389,16 @@
 	-fx-background-color: MUTED_BG;
 }
 
+/* Note: These values below are kinda random such that it looks ok. I'm pretty sure there is room for improvement. Additionally, fx-text-fill does not work*/
+.badge-debug {
+	-fx-font-family: 'Open Sans Bold';
+	-fx-font-size: 1.0em;
+	-fx-background-radius: 8px;
+	-fx-padding: 0.3em 0.55em 0.3em 0.55em;
+	-fx-background-color: RED_5;
+	-fx-background-radius: 2em;
+}
+
 /*******************************************************************************
  *                                                                             *
  * Password Strength Indicator                                                 *
@@ -431,7 +441,7 @@
 	-fx-font-size: 0.8em;
 	-fx-background-color: CONTROL_BG_NORMAL;
 	-fx-padding: 0.2em 0.4em 0.2em 0.4em;
-	-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.5), 2, 0, 0, 0);
+	-fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.5), 2, 0, 0, 0);
 }
 
 /*******************************************************************************
@@ -476,7 +486,7 @@
  ******************************************************************************/
 
 .text-area {
-    -fx-cursor: default;
+	-fx-cursor: default;
 	-fx-background-color: CONTROL_BORDER_NORMAL, CONTROL_BG_NORMAL;
 	-fx-background-insets: 0, 1px;
 	-fx-background-radius: 4px;
@@ -493,7 +503,7 @@
 }
 
 .text-area > .scroll-pane > .scroll-bar {
-    -fx-padding: 2px;
+	-fx-padding: 2px;
 }
 
 .text-area .content {
@@ -502,7 +512,7 @@
 	-fx-text-fill: TEXT_FILL;
 	-fx-highlight-fill: PRIMARY;
 	-fx-prompt-text-fill: TEXT_FILL_MUTED;
-    -fx-background-color: null;
+	-fx-background-color: null;
 }
 
 /*******************************************************************************
@@ -736,7 +746,7 @@
 	-fx-background-insets: 0, 1px;
 	-fx-background-radius: 4px;
 	-fx-padding: 0.2em 0 0.2em 0;
-	-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 8, 0, 0, 0);
+	-fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.2), 8, 0, 0, 0);
 }
 
 /*******************************************************************************
@@ -763,7 +773,7 @@
 }
 
 .menu-item > .label {
-    -fx-padding: 1px 0.5em 1px 0.5em;
+	-fx-padding: 1px 0.5em 1px 0.5em;
 }
 
 .menu-item:disabled > .label {
@@ -789,7 +799,7 @@
 }
 
 .progress-indicator:indeterminate > .spinner {
-	-fx-padding: 0.083333em; 
+	-fx-padding: 0.083333em;
 }
 
 .progress-indicator:indeterminate .segment {
@@ -798,51 +808,51 @@
 }
 
 .progress-indicator:indeterminate .segment0 {
-	-fx-shape:"m 12.007729,4.9541827 c -0.49762,0.7596865 0.893181,1.6216808 1.327833,0.7666252 L 15.456199,2.0477574 C 15.942094,1.2061627 14.61426,0.43953765 14.128365,1.2811324 z";
+	-fx-shape: "m 12.007729,4.9541827 c -0.49762,0.7596865 0.893181,1.6216808 1.327833,0.7666252 L 15.456199,2.0477574 C 15.942094,1.2061627 14.61426,0.43953765 14.128365,1.2811324 z";
 }
 
 .progress-indicator:indeterminate .segment1 {
-	-fx-shape:"m 9.2224559,4.62535 c -0.051108,0.9067177 1.5843581,0.957826 1.5332501,0 l 0,-4.24127319 c 0,-0.9717899 -1.5332501,-0.9717899 -1.5332501,0 z";
+	-fx-shape: "m 9.2224559,4.62535 c -0.051108,0.9067177 1.5843581,0.957826 1.5332501,0 l 0,-4.24127319 c 0,-0.9717899 -1.5332501,-0.9717899 -1.5332501,0 z";
 }
 
 .progress-indicator:indeterminate .segment2 {
-	-fx-shape:"M 8.0465401,4.9030617 C 8.5441601,5.6627485 7.1533584,6.5247425 6.7187068,5.6696872 L 4.5980702,1.9966363 C 4.1121752,1.1550418 5.4400085,0.38841683 5.9259035,1.2300114 z";
+	-fx-shape: "M 8.0465401,4.9030617 C 8.5441601,5.6627485 7.1533584,6.5247425 6.7187068,5.6696872 L 4.5980702,1.9966363 C 4.1121752,1.1550418 5.4400085,0.38841683 5.9259035,1.2300114 z";
 }
 
 .progress-indicator:indeterminate .segment3 {
-	-fx-shape:"M 5.7330066,6.5305598 C 6.5579512,6.9103162 5.8366865,8.3790371 5.0144939,7.8850315 L 1.2677551,5.8974832 C 0.409277,5.4420823 1.1277888,4.0876101 1.9862674,4.5430105 z";
+	-fx-shape: "M 5.7330066,6.5305598 C 6.5579512,6.9103162 5.8366865,8.3790371 5.0144939,7.8850315 L 1.2677551,5.8974832 C 0.409277,5.4420823 1.1277888,4.0876101 1.9862674,4.5430105 z";
 }
 
 .progress-indicator:indeterminate .segment4 {
-	-fx-shape:"m 0.42171041,9.2083842 c -0.90671825,-0.051108 -0.95782608,1.5843588 0,1.5332498 l 4.24127319,0 c 0.9717899,0 0.9717899,-1.5332498 0,-1.5332498 z";
+	-fx-shape: "m 0.42171041,9.2083842 c -0.90671825,-0.051108 -0.95782608,1.5843588 0,1.5332498 l 4.24127319,0 c 0.9717899,0 0.9717899,-1.5332498 0,-1.5332498 z";
 }
 
 .progress-indicator:indeterminate .segment5 {
-	-fx-shape:"M 5.7330066,13.443113 C 6.5579512,13.063356 5.8366865,11.594635 5.0144939,12.088641 L 1.2677551,14.076189 C 0.409277,14.53159 1.1277888,15.886062 1.9862674,15.430662 z";
+	-fx-shape: "M 5.7330066,13.443113 C 6.5579512,13.063356 5.8366865,11.594635 5.0144939,12.088641 L 1.2677551,14.076189 C 0.409277,14.53159 1.1277888,15.886062 1.9862674,15.430662 z";
 }
 
 .progress-indicator:indeterminate .segment6 {
-	-fx-shape:"M 8.0465401,15.070611 C 8.5441601,14.310924 7.1533584,13.44893 6.7187068,14.303985 l -2.1206366,3.673051 c -0.485895,0.841595 0.8419383,1.60822 1.3278333,0.766625 z";
+	-fx-shape: "M 8.0465401,15.070611 C 8.5441601,14.310924 7.1533584,13.44893 6.7187068,14.303985 l -2.1206366,3.673051 c -0.485895,0.841595 0.8419383,1.60822 1.3278333,0.766625 z";
 }
 
 .progress-indicator:indeterminate .segment7 {
-	-fx-shape:"m 9.2224559,19.539943 c -0.051108,0.906718 1.5843581,0.957826 1.5332501,0 l 0,-4.241273 c 0,-0.97179 -1.5332501,-0.97179 -1.5332501,0 z";
+	-fx-shape: "m 9.2224559,19.539943 c -0.051108,0.906718 1.5843581,0.957826 1.5332501,0 l 0,-4.241273 c 0,-0.97179 -1.5332501,-0.97179 -1.5332501,0 z";
 }
 
 .progress-indicator:indeterminate .segment8 {
-	-fx-shape:"m 12.10997,15.070611 c -0.49762,-0.759687 0.893182,-1.621681 1.327834,-0.766626 l 2.120636,3.673051 c 0.485895,0.841595 -0.841938,1.60822 -1.327833,0.766625 z";
+	-fx-shape: "m 12.10997,15.070611 c -0.49762,-0.759687 0.893182,-1.621681 1.327834,-0.766626 l 2.120636,3.673051 c 0.485895,0.841595 -0.841938,1.60822 -1.327833,0.766625 z";
 }
 
 .progress-indicator:indeterminate .segment9 {
-	-fx-shape:"m 14.423504,13.443113 c -0.824945,-0.379757 -0.10368,-1.848478 0.718512,-1.354472 l 3.746739,1.987548 c 0.858478,0.455401 0.139967,1.809873 -0.718512,1.354473 z";
+	-fx-shape: "m 14.423504,13.443113 c -0.824945,-0.379757 -0.10368,-1.848478 0.718512,-1.354472 l 3.746739,1.987548 c 0.858478,0.455401 0.139967,1.809873 -0.718512,1.354473 z";
 }
 
 .progress-indicator:indeterminate .segment10 {
-	-fx-shape:"m 15.372451,9.2445322 c -0.906719,-0.051108 -0.957826,1.5843588 0,1.5332498 l 4.241273,0 c 0.97179,0 0.97179,-1.5332498 0,-1.5332498 z";
+	-fx-shape: "m 15.372451,9.2445322 c -0.906719,-0.051108 -0.957826,1.5843588 0,1.5332498 l 4.241273,0 c 0.97179,0 0.97179,-1.5332498 0,-1.5332498 z";
 }
 
 .progress-indicator:indeterminate .segment11 {
-	-fx-shape:"m 14.321262,6.5816808 c -0.824944,0.3797564 -0.10368,1.8484772 0.718513,1.3544717 L 18.786514,5.9486042 C 19.644992,5.4932031 18.92648,4.1387308 18.068001,4.5941315 z";
+	-fx-shape: "m 14.321262,6.5816808 c -0.824944,0.3797564 -0.10368,1.8484772 0.718513,1.3544717 L 18.786514,5.9486042 C 19.644992,5.4932031 18.92648,4.1387308 18.068001,4.5941315 z";
 }
 
 /*******************************************************************************
@@ -871,4 +881,69 @@
 .progress-bar > .track {
 	-fx-background-color: PROGRESS_BAR_BG;
 	-fx-background-radius: 4px;
+}
+/*******************************************************************************
+ *                                                                             *
+ * I/O Statistics                                                              *
+ *                                                                             *
+ ******************************************************************************/
+.chart {
+	-fx-padding: 10px;
+}
+
+.chart-plot-background {
+	-fx-background-color: MAIN_BG;
+	-fx-padding: 20px;
+}
+
+/* content */
+
+
+.cache-arc-background {
+	-fx-fill: transparent;
+	-fx-stroke: MUTED_BG;
+	-fx-stroke-type: centered;
+	-fx-stroke-width: 12;
+	-fx-stroke-line-cap: butt;
+}
+
+.cache-arc-foreground {
+	-fx-fill: transparent;
+	-fx-stroke: PRIMARY;
+	-fx-stroke-type: centered;
+	-fx-stroke-width: 12;
+	-fx-stroke-line-cap: butt;
+}
+
+.chart.io-stats {
+	-fx-padding: 10px;
+	-fx-horizontal-grid-lines-visible: false;
+	-fx-horizontal-zero-line-visible: false;
+	-fx-vertical-grid-lines-visible: false;
+	-fx-vertical-zero-line-visible: false;
+}
+
+.axis.io-stats {
+	-fx-tick-mark-visible: false;
+	-fx-minor-tick-visible: false;
+	-fx-tick-labels-visible: false;
+}
+
+.chart-plot-background {
+	-fx-background-color: transparent;
+}
+
+.chart-vertical-zero-line,
+.chart-horizontal-zero-line,
+.chart-alternative-row-fill {
+	-fx-stroke: transparent;
+	-fx-stroke-width: 0;
+}
+
+.default-color0.chart-series-area-line {
+	-fx-stroke: PRIMARY;
+}
+.default-color0.chart-series-area-fill {
+	-fx-fill: linear-gradient(to bottom, PRIMARY, transparent);
+	-fx-stroke: transparent;
 }

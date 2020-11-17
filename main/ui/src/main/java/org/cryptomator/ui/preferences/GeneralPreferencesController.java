@@ -1,5 +1,18 @@
 package org.cryptomator.ui.preferences;
 
+import org.cryptomator.common.Environment;
+import org.cryptomator.common.LicenseHolder;
+import org.cryptomator.common.settings.KeychainBackend;
+import org.cryptomator.common.settings.Settings;
+import org.cryptomator.common.settings.UiTheme;
+import org.cryptomator.integrations.keychain.KeychainAccessProvider;
+import org.cryptomator.ui.common.ErrorComponent;
+import org.cryptomator.ui.common.FxController;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.inject.Inject;
+import javax.inject.Named;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
@@ -12,26 +25,21 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleGroup;
+import javafx.stage.Stage;
 import javafx.util.StringConverter;
-import org.cryptomator.common.Environment;
-import org.cryptomator.common.LicenseHolder;
-import org.cryptomator.common.settings.Settings;
-import org.cryptomator.common.settings.UiTheme;
-import org.cryptomator.ui.common.FxController;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.inject.Inject;
-import javax.inject.Named;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
+import java.util.stream.Collectors;
 
 @PreferencesScoped
 public class GeneralPreferencesController implements FxController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(GeneralPreferencesController.class);
 
+	private final Stage window;
 	private final Settings settings;
 	private final boolean trayMenuSupported;
 	private final Optional<AutoStartStrategy> autoStartStrategy;
@@ -41,7 +49,10 @@ public class GeneralPreferencesController implements FxController {
 	private final ResourceBundle resourceBundle;
 	private final Application application;
 	private final Environment environment;
+	private final Set<KeychainAccessProvider> keychainAccessProviders;
+	private final ErrorComponent.Builder errorComponent;
 	public ChoiceBox<UiTheme> themeChoiceBox;
+	public ChoiceBox<KeychainBackend> keychainBackendChoiceBox;
 	public CheckBox startHiddenCheckbox;
 	public CheckBox debugModeCheckbox;
 	public CheckBox autoStartCheckbox;
@@ -50,16 +61,19 @@ public class GeneralPreferencesController implements FxController {
 	public RadioButton nodeOrientationRtl;
 
 	@Inject
-	GeneralPreferencesController(Settings settings, @Named("trayMenuSupported") boolean trayMenuSupported, Optional<AutoStartStrategy> autoStartStrategy, ObjectProperty<SelectedPreferencesTab> selectedTabProperty, LicenseHolder licenseHolder, ExecutorService executor, ResourceBundle resourceBundle, Application application, Environment environment) {
+	GeneralPreferencesController(@PreferencesWindow Stage window, Settings settings, @Named("trayMenuSupported") boolean trayMenuSupported, Optional<AutoStartStrategy> autoStartStrategy, Set<KeychainAccessProvider> keychainAccessProviders, ObjectProperty<SelectedPreferencesTab> selectedTabProperty, LicenseHolder licenseHolder, ExecutorService executor, ResourceBundle resourceBundle, Application application, Environment environment, ErrorComponent.Builder errorComponent) {
+		this.window = window;
 		this.settings = settings;
 		this.trayMenuSupported = trayMenuSupported;
 		this.autoStartStrategy = autoStartStrategy;
+		this.keychainAccessProviders = keychainAccessProviders;
 		this.selectedTabProperty = selectedTabProperty;
 		this.licenseHolder = licenseHolder;
 		this.executor = executor;
 		this.resourceBundle = resourceBundle;
 		this.application = application;
 		this.environment = environment;
+		this.errorComponent = errorComponent;
 	}
 
 	@FXML
@@ -84,6 +98,15 @@ public class GeneralPreferencesController implements FxController {
 		nodeOrientationLtr.setSelected(settings.userInterfaceOrientation().get() == NodeOrientation.LEFT_TO_RIGHT);
 		nodeOrientationRtl.setSelected(settings.userInterfaceOrientation().get() == NodeOrientation.RIGHT_TO_LEFT);
 		nodeOrientation.selectedToggleProperty().addListener(this::toggleNodeOrientation);
+
+		keychainBackendChoiceBox.getItems().addAll(getAvailableBackends());
+		keychainBackendChoiceBox.setConverter(new KeychainBackendConverter(resourceBundle));
+		keychainBackendChoiceBox.valueProperty().bindBidirectional(settings.keychainBackend());
+	}
+
+	private KeychainBackend[] getAvailableBackends() {
+		var namesOfAvailableProviders = keychainAccessProviders.stream().map(KeychainAccessProvider::getClass).map(Class::getName).collect(Collectors.toUnmodifiableSet());
+		return Arrays.stream(KeychainBackend.values()).filter(value -> namesOfAvailableProviders.contains(value.getProviderClass())).toArray(KeychainBackend[]::new);
 	}
 
 	public boolean isTrayMenuSupported() {
@@ -109,7 +132,11 @@ public class GeneralPreferencesController implements FxController {
 		autoStartStrategy.ifPresent(autoStart -> {
 			boolean enableAutoStart = autoStartCheckbox.isSelected();
 			Task<Void> toggleTask = new ToggleAutoStartTask(autoStart, enableAutoStart);
-			toggleTask.setOnFailed(evt -> autoStartCheckbox.setSelected(!enableAutoStart)); // restore previous state
+			toggleTask.setOnFailed(event -> {
+				autoStartCheckbox.setSelected(!enableAutoStart); // restore previous state
+				LOG.error("Failed to toggle autostart.", event.getSource().getException());
+				errorComponent.cause(event.getSource().getException()).window(window).returnToScene(window.getScene()).build().showErrorScene();
+			});
 			executor.execute(toggleTask);
 		});
 	}
@@ -150,6 +177,25 @@ public class GeneralPreferencesController implements FxController {
 		}
 	}
 
+	private static class KeychainBackendConverter extends StringConverter<KeychainBackend> {
+
+		private final ResourceBundle resourceBundle;
+
+		KeychainBackendConverter(ResourceBundle resourceBundle) {
+			this.resourceBundle = resourceBundle;
+		}
+
+		@Override
+		public String toString(KeychainBackend impl) {
+			return resourceBundle.getString("preferences.general.keychainBackend." + impl.getProviderClass());
+		}
+
+		@Override
+		public KeychainBackend fromString(String string) {
+			throw new UnsupportedOperationException();
+		}
+	}
+
 	private static class ToggleAutoStartTask extends Task<Void> {
 
 		private final AutoStartStrategy autoStart;
@@ -158,6 +204,8 @@ public class GeneralPreferencesController implements FxController {
 		public ToggleAutoStartTask(AutoStartStrategy autoStart, boolean enable) {
 			this.autoStart = autoStart;
 			this.enable = enable;
+
+			setOnFailed(event -> LOG.error("Failed to toggle Autostart", getException()));
 		}
 
 		@Override

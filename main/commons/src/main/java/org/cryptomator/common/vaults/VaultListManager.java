@@ -8,8 +8,6 @@
  *******************************************************************************/
 package org.cryptomator.common.vaults;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.cryptofs.CryptoFileSystemProvider;
@@ -19,6 +17,8 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import java.io.IOException;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;

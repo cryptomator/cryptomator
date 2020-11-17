@@ -28,6 +28,7 @@ public enum FxmlFile {
 	UNLOCK_INVALID_MOUNT_POINT("/fxml/unlock_invalid_mount_point.fxml"), //
 	UNLOCK_SUCCESS("/fxml/unlock_success.fxml"), //
 	VAULT_OPTIONS("/fxml/vault_options.fxml"), //
+	VAULT_STATISTICS("/fxml/stats.fxml"), //
 	WRONGFILEALERT("/fxml/wrongfilealert.fxml");
 
 	private final String ressourcePathString;
@@ -36,7 +37,7 @@ public enum FxmlFile {
 		this.ressourcePathString = ressourcePathString;
 	}
 
-	public String getRessourcePathString(){
+	public String getRessourcePathString() {
 		return ressourcePathString;
 	}
 }

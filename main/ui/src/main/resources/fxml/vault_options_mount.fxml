@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import org.cryptomator.ui.controls.FontAwesome5IconView?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.CheckBox?>
@@ -10,10 +11,8 @@
 <?import javafx.scene.control.ToggleGroup?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
-<?import org.cryptomator.ui.controls.AlphanumericTextField?>
-<?import org.cryptomator.ui.controls.FontAwesome5IconView?>
-<VBox xmlns="http://javafx.com/javafx"
-	  xmlns:fx="http://javafx.com/fxml"
+<VBox xmlns:fx="http://javafx.com/fxml"
+	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.vaultoptions.MountOptionsController"
 	  spacing="6">
 	<fx:define>
@@ -44,7 +43,7 @@
 			<ChoiceBox fx:id="driveLetterSelection" disable="${!mountPointWinDriveLetter.selected}"/>
 		</HBox>
 		<HBox spacing="6" alignment="CENTER_LEFT" visible="${!controller.webDavAndWindows}" managed="${!controller.webDavAndWindows}">
-			<RadioButton toggleGroup="${mountPoint}" fx:id="mountPointCustomDir" text="%vaultOptions.mount.mountPoint.custom"/>
+			<RadioButton toggleGroup="${mountPoint}" fx:id="mountPointCustomDir" text="%vaultOptions.mount.mountPoint.custom" disable="${controller.restrictToStableFuseOnWindows}"/>
 			<Button text="%vaultOptions.mount.mountPoint.directoryPickerButton" onAction="#chooseCustomMountPoint" contentDisplay="LEFT" disable="${!mountPointCustomDir.selected}">
 				<graphic>
 					<FontAwesome5IconView glyph="FOLDER_OPEN" glyphSize="15"/>

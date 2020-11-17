@@ -1,21 +1,16 @@
 package org.cryptomator.ui.fxapp;
 
+import com.tobiasdiez.easybind.EasyBind;
 import dagger.Lazy;
-import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.beans.binding.Bindings;
-import javafx.beans.binding.BooleanBinding;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.ObservableSet;
-import javafx.stage.Stage;
 import org.cryptomator.common.LicenseHolder;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.UiTheme;
 import org.cryptomator.common.vaults.Vault;
-import org.cryptomator.jni.JniException;
-import org.cryptomator.jni.MacApplicationUiAppearance;
-import org.cryptomator.jni.MacApplicationUiState;
-import org.cryptomator.jni.MacFunctions;
+import org.cryptomator.integrations.tray.TrayIntegrationProvider;
+import org.cryptomator.integrations.uiappearance.Theme;
+import org.cryptomator.integrations.uiappearance.UiAppearanceException;
+import org.cryptomator.integrations.uiappearance.UiAppearanceListener;
+import org.cryptomator.integrations.uiappearance.UiAppearanceProvider;
 import org.cryptomator.ui.common.VaultService;
 import org.cryptomator.ui.mainwindow.MainWindowComponent;
 import org.cryptomator.ui.preferences.PreferencesComponent;
@@ -27,6 +22,13 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableSet;
+import javafx.stage.Stage;
 import java.awt.desktop.QuitResponse;
 import java.util.Optional;
 
@@ -40,21 +42,22 @@ public class FxApplication extends Application {
 	private final Lazy<PreferencesComponent> preferencesWindow;
 	private final Provider<UnlockComponent.Builder> unlockWindowBuilderProvider;
 	private final Provider<QuitComponent.Builder> quitWindowBuilderProvider;
-	private final Optional<MacFunctions> macFunctions;
+	private final Optional<TrayIntegrationProvider> trayIntegration;
+	private final Optional<UiAppearanceProvider> appearanceProvider;
 	private final VaultService vaultService;
 	private final LicenseHolder licenseHolder;
 	private final BooleanBinding hasVisibleStages;
-
-	private Optional<String> macApperanceObserverIdentifier = Optional.empty();
+	private final UiAppearanceListener systemInterfaceThemeListener = this::systemInterfaceThemeChanged;
 
 	@Inject
-	FxApplication(Settings settings, Lazy<MainWindowComponent> mainWindow, Lazy<PreferencesComponent> preferencesWindow, Provider<UnlockComponent.Builder> unlockWindowBuilderProvider, Provider<QuitComponent.Builder> quitWindowBuilderProvider, Optional<MacFunctions> macFunctions, VaultService vaultService, LicenseHolder licenseHolder, ObservableSet<Stage> visibleStages) {
+	FxApplication(Settings settings, Lazy<MainWindowComponent> mainWindow, Lazy<PreferencesComponent> preferencesWindow, Provider<UnlockComponent.Builder> unlockWindowBuilderProvider, Provider<QuitComponent.Builder> quitWindowBuilderProvider, Optional<TrayIntegrationProvider> trayIntegration, Optional<UiAppearanceProvider> appearanceProvider, VaultService vaultService, LicenseHolder licenseHolder, ObservableSet<Stage> visibleStages) {
 		this.settings = settings;
 		this.mainWindow = mainWindow;
 		this.preferencesWindow = preferencesWindow;
 		this.unlockWindowBuilderProvider = unlockWindowBuilderProvider;
 		this.quitWindowBuilderProvider = quitWindowBuilderProvider;
-		this.macFunctions = macFunctions;
+		this.trayIntegration = trayIntegration;
+		this.appearanceProvider = appearanceProvider;
 		this.vaultService = vaultService;
 		this.licenseHolder = licenseHolder;
 		this.hasVisibleStages = Bindings.isNotEmpty(visibleStages);
@@ -64,9 +67,9 @@ public class FxApplication extends Application {
 		LOG.trace("FxApplication.start()");
 		Platform.setImplicitExit(false);
 
-		hasVisibleStages.addListener(this::hasVisibleStagesChanged);
+		EasyBind.subscribe(hasVisibleStages, this::hasVisibleStagesChanged);
 
-		settings.theme().addListener(this::themeChanged);
+		settings.theme().addListener(this::appThemeChanged);
 		loadSelectedStyleSheet(settings.theme().get());
 	}
 
@@ -75,11 +78,11 @@ public class FxApplication extends Application {
 		throw new UnsupportedOperationException("Use start() instead.");
 	}
 
-	private void hasVisibleStagesChanged(@SuppressWarnings("unused") ObservableValue<? extends Boolean> observableValue, @SuppressWarnings("unused") boolean oldValue, boolean newValue) {
+	private void hasVisibleStagesChanged(boolean newValue) {
 		if (newValue) {
-			macFunctions.map(MacFunctions::uiState).ifPresent(MacApplicationUiState::transformToForegroundApplication);
+			trayIntegration.ifPresent(TrayIntegrationProvider::restoredFromTray);
 		} else {
-			macFunctions.map(MacFunctions::uiState).ifPresent(MacApplicationUiState::transformToAgentApplication);
+			trayIntegration.ifPresent(TrayIntegrationProvider::minimizedToTray);
 		}
 	}
 
@@ -115,45 +118,60 @@ public class FxApplication extends Application {
 		return vaultService;
 	}
 
-	private void themeChanged(@SuppressWarnings("unused") ObservableValue<? extends UiTheme> observable, @SuppressWarnings("unused") UiTheme oldValue, UiTheme newValue) {
-		if (macApperanceObserverIdentifier.isPresent()) {
-			macFunctions.map(MacFunctions::uiAppearance).ifPresent(uiAppearance -> uiAppearance.removeListener(macApperanceObserverIdentifier.get()));
-			macApperanceObserverIdentifier = Optional.empty();
-		}
+	private void appThemeChanged(@SuppressWarnings("unused") ObservableValue<? extends UiTheme> observable, @SuppressWarnings("unused") UiTheme oldValue, UiTheme newValue) {
+		appearanceProvider.ifPresent(appearanceProvider -> {
+			try {
+				appearanceProvider.removeListener(systemInterfaceThemeListener);
+			} catch (UiAppearanceException e) {
+				LOG.error("Failed to disable automatic theme switching.");
+			}
+		});
 		loadSelectedStyleSheet(newValue);
 	}
 
 	private void loadSelectedStyleSheet(UiTheme desiredTheme) {
 		UiTheme theme = licenseHolder.isValidLicense() ? desiredTheme : UiTheme.LIGHT;
 		switch (theme) {
-			case LIGHT -> setToLightTheme();
-			case DARK -> setToDarkTheme();
+			case LIGHT -> applyLightTheme();
+			case DARK -> applyDarkTheme();
 			case AUTOMATIC -> {
-				macFunctions.map(MacFunctions::uiAppearance).ifPresent(uiAppearance -> {
-					macApperanceObserverIdentifier = Optional.of(uiAppearance.addListener(this::macInterfaceThemeChanged));
+				appearanceProvider.ifPresent(appearanceProvider -> {
+					try {
+						appearanceProvider.addListener(systemInterfaceThemeListener);
+					} catch (UiAppearanceException e) {
+						LOG.error("Failed to enable automatic theme switching.");
+					}
 				});
-				macInterfaceThemeChanged();
+				applySystemTheme();
 			}
 		}
 	}
 
-	private void macInterfaceThemeChanged() {
-		macFunctions.map(MacFunctions::uiAppearance).ifPresent(uiAppearance -> {
-			switch (uiAppearance.getCurrentInterfaceStyle()) {
-				case LIGHT -> setToLightTheme();
-				case DARK -> setToDarkTheme();
-			}
+	private void systemInterfaceThemeChanged(Theme theme) {
+		switch (theme) {
+			case LIGHT -> applyLightTheme();
+			case DARK -> applyDarkTheme();
+		}
+	}
+
+	private void applySystemTheme() {
+		appearanceProvider.ifPresent(appearanceProvider -> {
+			systemInterfaceThemeChanged(appearanceProvider.getSystemTheme());
 		});
 	}
 
-	private void setToLightTheme() {
+	private void applyLightTheme() {
 		Application.setUserAgentStylesheet(getClass().getResource("/css/light_theme.css").toString());
-		macFunctions.map(MacFunctions::uiAppearance).ifPresent(JniException.ignore(MacApplicationUiAppearance::setToAqua));
+		appearanceProvider.ifPresent(appearanceProvider -> {
+			appearanceProvider.adjustToTheme(Theme.LIGHT);
+		});
 	}
 
-	private void setToDarkTheme() {
+	private void applyDarkTheme() {
 		Application.setUserAgentStylesheet(getClass().getResource("/css/dark_theme.css").toString());
-		macFunctions.map(MacFunctions::uiAppearance).ifPresent(JniException.ignore(MacApplicationUiAppearance::setToDarkAqua));
+		appearanceProvider.ifPresent(appearanceProvider -> {
+			appearanceProvider.adjustToTheme(Theme.DARK);
+		});
 	}
 
 }

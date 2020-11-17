@@ -1,5 +1,6 @@
 package org.cryptomator.common.vaults;
 
+import org.cryptomator.common.mountpoint.InvalidMountPointException;
 import org.cryptomator.common.settings.VolumeImpl;
 import org.cryptomator.cryptofs.CryptoFileSystem;
 
@@ -21,16 +22,25 @@ public interface Volume {
 	boolean isSupported();
 
 	/**
+	 * Gets the coresponding enum type of the {@link VolumeImpl volume implementation ("VolumeImpl")} that is implemented by this Volume.
+	 *
+	 * @return the type of implementation as defined by the {@link VolumeImpl VolumeImpl enum}
+	 */
+	VolumeImpl getImplementationType();
+
+	/**
 	 * @param fs
 	 * @throws IOException
 	 */
-	void mount(CryptoFileSystem fs, String mountFlags) throws IOException, VolumeException;
+	void mount(CryptoFileSystem fs, String mountFlags) throws IOException, VolumeException, InvalidMountPointException;
 
 	void reveal() throws VolumeException;
 
 	void unmount() throws VolumeException;
 
 	Optional<Path> getMountPoint();
+
+	MountPointRequirement getMountPointRequirement();
 
 	// optional forced unmounting:
 

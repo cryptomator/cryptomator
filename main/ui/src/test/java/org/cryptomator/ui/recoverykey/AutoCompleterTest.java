@@ -42,7 +42,7 @@ class AutoCompleterTest {
 			Assertions.assertTrue(result.isPresent());
 			Assertions.assertEquals("tame", result.get());
 		}
-		
+
 		@ParameterizedTest
 		@DisplayName("find 'teach'")
 		@ValueSource(strings = {"te", "tea", "teac", "teach"})

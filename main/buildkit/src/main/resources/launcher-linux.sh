@@ -1,4 +1,5 @@
 #!/bin/sh
+cd $(dirname $0)
 java \
 	-cp "libs/*" \
 	-Dcryptomator.settingsPath="~/.config/Cryptomator/settings.json" \
@@ -6,6 +7,6 @@ java \
 	-Dcryptomator.logDir="~/.local/share/Cryptomator/logs" \
 	-Dcryptomator.mountPointsDir="~/.local/share/Cryptomator/mnt" \
 	-Djdk.gtk.version=2 \
-	-Xss20m \
+	-Xss2m \
 	-Xmx512m \
 	org.cryptomator.launcher.Cryptomator

@@ -4,9 +4,11 @@ import com.google.common.io.ByteStreams;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import javafx.concurrent.Task;
 import org.apache.commons.lang3.SystemUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javafx.concurrent.Task;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -19,6 +21,8 @@ import java.util.Map;
 
 public class UpdateCheckerTask extends Task<String> {
 
+	private static final Logger LOG = LoggerFactory.getLogger(UpdateCheckerTask.class);
+
 	private static final long MAX_RESPONSE_SIZE = 10 * 1024; // 10kb should be sufficient. protect against flooding
 	private static final Gson GSON = new GsonBuilder().setLenient().create();
 
@@ -28,6 +32,8 @@ public class UpdateCheckerTask extends Task<String> {
 	UpdateCheckerTask(HttpClient httpClient, HttpRequest checkForUpdatesRequest) {
 		this.httpClient = httpClient;
 		this.checkForUpdatesRequest = checkForUpdatesRequest;
+
+		setOnFailed(event -> LOG.error("Failed to check for updates", getException()));
 	}
 
 	@Override

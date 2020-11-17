@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import org.cryptomator.ui.controls.FontAwesome5IconView?>
+<?import org.cryptomator.ui.controls.FormattedLabel?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Hyperlink?>
 <?import javafx.scene.control.Label?>
@@ -8,10 +10,8 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Circle?>
-<?import org.cryptomator.ui.controls.FontAwesome5IconView?>
-<?import org.cryptomator.ui.controls.FormattedLabel?>
-<VBox xmlns="http://javafx.com/javafx"
-	  xmlns:fx="http://javafx.com/fxml"
+<VBox xmlns:fx="http://javafx.com/fxml"
+	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.preferences.DonationKeyPreferencesController"
 	  spacing="18">
 	<padding>
@@ -26,7 +26,7 @@
 				</StackPane>
 				<FormattedLabel format="%preferences.donationKey.registeredFor" arg1="${controller.licenseHolder.licenseSubject}" wrapText="true"/>
 			</HBox>
-			
+
 			<HBox spacing="12" alignment="CENTER_LEFT" visible="${!controller.licenseHolder.validLicense}">
 				<StackPane alignment="CENTER" HBox.hgrow="NEVER">
 					<Circle styleClass="glyph-icon-primary" radius="24"/>
@@ -42,7 +42,7 @@
 				</VBox>
 			</HBox>
 		</StackPane>
-		
+
 		<TextArea fx:id="donationKeyField" wrapText="true" VBox.vgrow="ALWAYS" prefRowCount="6"/>
 	</children>
 </VBox>

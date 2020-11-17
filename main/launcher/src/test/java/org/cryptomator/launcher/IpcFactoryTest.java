@@ -62,8 +62,8 @@ public class IpcFactoryTest {
 				Assertions.assertTrue(endpoint2.isConnectedToRemote());
 				Assertions.assertNotSame(protocolHandler, endpoint2.getRemote());
 				Mockito.verifyZeroInteractions(protocolHandler);
-				endpoint2.getRemote().handleLaunchArgs(new String[] {"foo"});
-				Mockito.verify(protocolHandler).handleLaunchArgs(new String[] {"foo"});
+				endpoint2.getRemote().handleLaunchArgs(new String[]{"foo"});
+				Mockito.verify(protocolHandler).handleLaunchArgs(new String[]{"foo"});
 			}
 		}
 	}

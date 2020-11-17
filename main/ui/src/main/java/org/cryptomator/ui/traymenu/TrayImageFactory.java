@@ -1,9 +1,8 @@
 package org.cryptomator.ui.traymenu;
 
 import org.apache.commons.lang3.SystemUtils;
-import org.cryptomator.jni.MacApplicationUiAppearance;
-import org.cryptomator.jni.MacApplicationUiInterfaceStyle;
-import org.cryptomator.jni.MacFunctions;
+import org.cryptomator.integrations.uiappearance.Theme;
+import org.cryptomator.integrations.uiappearance.UiAppearanceProvider;
 
 import javax.inject.Inject;
 import java.awt.Image;
@@ -13,11 +12,11 @@ import java.util.Optional;
 @TrayMenuScoped
 class TrayImageFactory {
 
-	private final Optional<MacFunctions> macFunctions;
+	private final Optional<UiAppearanceProvider> appearanceProvider;
 
 	@Inject
-	TrayImageFactory(Optional<MacFunctions> macFunctions) {
-		this.macFunctions = macFunctions;
+	TrayImageFactory(Optional<UiAppearanceProvider> appearanceProvider) {
+		this.appearanceProvider = appearanceProvider;
 	}
 
 	public Image loadImage() {
@@ -26,10 +25,8 @@ class TrayImageFactory {
 	}
 
 	private String getMacResourceName() {
-		MacApplicationUiInterfaceStyle interfaceStyle = macFunctions.map(MacFunctions::uiAppearance) //
-				.map(MacApplicationUiAppearance::getCurrentInterfaceStyle) //
-				.orElse(MacApplicationUiInterfaceStyle.LIGHT);
-		return switch (interfaceStyle) {
+		var theme = appearanceProvider.map(UiAppearanceProvider::getSystemTheme).orElse(Theme.LIGHT);
+		return switch (theme) {
 			case DARK -> "/img/tray_icon_mac_white.png";
 			case LIGHT -> "/img/tray_icon_mac_black.png";
 		};

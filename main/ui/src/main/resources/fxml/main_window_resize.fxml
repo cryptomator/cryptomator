@@ -1,8 +1,8 @@
 <?import javafx.scene.Cursor?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.Region?>
-<AnchorPane xmlns="http://javafx.com/javafx"
-			xmlns:fx="http://javafx.com/fxml"
+<AnchorPane xmlns:fx="http://javafx.com/fxml"
+			xmlns="http://javafx.com/javafx"
 			fx:controller="org.cryptomator.ui.mainwindow.ResizeController"
 			nodeOrientation="LEFT_TO_RIGHT"
 			pickOnBounds="false">

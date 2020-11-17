@@ -15,7 +15,7 @@ import java.util.Map;
 
 @Singleton
 public class LoggerConfiguration {
-	
+
 	private final LoggerContext context;
 	private final Environment environment;
 	private final Appender<ILoggingEvent> stdout;

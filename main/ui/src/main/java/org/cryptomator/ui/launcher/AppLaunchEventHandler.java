@@ -1,6 +1,5 @@
 package org.cryptomator.ui.launcher;
 
-import javafx.application.Platform;
 import org.cryptomator.common.vaults.VaultListManager;
 import org.cryptomator.ui.fxapp.FxApplication;
 import org.slf4j.Logger;
@@ -9,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
+import javafx.application.Platform;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.concurrent.BlockingQueue;
@@ -54,10 +54,10 @@ class AppLaunchEventHandler {
 		switch (event.getType()) {
 			case REVEAL_APP -> fxApplicationStarter.get(hasTrayIcon).thenAccept(FxApplication::showMainWindow);
 			case OPEN_FILE -> fxApplicationStarter.get(hasTrayIcon).thenRun(() -> {
-					Platform.runLater(() -> {
-						event.getPathsToOpen().forEach(this::addVault);
-					});
+				Platform.runLater(() -> {
+					event.getPathsToOpen().forEach(this::addVault);
 				});
+			});
 			default -> LOG.warn("Unsupported event type: {}", event.getType());
 		}
 	}

@@ -1,16 +1,16 @@
 package org.cryptomator.ui.mainwindow;
 
+import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.ui.common.FXMLLoaderFactory;
+import org.cryptomator.ui.controls.DraggableListCell;
+
+import javax.inject.Inject;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.util.Callback;
-import org.cryptomator.ui.common.FXMLLoaderFactory;
-import org.cryptomator.ui.controls.DraggableListCell;
-import org.cryptomator.common.vaults.Vault;
-
-import javax.inject.Inject;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 
@@ -33,7 +33,7 @@ public class VaultListCellFactory implements Callback<ListView<Vault>, ListCell<
 			throw new UncheckedIOException("Failed to load /fxml/vault_list_cell.fxml.", e);
 		}
 	}
-	
+
 	private static class Cell extends DraggableListCell<Vault> {
 
 		private final Parent node;

@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import org.cryptomator.ui.controls.FontAwesome5IconView?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
-<?import org.cryptomator.ui.controls.FontAwesome5IconView?>
-<StackPane xmlns="http://javafx.com/javafx"
-		   xmlns:fx="http://javafx.com/fxml"
+<StackPane xmlns:fx="http://javafx.com/fxml"
+		   xmlns="http://javafx.com/javafx"
 		   fx:id="root"
 		   fx:controller="org.cryptomator.ui.mainwindow.MainWindowController"
 		   styleClass="main-window">
 	<VBox>
-		<fx:include source="/fxml/main_window_title.fxml" VBox.vgrow="NEVER" />
+		<fx:include source="/fxml/main_window_title.fxml" VBox.vgrow="NEVER"/>
 		<StackPane VBox.vgrow="ALWAYS">
 			<SplitPane dividerPositions="0.33" orientation="HORIZONTAL">
 				<fx:include source="/fxml/vault_list.fxml" SplitPane.resizableWithParent="false"/>

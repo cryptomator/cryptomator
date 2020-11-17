@@ -40,6 +40,7 @@ public class Environment {
 		LOG.debug("cryptomator.mountPointsDir: {}", System.getProperty("cryptomator.mountPointsDir"));
 		LOG.debug("cryptomator.minPwLength: {}", System.getProperty("cryptomator.minPwLength"));
 		LOG.debug("cryptomator.buildNumber: {}", System.getProperty("cryptomator.buildNumber"));
+		LOG.debug("fuse.experimental: {}", Boolean.getBoolean("fuse.experimental"));
 	}
 
 	public boolean useCustomLogbackConfig() {
@@ -72,6 +73,10 @@ public class Environment {
 
 	public int getMinPwLength() {
 		return getInt("cryptomator.minPwLength", DEFAULT_MIN_PW_LENGTH);
+	}
+
+	public boolean useExperimentalFuse() {
+		return Boolean.getBoolean("fuse.experimental");
 	}
 
 	private int getInt(String propertyName, int defaultValue) {

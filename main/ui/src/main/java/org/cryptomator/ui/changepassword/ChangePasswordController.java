@@ -1,17 +1,10 @@
 package org.cryptomator.ui.changepassword;
 
-import javafx.beans.binding.Bindings;
-import javafx.beans.binding.BooleanBinding;
-import javafx.beans.property.ObjectProperty;
-import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.stage.Stage;
+import org.cryptomator.common.keychain.KeychainManager;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.cryptofs.CryptoFileSystemProvider;
 import org.cryptomator.cryptolib.api.InvalidPassphraseException;
-import org.cryptomator.keychain.KeychainAccessException;
-import org.cryptomator.keychain.KeychainManager;
+import org.cryptomator.integrations.keychain.KeychainAccessException;
 import org.cryptomator.ui.common.Animations;
 import org.cryptomator.ui.common.ErrorComponent;
 import org.cryptomator.ui.common.FxController;
@@ -21,6 +14,13 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
+import javafx.beans.property.ObjectProperty;
+import javafx.fxml.FXML;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.stage.Stage;
 import java.io.IOException;
 import java.nio.CharBuffer;
 import java.util.Optional;
@@ -36,14 +36,14 @@ public class ChangePasswordController implements FxController {
 	private final Vault vault;
 	private final ObjectProperty<CharSequence> newPassword;
 	private final ErrorComponent.Builder errorComponent;
-	private final Optional<KeychainManager> keychain;
+	private final KeychainManager keychain;
 
 	public NiceSecurePasswordField oldPasswordField;
 	public CheckBox finalConfirmationCheckbox;
 	public Button finishButton;
 
 	@Inject
-	public ChangePasswordController(@ChangePasswordWindow Stage window, @ChangePasswordWindow Vault vault, @Named("newPassword") ObjectProperty<CharSequence> newPassword, ErrorComponent.Builder errorComponent, Optional<KeychainManager> keychain) {
+	public ChangePasswordController(@ChangePasswordWindow Stage window, @ChangePasswordWindow Vault vault, @Named("newPassword") ObjectProperty<CharSequence> newPassword, ErrorComponent.Builder errorComponent, KeychainManager keychain) {
 		this.window = window;
 		this.vault = vault;
 		this.newPassword = newPassword;
@@ -82,9 +82,9 @@ public class ChangePasswordController implements FxController {
 	}
 
 	private void updatePasswordInSystemkeychain() {
-		if (keychain.isPresent()) {
+		if (keychain.isSupported()) {
 			try {
-				keychain.get().changePassphrase(vault.getId(), CharBuffer.wrap(newPassword.get()));
+				keychain.changePassphrase(vault.getId(), CharBuffer.wrap(newPassword.get()));
 				LOG.info("Successfully updated password in system keychain for {}", vault.getDisplayName());
 			} catch (KeychainAccessException e) {
 				LOG.error("Failed to update password in system keychain.", e);

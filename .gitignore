@@ -18,5 +18,8 @@ pom.xml.versionsBackup
 .idea/**/workspace.xml
 .idea/**/tasks.xml
 .idea/dictionaries
+.idea/compiler.xml
+.idea/encodings.xml
+.idea/jarRepositories.xml
 .idea/**/libraries/
 *.iml

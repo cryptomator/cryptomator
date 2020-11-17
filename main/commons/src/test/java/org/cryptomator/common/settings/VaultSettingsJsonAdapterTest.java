@@ -50,7 +50,7 @@ public class VaultSettingsJsonAdapterTest {
 		String result = buf.toString();
 
 		MatcherAssert.assertThat(result, CoreMatchers.containsString("\"id\":\"test\""));
-		if(System.getProperty("os.name").contains("Windows")){
+		if (System.getProperty("os.name").contains("Windows")) {
 			MatcherAssert.assertThat(result, CoreMatchers.containsString("\"path\":\"\\\\foo\\\\bar\""));
 		} else {
 			MatcherAssert.assertThat(result, CoreMatchers.containsString("\"path\":\"/foo/bar\""));
