@@ -62,13 +62,13 @@ public class FuseVolume extends AbstractVolume {
 		for (int i = 0; i < results.size(); i++) {
 			MatchResult current = results.get(i);
 			MatchResult next = i + 1 < results.size() ? results.get(i + 1) : null;
-			if (getSpecialString(next) != null) {
-				//"next" is a quoted argument
+			if (getSpecialString(next) != null && current.group().endsWith("=")) {
+				//"next" is a quoted elements and "current" is missing it's argument
 				//--> "next" must be joined with "current" and is skipped in the regular iteration
 				strings.add(current.group() + getSpecialString(next));
 				i++;
 			} else {
-				//"next" is a normal unquoted string
+				//"next" is a normal unquoted string/is not missing from "current"
 				//--> Add "current" and advance
 				strings.add(current.group());
 			}
