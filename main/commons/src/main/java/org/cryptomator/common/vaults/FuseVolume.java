@@ -1,6 +1,5 @@
 package org.cryptomator.common.vaults;
 
-import com.google.common.base.Splitter;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.mountpoint.InvalidMountPointException;
 import org.cryptomator.common.mountpoint.MountPointChooser;
@@ -18,11 +17,18 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.SortedSet;
+import java.util.regex.MatchResult;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class FuseVolume extends AbstractVolume {
 
 	private static final Logger LOG = LoggerFactory.getLogger(FuseVolume.class);
+
+	private static final Pattern pattern = Pattern.compile("[^\\s\"']+|\"([^\"]*)\"|'([^']*)'"); //Thanks to https://stackoverflow.com/a/366532
 
 	private Mount mount;
 
@@ -51,7 +57,30 @@ public class FuseVolume extends AbstractVolume {
 	}
 
 	private String[] splitFlags(String str) {
-		return Splitter.on(' ').splitToList(str).toArray(String[]::new);
+		List<String> strings = new ArrayList<>();
+		List<MatchResult> results = pattern.matcher(str).results().collect(Collectors.toList());
+		for (int i = 0; i < results.size(); i++) {
+			MatchResult current = results.get(i);
+			MatchResult next = i + 1 < results.size() ? results.get(i + 1) : null;
+			if (getSpecialString(next) != null) {
+				//"next" is a quoted argument
+				//--> "next" must be joined with "current" and is skipped in the regular iteration
+				strings.add(current.group() + getSpecialString(next));
+				i++;
+			} else {
+				//"next" is a normal unquoted string
+				//--> Add "current" and advance
+				strings.add(current.group());
+			}
+		}
+		return strings.toArray(new String[0]);
+	}
+
+	private String getSpecialString(MatchResult result) {
+		if (result == null) {
+			return null;
+		}
+		return result.group(1) != null ? result.group(1) : result.group(2);
 	}
 
 	@Override
