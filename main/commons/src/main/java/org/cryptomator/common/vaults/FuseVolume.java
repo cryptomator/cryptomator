@@ -60,27 +60,34 @@ public class FuseVolume extends AbstractVolume {
 		List<String> strings = new ArrayList<>();
 		List<MatchResult> results = pattern.matcher(str).results().collect(Collectors.toList());
 		for (int i = 0; i < results.size(); i++) {
-			MatchResult current = results.get(i);
+			String current = group(results.get(i), false);
 			MatchResult next = i + 1 < results.size() ? results.get(i + 1) : null;
-			if (getSpecialString(next) != null && current.group().endsWith("=")) {
+
+			if (group(next, true) != null && current.endsWith("=")) {
 				//"next" is a quoted elements and "current" is missing it's argument
 				//--> "next" must be joined with "current" and is skipped in the regular iteration
-				strings.add(current.group() + getSpecialString(next));
+				strings.add(current + group(next, true));
 				i++;
 			} else {
 				//"next" is a normal unquoted string/is not missing from "current"
 				//--> Add "current" and advance
-				strings.add(current.group());
+				strings.add(current);
 			}
 		}
 		return strings.toArray(new String[0]);
 	}
 
-	private String getSpecialString(MatchResult result) {
+	private String group(MatchResult result, boolean onlyMatchQuoted) {
 		if (result == null) {
 			return null;
 		}
-		return result.group(1) != null ? result.group(1) : result.group(2);
+		if (result.group(1) != null) {
+			return result.group(1);
+		}
+		if (result.group(2) != null || onlyMatchQuoted) {
+			return result.group(2);
+		}
+		return result.group();
 	}
 
 	@Override
