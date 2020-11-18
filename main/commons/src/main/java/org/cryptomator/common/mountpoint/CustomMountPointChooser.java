@@ -20,9 +20,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
 
-public class CustomMountPointChooser implements MountPointChooser {
-
-	public static final int PRIORITY = 0;
+class CustomMountPointChooser implements MountPointChooser {
 
 	private static final Logger LOG = LoggerFactory.getLogger(CustomMountPointChooser.class);
 
@@ -94,8 +92,4 @@ public class CustomMountPointChooser implements MountPointChooser {
 		}
 	}
 
-	@Override
-	public int getPriority() {
-		return PRIORITY;
-	}
 }

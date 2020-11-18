@@ -1,6 +1,6 @@
 package org.cryptomator.common.vaults;
 
-import com.google.common.base.Splitter;
+import com.google.common.collect.Iterators;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.mountpoint.InvalidMountPointException;
 import org.cryptomator.common.mountpoint.MountPointChooser;
@@ -18,16 +18,20 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.SortedSet;
+import java.util.regex.Pattern;
 
 public class FuseVolume extends AbstractVolume {
 
 	private static final Logger LOG = LoggerFactory.getLogger(FuseVolume.class);
+	private static final Pattern NON_WHITESPACE_OR_QUOTED = Pattern.compile("[^\\s\"']+|\"([^\"]*)\"|'([^']*)'"); // Thanks to https://stackoverflow.com/a/366532
 
 	private Mount mount;
 
 	@Inject
-	public FuseVolume(@Named("orderedMountPointChoosers") SortedSet<MountPointChooser> choosers) {
+	public FuseVolume(@Named("orderedMountPointChoosers") Iterable<MountPointChooser> choosers) {
 		super(choosers);
 	}
 
@@ -51,7 +55,21 @@ public class FuseVolume extends AbstractVolume {
 	}
 
 	private String[] splitFlags(String str) {
-		return Splitter.on(' ').splitToList(str).toArray(String[]::new);
+		List<String> flags = new ArrayList<>();
+		var matches = Iterators.peekingIterator(NON_WHITESPACE_OR_QUOTED.matcher(str).results().iterator());
+		while (matches.hasNext()) {
+			String flag = matches.next().group();
+			// check if flag is missing its argument:
+			if (flag.endsWith("=") && matches.hasNext() && matches.peek().group(1) != null) { // next is "double quoted"
+				// next is "double quoted" and flag is missing its argument
+				flag += matches.next().group(1);
+			} else if (flag.endsWith("=") && matches.hasNext() && matches.peek().group(2) != null) {
+				// next is 'single quoted' and flag is missing its argument
+				flag += matches.next().group(2);
+			}
+			flags.add(flag);
+		}
+		return flags.toArray(String[]::new);
 	}
 
 	@Override

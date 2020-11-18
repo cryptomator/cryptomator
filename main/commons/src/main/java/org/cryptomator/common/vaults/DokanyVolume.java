@@ -28,7 +28,7 @@ public class DokanyVolume extends AbstractVolume {
 	private Mount mount;
 
 	@Inject
-	public DokanyVolume(VaultSettings vaultSettings, ExecutorService executorService, @Named("orderedMountPointChoosers") SortedSet<MountPointChooser> choosers) {
+	public DokanyVolume(VaultSettings vaultSettings, ExecutorService executorService, @Named("orderedMountPointChoosers") Iterable<MountPointChooser> choosers) {
 		super(choosers);
 		this.vaultSettings = vaultSettings;
 		this.mountFactory = new MountFactory(executorService);
