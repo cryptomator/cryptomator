@@ -107,6 +107,13 @@ public class FxApplication extends Application {
 		});
 	}
 
+	public void startLockWorkflow(Vault vault, Optional<Stage> owner) {
+		Platform.runLater(() -> {
+			//TODO
+			LOG.debug("Locking vault {}", vault.getDisplayName());
+		});
+	}
+
 	public void showQuitWindow(QuitResponse response) {
 		Platform.runLater(() -> {
 			quitWindowBuilderProvider.get().quitResponse(response).build().showQuitWindow();
