@@ -15,15 +15,15 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Optional;
 
 @Singleton
-class IrregularUnmountCleaner {
+class MountPointHelper {
 
-	public static Logger LOG = LoggerFactory.getLogger(IrregularUnmountCleaner.class);
+	public static Logger LOG = LoggerFactory.getLogger(MountPointHelper.class);
 
 	private final Optional<Path> tmpMountPointDir;
 	private volatile boolean alreadyChecked = false;
 
 	@Inject
-	public IrregularUnmountCleaner(Environment env) {
+	public MountPointHelper(Environment env) {
 		this.tmpMountPointDir = env.getMountPointsDir();
 	}
 

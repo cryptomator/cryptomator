@@ -20,14 +20,13 @@ class TemporaryMountPointChooser implements MountPointChooser {
 
 	private final VaultSettings vaultSettings;
 	private final Environment environment;
-	private final IrregularUnmountCleaner cleaner;
-	private volatile boolean clearedDebris;
+	private final MountPointHelper helper;
 
 	@Inject
-	public TemporaryMountPointChooser(VaultSettings vaultSettings, Environment environment, IrregularUnmountCleaner cleaner) {
+	public TemporaryMountPointChooser(VaultSettings vaultSettings, Environment environment, MountPointHelper helper) {
 		this.vaultSettings = vaultSettings;
 		this.environment = environment;
-		this.cleaner = cleaner;
+		this.helper = helper;
 	}
 
 	@Override
@@ -44,7 +43,7 @@ class TemporaryMountPointChooser implements MountPointChooser {
 		assert environment.getMountPointsDir().isPresent();
 		//clean leftovers of not-regularly unmounted vaults
 		//see https://github.com/cryptomator/cryptomator/issues/1013 and https://github.com/cryptomator/cryptomator/issues/1061
-		cleaner.clearIrregularUnmountDebrisIfNeeded();
+		helper.clearIrregularUnmountDebrisIfNeeded();
 		return this.environment.getMountPointsDir().map(this::choose);
 	}
 
