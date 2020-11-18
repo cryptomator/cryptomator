@@ -31,26 +31,30 @@ class MacVolumeMountChooser implements MountPointChooser {
 
 	@Override
 	public Optional<Path> chooseMountPoint(Volume caller) {
+		return Optional.of(VOLUME_PATH).map(this::choose);
+	}
+
+	private Path choose(Path parent) {
 		String basename = this.vaultSettings.mountName().get();
-		// regular
-		Path mountPoint = VOLUME_PATH.resolve(basename);
+		//regular
+		Path mountPoint = parent.resolve(basename);
 		if (Files.notExists(mountPoint)) {
-			return Optional.of(mountPoint);
+			return mountPoint;
 		}
-		// with id
-		mountPoint = VOLUME_PATH.resolve(basename + " (" + vaultSettings.getId() + ")");
+		//with id
+		mountPoint = parent.resolve(basename + " (" + vaultSettings.getId() + ")");
 		if (Files.notExists(mountPoint)) {
-			return Optional.of(mountPoint);
+			return mountPoint;
 		}
-		// with id and count
+		//with id and count
 		for (int i = 1; i < MAX_MOUNTPOINT_CREATION_RETRIES; i++) {
-			mountPoint = VOLUME_PATH.resolve(basename + "_(" + vaultSettings.getId() + ")_" + i);
+			mountPoint = parent.resolve(basename + "_(" + vaultSettings.getId() + ")_" + i);
 			if (Files.notExists(mountPoint)) {
-				return Optional.of(mountPoint);
+				return mountPoint;
 			}
 		}
 		LOG.error("Failed to find feasible mountpoint at /Volumes/{}_x. Giving up after {} attempts.", basename, MAX_MOUNTPOINT_CREATION_RETRIES);
-		return Optional.empty();
+		return null;
 	}
 
 	@Override
