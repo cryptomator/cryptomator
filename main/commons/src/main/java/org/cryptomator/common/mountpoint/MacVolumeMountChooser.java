@@ -28,7 +28,7 @@ class MacVolumeMountChooser implements MountPointChooser {
 
 	@Override
 	public Optional<Path> chooseMountPoint(Volume caller) {
-		return Optional.of(VOLUME_PATH).map(dir -> this.helper.chooseTemporaryMountPoint(this.vaultSettings, dir));
+		return Optional.of(helper.chooseTemporaryMountPoint(vaultSettings, VOLUME_PATH));
 	}
 
 	@Override
