@@ -1,5 +1,6 @@
 package org.cryptomator.common.vaults;
 
+import com.google.common.collect.Iterators;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.mountpoint.InvalidMountPointException;
 import org.cryptomator.common.mountpoint.MountPointChooser;
@@ -20,15 +21,12 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedSet;
-import java.util.regex.MatchResult;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 public class FuseVolume extends AbstractVolume {
 
 	private static final Logger LOG = LoggerFactory.getLogger(FuseVolume.class);
-
-	private static final Pattern pattern = Pattern.compile("[^\\s\"']+|\"([^\"]*)\"|'([^']*)'"); //Thanks to https://stackoverflow.com/a/366532
+	private static final Pattern NON_WHITESPACE_OR_QUOTED = Pattern.compile("[^\\s\"']+|\"([^\"]*)\"|'([^']*)'"); // Thanks to https://stackoverflow.com/a/366532
 
 	private Mount mount;
 
@@ -57,37 +55,21 @@ public class FuseVolume extends AbstractVolume {
 	}
 
 	private String[] splitFlags(String str) {
-		List<String> strings = new ArrayList<>();
-		List<MatchResult> results = pattern.matcher(str).results().collect(Collectors.toList());
-		for (int i = 0; i < results.size(); i++) {
-			String current = group(results.get(i), false);
-			MatchResult next = i + 1 < results.size() ? results.get(i + 1) : null;
-
-			if (group(next, true) != null && current.endsWith("=")) {
-				//"next" is a quoted elements and "current" is missing it's argument
-				//--> "next" must be joined with "current" and is skipped in the regular iteration
-				strings.add(current + group(next, true));
-				i++;
-			} else {
-				//"next" is a normal unquoted string/is not missing from "current"
-				//--> Add "current" and advance
-				strings.add(current);
+		List<String> flags = new ArrayList<>();
+		var matches = Iterators.peekingIterator(NON_WHITESPACE_OR_QUOTED.matcher(str).results().iterator());
+		while (matches.hasNext()) {
+			String flag = matches.next().group();
+			// check if flag is missing its argument:
+			if (flag.endsWith("=") && matches.hasNext() && matches.peek().group(1) != null) { // next is "double quoted"
+				// next is "double quoted" and flag is missing its argument
+				flag += matches.next().group(1);
+			} else if (flag.endsWith("=") && matches.hasNext() && matches.peek().group(2) != null) {
+				// next is 'single quoted' and flag is missing its argument
+				flag += matches.next().group(2);
 			}
+			flags.add(flag);
 		}
-		return strings.toArray(new String[0]);
-	}
-
-	private String group(MatchResult result, boolean onlyMatchQuoted) {
-		if (result == null) {
-			return null;
-		}
-		if (result.group(1) != null) {
-			return result.group(1);
-		}
-		if (result.group(2) != null || onlyMatchQuoted) {
-			return result.group(2);
-		}
-		return result.group();
+		return flags.toArray(String[]::new);
 	}
 
 	@Override
