@@ -73,6 +73,7 @@ class IrregularUnmountCleaner {
 	private void deleteEmptyDir(Path dir) throws IOException {
 		assert Files.isDirectory(dir, LinkOption.NOFOLLOW_LINKS);
 		try {
+			ensureIsEmpty(dir);
 			Files.delete(dir); // attempt to delete dir non-recursively (will fail, if there are contents)
 		} catch (DirectoryNotEmptyException e) {
 			LOG.info("Found non-empty directory in mountpoint dir: {}", dir);
@@ -86,4 +87,9 @@ class IrregularUnmountCleaner {
 		}
 	}
 
+	private void ensureIsEmpty(Path dir) throws IOException {
+		if(Files.newDirectoryStream(dir).iterator().hasNext()) {
+			throw new DirectoryNotEmptyException(dir.toString());
+		}
+	}
 }
