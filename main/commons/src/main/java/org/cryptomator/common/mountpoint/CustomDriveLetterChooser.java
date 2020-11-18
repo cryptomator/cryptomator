@@ -9,9 +9,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
 
-public class CustomDriveLetterChooser implements MountPointChooser {
-
-	public static final int PRIORITY = 100;
+class CustomDriveLetterChooser implements MountPointChooser {
 
 	private final VaultSettings vaultSettings;
 
@@ -28,10 +26,5 @@ public class CustomDriveLetterChooser implements MountPointChooser {
 	@Override
 	public Optional<Path> chooseMountPoint(Volume caller) {
 		return this.vaultSettings.getWinDriveLetter().map(letter -> letter.charAt(0) + ":\\").map(Paths::get);
-	}
-
-	@Override
-	public int getPriority() {
-		return PRIORITY;
 	}
 }

@@ -10,7 +10,7 @@ import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 
-public class IrregularUnmountCleaner {
+class IrregularUnmountCleaner {
 
 	public static Logger LOG = LoggerFactory.getLogger(IrregularUnmountCleaner.class);
 
