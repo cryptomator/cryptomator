@@ -47,7 +47,7 @@ import java.util.SortedSet;
  * If the preparation succeeds {@link #cleanup(Volume, Path)} can be used after unmount to do any
  * remaining cleanup.
  */
-public interface MountPointChooser extends Comparable<MountPointChooser> {
+public interface MountPointChooser {
 
 	/**
 	 * Called by the {@link Volume} to determine whether this MountPointChooser is
@@ -135,35 +135,4 @@ public interface MountPointChooser extends Comparable<MountPointChooser> {
 		//NO-OP
 	}
 
-	/**
-	 * Called by the {@link MountPointChooserModule} to sort the available MPCs
-	 * and determine their execution order.
-	 * The priority must be defined by the developer to reflect a useful execution order.
-	 * MPCs with lower priorities will be placed at lower indices in the resulting
-	 * {@link SortedSet} and will be executed with higher probability.<br>
-	 * A specific priority <b>must not</b> be assigned to more than one MPC at a time;
-	 * the result of having two MPCs with equal priority is undefined.
-	 *
-	 * @return the priority of this MPC.
-	 */
-	int getPriority();
-
-	/**
-	 * Called by the {@link Volume} to determine the execution order of the registered MPCs.
-	 * <b>Implementations usually may not override this method.</b> This default implementation
-	 * sorts the MPCs in ascending order of their {@link #getPriority() priority.}<br>
-	 * <br>
-	 * <b>Original description:</b>
-	 * <p>{@inheritDoc}
-	 *
-	 * @implNote This default implementation sorts the MPCs in ascending order
-	 * of their {@link #getPriority() priority.}
-	 */
-	@Override
-	default int compareTo(MountPointChooser other) {
-		Preconditions.checkNotNull(other, "Other must not be null!");
-
-		//Sort by priority (ascending order)
-		return Integer.compare(this.getPriority(), other.getPriority());
-	}
 }

@@ -1,6 +1,5 @@
 package org.cryptomator.common.mountpoint;
 
-import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.Environment;
 import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.common.vaults.Volume;
@@ -12,23 +11,23 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Optional;
 
-public class TemporaryMountPointChooser implements MountPointChooser {
-
-	public static final int PRIORITY = 300;
+class TemporaryMountPointChooser implements MountPointChooser {
 
 	private static final Logger LOG = LoggerFactory.getLogger(TemporaryMountPointChooser.class);
 	private static final int MAX_TMPMOUNTPOINT_CREATION_RETRIES = 10;
 
 	private final VaultSettings vaultSettings;
 	private final Environment environment;
+	private final IrregularUnmountCleaner cleaner;
+	private volatile boolean clearedDebris;
 
 	@Inject
-	public TemporaryMountPointChooser(VaultSettings vaultSettings, Environment environment) {
+	public TemporaryMountPointChooser(VaultSettings vaultSettings, Environment environment, IrregularUnmountCleaner cleaner) {
 		this.vaultSettings = vaultSettings;
 		this.environment = environment;
+		this.cleaner = cleaner;
 	}
 
 	@Override
@@ -42,8 +41,13 @@ public class TemporaryMountPointChooser implements MountPointChooser {
 
 	@Override
 	public Optional<Path> chooseMountPoint(Volume caller) {
+		assert environment.getMountPointsDir().isPresent();
+		//clean leftovers of not-regularly unmounted vaults
+		//see https://github.com/cryptomator/cryptomator/issues/1013 and https://github.com/cryptomator/cryptomator/issues/1061
+		cleaner.clearIrregularUnmountDebrisIfNeeded();
 		return this.environment.getMountPointsDir().map(this::choose);
 	}
+
 
 	private Path choose(Path parent) {
 		String basename = this.vaultSettings.mountName().get();
@@ -53,13 +57,13 @@ public class TemporaryMountPointChooser implements MountPointChooser {
 			return mountPoint;
 		}
 		//with id
-		mountPoint = parent.resolve(basename + " (" +vaultSettings.getId() + ")");
+		mountPoint = parent.resolve(basename + " (" + vaultSettings.getId() + ")");
 		if (Files.notExists(mountPoint)) {
 			return mountPoint;
 		}
 		//with id and count
 		for (int i = 1; i < MAX_TMPMOUNTPOINT_CREATION_RETRIES; i++) {
-			mountPoint = parent.resolve(basename + "_(" +vaultSettings.getId() + ")_"+i);
+			mountPoint = parent.resolve(basename + "_(" + vaultSettings.getId() + ")_" + i);
 			if (Files.notExists(mountPoint)) {
 				return mountPoint;
 			}
@@ -70,13 +74,6 @@ public class TemporaryMountPointChooser implements MountPointChooser {
 
 	@Override
 	public boolean prepare(Volume caller, Path mountPoint) throws InvalidMountPointException {
-		// https://github.com/osxfuse/osxfuse/issues/306#issuecomment-245114592:
-		// In order to allow non-admin users to mount FUSE volumes in `/Volumes`,
-		// starting with version 3.5.0, FUSE will create non-existent mount points automatically.
-		if (SystemUtils.IS_OS_MAC && mountPoint.getParent().equals(Paths.get("/Volumes"))) {
-			return false;
-		}
-
 		try {
 			switch (caller.getMountPointRequirement()) {
 				case PARENT_NO_MOUNT_POINT -> {
@@ -114,8 +111,4 @@ public class TemporaryMountPointChooser implements MountPointChooser {
 		}
 	}
 
-	@Override
-	public int getPriority() {
-		return PRIORITY;
-	}
 }
