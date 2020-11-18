@@ -28,7 +28,7 @@ class IrregularUnmountCleaner {
 	}
 
 
-	public void clearIrregularUnmountDebrisIfNeeded() {
+	public synchronized void clearIrregularUnmountDebrisIfNeeded() {
 		if (alreadyChecked || tmpMountPointDir.isEmpty()) {
 			return; //nuthin to do
 		}
