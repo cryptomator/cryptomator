@@ -15,9 +15,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
 
-public class TemporaryMountPointChooser implements MountPointChooser {
-
-	public static final int PRIORITY = 300;
+class TemporaryMountPointChooser implements MountPointChooser {
 
 	private static final Logger LOG = LoggerFactory.getLogger(TemporaryMountPointChooser.class);
 	private static final int MAX_TMPMOUNTPOINT_CREATION_RETRIES = 10;
@@ -70,13 +68,6 @@ public class TemporaryMountPointChooser implements MountPointChooser {
 
 	@Override
 	public boolean prepare(Volume caller, Path mountPoint) throws InvalidMountPointException {
-		// https://github.com/osxfuse/osxfuse/issues/306#issuecomment-245114592:
-		// In order to allow non-admin users to mount FUSE volumes in `/Volumes`,
-		// starting with version 3.5.0, FUSE will create non-existent mount points automatically.
-		if (SystemUtils.IS_OS_MAC && mountPoint.getParent().equals(Paths.get("/Volumes"))) {
-			return false;
-		}
-
 		try {
 			switch (caller.getMountPointRequirement()) {
 				case PARENT_NO_MOUNT_POINT -> {
@@ -114,8 +105,4 @@ public class TemporaryMountPointChooser implements MountPointChooser {
 		}
 	}
 
-	@Override
-	public int getPriority() {
-		return PRIORITY;
-	}
 }

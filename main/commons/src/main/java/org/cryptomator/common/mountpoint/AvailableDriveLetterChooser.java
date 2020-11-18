@@ -8,9 +8,7 @@ import javax.inject.Inject;
 import java.nio.file.Path;
 import java.util.Optional;
 
-public class AvailableDriveLetterChooser implements MountPointChooser {
-
-	public static final int PRIORITY = 200;
+class AvailableDriveLetterChooser implements MountPointChooser {
 
 	private final WindowsDriveLetters windowsDriveLetters;
 
@@ -27,10 +25,5 @@ public class AvailableDriveLetterChooser implements MountPointChooser {
 	@Override
 	public Optional<Path> chooseMountPoint(Volume caller) {
 		return this.windowsDriveLetters.getAvailableDriveLetterPath();
-	}
-
-	@Override
-	public int getPriority() {
-		return PRIORITY;
 	}
 }
