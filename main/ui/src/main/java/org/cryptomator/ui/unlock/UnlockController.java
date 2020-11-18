@@ -31,6 +31,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Translate;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import javafx.util.Duration;
 import java.util.Arrays;
 import java.util.Optional;
@@ -78,7 +79,7 @@ public class UnlockController implements FxController {
 		this.userInteractionDisabled = passwordEntryLock.awaitingInteraction().not();
 		this.unlockButtonDisabled = new SimpleBooleanProperty();
 		this.vaultName = WeakBindings.bindString(vault.displayNameProperty());
-		this.window.setOnCloseRequest(windowEvent -> cancel());
+		this.window.setOnHiding(this::windowClosed);
 	}
 
 	@FXML
@@ -128,14 +129,18 @@ public class UnlockController implements FxController {
 		passwordEntryLock.awaitingInteraction().addListener(observable -> stopUnlockAnimation());
 	}
 
-
 	@FXML
 	public void cancel() {
-		LOG.debug("Unlock canceled by user.");
 		window.close();
-		passwordEntryLock.interacted(UnlockModule.PasswordEntry.CANCELED);
 	}
 
+	private void windowClosed(WindowEvent windowEvent) {
+		// if not already interacted, mark this workflow as cancelled:
+		if (passwordEntryLock.awaitingInteraction().get()) {
+			LOG.debug("Unlock canceled by user.");
+			passwordEntryLock.interacted(UnlockModule.PasswordEntry.CANCELED);
+		}
+	}
 
 	@FXML
 	public void unlock() {
