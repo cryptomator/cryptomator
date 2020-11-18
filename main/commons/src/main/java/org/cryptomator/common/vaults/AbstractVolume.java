@@ -20,7 +20,8 @@ public abstract class AbstractVolume implements Volume {
 	}
 
 	protected Path determineMountPoint() throws InvalidMountPointException {
-		for (var chooser : Iterables.filter(choosers, c -> c.isApplicable(this))) {
+		var applicableChoosers = Iterables.filter(choosers, c -> c.isApplicable(this));
+		for (var chooser : applicableChoosers) {
 			Optional<Path> chosenPath = chooser.chooseMountPoint(this);
 			if (chosenPath.isEmpty()) { // chooser couldn't find a feasible mountpoint
 				continue;
@@ -29,7 +30,7 @@ public abstract class AbstractVolume implements Volume {
 			this.usedChooser = chooser;
 			return chosenPath.get();
 		}
-		throw new InvalidMountPointException("No feasible MountPoint found!");
+		throw new InvalidMountPointException(String.format("No feasible MountPoint found by choosers: %s", applicableChoosers));
 	}
 
 	protected void cleanupMountPoint() {
