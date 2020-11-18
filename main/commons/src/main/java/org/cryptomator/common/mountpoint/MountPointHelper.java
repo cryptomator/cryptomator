@@ -20,11 +20,10 @@ import java.util.Optional;
 class MountPointHelper {
 
 	public static Logger LOG = LoggerFactory.getLogger(MountPointHelper.class);
-
 	private static final int MAX_TMPMOUNTPOINT_CREATION_RETRIES = 10;
 
 	private final Optional<Path> tmpMountPointDir;
-	private volatile boolean alreadyChecked = false;
+	private volatile boolean unmountDebrisCleared = false;
 
 	@Inject
 	public MountPointHelper(Environment env) {
@@ -55,13 +54,13 @@ class MountPointHelper {
 	}
 
 	public synchronized void clearIrregularUnmountDebrisIfNeeded() {
-		if (alreadyChecked || tmpMountPointDir.isEmpty()) {
-			return; //nuthin to do
+		if (unmountDebrisCleared || tmpMountPointDir.isEmpty()) {
+			return; // nothing to do
 		}
 		if (Files.exists(tmpMountPointDir.get(), LinkOption.NOFOLLOW_LINKS)) {
 			clearIrregularUnmountDebris(tmpMountPointDir.get());
 		}
-		alreadyChecked = true;
+		unmountDebrisCleared = true;
 	}
 
 	private void clearIrregularUnmountDebris(Path dirContainingMountPoints) {
@@ -92,7 +91,7 @@ class MountPointHelper {
 		} catch (IOException e) {
 			LOG.warn("Unable to perform cleanup of mountpoint dir {}.", dirContainingMountPoints, e);
 		} finally {
-			alreadyChecked = true;
+			unmountDebrisCleared = true;
 		}
 	}
 
