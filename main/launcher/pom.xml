@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.cryptomator</groupId>
 		<artifactId>main</artifactId>
-		<version>1.5.9</version>
+		<version>1.5.10</version>
 	</parent>
 	<artifactId>launcher</artifactId>
 	<name>Cryptomator Launcher</name>
