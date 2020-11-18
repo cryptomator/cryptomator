@@ -10,7 +10,7 @@ import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 
-public class IrregularUnmountCleaner {
+class IrregularUnmountCleaner {
 
 	public static Logger LOG = LoggerFactory.getLogger(IrregularUnmountCleaner.class);
 
@@ -48,7 +48,6 @@ public class IrregularUnmountCleaner {
 	private static void deleteEmptyDir(Path dir) throws IOException {
 		assert Files.isDirectory(dir, LinkOption.NOFOLLOW_LINKS);
 		try {
-			checkEmpty(dir);
 			Files.delete(dir); // attempt to delete dir non-recursively (will fail, if there are contents)
 		} catch (DirectoryNotEmptyException e) {
 			LOG.info("Found non-empty directory in mountpoint dir: {}", dir);
@@ -59,12 +58,6 @@ public class IrregularUnmountCleaner {
 		assert Files.isSymbolicLink(symlink);
 		if (Files.notExists(symlink)) { // following link: target does not exist
 			Files.delete(symlink);
-		}
-	}
-
-	private static void checkEmpty(Path dir) throws IOException {
-		if(Files.newDirectoryStream(dir).iterator().hasNext()) {
-			throw new DirectoryNotEmptyException(dir.toString());
 		}
 	}
 
