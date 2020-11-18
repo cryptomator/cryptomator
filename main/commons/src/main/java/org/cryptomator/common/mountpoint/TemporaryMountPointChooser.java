@@ -1,6 +1,5 @@
 package org.cryptomator.common.mountpoint;
 
-import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.Environment;
 import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.common.vaults.Volume;
@@ -11,11 +10,8 @@ import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.LinkOption;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 class TemporaryMountPointChooser implements MountPointChooser {
 
@@ -24,12 +20,14 @@ class TemporaryMountPointChooser implements MountPointChooser {
 
 	private final VaultSettings vaultSettings;
 	private final Environment environment;
+	private final IrregularUnmountCleaner cleaner;
 	private volatile boolean clearedDebris;
 
 	@Inject
-	public TemporaryMountPointChooser(VaultSettings vaultSettings, Environment environment) {
+	public TemporaryMountPointChooser(VaultSettings vaultSettings, Environment environment, IrregularUnmountCleaner cleaner) {
 		this.vaultSettings = vaultSettings;
 		this.environment = environment;
+		this.cleaner = cleaner;
 	}
 
 	@Override
@@ -43,23 +41,13 @@ class TemporaryMountPointChooser implements MountPointChooser {
 
 	@Override
 	public Optional<Path> chooseMountPoint(Volume caller) {
-		clearDebrisIfNeeded();
+		assert environment.getMountPointsDir().isPresent();
+		//clean leftovers of not-regularly unmounted vaults
+		//see https://github.com/cryptomator/cryptomator/issues/1013 and https://github.com/cryptomator/cryptomator/issues/1061
+		cleaner.clearIrregularUnmountDebrisIfNeeded();
 		return this.environment.getMountPointsDir().map(this::choose);
 	}
 
-	//clean leftovers of not-regularly unmounted vaults
-	//see https://github.com/cryptomator/cryptomator/issues/1013 and https://github.com/cryptomator/cryptomator/issues/1061
-	private synchronized void clearDebrisIfNeeded() {
-		assert environment.getMountPointsDir().isPresent();
-		if (clearedDebris) {
-			return; // already cleared
-		}
-		Path mountPointDir = environment.getMountPointsDir().get();
-		if (Files.exists(mountPointDir, LinkOption.NOFOLLOW_LINKS)) {
-			IrregularUnmountCleaner.removeIrregularUnmountDebris(mountPointDir);
-		}
-		clearedDebris = true;
-	}
 
 	private Path choose(Path parent) {
 		String basename = this.vaultSettings.mountName().get();
