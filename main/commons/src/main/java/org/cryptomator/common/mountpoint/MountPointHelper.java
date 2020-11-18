@@ -1,11 +1,13 @@
 package org.cryptomator.common.mountpoint;
 
 import org.cryptomator.common.Environment;
+import org.cryptomator.common.settings.VaultSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.Files;
@@ -19,6 +21,8 @@ class MountPointHelper {
 
 	public static Logger LOG = LoggerFactory.getLogger(MountPointHelper.class);
 
+	private static final int MAX_TMPMOUNTPOINT_CREATION_RETRIES = 10;
+
 	private final Optional<Path> tmpMountPointDir;
 	private volatile boolean alreadyChecked = false;
 
@@ -27,6 +31,28 @@ class MountPointHelper {
 		this.tmpMountPointDir = env.getMountPointsDir();
 	}
 
+	public Path chooseTemporaryMountPoint(VaultSettings vaultSettings, Path parentDir) {
+		String basename = vaultSettings.mountName().get();
+		//regular
+		Path mountPoint = parentDir.resolve(basename);
+		if (Files.notExists(mountPoint)) {
+			return mountPoint;
+		}
+		//with id
+		mountPoint = parentDir.resolve(basename + " (" + vaultSettings.getId() + ")");
+		if (Files.notExists(mountPoint)) {
+			return mountPoint;
+		}
+		//with id and count
+		for (int i = 1; i < MAX_TMPMOUNTPOINT_CREATION_RETRIES; i++) {
+			mountPoint = parentDir.resolve(basename + "_(" + vaultSettings.getId() + ")_" + i);
+			if (Files.notExists(mountPoint)) {
+				return mountPoint;
+			}
+		}
+		LOG.error("Failed to find feasible mountpoint at {}{}{}_x. Giving up after {} attempts.", parentDir, File.separator, basename, MAX_TMPMOUNTPOINT_CREATION_RETRIES);
+		return null;
+	}
 
 	public synchronized void clearIrregularUnmountDebrisIfNeeded() {
 		if (alreadyChecked || tmpMountPointDir.isEmpty()) {
@@ -88,7 +114,7 @@ class MountPointHelper {
 	}
 
 	private void ensureIsEmpty(Path dir) throws IOException {
-		if(Files.newDirectoryStream(dir).iterator().hasNext()) {
+		if (Files.newDirectoryStream(dir).iterator().hasNext()) {
 			throw new DirectoryNotEmptyException(dir.toString());
 		}
 	}

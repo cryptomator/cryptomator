@@ -3,25 +3,22 @@ package org.cryptomator.common.mountpoint;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.common.vaults.Volume;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
 
 class MacVolumeMountChooser implements MountPointChooser {
 
-	private static final Logger LOG = LoggerFactory.getLogger(MacVolumeMountChooser.class);
-	private static final int MAX_MOUNTPOINT_CREATION_RETRIES = 10;
 	private static final Path VOLUME_PATH = Path.of("/Volumes");
 
 	private final VaultSettings vaultSettings;
+	private final MountPointHelper helper;
 
 	@Inject
-	public MacVolumeMountChooser(VaultSettings vaultSettings) {
+	public MacVolumeMountChooser(VaultSettings vaultSettings, MountPointHelper helper) {
 		this.vaultSettings = vaultSettings;
+		this.helper = helper;
 	}
 
 	@Override
@@ -31,30 +28,7 @@ class MacVolumeMountChooser implements MountPointChooser {
 
 	@Override
 	public Optional<Path> chooseMountPoint(Volume caller) {
-		return Optional.of(VOLUME_PATH).map(this::choose);
-	}
-
-	private Path choose(Path parent) {
-		String basename = this.vaultSettings.mountName().get();
-		//regular
-		Path mountPoint = parent.resolve(basename);
-		if (Files.notExists(mountPoint)) {
-			return mountPoint;
-		}
-		//with id
-		mountPoint = parent.resolve(basename + " (" + vaultSettings.getId() + ")");
-		if (Files.notExists(mountPoint)) {
-			return mountPoint;
-		}
-		//with id and count
-		for (int i = 1; i < MAX_MOUNTPOINT_CREATION_RETRIES; i++) {
-			mountPoint = parent.resolve(basename + "_(" + vaultSettings.getId() + ")_" + i);
-			if (Files.notExists(mountPoint)) {
-				return mountPoint;
-			}
-		}
-		LOG.error("Failed to find feasible mountpoint at /Volumes/{}_x. Giving up after {} attempts.", basename, MAX_MOUNTPOINT_CREATION_RETRIES);
-		return null;
+		return Optional.of(VOLUME_PATH).map(dir -> this.helper.chooseTemporaryMountPoint(this.vaultSettings, dir));
 	}
 
 	@Override
