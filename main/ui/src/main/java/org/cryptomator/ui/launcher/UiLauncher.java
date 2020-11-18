@@ -1,6 +1,5 @@
 package org.cryptomator.ui.launcher;
 
-import org.cryptomator.common.Environment;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.integrations.tray.TrayIntegrationProvider;
@@ -29,17 +28,15 @@ public class UiLauncher {
 	private final FxApplicationStarter fxApplicationStarter;
 	private final AppLaunchEventHandler launchEventHandler;
 	private final Optional<TrayIntegrationProvider> trayIntegration;
-	private final Environment env;
 
 	@Inject
-	public UiLauncher(Settings settings, ObservableList<Vault> vaults, TrayMenuComponent.Builder trayComponent, FxApplicationStarter fxApplicationStarter, AppLaunchEventHandler launchEventHandler, Optional<TrayIntegrationProvider> trayIntegration, Environment env) {
+	public UiLauncher(Settings settings, ObservableList<Vault> vaults, TrayMenuComponent.Builder trayComponent, FxApplicationStarter fxApplicationStarter, AppLaunchEventHandler launchEventHandler, Optional<TrayIntegrationProvider> trayIntegration) {
 		this.settings = settings;
 		this.vaults = vaults;
 		this.trayComponent = trayComponent;
 		this.fxApplicationStarter = fxApplicationStarter;
 		this.launchEventHandler = launchEventHandler;
 		this.trayIntegration = trayIntegration;
-		this.env = env;
 	}
 
 	public void launch() {
