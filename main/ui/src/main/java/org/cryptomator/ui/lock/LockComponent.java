@@ -19,7 +19,7 @@ public interface LockComponent {
 
 	LockWorkflow lockWorkflow();
 
-	default Future<Boolean> startLockWorkflow() {
+	default Future<Void> startLockWorkflow() {
 		LockWorkflow workflow = lockWorkflow();
 		defaultExecutorService().submit(workflow);
 		return workflow;

@@ -17,7 +17,15 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 
-public class LockWorkflow extends Task<Boolean> {
+/**
+ * The sequence of actions performed and checked during lock of a vault.
+ * <p>
+ * This class implements the Task interface, sucht that it can run in the background with some possible forground operations/requests to the ui, without blocking the main app.
+ * If the task succeeded, the vault was successfully locked.
+ * If the task is canceled, the lock was canceled.
+ * If the task failed, the lock failed due to an exception.
+ */
+public class LockWorkflow extends Task<Void> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(LockWorkflow.class);
 
@@ -37,15 +45,11 @@ public class LockWorkflow extends Task<Boolean> {
 	}
 
 	@Override
-	protected Boolean call() throws Volume.VolumeException, InterruptedException {
-		// change vault state to processing -- done by overriding scheduled method of Task
-		if (attemptLock() || attemptForcedLock()) {
-			handleSuccess();
-			return true;
-		} else {
-			//canceled -- for error the overriden failed() method is responsible
-			return false;
+	protected Void call() throws Volume.VolumeException, InterruptedException {
+		if (!attemptLock()) {
+			attemptForcedLock();
 		}
+		return null;
 	}
 
 	private boolean attemptLock() {
@@ -53,7 +57,7 @@ public class LockWorkflow extends Task<Boolean> {
 			vault.lock(false);
 			return true;
 		} catch (Volume.VolumeException e) {
-			e.printStackTrace();
+			LOG.debug("Regular lock of {} failed.", vault.getDisplayName(), e);
 			return false;
 		}
 	}
@@ -77,15 +81,11 @@ public class LockWorkflow extends Task<Boolean> {
 				vault.lock(true);
 				return true;
 			case CANCEL:
-				// if lock was performed over main window, show it again
+				this.cancel(false);
 				return false;
 			default:
 				return false;
 		}
-	}
-
-	private void handleSuccess() {
-		LOG.info("Lock of {} succeeded.", vault.getDisplayName());
 	}
 
 	@Override
@@ -95,17 +95,19 @@ public class LockWorkflow extends Task<Boolean> {
 
 	@Override
 	protected void succeeded() {
+		LOG.info("Lock of {} succeeded.", vault.getDisplayName());
 		vault.setState(VaultState.LOCKED);
 	}
 
 	@Override
 	protected void failed() {
-		LOG.info("Failed to lock {}.", vault.getDisplayName());
+		LOG.warn("Failed to lock {}.", vault.getDisplayName());
 		vault.setState(VaultState.UNLOCKED);
 	}
 
 	@Override
 	protected void cancelled() {
+		LOG.debug("Lock of {} canceled.", vault.getDisplayName());
 		vault.setState(VaultState.UNLOCKED);
 	}
 

@@ -45,4 +45,10 @@ public class LockForcedController implements FxController {
 		}
 	}
 
+	// ----- Getter & Setter -----
+
+	public String getVaultName() {
+		return vault.getDisplayName();
+	}
+
 }

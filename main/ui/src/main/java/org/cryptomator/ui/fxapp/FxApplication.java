@@ -113,7 +113,7 @@ public class FxApplication extends Application {
 	public void startLockWorkflow(Vault vault, Optional<Stage> owner) {
 		Platform.runLater(() -> {
 			lockWindowBuilderProvider.get().vault(vault).owner(owner).build().startLockWorkflow();
-			LOG.debug("Locking vault {}", vault.getDisplayName());
+			LOG.debug("Start lock workflow for {}", vault.getDisplayName());
 		});
 	}
 
