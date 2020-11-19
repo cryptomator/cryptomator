@@ -11,6 +11,8 @@ public enum FxmlFile {
 	CHANGEPASSWORD("/fxml/changepassword.fxml"), //
 	ERROR("/fxml/error.fxml"), //
 	FORGET_PASSWORD("/fxml/forget_password.fxml"), //
+	LOCK_FORCED("/fxml/lock_forced.fxml"), //
+	LOCK_FAILED("/fxml/lock_failed.fxml"), //
 	MAIN_WINDOW("/fxml/main_window.fxml"), //
 	MIGRATION_CAPABILITY_ERROR("/fxml/migration_capability_error.fxml"), //
 	MIGRATION_IMPOSSIBLE("/fxml/migration_impossible.fxml"),
