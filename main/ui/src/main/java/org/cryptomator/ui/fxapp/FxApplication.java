@@ -12,6 +12,7 @@ import org.cryptomator.integrations.uiappearance.UiAppearanceException;
 import org.cryptomator.integrations.uiappearance.UiAppearanceListener;
 import org.cryptomator.integrations.uiappearance.UiAppearanceProvider;
 import org.cryptomator.ui.common.VaultService;
+import org.cryptomator.ui.lock.LockComponent;
 import org.cryptomator.ui.mainwindow.MainWindowComponent;
 import org.cryptomator.ui.preferences.PreferencesComponent;
 import org.cryptomator.ui.preferences.SelectedPreferencesTab;
@@ -41,6 +42,7 @@ public class FxApplication extends Application {
 	private final Lazy<MainWindowComponent> mainWindow;
 	private final Lazy<PreferencesComponent> preferencesWindow;
 	private final Provider<UnlockComponent.Builder> unlockWindowBuilderProvider;
+	private final Provider<LockComponent.Builder> lockWindowBuilderProvider;
 	private final Provider<QuitComponent.Builder> quitWindowBuilderProvider;
 	private final Optional<TrayIntegrationProvider> trayIntegration;
 	private final Optional<UiAppearanceProvider> appearanceProvider;
@@ -50,11 +52,12 @@ public class FxApplication extends Application {
 	private final UiAppearanceListener systemInterfaceThemeListener = this::systemInterfaceThemeChanged;
 
 	@Inject
-	FxApplication(Settings settings, Lazy<MainWindowComponent> mainWindow, Lazy<PreferencesComponent> preferencesWindow, Provider<UnlockComponent.Builder> unlockWindowBuilderProvider, Provider<QuitComponent.Builder> quitWindowBuilderProvider, Optional<TrayIntegrationProvider> trayIntegration, Optional<UiAppearanceProvider> appearanceProvider, VaultService vaultService, LicenseHolder licenseHolder, ObservableSet<Stage> visibleStages) {
+	FxApplication(Settings settings, Lazy<MainWindowComponent> mainWindow, Lazy<PreferencesComponent> preferencesWindow, Provider<UnlockComponent.Builder> unlockWindowBuilderProvider, Provider<LockComponent.Builder> lockWindowBuilderProvider, Provider<QuitComponent.Builder> quitWindowBuilderProvider, Optional<TrayIntegrationProvider> trayIntegration, Optional<UiAppearanceProvider> appearanceProvider, VaultService vaultService, LicenseHolder licenseHolder, ObservableSet<Stage> visibleStages) {
 		this.settings = settings;
 		this.mainWindow = mainWindow;
 		this.preferencesWindow = preferencesWindow;
 		this.unlockWindowBuilderProvider = unlockWindowBuilderProvider;
+		this.lockWindowBuilderProvider = lockWindowBuilderProvider;
 		this.quitWindowBuilderProvider = quitWindowBuilderProvider;
 		this.trayIntegration = trayIntegration;
 		this.appearanceProvider = appearanceProvider;
@@ -109,7 +112,7 @@ public class FxApplication extends Application {
 
 	public void startLockWorkflow(Vault vault, Optional<Stage> owner) {
 		Platform.runLater(() -> {
-			//TODO
+			lockWindowBuilderProvider.get().vault(vault).owner(owner).build().startLockWorkflow();
 			LOG.debug("Locking vault {}", vault.getDisplayName());
 		});
 	}
