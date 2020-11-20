@@ -94,6 +94,8 @@ public class LockWorkflow extends Task<Void> {
 	protected void failed() {
 		LOG.warn("Failed to lock {}.", vault.getDisplayName());
 		vault.setState(VaultState.UNLOCKED);
+		lockWindow.setScene(lockFailedScene.get());
+		lockWindow.show();
 	}
 
 	@Override
