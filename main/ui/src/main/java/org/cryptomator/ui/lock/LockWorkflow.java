@@ -47,23 +47,22 @@ public class LockWorkflow extends Task<Void> {
 
 	@Override
 	protected Void call() throws Volume.VolumeException, InterruptedException {
-		if (!attemptLock()) {
-			attemptForcedLock();
+		try {
+			vault.lock(false);
+		} catch (Volume.VolumeException e) {
+			LOG.debug("Regular lock of {} failed.", vault.getDisplayName(), e);
+			var decision = askUserForAction();
+			switch (decision) {
+				case FORCE -> vault.lock(true);
+				case CANCEL -> cancel(false);
+				default -> throw new IllegalArgumentException("Unknown decision " + decision);
+			}
 		}
+
 		return null;
 	}
 
-	private boolean attemptLock() {
-		try {
-			vault.lock(false);
-			return true;
-		} catch (Volume.VolumeException e) {
-			LOG.debug("Regular lock of {} failed.", vault.getDisplayName(), e);
-			return false;
-		}
-	}
-
-	private boolean attemptForcedLock() throws Volume.VolumeException, InterruptedException {
+	private LockModule.ForceLockDecision askUserForAction() throws InterruptedException {
 		// show forcedLock dialogue ...
 		Platform.runLater(() -> {
 			lockWindow.setScene(lockForcedScene.get());
@@ -77,16 +76,7 @@ public class LockWorkflow extends Task<Void> {
 			}
 		});
 		// ... and wait for answer
-		switch (forceLockDecisionLock.awaitInteraction()) {
-			case FORCE:
-				vault.lock(true);
-				return true;
-			case CANCEL:
-				cancel(false);
-				return false;
-			default:
-				return false;
-		}
+		return forceLockDecisionLock.awaitInteraction();
 	}
 
 	@Override
