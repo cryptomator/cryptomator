@@ -55,7 +55,6 @@ public class LockWorkflow extends Task<Void> {
 			switch (decision) {
 				case FORCE -> vault.lock(true);
 				case CANCEL -> cancel(false);
-				default -> throw new IllegalArgumentException("Unknown decision " + decision);
 			}
 		}
 
