@@ -26,6 +26,8 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableSet;
 import javafx.stage.Stage;
@@ -49,6 +51,9 @@ public class FxApplication extends Application {
 	private final BooleanBinding hasVisibleStages;
 	private final UiAppearanceListener systemInterfaceThemeListener = this::systemInterfaceThemeChanged;
 
+	private volatile boolean quitDialogueIsShowing;
+	private ObjectProperty<Stage> quitStage;
+
 	@Inject
 	FxApplication(Settings settings, Lazy<MainWindowComponent> mainWindow, Lazy<PreferencesComponent> preferencesWindow, Provider<UnlockComponent.Builder> unlockWindowBuilderProvider, Provider<QuitComponent.Builder> quitWindowBuilderProvider, Optional<TrayIntegrationProvider> trayIntegration, Optional<UiAppearanceProvider> appearanceProvider, VaultService vaultService, LicenseHolder licenseHolder, ObservableSet<Stage> visibleStages) {
 		this.settings = settings;
@@ -61,6 +66,8 @@ public class FxApplication extends Application {
 		this.vaultService = vaultService;
 		this.licenseHolder = licenseHolder;
 		this.hasVisibleStages = Bindings.isNotEmpty(visibleStages);
+		this.quitDialogueIsShowing = false;
+		this.quitStage = new SimpleObjectProperty<>(null);
 	}
 
 	public void start() {
@@ -107,11 +114,29 @@ public class FxApplication extends Application {
 		});
 	}
 
-	public void showQuitWindow(QuitResponse response) {
-		Platform.runLater(() -> {
-			quitWindowBuilderProvider.get().quitResponse(response).build().showQuitWindow();
-			LOG.debug("Showing QuitWindow");
-		});
+	public synchronized void showQuitWindow(QuitResponse response) {
+		//TODO: manage a list of quit responses and execute for all the same actions?
+		if (quitDialogueIsShowing) {
+			if (quitStage.isNotNull().get()) {
+				Platform.runLater(() -> {
+					quitStage.get().requestFocus();
+					LOG.debug("Focus QuitWindow");
+				});
+			}
+		} else {
+			quitDialogueIsShowing = true;
+			Platform.runLater(() -> {
+				var window = quitWindowBuilderProvider.get().quitResponse(response).build().showQuitWindow();
+				quitStage.set(window);
+				var originalListener = window.getOnCloseRequest();
+				window.setOnCloseRequest(windowEvent -> {
+					originalListener.handle(windowEvent);
+					quitStage.set(null);
+				});
+				LOG.debug("Showing QuitWindow");
+			});
+		}
+
 	}
 
 	public VaultService getVaultService() {
