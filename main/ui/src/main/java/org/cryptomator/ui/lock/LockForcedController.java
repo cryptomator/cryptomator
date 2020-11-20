@@ -11,6 +11,7 @@ import javafx.event.ActionEvent;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
+@LockScoped
 public class LockForcedController implements FxController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(LockForcedController.class);

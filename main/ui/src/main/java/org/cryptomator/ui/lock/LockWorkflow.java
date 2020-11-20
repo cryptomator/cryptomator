@@ -21,9 +21,10 @@ import javafx.stage.Window;
  * The sequence of actions performed and checked during lock of a vault.
  * <p>
  * This class implements the Task interface, sucht that it can run in the background with some possible forground operations/requests to the ui, without blocking the main app.
- * If the task succeeded, the vault was successfully locked.
- * If the task is canceled, the lock was canceled.
- * If the task failed, the lock failed due to an exception.
+ * If the task state is
+ * <li>succeeded, the vault was successfully locked;</li>
+ * <li>canceled, the lock was canceled;</li>
+ * <li>failed, the lock failed due to an exception.</li>
  */
 public class LockWorkflow extends Task<Void> {
 
@@ -81,7 +82,7 @@ public class LockWorkflow extends Task<Void> {
 				vault.lock(true);
 				return true;
 			case CANCEL:
-				this.cancel(false);
+				cancel(false);
 				return false;
 			default:
 				return false;
