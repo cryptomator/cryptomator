@@ -57,7 +57,6 @@ public class LockWorkflow extends Task<Void> {
 				case CANCEL -> cancel(false);
 			}
 		}
-
 		return null;
 	}
 
