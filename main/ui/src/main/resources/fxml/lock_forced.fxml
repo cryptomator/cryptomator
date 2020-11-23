@@ -27,7 +27,7 @@
 				<FontAwesome5IconView styleClass="glyph-icon-white" glyph="EXCLAMATION" glyphSize="24"/>
 			</StackPane>
 			<VBox spacing="6">
-				<Label styleClass="label-medium" text="%lock.forced.heading"/>
+				<Label styleClass="label-large" text="%lock.forced.heading"/>
 				<FormattedLabel format="%lock.forced.message" arg1="${controller.vaultName}" wrapText="true"/>
 			</VBox>
 		</HBox>
