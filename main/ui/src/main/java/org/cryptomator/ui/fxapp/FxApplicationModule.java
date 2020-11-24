@@ -88,4 +88,8 @@ abstract class FxApplicationModule {
 		return builder.build();
 	}
 
+	@Provides
+	static QuitComponent provideQuitComponent(QuitComponent.Builder builder) {
+		return builder.build();
+	}
 }

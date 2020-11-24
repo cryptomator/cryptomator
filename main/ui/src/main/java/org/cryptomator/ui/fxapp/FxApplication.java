@@ -40,8 +40,8 @@ public class FxApplication extends Application {
 	private final Settings settings;
 	private final Lazy<MainWindowComponent> mainWindow;
 	private final Lazy<PreferencesComponent> preferencesWindow;
+	private final Lazy<QuitComponent> quitWindow;
 	private final Provider<UnlockComponent.Builder> unlockWindowBuilderProvider;
-	private final Provider<QuitComponent.Builder> quitWindowBuilderProvider;
 	private final Optional<TrayIntegrationProvider> trayIntegration;
 	private final Optional<UiAppearanceProvider> appearanceProvider;
 	private final VaultService vaultService;
@@ -50,12 +50,12 @@ public class FxApplication extends Application {
 	private final UiAppearanceListener systemInterfaceThemeListener = this::systemInterfaceThemeChanged;
 
 	@Inject
-	FxApplication(Settings settings, Lazy<MainWindowComponent> mainWindow, Lazy<PreferencesComponent> preferencesWindow, Provider<UnlockComponent.Builder> unlockWindowBuilderProvider, Provider<QuitComponent.Builder> quitWindowBuilderProvider, Optional<TrayIntegrationProvider> trayIntegration, Optional<UiAppearanceProvider> appearanceProvider, VaultService vaultService, LicenseHolder licenseHolder, ObservableSet<Stage> visibleStages) {
+	FxApplication(Settings settings, Lazy<MainWindowComponent> mainWindow, Lazy<PreferencesComponent> preferencesWindow, Provider<UnlockComponent.Builder> unlockWindowBuilderProvider, Lazy<QuitComponent> quitWindow, Optional<TrayIntegrationProvider> trayIntegration, Optional<UiAppearanceProvider> appearanceProvider, VaultService vaultService, LicenseHolder licenseHolder, ObservableSet<Stage> visibleStages) {
 		this.settings = settings;
 		this.mainWindow = mainWindow;
 		this.preferencesWindow = preferencesWindow;
 		this.unlockWindowBuilderProvider = unlockWindowBuilderProvider;
-		this.quitWindowBuilderProvider = quitWindowBuilderProvider;
+		this.quitWindow = quitWindow;
 		this.trayIntegration = trayIntegration;
 		this.appearanceProvider = appearanceProvider;
 		this.vaultService = vaultService;
@@ -109,7 +109,7 @@ public class FxApplication extends Application {
 
 	public void showQuitWindow(QuitResponse response) {
 		Platform.runLater(() -> {
-			quitWindowBuilderProvider.get().quitResponse(response).build().showQuitWindow();
+			quitWindow.get().showQuitWindow(response);
 			LOG.debug("Showing QuitWindow");
 		});
 	}
