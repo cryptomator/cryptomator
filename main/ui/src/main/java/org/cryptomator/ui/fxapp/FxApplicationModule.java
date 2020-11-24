@@ -22,14 +22,22 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableSet;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
+import java.awt.desktop.QuitResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Module(includes = {UpdateCheckerModule.class}, subcomponents = {MainWindowComponent.class, PreferencesComponent.class, UnlockComponent.class, QuitComponent.class, ErrorComponent.class})
 abstract class FxApplicationModule {
+
+	@Provides
+	@FxApplicationScoped
+	static AtomicReference<QuitResponse> provideQuitResponse() {
+		return new AtomicReference<>();
+	}
 
 	@Provides
 	@FxApplicationScoped
@@ -88,4 +96,8 @@ abstract class FxApplicationModule {
 		return builder.build();
 	}
 
+	@Provides
+	static QuitComponent provideQuitComponent(QuitComponent.Builder builder) {
+		return builder.build();
+	}
 }
