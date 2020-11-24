@@ -25,12 +25,6 @@ import java.util.ResourceBundle;
 abstract class QuitModule {
 
 	@Provides
-	@QuitScoped
-	static ObjectProperty<Stage> provideStageProperty() {
-		return new SimpleObjectProperty<>();
-	}
-
-	@Provides
 	@QuitWindow
 	@QuitScoped
 	static FXMLLoaderFactory provideFxmlLoaderFactory(Map<Class<? extends FxController>, Provider<FxController>> factories, DefaultSceneFactory sceneFactory, ResourceBundle resourceBundle) {

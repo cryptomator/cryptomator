@@ -31,7 +31,6 @@ import javafx.collections.ObservableSet;
 import javafx.stage.Stage;
 import java.awt.desktop.QuitResponse;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
 
 @FxApplicationScoped
 public class FxApplication extends Application {
@@ -49,10 +48,9 @@ public class FxApplication extends Application {
 	private final LicenseHolder licenseHolder;
 	private final BooleanBinding hasVisibleStages;
 	private final UiAppearanceListener systemInterfaceThemeListener = this::systemInterfaceThemeChanged;
-	private final AtomicReference<QuitResponse> quitResponse;
 
 	@Inject
-	FxApplication(Settings settings, Lazy<MainWindowComponent> mainWindow, Lazy<PreferencesComponent> preferencesWindow, Provider<UnlockComponent.Builder> unlockWindowBuilderProvider, Lazy<QuitComponent> quitWindow, Optional<TrayIntegrationProvider> trayIntegration, Optional<UiAppearanceProvider> appearanceProvider, VaultService vaultService, LicenseHolder licenseHolder, ObservableSet<Stage> visibleStages, AtomicReference<QuitResponse> quitResponse) {
+	FxApplication(Settings settings, Lazy<MainWindowComponent> mainWindow, Lazy<PreferencesComponent> preferencesWindow, Provider<UnlockComponent.Builder> unlockWindowBuilderProvider, Lazy<QuitComponent> quitWindow, Optional<TrayIntegrationProvider> trayIntegration, Optional<UiAppearanceProvider> appearanceProvider, VaultService vaultService, LicenseHolder licenseHolder, ObservableSet<Stage> visibleStages) {
 		this.settings = settings;
 		this.mainWindow = mainWindow;
 		this.preferencesWindow = preferencesWindow;
@@ -63,7 +61,6 @@ public class FxApplication extends Application {
 		this.vaultService = vaultService;
 		this.licenseHolder = licenseHolder;
 		this.hasVisibleStages = Bindings.isNotEmpty(visibleStages);
-		this.quitResponse = quitResponse;
 	}
 
 	public void start() {
@@ -111,9 +108,8 @@ public class FxApplication extends Application {
 	}
 
 	public void showQuitWindow(QuitResponse response) {
-		quitResponse.set(response);
 		Platform.runLater(() -> {
-			quitWindow.get().showQuitWindow();
+			quitWindow.get().showQuitWindow(response);
 			LOG.debug("Showing QuitWindow");
 		});
 	}

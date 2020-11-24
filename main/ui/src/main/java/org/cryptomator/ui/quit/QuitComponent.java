@@ -10,9 +10,9 @@ import dagger.Subcomponent;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 
-import javafx.beans.property.ObjectProperty;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import java.awt.desktop.QuitResponse;
 
 @QuitScoped
 @Subcomponent(modules = {QuitModule.class})
@@ -24,18 +24,12 @@ public interface QuitComponent {
 	@FxmlScene(FxmlFile.QUIT)
 	Lazy<Scene> scene();
 
-	ObjectProperty<Stage> provideStageProperty();
+	QuitController controller();
 
-	default Stage showQuitWindow() {
-		var stageProperty = provideStageProperty();
-		Stage stage;
-		if (stageProperty.isNull().get()) {
-			stage = window();
-			stage.setScene(scene().get());
-			stageProperty.set(stage);
-		} else {
-			stage = stageProperty.get();
-		}
+	default Stage showQuitWindow(QuitResponse response) {
+		controller().updateQuitRequest(response);
+		Stage stage = window();
+		stage.setScene(scene().get());
 		stage.show();
 		stage.requestFocus();
 		return stage;
