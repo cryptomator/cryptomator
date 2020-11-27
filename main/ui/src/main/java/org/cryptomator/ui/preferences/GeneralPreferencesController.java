@@ -5,6 +5,7 @@ import org.cryptomator.common.LicenseHolder;
 import org.cryptomator.common.settings.KeychainBackend;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.UiTheme;
+import org.cryptomator.integrations.autostart.AutoStartProvider;
 import org.cryptomator.integrations.keychain.KeychainAccessProvider;
 import org.cryptomator.ui.common.ErrorComponent;
 import org.cryptomator.ui.common.FxController;
@@ -31,6 +32,7 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
@@ -42,7 +44,7 @@ public class GeneralPreferencesController implements FxController {
 	private final Stage window;
 	private final Settings settings;
 	private final boolean trayMenuSupported;
-	private final Optional<AutoStartStrategy> autoStartStrategy;
+	private final Optional<AutoStartProvider> autoStartStrategy;
 	private final ObjectProperty<SelectedPreferencesTab> selectedTabProperty;
 	private final LicenseHolder licenseHolder;
 	private final ExecutorService executor;
@@ -61,7 +63,7 @@ public class GeneralPreferencesController implements FxController {
 	public RadioButton nodeOrientationRtl;
 
 	@Inject
-	GeneralPreferencesController(@PreferencesWindow Stage window, Settings settings, @Named("trayMenuSupported") boolean trayMenuSupported, Optional<AutoStartStrategy> autoStartStrategy, Set<KeychainAccessProvider> keychainAccessProviders, ObjectProperty<SelectedPreferencesTab> selectedTabProperty, LicenseHolder licenseHolder, ExecutorService executor, ResourceBundle resourceBundle, Application application, Environment environment, ErrorComponent.Builder errorComponent) {
+	GeneralPreferencesController(@PreferencesWindow Stage window, Settings settings, @Named("trayMenuSupported") boolean trayMenuSupported, Optional<AutoStartProvider> autoStartStrategy, Set<KeychainAccessProvider> keychainAccessProviders, ObjectProperty<SelectedPreferencesTab> selectedTabProperty, LicenseHolder licenseHolder, ExecutorService executor, ResourceBundle resourceBundle, Application application, Environment environment, ErrorComponent.Builder errorComponent) {
 		this.window = window;
 		this.settings = settings;
 		this.trayMenuSupported = trayMenuSupported;
@@ -90,7 +92,7 @@ public class GeneralPreferencesController implements FxController {
 		debugModeCheckbox.selectedProperty().bindBidirectional(settings.debugMode());
 
 		autoStartStrategy.ifPresent(autoStart -> {
-			autoStart.isAutoStartEnabled().thenAccept(enabled -> {
+			CompletableFuture.completedFuture(autoStart.isEnabled()).thenAccept(enabled -> {
 				Platform.runLater(() -> autoStartCheckbox.setSelected(enabled));
 			});
 		});
@@ -198,10 +200,10 @@ public class GeneralPreferencesController implements FxController {
 
 	private static class ToggleAutoStartTask extends Task<Void> {
 
-		private final AutoStartStrategy autoStart;
+		private final AutoStartProvider autoStart;
 		private final boolean enable;
 
-		public ToggleAutoStartTask(AutoStartStrategy autoStart, boolean enable) {
+		public ToggleAutoStartTask(AutoStartProvider autoStart, boolean enable) {
 			this.autoStart = autoStart;
 			this.enable = enable;
 
@@ -211,9 +213,9 @@ public class GeneralPreferencesController implements FxController {
 		@Override
 		protected Void call() throws Exception {
 			if (enable) {
-				autoStart.enableAutoStart();
+				autoStart.enable();
 			} else {
-				autoStart.disableAutoStart();
+				autoStart.disable();
 			}
 			return null;
 		}
