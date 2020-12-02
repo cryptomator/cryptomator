@@ -1,6 +1,5 @@
 package org.cryptomator.ui.fxapp;
 
-import com.tobiasdiez.easybind.EasyBind;
 import dagger.Lazy;
 import org.cryptomator.common.LicenseHolder;
 import org.cryptomator.common.settings.Settings;
@@ -67,7 +66,7 @@ public class FxApplication extends Application {
 		LOG.trace("FxApplication.start()");
 		Platform.setImplicitExit(false);
 
-		EasyBind.subscribe(hasVisibleStages, this::hasVisibleStagesChanged);
+		hasVisibleStages.addListener(this::hasVisibleStagesChanged);
 
 		settings.theme().addListener(this::appThemeChanged);
 		loadSelectedStyleSheet(settings.theme().get());
@@ -78,7 +77,7 @@ public class FxApplication extends Application {
 		throw new UnsupportedOperationException("Use start() instead.");
 	}
 
-	private void hasVisibleStagesChanged(boolean newValue) {
+	private void hasVisibleStagesChanged(@SuppressWarnings("unused") ObservableValue<? extends Boolean> observableValue, @SuppressWarnings("unused") boolean oldValue, boolean newValue) {
 		if (newValue) {
 			trayIntegration.ifPresent(TrayIntegrationProvider::restoredFromTray);
 		} else {
