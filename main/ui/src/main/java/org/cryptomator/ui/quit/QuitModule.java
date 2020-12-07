@@ -43,7 +43,7 @@ abstract class QuitModule {
 	@Provides
 	@FxmlScene(FxmlFile.QUIT)
 	@QuitScoped
-	static Scene provideUnlockScene(@QuitWindow FXMLLoaderFactory fxmlLoaders) {
+	static Scene provideQuitScene(@QuitWindow FXMLLoaderFactory fxmlLoaders) {
 		return fxmlLoaders.createScene("/fxml/quit.fxml");
 	}
 

@@ -5,8 +5,11 @@ labels: type:bug
 ---
 
 <!--
-⚠️⚠️⚠️ READ CAREFULLY ⚠️⚠️⚠️
-
+**************************************
+*                                    *
+*   ⚠️⚠️⚠️ READ CAREFULLY ⚠️⚠️⚠️   *
+*                                    *
+**************************************
 Do you want to ask a QUESTION? Are you looking for SUPPORT?
 We're happy to help you via our support channels! Please read: https://github.com/cryptomator/cryptomator/blob/develop/SUPPORT.md
 
@@ -14,7 +17,14 @@ By filing an issue, you are expected to comply with our code of conduct: https:/
 
 Of course, we also expect you to search for existing similar issues first! ;) https://github.com/cryptomator/cryptomator/issues?q=
 
-⚠️ IMPORTANT: If you don't stick to this template, the issue will get closed. To proof that you read this, please remove the X from the following line:
+
+⚠️ IMPORTANT: If you don't stick to this template, the issue will get closed.
+
+*****************************************************************************
+*                                                                           *
+*   To proof that you read this, please remove the X from the line below:   *
+*                                                                           *
+*****************************************************************************
 -->
 <!-- oooXooo -->
 
