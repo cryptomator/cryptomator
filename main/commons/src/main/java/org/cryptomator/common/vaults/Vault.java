@@ -10,7 +10,6 @@ package org.cryptomator.common.vaults;
 
 import com.google.common.base.Strings;
 import org.apache.commons.lang3.SystemUtils;
-import org.cryptomator.common.LazyInitializer;
 import org.cryptomator.common.mountpoint.InvalidMountPointException;
 import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.common.vaults.Volume.VolumeException;
@@ -100,11 +99,7 @@ public class Vault {
 	// Commands
 	// ********************************************************************************/
 
-	private CryptoFileSystem getCryptoFileSystem(CharSequence passphrase) throws NoSuchFileException, IOException, InvalidPassphraseException, CryptoException {
-		return LazyInitializer.initializeLazily(cryptoFileSystem, () -> unlockCryptoFileSystem(passphrase), IOException.class);
-	}
-
-	private CryptoFileSystem unlockCryptoFileSystem(CharSequence passphrase) throws NoSuchFileException, IOException, InvalidPassphraseException, CryptoException {
+	private CryptoFileSystem createCryptoFileSystem(CharSequence passphrase) throws NoSuchFileException, IOException, InvalidPassphraseException, CryptoException {
 		Set<FileSystemFlags> flags = EnumSet.noneOf(FileSystemFlags.class);
 		if (vaultSettings.usesReadOnlyMode().get()) {
 			flags.add(FileSystemFlags.READONLY);
@@ -127,9 +122,14 @@ public class Vault {
 	}
 
 	public synchronized void unlock(CharSequence passphrase) throws CryptoException, IOException, VolumeException, InvalidMountPointException {
-		CryptoFileSystem fs = getCryptoFileSystem(passphrase);
-		volume = volumeProvider.get();
-		volume.mount(fs, getEffectiveMountFlags());
+		if (cryptoFileSystem.get() == null) {
+			CryptoFileSystem fs = createCryptoFileSystem(passphrase);
+			cryptoFileSystem.set(fs);
+			volume = volumeProvider.get();
+			volume.mount(fs, getEffectiveMountFlags());
+		} else {
+			throw new IllegalStateException("Already unlocked.");
+		}
 	}
 
 	public synchronized void lock(boolean forced) throws VolumeException {
