@@ -27,6 +27,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
+import static org.cryptomator.common.Constants.VAULTCONFIG_FILENAME;
 
 @MainWindowScoped
 public class MainWindowController implements FxController {
@@ -91,9 +92,9 @@ public class MainWindowController implements FxController {
 	}
 
 	private boolean containsVault(Path path) {
-		if (path.getFileName().toString().equals(MASTERKEY_FILENAME)) {
+		if (path.getFileName().toString().equals(VAULTCONFIG_FILENAME)) {
 			return true;
-		} else if (Files.isDirectory(path) && Files.exists(path.resolve(MASTERKEY_FILENAME))) {
+		} else if (Files.isDirectory(path) && Files.exists(path.resolve(VAULTCONFIG_FILENAME))) {
 			return true;
 		} else {
 			return false;
@@ -102,7 +103,7 @@ public class MainWindowController implements FxController {
 
 	private void addVault(Path pathToVault) {
 		try {
-			if (pathToVault.getFileName().toString().equals(MASTERKEY_FILENAME)) {
+			if (pathToVault.getFileName().toString().equals(VAULTCONFIG_FILENAME)) {
 				vaultListManager.add(pathToVault.getParent());
 			} else {
 				vaultListManager.add(pathToVault);

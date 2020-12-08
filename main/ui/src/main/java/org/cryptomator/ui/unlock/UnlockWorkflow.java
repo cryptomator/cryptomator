@@ -7,6 +7,7 @@ import org.cryptomator.common.vaults.MountPointRequirement;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.common.vaults.Volume.VolumeException;
+import org.cryptomator.cryptolib.api.CryptoException;
 import org.cryptomator.cryptolib.api.InvalidPassphraseException;
 import org.cryptomator.integrations.keychain.KeychainAccessException;
 import org.cryptomator.ui.common.Animations;
@@ -85,7 +86,7 @@ public class UnlockWorkflow extends Task<Boolean> {
 	}
 
 	@Override
-	protected Boolean call() throws InterruptedException, IOException, VolumeException, InvalidMountPointException {
+	protected Boolean call() throws InterruptedException, IOException, VolumeException, InvalidMountPointException, CryptoException {
 		try {
 			if (attemptUnlock()) {
 				handleSuccess();
@@ -100,7 +101,7 @@ public class UnlockWorkflow extends Task<Boolean> {
 		}
 	}
 
-	private boolean attemptUnlock() throws InterruptedException, IOException, VolumeException, InvalidMountPointException {
+	private boolean attemptUnlock() throws InterruptedException, IOException, VolumeException, InvalidMountPointException, CryptoException {
 		boolean proceed = password.get() != null || askForPassword(false) == PasswordEntry.PASSWORD_ENTERED;
 		while (proceed) {
 			try {

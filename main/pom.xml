@@ -24,7 +24,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
 		<!-- cryptomator dependencies -->
-		<cryptomator.cryptofs.version>1.9.13</cryptomator.cryptofs.version>
+		<cryptomator.cryptofs.version>2.0.0-beta1</cryptomator.cryptofs.version>
 		<cryptomator.integrations.version>0.1.6</cryptomator.integrations.version>
 		<cryptomator.integrations.win.version>0.1.0-beta1</cryptomator.integrations.win.version>
 		<cryptomator.integrations.mac.version>0.1.0-beta3</cryptomator.integrations.mac.version>

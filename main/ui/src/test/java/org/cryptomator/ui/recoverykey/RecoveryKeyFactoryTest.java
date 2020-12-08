@@ -2,23 +2,40 @@ package org.cryptomator.ui.recoverykey;
 
 import com.google.common.base.Splitter;
 import org.cryptomator.cryptofs.CryptoFileSystemProvider;
+import org.cryptomator.cryptolib.api.CryptoException;
+import org.cryptomator.cryptolib.api.Masterkey;
+import org.cryptomator.cryptolib.common.MasterkeyFile;
+import org.cryptomator.cryptolib.common.MasterkeyFileLoader;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.security.SecureRandom;
 
 class RecoveryKeyFactoryTest {
 
 	private WordEncoder wordEncoder = new WordEncoder();
-	private RecoveryKeyFactory inTest = new RecoveryKeyFactory(wordEncoder);
+	private SecureRandom csprng = Mockito.mock(SecureRandom.class);
+	private RecoveryKeyFactory inTest = new RecoveryKeyFactory(wordEncoder, csprng);
 
 	@Test
 	@DisplayName("createRecoveryKey() creates 44 words")
-	public void testCreateRecoveryKey(@TempDir Path pathToVault) throws IOException {
-		CryptoFileSystemProvider.initialize(pathToVault, "masterkey.cryptomator", "asd");
+	public void testCreateRecoveryKey() throws IOException, CryptoException {
+		Path pathToVault = Path.of("path/to/vault");
+		MockedStatic<MasterkeyFile> masterkeyFileClass = Mockito.mockStatic(MasterkeyFile.class);
+		MasterkeyFile masterkeyFile = Mockito.mock(MasterkeyFile.class);
+		MasterkeyFileLoader keyLoader = Mockito.mock(MasterkeyFileLoader.class);
+		Masterkey masterkey = Mockito.mock(Masterkey.class);
+		masterkeyFileClass.when(() -> MasterkeyFile.withContentFromFile(Path.of("path/to/vault/masterkey.cryptomator"))).thenReturn(masterkeyFile);
+		Mockito.when(masterkeyFile.unlock(Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(keyLoader);
+		Mockito.when(keyLoader.loadKeyAndClose()).thenReturn(masterkey);
+		Mockito.when(masterkey.getEncoded()).thenReturn(new byte[64]);
+
 		String recoveryKey = inTest.createRecoveryKey(pathToVault, "asd");
 		Assertions.assertNotNull(recoveryKey);
 		Assertions.assertEquals(44, Splitter.on(' ').splitToList(recoveryKey).size()); // 66 bytes encoded as 44 words

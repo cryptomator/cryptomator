@@ -3,7 +3,10 @@ package org.cryptomator.ui.changepassword;
 import org.cryptomator.common.keychain.KeychainManager;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.cryptofs.CryptoFileSystemProvider;
+import org.cryptomator.cryptofs.common.MasterkeyBackupHelper;
+import org.cryptomator.cryptolib.api.CryptoException;
 import org.cryptomator.cryptolib.api.InvalidPassphraseException;
+import org.cryptomator.cryptolib.common.MasterkeyFile;
 import org.cryptomator.integrations.keychain.KeychainAccessException;
 import org.cryptomator.ui.common.Animations;
 import org.cryptomator.ui.common.ErrorComponent;
@@ -23,6 +26,12 @@ import javafx.scene.control.CheckBox;
 import javafx.stage.Stage;
 import java.io.IOException;
 import java.nio.CharBuffer;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
+import java.security.SecureRandom;
+import java.text.Normalizer;
 import java.util.Optional;
 
 import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
@@ -31,24 +40,27 @@ import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
 public class ChangePasswordController implements FxController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ChangePasswordController.class);
+	private static final String MASTERKEY_BACKUP_SUFFIX = ".bkup";
 
 	private final Stage window;
 	private final Vault vault;
 	private final ObjectProperty<CharSequence> newPassword;
 	private final ErrorComponent.Builder errorComponent;
 	private final KeychainManager keychain;
+	private final SecureRandom csprng;
 
 	public NiceSecurePasswordField oldPasswordField;
 	public CheckBox finalConfirmationCheckbox;
 	public Button finishButton;
 
 	@Inject
-	public ChangePasswordController(@ChangePasswordWindow Stage window, @ChangePasswordWindow Vault vault, @Named("newPassword") ObjectProperty<CharSequence> newPassword, ErrorComponent.Builder errorComponent, KeychainManager keychain) {
+	public ChangePasswordController(@ChangePasswordWindow Stage window, @ChangePasswordWindow Vault vault, @Named("newPassword") ObjectProperty<CharSequence> newPassword, ErrorComponent.Builder errorComponent, KeychainManager keychain, SecureRandom csprng) {
 		this.window = window;
 		this.vault = vault;
 		this.newPassword = newPassword;
 		this.errorComponent = errorComponent;
 		this.keychain = keychain;
+		this.csprng = csprng;
 	}
 
 	@FXML
@@ -67,17 +79,26 @@ public class ChangePasswordController implements FxController {
 	@FXML
 	public void finish() {
 		try {
-			CryptoFileSystemProvider.changePassphrase(vault.getPath(), MASTERKEY_FILENAME, oldPasswordField.getCharacters(), newPassword.get());
+			//String normalizedOldPassphrase = Normalizer.normalize(oldPasswordField.getCharacters(), Normalizer.Form.NFC);
+			//String normalizedNewPassphrase = Normalizer.normalize(newPassword.get(), Normalizer.Form.NFC);
+			CharSequence oldPassphrase = oldPasswordField.getCharacters(); // TODO verify: is this already NFC-normalized?
+			CharSequence newPassphrase = newPassword.get(); // TODO verify: is this already NFC-normalized?
+			Path masterkeyPath = vault.getPath().resolve(MASTERKEY_FILENAME);
+			byte[] oldMasterkeyBytes = Files.readAllBytes(masterkeyPath);
+			byte[] newMasterkeyBytes = MasterkeyFile.changePassphrase(oldMasterkeyBytes, oldPassphrase, newPassphrase, new byte[0], csprng);
+			Path backupKeyPath = vault.getPath().resolve(MASTERKEY_FILENAME + MasterkeyBackupHelper.generateFileIdSuffix(oldMasterkeyBytes) + MASTERKEY_BACKUP_SUFFIX);
+			Files.move(masterkeyPath, backupKeyPath, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+			Files.write(masterkeyPath, newMasterkeyBytes, StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE);
 			LOG.info("Successfully changed password for {}", vault.getDisplayName());
 			window.close();
 			updatePasswordInSystemkeychain();
-		} catch (IOException e) {
-			LOG.error("IO error occured during password change. Unable to perform operation.", e);
-			errorComponent.cause(e).window(window).returnToScene(window.getScene()).build().showErrorScene();
 		} catch (InvalidPassphraseException e) {
 			Animations.createShakeWindowAnimation(window).play();
 			oldPasswordField.selectAll();
 			oldPasswordField.requestFocus();
+		} catch (IOException | CryptoException e) {
+			LOG.error("Password change failed. Unable to perform operation.", e);
+			errorComponent.cause(e).window(window).returnToScene(window.getScene()).build().showErrorScene();
 		}
 	}
 

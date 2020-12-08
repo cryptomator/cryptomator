@@ -28,6 +28,7 @@ import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
+import static org.cryptomator.common.Constants.VAULTCONFIG_FILENAME;
 
 @Singleton
 public class VaultListManager {
@@ -54,7 +55,7 @@ public class VaultListManager {
 
 	public Vault add(Path pathToVault) throws NoSuchFileException {
 		Path normalizedPathToVault = pathToVault.normalize().toAbsolutePath();
-		if (!CryptoFileSystemProvider.containsVault(normalizedPathToVault, MASTERKEY_FILENAME)) {
+		if (!CryptoFileSystemProvider.containsVault(normalizedPathToVault, VAULTCONFIG_FILENAME, MASTERKEY_FILENAME)) {
 			throw new NoSuchFileException(normalizedPathToVault.toString(), null, "Not a vault directory");
 		}
 		Optional<Vault> alreadyExistingVault = get(normalizedPathToVault);
@@ -124,9 +125,9 @@ public class VaultListManager {
 	}
 
 	private static VaultState determineVaultState(Path pathToVault) throws IOException {
-		if (!CryptoFileSystemProvider.containsVault(pathToVault, MASTERKEY_FILENAME)) {
+		if (!CryptoFileSystemProvider.containsVault(pathToVault, VAULTCONFIG_FILENAME, MASTERKEY_FILENAME)) {
 			return VaultState.MISSING;
-		} else if (Migrators.get().needsMigration(pathToVault, MASTERKEY_FILENAME)) {
+		} else if (Migrators.get().needsMigration(pathToVault, VAULTCONFIG_FILENAME, MASTERKEY_FILENAME)) {
 			return VaultState.NEEDS_MIGRATION;
 		} else {
 			return VaultState.LOCKED;

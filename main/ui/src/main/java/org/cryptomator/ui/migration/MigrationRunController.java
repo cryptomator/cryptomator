@@ -43,6 +43,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
+import static org.cryptomator.common.Constants.VAULTCONFIG_FILENAME;
 
 @MigrationScoped
 public class MigrationRunController implements FxController {
@@ -110,8 +111,8 @@ public class MigrationRunController implements FxController {
 		}, 0, MIGRATION_PROGRESS_UPDATE_MILLIS, TimeUnit.MILLISECONDS);
 		Tasks.create(() -> {
 			Migrators migrators = Migrators.get();
-			migrators.migrate(vault.getPath(), MASTERKEY_FILENAME, password, this::migrationProgressChanged, this::migrationRequiresInput);
-			return migrators.needsMigration(vault.getPath(), MASTERKEY_FILENAME);
+			migrators.migrate(vault.getPath(), VAULTCONFIG_FILENAME, MASTERKEY_FILENAME, password, this::migrationProgressChanged, this::migrationRequiresInput);
+			return migrators.needsMigration(vault.getPath(), VAULTCONFIG_FILENAME, MASTERKEY_FILENAME);
 		}).onSuccess(needsAnotherMigration -> {
 			if (needsAnotherMigration) {
 				LOG.info("Migration of '{}' succeeded, but another migration is required.", vault.getDisplayName());

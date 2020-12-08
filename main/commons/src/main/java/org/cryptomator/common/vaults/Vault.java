@@ -21,6 +21,7 @@ import org.cryptomator.cryptofs.common.Constants;
 import org.cryptomator.cryptofs.common.FileSystemCapabilityChecker;
 import org.cryptomator.cryptolib.api.CryptoException;
 import org.cryptomator.cryptolib.api.InvalidPassphraseException;
+import org.cryptomator.cryptolib.common.MasterkeyFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,6 +46,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
+import static org.cryptomator.common.Constants.PEPPER;
 
 @PerVault
 public class Vault {
@@ -111,14 +113,17 @@ public class Vault {
 			LOG.info("Storing file name length limit of {}", limit);
 		}
 		assert vaultSettings.filenameLengthLimit().get() > 0;
-		CryptoFileSystemProperties fsProps = CryptoFileSystemProperties.cryptoFileSystemProperties() //
-				.withPassphrase(passphrase) //
-				.withFlags(flags) //
-				.withMasterkeyFilename(MASTERKEY_FILENAME) //
-				.withMaxPathLength(vaultSettings.filenameLengthLimit().get() + Constants.MAX_ADDITIONAL_PATH_LENGTH) //
-				.withMaxNameLength(vaultSettings.filenameLengthLimit().get()) //
-				.build();
-		return CryptoFileSystemProvider.newFileSystem(getPath(), fsProps);
+
+		Path masterkeyPath = getPath().resolve(MASTERKEY_FILENAME);
+		try (var keyLoader = MasterkeyFile.withContentFromFile(masterkeyPath).unlock(passphrase, PEPPER, Optional.empty())) {
+			CryptoFileSystemProperties fsProps = CryptoFileSystemProperties.cryptoFileSystemProperties() //
+					.withKeyLoader(keyLoader) //
+					.withFlags(flags) //
+					.withMaxPathLength(vaultSettings.filenameLengthLimit().get() + Constants.MAX_ADDITIONAL_PATH_LENGTH) //
+					.withMaxNameLength(vaultSettings.filenameLengthLimit().get()) //
+					.build();
+			return CryptoFileSystemProvider.newFileSystem(getPath(), fsProps);
+		}
 	}
 
 	public synchronized void unlock(CharSequence passphrase) throws CryptoException, IOException, VolumeException, InvalidMountPointException {
