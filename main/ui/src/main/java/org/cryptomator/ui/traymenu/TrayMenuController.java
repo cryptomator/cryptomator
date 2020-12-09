@@ -108,7 +108,7 @@ class TrayMenuController {
 	}
 
 	private void lockVault(Vault vault) {
-		fxApplicationStarter.get(true).thenAccept(app -> app.getVaultService().lock(vault, false));
+		fxApplicationStarter.get(true).thenAccept(app -> app.startLockWorkflow(vault, Optional.empty()));
 	}
 
 	private void lockAllVaults(ActionEvent actionEvent) {

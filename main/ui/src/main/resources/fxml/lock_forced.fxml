@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import org.cryptomator.ui.controls.FontAwesome5IconView?>
+<?import org.cryptomator.ui.controls.FormattedLabel?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ButtonBar?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Circle?>
+<VBox xmlns:fx="http://javafx.com/fxml"
+	  xmlns="http://javafx.com/javafx"
+	  fx:controller="org.cryptomator.ui.lock.LockForcedController"
+	  minWidth="400"
+	  maxWidth="400"
+	  minHeight="145"
+	  spacing="12">
+	<padding>
+		<Insets topRightBottomLeft="12"/>
+	</padding>
+	<children>
+		<HBox spacing="12" alignment="CENTER_LEFT" VBox.vgrow="ALWAYS">
+			<StackPane alignment="CENTER" HBox.hgrow="NEVER">
+				<Circle styleClass="glyph-icon-orange" radius="24"/>
+				<FontAwesome5IconView styleClass="glyph-icon-white" glyph="EXCLAMATION" glyphSize="24"/>
+			</StackPane>
+			<VBox spacing="6">
+				<Label styleClass="label-large" text="%lock.forced.heading"/>
+				<FormattedLabel format="%lock.forced.message" arg1="${controller.vaultName}" wrapText="true"/>
+			</VBox>
+		</HBox>
+
+		<VBox alignment="BOTTOM_CENTER" VBox.vgrow="ALWAYS">
+			<ButtonBar buttonMinWidth="120" buttonOrder="+CI">
+				<buttons>
+					<Button text="%generic.button.cancel" ButtonBar.buttonData="CANCEL_CLOSE" defaultButton="true" cancelButton="true" onAction="#cancel"/>
+					<!-- TODO: third button with retry? -->
+					<Button text="%lock.forced.confirmBtn" ButtonBar.buttonData="FINISH" onAction="#confirmForcedLock"/>
+				</buttons>
+			</ButtonBar>
+		</VBox>
+	</children>
+</VBox>
