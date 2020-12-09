@@ -19,7 +19,6 @@ import org.cryptomator.ui.unlock.UnlockComponent;
 
 import javax.inject.Named;
 import javafx.application.Application;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableSet;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
@@ -31,12 +30,6 @@ import java.util.List;
 
 @Module(includes = {UpdateCheckerModule.class}, subcomponents = {MainWindowComponent.class, PreferencesComponent.class, UnlockComponent.class, LockComponent.class, QuitComponent.class, ErrorComponent.class})
 abstract class FxApplicationModule {
-
-	@Provides
-	@FxApplicationScoped
-	static ObservableSet<Stage> provideVisibleStages() {
-		return FXCollections.observableSet();
-	}
 
 	@Provides
 	@Named("windowIcons")
@@ -57,16 +50,9 @@ abstract class FxApplicationModule {
 
 	@Provides
 	@FxApplicationScoped
-	static StageFactory provideStageFactory(@Named("windowIcons") List<Image> windowIcons, ObservableSet<Stage> visibleStages) {
+	static StageFactory provideStageFactory(@Named("windowIcons") List<Image> windowIcons) {
 		return new StageFactory(stage -> {
 			stage.getIcons().addAll(windowIcons);
-			stage.showingProperty().addListener((observableValue, wasShowing, isShowing) -> {
-				if (isShowing) {
-					visibleStages.add(stage);
-				} else {
-					visibleStages.remove(stage);
-				}
-			});
 		});
 	}
 

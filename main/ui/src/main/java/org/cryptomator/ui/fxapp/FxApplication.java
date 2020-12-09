@@ -27,8 +27,9 @@ import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.ObservableSet;
+import javafx.collections.ObservableList;
 import javafx.stage.Stage;
+import javafx.stage.Window;
 import java.awt.desktop.QuitResponse;
 import java.util.Optional;
 
@@ -47,11 +48,12 @@ public class FxApplication extends Application {
 	private final Optional<UiAppearanceProvider> appearanceProvider;
 	private final VaultService vaultService;
 	private final LicenseHolder licenseHolder;
-	private final BooleanBinding hasVisibleStages;
+	private final ObservableList<Window> visibleWindows;
+	private final BooleanBinding hasVisibleWindows;
 	private final UiAppearanceListener systemInterfaceThemeListener = this::systemInterfaceThemeChanged;
 
 	@Inject
-	FxApplication(Settings settings, Lazy<MainWindowComponent> mainWindow, Lazy<PreferencesComponent> preferencesWindow, Provider<UnlockComponent.Builder> unlockWindowBuilderProvider, Provider<LockComponent.Builder> lockWindowBuilderProvider, Lazy<QuitComponent> quitWindow, Optional<TrayIntegrationProvider> trayIntegration, Optional<UiAppearanceProvider> appearanceProvider, VaultService vaultService, LicenseHolder licenseHolder, ObservableSet<Stage> visibleStages) {
+	FxApplication(Settings settings, Lazy<MainWindowComponent> mainWindow, Lazy<PreferencesComponent> preferencesWindow, Provider<UnlockComponent.Builder> unlockWindowBuilderProvider, Provider<LockComponent.Builder> lockWindowBuilderProvider, Lazy<QuitComponent> quitWindow, Optional<TrayIntegrationProvider> trayIntegration, Optional<UiAppearanceProvider> appearanceProvider, VaultService vaultService, LicenseHolder licenseHolder) {
 		this.settings = settings;
 		this.mainWindow = mainWindow;
 		this.preferencesWindow = preferencesWindow;
@@ -62,14 +64,15 @@ public class FxApplication extends Application {
 		this.appearanceProvider = appearanceProvider;
 		this.vaultService = vaultService;
 		this.licenseHolder = licenseHolder;
-		this.hasVisibleStages = Bindings.isNotEmpty(visibleStages);
+		this.visibleWindows = Stage.getWindows().filtered(Window::isShowing);
+		this.hasVisibleWindows = Bindings.isNotEmpty(visibleWindows);
 	}
 
 	public void start() {
 		LOG.trace("FxApplication.start()");
 		Platform.setImplicitExit(false);
 
-		hasVisibleStages.addListener(this::hasVisibleStagesChanged);
+		hasVisibleWindows.addListener(this::hasVisibleStagesChanged);
 
 		settings.theme().addListener(this::appThemeChanged);
 		loadSelectedStyleSheet(settings.theme().get());
@@ -81,6 +84,7 @@ public class FxApplication extends Application {
 	}
 
 	private void hasVisibleStagesChanged(@SuppressWarnings("unused") ObservableValue<? extends Boolean> observableValue, @SuppressWarnings("unused") boolean oldValue, boolean newValue) {
+		LOG.warn("has visible stages: {}", newValue);
 		if (newValue) {
 			trayIntegration.ifPresent(TrayIntegrationProvider::restoredFromTray);
 		} else {

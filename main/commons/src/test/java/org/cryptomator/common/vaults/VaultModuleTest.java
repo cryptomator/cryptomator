@@ -43,7 +43,7 @@ public class VaultModuleTest {
 
 		StringBinding result = module.provideDefaultMountFlags(settings, vaultSettings);
 
-		MatcherAssert.assertThat(result.get(), CoreMatchers.containsString("-ovolname=TEST"));
+		MatcherAssert.assertThat(result.get(), CoreMatchers.containsString("-ovolname=\"TEST\""));
 		MatcherAssert.assertThat(result.get(), CoreMatchers.containsString("-ordonly"));
 	}
 

@@ -8,13 +8,13 @@
  *******************************************************************************/
 package org.cryptomator.common.settings;
 
+import com.google.common.base.Suppliers;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import org.cryptomator.common.Environment;
-import org.cryptomator.common.LazyInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +48,7 @@ public class SettingsProvider implements Supplier<Settings> {
 	private static final long SAVE_DELAY_MS = 1000;
 
 	private final AtomicReference<ScheduledFuture<?>> scheduledSaveCmd = new AtomicReference<>();
-	private final AtomicReference<Settings> settings = new AtomicReference<>();
+	private final Supplier<Settings> settings = Suppliers.memoize(this::load);
 	private final SettingsJsonAdapter settingsJsonAdapter = new SettingsJsonAdapter();
 	private final Environment env;
 	private final ScheduledExecutorService scheduler;
@@ -66,7 +66,7 @@ public class SettingsProvider implements Supplier<Settings> {
 
 	@Override
 	public Settings get() {
-		return LazyInitializer.initializeLazily(settings, this::load);
+		return settings.get();
 	}
 
 	private Settings load() {

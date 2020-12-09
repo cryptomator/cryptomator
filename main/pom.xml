@@ -175,6 +175,13 @@
 				<artifactId>java-jwt</artifactId>
 				<version>${jwt.version}</version>
 			</dependency>
+			<!-- fixes CVE-2020-25649, can be removed once https://github.com/auth0/java-jwt/pull/463 is closed and released -->
+			<dependency>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-databind</artifactId>
+				<version>2.10.5.1</version>
+			</dependency>
+
 
 			<!-- EasyBind -->
 			<dependency>
