@@ -156,7 +156,7 @@ public class VaultModule {
 		//See: https://github.com/billziss-gh/winfsp/issues/319
 		if (!readOnly.get()) {
 			flags.append(" -ouid=-1");
-			flags.append(" -ogid=-1");
+			flags.append(" -ogid=11");
 		}
 		flags.append(" -ovolname=").append('"').append(mountName.get()).append('"');
 		//Dokany requires this option to be set, WinFSP doesn't seem to share this peculiarity,
