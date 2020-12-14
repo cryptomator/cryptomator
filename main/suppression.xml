@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- This file lists false positives found by org.owasp:dependency-check-maven build plugin -->
+<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.2.xsd">
+	<suppress>
+		<notes><![CDATA[ Upstream fix backported from 2.11.0 to 2.10.5.1, see https://github.com/FasterXML/jackson-databind/issues/2589#issuecomment-714833837. ]]></notes>
+		<gav>com.fasterxml.jackson.core:jackson-databind:2.10.5.1</gav>
+		<cve>CVE-2020-25649</cve>
+	</suppress>
+	<suppress>
+		<notes><![CDATA[ Suppress known vulnerabilities in FUSE libraries for fuse-nio-adapter. For more info, see suppression.xml of https://github.com/cryptomator/fuse-nio-adapter ]]></notes>
+		<gav regex="true">^org\.cryptomator:fuse-nio-adapter:.*$</gav>
+		<cvssBelow>9</cvssBelow>
+	</suppress>
+	<suppress>
+		<notes><![CDATA[ Suppress known vulnerabilities in FUSE libraries for jnr-fuse (dependency of fuse-nio-adapter). ]]></notes>
+		<gav regex="true">^com\.github\.serceman:jnr-fuse:.*$</gav>
+		<cvssBelow>9</cvssBelow>
+	</suppress>
+</suppressions>

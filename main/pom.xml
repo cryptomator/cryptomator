@@ -230,6 +230,13 @@
 				<version>${javafx.version}</version>
 				<scope>test</scope>
 			</dependency>
+
+			<!-- TODO: temporary fix for XXE attack, can be removed once java-jwt is updated -->
+			<dependency>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-databind</artifactId>
+				<version>2.10.5.1</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 
@@ -331,6 +338,32 @@
 					<artifactId>integrations-win</artifactId>
 				</dependency>
 			</dependencies>
+		</profile>
+		<profile>
+			<id>dependency-check</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.owasp</groupId>
+						<artifactId>dependency-check-maven</artifactId>
+						<version>6.0.3</version>
+						<configuration>
+							<cveValidForHours>24</cveValidForHours>
+							<failBuildOnCVSS>0</failBuildOnCVSS>
+							<skipTestScope>true</skipTestScope>
+							<detail>true</detail>
+							<suppressionFile>suppression.xml</suppressionFile>
+						</configuration>
+						<executions>
+							<execution>
+								<goals>
+									<goal>check</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
 		</profile>
 	</profiles>
 
