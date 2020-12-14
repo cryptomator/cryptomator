@@ -16,7 +16,6 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
@@ -90,11 +89,7 @@ public class GeneralPreferencesController implements FxController {
 
 		debugModeCheckbox.selectedProperty().bindBidirectional(settings.debugMode());
 
-		autoStartProvider.ifPresent(autoStart -> {
-			if (autoStart.isEnabled()) {
-				Platform.runLater(() -> autoStartCheckbox.setSelected(true));
-			}
-		});
+		autoStartProvider.ifPresent(realProvider -> autoStartCheckbox.setSelected(realProvider.isEnabled()));
 
 		nodeOrientationLtr.setSelected(settings.userInterfaceOrientation().get() == NodeOrientation.LEFT_TO_RIGHT);
 		nodeOrientationRtl.setSelected(settings.userInterfaceOrientation().get() == NodeOrientation.RIGHT_TO_LEFT);
