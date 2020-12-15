@@ -89,7 +89,7 @@ public class GeneralPreferencesController implements FxController {
 
 		debugModeCheckbox.selectedProperty().bindBidirectional(settings.debugMode());
 
-		autoStartProvider.ifPresent(realProvider -> autoStartCheckbox.setSelected(realProvider.isEnabled()));
+		autoStartProvider.ifPresent(autoStart -> autoStartCheckbox.setSelected(autoStart.isEnabled()));
 
 		nodeOrientationLtr.setSelected(settings.userInterfaceOrientation().get() == NodeOrientation.LEFT_TO_RIGHT);
 		nodeOrientationRtl.setSelected(settings.userInterfaceOrientation().get() == NodeOrientation.RIGHT_TO_LEFT);
