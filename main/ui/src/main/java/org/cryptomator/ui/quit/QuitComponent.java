@@ -5,7 +5,6 @@
  *******************************************************************************/
 package org.cryptomator.ui.quit;
 
-import dagger.BindsInstance;
 import dagger.Lazy;
 import dagger.Subcomponent;
 import org.cryptomator.ui.common.FxmlFile;
@@ -25,7 +24,10 @@ public interface QuitComponent {
 	@FxmlScene(FxmlFile.QUIT)
 	Lazy<Scene> scene();
 
-	default Stage showQuitWindow() {
+	QuitController controller();
+
+	default Stage showQuitWindow(QuitResponse response) {
+		controller().updateQuitRequest(response);
 		Stage stage = window();
 		stage.setScene(scene().get());
 		stage.show();
@@ -35,9 +37,6 @@ public interface QuitComponent {
 
 	@Subcomponent.Builder
 	interface Builder {
-
-		@BindsInstance
-		Builder quitResponse(QuitResponse response);
 
 		QuitComponent build();
 	}

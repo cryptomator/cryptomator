@@ -6,25 +6,32 @@ import com.google.common.cache.LoadingCache;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.VaultService;
+import org.cryptomator.ui.fxapp.FxApplication;
 import org.cryptomator.ui.stats.VaultStatisticsComponent;
 
 import javax.inject.Inject;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.fxml.FXML;
+import javafx.stage.Stage;
+import java.util.Optional;
 
 @MainWindowScoped
 public class VaultDetailUnlockedController implements FxController {
 
 	private final ReadOnlyObjectProperty<Vault> vault;
+	private final FxApplication application;
 	private final VaultService vaultService;
+	private final Stage mainWindow;
 	private final LoadingCache<Vault, VaultStatisticsComponent> vaultStats;
 	private final VaultStatisticsComponent.Builder vaultStatsBuilder;
 
 	@Inject
-	public VaultDetailUnlockedController(ObjectProperty<Vault> vault, VaultService vaultService, VaultStatisticsComponent.Builder vaultStatsBuilder) {
+	public VaultDetailUnlockedController(ObjectProperty<Vault> vault, FxApplication application, VaultService vaultService, VaultStatisticsComponent.Builder vaultStatsBuilder, @MainWindow Stage mainWindow) {
 		this.vault = vault;
+		this.application = application;
 		this.vaultService = vaultService;
+		this.mainWindow = mainWindow;
 		this.vaultStats = CacheBuilder.newBuilder().weakValues().build(CacheLoader.from(this::buildVaultStats));
 		this.vaultStatsBuilder = vaultStatsBuilder;
 	}
@@ -40,8 +47,7 @@ public class VaultDetailUnlockedController implements FxController {
 
 	@FXML
 	public void lock() {
-		vaultService.lock(vault.get(), false);
-		// TODO count lock attempts, and allow forced lock
+		application.startLockWorkflow(vault.get(), Optional.of(mainWindow));
 	}
 
 	@FXML

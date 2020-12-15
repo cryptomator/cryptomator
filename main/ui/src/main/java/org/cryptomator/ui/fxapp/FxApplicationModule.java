@@ -11,6 +11,7 @@ import dagger.Provides;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.ui.common.ErrorComponent;
 import org.cryptomator.ui.common.StageFactory;
+import org.cryptomator.ui.lock.LockComponent;
 import org.cryptomator.ui.mainwindow.MainWindowComponent;
 import org.cryptomator.ui.preferences.PreferencesComponent;
 import org.cryptomator.ui.quit.QuitComponent;
@@ -18,7 +19,6 @@ import org.cryptomator.ui.unlock.UnlockComponent;
 
 import javax.inject.Named;
 import javafx.application.Application;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableSet;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
@@ -28,14 +28,8 @@ import java.io.UncheckedIOException;
 import java.util.Collections;
 import java.util.List;
 
-@Module(includes = {UpdateCheckerModule.class}, subcomponents = {MainWindowComponent.class, PreferencesComponent.class, UnlockComponent.class, QuitComponent.class, ErrorComponent.class})
+@Module(includes = {UpdateCheckerModule.class}, subcomponents = {MainWindowComponent.class, PreferencesComponent.class, UnlockComponent.class, LockComponent.class, QuitComponent.class, ErrorComponent.class})
 abstract class FxApplicationModule {
-
-	@Provides
-	@FxApplicationScoped
-	static ObservableSet<Stage> provideVisibleStages() {
-		return FXCollections.observableSet();
-	}
 
 	@Provides
 	@Named("windowIcons")
@@ -56,16 +50,9 @@ abstract class FxApplicationModule {
 
 	@Provides
 	@FxApplicationScoped
-	static StageFactory provideStageFactory(@Named("windowIcons") List<Image> windowIcons, ObservableSet<Stage> visibleStages) {
+	static StageFactory provideStageFactory(@Named("windowIcons") List<Image> windowIcons) {
 		return new StageFactory(stage -> {
 			stage.getIcons().addAll(windowIcons);
-			stage.showingProperty().addListener((observableValue, wasShowing, isShowing) -> {
-				if (isShowing) {
-					visibleStages.add(stage);
-				} else {
-					visibleStages.remove(stage);
-				}
-			});
 		});
 	}
 
@@ -88,4 +75,8 @@ abstract class FxApplicationModule {
 		return builder.build();
 	}
 
+	@Provides
+	static QuitComponent provideQuitComponent(QuitComponent.Builder builder) {
+		return builder.build();
+	}
 }

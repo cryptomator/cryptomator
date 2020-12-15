@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.cryptomator</groupId>
 	<artifactId>main</artifactId>
-	<version>1.5.10</version>
+	<version>1.5.11</version>
 	<packaging>pom</packaging>
 	<name>Cryptomator</name>
 
@@ -26,12 +26,12 @@
 		<!-- cryptomator dependencies -->
 		<cryptomator.cryptofs.version>1.9.13</cryptomator.cryptofs.version>
 		<cryptomator.integrations.version>0.1.6</cryptomator.integrations.version>
-		<cryptomator.integrations.win.version>0.1.0-beta1</cryptomator.integrations.win.version>
+		<cryptomator.integrations.win.version>0.2.0</cryptomator.integrations.win.version>
 		<cryptomator.integrations.mac.version>0.1.0-beta3</cryptomator.integrations.mac.version>
 		<cryptomator.integrations.linux.version>0.1.0-beta2</cryptomator.integrations.linux.version>
-		<cryptomator.fuse.version>1.2.5</cryptomator.fuse.version>
-		<cryptomator.dokany.version>1.2.0</cryptomator.dokany.version>
-		<cryptomator.webdav.version>1.0.13</cryptomator.webdav.version>
+		<cryptomator.fuse.version>1.2.6</cryptomator.fuse.version>
+		<cryptomator.dokany.version>1.2.1</cryptomator.dokany.version>
+		<cryptomator.webdav.version>1.0.14</cryptomator.webdav.version>
 
 		<!-- 3rd party dependencies -->
 		<javafx.version>15</javafx.version>
@@ -175,6 +175,13 @@
 				<artifactId>java-jwt</artifactId>
 				<version>${jwt.version}</version>
 			</dependency>
+			<!-- fixes CVE-2020-25649, can be removed once https://github.com/auth0/java-jwt/pull/463 is closed and released -->
+			<dependency>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-databind</artifactId>
+				<version>2.10.5.1</version>
+			</dependency>
+
 
 			<!-- EasyBind -->
 			<dependency>
@@ -222,6 +229,13 @@
 				<artifactId>javafx-swing</artifactId>
 				<version>${javafx.version}</version>
 				<scope>test</scope>
+			</dependency>
+
+			<!-- TODO: temporary fix for XXE attack, can be removed once java-jwt is updated -->
+			<dependency>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-databind</artifactId>
+				<version>2.10.5.1</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
@@ -324,6 +338,32 @@
 					<artifactId>integrations-win</artifactId>
 				</dependency>
 			</dependencies>
+		</profile>
+		<profile>
+			<id>dependency-check</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.owasp</groupId>
+						<artifactId>dependency-check-maven</artifactId>
+						<version>6.0.3</version>
+						<configuration>
+							<cveValidForHours>24</cveValidForHours>
+							<failBuildOnCVSS>0</failBuildOnCVSS>
+							<skipTestScope>true</skipTestScope>
+							<detail>true</detail>
+							<suppressionFile>suppression.xml</suppressionFile>
+						</configuration>
+						<executions>
+							<execution>
+								<goals>
+									<goal>check</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
 		</profile>
 	</profiles>
 

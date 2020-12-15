@@ -1,6 +1,5 @@
 package org.cryptomator.ui.fxapp;
 
-import com.tobiasdiez.easybind.EasyBind;
 import dagger.Lazy;
 import org.cryptomator.common.LicenseHolder;
 import org.cryptomator.common.settings.Settings;
@@ -12,6 +11,7 @@ import org.cryptomator.integrations.uiappearance.UiAppearanceException;
 import org.cryptomator.integrations.uiappearance.UiAppearanceListener;
 import org.cryptomator.integrations.uiappearance.UiAppearanceProvider;
 import org.cryptomator.ui.common.VaultService;
+import org.cryptomator.ui.lock.LockComponent;
 import org.cryptomator.ui.mainwindow.MainWindowComponent;
 import org.cryptomator.ui.preferences.PreferencesComponent;
 import org.cryptomator.ui.preferences.SelectedPreferencesTab;
@@ -27,8 +27,9 @@ import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.ObservableSet;
+import javafx.collections.ObservableList;
 import javafx.stage.Stage;
+import javafx.stage.Window;
 import java.awt.desktop.QuitResponse;
 import java.util.Optional;
 
@@ -40,34 +41,38 @@ public class FxApplication extends Application {
 	private final Settings settings;
 	private final Lazy<MainWindowComponent> mainWindow;
 	private final Lazy<PreferencesComponent> preferencesWindow;
+	private final Lazy<QuitComponent> quitWindow;
 	private final Provider<UnlockComponent.Builder> unlockWindowBuilderProvider;
-	private final Provider<QuitComponent.Builder> quitWindowBuilderProvider;
+	private final Provider<LockComponent.Builder> lockWindowBuilderProvider;
 	private final Optional<TrayIntegrationProvider> trayIntegration;
 	private final Optional<UiAppearanceProvider> appearanceProvider;
 	private final VaultService vaultService;
 	private final LicenseHolder licenseHolder;
-	private final BooleanBinding hasVisibleStages;
+	private final ObservableList<Window> visibleWindows;
+	private final BooleanBinding hasVisibleWindows;
 	private final UiAppearanceListener systemInterfaceThemeListener = this::systemInterfaceThemeChanged;
 
 	@Inject
-	FxApplication(Settings settings, Lazy<MainWindowComponent> mainWindow, Lazy<PreferencesComponent> preferencesWindow, Provider<UnlockComponent.Builder> unlockWindowBuilderProvider, Provider<QuitComponent.Builder> quitWindowBuilderProvider, Optional<TrayIntegrationProvider> trayIntegration, Optional<UiAppearanceProvider> appearanceProvider, VaultService vaultService, LicenseHolder licenseHolder, ObservableSet<Stage> visibleStages) {
+	FxApplication(Settings settings, Lazy<MainWindowComponent> mainWindow, Lazy<PreferencesComponent> preferencesWindow, Provider<UnlockComponent.Builder> unlockWindowBuilderProvider, Provider<LockComponent.Builder> lockWindowBuilderProvider, Lazy<QuitComponent> quitWindow, Optional<TrayIntegrationProvider> trayIntegration, Optional<UiAppearanceProvider> appearanceProvider, VaultService vaultService, LicenseHolder licenseHolder) {
 		this.settings = settings;
 		this.mainWindow = mainWindow;
 		this.preferencesWindow = preferencesWindow;
 		this.unlockWindowBuilderProvider = unlockWindowBuilderProvider;
-		this.quitWindowBuilderProvider = quitWindowBuilderProvider;
+		this.lockWindowBuilderProvider = lockWindowBuilderProvider;
+		this.quitWindow = quitWindow;
 		this.trayIntegration = trayIntegration;
 		this.appearanceProvider = appearanceProvider;
 		this.vaultService = vaultService;
 		this.licenseHolder = licenseHolder;
-		this.hasVisibleStages = Bindings.isNotEmpty(visibleStages);
+		this.visibleWindows = Stage.getWindows().filtered(Window::isShowing);
+		this.hasVisibleWindows = Bindings.isNotEmpty(visibleWindows);
 	}
 
 	public void start() {
 		LOG.trace("FxApplication.start()");
 		Platform.setImplicitExit(false);
 
-		EasyBind.subscribe(hasVisibleStages, this::hasVisibleStagesChanged);
+		hasVisibleWindows.addListener(this::hasVisibleStagesChanged);
 
 		settings.theme().addListener(this::appThemeChanged);
 		loadSelectedStyleSheet(settings.theme().get());
@@ -78,7 +83,8 @@ public class FxApplication extends Application {
 		throw new UnsupportedOperationException("Use start() instead.");
 	}
 
-	private void hasVisibleStagesChanged(boolean newValue) {
+	private void hasVisibleStagesChanged(@SuppressWarnings("unused") ObservableValue<? extends Boolean> observableValue, @SuppressWarnings("unused") boolean oldValue, boolean newValue) {
+		LOG.warn("has visible stages: {}", newValue);
 		if (newValue) {
 			trayIntegration.ifPresent(TrayIntegrationProvider::restoredFromTray);
 		} else {
@@ -107,9 +113,16 @@ public class FxApplication extends Application {
 		});
 	}
 
+	public void startLockWorkflow(Vault vault, Optional<Stage> owner) {
+		Platform.runLater(() -> {
+			lockWindowBuilderProvider.get().vault(vault).owner(owner).build().startLockWorkflow();
+			LOG.debug("Start lock workflow for {}", vault.getDisplayName());
+		});
+	}
+
 	public void showQuitWindow(QuitResponse response) {
 		Platform.runLater(() -> {
-			quitWindowBuilderProvider.get().quitResponse(response).build().showQuitWindow();
+			quitWindow.get().showQuitWindow(response);
 			LOG.debug("Showing QuitWindow");
 		});
 	}

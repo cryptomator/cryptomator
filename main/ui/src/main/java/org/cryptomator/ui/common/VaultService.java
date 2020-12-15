@@ -65,6 +65,7 @@ public class VaultService {
 	public Task<Vault> createLockTask(Vault vault, boolean forced) {
 		Task<Vault> task = new LockVaultTask(vault, forced);
 		task.setOnSucceeded(evt -> LOG.info("Locked {}", vault.getDisplayName()));
+		task.setOnFailed(evt -> LOG.info("Failed to lock {}.", vault.getDisplayName(), evt.getSource().getException()));
 		return task;
 	}
 
