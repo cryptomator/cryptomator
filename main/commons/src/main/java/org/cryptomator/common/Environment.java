@@ -75,6 +75,7 @@ public class Environment {
 		return getInt("cryptomator.minPwLength", DEFAULT_MIN_PW_LENGTH);
 	}
 
+	@Deprecated // TODO: remove as soon as custom mount path works properly on Win+Fuse
 	public boolean useExperimentalFuse() {
 		return Boolean.getBoolean("fuse.experimental");
 	}
