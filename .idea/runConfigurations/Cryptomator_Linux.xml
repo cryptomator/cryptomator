@@ -2,7 +2,7 @@
   <configuration default="false" name="Cryptomator Linux" type="Application" factoryName="Application">
     <option name="MAIN_CLASS_NAME" value="org.cryptomator.launcher.Cryptomator" />
     <module name="launcher" />
-    <option name="VM_PARAMETERS" value="-Djdk.gtk.version=2 -Duser.language=en -Dcryptomator.settingsPath=&quot;~/.config/Cryptomator/settings.json&quot; -Dcryptomator.ipcPortPath=&quot;~/.config/Cryptomator/ipcPort.bin&quot; -Dcryptomator.logDir=&quot;~/.local/share/Cryptomator/logs&quot; -Dcryptomator.mountPointsDir=&quot;~/.local/share/Cryptomator/mnt&quot; -Xss20m -Xmx512m" />
+    <option name="VM_PARAMETERS" value="-Djdk.gtk.version=2 -Duser.language=en -Dcryptomator.settingsPath=&quot;~/.config/Cryptomator/settings.json&quot; -Dcryptomator.ipcPortPath=&quot;~/.config/Cryptomator/ipcPort.bin&quot; -Dcryptomator.logDir=&quot;~/.local/share/Cryptomator/logs&quot; -Dcryptomator.mountPointsDir=&quot;~/.local/share/Cryptomator/mnt&quot; -Dcryptomator.showTrayIcon=true -Xss20m -Xmx512m" />
     <method v="2">
       <option name="Make" enabled="true" />
     </method>

@@ -5,6 +5,7 @@
  *******************************************************************************/
 package org.cryptomator.common.settings;
 
+import org.cryptomator.common.Environment;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -14,8 +15,10 @@ public class SettingsTest {
 
 	@Test
 	public void testAutoSave() {
+		Environment env = Mockito.mock(Environment.class);
 		@SuppressWarnings("unchecked") Consumer<Settings> changeListener = Mockito.mock(Consumer.class);
-		Settings settings = new Settings();
+
+		Settings settings = new Settings(env);
 		settings.setSaveCmd(changeListener);
 		VaultSettings vaultSettings = VaultSettings.withRandomId();
 		Mockito.verify(changeListener, Mockito.times(0)).accept(settings);

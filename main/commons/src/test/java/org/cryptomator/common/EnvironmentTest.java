@@ -8,6 +8,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -20,14 +21,10 @@ class EnvironmentTest {
 
 	private Environment env;
 
-	@BeforeAll
-	static void init() {
-		System.setProperty("user.home", "/home/testuser");
-	}
-
 	@BeforeEach
-	void initEach() {
-		env = new Environment();
+	void init() {
+		env = Mockito.spy(new Environment());
+		Mockito.when(env.getHomeDir()).thenReturn(Path.of("/home/testuser"));
 	}
 
 	@Test

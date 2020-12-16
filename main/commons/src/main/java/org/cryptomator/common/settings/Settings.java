@@ -9,6 +9,7 @@
 package org.cryptomator.common.settings;
 
 import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.common.Environment;
 
 import javafx.beans.Observable;
 import javafx.beans.property.BooleanProperty;
@@ -54,13 +55,16 @@ public class Settings {
 	private final ObjectProperty<KeychainBackend> keychainBackend = new SimpleObjectProperty<>(DEFAULT_KEYCHAIN_BACKEND);
 	private final ObjectProperty<NodeOrientation> userInterfaceOrientation = new SimpleObjectProperty<>(DEFAULT_USER_INTERFACE_ORIENTATION);
 	private final StringProperty licenseKey = new SimpleStringProperty(DEFAULT_LICENSE_KEY);
+	private final BooleanProperty showTrayIcon;
 
 	private Consumer<Settings> saveCmd;
 
 	/**
 	 * Package-private constructor; use {@link SettingsProvider}.
 	 */
-	Settings() {
+	Settings(Environment env) {
+		this.showTrayIcon = new SimpleBooleanProperty(env.showTrayIcon());
+
 		directories.addListener(this::somethingChanged);
 		askedForUpdateCheck.addListener(this::somethingChanged);
 		checkForUpdates.addListener(this::somethingChanged);
@@ -74,6 +78,7 @@ public class Settings {
 		keychainBackend.addListener(this::somethingChanged);
 		userInterfaceOrientation.addListener(this::somethingChanged);
 		licenseKey.addListener(this::somethingChanged);
+		showTrayIcon.addListener(this::somethingChanged);
 	}
 
 	void setSaveCmd(Consumer<Settings> saveCmd) {
@@ -140,5 +145,9 @@ public class Settings {
 
 	public StringProperty licenseKey() {
 		return licenseKey;
+	}
+
+	public BooleanProperty showTrayIcon() {
+		return showTrayIcon;
 	}
 }
