@@ -30,7 +30,7 @@ Of course, we also expect you to search for existing similar issues first! ;) ht
 
 ### System Setup
 
-* Operating system and version: [Windows/macOS/Linux + Version]
+* Operating system and version: [Windows/macOS/Linux + Version ( + Desktop Environment, if Linux)]
 * Cryptomator version: [Shown in the settings]
 * Volume type: [Dokany/FUSE/WebDAV, shown in the settings]
 
