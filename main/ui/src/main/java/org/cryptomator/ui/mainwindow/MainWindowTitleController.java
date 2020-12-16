@@ -28,7 +28,7 @@ public class MainWindowTitleController implements FxController {
 	private final AppLifecycleListener appLifecycle;
 	private final Stage window;
 	private final FxApplication application;
-	private final boolean minimizeToSysTray;
+	private final boolean isTrayIconPresent;
 	private final UpdateChecker updateChecker;
 	private final BooleanBinding updateAvailable;
 	private final LicenseHolder licenseHolder;
@@ -39,11 +39,11 @@ public class MainWindowTitleController implements FxController {
 	private double yOffset;
 
 	@Inject
-	MainWindowTitleController(AppLifecycleListener appLifecycle, @MainWindow Stage window, FxApplication application, @Named("trayMenuSupported") boolean minimizeToSysTray, UpdateChecker updateChecker, LicenseHolder licenseHolder, Settings settings) {
+	MainWindowTitleController(AppLifecycleListener appLifecycle, @MainWindow Stage window, FxApplication application, @Named("trayMenuSupported") boolean isTrayIconPresent, UpdateChecker updateChecker, LicenseHolder licenseHolder, Settings settings) {
 		this.appLifecycle = appLifecycle;
 		this.window = window;
 		this.application = application;
-		this.minimizeToSysTray = minimizeToSysTray;
+		this.isTrayIconPresent = isTrayIconPresent;
 		this.updateChecker = updateChecker;
 		this.updateAvailable = updateChecker.latestVersionProperty().isNotNull();
 		this.licenseHolder = licenseHolder;
@@ -71,7 +71,7 @@ public class MainWindowTitleController implements FxController {
 
 	@FXML
 	public void close() {
-		if (minimizeToSysTray) {
+		if (isTrayIconPresent) {
 			window.close();
 		} else {
 			appLifecycle.quit();
@@ -112,8 +112,8 @@ public class MainWindowTitleController implements FxController {
 		return updateAvailable.get();
 	}
 
-	public boolean isMinimizeToSysTray() {
-		return minimizeToSysTray;
+	public boolean isTrayIconPresent() {
+		return isTrayIconPresent;
 	}
 
 	public BooleanBinding debugModeEnabledProperty() {

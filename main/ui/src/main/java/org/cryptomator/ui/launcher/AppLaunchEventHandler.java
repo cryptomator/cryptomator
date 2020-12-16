@@ -34,15 +34,15 @@ class AppLaunchEventHandler {
 		this.vaultListManager = vaultListManager;
 	}
 
-	public void startHandlingLaunchEvents(boolean hasTrayIcon) {
-		executorService.submit(() -> handleLaunchEvents(hasTrayIcon));
+	public void startHandlingLaunchEvents() {
+		executorService.submit(this::handleLaunchEvents);
 	}
 
-	private void handleLaunchEvents(boolean hasTrayIcon) {
+	private void handleLaunchEvents() {
 		try {
 			while (!Thread.interrupted()) {
 				AppLaunchEvent event = launchEventQueue.take();
-				handleLaunchEvent(hasTrayIcon, event);
+				handleLaunchEvent(event);
 			}
 		} catch (InterruptedException e) {
 			LOG.warn("Interrupted launch event handler.");
@@ -50,10 +50,10 @@ class AppLaunchEventHandler {
 		}
 	}
 
-	private void handleLaunchEvent(boolean hasTrayIcon, AppLaunchEvent event) {
+	private void handleLaunchEvent(AppLaunchEvent event) {
 		switch (event.getType()) {
-			case REVEAL_APP -> fxApplicationStarter.get(hasTrayIcon).thenAccept(FxApplication::showMainWindow);
-			case OPEN_FILE -> fxApplicationStarter.get(hasTrayIcon).thenRun(() -> {
+			case REVEAL_APP -> fxApplicationStarter.get().thenAccept(FxApplication::showMainWindow);
+			case OPEN_FILE -> fxApplicationStarter.get().thenRun(() -> {
 				Platform.runLater(() -> {
 					event.getPathsToOpen().forEach(this::addVault);
 				});

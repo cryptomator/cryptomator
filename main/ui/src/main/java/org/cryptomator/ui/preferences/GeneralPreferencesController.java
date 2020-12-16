@@ -27,6 +27,7 @@ import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleGroup;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
+import java.awt.SystemTray;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -41,7 +42,6 @@ public class GeneralPreferencesController implements FxController {
 
 	private final Stage window;
 	private final Settings settings;
-	private final boolean trayMenuSupported;
 	private final Optional<AutoStartProvider> autoStartProvider;
 	private final ObjectProperty<SelectedPreferencesTab> selectedTabProperty;
 	private final LicenseHolder licenseHolder;
@@ -53,6 +53,7 @@ public class GeneralPreferencesController implements FxController {
 	private final ErrorComponent.Builder errorComponent;
 	public ChoiceBox<UiTheme> themeChoiceBox;
 	public ChoiceBox<KeychainBackend> keychainBackendChoiceBox;
+	public CheckBox showTrayIconCheckbox;
 	public CheckBox startHiddenCheckbox;
 	public CheckBox debugModeCheckbox;
 	public CheckBox autoStartCheckbox;
@@ -61,10 +62,9 @@ public class GeneralPreferencesController implements FxController {
 	public RadioButton nodeOrientationRtl;
 
 	@Inject
-	GeneralPreferencesController(@PreferencesWindow Stage window, Settings settings, @Named("trayMenuSupported") boolean trayMenuSupported, Optional<AutoStartProvider> autoStartProvider, Set<KeychainAccessProvider> keychainAccessProviders, ObjectProperty<SelectedPreferencesTab> selectedTabProperty, LicenseHolder licenseHolder, ExecutorService executor, ResourceBundle resourceBundle, Application application, Environment environment, ErrorComponent.Builder errorComponent) {
+	GeneralPreferencesController(@PreferencesWindow Stage window, Settings settings, Optional<AutoStartProvider> autoStartProvider, Set<KeychainAccessProvider> keychainAccessProviders, ObjectProperty<SelectedPreferencesTab> selectedTabProperty, LicenseHolder licenseHolder, ExecutorService executor, ResourceBundle resourceBundle, Application application, Environment environment, ErrorComponent.Builder errorComponent) {
 		this.window = window;
 		this.settings = settings;
-		this.trayMenuSupported = trayMenuSupported;
 		this.autoStartProvider = autoStartProvider;
 		this.keychainAccessProviders = keychainAccessProviders;
 		this.selectedTabProperty = selectedTabProperty;
@@ -84,6 +84,8 @@ public class GeneralPreferencesController implements FxController {
 		}
 		themeChoiceBox.valueProperty().bindBidirectional(settings.theme());
 		themeChoiceBox.setConverter(new UiThemeConverter(resourceBundle));
+
+		showTrayIconCheckbox.selectedProperty().bindBidirectional(settings.showTrayIcon());
 
 		startHiddenCheckbox.selectedProperty().bindBidirectional(settings.startHidden());
 
@@ -106,7 +108,7 @@ public class GeneralPreferencesController implements FxController {
 	}
 
 	public boolean isTrayMenuSupported() {
-		return this.trayMenuSupported;
+		return SystemTray.isSupported();
 	}
 
 	public boolean isAutoStartSupported() {

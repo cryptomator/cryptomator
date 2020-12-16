@@ -40,44 +40,50 @@ public class UiLauncher {
 	}
 
 	public void launch() {
-		final boolean hasTrayIcon;
-		if (SystemTray.isSupported()) {
+		boolean hidden = settings.startHidden().get();
+		if (SystemTray.isSupported() && settings.showTrayIcon().get()) {
 			trayComponent.build().addIconToSystemTray();
-			hasTrayIcon = true;
+			launch(true, hidden);
 		} else {
-			hasTrayIcon = false;
+			launch(false, hidden);
 		}
+	}
 
-		// show window on start?
-		if (hasTrayIcon && settings.startHidden().get()) {
+	private void launch(boolean withTrayIcon, boolean hidden) {
+		// start hidden, minimized or normal?
+		if (withTrayIcon && hidden) {
 			LOG.debug("Hiding application...");
 			trayIntegration.ifPresent(TrayIntegrationProvider::minimizedToTray);
+		} else if (!withTrayIcon && hidden) {
+			LOG.debug("Minimizing application...");
+			showMainWindowAsync(true);
 		} else {
-			showMainWindowAsync(hasTrayIcon);
+			LOG.debug("Showing application...");
+			showMainWindowAsync(false);
 		}
 
 		// register app reopen listener
-		Desktop.getDesktop().addAppEventListener((AppReopenedListener) e -> showMainWindowAsync(hasTrayIcon));
+		Desktop.getDesktop().addAppEventListener((AppReopenedListener) e -> showMainWindowAsync(false));
 
 		// auto unlock
 		Collection<Vault> vaultsToAutoUnlock = vaults.filtered(this::shouldAttemptAutoUnlock);
 		if (!vaultsToAutoUnlock.isEmpty()) {
-			fxApplicationStarter.get(hasTrayIcon).thenAccept(app -> {
+			fxApplicationStarter.get().thenAccept(app -> {
 				for (Vault vault : vaultsToAutoUnlock) {
 					app.startUnlockWorkflow(vault, Optional.empty());
 				}
 			});
 		}
 
-		launchEventHandler.startHandlingLaunchEvents(hasTrayIcon);
+		launchEventHandler.startHandlingLaunchEvents();
 	}
 
 	private boolean shouldAttemptAutoUnlock(Vault vault) {
 		return vault.isLocked() && vault.getVaultSettings().unlockAfterStartup().get();
 	}
 
-	private void showMainWindowAsync(boolean hasTrayIcon) {
-		fxApplicationStarter.get(hasTrayIcon).thenAccept(FxApplication::showMainWindow);
+	private void showMainWindowAsync(boolean minimize) {
+		fxApplicationStarter.get().thenCompose(FxApplication::showMainWindow).thenAccept(win -> win.setIconified(minimize));
 	}
 
 }
