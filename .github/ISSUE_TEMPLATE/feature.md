@@ -11,7 +11,7 @@ We're happy to help you via our support channels! Please read: https://github.co
 
 By filing a feature request, you are expected to comply with our code of conduct: https://github.com/cryptomator/cryptomator/blob/develop/.github/CODE_OF_CONDUCT.md
 
-Of course, we also expect you to search for existing similar feature requests first! ;)
+Of course, we also expect you to search for existing similar issues first! ;) https://github.com/cryptomator/cryptomator/issues?q=
 
 -->
 
