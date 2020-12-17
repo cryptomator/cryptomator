@@ -50,6 +50,7 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 		out.name("uiOrientation").value(value.userInterfaceOrientation().get().name());
 		out.name("keychainBackend").value(value.keychainBackend().get().name());
 		out.name("licenseKey").value(value.licenseKey().get());
+		out.name("showMinimizeButton").value(value.showMinimizeButton().get());
 		out.name("showTrayIcon").value(value.showTrayIcon().get());
 		out.endObject();
 	}
@@ -83,6 +84,7 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 				case "uiOrientation" -> settings.userInterfaceOrientation().set(parseUiOrientation(in.nextString()));
 				case "keychainBackend" -> settings.keychainBackend().set(parseKeychainBackend(in.nextString()));
 				case "licenseKey" -> settings.licenseKey().set(in.nextString());
+				case "showMinimizeButton" -> settings.showMinimizeButton().set(in.nextBoolean());
 				case "showTrayIcon" -> settings.showTrayIcon().set(in.nextBoolean());
 				default -> {
 					LOG.warn("Unsupported vault setting found in JSON: " + name);

@@ -52,6 +52,7 @@ public class GeneralPreferencesController implements FxController {
 	private final ErrorComponent.Builder errorComponent;
 	public ChoiceBox<UiTheme> themeChoiceBox;
 	public ChoiceBox<KeychainBackend> keychainBackendChoiceBox;
+	public CheckBox showMinimizeButtonCheckbox;
 	public CheckBox showTrayIconCheckbox;
 	public CheckBox startHiddenCheckbox;
 	public CheckBox debugModeCheckbox;
@@ -85,6 +86,8 @@ public class GeneralPreferencesController implements FxController {
 		}
 		themeChoiceBox.valueProperty().bindBidirectional(settings.theme());
 		themeChoiceBox.setConverter(new UiThemeConverter(resourceBundle));
+
+		showMinimizeButtonCheckbox.selectedProperty().bindBidirectional(settings.showMinimizeButton());
 
 		showTrayIconCheckbox.selectedProperty().bindBidirectional(settings.showTrayIcon());
 

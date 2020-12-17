@@ -34,6 +34,7 @@ public class MainWindowTitleController implements FxController {
 	private final BooleanBinding updateAvailable;
 	private final LicenseHolder licenseHolder;
 	private final Settings settings;
+	private final BooleanBinding showMinimizeButton;
 
 	private double xOffset;
 	private double yOffset;
@@ -49,6 +50,7 @@ public class MainWindowTitleController implements FxController {
 		this.updateAvailable = updateChecker.latestVersionProperty().isNotNull();
 		this.licenseHolder = licenseHolder;
 		this.settings = settings;
+		this.showMinimizeButton = Bindings.createBooleanBinding(this::isShowMinimizeButton, settings.showMinimizeButton(), settings.showTrayIcon());
 	}
 
 	@FXML
@@ -122,5 +124,14 @@ public class MainWindowTitleController implements FxController {
 
 	public boolean isDebugModeEnabled() {
 		return debugModeEnabledProperty().get();
+	}
+
+	public BooleanBinding showMinimizeButtonProperty() {
+		return showMinimizeButton;
+	}
+
+	public boolean isShowMinimizeButton() {
+		// always show the minimize button if no tray icon is present OR it is explicitily enabled
+		return !trayMenuInitialized || settings.showMinimizeButton().get();
 	}
 }
