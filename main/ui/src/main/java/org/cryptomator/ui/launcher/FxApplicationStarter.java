@@ -1,5 +1,6 @@
 package org.cryptomator.ui.launcher;
 
+import dagger.Lazy;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.ui.fxapp.FxApplication;
 import org.cryptomator.ui.fxapp.FxApplicationComponent;
@@ -20,19 +21,17 @@ public class FxApplicationStarter {
 
 	private static final Logger LOG = LoggerFactory.getLogger(FxApplicationStarter.class);
 
-	private final FxApplicationComponent.Builder fxAppComponent;
+	private final Lazy<FxApplicationComponent> fxAppComponent;
 	private final ExecutorService executor;
 	private final AtomicBoolean started;
 	private final CompletableFuture<FxApplication> future;
-	private final boolean hasTrayIcon;
 
 	@Inject
-	public FxApplicationStarter(FxApplicationComponent.Builder fxAppComponent, ExecutorService executor, Settings settings) {
+	public FxApplicationStarter(Lazy<FxApplicationComponent> fxAppComponent, ExecutorService executor, Settings settings) {
 		this.fxAppComponent = fxAppComponent;
 		this.executor = executor;
 		this.started = new AtomicBoolean();
 		this.future = new CompletableFuture<>();
-		this.hasTrayIcon = SystemTray.isSupported() && settings.showTrayIcon().get();
 	}
 
 	public CompletionStage<FxApplication> get() {
@@ -48,7 +47,7 @@ public class FxApplicationStarter {
 			Platform.startup(() -> {
 				assert Platform.isFxApplicationThread();
 				LOG.info("JavaFX Runtime started.");
-				FxApplication app = fxAppComponent.trayMenuSupported(hasTrayIcon).build().application();
+				FxApplication app = fxAppComponent.get().application();
 				app.start();
 				future.complete(app);
 			});

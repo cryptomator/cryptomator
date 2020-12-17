@@ -10,11 +10,11 @@ import org.cryptomator.integrations.autostart.ToggleAutoStartFailedException;
 import org.cryptomator.integrations.keychain.KeychainAccessProvider;
 import org.cryptomator.ui.common.ErrorComponent;
 import org.cryptomator.ui.common.FxController;
+import org.cryptomator.ui.traymenu.TrayMenuComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javafx.application.Application;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ObservableValue;
@@ -27,12 +27,10 @@ import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleGroup;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
-import java.awt.SystemTray;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
 @PreferencesScoped
@@ -42,10 +40,11 @@ public class GeneralPreferencesController implements FxController {
 
 	private final Stage window;
 	private final Settings settings;
+	private final boolean trayMenuInitialized;
+	private final boolean trayMenuSupported;
 	private final Optional<AutoStartProvider> autoStartProvider;
 	private final ObjectProperty<SelectedPreferencesTab> selectedTabProperty;
 	private final LicenseHolder licenseHolder;
-	private final ExecutorService executor;
 	private final ResourceBundle resourceBundle;
 	private final Application application;
 	private final Environment environment;
@@ -61,15 +60,17 @@ public class GeneralPreferencesController implements FxController {
 	public RadioButton nodeOrientationLtr;
 	public RadioButton nodeOrientationRtl;
 
+
 	@Inject
-	GeneralPreferencesController(@PreferencesWindow Stage window, Settings settings, Optional<AutoStartProvider> autoStartProvider, Set<KeychainAccessProvider> keychainAccessProviders, ObjectProperty<SelectedPreferencesTab> selectedTabProperty, LicenseHolder licenseHolder, ExecutorService executor, ResourceBundle resourceBundle, Application application, Environment environment, ErrorComponent.Builder errorComponent) {
+	GeneralPreferencesController(@PreferencesWindow Stage window, Settings settings, TrayMenuComponent trayMenu, Optional<AutoStartProvider> autoStartProvider, Set<KeychainAccessProvider> keychainAccessProviders, ObjectProperty<SelectedPreferencesTab> selectedTabProperty, LicenseHolder licenseHolder, ResourceBundle resourceBundle, Application application, Environment environment, ErrorComponent.Builder errorComponent) {
 		this.window = window;
 		this.settings = settings;
+		this.trayMenuInitialized = trayMenu.isInitialized();
+		this.trayMenuSupported = trayMenu.isSupported();
 		this.autoStartProvider = autoStartProvider;
 		this.keychainAccessProviders = keychainAccessProviders;
 		this.selectedTabProperty = selectedTabProperty;
 		this.licenseHolder = licenseHolder;
-		this.executor = executor;
 		this.resourceBundle = resourceBundle;
 		this.application = application;
 		this.environment = environment;
@@ -107,8 +108,12 @@ public class GeneralPreferencesController implements FxController {
 		return Arrays.stream(KeychainBackend.values()).filter(value -> namesOfAvailableProviders.contains(value.getProviderClass())).toArray(KeychainBackend[]::new);
 	}
 
+	public boolean isTrayMenuInitialized() {
+		return trayMenuInitialized;
+	}
+
 	public boolean isTrayMenuSupported() {
-		return SystemTray.isSupported();
+		return trayMenuSupported;
 	}
 
 	public boolean isAutoStartSupported() {
@@ -177,6 +182,7 @@ public class GeneralPreferencesController implements FxController {
 		public UiTheme fromString(String string) {
 			throw new UnsupportedOperationException();
 		}
+
 	}
 
 	private static class KeychainBackendConverter extends StringConverter<KeychainBackend> {
@@ -196,6 +202,6 @@ public class GeneralPreferencesController implements FxController {
 		public KeychainBackend fromString(String string) {
 			throw new UnsupportedOperationException();
 		}
-	}
 
+	}
 }

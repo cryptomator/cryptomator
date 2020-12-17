@@ -15,8 +15,27 @@ public interface TrayMenuComponent {
 
 	TrayIconController trayIconController();
 
-	default void addIconToSystemTray() {
-		assert SystemTray.isSupported();
+	/**
+	 * @return <code>true</code> if a tray icon can be installed
+	 */
+	default boolean isSupported() {
+		return SystemTray.isSupported();
+	}
+
+	/**
+	 * @return <code>true</code> if a tray icon has been installed
+	 */
+	default boolean isInitialized() {
+		return trayIconController().isInitialized();
+	}
+
+	/**
+	 * Installs a tray icon to the system tray.
+	 *
+	 * @throws IllegalStateException If already added
+	 */
+	default void addIconToSystemTray() throws IllegalStateException {
+		assert isSupported();
 		trayIconController().initializeTrayIcon();
 	}
 

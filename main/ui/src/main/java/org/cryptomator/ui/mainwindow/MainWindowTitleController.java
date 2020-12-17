@@ -7,13 +7,14 @@ import org.cryptomator.ui.fxapp.FxApplication;
 import org.cryptomator.ui.fxapp.UpdateChecker;
 import org.cryptomator.ui.launcher.AppLifecycleListener;
 import org.cryptomator.ui.preferences.SelectedPreferencesTab;
+import org.cryptomator.ui.traymenu.TrayMenuComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
+import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
@@ -28,27 +29,26 @@ public class MainWindowTitleController implements FxController {
 	private final AppLifecycleListener appLifecycle;
 	private final Stage window;
 	private final FxApplication application;
-	private final boolean isTrayIconPresent;
+	private final boolean trayMenuInitialized;
 	private final UpdateChecker updateChecker;
 	private final BooleanBinding updateAvailable;
 	private final LicenseHolder licenseHolder;
 	private final Settings settings;
-	private final BooleanBinding debugModeEnabled;
 
 	private double xOffset;
 	private double yOffset;
 
+
 	@Inject
-	MainWindowTitleController(AppLifecycleListener appLifecycle, @MainWindow Stage window, FxApplication application, @Named("trayMenuSupported") boolean isTrayIconPresent, UpdateChecker updateChecker, LicenseHolder licenseHolder, Settings settings) {
+	MainWindowTitleController(AppLifecycleListener appLifecycle, @MainWindow Stage window, FxApplication application, TrayMenuComponent trayMenu, UpdateChecker updateChecker, LicenseHolder licenseHolder, Settings settings) {
 		this.appLifecycle = appLifecycle;
 		this.window = window;
 		this.application = application;
-		this.isTrayIconPresent = isTrayIconPresent;
+		this.trayMenuInitialized = trayMenu.isInitialized();
 		this.updateChecker = updateChecker;
 		this.updateAvailable = updateChecker.latestVersionProperty().isNotNull();
 		this.licenseHolder = licenseHolder;
 		this.settings = settings;
-		this.debugModeEnabled = Bindings.createBooleanBinding(this::isDebugModeEnabled, settings.debugMode());
 	}
 
 	@FXML
@@ -71,7 +71,7 @@ public class MainWindowTitleController implements FxController {
 
 	@FXML
 	public void close() {
-		if (isTrayIconPresent) {
+		if (trayMenuInitialized) {
 			window.close();
 		} else {
 			appLifecycle.quit();
@@ -113,14 +113,14 @@ public class MainWindowTitleController implements FxController {
 	}
 
 	public boolean isTrayIconPresent() {
-		return isTrayIconPresent;
+		return trayMenuInitialized;
 	}
 
-	public BooleanBinding debugModeEnabledProperty() {
-		return debugModeEnabled;
+	public ReadOnlyBooleanProperty debugModeEnabledProperty() {
+		return settings.debugMode();
 	}
 
 	public boolean isDebugModeEnabled() {
-		return settings.debugMode().get();
+		return debugModeEnabledProperty().get();
 	}
 }

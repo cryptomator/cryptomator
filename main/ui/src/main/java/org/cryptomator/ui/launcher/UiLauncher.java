@@ -1,5 +1,6 @@
 package org.cryptomator.ui.launcher;
 
+import dagger.Lazy;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.integrations.tray.TrayIntegrationProvider;
@@ -24,16 +25,16 @@ public class UiLauncher {
 
 	private final Settings settings;
 	private final ObservableList<Vault> vaults;
-	private final TrayMenuComponent.Builder trayComponent;
+	private final Lazy<TrayMenuComponent> trayMenu;
 	private final FxApplicationStarter fxApplicationStarter;
 	private final AppLaunchEventHandler launchEventHandler;
 	private final Optional<TrayIntegrationProvider> trayIntegration;
 
 	@Inject
-	public UiLauncher(Settings settings, ObservableList<Vault> vaults, TrayMenuComponent.Builder trayComponent, FxApplicationStarter fxApplicationStarter, AppLaunchEventHandler launchEventHandler, Optional<TrayIntegrationProvider> trayIntegration) {
+	public UiLauncher(Settings settings, ObservableList<Vault> vaults, Lazy<TrayMenuComponent> trayMenu, FxApplicationStarter fxApplicationStarter, AppLaunchEventHandler launchEventHandler, Optional<TrayIntegrationProvider> trayIntegration) {
 		this.settings = settings;
 		this.vaults = vaults;
-		this.trayComponent = trayComponent;
+		this.trayMenu = trayMenu;
 		this.fxApplicationStarter = fxApplicationStarter;
 		this.launchEventHandler = launchEventHandler;
 		this.trayIntegration = trayIntegration;
@@ -42,7 +43,7 @@ public class UiLauncher {
 	public void launch() {
 		boolean hidden = settings.startHidden().get();
 		if (SystemTray.isSupported() && settings.showTrayIcon().get()) {
-			trayComponent.build().addIconToSystemTray();
+			trayMenu.get().addIconToSystemTray();
 			launch(true, hidden);
 		} else {
 			launch(false, hidden);
