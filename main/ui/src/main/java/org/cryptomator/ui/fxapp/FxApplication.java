@@ -32,6 +32,8 @@ import javafx.stage.Stage;
 import javafx.stage.Window;
 import java.awt.desktop.QuitResponse;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 @FxApplicationScoped
 public class FxApplication extends Application {
@@ -99,11 +101,14 @@ public class FxApplication extends Application {
 		});
 	}
 
-	public void showMainWindow() {
+	public CompletionStage<Stage> showMainWindow() {
+		CompletableFuture<Stage> future = new CompletableFuture<>();
 		Platform.runLater(() -> {
-			mainWindow.get().showMainWindow();
+			var win = mainWindow.get().showMainWindow();
 			LOG.debug("Showing MainWindow");
+			future.complete(win);
 		});
+		return future;
 	}
 
 	public void startUnlockWorkflow(Vault vault, Optional<Stage> owner) {
