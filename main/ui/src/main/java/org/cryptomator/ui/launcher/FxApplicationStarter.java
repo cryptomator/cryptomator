@@ -1,7 +1,6 @@
 package org.cryptomator.ui.launcher;
 
 import dagger.Lazy;
-import org.cryptomator.common.settings.Settings;
 import org.cryptomator.ui.fxapp.FxApplication;
 import org.cryptomator.ui.fxapp.FxApplicationComponent;
 import org.slf4j.Logger;
@@ -10,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javafx.application.Platform;
-import java.awt.SystemTray;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutorService;
@@ -27,7 +25,7 @@ public class FxApplicationStarter {
 	private final CompletableFuture<FxApplication> future;
 
 	@Inject
-	public FxApplicationStarter(Lazy<FxApplicationComponent> fxAppComponent, ExecutorService executor, Settings settings) {
+	public FxApplicationStarter(Lazy<FxApplicationComponent> fxAppComponent, ExecutorService executor) {
 		this.fxAppComponent = fxAppComponent;
 		this.executor = executor;
 		this.started = new AtomicBoolean();
