@@ -23,8 +23,7 @@ public class TrayIconController {
 	private final Optional<UiAppearanceProvider> appearanceProvider;
 	private final TrayMenuController trayMenuController;
 	private final TrayIcon trayIcon;
-	private boolean initialized;
-
+	private volatile boolean initialized;
 
 	@Inject
 	TrayIconController(TrayImageFactory imageFactory, TrayMenuController trayMenuController, Optional<UiAppearanceProvider> appearanceProvider) {
