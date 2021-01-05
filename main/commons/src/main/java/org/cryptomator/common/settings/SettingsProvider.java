@@ -91,7 +91,7 @@ public class SettingsProvider implements Supplier<Settings> {
 			}
 		} catch (NoSuchFileException e) {
 			return Stream.empty();
-		} catch (IOException e) {
+		} catch (IOException | JsonParseException e) {
 			LOG.warn("Exception while loading settings from " + path, e);
 			return Stream.empty();
 		}
