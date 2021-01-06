@@ -6,16 +6,28 @@ on:
 
 jobs:
   closeTemplateViolation:
-    name: Close bug reports that violate the issue template
+    name: Validate bug report against issue template
     runs-on: ubuntu-latest
+    if: contains(github.event.issue.labels.*.name, 'type:bug')
     steps:
-      - if: |
-          contains(github.event.issue.labels.*.name, 'type:bug')
-          && (
-            !contains(github.event.issue.body, '<!-- oooooo -->')
-            || !contains(github.event.issue.body, '### Description')
-          )
-        name: Close Issue
+      - name: Check "Description"
+        if: |
+          !contains(github.event.issue.body, env.MUST_CONTAIN)
+          || contains(toJson(github.event.issue.body), env.MUST_NOT_CONTAIN)
+        run: exit 1
+        env:
+          MUST_CONTAIN: '### Description'
+          MUST_NOT_CONTAIN: '### Description\r\n\r\n[Summarize your problem.]\r\n\r\n### System Setup'
+      - name: Check "Steps to Reproduce"
+        if: |
+          !contains(github.event.issue.body, env.MUST_CONTAIN)
+          || contains(toJson(github.event.issue.body), env.MUST_NOT_CONTAIN)
+        run: exit 1
+        env:
+          MUST_CONTAIN: '### Steps to Reproduce'
+          MUST_NOT_CONTAIN: '### Steps to Reproduce\r\n\r\n1. [First step]\r\n2. [Second step]\r\n3. [and so on…]\r\n\r\n#### Expected Behavior'
+      - name: Close issue if one of the checks failed
+        if: ${{ failure() }}
         uses: peter-evans/close-issue@v1
         with:
           comment: |
