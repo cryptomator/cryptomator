@@ -104,7 +104,7 @@ public class Vault {
 		if (vaultSettings.usesReadOnlyMode().get()) {
 			flags.add(FileSystemFlags.READONLY);
 		}
-		if (vaultSettings.filenameLengthLimit().get() == -1) {
+		if (!flags.contains(FileSystemFlags.READONLY) && vaultSettings.filenameLengthLimit().get() == -1) {
 			LOG.debug("Determining file name length limitations...");
 			int limit = new FileSystemCapabilityChecker().determineSupportedFileNameLength(getPath());
 			vaultSettings.filenameLengthLimit().set(limit);
