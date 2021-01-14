@@ -24,8 +24,6 @@ public class MainWindowTitleController implements FxController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(MainWindowTitleController.class);
 
-	public HBox titleBar;
-
 	private final AppLifecycleListener appLifecycle;
 	private final Stage window;
 	private final FxApplication application;
@@ -36,9 +34,9 @@ public class MainWindowTitleController implements FxController {
 	private final Settings settings;
 	private final BooleanBinding showMinimizeButton;
 
+	public HBox titleBar;
 	private double xOffset;
 	private double yOffset;
-
 
 	@Inject
 	MainWindowTitleController(AppLifecycleListener appLifecycle, @MainWindow Stage window, FxApplication application, TrayMenuComponent trayMenu, UpdateChecker updateChecker, LicenseHolder licenseHolder, Settings settings) {
