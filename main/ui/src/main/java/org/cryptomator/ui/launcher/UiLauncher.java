@@ -43,7 +43,7 @@ public class UiLauncher {
 	public void launch() {
 		boolean hidden = settings.startHidden().get();
 		if (SystemTray.isSupported() && settings.showTrayIcon().get()) {
-			trayMenu.get().addIconToSystemTray();
+			trayMenu.get().initializeTrayIcon();
 			launch(true, hidden);
 		} else {
 			launch(false, hidden);
