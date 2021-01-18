@@ -121,12 +121,28 @@ public class Vault {
 		return CryptoFileSystemProvider.newFileSystem(getPath(), fsProps);
 	}
 
+	private void destroyCryptoFileSystem() {
+		CryptoFileSystem fs = cryptoFileSystem.getAndSet(null);
+		if (fs != null) {
+			try {
+				fs.close();
+			} catch (IOException e) {
+				LOG.error("Error closing file system.", e);
+			}
+		}
+	}
+
 	public synchronized void unlock(CharSequence passphrase) throws CryptoException, IOException, VolumeException, InvalidMountPointException {
 		if (cryptoFileSystem.get() == null) {
 			CryptoFileSystem fs = createCryptoFileSystem(passphrase);
 			cryptoFileSystem.set(fs);
-			volume = volumeProvider.get();
-			volume.mount(fs, getEffectiveMountFlags());
+			try {
+				volume = volumeProvider.get();
+				volume.mount(fs, getEffectiveMountFlags());
+			} catch (IOException | InvalidMountPointException | VolumeException e) {
+				destroyCryptoFileSystem();
+				throw e;
+			}
 		} else {
 			throw new IllegalStateException("Already unlocked.");
 		}
@@ -138,14 +154,7 @@ public class Vault {
 		} else {
 			volume.unmount();
 		}
-		CryptoFileSystem fs = cryptoFileSystem.getAndSet(null);
-		if (fs != null) {
-			try {
-				fs.close();
-			} catch (IOException e) {
-				LOG.error("Error closing file system.", e);
-			}
-		}
+		destroyCryptoFileSystem();
 	}
 
 	public void reveal() throws VolumeException {
