@@ -8,6 +8,7 @@ import org.cryptomator.cryptofs.CryptoFileSystem;
 import org.cryptomator.frontend.dokany.Mount;
 import org.cryptomator.frontend.dokany.MountFactory;
 import org.cryptomator.frontend.dokany.MountFailedException;
+import org.cryptomator.frontend.dokany.RevealException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,10 +53,12 @@ public class DokanyVolume extends AbstractVolume {
 	}
 
 	@Override
-	public void reveal() throws VolumeException {
-		boolean success = mount.reveal();
-		if (!success) {
-			throw new VolumeException("Reveal failed.");
+	public void reveal(Revealer r) throws VolumeException {
+		try {
+			mount.reveal(r);
+		} catch (RevealException e) {
+			LOG.debug("Revealing the vault in file manger failed: " + e.getMessage());
+			throw new VolumeException(e);
 		}
 	}
 
@@ -79,6 +82,7 @@ public class DokanyVolume extends AbstractVolume {
 	public boolean supportsForcedUnmount() {
 		return true;
 	}
+
 	@Override
 	public boolean isSupported() {
 		return DokanyVolume.isSupportedStatic();

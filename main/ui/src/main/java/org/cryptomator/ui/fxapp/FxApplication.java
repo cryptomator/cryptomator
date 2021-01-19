@@ -68,6 +68,8 @@ public class FxApplication extends Application {
 		this.licenseHolder = licenseHolder;
 		this.visibleWindows = Stage.getWindows().filtered(Window::isShowing);
 		this.hasVisibleWindows = Bindings.isNotEmpty(visibleWindows);
+
+		vaultService.setVaultRevealer(p -> this.getHostServices().showDocument(p.toUri().toString()));
 	}
 
 	public void start() {

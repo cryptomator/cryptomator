@@ -15,6 +15,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 @FxApplicationScoped
@@ -24,13 +25,20 @@ public class VaultService {
 
 	private final ExecutorService executorService;
 
+	private AtomicReference<Volume.Revealer> vaultRevealer;
+
 	@Inject
 	public VaultService(ExecutorService executorService) {
 		this.executorService = executorService;
+		this.vaultRevealer = new AtomicReference<>(p -> {}); //the inital revealer does nuthin
 	}
 
 	public void reveal(Vault vault) {
 		executorService.execute(createRevealTask(vault));
+	}
+
+	public void setVaultRevealer(Volume.Revealer revealer){
+		this.vaultRevealer.set(revealer);
 	}
 
 	/**
@@ -39,7 +47,7 @@ public class VaultService {
 	 * @param vault The vault to reveal
 	 */
 	public Task<Vault> createRevealTask(Vault vault) {
-		Task<Vault> task = new RevealVaultTask(vault);
+		Task<Vault> task = new RevealVaultTask(vault, vaultRevealer.get());
 		task.setOnSucceeded(evt -> LOG.info("Revealed {}", vault.getDisplayName()));
 		task.setOnFailed(evt -> LOG.error("Failed to reveal " + vault.getDisplayName(), evt.getSource().getException()));
 		return task;
@@ -99,19 +107,22 @@ public class VaultService {
 	private static class RevealVaultTask extends Task<Vault> {
 
 		private final Vault vault;
+		private final Volume.Revealer revealer;
 
 		/**
 		 * @param vault The vault to lock
+		 * @param revealer The object to use to show the vault content to the user.
 		 */
-		public RevealVaultTask(Vault vault) {
+		public RevealVaultTask(Vault vault, Volume.Revealer revealer) {
 			this.vault = vault;
+			this.revealer = revealer;
 
 			setOnFailed(evt -> LOG.error("Failed to reveal " + vault.getDisplayName(), getException()));
 		}
 
 		@Override
 		protected Vault call() throws Volume.VolumeException {
-			vault.reveal();
+			vault.reveal(revealer);
 			return vault;
 		}
 	}

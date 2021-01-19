@@ -29,7 +29,6 @@ public class WebDavVolume implements Volume {
 	private WebDavServer server;
 	private WebDavServletController servlet;
 	private Mounter.Mount mount;
-	private Path mountPoint;
 
 	@Inject
 	public WebDavVolume(Provider<WebDavServer> serverProvider, VaultSettings vaultSettings, Settings settings) {
@@ -71,11 +70,10 @@ public class WebDavVolume implements Volume {
 	}
 
 	@Override
-	public void reveal() throws VolumeException {
+	public void reveal(Revealer r) throws VolumeException {
 		try {
-			mount.reveal();
-		} catch (Mounter.CommandFailedException e) {
-			e.printStackTrace();
+			mount.reveal(r);
+		} catch (Mounter.RevealException e) {
 			throw new VolumeException(e);
 		}
 	}
@@ -102,7 +100,7 @@ public class WebDavVolume implements Volume {
 
 	@Override
 	public Optional<Path> getMountPoint() {
-		return Optional.ofNullable(mountPoint); //TODO
+		return mount.getMountPoint();
 	}
 
 	@Override
