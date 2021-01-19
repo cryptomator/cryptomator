@@ -9,19 +9,29 @@ import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
+import org.cryptomator.common.Environment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import javafx.geometry.NodeOrientation;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+@Singleton
 public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(SettingsJsonAdapter.class);
 
 	private final VaultSettingsJsonAdapter vaultSettingsJsonAdapter = new VaultSettingsJsonAdapter();
+	private final Environment env;
+
+	@Inject
+	public SettingsJsonAdapter(Environment env) {
+		this.env = env;
+	}
 
 	@Override
 	public void write(JsonWriter out, Settings value) throws IOException {
@@ -40,6 +50,8 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 		out.name("uiOrientation").value(value.userInterfaceOrientation().get().name());
 		out.name("keychainBackend").value(value.keychainBackend().get().name());
 		out.name("licenseKey").value(value.licenseKey().get());
+		out.name("showMinimizeButton").value(value.showMinimizeButton().get());
+		out.name("showTrayIcon").value(value.showTrayIcon().get());
 		out.endObject();
 	}
 
@@ -53,7 +65,7 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 
 	@Override
 	public Settings read(JsonReader in) throws IOException {
-		Settings settings = new Settings();
+		Settings settings = new Settings(env);
 
 		in.beginObject();
 		while (in.hasNext()) {
@@ -72,6 +84,8 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 				case "uiOrientation" -> settings.userInterfaceOrientation().set(parseUiOrientation(in.nextString()));
 				case "keychainBackend" -> settings.keychainBackend().set(parseKeychainBackend(in.nextString()));
 				case "licenseKey" -> settings.licenseKey().set(in.nextString());
+				case "showMinimizeButton" -> settings.showMinimizeButton().set(in.nextBoolean());
+				case "showTrayIcon" -> settings.showTrayIcon().set(in.nextBoolean());
 				default -> {
 					LOG.warn("Unsupported vault setting found in JSON: " + name);
 					in.skipValue();
@@ -137,5 +151,4 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 		in.endArray();
 		return result;
 	}
-
 }

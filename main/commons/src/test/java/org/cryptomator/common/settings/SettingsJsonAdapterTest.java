@@ -5,16 +5,19 @@
  *******************************************************************************/
 package org.cryptomator.common.settings;
 
+import org.cryptomator.common.Environment;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.Mockito;
 
 import java.io.IOException;
 
 public class SettingsJsonAdapterTest {
 
-	private final SettingsJsonAdapter adapter = new SettingsJsonAdapter();
+	private final Environment env = Mockito.mock(Environment.class);
+	private final SettingsJsonAdapter adapter = new SettingsJsonAdapter(env);
 
 	@Test
 	public void testDeserialize() throws IOException {

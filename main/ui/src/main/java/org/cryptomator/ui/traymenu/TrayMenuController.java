@@ -1,6 +1,7 @@
 package org.cryptomator.ui.traymenu;
 
 import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.ui.fxapp.FxApplication;
 import org.cryptomator.ui.launcher.AppLifecycleListener;
 import org.cryptomator.ui.launcher.FxApplicationStarter;
 import org.cryptomator.ui.preferences.SelectedPreferencesTab;
@@ -103,32 +104,36 @@ class TrayMenuController {
 		return actionEvent -> consumer.accept(vault);
 	}
 
+	private void quitApplication(EventObject actionEvent) {
+		appLifecycle.quit();
+	}
+
 	private void unlockVault(Vault vault) {
-		fxApplicationStarter.get(true).thenAccept(app -> app.startUnlockWorkflow(vault, Optional.empty()));
+		showMainAppAndThen(app -> app.startUnlockWorkflow(vault, Optional.empty()));
 	}
 
 	private void lockVault(Vault vault) {
-		fxApplicationStarter.get(true).thenAccept(app -> app.getVaultService().lock(vault, false));
+		showMainAppAndThen(app -> app.startLockWorkflow(vault, Optional.empty()));
 	}
 
 	private void lockAllVaults(ActionEvent actionEvent) {
-		fxApplicationStarter.get(true).thenAccept(app -> app.getVaultService().lockAll(vaults.filtered(Vault::isUnlocked), false));
+		showMainAppAndThen(app -> app.getVaultService().lockAll(vaults.filtered(Vault::isUnlocked), false));
 	}
 
 	private void revealVault(Vault vault) {
-		fxApplicationStarter.get(true).thenAccept(app -> app.getVaultService().reveal(vault));
+		showMainAppAndThen(app -> app.getVaultService().reveal(vault));
 	}
 
 	void showMainWindow(@SuppressWarnings("unused") ActionEvent actionEvent) {
-		fxApplicationStarter.get(true).thenAccept(app -> app.showMainWindow());
+		showMainAppAndThen(app -> app.showMainWindow());
 	}
 
 	private void showPreferencesWindow(@SuppressWarnings("unused") EventObject actionEvent) {
-		fxApplicationStarter.get(true).thenAccept(app -> app.showPreferencesWindow(SelectedPreferencesTab.ANY));
+		showMainAppAndThen(app -> app.showPreferencesWindow(SelectedPreferencesTab.ANY));
 	}
 
-	private void quitApplication(EventObject actionEvent) {
-		appLifecycle.quit();
+	private void showMainAppAndThen(Consumer<FxApplication> action) {
+		fxApplicationStarter.get().thenAccept(action);
 	}
 
 }

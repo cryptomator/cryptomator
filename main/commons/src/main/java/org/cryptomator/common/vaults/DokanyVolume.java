@@ -71,10 +71,14 @@ public class DokanyVolume extends AbstractVolume {
 
 	@Override
 	public void unmountForced() {
-		mount.close(); //TODO: with next dokany-nio-release, change this to unmountForced()
+		mount.unmountForced();
 		cleanupMountPoint();
 	}
 
+	@Override
+	public boolean supportsForcedUnmount() {
+		return true;
+	}
 	@Override
 	public boolean isSupported() {
 		return DokanyVolume.isSupportedStatic();

@@ -1,5 +1,6 @@
 package org.cryptomator.ui.traymenu;
 
+import com.google.common.base.Preconditions;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.integrations.uiappearance.Theme;
 import org.cryptomator.integrations.uiappearance.UiAppearanceException;
@@ -22,6 +23,7 @@ public class TrayIconController {
 	private final Optional<UiAppearanceProvider> appearanceProvider;
 	private final TrayMenuController trayMenuController;
 	private final TrayIcon trayIcon;
+	private volatile boolean initialized;
 
 	@Inject
 	TrayIconController(TrayImageFactory imageFactory, TrayMenuController trayMenuController, Optional<UiAppearanceProvider> appearanceProvider) {
@@ -31,7 +33,9 @@ public class TrayIconController {
 		this.trayIcon = new TrayIcon(imageFactory.loadImage(), "Cryptomator", trayMenuController.getMenu());
 	}
 
-	public void initializeTrayIcon() {
+	public synchronized void initializeTrayIcon() throws IllegalStateException {
+		Preconditions.checkState(!initialized);
+
 		appearanceProvider.ifPresent(appearanceProvider -> {
 			try {
 				appearanceProvider.addListener(this::systemInterfaceThemeChanged);
@@ -53,10 +57,15 @@ public class TrayIconController {
 		}
 
 		trayMenuController.initTrayMenu();
+
+		this.initialized = true;
 	}
 
 	private void systemInterfaceThemeChanged(Theme theme) {
 		trayIcon.setImage(imageFactory.loadImage()); // TODO refactor "theme" is re-queried in loadImage()
 	}
 
+	public boolean isInitialized() {
+		return initialized;
+	}
 }

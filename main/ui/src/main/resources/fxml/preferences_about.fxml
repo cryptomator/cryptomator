@@ -22,7 +22,7 @@
 			</ImageView>
 			<VBox spacing="3" HBox.hgrow="ALWAYS" alignment="CENTER_LEFT">
 				<FormattedLabel styleClass="label-large" format="Cryptomator %s" arg1="${controller.applicationVersion}"/>
-				<Label text="© 2016 – 2020 Skymatic GmbH"/>
+				<Label text="© 2016 – 2021 Skymatic GmbH"/>
 			</VBox>
 		</HBox>
 

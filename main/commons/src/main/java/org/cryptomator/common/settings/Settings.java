@@ -9,6 +9,7 @@
 package org.cryptomator.common.settings;
 
 import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.common.Environment;
 
 import javafx.beans.Observable;
 import javafx.beans.property.BooleanProperty;
@@ -39,7 +40,8 @@ public class Settings {
 	public static final UiTheme DEFAULT_THEME = UiTheme.LIGHT;
 	public static final KeychainBackend DEFAULT_KEYCHAIN_BACKEND = SystemUtils.IS_OS_WINDOWS ? KeychainBackend.WIN_SYSTEM_KEYCHAIN : SystemUtils.IS_OS_MAC ? KeychainBackend.MAC_SYSTEM_KEYCHAIN : KeychainBackend.GNOME;
 	public static final NodeOrientation DEFAULT_USER_INTERFACE_ORIENTATION = NodeOrientation.LEFT_TO_RIGHT;
-	private static final String DEFAULT_LICENSE_KEY = "";
+	public static final String DEFAULT_LICENSE_KEY = "";
+	public static final boolean DEFAULT_SHOW_MINIMIZE_BUTTON = false;
 
 	private final ObservableList<VaultSettings> directories = FXCollections.observableArrayList(VaultSettings::observables);
 	private final BooleanProperty askedForUpdateCheck = new SimpleBooleanProperty(DEFAULT_ASKED_FOR_UPDATE_CHECK);
@@ -54,13 +56,17 @@ public class Settings {
 	private final ObjectProperty<KeychainBackend> keychainBackend = new SimpleObjectProperty<>(DEFAULT_KEYCHAIN_BACKEND);
 	private final ObjectProperty<NodeOrientation> userInterfaceOrientation = new SimpleObjectProperty<>(DEFAULT_USER_INTERFACE_ORIENTATION);
 	private final StringProperty licenseKey = new SimpleStringProperty(DEFAULT_LICENSE_KEY);
+	private final BooleanProperty showMinimizeButton = new SimpleBooleanProperty(DEFAULT_SHOW_MINIMIZE_BUTTON);
+	private final BooleanProperty showTrayIcon;
 
 	private Consumer<Settings> saveCmd;
 
 	/**
 	 * Package-private constructor; use {@link SettingsProvider}.
 	 */
-	Settings() {
+	Settings(Environment env) {
+		this.showTrayIcon = new SimpleBooleanProperty(env.showTrayIcon());
+
 		directories.addListener(this::somethingChanged);
 		askedForUpdateCheck.addListener(this::somethingChanged);
 		checkForUpdates.addListener(this::somethingChanged);
@@ -74,6 +80,8 @@ public class Settings {
 		keychainBackend.addListener(this::somethingChanged);
 		userInterfaceOrientation.addListener(this::somethingChanged);
 		licenseKey.addListener(this::somethingChanged);
+		showMinimizeButton.addListener(this::somethingChanged);
+		showTrayIcon.addListener(this::somethingChanged);
 	}
 
 	void setSaveCmd(Consumer<Settings> saveCmd) {
@@ -140,5 +148,13 @@ public class Settings {
 
 	public StringProperty licenseKey() {
 		return licenseKey;
+	}
+
+	public BooleanProperty showMinimizeButton() {
+		return showMinimizeButton;
+	}
+
+	public BooleanProperty showTrayIcon() {
+		return showTrayIcon;
 	}
 }

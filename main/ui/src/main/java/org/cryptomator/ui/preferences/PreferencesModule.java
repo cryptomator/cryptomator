@@ -20,7 +20,7 @@ import javafx.stage.Stage;
 import java.util.Map;
 import java.util.ResourceBundle;
 
-@Module(includes = {AutoStartModule.class})
+@Module
 abstract class PreferencesModule {
 
 	@Provides

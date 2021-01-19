@@ -2,7 +2,7 @@
   <configuration default="false" name="Cryptomator Windows" type="Application" factoryName="Application">
     <option name="MAIN_CLASS_NAME" value="org.cryptomator.launcher.Cryptomator" />
     <module name="launcher" />
-    <option name="VM_PARAMETERS" value="-Duser.language=en -Dcryptomator.settingsPath=&quot;~/AppData/Roaming/Cryptomator/settings.json&quot; -Dcryptomator.ipcPortPath=&quot;~/AppData/Roaming/Cryptomator/ipcPort.bin&quot; -Dcryptomator.logDir=&quot;~/AppData/Roaming/Cryptomator&quot; -Dcryptomator.keychainPath=&quot;~/AppData/Roaming/Cryptomator/keychain.json&quot; -Dcryptomator.mountPointsDir=&quot;~/Cryptomator&quot; -Xss2m -Xmx512m" />
+    <option name="VM_PARAMETERS" value="-Duser.language=en -Dcryptomator.settingsPath=&quot;~/AppData/Roaming/Cryptomator/settings.json&quot; -Dcryptomator.ipcPortPath=&quot;~/AppData/Roaming/Cryptomator/ipcPort.bin&quot; -Dcryptomator.logDir=&quot;~/AppData/Roaming/Cryptomator&quot; -Dcryptomator.keychainPath=&quot;~/AppData/Roaming/Cryptomator/keychain.json&quot; -Dcryptomator.mountPointsDir=&quot;~/Cryptomator&quot; -Dcryptomator.showTrayIcon=true -Xss2m -Xmx512m" />
     <method v="2">
       <option name="Make" enabled="true" />
     </method>

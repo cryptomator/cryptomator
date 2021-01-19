@@ -21,14 +21,13 @@ import java.util.stream.StreamSupport;
 public class Environment {
 
 	private static final Logger LOG = LoggerFactory.getLogger(Environment.class);
-	private static final String USER_HOME = System.getProperty("user.home");
 	private static final Path RELATIVE_HOME_DIR = Paths.get("~");
-	private static final Path ABSOLUTE_HOME_DIR = Paths.get(USER_HOME);
 	private static final char PATH_LIST_SEP = ':';
 	private static final int DEFAULT_MIN_PW_LENGTH = 8;
 
 	@Inject
 	public Environment() {
+		LOG.debug("user.home: {}", System.getProperty("user.home"));
 		LOG.debug("java.library.path: {}", System.getProperty("java.library.path"));
 		LOG.debug("user.language: {}", System.getProperty("user.language"));
 		LOG.debug("user.region: {}", System.getProperty("user.region"));
@@ -40,6 +39,7 @@ public class Environment {
 		LOG.debug("cryptomator.mountPointsDir: {}", System.getProperty("cryptomator.mountPointsDir"));
 		LOG.debug("cryptomator.minPwLength: {}", System.getProperty("cryptomator.minPwLength"));
 		LOG.debug("cryptomator.buildNumber: {}", System.getProperty("cryptomator.buildNumber"));
+		LOG.debug("cryptomator.showTrayIcon: {}", System.getProperty("cryptomator.showTrayIcon"));
 		LOG.debug("fuse.experimental: {}", Boolean.getBoolean("fuse.experimental"));
 	}
 
@@ -75,6 +75,11 @@ public class Environment {
 		return getInt("cryptomator.minPwLength", DEFAULT_MIN_PW_LENGTH);
 	}
 
+	public boolean showTrayIcon() {
+		return Boolean.getBoolean("cryptomator.showTrayIcon");
+	}
+
+	@Deprecated // TODO: remove as soon as custom mount path works properly on Win+Fuse
 	public boolean useExperimentalFuse() {
 		return Boolean.getBoolean("fuse.experimental");
 	}
@@ -92,8 +97,13 @@ public class Environment {
 		String value = System.getProperty(propertyName);
 		return Optional.ofNullable(value).map(Paths::get);
 	}
-	// visible for testing
 
+	// visible for testing
+	Path getHomeDir() {
+		return getPath("user.home").orElseThrow();
+	}
+
+	// visible for testing
 	Stream<Path> getPaths(String propertyName) {
 		Stream<String> rawSettingsPaths = getRawList(propertyName, PATH_LIST_SEP);
 		return rawSettingsPaths.filter(Predicate.not(Strings::isNullOrEmpty)).map(Paths::get).map(this::replaceHomeDir);
@@ -101,7 +111,7 @@ public class Environment {
 
 	private Path replaceHomeDir(Path path) {
 		if (path.startsWith(RELATIVE_HOME_DIR)) {
-			return ABSOLUTE_HOME_DIR.resolve(RELATIVE_HOME_DIR.relativize(path));
+			return getHomeDir().resolve(RELATIVE_HOME_DIR.relativize(path));
 		} else {
 			return path;
 		}

@@ -32,7 +32,11 @@
 			<RadioButton fx:id="nodeOrientationRtl" text="%preferences.general.interfaceOrientation.rtl" alignment="CENTER_RIGHT" toggleGroup="${nodeOrientation}"/>
 		</HBox>
 
-		<CheckBox fx:id="startHiddenCheckbox" text="%preferences.general.startHidden" visible="${controller.trayMenuSupported}" managed="${controller.trayMenuSupported}"/>
+		<CheckBox fx:id="showMinimizeButtonCheckbox" text="%preferences.general.showMinimizeButton" visible="${controller.trayMenuInitialized}" managed="${controller.trayMenuInitialized}"/>
+
+		<CheckBox fx:id="showTrayIconCheckbox" text="%preferences.general.showTrayIcon" visible="${controller.trayMenuSupported}" managed="${controller.trayMenuSupported}"/>
+
+		<CheckBox fx:id="startHiddenCheckbox" text="%preferences.general.startHidden" />
 
 		<HBox spacing="6" alignment="CENTER_LEFT">
 			<CheckBox fx:id="debugModeCheckbox" text="%preferences.general.debugLogging"/>

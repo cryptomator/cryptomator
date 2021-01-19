@@ -11,6 +11,7 @@ import org.cryptomator.integrations.uiappearance.UiAppearanceException;
 import org.cryptomator.integrations.uiappearance.UiAppearanceListener;
 import org.cryptomator.integrations.uiappearance.UiAppearanceProvider;
 import org.cryptomator.ui.common.VaultService;
+import org.cryptomator.ui.lock.LockComponent;
 import org.cryptomator.ui.mainwindow.MainWindowComponent;
 import org.cryptomator.ui.preferences.PreferencesComponent;
 import org.cryptomator.ui.preferences.SelectedPreferencesTab;
@@ -31,6 +32,8 @@ import javafx.stage.Stage;
 import javafx.stage.Window;
 import java.awt.desktop.QuitResponse;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 @FxApplicationScoped
 public class FxApplication extends Application {
@@ -42,6 +45,7 @@ public class FxApplication extends Application {
 	private final Lazy<PreferencesComponent> preferencesWindow;
 	private final Lazy<QuitComponent> quitWindow;
 	private final Provider<UnlockComponent.Builder> unlockWindowBuilderProvider;
+	private final Provider<LockComponent.Builder> lockWindowBuilderProvider;
 	private final Optional<TrayIntegrationProvider> trayIntegration;
 	private final Optional<UiAppearanceProvider> appearanceProvider;
 	private final VaultService vaultService;
@@ -51,11 +55,12 @@ public class FxApplication extends Application {
 	private final UiAppearanceListener systemInterfaceThemeListener = this::systemInterfaceThemeChanged;
 
 	@Inject
-	FxApplication(Settings settings, Lazy<MainWindowComponent> mainWindow, Lazy<PreferencesComponent> preferencesWindow, Provider<UnlockComponent.Builder> unlockWindowBuilderProvider, Lazy<QuitComponent> quitWindow, Optional<TrayIntegrationProvider> trayIntegration, Optional<UiAppearanceProvider> appearanceProvider, VaultService vaultService, LicenseHolder licenseHolder) {
+	FxApplication(Settings settings, Lazy<MainWindowComponent> mainWindow, Lazy<PreferencesComponent> preferencesWindow, Provider<UnlockComponent.Builder> unlockWindowBuilderProvider, Provider<LockComponent.Builder> lockWindowBuilderProvider, Lazy<QuitComponent> quitWindow, Optional<TrayIntegrationProvider> trayIntegration, Optional<UiAppearanceProvider> appearanceProvider, VaultService vaultService, LicenseHolder licenseHolder) {
 		this.settings = settings;
 		this.mainWindow = mainWindow;
 		this.preferencesWindow = preferencesWindow;
 		this.unlockWindowBuilderProvider = unlockWindowBuilderProvider;
+		this.lockWindowBuilderProvider = lockWindowBuilderProvider;
 		this.quitWindow = quitWindow;
 		this.trayIntegration = trayIntegration;
 		this.appearanceProvider = appearanceProvider;
@@ -96,17 +101,27 @@ public class FxApplication extends Application {
 		});
 	}
 
-	public void showMainWindow() {
+	public CompletionStage<Stage> showMainWindow() {
+		CompletableFuture<Stage> future = new CompletableFuture<>();
 		Platform.runLater(() -> {
-			mainWindow.get().showMainWindow();
+			var win = mainWindow.get().showMainWindow();
 			LOG.debug("Showing MainWindow");
+			future.complete(win);
 		});
+		return future;
 	}
 
 	public void startUnlockWorkflow(Vault vault, Optional<Stage> owner) {
 		Platform.runLater(() -> {
 			unlockWindowBuilderProvider.get().vault(vault).owner(owner).build().startUnlockWorkflow();
 			LOG.debug("Showing UnlockWindow for {}", vault.getDisplayName());
+		});
+	}
+
+	public void startLockWorkflow(Vault vault, Optional<Stage> owner) {
+		Platform.runLater(() -> {
+			lockWindowBuilderProvider.get().vault(vault).owner(owner).build().startLockWorkflow();
+			LOG.debug("Start lock workflow for {}", vault.getDisplayName());
 		});
 	}
 

@@ -54,7 +54,7 @@
 				<Tooltip text="%main.preferencesBtn.tooltip"/>
 			</tooltip>
 		</Button>
-		<Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#minimize" focusTraversable="false" visible="${!controller.minimizeToSysTray}" managed="${!controller.minimizeToSysTray}">
+		<Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#minimize" focusTraversable="false" visible="${controller.showMinimizeButton}" managed="${controller.showMinimizeButton}">
 			<graphic>
 				<FontAwesome5IconView glyph="WINDOW_MINIMIZE" glyphSize="12"/>
 			</graphic>
