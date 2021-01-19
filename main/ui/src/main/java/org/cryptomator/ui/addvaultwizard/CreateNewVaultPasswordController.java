@@ -183,7 +183,7 @@ public class CreateNewVaultPasswordController implements FxController {
 
 		// 2. verify masterkey and initialize vault:
 		try (var loader = MasterkeyFile.withContentFromFile(masterkeyFilePath).unlock(passphrase, PEPPER, Optional.of(999))) {
-			CryptoFileSystemProperties fsProps = CryptoFileSystemProperties.cryptoFileSystemProperties().withKeyLoader(loader).build();
+			CryptoFileSystemProperties fsProps = CryptoFileSystemProperties.cryptoFileSystemProperties().withCipherCombo(VaultCipherCombo.SIV_CTRMAC).withKeyLoader(loader).build();
 			CryptoFileSystemProvider.initialize(path, fsProps, MasterkeyFileLoader.KEY_ID);
 
 			// 3. write vault-internal readme file:
