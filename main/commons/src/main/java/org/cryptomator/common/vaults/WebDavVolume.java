@@ -10,6 +10,8 @@ import org.cryptomator.frontend.webdav.WebDavServer;
 import org.cryptomator.frontend.webdav.mount.MountParams;
 import org.cryptomator.frontend.webdav.mount.Mounter;
 import org.cryptomator.frontend.webdav.servlet.WebDavServletController;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -20,6 +22,7 @@ import java.util.Optional;
 
 public class WebDavVolume implements Volume {
 
+	private static final Logger LOG = LoggerFactory.getLogger(WebDavVolume.class);
 	private static final String LOCALHOST_ALIAS = "cryptomator-vault";
 
 	private final Provider<WebDavServer> serverProvider;
@@ -74,6 +77,7 @@ public class WebDavVolume implements Volume {
 		try {
 			mount.reveal(r);
 		} catch (Mounter.RevealException e) {
+			LOG.debug("Revealing the vault in file manger failed: " + e.getMessage());
 			throw new VolumeException(e);
 		}
 	}
