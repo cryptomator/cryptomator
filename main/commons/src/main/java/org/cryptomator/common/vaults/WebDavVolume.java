@@ -17,6 +17,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.file.Path;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 public class WebDavVolume implements Volume {
 
@@ -40,6 +41,11 @@ public class WebDavVolume implements Volume {
 
 	@Override
 	public void mount(CryptoFileSystem fs, String mountFlags) throws VolumeException {
+		startServlet(fs);
+		mountServlet();
+	}
+
+	private void startServlet(CryptoFileSystem fs){
 		if (server == null) {
 			server = serverProvider.get();
 		}
@@ -50,10 +56,9 @@ public class WebDavVolume implements Volume {
 		String urlConformMountName = acceptable.negate().collapseFrom(vaultSettings.mountName().get(), '_');
 		servlet = server.createWebDavServlet(fs.getPath("/"), vaultSettings.getId() + "/" + urlConformMountName);
 		servlet.start();
-		mount();
 	}
 
-	private void mount() throws VolumeException {
+	private void mountServlet() throws VolumeException {
 		if (servlet == null) {
 			throw new IllegalStateException("Mounting requires unlocked WebDAV servlet.");
 		}
@@ -65,7 +70,6 @@ public class WebDavVolume implements Volume {
 		try {
 			this.mount = servlet.mount(mountParams); // might block this thread for a while
 		} catch (Mounter.CommandFailedException e) {
-			e.printStackTrace();
 			throw new VolumeException(e);
 		}
 	}
