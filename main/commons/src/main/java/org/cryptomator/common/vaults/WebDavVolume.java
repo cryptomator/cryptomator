@@ -26,6 +26,7 @@ public class WebDavVolume implements Volume {
 	private final Provider<WebDavServer> serverProvider;
 	private final VaultSettings vaultSettings;
 	private final Settings settings;
+	private final WindowsDriveLetters windowsDriveLetters;
 
 	private WebDavServer server;
 	private WebDavServletController servlet;
@@ -33,10 +34,11 @@ public class WebDavVolume implements Volume {
 	private Path mountPoint;
 
 	@Inject
-	public WebDavVolume(Provider<WebDavServer> serverProvider, VaultSettings vaultSettings, Settings settings) {
+	public WebDavVolume(Provider<WebDavServer> serverProvider, VaultSettings vaultSettings, Settings settings, WindowsDriveLetters windowsDriveLetters) {
 		this.serverProvider = serverProvider;
 		this.vaultSettings = vaultSettings;
 		this.settings = settings;
+		this.windowsDriveLetters = windowsDriveLetters;
 	}
 
 	@Override
@@ -62,8 +64,17 @@ public class WebDavVolume implements Volume {
 		if (servlet == null) {
 			throw new IllegalStateException("Mounting requires unlocked WebDAV servlet.");
 		}
+
+		//on windows, prevent an automatic drive letter selection in the upstream library. Either we choose already a specifc one or there is no free.
+		Supplier<String> driveLetterSupplier;
+		if(System.getProperty("os.name").toLowerCase().contains("windows") && vaultSettings.winDriveLetter().isEmpty().get()) {
+			driveLetterSupplier = () -> windowsDriveLetters.getAvailableDriveLetter().orElse(null);
+		} else {
+			driveLetterSupplier = () -> vaultSettings.winDriveLetter().get();
+		}
+
 		MountParams mountParams = MountParams.create() //
-				.withWindowsDriveLetter(vaultSettings.winDriveLetter().get()) //
+				.withWindowsDriveLetter(driveLetterSupplier.get()) //
 				.withPreferredGvfsScheme(settings.preferredGvfsScheme().get().getPrefix())//
 				.withWebdavHostname(getLocalhostAliasOrNull()) //
 				.build();
