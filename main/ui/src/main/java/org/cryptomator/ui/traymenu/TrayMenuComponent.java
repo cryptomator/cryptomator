@@ -10,7 +10,7 @@ import dagger.Subcomponent;
 import java.awt.SystemTray;
 
 @TrayMenuScoped
-@Subcomponent(modules = TrayMenuModule.class)
+@Subcomponent
 public interface TrayMenuComponent {
 
 	Lazy<TrayIconController> trayIconController();
