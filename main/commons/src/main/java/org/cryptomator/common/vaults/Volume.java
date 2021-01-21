@@ -35,8 +35,11 @@ public interface Volume {
 	void mount(CryptoFileSystem fs, String mountFlags) throws IOException, VolumeException, InvalidMountPointException;
 
 	/**
-	 * TODO: refactor, such that this method accepts a (new) interface revealer and document that it could be ignored.
+	 * Reveals the mounted volume.
+	 * <p>
+	 * The given {@code revealer} might be used to do it, but not necessarily.
 	 *
+	 * @param revealer An object capable of revealing the location of the mounted vault to view the content (e.g. in the default file browser).
 	 * @throws VolumeException
 	 */
 	void reveal(RevealerFacade revealer) throws VolumeException;
@@ -84,6 +87,9 @@ public interface Volume {
 
 	}
 
+	/**
+	 * Hides and unifies the different Revealer implementations in the different nio-adapters.
+	 */
 	@FunctionalInterface
 	interface RevealerFacade {
 
