@@ -3,8 +3,6 @@ package org.cryptomator.common.vaults;
 import org.cryptomator.common.mountpoint.InvalidMountPointException;
 import org.cryptomator.common.settings.VolumeImpl;
 import org.cryptomator.cryptofs.CryptoFileSystem;
-import org.cryptomator.frontend.fuse.mount.Revealer;
-import org.cryptomator.frontend.webdav.mount.Mounter;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -38,9 +36,10 @@ public interface Volume {
 
 	/**
 	 * TODO: refactor, such that this method accepts a (new) interface revealer and document that it could be ignored.
+	 *
 	 * @throws VolumeException
 	 */
-	void reveal(Revealer revealer) throws VolumeException;
+	void reveal(RevealerFacade revealer) throws VolumeException;
 
 	void unmount() throws VolumeException;
 
@@ -85,10 +84,10 @@ public interface Volume {
 
 	}
 
-	/**
-	 * Interface to bundle the different revealer interfaces in the used nio-adapters
-	 */
-	interface Revealer extends org.cryptomator.frontend.fuse.mount.Revealer, org.cryptomator.frontend.dokany.Revealer, Mounter.Revealer{
+	@FunctionalInterface
+	interface RevealerFacade {
+
+		void reveal(Path p) throws VolumeException;
 
 	}
 

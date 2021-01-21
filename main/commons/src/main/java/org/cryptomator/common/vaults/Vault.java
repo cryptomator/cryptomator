@@ -148,7 +148,7 @@ public class Vault {
 		}
 	}
 
-	public void reveal(Volume.Revealer vaultRevealer) throws VolumeException {
+	public void reveal(Volume.RevealerFacade vaultRevealer) throws VolumeException {
 		volume.reveal(vaultRevealer);
 	}
 

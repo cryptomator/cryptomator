@@ -25,7 +25,7 @@ public class VaultService {
 
 	private final ExecutorService executorService;
 
-	private AtomicReference<Volume.Revealer> vaultRevealer;
+	private AtomicReference<Volume.RevealerFacade> vaultRevealer;
 
 	@Inject
 	public VaultService(ExecutorService executorService) {
@@ -37,7 +37,7 @@ public class VaultService {
 		executorService.execute(createRevealTask(vault));
 	}
 
-	public void setVaultRevealer(Volume.Revealer revealer){
+	public void setVaultRevealer(Volume.RevealerFacade revealer) {
 		this.vaultRevealer.set(revealer);
 	}
 
@@ -107,13 +107,13 @@ public class VaultService {
 	private static class RevealVaultTask extends Task<Vault> {
 
 		private final Vault vault;
-		private final Volume.Revealer revealer;
+		private final Volume.RevealerFacade revealer;
 
 		/**
 		 * @param vault The vault to lock
 		 * @param revealer The object to use to show the vault content to the user.
 		 */
-		public RevealVaultTask(Vault vault, Volume.Revealer revealer) {
+		public RevealVaultTask(Vault vault, Volume.RevealerFacade revealer) {
 			this.vault = vault;
 			this.revealer = revealer;
 

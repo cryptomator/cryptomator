@@ -73,12 +73,22 @@ public class WebDavVolume implements Volume {
 	}
 
 	@Override
-	public void reveal(Revealer r) throws VolumeException {
+	public void reveal(RevealerFacade r) throws VolumeException {
 		try {
-			mount.reveal(r);
+			mount.reveal(p -> {
+				try {
+					r.reveal(p);
+				} catch (VolumeException e) {
+					throw new Mounter.RevealException(e);
+				}
+			});
 		} catch (Mounter.RevealException e) {
 			LOG.debug("Revealing the vault in file manger failed: " + e.getMessage());
-			throw new VolumeException(e);
+			if (e.getCause() instanceof VolumeException) {
+				throw (VolumeException) e.getCause();
+			} else {
+				throw new VolumeException(e);
+			}
 		}
 	}
 
