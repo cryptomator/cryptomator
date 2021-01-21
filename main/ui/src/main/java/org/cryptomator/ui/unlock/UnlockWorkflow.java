@@ -15,7 +15,6 @@ import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.UserInteractionLock;
 import org.cryptomator.ui.common.VaultService;
-import org.cryptomator.ui.fxapp.FxApplication;
 import org.cryptomator.ui.unlock.UnlockModule.PasswordEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,10 +58,9 @@ public class UnlockWorkflow extends Task<Boolean> {
 	private final Lazy<Scene> successScene;
 	private final Lazy<Scene> invalidMountPointScene;
 	private final ErrorComponent.Builder errorComponent;
-	private final FxApplication application;
 
 	@Inject
-	UnlockWorkflow(@UnlockWindow Stage window, @UnlockWindow Vault vault, VaultService vaultService, AtomicReference<char[]> password, @Named("savePassword") AtomicBoolean savePassword, @Named("savedPassword") Optional<char[]> savedPassword, UserInteractionLock<PasswordEntry> passwordEntryLock, KeychainManager keychain, @FxmlScene(FxmlFile.UNLOCK) Lazy<Scene> unlockScene, @FxmlScene(FxmlFile.UNLOCK_SUCCESS) Lazy<Scene> successScene, @FxmlScene(FxmlFile.UNLOCK_INVALID_MOUNT_POINT) Lazy<Scene> invalidMountPointScene, ErrorComponent.Builder errorComponent, FxApplication application) {
+	UnlockWorkflow(@UnlockWindow Stage window, @UnlockWindow Vault vault, VaultService vaultService, AtomicReference<char[]> password, @Named("savePassword") AtomicBoolean savePassword, @Named("savedPassword") Optional<char[]> savedPassword, UserInteractionLock<PasswordEntry> passwordEntryLock, KeychainManager keychain, @FxmlScene(FxmlFile.UNLOCK) Lazy<Scene> unlockScene, @FxmlScene(FxmlFile.UNLOCK_SUCCESS) Lazy<Scene> successScene, @FxmlScene(FxmlFile.UNLOCK_INVALID_MOUNT_POINT) Lazy<Scene> invalidMountPointScene, ErrorComponent.Builder errorComponent) {
 		this.window = window;
 		this.vault = vault;
 		this.vaultService = vaultService;
@@ -75,7 +73,6 @@ public class UnlockWorkflow extends Task<Boolean> {
 		this.successScene = successScene;
 		this.invalidMountPointScene = invalidMountPointScene;
 		this.errorComponent = errorComponent;
-		this.application = application;
 
 		setOnFailed(event -> {
 			Throwable throwable = event.getSource().getException();
@@ -146,7 +143,7 @@ public class UnlockWorkflow extends Task<Boolean> {
 			});
 			case REVEAL -> {
 				Platform.runLater(window::close);
-				vaultService.reveal(vault, p -> application.getHostServices().showDocument(p.toUri().toString()));
+				vaultService.reveal(vault);
 			}
 			case IGNORE -> Platform.runLater(window::close);
 		}

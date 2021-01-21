@@ -23,14 +23,16 @@ public class VaultService {
 	private static final Logger LOG = LoggerFactory.getLogger(VaultService.class);
 
 	private final ExecutorService executorService;
+	private final HostServiceRevealer vaultRevealer;
 
 	@Inject
-	public VaultService(ExecutorService executorService) {
+	public VaultService(ExecutorService executorService, HostServiceRevealer vaultRevealer) {
 		this.executorService = executorService;
+		this.vaultRevealer = vaultRevealer;
 	}
 
-	public void reveal(Vault vault, Volume.Revealer vaultRevealCmd) {
-		executorService.execute(createRevealTask(vault, vaultRevealCmd));
+	public void reveal(Vault vault) {
+		executorService.execute(createRevealTask(vault));
 	}
 
 	/**
@@ -38,8 +40,8 @@ public class VaultService {
 	 *
 	 * @param vault The vault to reveal
 	 */
-	public Task<Vault> createRevealTask(Vault vault, Volume.Revealer vaultRevealCmd) {
-		Task<Vault> task = new RevealVaultTask(vault, vaultRevealCmd);
+	public Task<Vault> createRevealTask(Vault vault) {
+		Task<Vault> task = new RevealVaultTask(vault, vaultRevealer);
 		task.setOnSucceeded(evt -> LOG.info("Revealed {}", vault.getDisplayName()));
 		task.setOnFailed(evt -> LOG.error("Failed to reveal " + vault.getDisplayName(), evt.getSource().getException()));
 		return task;

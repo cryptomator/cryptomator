@@ -121,9 +121,7 @@ class TrayMenuController {
 	}
 
 	private void revealVault(Vault vault) {
-		showMainAppAndThen(app -> //
-				app.getVaultService().reveal(vault, p -> app.getHostServices().showDocument(p.toUri().toString())) //
-		);
+		showMainAppAndThen(app -> app.getVaultService().reveal(vault));
 	}
 
 	void showMainWindow(@SuppressWarnings("unused") ActionEvent actionEvent) {
