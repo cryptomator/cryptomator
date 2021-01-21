@@ -1,6 +1,7 @@
 package org.cryptomator.ui.traymenu;
 
 import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.common.vaults.Volume;
 import org.cryptomator.ui.fxapp.FxApplication;
 import org.cryptomator.ui.launcher.AppLifecycleListener;
 import org.cryptomator.ui.launcher.FxApplicationStarter;
@@ -27,14 +28,16 @@ class TrayMenuController {
 	private final AppLifecycleListener appLifecycle;
 	private final FxApplicationStarter fxApplicationStarter;
 	private final ObservableList<Vault> vaults;
+	private final Volume.RevealerFacade revealer;
 	private final PopupMenu menu;
 
 	@Inject
-	TrayMenuController(ResourceBundle resourceBundle, AppLifecycleListener appLifecycle, FxApplicationStarter fxApplicationStarter, ObservableList<Vault> vaults) {
+	TrayMenuController(ResourceBundle resourceBundle, AppLifecycleListener appLifecycle, FxApplicationStarter fxApplicationStarter, ObservableList<Vault> vaults, Volume.RevealerFacade revealer) {
 		this.resourceBundle = resourceBundle;
 		this.appLifecycle = appLifecycle;
 		this.fxApplicationStarter = fxApplicationStarter;
 		this.vaults = vaults;
+		this.revealer = revealer;
 		this.menu = new PopupMenu();
 	}
 
@@ -121,7 +124,7 @@ class TrayMenuController {
 	}
 
 	private void revealVault(Vault vault) {
-		showMainAppAndThen(app -> app.getVaultService().reveal(vault));
+		showMainAppAndThen(app -> app.getVaultService().reveal(vault, revealer));
 	}
 
 	void showMainWindow(@SuppressWarnings("unused") ActionEvent actionEvent) {

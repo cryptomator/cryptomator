@@ -25,20 +25,13 @@ public class VaultService {
 
 	private final ExecutorService executorService;
 
-	private AtomicReference<Volume.RevealerFacade> vaultRevealer;
-
 	@Inject
 	public VaultService(ExecutorService executorService) {
 		this.executorService = executorService;
-		this.vaultRevealer = new AtomicReference<>(p -> {}); //the inital revealer does nuthin
 	}
 
-	public void reveal(Vault vault) {
-		executorService.execute(createRevealTask(vault));
-	}
-
-	public void setVaultRevealer(Volume.RevealerFacade revealer) {
-		this.vaultRevealer.set(revealer);
+	public void reveal(Vault vault, Volume.RevealerFacade vaultRevealCmd) {
+		executorService.execute(createRevealTask(vault, vaultRevealCmd));
 	}
 
 	/**
@@ -46,8 +39,8 @@ public class VaultService {
 	 *
 	 * @param vault The vault to reveal
 	 */
-	public Task<Vault> createRevealTask(Vault vault) {
-		Task<Vault> task = new RevealVaultTask(vault, vaultRevealer.get());
+	public Task<Vault> createRevealTask(Vault vault, Volume.RevealerFacade vaultRevealCmd) {
+		Task<Vault> task = new RevealVaultTask(vault, vaultRevealCmd);
 		task.setOnSucceeded(evt -> LOG.info("Revealed {}", vault.getDisplayName()));
 		task.setOnFailed(evt -> LOG.error("Failed to reveal " + vault.getDisplayName(), evt.getSource().getException()));
 		return task;

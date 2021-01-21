@@ -42,7 +42,7 @@ public class VaultDetailUnlockedController implements FxController {
 
 	@FXML
 	public void revealAccessLocation() {
-		vaultService.reveal(vault.get());
+		vaultService.reveal(vault.get(), p -> application.getHostServices().showDocument(p.toUri().toString()));
 	}
 
 	@FXML

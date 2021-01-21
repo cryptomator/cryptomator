@@ -7,11 +7,10 @@ package org.cryptomator.ui.traymenu;
 
 import dagger.Lazy;
 import dagger.Subcomponent;
-
 import java.awt.SystemTray;
 
 @TrayMenuScoped
-@Subcomponent
+@Subcomponent(modules = TrayMenuModule.class)
 public interface TrayMenuComponent {
 
 	Lazy<TrayIconController> trayIconController();

@@ -4,6 +4,7 @@ import org.cryptomator.common.settings.WhenUnlocked;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.VaultService;
+import org.cryptomator.ui.fxapp.FxApplication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,17 +30,19 @@ public class UnlockSuccessController implements FxController {
 	private final Vault vault;
 	private final ExecutorService executor;
 	private final VaultService vaultService;
+	private final FxApplication application;
 	private final ObjectProperty<ContentDisplay> revealButtonState;
 	private final BooleanProperty revealButtonDisabled;
 
 	public CheckBox rememberChoiceCheckbox;
 
 	@Inject
-	public UnlockSuccessController(@UnlockWindow Stage window, @UnlockWindow Vault vault, ExecutorService executor, VaultService vaultService) {
+	public UnlockSuccessController(@UnlockWindow Stage window, @UnlockWindow Vault vault, ExecutorService executor, VaultService vaultService, FxApplication application) {
 		this.window = window;
 		this.vault = vault;
 		this.executor = executor;
 		this.vaultService = vaultService;
+		this.application = application;
 		this.revealButtonState = new SimpleObjectProperty<>(ContentDisplay.TEXT_ONLY);
 		this.revealButtonDisabled = new SimpleBooleanProperty();
 	}
@@ -59,7 +62,7 @@ public class UnlockSuccessController implements FxController {
 		revealButtonState.set(ContentDisplay.LEFT);
 		revealButtonDisabled.set(true);
 
-		Task<Vault> revealTask = vaultService.createRevealTask(vault);
+		Task<Vault> revealTask = vaultService.createRevealTask(vault, p -> application.getHostServices().showDocument(p.toUri().toString()));
 		revealTask.setOnSucceeded(evt -> {
 			revealButtonState.set(ContentDisplay.TEXT_ONLY);
 			revealButtonDisabled.set(false);
