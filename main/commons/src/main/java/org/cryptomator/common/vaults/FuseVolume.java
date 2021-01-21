@@ -12,7 +12,6 @@ import org.cryptomator.frontend.fuse.mount.FuseMountFactory;
 import org.cryptomator.frontend.fuse.mount.FuseNotSupportedException;
 import org.cryptomator.frontend.fuse.mount.Mount;
 import org.cryptomator.frontend.fuse.mount.Mounter;
-import org.cryptomator.frontend.fuse.mount.RevealException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,22 +72,11 @@ public class FuseVolume extends AbstractVolume {
 	}
 
 	@Override
-	public void reveal(RevealerFacade r) throws VolumeException {
+	public void reveal(RevealerFacade revealer) throws VolumeException {
 		try {
-			mount.reveal(p -> {
-				try {
-					r.reveal(p);
-				} catch (VolumeException e) {
-					throw new RevealException(e);
-				}
-			});
-		} catch (RevealException e) {
-			LOG.debug("Revealing the vault in file manger failed: " + e.getMessage());
-			if (e.getCause() instanceof VolumeException) {
-				throw (VolumeException) e.getCause();
-			} else {
-				throw new VolumeException(e);
-			}
+			mount.reveal(revealer::reveal);
+		} catch (Exception e) {
+			throw new VolumeException(e);
 		}
 	}
 

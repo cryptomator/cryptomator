@@ -8,7 +8,6 @@ import org.cryptomator.cryptofs.CryptoFileSystem;
 import org.cryptomator.frontend.dokany.Mount;
 import org.cryptomator.frontend.dokany.MountFactory;
 import org.cryptomator.frontend.dokany.MountFailedException;
-import org.cryptomator.frontend.dokany.RevealException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,22 +52,11 @@ public class DokanyVolume extends AbstractVolume {
 	}
 
 	@Override
-	public void reveal(RevealerFacade r) throws VolumeException {
+	public void reveal(RevealerFacade revealer) throws VolumeException {
 		try {
-			mount.reveal(p -> {
-				try {
-					r.reveal(p);
-				} catch (VolumeException e) {
-					throw new RevealException(e);
-				}
-			});
-		} catch (RevealException e) {
-			LOG.debug("Revealing the vault in file manger failed: " + e.getMessage());
-			if (e.getCause() instanceof VolumeException) {
-				throw (VolumeException) e.getCause();
-			} else {
-				throw new VolumeException(e);
-			}
+			mount.reveal(revealer::reveal);
+		} catch (Exception e) {
+			throw new VolumeException(e);
 		}
 	}
 
