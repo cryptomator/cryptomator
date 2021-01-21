@@ -73,7 +73,7 @@ public class WebDavVolume implements Volume {
 	}
 
 	@Override
-	public void reveal(RevealerFacade revealer) throws VolumeException {
+	public void reveal(Revealer revealer) throws VolumeException {
 		try {
 			mount.reveal(revealer::reveal);
 		} catch (Exception e) {

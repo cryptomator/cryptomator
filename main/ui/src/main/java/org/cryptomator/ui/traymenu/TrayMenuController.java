@@ -28,11 +28,11 @@ class TrayMenuController {
 	private final AppLifecycleListener appLifecycle;
 	private final FxApplicationStarter fxApplicationStarter;
 	private final ObservableList<Vault> vaults;
-	private final Volume.RevealerFacade revealer;
+	private final Volume.Revealer revealer;
 	private final PopupMenu menu;
 
 	@Inject
-	TrayMenuController(ResourceBundle resourceBundle, AppLifecycleListener appLifecycle, FxApplicationStarter fxApplicationStarter, ObservableList<Vault> vaults, Volume.RevealerFacade revealer) {
+	TrayMenuController(ResourceBundle resourceBundle, AppLifecycleListener appLifecycle, FxApplicationStarter fxApplicationStarter, ObservableList<Vault> vaults, Volume.Revealer revealer) {
 		this.resourceBundle = resourceBundle;
 		this.appLifecycle = appLifecycle;
 		this.fxApplicationStarter = fxApplicationStarter;

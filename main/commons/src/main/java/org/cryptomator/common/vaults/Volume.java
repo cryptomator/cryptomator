@@ -42,7 +42,7 @@ public interface Volume {
 	 * @param revealer An object capable of revealing the location of the mounted vault to view the content (e.g. in the default file browser).
 	 * @throws VolumeException
 	 */
-	void reveal(RevealerFacade revealer) throws VolumeException;
+	void reveal(Revealer revealer) throws VolumeException;
 
 	void unmount() throws VolumeException;
 
@@ -91,7 +91,7 @@ public interface Volume {
 	 * Hides and unifies the different Revealer implementations in the different nio-adapters.
 	 */
 	@FunctionalInterface
-	interface RevealerFacade {
+	interface Revealer {
 
 		void reveal(Path p) throws VolumeException;
 

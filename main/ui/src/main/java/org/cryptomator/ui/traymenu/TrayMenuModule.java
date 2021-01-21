@@ -11,7 +11,7 @@ import java.io.IOException;
 abstract class TrayMenuModule {
 
 	@Provides
-	static Volume.RevealerFacade provideAwtRevealer(){
+	static Volume.Revealer provideAwtRevealer(){
 		return p -> {
 			if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.OPEN)) {
 				try {

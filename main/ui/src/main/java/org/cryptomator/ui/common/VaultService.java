@@ -15,7 +15,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 @FxApplicationScoped
@@ -30,7 +29,7 @@ public class VaultService {
 		this.executorService = executorService;
 	}
 
-	public void reveal(Vault vault, Volume.RevealerFacade vaultRevealCmd) {
+	public void reveal(Vault vault, Volume.Revealer vaultRevealCmd) {
 		executorService.execute(createRevealTask(vault, vaultRevealCmd));
 	}
 
@@ -39,7 +38,7 @@ public class VaultService {
 	 *
 	 * @param vault The vault to reveal
 	 */
-	public Task<Vault> createRevealTask(Vault vault, Volume.RevealerFacade vaultRevealCmd) {
+	public Task<Vault> createRevealTask(Vault vault, Volume.Revealer vaultRevealCmd) {
 		Task<Vault> task = new RevealVaultTask(vault, vaultRevealCmd);
 		task.setOnSucceeded(evt -> LOG.info("Revealed {}", vault.getDisplayName()));
 		task.setOnFailed(evt -> LOG.error("Failed to reveal " + vault.getDisplayName(), evt.getSource().getException()));
@@ -100,13 +99,13 @@ public class VaultService {
 	private static class RevealVaultTask extends Task<Vault> {
 
 		private final Vault vault;
-		private final Volume.RevealerFacade revealer;
+		private final Volume.Revealer revealer;
 
 		/**
 		 * @param vault The vault to lock
 		 * @param revealer The object to use to show the vault content to the user.
 		 */
-		public RevealVaultTask(Vault vault, Volume.RevealerFacade revealer) {
+		public RevealVaultTask(Vault vault, Volume.Revealer revealer) {
 			this.vault = vault;
 			this.revealer = revealer;
 
