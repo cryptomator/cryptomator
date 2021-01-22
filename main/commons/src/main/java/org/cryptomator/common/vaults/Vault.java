@@ -162,8 +162,8 @@ public class Vault {
 		destroyCryptoFileSystem();
 	}
 
-	public void reveal() throws VolumeException {
-		volume.reveal();
+	public void reveal(Volume.Revealer vaultRevealer) throws VolumeException {
+		volume.reveal(vaultRevealer);
 	}
 
 	// ******************************************************************************

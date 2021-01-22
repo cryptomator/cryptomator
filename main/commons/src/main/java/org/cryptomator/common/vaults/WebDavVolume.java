@@ -17,6 +17,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.file.Path;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 public class WebDavVolume implements Volume {
 
@@ -25,21 +26,27 @@ public class WebDavVolume implements Volume {
 	private final Provider<WebDavServer> serverProvider;
 	private final VaultSettings vaultSettings;
 	private final Settings settings;
+	private final WindowsDriveLetters windowsDriveLetters;
 
 	private WebDavServer server;
 	private WebDavServletController servlet;
 	private Mounter.Mount mount;
-	private Path mountPoint;
 
 	@Inject
-	public WebDavVolume(Provider<WebDavServer> serverProvider, VaultSettings vaultSettings, Settings settings) {
+	public WebDavVolume(Provider<WebDavServer> serverProvider, VaultSettings vaultSettings, Settings settings, WindowsDriveLetters windowsDriveLetters) {
 		this.serverProvider = serverProvider;
 		this.vaultSettings = vaultSettings;
 		this.settings = settings;
+		this.windowsDriveLetters = windowsDriveLetters;
 	}
 
 	@Override
 	public void mount(CryptoFileSystem fs, String mountFlags) throws VolumeException {
+		startServlet(fs);
+		mountServlet();
+	}
+
+	private void startServlet(CryptoFileSystem fs){
 		if (server == null) {
 			server = serverProvider.get();
 		}
@@ -50,32 +57,38 @@ public class WebDavVolume implements Volume {
 		String urlConformMountName = acceptable.negate().collapseFrom(vaultSettings.mountName().get(), '_');
 		servlet = server.createWebDavServlet(fs.getPath("/"), vaultSettings.getId() + "/" + urlConformMountName);
 		servlet.start();
-		mount();
 	}
 
-	private void mount() throws VolumeException {
+	private void mountServlet() throws VolumeException {
 		if (servlet == null) {
 			throw new IllegalStateException("Mounting requires unlocked WebDAV servlet.");
 		}
+
+		//on windows, prevent an automatic drive letter selection in the upstream library. Either we choose already a specifc one or there is no free.
+		Supplier<String> driveLetterSupplier;
+		if(System.getProperty("os.name").toLowerCase().contains("windows") && vaultSettings.winDriveLetter().isEmpty().get()) {
+			driveLetterSupplier = () -> windowsDriveLetters.getAvailableDriveLetter().orElse(null);
+		} else {
+			driveLetterSupplier = () -> vaultSettings.winDriveLetter().get();
+		}
+
 		MountParams mountParams = MountParams.create() //
-				.withWindowsDriveLetter(vaultSettings.winDriveLetter().get()) //
+				.withWindowsDriveLetter(driveLetterSupplier.get()) //
 				.withPreferredGvfsScheme(settings.preferredGvfsScheme().get().getPrefix())//
 				.withWebdavHostname(getLocalhostAliasOrNull()) //
 				.build();
 		try {
 			this.mount = servlet.mount(mountParams); // might block this thread for a while
 		} catch (Mounter.CommandFailedException e) {
-			e.printStackTrace();
 			throw new VolumeException(e);
 		}
 	}
 
 	@Override
-	public void reveal() throws VolumeException {
+	public void reveal(Revealer revealer) throws VolumeException {
 		try {
-			mount.reveal();
-		} catch (Mounter.CommandFailedException e) {
-			e.printStackTrace();
+			mount.reveal(revealer::reveal);
+		} catch (Exception e) {
 			throw new VolumeException(e);
 		}
 	}
@@ -102,7 +115,7 @@ public class WebDavVolume implements Volume {
 
 	@Override
 	public Optional<Path> getMountPoint() {
-		return Optional.ofNullable(mountPoint); //TODO
+		return mount.getMountPoint();
 	}
 
 	@Override
