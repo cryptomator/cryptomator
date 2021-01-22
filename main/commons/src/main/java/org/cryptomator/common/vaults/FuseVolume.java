@@ -20,7 +20,6 @@ import javax.inject.Named;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.SortedSet;
 import java.util.regex.Pattern;
 
 public class FuseVolume extends AbstractVolume {
@@ -73,11 +72,10 @@ public class FuseVolume extends AbstractVolume {
 	}
 
 	@Override
-	public void reveal() throws VolumeException {
+	public void reveal(Revealer revealer) throws VolumeException {
 		try {
-			mount.revealInFileManager();
-		} catch (CommandFailedException e) {
-			LOG.debug("Revealing the vault in file manger failed: " + e.getMessage());
+			mount.reveal(revealer::reveal);
+		} catch (Exception e) {
 			throw new VolumeException(e);
 		}
 	}

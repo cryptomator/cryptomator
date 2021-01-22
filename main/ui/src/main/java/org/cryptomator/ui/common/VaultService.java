@@ -23,10 +23,12 @@ public class VaultService {
 	private static final Logger LOG = LoggerFactory.getLogger(VaultService.class);
 
 	private final ExecutorService executorService;
+	private final HostServiceRevealer vaultRevealer;
 
 	@Inject
-	public VaultService(ExecutorService executorService) {
+	public VaultService(ExecutorService executorService, HostServiceRevealer vaultRevealer) {
 		this.executorService = executorService;
+		this.vaultRevealer = vaultRevealer;
 	}
 
 	public void reveal(Vault vault) {
@@ -39,7 +41,7 @@ public class VaultService {
 	 * @param vault The vault to reveal
 	 */
 	public Task<Vault> createRevealTask(Vault vault) {
-		Task<Vault> task = new RevealVaultTask(vault);
+		Task<Vault> task = new RevealVaultTask(vault, vaultRevealer);
 		task.setOnSucceeded(evt -> LOG.info("Revealed {}", vault.getDisplayName()));
 		task.setOnFailed(evt -> LOG.error("Failed to reveal " + vault.getDisplayName(), evt.getSource().getException()));
 		return task;
@@ -99,19 +101,22 @@ public class VaultService {
 	private static class RevealVaultTask extends Task<Vault> {
 
 		private final Vault vault;
+		private final Volume.Revealer revealer;
 
 		/**
 		 * @param vault The vault to lock
+		 * @param revealer The object to use to show the vault content to the user.
 		 */
-		public RevealVaultTask(Vault vault) {
+		public RevealVaultTask(Vault vault, Volume.Revealer revealer) {
 			this.vault = vault;
+			this.revealer = revealer;
 
 			setOnFailed(evt -> LOG.error("Failed to reveal " + vault.getDisplayName(), getException()));
 		}
 
 		@Override
 		protected Vault call() throws Volume.VolumeException {
-			vault.reveal();
+			vault.reveal(revealer);
 			return vault;
 		}
 	}
