@@ -6,7 +6,7 @@ import org.cryptomator.cryptofs.common.MasterkeyBackupHelper;
 import org.cryptomator.cryptolib.api.CryptoException;
 import org.cryptomator.cryptolib.api.InvalidPassphraseException;
 import org.cryptomator.cryptolib.api.Masterkey;
-import org.cryptomator.cryptolib.common.MasterkeyFile;
+import org.cryptomator.cryptolib.common.MasterkeyFileAccess;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -30,11 +30,13 @@ public class RecoveryKeyFactory {
 
 	private final WordEncoder wordEncoder;
 	private final SecureRandom csprng;
+	private final MasterkeyFileAccess masterkeyFileAccess;
 
 	@Inject
-	public RecoveryKeyFactory(WordEncoder wordEncoder, SecureRandom csprng) {
+	public RecoveryKeyFactory(WordEncoder wordEncoder, SecureRandom csprng, MasterkeyFileAccess masterkeyFileAccess) {
 		this.wordEncoder = wordEncoder;
 		this.csprng = csprng;
+		this.masterkeyFileAccess = masterkeyFileAccess;
 	}
 
 	public Collection<String> getDictionary() {
@@ -53,7 +55,7 @@ public class RecoveryKeyFactory {
 	public String createRecoveryKey(Path vaultPath, CharSequence password) throws IOException, InvalidPassphraseException, CryptoException {
 		Path masterkeyPath = vaultPath.resolve(MASTERKEY_FILENAME);
 		byte[] rawKey = new byte[0];
-		try (var masterkey = MasterkeyFile.withContentFromFile(masterkeyPath).unlock(password, PEPPER, Optional.empty()).loadKeyAndClose()) {
+		try (var masterkey = masterkeyFileAccess.load(masterkeyPath, password)) {
 			rawKey = masterkey.getEncoded();
 			return createRecoveryKey(rawKey);
 		} finally {
@@ -87,14 +89,13 @@ public class RecoveryKeyFactory {
 	public void resetPasswordWithRecoveryKey(Path vaultPath, String recoveryKey, CharSequence newPassword) throws IOException, IllegalArgumentException {
 		final byte[] rawKey = decodeRecoveryKey(recoveryKey);
 		try (var masterkey = Masterkey.createFromRaw(rawKey)) {
-			byte[] restoredKey = MasterkeyFile.lock(masterkey, newPassword, PEPPER, 999, csprng);
 			Path masterkeyPath = vaultPath.resolve(MASTERKEY_FILENAME);
 			if (Files.exists(masterkeyPath)) {
 				byte[] oldMasterkeyBytes = Files.readAllBytes(masterkeyPath);
 				Path backupKeyPath = vaultPath.resolve(MASTERKEY_FILENAME + MasterkeyBackupHelper.generateFileIdSuffix(oldMasterkeyBytes) + MASTERKEY_BACKUP_SUFFIX);
 				Files.move(masterkeyPath, backupKeyPath, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
 			}
-			Files.write(masterkeyPath, restoredKey, StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE);
+			masterkeyFileAccess.persist(masterkey, masterkeyPath, newPassword);
 		} finally {
 			Arrays.fill(rawKey, (byte) 0x00);
 		}

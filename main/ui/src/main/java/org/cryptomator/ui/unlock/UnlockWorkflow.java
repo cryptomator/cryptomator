@@ -9,6 +9,10 @@ import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.common.vaults.Volume.VolumeException;
 import org.cryptomator.cryptolib.api.CryptoException;
 import org.cryptomator.cryptolib.api.InvalidPassphraseException;
+import org.cryptomator.cryptolib.api.MasterkeyLoader;
+import org.cryptomator.cryptolib.common.MasterkeyFileAccess;
+import org.cryptomator.cryptolib.common.MasterkeyFileLoader;
+import org.cryptomator.cryptolib.common.MasterkeyFileLoaderContext;
 import org.cryptomator.integrations.keychain.KeychainAccessException;
 import org.cryptomator.ui.common.Animations;
 import org.cryptomator.ui.common.ErrorComponent;
@@ -32,6 +36,7 @@ import java.nio.CharBuffer;
 import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.NotDirectoryException;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -43,7 +48,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * This class runs the unlock process and controls when to display which UI.
  */
 @UnlockScoped
-public class UnlockWorkflow extends Task<Boolean> {
+public class UnlockWorkflow extends Task<Boolean> implements MasterkeyFileLoaderContext {
 
 	private static final Logger LOG = LoggerFactory.getLogger(UnlockWorkflow.class);
 
@@ -59,9 +64,10 @@ public class UnlockWorkflow extends Task<Boolean> {
 	private final Lazy<Scene> successScene;
 	private final Lazy<Scene> invalidMountPointScene;
 	private final ErrorComponent.Builder errorComponent;
+	private final MasterkeyFileAccess masterkeyFileAccess;
 
 	@Inject
-	UnlockWorkflow(@UnlockWindow Stage window, @UnlockWindow Vault vault, VaultService vaultService, AtomicReference<char[]> password, @Named("savePassword") AtomicBoolean savePassword, @Named("savedPassword") Optional<char[]> savedPassword, UserInteractionLock<PasswordEntry> passwordEntryLock, KeychainManager keychain, @FxmlScene(FxmlFile.UNLOCK) Lazy<Scene> unlockScene, @FxmlScene(FxmlFile.UNLOCK_SUCCESS) Lazy<Scene> successScene, @FxmlScene(FxmlFile.UNLOCK_INVALID_MOUNT_POINT) Lazy<Scene> invalidMountPointScene, ErrorComponent.Builder errorComponent) {
+	UnlockWorkflow(@UnlockWindow Stage window, @UnlockWindow Vault vault, VaultService vaultService, AtomicReference<char[]> password, @Named("savePassword") AtomicBoolean savePassword, @Named("savedPassword") Optional<char[]> savedPassword, UserInteractionLock<PasswordEntry> passwordEntryLock, KeychainManager keychain, @FxmlScene(FxmlFile.UNLOCK) Lazy<Scene> unlockScene, @FxmlScene(FxmlFile.UNLOCK_SUCCESS) Lazy<Scene> successScene, @FxmlScene(FxmlFile.UNLOCK_INVALID_MOUNT_POINT) Lazy<Scene> invalidMountPointScene, ErrorComponent.Builder errorComponent, MasterkeyFileAccess masterkeyFileAccess) {
 		this.window = window;
 		this.vault = vault;
 		this.vaultService = vaultService;
@@ -74,6 +80,7 @@ public class UnlockWorkflow extends Task<Boolean> {
 		this.successScene = successScene;
 		this.invalidMountPointScene = invalidMountPointScene;
 		this.errorComponent = errorComponent;
+		this.masterkeyFileAccess = masterkeyFileAccess;
 
 		setOnFailed(event -> {
 			Throwable throwable = event.getSource().getException();
@@ -105,13 +112,23 @@ public class UnlockWorkflow extends Task<Boolean> {
 		boolean proceed = password.get() != null || askForPassword(false) == PasswordEntry.PASSWORD_ENTERED;
 		while (proceed) {
 			try {
-				vault.unlock(CharBuffer.wrap(password.get()));
+				vault.unlock(masterkeyFileAccess.keyLoader(vault.getPath(), this));
 				return true;
 			} catch (InvalidPassphraseException e) {
 				proceed = askForPassword(true) == PasswordEntry.PASSWORD_ENTERED;
 			}
 		}
 		return false;
+	}
+
+	@Override
+	public Path getMasterkeyFilePath(String masterkeyFilePath) {
+		return null; // TODO non-standard paths not yet supported (cancel unlock attempt)
+	}
+
+	@Override
+	public CharSequence getPassphrase(Path path) {
+		return CharBuffer.wrap(password.get());
 	}
 
 	private PasswordEntry askForPassword(boolean animateShake) throws InterruptedException {
@@ -238,5 +255,4 @@ public class UnlockWorkflow extends Task<Boolean> {
 	protected void cancelled() {
 		vault.setState(VaultState.LOCKED);
 	}
-
 }

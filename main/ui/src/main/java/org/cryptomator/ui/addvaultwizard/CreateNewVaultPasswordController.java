@@ -7,10 +7,8 @@ import org.cryptomator.cryptofs.CryptoFileSystemProperties;
 import org.cryptomator.cryptofs.CryptoFileSystemProvider;
 import org.cryptomator.cryptofs.VaultCipherCombo;
 import org.cryptomator.cryptolib.api.CryptoException;
-import org.cryptomator.cryptolib.api.InvalidPassphraseException;
 import org.cryptomator.cryptolib.api.Masterkey;
-import org.cryptomator.cryptolib.api.UnsupportedVaultFormatException;
-import org.cryptomator.cryptolib.common.MasterkeyFile;
+import org.cryptomator.cryptolib.common.MasterkeyFileAccess;
 import org.cryptomator.cryptolib.common.MasterkeyFileLoader;
 import org.cryptomator.ui.common.ErrorComponent;
 import org.cryptomator.ui.common.FxController;
@@ -36,7 +34,6 @@ import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleGroup;
 import javafx.stage.Stage;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.channels.WritableByteChannel;
@@ -46,14 +43,11 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.security.SecureRandom;
-import java.util.Collections;
-import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
 
 import static java.nio.charset.StandardCharsets.US_ASCII;
 import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
-import static org.cryptomator.common.Constants.PEPPER;
 
 @AddVaultWizardScoped
 public class CreateNewVaultPasswordController implements FxController {
@@ -76,6 +70,7 @@ public class CreateNewVaultPasswordController implements FxController {
 	private final ObjectProperty<CharSequence> password;
 	private final ReadmeGenerator readmeGenerator;
 	private final SecureRandom csprng;
+	private final MasterkeyFileAccess masterkeyFileAccess;
 	private final BooleanProperty processing;
 	private final BooleanProperty readyToCreateVault;
 	private final ObjectBinding<ContentDisplay> createVaultButtonState;
@@ -85,7 +80,7 @@ public class CreateNewVaultPasswordController implements FxController {
 	public Toggle skipRecoveryKey;
 
 	@Inject
-	CreateNewVaultPasswordController(@AddVaultWizardWindow Stage window, @FxmlScene(FxmlFile.ADDVAULT_NEW_LOCATION) Lazy<Scene> chooseLocationScene, @FxmlScene(FxmlFile.ADDVAULT_NEW_RECOVERYKEY) Lazy<Scene> recoveryKeyScene, @FxmlScene(FxmlFile.ADDVAULT_SUCCESS) Lazy<Scene> successScene, ErrorComponent.Builder errorComponent, ExecutorService executor, RecoveryKeyFactory recoveryKeyFactory, @Named("vaultName") StringProperty vaultName, ObjectProperty<Path> vaultPath, @AddVaultWizardWindow ObjectProperty<Vault> vault, @Named("recoveryKey") StringProperty recoveryKey, VaultListManager vaultListManager, ResourceBundle resourceBundle, @Named("newPassword") ObjectProperty<CharSequence> password, ReadmeGenerator readmeGenerator, SecureRandom csprng) {
+	CreateNewVaultPasswordController(@AddVaultWizardWindow Stage window, @FxmlScene(FxmlFile.ADDVAULT_NEW_LOCATION) Lazy<Scene> chooseLocationScene, @FxmlScene(FxmlFile.ADDVAULT_NEW_RECOVERYKEY) Lazy<Scene> recoveryKeyScene, @FxmlScene(FxmlFile.ADDVAULT_SUCCESS) Lazy<Scene> successScene, ErrorComponent.Builder errorComponent, ExecutorService executor, RecoveryKeyFactory recoveryKeyFactory, @Named("vaultName") StringProperty vaultName, ObjectProperty<Path> vaultPath, @AddVaultWizardWindow ObjectProperty<Vault> vault, @Named("recoveryKey") StringProperty recoveryKey, VaultListManager vaultListManager, ResourceBundle resourceBundle, @Named("newPassword") ObjectProperty<CharSequence> password, ReadmeGenerator readmeGenerator, SecureRandom csprng, MasterkeyFileAccess masterkeyFileAccess) {
 		this.window = window;
 		this.chooseLocationScene = chooseLocationScene;
 		this.recoveryKeyScene = recoveryKeyScene;
@@ -102,6 +97,7 @@ public class CreateNewVaultPasswordController implements FxController {
 		this.password = password;
 		this.readmeGenerator = readmeGenerator;
 		this.csprng = csprng;
+		this.masterkeyFileAccess = masterkeyFileAccess;
 		this.processing = new SimpleBooleanProperty();
 		this.readyToCreateVault = new SimpleBooleanProperty();
 		this.createVaultButtonState = Bindings.createObjectBinding(this::getCreateVaultButtonState, processing);
@@ -177,14 +173,15 @@ public class CreateNewVaultPasswordController implements FxController {
 		// 1. write masterkey:
 		Path masterkeyFilePath = path.resolve(MASTERKEY_FILENAME);
 		try (Masterkey masterkey = Masterkey.createNew(csprng)) {
-			byte[] serialized = MasterkeyFile.lock(masterkey, passphrase, PEPPER, 999, csprng);
-			Files.write(masterkeyFilePath, serialized, StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE);
+			masterkeyFileAccess.persist(masterkey, masterkeyFilePath, passphrase);
 		}
 
-		// 2. verify masterkey and initialize vault:
-		try (var loader = MasterkeyFile.withContentFromFile(masterkeyFilePath).unlock(passphrase, PEPPER, Optional.of(999))) {
-			CryptoFileSystemProperties fsProps = CryptoFileSystemProperties.cryptoFileSystemProperties().withCipherCombo(VaultCipherCombo.SIV_CTRMAC).withKeyLoader(loader).build();
-			CryptoFileSystemProvider.initialize(path, fsProps, MasterkeyFileLoader.KEY_ID);
+		// 2. initialize vault:
+		var context = new StaticMasterkeyFileLoaderContext(masterkeyFilePath, passphrase);
+		var loader = masterkeyFileAccess.keyLoader(path, context);
+		try {
+			CryptoFileSystemProperties fsProps = CryptoFileSystemProperties.cryptoFileSystemProperties().withCipherCombo(VaultCipherCombo.SIV_CTRMAC).withKeyLoaders(loader).build();
+			CryptoFileSystemProvider.initialize(path, fsProps, MasterkeyFileLoader.keyId(MASTERKEY_FILENAME));
 
 			// 3. write vault-internal readme file:
 			String vaultReadmeFileName = resourceBundle.getString("addvault.new.readme.accessLocation.fileName");

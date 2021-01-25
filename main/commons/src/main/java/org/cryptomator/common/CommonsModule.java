@@ -15,6 +15,7 @@ import org.cryptomator.common.settings.SettingsProvider;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultComponent;
 import org.cryptomator.common.vaults.VaultListManager;
+import org.cryptomator.cryptolib.common.MasterkeyFileAccess;
 import org.cryptomator.frontend.webdav.WebDavServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,6 +64,12 @@ public abstract class CommonsModule {
 		} catch (NoSuchAlgorithmException e) {
 			throw new IllegalStateException("A strong algorithm must exist in every Java platform.", e);
 		}
+	}
+
+	@Provides
+	@Singleton
+	static MasterkeyFileAccess provideMasterkeyFileAccess(SecureRandom csprng) {
+		return new MasterkeyFileAccess(Constants.PEPPER, csprng);
 	}
 
 	@Provides

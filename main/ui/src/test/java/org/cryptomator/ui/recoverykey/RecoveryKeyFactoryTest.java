@@ -1,16 +1,12 @@
 package org.cryptomator.ui.recoverykey;
 
 import com.google.common.base.Splitter;
-import org.cryptomator.cryptofs.CryptoFileSystemProvider;
 import org.cryptomator.cryptolib.api.CryptoException;
 import org.cryptomator.cryptolib.api.Masterkey;
-import org.cryptomator.cryptolib.common.MasterkeyFile;
-import org.cryptomator.cryptolib.common.MasterkeyFileLoader;
+import org.cryptomator.cryptolib.common.MasterkeyFileAccess;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
-import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
 import java.io.IOException;
@@ -21,19 +17,16 @@ class RecoveryKeyFactoryTest {
 
 	private WordEncoder wordEncoder = new WordEncoder();
 	private SecureRandom csprng = Mockito.mock(SecureRandom.class);
-	private RecoveryKeyFactory inTest = new RecoveryKeyFactory(wordEncoder, csprng);
+	private MasterkeyFileAccess masterkeyFileAccess = Mockito.mock(MasterkeyFileAccess.class);
+	private RecoveryKeyFactory inTest = new RecoveryKeyFactory(wordEncoder, csprng, masterkeyFileAccess);
 
 	@Test
 	@DisplayName("createRecoveryKey() creates 44 words")
 	public void testCreateRecoveryKey() throws IOException, CryptoException {
 		Path pathToVault = Path.of("path/to/vault");
-		MockedStatic<MasterkeyFile> masterkeyFileClass = Mockito.mockStatic(MasterkeyFile.class);
-		MasterkeyFile masterkeyFile = Mockito.mock(MasterkeyFile.class);
-		MasterkeyFileLoader keyLoader = Mockito.mock(MasterkeyFileLoader.class);
 		Masterkey masterkey = Mockito.mock(Masterkey.class);
-		masterkeyFileClass.when(() -> MasterkeyFile.withContentFromFile(Path.of("path/to/vault/masterkey.cryptomator"))).thenReturn(masterkeyFile);
-		Mockito.when(masterkeyFile.unlock(Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(keyLoader);
-		Mockito.when(keyLoader.loadKeyAndClose()).thenReturn(masterkey);
+		Mockito.when(masterkeyFileAccess.load(pathToVault.resolve("masterkey.cryptomator"), "asd")).thenReturn(masterkey);
+
 		Mockito.when(masterkey.getEncoded()).thenReturn(new byte[64]);
 
 		String recoveryKey = inTest.createRecoveryKey(pathToVault, "asd");

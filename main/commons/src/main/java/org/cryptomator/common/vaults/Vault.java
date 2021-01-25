@@ -20,8 +20,8 @@ import org.cryptomator.cryptofs.CryptoFileSystemProvider;
 import org.cryptomator.cryptofs.common.Constants;
 import org.cryptomator.cryptofs.common.FileSystemCapabilityChecker;
 import org.cryptomator.cryptolib.api.CryptoException;
-import org.cryptomator.cryptolib.api.InvalidPassphraseException;
-import org.cryptomator.cryptolib.common.MasterkeyFile;
+import org.cryptomator.cryptolib.api.MasterkeyLoader;
+import org.cryptomator.cryptolib.api.MasterkeyLoadingFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +36,6 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import java.io.IOException;
-import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.EnumSet;
@@ -44,9 +43,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
-
-import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
-import static org.cryptomator.common.Constants.PEPPER;
 
 @PerVault
 public class Vault {
@@ -101,7 +97,7 @@ public class Vault {
 	// Commands
 	// ********************************************************************************/
 
-	private CryptoFileSystem createCryptoFileSystem(CharSequence passphrase) throws NoSuchFileException, IOException, InvalidPassphraseException, CryptoException {
+	private CryptoFileSystem createCryptoFileSystem(MasterkeyLoader keyLoader) throws IOException, MasterkeyLoadingFailedException {
 		Set<FileSystemFlags> flags = EnumSet.noneOf(FileSystemFlags.class);
 		if (vaultSettings.usesReadOnlyMode().get()) {
 			flags.add(FileSystemFlags.READONLY);
@@ -114,20 +110,16 @@ public class Vault {
 		}
 		assert vaultSettings.filenameLengthLimit().get() > 0;
 
-		Path masterkeyPath = getPath().resolve(MASTERKEY_FILENAME);
-		try (var keyLoader = MasterkeyFile.withContentFromFile(masterkeyPath).unlock(passphrase, PEPPER, Optional.empty())) {
-			CryptoFileSystemProperties fsProps = CryptoFileSystemProperties.cryptoFileSystemProperties() //
-					.withKeyLoader(keyLoader) //
-					.withFlags(flags) //
-					.withMaxPathLength(vaultSettings.filenameLengthLimit().get() + Constants.MAX_ADDITIONAL_PATH_LENGTH) //
-					.withMaxNameLength(vaultSettings.filenameLengthLimit().get()) //
-					.build();
-			return CryptoFileSystemProvider.newFileSystem(getPath(), fsProps);
-		}
+		CryptoFileSystemProperties fsProps = CryptoFileSystemProperties.cryptoFileSystemProperties() //
+				.withKeyLoaders(keyLoader) //
+				.withFlags(flags) //
+				.withMaxPathLength(vaultSettings.filenameLengthLimit().get() + Constants.MAX_ADDITIONAL_PATH_LENGTH) //
+				.withMaxNameLength(vaultSettings.filenameLengthLimit().get()) //
+				.build();
+		return CryptoFileSystemProvider.newFileSystem(getPath(), fsProps);
 	}
 
-	private void destroyCryptoFileSystem() {
-		CryptoFileSystem fs = cryptoFileSystem.getAndSet(null);
+	private void destroyCryptoFileSystem(CryptoFileSystem fs) {
 		if (fs != null) {
 			try {
 				fs.close();
@@ -137,19 +129,21 @@ public class Vault {
 		}
 	}
 
-	public synchronized void unlock(CharSequence passphrase) throws CryptoException, IOException, VolumeException, InvalidMountPointException {
-		if (cryptoFileSystem.get() == null) {
-			CryptoFileSystem fs = createCryptoFileSystem(passphrase);
-			cryptoFileSystem.set(fs);
-			try {
-				volume = volumeProvider.get();
-				volume.mount(fs, getEffectiveMountFlags());
-			} catch (IOException | InvalidMountPointException | VolumeException e) {
-				destroyCryptoFileSystem();
-				throw e;
-			}
-		} else {
+	public synchronized void unlock(MasterkeyLoader keyLoader) throws CryptoException, IOException, VolumeException, InvalidMountPointException {
+		if (cryptoFileSystem.get() != null) {
 			throw new IllegalStateException("Already unlocked.");
+		}
+		CryptoFileSystem fs = createCryptoFileSystem(keyLoader);
+		boolean success = false;
+		try {
+			cryptoFileSystem.set(fs);
+			volume = volumeProvider.get();
+			volume.mount(fs, getEffectiveMountFlags());
+			success = true;
+		} finally {
+			if (!success) {
+				destroyCryptoFileSystem(fs);
+			}
 		}
 	}
 
@@ -159,7 +153,8 @@ public class Vault {
 		} else {
 			volume.unmount();
 		}
-		destroyCryptoFileSystem();
+		CryptoFileSystem fs = cryptoFileSystem.getAndSet(null);
+		destroyCryptoFileSystem(fs);
 	}
 
 	public void reveal(Volume.Revealer vaultRevealer) throws VolumeException {
