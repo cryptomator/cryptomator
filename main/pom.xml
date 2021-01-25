@@ -36,7 +36,7 @@
 		<!-- 3rd party dependencies -->
 		<javafx.version>15</javafx.version>
 		<commons-lang3.version>3.11</commons-lang3.version>
-		<jwt.version>3.11.0</jwt.version>
+		<jwt.version>3.12.0</jwt.version>
 		<easybind.version>2.1.0</easybind.version>
 		<guava.version>30.1-jre</guava.version>
 		<dagger.version>2.31</dagger.version>
@@ -175,13 +175,6 @@
 				<artifactId>java-jwt</artifactId>
 				<version>${jwt.version}</version>
 			</dependency>
-			<!-- fixes CVE-2020-25649, can be removed once https://github.com/auth0/java-jwt/pull/463 is closed and released -->
-			<dependency>
-				<groupId>com.fasterxml.jackson.core</groupId>
-				<artifactId>jackson-databind</artifactId>
-				<version>2.10.5.1</version>
-			</dependency>
-
 
 			<!-- EasyBind -->
 			<dependency>

@@ -120,6 +120,7 @@ public class Vault {
 	}
 
 	private void destroyCryptoFileSystem(CryptoFileSystem fs) {
+		LOG.trace("Trying to close associated CryptoFS...");
 		if (fs != null) {
 			try {
 				fs.close();
