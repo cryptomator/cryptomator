@@ -122,6 +122,7 @@ public class Vault {
 	}
 
 	private void destroyCryptoFileSystem() {
+		LOG.trace("Trying to close associated CryptoFS...");
 		CryptoFileSystem fs = cryptoFileSystem.getAndSet(null);
 		if (fs != null) {
 			try {
@@ -139,7 +140,7 @@ public class Vault {
 			try {
 				volume = volumeProvider.get();
 				volume.mount(fs, getEffectiveMountFlags());
-			} catch (IOException | InvalidMountPointException | VolumeException e) {
+			} catch (Exception e) {
 				destroyCryptoFileSystem();
 				throw e;
 			}
