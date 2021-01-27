@@ -16,7 +16,7 @@ class StaticMasterkeyFileLoaderContext implements MasterkeyFileLoaderContext {
 	}
 
 	@Override
-	public Path getMasterkeyFilePath(String s) {
+	public Path getCorrectMasterkeyFilePath(String s) {
 		return masterkeyFilePath;
 	}
 

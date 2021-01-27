@@ -10,8 +10,8 @@ import org.cryptomator.common.vaults.Volume.VolumeException;
 import org.cryptomator.cryptolib.api.CryptoException;
 import org.cryptomator.cryptolib.api.InvalidPassphraseException;
 import org.cryptomator.cryptolib.api.MasterkeyLoader;
+import org.cryptomator.cryptolib.api.MasterkeyLoadingFailedException;
 import org.cryptomator.cryptolib.common.MasterkeyFileAccess;
-import org.cryptomator.cryptolib.common.MasterkeyFileLoader;
 import org.cryptomator.cryptolib.common.MasterkeyFileLoaderContext;
 import org.cryptomator.integrations.keychain.KeychainAccessException;
 import org.cryptomator.ui.common.Animations;
@@ -66,6 +66,8 @@ public class UnlockWorkflow extends Task<Boolean> implements MasterkeyFileLoader
 	private final ErrorComponent.Builder errorComponent;
 	private final MasterkeyFileAccess masterkeyFileAccess;
 
+	private boolean didEnterWrongPassphrase = false;
+
 	@Inject
 	UnlockWorkflow(@UnlockWindow Stage window, @UnlockWindow Vault vault, VaultService vaultService, AtomicReference<char[]> password, @Named("savePassword") AtomicBoolean savePassword, @Named("savedPassword") Optional<char[]> savedPassword, UserInteractionLock<PasswordEntry> passwordEntryLock, KeychainManager keychain, @FxmlScene(FxmlFile.UNLOCK) Lazy<Scene> unlockScene, @FxmlScene(FxmlFile.UNLOCK_SUCCESS) Lazy<Scene> successScene, @FxmlScene(FxmlFile.UNLOCK_INVALID_MOUNT_POINT) Lazy<Scene> invalidMountPointScene, ErrorComponent.Builder errorComponent, MasterkeyFileAccess masterkeyFileAccess) {
 		this.window = window;
@@ -95,43 +97,57 @@ public class UnlockWorkflow extends Task<Boolean> implements MasterkeyFileLoader
 	@Override
 	protected Boolean call() throws InterruptedException, IOException, VolumeException, InvalidMountPointException, CryptoException {
 		try {
-			if (attemptUnlock()) {
-				handleSuccess();
-				return true;
-			} else {
-				cancel(false); // set Tasks state to cancelled
-				return false;
-			}
+			MasterkeyLoader keyLoader = masterkeyFileAccess.keyLoader(vault.getPath(), this);
+			attemptUnlock(keyLoader, 0);
+			handleSuccess();
+			return true;
+		} catch (PasswordEntryCancelledException e) {
+			cancel(false); // set Tasks state to cancelled
+			return false;
 		} finally {
 			wipePassword(password.get());
 			wipePassword(savedPassword.orElse(null));
 		}
 	}
 
-	private boolean attemptUnlock() throws InterruptedException, IOException, VolumeException, InvalidMountPointException, CryptoException {
-		boolean proceed = password.get() != null || askForPassword(false) == PasswordEntry.PASSWORD_ENTERED;
-		while (proceed) {
-			try {
-				vault.unlock(masterkeyFileAccess.keyLoader(vault.getPath(), this));
-				return true;
-			} catch (InvalidPassphraseException e) {
-				proceed = askForPassword(true) == PasswordEntry.PASSWORD_ENTERED;
-			}
+	private void attemptUnlock(MasterkeyLoader keyLoader, int attempt) throws IOException, VolumeException, InvalidMountPointException, CryptoException {
+		try {
+			vault.unlock(keyLoader);
+		} catch (InvalidPassphraseException e) {
+			LOG.info("Unlock attempt #{} failed due to incorrect password", attempt);
+			wipePassword(password.getAndSet(null));
+			didEnterWrongPassphrase = true;
+			attemptUnlock(keyLoader, attempt + 1);
 		}
-		return false;
 	}
 
 	@Override
-	public Path getMasterkeyFilePath(String masterkeyFilePath) {
-		return null; // TODO non-standard paths not yet supported (cancel unlock attempt)
+	public Path getCorrectMasterkeyFilePath(String masterkeyFilePath) {
+		LOG.warn("Did not find masterkey file at expected path: {}", masterkeyFilePath);
+		throw new MasterkeyLoadingFailedException(masterkeyFilePath + " not found.", new UnsupportedOperationException("getCorrectMasterkeyFilePath() not implemented"));
 	}
 
 	@Override
-	public CharSequence getPassphrase(Path path) {
-		return CharBuffer.wrap(password.get());
+	public CharSequence getPassphrase(Path path) throws PasswordEntryCancelledException {
+		if (password.get() != null) { // e.g. pre-filled from keychain
+			return CharBuffer.wrap(password.get());
+		}
+
+		assert password.get() == null;
+		try {
+			if (askForPassphrase() == PasswordEntry.PASSWORD_ENTERED) {
+				assert password.get() != null;
+				return CharBuffer.wrap(password.get());
+			} else {
+				throw new PasswordEntryCancelledException("Password entry cancelled.");
+			}
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			throw new PasswordEntryCancelledException("Password entry interrupted", e);
+		}
 	}
 
-	private PasswordEntry askForPassword(boolean animateShake) throws InterruptedException {
+	private PasswordEntry askForPassphrase() throws InterruptedException {
 		Platform.runLater(() -> {
 			window.setScene(unlockScene.get());
 			window.show();
@@ -142,7 +158,7 @@ public class UnlockWorkflow extends Task<Boolean> implements MasterkeyFileLoader
 			} else {
 				window.centerOnScreen();
 			}
-			if (animateShake) {
+			if (didEnterWrongPassphrase) {
 				Animations.createShakeWindowAnimation(window).play();
 			}
 		});
@@ -191,15 +207,12 @@ public class UnlockWorkflow extends Task<Boolean> implements MasterkeyFileLoader
 				LOG.error("Unlock failed. Mountpoint doesn't exist (needs to be a folder): {}", cause.getMessage());
 			}
 			showInvalidMountPointScene();
-			return;
 		} else if (cause instanceof FileAlreadyExistsException) {
 			LOG.error("Unlock failed. Mountpoint already exists: {}", cause.getMessage());
 			showInvalidMountPointScene();
-			return;
 		} else if (cause instanceof DirectoryNotEmptyException) {
 			LOG.error("Unlock failed. Mountpoint not an empty directory: {}", cause.getMessage());
 			showInvalidMountPointScene();
-			return;
 		} else {
 			handleGenericError(impExc);
 		}
@@ -240,5 +253,15 @@ public class UnlockWorkflow extends Task<Boolean> implements MasterkeyFileLoader
 	@Override
 	protected void cancelled() {
 		vault.setState(VaultState.LOCKED);
+	}
+
+	private static class PasswordEntryCancelledException extends MasterkeyLoadingFailedException {
+		public PasswordEntryCancelledException(String message) {
+			super(message);
+		}
+
+		public PasswordEntryCancelledException(String message, Throwable cause) {
+			super(message, cause);
+		}
 	}
 }
