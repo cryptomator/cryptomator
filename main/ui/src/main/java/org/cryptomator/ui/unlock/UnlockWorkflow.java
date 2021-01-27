@@ -190,6 +190,7 @@ public class UnlockWorkflow extends Task<Boolean> {
 	private void showInvalidMountPointScene() {
 		Platform.runLater(() -> {
 			window.setScene(invalidMountPointScene.get());
+			window.show();
 		});
 	}
 
