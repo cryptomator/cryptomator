@@ -24,6 +24,7 @@ import javax.inject.Provider;
 import javafx.scene.Scene;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import java.nio.file.Path;
 import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -40,9 +41,20 @@ abstract class UnlockModule {
 		CANCELED
 	}
 
+	public enum MasterkeyFileProvision {
+		MASTERKEYFILE_PROVIDED,
+		CANCELED
+	}
+
 	@Provides
 	@UnlockScoped
 	static UserInteractionLock<PasswordEntry> providePasswordEntryLock() {
+		return new UserInteractionLock<>(null);
+	}
+
+	@Provides
+	@UnlockScoped
+	static UserInteractionLock<MasterkeyFileProvision> provideMasterkeyFileProvisionLock() {
 		return new UserInteractionLock<>(null);
 	}
 
@@ -60,6 +72,13 @@ abstract class UnlockModule {
 				return Optional.empty();
 			}
 		}
+	}
+
+	@Provides
+	@Named("userProvidedMasterkeyPath")
+	@UnlockScoped
+	static AtomicReference<Path> provideUserProvidedMasterkeyPath() {
+		return new AtomicReference();
 	}
 
 	@Provides
@@ -106,6 +125,13 @@ abstract class UnlockModule {
 	}
 
 	@Provides
+	@FxmlScene(FxmlFile.UNLOCK_SELECT_MASTERKEYFILE)
+	@UnlockScoped
+	static Scene provideUnlockSelectMasterkeyFileScene(@UnlockWindow FXMLLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene("/fxml/unlock_select_masterkeyfile.fxml");
+	}
+
+	@Provides
 	@FxmlScene(FxmlFile.UNLOCK_SUCCESS)
 	@UnlockScoped
 	static Scene provideUnlockSuccessScene(@UnlockWindow FXMLLoaderFactory fxmlLoaders) {
@@ -125,6 +151,11 @@ abstract class UnlockModule {
 	@IntoMap
 	@FxControllerKey(UnlockController.class)
 	abstract FxController bindUnlockController(UnlockController controller);
+
+	@Binds
+	@IntoMap
+	@FxControllerKey(UnlockSelectMasterkeyFileController.class)
+	abstract FxController bindUnlockSelectMasterkeyFileController(UnlockSelectMasterkeyFileController controller);
 
 	@Binds
 	@IntoMap

@@ -28,6 +28,7 @@ public enum FxmlFile {
 	REMOVE_VAULT("/fxml/remove_vault.fxml"), //
 	UNLOCK("/fxml/unlock.fxml"),
 	UNLOCK_INVALID_MOUNT_POINT("/fxml/unlock_invalid_mount_point.fxml"), //
+	UNLOCK_SELECT_MASTERKEYFILE("/fxml/unlock_select_masterkeyfile.fxml"), //
 	UNLOCK_SUCCESS("/fxml/unlock_success.fxml"), //
 	VAULT_OPTIONS("/fxml/vault_options.fxml"), //
 	VAULT_STATISTICS("/fxml/stats.fxml"), //

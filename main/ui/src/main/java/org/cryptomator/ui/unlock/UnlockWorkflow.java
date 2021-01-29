@@ -20,6 +20,7 @@ import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.UserInteractionLock;
 import org.cryptomator.ui.common.VaultService;
+import org.cryptomator.ui.unlock.UnlockModule.MasterkeyFileProvision;
 import org.cryptomator.ui.unlock.UnlockModule.PasswordEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,9 +59,12 @@ public class UnlockWorkflow extends Task<Boolean> implements MasterkeyFileLoader
 	private final AtomicReference<char[]> password;
 	private final AtomicBoolean savePassword;
 	private final Optional<char[]> savedPassword;
+	private final AtomicReference<Path> correctMasterkeyPath;
 	private final UserInteractionLock<PasswordEntry> passwordEntryLock;
+	private final UserInteractionLock<MasterkeyFileProvision> masterkeyFileProvisionLock;
 	private final KeychainManager keychain;
 	private final Lazy<Scene> unlockScene;
+	private final Lazy<Scene> selectMasterkeyFileScene;
 	private final Lazy<Scene> successScene;
 	private final Lazy<Scene> invalidMountPointScene;
 	private final ErrorComponent.Builder errorComponent;
@@ -69,16 +73,19 @@ public class UnlockWorkflow extends Task<Boolean> implements MasterkeyFileLoader
 	private boolean didEnterWrongPassphrase = false;
 
 	@Inject
-	UnlockWorkflow(@UnlockWindow Stage window, @UnlockWindow Vault vault, VaultService vaultService, AtomicReference<char[]> password, @Named("savePassword") AtomicBoolean savePassword, @Named("savedPassword") Optional<char[]> savedPassword, UserInteractionLock<PasswordEntry> passwordEntryLock, KeychainManager keychain, @FxmlScene(FxmlFile.UNLOCK) Lazy<Scene> unlockScene, @FxmlScene(FxmlFile.UNLOCK_SUCCESS) Lazy<Scene> successScene, @FxmlScene(FxmlFile.UNLOCK_INVALID_MOUNT_POINT) Lazy<Scene> invalidMountPointScene, ErrorComponent.Builder errorComponent, MasterkeyFileAccess masterkeyFileAccess) {
+	UnlockWorkflow(@UnlockWindow Stage window, @UnlockWindow Vault vault, VaultService vaultService, AtomicReference<char[]> password, @Named("savePassword") AtomicBoolean savePassword, @Named("savedPassword") Optional<char[]> savedPassword, @Named("userProvidedMasterkeyPath") AtomicReference<Path> correctMasterkeyPath, UserInteractionLock<PasswordEntry> passwordEntryLock, UserInteractionLock<MasterkeyFileProvision> masterkeyFileProvisionLock, KeychainManager keychain, @FxmlScene(FxmlFile.UNLOCK) Lazy<Scene> unlockScene, @FxmlScene(FxmlFile.UNLOCK_SELECT_MASTERKEYFILE) Lazy<Scene> selectMasterkeyFileScene, @FxmlScene(FxmlFile.UNLOCK_SUCCESS) Lazy<Scene> successScene, @FxmlScene(FxmlFile.UNLOCK_INVALID_MOUNT_POINT) Lazy<Scene> invalidMountPointScene, ErrorComponent.Builder errorComponent, MasterkeyFileAccess masterkeyFileAccess) {
 		this.window = window;
 		this.vault = vault;
 		this.vaultService = vaultService;
 		this.password = password;
 		this.savePassword = savePassword;
 		this.savedPassword = savedPassword;
+		this.correctMasterkeyPath = correctMasterkeyPath;
 		this.passwordEntryLock = passwordEntryLock;
+		this.masterkeyFileProvisionLock = masterkeyFileProvisionLock;
 		this.keychain = keychain;
 		this.unlockScene = unlockScene;
+		this.selectMasterkeyFileScene = selectMasterkeyFileScene;
 		this.successScene = successScene;
 		this.invalidMountPointScene = invalidMountPointScene;
 		this.errorComponent = errorComponent;
@@ -101,7 +108,7 @@ public class UnlockWorkflow extends Task<Boolean> implements MasterkeyFileLoader
 			attemptUnlock(keyLoader, 0);
 			handleSuccess();
 			return true;
-		} catch (PasswordEntryCancelledException e) {
+		} catch (UnlockCancelledException e) {
 			cancel(false); // set Tasks state to cancelled
 			return false;
 		} finally {
@@ -123,12 +130,35 @@ public class UnlockWorkflow extends Task<Boolean> implements MasterkeyFileLoader
 
 	@Override
 	public Path getCorrectMasterkeyFilePath(String masterkeyFilePath) {
-		LOG.warn("Did not find masterkey file at expected path: {}", masterkeyFilePath);
-		throw new MasterkeyLoadingFailedException(masterkeyFilePath + " not found.", new UnsupportedOperationException("getCorrectMasterkeyFilePath() not implemented"));
+		try {
+			if (askForCorrectMasterkeyFile() == MasterkeyFileProvision.MASTERKEYFILE_PROVIDED) {
+				return correctMasterkeyPath.get();
+			} else {
+				throw new UnlockCancelledException("Password entry cancelled.");
+			}
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			throw new UnlockCancelledException("Password entry interrupted", e);
+		}
+	}
+
+	private MasterkeyFileProvision askForCorrectMasterkeyFile() throws InterruptedException {
+		Platform.runLater(() -> {
+			window.setScene(selectMasterkeyFileScene.get());
+			window.show();
+			Window owner = window.getOwner();
+			if (owner != null) {
+				window.setX(owner.getX() + (owner.getWidth() - window.getWidth()) / 2);
+				window.setY(owner.getY() + (owner.getHeight() - window.getHeight()) / 2);
+			} else {
+				window.centerOnScreen();
+			}
+		});
+		return masterkeyFileProvisionLock.awaitInteraction();
 	}
 
 	@Override
-	public CharSequence getPassphrase(Path path) throws PasswordEntryCancelledException {
+	public CharSequence getPassphrase(Path path) throws UnlockCancelledException {
 		if (password.get() != null) { // e.g. pre-filled from keychain
 			return CharBuffer.wrap(password.get());
 		}
@@ -139,11 +169,11 @@ public class UnlockWorkflow extends Task<Boolean> implements MasterkeyFileLoader
 				assert password.get() != null;
 				return CharBuffer.wrap(password.get());
 			} else {
-				throw new PasswordEntryCancelledException("Password entry cancelled.");
+				throw new UnlockCancelledException("Password entry cancelled.");
 			}
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
-			throw new PasswordEntryCancelledException("Password entry interrupted", e);
+			throw new UnlockCancelledException("Password entry interrupted", e);
 		}
 	}
 
@@ -255,12 +285,12 @@ public class UnlockWorkflow extends Task<Boolean> implements MasterkeyFileLoader
 		vault.setState(VaultState.LOCKED);
 	}
 
-	private static class PasswordEntryCancelledException extends MasterkeyLoadingFailedException {
-		public PasswordEntryCancelledException(String message) {
+	private static class UnlockCancelledException extends MasterkeyLoadingFailedException {
+		public UnlockCancelledException(String message) {
 			super(message);
 		}
 
-		public PasswordEntryCancelledException(String message, Throwable cause) {
+		public UnlockCancelledException(String message, Throwable cause) {
 			super(message, cause);
 		}
 	}
