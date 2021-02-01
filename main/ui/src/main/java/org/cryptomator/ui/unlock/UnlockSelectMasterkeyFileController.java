@@ -8,8 +8,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -24,7 +22,6 @@ public class UnlockSelectMasterkeyFileController implements FxController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(UnlockSelectMasterkeyFileController.class);
 
-	private final BooleanProperty proceedButtonDisabled = new SimpleBooleanProperty();
 	private final Stage window;
 	private final AtomicReference<Path> masterkeyPath;
 	private final UserInteractionLock<MasterkeyFileProvision> masterkeyFileProvisionLock;
@@ -66,11 +63,4 @@ public class UnlockSelectMasterkeyFileController implements FxController {
 		}
 	}
 
-	public BooleanProperty proceedButtonDisabledProperty() {
-		return proceedButtonDisabled;
-	}
-
-	public boolean isProceedButtonDisabled() {
-		return proceedButtonDisabled.get();
-	}
 }
