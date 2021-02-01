@@ -5,7 +5,7 @@ import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoMap;
 import org.cryptomator.ui.common.DefaultSceneFactory;
-import org.cryptomator.ui.common.FXMLLoaderFactory;
+import org.cryptomator.ui.common.FxmlLoaderFactory;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxControllerKey;
 import org.cryptomator.ui.common.FxmlFile;
@@ -25,8 +25,8 @@ abstract class QuitModule {
 	@Provides
 	@QuitWindow
 	@QuitScoped
-	static FXMLLoaderFactory provideFxmlLoaderFactory(Map<Class<? extends FxController>, Provider<FxController>> factories, DefaultSceneFactory sceneFactory, ResourceBundle resourceBundle) {
-		return new FXMLLoaderFactory(factories, sceneFactory, resourceBundle);
+	static FxmlLoaderFactory provideFxmlLoaderFactory(Map<Class<? extends FxController>, Provider<FxController>> factories, DefaultSceneFactory sceneFactory, ResourceBundle resourceBundle) {
+		return new FxmlLoaderFactory(factories, sceneFactory, resourceBundle);
 	}
 
 	@Provides
@@ -43,8 +43,8 @@ abstract class QuitModule {
 	@Provides
 	@FxmlScene(FxmlFile.QUIT)
 	@QuitScoped
-	static Scene provideQuitScene(@QuitWindow FXMLLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene("/fxml/quit.fxml");
+	static Scene provideQuitScene(@QuitWindow FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.QUIT);
 	}
 
 	// ------------------

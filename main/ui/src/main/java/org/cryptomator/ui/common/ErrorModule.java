@@ -18,8 +18,8 @@ import java.util.ResourceBundle;
 abstract class ErrorModule {
 
 	@Provides
-	static FXMLLoaderFactory provideFxmlLoaderFactory(Map<Class<? extends FxController>, Provider<FxController>> factories, DefaultSceneFactory sceneFactory, ResourceBundle resourceBundle) {
-		return new FXMLLoaderFactory(factories, sceneFactory, resourceBundle);
+	static FxmlLoaderFactory provideFxmlLoaderFactory(Map<Class<? extends FxController>, Provider<FxController>> factories, DefaultSceneFactory sceneFactory, ResourceBundle resourceBundle) {
+		return new FxmlLoaderFactory(factories, sceneFactory, resourceBundle);
 	}
 
 	@Provides
@@ -38,8 +38,8 @@ abstract class ErrorModule {
 
 	@Provides
 	@FxmlScene(FxmlFile.ERROR)
-	static Scene provideErrorScene(FXMLLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene(FxmlFile.ERROR.getRessourcePathString());
+	static Scene provideErrorScene(FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.ERROR);
 	}
 
 

@@ -6,7 +6,7 @@ import dagger.Provides;
 import dagger.multibindings.IntoMap;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.DefaultSceneFactory;
-import org.cryptomator.ui.common.FXMLLoaderFactory;
+import org.cryptomator.ui.common.FxmlLoaderFactory;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxControllerKey;
 import org.cryptomator.ui.common.FxmlFile;
@@ -43,8 +43,8 @@ public abstract class AddVaultModule {
 	@Provides
 	@AddVaultWizardWindow
 	@AddVaultWizardScoped
-	static FXMLLoaderFactory provideFxmlLoaderFactory(Map<Class<? extends FxController>, Provider<FxController>> factories, DefaultSceneFactory sceneFactory, ResourceBundle resourceBundle) {
-		return new FXMLLoaderFactory(factories, sceneFactory, resourceBundle);
+	static FxmlLoaderFactory provideFxmlLoaderFactory(Map<Class<? extends FxController>, Provider<FxController>> factories, DefaultSceneFactory sceneFactory, ResourceBundle resourceBundle) {
+		return new FxmlLoaderFactory(factories, sceneFactory, resourceBundle);
 	}
 
 	@Provides
@@ -91,50 +91,50 @@ public abstract class AddVaultModule {
 	@Provides
 	@FxmlScene(FxmlFile.ADDVAULT_WELCOME)
 	@AddVaultWizardScoped
-	static Scene provideWelcomeScene(@AddVaultWizardWindow FXMLLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene(FxmlFile.ADDVAULT_WELCOME.getRessourcePathString());
+	static Scene provideWelcomeScene(@AddVaultWizardWindow FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.ADDVAULT_WELCOME);
 	}
 
 	@Provides
 	@FxmlScene(FxmlFile.ADDVAULT_EXISTING)
 	@AddVaultWizardScoped
-	static Scene provideChooseExistingVaultScene(@AddVaultWizardWindow FXMLLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene(FxmlFile.ADDVAULT_EXISTING.getRessourcePathString());
+	static Scene provideChooseExistingVaultScene(@AddVaultWizardWindow FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.ADDVAULT_EXISTING);
 	}
 
 	@Provides
 	@FxmlScene(FxmlFile.ADDVAULT_NEW_NAME)
 	@AddVaultWizardScoped
-	static Scene provideCreateNewVaultNameScene(@AddVaultWizardWindow FXMLLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene(FxmlFile.ADDVAULT_NEW_NAME.getRessourcePathString());
+	static Scene provideCreateNewVaultNameScene(@AddVaultWizardWindow FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.ADDVAULT_NEW_NAME);
 	}
 
 	@Provides
 	@FxmlScene(FxmlFile.ADDVAULT_NEW_LOCATION)
 	@AddVaultWizardScoped
-	static Scene provideCreateNewVaultLocationScene(@AddVaultWizardWindow FXMLLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene(FxmlFile.ADDVAULT_NEW_LOCATION.getRessourcePathString());
+	static Scene provideCreateNewVaultLocationScene(@AddVaultWizardWindow FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.ADDVAULT_NEW_LOCATION);
 	}
 
 	@Provides
 	@FxmlScene(FxmlFile.ADDVAULT_NEW_PASSWORD)
 	@AddVaultWizardScoped
-	static Scene provideCreateNewVaultPasswordScene(@AddVaultWizardWindow FXMLLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene(FxmlFile.ADDVAULT_NEW_PASSWORD.getRessourcePathString());
+	static Scene provideCreateNewVaultPasswordScene(@AddVaultWizardWindow FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.ADDVAULT_NEW_PASSWORD);
 	}
 
 	@Provides
 	@FxmlScene(FxmlFile.ADDVAULT_NEW_RECOVERYKEY)
 	@AddVaultWizardScoped
-	static Scene provideCreateNewVaultRecoveryKeyScene(@AddVaultWizardWindow FXMLLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene(FxmlFile.ADDVAULT_NEW_RECOVERYKEY.getRessourcePathString());
+	static Scene provideCreateNewVaultRecoveryKeyScene(@AddVaultWizardWindow FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.ADDVAULT_NEW_RECOVERYKEY);
 	}
 
 	@Provides
 	@FxmlScene(FxmlFile.ADDVAULT_SUCCESS)
 	@AddVaultWizardScoped
-	static Scene provideCreateNewVaultSuccessScene(@AddVaultWizardWindow FXMLLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene(FxmlFile.ADDVAULT_SUCCESS.getRessourcePathString());
+	static Scene provideCreateNewVaultSuccessScene(@AddVaultWizardWindow FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.ADDVAULT_SUCCESS);
 	}
 
 	// ------------------

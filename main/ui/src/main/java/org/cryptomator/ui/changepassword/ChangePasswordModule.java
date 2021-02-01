@@ -5,7 +5,7 @@ import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoMap;
 import org.cryptomator.ui.common.DefaultSceneFactory;
-import org.cryptomator.ui.common.FXMLLoaderFactory;
+import org.cryptomator.ui.common.FxmlLoaderFactory;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxControllerKey;
 import org.cryptomator.ui.common.FxmlFile;
@@ -37,8 +37,8 @@ abstract class ChangePasswordModule {
 	@Provides
 	@ChangePasswordWindow
 	@ChangePasswordScoped
-	static FXMLLoaderFactory provideFxmlLoaderFactory(Map<Class<? extends FxController>, Provider<FxController>> factories, DefaultSceneFactory sceneFactory, ResourceBundle resourceBundle) {
-		return new FXMLLoaderFactory(factories, sceneFactory, resourceBundle);
+	static FxmlLoaderFactory provideFxmlLoaderFactory(Map<Class<? extends FxController>, Provider<FxController>> factories, DefaultSceneFactory sceneFactory, ResourceBundle resourceBundle) {
+		return new FxmlLoaderFactory(factories, sceneFactory, resourceBundle);
 	}
 
 	@Provides
@@ -56,8 +56,8 @@ abstract class ChangePasswordModule {
 	@Provides
 	@FxmlScene(FxmlFile.CHANGEPASSWORD)
 	@ChangePasswordScoped
-	static Scene provideUnlockScene(@ChangePasswordWindow FXMLLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene("/fxml/changepassword.fxml");
+	static Scene provideUnlockScene(@ChangePasswordWindow FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.CHANGEPASSWORD);
 	}
 
 

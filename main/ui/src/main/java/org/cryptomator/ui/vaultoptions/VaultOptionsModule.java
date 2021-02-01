@@ -7,7 +7,7 @@ import dagger.multibindings.IntoMap;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.changepassword.ChangePasswordComponent;
 import org.cryptomator.ui.common.DefaultSceneFactory;
-import org.cryptomator.ui.common.FXMLLoaderFactory;
+import org.cryptomator.ui.common.FxmlLoaderFactory;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxControllerKey;
 import org.cryptomator.ui.common.FxmlFile;
@@ -29,8 +29,8 @@ abstract class VaultOptionsModule {
 	@Provides
 	@VaultOptionsWindow
 	@VaultOptionsScoped
-	static FXMLLoaderFactory provideFxmlLoaderFactory(Map<Class<? extends FxController>, Provider<FxController>> factories, DefaultSceneFactory sceneFactory, ResourceBundle resourceBundle) {
-		return new FXMLLoaderFactory(factories, sceneFactory, resourceBundle);
+	static FxmlLoaderFactory provideFxmlLoaderFactory(Map<Class<? extends FxController>, Provider<FxController>> factories, DefaultSceneFactory sceneFactory, ResourceBundle resourceBundle) {
+		return new FxmlLoaderFactory(factories, sceneFactory, resourceBundle);
 	}
 
 	@Provides
@@ -50,8 +50,8 @@ abstract class VaultOptionsModule {
 	@Provides
 	@FxmlScene(FxmlFile.VAULT_OPTIONS)
 	@VaultOptionsScoped
-	static Scene provideVaultOptionsScene(@VaultOptionsWindow FXMLLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene("/fxml/vault_options.fxml");
+	static Scene provideVaultOptionsScene(@VaultOptionsWindow FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.VAULT_OPTIONS);
 	}
 
 	// ------------------

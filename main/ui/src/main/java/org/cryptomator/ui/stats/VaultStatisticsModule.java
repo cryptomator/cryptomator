@@ -11,7 +11,7 @@ import javafx.stage.Stage;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.ui.common.DefaultSceneFactory;
-import org.cryptomator.ui.common.FXMLLoaderFactory;
+import org.cryptomator.ui.common.FxmlLoaderFactory;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxControllerKey;
 import org.cryptomator.ui.common.FxmlFile;
@@ -29,8 +29,8 @@ abstract class VaultStatisticsModule {
 	@Provides
 	@VaultStatisticsWindow
 	@VaultStatisticsScoped
-	static FXMLLoaderFactory provideFxmlLoaderFactory(Map<Class<? extends FxController>, Provider<FxController>> factories, DefaultSceneFactory sceneFactory, ResourceBundle resourceBundle) {
-		return new FXMLLoaderFactory(factories, sceneFactory, resourceBundle);
+	static FxmlLoaderFactory provideFxmlLoaderFactory(Map<Class<? extends FxController>, Provider<FxController>> factories, DefaultSceneFactory sceneFactory, ResourceBundle resourceBundle) {
+		return new FxmlLoaderFactory(factories, sceneFactory, resourceBundle);
 	}
 
 	@Provides
@@ -60,8 +60,8 @@ abstract class VaultStatisticsModule {
 	@Provides
 	@FxmlScene(FxmlFile.VAULT_STATISTICS)
 	@VaultStatisticsScoped
-	static Scene provideVaultStatisticsScene(@VaultStatisticsWindow FXMLLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene("/fxml/stats.fxml");
+	static Scene provideVaultStatisticsScene(@VaultStatisticsWindow FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.VAULT_STATISTICS);
 	}
 
 	// ------------------

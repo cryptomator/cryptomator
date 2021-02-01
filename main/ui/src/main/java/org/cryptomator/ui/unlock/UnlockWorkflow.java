@@ -251,6 +251,7 @@ public class UnlockWorkflow extends Task<Boolean> implements MasterkeyFileLoader
 	private void showInvalidMountPointScene() {
 		Platform.runLater(() -> {
 			window.setScene(invalidMountPointScene.get());
+			window.show();
 		});
 	}
 
