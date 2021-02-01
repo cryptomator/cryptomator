@@ -6,7 +6,7 @@ import dagger.Provides;
 import dagger.multibindings.IntoMap;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.DefaultSceneFactory;
-import org.cryptomator.ui.common.FXMLLoaderFactory;
+import org.cryptomator.ui.common.FxmlLoaderFactory;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxControllerKey;
 import org.cryptomator.ui.common.FxmlFile;
@@ -33,8 +33,8 @@ abstract class RecoveryKeyModule {
 	@Provides
 	@RecoveryKeyWindow
 	@RecoveryKeyScoped
-	static FXMLLoaderFactory provideFxmlLoaderFactory(Map<Class<? extends FxController>, Provider<FxController>> factories, DefaultSceneFactory sceneFactory, ResourceBundle resourceBundle) {
-		return new FXMLLoaderFactory(factories, sceneFactory, resourceBundle);
+	static FxmlLoaderFactory provideFxmlLoaderFactory(Map<Class<? extends FxController>, Provider<FxController>> factories, DefaultSceneFactory sceneFactory, ResourceBundle resourceBundle) {
+		return new FxmlLoaderFactory(factories, sceneFactory, resourceBundle);
 	}
 
 	@Provides
@@ -69,29 +69,29 @@ abstract class RecoveryKeyModule {
 	@Provides
 	@FxmlScene(FxmlFile.RECOVERYKEY_CREATE)
 	@RecoveryKeyScoped
-	static Scene provideRecoveryKeyCreationScene(@RecoveryKeyWindow FXMLLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene("/fxml/recoverykey_create.fxml");
+	static Scene provideRecoveryKeyCreationScene(@RecoveryKeyWindow FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.RECOVERYKEY_CREATE);
 	}
 
 	@Provides
 	@FxmlScene(FxmlFile.RECOVERYKEY_SUCCESS)
 	@RecoveryKeyScoped
-	static Scene provideRecoveryKeySuccessScene(@RecoveryKeyWindow FXMLLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene("/fxml/recoverykey_success.fxml");
+	static Scene provideRecoveryKeySuccessScene(@RecoveryKeyWindow FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.RECOVERYKEY_SUCCESS);
 	}
 
 	@Provides
 	@FxmlScene(FxmlFile.RECOVERYKEY_RECOVER)
 	@RecoveryKeyScoped
-	static Scene provideRecoveryKeyRecoverScene(@RecoveryKeyWindow FXMLLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene("/fxml/recoverykey_recover.fxml");
+	static Scene provideRecoveryKeyRecoverScene(@RecoveryKeyWindow FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.RECOVERYKEY_RECOVER);
 	}
 
 	@Provides
 	@FxmlScene(FxmlFile.RECOVERYKEY_RESET_PASSWORD)
 	@RecoveryKeyScoped
-	static Scene provideRecoveryKeyResetPasswordScene(@RecoveryKeyWindow FXMLLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene("/fxml/recoverykey_reset_password.fxml");
+	static Scene provideRecoveryKeyResetPasswordScene(@RecoveryKeyWindow FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.RECOVERYKEY_RESET_PASSWORD);
 	}
 
 	// ------------------

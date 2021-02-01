@@ -5,7 +5,7 @@ import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoMap;
 import org.cryptomator.ui.common.DefaultSceneFactory;
-import org.cryptomator.ui.common.FXMLLoaderFactory;
+import org.cryptomator.ui.common.FxmlLoaderFactory;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxControllerKey;
 import org.cryptomator.ui.common.FxmlFile;
@@ -26,8 +26,8 @@ abstract class WrongFileAlertModule {
 	@Provides
 	@WrongFileAlertWindow
 	@WrongFileAlertScoped
-	static FXMLLoaderFactory provideFxmlLoaderFactory(Map<Class<? extends FxController>, Provider<FxController>> factories, DefaultSceneFactory sceneFactory, ResourceBundle resourceBundle) {
-		return new FXMLLoaderFactory(factories, sceneFactory, resourceBundle);
+	static FxmlLoaderFactory provideFxmlLoaderFactory(Map<Class<? extends FxController>, Provider<FxController>> factories, DefaultSceneFactory sceneFactory, ResourceBundle resourceBundle) {
+		return new FxmlLoaderFactory(factories, sceneFactory, resourceBundle);
 	}
 
 	@Provides
@@ -45,8 +45,8 @@ abstract class WrongFileAlertModule {
 	@Provides
 	@FxmlScene(FxmlFile.WRONGFILEALERT)
 	@WrongFileAlertScoped
-	static Scene provideWrongFileAlertScene(@WrongFileAlertWindow FXMLLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene("/fxml/wrongfilealert.fxml");
+	static Scene provideWrongFileAlertScene(@WrongFileAlertWindow FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.WRONGFILEALERT);
 	}
 
 	// ------------------

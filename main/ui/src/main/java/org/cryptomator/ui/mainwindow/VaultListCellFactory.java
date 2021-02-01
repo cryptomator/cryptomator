@@ -1,7 +1,7 @@
 package org.cryptomator.ui.mainwindow;
 
 import org.cryptomator.common.vaults.Vault;
-import org.cryptomator.ui.common.FXMLLoaderFactory;
+import org.cryptomator.ui.common.FxmlLoaderFactory;
 import org.cryptomator.ui.controls.DraggableListCell;
 
 import javax.inject.Inject;
@@ -17,10 +17,10 @@ import java.io.UncheckedIOException;
 @MainWindowScoped
 public class VaultListCellFactory implements Callback<ListView<Vault>, ListCell<Vault>> {
 
-	private final FXMLLoaderFactory fxmlLoaders;
+	private final FxmlLoaderFactory fxmlLoaders;
 
 	@Inject
-	VaultListCellFactory(@MainWindow FXMLLoaderFactory fxmlLoaders) {
+	VaultListCellFactory(@MainWindow FxmlLoaderFactory fxmlLoaders) {
 		this.fxmlLoaders = fxmlLoaders;
 	}
 

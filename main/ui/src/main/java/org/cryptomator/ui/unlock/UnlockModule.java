@@ -8,7 +8,7 @@ import org.cryptomator.common.keychain.KeychainManager;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.integrations.keychain.KeychainAccessException;
 import org.cryptomator.ui.common.DefaultSceneFactory;
-import org.cryptomator.ui.common.FXMLLoaderFactory;
+import org.cryptomator.ui.common.FxmlLoaderFactory;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxControllerKey;
 import org.cryptomator.ui.common.FxmlFile;
@@ -78,8 +78,8 @@ abstract class UnlockModule {
 	@Provides
 	@UnlockWindow
 	@UnlockScoped
-	static FXMLLoaderFactory provideFxmlLoaderFactory(Map<Class<? extends FxController>, Provider<FxController>> factories, DefaultSceneFactory sceneFactory, ResourceBundle resourceBundle) {
-		return new FXMLLoaderFactory(factories, sceneFactory, resourceBundle);
+	static FxmlLoaderFactory provideFxmlLoaderFactory(Map<Class<? extends FxController>, Provider<FxController>> factories, DefaultSceneFactory sceneFactory, ResourceBundle resourceBundle) {
+		return new FxmlLoaderFactory(factories, sceneFactory, resourceBundle);
 	}
 
 	@Provides
@@ -101,22 +101,22 @@ abstract class UnlockModule {
 	@Provides
 	@FxmlScene(FxmlFile.UNLOCK)
 	@UnlockScoped
-	static Scene provideUnlockScene(@UnlockWindow FXMLLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene("/fxml/unlock.fxml");
+	static Scene provideUnlockScene(@UnlockWindow FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.UNLOCK);
 	}
 
 	@Provides
 	@FxmlScene(FxmlFile.UNLOCK_SUCCESS)
 	@UnlockScoped
-	static Scene provideUnlockSuccessScene(@UnlockWindow FXMLLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene("/fxml/unlock_success.fxml");
+	static Scene provideUnlockSuccessScene(@UnlockWindow FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.UNLOCK_SUCCESS);
 	}
 
 	@Provides
 	@FxmlScene(FxmlFile.UNLOCK_INVALID_MOUNT_POINT)
 	@UnlockScoped
-	static Scene provideInvalidMountPointScene(@UnlockWindow FXMLLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene("/fxml/unlock_invalid_mount_point.fxml");
+	static Scene provideInvalidMountPointScene(@UnlockWindow FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.UNLOCK_INVALID_MOUNT_POINT);
 	}
 
 	// ------------------

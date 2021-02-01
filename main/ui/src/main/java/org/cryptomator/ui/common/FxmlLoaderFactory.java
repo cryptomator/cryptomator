@@ -11,13 +11,13 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.function.Function;
 
-public class FXMLLoaderFactory {
+public class FxmlLoaderFactory {
 
 	private final Map<Class<? extends FxController>, Provider<FxController>> controllerFactories;
 	private final Function<Parent, Scene> sceneFactory;
 	private final ResourceBundle resourceBundle;
 
-	public FXMLLoaderFactory(Map<Class<? extends FxController>, Provider<FxController>> controllerFactories, Function<Parent, Scene> sceneFactory, ResourceBundle resourceBundle) {
+	public FxmlLoaderFactory(Map<Class<? extends FxController>, Provider<FxController>> controllerFactories, Function<Parent, Scene> sceneFactory, ResourceBundle resourceBundle) {
 		this.controllerFactories = controllerFactories;
 		this.sceneFactory = sceneFactory;
 		this.resourceBundle = resourceBundle;
@@ -48,13 +48,17 @@ public class FXMLLoaderFactory {
 		return loader;
 	}
 
+	public Scene createScene(FxmlFile fxmlFile) {
+		return createScene(fxmlFile.getRessourcePathString());
+	}
+
 	/**
 	 * {@link #load(String) Loads} the FXML file and creates a new Scene containing the loaded ui.
 	 *
 	 * @param fxmlResourceName Name of the resource (as in {@link Class#getResource(String)}).
 	 * @throws UncheckedIOException wrapping any IOException thrown by {@link #load(String)).
 	 */
-	public Scene createScene(String fxmlResourceName) {
+	private Scene createScene(String fxmlResourceName) {
 		final FXMLLoader loader;
 		try {
 			loader = load(fxmlResourceName);

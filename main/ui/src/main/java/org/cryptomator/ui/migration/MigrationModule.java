@@ -6,7 +6,7 @@ import dagger.Provides;
 import dagger.multibindings.IntoMap;
 import org.cryptomator.cryptofs.common.FileSystemCapabilityChecker;
 import org.cryptomator.ui.common.DefaultSceneFactory;
-import org.cryptomator.ui.common.FXMLLoaderFactory;
+import org.cryptomator.ui.common.FxmlLoaderFactory;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxControllerKey;
 import org.cryptomator.ui.common.FxmlFile;
@@ -30,8 +30,8 @@ abstract class MigrationModule {
 	@Provides
 	@MigrationWindow
 	@MigrationScoped
-	static FXMLLoaderFactory provideFxmlLoaderFactory(Map<Class<? extends FxController>, Provider<FxController>> factories, DefaultSceneFactory sceneFactory, ResourceBundle resourceBundle) {
-		return new FXMLLoaderFactory(factories, sceneFactory, resourceBundle);
+	static FxmlLoaderFactory provideFxmlLoaderFactory(Map<Class<? extends FxController>, Provider<FxController>> factories, DefaultSceneFactory sceneFactory, ResourceBundle resourceBundle) {
+		return new FxmlLoaderFactory(factories, sceneFactory, resourceBundle);
 	}
 
 	@Provides
@@ -56,36 +56,36 @@ abstract class MigrationModule {
 	@Provides
 	@FxmlScene(FxmlFile.MIGRATION_START)
 	@MigrationScoped
-	static Scene provideMigrationStartScene(@MigrationWindow FXMLLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene("/fxml/migration_start.fxml");
+	static Scene provideMigrationStartScene(@MigrationWindow FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.MIGRATION_START);
 	}
 
 	@Provides
 	@FxmlScene(FxmlFile.MIGRATION_RUN)
 	@MigrationScoped
-	static Scene provideMigrationRunScene(@MigrationWindow FXMLLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene("/fxml/migration_run.fxml");
+	static Scene provideMigrationRunScene(@MigrationWindow FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.MIGRATION_RUN);
 	}
 
 	@Provides
 	@FxmlScene(FxmlFile.MIGRATION_SUCCESS)
 	@MigrationScoped
-	static Scene provideMigrationSuccessScene(@MigrationWindow FXMLLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene("/fxml/migration_success.fxml");
+	static Scene provideMigrationSuccessScene(@MigrationWindow FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.MIGRATION_SUCCESS);
 	}
 
 	@Provides
 	@FxmlScene(FxmlFile.MIGRATION_CAPABILITY_ERROR)
 	@MigrationScoped
-	static Scene provideMigrationCapabilityErrorScene(@MigrationWindow FXMLLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene("/fxml/migration_capability_error.fxml");
+	static Scene provideMigrationCapabilityErrorScene(@MigrationWindow FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.MIGRATION_CAPABILITY_ERROR);
 	}
 
 	@Provides
 	@FxmlScene(FxmlFile.MIGRATION_IMPOSSIBLE)
 	@MigrationScoped
-	static Scene provideMigrationImpossibleScene(@MigrationWindow FXMLLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene("/fxml/migration_impossible.fxml");
+	static Scene provideMigrationImpossibleScene(@MigrationWindow FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.MIGRATION_IMPOSSIBLE);
 	}
 
 	// ------------------
