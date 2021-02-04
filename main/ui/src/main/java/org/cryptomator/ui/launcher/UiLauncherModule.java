@@ -21,6 +21,18 @@ public abstract class UiLauncherModule {
 
 	@Provides
 	@Singleton
+	static TrayMenuComponent provideTrayMenuComponent(TrayMenuComponent.Builder builder) {
+		return builder.build();
+	}
+
+	@Provides
+	@Singleton
+	static FxApplicationComponent provideFxApplicationComponent(FxApplicationComponent.Builder builder) {
+		return builder.build();
+	}
+
+	@Provides
+	@Singleton
 	static Optional<UiAppearanceProvider> provideAppearanceProvider() {
 		return ServiceLoader.load(UiAppearanceProvider.class).findFirst();
 	}

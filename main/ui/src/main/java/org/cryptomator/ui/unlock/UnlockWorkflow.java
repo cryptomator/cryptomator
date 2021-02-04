@@ -165,15 +165,7 @@ public class UnlockWorkflow extends Task<Boolean> {
 		assert requirement != MountPointRequirement.PARENT_OPT_MOUNT_POINT; //Not implemented anywhere (yet)
 
 		Throwable cause = impExc.getCause();
-		//Cause is either null (cause the IMPE was thrown directly, e.g. because no MPC succeeded)
-		//or the cause was not an Exception (but some other kind of Throwable)
-		//Either way: Handle as generic error
-		if (!(cause instanceof Exception)) {
-			handleGenericError(impExc);
-			return;
-		}
-
-		//From here on handle the cause, not the caught exception
+		// TODO: apply https://openjdk.java.net/jeps/8213076 in future JDK versions
 		if (cause instanceof NotDirectoryException) {
 			if (requirement == MountPointRequirement.PARENT_NO_MOUNT_POINT) {
 				LOG.error("Unlock failed. Parent folder is missing: {}", cause.getMessage());
@@ -182,28 +174,23 @@ public class UnlockWorkflow extends Task<Boolean> {
 			}
 			showInvalidMountPointScene();
 			return;
-		}
-
-		if (cause instanceof FileAlreadyExistsException) {
+		} else if (cause instanceof FileAlreadyExistsException) {
 			LOG.error("Unlock failed. Mountpoint already exists: {}", cause.getMessage());
 			showInvalidMountPointScene();
 			return;
-		}
-
-		if (cause instanceof DirectoryNotEmptyException) {
+		} else if (cause instanceof DirectoryNotEmptyException) {
 			LOG.error("Unlock failed. Mountpoint not an empty directory: {}", cause.getMessage());
 			showInvalidMountPointScene();
 			return;
+		} else {
+			handleGenericError(impExc);
 		}
-
-		//Everything else (especially IOException) results in a generic error
-		//This must be done after the other exceptions because they extend IOException...
-		handleGenericError(cause);
 	}
 
 	private void showInvalidMountPointScene() {
 		Platform.runLater(() -> {
 			window.setScene(invalidMountPointScene.get());
+			window.show();
 		});
 	}
 

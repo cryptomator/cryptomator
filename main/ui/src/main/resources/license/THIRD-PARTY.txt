@@ -11,7 +11,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see http://www.gnu.org/licenses/.
 
-Cryptomator uses 47 third-party dependencies under the following licenses:
+Cryptomator uses 46 third-party dependencies under the following licenses:
         Apache License v2.0:
 			- jffi (com.github.jnr:jffi:1.2.23 - http://github.com/jnr/jffi)
 			- jnr-a64asm (com.github.jnr:jnr-a64asm:1.0.0 - http://nexus.sonatype.org/oss-repository-hosting.html/jnr-a64asm)
@@ -26,7 +26,6 @@ Cryptomator uses 47 third-party dependencies under the following licenses:
 			- Guava ListenableFuture only (com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava - https://github.com/google/guava/listenablefuture)
 			- J2ObjC Annotations (com.google.j2objc:j2objc-annotations:1.3 - https://github.com/google/j2objc/)
 			- Apache Commons CLI (commons-cli:commons-cli:1.4 - http://commons.apache.org/proper/commons-cli/)
-			- Apache Commons IO (commons-io:commons-io:2.6 - http://commons.apache.org/proper/commons-io/)
 			- javax.inject (javax.inject:javax.inject:1 - http://code.google.com/p/atinject/)
 			- Java Native Access (net.java.dev.jna:jna:5.6.0 - https://github.com/java-native-access/jna)
 			- Java Native Access Platform (net.java.dev.jna:jna-platform:5.5.0 - https://github.com/java-native-access/jna)
@@ -73,7 +72,7 @@ Cryptomator uses 47 third-party dependencies under the following licenses:
 			- Java Native Access (net.java.dev.jna:jna:5.6.0 - https://github.com/java-native-access/jna)
 			- Java Native Access Platform (net.java.dev.jna:jna-platform:5.5.0 - https://github.com/java-native-access/jna)
         MIT License:
-			- java jwt (com.auth0:java-jwt:3.11.0 - https://github.com/auth0/java-jwt)
+			- java jwt (com.auth0:java-jwt:3.12.0 - https://github.com/auth0/java-jwt)
 			- jnr-x86asm (com.github.jnr:jnr-x86asm:1.0.2 - http://github.com/jnr/jnr-x86asm)
 			- jnr-fuse (com.github.serceman:jnr-fuse:0.5.4 - no url defined)
 			- zxcvbn4j (com.nulab-inc:zxcvbn:1.3.0 - https://github.com/nulab/zxcvbn4j)

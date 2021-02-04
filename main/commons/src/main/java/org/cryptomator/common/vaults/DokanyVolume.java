@@ -52,10 +52,11 @@ public class DokanyVolume extends AbstractVolume {
 	}
 
 	@Override
-	public void reveal() throws VolumeException {
-		boolean success = mount.reveal();
-		if (!success) {
-			throw new VolumeException("Reveal failed.");
+	public void reveal(Revealer revealer) throws VolumeException {
+		try {
+			mount.reveal(revealer::reveal);
+		} catch (Exception e) {
+			throw new VolumeException(e);
 		}
 	}
 
@@ -79,6 +80,7 @@ public class DokanyVolume extends AbstractVolume {
 	public boolean supportsForcedUnmount() {
 		return true;
 	}
+
 	@Override
 	public boolean isSupported() {
 		return DokanyVolume.isSupportedStatic();

@@ -83,7 +83,7 @@ public class AppLifecycleListener {
 		if (allowQuitWithoutPrompt.get()) {
 			decoratedQuitResponse.performQuit();
 		} else {
-			fxApplicationStarter.get(true).thenAccept(app -> app.showQuitWindow(decoratedQuitResponse));
+			fxApplicationStarter.get().thenAccept(app -> app.showQuitWindow(decoratedQuitResponse));
 		}
 	}
 
@@ -113,11 +113,11 @@ public class AppLifecycleListener {
 	}
 
 	private void showPreferencesWindow(@SuppressWarnings("unused") EventObject actionEvent) {
-		fxApplicationStarter.get(true).thenAccept(app -> app.showPreferencesWindow(SelectedPreferencesTab.ANY));
+		fxApplicationStarter.get().thenAccept(app -> app.showPreferencesWindow(SelectedPreferencesTab.ANY));
 	}
 
 	private void showAboutWindow(@SuppressWarnings("unused") AboutEvent aboutEvent) {
-		fxApplicationStarter.get(true).thenAccept(app -> app.showPreferencesWindow(SelectedPreferencesTab.ABOUT));
+		fxApplicationStarter.get().thenAccept(app -> app.showPreferencesWindow(SelectedPreferencesTab.ABOUT));
 	}
 
 	private void forceUnmountRemainingVaults() {

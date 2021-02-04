@@ -104,7 +104,7 @@ public class Vault {
 		if (vaultSettings.usesReadOnlyMode().get()) {
 			flags.add(FileSystemFlags.READONLY);
 		}
-		if (vaultSettings.filenameLengthLimit().get() == -1) {
+		if (!flags.contains(FileSystemFlags.READONLY) && vaultSettings.filenameLengthLimit().get() == -1) {
 			LOG.debug("Determining file name length limitations...");
 			int limit = new FileSystemCapabilityChecker().determineSupportedFileNameLength(getPath());
 			vaultSettings.filenameLengthLimit().set(limit);
@@ -121,12 +121,29 @@ public class Vault {
 		return CryptoFileSystemProvider.newFileSystem(getPath(), fsProps);
 	}
 
+	private void destroyCryptoFileSystem() {
+		LOG.trace("Trying to close associated CryptoFS...");
+		CryptoFileSystem fs = cryptoFileSystem.getAndSet(null);
+		if (fs != null) {
+			try {
+				fs.close();
+			} catch (IOException e) {
+				LOG.error("Error closing file system.", e);
+			}
+		}
+	}
+
 	public synchronized void unlock(CharSequence passphrase) throws CryptoException, IOException, VolumeException, InvalidMountPointException {
 		if (cryptoFileSystem.get() == null) {
 			CryptoFileSystem fs = createCryptoFileSystem(passphrase);
 			cryptoFileSystem.set(fs);
-			volume = volumeProvider.get();
-			volume.mount(fs, getEffectiveMountFlags());
+			try {
+				volume = volumeProvider.get();
+				volume.mount(fs, getEffectiveMountFlags());
+			} catch (Exception e) {
+				destroyCryptoFileSystem();
+				throw e;
+			}
 		} else {
 			throw new IllegalStateException("Already unlocked.");
 		}
@@ -138,18 +155,11 @@ public class Vault {
 		} else {
 			volume.unmount();
 		}
-		CryptoFileSystem fs = cryptoFileSystem.getAndSet(null);
-		if (fs != null) {
-			try {
-				fs.close();
-			} catch (IOException e) {
-				LOG.error("Error closing file system.", e);
-			}
-		}
+		destroyCryptoFileSystem();
 	}
 
-	public void reveal() throws VolumeException {
-		volume.reveal();
+	public void reveal(Volume.Revealer vaultRevealer) throws VolumeException {
+		volume.reveal(vaultRevealer);
 	}
 
 	// ******************************************************************************

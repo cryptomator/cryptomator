@@ -1,8 +1,8 @@
 blank_issues_enabled: false
 contact_links:
-  - name: Cryptomator Community
+  - name: Help & Support
     url: https://community.cryptomator.org/
-    about: Please ask and answer questions here
-  - name: Documentation
+    about: You will find answers in our community forum
+  - name: User Manual
     url: https://docs.cryptomator.org/
-    about: Get instructions on how to use Cryptomator
+    about: Read the Cryptomator documentation here
