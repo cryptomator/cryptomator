@@ -46,6 +46,9 @@ public class KeychainManager implements KeychainAccessProvider {
 
 	@Override
 	public char[] loadPassphrase(String key) throws KeychainAccessException {
+		if (getKeychainOrFail().isLocked()) {
+			return null;
+		}
 		char[] passphrase = getKeychainOrFail().loadPassphrase(key);
 		setPassphraseStored(key, passphrase != null);
 		return passphrase;
