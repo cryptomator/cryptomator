@@ -7,16 +7,18 @@ import dagger.multibindings.IntoMap;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.changepassword.ChangePasswordComponent;
 import org.cryptomator.ui.common.DefaultSceneFactory;
-import org.cryptomator.ui.common.FxmlLoaderFactory;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxControllerKey;
 import org.cryptomator.ui.common.FxmlFile;
+import org.cryptomator.ui.common.FxmlLoaderFactory;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.StageFactory;
 import org.cryptomator.ui.mainwindow.MainWindow;
 import org.cryptomator.ui.recoverykey.RecoveryKeyComponent;
 
 import javax.inject.Provider;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Scene;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -25,6 +27,12 @@ import java.util.ResourceBundle;
 
 @Module(subcomponents = {ChangePasswordComponent.class, RecoveryKeyComponent.class})
 abstract class VaultOptionsModule {
+
+	@Provides
+	@VaultOptionsScoped
+	static ObjectProperty<SelectedVaultOptionsTab> provideSelectedTabProperty() {
+		return new SimpleObjectProperty<>(SelectedVaultOptionsTab.ANY);
+	}
 
 	@Provides
 	@VaultOptionsWindow

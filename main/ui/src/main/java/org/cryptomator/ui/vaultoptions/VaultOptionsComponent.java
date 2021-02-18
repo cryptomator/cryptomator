@@ -12,6 +12,7 @@ import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 
+import javafx.beans.property.ObjectProperty;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
@@ -25,7 +26,10 @@ public interface VaultOptionsComponent {
 	@FxmlScene(FxmlFile.VAULT_OPTIONS)
 	Lazy<Scene> scene();
 
-	default void showVaultOptionsWindow() {
+	ObjectProperty<SelectedVaultOptionsTab> selectedTabProperty();
+
+	default void showVaultOptionsWindow(SelectedVaultOptionsTab selectedTab) {
+		selectedTabProperty().set(selectedTab);
 		Stage stage = window();
 		stage.setScene(scene().get());
 		stage.show();
