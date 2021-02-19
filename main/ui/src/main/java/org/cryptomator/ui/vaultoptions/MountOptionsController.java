@@ -138,8 +138,6 @@ public class MountOptionsController implements FxController {
 		File file = directoryChooser.showDialog(window);
 		if (file != null) {
 			vault.getVaultSettings().customMountPath().set(file.getAbsolutePath());
-		} else {
-			vault.getVaultSettings().customMountPath().set(null);
 		}
 	}
 
