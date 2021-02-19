@@ -94,6 +94,17 @@ public class MountOptionsController implements FxController {
 		driveLetterSelection.setConverter(new WinDriveLetterLabelConverter(windowsDriveLetters, resourceBundle));
 		driveLetterSelection.setValue(vault.getVaultSettings().winDriveLetter().get());
 
+		enforceToggleState();
+
+		vault.getVaultSettings().useCustomMountPath().bind(mountPoint.selectedToggleProperty().isEqualTo(mountPointCustomDir));
+		vault.getVaultSettings().winDriveLetter().bind( //
+				Bindings.when(mountPoint.selectedToggleProperty().isEqualTo(mountPointWinDriveLetter)) //
+						.then(driveLetterSelection.getSelectionModel().selectedItemProperty()) //
+						.otherwise((String) null) //
+		);
+	}
+
+	private void enforceToggleState() {
 		if (vault.getVaultSettings().useCustomMountPath().get()
 				&& !Strings.isNullOrEmpty(vault.getVaultSettings().customMountPath().get())
 				&& !getRestrictToStableFuseOnWindows() /* to prevent invalid states */) {
@@ -103,13 +114,6 @@ public class MountOptionsController implements FxController {
 		} else {
 			mountPoint.selectToggle(mountPointAuto);
 		}
-
-		vault.getVaultSettings().useCustomMountPath().bind(mountPoint.selectedToggleProperty().isEqualTo(mountPointCustomDir));
-		vault.getVaultSettings().winDriveLetter().bind( //
-				Bindings.when(mountPoint.selectedToggleProperty().isEqualTo(mountPointWinDriveLetter)) //
-						.then(driveLetterSelection.getSelectionModel().selectedItemProperty()) //
-						.otherwise((String) null) //
-		);
 	}
 
 	@FXML
@@ -138,6 +142,8 @@ public class MountOptionsController implements FxController {
 		File file = directoryChooser.showDialog(window);
 		if (file != null) {
 			vault.getVaultSettings().customMountPath().set(file.getAbsolutePath());
+		} else {
+			enforceToggleState();
 		}
 	}
 
