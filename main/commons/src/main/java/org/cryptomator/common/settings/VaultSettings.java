@@ -24,8 +24,6 @@ import java.nio.file.Path;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * The settings specific to a single vault.
@@ -138,7 +136,10 @@ public class VaultSettings {
 
 	public Optional<String> getCustomMountPath() {
 		if (useCustomMountPath.get()) {
-			return Optional.ofNullable(Strings.emptyToNull(customMountPath.get()));
+			String mountPath = Strings.emptyToNull(customMountPath.get());
+			assert mountPath != null; //There must be a valid mountpath we are supposed to use it
+
+			return Optional.of(mountPath);
 		} else {
 			return Optional.empty();
 		}
