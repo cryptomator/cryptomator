@@ -94,7 +94,9 @@ public class MountOptionsController implements FxController {
 		driveLetterSelection.setConverter(new WinDriveLetterLabelConverter(windowsDriveLetters, resourceBundle));
 		driveLetterSelection.setValue(vault.getVaultSettings().winDriveLetter().get());
 
-		if (vault.getVaultSettings().useCustomMountPath().get() && !getRestrictToStableFuseOnWindows() /* to prevent invalid states */) {
+		if (vault.getVaultSettings().useCustomMountPath().get()
+				&& !Strings.isNullOrEmpty(vault.getVaultSettings().customMountPath().get())
+				&& !getRestrictToStableFuseOnWindows() /* to prevent invalid states */) {
 			mountPoint.selectToggle(mountPointCustomDir);
 		} else if (!Strings.isNullOrEmpty(vault.getVaultSettings().winDriveLetter().get())) {
 			mountPoint.selectToggle(mountPointWinDriveLetter);
