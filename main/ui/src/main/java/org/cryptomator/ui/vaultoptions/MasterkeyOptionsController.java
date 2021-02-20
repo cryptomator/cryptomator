@@ -36,7 +36,7 @@ public class MasterkeyOptionsController implements FxController {
 		this.changePasswordWindow = changePasswordWindow;
 		this.recoveryKeyWindow = recoveryKeyWindow;
 		this.keychain = keychain;
-		if (keychain.isSupported()) {
+		if (keychain.isSupported() && !keychain.isLocked()) {
 			this.passwordSaved = Bindings.createBooleanBinding(this::isPasswordSaved, keychain.getPassphraseStoredProperty(vault.getId()));
 		} else {
 			this.passwordSaved = new SimpleBooleanProperty(false);
@@ -74,7 +74,7 @@ public class MasterkeyOptionsController implements FxController {
 	}
 
 	public boolean isPasswordSaved() {
-		if (keychain.isSupported() && vault != null) {
+		if (keychain.isSupported() && !keychain.isLocked() && vault != null) {
 			return keychain.getPassphraseStoredProperty(vault.getId()).get();
 		} else return false;
 	}

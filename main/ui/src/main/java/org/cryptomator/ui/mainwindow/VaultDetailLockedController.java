@@ -33,7 +33,7 @@ public class VaultDetailLockedController implements FxController {
 		this.vaultOptionsWindow = vaultOptionsWindow;
 		this.keychain = keychain;
 		this.mainWindow = mainWindow;
-		if (keychain.isSupported()) {
+		if (keychain.isSupported() && !keychain.isLocked()) {
 			this.passwordSaved = BooleanExpression.booleanExpression(EasyBind.select(vault).selectObject(v -> keychain.getPassphraseStoredProperty(v.getId())));
 		} else {
 			this.passwordSaved = new SimpleBooleanProperty(false);
