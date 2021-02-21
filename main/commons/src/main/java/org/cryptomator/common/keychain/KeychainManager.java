@@ -85,7 +85,7 @@ public class KeychainManager implements KeychainAccessProvider {
 	public boolean isPassphraseStored(String key) throws KeychainAccessException {
 		char[] storedPw = null;
 		try {
-			storedPw = keychain.get().loadPassphrase(key);
+			storedPw = getKeychainOrFail().loadPassphrase(key);
 			return storedPw != null;
 		} finally {
 			if (storedPw != null) {
