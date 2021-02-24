@@ -22,13 +22,14 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.jdk.version>14</project.jdk.version>
 
 		<!-- cryptomator dependencies -->
 		<cryptomator.cryptofs.version>1.9.14</cryptomator.cryptofs.version>
 		<cryptomator.integrations.version>1.0.0-beta2</cryptomator.integrations.version>
 		<cryptomator.integrations.win.version>1.0.0-beta2</cryptomator.integrations.win.version>
-		<cryptomator.integrations.mac.version>0.1.0</cryptomator.integrations.mac.version>
-		<cryptomator.integrations.linux.version>0.1.1</cryptomator.integrations.linux.version>
+		<cryptomator.integrations.mac.version>1.0.0-beta2</cryptomator.integrations.mac.version>
+		<cryptomator.integrations.linux.version>1.0.0-beta1</cryptomator.integrations.linux.version>
 		<cryptomator.fuse.version>1.2.9</cryptomator.fuse.version>
 		<cryptomator.dokany.version>1.2.4</cryptomator.dokany.version>
 		<cryptomator.webdav.version>1.1.3</cryptomator.webdav.version>
@@ -49,13 +50,6 @@
 		<mockito.version>3.6.0</mockito.version>
 		<hamcrest.version>2.2</hamcrest.version>
 	</properties>
-
-	<repositories>
-		<repository>
-			<id>jcenter</id>
-			<url>https://jcenter.bintray.com</url>
-		</repository>
-	</repositories>
 
 	<dependencyManagement>
 		<dependencies>
@@ -437,7 +431,7 @@
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<configuration>
-					<release>14</release>
+					<release>${project.jdk.version}</release>
 					<annotationProcessorPaths>
 						<path>
 							<groupId>com.google.dagger</groupId>
