@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.VBox?>
+<?import javafx.geometry.Insets?>
+<VBox xmlns:fx="http://javafx.com/fxml"
+	  xmlns="http://javafx.com/javafx"
+	  fx:controller="org.cryptomator.ui.vaultoptions.AutoLockVaultOptionsController"
+	  spacing="6">
+	<padding>
+		<Insets topRightBottomLeft="12"/>
+	</padding>
+</VBox>

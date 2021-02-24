@@ -20,4 +20,10 @@ public enum SelectedVaultOptionsTab {
 	 * Show password tab
 	 */
 	KEY,
+
+	/**
+	 * Show Auto-Lock tab
+	 *
+	 */
+	AUTOLOCK,
 }

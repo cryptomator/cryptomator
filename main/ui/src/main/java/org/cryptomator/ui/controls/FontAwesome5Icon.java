@@ -41,6 +41,7 @@ public enum FontAwesome5Icon {
 	TIMES("\uF00D"), //
 	TRASH("\uF1F8"), //
 	UNLINK("\uf127"), //
+	USER_LOCK("\uF502"), //
 	WRENCH("\uF0AD"), //
 	WINDOW_MINIMIZE("\uF2D1"), //
 	;
