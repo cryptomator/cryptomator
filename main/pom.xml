@@ -22,6 +22,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.jdk.version>14</project.jdk.version>
 
 		<!-- cryptomator dependencies -->
 		<cryptomator.cryptofs.version>1.9.14</cryptomator.cryptofs.version>
@@ -430,7 +431,7 @@
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<configuration>
-					<release>14</release>
+					<release>${project.jdk.version}</release>
 					<annotationProcessorPaths>
 						<path>
 							<groupId>com.google.dagger</groupId>
