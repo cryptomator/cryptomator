@@ -8,7 +8,6 @@ package org.cryptomator.common.settings;
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Strings;
 import com.google.common.io.BaseEncoding;
-
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.StringBinding;
@@ -20,12 +19,11 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+
 import java.nio.file.Path;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * The settings specific to a single vault.
@@ -39,6 +37,9 @@ public class VaultSettings {
 	public static final String DEFAULT_MOUNT_FLAGS = "";
 	public static final int DEFAULT_FILENAME_LENGTH_LIMIT = -1;
 	public static final WhenUnlocked DEFAULT_ACTION_AFTER_UNLOCK = WhenUnlocked.ASK;
+	public static final boolean DEFAULT_LOCK_ON_SLEEP = false;
+	public static final boolean DEFAULT_LOCK_AFTER_IDLETIME = false;
+	public static final String DEFAULT_LOCK_IDLETIME_IN_MINUTES = "30";
 
 	private static final Random RNG = new Random();
 
@@ -54,7 +55,9 @@ public class VaultSettings {
 	private final StringProperty mountFlags = new SimpleStringProperty(DEFAULT_MOUNT_FLAGS);
 	private final IntegerProperty filenameLengthLimit = new SimpleIntegerProperty(DEFAULT_FILENAME_LENGTH_LIMIT);
 	private final ObjectProperty<WhenUnlocked> actionAfterUnlock = new SimpleObjectProperty<>(DEFAULT_ACTION_AFTER_UNLOCK);
-
+	private final BooleanProperty lockOnSleep = new SimpleBooleanProperty(DEFAULT_LOCK_ON_SLEEP);
+	private final BooleanProperty lockAfterIdleTime = new SimpleBooleanProperty(DEFAULT_LOCK_AFTER_IDLETIME);
+	private final StringProperty lockIdleTimeInMinutes = new SimpleStringProperty(DEFAULT_LOCK_IDLETIME_IN_MINUTES);
 	private final StringBinding mountName;
 
 	public VaultSettings(String id) {
@@ -63,7 +66,7 @@ public class VaultSettings {
 	}
 
 	Observable[] observables() {
-		return new Observable[]{path, displayName, winDriveLetter, unlockAfterStartup, revealAfterMount, useCustomMountPath, customMountPath, usesReadOnlyMode, mountFlags, filenameLengthLimit, actionAfterUnlock};
+		return new Observable[]{path, displayName, winDriveLetter, unlockAfterStartup, revealAfterMount, useCustomMountPath, customMountPath, usesReadOnlyMode, mountFlags, filenameLengthLimit, actionAfterUnlock, lockOnSleep, lockAfterIdleTime, lockIdleTimeInMinutes};
 	}
 
 	public static VaultSettings withRandomId() {
@@ -162,6 +165,18 @@ public class VaultSettings {
 
 	public WhenUnlocked getActionAfterUnlock() {
 		return actionAfterUnlock.get();
+	}
+
+	public BooleanProperty lockOnSleep() {
+		return lockOnSleep;
+	}
+
+	public BooleanProperty lockAfterIdleTime() {
+		return lockAfterIdleTime;
+	}
+
+	public StringProperty lockIdleTimeInMinutes() {
+		return lockIdleTimeInMinutes;
 	}
 
 	/* Hashcode/Equals */

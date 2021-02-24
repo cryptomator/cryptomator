@@ -31,6 +31,9 @@ class VaultSettingsJsonAdapter {
 		out.name("mountFlags").value(value.mountFlags().get());
 		out.name("filenameLengthLimit").value(value.filenameLengthLimit().get());
 		out.name("actionAfterUnlock").value(value.actionAfterUnlock().get().name());
+		out.name("lockOnSleep").value(value.lockOnSleep().get());
+		out.name("lockAfterIdleTime").value(value.lockAfterIdleTime().get());
+		out.name("lockIdleTimeInMinutes").value(value.lockIdleTimeInMinutes().get());
 		out.endObject();
 	}
 
@@ -48,6 +51,9 @@ class VaultSettingsJsonAdapter {
 		String mountFlags = VaultSettings.DEFAULT_MOUNT_FLAGS;
 		int filenameLengthLimit = VaultSettings.DEFAULT_FILENAME_LENGTH_LIMIT;
 		WhenUnlocked actionAfterUnlock = VaultSettings.DEFAULT_ACTION_AFTER_UNLOCK;
+		boolean lockOnSleep = VaultSettings.DEFAULT_LOCK_ON_SLEEP;
+		boolean lockAfterIdleTime = VaultSettings.DEFAULT_LOCK_AFTER_IDLETIME;
+		String lockIdleTimeInMinutes = VaultSettings.DEFAULT_LOCK_IDLETIME_IN_MINUTES;
 
 		in.beginObject();
 		while (in.hasNext()) {
@@ -66,6 +72,9 @@ class VaultSettingsJsonAdapter {
 				case "mountFlags" -> mountFlags = in.nextString();
 				case "filenameLengthLimit" -> filenameLengthLimit = in.nextInt();
 				case "actionAfterUnlock" -> actionAfterUnlock = parseActionAfterUnlock(in.nextString());
+				case "lockOnSleep" -> lockOnSleep = in.nextBoolean();
+				case "lockAfterIdleTime" -> lockAfterIdleTime = in.nextBoolean();
+				case "lockIdleTimeInMinutes" -> lockIdleTimeInMinutes = in.nextString();
 				default -> {
 					LOG.warn("Unsupported vault setting found in JSON: " + name);
 					in.skipValue();
@@ -90,6 +99,9 @@ class VaultSettingsJsonAdapter {
 		vaultSettings.mountFlags().set(mountFlags);
 		vaultSettings.filenameLengthLimit().set(filenameLengthLimit);
 		vaultSettings.actionAfterUnlock().set(actionAfterUnlock);
+		vaultSettings.lockOnSleep().set(lockOnSleep);
+		vaultSettings.lockAfterIdleTime().set(lockAfterIdleTime);
+		vaultSettings.lockIdleTimeInMinutes().set(lockIdleTimeInMinutes);
 		return vaultSettings;
 	}
 
