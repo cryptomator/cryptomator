@@ -86,6 +86,11 @@ jobs:
           release_name: ${{ github.ref }}
           body: |
             :construction: Work in Progress
+
+            TODO:
+            * [ ] add Linux appimage, zsync file and signature file
+            * [ ] add Windows installer and signature file
+            * [ ] add MacOs disk image and signature file
           draft: true
           prerelease: false
       - name: Upload buildkit-linux.zip to GitHub Releases

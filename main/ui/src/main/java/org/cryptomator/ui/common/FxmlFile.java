@@ -39,7 +39,7 @@ public enum FxmlFile {
 		this.ressourcePathString = ressourcePathString;
 	}
 
-	public String getRessourcePathString() {
+	String getRessourcePathString() {
 		return ressourcePathString;
 	}
 }

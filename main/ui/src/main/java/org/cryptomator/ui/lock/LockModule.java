@@ -6,7 +6,7 @@ import dagger.Provides;
 import dagger.multibindings.IntoMap;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.DefaultSceneFactory;
-import org.cryptomator.ui.common.FXMLLoaderFactory;
+import org.cryptomator.ui.common.FxmlLoaderFactory;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxControllerKey;
 import org.cryptomator.ui.common.FxmlFile;
@@ -40,8 +40,8 @@ abstract class LockModule {
 	@Provides
 	@LockWindow
 	@LockScoped
-	static FXMLLoaderFactory provideFxmlLoaderFactory(Map<Class<? extends FxController>, Provider<FxController>> factories, DefaultSceneFactory sceneFactory, ResourceBundle resourceBundle) {
-		return new FXMLLoaderFactory(factories, sceneFactory, resourceBundle);
+	static FxmlLoaderFactory provideFxmlLoaderFactory(Map<Class<? extends FxController>, Provider<FxController>> factories, DefaultSceneFactory sceneFactory, ResourceBundle resourceBundle) {
+		return new FxmlLoaderFactory(factories, sceneFactory, resourceBundle);
 	}
 
 	@Provides
@@ -63,15 +63,15 @@ abstract class LockModule {
 	@Provides
 	@FxmlScene(FxmlFile.LOCK_FORCED)
 	@LockScoped
-	static Scene provideForceLockScene(@LockWindow FXMLLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene("/fxml/lock_forced.fxml");
+	static Scene provideForceLockScene(@LockWindow FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.LOCK_FORCED);
 	}
 
 	@Provides
 	@FxmlScene(FxmlFile.LOCK_FAILED)
 	@LockScoped
-	static Scene provideLockFailedScene(@LockWindow FXMLLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene("/fxml/lock_failed.fxml");
+	static Scene provideLockFailedScene(@LockWindow FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.LOCK_FAILED);
 	}
 
 	// ------------------
