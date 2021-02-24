@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.layout.VBox?>
+<?import org.cryptomator.ui.controls.FormattedLabel?>
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.vaultoptions.AutoLockVaultOptionsController"
@@ -9,4 +13,12 @@
 	<padding>
 		<Insets topRightBottomLeft="12"/>
 	</padding>
+	<children>
+		<CheckBox text="%vaultOptions.autoLock.lockOnSleep" fx:id="lockOnSleepCheckbox"/>
+		<CheckBox text="%vaultOptions.autoLock.lockAfterIdleTime" fx:id="lockAfterIdleTimeCheckbox"/>
+		<HBox>
+			<FormattedLabel format="%vaultOptions.autoLock.lockAfterAmountOfIdleTime"/>
+			<TextField fx:id="lockIdleTimeInMinutesTextField"/>
+		</HBox>
+	</children>
 </VBox>
