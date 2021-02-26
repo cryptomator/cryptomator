@@ -68,6 +68,11 @@ public class KeychainManager implements KeychainAccessProvider {
 		return keychain.getValue() != null;
 	}
 
+	@Override
+	public boolean isLocked() {
+		return keychain.getValue() == null || keychain.get().isLocked();
+	}
+
 	/**
 	 * Checks if the keychain knows a passphrase for the given key.
 	 * <p>

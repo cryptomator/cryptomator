@@ -44,4 +44,9 @@ class MapKeychainAccess implements KeychainAccessProvider {
 		return true;
 	}
 
+	@Override
+	public boolean isLocked() {
+		return false;
+	}
+
 }
