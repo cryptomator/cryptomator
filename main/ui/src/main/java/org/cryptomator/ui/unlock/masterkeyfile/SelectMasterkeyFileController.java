@@ -1,8 +1,8 @@
-package org.cryptomator.ui.unlock;
+package org.cryptomator.ui.unlock.masterkeyfile;
 
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.UserInteractionLock;
-import org.cryptomator.ui.unlock.UnlockModule.MasterkeyFileProvision;
+import org.cryptomator.ui.unlock.masterkeyfile.MasterkeyFileLoadingModule.MasterkeyFileProvision;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,10 +17,10 @@ import java.nio.file.Path;
 import java.util.ResourceBundle;
 import java.util.concurrent.atomic.AtomicReference;
 
-@UnlockScoped
-public class UnlockSelectMasterkeyFileController implements FxController {
+@MasterkeyFileLoadingScoped
+public class SelectMasterkeyFileController implements FxController {
 
-	private static final Logger LOG = LoggerFactory.getLogger(UnlockSelectMasterkeyFileController.class);
+	private static final Logger LOG = LoggerFactory.getLogger(SelectMasterkeyFileController.class);
 
 	private final Stage window;
 	private final AtomicReference<Path> masterkeyPath;
@@ -28,7 +28,7 @@ public class UnlockSelectMasterkeyFileController implements FxController {
 	private final ResourceBundle resourceBundle;
 
 	@Inject
-	public UnlockSelectMasterkeyFileController(@UnlockWindow Stage window, @Named("userProvidedMasterkeyPath") AtomicReference<Path> masterkeyPath, UserInteractionLock<MasterkeyFileProvision> masterkeyFileProvisionLock, ResourceBundle resourceBundle) {
+	public SelectMasterkeyFileController(@MasterkeyFileLoading Stage window, AtomicReference<Path> masterkeyPath, UserInteractionLock<MasterkeyFileProvision> masterkeyFileProvisionLock, ResourceBundle resourceBundle) {
 		this.window = window;
 		this.masterkeyPath = masterkeyPath;
 		this.masterkeyFileProvisionLock = masterkeyFileProvisionLock;
