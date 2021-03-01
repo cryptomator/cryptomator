@@ -1,15 +1,11 @@
 package org.cryptomator.ui.unlock;
 
-import dagger.Lazy;
 import org.cryptomator.common.vaults.MountPointRequirement;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.FxController;
-import org.cryptomator.ui.common.FxmlFile;
-import org.cryptomator.ui.common.FxmlScene;
 
 import javax.inject.Inject;
 import javafx.fxml.FXML;
-import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 //At the current point in time only the CustomMountPointChooser may cause this window to be shown.

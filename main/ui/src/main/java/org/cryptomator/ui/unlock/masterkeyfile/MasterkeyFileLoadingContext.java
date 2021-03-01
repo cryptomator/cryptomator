@@ -13,15 +13,12 @@ import org.cryptomator.ui.unlock.masterkeyfile.MasterkeyFileLoadingModule.Passwo
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
-import javax.security.auth.DestroyFailedException;
-import javax.security.auth.Destroyable;
 import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import java.nio.CharBuffer;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicReference;
 
 @MasterkeyFileLoadingScoped
