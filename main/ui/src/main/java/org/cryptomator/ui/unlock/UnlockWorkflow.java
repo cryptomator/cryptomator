@@ -43,18 +43,16 @@ public class UnlockWorkflow extends Task<Boolean> {
 	private final Lazy<Scene> successScene;
 	private final Lazy<Scene> invalidMountPointScene;
 	private final ErrorComponent.Builder errorComponent;
-	private final MasterkeyFileAccess masterkeyFileAccess;
 	private final MasterkeyFileLoadingComponent.Builder masterkeyFileLoadingComponent;
 
 	@Inject
-	UnlockWorkflow(@UnlockWindow Stage window, @UnlockWindow Vault vault, VaultService vaultService, @FxmlScene(FxmlFile.UNLOCK_SUCCESS) Lazy<Scene> successScene, @FxmlScene(FxmlFile.UNLOCK_INVALID_MOUNT_POINT) Lazy<Scene> invalidMountPointScene, ErrorComponent.Builder errorComponent, MasterkeyFileAccess masterkeyFileAccess, MasterkeyFileLoadingComponent.Builder masterkeyFileLoadingComponent) {
+	UnlockWorkflow(@UnlockWindow Stage window, @UnlockWindow Vault vault, VaultService vaultService, @FxmlScene(FxmlFile.UNLOCK_SUCCESS) Lazy<Scene> successScene, @FxmlScene(FxmlFile.UNLOCK_INVALID_MOUNT_POINT) Lazy<Scene> invalidMountPointScene, ErrorComponent.Builder errorComponent, MasterkeyFileLoadingComponent.Builder masterkeyFileLoadingComponent) {
 		this.window = window;
 		this.vault = vault;
 		this.vaultService = vaultService;
 		this.successScene = successScene;
 		this.invalidMountPointScene = invalidMountPointScene;
 		this.errorComponent = errorComponent;
-		this.masterkeyFileAccess = masterkeyFileAccess;
 		this.masterkeyFileLoadingComponent = masterkeyFileLoadingComponent;
 
 		setOnFailed(event -> {
