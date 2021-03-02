@@ -137,13 +137,13 @@ public class FxApplication extends Application {
 	}
 
 	private void appThemeChanged(@SuppressWarnings("unused") ObservableValue<? extends UiTheme> observable, @SuppressWarnings("unused") UiTheme oldValue, UiTheme newValue) {
-		appearanceProvider.ifPresent(appearanceProvider -> {
+		if (appearanceProvider.isPresent() && oldValue == UiTheme.AUTOMATIC && newValue != UiTheme.AUTOMATIC) {
 			try {
-				appearanceProvider.removeListener(systemInterfaceThemeListener);
+				appearanceProvider.get().removeListener(systemInterfaceThemeListener);
 			} catch (UiAppearanceException e) {
 				LOG.error("Failed to disable automatic theme switching.");
 			}
-		});
+		}
 		loadSelectedStyleSheet(newValue);
 	}
 

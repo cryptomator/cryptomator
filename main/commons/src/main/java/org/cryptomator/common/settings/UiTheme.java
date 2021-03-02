@@ -8,7 +8,7 @@ public enum UiTheme {
 	AUTOMATIC("preferences.general.theme.automatic");
 
 	public static UiTheme[] applicableValues() {
-		if (SystemUtils.IS_OS_MAC) {
+		if (SystemUtils.IS_OS_MAC || SystemUtils.IS_OS_WINDOWS) {
 			return values();
 		} else {
 			return new UiTheme[]{LIGHT, DARK};

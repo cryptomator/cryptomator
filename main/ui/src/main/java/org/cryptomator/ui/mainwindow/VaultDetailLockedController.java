@@ -5,6 +5,7 @@ import org.cryptomator.common.keychain.KeychainManager;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.fxapp.FxApplication;
+import org.cryptomator.ui.vaultoptions.SelectedVaultOptionsTab;
 import org.cryptomator.ui.vaultoptions.VaultOptionsComponent;
 
 import javax.inject.Inject;
@@ -47,7 +48,12 @@ public class VaultDetailLockedController implements FxController {
 
 	@FXML
 	public void showVaultOptions() {
-		vaultOptionsWindow.vault(vault.get()).build().showVaultOptionsWindow();
+		vaultOptionsWindow.vault(vault.get()).build().showVaultOptionsWindow(SelectedVaultOptionsTab.ANY);
+	}
+
+	@FXML
+	public void showKeyVaultOptions() {
+		vaultOptionsWindow.vault(vault.get()).build().showVaultOptionsWindow(SelectedVaultOptionsTab.KEY);
 	}
 
 	/* Getter/Setter */

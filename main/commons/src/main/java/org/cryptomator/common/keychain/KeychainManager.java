@@ -70,7 +70,7 @@ public class KeychainManager implements KeychainAccessProvider {
 
 	@Override
 	public boolean isLocked() {
-		return null == keychain.getValue() || keychain.get().isLocked();
+		return keychain.getValue() == null || keychain.get().isLocked();
 	}
 
 	/**
