@@ -25,6 +25,7 @@ jobs:
       - name: Build and Test
         run: mvn -B install --file main/pom.xml -Pcoverage
       - name: Run Codacy Coverage Reporter
+        if: github.repository == 'cryptomator/cryptomator'
         run: |
           curl -o ~/codacy-coverage-reporter.jar https://repo.maven.apache.org/maven2/com/codacy/codacy-coverage-reporter/7.1.0/codacy-coverage-reporter-7.1.0-assembly.jar
           $JAVA_HOME/bin/java -jar ~/codacy-coverage-reporter.jar report -l Java -r main/commons/target/site/jacoco/jacoco.xml --partial
@@ -59,7 +60,7 @@ jobs:
     name: Draft a Release on GitHub Releases
     runs-on: ubuntu-latest
     needs: build
-    if: startsWith(github.ref, 'refs/tags/')
+    if: startsWith(github.ref, 'refs/tags/') && github.repository == 'cryptomator/cryptomator'
     steps:
       - name: Download buildkit-linux.zip
         uses: actions/download-artifact@v1
