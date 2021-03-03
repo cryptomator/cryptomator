@@ -12,7 +12,6 @@ import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlLoaderFactory;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.StageFactory;
-import org.cryptomator.ui.unlock.masterkeyfile.MasterkeyFileLoadingComponent;
 
 import javax.inject.Named;
 import javax.inject.Provider;
@@ -23,7 +22,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
-@Module(subcomponents = {MasterkeyFileLoadingComponent.class})
+@Module
 abstract class UnlockModule {
 
 	@Provides

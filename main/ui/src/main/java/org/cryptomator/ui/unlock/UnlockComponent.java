@@ -16,7 +16,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
 @UnlockScoped
-@Subcomponent(modules = {UnlockModule.class})
+@Subcomponent(modules = {UnlockModule.class, KeyLoadingModule.class})
 public interface UnlockComponent {
 
 	ExecutorService defaultExecutorService();

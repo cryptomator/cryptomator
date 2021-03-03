@@ -7,13 +7,11 @@ import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.common.vaults.Volume.VolumeException;
 import org.cryptomator.cryptolib.api.CryptoException;
-import org.cryptomator.cryptolib.api.InvalidPassphraseException;
-import org.cryptomator.cryptolib.common.MasterkeyFileAccess;
+import org.cryptomator.cryptolib.api.MasterkeyLoadingFailedException;
 import org.cryptomator.ui.common.ErrorComponent;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.VaultService;
-import org.cryptomator.ui.unlock.masterkeyfile.MasterkeyFileLoadingComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,17 +41,17 @@ public class UnlockWorkflow extends Task<Boolean> {
 	private final Lazy<Scene> successScene;
 	private final Lazy<Scene> invalidMountPointScene;
 	private final ErrorComponent.Builder errorComponent;
-	private final MasterkeyFileLoadingComponent.Builder masterkeyFileLoadingComponent;
+	private final KeyLoadingComponent keyLoadingComp;
 
 	@Inject
-	UnlockWorkflow(@UnlockWindow Stage window, @UnlockWindow Vault vault, VaultService vaultService, @FxmlScene(FxmlFile.UNLOCK_SUCCESS) Lazy<Scene> successScene, @FxmlScene(FxmlFile.UNLOCK_INVALID_MOUNT_POINT) Lazy<Scene> invalidMountPointScene, ErrorComponent.Builder errorComponent, MasterkeyFileLoadingComponent.Builder masterkeyFileLoadingComponent) {
+	UnlockWorkflow(@UnlockWindow Stage window, @UnlockWindow Vault vault, VaultService vaultService, @FxmlScene(FxmlFile.UNLOCK_SUCCESS) Lazy<Scene> successScene, @FxmlScene(FxmlFile.UNLOCK_INVALID_MOUNT_POINT) Lazy<Scene> invalidMountPointScene, ErrorComponent.Builder errorComponent, KeyLoadingComponent keyLoadingComp) {
 		this.window = window;
 		this.vault = vault;
 		this.vaultService = vaultService;
 		this.successScene = successScene;
 		this.invalidMountPointScene = invalidMountPointScene;
 		this.errorComponent = errorComponent;
-		this.masterkeyFileLoadingComponent = masterkeyFileLoadingComponent;
+		this.keyLoadingComp = keyLoadingComp;
 
 		setOnFailed(event -> {
 			Throwable throwable = event.getSource().getException();
@@ -68,8 +66,7 @@ public class UnlockWorkflow extends Task<Boolean> {
 	@Override
 	protected Boolean call() throws InterruptedException, IOException, VolumeException, InvalidMountPointException, CryptoException {
 		try {
-			// TODO: allow unlock strategies other than MasterkeyFile-based eventually
-			attemptUnlockUsingMasterkeyFile(0, null);
+			attemptUnlock();
 			handleSuccess();
 			return true;
 		} catch (UnlockCancelledException e) {
@@ -78,17 +75,20 @@ public class UnlockWorkflow extends Task<Boolean> {
 		}
 	}
 
-	private void attemptUnlockUsingMasterkeyFile(int attempt, Exception previousError) throws IOException, VolumeException, InvalidMountPointException, CryptoException {
-		var fileLoadingComp = masterkeyFileLoadingComponent.unlockWindow(window).vault(vault).previousError(previousError).build();
+	private void attemptUnlock() throws IOException, VolumeException, InvalidMountPointException, CryptoException {
 		boolean success = false;
 		try {
-			vault.unlock(fileLoadingComp.masterkeyLoader());
+			vault.unlock(keyLoadingComp.masterkeyLoader());
 			success = true;
-		} catch (InvalidPassphraseException e) {
-			LOG.info("Unlock attempt #{} failed due to {}", attempt, e.getMessage());
-			attemptUnlockUsingMasterkeyFile(attempt + 1, e);
+		} catch (MasterkeyLoadingFailedException e) {
+			if (keyLoadingComp.recoverFromException(e)) {
+				LOG.info("Unlock attempt threw {}. Reattempting...", e.getClass().getSimpleName());
+				attemptUnlock();
+			} else {
+				throw e;
+			}
 		} finally {
-			fileLoadingComp.cleanup(success);
+			keyLoadingComp.cleanup(success);
 		}
 	}
 

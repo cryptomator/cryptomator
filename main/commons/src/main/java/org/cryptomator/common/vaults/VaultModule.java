@@ -8,10 +8,12 @@ package org.cryptomator.common.vaults;
 import dagger.Module;
 import dagger.Provides;
 import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.common.Constants;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.common.settings.VolumeImpl;
 import org.cryptomator.cryptofs.CryptoFileSystem;
+import org.cryptomator.cryptofs.VaultConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,9 +26,11 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Module
@@ -51,6 +55,19 @@ public class VaultModule {
 	@PerVault
 	public ObjectProperty<Exception> provideLastKnownException(@Named("lastKnownException") @Nullable Exception initialErrorCause) {
 		return new SimpleObjectProperty<>(initialErrorCause);
+	}
+
+	@Provides
+	@PerVault
+	Optional<VaultConfig.UnverifiedVaultConfig> provideUnverifiedVaultConfig(VaultSettings settings) {
+		Path vaultRoot = settings.path().get();
+		Path configPath = vaultRoot.resolve(Constants.VAULTCONFIG_FILENAME);
+		try {
+			String token = Files.readString(configPath, StandardCharsets.US_ASCII);
+			return Optional.of(VaultConfig.decode(token));
+		} catch (IOException e) {
+			return Optional.empty();
+		}
 	}
 
 

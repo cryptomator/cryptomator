@@ -2,6 +2,7 @@ package org.cryptomator.ui.unlock.masterkeyfile;
 
 import dagger.Lazy;
 import org.cryptomator.cryptolib.api.InvalidPassphraseException;
+import org.cryptomator.cryptolib.api.MasterkeyLoadingFailedException;
 import org.cryptomator.cryptolib.common.MasterkeyFileLoaderContext;
 import org.cryptomator.ui.common.Animations;
 import org.cryptomator.ui.common.FxmlFile;
@@ -11,7 +12,6 @@ import org.cryptomator.ui.unlock.UnlockCancelledException;
 import org.cryptomator.ui.unlock.masterkeyfile.MasterkeyFileLoadingModule.MasterkeyFileProvision;
 import org.cryptomator.ui.unlock.masterkeyfile.MasterkeyFileLoadingModule.PasswordEntry;
 
-import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javafx.application.Platform;
 import javafx.scene.Scene;
@@ -22,7 +22,7 @@ import java.nio.file.Path;
 import java.util.concurrent.atomic.AtomicReference;
 
 @MasterkeyFileLoadingScoped
-class MasterkeyFileLoadingContext implements MasterkeyFileLoaderContext {
+public class MasterkeyFileLoadingContext implements MasterkeyFileLoaderContext {
 
 	private final Stage window;
 	private final Lazy<Scene> passphraseEntryScene;
@@ -31,10 +31,11 @@ class MasterkeyFileLoadingContext implements MasterkeyFileLoaderContext {
 	private final UserInteractionLock<MasterkeyFileProvision> masterkeyFileProvisionLock;
 	private final AtomicReference<char[]> password;
 	private final AtomicReference<Path> filePath;
-	private final Exception previousError;
+
+	private boolean wrongPassword;
 
 	@Inject
-	public MasterkeyFileLoadingContext(@MasterkeyFileLoading Stage window, @FxmlScene(FxmlFile.UNLOCK_ENTER_PASSWORD) Lazy<Scene> passphraseEntryScene, @FxmlScene(FxmlFile.UNLOCK_SELECT_MASTERKEYFILE) Lazy<Scene> selectMasterkeyFileScene, UserInteractionLock<PasswordEntry> passwordEntryLock, UserInteractionLock<MasterkeyFileProvision> masterkeyFileProvisionLock, AtomicReference<char[]> password, AtomicReference<Path> filePath, @Nullable Exception previousError) {
+	public MasterkeyFileLoadingContext(@MasterkeyFileLoading Stage window, @FxmlScene(FxmlFile.UNLOCK_ENTER_PASSWORD) Lazy<Scene> passphraseEntryScene, @FxmlScene(FxmlFile.UNLOCK_SELECT_MASTERKEYFILE) Lazy<Scene> selectMasterkeyFileScene, UserInteractionLock<PasswordEntry> passwordEntryLock, UserInteractionLock<MasterkeyFileProvision> masterkeyFileProvisionLock, AtomicReference<char[]> password, AtomicReference<Path> filePath) {
 		this.window = window;
 		this.passphraseEntryScene = passphraseEntryScene;
 		this.selectMasterkeyFileScene = selectMasterkeyFileScene;
@@ -42,11 +43,15 @@ class MasterkeyFileLoadingContext implements MasterkeyFileLoaderContext {
 		this.masterkeyFileProvisionLock = masterkeyFileProvisionLock;
 		this.password = password;
 		this.filePath = filePath;
-		this.previousError = previousError;
 	}
 
 	@Override
 	public Path getCorrectMasterkeyFilePath(String masterkeyFilePath) {
+		if (filePath.get() != null) { // e.g. already chosen on previous attempt with wrong password
+			return filePath.get();
+		}
+
+		assert filePath.get() == null;
 		try {
 			if (askForCorrectMasterkeyFile() == MasterkeyFileProvision.MASTERKEYFILE_PROVIDED) {
 				return filePath.get();
@@ -105,11 +110,20 @@ class MasterkeyFileLoadingContext implements MasterkeyFileLoaderContext {
 			} else {
 				window.centerOnScreen();
 			}
-			if (previousError instanceof InvalidPassphraseException) {
+			if (wrongPassword) {
 				Animations.createShakeWindowAnimation(window).play();
 			}
 		});
 		return passwordEntryLock.awaitInteraction();
 	}
 
+	public boolean recoverFromException(MasterkeyLoadingFailedException exception) {
+		if (exception instanceof InvalidPassphraseException) {
+			this.wrongPassword = true;
+			password.set(null);
+			return true; // reattempting key load
+		} else {
+			return false; // nothing we can do
+		}
+	}
 }

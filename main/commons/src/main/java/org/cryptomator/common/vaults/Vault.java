@@ -17,6 +17,8 @@ import org.cryptomator.cryptofs.CryptoFileSystem;
 import org.cryptomator.cryptofs.CryptoFileSystemProperties;
 import org.cryptomator.cryptofs.CryptoFileSystemProperties.FileSystemFlags;
 import org.cryptomator.cryptofs.CryptoFileSystemProvider;
+import org.cryptomator.cryptofs.VaultConfig;
+import org.cryptomator.cryptofs.VaultConfig.UnverifiedVaultConfig;
 import org.cryptomator.cryptofs.common.Constants;
 import org.cryptomator.cryptofs.common.FileSystemCapabilityChecker;
 import org.cryptomator.cryptolib.api.CryptoException;
@@ -66,13 +68,14 @@ public class Vault {
 	private final BooleanBinding needsMigration;
 	private final BooleanBinding unknownError;
 	private final StringBinding accessPoint;
+	private final Optional<UnverifiedVaultConfig> unverifiedVaultConfig;
 	private final BooleanBinding accessPointPresent;
 	private final BooleanProperty showingStats;
 
 	private volatile Volume volume;
 
 	@Inject
-	Vault(VaultSettings vaultSettings, Provider<Volume> volumeProvider, @DefaultMountFlags StringBinding defaultMountFlags, AtomicReference<CryptoFileSystem> cryptoFileSystem, ObjectProperty<VaultState> state, @Named("lastKnownException") ObjectProperty<Exception> lastKnownException, VaultStats stats) {
+	Vault(VaultSettings vaultSettings, Provider<Volume> volumeProvider, @DefaultMountFlags StringBinding defaultMountFlags, AtomicReference<CryptoFileSystem> cryptoFileSystem, ObjectProperty<VaultState> state, @Named("lastKnownException") ObjectProperty<Exception> lastKnownException, VaultStats stats, Optional<UnverifiedVaultConfig> unverifiedVaultConfig) {
 		this.vaultSettings = vaultSettings;
 		this.volumeProvider = volumeProvider;
 		this.defaultMountFlags = defaultMountFlags;
@@ -80,6 +83,7 @@ public class Vault {
 		this.state = state;
 		this.lastKnownException = lastKnownException;
 		this.stats = stats;
+		this.unverifiedVaultConfig = unverifiedVaultConfig;
 		this.displayName = Bindings.createStringBinding(this::getDisplayName, vaultSettings.displayName());
 		this.displayablePath = Bindings.createStringBinding(this::getDisplayablePath, vaultSettings.path());
 		this.locked = Bindings.createBooleanBinding(this::isLocked, state);
@@ -297,6 +301,10 @@ public class Vault {
 
 	public VaultStats getStats() {
 		return stats;
+	}
+
+	public Optional<UnverifiedVaultConfig> getUnverifiedVaultConfig() {
+		return unverifiedVaultConfig;
 	}
 
 	public Observable[] observables() {
