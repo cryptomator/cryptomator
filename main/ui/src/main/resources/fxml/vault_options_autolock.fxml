@@ -4,8 +4,9 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Text?>
+<?import javafx.scene.text.TextFlow?>
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.vaultoptions.AutoLockVaultOptionsController"
@@ -15,10 +16,13 @@
 	</padding>
 	<children>
 		<CheckBox text="%vaultOptions.autoLock.lockOnSleep" fx:id="lockOnSleepCheckbox"/>
-		<CheckBox text="%vaultOptions.autoLock.lockAfterIdleTime" fx:id="lockAfterIdleTimeCheckbox"/>
-		<HBox>
-			<FormattedLabel format="%vaultOptions.autoLock.lockAfterAmountOfIdleTime"/>
-			<TextField fx:id="lockIdleTimeInMinutesTextField"/>
-		</HBox>
+		<TextFlow styleClass="text-flow" prefWidth="-Infinity">
+			<CheckBox text="%vaultOptions.autoLock.lockAfterIdleTimePart1" fx:id="lockAfterIdleTimeCheckbox"/>
+			<Text text=" "/>
+			<TextField fx:id="lockIdleTimeInMinutesTextField" prefWidth="50"/> <!--prefWidth="${controller.calculatedWidthForTextfield}"/>-->
+			<Text text=" "/>
+			<FormattedLabel format="%vaultOptions.autoLock.lockAfterIdleTimePart2"/>
+		</TextFlow>
+
 	</children>
 </VBox>
