@@ -1,10 +1,23 @@
 package org.cryptomator.ui.fxapp;
 
 import dagger.Lazy;
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
+import javafx.stage.Stage;
+import javafx.stage.Window;
 import org.cryptomator.common.LicenseHolder;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.UiTheme;
 import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.common.vaults.VaultListManager;
+import org.cryptomator.common.vaults.Volume;
+import org.cryptomator.integrations.autolock.AutoLockException;
+import org.cryptomator.integrations.autolock.AutoLockProvider;
+import org.cryptomator.integrations.autolock.SystemState;
 import org.cryptomator.integrations.tray.TrayIntegrationProvider;
 import org.cryptomator.integrations.uiappearance.Theme;
 import org.cryptomator.integrations.uiappearance.UiAppearanceException;
@@ -22,15 +35,9 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
-import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.beans.binding.Bindings;
-import javafx.beans.binding.BooleanBinding;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.ObservableList;
-import javafx.stage.Stage;
-import javafx.stage.Window;
 import java.awt.desktop.QuitResponse;
+import java.awt.desktop.SystemSleepEvent;
+import java.awt.desktop.SystemSleepListener;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -53,9 +60,11 @@ public class FxApplication extends Application {
 	private final ObservableList<Window> visibleWindows;
 	private final BooleanBinding hasVisibleWindows;
 	private final UiAppearanceListener systemInterfaceThemeListener = this::systemInterfaceThemeChanged;
+	private final VaultListManager vaultListManager;
+	private final Optional<AutoLockProvider> autoLockProvider;
 
 	@Inject
-	FxApplication(Settings settings, Lazy<MainWindowComponent> mainWindow, Lazy<PreferencesComponent> preferencesWindow, Provider<UnlockComponent.Builder> unlockWindowBuilderProvider, Provider<LockComponent.Builder> lockWindowBuilderProvider, Lazy<QuitComponent> quitWindow, Optional<TrayIntegrationProvider> trayIntegration, Optional<UiAppearanceProvider> appearanceProvider, VaultService vaultService, LicenseHolder licenseHolder) {
+	FxApplication(Settings settings, Lazy<MainWindowComponent> mainWindow, Lazy<PreferencesComponent> preferencesWindow, Provider<UnlockComponent.Builder> unlockWindowBuilderProvider, Provider<LockComponent.Builder> lockWindowBuilderProvider, Lazy<QuitComponent> quitWindow, Optional<TrayIntegrationProvider> trayIntegration, Optional<UiAppearanceProvider> appearanceProvider, VaultService vaultService, LicenseHolder licenseHolder, VaultListManager vaultListManager, Optional<AutoLockProvider> autoLockProvider) {
 		this.settings = settings;
 		this.mainWindow = mainWindow;
 		this.preferencesWindow = preferencesWindow;
@@ -68,6 +77,8 @@ public class FxApplication extends Application {
 		this.licenseHolder = licenseHolder;
 		this.visibleWindows = Stage.getWindows().filtered(Window::isShowing);
 		this.hasVisibleWindows = Bindings.isNotEmpty(visibleWindows);
+		this.vaultListManager = vaultListManager;
+		this.autoLockProvider = autoLockProvider;
 	}
 
 	public void start() {
@@ -78,6 +89,7 @@ public class FxApplication extends Application {
 
 		settings.theme().addListener(this::appThemeChanged);
 		loadSelectedStyleSheet(settings.theme().get());
+		applySystemListener();
 	}
 
 	@Override
@@ -189,6 +201,32 @@ public class FxApplication extends Application {
 		Application.setUserAgentStylesheet(getClass().getResource("/css/dark_theme.css").toString());
 		appearanceProvider.ifPresent(appearanceProvider -> {
 			appearanceProvider.adjustToTheme(Theme.DARK);
+		});
+	}
+
+	private void applySystemListener() {
+		autoLockProvider.ifPresent(autoLockProvider -> {
+			try {
+				autoLockProvider.addListener(this::systemInterfaceStateChanged);
+			} catch (AutoLockException e) {
+				LOG.error("Failed to listen to changing System Power and Lock states.");
+			}
+		});
+	}
+
+	private void systemInterfaceStateChanged(SystemState systemState) {
+		vaultListManager.getVaultList().forEach(vault -> {
+			switch (systemState) {
+				case SLEEP -> {
+					if (vault.getVaultSettings().lockOnSleep().get()) {
+						try {
+							vault.lock(true);
+						} catch (Volume.VolumeException e) {
+							e.printStackTrace();
+						}
+					}
+				}
+			}
 		});
 	}
 
