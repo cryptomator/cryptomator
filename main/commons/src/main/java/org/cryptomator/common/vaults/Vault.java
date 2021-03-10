@@ -38,6 +38,8 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.EnumSet;
@@ -68,14 +70,13 @@ public class Vault {
 	private final BooleanBinding needsMigration;
 	private final BooleanBinding unknownError;
 	private final StringBinding accessPoint;
-	private final Optional<UnverifiedVaultConfig> unverifiedVaultConfig;
 	private final BooleanBinding accessPointPresent;
 	private final BooleanProperty showingStats;
 
 	private volatile Volume volume;
 
 	@Inject
-	Vault(VaultSettings vaultSettings, Provider<Volume> volumeProvider, @DefaultMountFlags StringBinding defaultMountFlags, AtomicReference<CryptoFileSystem> cryptoFileSystem, ObjectProperty<VaultState> state, @Named("lastKnownException") ObjectProperty<Exception> lastKnownException, VaultStats stats, Optional<UnverifiedVaultConfig> unverifiedVaultConfig) {
+	Vault(VaultSettings vaultSettings, Provider<Volume> volumeProvider, @DefaultMountFlags StringBinding defaultMountFlags, AtomicReference<CryptoFileSystem> cryptoFileSystem, ObjectProperty<VaultState> state, @Named("lastKnownException") ObjectProperty<Exception> lastKnownException, VaultStats stats) {
 		this.vaultSettings = vaultSettings;
 		this.volumeProvider = volumeProvider;
 		this.defaultMountFlags = defaultMountFlags;
@@ -83,7 +84,6 @@ public class Vault {
 		this.state = state;
 		this.lastKnownException = lastKnownException;
 		this.stats = stats;
-		this.unverifiedVaultConfig = unverifiedVaultConfig;
 		this.displayName = Bindings.createStringBinding(this::getDisplayName, vaultSettings.displayName());
 		this.displayablePath = Bindings.createStringBinding(this::getDisplayablePath, vaultSettings.path());
 		this.locked = Bindings.createBooleanBinding(this::isLocked, state);
@@ -304,7 +304,13 @@ public class Vault {
 	}
 
 	public Optional<UnverifiedVaultConfig> getUnverifiedVaultConfig() {
-		return unverifiedVaultConfig;
+		Path configPath = getPath().resolve(org.cryptomator.common.Constants.VAULTCONFIG_FILENAME);
+		try {
+			String token = Files.readString(configPath, StandardCharsets.US_ASCII);
+			return Optional.of(VaultConfig.decode(token));
+		} catch (IOException e) {
+			return Optional.empty();
+		}
 	}
 
 	public Observable[] observables() {

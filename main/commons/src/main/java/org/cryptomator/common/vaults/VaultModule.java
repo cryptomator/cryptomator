@@ -58,20 +58,6 @@ public class VaultModule {
 	}
 
 	@Provides
-	@PerVault
-	Optional<VaultConfig.UnverifiedVaultConfig> provideUnverifiedVaultConfig(VaultSettings settings) {
-		Path vaultRoot = settings.path().get();
-		Path configPath = vaultRoot.resolve(Constants.VAULTCONFIG_FILENAME);
-		try {
-			String token = Files.readString(configPath, StandardCharsets.US_ASCII);
-			return Optional.of(VaultConfig.decode(token));
-		} catch (IOException e) {
-			return Optional.empty();
-		}
-	}
-
-
-	@Provides
 	public Volume provideVolume(Settings settings, WebDavVolume webDavVolume, FuseVolume fuseVolume, DokanyVolume dokanyVolume) {
 		VolumeImpl preferredImpl = settings.preferredVolumeImpl().get();
 		if (VolumeImpl.DOKANY == preferredImpl && dokanyVolume.isSupported()) {
