@@ -158,7 +158,7 @@ public class GeneralPreferencesController implements FxController {
 
 	@FXML
 	public void showDonationTab() {
-		selectedTabProperty.set(SelectedPreferencesTab.DONATION_KEY);
+		selectedTabProperty.set(SelectedPreferencesTab.CONTRIBUTE);
 	}
 
 	@FXML
