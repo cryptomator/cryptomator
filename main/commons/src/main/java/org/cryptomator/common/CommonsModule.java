@@ -50,10 +50,12 @@ public abstract class CommonsModule {
 	@Named("licensePublicKey")
 	static String provideLicensePublicKey() {
 		// in PEM format without the dash-escaped begin/end lines
-		return "MIGbMBAGByqGSM49AgEGBSuBBAAjA4GGAAQB7NfnqiZbg2KTmoflmZ71PbXru7oW" //
-				+ "fmnV2yv3eDjlDfGruBrqz9TtXBZV/eYWt31xu1osIqaT12lKBvZ511aaAkIBeOEV" //
-				+ "gwcBIlJr6kUw7NKzeJt7r2rrsOyQoOG2nWc/Of/NBqA3mIZRHk5Aq1YupFdD26QE" //
-				+ "r0DzRyj4ixPIt38CQB8=";
+		return """
+				MIGbMBAGByqGSM49AgEGBSuBBAAjA4GGAAQB7NfnqiZbg2KTmoflmZ71PbXru7oW\
+				fmnV2yv3eDjlDfGruBrqz9TtXBZV/eYWt31xu1osIqaT12lKBvZ511aaAkIBeOEV\
+				gwcBIlJr6kUw7NKzeJt7r2rrsOyQoOG2nWc/Of/NBqA3mIZRHk5Aq1YupFdD26QE\
+				r0DzRyj4ixPIt38CQB8=\
+				""";
 	}
 
 	@Provides

@@ -80,7 +80,7 @@ public class VaultListManager {
 	}
 
 	private void addAll(Collection<VaultSettings> vaultSettings) {
-		Collection<Vault> vaults = vaultSettings.stream().map(this::create).collect(Collectors.toList());
+		Collection<Vault> vaults = vaultSettings.stream().map(this::create).toList();
 		vaultList.addAll(vaults);
 	}
 

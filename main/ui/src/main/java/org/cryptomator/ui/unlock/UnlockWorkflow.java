@@ -55,8 +55,8 @@ public class UnlockWorkflow extends Task<Boolean> {
 
 		setOnFailed(event -> {
 			Throwable throwable = event.getSource().getException();
-			if (throwable instanceof InvalidMountPointException) {
-				handleInvalidMountPoint((InvalidMountPointException) throwable);
+			if (throwable instanceof InvalidMountPointException e) {
+				handleInvalidMountPoint(e);
 			} else {
 				handleGenericError(throwable);
 			}
