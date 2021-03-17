@@ -172,7 +172,7 @@ public class CreateNewVaultPasswordController implements FxController {
 	private void initializeVault(Path path, CharSequence passphrase) throws IOException {
 		// 1. write masterkey:
 		Path masterkeyFilePath = path.resolve(MASTERKEY_FILENAME);
-		try (Masterkey masterkey = Masterkey.createNew(csprng)) {
+		try (Masterkey masterkey = Masterkey.generate(csprng)) {
 			masterkeyFileAccess.persist(masterkey, masterkeyFilePath, passphrase);
 		}
 

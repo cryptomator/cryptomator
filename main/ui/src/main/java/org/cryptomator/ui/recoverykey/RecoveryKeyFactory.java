@@ -88,7 +88,7 @@ public class RecoveryKeyFactory {
 	 */
 	public void resetPasswordWithRecoveryKey(Path vaultPath, String recoveryKey, CharSequence newPassword) throws IOException, IllegalArgumentException {
 		final byte[] rawKey = decodeRecoveryKey(recoveryKey);
-		try (var masterkey = Masterkey.createFromRaw(rawKey)) {
+		try (var masterkey = new Masterkey(rawKey)) {
 			Path masterkeyPath = vaultPath.resolve(MASTERKEY_FILENAME);
 			if (Files.exists(masterkeyPath)) {
 				byte[] oldMasterkeyBytes = Files.readAllBytes(masterkeyPath);
