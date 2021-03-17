@@ -33,8 +33,8 @@ class LicenseChecker {
 		try {
 			byte[] keyBytes = BaseEncoding.base64().decode(pemEncodedPublicKey);
 			PublicKey key = KeyFactory.getInstance("EC").generatePublic(new X509EncodedKeySpec(keyBytes));
-			if (key instanceof ECPublicKey) {
-				return (ECPublicKey) key;
+			if (key instanceof ECPublicKey k) {
+				return k;
 			} else {
 				throw new IllegalStateException("Key not an EC public key.");
 			}
