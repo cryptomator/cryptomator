@@ -19,7 +19,7 @@
 			<contextMenu>
 				<ContextMenu>
 					<items>
-						<MenuItem text="%main.vaultlist.contextMenu.remove" onAction="#didClickRemoveVault" disable="${controller.noVaultSelected}"/>
+						<MenuItem text="%main.vaultlist.contextMenu.remove" onAction="#didClickRemoveVault" disable="${!controller.selectedVaultRemovable}"/>
 					</items>
 				</ContextMenu>
 			</contextMenu>

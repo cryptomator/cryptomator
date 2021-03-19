@@ -11,7 +11,10 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -25,6 +28,7 @@ public class VaultListController implements FxController {
 
 	private final ObservableList<Vault> vaults;
 	private final ObjectProperty<Vault> selectedVault;
+	private final BooleanProperty selectedVaultRemovable;
 	private final VaultListCellFactory cellFactory;
 	private final AddVaultWizardComponent.Builder addVaultWizard;
 	private final RemoveVaultComponent.Builder removeVault;
@@ -41,6 +45,7 @@ public class VaultListController implements FxController {
 		this.removeVault = removeVault;
 		this.noVaultSelected = selectedVault.isNull();
 		this.emptyVaultList = Bindings.isEmpty(vaults);
+		this.selectedVaultRemovable = new SimpleBooleanProperty(false);
 		selectedVault.addListener(this::selectedVaultDidChange);
 	}
 
@@ -59,11 +64,21 @@ public class VaultListController implements FxController {
 	}
 
 	private void selectedVaultDidChange(@SuppressWarnings("unused") ObservableValue<? extends Vault> observableValue, @SuppressWarnings("unused") Vault oldValue, Vault newValue) {
+		if(oldValue != null){
+			oldValue.lockedProperty().removeListener((ChangeListener<? super Boolean>) this::updateSelectedVaultRemovable);
+		}
 		if (newValue == null) {
 			return;
 		}
 		VaultListManager.redetermineVaultState(newValue);
+		selectedVaultRemovable.setValue(newValue.isLocked());
+		newValue.lockedProperty().addListener((ChangeListener<? super Boolean>) this::updateSelectedVaultRemovable);
 	}
+
+	private void updateSelectedVaultRemovable(ObservableValue<? extends Boolean> observableValue, Boolean oldVal, Boolean newVal) {
+		selectedVaultRemovable.setValue(newVal);
+	}
+
 
 	@FXML
 	public void didClickAddVault() {
@@ -97,4 +112,13 @@ public class VaultListController implements FxController {
 	public boolean isNoVaultSelected() {
 		return noVaultSelected.get();
 	}
+
+	public BooleanProperty selectedVaultRemovableProperty() {
+		return selectedVaultRemovable;
+	}
+
+	public boolean isSelectedVaultRemovable() {
+		return selectedVaultRemovable.get();
+	}
+
 }
