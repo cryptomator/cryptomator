@@ -42,6 +42,7 @@ import java.util.EnumSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
@@ -139,7 +140,14 @@ public class Vault {
 			cryptoFileSystem.set(fs);
 			try {
 				volume = volumeProvider.get();
-				volume.mount(fs, getEffectiveMountFlags());
+				volume.mount(fs, getEffectiveMountFlags()).handle((voit, throwable) -> {
+					destroyCryptoFileSystem();
+					setState(VaultState.LOCKED); //TODO: possible race conditions of the vault state. Use Platform.runLater()?
+					if (throwable != null) {
+						LOG.warn("Unexpected unmount and lock of vault" + getDisplayName(), throwable);
+					}
+					return CompletableFuture.completedFuture(null);
+				});
 			} catch (Exception e) {
 				destroyCryptoFileSystem();
 				throw e;
