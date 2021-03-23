@@ -15,10 +15,8 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
-import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.value.ChangeListener;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -27,6 +25,8 @@ import javafx.scene.control.ListView;
 import javafx.stage.Stage;
 import java.util.Optional;
 
+import static org.cryptomator.common.vaults.VaultState.*;
+
 @MainWindowScoped
 public class VaultListController implements FxController {
 
@@ -34,8 +34,7 @@ public class VaultListController implements FxController {
 
 	private final ObservableList<Vault> vaults;
 	private final ObjectProperty<Vault> selectedVault;
-	private final BooleanProperty selectedVaultLocked;
-	private final BooleanProperty selectedVaultUnlocked;
+	private final ObjectProperty<VaultState> selectedVaultState;
 	private final VaultListCellFactory cellFactory;
 	private final Stage mainWindow;
 	private final FxApplication application;
@@ -44,6 +43,9 @@ public class VaultListController implements FxController {
 	private final VaultOptionsComponent.Builder vaultOptionsWindow;
 	private final BooleanBinding noVaultSelected;
 	private final BooleanBinding emptyVaultList;
+	private final BooleanBinding selectedVaultRemovable;
+	private final BooleanBinding selectedVaultLocked;
+	private final BooleanBinding selectedVaultUnlocked;
 
 	public ListView<Vault> vaultList;
 
@@ -59,8 +61,10 @@ public class VaultListController implements FxController {
 		this.noVaultSelected = selectedVault.isNull();
 		this.emptyVaultList = Bindings.isEmpty(vaults);
 		this.vaultOptionsWindow = vaultOptionsWindow;
-		this.selectedVaultLocked = new SimpleBooleanProperty(false);
-		this.selectedVaultUnlocked = new SimpleBooleanProperty(false);
+		this.selectedVaultState = new SimpleObjectProperty<>(null);
+		this.selectedVaultRemovable = Bindings.createBooleanBinding(() -> selectedVaultIsInState(LOCKED, MISSING, ERROR, NEEDS_MIGRATION), selectedVaultState);
+		this.selectedVaultLocked = Bindings.createBooleanBinding(() -> selectedVaultIsInState(LOCKED), selectedVaultState);
+		this.selectedVaultUnlocked = Bindings.createBooleanBinding(() -> selectedVaultIsInState(UNLOCKED), selectedVaultState);
 		selectedVault.addListener(this::selectedVaultDidChange);
 	}
 
@@ -80,24 +84,26 @@ public class VaultListController implements FxController {
 
 	private void selectedVaultDidChange(@SuppressWarnings("unused") ObservableValue<? extends Vault> observableValue, @SuppressWarnings("unused") Vault oldValue, Vault newValue) {
 		if (oldValue != null) {
-			oldValue.stateProperty().removeListener((ChangeListener<? super VaultState>) this::updateVaultStateDependencies);
+			selectedVaultState.unbind();
 		}
 		if (newValue == null) {
 			return;
 		}
 		VaultListManager.redetermineVaultState(newValue);
-		setVaultStateDependencies(newValue.getState());
-		newValue.stateProperty().addListener((ChangeListener<? super VaultState>) this::updateVaultStateDependencies);
+		selectedVaultState.bind(newValue.stateProperty());
 	}
 
-	private void setVaultStateDependencies(VaultState state) {
-		selectedVaultLocked.setValue(state == VaultState.LOCKED);
-		selectedVaultUnlocked.setValue(state == VaultState.UNLOCKED);
-	}
-
-	private void updateVaultStateDependencies(ObservableValue<? extends VaultState> observableValue, VaultState oldVal, VaultState newVal) {
-		selectedVaultLocked.setValue(newVal == VaultState.LOCKED);
-		selectedVaultUnlocked.setValue(newVal == VaultState.UNLOCKED);
+	private boolean selectedVaultIsInState(VaultState other, VaultState... others) {
+		final var state = selectedVaultState.get();
+		if (state == null) {
+			return false;
+		} else {
+			boolean result = (state == other);
+			for (VaultState o : others) {
+				result |= (state == o);
+			}
+			return result;
+		}
 	}
 
 
@@ -164,7 +170,7 @@ public class VaultListController implements FxController {
 		return noVaultSelected.get();
 	}
 
-	public BooleanProperty selectedVaultLockedProperty() {
+	public BooleanBinding selectedVaultLockedProperty() {
 		return selectedVaultLocked;
 	}
 
@@ -172,11 +178,19 @@ public class VaultListController implements FxController {
 		return selectedVaultLocked.get();
 	}
 
-	public BooleanProperty selectedVaultUnlockedProperty() {
+	public BooleanBinding selectedVaultUnlockedProperty() {
 		return selectedVaultUnlocked;
 	}
 
 	public boolean isSelectedVaultUnlocked() {
 		return selectedVaultUnlocked.get();
+	}
+
+	public BooleanBinding selectedVaultRemovableProperty() {
+		return selectedVaultRemovable;
+	}
+
+	public boolean isSelectedVaultRemovable() {
+		return selectedVaultRemovable.get();
 	}
 }

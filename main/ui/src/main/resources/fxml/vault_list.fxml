@@ -22,7 +22,7 @@
 						<MenuItem fx:id="lockEntry" text="%main.vaultlist.contextMenu.lock" onAction="#didClickLockVault" visible="${controller.selectedVaultUnlocked}"/>
 						<MenuItem fx:id="unlockEntry" text="%main.vaultlist.contextMenu.unlock" onAction="#didClickUnlockVault" visible="${controller.selectedVaultLocked}"/>
 						<MenuItem fx:id="optionsEntry" text="%main.vaultlist.contextMenu.vaultoptions" onAction="#didClickShowVaultOptions" disable="${!controller.selectedVaultLocked}"/>
-						<MenuItem fx:id="removeEntry" text="%main.vaultlist.contextMenu.remove" onAction="#didClickRemoveVault" disable="${!controller.selectedVaultLocked}"/>
+						<MenuItem fx:id="removeEntry" text="%main.vaultlist.contextMenu.remove" onAction="#didClickRemoveVault" disable="${!controller.selectedVaultRemovable}"/>
 					</items>
 				</ContextMenu>
 			</contextMenu>
