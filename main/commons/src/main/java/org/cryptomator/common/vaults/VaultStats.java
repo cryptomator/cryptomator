@@ -52,13 +52,13 @@ public class VaultStats {
 	}
 
 	private void vaultStateChanged(@SuppressWarnings("unused") Observable observable) {
-		if (VaultState.UNLOCKED.equals(state.get())) {
+		if (VaultState.UNLOCKED == state.get()) {
 			assert fs.get() != null;
 			LOG.debug("start recording stats");
-			updateService.restart();
+			Platform.runLater(() -> updateService.restart());
 		} else {
 			LOG.debug("stop recording stats");
-			updateService.cancel();
+			Platform.runLater(() -> updateService.cancel());
 		}
 	}
 
