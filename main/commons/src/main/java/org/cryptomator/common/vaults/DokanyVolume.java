@@ -13,6 +13,8 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutorService;
 
 public class DokanyVolume extends AbstractVolume {
@@ -39,7 +41,7 @@ public class DokanyVolume extends AbstractVolume {
 	}
 
 	@Override
-	public void mount(CryptoFileSystem fs, String mountFlags) throws InvalidMountPointException, VolumeException {
+	public CompletionStage<Void> mount(CryptoFileSystem fs, String mountFlags) throws InvalidMountPointException, VolumeException {
 		this.mountPoint = determineMountPoint();
 		try {
 			this.mount = mountFactory.mount(fs.getPath("/"), mountPoint, vaultSettings.mountName().get(), FS_TYPE_NAME, mountFlags.strip());
@@ -49,6 +51,7 @@ public class DokanyVolume extends AbstractVolume {
 			}
 			throw new VolumeException("Unable to mount Filesystem", e);
 		}
+		return CompletableFuture.failedFuture(new IllegalStateException("THOU SHOULD NOT PASS")); //FIXME
 	}
 
 	@Override

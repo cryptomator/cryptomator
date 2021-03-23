@@ -20,6 +20,8 @@ import javax.inject.Named;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.regex.Pattern;
 
 public class FuseVolume extends AbstractVolume {
@@ -35,10 +37,11 @@ public class FuseVolume extends AbstractVolume {
 	}
 
 	@Override
-	public void mount(CryptoFileSystem fs, String mountFlags) throws InvalidMountPointException, VolumeException {
+	public CompletionStage<Void> mount(CryptoFileSystem fs, String mountFlags) throws InvalidMountPointException, VolumeException {
 		this.mountPoint = determineMountPoint();
 
 		mount(fs.getPath("/"), mountFlags);
+		return CompletableFuture.failedFuture(new IllegalStateException("THOU SHOULD NOT PASS")); //FIXME
 	}
 
 	private void mount(Path root, String mountFlags) throws VolumeException {

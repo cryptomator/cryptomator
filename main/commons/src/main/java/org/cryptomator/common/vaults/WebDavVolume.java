@@ -17,6 +17,8 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.file.Path;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.function.Supplier;
 
 public class WebDavVolume implements Volume {
@@ -41,9 +43,10 @@ public class WebDavVolume implements Volume {
 	}
 
 	@Override
-	public void mount(CryptoFileSystem fs, String mountFlags) throws VolumeException {
+	public CompletionStage<Void> mount(CryptoFileSystem fs, String mountFlags) throws VolumeException {
 		startServlet(fs);
 		mountServlet();
+		return CompletableFuture.failedFuture(new IllegalStateException("THOU SHOULD NOT PASS")); //FIXME
 	}
 
 	private void startServlet(CryptoFileSystem fs){
