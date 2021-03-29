@@ -19,6 +19,7 @@
 			<contextMenu>
 				<ContextMenu>
 					<items>
+						<MenuItem fx:id="revealEntry" text="%main.vaultlist.contextMenu.reveal" onAction="#didClickRevealVault" visible="${controller.selectedVaultLockable}"/>
 						<MenuItem fx:id="lockEntry" text="%main.vaultlist.contextMenu.lock" onAction="#didClickLockVault" visible="${controller.selectedVaultLockable}"/>
 						<MenuItem fx:id="unlockEntry" text="%main.vaultlist.contextMenu.unlock" onAction="#didClickUnlockVault" visible="${controller.selectedVaultUnlockable &amp;&amp; !controller.selectedVaultPassphraseStored}"/>
 						<MenuItem fx:id="unlockNowEntry" text="%main.vaultlist.contextMenu.unlockNow" onAction="#didClickUnlockVault" visible="${controller.selectedVaultUnlockable &amp;&amp; controller.selectedVaultPassphraseStored}"/>

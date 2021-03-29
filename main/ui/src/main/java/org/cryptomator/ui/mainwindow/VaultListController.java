@@ -156,6 +156,16 @@ public class VaultListController implements FxController {
 		}
 	}
 
+	@FXML
+	public void didClickRevealVault() {
+		Vault v = selectedVault.get();
+		if (v != null) {
+			application.getVaultService().reveal(v);
+		} else {
+			LOG.debug("Cannot reveal vault if none is selected.");
+		}
+	}
+
 	// Getter and Setter
 
 	public BooleanBinding emptyVaultListProperty() {
