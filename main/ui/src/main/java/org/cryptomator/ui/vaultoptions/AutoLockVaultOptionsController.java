@@ -5,6 +5,8 @@ import org.cryptomator.ui.common.FxController;
 
 import javax.inject.Inject;
 
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.TextField;
@@ -17,10 +19,7 @@ public class AutoLockVaultOptionsController implements FxController {
 
 	private final Vault vault;
 	private final Stage window;
-	public CheckBox lockOnSleepCheckbox;
-	public CheckBox lockAfterIdleTimeCheckbox;
 	public CheckBox lockAfterTimeCheckbox;
-	public TextField lockIdleTimeInMinutesTextField;
 	public TextField lockTimeInMinutesTextField;
 
 	@Inject
@@ -31,10 +30,16 @@ public class AutoLockVaultOptionsController implements FxController {
 
 	@FXML
 	public void initialize() {
-		lockOnSleepCheckbox.selectedProperty().bindBidirectional(vault.getVaultSettings().lockOnSleep());
-		lockAfterIdleTimeCheckbox.selectedProperty().bindBidirectional(vault.getVaultSettings().lockAfterIdleTime());
-		lockIdleTimeInMinutesTextField.textProperty().bindBidirectional(vault.getVaultSettings().lockIdleTimeInMinutes());
 		lockAfterTimeCheckbox.selectedProperty().bindBidirectional(vault.getVaultSettings().lockAfterTime());
 		lockTimeInMinutesTextField.textProperty().bindBidirectional(vault.getVaultSettings().lockTimeInMinutes());
+		//force the field to be a double with the correct decimal point
+		lockTimeInMinutesTextField.textProperty().addListener(new ChangeListener<String>() {
+			@Override
+			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+				if (!newValue.matches("\\d{0,9}([\\.]\\d{0,9})?")) {
+					lockTimeInMinutesTextField.setText(newValue.replaceAll("[^\\d]", ""));
+				}
+			}
+		});
 	}
 }

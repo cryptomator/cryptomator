@@ -37,9 +37,6 @@ public class VaultSettings {
 	public static final String DEFAULT_MOUNT_FLAGS = "";
 	public static final int DEFAULT_FILENAME_LENGTH_LIMIT = -1;
 	public static final WhenUnlocked DEFAULT_ACTION_AFTER_UNLOCK = WhenUnlocked.ASK;
-	public static final boolean DEFAULT_LOCK_ON_SLEEP = false;
-	public static final boolean DEFAULT_LOCK_AFTER_IDLETIME = false;
-	public static final String DEFAULT_LOCK_IDLETIME_IN_MINUTES = "30";
 	public static final boolean DEFAULT_LOCK_AFTER_TIME = false;
 	public static final String DEFAULT_LOCK_TIME_IN_MINUTES = "30";
 
@@ -57,9 +54,6 @@ public class VaultSettings {
 	private final StringProperty mountFlags = new SimpleStringProperty(DEFAULT_MOUNT_FLAGS);
 	private final IntegerProperty filenameLengthLimit = new SimpleIntegerProperty(DEFAULT_FILENAME_LENGTH_LIMIT);
 	private final ObjectProperty<WhenUnlocked> actionAfterUnlock = new SimpleObjectProperty<>(DEFAULT_ACTION_AFTER_UNLOCK);
-	private final BooleanProperty lockOnSleep = new SimpleBooleanProperty(DEFAULT_LOCK_ON_SLEEP);
-	private final BooleanProperty lockAfterIdleTime = new SimpleBooleanProperty(DEFAULT_LOCK_AFTER_IDLETIME);
-	private final StringProperty lockIdleTimeInMinutes = new SimpleStringProperty(DEFAULT_LOCK_IDLETIME_IN_MINUTES);
 	private final BooleanProperty lockAfterTime = new SimpleBooleanProperty(DEFAULT_LOCK_AFTER_TIME);
 	private final StringProperty lockTimeInMinutes = new SimpleStringProperty(DEFAULT_LOCK_TIME_IN_MINUTES);
 	private final StringBinding mountName;
@@ -70,7 +64,7 @@ public class VaultSettings {
 	}
 
 	Observable[] observables() {
-		return new Observable[]{path, displayName, winDriveLetter, unlockAfterStartup, revealAfterMount, useCustomMountPath, customMountPath, usesReadOnlyMode, mountFlags, filenameLengthLimit, actionAfterUnlock, lockOnSleep, lockAfterIdleTime, lockIdleTimeInMinutes, lockAfterTime, lockTimeInMinutes};
+		return new Observable[]{path, displayName, winDriveLetter, unlockAfterStartup, revealAfterMount, useCustomMountPath, customMountPath, usesReadOnlyMode, mountFlags, filenameLengthLimit, actionAfterUnlock,  lockAfterTime, lockTimeInMinutes};
 	}
 
 	public static VaultSettings withRandomId() {
@@ -169,18 +163,6 @@ public class VaultSettings {
 
 	public WhenUnlocked getActionAfterUnlock() {
 		return actionAfterUnlock.get();
-	}
-
-	public BooleanProperty lockOnSleep() {
-		return lockOnSleep;
-	}
-
-	public BooleanProperty lockAfterIdleTime() {
-		return lockAfterIdleTime;
-	}
-
-	public StringProperty lockIdleTimeInMinutes() {
-		return lockIdleTimeInMinutes;
 	}
 
 	public BooleanProperty lockAfterTime() {
