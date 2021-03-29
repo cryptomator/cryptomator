@@ -93,17 +93,9 @@ public class VaultListController implements FxController {
 		selectedVaultState.bind(newValue.stateProperty());
 	}
 
-	private boolean selectedVaultIsInState(VaultState other, VaultState... others) {
-		final var state = selectedVaultState.get();
-		if (state == null) {
-			return false;
-		} else {
-			boolean result = (state == other);
-			for (VaultState o : others) {
-				result |= (state == o);
-			}
-			return result;
-		}
+	private boolean selectedVaultIsInState(VaultState... states) {
+		var state = selectedVaultState.get();
+		return Arrays.stream(states).anyMatch(s -> state == s);
 	}
 
 
