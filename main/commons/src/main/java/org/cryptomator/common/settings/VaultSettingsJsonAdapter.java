@@ -34,6 +34,8 @@ class VaultSettingsJsonAdapter {
 		out.name("lockOnSleep").value(value.lockOnSleep().get());
 		out.name("lockAfterIdleTime").value(value.lockAfterIdleTime().get());
 		out.name("lockIdleTimeInMinutes").value(value.lockIdleTimeInMinutes().get());
+		out.name("lockAfterTime").value(value.lockAfterTime().get());
+		out.name("lockTimeInMinutes").value(value.lockTimeInMinutes().get());
 		out.endObject();
 	}
 
@@ -54,6 +56,8 @@ class VaultSettingsJsonAdapter {
 		boolean lockOnSleep = VaultSettings.DEFAULT_LOCK_ON_SLEEP;
 		boolean lockAfterIdleTime = VaultSettings.DEFAULT_LOCK_AFTER_IDLETIME;
 		String lockIdleTimeInMinutes = VaultSettings.DEFAULT_LOCK_IDLETIME_IN_MINUTES;
+		boolean lockAfterTime = VaultSettings.DEFAULT_LOCK_AFTER_TIME;
+		String lockTimeInMinutes = VaultSettings.DEFAULT_LOCK_TIME_IN_MINUTES;
 
 		in.beginObject();
 		while (in.hasNext()) {
@@ -75,6 +79,8 @@ class VaultSettingsJsonAdapter {
 				case "lockOnSleep" -> lockOnSleep = in.nextBoolean();
 				case "lockAfterIdleTime" -> lockAfterIdleTime = in.nextBoolean();
 				case "lockIdleTimeInMinutes" -> lockIdleTimeInMinutes = in.nextString();
+				case "lockAfterTime" -> lockAfterTime = in.nextBoolean();
+				case "lockTimeInMinutes" -> lockTimeInMinutes = in.nextString();
 				default -> {
 					LOG.warn("Unsupported vault setting found in JSON: " + name);
 					in.skipValue();
@@ -102,6 +108,8 @@ class VaultSettingsJsonAdapter {
 		vaultSettings.lockOnSleep().set(lockOnSleep);
 		vaultSettings.lockAfterIdleTime().set(lockAfterIdleTime);
 		vaultSettings.lockIdleTimeInMinutes().set(lockIdleTimeInMinutes);
+		vaultSettings.lockAfterTime().set(lockAfterTime);
+		vaultSettings.lockTimeInMinutes().set(lockTimeInMinutes);
 		return vaultSettings;
 	}
 

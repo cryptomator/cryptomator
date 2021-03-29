@@ -19,13 +19,14 @@ public class AutoLockVaultOptionsController implements FxController {
 	private final Stage window;
 	public CheckBox lockOnSleepCheckbox;
 	public CheckBox lockAfterIdleTimeCheckbox;
+	public CheckBox lockAfterTimeCheckbox;
 	public TextField lockIdleTimeInMinutesTextField;
+	public TextField lockTimeInMinutesTextField;
 
 	@Inject
 	AutoLockVaultOptionsController(@VaultOptionsWindow Stage window, @VaultOptionsWindow Vault vault, ResourceBundle resourceBundle) {
 		this.window = window;
 		this.vault = vault;
-		//this.resourceBundle = resourceBundle;
 	}
 
 	@FXML
@@ -33,5 +34,7 @@ public class AutoLockVaultOptionsController implements FxController {
 		lockOnSleepCheckbox.selectedProperty().bindBidirectional(vault.getVaultSettings().lockOnSleep());
 		lockAfterIdleTimeCheckbox.selectedProperty().bindBidirectional(vault.getVaultSettings().lockAfterIdleTime());
 		lockIdleTimeInMinutesTextField.textProperty().bindBidirectional(vault.getVaultSettings().lockIdleTimeInMinutes());
+		lockAfterTimeCheckbox.selectedProperty().bindBidirectional(vault.getVaultSettings().lockAfterTime());
+		lockTimeInMinutesTextField.textProperty().bindBidirectional(vault.getVaultSettings().lockTimeInMinutes());
 	}
 }

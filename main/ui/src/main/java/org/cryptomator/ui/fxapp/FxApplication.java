@@ -15,9 +15,9 @@ import org.cryptomator.common.settings.UiTheme;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultListManager;
 import org.cryptomator.common.vaults.Volume;
-import org.cryptomator.integrations.autolock.AutoLockException;
-import org.cryptomator.integrations.autolock.AutoLockProvider;
-import org.cryptomator.integrations.autolock.SystemState;
+//import org.cryptomator.integrations.autolock.AutoLockException;
+//import org.cryptomator.integrations.autolock.AutoLockProvider;
+//import org.cryptomator.integrations.autolock.SystemState;
 import org.cryptomator.integrations.tray.TrayIntegrationProvider;
 import org.cryptomator.integrations.uiappearance.Theme;
 import org.cryptomator.integrations.uiappearance.UiAppearanceException;
@@ -36,8 +36,7 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import java.awt.desktop.QuitResponse;
-import java.awt.desktop.SystemSleepEvent;
-import java.awt.desktop.SystemSleepListener;
+import java.util.Date;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -61,10 +60,12 @@ public class FxApplication extends Application {
 	private final BooleanBinding hasVisibleWindows;
 	private final UiAppearanceListener systemInterfaceThemeListener = this::systemInterfaceThemeChanged;
 	private final VaultListManager vaultListManager;
-	private final Optional<AutoLockProvider> autoLockProvider;
+	//private final Optional<AutoLockProvider> autoLockProvider;
 
 	@Inject
-	FxApplication(Settings settings, Lazy<MainWindowComponent> mainWindow, Lazy<PreferencesComponent> preferencesWindow, Provider<UnlockComponent.Builder> unlockWindowBuilderProvider, Provider<LockComponent.Builder> lockWindowBuilderProvider, Lazy<QuitComponent> quitWindow, Optional<TrayIntegrationProvider> trayIntegration, Optional<UiAppearanceProvider> appearanceProvider, VaultService vaultService, LicenseHolder licenseHolder, VaultListManager vaultListManager, Optional<AutoLockProvider> autoLockProvider) {
+	//FxApplication(Settings settings, Lazy<MainWindowComponent> mainWindow, Lazy<PreferencesComponent> preferencesWindow, Provider<UnlockComponent.Builder> unlockWindowBuilderProvider, Provider<LockComponent.Builder> lockWindowBuilderProvider, Lazy<QuitComponent> quitWindow, Optional<TrayIntegrationProvider> trayIntegration, Optional<UiAppearanceProvider> appearanceProvider, VaultService vaultService, LicenseHolder licenseHolder, VaultListManager vaultListManager, Optional<AutoLockProvider> autoLockProvider) {
+	FxApplication(Settings settings, Lazy<MainWindowComponent> mainWindow, Lazy<PreferencesComponent> preferencesWindow, Provider<UnlockComponent.Builder> unlockWindowBuilderProvider, Provider<LockComponent.Builder> lockWindowBuilderProvider, Lazy<QuitComponent> quitWindow, Optional<TrayIntegrationProvider> trayIntegration, Optional<UiAppearanceProvider> appearanceProvider, VaultService vaultService, LicenseHolder licenseHolder, VaultListManager vaultListManager) {
+
 		this.settings = settings;
 		this.mainWindow = mainWindow;
 		this.preferencesWindow = preferencesWindow;
@@ -78,7 +79,7 @@ public class FxApplication extends Application {
 		this.visibleWindows = Stage.getWindows().filtered(Window::isShowing);
 		this.hasVisibleWindows = Bindings.isNotEmpty(visibleWindows);
 		this.vaultListManager = vaultListManager;
-		this.autoLockProvider = autoLockProvider;
+		//this.autoLockProvider = autoLockProvider;
 	}
 
 	public void start() {
@@ -89,7 +90,7 @@ public class FxApplication extends Application {
 
 		settings.theme().addListener(this::appThemeChanged);
 		loadSelectedStyleSheet(settings.theme().get());
-		applySystemListener();
+		//applySystemListener();
 	}
 
 	@Override
@@ -128,6 +129,7 @@ public class FxApplication extends Application {
 			unlockWindowBuilderProvider.get().vault(vault).owner(owner).build().startUnlockWorkflow();
 			LOG.debug("Showing UnlockWindow for {}", vault.getDisplayName());
 		});
+		checkAutolock(vault, owner);
 	}
 
 	public void startLockWorkflow(Vault vault, Optional<Stage> owner) {
@@ -204,7 +206,7 @@ public class FxApplication extends Application {
 		});
 	}
 
-	private void applySystemListener() {
+	/*private void applySystemListener() {
 		autoLockProvider.ifPresent(autoLockProvider -> {
 			try {
 				autoLockProvider.addListener(this::systemInterfaceStateChanged);
@@ -228,6 +230,22 @@ public class FxApplication extends Application {
 				}
 			}
 		});
+	}
+	 */
+
+	public void checkAutolock(Vault vault,  Optional<Stage> owner){
+		if (vault.getVaultSettings().lockAfterTime().get()){ //TODO: this is lock after a fixed amount of minutes
+			LOG.info("Locking after {} minutes", vault.getVaultSettings().lockTimeInMinutes().get());
+			new java.util.Timer().schedule(
+					new java.util.TimerTask() {
+						@Override
+						public void run() {
+							startLockWorkflow(vault, owner);
+						}
+					},
+					new Date(System.currentTimeMillis() + Integer.parseInt(vault.getVaultSettings().lockTimeInMinutes().get()) * 60 * 1000)
+			);
+		}
 	}
 
 }

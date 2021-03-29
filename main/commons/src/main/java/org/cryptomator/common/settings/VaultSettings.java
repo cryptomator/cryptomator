@@ -40,6 +40,8 @@ public class VaultSettings {
 	public static final boolean DEFAULT_LOCK_ON_SLEEP = false;
 	public static final boolean DEFAULT_LOCK_AFTER_IDLETIME = false;
 	public static final String DEFAULT_LOCK_IDLETIME_IN_MINUTES = "30";
+	public static final boolean DEFAULT_LOCK_AFTER_TIME = false;
+	public static final String DEFAULT_LOCK_TIME_IN_MINUTES = "30";
 
 	private static final Random RNG = new Random();
 
@@ -58,6 +60,8 @@ public class VaultSettings {
 	private final BooleanProperty lockOnSleep = new SimpleBooleanProperty(DEFAULT_LOCK_ON_SLEEP);
 	private final BooleanProperty lockAfterIdleTime = new SimpleBooleanProperty(DEFAULT_LOCK_AFTER_IDLETIME);
 	private final StringProperty lockIdleTimeInMinutes = new SimpleStringProperty(DEFAULT_LOCK_IDLETIME_IN_MINUTES);
+	private final BooleanProperty lockAfterTime = new SimpleBooleanProperty(DEFAULT_LOCK_AFTER_TIME);
+	private final StringProperty lockTimeInMinutes = new SimpleStringProperty(DEFAULT_LOCK_TIME_IN_MINUTES);
 	private final StringBinding mountName;
 
 	public VaultSettings(String id) {
@@ -66,7 +70,7 @@ public class VaultSettings {
 	}
 
 	Observable[] observables() {
-		return new Observable[]{path, displayName, winDriveLetter, unlockAfterStartup, revealAfterMount, useCustomMountPath, customMountPath, usesReadOnlyMode, mountFlags, filenameLengthLimit, actionAfterUnlock, lockOnSleep, lockAfterIdleTime, lockIdleTimeInMinutes};
+		return new Observable[]{path, displayName, winDriveLetter, unlockAfterStartup, revealAfterMount, useCustomMountPath, customMountPath, usesReadOnlyMode, mountFlags, filenameLengthLimit, actionAfterUnlock, lockOnSleep, lockAfterIdleTime, lockIdleTimeInMinutes, lockAfterTime, lockTimeInMinutes};
 	}
 
 	public static VaultSettings withRandomId() {
@@ -177,6 +181,14 @@ public class VaultSettings {
 
 	public StringProperty lockIdleTimeInMinutes() {
 		return lockIdleTimeInMinutes;
+	}
+
+	public BooleanProperty lockAfterTime() {
+		return lockAfterTime;
+	}
+
+	public StringProperty lockTimeInMinutes() {
+		return lockTimeInMinutes;
 	}
 
 	/* Hashcode/Equals */
