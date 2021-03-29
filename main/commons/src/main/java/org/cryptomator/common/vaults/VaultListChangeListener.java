@@ -22,10 +22,10 @@ class VaultListChangeListener implements ListChangeListener<Vault> {
 	public void onChanged(Change<? extends Vault> c) {
 		while (c.next()) {
 			if (c.wasAdded()) {
-				List<VaultSettings> addedSettings = c.getAddedSubList().stream().map(Vault::getVaultSettings).collect(Collectors.toList());
+				List<VaultSettings> addedSettings = c.getAddedSubList().stream().map(Vault::getVaultSettings).toList();
 				vaultSettingsList.addAll(c.getFrom(), addedSettings);
 			} else if (c.wasRemoved()) {
-				List<VaultSettings> removedSettings = c.getRemoved().stream().map(Vault::getVaultSettings).collect(Collectors.toList());
+				List<VaultSettings> removedSettings = c.getRemoved().stream().map(Vault::getVaultSettings).toList();
 				vaultSettingsList.removeAll(removedSettings);
 			}
 		}
