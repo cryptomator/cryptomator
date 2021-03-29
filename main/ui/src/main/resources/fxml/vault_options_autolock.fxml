@@ -22,15 +22,5 @@
 			<Text text=" "/>
 			<FormattedLabel format="%vaultOptions.autoLock.lockAfterTimePart2"/>
 		</TextFlow>
-
-		<CheckBox text="%vaultOptions.autoLock.lockOnSleep" fx:id="lockOnSleepCheckbox"/>
-		<TextFlow styleClass="text-flow" prefWidth="-Infinity">
-			<CheckBox text="%vaultOptions.autoLock.lockAfterIdleTimePart1" fx:id="lockAfterIdleTimeCheckbox"/>
-			<Text text=" "/>
-			<TextField fx:id="lockIdleTimeInMinutesTextField" prefWidth="50"/>
-			<Text text=" "/>
-			<FormattedLabel format="%vaultOptions.autoLock.lockAfterIdleTimePart2"/>
-		</TextFlow>
-
 	</children>
 </VBox>
