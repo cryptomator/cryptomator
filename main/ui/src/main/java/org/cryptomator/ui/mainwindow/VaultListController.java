@@ -1,5 +1,6 @@
 package org.cryptomator.ui.mainwindow;
 
+import org.cryptomator.common.keychain.KeychainManager;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultListManager;
 import org.cryptomator.common.vaults.VaultState;
@@ -15,7 +16,9 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
@@ -36,36 +39,38 @@ public class VaultListController implements FxController {
 	private final ObservableList<Vault> vaults;
 	private final ObjectProperty<Vault> selectedVault;
 	private final ObjectProperty<VaultState> selectedVaultState;
+	private final BooleanProperty selectedVaultPassphraseStored;
 	private final VaultListCellFactory cellFactory;
 	private final Stage mainWindow;
 	private final FxApplication application;
+	private final KeychainManager keychain;
 	private final AddVaultWizardComponent.Builder addVaultWizard;
 	private final RemoveVaultComponent.Builder removeVault;
 	private final VaultOptionsComponent.Builder vaultOptionsWindow;
-	private final BooleanBinding noVaultSelected;
 	private final BooleanBinding emptyVaultList;
 	private final BooleanBinding selectedVaultRemovable;
-	private final BooleanBinding selectedVaultLocked;
-	private final BooleanBinding selectedVaultUnlocked;
+	private final BooleanBinding selectedVaultUnlockable;
+	private final BooleanBinding selectedVaultLockable;
 
 	public ListView<Vault> vaultList;
 
 	@Inject
-	VaultListController(ObservableList<Vault> vaults, ObjectProperty<Vault> selectedVault, VaultListCellFactory cellFactory, @MainWindow Stage mainWindow, FxApplication application, AddVaultWizardComponent.Builder addVaultWizard, RemoveVaultComponent.Builder removeVault, VaultOptionsComponent.Builder vaultOptionsWindow) {
+	VaultListController(ObservableList<Vault> vaults, ObjectProperty<Vault> selectedVault, VaultListCellFactory cellFactory, @MainWindow Stage mainWindow, FxApplication application, KeychainManager keychain, AddVaultWizardComponent.Builder addVaultWizard, RemoveVaultComponent.Builder removeVault, VaultOptionsComponent.Builder vaultOptionsWindow) {
 		this.vaults = vaults;
 		this.selectedVault = selectedVault;
 		this.cellFactory = cellFactory;
 		this.mainWindow = mainWindow;
 		this.application = application;
+		this.keychain = keychain;
 		this.addVaultWizard = addVaultWizard;
 		this.removeVault = removeVault;
-		this.noVaultSelected = selectedVault.isNull();
 		this.emptyVaultList = Bindings.isEmpty(vaults);
 		this.vaultOptionsWindow = vaultOptionsWindow;
 		this.selectedVaultState = new SimpleObjectProperty<>(null);
+		this.selectedVaultPassphraseStored = new SimpleBooleanProperty(false);
 		this.selectedVaultRemovable = Bindings.createBooleanBinding(() -> selectedVaultIsInState(LOCKED, MISSING, ERROR, NEEDS_MIGRATION), selectedVaultState);
-		this.selectedVaultLocked = Bindings.createBooleanBinding(() -> selectedVaultIsInState(LOCKED), selectedVaultState);
-		this.selectedVaultUnlocked = Bindings.createBooleanBinding(() -> selectedVaultIsInState(UNLOCKED), selectedVaultState);
+		this.selectedVaultUnlockable = Bindings.createBooleanBinding(() -> selectedVaultIsInState(LOCKED), selectedVaultState);
+		this.selectedVaultLockable = Bindings.createBooleanBinding(() -> selectedVaultIsInState(UNLOCKED), selectedVaultState);
 		selectedVault.addListener(this::selectedVaultDidChange);
 	}
 
@@ -73,6 +78,10 @@ public class VaultListController implements FxController {
 		vaultList.setItems(vaults);
 		vaultList.setCellFactory(cellFactory);
 		selectedVault.bind(vaultList.getSelectionModel().selectedItemProperty());
+		if (selectedVault.get() != null) {
+			selectedVaultState.set(selectedVault.get().getState());
+			selectedVaultPassphraseStored.bind(keychain.getPassphraseStoredProperty(selectedVault.get().getId()));
+		}
 		vaults.addListener((ListChangeListener.Change<? extends Vault> c) -> {
 			while (c.next()) {
 				if (c.wasAdded()) {
@@ -86,12 +95,14 @@ public class VaultListController implements FxController {
 	private void selectedVaultDidChange(@SuppressWarnings("unused") ObservableValue<? extends Vault> observableValue, @SuppressWarnings("unused") Vault oldValue, Vault newValue) {
 		if (oldValue != null) {
 			selectedVaultState.unbind();
+			selectedVaultPassphraseStored.unbind();
 		}
 		if (newValue == null) {
 			return;
 		}
 		VaultListManager.redetermineVaultState(newValue);
 		selectedVaultState.bind(newValue.stateProperty());
+		selectedVaultPassphraseStored.bind(keychain.getPassphraseStoredProperty(newValue.getId()));
 	}
 
 	private boolean selectedVaultIsInState(VaultState... states) {
@@ -155,28 +166,20 @@ public class VaultListController implements FxController {
 		return emptyVaultList.get();
 	}
 
-	public BooleanBinding noVaultSelectedProperty() {
-		return noVaultSelected;
+	public BooleanBinding selectedVaultUnlockableProperty() {
+		return selectedVaultUnlockable;
 	}
 
-	public boolean isNoVaultSelected() {
-		return noVaultSelected.get();
+	public boolean isSelectedVaultUnlockable() {
+		return selectedVaultUnlockable.get();
 	}
 
-	public BooleanBinding selectedVaultLockedProperty() {
-		return selectedVaultLocked;
+	public BooleanBinding selectedVaultLockableProperty() {
+		return selectedVaultLockable;
 	}
 
-	public boolean isSelectedVaultLocked() {
-		return selectedVaultLocked.get();
-	}
-
-	public BooleanBinding selectedVaultUnlockedProperty() {
-		return selectedVaultUnlocked;
-	}
-
-	public boolean isSelectedVaultUnlocked() {
-		return selectedVaultUnlocked.get();
+	public boolean isSelectedVaultLockable() {
+		return selectedVaultLockable.get();
 	}
 
 	public BooleanBinding selectedVaultRemovableProperty() {
@@ -185,5 +188,13 @@ public class VaultListController implements FxController {
 
 	public boolean isSelectedVaultRemovable() {
 		return selectedVaultRemovable.get();
+	}
+
+	public BooleanProperty selectedVaultPassphraseStoredProperty() {
+		return selectedVaultPassphraseStored;
+	}
+
+	public boolean isSelectedVaultPassphraseStored() {
+		return selectedVaultPassphraseStored.get();
 	}
 }
