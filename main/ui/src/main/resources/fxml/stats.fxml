@@ -13,6 +13,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Arc?>
+<?import org.cryptomator.ui.stats.SmoothAreaChart?>
 <HBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
 	  fx:controller="org.cryptomator.ui.stats.VaultStatisticsController"
@@ -38,7 +39,7 @@
 	<!-- Read -->
 	<VBox prefWidth="300" prefHeight="300" spacing="6" alignment="CENTER">
 		<ThrougputLabel styleClass="label-large" idleFormat="%stats.read.throughput.idle" kibsFormat="%stats.read.throughput.kibs" mibsFormat="%stats.read.throughput.mibs" bytesPerSecond="${controller.bpsRead}"/>
-		<AreaChart fx:id="readChart" styleClass="io-stats" createSymbols="false" animated="false">
+		<SmoothAreaChart fx:id="readChart" styleClass="io-stats" createSymbols="false" animated="false">
 			<xAxis>
 				<NumberAxis fx:id="readChartXAxis" styleClass="io-stats" autoRanging="false" forceZeroInRange="false" side="BOTTOM"/>
 			</xAxis>
@@ -48,7 +49,7 @@
 			<cursor>
 				<Cursor fx:constant="DEFAULT"/>
 			</cursor>
-		</AreaChart>
+		</SmoothAreaChart>
 		<DataLabel byteFormat="%stats.read.total.data.none" kibFormat="%stats.read.total.data.kib" mibFormat="%stats.read.total.data.mib" gibFormat="%stats.read.total.data.gib" dataInBytes="${controller.totalBytesRead}"/>
 		<DataLabel byteFormat="%stats.decr.total.data.none" kibFormat="%stats.decr.total.data.kib" mibFormat="%stats.decr.total.data.mib" gibFormat="%stats.decr.total.data.gib" dataInBytes="${controller.totalBytesDecrypted}"/>
 		<FormattedLabel format="%stats.read.accessCount" arg1="${controller.filesRead}"/>
