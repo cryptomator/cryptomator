@@ -25,6 +25,8 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.ListView;
+import javafx.scene.input.ContextMenuEvent;
+import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 import java.util.Arrays;
 import java.util.Optional;
@@ -90,6 +92,19 @@ public class VaultListController implements FxController {
 				}
 			}
 		});
+		vaultList.addEventFilter(MouseEvent.MOUSE_RELEASED, this::deselect);
+		vaultList.addEventFilter(ContextMenuEvent.CONTEXT_MENU_REQUESTED, request -> {
+			if (selectedVault.get() == null) {
+				request.consume();
+			}
+		});
+	}
+
+	private void deselect(MouseEvent released) {
+		if (released.getY() > (vaultList.getItems().size() * vaultList.fixedCellSizeProperty().get())) {
+			vaultList.getSelectionModel().clearSelection();
+			released.consume();
+		}
 	}
 
 	private void selectedVaultDidChange(@SuppressWarnings("unused") ObservableValue<? extends Vault> observableValue, @SuppressWarnings("unused") Vault oldValue, Vault newValue) {

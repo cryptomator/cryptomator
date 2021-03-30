@@ -15,7 +15,7 @@
 	  fx:controller="org.cryptomator.ui.mainwindow.VaultListController"
 	  minWidth="206">
 	<StackPane VBox.vgrow="ALWAYS">
-		<ListView fx:id="vaultList" editable="true">
+		<ListView fx:id="vaultList" editable="true" fixedCellSize="60">
 			<contextMenu>
 				<ContextMenu>
 					<items>
