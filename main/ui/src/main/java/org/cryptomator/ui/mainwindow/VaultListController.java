@@ -66,13 +66,15 @@ public class VaultListController implements FxController {
 		this.keychain = keychain;
 		this.addVaultWizard = addVaultWizard;
 		this.removeVault = removeVault;
-		this.emptyVaultList = Bindings.isEmpty(vaults);
 		this.vaultOptionsWindow = vaultOptionsWindow;
+
+		this.emptyVaultList = Bindings.isEmpty(vaults);
 		this.selectedVaultState = new SimpleObjectProperty<>(null);
 		this.selectedVaultPassphraseStored = new SimpleBooleanProperty(false);
 		this.selectedVaultRemovable = Bindings.createBooleanBinding(() -> selectedVaultIsInState(LOCKED, MISSING, ERROR, NEEDS_MIGRATION), selectedVaultState);
 		this.selectedVaultUnlockable = Bindings.createBooleanBinding(() -> selectedVaultIsInState(LOCKED), selectedVaultState);
 		this.selectedVaultLockable = Bindings.createBooleanBinding(() -> selectedVaultIsInState(UNLOCKED), selectedVaultState);
+
 		selectedVault.addListener(this::selectedVaultDidChange);
 	}
 
@@ -124,7 +126,6 @@ public class VaultListController implements FxController {
 		var state = selectedVaultState.get();
 		return Arrays.stream(states).anyMatch(s -> state == s);
 	}
-
 
 	@FXML
 	public void didClickAddVault() {
