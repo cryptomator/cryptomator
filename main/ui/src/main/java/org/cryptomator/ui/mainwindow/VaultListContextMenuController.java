@@ -1,6 +1,8 @@
 package org.cryptomator.ui.mainwindow;
 
 import com.tobiasdiez.easybind.EasyBind;
+import com.tobiasdiez.easybind.optional.ObservableOptionalValue;
+import com.tobiasdiez.easybind.optional.OptionalBinding;
 import org.cryptomator.common.keychain.KeychainManager;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
@@ -9,18 +11,15 @@ import org.cryptomator.ui.fxapp.FxApplication;
 import org.cryptomator.ui.removevault.RemoveVaultComponent;
 import org.cryptomator.ui.vaultoptions.SelectedVaultOptionsTab;
 import org.cryptomator.ui.vaultoptions.VaultOptionsComponent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javafx.beans.binding.Binding;
 import javafx.beans.binding.Bindings;
-import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.fxml.FXML;
 import javafx.stage.Stage;
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.Optional;
 
 import static org.cryptomator.common.vaults.VaultState.ERROR;
@@ -32,126 +31,105 @@ import static org.cryptomator.common.vaults.VaultState.UNLOCKED;
 @MainWindowScoped
 public class VaultListContextMenuController implements FxController {
 
-	private static final Logger LOG = LoggerFactory.getLogger(VaultListContextMenuController.class);
-
-	private final ReadOnlyObjectProperty<Vault> selectedVault;
+	private final ObservableOptionalValue<Vault> selectedVault;
 	private final Stage mainWindow;
 	private final FxApplication application;
 	private final KeychainManager keychain;
 	private final RemoveVaultComponent.Builder removeVault;
 	private final VaultOptionsComponent.Builder vaultOptionsWindow;
-	private final Binding<VaultState> selectedVaultState;
-	private final BooleanBinding selectedVaultPassphraseStored;
-	private final BooleanBinding selectedVaultRemovable;
-	private final BooleanBinding selectedVaultUnlockable;
-	private final BooleanBinding selectedVaultLockable;
+	private final OptionalBinding<VaultState> selectedVaultState;
+	private final Binding<Boolean> selectedVaultPassphraseStored;
+	private final Binding<Boolean> selectedVaultRemovable;
+	private final Binding<Boolean> selectedVaultUnlockable;
+	private final Binding<Boolean> selectedVaultLockable;
 
 	@Inject
 	VaultListContextMenuController(ObjectProperty<Vault> selectedVault, @MainWindow Stage mainWindow, FxApplication application, KeychainManager keychain, RemoveVaultComponent.Builder removeVault, VaultOptionsComponent.Builder vaultOptionsWindow) {
-		this.selectedVault = selectedVault;
+		this.selectedVault = EasyBind.wrapNullable(selectedVault);
 		this.mainWindow = mainWindow;
 		this.application = application;
 		this.keychain = keychain;
 		this.removeVault = removeVault;
 		this.vaultOptionsWindow = vaultOptionsWindow;
 
-		this.selectedVaultState = EasyBind.wrapNullable(selectedVault).mapObservable(Vault::stateProperty).orElse((VaultState) null);
-		this.selectedVaultPassphraseStored = Bindings.createBooleanBinding(this::isSelectedVaultPassphraseStored, selectedVault);
-		this.selectedVaultRemovable = Bindings.createBooleanBinding(() -> selectedVaultIsInState(LOCKED, MISSING, ERROR, NEEDS_MIGRATION), selectedVaultState);
-		this.selectedVaultUnlockable = Bindings.createBooleanBinding(() -> selectedVaultIsInState(LOCKED), selectedVaultState);
-		this.selectedVaultLockable = Bindings.createBooleanBinding(() -> selectedVaultIsInState(UNLOCKED), selectedVaultState);
+		this.selectedVaultState = this.selectedVault.mapObservable(Vault::stateProperty);
+		this.selectedVaultPassphraseStored = this.selectedVault.map(this::isPasswordStored).orElse(false);
+		this.selectedVaultRemovable = selectedVaultState.map(EnumSet.of(LOCKED, MISSING, ERROR, NEEDS_MIGRATION)::contains).orElse(false);
+		this.selectedVaultUnlockable = selectedVaultState.map(LOCKED::equals).orElse(false);
+		this.selectedVaultLockable = selectedVaultState.map(UNLOCKED::equals).orElse(false);
+
 	}
 
-	private boolean selectedVaultIsInState(VaultState... states) {
-		var state = selectedVaultState.getValue();
-		return Arrays.stream(states).anyMatch(s -> state == s);
+	private boolean isPasswordStored(Vault vault) {
+		return keychain.getPassphraseStoredProperty(vault.getId()).get();
 	}
 
 	@FXML
 	public void didClickRemoveVault() {
-		Vault v = selectedVault.get();
-		if (v != null) {
+		selectedVault.ifValuePresent(v -> {
 			removeVault.vault(v).build().showRemoveVault();
-		} else {
-			LOG.debug("Cannot remove a vault if none is selected.");
-		}
+		});
 	}
 
 	@FXML
 	public void didClickShowVaultOptions() {
-		Vault v = selectedVault.get();
-		if (v != null) {
+		selectedVault.ifValuePresent(v -> {
 			vaultOptionsWindow.vault(v).build().showVaultOptionsWindow(SelectedVaultOptionsTab.ANY);
-		} else {
-			LOG.debug("Cannot open vault options if none is selected.");
-		}
+		});
 	}
 
 	@FXML
 	public void didClickUnlockVault() {
-		Vault v = selectedVault.get();
-		if (v != null) {
+		selectedVault.ifValuePresent(v -> {
 			application.startUnlockWorkflow(v, Optional.of(mainWindow));
-		} else {
-			LOG.debug("Cannot unlock vault if none is selected.");
-		}
+		});
 	}
 
 	@FXML
 	public void didClickLockVault() {
-		Vault v = selectedVault.get();
-		if (v != null) {
+		selectedVault.ifValuePresent(v -> {
 			application.startLockWorkflow(v, Optional.of(mainWindow));
-		} else {
-			LOG.debug("Cannot lock vault if none is selected.");
-		}
+		});
 	}
 
 	@FXML
 	public void didClickRevealVault() {
-		Vault v = selectedVault.get();
-		if (v != null) {
+		selectedVault.ifValuePresent(v -> {
 			application.getVaultService().reveal(v);
-		} else {
-			LOG.debug("Cannot reveal vault if none is selected.");
-		}
+		});
 	}
 
 	// Getter and Setter
 
-	public BooleanBinding selectedVaultUnlockableProperty() {
+	public Binding<Boolean> selectedVaultUnlockableProperty() {
 		return selectedVaultUnlockable;
 	}
 
 	public boolean isSelectedVaultUnlockable() {
-		return selectedVaultUnlockable.get();
+		return selectedVaultUnlockable.getValue();
 	}
 
-	public BooleanBinding selectedVaultLockableProperty() {
+	public Binding<Boolean> selectedVaultLockableProperty() {
 		return selectedVaultLockable;
 	}
 
 	public boolean isSelectedVaultLockable() {
-		return selectedVaultLockable.get();
+		return selectedVaultLockable.getValue();
 	}
 
-	public BooleanBinding selectedVaultRemovableProperty() {
+	public Binding<Boolean> selectedVaultRemovableProperty() {
 		return selectedVaultRemovable;
 	}
 
 	public boolean isSelectedVaultRemovable() {
-		return selectedVaultRemovable.get();
+		return selectedVaultRemovable.getValue();
 	}
 
-	public BooleanBinding selectedVaultPassphraseStoredProperty() {
+	public Binding<Boolean> selectedVaultPassphraseStoredProperty() {
 		return selectedVaultPassphraseStored;
 	}
 
 	public boolean isSelectedVaultPassphraseStored() {
-		if (selectedVault.get() == null) {
-			return false;
-		} else {
-			return keychain.getPassphraseStoredProperty(selectedVault.get().getId()).get();
-		}
+		return selectedVaultPassphraseStored.getValue();
 	}
 }
