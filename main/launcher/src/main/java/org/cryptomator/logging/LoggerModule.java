@@ -47,8 +47,8 @@ public class LoggerModule {
 	@Singleton
 	static LoggerContext provideLoggerContext() {
 		ILoggerFactory loggerFactory = LoggerFactory.getILoggerFactory();
-		if (loggerFactory instanceof LoggerContext) {
-			return (LoggerContext) loggerFactory;
+		if (loggerFactory instanceof LoggerContext context) {
+			return context;
 		} else {
 			throw new IllegalStateException("SLF4J not bound to Logback.");
 		}

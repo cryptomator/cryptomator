@@ -1,5 +1,6 @@
 package org.cryptomator.ui.launcher;
 
+import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultListManager;
 import org.cryptomator.ui.fxapp.FxApplication;
 import org.slf4j.Logger;
@@ -55,7 +56,7 @@ class AppLaunchEventHandler {
 			case REVEAL_APP -> fxApplicationStarter.get().thenAccept(FxApplication::showMainWindow);
 			case OPEN_FILE -> fxApplicationStarter.get().thenRun(() -> {
 				Platform.runLater(() -> {
-					event.getPathsToOpen().forEach(this::addVault);
+					event.getPathsToOpen().forEach(this::addOrRevealVault);
 				});
 			});
 			default -> LOG.warn("Unsupported event type: {}", event.getType());
@@ -63,13 +64,18 @@ class AppLaunchEventHandler {
 	}
 
 	// TODO dedup MainWindowController...
-	private void addVault(Path potentialVaultPath) {
+	private void addOrRevealVault(Path potentialVaultPath) {
 		assert Platform.isFxApplicationThread();
 		try {
+			final Vault v;
 			if (potentialVaultPath.getFileName().toString().equals(MASTERKEY_FILENAME)) {
-				vaultListManager.add(potentialVaultPath.getParent());
+				v = vaultListManager.add(potentialVaultPath.getParent());
 			} else {
-				vaultListManager.add(potentialVaultPath);
+				v = vaultListManager.add(potentialVaultPath);
+			}
+
+			if (v.isUnlocked()) {
+				fxApplicationStarter.get().thenAccept(app -> app.getVaultService().reveal(v));
 			}
 			LOG.debug("Added vault {}", potentialVaultPath);
 		} catch (NoSuchFileException e) {

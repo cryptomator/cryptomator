@@ -355,8 +355,7 @@ public class Vault {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj instanceof Vault && obj.getClass().equals(this.getClass())) {
-			final Vault other = (Vault) obj;
+		if (obj instanceof Vault other && obj.getClass().equals(this.getClass())) {
 			return Objects.equals(this.vaultSettings, other.vaultSettings);
 		} else {
 			return false;

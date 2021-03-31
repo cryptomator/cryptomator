@@ -86,7 +86,7 @@ public class FxApplication extends Application {
 	}
 
 	private void hasVisibleStagesChanged(@SuppressWarnings("unused") ObservableValue<? extends Boolean> observableValue, @SuppressWarnings("unused") boolean oldValue, boolean newValue) {
-		LOG.warn("has visible stages: {}", newValue);
+		LOG.debug("has visible stages: {}", newValue);
 		if (newValue) {
 			trayIntegration.ifPresent(TrayIntegrationProvider::restoredFromTray);
 		} else {
