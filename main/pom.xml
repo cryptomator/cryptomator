@@ -30,14 +30,14 @@
 		<cryptomator.integrations.win.version>1.0.0-beta2</cryptomator.integrations.win.version>
 		<cryptomator.integrations.mac.version>1.0.0-beta2</cryptomator.integrations.mac.version>
 		<cryptomator.integrations.linux.version>1.0.0-beta1</cryptomator.integrations.linux.version>
-		<cryptomator.fuse.version>1.2.9</cryptomator.fuse.version>
+		<cryptomator.fuse.version>1.3.0</cryptomator.fuse.version>
 		<cryptomator.dokany.version>1.2.4</cryptomator.dokany.version>
-		<cryptomator.webdav.version>1.1.4</cryptomator.webdav.version>
+		<cryptomator.webdav.version>1.2.0</cryptomator.webdav.version>
 
 		<!-- 3rd party dependencies -->
 		<javafx.version>15</javafx.version>
 		<commons-lang3.version>3.11</commons-lang3.version>
-		<jwt.version>3.12.0</jwt.version>
+		<jwt.version>3.13.0</jwt.version>
 		<easybind.version>2.1.0</easybind.version>
 		<guava.version>30.1-jre</guava.version>
 		<dagger.version>2.32</dagger.version>
@@ -218,12 +218,6 @@
 				<scope>test</scope>
 			</dependency>
 
-			<!-- TODO: temporary fix for XXE attack, can be removed once java-jwt is updated -->
-			<dependency>
-				<groupId>com.fasterxml.jackson.core</groupId>
-				<artifactId>jackson-databind</artifactId>
-				<version>2.10.5.1</version>
-			</dependency>
 		</dependencies>
 	</dependencyManagement>
 

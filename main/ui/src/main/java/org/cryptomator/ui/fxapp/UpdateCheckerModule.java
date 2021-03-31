@@ -15,6 +15,7 @@ import javafx.beans.property.StringProperty;
 import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Task;
 import javafx.util.Duration;
+import java.io.UncheckedIOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -39,8 +40,13 @@ public abstract class UpdateCheckerModule {
 
 	@Provides
 	@FxApplicationScoped
-	static HttpClient provideHttpClient() {
-		return HttpClient.newHttpClient();
+	static Optional<HttpClient> provideHttpClient() {
+		try {
+			return Optional.of(HttpClient.newHttpClient());
+		} catch (UncheckedIOException e) {
+			LOG.error("HttpClient for update check cannot be created.", e);
+			return Optional.empty();
+		}
 	}
 
 	@Provides
@@ -66,11 +72,20 @@ public abstract class UpdateCheckerModule {
 
 	@Provides
 	@FxApplicationScoped
-	static ScheduledService<String> provideCheckForUpdatesService(ExecutorService executor, HttpClient httpClient, HttpRequest checkForUpdatesRequest, @Named("checkForUpdatesInterval") ObjectBinding<Duration> period) {
+	static ScheduledService<String> provideCheckForUpdatesService(ExecutorService executor, Optional<HttpClient> httpClient, HttpRequest checkForUpdatesRequest, @Named("checkForUpdatesInterval") ObjectBinding<Duration> period) {
 		ScheduledService<String> service = new ScheduledService<>() {
 			@Override
 			protected Task<String> createTask() {
-				return new UpdateCheckerTask(httpClient, checkForUpdatesRequest);
+				if (httpClient.isPresent()) {
+					return new UpdateCheckerTask(httpClient.get(), checkForUpdatesRequest);
+				} else {
+					return new Task<>() {
+						@Override
+						protected String call() {
+							throw new NullPointerException("No HttpClient present.");
+						}
+					};
+				}
 			}
 		};
 		service.setOnFailed(event -> LOG.error("Failed to execute update service", service.getException()));
