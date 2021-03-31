@@ -8,14 +8,14 @@ import org.cryptomator.ui.keyloading.KeyLoadingStrategy;
 import javax.inject.Inject;
 
 @KeyLoading
-public class MasterkeyFileLoadingStrategy implements KeyLoadingStrategy {
+class MasterkeyFileLoadingStrategy implements KeyLoadingStrategy {
 
 	private final MasterkeyFileLoader masterkeyFileLoader;
 	private final MasterkeyFileLoadingContext context;
 	private final MasterkeyFileLoadingFinisher finisher;
 
 	@Inject
-	public MasterkeyFileLoadingStrategy(MasterkeyFileLoader masterkeyFileLoader, MasterkeyFileLoadingContext context, MasterkeyFileLoadingFinisher finisher){
+	public MasterkeyFileLoadingStrategy(MasterkeyFileLoader masterkeyFileLoader, MasterkeyFileLoadingContext context, MasterkeyFileLoadingFinisher finisher) {
 		this.masterkeyFileLoader = masterkeyFileLoader;
 		this.context = context;
 		this.finisher = finisher;

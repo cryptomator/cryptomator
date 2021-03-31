@@ -17,7 +17,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 @KeyLoadingScoped
-public class MasterkeyFileLoadingFinisher {
+class MasterkeyFileLoadingFinisher {
 
 	private static final Logger LOG = LoggerFactory.getLogger(MasterkeyFileLoadingFinisher.class);
 

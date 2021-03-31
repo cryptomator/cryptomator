@@ -4,12 +4,12 @@ import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoMap;
+import dagger.multibindings.StringKey;
 import org.cryptomator.common.keychain.KeychainManager;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.cryptolib.common.MasterkeyFileAccess;
 import org.cryptomator.cryptolib.common.MasterkeyFileLoader;
 import org.cryptomator.integrations.keychain.KeychainAccessException;
-import org.cryptomator.ui.common.DefaultSceneFactory;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxControllerKey;
 import org.cryptomator.ui.common.FxmlFile;
@@ -19,16 +19,14 @@ import org.cryptomator.ui.common.UserInteractionLock;
 import org.cryptomator.ui.forgetPassword.ForgetPasswordComponent;
 import org.cryptomator.ui.keyloading.KeyLoading;
 import org.cryptomator.ui.keyloading.KeyLoadingScoped;
+import org.cryptomator.ui.keyloading.KeyLoadingStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Named;
-import javax.inject.Provider;
 import javafx.scene.Scene;
 import java.nio.file.Path;
-import java.util.Map;
 import java.util.Optional;
-import java.util.ResourceBundle;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -123,5 +121,11 @@ public abstract class MasterkeyFileLoadingModule {
 	@IntoMap
 	@FxControllerKey(SelectMasterkeyFileController.class)
 	abstract FxController bindUnlockSelectMasterkeyFileController(SelectMasterkeyFileController controller);
+
+	@Binds
+	@IntoMap
+	@KeyLoadingScoped
+	@StringKey("masterkeyfile")
+	abstract KeyLoadingStrategy bindMasterkeyFileLoadingStrategy(MasterkeyFileLoadingStrategy strategy);
 
 }

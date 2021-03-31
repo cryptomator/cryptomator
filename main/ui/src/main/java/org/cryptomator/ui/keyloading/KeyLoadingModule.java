@@ -1,19 +1,13 @@
 package org.cryptomator.ui.keyloading;
 
-import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
-import dagger.multibindings.IntoMap;
-import dagger.multibindings.StringKey;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.cryptofs.VaultConfig.UnverifiedVaultConfig;
 import org.cryptomator.ui.common.DefaultSceneFactory;
 import org.cryptomator.ui.common.FxController;
-import org.cryptomator.ui.common.FxControllerKey;
 import org.cryptomator.ui.common.FxmlLoaderFactory;
 import org.cryptomator.ui.keyloading.masterkeyfile.MasterkeyFileLoadingModule;
-import org.cryptomator.ui.keyloading.masterkeyfile.MasterkeyFileLoadingStrategy;
-import org.cryptomator.ui.migration.MigrationStartController;
 
 import javax.inject.Provider;
 import java.net.URI;
@@ -50,10 +44,5 @@ abstract class KeyLoadingModule {
 			return strategies.getOrDefault(scheme, fallback);
 		}
 	}
-
-	@Binds
-	@IntoMap
-	@StringKey("masterkeyfile")
-	abstract KeyLoadingStrategy bindMasterkeyFileLoadingStrategy(MasterkeyFileLoadingStrategy strategy);
 
 }

@@ -22,7 +22,7 @@ import java.nio.file.Path;
 import java.util.concurrent.atomic.AtomicReference;
 
 @KeyLoadingScoped
-public class MasterkeyFileLoadingContext implements MasterkeyFileLoaderContext {
+class MasterkeyFileLoadingContext implements MasterkeyFileLoaderContext {
 
 	private final Stage window;
 	private final Lazy<Scene> passphraseEntryScene;
