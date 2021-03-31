@@ -1,4 +1,4 @@
-package org.cryptomator.ui.unlock.masterkeyfile;
+package org.cryptomator.ui.keyloading.masterkeyfile;
 
 import dagger.Binds;
 import dagger.Module;
@@ -17,6 +17,8 @@ import org.cryptomator.ui.common.FxmlLoaderFactory;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.UserInteractionLock;
 import org.cryptomator.ui.forgetPassword.ForgetPasswordComponent;
+import org.cryptomator.ui.keyloading.KeyLoading;
+import org.cryptomator.ui.keyloading.KeyLoadingScoped;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +33,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Module(subcomponents = {ForgetPasswordComponent.class})
-abstract class MasterkeyFileLoadingModule {
+public abstract class MasterkeyFileLoadingModule {
 
 	private static final Logger LOG = LoggerFactory.getLogger(MasterkeyFileLoadingModule.class);
 
@@ -46,27 +48,27 @@ abstract class MasterkeyFileLoadingModule {
 	}
 
 	@Provides
-	@MasterkeyFileLoadingScoped
-	static MasterkeyFileLoader provideMasterkeyFileLoader(MasterkeyFileAccess masterkeyFileAccess, @MasterkeyFileLoading Vault vault, MasterkeyFileLoadingContext context) {
+	@KeyLoadingScoped
+	static MasterkeyFileLoader provideMasterkeyFileLoader(MasterkeyFileAccess masterkeyFileAccess, @KeyLoading Vault vault, MasterkeyFileLoadingContext context) {
 		return masterkeyFileAccess.keyLoader(vault.getPath(), context);
 	}
 
 	@Provides
-	@MasterkeyFileLoadingScoped
+	@KeyLoadingScoped
 	static UserInteractionLock<PasswordEntry> providePasswordEntryLock() {
 		return new UserInteractionLock<>(null);
 	}
 
 	@Provides
-	@MasterkeyFileLoadingScoped
+	@KeyLoadingScoped
 	static UserInteractionLock<MasterkeyFileProvision> provideMasterkeyFileProvisionLock() {
 		return new UserInteractionLock<>(null);
 	}
 
 	@Provides
 	@Named("savedPassword")
-	@MasterkeyFileLoadingScoped
-	static Optional<char[]> provideStoredPassword(KeychainManager keychain, @MasterkeyFileLoading Vault vault) {
+	@KeyLoadingScoped
+	static Optional<char[]> provideStoredPassword(KeychainManager keychain, @KeyLoading Vault vault) {
 		if (!keychain.isSupported()) {
 			return Optional.empty();
 		} else {
@@ -80,42 +82,35 @@ abstract class MasterkeyFileLoadingModule {
 	}
 
 	@Provides
-	@MasterkeyFileLoadingScoped
+	@KeyLoadingScoped
 	static AtomicReference<Path> provideUserProvidedMasterkeyPath() {
 		return new AtomicReference<>();
 	}
 
 	@Provides
-	@MasterkeyFileLoadingScoped
+	@KeyLoadingScoped
 	static AtomicReference<char[]> providePassword(@Named("savedPassword") Optional<char[]> storedPassword) {
 		return new AtomicReference<>(storedPassword.orElse(null));
 	}
 
 	@Provides
 	@Named("savePassword")
-	@MasterkeyFileLoadingScoped
+	@KeyLoadingScoped
 	static AtomicBoolean provideSavePasswordFlag(@Named("savedPassword") Optional<char[]> storedPassword) {
 		return new AtomicBoolean(storedPassword.isPresent());
 	}
 
 	@Provides
-	@MasterkeyFileLoading
-	@MasterkeyFileLoadingScoped
-	static FxmlLoaderFactory provideFxmlLoaderFactory(Map<Class<? extends FxController>, Provider<FxController>> factories, DefaultSceneFactory sceneFactory, ResourceBundle resourceBundle) {
-		return new FxmlLoaderFactory(factories, sceneFactory, resourceBundle);
-	}
-
-	@Provides
 	@FxmlScene(FxmlFile.UNLOCK_ENTER_PASSWORD)
-	@MasterkeyFileLoadingScoped
-	static Scene provideUnlockScene(@MasterkeyFileLoading FxmlLoaderFactory fxmlLoaders) {
+	@KeyLoadingScoped
+	static Scene provideUnlockScene(@KeyLoading FxmlLoaderFactory fxmlLoaders) {
 		return fxmlLoaders.createScene(FxmlFile.UNLOCK_ENTER_PASSWORD);
 	}
 
 	@Provides
 	@FxmlScene(FxmlFile.UNLOCK_SELECT_MASTERKEYFILE)
-	@MasterkeyFileLoadingScoped
-	static Scene provideUnlockSelectMasterkeyFileScene(@MasterkeyFileLoading FxmlLoaderFactory fxmlLoaders) {
+	@KeyLoadingScoped
+	static Scene provideUnlockSelectMasterkeyFileScene(@KeyLoading FxmlLoaderFactory fxmlLoaders) {
 		return fxmlLoaders.createScene(FxmlFile.UNLOCK_SELECT_MASTERKEYFILE);
 	}
 
@@ -128,6 +123,5 @@ abstract class MasterkeyFileLoadingModule {
 	@IntoMap
 	@FxControllerKey(SelectMasterkeyFileController.class)
 	abstract FxController bindUnlockSelectMasterkeyFileController(SelectMasterkeyFileController controller);
-
 
 }

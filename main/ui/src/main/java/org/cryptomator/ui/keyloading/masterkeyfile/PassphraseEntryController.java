@@ -1,4 +1,4 @@
-package org.cryptomator.ui.unlock.masterkeyfile;
+package org.cryptomator.ui.keyloading.masterkeyfile;
 
 import org.cryptomator.common.keychain.KeychainManager;
 import org.cryptomator.common.vaults.Vault;
@@ -7,7 +7,9 @@ import org.cryptomator.ui.common.UserInteractionLock;
 import org.cryptomator.ui.common.WeakBindings;
 import org.cryptomator.ui.controls.NiceSecurePasswordField;
 import org.cryptomator.ui.forgetPassword.ForgetPasswordComponent;
-import org.cryptomator.ui.unlock.masterkeyfile.MasterkeyFileLoadingModule.PasswordEntry;
+import org.cryptomator.ui.keyloading.KeyLoading;
+import org.cryptomator.ui.keyloading.KeyLoadingScoped;
+import org.cryptomator.ui.keyloading.masterkeyfile.MasterkeyFileLoadingModule.PasswordEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +41,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-@MasterkeyFileLoadingScoped
+@KeyLoadingScoped
 public class PassphraseEntryController implements FxController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(PassphraseEntryController.class);
@@ -67,7 +69,7 @@ public class PassphraseEntryController implements FxController {
 	public Animation unlockAnimation;
 
 	@Inject
-	public PassphraseEntryController(@MasterkeyFileLoading Stage window, @MasterkeyFileLoading Vault vault, AtomicReference<char[]> password, @Named("savePassword") AtomicBoolean savePassword, @Named("savedPassword") Optional<char[]> savedPassword, UserInteractionLock<PasswordEntry> passwordEntryLock, ForgetPasswordComponent.Builder forgetPassword, KeychainManager keychain) {
+	public PassphraseEntryController(@KeyLoading Stage window, @KeyLoading Vault vault, AtomicReference<char[]> password, @Named("savePassword") AtomicBoolean savePassword, @Named("savedPassword") Optional<char[]> savedPassword, UserInteractionLock<PasswordEntry> passwordEntryLock, ForgetPasswordComponent.Builder forgetPassword, KeychainManager keychain) {
 		this.window = window;
 		this.vault = vault;
 		this.password = password;

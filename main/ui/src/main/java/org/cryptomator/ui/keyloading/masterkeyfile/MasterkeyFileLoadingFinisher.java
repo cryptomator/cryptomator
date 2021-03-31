@@ -1,8 +1,10 @@
-package org.cryptomator.ui.unlock.masterkeyfile;
+package org.cryptomator.ui.keyloading.masterkeyfile;
 
 import org.cryptomator.common.keychain.KeychainManager;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.integrations.keychain.KeychainAccessException;
+import org.cryptomator.ui.keyloading.KeyLoading;
+import org.cryptomator.ui.keyloading.KeyLoadingScoped;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,7 +16,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-@MasterkeyFileLoadingScoped
+@KeyLoadingScoped
 public class MasterkeyFileLoadingFinisher {
 
 	private static final Logger LOG = LoggerFactory.getLogger(MasterkeyFileLoadingFinisher.class);
@@ -26,7 +28,7 @@ public class MasterkeyFileLoadingFinisher {
 	private final KeychainManager keychain;
 
 	@Inject
-	MasterkeyFileLoadingFinisher(@MasterkeyFileLoading Vault vault, @Named("savedPassword") Optional<char[]> storedPassword, AtomicReference<char[]> enteredPassword, @Named("savePassword")AtomicBoolean shouldSavePassword, KeychainManager keychain) {
+	MasterkeyFileLoadingFinisher(@KeyLoading Vault vault, @Named("savedPassword") Optional<char[]> storedPassword, AtomicReference<char[]> enteredPassword, @Named("savePassword") AtomicBoolean shouldSavePassword, KeychainManager keychain) {
 		this.vault = vault;
 		this.storedPassword = storedPassword;
 		this.enteredPassword = enteredPassword;

@@ -12,6 +12,8 @@ import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlLoaderFactory;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.StageFactory;
+import org.cryptomator.ui.keyloading.KeyLoadingComponent;
+import org.cryptomator.ui.keyloading.KeyLoadingStrategy;
 
 import javax.inject.Named;
 import javax.inject.Provider;
@@ -22,7 +24,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
-@Module
+@Module(subcomponents = {KeyLoadingComponent.class})
 abstract class UnlockModule {
 
 	@Provides
@@ -46,6 +48,13 @@ abstract class UnlockModule {
 			stage.initModality(Modality.APPLICATION_MODAL);
 		}
 		return stage;
+	}
+
+	@Provides
+	@UnlockWindow
+	@UnlockScoped
+	static KeyLoadingStrategy provideKeyLoadingStrategy(KeyLoadingComponent.Builder compBuilder, @UnlockWindow Vault vault, @UnlockWindow Stage window) {
+		return compBuilder.vault(vault).window(window).build().keyloadingStrategy();
 	}
 
 	@Provides
