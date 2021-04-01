@@ -11,14 +11,7 @@ import com.google.common.io.BaseEncoding;
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.StringBinding;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
+import javafx.beans.property.*;
 
 import java.nio.file.Path;
 import java.util.Objects;
@@ -38,7 +31,7 @@ public class VaultSettings {
 	public static final int DEFAULT_FILENAME_LENGTH_LIMIT = -1;
 	public static final WhenUnlocked DEFAULT_ACTION_AFTER_UNLOCK = WhenUnlocked.ASK;
 	public static final boolean DEFAULT_LOCK_AFTER_TIME = false;
-	public static final String DEFAULT_LOCK_TIME_IN_MINUTES = "30";
+	public static final int DEFAULT_LOCK_TIME_IN_MINUTES = 30;
 
 	private static final Random RNG = new Random();
 
@@ -55,7 +48,7 @@ public class VaultSettings {
 	private final IntegerProperty filenameLengthLimit = new SimpleIntegerProperty(DEFAULT_FILENAME_LENGTH_LIMIT);
 	private final ObjectProperty<WhenUnlocked> actionAfterUnlock = new SimpleObjectProperty<>(DEFAULT_ACTION_AFTER_UNLOCK);
 	private final BooleanProperty lockAfterTime = new SimpleBooleanProperty(DEFAULT_LOCK_AFTER_TIME);
-	private final StringProperty lockTimeInMinutes = new SimpleStringProperty(DEFAULT_LOCK_TIME_IN_MINUTES);
+	private final IntegerProperty lockTimeInMinutes = new SimpleIntegerProperty(DEFAULT_LOCK_TIME_IN_MINUTES);
 	private final StringBinding mountName;
 
 	public VaultSettings(String id) {
@@ -169,7 +162,7 @@ public class VaultSettings {
 		return lockAfterTime;
 	}
 
-	public StringProperty lockTimeInMinutes() {
+	public IntegerProperty lockTimeInMinutes() {
 		return lockTimeInMinutes;
 	}
 

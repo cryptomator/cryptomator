@@ -14,7 +14,6 @@ import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.UiTheme;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultListManager;
-import org.cryptomator.common.vaults.Volume;
 import org.cryptomator.integrations.tray.TrayIntegrationProvider;
 import org.cryptomator.integrations.uiappearance.Theme;
 import org.cryptomator.integrations.uiappearance.UiAppearanceException;
@@ -33,10 +32,11 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import java.awt.desktop.QuitResponse;
-import java.util.Date;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 @FxApplicationScoped
 public class FxApplication extends Application {
@@ -57,9 +57,10 @@ public class FxApplication extends Application {
 	private final BooleanBinding hasVisibleWindows;
 	private final UiAppearanceListener systemInterfaceThemeListener = this::systemInterfaceThemeChanged;
 	private final VaultListManager vaultListManager;
+	private final ScheduledExecutorService scheduledExecutorService;
 
 	@Inject
-	FxApplication(Settings settings, Lazy<MainWindowComponent> mainWindow, Lazy<PreferencesComponent> preferencesWindow, Provider<UnlockComponent.Builder> unlockWindowBuilderProvider, Provider<LockComponent.Builder> lockWindowBuilderProvider, Lazy<QuitComponent> quitWindow, Optional<TrayIntegrationProvider> trayIntegration, Optional<UiAppearanceProvider> appearanceProvider, VaultService vaultService, LicenseHolder licenseHolder, VaultListManager vaultListManager) {
+	FxApplication(Settings settings, Lazy<MainWindowComponent> mainWindow, Lazy<PreferencesComponent> preferencesWindow, Provider<UnlockComponent.Builder> unlockWindowBuilderProvider, Provider<LockComponent.Builder> lockWindowBuilderProvider, Lazy<QuitComponent> quitWindow, Optional<TrayIntegrationProvider> trayIntegration, Optional<UiAppearanceProvider> appearanceProvider, VaultService vaultService, LicenseHolder licenseHolder, VaultListManager vaultListManager, ScheduledExecutorService scheduledExecutorService) {
 		this.settings = settings;
 		this.mainWindow = mainWindow;
 		this.preferencesWindow = preferencesWindow;
@@ -73,6 +74,7 @@ public class FxApplication extends Application {
 		this.visibleWindows = Stage.getWindows().filtered(Window::isShowing);
 		this.hasVisibleWindows = Bindings.isNotEmpty(visibleWindows);
 		this.vaultListManager = vaultListManager;
+		this.scheduledExecutorService = scheduledExecutorService;
 	}
 
 	public void start() {
@@ -199,19 +201,12 @@ public class FxApplication extends Application {
 	}
 
 
-
-	private void checkAutolock(Vault vault,  Optional<Stage> owner){
-		if (vault.getVaultSettings().lockAfterTime().get()){
+	private void checkAutolock(Vault vault, Optional<Stage> owner) {
+		if (vault.getVaultSettings().lockAfterTime().get()) {
 			LOG.info("Locking after {} minutes.", vault.getVaultSettings().lockTimeInMinutes().get());
-			new java.util.Timer().schedule(
-					new java.util.TimerTask() {
-						@Override
-						public void run() {
-							startLockWorkflow(vault, owner);
-						}
-					},
-					new Date(System.currentTimeMillis() + (int)(Double.parseDouble(vault.getVaultSettings().lockTimeInMinutes().get()) * 60 * 1000))
-			);
+			scheduledExecutorService.schedule(() -> {
+				startLockWorkflow(vault, owner);
+			}, (long) (vault.getVaultSettings().lockTimeInMinutes().get()), TimeUnit.MINUTES);
 		}
 	}
 

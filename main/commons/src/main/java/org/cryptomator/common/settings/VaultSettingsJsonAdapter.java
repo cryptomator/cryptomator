@@ -51,7 +51,7 @@ class VaultSettingsJsonAdapter {
 		int filenameLengthLimit = VaultSettings.DEFAULT_FILENAME_LENGTH_LIMIT;
 		WhenUnlocked actionAfterUnlock = VaultSettings.DEFAULT_ACTION_AFTER_UNLOCK;
 		boolean lockAfterTime = VaultSettings.DEFAULT_LOCK_AFTER_TIME;
-		String lockTimeInMinutes = VaultSettings.DEFAULT_LOCK_TIME_IN_MINUTES;
+		int lockTimeInMinutes = VaultSettings.DEFAULT_LOCK_TIME_IN_MINUTES;
 
 		in.beginObject();
 		while (in.hasNext()) {
@@ -71,7 +71,7 @@ class VaultSettingsJsonAdapter {
 				case "filenameLengthLimit" -> filenameLengthLimit = in.nextInt();
 				case "actionAfterUnlock" -> actionAfterUnlock = parseActionAfterUnlock(in.nextString());
 				case "lockAfterTime" -> lockAfterTime = in.nextBoolean();
-				case "lockTimeInMinutes" -> lockTimeInMinutes = in.nextString();
+				case "lockTimeInMinutes" -> lockTimeInMinutes = in.nextInt();
 				default -> {
 					LOG.warn("Unsupported vault setting found in JSON: " + name);
 					in.skipValue();

@@ -5,12 +5,14 @@ import org.cryptomator.ui.common.FxController;
 
 import javax.inject.Inject;
 
+import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
+import javafx.util.converter.NumberStringConverter;
 
 import java.util.ResourceBundle;
 
@@ -31,12 +33,11 @@ public class AutoLockVaultOptionsController implements FxController {
 	@FXML
 	public void initialize() {
 		lockAfterTimeCheckbox.selectedProperty().bindBidirectional(vault.getVaultSettings().lockAfterTime());
-		lockTimeInMinutesTextField.textProperty().bindBidirectional(vault.getVaultSettings().lockTimeInMinutes());
-		//force the field to be a double with the correct decimal point
+		Bindings.bindBidirectional(lockTimeInMinutesTextField.textProperty(), vault.getVaultSettings().lockTimeInMinutes(), new NumberStringConverter());
 		lockTimeInMinutesTextField.textProperty().addListener(new ChangeListener<String>() {
 			@Override
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-				if (!newValue.matches("\\d{0,9}([\\.]\\d{0,9})?")) {
+				if (!newValue.matches("\\d{0,9}")) {
 					lockTimeInMinutesTextField.setText(newValue.replaceAll("[^\\d]", ""));
 				}
 			}
