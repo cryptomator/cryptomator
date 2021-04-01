@@ -1,5 +1,6 @@
 package org.cryptomator.ui.health;
 
+import dagger.Lazy;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.cryptofs.VaultConfig;
 import org.cryptomator.cryptofs.VaultConfigLoadException;
@@ -7,6 +8,8 @@ import org.cryptomator.cryptofs.VaultKeyInvalidException;
 import org.cryptomator.cryptolib.api.Masterkey;
 import org.cryptomator.cryptolib.api.MasterkeyLoadingFailedException;
 import org.cryptomator.ui.common.FxController;
+import org.cryptomator.ui.common.FxmlFile;
+import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.fxapp.FxApplication;
 import org.cryptomator.ui.keyloading.KeyLoadingStrategy;
 import org.cryptomator.ui.unlock.UnlockCancelledException;
@@ -16,10 +19,12 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.scene.Scene;
 import javafx.stage.Stage;
 import java.net.URI;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicReference;
 
 @HealthCheckScoped
 public class StartController implements FxController {
@@ -30,13 +35,19 @@ public class StartController implements FxController {
 	private final Optional<VaultConfig.UnverifiedVaultConfig> unverifiedVaultConfig;
 	private final KeyLoadingStrategy keyLoadingStrategy;
 	private final ExecutorService executor;
+	private final AtomicReference<Masterkey> masterkeyRef;
+	private final AtomicReference<VaultConfig> vaultConfigRef;
+	private final Lazy<Scene> checkScene;
 
 	@Inject
-	public StartController(@HealthCheckWindow Vault vault, @HealthCheckWindow Stage window, @HealthCheckWindow KeyLoadingStrategy keyLoadingStrategy, ExecutorService executor) {
+	public StartController(@HealthCheckWindow Vault vault, @HealthCheckWindow Stage window, @HealthCheckWindow KeyLoadingStrategy keyLoadingStrategy, ExecutorService executor, AtomicReference<Masterkey> masterkeyRef, AtomicReference<VaultConfig> vaultConfigRef, @FxmlScene(FxmlFile.HEALTH_CHECK) Lazy<Scene> checkScene) {
 		this.window = window;
 		this.unverifiedVaultConfig = vault.getUnverifiedVaultConfig();
 		this.keyLoadingStrategy = keyLoadingStrategy;
 		this.executor = executor;
+		this.masterkeyRef = masterkeyRef;
+		this.vaultConfigRef = vaultConfigRef;
+		this.checkScene = checkScene;
 	}
 
 	@FXML
@@ -53,9 +64,16 @@ public class StartController implements FxController {
 
 	private void loadKey() {
 		assert !Platform.isFxApplicationThread();
+		assert unverifiedVaultConfig.isPresent();
 		try (var masterkey = keyLoadingStrategy.masterkeyLoader().loadKey(unverifiedVaultConfig.orElseThrow().getKeyId())) {
-			var clone = masterkey.clone(); // original key will get destroyed
-			Platform.runLater(() -> loadedKey(clone));
+			var unverifiedCfg = unverifiedVaultConfig.get();
+			var verifiedCfg = unverifiedCfg.verify(masterkey.getEncoded(), unverifiedCfg.allegedVaultVersion());
+			vaultConfigRef.set(verifiedCfg);
+			var old = masterkeyRef.getAndSet(masterkey.clone());
+			if (old != null) {
+				old.destroy();
+			}
+			Platform.runLater(this::loadedKey);
 		} catch (MasterkeyLoadingFailedException e) {
 			if (keyLoadingStrategy.recoverFromException(e)) {
 				// retry
@@ -63,29 +81,24 @@ public class StartController implements FxController {
 			} else {
 				Platform.runLater(() -> loadingKeyFailed(e));
 			}
-		}
-	}
-
-	private void loadedKey(Masterkey masterkey) {
-		assert unverifiedVaultConfig.isPresent();
-		var unverifiedCfg = unverifiedVaultConfig.get();
-		try {
-			var verifiedCfg = unverifiedCfg.verify(masterkey.getEncoded(), unverifiedCfg.allegedVaultVersion());
-			LOG.info("Verified vault config with cipher {}", verifiedCfg.getCipherCombo());
 		} catch (VaultKeyInvalidException e) {
-			LOG.error("Invalid key");
-			// TODO show error screen
+			Platform.runLater(() -> loadingKeyFailed(e));
 		} catch (VaultConfigLoadException e) {
-			LOG.error("Failed to verify vault config", e);
-			// TODO show error screen
-		} finally {
-			masterkey.destroy();
+			Platform.runLater(() -> loadingKeyFailed(e));
 		}
 	}
 
-	private void loadingKeyFailed(MasterkeyLoadingFailedException e) {
+	private void loadedKey() {
+		LOG.debug("Loaded valid key");
+		window.setScene(checkScene.get());
+	}
+
+	private void loadingKeyFailed(Exception e) {
 		if (e instanceof UnlockCancelledException) {
 			// ok
+		} else if (e instanceof VaultKeyInvalidException) {
+			LOG.error("Invalid key");
+			// TODO show error screen
 		} else {
 			LOG.error("Failed to load key.", e);
 			// TODO show error screen

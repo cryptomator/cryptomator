@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ButtonBar?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.VBox?>
+<VBox xmlns:fx="http://javafx.com/fxml"
+	  xmlns="http://javafx.com/javafx"
+	  fx:controller="org.cryptomator.ui.health.CheckController"
+	  minWidth="400"
+	  maxWidth="400"
+	  minHeight="145"
+	  spacing="12">
+	<padding>
+		<Insets topRightBottomLeft="12"/>
+	</padding>
+	<children>
+		<Label text="${controller.vaultConfig.cipherCombo}"/>
+
+		<ButtonBar buttonMinWidth="120" buttonOrder="+X">
+			<buttons>
+				<Button text="TODO run check" ButtonBar.buttonData="NEXT_FORWARD" defaultButton="true" onAction="#runCheck"/>
+			</buttons>
+		</ButtonBar>
+	</children>
+</VBox>
