@@ -1,10 +1,9 @@
-package org.cryptomator.ui.unlock;
+package org.cryptomator.ui.keyloading;
 
 import org.cryptomator.cryptolib.api.MasterkeyLoader;
 import org.cryptomator.cryptolib.api.MasterkeyLoadingFailedException;
 
-@FunctionalInterface
-public interface KeyLoadingComponent {
+public interface KeyLoadingStrategy {
 
 	/**
 	 * @return A reusable masterkey loader, preconfigured with the vault of the current unlock process
@@ -32,9 +31,19 @@ public interface KeyLoadingComponent {
 		// no-op
 	}
 
-	static KeyLoadingComponent exceptional(Exception exception) {
+	/**
+	 * A key loading strategy that will always fail by throwing a {@link MasterkeyLoadingFailedException}.
+	 *
+	 * @param exception The cause of the failure. If not alreay an {@link MasterkeyLoadingFailedException}, it will get wrapped.
+	 * @return A new KeyLoadingStrategy that will always fail with an {@link MasterkeyLoadingFailedException}.
+	 */
+	static KeyLoadingStrategy failed(Exception exception) {
 		return () -> {
-			throw new MasterkeyLoadingFailedException("Can not load key", exception);
+			if (exception instanceof MasterkeyLoadingFailedException e) {
+				throw e;
+			} else {
+				throw new MasterkeyLoadingFailedException("Can not load key", exception);
+			}
 		};
 	}
 

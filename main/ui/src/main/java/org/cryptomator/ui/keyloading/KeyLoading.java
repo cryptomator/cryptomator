@@ -1,4 +1,4 @@
-package org.cryptomator.ui.unlock.masterkeyfile;
+package org.cryptomator.ui.keyloading;
 
 import javax.inject.Qualifier;
 import java.lang.annotation.Documented;
@@ -9,6 +9,6 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Qualifier
 @Documented
 @Retention(RUNTIME)
-@interface MasterkeyFileLoading {
+public @interface KeyLoading {
 
 }

@@ -1,4 +1,4 @@
-package org.cryptomator.ui.unlock.masterkeyfile;
+package org.cryptomator.ui.keyloading.masterkeyfile;
 
 import dagger.Lazy;
 import org.cryptomator.cryptolib.api.InvalidPassphraseException;
@@ -8,9 +8,9 @@ import org.cryptomator.ui.common.Animations;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.UserInteractionLock;
+import org.cryptomator.ui.keyloading.KeyLoading;
+import org.cryptomator.ui.keyloading.KeyLoadingScoped;
 import org.cryptomator.ui.unlock.UnlockCancelledException;
-import org.cryptomator.ui.unlock.masterkeyfile.MasterkeyFileLoadingModule.MasterkeyFileProvision;
-import org.cryptomator.ui.unlock.masterkeyfile.MasterkeyFileLoadingModule.PasswordEntry;
 
 import javax.inject.Inject;
 import javafx.application.Platform;
@@ -21,21 +21,21 @@ import java.nio.CharBuffer;
 import java.nio.file.Path;
 import java.util.concurrent.atomic.AtomicReference;
 
-@MasterkeyFileLoadingScoped
-public class MasterkeyFileLoadingContext implements MasterkeyFileLoaderContext {
+@KeyLoadingScoped
+class MasterkeyFileLoadingContext implements MasterkeyFileLoaderContext {
 
 	private final Stage window;
 	private final Lazy<Scene> passphraseEntryScene;
 	private final Lazy<Scene> selectMasterkeyFileScene;
-	private final UserInteractionLock<PasswordEntry> passwordEntryLock;
-	private final UserInteractionLock<MasterkeyFileProvision> masterkeyFileProvisionLock;
+	private final UserInteractionLock<MasterkeyFileLoadingModule.PasswordEntry> passwordEntryLock;
+	private final UserInteractionLock<MasterkeyFileLoadingModule.MasterkeyFileProvision> masterkeyFileProvisionLock;
 	private final AtomicReference<char[]> password;
 	private final AtomicReference<Path> filePath;
 
 	private boolean wrongPassword;
 
 	@Inject
-	public MasterkeyFileLoadingContext(@MasterkeyFileLoading Stage window, @FxmlScene(FxmlFile.UNLOCK_ENTER_PASSWORD) Lazy<Scene> passphraseEntryScene, @FxmlScene(FxmlFile.UNLOCK_SELECT_MASTERKEYFILE) Lazy<Scene> selectMasterkeyFileScene, UserInteractionLock<PasswordEntry> passwordEntryLock, UserInteractionLock<MasterkeyFileProvision> masterkeyFileProvisionLock, AtomicReference<char[]> password, AtomicReference<Path> filePath) {
+	public MasterkeyFileLoadingContext(@KeyLoading Stage window, @FxmlScene(FxmlFile.UNLOCK_ENTER_PASSWORD) Lazy<Scene> passphraseEntryScene, @FxmlScene(FxmlFile.UNLOCK_SELECT_MASTERKEYFILE) Lazy<Scene> selectMasterkeyFileScene, UserInteractionLock<MasterkeyFileLoadingModule.PasswordEntry> passwordEntryLock, UserInteractionLock<MasterkeyFileLoadingModule.MasterkeyFileProvision> masterkeyFileProvisionLock, AtomicReference<char[]> password, AtomicReference<Path> filePath) {
 		this.window = window;
 		this.passphraseEntryScene = passphraseEntryScene;
 		this.selectMasterkeyFileScene = selectMasterkeyFileScene;
@@ -53,7 +53,7 @@ public class MasterkeyFileLoadingContext implements MasterkeyFileLoaderContext {
 
 		assert filePath.get() == null;
 		try {
-			if (askForCorrectMasterkeyFile() == MasterkeyFileProvision.MASTERKEYFILE_PROVIDED) {
+			if (askForCorrectMasterkeyFile() == MasterkeyFileLoadingModule.MasterkeyFileProvision.MASTERKEYFILE_PROVIDED) {
 				return filePath.get();
 			} else {
 				throw new UnlockCancelledException("Choosing masterkey file cancelled.");
@@ -64,7 +64,7 @@ public class MasterkeyFileLoadingContext implements MasterkeyFileLoaderContext {
 		}
 	}
 
-	private MasterkeyFileProvision askForCorrectMasterkeyFile() throws InterruptedException {
+	private MasterkeyFileLoadingModule.MasterkeyFileProvision askForCorrectMasterkeyFile() throws InterruptedException {
 		Platform.runLater(() -> {
 			window.setScene(selectMasterkeyFileScene.get());
 			window.show();
@@ -87,7 +87,7 @@ public class MasterkeyFileLoadingContext implements MasterkeyFileLoaderContext {
 
 		assert password.get() == null;
 		try {
-			if (askForPassphrase() == PasswordEntry.PASSWORD_ENTERED) {
+			if (askForPassphrase() == MasterkeyFileLoadingModule.PasswordEntry.PASSWORD_ENTERED) {
 				assert password.get() != null;
 				return CharBuffer.wrap(password.get());
 			} else {
@@ -99,7 +99,7 @@ public class MasterkeyFileLoadingContext implements MasterkeyFileLoaderContext {
 		}
 	}
 
-	private PasswordEntry askForPassphrase() throws InterruptedException {
+	private MasterkeyFileLoadingModule.PasswordEntry askForPassphrase() throws InterruptedException {
 		Platform.runLater(() -> {
 			window.setScene(passphraseEntryScene.get());
 			window.show();

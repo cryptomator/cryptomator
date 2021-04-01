@@ -89,6 +89,11 @@ abstract class MainWindowModule {
 
 	@Binds
 	@IntoMap
+	@FxControllerKey(VaultListContextMenuController.class)
+	abstract FxController bindVaultListContextMenuController(VaultListContextMenuController controller);
+
+	@Binds
+	@IntoMap
 	@FxControllerKey(VaultDetailController.class)
 	abstract FxController bindVaultDetailController(VaultDetailController controller);
 
