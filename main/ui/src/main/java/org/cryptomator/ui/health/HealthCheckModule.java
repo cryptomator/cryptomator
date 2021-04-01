@@ -4,6 +4,7 @@ import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoMap;
+import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.DefaultSceneFactory;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxControllerKey;
@@ -11,6 +12,8 @@ import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlLoaderFactory;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.StageFactory;
+import org.cryptomator.ui.keyloading.KeyLoadingComponent;
+import org.cryptomator.ui.keyloading.KeyLoadingStrategy;
 import org.cryptomator.ui.mainwindow.MainWindow;
 
 import javax.inject.Provider;
@@ -20,8 +23,15 @@ import javafx.stage.Stage;
 import java.util.Map;
 import java.util.ResourceBundle;
 
-@Module
+@Module(subcomponents = {KeyLoadingComponent.class})
 abstract class HealthCheckModule {
+
+	@Provides
+	@HealthCheckWindow
+	@HealthCheckScoped
+	static KeyLoadingStrategy provideKeyLoadingStrategy(KeyLoadingComponent.Builder compBuilder, @HealthCheckWindow Vault vault, @HealthCheckWindow Stage window) {
+		return compBuilder.vault(vault).window(window).build().keyloadingStrategy();
+	}
 
 	@Provides
 	@HealthCheckWindow

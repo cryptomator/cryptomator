@@ -16,12 +16,16 @@
 		<Insets topRightBottomLeft="12"/>
 	</padding>
 	<children>
-		<Label text="${controller.vault.displayablePath}"/>
+		<Label text="${controller.keyId}"/>
+
+		<Label text="${controller.vaultVersion}"/>
+
+		<Label text="TODO: Invalid vault config" visible="${controller.invalidConfig}" managed="${controller.invalidConfig}"/>
 
 		<ButtonBar buttonMinWidth="120" buttonOrder="+CX">
 			<buttons>
 				<Button text="%generic.button.cancel" ButtonBar.buttonData="CANCEL_CLOSE" cancelButton="true" onAction="#close"/>
-				<Button text="%unlock.unlockBtn" ButtonBar.buttonData="NEXT_FORWARD" defaultButton="true" onAction="#next"/>
+				<Button text="%unlock.unlockBtn" ButtonBar.buttonData="NEXT_FORWARD" disable="${controller.invalidConfig}" defaultButton="true" onAction="#next"/>
 			</buttons>
 		</ButtonBar>
 	</children>
