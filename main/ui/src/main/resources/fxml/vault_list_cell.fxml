@@ -13,6 +13,7 @@
 	  prefWidth="200"
 	  spacing="12"
 	  alignment="CENTER_LEFT">
+	<!-- Remark Check the containing list view for a fixed cell size before editing height properties -->
 	<padding>
 		<Insets topRightBottomLeft="12"/>
 	</padding>
