@@ -25,7 +25,6 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.ResourceBundle;
-import java.util.stream.Collectors;
 
 import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
 
@@ -108,15 +107,18 @@ public class VaultListManager {
 		VaultState previousState = vault.getState();
 		return switch (previousState) {
 			case LOCKED, NEEDS_MIGRATION, MISSING -> {
+				long stamp = vault.lockVaultState();
 				try {
 					VaultState determinedState = determineVaultState(vault.getPath());
-					vault.setState(determinedState);
+					vault.setState(determinedState, stamp);
 					yield determinedState;
 				} catch (IOException e) {
 					LOG.warn("Failed to determine vault state for " + vault.getPath(), e);
-					vault.setState(VaultState.ERROR);
+					vault.setState(VaultState.ERROR, stamp);
 					vault.setLastKnownException(e);
 					yield VaultState.ERROR;
+				} finally {
+					vault.unlockVaultState(stamp);
 				}
 			}
 			case ERROR, UNLOCKED, PROCESSING -> previousState;

@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
+import javafx.application.Platform;
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
@@ -43,6 +44,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.StampedLock;
 
 import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
 
@@ -51,6 +53,8 @@ public class Vault {
 
 	private static final Logger LOG = LoggerFactory.getLogger(Vault.class);
 	private static final Path HOME_DIR = Paths.get(SystemUtils.USER_HOME);
+
+	private final StampedLock stateLock;
 
 	private final VaultSettings vaultSettings;
 	private final Provider<Volume> volumeProvider;
@@ -93,6 +97,8 @@ public class Vault {
 		this.accessPoint = Bindings.createStringBinding(this::getAccessPoint, state);
 		this.accessPointPresent = this.accessPoint.isNotEmpty();
 		this.showingStats = new SimpleBooleanProperty(false);
+
+		this.stateLock = new StampedLock();
 	}
 
 	// ******************************************************************************
@@ -141,9 +147,13 @@ public class Vault {
 				volume = volumeProvider.get();
 				volume.mount(fs, getEffectiveMountFlags(), throwable -> {
 					destroyCryptoFileSystem();
-					setState(VaultState.LOCKED); //TODO: possible race conditions of the vault state. Use Platform.runLater()?
+					new Thread(() -> { //TODO: maybe use the executor service
+						long stamp = stateLock.writeLock();
+						setState(VaultState.LOCKED, stamp);
+						stateLock.unlock(stamp);
+					}).start();
 					if (throwable != null) {
-						LOG.warn("Unexpected unmount and lock of vault" + getDisplayName(), throwable);
+						LOG.warn("Unexpected unmount and lock of vault " + getDisplayName(), throwable);
 					}
 				});
 			} catch (Exception e) {
@@ -180,8 +190,24 @@ public class Vault {
 		return state.get();
 	}
 
-	public void setState(VaultState value) {
-		state.setValue(value);
+	public long lockVaultState() {
+		return stateLock.writeLock();
+	}
+
+	public void unlockVaultState(long stamp) {
+		stateLock.unlock(stamp);
+	}
+
+	public void setState(VaultState value, long stamp) {
+		if (stateLock.isWriteLockStamp(stamp)) {
+			if (Platform.isFxApplicationThread()) {
+				state.setValue(value);
+			} else {
+				Platform.runLater(() -> state.setValue(value));
+			}
+		} else {
+			throw new IllegalCallerException("Stamp is not a valid write lock.");
+		}
 	}
 
 	public ObjectProperty<Exception> lastKnownExceptionProperty() {

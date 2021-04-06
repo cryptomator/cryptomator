@@ -101,7 +101,8 @@ public class MigrationRunController implements FxController {
 	public void migrate() {
 		LOG.info("Migrating vault {}", vault.getPath());
 		CharSequence password = passwordField.getCharacters();
-		vault.setState(VaultState.PROCESSING);
+		long stamp = vault.lockVaultState();
+		vault.setState(VaultState.PROCESSING, stamp);
 		passwordField.setDisable(true);
 		ScheduledFuture<?> progressSyncTask = scheduler.scheduleAtFixedRate(() -> {
 			Platform.runLater(() -> {
@@ -115,10 +116,10 @@ public class MigrationRunController implements FxController {
 		}).onSuccess(needsAnotherMigration -> {
 			if (needsAnotherMigration) {
 				LOG.info("Migration of '{}' succeeded, but another migration is required.", vault.getDisplayName());
-				vault.setState(VaultState.NEEDS_MIGRATION);
+				vault.setState(VaultState.NEEDS_MIGRATION, stamp);
 			} else {
 				LOG.info("Migration of '{}' succeeded.", vault.getDisplayName());
-				vault.setState(VaultState.LOCKED);
+				vault.setState(VaultState.LOCKED, stamp);
 				passwordField.wipe();
 				window.setScene(successScene.get());
 			}
@@ -127,22 +128,23 @@ public class MigrationRunController implements FxController {
 			passwordField.setDisable(false);
 			passwordField.selectAll();
 			passwordField.requestFocus();
-			vault.setState(VaultState.NEEDS_MIGRATION);
+			vault.setState(VaultState.NEEDS_MIGRATION, stamp);
 		}).onError(FileSystemCapabilityChecker.MissingCapabilityException.class, e -> {
 			LOG.error("Underlying file system not supported.", e);
-			vault.setState(VaultState.NEEDS_MIGRATION);
+			vault.setState(VaultState.NEEDS_MIGRATION, stamp);
 			missingCapability.set(e.getMissingCapability());
 			window.setScene(capabilityErrorScene.get());
 		}).onError(FileNameTooLongException.class, e -> {
 			LOG.error("Migration failed because the underlying file system does not support long filenames.", e);
-			vault.setState(VaultState.NEEDS_MIGRATION);
+			vault.setState(VaultState.NEEDS_MIGRATION, stamp);
 			errorComponent.cause(e).window(window).returnToScene(startScene.get()).build().showErrorScene();
 			window.setScene(impossibleScene.get());
 		}).onError(Exception.class, e -> { // including RuntimeExceptions
 			LOG.error("Migration failed for technical reasons.", e);
-			vault.setState(VaultState.NEEDS_MIGRATION);
+			vault.setState(VaultState.NEEDS_MIGRATION, stamp);
 			errorComponent.cause(e).window(window).returnToScene(startScene.get()).build().showErrorScene();
 		}).andFinally(() -> {
+			vault.unlockVaultState(stamp);
 			passwordField.setDisable(false);
 			progressSyncTask.cancel(true);
 		}).runOnce(executor);

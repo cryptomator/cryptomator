@@ -36,6 +36,8 @@ public class LockWorkflow extends Task<Void> {
 	private final Lazy<Scene> lockForcedScene;
 	private final Lazy<Scene> lockFailedScene;
 
+	private volatile long stamp;
+
 	@Inject
 	public LockWorkflow(@LockWindow Stage lockWindow, @LockWindow Vault vault, UserInteractionLock<LockModule.ForceLockDecision> forceLockDecisionLock, @FxmlScene(FxmlFile.LOCK_FORCED) Lazy<Scene> lockForcedScene, @FxmlScene(FxmlFile.LOCK_FAILED) Lazy<Scene> lockFailedScene) {
 		this.lockWindow = lockWindow;
@@ -47,6 +49,7 @@ public class LockWorkflow extends Task<Void> {
 
 	@Override
 	protected Void call() throws Volume.VolumeException, InterruptedException {
+		this.stamp = vault.lockVaultState();
 		try {
 			vault.lock(false);
 		} catch (Volume.VolumeException e) {
@@ -79,19 +82,21 @@ public class LockWorkflow extends Task<Void> {
 
 	@Override
 	protected void scheduled() {
-		vault.setState(VaultState.PROCESSING);
+		vault.setState(VaultState.PROCESSING, stamp);
 	}
 
 	@Override
 	protected void succeeded() {
 		LOG.info("Lock of {} succeeded.", vault.getDisplayName());
-		vault.setState(VaultState.LOCKED);
+		vault.setState(VaultState.LOCKED, stamp);
+		vault.unlockVaultState(stamp);
 	}
 
 	@Override
 	protected void failed() {
 		LOG.warn("Failed to lock {}.", vault.getDisplayName());
-		vault.setState(VaultState.UNLOCKED);
+		vault.setState(VaultState.UNLOCKED, stamp);
+		vault.unlockVaultState(stamp);
 		lockWindow.setScene(lockFailedScene.get());
 		lockWindow.show();
 	}
@@ -99,7 +104,8 @@ public class LockWorkflow extends Task<Void> {
 	@Override
 	protected void cancelled() {
 		LOG.debug("Lock of {} canceled.", vault.getDisplayName());
-		vault.setState(VaultState.UNLOCKED);
+		vault.setState(VaultState.UNLOCKED, stamp);
+		vault.unlockVaultState(stamp);
 	}
 
 }

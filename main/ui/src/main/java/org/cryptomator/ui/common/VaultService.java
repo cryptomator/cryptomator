@@ -163,6 +163,8 @@ public class VaultService {
 		private final Vault vault;
 		private final boolean forced;
 
+		private volatile long stamp;
+
 		/**
 		 * @param vault The vault to lock
 		 * @param forced Whether to attempt a forced lock
@@ -176,23 +178,32 @@ public class VaultService {
 
 		@Override
 		protected Vault call() throws Volume.VolumeException {
+			this.stamp = vault.lockVaultState();
 			vault.lock(forced);
 			return vault;
 		}
 
 		@Override
 		protected void scheduled() {
-			vault.setState(VaultState.PROCESSING);
+			vault.setState(VaultState.PROCESSING, stamp);
 		}
 
 		@Override
 		protected void succeeded() {
-			vault.setState(VaultState.LOCKED);
+			vault.setState(VaultState.LOCKED, stamp);
+			vault.unlockVaultState(stamp);
 		}
 
 		@Override
 		protected void failed() {
-			vault.setState(VaultState.UNLOCKED);
+			vault.setState(VaultState.UNLOCKED, stamp);
+			vault.unlockVaultState(stamp);
+		}
+
+		@Override
+		protected void cancelled() {
+			vault.setState(VaultState.UNLOCKED, stamp);
+			vault.unlockVaultState(stamp);
 		}
 
 	}
