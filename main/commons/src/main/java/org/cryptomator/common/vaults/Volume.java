@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Optional;
 import java.util.concurrent.CompletionStage;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 /**
@@ -33,7 +34,7 @@ public interface Volume {
 	 * @param fs
 	 * @throws IOException
 	 */
-	CompletionStage<Void> mount(CryptoFileSystem fs, String mountFlags) throws IOException, VolumeException, InvalidMountPointException;
+	void mount(CryptoFileSystem fs, String mountFlags, Consumer<Throwable> onExitAction) throws IOException, VolumeException, InvalidMountPointException;
 
 	/**
 	 * Reveals the mounted volume.
