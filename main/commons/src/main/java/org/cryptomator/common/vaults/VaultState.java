@@ -1,6 +1,8 @@
 package org.cryptomator.common.vaults;
 
 import com.google.common.base.Preconditions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javafx.application.Platform;
@@ -10,6 +12,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 @PerVault
 public class VaultState extends ObservableValueBase<VaultState.Value> implements ObservableObjectValue<VaultState.Value> {
+
+	private static final Logger LOG = LoggerFactory.getLogger(VaultState.class);
 
 	public enum Value {
 		/**
@@ -46,7 +50,7 @@ public class VaultState extends ObservableValueBase<VaultState.Value> implements
 	private final AtomicReference<Value> value;
 
 	@Inject
-	public VaultState(VaultState.Value initialValue){
+	public VaultState(VaultState.Value initialValue) {
 		this.value = new AtomicReference<>(initialValue);
 	}
 
@@ -62,6 +66,7 @@ public class VaultState extends ObservableValueBase<VaultState.Value> implements
 
 	/**
 	 * Transitions from <code>fromState</code> to <code>toState</code>.
+	 *
 	 * @param fromState Previous state
 	 * @param toState New state
 	 * @return <code>true</code> if successful
@@ -71,6 +76,8 @@ public class VaultState extends ObservableValueBase<VaultState.Value> implements
 		boolean success = value.compareAndSet(fromState, toState);
 		if (success) {
 			fireValueChangedEvent();
+		} else {
+			LOG.debug("Failed transiting into state {}: Expected state was {}, but actual state is {}.", fromState, toState, value.get());
 		}
 		return success;
 	}
