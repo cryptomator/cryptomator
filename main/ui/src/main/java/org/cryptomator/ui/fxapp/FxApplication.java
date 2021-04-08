@@ -44,8 +44,8 @@ public class FxApplication extends Application {
 	private final Lazy<MainWindowComponent> mainWindow;
 	private final Lazy<PreferencesComponent> preferencesWindow;
 	private final Lazy<QuitComponent> quitWindow;
-	private final Provider<UnlockComponent.Builder> unlockWindowBuilderProvider;
-	private final Provider<LockComponent.Builder> lockWindowBuilderProvider;
+	private final Provider<UnlockComponent.Builder> unlockWorkflowBuilderProvider;
+	private final Provider<LockComponent.Builder> lockWorkflowBuilderProvider;
 	private final Optional<TrayIntegrationProvider> trayIntegration;
 	private final Optional<UiAppearanceProvider> appearanceProvider;
 	private final VaultService vaultService;
@@ -55,12 +55,12 @@ public class FxApplication extends Application {
 	private final UiAppearanceListener systemInterfaceThemeListener = this::systemInterfaceThemeChanged;
 
 	@Inject
-	FxApplication(Settings settings, Lazy<MainWindowComponent> mainWindow, Lazy<PreferencesComponent> preferencesWindow, Provider<UnlockComponent.Builder> unlockWindowBuilderProvider, Provider<LockComponent.Builder> lockWindowBuilderProvider, Lazy<QuitComponent> quitWindow, Optional<TrayIntegrationProvider> trayIntegration, Optional<UiAppearanceProvider> appearanceProvider, VaultService vaultService, LicenseHolder licenseHolder) {
+	FxApplication(Settings settings, Lazy<MainWindowComponent> mainWindow, Lazy<PreferencesComponent> preferencesWindow, Provider<UnlockComponent.Builder> unlockWorkflowBuilderProvider, Provider<LockComponent.Builder> lockWorkflowBuilderProvider, Lazy<QuitComponent> quitWindow, Optional<TrayIntegrationProvider> trayIntegration, Optional<UiAppearanceProvider> appearanceProvider, VaultService vaultService, LicenseHolder licenseHolder) {
 		this.settings = settings;
 		this.mainWindow = mainWindow;
 		this.preferencesWindow = preferencesWindow;
-		this.unlockWindowBuilderProvider = unlockWindowBuilderProvider;
-		this.lockWindowBuilderProvider = lockWindowBuilderProvider;
+		this.unlockWorkflowBuilderProvider = unlockWorkflowBuilderProvider;
+		this.lockWorkflowBuilderProvider = lockWorkflowBuilderProvider;
 		this.quitWindow = quitWindow;
 		this.trayIntegration = trayIntegration;
 		this.appearanceProvider = appearanceProvider;
@@ -113,14 +113,14 @@ public class FxApplication extends Application {
 
 	public void startUnlockWorkflow(Vault vault, Optional<Stage> owner) {
 		Platform.runLater(() -> {
-			unlockWindowBuilderProvider.get().vault(vault).owner(owner).build().startUnlockWorkflow();
+			unlockWorkflowBuilderProvider.get().vault(vault).owner(owner).build().startUnlockWorkflow();
 			LOG.debug("Showing UnlockWindow for {}", vault.getDisplayName());
 		});
 	}
 
 	public void startLockWorkflow(Vault vault, Optional<Stage> owner) {
 		Platform.runLater(() -> {
-			lockWindowBuilderProvider.get().vault(vault).owner(owner).build().startLockWorkflow();
+			lockWorkflowBuilderProvider.get().vault(vault).owner(owner).build().startLockWorkflow();
 			LOG.debug("Start lock workflow for {}", vault.getDisplayName());
 		});
 	}
