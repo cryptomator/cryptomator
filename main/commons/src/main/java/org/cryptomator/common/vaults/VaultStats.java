@@ -26,7 +26,7 @@ public class VaultStats {
 	private static final Logger LOG = LoggerFactory.getLogger(VaultStats.class);
 
 	private final AtomicReference<CryptoFileSystem> fs;
-	private final ObjectProperty<VaultState> state;
+	private final VaultState state;
 	private final ScheduledService<Optional<CryptoFileSystemStats>> updateService;
 	private final LongProperty bytesPerSecondRead = new SimpleLongProperty();
 	private final LongProperty bytesPerSecondWritten = new SimpleLongProperty();
@@ -41,7 +41,7 @@ public class VaultStats {
 	private final LongProperty filesWritten = new SimpleLongProperty();
 
 	@Inject
-	VaultStats(AtomicReference<CryptoFileSystem> fs, ObjectProperty<VaultState> state, ExecutorService executor) {
+	VaultStats(AtomicReference<CryptoFileSystem> fs, VaultState state, ExecutorService executor) {
 		this.fs = fs;
 		this.state = state;
 		this.updateService = new UpdateStatsService();
@@ -52,7 +52,7 @@ public class VaultStats {
 	}
 
 	private void vaultStateChanged(@SuppressWarnings("unused") Observable observable) {
-		if (VaultState.UNLOCKED == state.get()) {
+		if (VaultState.Value.UNLOCKED == state.get()) {
 			assert fs.get() != null;
 			LOG.debug("start recording stats");
 			Platform.runLater(() -> updateService.restart());

@@ -27,7 +27,6 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
-import javafx.application.Platform;
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
@@ -44,7 +43,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.concurrent.locks.StampedLock;
 
 import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
 
@@ -54,13 +52,11 @@ public class Vault {
 	private static final Logger LOG = LoggerFactory.getLogger(Vault.class);
 	private static final Path HOME_DIR = Paths.get(SystemUtils.USER_HOME);
 
-	private final StampedLock stateLock;
-
 	private final VaultSettings vaultSettings;
 	private final Provider<Volume> volumeProvider;
 	private final StringBinding defaultMountFlags;
 	private final AtomicReference<CryptoFileSystem> cryptoFileSystem;
-	private final ObjectProperty<VaultState> state;
+	private final VaultState state;
 	private final ObjectProperty<Exception> lastKnownException;
 	private final VaultStats stats;
 	private final StringBinding displayName;
@@ -78,7 +74,7 @@ public class Vault {
 	private volatile Volume volume;
 
 	@Inject
-	Vault(VaultSettings vaultSettings, Provider<Volume> volumeProvider, @DefaultMountFlags StringBinding defaultMountFlags, AtomicReference<CryptoFileSystem> cryptoFileSystem, ObjectProperty<VaultState> state, @Named("lastKnownException") ObjectProperty<Exception> lastKnownException, VaultStats stats) {
+	Vault(VaultSettings vaultSettings, Provider<Volume> volumeProvider, @DefaultMountFlags StringBinding defaultMountFlags, AtomicReference<CryptoFileSystem> cryptoFileSystem, VaultState state, @Named("lastKnownException") ObjectProperty<Exception> lastKnownException, VaultStats stats) {
 		this.vaultSettings = vaultSettings;
 		this.volumeProvider = volumeProvider;
 		this.defaultMountFlags = defaultMountFlags;
@@ -97,8 +93,6 @@ public class Vault {
 		this.accessPoint = Bindings.createStringBinding(this::getAccessPoint, state);
 		this.accessPointPresent = this.accessPoint.isNotEmpty();
 		this.showingStats = new SimpleBooleanProperty(false);
-
-		this.stateLock = new StampedLock();
 	}
 
 	// ******************************************************************************
@@ -146,12 +140,9 @@ public class Vault {
 			try {
 				volume = volumeProvider.get();
 				volume.mount(fs, getEffectiveMountFlags(), throwable -> {
+					LOG.info("Unmounted vault '{}'", getDisplayName());
 					destroyCryptoFileSystem();
-					new Thread(() -> { //TODO: maybe use the executor service
-						long stamp = stateLock.writeLock();
-						setState(VaultState.LOCKED, stamp);
-						stateLock.unlock(stamp);
-					}).start();
+					state.set(VaultState.Value.LOCKED);
 					if (throwable != null) {
 						LOG.warn("Unexpected unmount and lock of vault " + getDisplayName(), throwable);
 					}
@@ -182,32 +173,12 @@ public class Vault {
 	// Observable Properties
 	// *******************************************************************************
 
-	public ObjectProperty<VaultState> stateProperty() {
+	public VaultState stateProperty() {
 		return state;
 	}
 
-	public VaultState getState() {
-		return state.get();
-	}
-
-	public long lockVaultState() {
-		return stateLock.writeLock();
-	}
-
-	public void unlockVaultState(long stamp) {
-		stateLock.unlock(stamp);
-	}
-
-	public void setState(VaultState value, long stamp) {
-		if (stateLock.isWriteLockStamp(stamp)) {
-			if (Platform.isFxApplicationThread()) {
-				state.setValue(value);
-			} else {
-				Platform.runLater(() -> state.setValue(value));
-			}
-		} else {
-			throw new IllegalCallerException("Stamp is not a valid write lock.");
-		}
+	public VaultState.Value getState() {
+		return state.getValue();
 	}
 
 	public ObjectProperty<Exception> lastKnownExceptionProperty() {
@@ -227,7 +198,7 @@ public class Vault {
 	}
 
 	public boolean isLocked() {
-		return state.get() == VaultState.LOCKED;
+		return state.get() == VaultState.Value.LOCKED;
 	}
 
 	public BooleanBinding processingProperty() {
@@ -235,7 +206,7 @@ public class Vault {
 	}
 
 	public boolean isProcessing() {
-		return state.get() == VaultState.PROCESSING;
+		return state.get() == VaultState.Value.PROCESSING;
 	}
 
 	public BooleanBinding unlockedProperty() {
@@ -243,7 +214,7 @@ public class Vault {
 	}
 
 	public boolean isUnlocked() {
-		return state.get() == VaultState.UNLOCKED;
+		return state.get() == VaultState.Value.UNLOCKED;
 	}
 
 	public BooleanBinding missingProperty() {
@@ -251,7 +222,7 @@ public class Vault {
 	}
 
 	public boolean isMissing() {
-		return state.get() == VaultState.MISSING;
+		return state.get() == VaultState.Value.MISSING;
 	}
 
 	public BooleanBinding needsMigrationProperty() {
@@ -259,7 +230,7 @@ public class Vault {
 	}
 
 	public boolean isNeedsMigration() {
-		return state.get() == VaultState.NEEDS_MIGRATION;
+		return state.get() == VaultState.Value.NEEDS_MIGRATION;
 	}
 
 	public BooleanBinding unknownErrorProperty() {
@@ -267,7 +238,7 @@ public class Vault {
 	}
 
 	public boolean isUnknownError() {
-		return state.get() == VaultState.ERROR;
+		return state.get() == VaultState.Value.ERROR;
 	}
 
 	public StringBinding displayNameProperty() {
@@ -283,7 +254,7 @@ public class Vault {
 	}
 
 	public String getAccessPoint() {
-		if (state.get() == VaultState.UNLOCKED) {
+		if (state.getValue() == VaultState.Value.UNLOCKED) {
 			assert volume != null;
 			return volume.getMountPoint().orElse(Path.of("")).toString();
 		} else {

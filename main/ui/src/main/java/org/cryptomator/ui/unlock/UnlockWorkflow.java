@@ -59,8 +59,6 @@ public class UnlockWorkflow extends Task<Boolean> {
 	private final Lazy<Scene> invalidMountPointScene;
 	private final ErrorComponent.Builder errorComponent;
 
-	private volatile long stamp;
-
 	@Inject
 	UnlockWorkflow(@UnlockWindow Stage window, @UnlockWindow Vault vault, VaultService vaultService, AtomicReference<char[]> password, @Named("savePassword") AtomicBoolean savePassword, @Named("savedPassword") Optional<char[]> savedPassword, UserInteractionLock<PasswordEntry> passwordEntryLock, KeychainManager keychain, @FxmlScene(FxmlFile.UNLOCK) Lazy<Scene> unlockScene, @FxmlScene(FxmlFile.UNLOCK_SUCCESS) Lazy<Scene> successScene, @FxmlScene(FxmlFile.UNLOCK_INVALID_MOUNT_POINT) Lazy<Scene> invalidMountPointScene, ErrorComponent.Builder errorComponent) {
 		this.window = window;
@@ -89,7 +87,6 @@ public class UnlockWorkflow extends Task<Boolean> {
 	@Override
 	protected Boolean call() throws InterruptedException, IOException, VolumeException, InvalidMountPointException {
 		try {
-			this.stamp = vault.lockVaultState();
 			if (attemptUnlock()) {
 				handleSuccess();
 				return true;
@@ -176,15 +173,12 @@ public class UnlockWorkflow extends Task<Boolean> {
 				LOG.error("Unlock failed. Mountpoint doesn't exist (needs to be a folder): {}", cause.getMessage());
 			}
 			showInvalidMountPointScene();
-			return;
 		} else if (cause instanceof FileAlreadyExistsException) {
 			LOG.error("Unlock failed. Mountpoint already exists: {}", cause.getMessage());
 			showInvalidMountPointScene();
-			return;
 		} else if (cause instanceof DirectoryNotEmptyException) {
 			LOG.error("Unlock failed. Mountpoint not an empty directory: {}", cause.getMessage());
 			showInvalidMountPointScene();
-			return;
 		} else {
 			handleGenericError(impExc);
 		}
@@ -210,25 +204,22 @@ public class UnlockWorkflow extends Task<Boolean> {
 
 	@Override
 	protected void scheduled() {
-		vault.setState(VaultState.PROCESSING, stamp);
+		vault.stateProperty().transition(VaultState.Value.LOCKED, VaultState.Value.PROCESSING);
 	}
 
 	@Override
 	protected void succeeded() {
-		vault.setState(VaultState.UNLOCKED, stamp);
-		vault.unlockVaultState(stamp);
+		vault.stateProperty().transition(VaultState.Value.PROCESSING, VaultState.Value.UNLOCKED);
 	}
 
 	@Override
 	protected void failed() {
-		vault.setState(VaultState.LOCKED, stamp);
-		vault.unlockVaultState(stamp);
+		vault.stateProperty().transition(VaultState.Value.PROCESSING, VaultState.Value.LOCKED);
 	}
 
 	@Override
 	protected void cancelled() {
-		vault.setState(VaultState.LOCKED, stamp);
-		vault.unlockVaultState(stamp);
+		vault.stateProperty().transition(VaultState.Value.PROCESSING, VaultState.Value.LOCKED);
 	}
 
 }
