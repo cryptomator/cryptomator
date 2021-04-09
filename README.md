@@ -17,11 +17,26 @@ Cryptomator is provided free of charge as an open-source project despite the hig
 
 ### Gold Sponsors
 
-[<img src="https://cryptomator.org/img/sponsors/geewhiz.svg" alt="gee-whiz" height="96">](https://www.gee-whiz.de/)
+<table>
+  <tbody>
+    <tr>
+      <td><a href="https://www.gee-whiz.de/"><img src="https://cryptomator.org/img/sponsors/geewhiz.svg" alt="gee-whiz" height="80"></a></td>
+      <td><a href="https://proxy-hub.com/"><img src="https://cryptomator.org/img/sponsors/proxyhub.svg" alt="Proxy-Hub" height="80"></a></td>
+    </tr>
+  </tbody>
+</table>
 
 ### Silver Sponsors
 
-[![TheBestVPN](https://cryptomator.org/img/sponsors/thebestvpn.png)](https://thebestvpn.com/)
+<table>
+  <tbody>
+    <tr>
+      <td><a href="https://thebestvpn.com/"><img src="https://cryptomator.org/img/sponsors/thebestvpn@2x.png" alt="TheBestVPN" height="64"></a></td>
+    </tr>
+  </tbody>
+</table>
+
+- [Jameson Lopp](https://www.lopp.net/)
 
 ---
 

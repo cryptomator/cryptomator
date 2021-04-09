@@ -4,9 +4,6 @@ import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultListManager;
 import org.cryptomator.ui.addvaultwizard.AddVaultWizardComponent;
 import org.cryptomator.ui.common.FxController;
-import org.cryptomator.ui.removevault.RemoveVaultComponent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javafx.beans.binding.Bindings;
@@ -17,30 +14,30 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.ListView;
+import javafx.scene.input.ContextMenuEvent;
+import javafx.scene.input.MouseEvent;
 
 @MainWindowScoped
 public class VaultListController implements FxController {
 
-	private static final Logger LOG = LoggerFactory.getLogger(VaultListController.class);
 
 	private final ObservableList<Vault> vaults;
 	private final ObjectProperty<Vault> selectedVault;
 	private final VaultListCellFactory cellFactory;
 	private final AddVaultWizardComponent.Builder addVaultWizard;
-	private final RemoveVaultComponent.Builder removeVault;
-	private final BooleanBinding noVaultSelected;
 	private final BooleanBinding emptyVaultList;
+
 	public ListView<Vault> vaultList;
 
 	@Inject
-	VaultListController(ObservableList<Vault> vaults, ObjectProperty<Vault> selectedVault, VaultListCellFactory cellFactory, AddVaultWizardComponent.Builder addVaultWizard, RemoveVaultComponent.Builder removeVault) {
+	VaultListController(ObservableList<Vault> vaults, ObjectProperty<Vault> selectedVault, VaultListCellFactory cellFactory, AddVaultWizardComponent.Builder addVaultWizard) {
 		this.vaults = vaults;
 		this.selectedVault = selectedVault;
 		this.cellFactory = cellFactory;
 		this.addVaultWizard = addVaultWizard;
-		this.removeVault = removeVault;
-		this.noVaultSelected = selectedVault.isNull();
+
 		this.emptyVaultList = Bindings.isEmpty(vaults);
+
 		selectedVault.addListener(this::selectedVaultDidChange);
 	}
 
@@ -56,6 +53,19 @@ public class VaultListController implements FxController {
 				}
 			}
 		});
+		vaultList.addEventFilter(MouseEvent.MOUSE_RELEASED, this::deselect);
+		vaultList.addEventFilter(ContextMenuEvent.CONTEXT_MENU_REQUESTED, request -> {
+			if (selectedVault.get() == null) {
+				request.consume();
+			}
+		});
+	}
+
+	private void deselect(MouseEvent released) {
+		if (released.getY() > (vaultList.getItems().size() * vaultList.fixedCellSizeProperty().get())) {
+			vaultList.getSelectionModel().clearSelection();
+			released.consume();
+		}
 	}
 
 	private void selectedVaultDidChange(@SuppressWarnings("unused") ObservableValue<? extends Vault> observableValue, @SuppressWarnings("unused") Vault oldValue, Vault newValue) {
@@ -70,16 +80,6 @@ public class VaultListController implements FxController {
 		addVaultWizard.build().showAddVaultWizard();
 	}
 
-	@FXML
-	public void didClickRemoveVault() {
-		Vault v = selectedVault.get();
-		if (v != null) {
-			removeVault.vault(v).build().showRemoveVault();
-		} else {
-			LOG.debug("Cannot remove a vault if none is selected.");
-		}
-	}
-
 	// Getter and Setter
 
 	public BooleanBinding emptyVaultListProperty() {
@@ -90,11 +90,4 @@ public class VaultListController implements FxController {
 		return emptyVaultList.get();
 	}
 
-	public BooleanBinding noVaultSelectedProperty() {
-		return noVaultSelected;
-	}
-
-	public boolean isNoVaultSelected() {
-		return noVaultSelected.get();
-	}
 }
