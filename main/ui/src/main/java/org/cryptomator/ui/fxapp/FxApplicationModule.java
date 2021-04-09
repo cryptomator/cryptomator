@@ -9,7 +9,7 @@ import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import org.apache.commons.lang3.SystemUtils;
-import org.cryptomator.ui.common.ErrorComponent;
+import org.cryptomator.ui.error.ErrorComponent;
 import org.cryptomator.ui.common.StageFactory;
 import org.cryptomator.ui.lock.LockComponent;
 import org.cryptomator.ui.mainwindow.MainWindowComponent;
@@ -19,9 +19,7 @@ import org.cryptomator.ui.unlock.UnlockComponent;
 
 import javax.inject.Named;
 import javafx.application.Application;
-import javafx.collections.ObservableSet;
 import javafx.scene.image.Image;
-import javafx.stage.Stage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;

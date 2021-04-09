@@ -1,4 +1,6 @@
-package org.cryptomator.ui.common;
+package org.cryptomator.ui.error;
+
+import org.cryptomator.ui.common.FxController;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;

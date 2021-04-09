@@ -1,7 +1,9 @@
-package org.cryptomator.ui.common;
+package org.cryptomator.ui.error;
 
 import dagger.BindsInstance;
 import dagger.Subcomponent;
+import org.cryptomator.ui.common.FxmlFile;
+import org.cryptomator.ui.common.FxmlScene;
 
 import javax.annotation.Nullable;
 import javafx.application.Platform;

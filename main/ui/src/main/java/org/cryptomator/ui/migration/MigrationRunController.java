@@ -12,7 +12,7 @@ import org.cryptomator.cryptofs.migration.api.MigrationProgressListener;
 import org.cryptomator.cryptolib.api.InvalidPassphraseException;
 import org.cryptomator.integrations.keychain.KeychainAccessException;
 import org.cryptomator.ui.common.Animations;
-import org.cryptomator.ui.common.ErrorComponent;
+import org.cryptomator.ui.error.ErrorComponent;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;

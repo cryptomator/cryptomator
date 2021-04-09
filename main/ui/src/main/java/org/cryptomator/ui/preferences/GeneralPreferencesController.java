@@ -8,7 +8,7 @@ import org.cryptomator.common.settings.UiTheme;
 import org.cryptomator.integrations.autostart.AutoStartProvider;
 import org.cryptomator.integrations.autostart.ToggleAutoStartFailedException;
 import org.cryptomator.integrations.keychain.KeychainAccessProvider;
-import org.cryptomator.ui.common.ErrorComponent;
+import org.cryptomator.ui.error.ErrorComponent;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.traymenu.TrayMenuComponent;
 import org.slf4j.Logger;

@@ -1,7 +1,7 @@
 package org.cryptomator.ui.addvaultwizard;
 
 import dagger.Lazy;
-import org.cryptomator.ui.common.ErrorComponent;
+import org.cryptomator.ui.error.ErrorComponent;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
