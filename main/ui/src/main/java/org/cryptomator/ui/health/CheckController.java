@@ -16,6 +16,7 @@ import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
 
 @HealthCheckScoped
@@ -28,28 +29,29 @@ public class CheckController implements FxController {
 	private final Masterkey masterkey;
 	private final VaultConfig vaultConfig;
 	private final SecureRandom csprng;
+	private final ExecutorService executor;
 
 	@Inject
-	public CheckController(@HealthCheckWindow Vault vault, @HealthCheckWindow Stage window, AtomicReference<Masterkey> masterkeyRef, AtomicReference<VaultConfig> vaultConfigRef, SecureRandom csprng) {
+	public CheckController(@HealthCheckWindow Vault vault, @HealthCheckWindow Stage window, AtomicReference<Masterkey> masterkeyRef, AtomicReference<VaultConfig> vaultConfigRef, SecureRandom csprng, ExecutorService executor) {
 		this.vault = vault;
 		this.window = window;
 		this.masterkey = Objects.requireNonNull(masterkeyRef.get());
 		this.vaultConfig = Objects.requireNonNull(vaultConfigRef.get());
 		this.csprng = csprng;
+		this.executor = executor;
 	}
 
 	@FXML
 	public void runCheck() {
-		// TODO run in background task...
 		try (var cryptor = vaultConfig.getCipherCombo().getCryptorProvider(csprng).withKey(masterkey)) {
-			List<DiagnosticResult> results = new ArrayList<>();
-			HealthCheck.allChecks().forEach(c -> {
-				LOG.info("Running check {}...", c.identifier());
-				results.addAll(c.check(vault.getPath(), vaultConfig, masterkey, cryptor));
-			});
-			results.forEach(r -> {
-				LOG.info("Result: {}", r);
-			});
+			HealthCheck.allChecks().stream()
+					.peek(check -> {
+						LOG.info("Running check: {}", check.identifier());
+					})
+					.flatMap(check -> check.check(vault.getPath(), vaultConfig, masterkey, cryptor, executor))
+					.forEach(result -> {
+						LOG.info("Result: {}", result);
+					});
 		}
 	}
 
