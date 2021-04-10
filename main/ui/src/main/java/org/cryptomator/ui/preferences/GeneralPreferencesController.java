@@ -49,7 +49,7 @@ public class GeneralPreferencesController implements FxController {
 	private final Application application;
 	private final Environment environment;
 	private final Set<KeychainAccessProvider> keychainAccessProviders;
-	private final GenericErrorComponent.Builder errorComponent;
+	private final GenericErrorComponent.Builder genericErrorBuilder;
 	public ChoiceBox<UiTheme> themeChoiceBox;
 	public ChoiceBox<KeychainBackend> keychainBackendChoiceBox;
 	public CheckBox showMinimizeButtonCheckbox;
@@ -63,7 +63,7 @@ public class GeneralPreferencesController implements FxController {
 
 
 	@Inject
-	GeneralPreferencesController(@PreferencesWindow Stage window, Settings settings, TrayMenuComponent trayMenu, Optional<AutoStartProvider> autoStartProvider, Set<KeychainAccessProvider> keychainAccessProviders, ObjectProperty<SelectedPreferencesTab> selectedTabProperty, LicenseHolder licenseHolder, ResourceBundle resourceBundle, Application application, Environment environment, GenericErrorComponent.Builder errorComponent) {
+	GeneralPreferencesController(@PreferencesWindow Stage window, Settings settings, TrayMenuComponent trayMenu, Optional<AutoStartProvider> autoStartProvider, Set<KeychainAccessProvider> keychainAccessProviders, ObjectProperty<SelectedPreferencesTab> selectedTabProperty, LicenseHolder licenseHolder, ResourceBundle resourceBundle, Application application, Environment environment, GenericErrorComponent.Builder genericErrorBuilder) {
 		this.window = window;
 		this.settings = settings;
 		this.trayMenuInitialized = trayMenu.isInitialized();
@@ -75,7 +75,7 @@ public class GeneralPreferencesController implements FxController {
 		this.resourceBundle = resourceBundle;
 		this.application = application;
 		this.environment = environment;
-		this.errorComponent = errorComponent;
+		this.genericErrorBuilder = genericErrorBuilder;
 	}
 
 	@FXML
@@ -146,7 +146,7 @@ public class GeneralPreferencesController implements FxController {
 			} catch (ToggleAutoStartFailedException e) {
 				autoStartCheckbox.setSelected(!enableAutoStart); // restore previous state
 				LOG.error("Failed to toggle autostart.", e);
-				errorComponent.cause(e).window(window).returnToScene(window.getScene()).build().showErrorScene();
+				genericErrorBuilder.cause(e).window(window).returnToScene(window.getScene()).build().showErrorScene();
 			}
 		});
 	}

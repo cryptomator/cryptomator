@@ -34,7 +34,7 @@ public class ChooseExistingVaultController implements FxController {
 	private final Stage window;
 	private final Lazy<Scene> welcomeScene;
 	private final Lazy<Scene> successScene;
-	private final GenericErrorComponent.Builder errorComponent;
+	private final GenericErrorComponent.Builder genericErrorBuilder;
 	private final ObjectProperty<Path> vaultPath;
 	private final ObjectProperty<Vault> vault;
 	private final VaultListManager vaultListManager;
@@ -43,11 +43,11 @@ public class ChooseExistingVaultController implements FxController {
 	private Image screenshot;
 
 	@Inject
-	ChooseExistingVaultController(@AddVaultWizardWindow Stage window, @FxmlScene(FxmlFile.ADDVAULT_WELCOME) Lazy<Scene> welcomeScene, @FxmlScene(FxmlFile.ADDVAULT_SUCCESS) Lazy<Scene> successScene, GenericErrorComponent.Builder errorComponent, ObjectProperty<Path> vaultPath, @AddVaultWizardWindow ObjectProperty<Vault> vault, VaultListManager vaultListManager, ResourceBundle resourceBundle) {
+	ChooseExistingVaultController(@AddVaultWizardWindow Stage window, @FxmlScene(FxmlFile.ADDVAULT_WELCOME) Lazy<Scene> welcomeScene, @FxmlScene(FxmlFile.ADDVAULT_SUCCESS) Lazy<Scene> successScene, GenericErrorComponent.Builder genericErrorBuilder, ObjectProperty<Path> vaultPath, @AddVaultWizardWindow ObjectProperty<Vault> vault, VaultListManager vaultListManager, ResourceBundle resourceBundle) {
 		this.window = window;
 		this.welcomeScene = welcomeScene;
 		this.successScene = successScene;
-		this.errorComponent = errorComponent;
+		this.genericErrorBuilder = genericErrorBuilder;
 		this.vaultPath = vaultPath;
 		this.vault = vault;
 		this.vaultListManager = vaultListManager;
@@ -83,7 +83,7 @@ public class ChooseExistingVaultController implements FxController {
 				window.setScene(successScene.get());
 			} catch (NoSuchFileException e) {
 				LOG.error("Failed to open existing vault.", e);
-				errorComponent.cause(e).window(window).returnToScene(window.getScene()).build().showErrorScene();
+				genericErrorBuilder.cause(e).window(window).returnToScene(window.getScene()).build().showErrorScene();
 			}
 		}
 	}

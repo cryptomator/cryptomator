@@ -57,10 +57,10 @@ public class UnlockWorkflow extends Task<Boolean> {
 	private final Lazy<Scene> unlockScene;
 	private final Lazy<Scene> successScene;
 	private final Lazy<Scene> invalidMountPointScene;
-	private final GenericErrorComponent.Builder errorComponent;
+	private final GenericErrorComponent.Builder genericErrorBuilder;
 
 	@Inject
-	UnlockWorkflow(@UnlockWindow Stage window, @UnlockWindow Vault vault, VaultService vaultService, AtomicReference<char[]> password, @Named("savePassword") AtomicBoolean savePassword, @Named("savedPassword") Optional<char[]> savedPassword, UserInteractionLock<PasswordEntry> passwordEntryLock, KeychainManager keychain, @FxmlScene(FxmlFile.UNLOCK) Lazy<Scene> unlockScene, @FxmlScene(FxmlFile.UNLOCK_SUCCESS) Lazy<Scene> successScene, @FxmlScene(FxmlFile.UNLOCK_INVALID_MOUNT_POINT) Lazy<Scene> invalidMountPointScene, GenericErrorComponent.Builder errorComponent) {
+	UnlockWorkflow(@UnlockWindow Stage window, @UnlockWindow Vault vault, VaultService vaultService, AtomicReference<char[]> password, @Named("savePassword") AtomicBoolean savePassword, @Named("savedPassword") Optional<char[]> savedPassword, UserInteractionLock<PasswordEntry> passwordEntryLock, KeychainManager keychain, @FxmlScene(FxmlFile.UNLOCK) Lazy<Scene> unlockScene, @FxmlScene(FxmlFile.UNLOCK_SUCCESS) Lazy<Scene> successScene, @FxmlScene(FxmlFile.UNLOCK_INVALID_MOUNT_POINT) Lazy<Scene> invalidMountPointScene, GenericErrorComponent.Builder genericErrorBuilder) {
 		this.window = window;
 		this.vault = vault;
 		this.vaultService = vaultService;
@@ -72,7 +72,7 @@ public class UnlockWorkflow extends Task<Boolean> {
 		this.unlockScene = unlockScene;
 		this.successScene = successScene;
 		this.invalidMountPointScene = invalidMountPointScene;
-		this.errorComponent = errorComponent;
+		this.genericErrorBuilder = genericErrorBuilder;
 
 		setOnFailed(event -> {
 			Throwable throwable = event.getSource().getException();
@@ -196,7 +196,7 @@ public class UnlockWorkflow extends Task<Boolean> {
 
 	private void handleGenericError(Throwable e) {
 		LOG.error("Unlock failed for technical reasons.", e);
-		errorComponent.cause(e).window(window).returnToScene(window.getScene()).build().showErrorScene();
+		genericErrorBuilder.cause(e).window(window).returnToScene(window.getScene()).build().showErrorScene();
 	}
 
 	private void wipePassword(char[] pw) {

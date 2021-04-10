@@ -56,7 +56,7 @@ public class MigrationRunController implements FxController {
 	private final ScheduledExecutorService scheduler;
 	private final KeychainManager keychain;
 	private final ObjectProperty<FileSystemCapabilityChecker.Capability> missingCapability;
-	private final GenericErrorComponent.Builder errorComponent;
+	private final GenericErrorComponent.Builder genericErrorBuilder;
 	private final Lazy<Scene> startScene;
 	private final Lazy<Scene> successScene;
 	private final Lazy<Scene> impossibleScene;
@@ -68,14 +68,14 @@ public class MigrationRunController implements FxController {
 	public NiceSecurePasswordField passwordField;
 
 	@Inject
-	public MigrationRunController(@MigrationWindow Stage window, @MigrationWindow Vault vault, ExecutorService executor, ScheduledExecutorService scheduler, KeychainManager keychain, @Named("capabilityErrorCause") ObjectProperty<FileSystemCapabilityChecker.Capability> missingCapability, @FxmlScene(FxmlFile.MIGRATION_START) Lazy<Scene> startScene, @FxmlScene(FxmlFile.MIGRATION_SUCCESS) Lazy<Scene> successScene, @FxmlScene(FxmlFile.MIGRATION_CAPABILITY_ERROR) Lazy<Scene> capabilityErrorScene, @FxmlScene(FxmlFile.MIGRATION_IMPOSSIBLE) Lazy<Scene> impossibleScene, GenericErrorComponent.Builder errorComponent) {
+	public MigrationRunController(@MigrationWindow Stage window, @MigrationWindow Vault vault, ExecutorService executor, ScheduledExecutorService scheduler, KeychainManager keychain, @Named("capabilityErrorCause") ObjectProperty<FileSystemCapabilityChecker.Capability> missingCapability, @FxmlScene(FxmlFile.MIGRATION_START) Lazy<Scene> startScene, @FxmlScene(FxmlFile.MIGRATION_SUCCESS) Lazy<Scene> successScene, @FxmlScene(FxmlFile.MIGRATION_CAPABILITY_ERROR) Lazy<Scene> capabilityErrorScene, @FxmlScene(FxmlFile.MIGRATION_IMPOSSIBLE) Lazy<Scene> impossibleScene, GenericErrorComponent.Builder genericErrorBuilder) {
 		this.window = window;
 		this.vault = vault;
 		this.executor = executor;
 		this.scheduler = scheduler;
 		this.keychain = keychain;
 		this.missingCapability = missingCapability;
-		this.errorComponent = errorComponent;
+		this.genericErrorBuilder = genericErrorBuilder;
 		this.startScene = startScene;
 		this.successScene = successScene;
 		this.migrateButtonContentDisplay = Bindings.createObjectBinding(this::getMigrateButtonContentDisplay, vault.stateProperty());
@@ -136,12 +136,12 @@ public class MigrationRunController implements FxController {
 		}).onError(FileNameTooLongException.class, e -> {
 			LOG.error("Migration failed because the underlying file system does not support long filenames.", e);
 			vault.setState(VaultState.NEEDS_MIGRATION);
-			errorComponent.cause(e).window(window).returnToScene(startScene.get()).build().showErrorScene();
+			genericErrorBuilder.cause(e).window(window).returnToScene(startScene.get()).build().showErrorScene();
 			window.setScene(impossibleScene.get());
 		}).onError(Exception.class, e -> { // including RuntimeExceptions
 			LOG.error("Migration failed for technical reasons.", e);
 			vault.setState(VaultState.NEEDS_MIGRATION);
-			errorComponent.cause(e).window(window).returnToScene(startScene.get()).build().showErrorScene();
+			genericErrorBuilder.cause(e).window(window).returnToScene(startScene.get()).build().showErrorScene();
 		}).andFinally(() -> {
 			passwordField.setDisable(false);
 			progressSyncTask.cancel(true);

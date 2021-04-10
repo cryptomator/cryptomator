@@ -32,18 +32,18 @@ public class RecoveryKeyCreationController implements FxController {
 	private final ExecutorService executor;
 	private final RecoveryKeyFactory recoveryKeyFactory;
 	private final StringProperty recoveryKeyProperty;
-	private final GenericErrorComponent.Builder errorComponent;
+	private final GenericErrorComponent.Builder genericErrorBuilder;
 	public NiceSecurePasswordField passwordField;
 
 	@Inject
-	public RecoveryKeyCreationController(@RecoveryKeyWindow Stage window, @FxmlScene(FxmlFile.RECOVERYKEY_SUCCESS) Lazy<Scene> successScene, @RecoveryKeyWindow Vault vault, RecoveryKeyFactory recoveryKeyFactory, ExecutorService executor, @RecoveryKeyWindow StringProperty recoveryKey, GenericErrorComponent.Builder errorComponent) {
+	public RecoveryKeyCreationController(@RecoveryKeyWindow Stage window, @FxmlScene(FxmlFile.RECOVERYKEY_SUCCESS) Lazy<Scene> successScene, @RecoveryKeyWindow Vault vault, RecoveryKeyFactory recoveryKeyFactory, ExecutorService executor, @RecoveryKeyWindow StringProperty recoveryKey, GenericErrorComponent.Builder genericErrorBuilder) {
 		this.window = window;
 		this.successScene = successScene;
 		this.vault = vault;
 		this.executor = executor;
 		this.recoveryKeyFactory = recoveryKeyFactory;
 		this.recoveryKeyProperty = recoveryKey;
-		this.errorComponent = errorComponent;
+		this.genericErrorBuilder = genericErrorBuilder;
 	}
 
 	@FXML
@@ -62,7 +62,7 @@ public class RecoveryKeyCreationController implements FxController {
 				Animations.createShakeWindowAnimation(window).play();
 			} else {
 				LOG.error("Creation of recovery key failed.", task.getException());
-				errorComponent.cause(task.getException()).window(window).returnToScene(window.getScene()).build().showErrorScene();
+				genericErrorBuilder.cause(task.getException()).window(window).returnToScene(window.getScene()).build().showErrorScene();
 			}
 		});
 		executor.submit(task);

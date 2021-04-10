@@ -53,7 +53,7 @@ public class CreateNewVaultPasswordController implements FxController {
 	private final Lazy<Scene> chooseLocationScene;
 	private final Lazy<Scene> recoveryKeyScene;
 	private final Lazy<Scene> successScene;
-	private final GenericErrorComponent.Builder errorComponent;
+	private final GenericErrorComponent.Builder genericErrorBuilder;
 	private final ExecutorService executor;
 	private final RecoveryKeyFactory recoveryKeyFactory;
 	private final StringProperty vaultNameProperty;
@@ -73,12 +73,12 @@ public class CreateNewVaultPasswordController implements FxController {
 	public Toggle skipRecoveryKey;
 
 	@Inject
-	CreateNewVaultPasswordController(@AddVaultWizardWindow Stage window, @FxmlScene(FxmlFile.ADDVAULT_NEW_LOCATION) Lazy<Scene> chooseLocationScene, @FxmlScene(FxmlFile.ADDVAULT_NEW_RECOVERYKEY) Lazy<Scene> recoveryKeyScene, @FxmlScene(FxmlFile.ADDVAULT_SUCCESS) Lazy<Scene> successScene, GenericErrorComponent.Builder errorComponent, ExecutorService executor, RecoveryKeyFactory recoveryKeyFactory, @Named("vaultName") StringProperty vaultName, ObjectProperty<Path> vaultPath, @AddVaultWizardWindow ObjectProperty<Vault> vault, @Named("recoveryKey") StringProperty recoveryKey, VaultListManager vaultListManager, ResourceBundle resourceBundle, @Named("newPassword") ObjectProperty<CharSequence> password, ReadmeGenerator readmeGenerator) {
+	CreateNewVaultPasswordController(@AddVaultWizardWindow Stage window, @FxmlScene(FxmlFile.ADDVAULT_NEW_LOCATION) Lazy<Scene> chooseLocationScene, @FxmlScene(FxmlFile.ADDVAULT_NEW_RECOVERYKEY) Lazy<Scene> recoveryKeyScene, @FxmlScene(FxmlFile.ADDVAULT_SUCCESS) Lazy<Scene> successScene, GenericErrorComponent.Builder genericErrorBuilder, ExecutorService executor, RecoveryKeyFactory recoveryKeyFactory, @Named("vaultName") StringProperty vaultName, ObjectProperty<Path> vaultPath, @AddVaultWizardWindow ObjectProperty<Vault> vault, @Named("recoveryKey") StringProperty recoveryKey, VaultListManager vaultListManager, ResourceBundle resourceBundle, @Named("newPassword") ObjectProperty<CharSequence> password, ReadmeGenerator readmeGenerator) {
 		this.window = window;
 		this.chooseLocationScene = chooseLocationScene;
 		this.recoveryKeyScene = recoveryKeyScene;
 		this.successScene = successScene;
-		this.errorComponent = errorComponent;
+		this.genericErrorBuilder = genericErrorBuilder;
 		this.executor = executor;
 		this.recoveryKeyFactory = recoveryKeyFactory;
 		this.vaultNameProperty = vaultName;
@@ -113,7 +113,7 @@ public class CreateNewVaultPasswordController implements FxController {
 			Files.createDirectory(pathToVault);
 		} catch (IOException e) {
 			LOG.error("Failed to create vault directory.", e);
-			errorComponent.cause(e).window(window).returnToScene(window.getScene()).build().showErrorScene();
+			genericErrorBuilder.cause(e).window(window).returnToScene(window.getScene()).build().showErrorScene();
 			return;
 		}
 
@@ -138,7 +138,7 @@ public class CreateNewVaultPasswordController implements FxController {
 			window.setScene(recoveryKeyScene.get());
 		}).onError(IOException.class, e -> {
 			LOG.error("Failed to initialize vault.", e);
-			errorComponent.cause(e).window(window).returnToScene(window.getScene()).build().showErrorScene();
+			genericErrorBuilder.cause(e).window(window).returnToScene(window.getScene()).build().showErrorScene();
 		}).andFinally(() -> {
 			processing.set(false);
 		}).runOnce(executor);
@@ -154,7 +154,7 @@ public class CreateNewVaultPasswordController implements FxController {
 			window.setScene(successScene.get());
 		}).onError(IOException.class, e -> {
 			LOG.error("Failed to initialize vault.", e);
-			errorComponent.cause(e).window(window).returnToScene(window.getScene()).build().showErrorScene();
+			genericErrorBuilder.cause(e).window(window).returnToScene(window.getScene()).build().showErrorScene();
 		}).andFinally(() -> {
 			processing.set(false);
 		}).runOnce(executor);

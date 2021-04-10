@@ -35,10 +35,10 @@ public class RecoveryKeyResetPasswordController implements FxController {
 	private final ObjectProperty<CharSequence> newPassword;
 	private final Lazy<Scene> recoverScene;
 	private final BooleanBinding invalidNewPassword;
-	private final GenericErrorComponent.Builder errorComponent;
+	private final GenericErrorComponent.Builder genericErrorBuilder;
 
 	@Inject
-	public RecoveryKeyResetPasswordController(@RecoveryKeyWindow Stage window, @RecoveryKeyWindow Vault vault, RecoveryKeyFactory recoveryKeyFactory, ExecutorService executor, @RecoveryKeyWindow StringProperty recoveryKey, @Named("newPassword") ObjectProperty<CharSequence> newPassword, @FxmlScene(FxmlFile.RECOVERYKEY_RECOVER) Lazy<Scene> recoverScene, GenericErrorComponent.Builder errorComponent) {
+	public RecoveryKeyResetPasswordController(@RecoveryKeyWindow Stage window, @RecoveryKeyWindow Vault vault, RecoveryKeyFactory recoveryKeyFactory, ExecutorService executor, @RecoveryKeyWindow StringProperty recoveryKey, @Named("newPassword") ObjectProperty<CharSequence> newPassword, @FxmlScene(FxmlFile.RECOVERYKEY_RECOVER) Lazy<Scene> recoverScene, GenericErrorComponent.Builder genericErrorBuilder) {
 		this.window = window;
 		this.vault = vault;
 		this.recoveryKeyFactory = recoveryKeyFactory;
@@ -47,7 +47,7 @@ public class RecoveryKeyResetPasswordController implements FxController {
 		this.newPassword = newPassword;
 		this.recoverScene = recoverScene;
 		this.invalidNewPassword = Bindings.createBooleanBinding(this::isInvalidNewPassword, newPassword);
-		this.errorComponent = errorComponent;
+		this.genericErrorBuilder = genericErrorBuilder;
 	}
 
 	@FXML
@@ -68,7 +68,7 @@ public class RecoveryKeyResetPasswordController implements FxController {
 		});
 		task.setOnFailed(event -> {
 			LOG.error("Resetting password failed.", task.getException());
-			errorComponent.cause(task.getException()).window(window).returnToScene(recoverScene.get()).build().showErrorScene();
+			genericErrorBuilder.cause(task.getException()).window(window).returnToScene(recoverScene.get()).build().showErrorScene();
 		});
 		executor.submit(task);
 	}

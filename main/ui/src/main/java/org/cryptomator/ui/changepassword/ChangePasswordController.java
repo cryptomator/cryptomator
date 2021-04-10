@@ -34,7 +34,7 @@ public class ChangePasswordController implements FxController {
 	private final Stage window;
 	private final Vault vault;
 	private final ObjectProperty<CharSequence> newPassword;
-	private final GenericErrorComponent.Builder errorComponent;
+	private final GenericErrorComponent.Builder genericErrorBuilder;
 	private final KeychainManager keychain;
 
 	public NiceSecurePasswordField oldPasswordField;
@@ -42,11 +42,11 @@ public class ChangePasswordController implements FxController {
 	public Button finishButton;
 
 	@Inject
-	public ChangePasswordController(@ChangePasswordWindow Stage window, @ChangePasswordWindow Vault vault, @Named("newPassword") ObjectProperty<CharSequence> newPassword, GenericErrorComponent.Builder errorComponent, KeychainManager keychain) {
+	public ChangePasswordController(@ChangePasswordWindow Stage window, @ChangePasswordWindow Vault vault, @Named("newPassword") ObjectProperty<CharSequence> newPassword, GenericErrorComponent.Builder genericErrorBuilder, KeychainManager keychain) {
 		this.window = window;
 		this.vault = vault;
 		this.newPassword = newPassword;
-		this.errorComponent = errorComponent;
+		this.genericErrorBuilder = genericErrorBuilder;
 		this.keychain = keychain;
 	}
 
@@ -72,7 +72,7 @@ public class ChangePasswordController implements FxController {
 			updatePasswordInSystemkeychain();
 		} catch (IOException e) {
 			LOG.error("IO error occured during password change. Unable to perform operation.", e);
-			errorComponent.cause(e).window(window).returnToScene(window.getScene()).build().showErrorScene();
+			genericErrorBuilder.cause(e).window(window).returnToScene(window.getScene()).build().showErrorScene();
 		} catch (InvalidPassphraseException e) {
 			Animations.createShakeWindowAnimation(window).play();
 			oldPasswordField.selectAll();
