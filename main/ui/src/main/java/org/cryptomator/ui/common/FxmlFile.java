@@ -9,8 +9,8 @@ public enum FxmlFile {
 	ADDVAULT_SUCCESS("/fxml/addvault_success.fxml"), //
 	ADDVAULT_WELCOME("/fxml/addvault_welcome.fxml"), //
 	CHANGEPASSWORD("/fxml/changepassword.fxml"), //
-	ERROR("/fxml/error.fxml"), //
 	FORGET_PASSWORD("/fxml/forget_password.fxml"), //
+	GENERIC_ERROR("/fxml/generic_error.fxml"), //
 	LOCK_FORCED("/fxml/lock_forced.fxml"), //
 	LOCK_FAILED("/fxml/lock_failed.fxml"), //
 	MAIN_WINDOW("/fxml/main_window.fxml"), //

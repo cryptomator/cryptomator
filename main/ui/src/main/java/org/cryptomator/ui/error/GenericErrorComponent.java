@@ -11,11 +11,11 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 @Subcomponent(modules = {ErrorModule.class})
-public interface ErrorComponent {
+public interface GenericErrorComponent {
 
 	Stage window();
 
-	@FxmlScene(FxmlFile.ERROR)
+	@FxmlScene(FxmlFile.GENERIC_ERROR)
 	Scene scene();
 
 	default void showErrorScene() {
@@ -44,7 +44,7 @@ public interface ErrorComponent {
 		@BindsInstance
 		Builder returnToScene(@Nullable Scene previousScene);
 
-		ErrorComponent build();
+		GenericErrorComponent build();
 
 	}
 

@@ -39,13 +39,13 @@ abstract class ErrorModule {
 
 	@Binds
 	@IntoMap
-	@FxControllerKey(ErrorController.class)
-	abstract FxController bindErrorController(ErrorController controller);
+	@FxControllerKey(GenericErrorController.class)
+	abstract FxController bindErrorController(GenericErrorController controller);
 
 	@Provides
-	@FxmlScene(FxmlFile.ERROR)
+	@FxmlScene(FxmlFile.GENERIC_ERROR)
 	static Scene provideErrorScene(FxmlLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene(FxmlFile.ERROR);
+		return fxmlLoaders.createScene(FxmlFile.GENERIC_ERROR);
 	}
 
 

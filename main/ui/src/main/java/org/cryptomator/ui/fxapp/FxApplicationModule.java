@@ -9,7 +9,7 @@ import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import org.apache.commons.lang3.SystemUtils;
-import org.cryptomator.ui.error.ErrorComponent;
+import org.cryptomator.ui.error.GenericErrorComponent;
 import org.cryptomator.ui.common.StageFactory;
 import org.cryptomator.ui.lock.LockComponent;
 import org.cryptomator.ui.mainwindow.MainWindowComponent;
@@ -26,7 +26,7 @@ import java.io.UncheckedIOException;
 import java.util.Collections;
 import java.util.List;
 
-@Module(includes = {UpdateCheckerModule.class}, subcomponents = {MainWindowComponent.class, PreferencesComponent.class, UnlockComponent.class, LockComponent.class, QuitComponent.class, ErrorComponent.class})
+@Module(includes = {UpdateCheckerModule.class}, subcomponents = {MainWindowComponent.class, PreferencesComponent.class, UnlockComponent.class, LockComponent.class, QuitComponent.class, GenericErrorComponent.class})
 abstract class FxApplicationModule {
 
 	@Provides

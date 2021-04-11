@@ -2,7 +2,7 @@ package org.cryptomator.ui.recoverykey;
 
 import dagger.Lazy;
 import org.cryptomator.common.vaults.Vault;
-import org.cryptomator.ui.error.ErrorComponent;
+import org.cryptomator.ui.error.GenericErrorComponent;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
@@ -35,10 +35,10 @@ public class RecoveryKeyResetPasswordController implements FxController {
 	private final ObjectProperty<CharSequence> newPassword;
 	private final Lazy<Scene> recoverScene;
 	private final BooleanBinding invalidNewPassword;
-	private final ErrorComponent.Builder errorComponent;
+	private final GenericErrorComponent.Builder errorComponent;
 
 	@Inject
-	public RecoveryKeyResetPasswordController(@RecoveryKeyWindow Stage window, @RecoveryKeyWindow Vault vault, RecoveryKeyFactory recoveryKeyFactory, ExecutorService executor, @RecoveryKeyWindow StringProperty recoveryKey, @Named("newPassword") ObjectProperty<CharSequence> newPassword, @FxmlScene(FxmlFile.RECOVERYKEY_RECOVER) Lazy<Scene> recoverScene, ErrorComponent.Builder errorComponent) {
+	public RecoveryKeyResetPasswordController(@RecoveryKeyWindow Stage window, @RecoveryKeyWindow Vault vault, RecoveryKeyFactory recoveryKeyFactory, ExecutorService executor, @RecoveryKeyWindow StringProperty recoveryKey, @Named("newPassword") ObjectProperty<CharSequence> newPassword, @FxmlScene(FxmlFile.RECOVERYKEY_RECOVER) Lazy<Scene> recoverScene, GenericErrorComponent.Builder errorComponent) {
 		this.window = window;
 		this.vault = vault;
 		this.recoveryKeyFactory = recoveryKeyFactory;

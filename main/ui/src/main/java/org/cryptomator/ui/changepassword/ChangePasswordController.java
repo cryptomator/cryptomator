@@ -6,7 +6,7 @@ import org.cryptomator.cryptofs.CryptoFileSystemProvider;
 import org.cryptomator.cryptolib.api.InvalidPassphraseException;
 import org.cryptomator.integrations.keychain.KeychainAccessException;
 import org.cryptomator.ui.common.Animations;
-import org.cryptomator.ui.error.ErrorComponent;
+import org.cryptomator.ui.error.GenericErrorComponent;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.controls.NiceSecurePasswordField;
 import org.slf4j.Logger;
@@ -23,7 +23,6 @@ import javafx.scene.control.CheckBox;
 import javafx.stage.Stage;
 import java.io.IOException;
 import java.nio.CharBuffer;
-import java.util.Optional;
 
 import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
 
@@ -35,7 +34,7 @@ public class ChangePasswordController implements FxController {
 	private final Stage window;
 	private final Vault vault;
 	private final ObjectProperty<CharSequence> newPassword;
-	private final ErrorComponent.Builder errorComponent;
+	private final GenericErrorComponent.Builder errorComponent;
 	private final KeychainManager keychain;
 
 	public NiceSecurePasswordField oldPasswordField;
@@ -43,7 +42,7 @@ public class ChangePasswordController implements FxController {
 	public Button finishButton;
 
 	@Inject
-	public ChangePasswordController(@ChangePasswordWindow Stage window, @ChangePasswordWindow Vault vault, @Named("newPassword") ObjectProperty<CharSequence> newPassword, ErrorComponent.Builder errorComponent, KeychainManager keychain) {
+	public ChangePasswordController(@ChangePasswordWindow Stage window, @ChangePasswordWindow Vault vault, @Named("newPassword") ObjectProperty<CharSequence> newPassword, GenericErrorComponent.Builder errorComponent, KeychainManager keychain) {
 		this.window = window;
 		this.vault = vault;
 		this.newPassword = newPassword;

@@ -4,7 +4,7 @@ import dagger.Lazy;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultListManager;
-import org.cryptomator.ui.error.ErrorComponent;
+import org.cryptomator.ui.error.GenericErrorComponent;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
@@ -34,7 +34,7 @@ public class ChooseExistingVaultController implements FxController {
 	private final Stage window;
 	private final Lazy<Scene> welcomeScene;
 	private final Lazy<Scene> successScene;
-	private final ErrorComponent.Builder errorComponent;
+	private final GenericErrorComponent.Builder errorComponent;
 	private final ObjectProperty<Path> vaultPath;
 	private final ObjectProperty<Vault> vault;
 	private final VaultListManager vaultListManager;
@@ -43,7 +43,7 @@ public class ChooseExistingVaultController implements FxController {
 	private Image screenshot;
 
 	@Inject
-	ChooseExistingVaultController(@AddVaultWizardWindow Stage window, @FxmlScene(FxmlFile.ADDVAULT_WELCOME) Lazy<Scene> welcomeScene, @FxmlScene(FxmlFile.ADDVAULT_SUCCESS) Lazy<Scene> successScene, ErrorComponent.Builder errorComponent, ObjectProperty<Path> vaultPath, @AddVaultWizardWindow ObjectProperty<Vault> vault, VaultListManager vaultListManager, ResourceBundle resourceBundle) {
+	ChooseExistingVaultController(@AddVaultWizardWindow Stage window, @FxmlScene(FxmlFile.ADDVAULT_WELCOME) Lazy<Scene> welcomeScene, @FxmlScene(FxmlFile.ADDVAULT_SUCCESS) Lazy<Scene> successScene, GenericErrorComponent.Builder errorComponent, ObjectProperty<Path> vaultPath, @AddVaultWizardWindow ObjectProperty<Vault> vault, VaultListManager vaultListManager, ResourceBundle resourceBundle) {
 		this.window = window;
 		this.welcomeScene = welcomeScene;
 		this.successScene = successScene;

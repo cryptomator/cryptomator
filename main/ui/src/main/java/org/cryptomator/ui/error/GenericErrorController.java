@@ -9,14 +9,14 @@ import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-public class ErrorController implements FxController {
+public class GenericErrorController implements FxController {
 
 	private final String stackTrace;
 	private final Scene previousScene;
 	private final Stage window;
 
 	@Inject
-	ErrorController(@Named("stackTrace") String stackTrace, @Nullable Scene previousScene, Stage window) {
+	GenericErrorController(@Named("stackTrace") String stackTrace, @Nullable Scene previousScene, Stage window) {
 		this.stackTrace = stackTrace;
 		this.previousScene = previousScene;
 		this.window = window;
