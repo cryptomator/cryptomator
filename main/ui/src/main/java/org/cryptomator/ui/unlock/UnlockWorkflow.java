@@ -10,11 +10,12 @@ import org.cryptomator.common.vaults.Volume.VolumeException;
 import org.cryptomator.cryptolib.api.InvalidPassphraseException;
 import org.cryptomator.integrations.keychain.KeychainAccessException;
 import org.cryptomator.ui.common.Animations;
-import org.cryptomator.ui.error.GenericErrorComponent;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.UserInteractionLock;
 import org.cryptomator.ui.common.VaultService;
+import org.cryptomator.ui.error.GenericErrorComponent;
+import org.cryptomator.ui.error.InvalidMountPointExceptionComponent;
 import org.cryptomator.ui.unlock.UnlockModule.PasswordEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,11 +57,11 @@ public class UnlockWorkflow extends Task<Boolean> {
 	private final KeychainManager keychain;
 	private final Lazy<Scene> unlockScene;
 	private final Lazy<Scene> successScene;
-	private final Lazy<Scene> invalidMountPointScene;
 	private final GenericErrorComponent.Builder genericErrorBuilder;
+	private final InvalidMountPointExceptionComponent.Builder invalidMountPointExceptionBuilder;
 
 	@Inject
-	UnlockWorkflow(@UnlockWindow Stage window, @UnlockWindow Vault vault, VaultService vaultService, AtomicReference<char[]> password, @Named("savePassword") AtomicBoolean savePassword, @Named("savedPassword") Optional<char[]> savedPassword, UserInteractionLock<PasswordEntry> passwordEntryLock, KeychainManager keychain, @FxmlScene(FxmlFile.UNLOCK) Lazy<Scene> unlockScene, @FxmlScene(FxmlFile.UNLOCK_SUCCESS) Lazy<Scene> successScene, @FxmlScene(FxmlFile.UNLOCK_INVALID_MOUNT_POINT) Lazy<Scene> invalidMountPointScene, GenericErrorComponent.Builder genericErrorBuilder) {
+	UnlockWorkflow(@UnlockWindow Stage window, @UnlockWindow Vault vault, VaultService vaultService, AtomicReference<char[]> password, @Named("savePassword") AtomicBoolean savePassword, @Named("savedPassword") Optional<char[]> savedPassword, UserInteractionLock<PasswordEntry> passwordEntryLock, KeychainManager keychain, @FxmlScene(FxmlFile.UNLOCK) Lazy<Scene> unlockScene, @FxmlScene(FxmlFile.UNLOCK_SUCCESS) Lazy<Scene> successScene, GenericErrorComponent.Builder genericErrorBuilder, InvalidMountPointExceptionComponent.Builder invalidMountPointExceptionBuilder) {
 		this.window = window;
 		this.vault = vault;
 		this.vaultService = vaultService;
@@ -71,8 +72,8 @@ public class UnlockWorkflow extends Task<Boolean> {
 		this.keychain = keychain;
 		this.unlockScene = unlockScene;
 		this.successScene = successScene;
-		this.invalidMountPointScene = invalidMountPointScene;
 		this.genericErrorBuilder = genericErrorBuilder;
+		this.invalidMountPointExceptionBuilder = invalidMountPointExceptionBuilder;
 
 		setOnFailed(event -> {
 			Throwable throwable = event.getSource().getException();
@@ -172,26 +173,23 @@ public class UnlockWorkflow extends Task<Boolean> {
 			} else {
 				LOG.error("Unlock failed. Mountpoint doesn't exist (needs to be a folder): {}", cause.getMessage());
 			}
-			showInvalidMountPointScene();
+			showInvalidMountPointScene(cause);
 			return;
 		} else if (cause instanceof FileAlreadyExistsException) {
 			LOG.error("Unlock failed. Mountpoint already exists: {}", cause.getMessage());
-			showInvalidMountPointScene();
+			showInvalidMountPointScene(cause);
 			return;
 		} else if (cause instanceof DirectoryNotEmptyException) {
 			LOG.error("Unlock failed. Mountpoint not an empty directory: {}", cause.getMessage());
-			showInvalidMountPointScene();
+			showInvalidMountPointScene(cause);
 			return;
 		} else {
 			handleGenericError(impExc);
 		}
 	}
 
-	private void showInvalidMountPointScene() {
-		Platform.runLater(() -> {
-			window.setScene(invalidMountPointScene.get());
-			window.show();
-		});
+	private void showInvalidMountPointScene(Throwable e) {
+		invalidMountPointExceptionBuilder.cause(e).window(window).returnToScene(window.getScene()).vault(vault).build().showErrorScene();
 	}
 
 	private void handleGenericError(Throwable e) {

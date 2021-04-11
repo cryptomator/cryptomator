@@ -8,6 +8,6 @@ import java.lang.annotation.RetentionPolicy;
 @Scope
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
-@interface UnlockScoped {
+public @interface UnlockScoped {
 
 }

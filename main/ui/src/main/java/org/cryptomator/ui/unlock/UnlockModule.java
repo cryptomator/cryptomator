@@ -130,10 +130,4 @@ abstract class UnlockModule {
 	@IntoMap
 	@FxControllerKey(UnlockSuccessController.class)
 	abstract FxController bindUnlockSuccessController(UnlockSuccessController controller);
-
-	@Binds
-	@IntoMap
-	@FxControllerKey(UnlockInvalidMountPointController.class)
-	abstract FxController bindUnlockInvalidMountPointController(UnlockInvalidMountPointController controller);
-
 }

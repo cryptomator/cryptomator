@@ -1,51 +1,32 @@
 package org.cryptomator.ui.error;
 
-import dagger.BindsInstance;
+import dagger.Binds;
+import dagger.Module;
+import dagger.Provides;
 import dagger.Subcomponent;
+import dagger.multibindings.IntoMap;
+import org.cryptomator.ui.common.FxController;
+import org.cryptomator.ui.common.FxControllerKey;
 import org.cryptomator.ui.common.FxmlFile;
-import org.cryptomator.ui.common.FxmlScene;
 
-import javax.annotation.Nullable;
-import javafx.application.Platform;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
-
-@Subcomponent(modules = {ErrorModule.class})
-public interface GenericErrorComponent {
-
-	Stage window();
-
-	@FxmlScene(FxmlFile.GENERIC_ERROR)
-	Scene scene();
-
-	default void showErrorScene() {
-		if (Platform.isFxApplicationThread()) {
-			show();
-		} else {
-			Platform.runLater(this::show);
-		}
-	}
-
-	private void show() {
-		Stage stage = window();
-		stage.setScene(scene());
-		stage.show();
-	}
+@Subcomponent(modules = {ErrorModule.class, GenericErrorComponent.GenericErrorModule.class})
+public interface GenericErrorComponent extends ErrorComponentBase {
 
 	@Subcomponent.Builder
-	interface Builder {
+	interface Builder extends BuilderBase<Builder, GenericErrorComponent> { /* Handled by base interface */ }
 
-		@BindsInstance
-		Builder cause(Throwable cause);
+	@Module
+	abstract class GenericErrorModule {
 
-		@BindsInstance
-		Builder window(Stage window);
+		@Provides
+		@ErrorReport
+		static FxmlFile provideFxmlFile() {
+			return FxmlFile.GENERIC_ERROR;
+		}
 
-		@BindsInstance
-		Builder returnToScene(@Nullable Scene previousScene);
-
-		GenericErrorComponent build();
-
+		@Binds
+		@IntoMap
+		@FxControllerKey(GenericErrorController.class)
+		abstract FxController bindController(GenericErrorController controller);
 	}
-
 }

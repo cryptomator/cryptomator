@@ -9,8 +9,9 @@ import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import org.apache.commons.lang3.SystemUtils;
-import org.cryptomator.ui.error.GenericErrorComponent;
 import org.cryptomator.ui.common.StageFactory;
+import org.cryptomator.ui.error.GenericErrorComponent;
+import org.cryptomator.ui.error.InvalidMountPointExceptionComponent;
 import org.cryptomator.ui.lock.LockComponent;
 import org.cryptomator.ui.mainwindow.MainWindowComponent;
 import org.cryptomator.ui.preferences.PreferencesComponent;
@@ -26,8 +27,8 @@ import java.io.UncheckedIOException;
 import java.util.Collections;
 import java.util.List;
 
-@Module(includes = {UpdateCheckerModule.class}, subcomponents = {MainWindowComponent.class, PreferencesComponent.class, UnlockComponent.class, LockComponent.class, QuitComponent.class, GenericErrorComponent.class})
-abstract class FxApplicationModule {
+@Module(includes = {UpdateCheckerModule.class}, subcomponents = {MainWindowComponent.class, PreferencesComponent.class, UnlockComponent.class, LockComponent.class, QuitComponent.class, GenericErrorComponent.class, InvalidMountPointExceptionComponent.class})
+public abstract class FxApplicationModule {
 
 	@Provides
 	@Named("windowIcons")
