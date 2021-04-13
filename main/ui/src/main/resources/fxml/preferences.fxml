@@ -38,7 +38,7 @@
 				<fx:include source="/fxml/preferences_updates.fxml"/>
 			</content>
 		</Tab>
-		<Tab fx:id="contributeTab" id="CONTRIBUTE" text="%preferences.contribution">
+		<Tab fx:id="contributeTab" id="CONTRIBUTE" text="%preferences.contribute">
 			<graphic>
 				<FontAwesome5IconView glyph="HEART"/>
 			</graphic>
