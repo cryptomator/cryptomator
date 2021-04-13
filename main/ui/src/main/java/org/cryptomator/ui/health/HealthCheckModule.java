@@ -6,6 +6,7 @@ import dagger.Provides;
 import dagger.multibindings.IntoMap;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.cryptofs.VaultConfig;
+import org.cryptomator.cryptofs.health.api.HealthCheck;
 import org.cryptomator.cryptolib.api.Masterkey;
 import org.cryptomator.ui.common.DefaultSceneFactory;
 import org.cryptomator.ui.common.FxController;
@@ -19,9 +20,9 @@ import org.cryptomator.ui.keyloading.KeyLoadingStrategy;
 import org.cryptomator.ui.mainwindow.MainWindow;
 
 import javax.inject.Provider;
-import javafx.beans.Observable;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.scene.Scene;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -32,6 +33,12 @@ import java.util.concurrent.atomic.AtomicReference;
 
 @Module(subcomponents = {KeyLoadingComponent.class})
 abstract class HealthCheckModule {
+
+	@Provides
+	@HealthCheckScoped
+	static ObjectProperty<HealthCheck> selectedHealthCheck() {
+		return new SimpleObjectProperty<HealthCheck>();
+	}
 
 	@Provides
 	@HealthCheckScoped

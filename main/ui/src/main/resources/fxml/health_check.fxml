@@ -5,7 +5,9 @@
 <?import javafx.scene.control.ButtonBar?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.VBox?>
-<VBox xmlns:fx="http://javafx.com/fxml"
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.ListView?>
+<HBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.health.CheckController"
 	  minWidth="400"
@@ -16,12 +18,17 @@
 		<Insets topRightBottomLeft="12"/>
 	</padding>
 	<children>
-		<Label text="${controller.vaultConfig.cipherCombo}"/>
+		<ListView fx:id="checksListView"/>
+		<VBox>
+			<Label text="${controller.vaultConfig.cipherCombo}"/>
 
-		<ButtonBar buttonMinWidth="120" buttonOrder="+X">
-			<buttons>
-				<Button text="TODO run check" ButtonBar.buttonData="NEXT_FORWARD" defaultButton="true" onAction="#runCheck"/>
-			</buttons>
-		</ButtonBar>
+			<ListView fx:id="resultsListView"/>
+
+			<ButtonBar buttonMinWidth="120" buttonOrder="+X">
+				<buttons>
+					<Button text="TODO run check" ButtonBar.buttonData="NEXT_FORWARD" defaultButton="true" onAction="#runCheck" disable="${selectedCheck.isNull}"/>
+				</buttons>
+			</ButtonBar>
+		</VBox>
 	</children>
-</VBox>
+</HBox>
