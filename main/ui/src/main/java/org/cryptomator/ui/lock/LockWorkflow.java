@@ -4,6 +4,7 @@ import dagger.Lazy;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.common.vaults.Volume;
+import org.cryptomator.ui.common.ErrorComponent;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.UserInteractionLock;
@@ -35,14 +36,16 @@ public class LockWorkflow extends Task<Void> {
 	private final UserInteractionLock<LockModule.ForceLockDecision> forceLockDecisionLock;
 	private final Lazy<Scene> lockForcedScene;
 	private final Lazy<Scene> lockFailedScene;
+	private final ErrorComponent.Builder errorComponent;
 
 	@Inject
-	public LockWorkflow(@LockWindow Stage lockWindow, @LockWindow Vault vault, UserInteractionLock<LockModule.ForceLockDecision> forceLockDecisionLock, @FxmlScene(FxmlFile.LOCK_FORCED) Lazy<Scene> lockForcedScene, @FxmlScene(FxmlFile.LOCK_FAILED) Lazy<Scene> lockFailedScene) {
+	public LockWorkflow(@LockWindow Stage lockWindow, @LockWindow Vault vault, UserInteractionLock<LockModule.ForceLockDecision> forceLockDecisionLock, @FxmlScene(FxmlFile.LOCK_FORCED) Lazy<Scene> lockForcedScene, @FxmlScene(FxmlFile.LOCK_FAILED) Lazy<Scene> lockFailedScene, ErrorComponent.Builder errorComponent) {
 		this.lockWindow = lockWindow;
 		this.vault = vault;
 		this.forceLockDecisionLock = forceLockDecisionLock;
 		this.lockForcedScene = lockForcedScene;
 		this.lockFailedScene = lockFailedScene;
+		this.errorComponent = errorComponent;
 	}
 
 	@Override
@@ -78,22 +81,22 @@ public class LockWorkflow extends Task<Void> {
 	}
 
 	@Override
-	protected void scheduled() {
-		vault.stateProperty().transition(VaultState.Value.UNLOCKED, VaultState.Value.PROCESSING);
-	}
-
-	@Override
 	protected void succeeded() {
 		LOG.info("Lock of {} succeeded.", vault.getDisplayName());
-		vault.stateProperty().transition(VaultState.Value.PROCESSING, VaultState.Value.LOCKED);
+		//DO NOT SET VAULT STATE HERE, this is done by the vault internally
 	}
 
 	@Override
 	protected void failed() {
-		LOG.warn("Failed to lock {}.", vault.getDisplayName());
+		final var throwable = super.getException();
+		LOG.warn("Lock of {} failed.", vault.getDisplayName(), throwable);
 		vault.stateProperty().transition(VaultState.Value.PROCESSING, VaultState.Value.UNLOCKED);
-		lockWindow.setScene(lockFailedScene.get());
-		lockWindow.show();
+		if (throwable instanceof Volume.VolumeException) {
+			lockWindow.setScene(lockFailedScene.get());
+			lockWindow.show();
+		} else {
+			errorComponent.cause(throwable).window(lockWindow).build().showErrorScene();
+		}
 	}
 
 	@Override
