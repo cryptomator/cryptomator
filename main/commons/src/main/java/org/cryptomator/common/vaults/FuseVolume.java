@@ -45,7 +45,9 @@ public class FuseVolume extends AbstractVolume {
 		try {
 			Mounter mounter = FuseMountFactory.getMounter();
 			EnvironmentVariables envVars = EnvironmentVariables.create() //
-					.withFlags(splitFlags(mountFlags)).withMountPoint(mountPoint) //
+					.withFlags(splitFlags(mountFlags)) //
+					.withMountPoint(mountPoint) //
+					.withFileNameTranscoder(mounter.defaultFileNameTranscoder()) //
 					.build();
 			this.mount = mounter.mount(root, envVars);
 		} catch (CommandFailedException | FuseNotSupportedException e) {

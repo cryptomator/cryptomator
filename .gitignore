@@ -21,5 +21,6 @@ pom.xml.versionsBackup
 .idea/compiler.xml
 .idea/encodings.xml
 .idea/jarRepositories.xml
+.idea/uiDesigner.xml
 .idea/**/libraries/
 *.iml

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.ContextMenu?>
+<?import javafx.scene.control.MenuItem?>
+<ContextMenu xmlns:fx="http://javafx.com/fxml"
+			 xmlns="http://javafx.com/javafx"
+			 fx:controller="org.cryptomator.ui.mainwindow.VaultListContextMenuController">
+	<items>
+		<MenuItem fx:id="revealEntry" text="%main.vaultlist.contextMenu.reveal" onAction="#didClickRevealVault" visible="${controller.selectedVaultLockable}"/>
+		<MenuItem fx:id="lockEntry" text="%main.vaultlist.contextMenu.lock" onAction="#didClickLockVault" visible="${controller.selectedVaultLockable}"/>
+		<MenuItem fx:id="unlockEntry" text="%main.vaultlist.contextMenu.unlock" onAction="#didClickUnlockVault" visible="${controller.selectedVaultUnlockable &amp;&amp; !controller.selectedVaultPassphraseStored}"/>
+		<MenuItem fx:id="unlockNowEntry" text="%main.vaultlist.contextMenu.unlockNow" onAction="#didClickUnlockVault" visible="${controller.selectedVaultUnlockable &amp;&amp; controller.selectedVaultPassphraseStored}"/>
+		<MenuItem fx:id="optionsEntry" text="%main.vaultlist.contextMenu.vaultoptions" onAction="#didClickShowVaultOptions" disable="${!controller.selectedVaultUnlockable}"/>
+		<MenuItem fx:id="removeEntry" text="%main.vaultlist.contextMenu.remove" onAction="#didClickRemoveVault" disable="${!controller.selectedVaultRemovable}"/>
+	</items>
+</ContextMenu>

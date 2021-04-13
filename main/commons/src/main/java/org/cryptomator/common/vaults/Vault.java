@@ -104,19 +104,27 @@ public class Vault {
 		if (vaultSettings.usesReadOnlyMode().get()) {
 			flags.add(FileSystemFlags.READONLY);
 		}
-		if (!flags.contains(FileSystemFlags.READONLY) && vaultSettings.filenameLengthLimit().get() == -1) {
+
+		int usedFilenameLengthLimit;
+		var fileSystemCapabilityChecker = new FileSystemCapabilityChecker();
+		if (flags.contains(FileSystemFlags.READONLY)) {
+			usedFilenameLengthLimit = Constants.MAX_CIPHERTEXT_NAME_LENGTH;
+		} else if (vaultSettings.filenameLengthLimit().get() == -1) {
 			LOG.debug("Determining file name length limitations...");
-			int limit = new FileSystemCapabilityChecker().determineSupportedFileNameLength(getPath());
-			vaultSettings.filenameLengthLimit().set(limit);
-			LOG.info("Storing file name length limit of {}", limit);
+			usedFilenameLengthLimit = fileSystemCapabilityChecker.determineSupportedFileNameLength(getPath());
+			vaultSettings.filenameLengthLimit().set(usedFilenameLengthLimit);
+			LOG.info("Storing file name length limit of {}", usedFilenameLengthLimit);
+		} else {
+			usedFilenameLengthLimit = vaultSettings.filenameLengthLimit().get();
 		}
-		assert vaultSettings.filenameLengthLimit().get() > 0;
+
+		assert usedFilenameLengthLimit > 0;
 		CryptoFileSystemProperties fsProps = CryptoFileSystemProperties.cryptoFileSystemProperties() //
 				.withPassphrase(passphrase) //
 				.withFlags(flags) //
 				.withMasterkeyFilename(MASTERKEY_FILENAME) //
 				.withMaxPathLength(vaultSettings.filenameLengthLimit().get() + Constants.MAX_ADDITIONAL_PATH_LENGTH) //
-				.withMaxNameLength(vaultSettings.filenameLengthLimit().get()) //
+				.withMaxNameLength(usedFilenameLengthLimit) //
 				.build();
 		return CryptoFileSystemProvider.newFileSystem(getPath(), fsProps);
 	}
@@ -355,8 +363,7 @@ public class Vault {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj instanceof Vault && obj.getClass().equals(this.getClass())) {
-			final Vault other = (Vault) obj;
+		if (obj instanceof Vault other && obj.getClass().equals(this.getClass())) {
 			return Objects.equals(this.vaultSettings, other.vaultSettings);
 		} else {
 			return false;
