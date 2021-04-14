@@ -24,9 +24,10 @@
 
 			<ListView fx:id="resultsListView"/>
 
-			<ButtonBar buttonMinWidth="120" buttonOrder="+X">
+			<ButtonBar buttonMinWidth="120" buttonOrder="+CA">
 				<buttons>
-					<Button text="TODO run check" ButtonBar.buttonData="NEXT_FORWARD" defaultButton="true" onAction="#runCheck" disable="${selectedCheck.isNull}"/>
+					<Button text="%generic.button.cancel" ButtonBar.buttonData="CANCEL_CLOSE" onAction="#cancelCheck" disable="${!controller.running}"/>
+					<Button text="TODO run check" ButtonBar.buttonData="APPLY" defaultButton="true" onAction="#runCheck" disable="${!controller.ready}"/>
 				</buttons>
 			</ButtonBar>
 		</VBox>

@@ -12,6 +12,8 @@ class ResultListCell extends ListCell<DiagnosticResult> {
 		super.updateItem(item, empty);
 		if (item != null) {
 			setText(item.toString());
+		} else {
+			setText(null);
 		}
 	}
 }

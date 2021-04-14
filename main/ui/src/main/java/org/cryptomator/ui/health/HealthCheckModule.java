@@ -3,6 +3,7 @@ package org.cryptomator.ui.health;
 import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
+import dagger.multibindings.ElementsIntoSet;
 import dagger.multibindings.IntoMap;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.cryptofs.VaultConfig;
@@ -26,9 +27,12 @@ import javafx.beans.value.ChangeListener;
 import javafx.scene.Scene;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import java.security.SecureRandom;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Module(subcomponents = {KeyLoadingComponent.class})
@@ -36,8 +40,8 @@ abstract class HealthCheckModule {
 
 	@Provides
 	@HealthCheckScoped
-	static ObjectProperty<HealthCheck> selectedHealthCheck() {
-		return new SimpleObjectProperty<HealthCheck>();
+	static ObjectProperty<HealthCheckTask> selectedHealthCheckTask() {
+		return new SimpleObjectProperty<>();
 	}
 
 	@Provides
@@ -60,6 +64,12 @@ abstract class HealthCheckModule {
 	}
 
 	@Provides
+	@HealthCheckScoped
+	static Collection<HealthCheckTask> provideHealthCheckTasks(@HealthCheckWindow Vault vault, AtomicReference<Masterkey> masterkeyRef, AtomicReference<VaultConfig> vaultConfigRef, SecureRandom csprng) {
+		return HealthCheck.allChecks().stream().map(check -> new HealthCheckTask(vault.getPath(), vaultConfigRef.get(), masterkeyRef.get(), csprng, check)).toList();
+	}
+
+	@Provides
 	@HealthCheckWindow
 	@HealthCheckScoped
 	static FxmlLoaderFactory provideFxmlLoaderFactory(Map<Class<? extends FxController>, Provider<FxController>> factories, DefaultSceneFactory sceneFactory, ResourceBundle resourceBundle) {
@@ -72,7 +82,7 @@ abstract class HealthCheckModule {
 	static Stage provideStage(StageFactory factory, @MainWindow Stage owner, ResourceBundle resourceBundle, ChangeListener<Boolean> showingListener) {
 		Stage stage = factory.create();
 		stage.setTitle(resourceBundle.getString("health.title"));
-		stage.setResizable(false);
+		stage.setResizable(true);
 		stage.initModality(Modality.WINDOW_MODAL);
 		stage.initOwner(owner);
 		stage.showingProperty().addListener(showingListener);

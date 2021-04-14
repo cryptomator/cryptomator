@@ -8,7 +8,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javafx.application.Platform;
+import javafx.beans.binding.BooleanBinding;
+import javafx.beans.property.ReadOnlyBooleanProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
+import javafx.concurrent.Worker;
 import java.nio.file.Path;
 import java.security.SecureRandom;
 import java.util.Objects;
@@ -24,15 +29,15 @@ class HealthCheckTask extends Task<Void> {
 	private final Masterkey masterkey;
 	private final SecureRandom csprng;
 	private final HealthCheck check;
-	private final Consumer<DiagnosticResult> resultConsumer;
+	private final ObservableList<DiagnosticResult> results;
 
-	public HealthCheckTask(Path vaultPath, VaultConfig vaultConfig, Masterkey masterkey, SecureRandom csprng, HealthCheck check, Consumer<DiagnosticResult> resultConsumer) {
-		this.vaultPath = vaultPath;
-		this.vaultConfig = vaultConfig;
-		this.masterkey = masterkey;
-		this.csprng = csprng;
+	public HealthCheckTask(Path vaultPath, VaultConfig vaultConfig, Masterkey masterkey, SecureRandom csprng, HealthCheck check) {
+		this.vaultPath = Objects.requireNonNull(vaultPath);
+		this.vaultConfig = Objects.requireNonNull(vaultConfig);
+		this.masterkey = Objects.requireNonNull(masterkey);
+		this.csprng = Objects.requireNonNull(csprng);
 		this.check = Objects.requireNonNull(check);
-		this.resultConsumer = resultConsumer;
+		this.results = FXCollections.observableArrayList();
 	}
 
 	@Override
@@ -42,7 +47,13 @@ class HealthCheckTask extends Task<Void> {
 				if (isCancelled()) {
 					throw new CancellationException();
 				}
-				Platform.runLater(() -> resultConsumer.accept(result));
+				// FIXME: slowdown for demonstration purposes only:
+				try {
+					Thread.sleep(200);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				Platform.runLater(() -> results.add(result));
 			});
 		}
 		return null;
@@ -57,4 +68,15 @@ class HealthCheckTask extends Task<Void> {
 	protected void done() {
 		LOG.info("finished {}", check.identifier());
 	}
+
+	/* Getter */
+
+	public ObservableList<DiagnosticResult> results() {
+		return results;
+	}
+
+	public HealthCheck getCheck() {
+		return check;
+	}
+
 }
