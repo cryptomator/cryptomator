@@ -1,6 +1,7 @@
 package org.cryptomator.ui.lock;
 
 import dagger.Lazy;
+import org.cryptomator.common.vaults.LockNotCompletedException;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.common.vaults.Volume;
@@ -49,10 +50,10 @@ public class LockWorkflow extends Task<Void> {
 	}
 
 	@Override
-	protected Void call() throws Volume.VolumeException, InterruptedException {
+	protected Void call() throws Volume.VolumeException, InterruptedException, LockNotCompletedException {
 		try {
 			vault.lock(false);
-		} catch (Volume.VolumeException e) {
+		} catch (Volume.VolumeException | LockNotCompletedException e) {
 			LOG.debug("Regular lock of {} failed.", vault.getDisplayName(), e);
 			var decision = askUserForAction();
 			switch (decision) {

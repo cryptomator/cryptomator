@@ -1,6 +1,7 @@
 package org.cryptomator.ui.launcher;
 
 import org.cryptomator.common.ShutdownHook;
+import org.cryptomator.common.vaults.LockNotCompletedException;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.common.vaults.Volume;
@@ -129,6 +130,8 @@ public class AppLifecycleListener {
 					vault.lock(true);
 				} catch (Volume.VolumeException e) {
 					LOG.error("Failed to unmount vault " + vault.getPath(), e);
+				} catch (LockNotCompletedException e) {
+					LOG.error("Failed to lock vault " + vault.getPath(), e);
 				}
 			}
 		}

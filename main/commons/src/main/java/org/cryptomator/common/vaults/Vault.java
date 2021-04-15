@@ -140,14 +140,7 @@ public class Vault {
 			cryptoFileSystem.set(fs);
 			try {
 				volume = volumeProvider.get();
-				volume.mount(fs, getEffectiveMountFlags(), throwable -> {
-					LOG.info("Unmounted vault '{}'", getDisplayName());
-					destroyCryptoFileSystem();
-					state.set(VaultState.Value.LOCKED);
-					if (throwable != null) {
-						LOG.warn("Unexpected unmount and lock of vault " + getDisplayName(), throwable);
-					}
-				});
+				volume.mount(fs, getEffectiveMountFlags(), this::lockOnVolumeExit);
 			} catch (Exception e) {
 				destroyCryptoFileSystem();
 				throw e;
@@ -157,21 +150,32 @@ public class Vault {
 		}
 	}
 
-	public synchronized void lock(boolean forced) throws VolumeException {
+	private void lockOnVolumeExit(Throwable t) {
+		LOG.info("Unmounted vault '{}'", getDisplayName());
+		destroyCryptoFileSystem();
+		state.set(VaultState.Value.LOCKED);
+		if (t != null) {
+			LOG.warn("Unexpected unmount and lock of vault " + getDisplayName(), t);
+		}
+	}
+
+	public synchronized void lock(boolean forced) throws VolumeException, LockNotCompletedException {
+		//initiate unmount
 		if (forced && volume.supportsForcedUnmount()) {
 			volume.unmountForced();
 		} else {
 			volume.unmount();
 		}
-		destroyCryptoFileSystem();
+
+		//wait for lockOnVolumeExit to be executed
 		try {
 			boolean locked = state.awaitState(VaultState.Value.LOCKED, 3000, TimeUnit.MILLISECONDS);
 			if (!locked) {
-				throw new VolumeException("Locking failed"); //FIXME: other exception
+				throw new LockNotCompletedException("Locking of vault " + this.getDisplayName() + " still in progress.");
 			}
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
-			throw new VolumeException("Lock failed."); //FIXME: other/new exception
+			throw new LockNotCompletedException(e);
 		}
 	}
 

@@ -1,5 +1,6 @@
 package org.cryptomator.ui.common;
 
+import org.cryptomator.common.vaults.LockNotCompletedException;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.common.vaults.Volume;
@@ -175,7 +176,7 @@ public class VaultService {
 		}
 
 		@Override
-		protected Vault call() throws Volume.VolumeException {
+		protected Vault call() throws Volume.VolumeException, LockNotCompletedException {
 			vault.lock(forced);
 			return vault;
 		}
