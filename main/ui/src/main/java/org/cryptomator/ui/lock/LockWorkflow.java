@@ -83,7 +83,7 @@ public class LockWorkflow extends Task<Void> {
 	@Override
 	protected void succeeded() {
 		LOG.info("Lock of {} succeeded.", vault.getDisplayName());
-		//DO NOT SET VAULT STATE HERE, this is done by the vault internally
+		vault.stateProperty().transition(VaultState.Value.PROCESSING, VaultState.Value.LOCKED);
 	}
 
 	@Override

@@ -42,7 +42,11 @@ import java.util.EnumSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
 
@@ -70,6 +74,8 @@ public class Vault {
 	private final StringBinding accessPoint;
 	private final BooleanBinding accessPointPresent;
 	private final BooleanProperty showingStats;
+	private final Lock lock = new ReentrantLock(); //FIXME: naming
+	private final Condition isLocked = lock.newCondition(); //FIXME: improve naming
 
 	private volatile Volume volume;
 
@@ -146,6 +152,13 @@ public class Vault {
 					if (throwable != null) {
 						LOG.warn("Unexpected unmount and lock of vault " + getDisplayName(), throwable);
 					}
+					lock.lock();
+					try {
+						isLocked.signal();
+					} finally {
+						lock.unlock();
+					}
+
 				});
 			} catch (Exception e) {
 				destroyCryptoFileSystem();
@@ -163,6 +176,20 @@ public class Vault {
 			volume.unmount();
 		}
 		destroyCryptoFileSystem();
+		lock.lock();
+		try {
+			while (state.get() != VaultState.Value.LOCKED) {
+				if (!isLocked.await(3000, TimeUnit.MILLISECONDS)) {
+					throw new VolumeException("Locking failed"); //FIXME: other exception
+				}
+			}
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			throw new VolumeException("Lock failed."); //FIXME: other/new exception
+		} finally {
+			lock.unlock();
+		}
+
 	}
 
 	public void reveal(Volume.Revealer vaultRevealer) throws VolumeException {
