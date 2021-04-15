@@ -107,7 +107,7 @@ public class VaultState extends ObservableValueBase<VaultState.Value> implements
 	public boolean awaitState(Value desiredState, long time, TimeUnit unit) throws InterruptedException {
 		lock.lock();
 		try {
-			long remaining = unit.convert(time, TimeUnit.NANOSECONDS);
+			long remaining = TimeUnit.NANOSECONDS.convert(time, unit);
 			while (value.get() != desiredState) {
 				if (remaining <= 0L) {
 					return false;
