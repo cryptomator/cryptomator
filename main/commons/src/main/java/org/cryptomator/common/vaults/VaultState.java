@@ -8,7 +8,11 @@ import javax.inject.Inject;
 import javafx.application.Platform;
 import javafx.beans.value.ObservableObjectValue;
 import javafx.beans.value.ObservableValueBase;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 @PerVault
 public class VaultState extends ObservableValueBase<VaultState.Value> implements ObservableObjectValue<VaultState.Value> {
@@ -48,6 +52,8 @@ public class VaultState extends ObservableValueBase<VaultState.Value> implements
 	}
 
 	private final AtomicReference<Value> value;
+	private final Lock lock = new ReentrantLock();
+	private final Condition valueChanged = lock.newCondition();
 
 	@Inject
 	public VaultState(VaultState.Value initialValue) {
@@ -89,7 +95,43 @@ public class VaultState extends ObservableValueBase<VaultState.Value> implements
 		}
 	}
 
+	/**
+	 * Waits for the specified time, until the desired state is reached.
+	 *
+	 * @param desiredState what state to wait for
+	 * @param time the maximum time to wait
+	 * @param unit the time unit of the {@code time} argument
+	 * @return {@code false} if the waiting time detectably elapsed before reaching {@code desiredState}
+	 * @throws InterruptedException if the current thread is interrupted
+	 */
+	public boolean awaitState(Value desiredState, long time, TimeUnit unit) throws InterruptedException {
+		lock.lock();
+		try {
+			long remaining = unit.convert(time, TimeUnit.NANOSECONDS);
+			while (value.get() != desiredState) {
+				if (remaining <= 0L) {
+					return false;
+				}
+				remaining = valueChanged.awaitNanos(remaining);
+			}
+			return true;
+		} finally {
+			lock.unlock();
+		}
+	}
+
+	private void signal() {
+		lock.lock();
+		try {
+			valueChanged.signalAll();
+		} finally {
+			lock.unlock();
+		}
+	}
+
+	@Override
 	protected void fireValueChangedEvent() {
+		signal();
 		if (Platform.isFxApplicationThread()) {
 			super.fireValueChangedEvent();
 		} else {
