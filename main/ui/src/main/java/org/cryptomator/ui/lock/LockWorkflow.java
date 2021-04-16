@@ -1,9 +1,11 @@
 package org.cryptomator.ui.lock;
 
 import dagger.Lazy;
+import org.cryptomator.common.vaults.LockNotCompletedException;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.common.vaults.Volume;
+import org.cryptomator.ui.common.ErrorComponent;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.UserInteractionLock;
@@ -35,21 +37,23 @@ public class LockWorkflow extends Task<Void> {
 	private final UserInteractionLock<LockModule.ForceLockDecision> forceLockDecisionLock;
 	private final Lazy<Scene> lockForcedScene;
 	private final Lazy<Scene> lockFailedScene;
+	private final ErrorComponent.Builder errorComponent;
 
 	@Inject
-	public LockWorkflow(@LockWindow Stage lockWindow, @LockWindow Vault vault, UserInteractionLock<LockModule.ForceLockDecision> forceLockDecisionLock, @FxmlScene(FxmlFile.LOCK_FORCED) Lazy<Scene> lockForcedScene, @FxmlScene(FxmlFile.LOCK_FAILED) Lazy<Scene> lockFailedScene) {
+	public LockWorkflow(@LockWindow Stage lockWindow, @LockWindow Vault vault, UserInteractionLock<LockModule.ForceLockDecision> forceLockDecisionLock, @FxmlScene(FxmlFile.LOCK_FORCED) Lazy<Scene> lockForcedScene, @FxmlScene(FxmlFile.LOCK_FAILED) Lazy<Scene> lockFailedScene, ErrorComponent.Builder errorComponent) {
 		this.lockWindow = lockWindow;
 		this.vault = vault;
 		this.forceLockDecisionLock = forceLockDecisionLock;
 		this.lockForcedScene = lockForcedScene;
 		this.lockFailedScene = lockFailedScene;
+		this.errorComponent = errorComponent;
 	}
 
 	@Override
-	protected Void call() throws Volume.VolumeException, InterruptedException {
+	protected Void call() throws Volume.VolumeException, InterruptedException, LockNotCompletedException {
 		try {
 			vault.lock(false);
-		} catch (Volume.VolumeException e) {
+		} catch (Volume.VolumeException | LockNotCompletedException e) {
 			LOG.debug("Regular lock of {} failed.", vault.getDisplayName(), e);
 			var decision = askUserForAction();
 			switch (decision) {
@@ -78,28 +82,28 @@ public class LockWorkflow extends Task<Void> {
 	}
 
 	@Override
-	protected void scheduled() {
-		vault.setState(VaultState.PROCESSING);
-	}
-
-	@Override
 	protected void succeeded() {
 		LOG.info("Lock of {} succeeded.", vault.getDisplayName());
-		vault.setState(VaultState.LOCKED);
+		vault.stateProperty().transition(VaultState.Value.PROCESSING, VaultState.Value.LOCKED);
 	}
 
 	@Override
 	protected void failed() {
-		LOG.warn("Failed to lock {}.", vault.getDisplayName());
-		vault.setState(VaultState.UNLOCKED);
-		lockWindow.setScene(lockFailedScene.get());
-		lockWindow.show();
+		final var throwable = super.getException();
+		LOG.warn("Lock of {} failed.", vault.getDisplayName(), throwable);
+		vault.stateProperty().transition(VaultState.Value.PROCESSING, VaultState.Value.UNLOCKED);
+		if (throwable instanceof Volume.VolumeException) {
+			lockWindow.setScene(lockFailedScene.get());
+			lockWindow.show();
+		} else {
+			errorComponent.cause(throwable).window(lockWindow).build().showErrorScene();
+		}
 	}
 
 	@Override
 	protected void cancelled() {
 		LOG.debug("Lock of {} canceled.", vault.getDisplayName());
-		vault.setState(VaultState.UNLOCKED);
+		vault.stateProperty().transition(VaultState.Value.PROCESSING, VaultState.Value.UNLOCKED);
 	}
 
 }

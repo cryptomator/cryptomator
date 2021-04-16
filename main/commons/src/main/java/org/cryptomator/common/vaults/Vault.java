@@ -42,6 +42,7 @@ import java.util.EnumSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
@@ -56,7 +57,7 @@ public class Vault {
 	private final Provider<Volume> volumeProvider;
 	private final StringBinding defaultMountFlags;
 	private final AtomicReference<CryptoFileSystem> cryptoFileSystem;
-	private final ObjectProperty<VaultState> state;
+	private final VaultState state;
 	private final ObjectProperty<Exception> lastKnownException;
 	private final VaultStats stats;
 	private final StringBinding displayName;
@@ -74,7 +75,7 @@ public class Vault {
 	private volatile Volume volume;
 
 	@Inject
-	Vault(VaultSettings vaultSettings, Provider<Volume> volumeProvider, @DefaultMountFlags StringBinding defaultMountFlags, AtomicReference<CryptoFileSystem> cryptoFileSystem, ObjectProperty<VaultState> state, @Named("lastKnownException") ObjectProperty<Exception> lastKnownException, VaultStats stats) {
+	Vault(VaultSettings vaultSettings, Provider<Volume> volumeProvider, @DefaultMountFlags StringBinding defaultMountFlags, AtomicReference<CryptoFileSystem> cryptoFileSystem, VaultState state, @Named("lastKnownException") ObjectProperty<Exception> lastKnownException, VaultStats stats) {
 		this.vaultSettings = vaultSettings;
 		this.volumeProvider = volumeProvider;
 		this.defaultMountFlags = defaultMountFlags;
@@ -147,7 +148,7 @@ public class Vault {
 			cryptoFileSystem.set(fs);
 			try {
 				volume = volumeProvider.get();
-				volume.mount(fs, getEffectiveMountFlags());
+				volume.mount(fs, getEffectiveMountFlags(), this::lockOnVolumeExit);
 			} catch (Exception e) {
 				destroyCryptoFileSystem();
 				throw e;
@@ -157,13 +158,33 @@ public class Vault {
 		}
 	}
 
-	public synchronized void lock(boolean forced) throws VolumeException {
+	private void lockOnVolumeExit(Throwable t) {
+		LOG.info("Unmounted vault '{}'", getDisplayName());
+		destroyCryptoFileSystem();
+		state.set(VaultState.Value.LOCKED);
+		if (t != null) {
+			LOG.warn("Unexpected unmount and lock of vault " + getDisplayName(), t);
+		}
+	}
+
+	public synchronized void lock(boolean forced) throws VolumeException, LockNotCompletedException {
+		//initiate unmount
 		if (forced && volume.supportsForcedUnmount()) {
 			volume.unmountForced();
 		} else {
 			volume.unmount();
 		}
-		destroyCryptoFileSystem();
+
+		//wait for lockOnVolumeExit to be executed
+		try {
+			boolean locked = state.awaitState(VaultState.Value.LOCKED, 3000, TimeUnit.MILLISECONDS);
+			if (!locked) {
+				throw new LockNotCompletedException("Locking of vault " + this.getDisplayName() + " still in progress.");
+			}
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			throw new LockNotCompletedException(e);
+		}
 	}
 
 	public void reveal(Volume.Revealer vaultRevealer) throws VolumeException {
@@ -174,16 +195,12 @@ public class Vault {
 	// Observable Properties
 	// *******************************************************************************
 
-	public ObjectProperty<VaultState> stateProperty() {
+	public VaultState stateProperty() {
 		return state;
 	}
 
-	public VaultState getState() {
-		return state.get();
-	}
-
-	public void setState(VaultState value) {
-		state.setValue(value);
+	public VaultState.Value getState() {
+		return state.getValue();
 	}
 
 	public ObjectProperty<Exception> lastKnownExceptionProperty() {
@@ -203,7 +220,7 @@ public class Vault {
 	}
 
 	public boolean isLocked() {
-		return state.get() == VaultState.LOCKED;
+		return state.get() == VaultState.Value.LOCKED;
 	}
 
 	public BooleanBinding processingProperty() {
@@ -211,7 +228,7 @@ public class Vault {
 	}
 
 	public boolean isProcessing() {
-		return state.get() == VaultState.PROCESSING;
+		return state.get() == VaultState.Value.PROCESSING;
 	}
 
 	public BooleanBinding unlockedProperty() {
@@ -219,7 +236,7 @@ public class Vault {
 	}
 
 	public boolean isUnlocked() {
-		return state.get() == VaultState.UNLOCKED;
+		return state.get() == VaultState.Value.UNLOCKED;
 	}
 
 	public BooleanBinding missingProperty() {
@@ -227,7 +244,7 @@ public class Vault {
 	}
 
 	public boolean isMissing() {
-		return state.get() == VaultState.MISSING;
+		return state.get() == VaultState.Value.MISSING;
 	}
 
 	public BooleanBinding needsMigrationProperty() {
@@ -235,7 +252,7 @@ public class Vault {
 	}
 
 	public boolean isNeedsMigration() {
-		return state.get() == VaultState.NEEDS_MIGRATION;
+		return state.get() == VaultState.Value.NEEDS_MIGRATION;
 	}
 
 	public BooleanBinding unknownErrorProperty() {
@@ -243,7 +260,7 @@ public class Vault {
 	}
 
 	public boolean isUnknownError() {
-		return state.get() == VaultState.ERROR;
+		return state.get() == VaultState.Value.ERROR;
 	}
 
 	public StringBinding displayNameProperty() {
@@ -259,7 +276,7 @@ public class Vault {
 	}
 
 	public String getAccessPoint() {
-		if (state.get() == VaultState.UNLOCKED) {
+		if (state.getValue() == VaultState.Value.UNLOCKED) {
 			assert volume != null;
 			return volume.getMountPoint().orElse(Path.of("")).toString();
 		} else {
