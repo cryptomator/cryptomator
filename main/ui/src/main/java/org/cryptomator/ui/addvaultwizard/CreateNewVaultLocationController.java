@@ -1,7 +1,6 @@
 package org.cryptomator.ui.addvaultwizard;
 
 import dagger.Lazy;
-import org.cryptomator.ui.common.ErrorComponent;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
@@ -16,10 +15,12 @@ import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.RadioButton;
@@ -48,7 +49,8 @@ public class CreateNewVaultLocationController implements FxController {
 	private final ResourceBundle resourceBundle;
 	private final BooleanBinding validVaultPath;
 	private final BooleanProperty usePresetPath;
-	private final StringProperty warningText;
+	private final StringProperty statusText;
+	private final ObjectProperty<Node> statusGraphic;
 
 	private Path customVaultPath = DEFAULT_CUSTOM_VAULT_PATH;
 
@@ -72,27 +74,33 @@ public class CreateNewVaultLocationController implements FxController {
 		this.vaultPath = vaultPath;
 		this.vaultName = vaultName;
 		this.resourceBundle = resourceBundle;
-		this.validVaultPath = Bindings.createBooleanBinding(this::isValidVaultPath, this.vaultPath);
+		this.validVaultPath = Bindings.createBooleanBinding(this::validateVaultPathAndSetStatus, this.vaultPath);
 		this.usePresetPath = new SimpleBooleanProperty();
-		this.warningText = new SimpleStringProperty();
+		this.statusText = new SimpleStringProperty();
+		this.statusGraphic = new SimpleObjectProperty<>();
 	}
 
-	private boolean isValidVaultPath() {
+	private boolean validateVaultPathAndSetStatus() {
 		final Path p = vaultPath.get();
 		if (p == null) {
-			warningText.set("ERROR");
+			statusText.set("Error: Path is NULL.");
+			statusGraphic.set(badLocation);
 			return false;
 		} else if (!Files.exists(p.getParent())) {
-			warningText.set(resourceBundle.getString("addvaultwizard.new.locationDoesNotExist"));
+			statusText.set(resourceBundle.getString("addvaultwizard.new.locationDoesNotExist"));
+			statusGraphic.set(badLocation);
 			return false;
 		} else if (!Files.isWritable(p.getParent())) {
-			warningText.set(resourceBundle.getString("addvaultwizard.new.locationIsNotWritable"));
+			statusText.set(resourceBundle.getString("addvaultwizard.new.locationIsNotWritable"));
+			statusGraphic.set(badLocation);
 			return false;
 		} else if (!Files.notExists(p)) {
-			warningText.set(resourceBundle.getString("addvaultwizard.new.fileAlreadyExists"));
+			statusText.set(resourceBundle.getString("addvaultwizard.new.fileAlreadyExists"));
+			statusGraphic.set(badLocation);
 			return false;
 		} else {
-			warningText.set(null);
+			statusText.set(resourceBundle.getString("addvaultwizard.new.locationIsOk"));
+			statusGraphic.set(goodLocation);
 			return true;
 		}
 	}
@@ -101,16 +109,6 @@ public class CreateNewVaultLocationController implements FxController {
 	public void initialize() {
 		predefinedLocationToggler.selectedToggleProperty().addListener(this::togglePredefinedLocation);
 		usePresetPath.bind(predefinedLocationToggler.selectedToggleProperty().isNotEqualTo(customRadioButton));
-		vaultPathStatus.graphicProperty().bind(Bindings.when(validVaultPath).then(goodLocation).otherwise(badLocation));
-		vaultPathStatus.textProperty().bind(Bindings.createStringBinding(this::chooseStatusText, validVaultPath, warningText));
-	}
-
-	private String chooseStatusText() {
-		if (validVaultPath.get()) {
-			return resourceBundle.getString("addvaultwizard.new.locationIsOk");
-		} else {
-			return warningText.get();
-		}
 	}
 
 	private void togglePredefinedLocation(@SuppressWarnings("unused") ObservableValue<? extends Toggle> observable, @SuppressWarnings("unused") Toggle oldValue, Toggle newValue) {
@@ -134,13 +132,10 @@ public class CreateNewVaultLocationController implements FxController {
 
 	@FXML
 	public void next() {
-		if (isValidVaultPath()) {
+		if (validateVaultPathAndSetStatus()) {
 			window.setScene(choosePasswordScene.get());
 		} else {
-			//trigger change event
-			var tmp = vaultPath.get();
-			vaultPath.set(null);
-			vaultPath.set(tmp);
+			validVaultPath.invalidate();
 		}
 	}
 
@@ -196,5 +191,21 @@ public class CreateNewVaultLocationController implements FxController {
 
 	public boolean isAnyRadioButtonSelected() {
 		return anyRadioButtonSelectedProperty().get();
+	}
+
+	public StringProperty statusTextProperty() {
+		return statusText;
+	}
+
+	public String getStatusText() {
+		return statusText.get();
+	}
+
+	public ObjectProperty<Node> statusGraphicProperty() {
+		return statusGraphic;
+	}
+
+	public Node getStatusGraphic() {
+		return statusGraphic.get();
 	}
 }

@@ -50,7 +50,7 @@
 		<VBox spacing="6">
 			<Label text="%addvaultwizard.new.locationLabel" labelFor="$locationTextField"/>
 			<TextField promptText="%addvaultwizard.new.locationPrompt" text="${controller.vaultPath}" editable="false" disable="${!controller.anyRadioButtonSelected}" HBox.hgrow="ALWAYS"/>
-			<Label fx:id="vaultPathStatus" alignment="CENTER_RIGHT" wrapText="true" visible="${controller.anyRadioButtonSelected}" maxWidth="Infinity" graphicTextGap="6" />
+			<Label fx:id="vaultPathStatus" alignment="CENTER_RIGHT" wrapText="true" visible="${controller.anyRadioButtonSelected}" maxWidth="Infinity" graphicTextGap="6" text="${controller.statusText}" graphic="${controller.statusGraphic}" />
 		</VBox>
 
 		<Region VBox.vgrow="ALWAYS"/>
