@@ -12,7 +12,7 @@
 <?import javafx.scene.shape.Circle?>
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
-	  fx:controller="org.cryptomator.ui.preferences.DonationKeyPreferencesController"
+	  fx:controller="org.cryptomator.ui.preferences.SupporterCertificateController"
 	  spacing="18">
 	<padding>
 		<Insets topRightBottomLeft="12"/>
@@ -24,7 +24,7 @@
 					<Circle styleClass="glyph-icon-primary" radius="24"/>
 					<FontAwesome5IconView styleClass="glyph-icon-white" glyph="CROWN" glyphSize="24"/>
 				</StackPane>
-				<FormattedLabel format="%preferences.donationKey.registeredFor" arg1="${controller.licenseHolder.licenseSubject}" wrapText="true"/>
+				<FormattedLabel format="%preferences.contribute.registeredFor" arg1="${controller.licenseHolder.licenseSubject}" wrapText="true"/>
 			</HBox>
 
 			<HBox spacing="12" alignment="CENTER_LEFT" visible="${!controller.licenseHolder.validLicense}">
@@ -33,8 +33,8 @@
 					<FontAwesome5IconView styleClass="glyph-icon-white" glyph="HAND_HOLDING_HEART" glyphSize="24"/>
 				</StackPane>
 				<VBox HBox.hgrow="ALWAYS" spacing="6">
-					<Label text="%preferences.donationKey.noDonationKey" wrapText="true" VBox.vgrow="ALWAYS"/>
-					<Hyperlink text="%preferences.donationKey.getDonationKey" onAction="#getDonationKey" contentDisplay="LEFT">
+					<Label text="%preferences.contribute.noCertificate" wrapText="true" VBox.vgrow="ALWAYS"/>
+					<Hyperlink text="%preferences.contribute.getCertificate" onAction="#getSupporterCertificate" contentDisplay="LEFT">
 						<graphic>
 							<FontAwesome5IconView glyph="LINK"/>
 						</graphic>
@@ -43,6 +43,6 @@
 			</HBox>
 		</StackPane>
 
-		<TextArea fx:id="donationKeyField" wrapText="true" VBox.vgrow="ALWAYS" prefRowCount="6"/>
+		<TextArea fx:id="supporterCertificateField" promptText="%preferences.contribute.promptText" wrapText="true" VBox.vgrow="ALWAYS" prefRowCount="6"/>
 	</children>
 </VBox>
