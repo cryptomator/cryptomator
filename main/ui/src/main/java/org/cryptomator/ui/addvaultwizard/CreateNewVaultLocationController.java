@@ -5,6 +5,7 @@ import org.cryptomator.ui.common.ErrorComponent;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
+import org.cryptomator.ui.controls.FontAwesome5IconView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,16 +21,14 @@ import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleGroup;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ResourceBundle;
@@ -53,12 +52,17 @@ public class CreateNewVaultLocationController implements FxController {
 	private final StringProperty warningText;
 
 	private Path customVaultPath = DEFAULT_CUSTOM_VAULT_PATH;
+
+	//FXML
 	public ToggleGroup predefinedLocationToggler;
 	public RadioButton iclouddriveRadioButton;
 	public RadioButton dropboxRadioButton;
 	public RadioButton gdriveRadioButton;
 	public RadioButton onedriveRadioButton;
 	public RadioButton customRadioButton;
+	public Label vaultPathStatus;
+	public FontAwesome5IconView goodLocation;
+	public FontAwesome5IconView badLocation;
 
 	@Inject
 	CreateNewVaultLocationController(@AddVaultWizardWindow Stage window, @FxmlScene(FxmlFile.ADDVAULT_NEW_NAME) Lazy<Scene> chooseNameScene, @FxmlScene(FxmlFile.ADDVAULT_NEW_PASSWORD) Lazy<Scene> choosePasswordScene, ErrorComponent.Builder errorComponent, LocationPresets locationPresets, ObjectProperty<Path> vaultPath, @Named("vaultName") StringProperty vaultName, ResourceBundle resourceBundle) {
@@ -70,27 +74,44 @@ public class CreateNewVaultLocationController implements FxController {
 		this.vaultPath = vaultPath;
 		this.vaultName = vaultName;
 		this.resourceBundle = resourceBundle;
-		this.validVaultPath = Bindings.createBooleanBinding(this::isValidVaultPath, vaultPath);
+		this.validVaultPath = Bindings.createBooleanBinding(this::isValidVaultPath, this.vaultPath);
 		this.usePresetPath = new SimpleBooleanProperty();
 		this.warningText = new SimpleStringProperty();
 	}
 
 	private boolean isValidVaultPath() {
-		return vaultPath.get() != null && Files.notExists(vaultPath.get());
+		final Path p = vaultPath.get();
+		if (p == null) {
+			warningText.set("ERROR");
+			return false;
+		} else if (!Files.exists(p.getParent())) {
+			warningText.set(resourceBundle.getString("addvaultwizard.new.locationDoesNotExist"));
+			return false;
+		} else if (!Files.isWritable(p.getParent())) {
+			warningText.set(resourceBundle.getString("addvaultwizard.new.locationIsNotWritable"));
+			return false;
+		} else if (!Files.notExists(p)) {
+			warningText.set(resourceBundle.getString("addvaultwizard.new.fileAlreadyExists"));
+			return false;
+		} else {
+			warningText.set(null);
+			return true;
+		}
 	}
 
 	@FXML
 	public void initialize() {
 		predefinedLocationToggler.selectedToggleProperty().addListener(this::togglePredefinedLocation);
 		usePresetPath.bind(predefinedLocationToggler.selectedToggleProperty().isNotEqualTo(customRadioButton));
-		vaultPath.addListener(this::vaultPathDidChange);
+		vaultPathStatus.graphicProperty().bind(Bindings.when(validVaultPath).then(goodLocation).otherwise(badLocation));
+		vaultPathStatus.textProperty().bind(Bindings.createStringBinding(this::chooseStatusText, validVaultPath, warningText));
 	}
 
-	private void vaultPathDidChange(@SuppressWarnings("unused") ObservableValue<? extends Path> observable, @SuppressWarnings("unused") Path oldValue, Path newValue) {
-		if (!Files.notExists(newValue)) {
-			warningText.set(resourceBundle.getString("addvaultwizard.new.fileAlreadyExists"));
+	private String chooseStatusText() {
+		if (validVaultPath.get()) {
+			return resourceBundle.getString("addvaultwizard.new.locationIsOk");
 		} else {
-			warningText.set(null);
+			return warningText.get();
 		}
 	}
 
@@ -115,21 +136,13 @@ public class CreateNewVaultLocationController implements FxController {
 
 	@FXML
 	public void next() {
-		try {
-			// check if we have write access AND the vaultPath doesn't already exist:
-			assert Files.isDirectory(vaultPath.get().getParent());
-			Path createdDir = Files.createDirectory(vaultPath.get());
-			Files.delete(createdDir); // assert: dir exists and is empty
+		if (isValidVaultPath()) {
 			window.setScene(choosePasswordScene.get());
-		} catch (FileAlreadyExistsException e) {
-			LOG.warn("Can not use already existing vault path {}", vaultPath.get());
-			warningText.set(resourceBundle.getString("addvaultwizard.new.fileAlreadyExists"));
-		} catch (NoSuchFileException e) {
-			LOG.warn("At least one path component does not exist of path {}", vaultPath.get());
-			warningText.set(resourceBundle.getString("addvaultwizard.new.locationDoesNotExist"));
-		} catch (IOException e) {
-			LOG.error("Failed to create and delete directory at chosen vault path.", e);
-			errorComponent.cause(e).window(window).returnToScene(window.getScene()).build().showErrorScene();
+		} else {
+			//trigger change event
+			var tmp = vaultPath.get();
+			vaultPath.set(null);
+			vaultPath.set(tmp);
 		}
 	}
 
@@ -179,19 +192,11 @@ public class CreateNewVaultLocationController implements FxController {
 		return usePresetPath.get();
 	}
 
-	public StringProperty warningTextProperty() {
-		return warningText;
+	public BooleanBinding anyRadioButtonSelectedProperty() {
+		return predefinedLocationToggler.selectedToggleProperty().isNotNull();
 	}
 
-	public String getWarningText() {
-		return warningText.get();
-	}
-
-	public BooleanBinding showWarningProperty() {
-		return warningText.isNotEmpty();
-	}
-
-	public boolean isShowWarning() {
-		return showWarningProperty().get();
+	public boolean isAnyRadioButtonSelected() {
+		return anyRadioButtonSelectedProperty().get();
 	}
 }
