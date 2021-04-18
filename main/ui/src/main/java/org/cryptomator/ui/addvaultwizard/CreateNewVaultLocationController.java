@@ -60,6 +60,8 @@ public class CreateNewVaultLocationController implements FxController {
 	public RadioButton dropboxRadioButton;
 	public RadioButton gdriveRadioButton;
 	public RadioButton onedriveRadioButton;
+	public RadioButton megaRadioButton;
+	public RadioButton pcloudRadioButton;
 	public RadioButton customRadioButton;
 	public Label vaultPathStatus;
 	public FontAwesome5IconView goodLocation;
@@ -120,6 +122,10 @@ public class CreateNewVaultLocationController implements FxController {
 			vaultPath.set(locationPresets.getGdriveLocation().resolve(vaultName.get()));
 		} else if (onedriveRadioButton.equals(newValue)) {
 			vaultPath.set(locationPresets.getOnedriveLocation().resolve(vaultName.get()));
+		} else if (megaRadioButton.equals(newValue)) {
+			vaultPath.set(locationPresets.getMegaLocation().resolve(vaultName.get()));
+		} else if (pcloudRadioButton.equals(newValue)) {
+			vaultPath.set(locationPresets.getPcloudLocation().resolve(vaultName.get()));
 		} else if (customRadioButton.equals(newValue)) {
 			vaultPath.set(customVaultPath.resolve(vaultName.get()));
 		}
