@@ -14,7 +14,10 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
+import java.awt.Button;
 import java.util.Optional;
 
 @MainWindowScoped
@@ -39,6 +42,15 @@ public class VaultDetailLockedController implements FxController {
 		} else {
 			this.passwordSaved = new SimpleBooleanProperty(false);
 		}
+	}
+
+	public void initialize() {
+		mainWindow.addEventFilter(KeyEvent.KEY_PRESSED, keyEvent -> {
+			if( keyEvent.getCode() == KeyCode.ENTER && vault.get() != null && vault.get().isLocked()) {
+				this.unlock();
+				keyEvent.consume();
+			}
+		});
 	}
 
 	@FXML
