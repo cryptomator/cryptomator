@@ -49,6 +49,12 @@ public class VaultDetailUnlockedController implements FxController {
 				keyEvent.consume();
 			}
 		});
+		mainWindow.addEventFilter(KeyEvent.KEY_PRESSED, keyEvent -> {
+			if (keyEvent.isShortcutDown() && keyEvent.getCode() == KeyCode.L && vault.get() != null && vault.get().isUnlocked()) {
+				this.lock();
+				keyEvent.consume();
+			}
+		});
 	}
 
 	@FXML
