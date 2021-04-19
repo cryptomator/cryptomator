@@ -15,12 +15,15 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.ListView;
 import javafx.scene.input.ContextMenuEvent;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
+import javafx.stage.Stage;
 
 @MainWindowScoped
 public class VaultListController implements FxController {
 
 
+	private final Stage mainWindow;
 	private final ObservableList<Vault> vaults;
 	private final ObjectProperty<Vault> selectedVault;
 	private final VaultListCellFactory cellFactory;
@@ -30,7 +33,8 @@ public class VaultListController implements FxController {
 	public ListView<Vault> vaultList;
 
 	@Inject
-	VaultListController(ObservableList<Vault> vaults, ObjectProperty<Vault> selectedVault, VaultListCellFactory cellFactory, AddVaultWizardComponent.Builder addVaultWizard) {
+	VaultListController(@MainWindow Stage mainWindow, ObservableList<Vault> vaults, ObjectProperty<Vault> selectedVault, VaultListCellFactory cellFactory, AddVaultWizardComponent.Builder addVaultWizard) {
+		this.mainWindow = mainWindow;
 		this.vaults = vaults;
 		this.selectedVault = selectedVault;
 		this.cellFactory = cellFactory;
@@ -57,6 +61,13 @@ public class VaultListController implements FxController {
 		vaultList.addEventFilter(ContextMenuEvent.CONTEXT_MENU_REQUESTED, request -> {
 			if (selectedVault.get() == null) {
 				request.consume();
+			}
+		});
+		//register vault selection shortcut globally
+		mainWindow.addEventFilter(KeyEvent.KEY_RELEASED, keyEvent -> {
+			if (keyEvent.isShortcutDown() && keyEvent.getCode().isDigitKey()) {
+				vaultList.getSelectionModel().select(Integer.parseInt(keyEvent.getText()) - 1);
+				keyEvent.consume();
 			}
 		});
 	}
