@@ -3,6 +3,7 @@ package org.cryptomator.ui.mainwindow;
 import com.tobiasdiez.easybind.EasyBind;
 import com.tobiasdiez.easybind.optional.ObservableOptionalValue;
 import com.tobiasdiez.easybind.optional.OptionalBinding;
+import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.keychain.KeychainManager;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
@@ -16,6 +17,8 @@ import javax.inject.Inject;
 import javafx.beans.binding.Binding;
 import javafx.beans.property.ObjectProperty;
 import javafx.fxml.FXML;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 import java.util.EnumSet;
 import java.util.Optional;
@@ -51,6 +54,27 @@ public class VaultListContextMenuController implements FxController {
 		this.selectedVaultRemovable = selectedVaultState.map(EnumSet.of(LOCKED, MISSING, ERROR, NEEDS_MIGRATION)::contains).orElse(false);
 		this.selectedVaultUnlockable = selectedVaultState.map(LOCKED::equals).orElse(false);
 		this.selectedVaultLockable = selectedVaultState.map(UNLOCKED::equals).orElse(false);
+	}
+
+	public void initialize() {
+		mainWindow.addEventFilter(KeyEvent.KEY_RELEASED, keyEvent -> {
+			if (keyEvent.getCode() == KeyCode.DELETE && isSelectedVaultRemovable()) {
+				selectedVault.ifValuePresent(v -> {
+					removeVault.vault(v).build().showRemoveVault();
+				});
+				keyEvent.consume();
+			}
+		});
+		if (SystemUtils.IS_OS_MAC) {
+			mainWindow.addEventFilter(KeyEvent.KEY_RELEASED, keyEvent -> {
+				if (keyEvent.getCode() == KeyCode.BACK_SPACE && isSelectedVaultRemovable()) {
+					selectedVault.ifValuePresent(v -> {
+						removeVault.vault(v).build().showRemoveVault();
+					});
+					keyEvent.consume();
+				}
+			});
+		}
 	}
 
 	private boolean isPasswordStored(Vault vault) {
