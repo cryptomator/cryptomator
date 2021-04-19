@@ -16,7 +16,7 @@ public class LocationPresets {
 	private static final String[] DROPBOX_LOCATIONS = {"~/Dropbox"};
 	private static final String[] GDRIVE_LOCATIONS = {"~/Google Drive"};
 	private static final String[] ONEDRIVE_LOCATIONS = {"~/OneDrive"};
-	private static final String[] MEGA_LOCATIONS = {"~/MEGAsync"};
+	private static final String[] MEGA_LOCATIONS = {"~/MEGA"};
 	private static final String[] PCLOUD_LOCATIONS = {"~/pCloudDrive"};
 
 	private final ReadOnlyObjectProperty<Path> iclouddriveLocation;
