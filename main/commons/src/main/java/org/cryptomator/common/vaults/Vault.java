@@ -19,7 +19,6 @@ import org.cryptomator.cryptofs.CryptoFileSystemProperties.FileSystemFlags;
 import org.cryptomator.cryptofs.CryptoFileSystemProvider;
 import org.cryptomator.cryptofs.VaultConfig;
 import org.cryptomator.cryptofs.VaultConfig.UnverifiedVaultConfig;
-import org.cryptomator.cryptofs.common.Constants;
 import org.cryptomator.cryptofs.common.FileSystemCapabilityChecker;
 import org.cryptomator.cryptolib.api.CryptoException;
 import org.cryptomator.cryptolib.api.MasterkeyLoader;
@@ -105,20 +104,27 @@ public class Vault {
 		Set<FileSystemFlags> flags = EnumSet.noneOf(FileSystemFlags.class);
 		if (vaultSettings.usesReadOnlyMode().get()) {
 			flags.add(FileSystemFlags.READONLY);
+		} else if(vaultSettings.maxCleartextFilenameLength().get() == -1) {
+			LOG.debug("Determining cleartext filename length limitations...");
+			var checker = new FileSystemCapabilityChecker();
+			int shorteningThreshold = getUnverifiedVaultConfig().orElseThrow().allegedShorteningThreshold();
+			int ciphertextLimit = checker.determineSupportedCiphertextFileNameLength(getPath());
+			if (ciphertextLimit < shorteningThreshold) {
+				int cleartextLimit = checker.determineSupportedCleartextFileNameLength(getPath());
+				vaultSettings.maxCleartextFilenameLength().set(cleartextLimit);
+			} else {
+				vaultSettings.maxCleartextFilenameLength().setValue(Integer.MAX_VALUE);
+			}
 		}
-		if (!flags.contains(FileSystemFlags.READONLY) && vaultSettings.filenameLengthLimit().get() == -1) {
-			LOG.debug("Determining file name length limitations...");
-			int limit = new FileSystemCapabilityChecker().determineSupportedFileNameLength(getPath());
-			vaultSettings.filenameLengthLimit().set(limit);
-			LOG.info("Storing file name length limit of {}", limit);
+
+		if (vaultSettings.maxCleartextFilenameLength().get() < Integer.MAX_VALUE) {
+			LOG.warn("Limiting cleartext filename length on this device to {}.", vaultSettings.maxCleartextFilenameLength().get());
 		}
-		assert vaultSettings.filenameLengthLimit().get() > 0;
 
 		CryptoFileSystemProperties fsProps = CryptoFileSystemProperties.cryptoFileSystemProperties() //
 				.withKeyLoaders(keyLoader) //
 				.withFlags(flags) //
-				.withMaxPathLength(vaultSettings.filenameLengthLimit().get() + Constants.MAX_ADDITIONAL_PATH_LENGTH) //
-				.withMaxNameLength(vaultSettings.filenameLengthLimit().get()) //
+				.withMaxCleartextNameLength(vaultSettings.maxCleartextFilenameLength().get()) //
 				.build();
 		return CryptoFileSystemProvider.newFileSystem(getPath(), fsProps);
 	}
