@@ -26,7 +26,7 @@ public interface VaultComponent {
 		Builder vaultSettings(VaultSettings vaultSettings);
 
 		@BindsInstance
-		Builder initialVaultState(VaultState vaultState);
+		Builder initialVaultState(VaultState.Value vaultState);
 
 		@BindsInstance
 		Builder initialErrorCause(@Nullable @Named("lastKnownException") Exception initialErrorCause);

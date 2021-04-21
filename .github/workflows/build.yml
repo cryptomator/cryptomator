@@ -92,6 +92,16 @@ jobs:
             * [ ] add Linux appimage, zsync file and signature file
             * [ ] add Windows installer and signature file
             * [ ] add MacOs disk image and signature file
+
+            ## What's new
+
+            ## Bugfixes
+
+            ## Misc
+
+            ---
+
+            :scroll: A complete list of closed issues is available [here](LINK)
           draft: true
           prerelease: false
       - name: Upload buildkit-linux.zip to GitHub Releases

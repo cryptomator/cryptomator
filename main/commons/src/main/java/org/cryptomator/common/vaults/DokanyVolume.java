@@ -5,15 +5,15 @@ import org.cryptomator.common.mountpoint.MountPointChooser;
 import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.common.settings.VolumeImpl;
 import org.cryptomator.cryptofs.CryptoFileSystem;
+import org.cryptomator.frontend.dokany.DokanyMountFailedException;
 import org.cryptomator.frontend.dokany.Mount;
 import org.cryptomator.frontend.dokany.MountFactory;
-import org.cryptomator.frontend.dokany.MountFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import java.util.concurrent.ExecutorService;
+import java.util.function.Consumer;
 
 public class DokanyVolume extends AbstractVolume {
 
@@ -22,15 +22,13 @@ public class DokanyVolume extends AbstractVolume {
 	private static final String FS_TYPE_NAME = "CryptomatorFS";
 
 	private final VaultSettings vaultSettings;
-	private final MountFactory mountFactory;
 
 	private Mount mount;
 
 	@Inject
-	public DokanyVolume(VaultSettings vaultSettings, ExecutorService executorService, @Named("orderedMountPointChoosers") Iterable<MountPointChooser> choosers) {
+	public DokanyVolume(VaultSettings vaultSettings, @Named("orderedMountPointChoosers") Iterable<MountPointChooser> choosers) {
 		super(choosers);
 		this.vaultSettings = vaultSettings;
-		this.mountFactory = new MountFactory(executorService);
 	}
 
 	@Override
@@ -39,11 +37,11 @@ public class DokanyVolume extends AbstractVolume {
 	}
 
 	@Override
-	public void mount(CryptoFileSystem fs, String mountFlags) throws InvalidMountPointException, VolumeException {
+	public void mount(CryptoFileSystem fs, String mountFlags, Consumer<Throwable> onExitAction) throws InvalidMountPointException, VolumeException {
 		this.mountPoint = determineMountPoint();
 		try {
-			this.mount = mountFactory.mount(fs.getPath("/"), mountPoint, vaultSettings.mountName().get(), FS_TYPE_NAME, mountFlags.strip());
-		} catch (MountFailedException e) {
+			this.mount = MountFactory.mount(fs.getPath("/"), mountPoint, vaultSettings.mountName().get(), FS_TYPE_NAME, mountFlags.strip(), onExitAction);
+		} catch (DokanyMountFailedException e) {
 			if (vaultSettings.getCustomMountPath().isPresent()) {
 				LOG.warn("Failed to mount vault into {}. Is this directory currently accessed by another process (e.g. Windows Explorer)?", mountPoint);
 			}

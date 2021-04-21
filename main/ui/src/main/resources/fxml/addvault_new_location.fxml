@@ -20,6 +20,8 @@
 	  alignment="CENTER_LEFT">
 	<fx:define>
 		<ToggleGroup fx:id="predefinedLocationToggler"/>
+		<FontAwesome5IconView fx:id="badLocation" styleClass="glyph-icon-red" glyph="TIMES" />
+		<FontAwesome5IconView fx:id="goodLocation" styleClass="glyph-icon-primary" glyph="CHECK" />
 	</fx:define>
 	<padding>
 		<Insets topRightBottomLeft="24"/>
@@ -33,6 +35,8 @@
 			<RadioButton fx:id="dropboxRadioButton" toggleGroup="${predefinedLocationToggler}" text="Dropbox" visible="${controller.locationPresets.foundDropbox}" managed="${controller.locationPresets.foundDropbox}"/>
 			<RadioButton fx:id="gdriveRadioButton" toggleGroup="${predefinedLocationToggler}" text="Google Drive" visible="${controller.locationPresets.foundGdrive}" managed="${controller.locationPresets.foundGdrive}"/>
 			<RadioButton fx:id="onedriveRadioButton" toggleGroup="${predefinedLocationToggler}" text="OneDrive" visible="${controller.locationPresets.foundOnedrive}" managed="${controller.locationPresets.foundOnedrive}"/>
+			<RadioButton fx:id="megaRadioButton" toggleGroup="${predefinedLocationToggler}" text="MEGA" visible="${controller.locationPresets.foundMega}" managed="${controller.locationPresets.foundMega}"/>
+			<RadioButton fx:id="pcloudRadioButton" toggleGroup="${predefinedLocationToggler}" text="pCloud" visible="${controller.locationPresets.foundPcloud}" managed="${controller.locationPresets.foundPcloud}"/>
 			<HBox spacing="12" alignment="CENTER_LEFT">
 				<RadioButton fx:id="customRadioButton" toggleGroup="${predefinedLocationToggler}" text="%addvaultwizard.new.directoryPickerLabel"/>
 				<Button contentDisplay="LEFT" text="%addvaultwizard.new.directoryPickerButton" onAction="#chooseCustomVaultPath" disable="${controller.usePresetPath}">
@@ -47,12 +51,8 @@
 
 		<VBox spacing="6">
 			<Label text="%addvaultwizard.new.locationLabel" labelFor="$locationTextField"/>
-			<TextField fx:id="locationTextField" promptText="%addvaultwizard.new.locationPrompt" text="${controller.vaultPath}" disable="true" HBox.hgrow="ALWAYS"/>
-			<Label text="${controller.warningText}" wrapText="true" visible="${controller.showWarning}">
-				<graphic>
-					<FontAwesome5IconView glyph="EXCLAMATION_TRIANGLE"/>
-				</graphic>
-			</Label>
+			<TextField promptText="%addvaultwizard.new.locationPrompt" text="${controller.vaultPath}" editable="false" disable="${!controller.anyRadioButtonSelected}" HBox.hgrow="ALWAYS"/>
+			<Label fx:id="vaultPathStatus" styleClass="label-muted" alignment="CENTER_RIGHT" wrapText="true" visible="${controller.anyRadioButtonSelected}" maxWidth="Infinity" graphicTextGap="6" text="${controller.statusText}" graphic="${controller.statusGraphic}" />
 		</VBox>
 
 		<Region VBox.vgrow="ALWAYS"/>

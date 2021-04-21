@@ -17,6 +17,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.file.Path;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class WebDavVolume implements Volume {
@@ -31,6 +32,7 @@ public class WebDavVolume implements Volume {
 	private WebDavServer server;
 	private WebDavServletController servlet;
 	private Mounter.Mount mount;
+	private Consumer<Throwable> onExitAction;
 
 	@Inject
 	public WebDavVolume(Provider<WebDavServer> serverProvider, VaultSettings vaultSettings, Settings settings, WindowsDriveLetters windowsDriveLetters) {
@@ -41,12 +43,13 @@ public class WebDavVolume implements Volume {
 	}
 
 	@Override
-	public void mount(CryptoFileSystem fs, String mountFlags) throws VolumeException {
+	public void mount(CryptoFileSystem fs, String mountFlags, Consumer<Throwable> onExitAction) throws VolumeException {
 		startServlet(fs);
 		mountServlet();
+		this.onExitAction = onExitAction;
 	}
 
-	private void startServlet(CryptoFileSystem fs){
+	private void startServlet(CryptoFileSystem fs) {
 		if (server == null) {
 			server = serverProvider.get();
 		}
@@ -66,7 +69,7 @@ public class WebDavVolume implements Volume {
 
 		//on windows, prevent an automatic drive letter selection in the upstream library. Either we choose already a specifc one or there is no free.
 		Supplier<String> driveLetterSupplier;
-		if(System.getProperty("os.name").toLowerCase().contains("windows") && vaultSettings.winDriveLetter().isEmpty().get()) {
+		if (System.getProperty("os.name").toLowerCase().contains("windows") && vaultSettings.winDriveLetter().isEmpty().get()) {
 			driveLetterSupplier = () -> windowsDriveLetters.getAvailableDriveLetter().orElse(null);
 		} else {
 			driveLetterSupplier = () -> vaultSettings.winDriveLetter().get();
@@ -101,6 +104,7 @@ public class WebDavVolume implements Volume {
 			throw new VolumeException(e);
 		}
 		cleanup();
+		onExitAction.accept(null);
 	}
 
 	@Override
@@ -111,6 +115,7 @@ public class WebDavVolume implements Volume {
 			throw new VolumeException(e);
 		}
 		cleanup();
+		onExitAction.accept(null);
 	}
 
 	@Override

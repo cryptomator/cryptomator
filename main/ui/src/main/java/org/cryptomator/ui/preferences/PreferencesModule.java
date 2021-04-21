@@ -77,8 +77,8 @@ abstract class PreferencesModule {
 
 	@Binds
 	@IntoMap
-	@FxControllerKey(DonationKeyPreferencesController.class)
-	abstract FxController bindDonationKeyPreferencesController(DonationKeyPreferencesController controller);
+	@FxControllerKey(SupporterCertificateController.class)
+	abstract FxController bindSupporterCertificatePreferencesController(SupporterCertificateController controller);
 
 	@Binds
 	@IntoMap

@@ -41,12 +41,6 @@ public class VaultModule {
 	}
 
 	@Provides
-	@PerVault
-	public ObjectProperty<VaultState> provideVaultState(VaultState initialState) {
-		return new SimpleObjectProperty<>(initialState);
-	}
-
-	@Provides
 	@Named("lastKnownException")
 	@PerVault
 	public ObjectProperty<Exception> provideLastKnownException(@Named("lastKnownException") @Nullable Exception initialErrorCause) {
