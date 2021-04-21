@@ -14,19 +14,13 @@ import org.cryptomator.ui.vaultoptions.VaultOptionsComponent;
 
 import javax.inject.Inject;
 import javafx.beans.binding.Binding;
-import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.fxml.FXML;
 import javafx.stage.Stage;
-import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Optional;
 
-import static org.cryptomator.common.vaults.VaultState.ERROR;
-import static org.cryptomator.common.vaults.VaultState.LOCKED;
-import static org.cryptomator.common.vaults.VaultState.MISSING;
-import static org.cryptomator.common.vaults.VaultState.NEEDS_MIGRATION;
-import static org.cryptomator.common.vaults.VaultState.UNLOCKED;
+import static org.cryptomator.common.vaults.VaultState.Value.*;
 
 @MainWindowScoped
 public class VaultListContextMenuController implements FxController {
@@ -37,7 +31,7 @@ public class VaultListContextMenuController implements FxController {
 	private final KeychainManager keychain;
 	private final RemoveVaultComponent.Builder removeVault;
 	private final VaultOptionsComponent.Builder vaultOptionsWindow;
-	private final OptionalBinding<VaultState> selectedVaultState;
+	private final OptionalBinding<VaultState.Value> selectedVaultState;
 	private final Binding<Boolean> selectedVaultPassphraseStored;
 	private final Binding<Boolean> selectedVaultRemovable;
 	private final Binding<Boolean> selectedVaultUnlockable;
@@ -57,7 +51,6 @@ public class VaultListContextMenuController implements FxController {
 		this.selectedVaultRemovable = selectedVaultState.map(EnumSet.of(LOCKED, MISSING, ERROR, NEEDS_MIGRATION)::contains).orElse(false);
 		this.selectedVaultUnlockable = selectedVaultState.map(LOCKED::equals).orElse(false);
 		this.selectedVaultLockable = selectedVaultState.map(UNLOCKED::equals).orElse(false);
-
 	}
 
 	private boolean isPasswordStored(Vault vault) {

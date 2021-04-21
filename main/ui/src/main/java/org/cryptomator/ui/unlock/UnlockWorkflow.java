@@ -54,22 +54,12 @@ public class UnlockWorkflow extends Task<Boolean> {
 		this.invalidMountPointScene = invalidMountPointScene;
 		this.errorComponent = errorComponent;
 		this.keyLoadingStrategy = keyLoadingStrategy;
-
-		setOnFailed(event -> {
-			Throwable throwable = event.getSource().getException();
-			if (throwable instanceof InvalidMountPointException e) {
-				handleInvalidMountPoint(e);
-			} else {
-				handleGenericError(throwable);
-			}
-		});
 	}
 
 	@Override
 	protected Boolean call() throws InterruptedException, IOException, VolumeException, InvalidMountPointException, CryptoException {
 		try {
 			attemptUnlock();
-			handleSuccess();
 			return true;
 		} catch (UnlockCancelledException e) {
 			cancel(false); // set Tasks state to cancelled
@@ -91,21 +81,6 @@ public class UnlockWorkflow extends Task<Boolean> {
 			}
 		} finally {
 			keyLoadingStrategy.cleanup(success);
-		}
-	}
-
-	private void handleSuccess() {
-		LOG.info("Unlock of '{}' succeeded.", vault.getDisplayName());
-		switch (vault.getVaultSettings().actionAfterUnlock().get()) {
-			case ASK -> Platform.runLater(() -> {
-				window.setScene(successScene.get());
-				window.show();
-			});
-			case REVEAL -> {
-				Platform.runLater(window::close);
-				vaultService.reveal(vault);
-			}
-			case IGNORE -> Platform.runLater(window::close);
 		}
 	}
 
@@ -143,27 +118,44 @@ public class UnlockWorkflow extends Task<Boolean> {
 
 	private void handleGenericError(Throwable e) {
 		LOG.error("Unlock failed for technical reasons.", e);
-		errorComponent.cause(e).window(window).returnToScene(window.getScene()).build().showErrorScene();
-	}
-
-	@Override
-	protected void scheduled() {
-		vault.setState(VaultState.PROCESSING);
+		errorComponent.cause(e).window(window).build().showErrorScene();
 	}
 
 	@Override
 	protected void succeeded() {
-		vault.setState(VaultState.UNLOCKED);
+		LOG.info("Unlock of '{}' succeeded.", vault.getDisplayName());
+
+		switch (vault.getVaultSettings().actionAfterUnlock().get()) {
+			case ASK -> Platform.runLater(() -> {
+				window.setScene(successScene.get());
+				window.show();
+			});
+			case REVEAL -> {
+				Platform.runLater(window::close);
+				vaultService.reveal(vault);
+			}
+			case IGNORE -> Platform.runLater(window::close);
+		}
+
+		vault.stateProperty().transition(VaultState.Value.PROCESSING, VaultState.Value.UNLOCKED);
 	}
 
 	@Override
 	protected void failed() {
-		vault.setState(VaultState.LOCKED);
+		LOG.info("Unlock of '{}' failed.", vault.getDisplayName());
+		Throwable throwable = super.getException();
+		if (throwable instanceof InvalidMountPointException e) {
+			handleInvalidMountPoint(e);
+		} else {
+			handleGenericError(throwable);
+		}
+		vault.stateProperty().transition(VaultState.Value.PROCESSING, VaultState.Value.LOCKED);
 	}
 
 	@Override
 	protected void cancelled() {
-		vault.setState(VaultState.LOCKED);
+		LOG.debug("Unlock of '{}' canceled.", vault.getDisplayName());
+		vault.stateProperty().transition(VaultState.Value.PROCESSING, VaultState.Value.LOCKED);
 	}
 
 }

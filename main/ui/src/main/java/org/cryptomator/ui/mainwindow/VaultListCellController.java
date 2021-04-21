@@ -24,7 +24,8 @@ public class VaultListCellController implements FxController {
 				.map(this::getGlyphForVaultState);
 	}
 
-	private FontAwesome5Icon getGlyphForVaultState(VaultState state) {
+	// TODO deduplicate w/ VaultDetailController
+	private FontAwesome5Icon getGlyphForVaultState(VaultState.Value state) {
 		if (state != null) {
 			return switch (state) {
 				case LOCKED -> FontAwesome5Icon.LOCK;
