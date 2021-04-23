@@ -26,7 +26,7 @@
 				<FontAwesome5IconView styleClass="glyph-icon-white" glyph="FILE" glyphSize="24"/>
 			</StackPane>
 			<VBox spacing="6">
-				<Label text="Could not find the masterkey file for this vault at its expected location. Please choose the key file manually." wrapText="true" HBox.hgrow="ALWAYS"/>
+				<Label text="%unlock.chooseMasterkey.prompt" wrapText="true" HBox.hgrow="ALWAYS"/>
 			</VBox>
 		</HBox>
 

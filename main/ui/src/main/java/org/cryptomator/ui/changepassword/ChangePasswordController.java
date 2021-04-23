@@ -31,13 +31,13 @@ import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.security.SecureRandom;
 
+import static org.cryptomator.common.Constants.MASTERKEY_BACKUP_SUFFIX;
 import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
 
 @ChangePasswordScoped
 public class ChangePasswordController implements FxController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ChangePasswordController.class);
-	private static final String MASTERKEY_BACKUP_SUFFIX = ".bkup";
 
 	private final Stage window;
 	private final Vault vault;

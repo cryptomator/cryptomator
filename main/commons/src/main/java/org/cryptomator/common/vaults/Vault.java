@@ -53,6 +53,7 @@ public class Vault {
 
 	private static final Logger LOG = LoggerFactory.getLogger(Vault.class);
 	private static final Path HOME_DIR = Paths.get(SystemUtils.USER_HOME);
+	private static final int UNLIMITED_FILENAME_LENGTH = Integer.MAX_VALUE;
 
 	private final VaultSettings vaultSettings;
 	private final Provider<Volume> volumeProvider;
@@ -114,11 +115,11 @@ public class Vault {
 				int cleartextLimit = checker.determineSupportedCleartextFileNameLength(getPath());
 				vaultSettings.maxCleartextFilenameLength().set(cleartextLimit);
 			} else {
-				vaultSettings.maxCleartextFilenameLength().setValue(Integer.MAX_VALUE);
+				vaultSettings.maxCleartextFilenameLength().setValue(UNLIMITED_FILENAME_LENGTH);
 			}
 		}
 
-		if (vaultSettings.maxCleartextFilenameLength().get() < Integer.MAX_VALUE) {
+		if (vaultSettings.maxCleartextFilenameLength().get() < UNLIMITED_FILENAME_LENGTH) {
 			LOG.warn("Limiting cleartext filename length on this device to {}.", vaultSettings.maxCleartextFilenameLength().get());
 		}
 
