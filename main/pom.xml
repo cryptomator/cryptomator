@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.cryptomator</groupId>
 	<artifactId>main</artifactId>
-	<version>1.5.15</version>
+	<version>1.5.16</version>
 	<packaging>pom</packaging>
 	<name>Cryptomator</name>
 
@@ -31,7 +31,7 @@
 		<cryptomator.integrations.mac.version>1.0.0-beta2</cryptomator.integrations.mac.version>
 		<cryptomator.integrations.linux.version>1.0.0-beta1</cryptomator.integrations.linux.version>
 		<cryptomator.fuse.version>1.3.1</cryptomator.fuse.version>
-		<cryptomator.dokany.version>1.3.0</cryptomator.dokany.version>
+		<cryptomator.dokany.version>1.3.1</cryptomator.dokany.version>
 		<cryptomator.webdav.version>1.2.0</cryptomator.webdav.version>
 
 		<!-- 3rd party dependencies -->
