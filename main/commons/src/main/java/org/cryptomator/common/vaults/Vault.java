@@ -123,7 +123,7 @@ public class Vault {
 		}
 
 		CryptoFileSystemProperties fsProps = CryptoFileSystemProperties.cryptoFileSystemProperties() //
-				.withKeyLoaders(keyLoader) //
+				.withKeyLoader(keyLoader) //
 				.withFlags(flags) //
 				.withMaxCleartextNameLength(vaultSettings.maxCleartextFilenameLength().get()) //
 				.build();

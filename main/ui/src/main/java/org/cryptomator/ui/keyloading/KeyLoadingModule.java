@@ -35,13 +35,13 @@ abstract class KeyLoadingModule {
 	@Provides
 	@KeyLoading
 	@KeyLoadingScoped
-	static KeyLoadingStrategy provideKeyLoaderProvider(@KeyLoading Optional<URI> keyId, Map<String, KeyLoadingStrategy> strategies) {
+	static KeyLoadingStrategy provideKeyLoaderProvider(@KeyLoading Optional<URI> keyId, Map<String, Provider<KeyLoadingStrategy>> strategies) {
 		if (keyId.isEmpty()) {
 			return KeyLoadingStrategy.failed(new IllegalArgumentException("No key id provided"));
 		} else {
 			String scheme = keyId.get().getScheme();
 			var fallback = KeyLoadingStrategy.failed(new IllegalArgumentException("Unsupported key id " + scheme));
-			return strategies.getOrDefault(scheme, fallback);
+			return strategies.getOrDefault(scheme, () -> fallback).get();
 		}
 	}
 

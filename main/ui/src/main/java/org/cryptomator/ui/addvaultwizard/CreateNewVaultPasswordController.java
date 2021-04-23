@@ -8,13 +8,14 @@ import org.cryptomator.cryptofs.CryptoFileSystemProvider;
 import org.cryptomator.cryptofs.VaultCipherCombo;
 import org.cryptomator.cryptolib.api.CryptoException;
 import org.cryptomator.cryptolib.api.Masterkey;
+import org.cryptomator.cryptolib.api.MasterkeyLoader;
 import org.cryptomator.cryptolib.common.MasterkeyFileAccess;
-import org.cryptomator.cryptolib.common.MasterkeyFileLoader;
 import org.cryptomator.ui.common.ErrorComponent;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.Tasks;
+import org.cryptomator.ui.keyloading.masterkeyfile.MasterkeyFileLoadingStrategy;
 import org.cryptomator.ui.recoverykey.RecoveryKeyFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +37,7 @@ import javafx.scene.control.ToggleGroup;
 import javafx.stage.Stage;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.net.URI;
 import java.nio.channels.WritableByteChannel;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
@@ -53,6 +55,7 @@ import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
 public class CreateNewVaultPasswordController implements FxController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(CreateNewVaultPasswordController.class);
+	private static final URI DEFAULT_KEY_ID = URI.create(MasterkeyFileLoadingStrategy.SCHEME + ":" + MASTERKEY_FILENAME); // TODO better place?
 
 	private final Stage window;
 	private final Lazy<Scene> chooseLocationScene;
@@ -174,23 +177,22 @@ public class CreateNewVaultPasswordController implements FxController {
 		Path masterkeyFilePath = path.resolve(MASTERKEY_FILENAME);
 		try (Masterkey masterkey = Masterkey.generate(csprng)) {
 			masterkeyFileAccess.persist(masterkey, masterkeyFilePath, passphrase);
-		}
 
-		// 2. initialize vault:
-		var context = new StaticMasterkeyFileLoaderContext(masterkeyFilePath, passphrase);
-		var loader = masterkeyFileAccess.keyLoader(path, context);
-		try {
-			CryptoFileSystemProperties fsProps = CryptoFileSystemProperties.cryptoFileSystemProperties().withCipherCombo(VaultCipherCombo.SIV_CTRMAC).withKeyLoaders(loader).build();
-			CryptoFileSystemProvider.initialize(path, fsProps, MasterkeyFileLoader.keyId(MASTERKEY_FILENAME));
+			// 2. initialize vault:
+			try {
+				MasterkeyLoader loader = ignored -> masterkey;
+				CryptoFileSystemProperties fsProps = CryptoFileSystemProperties.cryptoFileSystemProperties().withCipherCombo(VaultCipherCombo.SIV_CTRMAC).withKeyLoader(loader).build();
+				CryptoFileSystemProvider.initialize(path, fsProps, DEFAULT_KEY_ID);
 
-			// 3. write vault-internal readme file:
-			String vaultReadmeFileName = resourceBundle.getString("addvault.new.readme.accessLocation.fileName");
-			try (FileSystem fs = CryptoFileSystemProvider.newFileSystem(path, fsProps); //
-				 WritableByteChannel ch = Files.newByteChannel(fs.getPath("/", vaultReadmeFileName), StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE)) {
-				ch.write(US_ASCII.encode(readmeGenerator.createVaultAccessLocationReadmeRtf()));
+				// 3. write vault-internal readme file:
+				String vaultReadmeFileName = resourceBundle.getString("addvault.new.readme.accessLocation.fileName");
+				try (FileSystem fs = CryptoFileSystemProvider.newFileSystem(path, fsProps); //
+					 WritableByteChannel ch = Files.newByteChannel(fs.getPath("/", vaultReadmeFileName), StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE)) {
+					ch.write(US_ASCII.encode(readmeGenerator.createVaultAccessLocationReadmeRtf()));
+				}
+			} catch (CryptoException e) {
+				throw new IOException("Failed initialize vault.", e);
 			}
-		} catch (CryptoException e) {
-			throw new IOException("Failed initialize vault.", e);
 		}
 
 		// 4. write vault-external readme file:

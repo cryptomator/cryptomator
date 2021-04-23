@@ -70,7 +70,7 @@ public class UnlockWorkflow extends Task<Boolean> {
 	private void attemptUnlock() throws IOException, VolumeException, InvalidMountPointException, CryptoException {
 		boolean success = false;
 		try {
-			vault.unlock(keyLoadingStrategy.masterkeyLoader());
+			vault.unlock(keyLoadingStrategy);
 			success = true;
 		} catch (MasterkeyLoadingFailedException e) {
 			if (keyLoadingStrategy.recoverFromException(e)) {

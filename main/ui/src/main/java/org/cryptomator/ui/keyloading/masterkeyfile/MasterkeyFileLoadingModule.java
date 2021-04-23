@@ -7,8 +7,6 @@ import dagger.multibindings.IntoMap;
 import dagger.multibindings.StringKey;
 import org.cryptomator.common.keychain.KeychainManager;
 import org.cryptomator.common.vaults.Vault;
-import org.cryptomator.cryptolib.common.MasterkeyFileAccess;
-import org.cryptomator.cryptolib.common.MasterkeyFileLoader;
 import org.cryptomator.integrations.keychain.KeychainAccessException;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxControllerKey;
@@ -43,12 +41,6 @@ public abstract class MasterkeyFileLoadingModule {
 	public enum MasterkeyFileProvision {
 		MASTERKEYFILE_PROVIDED,
 		CANCELED
-	}
-
-	@Provides
-	@KeyLoadingScoped
-	static MasterkeyFileLoader provideMasterkeyFileLoader(MasterkeyFileAccess masterkeyFileAccess, @KeyLoading Vault vault, MasterkeyFileLoadingContext context) {
-		return masterkeyFileAccess.keyLoader(vault.getPath(), context);
 	}
 
 	@Provides
@@ -125,7 +117,7 @@ public abstract class MasterkeyFileLoadingModule {
 	@Binds
 	@IntoMap
 	@KeyLoadingScoped
-	@StringKey("masterkeyfile")
+	@StringKey(MasterkeyFileLoadingStrategy.SCHEME)
 	abstract KeyLoadingStrategy bindMasterkeyFileLoadingStrategy(MasterkeyFileLoadingStrategy strategy);
 
 }
