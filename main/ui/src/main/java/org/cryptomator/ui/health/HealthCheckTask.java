@@ -8,17 +8,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javafx.application.Platform;
-import javafx.beans.binding.BooleanBinding;
-import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
-import javafx.concurrent.Worker;
 import java.nio.file.Path;
 import java.security.SecureRandom;
 import java.util.Objects;
 import java.util.concurrent.CancellationException;
-import java.util.function.Consumer;
 
 class HealthCheckTask extends Task<Void> {
 
@@ -42,8 +38,9 @@ class HealthCheckTask extends Task<Void> {
 
 	@Override
 	protected Void call() {
-		try (var cryptor = vaultConfig.getCipherCombo().getCryptorProvider(csprng).withKey(masterkey)) {
-			check.check(vaultPath, vaultConfig, masterkey, cryptor, result -> {
+		try (var masterkeyClone = masterkey.clone(); //
+			 var cryptor = vaultConfig.getCipherCombo().getCryptorProvider(csprng).withKey(masterkeyClone)) {
+			check.check(vaultPath, vaultConfig, masterkeyClone, cryptor, result -> { //TODO: why using both masterkey and Cryptor ??
 				if (isCancelled()) {
 					throw new CancellationException();
 				}

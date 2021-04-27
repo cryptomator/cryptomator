@@ -3,7 +3,6 @@ package org.cryptomator.ui.health;
 import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
-import dagger.multibindings.ElementsIntoSet;
 import dagger.multibindings.IntoMap;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.cryptofs.VaultConfig;
@@ -23,16 +22,15 @@ import org.cryptomator.ui.mainwindow.MainWindow;
 import javax.inject.Provider;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ChangeListener;
 import javafx.scene.Scene;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Module(subcomponents = {KeyLoadingComponent.class})
@@ -52,8 +50,27 @@ abstract class HealthCheckModule {
 
 	@Provides
 	@HealthCheckScoped
+	static Runnable provideMasterkeyDestructor(AtomicReference<Masterkey> masterkeyRef) {
+		return () -> Optional.ofNullable(masterkeyRef.getAndSet(null)).ifPresent(Masterkey::destroy);
+	}
+
+	@Provides
+	@HealthCheckScoped
 	static AtomicReference<VaultConfig> provideVaultConfigRef() {
 		return new AtomicReference<>();
+	}
+
+	@Provides
+	@HealthCheckScoped
+	static Collection<HealthCheck> provideSelectedHealthChecks() {
+		return new ArrayList<>();
+	}
+
+	/* Only inject with Lazy-Wrapper!*/
+	@Provides
+	@HealthCheckScoped
+	static Collection<HealthCheckTask> provideSelectedHealthCheckTasks(Collection<HealthCheck> selectedHealthChecks, @HealthCheckWindow Vault vault, AtomicReference<Masterkey> masterkeyRef, AtomicReference<VaultConfig> vaultConfigRef, SecureRandom csprng) {
+		return selectedHealthChecks.stream().map(check -> new HealthCheckTask(vault.getPath(), vaultConfigRef.get(), masterkeyRef.get(), csprng, check)).toList(); //TODO: for every task clone the masterkey and destroy it afterwards
 	}
 
 	@Provides
@@ -61,12 +78,6 @@ abstract class HealthCheckModule {
 	@HealthCheckScoped
 	static KeyLoadingStrategy provideKeyLoadingStrategy(KeyLoadingComponent.Builder compBuilder, @HealthCheckWindow Vault vault, @HealthCheckWindow Stage window) {
 		return compBuilder.vault(vault).window(window).build().keyloadingStrategy();
-	}
-
-	@Provides
-	@HealthCheckScoped
-	static Collection<HealthCheckTask> provideHealthCheckTasks(@HealthCheckWindow Vault vault, AtomicReference<Masterkey> masterkeyRef, AtomicReference<VaultConfig> vaultConfigRef, SecureRandom csprng) {
-		return HealthCheck.allChecks().stream().map(check -> new HealthCheckTask(vault.getPath(), vaultConfigRef.get(), masterkeyRef.get(), csprng, check)).toList();
 	}
 
 	@Provides
@@ -79,24 +90,18 @@ abstract class HealthCheckModule {
 	@Provides
 	@HealthCheckWindow
 	@HealthCheckScoped
-	static Stage provideStage(StageFactory factory, @MainWindow Stage owner, ResourceBundle resourceBundle, ChangeListener<Boolean> showingListener) {
+	static Stage provideStage(StageFactory factory, @MainWindow Stage owner, ResourceBundle resourceBundle, Runnable masterkeyDestructor) {
 		Stage stage = factory.create();
 		stage.setTitle(resourceBundle.getString("health.title"));
 		stage.setResizable(true);
 		stage.initModality(Modality.WINDOW_MODAL);
 		stage.initOwner(owner);
-		stage.showingProperty().addListener(showingListener);
-		return stage;
-	}
-
-	@Provides
-	@HealthCheckScoped
-	static ChangeListener<Boolean> provideWindowShowingChangeListener(AtomicReference<Masterkey> masterkey) {
-		return (observable, wasShowing, isShowing) -> {
+		stage.showingProperty().addListener((observable, wasShowing, isShowing) -> {  //TODO: should we use showingProperty or onCloseRequest
 			if (!isShowing) {
-				Optional.ofNullable(masterkey.getAndSet(null)).ifPresent(Masterkey::destroy);
+				masterkeyDestructor.run();
 			}
-		};
+		});
+		return stage;
 	}
 
 	@Provides
