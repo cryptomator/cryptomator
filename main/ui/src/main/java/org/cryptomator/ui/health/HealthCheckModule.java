@@ -70,7 +70,7 @@ abstract class HealthCheckModule {
 	@Provides
 	@HealthCheckScoped
 	static Collection<HealthCheckTask> provideSelectedHealthCheckTasks(Collection<HealthCheck> selectedHealthChecks, @HealthCheckWindow Vault vault, AtomicReference<Masterkey> masterkeyRef, AtomicReference<VaultConfig> vaultConfigRef, SecureRandom csprng) {
-		return selectedHealthChecks.stream().map(check -> new HealthCheckTask(vault.getPath(), vaultConfigRef.get(), masterkeyRef.get(), csprng, check)).toList(); //TODO: for every task clone the masterkey and destroy it afterwards
+		return selectedHealthChecks.stream().map(check -> new HealthCheckTask(vault.getPath(), vaultConfigRef.get(), masterkeyRef.get(), csprng, check)).toList();
 	}
 
 	@Provides

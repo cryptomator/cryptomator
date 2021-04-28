@@ -40,7 +40,7 @@ class HealthCheckTask extends Task<Void> {
 	protected Void call() {
 		try (var masterkeyClone = masterkey.clone(); //
 			 var cryptor = vaultConfig.getCipherCombo().getCryptorProvider(csprng).withKey(masterkeyClone)) {
-			check.check(vaultPath, vaultConfig, masterkeyClone, cryptor, result -> { //TODO: why using both masterkey and Cryptor ??
+			check.check(vaultPath, vaultConfig, masterkeyClone, cryptor, result -> { //TODO: API-question about using Masterkey _and_ cryptor
 				if (isCancelled()) {
 					throw new CancellationException();
 				}
