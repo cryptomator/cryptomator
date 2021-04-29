@@ -2,106 +2,98 @@ package org.cryptomator.ui.health;
 
 import com.tobiasdiez.easybind.EasyBind;
 import com.tobiasdiez.easybind.optional.OptionalBinding;
-import dagger.Lazy;
-import org.cryptomator.cryptofs.VaultConfig;
 import org.cryptomator.cryptofs.health.api.DiagnosticResult;
 import org.cryptomator.ui.common.FxController;
 
 import javax.inject.Inject;
-import javafx.beans.binding.Bindings;
-import javafx.beans.binding.BooleanExpression;
-import javafx.beans.binding.ObjectBinding;
+import javafx.beans.binding.Binding;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
 import javafx.scene.control.ListView;
-import java.util.Collection;
-import java.util.Objects;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicReference;
 
 @HealthCheckScoped
 public class CheckController implements FxController {
 
-	private final VaultConfig vaultConfig;
-	private final Runnable masterkeyDestructor;
-	private final ExecutorService executor;
+	private final HealthCheckSupervisor supervisor;
+	private final ExecutorService executorService;
 	private final ObjectProperty<HealthCheckTask> selectedTask;
-	private final ObservableList<HealthCheckTask> tasks;
-	private final ObjectBinding<ObservableList<DiagnosticResult>> selectedResults;
+	private final Binding<ObservableList<DiagnosticResult>> selectedResults;
 	private final OptionalBinding<Worker.State> selectedTaskState;
-	private final BooleanExpression ready;
-	private final BooleanExpression running;
+	private final Binding<String> selectedTaskName;
+	private final Binding<String> selectedTaskDescription;
+	private final ReadOnlyBooleanProperty running;
 
+	/* FXML */
 	public ListView<HealthCheckTask> checksListView;
-	public ListView<DiagnosticResult> resultsListView;
+	public TableView<DiagnosticResult> resultsTableView;
+	public TableColumn<DiagnosticResult, String> resultDescriptionColumn;
+	public TableColumn<DiagnosticResult, String> resultSeverityColumn;
 
 
 	@Inject
-	public CheckController(AtomicReference<VaultConfig> vaultConfigRef, Runnable masterkeyDestructor, Lazy<Collection<HealthCheckTask>> tasks, ObjectProperty<HealthCheckTask> selectedTask) {
-		this.vaultConfig = Objects.requireNonNull(vaultConfigRef.get());
-		this.masterkeyDestructor = masterkeyDestructor;
-		this.executor = Executors.newSingleThreadExecutor();
-		this.selectedTask = selectedTask;
-		this.selectedResults = Bindings.createObjectBinding(this::getSelectedResults, selectedTask);
+	public CheckController(HealthCheckSupervisor supervisor, ExecutorService executorService) {
+		this.supervisor = supervisor;
+		this.executorService = executorService;
+		this.selectedTask = new SimpleObjectProperty<>();
+		this.selectedResults = EasyBind.wrapNullable(selectedTask).map(HealthCheckTask::results).orElse(FXCollections.emptyObservableList());
 		this.selectedTaskState = EasyBind.wrapNullable(selectedTask).mapObservable(HealthCheckTask::stateProperty);
-		this.ready = BooleanExpression.booleanExpression(selectedTaskState.map(Worker.State.READY::equals).orElse(false));
-		this.running = BooleanExpression.booleanExpression(selectedTaskState.map(Worker.State.RUNNING::equals).orElse(false));
-		this.tasks = FXCollections.observableArrayList(tasks.get());
+		this.selectedTaskName = EasyBind.wrapNullable(selectedTask).map(HealthCheckTask::getTitle).orElse("");
+		this.selectedTaskDescription = EasyBind.wrapNullable(selectedTask).map(task -> task.getCheck().toString()).orElse("");
+		this.running = supervisor.runningProperty();
 	}
 
 	@FXML
 	public void initialize() {
-		checksListView.setItems(tasks);
+		checksListView.setItems(FXCollections.observableArrayList(supervisor.getTasks()));
 		checksListView.setCellFactory(ignored -> new CheckListCell());
-		resultsListView.itemsProperty().bind(selectedResults);
-		resultsListView.setCellFactory(ignored -> new ResultListCell());
-		selectedTask.bind(checksListView.getSelectionModel().selectedItemProperty());
 		checksListView.getSelectionModel().select(0);
+		selectedTask.bind(checksListView.getSelectionModel().selectedItemProperty());
 
-		tasks.forEach(task -> executor.execute(task));
-
-		//ensure that at the end the masterkey is destroyed
-		executor.submit(masterkeyDestructor);
+		resultsTableView.itemsProperty().bind(selectedResults);
+		resultDescriptionColumn.setCellValueFactory(cellFeatures -> new SimpleStringProperty(cellFeatures.getValue().toString()));
+		resultSeverityColumn.setCellValueFactory(cellFeatures -> new SimpleStringProperty(cellFeatures.getValue().getServerity().name()));
+		executorService.execute(supervisor);
 	}
 
 	@FXML
 	public void cancelCheck() {
-		//assert selectedTask.get().isRunning(); Replace with something like executor.isRunning()
-		executor.shutdownNow();
-		masterkeyDestructor.run();
+		assert running.get();
+		supervisor.cancel(true);
 	}
 
-	/* Getter/Setter */
 
-	public VaultConfig getVaultConfig() {
-		return vaultConfig;
-	}
+	/* Getter&Setter */
 
 	public boolean isRunning() {
 		return running.get();
 	}
 
-	public BooleanExpression runningProperty() {
+	public ReadOnlyBooleanProperty runningProperty() {
 		return running;
 	}
 
-	public boolean isReady() {
-		return ready.get();
+	public Binding<String> selectedTaskNameProperty() {
+		return selectedTaskName;
 	}
 
-	public BooleanExpression readyProperty() {
-		return ready;
+	public String isSelectedTaskName() {
+		return selectedTaskName.getValue();
 	}
 
-	private ObservableList<DiagnosticResult> getSelectedResults() {
-		if (selectedTask.get() == null) {
-			return FXCollections.emptyObservableList();
-		} else {
-			return selectedTask.get().results();
-		}
+	public Binding<String> selectedTaskDescriptionProperty() {
+		return selectedTaskDescription;
+	}
+
+	public String isSelectedTaskDescription() {
+		return selectedTaskDescription.getValue();
 	}
 }

@@ -20,8 +20,6 @@ import org.cryptomator.ui.keyloading.KeyLoadingStrategy;
 import org.cryptomator.ui.mainwindow.MainWindow;
 
 import javax.inject.Provider;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Scene;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -35,12 +33,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 @Module(subcomponents = {KeyLoadingComponent.class})
 abstract class HealthCheckModule {
-
-	@Provides
-	@HealthCheckScoped
-	static ObjectProperty<HealthCheckTask> selectedHealthCheckTask() {
-		return new SimpleObjectProperty<>();
-	}
 
 	@Provides
 	@HealthCheckScoped

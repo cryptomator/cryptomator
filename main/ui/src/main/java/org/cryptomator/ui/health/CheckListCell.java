@@ -36,7 +36,8 @@ class CheckListCell extends ListCell<HealthCheckTask> {
 		return switch (state) {
 			case READY, SCHEDULED -> FontAwesome5Icon.ANCHOR;
 			case RUNNING -> FontAwesome5Icon.SPINNER;
-			case FAILED, CANCELLED -> FontAwesome5Icon.EXCLAMATION_TRIANGLE;
+			case FAILED -> FontAwesome5Icon.EXCLAMATION_TRIANGLE;
+			case CANCELLED -> FontAwesome5Icon.BAN;
 			case SUCCEEDED -> FontAwesome5Icon.CHECK;
 		};
 	}

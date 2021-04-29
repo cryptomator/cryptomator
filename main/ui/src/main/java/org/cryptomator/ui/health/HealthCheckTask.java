@@ -14,7 +14,9 @@ import javafx.concurrent.Task;
 import java.nio.file.Path;
 import java.security.SecureRandom;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.CancellationException;
+import java.util.concurrent.atomic.AtomicReference;
 
 class HealthCheckTask extends Task<Void> {
 
@@ -27,6 +29,9 @@ class HealthCheckTask extends Task<Void> {
 	private final HealthCheck check;
 	private final ObservableList<DiagnosticResult> results;
 
+	private final AtomicReference<State> endState;
+	private final AtomicReference<Throwable> exceptionOnDone;
+
 	public HealthCheckTask(Path vaultPath, VaultConfig vaultConfig, Masterkey masterkey, SecureRandom csprng, HealthCheck check) {
 		this.vaultPath = Objects.requireNonNull(vaultPath);
 		this.vaultConfig = Objects.requireNonNull(vaultConfig);
@@ -34,6 +39,11 @@ class HealthCheckTask extends Task<Void> {
 		this.csprng = Objects.requireNonNull(csprng);
 		this.check = Objects.requireNonNull(check);
 		this.results = FXCollections.observableArrayList();
+		this.endState = new AtomicReference<>(null);
+		this.exceptionOnDone = new AtomicReference<>();
+
+		var tmp = check.identifier();
+		updateTitle(tmp.substring(tmp.length() - 10)); //TODO: new method with reliable logic
 	}
 
 	@Override
@@ -46,9 +56,14 @@ class HealthCheckTask extends Task<Void> {
 				}
 				// FIXME: slowdown for demonstration purposes only:
 				try {
-					Thread.sleep(200);
+					Thread.sleep(2000);
 				} catch (InterruptedException e) {
-					e.printStackTrace();
+					if(isCancelled()) {
+						return;
+					} else {
+						Thread.currentThread().interrupt();
+						throw new RuntimeException(e);
+					}
 				}
 				Platform.runLater(() -> results.add(result));
 			});
@@ -64,6 +79,12 @@ class HealthCheckTask extends Task<Void> {
 	@Override
 	protected void done() {
 		LOG.info("finished {}", check.identifier());
+		Platform.runLater(() -> endState.set(getState()));
+	}
+
+	@Override
+	protected void failed() {
+		Platform.runLater(() -> exceptionOnDone.set(getException()));
 	}
 
 	/* Getter */
@@ -76,4 +97,11 @@ class HealthCheckTask extends Task<Void> {
 		return check;
 	}
 
+	public State getEndState() {
+		return endState.get();
+	}
+
+	public Optional<Throwable> getExceptionOnDone() {
+		return Optional.ofNullable(exceptionOnDone.get());
+	}
 }
