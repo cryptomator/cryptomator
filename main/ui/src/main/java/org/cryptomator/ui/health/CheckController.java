@@ -24,6 +24,7 @@ import java.util.concurrent.ExecutorService;
 public class CheckController implements FxController {
 
 	private final HealthCheckSupervisor supervisor;
+	private final HealthReportWriteTask reportWriter;
 	private final ExecutorService executorService;
 	private final ObjectProperty<HealthCheckTask> selectedTask;
 	private final Binding<ObservableList<DiagnosticResult>> selectedResults;
@@ -40,8 +41,9 @@ public class CheckController implements FxController {
 
 
 	@Inject
-	public CheckController(HealthCheckSupervisor supervisor, ExecutorService executorService) {
+	public CheckController(HealthCheckSupervisor supervisor, HealthReportWriteTask reportWriteTask, ExecutorService executorService) {
 		this.supervisor = supervisor;
+		this.reportWriter = reportWriteTask;
 		this.executorService = executorService;
 		this.selectedTask = new SimpleObjectProperty<>();
 		this.selectedResults = EasyBind.wrapNullable(selectedTask).map(HealthCheckTask::results).orElse(FXCollections.emptyObservableList());
@@ -70,6 +72,11 @@ public class CheckController implements FxController {
 		supervisor.cancel(true);
 	}
 
+
+	@FXML
+	public void exportResults() {
+		executorService.execute(reportWriter);
+	}
 
 	/* Getter&Setter */
 
