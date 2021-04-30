@@ -4,8 +4,10 @@ import dagger.Lazy;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.cryptomator.common.Environment;
 import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.common.vaults.Volume;
 import org.cryptomator.cryptofs.VaultConfig;
 import org.cryptomator.cryptofs.health.api.DiagnosticResult;
+import org.cryptomator.ui.common.HostServiceRevealer;
 
 import javax.inject.Inject;
 import javafx.concurrent.Task;
@@ -46,19 +48,20 @@ public class HealthReportWriteTask extends Task<Void> {
 	private final Vault vault;
 	private final VaultConfig vaultConfig;
 	private final Lazy<Collection<HealthCheckTask>> tasks;
-	private final Environment env;
+	private final Path path;
+	private final HostServiceRevealer revealer;
 
 	@Inject
-	public HealthReportWriteTask(@HealthCheckWindow Vault vault, AtomicReference<VaultConfig> vaultConfigRef, Lazy<Collection<HealthCheckTask>> tasks, Environment env) {
+	public HealthReportWriteTask(@HealthCheckWindow Vault vault, AtomicReference<VaultConfig> vaultConfigRef, Lazy<Collection<HealthCheckTask>> tasks, Environment env, HostServiceRevealer revealer) {
 		this.vault = vault;
 		this.vaultConfig = Objects.requireNonNull(vaultConfigRef.get());
 		this.tasks = tasks;
-		this.env = env;
+		this.revealer = revealer;
+		this.path = env.getLogDir().orElse(Path.of(System.getProperty("user.home"))).resolve("healthReport_" + vault.getDisplayName() + "_" + TIME_STAMP.format(Instant.now()) + ".log");
 	}
 
 	@Override
 	protected Void call() throws IOException {
-		var path = env.getLogDir().orElse(Path.of(System.getProperty("user.home"))).resolve("healthReport_" + vault.getDisplayName() + "_" + TIME_STAMP.format(Instant.now()) + ".log");
 		final var tasks = this.tasks.get();
 		//use file channel, since results can be pretty big
 		try (var channel = Files.newByteChannel(path, StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING)) {
@@ -101,6 +104,15 @@ public class HealthReportWriteTask extends Task<Void> {
 				.map(t -> ExceptionUtils.getStackTrace(t)).orElse("Unknown reason of failure.") //
 				.lines().map(line -> "\t\t" + line + "\n") //
 				.collect(Collectors.joining());
+	}
+
+	@Override
+	protected void succeeded() {
+		try {
+			revealer.reveal(path);
+		} catch (Volume.VolumeException e) {
+			//should not happen
+		}
 	}
 
 }
