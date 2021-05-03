@@ -1,5 +1,6 @@
 package org.cryptomator.ui.common;
 
+import org.cryptomator.common.vaults.LockNotCompletedException;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.common.vaults.Volume;
@@ -175,24 +176,29 @@ public class VaultService {
 		}
 
 		@Override
-		protected Vault call() throws Volume.VolumeException {
+		protected Vault call() throws Volume.VolumeException, LockNotCompletedException {
 			vault.lock(forced);
 			return vault;
 		}
 
 		@Override
 		protected void scheduled() {
-			vault.setState(VaultState.PROCESSING);
+			vault.stateProperty().transition(VaultState.Value.UNLOCKED, VaultState.Value.PROCESSING);
 		}
 
 		@Override
 		protected void succeeded() {
-			vault.setState(VaultState.LOCKED);
+			vault.stateProperty().transition(VaultState.Value.PROCESSING, VaultState.Value.LOCKED);
 		}
 
 		@Override
 		protected void failed() {
-			vault.setState(VaultState.UNLOCKED);
+			vault.stateProperty().transition(VaultState.Value.PROCESSING, VaultState.Value.UNLOCKED);
+		}
+
+		@Override
+		protected void cancelled() {
+			vault.stateProperty().transition(VaultState.Value.PROCESSING, VaultState.Value.UNLOCKED);
 		}
 
 	}

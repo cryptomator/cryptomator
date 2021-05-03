@@ -122,7 +122,7 @@ public class StartController implements FxController {
 	private void loadKey() {
 		assert !Platform.isFxApplicationThread();
 		assert unverifiedVaultConfig.isPresent();
-		try (var masterkey = keyLoadingStrategy.masterkeyLoader().loadKey(unverifiedVaultConfig.orElseThrow().getKeyId())) {
+		try (var masterkey = keyLoadingStrategy.loadKey(unverifiedVaultConfig.orElseThrow().getKeyId())) {
 			var unverifiedCfg = unverifiedVaultConfig.get();
 			var verifiedCfg = unverifiedCfg.verify(masterkey.getEncoded(), unverifiedCfg.allegedVaultVersion());
 			vaultConfigRef.set(verifiedCfg);

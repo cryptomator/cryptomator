@@ -14,17 +14,17 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextFormatter;
 
 @PreferencesScoped
-public class DonationKeyPreferencesController implements FxController {
+public class SupporterCertificateController implements FxController {
 
-	private static final String DONATION_URI = "https://store.cryptomator.org/desktop";
+	private static final String SUPPORTER_URI = "https://store.cryptomator.org/desktop";
 
 	private final Application application;
 	private final LicenseHolder licenseHolder;
 	private final Settings settings;
-	public TextArea donationKeyField;
+	public TextArea supporterCertificateField;
 
 	@Inject
-	DonationKeyPreferencesController(Application application, LicenseHolder licenseHolder, Settings settings) {
+	SupporterCertificateController(Application application, LicenseHolder licenseHolder, Settings settings) {
 		this.application = application;
 		this.licenseHolder = licenseHolder;
 		this.settings = settings;
@@ -32,9 +32,9 @@ public class DonationKeyPreferencesController implements FxController {
 
 	@FXML
 	public void initialize() {
-		donationKeyField.setText(licenseHolder.getLicenseKey().orElse(null));
-		donationKeyField.textProperty().addListener(this::registrationKeyChanged);
-		donationKeyField.setTextFormatter(new TextFormatter<>(this::checkVaultNameLength));
+		supporterCertificateField.setText(licenseHolder.getLicenseKey().orElse(null));
+		supporterCertificateField.textProperty().addListener(this::registrationKeyChanged);
+		supporterCertificateField.setTextFormatter(new TextFormatter<>(this::checkVaultNameLength));
 	}
 
 	private TextFormatter.Change checkVaultNameLength(TextFormatter.Change change) {
@@ -53,8 +53,8 @@ public class DonationKeyPreferencesController implements FxController {
 	}
 
 	@FXML
-	public void getDonationKey() {
-		application.getHostServices().showDocument(DONATION_URI);
+	public void getSupporterCertificate() {
+		application.getHostServices().showDocument(SUPPORTER_URI);
 	}
 
 	public LicenseHolder getLicenseHolder() {

@@ -24,7 +24,7 @@ class MasterkeyFileLoadingFinisher {
 	private final Vault vault;
 	private final Optional<char[]> storedPassword;
 	private final AtomicReference<char[]> enteredPassword;
-	private final boolean shouldSavePassword;
+	private final AtomicBoolean shouldSavePassword;
 	private final KeychainManager keychain;
 
 	@Inject
@@ -32,12 +32,12 @@ class MasterkeyFileLoadingFinisher {
 		this.vault = vault;
 		this.storedPassword = storedPassword;
 		this.enteredPassword = enteredPassword;
-		this.shouldSavePassword = shouldSavePassword.get();
+		this.shouldSavePassword = shouldSavePassword;
 		this.keychain = keychain;
 	}
 
 	public void cleanup(boolean successfullyUnlocked) {
-		if (successfullyUnlocked && shouldSavePassword) {
+		if (successfullyUnlocked && shouldSavePassword.get()) {
 			savePasswordToSystemkeychain();
 		}
 		wipePassword(storedPassword.orElse(null));

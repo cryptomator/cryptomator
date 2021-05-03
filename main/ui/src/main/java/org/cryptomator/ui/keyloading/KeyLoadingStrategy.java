@@ -1,21 +1,34 @@
 package org.cryptomator.ui.keyloading;
 
+import org.cryptomator.cryptolib.api.Masterkey;
 import org.cryptomator.cryptolib.api.MasterkeyLoader;
 import org.cryptomator.cryptolib.api.MasterkeyLoadingFailedException;
 
-public interface KeyLoadingStrategy {
+import java.net.URI;
+
+/**
+ * A reusable, stateful {@link MasterkeyLoader}, that can deal with certain exceptions.
+ */
+@FunctionalInterface
+public interface KeyLoadingStrategy extends MasterkeyLoader {
 
 	/**
-	 * @return A reusable masterkey loader, preconfigured with the vault of the current unlock process
-	 * @throws MasterkeyLoadingFailedException If unable to provide the masterkey loader
-	 */
-	MasterkeyLoader masterkeyLoader() throws MasterkeyLoadingFailedException;
-
-	/**
-	 * Allows the component to try and recover from an exception thrown while loading a masterkey.
+	 * Loads a master key. This might be a long-running operation, as it may require user input or expensive computations.
+	 * <p>
+	 * If loading fails exceptionally, this strategy might be able to {@link #recoverFromException(MasterkeyLoadingFailedException) recover from this exception}, so it can be used in a further attempt.
 	 *
-	 * @param exception An exception thrown either by {@link #masterkeyLoader()} or by the returned {@link MasterkeyLoader}.
-	 * @return <code>true</code> if this component was able to handle the exception and another attempt should be made to load a masterkey
+	 * @param keyId An URI uniquely identifying the source and identity of the key
+	 * @return The raw key bytes. Must not be null
+	 * @throws MasterkeyLoadingFailedException Thrown when it is impossible to fulfill the request
+	 */
+	@Override
+	Masterkey loadKey(URI keyId) throws MasterkeyLoadingFailedException;
+
+	/**
+	 * Allows the loader to try and recover from an exception thrown during the last attempt.
+	 *
+	 * @param exception An exception thrown by {@link #loadKey(URI)}.
+	 * @return <code>true</code> if this component was able to handle the exception and another attempt can be made to load a masterkey
 	 */
 	default boolean recoverFromException(MasterkeyLoadingFailedException exception) {
 		return false;
@@ -38,7 +51,7 @@ public interface KeyLoadingStrategy {
 	 * @return A new KeyLoadingStrategy that will always fail with an {@link MasterkeyLoadingFailedException}.
 	 */
 	static KeyLoadingStrategy failed(Exception exception) {
-		return () -> {
+		return keyid -> {
 			if (exception instanceof MasterkeyLoadingFailedException e) {
 				throw e;
 			} else {

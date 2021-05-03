@@ -25,7 +25,6 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.ResourceBundle;
-import java.util.stream.Collectors;
 
 import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
 import static org.cryptomator.common.Constants.VAULTCONFIG_FILENAME;
@@ -95,42 +94,43 @@ public class VaultListManager {
 	private Vault create(VaultSettings vaultSettings) {
 		VaultComponent.Builder compBuilder = vaultComponentBuilder.vaultSettings(vaultSettings);
 		try {
-			VaultState vaultState = determineVaultState(vaultSettings.path().get());
+			VaultState.Value vaultState = determineVaultState(vaultSettings.path().get());
 			compBuilder.initialVaultState(vaultState);
 		} catch (IOException e) {
 			LOG.warn("Failed to determine vault state for " + vaultSettings.path().get(), e);
-			compBuilder.initialVaultState(VaultState.ERROR);
+			compBuilder.initialVaultState(VaultState.Value.ERROR);
 			compBuilder.initialErrorCause(e);
 		}
 		return compBuilder.build().vault();
 	}
 
-	public static VaultState redetermineVaultState(Vault vault) {
-		VaultState previousState = vault.getState();
+	public static VaultState.Value redetermineVaultState(Vault vault) {
+		VaultState state = vault.stateProperty();
+		VaultState.Value previousState = state.getValue();
 		return switch (previousState) {
 			case LOCKED, NEEDS_MIGRATION, MISSING -> {
 				try {
-					VaultState determinedState = determineVaultState(vault.getPath());
-					vault.setState(determinedState);
+					VaultState.Value determinedState = determineVaultState(vault.getPath());
+					state.set(determinedState);
 					yield determinedState;
 				} catch (IOException e) {
 					LOG.warn("Failed to determine vault state for " + vault.getPath(), e);
-					vault.setState(VaultState.ERROR);
+					state.set(VaultState.Value.ERROR);
 					vault.setLastKnownException(e);
-					yield VaultState.ERROR;
+					yield VaultState.Value.ERROR;
 				}
 			}
 			case ERROR, UNLOCKED, PROCESSING -> previousState;
 		};
 	}
 
-	private static VaultState determineVaultState(Path pathToVault) throws IOException {
+	private static VaultState.Value determineVaultState(Path pathToVault) throws IOException {
 		if (!CryptoFileSystemProvider.containsVault(pathToVault, VAULTCONFIG_FILENAME, MASTERKEY_FILENAME)) {
-			return VaultState.MISSING;
+			return VaultState.Value.MISSING;
 		} else if (Migrators.get().needsMigration(pathToVault, VAULTCONFIG_FILENAME, MASTERKEY_FILENAME)) {
-			return VaultState.NEEDS_MIGRATION;
+			return VaultState.Value.NEEDS_MIGRATION;
 		} else {
-			return VaultState.LOCKED;
+			return VaultState.Value.LOCKED;
 		}
 	}
 

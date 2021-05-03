@@ -14,28 +14,21 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.nio.file.StandardOpenOption;
-import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Optional;
 
+import static org.cryptomator.common.Constants.MASTERKEY_BACKUP_SUFFIX;
 import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
-import static org.cryptomator.common.Constants.PEPPER;
 
 @Singleton
 public class RecoveryKeyFactory {
 
-	private static final String MASTERKEY_BACKUP_SUFFIX = ".bkup";
-
 	private final WordEncoder wordEncoder;
-	private final SecureRandom csprng;
 	private final MasterkeyFileAccess masterkeyFileAccess;
 
 	@Inject
-	public RecoveryKeyFactory(WordEncoder wordEncoder, SecureRandom csprng, MasterkeyFileAccess masterkeyFileAccess) {
+	public RecoveryKeyFactory(WordEncoder wordEncoder, MasterkeyFileAccess masterkeyFileAccess) {
 		this.wordEncoder = wordEncoder;
-		this.csprng = csprng;
 		this.masterkeyFileAccess = masterkeyFileAccess;
 	}
 
@@ -92,6 +85,7 @@ public class RecoveryKeyFactory {
 			Path masterkeyPath = vaultPath.resolve(MASTERKEY_FILENAME);
 			if (Files.exists(masterkeyPath)) {
 				byte[] oldMasterkeyBytes = Files.readAllBytes(masterkeyPath);
+				// TODO: deduplicate with ChangePasswordController:
 				Path backupKeyPath = vaultPath.resolve(MASTERKEY_FILENAME + MasterkeyBackupHelper.generateFileIdSuffix(oldMasterkeyBytes) + MASTERKEY_BACKUP_SUFFIX);
 				Files.move(masterkeyPath, backupKeyPath, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
 			}

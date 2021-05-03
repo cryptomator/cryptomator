@@ -43,8 +43,8 @@ abstract class VaultStatisticsModule {
 		var weakStage = new WeakReference<>(stage);
 		vault.stateProperty().addListener(new ChangeListener<>() {
 			@Override
-			public void changed(ObservableValue<? extends VaultState> observable, VaultState oldValue, VaultState newValue) {
-				if (newValue != VaultState.UNLOCKED) {
+			public void changed(ObservableValue<? extends VaultState.Value> observable, VaultState.Value oldValue, VaultState.Value newValue) {
+				if (newValue != VaultState.Value.UNLOCKED) {
 					Stage stage = weakStage.get();
 					if (stage != null) {
 						stage.hide();
