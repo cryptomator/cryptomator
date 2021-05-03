@@ -16,9 +16,8 @@ import java.security.SecureRandom;
 class RecoveryKeyFactoryTest {
 
 	private WordEncoder wordEncoder = new WordEncoder();
-	private SecureRandom csprng = Mockito.mock(SecureRandom.class);
 	private MasterkeyFileAccess masterkeyFileAccess = Mockito.mock(MasterkeyFileAccess.class);
-	private RecoveryKeyFactory inTest = new RecoveryKeyFactory(wordEncoder, csprng, masterkeyFileAccess);
+	private RecoveryKeyFactory inTest = new RecoveryKeyFactory(wordEncoder, masterkeyFileAccess);
 
 	@Test
 	@DisplayName("createRecoveryKey() creates 44 words")
