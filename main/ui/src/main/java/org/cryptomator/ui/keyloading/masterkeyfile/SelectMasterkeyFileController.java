@@ -12,6 +12,7 @@ import javax.inject.Inject;
 import javafx.fxml.FXML;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.stage.Window;
 import javafx.stage.WindowEvent;
 import java.io.File;
 import java.nio.file.Path;
@@ -35,6 +36,16 @@ public class SelectMasterkeyFileController implements FxController {
 		this.masterkeyFileProvisionLock = masterkeyFileProvisionLock;
 		this.resourceBundle = resourceBundle;
 		this.window.setOnHiding(this::windowClosed);
+	}
+
+	public void initialize() {
+		Window owner = window.getOwner();
+		if (owner != null) {
+			window.setX(owner.getX() + (owner.getWidth() - window.getWidth()) / 2);
+			window.setY(owner.getY() + (owner.getHeight() - window.getHeight()) / 2);
+		} else {
+			window.centerOnScreen();
+		}
 	}
 
 	@FXML
