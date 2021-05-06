@@ -126,13 +126,15 @@ public class VaultListManager {
 	}
 
 	private static VaultState.Value determineVaultState(Path pathToVault) throws IOException {
-		return switch (CryptoFileSystemProvider.checkDirStructureForVault(pathToVault, VAULTCONFIG_FILENAME, MASTERKEY_FILENAME)) {
-			case VAULT -> VaultState.Value.LOCKED;
-			case UNRELATED -> VaultState.Value.MISSING;
-			case MAYBE_LEGACY -> Migrators.get().needsMigration(pathToVault, VAULTCONFIG_FILENAME, MASTERKEY_FILENAME)
-					? VaultState.Value.NEEDS_MIGRATION
-					: VaultState.Value.MISSING;
-		};
+		try {
+			return switch (CryptoFileSystemProvider.checkDirStructureForVault(pathToVault, VAULTCONFIG_FILENAME, MASTERKEY_FILENAME)) {
+				case VAULT -> VaultState.Value.LOCKED;
+				case UNRELATED -> VaultState.Value.MISSING;
+				case MAYBE_LEGACY -> Migrators.get().needsMigration(pathToVault, VAULTCONFIG_FILENAME, MASTERKEY_FILENAME) ? VaultState.Value.NEEDS_MIGRATION : VaultState.Value.MISSING;
+			};
+		} catch (NoSuchFileException e) {
+			return VaultState.Value.MISSING;
+		}
 	}
 
 }
