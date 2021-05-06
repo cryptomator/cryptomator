@@ -47,7 +47,6 @@ public class VaultModule {
 		return new SimpleObjectProperty<>(initialErrorCause);
 	}
 
-
 	@Provides
 	public Volume provideVolume(Settings settings, WebDavVolume webDavVolume, FuseVolume fuseVolume, DokanyVolume dokanyVolume) {
 		VolumeImpl preferredImpl = settings.preferredVolumeImpl().get();

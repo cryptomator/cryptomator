@@ -1,4 +1,4 @@
-package org.cryptomator.ui.unlock;
+package org.cryptomator.ui.keyloading.masterkeyfile;
 
 import org.cryptomator.common.keychain.KeychainManager;
 import org.cryptomator.common.vaults.Vault;
@@ -7,6 +7,9 @@ import org.cryptomator.ui.common.UserInteractionLock;
 import org.cryptomator.ui.common.WeakBindings;
 import org.cryptomator.ui.controls.NiceSecurePasswordField;
 import org.cryptomator.ui.forgetPassword.ForgetPasswordComponent;
+import org.cryptomator.ui.keyloading.KeyLoading;
+import org.cryptomator.ui.keyloading.KeyLoadingScoped;
+import org.cryptomator.ui.keyloading.masterkeyfile.MasterkeyFileLoadingModule.PasswordEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,17 +41,17 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-@UnlockScoped
-public class UnlockController implements FxController {
+@KeyLoadingScoped
+public class PassphraseEntryController implements FxController {
 
-	private static final Logger LOG = LoggerFactory.getLogger(UnlockController.class);
+	private static final Logger LOG = LoggerFactory.getLogger(PassphraseEntryController.class);
 
 	private final Stage window;
 	private final Vault vault;
 	private final AtomicReference<char[]> password;
 	private final AtomicBoolean savePassword;
 	private final Optional<char[]> savedPassword;
-	private final UserInteractionLock<UnlockModule.PasswordEntry> passwordEntryLock;
+	private final UserInteractionLock<PasswordEntry> passwordEntryLock;
 	private final ForgetPasswordComponent.Builder forgetPassword;
 	private final KeychainManager keychain;
 	private final ObjectBinding<ContentDisplay> unlockButtonContentDisplay;
@@ -66,7 +69,7 @@ public class UnlockController implements FxController {
 	public Animation unlockAnimation;
 
 	@Inject
-	public UnlockController(@UnlockWindow Stage window, @UnlockWindow Vault vault, AtomicReference<char[]> password, @Named("savePassword") AtomicBoolean savePassword, @Named("savedPassword") Optional<char[]> savedPassword, UserInteractionLock<UnlockModule.PasswordEntry> passwordEntryLock, ForgetPasswordComponent.Builder forgetPassword, KeychainManager keychain) {
+	public PassphraseEntryController(@KeyLoading Stage window, @KeyLoading Vault vault, AtomicReference<char[]> password, @Named("savePassword") AtomicBoolean savePassword, @Named("savedPassword") Optional<char[]> savedPassword, UserInteractionLock<PasswordEntry> passwordEntryLock, ForgetPasswordComponent.Builder forgetPassword, KeychainManager keychain) {
 		this.window = window;
 		this.vault = vault;
 		this.password = password;
@@ -138,7 +141,7 @@ public class UnlockController implements FxController {
 		// if not already interacted, mark this workflow as cancelled:
 		if (passwordEntryLock.awaitingInteraction().get()) {
 			LOG.debug("Unlock canceled by user.");
-			passwordEntryLock.interacted(UnlockModule.PasswordEntry.CANCELED);
+			passwordEntryLock.interacted(PasswordEntry.CANCELED);
 		}
 	}
 
@@ -154,7 +157,7 @@ public class UnlockController implements FxController {
 		if (oldPw != null) {
 			Arrays.fill(oldPw, ' ');
 		}
-		passwordEntryLock.interacted(UnlockModule.PasswordEntry.PASSWORD_ENTERED);
+		passwordEntryLock.interacted(PasswordEntry.PASSWORD_ENTERED);
 		startUnlockAnimation();
 	}
 

@@ -3,6 +3,8 @@ package org.cryptomator.ui.mainwindow;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultListManager;
+import org.cryptomator.cryptofs.CryptoFileSystemProvider;
+import org.cryptomator.cryptofs.DirStructure;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.wrongfilealert.WrongFileAlertComponent;
 import org.slf4j.Logger;
@@ -20,6 +22,7 @@ import javafx.scene.input.TransferMode;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
@@ -27,6 +30,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
+import static org.cryptomator.common.Constants.VAULTCONFIG_FILENAME;
 
 @MainWindowScoped
 public class MainWindowController implements FxController {
@@ -91,23 +95,21 @@ public class MainWindowController implements FxController {
 	}
 
 	private boolean containsVault(Path path) {
-		if (path.getFileName().toString().equals(MASTERKEY_FILENAME)) {
-			return true;
-		} else if (Files.isDirectory(path) && Files.exists(path.resolve(MASTERKEY_FILENAME))) {
-			return true;
-		} else {
+		try {
+			return CryptoFileSystemProvider.checkDirStructureForVault(path, VAULTCONFIG_FILENAME, MASTERKEY_FILENAME) != DirStructure.UNRELATED;
+		} catch (IOException e) {
 			return false;
 		}
 	}
 
 	private void addVault(Path pathToVault) {
 		try {
-			if (pathToVault.getFileName().toString().equals(MASTERKEY_FILENAME)) {
+			if (pathToVault.getFileName().toString().equals(VAULTCONFIG_FILENAME)) {
 				vaultListManager.add(pathToVault.getParent());
 			} else {
 				vaultListManager.add(pathToVault);
 			}
-		} catch (NoSuchFileException e) {
+		} catch (IOException e) {
 			LOG.debug("Not a vault: {}", pathToVault);
 		}
 	}

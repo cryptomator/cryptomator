@@ -17,10 +17,12 @@ import org.cryptomator.cryptofs.CryptoFileSystem;
 import org.cryptomator.cryptofs.CryptoFileSystemProperties;
 import org.cryptomator.cryptofs.CryptoFileSystemProperties.FileSystemFlags;
 import org.cryptomator.cryptofs.CryptoFileSystemProvider;
-import org.cryptomator.cryptofs.common.Constants;
+import org.cryptomator.cryptofs.VaultConfig;
+import org.cryptomator.cryptofs.VaultConfig.UnverifiedVaultConfig;
 import org.cryptomator.cryptofs.common.FileSystemCapabilityChecker;
 import org.cryptomator.cryptolib.api.CryptoException;
-import org.cryptomator.cryptolib.api.InvalidPassphraseException;
+import org.cryptomator.cryptolib.api.MasterkeyLoader;
+import org.cryptomator.cryptolib.api.MasterkeyLoadingFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +37,8 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import java.io.IOException;
-import java.nio.file.NoSuchFileException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.EnumSet;
@@ -45,13 +48,12 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
-
 @PerVault
 public class Vault {
 
 	private static final Logger LOG = LoggerFactory.getLogger(Vault.class);
 	private static final Path HOME_DIR = Paths.get(SystemUtils.USER_HOME);
+	private static final int UNLIMITED_FILENAME_LENGTH = Integer.MAX_VALUE;
 
 	private final VaultSettings vaultSettings;
 	private final Provider<Volume> volumeProvider;
@@ -100,32 +102,31 @@ public class Vault {
 	// Commands
 	// ********************************************************************************/
 
-	private CryptoFileSystem createCryptoFileSystem(CharSequence passphrase) throws NoSuchFileException, IOException, InvalidPassphraseException, CryptoException {
+	private CryptoFileSystem createCryptoFileSystem(MasterkeyLoader keyLoader) throws IOException, MasterkeyLoadingFailedException {
 		Set<FileSystemFlags> flags = EnumSet.noneOf(FileSystemFlags.class);
 		if (vaultSettings.usesReadOnlyMode().get()) {
 			flags.add(FileSystemFlags.READONLY);
+		} else if(vaultSettings.maxCleartextFilenameLength().get() == -1) {
+			LOG.debug("Determining cleartext filename length limitations...");
+			var checker = new FileSystemCapabilityChecker();
+			int shorteningThreshold = getUnverifiedVaultConfig().orElseThrow().allegedShorteningThreshold();
+			int ciphertextLimit = checker.determineSupportedCiphertextFileNameLength(getPath());
+			if (ciphertextLimit < shorteningThreshold) {
+				int cleartextLimit = checker.determineSupportedCleartextFileNameLength(getPath());
+				vaultSettings.maxCleartextFilenameLength().set(cleartextLimit);
+			} else {
+				vaultSettings.maxCleartextFilenameLength().setValue(UNLIMITED_FILENAME_LENGTH);
+			}
 		}
 
-		int usedFilenameLengthLimit;
-		var fileSystemCapabilityChecker = new FileSystemCapabilityChecker();
-		if (flags.contains(FileSystemFlags.READONLY)) {
-			usedFilenameLengthLimit = Constants.MAX_CIPHERTEXT_NAME_LENGTH;
-		} else if (vaultSettings.filenameLengthLimit().get() == -1) {
-			LOG.debug("Determining file name length limitations...");
-			usedFilenameLengthLimit = fileSystemCapabilityChecker.determineSupportedFileNameLength(getPath());
-			vaultSettings.filenameLengthLimit().set(usedFilenameLengthLimit);
-			LOG.info("Storing file name length limit of {}", usedFilenameLengthLimit);
-		} else {
-			usedFilenameLengthLimit = vaultSettings.filenameLengthLimit().get();
+		if (vaultSettings.maxCleartextFilenameLength().get() < UNLIMITED_FILENAME_LENGTH) {
+			LOG.warn("Limiting cleartext filename length on this device to {}.", vaultSettings.maxCleartextFilenameLength().get());
 		}
 
-		assert usedFilenameLengthLimit > 0;
 		CryptoFileSystemProperties fsProps = CryptoFileSystemProperties.cryptoFileSystemProperties() //
-				.withPassphrase(passphrase) //
+				.withKeyLoader(keyLoader) //
 				.withFlags(flags) //
-				.withMasterkeyFilename(MASTERKEY_FILENAME) //
-				.withMaxPathLength(vaultSettings.filenameLengthLimit().get() + Constants.MAX_ADDITIONAL_PATH_LENGTH) //
-				.withMaxNameLength(usedFilenameLengthLimit) //
+				.withMaxCleartextNameLength(vaultSettings.maxCleartextFilenameLength().get()) //
 				.build();
 		return CryptoFileSystemProvider.newFileSystem(getPath(), fsProps);
 	}
@@ -142,19 +143,21 @@ public class Vault {
 		}
 	}
 
-	public synchronized void unlock(CharSequence passphrase) throws CryptoException, IOException, VolumeException, InvalidMountPointException {
-		if (cryptoFileSystem.get() == null) {
-			CryptoFileSystem fs = createCryptoFileSystem(passphrase);
-			cryptoFileSystem.set(fs);
-			try {
-				volume = volumeProvider.get();
-				volume.mount(fs, getEffectiveMountFlags(), this::lockOnVolumeExit);
-			} catch (Exception e) {
-				destroyCryptoFileSystem();
-				throw e;
-			}
-		} else {
+	public synchronized void unlock(MasterkeyLoader keyLoader) throws CryptoException, IOException, VolumeException, InvalidMountPointException {
+		if (cryptoFileSystem.get() != null) {
 			throw new IllegalStateException("Already unlocked.");
+		}
+		CryptoFileSystem fs = createCryptoFileSystem(keyLoader);
+		boolean success = false;
+		try {
+			cryptoFileSystem.set(fs);
+			volume = volumeProvider.get();
+			volume.mount(fs, getEffectiveMountFlags(), this::lockOnVolumeExit);
+			success = true;
+		} finally {
+			if (!success) {
+				destroyCryptoFileSystem();
+			}
 		}
 	}
 
@@ -322,6 +325,16 @@ public class Vault {
 
 	public VaultStats getStats() {
 		return stats;
+	}
+
+	public Optional<UnverifiedVaultConfig> getUnverifiedVaultConfig() {
+		Path configPath = getPath().resolve(org.cryptomator.common.Constants.VAULTCONFIG_FILENAME);
+		try {
+			String token = Files.readString(configPath, StandardCharsets.US_ASCII);
+			return Optional.of(VaultConfig.decode(token));
+		} catch (IOException e) {
+			return Optional.empty();
+		}
 	}
 
 	public Observable[] observables() {

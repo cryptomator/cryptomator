@@ -10,6 +10,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import javafx.application.Platform;
+import java.io.IOException;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.concurrent.BlockingQueue;
@@ -78,7 +79,7 @@ class AppLaunchEventHandler {
 				fxApplicationStarter.get().thenAccept(app -> app.getVaultService().reveal(v));
 			}
 			LOG.debug("Added vault {}", potentialVaultPath);
-		} catch (NoSuchFileException e) {
+		} catch (IOException e) {
 			LOG.error("Failed to add vault " + potentialVaultPath, e);
 		}
 	}
