@@ -11,6 +11,7 @@ package org.cryptomator.common.vaults;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.cryptofs.CryptoFileSystemProvider;
+import org.cryptomator.cryptofs.DirStructure;
 import org.cryptomator.cryptofs.migration.Migrators;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,9 +53,9 @@ public class VaultListManager {
 		return vaultList;
 	}
 
-	public Vault add(Path pathToVault) throws NoSuchFileException {
+	public Vault add(Path pathToVault) throws IOException {
 		Path normalizedPathToVault = pathToVault.normalize().toAbsolutePath();
-		if (!CryptoFileSystemProvider.containsVault(normalizedPathToVault, VAULTCONFIG_FILENAME, MASTERKEY_FILENAME)) {
+		if (CryptoFileSystemProvider.checkDirStructureForVault(normalizedPathToVault, VAULTCONFIG_FILENAME, MASTERKEY_FILENAME) == DirStructure.UNRELATED) {
 			throw new NoSuchFileException(normalizedPathToVault.toString(), null, "Not a vault directory");
 		}
 		Optional<Vault> alreadyExistingVault = get(normalizedPathToVault);
@@ -125,13 +126,13 @@ public class VaultListManager {
 	}
 
 	private static VaultState.Value determineVaultState(Path pathToVault) throws IOException {
-		if (!CryptoFileSystemProvider.containsVault(pathToVault, VAULTCONFIG_FILENAME, MASTERKEY_FILENAME)) {
-			return VaultState.Value.MISSING;
-		} else if (Migrators.get().needsMigration(pathToVault, VAULTCONFIG_FILENAME, MASTERKEY_FILENAME)) {
-			return VaultState.Value.NEEDS_MIGRATION;
-		} else {
-			return VaultState.Value.LOCKED;
-		}
+		return switch (CryptoFileSystemProvider.checkDirStructureForVault(pathToVault, VAULTCONFIG_FILENAME, MASTERKEY_FILENAME)) {
+			case VAULT -> VaultState.Value.LOCKED;
+			case UNRELATED -> VaultState.Value.MISSING;
+			case MAYBE_LEGACY -> Migrators.get().needsMigration(pathToVault, VAULTCONFIG_FILENAME, MASTERKEY_FILENAME)
+					? VaultState.Value.NEEDS_MIGRATION
+					: VaultState.Value.MISSING;
+		};
 	}
 
 }

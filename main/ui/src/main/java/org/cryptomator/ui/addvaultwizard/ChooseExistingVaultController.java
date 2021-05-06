@@ -81,7 +81,7 @@ public class ChooseExistingVaultController implements FxController {
 				Vault newVault = vaultListManager.add(vaultPath.get());
 				vault.set(newVault);
 				window.setScene(successScene.get());
-			} catch (NoSuchFileException e) {
+			} catch (IOException e) {
 				LOG.error("Failed to open existing vault.", e);
 				errorComponent.cause(e).window(window).returnToScene(window.getScene()).build().showErrorScene();
 			}

@@ -208,7 +208,7 @@ public class CreateNewVaultPasswordController implements FxController {
 		try {
 			Vault newVault = vaultListManager.add(pathToVault);
 			vaultProperty.set(newVault);
-		} catch (NoSuchFileException e) {
+		} catch (IOException e) {
 			throw new UncheckedIOException(e);
 		}
 	}
