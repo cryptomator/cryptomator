@@ -76,6 +76,12 @@
 				<artifactId>cryptofs</artifactId>
 				<version>${cryptomator.cryptofs.version}</version>
 			</dependency>
+			<!--TODO: only temporary workaround until 1.6.0-beta -->
+			<dependency>
+				<groupId>org.cryptomator</groupId>
+				<artifactId>cryptolib</artifactId>
+				<version>2.0.0-rc1</version>
+			</dependency>
 			<dependency>
 				<groupId>org.cryptomator</groupId>
 				<artifactId>fuse-nio-adapter</artifactId>
