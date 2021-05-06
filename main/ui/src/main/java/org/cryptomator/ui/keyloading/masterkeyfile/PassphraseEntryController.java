@@ -34,7 +34,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Translate;
 import javafx.stage.Stage;
-import javafx.stage.Window;
 import javafx.stage.WindowEvent;
 import javafx.util.Duration;
 import java.util.Arrays;
@@ -88,14 +87,6 @@ public class PassphraseEntryController implements FxController {
 
 	@FXML
 	public void initialize() {
-		Window owner = window.getOwner();
-		if (owner != null) {
-			window.setX(owner.getX() + (owner.getWidth() - window.getWidth()) / 2);
-			window.setY(owner.getY() + (owner.getHeight() - window.getHeight()) / 2);
-		} else {
-			window.centerOnScreen();
-		}
-
 		savePasswordCheckbox.setSelected(savedPassword.isPresent());
 		if (password.get() != null) {
 			passwordField.setPassword(password.get());
