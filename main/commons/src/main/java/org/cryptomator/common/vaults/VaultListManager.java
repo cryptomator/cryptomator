@@ -29,6 +29,7 @@ import java.util.ResourceBundle;
 
 import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
 import static org.cryptomator.common.Constants.VAULTCONFIG_FILENAME;
+import static org.cryptomator.common.vaults.VaultState.Value.ERROR;
 
 @Singleton
 public class VaultListManager {
@@ -58,14 +59,13 @@ public class VaultListManager {
 		if (CryptoFileSystemProvider.checkDirStructureForVault(normalizedPathToVault, VAULTCONFIG_FILENAME, MASTERKEY_FILENAME) == DirStructure.UNRELATED) {
 			throw new NoSuchFileException(normalizedPathToVault.toString(), null, "Not a vault directory");
 		}
-		Optional<Vault> alreadyExistingVault = get(normalizedPathToVault);
-		if (alreadyExistingVault.isPresent()) {
-			return alreadyExistingVault.get();
-		} else {
-			Vault newVault = create(newVaultSettings(normalizedPathToVault));
-			vaultList.add(newVault);
-			return newVault;
-		}
+
+		return get(normalizedPathToVault) //
+				.orElseGet(() -> {
+					Vault newVault = create(newVaultSettings(normalizedPathToVault));
+					vaultList.add(newVault);
+					return newVault;
+				});
 	}
 
 	private VaultSettings newVaultSettings(Path path) {
@@ -99,7 +99,7 @@ public class VaultListManager {
 			compBuilder.initialVaultState(vaultState);
 		} catch (IOException e) {
 			LOG.warn("Failed to determine vault state for " + vaultSettings.path().get(), e);
-			compBuilder.initialVaultState(VaultState.Value.ERROR);
+			compBuilder.initialVaultState(ERROR);
 			compBuilder.initialErrorCause(e);
 		}
 		return compBuilder.build().vault();
@@ -111,14 +111,14 @@ public class VaultListManager {
 		return switch (previousState) {
 			case LOCKED, NEEDS_MIGRATION, MISSING -> {
 				try {
-					VaultState.Value determinedState = determineVaultState(vault.getPath());
+					var determinedState = determineVaultState(vault.getPath());
 					state.set(determinedState);
 					yield determinedState;
 				} catch (IOException e) {
 					LOG.warn("Failed to determine vault state for " + vault.getPath(), e);
-					state.set(VaultState.Value.ERROR);
+					state.set(ERROR);
 					vault.setLastKnownException(e);
-					yield VaultState.Value.ERROR;
+					yield ERROR;
 				}
 			}
 			case ERROR, UNLOCKED, PROCESSING -> previousState;
