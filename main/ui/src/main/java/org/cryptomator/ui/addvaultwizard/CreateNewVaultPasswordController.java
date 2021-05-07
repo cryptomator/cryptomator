@@ -180,7 +180,7 @@ public class CreateNewVaultPasswordController implements FxController {
 
 			// 2. initialize vault:
 			try {
-				MasterkeyLoader loader = ignored -> masterkey;
+				MasterkeyLoader loader = ignored -> masterkey.clone();
 				CryptoFileSystemProperties fsProps = CryptoFileSystemProperties.cryptoFileSystemProperties().withCipherCombo(VaultCipherCombo.SIV_CTRMAC).withKeyLoader(loader).build();
 				CryptoFileSystemProvider.initialize(path, fsProps, DEFAULT_KEY_ID);
 
@@ -208,7 +208,7 @@ public class CreateNewVaultPasswordController implements FxController {
 		try {
 			Vault newVault = vaultListManager.add(pathToVault);
 			vaultProperty.set(newVault);
-		} catch (NoSuchFileException e) {
+		} catch (IOException e) {
 			throw new UncheckedIOException(e);
 		}
 	}

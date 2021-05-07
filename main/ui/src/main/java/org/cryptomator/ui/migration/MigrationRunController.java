@@ -95,6 +95,8 @@ public class MigrationRunController implements FxController {
 		migrationButtonDisabled.bind(ObjectExpression.objectExpression(vault.stateProperty())
 				.isNotEqualTo(VaultState.Value.NEEDS_MIGRATION)
 				.or(passwordField.textProperty().isEmpty()));
+
+		window.setOnHiding(event -> passwordField.wipe());
 	}
 
 	@FXML
