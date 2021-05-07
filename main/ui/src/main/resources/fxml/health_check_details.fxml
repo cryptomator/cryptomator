@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Text?>
+<VBox xmlns:fx="http://javafx.com/fxml"
+	  xmlns="http://javafx.com/javafx"
+	  fx:controller="org.cryptomator.ui.health.CheckDetailController"
+	  spacing="6">
+	<Label fx:id="checkTitle" styleClass="label-large" text="${controller.selectedTaskName}"/>
+	<Text fx:id="checkDescription" styleClass="label" text="${controller.selectedTaskDescription}"/>
+	<!-- TODO hide if state != succeeded: -->
+	<TableView fx:id="resultsTableView">
+		<columns>
+			<TableColumn fx:id="resultDescriptionColumn" text="Info" editable="false"/>
+			<TableColumn fx:id="resultSeverityColumn" text="Severity" editable="false"/>
+			<!--TableColumn fx:id="resultAction" text="Action" /-->
+		</columns>
+	</TableView>
+</VBox>
