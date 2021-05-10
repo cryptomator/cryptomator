@@ -14,9 +14,7 @@ import javafx.concurrent.Task;
 import java.nio.file.Path;
 import java.security.SecureRandom;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.CancellationException;
-import java.util.concurrent.atomic.AtomicReference;
 
 class HealthCheckTask extends Task<Void> {
 
@@ -53,7 +51,7 @@ class HealthCheckTask extends Task<Void> {
 				try {
 					Thread.sleep(2000);
 				} catch (InterruptedException e) {
-					if(isCancelled()) {
+					if (isCancelled()) {
 						return;
 					} else {
 						Thread.currentThread().interrupt();
