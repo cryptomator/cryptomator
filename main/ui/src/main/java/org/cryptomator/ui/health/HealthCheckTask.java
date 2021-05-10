@@ -29,9 +29,6 @@ class HealthCheckTask extends Task<Void> {
 	private final HealthCheck check;
 	private final ObservableList<DiagnosticResult> results;
 
-	private final AtomicReference<State> endState;
-	private final AtomicReference<Throwable> exceptionOnDone;
-
 	public HealthCheckTask(Path vaultPath, VaultConfig vaultConfig, Masterkey masterkey, SecureRandom csprng, HealthCheck check) {
 		this.vaultPath = Objects.requireNonNull(vaultPath);
 		this.vaultConfig = Objects.requireNonNull(vaultConfig);
@@ -39,8 +36,6 @@ class HealthCheckTask extends Task<Void> {
 		this.csprng = Objects.requireNonNull(csprng);
 		this.check = Objects.requireNonNull(check);
 		this.results = FXCollections.observableArrayList();
-		this.endState = new AtomicReference<>(null);
-		this.exceptionOnDone = new AtomicReference<>();
 
 		var tmp = check.identifier();
 		updateTitle(tmp.substring(tmp.length() - 10)); //TODO: new method with reliable logic
@@ -79,12 +74,6 @@ class HealthCheckTask extends Task<Void> {
 	@Override
 	protected void done() {
 		LOG.info("finished {}", check.identifier());
-		Platform.runLater(() -> endState.set(getState()));
-	}
-
-	@Override
-	protected void failed() {
-		Platform.runLater(() -> exceptionOnDone.set(getException()));
 	}
 
 	/* Getter */
@@ -95,13 +84,5 @@ class HealthCheckTask extends Task<Void> {
 
 	public HealthCheck getCheck() {
 		return check;
-	}
-
-	public State getEndState() {
-		return endState.get();
-	}
-
-	public Optional<Throwable> getExceptionOnDone() {
-		return Optional.ofNullable(exceptionOnDone.get());
 	}
 }

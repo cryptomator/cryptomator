@@ -6,14 +6,13 @@ import org.cryptomator.common.Environment;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.Volume;
 import org.cryptomator.cryptofs.VaultConfig;
-import org.cryptomator.cryptofs.health.api.DiagnosticResult;
 import org.cryptomator.ui.common.HostServiceRevealer;
 
 import javax.inject.Inject;
 import javafx.concurrent.Task;
+import java.io.BufferedWriter;
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.channels.ByteChannel;
+import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -27,13 +26,13 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 @HealthCheckScoped
-public class HealthReportWriteTask extends Task<Void> {
+public class ReportWriter {
 
 	private static final String REPORT_HEADER = """
 			**************************************
 			*   Cryptomator Vault Health Report  *
 			**************************************
-			Analyzed vault: %s (Current name \"%s\")
+			Analyzed vault: %s (Current name "%s")
 			Vault storage path: %s
 			""";
 	private static final String REPORT_CHECK_HEADER = """
@@ -42,72 +41,59 @@ public class HealthReportWriteTask extends Task<Void> {
 			Check %s
 			------------------------------
 			""";
-	private static final String REPORT_CHECK_RESULT = "%s - %s";
+	private static final String REPORT_CHECK_RESULT = "%8s - %s";
 	private static final DateTimeFormatter TIME_STAMP = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss").withZone(ZoneId.systemDefault());
 
 	private final Vault vault;
 	private final VaultConfig vaultConfig;
-	private final Lazy<Collection<HealthCheckTask>> tasks;
 	private final Path path;
 	private final HostServiceRevealer revealer;
 
 	@Inject
-	public HealthReportWriteTask(@HealthCheckWindow Vault vault, AtomicReference<VaultConfig> vaultConfigRef, Lazy<Collection<HealthCheckTask>> tasks, Environment env, HostServiceRevealer revealer) {
+	public ReportWriter(@HealthCheckWindow Vault vault, AtomicReference<VaultConfig> vaultConfigRef, Environment env, HostServiceRevealer revealer) {
 		this.vault = vault;
 		this.vaultConfig = Objects.requireNonNull(vaultConfigRef.get());
-		this.tasks = tasks;
 		this.revealer = revealer;
 		this.path = env.getLogDir().orElse(Path.of(System.getProperty("user.home"))).resolve("healthReport_" + vault.getDisplayName() + "_" + TIME_STAMP.format(Instant.now()) + ".log");
 	}
 
-	@Override
-	protected Void call() throws IOException {
-		final var tasks = this.tasks.get();
-		//use file channel, since results can be pretty big
-		try (var channel = Files.newByteChannel(path, StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING)) {
-			internalWrite(channel, String.format(REPORT_HEADER, vaultConfig.getId(), vault.getDisplayName(), vault.getPath()));
+	protected void writeReport(Collection<HealthCheckTask> tasks) throws IOException {
+		try (var out = Files.newOutputStream(path, StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING); //
+			 var writer = new BufferedWriter(new OutputStreamWriter(out, StandardCharsets.UTF_8))) {
+			writer.write(REPORT_HEADER.formatted(vaultConfig.getId(), vault.getDisplayName(), vault.getPath()));
 			for (var task : tasks) {
-				internalWrite(channel, REPORT_CHECK_HEADER, task.getCheck().identifier());
-				final var state = task.getEndState();
-				switch (state) {
+				writer.write(REPORT_CHECK_HEADER.formatted(task.getCheck().identifier()));
+				switch (task.getState()) {
 					case SUCCEEDED -> {
-						internalWrite(channel, "STATUS: SUCCESS\nRESULTS:\n");
+						writer.write("STATUS: SUCCESS\nRESULTS:\n");
 						for (var result : task.results()) {
-							internalWrite(channel, REPORT_CHECK_RESULT, severityToString(result.getServerity()), result);
+							writer.write(REPORT_CHECK_RESULT.formatted(result.getServerity(), result));
 						}
 					}
-					case CANCELLED -> internalWrite(channel, "STATUS: CANCELED\n");
+					case CANCELLED -> writer.write("STATUS: CANCELED\n");
 					case FAILED -> {
-						internalWrite(channel, "STATUS: FAILED\nREASON:\n", task.getCheck().identifier());
-						internalWrite(channel, prepareFailureMsg(task));
+						writer.write("STATUS: FAILED\nREASON:\n" + task.getCheck().identifier());
+						writer.write(prepareFailureMsg(task));
 					}
 					case READY, RUNNING, SCHEDULED -> throw new IllegalStateException("Cannot export unfinished task");
 				}
 			}
 		}
-		return null;
-	}
-
-	private void internalWrite(ByteChannel channel, String s, Object... formatArguments) throws IOException {
-		channel.write(ByteBuffer.wrap(s.formatted(formatArguments).getBytes(StandardCharsets.UTF_8)));
-	}
-
-	private String severityToString(DiagnosticResult.Severity s) {
-		return switch (s) {
-			case GOOD, INFO, WARN -> s.name();
-			case CRITICAL -> "CRIT";
-		};
+		reveal();
 	}
 
 	private String prepareFailureMsg(HealthCheckTask task) {
-		return task.getExceptionOnDone() //
-				.map(t -> ExceptionUtils.getStackTrace(t)).orElse("Unknown reason of failure.") //
-				.lines().map(line -> "\t\t" + line + "\n") //
-				.collect(Collectors.joining());
+		if (task.getException() != null) {
+			return ExceptionUtils.getStackTrace(task.getException()) //
+					.lines() //
+					.map(line -> "\t\t" + line + "\n") //
+					.collect(Collectors.joining());
+		} else {
+			return "Unknown reason of failure.";
+		}
 	}
 
-	@Override
-	protected void succeeded() {
+	private void reveal() {
 		try {
 			revealer.reveal(path);
 		} catch (Volume.VolumeException e) {

@@ -2,32 +2,32 @@ package org.cryptomator.ui.health;
 
 import com.google.common.base.Preconditions;
 import com.tobiasdiez.easybind.EasyBind;
-import com.tobiasdiez.easybind.optional.OptionalBinding;
 import dagger.Lazy;
-import org.cryptomator.cryptofs.health.api.DiagnosticResult;
 import org.cryptomator.ui.common.FxController;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javafx.beans.binding.Binding;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
 import javafx.scene.control.ListView;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 
 @HealthCheckScoped
 public class CheckListController implements FxController {
 
+	private static final Logger LOG = LoggerFactory.getLogger(CheckListController.class);
+
 	private final ObservableList<HealthCheckTask> tasks;
-	private final HealthReportWriteTask reportWriter;
+	private final ReportWriter reportWriter;
 	private final ExecutorService executorService;
 	private final ObjectProperty<HealthCheckTask> selectedTask;
 	private final SimpleObjectProperty<Worker<?>> runningTask;
@@ -38,13 +38,13 @@ public class CheckListController implements FxController {
 	public ListView<HealthCheckTask> checksListView;
 
 	@Inject
-	public CheckListController(Lazy<Collection<HealthCheckTask>> tasks, HealthReportWriteTask reportWriteTask, ObjectProperty<HealthCheckTask> selectedTask, ExecutorService executorService) {
+	public CheckListController(Lazy<Collection<HealthCheckTask>> tasks, ReportWriter reportWriteTask, ObjectProperty<HealthCheckTask> selectedTask, ExecutorService executorService) {
 		this.tasks = FXCollections.observableArrayList(tasks.get());
 		this.reportWriter = reportWriteTask;
 		this.executorService = executorService;
 		this.selectedTask = selectedTask;
 		this.runningTask = new SimpleObjectProperty<>();
-		this.running = EasyBind.wrapNullable(runningTask).map(Worker::isRunning).orElse(false);
+		this.running = EasyBind.wrapNullable(runningTask).mapObservable(Worker::runningProperty).orElse(false);
 		this.anyCheckSelected = selectedTask.isNotNull();
 	}
 
@@ -81,7 +81,11 @@ public class CheckListController implements FxController {
 
 	@FXML
 	public void exportResults() {
-		executorService.execute(reportWriter);
+		try {
+			reportWriter.writeReport(tasks);
+		} catch (IOException e) {
+			LOG.error("Failed to write health check report.", e);
+		}
 	}
 
 	/* Getter/Setter */
