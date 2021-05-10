@@ -9,10 +9,9 @@
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.health.CheckDetailController"
 	  spacing="6">
-	<Label fx:id="checkTitle" styleClass="label-large" text="${controller.selectedTaskName}"/>
-	<Text fx:id="checkDescription" styleClass="label" text="${controller.selectedTaskDescription}"/>
-	<!-- TODO hide if state != succeeded: -->
-	<TableView fx:id="resultsTableView">
+	<Label fx:id="checkTitle" styleClass="label-large" text="${controller.taskName}"/>
+	<Text fx:id="checkDescription" styleClass="label" text="${controller.taskDescription}"/>
+	<TableView fx:id="resultsTableView" visible="${controller.producingResults}" managed="${controller.producingResults}">
 		<columns>
 			<TableColumn fx:id="resultDescriptionColumn" text="Info" editable="false"/>
 			<TableColumn fx:id="resultSeverityColumn" text="Severity" editable="false"/>
