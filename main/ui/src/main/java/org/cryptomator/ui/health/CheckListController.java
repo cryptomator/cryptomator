@@ -33,9 +33,11 @@ public class CheckListController implements FxController {
 	private final SimpleObjectProperty<Worker<?>> runningTask;
 	private final Binding<Boolean> running;
 	private final BooleanBinding anyCheckSelected;
+	private final BooleanBinding readyToRun;
 
 	/* FXML */
 	public ListView<HealthCheckTask> checksListView;
+
 
 	@Inject
 	public CheckListController(Lazy<Collection<HealthCheckTask>> tasks, ReportWriter reportWriteTask, ObjectProperty<HealthCheckTask> selectedTask, ExecutorService executorService) {
@@ -46,6 +48,7 @@ public class CheckListController implements FxController {
 		this.runningTask = new SimpleObjectProperty<>();
 		this.running = EasyBind.wrapNullable(runningTask).mapObservable(Worker::runningProperty).orElse(false);
 		this.anyCheckSelected = selectedTask.isNotNull();
+		this.readyToRun = runningTask.isNull();
 	}
 
 	@FXML
@@ -87,8 +90,16 @@ public class CheckListController implements FxController {
 			LOG.error("Failed to write health check report.", e);
 		}
 	}
-
 	/* Getter/Setter */
+
+
+	public boolean isReadyToRun() {
+		return readyToRun.get();
+	}
+
+	public BooleanBinding readyToRunProperty() {
+		return readyToRun;
+	}
 
 	public boolean isRunning() {
 		return running.getValue();
@@ -105,5 +116,4 @@ public class CheckListController implements FxController {
 	public BooleanBinding anyCheckSelectedProperty() {
 		return anyCheckSelected;
 	}
-
 }
