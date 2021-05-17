@@ -123,7 +123,7 @@ public class SecurePasswordField extends TextField {
 	}
 
 	private void updateCapsLocked() {
-		// AWT code needed until https://bugs.openjdk.java.net/browse/JDK-8090882 is closed:
+		//TODO: fixed in JavaFX 17. AWT code needed until update (see https://bugs.openjdk.java.net/browse/JDK-8259680)
 		capsLocked.set(isFocused() && Toolkit.getDefaultToolkit().getLockingKeyState(java.awt.event.KeyEvent.VK_CAPS_LOCK));
 	}
 

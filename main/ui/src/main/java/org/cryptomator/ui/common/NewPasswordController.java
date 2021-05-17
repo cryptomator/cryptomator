@@ -8,7 +8,8 @@ import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyBooleanProperty;
+import javafx.beans.property.ReadOnlyBooleanWrapper;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
@@ -18,8 +19,8 @@ public class NewPasswordController implements FxController {
 
 	private final ResourceBundle resourceBundle;
 	private final PasswordStrengthUtil strengthRater;
-	private final ObjectProperty<CharSequence> password;
 	private final IntegerProperty passwordStrength = new SimpleIntegerProperty(-1);
+	private final ReadOnlyBooleanWrapper passwordsMatchAndSufficient = new ReadOnlyBooleanWrapper();
 
 	public NiceSecurePasswordField passwordField;
 	public NiceSecurePasswordField reenterField;
@@ -31,10 +32,9 @@ public class NewPasswordController implements FxController {
 	public FontAwesome5IconView passwordMatchCheckmark;
 	public FontAwesome5IconView passwordMatchCross;
 
-	public NewPasswordController(ResourceBundle resourceBundle, PasswordStrengthUtil strengthRater, ObjectProperty<CharSequence> password) {
+	public NewPasswordController(ResourceBundle resourceBundle, PasswordStrengthUtil strengthRater) {
 		this.resourceBundle = resourceBundle;
 		this.strengthRater = strengthRater;
-		this.password = password;
 	}
 
 	@FXML
@@ -44,7 +44,7 @@ public class NewPasswordController implements FxController {
 		passwordStrengthLabel.graphicProperty().bind(Bindings.createObjectBinding(this::getIconViewForPasswordStrengthLabel, passwordField.textProperty(), passwordStrength));
 		passwordStrengthLabel.textProperty().bind(EasyBind.map(passwordStrength, strengthRater::getStrengthDescription));
 
-		BooleanBinding passwordsMatch = Bindings.createBooleanBinding(this::hasSamePasswordInBothFields, passwordField.textProperty(), reenterField.textProperty());
+		BooleanBinding passwordsMatch = Bindings.createBooleanBinding(this::passwordFieldsMatch, passwordField.textProperty(), reenterField.textProperty());
 		BooleanBinding reenterFieldNotEmpty = reenterField.textProperty().isNotEmpty();
 		passwordMatchLabel.visibleProperty().bind(reenterFieldNotEmpty);
 		passwordMatchLabel.graphicProperty().bind(Bindings.when(passwordsMatch.and(reenterFieldNotEmpty)).then(passwordMatchCheckmark).otherwise(passwordMatchCross));
@@ -53,6 +53,7 @@ public class NewPasswordController implements FxController {
 		passwordField.textProperty().addListener(this::passwordsDidChange);
 		reenterField.textProperty().addListener(this::passwordsDidChange);
 	}
+
 
 	private FontAwesome5IconView getIconViewForPasswordStrengthLabel() {
 		if (passwordField.getCharacters().length() == 0) {
@@ -67,15 +68,17 @@ public class NewPasswordController implements FxController {
 	}
 
 	private void passwordsDidChange(@SuppressWarnings("unused") Observable observable) {
-		if (hasSamePasswordInBothFields() && strengthRater.fulfillsMinimumRequirements(passwordField.getCharacters())) {
-			password.set(passwordField.getCharacters());
-		} else {
-			password.set("");
+		if (passwordFieldsMatch() && strengthRater.fulfillsMinimumRequirements(passwordField.getCharacters())) {
+			passwordsMatchAndSufficient.setValue(true);
 		}
 	}
 
-	private boolean hasSamePasswordInBothFields() {
+	private boolean passwordFieldsMatch() {
 		return CharSequence.compare(passwordField.getCharacters(), reenterField.getCharacters()) == 0;
+	}
+
+	public ReadOnlyBooleanProperty passwordsMatchAndSufficientProperty() {
+		return passwordsMatchAndSufficient.getReadOnlyProperty();
 	}
 
 	/* Getter/Setter */

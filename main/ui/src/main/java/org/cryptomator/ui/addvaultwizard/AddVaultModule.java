@@ -6,10 +6,10 @@ import dagger.Provides;
 import dagger.multibindings.IntoMap;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.DefaultSceneFactory;
-import org.cryptomator.ui.common.FxmlLoaderFactory;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxControllerKey;
 import org.cryptomator.ui.common.FxmlFile;
+import org.cryptomator.ui.common.FxmlLoaderFactory;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.NewPasswordController;
 import org.cryptomator.ui.common.PasswordStrengthUtil;
@@ -32,13 +32,6 @@ import java.util.ResourceBundle;
 
 @Module
 public abstract class AddVaultModule {
-
-	@Provides
-	@AddVaultWizardScoped
-	@Named("newPassword")
-	static ObjectProperty<CharSequence> provideNewPasswordProperty() {
-		return new SimpleObjectProperty<>("");
-	}
 
 	@Provides
 	@AddVaultWizardWindow
@@ -167,8 +160,8 @@ public abstract class AddVaultModule {
 	@Provides
 	@IntoMap
 	@FxControllerKey(NewPasswordController.class)
-	static FxController provideNewPasswordController(ResourceBundle resourceBundle, PasswordStrengthUtil strengthRater, @Named("newPassword") ObjectProperty<CharSequence> password) {
-		return new NewPasswordController(resourceBundle, strengthRater, password);
+	static FxController provideNewPasswordController(ResourceBundle resourceBundle, PasswordStrengthUtil strengthRater) {
+		return new NewPasswordController(resourceBundle, strengthRater);
 	}
 
 	@Binds

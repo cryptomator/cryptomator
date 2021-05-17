@@ -10,21 +10,18 @@ import org.cryptomator.integrations.keychain.KeychainAccessException;
 import org.cryptomator.ui.common.Animations;
 import org.cryptomator.ui.common.ErrorComponent;
 import org.cryptomator.ui.common.FxController;
+import org.cryptomator.ui.common.NewPasswordController;
 import org.cryptomator.ui.controls.NiceSecurePasswordField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import javax.inject.Named;
-import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
-import javafx.beans.property.ObjectProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.stage.Stage;
 import java.io.IOException;
-import java.nio.CharBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -41,7 +38,6 @@ public class ChangePasswordController implements FxController {
 
 	private final Stage window;
 	private final Vault vault;
-	private final ObjectProperty<CharSequence> newPassword;
 	private final ErrorComponent.Builder errorComponent;
 	private final KeychainManager keychain;
 	private final SecureRandom csprng;
@@ -50,12 +46,12 @@ public class ChangePasswordController implements FxController {
 	public NiceSecurePasswordField oldPasswordField;
 	public CheckBox finalConfirmationCheckbox;
 	public Button finishButton;
+	public NewPasswordController newPasswordController;
 
 	@Inject
-	public ChangePasswordController(@ChangePasswordWindow Stage window, @ChangePasswordWindow Vault vault, @Named("newPassword") ObjectProperty<CharSequence> newPassword, ErrorComponent.Builder errorComponent, KeychainManager keychain, SecureRandom csprng, MasterkeyFileAccess masterkeyFileAccess) {
+	public ChangePasswordController(@ChangePasswordWindow Stage window, @ChangePasswordWindow Vault vault, ErrorComponent.Builder errorComponent, KeychainManager keychain, SecureRandom csprng, MasterkeyFileAccess masterkeyFileAccess) {
 		this.window = window;
 		this.vault = vault;
-		this.newPassword = newPassword;
 		this.errorComponent = errorComponent;
 		this.keychain = keychain;
 		this.csprng = csprng;
@@ -66,8 +62,12 @@ public class ChangePasswordController implements FxController {
 	public void initialize() {
 		BooleanBinding checkboxNotConfirmed = finalConfirmationCheckbox.selectedProperty().not();
 		BooleanBinding oldPasswordFieldEmpty = oldPasswordField.textProperty().isEmpty();
-		BooleanBinding newPasswordInvalid = Bindings.createBooleanBinding(() -> newPassword.get() == null || newPassword.get().length() == 0, newPassword);
-		finishButton.disableProperty().bind(checkboxNotConfirmed.or(oldPasswordFieldEmpty).or(newPasswordInvalid));
+		finishButton.disableProperty().bind(checkboxNotConfirmed.or(oldPasswordFieldEmpty).or(newPasswordController.passwordsMatchAndSufficientProperty().not()));
+		window.setOnHiding(event -> {
+			oldPasswordField.wipe();
+			newPasswordController.passwordField.wipe();
+			newPasswordController.reenterField.wipe();
+		});
 	}
 
 	@FXML
@@ -78,10 +78,8 @@ public class ChangePasswordController implements FxController {
 	@FXML
 	public void finish() {
 		try {
-			//String normalizedOldPassphrase = Normalizer.normalize(oldPasswordField.getCharacters(), Normalizer.Form.NFC);
-			//String normalizedNewPassphrase = Normalizer.normalize(newPassword.get(), Normalizer.Form.NFC);
-			CharSequence oldPassphrase = oldPasswordField.getCharacters(); // TODO verify: is this already NFC-normalized?
-			CharSequence newPassphrase = newPassword.get(); // TODO verify: is this already NFC-normalized?
+			CharSequence oldPassphrase = oldPasswordField.getCharacters();
+			CharSequence newPassphrase = newPasswordController.passwordField.getCharacters();
 			Path masterkeyPath = vault.getPath().resolve(MASTERKEY_FILENAME);
 			byte[] oldMasterkeyBytes = Files.readAllBytes(masterkeyPath);
 			byte[] newMasterkeyBytes = masterkeyFileAccess.changePassphrase(oldMasterkeyBytes, oldPassphrase, newPassphrase);
@@ -89,8 +87,8 @@ public class ChangePasswordController implements FxController {
 			Files.move(masterkeyPath, backupKeyPath, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
 			Files.write(masterkeyPath, newMasterkeyBytes, StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE);
 			LOG.info("Successfully changed password for {}", vault.getDisplayName());
-			window.close();
 			updatePasswordInSystemkeychain();
+			window.close();
 		} catch (InvalidPassphraseException e) {
 			Animations.createShakeWindowAnimation(window).play();
 			oldPasswordField.selectAll();
@@ -104,7 +102,7 @@ public class ChangePasswordController implements FxController {
 	private void updatePasswordInSystemkeychain() {
 		if (keychain.isSupported()) {
 			try {
-				keychain.changePassphrase(vault.getId(), CharBuffer.wrap(newPassword.get()));
+				keychain.changePassphrase(vault.getId(), newPasswordController.passwordField.getCharacters());
 				LOG.info("Successfully updated password in system keychain for {}", vault.getDisplayName());
 			} catch (KeychainAccessException e) {
 				LOG.error("Failed to update password in system keychain.", e);

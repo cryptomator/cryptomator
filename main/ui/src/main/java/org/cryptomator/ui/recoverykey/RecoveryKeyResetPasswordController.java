@@ -6,14 +6,12 @@ import org.cryptomator.ui.common.ErrorComponent;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
+import org.cryptomator.ui.common.NewPasswordController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import javax.inject.Named;
-import javafx.beans.binding.Bindings;
-import javafx.beans.binding.BooleanBinding;
-import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.StringProperty;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
@@ -32,21 +30,19 @@ public class RecoveryKeyResetPasswordController implements FxController {
 	private final RecoveryKeyFactory recoveryKeyFactory;
 	private final ExecutorService executor;
 	private final StringProperty recoveryKey;
-	private final ObjectProperty<CharSequence> newPassword;
 	private final Lazy<Scene> recoverScene;
-	private final BooleanBinding invalidNewPassword;
 	private final ErrorComponent.Builder errorComponent;
 
+	public NewPasswordController newPasswordController;
+
 	@Inject
-	public RecoveryKeyResetPasswordController(@RecoveryKeyWindow Stage window, @RecoveryKeyWindow Vault vault, RecoveryKeyFactory recoveryKeyFactory, ExecutorService executor, @RecoveryKeyWindow StringProperty recoveryKey, @Named("newPassword") ObjectProperty<CharSequence> newPassword, @FxmlScene(FxmlFile.RECOVERYKEY_RECOVER) Lazy<Scene> recoverScene, ErrorComponent.Builder errorComponent) {
+	public RecoveryKeyResetPasswordController(@RecoveryKeyWindow Stage window, @RecoveryKeyWindow Vault vault, RecoveryKeyFactory recoveryKeyFactory, ExecutorService executor, @RecoveryKeyWindow StringProperty recoveryKey, @FxmlScene(FxmlFile.RECOVERYKEY_RECOVER) Lazy<Scene> recoverScene, ErrorComponent.Builder errorComponent) {
 		this.window = window;
 		this.vault = vault;
 		this.recoveryKeyFactory = recoveryKeyFactory;
 		this.executor = executor;
 		this.recoveryKey = recoveryKey;
-		this.newPassword = newPassword;
 		this.recoverScene = recoverScene;
-		this.invalidNewPassword = Bindings.createBooleanBinding(this::isInvalidNewPassword, newPassword);
 		this.errorComponent = errorComponent;
 	}
 
@@ -81,7 +77,7 @@ public class RecoveryKeyResetPasswordController implements FxController {
 
 		@Override
 		protected Void call() throws IOException, IllegalArgumentException {
-			recoveryKeyFactory.resetPasswordWithRecoveryKey(vault.getPath(), recoveryKey.get(), newPassword.get());
+			recoveryKeyFactory.resetPasswordWithRecoveryKey(vault.getPath(), recoveryKey.get(), newPasswordController.passwordField.getCharacters());
 			return null;
 		}
 
@@ -89,11 +85,12 @@ public class RecoveryKeyResetPasswordController implements FxController {
 
 	/* Getter/Setter */
 
-	public BooleanBinding invalidNewPasswordProperty() {
-		return invalidNewPassword;
+	public ReadOnlyBooleanProperty validPasswordProperty() {
+		return newPasswordController.passwordsMatchAndSufficientProperty();
 	}
 
-	public boolean isInvalidNewPassword() {
-		return newPassword.get() == null || newPassword.get().length() == 0;
+	public boolean isValidPassword() {
+		return newPasswordController.passwordsMatchAndSufficientProperty().get();
 	}
+
 }
