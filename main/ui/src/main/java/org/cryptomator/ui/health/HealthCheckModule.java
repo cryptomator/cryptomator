@@ -27,7 +27,6 @@ import javafx.scene.Scene;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import java.security.SecureRandom;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
@@ -126,8 +125,8 @@ abstract class HealthCheckModule {
 
 	@Binds
 	@IntoMap
-	@FxControllerKey(CheckListController.class)
-	abstract FxController bindCheckController(CheckListController controller);
+	@FxControllerKey(CheckController.class)
+	abstract FxController bindChecksController(CheckController controller);
 
 	@Binds
 	@IntoMap

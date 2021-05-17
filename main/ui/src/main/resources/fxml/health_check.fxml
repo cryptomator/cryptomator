@@ -9,7 +9,7 @@
 <?import javafx.scene.layout.VBox?>
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
-	  fx:controller="org.cryptomator.ui.health.CheckListController"
+	  fx:controller="org.cryptomator.ui.health.CheckController"
 	  minWidth="400"
 	  maxWidth="400"
 	  minHeight="145"

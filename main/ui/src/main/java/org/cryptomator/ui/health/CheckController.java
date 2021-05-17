@@ -23,9 +23,9 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
 @HealthCheckScoped
-public class CheckListController implements FxController {
+public class CheckController implements FxController {
 
-	private static final Logger LOG = LoggerFactory.getLogger(CheckListController.class);
+	private static final Logger LOG = LoggerFactory.getLogger(CheckController.class);
 	private static final Set<Worker.State> endStates = Set.of(Worker.State.FAILED, Worker.State.CANCELLED, Worker.State.SUCCEEDED);
 
 	private final ObservableList<HealthCheckTask> tasks;
@@ -42,7 +42,7 @@ public class CheckListController implements FxController {
 
 
 	@Inject
-	public CheckListController(Lazy<Collection<HealthCheckTask>> tasks, ReportWriter reportWriteTask, ObjectProperty<HealthCheckTask> selectedTask, ExecutorService executorService) {
+	public CheckController(Lazy<Collection<HealthCheckTask>> tasks, ReportWriter reportWriteTask, ObjectProperty<HealthCheckTask> selectedTask, ExecutorService executorService) {
 		this.tasks = FXCollections.observableArrayList(tasks.get());
 		this.reportWriter = reportWriteTask;
 		this.executorService = executorService;
