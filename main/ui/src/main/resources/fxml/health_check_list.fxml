@@ -23,7 +23,7 @@
 				<Label fx:id="listHeading" text="Health checks"/>
 				<ListView fx:id="checksListView"/>
 				<!-- TODO: clean up button states: -->
-				<Button text="TODO: run selected" onAction="#runSelectedChecks" disable="${controller.anyCheckSelected}" visible="${controller.readyToRun}" managed="${controller.readyToRun}" maxWidth="Infinity"/>
+				<Button text="TODO: run selected" onAction="#runSelectedChecks" disable="${!controller.anyCheckSelected}" visible="${controller.readyToRun}" managed="${controller.readyToRun}" maxWidth="Infinity"/>
 				<Button text="TODO: run all" onAction="#runAllChecks" visible="${controller.readyToRun}" managed="${controller.readyToRun}" maxWidth="Infinity"/>
 				<Button text="%generic.button.cancel" onAction="#cancelCheck" visible="${controller.running}" managed="${controller.running}" maxWidth="Infinity"/>
 			</VBox>
