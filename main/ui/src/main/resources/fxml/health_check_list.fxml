@@ -31,8 +31,7 @@
 		</HBox>
 		<ButtonBar buttonMinWidth="120" buttonOrder="+X">
 			<buttons>
-				<!-- TODO: hide/disable if no results yet -->
-				<Button text="TODO Export Results" ButtonBar.buttonData="NEXT_FORWARD" disable="${controller.running}" onAction="#exportResults"/>
+				<Button text="TODO Export Results" ButtonBar.buttonData="NEXT_FORWARD" disable="${!controller.finished}" onAction="#exportResults"/>
 			</buttons>
 		</ButtonBar>
 	</children>

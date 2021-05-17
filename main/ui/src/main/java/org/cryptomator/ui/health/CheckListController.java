@@ -19,12 +19,14 @@ import javafx.fxml.FXML;
 import javafx.scene.control.ListView;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
 @HealthCheckScoped
 public class CheckListController implements FxController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(CheckListController.class);
+	private static final Set<Worker.State> endStates = Set.of(Worker.State.FAILED, Worker.State.CANCELLED, Worker.State.SUCCEEDED);
 
 	private final ObservableList<HealthCheckTask> tasks;
 	private final ReportWriter reportWriter;
@@ -32,6 +34,7 @@ public class CheckListController implements FxController {
 	private final ObjectProperty<HealthCheckTask> selectedTask;
 	private final SimpleObjectProperty<Worker<?>> runningTask;
 	private final Binding<Boolean> running;
+	private final Binding<Boolean> finished;
 	private final BooleanBinding anyCheckSelected;
 	private final BooleanBinding readyToRun;
 
@@ -47,6 +50,7 @@ public class CheckListController implements FxController {
 		this.selectedTask = selectedTask;
 		this.runningTask = new SimpleObjectProperty<>();
 		this.running = EasyBind.wrapNullable(runningTask).mapObservable(Worker::runningProperty).orElse(false);
+		this.finished = EasyBind.wrapNullable(runningTask).mapObservable(Worker::stateProperty).map(endStates::contains).orElse(false);
 		this.anyCheckSelected = selectedTask.isNotNull();
 		this.readyToRun = runningTask.isNull();
 	}
@@ -107,6 +111,14 @@ public class CheckListController implements FxController {
 
 	public Binding<Boolean> runningProperty() {
 		return running;
+	}
+
+	public boolean isFinished() {
+		return finished.getValue();
+	}
+
+	public Binding<Boolean> finishedProperty() {
+		return finished;
 	}
 
 	public boolean isAnyCheckSelected() {
