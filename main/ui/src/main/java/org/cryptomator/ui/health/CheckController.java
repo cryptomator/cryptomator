@@ -35,6 +35,7 @@ public class CheckController implements FxController {
 	private final SimpleObjectProperty<Worker<?>> runningTask;
 	private final Binding<Boolean> running;
 	private final Binding<Boolean> finished;
+	private final BooleanBinding anyCheckSelected;
 	private final BooleanBinding readyToRun;
 
 	/* FXML */
@@ -51,6 +52,7 @@ public class CheckController implements FxController {
 		this.running = EasyBind.wrapNullable(runningTask).mapObservable(Worker::runningProperty).orElse(false);
 		this.finished = EasyBind.wrapNullable(runningTask).mapObservable(Worker::stateProperty).map(endStates::contains).orElse(false);
 		this.readyToRun = runningTask.isNull();
+		this.anyCheckSelected = selectedTask.isNotNull();
 	}
 
 	@FXML
@@ -121,10 +123,11 @@ public class CheckController implements FxController {
 	}
 
 	public boolean isAnyCheckSelected() {
-		return anyCheckSelectedProperty().get();
+		return anyCheckSelected.get();
 	}
 
 	public BooleanBinding anyCheckSelectedProperty() {
-		return selectedTask.isNotNull();
+		return anyCheckSelected;
 	}
+
 }
