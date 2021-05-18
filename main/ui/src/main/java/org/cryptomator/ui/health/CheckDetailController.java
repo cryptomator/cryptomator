@@ -2,7 +2,6 @@ package org.cryptomator.ui.health;
 
 import com.tobiasdiez.easybind.EasyBind;
 import com.tobiasdiez.easybind.optional.OptionalBinding;
-import org.cryptomator.cryptofs.health.api.DiagnosticResult;
 import org.cryptomator.ui.common.FxController;
 
 import javax.inject.Inject;
@@ -19,15 +18,15 @@ import javafx.scene.control.TableView;
 
 public class CheckDetailController implements FxController {
 
-	private final Binding<ObservableList<DiagnosticResult>> results;
+	private final Binding<ObservableList<DiagnosticResultAction>> results;
 	private final OptionalBinding<Worker.State> taskState;
 	private final Binding<String> taskName;
 	private final Binding<String> taskDescription;
 	private final BooleanBinding producingResults;
 
-	public TableView<DiagnosticResult> resultsTableView;
-	public TableColumn<DiagnosticResult, String> resultDescriptionColumn;
-	public TableColumn<DiagnosticResult, String> resultSeverityColumn;
+	public TableView<DiagnosticResultAction> resultsTableView;
+	public TableColumn<DiagnosticResultAction, String> resultDescriptionColumn;
+	public TableColumn<DiagnosticResultAction, String> resultSeverityColumn;
 
 	@Inject
 	public CheckDetailController(ObjectProperty<HealthCheckTask> selectedTask) {
@@ -48,8 +47,8 @@ public class CheckDetailController implements FxController {
 	@FXML
 	public void initialize() {
 		resultsTableView.itemsProperty().bind(results);
-		resultDescriptionColumn.setCellValueFactory(cellFeatures -> new SimpleStringProperty(cellFeatures.getValue().toString()));
-		resultSeverityColumn.setCellValueFactory(cellFeatures -> new SimpleStringProperty(cellFeatures.getValue().getServerity().name()));
+		resultDescriptionColumn.setCellValueFactory(cellFeatures -> new SimpleStringProperty(cellFeatures.getValue().getDescription()));
+		resultSeverityColumn.setCellValueFactory(cellFeatures -> new SimpleStringProperty(cellFeatures.getValue().getSeverity().name()));
 	}
 	/* Getter/Setter */
 

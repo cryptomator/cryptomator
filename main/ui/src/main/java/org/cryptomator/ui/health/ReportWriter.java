@@ -67,7 +67,7 @@ public class ReportWriter {
 					case SUCCEEDED -> {
 						writer.write("STATUS: SUCCESS\nRESULTS:\n");
 						for (var result : task.results()) {
-							writer.write(REPORT_CHECK_RESULT.formatted(result.getServerity(), result));
+							writer.write(REPORT_CHECK_RESULT.formatted(result.getSeverity(), result));
 						}
 					}
 					case CANCELLED -> writer.write("STATUS: CANCELED\n");
