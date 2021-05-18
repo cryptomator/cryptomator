@@ -8,6 +8,7 @@ import javax.inject.Inject;
 import javafx.beans.binding.Binding;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -27,6 +28,7 @@ public class CheckDetailController implements FxController {
 	public TableView<DiagnosticResultAction> resultsTableView;
 	public TableColumn<DiagnosticResultAction, String> resultDescriptionColumn;
 	public TableColumn<DiagnosticResultAction, String> resultSeverityColumn;
+	public TableColumn<DiagnosticResultAction, Runnable> resultActionColumn;
 
 	@Inject
 	public CheckDetailController(ObjectProperty<HealthCheckTask> selectedTask) {
@@ -49,6 +51,8 @@ public class CheckDetailController implements FxController {
 		resultsTableView.itemsProperty().bind(results);
 		resultDescriptionColumn.setCellValueFactory(cellFeatures -> new SimpleStringProperty(cellFeatures.getValue().getDescription()));
 		resultSeverityColumn.setCellValueFactory(cellFeatures -> new SimpleStringProperty(cellFeatures.getValue().getSeverity().name()));
+		resultActionColumn.setCellValueFactory(cellFeatures -> new SimpleObjectProperty<>(cellFeatures.getValue()));
+		resultActionColumn.setCellFactory(column -> new ResultActionTableCell());
 	}
 	/* Getter/Setter */
 
