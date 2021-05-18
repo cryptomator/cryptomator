@@ -18,20 +18,24 @@
 		<Insets topRightBottomLeft="12"/>
 	</padding>
 	<children>
-		<HBox>
-			<VBox minWidth="80">
+		<HBox spacing="12">
+			<VBox minWidth="80" spacing="6">
 				<Label fx:id="listHeading" text="Health checks"/>
 				<ListView fx:id="checksListView"/>
-				<!-- TODO: clean up button states: -->
-				<Button text="TODO: run selected" onAction="#runSelectedChecks" disable="${!controller.anyCheckSelected}" visible="${controller.readyToRun}" managed="${controller.readyToRun}" maxWidth="Infinity"/>
-				<Button text="TODO: run all" onAction="#runAllChecks" visible="${controller.readyToRun}" managed="${controller.readyToRun}" maxWidth="Infinity"/>
-				<Button text="%generic.button.cancel" onAction="#cancelCheck" visible="${controller.running}" managed="${controller.running}" maxWidth="Infinity"/>
 			</VBox>
-			<fx:include source="/fxml/health_check_details.fxml" visible="${controller.anyCheckSelected}" managed="${controller.anyCheckSelected}"/>
+			<!-- Maybe use class Seperator ?-->
+			<fx:include  source="/fxml/health_check_details.fxml" visible="${controller.anyCheckSelected}" managed="${controller.anyCheckSelected}"/>
+			<VBox alignment="CENTER" >
+				<Label text="TODO: Select a Check from the left list to get more info." wrapText="true" alignment="CENTER" visible="${!controller.anyCheckSelected}" managed="${!controller.anyCheckSelected}" />
+			</VBox>
 		</HBox>
-		<ButtonBar buttonMinWidth="120" buttonOrder="+X">
+		<ButtonBar buttonMinWidth="120" buttonOrder="+CX">
 			<buttons>
-				<Button text="TODO Export Results" ButtonBar.buttonData="NEXT_FORWARD" disable="${!controller.finished}" onAction="#exportResults"/>
+				<!-- Buttons have a prefWidth to prevent uneven interface -->
+				<Button prefWidth="20" text="%generic.button.cancel" ButtonBar.buttonData="CANCEL_CLOSE" onAction="#cancelCheck" visible="${controller.running}" managed="${controller.running}" />
+				<Button prefWidth="20" text="TODO: run all" ButtonBar.buttonData="NEXT_FORWARD" onAction="#runAllChecks" visible="${controller.readyToRun &amp;&amp; !controller.anyCheckSelected}" managed="${controller.readyToRun &amp;&amp; !controller.anyCheckSelected}" />
+				<Button prefWidth="20" text="TODO: run selected" ButtonBar.buttonData="NEXT_FORWARD" onAction="#runSelectedChecks" visible="${controller.readyToRun &amp;&amp; controller.anyCheckSelected}" managed="${controller.readyToRun &amp;&amp; controller.anyCheckSelected}" />
+				<Button text="TODO Export Results" ButtonBar.buttonData="NEXT_FORWARD" disable="${!controller.finished}" visible="${!controller.readyToRun}" managed="${!controller.readyToRun}" onAction="#exportResults"/>
 			</buttons>
 		</ButtonBar>
 	</children>
