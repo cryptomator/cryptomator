@@ -41,7 +41,7 @@ public class ReportWriter {
 			Check %s
 			------------------------------
 			""";
-	private static final String REPORT_CHECK_RESULT = "%8s - %s";
+	private static final String REPORT_CHECK_RESULT = "%8s - %s\n";
 	private static final DateTimeFormatter TIME_STAMP = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss").withZone(ZoneId.systemDefault());
 
 	private final Vault vault;
@@ -67,7 +67,7 @@ public class ReportWriter {
 					case SUCCEEDED -> {
 						writer.write("STATUS: SUCCESS\nRESULTS:\n");
 						for (var result : task.results()) {
-							writer.write(REPORT_CHECK_RESULT.formatted(result.getSeverity(), result));
+							writer.write(REPORT_CHECK_RESULT.formatted(result.getSeverity(), result.getDescription()));
 						}
 					}
 					case CANCELLED -> writer.write("STATUS: CANCELED\n");
