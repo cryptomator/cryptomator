@@ -33,8 +33,8 @@
 			<buttons>
 				<!-- Buttons have a prefWidth to prevent uneven interface -->
 				<Button prefWidth="20" text="%generic.button.cancel" ButtonBar.buttonData="CANCEL_CLOSE" onAction="#cancelCheck" visible="${controller.running}" managed="${controller.running}" />
-				<Button prefWidth="20" text="TODO: run all" ButtonBar.buttonData="NEXT_FORWARD" onAction="#runAllChecks" visible="${controller.readyToRun &amp;&amp; !controller.anyCheckSelected}" managed="${controller.readyToRun &amp;&amp; !controller.anyCheckSelected}" />
-				<Button prefWidth="20" text="TODO: run selected" ButtonBar.buttonData="NEXT_FORWARD" onAction="#runSelectedChecks" visible="${controller.readyToRun &amp;&amp; controller.anyCheckSelected}" managed="${controller.readyToRun &amp;&amp; controller.anyCheckSelected}" />
+				<Button prefWidth="20" text="%health.check.runAllButton" ButtonBar.buttonData="NEXT_FORWARD" onAction="#runAllChecks" visible="${controller.readyToRun &amp;&amp; !controller.anyCheckSelected}" managed="${controller.readyToRun &amp;&amp; !controller.anyCheckSelected}" />
+				<Button prefWidth="20" text="%health.check.runSingleButton" ButtonBar.buttonData="NEXT_FORWARD" onAction="#runSelectedChecks" visible="${controller.readyToRun &amp;&amp; controller.anyCheckSelected}" managed="${controller.readyToRun &amp;&amp; controller.anyCheckSelected}" />
 				<Button text="TODO Export Results" ButtonBar.buttonData="NEXT_FORWARD" disable="${!controller.finished}" visible="${!controller.readyToRun}" managed="${!controller.readyToRun}" onAction="#exportResults"/>
 			</buttons>
 		</ButtonBar>
