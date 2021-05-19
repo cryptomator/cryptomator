@@ -11,9 +11,9 @@
 	  spacing="6">
 	<Label fx:id="checkTitle" styleClass="label-large" text="${controller.taskName}"/>
 	<Text fx:id="checkDescription" styleClass="label" text="${controller.taskDescription}"/>
-	<TableView fx:id="resultsTableView" visible="${controller.producingResults}" managed="${controller.producingResults}">
+	<TableView fx:id="resultsTableView" visible="${controller.producingResults}" managed="${controller.producingResults}" VBox.vgrow="ALWAYS">
 		<columns>
-			<TableColumn fx:id="resultDescriptionColumn" text="Info" editable="false" maxWidth="Infinity"/>
+			<TableColumn fx:id="resultDescriptionColumn" text="Info" editable="false" maxWidth="Infinity" />
 			<TableColumn fx:id="resultSeverityColumn" text="Severity" editable="false" />
 			<TableColumn fx:id="resultActionColumn" text="Action" editable="false"/>
 		</columns>

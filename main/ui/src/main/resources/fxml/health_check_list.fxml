@@ -25,12 +25,10 @@
 				<ListView fx:id="checksListView" VBox.vgrow="ALWAYS"/>
 			</VBox>
 			<!-- Maybe use class Seperator ?-->
-			<StackPane HBox.hgrow="ALWAYS">
-				<VBox minWidth="300" alignment="CENTER">
-					<Label text="TODO: Select a Check from the left list to get more info." wrapText="true" alignment="CENTER" visible="${!controller.anyCheckSelected}" />
-				</VBox>
-				<fx:include  source="/fxml/health_check_details.fxml" visible="${controller.anyCheckSelected}" />
-			</StackPane>
+			<VBox minWidth="300" alignment="CENTER" HBox.hgrow="ALWAYS" visible="${!controller.anyCheckSelected}" managed="${!controller.anyCheckSelected}" >
+				<Label text="TODO: Select a Check from the left list to get more info." wrapText="true" alignment="CENTER" />
+			</VBox>
+			<fx:include  source="/fxml/health_check_details.fxml" visible="${controller.anyCheckSelected}" managed="${controller.anyCheckSelected}" HBox.hgrow="ALWAYS" />
 		</HBox>
 		<ButtonBar buttonMinWidth="120" buttonOrder="+CX">
 			<buttons>
