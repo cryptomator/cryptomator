@@ -17,6 +17,7 @@ public class ResultSeverityTableCell extends TableCell<DiagnosticResultAction, D
 	@Override
 	protected void updateItem(DiagnosticResult.Severity item, boolean empty) {
 		super.updateItem(item, empty);
+		iconView.getStyleClass().clear();
 		if (empty || item == null) {
 			setText(null);
 			setGraphic(null);
