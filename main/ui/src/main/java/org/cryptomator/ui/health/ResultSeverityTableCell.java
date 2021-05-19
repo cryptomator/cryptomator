@@ -21,12 +21,24 @@ public class ResultSeverityTableCell extends TableCell<DiagnosticResultAction, D
 			setText(null);
 			setGraphic(null);
 		} else {
-			iconView.glyphProperty().set(switch (item) {
-				case INFO -> FontAwesome5Icon.INFO_CIRCLE;
-				case GOOD -> FontAwesome5Icon.CHECK;
-				case WARN -> FontAwesome5Icon.EXCLAMATION_TRIANGLE;
-				case CRITICAL -> FontAwesome5Icon.TIMES;
-			});
+			switch (item) {
+				case INFO -> {
+					iconView.setGlyph(FontAwesome5Icon.INFO_CIRCLE);
+					iconView.getStyleClass().add("glyph-icon-muted");
+				}
+				case GOOD -> {
+					iconView.setGlyph(FontAwesome5Icon.CHECK);
+					iconView.getStyleClass().add("glyph-icon-primary");
+				}
+				case WARN -> {
+					iconView.setGlyph(FontAwesome5Icon.EXCLAMATION_TRIANGLE);
+					iconView.getStyleClass().add("glyph-icon-orange");
+				}
+				case CRITICAL -> {
+					iconView.setGlyph(FontAwesome5Icon.TIMES);
+					iconView.getStyleClass().add("glyph-icon-red");
+				}
+			}
 			setGraphic(iconView);
 			setText(item.name());
 		}
