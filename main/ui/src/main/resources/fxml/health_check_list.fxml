@@ -7,6 +7,7 @@
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+<?import java.lang.Integer?>
 <?import javafx.scene.layout.StackPane?>
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
@@ -18,25 +19,28 @@
 	<padding>
 		<Insets topRightBottomLeft="12"/>
 	</padding>
+	<fx:define>
+		<Integer fx:id="ZERO" fx:value="0"/>
+	</fx:define>
 	<children>
 		<HBox spacing="12" VBox.vgrow="ALWAYS">
 			<VBox minWidth="80" spacing="6" >
 				<Label fx:id="listHeading" text="Health checks"/>
+				<!-- TODO:HEADER with select all checkbox -->
 				<ListView fx:id="checksListView" VBox.vgrow="ALWAYS"/>
 			</VBox>
-			<!-- Maybe use class Seperator ?-->
-			<VBox minWidth="300" alignment="CENTER" HBox.hgrow="ALWAYS" visible="${!controller.anyCheckSelected}" managed="${!controller.anyCheckSelected}" >
-				<Label text="TODO: Select a Check from the left list to get more info." wrapText="true" alignment="CENTER" />
-			</VBox>
-			<fx:include  source="/fxml/health_check_details.fxml" visible="${controller.anyCheckSelected}" managed="${controller.anyCheckSelected}" HBox.hgrow="ALWAYS" />
+			<StackPane visible="${controller.showResultScreen}" managed="${controller.showResultScreen}" HBox.hgrow="ALWAYS" >
+				<VBox minWidth="300" alignment="CENTER" visible="${!controller.anyCheckSelected}" managed="${!controller.anyCheckSelected}" >
+					<Label text="%health.check.result.noSelectedCheck" wrapText="true" alignment="CENTER" />
+				</VBox>
+				<fx:include  source="/fxml/health_check_details.fxml" visible="${controller.anyCheckSelected}" managed="${controller.anyCheckSelected}" />
+			</StackPane>
 		</HBox>
 		<ButtonBar buttonMinWidth="120" buttonOrder="+CX">
 			<buttons>
-				<!-- Buttons have a prefWidth to prevent uneven interface -->
-				<Button prefWidth="20" text="%generic.button.cancel" ButtonBar.buttonData="CANCEL_CLOSE" onAction="#cancelCheck" visible="${controller.running}" managed="${controller.running}" />
-				<Button prefWidth="20" text="%health.check.runAllButton" ButtonBar.buttonData="NEXT_FORWARD" onAction="#runAllChecks" visible="${controller.readyToRun &amp;&amp; !controller.anyCheckSelected}" managed="${controller.readyToRun &amp;&amp; !controller.anyCheckSelected}" />
-				<Button prefWidth="20" text="%health.check.runSingleButton" ButtonBar.buttonData="NEXT_FORWARD" onAction="#runSelectedChecks" visible="${controller.readyToRun &amp;&amp; controller.anyCheckSelected}" managed="${controller.readyToRun &amp;&amp; controller.anyCheckSelected}" />
-				<Button text="TODO Export Results" ButtonBar.buttonData="NEXT_FORWARD" disable="${!controller.finished}" visible="${!controller.readyToRun}" managed="${!controller.readyToRun}" onAction="#exportResults"/>
+				<Button text="%generic.button.cancel" ButtonBar.buttonData="CANCEL_CLOSE" onAction="#cancelCheck" disable="${!controller.running}" visible="${controller.showResultScreen}" managed="${controller.showResultScreen}" />
+				<Button text="%health.check.export" ButtonBar.buttonData="NEXT_FORWARD" defaultButton="true" disable="${!controller.finished}" visible="${controller.showResultScreen}" managed="${controller.showResultScreen}" onAction="#exportResults"/>
+				<Button text="%health.check.runBatchButton" ButtonBar.buttonData="NEXT_FORWARD" defaultButton="true" onAction="#runSelectedChecks" disable="${controller.numberOfPickedChecks == ZERO}" visible="${!controller.showResultScreen}" managed="${!controller.showResultScreen}"/>
 			</buttons>
 		</ButtonBar>
 	</children>

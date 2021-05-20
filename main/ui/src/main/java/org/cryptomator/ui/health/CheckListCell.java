@@ -20,6 +20,9 @@ class CheckListCell extends ListCell<HealthCheckTask> {
 			item.stateProperty().addListener(this::stateChanged);
 			setGraphic(stateIcon);
 			stateIcon.setGlyph(glyphForState(item.getState()));
+			if (item.getState() == Worker.State.READY) {
+				stateIcon.setVisible(false);
+			}
 			setContentDisplay(ContentDisplay.LEFT);
 		} else {
 			setText(null);
@@ -29,12 +32,14 @@ class CheckListCell extends ListCell<HealthCheckTask> {
 
 	private void stateChanged(ObservableValue<? extends Worker.State> observable, Worker.State oldState, Worker.State newState) {
 		stateIcon.setGlyph(glyphForState(newState));
+		stateIcon.setVisible(true);
 	}
 
 	private FontAwesome5Icon glyphForState(Worker.State state) {
 		// TODO choose appropriate glyphs
 		return switch (state) {
-			case READY, SCHEDULED -> FontAwesome5Icon.ANCHOR;
+			case READY -> FontAwesome5Icon.COG; //just a placeholder
+			case SCHEDULED -> FontAwesome5Icon.CLOCK;
 			case RUNNING -> FontAwesome5Icon.SPINNER;
 			case FAILED -> FontAwesome5Icon.EXCLAMATION_TRIANGLE;
 			case CANCELLED -> FontAwesome5Icon.BAN;

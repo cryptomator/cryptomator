@@ -9,6 +9,7 @@ public enum FontAwesome5Icon {
 	BAN("\uF05E"), //
 	BUG("\uF188"), //
 	CHECK("\uF00C"), //
+	CLOCK("\uF017"), //
 	COG("\uF013"), //
 	COGS("\uF085"), //
 	COPY("\uF0C5"), //
