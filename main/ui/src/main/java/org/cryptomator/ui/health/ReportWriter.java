@@ -1,15 +1,16 @@
 package org.cryptomator.ui.health;
 
-import dagger.Lazy;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.cryptomator.common.Environment;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.Volume;
 import org.cryptomator.cryptofs.VaultConfig;
 import org.cryptomator.ui.common.HostServiceRevealer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import javafx.concurrent.Task;
+import javafx.concurrent.Worker;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -28,6 +29,7 @@ import java.util.stream.Collectors;
 @HealthCheckScoped
 public class ReportWriter {
 
+	private static final Logger LOG = LoggerFactory.getLogger(ReportWriter.class);
 	private static final String REPORT_HEADER = """
 			**************************************
 			*   Cryptomator Vault Health Report  *
@@ -62,6 +64,10 @@ public class ReportWriter {
 			 var writer = new BufferedWriter(new OutputStreamWriter(out, StandardCharsets.UTF_8))) {
 			writer.write(REPORT_HEADER.formatted(vaultConfig.getId(), vault.getDisplayName(), vault.getPath()));
 			for (var task : tasks) {
+				if (task.getState() == Worker.State.READY) {
+					LOG.debug("Skipping not performed check {}.",task.getCheck().identifier());
+					continue;
+				}
 				writer.write(REPORT_CHECK_HEADER.formatted(task.getCheck().identifier()));
 				switch (task.getState()) {
 					case SUCCEEDED -> {
@@ -75,7 +81,7 @@ public class ReportWriter {
 						writer.write("STATUS: FAILED\nREASON:\n" + task.getCheck().identifier());
 						writer.write(prepareFailureMsg(task));
 					}
-					case READY, RUNNING, SCHEDULED -> throw new IllegalStateException("Cannot export unfinished task");
+					case RUNNING, SCHEDULED -> throw new IllegalStateException("Checks are still running.");
 				}
 			}
 		}
