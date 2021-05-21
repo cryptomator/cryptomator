@@ -22,7 +22,7 @@
 	</fx:define>
 	<children>
 		<HBox spacing="12" VBox.vgrow="ALWAYS">
-			<VBox minWidth="80" spacing="6" HBox.hgrow="ALWAYS" >
+			<VBox minWidth="80" maxWidth="200" spacing="6" HBox.hgrow="ALWAYS" >
 				<Label fx:id="listHeading" text="%health.check.listHeader"/>
 				<!-- TODO:HEADER with select all checkbox -->
 				<ListView fx:id="checksListView" VBox.vgrow="ALWAYS"/>

@@ -4,11 +4,12 @@
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Text?>
+<?import org.cryptomator.ui.controls.FormattedLabel?>
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.health.CheckDetailController"
 	  spacing="6">
-	<Label fx:id="checkTitle" styleClass="label-large" text="${controller.taskName}"/> <!-- use formatted label and let the text be "Results of [TASKNAME] -->
-	<Text fx:id="checkDescription" styleClass="label" text="${controller.taskDescription}"/>
+	<FormattedLabel fx:id="checkTitle" styleClass="label-large" format="%health.check.result.header" arg1="${controller.taskName}"/>
+	<Text fx:id="checkDescription" styleClass="label" text="FIXME: Here could be a small description."/>
 	<ListView fx:id="resultsListView"/>
 </VBox>
