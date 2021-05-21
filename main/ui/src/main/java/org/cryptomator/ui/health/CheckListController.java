@@ -3,6 +3,7 @@ package org.cryptomator.ui.health;
 import com.google.common.base.Preconditions;
 import com.tobiasdiez.easybind.EasyBind;
 import dagger.Lazy;
+import org.cryptomator.ui.common.ErrorComponent;
 import org.cryptomator.ui.common.FxController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +45,7 @@ public class CheckListController implements FxController {
 	private final ReportWriter reportWriter;
 	private final ExecutorService executorService;
 	private final ObjectProperty<HealthCheckTask> selectedTask;
+	private final Lazy<ErrorComponent.Builder> errorComponenBuilder;
 	private final SimpleObjectProperty<Worker<?>> runningTask;
 	private final Binding<Boolean> running;
 	private final Binding<Boolean> finished;
@@ -58,12 +60,13 @@ public class CheckListController implements FxController {
 
 
 	@Inject
-	public CheckListController(@HealthCheckWindow Stage window, Lazy<Collection<HealthCheckTask>> tasks, ReportWriter reportWriteTask, ObjectProperty<HealthCheckTask> selectedTask, ExecutorService executorService) {
+	public CheckListController(@HealthCheckWindow Stage window, Lazy<Collection<HealthCheckTask>> tasks, ReportWriter reportWriteTask, ObjectProperty<HealthCheckTask> selectedTask, ExecutorService executorService, Lazy<ErrorComponent.Builder> errorComponenBuilder) {
 		this.window = window;
 		this.tasks = FXCollections.observableArrayList(tasks.get());
 		this.reportWriter = reportWriteTask;
 		this.executorService = executorService;
 		this.selectedTask = selectedTask;
+		this.errorComponenBuilder = errorComponenBuilder;
 		this.runningTask = new SimpleObjectProperty<>();
 		this.running = EasyBind.wrapNullable(runningTask).mapObservable(Worker::runningProperty).orElse(false);
 		this.finished = EasyBind.wrapNullable(runningTask).mapObservable(Worker::stateProperty).map(END_STATES::contains).orElse(false);
@@ -127,8 +130,8 @@ public class CheckListController implements FxController {
 		try {
 			reportWriter.writeReport(tasks);
 		} catch (IOException e) {
-			//TODO: better error handling
 			LOG.error("Failed to write health check report.", e);
+			errorComponenBuilder.get().cause(e).window(window).returnToScene(window.getScene()).build().showErrorScene();
 		}
 	}
 
