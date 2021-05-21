@@ -12,8 +12,6 @@
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.health.CheckListController"
-	  minWidth="400"
-	  prefWidth="400"
 	  minHeight="145"
 	  spacing="12">
 	<padding>
@@ -24,8 +22,8 @@
 	</fx:define>
 	<children>
 		<HBox spacing="12" VBox.vgrow="ALWAYS">
-			<VBox minWidth="80" spacing="6" >
-				<Label fx:id="listHeading" text="Health checks"/>
+			<VBox minWidth="80" spacing="6" HBox.hgrow="ALWAYS" >
+				<Label fx:id="listHeading" text="%health.check.listHeader"/>
 				<!-- TODO:HEADER with select all checkbox -->
 				<ListView fx:id="checksListView" VBox.vgrow="ALWAYS"/>
 			</VBox>

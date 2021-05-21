@@ -22,6 +22,8 @@ import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
 import javafx.scene.control.ListView;
 import javafx.scene.control.cell.CheckBoxListCell;
+import javafx.stage.Stage;
+import javafx.util.StringConverter;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
@@ -35,6 +37,7 @@ public class CheckListController implements FxController {
 	private static final Logger LOG = LoggerFactory.getLogger(CheckListController.class);
 	private static final Set<Worker.State> END_STATES = Set.of(Worker.State.FAILED, Worker.State.CANCELLED, Worker.State.SUCCEEDED);
 
+	private final Stage window;
 	private final ObservableList<HealthCheckTask> tasks;
 	private final ReportWriter reportWriter;
 	private final ExecutorService executorService;
@@ -52,7 +55,8 @@ public class CheckListController implements FxController {
 
 
 	@Inject
-	public CheckListController(Lazy<Collection<HealthCheckTask>> tasks, ReportWriter reportWriteTask, ObjectProperty<HealthCheckTask> selectedTask, ExecutorService executorService) {
+	public CheckListController(@HealthCheckWindow Stage window, Lazy<Collection<HealthCheckTask>> tasks, ReportWriter reportWriteTask, ObjectProperty<HealthCheckTask> selectedTask, ExecutorService executorService) {
+		this.window = window;
 		this.tasks = FXCollections.observableArrayList(tasks.get());
 		this.reportWriter = reportWriteTask;
 		this.executorService = executorService;
@@ -74,7 +78,17 @@ public class CheckListController implements FxController {
 	@FXML
 	public void initialize() {
 		checksListView.setItems(tasks);
-		checksListView.setCellFactory(CheckBoxListCell.forListView(listPickIndicators::get));
+		checksListView.setCellFactory(CheckBoxListCell.forListView(listPickIndicators::get, new StringConverter<HealthCheckTask>() {
+			@Override
+			public String toString(HealthCheckTask object) {
+				return object.getCheck().identifier();
+			}
+
+			@Override
+			public HealthCheckTask fromString(String string) {
+				return null;
+			}
+		}));
 		selectedTask.bind(checksListView.getSelectionModel().selectedItemProperty());
 	}
 
@@ -89,6 +103,7 @@ public class CheckListController implements FxController {
 		checksListView.setCellFactory(view -> new CheckListCell());
 		showResultScreen.set(true);
 		checksListView.getSelectionModel().select(batch.getViewIndex(0));
+		window.sizeToScene();
 	}
 
 	@FXML

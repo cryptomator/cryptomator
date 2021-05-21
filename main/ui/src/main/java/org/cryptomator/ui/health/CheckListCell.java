@@ -5,12 +5,17 @@ import org.cryptomator.ui.controls.FontAwesome5IconView;
 
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Worker;
+import javafx.geometry.Insets;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.ListCell;
 
 class CheckListCell extends ListCell<HealthCheckTask> {
 
 	private final FontAwesome5IconView stateIcon = new FontAwesome5IconView();
+
+	CheckListCell(){
+		paddingProperty().set(new Insets(6));
+	}
 
 	@Override
 	protected void updateItem(HealthCheckTask item, boolean empty) {
