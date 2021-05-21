@@ -21,6 +21,6 @@
 		<FontAwesome5IconView fx:id="iconView" HBox.hgrow="NEVER" glyphSize="16"/>
 		<Label text="${controller.description}" wrapText="true"/>
 		<Region HBox.hgrow="ALWAYS"/>
-		<Button text="YOLO" onAction="#runResultAction" alignment="CENTER_RIGHT" visible="${controller.fixButtonVisibile}"/>
+		<Button fx:id="actionButton" text="%health.check.export" onAction="#runResultAction" alignment="CENTER_RIGHT" visible="false" />
 	</children>
 </HBox>

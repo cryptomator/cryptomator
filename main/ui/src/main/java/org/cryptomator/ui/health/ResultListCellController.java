@@ -1,38 +1,40 @@
 package org.cryptomator.ui.health;
 
 import com.tobiasdiez.easybind.EasyBind;
-import org.cryptomator.cryptofs.health.api.DiagnosticResult;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.controls.FontAwesome5Icon;
 import org.cryptomator.ui.controls.FontAwesome5IconView;
 
 import javax.inject.Inject;
 import javafx.beans.binding.Binding;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 
 public class ResultListCellController implements FxController {
 
 	private final ObjectProperty<DiagnosticResultAction> result;
-	private final Binding<Boolean> fixButtonVisible;
 	private final Binding<String> description;
 
 	@FXML
 	public FontAwesome5IconView iconView;
+	@FXML
+	public Button actionButton;
 
 	@Inject
 	public ResultListCellController() {
 		this.result = new SimpleObjectProperty<>(null);
-		this.fixButtonVisible = EasyBind.wrapNullable(result) //
-				.map(val -> val.getSeverity() == DiagnosticResult.Severity.WARN).orElse(true); //
 		this.description = EasyBind.wrapNullable(result).map(DiagnosticResultAction::getDescription).orElse("");
-		result.addListener(this::getGlyphForSeverity);
+		result.addListener(this::updateCellContent);
 	}
 
-	private void getGlyphForSeverity(ObservableValue<? extends DiagnosticResultAction> observable, DiagnosticResultAction oldVal, DiagnosticResultAction newVal) {
+	private void updateCellContent(ObservableValue<? extends DiagnosticResultAction> observable, DiagnosticResultAction oldVal, DiagnosticResultAction newVal) {
 		iconView.getStyleClass().clear();
+		actionButton.setVisible(false);
 		switch (newVal.getSeverity()) {
 			case INFO -> {
 				iconView.setGlyph(FontAwesome5Icon.INFO_CIRCLE);
@@ -45,6 +47,7 @@ public class ResultListCellController implements FxController {
 			case WARN -> {
 				iconView.setGlyph(FontAwesome5Icon.EXCLAMATION_TRIANGLE);
 				iconView.getStyleClass().add("glyph-icon-orange");
+				actionButton.setVisible(true);
 			}
 			case CRITICAL -> {
 				iconView.setGlyph(FontAwesome5Icon.TIMES);
@@ -73,14 +76,6 @@ public class ResultListCellController implements FxController {
 
 	public ObjectProperty<DiagnosticResultAction> resultProperty() {
 		return result;
-	}
-
-	public boolean isFixButtonVisibile() {
-		return fixButtonVisible.getValue();
-	}
-
-	public Binding<Boolean> fixButtonVisibleProperty() {
-		return fixButtonVisible;
 	}
 
 	public String getDescription() {
