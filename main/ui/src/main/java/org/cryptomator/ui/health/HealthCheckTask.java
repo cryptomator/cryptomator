@@ -26,7 +26,7 @@ class HealthCheckTask extends Task<Void> {
 	private final Masterkey masterkey;
 	private final SecureRandom csprng;
 	private final HealthCheck check;
-	private final ObservableList<DiagnosticResultAction> results;
+	private final ObservableList<DiagnosticResult> results;
 
 	public HealthCheckTask(Path vaultPath, VaultConfig vaultConfig, Masterkey masterkey, SecureRandom csprng, HealthCheck check) {
 		this.vaultPath = Objects.requireNonNull(vaultPath);
@@ -35,7 +35,6 @@ class HealthCheckTask extends Task<Void> {
 		this.csprng = Objects.requireNonNull(csprng);
 		this.check = Objects.requireNonNull(check);
 		this.results = FXCollections.observableArrayList();
-
 		updateTitle(getDisplayNameOf(check));
 	}
 
@@ -58,7 +57,7 @@ class HealthCheckTask extends Task<Void> {
 						throw new RuntimeException(e);
 					}
 				}
-				Platform.runLater(() -> results.add(new DiagnosticResultAction(result,vaultPath,vaultConfig, masterkey,csprng))); //FIXME: there can be a lotta results, each with a reference to the master key -> differentiate with severity!
+				Platform.runLater(() -> results.add(result));
 			});
 		}
 		return null;
@@ -76,7 +75,7 @@ class HealthCheckTask extends Task<Void> {
 
 	/* Getter */
 
-	public ObservableList<DiagnosticResultAction> results() {
+	public ObservableList<DiagnosticResult> results() {
 		return results;
 	}
 
@@ -85,7 +84,7 @@ class HealthCheckTask extends Task<Void> {
 	}
 
 	static String getDisplayNameOf(HealthCheck check) {
-		if( check instanceof DirIdCheck) { //TODO: discuss if this should be localized
+		if (check instanceof DirIdCheck) { //TODO: discuss if this should be localized
 			return "DirectoryCheck";
 		} else {
 			return check.identifier();

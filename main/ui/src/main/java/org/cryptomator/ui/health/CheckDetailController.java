@@ -2,6 +2,7 @@ package org.cryptomator.ui.health;
 
 import com.tobiasdiez.easybind.EasyBind;
 import com.tobiasdiez.easybind.optional.OptionalBinding;
+import org.cryptomator.cryptofs.health.api.DiagnosticResult;
 import org.cryptomator.ui.common.FxController;
 
 import javax.inject.Inject;
@@ -14,15 +15,16 @@ import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
 import javafx.scene.control.ListView;
 
+@HealthCheckScoped
 public class CheckDetailController implements FxController {
 
-	private final Binding<ObservableList<DiagnosticResultAction>> results;
+	private final Binding<ObservableList<DiagnosticResult>> results;
 	private final OptionalBinding<Worker.State> taskState;
 	private final Binding<String> taskName;
 	private final ResultListCellFactory resultListCellFactory;
 	private final BooleanBinding producingResults;
 
-	public ListView<DiagnosticResultAction> resultsListView;
+	public ListView<DiagnosticResult> resultsListView;
 
 	@Inject
 	public CheckDetailController(ObjectProperty<HealthCheckTask> selectedTask, ResultListCellFactory resultListCellFactory) {
@@ -45,8 +47,8 @@ public class CheckDetailController implements FxController {
 		resultsListView.itemsProperty().bind(results);
 		resultsListView.setCellFactory(resultListCellFactory);
 	}
-	/* Getter/Setter */
 
+	/* Getter/Setter */
 
 	public String getTaskName() {
 		return taskName.getValue();

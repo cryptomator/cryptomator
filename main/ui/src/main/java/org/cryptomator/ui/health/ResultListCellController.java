@@ -1,6 +1,7 @@
 package org.cryptomator.ui.health;
 
 import com.tobiasdiez.easybind.EasyBind;
+import org.cryptomator.cryptofs.health.api.DiagnosticResult;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.controls.FontAwesome5Icon;
 import org.cryptomator.ui.controls.FontAwesome5IconView;
@@ -13,27 +14,28 @@ import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 
+// unscoped because each cell needs its own controller
 public class ResultListCellController implements FxController {
 
-	private final ObjectProperty<DiagnosticResultAction> result;
+	private final ResultFixApplier fixApplier;
+	private final ObjectProperty<DiagnosticResult> result;
 	private final Binding<String> description;
 
-	@FXML
 	public FontAwesome5IconView iconView;
-	@FXML
 	public Button actionButton;
 
 	@Inject
-	public ResultListCellController() {
+	public ResultListCellController(ResultFixApplier fixApplier) {
 		this.result = new SimpleObjectProperty<>(null);
-		this.description = EasyBind.wrapNullable(result).map(DiagnosticResultAction::getDescription).orElse("");
+		this.description = EasyBind.wrapNullable(result).map(DiagnosticResult::toString).orElse("");
+		this.fixApplier = fixApplier;
 		result.addListener(this::updateCellContent);
 	}
 
-	private void updateCellContent(ObservableValue<? extends DiagnosticResultAction> observable, DiagnosticResultAction oldVal, DiagnosticResultAction newVal) {
+	private void updateCellContent(ObservableValue<? extends DiagnosticResult> observable, DiagnosticResult oldVal, DiagnosticResult newVal) {
 		iconView.getStyleClass().clear();
 		actionButton.setVisible(false);
-		switch (newVal.getSeverity()) {
+		switch (newVal.getServerity()) {
 			case INFO -> {
 				iconView.setGlyph(FontAwesome5Icon.INFO_CIRCLE);
 				iconView.getStyleClass().add("glyph-icon-muted");
@@ -58,21 +60,21 @@ public class ResultListCellController implements FxController {
 	public void runResultAction() {
 		final var realResult = result.get();
 		if (realResult != null) {
-			realResult.run(); //TODO: this hogs currently the JAVAFX thread
+			fixApplier.fix(realResult);
 		}
 	}
-
 	/* Getter & Setter */
 
-	public DiagnosticResultAction getResult() {
+
+	public DiagnosticResult getResult() {
 		return result.get();
 	}
 
-	public void setResult(DiagnosticResultAction result) {
+	public void setResult(DiagnosticResult result) {
 		this.result.set(result);
 	}
 
-	public ObjectProperty<DiagnosticResultAction> resultProperty() {
+	public ObjectProperty<DiagnosticResult> resultProperty() {
 		return result;
 	}
 

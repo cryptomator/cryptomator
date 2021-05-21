@@ -12,7 +12,7 @@ public enum FxmlFile {
 	ERROR("/fxml/error.fxml"), //
 	FORGET_PASSWORD("/fxml/forget_password.fxml"), //
 	HEALTH_START("/fxml/health_start.fxml"), //
-	HEALTH_CHECK("/fxml/health_check_list.fxml"), //
+	HEALTH_CHECK_LIST("/fxml/health_check_list.fxml"), //
 	LOCK_FORCED("/fxml/lock_forced.fxml"), //
 	LOCK_FAILED("/fxml/lock_failed.fxml"), //
 	MAIN_WINDOW("/fxml/main_window.fxml"), //

@@ -27,7 +27,6 @@ import javafx.scene.Scene;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import java.security.SecureRandom;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
@@ -113,10 +112,10 @@ abstract class HealthCheckModule {
 	}
 
 	@Provides
-	@FxmlScene(FxmlFile.HEALTH_CHECK)
+	@FxmlScene(FxmlFile.HEALTH_CHECK_LIST)
 	@HealthCheckScoped
-	static Scene provideHealthCheckScene(@HealthCheckWindow FxmlLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene(FxmlFile.HEALTH_CHECK);
+	static Scene provideHealthCheckListScene(@HealthCheckWindow FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.HEALTH_CHECK_LIST);
 	}
 
 	@Binds

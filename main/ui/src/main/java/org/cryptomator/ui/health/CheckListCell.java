@@ -6,6 +6,8 @@ import org.cryptomator.ui.controls.FontAwesome5IconView;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Worker;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.ListCell;
 
@@ -13,31 +15,37 @@ class CheckListCell extends ListCell<HealthCheckTask> {
 
 	private final FontAwesome5IconView stateIcon = new FontAwesome5IconView();
 
-	CheckListCell(){
-		paddingProperty().set(new Insets(6));
+	CheckListCell() {
+		setPadding(new Insets(6));
+		setAlignment(Pos.CENTER_LEFT);
+		setContentDisplay(ContentDisplay.LEFT);
 	}
 
 	@Override
 	protected void updateItem(HealthCheckTask item, boolean empty) {
 		super.updateItem(item, empty);
+
 		if (item != null) {
 			setText(item.getTitle());
 			item.stateProperty().addListener(this::stateChanged);
-			setGraphic(stateIcon);
+			setGraphic(graphicForState(item.getState()));
 			stateIcon.setGlyph(glyphForState(item.getState()));
-			if (item.getState() == Worker.State.READY) {
-				stateIcon.setVisible(false);
-			}
-			setContentDisplay(ContentDisplay.LEFT);
 		} else {
+			setGraphic(null);
 			setText(null);
-			setContentDisplay(ContentDisplay.TEXT_ONLY);
 		}
 	}
 
 	private void stateChanged(ObservableValue<? extends Worker.State> observable, Worker.State oldState, Worker.State newState) {
 		stateIcon.setGlyph(glyphForState(newState));
 		stateIcon.setVisible(true);
+	}
+
+	private Node graphicForState(Worker.State state) {
+		return switch (state) {
+			case READY -> null;
+			case SCHEDULED, RUNNING, FAILED, CANCELLED, SUCCEEDED -> stateIcon;
+		};
 	}
 
 	private FontAwesome5Icon glyphForState(Worker.State state) {
