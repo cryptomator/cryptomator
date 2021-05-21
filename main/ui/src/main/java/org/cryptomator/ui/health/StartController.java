@@ -7,6 +7,7 @@ import org.cryptomator.cryptofs.VaultConfigLoadException;
 import org.cryptomator.cryptofs.VaultKeyInvalidException;
 import org.cryptomator.cryptolib.api.Masterkey;
 import org.cryptomator.cryptolib.api.MasterkeyLoadingFailedException;
+import org.cryptomator.ui.common.ErrorComponent;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
@@ -36,11 +37,12 @@ public class StartController implements FxController {
 	private final AtomicReference<Masterkey> masterkeyRef;
 	private final AtomicReference<VaultConfig> vaultConfigRef;
 	private final Lazy<Scene> checkScene;
+	private final Lazy<ErrorComponent.Builder> errorComponent;
 
 	/* FXML */
 
 	@Inject
-	public StartController(@HealthCheckWindow Vault vault, @HealthCheckWindow Stage window, @HealthCheckWindow KeyLoadingStrategy keyLoadingStrategy, ExecutorService executor, AtomicReference<Masterkey> masterkeyRef, AtomicReference<VaultConfig> vaultConfigRef, @FxmlScene(FxmlFile.HEALTH_CHECK) Lazy<Scene> checkScene) {
+	public StartController(@HealthCheckWindow Vault vault, @HealthCheckWindow Stage window, @HealthCheckWindow KeyLoadingStrategy keyLoadingStrategy, ExecutorService executor, AtomicReference<Masterkey> masterkeyRef, AtomicReference<VaultConfig> vaultConfigRef, @FxmlScene(FxmlFile.HEALTH_CHECK) Lazy<Scene> checkScene, Lazy<ErrorComponent.Builder> errorComponent) {
 		this.window = window;
 		this.unverifiedVaultConfig = vault.getUnverifiedVaultConfig(); //TODO: prevent workflow at all, if the vault config is emtpy
 		this.keyLoadingStrategy = keyLoadingStrategy;
@@ -48,6 +50,7 @@ public class StartController implements FxController {
 		this.masterkeyRef = masterkeyRef;
 		this.vaultConfigRef = vaultConfigRef;
 		this.checkScene = checkScene;
+		this.errorComponent = errorComponent;
 	}
 
 	@FXML
@@ -97,11 +100,11 @@ public class StartController implements FxController {
 		if (e instanceof UnlockCancelledException) {
 			// ok
 		} else if (e instanceof VaultKeyInvalidException) {
-			LOG.error("Invalid key");
-			// TODO show error screen
+			LOG.error("Invalid key"); //TODO: specific error screen
+			errorComponent.get().window(window).cause(e).build().showErrorScene();
 		} else {
 			LOG.error("Failed to load key.", e);
-			// TODO show error screen
+			errorComponent.get().window(window).cause(e).build().showErrorScene();
 		}
 	}
 
