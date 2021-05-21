@@ -25,7 +25,7 @@
 		<HBox spacing="12" VBox.vgrow="ALWAYS">
 			<VBox minWidth="80" maxWidth="200" spacing="6" HBox.hgrow="ALWAYS" >
 				<Label fx:id="listHeading" text="%health.check.listHeader"/>
-				<CheckBox fx:id="selectAllBox" text="FIX: SELECT ALL" />
+				<CheckBox onAction="#toggleSelectAll" text="FIX: SELECT ALL" visible="${!controller.showResultScreen}" managed="${!controller.showResultScreen}" />
 				<ListView fx:id="checksListView" VBox.vgrow="ALWAYS"/>
 			</VBox>
 			<StackPane visible="${controller.showResultScreen}" managed="${controller.showResultScreen}" HBox.hgrow="ALWAYS" >

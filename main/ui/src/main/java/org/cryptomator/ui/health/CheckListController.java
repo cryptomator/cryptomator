@@ -21,6 +21,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Worker;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ListView;
@@ -55,7 +56,6 @@ public class CheckListController implements FxController {
 	private final BooleanProperty showResultScreen;
 
 	/* FXML */
-	public CheckBox selectAllBox;
 	public ListView<HealthCheckTask> checksListView;
 
 
@@ -96,13 +96,13 @@ public class CheckListController implements FxController {
 			}
 		}));
 		selectedTask.bind(checksListView.getSelectionModel().selectedItemProperty());
-		selectAllBox.selectedProperty().addListener(this::selectOrDeselectAll);
-		selectAllBox.visibleProperty().bind(showResultScreen.not());
-		selectAllBox.managedProperty().bind(showResultScreen.not());
 	}
 
-	public void selectOrDeselectAll(ObservableValue<? extends Boolean> observable, boolean oldValue, boolean newValue) {
-		listPickIndicators.forEach( (task, pickProperty) -> pickProperty.set(newValue));
+	@FXML
+	public void toggleSelectAll(ActionEvent event) {
+		if (event.getSource() instanceof CheckBox c) {
+			listPickIndicators.forEach( (task, pickProperty) -> pickProperty.set(c.isSelected()));
+		}
 	}
 
 	@FXML
@@ -113,9 +113,9 @@ public class CheckListController implements FxController {
 		batchService.setExecutor(executorService);
 		batchService.start();
 		runningTask.set(batchService);
-		checksListView.setCellFactory(view -> new CheckListCell());
 		showResultScreen.set(true);
 		checksListView.getSelectionModel().select(batch.get(0));
+		checksListView.setCellFactory(view -> new CheckListCell());
 		window.sizeToScene();
 	}
 
