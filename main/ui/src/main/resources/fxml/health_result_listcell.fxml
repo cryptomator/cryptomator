@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import org.cryptomator.ui.controls.FontAwesome5IconView?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.layout.Region?>
+<HBox xmlns:fx="http://javafx.com/fxml"
+	  xmlns="http://javafx.com/javafx"
+	  fx:controller="org.cryptomator.ui.health.ResultListCellController"
+	  prefHeight="25"
+	  prefWidth="200"
+	  spacing="6"
+	  alignment="CENTER_LEFT">
+	<!-- Remark Check the containing list view for a fixed cell size before editing height properties -->
+	<padding>
+		<Insets topRightBottomLeft="6"/>
+	</padding>
+	<children>
+		<FontAwesome5IconView fx:id="iconView" HBox.hgrow="NEVER" glyphSize="16"/>
+		<Label text="${controller.description}" wrapText="true"/>
+		<Region HBox.hgrow="ALWAYS"/>
+		<Button text="YOLO" onAction="#runResultAction" alignment="CENTER_RIGHT" visible="${controller.fixButtonVisibile}"/>
+	</children>
+</HBox>

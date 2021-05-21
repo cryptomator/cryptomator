@@ -1,21 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.ListView?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Text?>
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.health.CheckDetailController"
 	  spacing="6">
-	<Label fx:id="checkTitle" styleClass="label-large" text="${controller.taskName}"/>
+	<Label fx:id="checkTitle" styleClass="label-large" text="${controller.taskName}"/> <!-- use formatted label and let the text be "Results of [TASKNAME] -->
 	<Text fx:id="checkDescription" styleClass="label" text="${controller.taskDescription}"/>
-	<TableView fx:id="resultsTableView" visible="${controller.producingResults}" managed="${controller.producingResults}" VBox.vgrow="ALWAYS">
-		<columns>
-			<TableColumn fx:id="resultDescriptionColumn" text="Info" editable="false" maxWidth="Infinity" />
-			<TableColumn fx:id="resultSeverityColumn" text="Severity" editable="false" />
-			<TableColumn fx:id="resultActionColumn" text="Action" editable="false"/>
-		</columns>
-	</TableView>
+	<ListView fx:id="resultsListView"/>
 </VBox>

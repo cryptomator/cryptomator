@@ -2,21 +2,17 @@ package org.cryptomator.ui.health;
 
 import com.tobiasdiez.easybind.EasyBind;
 import com.tobiasdiez.easybind.optional.OptionalBinding;
-import org.cryptomator.cryptofs.health.api.DiagnosticResult;
 import org.cryptomator.ui.common.FxController;
 
 import javax.inject.Inject;
 import javafx.beans.binding.Binding;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.ListView;
 
 public class CheckDetailController implements FxController {
 
@@ -24,19 +20,18 @@ public class CheckDetailController implements FxController {
 	private final OptionalBinding<Worker.State> taskState;
 	private final Binding<String> taskName;
 	private final Binding<String> taskDescription;
+	private final ResultListCellFactory resultListCellFactory;
 	private final BooleanBinding producingResults;
 
-	public TableView<DiagnosticResultAction> resultsTableView;
-	public TableColumn<DiagnosticResultAction, String> resultDescriptionColumn;
-	public TableColumn<DiagnosticResultAction, DiagnosticResult.Severity> resultSeverityColumn;
-	public TableColumn<DiagnosticResultAction, Runnable> resultActionColumn;
+	public ListView<DiagnosticResultAction> resultsListView;
 
 	@Inject
-	public CheckDetailController(ObjectProperty<HealthCheckTask> selectedTask) {
+	public CheckDetailController(ObjectProperty<HealthCheckTask> selectedTask, ResultListCellFactory resultListCellFactory) {
 		this.results = EasyBind.wrapNullable(selectedTask).map(HealthCheckTask::results).orElse(FXCollections.emptyObservableList());
 		this.taskState = EasyBind.wrapNullable(selectedTask).mapObservable(HealthCheckTask::stateProperty);
 		this.taskName = EasyBind.wrapNullable(selectedTask).map(HealthCheckTask::getTitle).orElse("");
 		this.taskDescription = EasyBind.wrapNullable(selectedTask).map(task -> task.getCheck().toString()).orElse("");
+		this.resultListCellFactory = resultListCellFactory;
 		this.producingResults = taskState.filter(this::producesResults).isPresent();
 	}
 
@@ -49,12 +44,8 @@ public class CheckDetailController implements FxController {
 
 	@FXML
 	public void initialize() {
-		resultsTableView.itemsProperty().bind(results);
-		resultDescriptionColumn.setCellValueFactory(cellFeatures -> new SimpleStringProperty(cellFeatures.getValue().getDescription()));
-		resultSeverityColumn.setCellValueFactory(cellFeatures -> new SimpleObjectProperty<>(cellFeatures.getValue().getSeverity()));
-		resultSeverityColumn.setCellFactory(column -> new ResultSeverityTableCell());
-		resultActionColumn.setCellValueFactory(cellFeatures -> new SimpleObjectProperty<>(cellFeatures.getValue()));
-		resultActionColumn.setCellFactory(column -> new ResultActionTableCell());
+		resultsListView.itemsProperty().bind(results);
+		resultsListView.setCellFactory(resultListCellFactory);
 	}
 	/* Getter/Setter */
 
