@@ -41,7 +41,6 @@ class CheckListCell extends ListCell<HealthCheckTask> {
 	}
 
 	private FontAwesome5Icon glyphForState(Worker.State state) {
-		// TODO choose appropriate glyphs
 		return switch (state) {
 			case READY -> FontAwesome5Icon.COG; //just a placeholder
 			case SCHEDULED -> FontAwesome5Icon.CLOCK;
