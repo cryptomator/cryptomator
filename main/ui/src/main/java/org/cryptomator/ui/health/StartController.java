@@ -5,8 +5,6 @@ import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.cryptofs.VaultConfig;
 import org.cryptomator.cryptofs.VaultConfigLoadException;
 import org.cryptomator.cryptofs.VaultKeyInvalidException;
-import org.cryptomator.cryptofs.health.api.HealthCheck;
-import org.cryptomator.cryptofs.health.dirid.DirIdCheck;
 import org.cryptomator.cryptolib.api.Masterkey;
 import org.cryptomator.cryptolib.api.MasterkeyLoadingFailedException;
 import org.cryptomator.ui.common.FxController;
@@ -19,22 +17,10 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javafx.application.Platform;
-import javafx.beans.binding.BooleanBinding;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
-import javafx.scene.control.ListView;
-import javafx.scene.control.RadioButton;
-import javafx.scene.control.ToggleGroup;
-import javafx.scene.control.cell.CheckBoxListCell;
 import javafx.stage.Stage;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -49,20 +35,18 @@ public class StartController implements FxController {
 	private final ExecutorService executor;
 	private final AtomicReference<Masterkey> masterkeyRef;
 	private final AtomicReference<VaultConfig> vaultConfigRef;
-	private final Collection<HealthCheck> selectedChecks;
 	private final Lazy<Scene> checkScene;
 
 	/* FXML */
 
 	@Inject
-	public StartController(@HealthCheckWindow Vault vault, @HealthCheckWindow Stage window, @HealthCheckWindow KeyLoadingStrategy keyLoadingStrategy, ExecutorService executor, AtomicReference<Masterkey> masterkeyRef, AtomicReference<VaultConfig> vaultConfigRef, Collection<HealthCheck> selectedChecks, @FxmlScene(FxmlFile.HEALTH_CHECK) Lazy<Scene> checkScene) {
+	public StartController(@HealthCheckWindow Vault vault, @HealthCheckWindow Stage window, @HealthCheckWindow KeyLoadingStrategy keyLoadingStrategy, ExecutorService executor, AtomicReference<Masterkey> masterkeyRef, AtomicReference<VaultConfig> vaultConfigRef, @FxmlScene(FxmlFile.HEALTH_CHECK) Lazy<Scene> checkScene) {
 		this.window = window;
 		this.unverifiedVaultConfig = vault.getUnverifiedVaultConfig(); //TODO: prevent workflow at all, if the vault config is emtpy
 		this.keyLoadingStrategy = keyLoadingStrategy;
 		this.executor = executor;
 		this.masterkeyRef = masterkeyRef;
 		this.vaultConfigRef = vaultConfigRef;
-		this.selectedChecks = selectedChecks;
 		this.checkScene = checkScene;
 	}
 
