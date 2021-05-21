@@ -16,10 +16,12 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ListView;
 import javafx.scene.control.cell.CheckBoxListCell;
 import javafx.stage.Stage;
@@ -51,6 +53,7 @@ public class CheckListController implements FxController {
 	private final BooleanProperty showResultScreen;
 
 	/* FXML */
+	public CheckBox selectAllBox;
 	public ListView<HealthCheckTask> checksListView;
 
 
@@ -90,6 +93,13 @@ public class CheckListController implements FxController {
 			}
 		}));
 		selectedTask.bind(checksListView.getSelectionModel().selectedItemProperty());
+		selectAllBox.selectedProperty().addListener(this::selectOrDeselectAll);
+		selectAllBox.visibleProperty().bind(showResultScreen.not());
+		selectAllBox.managedProperty().bind(showResultScreen.not());
+	}
+
+	public void selectOrDeselectAll(ObservableValue<? extends Boolean> observable, boolean oldValue, boolean newValue) {
+		listPickIndicators.forEach( (task, pickProperty) -> pickProperty.set(newValue));
 	}
 
 	@FXML
