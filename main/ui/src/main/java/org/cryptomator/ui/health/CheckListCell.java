@@ -26,7 +26,7 @@ class CheckListCell extends ListCell<HealthCheckTask> {
 		super.updateItem(item, empty);
 
 		if (item != null) {
-			setText(item.getTitle());
+			setText(item.getCheck().identifier()); // TODO lookup l18n key
 			item.stateProperty().addListener(this::stateChanged);
 			setGraphic(graphicForState(item.getState()));
 			stateIcon.setGlyph(glyphForState(item.getState()));
