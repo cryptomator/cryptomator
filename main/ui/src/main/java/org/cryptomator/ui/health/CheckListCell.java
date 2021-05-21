@@ -21,7 +21,7 @@ class CheckListCell extends ListCell<HealthCheckTask> {
 	protected void updateItem(HealthCheckTask item, boolean empty) {
 		super.updateItem(item, empty);
 		if (item != null) {
-			setText(item.getCheck().identifier());
+			setText(item.getTitle());
 			item.stateProperty().addListener(this::stateChanged);
 			setGraphic(stateIcon);
 			stateIcon.setGlyph(glyphForState(item.getState()));

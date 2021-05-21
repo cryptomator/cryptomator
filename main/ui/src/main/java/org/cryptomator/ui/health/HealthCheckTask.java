@@ -3,6 +3,7 @@ package org.cryptomator.ui.health;
 import org.cryptomator.cryptofs.VaultConfig;
 import org.cryptomator.cryptofs.health.api.DiagnosticResult;
 import org.cryptomator.cryptofs.health.api.HealthCheck;
+import org.cryptomator.cryptofs.health.dirid.DirIdCheck;
 import org.cryptomator.cryptolib.api.Masterkey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,8 +36,7 @@ class HealthCheckTask extends Task<Void> {
 		this.check = Objects.requireNonNull(check);
 		this.results = FXCollections.observableArrayList();
 
-		var tmp = check.identifier();
-		updateTitle(tmp.substring(tmp.length() - 10)); //TODO: new method with reliable logic
+		updateTitle(getDisplayNameOf(check));
 	}
 
 	@Override
@@ -82,5 +82,13 @@ class HealthCheckTask extends Task<Void> {
 
 	public HealthCheck getCheck() {
 		return check;
+	}
+
+	static String getDisplayNameOf(HealthCheck check) {
+		if( check instanceof DirIdCheck) { //TODO: discuss if this should be localized
+			return "DirectoryCheck";
+		} else {
+			return check.identifier();
+		}
 	}
 }

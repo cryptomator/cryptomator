@@ -19,7 +19,6 @@ public class CheckDetailController implements FxController {
 	private final Binding<ObservableList<DiagnosticResultAction>> results;
 	private final OptionalBinding<Worker.State> taskState;
 	private final Binding<String> taskName;
-	private final Binding<String> taskDescription;
 	private final ResultListCellFactory resultListCellFactory;
 	private final BooleanBinding producingResults;
 
@@ -30,7 +29,6 @@ public class CheckDetailController implements FxController {
 		this.results = EasyBind.wrapNullable(selectedTask).map(HealthCheckTask::results).orElse(FXCollections.emptyObservableList());
 		this.taskState = EasyBind.wrapNullable(selectedTask).mapObservable(HealthCheckTask::stateProperty);
 		this.taskName = EasyBind.wrapNullable(selectedTask).map(HealthCheckTask::getTitle).orElse("");
-		this.taskDescription = EasyBind.wrapNullable(selectedTask).map(task -> task.getCheck().toString()).orElse("");
 		this.resultListCellFactory = resultListCellFactory;
 		this.producingResults = taskState.filter(this::producesResults).isPresent();
 	}
@@ -56,14 +54,6 @@ public class CheckDetailController implements FxController {
 
 	public Binding<String> taskNameProperty() {
 		return taskName;
-	}
-
-	public String getTaskDescription() {
-		return taskDescription.getValue();
-	}
-
-	public Binding<String> taskDescriptionProperty() {
-		return taskDescription;
 	}
 
 	public boolean isProducingResults() {

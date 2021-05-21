@@ -87,7 +87,7 @@ public class CheckListController implements FxController {
 		checksListView.setCellFactory(CheckBoxListCell.forListView(listPickIndicators::get, new StringConverter<HealthCheckTask>() {
 			@Override
 			public String toString(HealthCheckTask object) {
-				return object.getCheck().identifier();
+				return object.getTitle();
 			}
 
 			@Override
