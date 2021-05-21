@@ -102,7 +102,7 @@ public class CheckListController implements FxController {
 		runningTask.set(batchService);
 		checksListView.setCellFactory(view -> new CheckListCell());
 		showResultScreen.set(true);
-		checksListView.getSelectionModel().select(batch.getViewIndex(0));
+		checksListView.getSelectionModel().select(batch.get(0));
 		window.sizeToScene();
 	}
 
