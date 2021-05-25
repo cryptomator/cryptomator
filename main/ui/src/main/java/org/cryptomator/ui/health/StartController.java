@@ -21,6 +21,7 @@ import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import java.io.IOException;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
@@ -44,13 +45,24 @@ public class StartController implements FxController {
 	@Inject
 	public StartController(@HealthCheckWindow Vault vault, @HealthCheckWindow Stage window, @HealthCheckWindow KeyLoadingStrategy keyLoadingStrategy, ExecutorService executor, AtomicReference<Masterkey> masterkeyRef, AtomicReference<VaultConfig> vaultConfigRef, @FxmlScene(FxmlFile.HEALTH_CHECK_LIST) Lazy<Scene> checkScene, Lazy<ErrorComponent.Builder> errorComponent) {
 		this.window = window;
-		this.unverifiedVaultConfig = vault.getUnverifiedVaultConfig(); //TODO: prevent workflow at all, if the vault config is emtpy
 		this.keyLoadingStrategy = keyLoadingStrategy;
 		this.executor = executor;
 		this.masterkeyRef = masterkeyRef;
 		this.vaultConfigRef = vaultConfigRef;
 		this.checkScene = checkScene;
 		this.errorComponent = errorComponent;
+
+		//TODO: this is ugly
+		//idea: delay the loading of the vault config and show a spinner (something like "check/load config") and react to the result of the loading
+		//or: load vault config in a previous step to see if it is loadable.
+		VaultConfig.UnverifiedVaultConfig tmp;
+		try {
+			tmp = vault.getUnverifiedVaultConfig();
+		} catch (IOException e) {
+			e.printStackTrace();
+			tmp =  null;
+		}
+		this.unverifiedVaultConfig = Optional.ofNullable(tmp);
 	}
 
 	@FXML
