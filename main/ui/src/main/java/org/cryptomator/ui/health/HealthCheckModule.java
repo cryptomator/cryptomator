@@ -63,8 +63,8 @@ abstract class HealthCheckModule {
 	/* Only inject with Lazy-Wrapper!*/
 	@Provides
 	@HealthCheckScoped
-	static Collection<HealthCheckTask> provideAvailableHealthCheckTasks(Collection<HealthCheck> availableHealthChecks, @HealthCheckWindow Vault vault, AtomicReference<Masterkey> masterkeyRef, AtomicReference<VaultConfig> vaultConfigRef, SecureRandom csprng) {
-		return availableHealthChecks.stream().map(check -> new HealthCheckTask(vault.getPath(), vaultConfigRef.get(), masterkeyRef.get(), csprng, check)).toList();
+	static Collection<HealthCheckTask> provideAvailableHealthCheckTasks(Collection<HealthCheck> availableHealthChecks, @HealthCheckWindow Vault vault, AtomicReference<Masterkey> masterkeyRef, AtomicReference<VaultConfig> vaultConfigRef, SecureRandom csprng, ResourceBundle resourceBundle) {
+		return availableHealthChecks.stream().map(check -> new HealthCheckTask(vault.getPath(), vaultConfigRef.get(), masterkeyRef.get(), csprng, check, resourceBundle)).toList();
 	}
 
 	@Provides

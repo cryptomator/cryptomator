@@ -3,7 +3,6 @@ package org.cryptomator.ui.health;
 import org.cryptomator.cryptofs.VaultConfig;
 import org.cryptomator.cryptofs.health.api.DiagnosticResult;
 import org.cryptomator.cryptofs.health.api.HealthCheck;
-import org.cryptomator.cryptofs.health.dirid.DirIdCheck;
 import org.cryptomator.cryptolib.api.Masterkey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +13,9 @@ import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import java.nio.file.Path;
 import java.security.SecureRandom;
+import java.util.MissingResourceException;
 import java.util.Objects;
+import java.util.ResourceBundle;
 import java.util.concurrent.CancellationException;
 
 class HealthCheckTask extends Task<Void> {
@@ -28,14 +29,19 @@ class HealthCheckTask extends Task<Void> {
 	private final HealthCheck check;
 	private final ObservableList<DiagnosticResult> results;
 
-	public HealthCheckTask(Path vaultPath, VaultConfig vaultConfig, Masterkey masterkey, SecureRandom csprng, HealthCheck check) {
+	public HealthCheckTask(Path vaultPath, VaultConfig vaultConfig, Masterkey masterkey, SecureRandom csprng, HealthCheck check, ResourceBundle resourceBundle) {
 		this.vaultPath = Objects.requireNonNull(vaultPath);
 		this.vaultConfig = Objects.requireNonNull(vaultConfig);
 		this.masterkey = Objects.requireNonNull(masterkey);
 		this.csprng = Objects.requireNonNull(csprng);
 		this.check = Objects.requireNonNull(check);
 		this.results = FXCollections.observableArrayList();
-		updateTitle(getDisplayNameOf(check));
+		try {
+			updateTitle(resourceBundle.getString("health." + check.identifier()));
+		} catch (MissingResourceException e) {
+			LOG.warn("Missing proper name for health check {}, falling back to default.", check.identifier());
+			updateTitle(check.identifier());
+		}
 	}
 
 	@Override
@@ -83,11 +89,4 @@ class HealthCheckTask extends Task<Void> {
 		return check;
 	}
 
-	static String getDisplayNameOf(HealthCheck check) {
-		if (check instanceof DirIdCheck) { //TODO: discuss if this should be localized
-			return "DirectoryCheck";
-		} else {
-			return check.identifier();
-		}
-	}
 }
