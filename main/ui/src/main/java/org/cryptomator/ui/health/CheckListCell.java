@@ -3,6 +3,7 @@ package org.cryptomator.ui.health;
 import org.cryptomator.ui.controls.FontAwesome5Icon;
 import org.cryptomator.ui.controls.FontAwesome5IconView;
 
+import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Worker;
 import javafx.geometry.Insets;
@@ -11,6 +12,7 @@ import javafx.scene.Node;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.ListCell;
 
+@HealthCheckScoped
 class CheckListCell extends ListCell<HealthCheckTask> {
 
 	private final FontAwesome5IconView stateIcon = new FontAwesome5IconView();
@@ -28,10 +30,11 @@ class CheckListCell extends ListCell<HealthCheckTask> {
 		if (item != null) {
 			textProperty().bind(item.titleProperty());
 			item.stateProperty().addListener(this::stateChanged);
-			setGraphic(graphicForState(item.getState()));
+			graphicProperty().bind(Bindings.createObjectBinding(() -> graphicForState(item.getState()),item.stateProperty()));
 			stateIcon.setGlyph(glyphForState(item.getState()));
 		} else {
 			textProperty().unbind();
+			graphicProperty().unbind();
 			setGraphic(null);
 			setText(null);
 		}
