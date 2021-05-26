@@ -12,7 +12,6 @@ import javafx.scene.Node;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.ListCell;
 
-@HealthCheckScoped
 class CheckListCell extends ListCell<HealthCheckTask> {
 
 	private final FontAwesome5IconView stateIcon = new FontAwesome5IconView();
