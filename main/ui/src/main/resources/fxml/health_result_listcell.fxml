@@ -21,6 +21,9 @@
 		<FontAwesome5IconView fx:id="iconView" HBox.hgrow="NEVER" glyphSize="16"/>
 		<Label text="${controller.description}" wrapText="true"/>
 		<Region HBox.hgrow="ALWAYS"/>
-		<Button fx:id="actionButton" text="%health.check.fix" onAction="#runResultAction" alignment="CENTER_RIGHT" visible="false" />
+		<!-- TODO: setting the minWidth of the button is just a workaround.
+		           What we actually want to do is to prevent shrinking the button more than the text
+		           -> own subclass of HBox is needed -->
+		<Button fx:id="actionButton" text="%health.check.fixBtn" onAction="#runResultAction" alignment="CENTER" visible="false" minWidth="50"/>
 	</children>
 </HBox>

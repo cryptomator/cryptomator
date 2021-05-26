@@ -4,10 +4,6 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ButtonBar?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ListView?>
-<?import javafx.scene.control.RadioButton?>
-<?import javafx.scene.control.ToggleGroup?>
-<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.VBox?>
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
@@ -20,9 +16,10 @@
 		<Insets topRightBottomLeft="12"/>
 	</padding>
 	<children>
-		<Label text="TODO: Invalid vault config" visible="${controller.invalidConfig}" managed="${controller.invalidConfig}"/>
+		<Label text="%health.start.introduction" wrapText="true"/>
 
-		<Label text="TODO: Blabla going to health check now...:"/>
+		<Label text="%health.start.configInvalid" visible="${controller.invalidConfig}" managed="${controller.invalidConfig}"/>
+		<Label text="%health.start.configValid" visible="${!controller.invalidConfig}" managed="${!controller.invalidConfig}" wrapText="true"/>
 
 		<ButtonBar buttonMinWidth="120" buttonOrder="+CX">
 			<buttons>

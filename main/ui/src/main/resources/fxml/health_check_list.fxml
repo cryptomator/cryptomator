@@ -24,8 +24,8 @@
 	<children>
 		<HBox spacing="12" VBox.vgrow="ALWAYS">
 			<VBox minWidth="80" maxWidth="200" spacing="6" HBox.hgrow="ALWAYS" >
-				<Label fx:id="listHeading" text="%health.check.listHeader"/>
-				<CheckBox onAction="#toggleSelectAll" text="FIX: SELECT ALL" visible="${!controller.showResultScreen}" managed="${!controller.showResultScreen}" />
+				<Label fx:id="listHeading" text="%health.checkList.header"/>
+				<CheckBox onAction="#toggleSelectAll" text="%health.checkList.selectAllBox" visible="${!controller.showResultScreen}" managed="${!controller.showResultScreen}" />
 				<ListView fx:id="checksListView" VBox.vgrow="ALWAYS"/>
 			</VBox>
 			<StackPane visible="${controller.showResultScreen}" managed="${controller.showResultScreen}" HBox.hgrow="ALWAYS" >
@@ -38,8 +38,8 @@
 		<ButtonBar buttonMinWidth="120" buttonOrder="+CX">
 			<buttons>
 				<Button text="%generic.button.cancel" ButtonBar.buttonData="CANCEL_CLOSE" onAction="#cancelCheck" disable="${!controller.running}" visible="${controller.showResultScreen}" managed="${controller.showResultScreen}" />
-				<Button text="%health.check.export" ButtonBar.buttonData="NEXT_FORWARD" defaultButton="true" disable="${!controller.finished}" visible="${controller.showResultScreen}" managed="${controller.showResultScreen}" onAction="#exportResults"/>
-				<Button text="%health.check.runBatchButton" ButtonBar.buttonData="NEXT_FORWARD" defaultButton="true" onAction="#runSelectedChecks" disable="${controller.numberOfPickedChecks == ZERO}" visible="${!controller.showResultScreen}" managed="${!controller.showResultScreen}"/>
+				<Button text="%health.check.exportBtn" ButtonBar.buttonData="NEXT_FORWARD" defaultButton="true" disable="${!controller.finished}" visible="${controller.showResultScreen}" managed="${controller.showResultScreen}" onAction="#exportResults"/>
+				<Button text="%health.check.runBatchBtn" ButtonBar.buttonData="NEXT_FORWARD" defaultButton="true" onAction="#runSelectedChecks" disable="${controller.numberOfPickedChecks == ZERO}" visible="${!controller.showResultScreen}" managed="${!controller.showResultScreen}"/>
 			</buttons>
 		</ButtonBar>
 	</children>
