@@ -4,7 +4,8 @@ public enum KeychainBackend {
 	GNOME("org.cryptomator.linux.keychain.SecretServiceKeychainAccess"),
 	KDE("org.cryptomator.linux.keychain.KDEWalletKeychainAccess"),
 	MAC_SYSTEM_KEYCHAIN("org.cryptomator.macos.keychain.MacSystemKeychainAccess"),
-	WIN_SYSTEM_KEYCHAIN("org.cryptomator.windows.keychain.WindowsProtectedKeychainAccess");
+	WIN_SYSTEM_KEYCHAIN("org.cryptomator.windows.keychain.WindowsProtectedKeychainAccess"),
+	KEEPASSXC("org.purejava.integrations.keychain.KeePassXCAccess");
 
 	private final String providerClass;
 
