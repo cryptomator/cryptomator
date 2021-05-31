@@ -8,11 +8,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javafx.application.Platform;
+import javafx.beans.property.LongProperty;
+import javafx.beans.property.SimpleLongProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import java.nio.file.Path;
 import java.security.SecureRandom;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.MissingResourceException;
 import java.util.Objects;
 import java.util.ResourceBundle;
@@ -28,6 +32,7 @@ class HealthCheckTask extends Task<Void> {
 	private final SecureRandom csprng;
 	private final HealthCheck check;
 	private final ObservableList<DiagnosticResult> results;
+	private final LongProperty durationInMillis;
 
 	public HealthCheckTask(Path vaultPath, VaultConfig vaultConfig, Masterkey masterkey, SecureRandom csprng, HealthCheck check, ResourceBundle resourceBundle) {
 		this.vaultPath = Objects.requireNonNull(vaultPath);
@@ -42,10 +47,12 @@ class HealthCheckTask extends Task<Void> {
 			LOG.warn("Missing proper name for health check {}, falling back to default.", check.identifier());
 			updateTitle(check.identifier());
 		}
+		this.durationInMillis = new SimpleLongProperty(-1);
 	}
 
 	@Override
 	protected Void call() {
+		Instant start = Instant.now();
 		try (var masterkeyClone = masterkey.clone(); //
 			 var cryptor = vaultConfig.getCipherCombo().getCryptorProvider(csprng).withKey(masterkeyClone)) {
 			check.check(vaultPath, vaultConfig, masterkeyClone, cryptor, result -> {
@@ -66,6 +73,7 @@ class HealthCheckTask extends Task<Void> {
 				Platform.runLater(() -> results.add(result));
 			});
 		}
+		Platform.runLater(() ->durationInMillis.set(Duration.between(start, Instant.now()).toMillis()));
 		return null;
 	}
 
@@ -87,6 +95,14 @@ class HealthCheckTask extends Task<Void> {
 
 	public HealthCheck getCheck() {
 		return check;
+	}
+
+	public LongProperty durationInMillisProperty() {
+		return durationInMillis;
+	}
+
+	public long getDurationInMillis() {
+		return durationInMillis.get();
 	}
 
 }

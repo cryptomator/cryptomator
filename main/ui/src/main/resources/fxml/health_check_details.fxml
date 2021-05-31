@@ -1,15 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import org.cryptomator.ui.controls.FormattedLabel?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Text?>
-<?import org.cryptomator.ui.controls.FormattedLabel?>
+<?import org.cryptomator.ui.controls.FormattedLabel2?>
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.health.CheckDetailController"
 	  spacing="6">
 	<FormattedLabel fx:id="checkTitle" styleClass="label-large" format="%health.check.result.header" arg1="${controller.taskName}"/>
-	<Text fx:id="checkDescription" styleClass="label" text="FIXME: Here could be a small description."/>
-	<ListView fx:id="resultsListView"/>
+	<Label text="The check is currently running..." visible="${controller.producingResults}" managed="${controller.producingResults}"/>
+	<!-- TODO: what if the check was canceled? Should be indicated in ui -->
+	<FormattedLabel fx:id="checkDescription" styleClass="label" format="The check finished after %d milliseconds." arg1="${controller.taskDuration}" visible="${!controller.producingResults}" managed="${!controller.producingResults}"/>
+	<FormattedLabel2 styleClass="label" format="Found %d Warnings and %d unfixable Errors." arg1="${controller.numOfWarnings}" arg2="${controller.numOfErrors}" />
+	<ListView fx:id="resultsListView" VBox.vgrow="ALWAYS"/>
 </VBox>
