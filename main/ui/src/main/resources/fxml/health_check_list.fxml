@@ -30,7 +30,7 @@
 			</VBox>
 			<StackPane visible="${controller.showResultScreen}" managed="${controller.showResultScreen}" HBox.hgrow="ALWAYS" >
 				<VBox minWidth="300" alignment="CENTER" visible="${!controller.anyCheckSelected}" managed="${!controller.anyCheckSelected}" >
-					<Label text="%health.check.result.noSelectedCheck" wrapText="true" alignment="CENTER" />
+					<Label text="%health.check.detail.noSelectedCheck" wrapText="true" alignment="CENTER" />
 				</VBox>
 				<fx:include  source="/fxml/health_check_details.fxml" visible="${controller.anyCheckSelected}" managed="${controller.anyCheckSelected}" />
 			</StackPane>
