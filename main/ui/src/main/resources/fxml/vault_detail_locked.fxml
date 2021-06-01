@@ -33,7 +33,6 @@
 		<Region VBox.vgrow="ALWAYS"/>
 
 		<HBox alignment="BOTTOM_RIGHT">
-			<Button text="%main.vaultDetail.healthBtn" onAction="#showHealthCheck"/>
 			<Button text="%main.vaultDetail.optionsBtn" minWidth="120" onAction="#showVaultOptions">
 				<graphic>
 					<FontAwesome5IconView glyph="COG"/>

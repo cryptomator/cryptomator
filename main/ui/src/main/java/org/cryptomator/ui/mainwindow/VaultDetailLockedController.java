@@ -24,17 +24,15 @@ public class VaultDetailLockedController implements FxController {
 
 	private final ReadOnlyObjectProperty<Vault> vault;
 	private final FxApplication application;
-	private final HealthCheckComponent.Builder healthCheckWindow;
 	private final VaultOptionsComponent.Builder vaultOptionsWindow;
 	private final KeychainManager keychain;
 	private final Stage mainWindow;
 	private final BooleanExpression passwordSaved;
 
 	@Inject
-	VaultDetailLockedController(ObjectProperty<Vault> vault, FxApplication application, HealthCheckComponent.Builder healthCheckWindow, VaultOptionsComponent.Builder vaultOptionsWindow, KeychainManager keychain, @MainWindow Stage mainWindow) {
+	VaultDetailLockedController(ObjectProperty<Vault> vault, FxApplication application,  VaultOptionsComponent.Builder vaultOptionsWindow, KeychainManager keychain, @MainWindow Stage mainWindow) {
 		this.vault = vault;
 		this.application = application;
-		this.healthCheckWindow = healthCheckWindow;
 		this.vaultOptionsWindow = vaultOptionsWindow;
 		this.keychain = keychain;
 		this.mainWindow = mainWindow;
@@ -58,11 +56,6 @@ public class VaultDetailLockedController implements FxController {
 	@FXML
 	public void showKeyVaultOptions() {
 		vaultOptionsWindow.vault(vault.get()).build().showVaultOptionsWindow(SelectedVaultOptionsTab.KEY);
-	}
-
-	@FXML
-	public void showHealthCheck() {
-		healthCheckWindow.vault(vault.get()).build().showHealthCheckWindow();
 	}
 
 	/* Getter/Setter */

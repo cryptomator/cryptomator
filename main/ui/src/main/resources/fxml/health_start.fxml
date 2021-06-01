@@ -18,7 +18,7 @@
 	<children>
 		<Label text="%health.start.introduction" wrapText="true"/>
 
-		<Label text="%health.start.configInvalid" visible="${controller.invalidConfig}" managed="${controller.invalidConfig}"/>
+		<Label text="%health.start.configInvalid" visible="${controller.invalidConfig}" managed="${controller.invalidConfig}" wrapText="true"/>
 		<Label text="%health.start.configValid" visible="${!controller.invalidConfig}" managed="${!controller.invalidConfig}" wrapText="true"/>
 
 		<ButtonBar buttonMinWidth="120" buttonOrder="+CX">
