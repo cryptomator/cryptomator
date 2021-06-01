@@ -1,31 +1,27 @@
 package org.cryptomator.ui.health;
 
 import com.tobiasdiez.easybind.EasyBind;
+import com.tobiasdiez.easybind.EasyObservableList;
+import com.tobiasdiez.easybind.Subscription;
 import com.tobiasdiez.easybind.optional.OptionalBinding;
 import org.cryptomator.cryptofs.health.api.DiagnosticResult;
 import org.cryptomator.ui.common.FxController;
 
 import javax.inject.Inject;
 import javafx.beans.binding.Binding;
-import javafx.beans.property.LongProperty;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
-import javafx.collections.ObservableList;
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
 import javafx.scene.control.ListView;
-import java.util.IdentityHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 @HealthCheckScoped
 public class CheckDetailController implements FxController {
 
-	private final Map<ObservableList<DiagnosticResult>, WarnAndErrorEntry> cachedWarnAndCritCounts;
-	private final Binding<ObservableList<DiagnosticResult>> results;
+	private final EasyObservableList<DiagnosticResult> results;
 	private final OptionalBinding<Worker.State> taskState;
 	private final Binding<String> taskName;
 	private final Binding<Number> taskDuration;
@@ -37,15 +33,15 @@ public class CheckDetailController implements FxController {
 	private final Binding<Boolean> taskSucceeded;
 	private final Binding<Boolean> taskFailed;
 	private final Binding<Boolean> taskCancelled;
-	private final LongProperty countOfWarnSeverity;
-	private final LongProperty countOfCritSeverity;
+	private final Binding<Number> countOfWarnSeverity;
+	private final Binding<Number> countOfCritSeverity;
 
 	public ListView<DiagnosticResult> resultsListView;
+	private Subscription resultSubscription;
 
 	@Inject
 	public CheckDetailController(ObjectProperty<HealthCheckTask> selectedTask, ResultListCellFactory resultListCellFactory) {
-		selectedTask.addListener(this::rebindWarnAndCritProperties);
-		this.results = EasyBind.wrapNullable(selectedTask).map(HealthCheckTask::results).orElse(FXCollections.emptyObservableList());
+		this.results = EasyBind.wrapList(FXCollections.observableArrayList());
 		this.taskState = EasyBind.wrapNullable(selectedTask).mapObservable(HealthCheckTask::stateProperty);
 		this.taskName = EasyBind.wrapNullable(selectedTask).map(HealthCheckTask::getTitle).orElse("");
 		this.taskDuration = EasyBind.wrapNullable(selectedTask).mapObservable(HealthCheckTask::durationInMillisProperty).orElse(-1L);
@@ -57,46 +53,27 @@ public class CheckDetailController implements FxController {
 		this.taskFailed = taskState.map(Worker.State.FAILED::equals).orElse(false);
 		this.taskCancelled = taskState.map(Worker.State.CANCELLED::equals).orElse(false);
 		this.taskFinished = EasyBind.combine(taskSucceeded, taskFailed, taskCancelled, (a, b, c) -> a || b || c);
-		this.countOfWarnSeverity = new SimpleLongProperty(0);
-		this.countOfCritSeverity = new SimpleLongProperty(0);
-		this.cachedWarnAndCritCounts = new IdentityHashMap<>(); //important to use an identity hashmap, because collections violate the immnutable hashkey contract
+		this.countOfWarnSeverity = results.reduce(countSeverity(DiagnosticResult.Severity.WARN));
+		this.countOfCritSeverity = results.reduce(countSeverity(DiagnosticResult.Severity.CRITICAL));
+		selectedTask.addListener(this::selectedTaskChanged);
 	}
 
-	private synchronized void rebindWarnAndCritProperties(ObservableValue<? extends HealthCheckTask> observable, HealthCheckTask oldVal, HealthCheckTask newVal) {
-		//create and cache properites for the newList, if not already present
-		final var listToUpdate = newVal.results();
-		cachedWarnAndCritCounts.computeIfAbsent(listToUpdate, key -> {
-			var warnProperty = new SimpleLongProperty(countSeverityInList(listToUpdate, DiagnosticResult.Severity.WARN));
-			var errProperty = new SimpleLongProperty(countSeverityInList(listToUpdate, DiagnosticResult.Severity.CRITICAL));
-			return new WarnAndErrorEntry(warnProperty, errProperty);
-		});
-		listToUpdate.addListener(this::updateListSpecificWarnAndCritCount);
-
-		//updateBindings
-		countOfCritSeverity.bind(cachedWarnAndCritCounts.get(listToUpdate).errorCount);
-		countOfWarnSeverity.bind(cachedWarnAndCritCounts.get(listToUpdate).warningCount);
-	}
-
-	private synchronized void updateListSpecificWarnAndCritCount(ListChangeListener.Change<? extends DiagnosticResult> c) {
-		long tmpErr = cachedWarnAndCritCounts.get(c.getList()).errorCount.get();
-		long tmpWarn = cachedWarnAndCritCounts.get(c.getList()).warningCount.get();
-		while (c.next()) {
-			if (c.wasAdded()) {
-				tmpWarn += countSeverityInList(c.getAddedSubList(), DiagnosticResult.Severity.WARN);
-				tmpErr += countSeverityInList(c.getAddedSubList(), DiagnosticResult.Severity.CRITICAL);
-			}
+	private void selectedTaskChanged(ObservableValue<? extends HealthCheckTask> observable, HealthCheckTask oldValue, HealthCheckTask newValue) {
+		if (resultSubscription != null) {
+			resultSubscription.unsubscribe();
 		}
-		cachedWarnAndCritCounts.get(c.getList()).errorCount.set(tmpErr);
-		cachedWarnAndCritCounts.get(c.getList()).warningCount.set(tmpWarn);
+		if (newValue != null) {
+			resultSubscription = EasyBind.bindContent(results, newValue.results());
+		}
 	}
 
-	private long countSeverityInList(List<? extends DiagnosticResult> list, DiagnosticResult.Severity severityToCount) {
-		return list.stream().map(DiagnosticResult::getServerity).filter(severityToCount::equals).count();
+	private Function<Stream<? extends DiagnosticResult>, Long> countSeverity(DiagnosticResult.Severity severity) {
+		return stream -> stream.filter(item -> severity.equals(item.getServerity())).count();
 	}
 
 	@FXML
 	public void initialize() {
-		resultsListView.itemsProperty().bind(results);
+		resultsListView.setItems(results);
 		resultsListView.setCellFactory(resultListCellFactory);
 	}
 
@@ -119,18 +96,18 @@ public class CheckDetailController implements FxController {
 	}
 
 	public long getCountOfWarnSeverity() {
-		return countOfWarnSeverity.get();
+		return countOfWarnSeverity.getValue().longValue();
 	}
 
-	public LongProperty countOfWarnSeverityProperty() {
+	public Binding<Number> countOfWarnSeverityProperty() {
 		return countOfWarnSeverity;
 	}
 
 	public long getCountOfCritSeverity() {
-		return countOfCritSeverity.get();
+		return countOfCritSeverity.getValue().longValue();
 	}
 
-	public LongProperty countOfCritSeverityProperty() {
+	public Binding<Number> countOfCritSeverityProperty() {
 		return countOfCritSeverity;
 	}
 
@@ -188,17 +165,6 @@ public class CheckDetailController implements FxController {
 
 	public Binding<Boolean> taskCancelledProperty() {
 		return taskCancelled;
-	}
-
-	private static class WarnAndErrorEntry {
-
-		WarnAndErrorEntry(LongProperty warningCount, LongProperty errorCount) {
-			this.warningCount = warningCount;
-			this.errorCount = errorCount;
-		}
-
-		final LongProperty warningCount;
-		final LongProperty errorCount;
 	}
 
 }
