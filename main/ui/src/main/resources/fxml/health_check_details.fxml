@@ -7,6 +7,7 @@
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.health.CheckDetailController"
+	  prefWidth="500"
 	  spacing="6">
 	<FormattedLabel fx:id="checkTitle" styleClass="label-large" format="%health.check.detail.header" arg1="${controller.taskName}"/>
 

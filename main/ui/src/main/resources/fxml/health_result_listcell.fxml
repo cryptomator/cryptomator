@@ -2,9 +2,9 @@
 
 <?import org.cryptomator.ui.controls.FontAwesome5IconView?>
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.control.Button?>
 <?import javafx.scene.layout.Region?>
 <HBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
@@ -13,17 +13,17 @@
 	  prefWidth="200"
 	  spacing="6"
 	  alignment="CENTER_LEFT">
-	<!-- Remark Check the containing list view for a fixed cell size before editing height properties -->
+	<!-- Remark: Check the containing list view for a fixed cell size before editing height properties -->
 	<padding>
 		<Insets topRightBottomLeft="6"/>
 	</padding>
 	<children>
 		<FontAwesome5IconView fx:id="iconView" HBox.hgrow="NEVER" glyphSize="16"/>
-		<Label text="${controller.description}" wrapText="true"/>
+		<Label text="${controller.description}"/>
 		<Region HBox.hgrow="ALWAYS"/>
 		<!-- TODO: setting the minWidth of the button is just a workaround.
 		           What we actually want to do is to prevent shrinking the button more than the text
 		           -> own subclass of HBox is needed -->
-		<Button fx:id="actionButton" text="%health.check.fixBtn" onAction="#runResultAction" alignment="CENTER" visible="false" minWidth="50"/>
+		<Button fx:id="actionButton" text="%health.check.fixBtn" onAction="#runResultAction" alignment="CENTER" visible="false" minWidth="-Infinity"/>
 	</children>
 </HBox>
