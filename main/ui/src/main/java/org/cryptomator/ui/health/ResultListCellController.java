@@ -35,6 +35,8 @@ public class ResultListCellController implements FxController {
 	private void updateCellContent(ObservableValue<? extends DiagnosticResult> observable, DiagnosticResult oldVal, DiagnosticResult newVal) {
 		iconView.getStyleClass().clear();
 		actionButton.setVisible(false);
+		//TODO: see comment in case WARN
+		actionButton.setManaged(false);
 		switch (newVal.getServerity()) {
 			case INFO -> {
 				iconView.setGlyph(FontAwesome5Icon.INFO_CIRCLE);
@@ -47,7 +49,9 @@ public class ResultListCellController implements FxController {
 			case WARN -> {
 				iconView.setGlyph(FontAwesome5Icon.EXCLAMATION_TRIANGLE);
 				iconView.getStyleClass().add("glyph-icon-orange");
-				actionButton.setVisible(true);
+				//TODO: Neither is any fix implemented, nor it is ensured, that only fix is executed at a time with good ui indication
+				//	before both are not fix, do not show the button
+				//actionButton.setVisible(true);
 			}
 			case CRITICAL -> {
 				iconView.setGlyph(FontAwesome5Icon.TIMES);
