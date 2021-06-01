@@ -109,7 +109,7 @@ public class Vault {
 		} else if(vaultSettings.maxCleartextFilenameLength().get() == -1) {
 			LOG.debug("Determining cleartext filename length limitations...");
 			var checker = new FileSystemCapabilityChecker();
-			int shorteningThreshold = getUnverifiedVaultConfig().orElseThrow().allegedShorteningThreshold();
+			int shorteningThreshold = getUnverifiedVaultConfig().allegedShorteningThreshold();
 			int ciphertextLimit = checker.determineSupportedCiphertextFileNameLength(getPath());
 			if (ciphertextLimit < shorteningThreshold) {
 				int cleartextLimit = checker.determineSupportedCleartextFileNameLength(getPath());
@@ -327,14 +327,10 @@ public class Vault {
 		return stats;
 	}
 
-	public Optional<UnverifiedVaultConfig> getUnverifiedVaultConfig() {
+	public UnverifiedVaultConfig getUnverifiedVaultConfig() throws IOException {
 		Path configPath = getPath().resolve(org.cryptomator.common.Constants.VAULTCONFIG_FILENAME);
-		try {
-			String token = Files.readString(configPath, StandardCharsets.US_ASCII);
-			return Optional.of(VaultConfig.decode(token));
-		} catch (IOException e) {
-			return Optional.empty();
-		}
+		String token = Files.readString(configPath, StandardCharsets.US_ASCII);
+		return VaultConfig.decode(token);
 	}
 
 	public Observable[] observables() {

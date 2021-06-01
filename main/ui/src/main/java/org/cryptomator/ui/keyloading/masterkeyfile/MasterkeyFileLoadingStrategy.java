@@ -92,7 +92,7 @@ public class MasterkeyFileLoadingStrategy implements KeyLoadingStrategy {
 	}
 
 	private Path getAlternateMasterkeyFilePath() throws UnlockCancelledException, InterruptedException {
-		if (filePath == null) {
+		if (filePath.get() == null) {
 			return switch (askUserForMasterkeyFilePath()) {
 				case MASTERKEYFILE_PROVIDED -> filePath.get();
 				case CANCELED -> throw new UnlockCancelledException("Choosing masterkey file cancelled.");
