@@ -98,7 +98,6 @@ public class VaultModule {
 		flags.append(" -oatomic_o_trunc");
 		flags.append(" -oauto_xattr");
 		flags.append(" -oauto_cache");
-		flags.append(" -omodules=iconv,from_code=UTF-8,to_code=UTF-8-MAC"); // show files names in Unicode NFD encoding
 		flags.append(" -onoappledouble"); // vastly impacts performance for some reason...
 		flags.append(" -odefault_permissions"); // let the kernel assume permissions based on file attributes etc
 
