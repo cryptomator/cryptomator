@@ -4,7 +4,6 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.layout.VBox?>
-<?import org.cryptomator.ui.controls.FormattedLabel2?>
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.health.CheckDetailController"
@@ -18,7 +17,7 @@
 	<Label text="%health.check.detail.taskFailed" visible="${controller.taskFailed}" managed="${controller.taskFailed}"/>
 	<FormattedLabel styleClass="label" format="%health.check.detail.taskSucceeded" arg1="${controller.taskDuration}" visible="${controller.taskSucceeded}" managed="${controller.taskSucceeded}"/>
 
-	<FormattedLabel2 styleClass="label" format="%health.check.detail.problemCount" arg1="${controller.countOfWarnSeverity}" arg2="${controller.countOfCritSeverity}" visible="${!controller.taskNotStarted}"
+	<FormattedLabel styleClass="label" format="%health.check.detail.problemCount" arg1="${controller.countOfWarnSeverity}" arg2="${controller.countOfCritSeverity}" visible="${!controller.taskNotStarted}"
 					 managed="${!controller.taskNotStarted}"	/>
 	<ListView fx:id="resultsListView" VBox.vgrow="ALWAYS"/>
 </VBox>
