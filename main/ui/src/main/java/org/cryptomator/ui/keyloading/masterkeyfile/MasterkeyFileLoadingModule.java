@@ -59,7 +59,7 @@ public abstract class MasterkeyFileLoadingModule {
 	@Named("savedPassword")
 	@KeyLoadingScoped
 	static Optional<char[]> provideStoredPassword(KeychainManager keychain, @KeyLoading Vault vault) {
-		if (!keychain.isSupported()) {
+		if (!keychain.isSupported() || keychain.isLocked()) {
 			return Optional.empty();
 		} else {
 			try {
