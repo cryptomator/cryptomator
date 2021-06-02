@@ -8,11 +8,18 @@ package org.cryptomator.common.settings;
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Strings;
 import com.google.common.io.BaseEncoding;
+
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.StringBinding;
-import javafx.beans.property.*;
-
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import java.nio.file.Path;
 import java.util.Objects;
 import java.util.Optional;
