@@ -59,11 +59,9 @@ public class FxApplication extends Application {
 	private final ObservableList<Window> visibleWindows;
 	private final BooleanBinding hasVisibleWindows;
 	private final UiAppearanceListener systemInterfaceThemeListener = this::systemInterfaceThemeChanged;
-	private final VaultListManager vaultListManager;
-	private final ScheduledExecutorService scheduledExecutorService;
 
 	@Inject
-	FxApplication(Settings settings, Lazy<MainWindowComponent> mainWindow, Lazy<PreferencesComponent> preferencesWindow, Provider<UnlockComponent.Builder> unlockWorkflowBuilderProvider, Provider<LockComponent.Builder> lockWorkflowBuilderProvider, Lazy<QuitComponent> quitWindow, ErrorComponent.Builder errorWindowBuilder, Optional<TrayIntegrationProvider> trayIntegration, Optional<UiAppearanceProvider> appearanceProvider, VaultService vaultService, LicenseHolder licenseHolder, VaultListManager vaultListManager, ScheduledExecutorService scheduledExecutorService) {
+	FxApplication(Settings settings, Lazy<MainWindowComponent> mainWindow, Lazy<PreferencesComponent> preferencesWindow, Provider<UnlockComponent.Builder> unlockWorkflowBuilderProvider, Provider<LockComponent.Builder> lockWorkflowBuilderProvider, Lazy<QuitComponent> quitWindow, ErrorComponent.Builder errorWindowBuilder, Optional<TrayIntegrationProvider> trayIntegration, Optional<UiAppearanceProvider> appearanceProvider, VaultService vaultService, LicenseHolder licenseHolder) {
 		this.settings = settings;
 		this.mainWindow = mainWindow;
 		this.preferencesWindow = preferencesWindow;
@@ -77,8 +75,6 @@ public class FxApplication extends Application {
 		this.licenseHolder = licenseHolder;
 		this.visibleWindows = Stage.getWindows().filtered(Window::isShowing);
 		this.hasVisibleWindows = Bindings.isNotEmpty(visibleWindows);
-		this.vaultListManager = vaultListManager;
-		this.scheduledExecutorService = scheduledExecutorService;
 	}
 
 	public void start() {
@@ -131,7 +127,6 @@ public class FxApplication extends Application {
 				showMainWindow().thenAccept(mainWindow -> errorWindowBuilder.window(mainWindow).cause(new IllegalStateException("Unable to unlock vault in non-locked state.")));
 			}
 		});
-		checkAutolock(vault, owner);
 	}
 
 	public void startLockWorkflow(Vault vault, Optional<Stage> owner) {
@@ -210,16 +205,6 @@ public class FxApplication extends Application {
 		appearanceProvider.ifPresent(appearanceProvider -> {
 			appearanceProvider.adjustToTheme(Theme.DARK);
 		});
-	}
-
-
-	private void checkAutolock(Vault vault, Optional<Stage> owner) {
-		if (vault.getVaultSettings().lockAfterTime().get()) {
-			LOG.info("Locking after {} minutes.", vault.getVaultSettings().lockTimeInMinutes().get());
-			scheduledExecutorService.schedule(() -> {
-				startLockWorkflow(vault, owner);
-			}, (long) (vault.getVaultSettings().lockTimeInMinutes().get()), TimeUnit.MINUTES);
-		}
 	}
 
 }

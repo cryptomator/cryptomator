@@ -37,22 +37,21 @@ public class VaultListManager {
 
 	private static final Logger LOG = LoggerFactory.getLogger(VaultListManager.class);
 
+	private final AutoLocker autoLocker;
 	private final VaultComponent.Builder vaultComponentBuilder;
 	private final ObservableList<Vault> vaultList;
 	private final String defaultVaultName;
 
 	@Inject
-	public VaultListManager(VaultComponent.Builder vaultComponentBuilder, ResourceBundle resourceBundle, Settings settings) {
+	public VaultListManager(ObservableList<Vault> vaultList, AutoLocker autoLocker, VaultComponent.Builder vaultComponentBuilder, ResourceBundle resourceBundle, Settings settings) {
+		this.vaultList = vaultList;
+		this.autoLocker = autoLocker;
 		this.vaultComponentBuilder = vaultComponentBuilder;
 		this.defaultVaultName = resourceBundle.getString("defaults.vault.vaultName");
-		this.vaultList = FXCollections.observableArrayList(Vault::observables);
 
 		addAll(settings.getDirectories());
 		vaultList.addListener(new VaultListChangeListener(settings.getDirectories()));
-	}
-
-	public ObservableList<Vault> getVaultList() {
-		return vaultList;
+		autoLocker.init();
 	}
 
 	public Vault add(Path pathToVault) throws IOException {

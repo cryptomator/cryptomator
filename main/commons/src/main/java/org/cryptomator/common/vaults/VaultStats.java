@@ -13,9 +13,11 @@ import javafx.beans.property.LongProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleLongProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Task;
 import javafx.util.Duration;
+import java.time.Instant;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
@@ -39,6 +41,7 @@ public class VaultStats {
 	private final LongProperty totalBytesDecrypted = new SimpleLongProperty();
 	private final LongProperty filesRead = new SimpleLongProperty();
 	private final LongProperty filesWritten = new SimpleLongProperty();
+	private final ObjectProperty<Instant> lastActivity = new SimpleObjectProperty<>();
 
 	@Inject
 	VaultStats(AtomicReference<CryptoFileSystem> fs, VaultState state, ExecutorService executor) {
@@ -73,9 +76,16 @@ public class VaultStats {
 		toalBytesWritten.set(stats.map(CryptoFileSystemStats::pollTotalBytesWritten).orElse(0L));
 		totalBytesEncrypted.set(stats.map(CryptoFileSystemStats::pollTotalBytesEncrypted).orElse(0L));
 		totalBytesDecrypted.set(stats.map(CryptoFileSystemStats::pollTotalBytesDecrypted).orElse(0L));
+		var oldAccessCount = filesRead.get() + filesWritten.get();
 		filesRead.set(stats.map(CryptoFileSystemStats::pollAmountOfAccessesRead).orElse(0L));
 		filesWritten.set(stats.map(CryptoFileSystemStats::pollAmountOfAccessesWritten).orElse(0L));
+		var newAccessCount = filesRead.get() + filesWritten.get();
 
+		// check for any I/O activity
+		if (newAccessCount > oldAccessCount) {
+			LOG.info("ACTIVITY!");
+			lastActivity.set(Instant.now());
+		}
 	}
 
 	private double getCacheHitRate(CryptoFileSystemStats stats) {
@@ -175,4 +185,12 @@ public class VaultStats {
 	public LongProperty filesWritten() {return filesWritten;}
 
 	public long getFilesWritten() {return filesWritten.get();}
+
+	public ObjectProperty<Instant> lastActivityProperty() {
+		return lastActivity;
+	}
+
+	public Instant getLastActivity() {
+		return lastActivity.get();
+	}
 }
