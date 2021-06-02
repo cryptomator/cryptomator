@@ -31,6 +31,8 @@ class VaultSettingsJsonAdapter {
 		out.name("mountFlags").value(value.mountFlags().get());
 		out.name("maxCleartextFilenameLength").value(value.maxCleartextFilenameLength().get());
 		out.name("actionAfterUnlock").value(value.actionAfterUnlock().get().name());
+		out.name("autoLockWhenIdle").value(value.autoLockWhenIdle().get());
+		out.name("autoLockIdleSeconds").value(value.autoLockIdleSeconds().get());
 		out.endObject();
 	}
 
@@ -48,6 +50,8 @@ class VaultSettingsJsonAdapter {
 		String mountFlags = VaultSettings.DEFAULT_MOUNT_FLAGS;
 		int maxCleartextFilenameLength = VaultSettings.DEFAULT_MAX_CLEARTEXT_FILENAME_LENGTH;
 		WhenUnlocked actionAfterUnlock = VaultSettings.DEFAULT_ACTION_AFTER_UNLOCK;
+		boolean autoLockWhenIdle = VaultSettings.DEFAULT_AUTOLOCK_WHEN_IDLE;
+		int autoLockIdleSeconds = VaultSettings.DEFAULT_AUTOLOCK_IDLE_SECONDS;
 
 		in.beginObject();
 		while (in.hasNext()) {
@@ -66,6 +70,8 @@ class VaultSettingsJsonAdapter {
 				case "mountFlags" -> mountFlags = in.nextString();
 				case "maxCleartextFilenameLength" -> maxCleartextFilenameLength = in.nextInt();
 				case "actionAfterUnlock" -> actionAfterUnlock = parseActionAfterUnlock(in.nextString());
+				case "autoLockWhenIdle" -> autoLockWhenIdle = in.nextBoolean();
+				case "autoLockIdleSeconds" -> autoLockIdleSeconds = in.nextInt();
 				default -> {
 					LOG.warn("Unsupported vault setting found in JSON: " + name);
 					in.skipValue();
@@ -90,6 +96,8 @@ class VaultSettingsJsonAdapter {
 		vaultSettings.mountFlags().set(mountFlags);
 		vaultSettings.maxCleartextFilenameLength().set(maxCleartextFilenameLength);
 		vaultSettings.actionAfterUnlock().set(actionAfterUnlock);
+		vaultSettings.autoLockWhenIdle().set(autoLockWhenIdle);
+		vaultSettings.autoLockIdleSeconds().set(autoLockIdleSeconds);
 		return vaultSettings;
 	}
 

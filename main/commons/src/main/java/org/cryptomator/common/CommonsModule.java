@@ -15,6 +15,7 @@ import org.cryptomator.common.settings.SettingsProvider;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultComponent;
 import org.cryptomator.common.vaults.VaultListManager;
+import org.cryptomator.common.vaults.VaultListModule;
 import org.cryptomator.cryptolib.common.MasterkeyFileAccess;
 import org.cryptomator.frontend.webdav.WebDavServer;
 import org.slf4j.Logger;
@@ -37,7 +38,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-@Module(subcomponents = {VaultComponent.class}, includes = {KeychainModule.class})
+@Module(subcomponents = {VaultComponent.class}, includes = {VaultListModule.class, KeychainModule.class})
 public abstract class CommonsModule {
 
 	private static final Logger LOG = LoggerFactory.getLogger(CommonsModule.class);
@@ -85,12 +86,6 @@ public abstract class CommonsModule {
 	@Singleton
 	static Settings provideSettings(SettingsProvider settingsProvider) {
 		return settingsProvider.get();
-	}
-
-	@Provides
-	@Singleton
-	static ObservableList<Vault> provideVaultList(VaultListManager vaultListManager) {
-		return vaultListManager.getVaultList();
 	}
 
 	@Provides

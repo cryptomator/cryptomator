@@ -37,6 +37,8 @@ public class VaultSettings {
 	public static final String DEFAULT_MOUNT_FLAGS = "";
 	public static final int DEFAULT_MAX_CLEARTEXT_FILENAME_LENGTH = -1;
 	public static final WhenUnlocked DEFAULT_ACTION_AFTER_UNLOCK = WhenUnlocked.ASK;
+	public static final boolean DEFAULT_AUTOLOCK_WHEN_IDLE = false;
+	public static final int DEFAULT_AUTOLOCK_IDLE_SECONDS = 30 * 60;
 
 	private static final Random RNG = new Random();
 
@@ -52,7 +54,8 @@ public class VaultSettings {
 	private final StringProperty mountFlags = new SimpleStringProperty(DEFAULT_MOUNT_FLAGS);
 	private final IntegerProperty maxCleartextFilenameLength = new SimpleIntegerProperty(DEFAULT_MAX_CLEARTEXT_FILENAME_LENGTH);
 	private final ObjectProperty<WhenUnlocked> actionAfterUnlock = new SimpleObjectProperty<>(DEFAULT_ACTION_AFTER_UNLOCK);
-
+	private final BooleanProperty autoLockWhenIdle = new SimpleBooleanProperty(DEFAULT_AUTOLOCK_WHEN_IDLE);
+	private final IntegerProperty autoLockIdleSeconds = new SimpleIntegerProperty(DEFAULT_AUTOLOCK_IDLE_SECONDS);
 	private final StringBinding mountName;
 
 	public VaultSettings(String id) {
@@ -61,7 +64,7 @@ public class VaultSettings {
 	}
 
 	Observable[] observables() {
-		return new Observable[]{path, displayName, winDriveLetter, unlockAfterStartup, revealAfterMount, useCustomMountPath, customMountPath, usesReadOnlyMode, mountFlags, maxCleartextFilenameLength, actionAfterUnlock};
+		return new Observable[]{path, displayName, winDriveLetter, unlockAfterStartup, revealAfterMount, useCustomMountPath, customMountPath, usesReadOnlyMode, mountFlags, maxCleartextFilenameLength, actionAfterUnlock, autoLockWhenIdle, autoLockIdleSeconds};
 	}
 
 	public static VaultSettings withRandomId() {
@@ -160,6 +163,14 @@ public class VaultSettings {
 
 	public WhenUnlocked getActionAfterUnlock() {
 		return actionAfterUnlock.get();
+	}
+
+	public BooleanProperty autoLockWhenIdle() {
+		return autoLockWhenIdle;
+	}
+
+	public IntegerProperty autoLockIdleSeconds() {
+		return autoLockIdleSeconds;
 	}
 
 	/* Hashcode/Equals */

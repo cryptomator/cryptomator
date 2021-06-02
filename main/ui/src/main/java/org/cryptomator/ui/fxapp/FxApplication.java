@@ -1,10 +1,19 @@
 package org.cryptomator.ui.fxapp;
 
 import dagger.Lazy;
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
+import javafx.stage.Stage;
+import javafx.stage.Window;
 import org.cryptomator.common.LicenseHolder;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.UiTheme;
 import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.common.vaults.VaultListManager;
 import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.integrations.tray.TrayIntegrationProvider;
 import org.cryptomator.integrations.uiappearance.Theme;
@@ -24,18 +33,12 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
-import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.beans.binding.Bindings;
-import javafx.beans.binding.BooleanBinding;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.ObservableList;
-import javafx.stage.Stage;
-import javafx.stage.Window;
 import java.awt.desktop.QuitResponse;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 @FxApplicationScoped
 public class FxApplication extends Application {
