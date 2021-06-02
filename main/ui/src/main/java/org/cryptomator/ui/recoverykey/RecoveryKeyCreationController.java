@@ -2,6 +2,7 @@ package org.cryptomator.ui.recoverykey;
 
 import dagger.Lazy;
 import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.cryptolib.api.CryptoException;
 import org.cryptomator.cryptolib.api.InvalidPassphraseException;
 import org.cryptomator.ui.common.Animations;
 import org.cryptomator.ui.common.ErrorComponent;
@@ -80,7 +81,7 @@ public class RecoveryKeyCreationController implements FxController {
 		}
 
 		@Override
-		protected String call() throws IOException {
+		protected String call() throws IOException, CryptoException {
 			return recoveryKeyFactory.createRecoveryKey(vault.getPath(), passwordField.getCharacters());
 		}
 

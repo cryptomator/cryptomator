@@ -5,10 +5,10 @@ import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoMap;
 import org.cryptomator.ui.common.DefaultSceneFactory;
-import org.cryptomator.ui.common.FxmlLoaderFactory;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxControllerKey;
 import org.cryptomator.ui.common.FxmlFile;
+import org.cryptomator.ui.common.FxmlLoaderFactory;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.NewPasswordController;
 import org.cryptomator.ui.common.PasswordStrengthUtil;
@@ -16,8 +16,6 @@ import org.cryptomator.ui.common.StageFactory;
 
 import javax.inject.Named;
 import javax.inject.Provider;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Scene;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -26,13 +24,6 @@ import java.util.ResourceBundle;
 
 @Module
 abstract class ChangePasswordModule {
-
-	@Provides
-	@ChangePasswordScoped
-	@Named("newPassword")
-	static ObjectProperty<CharSequence> provideNewPasswordProperty() {
-		return new SimpleObjectProperty<>("");
-	}
 
 	@Provides
 	@ChangePasswordWindow
@@ -71,8 +62,8 @@ abstract class ChangePasswordModule {
 	@Provides
 	@IntoMap
 	@FxControllerKey(NewPasswordController.class)
-	static FxController provideNewPasswordController(ResourceBundle resourceBundle, PasswordStrengthUtil strengthRater, @Named("newPassword") ObjectProperty<CharSequence> password) {
-		return new NewPasswordController(resourceBundle, strengthRater, password);
+	static FxController provideNewPasswordController(ResourceBundle resourceBundle, PasswordStrengthUtil strengthRater) {
+		return new NewPasswordController(resourceBundle, strengthRater);
 	}
 
 }

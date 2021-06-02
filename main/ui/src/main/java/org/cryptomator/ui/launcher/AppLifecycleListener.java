@@ -1,6 +1,7 @@
 package org.cryptomator.ui.launcher;
 
 import org.cryptomator.common.ShutdownHook;
+import org.cryptomator.common.vaults.LockNotCompletedException;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.common.vaults.Volume;
@@ -24,11 +25,13 @@ import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static org.cryptomator.common.vaults.VaultState.Value.*;
+
 @Singleton
 public class AppLifecycleListener {
 
 	private static final Logger LOG = LoggerFactory.getLogger(AppLifecycleListener.class);
-	public static final Set<VaultState> STATES_ALLOWING_TERMINATION = EnumSet.of(VaultState.LOCKED, VaultState.NEEDS_MIGRATION, VaultState.MISSING, VaultState.ERROR);
+	public static final Set<VaultState.Value> STATES_ALLOWING_TERMINATION = EnumSet.of(LOCKED, NEEDS_MIGRATION, MISSING, ERROR);
 
 	private final FxApplicationStarter fxApplicationStarter;
 	private final CountDownLatch shutdownLatch;
@@ -127,6 +130,8 @@ public class AppLifecycleListener {
 					vault.lock(true);
 				} catch (Volume.VolumeException e) {
 					LOG.error("Failed to unmount vault " + vault.getPath(), e);
+				} catch (LockNotCompletedException e) {
+					LOG.error("Failed to lock vault " + vault.getPath(), e);
 				}
 			}
 		}

@@ -12,7 +12,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-java@v1
         with:
-          java-version: 14
+          java-version: 16
       - uses: actions/cache@v1
         with:
           path: ~/.m2/repository
@@ -28,10 +28,10 @@ jobs:
         if: github.repository == 'cryptomator/cryptomator'
         run: |
           curl -o ~/codacy-coverage-reporter.jar https://repo.maven.apache.org/maven2/com/codacy/codacy-coverage-reporter/7.1.0/codacy-coverage-reporter-7.1.0-assembly.jar
-          $JAVA_HOME/bin/java -jar ~/codacy-coverage-reporter.jar report -l Java -r main/commons/target/site/jacoco/jacoco.xml --partial
-          $JAVA_HOME/bin/java -jar ~/codacy-coverage-reporter.jar report -l Java -r main/ui/target/site/jacoco/jacoco.xml --partial
-          $JAVA_HOME/bin/java -jar ~/codacy-coverage-reporter.jar report -l Java -r main/launcher/target/site/jacoco/jacoco.xml --partial
-          $JAVA_HOME/bin/java -jar ~/codacy-coverage-reporter.jar final
+          $JAVA_HOME/bin/java --illegal-access=permit -jar ~/codacy-coverage-reporter.jar report -l Java -r main/commons/target/site/jacoco/jacoco.xml --partial
+          $JAVA_HOME/bin/java --illegal-access=permit -jar ~/codacy-coverage-reporter.jar report -l Java -r main/ui/target/site/jacoco/jacoco.xml --partial
+          $JAVA_HOME/bin/java --illegal-access=permit -jar ~/codacy-coverage-reporter.jar report -l Java -r main/launcher/target/site/jacoco/jacoco.xml --partial
+          $JAVA_HOME/bin/java --illegal-access=permit -jar ~/codacy-coverage-reporter.jar final
         env:
           CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
       - name: Assemble buildkit-linux.zip
@@ -92,6 +92,16 @@ jobs:
             * [ ] add Linux appimage, zsync file and signature file
             * [ ] add Windows installer and signature file
             * [ ] add MacOs disk image and signature file
+
+            ## What's new
+
+            ## Bugfixes
+
+            ## Misc
+
+            ---
+
+            :scroll: A complete list of closed issues is available [here](LINK)
           draft: true
           prerelease: false
       - name: Upload buildkit-linux.zip to GitHub Releases

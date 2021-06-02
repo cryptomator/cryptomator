@@ -15,6 +15,7 @@ import org.cryptomator.common.settings.SettingsProvider;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultComponent;
 import org.cryptomator.common.vaults.VaultListManager;
+import org.cryptomator.cryptolib.common.MasterkeyFileAccess;
 import org.cryptomator.frontend.webdav.WebDavServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +26,8 @@ import javafx.beans.binding.Binding;
 import javafx.beans.binding.Bindings;
 import javafx.collections.ObservableList;
 import java.net.InetSocketAddress;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.Comparator;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -47,10 +50,28 @@ public abstract class CommonsModule {
 	@Named("licensePublicKey")
 	static String provideLicensePublicKey() {
 		// in PEM format without the dash-escaped begin/end lines
-		return "MIGbMBAGByqGSM49AgEGBSuBBAAjA4GGAAQB7NfnqiZbg2KTmoflmZ71PbXru7oW" //
-				+ "fmnV2yv3eDjlDfGruBrqz9TtXBZV/eYWt31xu1osIqaT12lKBvZ511aaAkIBeOEV" //
-				+ "gwcBIlJr6kUw7NKzeJt7r2rrsOyQoOG2nWc/Of/NBqA3mIZRHk5Aq1YupFdD26QE" //
-				+ "r0DzRyj4ixPIt38CQB8=";
+		return """
+				MIGbMBAGByqGSM49AgEGBSuBBAAjA4GGAAQB7NfnqiZbg2KTmoflmZ71PbXru7oW\
+				fmnV2yv3eDjlDfGruBrqz9TtXBZV/eYWt31xu1osIqaT12lKBvZ511aaAkIBeOEV\
+				gwcBIlJr6kUw7NKzeJt7r2rrsOyQoOG2nWc/Of/NBqA3mIZRHk5Aq1YupFdD26QE\
+				r0DzRyj4ixPIt38CQB8=\
+				""";
+	}
+
+	@Provides
+	@Singleton
+	static SecureRandom provideCSPRNG() {
+		try {
+			return SecureRandom.getInstanceStrong();
+		} catch (NoSuchAlgorithmException e) {
+			throw new IllegalStateException("A strong algorithm must exist in every Java platform.", e);
+		}
+	}
+
+	@Provides
+	@Singleton
+	static MasterkeyFileAccess provideMasterkeyFileAccess(SecureRandom csprng) {
+		return new MasterkeyFileAccess(Constants.PEPPER, csprng);
 	}
 
 	@Provides

@@ -7,6 +7,7 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.Button?>
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.vaultoptions.GeneralVaultOptionsController"
@@ -26,5 +27,6 @@
 			<Label text="%vaultOptions.general.actionAfterUnlock"/>
 			<ChoiceBox fx:id="actionAfterUnlockChoiceBox"/>
 		</HBox>
+		<Button text="%vaultOptions.general.healthBtn" onAction="#showHealthCheck"/>
 	</children>
 </VBox>

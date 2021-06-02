@@ -21,13 +21,18 @@ public class SettingsJsonAdapterTest {
 
 	@Test
 	public void testDeserialize() throws IOException {
-		String vault1Json = "{\"id\": \"1\", \"path\": \"/vault1\", \"mountName\": \"vault1\", \"winDriveLetter\": \"X\"}";
-		String vault2Json = "{\"id\": \"2\", \"path\": \"/vault2\", \"mountName\": \"vault2\", \"winDriveLetter\": \"Y\"}";
-		String json = "{\"directories\": [" + vault1Json + "," + vault2Json + "]," //
-				+ "\"checkForUpdatesEnabled\": true,"//
-				+ "\"port\": 8080,"//
-				+ "\"numTrayNotifications\": 42,"//
-				+ "\"preferredVolumeImpl\": \"FUSE\"}";
+		String json = """
+				{
+					"directories": [
+						{"id": "1", "path": "/vault1", "mountName": "vault1", "winDriveLetter": "X"},
+						{"id": "2", "path": "/vault2", "mountName": "vault2", "winDriveLetter": "Y"}
+					],
+					"checkForUpdatesEnabled": true,
+					"port": 8080,
+					"numTrayNotifications": 42,
+					"preferredVolumeImpl": "FUSE"
+				}
+				""";
 
 		Settings settings = adapter.fromJson(json);
 

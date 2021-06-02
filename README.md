@@ -2,7 +2,7 @@
 
 [![Build](https://github.com/cryptomator/cryptomator/workflows/Build/badge.svg)](https://github.com/cryptomator/cryptomator/actions?query=workflow%3ABuild)
 [![Known Vulnerabilities](https://snyk.io/test/github/cryptomator/cryptomator/badge.svg?targetFile=main%2Fpom.xml)](https://snyk.io/test/github/cryptomator/cryptomator?targetFile=main%2Fpom.xml)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/2a0adf3cec6a4143b91035d3924178f1)](https://www.codacy.com/app/cryptomator/cryptomator?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=cryptomator/cryptomator&amp;utm_campaign=Badge_Grade)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/2a0adf3cec6a4143b91035d3924178f1)](https://www.codacy.com/gh/cryptomator/cryptomator/dashboard)
 [![Twitter](https://img.shields.io/badge/twitter-@Cryptomator-blue.svg?style=flat)](http://twitter.com/Cryptomator)
 [![Crowdin](https://badges.crowdin.net/cryptomator/localized.svg)](https://translate.cryptomator.org/)
 [![Latest Release](https://img.shields.io/github/release/cryptomator/cryptomator.svg)](https://github.com/cryptomator/cryptomator/releases/latest)
@@ -17,11 +17,26 @@ Cryptomator is provided free of charge as an open-source project despite the hig
 
 ### Gold Sponsors
 
-[<img src="https://cryptomator.org/img/sponsors/geewhiz.svg" alt="gee-whiz" height="96">](https://www.gee-whiz.de/)
+<table>
+  <tbody>
+    <tr>
+      <td><a href="https://www.gee-whiz.de/"><img src="https://cryptomator.org/img/sponsors/geewhiz.svg" alt="gee-whiz" height="80"></a></td>
+      <td><a href="https://proxy-hub.com/"><img src="https://cryptomator.org/img/sponsors/proxyhub.svg" alt="Proxy-Hub" height="80"></a></td>
+    </tr>
+  </tbody>
+</table>
 
 ### Silver Sponsors
 
-[![TheBestVPN](https://cryptomator.org/img/sponsors/thebestvpn.png)](https://thebestvpn.com/)
+<table>
+  <tbody>
+    <tr>
+      <td><a href="https://thebestvpn.com/"><img src="https://cryptomator.org/img/sponsors/thebestvpn@2x.png" alt="TheBestVPN" height="64"></a></td>
+    </tr>
+  </tbody>
+</table>
+
+- [Jameson Lopp](https://www.lopp.net/)
 
 ---
 
@@ -33,7 +48,7 @@ Download native binaries of Cryptomator on [cryptomator.org](https://cryptomator
 
 ## Features
 
-- Works with Dropbox, Google Drive, OneDrive, ownCloud, Nextcloud and any other cloud storage service which synchronizes with a local directory
+- Works with Dropbox, Google Drive, OneDrive, MEGA, pCloud, ownCloud, Nextcloud and any other cloud storage service which synchronizes with a local directory
 - Open Source means: No backdoors, control is better than trust
 - Client-side: No accounts, no data shared with any online service
 - Totally transparent: Just work on the virtual drive as if it were a USB flash drive
@@ -65,7 +80,7 @@ For more information on the security details visit [cryptomator.org](https://doc
 
 ### Dependencies
 
-* JDK 14 (e.g. adoptopenjdk)
+* JDK 16 (e.g. adoptopenjdk)
 * Maven 3
 * Optional: OS-dependent build tools for native packaging (see [Windows](https://github.com/cryptomator/cryptomator-win), [OS X](https://github.com/cryptomator/cryptomator-osx), [Linux](https://github.com/cryptomator/builder-containers))
 

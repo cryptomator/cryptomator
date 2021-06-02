@@ -42,8 +42,8 @@ public class DefaultSceneFactory implements Function<Parent, Scene> {
 	protected void configureScene(Scene scene) {
 		scene.windowProperty().addListener(observable -> {
 			Window window = scene.getWindow();
-			if (window instanceof Stage) {
-				setupDefaultAccelerators(scene, (Stage) window);
+			if (window instanceof Stage s) {
+				setupDefaultAccelerators(scene, s);
 			}
 		});
 	}

@@ -44,6 +44,9 @@ class TrayMenuController {
 
 	public void initTrayMenu() {
 		vaults.addListener(this::vaultListChanged);
+		vaults.forEach(v -> {
+			v.displayNameProperty().addListener(this::vaultListChanged);
+		});
 		rebuildMenu();
 	}
 

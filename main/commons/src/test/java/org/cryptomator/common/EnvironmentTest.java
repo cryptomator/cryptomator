@@ -32,7 +32,7 @@ class EnvironmentTest {
 	public void testSettingsPath() {
 		System.setProperty("cryptomator.settingsPath", "~/.config/Cryptomator/settings.json:~/.Cryptomator/settings.json");
 
-		List<Path> result = env.getSettingsPath().collect(Collectors.toList());
+		List<Path> result = env.getSettingsPath().toList();
 		MatcherAssert.assertThat(result, Matchers.hasSize(2));
 		MatcherAssert.assertThat(result, Matchers.contains(Paths.get("/home/testuser/.config/Cryptomator/settings.json"), //
 				Paths.get("/home/testuser/.Cryptomator/settings.json")));
@@ -43,7 +43,7 @@ class EnvironmentTest {
 	public void testIpcPortPath() {
 		System.setProperty("cryptomator.ipcPortPath", "~/.config/Cryptomator/ipcPort.bin:~/.Cryptomator/ipcPort.bin");
 
-		List<Path> result = env.getIpcPortPath().collect(Collectors.toList());
+		List<Path> result = env.getIpcPortPath().toList();
 		MatcherAssert.assertThat(result, Matchers.hasSize(2));
 		MatcherAssert.assertThat(result, Matchers.contains(Paths.get("/home/testuser/.config/Cryptomator/ipcPort.bin"), //
 				Paths.get("/home/testuser/.Cryptomator/ipcPort.bin")));
@@ -54,7 +54,7 @@ class EnvironmentTest {
 	public void testKeychainPath() {
 		System.setProperty("cryptomator.keychainPath", "~/AppData/Roaming/Cryptomator/keychain.json");
 
-		List<Path> result = env.getKeychainPath().collect(Collectors.toList());
+		List<Path> result = env.getKeychainPath().toList();
 		MatcherAssert.assertThat(result, Matchers.hasSize(1));
 		MatcherAssert.assertThat(result, Matchers.contains(Paths.get("/home/testuser/AppData/Roaming/Cryptomator/keychain.json")));
 	}
@@ -88,7 +88,7 @@ class EnvironmentTest {
 		@DisplayName("test.path.property=")
 		public void testEmptyList() {
 			System.setProperty("test.path.property", "");
-			List<Path> result = env.getPaths("test.path.property").collect(Collectors.toList());
+			List<Path> result = env.getPaths("test.path.property").toList();
 
 			MatcherAssert.assertThat(result, Matchers.hasSize(0));
 		}
@@ -97,7 +97,7 @@ class EnvironmentTest {
 		@DisplayName("test.path.property=/foo/bar/test")
 		public void testSingleAbsolutePath() {
 			System.setProperty("test.path.property", "/foo/bar/test");
-			List<Path> result = env.getPaths("test.path.property").collect(Collectors.toList());
+			List<Path> result = env.getPaths("test.path.property").toList();
 
 			MatcherAssert.assertThat(result, Matchers.hasSize(1));
 			MatcherAssert.assertThat(result, Matchers.hasItem(Paths.get("/foo/bar/test")));
@@ -107,7 +107,7 @@ class EnvironmentTest {
 		@DisplayName("test.path.property=~/test")
 		public void testSingleHomeRelativePath() {
 			System.setProperty("test.path.property", "~/test");
-			List<Path> result = env.getPaths("test.path.property").collect(Collectors.toList());
+			List<Path> result = env.getPaths("test.path.property").toList();
 
 			MatcherAssert.assertThat(result, Matchers.hasSize(1));
 			MatcherAssert.assertThat(result, Matchers.hasItem(Paths.get("/home/testuser/test")));
@@ -117,7 +117,7 @@ class EnvironmentTest {
 		@DisplayName("test.path.property=~/test:~/test2:/foo/bar/test")
 		public void testMultiplePaths() {
 			System.setProperty("test.path.property", "~/test:~/test2:/foo/bar/test");
-			List<Path> result = env.getPaths("test.path.property").collect(Collectors.toList());
+			List<Path> result = env.getPaths("test.path.property").toList();
 
 			MatcherAssert.assertThat(result, Matchers.hasSize(3));
 			MatcherAssert.assertThat(result, Matchers.contains(Paths.get("/home/testuser/test"), //

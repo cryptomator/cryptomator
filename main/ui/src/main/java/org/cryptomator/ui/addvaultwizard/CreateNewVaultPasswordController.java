@@ -5,11 +5,18 @@ import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultListManager;
 import org.cryptomator.cryptofs.CryptoFileSystemProperties;
 import org.cryptomator.cryptofs.CryptoFileSystemProvider;
+import org.cryptomator.cryptofs.VaultCipherCombo;
+import org.cryptomator.cryptolib.api.CryptoException;
+import org.cryptomator.cryptolib.api.Masterkey;
+import org.cryptomator.cryptolib.api.MasterkeyLoader;
+import org.cryptomator.cryptolib.common.MasterkeyFileAccess;
 import org.cryptomator.ui.common.ErrorComponent;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
+import org.cryptomator.ui.common.NewPasswordController;
 import org.cryptomator.ui.common.Tasks;
+import org.cryptomator.ui.keyloading.masterkeyfile.MasterkeyFileLoadingStrategy;
 import org.cryptomator.ui.recoverykey.RecoveryKeyFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +24,6 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javafx.beans.binding.Bindings;
-import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
@@ -31,13 +37,13 @@ import javafx.scene.control.ToggleGroup;
 import javafx.stage.Stage;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.net.URI;
 import java.nio.channels.WritableByteChannel;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.Collections;
+import java.security.SecureRandom;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
 
@@ -48,6 +54,7 @@ import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
 public class CreateNewVaultPasswordController implements FxController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(CreateNewVaultPasswordController.class);
+	private static final URI DEFAULT_KEY_ID = URI.create(MasterkeyFileLoadingStrategy.SCHEME + ":" + MASTERKEY_FILENAME); // TODO better place?
 
 	private final Stage window;
 	private final Lazy<Scene> chooseLocationScene;
@@ -62,8 +69,9 @@ public class CreateNewVaultPasswordController implements FxController {
 	private final StringProperty recoveryKeyProperty;
 	private final VaultListManager vaultListManager;
 	private final ResourceBundle resourceBundle;
-	private final ObjectProperty<CharSequence> password;
 	private final ReadmeGenerator readmeGenerator;
+	private final SecureRandom csprng;
+	private final MasterkeyFileAccess masterkeyFileAccess;
 	private final BooleanProperty processing;
 	private final BooleanProperty readyToCreateVault;
 	private final ObjectBinding<ContentDisplay> createVaultButtonState;
@@ -71,9 +79,10 @@ public class CreateNewVaultPasswordController implements FxController {
 	public ToggleGroup recoveryKeyChoice;
 	public Toggle showRecoveryKey;
 	public Toggle skipRecoveryKey;
+	public NewPasswordController newPasswordSceneController;
 
 	@Inject
-	CreateNewVaultPasswordController(@AddVaultWizardWindow Stage window, @FxmlScene(FxmlFile.ADDVAULT_NEW_LOCATION) Lazy<Scene> chooseLocationScene, @FxmlScene(FxmlFile.ADDVAULT_NEW_RECOVERYKEY) Lazy<Scene> recoveryKeyScene, @FxmlScene(FxmlFile.ADDVAULT_SUCCESS) Lazy<Scene> successScene, ErrorComponent.Builder errorComponent, ExecutorService executor, RecoveryKeyFactory recoveryKeyFactory, @Named("vaultName") StringProperty vaultName, ObjectProperty<Path> vaultPath, @AddVaultWizardWindow ObjectProperty<Vault> vault, @Named("recoveryKey") StringProperty recoveryKey, VaultListManager vaultListManager, ResourceBundle resourceBundle, @Named("newPassword") ObjectProperty<CharSequence> password, ReadmeGenerator readmeGenerator) {
+	CreateNewVaultPasswordController(@AddVaultWizardWindow Stage window, @FxmlScene(FxmlFile.ADDVAULT_NEW_LOCATION) Lazy<Scene> chooseLocationScene, @FxmlScene(FxmlFile.ADDVAULT_NEW_RECOVERYKEY) Lazy<Scene> recoveryKeyScene, @FxmlScene(FxmlFile.ADDVAULT_SUCCESS) Lazy<Scene> successScene, ErrorComponent.Builder errorComponent, ExecutorService executor, RecoveryKeyFactory recoveryKeyFactory, @Named("vaultName") StringProperty vaultName, ObjectProperty<Path> vaultPath, @AddVaultWizardWindow ObjectProperty<Vault> vault, @Named("recoveryKey") StringProperty recoveryKey, VaultListManager vaultListManager, ResourceBundle resourceBundle, ReadmeGenerator readmeGenerator, SecureRandom csprng, MasterkeyFileAccess masterkeyFileAccess) {
 		this.window = window;
 		this.chooseLocationScene = chooseLocationScene;
 		this.recoveryKeyScene = recoveryKeyScene;
@@ -87,8 +96,9 @@ public class CreateNewVaultPasswordController implements FxController {
 		this.recoveryKeyProperty = recoveryKey;
 		this.vaultListManager = vaultListManager;
 		this.resourceBundle = resourceBundle;
-		this.password = password;
 		this.readmeGenerator = readmeGenerator;
+		this.csprng = csprng;
+		this.masterkeyFileAccess = masterkeyFileAccess;
 		this.processing = new SimpleBooleanProperty();
 		this.readyToCreateVault = new SimpleBooleanProperty();
 		this.createVaultButtonState = Bindings.createObjectBinding(this::getCreateVaultButtonState, processing);
@@ -96,8 +106,11 @@ public class CreateNewVaultPasswordController implements FxController {
 
 	@FXML
 	public void initialize() {
-		BooleanBinding isValidNewPassword = Bindings.createBooleanBinding(() -> password.get() != null && password.get().length() > 0, password);
-		readyToCreateVault.bind(isValidNewPassword.and(recoveryKeyChoice.selectedToggleProperty().isNotNull()).and(processing.not()));
+		readyToCreateVault.bind(newPasswordSceneController.passwordsMatchAndSufficientProperty().and(recoveryKeyChoice.selectedToggleProperty().isNotNull()).and(processing.not()));
+		window.setOnHiding(event -> {
+			newPasswordSceneController.passwordField.wipe();
+			newPasswordSceneController.reenterField.wipe();
+		});
 	}
 
 	@FXML
@@ -130,8 +143,8 @@ public class CreateNewVaultPasswordController implements FxController {
 		Path pathToVault = vaultPathProperty.get();
 		processing.set(true);
 		Tasks.create(() -> {
-			initializeVault(pathToVault, password.get());
-			return recoveryKeyFactory.createRecoveryKey(pathToVault, password.get());
+			initializeVault(pathToVault);
+			return recoveryKeyFactory.createRecoveryKey(pathToVault, newPasswordSceneController.passwordField.getCharacters());
 		}).onSuccess(recoveryKey -> {
 			initializationSucceeded(pathToVault);
 			recoveryKeyProperty.set(recoveryKey);
@@ -148,7 +161,7 @@ public class CreateNewVaultPasswordController implements FxController {
 		Path pathToVault = vaultPathProperty.get();
 		processing.set(true);
 		Tasks.create(() -> {
-			initializeVault(pathToVault, password.get());
+			initializeVault(pathToVault);
 		}).onSuccess(() -> {
 			initializationSucceeded(pathToVault);
 			window.setScene(successScene.get());
@@ -160,24 +173,35 @@ public class CreateNewVaultPasswordController implements FxController {
 		}).runOnce(executor);
 	}
 
-	private void initializeVault(Path path, CharSequence passphrase) throws IOException {
-		CryptoFileSystemProvider.initialize(path, MASTERKEY_FILENAME, passphrase);
-		CryptoFileSystemProperties fsProps = CryptoFileSystemProperties.cryptoFileSystemProperties() //
-				.withPassphrase(passphrase) //
-				.withFlags(Collections.emptySet()) //
-				.withMasterkeyFilename(MASTERKEY_FILENAME) //
-				.build();
+	private void initializeVault(Path path) throws IOException {
+		// 1. write masterkey:
+		Path masterkeyFilePath = path.resolve(MASTERKEY_FILENAME);
+		try (Masterkey masterkey = Masterkey.generate(csprng)) {
+			masterkeyFileAccess.persist(masterkey, masterkeyFilePath, newPasswordSceneController.passwordField.getCharacters());
 
-		String vaultReadmeFileName = resourceBundle.getString("addvault.new.readme.accessLocation.fileName");
-		try (FileSystem fs = CryptoFileSystemProvider.newFileSystem(path, fsProps); // 
-			 WritableByteChannel ch = Files.newByteChannel(fs.getPath("/", vaultReadmeFileName), StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE)) {
-			ch.write(US_ASCII.encode(readmeGenerator.createVaultAccessLocationReadmeRtf()));
+			// 2. initialize vault:
+			try {
+				MasterkeyLoader loader = ignored -> masterkey.clone();
+				CryptoFileSystemProperties fsProps = CryptoFileSystemProperties.cryptoFileSystemProperties().withCipherCombo(VaultCipherCombo.SIV_CTRMAC).withKeyLoader(loader).build();
+				CryptoFileSystemProvider.initialize(path, fsProps, DEFAULT_KEY_ID);
+
+				// 3. write vault-internal readme file:
+				String vaultReadmeFileName = resourceBundle.getString("addvault.new.readme.accessLocation.fileName");
+				try (FileSystem fs = CryptoFileSystemProvider.newFileSystem(path, fsProps); //
+					 WritableByteChannel ch = Files.newByteChannel(fs.getPath("/", vaultReadmeFileName), StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE)) {
+					ch.write(US_ASCII.encode(readmeGenerator.createVaultAccessLocationReadmeRtf()));
+				}
+			} catch (CryptoException e) {
+				throw new IOException("Failed initialize vault.", e);
+			}
 		}
 
+		// 4. write vault-external readme file:
 		String storagePathReadmeFileName = resourceBundle.getString("addvault.new.readme.storageLocation.fileName");
 		try (WritableByteChannel ch = Files.newByteChannel(path.resolve(storagePathReadmeFileName), StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE)) {
 			ch.write(US_ASCII.encode(readmeGenerator.createVaultStorageLocationReadmeRtf()));
 		}
+
 		LOG.info("Created vault at {}", path);
 	}
 
@@ -185,7 +209,7 @@ public class CreateNewVaultPasswordController implements FxController {
 		try {
 			Vault newVault = vaultListManager.add(pathToVault);
 			vaultProperty.set(newVault);
-		} catch (NoSuchFileException e) {
+		} catch (IOException e) {
 			throw new UncheckedIOException(e);
 		}
 	}

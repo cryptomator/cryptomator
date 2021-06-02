@@ -26,6 +26,7 @@ import javax.inject.Named;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ObjectBinding;
+import javafx.beans.binding.ObjectExpression;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
@@ -43,6 +44,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
+import static org.cryptomator.common.Constants.VAULTCONFIG_FILENAME;
 
 @MigrationScoped
 public class MigrationRunController implements FxController {
@@ -89,7 +91,12 @@ public class MigrationRunController implements FxController {
 		if (keychain.isSupported()) {
 			loadStoredPassword();
 		}
-		migrationButtonDisabled.bind(vault.stateProperty().isNotEqualTo(VaultState.NEEDS_MIGRATION).or(passwordField.textProperty().isEmpty()));
+
+		migrationButtonDisabled.bind(ObjectExpression.objectExpression(vault.stateProperty())
+				.isNotEqualTo(VaultState.Value.NEEDS_MIGRATION)
+				.or(passwordField.textProperty().isEmpty()));
+
+		window.setOnHiding(event -> passwordField.wipe());
 	}
 
 	@FXML
@@ -101,7 +108,7 @@ public class MigrationRunController implements FxController {
 	public void migrate() {
 		LOG.info("Migrating vault {}", vault.getPath());
 		CharSequence password = passwordField.getCharacters();
-		vault.setState(VaultState.PROCESSING);
+		vault.stateProperty().transition(VaultState.Value.NEEDS_MIGRATION, VaultState.Value.PROCESSING);
 		passwordField.setDisable(true);
 		ScheduledFuture<?> progressSyncTask = scheduler.scheduleAtFixedRate(() -> {
 			Platform.runLater(() -> {
@@ -110,15 +117,15 @@ public class MigrationRunController implements FxController {
 		}, 0, MIGRATION_PROGRESS_UPDATE_MILLIS, TimeUnit.MILLISECONDS);
 		Tasks.create(() -> {
 			Migrators migrators = Migrators.get();
-			migrators.migrate(vault.getPath(), MASTERKEY_FILENAME, password, this::migrationProgressChanged, this::migrationRequiresInput);
-			return migrators.needsMigration(vault.getPath(), MASTERKEY_FILENAME);
+			migrators.migrate(vault.getPath(), VAULTCONFIG_FILENAME, MASTERKEY_FILENAME, password, this::migrationProgressChanged, this::migrationRequiresInput);
+			return migrators.needsMigration(vault.getPath(), VAULTCONFIG_FILENAME, MASTERKEY_FILENAME);
 		}).onSuccess(needsAnotherMigration -> {
 			if (needsAnotherMigration) {
 				LOG.info("Migration of '{}' succeeded, but another migration is required.", vault.getDisplayName());
-				vault.setState(VaultState.NEEDS_MIGRATION);
+				vault.stateProperty().transition(VaultState.Value.PROCESSING, VaultState.Value.NEEDS_MIGRATION);
 			} else {
 				LOG.info("Migration of '{}' succeeded.", vault.getDisplayName());
-				vault.setState(VaultState.LOCKED);
+				vault.stateProperty().transition(VaultState.Value.PROCESSING, VaultState.Value.LOCKED);
 				passwordField.wipe();
 				window.setScene(successScene.get());
 			}
@@ -127,20 +134,20 @@ public class MigrationRunController implements FxController {
 			passwordField.setDisable(false);
 			passwordField.selectAll();
 			passwordField.requestFocus();
-			vault.setState(VaultState.NEEDS_MIGRATION);
+			vault.stateProperty().transition(VaultState.Value.PROCESSING, VaultState.Value.NEEDS_MIGRATION);
 		}).onError(FileSystemCapabilityChecker.MissingCapabilityException.class, e -> {
 			LOG.error("Underlying file system not supported.", e);
-			vault.setState(VaultState.NEEDS_MIGRATION);
+			vault.stateProperty().transition(VaultState.Value.PROCESSING, VaultState.Value.NEEDS_MIGRATION);
 			missingCapability.set(e.getMissingCapability());
 			window.setScene(capabilityErrorScene.get());
 		}).onError(FileNameTooLongException.class, e -> {
 			LOG.error("Migration failed because the underlying file system does not support long filenames.", e);
-			vault.setState(VaultState.NEEDS_MIGRATION);
+			vault.stateProperty().transition(VaultState.Value.PROCESSING, VaultState.Value.NEEDS_MIGRATION);
 			errorComponent.cause(e).window(window).returnToScene(startScene.get()).build().showErrorScene();
 			window.setScene(impossibleScene.get());
 		}).onError(Exception.class, e -> { // including RuntimeExceptions
 			LOG.error("Migration failed for technical reasons.", e);
-			vault.setState(VaultState.NEEDS_MIGRATION);
+			vault.stateProperty().transition(VaultState.Value.PROCESSING, VaultState.Value.NEEDS_MIGRATION);
 			errorComponent.cause(e).window(window).returnToScene(startScene.get()).build().showErrorScene();
 		}).andFinally(() -> {
 			passwordField.setDisable(false);

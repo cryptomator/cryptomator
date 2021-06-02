@@ -11,6 +11,7 @@ package org.cryptomator.common.vaults;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.cryptofs.CryptoFileSystemProvider;
+import org.cryptomator.cryptofs.DirStructure;
 import org.cryptomator.cryptofs.migration.Migrators;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,14 +21,16 @@ import javax.inject.Singleton;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.ResourceBundle;
-import java.util.stream.Collectors;
 
 import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
+import static org.cryptomator.common.Constants.VAULTCONFIG_FILENAME;
+import static org.cryptomator.common.vaults.VaultState.Value.ERROR;
 
 @Singleton
 public class VaultListManager {
@@ -52,19 +55,18 @@ public class VaultListManager {
 		return vaultList;
 	}
 
-	public Vault add(Path pathToVault) throws NoSuchFileException {
+	public Vault add(Path pathToVault) throws IOException {
 		Path normalizedPathToVault = pathToVault.normalize().toAbsolutePath();
-		if (!CryptoFileSystemProvider.containsVault(normalizedPathToVault, MASTERKEY_FILENAME)) {
+		if (CryptoFileSystemProvider.checkDirStructureForVault(normalizedPathToVault, VAULTCONFIG_FILENAME, MASTERKEY_FILENAME) == DirStructure.UNRELATED) {
 			throw new NoSuchFileException(normalizedPathToVault.toString(), null, "Not a vault directory");
 		}
-		Optional<Vault> alreadyExistingVault = get(normalizedPathToVault);
-		if (alreadyExistingVault.isPresent()) {
-			return alreadyExistingVault.get();
-		} else {
-			Vault newVault = create(newVaultSettings(normalizedPathToVault));
-			vaultList.add(newVault);
-			return newVault;
-		}
+
+		return get(normalizedPathToVault) //
+				.orElseGet(() -> {
+					Vault newVault = create(newVaultSettings(normalizedPathToVault));
+					vaultList.add(newVault);
+					return newVault;
+				});
 	}
 
 	private VaultSettings newVaultSettings(Path path) {
@@ -79,7 +81,7 @@ public class VaultListManager {
 	}
 
 	private void addAll(Collection<VaultSettings> vaultSettings) {
-		Collection<Vault> vaults = vaultSettings.stream().map(this::create).collect(Collectors.toList());
+		Collection<Vault> vaults = vaultSettings.stream().map(this::create).toList();
 		vaultList.addAll(vaults);
 	}
 
@@ -94,43 +96,45 @@ public class VaultListManager {
 	private Vault create(VaultSettings vaultSettings) {
 		VaultComponent.Builder compBuilder = vaultComponentBuilder.vaultSettings(vaultSettings);
 		try {
-			VaultState vaultState = determineVaultState(vaultSettings.path().get());
+			VaultState.Value vaultState = determineVaultState(vaultSettings.path().get());
 			compBuilder.initialVaultState(vaultState);
 		} catch (IOException e) {
 			LOG.warn("Failed to determine vault state for " + vaultSettings.path().get(), e);
-			compBuilder.initialVaultState(VaultState.ERROR);
+			compBuilder.initialVaultState(ERROR);
 			compBuilder.initialErrorCause(e);
 		}
 		return compBuilder.build().vault();
 	}
 
-	public static VaultState redetermineVaultState(Vault vault) {
-		VaultState previousState = vault.getState();
+	public static VaultState.Value redetermineVaultState(Vault vault) {
+		VaultState state = vault.stateProperty();
+		VaultState.Value previousState = state.getValue();
 		return switch (previousState) {
 			case LOCKED, NEEDS_MIGRATION, MISSING -> {
 				try {
-					VaultState determinedState = determineVaultState(vault.getPath());
-					vault.setState(determinedState);
+					var determinedState = determineVaultState(vault.getPath());
+					state.set(determinedState);
 					yield determinedState;
 				} catch (IOException e) {
 					LOG.warn("Failed to determine vault state for " + vault.getPath(), e);
-					vault.setState(VaultState.ERROR);
+					state.set(ERROR);
 					vault.setLastKnownException(e);
-					yield VaultState.ERROR;
+					yield ERROR;
 				}
 			}
 			case ERROR, UNLOCKED, PROCESSING -> previousState;
 		};
 	}
 
-	private static VaultState determineVaultState(Path pathToVault) throws IOException {
-		if (!CryptoFileSystemProvider.containsVault(pathToVault, MASTERKEY_FILENAME)) {
-			return VaultState.MISSING;
-		} else if (Migrators.get().needsMigration(pathToVault, MASTERKEY_FILENAME)) {
-			return VaultState.NEEDS_MIGRATION;
-		} else {
-			return VaultState.LOCKED;
+	private static VaultState.Value determineVaultState(Path pathToVault) throws IOException {
+		if (!Files.exists(pathToVault)) {
+			return VaultState.Value.MISSING;
 		}
+		return switch (CryptoFileSystemProvider.checkDirStructureForVault(pathToVault, VAULTCONFIG_FILENAME, MASTERKEY_FILENAME)) {
+			case VAULT -> VaultState.Value.LOCKED;
+			case UNRELATED -> VaultState.Value.MISSING;
+			case MAYBE_LEGACY -> Migrators.get().needsMigration(pathToVault, VAULTCONFIG_FILENAME, MASTERKEY_FILENAME) ? VaultState.Value.NEEDS_MIGRATION : VaultState.Value.MISSING;
+		};
 	}
 
 }

@@ -95,7 +95,7 @@ public class MainWindowTitleController implements FxController {
 
 	@FXML
 	public void showDonationKeyPreferences() {
-		application.showPreferencesWindow(SelectedPreferencesTab.DONATION_KEY);
+		application.showPreferencesWindow(SelectedPreferencesTab.CONTRIBUTE);
 	}
 
 	/* Getter/Setter */

@@ -38,12 +38,12 @@
 				<fx:include source="/fxml/preferences_updates.fxml"/>
 			</content>
 		</Tab>
-		<Tab fx:id="donationKeyTab" id="DONATION_KEY" text="%preferences.donationKey">
+		<Tab fx:id="contributeTab" id="CONTRIBUTE" text="%preferences.contribute">
 			<graphic>
 				<FontAwesome5IconView glyph="HEART"/>
 			</graphic>
 			<content>
-				<fx:include source="/fxml/preferences_donationkey.fxml"/>
+				<fx:include source="/fxml/preferences_contribute.fxml"/>
 			</content>
 		</Tab>
 		<Tab fx:id="aboutTab" id="ABOUT" text="%preferences.about">

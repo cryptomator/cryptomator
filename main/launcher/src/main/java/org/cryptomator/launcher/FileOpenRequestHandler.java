@@ -41,7 +41,7 @@ class FileOpenRequestHandler {
 	}
 
 	private void openFiles(OpenFilesEvent evt) {
-		Collection<Path> pathsToOpen = evt.getFiles().stream().map(File::toPath).collect(Collectors.toList());
+		Collection<Path> pathsToOpen = evt.getFiles().stream().map(File::toPath).toList();
 		AppLaunchEvent launchEvent = new AppLaunchEvent(AppLaunchEvent.EventType.OPEN_FILE, pathsToOpen);
 		tryToEnqueueFileOpenRequest(launchEvent);
 	}
@@ -59,7 +59,7 @@ class FileOpenRequestHandler {
 				LOG.trace("Argument not a valid path: {}", str);
 				return null;
 			}
-		}).filter(Objects::nonNull).collect(Collectors.toList());
+		}).filter(Objects::nonNull).toList();
 		if (!pathsToOpen.isEmpty()) {
 			AppLaunchEvent launchEvent = new AppLaunchEvent(AppLaunchEvent.EventType.OPEN_FILE, pathsToOpen);
 			tryToEnqueueFileOpenRequest(launchEvent);

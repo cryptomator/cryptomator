@@ -5,6 +5,7 @@ import org.cryptomator.common.keychain.KeychainManager;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.fxapp.FxApplication;
+import org.cryptomator.ui.health.HealthCheckComponent;
 import org.cryptomator.ui.vaultoptions.SelectedVaultOptionsTab;
 import org.cryptomator.ui.vaultoptions.VaultOptionsComponent;
 
@@ -13,6 +14,7 @@ import javafx.beans.binding.BooleanExpression;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.stage.Stage;
 import java.util.Optional;
@@ -28,7 +30,7 @@ public class VaultDetailLockedController implements FxController {
 	private final BooleanExpression passwordSaved;
 
 	@Inject
-	VaultDetailLockedController(ObjectProperty<Vault> vault, FxApplication application, VaultOptionsComponent.Builder vaultOptionsWindow, KeychainManager keychain, @MainWindow Stage mainWindow) {
+	VaultDetailLockedController(ObjectProperty<Vault> vault, FxApplication application,  VaultOptionsComponent.Builder vaultOptionsWindow, KeychainManager keychain, @MainWindow Stage mainWindow) {
 		this.vault = vault;
 		this.application = application;
 		this.vaultOptionsWindow = vaultOptionsWindow;
