@@ -41,18 +41,11 @@ public class VaultModule {
 	}
 
 	@Provides
-	@PerVault
-	public ObjectProperty<VaultState> provideVaultState(VaultState initialState) {
-		return new SimpleObjectProperty<>(initialState);
-	}
-
-	@Provides
 	@Named("lastKnownException")
 	@PerVault
 	public ObjectProperty<Exception> provideLastKnownException(@Named("lastKnownException") @Nullable Exception initialErrorCause) {
 		return new SimpleObjectProperty<>(initialErrorCause);
 	}
-
 
 	@Provides
 	public Volume provideVolume(Settings settings, WebDavVolume webDavVolume, FuseVolume fuseVolume, DokanyVolume dokanyVolume) {
@@ -105,7 +98,6 @@ public class VaultModule {
 		flags.append(" -oatomic_o_trunc");
 		flags.append(" -oauto_xattr");
 		flags.append(" -oauto_cache");
-		flags.append(" -omodules=iconv,from_code=UTF-8,to_code=UTF-8-MAC"); // show files names in Unicode NFD encoding
 		flags.append(" -onoappledouble"); // vastly impacts performance for some reason...
 		flags.append(" -odefault_permissions"); // let the kernel assume permissions based on file attributes etc
 

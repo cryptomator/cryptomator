@@ -29,7 +29,7 @@ class VaultSettingsJsonAdapter {
 		out.name("customMountPath").value(value.customMountPath().get());
 		out.name("usesReadOnlyMode").value(value.usesReadOnlyMode().get());
 		out.name("mountFlags").value(value.mountFlags().get());
-		out.name("filenameLengthLimit").value(value.filenameLengthLimit().get());
+		out.name("maxCleartextFilenameLength").value(value.maxCleartextFilenameLength().get());
 		out.name("actionAfterUnlock").value(value.actionAfterUnlock().get().name());
 		out.name("lockAfterTime").value(value.lockAfterTime().get());
 		out.name("lockTimeInMinutes").value(value.lockTimeInMinutes().get());
@@ -48,7 +48,7 @@ class VaultSettingsJsonAdapter {
 		boolean useCustomMountPath = VaultSettings.DEFAULT_USES_INDIVIDUAL_MOUNTPATH;
 		boolean usesReadOnlyMode = VaultSettings.DEFAULT_USES_READONLY_MODE;
 		String mountFlags = VaultSettings.DEFAULT_MOUNT_FLAGS;
-		int filenameLengthLimit = VaultSettings.DEFAULT_FILENAME_LENGTH_LIMIT;
+		int maxCleartextFilenameLength = VaultSettings.DEFAULT_MAX_CLEARTEXT_FILENAME_LENGTH;
 		WhenUnlocked actionAfterUnlock = VaultSettings.DEFAULT_ACTION_AFTER_UNLOCK;
 		boolean lockAfterTime = VaultSettings.DEFAULT_LOCK_AFTER_TIME;
 		int lockTimeInMinutes = VaultSettings.DEFAULT_LOCK_TIME_IN_MINUTES;
@@ -68,7 +68,7 @@ class VaultSettingsJsonAdapter {
 				case "individualMountPath", "customMountPath" -> customMountPath = in.nextString();
 				case "usesReadOnlyMode" -> usesReadOnlyMode = in.nextBoolean();
 				case "mountFlags" -> mountFlags = in.nextString();
-				case "filenameLengthLimit" -> filenameLengthLimit = in.nextInt();
+				case "maxCleartextFilenameLength" -> maxCleartextFilenameLength = in.nextInt();
 				case "actionAfterUnlock" -> actionAfterUnlock = parseActionAfterUnlock(in.nextString());
 				case "lockAfterTime" -> lockAfterTime = in.nextBoolean();
 				case "lockTimeInMinutes" -> lockTimeInMinutes = in.nextInt();
@@ -94,7 +94,7 @@ class VaultSettingsJsonAdapter {
 		vaultSettings.customMountPath().set(customMountPath);
 		vaultSettings.usesReadOnlyMode().set(usesReadOnlyMode);
 		vaultSettings.mountFlags().set(mountFlags);
-		vaultSettings.filenameLengthLimit().set(filenameLengthLimit);
+		vaultSettings.maxCleartextFilenameLength().set(maxCleartextFilenameLength);
 		vaultSettings.actionAfterUnlock().set(actionAfterUnlock);
 		vaultSettings.lockAfterTime().set(lockAfterTime);
 		vaultSettings.lockTimeInMinutes().set(lockTimeInMinutes);

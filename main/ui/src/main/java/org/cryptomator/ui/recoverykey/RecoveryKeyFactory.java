@@ -2,28 +2,34 @@ package org.cryptomator.ui.recoverykey;
 
 import com.google.common.base.Preconditions;
 import com.google.common.hash.Hashing;
-import org.cryptomator.cryptofs.CryptoFileSystemProvider;
+import org.cryptomator.cryptofs.common.MasterkeyBackupHelper;
+import org.cryptomator.cryptolib.api.CryptoException;
 import org.cryptomator.cryptolib.api.InvalidPassphraseException;
+import org.cryptomator.cryptolib.api.Masterkey;
+import org.cryptomator.cryptolib.common.MasterkeyFileAccess;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.Collection;
 
+import static org.cryptomator.common.Constants.MASTERKEY_BACKUP_SUFFIX;
 import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
 
 @Singleton
 public class RecoveryKeyFactory {
 
-	private static final byte[] PEPPER = new byte[0];
-
 	private final WordEncoder wordEncoder;
+	private final MasterkeyFileAccess masterkeyFileAccess;
 
 	@Inject
-	public RecoveryKeyFactory(WordEncoder wordEncoder) {
+	public RecoveryKeyFactory(WordEncoder wordEncoder, MasterkeyFileAccess masterkeyFileAccess) {
 		this.wordEncoder = wordEncoder;
+		this.masterkeyFileAccess = masterkeyFileAccess;
 	}
 
 	public Collection<String> getDictionary() {
@@ -36,11 +42,14 @@ public class RecoveryKeyFactory {
 	 * @return The recovery key of the vault at the given path
 	 * @throws IOException If the masterkey file could not be read
 	 * @throws InvalidPassphraseException If the provided password is wrong
+	 * @throws CryptoException In case of other cryptographic errors
 	 * @apiNote This is a long-running operation and should be invoked in a background thread
 	 */
-	public String createRecoveryKey(Path vaultPath, CharSequence password) throws IOException, InvalidPassphraseException {
-		byte[] rawKey = CryptoFileSystemProvider.exportRawKey(vaultPath, MASTERKEY_FILENAME, PEPPER, password);
-		try {
+	public String createRecoveryKey(Path vaultPath, CharSequence password) throws IOException, InvalidPassphraseException, CryptoException {
+		Path masterkeyPath = vaultPath.resolve(MASTERKEY_FILENAME);
+		byte[] rawKey = new byte[0];
+		try (var masterkey = masterkeyFileAccess.load(masterkeyPath, password)) {
+			rawKey = masterkey.getEncoded();
 			return createRecoveryKey(rawKey);
 		} finally {
 			Arrays.fill(rawKey, (byte) 0x00);
@@ -72,8 +81,15 @@ public class RecoveryKeyFactory {
 	 */
 	public void resetPasswordWithRecoveryKey(Path vaultPath, String recoveryKey, CharSequence newPassword) throws IOException, IllegalArgumentException {
 		final byte[] rawKey = decodeRecoveryKey(recoveryKey);
-		try {
-			CryptoFileSystemProvider.restoreRawKey(vaultPath, MASTERKEY_FILENAME, rawKey, PEPPER, newPassword);
+		try (var masterkey = new Masterkey(rawKey)) {
+			Path masterkeyPath = vaultPath.resolve(MASTERKEY_FILENAME);
+			if (Files.exists(masterkeyPath)) {
+				byte[] oldMasterkeyBytes = Files.readAllBytes(masterkeyPath);
+				// TODO: deduplicate with ChangePasswordController:
+				Path backupKeyPath = vaultPath.resolve(MASTERKEY_FILENAME + MasterkeyBackupHelper.generateFileIdSuffix(oldMasterkeyBytes) + MASTERKEY_BACKUP_SUFFIX);
+				Files.move(masterkeyPath, backupKeyPath, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+			}
+			masterkeyFileAccess.persist(masterkey, masterkeyPath, newPassword);
 		} finally {
 			Arrays.fill(rawKey, (byte) 0x00);
 		}

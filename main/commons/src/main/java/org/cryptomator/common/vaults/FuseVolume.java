@@ -6,8 +6,8 @@ import org.cryptomator.common.mountpoint.InvalidMountPointException;
 import org.cryptomator.common.mountpoint.MountPointChooser;
 import org.cryptomator.common.settings.VolumeImpl;
 import org.cryptomator.cryptofs.CryptoFileSystem;
-import org.cryptomator.frontend.fuse.mount.CommandFailedException;
 import org.cryptomator.frontend.fuse.mount.EnvironmentVariables;
+import org.cryptomator.frontend.fuse.mount.FuseMountException;
 import org.cryptomator.frontend.fuse.mount.FuseMountFactory;
 import org.cryptomator.frontend.fuse.mount.FuseNotSupportedException;
 import org.cryptomator.frontend.fuse.mount.Mount;
@@ -20,6 +20,7 @@ import javax.inject.Named;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
 public class FuseVolume extends AbstractVolume {
@@ -35,20 +36,21 @@ public class FuseVolume extends AbstractVolume {
 	}
 
 	@Override
-	public void mount(CryptoFileSystem fs, String mountFlags) throws InvalidMountPointException, VolumeException {
+	public void mount(CryptoFileSystem fs, String mountFlags, Consumer<Throwable> onExitAction) throws InvalidMountPointException, VolumeException {
 		this.mountPoint = determineMountPoint();
-
-		mount(fs.getPath("/"), mountFlags);
+		mount(fs.getPath("/"), mountFlags, onExitAction);
 	}
 
-	private void mount(Path root, String mountFlags) throws VolumeException {
+	private void mount(Path root, String mountFlags, Consumer<Throwable> onExitAction) throws VolumeException {
 		try {
 			Mounter mounter = FuseMountFactory.getMounter();
 			EnvironmentVariables envVars = EnvironmentVariables.create() //
-					.withFlags(splitFlags(mountFlags)).withMountPoint(mountPoint) //
+					.withFlags(splitFlags(mountFlags)) //
+					.withMountPoint(mountPoint) //
+					.withFileNameTranscoder(mounter.defaultFileNameTranscoder()) //
 					.build();
-			this.mount = mounter.mount(root, envVars);
-		} catch (CommandFailedException | FuseNotSupportedException e) {
+			this.mount = mounter.mount(root, envVars, onExitAction);
+		} catch ( FuseMountException | FuseNotSupportedException e) {
 			throw new VolumeException("Unable to mount Filesystem", e);
 		}
 	}
@@ -89,8 +91,7 @@ public class FuseVolume extends AbstractVolume {
 	public synchronized void unmountForced() throws VolumeException {
 		try {
 			mount.unmountForced();
-			mount.close();
-		} catch (CommandFailedException e) {
+		} catch (FuseMountException e) {
 			throw new VolumeException(e);
 		}
 		cleanupMountPoint();
@@ -100,8 +101,7 @@ public class FuseVolume extends AbstractVolume {
 	public synchronized void unmount() throws VolumeException {
 		try {
 			mount.unmount();
-			mount.close();
-		} catch (CommandFailedException e) {
+		} catch (FuseMountException e) {
 			throw new VolumeException(e);
 		}
 		cleanupMountPoint();

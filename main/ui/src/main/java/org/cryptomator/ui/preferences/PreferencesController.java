@@ -26,7 +26,7 @@ public class PreferencesController implements FxController {
 	public Tab generalTab;
 	public Tab volumeTab;
 	public Tab updatesTab;
-	public Tab donationKeyTab;
+	public Tab contributeTab;
 	public Tab aboutTab;
 
 	@Inject
@@ -52,7 +52,7 @@ public class PreferencesController implements FxController {
 		return switch (selectedTab) {
 			case UPDATES -> updatesTab;
 			case VOLUME -> volumeTab;
-			case DONATION_KEY -> donationKeyTab;
+			case CONTRIBUTE -> contributeTab;
 			case GENERAL -> generalTab;
 			case ABOUT -> aboutTab;
 			case ANY -> updateAvailable.get() ? updatesTab : generalTab;

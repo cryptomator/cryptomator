@@ -16,15 +16,21 @@ public class LocationPresets {
 	private static final String[] DROPBOX_LOCATIONS = {"~/Dropbox"};
 	private static final String[] GDRIVE_LOCATIONS = {"~/Google Drive"};
 	private static final String[] ONEDRIVE_LOCATIONS = {"~/OneDrive"};
+	private static final String[] MEGA_LOCATIONS = {"~/MEGA"};
+	private static final String[] PCLOUD_LOCATIONS = {"~/pCloudDrive"};
 
 	private final ReadOnlyObjectProperty<Path> iclouddriveLocation;
 	private final ReadOnlyObjectProperty<Path> dropboxLocation;
 	private final ReadOnlyObjectProperty<Path> gdriveLocation;
 	private final ReadOnlyObjectProperty<Path> onedriveLocation;
+	private final ReadOnlyObjectProperty<Path> megaLocation;
+	private final ReadOnlyObjectProperty<Path> pcloudLocation;
 	private final BooleanBinding foundIclouddrive;
 	private final BooleanBinding foundDropbox;
 	private final BooleanBinding foundGdrive;
 	private final BooleanBinding foundOnedrive;
+	private final BooleanBinding foundMega;
+	private final BooleanBinding foundPcloud;
 
 	@Inject
 	public LocationPresets() {
@@ -32,10 +38,14 @@ public class LocationPresets {
 		this.dropboxLocation = new SimpleObjectProperty<>(existingWritablePath(DROPBOX_LOCATIONS));
 		this.gdriveLocation = new SimpleObjectProperty<>(existingWritablePath(GDRIVE_LOCATIONS));
 		this.onedriveLocation = new SimpleObjectProperty<>(existingWritablePath(ONEDRIVE_LOCATIONS));
+		this.megaLocation = new SimpleObjectProperty<>(existingWritablePath(MEGA_LOCATIONS));
+		this.pcloudLocation = new SimpleObjectProperty<>(existingWritablePath(PCLOUD_LOCATIONS));
 		this.foundIclouddrive = iclouddriveLocation.isNotNull();
 		this.foundDropbox = dropboxLocation.isNotNull();
 		this.foundGdrive = gdriveLocation.isNotNull();
 		this.foundOnedrive = onedriveLocation.isNotNull();
+		this.foundMega = megaLocation.isNotNull();
+		this.foundPcloud = pcloudLocation.isNotNull();
 	}
 
 	private static Path existingWritablePath(String... candidates) {
@@ -120,6 +130,38 @@ public class LocationPresets {
 
 	public boolean isFoundOnedrive() {
 		return foundOnedrive.get();
+	}
+
+	public ReadOnlyObjectProperty<Path> megaLocationProperty() {
+		return megaLocation;
+	}
+
+	public Path getMegaLocation() {
+		return megaLocation.get();
+	}
+
+	public BooleanBinding foundMegaProperty() {
+		return foundMega;
+	}
+
+	public boolean isFoundMega() {
+		return foundMega.get();
+	}
+
+	public ReadOnlyObjectProperty<Path> pcloudLocationProperty() {
+		return pcloudLocation;
+	}
+
+	public Path getPcloudLocation() {
+		return pcloudLocation.get();
+	}
+
+	public BooleanBinding foundPcloudProperty() {
+		return foundPcloud;
+	}
+
+	public boolean isFoundPcloud() {
+		return foundPcloud.get();
 	}
 
 }

@@ -14,11 +14,13 @@ import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.UiTheme;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultListManager;
+import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.integrations.tray.TrayIntegrationProvider;
 import org.cryptomator.integrations.uiappearance.Theme;
 import org.cryptomator.integrations.uiappearance.UiAppearanceException;
 import org.cryptomator.integrations.uiappearance.UiAppearanceListener;
 import org.cryptomator.integrations.uiappearance.UiAppearanceProvider;
+import org.cryptomator.ui.common.ErrorComponent;
 import org.cryptomator.ui.common.VaultService;
 import org.cryptomator.ui.lock.LockComponent;
 import org.cryptomator.ui.mainwindow.MainWindowComponent;
@@ -47,8 +49,9 @@ public class FxApplication extends Application {
 	private final Lazy<MainWindowComponent> mainWindow;
 	private final Lazy<PreferencesComponent> preferencesWindow;
 	private final Lazy<QuitComponent> quitWindow;
-	private final Provider<UnlockComponent.Builder> unlockWindowBuilderProvider;
-	private final Provider<LockComponent.Builder> lockWindowBuilderProvider;
+	private final Provider<UnlockComponent.Builder> unlockWorkflowBuilderProvider;
+	private final Provider<LockComponent.Builder> lockWorkflowBuilderProvider;
+	private final ErrorComponent.Builder errorWindowBuilder;
 	private final Optional<TrayIntegrationProvider> trayIntegration;
 	private final Optional<UiAppearanceProvider> appearanceProvider;
 	private final VaultService vaultService;
@@ -60,13 +63,14 @@ public class FxApplication extends Application {
 	private final ScheduledExecutorService scheduledExecutorService;
 
 	@Inject
-	FxApplication(Settings settings, Lazy<MainWindowComponent> mainWindow, Lazy<PreferencesComponent> preferencesWindow, Provider<UnlockComponent.Builder> unlockWindowBuilderProvider, Provider<LockComponent.Builder> lockWindowBuilderProvider, Lazy<QuitComponent> quitWindow, Optional<TrayIntegrationProvider> trayIntegration, Optional<UiAppearanceProvider> appearanceProvider, VaultService vaultService, LicenseHolder licenseHolder, VaultListManager vaultListManager, ScheduledExecutorService scheduledExecutorService) {
+	FxApplication(Settings settings, Lazy<MainWindowComponent> mainWindow, Lazy<PreferencesComponent> preferencesWindow, Provider<UnlockComponent.Builder> unlockWorkflowBuilderProvider, Provider<LockComponent.Builder> lockWorkflowBuilderProvider, Lazy<QuitComponent> quitWindow, ErrorComponent.Builder errorWindowBuilder, Optional<TrayIntegrationProvider> trayIntegration, Optional<UiAppearanceProvider> appearanceProvider, VaultService vaultService, LicenseHolder licenseHolder, VaultListManager vaultListManager, ScheduledExecutorService scheduledExecutorService) {
 		this.settings = settings;
 		this.mainWindow = mainWindow;
 		this.preferencesWindow = preferencesWindow;
-		this.unlockWindowBuilderProvider = unlockWindowBuilderProvider;
-		this.lockWindowBuilderProvider = lockWindowBuilderProvider;
+		this.unlockWorkflowBuilderProvider = unlockWorkflowBuilderProvider;
+		this.lockWorkflowBuilderProvider = lockWorkflowBuilderProvider;
 		this.quitWindow = quitWindow;
+		this.errorWindowBuilder = errorWindowBuilder;
 		this.trayIntegration = trayIntegration;
 		this.appearanceProvider = appearanceProvider;
 		this.vaultService = vaultService;
@@ -93,7 +97,7 @@ public class FxApplication extends Application {
 	}
 
 	private void hasVisibleStagesChanged(@SuppressWarnings("unused") ObservableValue<? extends Boolean> observableValue, @SuppressWarnings("unused") boolean oldValue, boolean newValue) {
-		LOG.warn("has visible stages: {}", newValue);
+		LOG.debug("has visible stages: {}", newValue);
 		if (newValue) {
 			trayIntegration.ifPresent(TrayIntegrationProvider::restoredFromTray);
 		} else {
@@ -120,16 +124,24 @@ public class FxApplication extends Application {
 
 	public void startUnlockWorkflow(Vault vault, Optional<Stage> owner) {
 		Platform.runLater(() -> {
-			unlockWindowBuilderProvider.get().vault(vault).owner(owner).build().startUnlockWorkflow();
-			LOG.debug("Showing UnlockWindow for {}", vault.getDisplayName());
+			if (vault.stateProperty().transition(VaultState.Value.LOCKED, VaultState.Value.PROCESSING)) {
+				unlockWorkflowBuilderProvider.get().vault(vault).owner(owner).build().startUnlockWorkflow();
+				LOG.debug("Start unlock workflow for {}", vault.getDisplayName());
+			} else {
+				showMainWindow().thenAccept(mainWindow -> errorWindowBuilder.window(mainWindow).cause(new IllegalStateException("Unable to unlock vault in non-locked state.")));
+			}
 		});
 		checkAutolock(vault, owner);
 	}
 
 	public void startLockWorkflow(Vault vault, Optional<Stage> owner) {
 		Platform.runLater(() -> {
-			lockWindowBuilderProvider.get().vault(vault).owner(owner).build().startLockWorkflow();
-			LOG.debug("Start lock workflow for {}", vault.getDisplayName());
+			if (vault.stateProperty().transition(VaultState.Value.UNLOCKED, VaultState.Value.PROCESSING)) {
+				lockWorkflowBuilderProvider.get().vault(vault).owner(owner).build().startLockWorkflow();
+				LOG.debug("Start lock workflow for {}", vault.getDisplayName());
+			} else {
+				showMainWindow().thenAccept(mainWindow -> errorWindowBuilder.window(mainWindow).cause(new IllegalStateException("Unable to lock vault in non-unlocked state.")));
+			}
 		});
 	}
 

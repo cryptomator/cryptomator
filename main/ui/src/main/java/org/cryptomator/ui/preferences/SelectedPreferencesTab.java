@@ -22,9 +22,9 @@ public enum SelectedPreferencesTab {
 	UPDATES,
 
 	/**
-	 * Show donation key tab
+	 * Show contribute tab
 	 */
-	DONATION_KEY,
+	CONTRIBUTE,
 
 	/**
 	 * Show about tab

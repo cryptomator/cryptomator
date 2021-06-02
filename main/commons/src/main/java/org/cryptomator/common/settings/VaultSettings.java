@@ -28,7 +28,7 @@ public class VaultSettings {
 	public static final boolean DEFAULT_USES_INDIVIDUAL_MOUNTPATH = false;
 	public static final boolean DEFAULT_USES_READONLY_MODE = false;
 	public static final String DEFAULT_MOUNT_FLAGS = "";
-	public static final int DEFAULT_FILENAME_LENGTH_LIMIT = -1;
+	public static final int DEFAULT_MAX_CLEARTEXT_FILENAME_LENGTH = -1;
 	public static final WhenUnlocked DEFAULT_ACTION_AFTER_UNLOCK = WhenUnlocked.ASK;
 	public static final boolean DEFAULT_LOCK_AFTER_TIME = false;
 	public static final int DEFAULT_LOCK_TIME_IN_MINUTES = 30;
@@ -45,7 +45,7 @@ public class VaultSettings {
 	private final StringProperty customMountPath = new SimpleStringProperty();
 	private final BooleanProperty usesReadOnlyMode = new SimpleBooleanProperty(DEFAULT_USES_READONLY_MODE);
 	private final StringProperty mountFlags = new SimpleStringProperty(DEFAULT_MOUNT_FLAGS);
-	private final IntegerProperty filenameLengthLimit = new SimpleIntegerProperty(DEFAULT_FILENAME_LENGTH_LIMIT);
+	private final IntegerProperty maxCleartextFilenameLength = new SimpleIntegerProperty(DEFAULT_MAX_CLEARTEXT_FILENAME_LENGTH);
 	private final ObjectProperty<WhenUnlocked> actionAfterUnlock = new SimpleObjectProperty<>(DEFAULT_ACTION_AFTER_UNLOCK);
 	private final BooleanProperty lockAfterTime = new SimpleBooleanProperty(DEFAULT_LOCK_AFTER_TIME);
 	private final IntegerProperty lockTimeInMinutes = new SimpleIntegerProperty(DEFAULT_LOCK_TIME_IN_MINUTES);
@@ -57,7 +57,7 @@ public class VaultSettings {
 	}
 
 	Observable[] observables() {
-		return new Observable[]{path, displayName, winDriveLetter, unlockAfterStartup, revealAfterMount, useCustomMountPath, customMountPath, usesReadOnlyMode, mountFlags, filenameLengthLimit, actionAfterUnlock,  lockAfterTime, lockTimeInMinutes};
+		return new Observable[]{path, displayName, winDriveLetter, unlockAfterStartup, revealAfterMount, useCustomMountPath, customMountPath, usesReadOnlyMode, mountFlags, maxCleartextFilenameLength, actionAfterUnlock,  lockAfterTime, lockTimeInMinutes};
 	}
 
 	public static VaultSettings withRandomId() {
@@ -146,8 +146,8 @@ public class VaultSettings {
 		return mountFlags;
 	}
 
-	public IntegerProperty filenameLengthLimit() {
-		return filenameLengthLimit;
+	public IntegerProperty maxCleartextFilenameLength() {
+		return maxCleartextFilenameLength;
 	}
 
 	public ObjectProperty<WhenUnlocked> actionAfterUnlock() {

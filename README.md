@@ -48,7 +48,7 @@ Download native binaries of Cryptomator on [cryptomator.org](https://cryptomator
 
 ## Features
 
-- Works with Dropbox, Google Drive, OneDrive, ownCloud, Nextcloud and any other cloud storage service which synchronizes with a local directory
+- Works with Dropbox, Google Drive, OneDrive, MEGA, pCloud, ownCloud, Nextcloud and any other cloud storage service which synchronizes with a local directory
 - Open Source means: No backdoors, control is better than trust
 - Client-side: No accounts, no data shared with any online service
 - Totally transparent: Just work on the virtual drive as if it were a USB flash drive
