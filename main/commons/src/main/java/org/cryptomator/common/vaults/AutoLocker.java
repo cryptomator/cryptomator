@@ -7,7 +7,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import javafx.collections.ObservableList;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -48,11 +47,10 @@ public class AutoLocker {
 	private boolean exceedsIdleTime(Vault vault) {
 		assert vault.isUnlocked();
 		// TODO: shouldn't we read these properties from within FX Application Thread?
-		if (vault.getVaultSettings().lockAfterTime().get()) {
-			int maxIdleMinutes = vault.getVaultSettings().lockTimeInMinutes().get();
-			var idleSince = vault.getStats().getLastActivity();
-			var threshold = idleSince.plus(maxIdleMinutes, ChronoUnit.MINUTES);
-			return threshold.isBefore(Instant.now());
+		if (vault.getVaultSettings().autoLockWhenIdle().get()) {
+			int maxIdleSeconds = vault.getVaultSettings().autoLockIdleSeconds().get();
+			var deadline = vault.getStats().getLastActivity().plusSeconds(maxIdleSeconds);
+			return deadline.isBefore(Instant.now());
 		} else {
 			return false;
 		}

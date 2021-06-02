@@ -31,8 +31,8 @@ class VaultSettingsJsonAdapter {
 		out.name("mountFlags").value(value.mountFlags().get());
 		out.name("maxCleartextFilenameLength").value(value.maxCleartextFilenameLength().get());
 		out.name("actionAfterUnlock").value(value.actionAfterUnlock().get().name());
-		out.name("lockAfterTime").value(value.lockAfterTime().get());
-		out.name("lockTimeInMinutes").value(value.lockTimeInMinutes().get());
+		out.name("autoLockWhenIdle").value(value.autoLockWhenIdle().get());
+		out.name("autoLockIdleSeconds").value(value.autoLockIdleSeconds().get());
 		out.endObject();
 	}
 
@@ -50,8 +50,8 @@ class VaultSettingsJsonAdapter {
 		String mountFlags = VaultSettings.DEFAULT_MOUNT_FLAGS;
 		int maxCleartextFilenameLength = VaultSettings.DEFAULT_MAX_CLEARTEXT_FILENAME_LENGTH;
 		WhenUnlocked actionAfterUnlock = VaultSettings.DEFAULT_ACTION_AFTER_UNLOCK;
-		boolean lockAfterTime = VaultSettings.DEFAULT_LOCK_AFTER_TIME;
-		int lockTimeInMinutes = VaultSettings.DEFAULT_LOCK_TIME_IN_MINUTES;
+		boolean autoLockWhenIdle = VaultSettings.DEFAULT_AUTOLOCK_WHEN_IDLE;
+		int autoLockIdleSeconds = VaultSettings.DEFAULT_AUTOLOCK_IDLE_SECONDS;
 
 		in.beginObject();
 		while (in.hasNext()) {
@@ -70,8 +70,8 @@ class VaultSettingsJsonAdapter {
 				case "mountFlags" -> mountFlags = in.nextString();
 				case "maxCleartextFilenameLength" -> maxCleartextFilenameLength = in.nextInt();
 				case "actionAfterUnlock" -> actionAfterUnlock = parseActionAfterUnlock(in.nextString());
-				case "lockAfterTime" -> lockAfterTime = in.nextBoolean();
-				case "lockTimeInMinutes" -> lockTimeInMinutes = in.nextInt();
+				case "autoLockWhenIdle" -> autoLockWhenIdle = in.nextBoolean();
+				case "autoLockIdleSeconds" -> autoLockIdleSeconds = in.nextInt();
 				default -> {
 					LOG.warn("Unsupported vault setting found in JSON: " + name);
 					in.skipValue();
@@ -96,8 +96,8 @@ class VaultSettingsJsonAdapter {
 		vaultSettings.mountFlags().set(mountFlags);
 		vaultSettings.maxCleartextFilenameLength().set(maxCleartextFilenameLength);
 		vaultSettings.actionAfterUnlock().set(actionAfterUnlock);
-		vaultSettings.lockAfterTime().set(lockAfterTime);
-		vaultSettings.lockTimeInMinutes().set(lockTimeInMinutes);
+		vaultSettings.autoLockWhenIdle().set(autoLockWhenIdle);
+		vaultSettings.autoLockIdleSeconds().set(autoLockIdleSeconds);
 		return vaultSettings;
 	}
 
