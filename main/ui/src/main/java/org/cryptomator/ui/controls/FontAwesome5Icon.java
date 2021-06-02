@@ -39,11 +39,11 @@ public enum FontAwesome5Icon {
 	REDO("\uF01E"), //
 	SEARCH("\uF002"), //
 	SPINNER("\uF110"), //
+	STOPWATCH("\uF2F2"), //
 	SYNC("\uF021"), //
 	TIMES("\uF00D"), //
 	TRASH("\uF1F8"), //
 	UNLINK("\uf127"), //
-	USER_LOCK("\uF502"), //
 	WRENCH("\uF0AD"), //
 	WINDOW_MINIMIZE("\uF2D1"), //
 	;

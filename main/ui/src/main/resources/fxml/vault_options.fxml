@@ -38,7 +38,7 @@
 		</Tab>
 		<Tab fx:id="autoLockTab" id="AUTOLOCK" text="%vaultOptions.autoLock">
 			<graphic>
-				<FontAwesome5IconView glyph="USER_LOCK"/>
+				<FontAwesome5IconView glyph="STOPWATCH"/>
 			</graphic>
 			<content>
 				<fx:include source="/fxml/vault_options_autolock.fxml"/>
