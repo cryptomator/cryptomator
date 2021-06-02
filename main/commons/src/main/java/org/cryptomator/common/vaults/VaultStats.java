@@ -83,7 +83,6 @@ public class VaultStats {
 
 		// check for any I/O activity
 		if (newAccessCount > oldAccessCount) {
-			LOG.info("ACTIVITY!");
 			lastActivity.set(Instant.now());
 		}
 	}
