@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import org.cryptomator.ui.controls.FormattedLabel?>
+<?import org.cryptomator.ui.controls.NumericTextField?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.CheckBox?>
-<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Text?>
 <?import javafx.scene.text.TextFlow?>
@@ -18,7 +18,7 @@
 		<TextFlow styleClass="text-flow" prefWidth="-Infinity">
 			<CheckBox text="%vaultOptions.autoLock.lockAfterTimePart1" fx:id="lockAfterTimeCheckbox"/>
 			<Text text=" "/>
-			<TextField fx:id="lockTimeInMinutesTextField" prefWidth="50"/>
+			<NumericTextField fx:id="lockTimeInMinutesTextField" prefWidth="50"/>
 			<Text text=" "/>
 			<FormattedLabel format="%vaultOptions.autoLock.lockAfterTimePart2"/>
 		</TextFlow>
