@@ -20,41 +20,37 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
       - name: Ensure to use tagged version
-        run: mvn versions:set --file main/pom.xml -DnewVersion=${GITHUB_REF##*/} # use shell parameter expansion to strip of 'refs/tags'
+        run: mvn versions:set -DnewVersion=${GITHUB_REF##*/} # use shell parameter expansion to strip of 'refs/tags'
         if: startsWith(github.ref, 'refs/tags/')
       - name: Build and Test
-        run: mvn -B install --file main/pom.xml -Pcoverage
-      - name: Run Codacy Coverage Reporter
-        if: github.repository == 'cryptomator/cryptomator'
-        run: |
-          curl -o ~/codacy-coverage-reporter.jar https://repo.maven.apache.org/maven2/com/codacy/codacy-coverage-reporter/7.1.0/codacy-coverage-reporter-7.1.0-assembly.jar
-          $JAVA_HOME/bin/java --illegal-access=permit -jar ~/codacy-coverage-reporter.jar report -l Java -r main/commons/target/site/jacoco/jacoco.xml --partial
-          $JAVA_HOME/bin/java --illegal-access=permit -jar ~/codacy-coverage-reporter.jar report -l Java -r main/ui/target/site/jacoco/jacoco.xml --partial
-          $JAVA_HOME/bin/java --illegal-access=permit -jar ~/codacy-coverage-reporter.jar report -l Java -r main/launcher/target/site/jacoco/jacoco.xml --partial
-          $JAVA_HOME/bin/java --illegal-access=permit -jar ~/codacy-coverage-reporter.jar final
+        run: mvn -B clean install jacoco:report -Pcoverage,dependency-check
+      - name: Upload code coverage report
+        id: codacyCoverageReporter
+        run: bash <(curl -Ls https://coverage.codacy.com/get.sh)
         env:
           CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
+        continue-on-error: true
       - name: Assemble buildkit-linux.zip
-        run: mvn -B clean package -DskipTests --file main/pom.xml --resume-from=buildkit -Prelease,linux
-      - name: Upload buildkit-linux.zip
-        uses: actions/upload-artifact@v1
-        with:
-          name: buildkit-linux.zip
-          path: main/buildkit/target/buildkit-linux.zip
-      - name: Assemble buildkit-mac.zip
-        run: mvn -B clean package -DskipTests --file main/pom.xml --resume-from=buildkit -Prelease,mac
-      - name: Upload buildkit-mac.zip
-        uses: actions/upload-artifact@v1
-        with:
-          name: buildkit-mac.zip
-          path: main/buildkit/target/buildkit-mac.zip
-      - name: Assemble buildkit-win.zip
-        run: mvn -B clean package -DskipTests --file main/pom.xml --resume-from=buildkit -Prelease,windows
-      - name: Upload buildkit-win.zip
-        uses: actions/upload-artifact@v1
-        with:
-          name: buildkit-win.zip
-          path: main/buildkit/target/buildkit-win.zip
+        run: mvn -B clean package -DskipTests --resume-from=buildkit -Prelease,linux
+#      - name: Upload buildkit-linux.zip
+#        uses: actions/upload-artifact@v1
+#        with:
+#          name: buildkit-linux.zip
+#          path: main/buildkit/target/buildkit-linux.zip
+#      - name: Assemble buildkit-mac.zip
+#        run: mvn -B clean package -DskipTests --resume-from=buildkit -Prelease,mac
+#      - name: Upload buildkit-mac.zip
+#        uses: actions/upload-artifact@v1
+#        with:
+#          name: buildkit-mac.zip
+#          path: main/buildkit/target/buildkit-mac.zip
+#      - name: Assemble buildkit-win.zip
+#        run: mvn -B clean package -DskipTests --resume-from=buildkit -Prelease,windows
+#      - name: Upload buildkit-win.zip
+#        uses: actions/upload-artifact@v1
+#        with:
+#          name: buildkit-win.zip
+#          path: main/buildkit/target/buildkit-win.zip
           
   release:
     name: Draft a Release on GitHub Releases
