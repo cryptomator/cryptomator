@@ -88,12 +88,13 @@ For more information on the security details visit [cryptomator.org](https://doc
 
 ```
 cd main
-mvn clean install -Prelease,windows
-# or mvn clean install -Prelease,mac
-# or mvn clean install -Prelease,linux
+mvn clean install
+# or mvn clean install -Pwindows
+# or mvn clean install -Pmac
+# or mvn clean install -Plinux
 ```
 
-This will build all the jars and bundle them together with their OS-specific dependencies under `main/buildkit/target`. This can now be used to build native packages.
+This will build all the jars and bundle them together with their OS-specific dependencies under `target`. This can now be used to build native packages.
 
 ### Start Cryptomator
 
