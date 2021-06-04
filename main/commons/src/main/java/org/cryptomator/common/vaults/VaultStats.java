@@ -58,7 +58,10 @@ public class VaultStats {
 		if (VaultState.Value.UNLOCKED == state.get()) {
 			assert fs.get() != null;
 			LOG.debug("start recording stats");
-			Platform.runLater(() -> updateService.restart());
+			Platform.runLater(() -> {
+				lastActivity.set(Instant.now());
+				updateService.restart();
+			});
 		} else {
 			LOG.debug("stop recording stats");
 			Platform.runLater(() -> updateService.cancel());
