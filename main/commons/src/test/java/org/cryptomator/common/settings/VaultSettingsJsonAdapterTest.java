@@ -7,15 +7,17 @@ package org.cryptomator.common.settings;
 
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
-import org.hamcrest.CoreMatchers;
-import org.hamcrest.MatcherAssert;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.nio.file.Paths;
+
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class VaultSettingsJsonAdapterTest {
 
@@ -27,14 +29,15 @@ public class VaultSettingsJsonAdapterTest {
 		JsonReader jsonReader = new JsonReader(new StringReader(json));
 
 		VaultSettings vaultSettings = adapter.read(jsonReader);
-		Assertions.assertEquals("foo", vaultSettings.getId());
-		Assertions.assertEquals(Paths.get("/foo/bar"), vaultSettings.path().get());
-		Assertions.assertEquals("test", vaultSettings.displayName().get());
-		Assertions.assertEquals("X", vaultSettings.winDriveLetter().get());
-		Assertions.assertEquals("/home/test/crypto", vaultSettings.customMountPath().get());
-		Assertions.assertEquals("--foo --bar", vaultSettings.mountFlags().get());
 
-
+		assertAll(
+				() -> assertEquals("foo", vaultSettings.getId()),
+				() -> assertEquals(Paths.get("/foo/bar"), vaultSettings.path().get()),
+				() -> assertEquals("test", vaultSettings.displayName().get()),
+				() -> assertEquals("X", vaultSettings.winDriveLetter().get()),
+				() -> assertEquals("/home/test/crypto", vaultSettings.customMountPath().get()),
+				() -> assertEquals("--foo --bar", vaultSettings.mountFlags().get())
+		);
 	}
 
 	@Test
@@ -49,14 +52,17 @@ public class VaultSettingsJsonAdapterTest {
 		adapter.write(jsonWriter, vaultSettings);
 		String result = buf.toString();
 
-		MatcherAssert.assertThat(result, CoreMatchers.containsString("\"id\":\"test\""));
-		if (System.getProperty("os.name").contains("Windows")) {
-			MatcherAssert.assertThat(result, CoreMatchers.containsString("\"path\":\"\\\\foo\\\\bar\""));
-		} else {
-			MatcherAssert.assertThat(result, CoreMatchers.containsString("\"path\":\"/foo/bar\""));
-		}
-		MatcherAssert.assertThat(result, CoreMatchers.containsString("\"displayName\":\"mountyMcMountFace\""));
-		MatcherAssert.assertThat(result, CoreMatchers.containsString("\"mountFlags\":\"--foo --bar\""));
+		assertAll(
+				() -> assertThat(result, containsString("\"id\":\"test\"")),
+				() -> {
+					if (System.getProperty("os.name").contains("Windows")) {
+						assertThat(result, containsString("\"path\":\"\\\\foo\\\\bar\""));
+					} else {
+						assertThat(result, containsString("\"path\":\"/foo/bar\""));
+					}
+				},
+				() -> assertThat(result, containsString("\"displayName\":\"mountyMcMountFace\"")),
+				() -> assertThat(result, containsString("\"mountFlags\":\"--foo --bar\""))
+		);
 	}
-
 }
