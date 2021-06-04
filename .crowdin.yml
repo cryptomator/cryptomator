@@ -1,4 +1,4 @@
-commit_message: "[ci skip]"
+commit_message: '[ci skip]'
 files:
   - source: /src/main/resources/i18n/strings.properties
     translation: /src/main/resources/i18n/strings_%two_letters_code%.properties
