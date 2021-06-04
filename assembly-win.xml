@@ -24,10 +24,17 @@
 		<fileSet>
 			<directory>target/</directory>
 			<includes>
-				<include>launcher-mac.sh</include>
+				<include>launcher-win.bat</include>
 			</includes>
 			<outputDirectory></outputDirectory>
 			<fileMode>0755</fileMode>
+		</fileSet>
+		<fileSet>
+			<directory>target/</directory>
+			<includes>
+				<include>cryptomator-*.jar</include>
+			</includes>
+			<outputDirectory>libs</outputDirectory>
 		</fileSet>
 		<fileSet>
 			<directory>target/libs</directory>

@@ -30,6 +30,13 @@
 			<fileMode>0755</fileMode>
 		</fileSet>
 		<fileSet>
+			<directory>target/</directory>
+			<includes>
+				<include>cryptomator-*.jar</include>
+			</includes>
+			<outputDirectory>libs</outputDirectory>
+		</fileSet>
+		<fileSet>
 			<directory>target/libs</directory>
 			<includes>
 				<include>*.jar</include>

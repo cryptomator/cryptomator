@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- This file lists false positives found by org.owasp:dependency-check-maven build plugin -->
+<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
+	<suppress>
+		<notes><![CDATA[ Suppress known vulnerabilities in FUSE libraries for fuse-nio-adapter. For more info, see suppression.xml of https://github.com/cryptomator/fuse-nio-adapter ]]></notes>
+		<gav regex="true">^org\.cryptomator:fuse-nio-adapter:.*$</gav>
+		<cvssBelow>9</cvssBelow>
+	</suppress>
+	<suppress>
+		<notes><![CDATA[ Suppress known vulnerabilities in FUSE libraries for jnr-fuse (dependency of fuse-nio-adapter). ]]></notes>
+		<gav regex="true">^com\.github\.serceman:jnr-fuse:.*$</gav>
+		<cvssBelow>9</cvssBelow>
+	</suppress>
+
+	<!-- Jetty false positives below -->
+	<suppress>
+		<notes><![CDATA[ Affects jetty < 6.1.22 ]]></notes>
+		<gav>org.eclipse.jetty.toolchain:jetty-servlet-api:4.0.6</gav>
+		<cve>CVE-2009-5045</cve>
+	</suppress>
+	<suppress>
+		<notes><![CDATA[ Affects jetty < 6.1.22 ]]></notes>
+		<gav>org.eclipse.jetty.toolchain:jetty-servlet-api:4.0.6</gav>
+		<cve>CVE-2009-5046</cve>
+	</suppress>
+
+	<suppress>
+		<notes><![CDATA[ Affects jetty-server 9.x ]]></notes>
+		<gav>org.eclipse.jetty.toolchain:jetty-servlet-api:4.0.6</gav>
+		<cve>CVE-2017-9735</cve>
+	</suppress>
+	<suppress>
+		<notes><![CDATA[ Affects jetty-server 9.x ]]></notes>
+		<gav>org.eclipse.jetty.toolchain:jetty-servlet-api:4.0.6</gav>
+		<cve>CVE-2017-7656</cve>
+	</suppress>
+	<suppress>
+		<notes><![CDATA[ Affects jetty-server 9.x ]]></notes>
+		<gav>org.eclipse.jetty.toolchain:jetty-servlet-api:4.0.6</gav>
+		<cve>CVE-2017-7657</cve>
+	</suppress>
+	<suppress>
+		<notes><![CDATA[ Affects jetty-server 9.x ]]></notes>
+		<gav>org.eclipse.jetty.toolchain:jetty-servlet-api:4.0.6</gav>
+		<cve>CVE-2017-7658</cve>
+	</suppress>
+
+	<suppress>
+		<notes><![CDATA[ Fixed since jetty-server 10.0.0.beta2 ]]></notes>
+		<gav>org.eclipse.jetty.toolchain:jetty-servlet-api:4.0.6</gav>
+		<cve>CVE-2020-27216</cve>
+	</suppress>
+</suppressions>
