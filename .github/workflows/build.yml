@@ -30,8 +30,8 @@ jobs:
         env:
           CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
         continue-on-error: true
-      - name: Assemble buildkit-linux.zip
-        run: mvn -B clean package -DskipTests --resume-from=buildkit -Prelease,linux
+#      - name: Assemble buildkit-linux.zip
+#        run: mvn -B clean package -DskipTests --resume-from=buildkit -Prelease,linux
 #      - name: Upload buildkit-linux.zip
 #        uses: actions/upload-artifact@v1
 #        with:
