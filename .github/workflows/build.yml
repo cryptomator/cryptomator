@@ -23,7 +23,7 @@ jobs:
         run: mvn versions:set -DnewVersion=${GITHUB_REF##*/} # use shell parameter expansion to strip of 'refs/tags'
         if: startsWith(github.ref, 'refs/tags/')
       - name: Build and Test
-        run: mvn -B clean install jacoco:report -Pcoverage,dependency-check,linux
+        run: mvn -B clean install jacoco:report -Pcoverage,dependency-check
       - name: Upload code coverage report
         id: codacyCoverageReporter
         run: bash <(curl -Ls https://coverage.codacy.com/get.sh)
@@ -31,6 +31,8 @@ jobs:
           CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
         continue-on-error: true
 ### TODO: move to matrix build:
+      - name: Assemble buildkit-linux.zip
+        run: mvn -B clean package -DskipTests -Plinux
       - name: Upload buildkit-linux.zip
         uses: actions/upload-artifact@v1
         with:
