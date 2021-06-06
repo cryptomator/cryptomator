@@ -87,7 +87,6 @@ For more information on the security details visit [cryptomator.org](https://doc
 ### Run Maven
 
 ```
-cd main
 mvn clean install
 # or mvn clean install -Pwindows
 # or mvn clean install -Pmac
