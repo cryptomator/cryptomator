@@ -191,7 +191,7 @@ public class GeneralPreferencesController implements FxController {
 			if (provider == null) {
 				return null;
 			} else {
-				return provider.getClass().getSimpleName(); // TODO: change to provider.getDisplayName();
+				return provider.displayName();
 			}
 		}
 
