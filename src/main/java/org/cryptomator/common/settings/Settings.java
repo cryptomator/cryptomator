@@ -38,7 +38,8 @@ public class Settings {
 	public static final boolean DEFAULT_DEBUG_MODE = false;
 	public static final VolumeImpl DEFAULT_PREFERRED_VOLUME_IMPL = SystemUtils.IS_OS_WINDOWS ? VolumeImpl.DOKANY : VolumeImpl.FUSE;
 	public static final UiTheme DEFAULT_THEME = UiTheme.LIGHT;
-	public static final KeychainBackend DEFAULT_KEYCHAIN_BACKEND = SystemUtils.IS_OS_WINDOWS ? KeychainBackend.WIN_SYSTEM_KEYCHAIN : SystemUtils.IS_OS_MAC ? KeychainBackend.MAC_SYSTEM_KEYCHAIN : KeychainBackend.GNOME;
+	@Deprecated // to be changed to "whatever is available" eventually
+	public static final String DEFAULT_KEYCHAIN_PROVIDER = SystemUtils.IS_OS_WINDOWS ? "org.cryptomator.windows.keychain.WindowsProtectedKeychainAccess" : SystemUtils.IS_OS_MAC ? "org.cryptomator.macos.keychain.MacSystemKeychainAccess" : "org.cryptomator.linux.keychain.SecretServiceKeychainAccess";
 	public static final NodeOrientation DEFAULT_USER_INTERFACE_ORIENTATION = NodeOrientation.LEFT_TO_RIGHT;
 	public static final String DEFAULT_LICENSE_KEY = "";
 	public static final boolean DEFAULT_SHOW_MINIMIZE_BUTTON = false;
@@ -53,7 +54,7 @@ public class Settings {
 	private final BooleanProperty debugMode = new SimpleBooleanProperty(DEFAULT_DEBUG_MODE);
 	private final ObjectProperty<VolumeImpl> preferredVolumeImpl = new SimpleObjectProperty<>(DEFAULT_PREFERRED_VOLUME_IMPL);
 	private final ObjectProperty<UiTheme> theme = new SimpleObjectProperty<>(DEFAULT_THEME);
-	private final ObjectProperty<KeychainBackend> keychainBackend = new SimpleObjectProperty<>(DEFAULT_KEYCHAIN_BACKEND);
+	private final ObjectProperty<String> keychainProvider = new SimpleObjectProperty<>(DEFAULT_KEYCHAIN_PROVIDER);
 	private final ObjectProperty<NodeOrientation> userInterfaceOrientation = new SimpleObjectProperty<>(DEFAULT_USER_INTERFACE_ORIENTATION);
 	private final StringProperty licenseKey = new SimpleStringProperty(DEFAULT_LICENSE_KEY);
 	private final BooleanProperty showMinimizeButton = new SimpleBooleanProperty(DEFAULT_SHOW_MINIMIZE_BUTTON);
@@ -77,7 +78,7 @@ public class Settings {
 		debugMode.addListener(this::somethingChanged);
 		preferredVolumeImpl.addListener(this::somethingChanged);
 		theme.addListener(this::somethingChanged);
-		keychainBackend.addListener(this::somethingChanged);
+		keychainProvider.addListener(this::somethingChanged);
 		userInterfaceOrientation.addListener(this::somethingChanged);
 		licenseKey.addListener(this::somethingChanged);
 		showMinimizeButton.addListener(this::somethingChanged);
@@ -140,7 +141,7 @@ public class Settings {
 		return theme;
 	}
 
-	public ObjectProperty<KeychainBackend> keychainBackend() { return keychainBackend; }
+	public ObjectProperty<String> keychainProvider() { return keychainProvider; }
 
 	public ObjectProperty<NodeOrientation> userInterfaceOrientation() {
 		return userInterfaceOrientation;

@@ -48,7 +48,7 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 		out.name("preferredVolumeImpl").value(value.preferredVolumeImpl().get().name());
 		out.name("theme").value(value.theme().get().name());
 		out.name("uiOrientation").value(value.userInterfaceOrientation().get().name());
-		out.name("keychainBackend").value(value.keychainBackend().get().name());
+		out.name("keychainProvider").value(value.keychainProvider().get());
 		out.name("licenseKey").value(value.licenseKey().get());
 		out.name("showMinimizeButton").value(value.showMinimizeButton().get());
 		out.name("showTrayIcon").value(value.showTrayIcon().get());
@@ -82,7 +82,7 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 				case "preferredVolumeImpl" -> settings.preferredVolumeImpl().set(parsePreferredVolumeImplName(in.nextString()));
 				case "theme" -> settings.theme().set(parseUiTheme(in.nextString()));
 				case "uiOrientation" -> settings.userInterfaceOrientation().set(parseUiOrientation(in.nextString()));
-				case "keychainBackend" -> settings.keychainBackend().set(parseKeychainBackend(in.nextString()));
+				case "keychainProvider" -> settings.keychainProvider().set(in.nextString());
 				case "licenseKey" -> settings.licenseKey().set(in.nextString());
 				case "showMinimizeButton" -> settings.showMinimizeButton().set(in.nextBoolean());
 				case "showTrayIcon" -> settings.showTrayIcon().set(in.nextBoolean());
@@ -121,15 +121,6 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 		} catch (IllegalArgumentException e) {
 			LOG.warn("Invalid ui theme {}. Defaulting to {}.", uiThemeName, Settings.DEFAULT_THEME);
 			return Settings.DEFAULT_THEME;
-		}
-	}
-
-	private KeychainBackend parseKeychainBackend(String backendName) {
-		try {
-			return KeychainBackend.valueOf(backendName.toUpperCase());
-		} catch (IllegalArgumentException e) {
-			LOG.warn("Invalid keychain backend {}. Defaulting to {}.", backendName, Settings.DEFAULT_KEYCHAIN_BACKEND);
-			return Settings.DEFAULT_KEYCHAIN_BACKEND;
 		}
 	}
 
