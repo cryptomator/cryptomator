@@ -34,11 +34,11 @@ public class KeychainModule {
 	@Singleton
 	static ObjectExpression<KeychainAccessProvider> provideKeychainAccessProvider(Settings settings, Set<KeychainAccessProvider> providers) {
 		return Bindings.createObjectBinding(() -> {
-			var selectedProviderClass = settings.keychainBackend().get().getProviderClass();
+			var selectedProviderClass = settings.keychainProvider().get();
 			var selectedProvider = providers.stream().filter(provider -> provider.getClass().getName().equals(selectedProviderClass)).findAny();
 			var fallbackProvider = providers.stream().findAny().orElse(null);
 			return selectedProvider.orElse(fallbackProvider);
-		}, settings.keychainBackend());
+		}, settings.keychainProvider());
 	}
 
 }
