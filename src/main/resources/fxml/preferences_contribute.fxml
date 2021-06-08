@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import org.cryptomator.ui.controls.FontAwesome5IconView?>
+<?import org.cryptomator.ui.controls.FormattedLabel?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Circle?>
+<VBox xmlns:fx="http://javafx.com/fxml"
+	  xmlns="http://javafx.com/javafx"
+	  fx:controller="org.cryptomator.ui.preferences.SupporterCertificateController"
+	  spacing="18">
+	<padding>
+		<Insets topRightBottomLeft="12"/>
+	</padding>
+	<children>
+		<StackPane VBox.vgrow="NEVER" prefHeight="60">
+			<HBox spacing="12" alignment="CENTER_LEFT" visible="${controller.licenseHolder.validLicense}">
+				<StackPane alignment="CENTER" HBox.hgrow="NEVER">
+					<Circle styleClass="glyph-icon-primary" radius="24"/>
+					<FontAwesome5IconView styleClass="glyph-icon-white" glyph="CROWN" glyphSize="24"/>
+				</StackPane>
+				<FormattedLabel format="%preferences.contribute.registeredFor" arg1="${controller.licenseHolder.licenseSubject}" wrapText="true"/>
+			</HBox>
+
+			<HBox spacing="12" alignment="CENTER_LEFT" visible="${!controller.licenseHolder.validLicense}">
+				<StackPane alignment="CENTER" HBox.hgrow="NEVER">
+					<Circle styleClass="glyph-icon-primary" radius="24"/>
+					<FontAwesome5IconView styleClass="glyph-icon-white" glyph="HAND_HOLDING_HEART" glyphSize="24"/>
+				</StackPane>
+				<VBox HBox.hgrow="ALWAYS" spacing="6">
+					<Label text="%preferences.contribute.noCertificate" wrapText="true" VBox.vgrow="ALWAYS"/>
+					<Hyperlink text="%preferences.contribute.getCertificate" onAction="#getSupporterCertificate" contentDisplay="LEFT">
+						<graphic>
+							<FontAwesome5IconView glyph="LINK"/>
+						</graphic>
+					</Hyperlink>
+				</VBox>
+			</HBox>
+		</StackPane>
+
+		<TextArea fx:id="supporterCertificateField" promptText="%preferences.contribute.promptText" wrapText="true" VBox.vgrow="ALWAYS" prefRowCount="6"/>
+	</children>
+</VBox>

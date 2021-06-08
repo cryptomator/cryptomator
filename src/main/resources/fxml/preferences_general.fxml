@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<VBox xmlns:fx="http://javafx.com/fxml"
+	  xmlns="http://javafx.com/javafx"
+	  fx:controller="org.cryptomator.ui.preferences.GeneralPreferencesController"
+	  spacing="6">
+	<fx:define>
+		<ToggleGroup fx:id="nodeOrientation"/>
+	</fx:define>
+	<padding>
+		<Insets topRightBottomLeft="12"/>
+	</padding>
+	<children>
+		<HBox spacing="6" alignment="CENTER_LEFT">
+			<Label text="%preferences.general.theme"/>
+			<ChoiceBox fx:id="themeChoiceBox" disable="${!controller.licenseHolder.validLicense}"/>
+			<Hyperlink styleClass="hyperlink-underline,hyperlink-muted" text="%preferences.general.unlockThemes" onAction="#showContributeTab" visible="${!controller.licenseHolder.validLicense}" managed="${!controller.licenseHolder.validLicense}"/>
+		</HBox>
+
+		<HBox spacing="6" alignment="CENTER_LEFT">
+			<Label text="%preferences.general.interfaceOrientation" HBox.hgrow="NEVER"/>
+			<RadioButton fx:id="nodeOrientationLtr" text="%preferences.general.interfaceOrientation.ltr" alignment="CENTER_LEFT" toggleGroup="${nodeOrientation}"/>
+			<RadioButton fx:id="nodeOrientationRtl" text="%preferences.general.interfaceOrientation.rtl" alignment="CENTER_RIGHT" toggleGroup="${nodeOrientation}"/>
+		</HBox>
+
+		<CheckBox fx:id="showMinimizeButtonCheckbox" text="%preferences.general.showMinimizeButton" visible="${controller.trayMenuInitialized}" managed="${controller.trayMenuInitialized}"/>
+
+		<CheckBox fx:id="showTrayIconCheckbox" text="%preferences.general.showTrayIcon" visible="${controller.trayMenuSupported}" managed="${controller.trayMenuSupported}"/>
+
+		<CheckBox fx:id="startHiddenCheckbox" text="%preferences.general.startHidden" />
+
+		<HBox spacing="6" alignment="CENTER_LEFT">
+			<CheckBox fx:id="debugModeCheckbox" text="%preferences.general.debugLogging"/>
+			<Hyperlink styleClass="hyperlink-underline" text="%preferences.general.debugDirectory" onAction="#showLogfileDirectory"/>
+		</HBox>
+
+		<HBox spacing="6" alignment="CENTER_LEFT">
+			<Label text="%preferences.general.keychainBackend"/>
+			<ChoiceBox fx:id="keychainBackendChoiceBox"/>
+		</HBox>
+
+		<CheckBox fx:id="autoStartCheckbox" text="%preferences.general.autoStart" visible="${controller.autoStartSupported}" managed="${controller.autoStartSupported}" onAction="#toggleAutoStart"/>
+	</children>
+</VBox>

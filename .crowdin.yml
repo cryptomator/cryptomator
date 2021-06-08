@@ -1,5 +1,6 @@
-commit_message: "[ci skip]"
-escape_special_characters: 0
+commit_message: '[ci skip]'
 files:
-  - source: /main/ui/src/main/resources/i18n/strings.properties
-    translation: /main/ui/src/main/resources/i18n/strings_%two_letters_code%.properties
+  - source: /src/main/resources/i18n/strings.properties
+    translation: /src/main/resources/i18n/strings_%two_letters_code%.properties
+    escape_quotes: 0
+    escape_special_characters: 0

@@ -48,7 +48,7 @@ Download native binaries of Cryptomator on [cryptomator.org](https://cryptomator
 
 ## Features
 
-- Works with Dropbox, Google Drive, OneDrive, ownCloud, Nextcloud and any other cloud storage service which synchronizes with a local directory
+- Works with Dropbox, Google Drive, OneDrive, MEGA, pCloud, ownCloud, Nextcloud and any other cloud storage service which synchronizes with a local directory
 - Open Source means: No backdoors, control is better than trust
 - Client-side: No accounts, no data shared with any online service
 - Totally transparent: Just work on the virtual drive as if it were a USB flash drive
@@ -87,13 +87,13 @@ For more information on the security details visit [cryptomator.org](https://doc
 ### Run Maven
 
 ```
-cd main
-mvn clean install -Prelease,windows
-# or mvn clean install -Prelease,mac
-# or mvn clean install -Prelease,linux
+mvn clean install
+# or mvn clean install -Pwindows
+# or mvn clean install -Pmac
+# or mvn clean install -Plinux
 ```
 
-This will build all the jars and bundle them together with their OS-specific dependencies under `main/buildkit/target`. This can now be used to build native packages.
+This will build all the jars and bundle them together with their OS-specific dependencies under `target`. This can now be used to build native packages.
 
 ### Start Cryptomator
 
