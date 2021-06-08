@@ -1,8 +1,10 @@
 package org.cryptomator.ui.vaultoptions;
 
+import org.cryptomator.common.Constants;
 import org.cryptomator.common.settings.WhenUnlocked;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.FxController;
+import org.cryptomator.ui.controls.NumericTextField;
 import org.cryptomator.ui.health.HealthCheckComponent;
 
 import javax.inject.Inject;
@@ -28,6 +30,8 @@ public class GeneralVaultOptionsController implements FxController {
 
 	public TextField vaultName;
 	public CheckBox unlockOnStartupCheckbox;
+	public CheckBox filenameLengthRestrictionCheckbox;
+	public NumericTextField filenameLengthField;
 	public ChoiceBox<WhenUnlocked> actionAfterUnlockChoiceBox;
 
 	@Inject
@@ -41,16 +45,38 @@ public class GeneralVaultOptionsController implements FxController {
 	@FXML
 	public void initialize() {
 		vaultName.textProperty().set(vault.getVaultSettings().displayName().get());
-		vaultName.focusedProperty().addListener(this::trimVaultNameOnFocusLoss);
+		vaultName.focusedProperty().addListener(this::trimAndSetVaultNameOnFocusLoss);
 		vaultName.setTextFormatter(new TextFormatter<>(this::removeWhitespaces));
+
 		unlockOnStartupCheckbox.selectedProperty().bindBidirectional(vault.getVaultSettings().unlockAfterStartup());
+
 		actionAfterUnlockChoiceBox.getItems().addAll(WhenUnlocked.values());
 		actionAfterUnlockChoiceBox.valueProperty().bindBidirectional(vault.getVaultSettings().actionAfterUnlock());
 		actionAfterUnlockChoiceBox.setConverter(new WhenUnlockedConverter(resourceBundle));
+
+		int maxClearTextFileNameLength = vault.getVaultSettings().maxCleartextFilenameLength().get();
+		filenameLengthRestrictionCheckbox.selectedProperty().set(maxClearTextFileNameLength != Constants.UNKNOWN_CLEARTEXT_FILENAME_LENGTH_LIMIT && maxClearTextFileNameLength != Constants.UNLIMITED_CLEARTEXT_FILENAME_LENGTH);
+		filenameLengthRestrictionCheckbox.selectedProperty().addListener(this::resetFileNameLimit);
+
+		filenameLengthField.setText(maxClearTextFileNameLength);
+		filenameLengthField.focusedProperty().addListener(this::setFileNameLengthLimitOnFocusLoss);
 	}
 
-	private void trimVaultNameOnFocusLoss(Observable observable, Boolean wasFocussed, Boolean isFocussed) {
-		if (!isFocussed) {
+	private void resetFileNameLimit(Observable observable, Boolean wasTicked, Boolean isTicked) {
+		if (!isTicked) {
+			vault.getVaultSettings().maxCleartextFilenameLength().set(Constants.UNKNOWN_CLEARTEXT_FILENAME_LENGTH_LIMIT);
+			filenameLengthField.setText("");
+		}
+	}
+
+	private void setFileNameLengthLimitOnFocusLoss(Observable observable, Boolean wasFocused, Boolean isFocused) {
+		if (!isFocused) {
+			vault.getVaultSettings().maxCleartextFilenameLength().set(filenameLengthField.getAsInt().orElse(Constants.UNLIMITED_CLEARTEXT_FILENAME_LENGTH));
+		}
+	}
+
+	private void trimAndSetVaultNameOnFocusLoss(Observable observable, Boolean wasFocused, Boolean isFocused) {
+		if (!isFocused) {
 			var trimmed = vaultName.getText().trim();
 			vault.getVaultSettings().displayName().set(trimmed);
 		}

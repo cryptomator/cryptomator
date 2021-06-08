@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import org.cryptomator.ui.controls.NumericTextField?>
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.control.Button?>
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.vaultoptions.GeneralVaultOptionsController"
@@ -19,6 +20,14 @@
 		<HBox spacing="6" alignment="CENTER_LEFT">
 			<Label text="%vaultOptions.general.vaultName"/>
 			<TextField fx:id="vaultName"/>
+		</HBox>
+		<CheckBox text="Restrict length of filenames inside vault" fx:id="filenameLengthRestrictionCheckbox"/>
+		<HBox spacing="6" alignment="CENTER_LEFT" visible="${filenameLengthRestrictionCheckbox.selected}" managed="${filenameLengthRestrictionCheckbox.selected}">
+			<padding>
+				<Insets left="12"/>
+			</padding>
+			<Label text="Maximum number of Characters:"/>
+			<NumericTextField fx:id="filenameLengthField" prefWidth="100" alignment="CENTER_RIGHT"/>
 		</HBox>
 
 		<CheckBox text="%vaultOptions.general.unlockAfterStartup" fx:id="unlockOnStartupCheckbox"/>

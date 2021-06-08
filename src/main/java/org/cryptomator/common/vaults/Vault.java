@@ -10,6 +10,7 @@ package org.cryptomator.common.vaults;
 
 import com.google.common.base.Strings;
 import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.common.Constants;
 import org.cryptomator.common.mountpoint.InvalidMountPointException;
 import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.common.vaults.Volume.VolumeException;
@@ -53,7 +54,6 @@ public class Vault {
 
 	private static final Logger LOG = LoggerFactory.getLogger(Vault.class);
 	private static final Path HOME_DIR = Paths.get(SystemUtils.USER_HOME);
-	private static final int UNLIMITED_FILENAME_LENGTH = Integer.MAX_VALUE;
 
 	private final VaultSettings vaultSettings;
 	private final Provider<Volume> volumeProvider;
@@ -106,7 +106,7 @@ public class Vault {
 		Set<FileSystemFlags> flags = EnumSet.noneOf(FileSystemFlags.class);
 		if (vaultSettings.usesReadOnlyMode().get()) {
 			flags.add(FileSystemFlags.READONLY);
-		} else if(vaultSettings.maxCleartextFilenameLength().get() == -1) {
+		} else if(vaultSettings.maxCleartextFilenameLength().get() == Constants.UNKNOWN_CLEARTEXT_FILENAME_LENGTH_LIMIT) {
 			LOG.debug("Determining cleartext filename length limitations...");
 			var checker = new FileSystemCapabilityChecker();
 			int shorteningThreshold = getUnverifiedVaultConfig().allegedShorteningThreshold();
@@ -115,11 +115,11 @@ public class Vault {
 				int cleartextLimit = checker.determineSupportedCleartextFileNameLength(getPath());
 				vaultSettings.maxCleartextFilenameLength().set(cleartextLimit);
 			} else {
-				vaultSettings.maxCleartextFilenameLength().setValue(UNLIMITED_FILENAME_LENGTH);
+				vaultSettings.maxCleartextFilenameLength().setValue(Constants.UNLIMITED_CLEARTEXT_FILENAME_LENGTH);
 			}
 		}
 
-		if (vaultSettings.maxCleartextFilenameLength().get() < UNLIMITED_FILENAME_LENGTH) {
+		if (vaultSettings.maxCleartextFilenameLength().get() < Constants.UNLIMITED_CLEARTEXT_FILENAME_LENGTH) {
 			LOG.warn("Limiting cleartext filename length on this device to {}.", vaultSettings.maxCleartextFilenameLength().get());
 		}
 
