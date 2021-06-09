@@ -130,6 +130,12 @@
 			<artifactId>java-jwt</artifactId>
 			<version>${jwt.version}</version>
 		</dependency>
+		<dependency> <!-- TMP waiting for upstream fix: https://github.com/auth0/java-jwt/pull/484 -->
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>2.11.0</version>
+		</dependency>
+
 
 		<!-- EasyBind -->
 		<dependency>
