@@ -99,12 +99,12 @@ public class Environment {
 	}
 
 	// visible for testing
-	Path getHomeDir() {
+	public Path getHomeDir() {
 		return getPath("user.home").orElseThrow();
 	}
 
 	// visible for testing
-	Stream<Path> getPaths(String propertyName) {
+	public Stream<Path> getPaths(String propertyName) {
 		Stream<String> rawSettingsPaths = getRawList(propertyName, PATH_LIST_SEP);
 		return rawSettingsPaths.filter(Predicate.not(Strings::isNullOrEmpty)).map(Paths::get).map(this::replaceHomeDir);
 	}

@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
-class LicenseCheckerTest {
+public class LicenseCheckerTest {
 
 	private static final String PUBLIC_KEY = """
 			MIGbMBAGByqGSM49AgEGBSuBBAAjA4GGAAQBgc4HZz+/fBbC7lmEww0AO3NK9wVZ\

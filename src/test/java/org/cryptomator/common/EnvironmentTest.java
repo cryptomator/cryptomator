@@ -17,12 +17,12 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @DisplayName("Environment Variables Test")
-class EnvironmentTest {
+public class EnvironmentTest {
 
 	private Environment env;
 
 	@BeforeEach
-	void init() {
+	public void init() {
 		env = Mockito.spy(new Environment());
 		Mockito.when(env.getHomeDir()).thenReturn(Path.of("/home/testuser"));
 	}
@@ -82,7 +82,7 @@ class EnvironmentTest {
 
 	@Nested
 	@DisplayName("Path Lists")
-	class SettingsPath {
+	public class SettingsPath {
 
 		@Test
 		@DisplayName("test.path.property=")

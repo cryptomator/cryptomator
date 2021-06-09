@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.security.SecureRandom;
 
-class RecoveryKeyFactoryTest {
+public class RecoveryKeyFactoryTest {
 
 	private WordEncoder wordEncoder = new WordEncoder();
 	private MasterkeyFileAccess masterkeyFileAccess = Mockito.mock(MasterkeyFileAccess.class);

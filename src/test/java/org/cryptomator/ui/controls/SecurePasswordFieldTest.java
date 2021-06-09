@@ -12,12 +12,12 @@ import java.awt.GraphicsEnvironment;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-class SecurePasswordFieldTest {
+public class SecurePasswordFieldTest {
 
 	private SecurePasswordField pwField = new SecurePasswordField();
 
 	@BeforeAll
-	static void initJavaFx() throws InterruptedException {
+	public static void initJavaFx() throws InterruptedException {
 		Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
 		final CountDownLatch latch = new CountDownLatch(1);
 		Platform.startup(latch::countDown);
@@ -29,7 +29,7 @@ class SecurePasswordFieldTest {
 
 	@Nested
 	@DisplayName("Content Update Events")
-	class TextChange {
+	public class TextChange {
 
 		@Test
 		@DisplayName("\"ant\".append(\"eater\")")

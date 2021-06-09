@@ -12,7 +12,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class WordEncoderTest {
+public class WordEncoderTest {
 
 	private static final Random PRNG = new Random(42l);
 	private WordEncoder encoder;
@@ -25,13 +25,13 @@ class WordEncoderTest {
 	@DisplayName("decode(encode(input)) == input")
 	@ParameterizedTest(name = "test {index}")
 	@MethodSource("createRandomByteSequences")
-	void encodeAndDecode(byte[] input) {
+	public void encodeAndDecode(byte[] input) {
 		String encoded = encoder.encodePadded(input);
 		byte[] decoded = encoder.decode(encoded);
 		Assertions.assertArrayEquals(input, decoded);
 	}
 
-	static Stream<byte[]> createRandomByteSequences() {
+	public static Stream<byte[]> createRandomByteSequences() {
 		return IntStream.range(0, 30).mapToObj(i -> {
 			byte[] randomBytes = new byte[i * 3];
 			PRNG.nextBytes(randomBytes);
