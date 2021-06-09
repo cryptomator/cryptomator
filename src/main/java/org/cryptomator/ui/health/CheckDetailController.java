@@ -68,7 +68,7 @@ public class CheckDetailController implements FxController {
 	}
 
 	private Function<Stream<? extends DiagnosticResult>, Long> countSeverity(DiagnosticResult.Severity severity) {
-		return stream -> stream.filter(item -> severity.equals(item.getServerity())).count();
+		return stream -> stream.filter(item -> severity.equals(item.getSeverity())).count();
 	}
 
 	@FXML

@@ -37,7 +37,7 @@ public class ResultListCellController implements FxController {
 		actionButton.setVisible(false);
 		//TODO: see comment in case WARN
 		actionButton.setManaged(false);
-		switch (newVal.getServerity()) {
+		switch (newVal.getSeverity()) {
 			case INFO -> {
 				iconView.setGlyph(FontAwesome5Icon.INFO_CIRCLE);
 				iconView.getStyleClass().add("glyph-icon-muted");

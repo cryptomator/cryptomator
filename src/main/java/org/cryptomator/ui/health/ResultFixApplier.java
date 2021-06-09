@@ -33,7 +33,7 @@ class ResultFixApplier {
 	}
 
 	public void fix(DiagnosticResult result) {
-		Preconditions.checkArgument(result.getServerity() == DiagnosticResult.Severity.WARN, "Unfixable result");
+		Preconditions.checkArgument(result.getSeverity() == DiagnosticResult.Severity.WARN, "Unfixable result");
 		try (var masterkeyClone = masterkey.clone(); //
 			 var cryptor = vaultConfig.getCipherCombo().getCryptorProvider(csprng).withKey(masterkeyClone)) {
 			result.fix(vaultPath, vaultConfig, masterkeyClone, cryptor);

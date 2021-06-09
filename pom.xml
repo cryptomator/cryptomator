@@ -24,7 +24,7 @@
 		<project.jdk.version>16</project.jdk.version>
 
 		<!-- cryptomator dependencies -->
-		<cryptomator.cryptofs.version>2.1.0-beta5</cryptomator.cryptofs.version>
+		<cryptomator.cryptofs.version>2.1.0-beta6</cryptomator.cryptofs.version>
 		<cryptomator.integrations.version>1.0.0-rc1</cryptomator.integrations.version>
 		<cryptomator.integrations.win.version>1.0.0-beta2</cryptomator.integrations.win.version>
 		<cryptomator.integrations.mac.version>1.0.0-beta2</cryptomator.integrations.mac.version>
