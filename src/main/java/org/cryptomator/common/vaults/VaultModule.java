@@ -48,12 +48,12 @@ public class VaultModule {
 	}
 
 	@Provides
-	public Volume provideVolume(Settings settings, WebDavVolume webDavVolume, FuseVolume fuseVolume, DokanyVolume dokanyVolume) {
+	public Volume provideVolume(Settings settings, WebDavVolume webDavVolume, DokanyVolume dokanyVolume) {
 		VolumeImpl preferredImpl = settings.preferredVolumeImpl().get();
 		if (VolumeImpl.DOKANY == preferredImpl && dokanyVolume.isSupported()) {
 			return dokanyVolume;
-		} else if (VolumeImpl.FUSE == preferredImpl && fuseVolume.isSupported()) {
-			return fuseVolume;
+//		} else if (VolumeImpl.FUSE == preferredImpl && fuseVolume.isSupported()) {
+//			return fuseVolume;
 		} else {
 			if (VolumeImpl.WEBDAV != preferredImpl) {
 				LOG.warn("Using WebDAV, because {} is not supported.", preferredImpl.getDisplayName());

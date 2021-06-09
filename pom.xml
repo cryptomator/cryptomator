@@ -57,11 +57,11 @@
 			<artifactId>cryptofs</artifactId>
 			<version>${cryptomator.cryptofs.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>org.cryptomator</groupId>
-			<artifactId>fuse-nio-adapter</artifactId>
-			<version>${cryptomator.fuse.version}</version>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.cryptomator</groupId>-->
+<!--			<artifactId>fuse-nio-adapter</artifactId>-->
+<!--			<version>${cryptomator.fuse.version}</version>-->
+<!--		</dependency>-->
 		<dependency>
 			<groupId>org.cryptomator</groupId>
 			<artifactId>dokany-nio-adapter</artifactId>
