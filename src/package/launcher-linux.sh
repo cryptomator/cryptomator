@@ -1,7 +1,7 @@
 #!/bin/sh
 cd $(dirname $0)
 java \
-	-cp "libs/*" \
+	-p "libs" \
 	-Dcryptomator.settingsPath="~/.config/Cryptomator/settings.json" \
 	-Dcryptomator.ipcPortPath="~/.config/Cryptomator/ipcPort.bin" \
 	-Dcryptomator.logDir="~/.local/share/Cryptomator/logs" \
@@ -9,4 +9,4 @@ java \
 	-Djdk.gtk.version=2 \
 	-Xss2m \
 	-Xmx512m \
-	org.cryptomator.launcher.Cryptomator
+	-m org.cryptomator.desktop/org.cryptomator.launcher.Cryptomator
