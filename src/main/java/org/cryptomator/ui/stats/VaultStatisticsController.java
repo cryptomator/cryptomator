@@ -65,8 +65,8 @@ public class VaultStatisticsController implements FxController {
 		this.cacheHitRate = WeakBindings.bindDouble(stats.cacheHitRateProperty());
 		this.cacheHitDegrees = cacheHitRate.multiply(-270);
 		this.cacheHitPercentage = cacheHitRate.multiply(100);
-		this.totalBytesRead = WeakBindings.bindLong(stats.toalBytesReadProperty());
-		this.totalBytesWritten = WeakBindings.bindLong(stats.toalBytesWrittenProperty());
+		this.totalBytesRead = WeakBindings.bindLong(stats.totalBytesReadProperty());
+		this.totalBytesWritten = WeakBindings.bindLong(stats.totalBytesWrittenProperty());
 		this.totalBytesDecrypted = WeakBindings.bindLong(stats.totalBytesDecryptedProperty());
 		this.totalBytesEncrypted = WeakBindings.bindLong(stats.totalBytesEncryptedProperty());
 		this.filesRead = WeakBindings.bindLong(stats.filesRead());

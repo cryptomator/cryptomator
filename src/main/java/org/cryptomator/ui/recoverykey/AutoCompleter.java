@@ -26,7 +26,7 @@ public class AutoCompleter {
 		if (Strings.isNullOrEmpty(prefix)) {
 			return Optional.empty();
 		}
-		int potentialMatchIdx = findIndexOfLexicographicallyPreceeding(0, dictionary.size(), prefix);
+		int potentialMatchIdx = findIndexOfLexicographicallyPreceding(0, dictionary.size(), prefix);
 		if (potentialMatchIdx < dictionary.size()) {
 			String potentialMatch = dictionary.get(potentialMatchIdx);
 			return potentialMatch.startsWith(prefix) ? Optional.of(potentialMatch) : Optional.empty();
@@ -48,21 +48,21 @@ public class AutoCompleter {
 	 * @param prefix
 	 * @return index between [0, dictLen], i.e. index can exceed the upper bounds of {@link #dictionary}.
 	 */
-	private int findIndexOfLexicographicallyPreceeding(int begin, int end, String prefix) {
+	private int findIndexOfLexicographicallyPreceding(int begin, int end, String prefix) {
 		if (begin >= end) {
 			return begin; // this is usually where a binary search ends "unsuccessful"
 		}
 
 		int mid = (begin + end) / 2;
 		String word = dictionary.get(mid);
-		if (prefix.compareTo(word) <= 0) { // prefix preceeds or matches word
+		if (prefix.compareTo(word) <= 0) { // prefix precedes or matches word
 			// proceed in left half
 			assert mid < end;
-			return findIndexOfLexicographicallyPreceeding(0, mid, prefix);
+			return findIndexOfLexicographicallyPreceding(0, mid, prefix);
 		} else {
 			// proceed in right half
 			assert mid >= begin;
-			return findIndexOfLexicographicallyPreceeding(mid + 1, end, prefix);
+			return findIndexOfLexicographicallyPreceding(mid + 1, end, prefix);
 		}
 	}
 

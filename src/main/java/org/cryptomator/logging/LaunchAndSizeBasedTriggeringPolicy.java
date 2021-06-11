@@ -11,12 +11,12 @@ import java.io.File;
  *
  * @param <E> Event type the policy possibly reacts to
  */
-public class LaunchAndSizeBasedTriggerinPolicy<E> extends TriggeringPolicyBase<E> {
+public class LaunchAndSizeBasedTriggeringPolicy<E> extends TriggeringPolicyBase<E> {
 
 	LaunchBasedTriggeringPolicy<E> launchBasedTriggeringPolicy;
 	SizeBasedTriggeringPolicy<E> sizeBasedTriggeringPolicy;
 
-	public LaunchAndSizeBasedTriggerinPolicy(FileSize threshold) {
+	public LaunchAndSizeBasedTriggeringPolicy(FileSize threshold) {
 		this.launchBasedTriggeringPolicy = new LaunchBasedTriggeringPolicy<>();
 		this.sizeBasedTriggeringPolicy = new SizeBasedTriggeringPolicy<>();
 		sizeBasedTriggeringPolicy.setMaxFileSize(threshold);
