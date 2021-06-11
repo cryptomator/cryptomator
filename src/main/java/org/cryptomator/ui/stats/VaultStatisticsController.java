@@ -102,7 +102,7 @@ public class VaultStatisticsController implements FxController {
 			this.decryptedBytesRead = readData;
 			this.encryptedBytesWrite = writeData;
 
-			// initialize data once and change value of datapoints later:
+			// initialize data once and change value of data points later:
 			for (int i = 0; i < IO_SAMPLING_STEPS; i++) {
 				decryptedBytesRead.getData().add(new Data<>(i, 0));
 				encryptedBytesWrite.getData().add(new Data<>(i, 0));

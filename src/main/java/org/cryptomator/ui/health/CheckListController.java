@@ -46,7 +46,7 @@ public class CheckListController implements FxController {
 	private final ReportWriter reportWriter;
 	private final ExecutorService executorService;
 	private final ObjectProperty<HealthCheckTask> selectedTask;
-	private final Lazy<ErrorComponent.Builder> errorComponenBuilder;
+	private final Lazy<ErrorComponent.Builder> errorComponentBuilder;
 	private final SimpleObjectProperty<Worker<?>> runningTask;
 	private final Binding<Boolean> running;
 	private final Binding<Boolean> finished;
@@ -60,13 +60,13 @@ public class CheckListController implements FxController {
 
 
 	@Inject
-	public CheckListController(@HealthCheckWindow Stage window, Lazy<Collection<HealthCheckTask>> tasks, ReportWriter reportWriteTask, ObjectProperty<HealthCheckTask> selectedTask, ExecutorService executorService, Lazy<ErrorComponent.Builder> errorComponenBuilder) {
+	public CheckListController(@HealthCheckWindow Stage window, Lazy<Collection<HealthCheckTask>> tasks, ReportWriter reportWriteTask, ObjectProperty<HealthCheckTask> selectedTask, ExecutorService executorService, Lazy<ErrorComponent.Builder> errorComponentBuilder) {
 		this.window = window;
 		this.tasks = FXCollections.observableArrayList(tasks.get());
 		this.reportWriter = reportWriteTask;
 		this.executorService = executorService;
 		this.selectedTask = selectedTask;
-		this.errorComponenBuilder = errorComponenBuilder;
+		this.errorComponentBuilder = errorComponentBuilder;
 		this.runningTask = new SimpleObjectProperty<>();
 		this.running = EasyBind.wrapNullable(runningTask).mapObservable(Worker::runningProperty).orElse(false);
 		this.finished = EasyBind.wrapNullable(runningTask).mapObservable(Worker::stateProperty).map(END_STATES::contains).orElse(false);
@@ -131,7 +131,7 @@ public class CheckListController implements FxController {
 			reportWriter.writeReport(tasks);
 		} catch (IOException e) {
 			LOG.error("Failed to write health check report.", e);
-			errorComponenBuilder.get().cause(e).window(window).returnToScene(window.getScene()).build().showErrorScene();
+			errorComponentBuilder.get().cause(e).window(window).returnToScene(window.getScene()).build().showErrorScene();
 		}
 	}
 

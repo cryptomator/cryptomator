@@ -14,5 +14,5 @@ For _everything else_, please visit our official [Cryptomator Community](https:/
   - Discussions about the apps
 - [Development discussions](https://community.cryptomator.org/c/development)
   - General questions
-  - Discussions regarding our design decissions
+  - Discussions regarding our design decisions
   - Our roadmap
