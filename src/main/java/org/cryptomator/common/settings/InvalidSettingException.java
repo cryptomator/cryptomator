@@ -1,24 +1,24 @@
 package org.cryptomator.common.settings;
 
 
-public class InvalidSettingsException extends RuntimeException {
+public class InvalidSettingException extends RuntimeException {
 
 	private final AbstractInvalidSetting reason;
 	private final String additionalMessage;
 
-	public InvalidSettingsException(AbstractInvalidSetting reason) {
+	public InvalidSettingException(AbstractInvalidSetting reason) {
 		this(reason, null, null);
 	}
 
-	public InvalidSettingsException(AbstractInvalidSetting reason, String additionalMessage) {
+	public InvalidSettingException(AbstractInvalidSetting reason, String additionalMessage) {
 		this(reason, additionalMessage, null);
 	}
 
-	public InvalidSettingsException(AbstractInvalidSetting reason, Throwable cause) {
+	public InvalidSettingException(AbstractInvalidSetting reason, Throwable cause) {
 		this(reason, null, cause);
 	}
 
-	public InvalidSettingsException(AbstractInvalidSetting reason, String additionalMessage, Throwable cause) {
+	public InvalidSettingException(AbstractInvalidSetting reason, String additionalMessage, Throwable cause) {
 		super(composeMessage(reason, additionalMessage), cause);
 		this.reason = reason;
 		this.additionalMessage = additionalMessage;
