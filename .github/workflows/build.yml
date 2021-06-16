@@ -76,11 +76,11 @@ jobs:
           name: buildkit-win.zip
           path: .
       - name: Create tarball
-        run: git archive --prefix="cryptomator-${{ github.ref }}/" -o ${{ github.ref }}.tar.gz ${{ github.ref }}
+        run: git archive --prefix="cryptomator-${{ github.ref }}/" -o "cryptomator-${{ github.ref }}.tar.gz" ${{ github.ref }}
       - name: Sign tarball with key 615D449FE6E6A235
         run: |
           echo "${GPG_PRIVATE_KEY}" | gpg --batch --quiet --import
-          echo "${GPG_PASSPHRASE}" | gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign -a ${{ github.ref }}.tar.gz
+          echo "${GPG_PASSPHRASE}" | gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign -a "cryptomator-${{ github.ref }}.tar.gz"
         env:
           GPG_PRIVATE_KEY: ${{ secrets.RELEASES_GPG_PRIVATE_KEY }}
           GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
@@ -144,6 +144,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{ github.ref }}.tar.gz.asc
-          asset_name: ${{ github.ref }}.tar.gz.asc
+          asset_path: "cryptomator-${{ github.ref }}.tar.gz.asc"
+          asset_name: "cryptomator-${{ github.ref }}.tar.gz.asc"
           asset_content_type: application/octet-stream
