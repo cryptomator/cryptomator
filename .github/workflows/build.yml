@@ -77,15 +77,13 @@ jobs:
           path: .
       - name: Create tarball
         run: git archive --prefix="cryptomator-${{ github.ref }}/" -o ${{ github.ref }}.tar.gz ${{ github.ref }}
-      - name: Prepare GPG-Agent to sign tarball with key 615D449FE6E6A235
+      - name: Sign tarball with key 615D449FE6E6A235
         run: |
           echo "${GPG_PRIVATE_KEY}" | gpg --batch --quiet --import
-          echo "${GPG_PASSPHRASE}" | gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --dry-run --sign ${{ github.ref }}.tar.gz
+          echo "${GPG_PASSPHRASE}" | gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign -a ${{ github.ref }}.tar.gz
         env:
           GPG_PRIVATE_KEY: ${{ secrets.RELEASES_GPG_PRIVATE_KEY }}
           GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
-      - name: Sign tarball
-        run: gpg --batch --quiet --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign -a ${{ github.ref }}.tar.gz
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
