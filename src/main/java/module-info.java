@@ -18,16 +18,16 @@ module org.cryptomator.desktop {
 	requires javafx.fxml;
 	requires com.tobiasdiez.easybind;
 	requires com.google.common;
-	requires com.google.gson; // really?
+	requires com.google.gson;
+	requires com.nulabinc.zxcvbn;
 	requires org.slf4j;
 	requires org.apache.commons.lang3;
+	requires dagger;
 
 	/* TODO: filename-based modules: */
-	requires dagger;
 	requires static javax.inject; /* ugly dagger/guava crap */
 	requires java.jwt;
 	requires com.fasterxml.jackson.databind; // TODO: tmp fix, waiting for https://github.com/auth0/java-jwt/pull/484
-	requires zxcvbn;
 	requires logback.classic;
 	requires logback.core;
 
