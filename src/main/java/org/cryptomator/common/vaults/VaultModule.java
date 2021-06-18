@@ -8,6 +8,7 @@ package org.cryptomator.common.vaults;
 import dagger.Module;
 import dagger.Provides;
 import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.common.Nullable;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.common.settings.VolumeImpl;
@@ -15,7 +16,6 @@ import org.cryptomator.cryptofs.CryptoFileSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
 import javax.inject.Named;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.StringBinding;

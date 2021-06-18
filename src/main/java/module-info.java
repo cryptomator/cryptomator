@@ -25,7 +25,6 @@ module org.cryptomator.desktop {
 	/* TODO: filename-based modules: */
 	requires dagger;
 	requires static javax.inject; /* ugly dagger/guava crap */
-	requires static jsr305; /* ugly dagger/guava crap */
 	requires java.jwt;
 	requires com.fasterxml.jackson.databind; // TODO: tmp fix, waiting for https://github.com/auth0/java-jwt/pull/484
 	requires zxcvbn;
