@@ -19,6 +19,8 @@ import org.cryptomator.ui.keyloading.KeyLoadingComponent;
 import org.cryptomator.ui.keyloading.KeyLoadingStrategy;
 import org.cryptomator.ui.mainwindow.MainWindow;
 
+import javax.annotation.Nullable;
+import javax.inject.Named;
 import javax.inject.Provider;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -84,12 +86,15 @@ abstract class HealthCheckModule {
 	@Provides
 	@HealthCheckWindow
 	@HealthCheckScoped
-	static Stage provideStage(StageFactory factory, @MainWindow Stage owner, ResourceBundle resourceBundle, ChangeListener<Boolean> showingListener) {
+	static Stage provideStage(@Nullable Stage windowToClose, StageFactory factory, @MainWindow Stage owner, ResourceBundle resourceBundle, ChangeListener<Boolean> showingListener) {
+		if (windowToClose != null) {
+			windowToClose.close();
+		}
 		Stage stage = factory.create();
-		stage.setTitle(resourceBundle.getString("health.title"));
-		stage.setResizable(true);
 		stage.initModality(Modality.WINDOW_MODAL);
 		stage.initOwner(owner);
+		stage.setTitle(resourceBundle.getString("health.title"));
+		stage.setResizable(true);
 		stage.showingProperty().addListener(showingListener); // bind masterkey lifecycle to window
 		return stage;
 	}

@@ -7,6 +7,7 @@ import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 
+import javax.annotation.Nullable;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
@@ -32,6 +33,9 @@ public interface HealthCheckComponent {
 
 		@BindsInstance
 		Builder vault(@HealthCheckWindow Vault vault);
+
+		@BindsInstance
+		Builder windowToClose(@Nullable Stage window);
 
 		HealthCheckComponent build();
 	}

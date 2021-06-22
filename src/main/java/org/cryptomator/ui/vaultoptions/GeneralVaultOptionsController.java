@@ -23,7 +23,6 @@ public class GeneralVaultOptionsController implements FxController {
 
 	private final Stage window;
 	private final Vault vault;
-	private final HealthCheckComponent.Builder healthCheckWindow;
 	private final ResourceBundle resourceBundle;
 
 	public TextField vaultName;
@@ -31,10 +30,9 @@ public class GeneralVaultOptionsController implements FxController {
 	public ChoiceBox<WhenUnlocked> actionAfterUnlockChoiceBox;
 
 	@Inject
-	GeneralVaultOptionsController(@VaultOptionsWindow Stage window, @VaultOptionsWindow Vault vault, HealthCheckComponent.Builder healthCheckWindow, ResourceBundle resourceBundle) {
+	GeneralVaultOptionsController(@VaultOptionsWindow Stage window, @VaultOptionsWindow Vault vault,  ResourceBundle resourceBundle) {
 		this.window = window;
 		this.vault = vault;
-		this.healthCheckWindow = healthCheckWindow;
 		this.resourceBundle = resourceBundle;
 	}
 
@@ -63,12 +61,6 @@ public class GeneralVaultOptionsController implements FxController {
 			return change;
 		}
 	}
-
-	@FXML
-	public void showHealthCheck() {
-		healthCheckWindow.vault(vault).build().showHealthCheckWindow();
-	}
-
 
 	private static class WhenUnlockedConverter extends StringConverter<WhenUnlocked> {
 

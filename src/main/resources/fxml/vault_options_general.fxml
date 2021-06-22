@@ -27,6 +27,5 @@
 			<Label text="%vaultOptions.general.actionAfterUnlock"/>
 			<ChoiceBox fx:id="actionAfterUnlockChoiceBox"/>
 		</HBox>
-		<Button text="%vaultOptions.general.healthBtn" onAction="#showHealthCheck"/>
 	</children>
 </VBox>

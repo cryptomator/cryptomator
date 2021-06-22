@@ -17,7 +17,6 @@
 		<Insets topRightBottomLeft="12"/>
 	</padding>
 	<children>
-		<Label text="%health.start.introduction" wrapText="true"/>
 
 		<!-- TODO: combine the two below labels to one and bind the properties accordingly or, preferably think about a new flow -->
 		<Label text="%health.start.configInvalid" visible="${controller.invalidConfig}" managed="${controller.invalidConfig}" wrapText="true" contentDisplay="LEFT">
