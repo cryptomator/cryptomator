@@ -84,17 +84,7 @@ public class CheckListController implements FxController {
 	@FXML
 	public void initialize() {
 		checksListView.setItems(tasks);
-		checksListView.setCellFactory(CheckBoxListCell.forListView(listPickIndicators::get, new StringConverter<HealthCheckTask>() {
-			@Override
-			public String toString(HealthCheckTask object) {
-				return object.getTitle();
-			}
-
-			@Override
-			public HealthCheckTask fromString(String string) {
-				return null;
-			}
-		}));
+		checksListView.setCellFactory(view -> new CheckListCell(listPickIndicators::get, showResultScreen));
 		selectedTask.bind(checksListView.getSelectionModel().selectedItemProperty());
 	}
 
@@ -115,7 +105,7 @@ public class CheckListController implements FxController {
 		runningTask.set(batchService);
 		showResultScreen.set(true);
 		checksListView.getSelectionModel().select(batch.get(0));
-		checksListView.setCellFactory(view -> new CheckListCell());
+		checksListView.refresh();
 		window.sizeToScene();
 	}
 
