@@ -11,11 +11,15 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see http://www.gnu.org/licenses/.
 
-Cryptomator uses 31 third-party dependencies under the following licenses:
+Cryptomator uses 43 third-party dependencies under the following licenses:
         Apache License v2.0:
 			- Jackson-annotations (com.fasterxml.jackson.core:jackson-annotations:2.11.0 - http://github.com/FasterXML/jackson)
 			- Jackson-core (com.fasterxml.jackson.core:jackson-core:2.11.0 - https://github.com/FasterXML/jackson-core)
 			- jackson-databind (com.fasterxml.jackson.core:jackson-databind:2.11.0 - http://github.com/FasterXML/jackson)
+			- jffi (com.github.jnr:jffi:1.2.23 - http://github.com/jnr/jffi)
+			- jnr-a64asm (com.github.jnr:jnr-a64asm:1.0.0 - http://nexus.sonatype.org/oss-repository-hosting.html/jnr-a64asm)
+			- jnr-constants (com.github.jnr:jnr-constants:0.9.15 - http://github.com/jnr/jnr-constants)
+			- jnr-ffi (com.github.jnr:jnr-ffi:2.1.12 - http://github.com/jnr/jnr-ffi)
 			- Gson (com.google.code.gson:gson:2.8.6 - https://github.com/google/gson/gson)
 			- Dagger (com.google.dagger:dagger:2.37 - https://github.com/google/dagger)
 			- Guava InternalFutureFailureAccess and InternalFutures (com.google.guava:failureaccess:1.0.1 - https://github.com/google/guava/failureaccess)
@@ -34,6 +38,12 @@ Cryptomator uses 31 third-party dependencies under the following licenses:
 			- Jetty :: Servlet Handling (org.eclipse.jetty:jetty-servlet:10.0.2 - https://eclipse.org/jetty/jetty-servlet)
 			- Jetty :: Utilities (org.eclipse.jetty:jetty-util:10.0.2 - https://eclipse.org/jetty/jetty-util)
 			- Jetty :: Servlet API and Schemas for JPMS and OSGi (org.eclipse.jetty.toolchain:jetty-servlet-api:4.0.6 - https://eclipse.org/jetty/jetty-servlet-api)
+        BSD:
+			- asm (org.ow2.asm:asm:7.1 - http://asm.ow2.org/)
+			- asm-analysis (org.ow2.asm:asm-analysis:7.1 - http://asm.ow2.org/)
+			- asm-commons (org.ow2.asm:asm-commons:7.1 - http://asm.ow2.org/)
+			- asm-tree (org.ow2.asm:asm-tree:7.1 - http://asm.ow2.org/)
+			- asm-util (org.ow2.asm:asm-util:7.1 - http://asm.ow2.org/)
         Eclipse Public License - Version 1.0:
 			- Jetty :: Servlet API and Schemas for JPMS and OSGi (org.eclipse.jetty.toolchain:jetty-servlet-api:4.0.6 - https://eclipse.org/jetty/jetty-servlet-api)
         Eclipse Public License - Version 2.0:
@@ -46,19 +56,26 @@ Cryptomator uses 31 third-party dependencies under the following licenses:
         Eclipse Public License - v 1.0:
 			- Logback Classic Module (ch.qos.logback:logback-classic:1.2.3 - http://logback.qos.ch/logback-classic)
 			- Logback Core Module (ch.qos.logback:logback-core:1.2.3 - http://logback.qos.ch/logback-core)
+        Eclipse Public License - v 2.0:
+			- jnr-posix (com.github.jnr:jnr-posix:3.0.54 - http://nexus.sonatype.org/oss-repository-hosting.html/jnr-posix)
         GNU Lesser General Public License:
 			- Logback Classic Module (ch.qos.logback:logback-classic:1.2.3 - http://logback.qos.ch/logback-classic)
 			- Logback Core Module (ch.qos.logback:logback-core:1.2.3 - http://logback.qos.ch/logback-core)
+        GPLv2:
+			- jnr-posix (com.github.jnr:jnr-posix:3.0.54 - http://nexus.sonatype.org/oss-repository-hosting.html/jnr-posix)
         GPLv2+CE:
 			- javafx-base (org.openjfx:javafx-base:16 - https://openjdk.java.net/projects/openjfx/javafx-base/)
 			- javafx-controls (org.openjfx:javafx-controls:16 - https://openjdk.java.net/projects/openjfx/javafx-controls/)
 			- javafx-fxml (org.openjfx:javafx-fxml:16 - https://openjdk.java.net/projects/openjfx/javafx-fxml/)
 			- javafx-graphics (org.openjfx:javafx-graphics:16 - https://openjdk.java.net/projects/openjfx/javafx-graphics/)
         LGPL 2.1:
+			- jnr-posix (com.github.jnr:jnr-posix:3.0.54 - http://nexus.sonatype.org/oss-repository-hosting.html/jnr-posix)
 			- Java Native Access (net.java.dev.jna:jna:5.7.0 - https://github.com/java-native-access/jna)
 			- Java Native Access Platform (net.java.dev.jna:jna-platform:5.7.0 - https://github.com/java-native-access/jna)
         MIT License:
 			- java jwt (com.auth0:java-jwt:3.15.0 - https://github.com/auth0/java-jwt)
+			- jnr-x86asm (com.github.jnr:jnr-x86asm:1.0.2 - http://github.com/jnr/jnr-x86asm)
+			- jnr-fuse (com.github.serceman:jnr-fuse:0.5.5 - https://github.com/SerCeMan/jnr-fuse)
 			- zxcvbn4j (com.nulab-inc:zxcvbn:1.5.2 - https://github.com/nulab/zxcvbn4j)
 			- SLF4J API Module (org.slf4j:slf4j-api:1.7.30 - http://www.slf4j.org)
         The BSD 2-Clause License:

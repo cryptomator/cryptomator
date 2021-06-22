@@ -23,6 +23,9 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.jdk.version>16</project.jdk.version>
 
+		<!-- Group IDs of jars that need to stay on the class path for now -->
+		<nonModularGroupIds>com.github.serceman,com.github.jnr,org.ow2.asm,net.java.dev.jna,org.apache.jackrabbit,org.apache.httpcomponents</nonModularGroupIds>
+
 		<!-- cryptomator dependencies -->
 		<cryptomator.cryptofs.version>2.1.0-beta6</cryptomator.cryptofs.version>
 		<cryptomator.integrations.version>1.0.0-rc1</cryptomator.integrations.version>
@@ -58,11 +61,11 @@
 			<artifactId>cryptofs</artifactId>
 			<version>${cryptomator.cryptofs.version}</version>
 		</dependency>
-<!--		<dependency>-->
-<!--			<groupId>org.cryptomator</groupId>-->
-<!--			<artifactId>fuse-nio-adapter</artifactId>-->
-<!--			<version>${cryptomator.fuse.version}</version>-->
-<!--		</dependency>-->
+		<dependency>
+			<groupId>org.cryptomator</groupId>
+			<artifactId>fuse-nio-adapter</artifactId>
+			<version>${cryptomator.fuse.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>org.cryptomator</groupId>
 			<artifactId>dokany-nio-adapter</artifactId>
@@ -240,7 +243,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-dependency-plugin</artifactId>
-					<version>3.1.2</version>
+					<version>3.2.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -340,6 +343,19 @@
 				<artifactId>maven-dependency-plugin</artifactId>
 				<executions>
 					<execution>
+						<id>copy-mods</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>copy-dependencies</goal>
+						</goals>
+						<configuration>
+							<includeScope>runtime</includeScope>
+							<outputDirectory>${project.build.directory}/mods</outputDirectory>
+							<excludeClassifiers>linux,mac,win</excludeClassifiers>
+							<excludeGroupIds>${nonModularGroupIds}</excludeGroupIds>
+						</configuration>
+					</execution>
+					<execution>
 						<id>copy-libs</id>
 						<phase>prepare-package</phase>
 						<goals>
@@ -348,7 +364,7 @@
 						<configuration>
 							<includeScope>runtime</includeScope>
 							<outputDirectory>${project.build.directory}/libs</outputDirectory>
-							<excludeClassifiers>linux,mac,win</excludeClassifiers>
+							<includeGroupIds>${nonModularGroupIds}</includeGroupIds>
 						</configuration>
 					</execution>
 				</executions>
@@ -492,7 +508,7 @@
 									<goal>copy-dependencies</goal>
 								</goals>
 								<configuration>
-									<outputDirectory>${project.build.directory}/libs</outputDirectory>
+									<outputDirectory>${project.build.directory}/mods</outputDirectory>
 									<includeGroupIds>org.openjfx</includeGroupIds>
 									<classifier>mac</classifier>
 								</configuration>
@@ -554,7 +570,7 @@
 									<goal>copy-dependencies</goal>
 								</goals>
 								<configuration>
-									<outputDirectory>${project.build.directory}/libs</outputDirectory>
+									<outputDirectory>${project.build.directory}/mods</outputDirectory>
 									<includeGroupIds>org.openjfx</includeGroupIds>
 									<classifier>linux</classifier>
 								</configuration>
@@ -615,7 +631,7 @@
 									<goal>copy-dependencies</goal>
 								</goals>
 								<configuration>
-									<outputDirectory>${project.build.directory}/libs</outputDirectory>
+									<outputDirectory>${project.build.directory}/mods</outputDirectory>
 									<includeGroupIds>org.openjfx</includeGroupIds>
 									<classifier>win</classifier>
 								</configuration>

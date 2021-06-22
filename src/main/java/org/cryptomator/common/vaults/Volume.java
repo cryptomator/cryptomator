@@ -66,7 +66,7 @@ public interface Volume {
 		return Stream.of(VolumeImpl.values()).filter(impl -> switch (impl) {
 			case WEBDAV -> WebDavVolume.isSupportedStatic();
 			case DOKANY -> DokanyVolume.isSupportedStatic();
-			case FUSE -> false; // FuseVolume.isSupportedStatic();
+			case FUSE -> FuseVolume.isSupportedStatic();
 		}).toArray(VolumeImpl[]::new);
 	}
 

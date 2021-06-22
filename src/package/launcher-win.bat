@@ -1,6 +1,7 @@
 @echo off
 java ^
-	-p "libs" ^
+	-p "mods" ^
+	-cp "libs/*" ^
 	-Dcryptomator.settingsPath="~/AppData/Roaming/Cryptomator/settings.json" ^
 	-Dcryptomator.ipcPortPath="~/AppData/Roaming/Cryptomator/ipcPort.bin" ^
 	-Dcryptomator.logDir="~/AppData/Roaming/Cryptomator" ^
