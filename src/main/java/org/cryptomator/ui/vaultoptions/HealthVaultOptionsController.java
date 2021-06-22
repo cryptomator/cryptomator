@@ -21,7 +21,7 @@ public class HealthVaultOptionsController implements FxController {
 
 	@FXML
 	public void startHealthCheck(ActionEvent event) {
-		healthCheckWindow.vault(vault).build().showHealthCheckWindow();
+		healthCheckWindow.vault(vault).windowToClose(window).build().showHealthCheckWindow();
 	}
 
 	private final Stage window;
