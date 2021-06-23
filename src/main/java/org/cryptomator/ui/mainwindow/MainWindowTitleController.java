@@ -129,7 +129,7 @@ public class MainWindowTitleController implements FxController {
 	}
 
 	public boolean isShowMinimizeButton() {
-		// always show the minimize button if no tray icon is present OR it is explicitily enabled
+		// always show the minimize button if no tray icon is present OR it is explicitly enabled
 		return !trayMenuInitialized || settings.showMinimizeButton().get();
 	}
 }

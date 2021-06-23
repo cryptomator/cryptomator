@@ -58,7 +58,7 @@ class WordEncoder {
 	 * @throws IllegalArgumentException If input is not a multiple of three bytes
 	 */
 	public String encodePadded(byte[] input) {
-		Preconditions.checkArgument(input.length % 3 == 0, "input needs to be padded to a multipe of three");
+		Preconditions.checkArgument(input.length % 3 == 0, "input needs to be padded to a multiple of three");
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < input.length; i += 3) {
 			byte b1 = input[i];
@@ -85,12 +85,12 @@ class WordEncoder {
 	 * @throws IllegalArgumentException If the encoded string doesn't consist of a multiple of two words or one of the words is unknown to this encoder.
 	 */
 	public byte[] decode(String encoded) {
-		List<String> splitted = Splitter.on(DELIMITER).omitEmptyStrings().splitToList(Strings.nullToEmpty(encoded));
-		Preconditions.checkArgument(splitted.size() % 2 == 0, "%s needs to be a multiple of two words", encoded);
-		byte[] result = new byte[splitted.size() / 2 * 3];
-		for (int i = 0; i < splitted.size(); i += 2) {
-			String w1 = splitted.get(i);
-			String w2 = splitted.get(i + 1);
+		List<String> split = Splitter.on(DELIMITER).omitEmptyStrings().splitToList(Strings.nullToEmpty(encoded));
+		Preconditions.checkArgument(split.size() % 2 == 0, "%s needs to be a multiple of two words", encoded);
+		byte[] result = new byte[split.size() / 2 * 3];
+		for (int i = 0; i < split.size(); i += 2) {
+			String w1 = split.get(i);
+			String w2 = split.get(i + 1);
 			int firstWordIndex = indices.getOrDefault(w1, -1);
 			int secondWordIndex = indices.getOrDefault(w2, -1);
 			Preconditions.checkArgument(firstWordIndex != -1, "%s not in dictionary", w1);

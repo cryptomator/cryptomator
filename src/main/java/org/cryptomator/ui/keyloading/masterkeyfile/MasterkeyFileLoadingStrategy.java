@@ -32,7 +32,7 @@ public class MasterkeyFileLoadingStrategy implements KeyLoadingStrategy {
 	public static final String SCHEME = "masterkeyfile";
 
 	private final Vault vault;
-	private final MasterkeyFileAccess masterkeyFileAcccess;
+	private final MasterkeyFileAccess masterkeyFileAccess;
 	private final Stage window;
 	private final Lazy<Scene> passphraseEntryScene;
 	private final Lazy<Scene> selectMasterkeyFileScene;
@@ -45,9 +45,9 @@ public class MasterkeyFileLoadingStrategy implements KeyLoadingStrategy {
 	private boolean wrongPassword;
 
 	@Inject
-	public MasterkeyFileLoadingStrategy(@KeyLoading Vault vault, MasterkeyFileAccess masterkeyFileAcccess, @KeyLoading Stage window, @FxmlScene(FxmlFile.UNLOCK_ENTER_PASSWORD) Lazy<Scene> passphraseEntryScene, @FxmlScene(FxmlFile.UNLOCK_SELECT_MASTERKEYFILE) Lazy<Scene> selectMasterkeyFileScene, UserInteractionLock<MasterkeyFileLoadingModule.PasswordEntry> passwordEntryLock, UserInteractionLock<MasterkeyFileLoadingModule.MasterkeyFileProvision> masterkeyFileProvisionLock, AtomicReference<char[]> password, AtomicReference<Path> filePath, MasterkeyFileLoadingFinisher finisher) {
+	public MasterkeyFileLoadingStrategy(@KeyLoading Vault vault, MasterkeyFileAccess masterkeyFileAccess, @KeyLoading Stage window, @FxmlScene(FxmlFile.UNLOCK_ENTER_PASSWORD) Lazy<Scene> passphraseEntryScene, @FxmlScene(FxmlFile.UNLOCK_SELECT_MASTERKEYFILE) Lazy<Scene> selectMasterkeyFileScene, UserInteractionLock<MasterkeyFileLoadingModule.PasswordEntry> passwordEntryLock, UserInteractionLock<MasterkeyFileLoadingModule.MasterkeyFileProvision> masterkeyFileProvisionLock, AtomicReference<char[]> password, AtomicReference<Path> filePath, MasterkeyFileLoadingFinisher finisher) {
 		this.vault = vault;
-		this.masterkeyFileAcccess = masterkeyFileAcccess;
+		this.masterkeyFileAccess = masterkeyFileAccess;
 		this.window = window;
 		this.passphraseEntryScene = passphraseEntryScene;
 		this.selectMasterkeyFileScene = selectMasterkeyFileScene;
@@ -68,7 +68,7 @@ public class MasterkeyFileLoadingStrategy implements KeyLoadingStrategy {
 				filePath = getAlternateMasterkeyFilePath();
 			}
 			CharSequence passphrase = getPassphrase();
-			return masterkeyFileAcccess.load(filePath, passphrase);
+			return masterkeyFileAccess.load(filePath, passphrase);
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 			throw new UnlockCancelledException("Unlock interrupted", e);

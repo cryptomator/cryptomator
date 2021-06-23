@@ -18,7 +18,8 @@ pom.xml.versionsBackup
 .idea/**/workspace.xml
 .idea/**/tasks.xml
 .idea/**/shelf
-.idea/dictionaries
+.idea/dictionaries/**
+!.idea/dictionaries/dict_*
 .idea/compiler.xml
 .idea/encodings.xml
 .idea/jarRepositories.xml

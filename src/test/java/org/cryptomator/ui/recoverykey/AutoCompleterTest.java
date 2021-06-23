@@ -43,6 +43,7 @@ public class AutoCompleterTest {
 			Assertions.assertEquals("tame", result.get());
 		}
 
+		@SuppressWarnings("SpellCheckingInspection")
 		@ParameterizedTest
 		@DisplayName("find 'teach'")
 		@ValueSource(strings = {"te", "tea", "teac", "teach"})
@@ -52,6 +53,7 @@ public class AutoCompleterTest {
 			Assertions.assertEquals("teach", result.get());
 		}
 
+		@SuppressWarnings("SpellCheckingInspection")
 		@ParameterizedTest
 		@DisplayName("find 'teacher'")
 		@ValueSource(strings = {"teache", "teacher"})

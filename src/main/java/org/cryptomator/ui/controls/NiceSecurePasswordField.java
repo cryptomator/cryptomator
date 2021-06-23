@@ -12,8 +12,8 @@ import javafx.scene.layout.StackPane;
 public class NiceSecurePasswordField extends StackPane {
 
 	private static final String STYLE_CLASS = "nice-secure-password-field";
-	private static final String ICONS_STLYE_CLASS = "icons";
-	private static final String REVEAL_BUTTON_STLYE_CLASS = "reveal-button";
+	private static final String ICONS_STYLE_CLASS = "icons";
+	private static final String REVEAL_BUTTON_STYLE_CLASS = "reveal-button";
 	private static final int ICON_SPACING = 6;
 	private static final double ICON_SIZE = 14.0;
 
@@ -30,7 +30,7 @@ public class NiceSecurePasswordField extends StackPane {
 		iconContainer.setAlignment(Pos.CENTER_RIGHT);
 		iconContainer.setMaxWidth(Double.NEGATIVE_INFINITY);
 		iconContainer.setPrefWidth(42); // TODO
-		iconContainer.getStyleClass().add(ICONS_STLYE_CLASS);
+		iconContainer.getStyleClass().add(ICONS_STYLE_CLASS);
 		StackPane.setAlignment(iconContainer, Pos.CENTER_RIGHT);
 
 		capsLockedIcon.setGlyph(FontAwesome5Icon.ARROW_UP);
@@ -51,7 +51,7 @@ public class NiceSecurePasswordField extends StackPane {
 		revealPasswordButton.setFocusTraversable(false);
 		revealPasswordButton.visibleProperty().bind(passwordField.focusedProperty());
 		revealPasswordButton.managedProperty().bind(passwordField.focusedProperty());
-		revealPasswordButton.getStyleClass().add(REVEAL_BUTTON_STLYE_CLASS);
+		revealPasswordButton.getStyleClass().add(REVEAL_BUTTON_STYLE_CLASS);
 
 		passwordField.revealPasswordProperty().bind(revealPasswordButton.selectedProperty());
 

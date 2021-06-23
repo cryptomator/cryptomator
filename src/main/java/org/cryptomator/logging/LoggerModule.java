@@ -85,7 +85,7 @@ public class LoggerModule {
 			appender.setContext(context);
 			appender.setFile(logDir.resolve(LOGFILE_NAME).toString());
 			appender.setEncoder(encoder);
-			LaunchAndSizeBasedTriggerinPolicy triggeringPolicy = new LaunchAndSizeBasedTriggerinPolicy(FileSize.valueOf(LOG_MAX_SIZE));
+			LaunchAndSizeBasedTriggeringPolicy triggeringPolicy = new LaunchAndSizeBasedTriggeringPolicy(FileSize.valueOf(LOG_MAX_SIZE));
 			triggeringPolicy.setContext(context);
 			triggeringPolicy.start();
 			appender.setTriggeringPolicy(triggeringPolicy);

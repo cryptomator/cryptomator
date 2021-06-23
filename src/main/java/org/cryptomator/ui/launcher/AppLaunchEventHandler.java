@@ -64,7 +64,7 @@ class AppLaunchEventHandler {
 		}
 	}
 
-	// TODO dedup MainWindowController...
+	// TODO deduplicate MainWindowController...
 	private void addOrRevealVault(Path potentialVaultPath) {
 		assert Platform.isFxApplicationThread();
 		try {
