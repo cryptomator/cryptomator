@@ -24,7 +24,7 @@ public class IpcFactoryTest {
 	private IpcProtocolImpl protocolHandler = Mockito.mock(IpcProtocolImpl.class);
 
 	@Test
-	@DisplayName("Wihout IPC port files")
+	@DisplayName("Without IPC port files")
 	public void testNoIpcWithoutPortFile() throws IOException {
 		IpcFactory inTest = new IpcFactory(environment, protocolHandler);
 

@@ -35,7 +35,7 @@ public interface KeyLoadingStrategy extends MasterkeyLoader {
 	}
 
 	/**
-	 * Release any ressources or do follow-up tasks after loading a key.
+	 * Release any resources or do follow-up tasks after loading a key.
 	 *
 	 * @param unlockedSuccessfully <code>true</code> if successfully unlocked a vault with the loaded key
 	 * @implNote This method might be invoked multiple times, depending on whether multiple attempts to load a key are started.
@@ -47,7 +47,7 @@ public interface KeyLoadingStrategy extends MasterkeyLoader {
 	/**
 	 * A key loading strategy that will always fail by throwing a {@link MasterkeyLoadingFailedException}.
 	 *
-	 * @param exception The cause of the failure. If not alreay an {@link MasterkeyLoadingFailedException}, it will get wrapped.
+	 * @param exception The cause of the failure. If not already an {@link MasterkeyLoadingFailedException}, it will get wrapped.
 	 * @return A new KeyLoadingStrategy that will always fail with an {@link MasterkeyLoadingFailedException}.
 	 */
 	static KeyLoadingStrategy failed(Exception exception) {

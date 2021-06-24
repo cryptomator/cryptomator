@@ -8,7 +8,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.scene.control.Label;
 
-public class ThrougputLabel extends Label {
+public class ThroughputLabel extends Label {
 
 	private static final long KIBS_THRESHOLD = 1l << 7; // 0.128 kiB/s
 	private static final long MIBS_THRESHOLD = 1l << 19; // 0.512 MiB/s
@@ -18,7 +18,7 @@ public class ThrougputLabel extends Label {
 	private final StringProperty mibsFormat = new SimpleStringProperty("%.3f");
 	private final LongProperty bytesPerSecond = new SimpleLongProperty();
 
-	public ThrougputLabel() {
+	public ThroughputLabel() {
 		textProperty().bind(createStringBinding());
 	}
 
