@@ -40,7 +40,6 @@ public enum FontAwesome5Icon {
 	SEARCH("\uF002"), //
 	SPINNER("\uF110"), //
 	STETHOSCOPE("\uF0f1"), //
-	STOPWATCH("\uF2F2"), //
 	SYNC("\uF021"), //
 	TIMES("\uF00D"), //
 	TRASH("\uF1F8"), //
