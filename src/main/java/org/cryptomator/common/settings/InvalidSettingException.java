@@ -3,28 +3,28 @@ package org.cryptomator.common.settings;
 
 public class InvalidSettingException extends RuntimeException {
 
-	private final AbstractInvalidSetting reason;
+	private final InvalidSetting reason;
 	private final String additionalMessage;
 
-	public InvalidSettingException(AbstractInvalidSetting reason) {
+	public InvalidSettingException(InvalidSetting reason) {
 		this(reason, null, null);
 	}
 
-	public InvalidSettingException(AbstractInvalidSetting reason, String additionalMessage) {
+	public InvalidSettingException(InvalidSetting reason, String additionalMessage) {
 		this(reason, additionalMessage, null);
 	}
 
-	public InvalidSettingException(AbstractInvalidSetting reason, Throwable cause) {
+	public InvalidSettingException(InvalidSetting reason, Throwable cause) {
 		this(reason, null, cause);
 	}
 
-	public InvalidSettingException(AbstractInvalidSetting reason, String additionalMessage, Throwable cause) {
+	public InvalidSettingException(InvalidSetting reason, String additionalMessage, Throwable cause) {
 		super(composeMessage(reason, additionalMessage), cause);
 		this.reason = reason;
 		this.additionalMessage = additionalMessage;
 	}
 
-	public AbstractInvalidSetting getReason() {
+	public InvalidSetting getReason() {
 		return this.reason;
 	}
 
@@ -32,7 +32,7 @@ public class InvalidSettingException extends RuntimeException {
 		return this.additionalMessage;
 	}
 
-	private static String composeMessage(AbstractInvalidSetting reason, String additionalMessage) {
+	private static String composeMessage(InvalidSetting reason, String additionalMessage) {
 		if (additionalMessage == null) {
 			return reason.getMessage();
 		}

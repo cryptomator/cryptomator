@@ -4,7 +4,7 @@ import java.net.URI;
 import java.util.Objects;
 import java.util.ResourceBundle;
 
-public enum InvalidSetting implements AbstractInvalidSetting {
+public enum InvalidSetting {
 
 	;
 
@@ -24,12 +24,23 @@ public enum InvalidSetting implements AbstractInvalidSetting {
 		this(onDefaultTracker(issueId), Objects.requireNonNull(resourceKey));
 	}
 
-	@Override
+	/**
+	 * Returns the corresponding issue URI of this setting.<br>
+	 * The issue URI usually resolves to a page on the
+	 * <a href="https://github.com/cryptomator/cryptomator/issues">Cryptomator Bugtracker.</a>
+	 *
+	 * @return the issue URI or {@code null} if none is provided.
+	 */
 	public URI getIssueURI() {
 		return this.issue;
 	}
 
-	@Override
+	/**
+	 * Returns a (preferably localized) message, that helps the user understand the
+	 * issue in their configuration and how to fix it.
+	 *
+	 * @return the non-null description of the issue.
+	 */
 	public String getMessage() {
 		if (!BUNDLE.containsKey(this.resourceKey)) {
 			return UNKNOWN_KEY_FORMAT.formatted(this.resourceKey);
