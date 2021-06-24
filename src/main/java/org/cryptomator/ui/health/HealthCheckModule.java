@@ -86,10 +86,7 @@ abstract class HealthCheckModule {
 	@Provides
 	@HealthCheckWindow
 	@HealthCheckScoped
-	static Stage provideStage(@Nullable Stage windowToClose, StageFactory factory, @MainWindow Stage owner, ResourceBundle resourceBundle, ChangeListener<Boolean> showingListener) {
-		if (windowToClose != null) {
-			windowToClose.close();
-		}
+	static Stage provideStage(StageFactory factory, @MainWindow Stage owner, ResourceBundle resourceBundle, ChangeListener<Boolean> showingListener) {
 		Stage stage = factory.create();
 		stage.initModality(Modality.WINDOW_MODAL);
 		stage.initOwner(owner);
