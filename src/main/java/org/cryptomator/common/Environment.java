@@ -123,8 +123,8 @@ public class Environment {
 			return Stream.empty();
 		} else {
 			Iterable<String> iter = Splitter.on(separator).split(value);
-			Spliterator<String> spliter = Spliterators.spliteratorUnknownSize(iter.iterator(), Spliterator.ORDERED | Spliterator.IMMUTABLE);
-			return StreamSupport.stream(spliter, false);
+			Spliterator<String> spliterator = Spliterators.spliteratorUnknownSize(iter.iterator(), Spliterator.ORDERED | Spliterator.IMMUTABLE);
+			return StreamSupport.stream(spliterator, false);
 		}
 	}
 }

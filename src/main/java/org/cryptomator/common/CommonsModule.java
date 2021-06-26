@@ -46,6 +46,7 @@ public abstract class CommonsModule {
 	private static final int NUM_CORE_BG_THREADS = 6;
 	private static final long BG_THREAD_KEEPALIVE_SECONDS = 60l;
 
+	@SuppressWarnings("SpellCheckingInspection")
 	@Provides
 	@Singleton
 	@Named("licensePublicKey")

@@ -60,17 +60,17 @@ public class SemVerComparator implements Comparator<String> {
 		final int commonCompCount = Math.min(vComps1.length, vComps2.length);
 
 		for (int i = 0; i < commonCompCount; i++) {
-			int subversionComparisionResult = 0;
+			int subversionComparisonResult = 0;
 			try {
 				final int v1 = Integer.parseInt(vComps1[i]);
 				final int v2 = Integer.parseInt(vComps2[i]);
-				subversionComparisionResult = v1 - v2;
+				subversionComparisonResult = v1 - v2;
 			} catch (NumberFormatException ex) {
 				// ok, lets compare this fragment lexicographically
-				subversionComparisionResult = vComps1[i].compareTo(vComps2[i]);
+				subversionComparisonResult = vComps1[i].compareTo(vComps2[i]);
 			}
-			if (subversionComparisionResult != 0) {
-				return subversionComparisionResult;
+			if (subversionComparisonResult != 0) {
+				return subversionComparisonResult;
 			}
 		}
 

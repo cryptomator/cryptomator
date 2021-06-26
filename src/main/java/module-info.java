@@ -23,11 +23,10 @@ module org.cryptomator.desktop {
 	requires org.slf4j;
 	requires org.apache.commons.lang3;
 	requires dagger;
+	requires com.auth0.jwt;
 
 	/* TODO: filename-based modules: */
 	requires static javax.inject; /* ugly dagger/guava crap */
-	requires java.jwt;
-	requires com.fasterxml.jackson.databind; // TODO: tmp fix, waiting for https://github.com/auth0/java-jwt/pull/484
 	requires logback.classic;
 	requires logback.core;
 

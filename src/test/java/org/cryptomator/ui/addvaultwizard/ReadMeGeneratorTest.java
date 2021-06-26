@@ -11,6 +11,7 @@ import java.util.List;
 
 public class ReadMeGeneratorTest {
 
+	@SuppressWarnings("SpellCheckingInspection")
 	@ParameterizedTest
 	@CsvSource({ //
 			"test,test", //

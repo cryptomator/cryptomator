@@ -35,8 +35,8 @@ public class VaultStats {
 	private final LongProperty bytesPerSecondEncrypted = new SimpleLongProperty();
 	private final LongProperty bytesPerSecondDecrypted = new SimpleLongProperty();
 	private final DoubleProperty cacheHitRate = new SimpleDoubleProperty();
-	private final LongProperty toalBytesRead = new SimpleLongProperty();
-	private final LongProperty toalBytesWritten = new SimpleLongProperty();
+	private final LongProperty totalBytesRead = new SimpleLongProperty();
+	private final LongProperty totalBytesWritten = new SimpleLongProperty();
 	private final LongProperty totalBytesEncrypted = new SimpleLongProperty();
 	private final LongProperty totalBytesDecrypted = new SimpleLongProperty();
 	private final LongProperty filesRead = new SimpleLongProperty();
@@ -75,8 +75,8 @@ public class VaultStats {
 		cacheHitRate.set(stats.map(this::getCacheHitRate).orElse(0.0));
 		bytesPerSecondDecrypted.set(stats.map(CryptoFileSystemStats::pollBytesDecrypted).orElse(0L));
 		bytesPerSecondEncrypted.set(stats.map(CryptoFileSystemStats::pollBytesEncrypted).orElse(0L));
-		toalBytesRead.set(stats.map(CryptoFileSystemStats::pollTotalBytesRead).orElse(0L));
-		toalBytesWritten.set(stats.map(CryptoFileSystemStats::pollTotalBytesWritten).orElse(0L));
+		totalBytesRead.set(stats.map(CryptoFileSystemStats::pollTotalBytesRead).orElse(0L));
+		totalBytesWritten.set(stats.map(CryptoFileSystemStats::pollTotalBytesWritten).orElse(0L));
 		totalBytesEncrypted.set(stats.map(CryptoFileSystemStats::pollTotalBytesEncrypted).orElse(0L));
 		totalBytesDecrypted.set(stats.map(CryptoFileSystemStats::pollTotalBytesDecrypted).orElse(0L));
 		var oldAccessCount = filesRead.get() + filesWritten.get();
@@ -146,7 +146,7 @@ public class VaultStats {
 		return bytesPerSecondEncrypted;
 	}
 
-	public long getBytesPerSecondEnrypted() {
+	public long getBytesPerSecondEncrypted() {
 		return bytesPerSecondEncrypted.get();
 	}
 
@@ -164,13 +164,13 @@ public class VaultStats {
 		return cacheHitRate.get();
 	}
 
-	public LongProperty toalBytesReadProperty() {return toalBytesRead;}
+	public LongProperty totalBytesReadProperty() {return totalBytesRead;}
 
-	public long getTotalBytesRead() { return toalBytesRead.get();}
+	public long getTotalBytesRead() { return totalBytesRead.get();}
 
-	public LongProperty toalBytesWrittenProperty() {return toalBytesWritten;}
+	public LongProperty totalBytesWrittenProperty() {return totalBytesWritten;}
 
-	public long getTotalBytesWritten() { return toalBytesWritten.get();}
+	public long getTotalBytesWritten() { return totalBytesWritten.get();}
 
 	public LongProperty totalBytesEncryptedProperty() {return totalBytesEncrypted;}
 

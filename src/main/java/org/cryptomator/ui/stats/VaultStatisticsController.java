@@ -65,8 +65,8 @@ public class VaultStatisticsController implements FxController {
 		this.cacheHitRate = WeakBindings.bindDouble(stats.cacheHitRateProperty());
 		this.cacheHitDegrees = cacheHitRate.multiply(-270);
 		this.cacheHitPercentage = cacheHitRate.multiply(100);
-		this.totalBytesRead = WeakBindings.bindLong(stats.toalBytesReadProperty());
-		this.totalBytesWritten = WeakBindings.bindLong(stats.toalBytesWrittenProperty());
+		this.totalBytesRead = WeakBindings.bindLong(stats.totalBytesReadProperty());
+		this.totalBytesWritten = WeakBindings.bindLong(stats.totalBytesWrittenProperty());
 		this.totalBytesDecrypted = WeakBindings.bindLong(stats.totalBytesDecryptedProperty());
 		this.totalBytesEncrypted = WeakBindings.bindLong(stats.totalBytesEncryptedProperty());
 		this.filesRead = WeakBindings.bindLong(stats.filesRead());
@@ -102,7 +102,7 @@ public class VaultStatisticsController implements FxController {
 			this.decryptedBytesRead = readData;
 			this.encryptedBytesWrite = writeData;
 
-			// initialize data once and change value of datapoints later:
+			// initialize data once and change value of data points later:
 			for (int i = 0; i < IO_SAMPLING_STEPS; i++) {
 				decryptedBytesRead.getData().add(new Data<>(i, 0));
 				encryptedBytesWrite.getData().add(new Data<>(i, 0));
