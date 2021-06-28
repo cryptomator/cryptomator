@@ -5,8 +5,8 @@ import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultListManager;
 import org.cryptomator.cryptofs.CryptoFileSystemProperties;
 import org.cryptomator.cryptofs.CryptoFileSystemProvider;
-import org.cryptomator.cryptofs.VaultCipherCombo;
 import org.cryptomator.cryptolib.api.CryptoException;
+import org.cryptomator.cryptolib.api.CryptorProvider;
 import org.cryptomator.cryptolib.api.Masterkey;
 import org.cryptomator.cryptolib.api.MasterkeyLoader;
 import org.cryptomator.cryptolib.common.MasterkeyFileAccess;
@@ -182,7 +182,7 @@ public class CreateNewVaultPasswordController implements FxController {
 			// 2. initialize vault:
 			try {
 				MasterkeyLoader loader = ignored -> masterkey.clone();
-				CryptoFileSystemProperties fsProps = CryptoFileSystemProperties.cryptoFileSystemProperties().withCipherCombo(VaultCipherCombo.SIV_CTRMAC).withKeyLoader(loader).build();
+				CryptoFileSystemProperties fsProps = CryptoFileSystemProperties.cryptoFileSystemProperties().withCipherCombo(CryptorProvider.Scheme.SIV_CTRMAC).withKeyLoader(loader).build();
 				CryptoFileSystemProvider.initialize(path, fsProps, DEFAULT_KEY_ID);
 
 				// 3. write vault-internal readme file:
