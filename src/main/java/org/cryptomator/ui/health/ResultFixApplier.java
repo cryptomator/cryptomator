@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.cryptofs.VaultConfig;
 import org.cryptomator.cryptofs.health.api.DiagnosticResult;
+import org.cryptomator.cryptolib.api.CryptorProvider;
 import org.cryptomator.cryptolib.api.Masterkey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +36,7 @@ class ResultFixApplier {
 	public void fix(DiagnosticResult result) {
 		Preconditions.checkArgument(result.getSeverity() == DiagnosticResult.Severity.WARN, "Unfixable result");
 		try (var masterkeyClone = masterkey.clone(); //
-			 var cryptor = vaultConfig.getCipherCombo().getCryptorProvider(csprng).withKey(masterkeyClone)) {
+			 var cryptor = CryptorProvider.forScheme(vaultConfig.getCipherCombo()).provide(masterkeyClone, csprng)) {
 			result.fix(vaultPath, vaultConfig, masterkeyClone, cryptor);
 		} catch (Exception e) {
 			LOG.error("Failed to apply fix", e);

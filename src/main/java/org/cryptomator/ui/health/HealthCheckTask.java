@@ -3,6 +3,7 @@ package org.cryptomator.ui.health;
 import org.cryptomator.cryptofs.VaultConfig;
 import org.cryptomator.cryptofs.health.api.DiagnosticResult;
 import org.cryptomator.cryptofs.health.api.HealthCheck;
+import org.cryptomator.cryptolib.api.CryptorProvider;
 import org.cryptomator.cryptolib.api.Masterkey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,7 +55,7 @@ class HealthCheckTask extends Task<Void> {
 	protected Void call() {
 		Instant start = Instant.now();
 		try (var masterkeyClone = masterkey.clone(); //
-			 var cryptor = vaultConfig.getCipherCombo().getCryptorProvider(csprng).withKey(masterkeyClone)) {
+			 var cryptor = CryptorProvider.forScheme(vaultConfig.getCipherCombo()).provide(masterkeyClone, csprng)) {
 			check.check(vaultPath, vaultConfig, masterkeyClone, cryptor, result -> {
 				if (isCancelled()) {
 					throw new CancellationException();
