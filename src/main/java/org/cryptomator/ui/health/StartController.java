@@ -27,6 +27,7 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -80,10 +81,11 @@ public class StartController implements FxController {
 	@FXML
 	public void next() {
 		LOG.trace("StartController.next()");
-		executor.submit(this::loadKey);
+		CompletableFuture.runAsync(this::loadKey, executor).whenCompleteAsync(this::loadedKey, Platform::runLater);
 	}
 
 	private VaultConfig.UnverifiedVaultConfig loadConfig() {
+		assert !Platform.isFxApplicationThread();
 		try {
 			return this.vault.getUnverifiedVaultConfig();
 		} catch (IOException e) {
@@ -112,25 +114,31 @@ public class StartController implements FxController {
 			if (old != null) {
 				old.destroy();
 			}
-			Platform.runLater(this::loadedKey);
 		} catch (MasterkeyLoadingFailedException e) {
 			if (keyLoadingStrategy.recoverFromException(e)) {
 				// retry
 				loadKey();
 			} else {
-				Platform.runLater(() -> loadingKeyFailed(e));
+				throw new LoadingFailedException(e);
 			}
 		} catch (VaultConfigLoadException e) {
-			Platform.runLater(() -> loadingKeyFailed(e));
+			throw new LoadingFailedException(e);
 		}
 	}
 
-	private void loadedKey() {
-		LOG.debug("Loaded valid key");
-		window.setScene(checkScene.get());
+	private void loadedKey(Void unused, Throwable exception) {
+		assert Platform.isFxApplicationThread();
+		if (exception instanceof LoadingFailedException) {
+			loadingKeyFailed(exception.getCause());
+		} else if (exception != null) {
+			loadingKeyFailed(exception);
+		} else {
+			LOG.debug("Loaded valid key");
+			window.setScene(checkScene.get());
+		}
 	}
 
-	private void loadingKeyFailed(Exception e) {
+	private void loadingKeyFailed(Throwable e) {
 		if (e instanceof UnlockCancelledException) {
 			// ok
 		} else if (e instanceof VaultKeyInvalidException) {
@@ -166,5 +174,13 @@ public class StartController implements FxController {
 
 	public boolean isLoaded() {
 		return loaded.get();
+	}
+
+	/* internal types */
+
+	private static class LoadingFailedException extends CompletionException {
+		LoadingFailedException(Throwable cause) {
+			super(cause);
+		}
 	}
 }
