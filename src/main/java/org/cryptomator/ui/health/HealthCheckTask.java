@@ -9,7 +9,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javafx.application.Platform;
+import javafx.beans.Observable;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.LongProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleLongProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -34,6 +37,7 @@ class HealthCheckTask extends Task<Void> {
 	private final HealthCheck check;
 	private final ObservableList<DiagnosticResult> results;
 	private final LongProperty durationInMillis;
+	private final BooleanProperty chosenForExecution;
 
 	public HealthCheckTask(Path vaultPath, VaultConfig vaultConfig, Masterkey masterkey, SecureRandom csprng, HealthCheck check, ResourceBundle resourceBundle) {
 		this.vaultPath = Objects.requireNonNull(vaultPath);
@@ -49,6 +53,7 @@ class HealthCheckTask extends Task<Void> {
 			updateTitle(check.identifier());
 		}
 		this.durationInMillis = new SimpleLongProperty(-1);
+		this.chosenForExecution = new SimpleBooleanProperty();
 	}
 
 	@Override
@@ -60,21 +65,10 @@ class HealthCheckTask extends Task<Void> {
 				if (isCancelled()) {
 					throw new CancellationException();
 				}
-				// FIXME: slowdown for demonstration purposes only:
-				try {
-					Thread.sleep(2000);
-				} catch (InterruptedException e) {
-					if (isCancelled()) {
-						return;
-					} else {
-						Thread.currentThread().interrupt();
-						throw new RuntimeException(e);
-					}
-				}
 				Platform.runLater(() -> results.add(result));
 			});
 		}
-		Platform.runLater(() ->durationInMillis.set(Duration.between(start, Instant.now()).toMillis()));
+		Platform.runLater(() -> durationInMillis.set(Duration.between(start, Instant.now()).toMillis()));
 		return null;
 	}
 
@@ -89,6 +83,10 @@ class HealthCheckTask extends Task<Void> {
 	}
 
 	/* Getter */
+
+	Observable[] observables() {
+		return new Observable[]{results, chosenForExecution};
+	}
 
 	public ObservableList<DiagnosticResult> results() {
 		return results;
@@ -106,4 +104,11 @@ class HealthCheckTask extends Task<Void> {
 		return durationInMillis.get();
 	}
 
+	public BooleanProperty chosenForExecutionProperty() {
+		return chosenForExecution;
+	}
+
+	public boolean isChosenForExecution() {
+		return chosenForExecution.get();
+	}
 }

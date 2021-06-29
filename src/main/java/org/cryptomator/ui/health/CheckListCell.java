@@ -20,28 +20,13 @@ import javafx.util.Callback;
 class CheckListCell extends ListCell<HealthCheckTask> {
 
 	private final FontAwesome5IconView stateIcon = new FontAwesome5IconView();
-	private final Callback<HealthCheckTask, BooleanProperty> selectedGetter;
-	private final ObjectProperty<State> stateProperty;
-
 	private CheckBox checkBox = new CheckBox();
-	private BooleanProperty selectedProperty;
 
-	CheckListCell(Callback<HealthCheckTask, BooleanProperty> selectedGetter, ObservableValue<Boolean> switchIndicator) {
-		this.selectedGetter = selectedGetter;
-		this.stateProperty = new SimpleObjectProperty<>(State.SELECTION);
-		switchIndicator.addListener(this::changeState);
+	CheckListCell() {
 		setPadding(new Insets(6));
 		setAlignment(Pos.CENTER_LEFT);
 		setContentDisplay(ContentDisplay.LEFT);
 		getStyleClass().add("label");
-	}
-
-	private void changeState(ObservableValue<? extends Boolean> observableValue, boolean oldValue, boolean newValue) {
-		if (newValue) {
-			stateProperty.set(State.RUN);
-		} else {
-			stateProperty.set(State.SELECTION);
-		}
 	}
 
 	@Override
@@ -49,39 +34,15 @@ class CheckListCell extends ListCell<HealthCheckTask> {
 		super.updateItem(item, empty);
 		if (item != null) {
 			setText(item.getTitle());
-		}
-		switch (stateProperty.get()) {
-			case SELECTION -> updateItemSelection(item, empty);
-			case RUN -> updateItemRun(item, empty);
-		}
-	}
-
-	private void updateItemSelection(HealthCheckTask item, boolean empty) {
-		if (!empty) {
-			setGraphic(checkBox);
-
-			if (selectedProperty != null) {
-				checkBox.selectedProperty().unbindBidirectional(selectedProperty);
-			}
-			selectedProperty = selectedGetter.call(item);
-			if (selectedProperty != null) {
-				checkBox.selectedProperty().bindBidirectional(selectedProperty);
-			}
-		} else {
-			setGraphic(null);
-			setText(null);
-		}
-	}
-
-	private void updateItemRun(HealthCheckTask item, boolean empty) {
-		if (item != null) {
 			item.stateProperty().addListener(this::stateChanged);
 			graphicProperty().bind(Bindings.createObjectBinding(() -> graphicForState(item.getState()), item.stateProperty()));
 			stateIcon.setGlyph(glyphForState(item.getState()));
+			checkBox.selectedProperty().bindBidirectional(item.chosenForExecutionProperty());
 		} else {
 			graphicProperty().unbind();
 			setGraphic(null);
 			setText(null);
+			checkBox.selectedProperty().unbind();
 		}
 	}
 
@@ -92,7 +53,7 @@ class CheckListCell extends ListCell<HealthCheckTask> {
 
 	private Node graphicForState(Worker.State state) {
 		return switch (state) {
-			case READY -> null;
+			case READY -> checkBox;
 			case SCHEDULED, RUNNING, FAILED, CANCELLED, SUCCEEDED -> stateIcon;
 		};
 	}
@@ -108,8 +69,4 @@ class CheckListCell extends ListCell<HealthCheckTask> {
 		};
 	}
 
-	private enum State {
-		SELECTION,
-		RUN;
-	}
 }
