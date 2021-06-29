@@ -3,6 +3,8 @@ package org.cryptomator.ui.controls;
 import com.tobiasdiez.easybind.EasyBind;
 
 import javafx.animation.AnimationTimer;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.scene.control.ProgressIndicator;
 import java.time.Duration;
 
@@ -11,13 +13,22 @@ import java.time.Duration;
  * <p>
  * See also https://docs.oracle.com/javase/8/javafx/api/javafx/scene/doc-files/cssref.html#progressindicator
  */
-public class FontAwesomeSpinner extends ProgressIndicator {
+public class FontAwesome5Spinner extends ProgressIndicator {
+
+	private static final double DEFAULT_GLYPH_SIZE = 12.0;
 
 	private final Animator animation;
+	private DoubleProperty glyphSize = new SimpleDoubleProperty(this, "glyphSize", DEFAULT_GLYPH_SIZE);
 
-	public FontAwesomeSpinner() {
+	public FontAwesome5Spinner() {
 		this.animation = new Animator(this);
 		EasyBind.subscribe(this.visibleProperty(), this::startStopAnimation);
+		EasyBind.subscribe(glyphSize, this::shrinkToGlyphSize);
+	}
+
+	private void shrinkToGlyphSize(Number newValue) {
+		double sizeInPx	= newValue.doubleValue() * 1.333;
+		setMaxSize(sizeInPx,sizeInPx);
 	}
 
 	private void startStopAnimation(boolean flag) {
@@ -26,6 +37,17 @@ public class FontAwesomeSpinner extends ProgressIndicator {
 		} else {
 			animation.stop();
 		}
+	}
+	public DoubleProperty glyphSizeProperty() {
+		return glyphSize;
+	}
+
+	public double getGlyphSize() {
+		return glyphSize.get();
+	}
+
+	public void setGlyphSize(double glyphSize) {
+		this.glyphSize.set(glyphSize);
 	}
 
 	private static class Animator extends AnimationTimer {

@@ -6,7 +6,6 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
-<?import org.cryptomator.ui.controls.FontAwesomeSpinner?>
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.mainwindow.VaultDetailLockedController"
@@ -30,7 +29,6 @@
 				<FontAwesome5IconView glyph="LOCK"/>
 			</graphic>
 		</Hyperlink>
-		<FontAwesomeSpinner />
 
 		<Region VBox.vgrow="ALWAYS"/>
 
