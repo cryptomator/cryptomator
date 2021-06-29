@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.shape.Box?>
+<?import javafx.scene.Group?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.collections.ObservableList?>
+<?import javafx.collections.FXCollections?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.CheckBox?>
+<VBox xmlns:fx="http://javafx.com/fxml"
+	  xmlns="http://javafx.com/javafx"
+	  fx:controller="org.cryptomator.ui.vaultoptions.HealthVaultOptionsController"
+	  spacing="6">
+	<padding>
+		<Insets topRightBottomLeft="12"/>
+	</padding>
+	<children>
+		<Label text="%vaultOptions.health.introduction" wrapText="true"/>
+		<Label text="%vaultOptions.health.remarks" wrapText="true"/>
+		<GridPane >
+			<padding>
+				<Insets left="6"/>
+			</padding>
+			<columnConstraints>
+				<ColumnConstraints minWidth="20" halignment="LEFT"/>
+				<ColumnConstraints fillWidth="true"/>
+			</columnConstraints>
+			<rowConstraints>
+				<RowConstraints valignment="TOP"/>
+				<RowConstraints valignment="TOP"/>
+				<RowConstraints valignment="TOP"/>
+			</rowConstraints>
+			<Label text="1." GridPane.rowIndex="0" GridPane.columnIndex="0" />
+			<Label text="%vaultOptions.health.remarkSync" wrapText="true" GridPane.rowIndex="0" GridPane.columnIndex="1" />
+			<Label text="2." GridPane.rowIndex="1" GridPane.columnIndex="0" />
+			<Label text="%vaultOptions.health.remarkFix" wrapText="true" GridPane.rowIndex="1" GridPane.columnIndex="1" />
+			<Label text="3." GridPane.rowIndex="2" GridPane.columnIndex="0" />
+			<Label text="%vaultOptions.health.remarkBackup" wrapText="true" GridPane.rowIndex="2" GridPane.columnIndex="1" />
+		</GridPane>
+		<CheckBox text="%vaultOptions.health.affirmation" fx:id="affirmationBox"/>
+		<Button text="%vaultOptions.health.startBtn" disable="${!affirmationBox.selected}" onAction="#startHealthCheck"/>
+	</children>
+</VBox>

@@ -86,7 +86,6 @@ abstract class VaultOptionsModule {
 
 	@Binds
 	@IntoMap
-	@FxControllerKey(AutoLockVaultOptionsController.class)
-	abstract FxController bindAutoLockVaultOptionsController(AutoLockVaultOptionsController controller);
-
+	@FxControllerKey(HealthVaultOptionsController.class)
+	abstract FxController bindHealthOptionsController(HealthVaultOptionsController controller);
 }

@@ -39,7 +39,7 @@ public enum FontAwesome5Icon {
 	REDO("\uF01E"), //
 	SEARCH("\uF002"), //
 	SPINNER("\uF110"), //
-	STOPWATCH("\uF2F2"), //
+	STETHOSCOPE("\uF0f1"), //
 	SYNC("\uF021"), //
 	TIMES("\uF00D"), //
 	TRASH("\uF1F8"), //
