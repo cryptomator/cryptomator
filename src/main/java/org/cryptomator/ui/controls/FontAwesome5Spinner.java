@@ -18,10 +18,15 @@ public class FontAwesome5Spinner extends ProgressIndicator {
 
 	private static final double DEFAULT_GLYPH_SIZE = 12.0;
 
+	private final FontAwesome5IconView boundingBox;
 	private final RotateTransition animation;
-	private DoubleProperty glyphSize = new SimpleDoubleProperty(this, "glyphSize", DEFAULT_GLYPH_SIZE);
+	private final DoubleProperty glyphSize = new SimpleDoubleProperty(this, "glyphSize", DEFAULT_GLYPH_SIZE);
 
 	public FontAwesome5Spinner() {
+		this.boundingBox = new FontAwesome5IconView();
+		boundingBox.setGlyph(FontAwesome5Icon.SPINNER);
+		boundingBox.glyphSizeProperty().bind(glyphSize);
+
 		this.animation = new RotateTransition(Duration.millis(100), this);
 		animation.setInterpolator(Interpolator.DISCRETE);
 		animation.setByAngle(45);
@@ -33,12 +38,11 @@ public class FontAwesome5Spinner extends ProgressIndicator {
 		});
 
 		EasyBind.subscribe(this.visibleProperty(), this::reset);
-		EasyBind.subscribe(glyphSize, this::shrinkToGlyphSize);
+		EasyBind.subscribe(boundingBox.glyphSizeProperty(), this::shrinkToGlyphSize);
 	}
 
 	private void shrinkToGlyphSize(Number newValue) {
-		double sizeInPx = newValue.doubleValue() * 1.333;
-		setMaxSize(sizeInPx, sizeInPx);
+		setMaxSize(boundingBox.getBoundsInLocal().getWidth(), boundingBox.getBoundsInLocal().getHeight());
 	}
 
 	private void reset(boolean flag) {
