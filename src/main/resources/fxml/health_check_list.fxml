@@ -28,7 +28,7 @@
 				<CheckBox onAction="#toggleSelectAll" text="%health.checkList.selectAllBox" visible="${!controller.showResultScreen}" managed="${!controller.showResultScreen}" />
 				<ListView fx:id="checksListView" VBox.vgrow="ALWAYS"/>
 			</VBox>
-			<StackPane visible="${controller.showResultScreen}" managed="${controller.showResultScreen}" HBox.hgrow="ALWAYS" >
+			<StackPane visible="${controller.showResultScreen}" HBox.hgrow="ALWAYS" >
 				<VBox minWidth="300" alignment="CENTER" visible="${!controller.anyCheckSelected}" managed="${!controller.anyCheckSelected}" >
 					<Label text="%health.check.detail.noSelectedCheck" wrapText="true" alignment="CENTER" />
 				</VBox>
