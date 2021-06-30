@@ -23,7 +23,7 @@ import java.util.stream.Stream;
 @HealthCheckScoped
 public class CheckDetailController implements FxController {
 
-	private final EasyObservableList<DiagnosticResult> results;
+	private final EasyObservableList<Result> results;
 	private final OptionalBinding<Worker.State> taskState;
 	private final Binding<String> taskName;
 	private final Binding<String> taskDuration;
@@ -39,7 +39,7 @@ public class CheckDetailController implements FxController {
 	private final ResultListCellFactory resultListCellFactory;
 	private final ResourceBundle resourceBundle;
 
-	public ListView<DiagnosticResult> resultsListView;
+	public ListView<Result> resultsListView;
 	private Subscription resultSubscription;
 
 	@Inject
@@ -71,8 +71,8 @@ public class CheckDetailController implements FxController {
 		}
 	}
 
-	private Function<Stream<? extends DiagnosticResult>, Long> countSeverity(DiagnosticResult.Severity severity) {
-		return stream -> stream.filter(item -> severity.equals(item.getSeverity())).count();
+	private Function<Stream<? extends Result>, Long> countSeverity(DiagnosticResult.Severity severity) {
+		return stream -> stream.filter(item -> severity.equals(item.diagnosis().getSeverity())).count();
 	}
 
 	@FXML

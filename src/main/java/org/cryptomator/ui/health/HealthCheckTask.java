@@ -35,7 +35,7 @@ class HealthCheckTask extends Task<Void> {
 	private final Masterkey masterkey;
 	private final SecureRandom csprng;
 	private final HealthCheck check;
-	private final ObservableList<DiagnosticResult> results;
+	private final ObservableList<Result> results;
 	private final LongProperty durationInMillis;
 	private final BooleanProperty chosenForExecution;
 
@@ -45,7 +45,7 @@ class HealthCheckTask extends Task<Void> {
 		this.masterkey = Objects.requireNonNull(masterkey);
 		this.csprng = Objects.requireNonNull(csprng);
 		this.check = Objects.requireNonNull(check);
-		this.results = FXCollections.observableArrayList();
+		this.results = FXCollections.observableArrayList(Result::observables);
 		try {
 			updateTitle(resourceBundle.getString("health." + check.identifier()));
 		} catch (MissingResourceException e) {
@@ -61,11 +61,11 @@ class HealthCheckTask extends Task<Void> {
 		Instant start = Instant.now();
 		try (var masterkeyClone = masterkey.clone(); //
 			 var cryptor = CryptorProvider.forScheme(vaultConfig.getCipherCombo()).provide(masterkeyClone, csprng)) {
-			check.check(vaultPath, vaultConfig, masterkeyClone, cryptor, result -> {
+			check.check(vaultPath, vaultConfig, masterkeyClone, cryptor, diagnosis -> {
 				if (isCancelled()) {
 					throw new CancellationException();
 				}
-				Platform.runLater(() -> results.add(result));
+				Platform.runLater(() -> results.add(Result.create(diagnosis)));
 			});
 		}
 		Platform.runLater(() -> durationInMillis.set(Duration.between(start, Instant.now()).toMillis()));
@@ -88,7 +88,7 @@ class HealthCheckTask extends Task<Void> {
 		return new Observable[]{results, chosenForExecution};
 	}
 
-	public ObservableList<DiagnosticResult> results() {
+	public ObservableList<Result> results() {
 		return results;
 	}
 
