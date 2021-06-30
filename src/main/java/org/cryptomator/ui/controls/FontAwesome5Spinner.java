@@ -2,11 +2,12 @@ package org.cryptomator.ui.controls;
 
 import com.tobiasdiez.easybind.EasyBind;
 
-import javafx.animation.AnimationTimer;
+import javafx.animation.Interpolator;
+import javafx.animation.RotateTransition;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.scene.control.ProgressIndicator;
-import java.time.Duration;
+import javafx.util.Duration;
 
 /**
  * A progress indicator in the shape of {@link FontAwesome5Icon#SPINNER}. The single spinner segements are defined in the css in the `progress-indicator` class.
@@ -17,27 +18,38 @@ public class FontAwesome5Spinner extends ProgressIndicator {
 
 	private static final double DEFAULT_GLYPH_SIZE = 12.0;
 
-	private final Animator animation;
+	private final RotateTransition animation;
 	private DoubleProperty glyphSize = new SimpleDoubleProperty(this, "glyphSize", DEFAULT_GLYPH_SIZE);
 
 	public FontAwesome5Spinner() {
-		this.animation = new Animator(this);
-		EasyBind.subscribe(this.visibleProperty(), this::startStopAnimation);
+		this.animation = new RotateTransition(Duration.millis(100), this);
+		animation.setInterpolator(Interpolator.DISCRETE);
+		animation.setByAngle(45);
+		animation.setCycleCount(1);
+		animation.setOnFinished(event -> {
+			double currentAngle = this.getRotate();
+			animation.setFromAngle(currentAngle);
+			animation.play();
+		});
+
+		EasyBind.subscribe(this.visibleProperty(), this::reset);
 		EasyBind.subscribe(glyphSize, this::shrinkToGlyphSize);
 	}
 
 	private void shrinkToGlyphSize(Number newValue) {
-		double sizeInPx	= newValue.doubleValue() * 1.333;
-		setMaxSize(sizeInPx,sizeInPx);
+		double sizeInPx = newValue.doubleValue() * 1.333;
+		setMaxSize(sizeInPx, sizeInPx);
 	}
 
-	private void startStopAnimation(boolean flag) {
+	private void reset(boolean flag) {
 		if (flag) {
-			animation.start();
+			setRotate(0);
+			animation.playFromStart();
 		} else {
 			animation.stop();
 		}
 	}
+
 	public DoubleProperty glyphSizeProperty() {
 		return glyphSize;
 	}
@@ -48,37 +60,6 @@ public class FontAwesome5Spinner extends ProgressIndicator {
 
 	public void setGlyphSize(double glyphSize) {
 		this.glyphSize.set(glyphSize);
-	}
-
-	private static class Animator extends AnimationTimer {
-
-		private static final long STATIC_TIMEFRAME = Duration.ofMillis(100).toNanos();
-		//defined in css!
-		private static int SEGMENT_COUNT = 8;
-		private static final int ROTATION_ANGLE = 360 / SEGMENT_COUNT;
-
-		private final ProgressIndicator toRotate;
-
-		private long lastChange = 0;
-		private int rotation_count = 0;
-
-		Animator(ProgressIndicator toRotate) {
-			this.toRotate = toRotate;
-		}
-
-		@Override
-		public void handle(long now) {
-			if (now - lastChange > STATIC_TIMEFRAME) {
-				lastChange = now;
-
-				toRotate.setRotate(ROTATION_ANGLE * rotation_count);
-
-				rotation_count++;
-				if (rotation_count == SEGMENT_COUNT) {
-					rotation_count = 0;
-				}
-			}
-		}
 	}
 
 }
