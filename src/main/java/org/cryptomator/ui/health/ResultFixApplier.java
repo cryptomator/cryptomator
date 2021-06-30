@@ -10,20 +10,24 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import javafx.scene.control.Alert;
+import javafx.application.Platform;
 import java.nio.file.Path;
 import java.security.SecureRandom;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
 
 @HealthCheckScoped
 class ResultFixApplier {
 
-	private static final Logger LOG = LoggerFactory.getLogger(ResultFixApplier.class);
-
 	private final Path vaultPath;
 	private final SecureRandom csprng;
 	private final Masterkey masterkey;
 	private final VaultConfig vaultConfig;
+	private final ExecutorService sequentialExecutor;
 
 	@Inject
 	public ResultFixApplier(@HealthCheckWindow Vault vault, AtomicReference<Masterkey> masterkeyRef, AtomicReference<VaultConfig> vaultConfigRef, SecureRandom csprng) {
@@ -31,18 +35,32 @@ class ResultFixApplier {
 		this.masterkey = masterkeyRef.get();
 		this.vaultConfig = vaultConfigRef.get();
 		this.csprng = csprng;
+		this.sequentialExecutor = Executors.newSingleThreadExecutor();
 	}
 
-	public void fix(DiagnosticResult result) {
-		Preconditions.checkArgument(result.getSeverity() == DiagnosticResult.Severity.WARN, "Unfixable result");
+	public CompletionStage<Void> fix(Result result) {
+		Preconditions.checkArgument(result.getState() == Result.FixState.FIXABLE);
+		result.setState(Result.FixState.FIXING);
+		return CompletableFuture.runAsync(() -> fix(result.diagnosis()), sequentialExecutor)
+				.whenCompleteAsync((unused, throwable) -> {
+					var fixed = throwable == null ? Result.FixState.FIXED : Result.FixState.FIX_FAILED;
+					result.setState(fixed);
+				}, Platform::runLater);
+	}
+
+	public void fix(DiagnosticResult diagnosis) {
+		Preconditions.checkArgument(diagnosis.getSeverity() == DiagnosticResult.Severity.WARN, "Unfixable result");
 		try (var masterkeyClone = masterkey.clone(); //
 			 var cryptor = CryptorProvider.forScheme(vaultConfig.getCipherCombo()).provide(masterkeyClone, csprng)) {
-			result.fix(vaultPath, vaultConfig, masterkeyClone, cryptor);
+			diagnosis.fix(vaultPath, vaultConfig, masterkeyClone, cryptor);
 		} catch (Exception e) {
-			LOG.error("Failed to apply fix", e);
-			Alert alert = new Alert(Alert.AlertType.ERROR, e.getMessage());
-			alert.showAndWait();
-			//TODO: real error/not supported handling
+			throw new FixFailedException(e);
+		}
+	}
+
+	public static class FixFailedException extends CompletionException {
+		private FixFailedException(Throwable cause) {
+			super(cause);
 		}
 	}
 }

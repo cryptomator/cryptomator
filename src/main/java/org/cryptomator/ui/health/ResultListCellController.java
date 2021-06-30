@@ -16,7 +16,6 @@ import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ObservableObjectValue;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 
@@ -50,14 +49,6 @@ public class ResultListCellController implements FxController {
 	}
 
 	@FXML
-	public void fix() {
-		final var realResult = result.get();
-		if (realResult != null) {
-			fixApplier.fix(realResult);
-		}
-	}
-
-	@FXML
 	public void initialize() {
 		// see getGlyph() for relevant glyphs:
 		EasyBind.includeWhen(iconView.getStyleClass(), "glyph-icon-muted", iconView.glyphProperty().isEqualTo(FontAwesome5Icon.INFO_CIRCLE));
@@ -65,6 +56,22 @@ public class ResultListCellController implements FxController {
 		EasyBind.includeWhen(iconView.getStyleClass(), "glyph-icon-orange", iconView.glyphProperty().isEqualTo(FontAwesome5Icon.EXCLAMATION_TRIANGLE));
 		EasyBind.includeWhen(iconView.getStyleClass(), "glyph-icon-red", iconView.glyphProperty().isEqualTo(FontAwesome5Icon.TIMES));
 	}
+
+	@FXML
+	public void fix() {
+		Result r = result.get();
+		if (r != null) {
+			fixApplier.fix(r).whenCompleteAsync(this::fixFinished, Platform::runLater);
+		}
+	}
+
+	private void fixFinished(Void unused, Throwable exception) {
+		if (exception != null) {
+			LOG.error("Failed to apply fix", exception);
+			// TODO ...
+		}
+	}
+
 
 	/* Getter & Setter */
 
