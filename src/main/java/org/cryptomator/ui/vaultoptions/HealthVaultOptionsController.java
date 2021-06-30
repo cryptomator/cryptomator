@@ -12,6 +12,10 @@ import javafx.stage.Stage;
 @VaultOptionsScoped
 public class HealthVaultOptionsController implements FxController {
 
+	private final Stage window;
+	private final Vault vault;
+	private final HealthCheckComponent.Builder healthCheckWindow;
+
 	@Inject
 	public HealthVaultOptionsController(@VaultOptionsWindow Stage window, @VaultOptionsWindow Vault vault, HealthCheckComponent.Builder healthCheckWindow) {
 		this.window = window;
@@ -23,8 +27,4 @@ public class HealthVaultOptionsController implements FxController {
 	public void startHealthCheck(ActionEvent event) {
 		healthCheckWindow.vault(vault).windowToClose(window).build().showHealthCheckWindow();
 	}
-
-	private final Stage window;
-	private final Vault vault;
-	private final HealthCheckComponent.Builder healthCheckWindow;
 }
