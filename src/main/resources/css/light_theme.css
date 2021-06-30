@@ -802,6 +802,18 @@
 	-fx-scale-shape: false;
 }
 
+/**
+statusView
+**/
+
+.status-view-white .glyph-icon {
+	-fx-fill: white;
+}
+
+.status-view-white .progress-indicator .segment {
+	-fx-background-color: white;
+}
+
 /*******************************************************************************
  *                                                                             *
  * ProgressIndicator                                                           *

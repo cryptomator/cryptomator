@@ -10,6 +10,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Circle?>
+<?import org.cryptomator.ui.controls.FontAwesome5StatusView?>
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.mainwindow.VaultDetailController"
@@ -22,7 +23,7 @@
 		<HBox spacing="12" visible="${controller.anyVaultSelected}" managed="${controller.anyVaultSelected}">
 			<StackPane alignment="CENTER">
 				<Circle styleClass="glyph-icon-primary" radius="16"/>
-				<FontAwesome5IconView styleClass="glyph-icon-white" glyph="${controller.glyph}" HBox.hgrow="NEVER" glyphSize="16"/>
+				<FontAwesome5StatusView styleClass="status-view-white" glyph="${controller.glyph}" glyphSize="16"/>
 			</StackPane>
 			<VBox spacing="4" HBox.hgrow="ALWAYS">
 				<HBox spacing="12">

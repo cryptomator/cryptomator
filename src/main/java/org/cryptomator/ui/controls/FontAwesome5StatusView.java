@@ -33,6 +33,12 @@ public class FontAwesome5StatusView extends Label {
 		animatedSpinner.glyphSizeProperty().bind(glyphSize);
 
 		EasyBind.subscribe(glyphProperty(), this::spinnerOrIcon);
+		EasyBind.subscribe(glyphSize, this::shrinkToGlyphSize);
+	}
+
+	private void shrinkToGlyphSize(Number newValue) {
+		double sizeInPx = newValue.doubleValue() * 1.333;
+		setMaxSize(sizeInPx, sizeInPx);
 	}
 
 	private void spinnerOrIcon(FontAwesome5Icon icon) {
