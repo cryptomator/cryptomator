@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import org.cryptomator.ui.controls.FontAwesome5IconView?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+<?import org.cryptomator.ui.controls.FontAwesome5StatusView?>
 <HBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.mainwindow.VaultListCellController"
@@ -19,7 +19,7 @@
 	</padding>
 	<children>
 		<VBox alignment="CENTER" minWidth="20">
-			<FontAwesome5IconView glyph="${controller.glyph}" HBox.hgrow="NEVER" glyphSize="16"/>
+			<FontAwesome5StatusView glyph="${controller.glyph}" HBox.hgrow="NEVER" glyphSize="16"/>
 		</VBox>
 		<VBox spacing="4" HBox.hgrow="ALWAYS">
 			<Label styleClass="header-label" text="${controller.vault.displayName}"/>

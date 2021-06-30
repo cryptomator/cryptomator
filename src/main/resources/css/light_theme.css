@@ -284,6 +284,10 @@
 	-fx-fill: TEXT_FILL_MUTED;
 }
 
+.list-cell .progress-indicator .segment {
+	-fx-background-color: TEXT_FILL_MUTED;
+}
+
 .list-cell .header-label {
 	-fx-font-family: 'Open Sans SemiBold';
 	-fx-font-size: 1.0em;
@@ -296,6 +300,10 @@
 
 .list-cell:selected .glyph-icon {
 	-fx-fill: PRIMARY;
+}
+
+.list-cell:selected .progress-indicator .segment {
+	-fx-background-color: PRIMARY;
 }
 
 .list-cell:selected .header-label {
@@ -562,8 +570,16 @@
 	-fx-fill: TEXT_FILL_MUTED;
 }
 
+.button:disabled .progress-indicator .segment {
+	-fx-background-color: TEXT_FILL_MUTED;
+}
+
 .button:default .glyph-icon {
 	-fx-fill: white;
+}
+
+.button:default .progress-indicator .segment {
+ 	-fx-background-color: white;
 }
 
 .button:default .label {
@@ -805,7 +821,6 @@
 }
 
 .progress-indicator:indeterminate .segment {
-	-fx-background-color: TEXT_FILL;
 	-fx-background-insets: 0, 0.5;
 }
 
@@ -814,7 +829,7 @@
 }
 
 .progress-indicator:indeterminate .segment7 {
-	-fx-shape: "M 403.07812 60.921875 L 355.07812 108.92188 L 403.07812 156.92188 L 451.07812 108.92188 L 403.07812 60.921875 z";
+	-fx-shape: "M 403.07812 60.921875";
 	-fx-background-color: transparent;
 }
 
