@@ -9,14 +9,14 @@
 	  fx:controller="org.cryptomator.ui.health.CheckDetailController"
 	  prefWidth="500"
 	  spacing="6">
-	<FormattedLabel fx:id="checkTitle" styleClass="label-large" format="%health.check.detail.header" arg1="${controller.taskName}"/>
+	<FormattedLabel fx:id="checkTitle" styleClass="label-large" format="%health.check.detail.header" arg1="${controller.checkName}"/>
 
-	<Label text="%health.check.detail.taskNotStarted" visible="${controller.taskNotStarted}" managed="${controller.taskNotStarted}"/>
-	<Label text="%health.check.detail.taskRunning" visible="${controller.taskRunning}" managed="${controller.taskRunning}"/>
-	<Label text="%health.check.detail.taskScheduled" visible="${controller.taskScheduled}" managed="${controller.taskScheduled}"/>
-	<Label text="%health.check.detail.taskCancelled" visible="${controller.taskCancelled}" managed="${controller.taskCancelled}"/>
-	<Label text="%health.check.detail.taskFailed" visible="${controller.taskFailed}" managed="${controller.taskFailed}"/>
-	<Label text="%health.check.detail.taskSucceeded" visible="${controller.taskSucceeded}" managed="${controller.taskSucceeded}"/>
+	<Label text="%health.check.detail.checkRunning" visible="${controller.checkRunning}" managed="${controller.checkRunning}"/>
+	<Label text="%health.check.detail.checkScheduled" visible="${controller.checkScheduled}" managed="${controller.checkScheduled}"/>
+	<Label text="%health.check.detail.checkSkipped" visible="${controller.checkSkipped}" managed="${controller.checkSkipped}"/>
+	<Label text="%health.check.detail.checkCancelled" visible="${controller.checkCancelled}" managed="${controller.checkCancelled}"/>
+	<Label text="%health.check.detail.checkFailed" visible="${controller.checkFailed}" managed="${controller.checkFailed}"/>
+	<Label text="%health.check.detail.checkSucceeded" visible="${controller.checkSucceeded}" managed="${controller.checkSucceeded}"/>
 
 	<FormattedLabel styleClass="label" format="%health.check.detail.problemCount" arg1="${controller.countOfWarnSeverity}" arg2="${controller.countOfCritSeverity}" visible="${!controller.taskNotStarted}"
 					 managed="${!controller.taskNotStarted}"	/>
