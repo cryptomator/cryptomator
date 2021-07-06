@@ -1,84 +1,89 @@
 package org.cryptomator.ui.health;
 
 import com.tobiasdiez.easybind.EasyBind;
-import org.cryptomator.cryptofs.health.api.DiagnosticResult;
+import com.tobiasdiez.easybind.optional.OptionalBinding;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.controls.FontAwesome5Icon;
 import org.cryptomator.ui.controls.FontAwesome5IconView;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javafx.application.Platform;
 import javafx.beans.binding.Binding;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
+import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 
 // unscoped because each cell needs its own controller
 public class ResultListCellController implements FxController {
 
-	private final ResultFixApplier fixApplier;
-	private final ObjectProperty<DiagnosticResult> result;
+	private final Logger LOG = LoggerFactory.getLogger(ResultListCellController.class);
+
+	private final ObjectProperty<Result> result;
 	private final Binding<String> description;
+	private final ResultFixApplier fixApplier;
+	private final OptionalBinding<Result.FixState> fixState;
+	private final ObjectBinding<FontAwesome5Icon> glyph;
+	private final BooleanBinding fixable;
+	private final BooleanBinding fixing;
+	private final BooleanBinding fixed;
 
 	public FontAwesome5IconView iconView;
-	public Button actionButton;
+	public Button fixButton;
 
 	@Inject
 	public ResultListCellController(ResultFixApplier fixApplier) {
 		this.result = new SimpleObjectProperty<>(null);
-		this.description = EasyBind.wrapNullable(result).map(DiagnosticResult::toString).orElse("");
+		this.description = EasyBind.wrapNullable(result).map(Result::getDescription).orElse("");
 		this.fixApplier = fixApplier;
-		result.addListener(this::updateCellContent);
-	}
-
-	private void updateCellContent(ObservableValue<? extends DiagnosticResult> observable, DiagnosticResult oldVal, DiagnosticResult newVal) {
-		iconView.getStyleClass().clear();
-		actionButton.setVisible(false);
-		//TODO: see comment in case WARN
-		actionButton.setManaged(false);
-		switch (newVal.getSeverity()) {
-			case INFO -> {
-				iconView.setGlyph(FontAwesome5Icon.INFO_CIRCLE);
-				iconView.getStyleClass().add("glyph-icon-muted");
-			}
-			case GOOD -> {
-				iconView.setGlyph(FontAwesome5Icon.CHECK);
-				iconView.getStyleClass().add("glyph-icon-primary");
-			}
-			case WARN -> {
-				iconView.setGlyph(FontAwesome5Icon.EXCLAMATION_TRIANGLE);
-				iconView.getStyleClass().add("glyph-icon-orange");
-				//TODO: Neither is any fix implemented, nor it is ensured, that only fix is executed at a time with good ui indication
-				//	before both are not fix, do not show the button
-				//actionButton.setVisible(true);
-			}
-			case CRITICAL -> {
-				iconView.setGlyph(FontAwesome5Icon.TIMES);
-				iconView.getStyleClass().add("glyph-icon-red");
-			}
-		}
+		this.fixState = EasyBind.wrapNullable(result).mapObservable(Result::fixState);
+		this.glyph = Bindings.createObjectBinding(this::getGlyph, result);
+		this.fixable = Bindings.createBooleanBinding(this::isFixable, fixState);
+		this.fixing = Bindings.createBooleanBinding(this::isFixing, fixState);
+		this.fixed = Bindings.createBooleanBinding(this::isFixed, fixState);
 	}
 
 	@FXML
-	public void runResultAction() {
-		final var realResult = result.get();
-		if (realResult != null) {
-			fixApplier.fix(realResult);
+	public void initialize() {
+		// see getGlyph() for relevant glyphs:
+		EasyBind.includeWhen(iconView.getStyleClass(), "glyph-icon-muted", iconView.glyphProperty().isEqualTo(FontAwesome5Icon.INFO_CIRCLE));
+		EasyBind.includeWhen(iconView.getStyleClass(), "glyph-icon-primary", iconView.glyphProperty().isEqualTo(FontAwesome5Icon.CHECK));
+		EasyBind.includeWhen(iconView.getStyleClass(), "glyph-icon-orange", iconView.glyphProperty().isEqualTo(FontAwesome5Icon.EXCLAMATION_TRIANGLE));
+		EasyBind.includeWhen(iconView.getStyleClass(), "glyph-icon-red", iconView.glyphProperty().isEqualTo(FontAwesome5Icon.TIMES));
+	}
+
+	@FXML
+	public void fix() {
+		Result r = result.get();
+		if (r != null) {
+			fixApplier.fix(r).whenCompleteAsync(this::fixFinished, Platform::runLater);
 		}
 	}
+
+	private void fixFinished(Void unused, Throwable exception) {
+		if (exception != null) {
+			LOG.error("Failed to apply fix", exception);
+			// TODO ...
+		}
+	}
+
+
 	/* Getter & Setter */
 
-
-	public DiagnosticResult getResult() {
+	public Result getResult() {
 		return result.get();
 	}
 
-	public void setResult(DiagnosticResult result) {
+	public void setResult(Result result) {
 		this.result.set(result);
 	}
 
-	public ObjectProperty<DiagnosticResult> resultProperty() {
+	public ObjectProperty<Result> resultProperty() {
 		return result;
 	}
 
@@ -86,7 +91,49 @@ public class ResultListCellController implements FxController {
 		return description.getValue();
 	}
 
+	public ObjectBinding<FontAwesome5Icon> glyphProperty() {
+		return glyph;
+	}
+
+	public FontAwesome5Icon getGlyph() {
+		var r = result.get();
+		if (r == null) {
+			return null;
+		}
+		return switch (r.diagnosis().getSeverity()) {
+			case INFO -> FontAwesome5Icon.INFO_CIRCLE;
+			case GOOD -> FontAwesome5Icon.CHECK;
+			case WARN -> FontAwesome5Icon.EXCLAMATION_TRIANGLE;
+			case CRITICAL -> FontAwesome5Icon.TIMES;
+		};
+	}
+
 	public Binding<String> descriptionProperty() {
 		return description;
 	}
+
+	public BooleanBinding fixableProperty() {
+		return fixable;
+	}
+
+	public boolean isFixable() {
+		return fixState.get().map(Result.FixState.FIXABLE::equals).orElse(false);
+	}
+
+	public BooleanBinding fixingProperty() {
+		return fixing;
+	}
+
+	public boolean isFixing() {
+		return fixState.get().map(Result.FixState.FIXING::equals).orElse(false);
+	}
+
+	public BooleanBinding fixedProperty() {
+		return fixed;
+	}
+
+	public boolean isFixed() {
+		return fixState.get().map(Result.FixState.FIXED::equals).orElse(false);
+	}
+
 }

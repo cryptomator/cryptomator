@@ -15,17 +15,18 @@ import javafx.collections.FXCollections;
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
 import javafx.scene.control.ListView;
+import java.time.Duration;
+import java.util.ResourceBundle;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
 @HealthCheckScoped
 public class CheckDetailController implements FxController {
 
-	private final EasyObservableList<DiagnosticResult> results;
+	private final EasyObservableList<Result> results;
 	private final OptionalBinding<Worker.State> taskState;
 	private final Binding<String> taskName;
-	private final Binding<Number> taskDuration;
-	private final ResultListCellFactory resultListCellFactory;
+	private final Binding<String> taskDuration;
 	private final Binding<Boolean> taskRunning;
 	private final Binding<Boolean> taskScheduled;
 	private final Binding<Boolean> taskFinished;
@@ -35,17 +36,20 @@ public class CheckDetailController implements FxController {
 	private final Binding<Boolean> taskCancelled;
 	private final Binding<Number> countOfWarnSeverity;
 	private final Binding<Number> countOfCritSeverity;
+	private final ResultListCellFactory resultListCellFactory;
+	private final ResourceBundle resourceBundle;
 
-	public ListView<DiagnosticResult> resultsListView;
+	public ListView<Result> resultsListView;
 	private Subscription resultSubscription;
 
 	@Inject
-	public CheckDetailController(ObjectProperty<HealthCheckTask> selectedTask, ResultListCellFactory resultListCellFactory) {
+	public CheckDetailController(ObjectProperty<HealthCheckTask> selectedTask, ResultListCellFactory resultListCellFactory, ResourceBundle resourceBundle) {
+		this.resultListCellFactory = resultListCellFactory;
+		this.resourceBundle = resourceBundle;
 		this.results = EasyBind.wrapList(FXCollections.observableArrayList());
 		this.taskState = EasyBind.wrapNullable(selectedTask).mapObservable(HealthCheckTask::stateProperty);
 		this.taskName = EasyBind.wrapNullable(selectedTask).map(HealthCheckTask::getTitle).orElse("");
-		this.taskDuration = EasyBind.wrapNullable(selectedTask).mapObservable(HealthCheckTask::durationInMillisProperty).orElse(-1L);
-		this.resultListCellFactory = resultListCellFactory;
+		this.taskDuration = EasyBind.wrapNullable(selectedTask).mapObservable(HealthCheckTask::durationInMillisProperty).orElse(-1L).map(this::millisToReadAbleDuration);
 		this.taskRunning = EasyBind.wrapNullable(selectedTask).mapObservable(HealthCheckTask::runningProperty).orElse(false); //TODO: DOES NOT WORK
 		this.taskScheduled = taskState.map(Worker.State.SCHEDULED::equals).orElse(false);
 		this.taskNotStarted = taskState.map(Worker.State.READY::equals).orElse(false);
@@ -67,8 +71,8 @@ public class CheckDetailController implements FxController {
 		}
 	}
 
-	private Function<Stream<? extends DiagnosticResult>, Long> countSeverity(DiagnosticResult.Severity severity) {
-		return stream -> stream.filter(item -> severity.equals(item.getSeverity())).count();
+	private Function<Stream<? extends Result>, Long> countSeverity(DiagnosticResult.Severity severity) {
+		return stream -> stream.filter(item -> severity.equals(item.diagnosis().getSeverity())).count();
 	}
 
 	@FXML
@@ -87,11 +91,11 @@ public class CheckDetailController implements FxController {
 		return taskName;
 	}
 
-	public Number getTaskDuration() {
+	public String getTaskDuration() {
 		return taskDuration.getValue();
 	}
 
-	public Binding<Number> taskDurationProperty() {
+	public Binding<String> taskDurationProperty() {
 		return taskDuration;
 	}
 
@@ -165,6 +169,23 @@ public class CheckDetailController implements FxController {
 
 	public Binding<Boolean> taskCancelledProperty() {
 		return taskCancelled;
+	}
+
+	private String millisToReadAbleDuration(Number millis) {
+		Duration tmp = Duration.ofMillis(millis.longValue());
+		long hours = tmp.toHoursPart();
+		long minutes = tmp.toMinutesPart();
+		long seconds = tmp.toSecondsPart();
+		if (hours != 0) {
+			String hms_format = resourceBundle.getString("health.check.detail.hmsFormat");
+			return String.format(hms_format, hours, minutes, seconds);
+		} else if (minutes != 0) {
+			String ms_format = resourceBundle.getString("health.check.detail.msFormat");
+			return String.format(ms_format, minutes, seconds);
+		} else {
+			String s_format = resourceBundle.getString("health.check.detail.sFormat");
+			return String.format(s_format, seconds);
+		}
 	}
 
 }

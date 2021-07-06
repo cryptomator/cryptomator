@@ -28,6 +28,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import java.security.SecureRandom;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -63,7 +64,7 @@ abstract class HealthCheckModule {
 	/* Only inject with Lazy-Wrapper!*/
 	@Provides
 	@HealthCheckScoped
-	static Collection<HealthCheckTask> provideAvailableHealthCheckTasks(Collection<HealthCheck> availableHealthChecks, @HealthCheckWindow Vault vault, AtomicReference<Masterkey> masterkeyRef, AtomicReference<VaultConfig> vaultConfigRef, SecureRandom csprng, ResourceBundle resourceBundle) {
+	static List<HealthCheckTask> provideAvailableHealthCheckTasks(Collection<HealthCheck> availableHealthChecks, @HealthCheckWindow Vault vault, AtomicReference<Masterkey> masterkeyRef, AtomicReference<VaultConfig> vaultConfigRef, SecureRandom csprng, ResourceBundle resourceBundle) {
 		return availableHealthChecks.stream().map(check -> new HealthCheckTask(vault.getPath(), vaultConfigRef.get(), masterkeyRef.get(), csprng, check, resourceBundle)).toList();
 	}
 
@@ -86,10 +87,10 @@ abstract class HealthCheckModule {
 	@HealthCheckScoped
 	static Stage provideStage(StageFactory factory, @MainWindow Stage owner, ResourceBundle resourceBundle, ChangeListener<Boolean> showingListener) {
 		Stage stage = factory.create();
-		stage.setTitle(resourceBundle.getString("health.title"));
-		stage.setResizable(true);
 		stage.initModality(Modality.WINDOW_MODAL);
 		stage.initOwner(owner);
+		stage.setTitle(resourceBundle.getString("health.title"));
+		stage.setResizable(true);
 		stage.showingProperty().addListener(showingListener); // bind masterkey lifecycle to window
 		return stage;
 	}

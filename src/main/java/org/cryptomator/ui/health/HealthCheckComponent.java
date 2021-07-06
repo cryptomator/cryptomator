@@ -7,6 +7,7 @@ import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 
+import javax.inject.Named;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
@@ -17,6 +18,9 @@ public interface HealthCheckComponent {
 	@HealthCheckWindow
 	Stage window();
 
+	@Named("windowToClose")
+	Stage windowToClose();
+
 	@FxmlScene(FxmlFile.HEALTH_START)
 	Lazy<Scene> scene();
 
@@ -24,6 +28,7 @@ public interface HealthCheckComponent {
 		Stage stage = window();
 		stage.setScene(scene().get());
 		stage.show();
+		windowToClose().close();
 		return stage;
 	}
 
@@ -32,6 +37,9 @@ public interface HealthCheckComponent {
 
 		@BindsInstance
 		Builder vault(@HealthCheckWindow Vault vault);
+
+		@BindsInstance
+		Builder windowToClose(@Named("windowToClose") Stage window);
 
 		HealthCheckComponent build();
 	}

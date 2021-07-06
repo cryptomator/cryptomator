@@ -67,8 +67,8 @@ public class FxmlLoaderFactory {
 		}
 		Parent root = loader.getRoot();
 		// TODO: discuss if we can remove language-specific stylesheets
-		// List<String> addtionalStyleSheets = Splitter.on(',').omitEmptyStrings().splitToList(resourceBundle.getString("additionalStyleSheets"));
-		// addtionalStyleSheets.forEach(styleSheet -> root.getStylesheets().add("/css/" + styleSheet));
+		// List<String> additionalStyleSheets = Splitter.on(',').omitEmptyStrings().splitToList(resourceBundle.getString("additionalStyleSheets"));
+		// additionalStyleSheets.forEach(styleSheet -> root.getStylesheets().add("/css/" + styleSheet));
 		return sceneFactory.apply(root);
 	}
 

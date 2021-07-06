@@ -3,12 +3,16 @@ package org.cryptomator.ui.health;
 import org.cryptomator.cryptofs.VaultConfig;
 import org.cryptomator.cryptofs.health.api.DiagnosticResult;
 import org.cryptomator.cryptofs.health.api.HealthCheck;
+import org.cryptomator.cryptolib.api.CryptorProvider;
 import org.cryptomator.cryptolib.api.Masterkey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javafx.application.Platform;
+import javafx.beans.Observable;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.LongProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleLongProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -31,8 +35,9 @@ class HealthCheckTask extends Task<Void> {
 	private final Masterkey masterkey;
 	private final SecureRandom csprng;
 	private final HealthCheck check;
-	private final ObservableList<DiagnosticResult> results;
+	private final ObservableList<Result> results;
 	private final LongProperty durationInMillis;
+	private final BooleanProperty chosenForExecution;
 
 	public HealthCheckTask(Path vaultPath, VaultConfig vaultConfig, Masterkey masterkey, SecureRandom csprng, HealthCheck check, ResourceBundle resourceBundle) {
 		this.vaultPath = Objects.requireNonNull(vaultPath);
@@ -40,7 +45,7 @@ class HealthCheckTask extends Task<Void> {
 		this.masterkey = Objects.requireNonNull(masterkey);
 		this.csprng = Objects.requireNonNull(csprng);
 		this.check = Objects.requireNonNull(check);
-		this.results = FXCollections.observableArrayList();
+		this.results = FXCollections.observableArrayList(Result::observables);
 		try {
 			updateTitle(resourceBundle.getString("health." + check.identifier()));
 		} catch (MissingResourceException e) {
@@ -48,32 +53,22 @@ class HealthCheckTask extends Task<Void> {
 			updateTitle(check.identifier());
 		}
 		this.durationInMillis = new SimpleLongProperty(-1);
+		this.chosenForExecution = new SimpleBooleanProperty();
 	}
 
 	@Override
 	protected Void call() {
 		Instant start = Instant.now();
 		try (var masterkeyClone = masterkey.clone(); //
-			 var cryptor = vaultConfig.getCipherCombo().getCryptorProvider(csprng).withKey(masterkeyClone)) {
-			check.check(vaultPath, vaultConfig, masterkeyClone, cryptor, result -> {
+			 var cryptor = CryptorProvider.forScheme(vaultConfig.getCipherCombo()).provide(masterkeyClone, csprng)) {
+			check.check(vaultPath, vaultConfig, masterkeyClone, cryptor, diagnosis -> {
 				if (isCancelled()) {
 					throw new CancellationException();
 				}
-				// FIXME: slowdown for demonstration purposes only:
-				try {
-					Thread.sleep(2000);
-				} catch (InterruptedException e) {
-					if (isCancelled()) {
-						return;
-					} else {
-						Thread.currentThread().interrupt();
-						throw new RuntimeException(e);
-					}
-				}
-				Platform.runLater(() -> results.add(result));
+				Platform.runLater(() -> results.add(Result.create(diagnosis)));
 			});
 		}
-		Platform.runLater(() ->durationInMillis.set(Duration.between(start, Instant.now()).toMillis()));
+		Platform.runLater(() -> durationInMillis.set(Duration.between(start, Instant.now()).toMillis()));
 		return null;
 	}
 
@@ -89,7 +84,11 @@ class HealthCheckTask extends Task<Void> {
 
 	/* Getter */
 
-	public ObservableList<DiagnosticResult> results() {
+	Observable[] observables() {
+		return new Observable[]{results, chosenForExecution};
+	}
+
+	public ObservableList<Result> results() {
 		return results;
 	}
 
@@ -105,4 +104,11 @@ class HealthCheckTask extends Task<Void> {
 		return durationInMillis.get();
 	}
 
+	public BooleanProperty chosenForExecutionProperty() {
+		return chosenForExecution;
+	}
+
+	public boolean isChosenForExecution() {
+		return chosenForExecution.get();
+	}
 }

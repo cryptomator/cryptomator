@@ -1,7 +1,7 @@
 [![cryptomator](cryptomator.png)](https://cryptomator.org/)
 
 [![Build](https://github.com/cryptomator/cryptomator/workflows/Build/badge.svg)](https://github.com/cryptomator/cryptomator/actions?query=workflow%3ABuild)
-[![Known Vulnerabilities](https://snyk.io/test/github/cryptomator/cryptomator/badge.svg?targetFile=main%2Fpom.xml)](https://snyk.io/test/github/cryptomator/cryptomator?targetFile=main%2Fpom.xml)
+[![Known Vulnerabilities](https://snyk.io/test/github/cryptomator/cryptomator/badge.svg)](https://snyk.io/test/github/cryptomator/cryptomator)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/2a0adf3cec6a4143b91035d3924178f1)](https://www.codacy.com/gh/cryptomator/cryptomator/dashboard)
 [![Twitter](https://img.shields.io/badge/twitter-@Cryptomator-blue.svg?style=flat)](http://twitter.com/Cryptomator)
 [![Crowdin](https://badges.crowdin.net/cryptomator/localized.svg)](https://translate.cryptomator.org/)
@@ -56,7 +56,7 @@ Download native binaries of Cryptomator on [cryptomator.org](https://cryptomator
 - File names get encrypted
 - Folder structure gets obfuscated
 - Use as many vaults in your Dropbox as you want, each having individual passwords
-- Two thousand commits for the security of your data!! :tada:
+- Three thousand commits for the security of your data!! :tada:
 
 ### Privacy
 

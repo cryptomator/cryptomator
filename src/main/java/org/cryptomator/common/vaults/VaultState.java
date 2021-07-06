@@ -46,7 +46,7 @@ public class VaultState extends ObservableValueBase<VaultState.Value> implements
 		UNLOCKED,
 
 		/**
-		 * Unknown state due to preceeding unrecoverable exceptions.
+		 * Unknown state due to preceding unrecoverable exceptions.
 		 */
 		ERROR;
 	}
