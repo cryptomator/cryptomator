@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javafx.application.Application;
-import javafx.concurrent.Worker;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -30,9 +29,9 @@ public class ReportWriter {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ReportWriter.class);
 	private static final String REPORT_HEADER = """
-			**************************************
-			*   Cryptomator Vault Health Report  *
-			**************************************
+			*******************************************
+			*     Cryptomator Vault Health Report     *
+			*******************************************
 			Analyzed vault: %s (Current name "%s")
 			Vault storage path: %s
 			""";
@@ -58,38 +57,35 @@ public class ReportWriter {
 		this.exportDestination = env.getLogDir().orElse(Path.of(System.getProperty("user.home"))).resolve("healthReport_" + vault.getDisplayName() + "_" + TIME_STAMP.format(Instant.now()) + ".log");
 	}
 
-	protected void writeReport(Collection<HealthCheckTask> tasks) throws IOException {
+	protected void writeReport(Collection<Check> performedChecks) throws IOException {
 		try (var out = Files.newOutputStream(exportDestination, StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING); //
 			 var writer = new BufferedWriter(new OutputStreamWriter(out, StandardCharsets.UTF_8))) {
 			writer.write(REPORT_HEADER.formatted(vaultConfig.getId(), vault.getDisplayName(), vault.getPath()));
-			for (var task : tasks) {
-				if (task.getState() == Worker.State.READY) {
-					LOG.debug("Skipping not performed check {}.", task.getCheck().identifier());
-					continue;
-				}
-				writer.write(REPORT_CHECK_HEADER.formatted(task.getCheck().identifier()));
-				switch (task.getState()) {
-					case SUCCEEDED -> {
+			for (var check : performedChecks) {
+				writer.write(REPORT_CHECK_HEADER.formatted(check.getHealthCheck().identifier()));
+				switch (check.getState()) {
+					case ALL_GOOD, WITH_CRITICALS, WITH_WARNINGS -> {
 						writer.write("STATUS: SUCCESS\nRESULTS:\n");
-						for (var result : task.results()) {
+						for (var result : check.getResults()) {
 							writer.write(REPORT_CHECK_RESULT.formatted(result.diagnosis().getSeverity(), result.getDescription()));
 						}
 					}
 					case CANCELLED -> writer.write("STATUS: CANCELED\n");
-					case FAILED -> {
-						writer.write("STATUS: FAILED\nREASON:\n" + task.getCheck().identifier());
-						writer.write(prepareFailureMsg(task));
+					case ERROR -> {
+						writer.write("STATUS: FAILED\nREASON:\n");
+						writer.write(prepareFailureMsg(check));
 					}
-					case RUNNING, SCHEDULED -> throw new IllegalStateException("Checks are still running.");
+					case RUNNABLE, RUNNING, SCHEDULED -> throw new IllegalStateException("Checks are still running.");
+					case SKIPPED -> {} //noop
 				}
 			}
 		}
 		reveal();
 	}
 
-	private String prepareFailureMsg(HealthCheckTask task) {
-		if (task.getException() != null) {
-			return ExceptionUtils.getStackTrace(task.getException()) //
+	private String prepareFailureMsg(Check check) {
+		if (check.getError() != null) {
+			return ExceptionUtils.getStackTrace(check.getError()) //
 					.lines() //
 					.map(line -> "\t\t" + line + "\n") //
 					.collect(Collectors.joining());

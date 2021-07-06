@@ -1,20 +1,18 @@
 package org.cryptomator.ui.health;
 
-import org.cryptomator.cryptofs.health.api.DiagnosticResult;
+import com.tobiasdiez.easybind.EasyBind;
 import org.cryptomator.ui.controls.FontAwesome5Icon;
 import org.cryptomator.ui.controls.FontAwesome5IconView;
 
 import javafx.beans.binding.Bindings;
-import javafx.concurrent.Worker;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.ListCell;
-import java.util.function.Predicate;
 
-class CheckListCell extends ListCell<HealthCheckTask> {
+class CheckListCell extends ListCell<Check> {
 
 	private final FontAwesome5IconView stateIcon = new FontAwesome5IconView();
 	private CheckBox checkBox = new CheckBox();
@@ -24,14 +22,18 @@ class CheckListCell extends ListCell<HealthCheckTask> {
 		setAlignment(Pos.CENTER_LEFT);
 		setContentDisplay(ContentDisplay.LEFT);
 		getStyleClass().add("label");
+		EasyBind.includeWhen(stateIcon.getStyleClass(), "glyph-icon-muted", stateIcon.glyphProperty().isEqualTo(FontAwesome5Icon.INFO_CIRCLE));
+		EasyBind.includeWhen(stateIcon.getStyleClass(), "glyph-icon-primary", stateIcon.glyphProperty().isEqualTo(FontAwesome5Icon.CHECK));
+		EasyBind.includeWhen(stateIcon.getStyleClass(), "glyph-icon-orange", stateIcon.glyphProperty().isEqualTo(FontAwesome5Icon.EXCLAMATION_TRIANGLE));
+		EasyBind.includeWhen(stateIcon.getStyleClass(), "glyph-icon-red", stateIcon.glyphProperty().isEqualTo(FontAwesome5Icon.TIMES));
 	}
 
 	@Override
-	protected void updateItem(HealthCheckTask item, boolean empty) {
+	protected void updateItem(Check item, boolean empty) {
 		super.updateItem(item, empty);
 		if (item != null) {
-			setText(item.getTitle());
-			graphicProperty().bind(Bindings.createObjectBinding(() -> graphicForState(item.getState()), item.stateProperty()));
+			setText(item.getLocalizedName());
+			graphicProperty().bind(EasyBind.map(item.stateProperty(),this::chooseNodeFromState));
 			stateIcon.glyphProperty().bind(Bindings.createObjectBinding(() -> glyphForState(item), item.stateProperty()));
 			checkBox.selectedProperty().bindBidirectional(item.chosenForExecutionProperty());
 		} else {
@@ -42,30 +44,25 @@ class CheckListCell extends ListCell<HealthCheckTask> {
 		}
 	}
 
-	private Node graphicForState(Worker.State state) {
-		return switch (state) {
-			case READY -> checkBox;
-			case SCHEDULED, RUNNING, FAILED, CANCELLED, SUCCEEDED -> stateIcon;
-		};
+	// see getGlyph() for relevant glyphs:
+	private Node chooseNodeFromState(Check.CheckState state) {
+		if (state == Check.CheckState.RUNNABLE) {
+			return checkBox;
+		} else {
+			return stateIcon;
+		}
 	}
 
-	private FontAwesome5Icon glyphForState(HealthCheckTask item) {
+	private FontAwesome5Icon glyphForState(Check item) {
 		return switch (item.getState()) {
-			case READY -> FontAwesome5Icon.COG; //just a placeholder
+			case RUNNABLE, SKIPPED -> null;
 			case SCHEDULED -> FontAwesome5Icon.CLOCK;
 			case RUNNING -> FontAwesome5Icon.SPINNER;
-			case FAILED -> FontAwesome5Icon.EXCLAMATION_TRIANGLE;
+			case ERROR -> FontAwesome5Icon.TIMES;
 			case CANCELLED -> FontAwesome5Icon.BAN;
-			case SUCCEEDED -> checkFoundProblems(item) ? FontAwesome5Icon.EXCLAMATION_TRIANGLE : FontAwesome5Icon.CHECK;
+			case ALL_GOOD -> FontAwesome5Icon.CHECK;
+			case WITH_WARNINGS, WITH_CRITICALS -> FontAwesome5Icon.EXCLAMATION_TRIANGLE;
 		};
-	}
-
-	private boolean checkFoundProblems(HealthCheckTask item) {
-		Predicate<DiagnosticResult.Severity> isProblem = severity -> switch (severity) {
-			case WARN, CRITICAL -> true;
-			case INFO, GOOD -> false;
-		};
-		return item.results().stream().map(Result::diagnosis).map(DiagnosticResult::getSeverity).anyMatch(isProblem);
 	}
 
 }

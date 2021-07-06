@@ -26,21 +26,21 @@
 		<HBox spacing="12" VBox.vgrow="ALWAYS">
 			<VBox minWidth="80" maxWidth="200" spacing="6" HBox.hgrow="ALWAYS" >
 				<Label fx:id="listHeading" text="%health.checkList.header"/>
-				<CheckBox onAction="#toggleSelectAll" text="%health.checkList.selectAllBox" visible="${!controller.showResultScreen}" managed="${!controller.showResultScreen}" />
+				<CheckBox onAction="#toggleSelectAll" text="%health.checkList.selectAllBox" visible="${!controller.mainRunStarted}" managed="${!controller.mainRunStarted}" />
 				<ListView fx:id="checksListView" VBox.vgrow="ALWAYS"/>
 			</VBox>
-			<StackPane visible="${controller.showResultScreen}" HBox.hgrow="ALWAYS" >
+			<StackPane visible="${controller.mainRunStarted}"  managed="${controller.mainRunStarted}" HBox.hgrow="ALWAYS">
 				<VBox minWidth="300" alignment="CENTER" visible="${!controller.anyCheckSelected}" managed="${!controller.anyCheckSelected}" >
 					<Label text="%health.check.detail.noSelectedCheck" wrapText="true" alignment="CENTER" />
 				</VBox>
-				<fx:include  source="/fxml/health_check_details.fxml" visible="${controller.anyCheckSelected}" managed="${controller.anyCheckSelected}" />
+				<fx:include source="/fxml/health_check_details.fxml" visible="${controller.anyCheckSelected}" managed="${controller.anyCheckSelected}" />
 			</StackPane>
 		</HBox>
 		<ButtonBar buttonMinWidth="120" buttonOrder="+CX">
 			<buttons>
-				<Button text="%generic.button.cancel" ButtonBar.buttonData="CANCEL_CLOSE" onAction="#cancelCheck" disable="${!controller.running}" visible="${controller.showResultScreen}" managed="${controller.showResultScreen}" />
-				<Button text="%health.check.exportBtn" ButtonBar.buttonData="NEXT_FORWARD" defaultButton="true" disable="${!controller.finished}" visible="${controller.showResultScreen}" managed="${controller.showResultScreen}" onAction="#exportResults"/>
-				<Button text="%health.check.runBatchBtn" ButtonBar.buttonData="NEXT_FORWARD" defaultButton="true" onAction="#runSelectedChecks" disable="${controller.chosenTaskCount == ZERO}" visible="${!controller.showResultScreen}" managed="${!controller.showResultScreen}"/>
+				<Button text="%generic.button.cancel" ButtonBar.buttonData="CANCEL_CLOSE" onAction="#cancelRun" disable="${!controller.running}" visible="${controller.mainRunStarted}" managed="${controller.mainRunStarted}" />
+				<Button text="%health.check.exportBtn" ButtonBar.buttonData="NEXT_FORWARD" defaultButton="true" disable="${controller.running}" visible="${controller.mainRunStarted}" managed="${controller.mainRunStarted}" onAction="#exportResults"/>
+				<Button text="%health.check.runBatchBtn" ButtonBar.buttonData="NEXT_FORWARD" defaultButton="true" onAction="#runSelectedChecks" disable="${controller.chosenTaskCount == ZERO}" visible="${!controller.mainRunStarted}" managed="${!controller.mainRunStarted}"/>
 			</buttons>
 		</ButtonBar>
 	</children>

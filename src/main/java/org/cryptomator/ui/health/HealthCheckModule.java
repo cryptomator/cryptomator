@@ -26,8 +26,6 @@ import javafx.beans.value.ChangeListener;
 import javafx.scene.Scene;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import java.security.SecureRandom;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -51,21 +49,14 @@ abstract class HealthCheckModule {
 
 	@Provides
 	@HealthCheckScoped
-	static Collection<HealthCheck> provideAvailableHealthChecks() {
-		return HealthCheck.allChecks();
-	}
-
-	@Provides
-	@HealthCheckScoped
-	static ObjectProperty<HealthCheckTask> provideSelectedHealthCheckTask() {
+	static ObjectProperty<Check> provideSelectedCheck() {
 		return new SimpleObjectProperty<>();
 	}
 
-	/* Only inject with Lazy-Wrapper!*/
 	@Provides
 	@HealthCheckScoped
-	static List<HealthCheckTask> provideAvailableHealthCheckTasks(Collection<HealthCheck> availableHealthChecks, @HealthCheckWindow Vault vault, AtomicReference<Masterkey> masterkeyRef, AtomicReference<VaultConfig> vaultConfigRef, SecureRandom csprng, ResourceBundle resourceBundle) {
-		return availableHealthChecks.stream().map(check -> new HealthCheckTask(vault.getPath(), vaultConfigRef.get(), masterkeyRef.get(), csprng, check, resourceBundle)).toList();
+	static List<Check> provideAvailableChecks(ResourceBundle bundle) {
+		return HealthCheck.allChecks().stream().map(hc -> new Check(hc, bundle)).toList();
 	}
 
 	@Provides

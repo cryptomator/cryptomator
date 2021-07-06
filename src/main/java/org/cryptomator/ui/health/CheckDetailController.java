@@ -12,7 +12,6 @@ import javafx.beans.binding.Binding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
 import javafx.scene.control.ListView;
 import java.time.Duration;
@@ -24,9 +23,8 @@ import java.util.stream.Stream;
 public class CheckDetailController implements FxController {
 
 	private final EasyObservableList<Result> results;
-	private final OptionalBinding<Worker.State> taskState;
+	private final OptionalBinding<Check.CheckState> taskState;
 	private final Binding<String> taskName;
-	private final Binding<String> taskDuration;
 	private final Binding<Boolean> taskRunning;
 	private final Binding<Boolean> taskScheduled;
 	private final Binding<Boolean> taskFinished;
@@ -43,31 +41,30 @@ public class CheckDetailController implements FxController {
 	private Subscription resultSubscription;
 
 	@Inject
-	public CheckDetailController(ObjectProperty<HealthCheckTask> selectedTask, ResultListCellFactory resultListCellFactory, ResourceBundle resourceBundle) {
+	public CheckDetailController(ObjectProperty<Check> selectedTask, ResultListCellFactory resultListCellFactory, ResourceBundle resourceBundle) {
 		this.resultListCellFactory = resultListCellFactory;
 		this.resourceBundle = resourceBundle;
 		this.results = EasyBind.wrapList(FXCollections.observableArrayList());
-		this.taskState = EasyBind.wrapNullable(selectedTask).mapObservable(HealthCheckTask::stateProperty);
-		this.taskName = EasyBind.wrapNullable(selectedTask).map(HealthCheckTask::getTitle).orElse("");
-		this.taskDuration = EasyBind.wrapNullable(selectedTask).mapObservable(HealthCheckTask::durationInMillisProperty).orElse(-1L).map(this::millisToReadAbleDuration);
-		this.taskRunning = EasyBind.wrapNullable(selectedTask).mapObservable(HealthCheckTask::runningProperty).orElse(false); //TODO: DOES NOT WORK
-		this.taskScheduled = taskState.map(Worker.State.SCHEDULED::equals).orElse(false);
-		this.taskNotStarted = taskState.map(Worker.State.READY::equals).orElse(false);
-		this.taskSucceeded = taskState.map(Worker.State.SUCCEEDED::equals).orElse(false);
-		this.taskFailed = taskState.map(Worker.State.FAILED::equals).orElse(false);
-		this.taskCancelled = taskState.map(Worker.State.CANCELLED::equals).orElse(false);
+		this.taskState = EasyBind.wrapNullable(selectedTask).mapObservable(Check::stateProperty);
+		this.taskName = EasyBind.wrapNullable(selectedTask).map(Check::getLocalizedName).orElse("");
+		this.taskRunning = taskState.map(Check.CheckState.RUNNING::equals).orElse(false);
+		this.taskScheduled = taskState.map(Check.CheckState.SCHEDULED::equals).orElse(false);
+		this.taskNotStarted = taskState.map(Check.CheckState.SKIPPED::equals).orElse(false);
+		this.taskSucceeded = taskState.map(state -> state == Check.CheckState.ALL_GOOD || state == Check.CheckState.WITH_WARNINGS || state == Check.CheckState.WITH_CRITICALS).orElse(false);
+		this.taskFailed = taskState.map(Check.CheckState.ERROR::equals).orElse(false);
+		this.taskCancelled = taskState.map(Check.CheckState.CANCELLED::equals).orElse(false);
 		this.taskFinished = EasyBind.combine(taskSucceeded, taskFailed, taskCancelled, (a, b, c) -> a || b || c);
 		this.countOfWarnSeverity = results.reduce(countSeverity(DiagnosticResult.Severity.WARN));
 		this.countOfCritSeverity = results.reduce(countSeverity(DiagnosticResult.Severity.CRITICAL));
 		selectedTask.addListener(this::selectedTaskChanged);
 	}
 
-	private void selectedTaskChanged(ObservableValue<? extends HealthCheckTask> observable, HealthCheckTask oldValue, HealthCheckTask newValue) {
+	private void selectedTaskChanged(ObservableValue<? extends Check> observable, Check oldValue, Check newValue) {
 		if (resultSubscription != null) {
 			resultSubscription.unsubscribe();
 		}
 		if (newValue != null) {
-			resultSubscription = EasyBind.bindContent(results, newValue.results());
+			resultSubscription = EasyBind.bindContent(results, newValue.getResults());
 		}
 	}
 
@@ -89,14 +86,6 @@ public class CheckDetailController implements FxController {
 
 	public Binding<String> taskNameProperty() {
 		return taskName;
-	}
-
-	public String getTaskDuration() {
-		return taskDuration.getValue();
-	}
-
-	public Binding<String> taskDurationProperty() {
-		return taskDuration;
 	}
 
 	public long getCountOfWarnSeverity() {
