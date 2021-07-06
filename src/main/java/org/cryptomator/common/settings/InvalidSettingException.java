@@ -36,7 +36,6 @@ public class InvalidSettingException extends RuntimeException {
 		if (additionalMessage == null) {
 			return reason.getMessage();
 		}
-		return reason.getMessage() + "\n" //
-				+ "Additionally: " + additionalMessage;
+		return reason.getMessage() + "Additionally: " + additionalMessage;
 	}
 }
