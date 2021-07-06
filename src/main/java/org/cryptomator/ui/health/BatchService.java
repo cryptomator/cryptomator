@@ -16,7 +16,6 @@ public class BatchService extends Service<Void> {
 
 	private final Iterator<HealthCheckTask> remainingTasks;
 
-	@Inject
 	public BatchService(Iterable<HealthCheckTask> tasks) {
 		this.remainingTasks = tasks.iterator();
 	}

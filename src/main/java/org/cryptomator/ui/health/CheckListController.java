@@ -1,6 +1,7 @@
 package org.cryptomator.ui.health;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Predicates;
 import com.tobiasdiez.easybind.EasyBind;
 import dagger.Lazy;
 import org.cryptomator.ui.common.ErrorComponent;
@@ -10,28 +11,24 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javafx.beans.binding.Binding;
+import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
+import javafx.beans.binding.IntegerBinding;
 import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 import javafx.concurrent.Worker;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ListView;
-import javafx.scene.control.cell.CheckBoxListCell;
 import javafx.stage.Stage;
-import javafx.util.StringConverter;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
@@ -43,6 +40,7 @@ public class CheckListController implements FxController {
 
 	private final Stage window;
 	private final ObservableList<HealthCheckTask> tasks;
+	private final FilteredList<HealthCheckTask> chosenTasks;
 	private final ReportWriter reportWriter;
 	private final ExecutorService executorService;
 	private final ObjectProperty<HealthCheckTask> selectedTask;
@@ -50,19 +48,18 @@ public class CheckListController implements FxController {
 	private final SimpleObjectProperty<Worker<?>> runningTask;
 	private final Binding<Boolean> running;
 	private final Binding<Boolean> finished;
-	private final Map<HealthCheckTask, BooleanProperty> listPickIndicators;
-	private final IntegerProperty numberOfPickedChecks;
+	private final IntegerBinding chosenTaskCount;
 	private final BooleanBinding anyCheckSelected;
 	private final BooleanProperty showResultScreen;
 
 	/* FXML */
 	public ListView<HealthCheckTask> checksListView;
 
-
 	@Inject
-	public CheckListController(@HealthCheckWindow Stage window, Lazy<Collection<HealthCheckTask>> tasks, ReportWriter reportWriteTask, ObjectProperty<HealthCheckTask> selectedTask, ExecutorService executorService, Lazy<ErrorComponent.Builder> errorComponentBuilder) {
+	public CheckListController(@HealthCheckWindow Stage window, Lazy<List<HealthCheckTask>> tasks, ReportWriter reportWriteTask, ObjectProperty<HealthCheckTask> selectedTask, ExecutorService executorService, Lazy<ErrorComponent.Builder> errorComponentBuilder) {
 		this.window = window;
-		this.tasks = FXCollections.observableArrayList(tasks.get());
+		this.tasks = FXCollections.observableList(tasks.get(), HealthCheckTask::observables);
+		this.chosenTasks = this.tasks.filtered(HealthCheckTask::isChosenForExecution);
 		this.reportWriter = reportWriteTask;
 		this.executorService = executorService;
 		this.selectedTask = selectedTask;
@@ -70,13 +67,7 @@ public class CheckListController implements FxController {
 		this.runningTask = new SimpleObjectProperty<>();
 		this.running = EasyBind.wrapNullable(runningTask).mapObservable(Worker::runningProperty).orElse(false);
 		this.finished = EasyBind.wrapNullable(runningTask).mapObservable(Worker::stateProperty).map(END_STATES::contains).orElse(false);
-		this.listPickIndicators = new HashMap<>();
-		this.numberOfPickedChecks = new SimpleIntegerProperty(0);
-		this.tasks.forEach(task -> {
-			var entrySelectedProp = new SimpleBooleanProperty(false);
-			entrySelectedProp.addListener((observable, oldValue, newValue) -> numberOfPickedChecks.set(numberOfPickedChecks.get() + (newValue ? 1 : -1)));
-			listPickIndicators.put(task, entrySelectedProp);
-		});
+		this.chosenTaskCount = Bindings.size(this.chosenTasks);
 		this.anyCheckSelected = selectedTask.isNotNull();
 		this.showResultScreen = new SimpleBooleanProperty(false);
 	}
@@ -84,27 +75,31 @@ public class CheckListController implements FxController {
 	@FXML
 	public void initialize() {
 		checksListView.setItems(tasks);
-		checksListView.setCellFactory(view -> new CheckListCell(listPickIndicators::get, showResultScreen));
+		checksListView.setCellFactory(view -> new CheckListCell());
 		selectedTask.bind(checksListView.getSelectionModel().selectedItemProperty());
 	}
 
 	@FXML
 	public void toggleSelectAll(ActionEvent event) {
 		if (event.getSource() instanceof CheckBox c) {
-			listPickIndicators.forEach( (task, pickProperty) -> pickProperty.set(c.isSelected()));
+			tasks.forEach(t -> t.chosenForExecutionProperty().set(c.isSelected()));
 		}
 	}
 
 	@FXML
 	public void runSelectedChecks() {
 		Preconditions.checkState(runningTask.get() == null);
-		var batch = checksListView.getItems().filtered(item -> listPickIndicators.get(item).get());
-		var batchService = new BatchService(batch);
+
+		// prevent further interaction by cancelling non-chosen tasks:
+		tasks.filtered(Predicates.not(chosenTasks::contains)).forEach(HealthCheckTask::cancel);
+
+		// run chosen tasks:
+		var batchService = new BatchService(chosenTasks);
 		batchService.setExecutor(executorService);
 		batchService.start();
 		runningTask.set(batchService);
 		showResultScreen.set(true);
-		checksListView.getSelectionModel().select(batch.get(0));
+		checksListView.getSelectionModel().select(chosenTasks.get(0));
 		checksListView.refresh();
 		window.sizeToScene();
 	}
@@ -158,13 +153,12 @@ public class CheckListController implements FxController {
 		return showResultScreen;
 	}
 
-	public int getNumberOfPickedChecks() {
-		return numberOfPickedChecks.get();
+	public int getChosenTaskCount() {
+		return chosenTaskCount.getValue();
 	}
 
-	public IntegerProperty numberOfPickedChecksProperty() {
-		return numberOfPickedChecks;
+	public IntegerBinding chosenTaskCountProperty() {
+		return chosenTaskCount;
 	}
-
 
 }

@@ -36,12 +36,12 @@
 				<fx:include source="vault_options_masterkey.fxml"/>
 			</content>
 		</Tab>
-		<Tab fx:id="autoLockTab" id="AUTOLOCK" text="%vaultOptions.autoLock">
+		<Tab fx:id="healthTab" id="HEALTH" text="%vaultOptions.health">
 			<graphic>
-				<FontAwesome5IconView glyph="STOPWATCH"/>
+				<FontAwesome5IconView glyph="STETHOSCOPE"/>
 			</graphic>
 			<content>
-				<fx:include source="vault_options_autolock.fxml"/>
+				<fx:include source="vault_options_health.fxml"/>
 			</content>
 		</Tab>
 	</tabs>
