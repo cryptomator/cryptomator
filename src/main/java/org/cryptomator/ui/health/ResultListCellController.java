@@ -22,6 +22,12 @@ import javafx.scene.control.Button;
 // unscoped because each cell needs its own controller
 public class ResultListCellController implements FxController {
 
+	//TODO: use different glyphs!
+	private static final FontAwesome5Icon INFO_ICON = FontAwesome5Icon.INFO_CIRCLE;
+	private static final FontAwesome5Icon GOOD_ICON = FontAwesome5Icon.CHECK;
+	private static final FontAwesome5Icon WARN_ICON = FontAwesome5Icon.EXCLAMATION_TRIANGLE;
+	private static final FontAwesome5Icon CRIT_ICON = FontAwesome5Icon.TIMES;
+
 	private final Logger LOG = LoggerFactory.getLogger(ResultListCellController.class);
 
 	private final ObjectProperty<Result> result;
@@ -51,10 +57,11 @@ public class ResultListCellController implements FxController {
 	@FXML
 	public void initialize() {
 		// see getGlyph() for relevant glyphs:
-		EasyBind.includeWhen(iconView.getStyleClass(), "glyph-icon-muted", iconView.glyphProperty().isEqualTo(FontAwesome5Icon.INFO_CIRCLE));
-		EasyBind.includeWhen(iconView.getStyleClass(), "glyph-icon-primary", iconView.glyphProperty().isEqualTo(FontAwesome5Icon.CHECK));
-		EasyBind.includeWhen(iconView.getStyleClass(), "glyph-icon-orange", iconView.glyphProperty().isEqualTo(FontAwesome5Icon.EXCLAMATION_TRIANGLE));
-		EasyBind.includeWhen(iconView.getStyleClass(), "glyph-icon-red", iconView.glyphProperty().isEqualTo(FontAwesome5Icon.TIMES));
+		iconView.getStyleClass().remove("glyph-icon");
+		EasyBind.includeWhen(iconView.getStyleClass(), "glyph-icon-muted", iconView.glyphProperty().isEqualTo(INFO_ICON));
+		EasyBind.includeWhen(iconView.getStyleClass(), "glyph-icon-primary", iconView.glyphProperty().isEqualTo(GOOD_ICON));
+		EasyBind.includeWhen(iconView.getStyleClass(), "glyph-icon-orange", iconView.glyphProperty().isEqualTo(WARN_ICON));
+		EasyBind.includeWhen(iconView.getStyleClass(), "glyph-icon-red", iconView.glyphProperty().isEqualTo(CRIT_ICON));
 	}
 
 	@FXML
@@ -101,10 +108,10 @@ public class ResultListCellController implements FxController {
 			return null;
 		}
 		return switch (r.diagnosis().getSeverity()) {
-			case INFO -> FontAwesome5Icon.INFO_CIRCLE;
-			case GOOD -> FontAwesome5Icon.CHECK;
-			case WARN -> FontAwesome5Icon.EXCLAMATION_TRIANGLE;
-			case CRITICAL -> FontAwesome5Icon.TIMES;
+			case INFO -> INFO_ICON;
+			case GOOD -> GOOD_ICON;
+			case WARN -> WARN_ICON;
+			case CRITICAL -> CRIT_ICON;
 		};
 	}
 

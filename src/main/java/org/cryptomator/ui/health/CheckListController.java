@@ -87,7 +87,7 @@ public class CheckListController implements FxController {
 
 	@FXML
 	public synchronized void cancelRun() {
-		Preconditions.checkState(runningProperty().get());
+		Preconditions.checkState(somethingsRunning.get());
 		checkExecutor.cancel();
 	}
 
