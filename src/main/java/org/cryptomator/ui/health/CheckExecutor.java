@@ -10,11 +10,11 @@ import javax.inject.Inject;
 import javafx.concurrent.Task;
 import java.nio.file.Path;
 import java.security.SecureRandom;
-import java.util.ArrayDeque;
 import java.util.List;
-import java.util.Queue;
+import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.atomic.AtomicReference;
 
 @HealthCheckScoped
@@ -25,7 +25,7 @@ public class CheckExecutor {
 	private final Masterkey masterkey;
 	private final VaultConfig vaultConfig;
 	private final ExecutorService sequentialExecutor;
-	private final Queue<CheckTask> runningTasks;
+	private final BlockingDeque<CheckTask> tasksToExecute;
 
 
 	@Inject
@@ -34,22 +34,23 @@ public class CheckExecutor {
 		this.masterkey = masterkeyRef.get();
 		this.vaultConfig = vaultConfigRef.get();
 		this.csprng = csprng;
+		this.tasksToExecute = new LinkedBlockingDeque<>();
 		this.sequentialExecutor = Executors.newSingleThreadExecutor();
-		this.runningTasks = new ArrayDeque<>();
 	}
 
 	public synchronized void executeBatch(List<Check> checks) {
 		checks.stream().map(c -> {
 			c.setState(Check.CheckState.SCHEDULED);
 			var task = new CheckTask(c);
-			runningTasks.add(task); // we need to use CheckTask and not Futures to set state to CANCEL
+			tasksToExecute.addLast(task);
 			return task;
 		}).forEach(sequentialExecutor::submit);
 	}
 
 	public synchronized void cancel() {
-		while (!runningTasks.isEmpty()) {
-			runningTasks.remove().cancel(true);
+		while (!tasksToExecute.isEmpty()) {
+			var task = (CheckTask) tasksToExecute.removeLast();
+			task.cancel(true);
 		}
 	}
 
@@ -94,18 +95,21 @@ public class CheckExecutor {
 		@Override
 		protected void cancelled() {
 			c.setState(Check.CheckState.CANCELLED);
+			tasksToExecute.remove(this);
 		}
 
 		@Override
 		protected void succeeded() {
 			c.setState(Check.CheckState.SUCCEEDED);
 			c.setHighestResultSeverity(highestResultSeverity);
+			tasksToExecute.remove(this);
 		}
 
 		@Override
 		protected void failed() {
 			c.setState(Check.CheckState.ERROR);
 			c.setError(this.getException());
+			tasksToExecute.remove(this);
 		}
 
 	}
