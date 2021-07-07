@@ -46,7 +46,7 @@ public class CheckDetailController implements FxController {
 		this.checkRunning = checkState.map(Check.CheckState.RUNNING::equals).orElse(false);
 		this.checkScheduled = checkState.map(Check.CheckState.SCHEDULED::equals).orElse(false);
 		this.checkSkipped = checkState.map(Check.CheckState.SKIPPED::equals).orElse(false);
-		this.checkSucceeded = checkState.map(state -> state == Check.CheckState.ALL_GOOD || state == Check.CheckState.WITH_WARNINGS || state == Check.CheckState.WITH_CRITICALS).orElse(false);
+		this.checkSucceeded = checkState.map(Check.CheckState.SUCCEEDED::equals).orElse(false);
 		this.checkFailed = checkState.map(Check.CheckState.ERROR::equals).orElse(false);
 		this.checkCancelled = checkState.map(Check.CheckState.CANCELLED::equals).orElse(false);
 		this.checkFinished = EasyBind.combine(checkSucceeded, checkFailed, checkCancelled, (a, b, c) -> a || b || c);

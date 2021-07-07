@@ -18,7 +18,7 @@
 	<Label text="%health.check.detail.checkFailed" visible="${controller.checkFailed}" managed="${controller.checkFailed}"/>
 	<Label text="%health.check.detail.checkSucceeded" visible="${controller.checkSucceeded}" managed="${controller.checkSucceeded}"/>
 
-	<FormattedLabel styleClass="label" format="%health.check.detail.problemCount" arg1="${controller.countOfWarnSeverity}" arg2="${controller.countOfCritSeverity}" visible="${!controller.taskNotStarted}"
-					 managed="${!controller.taskNotStarted}"	/>
+	<FormattedLabel styleClass="label" format="%health.check.detail.problemCount" arg1="${controller.countOfWarnSeverity}" arg2="${controller.countOfCritSeverity}" visible="${!controller.checkSkipped}"
+					 managed="${!controller.checkSkipped}"	/>
 	<ListView fx:id="resultsListView" VBox.vgrow="ALWAYS"/>
 </VBox>

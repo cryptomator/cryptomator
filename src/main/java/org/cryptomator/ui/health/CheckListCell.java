@@ -1,6 +1,7 @@
 package org.cryptomator.ui.health;
 
 import com.tobiasdiez.easybind.EasyBind;
+import org.cryptomator.cryptofs.health.api.DiagnosticResult;
 import org.cryptomator.ui.controls.FontAwesome5Icon;
 import org.cryptomator.ui.controls.FontAwesome5IconView;
 
@@ -34,7 +35,7 @@ class CheckListCell extends ListCell<Check> {
 		if (item != null) {
 			setText(item.getLocalizedName());
 			graphicProperty().bind(EasyBind.map(item.stateProperty(),this::chooseNodeFromState));
-			stateIcon.glyphProperty().bind(Bindings.createObjectBinding(() -> glyphForState(item), item.stateProperty()));
+			stateIcon.glyphProperty().bind(Bindings.createObjectBinding(() -> glyphForState(item), item.stateProperty(), item.highestResultSeverityProperty()));
 			checkBox.selectedProperty().bindBidirectional(item.chosenForExecutionProperty());
 		} else {
 			graphicProperty().unbind();
@@ -60,8 +61,13 @@ class CheckListCell extends ListCell<Check> {
 			case RUNNING -> FontAwesome5Icon.SPINNER;
 			case ERROR -> FontAwesome5Icon.TIMES;
 			case CANCELLED -> FontAwesome5Icon.BAN;
-			case ALL_GOOD -> FontAwesome5Icon.CHECK;
-			case WITH_WARNINGS, WITH_CRITICALS -> FontAwesome5Icon.EXCLAMATION_TRIANGLE;
+			case SUCCEEDED -> {
+				if (item.getHighestResultSeverity() == DiagnosticResult.Severity.INFO || item.getHighestResultSeverity() == DiagnosticResult.Severity.GOOD) {
+					yield FontAwesome5Icon.CHECK;
+				} else {
+					yield FontAwesome5Icon.EXCLAMATION_TRIANGLE;
+				}
+			}
 		};
 	}
 

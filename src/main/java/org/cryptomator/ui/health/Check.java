@@ -1,5 +1,6 @@
 package org.cryptomator.ui.health;
 
+import org.cryptomator.cryptofs.health.api.DiagnosticResult;
 import org.cryptomator.cryptofs.health.api.HealthCheck;
 
 import javafx.beans.Observable;
@@ -23,6 +24,7 @@ public class Check {
 	private final BooleanProperty chosenForExecution = new SimpleBooleanProperty(false);
 	private final ObjectProperty<CheckState> state = new SimpleObjectProperty<>(CheckState.RUNNABLE);
 	private final ObservableList<Result> results = FXCollections.observableArrayList(Result::observables);
+	private final ObjectProperty<DiagnosticResult.Severity> highestResultSeverity = new SimpleObjectProperty<>(null);
 	private final ObjectProperty<Throwable> error = new SimpleObjectProperty<>(null);
 	private final BooleanBinding isInReRunState = state.isNotEqualTo(CheckState.RUNNING).or(state.isNotEqualTo(CheckState.SCHEDULED));
 
@@ -75,6 +77,18 @@ public class Check {
 		error.set(t);
 	}
 
+	ObjectProperty highestResultSeverityProperty() {
+		return highestResultSeverity;
+	}
+
+	DiagnosticResult.Severity getHighestResultSeverity() {
+		return highestResultSeverity.get();
+	}
+
+	void setHighestResultSeverity(DiagnosticResult.Severity severity) {
+		highestResultSeverity.set(severity);
+	}
+
 	boolean isInReRunState() {
 		return isInReRunState.get();
 	}
@@ -83,9 +97,7 @@ public class Check {
 		RUNNABLE,
 		SCHEDULED,
 		RUNNING,
-		WITH_CRITICALS, //TODO: maybe the highest result represnt by property and only use one state
-		WITH_WARNINGS,
-		ALL_GOOD,
+		SUCCEEDED,
 		SKIPPED,
 		ERROR,
 		CANCELLED;

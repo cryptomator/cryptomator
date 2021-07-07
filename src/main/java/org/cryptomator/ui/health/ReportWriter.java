@@ -64,7 +64,7 @@ public class ReportWriter {
 			for (var check : performedChecks) {
 				writer.write(REPORT_CHECK_HEADER.formatted(check.getHealthCheck().identifier()));
 				switch (check.getState()) {
-					case ALL_GOOD, WITH_CRITICALS, WITH_WARNINGS -> {
+					case SUCCEEDED -> {
 						writer.write("STATUS: SUCCESS\nRESULTS:\n");
 						for (var result : check.getResults()) {
 							writer.write(REPORT_CHECK_RESULT.formatted(result.diagnosis().getSeverity(), result.getDescription()));
