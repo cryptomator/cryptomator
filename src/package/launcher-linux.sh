@@ -1,7 +1,7 @@
 #!/bin/sh
 cd $(dirname $0)
 java \
-	-cp "libs/*" \
+	-cp "cryptomator-${project.version}.jar:libs/*" \
 	-Dcryptomator.settingsPath="~/.config/Cryptomator/settings.json" \
 	-Dcryptomator.ipcPortPath="~/.config/Cryptomator/ipcPort.bin" \
 	-Dcryptomator.logDir="~/.local/share/Cryptomator/logs" \
