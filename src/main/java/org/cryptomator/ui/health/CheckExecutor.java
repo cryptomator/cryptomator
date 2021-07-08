@@ -7,6 +7,7 @@ import org.cryptomator.cryptolib.api.CryptorProvider;
 import org.cryptomator.cryptolib.api.Masterkey;
 
 import javax.inject.Inject;
+import javafx.application.Platform;
 import javafx.concurrent.Task;
 import java.nio.file.Path;
 import java.security.SecureRandom;
@@ -68,7 +69,7 @@ public class CheckExecutor {
 			try (var masterkeyClone = masterkey.clone(); //
 				 var cryptor = CryptorProvider.forScheme(vaultConfig.getCipherCombo()).provide(masterkeyClone, csprng)) {
 				c.getHealthCheck().check(vaultPath, vaultConfig, masterkeyClone, cryptor, diagnosis -> {
-					c.getResults().add(Result.create(diagnosis));
+					Platform.runLater(() -> c.getResults().add(Result.create(diagnosis)));
 					if (highestResultSeverity.compareTo(diagnosis.getSeverity()) < 0) {
 						highestResultSeverity = diagnosis.getSeverity();
 					}
