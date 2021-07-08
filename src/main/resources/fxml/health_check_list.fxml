@@ -38,7 +38,7 @@
 		</HBox>
 		<ButtonBar buttonMinWidth="120" buttonOrder="+CX">
 			<buttons>
-				<Button text="%generic.button.cancel" ButtonBar.buttonData="CANCEL_CLOSE" onAction="#cancelRun" disable="${!controller.running}" visible="${controller.mainRunStarted}" managed="${controller.mainRunStarted}" />
+				<Button text="%generic.button.cancel" ButtonBar.buttonData="CANCEL_CLOSE" onAction="#cancelRun" visible="${controller.running}" managed="${controller.running}" />
 				<Button text="%health.check.exportBtn" ButtonBar.buttonData="NEXT_FORWARD" defaultButton="true" disable="${controller.running}" visible="${controller.mainRunStarted}" managed="${controller.mainRunStarted}" onAction="#exportResults"/>
 				<Button text="%health.check.runBatchBtn" ButtonBar.buttonData="NEXT_FORWARD" defaultButton="true" onAction="#runSelectedChecks" disable="${controller.chosenTaskCount == ZERO}" visible="${!controller.mainRunStarted}" managed="${!controller.mainRunStarted}"/>
 			</buttons>

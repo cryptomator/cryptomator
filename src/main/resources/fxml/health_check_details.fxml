@@ -20,5 +20,5 @@
 
 	<FormattedLabel styleClass="label" format="%health.check.detail.problemCount" arg1="${controller.countOfWarnSeverity}" arg2="${controller.countOfCritSeverity}" visible="${!controller.checkSkipped}"
 					 managed="${!controller.checkSkipped}"	/>
-	<ListView fx:id="resultsListView" VBox.vgrow="ALWAYS"/>
+	<ListView fx:id="resultsListView" VBox.vgrow="ALWAYS" visible="${!controller.checkSkipped}"/>
 </VBox>

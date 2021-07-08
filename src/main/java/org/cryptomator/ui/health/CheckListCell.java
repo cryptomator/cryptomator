@@ -56,7 +56,8 @@ class CheckListCell extends ListCell<Check> {
 
 	private FontAwesome5Icon glyphForState(Check item) {
 		return switch (item.getState()) {
-			case RUNNABLE, SKIPPED -> null;
+			case RUNNABLE -> null;
+			case SKIPPED -> FontAwesome5Icon.FAST_FORWARD;
 			case SCHEDULED -> FontAwesome5Icon.CLOCK;
 			case RUNNING -> FontAwesome5Icon.SPINNER;
 			case ERROR -> FontAwesome5Icon.TIMES;

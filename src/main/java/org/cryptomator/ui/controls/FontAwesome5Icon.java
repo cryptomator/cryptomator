@@ -20,6 +20,7 @@ public enum FontAwesome5Icon {
 	EXCLAMATION_TRIANGLE("\uF071"), //
 	EYE("\uF06E"), //
 	EYE_SLASH("\uF070"), //
+	FAST_FORWARD("\uF050"), //
 	FILE("\uF15B"), //
 	FILE_IMPORT("\uF56F"), //
 	FOLDER_OPEN("\uF07C"), //
