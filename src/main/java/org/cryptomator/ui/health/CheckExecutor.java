@@ -48,16 +48,16 @@ public class CheckExecutor {
 	}
 
 	public synchronized void cancel() {
-		while (!tasksToExecute.isEmpty()) {
-			var task = (CheckTask) tasksToExecute.removeLast();
+		CheckTask task;
+		while ((task = tasksToExecute.pollLast()) != null) {
 			task.cancel(true);
 		}
 	}
 
 	private class CheckTask extends Task<Void> {
 
-		private Check c;
-		private DiagnosticResult.Severity highestResultSeverity;
+		private final Check c;
+		private DiagnosticResult.Severity highestResultSeverity = DiagnosticResult.Severity.GOOD;
 
 		CheckTask(Check c) {
 			this.c = c;
@@ -69,22 +69,12 @@ public class CheckExecutor {
 				 var cryptor = CryptorProvider.forScheme(vaultConfig.getCipherCombo()).provide(masterkeyClone, csprng)) {
 				c.getHealthCheck().check(vaultPath, vaultConfig, masterkeyClone, cryptor, diagnosis -> {
 					c.getResults().add(Result.create(diagnosis));
-					compareAndSetSeverity(diagnosis.getSeverity());
+					if (highestResultSeverity.compareTo(diagnosis.getSeverity()) < 0) {
+						highestResultSeverity = diagnosis.getSeverity();
+					}
 				});
 			}
 			return null;
-		}
-
-		private void compareAndSetSeverity(DiagnosticResult.Severity newOne) {
-			if (highestResultSeverity != DiagnosticResult.Severity.CRITICAL && newOne == DiagnosticResult.Severity.CRITICAL) {
-				highestResultSeverity = DiagnosticResult.Severity.CRITICAL;
-			} else if (highestResultSeverity != DiagnosticResult.Severity.WARN && newOne == DiagnosticResult.Severity.WARN) {
-				highestResultSeverity = DiagnosticResult.Severity.WARN;
-			} else if (highestResultSeverity != DiagnosticResult.Severity.GOOD && newOne == DiagnosticResult.Severity.GOOD) {
-				highestResultSeverity = DiagnosticResult.Severity.GOOD;
-			} else {
-				highestResultSeverity = DiagnosticResult.Severity.INFO;
-			}
 		}
 
 		@Override
@@ -95,20 +85,22 @@ public class CheckExecutor {
 		@Override
 		protected void cancelled() {
 			c.setState(Check.CheckState.CANCELLED);
-			tasksToExecute.remove(this);
 		}
 
 		@Override
 		protected void succeeded() {
 			c.setState(Check.CheckState.SUCCEEDED);
 			c.setHighestResultSeverity(highestResultSeverity);
-			tasksToExecute.remove(this);
 		}
 
 		@Override
 		protected void failed() {
 			c.setState(Check.CheckState.ERROR);
 			c.setError(this.getException());
+		}
+
+		@Override
+		protected void done() {
 			tasksToExecute.remove(this);
 		}
 
