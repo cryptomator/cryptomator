@@ -8,21 +8,26 @@ import org.cryptomator.ui.controls.FontAwesome5IconView;
 import javafx.beans.binding.Bindings;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.ListCell;
+import javafx.scene.layout.StackPane;
 
 class CheckListCell extends ListCell<Check> {
 
 	private final FontAwesome5IconView stateIcon = new FontAwesome5IconView();
 	private CheckBox checkBox = new CheckBox();
+	private final StackPane graphicContainer = new StackPane(stateIcon, checkBox);
 
 	CheckListCell() {
 		setPadding(new Insets(6));
 		setAlignment(Pos.CENTER_LEFT);
 		setContentDisplay(ContentDisplay.LEFT);
 		getStyleClass().add("label");
+		graphicContainer.minWidth(20);
+		graphicContainer.maxWidth(20);
+		graphicContainer.setAlignment(Pos.CENTER);
+
 		EasyBind.includeWhen(stateIcon.getStyleClass(), "glyph-icon-muted", stateIcon.glyphProperty().isEqualTo(FontAwesome5Icon.INFO_CIRCLE));
 		EasyBind.includeWhen(stateIcon.getStyleClass(), "glyph-icon-primary", stateIcon.glyphProperty().isEqualTo(FontAwesome5Icon.CHECK));
 		EasyBind.includeWhen(stateIcon.getStyleClass(), "glyph-icon-orange", stateIcon.glyphProperty().isEqualTo(FontAwesome5Icon.EXCLAMATION_TRIANGLE));
@@ -34,23 +39,18 @@ class CheckListCell extends ListCell<Check> {
 		super.updateItem(item, empty);
 		if (item != null) {
 			setText(item.getLocalizedName());
-			graphicProperty().bind(EasyBind.map(item.stateProperty(),this::chooseNodeFromState));
+			setGraphic(graphicContainer);
+			checkBox.visibleProperty().bind(Bindings.createBooleanBinding(() -> item.getState() == Check.CheckState.RUNNABLE, item.stateProperty()));
+			stateIcon.visibleProperty().bind(Bindings.createBooleanBinding(() -> item.getState() != Check.CheckState.RUNNABLE, item.stateProperty()));
 			stateIcon.glyphProperty().bind(Bindings.createObjectBinding(() -> glyphForState(item), item.stateProperty(), item.highestResultSeverityProperty()));
 			checkBox.selectedProperty().bindBidirectional(item.chosenForExecutionProperty());
 		} else {
-			graphicProperty().unbind();
+			graphicProperty();
+			checkBox.visibleProperty().unbind();
+			stateIcon.visibleProperty().unbind();
 			setGraphic(null);
 			setText(null);
 			checkBox.selectedProperty().unbind();
-		}
-	}
-
-	// see getGlyph() for relevant glyphs:
-	private Node chooseNodeFromState(Check.CheckState state) {
-		if (state == Check.CheckState.RUNNABLE) {
-			return checkBox;
-		} else {
-			return stateIcon;
 		}
 	}
 
