@@ -25,9 +25,4 @@ public enum SelectedVaultOptionsTab {
 	 * Show Auto-Lock tab
 	 */
 	AUTOLOCK,
-
-	/**
-	 * Show health tab
-	 */
-	HEALTH;
 }

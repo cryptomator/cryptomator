@@ -12,6 +12,7 @@
 <?import javafx.scene.text.Text?>
 <?import org.cryptomator.ui.controls.NumericTextField?>
 <?import org.cryptomator.ui.controls.FormattedLabel?>
+<?import org.cryptomator.ui.controls.FontAwesome5IconView?>
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.vaultoptions.GeneralVaultOptionsController"
@@ -39,5 +40,11 @@
 			<Label text="%vaultOptions.general.actionAfterUnlock"/>
 			<ChoiceBox fx:id="actionAfterUnlockChoiceBox"/>
 		</HBox>
+
+		<Button fx:id="healthCheckButton" text="%vaultOptions.health.startBtn" onAction="#startHealthCheck">
+			<graphic>
+				<FontAwesome5IconView glyph="STETHOSCOPE"/>
+			</graphic>
+		</Button>
 	</children>
 </VBox>

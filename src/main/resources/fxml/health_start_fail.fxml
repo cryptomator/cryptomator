@@ -1,0 +1,19 @@
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ButtonBar?>
+<?import javafx.scene.control.Button?>
+<VBox xmlns="http://javafx.com/javafx"
+	  xmlns:fx="http://javafx.com/fxml"
+	  fx:controller="org.cryptomator.ui.health.StartFailController"
+	  minWidth="400"
+	  maxWidth="400"
+	  minHeight="145"
+	  spacing="12">
+
+	<Label text="TODO: Error on loading" />
+	<ButtonBar buttonMinWidth="120" buttonOrder="+CX">
+		<buttons>
+			<Button text="%generic.button.close" ButtonBar.buttonData="CANCEL_CLOSE" cancelButton="true" onAction="#close"/>
+		</buttons>
+	</ButtonBar>
+</VBox>
