@@ -110,6 +110,6 @@ public class GeneralVaultOptionsController implements FxController {
 	}
 
 	public void startHealthCheck() {
-		healthCheckWindow.vault(vault).build().showHealthCheckWindow();
+		healthCheckWindow.vault(vault).owner(window).build().showHealthCheckWindow();
 	}
 }

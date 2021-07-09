@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -34,6 +35,7 @@ public class StartController implements FxController {
 	private static final Logger LOG = LoggerFactory.getLogger(StartController.class);
 
 	private final Stage window;
+	private final Stage unlockWindow;
 	private final ObjectProperty<VaultConfig.UnverifiedVaultConfig> unverifiedVaultConfig;
 	private final KeyLoadingStrategy keyLoadingStrategy;
 	private final ExecutorService executor;
@@ -43,9 +45,10 @@ public class StartController implements FxController {
 	private final Lazy<ErrorComponent.Builder> errorComponent;
 
 	@Inject
-	public StartController(@HealthCheckWindow Stage window, HealthCheckComponent.LoadUnverifiedConfigResult configLoadResult, @HealthCheckWindow KeyLoadingStrategy keyLoadingStrategy, ExecutorService executor, AtomicReference<Masterkey> masterkeyRef, AtomicReference<VaultConfig> vaultConfigRef, @FxmlScene(FxmlFile.HEALTH_CHECK_LIST) Lazy<Scene> checkScene, Lazy<ErrorComponent.Builder> errorComponent) {
+	public StartController(@HealthCheckWindow Stage window, HealthCheckComponent.LoadUnverifiedConfigResult configLoadResult, @HealthCheckWindow KeyLoadingStrategy keyLoadingStrategy, ExecutorService executor, AtomicReference<Masterkey> masterkeyRef, AtomicReference<VaultConfig> vaultConfigRef, @FxmlScene(FxmlFile.HEALTH_CHECK_LIST) Lazy<Scene> checkScene, Lazy<ErrorComponent.Builder> errorComponent, @Named("unlockWindow") Stage unlockWindow) {
 		Preconditions.checkNotNull(configLoadResult.config());
 		this.window = window;
+		this.unlockWindow = unlockWindow;
 		this.unverifiedVaultConfig = new SimpleObjectProperty<>(configLoadResult.config());
 		this.keyLoadingStrategy = keyLoadingStrategy;
 		this.executor = executor;
@@ -98,6 +101,7 @@ public class StartController implements FxController {
 			loadingKeyFailed(exception);
 		} else {
 			LOG.debug("Loaded valid key");
+			unlockWindow.close();
 			window.setScene(checkScene.get());
 		}
 	}

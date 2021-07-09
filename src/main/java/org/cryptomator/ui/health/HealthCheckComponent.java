@@ -8,6 +8,7 @@ import org.cryptomator.cryptofs.VaultConfig;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 
+import javax.inject.Named;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
@@ -43,6 +44,9 @@ public interface HealthCheckComponent {
 
 		@BindsInstance
 		Builder vault(@HealthCheckWindow Vault vault);
+
+		@BindsInstance
+		Builder owner(@Named("healthCheckOwner") Stage owner);
 
 		HealthCheckComponent build();
 	}
