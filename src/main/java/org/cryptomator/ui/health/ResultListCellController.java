@@ -1,6 +1,7 @@
 package org.cryptomator.ui.health;
 
 import com.tobiasdiez.easybind.EasyBind;
+import com.tobiasdiez.easybind.Subscription;
 import com.tobiasdiez.easybind.optional.OptionalBinding;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.controls.FontAwesome5Icon;
@@ -18,6 +19,8 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import java.util.ArrayList;
+import java.util.List;
 
 // unscoped because each cell needs its own controller
 public class ResultListCellController implements FxController {
@@ -38,6 +41,7 @@ public class ResultListCellController implements FxController {
 	private final BooleanBinding fixable;
 	private final BooleanBinding fixing;
 	private final BooleanBinding fixed;
+	private final List<Subscription> subscriptions;
 
 	public FontAwesome5IconView iconView;
 	public Button fixButton;
@@ -52,16 +56,19 @@ public class ResultListCellController implements FxController {
 		this.fixable = Bindings.createBooleanBinding(this::isFixable, fixState);
 		this.fixing = Bindings.createBooleanBinding(this::isFixing, fixState);
 		this.fixed = Bindings.createBooleanBinding(this::isFixed, fixState);
+		this.subscriptions = new ArrayList<>();
 	}
 
 	@FXML
 	public void initialize() {
 		// see getGlyph() for relevant glyphs:
 		iconView.getStyleClass().remove("glyph-icon");
-		EasyBind.includeWhen(iconView.getStyleClass(), "glyph-icon-muted", iconView.glyphProperty().isEqualTo(INFO_ICON));
-		EasyBind.includeWhen(iconView.getStyleClass(), "glyph-icon-primary", iconView.glyphProperty().isEqualTo(GOOD_ICON));
-		EasyBind.includeWhen(iconView.getStyleClass(), "glyph-icon-orange", iconView.glyphProperty().isEqualTo(WARN_ICON));
-		EasyBind.includeWhen(iconView.getStyleClass(), "glyph-icon-red", iconView.glyphProperty().isEqualTo(CRIT_ICON));
+		subscriptions.addAll(List.of(
+				EasyBind.includeWhen(iconView.getStyleClass(), "glyph-icon-muted", iconView.glyphProperty().isEqualTo(INFO_ICON)), //
+				EasyBind.includeWhen(iconView.getStyleClass(), "glyph-icon-primary", iconView.glyphProperty().isEqualTo(GOOD_ICON)), //
+				EasyBind.includeWhen(iconView.getStyleClass(), "glyph-icon-orange", iconView.glyphProperty().isEqualTo(WARN_ICON)), //
+				EasyBind.includeWhen(iconView.getStyleClass(), "glyph-icon-red", iconView.glyphProperty().isEqualTo(CRIT_ICON))) //
+		);
 	}
 
 	@FXML

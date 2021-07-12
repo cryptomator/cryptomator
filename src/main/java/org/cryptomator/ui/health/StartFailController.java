@@ -14,6 +14,7 @@ import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
 import javafx.stage.Stage;
 
+@HealthCheckScoped
 public class StartFailController implements FxController {
 
 	@Inject
