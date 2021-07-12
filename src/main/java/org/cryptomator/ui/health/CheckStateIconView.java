@@ -14,6 +14,8 @@ import java.util.Optional;
 
 public class CheckStateIconView extends FontAwesome5IconView {
 
+	private final static List<FontAwesome5Icon> ATTENTION_ICONS = List.of(FontAwesome5Icon.CHECK, FontAwesome5Icon.EXCLAMATION_TRIANGLE, FontAwesome5Icon.TIMES);
+
 	private final ObjectProperty<Check> check = new SimpleObjectProperty<>();
 	private final OptionalBinding<Check.CheckState> state;
 	private final OptionalBinding<DiagnosticResult.Severity> severity;
@@ -26,7 +28,7 @@ public class CheckStateIconView extends FontAwesome5IconView {
 		this.severity = EasyBind.wrapNullable(check).mapObservable(Check::highestResultSeverityProperty);
 		glyphProperty().bind(EasyBind.combine(state, severity, this::glyphForState)); //TODO: does the binding need to be stored?
 		this.subscriptions = List.of(
-			EasyBind.includeWhen(getStyleClass(), "glyph-icon-muted", glyphProperty().isEqualTo(FontAwesome5Icon.INFO_CIRCLE)),
+			EasyBind.includeWhen(getStyleClass(), "glyph-icon-muted", EasyBind.map(glyphProperty(), glyph -> glyph == null || !ATTENTION_ICONS.contains(glyph))),
 			EasyBind.includeWhen(getStyleClass(), "glyph-icon-primary", glyphProperty().isEqualTo(FontAwesome5Icon.CHECK)),
 			EasyBind.includeWhen(getStyleClass(), "glyph-icon-orange", glyphProperty().isEqualTo(FontAwesome5Icon.EXCLAMATION_TRIANGLE)),
 			EasyBind.includeWhen(getStyleClass(), "glyph-icon-red", glyphProperty().isEqualTo(FontAwesome5Icon.TIMES))
