@@ -27,13 +27,13 @@
 			<VBox minWidth="80" maxWidth="200" spacing="6" HBox.hgrow="ALWAYS" >
 				<Label fx:id="listHeading" text="%health.checkList.header"/>
 				<CheckBox onAction="#toggleSelectAll" text="%health.checkList.selectAllBox" visible="${!controller.mainRunStarted}" managed="${!controller.mainRunStarted}" />
-				<ListView fx:id="checksListView" VBox.vgrow="ALWAYS"/>
+				<ListView fx:id="checksListView" VBox.vgrow="ALWAYS" minWidth="150"/>
 			</VBox>
 			<StackPane visible="${controller.mainRunStarted}"  managed="${controller.mainRunStarted}" HBox.hgrow="ALWAYS">
 				<VBox minWidth="300" alignment="CENTER" visible="${!controller.anyCheckSelected}" managed="${!controller.anyCheckSelected}" >
 					<Label text="%health.check.detail.noSelectedCheck" wrapText="true" alignment="CENTER" />
 				</VBox>
-				<fx:include source="/fxml/health_check_details.fxml" visible="${controller.anyCheckSelected}" managed="${controller.anyCheckSelected}" />
+				<fx:include source="/fxml/health_check_details.fxml" visible="${controller.anyCheckSelected}" managed="${controller.anyCheckSelected}" maxWidth="450"/>
 			</StackPane>
 		</HBox>
 		<ButtonBar buttonMinWidth="120" buttonOrder="+CX">
