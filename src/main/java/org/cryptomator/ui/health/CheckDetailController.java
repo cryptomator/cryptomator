@@ -3,6 +3,7 @@ package org.cryptomator.ui.health;
 import com.tobiasdiez.easybind.EasyBind;
 import com.tobiasdiez.easybind.EasyObservableList;
 import com.tobiasdiez.easybind.Subscription;
+import com.tobiasdiez.easybind.optional.ObservableOptionalValue;
 import com.tobiasdiez.easybind.optional.OptionalBinding;
 import org.cryptomator.cryptofs.health.api.DiagnosticResult;
 import org.cryptomator.ui.common.FxController;
@@ -21,6 +22,7 @@ import java.util.stream.Stream;
 public class CheckDetailController implements FxController {
 
 	private final EasyObservableList<Result> results;
+	private final ObjectProperty<Check> check;
 	private final OptionalBinding<Check.CheckState> checkState;
 	private final Binding<String> checkName;
 	private final Binding<Boolean> checkRunning;
@@ -34,6 +36,7 @@ public class CheckDetailController implements FxController {
 	private final Binding<Number> countOfCritSeverity;
 	private final ResultListCellFactory resultListCellFactory;
 
+	public CheckStateIconView checkStateIconView;
 	public ListView<Result> resultsListView;
 	private Subscription resultSubscription;
 
@@ -41,6 +44,7 @@ public class CheckDetailController implements FxController {
 	public CheckDetailController(ObjectProperty<Check> selectedTask, ResultListCellFactory resultListCellFactory) {
 		this.resultListCellFactory = resultListCellFactory;
 		this.results = EasyBind.wrapList(FXCollections.observableArrayList());
+		this.check = selectedTask;
 		this.checkState = EasyBind.wrapNullable(selectedTask).mapObservable(Check::stateProperty);
 		this.checkName = EasyBind.wrapNullable(selectedTask).map(Check::getLocalizedName).orElse("");
 		this.checkRunning = checkState.map(Check.CheckState.RUNNING::equals).orElse(false);
@@ -156,4 +160,11 @@ public class CheckDetailController implements FxController {
 		return checkCancelled;
 	}
 
+	public ObjectProperty<Check> checkProperty() {
+		return check;
+	}
+
+	public Check getCheck() {
+		return check.get();
+	}
 }

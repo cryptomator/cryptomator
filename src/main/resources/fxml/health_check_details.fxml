@@ -4,12 +4,17 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.layout.VBox?>
+<?import org.cryptomator.ui.health.CheckStateIconView?>
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.health.CheckDetailController"
 	  prefWidth="500"
 	  spacing="6">
-	<FormattedLabel fx:id="checkTitle" styleClass="label-large" format="%health.check.detail.header" arg1="${controller.checkName}"/>
+	<FormattedLabel fx:id="checkTitle" styleClass="label-large" format="%health.check.detail.header" arg1="${controller.checkName}" contentDisplay="LEFT">
+		<graphic>
+			<CheckStateIconView fx:id="checkStateIconView" check="${controller.check}" glyphSize="20"/>
+		</graphic>
+	</FormattedLabel>
 
 	<Label text="%health.check.detail.checkRunning" visible="${controller.checkRunning}" managed="${controller.checkRunning}"/>
 	<Label text="%health.check.detail.checkScheduled" visible="${controller.checkScheduled}" managed="${controller.checkScheduled}"/>
@@ -19,6 +24,6 @@
 	<Label text="%health.check.detail.checkSucceeded" visible="${controller.checkSucceeded}" managed="${controller.checkSucceeded}"/>
 
 	<FormattedLabel styleClass="label" format="%health.check.detail.problemCount" arg1="${controller.countOfWarnSeverity}" arg2="${controller.countOfCritSeverity}" visible="${!controller.checkSkipped}"
-					 managed="${!controller.checkSkipped}"	/>
+					managed="${!controller.checkSkipped}"/>
 	<ListView fx:id="resultsListView" VBox.vgrow="ALWAYS" visible="${!controller.checkSkipped}"/>
 </VBox>
