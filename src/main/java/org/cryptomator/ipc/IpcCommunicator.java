@@ -1,0 +1,73 @@
+package org.cryptomator.ipc;
+
+import com.google.common.base.Preconditions;
+import com.google.common.util.concurrent.MoreExecutors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.Closeable;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Future;
+
+public interface IpcCommunicator extends Closeable {
+
+	Logger LOG = LoggerFactory.getLogger(IpcCommunicator.class);
+
+	/**
+	 * Attempts to establish a socket connection via one of the given paths.
+	 * <p>
+	 * If no connection to an existing sockets can be established, a new socket is created for the first given path.
+	 * <p>
+	 * If this fails as well, a fallback communicator is returned that allows process-internal communication mocking the API
+	 * that would have been used for IPC.
+	 *
+	 * @param socketPaths The socket path(s)
+	 * @return A communicator object that allows sending and receiving messages
+	 */
+	static IpcCommunicator create(Iterable<Path> socketPaths) {
+		Preconditions.checkArgument(socketPaths.iterator().hasNext(), "socketPaths must contain at least one element");
+		for (var p : socketPaths) {
+			try {
+				return Client.create(p);
+			} catch (IOException e) {
+				// attempt next socket path
+			}
+		}
+		// Didn't get any connection yet? I.e. we're the first app instance, so let's launch a server:
+		try {
+			return Server.create(socketPaths.iterator().next());
+		} catch (IOException e) {
+			LOG.error("Failed to create IPC server using UNIX sockets", e);
+			return new LoopbackCommunicator();
+		}
+	}
+
+	boolean isClient();
+
+	/**
+	 * Listens to incoming messages until the connection gets closed.
+	 *  @param listener The listener that should be notified of incoming messages
+	 * @param executor An executor on which to listen. Listening will block, so you might want to use a background thread.
+	 * @return
+	 */
+	void listen(IpcMessageListener listener, Executor executor);
+
+	/**
+	 * Sends the given message.
+	 *
+	 * @param message The message to send
+	 * @param executor An executor used to send the message. Sending will block, so you might want to use a background thread.
+	 */
+	void send(IpcMessage message, Executor executor);
+
+	default void sendRevealRunningApp() {
+		send(new RevealRunningAppMessage(), MoreExecutors.directExecutor());
+	}
+
+	default void sendHandleLaunchargs(List<String> args) {
+		send(new HandleLaunchArgsMessage(args), MoreExecutors.directExecutor());
+	}
+}

@@ -3,7 +3,6 @@ package org.cryptomator.common;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -14,7 +13,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @DisplayName("Environment Variables Test")
 public class EnvironmentTest {
@@ -43,7 +41,7 @@ public class EnvironmentTest {
 	public void testIpcPortPath() {
 		System.setProperty("cryptomator.ipcPortPath", "~/.config/Cryptomator/ipcPort.bin:~/.Cryptomator/ipcPort.bin");
 
-		List<Path> result = env.getIpcPortPath().toList();
+		List<Path> result = env.ipcSocketPath().toList();
 		MatcherAssert.assertThat(result, Matchers.hasSize(2));
 		MatcherAssert.assertThat(result, Matchers.contains(Paths.get("/home/testuser/.config/Cryptomator/ipcPort.bin"), //
 				Paths.get("/home/testuser/.Cryptomator/ipcPort.bin")));
