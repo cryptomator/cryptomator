@@ -19,6 +19,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ListView;
+import javafx.scene.control.SelectionMode;
 import javafx.stage.Stage;
 import java.io.IOException;
 import java.util.List;
@@ -60,6 +61,7 @@ public class CheckListController implements FxController {
 
 	@FXML
 	public void initialize() {
+		checksListView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
 		checksListView.setItems(checks);
 		checksListView.setCellFactory(view -> new CheckListCell());
 		selectedCheck.bind(checksListView.getSelectionModel().selectedItemProperty());

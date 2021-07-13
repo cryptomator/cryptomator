@@ -34,6 +34,7 @@ public class CheckDetailController implements FxController {
 	private final Binding<Boolean> checkCancelled;
 	private final Binding<Number> countOfWarnSeverity;
 	private final Binding<Number> countOfCritSeverity;
+	private final Binding<Boolean> warnOrCritsExist;
 	private final ResultListCellFactory resultListCellFactory;
 
 	public CheckStateIconView checkStateIconView;
@@ -56,6 +57,7 @@ public class CheckDetailController implements FxController {
 		this.checkFinished = EasyBind.combine(checkSucceeded, checkFailed, checkCancelled, (a, b, c) -> a || b || c);
 		this.countOfWarnSeverity = results.reduce(countSeverity(DiagnosticResult.Severity.WARN));
 		this.countOfCritSeverity = results.reduce(countSeverity(DiagnosticResult.Severity.CRITICAL));
+		this.warnOrCritsExist = EasyBind.combine(checkSucceeded, countOfWarnSeverity, countOfCritSeverity, (suceeded, warns, crits) -> suceeded && (warns.longValue() > 0 || crits.longValue() > 0) );
 		selectedTask.addListener(this::selectedTaskChanged);
 	}
 
@@ -154,6 +156,14 @@ public class CheckDetailController implements FxController {
 
 	public boolean isCheckCancelled() {
 		return checkCancelled.getValue();
+	}
+
+	public Binding<Boolean> warnOrCritsExistProperty() {
+		return warnOrCritsExist;
+	}
+
+	public boolean isWarnOrCritsExist() {
+		return warnOrCritsExist.getValue();
 	}
 
 	public Binding<Boolean> checkCancelledProperty() {
