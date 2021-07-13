@@ -2,14 +2,33 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ButtonBar?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.geometry.Insets?>
+<?import org.cryptomator.ui.controls.FormattedLabel?>
+<?import javafx.scene.control.TitledPane?>
+<?import org.cryptomator.ui.controls.FontAwesome5IconView?>
+<?import javafx.scene.layout.Region?>
 <VBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
 	  fx:controller="org.cryptomator.ui.health.StartFailController"
 	  prefWidth="600"
 	  prefHeight="400"
 	  spacing="12">
-
+	<padding>
+		<Insets topRightBottomLeft="12"/>
+	</padding>
 	<Label text="TODO: Error on loading" />
+	<FormattedLabel format="TODO: Error reading file: %s" arg1="${controller.localizedErrorMessage}" visible="${controller.ioException}" managed="${controller.ioException}"/>
+	<Label text="TODO: Malformed vault config" visible="${controller.parseException}" managed="${controller.parseException}"/>
+	<TitledPane fx:id="moreInfoPane" text="More Info" expanded="false" contentDisplay="LEFT">
+		<graphic>
+			<FontAwesome5IconView glyph="${controller.moreInfoIcon}"/>
+		</graphic>
+		<content>
+			<TextArea VBox.vgrow="ALWAYS" text="${controller.stackTrace}" prefRowCount="20" editable="false" />
+		</content>
+	</TitledPane>
+	<Region VBox.vgrow="ALWAYS"/>
 	<ButtonBar buttonMinWidth="120" buttonOrder="+CX">
 		<buttons>
 			<Button text="%generic.button.close" ButtonBar.buttonData="CANCEL_CLOSE" cancelButton="true" onAction="#close"/>
