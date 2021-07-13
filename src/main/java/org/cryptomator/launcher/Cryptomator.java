@@ -52,6 +52,7 @@ public class Cryptomator {
 
 	public static void main(String[] args) {
 		int exitCode = CRYPTOMATOR_COMPONENT.application().run(args);
+		LOG.info("Exit {}", exitCode);
 		System.exit(exitCode); // end remaining non-daemon threads.
 	}
 
