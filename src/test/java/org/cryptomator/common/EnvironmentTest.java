@@ -37,14 +37,14 @@ public class EnvironmentTest {
 	}
 
 	@Test
-	@DisplayName("cryptomator.ipcPortPath=~/.config/Cryptomator/ipcPort.bin:~/.Cryptomator/ipcPort.bin")
-	public void testIpcPortPath() {
-		System.setProperty("cryptomator.ipcPortPath", "~/.config/Cryptomator/ipcPort.bin:~/.Cryptomator/ipcPort.bin");
+	@DisplayName("cryptomator.ipcSocketPath=~/.config/Cryptomator/ipc.socket:~/.Cryptomator/ipc.socket")
+	public void testIpcSocketPath() {
+		System.setProperty("cryptomator.ipcSocketPath", "~/.config/Cryptomator/ipc.socket:~/.Cryptomator/ipc.socket");
 
 		List<Path> result = env.ipcSocketPath().toList();
 		MatcherAssert.assertThat(result, Matchers.hasSize(2));
-		MatcherAssert.assertThat(result, Matchers.contains(Paths.get("/home/testuser/.config/Cryptomator/ipcPort.bin"), //
-				Paths.get("/home/testuser/.Cryptomator/ipcPort.bin")));
+		MatcherAssert.assertThat(result, Matchers.contains(Paths.get("/home/testuser/.config/Cryptomator/ipc.socket"), //
+				Paths.get("/home/testuser/.Cryptomator/ipc.socket")));
 	}
 
 	@Test
