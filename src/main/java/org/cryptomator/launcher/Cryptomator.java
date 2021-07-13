@@ -5,6 +5,7 @@
  *******************************************************************************/
 package org.cryptomator.launcher;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.Environment;
 import org.cryptomator.ipc.IpcCommunicator;
@@ -78,8 +79,9 @@ public class Cryptomator {
 				LOG.info("Found running application instance. Shutting down...");
 				return 2;
 			} else {
+				var executor = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setNameFormat("IPC-%d").build());
 				ipcMessageHandler.handleLaunchArgs(List.of(args));
-				communicator.listen(ipcMessageHandler, Executors.newSingleThreadExecutor()); // TODO named thread
+				communicator.listen(ipcMessageHandler, executor);
 				LOG.debug("Did not find running application instance. Launching GUI...");
 				return runGuiApplication();
 			}
