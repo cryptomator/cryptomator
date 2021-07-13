@@ -19,6 +19,7 @@ import java.awt.Desktop;
 import java.awt.EventQueue;
 import java.awt.desktop.AboutEvent;
 import java.awt.desktop.QuitResponse;
+import java.awt.desktop.QuitStrategy;
 import java.util.EnumSet;
 import java.util.EventObject;
 import java.util.Set;
@@ -61,6 +62,11 @@ public class AppLifecycleListener {
 			Desktop.getDesktop().setQuitHandler(this::handleQuitRequest);
 		}
 
+		// set quit strategy (cmd+q would call `System.exit(0)` otherwise)
+		if (Desktop.getDesktop().isSupported(Desktop.Action.APP_QUIT_STRATEGY)) {
+			Desktop.getDesktop().setQuitStrategy(QuitStrategy.CLOSE_ALL_WINDOWS);
+		}
+
 		shutdownHook.runOnShutdown(this::forceUnmountRemainingVaults);
 	}
 
@@ -71,7 +77,7 @@ public class AppLifecycleListener {
 		handleQuitRequest(null, new QuitResponse() {
 			@Override
 			public void performQuit() {
-				System.exit(0);
+				// no-op
 			}
 
 			@Override
@@ -96,7 +102,7 @@ public class AppLifecycleListener {
 			public void performQuit() {
 				Platform.exit(); // will be no-op, if JavaFX never started.
 				shutdownLatch.countDown(); // main thread is waiting for this latch
-				EventQueue.invokeLater(originalQuitResponse::performQuit); // this will eventually call System.exit(0)
+				originalQuitResponse.performQuit();
 			}
 
 			@Override
