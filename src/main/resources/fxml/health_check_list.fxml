@@ -24,10 +24,11 @@
 	</fx:define>
 	<children>
 		<HBox spacing="12" VBox.vgrow="ALWAYS">
-			<VBox minWidth="80" maxWidth="200" spacing="6" HBox.hgrow="ALWAYS" >
-				<Label fx:id="listHeading" text="%health.checkList.header"/>
-				<CheckBox onAction="#toggleSelectAll" text="%health.checkList.selectAllBox" visible="${!controller.mainRunStarted}" managed="${!controller.mainRunStarted}" />
-				<ListView fx:id="checksListView" VBox.vgrow="ALWAYS" minWidth="150"/>
+			<ListView fx:id="checksListView" VBox.vgrow="ALWAYS" prefWidth="175"/>
+			<VBox alignment="CENTER" visible="${!controller.mainRunStarted}"  managed="${!controller.mainRunStarted}" HBox.hgrow="ALWAYS">
+				<Label text="TODO: Introductory/Explanatory Text? "/>
+				<Button onAction="#selectAllChecks" text="%health.checkList.selectAllBox" />
+				<Button onAction="#deselectAllChecks" text="TODO:Deselect all Checks" />
 			</VBox>
 			<StackPane visible="${controller.mainRunStarted}"  managed="${controller.mainRunStarted}" HBox.hgrow="ALWAYS">
 				<VBox minWidth="300" alignment="CENTER" visible="${!controller.anyCheckSelected}" managed="${!controller.anyCheckSelected}" >

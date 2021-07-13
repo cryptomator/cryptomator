@@ -68,10 +68,13 @@ public class CheckListController implements FxController {
 	}
 
 	@FXML
-	public void toggleSelectAll(ActionEvent event) {
-		if (event.getSource() instanceof CheckBox c) {
-			checks.forEach(t -> t.chosenForExecutionProperty().set(c.isSelected()));
-		}
+	public void selectAllChecks() {
+		checks.forEach(t -> t.chosenForExecutionProperty().set(true));
+	}
+
+	@FXML
+	public void deselectAllChecks() {
+		checks.forEach(t -> t.chosenForExecutionProperty().set(false));
 	}
 
 	@FXML
