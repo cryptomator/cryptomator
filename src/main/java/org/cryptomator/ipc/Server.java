@@ -30,7 +30,7 @@ class Server implements IpcCommunicator {
 		var address = UnixDomainSocketAddress.of(socketPath);
 		var serverSocketChannel = ServerSocketChannel.open(StandardProtocolFamily.UNIX);
 		serverSocketChannel.bind(address);
-		LOG.info("Spawning IPC server listening on UNIX socket {}", socketPath);
+		LOG.info("Spawning IPC server listening on socket {}", socketPath);
 		return new Server(serverSocketChannel, socketPath);
 	}
 

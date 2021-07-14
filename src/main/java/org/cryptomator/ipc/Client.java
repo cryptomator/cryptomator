@@ -24,7 +24,7 @@ class Client implements IpcCommunicator {
 	public static Client create(Path socketPath) throws IOException {
 		var address = UnixDomainSocketAddress.of(socketPath);
 		var socketChannel = SocketChannel.open(address);
-		LOG.info("Connected to IPC server on UNIX socket {}", socketPath);
+		LOG.info("Connected to IPC server on socket {}", socketPath);
 		return new Client(socketChannel);
 	}
 

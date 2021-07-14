@@ -45,7 +45,7 @@ public interface IpcCommunicator extends Closeable {
 		try {
 			return Server.create(socketPaths.iterator().next());
 		} catch (IOException e) {
-			LOG.error("Failed to create IPC server using UNIX sockets", e);
+			LOG.warn("Failed to create IPC server", e);
 			return new LoopbackCommunicator();
 		}
 	}
