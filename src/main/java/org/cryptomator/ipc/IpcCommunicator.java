@@ -9,6 +9,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
@@ -32,7 +33,8 @@ public interface IpcCommunicator extends Closeable {
 		Preconditions.checkArgument(socketPaths.iterator().hasNext(), "socketPaths must contain at least one element");
 		for (var p : socketPaths) {
 			try {
-				if (Files.exists(p)) {
+				var attr = Files.readAttributes(p, BasicFileAttributes.class);
+				if (attr.isOther()) {
 					return Client.create(p);
 				}
 			} catch (IOException e) {
