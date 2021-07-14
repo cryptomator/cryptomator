@@ -6,6 +6,7 @@
 package org.cryptomator.launcher;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import dagger.Lazy;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.Environment;
 import org.cryptomator.ipc.IpcCommunicator;
@@ -18,7 +19,6 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
-import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
@@ -35,13 +35,13 @@ public class Cryptomator {
 	private final LoggerConfiguration logConfig;
 	private final DebugMode debugMode;
 	private final Environment env;
-	private final IpcMessageHandler ipcMessageHandler;
+	private final Lazy<IpcMessageHandler> ipcMessageHandler;
 	private final Optional<String> applicationVersion;
 	private final CountDownLatch shutdownLatch;
-	private final UiLauncher uiLauncher;
+	private final Lazy<UiLauncher> uiLauncher;
 
 	@Inject
-	Cryptomator(LoggerConfiguration logConfig, DebugMode debugMode, Environment env, IpcMessageHandler ipcMessageHandler, @Named("applicationVersion") Optional<String> applicationVersion, @Named("shutdownLatch") CountDownLatch shutdownLatch, UiLauncher uiLauncher) {
+	Cryptomator(LoggerConfiguration logConfig, DebugMode debugMode, Environment env, Lazy<IpcMessageHandler> ipcMessageHandler, @Named("applicationVersion") Optional<String> applicationVersion, @Named("shutdownLatch") CountDownLatch shutdownLatch, Lazy<UiLauncher> uiLauncher) {
 		this.logConfig = logConfig;
 		this.debugMode = debugMode;
 		this.env = env;
@@ -80,8 +80,9 @@ public class Cryptomator {
 				return 2;
 			} else {
 				var executor = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setNameFormat("IPC-%d").build());
-				ipcMessageHandler.handleLaunchArgs(List.of(args));
-				communicator.listen(ipcMessageHandler, executor);
+				var msgHandler = ipcMessageHandler.get();
+				msgHandler.handleLaunchArgs(List.of(args));
+				communicator.listen(msgHandler, executor);
 				LOG.debug("Did not find running application instance. Launching GUI...");
 				return runGuiApplication();
 			}
@@ -99,7 +100,7 @@ public class Cryptomator {
 	 */
 	private int runGuiApplication() {
 		try {
-			uiLauncher.launch();
+			uiLauncher.get().launch();
 			shutdownLatch.await();
 			LOG.info("UI shut down");
 			return 0;
@@ -108,6 +109,5 @@ public class Cryptomator {
 			return 1;
 		}
 	}
-
 
 }
