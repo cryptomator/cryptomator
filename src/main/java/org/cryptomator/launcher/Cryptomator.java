@@ -5,6 +5,7 @@
  *******************************************************************************/
 package org.cryptomator.launcher;
 
+import dagger.Lazy;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.logging.DebugMode;
 import org.cryptomator.logging.LoggerConfiguration;
@@ -32,10 +33,10 @@ public class Cryptomator {
 	private final IpcFactory ipcFactory;
 	private final Optional<String> applicationVersion;
 	private final CountDownLatch shutdownLatch;
-	private final UiLauncher uiLauncher;
+	private final Lazy<UiLauncher> uiLauncher;
 
 	@Inject
-	Cryptomator(LoggerConfiguration logConfig, DebugMode debugMode, IpcFactory ipcFactory, @Named("applicationVersion") Optional<String> applicationVersion, @Named("shutdownLatch") CountDownLatch shutdownLatch, UiLauncher uiLauncher) {
+	Cryptomator(LoggerConfiguration logConfig, DebugMode debugMode, IpcFactory ipcFactory, @Named("applicationVersion") Optional<String> applicationVersion, @Named("shutdownLatch") CountDownLatch shutdownLatch, Lazy<UiLauncher> uiLauncher) {
 		this.logConfig = logConfig;
 		this.debugMode = debugMode;
 		this.ipcFactory = ipcFactory;
@@ -89,7 +90,7 @@ public class Cryptomator {
 	 */
 	private int runGuiApplication() {
 		try {
-			uiLauncher.launch();
+			uiLauncher.get().launch();
 			shutdownLatch.await();
 			LOG.info("UI shut down");
 			return 0;
