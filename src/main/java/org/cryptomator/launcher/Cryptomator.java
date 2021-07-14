@@ -9,6 +9,7 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import dagger.Lazy;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.Environment;
+import org.cryptomator.common.ShutdownHook;
 import org.cryptomator.ipc.IpcCommunicator;
 import org.cryptomator.logging.DebugMode;
 import org.cryptomator.logging.LoggerConfiguration;
@@ -19,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
@@ -38,16 +40,18 @@ public class Cryptomator {
 	private final Lazy<IpcMessageHandler> ipcMessageHandler;
 	private final Optional<String> applicationVersion;
 	private final CountDownLatch shutdownLatch;
+	private final ShutdownHook shutdownHook;
 	private final Lazy<UiLauncher> uiLauncher;
 
 	@Inject
-	Cryptomator(LoggerConfiguration logConfig, DebugMode debugMode, Environment env, Lazy<IpcMessageHandler> ipcMessageHandler, @Named("applicationVersion") Optional<String> applicationVersion, @Named("shutdownLatch") CountDownLatch shutdownLatch, Lazy<UiLauncher> uiLauncher) {
+	Cryptomator(LoggerConfiguration logConfig, DebugMode debugMode, Environment env, Lazy<IpcMessageHandler> ipcMessageHandler, @Named("applicationVersion") Optional<String> applicationVersion, @Named("shutdownLatch") CountDownLatch shutdownLatch, ShutdownHook shutdownHook, Lazy<UiLauncher> uiLauncher) {
 		this.logConfig = logConfig;
 		this.debugMode = debugMode;
 		this.env = env;
 		this.ipcMessageHandler = ipcMessageHandler;
 		this.applicationVersion = applicationVersion;
 		this.shutdownLatch = shutdownLatch;
+		this.shutdownHook = shutdownHook;
 		this.uiLauncher = uiLauncher;
 	}
 
@@ -79,6 +83,14 @@ public class Cryptomator {
 				LOG.info("Found running application instance. Shutting down...");
 				return 2;
 			} else {
+				// TODO: move this to a better place?
+				shutdownHook.runOnShutdown(() -> {
+					try {
+						communicator.close();
+					} catch (IOException e) {
+						LOG.warn("IPC cleanup failed");
+					}
+				});
 				var executor = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setNameFormat("IPC-%d").build());
 				var msgHandler = ipcMessageHandler.get();
 				msgHandler.handleLaunchArgs(List.of(args));

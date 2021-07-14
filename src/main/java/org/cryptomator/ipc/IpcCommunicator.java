@@ -75,4 +75,13 @@ public interface IpcCommunicator extends Closeable {
 	default void sendHandleLaunchargs(List<String> args) {
 		send(new HandleLaunchArgsMessage(args), MoreExecutors.directExecutor());
 	}
+
+	/**
+	 * Clean up resources.
+	 *
+	 * @implSpec Must be idempotent
+	 * @throws IOException In case of I/O errors.
+	 */
+	@Override
+	void close() throws IOException;
 }
