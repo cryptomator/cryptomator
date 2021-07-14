@@ -1,11 +1,9 @@
 package org.cryptomator.ipc;
 
-import com.google.common.util.concurrent.MoreExecutors;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.api.io.TempDir;
-import org.mockito.Mockito;
 
 import java.io.IOException;
 import java.nio.file.Path;
