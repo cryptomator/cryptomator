@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.Executor;
@@ -31,7 +32,9 @@ public interface IpcCommunicator extends Closeable {
 		Preconditions.checkArgument(socketPaths.iterator().hasNext(), "socketPaths must contain at least one element");
 		for (var p : socketPaths) {
 			try {
-				return Client.create(p);
+				if (Files.exists(p)) {
+					return Client.create(p);
+				}
 			} catch (IOException e) {
 				// attempt next socket path
 			}

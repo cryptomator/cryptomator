@@ -22,8 +22,6 @@ class Client implements IpcCommunicator {
 	}
 
 	public static Client create(Path socketPath) throws IOException {
-		// fail with NoSuchFileException early to prevent implicit creation of socket on Windows:
-		socketPath.getFileSystem().provider().checkAccess(socketPath);
 		var address = UnixDomainSocketAddress.of(socketPath);
 		var socketChannel = SocketChannel.open(address);
 		LOG.info("Connected to IPC server on UNIX socket {}", socketPath);
