@@ -8,6 +8,7 @@
 <?import javafx.scene.control.TitledPane?>
 <?import org.cryptomator.ui.controls.FontAwesome5IconView?>
 <?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.HBox?>
 <VBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
 	  fx:controller="org.cryptomator.ui.health.StartFailController"
@@ -20,9 +21,11 @@
 	<Label text="TODO: Error on loading" />
 	<FormattedLabel format="TODO: Error reading file: %s" arg1="${controller.localizedErrorMessage}" visible="${controller.ioException}" managed="${controller.ioException}"/>
 	<Label text="TODO: Malformed vault config" visible="${controller.parseException}" managed="${controller.parseException}"/>
-	<TitledPane fx:id="moreInfoPane" text="More Info" expanded="false" contentDisplay="LEFT">
+	<TitledPane fx:id="moreInfoPane" text="TODO: More" expanded="false" contentDisplay="LEFT" >
 		<graphic>
-			<FontAwesome5IconView glyph="${controller.moreInfoIcon}"/>
+			<HBox alignment="CENTER" minWidth="8">
+				<FontAwesome5IconView glyph="${controller.moreInfoIcon}"/>
+			</HBox>
 		</graphic>
 		<content>
 			<TextArea VBox.vgrow="ALWAYS" text="${controller.stackTrace}" prefRowCount="20" editable="false" />

@@ -37,7 +37,6 @@ public class CheckDetailController implements FxController {
 	private final Binding<Boolean> warnOrCritsExist;
 	private final ResultListCellFactory resultListCellFactory;
 
-	public CheckStateIconView checkStateIconView;
 	public ListView<Result> resultsListView;
 	private Subscription resultSubscription;
 

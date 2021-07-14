@@ -24,7 +24,7 @@
 	</fx:define>
 	<children>
 		<HBox spacing="12" VBox.vgrow="ALWAYS">
-			<ListView fx:id="checksListView" VBox.vgrow="ALWAYS" prefWidth="175"/>
+			<ListView fx:id="checksListView" VBox.vgrow="ALWAYS" minWidth="175" maxWidth="175"/>
 			<VBox alignment="CENTER" visible="${!controller.mainRunStarted}"  managed="${!controller.mainRunStarted}" HBox.hgrow="ALWAYS">
 				<Label text="TODO: Introductory/Explanatory Text? "/>
 				<Button onAction="#selectAllChecks" text="%health.checkList.selectAllBox" />
