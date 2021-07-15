@@ -1,5 +1,6 @@
 package org.cryptomator.launcher;
 
+import org.cryptomator.ipc.IpcMessageListener;
 import org.cryptomator.ui.launcher.AppLaunchEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -7,20 +8,20 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
-import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 
 @Singleton
-class IpcProtocolImpl implements IpcProtocol {
+class IpcMessageHandler implements IpcMessageListener {
 
-	private static final Logger LOG = LoggerFactory.getLogger(IpcProtocolImpl.class);
+	private static final Logger LOG = LoggerFactory.getLogger(IpcMessageHandler.class);
 
 	private final FileOpenRequestHandler fileOpenRequestHandler;
 	private final BlockingQueue<AppLaunchEvent> launchEventQueue;
 
 	@Inject
-	public IpcProtocolImpl(FileOpenRequestHandler fileOpenRequestHandler, @Named("launchEventQueue") BlockingQueue<AppLaunchEvent> launchEventQueue) {
+	public IpcMessageHandler(FileOpenRequestHandler fileOpenRequestHandler, @Named("launchEventQueue") BlockingQueue<AppLaunchEvent> launchEventQueue) {
 		this.fileOpenRequestHandler = fileOpenRequestHandler;
 		this.launchEventQueue = launchEventQueue;
 	}
@@ -31,8 +32,8 @@ class IpcProtocolImpl implements IpcProtocol {
 	}
 
 	@Override
-	public void handleLaunchArgs(String... args) {
-		LOG.debug("Received launch args: {}", Arrays.stream(args).reduce((a, b) -> a + ", " + b).orElse(""));
+	public void handleLaunchArgs(List<String> args) {
+		LOG.debug("Received launch args: {}", args.stream().reduce((a, b) -> a + ", " + b).orElse(""));
 		fileOpenRequestHandler.handleLaunchArgs(args);
 	}
 

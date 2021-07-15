@@ -5,8 +5,12 @@
  *******************************************************************************/
 package org.cryptomator.launcher;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import dagger.Lazy;
 import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.common.Environment;
+import org.cryptomator.common.ShutdownHook;
+import org.cryptomator.ipc.IpcCommunicator;
 import org.cryptomator.logging.DebugMode;
 import org.cryptomator.logging.LoggerConfiguration;
 import org.cryptomator.ui.launcher.UiLauncher;
@@ -17,8 +21,10 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executors;
 
 @Singleton
 public class Cryptomator {
@@ -30,18 +36,22 @@ public class Cryptomator {
 
 	private final LoggerConfiguration logConfig;
 	private final DebugMode debugMode;
-	private final IpcFactory ipcFactory;
+	private final Environment env;
+	private final Lazy<IpcMessageHandler> ipcMessageHandler;
 	private final Optional<String> applicationVersion;
 	private final CountDownLatch shutdownLatch;
+	private final ShutdownHook shutdownHook;
 	private final Lazy<UiLauncher> uiLauncher;
 
 	@Inject
-	Cryptomator(LoggerConfiguration logConfig, DebugMode debugMode, IpcFactory ipcFactory, @Named("applicationVersion") Optional<String> applicationVersion, @Named("shutdownLatch") CountDownLatch shutdownLatch, Lazy<UiLauncher> uiLauncher) {
+	Cryptomator(LoggerConfiguration logConfig, DebugMode debugMode, Environment env, Lazy<IpcMessageHandler> ipcMessageHandler, @Named("applicationVersion") Optional<String> applicationVersion, @Named("shutdownLatch") CountDownLatch shutdownLatch, ShutdownHook shutdownHook, Lazy<UiLauncher> uiLauncher) {
 		this.logConfig = logConfig;
 		this.debugMode = debugMode;
-		this.ipcFactory = ipcFactory;
+		this.env = env;
+		this.ipcMessageHandler = ipcMessageHandler;
 		this.applicationVersion = applicationVersion;
 		this.shutdownLatch = shutdownLatch;
+		this.shutdownHook = shutdownHook;
 		this.uiLauncher = uiLauncher;
 	}
 
@@ -66,19 +76,24 @@ public class Cryptomator {
 		 * Attempts to create an IPC connection to a running Cryptomator instance and sends it the given args.
 		 * If no external process could be reached, the args will be handled by the loopback IPC endpoint.
 		 */
-		try (IpcFactory.IpcEndpoint endpoint = ipcFactory.create()) {
-			endpoint.getRemote().handleLaunchArgs(args); // if we are the server, getRemote() returns self.
-			if (endpoint.isConnectedToRemote()) {
-				endpoint.getRemote().revealRunningApp();
+		try (var communicator = IpcCommunicator.create(env.ipcSocketPath().toList())) {
+			if (communicator.isClient()) {
+				communicator.sendHandleLaunchargs(List.of(args));
+				communicator.sendRevealRunningApp();
 				LOG.info("Found running application instance. Shutting down...");
 				return 2;
 			} else {
+				shutdownHook.runOnShutdown(communicator::closeUnchecked);
+				var executor = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setNameFormat("IPC-%d").build());
+				var msgHandler = ipcMessageHandler.get();
+				msgHandler.handleLaunchArgs(List.of(args));
+				communicator.listen(msgHandler, executor);
 				LOG.debug("Did not find running application instance. Launching GUI...");
 				return runGuiApplication();
 			}
-		} catch (IOException e) {
-			LOG.error("Failed to initiate inter-process communication.", e);
-			return runGuiApplication();
+		} catch (Throwable e) {
+			LOG.error("Running application failed", e);
+			return 1;
 		}
 	}
 
@@ -99,6 +114,5 @@ public class Cryptomator {
 			return 1;
 		}
 	}
-
 
 }

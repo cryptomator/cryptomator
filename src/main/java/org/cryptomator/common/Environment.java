@@ -33,7 +33,7 @@ public class Environment {
 		LOG.debug("user.region: {}", System.getProperty("user.region"));
 		LOG.debug("logback.configurationFile: {}", System.getProperty("logback.configurationFile"));
 		LOG.debug("cryptomator.settingsPath: {}", System.getProperty("cryptomator.settingsPath"));
-		LOG.debug("cryptomator.ipcPortPath: {}", System.getProperty("cryptomator.ipcPortPath"));
+		LOG.debug("cryptomator.ipcSocketPath: {}", System.getProperty("cryptomator.ipcSocketPath"));
 		LOG.debug("cryptomator.keychainPath: {}", System.getProperty("cryptomator.keychainPath"));
 		LOG.debug("cryptomator.logDir: {}", System.getProperty("cryptomator.logDir"));
 		LOG.debug("cryptomator.mountPointsDir: {}", System.getProperty("cryptomator.mountPointsDir"));
@@ -51,8 +51,8 @@ public class Environment {
 		return getPaths("cryptomator.settingsPath");
 	}
 
-	public Stream<Path> getIpcPortPath() {
-		return getPaths("cryptomator.ipcPortPath");
+	public Stream<Path> ipcSocketPath() {
+		return getPaths("cryptomator.ipcSocketPath");
 	}
 
 	public Stream<Path> getKeychainPath() {

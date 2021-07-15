@@ -2,7 +2,7 @@
 java ^
 	-cp "libs/*" ^
 	-Dcryptomator.settingsPath="~/AppData/Roaming/Cryptomator/settings.json" ^
-	-Dcryptomator.ipcPortPath="~/AppData/Roaming/Cryptomator/ipcPort.bin" ^
+	-Dcryptomator.ipcSocketPath="~/AppData/Roaming/Cryptomator/ipc.socket" ^
 	-Dcryptomator.logDir="~/AppData/Roaming/Cryptomator" ^
 	-Dcryptomator.mountPointsDir="~/Cryptomator" ^
 	-Dcryptomator.keychainPath="~/AppData/Roaming/Cryptomator/keychain.json" ^
