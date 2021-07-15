@@ -44,6 +44,6 @@
 			<Label text="%vaultOptions.health.remarkBackup" wrapText="true" GridPane.rowIndex="2" GridPane.columnIndex="1" />
 		</GridPane>
 		<CheckBox text="%vaultOptions.health.affirmation" fx:id="affirmationBox"/>
-		<Button text="%vaultOptions.health.startBtn" disable="${!affirmationBox.selected}" onAction="#startHealthCheck"/>
+		<Button text="%vaultOptions.general.startBtn" disable="${!affirmationBox.selected}" onAction="#startHealthCheck"/>
 	</children>
 </VBox>

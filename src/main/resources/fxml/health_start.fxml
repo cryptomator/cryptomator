@@ -33,10 +33,10 @@
 				<padding>
 					<Insets topRightBottomLeft="12"/>
 				</padding>
-				<Label text="TODO:Health Check" styleClass="label-large"/>
+				<Label text="%health.intro.header" styleClass="label-large"/>
 				<Region minHeight="15"/>
 				<VBox>
-					<Label text="TODO: short text" wrapText="true"/>
+					<Label text="%health.intro.text" wrapText="true"/>
 					<GridPane alignment="CENTER_LEFT" >
 						<padding>
 							<Insets left="6"/>
@@ -51,14 +51,14 @@
 							<RowConstraints valignment="TOP"/>
 						</rowConstraints>
 						<Label text="1." GridPane.rowIndex="0" GridPane.columnIndex="0" />
-						<Label text="%vaultOptions.health.remarkSync" wrapText="true" GridPane.rowIndex="0" GridPane.columnIndex="1" />
+						<Label text="%health.intro.remarkSync" wrapText="true" GridPane.rowIndex="0" GridPane.columnIndex="1" />
 						<Label text="2." GridPane.rowIndex="1" GridPane.columnIndex="0" />
-						<Label text="%vaultOptions.health.remarkFix" wrapText="true" GridPane.rowIndex="1" GridPane.columnIndex="1" />
+						<Label text="%health.intro.remarkFix" wrapText="true" GridPane.rowIndex="1" GridPane.columnIndex="1" />
 						<Label text="3." GridPane.rowIndex="2" GridPane.columnIndex="0" />
-						<Label text="%vaultOptions.health.remarkBackup" wrapText="true" GridPane.rowIndex="2" GridPane.columnIndex="1" />
+						<Label text="%health.intro.remarkBackup" wrapText="true" GridPane.rowIndex="2" GridPane.columnIndex="1" />
 					</GridPane>
 					<Region minHeight="15"/>
-					<CheckBox text="%vaultOptions.health.affirmation" fx:id="affirmationBox"/>
+					<CheckBox text="%health.intro.affirmation" fx:id="affirmationBox"/>
 				</VBox>
 			</VBox>
 		</HBox>

@@ -25,10 +25,12 @@
 	<children>
 		<HBox spacing="12" VBox.vgrow="ALWAYS">
 			<ListView fx:id="checksListView" VBox.vgrow="ALWAYS" minWidth="175" maxWidth="175"/>
-			<VBox alignment="CENTER" visible="${!controller.mainRunStarted}"  managed="${!controller.mainRunStarted}" HBox.hgrow="ALWAYS">
-				<Label text="TODO: Introductory/Explanatory Text? "/>
-				<Button onAction="#selectAllChecks" text="%health.checkList.selectAllBox" />
-				<Button onAction="#deselectAllChecks" text="TODO:Deselect all Checks" />
+			<VBox alignment="CENTER" visible="${!controller.mainRunStarted}"  managed="${!controller.mainRunStarted}" HBox.hgrow="ALWAYS" spacing="12">
+				<Label text="%health.checkList.description" wrapText="true"/>
+				<HBox alignment="CENTER">
+					<Button onAction="#selectAllChecks" text="%health.checkList.selectAllButton" />
+					<Button onAction="#deselectAllChecks" text="%health.checkList.deselectAllButton" />
+				</HBox>
 			</VBox>
 			<StackPane visible="${controller.mainRunStarted}"  managed="${controller.mainRunStarted}" HBox.hgrow="ALWAYS">
 				<VBox minWidth="300" alignment="CENTER" visible="${!controller.anyCheckSelected}" managed="${!controller.anyCheckSelected}" >

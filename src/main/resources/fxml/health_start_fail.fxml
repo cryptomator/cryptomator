@@ -18,10 +18,10 @@
 	<padding>
 		<Insets topRightBottomLeft="12"/>
 	</padding>
-	<Label text="TODO: Error on loading" />
-	<FormattedLabel format="TODO: Error reading file: %s" arg1="${controller.localizedErrorMessage}" visible="${controller.ioException}" managed="${controller.ioException}"/>
-	<Label text="TODO: Malformed vault config" visible="${controller.parseException}" managed="${controller.parseException}"/>
-	<TitledPane fx:id="moreInfoPane" text="TODO: More" expanded="false" contentDisplay="LEFT" >
+	<Label text="%health.fail.header" styleClass="label-large" />
+	<FormattedLabel fx:id="ioErrorLabel" format="%health.fail.ioError" arg1="${controller.localizedErrorMessage}" visible="${controller.ioException}" managed="${controller.ioException}"/>
+	<Label fx:id="parseErrorLabel" text="%health.fail.parseError" visible="${controller.parseException}" managed="${controller.parseException}"/>
+	<TitledPane fx:id="moreInfoPane" text="%health.fail.moreInfo" expanded="false" contentDisplay="LEFT" >
 		<graphic>
 			<HBox alignment="CENTER" minWidth="8">
 				<FontAwesome5IconView glyph="${controller.moreInfoIcon}"/>
