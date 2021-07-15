@@ -40,15 +40,17 @@ public class CheckListController implements FxController {
 	private final Lazy<ErrorComponent.Builder> errorComponentBuilder;
 	private final IntegerBinding chosenTaskCount;
 	private final BooleanBinding anyCheckSelected;
+	private final CheckListCellFactory listCellFactory;
 
 	/* FXML */
 	public ListView<Check> checksListView;
 
 	@Inject
-	public CheckListController(@HealthCheckWindow Stage window, List<Check> checks, CheckExecutor checkExecutor, ReportWriter reportWriteTask, ObjectProperty<Check> selectedCheck, Lazy<ErrorComponent.Builder> errorComponentBuilder) {
+	public CheckListController(@HealthCheckWindow Stage window, List<Check> checks, CheckExecutor checkExecutor, ReportWriter reportWriteTask, ObjectProperty<Check> selectedCheck, Lazy<ErrorComponent.Builder> errorComponentBuilder, CheckListCellFactory listCellFactory) {
 		this.window = window;
 		this.checks = FXCollections.observableList(checks, Check::observables);
 		this.checkExecutor = checkExecutor;
+		this.listCellFactory = listCellFactory;
 		this.chosenChecks = this.checks.filtered(Check::isChosenForExecution);
 		this.reportWriter = reportWriteTask;
 		this.selectedCheck = selectedCheck;
@@ -63,7 +65,7 @@ public class CheckListController implements FxController {
 	public void initialize() {
 		checksListView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
 		checksListView.setItems(checks);
-		checksListView.setCellFactory(view -> new CheckListCell());
+		checksListView.setCellFactory(listCellFactory);
 		selectedCheck.bind(checksListView.getSelectionModel().selectedItemProperty());
 	}
 

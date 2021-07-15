@@ -166,4 +166,8 @@ abstract class HealthCheckModule {
 	@FxControllerKey(ResultListCellController.class)
 	abstract FxController bindResultListCellController(ResultListCellController controller);
 
+	@Binds
+	@IntoMap
+	@FxControllerKey(CheckListCellController.class)
+	abstract FxController bindCheckListCellController(CheckListCellController controller);
 }
