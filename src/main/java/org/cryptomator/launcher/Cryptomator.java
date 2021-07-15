@@ -83,14 +83,7 @@ public class Cryptomator {
 				LOG.info("Found running application instance. Shutting down...");
 				return 2;
 			} else {
-				// TODO: move this to a better place?
-				shutdownHook.runOnShutdown(() -> {
-					try {
-						communicator.close();
-					} catch (IOException e) {
-						LOG.warn("IPC cleanup failed");
-					}
-				});
+				shutdownHook.runOnShutdown(communicator::closeUnchecked);
 				var executor = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setNameFormat("IPC-%d").build());
 				var msgHandler = ipcMessageHandler.get();
 				msgHandler.handleLaunchArgs(List.of(args));

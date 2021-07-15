@@ -76,6 +76,7 @@ class Server implements IpcCommunicator {
 			serverSocketChannel.close();
 		} finally {
 			Files.deleteIfExists(socketPath);
+			LOG.debug("IPC server closed");
 		}
 	}
 }

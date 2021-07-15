@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
@@ -84,4 +85,12 @@ public interface IpcCommunicator extends Closeable {
 	 */
 	@Override
 	void close() throws IOException;
+
+	default void closeUnchecked() throws UncheckedIOException {
+		try {
+			close();
+		} catch (IOException e) {
+			throw new UncheckedIOException(e);
+		}
+	}
 }
