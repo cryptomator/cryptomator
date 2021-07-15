@@ -4,7 +4,7 @@ java \
 	-p "mods" \
 	-cp "libs/*" \
 	-Dcryptomator.settingsPath="~/Library/Application Support/Cryptomator/settings.json" \
-	-Dcryptomator.ipcPortPath="~/Library/Application Support/Cryptomator/ipcPort.bin" \
+	-Dcryptomator.ipcSocketPath="~/Library/Application Support/Cryptomator/ipc.socket" \
 	-Dcryptomator.logDir="~/Library/Logs/Cryptomator" \
 	-Dcryptomator.mountPointsDir="/Volumes" \
 	-Xss20m \

@@ -22,6 +22,7 @@ import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.BlockingQueue;
 import java.util.stream.Collectors;
@@ -46,13 +47,13 @@ class FileOpenRequestHandler {
 		tryToEnqueueFileOpenRequest(launchEvent);
 	}
 
-	public void handleLaunchArgs(String[] args) {
+	public void handleLaunchArgs(List<String> args) {
 		handleLaunchArgs(FileSystems.getDefault(), args);
 	}
 
 	// visible for testing
-	void handleLaunchArgs(FileSystem fs, String[] args) {
-		Collection<Path> pathsToOpen = Arrays.stream(args).map(str -> {
+	void handleLaunchArgs(FileSystem fs, List<String> args) {
+		Collection<Path> pathsToOpen = args.stream().map(str -> {
 			try {
 				return fs.getPath(str);
 			} catch (InvalidPathException e) {
