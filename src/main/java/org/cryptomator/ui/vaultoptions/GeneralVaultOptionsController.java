@@ -4,10 +4,12 @@ import org.cryptomator.common.settings.WhenUnlocked;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.controls.NumericTextField;
+import org.cryptomator.ui.health.HealthCheckComponent;
 
 import javax.inject.Inject;
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
@@ -24,6 +26,7 @@ public class GeneralVaultOptionsController implements FxController {
 
 	private final Stage window;
 	private final Vault vault;
+	private final HealthCheckComponent.Builder healthCheckWindow;
 	private final ResourceBundle resourceBundle;
 
 	public TextField vaultName;
@@ -33,9 +36,10 @@ public class GeneralVaultOptionsController implements FxController {
 	public NumericTextField lockTimeInMinutesTextField;
 
 	@Inject
-	GeneralVaultOptionsController(@VaultOptionsWindow Stage window, @VaultOptionsWindow Vault vault, ResourceBundle resourceBundle) {
+	GeneralVaultOptionsController(@VaultOptionsWindow Stage window, @VaultOptionsWindow Vault vault, HealthCheckComponent.Builder healthCheckWindow, ResourceBundle resourceBundle) {
 		this.window = window;
 		this.vault = vault;
+		this.healthCheckWindow = healthCheckWindow;
 		this.resourceBundle = resourceBundle;
 	}
 
@@ -103,5 +107,9 @@ public class GeneralVaultOptionsController implements FxController {
 				return 0;
 			}
 		}
+	}
+
+	public void startHealthCheck() {
+		healthCheckWindow.vault(vault).owner(window).build().showHealthCheckWindow();
 	}
 }

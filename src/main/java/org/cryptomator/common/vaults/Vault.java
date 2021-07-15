@@ -19,6 +19,7 @@ import org.cryptomator.cryptofs.CryptoFileSystemProperties.FileSystemFlags;
 import org.cryptomator.cryptofs.CryptoFileSystemProvider;
 import org.cryptomator.cryptofs.VaultConfig;
 import org.cryptomator.cryptofs.VaultConfig.UnverifiedVaultConfig;
+import org.cryptomator.cryptofs.VaultConfigLoadException;
 import org.cryptomator.cryptofs.common.FileSystemCapabilityChecker;
 import org.cryptomator.cryptolib.api.CryptoException;
 import org.cryptomator.cryptolib.api.MasterkeyLoader;
@@ -327,6 +328,14 @@ public class Vault {
 		return stats;
 	}
 
+	/**
+	 * Attempts to read the vault config file and parse it without verifying its integrity.
+	 *
+	 * @return an unverified vault config
+	 * @throws VaultConfigLoadException if the read file cannot be properly parsed
+	 * @throws IOException if reading the file fails
+	 *
+	 */
 	public UnverifiedVaultConfig getUnverifiedVaultConfig() throws IOException {
 		Path configPath = getPath().resolve(org.cryptomator.common.Constants.VAULTCONFIG_FILENAME);
 		String token = Files.readString(configPath, StandardCharsets.US_ASCII);
