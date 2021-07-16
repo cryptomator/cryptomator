@@ -94,13 +94,7 @@ public class MountOptionsController implements FxController {
 		driveLetterSelection.setConverter(new WinDriveLetterLabelConverter(windowsDriveLetters, resourceBundle));
 		driveLetterSelection.setValue(vault.getVaultSettings().winDriveLetter().get());
 
-		if (vault.getVaultSettings().useCustomMountPath().get() && !getRestrictToStableFuseOnWindows() /* to prevent invalid states */) {
-			mountPoint.selectToggle(mountPointCustomDir);
-		} else if (!Strings.isNullOrEmpty(vault.getVaultSettings().winDriveLetter().get())) {
-			mountPoint.selectToggle(mountPointWinDriveLetter);
-		} else {
-			mountPoint.selectToggle(mountPointAuto);
-		}
+		validateMountPointChoice();
 
 		vault.getVaultSettings().useCustomMountPath().bind(mountPoint.selectedToggleProperty().isEqualTo(mountPointCustomDir));
 		vault.getVaultSettings().winDriveLetter().bind( //
@@ -108,6 +102,20 @@ public class MountOptionsController implements FxController {
 						.then(driveLetterSelection.getSelectionModel().selectedItemProperty()) //
 						.otherwise((String) null) //
 		);
+	}
+
+	// Checks the plausibility of combined "mount point" configuration params.
+	// Resets toggle to "choose mount point automatically" (mountPointAuto) if invalid.
+	private void validateMountPointChoice() {
+		if (vault.getVaultSettings().useCustomMountPath().get()
+				&& !Strings.isNullOrEmpty(vault.getVaultSettings().customMountPath().get())
+				&& !getRestrictToStableFuseOnWindows() /* to prevent invalid states */) {
+			mountPoint.selectToggle(mountPointCustomDir);
+		} else if (!Strings.isNullOrEmpty(vault.getVaultSettings().winDriveLetter().get())) {
+			mountPoint.selectToggle(mountPointWinDriveLetter);
+		} else {
+			mountPoint.selectToggle(mountPointAuto);
+		}
 	}
 
 	@FXML
@@ -137,7 +145,7 @@ public class MountOptionsController implements FxController {
 		if (file != null) {
 			vault.getVaultSettings().customMountPath().set(file.getAbsolutePath());
 		} else {
-			vault.getVaultSettings().customMountPath().set(null);
+			validateMountPointChoice();
 		}
 	}
 

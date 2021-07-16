@@ -139,7 +139,10 @@ public class VaultSettings {
 
 	public Optional<String> getCustomMountPath() {
 		if (useCustomMountPath.get()) {
-			return Optional.ofNullable(Strings.emptyToNull(customMountPath.get()));
+			String mountPath = Strings.emptyToNull(customMountPath.get());
+			assert mountPath != null; //There must be a valid mountpath we are supposed to use it
+
+			return Optional.of(mountPath);
 		} else {
 			return Optional.empty();
 		}
