@@ -34,11 +34,13 @@ import java.util.SortedSet;
  * this volume, even if {@code #prepare(Volume, Path)} fails.</i>
  *
  * <p>If {@code #chooseMountPoint(Volume)} yields no result, the next MPC is executed
- * <i>without</i> first calling the {@code #prepare(Volume, Path)} method of the current MPC.
+ * <i>without</i> calling the {@code #prepare(Volume, Path)} method of the current MPC first.
  * This is repeated until<br>
  * <ul>
  *     <li><b>either</b> a mountpoint is returned by {@code #chooseMountPoint(Volume)}
  *     and {@code #prepare(Volume, Path)} succeeds or fails, ending the entire operation</li>
+ *     <li><b>or</b> {@code #chooseMountPoint(Volume)} throws an exception,
+ *     ending the entire operation</li>
  *     <li><b>or</b> no MPC remains and an {@link InvalidMountPointException} is thrown.</li>
  * </ul>
  * If the {@code #prepare(Volume, Path)} method of a MPC fails, the entire
@@ -72,12 +74,13 @@ public interface MountPointChooser {
 	 * Developers should override this method to find or extract a mountpoint for
 	 * the volume <b>without</b> preparing it. Preparation should be done by
 	 * {@link #prepare(Volume, Path)} instead.
-	 * Exceptions in this method should be handled gracefully and result in returning
-	 * {@link Optional#empty()} instead of throwing an exception.
+	 * The Mountpoint-Choosing-Operation will fail if an exception occurs.
+	 * Consequently developers should try to restrict throwing exceptions to those cases where
+	 * aborting the entire operation is sensible. Failure to choose a suitable path should
+	 * be indicated by returning {@link Optional#empty()} instead.
 	 *
 	 * @param caller The Volume that is calling the method to choose a mountpoint
-	 * @return the chosen path or {@link Optional#empty()} if an exception occurred
-	 * or no mountpoint could be found.
+	 * @return the chosen path or {@link Optional#empty()} if no mountpoint could be found.
 	 * @see #isApplicable(Volume)
 	 * @see #prepare(Volume, Path)
 	 */
