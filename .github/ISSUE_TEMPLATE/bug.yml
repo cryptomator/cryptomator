@@ -31,6 +31,7 @@ body:
           - Operating System: 
           - Cryptomator: 
           - …
+      render: markdown
     validations:
       required: true
   - type: dropdown
