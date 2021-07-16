@@ -34,7 +34,14 @@
 			<includes>
 				<include>cryptomator-*.jar</include>
 			</includes>
-			<outputDirectory>libs</outputDirectory>
+			<outputDirectory>mods</outputDirectory>
+		</fileSet>
+		<fileSet>
+			<directory>target/mods</directory>
+			<includes>
+				<include>*.jar</include>
+			</includes>
+			<outputDirectory>mods</outputDirectory>
 		</fileSet>
 		<fileSet>
 			<directory>target/libs</directory>

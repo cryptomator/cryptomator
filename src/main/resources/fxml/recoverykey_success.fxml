@@ -17,7 +17,7 @@
 		<Insets topRightBottomLeft="12"/>
 	</padding>
 	<children>
-		<fx:include source="/fxml/recoverykey_display.fxml"/>
+		<fx:include source="recoverykey_display.fxml"/>
 
 		<Region VBox.vgrow="ALWAYS"/>
 
