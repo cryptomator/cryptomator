@@ -28,14 +28,6 @@ Cryptomator is provided free of charge as an open-source project despite the hig
 
 ### Silver Sponsors
 
-<table>
-  <tbody>
-    <tr>
-      <td><a href="https://thebestvpn.com/"><img src="https://cryptomator.org/img/sponsors/thebestvpn@2x.png" alt="TheBestVPN" height="64"></a></td>
-    </tr>
-  </tbody>
-</table>
-
 - [Jameson Lopp](https://www.lopp.net/)
 
 ---
