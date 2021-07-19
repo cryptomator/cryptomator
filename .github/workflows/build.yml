@@ -67,14 +67,20 @@ jobs:
         run: mvn -B clean package -DskipTests -P${{ matrix.profile }}
         shell: bash
       - name: Archive buildkit-${{ matrix.profile }}.tar.gz
-        run: tar -czf buildkit-${{ matrix.profile }}.tar.gz libs mods ../LICENSE.txt ../dist/${{ matrix.launcher }}
+        run: |
+          cp LICENSE.txt target
+          cp dist/${{ matrix.launcher }} target
         shell: bash
-        working-directory: target
-      - name: Upload buildkit-${{ matrix.profile }}.tar.gz
+      - name: Upload buildkit-${{ matrix.profile }}
         uses: actions/upload-artifact@v2
         with:
-          name: buildkit-${{ matrix.profile }}.tar.gz
-          path: target/buildkit-${{ matrix.profile }}.tar.gz
+          name: buildkit-${{ matrix.profile }}
+          path: |
+            target/libs
+            target/mods
+            target/LICENSE.txt
+            target/${{ matrix.launcher }}
+          if-no-files-found: error
           if-no-files-found: error
 
   # release:
