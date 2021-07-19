@@ -19,7 +19,9 @@
 		<Insets topRightBottomLeft="6"/>
 	</padding>
 	<children>
-		<FontAwesome5IconView fx:id="severityView" HBox.hgrow="NEVER" glyphSize="16" glyph="${controller.severityGlyph}"/>
+		<StackPane minWidth="25" minHeight="25">
+			<FontAwesome5IconView fx:id="severityView" HBox.hgrow="NEVER" glyphSize="16" glyph="${controller.severityGlyph}"/>
+		</StackPane>
 		<Label text="${controller.description}"/>
 		<Region HBox.hgrow="ALWAYS"/>
 		<StackPane HBox.hgrow="NEVER" >
