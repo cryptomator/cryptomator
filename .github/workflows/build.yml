@@ -3,6 +3,14 @@ name: Build
 on:
   [push]
 
+env:
+  JAVA_VERSION: 16
+  ADDITIONAL_MODULES: jdk.crypto.ec,jdk.accessibility
+
+defaults:
+  run:
+    shell: bash
+
 jobs: 
   test:
     name: Build and Test
@@ -12,7 +20,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-java@v1
         with:
-          java-version: 16
+          java-version: ${{ env.JAVA_VERSION }}
       - uses: actions/cache@v2
         with:
           path: ~/.m2/repository
@@ -36,7 +44,7 @@ jobs:
 #
 
   buildkit:
-    name: Build buildkit-${{ matrix.profile }}.zip
+    name: Build buildkit-${{ matrix.profile }}
     needs: test
     runs-on: ${{ matrix.os }}
     strategy:
@@ -56,7 +64,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-java@v1
         with:
-          java-version: 16
+          java-version: ${{ env.JAVA_VERSION }}
       - uses: actions/cache@v2
         with:
           path: ~/.m2/repository
@@ -65,13 +73,11 @@ jobs:
             ${{ runner.os }}-maven-
       - name: Copy .jar files
         run: mvn -B clean package -DskipTests -P${{ matrix.profile }}
-        shell: bash
       - name: Archive buildkit-${{ matrix.profile }}.tar.gz
         run: |
           cp LICENSE.txt target
           cp dist/${{ matrix.launcher }} target
           cp target/cryptomator-*.jar target/mods
-        shell: bash
       - name: Upload buildkit-${{ matrix.profile }}
         uses: actions/upload-artifact@v2
         with:
@@ -81,6 +87,64 @@ jobs:
             target/mods
             target/LICENSE.txt
             target/${{ matrix.launcher }}
+          if-no-files-found: error
+
+#
+# jlink
+#
+
+  jlink:
+    name: Create runtime-${{ matrix.profile }}
+    needs: buildkit
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+        - os: ubuntu-latest
+          profile: linux
+        - os: windows-latest
+          profile: win
+        - os: macOS-latest
+          profile: mac
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-java@v1
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+      - name: Download buildkit-linux
+        uses: actions/download-artifact@v2
+        with:
+          name: buildkit-${{ matrix.profile }}
+          path: buildkit
+      - name: Run jdeps
+        run: >
+          jmods=`
+          ${JAVA_HOME}/bin/jdeps --module-path buildkit/mods -R --multi-release ${{ env.JAVA_VERSION }} -s buildkit/mods/cryptomator-*.jar
+          | awk -F ' -> ' '{print $2}'
+          | grep -E '^java\.|^jdk\.'
+          | sort
+          | uniq
+          | tr '\n' ','
+          `
+          && echo "REQUIRED_MODULES=${jmods}" >> $GITHUB_ENV
+        working-directory: buildkit
+      - name: Create Runtime Image
+        run: >
+          ${JAVA_HOME}/bin/jlink
+          --verbose
+          --output runtime
+          --module-path "${JAVA_HOME/}/jmods"
+          --add-modules ${{ env.REQUIRED_MODULES }}${{ env.ADDITIONAL_MODULES }}
+          --no-header-files
+          --no-man-pages
+          --strip-debug
+          --compress=1
+      - name: Upload runtime-${{ matrix.profile }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: runtime-${{ matrix.profile }}
+          path: runtime
           if-no-files-found: error
 
   # release:
