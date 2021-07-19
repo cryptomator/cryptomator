@@ -154,10 +154,10 @@ jobs:
         with:
           name: buildkit-linux
           path: Cryptomator.AppDir
-      - name: Download buildkit-linux
+      - name: Download runtime-linux
         uses: actions/download-artifact@v2
         with:
-          name: buildkit-linux
+          name: runtime-linux
           path: Cryptomator.AppDir/runtime
       - name: Extract libjffi.so # workaround for https://github.com/cryptomator/cryptomator-linux/issues/27
         run: |
