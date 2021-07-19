@@ -1,5 +1,6 @@
 package org.cryptomator.ui.addvaultwizard;
 
+import com.tobiasdiez.easybind.Subscription;
 import dagger.Lazy;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultListManager;
@@ -10,12 +11,14 @@ import org.cryptomator.cryptolib.api.CryptorProvider;
 import org.cryptomator.cryptolib.api.Masterkey;
 import org.cryptomator.cryptolib.api.MasterkeyLoader;
 import org.cryptomator.cryptolib.common.MasterkeyFileAccess;
+import org.cryptomator.ui.common.Animations;
 import org.cryptomator.ui.common.ErrorComponent;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.NewPasswordController;
 import org.cryptomator.ui.common.Tasks;
+import org.cryptomator.ui.controls.FontAwesome5IconView;
 import org.cryptomator.ui.keyloading.masterkeyfile.MasterkeyFileLoadingStrategy;
 import org.cryptomator.ui.recoverykey.RecoveryKeyFactory;
 import org.slf4j.Logger;
@@ -76,10 +79,14 @@ public class CreateNewVaultPasswordController implements FxController {
 	private final BooleanProperty readyToCreateVault;
 	private final ObjectBinding<ContentDisplay> createVaultButtonState;
 
+	private Subscription rotationSubscription;
+
+	/* FXML */
 	public ToggleGroup recoveryKeyChoice;
 	public Toggle showRecoveryKey;
 	public Toggle skipRecoveryKey;
 	public NewPasswordController newPasswordSceneController;
+	public FontAwesome5IconView createInProgressView;
 
 	@Inject
 	CreateNewVaultPasswordController(@AddVaultWizardWindow Stage window, @FxmlScene(FxmlFile.ADDVAULT_NEW_LOCATION) Lazy<Scene> chooseLocationScene, @FxmlScene(FxmlFile.ADDVAULT_NEW_RECOVERYKEY) Lazy<Scene> recoveryKeyScene, @FxmlScene(FxmlFile.ADDVAULT_SUCCESS) Lazy<Scene> successScene, ErrorComponent.Builder errorComponent, ExecutorService executor, RecoveryKeyFactory recoveryKeyFactory, @Named("vaultName") StringProperty vaultName, ObjectProperty<Path> vaultPath, @AddVaultWizardWindow ObjectProperty<Vault> vault, @Named("recoveryKey") StringProperty recoveryKey, VaultListManager vaultListManager, ResourceBundle resourceBundle, ReadmeGenerator readmeGenerator, SecureRandom csprng, MasterkeyFileAccess masterkeyFileAccess) {
@@ -111,6 +118,7 @@ public class CreateNewVaultPasswordController implements FxController {
 			newPasswordSceneController.passwordField.wipe();
 			newPasswordSceneController.reenterField.wipe();
 		});
+		this.rotationSubscription = Animations.spinOnCondition(createInProgressView, createInProgressView.visibleProperty(), isVisible -> isVisible);
 	}
 
 	@FXML

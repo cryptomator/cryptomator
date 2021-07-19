@@ -7,8 +7,8 @@
 <?import javafx.scene.control.ButtonBar?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ProgressBar?>
-<?import javafx.scene.control.ProgressIndicator?>
 <?import javafx.scene.layout.VBox?>
+<?import org.cryptomator.ui.controls.FontAwesome5IconView?>
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.migration.MigrationRunController"
@@ -37,7 +37,7 @@
 					<Button text="%migration.run.startMigrationBtn" ButtonBar.buttonData="NEXT_FORWARD" defaultButton="true" onAction="#migrate" contentDisplay="${controller.migrateButtonContentDisplay}"
 							disable="${controller.migrationButtonDisabled}">
 						<graphic>
-							<ProgressIndicator progress="-1" prefWidth="12" prefHeight="12"/>
+							<FontAwesome5IconView fx:id="migrationInProgressView" glyph="SPINNER" glyphSize="12" />
 						</graphic>
 					</Button>
 				</buttons>

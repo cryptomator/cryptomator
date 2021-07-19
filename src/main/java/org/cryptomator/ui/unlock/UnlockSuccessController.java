@@ -1,9 +1,12 @@
 package org.cryptomator.ui.unlock;
 
+import com.tobiasdiez.easybind.Subscription;
 import org.cryptomator.common.settings.WhenUnlocked;
 import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.ui.common.Animations;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.VaultService;
+import org.cryptomator.ui.controls.FontAwesome5IconView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +35,11 @@ public class UnlockSuccessController implements FxController {
 	private final ObjectProperty<ContentDisplay> revealButtonState;
 	private final BooleanProperty revealButtonDisabled;
 
+	private Subscription rotationSubscription;
+
+	/* FXML */
 	public CheckBox rememberChoiceCheckbox;
+	public FontAwesome5IconView revealInProgressView;
 
 	@Inject
 	public UnlockSuccessController(@UnlockWindow Stage window, @UnlockWindow Vault vault, ExecutorService executor, VaultService vaultService) {
@@ -42,6 +49,10 @@ public class UnlockSuccessController implements FxController {
 		this.vaultService = vaultService;
 		this.revealButtonState = new SimpleObjectProperty<>(ContentDisplay.TEXT_ONLY);
 		this.revealButtonDisabled = new SimpleBooleanProperty();
+	}
+
+	public void initialize() {
+		this.rotationSubscription = Animations.spinOnCondition(revealInProgressView, revealInProgressView.visibleProperty(), isVisible -> isVisible);
 	}
 
 	@FXML

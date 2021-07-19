@@ -1,5 +1,6 @@
 package org.cryptomator.ui.migration;
 
+import com.tobiasdiez.easybind.Subscription;
 import dagger.Lazy;
 import org.cryptomator.common.keychain.KeychainManager;
 import org.cryptomator.common.vaults.Vault;
@@ -17,6 +18,7 @@ import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.Tasks;
+import org.cryptomator.ui.controls.FontAwesome5IconView;
 import org.cryptomator.ui.controls.NiceSecurePasswordField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,7 +68,12 @@ public class MigrationRunController implements FxController {
 	private final Lazy<Scene> capabilityErrorScene;
 	private final BooleanProperty migrationButtonDisabled;
 	private final DoubleProperty migrationProgress;
+
+	private Subscription rotationSubscription;
 	private volatile double volatileMigrationProgress = -1.0;
+
+	/* FXML */
+	public FontAwesome5IconView migrationInProgressView;
 	public NiceSecurePasswordField passwordField;
 
 	@Inject
@@ -97,6 +104,8 @@ public class MigrationRunController implements FxController {
 				.or(passwordField.textProperty().isEmpty()));
 
 		window.setOnHiding(event -> passwordField.wipe());
+
+		this.rotationSubscription = Animations.spinOnCondition(migrationInProgressView, migrationInProgressView.visibleProperty(), isVisible -> isVisible);
 	}
 
 	@FXML

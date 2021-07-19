@@ -1,10 +1,13 @@
 package org.cryptomator.ui.keyloading.masterkeyfile;
 
+import com.tobiasdiez.easybind.Subscription;
 import org.cryptomator.common.keychain.KeychainManager;
 import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.ui.common.Animations;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.UserInteractionLock;
 import org.cryptomator.ui.common.WeakBindings;
+import org.cryptomator.ui.controls.FontAwesome5IconView;
 import org.cryptomator.ui.controls.NiceSecurePasswordField;
 import org.cryptomator.ui.forgetPassword.ForgetPasswordComponent;
 import org.cryptomator.ui.keyloading.KeyLoading;
@@ -59,8 +62,12 @@ public class PassphraseEntryController implements FxController {
 	private final BooleanProperty unlockButtonDisabled;
 	private final StringBinding vaultName;
 
+	private Subscription rotationSubscription;
+
+	/* FXML */
 	public NiceSecurePasswordField passwordField;
 	public CheckBox savePasswordCheckbox;
+	public FontAwesome5IconView unlockInProgressView;
 	public ImageView face;
 	public ImageView leftArm;
 	public ImageView rightArm;
@@ -130,6 +137,8 @@ public class PassphraseEntryController implements FxController {
 		);
 
 		passwordEntryLock.awaitingInteraction().addListener(observable -> stopUnlockAnimation());
+
+		this.rotationSubscription = Animations.spinOnCondition(unlockInProgressView, unlockInProgressView.visibleProperty(), isVisible -> isVisible);
 	}
 
 	@FXML
