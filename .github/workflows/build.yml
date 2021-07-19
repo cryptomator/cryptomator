@@ -6,6 +6,10 @@ on:
 env:
   JAVA_VERSION: 16
 
+defaults:
+  run:
+    shell: bash
+
 jobs: 
   test:
     name: Build and Test
@@ -55,9 +59,6 @@ jobs:
         - os: macOS-latest
           profile: mac
           launcher: launcher-mac.sh
-    defaults:
-      run:
-        shell: bash
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-java@v1
@@ -115,7 +116,7 @@ jobs:
           ${JAVA_HOME}/bin/jlink
           --verbose
           --output runtime
-          --module-path "${JAVA_HOME/}/jmods"
+          --module-path "${JAVA_HOME}/jmods"
           --add-modules java.base,java.desktop,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.crypto.ec,jdk.accessibility
           --no-header-files
           --no-man-pages
