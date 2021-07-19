@@ -136,7 +136,7 @@ jobs:
 # 
 
   linux-appimage:
-    name: Build AppDir
+    name: Build AppImage
     runs-on: ubuntu-latest
     needs: [buildkit, jlink]
     steps:
@@ -168,6 +168,7 @@ jobs:
       - name: Patch Cryptomator.AppDir
         run: |
           cp -r dist/appimage/resources/appimage/AppDir/* Cryptomator.AppDir/
+          chmod +x Cryptomator.AppDir/runtime/bin/java
           export REVISION_NO=`git rev-list --count HEAD`
           envsubst '${REVISION_NO}' < dist/appimage/resources/appimage/AppDir/bin/cryptomator.sh > Cryptomator.AppDir/bin/cryptomator.sh
           ln -s usr/share/icons/hicolor/scalable/apps/org.cryptomator.Cryptomator.svg Cryptomator.AppDir/org.cryptomator.Cryptomator.svg
@@ -183,7 +184,7 @@ jobs:
       - name: Prepare GPG-Agent for signing with key 615D449FE6E6A235
         run: |
           echo "${GPG_PRIVATE_KEY}" | gpg --batch --quiet --import
-          echo "${GPG_PASSPHRASE}" | gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --dry-run --sign appdir.tar.gz
+          echo "${GPG_PASSPHRASE}" | gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --dry-run --sign Cryptomator.AppDir/AppRun
         env:
           GPG_PRIVATE_KEY: ${{ secrets.RELEASES_GPG_PRIVATE_KEY }}
           GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
