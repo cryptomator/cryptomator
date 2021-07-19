@@ -67,8 +67,8 @@ abstract class HealthCheckModule {
 
 	@Provides
 	@HealthCheckScoped
-	static List<Check> provideAvailableChecks(ResourceBundle bundle) {
-		return HealthCheck.allChecks().stream().map(hc -> new Check(hc, bundle)).toList();
+	static List<Check> provideAvailableChecks() {
+		return HealthCheck.allChecks().stream().map(Check::new).toList();
 	}
 
 	@Provides

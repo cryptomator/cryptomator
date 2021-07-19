@@ -3,7 +3,6 @@ package org.cryptomator.ui.health;
 import com.tobiasdiez.easybind.EasyBind;
 import com.tobiasdiez.easybind.EasyObservableList;
 import com.tobiasdiez.easybind.Subscription;
-import com.tobiasdiez.easybind.optional.ObservableOptionalValue;
 import com.tobiasdiez.easybind.optional.OptionalBinding;
 import org.cryptomator.cryptofs.health.api.DiagnosticResult;
 import org.cryptomator.ui.common.FxController;
@@ -46,7 +45,7 @@ public class CheckDetailController implements FxController {
 		this.results = EasyBind.wrapList(FXCollections.observableArrayList());
 		this.check = selectedTask;
 		this.checkState = EasyBind.wrapNullable(selectedTask).mapObservable(Check::stateProperty);
-		this.checkName = EasyBind.wrapNullable(selectedTask).map(Check::getLocalizedName).orElse("");
+		this.checkName = EasyBind.wrapNullable(selectedTask).map(Check::getName).orElse("");
 		this.checkRunning = checkState.map(Check.CheckState.RUNNING::equals).orElse(false);
 		this.checkScheduled = checkState.map(Check.CheckState.SCHEDULED::equals).orElse(false);
 		this.checkSkipped = checkState.map(Check.CheckState.SKIPPED::equals).orElse(false);

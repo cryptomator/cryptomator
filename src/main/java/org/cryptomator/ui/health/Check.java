@@ -11,15 +11,12 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
 
 public class Check {
 
 	private static final String LOCALIZE_PREFIX = "health.";
 
 	private final HealthCheck check;
-	private final ResourceBundle resourceBundle;
 
 	private final BooleanProperty chosenForExecution = new SimpleBooleanProperty(false);
 	private final ObjectProperty<CheckState> state = new SimpleObjectProperty<>(CheckState.RUNNABLE);
@@ -28,17 +25,12 @@ public class Check {
 	private final ObjectProperty<Throwable> error = new SimpleObjectProperty<>(null);
 	private final BooleanBinding isInReRunState = state.isNotEqualTo(CheckState.RUNNING).or(state.isNotEqualTo(CheckState.SCHEDULED));
 
-	Check(HealthCheck check, ResourceBundle resourceBundle) {
+	Check(HealthCheck check) {
 		this.check = check;
-		this.resourceBundle = resourceBundle;
 	}
 
-	String getLocalizedName() {
-		try {
-			return resourceBundle.getString(LOCALIZE_PREFIX+check.name());
-		} catch (MissingResourceException e){
-			return check.name();
-		}
+	String getName() {
+		return check.name();
 	}
 
 	HealthCheck getHealthCheck() {

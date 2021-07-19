@@ -27,7 +27,7 @@ public class CheckListCellController implements FxController {
 	public CheckListCellController() {
 		check = new SimpleObjectProperty<>();
 		checkRunnable = EasyBind.wrapNullable(check).mapObservable(Check::stateProperty).map(Check.CheckState.RUNNABLE::equals).orElse(false);
-		checkName = EasyBind.wrapNullable(check).map(Check::getLocalizedName).orElse("");
+		checkName = EasyBind.wrapNullable(check).map(Check::getName).orElse("");
 		subscriptions = new ArrayList<>();
 	}
 
