@@ -47,10 +47,10 @@ class HealthCheckTask extends Task<Void> {
 		this.check = Objects.requireNonNull(check);
 		this.results = FXCollections.observableArrayList(Result::observables);
 		try {
-			updateTitle(resourceBundle.getString("health." + check.identifier()));
+			updateTitle(resourceBundle.getString("health." + check.name()));
 		} catch (MissingResourceException e) {
-			LOG.warn("Missing proper name for health check {}, falling back to default.", check.identifier());
-			updateTitle(check.identifier());
+			LOG.warn("Missing proper name for health check {}, falling back to default.", check.name());
+			updateTitle(check.name());
 		}
 		this.durationInMillis = new SimpleLongProperty(-1);
 		this.chosenForExecution = new SimpleBooleanProperty();
@@ -74,12 +74,12 @@ class HealthCheckTask extends Task<Void> {
 
 	@Override
 	protected void scheduled() {
-		LOG.info("starting {}", check.identifier());
+		LOG.info("starting {}", check.name());
 	}
 
 	@Override
 	protected void done() {
-		LOG.info("finished {}", check.identifier());
+		LOG.info("finished {}", check.name());
 	}
 
 	/* Getter */
