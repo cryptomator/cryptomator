@@ -64,10 +64,10 @@ public class ReportWriter {
 			writer.write(REPORT_HEADER.formatted(vaultConfig.getId(), vault.getDisplayName(), vault.getPath()));
 			for (var task : tasks) {
 				if (task.getState() == Worker.State.READY) {
-					LOG.debug("Skipping not performed check {}.", task.getCheck().identifier());
+					LOG.debug("Skipping not performed check {}.", task.getCheck().name());
 					continue;
 				}
-				writer.write(REPORT_CHECK_HEADER.formatted(task.getCheck().identifier()));
+				writer.write(REPORT_CHECK_HEADER.formatted(task.getCheck().name()));
 				switch (task.getState()) {
 					case SUCCEEDED -> {
 						writer.write("STATUS: SUCCESS\nRESULTS:\n");
@@ -77,7 +77,7 @@ public class ReportWriter {
 					}
 					case CANCELLED -> writer.write("STATUS: CANCELED\n");
 					case FAILED -> {
-						writer.write("STATUS: FAILED\nREASON:\n" + task.getCheck().identifier());
+						writer.write("STATUS: FAILED\nREASON:\n" + task.getCheck().name());
 						writer.write(prepareFailureMsg(task));
 					}
 					case RUNNING, SCHEDULED -> throw new IllegalStateException("Checks are still running.");
