@@ -28,14 +28,6 @@ Cryptomator is provided free of charge as an open-source project despite the hig
 
 ### Silver Sponsors
 
-<table>
-  <tbody>
-    <tr>
-      <td><a href="https://thebestvpn.com/"><img src="https://cryptomator.org/img/sponsors/thebestvpn@2x.png" alt="TheBestVPN" height="64"></a></td>
-    </tr>
-  </tbody>
-</table>
-
 - [Jameson Lopp](https://www.lopp.net/)
 
 ---
@@ -56,7 +48,7 @@ Download native binaries of Cryptomator on [cryptomator.org](https://cryptomator
 - File names get encrypted
 - Folder structure gets obfuscated
 - Use as many vaults in your Dropbox as you want, each having individual passwords
-- Two thousand commits for the security of your data!! :tada:
+- Three thousand commits for the security of your data!! :tada:
 
 ### Privacy
 

@@ -23,24 +23,28 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.jdk.version>16</project.jdk.version>
 
+		<!-- Group IDs of jars that need to stay on the class path for now -->
+		<nonModularGroupIds>com.github.serceman,com.github.jnr,org.ow2.asm,net.java.dev.jna,org.apache.jackrabbit,org.apache.httpcomponents</nonModularGroupIds>
+
 		<!-- cryptomator dependencies -->
-		<cryptomator.cryptofs.version>2.1.0-beta8</cryptomator.cryptofs.version>
+		<cryptomator.cryptofs.version>2.1.0-beta9</cryptomator.cryptofs.version>
 		<cryptomator.integrations.version>1.0.0-rc1</cryptomator.integrations.version>
 		<cryptomator.integrations.win.version>1.0.0-beta2</cryptomator.integrations.win.version>
 		<cryptomator.integrations.mac.version>1.0.0-beta2</cryptomator.integrations.mac.version>
 		<cryptomator.integrations.linux.version>1.0.0-beta1</cryptomator.integrations.linux.version>
 		<cryptomator.fuse.version>1.3.1</cryptomator.fuse.version>
 		<cryptomator.dokany.version>1.3.1</cryptomator.dokany.version>
-		<cryptomator.webdav.version>1.2.4</cryptomator.webdav.version>
+		<cryptomator.webdav.version>1.2.5</cryptomator.webdav.version>
 
 		<!-- 3rd party dependencies -->
 		<javafx.version>16</javafx.version>
 		<commons-lang3.version>3.12.0</commons-lang3.version>
-		<jwt.version>3.17.0</jwt.version>
+		<jwt.version>3.18.1</jwt.version>
 		<easybind.version>2.2</easybind.version>
 		<guava.version>30.1.1-jre</guava.version>
 		<dagger.version>2.37</dagger.version>
-		<gson.version>2.8.6</gson.version>
+		<gson.version>2.8.7</gson.version>
+		<zxcvbn.version>1.5.2</zxcvbn.version>
 		<slf4j.version>1.7.31</slf4j.version>
 		<logback.version>1.2.3</logback.version>
 
@@ -142,7 +146,7 @@
 		<dependency>
 			<groupId>com.nulab-inc</groupId>
 			<artifactId>zxcvbn</artifactId>
-			<version>1.3.0</version>
+			<version>${zxcvbn.version}</version>
 		</dependency>
 
 		<!-- Google -->
@@ -150,6 +154,29 @@
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
 			<version>${guava.version}</version>
+			<exclusions>
+				<!-- see https://github.com/google/guava/wiki/UseGuavaInYourBuild#what-about-guavas-own-dependencies -->
+				<exclusion>
+					<groupId>com.google.guava</groupId>
+					<artifactId>listenablefuture</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.google.code.findbugs</groupId>
+					<artifactId>jsr305</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.checkerframework</groupId>
+					<artifactId>checker-qual</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.google.errorprone</groupId>
+					<artifactId>error_prone_annotations</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.google.j2objc</groupId>
+					<artifactId>j2objc-annotations</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>com.google.dagger</groupId>
@@ -190,7 +217,7 @@
 		<dependency>
 			<groupId>com.google.jimfs</groupId>
 			<artifactId>jimfs</artifactId>
-			<version>1.1</version>
+			<version>1.2</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
@@ -211,7 +238,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-dependency-plugin</artifactId>
-					<version>3.1.2</version>
+					<version>3.2.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -221,7 +248,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
-					<version>2.22.2</version>
+					<version>3.0.0-M5</version>
 				</plugin>
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
@@ -236,12 +263,12 @@
 				<plugin>
 					<groupId>org.jacoco</groupId>
 					<artifactId>jacoco-maven-plugin</artifactId>
-					<version>0.8.6</version>
+					<version>0.8.7</version>
 				</plugin>
 				<plugin>
 					<groupId>org.owasp</groupId>
 					<artifactId>dependency-check-maven</artifactId>
-					<version>6.0.3</version>
+					<version>6.2.2</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
@@ -258,6 +285,10 @@
 							<version>${dagger.version}</version>
 						</path>
 					</annotationProcessorPaths>
+					<compilerArgs>
+						<arg>-Adagger.fastInit=enabled</arg>
+						<arg>-Adagger.formatGeneratedSource=enabled</arg>
+					</compilerArgs>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -311,6 +342,19 @@
 				<artifactId>maven-dependency-plugin</artifactId>
 				<executions>
 					<execution>
+						<id>copy-mods</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>copy-dependencies</goal>
+						</goals>
+						<configuration>
+							<includeScope>runtime</includeScope>
+							<outputDirectory>${project.build.directory}/mods</outputDirectory>
+							<excludeClassifiers>linux,mac,win</excludeClassifiers>
+							<excludeGroupIds>${nonModularGroupIds}</excludeGroupIds>
+						</configuration>
+					</execution>
+					<execution>
 						<id>copy-libs</id>
 						<phase>prepare-package</phase>
 						<goals>
@@ -319,7 +363,7 @@
 						<configuration>
 							<includeScope>runtime</includeScope>
 							<outputDirectory>${project.build.directory}/libs</outputDirectory>
-							<excludeClassifiers>linux,mac,win</excludeClassifiers>
+							<includeGroupIds>${nonModularGroupIds}</includeGroupIds>
 						</configuration>
 					</execution>
 				</executions>
@@ -463,7 +507,7 @@
 									<goal>copy-dependencies</goal>
 								</goals>
 								<configuration>
-									<outputDirectory>${project.build.directory}/libs</outputDirectory>
+									<outputDirectory>${project.build.directory}/mods</outputDirectory>
 									<includeGroupIds>org.openjfx</includeGroupIds>
 									<classifier>mac</classifier>
 								</configuration>
@@ -525,7 +569,7 @@
 									<goal>copy-dependencies</goal>
 								</goals>
 								<configuration>
-									<outputDirectory>${project.build.directory}/libs</outputDirectory>
+									<outputDirectory>${project.build.directory}/mods</outputDirectory>
 									<includeGroupIds>org.openjfx</includeGroupIds>
 									<classifier>linux</classifier>
 								</configuration>
@@ -586,7 +630,7 @@
 									<goal>copy-dependencies</goal>
 								</goals>
 								<configuration>
-									<outputDirectory>${project.build.directory}/libs</outputDirectory>
+									<outputDirectory>${project.build.directory}/mods</outputDirectory>
 									<includeGroupIds>org.openjfx</includeGroupIds>
 									<classifier>win</classifier>
 								</configuration>

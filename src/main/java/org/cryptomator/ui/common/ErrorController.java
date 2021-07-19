@@ -1,6 +1,7 @@
 package org.cryptomator.ui.common;
 
-import javax.annotation.Nullable;
+import org.cryptomator.common.Nullable;
+
 import javax.inject.Inject;
 import javax.inject.Named;
 import javafx.fxml.FXML;

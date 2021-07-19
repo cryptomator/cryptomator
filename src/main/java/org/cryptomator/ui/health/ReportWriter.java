@@ -62,7 +62,7 @@ public class ReportWriter {
 			 var writer = new BufferedWriter(new OutputStreamWriter(out, StandardCharsets.UTF_8))) {
 			writer.write(REPORT_HEADER.formatted(vaultConfig.getId(), vault.getDisplayName(), vault.getPath()));
 			for (var check : performedChecks) {
-				writer.write(REPORT_CHECK_HEADER.formatted(check.getHealthCheck().identifier()));
+				writer.write(REPORT_CHECK_HEADER.formatted(check.getHealthCheck().name()));
 				switch (check.getState()) {
 					case SUCCEEDED -> {
 						writer.write("STATUS: SUCCESS\nRESULTS:\n");

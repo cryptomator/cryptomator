@@ -17,7 +17,7 @@
 				<FontAwesome5IconView glyph="WRENCH"/>
 			</graphic>
 			<content>
-				<fx:include source="/fxml/vault_options_general.fxml"/>
+				<fx:include source="vault_options_general.fxml"/>
 			</content>
 		</Tab>
 		<Tab fx:id="mountTab" id="MOUNT" text="%vaultOptions.mount">
@@ -25,7 +25,7 @@
 				<FontAwesome5IconView glyph="HDD"/>
 			</graphic>
 			<content>
-				<fx:include source="/fxml/vault_options_mount.fxml"/>
+				<fx:include source="vault_options_mount.fxml"/>
 			</content>
 		</Tab>
 		<Tab fx:id="keyTab" id="KEY" text="%vaultOptions.masterkey">
@@ -33,7 +33,7 @@
 				<FontAwesome5IconView glyph="KEY"/>
 			</graphic>
 			<content>
-				<fx:include source="/fxml/vault_options_masterkey.fxml"/>
+				<fx:include source="vault_options_masterkey.fxml"/>
 			</content>
 		</Tab>
 	</tabs>

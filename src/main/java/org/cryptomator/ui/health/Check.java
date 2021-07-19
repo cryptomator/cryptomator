@@ -35,9 +35,9 @@ public class Check {
 
 	String getLocalizedName() {
 		try {
-			return resourceBundle.getString(LOCALIZE_PREFIX+check.identifier());
+			return resourceBundle.getString(LOCALIZE_PREFIX+check.name());
 		} catch (MissingResourceException e){
-			return check.identifier();
+			return check.name();
 		}
 	}
 

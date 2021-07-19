@@ -26,7 +26,7 @@
 		<HBox VBox.vgrow="ALWAYS">
 			<VBox alignment="CENTER" minWidth="175" maxWidth="175">
 				<ImageView VBox.vgrow="ALWAYS" fitHeight="128" preserveRatio="true" smooth="true" cache="true">
-					<Image url="/img/bot/bot.png"/>
+					<Image url="@../img/bot/bot.png"/>
 				</ImageView>
 			</VBox>
 			<VBox HBox.hgrow="ALWAYS" alignment="CENTER">
