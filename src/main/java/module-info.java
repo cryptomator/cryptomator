@@ -9,7 +9,6 @@ module org.cryptomator.desktop {
 	requires org.cryptomator.frontend.fuse;
 	requires org.cryptomator.frontend.webdav;
 	requires org.cryptomator.integrations.api;
-	requires java.rmi;
 	requires java.desktop;
 	requires java.net.http;
 	requires javafx.base;
@@ -36,8 +35,6 @@ module org.cryptomator.desktop {
 	uses UiAppearanceProvider;
 
 	opens org.cryptomator.common.settings to com.google.gson;
-
-	opens org.cryptomator.launcher to java.rmi;
 
 	opens org.cryptomator.common to javafx.fxml;
 	opens org.cryptomator.common.vaults to javafx.fxml;
