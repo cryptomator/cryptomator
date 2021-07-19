@@ -81,7 +81,6 @@ jobs:
             target/LICENSE.txt
             target/${{ matrix.launcher }}
           if-no-files-found: error
-          if-no-files-found: error
 
   # release:
   #   name: Draft a Release on GitHub Releases
