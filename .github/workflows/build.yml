@@ -70,6 +70,7 @@ jobs:
         run: |
           cp LICENSE.txt target
           cp dist/${{ matrix.launcher }} target
+          cp target/cryptomator-*.jar target/mods
         shell: bash
       - name: Upload buildkit-${{ matrix.profile }}
         uses: actions/upload-artifact@v2
