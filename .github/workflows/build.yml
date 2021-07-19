@@ -129,6 +129,84 @@ jobs:
           path: runtime
           if-no-files-found: error
 
+
+
+#
+# Linux AppImage
+# 
+
+  linux-appimage:
+    name: Build AppDir
+    runs-on: ubuntu-latest
+    needs: [buildkit, jlink]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set version
+        id: setversion
+        run: |
+          if [[ $GITHUB_REF == refs/tags/* ]]; then
+            echo "BUILD_VERSION=${GITHUB_REF##*/}" >> $GITHUB_ENV
+          else
+            echo "BUILD_VERSION=SNAPSHOT" >> $GITHUB_ENV
+          fi
+      - name: Download buildkit-linux
+        uses: actions/download-artifact@v2
+        with:
+          name: buildkit-linux
+          path: Cryptomator.AppDir
+      - name: Download buildkit-linux
+        uses: actions/download-artifact@v2
+        with:
+          name: buildkit-linux
+          path: Cryptomator.AppDir/runtime
+      - name: Extract libjffi.so # workaround for https://github.com/cryptomator/cryptomator-linux/issues/27
+        run: |
+          JFFI_NATIVE_JAR=`ls libs/ | grep -e 'jffi-[1-9]\.[0-9]\{1,2\}.[0-9]\{1,2\}-native.jar'`
+          ${JAVA_HOME}/bin/jar -xf libs/${JFFI_NATIVE_JAR} /jni/x86_64-Linux/
+          mv jni/x86_64-Linux/* libs/libjffi.so
+        working-directory: Cryptomator.AppDir
+      - name: Patch Cryptomator.AppDir
+        run: |
+          cp -r dist/appimage/resources/appimage/AppDir/* Cryptomator.AppDir/
+          export REVISION_NO=`git rev-list --count HEAD`
+          envsubst '${REVISION_NO}' < dist/appimage/resources/appimage/AppDir/bin/cryptomator.sh > Cryptomator.AppDir/bin/cryptomator.sh
+          ln -s usr/share/icons/hicolor/scalable/apps/org.cryptomator.Cryptomator.svg Cryptomator.AppDir/org.cryptomator.Cryptomator.svg
+          ln -s usr/share/icons/hicolor/scalable/apps/org.cryptomator.Cryptomator.svg Cryptomator.AppDir/Cryptomator.svg
+          ln -s usr/share/icons/hicolor/scalable/apps/org.cryptomator.Cryptomator.svg Cryptomator.AppDir/.DirIcon
+          ln -s usr/share/applications/org.cryptomator.Cryptomator.desktop Cryptomator.AppDir/Cryptomator.desktop
+          ln -s bin/cryptomator.sh Cryptomator.AppDir/AppRun
+      - name: Download AppImageKit
+        run: |
+          curl -L https://github.com/AppImage/AppImageKit/releases/download/13/appimagetool-x86_64.AppImage -o appimagetool.AppImage
+          chmod +x appimagetool.AppImage
+          ./appimagetool.AppImage --appimage-extract
+      - name: Prepare GPG-Agent for signing with key 615D449FE6E6A235
+        run: |
+          echo "${GPG_PRIVATE_KEY}" | gpg --batch --quiet --import
+          echo "${GPG_PASSPHRASE}" | gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --dry-run --sign appdir.tar.gz
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.RELEASES_GPG_PRIVATE_KEY }}
+          GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
+      - name: Build AppImage
+        run: >
+          ./squashfs-root/AppRun Cryptomator.AppDir cryptomator-${{ env.BUILD_VERSION }}-x86_64.AppImage
+          -u 'gh-releases-zsync|cryptomator|cryptomator|latest|cryptomator-*-x86_64.AppImage.zsync'
+          --sign --sign-key=615D449FE6E6A235 --sign-args="--batch --pinentry-mode loopback"
+      - name: Create Detached GPG Signature
+        run: |
+          gpg --batch --quiet --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign -a cryptomator-${{ env.BUILD_VERSION }}-x86_64.AppImage
+          gpg --batch --quiet --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign -a cryptomator-${{ env.BUILD_VERSION }}-x86_64.AppImage.zsync
+      - name: Upload AppImage
+        uses: actions/upload-artifact@v2
+        with:
+          name: appimage
+          path: |
+            cryptomator-${{ env.BUILD_VERSION }}-x86_64.AppImage
+            cryptomator-${{ env.BUILD_VERSION }}-x86_64.AppImage.asc
+            cryptomator-${{ env.BUILD_VERSION }}-x86_64.AppImage.zsync
+            cryptomator-${{ env.BUILD_VERSION }}-x86_64.AppImage.zsync.asc
+          if-no-files-found: error
+
   # release:
   #   name: Draft a Release on GitHub Releases
   #   runs-on: ubuntu-latest
