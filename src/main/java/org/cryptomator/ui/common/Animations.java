@@ -1,11 +1,22 @@
 package org.cryptomator.ui.common;
 
+import com.tobiasdiez.easybind.EasyBind;
+import com.tobiasdiez.easybind.Subscription;
+
+import javafx.animation.Animation;
+import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
+import javafx.animation.RotateTransition;
+import javafx.animation.SequentialTransition;
 import javafx.animation.Timeline;
+import javafx.beans.value.ObservableValue;
 import javafx.beans.value.WritableValue;
+import javafx.scene.Node;
 import javafx.stage.Window;
 import javafx.util.Duration;
+import java.util.function.Predicate;
+import java.util.stream.IntStream;
 
 public class Animations {
 
@@ -31,6 +42,33 @@ public class Animations {
 				new KeyFrame(new Duration(600), new KeyValue(writableWindowX, window.getX() + 2.0)), //
 				new KeyFrame(new Duration(700), new KeyValue(writableWindowX, window.getX())) //
 		);
+	}
+
+	public static <T> Subscription spinOnCondition(Node node, ObservableValue<T> observableValue, Predicate<T> spinCondition) {
+		var spinAnimation = Animations.createDiscrete360Rotation();
+		spinAnimation.setNode(node);
+		return EasyBind.subscribe(observableValue, val -> {
+			if (spinCondition.test(val)) {
+				spinAnimation.playFromStart();
+			} else {
+				spinAnimation.stop();
+				node.setRotate(0);
+			}
+		});
+	}
+
+	public static SequentialTransition createDiscrete360Rotation() {
+		var animation = new SequentialTransition(IntStream.range(0, 8).mapToObj(i -> Animations.createDiscrete45Rotation()).toArray(Animation[]::new));
+		animation.setCycleCount(Animation.INDEFINITE);
+		return animation;
+	}
+
+	private static RotateTransition createDiscrete45Rotation() {
+		var animation = new RotateTransition(Duration.millis(100));
+		animation.setInterpolator(Interpolator.DISCRETE);
+		animation.setByAngle(45);
+		animation.setCycleCount(1);
+		return animation;
 	}
 
 }
