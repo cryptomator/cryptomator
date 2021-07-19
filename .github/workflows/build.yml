@@ -5,7 +5,6 @@ on:
 
 env:
   JAVA_VERSION: 16
-  ADDITIONAL_MODULES: jdk.crypto.ec,jdk.accessibility
 
 defaults:
   run:
@@ -95,7 +94,7 @@ jobs:
 
   jlink:
     name: Create runtime-${{ matrix.profile }}
-    needs: buildkit
+    needs: test
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: true
@@ -112,30 +111,13 @@ jobs:
       - uses: actions/setup-java@v1
         with:
           java-version: ${{ env.JAVA_VERSION }}
-      - name: Download buildkit-linux
-        uses: actions/download-artifact@v2
-        with:
-          name: buildkit-${{ matrix.profile }}
-          path: buildkit
-      - name: Run jdeps
-        run: >
-          jmods=`
-          ${JAVA_HOME}/bin/jdeps --module-path buildkit/mods -R --multi-release ${{ env.JAVA_VERSION }} -s buildkit/mods/cryptomator-*.jar
-          | awk -F ' -> ' '{print $2}'
-          | grep -E '^java\.|^jdk\.'
-          | sort
-          | uniq
-          | tr '\n' ','
-          `
-          && echo "REQUIRED_MODULES=${jmods}" >> $GITHUB_ENV
-        working-directory: buildkit
       - name: Create Runtime Image
         run: >
           ${JAVA_HOME}/bin/jlink
           --verbose
           --output runtime
           --module-path "${JAVA_HOME/}/jmods"
-          --add-modules ${{ env.REQUIRED_MODULES }}${{ env.ADDITIONAL_MODULES }}
+          --add-modules java.base,java.desktop,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.crypto.ec,jdk.accessibility
           --no-header-files
           --no-man-pages
           --strip-debug
