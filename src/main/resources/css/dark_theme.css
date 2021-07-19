@@ -568,6 +568,10 @@
 	-fx-fill: white;
 }
 
+.button:default:disabled .glyph-icon {
+	-fx-fill: TEXT_FILL_MUTED;
+}
+
 .button:default .label {
 	-fx-text-fill: white;
 }
