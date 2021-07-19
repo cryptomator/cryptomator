@@ -1,6 +1,7 @@
 #!/bin/sh
 cd $(dirname $0)
 java \
+	-p "mods" \
 	-cp "libs/*" \
 	-Dcryptomator.settingsPath="~/Library/Application Support/Cryptomator/settings.json" \
 	-Dcryptomator.ipcSocketPath="~/Library/Application Support/Cryptomator/ipc.socket" \
@@ -8,4 +9,4 @@ java \
 	-Dcryptomator.mountPointsDir="/Volumes" \
 	-Xss20m \
 	-Xmx512m \
-	org.cryptomator.launcher.Cryptomator
+	-m org.cryptomator.desktop/org.cryptomator.launcher.Cryptomator

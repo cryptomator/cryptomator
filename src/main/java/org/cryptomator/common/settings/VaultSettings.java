@@ -43,7 +43,7 @@ public class VaultSettings {
 	private static final Random RNG = new Random();
 
 	private final String id;
-	private final ObjectProperty<Path> path = new SimpleObjectProperty();
+	private final ObjectProperty<Path> path = new SimpleObjectProperty<>();
 	private final StringProperty displayName = new SimpleStringProperty();
 	private final StringProperty winDriveLetter = new SimpleStringProperty();
 	private final BooleanProperty unlockAfterStartup = new SimpleBooleanProperty(DEFAULT_UNLOCK_AFTER_STARTUP);

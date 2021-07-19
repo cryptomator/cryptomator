@@ -11,20 +11,16 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see http://www.gnu.org/licenses/.
 
-Cryptomator uses 45 third-party dependencies under the following licenses:
+Cryptomator uses 40 third-party dependencies under the following licenses:
         Apache License v2.0:
 			- jffi (com.github.jnr:jffi:1.2.23 - http://github.com/jnr/jffi)
 			- jnr-a64asm (com.github.jnr:jnr-a64asm:1.0.0 - http://nexus.sonatype.org/oss-repository-hosting.html/jnr-a64asm)
 			- jnr-constants (com.github.jnr:jnr-constants:0.9.15 - http://github.com/jnr/jnr-constants)
 			- jnr-ffi (com.github.jnr:jnr-ffi:2.1.12 - http://github.com/jnr/jnr-ffi)
-			- FindBugs-jsr305 (com.google.code.findbugs:jsr305:3.0.2 - http://findbugs.sourceforge.net/)
 			- Gson (com.google.code.gson:gson:2.8.7 - https://github.com/google/gson/gson)
 			- Dagger (com.google.dagger:dagger:2.37 - https://github.com/google/dagger)
-			- error-prone annotations (com.google.errorprone:error_prone_annotations:2.5.1 - http://nexus.sonatype.org/oss-repository-hosting.html/error_prone_parent/error_prone_annotations)
 			- Guava InternalFutureFailureAccess and InternalFutures (com.google.guava:failureaccess:1.0.1 - https://github.com/google/guava/failureaccess)
 			- Guava: Google Core Libraries for Java (com.google.guava:guava:30.1.1-jre - https://github.com/google/guava/guava)
-			- Guava ListenableFuture only (com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava - https://github.com/google/guava/listenablefuture)
-			- J2ObjC Annotations (com.google.j2objc:j2objc-annotations:1.3 - https://github.com/google/j2objc/)
 			- Apache Commons CLI (commons-cli:commons-cli:1.4 - http://commons.apache.org/proper/commons-cli/)
 			- javax.inject (javax.inject:javax.inject:1 - http://code.google.com/p/atinject/)
 			- Java Native Access (net.java.dev.jna:jna:5.7.0 - https://github.com/java-native-access/jna)
@@ -77,8 +73,7 @@ Cryptomator uses 45 third-party dependencies under the following licenses:
 			- java jwt (com.auth0:java-jwt:3.18.1 - https://github.com/auth0/java-jwt)
 			- jnr-x86asm (com.github.jnr:jnr-x86asm:1.0.2 - http://github.com/jnr/jnr-x86asm)
 			- jnr-fuse (com.github.serceman:jnr-fuse:0.5.5 - https://github.com/SerCeMan/jnr-fuse)
-			- zxcvbn4j (com.nulab-inc:zxcvbn:1.3.0 - https://github.com/nulab/zxcvbn4j)
-			- Checker Qual (org.checkerframework:checker-qual:3.8.0 - https://checkerframework.org)
+			- zxcvbn4j (com.nulab-inc:zxcvbn:1.5.2 - https://github.com/nulab/zxcvbn4j)
 			- SLF4J API Module (org.slf4j:slf4j-api:1.7.31 - http://www.slf4j.org)
         The BSD 2-Clause License:
 			- EasyBind (com.tobiasdiez:easybind:2.2 - https://github.com/tobiasdiez/EasyBind)

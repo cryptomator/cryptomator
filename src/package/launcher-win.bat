@@ -1,5 +1,6 @@
 @echo off
 java ^
+	-p "mods" ^
 	-cp "libs/*" ^
 	-Dcryptomator.settingsPath="~/AppData/Roaming/Cryptomator/settings.json" ^
 	-Dcryptomator.ipcSocketPath="~/AppData/Roaming/Cryptomator/ipc.socket" ^
@@ -8,4 +9,4 @@ java ^
 	-Dcryptomator.keychainPath="~/AppData/Roaming/Cryptomator/keychain.json" ^
 	-Xss20m ^
 	-Xmx512m ^
-	org.cryptomator.launcher.Cryptomator
+	-m org.cryptomator.desktop/org.cryptomator.launcher.Cryptomator
