@@ -231,6 +231,7 @@ jobs:
           name: appdir-linux
       - name: Patch Cryptomator.AppDir
         run: |
+          ls -lR Cryptomator
           mv Cryptomator Cryptomator.AppDir
           cp -r dist/appimage/resources/AppDir/* Cryptomator.AppDir/
           chmod +x Cryptomator.AppDir/runtime/bin/java
