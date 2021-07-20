@@ -1,5 +1,6 @@
 package org.cryptomator.ui.health;
 
+import com.google.common.collect.Comparators;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.cryptofs.VaultConfig;
 import org.cryptomator.cryptofs.health.api.DiagnosticResult;
@@ -70,9 +71,7 @@ public class CheckExecutor {
 				 var cryptor = CryptorProvider.forScheme(vaultConfig.getCipherCombo()).provide(masterkeyClone, csprng)) {
 				c.getHealthCheck().check(vaultPath, vaultConfig, masterkeyClone, cryptor, diagnosis -> {
 					Platform.runLater(() -> c.getResults().add(Result.create(diagnosis)));
-					if (highestResultSeverity.compareTo(diagnosis.getSeverity()) < 0) {
-						highestResultSeverity = diagnosis.getSeverity();
-					}
+					highestResultSeverity = Comparators.max(highestResultSeverity, diagnosis.getSeverity());
 				});
 			}
 			return null;
