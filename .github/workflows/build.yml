@@ -147,6 +147,7 @@ jobs:
           else
             echo "BUILD_VERSION=SNAPSHOT" >> $GITHUB_ENV
           fi
+          echo "REVISION_NO=`git rev-list --count HEAD`" >> $GITHUB_ENV
       - name: Download buildkit-linux
         uses: actions/download-artifact@v2
         with:
@@ -167,13 +168,14 @@ jobs:
         run: |
           cp -r dist/appimage/resources/AppDir/* Cryptomator.AppDir/
           chmod +x Cryptomator.AppDir/runtime/bin/java
-          export REVISION_NO=`git rev-list --count HEAD`
           envsubst '${REVISION_NO}' < dist/appimage/resources/AppDir/bin/cryptomator.sh > Cryptomator.AppDir/bin/cryptomator.sh
           ln -s usr/share/icons/hicolor/scalable/apps/org.cryptomator.Cryptomator.svg Cryptomator.AppDir/org.cryptomator.Cryptomator.svg
           ln -s usr/share/icons/hicolor/scalable/apps/org.cryptomator.Cryptomator.svg Cryptomator.AppDir/Cryptomator.svg
           ln -s usr/share/icons/hicolor/scalable/apps/org.cryptomator.Cryptomator.svg Cryptomator.AppDir/.DirIcon
           ln -s usr/share/applications/org.cryptomator.Cryptomator.desktop Cryptomator.AppDir/Cryptomator.desktop
           ln -s bin/cryptomator.sh Cryptomator.AppDir/AppRun
+        env:
+          REVISION_NO: ${{ env.REVISION_NO }}
       - name: Download AppImageKit
         run: |
           curl -L https://github.com/AppImage/AppImageKit/releases/download/13/appimagetool-x86_64.AppImage -o appimagetool.AppImage
@@ -204,6 +206,74 @@ jobs:
             cryptomator-${{ env.BUILD_VERSION }}-x86_64.AppImage.asc
             cryptomator-${{ env.BUILD_VERSION }}-x86_64.AppImage.zsync
             cryptomator-${{ env.BUILD_VERSION }}-x86_64.AppImage.zsync.asc
+          if-no-files-found: error
+
+#
+# Windows App Dir
+#
+
+  windows-appdir:
+    name: Build App Directory
+    runs-on: windows-latest
+    needs: [buildkit, jlink]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set version
+        id: setversion
+        run: |
+          if [[ $GITHUB_REF == refs/tags/* ]]; then
+            echo "BUILD_VERSION=${GITHUB_REF##*/}" >> $GITHUB_ENV
+            echo "NUMERIC_VERSION=${GITHUB_REF##*/}" >> $GITHUB_ENV
+          else
+            echo "BUILD_VERSION=SNAPSHOT" >> $GITHUB_ENV
+            echo "NUMERIC_VERSION=99.0.0" >> $GITHUB_ENV
+          fi
+          echo "REVISION_NO=`git rev-list --count HEAD`" >> $GITHUB_ENV
+      - name: Download buildkit-win
+        uses: actions/download-artifact@v2
+        with:
+          name: buildkit-win
+          path: buildkit
+      - name: Download runtime-win
+        uses: actions/download-artifact@v2
+        with:
+          name: runtime-win
+          path: runtime
+      - name: Create app directory
+        run: >
+          "${JAVA_HOME}\bin\jpackage"
+          --verbose
+          --type app-image
+          --runtime-image runtime
+          --input buildkit/libs
+          --module-path buildkit/mods
+          --dest app
+          --name Cryptomator
+          --vendor "Skymatic GmbH"
+          --copyright "(C) 2016 - 2021 Skymatic GmbH"
+          --app-version "${{ env.NUMERIC_VERSION }}.${{ env.REVISION_NO }}"
+          --icon dist/msi/resources/app/Cryptomator.ico
+          --java-options "-Dfile.encoding=`"utf-8`""
+          --java-options "-Dcryptomator.logDir=`"~/AppData/Roaming/Cryptomator`""
+          --java-options "-Dcryptomator.settingsPath=`"~/AppData/Roaming/Cryptomator/settings.json`""
+          --java-options "-Dcryptomator.ipcPortPath=`"~/AppData/Roaming/Cryptomator/ipcPort.bin`""
+          --java-options "-Dcryptomator.keychainPath=`"~/AppData/Roaming/Cryptomator/keychain.json`""
+          --java-options "-Dcryptomator.mountPointsDir=`"~/Cryptomator`""
+          --java-options "-Dcryptomator.showTrayIcon=true"
+          --java-options "-Dcryptomator.buildNumber=`"msi-${{ env.REVISION_NO }}`""
+          --java-options "-Xss2m"
+          --java-options "-Xmx256m"
+          --module org.cryptomator.desktop/org.cryptomator.launcher.Cryptomator
+        shell: bash
+      - name: Patch app directory
+        run: |
+          cp dist/msi/resources/app/dlls/* app/Cryptomator/
+        shell: bash
+      - name: Upload app directory
+        uses: actions/upload-artifact@v2
+        with:
+          name: win-appdir
+          path: app/Cryptomator
           if-no-files-found: error
 
   # release:
