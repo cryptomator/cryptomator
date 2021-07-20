@@ -27,6 +27,7 @@ import javafx.scene.Scene;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -68,7 +69,13 @@ abstract class HealthCheckModule {
 	@Provides
 	@HealthCheckScoped
 	static List<Check> provideAvailableChecks() {
-		return HealthCheck.allChecks().stream().map(Check::new).toList();
+		//return HealthCheck.allChecks().stream().map(Check::new).toList();
+		//TODO: remove below lines and uncomment above one
+		var realChecks = HealthCheck.allChecks().stream().map(Check::new).toList();
+		var tmp = new ArrayList<>(realChecks);
+		var tmp2 = List.of(new DummyHealthChecks.DummyCheck1(), new DummyHealthChecks.DummyCheck2(), new DummyHealthChecks.DummyCheck3()).stream().map(Check::new).toList();
+		tmp.addAll(tmp2);
+		return tmp;
 	}
 
 	@Provides
