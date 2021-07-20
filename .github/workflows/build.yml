@@ -211,7 +211,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: appdir-${{ matrix.profile }}
-          path: appdir/Cryptomator*/
+          path: appdir/Cryptomator*/**
           if-no-files-found: error
 
 
