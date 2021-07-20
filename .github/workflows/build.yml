@@ -87,48 +87,6 @@ jobs:
             target/LICENSE.txt
             target/${{ matrix.launcher }}
           if-no-files-found: error
-
-#
-# jlink
-#
-
-  jlink:
-    name: Create runtime-${{ matrix.profile }}
-    needs: test
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: true
-      matrix:
-        include:
-        - os: ubuntu-latest
-          profile: linux
-        - os: windows-latest
-          profile: win
-        - os: macOS-latest
-          profile: mac
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-java@v1
-        with:
-          java-version: ${{ env.JAVA_VERSION }}
-      - name: Create Runtime Image
-        run: >
-          ${JAVA_HOME}/bin/jlink
-          --verbose
-          --output runtime
-          --module-path "${JAVA_HOME}/jmods"
-          --add-modules java.base,java.desktop,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.crypto.ec,jdk.accessibility
-          --no-header-files
-          --no-man-pages
-          --strip-debug
-          --compress=1
-      - name: Upload runtime-${{ matrix.profile }}
-        uses: actions/upload-artifact@v2
-        with:
-          name: runtime-${{ matrix.profile }}
-          path: runtime
-          if-no-files-found: error
-
 #
 # Release Metadata
 #
@@ -155,7 +113,105 @@ jobs:
             echo "::set-output name=versionNum::99.0.0"
           fi
           echo "::set-output name=revNum::`git rev-list --count HEAD`"
-          
+
+#
+# Application Directory
+#
+
+  appdir:
+    name: Create appdir-${{ matrix.profile }}
+    needs: [buildkit, metadata]
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+        - os: ubuntu-latest
+          profile: linux
+          jpackageoptions: >
+            --java-options "-Dfile.encoding=\"utf-8\""
+            --java-options "-Dcryptomator.logDir=\"~/.local/share/Cryptomator/logs\""
+            --java-options "-Dcryptomator.settingsPath=\"~/.config/Cryptomator/settings.json:~/.Cryptomator/settings.json\""
+            --java-options "-Dcryptomator.ipcSocketPath=\"~/.config/Cryptomator/ipc.socket\""
+            --java-options "-Dcryptomator.mountPointsDir=\"~/.local/share/Cryptomator/mnt\""
+            --java-options "-Dcryptomator.showTrayIcon=false"
+            --java-options "-Dcryptomator.buildNumber=\"appimage-${{ needs.metadata.outputs.revNum }}\""
+            --resource-dir dist/appdir/linux/resources
+        - os: windows-latest
+          profile: win
+          jpackageoptions: >
+            --java-options "-Dfile.encoding=\"utf-8\""
+            --java-options "-Dcryptomator.logDir=\"~/AppData/Roaming/Cryptomator\""
+            --java-options "-Dcryptomator.settingsPath=\"~/AppData/Roaming/Cryptomator/settings.json\""
+            --java-options "-Dcryptomator.ipcSocketPath=\"~/AppData/Roaming/Cryptomator/ipc.socket\""
+            --java-options "-Dcryptomator.keychainPath=\"~/AppData/Roaming/Cryptomator/keychain.json\""
+            --java-options "-Dcryptomator.mountPointsDir=\"~/Cryptomator\""
+            --java-options "-Dcryptomator.showTrayIcon=true"
+            --java-options "-Dcryptomator.buildNumber=\"msi-${{ needs.metadata.outputs.revNum }}\""
+            --resource-dir dist/appdir/win/resources
+            --icon dist/appdir/win/resources/Cryptomator.ico
+        - os: macOS-latest
+          profile: mac
+          jpackageoptions: >
+            --java-options "-Dfile.encoding=\"utf-8\""
+            --java-options "-Dcryptomator.logDir=\"~/Library/Logs/Cryptomator\""
+            --java-options "-Dcryptomator.settingsPath=\"~/Library/Application Support/Cryptomator/settings.json\""
+            --java-options "-Dcryptomator.ipcSocketPath=\"~/Library/Application Support/Cryptomator/ipc.socket\""
+            --java-options "-Dcryptomator.showTrayIcon=true"
+            --java-options "-Dcryptomator.buildNumber=\"dmg-${{ needs.metadata.outputs.revNum }}\""
+            --mac-package-identifier org.cryptomator
+            --resource-dir dist/appdir/mac/resources
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-java@v1
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+      - name: Download buildkit-${{ matrix.profile }}
+        uses: actions/download-artifact@v2
+        with:
+          name: buildkit-${{ matrix.profile }}
+          path: buildkit
+      - name: Create Runtime Image
+        run: >
+          ${JAVA_HOME}/bin/jlink
+          --verbose
+          --output runtime
+          --module-path "${JAVA_HOME}/jmods"
+          --add-modules java.base,java.desktop,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.crypto.ec,jdk.accessibility
+          --no-header-files
+          --no-man-pages
+          --strip-debug
+          --compress=1
+      - name: Create App Directory
+        run: >
+          ${JAVA_HOME}/bin/jpackage
+          --verbose
+          --type app-image
+          --runtime-image runtime
+          --input buildkit/libs
+          --module-path buildkit/mods
+          --module org.cryptomator.desktop/org.cryptomator.launcher.Cryptomator
+          --dest appdir
+          --name Cryptomator
+          --vendor "Skymatic GmbH"
+          --copyright "(C) 2016 - 2021 Skymatic GmbH"
+          --app-version "${{ needs.metadata.outputs.versionNum }}.${{ needs.metadata.outputs.revNum }}"
+          --java-options "-Xss5m"
+          --java-options "-Xmx256m"
+          ${{ matrix.jpackageoptions }}
+      - name: Add Contrib Files
+        run: |
+          if [ -e dist/appdir/${{ matrix.profile }}/contrib/ ]; then
+            cp dist/appdir/${{ matrix.profile }}/contrib/* appdir/
+          fi
+      - name: Upload appdir-${{ matrix.profile }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: appdir-${{ matrix.profile }}
+          path: appdir
+          if-no-files-found: error
+
+
 #
 # Linux AppImage
 # 
@@ -163,19 +219,14 @@ jobs:
   linux-appimage:
     name: Build AppImage
     runs-on: ubuntu-latest
-    needs: [buildkit, jlink, metadata]
+    needs: [appdir]
     steps:
       - uses: actions/checkout@v2
       - name: Download buildkit-linux
         uses: actions/download-artifact@v2
         with:
-          name: buildkit-linux
+          name: appdir-linux
           path: Cryptomator.AppDir
-      - name: Download runtime-linux
-        uses: actions/download-artifact@v2
-        with:
-          name: runtime-linux
-          path: Cryptomator.AppDir/runtime
       - name: Extract libjffi.so # workaround for https://github.com/cryptomator/cryptomator-linux/issues/27
         run: |
           JFFI_NATIVE_JAR=`ls libs/ | grep -e 'jffi-[1-9]\.[0-9]\{1,2\}.[0-9]\{1,2\}-native.jar'`
@@ -224,64 +275,6 @@ jobs:
             cryptomator-${{ needs.metadata.outputs.versionStr }}-x86_64.AppImage.asc
             cryptomator-${{ needs.metadata.outputs.versionStr }}-x86_64.AppImage.zsync
             cryptomator-${{ needs.metadata.outputs.versionStr }}-x86_64.AppImage.zsync.asc
-          if-no-files-found: error
-
-#
-# Windows App Dir
-#
-
-  windows-appdir:
-    name: Build Windows App Directory
-    runs-on: windows-latest
-    needs: [buildkit, jlink, metadata]
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-java@v1
-        with:
-          java-version: ${{ env.JAVA_VERSION }}
-      - name: Download buildkit-win
-        uses: actions/download-artifact@v2
-        with:
-          name: buildkit-win
-          path: buildkit
-      - name: Download runtime-win
-        uses: actions/download-artifact@v2
-        with:
-          name: runtime-win
-          path: runtime
-      - name: Create app directory
-        run: >
-          ${JAVA_HOME}/bin/jpackage
-          --verbose
-          --type app-image
-          --runtime-image runtime
-          --input buildkit/libs
-          --module-path buildkit/mods
-          --dest app
-          --name Cryptomator
-          --vendor "Skymatic GmbH"
-          --copyright "(C) 2016 - 2021 Skymatic GmbH"
-          --app-version "${{ needs.metadata.outputs.versionNum }}.${{ needs.metadata.outputs.revNum }}"
-          --icon dist/msi/resources/app/Cryptomator.ico
-          --java-options "-Dfile.encoding=\"utf-8\""
-          --java-options "-Dcryptomator.logDir=\"~/AppData/Roaming/Cryptomator\""
-          --java-options "-Dcryptomator.settingsPath=\"~/AppData/Roaming/Cryptomator/settings.json\""
-          --java-options "-Dcryptomator.ipcPortPath=\"~/AppData/Roaming/Cryptomator/ipcPort.bin\""
-          --java-options "-Dcryptomator.keychainPath=\"~/AppData/Roaming/Cryptomator/keychain.json\""
-          --java-options "-Dcryptomator.mountPointsDir=\"~/Cryptomator\""
-          --java-options "-Dcryptomator.showTrayIcon=true"
-          --java-options "-Dcryptomator.buildNumber=\"msi-${{ needs.metadata.outputs.revNum }}\""
-          --java-options "-Xss2m"
-          --java-options "-Xmx256m"
-          --module org.cryptomator.desktop/org.cryptomator.launcher.Cryptomator
-      - name: Patch app directory
-        run: |
-          cp dist/msi/resources/app/dlls/* app/Cryptomator/
-      - name: Upload app directory
-        uses: actions/upload-artifact@v2
-        with:
-          name: win-appdir
-          path: app/Cryptomator
           if-no-files-found: error
 
   # release:
