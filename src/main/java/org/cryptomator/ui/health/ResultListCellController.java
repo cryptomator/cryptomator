@@ -18,8 +18,11 @@ import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
+import javafx.scene.control.Tooltip;
+import javafx.util.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ResourceBundle;
 
 // unscoped because each cell needs its own controller
 public class ResultListCellController implements FxController {
@@ -43,12 +46,15 @@ public class ResultListCellController implements FxController {
 	private final BooleanBinding fixFailed;
 	private final BooleanBinding fixRunningOrDone;
 	private final List<Subscription> subscriptions;
+	private final Tooltip fixSuccess;
+	private final Tooltip fixFail;
 
+	/* FXML */
 	public FontAwesome5IconView severityView;
 	public FontAwesome5IconView fixView;
 
 	@Inject
-	public ResultListCellController(ResultFixApplier fixApplier) {
+	public ResultListCellController(ResultFixApplier fixApplier, ResourceBundle resourceBundle) {
 		this.result = new SimpleObjectProperty<>(null);
 		this.description = EasyBind.wrapNullable(result).map(Result::getDescription).orElse("");
 		this.fixApplier = fixApplier;
@@ -61,6 +67,10 @@ public class ResultListCellController implements FxController {
 		this.fixFailed = Bindings.createBooleanBinding(this::isFixFailed, fixState);
 		this.fixRunningOrDone = fixing.or(fixed).or(fixFailed);
 		this.subscriptions = new ArrayList<>();
+		this.fixSuccess = new Tooltip(resourceBundle.getString("health.fix.successTip"));
+		this.fixFail = new Tooltip(resourceBundle.getString("health.fix.failTip"));
+		fixSuccess.setShowDelay(Duration.millis(100));
+		fixFail.setShowDelay(Duration.millis(100));
 	}
 
 	@FXML
@@ -68,8 +78,7 @@ public class ResultListCellController implements FxController {
 		// see getGlyph() for relevant glyphs:
 		severityView.getStyleClass().remove("glyph-icon");
 		fixView.getStyleClass().remove("glyph-icon");
-		subscriptions.addAll(List.of(
-				EasyBind.includeWhen(severityView.getStyleClass(), "glyph-icon-muted", severityView.glyphProperty().isEqualTo(INFO_ICON)), //
+		subscriptions.addAll(List.of(EasyBind.includeWhen(severityView.getStyleClass(), "glyph-icon-muted", severityView.glyphProperty().isEqualTo(INFO_ICON)), //
 				EasyBind.includeWhen(severityView.getStyleClass(), "glyph-icon-primary", severityView.glyphProperty().isEqualTo(GOOD_ICON)), //
 				EasyBind.includeWhen(severityView.getStyleClass(), "glyph-icon-orange", severityView.glyphProperty().isEqualTo(WARN_ICON)), //
 				EasyBind.includeWhen(severityView.getStyleClass(), "glyph-icon-red", severityView.glyphProperty().isEqualTo(CRIT_ICON)), //
@@ -88,7 +97,9 @@ public class ResultListCellController implements FxController {
 	private void fixFinished(Void unused, Throwable exception) {
 		if (exception != null) {
 			LOG.error("Failed to apply fix", exception);
-			// TODO ...
+			Tooltip.install(fixView, fixFail);
+		} else {
+			Tooltip.install(fixView, fixSuccess);
 		}
 	}
 

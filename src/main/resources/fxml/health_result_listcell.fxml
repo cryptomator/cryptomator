@@ -24,8 +24,8 @@
 		</StackPane>
 		<Label text="${controller.description}"/>
 		<Region HBox.hgrow="ALWAYS"/>
-		<StackPane HBox.hgrow="NEVER" >
-				<Button fx:id="fixButton" text="%health.check.fixBtn" visible="${controller.fixable}" onAction="#fix" alignment="CENTER" minWidth="-Infinity"/>
+		<StackPane HBox.hgrow="NEVER">
+				<Button fx:id="fixButton" text="%health.fix.fixBtn" visible="${controller.fixable}" onAction="#fix" alignment="CENTER" minWidth="-Infinity"/>
 				<FontAwesome5IconView fx:id="fixView" glyph="${controller.fixGlyph}" glyphSize="16" visible="${controller.fixRunningOrDone}" managed="${controller.fixRunningOrDone}"/>
 		</StackPane>
 	</children>
