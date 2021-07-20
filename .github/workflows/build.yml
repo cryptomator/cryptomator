@@ -129,6 +129,7 @@ jobs:
         - os: ubuntu-latest
           profile: linux
           jpackageoptions: >
+            --app-version "${{ needs.metadata.outputs.versionNum }}.${{ needs.metadata.outputs.revNum }}"
             --java-options "-Dfile.encoding=\"utf-8\""
             --java-options "-Dcryptomator.logDir=\"~/.local/share/Cryptomator/logs\""
             --java-options "-Dcryptomator.settingsPath=\"~/.config/Cryptomator/settings.json:~/.Cryptomator/settings.json\""
@@ -140,6 +141,7 @@ jobs:
         - os: windows-latest
           profile: win
           jpackageoptions: >
+            --app-version "${{ needs.metadata.outputs.versionNum }}.${{ needs.metadata.outputs.revNum }}"
             --java-options "-Dfile.encoding=\"utf-8\""
             --java-options "-Dcryptomator.logDir=\"~/AppData/Roaming/Cryptomator\""
             --java-options "-Dcryptomator.settingsPath=\"~/AppData/Roaming/Cryptomator/settings.json\""
@@ -153,6 +155,7 @@ jobs:
         - os: macOS-latest
           profile: mac
           jpackageoptions: >
+            --app-version "${{ needs.metadata.outputs.versionNum }}"
             --java-options "-Dfile.encoding=\"utf-8\""
             --java-options "-Dcryptomator.logDir=\"~/Library/Logs/Cryptomator\""
             --java-options "-Dcryptomator.settingsPath=\"~/Library/Application Support/Cryptomator/settings.json\""
@@ -195,7 +198,6 @@ jobs:
           --name Cryptomator
           --vendor "Skymatic GmbH"
           --copyright "(C) 2016 - 2021 Skymatic GmbH"
-          --app-version "${{ needs.metadata.outputs.versionNum }}.${{ needs.metadata.outputs.revNum }}"
           --java-options "-Xss5m"
           --java-options "-Xmx256m"
           ${{ matrix.jpackageoptions }}
