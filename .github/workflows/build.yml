@@ -12,7 +12,7 @@ defaults:
 
 jobs: 
   test:
-    name: Build and Test
+    name: Compile and Test
     runs-on: ubuntu-latest
     if: "!contains(github.event.head_commit.message, '[ci skip]') && !contains(github.event.head_commit.message, '[skip ci]')"
     steps:
@@ -75,7 +75,7 @@ jobs:
       - name: Archive buildkit-${{ matrix.profile }}.tar.gz
         run: |
           cp LICENSE.txt target
-          cp dist/${{ matrix.launcher }} target
+          cp dist/buildkit/${{ matrix.launcher }} target
           cp target/cryptomator-*.jar target/mods
       - name: Upload buildkit-${{ matrix.profile }}
         uses: actions/upload-artifact@v2
@@ -129,8 +129,6 @@ jobs:
           path: runtime
           if-no-files-found: error
 
-
-
 #
 # Linux AppImage
 # 
@@ -167,10 +165,10 @@ jobs:
         working-directory: Cryptomator.AppDir
       - name: Patch Cryptomator.AppDir
         run: |
-          cp -r dist/appimage/resources/appimage/AppDir/* Cryptomator.AppDir/
+          cp -r dist/appimage/resources/AppDir/* Cryptomator.AppDir/
           chmod +x Cryptomator.AppDir/runtime/bin/java
           export REVISION_NO=`git rev-list --count HEAD`
-          envsubst '${REVISION_NO}' < dist/appimage/resources/appimage/AppDir/bin/cryptomator.sh > Cryptomator.AppDir/bin/cryptomator.sh
+          envsubst '${REVISION_NO}' < dist/appimage/resources/AppDir/bin/cryptomator.sh > Cryptomator.AppDir/bin/cryptomator.sh
           ln -s usr/share/icons/hicolor/scalable/apps/org.cryptomator.Cryptomator.svg Cryptomator.AppDir/org.cryptomator.Cryptomator.svg
           ln -s usr/share/icons/hicolor/scalable/apps/org.cryptomator.Cryptomator.svg Cryptomator.AppDir/Cryptomator.svg
           ln -s usr/share/icons/hicolor/scalable/apps/org.cryptomator.Cryptomator.svg Cryptomator.AppDir/.DirIcon
