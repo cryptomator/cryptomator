@@ -134,14 +134,19 @@ jobs:
 #
 
   metadata:
-    name: Determine Version Number
+    name: Determine Version Metadata
     runs-on: ubuntu-latest
     needs: test
+    outputs:
+      versionStr: ${{ steps.versions.outputs.versionStr }}
+      versionNum: ${{ steps.versions.outputs.versionNum }}
+      revNum: ${{ steps.versions.outputs.revNum }}
     steps:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0
-      - run: |
+      - id: versions
+        run: |
           if [[ $GITHUB_REF == refs/tags/* ]]; then
             echo "::set-output name=versionStr::${GITHUB_REF##*/}"
             echo "::set-output name=versionNum::${GITHUB_REF##*/}"
