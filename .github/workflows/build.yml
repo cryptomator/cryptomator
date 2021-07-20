@@ -201,16 +201,17 @@ jobs:
           --java-options "-Xss5m"
           --java-options "-Xmx256m"
           ${{ matrix.jpackageoptions }}
-      - name: Add Contrib Files
-        run: |
-          if [ -e dist/appdir/${{ matrix.profile }}/contrib/ ]; then
-            cp dist/appdir/${{ matrix.profile }}/contrib/* appdir/
-          fi
+      # TODO: patch in separate job
+      # - name: Add Contrib Files
+      #   run: |
+      #     if [ -e dist/appdir/${{ matrix.profile }}/contrib/ ]; then
+      #       cp dist/appdir/${{ matrix.profile }}/contrib/* appdir/
+      #     fi
       - name: Upload appdir-${{ matrix.profile }}
         uses: actions/upload-artifact@v2
         with:
           name: appdir-${{ matrix.profile }}
-          path: appdir
+          path: appdir/Cryptomator*/
           if-no-files-found: error
 
 
