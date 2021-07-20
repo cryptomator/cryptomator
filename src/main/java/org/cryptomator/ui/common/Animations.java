@@ -15,7 +15,6 @@ import javafx.beans.value.WritableValue;
 import javafx.scene.Node;
 import javafx.stage.Window;
 import javafx.util.Duration;
-import java.util.function.Predicate;
 import java.util.stream.IntStream;
 
 public class Animations {
@@ -44,11 +43,11 @@ public class Animations {
 		);
 	}
 
-	public static <T> Subscription spinOnCondition(Node node, ObservableValue<T> observableValue, Predicate<T> spinCondition) {
+	public static Subscription spinOnCondition(Node node, ObservableValue<Boolean> observableCondition) {
 		var spinAnimation = Animations.createDiscrete360Rotation();
 		spinAnimation.setNode(node);
-		return EasyBind.subscribe(observableValue, val -> {
-			if (spinCondition.test(val)) {
+		return EasyBind.subscribe(observableCondition, test -> {
+			if (test) {
 				spinAnimation.playFromStart();
 			} else {
 				spinAnimation.stop();

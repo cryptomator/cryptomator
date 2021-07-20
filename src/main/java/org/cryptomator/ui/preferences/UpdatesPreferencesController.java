@@ -49,7 +49,7 @@ public class UpdatesPreferencesController implements FxController {
 
 	public void initialize() {
 		checkForUpdatesCheckbox.selectedProperty().bindBidirectional(settings.checkForUpdates());
-		this.rotationSubscription = Animations.spinOnCondition(updateCheckRunningView, updateCheckRunningView.visibleProperty(), isVisible -> isVisible);
+		this.rotationSubscription = Animations.spinOnCondition(updateCheckRunningView, updateCheckRunningView.visibleProperty());
 	}
 
 	@FXML

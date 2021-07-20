@@ -105,7 +105,7 @@ public class MigrationRunController implements FxController {
 
 		window.setOnHiding(event -> passwordField.wipe());
 
-		this.rotationSubscription = Animations.spinOnCondition(migrationInProgressView, migrationInProgressView.visibleProperty(), isVisible -> isVisible);
+		this.rotationSubscription = Animations.spinOnCondition(migrationInProgressView, migrationInProgressView.visibleProperty());
 	}
 
 	@FXML

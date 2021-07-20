@@ -34,7 +34,7 @@ public class VaultListCellController implements FxController {
 	}
 
 	public void initialize() {
-		this.rotationSubscription = Animations.spinOnCondition(vaultStateView,EasyBind.select(vault).selectObject(Vault::stateProperty),VaultState.Value.PROCESSING::equals);
+		this.rotationSubscription = Animations.spinOnCondition(vaultStateView,EasyBind.select(vault).selectObject(Vault::stateProperty).map(VaultState.Value.PROCESSING::equals));
 	}
 
 	// TODO deduplicate w/ VaultDetailController

@@ -50,7 +50,7 @@ public class QuitController implements FxController {
 	}
 
 	public void initialize() {
-		this.rotationSubscription = Animations.spinOnCondition(quitInProgressView, quitInProgressView.visibleProperty(), isVisible -> isVisible);
+		this.rotationSubscription = Animations.spinOnCondition(quitInProgressView, quitInProgressView.visibleProperty());
 	}
 
 	public void updateQuitRequest(QuitResponse newResponse) {

@@ -52,7 +52,7 @@ public class UnlockSuccessController implements FxController {
 	}
 
 	public void initialize() {
-		this.rotationSubscription = Animations.spinOnCondition(revealInProgressView, revealInProgressView.visibleProperty(), isVisible -> isVisible);
+		this.rotationSubscription = Animations.spinOnCondition(revealInProgressView, revealInProgressView.visibleProperty());
 	}
 
 	@FXML

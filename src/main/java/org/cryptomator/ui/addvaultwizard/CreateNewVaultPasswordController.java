@@ -118,7 +118,7 @@ public class CreateNewVaultPasswordController implements FxController {
 			newPasswordSceneController.passwordField.wipe();
 			newPasswordSceneController.reenterField.wipe();
 		});
-		this.rotationSubscription = Animations.spinOnCondition(createInProgressView, createInProgressView.visibleProperty(), isVisible -> isVisible);
+		this.rotationSubscription = Animations.spinOnCondition(createInProgressView, createInProgressView.visibleProperty());
 	}
 
 	@FXML

@@ -138,7 +138,7 @@ public class PassphraseEntryController implements FxController {
 
 		passwordEntryLock.awaitingInteraction().addListener(observable -> stopUnlockAnimation());
 
-		this.rotationSubscription = Animations.spinOnCondition(unlockInProgressView, unlockInProgressView.visibleProperty(), isVisible -> isVisible);
+		this.rotationSubscription = Animations.spinOnCondition(unlockInProgressView, unlockInProgressView.visibleProperty());
 	}
 
 	@FXML
