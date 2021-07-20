@@ -134,7 +134,7 @@ jobs:
 #
 
   metadata:
-    name: Build AppImage
+    name: Determine Version Number
     runs-on: ubuntu-latest
     needs: test
     steps:
