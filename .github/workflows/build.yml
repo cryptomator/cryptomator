@@ -147,7 +147,6 @@ jobs:
           else
             echo "BUILD_VERSION=SNAPSHOT" >> $GITHUB_ENV
           fi
-          echo "REVISION_NO=`git rev-list --count HEAD`" >> $GITHUB_ENV
       - name: Download buildkit-linux
         uses: actions/download-artifact@v2
         with:
@@ -175,7 +174,7 @@ jobs:
           ln -s usr/share/applications/org.cryptomator.Cryptomator.desktop Cryptomator.AppDir/Cryptomator.desktop
           ln -s bin/cryptomator.sh Cryptomator.AppDir/AppRun
         env:
-          REVISION_NO: ${{ env.REVISION_NO }}
+          REVISION_NO: ${{ github.run_id }}
       - name: Download AppImageKit
         run: |
           curl -L https://github.com/AppImage/AppImageKit/releases/download/13/appimagetool-x86_64.AppImage -o appimagetool.AppImage
@@ -228,7 +227,6 @@ jobs:
             echo "BUILD_VERSION=SNAPSHOT" >> $GITHUB_ENV
             echo "NUMERIC_VERSION=99.0.0" >> $GITHUB_ENV
           fi
-          echo "REVISION_NO=`git rev-list --count HEAD`" >> $GITHUB_ENV
       - name: Download buildkit-win
         uses: actions/download-artifact@v2
         with:
@@ -241,7 +239,7 @@ jobs:
           path: runtime
       - name: Create app directory
         run: >
-          "${JAVA_HOME}\bin\jpackage"
+          ${JAVA_HOME}/bin/jpackage
           --verbose
           --type app-image
           --runtime-image runtime
@@ -251,24 +249,22 @@ jobs:
           --name Cryptomator
           --vendor "Skymatic GmbH"
           --copyright "(C) 2016 - 2021 Skymatic GmbH"
-          --app-version "${{ env.NUMERIC_VERSION }}.${{ env.REVISION_NO }}"
+          --app-version "${{ env.NUMERIC_VERSION }}.${{ github.run_id }}"
           --icon dist/msi/resources/app/Cryptomator.ico
-          --java-options "-Dfile.encoding=`"utf-8`""
-          --java-options "-Dcryptomator.logDir=`"~/AppData/Roaming/Cryptomator`""
-          --java-options "-Dcryptomator.settingsPath=`"~/AppData/Roaming/Cryptomator/settings.json`""
-          --java-options "-Dcryptomator.ipcPortPath=`"~/AppData/Roaming/Cryptomator/ipcPort.bin`""
-          --java-options "-Dcryptomator.keychainPath=`"~/AppData/Roaming/Cryptomator/keychain.json`""
-          --java-options "-Dcryptomator.mountPointsDir=`"~/Cryptomator`""
+          --java-options "-Dfile.encoding=\"utf-8\""
+          --java-options "-Dcryptomator.logDir=\"~/AppData/Roaming/Cryptomator\""
+          --java-options "-Dcryptomator.settingsPath=\"~/AppData/Roaming/Cryptomator/settings.json\""
+          --java-options "-Dcryptomator.ipcPortPath=\"~/AppData/Roaming/Cryptomator/ipcPort.bin\""
+          --java-options "-Dcryptomator.keychainPath=\"~/AppData/Roaming/Cryptomator/keychain.json\""
+          --java-options "-Dcryptomator.mountPointsDir=\"~/Cryptomator\""
           --java-options "-Dcryptomator.showTrayIcon=true"
-          --java-options "-Dcryptomator.buildNumber=`"msi-${{ env.REVISION_NO }}`""
+          --java-options "-Dcryptomator.buildNumber=\"msi-${{ github.run_id }}\""
           --java-options "-Xss2m"
           --java-options "-Xmx256m"
           --module org.cryptomator.desktop/org.cryptomator.launcher.Cryptomator
-        shell: bash
       - name: Patch app directory
         run: |
           cp dist/msi/resources/app/dlls/* app/Cryptomator/
-        shell: bash
       - name: Upload app directory
         uses: actions/upload-artifact@v2
         with:
