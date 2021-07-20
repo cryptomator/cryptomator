@@ -211,7 +211,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: appdir-${{ matrix.profile }}
-          path: appdir/Cryptomator*/**
+          path: appdir/
           if-no-files-found: error
 
 
@@ -225,19 +225,13 @@ jobs:
     needs: [appdir]
     steps:
       - uses: actions/checkout@v2
-      - name: Download buildkit-linux
+      - name: Download appdir-linux
         uses: actions/download-artifact@v2
         with:
           name: appdir-linux
-          path: Cryptomator.AppDir
-      - name: Extract libjffi.so # workaround for https://github.com/cryptomator/cryptomator-linux/issues/27
-        run: |
-          JFFI_NATIVE_JAR=`ls libs/ | grep -e 'jffi-[1-9]\.[0-9]\{1,2\}.[0-9]\{1,2\}-native.jar'`
-          ${JAVA_HOME}/bin/jar -xf libs/${JFFI_NATIVE_JAR} /jni/x86_64-Linux/
-          mv jni/x86_64-Linux/* libs/libjffi.so
-        working-directory: Cryptomator.AppDir
       - name: Patch Cryptomator.AppDir
         run: |
+          mv Cryptomator Cryptomator.AppDir
           cp -r dist/appimage/resources/AppDir/* Cryptomator.AppDir/
           chmod +x Cryptomator.AppDir/runtime/bin/java
           envsubst '${REVISION_NO}' < dist/appimage/resources/AppDir/bin/cryptomator.sh > Cryptomator.AppDir/bin/cryptomator.sh
@@ -248,6 +242,12 @@ jobs:
           ln -s bin/cryptomator.sh Cryptomator.AppDir/AppRun
         env:
           REVISION_NO: ${{ needs.metadata.outputs.revNum }}
+      - name: Extract libjffi.so # workaround for https://github.com/cryptomator/cryptomator-linux/issues/27
+        run: |
+          JFFI_NATIVE_JAR=`ls libs/ | grep -e 'jffi-[1-9]\.[0-9]\{1,2\}.[0-9]\{1,2\}-native.jar'`
+          ${JAVA_HOME}/bin/jar -xf libs/${JFFI_NATIVE_JAR} /jni/x86_64-Linux/
+          mv jni/x86_64-Linux/* libs/libjffi.so
+        working-directory: Cryptomator.AppDir
       - name: Download AppImageKit
         run: |
           curl -L https://github.com/AppImage/AppImageKit/releases/download/13/appimagetool-x86_64.AppImage -o appimagetool.AppImage
