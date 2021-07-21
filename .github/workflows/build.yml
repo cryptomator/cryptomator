@@ -234,7 +234,7 @@ jobs:
           ls -lR Cryptomator
           mv Cryptomator Cryptomator.AppDir
           cp -r dist/appimage/resources/AppDir/* Cryptomator.AppDir/
-          chmod +x Cryptomator.AppDir/runtime/bin/java
+          chmod +x Cryptomator.AppDir/lib/runtime/bin/java
           envsubst '${REVISION_NO}' < dist/appimage/resources/AppDir/bin/cryptomator.sh > Cryptomator.AppDir/bin/cryptomator.sh
           ln -s usr/share/icons/hicolor/scalable/apps/org.cryptomator.Cryptomator.svg Cryptomator.AppDir/org.cryptomator.Cryptomator.svg
           ln -s usr/share/icons/hicolor/scalable/apps/org.cryptomator.Cryptomator.svg Cryptomator.AppDir/Cryptomator.svg
@@ -245,9 +245,9 @@ jobs:
           REVISION_NO: ${{ needs.metadata.outputs.revNum }}
       - name: Extract libjffi.so # workaround for https://github.com/cryptomator/cryptomator-linux/issues/27
         run: |
-          JFFI_NATIVE_JAR=`ls libs/ | grep -e 'jffi-[1-9]\.[0-9]\{1,2\}.[0-9]\{1,2\}-native.jar'`
-          ${JAVA_HOME}/bin/jar -xf libs/${JFFI_NATIVE_JAR} /jni/x86_64-Linux/
-          mv jni/x86_64-Linux/* libs/libjffi.so
+          JFFI_NATIVE_JAR=`ls lib/app/ | grep -e 'jffi-[1-9]\.[0-9]\{1,2\}.[0-9]\{1,2\}-native.jar'`
+          ${JAVA_HOME}/bin/jar -xf lib/app/${JFFI_NATIVE_JAR} /jni/x86_64-Linux/
+          mv jni/x86_64-Linux/* lib/app/libjffi.so
         working-directory: Cryptomator.AppDir
       - name: Download AppImageKit
         run: |
