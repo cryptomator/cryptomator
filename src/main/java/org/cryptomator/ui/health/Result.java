@@ -17,10 +17,7 @@ record Result(DiagnosticResult diagnosis, ObjectProperty<FixState> fixState) {
 	}
 
 	public static Result create(DiagnosticResult diagnosis) {
-		FixState initialState = switch (diagnosis.getSeverity()) {
-			case WARN -> FixState.FIXABLE;
-			default -> FixState.NOT_FIXABLE;
-		};
+		FixState initialState = diagnosis.getSeverity() == DiagnosticResult.Severity.WARN ? FixState.FIXABLE : FixState.NOT_FIXABLE;
 		return new Result(diagnosis, new SimpleObjectProperty<>(initialState));
 	}
 

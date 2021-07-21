@@ -14,8 +14,6 @@ import javafx.collections.ObservableList;
 
 public class Check {
 
-	private static final String LOCALIZE_PREFIX = "health.";
-
 	private final HealthCheck check;
 
 	private final BooleanProperty chosenForExecution = new SimpleBooleanProperty(false);
@@ -45,7 +43,7 @@ public class Check {
 		return chosenForExecution.get();
 	}
 
-	ObjectProperty stateProperty() {
+	ObjectProperty<CheckState> stateProperty() {
 		return state;
 	}
 
@@ -57,7 +55,7 @@ public class Check {
 		state.set(newState);
 	}
 
-	ObjectProperty errorProperty() {
+	ObjectProperty<Throwable> errorProperty() {
 		return error;
 	}
 
@@ -69,7 +67,7 @@ public class Check {
 		error.set(t);
 	}
 
-	ObjectProperty highestResultSeverityProperty() {
+	ObjectProperty<DiagnosticResult.Severity> highestResultSeverityProperty() {
 		return highestResultSeverity;
 	}
 

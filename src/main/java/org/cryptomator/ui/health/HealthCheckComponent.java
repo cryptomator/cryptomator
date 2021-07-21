@@ -29,6 +29,7 @@ public interface HealthCheckComponent {
 
 	default Stage showHealthCheckWindow() {
 		Stage stage = window();
+		// TODO reevaluate config loading, as soon as we have the new generic error screen
 		var unverifiedConf = loadConfig();
 		if (unverifiedConf.config() != null) {
 			stage.setScene(startScene().get());

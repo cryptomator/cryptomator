@@ -37,6 +37,7 @@ import java.util.concurrent.atomic.AtomicReference;
 @Module(subcomponents = {KeyLoadingComponent.class})
 abstract class HealthCheckModule {
 
+	// TODO reevaluate config loading, as soon as we have the new generic error screen
 	@Provides
 	@HealthCheckScoped
 	static HealthCheckComponent.LoadUnverifiedConfigResult provideLoadConfigResult(@HealthCheckWindow Vault vault) {

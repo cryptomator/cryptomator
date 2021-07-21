@@ -68,6 +68,7 @@ public class UnlockWorkflow extends Task<Boolean> {
 	}
 
 	private void attemptUnlock() throws IOException, VolumeException, InvalidMountPointException, CryptoException {
+		// TODO: dedup keyloading w/ StartController.loadKey()
 		boolean success = false;
 		try {
 			vault.unlock(keyLoadingStrategy);

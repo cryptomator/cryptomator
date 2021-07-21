@@ -16,6 +16,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 
+// TODO reevaluate config loading, as soon as we have the new generic error screen
 @HealthCheckScoped
 public class StartFailController implements FxController {
 

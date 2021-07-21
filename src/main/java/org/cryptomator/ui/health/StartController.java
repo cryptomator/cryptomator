@@ -74,6 +74,8 @@ public class StartController implements FxController {
 		assert !Platform.isFxApplicationThread();
 		assert unverifiedVaultConfig.get() != null;
 		var unverifiedCfg = unverifiedVaultConfig.get();
+		// TODO: dedup keyloading w/ UnlockWorkflow.attemptUnlock()
+		boolean success = false;
 		try (var masterkey = keyLoadingStrategy.loadKey(unverifiedCfg.getKeyId())) {
 			var verifiedCfg = unverifiedCfg.verify(masterkey.getEncoded(), unverifiedCfg.allegedVaultVersion());
 			vaultConfigRef.set(verifiedCfg);
@@ -81,6 +83,7 @@ public class StartController implements FxController {
 			if (old != null) {
 				old.destroy();
 			}
+			success = true;
 		} catch (MasterkeyLoadingFailedException e) {
 			if (keyLoadingStrategy.recoverFromException(e)) {
 				// retry
@@ -90,6 +93,8 @@ public class StartController implements FxController {
 			}
 		} catch (VaultConfigLoadException e) {
 			throw new LoadingFailedException(e);
+		} finally {
+			keyLoadingStrategy.cleanup(success);
 		}
 	}
 

@@ -1,11 +1,9 @@
 package org.cryptomator.ui.health;
 
-import org.apache.commons.lang3.exception.ExceptionUtils;
+import com.google.common.base.Throwables;
 import org.cryptomator.common.Environment;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.cryptofs.VaultConfig;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javafx.application.Application;
@@ -27,7 +25,6 @@ import java.util.stream.Collectors;
 @HealthCheckScoped
 public class ReportWriter {
 
-	private static final Logger LOG = LoggerFactory.getLogger(ReportWriter.class);
 	private static final String REPORT_HEADER = """
 			*******************************************
 			*     Cryptomator Vault Health Report     *
@@ -85,7 +82,7 @@ public class ReportWriter {
 
 	private String prepareFailureMsg(Check check) {
 		if (check.getError() != null) {
-			return ExceptionUtils.getStackTrace(check.getError()) //
+			return Throwables.getStackTraceAsString(check.getError()) //
 					.lines() //
 					.map(line -> "\t\t" + line + "\n") //
 					.collect(Collectors.joining());
