@@ -76,8 +76,6 @@ public class ResultListCellController implements FxController {
 	@FXML
 	public void initialize() {
 		// see getGlyph() for relevant glyphs:
-		severityView.getStyleClass().remove("glyph-icon");
-		fixView.getStyleClass().remove("glyph-icon");
 		subscriptions.addAll(List.of(EasyBind.includeWhen(severityView.getStyleClass(), "glyph-icon-muted", severityView.glyphProperty().isEqualTo(INFO_ICON)), //
 				EasyBind.includeWhen(severityView.getStyleClass(), "glyph-icon-primary", severityView.glyphProperty().isEqualTo(GOOD_ICON)), //
 				EasyBind.includeWhen(severityView.getStyleClass(), "glyph-icon-orange", severityView.glyphProperty().isEqualTo(WARN_ICON)), //

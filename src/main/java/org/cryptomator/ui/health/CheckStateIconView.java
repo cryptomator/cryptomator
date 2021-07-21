@@ -23,7 +23,6 @@ public class CheckStateIconView extends FontAwesome5IconView {
 
 	public CheckStateIconView() {
 		super();
-		this.getStyleClass().remove("glyph-icon");
 		this.state = EasyBind.wrapNullable(check).mapObservable(Check::stateProperty);
 		this.severity = EasyBind.wrapNullable(check).mapObservable(Check::highestResultSeverityProperty);
 		glyphProperty().bind(EasyBind.combine(state, severity, this::glyphForState)); //TODO: does the binding need to be stored?
