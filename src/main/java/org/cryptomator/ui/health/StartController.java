@@ -6,7 +6,6 @@ import org.cryptomator.cryptofs.VaultConfig;
 import org.cryptomator.cryptofs.VaultConfigLoadException;
 import org.cryptomator.cryptofs.VaultKeyInvalidException;
 import org.cryptomator.cryptolib.api.Masterkey;
-import org.cryptomator.cryptolib.api.MasterkeyLoadingFailedException;
 import org.cryptomator.ui.common.ErrorComponent;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxmlFile;
@@ -73,9 +72,15 @@ public class StartController implements FxController {
 	private void loadKey() {
 		assert !Platform.isFxApplicationThread();
 		assert unverifiedVaultConfig.get() != null;
+		try {
+			keyLoadingStrategy.use(this::verifyVaultConfig);
+		} catch (VaultConfigLoadException e) {
+			throw new LoadingFailedException(e);
+		}
+	}
+
+	private void verifyVaultConfig(KeyLoadingStrategy keyLoadingStrategy) throws VaultConfigLoadException {
 		var unverifiedCfg = unverifiedVaultConfig.get();
-		// TODO: dedup keyloading w/ UnlockWorkflow.attemptUnlock()
-		boolean success = false;
 		try (var masterkey = keyLoadingStrategy.loadKey(unverifiedCfg.getKeyId())) {
 			var verifiedCfg = unverifiedCfg.verify(masterkey.getEncoded(), unverifiedCfg.allegedVaultVersion());
 			vaultConfigRef.set(verifiedCfg);
@@ -83,18 +88,6 @@ public class StartController implements FxController {
 			if (old != null) {
 				old.destroy();
 			}
-			success = true;
-		} catch (MasterkeyLoadingFailedException e) {
-			if (keyLoadingStrategy.recoverFromException(e)) {
-				// retry
-				loadKey();
-			} else {
-				throw new LoadingFailedException(e);
-			}
-		} catch (VaultConfigLoadException e) {
-			throw new LoadingFailedException(e);
-		} finally {
-			keyLoadingStrategy.cleanup(success);
 		}
 	}
 

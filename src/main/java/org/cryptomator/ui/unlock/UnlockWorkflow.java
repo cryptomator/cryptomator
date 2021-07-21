@@ -1,5 +1,6 @@
 package org.cryptomator.ui.unlock;
 
+import com.google.common.base.Throwables;
 import dagger.Lazy;
 import org.cryptomator.common.mountpoint.InvalidMountPointException;
 import org.cryptomator.common.vaults.MountPointRequirement;
@@ -7,12 +8,10 @@ import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.common.vaults.Volume.VolumeException;
 import org.cryptomator.cryptolib.api.CryptoException;
-import org.cryptomator.cryptolib.api.MasterkeyLoadingFailedException;
 import org.cryptomator.ui.common.ErrorComponent;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.VaultService;
-import org.cryptomator.ui.keyloading.KeyLoadingComponent;
 import org.cryptomator.ui.keyloading.KeyLoadingStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,20 +67,14 @@ public class UnlockWorkflow extends Task<Boolean> {
 	}
 
 	private void attemptUnlock() throws IOException, VolumeException, InvalidMountPointException, CryptoException {
-		// TODO: dedup keyloading w/ StartController.loadKey()
-		boolean success = false;
 		try {
-			vault.unlock(keyLoadingStrategy);
-			success = true;
-		} catch (MasterkeyLoadingFailedException e) {
-			if (keyLoadingStrategy.recoverFromException(e)) {
-				LOG.info("Unlock attempt threw {}. Reattempting...", e.getClass().getSimpleName());
-				attemptUnlock();
-			} else {
-				throw e;
-			}
-		} finally {
-			keyLoadingStrategy.cleanup(success);
+			keyLoadingStrategy.use(vault::unlock);
+		} catch (Exception e) {
+			Throwables.propagateIfPossible(e, IOException.class);
+			Throwables.propagateIfPossible(e, VolumeException.class);
+			Throwables.propagateIfPossible(e, InvalidMountPointException.class);
+			Throwables.propagateIfPossible(e, CryptoException.class);
+			throw new IllegalStateException("unexpected exception type", e);
 		}
 	}
 
