@@ -2,7 +2,7 @@ package org.cryptomator.ui.health;
 
 import com.tobiasdiez.easybind.EasyBind;
 import com.tobiasdiez.easybind.Subscription;
-import com.tobiasdiez.easybind.optional.OptionalBinding;
+import org.cryptomator.cryptofs.health.api.DiagnosticResult;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.controls.FontAwesome5Icon;
 import org.cryptomator.ui.controls.FontAwesome5IconView;
@@ -17,6 +17,7 @@ import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ObservableObjectValue;
 import javafx.fxml.FXML;
 import javafx.scene.control.Tooltip;
 import javafx.util.Duration;
@@ -35,9 +36,10 @@ public class ResultListCellController implements FxController {
 	private final Logger LOG = LoggerFactory.getLogger(ResultListCellController.class);
 
 	private final ObjectProperty<Result> result;
+	private final ObservableObjectValue<DiagnosticResult.Severity> severity;
 	private final Binding<String> description;
 	private final ResultFixApplier fixApplier;
-	private final OptionalBinding<Result.FixState> fixState;
+	private final ObservableObjectValue<Result.FixState> fixState;
 	private final ObjectBinding<FontAwesome5Icon> severityGlyph;
 	private final ObjectBinding<FontAwesome5Icon> fixGlyph;
 	private final BooleanBinding fixable;
@@ -56,9 +58,10 @@ public class ResultListCellController implements FxController {
 	@Inject
 	public ResultListCellController(ResultFixApplier fixApplier, ResourceBundle resourceBundle) {
 		this.result = new SimpleObjectProperty<>(null);
+		this.severity = EasyBind.wrapNullable(result).map(r -> r.diagnosis().getSeverity()).asOrdinary();
 		this.description = EasyBind.wrapNullable(result).map(Result::getDescription).orElse("");
 		this.fixApplier = fixApplier;
-		this.fixState = EasyBind.wrapNullable(result).mapObservable(Result::fixState);
+		this.fixState = EasyBind.wrapNullable(result).mapObservable(Result::fixState).asOrdinary();
 		this.severityGlyph = Bindings.createObjectBinding(this::getSeverityGlyph, result);
 		this.fixGlyph = Bindings.createObjectBinding(this::getFixGlyph, fixState);
 		this.fixable = Bindings.createBooleanBinding(this::isFixable, fixState);
@@ -76,12 +79,12 @@ public class ResultListCellController implements FxController {
 	@FXML
 	public void initialize() {
 		// see getGlyph() for relevant glyphs:
-		subscriptions.addAll(List.of(EasyBind.includeWhen(severityView.getStyleClass(), "glyph-icon-muted", severityView.glyphProperty().isEqualTo(INFO_ICON)), //
-				EasyBind.includeWhen(severityView.getStyleClass(), "glyph-icon-primary", severityView.glyphProperty().isEqualTo(GOOD_ICON)), //
-				EasyBind.includeWhen(severityView.getStyleClass(), "glyph-icon-orange", severityView.glyphProperty().isEqualTo(WARN_ICON)), //
-				EasyBind.includeWhen(severityView.getStyleClass(), "glyph-icon-red", severityView.glyphProperty().isEqualTo(CRIT_ICON)), //
-				EasyBind.includeWhen(fixView.getStyleClass(), "glyph-icon-muted", fixView.glyphProperty().isNotNull())) //
-		);
+		subscriptions.addAll(List.of(EasyBind.includeWhen(severityView.getStyleClass(), "glyph-icon-muted", Bindings.equal(severity, DiagnosticResult.Severity.INFO)), //
+				EasyBind.includeWhen(severityView.getStyleClass(), "glyph-icon-primary", Bindings.equal(severity, DiagnosticResult.Severity.GOOD)), //
+				EasyBind.includeWhen(severityView.getStyleClass(), "glyph-icon-orange", Bindings.equal(severity, DiagnosticResult.Severity.WARN)), //
+				EasyBind.includeWhen(severityView.getStyleClass(), "glyph-icon-red", Bindings.equal(severity, DiagnosticResult.Severity.CRITICAL)) //
+				// EasyBind.includeWhen(fixView.getStyleClass(), "glyph-icon-muted", fixView.glyphProperty().isNotNull())) // TODO not really needed, right?
+		));
 	}
 
 	@FXML
@@ -146,12 +149,15 @@ public class ResultListCellController implements FxController {
 	}
 
 	public FontAwesome5Icon getFixGlyph() {
-		return fixState.get().map(s -> switch (s) {
+		if (fixState.getValue() == null) {
+			return null;
+		}
+		return switch (fixState.getValue()) {
 			case NOT_FIXABLE, FIXABLE -> null;
 			case FIXING -> FontAwesome5Icon.SPINNER;
 			case FIXED -> FontAwesome5Icon.CHECK;
 			case FIX_FAILED -> FontAwesome5Icon.TIMES;
-		}).orElse(null);
+		};
 	}
 
 	public BooleanBinding fixableProperty() {
@@ -159,7 +165,7 @@ public class ResultListCellController implements FxController {
 	}
 
 	public boolean isFixable() {
-		return fixState.get().map(Result.FixState.FIXABLE::equals).orElse(false);
+		return Result.FixState.FIXABLE.equals(fixState.get());
 	}
 
 	public BooleanBinding fixingProperty() {
@@ -167,7 +173,7 @@ public class ResultListCellController implements FxController {
 	}
 
 	public boolean isFixing() {
-		return fixState.get().map(Result.FixState.FIXING::equals).orElse(false);
+		return Result.FixState.FIXING.equals(fixState.get());
 	}
 
 	public BooleanBinding fixedProperty() {
@@ -175,7 +181,7 @@ public class ResultListCellController implements FxController {
 	}
 
 	public boolean isFixed() {
-		return fixState.get().map(Result.FixState.FIXED::equals).orElse(false);
+		return Result.FixState.FIXED.equals(fixState.get());
 	}
 
 	public BooleanBinding fixFailedProperty() {
@@ -183,7 +189,7 @@ public class ResultListCellController implements FxController {
 	}
 
 	public Boolean isFixFailed() {
-		return fixState.get().map(Result.FixState.FIX_FAILED::equals).orElse(false);
+		return Result.FixState.FIX_FAILED.equals(fixState.get());
 	}
 
 	public BooleanBinding fixRunningOrDoneProperty() {
