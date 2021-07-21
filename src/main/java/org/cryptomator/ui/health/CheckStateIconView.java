@@ -27,8 +27,8 @@ public class CheckStateIconView extends FontAwesome5IconView {
 		this.state = EasyBind.wrapNullable(check).mapObservable(Check::stateProperty).asOrdinary();
 		this.severity = EasyBind.wrapNullable(check).mapObservable(Check::highestResultSeverityProperty).asOrdinary();
 		this.glyph.bind(Bindings.createObjectBinding(this::glyphForState, state, severity));
-		this.subscriptions = List.of(
-				//EasyBind.includeWhen(getStyleClass(), "glyph-icon-muted", Bindings.notEqual(state, Check.CheckState.ERROR).and(Bindings.isNull(severity))), // TODO not really needed, right?
+		this.subscriptions = List.of( // TODO: make final decision about what color/style-class to show when
+				EasyBind.includeWhen(getStyleClass(), "glyph-icon-muted", Bindings.equal(state, Check.CheckState.SKIPPED).or(Bindings.equal(state,Check.CheckState.CANCELLED))), //
 				EasyBind.includeWhen(getStyleClass(), "glyph-icon-primary", Bindings.equal(severity, DiagnosticResult.Severity.GOOD)), //
 				EasyBind.includeWhen(getStyleClass(), "glyph-icon-orange", Bindings.equal(severity, DiagnosticResult.Severity.WARN)), //
 				EasyBind.includeWhen(getStyleClass(), "glyph-icon-red", Bindings.equal(severity, DiagnosticResult.Severity.CRITICAL).or(Bindings.equal(state, Check.CheckState.ERROR))) //
