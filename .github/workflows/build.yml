@@ -385,6 +385,7 @@ jobs:
           --type msi
           --app-image appdir
           --dest installer
+          --name Cryptomator
       - name: Upload appdir-${{ matrix.profile }}
         uses: actions/upload-artifact@v2
         with:
