@@ -233,10 +233,13 @@ jobs:
           name: appdir-linux
           path: appdir.tar
       - name: Untar appdir.tar
-        run: tar -xvf appdir.tar appdir/Cryptomator
+        run: |
+          ls -l
+          tar -xvf appdir.tar
       - name: Patch Cryptomator.AppDir
         run: |
-          mv Cryptomator Cryptomator.AppDir
+          ls -l
+          mv appdir/Cryptomator Cryptomator.AppDir
           cp -r dist/appimage/resources/AppDir/* Cryptomator.AppDir/
           envsubst '${REVISION_NO}' < dist/appimage/resources/AppDir/bin/cryptomator.sh > Cryptomator.AppDir/bin/cryptomator.sh
           ln -s usr/share/icons/hicolor/scalable/apps/org.cryptomator.Cryptomator.svg Cryptomator.AppDir/org.cryptomator.Cryptomator.svg
