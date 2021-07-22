@@ -350,8 +350,7 @@ jobs:
           codesign --force --deep --entitlements dist/mac/Cryptomator.entitlements -o runtime -s ${CODESIGN_IDENTITY} Cryptomator.app
       - name: Clean up codesign certificate
         if: ${{ always() }}
-        run: |
-          security delete-keychain $RUNNER_TEMP/codesign.keychain-db
+        run: security delete-keychain $RUNNER_TEMP/codesign.keychain-db
       - name: Create app.tar
         run: tar -cvf app.tar Cryptomator.app
       - name: Upload appdir-${{ matrix.profile }}
