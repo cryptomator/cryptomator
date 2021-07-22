@@ -43,11 +43,11 @@ ${JAVA_HOME}/bin/jpackage \
     --java-options "-Dcryptomator.mountPointsDir=\"~/.local/share/Cryptomator/mnt\"" \
     --java-options "-Dcryptomator.showTrayIcon=false" \
     --java-options "-Dcryptomator.buildNumber=\"appimage-${{ needs.metadata.outputs.revNum }}\"" \
-    --resource-dir ../appdir/linux/resources
+    --resource-dir ../resources
 
 # transform AppDir
 mv Cryptomator Cryptomator.AppDir
-cp -r dist/appimage/resources/AppDir/* Cryptomator.AppDir/
+cp -r dist/linux/appimage/resources/AppDir/* Cryptomator.AppDir/
 chmod +x Cryptomator.AppDir/lib/runtime/bin/java
 envsubst '${REVISION_NO}' < resources/AppDir/bin/cryptomator.sh > Cryptomator.AppDir/bin/cryptomator.sh
 ln -s usr/share/icons/hicolor/scalable/apps/org.cryptomator.Cryptomator.svg Cryptomator.AppDir/org.cryptomator.Cryptomator.svg

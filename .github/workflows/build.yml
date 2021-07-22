@@ -215,11 +215,11 @@ jobs:
 
 
 #
-# Linux AppImage
+# Linux Cryptomator.AppImage
 # 
 
   linux-appimage:
-    name: Build AppImage
+    name: Build Cryptomator.AppImage
     runs-on: ubuntu-latest
     needs: [appdir, metadata]
     steps:
