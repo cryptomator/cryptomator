@@ -383,7 +383,7 @@ jobs:
           ${JAVA_HOME}/bin/jpackage
           --verbose
           --type msi
-          --app-image appdir
+          --app-image appdir/Cryptomator
           --dest installer
           --name Cryptomator
       - name: Upload appdir-${{ matrix.profile }}
