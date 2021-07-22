@@ -20,7 +20,7 @@ if [ "$GTK2_PRESENT" -eq 0 ] && [ "$GTK3_PRESENT" -ne 0 ]; then
 fi
 
 # workaround for https://github.com/cryptomator/cryptomator-linux/issues/27
-export LD_PRELOAD=libs/libjffi.so
+export LD_PRELOAD=lib/app/libjffi.so
 
 # start Cryptomator
 ./lib/runtime/bin/java \

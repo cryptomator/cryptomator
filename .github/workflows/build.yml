@@ -222,7 +222,7 @@ jobs:
   linux-appimage:
     name: Build AppImage
     runs-on: ubuntu-latest
-    needs: [appdir]
+    needs: [appdir, metadata]
     steps:
       - uses: actions/checkout@v2
       - name: Download appdir-linux
