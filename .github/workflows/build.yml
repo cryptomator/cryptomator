@@ -56,7 +56,7 @@ jobs:
         - os: windows-latest
           profile: win
           launcher: launcher-win.bat
-        - os: macOS-latest
+        - os: macos-latest
           profile: mac
           launcher: launcher-mac.sh
     steps:
@@ -152,7 +152,7 @@ jobs:
             --java-options "-Dcryptomator.buildNumber=\"msi-${{ needs.metadata.outputs.revNum }}\""
             --resource-dir dist/appdir/win/resources
             --icon dist/appdir/win/resources/Cryptomator.ico
-        - os: macOS-latest
+        - os: macos-latest
           profile: mac
           jpackageoptions: >
             --app-version "${{ needs.metadata.outputs.versionNum }}"
@@ -201,6 +201,8 @@ jobs:
           --java-options "-Xss5m"
           --java-options "-Xmx256m"
           ${{ matrix.jpackageoptions }}
+      - name: Create appdir.tar
+        run: tar -C appdir -cvf appdir.tar *
       # TODO: patch in separate job
       # - name: Add Contrib Files
       #   run: |
@@ -211,7 +213,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: appdir-${{ matrix.profile }}
-          path: appdir/
+          path: appdir.tar
           if-no-files-found: error
 
 
@@ -229,11 +231,13 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: appdir-linux
+          path: appdir.tar
+      - name: Untar appdir.tar
+        run: tar -xvf appdir.tar Cryptomator
       - name: Patch Cryptomator.AppDir
         run: |
           mv Cryptomator Cryptomator.AppDir
           cp -r dist/appimage/resources/AppDir/* Cryptomator.AppDir/
-          chmod +x Cryptomator.AppDir/lib/runtime/bin/java
           envsubst '${REVISION_NO}' < dist/appimage/resources/AppDir/bin/cryptomator.sh > Cryptomator.AppDir/bin/cryptomator.sh
           ln -s usr/share/icons/hicolor/scalable/apps/org.cryptomator.Cryptomator.svg Cryptomator.AppDir/org.cryptomator.Cryptomator.svg
           ln -s usr/share/icons/hicolor/scalable/apps/org.cryptomator.Cryptomator.svg Cryptomator.AppDir/Cryptomator.svg
