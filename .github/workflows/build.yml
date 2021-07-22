@@ -303,14 +303,13 @@ jobs:
       - name: Patch Cryptomator.app
         run: |
           mv appdir/Cryptomator.app Cryptomator.app
-          sed -i '' "s|###BUNDLE_SHORT_VERSION_STRING###|${VERSION_NO}|g" buildkit/app/Cryptomator.app/Contents/Info.plist
-          sed -i '' "s|###BUNDLE_VERSION###|${REVISION_NO}|g" buildkit/app/Cryptomator.app/Contents/Info.plist
+          sed -i '' "s|###BUNDLE_SHORT_VERSION_STRING###|${VERSION_NO}|g" Cryptomator.app/Contents/Info.plist
+          sed -i '' "s|###BUNDLE_VERSION###|${REVISION_NO}|g" Cryptomator.app/Contents/Info.plist
         env:
           VERSION_NO: ${{ needs.metadata.outputs.versionNum }}
           REVISION_NO: ${{ needs.metadata.outputs.revNum }}
       - name: Install codesign certificate
         env:
-          #CODESIGN_IDENTITY: ${{ secrets.MACOS_CODESIGN_IDENTITY }}
           CODESIGN_P12_BASE64: ${{ secrets.MACOS_CODESIGN_P12_BASE64 }}
           CODESIGN_P12_PW: ${{ secrets.MACOS_CODESIGN_P12_PW }}
           CODESIGN_TMP_KEYCHAIN_PW: ${{ secrets.MACOS_CODESIGN_TMP_KEYCHAIN_PW }}
@@ -324,7 +323,7 @@ jobs:
 
           # create temporary keychain
           security create-keychain -p "$CODESIGN_TMP_KEYCHAIN_PW" $KEYCHAIN_PATH
-          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+          security set-keychain-settings -lut 900 $KEYCHAIN_PATH
           security unlock-keychain -p "$CODESIGN_TMP_KEYCHAIN_PW" $KEYCHAIN_PATH
 
           # import certificate to keychain
@@ -334,8 +333,8 @@ jobs:
         env:
           CODESIGN_IDENTITY: ${{ secrets.MACOS_CODESIGN_IDENTITY }}
         run: |
-          find buildkit/app/Cryptomator.app/Contents/runtime/Contents/MacOS -name '*.dylib' -exec codesign --force -s ${CODESIGN_IDENTITY} {} \;
-          for JAR_PATH in buildkit/app/Cryptomator.app/Contents/app/*.jar; do
+          find Cryptomator.app/Contents/runtime/Contents/MacOS -name '*.dylib' -exec codesign --force -s ${CODESIGN_IDENTITY} {} \;
+          for JAR_PATH in Cryptomator.app/Contents/app/*.jar; do
             if [[ `unzip -l ${JAR_PATH} | grep '.dylib\|.jnilib'` ]]; then
               JAR_FILENAME=$(basename ${JAR_PATH})
               OUTPUT_PATH=${JAR_PATH%.*}
@@ -351,7 +350,7 @@ jobs:
             fi
           done
           echo "Codesigning Cryptomator.app..."
-          codesign --force --deep --entitlements dist/mac/Cryptomator.entitlements -o runtime -s ${CODESIGN_IDENTITY} buildkit/app/Cryptomator.app
+          codesign --force --deep --entitlements dist/mac/Cryptomator.entitlements -o runtime -s ${CODESIGN_IDENTITY} Cryptomator.app
       - name: Clean up codesign certificate
         if: ${{ always() }}
         run: |
