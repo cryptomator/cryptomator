@@ -348,6 +348,7 @@ jobs:
           done
           echo "Codesigning Cryptomator.app..."
           codesign --force --deep --entitlements dist/mac/Cryptomator.entitlements -o runtime -s ${CODESIGN_IDENTITY} Cryptomator.app
+        shell: zsh {0}
       - name: Clean up codesign certificate
         if: ${{ always() }}
         run: security delete-keychain $RUNNER_TEMP/codesign.keychain-db
