@@ -52,13 +52,10 @@ jobs:
         include:
         - os: ubuntu-latest
           profile: linux
-          launcher: launcher-linux.sh
         - os: windows-latest
           profile: win
-          launcher: launcher-win.bat
         - os: macos-latest
           profile: mac
-          launcher: launcher-mac.sh
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-java@v1
@@ -75,7 +72,7 @@ jobs:
       - name: Archive buildkit-${{ matrix.profile }}.tar.gz
         run: |
           cp LICENSE.txt target
-          cp dist/buildkit/${{ matrix.launcher }} target
+          cp dist/${{ matrix.profile }}/launcher* target
           cp target/cryptomator-*.jar target/mods
       - name: Upload buildkit-${{ matrix.profile }}
         uses: actions/upload-artifact@v2
@@ -137,7 +134,7 @@ jobs:
             --java-options "-Dcryptomator.mountPointsDir=\"~/.local/share/Cryptomator/mnt\""
             --java-options "-Dcryptomator.showTrayIcon=false"
             --java-options "-Dcryptomator.buildNumber=\"appimage-${{ needs.metadata.outputs.revNum }}\""
-            --resource-dir dist/appdir/linux/resources
+            --resource-dir dist/linux/resources
         - os: windows-latest
           profile: win
           jpackageoptions: >
@@ -150,8 +147,8 @@ jobs:
             --java-options "-Dcryptomator.mountPointsDir=\"~/Cryptomator\""
             --java-options "-Dcryptomator.showTrayIcon=true"
             --java-options "-Dcryptomator.buildNumber=\"msi-${{ needs.metadata.outputs.revNum }}\""
-            --resource-dir dist/appdir/win/resources
-            --icon dist/appdir/win/resources/Cryptomator.ico
+            --resource-dir dist/win/resources
+            --icon dist/win/resources/Cryptomator.ico
         - os: macos-latest
           profile: mac
           jpackageoptions: >
@@ -163,7 +160,7 @@ jobs:
             --java-options "-Dcryptomator.showTrayIcon=true"
             --java-options "-Dcryptomator.buildNumber=\"dmg-${{ needs.metadata.outputs.revNum }}\""
             --mac-package-identifier org.cryptomator
-            --resource-dir dist/appdir/mac/resources
+            --resource-dir dist/mac/resources
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-java@v1
@@ -237,8 +234,8 @@ jobs:
       - name: Patch Cryptomator.AppDir
         run: |
           mv appdir/Cryptomator Cryptomator.AppDir
-          cp -r dist/appimage/resources/AppDir/* Cryptomator.AppDir/
-          envsubst '${REVISION_NO}' < dist/appimage/resources/AppDir/bin/cryptomator.sh > Cryptomator.AppDir/bin/cryptomator.sh
+          cp -r dist/linux/appimage/resources/AppDir/* Cryptomator.AppDir/
+          envsubst '${REVISION_NO}' < dist/linux/appimage/resources/AppDir/bin/cryptomator.sh > Cryptomator.AppDir/bin/cryptomator.sh
           ln -s usr/share/icons/hicolor/scalable/apps/org.cryptomator.Cryptomator.svg Cryptomator.AppDir/org.cryptomator.Cryptomator.svg
           ln -s usr/share/icons/hicolor/scalable/apps/org.cryptomator.Cryptomator.svg Cryptomator.AppDir/Cryptomator.svg
           ln -s usr/share/icons/hicolor/scalable/apps/org.cryptomator.Cryptomator.svg Cryptomator.AppDir/.DirIcon
