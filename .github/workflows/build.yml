@@ -233,11 +233,9 @@ jobs:
           name: appdir-linux
       - name: Untar appdir.tar
         run: |
-          ls -l
           tar -xvf appdir.tar
       - name: Patch Cryptomator.AppDir
         run: |
-          ls -l
           mv appdir/Cryptomator Cryptomator.AppDir
           cp -r dist/appimage/resources/AppDir/* Cryptomator.AppDir/
           envsubst '${REVISION_NO}' < dist/appimage/resources/AppDir/bin/cryptomator.sh > Cryptomator.AppDir/bin/cryptomator.sh
@@ -284,6 +282,87 @@ jobs:
             cryptomator-${{ needs.metadata.outputs.versionStr }}-x86_64.AppImage.asc
             cryptomator-${{ needs.metadata.outputs.versionStr }}-x86_64.AppImage.zsync
             cryptomator-${{ needs.metadata.outputs.versionStr }}-x86_64.AppImage.zsync.asc
+          if-no-files-found: error
+
+#
+# macOS Cryptomator.app
+# 
+
+  mac-app:
+    name: Build Cryptomator.app
+    runs-on: macos-latest
+    needs: [appdir, metadata]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Download appdir-mac
+        uses: actions/download-artifact@v2
+        with:
+          name: appdir-mac
+      - name: Untar appdir.tar
+        run: tar -xvf appdir.tar
+      - name: Patch Cryptomator.app
+        run: |
+          mv appdir/Cryptomator.app Cryptomator.app
+          sed -i '' "s|###BUNDLE_SHORT_VERSION_STRING###|${VERSION_NO}|g" buildkit/app/Cryptomator.app/Contents/Info.plist
+          sed -i '' "s|###BUNDLE_VERSION###|${REVISION_NO}|g" buildkit/app/Cryptomator.app/Contents/Info.plist
+        env:
+          VERSION_NO: ${{ needs.metadata.outputs.versionNum }}
+          REVISION_NO: ${{ needs.metadata.outputs.revNum }}
+      - name: Install codesign certificate
+        env:
+          #CODESIGN_IDENTITY: ${{ secrets.MACOS_CODESIGN_IDENTITY }}
+          CODESIGN_P12_BASE64: ${{ secrets.MACOS_CODESIGN_P12_BASE64 }}
+          CODESIGN_P12_PW: ${{ secrets.MACOS_CODESIGN_P12_PW }}
+          CODESIGN_TMP_KEYCHAIN_PW: ${{ secrets.MACOS_CODESIGN_TMP_KEYCHAIN_PW }}
+        run: |
+          # create variables
+          CERTIFICATE_PATH=$RUNNER_TEMP/codesign.p12
+          KEYCHAIN_PATH=$RUNNER_TEMP/codesign.keychain-db
+
+          # import certificate and provisioning profile from secrets
+          echo -n "$CODESIGN_P12_BASE64" | base64 --decode --output $CERTIFICATE_PATH
+
+          # create temporary keychain
+          security create-keychain -p "$CODESIGN_TMP_KEYCHAIN_PW" $KEYCHAIN_PATH
+          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+          security unlock-keychain -p "$CODESIGN_TMP_KEYCHAIN_PW" $KEYCHAIN_PATH
+
+          # import certificate to keychain
+          security import $CERTIFICATE_PATH -P "$CODESIGN_P12_PW" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+          security list-keychain -d user -s $KEYCHAIN_PATH
+      - name: Codesign
+        env:
+          CODESIGN_IDENTITY: ${{ secrets.MACOS_CODESIGN_IDENTITY }}
+        run: |
+          find buildkit/app/Cryptomator.app/Contents/runtime/Contents/MacOS -name '*.dylib' -exec codesign --force -s ${CODESIGN_IDENTITY} {} \;
+          for JAR_PATH in buildkit/app/Cryptomator.app/Contents/app/*.jar; do
+            if [[ `unzip -l ${JAR_PATH} | grep '.dylib\|.jnilib'` ]]; then
+              JAR_FILENAME=$(basename ${JAR_PATH})
+              OUTPUT_PATH=${JAR_PATH%.*}
+              echo "Codesigning libs in ${JAR_FILENAME}..."
+              unzip -q ${JAR_PATH} -d ${OUTPUT_PATH}
+              find ${OUTPUT_PATH} -name '*.dylib' -exec codesign -s ${CODESIGN_IDENTITY} {} \;
+              find ${OUTPUT_PATH} -name '*.jnilib' -exec codesign -s ${CODESIGN_IDENTITY} {} \;
+              rm ${JAR_PATH}
+              pushd ${OUTPUT_PATH} > /dev/null
+              zip -qr ../${JAR_FILENAME} *
+              popd > /dev/null
+              rm -r ${OUTPUT_PATH}
+            fi
+          done
+          echo "Codesigning Cryptomator.app..."
+          codesign --force --deep --entitlements dist/mac/Cryptomator.entitlements -o runtime -s ${CODESIGN_IDENTITY} buildkit/app/Cryptomator.app
+      - name: Clean up codesign certificate
+        if: ${{ always() }}
+        run: |
+          security delete-keychain $RUNNER_TEMP/codesign.keychain-db
+      - name: Create app.tar
+        run: tar -cvf app.tar Cryptomator.app
+      - name: Upload appdir-${{ matrix.profile }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: macOS-app
+          path: app.tar
           if-no-files-found: error
 
   # release:
