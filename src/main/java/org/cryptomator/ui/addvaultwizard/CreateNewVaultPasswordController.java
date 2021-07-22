@@ -12,6 +12,7 @@ import org.cryptomator.cryptolib.api.Masterkey;
 import org.cryptomator.cryptolib.api.MasterkeyLoader;
 import org.cryptomator.cryptolib.common.MasterkeyFileAccess;
 import org.cryptomator.ui.common.Animations;
+import org.cryptomator.ui.common.AutoAnimator;
 import org.cryptomator.ui.common.ErrorComponent;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxmlFile;
@@ -79,7 +80,7 @@ public class CreateNewVaultPasswordController implements FxController {
 	private final BooleanProperty readyToCreateVault;
 	private final ObjectBinding<ContentDisplay> createVaultButtonState;
 
-	private Subscription rotationSubscription;
+	private AutoAnimator spinAnimation;
 
 	/* FXML */
 	public ToggleGroup recoveryKeyChoice;
@@ -118,7 +119,10 @@ public class CreateNewVaultPasswordController implements FxController {
 			newPasswordSceneController.passwordField.wipe();
 			newPasswordSceneController.reenterField.wipe();
 		});
-		this.rotationSubscription = Animations.spinOnCondition(createInProgressView, createInProgressView.visibleProperty());
+		this.spinAnimation = AutoAnimator.Builder.with(Animations.createDiscrete360Rotation(createInProgressView)) //
+				.onCondition(createInProgressView.visibleProperty()) //
+				.afterStop(() -> createInProgressView.setRotate(0)) //
+				.build();
 	}
 
 	@FXML

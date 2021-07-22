@@ -3,6 +3,7 @@ package org.cryptomator.ui.quit;
 import com.tobiasdiez.easybind.Subscription;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.Animations;
+import org.cryptomator.ui.common.AutoAnimator;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.VaultService;
 import org.cryptomator.ui.controls.FontAwesome5IconView;
@@ -34,7 +35,7 @@ public class QuitController implements FxController {
 	private final VaultService vaultService;
 	private final AtomicReference<QuitResponse> quitResponse = new AtomicReference<>();
 
-	private Subscription rotationSubscription;
+	private AutoAnimator spinAnimation;
 
 	/* FXML */
 	public Button lockAndQuitButton;
@@ -50,7 +51,10 @@ public class QuitController implements FxController {
 	}
 
 	public void initialize() {
-		this.rotationSubscription = Animations.spinOnCondition(quitInProgressView, quitInProgressView.visibleProperty());
+		this.spinAnimation = AutoAnimator.Builder.with(Animations.createDiscrete360Rotation(quitInProgressView)) //
+				.onCondition(quitInProgressView.visibleProperty()) //
+				.afterStop(() -> quitInProgressView.setRotate(0)) //
+				.build();
 	}
 
 	public void updateQuitRequest(QuitResponse newResponse) {

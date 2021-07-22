@@ -1,9 +1,9 @@
 package org.cryptomator.ui.unlock;
 
-import com.tobiasdiez.easybind.Subscription;
 import org.cryptomator.common.settings.WhenUnlocked;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.Animations;
+import org.cryptomator.ui.common.AutoAnimator;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.VaultService;
 import org.cryptomator.ui.controls.FontAwesome5IconView;
@@ -35,7 +35,7 @@ public class UnlockSuccessController implements FxController {
 	private final ObjectProperty<ContentDisplay> revealButtonState;
 	private final BooleanProperty revealButtonDisabled;
 
-	private Subscription rotationSubscription;
+	private AutoAnimator spinAnimation;
 
 	/* FXML */
 	public CheckBox rememberChoiceCheckbox;
@@ -52,7 +52,10 @@ public class UnlockSuccessController implements FxController {
 	}
 
 	public void initialize() {
-		this.rotationSubscription = Animations.spinOnCondition(revealInProgressView, revealInProgressView.visibleProperty());
+		this.spinAnimation = AutoAnimator.Builder.with(Animations.createDiscrete360Rotation(revealInProgressView)) //
+				.onCondition(revealInProgressView.visibleProperty()) //
+				.afterStop(() -> revealInProgressView.setRotate(0)) //
+				.build();
 	}
 
 	@FXML

@@ -1,8 +1,5 @@
 package org.cryptomator.ui.common;
 
-import com.tobiasdiez.easybind.EasyBind;
-import com.tobiasdiez.easybind.Subscription;
-
 import javafx.animation.Animation;
 import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
@@ -10,7 +7,6 @@ import javafx.animation.KeyValue;
 import javafx.animation.RotateTransition;
 import javafx.animation.SequentialTransition;
 import javafx.animation.Timeline;
-import javafx.beans.value.ObservableValue;
 import javafx.beans.value.WritableValue;
 import javafx.scene.Node;
 import javafx.stage.Window;
@@ -43,22 +39,10 @@ public class Animations {
 		);
 	}
 
-	public static Subscription spinOnCondition(Node node, ObservableValue<Boolean> observableCondition) {
-		var spinAnimation = Animations.createDiscrete360Rotation();
-		spinAnimation.setNode(node);
-		return EasyBind.subscribe(observableCondition, test -> {
-			if (test) {
-				spinAnimation.playFromStart();
-			} else {
-				spinAnimation.stop();
-				node.setRotate(0);
-			}
-		});
-	}
-
-	public static SequentialTransition createDiscrete360Rotation() {
+	public static SequentialTransition createDiscrete360Rotation(Node toAnimate) {
 		var animation = new SequentialTransition(IntStream.range(0, 8).mapToObj(i -> Animations.createDiscrete45Rotation()).toArray(Animation[]::new));
 		animation.setCycleCount(Animation.INDEFINITE);
+		animation.setNode(toAnimate);
 		return animation;
 	}
 

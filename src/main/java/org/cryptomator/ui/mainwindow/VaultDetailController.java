@@ -5,6 +5,7 @@ import com.tobiasdiez.easybind.Subscription;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.ui.common.Animations;
+import org.cryptomator.ui.common.AutoAnimator;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.controls.FontAwesome5Icon;
 import org.cryptomator.ui.controls.FontAwesome5IconView;
@@ -25,7 +26,7 @@ public class VaultDetailController implements FxController {
 	private final Binding<FontAwesome5Icon> glyph;
 	private final BooleanBinding anyVaultSelected;
 
-	private Subscription rotationSubscriptions;
+	private AutoAnimator spinAnimation;
 
 	/* FXML */
 	public FontAwesome5IconView vaultStateView;
@@ -42,7 +43,10 @@ public class VaultDetailController implements FxController {
 	}
 
 	public void initialize() {
-		rotationSubscriptions = Animations.spinOnCondition(vaultStateView,EasyBind.select(vault).selectObject(Vault::stateProperty).map(VaultState.Value.PROCESSING::equals));
+		this.spinAnimation = AutoAnimator.Builder.with(Animations.createDiscrete360Rotation(vaultStateView)) //
+				.onCondition(EasyBind.select(vault).selectObject(Vault::stateProperty).map(VaultState.Value.PROCESSING::equals)) //
+				.afterStop(() -> vaultStateView.setRotate(0)) //
+				.build();
 	}
 
 	// TODO deduplicate w/ VaultListCellController
