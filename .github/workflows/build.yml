@@ -231,10 +231,13 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: appdir-linux
-          path: appdir
+      - name: Untar appdir.tar
+        run: |
+          ls -l
+          tar -xvf appdir.tar
       - name: Patch Cryptomator.AppDir
         run: |
-          ls -l appdir
+          ls -l
           mv appdir/Cryptomator Cryptomator.AppDir
           cp -r dist/appimage/resources/AppDir/* Cryptomator.AppDir/
           envsubst '${REVISION_NO}' < dist/appimage/resources/AppDir/bin/cryptomator.sh > Cryptomator.AppDir/bin/cryptomator.sh
