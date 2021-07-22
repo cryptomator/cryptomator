@@ -202,7 +202,7 @@ jobs:
           --java-options "-Xmx256m"
           ${{ matrix.jpackageoptions }}
       - name: Create appdir.tar
-        run: tar -C appdir -cvf appdir.tar *
+        run: tar -cvf appdir.tar appdir
       # TODO: patch in separate job
       # - name: Add Contrib Files
       #   run: |
@@ -233,7 +233,7 @@ jobs:
           name: appdir-linux
           path: appdir.tar
       - name: Untar appdir.tar
-        run: tar -xvf appdir.tar Cryptomator
+        run: tar -xvf appdir.tar appdir/Cryptomator
       - name: Patch Cryptomator.AppDir
         run: |
           mv Cryptomator Cryptomator.AppDir
