@@ -331,7 +331,7 @@ jobs:
           CODESIGN_IDENTITY: ${{ secrets.MACOS_CODESIGN_IDENTITY }}
         run: |
           find Cryptomator.app/Contents/runtime/Contents/MacOS -name '*.dylib' -exec codesign --force -s ${CODESIGN_IDENTITY} {} \;
-          for JAR_PATH in Cryptomator.app/Contents/app/**/*.jar; do
+          for JAR_PATH in Cryptomator.app/**/*.jar; do
             if [[ `unzip -l ${JAR_PATH} | grep '.dylib\|.jnilib'` ]]; then
               JAR_FILENAME=$(basename ${JAR_PATH})
               OUTPUT_PATH=${JAR_PATH%.*}
