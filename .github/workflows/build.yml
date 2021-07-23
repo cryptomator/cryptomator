@@ -375,9 +375,13 @@ jobs:
           mv Cryptomator.app dmg
           cp dist/mac/dmg/resources/macFUSE.webloc dmg
           ls -l dmg
+      - name: Install create-dmg
+        run: |
+          brew install create-dmg
+          create-dmg --help
       - name: Create .dmg
         run: >
-          dist/mac/dmg/tools/create-dmg/create-dmg.sh
+          create-dmg
             --volname Cryptomator
             --volicon "dist/mac/dmg/resources/Cryptomator-Volume.icns"
             --background "dist/mac/dmg/resources/Cryptomator-background.tiff"
