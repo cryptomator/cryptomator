@@ -461,7 +461,7 @@
 		</profile>
 
 		<profile>
-			<id>windows</id>
+			<id>win</id>
 			<activation>
 				<os>
 					<family>windows</family>
