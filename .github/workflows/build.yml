@@ -428,6 +428,9 @@ jobs:
       - name: Patch Application Directory
         run: |
           cp dist/win/contrib/* appdir/Cryptomator
+      - name: Fix permissions
+        run: attrib -r appdir/Cryptomator/Cryptomator.exe
+        shell: pwsh
       - name: Codesign
         uses: skymatic/code-sign-action@v1.0.1
         with:
