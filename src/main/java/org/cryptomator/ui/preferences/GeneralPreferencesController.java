@@ -224,7 +224,7 @@ public class GeneralPreferencesController implements FxController {
 			if (string == null) {
 				return null;
 			} else {
-				return keychainAccessProviders.stream().filter(provider -> provider.getClass().getName().equals(string)).findAny().orElseThrow();
+				return keychainAccessProviders.stream().filter(provider -> provider.getClass().getName().equals(string)).findAny().orElse(null);
 			}
 		}
 	}
