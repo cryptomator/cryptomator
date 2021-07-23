@@ -428,6 +428,28 @@ jobs:
       - name: Patch Application Directory
         run: |
           cp dist/win/contrib/* appdir/Cryptomator
+      - name: Import codesign cert
+        run: echo -n "$CODESIGN_P12_BASE64" | base64 --decode > $RUNNER_TEMP/codesign.p12
+        env:
+          CODESIGN_P12_BASE64: ${{ secrets.WIN_CODESIGN_P12_BASE64 }}
+      - name: Codesign
+        run: |
+          SIGNTOOL_PATH="C:/Program Files (x86)/Windows Kits/10/bin/10.0.17763.0/x86/signtool.exe"
+          for BINARY_FILE in `find appdir/Cryptomator -name "*.dll" -o -name "*.exe"`; do
+            ${SIGNTOOL_PATH} sign /v \
+              /f ${RUNNER_TEMP}/codesign.p12 \
+              /d "Cryptomator" \
+              /du "https://cryptomator.org" \
+              /p ${CODESIGN_P12_PW} \
+              /fd SHA256 \
+              /sha1 ${CODESIGN_CERT_SHA1} \
+              /tr "http://timestamp.sectigo.com" \
+              /td SHA256 \
+              ${BINARY_FILE}
+          done
+        env:
+          CODESIGN_P12_PW: ${{ secrets.WIN_CODESIGN_P12_PW }}
+          CODESIGN_CERT_SHA1: FF52240075AD7D14AF25629FDF69635357C7D14B
       - name: Create MSI
         run: >
           ${JAVA_HOME}/bin/jpackage
@@ -440,6 +462,22 @@ jobs:
           --vendor "Skymatic GmbH"
           --copyright "(C) 2016 - 2021 Skymatic GmbH"
           --app-version "${{ needs.metadata.outputs.versionNum }}"
+      - name: Codesign MSI
+        run: |
+          SIGNTOOL_PATH="C:/Program Files (x86)/Windows Kits/10/bin/10.0.17763.0/x86/signtool.exe"
+          ${SIGNTOOL_PATH} sign /v \
+            /f ${RUNNER_TEMP}/codesign.p12 \
+            /d "Cryptomator" \
+            /du "https://cryptomator.org" \
+            /p ${CODESIGN_P12_PW} \
+            /fd SHA256 \
+            /sha1 ${CODESIGN_CERT_SHA1} \
+            /tr "http://timestamp.sectigo.com" \
+            /td SHA256 \
+            installer/Cryptomator-${{ needs.metadata.outputs.versionNum }}.msi
+        env:
+          CODESIGN_P12_PW: ${{ secrets.WIN_CODESIGN_P12_PW }}
+          CODESIGN_CERT_SHA1: FF52240075AD7D14AF25629FDF69635357C7D14B
       - name: Upload win-msi
         uses: actions/upload-artifact@v2
         with:
