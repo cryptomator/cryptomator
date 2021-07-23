@@ -382,22 +382,22 @@ jobs:
       - name: Create .dmg
         run: >
           create-dmg
-            --volname Cryptomator
-            --volicon "dist/mac/dmg/resources/Cryptomator-Volume.icns"
-            --background "dist/mac/dmg/resources/Cryptomator-background.tiff"
-            --window-pos 400 100
-            --window-size 640 694
-            --icon-size 128
-            --icon "Cryptomator.app" 128 245
-            --hide-extension "Cryptomator.app"
-            --icon "macFUSE.webloc" 320 501
-            --hide-extension "macFUSE.webloc"
-            --app-drop-link 512 245
-            --eula "dist/mac/dmg/resources/license.rtf"
-            --icon ".background" 128 758
-            --icon ".fseventsd" 320 758
-            --icon ".VolumeIcon.icns" 512 758
-            Cryptomator-${VERSION_NO}.dmg dmg
+          --volname Cryptomator
+          --volicon "dist/mac/dmg/resources/Cryptomator-Volume.icns"
+          --background "dist/mac/dmg/resources/Cryptomator-background.tiff"
+          --window-pos 400 100
+          --window-size 640 694
+          --icon-size 128
+          --icon "Cryptomator.app" 128 245
+          --hide-extension "Cryptomator.app"
+          --icon "macFUSE.webloc" 320 501
+          --hide-extension "macFUSE.webloc"
+          --app-drop-link 512 245
+          --eula "dist/mac/dmg/resources/license.rtf"
+          --icon ".background" 128 758
+          --icon ".fseventsd" 320 758
+          --icon ".VolumeIcon.icns" 512 758
+          Cryptomator-${VERSION_NO}.dmg dmg
         env:
           VERSION_NO: ${{ needs.metadata.outputs.versionNum }}
       - name: Upload mac-dmg
