@@ -43,7 +43,7 @@ jobs:
 #
 
   buildkit:
-    name: Build buildkit-${{ matrix.profile }}
+    name: Build ${{ matrix.profile }}-buildkit
     needs: test
     runs-on: ${{ matrix.os }}
     strategy:
@@ -69,15 +69,15 @@ jobs:
             ${{ runner.os }}-maven-
       - name: Copy .jar files
         run: mvn -B clean package -DskipTests -P${{ matrix.profile }}
-      - name: Archive buildkit-${{ matrix.profile }}.tar.gz
+      - name: Patch buildkit
         run: |
           cp LICENSE.txt target
           cp dist/${{ matrix.profile }}/launcher* target
           cp target/cryptomator-*.jar target/mods
-      - name: Upload buildkit-${{ matrix.profile }}
+      - name: Upload ${{ matrix.profile }}-buildkit
         uses: actions/upload-artifact@v2
         with:
-          name: buildkit-${{ matrix.profile }}
+          name: ${{ matrix.profile }}-buildkit
           path: |
             target/libs
             target/mods
@@ -166,10 +166,10 @@ jobs:
       - uses: actions/setup-java@v1
         with:
           java-version: ${{ env.JAVA_VERSION }}
-      - name: Download buildkit-${{ matrix.profile }}
+      - name: Download ${{ matrix.profile }}-buildkit
         uses: actions/download-artifact@v2
         with:
-          name: buildkit-${{ matrix.profile }}
+          name: ${{ matrix.profile }}-buildkit
           path: buildkit
       - name: Create Runtime Image
         run: >
