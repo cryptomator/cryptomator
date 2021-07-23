@@ -379,12 +379,13 @@ jobs:
           ${JAVA_HOME}/bin/jpackage
           --verbose
           --type msi
+          --win-upgrade-uuid bda45523-42b1-4cae-9354-a45475ed4775
           --app-image appdir/Cryptomator
           --dest installer
           --name Cryptomator
           --vendor "Skymatic GmbH"
           --copyright "(C) 2016 - 2021 Skymatic GmbH"
-          --app-version "${{ needs.metadata.outputs.versionNum }}.${{ needs.metadata.outputs.revNum }}"
+          --app-version "${{ needs.metadata.outputs.versionNum }}"
       - name: Upload win-msi
         uses: actions/upload-artifact@v2
         with:
