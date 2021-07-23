@@ -188,9 +188,12 @@ public class FxApplication extends Application {
 	}
 
 	private void applySystemTheme() {
-		appearanceProvider.ifPresent(appearanceProvider -> {
-			systemInterfaceThemeChanged(appearanceProvider.getSystemTheme());
-		});
+		if (appearanceProvider.isPresent()) {
+			systemInterfaceThemeChanged(appearanceProvider.get().getSystemTheme());
+		} else {
+			LOG.warn("No UiAppearanceProvider present, assuming LIGHT theme...");
+			applyLightTheme();
+		}
 	}
 
 	private void applyLightTheme() {
