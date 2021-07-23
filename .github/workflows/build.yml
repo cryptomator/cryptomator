@@ -116,7 +116,7 @@ jobs:
 #
 
   appdir:
-    name: Create appdir-${{ matrix.profile }}
+    name: Create ${{ matrix.profile }}-appdir
     needs: [buildkit, metadata]
     runs-on: ${{ matrix.os }}
     strategy:
@@ -200,19 +200,12 @@ jobs:
           ${{ matrix.jpackageoptions }}
       - name: Create appdir.tar
         run: tar -cvf appdir.tar appdir
-      # TODO: patch in separate job
-      # - name: Add Contrib Files
-      #   run: |
-      #     if [ -e dist/appdir/${{ matrix.profile }}/contrib/ ]; then
-      #       cp dist/appdir/${{ matrix.profile }}/contrib/* appdir/
-      #     fi
-      - name: Upload appdir-${{ matrix.profile }}
+      - name: Upload ${{ matrix.profile }}-appdir
         uses: actions/upload-artifact@v2
         with:
-          name: appdir-${{ matrix.profile }}
+          name: ${{ matrix.profile }}-appdir
           path: appdir.tar
           if-no-files-found: error
-
 
 #
 # Linux Cryptomator.AppImage
@@ -224,10 +217,10 @@ jobs:
     needs: [appdir, metadata]
     steps:
       - uses: actions/checkout@v2
-      - name: Download appdir-linux
+      - name: Download linux-appdir
         uses: actions/download-artifact@v2
         with:
-          name: appdir-linux
+          name: linux-appdir
       - name: Untar appdir.tar
         run: |
           tar -xvf appdir.tar
@@ -273,7 +266,7 @@ jobs:
       - name: Upload AppImage
         uses: actions/upload-artifact@v2
         with:
-          name: appimage
+          name: linux-appimage
           path: |
             cryptomator-${{ needs.metadata.outputs.versionStr }}-x86_64.AppImage
             cryptomator-${{ needs.metadata.outputs.versionStr }}-x86_64.AppImage.asc
@@ -291,10 +284,10 @@ jobs:
     needs: [appdir, metadata]
     steps:
       - uses: actions/checkout@v2
-      - name: Download appdir-mac
+      - name: Download mac-appdir
         uses: actions/download-artifact@v2
         with:
-          name: appdir-mac
+          name: mac-appdir
       - name: Untar appdir.tar
         run: tar -xvf appdir.tar
       - name: Patch Cryptomator.app
@@ -353,10 +346,10 @@ jobs:
         run: security delete-keychain $RUNNER_TEMP/codesign.keychain-db
       - name: Create app.tar
         run: tar -cvf app.tar Cryptomator.app
-      - name: Upload appdir-${{ matrix.profile }}
+      - name: Upload mac-app
         uses: actions/upload-artifact@v2
         with:
-          name: macOS-app
+          name: mac-app
           path: app.tar
           if-no-files-found: error
 
@@ -366,18 +359,21 @@ jobs:
   win-msi:
     name: Build Cryptomator.msi
     runs-on: windows-latest
-    needs: [appdir]
+    needs: [appdir, metadata]
     steps:
       - uses: actions/checkout@v2
-      - name: Download appdir-win
+      - name: Download win-appdir
         uses: actions/download-artifact@v2
         with:
-          name: appdir-win
+          name: win-appdir
       - name: Untar appdir.tar
         run: tar -xvf appdir.tar
       - uses: actions/setup-java@v1
         with:
           java-version: ${{ env.JAVA_VERSION }}
+      - name: Patch Application Directory
+        run: |
+          cp dist/win/contrib/* appdir/Cryptomator
       - name: Create MSI
         run: >
           ${JAVA_HOME}/bin/jpackage
@@ -386,14 +382,15 @@ jobs:
           --app-image appdir/Cryptomator
           --dest installer
           --name Cryptomator
-      - name: Upload appdir-${{ matrix.profile }}
+          --vendor "Skymatic GmbH"
+          --copyright "(C) 2016 - 2021 Skymatic GmbH"
+          --app-version "${{ needs.metadata.outputs.versionNum }}.${{ needs.metadata.outputs.revNum }}"
+      - name: Upload win-msi
         uses: actions/upload-artifact@v2
         with:
           name: win-msi
-          path: installer/*
+          path: installer/*.msi
           if-no-files-found: error
-
-#--app-image
 
   # release:
   #   name: Draft a Release on GitHub Releases
