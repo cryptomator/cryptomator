@@ -354,6 +354,56 @@ jobs:
           if-no-files-found: error
 
 #
+# macOS Cryptomator.dmg
+#
+
+  mac-dmg:
+    name: Build Cryptomator.dmg
+    runs-on: macos-latest
+    needs: [mac-app, metadata]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Download mac-appdir
+        uses: actions/download-artifact@v2
+        with:
+          name: mac-app
+      - name: Untar app.tar
+        run: tar -xvf app.tar
+      - name: Prepare .dmg contents
+        run: |
+          mkdir dmg
+          mv Cryptomator.app dmg
+          cp dist/mac/dmg/resources/macFUSE.webloc dmg
+          ls -l dmg
+      - name: Create .dmg
+        run: >
+          dist/mac/dmg/tools/create-dmg/create-dmg.sh
+            --volname Cryptomator
+            --volicon "dist/mac/dmg/resources/Cryptomator-Volume.icns"
+            --background "dist/mac/dmg/resources/Cryptomator-background.tiff"
+            --window-pos 400 100
+            --window-size 640 694
+            --icon-size 128
+            --icon "Cryptomator.app" 128 245
+            --hide-extension "Cryptomator.app"
+            --icon "macFUSE.webloc" 320 501
+            --hide-extension "macFUSE.webloc"
+            --app-drop-link 512 245
+            --eula "dist/mac/dmg/resources/license.rtf"
+            --icon ".background" 128 758
+            --icon ".fseventsd" 320 758
+            --icon ".VolumeIcon.icns" 512 758
+            Cryptomator-${VERSION_NO}.dmg dmg
+        env:
+          VERSION_NO: ${{ needs.metadata.outputs.versionNum }}
+      - name: Upload mac-dmg
+        uses: actions/upload-artifact@v2
+        with:
+          name: mac-dmg
+          path: Cryptomator-*.dmg
+          if-no-files-found: error
+
+#
 # MSI package
 #
   win-msi:
