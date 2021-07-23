@@ -429,7 +429,7 @@ jobs:
         run: |
           cp dist/win/contrib/* appdir/Cryptomator
       - name: Codesign
-        uses: skymatic/code-sign-action@v1
+        uses: skymatic/code-sign-action@v1.0.1
         with:
           certificate: ${{ secrets.WIN_CODESIGN_P12_BASE64 }}
           password: ${{ secrets.WIN_CODESIGN_P12_PW }}
@@ -450,7 +450,7 @@ jobs:
           --copyright "(C) 2016 - 2021 Skymatic GmbH"
           --app-version "${{ needs.metadata.outputs.versionNum }}"
       - name: Codesign MSI
-        uses: skymatic/code-sign-action@v1
+        uses: skymatic/code-sign-action@v1.0.1
         with:
           certificate: ${{ secrets.WIN_CODESIGN_P12_BASE64 }}
           password: ${{ secrets.WIN_CODESIGN_P12_PW }}
