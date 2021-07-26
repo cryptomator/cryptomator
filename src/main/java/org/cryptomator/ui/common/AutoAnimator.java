@@ -9,13 +9,14 @@ import javafx.beans.value.ObservableValue;
 
 /**
  * TODO: doc doc doc
- * 		-- the duckumentation dock
+ * 		-- the dockumentation duck
  *                __
  *              <(o )___
  *               ( ._> /
  *                `---'   hjw
  */
 public class AutoAnimator<T extends Animation> {
+
 
 	private final T animation;
 	private final ObservableValue<Boolean> condition;
@@ -71,10 +72,6 @@ public class AutoAnimator<T extends Animation> {
 		}
 	}
 
-	public static Builder animate(Animation animation) {
-		return new Builder(animation);
-	}
-
 	public static class Builder {
 
 		private Animation animation;
@@ -84,6 +81,10 @@ public class AutoAnimator<T extends Animation> {
 
 		private Builder(Animation animation) {
 			this.animation = animation;
+		}
+
+		public static Builder with(Animation animation) {
+			return new Builder(animation);
 		}
 
 		public Builder onCondition(ObservableValue<Boolean> condition) {
