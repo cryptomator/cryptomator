@@ -74,7 +74,7 @@ public class StartController implements FxController {
 		assert unverifiedVaultConfig.get() != null;
 		try {
 			keyLoadingStrategy.use(this::verifyVaultConfig);
-		} catch (VaultConfigLoadException e) {
+		} catch (VaultConfigLoadException | UnlockCancelledException e) {
 			throw new LoadingFailedException(e);
 		}
 	}
