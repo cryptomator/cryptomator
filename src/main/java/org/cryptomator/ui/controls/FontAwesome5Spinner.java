@@ -6,6 +6,11 @@ import org.cryptomator.ui.common.AutoAnimator;
 import javafx.beans.NamedArg;
 import javafx.beans.value.ObservableValue;
 
+/**
+ * An animated progress spinner using the {@link FontAwesome5IconView} with the spinner glyph.
+ *
+ * By default, the animation is always played if the icon is visible. To animate on other conditions, use the "spinning" property.
+ */
 public class FontAwesome5Spinner extends FontAwesome5IconView{
 
 	private final AutoAnimator animator;

@@ -8,12 +8,10 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
 
 /**
- * TODO: doc doc doc
- * 		-- the dockumentation duck
- *                __
- *              <(o )___
- *               ( ._> /
- *                `---'   hjw
+ * Animation which starts and stops automatically based on an observable condition.
+ * <p>
+ * During creation the consumer can optionally define actions to be executed everytime before the animation starts and after it stops.
+ * The automatic playback of the animation based on the condition can be stopped by calling {@link #deactivateCondition()}. To reactivate it, {@link #activateCondition()} must be called.
  */
 public class AutoAnimator<T extends Animation> {
 
