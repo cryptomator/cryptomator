@@ -1,12 +1,8 @@
 package org.cryptomator.ui.quit;
 
-import com.tobiasdiez.easybind.Subscription;
 import org.cryptomator.common.vaults.Vault;
-import org.cryptomator.ui.common.Animations;
-import org.cryptomator.ui.common.AutoAnimator;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.VaultService;
-import org.cryptomator.ui.controls.FontAwesome5IconView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,11 +31,8 @@ public class QuitController implements FxController {
 	private final VaultService vaultService;
 	private final AtomicReference<QuitResponse> quitResponse = new AtomicReference<>();
 
-	private AutoAnimator spinAnimation;
-
 	/* FXML */
 	public Button lockAndQuitButton;
-	public FontAwesome5IconView quitInProgressView;
 
 	@Inject
 	QuitController(@QuitWindow Stage window, ObservableList<Vault> vaults, ExecutorService executorService, VaultService vaultService) {
@@ -48,13 +41,6 @@ public class QuitController implements FxController {
 		this.executorService = executorService;
 		this.vaultService = vaultService;
 		window.setOnCloseRequest(windowEvent -> cancel());
-	}
-
-	public void initialize() {
-		this.spinAnimation = AutoAnimator.Builder.with(Animations.createDiscrete360Rotation(quitInProgressView)) //
-				.onCondition(quitInProgressView.visibleProperty()) //
-				.afterStop(() -> quitInProgressView.setRotate(0)) //
-				.build();
 	}
 
 	public void updateQuitRequest(QuitResponse newResponse) {

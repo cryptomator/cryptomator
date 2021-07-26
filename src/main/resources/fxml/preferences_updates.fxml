@@ -7,7 +7,7 @@
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.Hyperlink?>
 <?import javafx.scene.layout.VBox?>
-<?import org.cryptomator.ui.controls.FontAwesome5IconView?>
+<?import org.cryptomator.ui.controls.FontAwesome5Spinner?>
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.preferences.UpdatesPreferencesController"
@@ -26,7 +26,7 @@
 		<VBox alignment="CENTER" spacing="6">
 			<Button text="%preferences.updates.checkNowBtn" defaultButton="true" onAction="#checkNow" contentDisplay="${controller.checkForUpdatesButtonState}">
 				<graphic>
-					<FontAwesome5IconView fx:id="updateCheckRunningView" glyph="SPINNER" glyphSize="12" />
+					<FontAwesome5Spinner fx:id="spinner" glyphSize="12"/>
 				</graphic>
 			</Button>
 

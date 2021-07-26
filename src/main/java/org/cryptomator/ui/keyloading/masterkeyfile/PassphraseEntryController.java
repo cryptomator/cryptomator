@@ -1,10 +1,7 @@
 package org.cryptomator.ui.keyloading.masterkeyfile;
 
-import com.tobiasdiez.easybind.Subscription;
 import org.cryptomator.common.keychain.KeychainManager;
 import org.cryptomator.common.vaults.Vault;
-import org.cryptomator.ui.common.Animations;
-import org.cryptomator.ui.common.AutoAnimator;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.UserInteractionLock;
 import org.cryptomator.ui.common.WeakBindings;
@@ -62,8 +59,6 @@ public class PassphraseEntryController implements FxController {
 	private final BooleanBinding userInteractionDisabled;
 	private final BooleanProperty unlockButtonDisabled;
 	private final StringBinding vaultName;
-
-	private AutoAnimator spinAnimation;
 
 	/* FXML */
 	public NiceSecurePasswordField passwordField;
@@ -138,11 +133,6 @@ public class PassphraseEntryController implements FxController {
 		);
 
 		passwordEntryLock.awaitingInteraction().addListener(observable -> stopUnlockAnimation());
-
-		this.spinAnimation = AutoAnimator.Builder.with(Animations.createDiscrete360Rotation(unlockInProgressView)) //
-				.onCondition(unlockInProgressView.visibleProperty()) //
-				.afterStop(() -> unlockInProgressView.setRotate(0)) //
-				.build();
 	}
 
 	@FXML

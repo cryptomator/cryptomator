@@ -1,6 +1,5 @@
 package org.cryptomator.ui.migration;
 
-import com.tobiasdiez.easybind.Subscription;
 import dagger.Lazy;
 import org.cryptomator.common.keychain.KeychainManager;
 import org.cryptomator.common.vaults.Vault;
@@ -13,13 +12,11 @@ import org.cryptomator.cryptofs.migration.api.MigrationProgressListener;
 import org.cryptomator.cryptolib.api.InvalidPassphraseException;
 import org.cryptomator.integrations.keychain.KeychainAccessException;
 import org.cryptomator.ui.common.Animations;
-import org.cryptomator.ui.common.AutoAnimator;
 import org.cryptomator.ui.common.ErrorComponent;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.Tasks;
-import org.cryptomator.ui.controls.FontAwesome5IconView;
 import org.cryptomator.ui.controls.NiceSecurePasswordField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,11 +67,9 @@ public class MigrationRunController implements FxController {
 	private final BooleanProperty migrationButtonDisabled;
 	private final DoubleProperty migrationProgress;
 
-	private AutoAnimator spinAnimation;
 	private volatile double volatileMigrationProgress = -1.0;
 
 	/* FXML */
-	public FontAwesome5IconView migrationInProgressView;
 	public NiceSecurePasswordField passwordField;
 
 	@Inject
@@ -105,11 +100,6 @@ public class MigrationRunController implements FxController {
 				.or(passwordField.textProperty().isEmpty()));
 
 		window.setOnHiding(event -> passwordField.wipe());
-
-		this.spinAnimation = AutoAnimator.Builder.with(Animations.createDiscrete360Rotation(migrationInProgressView)) //
-				.onCondition(migrationInProgressView.visibleProperty()) //
-				.afterStop(() -> migrationInProgressView.setRotate(0)) //
-				.build();
 	}
 
 	@FXML

@@ -1,11 +1,7 @@
 package org.cryptomator.ui.preferences;
 
-import com.tobiasdiez.easybind.Subscription;
 import org.cryptomator.common.settings.Settings;
-import org.cryptomator.ui.common.Animations;
-import org.cryptomator.ui.common.AutoAnimator;
 import org.cryptomator.ui.common.FxController;
-import org.cryptomator.ui.controls.FontAwesome5IconView;
 import org.cryptomator.ui.fxapp.UpdateChecker;
 
 import javax.inject.Inject;
@@ -31,10 +27,7 @@ public class UpdatesPreferencesController implements FxController {
 	private final ReadOnlyStringProperty currentVersion;
 	private final BooleanBinding updateAvailable;
 
-	private AutoAnimator spinAnimation;
-
 	/* FXML */
-	public FontAwesome5IconView updateCheckRunningView;
 	public CheckBox checkForUpdatesCheckbox;
 
 	@Inject
@@ -50,10 +43,6 @@ public class UpdatesPreferencesController implements FxController {
 
 	public void initialize() {
 		checkForUpdatesCheckbox.selectedProperty().bindBidirectional(settings.checkForUpdates());
-		this.spinAnimation = AutoAnimator.Builder.with(Animations.createDiscrete360Rotation(updateCheckRunningView)) //
-				.onCondition(updateCheckRunningView.visibleProperty()) //
-				.afterStop(() -> updateCheckRunningView.setRotate(0)) //
-				.build();
 	}
 
 	@FXML
