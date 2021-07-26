@@ -33,7 +33,7 @@ public class VaultListCellController implements FxController {
 	}
 
 	public void initialize() {
-		this.spinAnimation = AutoAnimator.Builder.with(Animations.createDiscrete360Rotation(vaultStateView)) //
+		this.spinAnimation = AutoAnimator.animate(Animations.createDiscrete360Rotation(vaultStateView)) //
 				.onCondition(EasyBind.select(vault).selectObject(Vault::stateProperty).map(VaultState.Value.PROCESSING::equals)) //
 				.afterStop(() -> vaultStateView.setRotate(0)) //
 				.build();

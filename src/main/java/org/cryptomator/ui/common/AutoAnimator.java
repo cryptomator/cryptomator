@@ -72,6 +72,10 @@ public class AutoAnimator<T extends Animation> {
 		}
 	}
 
+	public static Builder animate(Animation animation) {
+		return new Builder(animation);
+	}
+
 	public static class Builder {
 
 		private Animation animation;
@@ -81,10 +85,6 @@ public class AutoAnimator<T extends Animation> {
 
 		private Builder(Animation animation) {
 			this.animation = animation;
-		}
-
-		public static Builder with(Animation animation) {
-			return new Builder(animation);
 		}
 
 		public Builder onCondition(ObservableValue<Boolean> condition) {
