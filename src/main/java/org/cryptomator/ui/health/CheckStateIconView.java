@@ -3,6 +3,8 @@ package org.cryptomator.ui.health;
 import com.tobiasdiez.easybind.EasyBind;
 import com.tobiasdiez.easybind.Subscription;
 import org.cryptomator.cryptofs.health.api.DiagnosticResult;
+import org.cryptomator.ui.common.Animations;
+import org.cryptomator.ui.common.AutoAnimator;
 import org.cryptomator.ui.controls.FontAwesome5Icon;
 import org.cryptomator.ui.controls.FontAwesome5IconView;
 
@@ -22,6 +24,7 @@ public class CheckStateIconView extends FontAwesome5IconView {
 	private final ObservableObjectValue<Check.CheckState> state;
 	private final ObservableObjectValue<DiagnosticResult.Severity> severity;
 	private final List<Subscription> subscriptions;
+	private final AutoAnimator onRunningRotator;
 
 	public CheckStateIconView() {
 		this.state = EasyBind.wrapNullable(check).mapObservable(Check::stateProperty).asOrdinary();
@@ -33,6 +36,11 @@ public class CheckStateIconView extends FontAwesome5IconView {
 				EasyBind.includeWhen(getStyleClass(), "glyph-icon-orange", Bindings.equal(severity, DiagnosticResult.Severity.WARN).or(Bindings.equal(severity, DiagnosticResult.Severity.CRITICAL))), //
 				EasyBind.includeWhen(getStyleClass(), "glyph-icon-red", Bindings.equal(state, Check.CheckState.ERROR)) //
 		);
+		var animation = Animations.createDiscrete360Rotation(this);
+		this.onRunningRotator = AutoAnimator.animate(animation) //
+				.onCondition(Bindings.equal(state, Check.CheckState.RUNNING)) //
+				.afterStop(() -> setRotate(0)) //
+				.build();
 	}
 
 	private FontAwesome5Icon glyphForState() {

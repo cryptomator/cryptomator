@@ -3,6 +3,8 @@ package org.cryptomator.ui.health;
 import com.tobiasdiez.easybind.EasyBind;
 import com.tobiasdiez.easybind.Subscription;
 import org.cryptomator.cryptofs.health.api.DiagnosticResult;
+import org.cryptomator.ui.common.Animations;
+import org.cryptomator.ui.common.AutoAnimator;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.controls.FontAwesome5Icon;
 import org.cryptomator.ui.controls.FontAwesome5IconView;
@@ -51,6 +53,8 @@ public class ResultListCellController implements FxController {
 	private final Tooltip fixSuccess;
 	private final Tooltip fixFail;
 
+	private AutoAnimator fixRunningRotator;
+
 	/* FXML */
 	public FontAwesome5IconView severityView;
 	public FontAwesome5IconView fixView;
@@ -83,8 +87,12 @@ public class ResultListCellController implements FxController {
 				EasyBind.includeWhen(severityView.getStyleClass(), "glyph-icon-primary", Bindings.equal(severity, DiagnosticResult.Severity.GOOD)), //
 				EasyBind.includeWhen(severityView.getStyleClass(), "glyph-icon-orange", Bindings.equal(severity, DiagnosticResult.Severity.WARN)), //
 				EasyBind.includeWhen(severityView.getStyleClass(), "glyph-icon-red", Bindings.equal(severity, DiagnosticResult.Severity.CRITICAL)) //
-				// EasyBind.includeWhen(fixView.getStyleClass(), "glyph-icon-muted", fixView.glyphProperty().isNotNull())) // TODO not really needed, right?
 		));
+		var animation = Animations.createDiscrete360Rotation(fixView);
+		this.fixRunningRotator = AutoAnimator.animate(animation) //
+				.onCondition(Bindings.equal(fixState, Result.FixState.FIXING)) //
+				.afterStop(() -> fixView.setRotate(0)) //
+				.build();
 	}
 
 	@FXML
