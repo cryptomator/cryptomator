@@ -4,11 +4,12 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.geometry.Insets?>
-<?import org.cryptomator.ui.controls.FormattedLabel?>
 <?import javafx.scene.control.TitledPane?>
 <?import org.cryptomator.ui.controls.FontAwesome5IconView?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.text.TextFlow?>
+<?import javafx.scene.text.Text?>
 <VBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
 	  fx:controller="org.cryptomator.ui.health.StartFailController"
@@ -19,9 +20,12 @@
 		<Insets topRightBottomLeft="12"/>
 	</padding>
 	<Label text="%health.fail.header" styleClass="label-large" />
-	<FormattedLabel fx:id="ioErrorLabel" format="%health.fail.ioError" arg1="${controller.localizedErrorMessage}" visible="${controller.ioException}" managed="${controller.ioException}"/>
+	<TextFlow fx:id="ioErrorLabel" visible="${controller.ioException}" managed="${controller.ioException}">
+		<Text text="%health.fail.ioError" />
+		<Text text="${controller.localizedErrorMessage}"/>
+	</TextFlow>
 	<Label fx:id="parseErrorLabel" text="%health.fail.parseError" visible="${controller.parseException}" managed="${controller.parseException}"/>
-	<TitledPane fx:id="moreInfoPane" text="%health.fail.moreInfo" expanded="false" contentDisplay="LEFT" >
+	<TitledPane fx:id="moreInfoPane" text="%health.fail.moreInfo" expanded="false">
 		<graphic>
 			<HBox alignment="CENTER" minWidth="8">
 				<FontAwesome5IconView glyph="${controller.moreInfoIcon}"/>

@@ -41,7 +41,7 @@
 			<ChoiceBox fx:id="actionAfterUnlockChoiceBox"/>
 		</HBox>
 
-		<Button fx:id="healthCheckButton" text="%vaultOptions.general.startBtn" onAction="#startHealthCheck">
+		<Button fx:id="healthCheckButton" text="%vaultOptions.general.startHealthCheckBtn" onAction="#startHealthCheck">
 			<graphic>
 				<FontAwesome5IconView glyph="STETHOSCOPE"/>
 			</graphic>
