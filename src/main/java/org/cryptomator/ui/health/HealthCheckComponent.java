@@ -4,6 +4,7 @@ import dagger.BindsInstance;
 import dagger.Lazy;
 import dagger.Subcomponent;
 import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.cryptofs.VaultConfig;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 
@@ -15,20 +16,27 @@ import javafx.stage.Stage;
 @Subcomponent(modules = {HealthCheckModule.class})
 public interface HealthCheckComponent {
 
+	LoadUnverifiedConfigResult loadConfig();
+
 	@HealthCheckWindow
 	Stage window();
 
-	@Named("windowToClose")
-	Stage windowToClose();
-
 	@FxmlScene(FxmlFile.HEALTH_START)
-	Lazy<Scene> scene();
+	Lazy<Scene> startScene();
+
+	@FxmlScene(FxmlFile.HEALTH_START_FAIL)
+	Lazy<Scene> failScene();
 
 	default Stage showHealthCheckWindow() {
 		Stage stage = window();
-		stage.setScene(scene().get());
+		// TODO reevaluate config loading, as soon as we have the new generic error screen
+		var unverifiedConf = loadConfig();
+		if (unverifiedConf.config() != null) {
+			stage.setScene(startScene().get());
+		} else {
+			stage.setScene(failScene().get());
+		}
 		stage.show();
-		windowToClose().close();
 		return stage;
 	}
 
@@ -39,9 +47,10 @@ public interface HealthCheckComponent {
 		Builder vault(@HealthCheckWindow Vault vault);
 
 		@BindsInstance
-		Builder windowToClose(@Named("windowToClose") Stage window);
+		Builder owner(@Named("healthCheckOwner") Stage owner);
 
 		HealthCheckComponent build();
 	}
 
+	record LoadUnverifiedConfigResult(VaultConfig.UnverifiedVaultConfig config, Throwable error) {}
 }

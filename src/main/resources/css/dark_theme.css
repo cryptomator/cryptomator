@@ -127,23 +127,38 @@
 	-fx-fill: TEXT_FILL;
 }
 
-.glyph-icon-primary {
+.glyph-icon-primary,
+.glyph-icon.glyph-icon-primary,
+.list-cell .glyph-icon.glyph-icon-primary,
+.list-cell:selected .glyph-icon.glyph-icon-primary {
 	-fx-fill: PRIMARY;
 }
 
-.glyph-icon-muted {
+.glyph-icon-muted,
+.glyph-icon.glyph-icon-muted,
+.list-cell .glyph-icon.glyph-icon-muted,
+.list-cell:selected .glyph-icon.glyph-icon-muted {
 	-fx-fill: TEXT_FILL_MUTED;
 }
 
-.glyph-icon-white {
+.glyph-icon-white,
+.glyph-icon.glyph-icon-white,
+.list-cell .glyph-icon.glyph-icon-white,
+.list-cell:selected .glyph-icon.glyph-icon-white {
 	-fx-fill: white;
 }
 
-.glyph-icon-red {
+.glyph-icon-red,
+.glyph-icon.glyph-icon-red,
+.list-cell .glyph-icon.glyph-icon-red,
+.list-cell:selected .glyph-icon.glyph-icon-red {
 	-fx-fill: RED_5;
 }
 
-.glyph-icon-orange {
+.glyph-icon-orange,
+.glyph-icon.glyph-icon-orange,
+.list-cell .glyph-icon.glyph-icon-orange,
+.list-cell:selected .glyph-icon.glyph-icon-orange {
 	-fx-fill: ORANGE_5;
 }
 
