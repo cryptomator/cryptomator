@@ -70,13 +70,7 @@ abstract class HealthCheckModule {
 	@Provides
 	@HealthCheckScoped
 	static List<Check> provideAvailableChecks() {
-		//return HealthCheck.allChecks().stream().map(Check::new).toList();
-		//TODO: remove below lines and uncomment above one
-		var realChecks = HealthCheck.allChecks().stream().map(Check::new).toList();
-		var tmp = new ArrayList<>(realChecks);
-		var tmp2 = List.of(new DummyHealthChecks.DummyCheck1(), new DummyHealthChecks.DummyCheck2(), new DummyHealthChecks.DummyCheck3()).stream().map(Check::new).toList();
-		tmp.addAll(tmp2);
-		return tmp;
+		return HealthCheck.allChecks().stream().map(Check::new).toList();
 	}
 
 	@Provides
