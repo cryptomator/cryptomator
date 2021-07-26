@@ -76,6 +76,7 @@ public class CreateNewVaultPasswordController implements FxController {
 	private final BooleanProperty readyToCreateVault;
 	private final ObjectBinding<ContentDisplay> createVaultButtonState;
 
+	/* FXML */
 	public ToggleGroup recoveryKeyChoice;
 	public Toggle showRecoveryKey;
 	public Toggle skipRecoveryKey;

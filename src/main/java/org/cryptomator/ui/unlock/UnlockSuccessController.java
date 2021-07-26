@@ -32,6 +32,7 @@ public class UnlockSuccessController implements FxController {
 	private final ObjectProperty<ContentDisplay> revealButtonState;
 	private final BooleanProperty revealButtonDisabled;
 
+	/* FXML */
 	public CheckBox rememberChoiceCheckbox;
 
 	@Inject
