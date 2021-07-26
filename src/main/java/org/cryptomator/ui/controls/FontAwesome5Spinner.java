@@ -13,7 +13,7 @@ public class FontAwesome5Spinner extends FontAwesome5IconView{
 	public FontAwesome5Spinner(@NamedArg("spinning") ObservableValue<Boolean> spinning) {
 		setGlyph(FontAwesome5Icon.SPINNER);
 		var animation = Animations.createDiscrete360Rotation(this);
-		this.animator = AutoAnimator.Builder.with(animation)
+		this.animator = AutoAnimator.animate(animation)
 				.afterStop(() -> setRotate(0))
 				.onCondition(spinning == null? visibleProperty():spinning)
 				.build();
