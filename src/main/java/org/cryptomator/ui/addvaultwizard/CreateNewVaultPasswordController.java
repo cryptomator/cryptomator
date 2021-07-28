@@ -107,7 +107,7 @@ public class CreateNewVaultPasswordController implements FxController {
 
 	@FXML
 	public void initialize() {
-		readyToCreateVault.bind(newPasswordSceneController.passwordsMatchAndSufficientProperty().and(recoveryKeyChoice.selectedToggleProperty().isNotNull()).and(processing.not()));
+		readyToCreateVault.bind(newPasswordSceneController.goodPasswordProperty().and(recoveryKeyChoice.selectedToggleProperty().isNotNull()).and(processing.not()));
 		window.setOnHiding(event -> {
 			newPasswordSceneController.passwordField.wipe();
 			newPasswordSceneController.reenterField.wipe();
