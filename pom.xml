@@ -39,6 +39,7 @@
 		<!-- 3rd party dependencies -->
 		<javafx.version>16</javafx.version>
 		<commons-lang3.version>3.12.0</commons-lang3.version>
+		<bouncycastle.version>1.69</bouncycastle.version>
 		<jwt.version>3.18.1</jwt.version>
 		<easybind.version>2.2</easybind.version>
 		<guava.version>30.1.1-jre</guava.version>
@@ -126,6 +127,13 @@
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
 			<version>${commons-lang3.version}</version>
+		</dependency>
+
+		<!-- BouncyCastle -->
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcpkix-jdk15on</artifactId>
+			<version>${bouncycastle.version}</version>
 		</dependency>
 
 		<!-- JWT -->

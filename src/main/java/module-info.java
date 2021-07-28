@@ -23,6 +23,8 @@ module org.cryptomator.desktop {
 	requires org.apache.commons.lang3;
 	requires dagger;
 	requires com.auth0.jwt;
+	requires org.bouncycastle.provider;
+	requires org.bouncycastle.pkix;
 
 	/* TODO: filename-based modules: */
 	requires static javax.inject; /* ugly dagger/guava crap */

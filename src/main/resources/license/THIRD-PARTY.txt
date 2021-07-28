@@ -11,7 +11,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see http://www.gnu.org/licenses/.
 
-Cryptomator uses 40 third-party dependencies under the following licenses:
+Cryptomator uses 43 third-party dependencies under the following licenses:
         Apache License v2.0:
 			- jffi (com.github.jnr:jffi:1.2.23 - http://github.com/jnr/jffi)
 			- jnr-a64asm (com.github.jnr:jnr-a64asm:1.0.0 - http://nexus.sonatype.org/oss-repository-hosting.html/jnr-a64asm)
@@ -41,6 +41,10 @@ Cryptomator uses 40 third-party dependencies under the following licenses:
 			- asm-commons (org.ow2.asm:asm-commons:7.1 - http://asm.ow2.org/)
 			- asm-tree (org.ow2.asm:asm-tree:7.1 - http://asm.ow2.org/)
 			- asm-util (org.ow2.asm:asm-util:7.1 - http://asm.ow2.org/)
+        Bouncy Castle Licence:
+			- Bouncy Castle PKIX, CMS, EAC, TSP, PKCS, OCSP, CMP, and CRMF APIs (org.bouncycastle:bcpkix-jdk15on:1.69 - https://www.bouncycastle.org/java.html)
+			- Bouncy Castle Provider (org.bouncycastle:bcprov-jdk15on:1.69 - https://www.bouncycastle.org/java.html)
+			- Bouncy Castle ASN.1 Extension and Utility APIs (org.bouncycastle:bcutil-jdk15on:1.69 - https://www.bouncycastle.org/java.html)
         Eclipse Public License - Version 1.0:
 			- Jetty :: Servlet API and Schemas for JPMS and OSGi (org.eclipse.jetty.toolchain:jetty-servlet-api:4.0.6 - https://eclipse.org/jetty/jetty-servlet-api)
         Eclipse Public License - Version 2.0:
