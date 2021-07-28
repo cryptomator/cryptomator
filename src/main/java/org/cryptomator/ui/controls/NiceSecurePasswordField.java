@@ -82,6 +82,10 @@ public class NiceSecurePasswordField extends StackPane {
 		return passwordField.textProperty();
 	}
 
+	public char[] copyChars() {
+		return passwordField.copyChars();
+	}
+
 	public CharSequence getCharacters() {
 		return passwordField.getCharacters();
 	}

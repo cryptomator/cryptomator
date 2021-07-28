@@ -195,6 +195,15 @@ public class SecurePasswordField extends TextField {
 	}
 
 	/**
+	 * Retrieves a copy of the password characters. This copy needs to be wiped by the caller when done.
+	 *
+	 * @return A copy of the password
+	 */
+	public char[] copyChars() {
+		return Arrays.copyOf(content, length);
+	}
+
+	/**
 	 * Creates a CharSequence by wrapping the password characters.
 	 *
 	 * @return A character sequence backed by the SecurePasswordField's buffer (not a copy).

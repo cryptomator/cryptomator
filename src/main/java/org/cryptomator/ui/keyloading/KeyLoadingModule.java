@@ -7,6 +7,7 @@ import org.cryptomator.cryptofs.VaultConfig.UnverifiedVaultConfig;
 import org.cryptomator.ui.common.DefaultSceneFactory;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxmlLoaderFactory;
+import org.cryptomator.ui.keyloading.hub.HubKeyLoadingModule;
 import org.cryptomator.ui.keyloading.masterkeyfile.MasterkeyFileLoadingModule;
 
 import javax.inject.Provider;
@@ -16,7 +17,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
-@Module(includes = {MasterkeyFileLoadingModule.class})
+@Module(includes = {MasterkeyFileLoadingModule.class, HubKeyLoadingModule.class})
 abstract class KeyLoadingModule {
 
 	@Provides

@@ -2,7 +2,7 @@
   <configuration default="false" name="Cryptomator Linux Dev" type="Application" factoryName="Application">
     <option name="MAIN_CLASS_NAME" value="org.cryptomator.launcher.Cryptomator" />
     <module name="cryptomator" />
-    <option name="VM_PARAMETERS" value="-Djdk.gtk.version=2 -Duser.language=en -Dcryptomator.settingsPath=&quot;~/.config/Cryptomator-Dev/settings.json&quot; -Dcryptomator.ipcSocketPath=&quot;~/.config/Cryptomator-Dev/ipc.socket&quot; -Dcryptomator.logDir=&quot;~/.local/share/Cryptomator-Dev/logs&quot; -Dcryptomator.mountPointsDir=&quot;~/.local/share/Cryptomator-Dev/mnt&quot; -Dcryptomator.showTrayIcon=true -Dfuse.experimental=&quot;true&quot; -Xss20m -Xmx512m" />
+    <option name="VM_PARAMETERS" value="-Djdk.gtk.version=2 -Duser.language=en -Dcryptomator.settingsPath=&quot;~/.config/Cryptomator-Dev/settings.json&quot; -Dcryptomator.p12Path=&quot;~/.config/Cryptomator-Dev/key.p12&quot; -Dcryptomator.ipcSocketPath=&quot;~/.config/Cryptomator-Dev/ipc.socket&quot; -Dcryptomator.logDir=&quot;~/.local/share/Cryptomator-Dev/logs&quot; -Dcryptomator.mountPointsDir=&quot;~/.local/share/Cryptomator-Dev/mnt&quot; -Dcryptomator.showTrayIcon=true -Dfuse.experimental=&quot;true&quot; -Xss20m -Xmx512m" />
     <method v="2">
       <option name="Make" enabled="true" />
     </method>
