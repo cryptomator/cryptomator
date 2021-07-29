@@ -21,6 +21,7 @@ module org.cryptomator.desktop {
 	requires com.nulabinc.zxcvbn;
 	requires org.slf4j;
 	requires org.apache.commons.lang3;
+	requires org.eclipse.jetty.server;
 	requires dagger;
 	requires com.auth0.jwt;
 	requires org.bouncycastle.provider;
