@@ -11,25 +11,21 @@ import javafx.beans.value.ObservableValue;
  * Animation which starts and stops automatically based on an observable condition.
  * <p>
  * During creation the consumer can optionally define actions to be executed everytime before the animation starts and after it stops.
- * The automatic playback of the animation based on the condition can be stopped by calling {@link #deactivateCondition()}. To reactivate it, {@link #activateCondition()} must be called.
  */
 public class AutoAnimator<T extends Animation> {
-
 
 	private final T animation;
 	private final ObservableValue<Boolean> condition;
 	private final Runnable beforeStart;
 	private final Runnable afterStop;
-
-	private Subscription sub;
+	private final Subscription sub;
 
 	AutoAnimator(T animation, ObservableValue<Boolean> condition, Runnable beforeStart, Runnable afterStop) {
 		this.animation = animation;
 		this.condition = condition;
 		this.beforeStart = beforeStart;
 		this.afterStop = afterStop;
-
-		activateCondition();
+		this.sub = EasyBind.subscribe(condition, this::togglePlay);
 	}
 
 	public void playFromStart() {
@@ -40,26 +36,6 @@ public class AutoAnimator<T extends Animation> {
 	public void stop() {
 		animation.stop();
 		afterStop.run();
-	}
-
-	/**
-	 * Deactivates activation on the condition.
-	 * No-op if condition is already deactivated.
-	 */
-	public void deactivateCondition() {
-		if (sub != null) {
-			sub.unsubscribe();
-		}
-	}
-
-	/**
-	 * Activates the condition
-	 * No-op if condition is already activated.
-	 */
-	public void activateCondition() {
-		if (sub == null) {
-			this.sub = EasyBind.subscribe(condition, this::togglePlay);
-		}
 	}
 
 	private void togglePlay(boolean play) {
