@@ -3,9 +3,9 @@ package org.cryptomator.ui.controls;
 import org.cryptomator.ui.common.Animations;
 import org.cryptomator.ui.common.AutoAnimator;
 
-import javafx.beans.NamedArg;
-import javafx.beans.value.ObservableValue;
-import java.util.Optional;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 
 /**
  * An animated progress spinner using the {@link FontAwesome5IconView} with the spinner glyph.
@@ -14,23 +14,31 @@ import java.util.Optional;
  */
 public class FontAwesome5Spinner extends FontAwesome5IconView {
 
+	protected final BooleanProperty spinning = new SimpleBooleanProperty(this, "spinning", true);
+
 	private AutoAnimator animator;
 
 	public FontAwesome5Spinner() {
-		new FontAwesome5Spinner(Optional.empty());
-	}
-
-	public FontAwesome5Spinner(@NamedArg("spinning") ObservableValue<Boolean> spinning) {
-		new FontAwesome5Spinner(Optional.of(spinning));
-	}
-
-	private FontAwesome5Spinner(Optional<ObservableValue<Boolean>> animateCondition) {
 		setGlyph(FontAwesome5Icon.SPINNER);
 		var animation = Animations.createDiscrete360Rotation(this);
 		this.animator = AutoAnimator.animate(animation) //
 				.afterStop(() -> setRotate(0)) //
-				.onCondition(animateCondition.orElse(visibleProperty())) //
+				.onCondition(spinning.and(visibleProperty())) //
 				.build();
+	}
+
+	/* Getter/Setter */
+
+	public BooleanProperty spinningProperty() {
+		return spinning;
+	}
+
+	public boolean isSpinning() {
+		return spinning.get();
+	}
+
+	public void setSpinning(boolean spinning) {
+		this.spinning.set(spinning);
 	}
 
 }
