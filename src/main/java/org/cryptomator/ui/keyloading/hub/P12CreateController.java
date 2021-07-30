@@ -1,9 +1,12 @@
 package org.cryptomator.ui.keyloading.hub;
 
 import com.google.common.base.Preconditions;
+import dagger.Lazy;
 import org.cryptomator.common.Environment;
 import org.cryptomator.cryptolib.common.Destroyables;
 import org.cryptomator.ui.common.FxController;
+import org.cryptomator.ui.common.FxmlFile;
+import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.NewPasswordController;
 import org.cryptomator.ui.common.UserInteractionLock;
 import org.cryptomator.ui.keyloading.KeyLoading;
@@ -19,8 +22,10 @@ import javafx.beans.binding.ObjectExpression;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
+import javafx.scene.Scene;
 import javafx.scene.control.ContentDisplay;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.security.KeyPair;
@@ -35,30 +40,37 @@ public class P12CreateController implements FxController  {
 	private final Stage window;
 	private final Environment env;
 	private final AtomicReference<KeyPair> keyPairRef;
-	private final UserInteractionLock<HubKeyLoadingModule.P12KeyLoading> p12LoadingLock;
+	private final Lazy<Scene> authScene;
+
 	private final BooleanProperty userInteractionDisabled = new SimpleBooleanProperty();
 	private final ObjectBinding<ContentDisplay> unlockButtonContentDisplay = Bindings.createObjectBinding(this::getUnlockButtonContentDisplay, userInteractionDisabled);
 	private final BooleanProperty readyToCreate = new SimpleBooleanProperty();
 
 	public NewPasswordController newPasswordController;
 
-
 	@Inject
-	public P12CreateController(@KeyLoading Stage window, Environment env, AtomicReference<KeyPair> keyPairRef, UserInteractionLock<HubKeyLoadingModule.P12KeyLoading> p12LoadingLock) {
+	public P12CreateController(@KeyLoading Stage window, Environment env, AtomicReference<KeyPair> keyPairRef, @FxmlScene(FxmlFile.HUB_AUTH) Lazy<Scene> authScene) {
 		this.window = window;
 		this.env = env;
 		this.keyPairRef = keyPairRef;
-		this.p12LoadingLock = p12LoadingLock;
+		this.authScene = authScene;
+		this.window.addEventHandler(WindowEvent.WINDOW_HIDING, this::windowClosed);
 	}
 
 	@FXML
 	public void initialize() {
 		readyToCreate.bind(newPasswordController.goodPasswordProperty());
+		newPasswordController.passwordField.requestFocus();
 	}
 
 	@FXML
 	public void cancel() {
 		window.close();
+	}
+
+	private void windowClosed(WindowEvent windowEvent) {
+		newPasswordController.passwordField.wipe();
+		newPasswordController.reenterField.wipe();
 	}
 
 	@FXML
@@ -70,15 +82,12 @@ public class P12CreateController implements FxController  {
 			var keyPair = P12AccessHelper.createNew(p12File, pw);
 			setKeyPair(keyPair);
 			LOG.debug("Created .p12 file {}", p12File);
-			p12LoadingLock.interacted(HubKeyLoadingModule.P12KeyLoading.CREATED);
-			window.close();
+			window.setScene(authScene.get());
 		} catch (IOException e) {
 			LOG.error("Failed to load .p12 file.", e);
 			// TODO
 		} finally {
 			Arrays.fill(pw, '\0');
-			newPasswordController.passwordField.wipe();
-			newPasswordController.reenterField.wipe();
 		}
 	}
 

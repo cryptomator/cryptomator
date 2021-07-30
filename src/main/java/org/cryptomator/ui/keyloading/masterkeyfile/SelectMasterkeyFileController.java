@@ -45,8 +45,8 @@ public class SelectMasterkeyFileController implements FxController {
 	private void windowClosed(WindowEvent windowEvent) {
 		// if not already interacted, mark this workflow as cancelled:
 		if (masterkeyFileProvisionLock.awaitingInteraction().get()) {
-			LOG.debug("Unlock canceled by user.");
-			masterkeyFileProvisionLock.interacted(MasterkeyFileProvision.CANCELED);
+			LOG.debug("Unlock cancelled by user.");
+			masterkeyFileProvisionLock.interacted(MasterkeyFileProvision.CANCELLED);
 		}
 	}
 

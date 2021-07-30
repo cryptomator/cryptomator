@@ -21,7 +21,7 @@
 	</padding>
 	<children>
 		<HBox spacing="12" VBox.vgrow="ALWAYS">
-			<ImageView VBox.vgrow="ALWAYS" fitWidth="64" preserveRatio="true" smooth="true" cache="true" visible="false">
+			<ImageView VBox.vgrow="ALWAYS" fitWidth="64" preserveRatio="true" cache="true">
 				<Image url="@../img/bot/bot.png"/>
 			</ImageView>
 			<VBox spacing="6" HBox.hgrow="ALWAYS">

@@ -35,12 +35,12 @@ public abstract class MasterkeyFileLoadingModule {
 
 	public enum PasswordEntry {
 		PASSWORD_ENTERED,
-		CANCELED
+		CANCELLED
 	}
 
 	public enum MasterkeyFileProvision {
 		MASTERKEYFILE_PROVIDED,
-		CANCELED
+		CANCELLED
 	}
 
 	@Provides

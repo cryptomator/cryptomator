@@ -9,23 +9,26 @@ module org.cryptomator.desktop {
 	requires org.cryptomator.frontend.fuse;
 	requires org.cryptomator.frontend.webdav;
 	requires org.cryptomator.integrations.api;
+	// jdk:
 	requires java.desktop;
 	requires java.net.http;
 	requires javafx.base;
 	requires javafx.graphics;
 	requires javafx.controls;
 	requires javafx.fxml;
-	requires com.tobiasdiez.easybind;
+	requires jdk.crypto.ec;
+	// 3rd party:
+	requires com.auth0.jwt;
 	requires com.google.common;
 	requires com.google.gson;
 	requires com.nulabinc.zxcvbn;
-	requires org.slf4j;
-	requires org.apache.commons.lang3;
-	requires org.eclipse.jetty.server;
+	requires com.tobiasdiez.easybind;
 	requires dagger;
-	requires com.auth0.jwt;
+	requires org.slf4j;
 	requires org.bouncycastle.provider;
 	requires org.bouncycastle.pkix;
+	requires org.apache.commons.lang3;
+	requires org.eclipse.jetty.server;
 
 	/* TODO: filename-based modules: */
 	requires static javax.inject; /* ugly dagger/guava crap */

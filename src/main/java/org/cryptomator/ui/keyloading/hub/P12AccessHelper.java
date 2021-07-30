@@ -93,7 +93,7 @@ class P12AccessHelper {
 			keyGen.initialize(new ECGenParameterSpec(EC_CURVE_NAME));
 			return keyGen;
 		} catch (NoSuchAlgorithmException | InvalidAlgorithmParameterException e) {
-			throw new IllegalStateException("secp256r1 curve not supported");
+			throw new IllegalStateException(EC_CURVE_NAME + " curve not supported");
 		}
 	}
 

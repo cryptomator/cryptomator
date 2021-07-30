@@ -15,6 +15,7 @@ public enum FxmlFile {
 	HEALTH_START_FAIL("/fxml/health_start_fail.fxml"), //
 	HEALTH_CHECK_LIST("/fxml/health_check_list.fxml"), //
 	HUB_P12("/fxml/hub_p12.fxml"), //
+	HUB_AUTH("/fxml/hub_auth.fxml"), //
 	LOCK_FORCED("/fxml/lock_forced.fxml"), //
 	LOCK_FAILED("/fxml/lock_failed.fxml"), //
 	MAIN_WINDOW("/fxml/main_window.fxml"), //

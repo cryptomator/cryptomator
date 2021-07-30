@@ -143,8 +143,8 @@ public class PassphraseEntryController implements FxController {
 	private void windowClosed(WindowEvent windowEvent) {
 		// if not already interacted, mark this workflow as cancelled:
 		if (passwordEntryLock.awaitingInteraction().get()) {
-			LOG.debug("Unlock canceled by user.");
-			passwordEntryLock.interacted(PasswordEntry.CANCELED);
+			LOG.debug("Unlock cancelled by user.");
+			passwordEntryLock.interacted(PasswordEntry.CANCELLED);
 		}
 	}
 

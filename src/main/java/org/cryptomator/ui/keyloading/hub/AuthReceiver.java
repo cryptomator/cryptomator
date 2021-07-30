@@ -1,6 +1,5 @@
 package org.cryptomator.ui.keyloading.hub;
 
-import com.google.common.io.BaseEncoding;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
@@ -13,19 +12,8 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
-import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.LinkedTransferQueue;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.concurrent.TransferQueue;
-import java.util.function.Consumer;
 
 /**
  * A basic implementation for RFC 8252, Section 7.3:
@@ -41,11 +29,11 @@ class AuthReceiver implements AutoCloseable {
 	private static final String REDIRECT_SCHEME = "http";
 	private static final String LOOPBACK_ADDR = "127.0.0.1";
 	private static final String JSON_200 = """
-					{"status": "success"}
-					""";
+			{"status": "success"}
+			""";
 	private static final String JSON_400 = """
-					{"status": "missing param key"}
-					""";
+			{"status": "missing param"}
+			""";
 
 	private final Server server;
 	private final ServerConnector connector;
@@ -78,7 +66,7 @@ class AuthReceiver implements AutoCloseable {
 		return new AuthReceiver(server, connector, handler);
 	}
 
-	public String receive() throws InterruptedException {
+	public AuthParams receive() throws InterruptedException {
 		return handler.receivedKeys.take();
 	}
 
@@ -89,14 +77,15 @@ class AuthReceiver implements AutoCloseable {
 
 	private static class Handler extends AbstractHandler {
 
-		private final BlockingQueue<String> receivedKeys = new LinkedBlockingQueue<>();
+		private final BlockingQueue<AuthParams> receivedKeys = new LinkedBlockingQueue<>();
 
 		@Override
 		public void handle(String target, Request baseRequest, HttpServletRequest req, HttpServletResponse res) throws IOException {
 			baseRequest.setHandled(true);
-			var key = req.getParameter("key");
+			var m = req.getParameter("m"); // encrypted masterkey
+			var epk = req.getParameter("epk"); // ephemeral public key
 			byte[] response;
-			if (key != null) {
+			if (m != null && epk != null) {
 				res.setStatus(HttpServletResponse.SC_OK);
 				response = JSON_200.getBytes(StandardCharsets.UTF_8);
 			} else {
@@ -110,8 +99,8 @@ class AuthReceiver implements AutoCloseable {
 
 			// the following line might trigger a server shutdown,
 			// so let's make sure the response is flushed first
-			if (key != null) {
-				receivedKeys.add(key);
+			if (m != null && epk != null) {
+				receivedKeys.add(new AuthParams(m, epk));
 			}
 		}
 	}

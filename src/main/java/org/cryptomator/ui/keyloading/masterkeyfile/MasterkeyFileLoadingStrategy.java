@@ -95,7 +95,7 @@ public class MasterkeyFileLoadingStrategy implements KeyLoadingStrategy {
 		if (filePath.get() == null) {
 			return switch (askUserForMasterkeyFilePath()) {
 				case MASTERKEYFILE_PROVIDED -> filePath.get();
-				case CANCELED -> throw new UnlockCancelledException("Choosing masterkey file cancelled.");
+				case CANCELLED -> throw new UnlockCancelledException("Choosing masterkey file cancelled.");
 			};
 		} else {
 			return filePath.get();
@@ -121,7 +121,7 @@ public class MasterkeyFileLoadingStrategy implements KeyLoadingStrategy {
 		if (password.get() == null) {
 			return switch (askForPassphrase()) {
 				case PASSWORD_ENTERED -> CharBuffer.wrap(password.get());
-				case CANCELED -> throw new UnlockCancelledException("Password entry cancelled.");
+				case CANCELLED -> throw new UnlockCancelledException("Password entry cancelled.");
 			};
 		} else {
 			// e.g. pre-filled from keychain or previous unlock attempt

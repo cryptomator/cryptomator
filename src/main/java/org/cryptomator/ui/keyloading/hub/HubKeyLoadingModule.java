@@ -18,6 +18,7 @@ import org.cryptomator.ui.keyloading.KeyLoadingScoped;
 import org.cryptomator.ui.keyloading.KeyLoadingStrategy;
 
 import javafx.scene.Scene;
+import java.net.URI;
 import java.security.KeyPair;
 import java.util.ResourceBundle;
 import java.util.concurrent.atomic.AtomicReference;
@@ -25,10 +26,10 @@ import java.util.concurrent.atomic.AtomicReference;
 @Module
 public abstract class HubKeyLoadingModule {
 
-	public enum P12KeyLoading {
-		LOADED,
-		CREATED,
-		CANCELED
+	public enum AuthFlow {
+		SUCCESS,
+		FAILED,
+		CANCELLED
 	}
 
 	@Provides
@@ -39,8 +40,14 @@ public abstract class HubKeyLoadingModule {
 
 	@Provides
 	@KeyLoadingScoped
-	static UserInteractionLock<P12KeyLoading> provideP12KeyLoadingLock() {
+	static UserInteractionLock<AuthFlow> provideAuthFlowLock() {
 		return new UserInteractionLock<>(null);
+	}
+
+	@Provides
+	@KeyLoadingScoped
+	static AtomicReference<URI> provideHubUri() {
+		return new AtomicReference<>();
 	}
 
 	@Binds
@@ -60,6 +67,13 @@ public abstract class HubKeyLoadingModule {
 	@KeyLoadingScoped
 	static Scene provideHubP12LoadingScene(@KeyLoading FxmlLoaderFactory fxmlLoaders) {
 		return fxmlLoaders.createScene(FxmlFile.HUB_P12);
+	}
+
+	@Provides
+	@FxmlScene(FxmlFile.HUB_AUTH)
+	@KeyLoadingScoped
+	static Scene provideHubAuthScene(@KeyLoading FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.HUB_AUTH);
 	}
 
 	@Binds
@@ -83,5 +97,10 @@ public abstract class HubKeyLoadingModule {
 	static FxController provideNewPasswordController(ResourceBundle resourceBundle, PasswordStrengthUtil strengthRater) {
 		return new NewPasswordController(resourceBundle, strengthRater);
 	}
+
+	@Binds
+	@IntoMap
+	@FxControllerKey(AuthController.class)
+	abstract FxController bindAuthController(AuthController controller);
 
 }
