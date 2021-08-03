@@ -440,6 +440,11 @@ jobs:
           timestampUrl: 'http://timestamp.digicert.com'
           folder: appdir/Cryptomator
           recursive: true
+      - name: Prepare env for building msi
+        run: |
+          $path = (Get-Location).Path + "\dist\win\resources" 
+          [Environment]::SetEnvironmentVariable("JpackageWixWizardResources", $path, 'Machine')
+        shell: pwsh
       - name: Create MSI
         run: >
           ${JAVA_HOME}/bin/jpackage
@@ -452,6 +457,11 @@ jobs:
           --vendor "Skymatic GmbH"
           --copyright "(C) 2016 - 2021 Skymatic GmbH"
           --app-version "${{ needs.metadata.outputs.versionNum }}"
+          --win-shortcut 
+          --win-menu 
+          --win-dir-chooser 
+          --resource-dir dist/win/resources 
+          --license-file dist/win/resources/license.rtf
       - name: Codesign MSI
         uses: skymatic/code-sign-action@v1.0.1
         with:
