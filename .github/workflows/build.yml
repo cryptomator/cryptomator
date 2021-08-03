@@ -430,7 +430,6 @@ jobs:
           cp dist/win/contrib/* appdir/Cryptomator
       - name: Fix permissions
         run: attrib -r appdir/Cryptomator/Cryptomator.exe
-        shell: pwsh
       - name: Codesign
         uses: skymatic/code-sign-action@v1.0.1
         with:
@@ -440,27 +439,23 @@ jobs:
           timestampUrl: 'http://timestamp.digicert.com'
           folder: appdir/Cryptomator
           recursive: true
-      - name: Prepare env for building msi
-        run: |
-          $path = (Get-Location).Path + "\dist\win\resources" 
-          [Environment]::SetEnvironmentVariable("JpackageWixWizardResources", $path, 'Machine')
-        shell: pwsh
       - name: Create MSI
-        run: >
-          ${JAVA_HOME}/bin/jpackage
-          --verbose
-          --type msi
-          --win-upgrade-uuid bda45523-42b1-4cae-9354-a45475ed4775
-          --app-image appdir/Cryptomator
-          --dest installer
-          --name Cryptomator
-          --vendor "Skymatic GmbH"
-          --copyright "(C) 2016 - 2021 Skymatic GmbH"
-          --app-version "${{ needs.metadata.outputs.versionNum }}"
-          --win-shortcut 
-          --win-menu 
-          --win-dir-chooser 
-          --resource-dir dist/win/resources 
+        run: |
+          $Env:JpackageWixWizardResources = (Get-Location).Path + "\dist\win\resources" 
+          ${JAVA_HOME}/bin/jpackage `
+          --verbose `
+          --type msi `
+          --win-upgrade-uuid bda45523-42b1-4cae-9354-a45475ed4775 `
+          --app-image appdir/Cryptomator `
+          --dest installer `
+          --name Cryptomator `
+          --vendor "Skymatic GmbH" `
+          --copyright "(C) 2016 - 2021 Skymatic GmbH" `
+          --app-version "${{ needs.metadata.outputs.versionNum }}" `
+          --win-shortcut `
+          --win-menu `
+          --win-dir-chooser `
+          --resource-dir dist/win/resources `
           --license-file dist/win/resources/license.rtf
       - name: Codesign MSI
         uses: skymatic/code-sign-action@v1.0.1
