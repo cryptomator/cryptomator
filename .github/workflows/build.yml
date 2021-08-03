@@ -443,7 +443,7 @@ jobs:
       - name: Create MSI
         run: |
           $Env:JpackageWixWizardResources = (Get-Location).Path + "\dist\win\resources" 
-          & ${JAVA_HOME}/bin/jpackage `
+          & "$Env:JAVA_HOME}\bin\jpackage" `
           --verbose `
           --type msi `
           --win-upgrade-uuid bda45523-42b1-4cae-9354-a45475ed4775 `
