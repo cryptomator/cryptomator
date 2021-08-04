@@ -83,9 +83,10 @@
       </Dialog>
 
       <!--
-        Run WixUI_InstallDir dialog in the default install directory.
+        Run our custom wizard in the default install directory.
       -->
       <Property Id="WIXUI_INSTALLDIR" Value="INSTALLDIR"/>
+      <!-- included at the end -->
       <UIRef Id="CustomWizard" />
 
       <Publish Dialog="InstallDirDlg" Control="Next" Event="DoAction" Value="JpCheckInstallDir" Order="3">1</Publish>
@@ -126,9 +127,9 @@
       <RemoveExistingProducts Before="CostInitialize"/>
     </InstallExecuteSequence>
 
-    <WixVariable Id="WixUIBannerBmp" Value="$(env.JpackageWixWizardResources)\banner.bmp" />
-    <WixVariable Id="WixUIDialogBmp" Value="$(env.JpackageWixWizardResources)\background.bmp" />
+    <WixVariable Id="WixUIBannerBmp" Value="$(env.JP_WIXWIZARD_RESOURCES)\banner.bmp" />
+    <WixVariable Id="WixUIDialogBmp" Value="$(env.JP_WIXWIZARD_RESOURCES)\background.bmp" />
   </Product>
 
-  <?include $(env.JpackageWixWizardResources)\customWizard.wxi ?>
+  <?include $(env.JP_WIXWIZARD_RESOURCES)\customWizard.wxi ?>
 </Wix>

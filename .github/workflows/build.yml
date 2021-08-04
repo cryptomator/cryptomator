@@ -458,7 +458,7 @@ jobs:
           --resource-dir dist/win/resources
           --license-file dist/win/resources/license.rtf
         env:
-          JpackageWixWizardResources: ${{ github.workspace }}/dist/win/resources # seems to require an abs path?
+          JP_WIXWIZARD_RESOURCES: ${{ github.workspace }}/dist/win/resources # requires abs path, used in resources/main.wxs
       - name: Codesign MSI
         uses: skymatic/code-sign-action@v1.1.0
         with:
