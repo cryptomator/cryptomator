@@ -453,7 +453,6 @@ jobs:
           --vendor "Skymatic GmbH"
           --copyright "(C) 2016 - 2021 Skymatic GmbH"
           --app-version "${{ needs.metadata.outputs.versionNum }}"
-          --win-shortcut
           --win-menu
           --win-dir-chooser
           --resource-dir dist/win/resources
