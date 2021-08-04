@@ -432,11 +432,12 @@ jobs:
         run: attrib -r appdir/Cryptomator/Cryptomator.exe
         shell: pwsh
       - name: Codesign
-        uses: skymatic/code-sign-action@v1.0.1
+        uses: skymatic/code-sign-action@v1.1.0
         with:
           certificate: ${{ secrets.WIN_CODESIGN_P12_BASE64 }}
           password: ${{ secrets.WIN_CODESIGN_P12_PW }}
           certificatesha1: FF52240075AD7D14AF25629FDF69635357C7D14B
+          description: Cryptomator
           timestampUrl: 'http://timestamp.digicert.com'
           folder: appdir/Cryptomator
           recursive: true
@@ -460,11 +461,12 @@ jobs:
         env:
           JpackageWixWizardResources: ${{ github.workspace }}/dist/win/resources # seems to require an abs path?
       - name: Codesign MSI
-        uses: skymatic/code-sign-action@v1.0.1
+        uses: skymatic/code-sign-action@v1.1.0
         with:
           certificate: ${{ secrets.WIN_CODESIGN_P12_BASE64 }}
           password: ${{ secrets.WIN_CODESIGN_P12_PW }}
           certificatesha1: FF52240075AD7D14AF25629FDF69635357C7D14B
+          description: Cryptomator Installer
           timestampUrl: 'http://timestamp.digicert.com'
           folder: installer
       - name: Upload win-msi
