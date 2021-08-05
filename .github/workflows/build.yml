@@ -359,7 +359,7 @@ jobs:
 
   mac-dmg:
     name: Build Cryptomator.dmg
-    runs-on: macos-latest
+    runs-on: macos-11
     needs: [mac-app, metadata]
     steps:
       - uses: actions/checkout@v2
@@ -400,6 +400,15 @@ jobs:
           Cryptomator-${VERSION_NO}.dmg dmg
         env:
           VERSION_NO: ${{ needs.metadata.outputs.versionNum }}
+      - name: Notarize .dmg
+        env:
+          NOTARIZATION_APPLE_ID: ${{ secrets.MACOS_NOTARIZATION_APPLE_ID }}
+          NOTARIZATION_PW: ${{ secrets.MACOS_NOTARIZATION_PW }}
+          NOTARIZATION_TEAM_ID: ${{ secrets.MACOS_NOTARIZATION_TEAM_ID }}
+        run: >
+          sudo xcode-select -s /Applications/Xcode_13.0.app
+          xcrun notarytool submit Cryptomator-*.dmg --apple-id ${NOTARIZATION_APPLE_ID} --password ${NOTARIZATION_PW} --team-id ${NOTARIZATION_TEAM_ID} --wait
+          xcrun stapler staple Cryptomator-*.dmg
       - name: Upload mac-dmg
         uses: actions/upload-artifact@v2
         with:
