@@ -441,7 +441,7 @@ jobs:
         run: attrib -r appdir/Cryptomator/Cryptomator.exe
         shell: pwsh
       - name: Codesign
-        uses: skymatic/code-sign-action@v1.1.0
+        uses: skymatic/code-sign-action@v1
         with:
           certificate: ${{ secrets.WIN_CODESIGN_P12_BASE64 }}
           password: ${{ secrets.WIN_CODESIGN_P12_PW }}
@@ -469,7 +469,7 @@ jobs:
         env:
           JP_WIXWIZARD_RESOURCES: ${{ github.workspace }}/dist/win/resources # requires abs path, used in resources/main.wxs
       - name: Codesign MSI
-        uses: skymatic/code-sign-action@v1.1.0
+        uses: skymatic/code-sign-action@v1
         with:
           certificate: ${{ secrets.WIN_CODESIGN_P12_BASE64 }}
           password: ${{ secrets.WIN_CODESIGN_P12_PW }}
