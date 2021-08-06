@@ -407,7 +407,7 @@ jobs:
           NOTARIZATION_TEAM_ID: ${{ secrets.MACOS_NOTARIZATION_TEAM_ID }}
         run: >
           sudo xcode-select -s /Applications/Xcode_13.0.app
-          xcrun notarytool submit Cryptomator-*.dmg --apple-id ${NOTARIZATION_APPLE_ID} --password ${NOTARIZATION_PW} --team-id ${NOTARIZATION_TEAM_ID} --wait
+          echo "${NOTARIZATION_PW}" | xcrun notarytool submit Cryptomator-*.dmg --apple-id ${NOTARIZATION_APPLE_ID} --team-id ${NOTARIZATION_TEAM_ID} --wait
           xcrun stapler staple Cryptomator-*.dmg
       - name: Upload mac-dmg
         uses: actions/upload-artifact@v2
