@@ -416,6 +416,29 @@
 
 /*******************************************************************************
  *                                                                             *
+ * Highlighted Textflow                                                        *
+ *                                                                             *
+ ******************************************************************************/
+
+.highlighted-textflow-pill {
+	-fx-background-radius: 1em;
+	-fx-background-color: PRIMARY;
+	-fx-padding: 0.2em 0.4em 0.2em 0.4em;
+}
+
+.highlighted-textflow-text {
+	-fx-font-family: 'Open Sans Bold';
+	-fx-font-size: 1em;
+	-fx-fill: GRAY_9;
+}
+
+.hyperlink.highlighted-textflow-link {
+	-fx-font-size: 1em;
+	-fx-text-fill: GRAY_9;
+}
+
+/*******************************************************************************
+ *                                                                             *
  * Password Strength Indicator                                                 *
  *                                                                             *
  ******************************************************************************/

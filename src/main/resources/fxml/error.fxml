@@ -4,12 +4,15 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ButtonBar?>
+<?import javafx.scene.control.Hyperlink?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Circle?>
+<?import javafx.scene.text.Text?>
+<?import javafx.scene.text.TextFlow?>
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.common.ErrorController"
@@ -31,6 +34,11 @@
 				<Label text="%generic.error.instruction" wrapText="true"/>
 			</VBox>
 		</HBox>
+		<TextFlow styleClass="highlighted-textflow-pill">
+			<Text styleClass="highlighted-textflow-text" text="%generic.error.errorCode"/>
+			<Text styleClass="highlighted-textflow-text" text=" "/>
+			<Hyperlink styleClass="highlighted-textflow-text,hyperlink-underline,highlighted-textflow-link" onAction="#searchErrorCode" text="${controller.errorCode}"/>
+		</TextFlow>
 
 		<TextArea VBox.vgrow="ALWAYS" text="${controller.stackTrace}" prefRowCount="5" editable="false"/>
 
