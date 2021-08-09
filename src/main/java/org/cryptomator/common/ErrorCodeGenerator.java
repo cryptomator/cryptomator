@@ -13,19 +13,15 @@ public class ErrorCodeGenerator {
 
 	private final static int A_PRIME = Integer.MAX_VALUE;
 
-	private final static int NO_CAUSES = 0;
 	private final static int LATEST_FRAME = 1;
-	private final static int ALL_FRAMES = -1;
-	private final static int ALL_CAUSES = -1;
+	private final static int ALL_FRAMES = Integer.MAX_VALUE;
 
 	@Inject
-	ErrorCodeGenerator() {
-		//NO-OP
-	}
+	ErrorCodeGenerator() { /* NO-OP */ }
 
 	public String of(Throwable e) {
 		Preconditions.checkNotNull(e);
-		return format(traceCode(rootCause(e), NO_CAUSES, LATEST_FRAME)) + ':' + format(traceCode(e, ALL_CAUSES, ALL_FRAMES));
+		return format(traceCode(rootCause(e), LATEST_FRAME)) + ':' + format(traceCode(e, ALL_FRAMES));
 	}
 
 	private Throwable rootCause(Throwable e) {
@@ -41,14 +37,14 @@ public class ErrorCodeGenerator {
 		return Strings.padStart(Integer.toString(value, 32).toUpperCase(Locale.ROOT), 4, '0');
 	}
 
-	private int traceCode(Throwable e, int causeDepth, int frameCount) {
+	private int traceCode(Throwable e, int frameCount) {
 		int result = 0x6c528c4a;
-		if (causeDepth != 0 && e.getCause() != null) {
-			result = traceCode(e.getCause(), (causeDepth == ALL_CAUSES ? ALL_CAUSES : causeDepth - 1), frameCount);
+		if (e.getCause() != null) {
+			result = traceCode(e.getCause(), frameCount);
 		}
 		result = result * A_PRIME + e.getClass().getName().hashCode();
 		var stack = e.getStackTrace();
-		for (int i = 0; i < stack.length && (frameCount == ALL_FRAMES || i < frameCount); i++) {
+		for (int i = 0; i < Math.min(stack.length, frameCount); i++) {
 			result = result * A_PRIME + stack[i].getClassName().hashCode();
 			result = result * A_PRIME + stack[i].getMethodName().hashCode();
 		}
