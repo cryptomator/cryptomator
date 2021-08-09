@@ -40,6 +40,12 @@ public abstract class HubKeyLoadingModule {
 
 	@Provides
 	@KeyLoadingScoped
+	static AtomicReference<EciesParams> provideAuthParamsRef() {
+		return new AtomicReference<>();
+	}
+
+	@Provides
+	@KeyLoadingScoped
 	static UserInteractionLock<AuthFlow> provideAuthFlowLock() {
 		return new UserInteractionLock<>(null);
 	}

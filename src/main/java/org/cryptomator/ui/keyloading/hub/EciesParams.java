@@ -7,7 +7,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.InvalidKeySpecException;
-import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
 /**
@@ -19,7 +18,7 @@ import java.security.spec.X509EncodedKeySpec;
  *
  * No separate tag required, since we use GCM for encryption.
  */
-record AuthParams(String m, String epk) {
+record EciesParams(String m, String epk) {
 
 	public byte[] getCiphertext() {
 		return BaseEncoding.base64Url().decode(m());

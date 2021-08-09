@@ -1,21 +1,14 @@
 package org.cryptomator.ui.keyloading.hub;
 
 import org.eclipse.jetty.server.Connector;
-import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
-import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.servlets.CrossOriginFilter;
 
 import javax.servlet.DispatcherType;
-import javax.servlet.FilterConfig;
-import javax.servlet.Servlet;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -86,7 +79,7 @@ class AuthReceiver implements AutoCloseable {
 		return new AuthReceiver(server, connector, servlet);
 	}
 
-	public AuthParams receive() throws InterruptedException {
+	public EciesParams receive() throws InterruptedException {
 		return servlet.receivedKeys.take();
 	}
 
@@ -97,7 +90,7 @@ class AuthReceiver implements AutoCloseable {
 
 	private static class CallbackServlet extends HttpServlet {
 
-		private final BlockingQueue<AuthParams> receivedKeys = new LinkedBlockingQueue<>();
+		private final BlockingQueue<EciesParams> receivedKeys = new LinkedBlockingQueue<>();
 
 		// TODO change to POST?
 		@Override
@@ -120,7 +113,7 @@ class AuthReceiver implements AutoCloseable {
 			// the following line might trigger a server shutdown,
 			// so let's make sure the response is flushed first
 			if (m != null && epk != null) {
-				receivedKeys.add(new AuthParams(m, epk));
+				receivedKeys.add(new EciesParams(m, epk));
 			}
 		}
 	}

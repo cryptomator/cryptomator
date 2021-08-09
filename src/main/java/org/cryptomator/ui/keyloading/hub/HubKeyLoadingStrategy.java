@@ -5,6 +5,7 @@ import dagger.Lazy;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.cryptolib.api.Masterkey;
 import org.cryptomator.cryptolib.api.MasterkeyLoadingFailedException;
+import org.cryptomator.cryptolib.common.Destroyables;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.UserInteractionLock;
@@ -34,29 +35,40 @@ public class HubKeyLoadingStrategy implements KeyLoadingStrategy {
 	private final Lazy<Scene> p12LoadingScene;
 	private final UserInteractionLock<HubKeyLoadingModule.AuthFlow> userInteraction;
 	private final AtomicReference<URI> hubUriRef;
+	private final AtomicReference<KeyPair> keyPairRef;
+	private final AtomicReference<EciesParams> authParamsRef;
 
 	@Inject
-	public HubKeyLoadingStrategy(@KeyLoading Vault vault, @KeyLoading Stage window, @FxmlScene(FxmlFile.HUB_P12) Lazy<Scene> p12LoadingScene, UserInteractionLock<HubKeyLoadingModule.AuthFlow> userInteraction, AtomicReference<URI> hubUriRef) {
+	public HubKeyLoadingStrategy(@KeyLoading Vault vault, @KeyLoading Stage window, @FxmlScene(FxmlFile.HUB_P12) Lazy<Scene> p12LoadingScene, UserInteractionLock<HubKeyLoadingModule.AuthFlow> userInteraction, AtomicReference<URI> hubUriRef, AtomicReference<KeyPair> keyPairRef, AtomicReference<EciesParams> authParamsRef) {
 		this.vault = vault;
 		this.window = window;
 		this.p12LoadingScene = p12LoadingScene;
 		this.userInteraction = userInteraction;
 		this.hubUriRef = hubUriRef;
+		this.keyPairRef = keyPairRef;
+		this.authParamsRef = authParamsRef;
 	}
 
 	@Override
 	public Masterkey loadKey(URI keyId) throws MasterkeyLoadingFailedException {
 		hubUriRef.set(getHubUri(keyId));
 		try {
-			switch (auth()) {
-				case SUCCESS -> LOG.debug("TODO success"); // TODO return key
-				//case FAILED -> LOG.error("failed to load keypair");
+			return switch (auth()) {
+				case SUCCESS -> EciesHelper.decryptMasterkey(keyPairRef.get(), authParamsRef.get());
+				case FAILED -> throw new MasterkeyLoadingFailedException("failed to load keypair");
 				case CANCELLED -> throw new UnlockCancelledException("User cancelled auth workflow");
-			}
-			throw new UnlockCancelledException("not yet implemented"); // TODO remove
+			};
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 			throw new UnlockCancelledException("Loading interrupted", e);
+		}
+	}
+
+	@Override
+	public void cleanup(boolean unlockedSuccessfully) {
+		var keyPair = keyPairRef.getAndSet(null);
+		if (keyPair != null) {
+			Destroyables.destroySilently(keyPair.getPrivate());
 		}
 	}
 

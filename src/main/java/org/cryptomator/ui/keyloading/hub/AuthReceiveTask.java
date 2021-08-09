@@ -8,7 +8,7 @@ import javafx.concurrent.Task;
 import java.net.URI;
 import java.util.function.Consumer;
 
-class AuthReceiveTask extends Task<AuthParams> {
+class AuthReceiveTask extends Task<EciesParams> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(AuthReceiveTask.class);
 
@@ -24,7 +24,7 @@ class AuthReceiveTask extends Task<AuthParams> {
 	}
 
 	@Override
-	protected AuthParams call() throws Exception {
+	protected EciesParams call() throws Exception {
 		try (var receiver = AuthReceiver.start()) {
 			var redirectUri = receiver.getRedirectURL();
 			Platform.runLater(() -> redirectUriConsumer.accept(redirectUri));
