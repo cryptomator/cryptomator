@@ -405,7 +405,7 @@ jobs:
           NOTARIZATION_APPLE_ID: ${{ secrets.MACOS_NOTARIZATION_APPLE_ID }}
           NOTARIZATION_PW: ${{ secrets.MACOS_NOTARIZATION_PW }}
           NOTARIZATION_TEAM_ID: ${{ secrets.MACOS_NOTARIZATION_TEAM_ID }}
-        run: >
+        run: |
           sudo xcode-select -s /Applications/Xcode_13.0.app
           echo "${NOTARIZATION_PW}" | xcrun notarytool submit Cryptomator-*.dmg --apple-id ${NOTARIZATION_APPLE_ID} --team-id ${NOTARIZATION_TEAM_ID} --wait
           xcrun stapler staple Cryptomator-*.dmg
