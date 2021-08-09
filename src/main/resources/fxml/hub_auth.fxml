@@ -28,7 +28,7 @@
 			</ImageView>
 			<TextFlow visible="${controller.ready}" managed="${controller.ready}">
 				<Text text="TODO: please login via " />
-				<Hyperlink styleClass="hyperlink-underline" text="${controller.authUriHost}" onAction="#openBrowser"/>
+				<Hyperlink styleClass="hyperlink-underline" text="${controller.hubUriHost}" onAction="#openBrowser"/>
 			</TextFlow>
 			<FontAwesome5Spinner glyphSize="12" visible="${!controller.ready}" managed="${!controller.ready}"/>
 		</HBox>

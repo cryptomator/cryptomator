@@ -64,7 +64,7 @@ public class HubKeyLoadingStrategy implements KeyLoadingStrategy {
 		Preconditions.checkArgument(keyId.getScheme().startsWith(SCHEME_PREFIX));
 		var hubUriScheme = keyId.getScheme().substring(SCHEME_PREFIX.length());
 		try {
-			return new URI(hubUriScheme, keyId.getSchemeSpecificPart(), null);
+			return new URI(hubUriScheme, keyId.getSchemeSpecificPart(), keyId.getFragment());
 		} catch (URISyntaxException e) {
 			throw new IllegalStateException("URI constructed from params known to be valid", e);
 		}

@@ -5,13 +5,25 @@ import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.AbstractHandler;
+import org.eclipse.jetty.servlet.FilterHolder;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.servlets.CrossOriginFilter;
 
+import javax.servlet.DispatcherType;
+import javax.servlet.FilterConfig;
+import javax.servlet.Servlet;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
+import java.util.EnumSet;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -37,13 +49,13 @@ class AuthReceiver implements AutoCloseable {
 
 	private final Server server;
 	private final ServerConnector connector;
-	private final Handler handler;
+	private final CallbackServlet servlet;
 
-	private AuthReceiver(Server server, ServerConnector connector, Handler handler) {
+	private AuthReceiver(Server server, ServerConnector connector, CallbackServlet servlet) {
 		assert server.isRunning();
 		this.server = server;
 		this.connector = connector;
-		this.handler = handler;
+		this.servlet = servlet;
 	}
 
 	public URI getRedirectURL() {
@@ -55,19 +67,27 @@ class AuthReceiver implements AutoCloseable {
 	}
 
 	public static AuthReceiver start() throws Exception {
-		Server server = new Server();
-		var handler = new Handler();
+		var server = new Server();
+		var context = new ServletContextHandler();
+
+		var corsFilter = new FilterHolder(new CrossOriginFilter());
+		corsFilter.setInitParameter(CrossOriginFilter.ALLOWED_ORIGINS_PARAM, "*"); // TODO restrict to hub host
+		context.addFilter(corsFilter, "/*", EnumSet.of(DispatcherType.REQUEST));
+
+		var servlet = new CallbackServlet();
+		context.addServlet(new ServletHolder(servlet), "/*");
+
 		var connector = new ServerConnector(server);
 		connector.setPort(0);
 		connector.setHost(LOOPBACK_ADDR);
 		server.setConnectors(new Connector[]{connector});
-		server.setHandler(handler);
+		server.setHandler(context);
 		server.start();
-		return new AuthReceiver(server, connector, handler);
+		return new AuthReceiver(server, connector, servlet);
 	}
 
 	public AuthParams receive() throws InterruptedException {
-		return handler.receivedKeys.take();
+		return servlet.receivedKeys.take();
 	}
 
 	@Override
@@ -75,13 +95,13 @@ class AuthReceiver implements AutoCloseable {
 		server.stop();
 	}
 
-	private static class Handler extends AbstractHandler {
+	private static class CallbackServlet extends HttpServlet {
 
 		private final BlockingQueue<AuthParams> receivedKeys = new LinkedBlockingQueue<>();
 
+		// TODO change to POST?
 		@Override
-		public void handle(String target, Request baseRequest, HttpServletRequest req, HttpServletResponse res) throws IOException {
-			baseRequest.setHandled(true);
+		protected void doGet(HttpServletRequest req, HttpServletResponse res) throws IOException {
 			var m = req.getParameter("m"); // encrypted masterkey
 			var epk = req.getParameter("epk"); // ephemeral public key
 			byte[] response;

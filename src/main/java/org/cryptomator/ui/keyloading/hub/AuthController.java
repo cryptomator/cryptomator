@@ -1,6 +1,7 @@
 package org.cryptomator.ui.keyloading.hub;
 
 import com.google.common.base.Preconditions;
+import com.google.common.io.BaseEncoding;
 import org.cryptomator.ui.common.ErrorComponent;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.UserInteractionLock;
@@ -43,8 +44,6 @@ public class AuthController implements FxController {
 	private final AtomicReference<URI> hubUriRef;
 	private final ErrorComponent.Builder errorComponent;
 	private final ObjectProperty<URI> redirectUriRef;
-	private final ObjectBinding<URI> authUri;
-	private final StringBinding authUriHost;
 	private final BooleanBinding ready;
 	private final AuthReceiveTask receiveTask;
 
@@ -58,9 +57,7 @@ public class AuthController implements FxController {
 		this.hubUriRef = hubUriRef;
 		this.errorComponent = errorComponent;
 		this.redirectUriRef = new SimpleObjectProperty<>();
-		this.authUri = Bindings.createObjectBinding(this::getAuthUri, redirectUriRef);
-		this.authUriHost = Bindings.createStringBinding(this::getAuthUriHost, authUri);
-		this.ready = authUri.isNotNull();
+		this.ready = redirectUriRef.isNotNull();
 		this.receiveTask = new AuthReceiveTask(redirectUriRef::set);
 		this.window.addEventHandler(WindowEvent.WINDOW_HIDING, this::windowClosed);
 	}
@@ -81,7 +78,7 @@ public class AuthController implements FxController {
 
 	private void receivedKey(WorkerStateEvent workerStateEvent) {
 		var authParams = receiveTask.getValue();
-		LOG.info("Cryptomator Hub login succeeded: {} encrypted with {}", authParams, keyPair.getPublic());
+		LOG.info("Cryptomator Hub login succeeded: {} encrypted with {}", authParams.getEphemeralPublicKey(), keyPair.getPublic());
 		// TODO decrypt and return masterkey
 		authFlowLock.interacted(HubKeyLoadingModule.AuthFlow.SUCCESS);
 		window.close();
@@ -104,40 +101,25 @@ public class AuthController implements FxController {
 
 	@FXML
 	public void openBrowser() {
-		assert getAuthUri() != null;
-		application.getHostServices().showDocument(getAuthUri().toString());
+		assert ready.get();
+		var hubUri = Objects.requireNonNull(hubUriRef.get());
+		var redirectUri = Objects.requireNonNull(redirectUriRef.get());
+		var sb = new StringBuilder(hubUri.toString());
+		sb.append("?redirect_uri=").append(URLEncoder.encode(redirectUri.toString(), StandardCharsets.US_ASCII));
+		sb.append("&device_id=").append("desktop-app-3000");
+		sb.append("&device_key=").append(BaseEncoding.base64Url().omitPadding().encode(keyPair.getPublic().getEncoded()));
+		var url = sb.toString();
+		application.getHostServices().showDocument(url);
 	}
 
 	/* Getter/Setter */
 
-	public ObjectBinding<URI> authUriProperty() {
-		return authUri;
-	}
-
-	public URI getAuthUri() {
+	public String getHubUriHost() {
 		var hubUri = hubUriRef.get();
-		var redirectUri = redirectUriRef.get();
-		if (hubUri == null || redirectUri == null) {
-			return null;
-		}
-		var redirectParam = "redirect_uri=" + URLEncoder.encode(redirectUri.toString(), StandardCharsets.US_ASCII);
-		try {
-			return new URI(hubUri.getScheme(), hubUri.getAuthority(), hubUri.getPath(), redirectParam, null);
-		} catch (URISyntaxException e) {
-			throw new IllegalStateException("URI constructed from params known to be valid", e);
-		}
-	}
-
-	public StringBinding authUriHostProperty() {
-		return authUriHost;
-	}
-
-	public String getAuthUriHost() {
-		var authUri = getAuthUri();
-		if (authUri == null) {
+		if (hubUri == null) {
 			return null;
 		} else {
-			return authUri.getHost();
+			return hubUri.getHost();
 		}
 	}
 

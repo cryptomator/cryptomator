@@ -23,7 +23,7 @@ import java.security.spec.ECGenParameterSpec;
 class P12AccessHelper {
 
 	private static final String EC_ALG = "EC";
-	private static final String EC_CURVE_NAME = "secp256r1";
+	private static final String EC_CURVE_NAME = "secp256r1"; // TODO switch to secp384r1
 	private static final String SIGNATURE_ALG = "SHA256withECDSA";
 	private static final String KEYSTORE_ALIAS_KEY = "key";
 	private static final String KEYSTORE_ALIAS_CERT = "crt";

@@ -29,6 +29,8 @@ module org.cryptomator.desktop {
 	requires org.bouncycastle.pkix;
 	requires org.apache.commons.lang3;
 	requires org.eclipse.jetty.server;
+	requires org.eclipse.jetty.webapp;
+	requires org.eclipse.jetty.servlets;
 
 	/* TODO: filename-based modules: */
 	requires static javax.inject; /* ugly dagger/guava crap */
