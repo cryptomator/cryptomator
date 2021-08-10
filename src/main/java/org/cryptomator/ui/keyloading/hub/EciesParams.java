@@ -13,7 +13,7 @@ import java.security.spec.X509EncodedKeySpec;
  * ECIES parameters required to decrypt the masterkey:
  * <ul>
  *     <li><code>m</code> Encrypted Masterkey (base64url-encoded ciphertext)</li>
- *     <li><code>epk</code> Ephemeral Public Key (base64url-encoded PKCS8)</li>
+ *     <li><code>epk</code> Ephemeral Public Key (base64url-encoded SPKI format)</li>
  * </ul>
  *
  * No separate tag required, since we use GCM for encryption.
