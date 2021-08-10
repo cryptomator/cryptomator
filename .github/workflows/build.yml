@@ -1,7 +1,7 @@
 name: Build
 
 on:
-  [push]
+  [push, workflow_dispatch]
 
 env:
   JAVA_VERSION: 16
@@ -46,6 +46,7 @@ jobs:
     name: Build ${{ matrix.profile }}-buildkit
     needs: test
     runs-on: ${{ matrix.os }}
+    if: startsWith(github.ref, 'refs/tags/') && github.repository == 'cryptomator/cryptomator' || github.event_name == 'workflow_dispatch'
     strategy:
       fail-fast: true
       matrix:
