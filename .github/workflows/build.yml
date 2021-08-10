@@ -400,15 +400,35 @@ jobs:
           Cryptomator-${VERSION_NO}.dmg dmg
         env:
           VERSION_NO: ${{ needs.metadata.outputs.versionNum }}
-      - name: Notarize .dmg
+      - name: Install notarization credentials
         env:
+          NOTARIZATION_KEYCHAIN_PROFILE: ${{ secrets.MACOS_NOTARIZATION_KEYCHAIN_PROFILE }}
           NOTARIZATION_APPLE_ID: ${{ secrets.MACOS_NOTARIZATION_APPLE_ID }}
           NOTARIZATION_PW: ${{ secrets.MACOS_NOTARIZATION_PW }}
           NOTARIZATION_TEAM_ID: ${{ secrets.MACOS_NOTARIZATION_TEAM_ID }}
+          NOTARIZATION_TMP_KEYCHAIN_PW: ${{ secrets.MACOS_NOTARIZATION_TMP_KEYCHAIN_PW }}
+        run: |
+          # create variables
+          KEYCHAIN_PATH=$RUNNER_TEMP/notarization.keychain-db
+
+          # create temporary keychain
+          security create-keychain -p "${NOTARIZATION_TMP_KEYCHAIN_PW}" ${KEYCHAIN_PATH}
+          security set-keychain-settings -lut 900 ${KEYCHAIN_PATH}
+          security unlock-keychain -p "${NOTARIZATION_TMP_KEYCHAIN_PW}" ${KEYCHAIN_PATH}
+
+          # import credentials from secrets
+          sudo xcode-select -s /Applications/Xcode_13.0.app
+          xcrun notarytool store-credentials "${NOTARIZATION_KEYCHAIN_PROFILE}" --apple-id "${NOTARIZATION_APPLE_ID}" --password "${NOTARIZATION_PW}" --team-id "${NOTARIZATION_TEAM_ID}" --keychain "${KEYCHAIN_PATH}"
+      - name: Notarize .dmg
+        env:
+          NOTARIZATION_KEYCHAIN_PROFILE: ${{ secrets.MACOS_NOTARIZATION_KEYCHAIN_PROFILE }}
         run: |
           sudo xcode-select -s /Applications/Xcode_13.0.app
-          echo "${NOTARIZATION_PW}" | xcrun notarytool submit Cryptomator-*.dmg --apple-id ${NOTARIZATION_APPLE_ID} --team-id ${NOTARIZATION_TEAM_ID} --wait
+          xcrun notarytool submit Cryptomator-*.dmg --keychain-profile "${NOTARIZATION_KEYCHAIN_PROFILE}" --wait
           xcrun stapler staple Cryptomator-*.dmg
+      - name: Clean up notarization credentials
+        if: ${{ always() }}
+        run: security delete-keychain $RUNNER_TEMP/notarization.keychain-db
       - name: Upload mac-dmg
         uses: actions/upload-artifact@v2
         with:
