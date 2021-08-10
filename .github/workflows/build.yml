@@ -1,7 +1,13 @@
 name: Build
 
 on:
-  [push, workflow_dispatch]
+  push:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Reference which build is based on' #see actions/checkout for details
+        required: true
+        default: 'refs/heads/develop'
 
 env:
   JAVA_VERSION: 16
@@ -17,6 +23,11 @@ jobs:
     if: "!contains(github.event.head_commit.message, '[ci skip]') && !contains(github.event.head_commit.message, '[skip ci]')"
     steps:
       - uses: actions/checkout@v2
+        if: github.event_name != 'workflow_dispatch'
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.inputs.ref }}
+        if: github.event_name == 'workflow_dispatch'
       - uses: actions/setup-java@v1
         with:
           java-version: ${{ env.JAVA_VERSION }}
