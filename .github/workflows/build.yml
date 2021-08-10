@@ -402,15 +402,13 @@ jobs:
           VERSION_NO: ${{ needs.metadata.outputs.versionNum }}
       - name: Install notarization credentials
         env:
+          KEYCHAIN_PATH: ${{ env.RUNNER_TEMP }}/notarization.keychain-db
           NOTARIZATION_KEYCHAIN_PROFILE: ${{ secrets.MACOS_NOTARIZATION_KEYCHAIN_PROFILE }}
           NOTARIZATION_APPLE_ID: ${{ secrets.MACOS_NOTARIZATION_APPLE_ID }}
           NOTARIZATION_PW: ${{ secrets.MACOS_NOTARIZATION_PW }}
           NOTARIZATION_TEAM_ID: ${{ secrets.MACOS_NOTARIZATION_TEAM_ID }}
           NOTARIZATION_TMP_KEYCHAIN_PW: ${{ secrets.MACOS_NOTARIZATION_TMP_KEYCHAIN_PW }}
         run: |
-          # create variables
-          KEYCHAIN_PATH=$RUNNER_TEMP/notarization.keychain-db
-
           # create temporary keychain
           security create-keychain -p "${NOTARIZATION_TMP_KEYCHAIN_PW}" ${KEYCHAIN_PATH}
           security set-keychain-settings -lut 900 ${KEYCHAIN_PATH}
@@ -421,14 +419,17 @@ jobs:
           xcrun notarytool store-credentials "${NOTARIZATION_KEYCHAIN_PROFILE}" --apple-id "${NOTARIZATION_APPLE_ID}" --password "${NOTARIZATION_PW}" --team-id "${NOTARIZATION_TEAM_ID}" --keychain "${KEYCHAIN_PATH}"
       - name: Notarize .dmg
         env:
+          KEYCHAIN_PATH: ${{ env.RUNNER_TEMP }}/notarization.keychain-db
           NOTARIZATION_KEYCHAIN_PROFILE: ${{ secrets.MACOS_NOTARIZATION_KEYCHAIN_PROFILE }}
         run: |
           sudo xcode-select -s /Applications/Xcode_13.0.app
-          xcrun notarytool submit Cryptomator-*.dmg --keychain-profile "${NOTARIZATION_KEYCHAIN_PROFILE}" --wait
+          xcrun notarytool submit Cryptomator-*.dmg --keychain-profile "${NOTARIZATION_KEYCHAIN_PROFILE}" --keychain "${KEYCHAIN_PATH}" --wait
           xcrun stapler staple Cryptomator-*.dmg
       - name: Clean up notarization credentials
         if: ${{ always() }}
-        run: security delete-keychain $RUNNER_TEMP/notarization.keychain-db
+        env:
+          KEYCHAIN_PATH: ${{ env.RUNNER_TEMP }}/notarization.keychain-db
+        run: security delete-keychain ${KEYCHAIN_PATH}
       - name: Upload mac-dmg
         uses: actions/upload-artifact@v2
         with:
