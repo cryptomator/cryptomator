@@ -235,10 +235,6 @@ jobs:
           ./squashfs-root/AppRun Cryptomator.AppDir cryptomator-${{ needs.metadata.outputs.versionStr }}-x86_64.AppImage
           -u 'gh-releases-zsync|cryptomator|cryptomator|latest|cryptomator-*-x86_64.AppImage.zsync'
           --sign --sign-key=615D449FE6E6A235 --sign-args="--batch --pinentry-mode loopback"
-      - name: Create Detached GPG Signature
-        run: |
-          gpg --batch --quiet --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign -a cryptomator-${{ needs.metadata.outputs.versionStr }}-x86_64.AppImage
-          gpg --batch --quiet --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign -a cryptomator-${{ needs.metadata.outputs.versionStr }}-x86_64.AppImage.zsync
       - name: Upload AppImage
         uses: actions/upload-artifact@v2
         with:
@@ -489,6 +485,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: Create tarball
         run: git archive --prefix="cryptomator-${{ github.ref }}/" -o "cryptomator-${{ github.ref }}.tar.gz" ${{ github.ref }}
+        #Signature von finalen Artefakten
       - name: Sign tarball with key 615D449FE6E6A235
         run: |
           echo "${GPG_PRIVATE_KEY}" | gpg --batch --quiet --import
@@ -508,6 +505,14 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: win-msi
+
+      - name: Create Detached GPG Signature for all release files with key 615D449FE6E6A235
+        run: |
+          echo "${GPG_PRIVATE_KEY}" | gpg --batch --quiet --import
+          for extension in .appimage .dmg .msi .zsync; do
+            $FILE=$(ls | grep ${extension})
+            echo "${GPG_PASSPHRASE}" | gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign -a ${FILE}
+          done
       - name: Create release draft
         uses: softprops/action-gh-release@v1
         with:
