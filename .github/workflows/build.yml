@@ -1,0 +1,36 @@
+name: Build
+
+on:
+  push:
+
+env:
+  JAVA_VERSION: 16
+
+defaults:
+  run:
+    shell: bash
+
+jobs: 
+  test:
+    name: Compile and Test
+    runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, '[ci skip]') && !contains(github.event.head_commit.message, '[skip ci]')"
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-java@v1
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+      - uses: actions/cache@v2
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+      - name: Build and Test
+        run: mvn -B clean install jacoco:report -Pcoverage,dependency-check
+      - name: Upload code coverage report
+        id: codacyCoverageReporter
+        run: bash <(curl -Ls https://coverage.codacy.com/get.sh)
+        env:
+          CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
+        continue-on-error: true

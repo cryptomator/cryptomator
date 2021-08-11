@@ -1,7 +1,6 @@
 name: Release
 
-on:
-  [push]
+on: [workflow_dispatch]
 
 env:
   JAVA_VERSION: 16
@@ -11,32 +10,6 @@ defaults:
     shell: bash
 
 jobs: 
-  test:
-    name: Compile and Test
-    runs-on: ubuntu-latest
-    if: "!contains(github.event.head_commit.message, '[ci skip]') && !contains(github.event.head_commit.message, '[skip ci]')"
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-java@v1
-        with:
-          java-version: ${{ env.JAVA_VERSION }}
-      - uses: actions/cache@v2
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
-      - name: Ensure to use tagged version
-        run: mvn versions:set -DnewVersion=${GITHUB_REF##*/} # use shell parameter expansion to strip of 'refs/tags'
-        if: startsWith(github.ref, 'refs/tags/')
-      - name: Build and Test
-        run: mvn -B clean install jacoco:report -Pcoverage,dependency-check
-      - name: Upload code coverage report
-        id: codacyCoverageReporter
-        run: bash <(curl -Ls https://coverage.codacy.com/get.sh)
-        env:
-          CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
-        continue-on-error: true
 
 #
 # Buildkit
@@ -67,8 +40,11 @@ jobs:
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-maven-
-      - name: Copy .jar files
-        run: mvn -B clean package -DskipTests -P${{ matrix.profile }}
+      - name: Ensure to use tagged version
+        run: mvn versions:set -DnewVersion=${GITHUB_REF##*/} # use shell parameter expansion to strip of 'refs/tags'
+        if: startsWith(github.ref, 'refs/tags/')
+      - name: Build and Test
+        run: mvn -B clean package -Pdependency-check,${{ matrix.profile }}
       - name: Patch buildkit
         run: |
           cp LICENSE.txt target
@@ -503,97 +479,49 @@ jobs:
           path: installer/*.msi
           if-no-files-found: error
 
-  # release:
-  #   name: Draft a Release on GitHub Releases
-  #   runs-on: ubuntu-latest
-  #   needs: test
-  #   if: startsWith(github.ref, 'refs/tags/') && github.repository == 'cryptomator/cryptomator'
-  #   steps:
-  #     - uses: actions/checkout@v2
-  #     - name: Download buildkit-linux.zip
-  #       uses: actions/download-artifact@v1
-  #       with:
-  #         name: buildkit-linux.zip
-  #         path: .
-  #     - name: Download buildkit-mac.zip
-  #       uses: actions/download-artifact@v1
-  #       with:
-  #         name: buildkit-mac.zip
-  #         path: .
-  #     - name: Download buildkit-win.zip
-  #       uses: actions/download-artifact@v1
-  #       with:
-  #         name: buildkit-win.zip
-  #         path: .
-  #     - name: Create tarball
-  #       run: git archive --prefix="cryptomator-${{ github.ref }}/" -o "cryptomator-${{ github.ref }}.tar.gz" ${{ github.ref }}
-  #     - name: Sign tarball with key 615D449FE6E6A235
-  #       run: |
-  #         echo "${GPG_PRIVATE_KEY}" | gpg --batch --quiet --import
-  #         echo "${GPG_PASSPHRASE}" | gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign -a "cryptomator-${{ github.ref }}.tar.gz"
-  #       env:
-  #         GPG_PRIVATE_KEY: ${{ secrets.RELEASES_GPG_PRIVATE_KEY }}
-  #         GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
-  #     - name: Create Release
-  #       id: create_release
-  #       uses: actions/create-release@v1
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #       with:
-  #         tag_name: ${{ github.ref }}
-  #         release_name: ${{ github.ref }}
-  #         body: |
-  #           :construction: Work in Progress
-
-  #           TODO:
-  #           * [ ] add Linux appimage, zsync file and signature file
-  #           * [ ] add Windows installer and signature file
-  #           * [ ] add MacOs disk image and signature file
-
-  #           ## What's new
-
-  #           ## Bugfixes
-
-  #           ## Misc
-
-  #           ---
-
-  #           :scroll: A complete list of closed issues is available [here](LINK)
-  #         draft: true
-  #         prerelease: false
-  #     - name: Upload buildkit-linux.zip to GitHub Releases
-  #       uses: actions/upload-release-asset@v1.0.1
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #       with:
-  #         upload_url: ${{ steps.create_release.outputs.upload_url }}
-  #         asset_path: buildkit-linux.zip
-  #         asset_name: buildkit-linux.zip
-  #         asset_content_type: application/zip
-  #     - name: Upload buildkit-mac.zip to GitHub Releases
-  #       uses: actions/upload-release-asset@v1.0.1
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #       with:
-  #         upload_url: ${{ steps.create_release.outputs.upload_url }}
-  #         asset_path: buildkit-mac.zip
-  #         asset_name: buildkit-mac.zip
-  #         asset_content_type: application/zip
-  #     - name: Upload buildkit-win.zip to GitHub Releases
-  #       uses: actions/upload-release-asset@v1.0.1
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #       with:
-  #         upload_url: ${{ steps.create_release.outputs.upload_url }}
-  #         asset_path: buildkit-win.zip
-  #         asset_name: buildkit-win.zip
-  #         asset_content_type: application/zip
-  #     - name: Upload tarball signature to GitHub Releases
-  #       uses: actions/upload-release-asset@v1.0.1
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #       with:
-  #         upload_url: ${{ steps.create_release.outputs.upload_url }}
-  #         asset_path: "cryptomator-${{ github.ref }}.tar.gz.asc"
-  #         asset_name: "cryptomator-${{ github.ref }}.tar.gz.asc"
-  #         asset_content_type: application/octet-stream
+  release:
+    name: Draft a release on Github
+    runs-on: ubuntu-latest
+    needs: [linux-appimage,mac-dmg,win-msi]
+    if: startsWith(github.ref, 'refs/tags/') && github.repository == 'cryptomator/cryptomator'
+    steps:
+      - uses: actions/checkout@v2
+      - name: Create tarball
+        run: git archive --prefix="cryptomator-${{ github.ref }}/" -o "cryptomator-${{ github.ref }}.tar.gz" ${{ github.ref }}
+      - name: Sign tarball with key 615D449FE6E6A235
+        run: |
+          echo "${GPG_PRIVATE_KEY}" | gpg --batch --quiet --import
+          echo "${GPG_PASSPHRASE}" | gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign -a "cryptomator-${{ github.ref }}.tar.gz"
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.RELEASES_GPG_PRIVATE_KEY }}
+          GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
+      - name: Download linux appimage
+        uses: actions/download-artifact@v2
+        with:
+          name: linux-appimage
+      - name: Download macOS dmg
+        uses: actions/download-artifact@v2
+        with:
+          name: mac-dmg
+      - name: Download Windows msi
+        uses: actions/download-artifact@v2
+        with:
+          name: win-msi
+      - name: Create release draft
+        uses: softprops/action-gh-release@v1
+        with:
+          draft: true
+          fail_on_unmatched_files: true
+          files: |
+            *.appimage
+            *.zsync
+            *.asc
+            *.dmg
+            *.msi
+          body: |
+            :construction: Work in Progress
+            ## What's new
+            ## Bugfixes
+            ## Misc
+            ---
+            :scroll: A complete list of closed issues is available [here](LINK)
