@@ -1,4 +1,4 @@
-name: Release
+name: Installers and Release
 
 on: [workflow_dispatch]
 
@@ -9,15 +9,13 @@ defaults:
   run:
     shell: bash
 
-jobs: 
+jobs:
 
 #
 # Buildkit
 #
-
   buildkit:
     name: Build ${{ matrix.profile }}-buildkit
-    needs: test
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: true
@@ -60,10 +58,10 @@ jobs:
             target/LICENSE.txt
             target/${{ matrix.launcher }}
           if-no-files-found: error
+
 #
 # Release Metadata
 #
-
   metadata:
     name: Determine Version Metadata
     runs-on: ubuntu-latest
@@ -90,7 +88,6 @@ jobs:
 #
 # Application Directory
 #
-
   appdir:
     name: Create ${{ matrix.profile }}-appdir
     needs: [buildkit, metadata]
@@ -186,7 +183,6 @@ jobs:
 #
 # Linux Cryptomator.AppImage
 # 
-
   linux-appimage:
     name: Build Cryptomator.AppImage
     runs-on: ubuntu-latest
@@ -253,7 +249,6 @@ jobs:
 #
 # macOS Cryptomator.app
 # 
-
   mac-app:
     name: Build Cryptomator.app
     runs-on: macos-latest
@@ -332,7 +327,6 @@ jobs:
 #
 # macOS Cryptomator.dmg
 #
-
   mac-dmg:
     name: Build Cryptomator.dmg
     runs-on: macos-11
@@ -479,6 +473,9 @@ jobs:
           path: installer/*.msi
           if-no-files-found: error
 
+#
+# Release
+#
   release:
     name: Draft a release on Github
     runs-on: ubuntu-latest
