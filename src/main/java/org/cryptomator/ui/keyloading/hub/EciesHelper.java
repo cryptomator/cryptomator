@@ -1,6 +1,7 @@
 package org.cryptomator.ui.keyloading.hub;
 
 import com.google.common.base.Preconditions;
+import com.google.common.io.BaseEncoding;
 import org.cryptomator.cryptolib.api.Masterkey;
 import org.cryptomator.cryptolib.api.MasterkeyLoadingFailedException;
 import org.cryptomator.cryptolib.common.CipherSupplier;
@@ -13,6 +14,7 @@ import javax.crypto.KeyAgreement;
 import javax.crypto.spec.GCMParameterSpec;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.security.DigestException;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
@@ -26,16 +28,17 @@ import java.util.Arrays;
 
 class EciesHelper {
 
+	private static final int GCM_KEY_SIZE = 32;
 	private static final int GCM_TAG_SIZE = 16;
 	private static final int GCM_NONCE_SIZE = 12; // 96 bit IVs strongly recommended for GCM
 
 	private EciesHelper() {}
 
 	public static Masterkey decryptMasterkey(KeyPair deviceKey, EciesParams eciesParams) throws MasterkeyLoadingFailedException {
-		var sharedSecret = ecdhAndKdf(deviceKey.getPrivate(), eciesParams.getEphemeralPublicKey(), 44);
+		var sharedSecret = ecdhAndKdf(deviceKey.getPrivate(), eciesParams.getEphemeralPublicKey(), GCM_KEY_SIZE + GCM_NONCE_SIZE);
 		var cleartext = new byte[0];
-		try (var kek = new DestroyableSecretKey(sharedSecret, 0, 32, "AES")) {
-			var nonce = Arrays.copyOfRange(sharedSecret, 32, GCM_NONCE_SIZE);
+		try (var kek = new DestroyableSecretKey(sharedSecret, 0, GCM_KEY_SIZE, "AES")) {
+			var nonce = Arrays.copyOfRange(sharedSecret, GCM_KEY_SIZE, GCM_KEY_SIZE + GCM_NONCE_SIZE);
 			var cipher = CipherSupplier.AES_GCM.forDecryption(kek, new GCMParameterSpec(GCM_TAG_SIZE * Byte.SIZE, nonce));
 			cleartext = cipher.doFinal(eciesParams.getCiphertext());
 			return new Masterkey(cleartext);
@@ -78,6 +81,7 @@ class EciesHelper {
 	/**
 	 * Performs <a href="https://www.secg.org/sec1-v2.pdf">ANSI-X9.63-KDF</a> with SHA-256
 	 * @param sharedSecret A shared secret
+	 * @param sharedInfo Additional authenticated data
 	 * @param keyDataLen Desired key length (in bytes)
 	 * @return key data
 	 */
@@ -91,6 +95,7 @@ class EciesHelper {
 		assert keyDataLen < (2L << 32 - 1) * hashLen : "keyDataLen larger than hashLen × (2^32 − 1)";
 
 		ByteBuffer counter = ByteBuffer.allocate(Integer.BYTES);
+		assert ByteOrder.BIG_ENDIAN.equals(counter.order());
 		int n = (keyDataLen + hashLen - 1) / hashLen;
 		byte[] buffer = new byte[n * hashLen];
 		try {
