@@ -69,7 +69,6 @@ jobs:
   metadata:
     name: Determine Version Metadata
     runs-on: ubuntu-latest
-    needs: test
     outputs:
       versionStr: ${{ steps.versions.outputs.versionStr }}
       versionNum: ${{ steps.versions.outputs.versionNum }}
