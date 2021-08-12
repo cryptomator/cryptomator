@@ -267,11 +267,6 @@
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-assembly-plugin</artifactId>
-					<version>3.3.0</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
 					<version>3.0.0-M5</version>
 				</plugin>
@@ -334,36 +329,6 @@
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-resources-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>copy-resources</id>
-						<phase>prepare-package</phase>
-						<goals>
-							<goal>copy-resources</goal>
-						</goals>
-						<configuration>
-							<outputDirectory>${project.build.directory}</outputDirectory>
-							<resources>
-								<resource>
-									<directory>${project.basedir}/src/package</directory>
-									<includes>
-										<include>version.txt</include>
-										<include>ffi-version.txt</include>
-										<include>launcher-mac.sh</include>
-										<include>launcher-linux.sh</include>
-										<include>launcher-win.bat</include>
-										<include>LICENSE.txt</include>
-									</includes>
-									<filtering>true</filtering>
-								</resource>
-							</resources>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
 				<executions>
 					<execution>
@@ -375,7 +340,6 @@
 						<configuration>
 							<includeScope>runtime</includeScope>
 							<outputDirectory>${project.build.directory}/mods</outputDirectory>
-							<excludeClassifiers>linux,mac,win</excludeClassifiers>
 							<excludeGroupIds>${nonModularGroupIds}</excludeGroupIds>
 						</configuration>
 					</execution>
@@ -499,48 +463,6 @@
 					<version>${cryptomator.integrations.mac.version}</version>
 				</dependency>
 			</dependencies>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-assembly-plugin</artifactId>
-						<executions>
-							<execution>
-								<id>assemble-mac</id>
-								<phase>package</phase>
-								<goals>
-									<goal>single</goal>
-								</goals>
-								<configuration>
-									<descriptors>
-										<descriptor>assembly-mac.xml</descriptor>
-									</descriptors>
-									<appendAssemblyId>false</appendAssemblyId>
-									<finalName>buildkit-mac</finalName>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-dependency-plugin</artifactId>
-						<executions>
-							<execution>
-								<id>copy-mac-libs</id>
-								<phase>prepare-package</phase>
-								<goals>
-									<goal>copy-dependencies</goal>
-								</goals>
-								<configuration>
-									<outputDirectory>${project.build.directory}/mods</outputDirectory>
-									<includeGroupIds>org.openjfx</includeGroupIds>
-									<classifier>mac</classifier>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
 		</profile>
 
 		<profile>
@@ -561,52 +483,10 @@
 					<version>${cryptomator.integrations.linux.version}</version>
 				</dependency>
 			</dependencies>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-assembly-plugin</artifactId>
-						<executions>
-							<execution>
-								<id>assemble-linux</id>
-								<phase>package</phase>
-								<goals>
-									<goal>single</goal>
-								</goals>
-								<configuration>
-									<descriptors>
-										<descriptor>assembly-linux.xml</descriptor>
-									</descriptors>
-									<appendAssemblyId>false</appendAssemblyId>
-									<finalName>buildkit-linux</finalName>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-dependency-plugin</artifactId>
-						<executions>
-							<execution>
-								<id>copy-linux-libs</id>
-								<phase>prepare-package</phase>
-								<goals>
-									<goal>copy-dependencies</goal>
-								</goals>
-								<configuration>
-									<outputDirectory>${project.build.directory}/mods</outputDirectory>
-									<includeGroupIds>org.openjfx</includeGroupIds>
-									<classifier>linux</classifier>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
 		</profile>
 
 		<profile>
-			<id>windows</id>
+			<id>win</id>
 			<activation>
 				<os>
 					<family>windows</family>
@@ -622,48 +502,6 @@
 					<version>${cryptomator.integrations.win.version}</version>
 				</dependency>
 			</dependencies>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-assembly-plugin</artifactId>
-						<executions>
-							<execution>
-								<id>assemble-win</id>
-								<phase>package</phase>
-								<goals>
-									<goal>single</goal>
-								</goals>
-								<configuration>
-									<descriptors>
-										<descriptor>assembly-win.xml</descriptor>
-									</descriptors>
-									<appendAssemblyId>false</appendAssemblyId>
-									<finalName>buildkit-win</finalName>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-dependency-plugin</artifactId>
-						<executions>
-							<execution>
-								<id>copy-win-libs</id>
-								<phase>prepare-package</phase>
-								<goals>
-									<goal>copy-dependencies</goal>
-								</goals>
-								<configuration>
-									<outputDirectory>${project.build.directory}/mods</outputDirectory>
-									<includeGroupIds>org.openjfx</includeGroupIds>
-									<classifier>win</classifier>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
 		</profile>
 	</profiles>
 
