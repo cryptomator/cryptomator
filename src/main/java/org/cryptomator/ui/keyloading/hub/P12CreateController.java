@@ -39,7 +39,7 @@ public class P12CreateController implements FxController  {
 	private final Stage window;
 	private final Environment env;
 	private final AtomicReference<KeyPair> keyPairRef;
-	private final Lazy<Scene> receiveKeyScene;
+	private final Lazy<Scene> authFlowScene;
 
 	private final BooleanProperty userInteractionDisabled = new SimpleBooleanProperty();
 	private final ObjectBinding<ContentDisplay> unlockButtonContentDisplay = Bindings.createObjectBinding(this::getUnlockButtonContentDisplay, userInteractionDisabled);
@@ -48,11 +48,11 @@ public class P12CreateController implements FxController  {
 	public NewPasswordController newPasswordController;
 
 	@Inject
-	public P12CreateController(@KeyLoading Stage window, Environment env, AtomicReference<KeyPair> keyPairRef, @FxmlScene(FxmlFile.HUB_RECEIVE_KEY) Lazy<Scene> receiveKeyScene) {
+	public P12CreateController(@KeyLoading Stage window, Environment env, AtomicReference<KeyPair> keyPairRef, @FxmlScene(FxmlFile.HUB_AUTH_FLOW) Lazy<Scene> authFlowScene) {
 		this.window = window;
 		this.env = env;
 		this.keyPairRef = keyPairRef;
-		this.receiveKeyScene = receiveKeyScene;
+		this.authFlowScene = authFlowScene;
 		this.window.addEventHandler(WindowEvent.WINDOW_HIDING, this::windowClosed);
 	}
 
@@ -81,7 +81,7 @@ public class P12CreateController implements FxController  {
 			var keyPair = P12AccessHelper.createNew(p12File, pw);
 			setKeyPair(keyPair);
 			LOG.debug("Created .p12 file {}", p12File);
-			window.setScene(receiveKeyScene.get());
+			window.setScene(authFlowScene.get());
 		} catch (IOException e) {
 			LOG.error("Failed to load .p12 file.", e);
 			// TODO

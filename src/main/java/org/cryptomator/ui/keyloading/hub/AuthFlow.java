@@ -127,25 +127,11 @@ class AuthFlow implements AutoCloseable {
 				.build();
 		HttpResponse<InputStream> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofInputStream());
 		if (response.statusCode() == 200) {
-			var json = parseBody(response);
+			var json = HttpHelper.parseBody(response);
 			return json.getAsJsonObject().get("access_token").getAsString();
 		} else {
-			LOG.error("Unexpected HTTP response {}: {}", response.statusCode(), readBody(response));
+			LOG.error("Unexpected HTTP response {}: {}", response.statusCode(), HttpHelper.readBody(response));
 			throw new IOException("Unexpected HTTP response code " + response.statusCode());
-		}
-	}
-
-	private String readBody(HttpResponse<InputStream> response) throws IOException {
-		try (var in = response.body(); var reader = new InputStreamReader(in, StandardCharsets.UTF_8)) {
-			return CharStreams.toString(reader);
-		}
-	}
-
-	private JsonElement parseBody(HttpResponse<InputStream> response) throws IOException {
-		try (InputStream in = response.body(); Reader reader = new InputStreamReader(in, StandardCharsets.UTF_8)) {
-			return JsonParser.parseReader(reader);
-		} catch (JsonParseException e) {
-			throw new IOException("Failed to parse JSON", e);
 		}
 	}
 

@@ -19,7 +19,6 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.security.KeyPair;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -33,28 +32,26 @@ public class HubKeyLoadingStrategy implements KeyLoadingStrategy {
 	private final Vault vault;
 	private final Stage window;
 	private final Lazy<Scene> p12LoadingScene;
-	private final UserInteractionLock<HubKeyLoadingModule.AuthFlow> userInteraction;
-	private final AtomicReference<URI> hubUriRef;
+	private final UserInteractionLock<HubKeyLoadingModule.HubLoadingResult> userInteraction;
 	private final AtomicReference<KeyPair> keyPairRef;
-	private final AtomicReference<EciesParams> authParamsRef;
+	private final AtomicReference<EciesParams> eciesParams;
 
 	@Inject
-	public HubKeyLoadingStrategy(@KeyLoading Vault vault, @KeyLoading Stage window, @FxmlScene(FxmlFile.HUB_P12) Lazy<Scene> p12LoadingScene, UserInteractionLock<HubKeyLoadingModule.AuthFlow> userInteraction, AtomicReference<URI> hubUriRef, AtomicReference<KeyPair> keyPairRef, AtomicReference<EciesParams> authParamsRef) {
+	public HubKeyLoadingStrategy(@KeyLoading Vault vault, @KeyLoading Stage window, @FxmlScene(FxmlFile.HUB_P12) Lazy<Scene> p12LoadingScene, UserInteractionLock<HubKeyLoadingModule.HubLoadingResult> userInteraction, AtomicReference<KeyPair> keyPairRef, AtomicReference<EciesParams> eciesParams) {
 		this.vault = vault;
 		this.window = window;
 		this.p12LoadingScene = p12LoadingScene;
 		this.userInteraction = userInteraction;
-		this.hubUriRef = hubUriRef;
 		this.keyPairRef = keyPairRef;
-		this.authParamsRef = authParamsRef;
+		this.eciesParams = eciesParams;
 	}
 
 	@Override
 	public Masterkey loadKey(URI keyId) throws MasterkeyLoadingFailedException {
-		hubUriRef.set(getHubUri(keyId));
+		Preconditions.checkArgument(keyId.getScheme().startsWith(SCHEME_PREFIX));
 		try {
 			return switch (auth()) {
-				case SUCCESS -> EciesHelper.decryptMasterkey(keyPairRef.get(), authParamsRef.get());
+				case SUCCESS -> EciesHelper.decryptMasterkey(keyPairRef.get(), eciesParams.get());
 				case FAILED -> throw new MasterkeyLoadingFailedException("failed to load keypair");
 				case CANCELLED -> throw new UnlockCancelledException("User cancelled auth workflow");
 			};
@@ -72,17 +69,7 @@ public class HubKeyLoadingStrategy implements KeyLoadingStrategy {
 		}
 	}
 
-	private URI getHubUri(URI keyId) {
-		Preconditions.checkArgument(keyId.getScheme().startsWith(SCHEME_PREFIX));
-		var hubUriScheme = keyId.getScheme().substring(SCHEME_PREFIX.length());
-		try {
-			return new URI(hubUriScheme, keyId.getSchemeSpecificPart(), keyId.getFragment());
-		} catch (URISyntaxException e) {
-			throw new IllegalStateException("URI constructed from params known to be valid", e);
-		}
-	}
-
-	private HubKeyLoadingModule.AuthFlow auth() throws InterruptedException {
+	private HubKeyLoadingModule.HubLoadingResult auth() throws InterruptedException {
 		Platform.runLater(() -> {
 			window.setScene(p12LoadingScene.get());
 			window.show();

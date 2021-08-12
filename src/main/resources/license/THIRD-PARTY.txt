@@ -11,7 +11,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see http://www.gnu.org/licenses/.
 
-Cryptomator uses 43 third-party dependencies under the following licenses:
+Cryptomator uses 46 third-party dependencies under the following licenses:
         Apache License v2.0:
 			- jffi (com.github.jnr:jffi:1.2.23 - http://github.com/jnr/jffi)
 			- jnr-a64asm (com.github.jnr:jnr-a64asm:1.0.0 - http://nexus.sonatype.org/oss-repository-hosting.html/jnr-a64asm)
@@ -33,7 +33,10 @@ Cryptomator uses 43 third-party dependencies under the following licenses:
 			- Jetty :: Security (org.eclipse.jetty:jetty-security:10.0.6 - https://eclipse.org/jetty/jetty-security)
 			- Jetty :: Server Core (org.eclipse.jetty:jetty-server:10.0.6 - https://eclipse.org/jetty/jetty-server)
 			- Jetty :: Servlet Handling (org.eclipse.jetty:jetty-servlet:10.0.6 - https://eclipse.org/jetty/jetty-servlet)
+			- Jetty :: Utility Servlets and Filters (org.eclipse.jetty:jetty-servlets:10.0.6 - https://eclipse.org/jetty/jetty-servlets)
 			- Jetty :: Utilities (org.eclipse.jetty:jetty-util:10.0.6 - https://eclipse.org/jetty/jetty-util)
+			- Jetty :: Webapp Application Support (org.eclipse.jetty:jetty-webapp:10.0.6 - https://eclipse.org/jetty/jetty-webapp)
+			- Jetty :: XML utilities (org.eclipse.jetty:jetty-xml:10.0.6 - https://eclipse.org/jetty/jetty-xml)
 			- Jetty :: Servlet API and Schemas for JPMS and OSGi (org.eclipse.jetty.toolchain:jetty-servlet-api:4.0.6 - https://eclipse.org/jetty/jetty-servlet-api)
         BSD:
 			- asm (org.ow2.asm:asm:7.1 - http://asm.ow2.org/)
@@ -53,7 +56,10 @@ Cryptomator uses 43 third-party dependencies under the following licenses:
 			- Jetty :: Security (org.eclipse.jetty:jetty-security:10.0.6 - https://eclipse.org/jetty/jetty-security)
 			- Jetty :: Server Core (org.eclipse.jetty:jetty-server:10.0.6 - https://eclipse.org/jetty/jetty-server)
 			- Jetty :: Servlet Handling (org.eclipse.jetty:jetty-servlet:10.0.6 - https://eclipse.org/jetty/jetty-servlet)
+			- Jetty :: Utility Servlets and Filters (org.eclipse.jetty:jetty-servlets:10.0.6 - https://eclipse.org/jetty/jetty-servlets)
 			- Jetty :: Utilities (org.eclipse.jetty:jetty-util:10.0.6 - https://eclipse.org/jetty/jetty-util)
+			- Jetty :: Webapp Application Support (org.eclipse.jetty:jetty-webapp:10.0.6 - https://eclipse.org/jetty/jetty-webapp)
+			- Jetty :: XML utilities (org.eclipse.jetty:jetty-xml:10.0.6 - https://eclipse.org/jetty/jetty-xml)
         Eclipse Public License - v 1.0:
 			- Logback Classic Module (ch.qos.logback:logback-classic:1.2.3 - http://logback.qos.ch/logback-classic)
 			- Logback Core Module (ch.qos.logback:logback-core:1.2.3 - http://logback.qos.ch/logback-core)

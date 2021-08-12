@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import org.cryptomator.ui.controls.FontAwesome5Spinner?>
+<?import org.cryptomator.ui.keyloading.hub.ReceiveKeyState?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ButtonBar?>
-<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Text?>
-<?import javafx.scene.text.TextFlow?>
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.keyloading.hub.ReceiveKeyController"
@@ -18,6 +18,10 @@
 	  maxWidth="400"
 	  minHeight="145"
 	  spacing="12">
+	<fx:define>
+		<ReceiveKeyState fx:id="loading" fx:constant="LOADING" />
+		<ReceiveKeyState fx:id="needsRegistration" fx:constant="NEEDS_REGISTRATION"/>
+	</fx:define>
 	<padding>
 		<Insets topRightBottomLeft="12"/>
 	</padding>
@@ -26,17 +30,20 @@
 			<ImageView VBox.vgrow="ALWAYS" fitWidth="64" preserveRatio="true" cache="true">
 				<Image url="@../img/bot/bot.png"/>
 			</ImageView>
-			<TextFlow visible="${controller.ready}" managed="${controller.ready}">
-				<Text text="TODO: please login via " />
-				<Hyperlink styleClass="hyperlink-underline" text="${controller.hubUriHost}" onAction="#openBrowser"/>
-			</TextFlow>
-			<FontAwesome5Spinner glyphSize="12" visible="${!controller.ready}" managed="${!controller.ready}"/>
+
+			<FontAwesome5Spinner glyphSize="12" visible="${controller.state == loading}" managed="${controller.state == loading}"/>
+
+			<VBox spacing="6" visible="${controller.state == needsRegistration}" managed="${controller.state == needsRegistration}">
+				<Label text="TODO: register device" labelFor="$locationTextField"/>
+				<TextField fx:id="deviceName" promptText="TODO: device name" VBox.vgrow="ALWAYS"/>
+			</VBox>
 		</HBox>
 
 		<VBox alignment="BOTTOM_CENTER" VBox.vgrow="ALWAYS">
-			<ButtonBar buttonMinWidth="120" buttonOrder="+C">
+			<ButtonBar buttonMinWidth="120" buttonOrder="+CX">
 				<buttons>
 					<Button text="%generic.button.cancel" ButtonBar.buttonData="CANCEL_CLOSE" cancelButton="true" onAction="#cancel"/>
+					<Button text="TODO: register device" ButtonBar.buttonData="NEXT_FORWARD" visible="${controller.state == needsRegistration}" managed="${controller.state == needsRegistration}" defaultButton="true" onAction="#register"/>
 				</buttons>
 			</ButtonBar>
 		</VBox>

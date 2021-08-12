@@ -17,6 +17,7 @@ import org.cryptomator.ui.keyloading.KeyLoading;
 import org.cryptomator.ui.keyloading.KeyLoadingScoped;
 import org.cryptomator.ui.keyloading.KeyLoadingStrategy;
 
+import javax.inject.Named;
 import javafx.scene.Scene;
 import java.net.URI;
 import java.security.KeyPair;
@@ -26,7 +27,7 @@ import java.util.concurrent.atomic.AtomicReference;
 @Module
 public abstract class HubKeyLoadingModule {
 
-	public enum AuthFlow {
+	public enum HubLoadingResult {
 		SUCCESS,
 		FAILED,
 		CANCELLED
@@ -39,21 +40,22 @@ public abstract class HubKeyLoadingModule {
 	}
 
 	@Provides
+	@Named("bearerToken")
 	@KeyLoadingScoped
-	static AtomicReference<EciesParams> provideAuthParamsRef() {
+	static AtomicReference<String> provideBearerTokenRef() {
 		return new AtomicReference<>();
 	}
 
 	@Provides
 	@KeyLoadingScoped
-	static UserInteractionLock<AuthFlow> provideAuthFlowLock() {
+	static AtomicReference<EciesParams> provideEciesParamsRef() {
+		return new AtomicReference<>();
+	}
+
+	@Provides
+	@KeyLoadingScoped
+	static UserInteractionLock<HubLoadingResult> provideResultLock() {
 		return new UserInteractionLock<>(null);
-	}
-
-	@Provides
-	@KeyLoadingScoped
-	static AtomicReference<URI> provideHubUri() {
-		return new AtomicReference<>();
 	}
 
 	@Binds
@@ -76,9 +78,17 @@ public abstract class HubKeyLoadingModule {
 	}
 
 	@Provides
+	@FxmlScene(FxmlFile.HUB_AUTH_FLOW)
+	@KeyLoadingScoped
+	static Scene provideHubAuthFlowScene(@KeyLoading FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.HUB_AUTH_FLOW);
+	}
+
+
+	@Provides
 	@FxmlScene(FxmlFile.HUB_RECEIVE_KEY)
 	@KeyLoadingScoped
-	static Scene provideHubAuthScene(@KeyLoading FxmlLoaderFactory fxmlLoaders) {
+	static Scene provideHubReceiveKeyScene(@KeyLoading FxmlLoaderFactory fxmlLoaders) {
 		return fxmlLoaders.createScene(FxmlFile.HUB_RECEIVE_KEY);
 	}
 
@@ -96,6 +106,11 @@ public abstract class HubKeyLoadingModule {
 	@IntoMap
 	@FxControllerKey(P12CreateController.class)
 	abstract FxController bindP12CreateController(P12CreateController controller);
+
+	@Binds
+	@IntoMap
+	@FxControllerKey(AuthFlowController.class)
+	abstract FxController bindAuthFlowController(AuthFlowController controller);
 
 	@Provides
 	@IntoMap

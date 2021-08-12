@@ -20,10 +20,10 @@ public class P12Controller implements FxController {
 
 	private final Stage window;
 	private final Environment env;
-	private final UserInteractionLock<HubKeyLoadingModule.AuthFlow> userInteraction;
+	private final UserInteractionLock<HubKeyLoadingModule.HubLoadingResult> userInteraction;
 
 	@Inject
-	public P12Controller(@KeyLoading Stage window, Environment env, UserInteractionLock<HubKeyLoadingModule.AuthFlow> userInteraction) {
+	public P12Controller(@KeyLoading Stage window, Environment env, UserInteractionLock<HubKeyLoadingModule.HubLoadingResult> userInteraction) {
 		this.window = window;
 		this.env = env;
 		this.userInteraction = userInteraction;
@@ -34,7 +34,7 @@ public class P12Controller implements FxController {
 		// if not already interacted, mark this workflow as cancelled:
 		if (userInteraction.awaitingInteraction().get()) {
 			LOG.debug("P12 loading cancelled by user.");
-			userInteraction.interacted(HubKeyLoadingModule.AuthFlow.CANCELLED);
+			userInteraction.interacted(HubKeyLoadingModule.HubLoadingResult.CANCELLED);
 		}
 	}
 
