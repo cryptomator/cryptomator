@@ -17,7 +17,7 @@ import java.util.concurrent.LinkedBlockingQueue;
  * A basic implementation for RFC 8252, Section 7.3:
  * <p>
  * We're spawning a local http server on a system-assigned high port and
- * use <code>http://127.0.0.1:{PORT}/success</code> as a redirect URI.
+ * use <code>http://127.0.0.1:{PORT}/callback</code> as a redirect URI.
  * <p>
  * Furthermore, we can deliver a html response to inform the user that the
  * auth workflow finished and she can close the browser tab.
@@ -50,10 +50,6 @@ class AuthFlowReceiver implements AutoCloseable {
 	public static AuthFlowReceiver start() throws Exception {
 		var server = new Server();
 		var context = new ServletContextHandler();
-
-//		var corsFilter = new FilterHolder(new CrossOriginFilter());
-//		corsFilter.setInitParameter(CrossOriginFilter.ALLOWED_ORIGINS_PARAM, "*"); // TODO restrict to hub host
-//		context.addFilter(corsFilter, "/*", EnumSet.of(DispatcherType.REQUEST));
 
 		var servlet = new CallbackServlet();
 		context.addServlet(new ServletHolder(servlet), CALLBACK_PATH);

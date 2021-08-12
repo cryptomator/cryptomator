@@ -65,8 +65,8 @@ class AuthFlow implements AutoCloseable {
 	 * @param authEndpoint Address of the <a href="https://datatracker.ietf.org/doc/html/rfc6749#section-3.1">Authorization Endpoint</a>
 	 * @param tokenEndpoint Address of the <a href="https://datatracker.ietf.org/doc/html/rfc6749#section-3.2">Token Endpoint</a>
 	 * @param clientId The <a href="https://datatracker.ietf.org/doc/html/rfc6749#section-4.1.1"><code>client_id</code></a>
-	 * @return An authorization
-	 * @throws Exception
+	 * @return An authorization flow
+	 * @throws Exception In case of any problems starting the server
 	 */
 	public static AuthFlow init(URI authEndpoint, URI tokenEndpoint, String clientId) throws Exception {
 		var receiver = AuthFlowReceiver.start();
