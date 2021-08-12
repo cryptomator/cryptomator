@@ -28,9 +28,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
 
 @KeyLoadingScoped
-public class AuthController implements FxController {
+public class ReceiveKeyController implements FxController {
 
-	private static final Logger LOG = LoggerFactory.getLogger(AuthController.class);
+	private static final Logger LOG = LoggerFactory.getLogger(ReceiveKeyController.class);
 
 	private final Application application;
 	private final ExecutorService executor;
@@ -45,7 +45,7 @@ public class AuthController implements FxController {
 	private final AuthReceiveTask receiveTask;
 
 	@Inject
-	public AuthController(Application application, ExecutorService executor, @KeyLoading Stage window, AtomicReference<KeyPair> keyPairRef, AtomicReference<EciesParams> authParamsRef, UserInteractionLock<HubKeyLoadingModule.AuthFlow> authFlowLock, AtomicReference<URI> hubUriRef, ErrorComponent.Builder errorComponent) {
+	public ReceiveKeyController(Application application, ExecutorService executor, @KeyLoading Stage window, AtomicReference<KeyPair> keyPairRef, AtomicReference<EciesParams> authParamsRef, UserInteractionLock<HubKeyLoadingModule.AuthFlow> authFlowLock, AtomicReference<URI> hubUriRef, ErrorComponent.Builder errorComponent) {
 		this.application = application;
 		this.executor = executor;
 		this.window = window;

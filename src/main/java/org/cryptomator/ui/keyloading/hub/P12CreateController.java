@@ -8,7 +8,6 @@ import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.NewPasswordController;
-import org.cryptomator.ui.common.UserInteractionLock;
 import org.cryptomator.ui.keyloading.KeyLoading;
 import org.cryptomator.ui.keyloading.KeyLoadingScoped;
 import org.slf4j.Logger;
@@ -40,7 +39,7 @@ public class P12CreateController implements FxController  {
 	private final Stage window;
 	private final Environment env;
 	private final AtomicReference<KeyPair> keyPairRef;
-	private final Lazy<Scene> authScene;
+	private final Lazy<Scene> receiveKeyScene;
 
 	private final BooleanProperty userInteractionDisabled = new SimpleBooleanProperty();
 	private final ObjectBinding<ContentDisplay> unlockButtonContentDisplay = Bindings.createObjectBinding(this::getUnlockButtonContentDisplay, userInteractionDisabled);
@@ -49,11 +48,11 @@ public class P12CreateController implements FxController  {
 	public NewPasswordController newPasswordController;
 
 	@Inject
-	public P12CreateController(@KeyLoading Stage window, Environment env, AtomicReference<KeyPair> keyPairRef, @FxmlScene(FxmlFile.HUB_AUTH) Lazy<Scene> authScene) {
+	public P12CreateController(@KeyLoading Stage window, Environment env, AtomicReference<KeyPair> keyPairRef, @FxmlScene(FxmlFile.HUB_RECEIVE_KEY) Lazy<Scene> receiveKeyScene) {
 		this.window = window;
 		this.env = env;
 		this.keyPairRef = keyPairRef;
-		this.authScene = authScene;
+		this.receiveKeyScene = receiveKeyScene;
 		this.window.addEventHandler(WindowEvent.WINDOW_HIDING, this::windowClosed);
 	}
 
@@ -82,7 +81,7 @@ public class P12CreateController implements FxController  {
 			var keyPair = P12AccessHelper.createNew(p12File, pw);
 			setKeyPair(keyPair);
 			LOG.debug("Created .p12 file {}", p12File);
-			window.setScene(authScene.get());
+			window.setScene(receiveKeyScene.get());
 		} catch (IOException e) {
 			LOG.error("Failed to load .p12 file.", e);
 			// TODO

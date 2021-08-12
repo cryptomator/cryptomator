@@ -13,7 +13,7 @@
 <?import javafx.scene.text.TextFlow?>
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
-	  fx:controller="org.cryptomator.ui.keyloading.hub.AuthController"
+	  fx:controller="org.cryptomator.ui.keyloading.hub.ReceiveKeyController"
 	  minWidth="400"
 	  maxWidth="400"
 	  minHeight="145"

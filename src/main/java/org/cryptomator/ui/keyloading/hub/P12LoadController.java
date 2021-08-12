@@ -8,7 +8,6 @@ import org.cryptomator.ui.common.Animations;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
-import org.cryptomator.ui.common.UserInteractionLock;
 import org.cryptomator.ui.controls.NiceSecurePasswordField;
 import org.cryptomator.ui.keyloading.KeyLoading;
 import org.cryptomator.ui.keyloading.KeyLoadingScoped;
@@ -42,18 +41,18 @@ public class P12LoadController implements FxController {
 	private final Stage window;
 	private final Environment env;
 	private final AtomicReference<KeyPair> keyPairRef;
-	private final Lazy<Scene> authScene;
+	private final Lazy<Scene> receiveKeyScene;
 	private final BooleanProperty userInteractionDisabled = new SimpleBooleanProperty();
 	private final ObjectBinding<ContentDisplay> unlockButtonContentDisplay = Bindings.createObjectBinding(this::getUnlockButtonContentDisplay, userInteractionDisabled);
 
 	public NiceSecurePasswordField passwordField;
 
 	@Inject
-	public P12LoadController(@KeyLoading Stage window, Environment env, AtomicReference<KeyPair> keyPairRef, @FxmlScene(FxmlFile.HUB_AUTH) Lazy<Scene> authScene) {
+	public P12LoadController(@KeyLoading Stage window, Environment env, AtomicReference<KeyPair> keyPairRef, @FxmlScene(FxmlFile.HUB_RECEIVE_KEY) Lazy<Scene> receiveKeyScene) {
 		this.window = window;
 		this.env = env;
 		this.keyPairRef = keyPairRef;
-		this.authScene = authScene;
+		this.receiveKeyScene = receiveKeyScene;
 		this.window.addEventHandler(WindowEvent.WINDOW_HIDING, this::windowClosed);
 	}
 
@@ -79,7 +78,7 @@ public class P12LoadController implements FxController {
 			var keyPair = P12AccessHelper.loadExisting(p12File, pw);
 			setKeyPair(keyPair);
 			LOG.debug("Loaded .p12 file {}", p12File);
-			window.setScene(authScene.get());
+			window.setScene(receiveKeyScene.get());
 		} catch (InvalidPassphraseException e) {
 			LOG.warn("Invalid passphrase entered for .p12 file");
 			Animations.createShakeWindowAnimation(window).playFromStart();

@@ -76,10 +76,10 @@ public abstract class HubKeyLoadingModule {
 	}
 
 	@Provides
-	@FxmlScene(FxmlFile.HUB_AUTH)
+	@FxmlScene(FxmlFile.HUB_RECEIVE_KEY)
 	@KeyLoadingScoped
 	static Scene provideHubAuthScene(@KeyLoading FxmlLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene(FxmlFile.HUB_AUTH);
+		return fxmlLoaders.createScene(FxmlFile.HUB_RECEIVE_KEY);
 	}
 
 	@Binds
@@ -106,7 +106,7 @@ public abstract class HubKeyLoadingModule {
 
 	@Binds
 	@IntoMap
-	@FxControllerKey(AuthController.class)
-	abstract FxController bindAuthController(AuthController controller);
+	@FxControllerKey(ReceiveKeyController.class)
+	abstract FxController bindReceiveKeyController(ReceiveKeyController controller);
 
 }
