@@ -1,7 +1,9 @@
 package org.cryptomator.ui.keyloading.hub;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import com.google.common.io.BaseEncoding;
+import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.ErrorComponent;
@@ -45,6 +47,7 @@ public class ReceiveKeyController implements FxController {
 
 	private final Stage window;
 	private final String bearerToken;
+	private final KeyPair keyPair;
 	private final AtomicReference<EciesParams> eciesParamsRef;
 	private final UserInteractionLock<HubKeyLoadingModule.HubLoadingResult> result;
 	private final ErrorComponent.Builder errorComponent;
@@ -58,19 +61,18 @@ public class ReceiveKeyController implements FxController {
 	public ReceiveKeyController(@KeyLoading Vault vault, ExecutorService executor, @KeyLoading Stage window, AtomicReference<KeyPair> keyPairRef, @Named("bearerToken") AtomicReference<String> tokenRef, AtomicReference<EciesParams> eciesParamsRef, UserInteractionLock<HubKeyLoadingModule.HubLoadingResult> result, ErrorComponent.Builder errorComponent) {
 		this.window = window;
 		this.bearerToken = Objects.requireNonNull(tokenRef.get());
+		this.keyPair = Objects.requireNonNull(keyPairRef.get());
 		this.eciesParamsRef = eciesParamsRef;
 		this.result = result;
 		this.errorComponent = errorComponent;
 		this.vaultBaseUri = getVaultBaseUri(vault);
 		this.window.addEventHandler(WindowEvent.WINDOW_HIDING, this::windowClosed);
 		this.httpClient = HttpClient.newBuilder().executor(executor).build();
-//		var deviceKey = BaseEncoding.base64Url().omitPadding().encode(keyPairRef.get().getPublic().getEncoded());
-//		LOG.info("deviceKey {}", deviceKey);
 	}
 
 	@FXML
 	public void initialize() {
-		var keyUri = appendPath(vaultBaseUri, "/keys/desktop-app-3000"); // TODO use actual device id
+		var keyUri = appendPath(vaultBaseUri, "/keys/desktop-app"); // TODO use actual device id
 		var request = HttpRequest.newBuilder(keyUri) //
 				.header("Authorization", "Bearer " + bearerToken) //
 				.GET() //
@@ -93,14 +95,36 @@ public class ReceiveKeyController implements FxController {
 
 	@FXML
 	public void register() {
-		Preconditions.checkArgument(deviceName.textProperty().isNotEmpty().get(), "device name must not be empty");
-//		var keyUri = appendPath(vaultBaseUri, "../../devices/desktop-app-3000");
-//		var request = HttpRequest.newBuilder(keyUri) //
-//				.header("Authorization", "Bearer " + bearerToken) //
-//				.GET() //
-//				.build();
-//		httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream()) //
-//				.whenCompleteAsync(this::loadedExistingKey, Platform::runLater);
+		Preconditions.checkArgument(!Strings.isNullOrEmpty(deviceName.getText()), "device name must not be empty");
+		var deviceKey = BaseEncoding.base64Url().omitPadding().encode(keyPair.getPublic().getEncoded());
+		var json = """
+    			{
+    				"id": "desktop-app",
+    				"name": "%s",
+    				"publicKey": "%s"
+    			}
+				""".formatted(deviceName.getText(), deviceKey); // TODO use gson
+
+		var regUri = URI.create("http://localhost:9090/devices/desktop-app"); // TODO read api base from vault config!
+		var request = HttpRequest.newBuilder(regUri) //
+				.header("Authorization", "Bearer " + bearerToken) //
+				.header("Content-Type", "application/json; charset=UTF-8") //
+				.PUT(HttpRequest.BodyPublishers.ofString(json)) //
+				.build();
+		httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream()) //
+				.whenCompleteAsync(this::createdNewDevice, Platform::runLater);
+	}
+
+	private void createdNewDevice(HttpResponse<InputStream> response, Throwable error) {
+		if (error != null) {
+			retrievalFailed(error);
+		} else {
+			switch (response.statusCode()) {
+				case 201 -> LOG.info("TODO device created, waiting for authorization");
+				case 409 -> LOG.info("TODO device already exists. still waiting for authorization");
+				default -> retrievalFailed(new IOException("Unexpected response " + response.statusCode()));
+			}
+		}
 	}
 
 	private void retrievalSucceeded(HttpResponse<InputStream> response) {
