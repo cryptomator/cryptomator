@@ -3,8 +3,9 @@ name: Installers and Release
 on:
   workflow_dispatch:
   push:
-    tags:
-      - '*'
+    tags: # see https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#filter-pattern-cheat-sheet
+    - '[0-9]+.[0-9]+.[0-9]+'
+    - '[0-9]+.[0-9]+.[0-9]+-*'
 
 env:
   JAVA_VERSION: 16
@@ -80,8 +81,9 @@ jobs:
       - id: versions
         run: |
           if [[ $GITHUB_REF == refs/tags/* ]]; then
+            VERSION_NUM=`echo ${GITHUB_REF##*/} | sed -E 's/([0-9]+\.[0-9]+\.[0-9]+).*/\1/'`
             echo "::set-output name=versionStr::${GITHUB_REF##*/}"
-            echo "::set-output name=versionNum::${GITHUB_REF##*/}"
+            echo "::set-output name=versionNum::${VERSION_NUM}"
           else
             echo "::set-output name=versionStr::SNAPSHOT"
             echo "::set-output name=versionNum::99.0.0"
@@ -239,10 +241,8 @@ jobs:
         with:
           name: linux-appimage
           path: |
-            cryptomator-${{ needs.metadata.outputs.versionStr }}-x86_64.AppImage
-            cryptomator-${{ needs.metadata.outputs.versionStr }}-x86_64.AppImage.asc
-            cryptomator-${{ needs.metadata.outputs.versionStr }}-x86_64.AppImage.zsync
-            cryptomator-${{ needs.metadata.outputs.versionStr }}-x86_64.AppImage.zsync.asc
+            cryptomator-*.AppImage
+            cryptomator-*.AppImage.zsync
           if-no-files-found: error
 
 #
@@ -480,20 +480,12 @@ jobs:
   release:
     name: Draft a release on Github
     runs-on: ubuntu-latest
-    needs: [linux-appimage,mac-dmg,win-msi]
+    needs: [metadata,linux-appimage,mac-dmg,win-msi]
     if: startsWith(github.ref, 'refs/tags/') && github.repository == 'cryptomator/cryptomator'
     steps:
       - uses: actions/checkout@v2
       - name: Create tarball
-        run: git archive --prefix="cryptomator-${{ github.ref }}/" -o "cryptomator-${{ github.ref }}.tar.gz" ${{ github.ref }}
-        #Signature von finalen Artefakten
-      - name: Sign tarball with key 615D449FE6E6A235
-        run: |
-          echo "${GPG_PRIVATE_KEY}" | gpg --batch --quiet --import
-          echo "${GPG_PASSPHRASE}" | gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign -a "cryptomator-${{ github.ref }}.tar.gz"
-        env:
-          GPG_PRIVATE_KEY: ${{ secrets.RELEASES_GPG_PRIVATE_KEY }}
-          GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
+        run: git archive --prefix="cryptomator-${{ needs.metadata.outputs.versionStr }}/" -o "cryptomator-${{ needs.metadata.outputs.versionStr }}.tar.gz" ${{ github.ref }}
       - name: Download linux appimage
         uses: actions/download-artifact@v2
         with:
@@ -506,21 +498,24 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: win-msi
-
-      - name: Create Detached GPG Signature for all release files with key 615D449FE6E6A235
+      - name: Create detached GPG signature for all release files with key 615D449FE6E6A235
         run: |
           echo "${GPG_PRIVATE_KEY}" | gpg --batch --quiet --import
-          for extension in .appimage .dmg .msi .zsync; do
-            $FILE=$(ls | grep ${extension})
+          for FILE in `find . -name "*.AppImage" -o -name "*.dmg" -o -name "*.msi" -o -name "*.zsync" -o -name "*.tar.gz"`; do
             echo "${GPG_PASSPHRASE}" | gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign -a ${FILE}
           done
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.RELEASES_GPG_PRIVATE_KEY }}
+          GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
       - name: Create release draft
         uses: softprops/action-gh-release@v1
         with:
           draft: true
           fail_on_unmatched_files: true
+          discussion_category_name: releases
+          token: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}
           files: |
-            *.appimage
+            *.AppImage
             *.zsync
             *.asc
             *.dmg
