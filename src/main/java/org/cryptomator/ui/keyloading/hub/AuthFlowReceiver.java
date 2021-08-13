@@ -40,18 +40,20 @@ class AuthFlowReceiver implements AutoCloseable {
 	private final Server server;
 	private final ServerConnector connector;
 	private final CallbackServlet servlet;
+	private final HubConfig hubConfig;
 
-	private AuthFlowReceiver(Server server, ServerConnector connector, CallbackServlet servlet) {
+	private AuthFlowReceiver(Server server, ServerConnector connector, CallbackServlet servlet, HubConfig hubConfig) {
 		this.server = server;
 		this.connector = connector;
 		this.servlet = servlet;
+		this.hubConfig = hubConfig;
 	}
 
-	public static AuthFlowReceiver start() throws Exception {
+	public static AuthFlowReceiver start(HubConfig hubConfig) throws Exception {
 		var server = new Server();
 		var context = new ServletContextHandler();
 
-		var servlet = new CallbackServlet();
+		var servlet = new CallbackServlet(hubConfig);
 		context.addServlet(new ServletHolder(servlet), CALLBACK_PATH);
 
 		var connector = new ServerConnector(server);
@@ -60,7 +62,7 @@ class AuthFlowReceiver implements AutoCloseable {
 		server.setConnectors(new Connector[]{connector});
 		server.setHandler(context);
 		server.start();
-		return new AuthFlowReceiver(server, connector, servlet);
+		return new AuthFlowReceiver(server, connector, servlet, hubConfig);
 	}
 
 	public String getRedirectUri() {
@@ -81,6 +83,11 @@ class AuthFlowReceiver implements AutoCloseable {
 	private static class CallbackServlet extends HttpServlet {
 
 		private final BlockingQueue<Callback> callback = new LinkedBlockingQueue<>();
+		private final HubConfig hubConfig;
+
+		public CallbackServlet(HubConfig hubConfig) {
+			this.hubConfig = hubConfig;
+		}
 
 		@Override
 		protected void doGet(HttpServletRequest req, HttpServletResponse res) throws IOException {
@@ -88,14 +95,15 @@ class AuthFlowReceiver implements AutoCloseable {
 			var code = req.getParameter("code");
 			var state = req.getParameter("state");
 
-			// TODO 302 use redirect to configurable site
-			res.setContentType("text/html;charset=utf-8");
-			res.getWriter().write(HTML_SUCCESS);
-			res.getWriter().flush();
+			res.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY);
+			if (error == null && code != null) {
+				res.setHeader("Location", hubConfig.unlockSuccessUrl);
+			} else {
+				res.setHeader("Location", hubConfig.unlockErrorUrl);
+			}
 
 			callback.add(new Callback(error, code, state));
 		}
-
 	}
 
 }

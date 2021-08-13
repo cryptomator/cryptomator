@@ -5,6 +5,7 @@ import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoMap;
 import dagger.multibindings.StringKey;
+import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxControllerKey;
 import org.cryptomator.ui.common.FxmlFile;
@@ -19,6 +20,8 @@ import org.cryptomator.ui.keyloading.KeyLoadingStrategy;
 
 import javax.inject.Named;
 import javafx.scene.Scene;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.net.URI;
 import java.security.KeyPair;
 import java.util.ResourceBundle;
@@ -31,6 +34,16 @@ public abstract class HubKeyLoadingModule {
 		SUCCESS,
 		FAILED,
 		CANCELLED
+	}
+
+	@Provides
+	@KeyLoadingScoped
+	static HubConfig provideHubConfig(@KeyLoading Vault vault) {
+		try {
+			return vault.getUnverifiedVaultConfig().getHeader("hub", HubConfig.class);
+		} catch (IOException e) {
+			throw new UncheckedIOException(e);
+		}
 	}
 
 	@Provides
@@ -92,6 +105,14 @@ public abstract class HubKeyLoadingModule {
 		return fxmlLoaders.createScene(FxmlFile.HUB_RECEIVE_KEY);
 	}
 
+	@Provides
+	@FxmlScene(FxmlFile.HUB_REGISTER_DEVICE)
+	@KeyLoadingScoped
+	static Scene provideHubRegisterDeviceScene(@KeyLoading FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.HUB_REGISTER_DEVICE);
+	}
+
+
 	@Binds
 	@IntoMap
 	@FxControllerKey(P12Controller.class)
@@ -123,5 +144,10 @@ public abstract class HubKeyLoadingModule {
 	@IntoMap
 	@FxControllerKey(ReceiveKeyController.class)
 	abstract FxController bindReceiveKeyController(ReceiveKeyController controller);
+
+	@Binds
+	@IntoMap
+	@FxControllerKey(RegisterDeviceController.class)
+	abstract FxController bindRegisterDeviceController(RegisterDeviceController controller);
 
 }

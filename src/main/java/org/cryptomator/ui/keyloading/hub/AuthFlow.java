@@ -46,15 +46,15 @@ class AuthFlow implements AutoCloseable {
 	public static final Escaper QUERY_STRING_ESCAPER = new PercentEscaper("-_.!~*'()@:$,;/?", false);
 
 	private final AuthFlowReceiver receiver;
-	private final URI authEndpoint;
-	private final URI tokenEndpoint;
-	private final String clientId;
+	private final URI authEndpoint; // see https://datatracker.ietf.org/doc/html/rfc6749#section-3.1
+	private final URI tokenEndpoint; // see https://datatracker.ietf.org/doc/html/rfc6749#section-3.2
+	private final String clientId; // see https://datatracker.ietf.org/doc/html/rfc6749#section-4.1.1
 
-	private AuthFlow(AuthFlowReceiver receiver, URI authEndpoint, URI tokenEndpoint, String clientId) {
+	private AuthFlow(AuthFlowReceiver receiver, HubConfig hubConfig) {
 		this.receiver = receiver;
-		this.authEndpoint = authEndpoint;
-		this.tokenEndpoint = tokenEndpoint;
-		this.clientId = clientId;
+		this.authEndpoint = URI.create(hubConfig.authEndpoint);
+		this.tokenEndpoint = URI.create(hubConfig.tokenEndpoint);
+		this.clientId = hubConfig.clientId;
 	}
 
 	/**
@@ -62,15 +62,13 @@ class AuthFlow implements AutoCloseable {
 	 * <p>
 	 * This will start a loopback server, so make sure to {@link #close()} this resource.
 	 *
-	 * @param authEndpoint Address of the <a href="https://datatracker.ietf.org/doc/html/rfc6749#section-3.1">Authorization Endpoint</a>
-	 * @param tokenEndpoint Address of the <a href="https://datatracker.ietf.org/doc/html/rfc6749#section-3.2">Token Endpoint</a>
-	 * @param clientId The <a href="https://datatracker.ietf.org/doc/html/rfc6749#section-4.1.1"><code>client_id</code></a>
+	 * @param hubConfig A hub config object containing parameters required for this auth flow
 	 * @return An authorization flow
 	 * @throws Exception In case of any problems starting the server
 	 */
-	public static AuthFlow init(URI authEndpoint, URI tokenEndpoint, String clientId) throws Exception {
-		var receiver = AuthFlowReceiver.start();
-		return new AuthFlow(receiver, authEndpoint, tokenEndpoint, clientId);
+	public static AuthFlow init(HubConfig hubConfig) throws Exception {
+		var receiver = AuthFlowReceiver.start(hubConfig);
+		return new AuthFlow(receiver, hubConfig);
 	}
 
 	/**

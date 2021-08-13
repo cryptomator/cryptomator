@@ -1,7 +1,6 @@
 package org.cryptomator.ui.keyloading.hub;
 
 import dagger.Lazy;
-import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.ErrorComponent;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxmlFile;
@@ -24,7 +23,6 @@ import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-import java.io.IOException;
 import java.net.URI;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
@@ -33,14 +31,11 @@ import java.util.concurrent.atomic.AtomicReference;
 public class AuthFlowController implements FxController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(AuthFlowController.class);
-	private static final String JWT_KEY_AUTH_ENDPOINT = "authEndpoint";
-	private static final String JWT_KEY_TOKEN_ENDPOINT = "tokenEndpoint";
-	private static final String JWT_KEY_CLIENT_ID = "clientId";
 
 	private final Application application;
 	private final Stage window;
 	private final ExecutorService executor;
-	private final Vault vault;
+	private final HubConfig hubConfig;
 	private final AtomicReference<String> tokenRef;
 	private final UserInteractionLock<HubKeyLoadingModule.HubLoadingResult> result;
 	private final Lazy<Scene> receiveKeyScene;
@@ -50,11 +45,11 @@ public class AuthFlowController implements FxController {
 	private AuthFlowTask task;
 
 	@Inject
-	public AuthFlowController(Application application, @KeyLoading Stage window, ExecutorService executor, @KeyLoading Vault vault, @Named("bearerToken") AtomicReference<String> tokenRef, UserInteractionLock<HubKeyLoadingModule.HubLoadingResult> result, @FxmlScene(FxmlFile.HUB_RECEIVE_KEY) Lazy<Scene> receiveKeyScene, ErrorComponent.Builder errorComponent) {
+	public AuthFlowController(Application application, @KeyLoading Stage window, ExecutorService executor, HubConfig hubConfig, @Named("bearerToken") AtomicReference<String> tokenRef, UserInteractionLock<HubKeyLoadingModule.HubLoadingResult> result, @FxmlScene(FxmlFile.HUB_RECEIVE_KEY) Lazy<Scene> receiveKeyScene, ErrorComponent.Builder errorComponent) {
 		this.application = application;
 		this.window = window;
 		this.executor = executor;
-		this.vault = vault;
+		this.hubConfig = hubConfig;
 		this.tokenRef = tokenRef;
 		this.result = result;
 		this.receiveKeyScene = receiveKeyScene;
@@ -67,15 +62,10 @@ public class AuthFlowController implements FxController {
 	@FXML
 	public void initialize() {
 		assert task == null;
-		try {
-			task = setupTask();
-			task.setOnFailed(this::authFailed);
-			task.setOnSucceeded(this::authSucceeded);
-			executor.submit(task);
-		} catch (IOException e) {
-			LOG.error("Unreadable vault config", e);
-			errorComponent.cause(e).window(window).build().showErrorScene();
-		}
+		task = new AuthFlowTask(hubConfig, this::setAuthUri);;
+		task.setOnFailed(this::authFailed);
+		task.setOnSucceeded(this::authSucceeded);
+		executor.submit(task);
 	}
 
 	@FXML
@@ -86,13 +76,6 @@ public class AuthFlowController implements FxController {
 	@FXML
 	public void cancel() {
 		window.close();
-	}
-
-	private AuthFlowTask setupTask() throws IOException {
-		var authUri = URI.create(vault.getUnverifiedVaultConfig().get(JWT_KEY_AUTH_ENDPOINT).asString());
-		var tokenUri = URI.create(vault.getUnverifiedVaultConfig().get(JWT_KEY_TOKEN_ENDPOINT).asString());
-		var clientId = vault.getUnverifiedVaultConfig().get(JWT_KEY_CLIENT_ID).asString();
-		return new AuthFlowTask(authUri, tokenUri, clientId, this::setAuthUri);
 	}
 
 	private void setAuthUri(URI uri) {
@@ -138,4 +121,5 @@ public class AuthFlowController implements FxController {
 			return uri.getAuthority().toString();
 		}
 	}
+
 }

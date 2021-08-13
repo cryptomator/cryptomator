@@ -17,6 +17,7 @@ public enum FxmlFile {
 	HUB_AUTH_FLOW("/fxml/hub_auth_flow.fxml"), //
 	HUB_P12("/fxml/hub_p12.fxml"), //
 	HUB_RECEIVE_KEY("/fxml/hub_receive_key.fxml"), //
+	HUB_REGISTER_DEVICE("/fxml/hub_register_device.fxml"), //
 	LOCK_FORCED("/fxml/lock_forced.fxml"), //
 	LOCK_FAILED("/fxml/lock_failed.fxml"), //
 	MAIN_WINDOW("/fxml/main_window.fxml"), //

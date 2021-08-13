@@ -5,9 +5,12 @@ import com.google.common.base.Strings;
 import com.google.common.io.BaseEncoding;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
+import dagger.Lazy;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.ErrorComponent;
 import org.cryptomator.ui.common.FxController;
+import org.cryptomator.ui.common.FxmlFile;
+import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.UserInteractionLock;
 import org.cryptomator.ui.keyloading.KeyLoading;
 import org.cryptomator.ui.keyloading.KeyLoadingScoped;
@@ -23,6 +26,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
+import javafx.scene.Scene;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
@@ -47,23 +51,20 @@ public class ReceiveKeyController implements FxController {
 
 	private final Stage window;
 	private final String bearerToken;
-	private final KeyPair keyPair;
 	private final AtomicReference<EciesParams> eciesParamsRef;
 	private final UserInteractionLock<HubKeyLoadingModule.HubLoadingResult> result;
+	private final Lazy<Scene> registerDeviceScene;
 	private final ErrorComponent.Builder errorComponent;
 	private final URI vaultBaseUri;
-	private final ObjectProperty<ReceiveKeyState> state = new SimpleObjectProperty<>(ReceiveKeyState.LOADING);
 	private final HttpClient httpClient;
 
-	public TextField deviceName;
-
 	@Inject
-	public ReceiveKeyController(@KeyLoading Vault vault, ExecutorService executor, @KeyLoading Stage window, AtomicReference<KeyPair> keyPairRef, @Named("bearerToken") AtomicReference<String> tokenRef, AtomicReference<EciesParams> eciesParamsRef, UserInteractionLock<HubKeyLoadingModule.HubLoadingResult> result, ErrorComponent.Builder errorComponent) {
+	public ReceiveKeyController(@KeyLoading Vault vault, ExecutorService executor, @KeyLoading Stage window, AtomicReference<KeyPair> keyPairRef, @Named("bearerToken") AtomicReference<String> tokenRef, AtomicReference<EciesParams> eciesParamsRef, UserInteractionLock<HubKeyLoadingModule.HubLoadingResult> result, @FxmlScene(FxmlFile.HUB_REGISTER_DEVICE) Lazy<Scene> registerDeviceScene, ErrorComponent.Builder errorComponent) {
 		this.window = window;
 		this.bearerToken = Objects.requireNonNull(tokenRef.get());
-		this.keyPair = Objects.requireNonNull(keyPairRef.get());
 		this.eciesParamsRef = eciesParamsRef;
 		this.result = result;
+		this.registerDeviceScene = registerDeviceScene;
 		this.errorComponent = errorComponent;
 		this.vaultBaseUri = getVaultBaseUri(vault);
 		this.window.addEventHandler(WindowEvent.WINDOW_HIDING, this::windowClosed);
@@ -87,41 +88,8 @@ public class ReceiveKeyController implements FxController {
 		} else {
 			switch (response.statusCode()) {
 				case 200 -> retrievalSucceeded(response);
-				case 404 -> state.set(ReceiveKeyState.NEEDS_REGISTRATION);
-				default -> retrievalFailed(new IOException("Unexpected response " + response.statusCode()));
-			}
-		}
-	}
-
-	@FXML
-	public void register() {
-		Preconditions.checkArgument(!Strings.isNullOrEmpty(deviceName.getText()), "device name must not be empty");
-		var deviceKey = BaseEncoding.base64Url().omitPadding().encode(keyPair.getPublic().getEncoded());
-		var json = """
-    			{
-    				"id": "desktop-app",
-    				"name": "%s",
-    				"publicKey": "%s"
-    			}
-				""".formatted(deviceName.getText(), deviceKey); // TODO use gson
-
-		var regUri = URI.create("http://localhost:9090/devices/desktop-app"); // TODO read api base from vault config!
-		var request = HttpRequest.newBuilder(regUri) //
-				.header("Authorization", "Bearer " + bearerToken) //
-				.header("Content-Type", "application/json; charset=UTF-8") //
-				.PUT(HttpRequest.BodyPublishers.ofString(json)) //
-				.build();
-		httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream()) //
-				.whenCompleteAsync(this::createdNewDevice, Platform::runLater);
-	}
-
-	private void createdNewDevice(HttpResponse<InputStream> response, Throwable error) {
-		if (error != null) {
-			retrievalFailed(error);
-		} else {
-			switch (response.statusCode()) {
-				case 201 -> LOG.info("TODO device created, waiting for authorization");
-				case 409 -> LOG.info("TODO device already exists. still waiting for authorization");
+				case 403 -> accessNotGranted();
+				case 404 -> needsDeviceRegistration();
 				default -> retrievalFailed(new IOException("Unexpected response " + response.statusCode()));
 			}
 		}
@@ -141,6 +109,14 @@ public class ReceiveKeyController implements FxController {
 		} catch (IOException | IllegalArgumentException e) {
 			retrievalFailed(e);
 		}
+	}
+
+	private void needsDeviceRegistration() {
+		window.setScene(registerDeviceScene.get());
+	}
+
+	private void accessNotGranted() {
+		LOG.warn("unauthorized device"); // TODO
 	}
 
 	private void retrievalFailed(Throwable cause) {
@@ -183,13 +159,5 @@ public class ReceiveKeyController implements FxController {
 			throw new IllegalStateException("URI constructed from params known to be valid", e);
 		}
 	}
-	/* Getter/Setter */
 
-	public ObjectProperty<ReceiveKeyState> stateProperty() {
-		return state;
-	}
-
-	public ReceiveKeyState getState() {
-		return state.get();
-	}
 }

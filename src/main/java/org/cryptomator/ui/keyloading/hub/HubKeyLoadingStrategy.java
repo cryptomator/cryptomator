@@ -29,7 +29,6 @@ public class HubKeyLoadingStrategy implements KeyLoadingStrategy {
 	static final String SCHEME_HUB_HTTP = SCHEME_PREFIX + "http";
 	static final String SCHEME_HUB_HTTPS = SCHEME_PREFIX + "https";
 
-	private final Vault vault;
 	private final Stage window;
 	private final Lazy<Scene> p12LoadingScene;
 	private final UserInteractionLock<HubKeyLoadingModule.HubLoadingResult> userInteraction;
@@ -37,8 +36,7 @@ public class HubKeyLoadingStrategy implements KeyLoadingStrategy {
 	private final AtomicReference<EciesParams> eciesParams;
 
 	@Inject
-	public HubKeyLoadingStrategy(@KeyLoading Vault vault, @KeyLoading Stage window, @FxmlScene(FxmlFile.HUB_P12) Lazy<Scene> p12LoadingScene, UserInteractionLock<HubKeyLoadingModule.HubLoadingResult> userInteraction, AtomicReference<KeyPair> keyPairRef, AtomicReference<EciesParams> eciesParams) {
-		this.vault = vault;
+	public HubKeyLoadingStrategy(@KeyLoading Stage window, @FxmlScene(FxmlFile.HUB_P12) Lazy<Scene> p12LoadingScene, UserInteractionLock<HubKeyLoadingModule.HubLoadingResult> userInteraction, AtomicReference<KeyPair> keyPairRef, AtomicReference<EciesParams> eciesParams) {
 		this.window = window;
 		this.p12LoadingScene = p12LoadingScene;
 		this.userInteraction = userInteraction;

@@ -7,27 +7,25 @@ import java.util.function.Consumer;
 
 class AuthFlowTask extends Task<String> {
 
-	private final URI authUri;
-	private final URI tokenUri;
-	private final String clientId;
 	private final Consumer<URI> redirectUriConsumer;
 
 	/**
 	 * Spawns a server and waits for the redirectUri to be called.
 	 *
+	 * @param hubConfig Configuration object holding parameters required by {@link AuthFlow}
 	 * @param redirectUriConsumer A callback invoked with the redirectUri, as soon as the server has started
 	 */
-	public AuthFlowTask(URI authUri, URI tokenUri, String clientId, Consumer<URI> redirectUriConsumer) {
-		this.authUri = authUri;
-		this.tokenUri = tokenUri;
-		this.clientId = clientId;
+	public AuthFlowTask(HubConfig hubConfig, Consumer<URI> redirectUriConsumer) {
+		this.hubConfig = hubConfig;
 		this.redirectUriConsumer = redirectUriConsumer;
 	}
 
 	@Override
 	protected String call() throws Exception {
-		try (var authFlow = AuthFlow.init(authUri, tokenUri, clientId)) {
+		try (var authFlow = AuthFlow.init(hubConfig)) {
 			return authFlow.run(uri -> Platform.runLater(() -> redirectUriConsumer.accept(uri)));
 		}
 	}
+
+	private final HubConfig hubConfig;
 }

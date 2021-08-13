@@ -15,14 +15,18 @@ public class AuthFlowIntegrationTest {
 	}
 
 	private static final Logger LOG = LoggerFactory.getLogger(AuthFlowIntegrationTest.class);
-	private static final URI AUTH_URI = URI.create("http://localhost:8080/auth/realms/cryptomator/protocol/openid-connect/auth");
-	private static final URI TOKEN_URI = URI.create("http://localhost:8080/auth/realms/cryptomator/protocol/openid-connect/token");
-	private static final String CLIENT_ID = "cryptomator-hub";
 
 	@Test
 	@Disabled // only to be run manually
 	public void testRetrieveToken() throws Exception {
-		try (var authFlow = AuthFlow.init(AUTH_URI, TOKEN_URI, CLIENT_ID)) {
+		var hubConfig = new HubConfig();
+		hubConfig.authEndpoint = "http://localhost:8080/auth/realms/cryptomator/protocol/openid-connect/auth";
+		hubConfig.tokenEndpoint = "http://localhost:8080/auth/realms/cryptomator/protocol/openid-connect/token";
+		hubConfig.clientId = "cryptomator-hub";
+		hubConfig.unlockSuccessUrl = "http://localhost:3000/#/unlock-success";
+		hubConfig.unlockErrorUrl = "http://localhost:3000/#/unlock-error";
+
+		try (var authFlow = AuthFlow.init(hubConfig)) {
 			var token = authFlow.run(uri -> {
 				LOG.info("Visit {} to authenticate", uri);
 			});

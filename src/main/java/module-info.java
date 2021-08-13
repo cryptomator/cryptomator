@@ -42,6 +42,8 @@ module org.cryptomator.desktop {
 	uses TrayIntegrationProvider;
 	uses UiAppearanceProvider;
 
+	exports org.cryptomator.ui.keyloading.hub to com.fasterxml.jackson.databind;
+
 	opens org.cryptomator.common.settings to com.google.gson;
 
 	opens org.cryptomator.common to javafx.fxml;
