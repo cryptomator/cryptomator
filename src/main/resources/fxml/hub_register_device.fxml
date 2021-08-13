@@ -8,6 +8,8 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.text.TextFlow?>
+<?import javafx.scene.text.Text?>
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.keyloading.hub.RegisterDeviceController"
@@ -25,7 +27,12 @@
 			</ImageView>
 
 			<VBox spacing="12">
-				<Hyperlink text="TODO: Register Device" onAction="#browse"/>
+				<TextFlow styleClass="text-flow">
+					<Text text="TODO: Please click on "/>
+					<Hyperlink styleClass="hyperlink-underline" text="TODO: Register Device" onAction="#browse"/>
+					<Text text=" and enter this device verification code: "/>
+					<Text text="${controller.verificationCode}"/>
+				</TextFlow>
 			</VBox>
 		</HBox>
 
