@@ -504,7 +504,6 @@ jobs:
           for FILE in `find . -name "*.AppImage" -o -name "*.dmg" -o -name "*.msi" -o -name "*.zsync" -o -name "*.tar.gz"`; do
             echo "${GPG_PASSPHRASE}" | gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign -a ${FILE}
           done
-          ls -lR
         env:
           GPG_PRIVATE_KEY: ${{ secrets.RELEASES_GPG_PRIVATE_KEY }}
           GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
@@ -512,8 +511,8 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           draft: true
-          fail_on_unmatched_files: false # TODO
-          discussion_category_name: Releases
+          fail_on_unmatched_files: true
+          discussion_category_name: releases
           token: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}
           files: |
             *.AppImage
