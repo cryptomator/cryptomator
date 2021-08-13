@@ -241,10 +241,8 @@ jobs:
         with:
           name: linux-appimage
           path: |
-            cryptomator-${{ needs.metadata.outputs.versionStr }}-x86_64.AppImage
-            cryptomator-${{ needs.metadata.outputs.versionStr }}-x86_64.AppImage.asc
-            cryptomator-${{ needs.metadata.outputs.versionStr }}-x86_64.AppImage.zsync
-            cryptomator-${{ needs.metadata.outputs.versionStr }}-x86_64.AppImage.zsync.asc
+            cryptomator-*.AppImage
+            cryptomator-*.AppImage.zsync
           if-no-files-found: error
 
 #
@@ -503,9 +501,10 @@ jobs:
       - name: Create detached GPG signature for all release files with key 615D449FE6E6A235
         run: |
           echo "${GPG_PRIVATE_KEY}" | gpg --batch --quiet --import
-          for FILE in `find . -name "*.appimage" -o -name "*.dmg" -o -name "*.msi" -o -name "*.zsync" -o -name "*.tar.gz"`; do
+          for FILE in `find . -name "*.AppImage" -o -name "*.dmg" -o -name "*.msi" -o -name "*.zsync" -o -name "*.tar.gz"`; do
             echo "${GPG_PASSPHRASE}" | gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign -a ${FILE}
           done
+          ls -lR
         env:
           GPG_PRIVATE_KEY: ${{ secrets.RELEASES_GPG_PRIVATE_KEY }}
           GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
@@ -513,11 +512,11 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           draft: true
-          fail_on_unmatched_files: true
+          fail_on_unmatched_files: false # TODO
           discussion_category_name: Releases
           token: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}
           files: |
-            *.appimage
+            *.AppImage
             *.zsync
             *.asc
             *.dmg
