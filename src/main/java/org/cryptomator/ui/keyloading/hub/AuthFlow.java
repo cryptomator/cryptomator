@@ -5,18 +5,12 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Streams;
 import com.google.common.escape.Escaper;
 import com.google.common.io.BaseEncoding;
-import com.google.common.io.CharStreams;
 import com.google.common.net.PercentEscaper;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.http.HttpClient;
@@ -163,7 +157,6 @@ class AuthFlow implements AutoCloseable {
 	private static record PKCE(String challenge, String verifier) {
 
 		public static final String METHOD = "S256";
-
 
 		public PKCE(String verifier) {
 			this(BASE64URL.encode(sha256(verifier.getBytes(StandardCharsets.US_ASCII))), verifier);
