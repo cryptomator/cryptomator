@@ -519,6 +519,8 @@ jobs:
         with:
           draft: true
           fail_on_unmatched_files: true
+          discussion_category_name: Releases
+          token: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}
           files: |
             *.appimage
             *.zsync
