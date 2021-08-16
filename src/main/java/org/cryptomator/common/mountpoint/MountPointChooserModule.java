@@ -9,6 +9,7 @@ import dagger.multibindings.IntoMap;
 import org.cryptomator.common.vaults.PerVault;
 
 import javax.inject.Named;
+import java.util.Comparator;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -24,15 +25,21 @@ public abstract class MountPointChooserModule {
 
 	@Binds
 	@IntoMap
-	@IntKey(0)
+	@IntKey(1000)
 	@PerVault
 	public abstract MountPointChooser bindCustomMountPointChooser(CustomMountPointChooser chooser);
 
 	@Binds
 	@IntoMap
-	@IntKey(100)
+	@IntKey(900)
 	@PerVault
 	public abstract MountPointChooser bindCustomDriveLetterChooser(CustomDriveLetterChooser chooser);
+
+	@Binds
+	@IntoMap
+	@IntKey(800)
+	@PerVault
+	public abstract MountPointChooser bindAvailableDriveLetterChooser(AvailableDriveLetterChooser chooser);
 
 	@Binds
 	@IntoMap
@@ -42,13 +49,7 @@ public abstract class MountPointChooserModule {
 
 	@Binds
 	@IntoMap
-	@IntKey(200)
-	@PerVault
-	public abstract MountPointChooser bindAvailableDriveLetterChooser(AvailableDriveLetterChooser chooser);
-
-	@Binds
-	@IntoMap
-	@IntKey(999)
+	@IntKey(100)
 	@PerVault
 	public abstract MountPointChooser bindTemporaryMountPointChooser(TemporaryMountPointChooser chooser);
 
@@ -56,7 +57,8 @@ public abstract class MountPointChooserModule {
 	@PerVault
 	@Named("orderedMountPointChoosers")
 	public static Iterable<MountPointChooser> provideOrderedMountPointChoosers(Map<Integer, MountPointChooser> choosers) {
-		SortedMap<Integer, MountPointChooser> sortedChoosers = new TreeMap<>(choosers);
+		SortedMap<Integer, MountPointChooser> sortedChoosers = new TreeMap<>(Comparator.reverseOrder());
+		sortedChoosers.putAll(choosers);
 		return Iterables.unmodifiableIterable(sortedChoosers.values());
 	}
 }

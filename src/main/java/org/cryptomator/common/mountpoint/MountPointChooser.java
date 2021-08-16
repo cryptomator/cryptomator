@@ -1,6 +1,6 @@
 package org.cryptomator.common.mountpoint;
 
-import com.google.common.base.Preconditions;
+import dagger.multibindings.IntKey;
 import org.cryptomator.common.vaults.Volume;
 
 import java.nio.file.Path;
@@ -12,13 +12,13 @@ import java.util.SortedSet;
  * preparation of a mountpoint or an exception otherwise.<br>
  * <p>All <i>MountPointChoosers (MPCs)</i> need to implement this class and must be added to
  * the pool of possible MPCs by the {@link MountPointChooserModule MountPointChooserModule.}
- * The MountPointChooserModule will sort them according to their {@link #getPriority() priority.}
+ * The MountPointChooserModule will sort them according to their {@link IntKey IntKey priority.}
  * The priority must be defined by the developer to reflect a useful execution order.<br>
  * A specific priority <b>must not</b> be assigned to more than one MPC at a time;
  * the result of having two MPCs with equal priority is undefined.
  *
- * <p>MPCs are executed by a {@link Volume} in ascending order of their priority
- * (smaller priorities are tried first) to find and prepare a suitable mountpoint for the volume.
+ * <p>MPCs are executed by a {@link Volume} in descending order of their priority
+ * (higher priorities are tried first) to find and prepare a suitable mountpoint for the volume.
  * The volume has access to a {@link SortedSet} of MPCs in this specific order,
  * that is provided by the Module. The Set contains all available Choosers, even if they
  * are not {@link #isApplicable(Volume) applicable} for the Vault/Volume. The Volume must

@@ -29,7 +29,7 @@
 			</Button>
 		</VBox>
 		<Region VBox.vgrow="ALWAYS"/>
-		<Label maxWidth="-Infinity" text="%vaultOptions.masterkey.recoveryKeyExpanation" wrapText="true"/>
+		<Label maxWidth="-Infinity" text="%vaultOptions.masterkey.recoveryKeyExplanation" wrapText="true"/>
 		<VBox spacing="6" alignment="CENTER">
 			<Button text="%vaultOptions.masterkey.showRecoveryKeyBtn" onAction="#showRecoveryKey" contentDisplay="LEFT" maxWidth="Infinity">
 				<graphic>

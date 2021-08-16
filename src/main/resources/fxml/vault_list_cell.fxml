@@ -19,7 +19,7 @@
 	</padding>
 	<children>
 		<VBox alignment="CENTER" minWidth="20">
-			<FontAwesome5IconView glyph="${controller.glyph}" HBox.hgrow="NEVER" glyphSize="16"/>
+			<FontAwesome5IconView fx:id="vaultStateView" glyph="${controller.glyph}" HBox.hgrow="NEVER" glyphSize="16"/>
 		</VBox>
 		<VBox spacing="4" HBox.hgrow="ALWAYS">
 			<Label styleClass="header-label" text="${controller.vault.displayName}"/>

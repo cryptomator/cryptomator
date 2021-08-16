@@ -2,7 +2,6 @@ package org.cryptomator.ui.preferences;
 
 import org.cryptomator.common.Environment;
 import org.cryptomator.common.LicenseHolder;
-import org.cryptomator.common.settings.KeychainBackend;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.UiTheme;
 import org.cryptomator.integrations.autostart.AutoStartProvider;
@@ -16,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javafx.application.Application;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
@@ -27,11 +27,9 @@ import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleGroup;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
-import java.util.Arrays;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @PreferencesScoped
 public class GeneralPreferencesController implements FxController {
@@ -51,7 +49,7 @@ public class GeneralPreferencesController implements FxController {
 	private final Set<KeychainAccessProvider> keychainAccessProviders;
 	private final ErrorComponent.Builder errorComponent;
 	public ChoiceBox<UiTheme> themeChoiceBox;
-	public ChoiceBox<KeychainBackend> keychainBackendChoiceBox;
+	public ChoiceBox<KeychainAccessProvider> keychainBackendChoiceBox;
 	public CheckBox showMinimizeButtonCheckbox;
 	public CheckBox showTrayIconCheckbox;
 	public CheckBox startHiddenCheckbox;
@@ -101,15 +99,13 @@ public class GeneralPreferencesController implements FxController {
 		nodeOrientationRtl.setSelected(settings.userInterfaceOrientation().get() == NodeOrientation.RIGHT_TO_LEFT);
 		nodeOrientation.selectedToggleProperty().addListener(this::toggleNodeOrientation);
 
-		keychainBackendChoiceBox.getItems().addAll(getAvailableBackends());
-		keychainBackendChoiceBox.setConverter(new KeychainBackendConverter(resourceBundle));
-		keychainBackendChoiceBox.valueProperty().bindBidirectional(settings.keychainBackend());
+		var keychainSettingsConverter = new KeychainProviderClassNameConverter(keychainAccessProviders);
+		keychainBackendChoiceBox.getItems().addAll(keychainAccessProviders);
+		keychainBackendChoiceBox.setValue(keychainSettingsConverter.fromString(settings.keychainProvider().get()));
+		keychainBackendChoiceBox.setConverter(new KeychainProviderDisplayNameConverter());
+		Bindings.bindBidirectional(settings.keychainProvider(), keychainBackendChoiceBox.valueProperty(), keychainSettingsConverter);
 	}
 
-	private KeychainBackend[] getAvailableBackends() {
-		var namesOfAvailableProviders = keychainAccessProviders.stream().map(KeychainAccessProvider::getClass).map(Class::getName).collect(Collectors.toUnmodifiableSet());
-		return Arrays.stream(KeychainBackend.values()).filter(value -> namesOfAvailableProviders.contains(value.getProviderClass())).toArray(KeychainBackend[]::new);
-	}
 
 	public boolean isTrayMenuInitialized() {
 		return trayMenuInitialized;
@@ -188,23 +184,48 @@ public class GeneralPreferencesController implements FxController {
 
 	}
 
-	private static class KeychainBackendConverter extends StringConverter<KeychainBackend> {
+	private class KeychainProviderDisplayNameConverter extends StringConverter<KeychainAccessProvider> {
 
-		private final ResourceBundle resourceBundle;
-
-		KeychainBackendConverter(ResourceBundle resourceBundle) {
-			this.resourceBundle = resourceBundle;
+		@Override
+		public String toString(KeychainAccessProvider provider) {
+			if (provider == null) {
+				return null;
+			} else {
+				return provider.displayName();
+			}
 		}
 
 		@Override
-		public String toString(KeychainBackend impl) {
-			return resourceBundle.getString("preferences.general.keychainBackend." + impl.getProviderClass());
-		}
-
-		@Override
-		public KeychainBackend fromString(String string) {
+		public KeychainAccessProvider fromString(String string) {
 			throw new UnsupportedOperationException();
 		}
 
+	}
+
+	private static class KeychainProviderClassNameConverter extends StringConverter<KeychainAccessProvider> {
+
+		private final Set<KeychainAccessProvider> keychainAccessProviders;
+
+		public KeychainProviderClassNameConverter(Set<KeychainAccessProvider> keychainAccessProviders) {
+			this.keychainAccessProviders = keychainAccessProviders;
+		}
+
+		@Override
+		public String toString(KeychainAccessProvider provider) {
+			if (provider == null) {
+				return null;
+			} else {
+				return provider.getClass().getName();
+			}
+		}
+
+		@Override
+		public KeychainAccessProvider fromString(String string) {
+			if (string == null) {
+				return null;
+			} else {
+				return keychainAccessProviders.stream().filter(provider -> provider.getClass().getName().equals(string)).findAny().orElse(null);
+			}
+		}
 	}
 }

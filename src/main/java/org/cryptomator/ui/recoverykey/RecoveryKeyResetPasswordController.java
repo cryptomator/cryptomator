@@ -86,11 +86,11 @@ public class RecoveryKeyResetPasswordController implements FxController {
 	/* Getter/Setter */
 
 	public ReadOnlyBooleanProperty validPasswordProperty() {
-		return newPasswordController.passwordsMatchAndSufficientProperty();
+		return newPasswordController.goodPasswordProperty();
 	}
 
 	public boolean isValidPassword() {
-		return newPasswordController.passwordsMatchAndSufficientProperty().get();
+		return newPasswordController.isGoodPassword();
 	}
 
 }

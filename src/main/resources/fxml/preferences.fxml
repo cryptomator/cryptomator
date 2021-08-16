@@ -19,7 +19,7 @@
 				<FontAwesome5IconView glyph="WRENCH"/>
 			</graphic>
 			<content>
-				<fx:include source="/fxml/preferences_general.fxml"/>
+				<fx:include source="preferences_general.fxml"/>
 			</content>
 		</Tab>
 		<Tab fx:id="volumeTab" id="VOLUME" text="%preferences.volume">
@@ -27,7 +27,7 @@
 				<FontAwesome5IconView glyph="HDD"/>
 			</graphic>
 			<content>
-				<fx:include source="/fxml/preferences_volume.fxml"/>
+				<fx:include source="preferences_volume.fxml"/>
 			</content>
 		</Tab>
 		<Tab fx:id="updatesTab" id="UPDATES" text="%preferences.updates">
@@ -35,7 +35,7 @@
 				<FontAwesome5IconView glyph="SYNC"/>
 			</graphic>
 			<content>
-				<fx:include source="/fxml/preferences_updates.fxml"/>
+				<fx:include source="preferences_updates.fxml"/>
 			</content>
 		</Tab>
 		<Tab fx:id="contributeTab" id="CONTRIBUTE" text="%preferences.contribute">
@@ -43,7 +43,7 @@
 				<FontAwesome5IconView glyph="HEART"/>
 			</graphic>
 			<content>
-				<fx:include source="/fxml/preferences_contribute.fxml"/>
+				<fx:include source="preferences_contribute.fxml"/>
 			</content>
 		</Tab>
 		<Tab fx:id="aboutTab" id="ABOUT" text="%preferences.about">
@@ -51,7 +51,7 @@
 				<FontAwesome5IconView glyph="INFO_CIRCLE"/>
 			</graphic>
 			<content>
-				<fx:include source="/fxml/preferences_about.fxml"/>
+				<fx:include source="preferences_about.fxml"/>
 			</content>
 		</Tab>
 	</tabs>

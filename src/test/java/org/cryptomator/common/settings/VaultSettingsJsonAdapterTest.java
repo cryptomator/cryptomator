@@ -40,6 +40,7 @@ public class VaultSettingsJsonAdapterTest {
 		);
 	}
 
+	@SuppressWarnings("SpellCheckingInspection")
 	@Test
 	public void testSerialize() throws IOException {
 		VaultSettings vaultSettings = new VaultSettings("test");

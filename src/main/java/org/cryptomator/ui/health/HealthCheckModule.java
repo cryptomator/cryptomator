@@ -17,8 +17,8 @@ import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.StageFactory;
 import org.cryptomator.ui.keyloading.KeyLoadingComponent;
 import org.cryptomator.ui.keyloading.KeyLoadingStrategy;
-import org.cryptomator.ui.mainwindow.MainWindow;
 
+import javax.inject.Named;
 import javax.inject.Provider;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -26,8 +26,9 @@ import javafx.beans.value.ChangeListener;
 import javafx.scene.Scene;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import java.security.SecureRandom;
-import java.util.Collection;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -35,6 +36,18 @@ import java.util.concurrent.atomic.AtomicReference;
 
 @Module(subcomponents = {KeyLoadingComponent.class})
 abstract class HealthCheckModule {
+
+	// TODO reevaluate config loading, as soon as we have the new generic error screen
+	@Provides
+	@HealthCheckScoped
+	static HealthCheckComponent.LoadUnverifiedConfigResult provideLoadConfigResult(@HealthCheckWindow Vault vault) {
+		try {
+			return new HealthCheckComponent.LoadUnverifiedConfigResult(vault.getUnverifiedVaultConfig(), null);
+		} catch (IOException e) {
+			return new HealthCheckComponent.LoadUnverifiedConfigResult(null, e);
+		}
+	}
+
 
 	@Provides
 	@HealthCheckScoped
@@ -50,27 +63,20 @@ abstract class HealthCheckModule {
 
 	@Provides
 	@HealthCheckScoped
-	static Collection<HealthCheck> provideAvailableHealthChecks() {
-		return HealthCheck.allChecks();
-	}
-
-	@Provides
-	@HealthCheckScoped
-	static ObjectProperty<HealthCheckTask> provideSelectedHealthCheckTask() {
+	static ObjectProperty<Check> provideSelectedCheck() {
 		return new SimpleObjectProperty<>();
 	}
 
-	/* Only inject with Lazy-Wrapper!*/
 	@Provides
 	@HealthCheckScoped
-	static Collection<HealthCheckTask> provideAvailableHealthCheckTasks(Collection<HealthCheck> availableHealthChecks, @HealthCheckWindow Vault vault, AtomicReference<Masterkey> masterkeyRef, AtomicReference<VaultConfig> vaultConfigRef, SecureRandom csprng, ResourceBundle resourceBundle) {
-		return availableHealthChecks.stream().map(check -> new HealthCheckTask(vault.getPath(), vaultConfigRef.get(), masterkeyRef.get(), csprng, check, resourceBundle)).toList();
+	static List<Check> provideAvailableChecks() {
+		return HealthCheck.allChecks().stream().map(Check::new).toList();
 	}
 
 	@Provides
 	@HealthCheckWindow
 	@HealthCheckScoped
-	static KeyLoadingStrategy provideKeyLoadingStrategy(KeyLoadingComponent.Builder compBuilder, @HealthCheckWindow Vault vault, @HealthCheckWindow Stage window) {
+	static KeyLoadingStrategy provideKeyLoadingStrategy(KeyLoadingComponent.Builder compBuilder, @HealthCheckWindow Vault vault, @Named("unlockWindow") Stage window ) {
 		return compBuilder.vault(vault).window(window).build().keyloadingStrategy();
 	}
 
@@ -82,14 +88,26 @@ abstract class HealthCheckModule {
 	}
 
 	@Provides
+	@Named("unlockWindow")
+	@HealthCheckScoped
+	static Stage provideUnlockWindow (@HealthCheckWindow Stage window, @HealthCheckWindow Vault vault, StageFactory factory, ResourceBundle resourceBundle) {
+		Stage stage = factory.create();
+		stage.initModality(Modality.WINDOW_MODAL);
+		stage.initOwner(window);
+		stage.setTitle(String.format(resourceBundle.getString("unlock.title"), vault.getDisplayName()));
+		stage.setResizable(false);
+		return stage;
+	}
+
+	@Provides
 	@HealthCheckWindow
 	@HealthCheckScoped
-	static Stage provideStage(StageFactory factory, @MainWindow Stage owner, ResourceBundle resourceBundle, ChangeListener<Boolean> showingListener) {
+	static Stage provideStage(StageFactory factory, @Named("healthCheckOwner") Stage owner, @HealthCheckWindow Vault vault, ChangeListener<Boolean> showingListener, ResourceBundle resourceBundle) {
 		Stage stage = factory.create();
-		stage.setTitle(resourceBundle.getString("health.title"));
-		stage.setResizable(true);
 		stage.initModality(Modality.WINDOW_MODAL);
 		stage.initOwner(owner);
+		stage.setTitle(String.format(resourceBundle.getString("health.title"), vault.getDisplayName()));
+		stage.setResizable(true);
 		stage.showingProperty().addListener(showingListener); // bind masterkey lifecycle to window
 		return stage;
 	}
@@ -112,6 +130,13 @@ abstract class HealthCheckModule {
 	}
 
 	@Provides
+	@FxmlScene(FxmlFile.HEALTH_START_FAIL)
+	@HealthCheckScoped
+	static Scene provideHealthStartFailScene(@HealthCheckWindow FxmlLoaderFactory fxmlLoaders) {
+		return fxmlLoaders.createScene(FxmlFile.HEALTH_START_FAIL);
+	}
+
+	@Provides
 	@FxmlScene(FxmlFile.HEALTH_CHECK_LIST)
 	@HealthCheckScoped
 	static Scene provideHealthCheckListScene(@HealthCheckWindow FxmlLoaderFactory fxmlLoaders) {
@@ -122,6 +147,11 @@ abstract class HealthCheckModule {
 	@IntoMap
 	@FxControllerKey(StartController.class)
 	abstract FxController bindStartController(StartController controller);
+
+	@Binds
+	@IntoMap
+	@FxControllerKey(StartFailController.class)
+	abstract FxController bindStartFailController(StartFailController controller);
 
 	@Binds
 	@IntoMap
@@ -138,4 +168,8 @@ abstract class HealthCheckModule {
 	@FxControllerKey(ResultListCellController.class)
 	abstract FxController bindResultListCellController(ResultListCellController controller);
 
+	@Binds
+	@IntoMap
+	@FxControllerKey(CheckListCellController.class)
+	abstract FxController bindCheckListCellController(CheckListCellController controller);
 }

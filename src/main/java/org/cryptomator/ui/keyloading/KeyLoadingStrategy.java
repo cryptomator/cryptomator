@@ -3,6 +3,8 @@ package org.cryptomator.ui.keyloading;
 import org.cryptomator.cryptolib.api.Masterkey;
 import org.cryptomator.cryptolib.api.MasterkeyLoader;
 import org.cryptomator.cryptolib.api.MasterkeyLoadingFailedException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 
@@ -11,6 +13,8 @@ import java.net.URI;
  */
 @FunctionalInterface
 public interface KeyLoadingStrategy extends MasterkeyLoader {
+
+	Logger LOG = LoggerFactory.getLogger(KeyLoadingStrategy.class);
 
 	/**
 	 * Loads a master key. This might be a long-running operation, as it may require user input or expensive computations.
@@ -35,7 +39,7 @@ public interface KeyLoadingStrategy extends MasterkeyLoader {
 	}
 
 	/**
-	 * Release any ressources or do follow-up tasks after loading a key.
+	 * Release any resources or do follow-up tasks after loading a key.
 	 *
 	 * @param unlockedSuccessfully <code>true</code> if successfully unlocked a vault with the loaded key
 	 * @implNote This method might be invoked multiple times, depending on whether multiple attempts to load a key are started.
@@ -47,7 +51,7 @@ public interface KeyLoadingStrategy extends MasterkeyLoader {
 	/**
 	 * A key loading strategy that will always fail by throwing a {@link MasterkeyLoadingFailedException}.
 	 *
-	 * @param exception The cause of the failure. If not alreay an {@link MasterkeyLoadingFailedException}, it will get wrapped.
+	 * @param exception The cause of the failure. If not already an {@link MasterkeyLoadingFailedException}, it will get wrapped.
 	 * @return A new KeyLoadingStrategy that will always fail with an {@link MasterkeyLoadingFailedException}.
 	 */
 	static KeyLoadingStrategy failed(Exception exception) {
@@ -58,6 +62,38 @@ public interface KeyLoadingStrategy extends MasterkeyLoader {
 				throw new MasterkeyLoadingFailedException("Can not load key", exception);
 			}
 		};
+	}
+
+	/**
+	 * Makes the given <code>user</code> apply this key loading strategy. If the user fails with a {@link MasterkeyLoadingFailedException},
+	 * an attempt is made to {@link #recoverFromException(MasterkeyLoadingFailedException) recover} from it. Any other exception will be rethrown.
+	 *
+	 * @param user Some method using this strategy. May be invoked multiple times in case of recoverable {@link MasterkeyLoadingFailedException}s
+	 * @param <E> Optional exception type thrown by <code>user</code>
+	 * @throws MasterkeyLoadingFailedException If a non-recoverable exception is thrown by <code>user</code>
+	 * @throws E Exception thrown by <code>user</code> and rethrown by this method
+	 */
+	default <E extends Exception> void use(KeyLoadingStrategyUser<E> user) throws MasterkeyLoadingFailedException, E {
+		boolean success = false;
+		try {
+			user.use(this);
+		} catch (MasterkeyLoadingFailedException e) {
+			if (recoverFromException(e)) {
+				LOG.info("Unlock attempt threw {}. Reattempting...", e.getClass().getSimpleName());
+				use(user);
+			} else {
+				throw e;
+			}
+		} finally {
+			cleanup(success);
+		}
+	}
+
+	@FunctionalInterface
+	interface KeyLoadingStrategyUser<E extends Exception> {
+
+		void use(KeyLoadingStrategy strategy) throws MasterkeyLoadingFailedException, E;
+
 	}
 
 }

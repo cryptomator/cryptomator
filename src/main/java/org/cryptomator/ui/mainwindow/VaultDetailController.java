@@ -1,10 +1,14 @@
 package org.cryptomator.ui.mainwindow;
 
 import com.tobiasdiez.easybind.EasyBind;
+import com.tobiasdiez.easybind.Subscription;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
+import org.cryptomator.ui.common.Animations;
+import org.cryptomator.ui.common.AutoAnimator;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.controls.FontAwesome5Icon;
+import org.cryptomator.ui.controls.FontAwesome5IconView;
 import org.cryptomator.ui.fxapp.FxApplication;
 
 import javax.inject.Inject;
@@ -22,6 +26,12 @@ public class VaultDetailController implements FxController {
 	private final Binding<FontAwesome5Icon> glyph;
 	private final BooleanBinding anyVaultSelected;
 
+	private AutoAnimator spinAnimation;
+
+	/* FXML */
+	public FontAwesome5IconView vaultStateView;
+
+
 	@Inject
 	VaultDetailController(ObjectProperty<Vault> vault, FxApplication application) {
 		this.vault = vault;
@@ -30,6 +40,13 @@ public class VaultDetailController implements FxController {
 				.selectObject(Vault::stateProperty) //
 				.map(this::getGlyphForVaultState);
 		this.anyVaultSelected = vault.isNotNull();
+	}
+
+	public void initialize() {
+		this.spinAnimation = AutoAnimator.animate(Animations.createDiscrete360Rotation(vaultStateView)) //
+				.onCondition(EasyBind.select(vault).selectObject(Vault::stateProperty).map(VaultState.Value.PROCESSING::equals)) //
+				.afterStop(() -> vaultStateView.setRotate(0)) //
+				.build();
 	}
 
 	// TODO deduplicate w/ VaultListCellController

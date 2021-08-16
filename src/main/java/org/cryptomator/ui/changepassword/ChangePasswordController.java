@@ -62,7 +62,7 @@ public class ChangePasswordController implements FxController {
 	public void initialize() {
 		BooleanBinding checkboxNotConfirmed = finalConfirmationCheckbox.selectedProperty().not();
 		BooleanBinding oldPasswordFieldEmpty = oldPasswordField.textProperty().isEmpty();
-		finishButton.disableProperty().bind(checkboxNotConfirmed.or(oldPasswordFieldEmpty).or(newPasswordController.passwordsMatchAndSufficientProperty().not()));
+		finishButton.disableProperty().bind(checkboxNotConfirmed.or(oldPasswordFieldEmpty).or(newPasswordController.goodPasswordProperty().not()));
 		window.setOnHiding(event -> {
 			oldPasswordField.wipe();
 			newPasswordController.passwordField.wipe();

@@ -2,7 +2,7 @@
 
 <?import org.cryptomator.ui.controls.DataLabel?>
 <?import org.cryptomator.ui.controls.FormattedLabel?>
-<?import org.cryptomator.ui.controls.ThrougputLabel?>
+<?import org.cryptomator.ui.controls.ThroughputLabel?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.chart.AreaChart?>
 <?import javafx.scene.chart.NumberAxis?>
@@ -37,7 +37,7 @@
 
 	<!-- Read -->
 	<VBox prefWidth="300" prefHeight="300" spacing="6" alignment="CENTER">
-		<ThrougputLabel styleClass="label-large" idleFormat="%stats.read.throughput.idle" kibsFormat="%stats.read.throughput.kibs" mibsFormat="%stats.read.throughput.mibs" bytesPerSecond="${controller.bpsRead}"/>
+		<ThroughputLabel styleClass="label-large" idleFormat="%stats.read.throughput.idle" kibsFormat="%stats.read.throughput.kibs" mibsFormat="%stats.read.throughput.mibs" bytesPerSecond="${controller.bpsRead}"/>
 		<AreaChart fx:id="readChart" styleClass="io-stats" createSymbols="false" animated="false">
 			<xAxis>
 				<NumberAxis fx:id="readChartXAxis" styleClass="io-stats" autoRanging="false" forceZeroInRange="false" side="BOTTOM"/>
@@ -56,7 +56,7 @@
 
 	<!-- Write -->
 	<VBox prefWidth="300" prefHeight="300" spacing="6" alignment="CENTER">
-		<ThrougputLabel styleClass="label-large" idleFormat="%stats.write.throughput.idle" kibsFormat="%stats.write.throughput.kibs" mibsFormat="%stats.write.throughput.mibs" bytesPerSecond="${controller.bpsWritten}"/>
+		<ThroughputLabel styleClass="label-large" idleFormat="%stats.write.throughput.idle" kibsFormat="%stats.write.throughput.kibs" mibsFormat="%stats.write.throughput.mibs" bytesPerSecond="${controller.bpsWritten}"/>
 		<AreaChart fx:id="writeChart" styleClass="io-stats" createSymbols="false" animated="false">
 			<xAxis>
 				<NumberAxis fx:id="writeChartXAxis" styleClass="io-stats" autoRanging="false" forceZeroInRange="false" side="BOTTOM"/>

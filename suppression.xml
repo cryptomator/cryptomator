@@ -14,40 +14,15 @@
 
 	<!-- Jetty false positives below -->
 	<suppress>
-		<notes><![CDATA[ Affects jetty < 6.1.22 ]]></notes>
-		<gav>org.eclipse.jetty.toolchain:jetty-servlet-api:4.0.6</gav>
-		<cve>CVE-2009-5045</cve>
-	</suppress>
-	<suppress>
-		<notes><![CDATA[ Affects jetty < 6.1.22 ]]></notes>
-		<gav>org.eclipse.jetty.toolchain:jetty-servlet-api:4.0.6</gav>
-		<cve>CVE-2009-5046</cve>
-	</suppress>
+		<notes><![CDATA[
+		Suppress all for this javax.servlet api package:
+		There are lots of false positives, simply because its version number is way beyond the remaining
+		org.eclipse.jetty jar files. Note, that our actual Jetty version is different.
 
-	<suppress>
-		<notes><![CDATA[ Affects jetty-server 9.x ]]></notes>
+		As long as we don't suppress anything in org.eclipse.jetty:jetty-server or :jetty-servlet,
+		vulnerabilities will still trigger if we actually use an outdated Jetty version.
+		]]></notes>
 		<gav>org.eclipse.jetty.toolchain:jetty-servlet-api:4.0.6</gav>
-		<cve>CVE-2017-9735</cve>
-	</suppress>
-	<suppress>
-		<notes><![CDATA[ Affects jetty-server 9.x ]]></notes>
-		<gav>org.eclipse.jetty.toolchain:jetty-servlet-api:4.0.6</gav>
-		<cve>CVE-2017-7656</cve>
-	</suppress>
-	<suppress>
-		<notes><![CDATA[ Affects jetty-server 9.x ]]></notes>
-		<gav>org.eclipse.jetty.toolchain:jetty-servlet-api:4.0.6</gav>
-		<cve>CVE-2017-7657</cve>
-	</suppress>
-	<suppress>
-		<notes><![CDATA[ Affects jetty-server 9.x ]]></notes>
-		<gav>org.eclipse.jetty.toolchain:jetty-servlet-api:4.0.6</gav>
-		<cve>CVE-2017-7658</cve>
-	</suppress>
-
-	<suppress>
-		<notes><![CDATA[ Fixed since jetty-server 10.0.0.beta2 ]]></notes>
-		<gav>org.eclipse.jetty.toolchain:jetty-servlet-api:4.0.6</gav>
-		<cve>CVE-2020-27216</cve>
+		<cpe regex="true">.*</cpe>
 	</suppress>
 </suppressions>

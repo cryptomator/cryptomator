@@ -22,7 +22,7 @@ import javafx.stage.Window;
 /**
  * The sequence of actions performed and checked during lock of a vault.
  * <p>
- * This class implements the Task interface, sucht that it can run in the background with some possible forground operations/requests to the ui, without blocking the main app.
+ * This class implements the Task interface, sucht that it can run in the background with some possible foreground operations/requests to the ui, without blocking the main app.
  * If the task state is
  * <li>succeeded, the vault was successfully locked;</li>
  * <li>canceled, the lock was canceled;</li>

@@ -8,6 +8,8 @@ public enum FontAwesome5Icon {
 	ARROW_UP("\uF062"), //
 	BAN("\uF05E"), //
 	BUG("\uF188"), //
+	CARET_DOWN("\uF0D7"), //
+	CARET_RIGHT("\uF0Da"), //
 	CHECK("\uF00C"), //
 	CLOCK("\uF017"), //
 	COG("\uF013"), //
@@ -20,6 +22,7 @@ public enum FontAwesome5Icon {
 	EXCLAMATION_TRIANGLE("\uF071"), //
 	EYE("\uF06E"), //
 	EYE_SLASH("\uF070"), //
+	FAST_FORWARD("\uF050"), //
 	FILE("\uF15B"), //
 	FILE_IMPORT("\uF56F"), //
 	FOLDER_OPEN("\uF07C"), //
@@ -39,7 +42,7 @@ public enum FontAwesome5Icon {
 	REDO("\uF01E"), //
 	SEARCH("\uF002"), //
 	SPINNER("\uF110"), //
-	STOPWATCH("\uF2F2"), //
+	STETHOSCOPE("\uF0f1"), //
 	SYNC("\uF021"), //
 	TIMES("\uF00D"), //
 	TRASH("\uF1F8"), //

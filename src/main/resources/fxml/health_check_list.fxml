@@ -3,17 +3,18 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ButtonBar?>
+<?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import java.lang.Integer?>
-<?import javafx.scene.layout.StackPane?>
-<?import javafx.scene.control.CheckBox?>
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.health.CheckListController"
-	  minHeight="145"
+	  prefWidth="600"
+	  prefHeight="400"
 	  spacing="12">
 	<padding>
 		<Insets topRightBottomLeft="12"/>
@@ -23,23 +24,26 @@
 	</fx:define>
 	<children>
 		<HBox spacing="12" VBox.vgrow="ALWAYS">
-			<VBox minWidth="80" maxWidth="200" spacing="6" HBox.hgrow="ALWAYS" >
-				<Label fx:id="listHeading" text="%health.checkList.header"/>
-				<CheckBox onAction="#toggleSelectAll" text="%health.checkList.selectAllBox" visible="${!controller.showResultScreen}" managed="${!controller.showResultScreen}" />
-				<ListView fx:id="checksListView" VBox.vgrow="ALWAYS"/>
+			<ListView fx:id="checksListView" VBox.vgrow="ALWAYS" minWidth="175" maxWidth="175"/>
+			<VBox alignment="CENTER" visible="${!controller.mainRunStarted}"  managed="${!controller.mainRunStarted}" HBox.hgrow="ALWAYS" spacing="12">
+				<Label text="%health.checkList.description" wrapText="true"/>
+				<HBox alignment="CENTER">
+					<Button onAction="#selectAllChecks" text="%health.checkList.selectAllButton" />
+					<Button onAction="#deselectAllChecks" text="%health.checkList.deselectAllButton" />
+				</HBox>
 			</VBox>
-			<StackPane visible="${controller.showResultScreen}" managed="${controller.showResultScreen}" HBox.hgrow="ALWAYS" >
+			<StackPane visible="${controller.mainRunStarted}"  managed="${controller.mainRunStarted}" HBox.hgrow="ALWAYS">
 				<VBox minWidth="300" alignment="CENTER" visible="${!controller.anyCheckSelected}" managed="${!controller.anyCheckSelected}" >
 					<Label text="%health.check.detail.noSelectedCheck" wrapText="true" alignment="CENTER" />
 				</VBox>
-				<fx:include  source="/fxml/health_check_details.fxml" visible="${controller.anyCheckSelected}" managed="${controller.anyCheckSelected}" />
+				<fx:include source="health_check_details.fxml" visible="${controller.anyCheckSelected}" managed="${controller.anyCheckSelected}" HBox.hgrow="ALWAYS"/>
 			</StackPane>
 		</HBox>
 		<ButtonBar buttonMinWidth="120" buttonOrder="+CX">
 			<buttons>
-				<Button text="%generic.button.cancel" ButtonBar.buttonData="CANCEL_CLOSE" onAction="#cancelCheck" disable="${!controller.running}" visible="${controller.showResultScreen}" managed="${controller.showResultScreen}" />
-				<Button text="%health.check.exportBtn" ButtonBar.buttonData="NEXT_FORWARD" defaultButton="true" disable="${!controller.finished}" visible="${controller.showResultScreen}" managed="${controller.showResultScreen}" onAction="#exportResults"/>
-				<Button text="%health.check.runBatchBtn" ButtonBar.buttonData="NEXT_FORWARD" defaultButton="true" onAction="#runSelectedChecks" disable="${controller.numberOfPickedChecks == ZERO}" visible="${!controller.showResultScreen}" managed="${!controller.showResultScreen}"/>
+				<Button text="%generic.button.cancel" ButtonBar.buttonData="CANCEL_CLOSE" onAction="#cancelRun" visible="${controller.running}" managed="${controller.running}" />
+				<Button text="%health.check.exportBtn" ButtonBar.buttonData="NEXT_FORWARD" defaultButton="true" disable="${controller.running}" visible="${controller.mainRunStarted}" managed="${controller.mainRunStarted}" onAction="#exportResults"/>
+				<Button text="%health.check.runBatchBtn" ButtonBar.buttonData="NEXT_FORWARD" defaultButton="true" onAction="#runSelectedChecks" disable="${controller.chosenTaskCount == ZERO}" visible="${!controller.mainRunStarted}" managed="${!controller.mainRunStarted}"/>
 			</buttons>
 		</ButtonBar>
 	</children>
