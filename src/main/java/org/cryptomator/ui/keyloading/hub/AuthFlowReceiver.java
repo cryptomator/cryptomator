@@ -26,16 +26,6 @@ class AuthFlowReceiver implements AutoCloseable {
 
 	private static final String LOOPBACK_ADDR = "127.0.0.1";
 	private static final String CALLBACK_PATH = "/callback";
-	private static final String HTML_SUCCESS = """
-			<html>
-			<head>
-				<title>OAuth 2.0 Authentication Token Received</title>
-			</head>
-			<body>
-				<p>Received verification code. You may now close this window.</p>
-			</body>
-			</html>
-			""";
 
 	private final Server server;
 	private final ServerConnector connector;
