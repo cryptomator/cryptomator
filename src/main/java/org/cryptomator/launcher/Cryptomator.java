@@ -38,18 +38,16 @@ public class Cryptomator {
 	private final DebugMode debugMode;
 	private final Environment env;
 	private final Lazy<IpcMessageHandler> ipcMessageHandler;
-	private final Optional<String> applicationVersion;
 	private final CountDownLatch shutdownLatch;
 	private final ShutdownHook shutdownHook;
 	private final Lazy<UiLauncher> uiLauncher;
 
 	@Inject
-	Cryptomator(LoggerConfiguration logConfig, DebugMode debugMode, Environment env, Lazy<IpcMessageHandler> ipcMessageHandler, @Named("applicationVersion") Optional<String> applicationVersion, @Named("shutdownLatch") CountDownLatch shutdownLatch, ShutdownHook shutdownHook, Lazy<UiLauncher> uiLauncher) {
+	Cryptomator(LoggerConfiguration logConfig, DebugMode debugMode, Environment env, Lazy<IpcMessageHandler> ipcMessageHandler, @Named("shutdownLatch") CountDownLatch shutdownLatch, ShutdownHook shutdownHook, Lazy<UiLauncher> uiLauncher) {
 		this.logConfig = logConfig;
 		this.debugMode = debugMode;
 		this.env = env;
 		this.ipcMessageHandler = ipcMessageHandler;
-		this.applicationVersion = applicationVersion;
 		this.shutdownLatch = shutdownLatch;
 		this.shutdownHook = shutdownHook;
 		this.uiLauncher = uiLauncher;
@@ -69,7 +67,7 @@ public class Cryptomator {
 	 */
 	private int run(String[] args) {
 		logConfig.init();
-		LOG.info("Starting Cryptomator {} on {} {} ({})", applicationVersion.orElse("SNAPSHOT"), SystemUtils.OS_NAME, SystemUtils.OS_VERSION, SystemUtils.OS_ARCH);
+		LOG.info("Starting Cryptomator {} on {} {} ({})", env.getAppVersion().orElse("SNAPSHOT"), SystemUtils.OS_NAME, SystemUtils.OS_VERSION, SystemUtils.OS_ARCH);
 		debugMode.initialize();
 
 		/*

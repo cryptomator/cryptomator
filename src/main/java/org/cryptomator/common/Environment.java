@@ -38,6 +38,7 @@ public class Environment {
 		LOG.debug("cryptomator.logDir: {}", System.getProperty("cryptomator.logDir"));
 		LOG.debug("cryptomator.mountPointsDir: {}", System.getProperty("cryptomator.mountPointsDir"));
 		LOG.debug("cryptomator.minPwLength: {}", System.getProperty("cryptomator.minPwLength"));
+		LOG.debug("cryptomator.appVersion: {}", System.getProperty("cryptomator.appVersion"));
 		LOG.debug("cryptomator.buildNumber: {}", System.getProperty("cryptomator.buildNumber"));
 		LOG.debug("cryptomator.showTrayIcon: {}", System.getProperty("cryptomator.showTrayIcon"));
 		LOG.debug("fuse.experimental: {}", Boolean.getBoolean("fuse.experimental"));
@@ -65,6 +66,10 @@ public class Environment {
 
 	public Optional<Path> getMountPointsDir() {
 		return getPath("cryptomator.mountPointsDir").map(this::replaceHomeDir);
+	}
+
+	public Optional<String> getAppVersion() {
+		return Optional.ofNullable(System.getProperty("cryptomator.appVersion"));
 	}
 
 	public Optional<String> getBuildNumber() {

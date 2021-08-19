@@ -3,6 +3,7 @@ package org.cryptomator.ui.fxapp;
 import dagger.Module;
 import dagger.Provides;
 import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.common.Environment;
 import org.cryptomator.common.settings.Settings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,9 +52,9 @@ public abstract class UpdateCheckerModule {
 
 	@Provides
 	@FxApplicationScoped
-	static HttpRequest provideCheckForUpdatesRequest(@Named("applicationVersion") Optional<String> applicationVersion) {
+	static HttpRequest provideCheckForUpdatesRequest(Environment env) {
 		String userAgent = String.format("Cryptomator VersionChecker/%s %s %s (%s)", //
-				applicationVersion.orElse("SNAPSHOT"), //
+				env.getAppVersion().orElse("SNAPSHOT"), //
 				SystemUtils.OS_NAME, //
 				SystemUtils.OS_VERSION, //
 				SystemUtils.OS_ARCH); //

@@ -175,6 +175,7 @@ jobs:
           --copyright "(C) 2016 - 2021 Skymatic GmbH"
           --java-options "-Xss5m"
           --java-options "-Xmx256m"
+          --java-options "-Dcryptomator.appVersion=\"${{ needs.metadata.outputs.versionStr }}\""
           ${{ matrix.jpackageoptions }}
       - name: Create appdir.tar
         run: tar -cvf appdir.tar appdir
