@@ -84,7 +84,7 @@ public class StartController implements FxController {
 		try (var masterkey = keyLoadingStrategy.loadKey(unverifiedCfg.getKeyId())) {
 			var verifiedCfg = unverifiedCfg.verify(masterkey.getEncoded(), unverifiedCfg.allegedVaultVersion());
 			vaultConfigRef.set(verifiedCfg);
-			var old = masterkeyRef.getAndSet(masterkey.clone());
+			var old = masterkeyRef.getAndSet(masterkey.copy());
 			if (old != null) {
 				old.destroy();
 			}

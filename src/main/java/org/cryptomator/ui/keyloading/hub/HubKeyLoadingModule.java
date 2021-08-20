@@ -47,12 +47,6 @@ public abstract class HubKeyLoadingModule {
 	}
 
 	@Provides
-	@KeyLoadingScoped
-	static AtomicReference<KeyPair> provideKeyPair() {
-		return new AtomicReference<>();
-	}
-
-	@Provides
 	@Named("bearerToken")
 	@KeyLoadingScoped
 	static AtomicReference<String> provideBearerTokenRef() {
@@ -84,19 +78,11 @@ public abstract class HubKeyLoadingModule {
 	abstract KeyLoadingStrategy bindHubKeyLoadingStrategyToHubHttps(HubKeyLoadingStrategy strategy);
 
 	@Provides
-	@FxmlScene(FxmlFile.HUB_P12)
-	@KeyLoadingScoped
-	static Scene provideHubP12LoadingScene(@KeyLoading FxmlLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene(FxmlFile.HUB_P12);
-	}
-
-	@Provides
 	@FxmlScene(FxmlFile.HUB_AUTH_FLOW)
 	@KeyLoadingScoped
 	static Scene provideHubAuthFlowScene(@KeyLoading FxmlLoaderFactory fxmlLoaders) {
 		return fxmlLoaders.createScene(FxmlFile.HUB_AUTH_FLOW);
 	}
-
 
 	@Provides
 	@FxmlScene(FxmlFile.HUB_RECEIVE_KEY)
@@ -111,22 +97,6 @@ public abstract class HubKeyLoadingModule {
 	static Scene provideHubRegisterDeviceScene(@KeyLoading FxmlLoaderFactory fxmlLoaders) {
 		return fxmlLoaders.createScene(FxmlFile.HUB_REGISTER_DEVICE);
 	}
-
-
-	@Binds
-	@IntoMap
-	@FxControllerKey(P12Controller.class)
-	abstract FxController bindP12Controller(P12Controller controller);
-
-	@Binds
-	@IntoMap
-	@FxControllerKey(P12LoadController.class)
-	abstract FxController bindP12LoadController(P12LoadController controller);
-
-	@Binds
-	@IntoMap
-	@FxControllerKey(P12CreateController.class)
-	abstract FxController bindP12CreateController(P12CreateController controller);
 
 	@Binds
 	@IntoMap

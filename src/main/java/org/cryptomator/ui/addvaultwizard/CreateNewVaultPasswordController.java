@@ -182,7 +182,7 @@ public class CreateNewVaultPasswordController implements FxController {
 
 			// 2. initialize vault:
 			try {
-				MasterkeyLoader loader = ignored -> masterkey.clone();
+				MasterkeyLoader loader = ignored -> masterkey.copy();
 				CryptoFileSystemProperties fsProps = CryptoFileSystemProperties.cryptoFileSystemProperties().withCipherCombo(CryptorProvider.Scheme.SIV_CTRMAC).withKeyLoader(loader).build();
 				CryptoFileSystemProvider.initialize(path, fsProps, DEFAULT_KEY_ID);
 

@@ -27,7 +27,8 @@
 		<nonModularGroupIds>com.github.serceman,com.github.jnr,org.ow2.asm,net.java.dev.jna,org.apache.jackrabbit,org.apache.httpcomponents,de.swiesend,org.purejava,com.github.hypfvieh</nonModularGroupIds>
 
 		<!-- cryptomator dependencies -->
-		<cryptomator.cryptofs.version>2.1.0-beta11</cryptomator.cryptofs.version>
+		<cryptomator.cryptolib.version>2.1.0-beta2</cryptomator.cryptolib.version>
+		<cryptomator.cryptofs.version>2.1.0-beta12</cryptomator.cryptofs.version>
 		<cryptomator.integrations.version>1.0.0-rc1</cryptomator.integrations.version>
 		<cryptomator.integrations.win.version>1.0.0-beta2</cryptomator.integrations.win.version>
 		<cryptomator.integrations.mac.version>1.0.0-beta2</cryptomator.integrations.mac.version>
@@ -58,6 +59,11 @@
 
 	<dependencies>
 		<!-- Cryptomator Libs -->
+		<dependency>
+			<groupId>org.cryptomator</groupId>
+			<artifactId>cryptolib</artifactId>
+			<version>${cryptomator.cryptolib.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>org.cryptomator</groupId>
 			<artifactId>cryptofs</artifactId>
@@ -128,13 +134,6 @@
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
 			<version>${commons-lang3.version}</version>
-		</dependency>
-
-		<!-- BouncyCastle -->
-		<dependency>
-			<groupId>org.bouncycastle</groupId>
-			<artifactId>bcpkix-jdk15on</artifactId>
-			<version>${bouncycastle.version}</version>
 		</dependency>
 
 		<dependency>

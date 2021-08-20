@@ -4,6 +4,7 @@ import org.cryptomator.integrations.tray.TrayIntegrationProvider;
 import org.cryptomator.integrations.uiappearance.UiAppearanceProvider;
 
 module org.cryptomator.desktop {
+	requires org.cryptomator.cryptolib;
 	requires org.cryptomator.cryptofs;
 	requires org.cryptomator.frontend.dokany;
 	requires org.cryptomator.frontend.fuse;
@@ -25,8 +26,6 @@ module org.cryptomator.desktop {
 	requires com.tobiasdiez.easybind;
 	requires dagger;
 	requires org.slf4j;
-	requires org.bouncycastle.provider;
-	requires org.bouncycastle.pkix;
 	requires org.apache.commons.lang3;
 	requires org.eclipse.jetty.server;
 	requires org.eclipse.jetty.webapp;

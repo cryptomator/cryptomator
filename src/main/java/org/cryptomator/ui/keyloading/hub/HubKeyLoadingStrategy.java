@@ -2,10 +2,12 @@ package org.cryptomator.ui.keyloading.hub;
 
 import com.google.common.base.Preconditions;
 import dagger.Lazy;
+import org.cryptomator.common.settings.DeviceKey;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.cryptolib.api.Masterkey;
 import org.cryptomator.cryptolib.api.MasterkeyLoadingFailedException;
 import org.cryptomator.cryptolib.common.Destroyables;
+import org.cryptomator.cryptolib.common.MasterkeyHubAccess;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.UserInteractionLock;
@@ -30,17 +32,17 @@ public class HubKeyLoadingStrategy implements KeyLoadingStrategy {
 	static final String SCHEME_HUB_HTTPS = SCHEME_PREFIX + "https";
 
 	private final Stage window;
-	private final Lazy<Scene> p12LoadingScene;
+	private final Lazy<Scene> authFlowScene;
 	private final UserInteractionLock<HubKeyLoadingModule.HubLoadingResult> userInteraction;
-	private final AtomicReference<KeyPair> keyPairRef;
+	private final DeviceKey deviceKey;
 	private final AtomicReference<EciesParams> eciesParams;
 
 	@Inject
-	public HubKeyLoadingStrategy(@KeyLoading Stage window, @FxmlScene(FxmlFile.HUB_P12) Lazy<Scene> p12LoadingScene, UserInteractionLock<HubKeyLoadingModule.HubLoadingResult> userInteraction, AtomicReference<KeyPair> keyPairRef, AtomicReference<EciesParams> eciesParams) {
+	public HubKeyLoadingStrategy(@KeyLoading Stage window, @FxmlScene(FxmlFile.HUB_AUTH_FLOW) Lazy<Scene> authFlowScene, UserInteractionLock<HubKeyLoadingModule.HubLoadingResult> userInteraction, DeviceKey deviceKey, AtomicReference<EciesParams> eciesParams) {
 		this.window = window;
-		this.p12LoadingScene = p12LoadingScene;
+		this.authFlowScene = authFlowScene;
 		this.userInteraction = userInteraction;
-		this.keyPairRef = keyPairRef;
+		this.deviceKey = deviceKey;
 		this.eciesParams = eciesParams;
 	}
 
@@ -48,28 +50,23 @@ public class HubKeyLoadingStrategy implements KeyLoadingStrategy {
 	public Masterkey loadKey(URI keyId) throws MasterkeyLoadingFailedException {
 		Preconditions.checkArgument(keyId.getScheme().startsWith(SCHEME_PREFIX));
 		try {
+			var keyPair = deviceKey.get();
 			return switch (auth()) {
-				case SUCCESS -> EciesHelper.decryptMasterkey(keyPairRef.get(), eciesParams.get());
+				case SUCCESS -> MasterkeyHubAccess.decryptMasterkey(keyPair.getPrivate(), eciesParams.get().m(), eciesParams.get().epk());
 				case FAILED -> throw new MasterkeyLoadingFailedException("failed to load keypair");
 				case CANCELLED -> throw new UnlockCancelledException("User cancelled auth workflow");
 			};
+		} catch (DeviceKey.DeviceKeyRetrievalException e) {
+			throw new MasterkeyLoadingFailedException("Failed to create or load device key pair", e);
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 			throw new UnlockCancelledException("Loading interrupted", e);
 		}
 	}
 
-	@Override
-	public void cleanup(boolean unlockedSuccessfully) {
-		var keyPair = keyPairRef.getAndSet(null);
-		if (keyPair != null) {
-			Destroyables.destroySilently(keyPair.getPrivate());
-		}
-	}
-
 	private HubKeyLoadingModule.HubLoadingResult auth() throws InterruptedException {
 		Platform.runLater(() -> {
-			window.setScene(p12LoadingScene.get());
+			window.setScene(authFlowScene.get());
 			window.show();
 			Window owner = window.getOwner();
 			if (owner != null) {
