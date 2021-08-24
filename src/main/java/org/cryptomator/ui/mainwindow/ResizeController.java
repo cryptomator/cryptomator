@@ -45,14 +45,26 @@ public class ResizeController implements FxController {
 		blResizer.setOnMouseDragged(this::resizeBottomLeft);
 		brResizer.setOnMouseDragged(this::resizeBottomRight);
 
-		window.setY(settings.windowYPositionProperty().get());
-		window.setX(settings.windowXPositionProperty().get());
 		window.setHeight(settings.windowHeightProperty().get());
 		//TODO: remove comments
 		//window.setHeight(settings.windowHeightProperty().get() > window.getMaxHeight() ? window.getMaxHeight() * 0.95 : settings.windowHeightProperty().get());
 
 		window.setWidth(settings.windowWidthProperty().get());
 		//window.setWidth(settings.windowWidthProperty().get() > window.getMaxWidth() ? window.getMaxWidth() * 0.95 : settings.windowWidthProperty().get());
+
+
+		//TODO: define illegalPosition
+		boolean illegalPosition = false;
+		if (illegalPosition) {
+			// if the position is illegal, then the window appears on the main screen in the middle of the window.
+			window.setY((window.getMaxHeight() - window.getHeight()) / 2);
+			window.setX((window.getMaxWidth() - window.getWidth()) / 2);
+		}
+		else {
+			window.setX(settings.windowXPositionProperty().get());
+			window.setY(settings.windowYPositionProperty().get());
+		}
+
 	}
 
 	private void startResize(MouseEvent evt) {
