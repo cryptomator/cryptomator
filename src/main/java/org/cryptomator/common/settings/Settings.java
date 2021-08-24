@@ -59,6 +59,11 @@ public class Settings {
 	private final StringProperty licenseKey = new SimpleStringProperty(DEFAULT_LICENSE_KEY);
 	private final BooleanProperty showMinimizeButton = new SimpleBooleanProperty(DEFAULT_SHOW_MINIMIZE_BUTTON);
 	private final BooleanProperty showTrayIcon;
+	private final IntegerProperty windowXPosition = new SimpleIntegerProperty();
+	private final IntegerProperty windowYPosition = new SimpleIntegerProperty();
+	private final IntegerProperty windowWidth = new SimpleIntegerProperty();
+	private final IntegerProperty windowHeight = new SimpleIntegerProperty();
+
 
 	private Consumer<Settings> saveCmd;
 
@@ -83,6 +88,10 @@ public class Settings {
 		licenseKey.addListener(this::somethingChanged);
 		showMinimizeButton.addListener(this::somethingChanged);
 		showTrayIcon.addListener(this::somethingChanged);
+		windowXPosition.addListener(this::somethingChanged);
+		windowYPosition.addListener(this::somethingChanged);
+		windowWidth.addListener(this::somethingChanged);
+		windowHeight.addListener(this::somethingChanged);
 	}
 
 	void setSaveCmd(Consumer<Settings> saveCmd) {
@@ -157,5 +166,21 @@ public class Settings {
 
 	public BooleanProperty showTrayIcon() {
 		return showTrayIcon;
+	}
+
+	public IntegerProperty windowXPositionProperty() {
+		return windowXPosition;
+	}
+
+	public IntegerProperty windowYPositionProperty() {
+		return windowYPosition;
+	}
+
+	public IntegerProperty windowWidthProperty() {
+		return windowWidth;
+	}
+
+	public IntegerProperty windowHeightProperty() {
+		return windowHeight;
 	}
 }

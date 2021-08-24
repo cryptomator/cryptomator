@@ -52,6 +52,11 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 		out.name("licenseKey").value(value.licenseKey().get());
 		out.name("showMinimizeButton").value(value.showMinimizeButton().get());
 		out.name("showTrayIcon").value(value.showTrayIcon().get());
+		out.name("windowXPosition").value((value.windowXPositionProperty().get()));
+		out.name("windowYPosition").value((value.windowYPositionProperty().get()));
+		out.name("windowWidth").value((value.windowWidthProperty().get()));
+		out.name("windowHeight").value((value.windowHeightProperty().get()));
+
 		out.endObject();
 	}
 
@@ -86,6 +91,11 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 				case "licenseKey" -> settings.licenseKey().set(in.nextString());
 				case "showMinimizeButton" -> settings.showMinimizeButton().set(in.nextBoolean());
 				case "showTrayIcon" -> settings.showTrayIcon().set(in.nextBoolean());
+				case "windowXPosition" -> settings.windowXPositionProperty().set(in.nextInt());
+				case "windowYPosition" -> settings.windowYPositionProperty().set(in.nextInt());
+				case "windowWidth" -> settings.windowWidthProperty().set(in.nextInt());
+				case "windowHeight"-> settings.windowHeightProperty().set(in.nextInt());
+
 				default -> {
 					LOG.warn("Unsupported vault setting found in JSON: " + name);
 					in.skipValue();
