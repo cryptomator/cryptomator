@@ -22,6 +22,11 @@ public class ResizeController implements FxController {
 	public Region trResizer;
 	public Region blResizer;
 	public Region brResizer;
+	public Region tResizer;
+	public Region rResizer;
+	public Region bResizer;
+	public Region lResizer;
+
 
 	private double origX, origY, origW, origH;
 
@@ -40,10 +45,18 @@ public class ResizeController implements FxController {
 		trResizer.setOnMousePressed(this::startResize);
 		blResizer.setOnMousePressed(this::startResize);
 		brResizer.setOnMousePressed(this::startResize);
+		tResizer.setOnMousePressed(this::startResize);
+		rResizer.setOnMousePressed(this::startResize);
+		bResizer.setOnMousePressed(this::startResize);
+		lResizer.setOnMousePressed(this::startResize);
 		tlResizer.setOnMouseDragged(this::resizeTopLeft);
 		trResizer.setOnMouseDragged(this::resizeTopRight);
 		blResizer.setOnMouseDragged(this::resizeBottomLeft);
 		brResizer.setOnMouseDragged(this::resizeBottomRight);
+		tResizer.setOnMouseDragged(this::resizeTop);
+		rResizer.setOnMouseDragged(this::resizeRight);
+		bResizer.setOnMouseDragged(this::resizeBottom);
+		lResizer.setOnMouseDragged(this::resizeLeft);
 
 		window.setHeight(settings.windowHeightProperty().get());
 		//TODO: remove comments
