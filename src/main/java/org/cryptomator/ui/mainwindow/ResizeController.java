@@ -48,7 +48,11 @@ public class ResizeController implements FxController {
 		window.setY(settings.windowYPositionProperty().get());
 		window.setX(settings.windowXPositionProperty().get());
 		window.setHeight(settings.windowHeightProperty().get());
+		//TODO: remove comments
+		//window.setHeight(settings.windowHeightProperty().get() > window.getMaxHeight() ? window.getMaxHeight() * 0.95 : settings.windowHeightProperty().get());
+
 		window.setWidth(settings.windowWidthProperty().get());
+		//window.setWidth(settings.windowWidthProperty().get() > window.getMaxWidth() ? window.getMaxWidth() * 0.95 : settings.windowWidthProperty().get());
 	}
 
 	private void startResize(MouseEvent evt) {

@@ -53,8 +53,6 @@ abstract class MainWindowModule {
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		stage.setMinWidth(650);
 		stage.setMinHeight(440);
-		stage.setMaxWidth(screenSize.getWidth());
-		stage.setMaxHeight(screenSize.getHeight());
 		stage.setTitle("Cryptomator");
 		return stage;
 	}
