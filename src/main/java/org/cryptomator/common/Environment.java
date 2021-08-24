@@ -36,6 +36,7 @@ public class Environment {
 		LOG.debug("cryptomator.ipcSocketPath: {}", System.getProperty("cryptomator.ipcSocketPath"));
 		LOG.debug("cryptomator.keychainPath: {}", System.getProperty("cryptomator.keychainPath"));
 		LOG.debug("cryptomator.logDir: {}", System.getProperty("cryptomator.logDir"));
+		LOG.debug("cryptomator.pluginDir: {}", System.getProperty("cryptomator.pluginDir"));
 		LOG.debug("cryptomator.mountPointsDir: {}", System.getProperty("cryptomator.mountPointsDir"));
 		LOG.debug("cryptomator.minPwLength: {}", System.getProperty("cryptomator.minPwLength"));
 		LOG.debug("cryptomator.appVersion: {}", System.getProperty("cryptomator.appVersion"));
@@ -62,6 +63,10 @@ public class Environment {
 
 	public Optional<Path> getLogDir() {
 		return getPath("cryptomator.logDir").map(this::replaceHomeDir);
+	}
+
+	public Optional<Path> getPluginDir() {
+		return getPath("cryptomator.pluginDir").map(this::replaceHomeDir);
 	}
 
 	public Optional<Path> getMountPointsDir() {
