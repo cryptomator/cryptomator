@@ -73,6 +73,8 @@ public class MainWindowTitleController implements FxController {
 			}
 		});
 		titleBar.setOnMouseDragged(event -> {
+			//TODO should it be possible to move the window, when in fullscreen?
+			if (window.isFullScreen()) return;
 			window.setX(event.getScreenX() - xOffset);
 			window.setY(event.getScreenY() - yOffset);
 		});

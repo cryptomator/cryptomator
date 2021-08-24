@@ -152,4 +152,9 @@ public class ResizeController implements FxController {
 		settings.windowXPositionProperty().setValue(window.getX());
 	}
 
+	public boolean isShowResizingArrows(){
+		//If in fullscreen resizing should not be possible
+		return window.isFullScreen();
+	}
+
 }
