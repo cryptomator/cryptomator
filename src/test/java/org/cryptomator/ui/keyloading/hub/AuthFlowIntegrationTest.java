@@ -23,8 +23,8 @@ public class AuthFlowIntegrationTest {
 		hubConfig.authEndpoint = "http://localhost:8080/auth/realms/cryptomator/protocol/openid-connect/auth";
 		hubConfig.tokenEndpoint = "http://localhost:8080/auth/realms/cryptomator/protocol/openid-connect/token";
 		hubConfig.clientId = "cryptomator-hub";
-		hubConfig.unlockSuccessUrl = "http://localhost:3000/#/unlock-success";
-		hubConfig.unlockErrorUrl = "http://localhost:3000/#/unlock-error";
+		hubConfig.authSuccessUrl = "http://localhost:3000/#/unlock-success";
+		hubConfig.authErrorUrl = "http://localhost:3000/#/unlock-error";
 
 		try (var authFlow = AuthFlow.init(hubConfig)) {
 			var token = authFlow.run(uri -> {

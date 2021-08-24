@@ -7,7 +7,7 @@ public class HubConfig {
 	public String authEndpoint;
 	public String tokenEndpoint;
 	public String deviceRegistrationUrl;
-	public String unlockSuccessUrl;
-	public String unlockErrorUrl;
+	public String authSuccessUrl;
+	public String authErrorUrl;
 
 }

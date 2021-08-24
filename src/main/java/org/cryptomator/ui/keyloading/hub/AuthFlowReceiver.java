@@ -87,9 +87,9 @@ class AuthFlowReceiver implements AutoCloseable {
 
 			res.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY);
 			if (error == null && code != null) {
-				res.setHeader("Location", hubConfig.unlockSuccessUrl);
+				res.setHeader("Location", hubConfig.authSuccessUrl);
 			} else {
-				res.setHeader("Location", hubConfig.unlockErrorUrl);
+				res.setHeader("Location", hubConfig.authErrorUrl);
 			}
 
 			callback.add(new Callback(error, code, state));
