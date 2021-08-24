@@ -48,19 +48,21 @@ public class ReceiveKeyController implements FxController {
 	private final AtomicReference<EciesParams> eciesParamsRef;
 	private final UserInteractionLock<HubKeyLoadingModule.HubLoadingResult> result;
 	private final Lazy<Scene> registerDeviceScene;
+	private final Lazy<Scene> unauthorizedScene;
 	private final ErrorComponent.Builder errorComponent;
 	private final URI vaultBaseUri;
 	private final HttpClient httpClient;
 
 
 	@Inject
-	public ReceiveKeyController(@KeyLoading Vault vault, ExecutorService executor, @KeyLoading Stage window, DeviceKey deviceKey, @Named("bearerToken") AtomicReference<String> tokenRef, AtomicReference<EciesParams> eciesParamsRef, UserInteractionLock<HubKeyLoadingModule.HubLoadingResult> result, @FxmlScene(FxmlFile.HUB_REGISTER_DEVICE) Lazy<Scene> registerDeviceScene, ErrorComponent.Builder errorComponent) {
+	public ReceiveKeyController(@KeyLoading Vault vault, ExecutorService executor, @KeyLoading Stage window, DeviceKey deviceKey, @Named("bearerToken") AtomicReference<String> tokenRef, AtomicReference<EciesParams> eciesParamsRef, UserInteractionLock<HubKeyLoadingModule.HubLoadingResult> result, @FxmlScene(FxmlFile.HUB_REGISTER_DEVICE) Lazy<Scene> registerDeviceScene, @FxmlScene(FxmlFile.HUB_UNAUTHORIZED_DEVICE) Lazy<Scene> unauthorizedScene, ErrorComponent.Builder errorComponent) {
 		this.window = window;
 		this.keyPair = Objects.requireNonNull(deviceKey.get());
 		this.bearerToken = Objects.requireNonNull(tokenRef.get());
 		this.eciesParamsRef = eciesParamsRef;
 		this.result = result;
 		this.registerDeviceScene = registerDeviceScene;
+		this.unauthorizedScene = unauthorizedScene;
 		this.errorComponent = errorComponent;
 		this.vaultBaseUri = getVaultBaseUri(vault);
 		this.window.addEventHandler(WindowEvent.WINDOW_HIDING, this::windowClosed);
@@ -115,7 +117,7 @@ public class ReceiveKeyController implements FxController {
 	}
 
 	private void accessNotGranted() {
-		LOG.warn("unauthorized device"); // TODO
+		window.setScene(unauthorizedScene.get());
 	}
 
 	private void retrievalFailed(Throwable cause) {
