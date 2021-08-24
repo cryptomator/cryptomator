@@ -1,12 +1,12 @@
 package org.cryptomator.ui.keyloading.hub;
 
 import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
 import com.google.common.io.BaseEncoding;
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
 import dagger.Lazy;
+import org.cryptomator.common.settings.DeviceKey;
 import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.cryptolib.common.MessageDigestSupplier;
+import org.cryptomator.cryptolib.common.P384KeyPair;
 import org.cryptomator.ui.common.ErrorComponent;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxmlFile;
@@ -19,15 +19,9 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
-import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import java.io.IOException;
@@ -38,7 +32,6 @@ import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.security.KeyPair;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
@@ -50,6 +43,7 @@ public class ReceiveKeyController implements FxController {
 	private static final String SCHEME_PREFIX = "hub+";
 
 	private final Stage window;
+	private final P384KeyPair keyPair;
 	private final String bearerToken;
 	private final AtomicReference<EciesParams> eciesParamsRef;
 	private final UserInteractionLock<HubKeyLoadingModule.HubLoadingResult> result;
@@ -58,9 +52,11 @@ public class ReceiveKeyController implements FxController {
 	private final URI vaultBaseUri;
 	private final HttpClient httpClient;
 
+
 	@Inject
-	public ReceiveKeyController(@KeyLoading Vault vault, ExecutorService executor, @KeyLoading Stage window, @Named("bearerToken") AtomicReference<String> tokenRef, AtomicReference<EciesParams> eciesParamsRef, UserInteractionLock<HubKeyLoadingModule.HubLoadingResult> result, @FxmlScene(FxmlFile.HUB_REGISTER_DEVICE) Lazy<Scene> registerDeviceScene, ErrorComponent.Builder errorComponent) {
+	public ReceiveKeyController(@KeyLoading Vault vault, ExecutorService executor, @KeyLoading Stage window, DeviceKey deviceKey, @Named("bearerToken") AtomicReference<String> tokenRef, AtomicReference<EciesParams> eciesParamsRef, UserInteractionLock<HubKeyLoadingModule.HubLoadingResult> result, @FxmlScene(FxmlFile.HUB_REGISTER_DEVICE) Lazy<Scene> registerDeviceScene, ErrorComponent.Builder errorComponent) {
 		this.window = window;
+		this.keyPair = Objects.requireNonNull(deviceKey.get());
 		this.bearerToken = Objects.requireNonNull(tokenRef.get());
 		this.eciesParamsRef = eciesParamsRef;
 		this.result = result;
@@ -73,7 +69,10 @@ public class ReceiveKeyController implements FxController {
 
 	@FXML
 	public void initialize() {
-		var keyUri = appendPath(vaultBaseUri, "/keys/desktop-app"); // TODO use actual device id
+		var deviceKey = keyPair.getPublic().getEncoded();
+		var hashedKey = MessageDigestSupplier.SHA256.get().digest(deviceKey);
+		var deviceId = BaseEncoding.base16().encode(hashedKey);
+		var keyUri = appendPath(vaultBaseUri, "/keys/" + deviceId);
 		var request = HttpRequest.newBuilder(keyUri) //
 				.header("Authorization", "Bearer " + bearerToken) //
 				.GET() //
@@ -159,5 +158,4 @@ public class ReceiveKeyController implements FxController {
 			throw new IllegalStateException("URI constructed from params known to be valid", e);
 		}
 	}
-
 }

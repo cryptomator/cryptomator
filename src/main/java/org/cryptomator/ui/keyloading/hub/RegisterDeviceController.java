@@ -2,6 +2,7 @@ package org.cryptomator.ui.keyloading.hub;
 
 import com.google.common.io.BaseEncoding;
 import org.cryptomator.common.settings.DeviceKey;
+import org.cryptomator.cryptolib.common.MessageDigestSupplier;
 import org.cryptomator.cryptolib.common.P384KeyPair;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.UserInteractionLock;
@@ -44,10 +45,12 @@ public class RegisterDeviceController implements FxController {
 
 	@FXML
 	public void browse() {
-		var deviceKey = BaseEncoding.base64Url().omitPadding().encode(keyPair.getPublic().getEncoded());
-		var deviceId = "desktop-app"; // TODO use actual device id
-		var hash = computeVerificationHash(deviceId + deviceKey + verificationCode);
-		var url = hubConfig.deviceRegistrationUrl + "?device_key=" + deviceKey + "&device_id=" + deviceId + "&verification_hash=" + hash;
+		var deviceKey = keyPair.getPublic().getEncoded();
+		var encodedKey = BaseEncoding.base64Url().omitPadding().encode(deviceKey);
+		var hashedKey = MessageDigestSupplier.SHA256.get().digest(deviceKey);
+		var deviceId = BaseEncoding.base16().encode(hashedKey);
+		var hash = computeVerificationHash(deviceId + encodedKey + verificationCode);
+		var url = hubConfig.deviceRegistrationUrl + "?device_key=" + encodedKey + "&device_id=" + deviceId + "&verification_hash=" + hash;
 		application.getHostServices().showDocument(url);
 	}
 
