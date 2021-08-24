@@ -76,10 +76,18 @@ public class MainWindowTitleController implements FxController {
 			window.setX(event.getScreenX() - xOffset);
 			window.setY(event.getScreenY() - yOffset);
 		});
+		titleBar.setOnMouseReleased(event -> {
+			saveSettings();
+		});
 		window.setOnCloseRequest(event -> {
 			close();
 			event.consume();
 		});
+	}
+	//TODO: almost duplicate from ResizeController.class
+	private void saveSettings() {
+		settings.windowYPositionProperty().setValue(window.getY());
+		settings.windowXPositionProperty().setValue(window.getX());
 	}
 
 	@FXML
