@@ -1,15 +1,20 @@
 package org.cryptomator.ui.mainwindow;
 
-import org.cryptomator.ui.common.FxController;
-
-import javax.inject.Inject;
 import javafx.fxml.FXML;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Region;
 import javafx.stage.Stage;
+import org.cryptomator.common.settings.Settings;
+import org.cryptomator.ui.common.FxController;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.inject.Inject;
 
 @MainWindow
 public class ResizeController implements FxController {
+
+	private static final Logger LOG = LoggerFactory.getLogger(ResizeController.class);
 
 	private final Stage window;
 
@@ -20,14 +25,17 @@ public class ResizeController implements FxController {
 
 	private double origX, origY, origW, origH;
 
+	private final Settings settings;
+
 	@Inject
-	ResizeController(@MainWindow Stage window) {
+	ResizeController(@MainWindow Stage window, Settings settings) {
 		this.window = window;
-		// TODO inject settings and save current position and size
+		this.settings = settings;
 	}
 
 	@FXML
 	public void initialize() {
+		LOG.debug("init ResizeController");
 		tlResizer.setOnMousePressed(this::startResize);
 		trResizer.setOnMousePressed(this::startResize);
 		blResizer.setOnMousePressed(this::startResize);
@@ -36,6 +44,11 @@ public class ResizeController implements FxController {
 		trResizer.setOnMouseDragged(this::resizeTopRight);
 		blResizer.setOnMouseDragged(this::resizeBottomLeft);
 		brResizer.setOnMouseDragged(this::resizeBottomRight);
+
+		window.setY(settings.windowYPositionProperty().get());
+		window.setX(settings.windowXPositionProperty().get());
+		window.setHeight(settings.windowHeightProperty().get());
+		window.setWidth(settings.windowWidthProperty().get());
 	}
 
 	private void startResize(MouseEvent evt) {
@@ -48,21 +61,25 @@ public class ResizeController implements FxController {
 	private void resizeTopLeft(MouseEvent evt) {
 		resizeTop(evt);
 		resizeLeft(evt);
+		saveSettings();
 	}
 
 	private void resizeTopRight(MouseEvent evt) {
 		resizeTop(evt);
 		resizeRight(evt);
+		saveSettings();
 	}
 
 	private void resizeBottomLeft(MouseEvent evt) {
 		resizeBottom(evt);
 		resizeLeft(evt);
+		saveSettings();
 	}
 
 	private void resizeBottomRight(MouseEvent evt) {
 		resizeBottom(evt);
 		resizeRight(evt);
+		saveSettings();
 	}
 
 	private void resizeTop(MouseEvent evt) {
@@ -97,6 +114,13 @@ public class ResizeController implements FxController {
 		if (newW < window.getMaxWidth() && newW > window.getMinWidth()) {
 			window.setWidth(newW);
 		}
+	}
+
+	private void saveSettings() {
+		settings.windowHeightProperty().setValue(window.getHeight());
+		settings.windowWidthProperty().setValue(window.getWidth());
+		settings.windowYPositionProperty().setValue(window.getY());
+		settings.windowXPositionProperty().setValue(window.getX());
 	}
 
 }

@@ -4,27 +4,28 @@ import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoMap;
-import org.cryptomator.common.vaults.Vault;
-import org.cryptomator.ui.addvaultwizard.AddVaultWizardComponent;
-import org.cryptomator.ui.common.FxmlLoaderFactory;
-import org.cryptomator.ui.common.FxController;
-import org.cryptomator.ui.common.FxControllerKey;
-import org.cryptomator.ui.common.FxmlFile;
-import org.cryptomator.ui.common.FxmlScene;
-import org.cryptomator.ui.common.StageFactory;
-import org.cryptomator.ui.health.HealthCheckComponent;
-import org.cryptomator.ui.migration.MigrationComponent;
-import org.cryptomator.ui.removevault.RemoveVaultComponent;
-import org.cryptomator.ui.vaultoptions.VaultOptionsComponent;
-import org.cryptomator.ui.stats.VaultStatisticsComponent;
-import org.cryptomator.ui.wrongfilealert.WrongFileAlertComponent;
-
-import javax.inject.Provider;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.ui.addvaultwizard.AddVaultWizardComponent;
+import org.cryptomator.ui.common.FxController;
+import org.cryptomator.ui.common.FxControllerKey;
+import org.cryptomator.ui.common.FxmlFile;
+import org.cryptomator.ui.common.FxmlLoaderFactory;
+import org.cryptomator.ui.common.FxmlScene;
+import org.cryptomator.ui.common.StageFactory;
+import org.cryptomator.ui.health.HealthCheckComponent;
+import org.cryptomator.ui.migration.MigrationComponent;
+import org.cryptomator.ui.removevault.RemoveVaultComponent;
+import org.cryptomator.ui.stats.VaultStatisticsComponent;
+import org.cryptomator.ui.vaultoptions.VaultOptionsComponent;
+import org.cryptomator.ui.wrongfilealert.WrongFileAlertComponent;
+
+import javax.inject.Provider;
+import java.awt.*;
 import java.util.Map;
 import java.util.ResourceBundle;
 
@@ -49,11 +50,11 @@ abstract class MainWindowModule {
 	@MainWindowScoped
 	static Stage provideStage(StageFactory factory) {
 		Stage stage = factory.create(StageStyle.UNDECORATED);
-		// TODO: min/max values chosen arbitrarily. We might wanna take a look at the user's resolution...
+		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		stage.setMinWidth(650);
 		stage.setMinHeight(440);
-		stage.setMaxWidth(1000);
-		stage.setMaxHeight(700);
+		stage.setMaxWidth(screenSize.getWidth());
+		stage.setMaxHeight(screenSize.getHeight());
 		stage.setTitle("Cryptomator");
 		return stage;
 	}
