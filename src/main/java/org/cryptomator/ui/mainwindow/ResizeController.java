@@ -1,5 +1,7 @@
 package org.cryptomator.ui.mainwindow;
 
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
 import javafx.fxml.FXML;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Region;
@@ -27,15 +29,17 @@ public class ResizeController implements FxController {
 	public Region bResizer;
 	public Region lResizer;
 
-
 	private double origX, origY, origW, origH;
 
 	private final Settings settings;
+
+	private final BooleanBinding showResizingArrows;
 
 	@Inject
 	ResizeController(@MainWindow Stage window, Settings settings) {
 		this.window = window;
 		this.settings = settings;
+		this.showResizingArrows = Bindings.createBooleanBinding(this::isShowResizingArrows, window.fullScreenProperty());
 	}
 
 	@FXML
@@ -72,8 +76,7 @@ public class ResizeController implements FxController {
 			// if the position is illegal, then the window appears on the main screen in the middle of the window.
 			window.setY((window.getMaxHeight() - window.getHeight()) / 2);
 			window.setX((window.getMaxWidth() - window.getWidth()) / 2);
-		}
-		else {
+		} else {
 			window.setX(settings.windowXPositionProperty().get());
 			window.setY(settings.windowYPositionProperty().get());
 		}
@@ -152,9 +155,13 @@ public class ResizeController implements FxController {
 		settings.windowXPositionProperty().setValue(window.getX());
 	}
 
-	public boolean isShowResizingArrows(){
-		//If in fullscreen resizing should not be possible
-		return window.isFullScreen();
+	public BooleanBinding showResizingArrowsProperty() {
+		return showResizingArrows;
+	}
+
+	public boolean isShowResizingArrows() {
+		//If in fullscreen resizing should not be possible;
+		return !window.isFullScreen();
 	}
 
 }

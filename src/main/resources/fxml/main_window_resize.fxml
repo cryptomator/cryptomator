@@ -9,18 +9,17 @@
 	<fx:define>
 		<Cursor fx:id="nwResize" fx:constant="NW_RESIZE"/>
 		<Cursor fx:id="neResize" fx:constant="NE_RESIZE"/>
-		<Cursor fx:id="nsResize" fx:constant="N_RESIZE" />
-		<Cursor fx:id="ewResize" fx:constant="E_RESIZE" />
-
-
+		<Cursor fx:id="nsResize" fx:constant="N_RESIZE"/>
+		<Cursor fx:id="ewResize" fx:constant="E_RESIZE"/>
 	</fx:define>
-	<Region fx:id="tlResizer" cursor="${nwResize}" prefWidth="10" prefHeight="10" maxWidth="-Infinity" maxHeight="-Infinity" managed="${controller.showResizingArrows}" AnchorPane.topAnchor="0" AnchorPane.leftAnchor="0"/>
-	<Region fx:id="trResizer" cursor="${neResize}" prefWidth="10" prefHeight="10" maxWidth="-Infinity" maxHeight="-Infinity" managed="${controller.showResizingArrows}" AnchorPane.topAnchor="0" AnchorPane.rightAnchor="0"/>
-	<Region fx:id="blResizer" cursor="${neResize}" prefWidth="10" prefHeight="10" maxWidth="-Infinity" maxHeight="-Infinity" managed="${controller.showResizingArrows}" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0"/>
-	<Region fx:id="brResizer" cursor="${nwResize}" prefWidth="10" prefHeight="10" maxWidth="-Infinity" maxHeight="-Infinity" managed="${controller.showResizingArrows}" AnchorPane.bottomAnchor="0" AnchorPane.rightAnchor="0"/>
-	<Region fx:id="tResizer"  cursor="${nsResize}" prefWidth="10" prefHeight="10" maxWidth="-Infinity" maxHeight="-Infinity" managed="${controller.showResizingArrows}" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="0.0"/>
-	<Region fx:id="rResizer"  cursor="${ewResize}" prefWidth="10" prefHeight="10" maxWidth="-Infinity" maxHeight="-Infinity" managed="${controller.showResizingArrows}" AnchorPane.bottomAnchor="10.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="10.0"/>
-	<Region fx:id="bResizer"  cursor="${nsResize}" prefWidth="10" prefHeight="10" maxWidth="-Infinity" maxHeight="-Infinity" managed="${controller.showResizingArrows}" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0"/>
-	<Region fx:id="lResizer"  cursor="${ewResize}" prefWidth="10" prefHeight="10" maxWidth="-Infinity" maxHeight="-Infinity" managed="${controller.showResizingArrows}" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="10.0"/>
+
+	<Region fx:id="tlResizer" cursor="${nwResize}" prefWidth="10" prefHeight="10" maxWidth="-Infinity" maxHeight="-Infinity" visible="${controller.showResizingArrows}" managed="${controller.showResizingArrows}" AnchorPane.topAnchor="0" AnchorPane.leftAnchor="0"/>
+	<Region fx:id="trResizer" cursor="${neResize}" prefWidth="10" prefHeight="10" maxWidth="-Infinity" maxHeight="-Infinity" visible="${controller.showResizingArrows}" managed="${controller.showResizingArrows}" AnchorPane.topAnchor="0" AnchorPane.rightAnchor="0"/>
+	<Region fx:id="blResizer" cursor="${neResize}" prefWidth="10" prefHeight="10" maxWidth="-Infinity" maxHeight="-Infinity" visible="${controller.showResizingArrows}" managed="${controller.showResizingArrows}" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0"/>
+	<Region fx:id="brResizer" cursor="${nwResize}" prefWidth="10" prefHeight="10" maxWidth="-Infinity" maxHeight="-Infinity" visible="${controller.showResizingArrows}" managed="${controller.showResizingArrows}" AnchorPane.bottomAnchor="0" AnchorPane.rightAnchor="0"/>
+	<Region fx:id="tResizer" cursor="${nsResize}" prefWidth="10" prefHeight="10" maxWidth="-Infinity" maxHeight="-Infinity" visible="${controller.showResizingArrows}" managed="${controller.showResizingArrows}" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="0.0"/>
+	<Region fx:id="rResizer" cursor="${ewResize}" prefWidth="10" prefHeight="10" maxWidth="-Infinity" maxHeight="-Infinity" visible="${controller.showResizingArrows}" managed="${controller.showResizingArrows}" AnchorPane.bottomAnchor="10.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="10.0"/>
+	<Region fx:id="bResizer" cursor="${nsResize}" prefWidth="10" prefHeight="10" maxWidth="-Infinity" maxHeight="-Infinity" visible="${controller.showResizingArrows}" managed="${controller.showResizingArrows}" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0"/>
+	<Region fx:id="lResizer" cursor="${ewResize}" prefWidth="10" prefHeight="10" maxWidth="-Infinity" maxHeight="-Infinity" visible="${controller.showResizingArrows}" managed="${controller.showResizingArrows}" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="10.0"/>
 
 </AnchorPane>
