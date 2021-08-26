@@ -8,9 +8,6 @@
  ******************************************************************************/
 package org.cryptomator.common.settings;
 
-import org.apache.commons.lang3.SystemUtils;
-import org.cryptomator.common.Environment;
-
 import javafx.beans.Observable;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
@@ -23,6 +20,9 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.NodeOrientation;
+import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.common.Environment;
+
 import java.util.function.Consumer;
 
 public class Settings {
@@ -43,6 +43,8 @@ public class Settings {
 	public static final NodeOrientation DEFAULT_USER_INTERFACE_ORIENTATION = NodeOrientation.LEFT_TO_RIGHT;
 	public static final String DEFAULT_LICENSE_KEY = "";
 	public static final boolean DEFAULT_SHOW_MINIMIZE_BUTTON = false;
+	public static final String DEFAULT_DISPLAY_CONFIGURATION = "";
+
 
 	private final ObservableList<VaultSettings> directories = FXCollections.observableArrayList(VaultSettings::observables);
 	private final BooleanProperty askedForUpdateCheck = new SimpleBooleanProperty(DEFAULT_ASKED_FOR_UPDATE_CHECK);
@@ -63,6 +65,7 @@ public class Settings {
 	private final IntegerProperty windowYPosition = new SimpleIntegerProperty();
 	private final IntegerProperty windowWidth = new SimpleIntegerProperty();
 	private final IntegerProperty windowHeight = new SimpleIntegerProperty();
+	private final ObjectProperty<String> displayConfiguration = new SimpleObjectProperty<>(DEFAULT_DISPLAY_CONFIGURATION);
 
 
 	private Consumer<Settings> saveCmd;
@@ -92,6 +95,7 @@ public class Settings {
 		windowYPosition.addListener(this::somethingChanged);
 		windowWidth.addListener(this::somethingChanged);
 		windowHeight.addListener(this::somethingChanged);
+		displayConfiguration.addListener(this::somethingChanged);
 	}
 
 	void setSaveCmd(Consumer<Settings> saveCmd) {
@@ -182,5 +186,9 @@ public class Settings {
 
 	public IntegerProperty windowHeightProperty() {
 		return windowHeight;
+	}
+
+	public ObjectProperty<String> displayConfigurationProperty() {
+		return displayConfiguration;
 	}
 }

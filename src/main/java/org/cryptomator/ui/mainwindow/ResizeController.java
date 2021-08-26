@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import java.awt.*;
 
 @MainWindow
 public class ResizeController implements FxController {
@@ -63,24 +64,36 @@ public class ResizeController implements FxController {
 		lResizer.setOnMouseDragged(this::resizeLeft);
 
 		window.setHeight(settings.windowHeightProperty().get());
-		//TODO: remove comments
-		//window.setHeight(settings.windowHeightProperty().get() > window.getMaxHeight() ? window.getMaxHeight() * 0.95 : settings.windowHeightProperty().get());
-
 		window.setWidth(settings.windowWidthProperty().get());
-		//window.setWidth(settings.windowWidthProperty().get() > window.getMaxWidth() ? window.getMaxWidth() * 0.95 : settings.windowWidthProperty().get());
 
-
-		//TODO: define illegalPosition
-		boolean illegalPosition = false;
-		if (illegalPosition) {
-			// if the position is illegal, then the window appears on the main screen in the middle of the window.
-			window.setY((window.getMaxHeight() - window.getHeight()) / 2);
-			window.setX((window.getMaxWidth() - window.getWidth()) / 2);
+		if (checkForChangedDisplayConfiguration()) {
+			//If the position is illegal, then the window appears on the main screen in the middle of the window.
+			Dimension size = Toolkit.getDefaultToolkit().getScreenSize();
+			window.setX((size.getWidth() - window.getWidth()) / 2);
+			window.setY((size.getHeight() - window.getHeight()) / 2);
 		} else {
 			window.setX(settings.windowXPositionProperty().get());
 			window.setY(settings.windowYPositionProperty().get());
 		}
+		savePositionalSettings();
+	}
 
+	private boolean checkForChangedDisplayConfiguration(){
+		String currentDisplayConfiguration = getMonitorSizes();
+		boolean changedConfiguration = !settings.displayConfigurationProperty().get().equals(currentDisplayConfiguration);
+		if (changedConfiguration) settings.displayConfigurationProperty().setValue(currentDisplayConfiguration);
+		return changedConfiguration;
+	}
+
+	private String getMonitorSizes() {
+		GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+		GraphicsDevice[]    gs = ge.getScreenDevices();
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < gs.length; i++) {
+			DisplayMode dm = gs[i].getDisplayMode();
+			sb.append("screenId: " + i + ", " + dm.getWidth() + "x" + dm.getHeight() + "; ");
+		}
+		return sb.toString();
 	}
 
 	private void startResize(MouseEvent evt) {
@@ -93,25 +106,25 @@ public class ResizeController implements FxController {
 	private void resizeTopLeft(MouseEvent evt) {
 		resizeTop(evt);
 		resizeLeft(evt);
-		saveSettings();
+		savePositionalSettings();
 	}
 
 	private void resizeTopRight(MouseEvent evt) {
 		resizeTop(evt);
 		resizeRight(evt);
-		saveSettings();
+		savePositionalSettings();
 	}
 
 	private void resizeBottomLeft(MouseEvent evt) {
 		resizeBottom(evt);
 		resizeLeft(evt);
-		saveSettings();
+		savePositionalSettings();
 	}
 
 	private void resizeBottomRight(MouseEvent evt) {
 		resizeBottom(evt);
 		resizeRight(evt);
-		saveSettings();
+		savePositionalSettings();
 	}
 
 	private void resizeTop(MouseEvent evt) {
@@ -148,7 +161,7 @@ public class ResizeController implements FxController {
 		}
 	}
 
-	private void saveSettings() {
+	private void savePositionalSettings() {
 		settings.windowHeightProperty().setValue(window.getHeight());
 		settings.windowWidthProperty().setValue(window.getWidth());
 		settings.windowYPositionProperty().setValue(window.getY());
@@ -160,7 +173,7 @@ public class ResizeController implements FxController {
 	}
 
 	public boolean isShowResizingArrows() {
-		//If in fullscreen resizing should not be possible;
+		//If in fullscreen resizing is not be possible;
 		return !window.isFullScreen();
 	}
 

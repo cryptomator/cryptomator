@@ -9,13 +9,13 @@ import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
+import javafx.geometry.NodeOrientation;
 import org.cryptomator.common.Environment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import javafx.geometry.NodeOrientation;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -56,6 +56,7 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 		out.name("windowYPosition").value((value.windowYPositionProperty().get()));
 		out.name("windowWidth").value((value.windowWidthProperty().get()));
 		out.name("windowHeight").value((value.windowHeightProperty().get()));
+		out.name("displayConfiguration").value((value.displayConfigurationProperty().get()));
 
 		out.endObject();
 	}
@@ -95,6 +96,7 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 				case "windowYPosition" -> settings.windowYPositionProperty().set(in.nextInt());
 				case "windowWidth" -> settings.windowWidthProperty().set(in.nextInt());
 				case "windowHeight"-> settings.windowHeightProperty().set(in.nextInt());
+				case "displayConfiguration" -> settings.displayConfigurationProperty().set(in.nextString());
 
 				default -> {
 					LOG.warn("Unsupported vault setting found in JSON: " + name);
