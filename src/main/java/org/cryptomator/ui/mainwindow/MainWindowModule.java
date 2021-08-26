@@ -49,7 +49,7 @@ abstract class MainWindowModule {
 	@MainWindowScoped
 	static Stage provideStage(StageFactory factory) {
 		Stage stage = factory.create(StageStyle.UNDECORATED);
-		stage.setMinWidth(650);
+		stage.setMinWidth(550);
 		stage.setMinHeight(440);
 		stage.setTitle("Cryptomator");
 		return stage;

@@ -63,24 +63,37 @@ public class ResizeController implements FxController {
 		bResizer.setOnMouseDragged(this::resizeBottom);
 		lResizer.setOnMouseDragged(this::resizeLeft);
 
-		window.setHeight(settings.windowHeightProperty().get());
-		window.setWidth(settings.windowWidthProperty().get());
-
-		if (checkForChangedDisplayConfiguration()) {
-			//If the position is illegal, then the window appears on the main screen in the middle of the window.
-			Dimension size = Toolkit.getDefaultToolkit().getScreenSize();
-			window.setX((size.getWidth() - window.getWidth()) / 2);
-			window.setY((size.getHeight() - window.getHeight()) / 2);
+		if (neverTouched()){
+			settings.displayConfigurationProperty().setValue(getMonitorSizes());
+			return;
 		} else {
-			window.setX(settings.windowXPositionProperty().get());
-			window.setY(settings.windowYPositionProperty().get());
+			if (checkForChangedDisplayConfiguration()) {
+				//If the position is illegal, then the window appears on the main screen in the middle of the window.
+				Dimension size = Toolkit.getDefaultToolkit().getScreenSize();
+				window.setX((size.getWidth() - window.getMinWidth()) / 2);
+				window.setY((size.getHeight() - window.getMinHeight()) / 2);
+				window.setWidth(window.getMinWidth());
+				window.setHeight(window.getMinHeight());
+			}
+			else {
+				window.setHeight(settings.windowHeightProperty().get() > window.getMinHeight() ? settings.windowHeightProperty().get() : window.getMinHeight());
+				window.setWidth(settings.windowWidthProperty().get() > window.getMinWidth() ? settings.windowWidthProperty().get() : window.getMinWidth());
+				window.setX(settings.windowXPositionProperty().get());
+				window.setY(settings.windowYPositionProperty().get());
+			}
 		}
 		savePositionalSettings();
 	}
 
+	private boolean neverTouched(){
+		return (settings.windowHeightProperty().get() == 0) && (settings.windowWidthProperty().get() == 0) &&
+				(settings.windowXPositionProperty().get() == 0) && (settings.windowYPositionProperty().get() == 0);
+	}
+
 	private boolean checkForChangedDisplayConfiguration(){
 		String currentDisplayConfiguration = getMonitorSizes();
-		boolean changedConfiguration = !settings.displayConfigurationProperty().get().equals(currentDisplayConfiguration);
+		String settingsDisplayConfiguration = settings.displayConfigurationProperty().get();
+		boolean changedConfiguration = !settingsDisplayConfiguration.equals(currentDisplayConfiguration);
 		if (changedConfiguration) settings.displayConfigurationProperty().setValue(currentDisplayConfiguration);
 		return changedConfiguration;
 	}
@@ -107,25 +120,21 @@ public class ResizeController implements FxController {
 	private void resizeTopLeft(MouseEvent evt) {
 		resizeTop(evt);
 		resizeLeft(evt);
-		savePositionalSettings();
 	}
 
 	private void resizeTopRight(MouseEvent evt) {
 		resizeTop(evt);
 		resizeRight(evt);
-		savePositionalSettings();
 	}
 
 	private void resizeBottomLeft(MouseEvent evt) {
 		resizeBottom(evt);
 		resizeLeft(evt);
-		savePositionalSettings();
 	}
 
 	private void resizeBottomRight(MouseEvent evt) {
 		resizeBottom(evt);
 		resizeRight(evt);
-		savePositionalSettings();
 	}
 
 	private void resizeTop(MouseEvent evt) {
@@ -136,6 +145,7 @@ public class ResizeController implements FxController {
 			window.setY(newY);
 			window.setHeight(newH);
 		}
+		savePositionalSettings();
 	}
 
 	private void resizeLeft(MouseEvent evt) {
@@ -146,6 +156,7 @@ public class ResizeController implements FxController {
 			window.setX(newX);
 			window.setWidth(newW);
 		}
+		savePositionalSettings();
 	}
 
 	private void resizeBottom(MouseEvent evt) {
@@ -153,6 +164,7 @@ public class ResizeController implements FxController {
 		if (newH < window.getMaxHeight() && newH > window.getMinHeight()) {
 			window.setHeight(newH);
 		}
+		savePositionalSettings();
 	}
 
 	private void resizeRight(MouseEvent evt) {
@@ -160,6 +172,7 @@ public class ResizeController implements FxController {
 		if (newW < window.getMaxWidth() && newW > window.getMinWidth()) {
 			window.setWidth(newW);
 		}
+		savePositionalSettings();
 	}
 
 	private void savePositionalSettings() {
