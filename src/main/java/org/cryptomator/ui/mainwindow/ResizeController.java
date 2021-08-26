@@ -46,22 +46,6 @@ public class ResizeController implements FxController {
 	@FXML
 	public void initialize() {
 		LOG.trace("init ResizeController");
-		tlResizer.setOnMousePressed(this::startResize);
-		trResizer.setOnMousePressed(this::startResize);
-		blResizer.setOnMousePressed(this::startResize);
-		brResizer.setOnMousePressed(this::startResize);
-		tResizer.setOnMousePressed(this::startResize);
-		rResizer.setOnMousePressed(this::startResize);
-		bResizer.setOnMousePressed(this::startResize);
-		lResizer.setOnMousePressed(this::startResize);
-		tlResizer.setOnMouseDragged(this::resizeTopLeft);
-		trResizer.setOnMouseDragged(this::resizeTopRight);
-		blResizer.setOnMouseDragged(this::resizeBottomLeft);
-		brResizer.setOnMouseDragged(this::resizeBottomRight);
-		tResizer.setOnMouseDragged(this::resizeTop);
-		rResizer.setOnMouseDragged(this::resizeRight);
-		bResizer.setOnMouseDragged(this::resizeBottom);
-		lResizer.setOnMouseDragged(this::resizeLeft);
 
 		if (neverTouched()){
 			settings.displayConfigurationProperty().setValue(getMonitorSizes());
@@ -117,27 +101,33 @@ public class ResizeController implements FxController {
 		origH = window.getHeight();
 	}
 
+	@FXML
 	private void resizeTopLeft(MouseEvent evt) {
 		resizeTop(evt);
 		resizeLeft(evt);
 	}
 
+	@FXML
 	private void resizeTopRight(MouseEvent evt) {
 		resizeTop(evt);
 		resizeRight(evt);
 	}
 
+	@FXML
 	private void resizeBottomLeft(MouseEvent evt) {
 		resizeBottom(evt);
 		resizeLeft(evt);
 	}
 
+	@FXML
 	private void resizeBottomRight(MouseEvent evt) {
 		resizeBottom(evt);
 		resizeRight(evt);
 	}
 
+	@FXML
 	private void resizeTop(MouseEvent evt) {
+		startResize(evt);
 		double newY = evt.getScreenY();
 		double dy = newY - origY;
 		double newH = origH - dy;
@@ -148,7 +138,9 @@ public class ResizeController implements FxController {
 		savePositionalSettings();
 	}
 
+	@FXML
 	private void resizeLeft(MouseEvent evt) {
+		startResize(evt);
 		double newX = evt.getScreenX();
 		double dx = newX - origX;
 		double newW = origW - dx;
@@ -159,6 +151,7 @@ public class ResizeController implements FxController {
 		savePositionalSettings();
 	}
 
+	@FXML
 	private void resizeBottom(MouseEvent evt) {
 		double newH = evt.getSceneY();
 		if (newH < window.getMaxHeight() && newH > window.getMinHeight()) {
@@ -167,6 +160,7 @@ public class ResizeController implements FxController {
 		savePositionalSettings();
 	}
 
+	@FXML
 	private void resizeRight(MouseEvent evt) {
 		double newW = evt.getSceneX();
 		if (newW < window.getMaxWidth() && newW > window.getMinWidth()) {
