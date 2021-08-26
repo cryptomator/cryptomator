@@ -91,7 +91,8 @@ public class ResizeController implements FxController {
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < gs.length; i++) {
 			DisplayMode dm = gs[i].getDisplayMode();
-			sb.append("screenId: " + i + ", " + dm.getWidth() + "x" + dm.getHeight() + "; ");
+			if(!sb.isEmpty()) sb.append(" ");
+			sb.append("displayId: " + i + ", " + dm.getWidth() + "x" + dm.getHeight() + ";");
 		}
 		return sb.toString();
 	}
