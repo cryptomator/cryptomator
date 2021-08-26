@@ -45,7 +45,7 @@ public class ResizeController implements FxController {
 
 	@FXML
 	public void initialize() {
-		LOG.debug("init ResizeController");
+		LOG.trace("init ResizeController");
 		tlResizer.setOnMousePressed(this::startResize);
 		trResizer.setOnMousePressed(this::startResize);
 		blResizer.setOnMousePressed(this::startResize);

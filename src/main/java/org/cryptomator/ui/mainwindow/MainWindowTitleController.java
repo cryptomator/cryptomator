@@ -54,7 +54,7 @@ public class MainWindowTitleController implements FxController {
 
 	@FXML
 	public void initialize() {
-		LOG.debug("init MainWindowTitleController");
+		LOG.trace("init MainWindowTitleController");
 		updateChecker.automaticallyCheckForUpdatesIfEnabled();
 		titleBar.setOnMousePressed(event -> {
 			xOffset = event.getSceneX();

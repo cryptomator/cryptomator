@@ -1,5 +1,15 @@
 package org.cryptomator.ui.mainwindow;
 
+import javafx.beans.Observable;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.fxml.FXML;
+import javafx.scene.input.DragEvent;
+import javafx.scene.input.TransferMode;
+import javafx.scene.layout.StackPane;
+import javafx.stage.Stage;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultListManager;
@@ -11,20 +21,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import javafx.beans.Observable;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.ReadOnlyObjectProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.fxml.FXML;
-import javafx.scene.input.DragEvent;
-import javafx.scene.input.TransferMode;
-import javafx.scene.layout.StackPane;
-import javafx.stage.Stage;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -55,7 +53,7 @@ public class MainWindowController implements FxController {
 
 	@FXML
 	public void initialize() {
-		LOG.debug("init MainWindowController");
+		LOG.trace("init MainWindowController");
 		root.setOnDragEntered(this::handleDragEvent);
 		root.setOnDragOver(this::handleDragEvent);
 		root.setOnDragDropped(this::handleDragEvent);
