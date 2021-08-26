@@ -18,6 +18,7 @@ import java.nio.charset.StandardCharsets;
 
 // TODO reevaluate config loading, as soon as we have the new generic error screen
 @HealthCheckScoped
+@Deprecated
 public class StartFailController implements FxController {
 
 	private final Stage window;
@@ -28,10 +29,9 @@ public class StartFailController implements FxController {
 	public TitledPane moreInfoPane;
 
 	@Inject
-	public StartFailController(@HealthCheckWindow Stage window, HealthCheckComponent.LoadUnverifiedConfigResult configLoadResult) {
-		Preconditions.checkNotNull(configLoadResult.error());
+	public StartFailController(@HealthCheckWindow Stage window) {
 		this.window = window;
-		this.loadError = new SimpleObjectProperty<>(configLoadResult.error());
+		this.loadError = new SimpleObjectProperty<>(new IllegalStateException("This class is not reachable anymore"));
 		this.moreInfoIcon = new SimpleObjectProperty<>(FontAwesome5Icon.CARET_RIGHT);
 	}
 
