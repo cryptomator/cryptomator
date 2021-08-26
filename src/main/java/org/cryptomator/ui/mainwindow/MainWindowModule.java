@@ -25,7 +25,6 @@ import org.cryptomator.ui.vaultoptions.VaultOptionsComponent;
 import org.cryptomator.ui.wrongfilealert.WrongFileAlertComponent;
 
 import javax.inject.Provider;
-import java.awt.*;
 import java.util.Map;
 import java.util.ResourceBundle;
 
@@ -50,7 +49,6 @@ abstract class MainWindowModule {
 	@MainWindowScoped
 	static Stage provideStage(StageFactory factory) {
 		Stage stage = factory.create(StageStyle.UNDECORATED);
-		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		stage.setMinWidth(650);
 		stage.setMinHeight(440);
 		stage.setTitle("Cryptomator");
