@@ -12,7 +12,7 @@
 		   fx:id="root"
 		   fx:controller="org.cryptomator.ui.mainwindow.MainWindowController"
 		   styleClass="main-window">
-	<VBox>
+	<VBox minWidth="650">
 		<fx:include source="main_window_title.fxml" VBox.vgrow="NEVER"/>
 		<StackPane VBox.vgrow="ALWAYS">
 			<SplitPane dividerPositions="0.33" orientation="HORIZONTAL">
