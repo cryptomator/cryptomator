@@ -267,6 +267,7 @@ jobs:
       - name: Patch Cryptomator.app
         run: |
           mv appdir/Cryptomator.app Cryptomator.app
+          mv dist/mac/resources/Cryptomator-Vault.icns Cryptomator.app/Contents/Resources/
           sed -i '' "s|###BUNDLE_SHORT_VERSION_STRING###|${VERSION_NO}|g" Cryptomator.app/Contents/Info.plist
           sed -i '' "s|###BUNDLE_VERSION###|${REVISION_NO}|g" Cryptomator.app/Contents/Info.plist
         env:

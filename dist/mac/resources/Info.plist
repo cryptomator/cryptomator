@@ -84,7 +84,7 @@
         </array>
         <key>public.mime-type</key>
         <array>
-          <string>application/x-vnd.cryptomator.vault-metadata</string>
+          <string>application/vnd.cryptomator.vault</string>
         </array>
       </dict>
     </dict>
