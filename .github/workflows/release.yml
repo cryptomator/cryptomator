@@ -402,6 +402,8 @@ jobs:
       - name: Clean up notarization credentials
         if: ${{ always() }}
         run: security delete-keychain $RUNNER_TEMP/notarization.keychain-db
+      - name: Add possible alpha/beta tags to installer name
+        run: mv Cryptomator-*.dmg Cryptomator-${{ needs.metadata.outputs.versionStr }}.msi
       - name: Upload mac-dmg
         uses: actions/upload-artifact@v2
         with:
@@ -472,6 +474,8 @@ jobs:
           description: Cryptomator Installer
           timestampUrl: 'http://timestamp.digicert.com'
           folder: installer
+      - name: Add possible alpha/beta tags to installer name
+        run: mv Cryptomator-*.msi Cryptomator-${{ needs.metadata.outputs.versionStr }}.msi
       - name: Upload win-msi
         uses: actions/upload-artifact@v2
         with:
