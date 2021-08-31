@@ -22,11 +22,11 @@ import java.util.stream.StreamSupport;
 @Singleton
 public final class WindowsDriveLetters {
 
-	private static final Set<String> C_TO_Z;
+	private static final Set<String> A_TO_Z;
 
 	static {
-		try (IntStream stream = IntStream.rangeClosed('C', 'Z')) {
-			C_TO_Z = stream.mapToObj(i -> String.valueOf((char) i)).collect(ImmutableSet.toImmutableSet());
+		try (IntStream stream = IntStream.rangeClosed('A', 'Z')) {
+			A_TO_Z = stream.mapToObj(i -> String.valueOf((char) i)).collect(ImmutableSet.toImmutableSet());
 		}
 	}
 
@@ -35,7 +35,7 @@ public final class WindowsDriveLetters {
 	}
 
 	public Set<String> getAllDriveLetters() {
-		return C_TO_Z;
+		return A_TO_Z;
 	}
 
 	public Set<String> getOccupiedDriveLetters() {
@@ -57,6 +57,26 @@ public final class WindowsDriveLetters {
 
 	public Optional<Path> getAvailableDriveLetterPath() {
 		return getAvailableDriveLetter().map(this::toPath);
+	}
+
+	/**
+	 * Skips A and B and only returns them if all other are occupied.
+	 *
+	 * @return an Optional containing either the letter of a free drive letter or empty, if none is available
+	 */
+	public Optional<String> getDesiredAvailableDriveLetter() {
+		var availableDriveLetters = getAvailableDriveLetters();
+		var optString = availableDriveLetters.stream().filter(s -> !(s.equals("A") || s.equals("B"))).findFirst();
+		return optString.or(() -> availableDriveLetters.stream().findFirst());
+	}
+
+	/**
+	 * Skips A and B and only returns them if all other are occupied.
+	 *
+	 * @return an Optional containing either the path to a free drive letter or empty, if none is available
+	 */
+	public Optional<Path> getDesiredAvailableDriveLetterPath() {
+		return getDesiredAvailableDriveLetter().map(this::toPath);
 	}
 
 	public Path toPath(String driveLetter) {
