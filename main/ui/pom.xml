@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.cryptomator</groupId>
 		<artifactId>main</artifactId>
-		<version>1.5.16</version>
+		<version>1.5.17</version>
 	</parent>
 	<artifactId>ui</artifactId>
 	<name>Cryptomator GUI</name>
