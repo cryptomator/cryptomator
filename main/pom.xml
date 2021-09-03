@@ -25,13 +25,13 @@
 		<project.jdk.version>16</project.jdk.version>
 
 		<!-- cryptomator dependencies -->
-		<cryptomator.cryptofs.version>1.9.14</cryptomator.cryptofs.version>
+		<cryptomator.cryptofs.version>1.9.15</cryptomator.cryptofs.version>
 		<cryptomator.integrations.version>1.0.0-beta2</cryptomator.integrations.version>
 		<cryptomator.integrations.win.version>1.0.0-beta2</cryptomator.integrations.win.version>
 		<cryptomator.integrations.mac.version>1.0.0-beta2</cryptomator.integrations.mac.version>
 		<cryptomator.integrations.linux.version>1.0.0-beta1</cryptomator.integrations.linux.version>
 		<cryptomator.fuse.version>1.3.1</cryptomator.fuse.version>
-		<cryptomator.dokany.version>1.3.1</cryptomator.dokany.version>
+		<cryptomator.dokany.version>1.3.2</cryptomator.dokany.version>
 		<cryptomator.webdav.version>1.2.0</cryptomator.webdav.version>
 
 		<!-- 3rd party dependencies -->
