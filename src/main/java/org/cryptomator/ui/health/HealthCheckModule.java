@@ -117,13 +117,6 @@ abstract class HealthCheckModule {
 	}
 
 	@Provides
-	@FxmlScene(FxmlFile.HEALTH_START_FAIL)
-	@HealthCheckScoped
-	static Scene provideHealthStartFailScene(@HealthCheckWindow FxmlLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene(FxmlFile.HEALTH_START_FAIL);
-	}
-
-	@Provides
 	@FxmlScene(FxmlFile.HEALTH_CHECK_LIST)
 	@HealthCheckScoped
 	static Scene provideHealthCheckListScene(@HealthCheckWindow FxmlLoaderFactory fxmlLoaders) {
@@ -134,11 +127,6 @@ abstract class HealthCheckModule {
 	@IntoMap
 	@FxControllerKey(StartController.class)
 	abstract FxController bindStartController(StartController controller);
-
-	@Binds
-	@IntoMap
-	@FxControllerKey(StartFailController.class)
-	abstract FxController bindStartFailController(StartFailController controller);
 
 	@Binds
 	@IntoMap
