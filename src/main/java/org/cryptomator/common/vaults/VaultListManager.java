@@ -98,8 +98,9 @@ public class VaultListManager {
 		try {
 			VaultState.Value vaultState = determineVaultState(vaultSettings.path().get());
 			if (vaultState == LOCKED) {
-				//TODO: maybe already set it in the vault Wrapper ?
-				VaultConfig.UnverifiedVaultConfig config = VaultConfigWrapper.readConfigFromStorage(vaultSettings.path().get());
+				VaultConfigWrapper wrapper = new VaultConfigWrapper(vaultSettings);
+				compBuilder.vaultConfigWrapper(wrapper); //first set the wrapper in the builder, THEN try to load config
+				wrapper.reloadConfig();
 			}
 			compBuilder.initialVaultState(vaultState);
 		} catch (IOException e) {

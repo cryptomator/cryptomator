@@ -10,6 +10,7 @@ import dagger.Subcomponent;
 import org.cryptomator.common.Nullable;
 import org.cryptomator.common.mountpoint.MountPointChooserModule;
 import org.cryptomator.common.settings.VaultSettings;
+import org.cryptomator.cryptofs.VaultConfig;
 
 import javax.inject.Named;
 
@@ -24,6 +25,9 @@ public interface VaultComponent {
 
 		@BindsInstance
 		Builder vaultSettings(VaultSettings vaultSettings);
+
+		@BindsInstance
+		Builder vaultConfigWrapper(VaultConfigWrapper rapper);
 
 		@BindsInstance
 		Builder initialVaultState(VaultState.Value vaultState);

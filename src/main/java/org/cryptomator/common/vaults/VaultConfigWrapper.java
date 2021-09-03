@@ -17,13 +17,11 @@ import java.util.Objects;
 /**
  * Wrapper for lazy loading and on-demand reloading of the vault configuration.
  */
-@PerVault
 public class VaultConfigWrapper {
 
 	private final VaultSettings settings;
 	private final ObjectProperty<VaultConfig.UnverifiedVaultConfig> config;
 
-	@Inject
 	VaultConfigWrapper(VaultSettings settings) {
 		this.settings = settings;
 		this.config = new SimpleObjectProperty<>();
