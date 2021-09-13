@@ -1,6 +1,6 @@
 Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: cryptomator
-Upstream-Contact: Sebastian Stenzel <sebastian.stenzel@cryptomator.org>
+Upstream-Contact: Cryptomator <info@cryptomator.org>
 Source: https://cryptomator.org
 
 Files: *

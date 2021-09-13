@@ -1,5 +1,5 @@
 Source: cryptomator
-Maintainer: Sebastian Stenzel <sebastian.stenzel@gmail.com>
+Maintainer: Cryptobot <releases@cryptomator.org>
 Section: utils
 Priority: optional
 Build-Depends: debhelper (>=10), openjdk-16-jdk
