@@ -33,6 +33,7 @@ jobs:
     needs: [metadata]
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
       - name: Install build tools
         run: |
           sudo apt-get update
