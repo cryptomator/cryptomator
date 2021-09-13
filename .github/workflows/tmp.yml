@@ -63,7 +63,14 @@ jobs:
           VERSION_NUM: ${{ needs.metadata.outputs.versionNum }}
           REVISION_NUM: ${{ needs.metadata.outputs.revNum }}
           PPA_VERSION: ${{ needs.metadata.outputs.versionNum }}.${{ needs.metadata.outputs.revNum }}-0ppa1
+      - name: Prepare GPG-Agent for signing with key 615D449FE6E6A235
+        run: |
+          echo "${GPG_PRIVATE_KEY}" | gpg --batch --quiet --import
+          echo "${GPG_PASSPHRASE}" | gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --dry-run --sign dist/linux/debian/rules
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.RELEASES_GPG_PRIVATE_KEY }}
+          GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
       - name: debuild
-        run: debuild -S -sa -uc -us
+        run: debuild -S -sa -p"gpg --batch --pinentry-mode loopback -u 615D449FE6E6A235"
         working-directory: cryptomator_${{ needs.metadata.outputs.versionNum }}.${{ needs.metadata.outputs.revNum }}
 
