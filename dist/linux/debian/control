@@ -3,7 +3,7 @@ Maintainer: Sebastian Stenzel <sebastian.stenzel@gmail.com>
 Section: utils
 Priority: optional
 Build-Depends: debhelper (>=10), openjdk-16-jdk
-Standards-Version: 4.0.0
+Standards-Version: 4.5.0
 Homepage: https://cryptomator.org
 Vcs-Git: https://github.com/cryptomator/cryptomator.git
 Vcs-browser: https://github.com/cryptomator/cryptomator
