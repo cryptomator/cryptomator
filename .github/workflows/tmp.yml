@@ -56,7 +56,7 @@ jobs:
           envsubst '${VERSION_STR} ${VERSION_NUM} ${REVISION_NUM}' < dist/linux/debian/rules > pkgdir/debian/rules
           envsubst '${VERSION_STR}' < dist/linux/debian/org.cryptomator.Cryptomator.desktop > pkgdir/debian/org.cryptomator.Cryptomator.desktop
           envsubst '${PPA_VERSION} ${RFC2822_TIMESTAMP}' < dist/linux/debian/changelog > pkgdir/debian/changelog
-          find . -name "*.jar >> pkgdir/debian/source/include-binaries
+          find . -name "*.jar" >> pkgdir/debian/source/include-binaries
           mv pkgdir cryptomator_${{ needs.metadata.outputs.versionNum }}.${{ needs.metadata.outputs.revNum }}
         env:
           VERSION_STR: ${{ needs.metadata.outputs.versionStr }}
