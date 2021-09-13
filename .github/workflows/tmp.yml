@@ -1,0 +1,15 @@
+name: Tmp Playground # committed on develop to make `workflow_dispatch` work. Will be removed, once PPA uploads work
+
+on:
+  workflow_dispatch:
+
+jobs:
+
+#
+# Dummy
+#
+  dummy:
+    name: Basically noop
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
