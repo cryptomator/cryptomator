@@ -4,12 +4,14 @@ Upstream-Contact: Sebastian Stenzel <sebastian.stenzel@cryptomator.org>
 Source: https://cryptomator.org
 
 Files: *
-Copyright: 2016-2020 Skymatic GmbH
+Copyright: 2016-2021 Skymatic GmbH
 License: GPL-3+
 
+Files: debian/org.cryptomator.Cryptomator.appdata.xml
+Copyright: 2016-2021 Skymatic GmbH
+License: FSFAP
+
 License: GPL-3+
- Copyright (C) 2016-2021 Skymatic GmbH
- .
  This program is free software: you can redistribute it
  and/or modify it under the terms of the GNU General Public
  License as published by the Free Software Foundation, either
@@ -29,3 +31,9 @@ License: GPL-3+
  On Debian systems, the full text of the GNU General Public
  License version 3 can be found in the file
  `/usr/share/common-licenses/GPL-3'.
+
+License: FSFAP
+ Copying and distribution of this file, with or without modification, are
+ permitted in any medium without royalty provided the copyright notice and
+ this notice are preserved. This file is offered as-is, without any
+ warranty.
