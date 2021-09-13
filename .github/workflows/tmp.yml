@@ -40,7 +40,7 @@ jobs:
       - name: Download buildkit # TODO replace by downloading cached artifact
         run: |
           curl -o buildkit.zip -L https://github.com/cryptomator/cryptomator/releases/download/1.5.17/buildkit-linux.zip
-          unzip buildkit.zip -d cryptomator_${{ needs.metadata.outputs.versionNum }}.${{ needs.metadata.outputs.revNum }}
+          unzip buildkit.zip -d pkgdir
       - name: Create orig.tar.gz
         run: >
           mk-origtargz
@@ -48,15 +48,15 @@ jobs:
           --package=cryptomator
           --version=${{ needs.metadata.outputs.versionNum }}.${{ needs.metadata.outputs.revNum }}
           buildkit.zip
-      - name: Patch dir cryptomator_${{ needs.metadata.outputs.versionNum }}.${{ needs.metadata.outputs.revNum }}
+      - name: Patch and rename pkgdir
         run: |
-          cp dist/linux/debian/ .
+          cp dist/linux/debian/ pkgdir
           RFC2822_TIMESTAMP=`date --rfc-2822`
-          envsubst '${VERSION_STR} ${VERSION_NUM} ${REVISION_NUM}' < dist/linux/debian/rules > debian/rules
-          envsubst '${VERSION_STR}' < dist/linux/debian/org.cryptomator.Cryptomator.desktop > debian/org.cryptomator.Cryptomator.desktop
-          envsubst '${PPA_VERSION} ${RFC2822_TIMESTAMP}' < dist/linux/debian/changelog > debian/changelog
-          find . -name "*.jar >> debian/source/include-binaries
-        working-directory: cryptomator_${{ needs.metadata.outputs.versionNum }}.${{ needs.metadata.outputs.revNum }}
+          envsubst '${VERSION_STR} ${VERSION_NUM} ${REVISION_NUM}' < dist/linux/debian/rules > pkgdir/debian/rules
+          envsubst '${VERSION_STR}' < dist/linux/debian/org.cryptomator.Cryptomator.desktop > pkgdir/debian/org.cryptomator.Cryptomator.desktop
+          envsubst '${PPA_VERSION} ${RFC2822_TIMESTAMP}' < dist/linux/debian/changelog > pkgdir/debian/changelog
+          find . -name "*.jar >> pkgdir/debian/source/include-binaries
+          mv pkgdir cryptomator_${{ needs.metadata.outputs.versionNum }}.${{ needs.metadata.outputs.revNum }}
         env:
           VERSION_STR: ${{ needs.metadata.outputs.versionStr }}
           VERSION_NUM: ${{ needs.metadata.outputs.versionNum }}
