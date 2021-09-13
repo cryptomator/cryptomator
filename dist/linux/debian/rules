@@ -9,7 +9,7 @@ export JAVA_HOME=/usr/lib/jvm/java-15-openjdk-amd64
 	dh $@
 
 override_dh_auto_clean:
-	rm -rf runtimeImage
+	rm -rf runtime
 	rm -rf debian/cryptomator
 
 override_dh_auto_build:
