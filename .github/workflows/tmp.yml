@@ -6,10 +6,59 @@ on:
 jobs:
 
 #
-# Dummy
+# DUMMY Metadata (TODO remove)
 #
-  dummy:
-    name: Basically noop
+  metadata:
+    name: Determine Dummy Version Metadata
     runs-on: ubuntu-latest
+    outputs:
+      versionStr: ${{ steps.versions.outputs.versionStr }}
+      versionNum: ${{ steps.versions.outputs.versionNum }}
+      revNum: ${{ steps.versions.outputs.revNum }}
     steps:
       - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - id: versions
+        run: |
+          echo "::set-output name=versionStr::1.5.17"
+          echo "::set-output name=versionNum::1.5.17"
+          echo "::set-output name=revNum::`git rev-list --count HEAD`"
+
+#
+# Create source package for ppa
+#
+  ppa:
+    name: Create orig.tar.gz
+    needs: [metadata]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download buildkit # TODO replace by downloading cached artifact
+        run: |
+          curl -o buildkit.zip -L https://github.com/cryptomator/cryptomator/releases/download/1.5.17/buildkit-linux.zip
+          unzip buildkit.zip -d cryptomator_${{ needs.metadata.outputs.versionNum }}.${{ needs.metadata.outputs.revNum }}
+      - name: Create orig.tar.gz
+        run: >
+          mk-origtargz
+          --repack
+          --package=cryptomator
+          --version=${{ needs.metadata.outputs.versionNum }}.${{ needs.metadata.outputs.revNum }}
+          buildkit.zip
+      - name: Patch dir cryptomator_${{ needs.metadata.outputs.versionNum }}.${{ needs.metadata.outputs.revNum }}
+        run: |
+          cp dist/linux/debian/ .
+          RFC2822_TIMESTAMP=`date --rfc-2822`
+          envsubst '${VERSION_STR} ${VERSION_NUM} ${REVISION_NUM}' < dist/linux/debian/rules > debian/rules
+          envsubst '${VERSION_STR}' < dist/linux/debian/org.cryptomator.Cryptomator.desktop > debian/org.cryptomator.Cryptomator.desktop
+          envsubst '${PPA_VERSION} ${RFC2822_TIMESTAMP}' < dist/linux/debian/changelog > debian/changelog
+          find . -name "*.jar >> debian/source/include-binaries
+        working-directory: cryptomator_${{ needs.metadata.outputs.versionNum }}.${{ needs.metadata.outputs.revNum }}
+        env:
+          VERSION_STR: ${{ needs.metadata.outputs.versionStr }}
+          VERSION_NUM: ${{ needs.metadata.outputs.versionNum }}
+          REVISION_NUM: ${{ needs.metadata.outputs.revNum }}
+          PPA_VERSION: ${{ needs.metadata.outputs.versionNum }}.${{ needs.metadata.outputs.revNum }}-0ppa1
+      - name: debuild
+        run: debuild -S -sa -uc -us
+        working-directory: cryptomator_${{ needs.metadata.outputs.versionNum }}.${{ needs.metadata.outputs.revNum }}
+

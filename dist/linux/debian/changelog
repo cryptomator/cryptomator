@@ -1,0 +1,5 @@
+cryptomator (${PPA_VERSION}) groovy; urgency=low
+
+  * Full changelog can be found on https://github.com/cryptomator/cryptomator/releases
+
+ -- Sebastian Stenzel <sebastian.stenzel@gmail.com>  ${RFC2822_TIMESTAMP}
