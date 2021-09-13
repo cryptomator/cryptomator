@@ -71,6 +71,9 @@ jobs:
           GPG_PRIVATE_KEY: ${{ secrets.RELEASES_GPG_PRIVATE_KEY }}
           GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
       - name: debuild
-        run: debuild -S -sa -p"gpg --batch --pinentry-mode loopback" -k615D449FE6E6A235
+        run: debuild -S -sa
+        env:
+          DEBSIGN_PROGRAM: gpg --batch --pinentry-mode loopback
+          DEBSIGN_KEYID: 615D449FE6E6A235
         working-directory: cryptomator_${{ needs.metadata.outputs.versionNum }}.${{ needs.metadata.outputs.revNum }}
 
