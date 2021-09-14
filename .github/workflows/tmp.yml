@@ -77,5 +77,7 @@ jobs:
           DEBSIGN_KEYID: 615D449FE6E6A235
         working-directory: cryptomator_${{ needs.metadata.outputs.versionNum }}.${{ needs.metadata.outputs.revNum }}
       - name: dput to beta repo
-        run: dput ppa:sebastian-stenzel/cryptomator-beta cryptomator_${{ needs.metadata.outputs.versionNum }}.${{ needs.metadata.outputs.revNum }}_source.changes
+        run: dput ppa:sebastian-stenzel/cryptomator-beta cryptomator_${PPA_VERSION}_source.changes
+        env:
+          PPA_VERSION: ${{ needs.metadata.outputs.versionNum }}.${{ needs.metadata.outputs.revNum }}-0ppa1
 
