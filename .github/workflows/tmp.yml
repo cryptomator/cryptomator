@@ -26,15 +26,15 @@ jobs:
           echo "::set-output name=revNum::`git rev-list --count HEAD`"
 
 #
-# Create source package for ppa
+# Create and upload source package for ppa
 #
   ppa:
-    name: Create orig.tar.gz
+    name: Upload source package to PPA
     needs: [metadata]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Install build tools
+      - name: install build tools
         run: |
           sudo apt-get update
           sudo apt-get install debhelper devscripts dput
@@ -42,14 +42,14 @@ jobs:
         run: |
           curl -o buildkit.zip -L https://github.com/cryptomator/cryptomator/releases/download/1.5.17/buildkit-linux.zip
           unzip buildkit.zip -d pkgdir
-      - name: Create orig.tar.gz
+      - name: create orig.tar.gz
         run: >
           mk-origtargz
           --repack
           --package=cryptomator
           --version=${{ needs.metadata.outputs.versionNum }}.${{ needs.metadata.outputs.revNum }}
           buildkit.zip
-      - name: Patch and rename pkgdir
+      - name: patch and rename pkgdir
         run: |
           cp -r dist/linux/debian/ pkgdir
           export RFC2822_TIMESTAMP=`date --rfc-2822`
@@ -63,7 +63,7 @@ jobs:
           VERSION_NUM: ${{ needs.metadata.outputs.versionNum }}
           REVISION_NUM: ${{ needs.metadata.outputs.revNum }}
           PPA_VERSION: ${{ needs.metadata.outputs.versionNum }}.${{ needs.metadata.outputs.revNum }}-0ppa1
-      - name: Prepare GPG-Agent for signing with key 615D449FE6E6A235
+      - name: import gpg key 615D449FE6E6A235
         run: |
           echo "${GPG_PRIVATE_KEY}" | gpg --batch --quiet --import
           echo "${GPG_PASSPHRASE}" | gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --dry-run --sign dist/linux/debian/rules
@@ -76,4 +76,6 @@ jobs:
           DEBSIGN_PROGRAM: gpg --batch --pinentry-mode loopback
           DEBSIGN_KEYID: 615D449FE6E6A235
         working-directory: cryptomator_${{ needs.metadata.outputs.versionNum }}.${{ needs.metadata.outputs.revNum }}
+      - name: dput to beta repo
+        run: dput ppa:sebastian-stenzel/cryptomator-beta cryptomator_${{ needs.metadata.outputs.versionNum }}.${{ needs.metadata.outputs.revNum }}_source.changes
 
