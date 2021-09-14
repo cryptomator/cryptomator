@@ -3,7 +3,6 @@
 
 # Uncomment this to turn on verbose mode.
 export DH_VERBOSE=1
-export JAVA_HOME=/usr/lib/jvm/java-15-openjdk-amd64
 
 %:
 	dh $@
@@ -13,15 +12,14 @@ override_dh_auto_clean:
 	rm -rf debian/cryptomator
 
 override_dh_auto_build:
-	${JAVA_HOME}/bin/jlink \
+	jlink \
 		--output runtime \
-		--module-path "${JAVA_HOME}/jmods" \
 		--add-modules java.base,java.desktop,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.crypto.ec,jdk.accessibility \
 		--no-header-files \
 		--no-man-pages \
 		--strip-debug \
 		--compress=2
-	${JAVA_HOME}/bin/jpackage \
+	jpackage \
 		--type app-image \
 		--runtime-image runtime \
 		--input buildkit/libs \
