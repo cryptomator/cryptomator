@@ -12,8 +12,9 @@ jobs:
     name: Determine Dummy Version Metadata
     runs-on: ubuntu-latest
     outputs:
-      versionStr: ${{ steps.versions.outputs.versionStr }}
-      versionNum: ${{ steps.versions.outputs.versionNum }}
+      semVerNum: ${{ steps.versions.outputs.semVerNum }}
+      semVerStr: ${{ steps.versions.outputs.semVerStr }}
+      ppaVerStr: ${{ steps.versions.outputs.ppaVerStr }}
       revNum: ${{ steps.versions.outputs.revNum }}
     steps:
       - uses: actions/checkout@v2
@@ -21,16 +22,53 @@ jobs:
           fetch-depth: 0
       - id: versions
         run: |
-          echo "::set-output name=versionStr::1.5.17"
-          echo "::set-output name=versionNum::1.5.17"
-          echo "::set-output name=revNum::`git rev-list --count HEAD`"
+          REVCOUNT=`git rev-list --count HEAD`
+          echo "::set-output name=semVerNum::1.6.0"
+          echo "::set-output name=semVerStr::1.6.0-SNAPSHOT"
+          echo "::set-output name=ppaVerStr::1.6.0~SNAPSHOT-${REVCOUNT}"
+          echo "::set-output name=revNum::${REVCOUNT}"
+
+#
+# Buildkit
+#
+  buildkit:
+    name: Build linux-buildkit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-java@v1
+        with:
+          java-version: 16
+      - uses: actions/cache@v2
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+      - name: Build and Test
+        run: mvn -B clean package -Plinux -DskipTests
+      - name: Patch buildkit
+        run: |
+          cp LICENSE.txt target
+          cp dist/linux/launcher* target
+          cp target/cryptomator-*.jar target/mods
+      - name: Upload linux-buildkit
+        uses: actions/upload-artifact@v2
+        with:
+          name: linux-buildkit
+          path: |
+            target/libs
+            target/mods
+            target/LICENSE.txt
+          if-no-files-found: error
+
 
 #
 # Create and upload source package for ppa
 #
   ppa:
     name: Upload source package to PPA
-    needs: [metadata]
+    needs: [buildkit, metadata]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -38,17 +76,13 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install debhelper devscripts dput
-      - name: Download buildkit # TODO replace by downloading cached artifact
-        run: |
-          curl -o buildkit.zip -L https://github.com/cryptomator/cryptomator/releases/download/1.5.17/buildkit-linux.zip
-          unzip buildkit.zip -d pkgdir
+      - name: Download linux-buildkit
+        uses: actions/download-artifact@v2
+        with:
+          name: linux-buildkit
+          path: pkgdir
       - name: create orig.tar.gz
-        run: >
-          mk-origtargz
-          --repack
-          --package=cryptomator
-          --version=${{ needs.metadata.outputs.versionNum }}.${{ needs.metadata.outputs.revNum }}
-          buildkit.zip
+        run: tar -cJf cryptomator_${{ needs.metadata.outputs.ppaVerStr }}.orig.tar.xz pkgdir
       - name: patch and rename pkgdir
         run: |
           cp -r dist/linux/debian/ pkgdir
@@ -58,12 +92,12 @@ jobs:
           envsubst '${VERSION_STR}' < dist/linux/debian/org.cryptomator.Cryptomator.desktop > pkgdir/debian/org.cryptomator.Cryptomator.desktop
           envsubst '${PPA_VERSION} ${RFC2822_TIMESTAMP}' < dist/linux/debian/changelog > pkgdir/debian/changelog
           find . -name "*.jar" >> pkgdir/debian/source/include-binaries
-          mv pkgdir cryptomator_${{ needs.metadata.outputs.versionNum }}.${{ needs.metadata.outputs.revNum }}
+          mv pkgdir cryptomator_${{ needs.metadata.outputs.ppaVerStr }}
         env:
-          VERSION_STR: ${{ needs.metadata.outputs.versionStr }}
-          VERSION_NUM: ${{ needs.metadata.outputs.versionNum }}
+          VERSION_STR: ${{ needs.metadata.outputs.semVerStr }}
+          VERSION_NUM: ${{ needs.metadata.outputs.semVerNum }}
           REVISION_NUM: ${{ needs.metadata.outputs.revNum }}
-          PPA_VERSION: ${{ needs.metadata.outputs.versionNum }}.${{ needs.metadata.outputs.revNum }}-0ppa1
+          PPA_VERSION: ${{ needs.metadata.outputs.ppaVerStr }}-0ppa1
       - name: import gpg key 615D449FE6E6A235
         run: |
           echo "${GPG_PRIVATE_KEY}" | gpg --batch --quiet --import
@@ -76,7 +110,7 @@ jobs:
         env:
           DEBSIGN_PROGRAM: gpg --batch --pinentry-mode loopback
           DEBSIGN_KEYID: 615D449FE6E6A235
-        working-directory: cryptomator_${{ needs.metadata.outputs.versionNum }}.${{ needs.metadata.outputs.revNum }}
+        working-directory: cryptomator_${{ needs.metadata.outputs.ppaVerStr }}
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
@@ -87,8 +121,7 @@ jobs:
             cryptomator_*.debian.tar.xz
             cryptomator_*_source.changes
             cryptomator_*_source.buildinfo
-      - name: dput to beta repo
-        run: dput ppa:sebastian-stenzel/cryptomator-beta cryptomator_${PPA_VERSION}_source.changes
-        env:
-          PPA_VERSION: ${{ needs.metadata.outputs.versionNum }}.${{ needs.metadata.outputs.revNum }}-0ppa1
-
+      # - name: dput to beta repo
+      #   run: dput ppa:sebastian-stenzel/cryptomator-beta cryptomator_${PPA_VERSION}_source.changes
+      #   env:
+      #     PPA_VERSION: ${{ needs.metadata.outputs.ppaVerStr }}-0ppa1
