@@ -121,7 +121,7 @@ jobs:
             cryptomator_*.debian.tar.xz
             cryptomator_*_source.changes
             cryptomator_*_source.buildinfo
-      # - name: dput to beta repo
-      #   run: dput ppa:sebastian-stenzel/cryptomator-beta cryptomator_${PPA_VERSION}_source.changes
-      #   env:
-      #     PPA_VERSION: ${{ needs.metadata.outputs.ppaVerStr }}-0ppa1
+      - name: dput to beta repo
+        run: dput ppa:sebastian-stenzel/cryptomator-beta cryptomator_${PPA_VERSION}_source.changes
+        env:
+          PPA_VERSION: ${{ needs.metadata.outputs.ppaVerStr }}-0ppa1
