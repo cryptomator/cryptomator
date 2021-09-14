@@ -22,11 +22,11 @@ override_dh_auto_build:
 	jpackage \
 		--type app-image \
 		--runtime-image runtime \
-		--input buildkit/libs \
-		--module-path buildkit/mods \
+		--input libs \
+		--module-path mods \
 		--module org.cryptomator.desktop/org.cryptomator.launcher.Cryptomator \
-		--dest appdir \
-		--name Cryptomator \
+		--dest . \
+		--name cryptomator \
 		--vendor "Skymatic GmbH" \
 		--copyright "(C) 2016 - 2021 Skymatic GmbH" \
 		--java-options "-Xss5m" \
