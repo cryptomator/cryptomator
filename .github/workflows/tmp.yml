@@ -77,6 +77,16 @@ jobs:
           DEBSIGN_PROGRAM: gpg --batch --pinentry-mode loopback
           DEBSIGN_KEYID: 615D449FE6E6A235
         working-directory: cryptomator_${{ needs.metadata.outputs.versionNum }}.${{ needs.metadata.outputs.revNum }}
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: linux-ppa-sources
+          path: |
+            cryptomator_*.dsc
+            cryptomator_*.orig.tar.xz
+            cryptomator_*.debian.tar.xz
+            cryptomator_*_source.changes
+            cryptomator_*_source.buildinfo
       - name: dput to beta repo
         run: dput ppa:sebastian-stenzel/cryptomator-beta cryptomator_${PPA_VERSION}_source.changes
         env:
