@@ -52,6 +52,7 @@ jobs:
       - name: patch and rename pkgdir
         run: |
           cp -r dist/linux/debian/ pkgdir
+          cp -r dist/linux/resources/ pkgdir
           export RFC2822_TIMESTAMP=`date --rfc-2822`
           envsubst '${VERSION_STR} ${VERSION_NUM} ${REVISION_NUM}' < dist/linux/debian/rules > pkgdir/debian/rules
           envsubst '${VERSION_STR}' < dist/linux/debian/org.cryptomator.Cryptomator.desktop > pkgdir/debian/org.cryptomator.Cryptomator.desktop

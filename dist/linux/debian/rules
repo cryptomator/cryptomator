@@ -41,7 +41,7 @@ override_dh_auto_build:
 		--java-options "-Dcryptomator.buildNumber=\"ppa-${REVISION_NUM}\"" \
 		--java-options "-Dcryptomator.appVersion=\"${VERSION_STR}\"" \
 		--app-version "${VERSION_NUM}.${REVISION_NUM}" \
-		--resource-dir dist/linux/resources \
+		--resource-dir resources \
 		--verbose
 
 override_dh_fixperms:
