@@ -82,7 +82,7 @@ jobs:
           name: linux-buildkit
           path: pkgdir
       - name: create orig.tar.gz
-        run: tar -cJf cryptomator_${{ needs.metadata.outputs.ppaVerStr }}.orig.tar.xz -C pkgdir *
+        run: tar -cJf cryptomator_${{ needs.metadata.outputs.ppaVerStr }}.orig.tar.xz -C pkgdir .
       - name: patch and rename pkgdir
         run: |
           cp -r dist/linux/debian/ pkgdir
