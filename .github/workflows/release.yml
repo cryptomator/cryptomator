@@ -2,6 +2,11 @@ name: Installers and Release
 
 on:
   workflow_dispatch:
+    inputs:
+      semver:
+        description: 'SemVer'
+        required: true
+        default: '0.99.99-SNAPSHOT'
   push:
     tags: # see https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#filter-pattern-cheat-sheet
     - '[0-9]+.[0-9]+.[0-9]+'
@@ -85,8 +90,9 @@ jobs:
             echo "::set-output name=semVerStr::${GITHUB_REF##*/}"
             echo "::set-output name=semVerNum::${VERSION_NUM}"
           else
-            echo "::set-output name=semVerStr::99.0.0-SNAPSHOT"
-            echo "::set-output name=semVerNum::99.0.0"
+            VERSION_NUM=`echo "${{ github.event.inputs.semver }}" | sed -E 's/([0-9]+\.[0-9]+\.[0-9]+).*/\1/'`
+            echo "::set-output name=semVerStr::${{ github.event.inputs.semver }}"
+            echo "::set-output name=semVerNum::${VERSION_NUM}"
           fi
           echo "::set-output name=revNum::`git rev-list --count HEAD`"
 
