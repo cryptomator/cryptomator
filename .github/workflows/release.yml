@@ -71,8 +71,8 @@ jobs:
     name: Determine Version Metadata
     runs-on: ubuntu-latest
     outputs:
-      versionStr: ${{ steps.versions.outputs.versionStr }}
-      versionNum: ${{ steps.versions.outputs.versionNum }}
+      semVerNum: ${{ steps.versions.outputs.semVerNum }}
+      semVerStr: ${{ steps.versions.outputs.semVerStr }}
       revNum: ${{ steps.versions.outputs.revNum }}
     steps:
       - uses: actions/checkout@v2
@@ -82,11 +82,11 @@ jobs:
         run: |
           if [[ $GITHUB_REF == refs/tags/* ]]; then
             VERSION_NUM=`echo ${GITHUB_REF##*/} | sed -E 's/([0-9]+\.[0-9]+\.[0-9]+).*/\1/'`
-            echo "::set-output name=versionStr::${GITHUB_REF##*/}"
-            echo "::set-output name=versionNum::${VERSION_NUM}"
+            echo "::set-output name=semVerStr::${GITHUB_REF##*/}"
+            echo "::set-output name=semVerNum::${VERSION_NUM}"
           else
-            echo "::set-output name=versionStr::SNAPSHOT"
-            echo "::set-output name=versionNum::99.0.0"
+            echo "::set-output name=semVerStr::99.0.0-SNAPSHOT"
+            echo "::set-output name=semVerNum::99.0.0"
           fi
           echo "::set-output name=revNum::`git rev-list --count HEAD`"
 
@@ -104,7 +104,7 @@ jobs:
         - os: ubuntu-latest
           profile: linux
           jpackageoptions: >
-            --app-version "${{ needs.metadata.outputs.versionNum }}.${{ needs.metadata.outputs.revNum }}"
+            --app-version "${{ needs.metadata.outputs.semVerNum }}.${{ needs.metadata.outputs.revNum }}"
             --java-options "-Dfile.encoding=\"utf-8\""
             --java-options "-Dcryptomator.logDir=\"~/.local/share/Cryptomator/logs\""
             --java-options "-Dcryptomator.pluginDir=\"~/.local/share/Cryptomator/plugins\""
@@ -117,7 +117,7 @@ jobs:
         - os: windows-latest
           profile: win
           jpackageoptions: >
-            --app-version "${{ needs.metadata.outputs.versionNum }}.${{ needs.metadata.outputs.revNum }}"
+            --app-version "${{ needs.metadata.outputs.semVerNum }}.${{ needs.metadata.outputs.revNum }}"
             --java-options "-Dfile.encoding=\"utf-8\""
             --java-options "-Dcryptomator.logDir=\"~/AppData/Roaming/Cryptomator\""
             --java-options "-Dcryptomator.pluginDir=\"~/AppData/Roaming/Cryptomator/Plugins\""
@@ -132,7 +132,7 @@ jobs:
         - os: macos-latest
           profile: mac
           jpackageoptions: >
-            --app-version "${{ needs.metadata.outputs.versionNum }}"
+            --app-version "${{ needs.metadata.outputs.semVerNum }}"
             --java-options "-Dfile.encoding=\"utf-8\""
             --java-options "-Dcryptomator.logDir=\"~/Library/Logs/Cryptomator\""
             --java-options "-Dcryptomator.pluginDir=\"~/Library/Application Support/Cryptomator/Plugins\""
@@ -178,7 +178,7 @@ jobs:
           --copyright "(C) 2016 - 2021 Skymatic GmbH"
           --java-options "-Xss5m"
           --java-options "-Xmx256m"
-          --java-options "-Dcryptomator.appVersion=\"${{ needs.metadata.outputs.versionStr }}\""
+          --java-options "-Dcryptomator.appVersion=\"${{ needs.metadata.outputs.semVerStr }}\""
           ${{ matrix.jpackageoptions }}
       - name: Create appdir.tar
         run: tar -cvf appdir.tar appdir
@@ -237,7 +237,7 @@ jobs:
           GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
       - name: Build AppImage
         run: >
-          ./squashfs-root/AppRun Cryptomator.AppDir cryptomator-${{ needs.metadata.outputs.versionStr }}-x86_64.AppImage
+          ./squashfs-root/AppRun Cryptomator.AppDir cryptomator-${{ needs.metadata.outputs.semVerStr }}-x86_64.AppImage
           -u 'gh-releases-zsync|cryptomator|cryptomator|latest|cryptomator-*-x86_64.AppImage.zsync'
           --sign --sign-key=615D449FE6E6A235 --sign-args="--batch --pinentry-mode loopback"
       - name: Upload AppImage
@@ -271,7 +271,7 @@ jobs:
           sed -i '' "s|###BUNDLE_SHORT_VERSION_STRING###|${VERSION_NO}|g" Cryptomator.app/Contents/Info.plist
           sed -i '' "s|###BUNDLE_VERSION###|${REVISION_NO}|g" Cryptomator.app/Contents/Info.plist
         env:
-          VERSION_NO: ${{ needs.metadata.outputs.versionNum }}
+          VERSION_NO: ${{ needs.metadata.outputs.semVerNum }}
           REVISION_NO: ${{ needs.metadata.outputs.revNum }}
       - name: Install codesign certificate
         env:
@@ -373,7 +373,7 @@ jobs:
           --icon ".VolumeIcon.icns" 512 758
           Cryptomator-${VERSION_NO}.dmg dmg
         env:
-          VERSION_NO: ${{ needs.metadata.outputs.versionNum }}
+          VERSION_NO: ${{ needs.metadata.outputs.semVerNum }}
       - name: Install notarization credentials
         env:
           NOTARIZATION_KEYCHAIN_PROFILE: ${{ secrets.MACOS_NOTARIZATION_KEYCHAIN_PROFILE }}
@@ -403,7 +403,7 @@ jobs:
         if: ${{ always() }}
         run: security delete-keychain $RUNNER_TEMP/notarization.keychain-db
       - name: Add possible alpha/beta tags to installer name
-        run: mv Cryptomator-*.dmg Cryptomator-${{ needs.metadata.outputs.versionStr }}.dmg
+        run: mv Cryptomator-*.dmg Cryptomator-${{ needs.metadata.outputs.semVerStr }}.dmg
       - name: Upload mac-dmg
         uses: actions/upload-artifact@v2
         with:
@@ -456,7 +456,7 @@ jobs:
           --name Cryptomator
           --vendor "Skymatic GmbH"
           --copyright "(C) 2016 - 2021 Skymatic GmbH"
-          --app-version "${{ needs.metadata.outputs.versionNum }}"
+          --app-version "${{ needs.metadata.outputs.semVerNum }}"
           --win-menu
           --win-dir-chooser
           --resource-dir dist/win/resources
@@ -474,7 +474,7 @@ jobs:
           timestampUrl: 'http://timestamp.digicert.com'
           folder: installer
       - name: Add possible alpha/beta tags to installer name
-        run: mv installer/Cryptomator-*.msi installer/Cryptomator-${{ needs.metadata.outputs.versionStr }}.msi
+        run: mv installer/Cryptomator-*.msi installer/Cryptomator-${{ needs.metadata.outputs.semVerStr }}.msi
       - name: Upload win-msi
         uses: actions/upload-artifact@v2
         with:
@@ -497,7 +497,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Create tarball
-        run: git archive --prefix="cryptomator-${{ needs.metadata.outputs.versionStr }}/" -o "cryptomator-${{ needs.metadata.outputs.versionStr }}.tar.gz" ${{ github.ref }}
+        run: git archive --prefix="cryptomator-${{ needs.metadata.outputs.semVerStr }}/" -o "cryptomator-${{ needs.metadata.outputs.semVerStr }}.tar.gz" ${{ github.ref }}
       - name: Download linux appimage
         uses: actions/download-artifact@v2
         with:
