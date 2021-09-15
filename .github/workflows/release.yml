@@ -61,7 +61,7 @@ jobs:
             target/libs
             target/mods
             target/LICENSE.txt
-            target/${{ matrix.launcher }}
+            target/launcher*
           if-no-files-found: error
 
 #
