@@ -2,7 +2,7 @@
 # -*- makefile -*-
 
 # Uncomment this to turn on verbose mode.
-export DH_VERBOSE=1
+#export DH_VERBOSE=1
 
 %:
 	dh $@
@@ -11,7 +11,6 @@ override_dh_auto_clean:
 	rm -rf runtime
 	rm -rf cryptomator
 	rm -rf debian/cryptomator
-	ls -lR
 
 override_dh_auto_build:
 	jlink \
