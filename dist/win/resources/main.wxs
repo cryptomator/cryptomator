@@ -47,6 +47,16 @@
     <CustomAction Id="JpDisallowDowngrade" Error="!(loc.DowngradeErrorMessage)" />
     <?endif?>
 
+    <!-- Looking for legacy Cryptomator versions-->
+    <Property Id="OLDEXEINSTALLER">
+      <RegistrySearch Id="InnoSetupInstallation" Root="HKLM" Key="Software\Microsoft\Windows\CurrentVersion\Uninstall\Cryptomator_is1" Type="raw" Name="DisplayName" />
+    </Property>
+    <!-- Block installation if innosetup entry of Cryptomator is found -->
+    <!-- TODO: localize -->
+    <Condition Message="A lower version of [ProductName] is already installed. Uninstall it first and then start the setup again. Setup will now exit.">
+        <![CDATA[Installed OR NOT OLDEXEINSTALLER]]>
+    </Condition>
+
     <!-- Standard required root -->
     <Directory Id="TARGETDIR" Name="SourceDir"/>
 
