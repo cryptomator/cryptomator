@@ -9,6 +9,7 @@ export DH_VERBOSE=1
 
 override_dh_auto_clean:
 	rm -rf runtime
+	rm -rf cryptomator
 	rm -rf debian/cryptomator
 
 override_dh_auto_build:
@@ -46,7 +47,7 @@ override_dh_auto_build:
 
 override_dh_fixperms:
 	dh_fixperms
-	chmod +x debian/cryptomator/usr/bin/cryptomator
+	chmod +x debian/cryptomator/usr/lib/cryptomator/bin/cryptomator.sh
 
 # override_dh_strip:
 	# no-op
