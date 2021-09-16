@@ -78,6 +78,7 @@ jobs:
     outputs:
       semVerNum: ${{ steps.versions.outputs.semVerNum }}
       semVerStr: ${{ steps.versions.outputs.semVerStr }}
+      ppaVerStr: ${{ steps.versions.outputs.ppaVerStr }}
       revNum: ${{ steps.versions.outputs.revNum }}
     steps:
       - uses: actions/checkout@v2
@@ -86,15 +87,19 @@ jobs:
       - id: versions
         run: |
           if [[ $GITHUB_REF == refs/tags/* ]]; then
-            VERSION_NUM=`echo ${GITHUB_REF##*/} | sed -E 's/([0-9]+\.[0-9]+\.[0-9]+).*/\1/'`
-            echo "::set-output name=semVerStr::${GITHUB_REF##*/}"
-            echo "::set-output name=semVerNum::${VERSION_NUM}"
+            SEM_VER_STR=${GITHUB_REF##*/}
           else
-            VERSION_NUM=`echo "${{ github.event.inputs.semver }}" | sed -E 's/([0-9]+\.[0-9]+\.[0-9]+).*/\1/'`
-            echo "::set-output name=semVerStr::${{ github.event.inputs.semver }}"
-            echo "::set-output name=semVerNum::${VERSION_NUM}"
+            SEM_VER_STR=${{ github.event.inputs.semver }}
           fi
-          echo "::set-output name=revNum::`git rev-list --count HEAD`"
+          SEM_VER_NUM=`echo ${SEM_VER_STR} | sed -E 's/([0-9]+\.[0-9]+\.[0-9]+).*/\1/'`
+          REVCOUNT=`git rev-list --count HEAD`
+          echo "::set-output name=semVerStr::${SEM_VER_STR}"
+          echo "::set-output name=semVerNum::${SEM_VER_NUM}"
+          echo "::set-output name=ppaVerStr::${SEM_VER_STR/-/\~}-${REVCOUNT}"
+          echo "::set-output name=revNum::${REVCOUNT}"
+      - uses: rubenesp87/semver-validation-action@0.0.6
+        with:
+          version: ${{ steps.versions.outputs.semVerStr }}
 
 #
 # Application Directory
@@ -194,6 +199,69 @@ jobs:
           name: ${{ matrix.profile }}-appdir
           path: appdir.tar
           if-no-files-found: error
+
+#
+# Linux PPA Source Package
+#
+  ppa:
+    name: Upload source package to PPA
+    needs: [buildkit, metadata]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: install build tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install debhelper devscripts dput
+      - name: Download linux-buildkit
+        uses: actions/download-artifact@v2
+        with:
+          name: linux-buildkit
+          path: pkgdir
+      - name: create orig.tar.gz
+        run: tar -cJf cryptomator_${{ needs.metadata.outputs.ppaVerStr }}.orig.tar.xz -C pkgdir .
+      - name: patch and rename pkgdir
+        run: |
+          cp -r dist/linux/debian/ pkgdir
+          cp -r dist/linux/resources/ pkgdir
+          export RFC2822_TIMESTAMP=`date --rfc-2822`
+          envsubst '${VERSION_STR} ${VERSION_NUM} ${REVISION_NUM}' < dist/linux/debian/rules > pkgdir/debian/rules
+          envsubst '${VERSION_STR}' < dist/linux/debian/org.cryptomator.Cryptomator.desktop > pkgdir/debian/org.cryptomator.Cryptomator.desktop
+          envsubst '${PPA_VERSION} ${RFC2822_TIMESTAMP}' < dist/linux/debian/changelog > pkgdir/debian/changelog
+          find . -name "*.jar" >> pkgdir/debian/source/include-binaries
+          mv pkgdir cryptomator_${{ needs.metadata.outputs.ppaVerStr }}
+        env:
+          VERSION_STR: ${{ needs.metadata.outputs.semVerStr }}
+          VERSION_NUM: ${{ needs.metadata.outputs.semVerNum }}
+          REVISION_NUM: ${{ needs.metadata.outputs.revNum }}
+          PPA_VERSION: ${{ needs.metadata.outputs.ppaVerStr }}-0ppa1
+      - name: import gpg key 615D449FE6E6A235
+        run: |
+          echo "${GPG_PRIVATE_KEY}" | gpg --batch --quiet --import
+          echo "${GPG_PASSPHRASE}" | gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --dry-run --sign dist/linux/debian/rules
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.RELEASES_GPG_PRIVATE_KEY }}
+          GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
+      - name: debuild
+        run: debuild -S -sa -d
+        env:
+          DEBSIGN_PROGRAM: gpg --batch --pinentry-mode loopback
+          DEBSIGN_KEYID: 615D449FE6E6A235
+        working-directory: cryptomator_${{ needs.metadata.outputs.ppaVerStr }}
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: linux-deb-source-package
+          path: |
+            cryptomator_*.dsc
+            cryptomator_*.orig.tar.xz
+            cryptomator_*.debian.tar.xz
+            cryptomator_*_source.changes
+            cryptomator_*_source.buildinfo
+      - name: dput to beta repo
+        run: dput ppa:sebastian-stenzel/cryptomator-beta cryptomator_${PPA_VERSION}_source.changes
+        env:
+          PPA_VERSION: ${{ needs.metadata.outputs.ppaVerStr }}-0ppa1
 
 #
 # Linux Cryptomator.AppImage
