@@ -98,7 +98,6 @@ jobs:
           echo "::set-output name=ppaVerStr::${SEM_VER_STR/-/\~}-${REVCOUNT}"
           echo "::set-output name=revNum::${REVCOUNT}"
       - uses: rubenesp87/semver-validation-action@0.0.6
-        if: startsWith(github.ref, 'refs/tags/')
         with:
           version: ${{ steps.versions.outputs.semVerStr }}
 
