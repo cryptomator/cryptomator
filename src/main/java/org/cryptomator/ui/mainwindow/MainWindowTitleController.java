@@ -77,9 +77,13 @@ public class MainWindowTitleController implements FxController {
 			window.setX(event.getScreenX() - xOffset);
 			window.setY(event.getScreenY() - yOffset);
 		});
-		titleBar.setOnMouseReleased(event -> {
+		titleBar.setOnDragDetected(mouseDragEvent -> {
+			titleBar.startFullDrag();
+		});
+		titleBar.setOnMouseDragReleased(mouseDragEvent -> {
 			saveWindowSettings();
 		});
+
 		window.setOnCloseRequest(event -> {
 			close();
 			event.consume();
