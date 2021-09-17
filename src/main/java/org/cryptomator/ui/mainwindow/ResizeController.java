@@ -31,6 +31,10 @@ public class ResizeController implements FxController {
 	public Region rResizer;
 	public Region bResizer;
 	public Region lResizer;
+	public Region lDefaultRegion;
+	public Region tDefaultRegion;
+	public Region rDefaultRegion;
+	public Region bDefaultRegion;
 
 	private double origX, origY, origW, origH;
 
@@ -134,7 +138,6 @@ public class ResizeController implements FxController {
 			window.setY(newY);
 			window.setHeight(newH);
 		}
-		savePositionalSettings();
 	}
 
 	@FXML
@@ -147,7 +150,6 @@ public class ResizeController implements FxController {
 			window.setX(newX);
 			window.setWidth(newW);
 		}
-		savePositionalSettings();
 	}
 
 	@FXML
@@ -156,7 +158,6 @@ public class ResizeController implements FxController {
 		if (newH < window.getMaxHeight() && newH > window.getMinHeight()) {
 			window.setHeight(newH);
 		}
-		savePositionalSettings();
 	}
 
 	@FXML
@@ -165,10 +166,10 @@ public class ResizeController implements FxController {
 		if (newW < window.getMaxWidth() && newW > window.getMinWidth()) {
 			window.setWidth(newW);
 		}
-		savePositionalSettings();
 	}
 
-	private void savePositionalSettings() {
+	@FXML
+	public void savePositionalSettings() {
 		settings.windowHeightProperty().setValue(window.getHeight());
 		settings.windowWidthProperty().setValue(window.getWidth());
 		settings.windowYPositionProperty().setValue(window.getY());
