@@ -8,15 +8,13 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Region;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
-import java.awt.Dimension;
-import java.awt.DisplayMode;
-import java.awt.GraphicsDevice;
-import java.awt.GraphicsEnvironment;
-import java.awt.Toolkit;
 
 @MainWindow
 public class ResizeController implements FxController {
@@ -55,11 +53,11 @@ public class ResizeController implements FxController {
 			settings.displayConfigurationProperty().setValue(getMonitorSizes());
 			return;
 		} else {
-			if (checkForChangedDisplayConfiguration()) {
+			if (didDisplayConfigurationChange()) {
 				//If the position is illegal, then the window appears on the main screen in the middle of the window.
-				Dimension size = Toolkit.getDefaultToolkit().getScreenSize();
-				window.setX((size.getWidth() - window.getMinWidth()) / 2);
-				window.setY((size.getHeight() - window.getMinHeight()) / 2);
+				Rectangle2D primaryScreenBounds = Screen.getPrimary().getBounds();
+				window.setX((primaryScreenBounds.getWidth() - window.getMinWidth()) / 2);
+				window.setY((primaryScreenBounds.getHeight() - window.getMinHeight()) / 2);
 				window.setWidth(window.getMinWidth());
 				window.setHeight(window.getMinHeight());
 			} else {
@@ -76,22 +74,21 @@ public class ResizeController implements FxController {
 		return (settings.windowHeightProperty().get() == 0) && (settings.windowWidthProperty().get() == 0) && (settings.windowXPositionProperty().get() == 0) && (settings.windowYPositionProperty().get() == 0);
 	}
 
-	private boolean checkForChangedDisplayConfiguration() {
+	private boolean didDisplayConfigurationChange() {
 		String currentDisplayConfiguration = getMonitorSizes();
 		String settingsDisplayConfiguration = settings.displayConfigurationProperty().get();
-		boolean changedConfiguration = !settingsDisplayConfiguration.equals(currentDisplayConfiguration);
-		if (changedConfiguration) settings.displayConfigurationProperty().setValue(currentDisplayConfiguration);
-		return changedConfiguration;
+		boolean configurationHasChanged = !settingsDisplayConfiguration.equals(currentDisplayConfiguration);
+		if (configurationHasChanged) settings.displayConfigurationProperty().setValue(currentDisplayConfiguration);
+		return configurationHasChanged;
 	}
 
 	private String getMonitorSizes() {
-		GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-		GraphicsDevice[] gs = ge.getScreenDevices();
+		ObservableList<Screen> screens = Screen.getScreens();
 		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < gs.length; i++) {
-			DisplayMode dm = gs[i].getDisplayMode();
+		for (int i = 0; i < screens.size(); i++) {
+			Rectangle2D screenBounds = screens.get(i).getBounds();
 			if (!sb.isEmpty()) sb.append(" ");
-			sb.append("displayId: " + i + ", " + dm.getWidth() + "x" + dm.getHeight() + ";");
+			sb.append("displayId: " + i + ", " + screenBounds.getWidth() + "x" + screenBounds.getHeight() + ";");
 		}
 		return sb.toString();
 	}
