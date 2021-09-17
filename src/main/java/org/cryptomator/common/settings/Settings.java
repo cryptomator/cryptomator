@@ -8,6 +8,9 @@
  ******************************************************************************/
 package org.cryptomator.common.settings;
 
+import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.common.Environment;
+
 import javafx.beans.Observable;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
@@ -20,9 +23,6 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.NodeOrientation;
-import org.apache.commons.lang3.SystemUtils;
-import org.cryptomator.common.Environment;
-
 import java.util.function.Consumer;
 
 public class Settings {
@@ -154,7 +154,7 @@ public class Settings {
 		return theme;
 	}
 
-	public ObjectProperty<String> keychainProvider() { return keychainProvider; }
+	public ObjectProperty<String> keychainProvider() {return keychainProvider;}
 
 	public ObjectProperty<NodeOrientation> userInterfaceOrientation() {
 		return userInterfaceOrientation;

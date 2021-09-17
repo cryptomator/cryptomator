@@ -1,12 +1,5 @@
 package org.cryptomator.ui.mainwindow;
 
-import javafx.beans.binding.Bindings;
-import javafx.beans.binding.BooleanBinding;
-import javafx.beans.property.ReadOnlyBooleanProperty;
-import javafx.fxml.FXML;
-import javafx.scene.input.MouseButton;
-import javafx.scene.layout.HBox;
-import javafx.stage.Stage;
 import org.cryptomator.common.LicenseHolder;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.ui.common.FxController;
@@ -19,6 +12,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
+import javafx.beans.property.ReadOnlyBooleanProperty;
+import javafx.fxml.FXML;
+import javafx.scene.input.MouseButton;
+import javafx.scene.layout.HBox;
+import javafx.stage.Stage;
 
 @MainWindowScoped
 public class MainWindowTitleController implements FxController {

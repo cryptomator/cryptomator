@@ -1,18 +1,22 @@
 package org.cryptomator.ui.mainwindow;
 
-import javafx.beans.binding.Bindings;
-import javafx.beans.binding.BooleanBinding;
-import javafx.fxml.FXML;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.Region;
-import javafx.stage.Stage;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.ui.common.FxController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import java.awt.*;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
+import javafx.fxml.FXML;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.Region;
+import javafx.stage.Stage;
+import java.awt.Dimension;
+import java.awt.DisplayMode;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
+import java.awt.Toolkit;
 
 @MainWindow
 public class ResizeController implements FxController {
@@ -47,7 +51,7 @@ public class ResizeController implements FxController {
 	public void initialize() {
 		LOG.trace("init ResizeController");
 
-		if (neverTouched()){
+		if (neverTouched()) {
 			settings.displayConfigurationProperty().setValue(getMonitorSizes());
 			return;
 		} else {
@@ -58,8 +62,7 @@ public class ResizeController implements FxController {
 				window.setY((size.getHeight() - window.getMinHeight()) / 2);
 				window.setWidth(window.getMinWidth());
 				window.setHeight(window.getMinHeight());
-			}
-			else {
+			} else {
 				window.setHeight(settings.windowHeightProperty().get() > window.getMinHeight() ? settings.windowHeightProperty().get() : window.getMinHeight());
 				window.setWidth(settings.windowWidthProperty().get() > window.getMinWidth() ? settings.windowWidthProperty().get() : window.getMinWidth());
 				window.setX(settings.windowXPositionProperty().get());
@@ -69,12 +72,11 @@ public class ResizeController implements FxController {
 		savePositionalSettings();
 	}
 
-	private boolean neverTouched(){
-		return (settings.windowHeightProperty().get() == 0) && (settings.windowWidthProperty().get() == 0) &&
-				(settings.windowXPositionProperty().get() == 0) && (settings.windowYPositionProperty().get() == 0);
+	private boolean neverTouched() {
+		return (settings.windowHeightProperty().get() == 0) && (settings.windowWidthProperty().get() == 0) && (settings.windowXPositionProperty().get() == 0) && (settings.windowYPositionProperty().get() == 0);
 	}
 
-	private boolean checkForChangedDisplayConfiguration(){
+	private boolean checkForChangedDisplayConfiguration() {
 		String currentDisplayConfiguration = getMonitorSizes();
 		String settingsDisplayConfiguration = settings.displayConfigurationProperty().get();
 		boolean changedConfiguration = !settingsDisplayConfiguration.equals(currentDisplayConfiguration);
@@ -84,11 +86,11 @@ public class ResizeController implements FxController {
 
 	private String getMonitorSizes() {
 		GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-		GraphicsDevice[]    gs = ge.getScreenDevices();
+		GraphicsDevice[] gs = ge.getScreenDevices();
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < gs.length; i++) {
 			DisplayMode dm = gs[i].getDisplayMode();
-			if(!sb.isEmpty()) sb.append(" ");
+			if (!sb.isEmpty()) sb.append(" ");
 			sb.append("displayId: " + i + ", " + dm.getWidth() + "x" + dm.getHeight() + ";");
 		}
 		return sb.toString();
