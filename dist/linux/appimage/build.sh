@@ -2,6 +2,7 @@
 
 cd $(dirname $0)
 REVISION_NO=`git rev-list --count HEAD`
+VERSION=$(mvn org.apache.maven.plugins:maven-help-plugin:3.1.0:evaluate -Dexpression=project.version -q -DforceStdout)
 
 # check preconditions
 if [ -z "${JAVA_HOME}" ]; then echo "JAVA_HOME not set. Run using JAVA_HOME=/path/to/jdk ./build.sh"; exit 1; fi
@@ -9,7 +10,8 @@ command -v mvn >/dev/null 2>&1 || { echo >&2 "mvn not found."; exit 1; }
 command -v curl >/dev/null 2>&1 || { echo >&2 "curl not found."; exit 1; }
 
 # compile
-mvn -B -f../../pom.xml clean package -DskipTests -Plinux
+mvn -B -f ../../../pom.xml clean package -DskipTests -Plinux
+cp ../../../target/cryptomator-*.jar ../../../target/mods
 
 # add runtime
 ${JAVA_HOME}/bin/jlink \
@@ -26,8 +28,8 @@ ${JAVA_HOME}/bin/jpackage \
     --verbose \
     --type app-image \
     --runtime-image runtime \
-    --input buildkit/libs \
-    --module-path buildkit/mods \
+    --input ../../../target/libs \
+    --module-path ../../../target/mods \
     --module org.cryptomator.desktop/org.cryptomator.launcher.Cryptomator \
     --dest . \
     --name Cryptomator \
@@ -35,19 +37,19 @@ ${JAVA_HOME}/bin/jpackage \
     --copyright "(C) 2016 - 2021 Skymatic GmbH" \
     --java-options "-Xss5m" \
     --java-options "-Xmx256m" \
-    --app-version "${{ needs.metadata.outputs.versionNum }}.${{ needs.metadata.outputs.revNum }}" \
+    --app-version "$VERSION" \
     --java-options "-Dfile.encoding=\"utf-8\"" \
     --java-options "-Dcryptomator.logDir=\"~/.local/share/Cryptomator/logs\"" \
     --java-options "-Dcryptomator.settingsPath=\"~/.config/Cryptomator/settings.json:~/.Cryptomator/settings.json\"" \
     --java-options "-Dcryptomator.ipcSocketPath=\"~/.config/Cryptomator/ipc.socket\"" \
     --java-options "-Dcryptomator.mountPointsDir=\"~/.local/share/Cryptomator/mnt\"" \
     --java-options "-Dcryptomator.showTrayIcon=false" \
-    --java-options "-Dcryptomator.buildNumber=\"appimage-${{ needs.metadata.outputs.revNum }}\"" \
+    --java-options "-Dcryptomator.buildNumber=\"appimage-$VERSION\"" \
     --resource-dir ../resources
 
 # transform AppDir
 mv Cryptomator Cryptomator.AppDir
-cp -r dist/linux/appimage/resources/AppDir/* Cryptomator.AppDir/
+cp -r resources/AppDir/* Cryptomator.AppDir/
 chmod +x Cryptomator.AppDir/lib/runtime/bin/java
 envsubst '${REVISION_NO}' < resources/AppDir/bin/cryptomator.sh > Cryptomator.AppDir/bin/cryptomator.sh
 ln -s usr/share/icons/hicolor/scalable/apps/org.cryptomator.Cryptomator.svg Cryptomator.AppDir/org.cryptomator.Cryptomator.svg
