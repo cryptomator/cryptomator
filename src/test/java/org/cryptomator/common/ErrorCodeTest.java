@@ -63,20 +63,20 @@ public class ErrorCodeTest {
 		}
 
 		@Test
-		@DisplayName("causes are different")
-		public void testDifferentCauses() {
+		@DisplayName("throwableCodes are different")
+		public void testDifferentThrowableCodes() {
 			Assertions.assertNotEquals(code1.throwableCode(), code2.throwableCode());
 		}
 
 		@Test
-		@DisplayName("root causes are equal")
-		public void testSameRootCause() {
+		@DisplayName("rootCauseCodes are equal")
+		public void testSameRootCauseCodes() {
 			Assertions.assertEquals(code1.rootCauseCode(), code2.rootCauseCode());
 		}
 
 		@Test
-		@DisplayName("method throwing exception is the same")
-		public void testSameMethods() {
+		@DisplayName("methodCode are equal")
+		public void testSameMethodCodes() {
 			Assertions.assertEquals(code1.methodCode(), code2.methodCode());
 		}
 
@@ -108,20 +108,20 @@ public class ErrorCodeTest {
 		}
 
 		@Test
-		@DisplayName("causes are different")
-		public void testDifferentCauses() {
+		@DisplayName("throwableCodes are different")
+		public void testDifferentThrowableCodes() {
 			Assertions.assertNotEquals(code1.throwableCode(), code2.throwableCode());
 		}
 
 		@Test
-		@DisplayName("root causes are equal")
-		public void testSameRootCause() {
+		@DisplayName("rootCauseCodes are equal")
+		public void testSameRootCauseCodes() {
 			Assertions.assertEquals(code1.rootCauseCode(), code2.rootCauseCode());
 		}
 
 		@Test
-		@DisplayName("method throwing exception is the same")
-		public void testSameMethods() {
+		@DisplayName("methodCode are equal")
+		public void testSameMethodCodes() {
 			Assertions.assertEquals(code1.methodCode(), code2.methodCode());
 		}
 
