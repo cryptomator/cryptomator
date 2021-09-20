@@ -4,7 +4,7 @@ import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoMap;
-import org.cryptomator.common.ErrorCodeGenerator;
+import org.cryptomator.common.ErrorCode;
 
 import javax.inject.Named;
 import javax.inject.Provider;
@@ -34,8 +34,8 @@ abstract class ErrorModule {
 
 	@Provides
 	@Named("errorCode")
-	static String provideErrorCode(Throwable cause, ErrorCodeGenerator generator) {
-		return generator.of(cause);
+	static String provideErrorCode(Throwable cause) {
+		return ErrorCode.of(cause);
 	}
 
 	@Binds
