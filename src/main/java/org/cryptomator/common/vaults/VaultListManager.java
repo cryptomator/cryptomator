@@ -12,7 +12,6 @@ import org.cryptomator.common.settings.Settings;
 import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.cryptofs.CryptoFileSystemProvider;
 import org.cryptomator.cryptofs.DirStructure;
-import org.cryptomator.cryptofs.VaultConfig;
 import org.cryptomator.cryptofs.migration.Migrators;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -97,9 +96,9 @@ public class VaultListManager {
 		VaultComponent.Builder compBuilder = vaultComponentBuilder.vaultSettings(vaultSettings);
 		try {
 			VaultState.Value vaultState = determineVaultState(vaultSettings.path().get());
-			if (vaultState == LOCKED) {
-				VaultConfigWrapper wrapper = new VaultConfigWrapper(vaultSettings);
-				compBuilder.vaultConfigWrapper(wrapper); //first set the wrapper in the builder, THEN try to load config
+			VaultConfigCache wrapper = new VaultConfigCache(vaultSettings);
+			compBuilder.vaultConfigCache(wrapper); //first set the wrapper in the builder, THEN try to load config
+			if (vaultState == LOCKED) { //for legacy reasons: pre v8 vault do not have a config, but they are in the NEEDS_MIGRATION state
 				wrapper.reloadConfig();
 			}
 			compBuilder.initialVaultState(vaultState);

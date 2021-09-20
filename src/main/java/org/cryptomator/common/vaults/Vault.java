@@ -58,7 +58,7 @@ public class Vault {
 	private final AtomicReference<CryptoFileSystem> cryptoFileSystem;
 	private final VaultState state;
 	private final ObjectProperty<Exception> lastKnownException;
-	private final VaultConfigWrapper configWrapper;
+	private final VaultConfigCache configWrapper;
 	private final VaultStats stats;
 	private final StringBinding displayName;
 	private final StringBinding displayablePath;
@@ -75,7 +75,7 @@ public class Vault {
 	private volatile Volume volume;
 
 	@Inject
-	Vault(VaultSettings vaultSettings, VaultConfigWrapper configWrapper, Provider<Volume> volumeProvider, @DefaultMountFlags StringBinding defaultMountFlags, AtomicReference<CryptoFileSystem> cryptoFileSystem, VaultState state, @Named("lastKnownException") ObjectProperty<Exception> lastKnownException, VaultStats stats) {
+	Vault(VaultSettings vaultSettings, VaultConfigCache configWrapper, Provider<Volume> volumeProvider, @DefaultMountFlags StringBinding defaultMountFlags, AtomicReference<CryptoFileSystem> cryptoFileSystem, VaultState state, @Named("lastKnownException") ObjectProperty<Exception> lastKnownException, VaultStats stats) {
 		this.vaultSettings = vaultSettings;
 		this.configWrapper = configWrapper;
 		this.volumeProvider = volumeProvider;
@@ -368,7 +368,7 @@ public class Vault {
 		try {
 			return configWrapper.getConfig();
 		} catch (IOException e) {
-			throw new IllegalStateException("One should not accquire the config if thee is not present.");
+			throw new IllegalStateException("Vault Config not present.");
 		}
 
 	}
