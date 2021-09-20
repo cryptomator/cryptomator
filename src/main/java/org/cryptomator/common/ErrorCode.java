@@ -1,9 +1,12 @@
 package org.cryptomator.common;
 
-import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import com.google.common.base.Throwables;
 
 import java.util.Locale;
+import java.util.Objects;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public class ErrorCode {
 
@@ -13,14 +16,14 @@ public class ErrorCode {
 	private final static int LATEST_FRAME = 1;
 	private final static int ALL_FRAMES = Integer.MAX_VALUE;
 
-	private final Throwable origCause;
+	private final Throwable throwable;
 	private final Throwable rootCause;
+	private final int rootCauseSpecificFrames;
 
-	// visible for testing
-	ErrorCode(Throwable cause) {
-		Preconditions.checkNotNull(cause);
-		this.origCause = cause;
-		this.rootCause = rootCause(cause);
+	private ErrorCode(Throwable throwable, Throwable rootCause, int rootCauseSpecificFrames) {
+		this.throwable = Objects.requireNonNull(throwable);
+		this.rootCause = Objects.requireNonNull(rootCause);
+		this.rootCauseSpecificFrames = rootCauseSpecificFrames;
 	}
 
 	// visible for testing
@@ -30,17 +33,17 @@ public class ErrorCode {
 
 	// visible for testing
 	String rootCauseCode() {
-		return format(traceCode(rootCause, ALL_FRAMES));
+		return format(traceCode(rootCause, rootCauseSpecificFrames));
 	}
 
 	// visible for testing
-	String origCauseCode() {
-		return format(traceCode(origCause, ALL_FRAMES));
+	String throwableCode() {
+		return format(traceCode(throwable, ALL_FRAMES));
 	}
 
 	@Override
 	public String toString() {
-		return methodCode() + DELIM + rootCauseCode() + DELIM + origCauseCode();
+		return methodCode() + DELIM + rootCauseCode() + DELIM + throwableCode();
 	}
 
 	/**
@@ -55,22 +58,28 @@ public class ErrorCode {
 	 * <p>
 	 * Parts may be identical if the cause is the root cause or the root cause has just one single item in its stack trace.
 	 *
-	 * @param cause The exception
+	 * @param throwable The exception
 	 * @return A three-part error code
 	 */
-	public static String of(Throwable cause) {
-		return new ErrorCode(cause).toString();
+	public static String of(Throwable throwable) {
+		return create(throwable).toString();
 	}
 
-	private Throwable rootCause(Throwable e) {
-		if (e.getCause() == null) {
-			return e;
+	// visible for testing
+	static ErrorCode create(Throwable throwable) {
+		var causalChain = Throwables.getCausalChain(throwable);
+		if (causalChain.size() > 1) {
+			var rootCause = causalChain.get(causalChain.size() - 1);
+			var parentOfRootCause = causalChain.get(causalChain.size() - 2);
+			var rootSpecificFrames = nonOverlappingFrames(parentOfRootCause.getStackTrace(), rootCause.getStackTrace());
+			return new ErrorCode(throwable, rootCause, rootSpecificFrames);
+		} else {
+			return new ErrorCode(throwable, throwable, ALL_FRAMES);
 		}
-		return rootCause(e.getCause());
 	}
 
 	private String format(int value) {
-		//Cut off highest 12 bits (only leave 20 least significant bits) and XOR rest with cutoff
+		// Cut off highest 12 bits (only leave 20 least significant bits) and XOR rest with cutoff
 		value = (value & 0xfffff) ^ (value >>> 20);
 		return Strings.padStart(Integer.toString(value, 32).toUpperCase(Locale.ROOT), 4, '0');
 	}
@@ -88,4 +97,16 @@ public class ErrorCode {
 		}
 		return result;
 	}
+
+	private static int nonOverlappingFrames(StackTraceElement[] frames, StackTraceElement[] enclosingFrames) {
+		// Compute the number of elements in `frames` not contained in `enclosingFrames` by iterating backwards
+		// Result should usually be equal to the difference in size of both traces
+		var i = reverseStream(enclosingFrames).iterator();
+		return (int) reverseStream(frames).dropWhile(f -> i.hasNext() && i.next().equals(f)).count();
+	}
+
+	private static <T> Stream<T> reverseStream(T[] array) {
+		return IntStream.rangeClosed(1, array.length).mapToObj(i -> array[array.length - i]);
+	}
+
 }

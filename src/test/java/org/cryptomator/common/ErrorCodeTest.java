@@ -12,21 +12,25 @@ public class ErrorCodeTest {
 			runnable.run();
 			throw new IllegalStateException("should not reach this point");
 		} catch (RuntimeException e) {
-			return new ErrorCode(e);
+			return ErrorCode.create(e);
 		}
 	}
 
 	@Test
 	@DisplayName("same exception leads to same error code")
 	public void testDifferentErrorCodes() {
-		var code1 = codeCaughtFrom(this::foo);
-		var code2 = codeCaughtFrom(this::foo);
+		var code1 = codeCaughtFrom(this::throwNpe);
+		var code2 = codeCaughtFrom(this::throwNpe);
 
 		Assertions.assertEquals(code1.toString(), code2.toString());
 	}
 
-	private void foo() throws RuntimeException {
-		throw new NullPointerException();
+	private void throwNpe() {
+		throwException(new NullPointerException());
+	}
+
+	private void throwException(RuntimeException e) throws RuntimeException {
+		throw e;
 	}
 
 	@DisplayName("when different cause but same root cause")
@@ -36,15 +40,19 @@ public class ErrorCodeTest {
 		private final ErrorCode code1 = codeCaughtFrom(this::foo);
 		private final ErrorCode code2 = codeCaughtFrom(this::bar);
 
-		private void foo() throws NullPointerException {
-			throw new NullPointerException();
-		}
-
-		private void bar() throws IllegalArgumentException {
+		private void foo() throws IllegalArgumentException {
 			try {
-				foo();
+				throwNpe();
 			} catch (NullPointerException e) {
 				throw new IllegalArgumentException(e);
+			}
+		}
+
+		private void bar() throws IllegalStateException {
+			try {
+				throwNpe();
+			} catch (NullPointerException e) {
+				throw new IllegalStateException(e);
 			}
 		}
 
@@ -57,7 +65,7 @@ public class ErrorCodeTest {
 		@Test
 		@DisplayName("causes are different")
 		public void testDifferentCauses() {
-			Assertions.assertNotEquals(code1.origCauseCode(), code2.origCauseCode());
+			Assertions.assertNotEquals(code1.throwableCode(), code2.throwableCode());
 		}
 
 		@Test
@@ -82,7 +90,11 @@ public class ErrorCodeTest {
 		private final ErrorCode code2 = codeCaughtFrom(this::bar);
 
 		private void foo() throws NullPointerException {
-			throw new NullPointerException();
+			try {
+				throwNpe();
+			} catch (NullPointerException e) {
+				throw new IllegalArgumentException(e);
+			}
 		}
 
 		private void bar() throws NullPointerException {
@@ -96,9 +108,9 @@ public class ErrorCodeTest {
 		}
 
 		@Test
-		@DisplayName("causes are equal")
+		@DisplayName("causes are different")
 		public void testDifferentCauses() {
-			Assertions.assertEquals(code1.origCauseCode(), code2.origCauseCode());
+			Assertions.assertNotEquals(code1.throwableCode(), code2.throwableCode());
 		}
 
 		@Test
