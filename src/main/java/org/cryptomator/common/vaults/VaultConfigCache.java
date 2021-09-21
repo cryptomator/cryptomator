@@ -8,6 +8,7 @@ import org.cryptomator.cryptofs.VaultConfigLoadException;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -35,11 +36,19 @@ public class VaultConfigCache {
 		}
 	}
 
-	VaultConfig.UnverifiedVaultConfig getConfig() throws IOException {
+	public VaultConfig.UnverifiedVaultConfig get() throws IOException {
 		if (Objects.isNull(config.get())) {
 			reloadConfig();
 		}
 		return config.get();
+	}
+
+	public VaultConfig.UnverifiedVaultConfig getUnchecked() {
+		try {
+			return get();
+		} catch (IOException e) {
+			throw new UncheckedIOException(e);
+		}
 	}
 
 

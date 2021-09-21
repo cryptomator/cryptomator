@@ -2,6 +2,7 @@ package org.cryptomator.ui.health;
 
 import dagger.Lazy;
 import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.common.vaults.VaultConfigCache;
 import org.cryptomator.cryptofs.VaultConfig;
 import org.cryptomator.cryptofs.VaultConfigLoadException;
 import org.cryptomator.cryptofs.VaultKeyInvalidException;
@@ -21,7 +22,6 @@ import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutorService;
@@ -34,7 +34,7 @@ public class StartController implements FxController {
 
 	private final Stage window;
 	private final Stage unlockWindow;
-	private final Vault vault;
+	private final VaultConfigCache vaultConfig;
 	private final KeyLoadingStrategy keyLoadingStrategy;
 	private final ExecutorService executor;
 	private final AtomicReference<Masterkey> masterkeyRef;
@@ -46,7 +46,7 @@ public class StartController implements FxController {
 	public StartController(@HealthCheckWindow Stage window, @HealthCheckWindow Vault vault, @HealthCheckWindow KeyLoadingStrategy keyLoadingStrategy, ExecutorService executor, AtomicReference<Masterkey> masterkeyRef, AtomicReference<VaultConfig> vaultConfigRef, @FxmlScene(FxmlFile.HEALTH_CHECK_LIST) Lazy<Scene> checkScene, Lazy<ErrorComponent.Builder> errorComponent, @Named("unlockWindow") Stage unlockWindow) {
 		this.window = window;
 		this.unlockWindow = unlockWindow;
-		this.vault = vault;
+		this.vaultConfig = vault.getVaultConfigCache();
 		this.keyLoadingStrategy = keyLoadingStrategy;
 		this.executor = executor;
 		this.masterkeyRef = masterkeyRef;
@@ -77,7 +77,7 @@ public class StartController implements FxController {
 	}
 
 	private void verifyVaultConfig(KeyLoadingStrategy keyLoadingStrategy) throws VaultConfigLoadException {
-		var unverifiedCfg = vault.getUnverifiedVaultConfig();
+		var unverifiedCfg = vaultConfig.getUnchecked();
 		try (var masterkey = keyLoadingStrategy.loadKey(unverifiedCfg.getKeyId())) {
 			var verifiedCfg = unverifiedCfg.verify(masterkey.getEncoded(), unverifiedCfg.allegedVaultVersion());
 			vaultConfigRef.set(verifiedCfg);
