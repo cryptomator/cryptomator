@@ -9,6 +9,7 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Circle?>
@@ -17,7 +18,7 @@
 	  fx:controller="org.cryptomator.ui.common.ErrorController"
 	  prefWidth="450"
 	  prefHeight="450"
-	  spacing="12"
+	  spacing="18"
 	  alignment="TOP_CENTER">
 	<padding>
 		<Insets topRightBottomLeft="24"/>
@@ -44,7 +45,23 @@
 			</VBox>
 		</HBox>
 
-		<TextArea VBox.vgrow="ALWAYS" text="${controller.detailText}" prefRowCount="5" editable="false"/>
+		<VBox spacing="6" VBox.vgrow="ALWAYS">
+			<HBox>
+				<Label text="%generic.error.technicalDetails"/>
+				<Region HBox.hgrow="ALWAYS"/>
+				<Hyperlink styleClass="hyperlink-underline" text="%generic.button.copy" onAction="#copyDetails" contentDisplay="LEFT" visible="${!controller.copiedDetails}" managed="${!controller.copiedDetails}">
+					<graphic>
+						<FontAwesome5IconView glyph="CLIPBOARD" glyphSize="12"/>
+					</graphic>
+				</Hyperlink>
+				<Hyperlink styleClass="hyperlink-underline" text="%generic.button.copied" onAction="#copyDetails" contentDisplay="LEFT" visible="${controller.copiedDetails}" managed="${controller.copiedDetails}">
+					<graphic>
+						<FontAwesome5IconView glyph="CHECK" glyphSize="12"/>
+					</graphic>
+				</Hyperlink>
+			</HBox>
+			<TextArea VBox.vgrow="ALWAYS" text="${controller.detailText}" prefRowCount="5" editable="false"/>
+		</VBox>
 
 		<ButtonBar buttonMinWidth="120" buttonOrder="B+C">
 			<buttons>

@@ -6,11 +6,18 @@ import org.cryptomator.common.Nullable;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
 import javafx.stage.Stage;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 public class ErrorController implements FxController {
 
@@ -27,6 +34,8 @@ public class ErrorController implements FxController {
 	private final ErrorCode errorCode;
 	private final Scene previousScene;
 	private final Stage window;
+
+	private BooleanProperty copiedDetails = new SimpleBooleanProperty();
 
 	@Inject
 	ErrorController(Application application, @Named("stackTrace") String stackTrace, ErrorCode errorCode, @Nullable Scene previousScene, Stage window) {
@@ -62,6 +71,18 @@ public class ErrorController implements FxController {
 		application.getHostServices().showDocument(REPORT_URL_FORMAT.formatted(title, body));
 	}
 
+	@FXML
+	public void copyDetails() {
+		ClipboardContent clipboardContent = new ClipboardContent();
+		clipboardContent.putString(getDetailText());
+		Clipboard.getSystemClipboard().setContent(clipboardContent);
+
+		copiedDetails.set(true);
+		CompletableFuture.delayedExecutor(2, TimeUnit.SECONDS, Platform::runLater).execute(() -> {
+			copiedDetails.set(false);
+		});
+	}
+
 	/* Getter/Setter */
 
 	public boolean isPreviousScenePresent() {
@@ -78,5 +99,13 @@ public class ErrorController implements FxController {
 
 	public String getDetailText() {
 		return "```\nError Code " + getErrorCode() + "\n" + getStackTrace() + "\n```";
+	}
+
+	public BooleanProperty copiedDetailsProperty() {
+		return copiedDetails;
+	}
+
+	public boolean getCopiedDetails() {
+		return copiedDetails.get();
 	}
 }
