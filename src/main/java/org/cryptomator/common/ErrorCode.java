@@ -14,7 +14,7 @@ import java.util.stream.Stream;
  */
 public class ErrorCode {
 
-	private final static int A_PRIME = Integer.MAX_VALUE;
+	private final static int A_PRIME = 31;
 	public final static String DELIM = ":";
 
 	private final static int LATEST_FRAME = 1;
@@ -93,7 +93,7 @@ public class ErrorCode {
 	}
 
 	private int traceCode(Throwable e, int frameCount) {
-		int result = 0x6c528c4a;
+		int result = 0xdeadbeef;
 		if (e.getCause() != null) {
 			result = traceCode(e.getCause(), frameCount);
 		}
