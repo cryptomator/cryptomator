@@ -15,6 +15,7 @@ import java.util.stream.Stream;
 public class ErrorCode {
 
 	private final static int A_PRIME = 31;
+	private final static int SEED = 0xdeadbeef;
 	public final static String DELIM = ":";
 
 	private final static int LATEST_FRAME = 1;
@@ -93,7 +94,7 @@ public class ErrorCode {
 	}
 
 	private int traceCode(Throwable e, int frameCount) {
-		int result = 0xdeadbeef;
+		int result = SEED;
 		if (e.getCause() != null) {
 			result = traceCode(e.getCause(), frameCount);
 		}
