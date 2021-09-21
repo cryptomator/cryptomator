@@ -5,14 +5,12 @@ import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.cryptofs.VaultConfig;
 import org.cryptomator.cryptofs.VaultConfigLoadException;
 
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Wrapper for lazy loading and on-demand reloading of the vault configuration.
@@ -20,11 +18,11 @@ import java.util.Objects;
 public class VaultConfigCache {
 
 	private final VaultSettings settings;
-	private final ObjectProperty<VaultConfig.UnverifiedVaultConfig> config;
+	private final AtomicReference<VaultConfig.UnverifiedVaultConfig> config;
 
 	VaultConfigCache(VaultSettings settings) {
 		this.settings = settings;
-		this.config = new SimpleObjectProperty<>();
+		this.config = new AtomicReference<>(null);
 	}
 
 	void reloadConfig() throws IOException {
@@ -37,7 +35,7 @@ public class VaultConfigCache {
 	}
 
 	public VaultConfig.UnverifiedVaultConfig get() throws IOException {
-		if (Objects.isNull(config.get())) {
+		if (config.get() == null) {
 			reloadConfig();
 		}
 		return config.get();
