@@ -33,8 +33,7 @@ abstract class ErrorModule {
 	}
 
 	@Provides
-	@Named("errorCode")
-	static String provideErrorCode(Throwable cause) {
+	static ErrorCode provideErrorCode(Throwable cause) {
 		return ErrorCode.of(cause);
 	}
 

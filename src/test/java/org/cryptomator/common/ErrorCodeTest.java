@@ -12,7 +12,7 @@ public class ErrorCodeTest {
 			runnable.run();
 			throw new IllegalStateException("should not reach this point");
 		} catch (RuntimeException e) {
-			return ErrorCode.create(e);
+			return ErrorCode.of(e);
 		}
 	}
 

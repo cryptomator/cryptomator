@@ -8,10 +8,14 @@ import java.util.Objects;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+/**
+ * Holds a throwable and provides a human-readable {@link #toString() three-component string representation}
+ * aiming to allow documentation and lookup of same or similar errors.
+ */
 public class ErrorCode {
 
 	private final static int A_PRIME = Integer.MAX_VALUE;
-	private final static String DELIM = ":";
+	public final static String DELIM = ":";
 
 	private final static int LATEST_FRAME = 1;
 	private final static int ALL_FRAMES = Integer.MAX_VALUE;
@@ -41,6 +45,15 @@ public class ErrorCode {
 		return format(traceCode(throwable, ALL_FRAMES));
 	}
 
+	/**
+	 * Produces an error code consisting of three {@value DELIM}-separated components.
+	 * <p>
+	 * A full match of the error code indicates the exact same throwable (to the extent possible
+	 * without hash collisions). A partial match of the first or second component indicates related problems
+	 * with the same root cause.
+	 *
+	 * @return A three-part error code
+	 */
 	@Override
 	public String toString() {
 		return methodCode() + DELIM + rootCauseCode() + DELIM + throwableCode();
@@ -61,12 +74,7 @@ public class ErrorCode {
 	 * @param throwable The exception
 	 * @return A three-part error code
 	 */
-	public static String of(Throwable throwable) {
-		return create(throwable).toString();
-	}
-
-	// visible for testing
-	static ErrorCode create(Throwable throwable) {
+	public static ErrorCode of(Throwable throwable) {
 		var causalChain = Throwables.getCausalChain(throwable);
 		if (causalChain.size() > 1) {
 			var rootCause = causalChain.get(causalChain.size() - 1);
