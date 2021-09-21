@@ -118,7 +118,7 @@ public class VaultListManager {
 				try {
 					var determinedState = determineVaultState(vault.getPath());
 					if (determinedState == LOCKED) {
-						vault.reloadConfig();
+						vault.getVaultConfigCache().reloadConfig();
 					}
 					state.set(determinedState);
 					yield determinedState;

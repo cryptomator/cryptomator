@@ -192,10 +192,6 @@ public class Vault {
 		volume.reveal(vaultRevealer);
 	}
 
-	public void reloadConfig() throws IOException {
-		configCache.reloadConfig();
-	}
-
 	// ******************************************************************************
 	// Observable Properties
 	// *******************************************************************************
