@@ -18,7 +18,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -31,6 +30,7 @@ import java.util.ResourceBundle;
 import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
 import static org.cryptomator.common.Constants.VAULTCONFIG_FILENAME;
 import static org.cryptomator.common.vaults.VaultState.Value.ERROR;
+import static org.cryptomator.common.vaults.VaultState.Value.LOCKED;
 
 @Singleton
 public class VaultListManager {
@@ -96,6 +96,11 @@ public class VaultListManager {
 		VaultComponent.Builder compBuilder = vaultComponentBuilder.vaultSettings(vaultSettings);
 		try {
 			VaultState.Value vaultState = determineVaultState(vaultSettings.path().get());
+			VaultConfigCache wrapper = new VaultConfigCache(vaultSettings);
+			compBuilder.vaultConfigCache(wrapper); //first set the wrapper in the builder, THEN try to load config
+			if (vaultState == LOCKED) { //for legacy reasons: pre v8 vault do not have a config, but they are in the NEEDS_MIGRATION state
+				wrapper.reloadConfig();
+			}
 			compBuilder.initialVaultState(vaultState);
 		} catch (IOException e) {
 			LOG.warn("Failed to determine vault state for " + vaultSettings.path().get(), e);
@@ -112,6 +117,9 @@ public class VaultListManager {
 			case LOCKED, NEEDS_MIGRATION, MISSING -> {
 				try {
 					var determinedState = determineVaultState(vault.getPath());
+					if (determinedState == LOCKED) {
+						vault.getVaultConfigCache().reloadConfig();
+					}
 					state.set(determinedState);
 					yield determinedState;
 				} catch (IOException e) {
@@ -132,7 +140,9 @@ public class VaultListManager {
 		return switch (CryptoFileSystemProvider.checkDirStructureForVault(pathToVault, VAULTCONFIG_FILENAME, MASTERKEY_FILENAME)) {
 			case VAULT -> VaultState.Value.LOCKED;
 			case UNRELATED -> VaultState.Value.MISSING;
-			case MAYBE_LEGACY -> Migrators.get().needsMigration(pathToVault, VAULTCONFIG_FILENAME, MASTERKEY_FILENAME) ? VaultState.Value.NEEDS_MIGRATION : VaultState.Value.MISSING;
+			case MAYBE_LEGACY -> Migrators.get().needsMigration(pathToVault, VAULTCONFIG_FILENAME, MASTERKEY_FILENAME) ? //
+					VaultState.Value.NEEDS_MIGRATION //
+					: VaultState.Value.MISSING;
 		};
 	}
 

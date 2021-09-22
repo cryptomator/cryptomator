@@ -17,9 +17,6 @@ import org.cryptomator.cryptofs.CryptoFileSystem;
 import org.cryptomator.cryptofs.CryptoFileSystemProperties;
 import org.cryptomator.cryptofs.CryptoFileSystemProperties.FileSystemFlags;
 import org.cryptomator.cryptofs.CryptoFileSystemProvider;
-import org.cryptomator.cryptofs.VaultConfig;
-import org.cryptomator.cryptofs.VaultConfig.UnverifiedVaultConfig;
-import org.cryptomator.cryptofs.VaultConfigLoadException;
 import org.cryptomator.cryptofs.common.FileSystemCapabilityChecker;
 import org.cryptomator.cryptolib.api.CryptoException;
 import org.cryptomator.cryptolib.api.MasterkeyLoader;
@@ -38,8 +35,6 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.EnumSet;
@@ -62,6 +57,7 @@ public class Vault {
 	private final AtomicReference<CryptoFileSystem> cryptoFileSystem;
 	private final VaultState state;
 	private final ObjectProperty<Exception> lastKnownException;
+	private final VaultConfigCache configCache;
 	private final VaultStats stats;
 	private final StringBinding displayName;
 	private final StringBinding displayablePath;
@@ -78,8 +74,9 @@ public class Vault {
 	private volatile Volume volume;
 
 	@Inject
-	Vault(VaultSettings vaultSettings, Provider<Volume> volumeProvider, @DefaultMountFlags StringBinding defaultMountFlags, AtomicReference<CryptoFileSystem> cryptoFileSystem, VaultState state, @Named("lastKnownException") ObjectProperty<Exception> lastKnownException, VaultStats stats) {
+	Vault(VaultSettings vaultSettings, VaultConfigCache configCache, Provider<Volume> volumeProvider, @DefaultMountFlags StringBinding defaultMountFlags, AtomicReference<CryptoFileSystem> cryptoFileSystem, VaultState state, @Named("lastKnownException") ObjectProperty<Exception> lastKnownException, VaultStats stats) {
 		this.vaultSettings = vaultSettings;
+		this.configCache = configCache;
 		this.volumeProvider = volumeProvider;
 		this.defaultMountFlags = defaultMountFlags;
 		this.cryptoFileSystem = cryptoFileSystem;
@@ -107,10 +104,10 @@ public class Vault {
 		Set<FileSystemFlags> flags = EnumSet.noneOf(FileSystemFlags.class);
 		if (vaultSettings.usesReadOnlyMode().get()) {
 			flags.add(FileSystemFlags.READONLY);
-		} else if(vaultSettings.maxCleartextFilenameLength().get() == -1) {
+		} else if (vaultSettings.maxCleartextFilenameLength().get() == -1) {
 			LOG.debug("Determining cleartext filename length limitations...");
 			var checker = new FileSystemCapabilityChecker();
-			int shorteningThreshold = getUnverifiedVaultConfig().allegedShorteningThreshold();
+			int shorteningThreshold = configCache.get().allegedShorteningThreshold();
 			int ciphertextLimit = checker.determineSupportedCiphertextFileNameLength(getPath());
 			if (ciphertextLimit < shorteningThreshold) {
 				int cleartextLimit = checker.determineSupportedCleartextFileNameLength(getPath());
@@ -328,19 +325,6 @@ public class Vault {
 		return stats;
 	}
 
-	/**
-	 * Attempts to read the vault config file and parse it without verifying its integrity.
-	 *
-	 * @return an unverified vault config
-	 * @throws VaultConfigLoadException if the read file cannot be properly parsed
-	 * @throws IOException if reading the file fails
-	 *
-	 */
-	public UnverifiedVaultConfig getUnverifiedVaultConfig() throws IOException {
-		Path configPath = getPath().resolve(org.cryptomator.common.Constants.VAULTCONFIG_FILENAME);
-		String token = Files.readString(configPath, StandardCharsets.US_ASCII);
-		return VaultConfig.decode(token);
-	}
 
 	public Observable[] observables() {
 		return new Observable[]{state};
@@ -373,6 +357,10 @@ public class Vault {
 		} else {
 			return mountFlags;
 		}
+	}
+
+	public VaultConfigCache getVaultConfigCache() {
+		return configCache;
 	}
 
 	public void setCustomMountFlags(String mountFlags) {
