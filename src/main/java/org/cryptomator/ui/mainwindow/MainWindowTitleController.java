@@ -62,13 +62,11 @@ public class MainWindowTitleController implements FxController {
 
 		});
 		titleBar.setOnMouseClicked(event -> {
-			if (event.getButton().equals(MouseButton.PRIMARY)) {
-				if (event.getClickCount() == 2) {
-					if (window.isFullScreen()) {
-						window.setFullScreen(false);
-					} else {
-						window.setFullScreen(true);
-					}
+			if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
+				if (window.isFullScreen()) {
+					window.setFullScreen(false);
+				} else {
+					window.setFullScreen(true);
 				}
 			}
 		});
