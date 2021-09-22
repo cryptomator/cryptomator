@@ -77,6 +77,7 @@ public interface KeyLoadingStrategy extends MasterkeyLoader {
 		boolean success = false;
 		try {
 			user.use(this);
+			success = true;
 		} catch (MasterkeyLoadingFailedException e) {
 			if (recoverFromException(e)) {
 				LOG.info("Unlock attempt threw {}. Reattempting...", e.getClass().getSimpleName());

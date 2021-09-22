@@ -67,7 +67,7 @@ public class CheckExecutor {
 
 		@Override
 		protected Void call() throws Exception {
-			try (var masterkeyClone = masterkey.clone(); //
+			try (var masterkeyClone = masterkey.copy(); //
 				 var cryptor = CryptorProvider.forScheme(vaultConfig.getCipherCombo()).provide(masterkeyClone, csprng)) {
 				c.getHealthCheck().check(vaultPath, vaultConfig, masterkeyClone, cryptor, diagnosis -> {
 					Platform.runLater(() -> c.getResults().add(Result.create(diagnosis)));

@@ -47,13 +47,38 @@
     <CustomAction Id="JpDisallowDowngrade" Error="!(loc.DowngradeErrorMessage)" />
     <?endif?>
 
+    <!-- Looking for legacy Cryptomator versions-->
+    <Property Id="OLDEXEINSTALLER">
+      <RegistrySearch Id="InnoSetupInstallation" Root="HKLM" Key="Software\Microsoft\Windows\CurrentVersion\Uninstall\Cryptomator_is1" Type="raw" Name="DisplayName" />
+    </Property>
+    <!-- Block installation if innosetup entry of Cryptomator is found -->
+    <!-- TODO: localize -->
+    <Condition Message="A lower version of [ProductName] is already installed. Uninstall it first and then start the setup again. Setup will now exit.">
+        <![CDATA[Installed OR NOT OLDEXEINSTALLER]]>
+    </Condition>
+
     <!-- Standard required root -->
     <Directory Id="TARGETDIR" Name="SourceDir"/>
+
+    <!-- Non-Opening ProgID -->
+    <DirectoryRef Id="INSTALLDIR">
+        <Component Win64="yes" Id="nonStartingProgID" >
+          <File Id="IconFileForEncryptedData" KeyPath="yes" Source="$(env.JP_WIXWIZARD_RESOURCES)\Cryptomator-Vault.ico" Name="Cryptomator-Vault.ico"></File>
+          <ProgId Id="Cryptomator.Encrypted.1" Description="Cryptomator Encrypted Data" Icon="IconFileForEncryptedData" IconIndex="0">
+            <Extension Id="c9r" Advertise="no" ContentType="application/vnd.cryptomator.encrypted">
+              <MIME ContentType="application/vnd.cryptomator.encrypted" Default="yes"></MIME>
+            </Extension>
+            <Extension Id="c9s" Advertise="no" ContentType="application/vnd.cryptomator.encrypted"/>
+          </ProgId>
+        </Component>
+    </DirectoryRef>
 
     <Feature Id="DefaultFeature" Title="!(loc.MainFeatureTitle)" Level="1">
       <ComponentGroupRef Id="Shortcuts"/>
       <ComponentGroupRef Id="Files"/>
       <ComponentGroupRef Id="FileAssociations"/>
+      <!-- Ref to additional ProgIDs -->
+      <ComponentRef Id="nonStartingProgID" />
     </Feature>
 
     <?ifdef JpInstallDirChooser ?>

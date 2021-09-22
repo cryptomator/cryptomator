@@ -18,11 +18,4 @@ class CryptomatorModule {
 		return new CountDownLatch(1);
 	}
 
-	@Provides
-	@Singleton
-	@Named("applicationVersion")
-	static Optional<String> provideApplicationVersion() {
-		return Optional.ofNullable(Cryptomator.class.getPackage().getImplementationVersion());
-	}
-
 }
