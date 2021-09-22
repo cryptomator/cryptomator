@@ -599,7 +599,7 @@ jobs:
             CHECKSUM_MSG=$(sha256sum ${FILE})
             VALUE=$(echo ${CHECKSUM_MSG} | sed 's/\([0-9,a-f]\{64\}\)[[:blank:]]\([Cc]ryptomator-.*$\)/\2: `\1`/' )
             KEY=$(echo ${CHECKSUM_MSG} | sed 's/.*[[:blank:]].*\.\(.*$\)/\1/')
-            echo "{${KEY^^}_SHA256_MSG}={${VALUE}} >> $GITHUB_ENV
+            echo "{${KEY^^}_SHA256_MSG}={${VALUE}}" >> $GITHUB_ENV
           done
       - name: Create release draft
         uses: softprops/action-gh-release@v1
