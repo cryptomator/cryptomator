@@ -379,8 +379,8 @@ jobs:
               OUTPUT_PATH=${JAR_PATH%.*}
               echo "Codesigning libs in ${JAR_FILENAME}..."
               unzip -q ${JAR_PATH} -d ${OUTPUT_PATH}
-              find ${OUTPUT_PATH} -name '*.dylib' -exec codesign -s ${CODESIGN_IDENTITY} {} \;
-              find ${OUTPUT_PATH} -name '*.jnilib' -exec codesign -s ${CODESIGN_IDENTITY} {} \;
+              find ${OUTPUT_PATH} -name '*.dylib' -exec codesign --force -s ${CODESIGN_IDENTITY} {} \;
+              find ${OUTPUT_PATH} -name '*.jnilib' -exec codesign --force -s ${CODESIGN_IDENTITY} {} \;
               rm ${JAR_PATH}
               pushd ${OUTPUT_PATH} > /dev/null
               zip -qr ../${JAR_FILENAME} *
