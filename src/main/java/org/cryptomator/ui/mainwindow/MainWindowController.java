@@ -23,8 +23,6 @@ import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -55,7 +53,7 @@ public class MainWindowController implements FxController {
 
 	@FXML
 	public void initialize() {
-		LOG.debug("init MainWindowController");
+		LOG.trace("init MainWindowController");
 		root.setOnDragEntered(this::handleDragEvent);
 		root.setOnDragOver(this::handleDragEvent);
 		root.setOnDragDropped(this::handleDragEvent);

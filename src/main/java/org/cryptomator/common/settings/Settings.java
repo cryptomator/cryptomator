@@ -43,6 +43,8 @@ public class Settings {
 	public static final NodeOrientation DEFAULT_USER_INTERFACE_ORIENTATION = NodeOrientation.LEFT_TO_RIGHT;
 	public static final String DEFAULT_LICENSE_KEY = "";
 	public static final boolean DEFAULT_SHOW_MINIMIZE_BUTTON = false;
+	public static final String DEFAULT_DISPLAY_CONFIGURATION = "";
+
 
 	private final ObservableList<VaultSettings> directories = FXCollections.observableArrayList(VaultSettings::observables);
 	private final BooleanProperty askedForUpdateCheck = new SimpleBooleanProperty(DEFAULT_ASKED_FOR_UPDATE_CHECK);
@@ -59,6 +61,12 @@ public class Settings {
 	private final StringProperty licenseKey = new SimpleStringProperty(DEFAULT_LICENSE_KEY);
 	private final BooleanProperty showMinimizeButton = new SimpleBooleanProperty(DEFAULT_SHOW_MINIMIZE_BUTTON);
 	private final BooleanProperty showTrayIcon;
+	private final IntegerProperty windowXPosition = new SimpleIntegerProperty();
+	private final IntegerProperty windowYPosition = new SimpleIntegerProperty();
+	private final IntegerProperty windowWidth = new SimpleIntegerProperty();
+	private final IntegerProperty windowHeight = new SimpleIntegerProperty();
+	private final ObjectProperty<String> displayConfiguration = new SimpleObjectProperty<>(DEFAULT_DISPLAY_CONFIGURATION);
+
 
 	private Consumer<Settings> saveCmd;
 
@@ -83,6 +91,11 @@ public class Settings {
 		licenseKey.addListener(this::somethingChanged);
 		showMinimizeButton.addListener(this::somethingChanged);
 		showTrayIcon.addListener(this::somethingChanged);
+		windowXPosition.addListener(this::somethingChanged);
+		windowYPosition.addListener(this::somethingChanged);
+		windowWidth.addListener(this::somethingChanged);
+		windowHeight.addListener(this::somethingChanged);
+		displayConfiguration.addListener(this::somethingChanged);
 	}
 
 	void setSaveCmd(Consumer<Settings> saveCmd) {
@@ -141,7 +154,7 @@ public class Settings {
 		return theme;
 	}
 
-	public ObjectProperty<String> keychainProvider() { return keychainProvider; }
+	public ObjectProperty<String> keychainProvider() {return keychainProvider;}
 
 	public ObjectProperty<NodeOrientation> userInterfaceOrientation() {
 		return userInterfaceOrientation;
@@ -157,5 +170,25 @@ public class Settings {
 
 	public BooleanProperty showTrayIcon() {
 		return showTrayIcon;
+	}
+
+	public IntegerProperty windowXPositionProperty() {
+		return windowXPosition;
+	}
+
+	public IntegerProperty windowYPositionProperty() {
+		return windowYPosition;
+	}
+
+	public IntegerProperty windowWidthProperty() {
+		return windowWidth;
+	}
+
+	public IntegerProperty windowHeightProperty() {
+		return windowHeight;
+	}
+
+	public ObjectProperty<String> displayConfigurationProperty() {
+		return displayConfiguration;
 	}
 }
