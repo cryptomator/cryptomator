@@ -565,10 +565,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: [metadata,linux-appimage,mac-dmg,win-msi,ppa]
     if: startsWith(github.ref, 'refs/tags/') && github.repository == 'cryptomator/cryptomator'
-    env:
-      APPIMAGE_SHA256_MSG: undefined
-      DMG_SHA256_MSG: undefined
-      MSI_SHA256_MSG: undefined
     steps:
       - uses: actions/checkout@v2
       - name: Create tarball
@@ -594,14 +590,12 @@ jobs:
         env:
           GPG_PRIVATE_KEY: ${{ secrets.RELEASES_GPG_PRIVATE_KEY }}
           GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
-      - name: Compute SHA256 checksums of release artifacts # sha256sum is split on the whitespace with sed and reorderd. env keys are file name extensions in uppercase
+      - id: checksums
+        name: Compute SHA256 checksums of release artifacts
         run: |
-          for FILE in `find . -name "*.AppImage" -o -name "*.dmg" -o -name "*.msi" -o -name "*.zsync" -o -name "*.tar.gz"`; do
-            CHECKSUM_MSG=$(sha256sum ${FILE})
-            VALUE=$(echo ${CHECKSUM_MSG} | sed 's/\([0-9,a-f]\{64\}\)[[:blank:]]\([Cc]ryptomator-.*$\)/\2: `\1`/' )
-            KEY=$(echo ${CHECKSUM_MSG} | sed 's/.*[[:blank:]].*\.\(.*$\)/\1/')
-            echo "{${KEY^^}_SHA256_MSG}={${VALUE}}" >> $GITHUB_ENV
-          done
+          SHA256_SUMS=`find . -name "*.AppImage" -o -name "*.dmg" -o -name "*.msi" -name "*.tar.gz" | xargs sha256sum`
+          echo "::set-output name=SHA256_SUMS::${SHA256_SUMS}"
+        continue-on-error: true
       - name: Create release draft
         uses: softprops/action-gh-release@v1
         with:
@@ -624,6 +618,4 @@ jobs:
             :scroll: A complete list of closed issues is available [here](LINK)
             ---
             Checksums of release artifacts:
-            * ${{ env.APPIMAGE_SHA256_MSG}}
-            * ${{ env.DMG_SHA256_MSG}}
-            * ${{ env.MSI_SHA_256_MSG}}
+            ${{ steps.checksums.outputs.SHA256_SUMS }}"
