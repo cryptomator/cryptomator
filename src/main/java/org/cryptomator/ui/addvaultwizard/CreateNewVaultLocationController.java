@@ -29,16 +29,20 @@ import javafx.scene.control.ToggleGroup;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ResourceBundle;
+import java.util.UUID;
 
 @AddVaultWizardScoped
 public class CreateNewVaultLocationController implements FxController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(CreateNewVaultLocationController.class);
 	private static final Path DEFAULT_CUSTOM_VAULT_PATH = Paths.get(System.getProperty("user.home"));
+	private static final String TEMP_FILE_FORMAT = "cryptomator-%s.tmp";
 
 	private final Stage window;
 	private final Lazy<Scene> chooseNameScene;
@@ -92,7 +96,7 @@ public class CreateNewVaultLocationController implements FxController {
 			statusText.set(resourceBundle.getString("addvaultwizard.new.locationDoesNotExist"));
 			statusGraphic.set(badLocation);
 			return false;
-		} else if (!Files.isWritable(p.getParent())) {
+		} else if (!isActuallyWritable(p.getParent())) {
 			statusText.set(resourceBundle.getString("addvaultwizard.new.locationIsNotWritable"));
 			statusGraphic.set(badLocation);
 			return false;
@@ -104,6 +108,21 @@ public class CreateNewVaultLocationController implements FxController {
 			statusText.set(resourceBundle.getString("addvaultwizard.new.locationIsOk"));
 			statusGraphic.set(goodLocation);
 			return true;
+		}
+	}
+
+	private boolean isActuallyWritable(Path p) {
+		Path tmpFile = p.resolve(String.format(TEMP_FILE_FORMAT, UUID.randomUUID()));
+		try (var chan = Files.newByteChannel(tmpFile, StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE, StandardOpenOption.DELETE_ON_CLOSE)) {
+			return true;
+		} catch (IOException e) {
+			return false;
+		} finally {
+			try {
+				Files.deleteIfExists(tmpFile);
+			} catch (IOException e) {
+				LOG.warn("Unable to delete temporary file {}. Needs to be deleted manually.", tmpFile);
+			}
 		}
 	}
 
