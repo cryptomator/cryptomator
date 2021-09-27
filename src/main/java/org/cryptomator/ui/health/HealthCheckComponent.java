@@ -16,26 +16,15 @@ import javafx.stage.Stage;
 @Subcomponent(modules = {HealthCheckModule.class})
 public interface HealthCheckComponent {
 
-	LoadUnverifiedConfigResult loadConfig();
-
 	@HealthCheckWindow
 	Stage window();
 
 	@FxmlScene(FxmlFile.HEALTH_START)
 	Lazy<Scene> startScene();
 
-	@FxmlScene(FxmlFile.HEALTH_START_FAIL)
-	Lazy<Scene> failScene();
-
 	default Stage showHealthCheckWindow() {
 		Stage stage = window();
-		// TODO reevaluate config loading, as soon as we have the new generic error screen
-		var unverifiedConf = loadConfig();
-		if (unverifiedConf.config() != null) {
-			stage.setScene(startScene().get());
-		} else {
-			stage.setScene(failScene().get());
-		}
+		stage.setScene(startScene().get());
 		stage.show();
 		return stage;
 	}
@@ -52,5 +41,4 @@ public interface HealthCheckComponent {
 		HealthCheckComponent build();
 	}
 
-	record LoadUnverifiedConfigResult(VaultConfig.UnverifiedVaultConfig config, Throwable error) {}
 }

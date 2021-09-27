@@ -23,12 +23,11 @@ import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.cryptomator.common.Constants.CRYPTOMATOR_FILENAME_EXT;
 import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
 import static org.cryptomator.common.Constants.VAULTCONFIG_FILENAME;
 
@@ -55,7 +54,7 @@ public class MainWindowController implements FxController {
 
 	@FXML
 	public void initialize() {
-		LOG.debug("init MainWindowController");
+		LOG.trace("init MainWindowController");
 		root.setOnDragEntered(this::handleDragEvent);
 		root.setOnDragOver(this::handleDragEvent);
 		root.setOnDragDropped(this::handleDragEvent);
@@ -96,6 +95,9 @@ public class MainWindowController implements FxController {
 
 	private boolean containsVault(Path path) {
 		try {
+			if (path.getFileName().toString().endsWith(CRYPTOMATOR_FILENAME_EXT)) {
+				path = path.getParent();
+			}
 			return CryptoFileSystemProvider.checkDirStructureForVault(path, VAULTCONFIG_FILENAME, MASTERKEY_FILENAME) != DirStructure.UNRELATED;
 		} catch (IOException e) {
 			return false;
@@ -104,7 +106,7 @@ public class MainWindowController implements FxController {
 
 	private void addVault(Path pathToVault) {
 		try {
-			if (pathToVault.getFileName().toString().equals(VAULTCONFIG_FILENAME)) {
+			if (pathToVault.getFileName().toString().endsWith(CRYPTOMATOR_FILENAME_EXT)) {
 				vaultListManager.add(pathToVault.getParent());
 			} else {
 				vaultListManager.add(pathToVault);

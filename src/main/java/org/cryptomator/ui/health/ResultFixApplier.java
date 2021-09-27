@@ -50,7 +50,7 @@ class ResultFixApplier {
 
 	public void fix(DiagnosticResult diagnosis) {
 		Preconditions.checkArgument(diagnosis.getSeverity() == DiagnosticResult.Severity.WARN, "Unfixable result");
-		try (var masterkeyClone = masterkey.clone(); //
+		try (var masterkeyClone = masterkey.copy(); //
 			 var cryptor = CryptorProvider.forScheme(vaultConfig.getCipherCombo()).provide(masterkeyClone, csprng)) {
 			diagnosis.fix(vaultPath, vaultConfig, masterkeyClone, cryptor);
 		} catch (Exception e) {

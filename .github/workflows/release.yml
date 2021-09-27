@@ -97,7 +97,7 @@ jobs:
           echo "::set-output name=semVerNum::${SEM_VER_NUM}"
           echo "::set-output name=ppaVerStr::${SEM_VER_STR/-/\~}-${REVCOUNT}"
           echo "::set-output name=revNum::${REVCOUNT}"
-      - uses: rubenesp87/semver-validation-action@0.0.6
+      - uses: skymatic/semver-validation-action@v1
         with:
           version: ${{ steps.versions.outputs.semVerStr }}
 
@@ -283,7 +283,7 @@ jobs:
         run: |
           mv appdir/Cryptomator Cryptomator.AppDir
           cp -r dist/linux/appimage/resources/AppDir/* Cryptomator.AppDir/
-          envsubst '${REVISION_NO}' < dist/linux/appimage/resources/AppDir/bin/cryptomator.sh > Cryptomator.AppDir/bin/cryptomator.sh
+          envsubst '${REVISION_NO} ${SEMVER_STR}' < dist/linux/appimage/resources/AppDir/bin/cryptomator.sh > Cryptomator.AppDir/bin/cryptomator.sh
           ln -s usr/share/icons/hicolor/scalable/apps/org.cryptomator.Cryptomator.svg Cryptomator.AppDir/org.cryptomator.Cryptomator.svg
           ln -s usr/share/icons/hicolor/scalable/apps/org.cryptomator.Cryptomator.svg Cryptomator.AppDir/Cryptomator.svg
           ln -s usr/share/icons/hicolor/scalable/apps/org.cryptomator.Cryptomator.svg Cryptomator.AppDir/.DirIcon
@@ -291,6 +291,7 @@ jobs:
           ln -s bin/cryptomator.sh Cryptomator.AppDir/AppRun
         env:
           REVISION_NO: ${{ needs.metadata.outputs.revNum }}
+          SEMVER_STR: ${{ needs.metadata.outputs.semVerStr }}
       - name: Extract libjffi.so # workaround for https://github.com/cryptomator/cryptomator-linux/issues/27
         run: |
           JFFI_NATIVE_JAR=`ls lib/app/ | grep -e 'jffi-[1-9]\.[0-9]\{1,2\}.[0-9]\{1,2\}-native.jar'`
