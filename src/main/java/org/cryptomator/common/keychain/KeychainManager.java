@@ -39,6 +39,11 @@ public class KeychainManager implements KeychainAccessProvider {
 	}
 
 	@Override
+	public String displayName() {
+		return getClass().getName();
+	}
+
+	@Override
 	public void storePassphrase(String key, CharSequence passphrase) throws KeychainAccessException {
 		getKeychainOrFail().storePassphrase(key, passphrase);
 		setPassphraseStored(key, true);

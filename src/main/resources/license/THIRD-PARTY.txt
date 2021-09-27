@@ -17,10 +17,10 @@ Cryptomator uses 40 third-party dependencies under the following licenses:
 			- jnr-a64asm (com.github.jnr:jnr-a64asm:1.0.0 - http://nexus.sonatype.org/oss-repository-hosting.html/jnr-a64asm)
 			- jnr-constants (com.github.jnr:jnr-constants:0.9.15 - http://github.com/jnr/jnr-constants)
 			- jnr-ffi (com.github.jnr:jnr-ffi:2.1.12 - http://github.com/jnr/jnr-ffi)
-			- Gson (com.google.code.gson:gson:2.8.7 - https://github.com/google/gson/gson)
+			- Gson (com.google.code.gson:gson:2.8.8 - https://github.com/google/gson/gson)
 			- Dagger (com.google.dagger:dagger:2.38.1 - https://github.com/google/dagger)
 			- Guava InternalFutureFailureAccess and InternalFutures (com.google.guava:failureaccess:1.0.1 - https://github.com/google/guava/failureaccess)
-			- Guava: Google Core Libraries for Java (com.google.guava:guava:30.1.1-jre - https://github.com/google/guava/guava)
+			- Guava: Google Core Libraries for Java (com.google.guava:guava:31.0-jre - https://github.com/google/guava)
 			- Apache Commons CLI (commons-cli:commons-cli:1.4 - http://commons.apache.org/proper/commons-cli/)
 			- javax.inject (javax.inject:javax.inject:1 - http://code.google.com/p/atinject/)
 			- Apache Commons Lang (org.apache.commons:commons-lang3:3.12.0 - https://commons.apache.org/proper/commons-lang/)
@@ -52,31 +52,31 @@ Cryptomator uses 40 third-party dependencies under the following licenses:
 			- Jetty :: Servlet Handling (org.eclipse.jetty:jetty-servlet:10.0.6 - https://eclipse.org/jetty/jetty-servlet)
 			- Jetty :: Utilities (org.eclipse.jetty:jetty-util:10.0.6 - https://eclipse.org/jetty/jetty-util)
         Eclipse Public License - v 1.0:
-			- Logback Classic Module (ch.qos.logback:logback-classic:1.2.3 - http://logback.qos.ch/logback-classic)
-			- Logback Core Module (ch.qos.logback:logback-core:1.2.3 - http://logback.qos.ch/logback-core)
+			- Logback Classic Module (ch.qos.logback:logback-classic:1.2.6 - http://logback.qos.ch/logback-classic)
+			- Logback Core Module (ch.qos.logback:logback-core:1.2.6 - http://logback.qos.ch/logback-core)
         Eclipse Public License - v 2.0:
 			- jnr-posix (com.github.jnr:jnr-posix:3.0.54 - http://nexus.sonatype.org/oss-repository-hosting.html/jnr-posix)
         GNU Lesser General Public License:
-			- Logback Classic Module (ch.qos.logback:logback-classic:1.2.3 - http://logback.qos.ch/logback-classic)
-			- Logback Core Module (ch.qos.logback:logback-core:1.2.3 - http://logback.qos.ch/logback-core)
+			- Logback Classic Module (ch.qos.logback:logback-classic:1.2.6 - http://logback.qos.ch/logback-classic)
+			- Logback Core Module (ch.qos.logback:logback-core:1.2.6 - http://logback.qos.ch/logback-core)
         GPLv2:
 			- jnr-posix (com.github.jnr:jnr-posix:3.0.54 - http://nexus.sonatype.org/oss-repository-hosting.html/jnr-posix)
         GPLv2+CE:
-			- javafx-base (org.openjfx:javafx-base:16 - https://openjdk.java.net/projects/openjfx/javafx-base/)
-			- javafx-controls (org.openjfx:javafx-controls:16 - https://openjdk.java.net/projects/openjfx/javafx-controls/)
-			- javafx-fxml (org.openjfx:javafx-fxml:16 - https://openjdk.java.net/projects/openjfx/javafx-fxml/)
-			- javafx-graphics (org.openjfx:javafx-graphics:16 - https://openjdk.java.net/projects/openjfx/javafx-graphics/)
+			- javafx-base (org.openjfx:javafx-base:17.0.0.1 - https://openjdk.java.net/projects/openjfx/javafx-base/)
+			- javafx-controls (org.openjfx:javafx-controls:17.0.0.1 - https://openjdk.java.net/projects/openjfx/javafx-controls/)
+			- javafx-fxml (org.openjfx:javafx-fxml:17.0.0.1 - https://openjdk.java.net/projects/openjfx/javafx-fxml/)
+			- javafx-graphics (org.openjfx:javafx-graphics:17.0.0.1 - https://openjdk.java.net/projects/openjfx/javafx-graphics/)
         LGPL 2.1:
 			- jnr-posix (com.github.jnr:jnr-posix:3.0.54 - http://nexus.sonatype.org/oss-repository-hosting.html/jnr-posix)
         LGPL-2.1-or-later:
 			- Java Native Access (net.java.dev.jna:jna:5.9.0 - https://github.com/java-native-access/jna)
 			- Java Native Access Platform (net.java.dev.jna:jna-platform:5.9.0 - https://github.com/java-native-access/jna)
         MIT License:
-			- java jwt (com.auth0:java-jwt:3.18.1 - https://github.com/auth0/java-jwt)
+			- java jwt (com.auth0:java-jwt:3.18.2 - https://github.com/auth0/java-jwt)
 			- jnr-x86asm (com.github.jnr:jnr-x86asm:1.0.2 - http://github.com/jnr/jnr-x86asm)
 			- jnr-fuse (com.github.serceman:jnr-fuse:0.5.5 - https://github.com/SerCeMan/jnr-fuse)
 			- zxcvbn4j (com.nulab-inc:zxcvbn:1.5.2 - https://github.com/nulab/zxcvbn4j)
-			- SLF4J API Module (org.slf4j:slf4j-api:1.7.31 - http://www.slf4j.org)
+			- SLF4J API Module (org.slf4j:slf4j-api:1.7.32 - http://www.slf4j.org)
         The BSD 2-Clause License:
 			- EasyBind (com.tobiasdiez:easybind:2.2 - https://github.com/tobiasdiez/EasyBind)
 
