@@ -37,14 +37,14 @@ ${JAVA_HOME}/bin/jpackage \
     --copyright "(C) 2016 - 2021 Skymatic GmbH" \
     --java-options "-Xss5m" \
     --java-options "-Xmx256m" \
-    --app-version "$VERSION" \
+    --app-version "${VERSION}.${REVISION_NO}" \
     --java-options "-Dfile.encoding=\"utf-8\"" \
     --java-options "-Dcryptomator.logDir=\"~/.local/share/Cryptomator/logs\"" \
     --java-options "-Dcryptomator.settingsPath=\"~/.config/Cryptomator/settings.json:~/.Cryptomator/settings.json\"" \
     --java-options "-Dcryptomator.ipcSocketPath=\"~/.config/Cryptomator/ipc.socket\"" \
     --java-options "-Dcryptomator.mountPointsDir=\"~/.local/share/Cryptomator/mnt\"" \
     --java-options "-Dcryptomator.showTrayIcon=false" \
-    --java-options "-Dcryptomator.buildNumber=\"appimage-$VERSION\"" \
+    --java-options "-Dcryptomator.buildNumber=\"appimage-${REVISION_NO}\"" \
     --resource-dir ../resources
 
 # transform AppDir
