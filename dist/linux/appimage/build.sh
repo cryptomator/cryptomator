@@ -2,12 +2,13 @@
 
 cd $(dirname $0)
 REVISION_NO=`git rev-list --count HEAD`
-VERSION=$(mvn org.apache.maven.plugins:maven-help-plugin:3.1.0:evaluate -Dexpression=project.version -q -DforceStdout)
 
 # check preconditions
 if [ -z "${JAVA_HOME}" ]; then echo "JAVA_HOME not set. Run using JAVA_HOME=/path/to/jdk ./build.sh"; exit 1; fi
 command -v mvn >/dev/null 2>&1 || { echo >&2 "mvn not found."; exit 1; }
 command -v curl >/dev/null 2>&1 || { echo >&2 "curl not found."; exit 1; }
+
+VERSION=$(mvn -f ../../../pom.xml help:evaluate -Dexpression=project.version -q -DforceStdout)
 
 # compile
 mvn -B -f ../../../pom.xml clean package -DskipTests -Plinux
