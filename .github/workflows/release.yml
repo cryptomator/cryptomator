@@ -592,7 +592,7 @@ jobs:
           GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
       - name: Compute SHA256 checksums of release artifacts
         run: |
-          SHA256_SUMS=`find . -name "*.AppImage" -o -name "*.dmg" -o -name "*.msi" -name "*.tar.gz" | xargs sha256sum`
+          SHA256_SUMS=`find . -name "*.AppImage" -o -name "*.dmg" -o -name "*.msi" -o -name "*.tar.gz" | xargs sha256sum`
           echo "SHA256_SUMS<<EOF" >> $GITHUB_ENV
           echo "${SHA256_SUMS}" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
