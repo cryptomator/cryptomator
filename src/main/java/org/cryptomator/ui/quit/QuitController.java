@@ -30,6 +30,8 @@ public class QuitController implements FxController {
 	private final ExecutorService executorService;
 	private final VaultService vaultService;
 	private final AtomicReference<QuitResponse> quitResponse = new AtomicReference<>();
+
+	/* FXML */
 	public Button lockAndQuitButton;
 
 	@Inject

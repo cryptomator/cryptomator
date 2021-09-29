@@ -12,12 +12,12 @@ import java.awt.GraphicsEnvironment;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-class SecurePasswordFieldTest {
+public class SecurePasswordFieldTest {
 
 	private SecurePasswordField pwField = new SecurePasswordField();
 
 	@BeforeAll
-	static void initJavaFx() throws InterruptedException {
+	public static void initJavaFx() throws InterruptedException {
 		Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
 		final CountDownLatch latch = new CountDownLatch(1);
 		Platform.startup(latch::countDown);
@@ -29,7 +29,7 @@ class SecurePasswordFieldTest {
 
 	@Nested
 	@DisplayName("Content Update Events")
-	class TextChange {
+	public class TextChange {
 
 		@Test
 		@DisplayName("\"ant\".append(\"eater\")")
@@ -49,6 +49,7 @@ class SecurePasswordFieldTest {
 			Assertions.assertEquals("anteater", pwField.getCharacters().toString());
 		}
 
+		@SuppressWarnings("SpellCheckingInspection")
 		@Test
 		@DisplayName("\"anteater\".insert(3, \"b\")")
 		public void insert2() {
@@ -76,6 +77,7 @@ class SecurePasswordFieldTest {
 			Assertions.assertEquals("ant", pwField.getCharacters().toString());
 		}
 
+		@SuppressWarnings("SpellCheckingInspection")
 		@Test
 		@DisplayName("\"anteater\".replace(0, 3, \"hand\")")
 		public void replace1() {
@@ -85,6 +87,7 @@ class SecurePasswordFieldTest {
 			Assertions.assertEquals("handeater", pwField.getCharacters().toString());
 		}
 
+		@SuppressWarnings("SpellCheckingInspection")
 		@Test
 		@DisplayName("\"anteater\".replace(3, 6, \"keep\")")
 		public void replace2() {
@@ -94,6 +97,7 @@ class SecurePasswordFieldTest {
 			Assertions.assertEquals("antkeeper", pwField.getCharacters().toString());
 		}
 
+		@SuppressWarnings("SpellCheckingInspection")
 		@Test
 		@DisplayName("\"anteater\".replace(0, 3, \"bee\")")
 		public void replace3() {
@@ -105,6 +109,7 @@ class SecurePasswordFieldTest {
 
 	}
 
+	@SuppressWarnings("SpellCheckingInspection")
 	@Test
 	@DisplayName("entering NFC string leads to NFC char[]")
 	public void enterNfcString() {
@@ -125,6 +130,7 @@ class SecurePasswordFieldTest {
 		Assertions.assertEquals('\uDCA9', result.charAt(9));
 	}
 
+	@SuppressWarnings("SpellCheckingInspection")
 	@Test
 	@DisplayName("entering NFD string leads to NFC char[]")
 	public void enterNfdString() {

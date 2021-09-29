@@ -44,6 +44,7 @@ public class SettingsJsonAdapterTest {
 		Assertions.assertEquals(VolumeImpl.FUSE, settings.preferredVolumeImpl().get());
 	}
 
+	@SuppressWarnings("SpellCheckingInspection")
 	@ParameterizedTest(name = "fromJson() should throw IOException for input: {0}")
 	@ValueSource(strings = { //
 			"", //

@@ -24,6 +24,6 @@ class AvailableDriveLetterChooser implements MountPointChooser {
 
 	@Override
 	public Optional<Path> chooseMountPoint(Volume caller) {
-		return this.windowsDriveLetters.getAvailableDriveLetterPath();
+		return this.windowsDriveLetters.getDesiredAvailableDriveLetterPath();
 	}
 }

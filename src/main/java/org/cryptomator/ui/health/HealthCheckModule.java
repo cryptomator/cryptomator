@@ -17,8 +17,8 @@ import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.StageFactory;
 import org.cryptomator.ui.keyloading.KeyLoadingComponent;
 import org.cryptomator.ui.keyloading.KeyLoadingStrategy;
-import org.cryptomator.ui.mainwindow.MainWindow;
 
+import javax.inject.Named;
 import javax.inject.Provider;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -26,8 +26,8 @@ import javafx.beans.value.ChangeListener;
 import javafx.scene.Scene;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import java.security.SecureRandom;
-import java.util.Collection;
+import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -50,27 +50,20 @@ abstract class HealthCheckModule {
 
 	@Provides
 	@HealthCheckScoped
-	static Collection<HealthCheck> provideAvailableHealthChecks() {
-		return HealthCheck.allChecks();
-	}
-
-	@Provides
-	@HealthCheckScoped
-	static ObjectProperty<HealthCheckTask> provideSelectedHealthCheckTask() {
+	static ObjectProperty<Check> provideSelectedCheck() {
 		return new SimpleObjectProperty<>();
 	}
 
-	/* Only inject with Lazy-Wrapper!*/
 	@Provides
 	@HealthCheckScoped
-	static Collection<HealthCheckTask> provideAvailableHealthCheckTasks(Collection<HealthCheck> availableHealthChecks, @HealthCheckWindow Vault vault, AtomicReference<Masterkey> masterkeyRef, AtomicReference<VaultConfig> vaultConfigRef, SecureRandom csprng, ResourceBundle resourceBundle) {
-		return availableHealthChecks.stream().map(check -> new HealthCheckTask(vault.getPath(), vaultConfigRef.get(), masterkeyRef.get(), csprng, check, resourceBundle)).toList();
+	static List<Check> provideAvailableChecks() {
+		return HealthCheck.allChecks().stream().map(Check::new).toList();
 	}
 
 	@Provides
 	@HealthCheckWindow
 	@HealthCheckScoped
-	static KeyLoadingStrategy provideKeyLoadingStrategy(KeyLoadingComponent.Builder compBuilder, @HealthCheckWindow Vault vault, @HealthCheckWindow Stage window) {
+	static KeyLoadingStrategy provideKeyLoadingStrategy(KeyLoadingComponent.Builder compBuilder, @HealthCheckWindow Vault vault, @Named("unlockWindow") Stage window ) {
 		return compBuilder.vault(vault).window(window).build().keyloadingStrategy();
 	}
 
@@ -82,14 +75,26 @@ abstract class HealthCheckModule {
 	}
 
 	@Provides
+	@Named("unlockWindow")
+	@HealthCheckScoped
+	static Stage provideUnlockWindow (@HealthCheckWindow Stage window, @HealthCheckWindow Vault vault, StageFactory factory, ResourceBundle resourceBundle) {
+		Stage stage = factory.create();
+		stage.initModality(Modality.WINDOW_MODAL);
+		stage.initOwner(window);
+		stage.setTitle(String.format(resourceBundle.getString("unlock.title"), vault.getDisplayName()));
+		stage.setResizable(false);
+		return stage;
+	}
+
+	@Provides
 	@HealthCheckWindow
 	@HealthCheckScoped
-	static Stage provideStage(StageFactory factory, @MainWindow Stage owner, ResourceBundle resourceBundle, ChangeListener<Boolean> showingListener) {
+	static Stage provideStage(StageFactory factory, @Named("healthCheckOwner") Stage owner, @HealthCheckWindow Vault vault, ChangeListener<Boolean> showingListener, ResourceBundle resourceBundle) {
 		Stage stage = factory.create();
-		stage.setTitle(resourceBundle.getString("health.title"));
-		stage.setResizable(true);
 		stage.initModality(Modality.WINDOW_MODAL);
 		stage.initOwner(owner);
+		stage.setTitle(String.format(resourceBundle.getString("health.title"), vault.getDisplayName()));
+		stage.setResizable(true);
 		stage.showingProperty().addListener(showingListener); // bind masterkey lifecycle to window
 		return stage;
 	}
@@ -138,4 +143,8 @@ abstract class HealthCheckModule {
 	@FxControllerKey(ResultListCellController.class)
 	abstract FxController bindResultListCellController(ResultListCellController controller);
 
+	@Binds
+	@IntoMap
+	@FxControllerKey(CheckListCellController.class)
+	abstract FxController bindCheckListCellController(CheckListCellController controller);
 }

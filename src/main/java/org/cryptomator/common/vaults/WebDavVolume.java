@@ -67,10 +67,10 @@ public class WebDavVolume implements Volume {
 			throw new IllegalStateException("Mounting requires unlocked WebDAV servlet.");
 		}
 
-		//on windows, prevent an automatic drive letter selection in the upstream library. Either we choose already a specifc one or there is no free.
+		//on windows, prevent an automatic drive letter selection in the upstream library. Either we choose already a specific one or there is no free.
 		Supplier<String> driveLetterSupplier;
 		if (System.getProperty("os.name").toLowerCase().contains("windows") && vaultSettings.winDriveLetter().isEmpty().get()) {
-			driveLetterSupplier = () -> windowsDriveLetters.getAvailableDriveLetter().orElse(null);
+			driveLetterSupplier = () -> windowsDriveLetters.getDesiredAvailableDriveLetter().orElse(null);
 		} else {
 			driveLetterSupplier = () -> vaultSettings.winDriveLetter().get();
 		}

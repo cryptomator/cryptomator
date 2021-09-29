@@ -11,12 +11,11 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import javafx.application.Platform;
 import java.io.IOException;
-import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 
-import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
+import static org.cryptomator.common.Constants.CRYPTOMATOR_FILENAME_EXT;
 
 @Singleton
 class AppLaunchEventHandler {
@@ -64,12 +63,12 @@ class AppLaunchEventHandler {
 		}
 	}
 
-	// TODO dedup MainWindowController...
+	// TODO deduplicate MainWindowController...
 	private void addOrRevealVault(Path potentialVaultPath) {
 		assert Platform.isFxApplicationThread();
 		try {
 			final Vault v;
-			if (potentialVaultPath.getFileName().toString().equals(MASTERKEY_FILENAME)) {
+			if (potentialVaultPath.getFileName().toString().endsWith(CRYPTOMATOR_FILENAME_EXT)) {
 				v = vaultListManager.add(potentialVaultPath.getParent());
 			} else {
 				v = vaultListManager.add(potentialVaultPath);

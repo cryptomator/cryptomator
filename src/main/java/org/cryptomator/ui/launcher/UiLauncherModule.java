@@ -2,6 +2,7 @@ package org.cryptomator.ui.launcher;
 
 import dagger.Module;
 import dagger.Provides;
+import org.cryptomator.common.PluginClassLoader;
 import org.cryptomator.integrations.autostart.AutoStartProvider;
 import org.cryptomator.integrations.tray.TrayIntegrationProvider;
 import org.cryptomator.integrations.uiappearance.UiAppearanceProvider;
@@ -33,21 +34,21 @@ public abstract class UiLauncherModule {
 
 	@Provides
 	@Singleton
-	static Optional<UiAppearanceProvider> provideAppearanceProvider() {
-		return ServiceLoader.load(UiAppearanceProvider.class).findFirst();
+	static Optional<UiAppearanceProvider> provideAppearanceProvider(PluginClassLoader classLoader) {
+		return ServiceLoader.load(UiAppearanceProvider.class, classLoader).findFirst();
 	}
 
 	@Provides
 	@Singleton
-	static Optional<AutoStartProvider> provideAutostartProvider() {
-		return ServiceLoader.load(AutoStartProvider.class).findFirst();
+	static Optional<AutoStartProvider> provideAutostartProvider(PluginClassLoader classLoader) {
+		return ServiceLoader.load(AutoStartProvider.class, classLoader).findFirst();
 	}
 
 
 	@Provides
 	@Singleton
-	static Optional<TrayIntegrationProvider> provideTrayIntegrationProvider() {
-		return ServiceLoader.load(TrayIntegrationProvider.class).findFirst();
+	static Optional<TrayIntegrationProvider> provideTrayIntegrationProvider(PluginClassLoader classLoader) {
+		return ServiceLoader.load(TrayIntegrationProvider.class, classLoader).findFirst();
 	}
 
 	@Provides

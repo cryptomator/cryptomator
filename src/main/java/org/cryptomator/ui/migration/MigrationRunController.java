@@ -66,7 +66,10 @@ public class MigrationRunController implements FxController {
 	private final Lazy<Scene> capabilityErrorScene;
 	private final BooleanProperty migrationButtonDisabled;
 	private final DoubleProperty migrationProgress;
+
 	private volatile double volatileMigrationProgress = -1.0;
+
+	/* FXML */
 	public NiceSecurePasswordField passwordField;
 
 	@Inject

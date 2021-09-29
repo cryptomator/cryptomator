@@ -30,7 +30,7 @@ public class Settings {
 	public static final int MIN_PORT = 1024;
 	public static final int MAX_PORT = 65535;
 	public static final boolean DEFAULT_ASKED_FOR_UPDATE_CHECK = false;
-	public static final boolean DEFAULT_CHECK_FOR_UDPATES = false;
+	public static final boolean DEFAULT_CHECK_FOR_UPDATES = false;
 	public static final boolean DEFAULT_START_HIDDEN = false;
 	public static final int DEFAULT_PORT = 42427;
 	public static final int DEFAULT_NUM_TRAY_NOTIFICATIONS = 3;
@@ -43,10 +43,12 @@ public class Settings {
 	public static final NodeOrientation DEFAULT_USER_INTERFACE_ORIENTATION = NodeOrientation.LEFT_TO_RIGHT;
 	public static final String DEFAULT_LICENSE_KEY = "";
 	public static final boolean DEFAULT_SHOW_MINIMIZE_BUTTON = false;
+	public static final String DEFAULT_DISPLAY_CONFIGURATION = "";
+
 
 	private final ObservableList<VaultSettings> directories = FXCollections.observableArrayList(VaultSettings::observables);
 	private final BooleanProperty askedForUpdateCheck = new SimpleBooleanProperty(DEFAULT_ASKED_FOR_UPDATE_CHECK);
-	private final BooleanProperty checkForUpdates = new SimpleBooleanProperty(DEFAULT_CHECK_FOR_UDPATES);
+	private final BooleanProperty checkForUpdates = new SimpleBooleanProperty(DEFAULT_CHECK_FOR_UPDATES);
 	private final BooleanProperty startHidden = new SimpleBooleanProperty(DEFAULT_START_HIDDEN);
 	private final IntegerProperty port = new SimpleIntegerProperty(DEFAULT_PORT);
 	private final IntegerProperty numTrayNotifications = new SimpleIntegerProperty(DEFAULT_NUM_TRAY_NOTIFICATIONS);
@@ -59,6 +61,12 @@ public class Settings {
 	private final StringProperty licenseKey = new SimpleStringProperty(DEFAULT_LICENSE_KEY);
 	private final BooleanProperty showMinimizeButton = new SimpleBooleanProperty(DEFAULT_SHOW_MINIMIZE_BUTTON);
 	private final BooleanProperty showTrayIcon;
+	private final IntegerProperty windowXPosition = new SimpleIntegerProperty();
+	private final IntegerProperty windowYPosition = new SimpleIntegerProperty();
+	private final IntegerProperty windowWidth = new SimpleIntegerProperty();
+	private final IntegerProperty windowHeight = new SimpleIntegerProperty();
+	private final ObjectProperty<String> displayConfiguration = new SimpleObjectProperty<>(DEFAULT_DISPLAY_CONFIGURATION);
+
 
 	private Consumer<Settings> saveCmd;
 
@@ -83,6 +91,11 @@ public class Settings {
 		licenseKey.addListener(this::somethingChanged);
 		showMinimizeButton.addListener(this::somethingChanged);
 		showTrayIcon.addListener(this::somethingChanged);
+		windowXPosition.addListener(this::somethingChanged);
+		windowYPosition.addListener(this::somethingChanged);
+		windowWidth.addListener(this::somethingChanged);
+		windowHeight.addListener(this::somethingChanged);
+		displayConfiguration.addListener(this::somethingChanged);
 	}
 
 	void setSaveCmd(Consumer<Settings> saveCmd) {
@@ -141,7 +154,7 @@ public class Settings {
 		return theme;
 	}
 
-	public ObjectProperty<String> keychainProvider() { return keychainProvider; }
+	public ObjectProperty<String> keychainProvider() {return keychainProvider;}
 
 	public ObjectProperty<NodeOrientation> userInterfaceOrientation() {
 		return userInterfaceOrientation;
@@ -157,5 +170,25 @@ public class Settings {
 
 	public BooleanProperty showTrayIcon() {
 		return showTrayIcon;
+	}
+
+	public IntegerProperty windowXPositionProperty() {
+		return windowXPosition;
+	}
+
+	public IntegerProperty windowYPositionProperty() {
+		return windowYPosition;
+	}
+
+	public IntegerProperty windowWidthProperty() {
+		return windowWidth;
+	}
+
+	public IntegerProperty windowHeightProperty() {
+		return windowHeight;
+	}
+
+	public ObjectProperty<String> displayConfigurationProperty() {
+		return displayConfiguration;
 	}
 }

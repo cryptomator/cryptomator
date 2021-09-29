@@ -21,8 +21,8 @@ public class FontAwesome5IconView extends Text {
 	private static final String FONT_PATH = "/css/fontawesome5-free-solid.otf";
 	private static final Font FONT;
 
-	private ObjectProperty<FontAwesome5Icon> glyph = new SimpleObjectProperty<>(this, "glyph", DEFAULT_GLYPH);
-	private DoubleProperty glyphSize = new SimpleDoubleProperty(this, "glyphSize", DEFAULT_GLYPH_SIZE);
+	protected final ObjectProperty<FontAwesome5Icon> glyph = new SimpleObjectProperty<>(this, "glyph", DEFAULT_GLYPH);
+	protected final DoubleProperty glyphSize = new SimpleDoubleProperty(this, "glyphSize", DEFAULT_GLYPH_SIZE);
 
 	static {
 		try {
@@ -42,7 +42,7 @@ public class FontAwesome5IconView extends Text {
 	}
 
 	private void glyphChanged(@SuppressWarnings("unused") ObservableValue<? extends FontAwesome5Icon> observable, @SuppressWarnings("unused") FontAwesome5Icon oldValue, FontAwesome5Icon newValue) {
-		setText(newValue.unicode());
+		setText(newValue == null ? null : newValue.unicode());
 	}
 
 	private void glyphSizeChanged(@SuppressWarnings("unused") ObservableValue<? extends Number> observable, @SuppressWarnings("unused") Number oldValue, Number newValue) {

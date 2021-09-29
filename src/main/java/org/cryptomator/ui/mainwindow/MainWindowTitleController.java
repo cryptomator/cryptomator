@@ -16,6 +16,7 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.fxml.FXML;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 
@@ -53,20 +54,41 @@ public class MainWindowTitleController implements FxController {
 
 	@FXML
 	public void initialize() {
-		LOG.debug("init MainWindowTitleController");
+		LOG.trace("init MainWindowTitleController");
 		updateChecker.automaticallyCheckForUpdatesIfEnabled();
 		titleBar.setOnMousePressed(event -> {
 			xOffset = event.getSceneX();
 			yOffset = event.getSceneY();
+
+		});
+		titleBar.setOnMouseClicked(event -> {
+			if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
+				window.setFullScreen(!window.isFullScreen());
+			}
 		});
 		titleBar.setOnMouseDragged(event -> {
+			if (window.isFullScreen()) return;
 			window.setX(event.getScreenX() - xOffset);
 			window.setY(event.getScreenY() - yOffset);
 		});
+		titleBar.setOnDragDetected(mouseDragEvent -> {
+			titleBar.startFullDrag();
+		});
+		titleBar.setOnMouseDragReleased(mouseDragEvent -> {
+			saveWindowSettings();
+		});
+
 		window.setOnCloseRequest(event -> {
 			close();
 			event.consume();
 		});
+	}
+
+	private void saveWindowSettings() {
+		settings.windowYPositionProperty().setValue(window.getY());
+		settings.windowXPositionProperty().setValue(window.getX());
+		settings.windowWidthProperty().setValue(window.getWidth());
+		settings.windowHeightProperty().setValue(window.getHeight());
 	}
 
 	@FXML
@@ -129,7 +151,7 @@ public class MainWindowTitleController implements FxController {
 	}
 
 	public boolean isShowMinimizeButton() {
-		// always show the minimize button if no tray icon is present OR it is explicitily enabled
+		// always show the minimize button if no tray icon is present OR it is explicitly enabled
 		return !trayMenuInitialized || settings.showMinimizeButton().get();
 	}
 }

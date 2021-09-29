@@ -5,7 +5,7 @@
     </envs>
     <option name="MAIN_CLASS_NAME" value="org.cryptomator.launcher.Cryptomator" />
     <module name="cryptomator" />
-    <option name="VM_PARAMETERS" value="-Duser.language=en -Dcryptomator.settingsPath=&quot;~/Library/Application Support/Cryptomator-Dev/settings.json&quot; -Dcryptomator.ipcPortPath=&quot;~/Library/Application Support/Cryptomator-Dev/ipcPort.bin&quot; -Dcryptomator.logDir=&quot;~/Library/Logs/Cryptomator-Dev&quot; -Dcryptomator.showTrayIcon=true -Xss2m -Xmx512m -ea" />
+    <option name="VM_PARAMETERS" value="-Duser.language=en -Dcryptomator.settingsPath=&quot;~/Library/Application Support/Cryptomator-Dev/settings.json&quot; -Dcryptomator.ipcSocketPath=&quot;~/Library/Application Support/Cryptomator-Dev/ipc.socket&quot; -Dcryptomator.logDir=&quot;~/Library/Logs/Cryptomator-Dev&quot; -Dcryptomator.pluginDir=&quot;~/Library/Application Support/Cryptomator-Dev/Plugins&quot; -Dcryptomator.showTrayIcon=true -Xss2m -Xmx512m -ea" />
     <method v="2">
       <option name="Make" enabled="true" />
     </method>

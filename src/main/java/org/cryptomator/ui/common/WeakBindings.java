@@ -77,7 +77,7 @@ public final class WeakBindings {
 	 * @param observable The observable
 	 * @return a IntegerBinding weakly referenced from the given observable
 	 */
-	public static IntegerBinding bindInterger(ObservableValue<Number> observable) {
+	public static IntegerBinding bindInteger(ObservableValue<Number> observable) {
 		return new IntegerBinding() {
 			{
 				bind(observable);

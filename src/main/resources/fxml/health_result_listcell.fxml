@@ -6,6 +6,7 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
 <HBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.health.ResultListCellController"
@@ -18,12 +19,14 @@
 		<Insets topRightBottomLeft="6"/>
 	</padding>
 	<children>
-		<FontAwesome5IconView fx:id="iconView" HBox.hgrow="NEVER" glyphSize="16"/>
+		<StackPane minWidth="25" minHeight="25">
+			<FontAwesome5IconView fx:id="severityView" HBox.hgrow="NEVER" glyphSize="16" glyph="${controller.severityGlyph}"/>
+		</StackPane>
 		<Label text="${controller.description}"/>
 		<Region HBox.hgrow="ALWAYS"/>
-		<!-- TODO: setting the minWidth of the button is just a workaround.
-		           What we actually want to do is to prevent shrinking the button more than the text
-		           -> own subclass of HBox is needed -->
-		<Button fx:id="actionButton" text="%health.check.fixBtn" onAction="#runResultAction" alignment="CENTER" visible="false" minWidth="-Infinity"/>
+		<StackPane HBox.hgrow="NEVER">
+				<Button fx:id="fixButton" text="%health.fix.fixBtn" visible="${controller.fixable}" onAction="#fix" alignment="CENTER" minWidth="-Infinity"/>
+				<FontAwesome5IconView fx:id="fixView" styleClass="glyph-icon-muted" glyph="${controller.fixGlyph}" glyphSize="16" visible="${controller.fixRunningOrDone}" managed="${controller.fixRunningOrDone}"/>
+		</StackPane>
 	</children>
 </HBox>

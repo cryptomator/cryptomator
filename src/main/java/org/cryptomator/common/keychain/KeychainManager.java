@@ -39,6 +39,11 @@ public class KeychainManager implements KeychainAccessProvider {
 	}
 
 	@Override
+	public String displayName() {
+		return getClass().getName();
+	}
+
+	@Override
 	public void storePassphrase(String key, CharSequence passphrase) throws KeychainAccessException {
 		getKeychainOrFail().storePassphrase(key, passphrase);
 		setPassphraseStored(key, true);
@@ -59,8 +64,10 @@ public class KeychainManager implements KeychainAccessProvider {
 
 	@Override
 	public void changePassphrase(String key, CharSequence passphrase) throws KeychainAccessException {
-		getKeychainOrFail().changePassphrase(key, passphrase);
-		setPassphraseStored(key, true);
+		if (isPassphraseStored(key)) {
+			getKeychainOrFail().changePassphrase(key, passphrase);
+			setPassphraseStored(key, true);
+		}
 	}
 
 	@Override

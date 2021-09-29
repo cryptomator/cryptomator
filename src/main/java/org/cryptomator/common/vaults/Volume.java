@@ -12,7 +12,7 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 /**
- * Takes a Volume and usess it to mount an unlocked vault
+ * Takes a Volume and uses it to mount an unlocked vault
  */
 public interface Volume {
 
@@ -24,7 +24,7 @@ public interface Volume {
 	boolean isSupported();
 
 	/**
-	 * Gets the coresponding enum type of the {@link VolumeImpl volume implementation ("VolumeImpl")} that is implemented by this Volume.
+	 * Gets the corresponding enum type of the {@link VolumeImpl volume implementation ("VolumeImpl")} that is implemented by this Volume.
 	 *
 	 * @return the type of implementation as defined by the {@link VolumeImpl VolumeImpl enum}
 	 */

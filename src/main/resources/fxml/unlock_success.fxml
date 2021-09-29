@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import org.cryptomator.ui.controls.FontAwesome5IconView?>
+<?import org.cryptomator.ui.controls.FontAwesome5Spinner?>
 <?import org.cryptomator.ui.controls.FormattedLabel?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ButtonBar?>
 <?import javafx.scene.control.CheckBox?>
-<?import javafx.scene.control.ProgressIndicator?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
@@ -39,7 +39,7 @@
 					<Button text="%generic.button.done" ButtonBar.buttonData="CANCEL_CLOSE" cancelButton="true" onAction="#close"/>
 					<Button text="%unlock.success.revealBtn" ButtonBar.buttonData="FINISH" defaultButton="true" onAction="#revealAndClose" contentDisplay="${controller.revealButtonState}" disable="${controller.revealButtonDisabled}">
 						<graphic>
-							<ProgressIndicator progress="-1" prefWidth="12" prefHeight="12"/>
+							<FontAwesome5Spinner glyphSize="12"/>
 						</graphic>
 					</Button>
 				</buttons>

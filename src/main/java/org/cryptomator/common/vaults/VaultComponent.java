@@ -7,10 +7,10 @@ package org.cryptomator.common.vaults;
 
 import dagger.BindsInstance;
 import dagger.Subcomponent;
+import org.cryptomator.common.Nullable;
 import org.cryptomator.common.mountpoint.MountPointChooserModule;
 import org.cryptomator.common.settings.VaultSettings;
 
-import javax.annotation.Nullable;
 import javax.inject.Named;
 
 @PerVault
@@ -24,6 +24,9 @@ public interface VaultComponent {
 
 		@BindsInstance
 		Builder vaultSettings(VaultSettings vaultSettings);
+
+		@BindsInstance
+		Builder vaultConfigCache(VaultConfigCache configCache);
 
 		@BindsInstance
 		Builder initialVaultState(VaultState.Value vaultState);

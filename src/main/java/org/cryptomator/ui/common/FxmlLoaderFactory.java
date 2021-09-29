@@ -5,7 +5,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -26,11 +25,9 @@ public class FxmlLoaderFactory {
 	/**
 	 * @return A new FXMLLoader instance
 	 */
-	public FXMLLoader construct() {
-		FXMLLoader loader = new FXMLLoader();
-		loader.setControllerFactory(this::constructController);
-		loader.setResources(resourceBundle);
-		return loader;
+	private FXMLLoader construct(String fxmlResourceName) {
+		var url = getClass().getResource(fxmlResourceName);
+		return new FXMLLoader(url, resourceBundle, null, this::constructController);
 	}
 
 	/**
@@ -41,10 +38,8 @@ public class FxmlLoaderFactory {
 	 * @throws IOException if an error occurs while loading the FXML file
 	 */
 	public FXMLLoader load(String fxmlResourceName) throws IOException {
-		FXMLLoader loader = construct();
-		try (InputStream in = getClass().getResourceAsStream(fxmlResourceName)) {
-			loader.load(in);
-		}
+		FXMLLoader loader = construct(fxmlResourceName);
+		loader.load();
 		return loader;
 	}
 
@@ -67,8 +62,8 @@ public class FxmlLoaderFactory {
 		}
 		Parent root = loader.getRoot();
 		// TODO: discuss if we can remove language-specific stylesheets
-		// List<String> addtionalStyleSheets = Splitter.on(',').omitEmptyStrings().splitToList(resourceBundle.getString("additionalStyleSheets"));
-		// addtionalStyleSheets.forEach(styleSheet -> root.getStylesheets().add("/css/" + styleSheet));
+		// List<String> additionalStyleSheets = Splitter.on(',').omitEmptyStrings().splitToList(resourceBundle.getString("additionalStyleSheets"));
+		// additionalStyleSheets.forEach(styleSheet -> root.getStylesheets().add("/css/" + styleSheet));
 		return sceneFactory.apply(root);
 	}
 

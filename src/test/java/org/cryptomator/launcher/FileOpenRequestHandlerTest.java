@@ -21,6 +21,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
@@ -38,7 +39,7 @@ public class FileOpenRequestHandlerTest {
 	@Test
 	@DisplayName("./cryptomator.exe foo bar")
 	public void testOpenArgsWithCorrectPaths() {
-		inTest.handleLaunchArgs(new String[]{"foo", "bar"});
+		inTest.handleLaunchArgs(List.of("foo", "bar"));
 
 		AppLaunchEvent evt = queue.poll();
 		Assertions.assertNotNull(evt);
@@ -51,7 +52,7 @@ public class FileOpenRequestHandlerTest {
 	public void testOpenArgsWithIncorrectPaths() {
 		FileSystem fs = Mockito.mock(FileSystem.class);
 		Mockito.when(fs.getPath("foo")).thenThrow(new InvalidPathException("foo", "foo is not a path"));
-		inTest.handleLaunchArgs(fs, new String[]{"foo"});
+		inTest.handleLaunchArgs(fs, List.of("foo"));
 
 		AppLaunchEvent evt = queue.poll();
 		Assertions.assertNull(evt);
@@ -63,7 +64,7 @@ public class FileOpenRequestHandlerTest {
 		queue.add(new AppLaunchEvent(AppLaunchEvent.EventType.OPEN_FILE, Collections.emptyList()));
 		Assumptions.assumeTrue(queue.remainingCapacity() == 0);
 
-		inTest.handleLaunchArgs(new String[]{"foo"});
+		inTest.handleLaunchArgs(List.of("foo"));
 	}
 
 }

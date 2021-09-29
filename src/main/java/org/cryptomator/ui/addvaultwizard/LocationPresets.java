@@ -14,7 +14,7 @@ public class LocationPresets {
 	private static final String USER_HOME = System.getProperty("user.home");
 	private static final String[] ICLOUDDRIVE_LOCATIONS = {"~/Library/Mobile Documents/iCloud~com~setolabs~Cryptomator/Documents", "~/iCloudDrive/iCloud~com~setolabs~Cryptomator"};
 	private static final String[] DROPBOX_LOCATIONS = {"~/Dropbox"};
-	private static final String[] GDRIVE_LOCATIONS = {"~/Google Drive"};
+	private static final String[] GDRIVE_LOCATIONS = {"~/Google Drive/My Drive", "~/Google Drive"};
 	private static final String[] ONEDRIVE_LOCATIONS = {"~/OneDrive"};
 	private static final String[] MEGA_LOCATIONS = {"~/MEGA"};
 	private static final String[] PCLOUD_LOCATIONS = {"~/pCloudDrive"};

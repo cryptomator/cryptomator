@@ -1,0 +1,629 @@
+name: Installers and Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      semver:
+        description: 'SemVer'
+        required: true
+        default: '0.99.99-SNAPSHOT'
+  push:
+    tags: # see https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#filter-pattern-cheat-sheet
+    - '[0-9]+.[0-9]+.[0-9]+'
+    - '[0-9]+.[0-9]+.[0-9]+-*'
+
+env:
+  JAVA_VERSION: 16
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+
+#
+# Buildkit
+#
+  buildkit:
+    name: Build ${{ matrix.profile }}-buildkit
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+        - os: ubuntu-latest
+          profile: linux
+        - os: windows-latest
+          profile: win
+        - os: macos-latest
+          profile: mac
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-java@v1
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+      - uses: actions/cache@v2
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+      - name: Ensure to use tagged version
+        run: mvn versions:set -DnewVersion=${GITHUB_REF##*/} # use shell parameter expansion to strip of 'refs/tags'
+        if: startsWith(github.ref, 'refs/tags/')
+      - name: Build and Test
+        run: mvn -B clean package -Pdependency-check,${{ matrix.profile }}
+      - name: Patch buildkit
+        run: |
+          cp LICENSE.txt target
+          cp dist/${{ matrix.profile }}/launcher* target
+          cp target/cryptomator-*.jar target/mods
+      - name: Upload ${{ matrix.profile }}-buildkit
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.profile }}-buildkit
+          path: |
+            target/libs
+            target/mods
+            target/LICENSE.txt
+            target/launcher*
+          if-no-files-found: error
+
+#
+# Release Metadata
+#
+  metadata:
+    name: Determine Version Metadata
+    runs-on: ubuntu-latest
+    outputs:
+      semVerNum: ${{ steps.versions.outputs.semVerNum }}
+      semVerStr: ${{ steps.versions.outputs.semVerStr }}
+      ppaVerStr: ${{ steps.versions.outputs.ppaVerStr }}
+      revNum: ${{ steps.versions.outputs.revNum }}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - id: versions
+        run: |
+          if [[ $GITHUB_REF == refs/tags/* ]]; then
+            SEM_VER_STR=${GITHUB_REF##*/}
+          else
+            SEM_VER_STR=${{ github.event.inputs.semver }}
+          fi
+          SEM_VER_NUM=`echo ${SEM_VER_STR} | sed -E 's/([0-9]+\.[0-9]+\.[0-9]+).*/\1/'`
+          REVCOUNT=`git rev-list --count HEAD`
+          echo "::set-output name=semVerStr::${SEM_VER_STR}"
+          echo "::set-output name=semVerNum::${SEM_VER_NUM}"
+          echo "::set-output name=ppaVerStr::${SEM_VER_STR/-/\~}-${REVCOUNT}"
+          echo "::set-output name=revNum::${REVCOUNT}"
+      - uses: skymatic/semver-validation-action@v1
+        with:
+          version: ${{ steps.versions.outputs.semVerStr }}
+
+#
+# Application Directory
+#
+  appdir:
+    name: Create ${{ matrix.profile }}-appdir
+    needs: [buildkit, metadata]
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+        - os: ubuntu-latest
+          profile: linux
+          jpackageoptions: >
+            --app-version "${{ needs.metadata.outputs.semVerNum }}.${{ needs.metadata.outputs.revNum }}"
+            --java-options "-Dfile.encoding=\"utf-8\""
+            --java-options "-Dcryptomator.logDir=\"~/.local/share/Cryptomator/logs\""
+            --java-options "-Dcryptomator.pluginDir=\"~/.local/share/Cryptomator/plugins\""
+            --java-options "-Dcryptomator.settingsPath=\"~/.config/Cryptomator/settings.json:~/.Cryptomator/settings.json\""
+            --java-options "-Dcryptomator.ipcSocketPath=\"~/.config/Cryptomator/ipc.socket\""
+            --java-options "-Dcryptomator.mountPointsDir=\"~/.local/share/Cryptomator/mnt\""
+            --java-options "-Dcryptomator.showTrayIcon=false"
+            --java-options "-Dcryptomator.buildNumber=\"appimage-${{ needs.metadata.outputs.revNum }}\""
+            --resource-dir dist/linux/resources
+        - os: windows-latest
+          profile: win
+          jpackageoptions: >
+            --app-version "${{ needs.metadata.outputs.semVerNum }}.${{ needs.metadata.outputs.revNum }}"
+            --java-options "-Dfile.encoding=\"utf-8\""
+            --java-options "-Dcryptomator.logDir=\"~/AppData/Roaming/Cryptomator\""
+            --java-options "-Dcryptomator.pluginDir=\"~/AppData/Roaming/Cryptomator/Plugins\""
+            --java-options "-Dcryptomator.settingsPath=\"~/AppData/Roaming/Cryptomator/settings.json\""
+            --java-options "-Dcryptomator.ipcSocketPath=\"~/AppData/Roaming/Cryptomator/ipc.socket\""
+            --java-options "-Dcryptomator.keychainPath=\"~/AppData/Roaming/Cryptomator/keychain.json\""
+            --java-options "-Dcryptomator.mountPointsDir=\"~/Cryptomator\""
+            --java-options "-Dcryptomator.showTrayIcon=true"
+            --java-options "-Dcryptomator.buildNumber=\"msi-${{ needs.metadata.outputs.revNum }}\""
+            --resource-dir dist/win/resources
+            --icon dist/win/resources/Cryptomator.ico
+        - os: macos-latest
+          profile: mac
+          jpackageoptions: >
+            --app-version "${{ needs.metadata.outputs.semVerNum }}"
+            --java-options "-Dfile.encoding=\"utf-8\""
+            --java-options "-Dcryptomator.logDir=\"~/Library/Logs/Cryptomator\""
+            --java-options "-Dcryptomator.pluginDir=\"~/Library/Application Support/Cryptomator/Plugins\""
+            --java-options "-Dcryptomator.settingsPath=\"~/Library/Application Support/Cryptomator/settings.json\""
+            --java-options "-Dcryptomator.ipcSocketPath=\"~/Library/Application Support/Cryptomator/ipc.socket\""
+            --java-options "-Dcryptomator.showTrayIcon=true"
+            --java-options "-Dcryptomator.buildNumber=\"dmg-${{ needs.metadata.outputs.revNum }}\""
+            --mac-package-identifier org.cryptomator
+            --resource-dir dist/mac/resources
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-java@v1
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+      - name: Download ${{ matrix.profile }}-buildkit
+        uses: actions/download-artifact@v2
+        with:
+          name: ${{ matrix.profile }}-buildkit
+          path: buildkit
+      - name: Create Runtime Image
+        run: >
+          ${JAVA_HOME}/bin/jlink
+          --verbose
+          --output runtime
+          --module-path "${JAVA_HOME}/jmods"
+          --add-modules java.base,java.desktop,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.crypto.ec,jdk.accessibility
+          --no-header-files
+          --no-man-pages
+          --strip-debug
+          --compress=1
+      - name: Create App Directory
+        run: >
+          ${JAVA_HOME}/bin/jpackage
+          --verbose
+          --type app-image
+          --runtime-image runtime
+          --input buildkit/libs
+          --module-path buildkit/mods
+          --module org.cryptomator.desktop/org.cryptomator.launcher.Cryptomator
+          --dest appdir
+          --name Cryptomator
+          --vendor "Skymatic GmbH"
+          --copyright "(C) 2016 - 2021 Skymatic GmbH"
+          --java-options "-Xss5m"
+          --java-options "-Xmx256m"
+          --java-options "-Dcryptomator.appVersion=\"${{ needs.metadata.outputs.semVerStr }}\""
+          ${{ matrix.jpackageoptions }}
+      - name: Create appdir.tar
+        run: tar -cvf appdir.tar appdir
+      - name: Upload ${{ matrix.profile }}-appdir
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.profile }}-appdir
+          path: appdir.tar
+          if-no-files-found: error
+
+#
+# Linux PPA Source Package
+#
+  ppa:
+    name: Upload source package to PPA
+    needs: [buildkit, metadata]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: install build tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install debhelper devscripts dput
+      - name: Download linux-buildkit
+        uses: actions/download-artifact@v2
+        with:
+          name: linux-buildkit
+          path: pkgdir
+      - name: create orig.tar.gz
+        run: tar -cJf cryptomator_${{ needs.metadata.outputs.ppaVerStr }}.orig.tar.xz -C pkgdir .
+      - name: patch and rename pkgdir
+        run: |
+          cp -r dist/linux/debian/ pkgdir
+          cp -r dist/linux/resources/ pkgdir
+          export RFC2822_TIMESTAMP=`date --rfc-2822`
+          envsubst '${VERSION_STR} ${VERSION_NUM} ${REVISION_NUM}' < dist/linux/debian/rules > pkgdir/debian/rules
+          envsubst '${VERSION_STR}' < dist/linux/debian/org.cryptomator.Cryptomator.desktop > pkgdir/debian/org.cryptomator.Cryptomator.desktop
+          envsubst '${PPA_VERSION} ${RFC2822_TIMESTAMP}' < dist/linux/debian/changelog > pkgdir/debian/changelog
+          find . -name "*.jar" >> pkgdir/debian/source/include-binaries
+          mv pkgdir cryptomator_${{ needs.metadata.outputs.ppaVerStr }}
+        env:
+          VERSION_STR: ${{ needs.metadata.outputs.semVerStr }}
+          VERSION_NUM: ${{ needs.metadata.outputs.semVerNum }}
+          REVISION_NUM: ${{ needs.metadata.outputs.revNum }}
+          PPA_VERSION: ${{ needs.metadata.outputs.ppaVerStr }}-0ppa1
+      - name: import gpg key 615D449FE6E6A235
+        run: |
+          echo "${GPG_PRIVATE_KEY}" | gpg --batch --quiet --import
+          echo "${GPG_PASSPHRASE}" | gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --dry-run --sign dist/linux/debian/rules
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.RELEASES_GPG_PRIVATE_KEY }}
+          GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
+      - name: debuild
+        run: debuild -S -sa -d
+        env:
+          DEBSIGN_PROGRAM: gpg --batch --pinentry-mode loopback
+          DEBSIGN_KEYID: 615D449FE6E6A235
+        working-directory: cryptomator_${{ needs.metadata.outputs.ppaVerStr }}
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: linux-deb-source-package
+          path: |
+            cryptomator_*.dsc
+            cryptomator_*.orig.tar.xz
+            cryptomator_*.debian.tar.xz
+            cryptomator_*_source.changes
+            cryptomator_*_source.buildinfo
+      - name: dput to beta repo
+        run: dput ppa:sebastian-stenzel/cryptomator-beta cryptomator_${PPA_VERSION}_source.changes
+        env:
+          PPA_VERSION: ${{ needs.metadata.outputs.ppaVerStr }}-0ppa1
+
+#
+# Linux Cryptomator.AppImage
+# 
+  linux-appimage:
+    name: Build Cryptomator.AppImage
+    runs-on: ubuntu-latest
+    needs: [appdir, metadata]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Download linux-appdir
+        uses: actions/download-artifact@v2
+        with:
+          name: linux-appdir
+      - name: Untar appdir.tar
+        run: |
+          tar -xvf appdir.tar
+      - name: Patch Cryptomator.AppDir
+        run: |
+          mv appdir/Cryptomator Cryptomator.AppDir
+          cp -r dist/linux/appimage/resources/AppDir/* Cryptomator.AppDir/
+          envsubst '${REVISION_NO} ${SEMVER_STR}' < dist/linux/appimage/resources/AppDir/bin/cryptomator.sh > Cryptomator.AppDir/bin/cryptomator.sh
+          ln -s usr/share/icons/hicolor/scalable/apps/org.cryptomator.Cryptomator.svg Cryptomator.AppDir/org.cryptomator.Cryptomator.svg
+          ln -s usr/share/icons/hicolor/scalable/apps/org.cryptomator.Cryptomator.svg Cryptomator.AppDir/Cryptomator.svg
+          ln -s usr/share/icons/hicolor/scalable/apps/org.cryptomator.Cryptomator.svg Cryptomator.AppDir/.DirIcon
+          ln -s usr/share/applications/org.cryptomator.Cryptomator.desktop Cryptomator.AppDir/Cryptomator.desktop
+          ln -s bin/cryptomator.sh Cryptomator.AppDir/AppRun
+        env:
+          REVISION_NO: ${{ needs.metadata.outputs.revNum }}
+          SEMVER_STR: ${{ needs.metadata.outputs.semVerStr }}
+      - name: Extract libjffi.so # workaround for https://github.com/cryptomator/cryptomator-linux/issues/27
+        run: |
+          JFFI_NATIVE_JAR=`ls lib/app/ | grep -e 'jffi-[1-9]\.[0-9]\{1,2\}.[0-9]\{1,2\}-native.jar'`
+          ${JAVA_HOME}/bin/jar -xf lib/app/${JFFI_NATIVE_JAR} /jni/x86_64-Linux/
+          mv jni/x86_64-Linux/* lib/app/libjffi.so
+        working-directory: Cryptomator.AppDir
+      - name: Download AppImageKit
+        run: |
+          curl -L https://github.com/AppImage/AppImageKit/releases/download/13/appimagetool-x86_64.AppImage -o appimagetool.AppImage
+          chmod +x appimagetool.AppImage
+          ./appimagetool.AppImage --appimage-extract
+      - name: Prepare GPG-Agent for signing with key 615D449FE6E6A235
+        run: |
+          echo "${GPG_PRIVATE_KEY}" | gpg --batch --quiet --import
+          echo "${GPG_PASSPHRASE}" | gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --dry-run --sign Cryptomator.AppDir/AppRun
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.RELEASES_GPG_PRIVATE_KEY }}
+          GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
+      - name: Build AppImage
+        run: >
+          ./squashfs-root/AppRun Cryptomator.AppDir cryptomator-${{ needs.metadata.outputs.semVerStr }}-x86_64.AppImage
+          -u 'gh-releases-zsync|cryptomator|cryptomator|latest|cryptomator-*-x86_64.AppImage.zsync'
+          --sign --sign-key=615D449FE6E6A235 --sign-args="--batch --pinentry-mode loopback"
+      - name: Upload AppImage
+        uses: actions/upload-artifact@v2
+        with:
+          name: linux-appimage
+          path: |
+            cryptomator-*.AppImage
+            cryptomator-*.AppImage.zsync
+          if-no-files-found: error
+
+#
+# macOS Cryptomator.app
+# 
+  mac-app:
+    name: Build Cryptomator.app
+    runs-on: macos-latest
+    needs: [appdir, metadata]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Download mac-appdir
+        uses: actions/download-artifact@v2
+        with:
+          name: mac-appdir
+      - name: Untar appdir.tar
+        run: tar -xvf appdir.tar
+      - name: Patch Cryptomator.app
+        run: |
+          mv appdir/Cryptomator.app Cryptomator.app
+          mv dist/mac/resources/Cryptomator-Vault.icns Cryptomator.app/Contents/Resources/
+          sed -i '' "s|###BUNDLE_SHORT_VERSION_STRING###|${VERSION_NO}|g" Cryptomator.app/Contents/Info.plist
+          sed -i '' "s|###BUNDLE_VERSION###|${REVISION_NO}|g" Cryptomator.app/Contents/Info.plist
+        env:
+          VERSION_NO: ${{ needs.metadata.outputs.semVerNum }}
+          REVISION_NO: ${{ needs.metadata.outputs.revNum }}
+      - name: Install codesign certificate
+        env:
+          CODESIGN_P12_BASE64: ${{ secrets.MACOS_CODESIGN_P12_BASE64 }}
+          CODESIGN_P12_PW: ${{ secrets.MACOS_CODESIGN_P12_PW }}
+          CODESIGN_TMP_KEYCHAIN_PW: ${{ secrets.MACOS_CODESIGN_TMP_KEYCHAIN_PW }}
+        run: |
+          # create variables
+          CERTIFICATE_PATH=$RUNNER_TEMP/codesign.p12
+          KEYCHAIN_PATH=$RUNNER_TEMP/codesign.keychain-db
+
+          # import certificate and provisioning profile from secrets
+          echo -n "$CODESIGN_P12_BASE64" | base64 --decode --output $CERTIFICATE_PATH
+
+          # create temporary keychain
+          security create-keychain -p "$CODESIGN_TMP_KEYCHAIN_PW" $KEYCHAIN_PATH
+          security set-keychain-settings -lut 900 $KEYCHAIN_PATH
+          security unlock-keychain -p "$CODESIGN_TMP_KEYCHAIN_PW" $KEYCHAIN_PATH
+
+          # import certificate to keychain
+          security import $CERTIFICATE_PATH -P "$CODESIGN_P12_PW" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+          security list-keychain -d user -s $KEYCHAIN_PATH
+      - name: Codesign
+        env:
+          CODESIGN_IDENTITY: ${{ secrets.MACOS_CODESIGN_IDENTITY }}
+        run: |
+          find Cryptomator.app/Contents/runtime/Contents/MacOS -name '*.dylib' -exec codesign --force -s ${CODESIGN_IDENTITY} {} \;
+          for JAR_PATH in `find Cryptomator.app -name "*.jar"`; do
+            if [[ `unzip -l ${JAR_PATH} | grep '.dylib\|.jnilib'` ]]; then
+              JAR_FILENAME=$(basename ${JAR_PATH})
+              OUTPUT_PATH=${JAR_PATH%.*}
+              echo "Codesigning libs in ${JAR_FILENAME}..."
+              unzip -q ${JAR_PATH} -d ${OUTPUT_PATH}
+              find ${OUTPUT_PATH} -name '*.dylib' -exec codesign -s ${CODESIGN_IDENTITY} {} \;
+              find ${OUTPUT_PATH} -name '*.jnilib' -exec codesign -s ${CODESIGN_IDENTITY} {} \;
+              rm ${JAR_PATH}
+              pushd ${OUTPUT_PATH} > /dev/null
+              zip -qr ../${JAR_FILENAME} *
+              popd > /dev/null
+              rm -r ${OUTPUT_PATH}
+            fi
+          done
+          echo "Codesigning Cryptomator.app..."
+          codesign --force --deep --entitlements dist/mac/Cryptomator.entitlements -o runtime -s ${CODESIGN_IDENTITY} Cryptomator.app
+      - name: Clean up codesign certificate
+        if: ${{ always() }}
+        run: security delete-keychain $RUNNER_TEMP/codesign.keychain-db
+      - name: Create app.tar
+        run: tar -cvf app.tar Cryptomator.app
+      - name: Upload mac-app
+        uses: actions/upload-artifact@v2
+        with:
+          name: mac-app
+          path: app.tar
+          if-no-files-found: error
+
+#
+# macOS Cryptomator.dmg
+#
+  mac-dmg:
+    name: Build Cryptomator.dmg
+    runs-on: macos-11
+    needs: [mac-app, metadata]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Download mac-appdir
+        uses: actions/download-artifact@v2
+        with:
+          name: mac-app
+      - name: Untar app.tar
+        run: tar -xvf app.tar
+      - name: Prepare .dmg contents
+        run: |
+          mkdir dmg
+          mv Cryptomator.app dmg
+          cp dist/mac/dmg/resources/macFUSE.webloc dmg
+          ls -l dmg
+      - name: Install create-dmg
+        run: |
+          brew install create-dmg
+          create-dmg --help
+      - name: Create .dmg
+        run: >
+          create-dmg
+          --volname Cryptomator
+          --volicon "dist/mac/dmg/resources/Cryptomator-Volume.icns"
+          --background "dist/mac/dmg/resources/Cryptomator-background.tiff"
+          --window-pos 400 100
+          --window-size 640 694
+          --icon-size 128
+          --icon "Cryptomator.app" 128 245
+          --hide-extension "Cryptomator.app"
+          --icon "macFUSE.webloc" 320 501
+          --hide-extension "macFUSE.webloc"
+          --app-drop-link 512 245
+          --eula "dist/mac/dmg/resources/license.rtf"
+          --icon ".background" 128 758
+          --icon ".fseventsd" 320 758
+          --icon ".VolumeIcon.icns" 512 758
+          Cryptomator-${VERSION_NO}.dmg dmg
+        env:
+          VERSION_NO: ${{ needs.metadata.outputs.semVerNum }}
+      - name: Install notarization credentials
+        env:
+          NOTARIZATION_KEYCHAIN_PROFILE: ${{ secrets.MACOS_NOTARIZATION_KEYCHAIN_PROFILE }}
+          NOTARIZATION_APPLE_ID: ${{ secrets.MACOS_NOTARIZATION_APPLE_ID }}
+          NOTARIZATION_PW: ${{ secrets.MACOS_NOTARIZATION_PW }}
+          NOTARIZATION_TEAM_ID: ${{ secrets.MACOS_NOTARIZATION_TEAM_ID }}
+          NOTARIZATION_TMP_KEYCHAIN_PW: ${{ secrets.MACOS_NOTARIZATION_TMP_KEYCHAIN_PW }}
+        run: |
+          # create temporary keychain
+          KEYCHAIN_PATH=$RUNNER_TEMP/notarization.keychain-db
+          security create-keychain -p "${NOTARIZATION_TMP_KEYCHAIN_PW}" ${KEYCHAIN_PATH}
+          security set-keychain-settings -lut 900 ${KEYCHAIN_PATH}
+          security unlock-keychain -p "${NOTARIZATION_TMP_KEYCHAIN_PW}" ${KEYCHAIN_PATH}
+
+          # import credentials from secrets
+          sudo xcode-select -s /Applications/Xcode_13.0.app
+          xcrun notarytool store-credentials "${NOTARIZATION_KEYCHAIN_PROFILE}" --apple-id "${NOTARIZATION_APPLE_ID}" --password "${NOTARIZATION_PW}" --team-id "${NOTARIZATION_TEAM_ID}" --keychain "${KEYCHAIN_PATH}"
+      - name: Notarize .dmg
+        env:
+          NOTARIZATION_KEYCHAIN_PROFILE: ${{ secrets.MACOS_NOTARIZATION_KEYCHAIN_PROFILE }}
+        run: |
+          KEYCHAIN_PATH=$RUNNER_TEMP/notarization.keychain-db
+          sudo xcode-select -s /Applications/Xcode_13.0.app
+          xcrun notarytool submit Cryptomator-*.dmg --keychain-profile "${NOTARIZATION_KEYCHAIN_PROFILE}" --keychain "${KEYCHAIN_PATH}" --wait
+          xcrun stapler staple Cryptomator-*.dmg
+      - name: Clean up notarization credentials
+        if: ${{ always() }}
+        run: security delete-keychain $RUNNER_TEMP/notarization.keychain-db
+      - name: Add possible alpha/beta tags to installer name
+        run: mv Cryptomator-*.dmg Cryptomator-${{ needs.metadata.outputs.semVerStr }}.dmg
+      - name: Upload mac-dmg
+        uses: actions/upload-artifact@v2
+        with:
+          name: mac-dmg
+          path: Cryptomator-*.dmg
+          if-no-files-found: error
+
+#
+# MSI package
+#
+  win-msi:
+    name: Build Cryptomator.msi
+    runs-on: windows-latest
+    needs: [appdir, metadata]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Download win-appdir
+        uses: actions/download-artifact@v2
+        with:
+          name: win-appdir
+      - name: Untar appdir.tar
+        run: tar -xvf appdir.tar
+      - uses: actions/setup-java@v1
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+      - name: Patch Application Directory
+        run: |
+          cp dist/win/contrib/* appdir/Cryptomator
+      - name: Fix permissions
+        run: attrib -r appdir/Cryptomator/Cryptomator.exe
+        shell: pwsh
+      - name: Codesign
+        uses: skymatic/code-sign-action@v1
+        with:
+          certificate: ${{ secrets.WIN_CODESIGN_P12_BASE64 }}
+          password: ${{ secrets.WIN_CODESIGN_P12_PW }}
+          certificatesha1: FF52240075AD7D14AF25629FDF69635357C7D14B
+          description: Cryptomator
+          timestampUrl: 'http://timestamp.digicert.com'
+          folder: appdir/Cryptomator
+          recursive: true
+      - name: Create MSI
+        run: >
+          ${JAVA_HOME}/bin/jpackage
+          --verbose
+          --type msi
+          --win-upgrade-uuid bda45523-42b1-4cae-9354-a45475ed4775
+          --app-image appdir/Cryptomator
+          --dest installer
+          --name Cryptomator
+          --vendor "Skymatic GmbH"
+          --copyright "(C) 2016 - 2021 Skymatic GmbH"
+          --app-version "${{ needs.metadata.outputs.semVerNum }}"
+          --win-menu
+          --win-dir-chooser
+          --resource-dir dist/win/resources
+          --license-file dist/win/resources/license.rtf
+          --file-associations dist/win/resources/FAvaultFile.properties
+        env:
+          JP_WIXWIZARD_RESOURCES: ${{ github.workspace }}/dist/win/resources # requires abs path, used in resources/main.wxs
+      - name: Codesign MSI
+        uses: skymatic/code-sign-action@v1
+        with:
+          certificate: ${{ secrets.WIN_CODESIGN_P12_BASE64 }}
+          password: ${{ secrets.WIN_CODESIGN_P12_PW }}
+          certificatesha1: FF52240075AD7D14AF25629FDF69635357C7D14B
+          description: Cryptomator Installer
+          timestampUrl: 'http://timestamp.digicert.com'
+          folder: installer
+      - name: Add possible alpha/beta tags to installer name
+        run: mv installer/Cryptomator-*.msi installer/Cryptomator-${{ needs.metadata.outputs.semVerStr }}.msi
+      - name: Upload win-msi
+        uses: actions/upload-artifact@v2
+        with:
+          name: win-msi
+          path: installer/*.msi
+          if-no-files-found: error
+
+#
+# Release
+#
+  release:
+    name: Draft a release on Github
+    runs-on: ubuntu-latest
+    needs: [metadata,linux-appimage,mac-dmg,win-msi]
+    if: startsWith(github.ref, 'refs/tags/') && github.repository == 'cryptomator/cryptomator'
+    env:
+      APPIMAGE_SHA256_MSG: undefined
+      DMG_SHA256_MSG: undefined
+      MSI_SHA256_MSG: undefined
+    steps:
+      - uses: actions/checkout@v2
+      - name: Create tarball
+        run: git archive --prefix="cryptomator-${{ needs.metadata.outputs.semVerStr }}/" -o "cryptomator-${{ needs.metadata.outputs.semVerStr }}.tar.gz" ${{ github.ref }}
+      - name: Download linux appimage
+        uses: actions/download-artifact@v2
+        with:
+          name: linux-appimage
+      - name: Download macOS dmg
+        uses: actions/download-artifact@v2
+        with:
+          name: mac-dmg
+      - name: Download Windows msi
+        uses: actions/download-artifact@v2
+        with:
+          name: win-msi
+      - name: Create detached GPG signature for all release files with key 615D449FE6E6A235
+        run: |
+          echo "${GPG_PRIVATE_KEY}" | gpg --batch --quiet --import
+          for FILE in `find . -name "*.AppImage" -o -name "*.dmg" -o -name "*.msi" -o -name "*.zsync" -o -name "*.tar.gz"`; do
+            echo "${GPG_PASSPHRASE}" | gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign -a ${FILE}
+          done
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.RELEASES_GPG_PRIVATE_KEY }}
+          GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
+      - name: Compute SHA256 checksums of release artifacts # sha256sum is split on the whitespace with sed and reorderd. env keys are file name extensions in uppercase
+        run: |
+          for FILE in `find . -name "*.AppImage" -o -name "*.dmg" -o -name "*.msi" -o -name "*.zsync" -o -name "*.tar.gz"`; do
+            CHECKSUM_MSG=$(sha256sum ${FILE})
+            VALUE=$(echo ${CHECKSUM_MSG} | sed 's/\([0-9,a-f]\{64\}\)[[:blank:]]\([Cc]ryptomator-.*$\)/\2: `\1`/' )
+            KEY=$(echo ${CHECKSUM_MSG} | sed 's/.*[[:blank:]].*\.\(.*$\)/\1/')
+            echo "{${KEY^^}_SHA256_MSG}={${VALUE}} >> $GITHUB_ENV
+          done
+      - name: Create release draft
+        uses: softprops/action-gh-release@v1
+        with:
+          draft: true
+          fail_on_unmatched_files: true
+          discussion_category_name: releases
+          token: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}
+          files: |
+            *.AppImage
+            *.zsync
+            *.asc
+            *.dmg
+            *.msi
+          body: |
+            :construction: Work in Progress
+            ## What's new
+            ## Bugfixes
+            ## Misc
+            ---
+            :scroll: A complete list of closed issues is available [here](LINK)
+            ---
+            Checksums of release artifacts:
+            * ${{ env.APPIMAGE_SHA256_MSG}}
+            * ${{ env.DMG_SHA256_MSG}}
+            * ${{ env.MSI_SHA_256_MSG}}

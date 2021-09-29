@@ -33,11 +33,13 @@ public class Environment {
 		LOG.debug("user.region: {}", System.getProperty("user.region"));
 		LOG.debug("logback.configurationFile: {}", System.getProperty("logback.configurationFile"));
 		LOG.debug("cryptomator.settingsPath: {}", System.getProperty("cryptomator.settingsPath"));
-		LOG.debug("cryptomator.ipcPortPath: {}", System.getProperty("cryptomator.ipcPortPath"));
+		LOG.debug("cryptomator.ipcSocketPath: {}", System.getProperty("cryptomator.ipcSocketPath"));
 		LOG.debug("cryptomator.keychainPath: {}", System.getProperty("cryptomator.keychainPath"));
 		LOG.debug("cryptomator.logDir: {}", System.getProperty("cryptomator.logDir"));
+		LOG.debug("cryptomator.pluginDir: {}", System.getProperty("cryptomator.pluginDir"));
 		LOG.debug("cryptomator.mountPointsDir: {}", System.getProperty("cryptomator.mountPointsDir"));
 		LOG.debug("cryptomator.minPwLength: {}", System.getProperty("cryptomator.minPwLength"));
+		LOG.debug("cryptomator.appVersion: {}", System.getProperty("cryptomator.appVersion"));
 		LOG.debug("cryptomator.buildNumber: {}", System.getProperty("cryptomator.buildNumber"));
 		LOG.debug("cryptomator.showTrayIcon: {}", System.getProperty("cryptomator.showTrayIcon"));
 		LOG.debug("fuse.experimental: {}", Boolean.getBoolean("fuse.experimental"));
@@ -51,8 +53,8 @@ public class Environment {
 		return getPaths("cryptomator.settingsPath");
 	}
 
-	public Stream<Path> getIpcPortPath() {
-		return getPaths("cryptomator.ipcPortPath");
+	public Stream<Path> ipcSocketPath() {
+		return getPaths("cryptomator.ipcSocketPath");
 	}
 
 	public Stream<Path> getKeychainPath() {
@@ -63,8 +65,16 @@ public class Environment {
 		return getPath("cryptomator.logDir").map(this::replaceHomeDir);
 	}
 
+	public Optional<Path> getPluginDir() {
+		return getPath("cryptomator.pluginDir").map(this::replaceHomeDir);
+	}
+
 	public Optional<Path> getMountPointsDir() {
 		return getPath("cryptomator.mountPointsDir").map(this::replaceHomeDir);
+	}
+
+	public Optional<String> getAppVersion() {
+		return Optional.ofNullable(System.getProperty("cryptomator.appVersion"));
 	}
 
 	public Optional<String> getBuildNumber() {
@@ -99,12 +109,12 @@ public class Environment {
 	}
 
 	// visible for testing
-	Path getHomeDir() {
+	public Path getHomeDir() {
 		return getPath("user.home").orElseThrow();
 	}
 
 	// visible for testing
-	Stream<Path> getPaths(String propertyName) {
+	public Stream<Path> getPaths(String propertyName) {
 		Stream<String> rawSettingsPaths = getRawList(propertyName, PATH_LIST_SEP);
 		return rawSettingsPaths.filter(Predicate.not(Strings::isNullOrEmpty)).map(Paths::get).map(this::replaceHomeDir);
 	}
@@ -123,8 +133,8 @@ public class Environment {
 			return Stream.empty();
 		} else {
 			Iterable<String> iter = Splitter.on(separator).split(value);
-			Spliterator<String> spliter = Spliterators.spliteratorUnknownSize(iter.iterator(), Spliterator.ORDERED | Spliterator.IMMUTABLE);
-			return StreamSupport.stream(spliter, false);
+			Spliterator<String> spliterator = Spliterators.spliteratorUnknownSize(iter.iterator(), Spliterator.ORDERED | Spliterator.IMMUTABLE);
+			return StreamSupport.stream(spliterator, false);
 		}
 	}
 }

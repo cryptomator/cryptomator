@@ -10,7 +10,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import java.util.Optional;
 import java.util.Set;
 
-class AutoCompleterTest {
+public class AutoCompleterTest {
 
 	@Test
 	@DisplayName("no match in []")
@@ -30,7 +30,7 @@ class AutoCompleterTest {
 
 	@Nested
 	@DisplayName("search in dict: ['tame', 'teach', 'teacher']")
-	class NarrowedDownDict {
+	public class NarrowedDownDict {
 
 		AutoCompleter autoCompleter = new AutoCompleter(Set.of("tame", "teach", "teacher"));
 
@@ -43,6 +43,7 @@ class AutoCompleterTest {
 			Assertions.assertEquals("tame", result.get());
 		}
 
+		@SuppressWarnings("SpellCheckingInspection")
 		@ParameterizedTest
 		@DisplayName("find 'teach'")
 		@ValueSource(strings = {"te", "tea", "teac", "teach"})
@@ -52,6 +53,7 @@ class AutoCompleterTest {
 			Assertions.assertEquals("teach", result.get());
 		}
 
+		@SuppressWarnings("SpellCheckingInspection")
 		@ParameterizedTest
 		@DisplayName("find 'teacher'")
 		@ValueSource(strings = {"teache", "teacher"})

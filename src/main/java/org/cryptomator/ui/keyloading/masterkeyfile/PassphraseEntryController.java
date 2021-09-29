@@ -5,6 +5,7 @@ import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.UserInteractionLock;
 import org.cryptomator.ui.common.WeakBindings;
+import org.cryptomator.ui.controls.FontAwesome5IconView;
 import org.cryptomator.ui.controls.NiceSecurePasswordField;
 import org.cryptomator.ui.forgetPassword.ForgetPasswordComponent;
 import org.cryptomator.ui.keyloading.KeyLoading;
@@ -59,8 +60,10 @@ public class PassphraseEntryController implements FxController {
 	private final BooleanProperty unlockButtonDisabled;
 	private final StringBinding vaultName;
 
+	/* FXML */
 	public NiceSecurePasswordField passwordField;
 	public CheckBox savePasswordCheckbox;
+	public FontAwesome5IconView unlockInProgressView;
 	public ImageView face;
 	public ImageView leftArm;
 	public ImageView rightArm;

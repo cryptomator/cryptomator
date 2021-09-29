@@ -101,7 +101,7 @@ public class SettingsProvider implements Supplier<Settings> {
 		if (settings == null) {
 			return;
 		}
-		final Optional<Path> settingsPath = env.getSettingsPath().findFirst(); // alway save to preferred (first) path
+		final Optional<Path> settingsPath = env.getSettingsPath().findFirst(); // always save to preferred (first) path
 		settingsPath.ifPresent(path -> {
 			Runnable saveCommand = () -> this.save(settings, path);
 			ScheduledFuture<?> scheduledTask = scheduler.schedule(saveCommand, SAVE_DELAY_MS, TimeUnit.MILLISECONDS);

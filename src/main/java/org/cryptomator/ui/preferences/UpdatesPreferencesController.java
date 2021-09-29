@@ -26,6 +26,8 @@ public class UpdatesPreferencesController implements FxController {
 	private final ReadOnlyStringProperty latestVersion;
 	private final ReadOnlyStringProperty currentVersion;
 	private final BooleanBinding updateAvailable;
+
+	/* FXML */
 	public CheckBox checkForUpdatesCheckbox;
 
 	@Inject
