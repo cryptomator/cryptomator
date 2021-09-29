@@ -590,11 +590,12 @@ jobs:
         env:
           GPG_PRIVATE_KEY: ${{ secrets.RELEASES_GPG_PRIVATE_KEY }}
           GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
-      - id: checksums
-        name: Compute SHA256 checksums of release artifacts
+      - name: Compute SHA256 checksums of release artifacts
         run: |
           SHA256_SUMS=`find . -name "*.AppImage" -o -name "*.dmg" -o -name "*.msi" -name "*.tar.gz" | xargs sha256sum`
-          echo "::set-output name=SHA256_SUMS::${SHA256_SUMS}"
+          echo "SHA256_SUMS<<EOF" >> $GITHUB_ENV
+          echo "${SHA256_SUMS}" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
         continue-on-error: true
       - name: Create release draft
         uses: softprops/action-gh-release@v1
@@ -618,4 +619,4 @@ jobs:
             :scroll: A complete list of closed issues is available [here](LINK)
             ---
             Checksums of release artifacts:
-            ${{ steps.checksums.outputs.SHA256_SUMS }}"
+            ${{ env.SHA256_SUMS }}"
