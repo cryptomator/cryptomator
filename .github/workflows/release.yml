@@ -619,4 +619,4 @@ jobs:
             :scroll: A complete list of closed issues is available [here](LINK)
             ---
             Checksums of release artifacts:
-            ${{ env.SHA256_SUMS }}"
+            ${{ env.SHA256_SUMS }}
