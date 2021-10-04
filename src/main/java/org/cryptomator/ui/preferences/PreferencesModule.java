@@ -42,7 +42,6 @@ abstract class PreferencesModule {
 	static Stage provideStage(StageFactory factory, ResourceBundle resourceBundle) {
 		Stage stage = factory.create();
 		stage.setTitle(resourceBundle.getString("preferences.title"));
-		stage.setResizable(false);
 		return stage;
 	}
 
