@@ -108,7 +108,7 @@ public class MountOptionsController implements FxController {
 	// Resets toggle to "choose mount point automatically" (mountPointAuto) if invalid.
 	private void validateMountPointChoice() {
 		if (vault.getVaultSettings().useCustomMountPath().get()
-				&& !Strings.isNullOrEmpty(vault.getVaultSettings().customMountPath().get())
+				&& vault.getVaultSettings().getCustomMountPath().isPresent()
 				&& !getRestrictToStableFuseOnWindows() /* to prevent invalid states */) {
 			mountPoint.selectToggle(mountPointCustomDir);
 		} else if (!Strings.isNullOrEmpty(vault.getVaultSettings().winDriveLetter().get())) {
