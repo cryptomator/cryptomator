@@ -10,6 +10,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import java.lang.Integer?>
+<?import javafx.scene.layout.Region?>
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.health.CheckListController"
@@ -29,6 +30,7 @@
 				<Label text="%health.checkList.description" wrapText="true"/>
 				<HBox alignment="CENTER">
 					<Button onAction="#selectAllChecks" text="%health.checkList.selectAllButton" />
+					<Region prefWidth="6"/>
 					<Button onAction="#deselectAllChecks" text="%health.checkList.deselectAllButton" />
 				</HBox>
 			</VBox>
