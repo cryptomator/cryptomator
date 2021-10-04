@@ -95,19 +95,6 @@ public class MountOptionsController implements FxController {
 		driveLetterSelection.setConverter(new WinDriveLetterLabelConverter(windowsDriveLetters, resourceBundle));
 		driveLetterSelection.setValue(vault.getVaultSettings().winDriveLetter().get());
 
-		validateMountPointChoice();
-
-		vault.getVaultSettings().useCustomMountPath().bind(mountPoint.selectedToggleProperty().isEqualTo(mountPointCustomDir));
-		vault.getVaultSettings().winDriveLetter().bind( //
-				Bindings.when(mountPoint.selectedToggleProperty().isEqualTo(mountPointWinDriveLetter)) //
-						.then(driveLetterSelection.getSelectionModel().selectedItemProperty()) //
-						.otherwise((String) null) //
-		);
-	}
-
-	// Checks the plausibility of combined "mount point" configuration params.
-	// Resets toggle to "choose mount point automatically" (mountPointAuto) if invalid.
-	private void validateMountPointChoice() {
 		if (vault.getVaultSettings().useCustomMountPath().get()
 				&& vault.getVaultSettings().getCustomMountPath().isPresent()
 				&& !getRestrictToStableFuseOnWindows() /* to prevent invalid states */) {
@@ -117,6 +104,13 @@ public class MountOptionsController implements FxController {
 		} else {
 			mountPoint.selectToggle(mountPointAuto);
 		}
+
+		vault.getVaultSettings().useCustomMountPath().bind(mountPoint.selectedToggleProperty().isEqualTo(mountPointCustomDir));
+		vault.getVaultSettings().winDriveLetter().bind( //
+				Bindings.when(mountPoint.selectedToggleProperty().isEqualTo(mountPointWinDriveLetter)) //
+						.then(driveLetterSelection.getSelectionModel().selectedItemProperty()) //
+						.otherwise((String) null) //
+		);
 	}
 
 	@FXML
