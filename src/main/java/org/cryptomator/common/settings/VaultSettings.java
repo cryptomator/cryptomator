@@ -138,14 +138,11 @@ public class VaultSettings {
 	}
 
 	public Optional<String> getCustomMountPath() {
-		if (!useCustomMountPath.get()) {
+		if (useCustomMountPath.get()) {
+			return Optional.ofNullable(Strings.emptyToNull(customMountPath.get()));
+		} else {
 			return Optional.empty();
 		}
-		String mountPath = Strings.emptyToNull(customMountPath.get());
-		if (mountPath == null) {
-			throw new IllegalArgumentException("Error K5G8:EJ0V:EJ0V - No custom mountpath set!");
-		}
-		return Optional.of(mountPath);
 	}
 
 	public BooleanProperty usesReadOnlyMode() {
