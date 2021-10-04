@@ -27,6 +27,7 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
 import java.io.File;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.util.ResourceBundle;
 import java.util.Set;
@@ -133,25 +134,30 @@ public class MountOptionsController implements FxController {
 	}
 
 	@FXML
-	private void chooseCustomMountPoint() {
+	public void chooseCustomMountPoint() {
+		chooseCustomMountPointOrReset(mountPointCustomDir);
+	}
+
+	private void chooseCustomMountPointOrReset(Toggle previousMountToggle) {
 		DirectoryChooser directoryChooser = new DirectoryChooser();
 		directoryChooser.setTitle(resourceBundle.getString("vaultOptions.mount.mountPoint.directoryPickerTitle"));
 		try {
-			directoryChooser.setInitialDirectory(Path.of(System.getProperty("user.home")).toFile());
-		} catch (Exception e) {
-			//NO-OP
+			var initialDir = vault.getVaultSettings().getCustomMountPath().orElse(System.getProperty("user.home"));
+			directoryChooser.setInitialDirectory(Path.of(initialDir).toFile());
+		} catch (InvalidPathException e) {
+			// no-op
 		}
 		File file = directoryChooser.showDialog(window);
 		if (file != null) {
 			vault.getVaultSettings().customMountPath().set(file.getAbsolutePath());
 		} else {
-			validateMountPointChoice();
+			mountPoint.selectToggle(previousMountToggle);
 		}
 	}
 
-	private void toggleMountPoint(@SuppressWarnings("unused") ObservableValue<? extends Toggle> observable, @SuppressWarnings("unused") Toggle oldValue, Toggle newValue) {
+	private void toggleMountPoint(@SuppressWarnings("unused") ObservableValue<? extends Toggle> observable, Toggle oldValue, Toggle newValue) {
 		if (mountPointCustomDir.equals(newValue) && Strings.isNullOrEmpty(vault.getVaultSettings().customMountPath().get())) {
-			chooseCustomMountPoint();
+			chooseCustomMountPointOrReset(oldValue);
 		}
 	}
 
