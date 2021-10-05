@@ -5,6 +5,7 @@ import org.cryptomator.ui.common.FxController;
 
 import javax.inject.Inject;
 import javafx.beans.binding.Binding;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.control.CheckBox;
@@ -17,7 +18,7 @@ public class CheckListCellController implements FxController {
 	private final Binding<Boolean> checkRunnable;
 
 	/* FXML */
-	public CheckBox forRunSelectedCheckBox;
+	public CheckBox checkbox;
 
 	@Inject
 	public CheckListCellController() {
@@ -27,9 +28,12 @@ public class CheckListCellController implements FxController {
 	}
 
 	public void initialize() {
-		forRunSelectedCheckBox.selectedProperty().addListener((observable, wasSelected, isSelected) -> {
-			if (check.get() != null) {
-				check.get().chosenForExecutionProperty().set(isSelected);
+		check.addListener((observable, oldVal, newVal) -> {
+			if (oldVal != null) {
+				Bindings.unbindBidirectional(checkbox.selectedProperty(), oldVal.chosenForExecutionProperty());
+			}
+			if (newVal != null) {
+				Bindings.bindBidirectional(checkbox.selectedProperty(), newVal.chosenForExecutionProperty());
 			}
 		});
 	}
