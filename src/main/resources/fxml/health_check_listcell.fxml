@@ -18,7 +18,7 @@
 	</padding>
 
 	<StackPane minWidth="20" minHeight="20" alignment="CENTER">
-		<CheckBox fx:id="forRunSelectedCheckBox" visible="${controller.checkRunnable}" />
+		<CheckBox fx:id="checkbox" visible="${controller.checkRunnable}"/>
 		<CheckStateIconView check="${controller.check}" glyphSize="20" visible="${!controller.checkRunnable}"/>
 	</StackPane>
 	<Label text="${controller.checkName}"/>
