@@ -2,45 +2,46 @@ package org.cryptomator.ui.mainwindow;
 
 import com.tobiasdiez.easybind.EasyBind;
 import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.common.vaults.VaultListManager;
+import org.cryptomator.ui.common.ErrorComponent;
 import org.cryptomator.ui.common.FxController;
+import org.cryptomator.ui.removevault.RemoveVaultComponent;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javafx.beans.binding.Binding;
 import javafx.beans.property.ObjectProperty;
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-import java.nio.charset.StandardCharsets;
+import javafx.fxml.FXML;
+import javafx.stage.Stage;
 
 @MainWindowScoped
 public class VaultDetailUnknownErrorController implements FxController {
 
-	private final Binding<String> stackTrace;
+	private final ObjectProperty<Vault> vault;
+	private final ErrorComponent.Builder errorComponentBuilder;
+	private final Stage errorWindow;
+	private final RemoveVaultComponent.Builder removeVault;
 
 	@Inject
-	public VaultDetailUnknownErrorController(ObjectProperty<Vault> vault) {
-		this.stackTrace = EasyBind.select(vault) //
-				.selectObject(Vault::lastKnownExceptionProperty) //
-				.map(this::provideStackTrace);
+	public VaultDetailUnknownErrorController(ObjectProperty<Vault> vault, ErrorComponent.Builder errorComponentBuilder, @Named("errorWindow") Stage errorWindow, RemoveVaultComponent.Builder removeVault) {
+		this.vault = vault;
+		this.errorComponentBuilder = errorComponentBuilder;
+		this.errorWindow = errorWindow;
+		this.removeVault = removeVault;
 	}
 
-	private String provideStackTrace(Throwable cause) {
-		// TODO deduplicate ErrorModule.java
-		if (cause != null) {
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			cause.printStackTrace(new PrintStream(baos));
-			return baos.toString(StandardCharsets.UTF_8);
-		} else {
-			return "";
-		}
+	@FXML
+	public void showError() {
+		errorComponentBuilder.window(errorWindow).cause(vault.get().getLastKnownException()).build().showErrorScene();
 	}
 
-	/* Getter/Setter */
-
-	public Binding<String> stackTraceProperty() {
-		return stackTrace;
+	@FXML
+	public void reload() {
+		VaultListManager.redetermineVaultState(vault.get());
 	}
 
-	public String getStackTrace() {
-		return stackTrace.getValue();
+	@FXML
+	void didClickRemoveVault() {
+		removeVault.vault(vault.get()).build().showRemoveVault();
 	}
 }
