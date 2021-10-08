@@ -21,7 +21,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.jdk.version>16</project.jdk.version>
+		<project.jdk.version>17</project.jdk.version>
 
 		<!-- Group IDs of jars that need to stay on the class path for now -->
 		<nonModularGroupIds>com.github.serceman,com.github.jnr,org.ow2.asm,net.java.dev.jna,org.apache.jackrabbit,org.apache.httpcomponents,de.swiesend,org.purejava,com.github.hypfvieh</nonModularGroupIds>

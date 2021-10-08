@@ -8,7 +8,7 @@
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.mainwindow.VaultDetailUnknownErrorController"
-	  alignment="BASELINE_CENTER"
+	  alignment="TOP_CENTER"
 	  spacing="9">
 	<children>
 		<StackPane VBox.vgrow="NEVER">
