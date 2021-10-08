@@ -28,7 +28,7 @@ jobs:
         run: mvn -B clean install jacoco:report -Pcoverage,dependency-check
       - name: Upload code coverage report
         id: codacyCoverageReporter
-        if: "contains(github.event.pull_request.labels.*.name, 'pr:safe')"
+        if: "github.event_name == 'push' || contains(github.event.pull_request.labels.*.name, 'pr:safe')"
         run: bash <(curl -Ls https://coverage.codacy.com/get.sh)
         env:
           CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
