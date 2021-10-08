@@ -4,7 +4,7 @@ on:
   push:
 
 env:
-  JAVA_VERSION: 16
+  JAVA_VERSION: 17
 
 defaults:
   run:
