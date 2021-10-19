@@ -534,6 +534,9 @@ jobs:
           --app-version "${{ needs.metadata.outputs.semVerNum }}"
           --win-menu
           --win-dir-chooser
+          --win-shortcut-prompt
+          --win-update-url "https:\\cryptomator.org"
+          --win-menu-group Cryptomator
           --resource-dir dist/win/resources
           --license-file dist/win/resources/license.rtf
           --file-associations dist/win/resources/FAvaultFile.properties
