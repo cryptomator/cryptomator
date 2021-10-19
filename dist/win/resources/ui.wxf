@@ -1,0 +1,16 @@
+<?xml version="1.0" ?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:util="http://schemas.microsoft.com/wix/UtilExtension">
+  <Fragment>
+    <Property Id="WIXUI_INSTALLDIR" Value="INSTALLDIR"></Property>
+    <WixVariable Id="WixUILicenseRtf" Value="$(var.JpLicenseRtf)"></WixVariable>
+    <UI Id="JpUI">
+      <UIRef Id="CustomWizard" />
+      <DialogRef Id="InstallDirNotEmptyDlg"></DialogRef>
+      <Publish Dialog="ShortcutPromptDlg" Control="Back" Event="NewDialog" Value="InstallDirDlg">1</Publish>
+      <Publish Dialog="ShortcutPromptDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg">1</Publish>
+      <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="ShortcutPromptDlg" Order="6">NOT Installed</Publish>
+      <UIRef Id="CustomWizard" />
+    </UI>
+  </Fragment>
+  <?include $(env.JP_WIXWIZARD_RESOURCES)\customWizard.wxi ?>
+</Wix>
