@@ -46,6 +46,7 @@ module org.cryptomator.desktop {
 	opens org.cryptomator.ui.fxapp to javafx.fxml;
 	opens org.cryptomator.ui.health to javafx.fxml;
 	opens org.cryptomator.ui.keyloading.masterkeyfile to javafx.fxml;
+	opens org.cryptomator.ui.lock to javafx.fxml;
 	opens org.cryptomator.ui.mainwindow to javafx.fxml;
 	opens org.cryptomator.ui.migration to javafx.fxml;
 	opens org.cryptomator.ui.preferences to javafx.fxml;
