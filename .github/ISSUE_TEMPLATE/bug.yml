@@ -1,0 +1,93 @@
+name: Bug Report
+description: Create a report to help us improve
+labels: ["type:bug"]
+body:
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Please agree to the following
+      options:
+      - label: I have searched [existing issues](https://github.com/cryptomator/cryptomator/issues?q=) for duplicates
+        required: true
+      - label: I agree to follow this project's [Code of Conduct](https://github.com/cryptomator/cryptomator/blob/develop/.github/CODE_OF_CONDUCT.md)
+        required: true
+  - type: input
+    id: summary
+    attributes:
+      label: Summary
+      placeholder: Please summarize your problem.
+    validations:
+      required: true
+  - type: textarea
+    id: software-versions
+    attributes:
+      label: What software is involved?
+      description: |
+        Examples:
+          - Operating System: Windows 10
+          - Cryptomator: 1.5.16
+          - LibreOffice: 7.1.4
+      value: |
+          - Operating System: 
+          - Cryptomator: 
+          - …
+    validations:
+      required: true
+  - type: dropdown
+    id: volume-type
+    attributes:
+      label: Volume Type
+      description: What is selected under Settings → Virtual Drive?
+      multiple: true
+      options:
+        - FUSE
+        - Dokany
+        - WebDAV
+    validations:
+      required: false
+  - type: textarea
+    id: reproduction-steps
+    attributes:
+      label: Steps to Reproduce
+      value: |
+          1. [First Step]
+          2. [Second Step]
+          3. …
+    validations:
+      required: true
+  - type: textarea
+    id: expected-behaviour
+    attributes:
+      label: Expected Behavior
+      placeholder: What you expect to happen.
+    validations:
+      required: true
+  - type: textarea
+    id: actual-behaviour
+    attributes:
+      label: Actual Behavior
+      placeholder: What actually happens.
+    validations:
+      required: true
+  - type: dropdown
+    id: reproducibility
+    attributes:
+      label: Reproducibility
+      description: How often does the described behaviour occur?
+      options:
+        - Always
+        - Intermittent
+        - Only once
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant Log Output
+      description: Please copy and paste any relevant log output. This will be automatically formatted into code, so no need for backticks.
+      render: shell
+  - type: textarea
+    id: further-info
+    attributes:
+      label: Anything else?
+      description: Links? References? Screenshots? Configurations? Any data that might be necessary to reproduce the issue?

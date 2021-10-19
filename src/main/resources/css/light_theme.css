@@ -1,0 +1,899 @@
+/*******************************************************************************
+ *                                                                             *
+ * Fonts                                                                       *
+ *                                                                             *
+ ******************************************************************************/
+
+@font-face {
+	src: url('opensans-regular.ttf');
+}
+
+@font-face {
+	src: url('opensans-semibold.ttf');
+}
+
+@font-face {
+	src: url('opensans-bold.ttf');
+}
+
+@font-face {
+	src: url('quicksand-bold.ttf');
+}
+
+/*******************************************************************************
+ *                                                                             *
+ * Root Styling & Colors                                                       *
+ *                                                                             *
+ ******************************************************************************/
+
+.root {
+	PRIMARY_D2: #2D4D2E;
+	PRIMARY_D1: #407F41;
+	PRIMARY: #49B04A;
+	PRIMARY_L1: #66CC68;
+	PRIMARY_L2: #EBF5EB;
+
+	SECONDARY: #008A7B;
+
+	GRAY_0: #222222;
+	GRAY_1: #3B3B3B;
+	GRAY_2: #515151;
+	GRAY_3: #626262;
+	GRAY_4: #7E7E7E;
+	GRAY_5: #9E9E9E;
+	GRAY_6: #B1B1B1;
+	GRAY_7: #CFCFCF;
+	GRAY_8: #E1E1E1;
+	GRAY_9: #F7F7F7;
+
+	RED_5: #E74C3C;
+	ORANGE_5: #E67E22;
+	YELLOW_5: #F1C40F;
+
+	MAIN_BG: GRAY_9;
+	MUTED_BG: GRAY_5;
+	TEXT_FILL: GRAY_0;
+	TEXT_FILL_HIGHLIGHTED: PRIMARY;
+	TEXT_FILL_MUTED: GRAY_5;
+
+	TITLE_BG: PRIMARY;
+	TITLE_TEXT_FILL: white;
+
+	CONTROL_BORDER_NORMAL: GRAY_7;
+	CONTROL_BORDER_FOCUSED: GRAY_5;
+	CONTROL_BORDER_DISABLED: GRAY_8;
+	CONTROL_BG_NORMAL: white;
+	CONTROL_BG_HOVER: GRAY_9;
+	CONTROL_BG_ARMED: GRAY_8;
+	CONTROL_BG_DISABLED: GRAY_9;
+	CONTROL_BG_SELECTED: PRIMARY_L2;
+
+	CONTROL_PRIMARY_BORDER_NORMAL: PRIMARY_D1;
+	CONTROL_PRIMARY_BORDER_ARMED: PRIMARY_D2;
+	CONTROL_PRIMARY_BORDER_FOCUSED: SECONDARY;
+	CONTROL_PRIMARY_BG_NORMAL: PRIMARY;
+	CONTROL_PRIMARY_BG_ARMED: PRIMARY_D1;
+
+	SCROLL_BAR_THUMB_NORMAL: GRAY_7;
+	SCROLL_BAR_THUMB_HOVER: GRAY_6;
+
+	PROGRESS_INDICATOR_BEGIN: GRAY_2;
+	PROGRESS_INDICATOR_END: GRAY_4;
+	PROGRESS_BAR_BG: GRAY_8;
+
+	-fx-background-color: MAIN_BG;
+	-fx-text-fill: TEXT_FILL;
+	-fx-font-family: 'Open Sans';
+}
+
+/*******************************************************************************
+ *                                                                             *
+ * Labels                                                                      *
+ *                                                                             *
+ ******************************************************************************/
+
+.label {
+	-fx-text-fill: TEXT_FILL;
+}
+
+.label-muted {
+	-fx-text-fill: TEXT_FILL_MUTED;
+}
+
+.label-large {
+	-fx-font-family: 'Open Sans SemiBold';
+	-fx-font-size: 1.5em;
+}
+
+.label-small {
+	-fx-font-size: 0.8em;
+}
+
+.label-extra-small {
+	-fx-font-size: 0.64em;
+}
+
+.text-flow > * {
+	-fx-fill: TEXT_FILL;
+}
+
+/*******************************************************************************
+ *                                                                             *
+ * Glyph Icons                                                                 *
+ *                                                                             *
+ ******************************************************************************/
+
+.glyph-icon {
+	-fx-fill: TEXT_FILL;
+}
+
+.glyph-icon-primary,
+.glyph-icon.glyph-icon-primary,
+.list-cell .glyph-icon.glyph-icon-primary,
+.list-cell:selected .glyph-icon.glyph-icon-primary {
+	-fx-fill: PRIMARY;
+}
+
+.glyph-icon-muted,
+.glyph-icon.glyph-icon-muted,
+.list-cell .glyph-icon.glyph-icon-muted,
+.list-cell:selected .glyph-icon.glyph-icon-muted {
+	-fx-fill: TEXT_FILL_MUTED;
+}
+
+.glyph-icon-white,
+.glyph-icon.glyph-icon-white,
+.list-cell .glyph-icon.glyph-icon-white,
+.list-cell:selected .glyph-icon.glyph-icon-white {
+	-fx-fill: white;
+}
+
+.glyph-icon-red,
+.glyph-icon.glyph-icon-red,
+.list-cell .glyph-icon.glyph-icon-red,
+.list-cell:selected .glyph-icon.glyph-icon-red {
+	-fx-fill: RED_5;
+}
+
+.glyph-icon-orange,
+.glyph-icon.glyph-icon-orange,
+.list-cell .glyph-icon.glyph-icon-orange,
+.list-cell:selected .glyph-icon.glyph-icon-orange {
+	-fx-fill: ORANGE_5;
+}
+
+/*******************************************************************************
+ *                                                                             *
+ * Main Window                                                                 *
+ *                                                                             *
+ ******************************************************************************/
+
+/* windows needs an explicit border: */
+.main-window.os-windows {
+	-fx-border-color: TITLE_BG;
+	-fx-border-width: 1px;
+}
+
+.main-window .title {
+	-fx-background-color: TITLE_BG;
+}
+
+.main-window .title .label {
+	-fx-font-family: 'Quicksand';
+	-fx-font-size: 16px;
+	-fx-font-style: normal;
+	-fx-font-weight: 700;
+	-fx-text-fill: TITLE_TEXT_FILL;
+}
+
+.main-window .title .button {
+	-fx-pref-height: 30px;
+	-fx-pref-width: 30px;
+	-fx-background-color: none;
+	-fx-padding: 0;
+}
+
+.main-window .title .button .glyph-icon {
+	-fx-fill: white;
+}
+
+.main-window .title .button:armed .glyph-icon {
+	-fx-fill: GRAY_8;
+}
+
+.main-window .update-indicator {
+	-fx-background-color: white, RED_5;
+	-fx-background-insets: 1px, 2px;
+	-fx-background-radius: 6px, 5px;
+	-fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.8), 2, 0, 0, 0);
+}
+
+.main-window .drag-n-drop-indicator {
+	-fx-border-color: SECONDARY;
+	-fx-border-width: 3px;
+}
+
+.main-window .drag-n-drop-indicator .drag-n-drop-header {
+	-fx-background-color: SECONDARY;
+	-fx-padding: 3px;
+}
+
+/*******************************************************************************
+ *                                                                             *
+ * TabPane                                                                     *
+ *                                                                             *
+ ******************************************************************************/
+
+.tab-pane {
+	-fx-tab-min-height: 2em;
+}
+
+.tab-pane > .tab-header-area {
+	-fx-padding: 0 12px;
+	-fx-background-color: CONTROL_BORDER_NORMAL, CONTROL_BG_NORMAL;
+	-fx-background-insets: 0, 0 0 3px 0;
+}
+
+.tab-pane .tab {
+	-fx-background-color: CONTROL_BORDER_NORMAL, CONTROL_BG_NORMAL;
+	-fx-background-insets: 0, 0 0 3px 0;
+	-fx-padding: 6px 12px;
+}
+
+.tab-pane .tab:selected {
+	-fx-background-color: PRIMARY, CONTROL_BG_SELECTED;
+}
+
+.tab-pane .tab .tab-label {
+	-fx-text-fill: TEXT_FILL_MUTED;
+	-fx-alignment: CENTER;
+}
+
+.tab-pane .tab .glyph-icon {
+	-fx-fill: TEXT_FILL_MUTED;
+}
+
+.tab-pane .tab:selected .glyph-icon {
+	-fx-fill: PRIMARY;
+}
+
+.tab-pane .tab:selected .tab-label {
+	-fx-text-fill: TEXT_FILL_HIGHLIGHTED;
+}
+
+/*******************************************************************************
+ *                                                                             *
+ * SplitPane                                                                   *
+ *                                                                             *
+ ******************************************************************************/
+
+.split-pane > .split-pane-divider {
+	-fx-padding: 0px 1px;
+}
+
+.split-pane:horizontal > .split-pane-divider {
+	-fx-background-color: MAIN_BG, CONTROL_BORDER_NORMAL;
+	-fx-background-insets: 0, 0 1 0 0;
+}
+
+/*******************************************************************************
+ *                                                                             *
+ * Vault List                                                                  *
+ *                                                                             *
+ ******************************************************************************/
+
+.list-view {
+	-fx-background-color: CONTROL_BG_NORMAL;
+}
+
+.list-view:focused .list-cell:selected {
+	-fx-background-color: PRIMARY, CONTROL_BG_SELECTED;
+	-fx-background-insets: 0, 0 0 0 3px;
+}
+
+.list-cell:selected {
+	-fx-background-color: CONTROL_BG_SELECTED;
+}
+
+.list-cell .glyph-icon {
+	-fx-fill: TEXT_FILL_MUTED;
+}
+
+.list-cell .header-label {
+	-fx-font-family: 'Open Sans SemiBold';
+	-fx-font-size: 1.0em;
+}
+
+.list-cell .detail-label {
+	-fx-text-fill: TEXT_FILL_MUTED;
+	-fx-font-size: 0.8em;
+}
+
+.list-cell:selected .glyph-icon {
+	-fx-fill: PRIMARY;
+}
+
+.list-cell:selected .header-label {
+	-fx-text-fill: TEXT_FILL_HIGHLIGHTED;
+}
+
+.list-cell.drop-above {
+	-fx-border-color: CONTROL_BG_ARMED transparent transparent transparent;
+	-fx-border-width: 3px 0 0 0;
+}
+
+.list-cell.drop-below {
+	-fx-border-color: transparent transparent CONTROL_BG_ARMED transparent;
+	-fx-border-width: 0 0 3px 0;
+}
+
+.onboarding-overlay-arc {
+	-fx-stroke: TEXT_FILL;
+	-fx-fill: transparent;
+}
+
+.button.toolbar-button {
+	-fx-min-height: 40px;
+	-fx-background-color: transparent;
+	-fx-background-insets: 0;
+	-fx-background-radius: 0;
+	-fx-border-color: CONTROL_BORDER_NORMAL transparent transparent transparent;
+	-fx-border-width: 1px 0 0 0;
+	-fx-padding: 0;
+}
+
+.button.toolbar-button:focused {
+	-fx-background-color: CONTROL_BORDER_FOCUSED, MAIN_BG;
+	-fx-background-insets: 0, 2px 1px 1px 1px;
+}
+
+.button.toolbar-button:armed {
+	-fx-background-color: CONTROL_BG_ARMED;
+}
+
+/*******************************************************************************
+ *                                                                             *
+ * ScrollBar                                                                   *
+ *                                                                             *
+ ******************************************************************************/
+
+.scroll-bar > .thumb {
+	-fx-background-color: SCROLL_BAR_THUMB_NORMAL;
+	-fx-background-insets: 1px;
+	-fx-background-radius: 2px;
+}
+
+.scroll-bar > .thumb:hover {
+	-fx-background-color: SCROLL_BAR_THUMB_HOVER;
+}
+
+.scroll-bar:horizontal > .increment-button,
+.scroll-bar:horizontal > .decrement-button {
+	-fx-padding: 3 0 3 0;
+}
+
+.scroll-bar:vertical > .increment-button,
+.scroll-bar:vertical > .decrement-button {
+	-fx-padding: 0 3 0 3;
+}
+
+/*******************************************************************************
+ *                                                                             *
+ * Badge                                                                       *
+ *                                                                             *
+ ******************************************************************************/
+
+.badge {
+	-fx-font-family: 'Open Sans Bold';
+	-fx-font-size: 0.8em;
+	-fx-background-radius: 4px;
+	-fx-padding: 0.2em 0.4em 0.2em 0.4em;
+}
+
+.badge-pill {
+	-fx-background-radius: 1em;
+}
+
+.badge-primary {
+	-fx-text-fill: white;
+	-fx-background-color: PRIMARY;
+}
+
+.badge-muted {
+	-fx-text-fill: white;
+	-fx-background-color: MUTED_BG;
+}
+
+/* Note: These values below are kinda random such that it looks ok. I'm pretty sure there is room for improvement. Additionally, fx-text-fill does not work*/
+.badge-debug {
+	-fx-font-family: 'Open Sans Bold';
+	-fx-font-size: 1.0em;
+	-fx-background-radius: 8px;
+	-fx-padding: 0.3em 0.55em 0.3em 0.55em;
+	-fx-background-color: RED_5;
+	-fx-background-radius: 2em;
+}
+
+/*******************************************************************************
+ *                                                                             *
+ * Password Strength Indicator                                                 *
+ *                                                                             *
+ ******************************************************************************/
+
+.password-strength-indicator .segment {
+	-fx-background-color: CONTROL_BORDER_NORMAL;
+}
+
+.password-strength-indicator.strength-0 .segment.active {
+	-fx-background-color: RED_5;
+}
+
+.password-strength-indicator.strength-1 .segment.active {
+	-fx-background-color: ORANGE_5;
+}
+
+.password-strength-indicator.strength-2 .segment.active {
+	-fx-background-color: YELLOW_5;
+}
+
+.password-strength-indicator.strength-3 .segment.active {
+	-fx-background-color: PRIMARY;
+}
+
+.password-strength-indicator.strength-4 .segment.active {
+	-fx-background-color: PRIMARY_D1;
+}
+
+/*******************************************************************************
+ *                                                                             *
+ * Tooltip                                                                     *
+ *                                                                             *
+ ******************************************************************************/
+
+.tooltip {
+	-fx-font-family: 'Open Sans';
+	-fx-text-fill: TEXT_FILL;
+	-fx-font-size: 0.8em;
+	-fx-background-color: CONTROL_BG_NORMAL;
+	-fx-padding: 0.2em 0.4em 0.2em 0.4em;
+	-fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.5), 2, 0, 0, 0);
+}
+
+/*******************************************************************************
+ *                                                                             *
+ * Text Fields                                                                 *
+ *                                                                             *
+ ******************************************************************************/
+
+.text-input {
+	-fx-cursor: text;
+	-fx-text-fill: TEXT_FILL;
+	-fx-highlight-fill: PRIMARY;
+	-fx-prompt-text-fill: TEXT_FILL_MUTED;
+	-fx-background-color: CONTROL_BORDER_NORMAL, CONTROL_BG_NORMAL;
+	-fx-background-insets: 0, 1px;
+	-fx-background-radius: 4px;
+	-fx-padding: 0.3em 0.5em 0.3em 0.5em;
+}
+
+.text-input:focused {
+	-fx-background-color: CONTROL_BORDER_FOCUSED, CONTROL_BG_NORMAL;
+}
+
+.text-input:disabled {
+	-fx-text-fill: TEXT_FILL_MUTED;
+	-fx-background-color: CONTROL_BORDER_DISABLED, CONTROL_BG_DISABLED;
+}
+
+.nice-secure-password-field .secure-password-field {
+	-fx-padding: 0.3em 48px 0.3em 0.5em;
+}
+
+.nice-secure-password-field .icons {
+	-fx-width: 42px;
+	-fx-padding: 4px 6px 4px 0;
+}
+
+/*******************************************************************************
+ *                                                                             *
+ * Text Areas                                                                  *
+ *                                                                             *
+ ******************************************************************************/
+
+.text-area {
+	-fx-cursor: default;
+	-fx-background-color: CONTROL_BORDER_NORMAL, CONTROL_BG_NORMAL;
+	-fx-background-insets: 0, 1px;
+	-fx-background-radius: 4px;
+	-fx-padding: 0;
+}
+
+.text-input:focused {
+	-fx-background-color: CONTROL_BORDER_FOCUSED, CONTROL_BG_NORMAL;
+}
+
+.text-input:disabled {
+	-fx-text-fill: TEXT_FILL_MUTED;
+	-fx-background-color: CONTROL_BORDER_DISABLED, CONTROL_BG_DISABLED;
+}
+
+.text-area > .scroll-pane > .scroll-bar {
+	-fx-padding: 2px;
+}
+
+.text-area .content {
+	-fx-padding: 0.2em 0.5em 0.2em 0.5em;
+	-fx-cursor: text;
+	-fx-text-fill: TEXT_FILL;
+	-fx-highlight-fill: PRIMARY;
+	-fx-prompt-text-fill: TEXT_FILL_MUTED;
+	-fx-background-color: null;
+}
+
+/*******************************************************************************
+ *                                                                             *
+ * Buttons                                                                     *
+ *                                                                             *
+ ******************************************************************************/
+
+.button {
+	-fx-text-fill: TEXT_FILL;
+	-fx-alignment: CENTER;
+	-fx-background-color: CONTROL_BORDER_NORMAL, CONTROL_BG_NORMAL;
+	-fx-background-insets: 0, 1px;
+	-fx-background-radius: 4px;
+	-fx-padding: 0.3em 1em 0.3em 1em;
+	-fx-graphic-text-gap: 6px;
+}
+
+.button:focused {
+	-fx-background-color: CONTROL_BORDER_FOCUSED, CONTROL_BG_NORMAL;
+}
+
+.button:armed {
+	-fx-background-color: CONTROL_BORDER_NORMAL, CONTROL_BG_ARMED;
+}
+
+.button:default {
+	-fx-text-fill: white;
+	-fx-background-color: CONTROL_PRIMARY_BORDER_NORMAL, CONTROL_PRIMARY_BG_NORMAL;
+}
+
+.button:default:focused {
+	-fx-background-color: CONTROL_PRIMARY_BORDER_FOCUSED, CONTROL_PRIMARY_BG_NORMAL;
+}
+
+.button:default:armed {
+	-fx-background-color: CONTROL_PRIMARY_BORDER_ARMED, CONTROL_PRIMARY_BG_ARMED;
+}
+
+.button:disabled,
+.button:default:disabled {
+	-fx-text-fill: TEXT_FILL_MUTED;
+	-fx-background-color: CONTROL_BORDER_DISABLED, CONTROL_BG_DISABLED;
+}
+
+.button:disabled .glyph-icon {
+	-fx-fill: TEXT_FILL_MUTED;
+}
+
+.button:default .glyph-icon {
+	-fx-fill: white;
+}
+
+.button:default:disabled .glyph-icon {
+	-fx-fill: TEXT_FILL_MUTED;
+}
+
+.button:default .label {
+	-fx-text-fill: white;
+}
+
+.button-large {
+	-fx-font-size: 1.25em;
+	-fx-padding: 0.6em 1.5em 0.6em 1.5em;
+	-fx-graphic-text-gap: 9px;
+}
+
+/*******************************************************************************
+ *                                                                             *
+ * Hyperlinks                                                                  *
+ *                                                                             *
+ ******************************************************************************/
+
+.hyperlink {
+	-fx-text-fill: TEXT_FILL;
+	-fx-graphic-text-gap: 6px;
+}
+
+.hyperlink.hyperlink-underline {
+	-fx-underline: true;
+}
+
+.hyperlink.hyperlink-muted {
+	-fx-text-fill: TEXT_FILL_MUTED;
+}
+
+.hyperlink-hover-icon {
+	-fx-content-display: text-only;
+}
+
+.hyperlink-hover-icon:hover {
+	-fx-content-display: right;
+}
+
+/*******************************************************************************
+ *                                                                             *
+ * CheckBox                                                                    *
+ *                                                                             *
+ ******************************************************************************/
+
+.check-box {
+	-fx-text-fill: TEXT_FILL;
+	-fx-label-padding: 0 0 0 6px;
+	-fx-padding: 4px 0 4px 0;
+}
+
+.check-box:disabled {
+	-fx-text-fill: TEXT_FILL_MUTED;
+}
+
+.check-box > .box {
+	-fx-background-color: CONTROL_BORDER_NORMAL, CONTROL_BG_NORMAL;
+	-fx-background-insets: 0, 1px;
+	-fx-background-radius: 4px;
+	-fx-padding: 0.3em;
+}
+
+.check-box:focused > .box {
+	-fx-background-color: CONTROL_BORDER_FOCUSED, CONTROL_BG_NORMAL;
+}
+
+.check-box:disabled > .box {
+	-fx-background-color: CONTROL_BORDER_DISABLED, CONTROL_BG_DISABLED;
+}
+
+.check-box > .box > .mark {
+	-fx-background-color: transparent;
+	-fx-padding: 0.4em;
+	-fx-shape: "M-1,4, L-1,5.5 L3.5,8.5 L9,0 L9,-1 L7,-1 L3,6 L1,4 Z";
+}
+
+.check-box:selected > .box > .mark {
+	-fx-background-color: TEXT_FILL;
+}
+
+.check-box:selected:disabled > .box > .mark {
+	-fx-background-color: TEXT_FILL_MUTED;
+}
+
+/*******************************************************************************
+ *                                                                             *
+ * RadioButton                                                                 *
+ *                                                                             *
+ ******************************************************************************/
+
+.radio-button {
+	-fx-text-fill: TEXT_FILL;
+	-fx-label-padding: 0 0 0 6px;
+	-fx-padding: 4px 0 4px 0;
+}
+
+.radio-button > .radio {
+	-fx-border-color: CONTROL_BORDER_NORMAL;
+	-fx-border-radius: 1em; /* large value to make sure this remains circular */
+	-fx-background-color: CONTROL_BG_NORMAL;
+	-fx-background-radius: 1em;
+	-fx-padding: 0.3em; /* padding from outside edge to the inner black dot */
+}
+
+.radio-button:focused > .radio {
+	-fx-border-color: CONTROL_BORDER_FOCUSED;
+}
+
+.text-input:disabled > .radio {
+	-fx-border-color: CONTROL_BORDER_DISABLED;
+	-fx-background-color: CONTROL_BG_DISABLED;
+}
+
+.radio-button > .radio > .dot {
+	-fx-background-color: transparent;
+	-fx-background-radius: 1em; /* large value to make sure this remains circular */
+	-fx-padding: 0.2em; /* radius of the inner black dot when selected */
+}
+
+.radio-button:selected > .radio > .dot {
+	-fx-background-color: TEXT_FILL;
+}
+
+/*******************************************************************************
+ *                                                                             *
+ * ChoiceBox                                                                   *
+ *                                                                             *
+ ******************************************************************************/
+
+.choice-box {
+	-fx-background-color: CONTROL_BORDER_NORMAL, CONTROL_BG_NORMAL;
+	-fx-background-insets: 0, 1px;
+	-fx-background-radius: 4px;
+	-fx-padding: 0.3em 0.5em 0.3em 0.5em;
+}
+
+.choice-box:focused {
+	-fx-background-color: CONTROL_BORDER_FOCUSED, CONTROL_BG_NORMAL;
+}
+
+.choice-box:disabled {
+	-fx-background-color: CONTROL_BORDER_DISABLED, CONTROL_BG_DISABLED;
+}
+
+.choice-box > .label {
+	-fx-text-fill: TEXT_FILL;
+}
+
+.choice-box:disabled > .label {
+	-fx-text-fill: TEXT_FILL_MUTED;
+}
+
+.choice-box > .open-button {
+	-fx-padding: 0 0 0 0.3em;
+}
+
+.choice-box > .open-button > .arrow {
+	-fx-background-color: transparent, TEXT_FILL;
+	-fx-background-insets: 0 0 -1 0, 0;
+	-fx-padding: 0.15em 0.3em 0.15em 0.3em;
+	-fx-shape: "M 0 0 h 7 l -3.5 4 z";
+}
+
+.choice-box:disabled > .open-button > .arrow {
+	-fx-background-color: transparent, TEXT_FILL_MUTED;
+}
+
+.choice-box .context-menu {
+	-fx-translate-x: -1.4em;
+}
+
+/*******************************************************************************
+ *                                                                             *
+ * ContextMenu                                                                 *
+ *                                                                             *
+ ******************************************************************************/
+
+.context-menu {
+	-fx-background-color: CONTROL_BORDER_NORMAL, CONTROL_BG_NORMAL;
+	-fx-background-insets: 0, 1px;
+	-fx-background-radius: 4px;
+	-fx-padding: 0.2em 0 0.2em 0;
+	-fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.2), 8, 0, 0, 0);
+}
+
+/*******************************************************************************
+ *                                                                             *
+ * MenuItem                                                                    *
+ *                                                                             *
+ ******************************************************************************/
+
+.menu-item {
+	-fx-padding: 0.2em 0.4em 0.2em 0.4em;
+}
+
+.menu-item:focused {
+	-fx-background-color: transparent, CONTROL_BG_ARMED;
+	-fx-background-insets: 0, 0 1px 0 1px;
+}
+
+.menu-item:disabled {
+	-fx-background-color: transparent;
+}
+
+.menu-item > .left-container {
+	-fx-padding: 0.5em 0.25em 0.5em 0.5em;
+}
+
+.menu-item > .label {
+	-fx-padding: 1px 0.5em 1px 0.5em;
+}
+
+.menu-item:disabled > .label {
+	-fx-text-fill: TEXT_FILL_MUTED;
+}
+
+.radio-menu-item:checked > .left-container > .radio {
+	-fx-background-color: TEXT_FILL;
+	-fx-shape: "M-1,4, L-1,5.5 L3.5,8.5 L9,0 L9,-1 L7,-1 L3,6 L1,4 Z";
+	-fx-scale-shape: false;
+}
+
+/*******************************************************************************
+ *                                                                             *
+ * ProgressBar                                                                 *
+ *                                                                             *
+ ******************************************************************************/
+
+.progress-bar {
+	-fx-indeterminate-bar-length: 100;
+	-fx-indeterminate-bar-escape: true;
+	-fx-indeterminate-bar-flip: true;
+	-fx-indeterminate-bar-animation-time: 2;
+}
+
+.progress-bar > .bar {
+	-fx-background-color: CONTROL_PRIMARY_BG_NORMAL;
+	-fx-background-radius: 4px;
+	-fx-padding: 1em 0.5em;
+}
+
+.progress-bar:indeterminate > .bar {
+	-fx-background-color: linear-gradient(to left, transparent, CONTROL_PRIMARY_BG_NORMAL);
+}
+
+.progress-bar > .track {
+	-fx-background-color: PROGRESS_BAR_BG;
+	-fx-background-radius: 4px;
+}
+/*******************************************************************************
+ *                                                                             *
+ * I/O Statistics                                                              *
+ *                                                                             *
+ ******************************************************************************/
+.chart {
+	-fx-padding: 10px;
+}
+
+.chart-plot-background {
+	-fx-background-color: MAIN_BG;
+	-fx-padding: 20px;
+}
+
+/* content */
+
+
+.cache-arc-background {
+	-fx-fill: transparent;
+	-fx-stroke: MUTED_BG;
+	-fx-stroke-type: centered;
+	-fx-stroke-width: 12;
+	-fx-stroke-line-cap: butt;
+}
+
+.cache-arc-foreground {
+	-fx-fill: transparent;
+	-fx-stroke: PRIMARY;
+	-fx-stroke-type: centered;
+	-fx-stroke-width: 12;
+	-fx-stroke-line-cap: butt;
+}
+
+.chart.io-stats {
+	-fx-padding: 10px;
+	-fx-horizontal-grid-lines-visible: false;
+	-fx-horizontal-zero-line-visible: false;
+	-fx-vertical-grid-lines-visible: false;
+	-fx-vertical-zero-line-visible: false;
+}
+
+.axis.io-stats {
+	-fx-tick-mark-visible: false;
+	-fx-minor-tick-visible: false;
+	-fx-tick-labels-visible: false;
+}
+
+.chart-plot-background {
+	-fx-background-color: transparent;
+}
+
+.chart-vertical-zero-line,
+.chart-horizontal-zero-line,
+.chart-alternative-row-fill {
+	-fx-stroke: transparent;
+	-fx-stroke-width: 0;
+}
+
+.default-color0.chart-series-area-line {
+	-fx-stroke: PRIMARY;
+}
+.default-color0.chart-series-area-fill {
+	-fx-fill: linear-gradient(to bottom, PRIMARY, transparent);
+	-fx-stroke: transparent;
+}

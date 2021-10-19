@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- This file lists false positives found by org.owasp:dependency-check-maven build plugin -->
+<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
+	<suppress>
+		<notes><![CDATA[ Suppress known vulnerabilities in FUSE libraries for fuse-nio-adapter. For more info, see suppression.xml of https://github.com/cryptomator/fuse-nio-adapter ]]></notes>
+		<gav regex="true">^org\.cryptomator:fuse-nio-adapter:.*$</gav>
+		<cvssBelow>9</cvssBelow>
+	</suppress>
+	<suppress>
+		<notes><![CDATA[ Suppress known vulnerabilities in FUSE libraries for jnr-fuse (dependency of fuse-nio-adapter). ]]></notes>
+		<gav regex="true">^com\.github\.serceman:jnr-fuse:.*$</gav>
+		<cvssBelow>9</cvssBelow>
+	</suppress>
+
+	<!-- Jetty false positives below -->
+	<suppress>
+		<notes><![CDATA[
+		Suppress all for this javax.servlet api package:
+		There are lots of false positives, simply because its version number is way beyond the remaining
+		org.eclipse.jetty jar files. Note, that our actual Jetty version is different.
+
+		As long as we don't suppress anything in org.eclipse.jetty:jetty-server or :jetty-servlet,
+		vulnerabilities will still trigger if we actually use an outdated Jetty version.
+		]]></notes>
+		<gav>org.eclipse.jetty.toolchain:jetty-servlet-api:4.0.6</gav>
+		<cpe regex="true">.*</cpe>
+	</suppress>
+</suppressions>

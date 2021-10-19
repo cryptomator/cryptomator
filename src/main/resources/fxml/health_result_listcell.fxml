@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import org.cryptomator.ui.controls.FontAwesome5IconView?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<HBox xmlns:fx="http://javafx.com/fxml"
+	  xmlns="http://javafx.com/javafx"
+	  fx:controller="org.cryptomator.ui.health.ResultListCellController"
+	  prefHeight="25"
+	  prefWidth="200"
+	  spacing="6"
+	  alignment="CENTER_LEFT">
+	<!-- Remark: Check the containing list view for a fixed cell size before editing height properties -->
+	<padding>
+		<Insets topRightBottomLeft="6"/>
+	</padding>
+	<children>
+		<StackPane minWidth="25" minHeight="25">
+			<FontAwesome5IconView fx:id="severityView" HBox.hgrow="NEVER" glyphSize="16" glyph="${controller.severityGlyph}"/>
+		</StackPane>
+		<Label text="${controller.description}"/>
+		<Region HBox.hgrow="ALWAYS"/>
+		<StackPane HBox.hgrow="NEVER">
+				<Button fx:id="fixButton" text="%health.fix.fixBtn" visible="${controller.fixable}" onAction="#fix" alignment="CENTER" minWidth="-Infinity"/>
+				<FontAwesome5IconView fx:id="fixView" styleClass="glyph-icon-muted" glyph="${controller.fixGlyph}" glyphSize="16" visible="${controller.fixRunningOrDone}" managed="${controller.fixRunningOrDone}"/>
+		</StackPane>
+	</children>
+</HBox>

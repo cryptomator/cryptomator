@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.layout.VBox?>
+<?import org.cryptomator.ui.health.CheckStateIconView?>
+<?import javafx.scene.layout.HBox?>
+<VBox xmlns:fx="http://javafx.com/fxml"
+	  xmlns="http://javafx.com/javafx"
+	  fx:controller="org.cryptomator.ui.health.CheckDetailController"
+	  spacing="6">
+	<Label fx:id="detailHeader" styleClass="label-large" text="${controller.checkName}" contentDisplay="LEFT">
+		<graphic>
+			<HBox alignment="CENTER" minWidth="25" maxWidth="25">
+				<CheckStateIconView fx:id="checkStateIconView" check="${controller.check}" glyphSize="20"/>
+			</HBox>
+		</graphic>
+	</Label>
+
+	<Label text="%health.check.detail.checkRunning" visible="${controller.checkRunning}" managed="${controller.checkRunning}"/>
+	<Label text="%health.check.detail.checkScheduled" visible="${controller.checkScheduled}" managed="${controller.checkScheduled}"/>
+	<Label text="%health.check.detail.checkSkipped" visible="${controller.checkSkipped}" managed="${controller.checkSkipped}"/>
+	<Label text="%health.check.detail.checkCancelled" visible="${controller.checkCancelled}" managed="${controller.checkCancelled}"/>
+	<Label text="%health.check.detail.checkFailed" visible="${controller.checkFailed}" managed="${controller.checkFailed}"/>
+	<Label text="%health.check.detail.checkFinished" visible="${controller.checkSucceeded &amp;&amp; !controller.warnOrCritsExist}" managed="${controller.checkSucceeded &amp;&amp; !controller.warnOrCritsExist}"/>
+	<Label text="%health.check.detail.checkFinishedAndFound" visible="${controller.checkSucceeded &amp;&amp; controller.warnOrCritsExist}" managed="${controller.checkSucceeded &amp;&amp; controller.warnOrCritsExist}"/>
+
+	<ListView fx:id="resultsListView" VBox.vgrow="ALWAYS" visible="${!controller.checkSkipped}" fixedCellSize="25"/>
+</VBox>

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2018 Armin Schrenk <armin.schrenk@zoho.eu> -->
+<component type="desktop-application">
+  <id>org.cryptomator.Cryptomator</id>
+  <metadata_license>FSFAP</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+  <name>Cryptomator</name>
+  <summary>Multi-platform client-side encryption tool optimized for cloud storages</summary>
+  <description>
+    <p>
+      Cryptomator offers multi-platform transparent client-side encryption of your files in the cloud.
+    </p>
+    <p>
+      Features:
+      <ul>
+        <li>Works with Dropbox, Google Drive, OneDrive, ownCloud, Nextcloud and any other cloud storage service which synchronizes with a local directory</li>
+        <li>Open Source means: No backdoors, control is better than trust</li>
+        <li>Client-side: No accounts, no data shared with any online service</li>
+        <li>Totally transparent: Just work on the virtual drive as if it were a USB flash drive</li>
+        <li>AES encryption with 256-bit key length</li>
+        <li>File names get encrypted</li>
+        <li>Folder structure gets obfuscated</li>
+        <li>Use as many vaults in your Dropbox as you want, each having individual passwords</li>
+        <li>One thousand commits for the security of your data!! :tada:</li>
+      </ul>
+    </p>
+    <p>
+      Privacy:
+      <ul>
+        <li>256-bit keys (unlimited strength policy bundled with native binaries)</li>
+        <li>Scrypt key derivation</li>
+        <li>Cryptographically secure random numbers for salts, IVs and the masterkey of course</li>
+        <li>Sensitive data is wiped from the heap asap</li>
+        <li>Lightweight: Complexity kills security</li>
+      </ul>
+    </p>
+    <p>
+      Consistency:
+      <ul>
+        <li>HMAC over file contents to recognize changed ciphertext before decryption</li>
+        <li>I/O operations are transactional and atomic, if the filesystems support it</li>
+        <li>Each file contains all information needed for decryption (except for the key of course), no common metadata means no Single Point of Failure</li>
+      </ul>
+    </p>
+  </description>
+  <categories>
+      <category>Office</category>
+      <category>Security</category>
+      <category>FileTools</category>
+      <category>Java</category>
+  </categories>
+  <url type="homepage">http://cryptomator.org</url>
+  <url type="bugtracker">https://github.com/cryptomator/cryptomator/issues</url>
+  <url type="faq">https://community.cryptomator.org/c/kb/faq</url>
+  <url type="help">https://community.cryptomator.org/</url>
+  <url type="donation">https://cryptomator.org/</url>
+  <content_rating type="oars-1.0">
+    <content_attribute id="violence-cartoon">none</content_attribute>
+    <content_attribute id="drugs-alcohol">none</content_attribute>
+    <content_attribute id="sex-nudity">none</content_attribute>
+    <content_attribute id="language-profanity">none</content_attribute>
+    <content_attribute id="social-info">mild</content_attribute> <!-- update checker conencts to https://api.cryptomator.org/updates/latestVersion.json -->
+  </content_rating>
+  <project_group>Cryptomator</project_group>
+  <provides>
+    <binary>cryptomator</binary>
+  </provides>
+  <launchable type="desktop-id">org.cryptomator.Cryptomator.desktop</launchable>
+</component>

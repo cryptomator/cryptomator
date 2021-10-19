@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import org.cryptomator.ui.controls.FontAwesome5IconView?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<StackPane xmlns:fx="http://javafx.com/fxml"
+		   xmlns="http://javafx.com/javafx"
+		   fx:id="root"
+		   fx:controller="org.cryptomator.ui.mainwindow.MainWindowController"
+		   styleClass="main-window">
+	<VBox minWidth="650">
+		<fx:include source="main_window_title.fxml" VBox.vgrow="NEVER"/>
+		<StackPane VBox.vgrow="ALWAYS">
+			<SplitPane dividerPositions="0.33" orientation="HORIZONTAL">
+				<fx:include source="vault_list.fxml" SplitPane.resizableWithParent="false"/>
+				<fx:include source="vault_detail.fxml" SplitPane.resizableWithParent="true"/>
+			</SplitPane>
+
+			<VBox styleClass="drag-n-drop-indicator" visible="${controller.draggingOver}" alignment="TOP_CENTER">
+				<HBox visible="${!controller.draggingVaultOver}" managed="${!controller.draggingVaultOver}" spacing="6" styleClass="drag-n-drop-header" alignment="CENTER" VBox.vgrow="NEVER">
+					<FontAwesome5IconView glyph="EXCLAMATION_TRIANGLE"/>
+					<Label text="%main.dropZone.unknownDragboardContent"/>
+				</HBox>
+				<HBox visible="${controller.draggingVaultOver}" managed="${controller.draggingVaultOver}" spacing="6" styleClass="drag-n-drop-header" alignment="CENTER" VBox.vgrow="NEVER">
+					<FontAwesome5IconView glyph="CHECK"/>
+					<Label text="%main.dropZone.dropVault"/>
+				</HBox>
+				<Region VBox.vgrow="ALWAYS"/>
+			</VBox>
+		</StackPane>
+	</VBox>
+	<fx:include source="main_window_resize.fxml"/>
+</StackPane>

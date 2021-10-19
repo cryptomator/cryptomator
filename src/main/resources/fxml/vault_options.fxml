@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import org.cryptomator.ui.controls.FontAwesome5IconView?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<TabPane xmlns:fx="http://javafx.com/fxml"
+		 xmlns="http://javafx.com/javafx"
+		 fx:id="tabPane"
+		 fx:controller="org.cryptomator.ui.vaultoptions.VaultOptionsController"
+		 prefWidth="400"
+		 tabMinWidth="60"
+		 tabClosingPolicy="UNAVAILABLE"
+		 tabDragPolicy="FIXED">
+	<tabs>
+		<Tab fx:id="generalTab" id="GENERAL" text="%vaultOptions.general">
+			<graphic>
+				<FontAwesome5IconView glyph="WRENCH"/>
+			</graphic>
+			<content>
+				<fx:include source="vault_options_general.fxml"/>
+			</content>
+		</Tab>
+		<Tab fx:id="mountTab" id="MOUNT" text="%vaultOptions.mount">
+			<graphic>
+				<FontAwesome5IconView glyph="HDD"/>
+			</graphic>
+			<content>
+				<fx:include source="vault_options_mount.fxml"/>
+			</content>
+		</Tab>
+		<Tab fx:id="keyTab" id="KEY" text="%vaultOptions.masterkey">
+			<graphic>
+				<FontAwesome5IconView glyph="KEY"/>
+			</graphic>
+			<content>
+				<fx:include source="vault_options_masterkey.fxml"/>
+			</content>
+		</Tab>
+	</tabs>
+</TabPane>

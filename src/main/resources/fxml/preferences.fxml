@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import org.cryptomator.ui.controls.FontAwesome5IconView?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<TabPane xmlns:fx="http://javafx.com/fxml"
+		 xmlns="http://javafx.com/javafx"
+		 fx:id="tabPane"
+		 fx:controller="org.cryptomator.ui.preferences.PreferencesController"
+		 minWidth="-Infinity"
+		 maxWidth="-Infinity"
+		 prefWidth="500"
+		 tabMinWidth="60"
+		 tabClosingPolicy="UNAVAILABLE"
+		 tabDragPolicy="FIXED">
+	<tabs>
+		<Tab fx:id="generalTab" id="GENERAL" text="%preferences.general">
+			<graphic>
+				<FontAwesome5IconView glyph="WRENCH"/>
+			</graphic>
+			<content>
+				<fx:include source="preferences_general.fxml"/>
+			</content>
+		</Tab>
+		<Tab fx:id="volumeTab" id="VOLUME" text="%preferences.volume">
+			<graphic>
+				<FontAwesome5IconView glyph="HDD"/>
+			</graphic>
+			<content>
+				<fx:include source="preferences_volume.fxml"/>
+			</content>
+		</Tab>
+		<Tab fx:id="updatesTab" id="UPDATES" text="%preferences.updates">
+			<graphic>
+				<FontAwesome5IconView glyph="SYNC"/>
+			</graphic>
+			<content>
+				<fx:include source="preferences_updates.fxml"/>
+			</content>
+		</Tab>
+		<Tab fx:id="contributeTab" id="CONTRIBUTE" text="%preferences.contribute">
+			<graphic>
+				<FontAwesome5IconView glyph="HEART"/>
+			</graphic>
+			<content>
+				<fx:include source="preferences_contribute.fxml"/>
+			</content>
+		</Tab>
+		<Tab fx:id="aboutTab" id="ABOUT" text="%preferences.about">
+			<graphic>
+				<FontAwesome5IconView glyph="INFO_CIRCLE"/>
+			</graphic>
+			<content>
+				<fx:include source="preferences_about.fxml"/>
+			</content>
+		</Tab>
+	</tabs>
+</TabPane>

@@ -1,0 +1,23 @@
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Text?>
+<?import javafx.scene.text.TextFlow?>
+<VBox xmlns:fx="http://javafx.com/fxml"
+	  xmlns="http://javafx.com/javafx"
+	  fx:controller="org.cryptomator.ui.mainwindow.WelcomeController"
+	  alignment="CENTER"
+	  spacing="24">
+	<children>
+		<ImageView VBox.vgrow="ALWAYS" fitHeight="128" preserveRatio="true" smooth="true" cache="true">
+			<Image url="@../img/bot/bot.png"/>
+		</ImageView>
+
+		<TextFlow styleClass="text-flow" prefWidth="-Infinity" visible="${controller.noVaultPresent}" managed="${controller.noVaultPresent}">
+			<Text text="%main.vaultDetail.welcomeOnboarding"/>
+			<Text text=" "/>
+			<Hyperlink text="docs.cryptomator.org" styleClass="hyperlink-underline" onAction="#visitGettingStartedGuide"/>
+		</TextFlow>
+	</children>
+</VBox>

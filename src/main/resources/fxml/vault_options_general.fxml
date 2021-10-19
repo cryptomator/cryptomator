@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.text.TextFlow?>
+<?import javafx.scene.text.Text?>
+<?import org.cryptomator.ui.controls.NumericTextField?>
+<?import org.cryptomator.ui.controls.FormattedLabel?>
+<?import org.cryptomator.ui.controls.FontAwesome5IconView?>
+<VBox xmlns:fx="http://javafx.com/fxml"
+	  xmlns="http://javafx.com/javafx"
+	  fx:controller="org.cryptomator.ui.vaultoptions.GeneralVaultOptionsController"
+	  spacing="6">
+	<padding>
+		<Insets topRightBottomLeft="12"/>
+	</padding>
+	<children>
+		<HBox spacing="6" alignment="CENTER_LEFT">
+			<Label text="%vaultOptions.general.vaultName"/>
+			<TextField fx:id="vaultName"/>
+		</HBox>
+
+		<TextFlow styleClass="text-flow" prefWidth="-Infinity">
+			<CheckBox text="%vaultOptions.general.autoLock.lockAfterTimePart1" fx:id="lockAfterTimeCheckbox"/>
+			<Text text=" "/>
+			<NumericTextField fx:id="lockTimeInMinutesTextField" prefWidth="50"/>
+			<Text text=" "/>
+			<FormattedLabel format="%vaultOptions.general.autoLock.lockAfterTimePart2"/>
+		</TextFlow>
+
+		<CheckBox text="%vaultOptions.general.unlockAfterStartup" fx:id="unlockOnStartupCheckbox"/>
+
+		<HBox spacing="6" alignment="CENTER_LEFT">
+			<Label text="%vaultOptions.general.actionAfterUnlock"/>
+			<ChoiceBox fx:id="actionAfterUnlockChoiceBox"/>
+		</HBox>
+
+		<Button fx:id="healthCheckButton" text="%vaultOptions.general.startHealthCheckBtn" onAction="#startHealthCheck">
+			<graphic>
+				<FontAwesome5IconView glyph="STETHOSCOPE"/>
+			</graphic>
+		</Button>
+	</children>
+</VBox>

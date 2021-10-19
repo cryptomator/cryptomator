@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ButtonBar?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import java.lang.Integer?>
+<VBox xmlns:fx="http://javafx.com/fxml"
+	  xmlns="http://javafx.com/javafx"
+	  fx:controller="org.cryptomator.ui.health.CheckListController"
+	  prefWidth="600"
+	  prefHeight="400"
+	  spacing="12">
+	<padding>
+		<Insets topRightBottomLeft="12"/>
+	</padding>
+	<fx:define>
+		<Integer fx:id="ZERO" fx:value="0"/>
+	</fx:define>
+	<children>
+		<HBox spacing="12" VBox.vgrow="ALWAYS">
+			<ListView fx:id="checksListView" VBox.vgrow="ALWAYS" minWidth="175" maxWidth="175"/>
+			<VBox alignment="CENTER" visible="${!controller.mainRunStarted}"  managed="${!controller.mainRunStarted}" HBox.hgrow="ALWAYS" spacing="12">
+				<Label text="%health.checkList.description" wrapText="true"/>
+				<HBox alignment="CENTER" spacing="6">
+					<Button onAction="#selectAllChecks" text="%health.checkList.selectAllButton" />
+					<Button onAction="#deselectAllChecks" text="%health.checkList.deselectAllButton" />
+				</HBox>
+			</VBox>
+			<StackPane visible="${controller.mainRunStarted}"  managed="${controller.mainRunStarted}" HBox.hgrow="ALWAYS">
+				<VBox minWidth="300" alignment="CENTER" visible="${!controller.anyCheckSelected}" managed="${!controller.anyCheckSelected}" >
+					<Label text="%health.check.detail.noSelectedCheck" wrapText="true" alignment="CENTER" />
+				</VBox>
+				<fx:include source="health_check_details.fxml" visible="${controller.anyCheckSelected}" managed="${controller.anyCheckSelected}" HBox.hgrow="ALWAYS"/>
+			</StackPane>
+		</HBox>
+		<ButtonBar buttonMinWidth="120" buttonOrder="+CX">
+			<buttons>
+				<Button text="%generic.button.cancel" ButtonBar.buttonData="CANCEL_CLOSE" onAction="#cancelRun" visible="${controller.running}" managed="${controller.running}" />
+				<Button text="%health.check.exportBtn" ButtonBar.buttonData="NEXT_FORWARD" defaultButton="true" disable="${controller.running}" visible="${controller.mainRunStarted}" managed="${controller.mainRunStarted}" onAction="#exportResults"/>
+				<Button text="%health.check.runBatchBtn" ButtonBar.buttonData="NEXT_FORWARD" defaultButton="true" onAction="#runSelectedChecks" disable="${controller.chosenTaskCount == ZERO}" visible="${!controller.mainRunStarted}" managed="${!controller.mainRunStarted}"/>
+			</buttons>
+		</ButtonBar>
+	</children>
+</VBox>

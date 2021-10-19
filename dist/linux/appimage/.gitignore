@@ -1,0 +1,4 @@
+# created during build
+Cryptomator.AppDir
+*.AppImage
+*.AppImage.zsync
