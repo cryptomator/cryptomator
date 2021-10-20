@@ -534,6 +534,9 @@ jobs:
           --app-version "${{ needs.metadata.outputs.semVerNum }}"
           --win-menu
           --win-dir-chooser
+          --win-shortcut-prompt
+          --win-update-url "https:\\cryptomator.org"
+          --win-menu-group Cryptomator
           --resource-dir dist/win/resources
           --license-file dist/win/resources/license.rtf
           --file-associations dist/win/resources/FAvaultFile.properties
@@ -549,7 +552,7 @@ jobs:
           timestampUrl: 'http://timestamp.digicert.com'
           folder: installer
       - name: Add possible alpha/beta tags to installer name
-        run: mv installer/Cryptomator-*.msi installer/Cryptomator-${{ needs.metadata.outputs.semVerStr }}.msi
+        run: mv installer/Cryptomator-*.msi installer/Cryptomator-${{ needs.metadata.outputs.semVerStr }}-x64.msi
       - name: Upload win-msi
         uses: actions/upload-artifact@v2
         with:
