@@ -44,8 +44,8 @@ public interface IpcCommunicator extends Closeable {
 		}
 		// Didn't get any connection yet? I.e. we're the first app instance, so let's launch a server:
 		try {
-			final var socketPath = socketPaths.iterator().next(); // ensure path does not exist before creating it
-			Files.deleteIfExists(socketPath);
+			final var socketPath = socketPaths.iterator().next();
+			Files.deleteIfExists(socketPath); // ensure path does not exist before creating it
 			return Server.create(socketPath);
 		} catch (IOException e) {
 			LOG.warn("Failed to create IPC server", e);
