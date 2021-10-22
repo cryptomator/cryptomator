@@ -68,10 +68,9 @@ rm -r jni/x86_64-Linux
 # load AppImageTool
 curl -L https://github.com/AppImage/AppImageKit/releases/download/13/appimagetool-x86_64.AppImage -o /tmp/appimagetool.AppImage
 chmod +x /tmp/appimagetool.AppImage
-/tmp/appimagetool.AppImage --appimage-extract
 
 # create AppImage
-./squashfs-root/AppRun \
+/tmp/appimagetool.AppImage \
     Cryptomator.AppDir \
     cryptomator-SNAPSHOT-x86_64.AppImage \
     -u 'gh-releases-zsync|cryptomator|cryptomator|latest|cryptomator-*-x86_64.AppImage.zsync'
