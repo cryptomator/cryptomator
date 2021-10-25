@@ -64,7 +64,7 @@ public class VaultStats {
 			});
 		} else {
 			LOG.debug("stop recording stats");
-			Platform.runLater(() -> updateService.cancel());
+			Platform.runLater(updateService::cancel);
 		}
 	}
 

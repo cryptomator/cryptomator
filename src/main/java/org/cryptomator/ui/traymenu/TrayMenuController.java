@@ -128,7 +128,7 @@ class TrayMenuController {
 	}
 
 	void showMainWindow(@SuppressWarnings("unused") ActionEvent actionEvent) {
-		showMainAppAndThen(app -> app.showMainWindow());
+		showMainAppAndThen(FxApplication::showMainWindow);
 	}
 
 	private void showPreferencesWindow(@SuppressWarnings("unused") EventObject actionEvent) {
