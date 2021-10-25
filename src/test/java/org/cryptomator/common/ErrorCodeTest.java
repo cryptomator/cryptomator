@@ -106,7 +106,7 @@ public class ErrorCodeTest {
 		private ErrorCode code2;
 
 		@BeforeEach
-		private void setup() {
+		public void setup() {
 			Mockito.doReturn(new StackTraceElement[]{baz, bar, foo}).when(fooException).getStackTrace();
 			Mockito.doReturn(new StackTraceElement[]{foo}).when(fooBarException).getStackTrace();
 			Mockito.doReturn(new StackTraceElement[]{foo}).when(fooBazException).getStackTrace();
@@ -152,7 +152,7 @@ public class ErrorCodeTest {
 		private ErrorCode code2;
 
 		@BeforeEach
-		private void setup() {
+		public void setup() {
 			Mockito.doReturn(new StackTraceElement[]{foo, bar, baz}).when(fooException).getStackTrace();
 			Mockito.doReturn(new StackTraceElement[]{foo, baz, bar}).when(barException).getStackTrace();
 			this.code1 = ErrorCode.of(fooException);
