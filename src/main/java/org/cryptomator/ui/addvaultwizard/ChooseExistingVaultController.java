@@ -56,11 +56,10 @@ public class ChooseExistingVaultController implements FxController {
 
 	@FXML
 	public void initialize() {
-		final String resource = SystemUtils.IS_OS_MAC ? "/img/select-masterkey-mac.png" : "/img/select-masterkey-win.png";
-		try (InputStream in = getClass().getResourceAsStream(resource)) {
-			this.screenshot = new Image(in);
-		} catch (IOException e) {
-			throw new UncheckedIOException(e);
+		if (SystemUtils.IS_OS_MAC) {
+			this.screenshot = new Image(getClass().getResource("/img/select-masterkey-mac.png").toString());
+		} else {
+			this.screenshot = new Image(getClass().getResource("/img/select-masterkey-win.png").toString());
 		}
 	}
 
