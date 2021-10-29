@@ -72,7 +72,7 @@ public class ChooseExistingVaultController implements FxController {
 	public void chooseFileAndNext() {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(resourceBundle.getString("addvaultwizard.existing.filePickerTitle"));
-		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Cryptomator Masterkey", "*.cryptomator"));
+		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Cryptomator Vault", "*.cryptomator"));
 		File masterkeyFile = fileChooser.showOpenDialog(window);
 		if (masterkeyFile != null) {
 			vaultPath.setValue(masterkeyFile.toPath().toAbsolutePath().getParent());
