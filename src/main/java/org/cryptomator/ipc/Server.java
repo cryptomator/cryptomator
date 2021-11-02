@@ -27,6 +27,7 @@ class Server implements IpcCommunicator {
 	}
 
 	public static Server create(Path socketPath) throws IOException {
+		Files.createDirectories(socketPath.getParent());
 		var address = UnixDomainSocketAddress.of(socketPath);
 		var serverSocketChannel = ServerSocketChannel.open(StandardProtocolFamily.UNIX);
 		serverSocketChannel.bind(address);

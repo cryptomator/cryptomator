@@ -1,5 +1,6 @@
 package org.cryptomator.ui.fxapp;
 
+import org.cryptomator.common.Environment;
 import org.cryptomator.common.settings.Settings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,9 +32,9 @@ public class UpdateChecker {
 	private final ScheduledService<String> updateCheckerService;
 
 	@Inject
-	UpdateChecker(Settings settings, @Named("applicationVersion") Optional<String> applicationVersion, @Named("latestVersion") StringProperty latestVersionProperty, @Named("SemVer") Comparator<String> semVerComparator, ScheduledService<String> updateCheckerService) {
+	UpdateChecker(Settings settings, Environment env, @Named("latestVersion") StringProperty latestVersionProperty, @Named("SemVer") Comparator<String> semVerComparator, ScheduledService<String> updateCheckerService) {
 		this.settings = settings;
-		this.applicationVersion = applicationVersion;
+		this.applicationVersion = env.getAppVersion();
 		this.latestVersionProperty = latestVersionProperty;
 		this.semVerComparator = semVerComparator;
 		this.updateCheckerService = updateCheckerService;

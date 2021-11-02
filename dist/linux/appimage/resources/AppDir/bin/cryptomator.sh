@@ -26,12 +26,15 @@ export LD_PRELOAD=lib/app/libjffi.so
 ./lib/runtime/bin/java \
 	-p "lib/app/mods" \
 	-cp "lib/app/*" \
+	-Dfile.encoding="utf-8" \
 	-Dcryptomator.logDir="~/.local/share/Cryptomator/logs" \
+	-Dcryptomator.pluginDir="~/.local/share/Cryptomator/plugins" \
 	-Dcryptomator.mountPointsDir="~/.local/share/Cryptomator/mnt" \
 	-Dcryptomator.settingsPath="~/.config/Cryptomator/settings.json:~/.Cryptomator/settings.json" \
 	-Dcryptomator.ipcSocketPath="~/.config/Cryptomator/ipc.socket" \
 	-Dcryptomator.buildNumber="appimage-${REVISION_NO}" \
+	-Dcryptomator.appVersion="${SEMVER_STR}" \
 	$GTK_FLAG \
-	-Xss2m \
-	-Xmx512m \
+	-Xss5m \
+	-Xmx256m \
 	-m org.cryptomator.desktop/org.cryptomator.launcher.Cryptomator

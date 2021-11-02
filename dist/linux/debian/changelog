@@ -1,0 +1,5 @@
+cryptomator (${PPA_VERSION}) focal; urgency=low
+
+  * Full changelog can be found on https://github.com/cryptomator/cryptomator/releases
+
+ -- Cryptobot <releases@cryptomator.org>  ${RFC2822_TIMESTAMP}

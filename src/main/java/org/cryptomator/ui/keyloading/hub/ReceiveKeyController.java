@@ -150,7 +150,7 @@ public class ReceiveKeyController implements FxController {
 
 	private static URI getVaultBaseUri(Vault vault) {
 		try {
-			var kid = vault.getUnverifiedVaultConfig().getKeyId();
+			var kid = vault.getVaultConfigCache().get().getKeyId();
 			assert kid.getScheme().startsWith(SCHEME_PREFIX);
 			var hubUriScheme = kid.getScheme().substring(SCHEME_PREFIX.length());
 			return new URI(hubUriScheme, kid.getSchemeSpecificPart(), kid.getFragment());

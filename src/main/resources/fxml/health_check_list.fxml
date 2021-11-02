@@ -3,7 +3,6 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ButtonBar?>
-<?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.layout.HBox?>
@@ -27,7 +26,7 @@
 			<ListView fx:id="checksListView" VBox.vgrow="ALWAYS" minWidth="175" maxWidth="175"/>
 			<VBox alignment="CENTER" visible="${!controller.mainRunStarted}"  managed="${!controller.mainRunStarted}" HBox.hgrow="ALWAYS" spacing="12">
 				<Label text="%health.checkList.description" wrapText="true"/>
-				<HBox alignment="CENTER">
+				<HBox alignment="CENTER" spacing="6">
 					<Button onAction="#selectAllChecks" text="%health.checkList.selectAllButton" />
 					<Button onAction="#deselectAllChecks" text="%health.checkList.deselectAllButton" />
 				</HBox>

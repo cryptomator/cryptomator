@@ -40,7 +40,7 @@ public abstract class HubKeyLoadingModule {
 	@KeyLoadingScoped
 	static HubConfig provideHubConfig(@KeyLoading Vault vault) {
 		try {
-			return vault.getUnverifiedVaultConfig().getHeader("hub", HubConfig.class);
+			return vault.getVaultConfigCache().get().getHeader("hub", HubConfig.class);
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
 		}

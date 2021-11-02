@@ -26,6 +26,9 @@ public interface VaultComponent {
 		Builder vaultSettings(VaultSettings vaultSettings);
 
 		@BindsInstance
+		Builder vaultConfigCache(VaultConfigCache configCache);
+
+		@BindsInstance
 		Builder initialVaultState(VaultState.Value vaultState);
 
 		@BindsInstance

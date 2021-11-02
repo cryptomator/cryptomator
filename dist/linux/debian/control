@@ -1,0 +1,23 @@
+Source: cryptomator
+Maintainer: Cryptobot <releases@cryptomator.org>
+Section: utils
+Priority: optional
+Build-Depends: debhelper (>=10), openjdk-17-jdk
+Standards-Version: 4.5.0
+Homepage: https://cryptomator.org
+Vcs-Git: https://github.com/cryptomator/cryptomator.git
+Vcs-browser: https://github.com/cryptomator/cryptomator
+
+Package: cryptomator
+Architecture: any
+Section: utils
+Priority: optional
+Depends: ${shlibs:Depends}, ${misc:Depends}, libfuse2, xdg-utils, libjffi-jni
+Recommends: gvfs-backends, gvfs-fuse, gnome-keyring
+XB-AppName: Cryptomator
+XB-Category: Utility;Security;FileTools;
+Homepage: https://cryptomator.org
+Description: Multi-platform client-side encryption of your cloud files.
+ Cryptomator provides free client-side AES encryption for your cloud files.
+ Create encrypted vaults, which get mounted as virtual volumes. Whatever
+ you save on one of these volumes will end up encrypted inside your vault.

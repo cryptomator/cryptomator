@@ -1,15 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Cryptomator's Jpackage Wix installer file 
-    
-    Remark: Expressions like $(var.name) are preprocessor variables, see also https://wixtoolset.org/documentation/manual/v3/overview/preprocessor.html
--->
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi"
-  xmlns:util="http://schemas.microsoft.com/wix/UtilExtension">
+     xmlns:util="http://schemas.microsoft.com/wix/UtilExtension">
 
   <?ifdef JpIsSystemWide ?>
-  <?define JpInstallScope="perMachine"?>
+    <?define JpInstallScope="perMachine"?>
   <?else?>
-  <?define JpInstallScope="perUser"?>
+    <?define JpInstallScope="perUser"?>
   <?endif?>
 
   <?define JpProductLanguage=1033 ?>
@@ -17,27 +13,49 @@
   <?define JpCompressedMsi=yes ?>
 
   <?ifdef JpAllowUpgrades ?>
-  <?define JpUpgradeVersionOnlyDetectUpgrade="no"?>
+    <?define JpUpgradeVersionOnlyDetectUpgrade="no"?>
   <?else?>
-  <?define JpUpgradeVersionOnlyDetectUpgrade="yes"?>
+    <?define JpUpgradeVersionOnlyDetectUpgrade="yes"?>
   <?endif?>
   <?ifdef JpAllowDowngrades ?>
-  <?define JpUpgradeVersionOnlyDetectDowngrade="no"?>
+    <?define JpUpgradeVersionOnlyDetectDowngrade="no"?>
   <?else?>
-  <?define JpUpgradeVersionOnlyDetectDowngrade="yes"?>
+    <?define JpUpgradeVersionOnlyDetectDowngrade="yes"?>
   <?endif?>
 
   <?include $(var.JpConfigDir)/overrides.wxi ?>
 
-  <Product Id="$(var.JpProductCode)" Name="$(var.JpAppName)" Language="$(var.JpProductLanguage)" Version="$(var.JpAppVersion)" Manufacturer="$(var.JpAppVendor)" UpgradeCode="$(var.JpProductUpgradeCode)">
+  <Product
+    Id="$(var.JpProductCode)"
+    Name="$(var.JpAppName)"
+    Language="$(var.JpProductLanguage)"
+    Version="$(var.JpAppVersion)"
+    Manufacturer="$(var.JpAppVendor)"
+    UpgradeCode="$(var.JpProductUpgradeCode)">
 
-    <Package Description="$(var.JpAppDescription)" Manufacturer="$(var.JpAppVendor)" InstallerVersion="$(var.JpInstallerVersion)" Compressed="$(var.JpCompressedMsi)" InstallScope="$(var.JpInstallScope)" Platform="x64" />
+    <Package
+      Description="$(var.JpAppDescription)"
+      Manufacturer="$(var.JpAppVendor)"
+      InstallerVersion="$(var.JpInstallerVersion)"
+      Compressed="$(var.JpCompressedMsi)"
+      InstallScope="$(var.JpInstallScope)" Platform="x64"
+    />
 
     <Media Id="1" Cabinet="Data.cab" EmbedCab="yes" />
 
     <Upgrade Id="$(var.JpProductUpgradeCode)">
-      <UpgradeVersion OnlyDetect="$(var.JpUpgradeVersionOnlyDetectUpgrade)" Property="JP_UPGRADABLE_FOUND" Maximum="$(var.JpAppVersion)" MigrateFeatures="yes" IncludeMaximum="$(var.JpUpgradeVersionOnlyDetectUpgrade)" />
-      <UpgradeVersion OnlyDetect="$(var.JpUpgradeVersionOnlyDetectDowngrade)" Property="JP_DOWNGRADABLE_FOUND" Minimum="$(var.JpAppVersion)" MigrateFeatures="yes" IncludeMinimum="$(var.JpUpgradeVersionOnlyDetectDowngrade)" />
+      <UpgradeVersion
+        OnlyDetect="$(var.JpUpgradeVersionOnlyDetectUpgrade)"
+        Property="JP_UPGRADABLE_FOUND"
+        Maximum="$(var.JpAppVersion)"
+        MigrateFeatures="yes"
+        IncludeMaximum="$(var.JpUpgradeVersionOnlyDetectUpgrade)" />
+      <UpgradeVersion
+        OnlyDetect="$(var.JpUpgradeVersionOnlyDetectDowngrade)"
+        Property="JP_DOWNGRADABLE_FOUND"
+        Minimum="$(var.JpAppVersion)"
+        MigrateFeatures="yes"
+        IncludeMinimum="$(var.JpUpgradeVersionOnlyDetectDowngrade)" />
     </Upgrade>
 
     <?ifndef JpAllowUpgrades ?>
@@ -47,6 +65,37 @@
     <CustomAction Id="JpDisallowDowngrade" Error="!(loc.DowngradeErrorMessage)" />
     <?endif?>
 
+
+    <!-- Looking for legacy Cryptomator versions-->
+    <Property Id="OLDEXEINSTALLER">
+      <RegistrySearch Id="InnoSetupInstallation" Root="HKLM" Key="Software\Microsoft\Windows\CurrentVersion\Uninstall\Cryptomator_is1" Type="raw" Name="DisplayName" />
+    </Property>
+    <!-- Block installation if innosetup entry of Cryptomator is found -->
+    <!-- TODO: localize -->
+    <Condition Message="A lower version of [ProductName] is already installed. Uninstall it first and then start the setup again. Setup will now exit.">
+        <![CDATA[Installed OR NOT OLDEXEINSTALLER]]>
+    </Condition>
+    <!-- Cryptomator uses UNIX Sockets, which are supported starting with Windows 10 v1803-->
+    <Property Id="WINDOWSBUILDNUMBER" Secure="yes">
+      <RegistrySearch Id="BuildNumberSearch" Root="HKLM" Key="SOFTWARE\Microsoft\Windows NT\CurrentVersion" Name="CurrentBuildNumber" Type="raw" />
+    </Property>
+    <Condition Message="This application requires Windows 10 version 1803 (build 17134) or newer.">
+      <![CDATA[Installed OR (WINDOWSBUILDNUMBER >= 17134)]]>
+    </Condition>
+
+    <!-- Non-Opening ProgID -->
+    <DirectoryRef Id="INSTALLDIR">
+        <Component Win64="yes" Id="nonStartingProgID" >
+          <File Id="IconFileForEncryptedData" KeyPath="yes" Source="$(env.JP_WIXWIZARD_RESOURCES)\Cryptomator-Vault.ico" Name="Cryptomator-Vault.ico"></File>
+          <ProgId Id="Cryptomator.Encrypted.1" Description="Cryptomator Encrypted Data" Icon="IconFileForEncryptedData" IconIndex="0">
+            <Extension Id="c9r" Advertise="no" ContentType="application/vnd.cryptomator.encrypted">
+              <MIME ContentType="application/vnd.cryptomator.encrypted" Default="yes"></MIME>
+            </Extension>
+            <Extension Id="c9s" Advertise="no" ContentType="application/vnd.cryptomator.encrypted"/>
+          </ProgId>
+        </Component>
+    </DirectoryRef>
+
     <!-- Standard required root -->
     <Directory Id="TARGETDIR" Name="SourceDir"/>
 
@@ -54,70 +103,49 @@
       <ComponentGroupRef Id="Shortcuts"/>
       <ComponentGroupRef Id="Files"/>
       <ComponentGroupRef Id="FileAssociations"/>
+      <!-- Ref to additional ProgIDs -->
+      <ComponentRef Id="nonStartingProgID" />
     </Feature>
 
-    <?ifdef JpInstallDirChooser ?>
-    <Binary Id="JpCaDll" SourceFile="wixhelper.dll"/>
-    <CustomAction Id="JpCheckInstallDir" BinaryKey="JpCaDll" DllEntry="CheckInstallDir" />
+    <CustomAction Id="JpSetARPINSTALLLOCATION" Property="ARPINSTALLLOCATION" Value="[INSTALLDIR]" />
+    <CustomAction Id="JpSetARPCOMMENTS" Property="ARPCOMMENTS" Value="$(var.JpAppDescription)" />
+    <CustomAction Id="JpSetARPCONTACT" Property="ARPCONTACT" Value="$(var.JpAppVendor)" />
+    <CustomAction Id="JpSetARPSIZE" Property="ARPSIZE" Value="$(var.JpAppSizeKb)" />
+
+    <?ifdef JpHelpURL ?>
+      <CustomAction Id="JpSetARPHELPLINK" Property="ARPHELPLINK" Value="$(var.JpHelpURL)" />
     <?endif?>
 
-    <CustomAction Id="JpSetARPINSTALLLOCATION" Property="ARPINSTALLLOCATION" Value="[INSTALLDIR]" />
+    <?ifdef JpAboutURL ?>
+      <CustomAction Id="JpSetARPURLINFOABOUT" Property="ARPURLINFOABOUT" Value="$(var.JpAboutURL)" />
+    <?endif?>
+
+    <?ifdef JpUpdateURL ?>
+      <CustomAction Id="JpSetARPURLUPDATEINFO" Property="ARPURLUPDATEINFO" Value="$(var.JpUpdateURL)" />
+    <?endif?>
 
     <?ifdef JpIcon ?>
     <Property Id="ARPPRODUCTICON" Value="JpARPPRODUCTICON"/>
     <Icon Id="JpARPPRODUCTICON" SourceFile="$(var.JpIcon)"/>
     <?endif?>
 
-    <UI>
-      <?ifdef JpInstallDirChooser ?>
-      <Dialog Id="JpInvalidInstallDir" Width="300" Height="85" Title="[ProductName] Setup" NoMinimize="yes">
-        <Control Id="JpInvalidInstallDirYes" Type="PushButton" X="100" Y="55" Width="50" Height="15" Default="no" Cancel="no" Text="Yes">
-          <Publish Event="NewDialog" Value="VerifyReadyDlg">1</Publish>
-        </Control>
-        <Control Id="JpInvalidInstallDirNo" Type="PushButton" X="150" Y="55" Width="50" Height="15" Default="yes" Cancel="yes" Text="No">
-          <Publish Event="NewDialog" Value="InstallDirDlg">1</Publish>
-        </Control>
-        <Control Id="Text" Type="Text" X="25" Y="15" Width="250" Height="30" TabSkip="no">
-          <Text>!(loc.message.install.dir.exist)</Text>
-        </Control>
-      </Dialog>
-
-      <!--
-        Run our custom wizard in the default install directory.
-      -->
-      <Property Id="WIXUI_INSTALLDIR" Value="INSTALLDIR"/>
-      <!-- included at the end -->
-      <UIRef Id="CustomWizard" />
-
-      <Publish Dialog="InstallDirDlg" Control="Next" Event="DoAction" Value="JpCheckInstallDir" Order="3">1</Publish>
-      <Publish Dialog="InstallDirDlg" Control="Next" Event="NewDialog" Value="JpInvalidInstallDir" Order="5">INSTALLDIR_VALID="0"</Publish>
-      <Publish Dialog="InstallDirDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg" Order="5">INSTALLDIR_VALID="1"</Publish>
-
-      <?ifndef JpLicenseRtf ?>
-      <!--
-        No license file provided.
-        Override the dialog sequence in built-in dialog set "WixUI_InstallDir"
-        to exclude license dialog.
-      -->
-      <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="InstallDirDlg" Order="2">1</Publish>
-      <Publish Dialog="InstallDirDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg" Order="2">1</Publish>
-      <?endif?>
-
-      <?else?>
-
-      <?ifdef JpLicenseRtf ?>
-      <UIRef Id="WixUI_Minimal" />
-      <?endif?>
-
-      <?endif?>
-    </UI>
-
-    <?ifdef JpLicenseRtf ?>
-    <WixVariable Id="WixUILicenseRtf" Value="$(var.JpLicenseRtf)"/>
-    <?endif?>
+    <UIRef Id="JpUI"/>
 
     <InstallExecuteSequence>
       <Custom Action="JpSetARPINSTALLLOCATION" After="CostFinalize">Not Installed</Custom>
+      <Custom Action="JpSetARPCOMMENTS" After="CostFinalize">Not Installed</Custom>
+      <Custom Action="JpSetARPCONTACT" After="CostFinalize">Not Installed</Custom>
+      <Custom Action="JpSetARPSIZE" After="CostFinalize">Not Installed</Custom>
+      <?ifdef JpHelpURL ?>
+        <Custom Action="JpSetARPHELPLINK" After="CostFinalize">Not Installed</Custom>
+      <?endif?>
+      <?ifdef JpAboutURL ?>
+        <Custom Action="JpSetARPURLINFOABOUT" After="CostFinalize">Not Installed</Custom>
+      <?endif?>
+      <?ifdef JpUpdateURL ?>
+        <Custom Action="JpSetARPURLUPDATEINFO" After="CostFinalize">Not Installed</Custom>
+      <?endif?>
+
       <?ifndef JpAllowUpgrades ?>
       <Custom Action="JpDisallowUpgrade" After="FindRelatedProducts">JP_UPGRADABLE_FOUND</Custom>
       <?endif?>
@@ -131,5 +159,4 @@
     <WixVariable Id="WixUIDialogBmp" Value="$(env.JP_WIXWIZARD_RESOURCES)\background.bmp" />
   </Product>
 
-  <?include $(env.JP_WIXWIZARD_RESOURCES)\customWizard.wxi ?>
 </Wix>

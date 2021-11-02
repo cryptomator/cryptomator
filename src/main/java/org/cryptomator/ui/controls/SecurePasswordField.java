@@ -10,6 +10,7 @@ package org.cryptomator.ui.controls;
 
 import com.google.common.base.Strings;
 
+import javafx.application.Platform;
 import javafx.beans.NamedArg;
 import javafx.beans.Observable;
 import javafx.beans.property.BooleanProperty;
@@ -27,7 +28,6 @@ import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.TransferMode;
-import java.awt.Toolkit;
 import java.nio.CharBuffer;
 import java.text.Normalizer;
 import java.text.Normalizer.Form;
@@ -123,8 +123,7 @@ public class SecurePasswordField extends TextField {
 	}
 
 	private void updateCapsLocked() {
-		//TODO: fixed in JavaFX 17. AWT code needed until update (see https://bugs.openjdk.java.net/browse/JDK-8259680)
-		capsLocked.set(isFocused() && Toolkit.getDefaultToolkit().getLockingKeyState(java.awt.event.KeyEvent.VK_CAPS_LOCK));
+		capsLocked.set(Platform.isKeyLocked(KeyCode.CAPS).orElse(false));
 	}
 
 	private void updateContainingNonPrintableChars() {

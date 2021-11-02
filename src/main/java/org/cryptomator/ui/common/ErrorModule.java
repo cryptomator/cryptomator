@@ -4,6 +4,7 @@ import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoMap;
+import org.cryptomator.common.ErrorCode;
 
 import javax.inject.Named;
 import javax.inject.Provider;
@@ -29,6 +30,11 @@ abstract class ErrorModule {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		cause.printStackTrace(new PrintStream(baos));
 		return baos.toString(StandardCharsets.UTF_8);
+	}
+
+	@Provides
+	static ErrorCode provideErrorCode(Throwable cause) {
+		return ErrorCode.of(cause);
 	}
 
 	@Binds

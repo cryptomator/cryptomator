@@ -2,6 +2,7 @@ package org.cryptomator.common.keychain;
 
 import dagger.Module;
 import dagger.Provides;
+import org.cryptomator.common.PluginClassLoader;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.integrations.keychain.KeychainAccessProvider;
 
@@ -17,8 +18,8 @@ public class KeychainModule {
 
 	@Provides
 	@Singleton
-	static Set<ServiceLoader.Provider<KeychainAccessProvider>> provideAvailableKeychainAccessProviderFactories() {
-		return ServiceLoader.load(KeychainAccessProvider.class).stream().collect(Collectors.toUnmodifiableSet());
+	static Set<ServiceLoader.Provider<KeychainAccessProvider>> provideAvailableKeychainAccessProviderFactories(PluginClassLoader classLoader) {
+		return ServiceLoader.load(KeychainAccessProvider.class, classLoader).stream().collect(Collectors.toUnmodifiableSet());
 	}
 
 	@Provides

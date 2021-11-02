@@ -12,7 +12,6 @@ public enum FxmlFile {
 	ERROR("/fxml/error.fxml"), //
 	FORGET_PASSWORD("/fxml/forget_password.fxml"), //
 	HEALTH_START("/fxml/health_start.fxml"), //
-	HEALTH_START_FAIL("/fxml/health_start_fail.fxml"), //
 	HEALTH_CHECK_LIST("/fxml/health_check_list.fxml"), //
 	HUB_AUTH_FLOW("/fxml/hub_auth_flow.fxml"), //
 	HUB_RECEIVE_KEY("/fxml/hub_receive_key.fxml"), //

@@ -23,7 +23,6 @@ public class VaultOptionsController implements FxController {
 	public Tab generalTab;
 	public Tab mountTab;
 	public Tab keyTab;
-	public Tab autoLockTab;
 
 	@Inject
 	VaultOptionsController(@VaultOptionsWindow Stage window, ObjectProperty<SelectedVaultOptionsTab> selectedTabProperty) {
@@ -48,7 +47,6 @@ public class VaultOptionsController implements FxController {
 			case ANY, GENERAL -> generalTab;
 			case MOUNT -> mountTab;
 			case KEY -> keyTab;
-			case AUTOLOCK ->  autoLockTab;
 		};
 	}
 
