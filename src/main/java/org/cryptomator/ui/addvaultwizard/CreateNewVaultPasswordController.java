@@ -44,10 +44,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.security.SecureRandom;
-import java.util.Comparator;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static java.nio.charset.StandardCharsets.US_ASCII;
 import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
@@ -197,28 +195,12 @@ public class CreateNewVaultPasswordController implements FxController {
 			} catch (CryptoException e) {
 				throw new IOException("Failed initialize vault.", e);
 			}
-		} finally {
-			AtomicBoolean cleanupFailed = new AtomicBoolean(false);
-			Files.walk(path)
-				.sorted(Comparator.reverseOrder())
-				.forEach(p -> {
-					try {
-						Files.deleteIfExists(p);
-					} catch (IOException e) {
-						cleanupFailed.set(false);
-					}
-				});
-			if(cleanupFailed.get()) {
-				LOG.warn("Failed to cleanup after failed vault creation at {}. Leftovers need to be deleted manually.", path);
-			}
 		}
 
 		// 4. write vault-external readme file:
 		String storagePathReadmeFileName = resourceBundle.getString("addvault.new.readme.storageLocation.fileName");
 		try (WritableByteChannel ch = Files.newByteChannel(path.resolve(storagePathReadmeFileName), StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE)) {
 			ch.write(US_ASCII.encode(readmeGenerator.createVaultStorageLocationReadmeRtf()));
-		} catch (IOException e) {
-			LOG.warn("Unable to create vault storage location readme.", e);
 		}
 
 		LOG.info("Created vault at {}", path);
