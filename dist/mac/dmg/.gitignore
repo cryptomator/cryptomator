@@ -1,3 +1,4 @@
 # created during build
 runtime/
-*.app/
+dmg/
+*.dmg
