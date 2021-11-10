@@ -207,7 +207,7 @@ jobs:
   ppa:
     name: Upload source package to PPA
     needs: [buildkit, metadata]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
       - name: install build tools
