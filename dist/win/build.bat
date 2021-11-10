@@ -1,2 +1,2 @@
 @echo off
-powershell -NoExit -ExecutionPolicy Unrestricted -Command .\build.ps1
+powershell -NoLogo -NoExit -ExecutionPolicy Unrestricted -Command .\build.ps1

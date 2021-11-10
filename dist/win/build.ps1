@@ -68,7 +68,6 @@ Copy-Item "$buildDir\..\..\target\cryptomator-*.jar" -Destination "$buildDir\..\
 Copy-Item "contrib\*" -Destination "Cryptomator"
 attrib -r "Cryptomator\Cryptomator.exe"
 
-
 # create .msi bundle
 $Env:JP_WIXWIZARD_RESOURCES = "$buildDir\resources"
 & "$Env:JAVA_HOME\bin\jpackage" `
