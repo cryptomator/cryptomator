@@ -123,6 +123,8 @@
     <?ifdef JpUpdateURL ?>
       <CustomAction Id="JpSetARPURLUPDATEINFO" Property="ARPURLUPDATEINFO" Value="$(var.JpUpdateURL)" />
     <?endif?>
+	
+	<CustomAction Id="PatchHostsFile" Impersonate="no" ExeCommand="[INSTALLDIR]patchHosts.bat" Directory="INSTALLDIR" Execute="deferred" Return="asyncWait" />
 
     <?ifdef JpIcon ?>
     <Property Id="ARPPRODUCTICON" Value="JpARPPRODUCTICON"/>
@@ -153,6 +155,8 @@
       <Custom Action="JpDisallowDowngrade" After="FindRelatedProducts">JP_DOWNGRADABLE_FOUND</Custom>
       <?endif?>
       <RemoveExistingProducts Before="CostInitialize"/>
+	  
+	  <Custom Action="PatchHostsFile" After="InstallFiles">NOT Installed OR REINSTALL</Custom>
     </InstallExecuteSequence>
 
     <WixVariable Id="WixUIBannerBmp" Value="$(env.JP_WIXWIZARD_RESOURCES)\banner.bmp" />
