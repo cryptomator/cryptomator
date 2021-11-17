@@ -33,11 +33,11 @@
 		</HBox>
 
 		<VBox alignment="BOTTOM_CENTER" VBox.vgrow="ALWAYS">
-			<ButtonBar buttonMinWidth="120" buttonOrder="+CI">
+			<ButtonBar buttonMinWidth="100" buttonOrder="+CIU">
 				<buttons>
 					<Button text="%generic.button.cancel" ButtonBar.buttonData="CANCEL_CLOSE" defaultButton="true" cancelButton="true" onAction="#cancel"/>
-					<!-- TODO: third button with retry? -->
-					<Button text="%lock.forced.confirmBtn" ButtonBar.buttonData="FINISH" onAction="#confirmForcedLock"/>
+					<Button text="%lock.forced.retryBtn" ButtonBar.buttonData="FINISH" onAction="#retry"/>
+					<Button text="%lock.forced.forceBtn" ButtonBar.buttonData="OTHER" onAction="#force" disable="${!controller.forceSupported}"/>
 				</buttons>
 			</ButtonBar>
 		</VBox>
