@@ -62,6 +62,7 @@ public class LockWorkflow extends Task<Void> {
 			LOG.info("Locking {} failed (forced: {}).", vault.getDisplayName(), forced, e);
 			var decision = askUserForAction();
 			switch (decision) {
+				case RETRY -> lock(false);
 				case FORCE -> lock(true);
 				case CANCEL -> cancel(false);
 			}

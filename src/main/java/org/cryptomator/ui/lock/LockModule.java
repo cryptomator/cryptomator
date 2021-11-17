@@ -28,6 +28,7 @@ abstract class LockModule {
 
 	enum ForceLockDecision {
 		CANCEL,
+		RETRY,
 		FORCE;
 	}
 
