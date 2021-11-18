@@ -34,10 +34,10 @@ public class SupporterCertificateController implements FxController {
 	public void initialize() {
 		supporterCertificateField.setText(licenseHolder.getLicenseKey().orElse(null));
 		supporterCertificateField.textProperty().addListener(this::registrationKeyChanged);
-		supporterCertificateField.setTextFormatter(new TextFormatter<>(this::checkVaultNameLength));
+		supporterCertificateField.setTextFormatter(new TextFormatter<>(this::removeWhitespaces));
 	}
 
-	private TextFormatter.Change checkVaultNameLength(TextFormatter.Change change) {
+	private TextFormatter.Change removeWhitespaces(TextFormatter.Change change) {
 		if (change.isContentChange()) {
 			var strippedText = CharMatcher.whitespace().removeFrom(change.getText());
 			change.setText(strippedText);
