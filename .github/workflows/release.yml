@@ -39,15 +39,11 @@ jobs:
           profile: mac
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-java@v1
+      - uses: actions/setup-java@v2
         with:
+          distribution: 'temurin'
           java-version: ${{ env.JAVA_VERSION }}
-      - uses: actions/cache@v2
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
+          cache: 'maven'
       - name: Ensure to use tagged version
         run: mvn versions:set -DnewVersion=${GITHUB_REF##*/} # use shell parameter expansion to strip of 'refs/tags'
         if: startsWith(github.ref, 'refs/tags/')
@@ -159,8 +155,9 @@ jobs:
             --resource-dir dist/mac/resources
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-java@v1
+      - uses: actions/setup-java@v2
         with:
+          distribution: 'temurin'
           java-version: ${{ env.JAVA_VERSION }}
       - name: Download ${{ matrix.profile }}-buildkit
         uses: actions/download-artifact@v2
@@ -210,7 +207,7 @@ jobs:
   ppa:
     name: Upload source package to PPA
     needs: [buildkit, metadata]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
       - name: install build tools
@@ -505,8 +502,9 @@ jobs:
           name: win-appdir
       - name: Untar appdir.tar
         run: tar -xvf appdir.tar
-      - uses: actions/setup-java@v1
+      - uses: actions/setup-java@v2
         with:
+          distribution: 'temurin'
           java-version: ${{ env.JAVA_VERSION }}
       - name: Patch Application Directory
         run: |

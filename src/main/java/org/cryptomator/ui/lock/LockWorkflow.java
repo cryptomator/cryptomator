@@ -51,20 +51,26 @@ public class LockWorkflow extends Task<Void> {
 
 	@Override
 	protected Void call() throws Volume.VolumeException, InterruptedException, LockNotCompletedException {
-		try {
-			vault.lock(false);
-		} catch (Volume.VolumeException | LockNotCompletedException e) {
-			LOG.debug("Regular lock of {} failed.", vault.getDisplayName(), e);
-			var decision = askUserForAction();
-			switch (decision) {
-				case FORCE -> vault.lock(true);
-				case CANCEL -> cancel(false);
-			}
-		}
+		lock(false);
 		return null;
 	}
 
+	private void lock(boolean forced) throws InterruptedException {
+		try {
+			vault.lock(forced);
+		} catch (Volume.VolumeException | LockNotCompletedException e) {
+			LOG.info("Locking {} failed (forced: {}).", vault.getDisplayName(), forced, e);
+			var decision = askUserForAction();
+			switch (decision) {
+				case RETRY -> lock(false);
+				case FORCE -> lock(true);
+				case CANCEL -> cancel(false);
+			}
+		}
+	}
+
 	private LockModule.ForceLockDecision askUserForAction() throws InterruptedException {
+		forceLockDecisionLock.reset(null);
 		// show forcedLock dialogue ...
 		Platform.runLater(() -> {
 			lockWindow.setScene(lockForcedScene.get());
