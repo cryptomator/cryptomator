@@ -121,6 +121,7 @@ jobs:
             --java-options "-Dcryptomator.pluginDir=\"~/.local/share/Cryptomator/plugins\""
             --java-options "-Dcryptomator.settingsPath=\"~/.config/Cryptomator/settings.json:~/.Cryptomator/settings.json\""
             --java-options "-Dcryptomator.ipcSocketPath=\"~/.config/Cryptomator/ipc.socket\""
+            --java-options "-Dcryptomator.p12Path=\"~/.config/Cryptomator/key.p12\""
             --java-options "-Dcryptomator.mountPointsDir=\"~/.local/share/Cryptomator/mnt\""
             --java-options "-Dcryptomator.showTrayIcon=false"
             --java-options "-Dcryptomator.buildNumber=\"appimage-${{ needs.metadata.outputs.revNum }}\""
@@ -134,6 +135,7 @@ jobs:
             --java-options "-Dcryptomator.pluginDir=\"~/AppData/Roaming/Cryptomator/Plugins\""
             --java-options "-Dcryptomator.settingsPath=\"~/AppData/Roaming/Cryptomator/settings.json\""
             --java-options "-Dcryptomator.ipcSocketPath=\"~/AppData/Roaming/Cryptomator/ipc.socket\""
+            --java-options "-Dcryptomator.p12Path=\"~/AppData/Roaming/Cryptomator/key.p12\""
             --java-options "-Dcryptomator.keychainPath=\"~/AppData/Roaming/Cryptomator/keychain.json\""
             --java-options "-Dcryptomator.mountPointsDir=\"~/Cryptomator\""
             --java-options "-Dcryptomator.showTrayIcon=true"
@@ -150,6 +152,7 @@ jobs:
             --java-options "-Dcryptomator.pluginDir=\"~/Library/Application Support/Cryptomator/Plugins\""
             --java-options "-Dcryptomator.settingsPath=\"~/Library/Application Support/Cryptomator/settings.json\""
             --java-options "-Dcryptomator.ipcSocketPath=\"~/Library/Application Support/Cryptomator/ipc.socket\""
+            --java-options "-Dcryptomator.p12Path=\"~/Library/Application Support/Cryptomator/key.p12\""
             --java-options "-Dcryptomator.showTrayIcon=true"
             --java-options "-Dcryptomator.buildNumber=\"dmg-${{ needs.metadata.outputs.revNum }}\""
             --mac-package-identifier org.cryptomator
@@ -170,7 +173,7 @@ jobs:
           --verbose
           --output runtime
           --module-path "${JAVA_HOME}/jmods"
-          --add-modules java.base,java.desktop,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.crypto.ec,jdk.accessibility
+          --add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.crypto.ec,jdk.accessibility
           --no-header-files
           --no-man-pages
           --strip-debug
