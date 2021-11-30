@@ -124,7 +124,8 @@
       <CustomAction Id="JpSetARPURLUPDATEINFO" Property="ARPURLUPDATEINFO" Value="$(var.JpUpdateURL)" />
     <?endif?>
 
-    <CustomAction Id="PatchHostsFile" Impersonate="no" ExeCommand="[INSTALLDIR]patchHosts.bat" Directory="INSTALLDIR" Execute="deferred" Return="asyncWait" />
+    <!-- WebDAV patches -->
+    <CustomAction Id="PatchHostsFile" Impersonate="no" ExeCommand="[INSTALLDIR]patchWebDAV.bat" Directory="INSTALLDIR" Execute="deferred" Return="asyncWait" />
 
     <?ifdef JpIcon ?>
     <Property Id="ARPPRODUCTICON" Value="JpARPPRODUCTICON"/>

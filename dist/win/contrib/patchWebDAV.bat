@@ -1,3 +1,3 @@
 @echo off
 cd %~dp0
-powershell -NoLogo -NonInteractive -ExecutionPolicy Unrestricted -Command .\patchHosts.ps1
+powershell -NoLogo -NonInteractive -ExecutionPolicy Unrestricted -Command .\patchWebDAV.ps1
