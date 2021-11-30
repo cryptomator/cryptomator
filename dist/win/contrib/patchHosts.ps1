@@ -1,3 +1,4 @@
+# Adds for address 127.0.0.1 the 'cryptomator-vault' alias to the hosts file
 function Add-AliasToHost {
     $sysdir = [Environment]::SystemDirectory
     $hostsFile = "$sysdir\drivers\etc\hosts"

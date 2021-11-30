@@ -1,4 +1,4 @@
-# taken from https://devblogs.microsoft.com/powershell-community/how-to-update-or-add-a-registry-key-value-with-powershell/
+# Sets in the registry the webclient file size limit to the maximum value
 function Set-WebDAVFileSizeLimit {
     # Set variables to indicate value and key to set
     $RegistryPath = 'HKLM:\SYSTEM\CurrentControlSet\Services\WebClient\Parameters'
