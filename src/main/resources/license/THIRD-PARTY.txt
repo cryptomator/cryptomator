@@ -17,7 +17,7 @@ Cryptomator uses 40 third-party dependencies under the following licenses:
 			- jnr-a64asm (com.github.jnr:jnr-a64asm:1.0.0 - http://nexus.sonatype.org/oss-repository-hosting.html/jnr-a64asm)
 			- jnr-constants (com.github.jnr:jnr-constants:0.10.2 - http://github.com/jnr/jnr-constants)
 			- jnr-ffi (com.github.jnr:jnr-ffi:2.2.7 - http://github.com/jnr/jnr-ffi)
-			- Dagger (com.google.dagger:dagger:2.39 - https://github.com/google/dagger)
+			- Dagger (com.google.dagger:dagger:2.40.3 - https://github.com/google/dagger)
 			- Guava InternalFutureFailureAccess and InternalFutures (com.google.guava:failureaccess:1.0.1 - https://github.com/google/guava/failureaccess)
 			- Guava: Google Core Libraries for Java (com.google.guava:guava:31.0-jre - https://github.com/google/guava)
 			- Apache Commons CLI (commons-cli:commons-cli:1.4 - http://commons.apache.org/proper/commons-cli/)
