@@ -16,7 +16,11 @@ public class UserInteractionLock<E extends Enum> {
 	private volatile E state;
 
 	public UserInteractionLock(E initialValue) {
-		state = initialValue;
+		this.state = initialValue;
+	}
+
+	public synchronized void reset(E value) {
+		this.state = value;
 	}
 
 	public void interacted(E result) {

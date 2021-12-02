@@ -16,13 +16,14 @@ shift "$((OPTIND-1))"
 
 # prepare working dir and variables
 cd $(dirname $0)
-rm -rf runtime *.app
+rm -rf runtime dmg
 REVISION_NO=`git rev-list --count HEAD`
 VERSION_NO=`mvn -f../../../pom.xml help:evaluate -Dexpression=project.version -q -DforceStdout | sed -rn 's/.*([0-9]+\.[0-9]+\.[0-9]+).*/\1/p'`
 
 # check preconditions
 if [ -z "${JAVA_HOME}" ]; then echo "JAVA_HOME not set. Run using JAVA_HOME=/path/to/jdk ./build.sh"; exit 1; fi
 command -v mvn >/dev/null 2>&1 || { echo >&2 "mvn not found."; exit 1; }
+command -v create-dmg >/dev/null 2>&1 || { echo >&2 "create-dmg not found."; exit 1; }
 if [ -n "${CODESIGN_IDENTITY}" ]; then
     command -v codesign >/dev/null 2>&1 || { echo >&2 "codesign not found. Fix by 'xcode-select --install'."; exit 1; }
     if [[ ! `security find-identity -v -p codesigning | grep -w "${CODESIGN_IDENTITY}"` ]]; then echo "Given codesign identity is invalid."; exit 1; fi
@@ -59,6 +60,7 @@ ${JAVA_HOME}/bin/jpackage \
     --java-options "-Dcryptomator.appVersion=\"${VERSION_NO}\"" \
     --app-version "${VERSION_NO}" \
     --java-options "-Dfile.encoding=\"utf-8\"" \
+    --java-options "-Dapple.awt.enableTemplateImages=true" \
     --java-options "-Dcryptomator.logDir=\"~/Library/Logs/Cryptomator\"" \
     --java-options "-Dcryptomator.pluginDir=\"~/Library/Application Support/Cryptomator/Plugins\"" \
     --java-options "-Dcryptomator.settingsPath=\"~/Library/Application Support/Cryptomator/settings.json\"" \
@@ -94,3 +96,27 @@ if [ -n "${CODESIGN_IDENTITY}" ]; then
     echo "Codesigning Cryptomator.app..."
     codesign --force --deep --entitlements ../Cryptomator.entitlements -o runtime -s ${CODESIGN_IDENTITY} Cryptomator.app
 fi
+
+# prepare dmg contents
+mkdir dmg
+mv Cryptomator.app dmg
+cp resources/macFUSE.webloc dmg
+
+# create dmg
+create-dmg \
+    --volname Cryptomator \
+    --volicon "resources/Cryptomator-Volume.icns" \
+    --background "resources/Cryptomator-background.tiff" \
+    --window-pos 400 100 \
+    --window-size 640 694 \
+    --icon-size 128 \
+    --icon "Cryptomator.app" 128 245 \
+    --hide-extension "Cryptomator.app" \
+    --icon "macFUSE.webloc" 320 501 \
+    --hide-extension "macFUSE.webloc" \
+    --app-drop-link 512 245 \
+    --eula "resources/license.rtf" \
+    --icon ".background" 128 758 \
+    --icon ".fseventsd" 320 758 \
+    --icon ".VolumeIcon.icns" 512 758 \
+    Cryptomator-${VERSION_NO}.dmg dmg

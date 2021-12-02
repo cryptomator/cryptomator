@@ -35,7 +35,13 @@ public class LockForcedController implements FxController {
 	}
 
 	@FXML
-	public void confirmForcedLock() {
+	public void retry() {
+		forceLockDecisionLock.interacted(LockModule.ForceLockDecision.RETRY);
+		window.close();
+	}
+
+	@FXML
+	public void force() {
 		forceLockDecisionLock.interacted(LockModule.ForceLockDecision.FORCE);
 		window.close();
 	}
@@ -52,6 +58,10 @@ public class LockForcedController implements FxController {
 
 	public String getVaultName() {
 		return vault.getDisplayName();
+	}
+
+	public boolean isForceSupported() {
+		return vault.supportsForcedUnmount();
 	}
 
 }

@@ -2,7 +2,7 @@ package org.cryptomator.ui.changepassword;
 
 import org.cryptomator.common.keychain.KeychainManager;
 import org.cryptomator.common.vaults.Vault;
-import org.cryptomator.cryptofs.common.MasterkeyBackupHelper;
+import org.cryptomator.cryptofs.common.BackupHelper;
 import org.cryptomator.cryptolib.api.CryptoException;
 import org.cryptomator.cryptolib.api.InvalidPassphraseException;
 import org.cryptomator.cryptolib.common.MasterkeyFileAccess;
@@ -83,7 +83,7 @@ public class ChangePasswordController implements FxController {
 			Path masterkeyPath = vault.getPath().resolve(MASTERKEY_FILENAME);
 			byte[] oldMasterkeyBytes = Files.readAllBytes(masterkeyPath);
 			byte[] newMasterkeyBytes = masterkeyFileAccess.changePassphrase(oldMasterkeyBytes, oldPassphrase, newPassphrase);
-			Path backupKeyPath = vault.getPath().resolve(MASTERKEY_FILENAME + MasterkeyBackupHelper.generateFileIdSuffix(oldMasterkeyBytes) + MASTERKEY_BACKUP_SUFFIX);
+			Path backupKeyPath = vault.getPath().resolve(MASTERKEY_FILENAME + BackupHelper.generateFileIdSuffix(oldMasterkeyBytes) + MASTERKEY_BACKUP_SUFFIX);
 			Files.move(masterkeyPath, backupKeyPath, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
 			Files.write(masterkeyPath, newMasterkeyBytes, StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE);
 			LOG.info("Successfully changed password for {}", vault.getDisplayName());
@@ -102,7 +102,7 @@ public class ChangePasswordController implements FxController {
 	private void updatePasswordInSystemkeychain() {
 		if (keychain.isSupported() && !keychain.isLocked()) {
 			try {
-				keychain.changePassphrase(vault.getId(), newPasswordController.passwordField.getCharacters());
+				keychain.changePassphrase(vault.getId(), vault.getDisplayName(), newPasswordController.passwordField.getCharacters());
 				LOG.info("Successfully updated password in system keychain for {}", vault.getDisplayName());
 			} catch (KeychainAccessException e) {
 				LOG.error("Failed to update password in system keychain.", e);
