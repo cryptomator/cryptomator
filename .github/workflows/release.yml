@@ -39,15 +39,11 @@ jobs:
           profile: mac
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-java@v1
+      - uses: actions/setup-java@v2
         with:
+          distribution: 'temurin'
           java-version: ${{ env.JAVA_VERSION }}
-      - uses: actions/cache@v2
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
+          cache: 'maven'
       - name: Ensure to use tagged version
         run: mvn versions:set -DnewVersion=${GITHUB_REF##*/} # use shell parameter expansion to strip of 'refs/tags'
         if: startsWith(github.ref, 'refs/tags/')
@@ -145,6 +141,7 @@ jobs:
           jpackageoptions: >
             --app-version "${{ needs.metadata.outputs.semVerNum }}"
             --java-options "-Dfile.encoding=\"utf-8\""
+            --java-options "-Dapple.awt.enableTemplateImages=true"
             --java-options "-Dcryptomator.logDir=\"~/Library/Logs/Cryptomator\""
             --java-options "-Dcryptomator.pluginDir=\"~/Library/Application Support/Cryptomator/Plugins\""
             --java-options "-Dcryptomator.settingsPath=\"~/Library/Application Support/Cryptomator/settings.json\""
@@ -155,8 +152,9 @@ jobs:
             --resource-dir dist/mac/resources
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-java@v1
+      - uses: actions/setup-java@v2
         with:
+          distribution: 'temurin'
           java-version: ${{ env.JAVA_VERSION }}
       - name: Download ${{ matrix.profile }}-buildkit
         uses: actions/download-artifact@v2
@@ -206,7 +204,7 @@ jobs:
   ppa:
     name: Upload source package to PPA
     needs: [buildkit, metadata]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
       - name: install build tools
@@ -380,8 +378,8 @@ jobs:
               OUTPUT_PATH=${JAR_PATH%.*}
               echo "Codesigning libs in ${JAR_FILENAME}..."
               unzip -q ${JAR_PATH} -d ${OUTPUT_PATH}
-              find ${OUTPUT_PATH} -name '*.dylib' -exec codesign -s ${CODESIGN_IDENTITY} {} \;
-              find ${OUTPUT_PATH} -name '*.jnilib' -exec codesign -s ${CODESIGN_IDENTITY} {} \;
+              find ${OUTPUT_PATH} -name '*.dylib' -exec codesign --force -s ${CODESIGN_IDENTITY} {} \;
+              find ${OUTPUT_PATH} -name '*.jnilib' -exec codesign --force -s ${CODESIGN_IDENTITY} {} \;
               rm ${JAR_PATH}
               pushd ${OUTPUT_PATH} > /dev/null
               zip -qr ../${JAR_FILENAME} *
@@ -501,8 +499,9 @@ jobs:
           name: win-appdir
       - name: Untar appdir.tar
         run: tar -xvf appdir.tar
-      - uses: actions/setup-java@v1
+      - uses: actions/setup-java@v2
         with:
+          distribution: 'temurin'
           java-version: ${{ env.JAVA_VERSION }}
       - name: Patch Application Directory
         run: |
@@ -534,6 +533,9 @@ jobs:
           --app-version "${{ needs.metadata.outputs.semVerNum }}"
           --win-menu
           --win-dir-chooser
+          --win-shortcut-prompt
+          --win-update-url "https:\\cryptomator.org"
+          --win-menu-group Cryptomator
           --resource-dir dist/win/resources
           --license-file dist/win/resources/license.rtf
           --file-associations dist/win/resources/FAvaultFile.properties
@@ -549,7 +551,7 @@ jobs:
           timestampUrl: 'http://timestamp.digicert.com'
           folder: installer
       - name: Add possible alpha/beta tags to installer name
-        run: mv installer/Cryptomator-*.msi installer/Cryptomator-${{ needs.metadata.outputs.semVerStr }}.msi
+        run: mv installer/Cryptomator-*.msi installer/Cryptomator-${{ needs.metadata.outputs.semVerStr }}-x64.msi
       - name: Upload win-msi
         uses: actions/upload-artifact@v2
         with:
@@ -563,12 +565,8 @@ jobs:
   release:
     name: Draft a release on Github
     runs-on: ubuntu-latest
-    needs: [metadata,linux-appimage,mac-dmg,win-msi]
+    needs: [metadata,linux-appimage,mac-dmg,win-msi,ppa]
     if: startsWith(github.ref, 'refs/tags/') && github.repository == 'cryptomator/cryptomator'
-    env:
-      APPIMAGE_SHA256_MSG: undefined
-      DMG_SHA256_MSG: undefined
-      MSI_SHA256_MSG: undefined
     steps:
       - uses: actions/checkout@v2
       - name: Create tarball
@@ -594,14 +592,13 @@ jobs:
         env:
           GPG_PRIVATE_KEY: ${{ secrets.RELEASES_GPG_PRIVATE_KEY }}
           GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
-      - name: Compute SHA256 checksums of release artifacts # sha256sum is split on the whitespace with sed and reorderd. env keys are file name extensions in uppercase
+      - name: Compute SHA256 checksums of release artifacts
         run: |
-          for FILE in `find . -name "*.AppImage" -o -name "*.dmg" -o -name "*.msi" -o -name "*.zsync" -o -name "*.tar.gz"`; do
-            CHECKSUM_MSG=$(sha256sum ${FILE})
-            VALUE=$(echo ${CHECKSUM_MSG} | sed 's/\([0-9,a-f]\{64\}\)[[:blank:]]\([Cc]ryptomator-.*$\)/\2: `\1`/' )
-            KEY=$(echo ${CHECKSUM_MSG} | sed 's/.*[[:blank:]].*\.\(.*$\)/\1/')
-            echo "{${KEY^^}_SHA256_MSG}={${VALUE}} >> $GITHUB_ENV
-          done
+          SHA256_SUMS=`find . -name "*.AppImage" -o -name "*.dmg" -o -name "*.msi" -o -name "*.tar.gz" | xargs sha256sum`
+          echo "SHA256_SUMS<<EOF" >> $GITHUB_ENV
+          echo "${SHA256_SUMS}" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+        continue-on-error: true
       - name: Create release draft
         uses: softprops/action-gh-release@v1
         with:
@@ -623,7 +620,7 @@ jobs:
             ---
             :scroll: A complete list of closed issues is available [here](LINK)
             ---
-            Checksums of release artifacts:
-            * ${{ env.APPIMAGE_SHA256_MSG}}
-            * ${{ env.DMG_SHA256_MSG}}
-            * ${{ env.MSI_SHA_256_MSG}}
+            :floppy_disk: SHA-256 checksums of release artifacts:
+            ```
+            ${{ env.SHA256_SUMS }}
+            ```

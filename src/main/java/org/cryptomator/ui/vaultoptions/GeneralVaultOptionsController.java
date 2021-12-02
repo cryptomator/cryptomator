@@ -47,7 +47,7 @@ public class GeneralVaultOptionsController implements FxController {
 	public void initialize() {
 		vaultName.textProperty().set(vault.getVaultSettings().displayName().get());
 		vaultName.focusedProperty().addListener(this::trimVaultNameOnFocusLoss);
-		vaultName.setTextFormatter(new TextFormatter<>(this::removeWhitespaces));
+		vaultName.setTextFormatter(new TextFormatter<>(this::checkVaultNameLength));
 		unlockOnStartupCheckbox.selectedProperty().bindBidirectional(vault.getVaultSettings().unlockAfterStartup());
 		actionAfterUnlockChoiceBox.getItems().addAll(WhenUnlocked.values());
 		actionAfterUnlockChoiceBox.valueProperty().bindBidirectional(vault.getVaultSettings().actionAfterUnlock());
@@ -63,7 +63,7 @@ public class GeneralVaultOptionsController implements FxController {
 		}
 	}
 
-	private TextFormatter.Change removeWhitespaces(TextFormatter.Change change) {
+	private TextFormatter.Change checkVaultNameLength(TextFormatter.Change change) {
 		if (change.isContentChange() && change.getControlNewText().length() > VAULTNAME_TRUNCATE_THRESHOLD) {
 			return null; // reject any change that would lead to a text exceeding threshold
 		} else {

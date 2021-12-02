@@ -1,5 +1,6 @@
 package org.cryptomator.common;
 
+import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
 
@@ -80,7 +81,7 @@ public class ErrorCode {
 		if (causalChain.size() > 1) {
 			var rootCause = causalChain.get(causalChain.size() - 1);
 			var parentOfRootCause = causalChain.get(causalChain.size() - 2);
-			var rootSpecificFrames = nonOverlappingFrames(parentOfRootCause.getStackTrace(), rootCause.getStackTrace());
+			var rootSpecificFrames = countTopmostFrames(rootCause.getStackTrace(), parentOfRootCause.getStackTrace());
 			return new ErrorCode(throwable, rootCause, rootSpecificFrames);
 		} else {
 			return new ErrorCode(throwable, throwable, ALL_FRAMES);
@@ -107,11 +108,31 @@ public class ErrorCode {
 		return result;
 	}
 
-	private static int nonOverlappingFrames(StackTraceElement[] frames, StackTraceElement[] enclosingFrames) {
-		// Compute the number of elements in `frames` not contained in `enclosingFrames` by iterating backwards
-		// Result should usually be equal to the difference in size of both traces
-		var i = reverseStream(enclosingFrames).iterator();
-		return (int) reverseStream(frames).dropWhile(f -> i.hasNext() && i.next().equals(f)).count();
+	/**
+	 * Counts the number of <em>additional</em> frames contained in <code>allFrames</code> but not in <code>bottomFrames</code>.
+	 * <p>
+	 * If <code>allFrames</code> does not end with <code>bottomFrames</code>, it is considered distinct and all its frames are counted.
+	 *
+	 * @param allFrames Some stack frames
+	 * @param bottomFrames Other stack frames, potentially forming the bottom of the stack of <code>allFrames</code>
+	 * @return The number of additional frames in <code>allFrames</code>. In most cases this should be equal to the difference in size.
+	 */
+	// visible for testing
+	static int countTopmostFrames(StackTraceElement[] allFrames, StackTraceElement[] bottomFrames) {
+		if (allFrames.length < bottomFrames.length) {
+			// if frames had been stacked on top of bottomFrames, allFrames would be larger
+			return allFrames.length;
+		} else {
+			return allFrames.length - commonSuffixLength(allFrames, bottomFrames);
+		}
+	}
+
+	// visible for testing
+	static <T> int commonSuffixLength(T[] set, T[] subset) {
+		Preconditions.checkArgument(set.length >= subset.length);
+		// iterate items backwards as long as they are identical
+		var iterator = reverseStream(subset).iterator();
+		return (int) reverseStream(set).takeWhile(item -> iterator.hasNext() && iterator.next().equals(item)).count();
 	}
 
 	private static <T> Stream<T> reverseStream(T[] array) {

@@ -25,11 +25,7 @@ class TrayImageFactory {
 	}
 
 	private String getMacResourceName() {
-		var theme = appearanceProvider.map(UiAppearanceProvider::getSystemTheme).orElse(Theme.LIGHT);
-		return switch (theme) {
-			case DARK -> "/img/tray_icon_mac_white.png";
-			case LIGHT -> "/img/tray_icon_mac_black.png";
-		};
+		return "/img/tray_icon_mac.png";
 	}
 
 	private String getWinOrLinuxResourceName() {

@@ -1,5 +1,6 @@
 package org.cryptomator.ui.common;
 
+import org.cryptomator.common.Environment;
 import org.cryptomator.common.ErrorCode;
 import org.cryptomator.common.Nullable;
 
@@ -25,7 +26,11 @@ public class ErrorController implements FxController {
 	private static final String REPORT_URL_FORMAT = "https://github.com/cryptomator/cryptomator/discussions/new?category=Errors&title=Error+%s&body=%s";
 	private static final String SEARCH_ERRORCODE_DELIM = " OR ";
 	private static final String REPORT_BODY_TEMPLATE = """
+			OS: %s / %s
+			App: %s / %s
+			
 			<!-- ✏️ Please describe what happened as accurately as possible. -->
+			
 			<!-- 📋 Please also copy and paste the detail text from the error window. -->
 			""";
 
@@ -34,16 +39,18 @@ public class ErrorController implements FxController {
 	private final ErrorCode errorCode;
 	private final Scene previousScene;
 	private final Stage window;
+	private final Environment environment;
 
 	private BooleanProperty copiedDetails = new SimpleBooleanProperty();
 
 	@Inject
-	ErrorController(Application application, @Named("stackTrace") String stackTrace, ErrorCode errorCode, @Nullable Scene previousScene, Stage window) {
+	ErrorController(Application application, @Named("stackTrace") String stackTrace, ErrorCode errorCode, @Nullable Scene previousScene, Stage window, Environment environment) {
 		this.application = application;
 		this.stackTrace = stackTrace;
 		this.errorCode = errorCode;
 		this.previousScene = previousScene;
 		this.window = window;
+		this.environment = environment;
 	}
 
 	@FXML
@@ -67,7 +74,12 @@ public class ErrorController implements FxController {
 	@FXML
 	public void reportError() {
 		var title = URLEncoder.encode(getErrorCode(), StandardCharsets.UTF_8);
-		var body = URLEncoder.encode(REPORT_BODY_TEMPLATE, StandardCharsets.UTF_8);
+		var enhancedTemplate = String.format(REPORT_BODY_TEMPLATE, //
+				System.getProperty("os.name"), //
+				System.getProperty("os.version"), //
+				environment.getAppVersion().orElse("undefined"), //
+				environment.getBuildNumber().orElse("undefined"));
+		var body = URLEncoder.encode(enhancedTemplate, StandardCharsets.UTF_8);
 		application.getHostServices().showDocument(REPORT_URL_FORMAT.formatted(title, body));
 	}
 

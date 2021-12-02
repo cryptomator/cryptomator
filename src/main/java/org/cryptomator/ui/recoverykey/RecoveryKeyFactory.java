@@ -2,7 +2,7 @@ package org.cryptomator.ui.recoverykey;
 
 import com.google.common.base.Preconditions;
 import com.google.common.hash.Hashing;
-import org.cryptomator.cryptofs.common.MasterkeyBackupHelper;
+import org.cryptomator.cryptofs.common.BackupHelper;
 import org.cryptomator.cryptolib.api.CryptoException;
 import org.cryptomator.cryptolib.api.InvalidPassphraseException;
 import org.cryptomator.cryptolib.api.Masterkey;
@@ -86,7 +86,7 @@ public class RecoveryKeyFactory {
 			if (Files.exists(masterkeyPath)) {
 				byte[] oldMasterkeyBytes = Files.readAllBytes(masterkeyPath);
 				// TODO: deduplicate with ChangePasswordController:
-				Path backupKeyPath = vaultPath.resolve(MASTERKEY_FILENAME + MasterkeyBackupHelper.generateFileIdSuffix(oldMasterkeyBytes) + MASTERKEY_BACKUP_SUFFIX);
+				Path backupKeyPath = vaultPath.resolve(MASTERKEY_FILENAME + BackupHelper.generateFileIdSuffix(oldMasterkeyBytes) + MASTERKEY_BACKUP_SUFFIX);
 				Files.move(masterkeyPath, backupKeyPath, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
 			}
 			masterkeyFileAccess.persist(masterkey, masterkeyPath, newPassword);

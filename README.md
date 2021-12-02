@@ -28,6 +28,14 @@ Cryptomator is provided free of charge as an open-source project despite the hig
 
 ### Silver Sponsors
 
+<table>
+  <tbody>
+    <tr>
+      <td><a href="https://mowcapital.com/"><img src="https://cryptomator.org/img/sponsors/mowcapital.svg" alt="Mow Capital" height="40"></a></td>
+    </tr>
+  </tbody>
+</table>
+
 - [Jameson Lopp](https://www.lopp.net/)
 
 ---
