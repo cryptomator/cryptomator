@@ -23,7 +23,7 @@ public class UpdateCheckerTask extends Task<String> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(UpdateCheckerTask.class);
 
-	private static final long MAX_RESPONSE_SIZE = 10 * 1024; // 10kb should be sufficient. protect against flooding
+	private static final long MAX_RESPONSE_SIZE = 10L * 1024; // 10kb should be sufficient. protect against flooding
 	private static final Gson GSON = new GsonBuilder().setLenient().create();
 
 	private final HttpClient httpClient;

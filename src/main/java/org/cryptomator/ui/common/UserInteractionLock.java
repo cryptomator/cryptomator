@@ -4,30 +4,35 @@ import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class UserInteractionLock<E extends Enum> {
+public class UserInteractionLock<E extends Enum<E>> {
 
 	private final Lock lock = new ReentrantLock();
 	private final Condition condition = lock.newCondition();
 	private final BooleanProperty awaitingInteraction = new SimpleBooleanProperty();
-	private volatile E state;
+	private final AtomicBoolean interacted = new AtomicBoolean();
+	private final AtomicReference<E> state;
 
 	public UserInteractionLock(E initialValue) {
-		this.state = initialValue;
+		this.state = new AtomicReference<>(initialValue);
 	}
 
 	public synchronized void reset(E value) {
-		this.state = value;
+		state.set(value);
+		interacted.set(false);
 	}
 
 	public void interacted(E result) {
 		assert Platform.isFxApplicationThread();
 		lock.lock();
 		try {
-			state = result;
+			state.set(result);
+			interacted.set(true);
 			awaitingInteraction.set(false);
 			condition.signal();
 		} finally {
@@ -40,8 +45,10 @@ public class UserInteractionLock<E extends Enum> {
 		lock.lock();
 		try {
 			Platform.runLater(() -> awaitingInteraction.set(true));
-			condition.await();
-			return state;
+			while (!interacted.get()) {
+				condition.await();
+			}
+			return state.get();
 		} finally {
 			lock.unlock();
 		}

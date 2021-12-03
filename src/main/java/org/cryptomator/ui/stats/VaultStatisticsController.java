@@ -127,10 +127,10 @@ public class VaultStatisticsController implements FxController {
 			encryptedBytesWrite.getData().add(new Data<>(currentStep, encBytes));
 
 			// adjust ranges:
-			readChartXAxis.setLowerBound(currentStep - IO_SAMPLING_STEPS);
+			readChartXAxis.setLowerBound(currentStep - IO_SAMPLING_STEPS * 1.0);
 			readChartXAxis.setUpperBound(currentStep);
 			readChartYAxis.setUpperBound(allTimeMax);
-			writeChartXAxis.setLowerBound(currentStep - IO_SAMPLING_STEPS);
+			writeChartXAxis.setLowerBound(currentStep - IO_SAMPLING_STEPS * 1.0);
 			writeChartXAxis.setUpperBound(currentStep);
 			writeChartYAxis.setUpperBound(allTimeMax);
 		}

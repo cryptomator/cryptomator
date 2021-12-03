@@ -79,8 +79,9 @@ public class LoggerModule {
 	@Singleton
 	@Named("fileAppender")
 	static Appender<ILoggingEvent> provideFileAppender(LoggerContext context, PatternLayoutEncoder encoder, Environment environment) {
-		if (environment.getLogDir().isPresent()) {
-			Path logDir = environment.getLogDir().get();
+		var optionalLogDir = environment.getLogDir();
+		if (optionalLogDir.isPresent()) {
+			Path logDir = optionalLogDir.get();
 			RollingFileAppender<ILoggingEvent> appender = new RollingFileAppender<>();
 			appender.setContext(context);
 			appender.setFile(logDir.resolve(LOGFILE_NAME).toString());
@@ -110,9 +111,10 @@ public class LoggerModule {
 	@Singleton
 	@Named("upgradeAppender")
 	static Appender<ILoggingEvent> provideUpgradeAppender(LoggerContext context, PatternLayoutEncoder encoder, Environment environment) {
-		if (environment.getLogDir().isPresent()) {
+		var optionalLogDir = environment.getLogDir();
+		if (optionalLogDir.isPresent()) {
 			FileAppender<ILoggingEvent> appender = new FileAppender<>();
-			appender.setFile(environment.getLogDir().get().resolve(UPGRADE_FILENAME).toString());
+			appender.setFile(optionalLogDir.get().resolve(UPGRADE_FILENAME).toString());
 			appender.setContext(context);
 			appender.setEncoder(encoder);
 			appender.start();
