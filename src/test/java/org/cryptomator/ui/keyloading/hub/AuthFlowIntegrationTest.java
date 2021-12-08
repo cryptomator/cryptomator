@@ -26,7 +26,7 @@ public class AuthFlowIntegrationTest {
 		hubConfig.authSuccessUrl = "http://localhost:3000/#/unlock-success";
 		hubConfig.authErrorUrl = "http://localhost:3000/#/unlock-error";
 
-		try (var authFlow = AuthFlow.init(hubConfig)) {
+		try (var authFlow = AuthFlow.init(hubConfig, new RedirectContext("vaultId","deviceId"))) {
 			var token = authFlow.run(uri -> {
 				LOG.info("Visit {} to authenticate", uri);
 			});

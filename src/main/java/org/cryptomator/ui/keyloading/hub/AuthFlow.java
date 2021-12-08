@@ -60,8 +60,8 @@ class AuthFlow implements AutoCloseable {
 	 * @return An authorization flow
 	 * @throws Exception In case of any problems starting the server
 	 */
-	public static AuthFlow init(HubConfig hubConfig) throws Exception {
-		var receiver = AuthFlowReceiver.start(hubConfig);
+	public static AuthFlow init(HubConfig hubConfig, RedirectContext redirectContext) throws Exception {
+		var receiver = AuthFlowReceiver.start(hubConfig, redirectContext);
 		return new AuthFlow(receiver, hubConfig);
 	}
 
@@ -81,6 +81,7 @@ class AuthFlow implements AutoCloseable {
 
 	private String auth(PKCE pkce, Consumer<URI> browser) throws IOException, InterruptedException {
 		var state = BASE64URL.encode(randomBytes(16));
+		receiver.prepareReceive(state);
 		var params = Map.of("response_type", "code", //
 				"client_id", clientId, //
 				"redirect_uri", receiver.getRedirectUri(), //

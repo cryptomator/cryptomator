@@ -5,6 +5,8 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -39,11 +41,11 @@ class AuthFlowReceiver implements AutoCloseable {
 		this.hubConfig = hubConfig;
 	}
 
-	public static AuthFlowReceiver start(HubConfig hubConfig) throws Exception {
+	public static AuthFlowReceiver start(HubConfig hubConfig, RedirectContext redirectContext) throws Exception {
 		var server = new Server();
 		var context = new ServletContextHandler();
 
-		var servlet = new CallbackServlet(hubConfig);
+		var servlet = new CallbackServlet(hubConfig, redirectContext);
 		context.addServlet(new ServletHolder(servlet), CALLBACK_PATH);
 
 		var connector = new ServerConnector(server);
@@ -63,20 +65,31 @@ class AuthFlowReceiver implements AutoCloseable {
 		return servlet.callback.take();
 	}
 
+	public void prepareReceive(String expectedState) {
+		servlet.expectedStates.add(expectedState);
+	}
+
 	@Override
 	public void close() throws Exception {
 		server.stop();
 	}
 
-	public static record Callback(String error, String code, String state){}
+	public static record Callback(String error, String code, String state) {
+
+	}
 
 	private static class CallbackServlet extends HttpServlet {
 
-		private final BlockingQueue<Callback> callback = new LinkedBlockingQueue<>();
-		private final HubConfig hubConfig;
+		private static final Logger LOG = LoggerFactory.getLogger(CallbackServlet.class);
 
-		public CallbackServlet(HubConfig hubConfig) {
+		private final BlockingQueue<Callback> callback = new LinkedBlockingQueue<>();
+		private final BlockingQueue<String> expectedStates = new LinkedBlockingQueue<>();
+		private final HubConfig hubConfig;
+		private final RedirectContext redirectContext;
+
+		public CallbackServlet(HubConfig hubConfig, RedirectContext redirectContext) {
 			this.hubConfig = hubConfig;
+			this.redirectContext = redirectContext;
 		}
 
 		@Override
@@ -86,7 +99,19 @@ class AuthFlowReceiver implements AutoCloseable {
 			var state = req.getParameter("state");
 
 			res.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY);
-			if (error == null && code != null) {
+			String expectedState = null;
+			try {
+				expectedState = expectedStates.take();
+			} catch (InterruptedException e) {
+				LOG.info("Retrievel of state for auth interrupted", e);
+				//TODO: throw exception?
+			}
+
+			if (error == null && code != null && expectedState != null && expectedState.equals(state)) {
+				var successUrlWithQuery = String.format("%s?deviceId=%s&vaultId=%s", hubConfig.authSuccessUrl, redirectContext.deviceId(), redirectContext.vaultConfigId());
+				res.setHeader("Location", successUrlWithQuery);
+			} else if (error == null && code != null && expectedState == null) {
+				LOG.info("Redirecting with empty query due to missing state verification");
 				res.setHeader("Location", hubConfig.authSuccessUrl);
 			} else {
 				res.setHeader("Location", hubConfig.authErrorUrl);
