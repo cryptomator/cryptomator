@@ -58,17 +58,6 @@ public abstract class HubKeyLoadingModule {
 	}
 
 	@Provides
-	@KeyLoadingScoped
-	@Named("vaultConfigId")
-	static String provideVaultConfigId(@KeyLoading Vault vault) {
-		try {
-			return vault.getVaultConfigCache().get().getKeyId().getPath().substring(8);
-		} catch (IOException e) {
-			throw new UncheckedIOException(e);
-		}
-	}
-
-	@Provides
 	@Named("bearerToken")
 	@KeyLoadingScoped
 	static AtomicReference<String> provideBearerTokenRef() {
