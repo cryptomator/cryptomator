@@ -56,7 +56,7 @@ class CustomMountPointChooser implements MountPointChooser {
 				throw new InvalidMountPointException(new IllegalStateException("Illegal MountPointRequirement"));
 			}
 			default -> {
-				//Currently the case for "PARENT_OPT_MOUNT_POINT"
+				//Currently the case for "NO_PARENT_NO_MOUNT_POINT, PARENT_OPT_MOUNT_POINT"
 				throw new InvalidMountPointException(new IllegalStateException("Not implemented"));
 			}
 		}

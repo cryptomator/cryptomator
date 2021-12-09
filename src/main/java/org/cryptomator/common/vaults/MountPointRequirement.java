@@ -7,6 +7,11 @@ package org.cryptomator.common.vaults;
 public enum MountPointRequirement {
 
 	/**
+	 * There must not be a parent folder and the actual Mountpoint must not exist.
+	 */
+	NO_PARENT_NO_MOUNT_POINT,
+
+	/**
 	 * No Mountpoint on the local filesystem required. (e.g. WebDAV)
 	 */
 	NONE,
