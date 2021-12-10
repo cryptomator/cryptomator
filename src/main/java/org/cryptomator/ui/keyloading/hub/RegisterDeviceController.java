@@ -50,7 +50,7 @@ public class RegisterDeviceController implements FxController {
 		var hashedKey = MessageDigestSupplier.SHA256.get().digest(deviceKey);
 		var deviceId = BaseEncoding.base16().encode(hashedKey);
 		var hash = computeVerificationHash(deviceId + encodedKey + verificationCode);
-		var url = hubConfig.deviceRegistrationUrl + "?device_key=" + encodedKey + "&device_id=" + deviceId + "&verification_hash=" + hash;
+		var url = hubConfig.deviceRegistrationUrl + "&device_key=" + encodedKey + "&device_id=" + deviceId + "&verification_hash=" + hash;
 		application.getHostServices().showDocument(url);
 	}
 

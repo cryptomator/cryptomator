@@ -1,6 +1,6 @@
 package org.cryptomator.ui.keyloading.hub;
 
-import com.google.common.base.Preconditions;
+import com.nimbusds.jose.JWEObject;
 import dagger.Lazy;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.ErrorComponent;
@@ -28,6 +28,7 @@ import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.text.ParseException;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
@@ -41,7 +42,7 @@ public class ReceiveKeyController implements FxController {
 	private final Stage window;
 	private final String deviceId;
 	private final String bearerToken;
-	private final AtomicReference<EciesParams> eciesParamsRef;
+	private final AtomicReference<JWEObject> jweRef;
 	private final UserInteractionLock<HubKeyLoadingModule.HubLoadingResult> result;
 	private final Lazy<Scene> registerDeviceScene;
 	private final Lazy<Scene> unauthorizedScene;
@@ -49,13 +50,12 @@ public class ReceiveKeyController implements FxController {
 	private final URI vaultBaseUri;
 	private final HttpClient httpClient;
 
-
 	@Inject
-	public ReceiveKeyController(@KeyLoading Vault vault, ExecutorService executor, @KeyLoading Stage window, @Named("deviceId") String deviceId, @Named("bearerToken") AtomicReference<String> tokenRef, AtomicReference<EciesParams> eciesParamsRef, UserInteractionLock<HubKeyLoadingModule.HubLoadingResult> result, @FxmlScene(FxmlFile.HUB_REGISTER_DEVICE) Lazy<Scene> registerDeviceScene, @FxmlScene(FxmlFile.HUB_UNAUTHORIZED_DEVICE) Lazy<Scene> unauthorizedScene, ErrorComponent.Builder errorComponent) {
+	public ReceiveKeyController(@KeyLoading Vault vault, ExecutorService executor, @KeyLoading Stage window, @Named("deviceId") String deviceId, @Named("bearerToken") AtomicReference<String> tokenRef, AtomicReference<JWEObject> jweRef, UserInteractionLock<HubKeyLoadingModule.HubLoadingResult> result, @FxmlScene(FxmlFile.HUB_REGISTER_DEVICE) Lazy<Scene> registerDeviceScene, @FxmlScene(FxmlFile.HUB_UNAUTHORIZED_DEVICE) Lazy<Scene> unauthorizedScene, ErrorComponent.Builder errorComponent) {
 		this.window = window;
 		this.deviceId = deviceId;
 		this.bearerToken = Objects.requireNonNull(tokenRef.get());
-		this.eciesParamsRef = eciesParamsRef;
+		this.jweRef = jweRef;
 		this.result = result;
 		this.registerDeviceScene = registerDeviceScene;
 		this.unauthorizedScene = unauthorizedScene;
@@ -91,16 +91,11 @@ public class ReceiveKeyController implements FxController {
 
 	private void retrievalSucceeded(HttpResponse<InputStream> response) {
 		try {
-			var json = HttpHelper.parseBody(response);
-			Preconditions.checkArgument(json.isJsonObject());
-			Preconditions.checkArgument(json.getAsJsonObject().has("device_specific_masterkey"));
-			Preconditions.checkArgument(json.getAsJsonObject().has("ephemeral_public_key"));
-			var m = json.getAsJsonObject().get("device_specific_masterkey").getAsString();
-			var epk = json.getAsJsonObject().get("ephemeral_public_key").getAsString();
-			eciesParamsRef.set(new EciesParams(m, epk));
+			var string = HttpHelper.readBody(response);
+			jweRef.set(JWEObject.parse(string));
 			result.interacted(HubKeyLoadingModule.HubLoadingResult.SUCCESS);
 			window.close();
-		} catch (IOException | IllegalArgumentException e) {
+		} catch (ParseException | IOException e) {
 			retrievalFailed(e);
 		}
 	}

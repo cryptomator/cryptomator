@@ -35,6 +35,7 @@ module org.cryptomator.desktop {
 	requires static javax.inject; /* ugly dagger/guava crap */
 	requires logback.classic;
 	requires logback.core;
+	requires com.nimbusds.jose.jwt;
 
 	uses AutoStartProvider;
 	uses KeychainAccessProvider;

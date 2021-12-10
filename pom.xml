@@ -27,7 +27,7 @@
 		<nonModularGroupIds>com.github.serceman,com.github.jnr,org.ow2.asm,net.java.dev.jna,org.apache.jackrabbit,org.apache.httpcomponents,de.swiesend,org.purejava,com.github.hypfvieh</nonModularGroupIds>
 
 		<!-- cryptomator dependencies -->
-		<cryptomator.cryptolib.version>2.1.0-beta2</cryptomator.cryptolib.version>
+		<cryptomator.cryptolib.version>2.1.0-beta3</cryptomator.cryptolib.version>
 		<cryptomator.cryptofs.version>2.2.0</cryptomator.cryptofs.version>
 		<cryptomator.integrations.version>1.0.0</cryptomator.integrations.version>
 		<cryptomator.integrations.win.version>1.0.0</cryptomator.integrations.win.version>
@@ -156,6 +156,11 @@
 			<groupId>com.auth0</groupId>
 			<artifactId>java-jwt</artifactId>
 			<version>${jwt.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.nimbusds</groupId>
+			<artifactId>nimbus-jose-jwt</artifactId>
+			<version>9.15.2</version>
 		</dependency>
 
 		<!-- EasyBind -->

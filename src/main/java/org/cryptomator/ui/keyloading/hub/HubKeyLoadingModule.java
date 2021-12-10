@@ -1,6 +1,7 @@
 package org.cryptomator.ui.keyloading.hub;
 
 import com.google.common.io.BaseEncoding;
+import com.nimbusds.jose.JWEObject;
 import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
@@ -66,7 +67,7 @@ public abstract class HubKeyLoadingModule {
 
 	@Provides
 	@KeyLoadingScoped
-	static AtomicReference<EciesParams> provideEciesParamsRef() {
+	static AtomicReference<JWEObject> provideJweRef() {
 		return new AtomicReference<>();
 	}
 

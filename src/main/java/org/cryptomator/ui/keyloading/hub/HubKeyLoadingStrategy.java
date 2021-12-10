@@ -1,13 +1,11 @@
 package org.cryptomator.ui.keyloading.hub;
 
 import com.google.common.base.Preconditions;
+import com.nimbusds.jose.JWEObject;
 import dagger.Lazy;
 import org.cryptomator.common.settings.DeviceKey;
-import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.cryptolib.api.Masterkey;
 import org.cryptomator.cryptolib.api.MasterkeyLoadingFailedException;
-import org.cryptomator.cryptolib.common.Destroyables;
-import org.cryptomator.cryptolib.common.MasterkeyHubAccess;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.UserInteractionLock;
@@ -21,7 +19,6 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import java.net.URI;
-import java.security.KeyPair;
 import java.util.concurrent.atomic.AtomicReference;
 
 @KeyLoading
@@ -35,24 +32,23 @@ public class HubKeyLoadingStrategy implements KeyLoadingStrategy {
 	private final Lazy<Scene> authFlowScene;
 	private final UserInteractionLock<HubKeyLoadingModule.HubLoadingResult> userInteraction;
 	private final DeviceKey deviceKey;
-	private final AtomicReference<EciesParams> eciesParams;
+	private final AtomicReference<JWEObject> jweRef;
 
 	@Inject
-	public HubKeyLoadingStrategy(@KeyLoading Stage window, @FxmlScene(FxmlFile.HUB_AUTH_FLOW) Lazy<Scene> authFlowScene, UserInteractionLock<HubKeyLoadingModule.HubLoadingResult> userInteraction, DeviceKey deviceKey, AtomicReference<EciesParams> eciesParams) {
+	public HubKeyLoadingStrategy(@KeyLoading Stage window, @FxmlScene(FxmlFile.HUB_AUTH_FLOW) Lazy<Scene> authFlowScene, UserInteractionLock<HubKeyLoadingModule.HubLoadingResult> userInteraction, DeviceKey deviceKey, AtomicReference<JWEObject> jweRef) {
 		this.window = window;
 		this.authFlowScene = authFlowScene;
 		this.userInteraction = userInteraction;
 		this.deviceKey = deviceKey;
-		this.eciesParams = eciesParams;
+		this.jweRef = jweRef;
 	}
 
 	@Override
 	public Masterkey loadKey(URI keyId) throws MasterkeyLoadingFailedException {
 		Preconditions.checkArgument(keyId.getScheme().startsWith(SCHEME_PREFIX));
 		try {
-			var keyPair = deviceKey.get();
 			return switch (auth()) {
-				case SUCCESS -> MasterkeyHubAccess.decryptMasterkey(keyPair.getPrivate(), eciesParams.get().m(), eciesParams.get().epk());
+				case SUCCESS -> JWEHelper.decrypt(jweRef.get(), deviceKey.get().getPrivate());
 				case FAILED -> throw new MasterkeyLoadingFailedException("failed to load keypair");
 				case CANCELLED -> throw new UnlockCancelledException("User cancelled auth workflow");
 			};
