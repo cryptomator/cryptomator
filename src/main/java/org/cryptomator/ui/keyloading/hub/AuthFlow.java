@@ -60,8 +60,8 @@ class AuthFlow implements AutoCloseable {
 	 * @return An authorization flow
 	 * @throws Exception In case of any problems starting the server
 	 */
-	public static AuthFlow init(HubConfig hubConfig) throws Exception {
-		var receiver = AuthFlowReceiver.start(hubConfig);
+	public static AuthFlow init(HubConfig hubConfig, AuthFlowContext authFlowContext) throws Exception {
+		var receiver = AuthFlowReceiver.start(hubConfig, authFlowContext);
 		return new AuthFlow(receiver, hubConfig);
 	}
 

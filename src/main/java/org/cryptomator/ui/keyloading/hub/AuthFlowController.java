@@ -35,6 +35,7 @@ public class AuthFlowController implements FxController {
 	private final Application application;
 	private final Stage window;
 	private final ExecutorService executor;
+	private final String deviceId;
 	private final HubConfig hubConfig;
 	private final AtomicReference<String> tokenRef;
 	private final UserInteractionLock<HubKeyLoadingModule.HubLoadingResult> result;
@@ -45,10 +46,11 @@ public class AuthFlowController implements FxController {
 	private AuthFlowTask task;
 
 	@Inject
-	public AuthFlowController(Application application, @KeyLoading Stage window, ExecutorService executor, HubConfig hubConfig, @Named("bearerToken") AtomicReference<String> tokenRef, UserInteractionLock<HubKeyLoadingModule.HubLoadingResult> result, @FxmlScene(FxmlFile.HUB_RECEIVE_KEY) Lazy<Scene> receiveKeyScene, ErrorComponent.Builder errorComponent) {
+	public AuthFlowController(Application application, @KeyLoading Stage window, ExecutorService executor, @Named("deviceId") String deviceId, HubConfig hubConfig, @Named("bearerToken") AtomicReference<String> tokenRef, UserInteractionLock<HubKeyLoadingModule.HubLoadingResult> result, @FxmlScene(FxmlFile.HUB_RECEIVE_KEY) Lazy<Scene> receiveKeyScene, ErrorComponent.Builder errorComponent) {
 		this.application = application;
 		this.window = window;
 		this.executor = executor;
+		this.deviceId = deviceId;
 		this.hubConfig = hubConfig;
 		this.tokenRef = tokenRef;
 		this.result = result;
@@ -62,7 +64,7 @@ public class AuthFlowController implements FxController {
 	@FXML
 	public void initialize() {
 		assert task == null;
-		task = new AuthFlowTask(hubConfig, this::setAuthUri);;
+		task = new AuthFlowTask(hubConfig, new AuthFlowContext(deviceId), this::setAuthUri);;
 		task.setOnFailed(this::authFailed);
 		task.setOnSucceeded(this::authSucceeded);
 		executor.submit(task);

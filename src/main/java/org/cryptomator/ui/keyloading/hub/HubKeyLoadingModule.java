@@ -1,12 +1,15 @@
 package org.cryptomator.ui.keyloading.hub;
 
+import com.google.common.io.BaseEncoding;
 import com.nimbusds.jose.JWEObject;
 import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoMap;
 import dagger.multibindings.StringKey;
+import org.cryptomator.common.settings.DeviceKey;
 import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.cryptolib.common.MessageDigestSupplier;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxControllerKey;
 import org.cryptomator.ui.common.FxmlFile;
@@ -23,8 +26,7 @@ import javax.inject.Named;
 import javafx.scene.Scene;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.net.URI;
-import java.security.KeyPair;
+import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -45,6 +47,15 @@ public abstract class HubKeyLoadingModule {
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
 		}
+	}
+
+	@Provides
+	@KeyLoadingScoped
+	@Named("deviceId")
+	static String provideDeviceId(DeviceKey deviceKey) {
+		var publicKey = Objects.requireNonNull(deviceKey.get()).getPublic().getEncoded();
+		var hashedKey = MessageDigestSupplier.SHA256.get().digest(publicKey);
+		return BaseEncoding.base16().encode(hashedKey);
 	}
 
 	@Provides

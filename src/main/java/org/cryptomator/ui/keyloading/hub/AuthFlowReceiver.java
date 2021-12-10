@@ -30,20 +30,18 @@ class AuthFlowReceiver implements AutoCloseable {
 	private final Server server;
 	private final ServerConnector connector;
 	private final CallbackServlet servlet;
-	private final HubConfig hubConfig;
 
-	private AuthFlowReceiver(Server server, ServerConnector connector, CallbackServlet servlet, HubConfig hubConfig) {
+	private AuthFlowReceiver(Server server, ServerConnector connector, CallbackServlet servlet) {
 		this.server = server;
 		this.connector = connector;
 		this.servlet = servlet;
-		this.hubConfig = hubConfig;
 	}
 
-	public static AuthFlowReceiver start(HubConfig hubConfig) throws Exception {
+	public static AuthFlowReceiver start(HubConfig hubConfig, AuthFlowContext authFlowContext) throws Exception {
 		var server = new Server();
 		var context = new ServletContextHandler();
 
-		var servlet = new CallbackServlet(hubConfig);
+		var servlet = new CallbackServlet(hubConfig, authFlowContext);
 		context.addServlet(new ServletHolder(servlet), CALLBACK_PATH);
 
 		var connector = new ServerConnector(server);
@@ -52,7 +50,7 @@ class AuthFlowReceiver implements AutoCloseable {
 		server.setConnectors(new Connector[]{connector});
 		server.setHandler(context);
 		server.start();
-		return new AuthFlowReceiver(server, connector, servlet, hubConfig);
+		return new AuthFlowReceiver(server, connector, servlet);
 	}
 
 	public String getRedirectUri() {
@@ -68,15 +66,19 @@ class AuthFlowReceiver implements AutoCloseable {
 		server.stop();
 	}
 
-	public static record Callback(String error, String code, String state){}
+	public static record Callback(String error, String code, String state) {
+
+	}
 
 	private static class CallbackServlet extends HttpServlet {
 
 		private final BlockingQueue<Callback> callback = new LinkedBlockingQueue<>();
 		private final HubConfig hubConfig;
+		private final AuthFlowContext authFlowContext;
 
-		public CallbackServlet(HubConfig hubConfig) {
+		public CallbackServlet(HubConfig hubConfig, AuthFlowContext authFlowContext) {
 			this.hubConfig = hubConfig;
+			this.authFlowContext = authFlowContext;
 		}
 
 		@Override
@@ -87,9 +89,9 @@ class AuthFlowReceiver implements AutoCloseable {
 
 			res.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY);
 			if (error == null && code != null) {
-				res.setHeader("Location", hubConfig.authSuccessUrl);
+				res.setHeader("Location", hubConfig.authSuccessUrl + "&device=" + authFlowContext.deviceId());
 			} else {
-				res.setHeader("Location", hubConfig.authErrorUrl);
+				res.setHeader("Location", hubConfig.authErrorUrl + "&device=" + authFlowContext.deviceId());
 			}
 
 			callback.add(new Callback(error, code, state));

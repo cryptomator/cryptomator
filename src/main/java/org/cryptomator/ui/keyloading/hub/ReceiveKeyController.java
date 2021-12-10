@@ -1,12 +1,8 @@
 package org.cryptomator.ui.keyloading.hub;
 
-import com.google.common.io.BaseEncoding;
 import com.nimbusds.jose.JWEObject;
 import dagger.Lazy;
-import org.cryptomator.common.settings.DeviceKey;
 import org.cryptomator.common.vaults.Vault;
-import org.cryptomator.cryptolib.common.MessageDigestSupplier;
-import org.cryptomator.cryptolib.common.P384KeyPair;
 import org.cryptomator.ui.common.ErrorComponent;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxmlFile;
@@ -44,7 +40,7 @@ public class ReceiveKeyController implements FxController {
 	private static final String SCHEME_PREFIX = "hub+";
 
 	private final Stage window;
-	private final P384KeyPair keyPair;
+	private final String deviceId;
 	private final String bearerToken;
 	private final AtomicReference<JWEObject> jweRef;
 	private final UserInteractionLock<HubKeyLoadingModule.HubLoadingResult> result;
@@ -55,9 +51,9 @@ public class ReceiveKeyController implements FxController {
 	private final HttpClient httpClient;
 
 	@Inject
-	public ReceiveKeyController(@KeyLoading Vault vault, ExecutorService executor, @KeyLoading Stage window, DeviceKey deviceKey, @Named("bearerToken") AtomicReference<String> tokenRef, AtomicReference<JWEObject> jweRef, UserInteractionLock<HubKeyLoadingModule.HubLoadingResult> result, @FxmlScene(FxmlFile.HUB_REGISTER_DEVICE) Lazy<Scene> registerDeviceScene, @FxmlScene(FxmlFile.HUB_UNAUTHORIZED_DEVICE) Lazy<Scene> unauthorizedScene, ErrorComponent.Builder errorComponent) {
+	public ReceiveKeyController(@KeyLoading Vault vault, ExecutorService executor, @KeyLoading Stage window, @Named("deviceId") String deviceId, @Named("bearerToken") AtomicReference<String> tokenRef, AtomicReference<JWEObject> jweRef, UserInteractionLock<HubKeyLoadingModule.HubLoadingResult> result, @FxmlScene(FxmlFile.HUB_REGISTER_DEVICE) Lazy<Scene> registerDeviceScene, @FxmlScene(FxmlFile.HUB_UNAUTHORIZED_DEVICE) Lazy<Scene> unauthorizedScene, ErrorComponent.Builder errorComponent) {
 		this.window = window;
-		this.keyPair = Objects.requireNonNull(deviceKey.get());
+		this.deviceId = deviceId;
 		this.bearerToken = Objects.requireNonNull(tokenRef.get());
 		this.jweRef = jweRef;
 		this.result = result;
@@ -71,9 +67,6 @@ public class ReceiveKeyController implements FxController {
 
 	@FXML
 	public void initialize() {
-		var deviceKey = keyPair.getPublic().getEncoded();
-		var hashedKey = MessageDigestSupplier.SHA256.get().digest(deviceKey);
-		var deviceId = BaseEncoding.base16().encode(hashedKey);
 		var keyUri = appendPath(vaultBaseUri, "/keys/" + deviceId);
 		var request = HttpRequest.newBuilder(keyUri) //
 				.header("Authorization", "Bearer " + bearerToken) //

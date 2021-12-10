@@ -7,6 +7,7 @@ import java.util.function.Consumer;
 
 class AuthFlowTask extends Task<String> {
 
+	private final AuthFlowContext authFlowContext;
 	private final Consumer<URI> redirectUriConsumer;
 
 	/**
@@ -15,14 +16,15 @@ class AuthFlowTask extends Task<String> {
 	 * @param hubConfig Configuration object holding parameters required by {@link AuthFlow}
 	 * @param redirectUriConsumer A callback invoked with the redirectUri, as soon as the server has started
 	 */
-	public AuthFlowTask(HubConfig hubConfig, Consumer<URI> redirectUriConsumer) {
+	public AuthFlowTask(HubConfig hubConfig, AuthFlowContext authFlowContext, Consumer<URI> redirectUriConsumer) {
 		this.hubConfig = hubConfig;
+		this.authFlowContext = authFlowContext;
 		this.redirectUriConsumer = redirectUriConsumer;
 	}
 
 	@Override
 	protected String call() throws Exception {
-		try (var authFlow = AuthFlow.init(hubConfig)) {
+		try (var authFlow = AuthFlow.init(hubConfig, authFlowContext)) {
 			return authFlow.run(uri -> Platform.runLater(() -> redirectUriConsumer.accept(uri)));
 		}
 	}

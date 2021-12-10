@@ -6,8 +6,6 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.URI;
-
 public class AuthFlowIntegrationTest {
 
 	static {
@@ -23,10 +21,10 @@ public class AuthFlowIntegrationTest {
 		hubConfig.authEndpoint = "http://localhost:8080/auth/realms/cryptomator/protocol/openid-connect/auth";
 		hubConfig.tokenEndpoint = "http://localhost:8080/auth/realms/cryptomator/protocol/openid-connect/token";
 		hubConfig.clientId = "cryptomator-hub";
-		hubConfig.authSuccessUrl = "http://localhost:3000/#/unlock-success";
-		hubConfig.authErrorUrl = "http://localhost:3000/#/unlock-error";
+		hubConfig.authSuccessUrl = "http://localhost:3000/#/unlock-success?vault=vaultId";
+		hubConfig.authErrorUrl = "http://localhost:3000/#/unlock-error?vault=vaultId";
 
-		try (var authFlow = AuthFlow.init(hubConfig)) {
+		try (var authFlow = AuthFlow.init(hubConfig, new AuthFlowContext("deviceId"))) {
 			var token = authFlow.run(uri -> {
 				LOG.info("Visit {} to authenticate", uri);
 			});
