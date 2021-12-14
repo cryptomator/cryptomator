@@ -10,6 +10,7 @@ import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.UserInteractionLock;
 import org.cryptomator.ui.keyloading.KeyLoading;
 import org.cryptomator.ui.keyloading.KeyLoadingScoped;
+import org.eclipse.jetty.io.RuntimeIOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,30 +74,31 @@ public class ReceiveKeyController implements FxController {
 				.GET() //
 				.build();
 		httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream()) //
-				.whenCompleteAsync(this::loadedExistingKey, Platform::runLater);
+				.thenAcceptAsync(this::loadedExistingKey, Platform::runLater) //
+				.exceptionallyAsync(this::retrievalFailed, Platform::runLater);
 	}
 
-	private void loadedExistingKey(HttpResponse<InputStream> response, Throwable error) {
-		if (error != null) {
-			retrievalFailed(error);
-		} else {
+	private void loadedExistingKey(HttpResponse<InputStream> response) {
+		try {
 			switch (response.statusCode()) {
 				case 200 -> retrievalSucceeded(response);
 				case 403 -> accessNotGranted();
 				case 404 -> needsDeviceRegistration();
-				default -> retrievalFailed(new IOException("Unexpected response " + response.statusCode()));
+				default -> throw new IOException("Unexpected response " + response.statusCode());
 			}
+		} catch (IOException e) {
+			throw new RuntimeIOException(e);
 		}
 	}
 
-	private void retrievalSucceeded(HttpResponse<InputStream> response) {
+	private void retrievalSucceeded(HttpResponse<InputStream> response) throws IOException {
 		try {
 			var string = HttpHelper.readBody(response);
 			jweRef.set(JWEObject.parse(string));
 			result.interacted(HubKeyLoadingModule.HubLoadingResult.SUCCESS);
 			window.close();
-		} catch (ParseException | IOException e) {
-			retrievalFailed(e);
+		} catch (ParseException e) {
+			throw new IOException("Failed to parse JWE", e);
 		}
 	}
 
@@ -108,10 +110,11 @@ public class ReceiveKeyController implements FxController {
 		window.setScene(unauthorizedScene.get());
 	}
 
-	private void retrievalFailed(Throwable cause) {
+	private Void retrievalFailed(Throwable cause) {
 		result.interacted(HubKeyLoadingModule.HubLoadingResult.FAILED);
 		LOG.error("Key retrieval failed", cause);
 		errorComponent.cause(cause).window(window).build().showErrorScene();
+		return null;
 	}
 
 	@FXML

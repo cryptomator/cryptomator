@@ -45,6 +45,7 @@ module org.cryptomator.desktop {
 	exports org.cryptomator.ui.keyloading.hub to com.fasterxml.jackson.databind;
 
 	opens org.cryptomator.common.settings to com.google.gson;
+	opens org.cryptomator.ui.keyloading.hub to com.google.gson, javafx.fxml;
 
 	opens org.cryptomator.common to javafx.fxml;
 	opens org.cryptomator.common.vaults to javafx.fxml;
@@ -55,7 +56,6 @@ module org.cryptomator.desktop {
 	opens org.cryptomator.ui.forgetPassword to javafx.fxml;
 	opens org.cryptomator.ui.fxapp to javafx.fxml;
 	opens org.cryptomator.ui.health to javafx.fxml;
-	opens org.cryptomator.ui.keyloading.hub to javafx.fxml;
 	opens org.cryptomator.ui.keyloading.masterkeyfile to javafx.fxml;
 	opens org.cryptomator.ui.lock to javafx.fxml;
 	opens org.cryptomator.ui.mainwindow to javafx.fxml;
