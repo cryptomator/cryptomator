@@ -27,7 +27,7 @@
 		<nonModularGroupIds>com.github.serceman,com.github.jnr,org.ow2.asm,net.java.dev.jna,org.apache.jackrabbit,org.apache.httpcomponents,de.swiesend,org.purejava,com.github.hypfvieh</nonModularGroupIds>
 
 		<!-- cryptomator dependencies -->
-		<cryptomator.cryptofs.version>2.3.0</cryptomator.cryptofs.version>
+		<cryptomator.cryptofs.version>2.3.1</cryptomator.cryptofs.version>
 		<cryptomator.integrations.version>1.1.0-beta1</cryptomator.integrations.version>
 		<cryptomator.integrations.win.version>1.0.0</cryptomator.integrations.win.version>
 		<cryptomator.integrations.mac.version>1.0.0</cryptomator.integrations.mac.version>
