@@ -80,6 +80,7 @@ public class RegisterDeviceController implements FxController {
 
 	private void registrationSucceeded(HttpResponse<Void> voidHttpResponse) {
 		LOG.info("Registered!");
+		result.cancel(true); // TODO: show visual feedback "please wait for device authorization"
 	}
 
 	private Void registrationFailed(Throwable cause) {
