@@ -3,11 +3,9 @@ package org.cryptomator.ui.keyloading.hub;
 import com.nimbusds.jose.JWEObject;
 import dagger.Lazy;
 import org.cryptomator.common.vaults.Vault;
-import org.cryptomator.ui.common.ErrorComponent;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
-import org.cryptomator.ui.common.UserInteractionLock;
 import org.cryptomator.ui.keyloading.KeyLoading;
 import org.cryptomator.ui.keyloading.KeyLoadingScoped;
 import org.eclipse.jetty.io.RuntimeIOException;
@@ -31,6 +29,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.text.ParseException;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -43,24 +42,20 @@ public class ReceiveKeyController implements FxController {
 	private final Stage window;
 	private final String deviceId;
 	private final String bearerToken;
-	private final AtomicReference<JWEObject> jweRef;
-	private final UserInteractionLock<HubKeyLoadingModule.HubLoadingResult> result;
+	private final CompletableFuture<JWEObject> result;
 	private final Lazy<Scene> registerDeviceScene;
 	private final Lazy<Scene> unauthorizedScene;
-	private final ErrorComponent.Builder errorComponent;
 	private final URI vaultBaseUri;
 	private final HttpClient httpClient;
 
 	@Inject
-	public ReceiveKeyController(@KeyLoading Vault vault, ExecutorService executor, @KeyLoading Stage window, @Named("deviceId") String deviceId, @Named("bearerToken") AtomicReference<String> tokenRef, AtomicReference<JWEObject> jweRef, UserInteractionLock<HubKeyLoadingModule.HubLoadingResult> result, @FxmlScene(FxmlFile.HUB_REGISTER_DEVICE) Lazy<Scene> registerDeviceScene, @FxmlScene(FxmlFile.HUB_UNAUTHORIZED_DEVICE) Lazy<Scene> unauthorizedScene, ErrorComponent.Builder errorComponent) {
+	public ReceiveKeyController(@KeyLoading Vault vault, ExecutorService executor, @KeyLoading Stage window, @Named("deviceId") String deviceId, @Named("bearerToken") AtomicReference<String> tokenRef, CompletableFuture<JWEObject> result, @FxmlScene(FxmlFile.HUB_REGISTER_DEVICE) Lazy<Scene> registerDeviceScene, @FxmlScene(FxmlFile.HUB_UNAUTHORIZED_DEVICE) Lazy<Scene> unauthorizedScene) {
 		this.window = window;
 		this.deviceId = deviceId;
 		this.bearerToken = Objects.requireNonNull(tokenRef.get());
-		this.jweRef = jweRef;
 		this.result = result;
 		this.registerDeviceScene = registerDeviceScene;
 		this.unauthorizedScene = unauthorizedScene;
-		this.errorComponent = errorComponent;
 		this.vaultBaseUri = getVaultBaseUri(vault);
 		this.window.addEventHandler(WindowEvent.WINDOW_HIDING, this::windowClosed);
 		this.httpClient = HttpClient.newBuilder().executor(executor).build();
@@ -94,8 +89,7 @@ public class ReceiveKeyController implements FxController {
 	private void retrievalSucceeded(HttpResponse<InputStream> response) throws IOException {
 		try {
 			var string = HttpHelper.readBody(response);
-			jweRef.set(JWEObject.parse(string));
-			result.interacted(HubKeyLoadingModule.HubLoadingResult.SUCCESS);
+			result.complete(JWEObject.parse(string));
 			window.close();
 		} catch (ParseException e) {
 			throw new IOException("Failed to parse JWE", e);
@@ -111,9 +105,7 @@ public class ReceiveKeyController implements FxController {
 	}
 
 	private Void retrievalFailed(Throwable cause) {
-		result.interacted(HubKeyLoadingModule.HubLoadingResult.FAILED);
-		LOG.error("Key retrieval failed", cause);
-		errorComponent.cause(cause).window(window).build().showErrorScene();
+		result.completeExceptionally(cause);
 		return null;
 	}
 
@@ -123,11 +115,7 @@ public class ReceiveKeyController implements FxController {
 	}
 
 	private void windowClosed(WindowEvent windowEvent) {
-		// if not already interacted, mark this workflow as cancelled:
-		if (result.awaitingInteraction().get()) {
-			LOG.debug("Authorization cancelled by user.");
-			result.interacted(HubKeyLoadingModule.HubLoadingResult.CANCELLED);
-		}
+		result.cancel(true);
 	}
 
 	private static URI appendPath(URI base, String path) {

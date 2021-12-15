@@ -8,7 +8,6 @@ import org.cryptomator.cryptolib.api.Masterkey;
 import org.cryptomator.cryptolib.api.MasterkeyLoadingFailedException;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
-import org.cryptomator.ui.common.UserInteractionLock;
 import org.cryptomator.ui.keyloading.KeyLoading;
 import org.cryptomator.ui.keyloading.KeyLoadingStrategy;
 import org.cryptomator.ui.unlock.UnlockCancelledException;
@@ -19,8 +18,9 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import java.net.URI;
-import java.util.concurrent.CompletionStage;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 @KeyLoading
 public class HubKeyLoadingStrategy implements KeyLoadingStrategy {
@@ -31,37 +31,37 @@ public class HubKeyLoadingStrategy implements KeyLoadingStrategy {
 
 	private final Stage window;
 	private final Lazy<Scene> authFlowScene;
-	private final UserInteractionLock<HubKeyLoadingModule.HubLoadingResult> userInteraction;
+	private final CompletableFuture<JWEObject> result;
 	private final DeviceKey deviceKey;
-	private final AtomicReference<JWEObject> jweRef;
 
 	@Inject
-	public HubKeyLoadingStrategy(@KeyLoading Stage window, @FxmlScene(FxmlFile.HUB_AUTH_FLOW) Lazy<Scene> authFlowScene, UserInteractionLock<HubKeyLoadingModule.HubLoadingResult> userInteraction, DeviceKey deviceKey, AtomicReference<JWEObject> jweRef) {
+	public HubKeyLoadingStrategy(@KeyLoading Stage window, @FxmlScene(FxmlFile.HUB_AUTH_FLOW) Lazy<Scene> authFlowScene, CompletableFuture<JWEObject> result, DeviceKey deviceKey) {
 		this.window = window;
 		this.authFlowScene = authFlowScene;
-		this.userInteraction = userInteraction;
+		this.result = result;
 		this.deviceKey = deviceKey;
-		this.jweRef = jweRef;
 	}
 
 	@Override
 	public Masterkey loadKey(URI keyId) throws MasterkeyLoadingFailedException {
 		Preconditions.checkArgument(keyId.getScheme().startsWith(SCHEME_PREFIX));
 		try {
-			return switch (auth()) {
-				case SUCCESS -> JWEHelper.decrypt(jweRef.get(), deviceKey.get().getPrivate());
-				case FAILED -> throw new MasterkeyLoadingFailedException("failed to load keypair");
-				case CANCELLED -> throw new UnlockCancelledException("User cancelled auth workflow");
-			};
+			startAuthFlow();
+			var jwe = result.get();
+			return JWEHelper.decrypt(jwe, deviceKey.get().getPrivate());
 		} catch (DeviceKey.DeviceKeyRetrievalException e) {
-			throw new MasterkeyLoadingFailedException("Failed to create or load device key pair", e);
+			throw new MasterkeyLoadingFailedException("Failed to load keypair", e);
+		} catch (CancellationException e) {
+			throw new UnlockCancelledException("User cancelled auth workflow", e);
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 			throw new UnlockCancelledException("Loading interrupted", e);
+		} catch (ExecutionException e) {
+			throw new MasterkeyLoadingFailedException("Failed to retrieve key", e);
 		}
 	}
 
-	private HubKeyLoadingModule.HubLoadingResult auth() throws InterruptedException {
+	private void startAuthFlow() {
 		Platform.runLater(() -> {
 			window.setScene(authFlowScene.get());
 			window.show();
@@ -73,7 +73,6 @@ public class HubKeyLoadingStrategy implements KeyLoadingStrategy {
 				window.centerOnScreen();
 			}
 		});
-		return userInteraction.awaitInteraction();
 	}
 
 }

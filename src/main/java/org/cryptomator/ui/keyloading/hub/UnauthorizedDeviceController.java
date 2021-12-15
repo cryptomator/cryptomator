@@ -1,27 +1,24 @@
 package org.cryptomator.ui.keyloading.hub;
 
+import com.nimbusds.jose.JWEObject;
 import org.cryptomator.ui.common.FxController;
-import org.cryptomator.ui.common.UserInteractionLock;
 import org.cryptomator.ui.keyloading.KeyLoading;
 import org.cryptomator.ui.keyloading.KeyLoadingScoped;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javafx.fxml.FXML;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import java.util.concurrent.CompletableFuture;
 
 @KeyLoadingScoped
 public class UnauthorizedDeviceController implements FxController {
 
-	private static final Logger LOG = LoggerFactory.getLogger(UnauthorizedDeviceController.class);
-
 	private final Stage window;
-	private final UserInteractionLock<HubKeyLoadingModule.HubLoadingResult> result;
+	private final CompletableFuture<JWEObject> result;
 
 	@Inject
-	public UnauthorizedDeviceController(@KeyLoading Stage window, UserInteractionLock<HubKeyLoadingModule.HubLoadingResult> result) {
+	public UnauthorizedDeviceController(@KeyLoading Stage window, CompletableFuture<JWEObject> result) {
 		this.window = window;
 		this.result = result;
 		this.window.addEventHandler(WindowEvent.WINDOW_HIDING, this::windowClosed);
@@ -33,10 +30,6 @@ public class UnauthorizedDeviceController implements FxController {
 	}
 
 	private void windowClosed(WindowEvent windowEvent) {
-		// if not already interacted, mark this workflow as cancelled:
-		if (result.awaitingInteraction().get()) {
-			LOG.debug("Authorization cancelled. Device not authorized.");
-			result.interacted(HubKeyLoadingModule.HubLoadingResult.CANCELLED);
-		}
+		result.cancel(true);
 	}
 }

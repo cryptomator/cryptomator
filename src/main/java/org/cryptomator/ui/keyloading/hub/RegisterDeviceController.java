@@ -5,10 +5,10 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.google.common.io.BaseEncoding;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.nimbusds.jose.JWEObject;
 import org.cryptomator.common.settings.DeviceKey;
 import org.cryptomator.cryptolib.common.P384KeyPair;
 import org.cryptomator.ui.common.FxController;
-import org.cryptomator.ui.common.UserInteractionLock;
 import org.cryptomator.ui.keyloading.KeyLoading;
 import org.cryptomator.ui.keyloading.KeyLoadingScoped;
 import org.slf4j.Logger;
@@ -27,6 +27,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -41,14 +42,14 @@ public class RegisterDeviceController implements FxController {
 	private final String bearerToken;
 	private final String deviceId;
 	private final P384KeyPair keyPair;
-	private final UserInteractionLock<HubKeyLoadingModule.HubLoadingResult> result;
+	private final CompletableFuture<JWEObject> result;
 	private final DecodedJWT jwt;
 	private final HttpClient httpClient;
 
 	public TextField deviceNameField;
 
 	@Inject
-	public RegisterDeviceController(@KeyLoading Stage window, ExecutorService executor, HubConfig hubConfig, @Named("deviceId") String deviceId, DeviceKey deviceKey, UserInteractionLock<HubKeyLoadingModule.HubLoadingResult> result, @Named("bearerToken") AtomicReference<String> bearerToken) {
+	public RegisterDeviceController(@KeyLoading Stage window, ExecutorService executor, HubConfig hubConfig, @Named("deviceId") String deviceId, DeviceKey deviceKey, CompletableFuture<JWEObject> result, @Named("bearerToken") AtomicReference<String> bearerToken) {
 		this.window = window;
 		this.hubConfig = hubConfig;
 		this.deviceId = deviceId;
@@ -84,9 +85,7 @@ public class RegisterDeviceController implements FxController {
 	}
 
 	private Void registrationFailed(Throwable cause) {
-		result.interacted(HubKeyLoadingModule.HubLoadingResult.FAILED);
-		LOG.error("Key retrieval failed", cause);
-		// TODO errorComponent.cause(cause).window(window).build().showErrorScene();
+		result.completeExceptionally(cause);
 		return null;
 	}
 
@@ -96,10 +95,7 @@ public class RegisterDeviceController implements FxController {
 	}
 
 	private void windowClosed(WindowEvent windowEvent) {
-		// if not already interacted, mark this workflow as cancelled:
-		if (result.awaitingInteraction().get()) {
-			result.interacted(HubKeyLoadingModule.HubLoadingResult.CANCELLED);
-		}
+		result.cancel(true);
 	}
 
 	/* Getter */
