@@ -70,7 +70,7 @@ public class ReceiveKeyController implements FxController {
 				.build();
 		httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream()) //
 				.thenAcceptAsync(this::loadedExistingKey, Platform::runLater) //
-				.exceptionallyAsync(this::retrievalFailed, Platform::runLater);
+				.exceptionally(this::retrievalFailed);
 	}
 
 	private void loadedExistingKey(HttpResponse<InputStream> response) {

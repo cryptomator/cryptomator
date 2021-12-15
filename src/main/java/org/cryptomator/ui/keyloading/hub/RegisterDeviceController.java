@@ -76,7 +76,7 @@ public class RegisterDeviceController implements FxController {
 				.build();
 		httpClient.sendAsync(request, HttpResponse.BodyHandlers.discarding()) //
 				.thenAcceptAsync(this::registrationSucceeded, Platform::runLater) //
-				.exceptionallyAsync(this::registrationFailed, Platform::runLater);
+				.exceptionally(this::registrationFailed);
 	}
 
 	private void registrationSucceeded(HttpResponse<Void> voidHttpResponse) {
