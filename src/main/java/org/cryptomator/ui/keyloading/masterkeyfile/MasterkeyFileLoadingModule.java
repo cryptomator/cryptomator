@@ -12,16 +12,13 @@ import org.cryptomator.ui.forgetPassword.ForgetPasswordComponent;
 import org.cryptomator.ui.keyloading.KeyLoading;
 import org.cryptomator.ui.keyloading.KeyLoadingScoped;
 import org.cryptomator.ui.keyloading.KeyLoadingStrategy;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Named;
 import java.util.Optional;
 
 @Module(subcomponents = {ForgetPasswordComponent.class, PassphraseEntryComponent.class, ChooseMasterkeyFileComponent.class})
-public abstract class MasterkeyFileLoadingModule {
-
-	private static final Logger LOG = LoggerFactory.getLogger(MasterkeyFileLoadingModule.class);
+public interface MasterkeyFileLoadingModule {
 
 	@Provides
 	@Named("savedPassword")
@@ -33,7 +30,7 @@ public abstract class MasterkeyFileLoadingModule {
 			try {
 				return Optional.ofNullable(keychain.loadPassphrase(vault.getId()));
 			} catch (KeychainAccessException e) {
-				LOG.error("Failed to load entry from system keychain.", e);
+				LoggerFactory.getLogger(MasterkeyFileLoadingModule.class).error("Failed to load entry from system keychain.", e);
 				return Optional.empty();
 			}
 		}

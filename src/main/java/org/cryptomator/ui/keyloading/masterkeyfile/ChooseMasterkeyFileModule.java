@@ -16,7 +16,7 @@ import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
 
 @Module
-abstract class ChooseMasterkeyFileModule {
+interface ChooseMasterkeyFileModule {
 
 	@Provides
 	@ChooseMasterkeyFileScoped
