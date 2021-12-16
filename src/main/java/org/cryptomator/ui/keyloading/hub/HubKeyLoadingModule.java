@@ -17,7 +17,6 @@ import org.cryptomator.ui.common.FxmlLoaderFactory;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.NewPasswordController;
 import org.cryptomator.ui.common.PasswordStrengthUtil;
-import org.cryptomator.ui.common.UserInteractionLock;
 import org.cryptomator.ui.keyloading.KeyLoading;
 import org.cryptomator.ui.keyloading.KeyLoadingScoped;
 import org.cryptomator.ui.keyloading.KeyLoadingStrategy;
@@ -28,16 +27,11 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.Objects;
 import java.util.ResourceBundle;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Module
 public abstract class HubKeyLoadingModule {
-
-	public enum HubLoadingResult {
-		SUCCESS,
-		FAILED,
-		CANCELLED
-	}
 
 	@Provides
 	@KeyLoadingScoped
@@ -67,14 +61,8 @@ public abstract class HubKeyLoadingModule {
 
 	@Provides
 	@KeyLoadingScoped
-	static AtomicReference<JWEObject> provideJweRef() {
-		return new AtomicReference<>();
-	}
-
-	@Provides
-	@KeyLoadingScoped
-	static UserInteractionLock<HubLoadingResult> provideResultLock() {
-		return new UserInteractionLock<>(null);
+	static CompletableFuture<JWEObject> provideResult() {
+		return new CompletableFuture<>();
 	}
 
 	@Binds

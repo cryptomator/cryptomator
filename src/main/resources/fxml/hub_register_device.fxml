@@ -1,16 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import org.cryptomator.ui.controls.FontAwesome5IconView?>
+<?import org.cryptomator.ui.controls.FormattedLabel?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ButtonBar?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Text?>
-<?import javafx.scene.text.TextFlow?>
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.keyloading.hub.RegisterDeviceController"
@@ -30,11 +29,14 @@
 			</HBox>
 
 			<VBox spacing="6">
-				<Label text="This device is not yet known to Cryptomator Hub. Please register this device first." wrapText="true"/>
-				<TextFlow styleClass="text-flow">
-					<Text text="Verification Code: "/>
-					<Text styleClass="label-large" text="${controller.verificationCode}"/>
-				</TextFlow>
+				<Label text="TODO This device is not yet known to Cryptomator Hub. Please register this device first." wrapText="true"/>
+				<HBox spacing="6" alignment="CENTER_LEFT">
+					<FormattedLabel format="TODO User %s" arg1="${controller.userName}"/>
+				</HBox>
+				<HBox spacing="6" alignment="CENTER_LEFT">
+					<Label text="TODO Device Name" labelFor="$deviceNameField"/>
+					<TextField fx:id="deviceNameField"/>
+				</HBox>
 			</VBox>
 		</HBox>
 
@@ -42,11 +44,7 @@
 			<ButtonBar buttonMinWidth="120" buttonOrder="+CU">
 				<buttons>
 					<Button text="%generic.button.close" ButtonBar.buttonData="CANCEL_CLOSE" cancelButton="true" onAction="#close"/>
-					<Button text="Register Device" ButtonBar.buttonData="OTHER" defaultButton="true" onAction="#browse" contentDisplay="LEFT">
-						<graphic>
-							<FontAwesome5IconView glyph="LINK" glyphSize="12"/>
-						</graphic>
-					</Button>
+					<Button text="TODO Register Device" ButtonBar.buttonData="OTHER" defaultButton="true" onAction="#register"/>
 				</buttons>
 			</ButtonBar>
 		</VBox>
