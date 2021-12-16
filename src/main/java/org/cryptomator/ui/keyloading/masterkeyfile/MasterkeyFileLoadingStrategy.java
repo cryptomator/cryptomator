@@ -1,7 +1,7 @@
 package org.cryptomator.ui.keyloading.masterkeyfile;
 
 import com.google.common.base.Preconditions;
-import dagger.Lazy;
+import org.cryptomator.common.Passphrase;
 import org.cryptomator.common.keychain.KeychainManager;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.cryptofs.common.BackupHelper;
@@ -11,10 +11,6 @@ import org.cryptomator.cryptolib.api.MasterkeyLoadingFailedException;
 import org.cryptomator.cryptolib.common.MasterkeyFileAccess;
 import org.cryptomator.integrations.keychain.KeychainAccessException;
 import org.cryptomator.ui.common.Animations;
-import org.cryptomator.ui.common.FxmlFile;
-import org.cryptomator.ui.common.FxmlScene;
-import org.cryptomator.common.Passphrase;
-import org.cryptomator.ui.common.UserInteractionLock;
 import org.cryptomator.ui.keyloading.KeyLoading;
 import org.cryptomator.ui.keyloading.KeyLoadingStrategy;
 import org.cryptomator.ui.unlock.UnlockCancelledException;
@@ -22,7 +18,6 @@ import org.cryptomator.ui.unlock.UnlockCancelledException;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javafx.application.Platform;
-import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import java.io.IOException;
@@ -32,7 +27,6 @@ import java.nio.file.Path;
 import java.util.Optional;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.atomic.AtomicReference;
 
 @KeyLoading
 public class MasterkeyFileLoadingStrategy implements KeyLoadingStrategy {
@@ -42,10 +36,8 @@ public class MasterkeyFileLoadingStrategy implements KeyLoadingStrategy {
 	private final Vault vault;
 	private final MasterkeyFileAccess masterkeyFileAccess;
 	private final Stage window;
-	private final Lazy<Scene> selectMasterkeyFileScene;
 	private final PassphraseEntryComponent.Builder passphraseEntry;
-	private final UserInteractionLock<MasterkeyFileLoadingModule.MasterkeyFileProvision> masterkeyFileProvisionLock;
-	private final AtomicReference<Path> filePath;
+	private final ChooseMasterkeyFileComponent.Builder masterkeyChooser;
 	private final KeychainManager keychain;
 
 	private Passphrase passphrase;
@@ -53,14 +45,12 @@ public class MasterkeyFileLoadingStrategy implements KeyLoadingStrategy {
 	private boolean wrongPassphrase;
 
 	@Inject
-	public MasterkeyFileLoadingStrategy(@KeyLoading Vault vault, MasterkeyFileAccess masterkeyFileAccess, @KeyLoading Stage window, @FxmlScene(FxmlFile.UNLOCK_SELECT_MASTERKEYFILE) Lazy<Scene> selectMasterkeyFileScene, @Named("savedPassword") Optional<char[]> savedPassphrase, PassphraseEntryComponent.Builder passphraseEntry, UserInteractionLock<MasterkeyFileLoadingModule.MasterkeyFileProvision> masterkeyFileProvisionLock, AtomicReference<Path> filePath, KeychainManager keychain) {
+	public MasterkeyFileLoadingStrategy(@KeyLoading Vault vault, MasterkeyFileAccess masterkeyFileAccess, @KeyLoading Stage window, @Named("savedPassword") Optional<char[]> savedPassphrase, PassphraseEntryComponent.Builder passphraseEntry, ChooseMasterkeyFileComponent.Builder masterkeyChooser, KeychainManager keychain) {
 		this.vault = vault;
 		this.masterkeyFileAccess = masterkeyFileAccess;
 		this.window = window;
-		this.selectMasterkeyFileScene = selectMasterkeyFileScene;
 		this.passphraseEntry = passphraseEntry;
-		this.masterkeyFileProvisionLock = masterkeyFileProvisionLock;
-		this.filePath = filePath;
+		this.masterkeyChooser = masterkeyChooser;
 		this.keychain = keychain;
 		this.passphrase = savedPassphrase.map(Passphrase::new).orElse(null);
 		this.savePassphrase = savedPassphrase.isPresent();
@@ -72,7 +62,7 @@ public class MasterkeyFileLoadingStrategy implements KeyLoadingStrategy {
 		try {
 			Path filePath = vault.getPath().resolve(keyId.getSchemeSpecificPart());
 			if (!Files.exists(filePath)) {
-				filePath = getAlternateMasterkeyFilePath();
+				filePath = askUserForMasterkeyFilePath();
 			}
 			if (passphrase == null) {
 				askForPassphrase();
@@ -127,20 +117,10 @@ public class MasterkeyFileLoadingStrategy implements KeyLoadingStrategy {
 		}
 	}
 
-	private Path getAlternateMasterkeyFilePath() throws UnlockCancelledException, InterruptedException {
-		if (filePath.get() == null) {
-			return switch (askUserForMasterkeyFilePath()) {
-				case MASTERKEYFILE_PROVIDED -> filePath.get();
-				case CANCELED -> throw new UnlockCancelledException("Choosing masterkey file cancelled.");
-			};
-		} else {
-			return filePath.get();
-		}
-	}
-
-	private MasterkeyFileLoadingModule.MasterkeyFileProvision askUserForMasterkeyFilePath() throws InterruptedException {
+	private Path askUserForMasterkeyFilePath() throws InterruptedException {
+		var comp = masterkeyChooser.build();
 		Platform.runLater(() -> {
-			window.setScene(selectMasterkeyFileScene.get());
+			window.setScene(comp.chooseMasterkeyScene());
 			window.show();
 			Window owner = window.getOwner();
 			if (owner != null) {
@@ -150,7 +130,13 @@ public class MasterkeyFileLoadingStrategy implements KeyLoadingStrategy {
 				window.centerOnScreen();
 			}
 		});
-		return masterkeyFileProvisionLock.awaitInteraction();
+		try {
+			return comp.result().get();
+		} catch (CancellationException e) {
+			throw new UnlockCancelledException("Choosing masterkey file cancelled.");
+		} catch (ExecutionException e) {
+			throw new MasterkeyLoadingFailedException("Failed to select masterkey file.", e);
+		}
 	}
 
 	private void askForPassphrase() throws InterruptedException {
