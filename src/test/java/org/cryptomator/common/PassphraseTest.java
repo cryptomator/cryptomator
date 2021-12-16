@@ -8,7 +8,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
-class PassphraseTest {
+public class PassphraseTest {
 
 	@ParameterizedTest
 	@CsvSource(value = {
@@ -40,13 +40,8 @@ class PassphraseTest {
 		Assertions.assertEquals("test".substring(offset, offset + length), pw.toString());
 	}
 
-	@Test
-	public void testToString() {
-		Assertions.assertEquals("test", Passphrase.copyOf("test").toString());
-	}
-
 	@Nested
-	class WithInstances {
+	public class InstanceMethods {
 
 		private Passphrase pw1;
 		private Passphrase pw2;
@@ -59,10 +54,14 @@ class PassphraseTest {
 		}
 
 		@Test
-		public void testEquals() {
-			Assertions.assertEquals(pw1, pw2);
+		public void testToString() {
 			Assertions.assertEquals("test", pw1.toString());
 			Assertions.assertEquals("test", pw2.toString());
+		}
+
+		@Test
+		public void testEquals() {
+			Assertions.assertEquals(pw1, pw2);
 		}
 
 		@Test
