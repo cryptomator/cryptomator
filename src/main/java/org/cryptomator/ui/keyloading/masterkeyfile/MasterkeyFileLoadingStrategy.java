@@ -100,6 +100,7 @@ public class MasterkeyFileLoadingStrategy implements KeyLoadingStrategy {
 	public boolean recoverFromException(MasterkeyLoadingFailedException exception) {
 		if (exception instanceof InvalidPassphraseException) {
 			this.wrongPassphrase = true;
+			Arrays.fill(passphrase, '\0');
 			this.passphrase = null;
 			return true; // reattempting key load
 		} else {
