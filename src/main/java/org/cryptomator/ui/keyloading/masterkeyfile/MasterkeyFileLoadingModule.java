@@ -25,28 +25,16 @@ import javax.inject.Named;
 import javafx.scene.Scene;
 import java.nio.file.Path;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-@Module(subcomponents = {ForgetPasswordComponent.class})
+@Module(subcomponents = {ForgetPasswordComponent.class, PassphraseEntryComponent.class})
 public abstract class MasterkeyFileLoadingModule {
 
 	private static final Logger LOG = LoggerFactory.getLogger(MasterkeyFileLoadingModule.class);
 
-	public enum PasswordEntry {
-		PASSWORD_ENTERED,
-		CANCELED
-	}
-
 	public enum MasterkeyFileProvision {
 		MASTERKEYFILE_PROVIDED,
 		CANCELED
-	}
-
-	@Provides
-	@KeyLoadingScoped
-	static UserInteractionLock<PasswordEntry> providePasswordEntryLock() {
-		return new UserInteractionLock<>(null);
 	}
 
 	@Provides
@@ -78,36 +66,11 @@ public abstract class MasterkeyFileLoadingModule {
 	}
 
 	@Provides
-	@KeyLoadingScoped
-	static AtomicReference<char[]> providePassword(@Named("savedPassword") Optional<char[]> storedPassword) {
-		return new AtomicReference<>(storedPassword.orElse(null));
-	}
-
-	@Provides
-	@Named("savePassword")
-	@KeyLoadingScoped
-	static AtomicBoolean provideSavePasswordFlag(@Named("savedPassword") Optional<char[]> storedPassword) {
-		return new AtomicBoolean(storedPassword.isPresent());
-	}
-
-	@Provides
-	@FxmlScene(FxmlFile.UNLOCK_ENTER_PASSWORD)
-	@KeyLoadingScoped
-	static Scene provideUnlockScene(@KeyLoading FxmlLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene(FxmlFile.UNLOCK_ENTER_PASSWORD);
-	}
-
-	@Provides
 	@FxmlScene(FxmlFile.UNLOCK_SELECT_MASTERKEYFILE)
 	@KeyLoadingScoped
 	static Scene provideUnlockSelectMasterkeyFileScene(@KeyLoading FxmlLoaderFactory fxmlLoaders) {
 		return fxmlLoaders.createScene(FxmlFile.UNLOCK_SELECT_MASTERKEYFILE);
 	}
-
-	@Binds
-	@IntoMap
-	@FxControllerKey(PassphraseEntryController.class)
-	abstract FxController bindUnlockController(PassphraseEntryController controller);
 
 	@Binds
 	@IntoMap
