@@ -16,16 +16,16 @@ import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
 
 @ChooseMasterkeyFileScoped
-public class SelectMasterkeyFileController implements FxController {
+public class ChooseMasterkeyFileController implements FxController {
 
-	private static final Logger LOG = LoggerFactory.getLogger(SelectMasterkeyFileController.class);
+	private static final Logger LOG = LoggerFactory.getLogger(ChooseMasterkeyFileController.class);
 
 	private final Stage window;
 	private final CompletableFuture<Path> result;
 	private final ResourceBundle resourceBundle;
 
 	@Inject
-	public SelectMasterkeyFileController(@KeyLoading Stage window, CompletableFuture<Path> result, ResourceBundle resourceBundle) {
+	public ChooseMasterkeyFileController(@KeyLoading Stage window, CompletableFuture<Path> result, ResourceBundle resourceBundle) {
 		this.window = window;
 		this.result = result;
 		this.resourceBundle = resourceBundle;

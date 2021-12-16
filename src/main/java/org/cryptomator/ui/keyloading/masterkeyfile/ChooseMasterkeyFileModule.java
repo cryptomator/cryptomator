@@ -26,7 +26,7 @@ abstract class ChooseMasterkeyFileModule {
 
 	@Provides
 	@ChooseMasterkeyFileScoped
-	static Scene provideChooseMasterkeyScene(SelectMasterkeyFileController controller, DefaultSceneFactory sceneFactory, ResourceBundle resourceBundle) {
+	static Scene provideChooseMasterkeyScene(ChooseMasterkeyFileController controller, DefaultSceneFactory sceneFactory, ResourceBundle resourceBundle) {
 		// TODO: simplify FxmlLoaderFactory
 		try {
 			var url = FxmlLoaderFactory.class.getResource(FxmlFile.UNLOCK_SELECT_MASTERKEYFILE.getRessourcePathString());

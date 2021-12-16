@@ -11,7 +11,7 @@
 <?import javafx.scene.shape.Circle?>
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
-	  fx:controller="org.cryptomator.ui.keyloading.masterkeyfile.SelectMasterkeyFileController"
+	  fx:controller="org.cryptomator.ui.keyloading.masterkeyfile.ChooseMasterkeyFileController"
 	  minWidth="400"
 	  maxWidth="400"
 	  minHeight="145"

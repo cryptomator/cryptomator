@@ -37,7 +37,7 @@ public class MasterkeyFileLoadingStrategy implements KeyLoadingStrategy {
 	private final MasterkeyFileAccess masterkeyFileAccess;
 	private final Stage window;
 	private final PassphraseEntryComponent.Builder passphraseEntry;
-	private final ChooseMasterkeyFileComponent.Builder masterkeyChooser;
+	private final ChooseMasterkeyFileComponent.Builder masterkeyFileChoice;
 	private final KeychainManager keychain;
 
 	private Passphrase passphrase;
@@ -45,12 +45,12 @@ public class MasterkeyFileLoadingStrategy implements KeyLoadingStrategy {
 	private boolean wrongPassphrase;
 
 	@Inject
-	public MasterkeyFileLoadingStrategy(@KeyLoading Vault vault, MasterkeyFileAccess masterkeyFileAccess, @KeyLoading Stage window, @Named("savedPassword") Optional<char[]> savedPassphrase, PassphraseEntryComponent.Builder passphraseEntry, ChooseMasterkeyFileComponent.Builder masterkeyChooser, KeychainManager keychain) {
+	public MasterkeyFileLoadingStrategy(@KeyLoading Vault vault, MasterkeyFileAccess masterkeyFileAccess, @KeyLoading Stage window, @Named("savedPassword") Optional<char[]> savedPassphrase, PassphraseEntryComponent.Builder passphraseEntry, ChooseMasterkeyFileComponent.Builder masterkeyFileChoice, KeychainManager keychain) {
 		this.vault = vault;
 		this.masterkeyFileAccess = masterkeyFileAccess;
 		this.window = window;
 		this.passphraseEntry = passphraseEntry;
-		this.masterkeyChooser = masterkeyChooser;
+		this.masterkeyFileChoice = masterkeyFileChoice;
 		this.keychain = keychain;
 		this.passphrase = savedPassphrase.map(Passphrase::new).orElse(null);
 		this.savePassphrase = savedPassphrase.isPresent();
@@ -118,7 +118,7 @@ public class MasterkeyFileLoadingStrategy implements KeyLoadingStrategy {
 	}
 
 	private Path askUserForMasterkeyFilePath() throws InterruptedException {
-		var comp = masterkeyChooser.build();
+		var comp = masterkeyFileChoice.build();
 		Platform.runLater(() -> {
 			window.setScene(comp.chooseMasterkeyScene());
 			window.show();
