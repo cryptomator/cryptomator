@@ -612,14 +612,18 @@ jobs:
             *.asc
             *.dmg
             *.msi
-          body: |
+          body: |-
             :construction: Work in Progress
-            ## What's new
+            ## What's New
             ## Bugfixes
             ## Misc
+            
             ---
-            :scroll: A complete list of closed issues is available [here](LINK)
+            
+            :scroll: A complete list of closed issues is available [here](LINK).
+            
             ---
+            
             :floppy_disk: SHA-256 checksums of release artifacts:
             ```
             ${{ env.SHA256_SUMS }}
