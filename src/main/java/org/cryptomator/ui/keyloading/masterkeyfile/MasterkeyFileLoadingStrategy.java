@@ -13,6 +13,7 @@ import org.cryptomator.integrations.keychain.KeychainAccessException;
 import org.cryptomator.ui.common.Animations;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
+import org.cryptomator.common.Passphrase;
 import org.cryptomator.ui.common.UserInteractionLock;
 import org.cryptomator.ui.keyloading.KeyLoading;
 import org.cryptomator.ui.keyloading.KeyLoadingStrategy;
@@ -26,10 +27,8 @@ import javafx.stage.Stage;
 import javafx.stage.Window;
 import java.io.IOException;
 import java.net.URI;
-import java.nio.CharBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.Optional;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
@@ -49,7 +48,7 @@ public class MasterkeyFileLoadingStrategy implements KeyLoadingStrategy {
 	private final AtomicReference<Path> filePath;
 	private final KeychainManager keychain;
 
-	private char[] passphrase;
+	private Passphrase passphrase;
 	private boolean savePassphrase;
 	private boolean wrongPassphrase;
 
@@ -63,7 +62,7 @@ public class MasterkeyFileLoadingStrategy implements KeyLoadingStrategy {
 		this.masterkeyFileProvisionLock = masterkeyFileProvisionLock;
 		this.filePath = filePath;
 		this.keychain = keychain;
-		this.passphrase = savedPassphrase.orElse(null);
+		this.passphrase = savedPassphrase.map(Passphrase::new).orElse(null);
 		this.savePassphrase = savedPassphrase.isPresent();
 	}
 
@@ -78,7 +77,7 @@ public class MasterkeyFileLoadingStrategy implements KeyLoadingStrategy {
 			if (passphrase == null) {
 				askForPassphrase();
 			}
-			var masterkey = masterkeyFileAccess.load(filePath, CharBuffer.wrap(passphrase));
+			var masterkey = masterkeyFileAccess.load(filePath, passphrase);
 			//backup
 			if (filePath.startsWith(vault.getPath())) {
 				try {
@@ -100,7 +99,7 @@ public class MasterkeyFileLoadingStrategy implements KeyLoadingStrategy {
 	public boolean recoverFromException(MasterkeyLoadingFailedException exception) {
 		if (exception instanceof InvalidPassphraseException) {
 			this.wrongPassphrase = true;
-			Arrays.fill(passphrase, '\0');
+			passphrase.destroy();
 			this.passphrase = null;
 			return true; // reattempting key load
 		} else {
@@ -113,13 +112,15 @@ public class MasterkeyFileLoadingStrategy implements KeyLoadingStrategy {
 		if (unlockedSuccessfully && savePassphrase) {
 			savePasswordToSystemkeychain(passphrase);
 		}
-		Arrays.fill(passphrase, '\0');
+		if (passphrase != null) {
+			passphrase.destroy();
+		}
 	}
 
-	private void savePasswordToSystemkeychain(char[] passphrase) {
+	private void savePasswordToSystemkeychain(Passphrase passphrase) {
 		if (keychain.isSupported()) {
 			try {
-				keychain.storePassphrase(vault.getId(), vault.getDisplayName(), CharBuffer.wrap(passphrase));
+				keychain.storePassphrase(vault.getId(), vault.getDisplayName(), passphrase);
 			} catch (KeychainAccessException e) {
 				LOG.error("Failed to store passphrase in system keychain.", e);
 			}

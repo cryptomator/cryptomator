@@ -4,6 +4,7 @@ import org.cryptomator.common.Nullable;
 import org.cryptomator.common.keychain.KeychainManager;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.FxController;
+import org.cryptomator.common.Passphrase;
 import org.cryptomator.ui.common.WeakBindings;
 import org.cryptomator.ui.controls.NiceSecurePasswordField;
 import org.cryptomator.ui.forgetPassword.ForgetPasswordComponent;
@@ -44,7 +45,7 @@ public class PassphraseEntryController implements FxController {
 	private final Stage window;
 	private final Vault vault;
 	private final CompletableFuture<PassphraseEntryResult> result;
-	private final char[] savedPassword;
+	private final Passphrase savedPassword;
 	private final ForgetPasswordComponent.Builder forgetPassword;
 	private final KeychainManager keychain;
 	private final StringBinding vaultName;
@@ -63,7 +64,7 @@ public class PassphraseEntryController implements FxController {
 	public Animation unlockAnimation;
 
 	@Inject
-	public PassphraseEntryController(@KeyLoading Stage window, @KeyLoading Vault vault, CompletableFuture<PassphraseEntryResult> result, @Nullable @Named("savedPassword") char[] savedPassword, ForgetPasswordComponent.Builder forgetPassword, KeychainManager keychain) {
+	public PassphraseEntryController(@KeyLoading Stage window, @KeyLoading Vault vault, CompletableFuture<PassphraseEntryResult> result, @Nullable @Named("savedPassword") Passphrase savedPassword, ForgetPasswordComponent.Builder forgetPassword, KeychainManager keychain) {
 		this.window = window;
 		this.vault = vault;
 		this.result = result;
@@ -137,10 +138,7 @@ public class PassphraseEntryController implements FxController {
 		LOG.trace("UnlockController.unlock()");
 		unlockInProgress.set(true);
 		CharSequence pwFieldContents = passwordField.getCharacters();
-		char[] pw = new char[pwFieldContents.length()];
-		for (int i = 0; i < pwFieldContents.length(); i++) {
-			pw[i] = pwFieldContents.charAt(i);
-		}
+		Passphrase pw = Passphrase.copyOf(pwFieldContents);
 		result.complete(new PassphraseEntryResult(pw, savePasswordCheckbox.isSelected()));
 		startUnlockAnimation();
 	}

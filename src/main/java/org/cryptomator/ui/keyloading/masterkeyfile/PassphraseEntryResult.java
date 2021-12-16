@@ -1,6 +1,8 @@
 package org.cryptomator.ui.keyloading.masterkeyfile;
 
+import org.cryptomator.common.Passphrase;
+
 // TODO needs to be public due to Dagger -.-
-public record PassphraseEntryResult(char[] passphrase, boolean savePassphrase) {
+public record PassphraseEntryResult(Passphrase passphrase, boolean savePassphrase) {
 
 }
