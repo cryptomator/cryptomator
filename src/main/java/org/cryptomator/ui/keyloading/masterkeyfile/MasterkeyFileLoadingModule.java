@@ -23,8 +23,10 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Named;
 import javafx.scene.Scene;
+import javafx.stage.Stage;
 import java.nio.file.Path;
 import java.util.Optional;
+import java.util.ResourceBundle;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -93,15 +95,27 @@ public abstract class MasterkeyFileLoadingModule {
 	@Provides
 	@FxmlScene(FxmlFile.UNLOCK_ENTER_PASSWORD)
 	@KeyLoadingScoped
-	static Scene provideUnlockScene(@KeyLoading FxmlLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene(FxmlFile.UNLOCK_ENTER_PASSWORD);
+	static Scene provideUnlockScene(@KeyLoading FxmlLoaderFactory fxmlLoaders, @KeyLoading Stage window, @KeyLoading Vault v, ResourceBundle resourceBundle) {
+		var scene = fxmlLoaders.createScene(FxmlFile.UNLOCK_ENTER_PASSWORD);
+		scene.windowProperty().addListener((prop, oldVal, newVal) -> {
+			if (window.equals(newVal)) {
+				window.setTitle(String.format(resourceBundle.getString("unlock.title"), v.getDisplayName()));
+			}
+		});
+		return scene;
 	}
 
 	@Provides
 	@FxmlScene(FxmlFile.UNLOCK_SELECT_MASTERKEYFILE)
 	@KeyLoadingScoped
-	static Scene provideUnlockSelectMasterkeyFileScene(@KeyLoading FxmlLoaderFactory fxmlLoaders) {
-		return fxmlLoaders.createScene(FxmlFile.UNLOCK_SELECT_MASTERKEYFILE);
+	static Scene provideUnlockSelectMasterkeyFileScene(@KeyLoading FxmlLoaderFactory fxmlLoaders, @KeyLoading Stage window, @KeyLoading Vault v, ResourceBundle resourceBundle) {
+		var scene = fxmlLoaders.createScene(FxmlFile.UNLOCK_SELECT_MASTERKEYFILE);
+		scene.windowProperty().addListener((prop, oldVal, newVal) -> {
+			if (window.equals(newVal)) {
+				window.setTitle(String.format(resourceBundle.getString("unlock.chooseMasterkey.title"), v.getDisplayName()));
+			}
+		});
+		return scene;
 	}
 
 	@Binds
