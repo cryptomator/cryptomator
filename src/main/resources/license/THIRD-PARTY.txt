@@ -52,13 +52,13 @@ Cryptomator uses 40 third-party dependencies under the following licenses:
 			- Jetty :: Servlet Handling (org.eclipse.jetty:jetty-servlet:10.0.6 - https://eclipse.org/jetty/jetty-servlet)
 			- Jetty :: Utilities (org.eclipse.jetty:jetty-util:10.0.6 - https://eclipse.org/jetty/jetty-util)
         Eclipse Public License - v 1.0:
-			- Logback Classic Module (ch.qos.logback:logback-classic:1.2.8 - http://logback.qos.ch/logback-classic)
-			- Logback Core Module (ch.qos.logback:logback-core:1.2.8 - http://logback.qos.ch/logback-core)
+			- Logback Classic Module (ch.qos.logback:logback-classic:1.2.9 - http://logback.qos.ch/logback-classic)
+			- Logback Core Module (ch.qos.logback:logback-core:1.2.9 - http://logback.qos.ch/logback-core)
         Eclipse Public License - v 2.0:
 			- jnr-posix (com.github.jnr:jnr-posix:3.1.10 - http://nexus.sonatype.org/oss-repository-hosting.html/jnr-posix)
         GNU Lesser General Public License:
-			- Logback Classic Module (ch.qos.logback:logback-classic:1.2.8 - http://logback.qos.ch/logback-classic)
-			- Logback Core Module (ch.qos.logback:logback-core:1.2.8 - http://logback.qos.ch/logback-core)
+			- Logback Classic Module (ch.qos.logback:logback-classic:1.2.9 - http://logback.qos.ch/logback-classic)
+			- Logback Core Module (ch.qos.logback:logback-core:1.2.9 - http://logback.qos.ch/logback-core)
         GPLv2:
 			- jnr-posix (com.github.jnr:jnr-posix:3.1.10 - http://nexus.sonatype.org/oss-repository-hosting.html/jnr-posix)
         GPLv2+CE:
