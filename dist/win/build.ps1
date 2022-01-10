@@ -47,7 +47,7 @@ Copy-Item "$buildDir\..\..\target\cryptomator-*.jar" -Destination "$buildDir\..\
 	--dest . `
 	--name Cryptomator `
 	--vendor "Skymatic GmbH" `
-	--copyright "(C) 2016 - 2021 Skymatic GmbH" `
+	--copyright "(C) 2016 - 2022 Skymatic GmbH" `
 	--java-options "-Xss5m" `
 	--java-options "-Xmx256m" `
 	--java-options "-Dcryptomator.appVersion=`"$semVerNo`"" `
@@ -78,7 +78,7 @@ $Env:JP_WIXWIZARD_RESOURCES = "$buildDir\resources"
 	--dest installer `
 	--name Cryptomator `
 	--vendor "Skymatic GmbH" `
-	--copyright "(C) 2016 - 2021 Skymatic GmbH" `
+	--copyright "(C) 2016 - 2022 Skymatic GmbH" `
 	--app-version "$semVerNo" `
 	--win-menu `
 	--win-dir-chooser `

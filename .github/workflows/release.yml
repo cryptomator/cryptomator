@@ -184,7 +184,7 @@ jobs:
           --dest appdir
           --name Cryptomator
           --vendor "Skymatic GmbH"
-          --copyright "(C) 2016 - 2021 Skymatic GmbH"
+          --copyright "(C) 2016 - 2022 Skymatic GmbH"
           --java-options "-Xss5m"
           --java-options "-Xmx256m"
           --java-options "-Dcryptomator.appVersion=\"${{ needs.metadata.outputs.semVerStr }}\""
@@ -529,7 +529,7 @@ jobs:
           --dest installer
           --name Cryptomator
           --vendor "Skymatic GmbH"
-          --copyright "(C) 2016 - 2021 Skymatic GmbH"
+          --copyright "(C) 2016 - 2022 Skymatic GmbH"
           --app-version "${{ needs.metadata.outputs.semVerNum }}"
           --win-menu
           --win-dir-chooser
