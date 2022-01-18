@@ -96,7 +96,7 @@ public class UnlockWorkflow extends Task<Boolean> {
 			showInvalidMountPointScene();
 		} else if (cause instanceof FileAlreadyExistsException) {
 			if (requirement == MountPointRequirement.NO_PARENT_NO_MOUNT_POINT) {
-				LOG.error("Unlock failed. Drive Letter already occupied: {}", cause.getMessage());
+				LOG.error("Unlock failed. Drive Letter already in use: {}", cause.getMessage());
 			} else {
 				LOG.error("Unlock failed. Mountpoint already exists: {}", cause.getMessage());
 			}
