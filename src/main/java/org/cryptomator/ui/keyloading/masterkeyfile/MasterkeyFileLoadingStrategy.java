@@ -25,6 +25,7 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
+import java.util.ResourceBundle;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 
@@ -39,19 +40,21 @@ public class MasterkeyFileLoadingStrategy implements KeyLoadingStrategy {
 	private final PassphraseEntryComponent.Builder passphraseEntry;
 	private final ChooseMasterkeyFileComponent.Builder masterkeyFileChoice;
 	private final KeychainManager keychain;
+	private final ResourceBundle resourceBundle;
 
 	private Passphrase passphrase;
 	private boolean savePassphrase;
 	private boolean wrongPassphrase;
 
 	@Inject
-	public MasterkeyFileLoadingStrategy(@KeyLoading Vault vault, MasterkeyFileAccess masterkeyFileAccess, @KeyLoading Stage window, @Named("savedPassword") Optional<char[]> savedPassphrase, PassphraseEntryComponent.Builder passphraseEntry, ChooseMasterkeyFileComponent.Builder masterkeyFileChoice, KeychainManager keychain) {
+	public MasterkeyFileLoadingStrategy(@KeyLoading Vault vault, MasterkeyFileAccess masterkeyFileAccess, @KeyLoading Stage window, @Named("savedPassword") Optional<char[]> savedPassphrase, PassphraseEntryComponent.Builder passphraseEntry, ChooseMasterkeyFileComponent.Builder masterkeyFileChoice, KeychainManager keychain, ResourceBundle resourceBundle) {
 		this.vault = vault;
 		this.masterkeyFileAccess = masterkeyFileAccess;
 		this.window = window;
 		this.passphraseEntry = passphraseEntry;
 		this.masterkeyFileChoice = masterkeyFileChoice;
 		this.keychain = keychain;
+		this.resourceBundle = resourceBundle;
 		this.passphrase = savedPassphrase.map(Passphrase::new).orElse(null);
 		this.savePassphrase = savedPassphrase.isPresent();
 	}
@@ -121,6 +124,7 @@ public class MasterkeyFileLoadingStrategy implements KeyLoadingStrategy {
 		var comp = masterkeyFileChoice.build();
 		Platform.runLater(() -> {
 			window.setScene(comp.chooseMasterkeyScene());
+			window.setTitle(resourceBundle.getString("unlock.chooseMasterkey.title").formatted(vault.getDisplayName()));
 			window.show();
 			Window owner = window.getOwner();
 			if (owner != null) {
@@ -143,6 +147,7 @@ public class MasterkeyFileLoadingStrategy implements KeyLoadingStrategy {
 		var comp = passphraseEntry.savedPassword(passphrase).build();
 		Platform.runLater(() -> {
 			window.setScene(comp.passphraseEntryScene());
+			window.setTitle(resourceBundle.getString("unlock.title").formatted(vault.getDisplayName()));
 			window.show();
 			Window owner = window.getOwner();
 			if (owner != null) {
