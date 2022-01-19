@@ -1,9 +1,6 @@
 package org.cryptomator.common;
 
-import org.cryptomator.cryptolib.common.MessageDigestSupplier;
-
 import javax.security.auth.Destroyable;
-import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 /**

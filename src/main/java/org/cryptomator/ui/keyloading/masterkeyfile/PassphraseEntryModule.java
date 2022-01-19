@@ -6,11 +6,7 @@ import org.cryptomator.ui.common.DefaultSceneFactory;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlLoaderFactory;
 
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
 
