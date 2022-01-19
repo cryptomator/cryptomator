@@ -64,16 +64,12 @@ public class Passphrase implements Destroyable, CharSequence {
 
 	@Override
 	public int hashCode() {
-		// TODO: do we really need to a secure hashcode? toString leaks the pw anyway
-		var md = MessageDigestSupplier.SHA256.get();
-		ByteBuffer buf = ByteBuffer.allocate(Character.BYTES * length);
+		// basically Arrays.hashCode, but only for a certain subarray
+		int result = 1;
 		for (int i = 0; i < length; i++) {
-			char c = charAt(i);
-			buf.putChar(i * Character.BYTES, c);
+			result = 31 * result + charAt(i);
 		}
-		buf.flip();
-		md.update(buf);
-		return Arrays.hashCode(md.digest());
+		return result;
 	}
 
 	@Override

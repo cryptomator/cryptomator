@@ -26,16 +26,7 @@ interface PassphraseEntryModule {
 	@Provides
 	@PassphraseEntryScoped
 	static Scene provideUnlockScene(PassphraseEntryController controller, DefaultSceneFactory sceneFactory, ResourceBundle resourceBundle) {
-		// TODO: simplify FxmlLoaderFactory
-		try {
-			var url = FxmlLoaderFactory.class.getResource(FxmlFile.UNLOCK_ENTER_PASSWORD.getRessourcePathString());
-			var loader = new FXMLLoader(url, resourceBundle, null, clazz -> controller);
-			Parent root = loader.load();
-			return sceneFactory.apply(root);
-		} catch (IOException e) {
-			throw new UncheckedIOException("Failed to load UnlockScene", e);
-		}
+		return FxmlLoaderFactory.forController(controller, sceneFactory, resourceBundle).createScene(FxmlFile.UNLOCK_ENTER_PASSWORD);
 	}
-
 
 }

@@ -2,8 +2,6 @@ package org.cryptomator.ui.lock;
 
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.FxController;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javafx.fxml.FXML;
@@ -14,8 +12,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 @LockScoped
 public class LockForcedController implements FxController {
-
-	private static final Logger LOG = LoggerFactory.getLogger(LockForcedController.class);
 
 	private final Stage window;
 	private final Vault vault;

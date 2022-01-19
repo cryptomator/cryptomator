@@ -27,16 +27,7 @@ interface ChooseMasterkeyFileModule {
 	@Provides
 	@ChooseMasterkeyFileScoped
 	static Scene provideChooseMasterkeyScene(ChooseMasterkeyFileController controller, DefaultSceneFactory sceneFactory, ResourceBundle resourceBundle) {
-		// TODO: simplify FxmlLoaderFactory
-		try {
-			var url = FxmlLoaderFactory.class.getResource(FxmlFile.UNLOCK_SELECT_MASTERKEYFILE.getRessourcePathString());
-			var loader = new FXMLLoader(url, resourceBundle, null, clazz -> controller);
-			Parent root = loader.load();
-			return sceneFactory.apply(root);
-		} catch (IOException e) {
-			throw new UncheckedIOException("Failed to load ChooseMasterkeyScene", e);
-		}
+		return FxmlLoaderFactory.forController(controller, sceneFactory, resourceBundle).createScene(FxmlFile.UNLOCK_SELECT_MASTERKEYFILE);
 	}
-
 
 }
