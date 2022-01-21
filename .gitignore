@@ -26,3 +26,5 @@ pom.xml.versionsBackup
 .idea/uiDesigner.xml
 .idea/**/libraries/
 *.iml
+
+hs_err_pid*.log

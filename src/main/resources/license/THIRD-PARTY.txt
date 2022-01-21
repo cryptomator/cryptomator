@@ -62,10 +62,10 @@ Cryptomator uses 40 third-party dependencies under the following licenses:
         GPLv2:
 			- jnr-posix (com.github.jnr:jnr-posix:3.1.10 - http://nexus.sonatype.org/oss-repository-hosting.html/jnr-posix)
         GPLv2+CE:
-			- javafx-base (org.openjfx:javafx-base:17.0.1 - https://openjdk.java.net/projects/openjfx/javafx-base/)
-			- javafx-controls (org.openjfx:javafx-controls:17.0.1 - https://openjdk.java.net/projects/openjfx/javafx-controls/)
-			- javafx-fxml (org.openjfx:javafx-fxml:17.0.1 - https://openjdk.java.net/projects/openjfx/javafx-fxml/)
-			- javafx-graphics (org.openjfx:javafx-graphics:17.0.1 - https://openjdk.java.net/projects/openjfx/javafx-graphics/)
+			- javafx-base (org.openjfx:javafx-base:17.0.2 - https://openjdk.java.net/projects/openjfx/javafx-base/)
+			- javafx-controls (org.openjfx:javafx-controls:17.0.2 - https://openjdk.java.net/projects/openjfx/javafx-controls/)
+			- javafx-fxml (org.openjfx:javafx-fxml:17.0.2 - https://openjdk.java.net/projects/openjfx/javafx-fxml/)
+			- javafx-graphics (org.openjfx:javafx-graphics:17.0.2 - https://openjdk.java.net/projects/openjfx/javafx-graphics/)
         LGPL 2.1:
 			- jnr-posix (com.github.jnr:jnr-posix:3.1.10 - http://nexus.sonatype.org/oss-repository-hosting.html/jnr-posix)
         LGPL-2.1-or-later:
