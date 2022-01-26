@@ -22,8 +22,8 @@ VERSION_NO=`mvn -f../../../pom.xml help:evaluate -Dexpression=project.version -q
 
 # check preconditions
 if [ -z "${JAVA_HOME}" ]; then echo "JAVA_HOME not set. Run using JAVA_HOME=/path/to/jdk ./build.sh"; exit 1; fi
-command -v mvn >/dev/null 2>&1 || { echo >&2 "mvn not found."; exit 1; }
-command -v create-dmg >/dev/null 2>&1 || { echo >&2 "create-dmg not found."; exit 1; }
+command -v mvn >/dev/null 2>&1 || { echo >&2 "mvn not found. Fix by 'brew install maven'."; exit 1; }
+command -v create-dmg >/dev/null 2>&1 || { echo >&2 "create-dmg not found. Fix by 'brew install create-dmg'."; exit 1; }
 if [ -n "${CODESIGN_IDENTITY}" ]; then
     command -v codesign >/dev/null 2>&1 || { echo >&2 "codesign not found. Fix by 'xcode-select --install'."; exit 1; }
     if [[ ! `security find-identity -v -p codesigning | grep -w "${CODESIGN_IDENTITY}"` ]]; then echo "Given codesign identity is invalid."; exit 1; fi
@@ -37,7 +37,7 @@ cp ../../../target/cryptomator-*.jar ../../../target/mods
 ${JAVA_HOME}/bin/jlink \
     --output runtime \
     --module-path "${JAVA_HOME}/jmods" \
-    --add-modules java.base,java.desktop,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.crypto.ec,jdk.accessibility \
+    --add-modules java.base,java.desktop,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.crypto.ec,jdk.accessibility,jdk.management.jfr \
     --no-header-files \
     --no-man-pages \
     --strip-debug \
