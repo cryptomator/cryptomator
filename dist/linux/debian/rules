@@ -15,7 +15,7 @@ override_dh_auto_clean:
 override_dh_auto_build:
 	jlink \
 		--output runtime \
-		--add-modules java.base,java.desktop,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.crypto.ec,jdk.accessibility \
+		--add-modules java.base,java.desktop,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.crypto.ec,jdk.accessibility,jdk.management.jfr \
 		--no-header-files \
 		--no-man-pages \
 		--strip-debug \
