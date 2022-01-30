@@ -9,7 +9,7 @@ public enum MountPointRequirement {
 	/**
 	 * The Mountpoint needs to be a filesystem root and must not exist.
 	 */
-	NO_PARENT_NO_MOUNT_POINT,
+	UNUSED_ROOT_DIR,
 
 	/**
 	 * No Mountpoint on the local filesystem required. (e.g. WebDAV)

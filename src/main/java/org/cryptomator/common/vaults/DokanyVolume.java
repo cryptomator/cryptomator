@@ -86,7 +86,7 @@ public class DokanyVolume extends AbstractVolume {
 
 	@Override
 	public MountPointRequirement getMountPointRequirement() {
-		return this.vaultSettings.getWinDriveLetter().isPresent() ? MountPointRequirement.NO_PARENT_NO_MOUNT_POINT : MountPointRequirement.EMPTY_MOUNT_POINT;
+		return this.vaultSettings.getWinDriveLetter().isPresent() ? MountPointRequirement.UNUSED_ROOT_DIR : MountPointRequirement.EMPTY_MOUNT_POINT;
 	}
 
 	public static boolean isSupportedStatic() {

@@ -126,7 +126,7 @@ public class FuseVolume extends AbstractVolume {
 		if (!SystemUtils.IS_OS_WINDOWS) {
 			return MountPointRequirement.EMPTY_MOUNT_POINT;
 		}
-		return this.vaultSettings.getWinDriveLetter().isPresent() ? MountPointRequirement.NO_PARENT_NO_MOUNT_POINT : MountPointRequirement.PARENT_NO_MOUNT_POINT;
+		return this.vaultSettings.getWinDriveLetter().isPresent() ? MountPointRequirement.UNUSED_ROOT_DIR : MountPointRequirement.PARENT_NO_MOUNT_POINT;
 	}
 
 	public static boolean isSupportedStatic() {

@@ -83,7 +83,7 @@ public class UnlockWorkflow extends Task<Boolean> {
 		var requirement = vault.getVolume().orElseThrow(() -> new IllegalStateException("Invalid Mountpoint without a Volume?!", impExc)).getMountPointRequirement();
 		assert requirement != MountPointRequirement.NONE; //An invalid MountPoint with no required MountPoint doesn't seem sensible
 		assert requirement != MountPointRequirement.PARENT_OPT_MOUNT_POINT; //Not implemented anywhere (yet)
-		assert requirement != MountPointRequirement.NO_PARENT_NO_MOUNT_POINT || SystemUtils.IS_OS_WINDOWS; //Not implemented anywhere, but on Windows
+		assert requirement != MountPointRequirement.UNUSED_ROOT_DIR || SystemUtils.IS_OS_WINDOWS; //Not implemented anywhere, but on Windows
 
 		Throwable cause = impExc.getCause();
 		// TODO: apply https://openjdk.java.net/jeps/8213076 in future JDK versions
@@ -95,7 +95,7 @@ public class UnlockWorkflow extends Task<Boolean> {
 			}
 			showInvalidMountPointScene();
 		} else if (cause instanceof FileAlreadyExistsException) {
-			if (requirement == MountPointRequirement.NO_PARENT_NO_MOUNT_POINT) {
+			if (requirement == MountPointRequirement.UNUSED_ROOT_DIR) {
 				LOG.error("Unlock failed. Drive Letter already in use: {}", cause.getMessage());
 			} else {
 				LOG.error("Unlock failed. Mountpoint already exists: {}", cause.getMessage());

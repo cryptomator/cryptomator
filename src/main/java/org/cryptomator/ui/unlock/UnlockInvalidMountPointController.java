@@ -42,14 +42,14 @@ public class UnlockInvalidMountPointController implements FxController {
 	}
 
 	public boolean getDriveLetterOccupied() {
-		return getMountPointRequirement() == MountPointRequirement.NO_PARENT_NO_MOUNT_POINT;
+		return getMountPointRequirement() == MountPointRequirement.UNUSED_ROOT_DIR;
 	}
 
 	private MountPointRequirement getMountPointRequirement() {
 		var requirement = vault.getVolume().orElseThrow(() -> new IllegalStateException("Invalid Mountpoint without a Volume?!")).getMountPointRequirement();
 		assert requirement != MountPointRequirement.NONE; //An invalid MountPoint with no required MountPoint doesn't seem sensible
 		assert requirement != MountPointRequirement.PARENT_OPT_MOUNT_POINT; //Not implemented anywhere (yet)
-		assert requirement != MountPointRequirement.NO_PARENT_NO_MOUNT_POINT || SystemUtils.IS_OS_WINDOWS; //Not implemented anywhere, but on Windows
+		assert requirement != MountPointRequirement.UNUSED_ROOT_DIR || SystemUtils.IS_OS_WINDOWS; //Not implemented anywhere, but on Windows
 
 		return requirement;
 	}
