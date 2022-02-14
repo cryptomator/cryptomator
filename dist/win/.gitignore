@@ -1,3 +1,5 @@
 runtime
 Cryptomator
 installer
+*.wixobj
+*.pdb

@@ -86,5 +86,6 @@ $Env:JP_WIXWIZARD_RESOURCES = "$buildDir\resources"
 	--win-update-url "https:\\cryptomator.org" `
 	--win-menu-group Cryptomator `
 	--resource-dir resources `
+	--about-url "https:\\cryptomator.org" `
 	--license-file resources/license.rtf `
 	--file-associations resources/FAvaultFile.properties
