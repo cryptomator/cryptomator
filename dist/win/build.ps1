@@ -1,11 +1,14 @@
+# check parameters
+$clean = $args[0] -eq "fresh"
+
 # check preconditions
-if ((Get-Command "git" -ErrorAction SilentlyContinue) -eq $null) 
-{ 
+if ((Get-Command "git" -ErrorAction SilentlyContinue) -eq $null)
+{
    Write-Host "Unable to find git.exe in your PATH (try: choco install git)"
    exit 1
 }
-if ((Get-Command "mvn" -ErrorAction SilentlyContinue) -eq $null) 
-{ 
+if ((Get-Command "mvn" -ErrorAction SilentlyContinue) -eq $null)
+{
    Write-Host "Unable to find mvn.cmd in your PATH (try: choco install maven)"
    exit 1
 }
@@ -29,6 +32,11 @@ $copyright = "(C) 2016 - 2022 Skymatic GmbH"
 Copy-Item "$buildDir\..\..\target\cryptomator-*.jar" -Destination "$buildDir\..\..\target\mods"
 
 # add runtime
+$runtimeImagePath = '.\runtime'
+if ($clean && Test-Path -Path $runtimeImagePath) {
+	Remove-Item -Path $runtimeImagePath -Force -Recurse
+}
+
 & "$Env:JAVA_HOME\bin\jlink" `
 	--verbose `
 	--output runtime `
@@ -38,6 +46,11 @@ Copy-Item "$buildDir\..\..\target\cryptomator-*.jar" -Destination "$buildDir\..\
 	--no-man-pages `
 	--strip-debug `
 	--compress=1
+
+$appPath = '.\Cryptomator'
+if ($clean && Test-Path -Path $appPath) {
+	Remove-Item -Path $appPath -Force -Recurse
+}
 
 # create app dir
 & "$Env:JAVA_HOME\bin\jpackage" `
