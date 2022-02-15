@@ -21,6 +21,9 @@ Write-Output "`$revisionNo=$revisionNo"
 Write-Output "`$buildDir=$buildDir"
 Write-Output "`$Env:JAVA_HOME=$Env:JAVA_HOME"
 
+$vendor = "Skymatic GmbH"
+$copyright = "(C) 2016 - 2022 Skymatic GmbH"
+
 # compile
 &mvn -B -f $buildDir/../../pom.xml clean package -DskipTests -Pwin
 Copy-Item "$buildDir\..\..\target\cryptomator-*.jar" -Destination "$buildDir\..\..\target\mods"
@@ -46,8 +49,8 @@ Copy-Item "$buildDir\..\..\target\cryptomator-*.jar" -Destination "$buildDir\..\
 	--module org.cryptomator.desktop/org.cryptomator.launcher.Cryptomator `
 	--dest . `
 	--name Cryptomator `
-	--vendor "Skymatic GmbH" `
-	--copyright "(C) 2016 - 2022 Skymatic GmbH" `
+	--vendor $vendor `
+	--copyright $copyright `
 	--java-options "-Xss5m" `
 	--java-options "-Xmx256m" `
 	--java-options "-Dcryptomator.appVersion=`"$semVerNo`"" `
@@ -68,7 +71,11 @@ Copy-Item "$buildDir\..\..\target\cryptomator-*.jar" -Destination "$buildDir\..\
 Copy-Item "contrib\*" -Destination "Cryptomator"
 attrib -r "Cryptomator\Cryptomator.exe"
 
-# create .msi bundle
+$aboutUrl="https://cryptomator.org"
+$updateUrl="https://cryptomator.org/downloads/"
+$helpUrl="https://cryptomator.org/contact/"
+
+# create .msi
 $Env:JP_WIXWIZARD_RESOURCES = "$buildDir\resources"
 & "$Env:JAVA_HOME\bin\jpackage" `
 	--verbose `
@@ -77,15 +84,26 @@ $Env:JP_WIXWIZARD_RESOURCES = "$buildDir\resources"
 	--app-image Cryptomator `
 	--dest installer `
 	--name Cryptomator `
-	--vendor "Skymatic GmbH" `
-	--copyright "(C) 2016 - 2022 Skymatic GmbH" `
+	--vendor $vendor `
+	--copyright $copyright `
 	--app-version "$semVerNo" `
 	--win-menu `
 	--win-dir-chooser `
 	--win-shortcut-prompt `
-	--win-update-url "https:\\cryptomator.org" `
+	--win-update-url $updateUrl `
 	--win-menu-group Cryptomator `
 	--resource-dir resources `
-	--about-url "https:\\cryptomator.org" `
+	--about-url $aboutUrl `
 	--license-file resources/license.rtf `
 	--file-associations resources/FAvaultFile.properties
+
+# create bundle including winfsp
+& "$env:WIX\bin\candle.exe" bundlewithWinfsp.wxs -ext WixBalExtension -out tmp\ `
+	-dBundleVersion="$semVerNo.$revisionNo" `
+	-dBundleVendor="$vendor" `
+	-dBundleCopyright="$copyright" `
+	-dAboutUrl="$aboutUrl" `
+	-dHelpUrl="$helpUrl" `
+	-dUpdateUrl="$updateUrl" `
+	-dAppVersion="$semVerNo"
+& "$env:WIX\bin\light.exe" -b . .\tmp\BundlewithWinfsp.wixobj -ext WixBalExtension -out installer\CryptomatorBundle.exe
