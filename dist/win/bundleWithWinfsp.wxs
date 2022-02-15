@@ -30,7 +30,7 @@
 
             <!-- see https://wixtoolset.org/documentation/manual/v3/xsd/wix/msipackage.html-->
             <MsiPackage
-                SourceFile="installer/Cryptomator.msi"
+                SourceFile="installer/Cryptomator-$(var.AppVersion).msi"
                 CacheId="cryptomator-bundle-cryptomator"
                 DisplayInternalUI="yes"
                 Visible="no"
