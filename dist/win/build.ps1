@@ -33,7 +33,7 @@ Copy-Item "$buildDir\..\..\target\cryptomator-*.jar" -Destination "$buildDir\..\
 
 # add runtime
 $runtimeImagePath = '.\runtime'
-if ($clean && Test-Path -Path $runtimeImagePath) {
+if ($clean -and (Test-Path -Path $runtimeImagePath)) {
 	Remove-Item -Path $runtimeImagePath -Force -Recurse
 }
 
@@ -48,7 +48,7 @@ if ($clean && Test-Path -Path $runtimeImagePath) {
 	--compress=1
 
 $appPath = '.\Cryptomator'
-if ($clean && Test-Path -Path $appPath) {
+if ($clean -and (Test-Path -Path $appPath)) {
 	Remove-Item -Path $appPath -Force -Recurse
 }
 
