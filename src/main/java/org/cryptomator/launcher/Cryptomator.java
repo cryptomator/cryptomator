@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
-import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
@@ -54,6 +54,21 @@ public class Cryptomator {
 	}
 
 	public static void main(String[] args) {
+		var printVersion = Optional.ofNullable(args) //
+				.stream() //Streams either one element (the args-array) or zero elements
+				.flatMap(Arrays::stream) //
+				.anyMatch(arg -> "-v".equals(arg) || "--version".equals(arg));
+
+		if(printVersion) {
+			var appVer = Optional.ofNullable(System.getProperty("cryptomator.appVersion"));
+			var buildNumber = Optional.ofNullable(System.getProperty("cryptomator.buildNumber"));
+
+			//Reduce noise for parsers by using System.out directly
+			System.out.printf("Cryptomator version %s (build %s)%n", appVer.orElse("<undefined version>"), buildNumber.orElse("<undefined build>"));
+			System.exit(0);
+			return;
+		}
+
 		int exitCode = CRYPTOMATOR_COMPONENT.application().run(args);
 		LOG.info("Exit {}", exitCode);
 		System.exit(exitCode); // end remaining non-daemon threads.
