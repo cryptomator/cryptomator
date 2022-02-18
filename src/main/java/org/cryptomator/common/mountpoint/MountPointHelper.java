@@ -66,9 +66,9 @@ class MountPointHelper {
 	private void clearIrregularUnmountDebris(Path dirContainingMountPoints) {
 		IOException cleanupFailed = new IOException("Cleanup failed");
 
-		try {
+		try (var ds = Files.newDirectoryStream(dirContainingMountPoints)) {
 			LOG.debug("Performing cleanup of mountpoint dir {}.", dirContainingMountPoints);
-			for (Path p : Files.newDirectoryStream(dirContainingMountPoints)) {
+			for (Path p : ds) {
 				try {
 					var attr = Files.readAttributes(p, BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
 					if (attr.isOther() && attr.isDirectory()) { // yes, this is possible with windows junction points -.-
@@ -113,8 +113,10 @@ class MountPointHelper {
 	}
 
 	private void ensureIsEmpty(Path dir) throws IOException {
-		if (Files.newDirectoryStream(dir).iterator().hasNext()) {
-			throw new DirectoryNotEmptyException(dir.toString());
+		try (var ds = Files.newDirectoryStream(dir)) {
+			if (ds.iterator().hasNext()){
+				throw new DirectoryNotEmptyException(dir.toString());
+			}
 		}
 	}
 }

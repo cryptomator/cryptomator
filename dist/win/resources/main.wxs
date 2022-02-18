@@ -124,6 +124,9 @@
       <CustomAction Id="JpSetARPURLUPDATEINFO" Property="ARPURLUPDATEINFO" Value="$(var.JpUpdateURL)" />
     <?endif?>
 
+    <!-- WebDAV patches -->
+    <CustomAction Id="PatchWebDAV" Impersonate="no" ExeCommand="[INSTALLDIR]patchWebDAV.bat" Directory="INSTALLDIR" Execute="deferred" Return="asyncWait" />
+
     <?ifdef JpIcon ?>
     <Property Id="ARPPRODUCTICON" Value="JpARPPRODUCTICON"/>
     <Icon Id="JpARPPRODUCTICON" SourceFile="$(var.JpIcon)"/>
@@ -153,6 +156,8 @@
       <Custom Action="JpDisallowDowngrade" After="FindRelatedProducts">JP_DOWNGRADABLE_FOUND</Custom>
       <?endif?>
       <RemoveExistingProducts Before="CostInitialize"/>
+
+      <Custom Action="PatchWebDAV" After="InstallFiles">NOT Installed OR REINSTALL</Custom>
     </InstallExecuteSequence>
 
     <WixVariable Id="WixUIBannerBmp" Value="$(env.JP_WIXWIZARD_RESOURCES)\banner.bmp" />

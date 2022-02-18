@@ -2,6 +2,7 @@ package org.cryptomator.ui.unlock;
 
 import com.google.common.base.Throwables;
 import dagger.Lazy;
+import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.mountpoint.InvalidMountPointException;
 import org.cryptomator.common.vaults.MountPointRequirement;
 import org.cryptomator.common.vaults.Vault;
@@ -79,9 +80,10 @@ public class UnlockWorkflow extends Task<Boolean> {
 	}
 
 	private void handleInvalidMountPoint(InvalidMountPointException impExc) {
-		MountPointRequirement requirement = vault.getVolume().orElseThrow(() -> new IllegalStateException("Invalid Mountpoint without a Volume?!", impExc)).getMountPointRequirement();
+		var requirement = vault.getVolume().orElseThrow(() -> new IllegalStateException("Invalid Mountpoint without a Volume?!", impExc)).getMountPointRequirement();
 		assert requirement != MountPointRequirement.NONE; //An invalid MountPoint with no required MountPoint doesn't seem sensible
 		assert requirement != MountPointRequirement.PARENT_OPT_MOUNT_POINT; //Not implemented anywhere (yet)
+		assert requirement != MountPointRequirement.UNUSED_ROOT_DIR || SystemUtils.IS_OS_WINDOWS; //Not implemented anywhere, but on Windows
 
 		Throwable cause = impExc.getCause();
 		// TODO: apply https://openjdk.java.net/jeps/8213076 in future JDK versions
@@ -93,7 +95,11 @@ public class UnlockWorkflow extends Task<Boolean> {
 			}
 			showInvalidMountPointScene();
 		} else if (cause instanceof FileAlreadyExistsException) {
-			LOG.error("Unlock failed. Mountpoint already exists: {}", cause.getMessage());
+			if (requirement == MountPointRequirement.UNUSED_ROOT_DIR) {
+				LOG.error("Unlock failed. Drive Letter already in use: {}", cause.getMessage());
+			} else {
+				LOG.error("Unlock failed. Mountpoint already exists: {}", cause.getMessage());
+			}
 			showInvalidMountPointScene();
 		} else if (cause instanceof DirectoryNotEmptyException) {
 			LOG.error("Unlock failed. Mountpoint not an empty directory: {}", cause.getMessage());

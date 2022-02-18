@@ -47,7 +47,7 @@ class MasterkeyFileLoadingFinisher {
 	private void savePasswordToSystemkeychain() {
 		if (keychain.isSupported()) {
 			try {
-				keychain.storePassphrase(vault.getId(), CharBuffer.wrap(enteredPassword.get()));
+				keychain.storePassphrase(vault.getId(), vault.getDisplayName(), CharBuffer.wrap(enteredPassword.get()));
 			} catch (KeychainAccessException e) {
 				LOG.error("Failed to store passphrase in system keychain.", e);
 			}

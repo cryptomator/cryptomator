@@ -18,7 +18,7 @@ cp ../../../target/cryptomator-*.jar ../../../target/mods
 ${JAVA_HOME}/bin/jlink \
     --output runtime \
     --module-path "${JAVA_HOME}/jmods" \
-    --add-modules java.base,java.desktop,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.crypto.ec,jdk.accessibility \
+    --add-modules java.base,java.desktop,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.crypto.ec,jdk.accessibility,jdk.management.jfr \
     --no-header-files \
     --no-man-pages \
     --strip-debug \
@@ -35,7 +35,7 @@ ${JAVA_HOME}/bin/jpackage \
     --dest . \
     --name Cryptomator \
     --vendor "Skymatic GmbH" \
-    --copyright "(C) 2016 - 2021 Skymatic GmbH" \
+    --copyright "(C) 2016 - 2022 Skymatic GmbH" \
     --java-options "-Xss5m" \
     --java-options "-Xmx256m" \
     --app-version "${VERSION}.${REVISION_NO}" \

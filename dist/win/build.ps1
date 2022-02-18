@@ -30,7 +30,7 @@ Copy-Item "$buildDir\..\..\target\cryptomator-*.jar" -Destination "$buildDir\..\
 	--verbose `
 	--output runtime `
 	--module-path "$Env:JAVA_HOME/jmods" `
-	--add-modules java.base,java.desktop,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.crypto.ec,jdk.accessibility `
+	--add-modules java.base,java.desktop,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.crypto.ec,jdk.accessibility,jdk.management.jfr `
 	--no-header-files `
 	--no-man-pages `
 	--strip-debug `
@@ -47,7 +47,7 @@ Copy-Item "$buildDir\..\..\target\cryptomator-*.jar" -Destination "$buildDir\..\
 	--dest . `
 	--name Cryptomator `
 	--vendor "Skymatic GmbH" `
-	--copyright "(C) 2016 - 2021 Skymatic GmbH" `
+	--copyright "(C) 2016 - 2022 Skymatic GmbH" `
 	--java-options "-Xss5m" `
 	--java-options "-Xmx256m" `
 	--java-options "-Dcryptomator.appVersion=`"$semVerNo`"" `
@@ -68,7 +68,6 @@ Copy-Item "$buildDir\..\..\target\cryptomator-*.jar" -Destination "$buildDir\..\
 Copy-Item "contrib\*" -Destination "Cryptomator"
 attrib -r "Cryptomator\Cryptomator.exe"
 
-
 # create .msi bundle
 $Env:JP_WIXWIZARD_RESOURCES = "$buildDir\resources"
 & "$Env:JAVA_HOME\bin\jpackage" `
@@ -79,7 +78,7 @@ $Env:JP_WIXWIZARD_RESOURCES = "$buildDir\resources"
 	--dest installer `
 	--name Cryptomator `
 	--vendor "Skymatic GmbH" `
-	--copyright "(C) 2016 - 2021 Skymatic GmbH" `
+	--copyright "(C) 2016 - 2022 Skymatic GmbH" `
 	--app-version "$semVerNo" `
 	--win-menu `
 	--win-dir-chooser `

@@ -3,6 +3,7 @@ package org.cryptomator.ui.keyloading.masterkeyfile;
 import com.google.common.base.Preconditions;
 import dagger.Lazy;
 import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.cryptofs.common.BackupHelper;
 import org.cryptomator.cryptolib.api.InvalidPassphraseException;
 import org.cryptomator.cryptolib.api.Masterkey;
 import org.cryptomator.cryptolib.api.MasterkeyLoadingFailedException;
@@ -20,6 +21,7 @@ import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.stage.Window;
+import java.io.IOException;
 import java.net.URI;
 import java.nio.CharBuffer;
 import java.nio.file.Files;
@@ -61,14 +63,24 @@ public class MasterkeyFileLoadingStrategy implements KeyLoadingStrategy {
 	@Override
 	public Masterkey loadKey(URI keyId) throws MasterkeyLoadingFailedException {
 		Preconditions.checkArgument(SCHEME.equalsIgnoreCase(keyId.getScheme()), "Only supports keys with scheme " + SCHEME);
-
 		try {
 			Path filePath = vault.getPath().resolve(keyId.getSchemeSpecificPart());
 			if (!Files.exists(filePath)) {
 				filePath = getAlternateMasterkeyFilePath();
 			}
 			CharSequence passphrase = getPassphrase();
-			return masterkeyFileAccess.load(filePath, passphrase);
+			var masterkey = masterkeyFileAccess.load(filePath, passphrase);
+			//backup
+			if (filePath.startsWith(vault.getPath())) {
+				try {
+					BackupHelper.attemptBackup(filePath);
+				} catch (IOException e) {
+					LOG.warn("Unable to create backup for masterkey file.");
+				}
+			} else {
+				LOG.info("Masterkey file not stored inside vault. Not creating a backup.");
+			}
+			return masterkey;
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 			throw new UnlockCancelledException("Unlock interrupted", e);

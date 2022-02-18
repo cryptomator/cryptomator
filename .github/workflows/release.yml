@@ -170,7 +170,7 @@ jobs:
           --verbose
           --output runtime
           --module-path "${JAVA_HOME}/jmods"
-          --add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.crypto.ec,jdk.accessibility
+          --add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.crypto.ec,jdk.accessibility,jdk.management.jfr
           --no-header-files
           --no-man-pages
           --strip-debug
@@ -187,7 +187,7 @@ jobs:
           --dest appdir
           --name Cryptomator
           --vendor "Skymatic GmbH"
-          --copyright "(C) 2016 - 2021 Skymatic GmbH"
+          --copyright "(C) 2016 - 2022 Skymatic GmbH"
           --java-options "-Xss5m"
           --java-options "-Xmx256m"
           --java-options "-Dcryptomator.appVersion=\"${{ needs.metadata.outputs.semVerStr }}\""
@@ -532,7 +532,7 @@ jobs:
           --dest installer
           --name Cryptomator
           --vendor "Skymatic GmbH"
-          --copyright "(C) 2016 - 2021 Skymatic GmbH"
+          --copyright "(C) 2016 - 2022 Skymatic GmbH"
           --app-version "${{ needs.metadata.outputs.semVerNum }}"
           --win-menu
           --win-dir-chooser
@@ -615,14 +615,18 @@ jobs:
             *.asc
             *.dmg
             *.msi
-          body: |
+          body: |-
             :construction: Work in Progress
-            ## What's new
+            ## What's New
             ## Bugfixes
             ## Misc
+            
             ---
-            :scroll: A complete list of closed issues is available [here](LINK)
+            
+            :scroll: A complete list of closed issues is available [here](LINK).
+            
             ---
+            
             :floppy_disk: SHA-256 checksums of release artifacts:
             ```
             ${{ env.SHA256_SUMS }}

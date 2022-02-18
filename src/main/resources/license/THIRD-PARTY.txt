@@ -18,8 +18,7 @@ Cryptomator uses 45 third-party dependencies under the following licenses:
 			- jnr-constants (com.github.jnr:jnr-constants:0.10.2 - http://github.com/jnr/jnr-constants)
 			- jnr-ffi (com.github.jnr:jnr-ffi:2.2.7 - http://github.com/jnr/jnr-ffi)
 			- JCIP Annotations under Apache License (com.github.stephenc.jcip:jcip-annotations:1.0-1 - http://stephenc.github.com/jcip-annotations)
-			- Gson (com.google.code.gson:gson:2.8.8 - https://github.com/google/gson/gson)
-			- Dagger (com.google.dagger:dagger:2.39 - https://github.com/google/dagger)
+			- Dagger (com.google.dagger:dagger:2.40.3 - https://github.com/google/dagger)
 			- Guava InternalFutureFailureAccess and InternalFutures (com.google.guava:failureaccess:1.0.1 - https://github.com/google/guava/failureaccess)
 			- Guava: Google Core Libraries for Java (com.google.guava:guava:31.0-jre - https://github.com/google/guava)
 			- Nimbus JOSE+JWT (com.nimbusds:nimbus-jose-jwt:9.15.2 - https://bitbucket.org/connect2id/nimbus-jose-jwt)
@@ -39,6 +38,7 @@ Cryptomator uses 45 third-party dependencies under the following licenses:
 			- Jetty :: XML utilities (org.eclipse.jetty:jetty-xml:10.0.6 - https://eclipse.org/jetty/jetty-xml)
 			- Jetty :: Servlet API and Schemas for JPMS and OSGi (org.eclipse.jetty.toolchain:jetty-servlet-api:4.0.6 - https://eclipse.org/jetty/jetty-servlet-api)
         Apache-2.0:
+			- Gson (com.google.code.gson:gson:2.8.9 - https://github.com/google/gson/gson)
 			- Java Native Access (net.java.dev.jna:jna:5.9.0 - https://github.com/java-native-access/jna)
 			- Java Native Access Platform (net.java.dev.jna:jna-platform:5.9.0 - https://github.com/java-native-access/jna)
         BSD-3-Clause:
@@ -60,20 +60,20 @@ Cryptomator uses 45 third-party dependencies under the following licenses:
 			- Jetty :: Webapp Application Support (org.eclipse.jetty:jetty-webapp:10.0.6 - https://eclipse.org/jetty/jetty-webapp)
 			- Jetty :: XML utilities (org.eclipse.jetty:jetty-xml:10.0.6 - https://eclipse.org/jetty/jetty-xml)
         Eclipse Public License - v 1.0:
-			- Logback Classic Module (ch.qos.logback:logback-classic:1.2.6 - http://logback.qos.ch/logback-classic)
-			- Logback Core Module (ch.qos.logback:logback-core:1.2.6 - http://logback.qos.ch/logback-core)
+			- Logback Classic Module (ch.qos.logback:logback-classic:1.2.9 - http://logback.qos.ch/logback-classic)
+			- Logback Core Module (ch.qos.logback:logback-core:1.2.9 - http://logback.qos.ch/logback-core)
         Eclipse Public License - v 2.0:
 			- jnr-posix (com.github.jnr:jnr-posix:3.1.10 - http://nexus.sonatype.org/oss-repository-hosting.html/jnr-posix)
         GNU Lesser General Public License:
-			- Logback Classic Module (ch.qos.logback:logback-classic:1.2.6 - http://logback.qos.ch/logback-classic)
-			- Logback Core Module (ch.qos.logback:logback-core:1.2.6 - http://logback.qos.ch/logback-core)
+			- Logback Classic Module (ch.qos.logback:logback-classic:1.2.9 - http://logback.qos.ch/logback-classic)
+			- Logback Core Module (ch.qos.logback:logback-core:1.2.9 - http://logback.qos.ch/logback-core)
         GPLv2:
 			- jnr-posix (com.github.jnr:jnr-posix:3.1.10 - http://nexus.sonatype.org/oss-repository-hosting.html/jnr-posix)
         GPLv2+CE:
-			- javafx-base (org.openjfx:javafx-base:17.0.0.1 - https://openjdk.java.net/projects/openjfx/javafx-base/)
-			- javafx-controls (org.openjfx:javafx-controls:17.0.0.1 - https://openjdk.java.net/projects/openjfx/javafx-controls/)
-			- javafx-fxml (org.openjfx:javafx-fxml:17.0.0.1 - https://openjdk.java.net/projects/openjfx/javafx-fxml/)
-			- javafx-graphics (org.openjfx:javafx-graphics:17.0.0.1 - https://openjdk.java.net/projects/openjfx/javafx-graphics/)
+			- javafx-base (org.openjfx:javafx-base:17.0.2 - https://openjdk.java.net/projects/openjfx/javafx-base/)
+			- javafx-controls (org.openjfx:javafx-controls:17.0.2 - https://openjdk.java.net/projects/openjfx/javafx-controls/)
+			- javafx-fxml (org.openjfx:javafx-fxml:17.0.2 - https://openjdk.java.net/projects/openjfx/javafx-fxml/)
+			- javafx-graphics (org.openjfx:javafx-graphics:17.0.2 - https://openjdk.java.net/projects/openjfx/javafx-graphics/)
         LGPL 2.1:
 			- jnr-posix (com.github.jnr:jnr-posix:3.1.10 - http://nexus.sonatype.org/oss-repository-hosting.html/jnr-posix)
         LGPL-2.1-or-later:
