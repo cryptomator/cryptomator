@@ -6,7 +6,7 @@ public class HubConfig {
 	public String clientId;
 	public String authEndpoint;
 	public String tokenEndpoint;
-	public String deviceRegistrationUrl;
+	public String devicesResourceUrl;
 	public String authSuccessUrl;
 	public String authErrorUrl;
 

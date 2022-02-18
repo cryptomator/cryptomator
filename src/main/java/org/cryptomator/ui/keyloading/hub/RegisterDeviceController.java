@@ -63,7 +63,7 @@ public class RegisterDeviceController implements FxController {
 
 	@FXML
 	public void register() {
-		var keyUri = URI.create("http://localhost:9090/devices/" + deviceId); // TODO lol hubConfig.deviceRegistrationUrl
+		var keyUri = URI.create(hubConfig.devicesResourceUrl + deviceId);
 		var deviceKey = keyPair.getPublic().getEncoded();
 		var dto = new CreateDeviceDto();
 		dto.id = deviceId;
