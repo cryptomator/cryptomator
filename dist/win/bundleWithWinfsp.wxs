@@ -12,14 +12,15 @@
         <!-- for definition of the standard themes, see https://github.com/wixtoolset/wix3/blob/master/src/ext/BalExtension/wixstdba/Resources/-->
         <BootstrapperApplicationRef Id="WixStandardBootstrapperApplication.RtfLargeLicense">
             <!-- see https://wixtoolset.org/documentation/manual/v3/xsd/bal/wixstandardbootstrapperapplication.html -->
-            <!-- Possible Attributes: LaunchTarget, LocalizationFile, LogoFile, LogoSideFile, ThemeFile -->
+            <!-- Possible Attributes: LaunchTarget, LocalizationFile, LogoSideFile -->
             <bal:WixStandardBootstrapperApplication
                 LicenseFile="resources/license.rtf"
                 ShowVersion="yes"
                 SuppressOptionsUI="yes"
-                ThemeFile="resources/RtfLargeTheme.xml"
+                ThemeFile="resources/customBootstrapperTheme.xml"
                 LogoFile="resources/logo@64x64.png"
             />
+            <Payload SourceFile="resources\logoSide.png" />
         </BootstrapperApplicationRef>
         <Chain>
             <!-- see https://wixtoolset.org/documentation/manual/v3/xsd/wix/msipackage.html-->
