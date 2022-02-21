@@ -31,6 +31,12 @@ $copyright = "(C) 2016 - 2022 Skymatic GmbH"
 &mvn -B -f $buildDir/../../pom.xml clean package -DskipTests -Pwin
 Copy-Item "$buildDir\..\..\target\cryptomator-*.jar" -Destination "$buildDir\..\..\target\mods"
 
+#Create RTF license
+&mvn -B -f $buildDir/../../pom.xml license:add-third-party `
+ "-Dlicense.thirdPartyFilename=license.rtf" `
+ "-Dlicense.fileTemplate=$buildDir\resources\licenseTemplateRtf.ftl" `
+ "-Dlicense.outputDirectory=$buildDir\resources\"
+
 # add runtime
 $runtimeImagePath = '.\runtime'
 if ($clean -and (Test-Path -Path $runtimeImagePath)) {
