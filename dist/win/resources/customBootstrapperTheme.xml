@@ -56,12 +56,12 @@
         <Button Name="FilesInUseCancelButton" X="-11" Y="-11" Width="75" Height="23" TabStop="yes" FontId="0">#(loc.FilesInUseCancelButton)</Button>
     </Page>
     <Page Name="Progress">
-        <Image X="11" Y="11" Width="64" Height="64" ImageFile="logo.png" />
-        <Text X="80" Y="11" Width="-11" Height="64" FontId="1" DisablePrefix="yes">#(loc.Title)</Text>
+        <Text X="80" Y="11" Width="-11" Height="32" FontId="1" DisablePrefix="yes">#(loc.Title)</Text>
+        <Image X="11" Y="11" Width="64" Height="64" ImageFile="logo.png"/>
         <Text X="11" Y="80" Width="-11" Height="30" FontId="2" DisablePrefix="yes">#(loc.ProgressHeader)</Text>
-        <Text X="11" Y="121" Width="70" Height="17" FontId="3" DisablePrefix="yes">#(loc.ProgressLabel)</Text>
-        <Text Name="OverallProgressPackageText" X="85" Y="121" Width="-11" Height="17" FontId="3" DisablePrefix="yes">#(loc.OverallProgressPackageText)</Text>
-        <Progressbar Name="OverallCalculatedProgressbar" X="11" Y="143" Width="-11" Height="15" />
+        <Text X="11" Y="141" Width="70" Height="17" FontId="3" DisablePrefix="yes">#(loc.ProgressLabel)</Text>
+        <Text Name="OverallProgressPackageText" X="85" Y="141" Width="-11" Height="17" FontId="3" DisablePrefix="yes">#(loc.OverallProgressPackageText)</Text>
+        <Progressbar Name="OverallCalculatedProgressbar" X="11" Y="163" Width="-11" Height="20" />
         <Button Name="ProgressCancelButton" X="-11" Y="-11" Width="75" Height="23" TabStop="yes" FontId="0">#(loc.ProgressCancelButton)</Button>
     </Page>
     <Page Name="Modify">
@@ -73,27 +73,27 @@
         <Button Name="ModifyCancelButton" X="-11" Y="-11" Width="75" Height="23" TabStop="yes" FontId="0">#(loc.ModifyCloseButton)</Button>
     </Page>
     <Page Name="Success">
-        <Image X="11" Y="11" Width="64" Height="64" ImageFile="logo.png" />
-        <Text X="80" Y="11" Width="-11" Height="64" FontId="1" DisablePrefix="yes">#(loc.Title)</Text>
-        <Text Name="SuccessHeader" X="11" Y="80"  Width="-11" Height="30" FontId="2" HideWhenDisabled="yes" DisablePrefix="yes">#(loc.SuccessHeader)</Text>
-        <Text Name="SuccessInstallHeader" X="11" Y="80" Width="-11" Height="30" FontId="2" HideWhenDisabled="yes" DisablePrefix="yes">#(loc.SuccessInstallHeader)</Text>
-        <Text Name="SuccessRepairHeader" X="11" Y="80" Width="-11" Height="30" FontId="2" HideWhenDisabled="yes" DisablePrefix="yes">#(loc.SuccessRepairHeader)</Text> 	
-        <Text Name="SuccessUninstallHeader" X="11" Y="80" Width="-11" Height="30" FontId="2" HideWhenDisabled="yes" DisablePrefix="yes">#(loc.SuccessUninstallHeader)</Text> 
+        <Text X="185" Y="11" Width="-11" Height="32" FontId="1" DisablePrefix="yes">#(loc.Title)</Text>
+        <Image X="11" Y="11" Width="165" Height="400" ImageFile="logoside.png"/>
+        <Text Name="SuccessHeader" X="185" Y="50" Width="-11" Height="30" FontId="2" HideWhenDisabled="yes" DisablePrefix="yes">#(loc.SuccessHeader)</Text>
+        <Text Name="SuccessInstallHeader" X="185" Y="50" Width="-11" Height="100" FontId="2" HideWhenDisabled="yes" DisablePrefix="yes">#(loc.SuccessInstallHeader)</Text>
+        <Text Name="SuccessRepairHeader" X="185" Y="50" Width="-11" Height="100" FontId="2" HideWhenDisabled="yes" DisablePrefix="yes">#(loc.SuccessRepairHeader)</Text>
+        <Text Name="SuccessUninstallHeader" X="185" Y="50" Width="-11" Height="30" FontId="2" HideWhenDisabled="yes" DisablePrefix="yes">#(loc.SuccessUninstallHeader)</Text>
         <Button Name="LaunchButton" X="-91" Y="-11" Width="75" Height="23" TabStop="yes" FontId="0" HideWhenDisabled="yes">#(loc.SuccessLaunchButton)</Button>
-        <Text Name="SuccessRestartText" X="-11" Y="-51" Width="400" Height="34" FontId="3" HideWhenDisabled="yes" DisablePrefix="yes">#(loc.SuccessRestartText)</Text>
+        <Text Name="SuccessRestartText" X="185" Y="-51" Width="400" Height="34" FontId="3" HideWhenDisabled="yes" DisablePrefix="yes">#(loc.SuccessRestartText)</Text>
         <Button Name="SuccessRestartButton" X="-91" Y="-11" Width="75" Height="23" TabStop="yes" FontId="0" HideWhenDisabled="yes">#(loc.SuccessRestartButton)</Button>
         <Button Name="SuccessCancelButton" X="-11" Y="-11" Width="75" Height="23" TabStop="yes" FontId="0">#(loc.SuccessCloseButton)</Button>
     </Page>
     <Page Name="Failure">
-        <Image X="11" Y="11" Width="64" Height="64" ImageFile="logo.png" />
-        <Text X="80" Y="11" Width="-11" Height="64" FontId="1" DisablePrefix="yes">#(loc.Title)</Text>
-        <Text Name="FailureHeader" X="11" Y="80" Width="-11" Height="30" FontId="2" HideWhenDisabled="yes" DisablePrefix="yes">#(loc.FailureHeader)</Text>
-        <Text Name="FailureInstallHeader" X="11" Y="80" Width="-11" Height="30" FontId="2" HideWhenDisabled="yes" DisablePrefix="yes">#(loc.FailureInstallHeader)</Text>
-        <Text Name="FailureUninstallHeader" X="11" Y="80" Width="-11" Height="30" FontId="2" HideWhenDisabled="yes" DisablePrefix="yes">#(loc.FailureUninstallHeader)</Text>
-        <Text Name="FailureRepairHeader" X="11" Y="80" Width="-11" Height="30" FontId="2" HideWhenDisabled="yes" DisablePrefix="yes">#(loc.FailureRepairHeader)</Text>		
-        <Hypertext Name="FailureLogFileLink" X="11" Y="121" Width="-11" Height="42" FontId="3" TabStop="yes" HideWhenDisabled="yes">#(loc.FailureHyperlinkLogText)</Hypertext>
-        <Hypertext Name="FailureMessageText" X="22" Y="163" Width="-11" Height="51" FontId="3" TabStop="yes" HideWhenDisabled="yes" />
-        <Text Name="FailureRestartText" X="-11" Y="-51" Width="400" Height="34" FontId="3" HideWhenDisabled="yes" DisablePrefix="yes">#(loc.FailureRestartText)</Text>
+        <Text X="185" Y="11" Width="-11" Height="32" FontId="1" DisablePrefix="yes">#(loc.Title)</Text>
+        <Image X="11" Y="11" Width="165" Height="400" ImageFile="logoside.png"/>
+        <Text Name="FailureHeader" X="185" Y="50" Width="-11" Height="30" FontId="2" HideWhenDisabled="yes" DisablePrefix="yes">#(loc.FailureHeader)</Text>
+        <Text Name="FailureInstallHeader" X="185" Y="50" Width="-11" Height="30" FontId="2" HideWhenDisabled="yes" DisablePrefix="yes">#(loc.FailureInstallHeader)</Text>
+        <Text Name="FailureUninstallHeader" X="185" Y="50" Width="-11" Height="30" FontId="2" HideWhenDisabled="yes" DisablePrefix="yes">#(loc.FailureUninstallHeader)</Text>
+        <Text Name="FailureRepairHeader" X="185" Y="50" Width="-11" Height="30" FontId="2" HideWhenDisabled="yes" DisablePrefix="yes">#(loc.FailureRepairHeader)</Text>
+        <Hypertext Name="FailureLogFileLink" X="185" Y="121" Width="-11" Height="68" FontId="3" TabStop="yes" HideWhenDisabled="yes">#(loc.FailureHyperlinkLogText)</Hypertext>
+        <Hypertext Name="FailureMessageText" X="185" Y="-115" Width="-11" Height="80" FontId="3" TabStop="yes" HideWhenDisabled="yes" />
+        <Text Name="FailureRestartText" X="185" Y="-57" Width="-11" Height="80" FontId="3" HideWhenDisabled="yes" DisablePrefix="yes">#(loc.FailureRestartText)</Text>
         <Button Name="FailureRestartButton" X="-91" Y="-11" Width="75" Height="23" TabStop="yes" FontId="0" HideWhenDisabled="yes">#(loc.FailureRestartButton)</Button>
         <Button Name="FailureCloseButton" X="-11" Y="-11" Width="75" Height="23" TabStop="yes" FontId="0">#(loc.FailureCloseButton)</Button>
     </Page>
