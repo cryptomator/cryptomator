@@ -31,5 +31,9 @@ Cryptomator uses ${dependencyMap?size} third-party dependencies under the follow
 </#list>
 
 Cryptomator uses other third-party assets under the following licenses:
-SIL OFL 1.1 License:
-- Font Awesome 5.12.0 (https://fontawesome.com/)
+    SIL OFL 1.1 License:
+        - Font Awesome 5.12.0 (https://fontawesome.com/)
+
+Cryptomator dynamically links to third-party libraries under the following license:
+    Uncategorized License:
+        - WinFsp - Windows File System Proxy, Copyright (C) Bill Zissimopoulos (https://github.com/billziss-gh/winfsp)
