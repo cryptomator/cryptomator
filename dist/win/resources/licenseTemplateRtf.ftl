@@ -33,6 +33,7 @@ You should have received a copy of the GNU General Public License along with thi
 \par
 \b Cryptomator uses other third-party assets under the following licenses:\b0\par
 \tab SIL OFL 1.1 License:\par
+\par
 \tab\tab - Font Awesome 5.12.0 ({{\field{\*\fldinst{HYPERLINK https://fontawesome.com/ }}{\fldrslt{https://fontawesome.com/\ul0\cf0}}}}\f0\fs16 )\b\par
 \b Cryptomator dynamically links to third-party libraries under the following license:\b0\par
 \tab Uncategorized License:\par

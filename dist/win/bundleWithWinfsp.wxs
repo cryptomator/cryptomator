@@ -1,9 +1,5 @@
 <?xml version="1.0"?>
 
-<!-- Questions:
-    * How to handle the different Licenses? One way is to show the different installer
--->
-
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:bal="http://schemas.microsoft.com/wix/BalExtension">
     <!-- see https://wixtoolset.org/documentation/manual/v3/xsd/wix/bundle.html-->
     <!-- Attributes explicitly not used:
@@ -11,36 +7,35 @@
     -->
     <Bundle Name="Cryptomator Bundle" UpgradeCode="29eea626-2e5b-4449-b5f8-4602925ddf7b" Version="$(var.BundleVersion)" Manufacturer="$(var.BundleVendor)"
      AboutUrl="$(var.AboutUrl)" HelpUrl="$(var.HelpUrl)" UpdateUrl="$(var.UpdateUrl)" Copyright="$(var.BundleCopyright)" IconSourceFile="resources/Cryptomator.ico"
-     DisableModify="yes" DisableRemove="yes" SplashScreenSourceFile="resources/logo.png">
-        <!-- for definition of the HyperlinkSidebarTheme, see https://github.com/wixtoolset/wix3/blob/c02e48ec301a60eba88a3b519d47e88eeaa4c978/src/ext/BalExtension/wixstdba/Resources/HyperlinkSidebarTheme.xml-->
-        <BootstrapperApplicationRef Id="WixStandardBootstrapperApplication.HyperlinkSidebarLicense">
-            <!-- see https://wixtoolset.org/documentation/manual/v3/xsd/bal/wixstandardbootstrapperapplication.html-->
-            <!-- Possible Attributes: LaunchTarget, LocalizationFile, LogoFile, LogoSideFile, ThemeFile-->
+     DisableModify="yes" DisableRemove="yes">
+
+        <!-- for definition of the standard themes, see https://github.com/wixtoolset/wix3/blob/master/src/ext/BalExtension/wixstdba/Resources/-->
+        <BootstrapperApplicationRef Id="WixStandardBootstrapperApplication.RtfLargeLicense">
+            <!-- see https://wixtoolset.org/documentation/manual/v3/xsd/bal/wixstandardbootstrapperapplication.html -->
+            <!-- Possible Attributes: LaunchTarget, LocalizationFile, LogoFile, LogoSideFile, ThemeFile -->
             <bal:WixStandardBootstrapperApplication
-                LicenseUrl="http://example.com/license.html"
+                LicenseFile="resources/license.rtf"
                 ShowVersion="yes"
                 SuppressOptionsUI="yes"
+                ThemeFile="resources/RtfLargeTheme.xml"
+                LogoFile="resources/logo@64x64.png"
             />
         </BootstrapperApplicationRef>
         <Chain>
-            <!-- TODO: remove old innosetup installation-->
-
             <!-- see https://wixtoolset.org/documentation/manual/v3/xsd/wix/msipackage.html-->
             <MsiPackage
                 SourceFile="installer/Cryptomator-$(var.AppVersion).msi"
                 CacheId="cryptomator-bundle-cryptomator"
-                DisplayInternalUI="yes"
+                DisplayInternalUI="no"
                 Visible="yes"
             />
             <MsiPackage
                 SourceFile="resources/winfsp-1.10.22006.msi"
                 CacheId="cryptomator-bundle-winfsp"
                 Visible="yes"
+                DisplayInternalUI="no"
                 Vital="no"
             />
-            <!-- Use DownloadUrl attribute in MsiPackge Element-->
-
-
         </Chain>
     </Bundle>
 </Wix>
