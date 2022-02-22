@@ -17,7 +17,7 @@
                 ShowVersion="yes"
                 SuppressOptionsUI="yes"
                 ThemeFile="resources\customBootstrapperTheme.xml"
-                LogoFile="resources\logo@64x64.png"
+                LogoFile="resources\logo.png"
                 LocalizationFile="resources\customBootstrapperTheme.wxl"
             />
             <Payload SourceFile="resources\logoSide.png" />
