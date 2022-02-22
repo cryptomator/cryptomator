@@ -31,7 +31,7 @@
                 Visible="no"
             />
             <MsiPackage
-                SourceFile="resources\winfsp-1.10.22006.msi"
+                SourceFile="$(var.WinFspMsiPath)"
                 CacheId="cryptomator-bundle-winfsp"
                 Visible="yes"
                 DisplayInternalUI="no"
