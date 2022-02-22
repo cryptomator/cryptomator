@@ -25,8 +25,8 @@
         <Image X="11" Y="11" Width="165" Height="400" ImageFile="logoside.png"/>
         <Text X="185" Y="50" Width="-11" Height="32" FontId="2" DisablePrefix="yes">#(loc.InstallHeader)</Text>
         <Text X="185" Y="91" Width="-11" Height="64" FontId="3" DisablePrefix="yes">#(loc.InstallMessage)</Text>
-        <Richedit Name="EulaRichedit" X="185" Y="121" Width="-12" Height="-70" HexStyle="0x00800000" TabStop="yes" FontId="0" />
-        <Checkbox Name="EulaAcceptCheckbox" X="185" Y="-51" Width="-11" Height="17" TabStop="yes" FontId="3" HideWhenDisabled="yes">#(loc.InstallAcceptCheckbox)</Checkbox>
+        <Richedit Name="EulaRichedit" X="185" Y="131" Width="-12" Height="-65" HexStyle="0x00800000" TabStop="yes" FontId="0" />
+        <Checkbox Name="EulaAcceptCheckbox" X="185" Y="-46" Width="-11" Height="17" TabStop="yes" FontId="3" HideWhenDisabled="yes">#(loc.InstallAcceptCheckbox)</Checkbox>
         <!--Button Name="OptionsButton" X="-171" Y="-11" Width="75" Height="23" TabStop="yes" FontId="0" HideWhenDisabled="yes">#(loc.InstallOptionsButton)</Button-->
         <Text Name="InstallVersion" X="185" Y="-11" Width="-11" Height="17" FontId="3" DisablePrefix="yes" HideWhenDisabled="yes">#(loc.InstallVersion)</Text>
         <Button Name="InstallButton" X="-91" Y="-11" Width="75" Height="23" TabStop="yes" FontId="0">#(loc.InstallInstallButton)</Button>
