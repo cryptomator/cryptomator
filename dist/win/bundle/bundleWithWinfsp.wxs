@@ -6,21 +6,21 @@
         Condition - the single msi files have their own install conditions, no need to copy them here
     -->
     <Bundle Name="Cryptomator" UpgradeCode="29eea626-2e5b-4449-b5f8-4602925ddf7b" Version="$(var.BundleVersion)" Manufacturer="$(var.BundleVendor)"
-     AboutUrl="$(var.AboutUrl)" HelpUrl="$(var.HelpUrl)" UpdateUrl="$(var.UpdateUrl)" Copyright="$(var.BundleCopyright)" IconSourceFile="resources\Cryptomator.ico">
+     AboutUrl="$(var.AboutUrl)" HelpUrl="$(var.HelpUrl)" UpdateUrl="$(var.UpdateUrl)" Copyright="$(var.BundleCopyright)" IconSourceFile="bundle\resources\Cryptomator.ico">
 
         <!-- for definition of the standard themes, see https://github.com/wixtoolset/wix3/blob/master/src/ext/BalExtension/wixstdba/Resources/-->
         <BootstrapperApplicationRef Id="WixStandardBootstrapperApplication.RtfLargeLicense">
             <!-- see https://wixtoolset.org/documentation/manual/v3/xsd/bal/wixstandardbootstrapperapplication.html -->
             <!-- Possible Attributes: LaunchTarget -->
             <bal:WixStandardBootstrapperApplication
-                LicenseFile="resources\license.rtf"
+                LicenseFile="bundle\resources\license.rtf"
                 ShowVersion="yes"
                 SuppressOptionsUI="yes"
-                ThemeFile="resources\customBootstrapperTheme.xml"
-                LogoFile="resources\logo.png"
-                LocalizationFile="resources\customBootstrapperTheme.wxl"
+                ThemeFile="bundle\customBootstrapperTheme.xml"
+                LocalizationFile="bundle\customBootstrapperTheme.wxl"
+                LogoFile="bundle\resources\logo.png"
             />
-            <Payload SourceFile="resources\logoSide.png" />
+            <Payload SourceFile="bundle\resources\logoSide.png" />
         </BootstrapperApplicationRef>
         <Chain>
             <!-- see https://wixtoolset.org/documentation/manual/v3/xsd/wix/msipackage.html-->

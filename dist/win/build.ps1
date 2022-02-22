@@ -36,6 +36,7 @@ Copy-Item "$buildDir\..\..\target\cryptomator-*.jar" -Destination "$buildDir\..\
  "-Dlicense.thirdPartyFilename=license.rtf" `
  "-Dlicense.fileTemplate=$buildDir\resources\licenseTemplateRtf.ftl" `
  "-Dlicense.outputDirectory=$buildDir\resources\"
+Copy-Item -Force -Path "$buildDir\resources\license.rtf" -Destination "$buildDir\bundle\resources"
 
 # add runtime
 $runtimeImagePath = '.\runtime'
@@ -117,7 +118,7 @@ $Env:JP_WIXWIZARD_RESOURCES = "$buildDir\resources"
 	--file-associations resources/FAvaultFile.properties
 
 # create bundle including winfsp
-& "$env:WIX\bin\candle.exe" bundlewithWinfsp.wxs -ext WixBalExtension -out tmp\ `
+& "$env:WIX\bin\candle.exe" .\bundle\bundlewithWinfsp.wxs -ext WixBalExtension -out tmp\ `
 	-dBundleVersion="$semVerNo.$revisionNo" `
 	-dBundleVendor="$vendor" `
 	-dBundleCopyright="$copyright" `
