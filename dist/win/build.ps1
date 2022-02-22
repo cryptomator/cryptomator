@@ -117,6 +117,8 @@ $Env:JP_WIXWIZARD_RESOURCES = "$buildDir\resources"
 	--license-file resources/license.rtf `
 	--file-associations resources/FAvaultFile.properties
 
+# copy license to bundle
+Copy-Item -Force -Path "$buildDir\resources\license.rtf" -Destination "$buildDir\bundle\resources"
 
 # download Winfsp
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
