@@ -107,7 +107,7 @@ class AuthFlow implements AutoCloseable {
 
 	private String token(PKCE pkce, String authCode) throws IOException, InterruptedException {
 		var params = Map.of("grant_type", "authorization_code", //
-				"client_id", "cryptomator-hub", // TODO
+				"client_id", clientId, //
 				"redirect_uri", receiver.getRedirectUri(), //
 				"code", authCode, //
 				"code_verifier", pkce.verifier //
