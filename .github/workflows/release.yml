@@ -503,6 +503,7 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: ${{ env.JAVA_VERSION }}
+          cache: 'maven'
       - name: Patch Application Directory
         run: |
           cp dist/win/contrib/* appdir/Cryptomator
@@ -519,6 +520,12 @@ jobs:
           timestampUrl: 'http://timestamp.digicert.com'
           folder: appdir/Cryptomator
           recursive: true
+      - name: Generate license
+        run: >
+          mvn -B license:add-third-party
+          "-Dlicense.thirdPartyFilename=license.rtf"
+          "-Dlicense.fileTemplate=dist/win//resources/licenseTemplate.ftl"
+          "-Dlicense.outputDirectory=dist/win/resources"
       - name: Create MSI
         run: >
           ${JAVA_HOME}/bin/jpackage
@@ -560,12 +567,76 @@ jobs:
           if-no-files-found: error
 
 #
+# Windows Cryptomator.exe bundle
+#
+  win-exe:
+    name: Build Cryptomator.exe bundle
+    runs-on: windows-latest
+    needs: [win-msi, metadata]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Download Windows msi
+        uses: actions/download-artifact@v2
+        with:
+          name: win-msi
+          path: dist/win/bundle/resources
+      - name: Strip version info from msi file name
+        run: mv dist/win/bundle/resources/Cryptomator*.msi dist/win/bundle/resources/Cryptomator.msi
+      - uses: actions/setup-java@v2
+        with:
+          distribution: 'temurin'
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: 'maven'
+      - name: Generate license
+        run: >
+          mvn -B license:add-third-party
+          "-Dlicense.thirdPartyFilename=license.rtf"
+          "-Dlicense.fileTemplate=dist/win/bundle/resources/licenseTemplate.ftl"
+          "-Dlicense.outputDirectory=dist/win/bundle/resources"
+      - name: Download winfsp
+        run:
+          curl --output dist/win/bundle/resources/winfsp.msi -L https://github.com/billziss-gh/winfsp/releases/download/v1.10/winfsp-1.10.22006.msi
+      - name: Compile to wixObj file
+        run: >
+          "${WIX}/bin/candle.exe" dist/win/bundle/bundleWithWinfsp.wxs
+          -ext WixBalExtension
+          -out dist/win/bundle/
+          -dBundleVersion="${{ needs.metadata.outputs.semVerNum }}.${{ needs.metadata.outputs.revNum }}"
+          -dBundleVendor="Skymatic GmbH"
+          -dBundleCopyright="(C) 2016 - 2022 Skymatic GmbH"
+          -dAboutUrl="https://cryptomator.org"
+          -dHelpUrl="https://cryptomator.org/contact"
+          -dUpdateUrl="https://cryptomator.org/downloads/"
+      - name: Create executable with linker
+        run: >
+          "${WIX}/bin/light.exe" -b dist/win/ dist/win/bundle/bundleWithWinfsp.wixobj
+          -ext WixBalExtension
+          -out installer/Cryptomator.exe
+      - name: Codesign EXE
+        uses: skymatic/code-sign-action@v1
+        with:
+          certificate: ${{ secrets.WIN_CODESIGN_P12_BASE64 }}
+          password: ${{ secrets.WIN_CODESIGN_P12_PW }}
+          certificatesha1: FF52240075AD7D14AF25629FDF69635357C7D14B
+          description: Cryptomator Installer
+          timestampUrl: 'http://timestamp.digicert.com'
+          folder: installer
+      - name: Add possible alpha/beta tags to installer name
+        run: mv installer/Cryptomator.exe installer/Cryptomator-${{ needs.metadata.outputs.semVerStr }}-x64.exe
+      - name: Upload win-exe
+        uses: actions/upload-artifact@v2
+        with:
+          name: win-exe
+          path: installer/*.exe
+          if-no-files-found: error
+
+#
 # Release
 #
   release:
     name: Draft a release on Github
     runs-on: ubuntu-latest
-    needs: [metadata,linux-appimage,mac-dmg,win-msi,ppa]
+    needs: [metadata,linux-appimage,mac-dmg,win-exe,ppa]
     if: startsWith(github.ref, 'refs/tags/') && github.repository == 'cryptomator/cryptomator'
     steps:
       - uses: actions/checkout@v2
@@ -583,10 +654,14 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: win-msi
+      - name: Download Windows exe
+        uses: actions/download-artifact@v2
+        with:
+          name: win-exe
       - name: Create detached GPG signature for all release files with key 615D449FE6E6A235
         run: |
           echo "${GPG_PRIVATE_KEY}" | gpg --batch --quiet --import
-          for FILE in `find . -name "*.AppImage" -o -name "*.dmg" -o -name "*.msi" -o -name "*.zsync" -o -name "*.tar.gz"`; do
+          for FILE in `find . -name "*.AppImage" -o -name "*.dmg" -o -name "*.msi" -o -name "*.exe" -o -name "*.zsync" -o -name "*.tar.gz"`; do
             echo "${GPG_PASSPHRASE}" | gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign -a ${FILE}
           done
         env:
@@ -594,7 +669,7 @@ jobs:
           GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
       - name: Compute SHA256 checksums of release artifacts
         run: |
-          SHA256_SUMS=`find . -name "*.AppImage" -o -name "*.dmg" -o -name "*.msi" -o -name "*.tar.gz" | xargs sha256sum`
+          SHA256_SUMS=`find . -name "*.AppImage" -o -name "*.dmg" -o -name "*.msi" -o -name "*.exe" -o -name "*.tar.gz" | xargs sha256sum`
           echo "SHA256_SUMS<<EOF" >> $GITHUB_ENV
           echo "${SHA256_SUMS}" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
@@ -612,6 +687,7 @@ jobs:
             *.asc
             *.dmg
             *.msi
+            *.exe
           body: |-
             :construction: Work in Progress
             ## What's New
