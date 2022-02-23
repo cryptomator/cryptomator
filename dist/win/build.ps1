@@ -126,10 +126,9 @@ $Env:JP_WIXWIZARD_RESOURCES = "$buildDir\resources"
 # download Winfsp
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 $ProgressPreference = 'SilentlyContinue' # disables Invoke-WebRequest's progress bar, which slows down downloads to a few bytes/s
-$winfspMsiPath = ".\bundle\resources\winfsp.msi"
 $winfspMsiUrl = "https://github.com/billziss-gh/winfsp/releases/download/v1.10/winfsp-1.10.22006.msi"
 Write-Output "Downloading ${winfspMsiUrl}..."
-Invoke-WebRequest $winfspMsiUrl -OutFile $winfspMsiPath
+Invoke-WebRequest $winfspMsiUrl -OutFile ".\bundle\resources\winfsp.msi" # redirects are followed by default
 
 # create bundle including winfsp
 & "$env:WIX\bin\candle.exe" .\bundle\bundleWithWinfsp.wxs -ext WixBalExtension -out bundle\ `
@@ -138,7 +137,5 @@ Invoke-WebRequest $winfspMsiUrl -OutFile $winfspMsiPath
 	-dBundleCopyright="$copyright" `
 	-dAboutUrl="$aboutUrl" `
 	-dHelpUrl="$helpUrl" `
-	-dUpdateUrl="$updateUrl" `
-	-dAppVersion="$semVerNo" `
-	-dWinFspMsiPath="$winfspMsiPath"
+	-dUpdateUrl="$updateUrl"
 & "$env:WIX\bin\light.exe" -b . .\bundle\BundlewithWinfsp.wixobj -ext WixBalExtension -out installer\CryptomatorBundle.exe

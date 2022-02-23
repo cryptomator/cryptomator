@@ -25,13 +25,13 @@
         <Chain>
             <!-- see https://wixtoolset.org/documentation/manual/v3/xsd/wix/msipackage.html-->
             <MsiPackage
-                SourceFile="installer\Cryptomator-$(var.AppVersion).msi"
+                SourceFile="resources\Cryptomator.msi"
                 CacheId="cryptomator-bundle-cryptomator"
                 DisplayInternalUI="no"
                 Visible="no"
             />
             <MsiPackage
-                SourceFile="$(var.WinFspMsiPath)"
+                SourceFile="resources\winfsp.msi"
                 CacheId="cryptomator-bundle-winfsp"
                 Visible="yes"
                 DisplayInternalUI="no"
