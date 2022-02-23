@@ -578,9 +578,9 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: win-msi
-          path: /dist/win/bundle/resources
+          path: dist/win/bundle/resources
       - name: Strip version info from msi file name
-        run: mv /dist/win/bundle/resources/Cryptomator*.msi /dist/win/bundle/resources/Cryptomator.msi
+        run: mv dist/win/bundle/resources/Cryptomator*.msi dist/win/bundle/resources/Cryptomator.msi
       - uses: actions/setup-java@v2
         with:
           distribution: 'temurin'
@@ -589,7 +589,7 @@ jobs:
         run: >
           mvn -B license:add-third-party
           "-Dlicense.thirdPartyFilename=license.rtf"
-          "-Dlicense.fileTemplate=dist/win//resources/bundle/licenseTemplate.ftl"
+          "-Dlicense.fileTemplate=dist/win/resources/bundle/licenseTemplate.ftl"
           "-Dlicense.outputDirectory=dist/win/bunde/resources"
       - name: Download winfsp
         run:
