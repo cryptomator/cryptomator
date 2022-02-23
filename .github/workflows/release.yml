@@ -571,7 +571,7 @@ jobs:
   win-bundle:
     name: Build Cryptomator.exe bundle
     runs-on: windows-latest
-    needs: [win-msi]
+    needs: [win-msi, metadata]
     steps:
       - uses: actions/checkout@v2
       - name: Download Windows msi
@@ -634,7 +634,7 @@ jobs:
   release:
     name: Draft a release on Github
     runs-on: ubuntu-latest
-    needs: [metadata,linux-appimage,mac-dmg,win-msi,ppa]
+    needs: [metadata,linux-appimage,mac-dmg,win-exe,ppa]
     if: startsWith(github.ref, 'refs/tags/') && github.repository == 'cryptomator/cryptomator'
     steps:
       - uses: actions/checkout@v2
