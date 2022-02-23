@@ -503,6 +503,7 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: ${{ env.JAVA_VERSION }}
+          cache: 'maven'
       - name: Patch Application Directory
         run: |
           cp dist/win/contrib/* appdir/Cryptomator
@@ -585,12 +586,13 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: ${{ env.JAVA_VERSION }}
+          cache: 'maven'
       - name: Generate license
         run: >
           mvn -B license:add-third-party
           "-Dlicense.thirdPartyFilename=license.rtf"
-          "-Dlicense.fileTemplate=dist/win/resources/bundle/licenseTemplate.ftl"
-          "-Dlicense.outputDirectory=dist/win/bunde/resources"
+          "-Dlicense.fileTemplate=dist/win/bundle/resources/licenseTemplate.ftl"
+          "-Dlicense.outputDirectory=dist/win/bundle/resources"
       - name: Download winfsp
         run:
           curl --output dist/win/bundle/resources/winfsp.msi -L https://github.com/billziss-gh/winfsp/releases/download/v1.10/winfsp-1.10.22006.msi
