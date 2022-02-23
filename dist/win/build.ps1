@@ -31,13 +31,6 @@ $copyright = "(C) 2016 - 2022 Skymatic GmbH"
 &mvn -B -f $buildDir/../../pom.xml clean package -DskipTests -Pwin
 Copy-Item "$buildDir\..\..\target\cryptomator-*.jar" -Destination "$buildDir\..\..\target\mods"
 
-#Create RTF license
-&mvn -B -f $buildDir/../../pom.xml license:add-third-party `
- "-Dlicense.thirdPartyFilename=license.rtf" `
- "-Dlicense.fileTemplate=$buildDir\resources\licenseTemplateRtf.ftl" `
- "-Dlicense.outputDirectory=$buildDir\resources\"
-Copy-Item -Force -Path "$buildDir\resources\license.rtf" -Destination "$buildDir\bundle\resources"
-
 # add runtime
 $runtimeImagePath = '.\runtime'
 if ($clean -and (Test-Path -Path $runtimeImagePath)) {
@@ -87,6 +80,12 @@ if ($clean -and (Test-Path -Path $appPath)) {
 	--resource-dir resources `
 	--icon resources/Cryptomator.ico
 
+#Create RTF license for msi
+&mvn -B -f $buildDir/../../pom.xml license:add-third-party `
+ "-Dlicense.thirdPartyFilename=license.rtf" `
+ "-Dlicense.fileTemplate=$buildDir\resources\licenseTemplate.ftl" `
+ "-Dlicense.outputDirectory=$buildDir\resources\"
+
 # patch app dir
 Copy-Item "contrib\*" -Destination "Cryptomator"
 attrib -r "Cryptomator\Cryptomator.exe"
@@ -117,8 +116,12 @@ $Env:JP_WIXWIZARD_RESOURCES = "$buildDir\resources"
 	--license-file resources/license.rtf `
 	--file-associations resources/FAvaultFile.properties
 
-# copy license to bundle
-Copy-Item -Force -Path "$buildDir\resources\license.rtf" -Destination "$buildDir\bundle\resources"
+#Create RTF license for bundle
+#TODO: actually we should patch also the third-party-file in the Cryptomator jar
+&mvn -B -f $buildDir/../../pom.xml license:add-third-party `
+ "-Dlicense.thirdPartyFilename=license.rtf" `
+ "-Dlicense.fileTemplate=$buildDir\bundle\resources\licenseTemplate.ftl" `
+ "-Dlicense.outputDirectory=$buildDir\bundle\resources\"
 
 # download Winfsp
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
@@ -129,7 +132,7 @@ Write-Output "Downloading ${winfspMsiUrl}..."
 Invoke-WebRequest $winfspMsiUrl -OutFile $winfspMsiPath
 
 # create bundle including winfsp
-& "$env:WIX\bin\candle.exe" .\bundle\bundlewithWinfsp.wxs -ext WixBalExtension -out bundle\ `
+& "$env:WIX\bin\candle.exe" .\bundle\bundleWithWinfsp.wxs -ext WixBalExtension -out bundle\ `
 	-dBundleVersion="$semVerNo.$revisionNo" `
 	-dBundleVendor="$vendor" `
 	-dBundleCopyright="$copyright" `

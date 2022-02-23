@@ -21,14 +21,14 @@ You should have received a copy of the GNU General Public License along with thi
 
 \b Cryptomator uses ${dependencyMap?size} third-party dependencies under the following licenses:\b0\par
 <#list licenseMap as e>
-    <#assign license = e.getKey()/>
-    <#assign projects = e.getValue()/>
-    <#if projects?size &gt; 0>
-    \tab ${license}:\par
-    <#list projects as project>
-        \tab\tab- ${artifactFormat(project)}\par
-    </#list>
-    </#if>
+<#assign license = e.getKey()/>
+<#assign projects = e.getValue()/>
+<#if projects?size &gt; 0>
+\tab ${license}:\par
+<#list projects as project>
+\tab\tab- ${artifactFormat(project)}\par
+</#list>
+</#if>
 </#list>
 \par
 \b Cryptomator uses other third-party assets under the following licenses:\b0\par
