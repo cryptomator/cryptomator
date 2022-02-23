@@ -600,7 +600,7 @@ jobs:
         run: >
           "${WIX}/bin/candle.exe" dist/win/bundle/bundleWithWinfsp.wxs
           -ext WixBalExtension
-          -out bundle/
+          -out dist/win/bundle/
           -dBundleVersion="${{ needs.metadata.outputs.semVerNum }}.${{ needs.metadata.outputs.revNum }}"
           -dBundleVendor="Skymatic GmbH"
           -dBundleCopyright="(C) 2016 - 2022 Skymatic GmbH"
