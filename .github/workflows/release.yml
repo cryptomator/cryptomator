@@ -568,7 +568,7 @@ jobs:
 #
 # Windows Cryptomator.exe bundle
 #
-  win-bundle:
+  win-exe:
     name: Build Cryptomator.exe bundle
     runs-on: windows-latest
     needs: [win-msi, metadata]
