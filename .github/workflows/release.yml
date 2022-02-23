@@ -609,7 +609,7 @@ jobs:
           -dUpdateUrl="https://cryptomator.org/downloads/"
       - name: Create executable with linker
         run: >
-          "${WIX}/bin/light.exe" -b dist/win/ dist/win/bundle/BundlewithWinfsp.wixobj
+          "${WIX}/bin/light.exe" -b dist/win/ dist/win/bundle/bundleWithWinfsp.wixobj
           -ext WixBalExtension
           -out installer/Cryptomator.exe
       - name: Codesign EXE
