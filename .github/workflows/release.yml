@@ -622,7 +622,7 @@ jobs:
           timestampUrl: 'http://timestamp.digicert.com'
           folder: installer
       - name: Add possible alpha/beta tags to installer name
-        run: mv installer/Cryptomator-*.exe installer/Cryptomator-${{ needs.metadata.outputs.semVerStr }}-x64.exe
+        run: mv installer/Cryptomator.exe installer/Cryptomator-${{ needs.metadata.outputs.semVerStr }}-x64.exe
       - name: Upload win-exe
         uses: actions/upload-artifact@v2
         with:
