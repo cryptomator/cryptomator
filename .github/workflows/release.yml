@@ -524,7 +524,7 @@ jobs:
         run: >
           mvn -B license:add-third-party
           "-Dlicense.thirdPartyFilename=license.rtf"
-          "-Dlicense.fileTemplate=dist/win//resources/licenseTemplate.ftl"
+          "-Dlicense.fileTemplate=dist/win/resources/licenseTemplate.ftl"
           "-Dlicense.outputDirectory=dist/win/resources"
       - name: Create MSI
         run: >
@@ -636,7 +636,7 @@ jobs:
   release:
     name: Draft a release on Github
     runs-on: ubuntu-latest
-    needs: [metadata,linux-appimage,mac-dmg,win-exe,ppa]
+    needs: [metadata,linux-appimage,mac-dmg,win-msi,win-exe,ppa]
     if: startsWith(github.ref, 'refs/tags/') && github.repository == 'cryptomator/cryptomator'
     steps:
       - uses: actions/checkout@v2
