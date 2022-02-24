@@ -40,7 +40,7 @@ override_dh_auto_build:
 		--java-options "-Dcryptomator.mountPointsDir=\"~/.local/share/Cryptomator/mnt\"" \
 		--java-options "-Dcryptomator.showTrayIcon=false" \
 		--java-options "-Dcryptomator.buildNumber=\"ppa-${REVISION_NUM}\"" \
-		--java-options "-Dcryptomator.appVersion=\"${VERSION_STR}\"" \
+		--java-options "-Dcryptomator.appVersion=\"${SEMVER_STR}\"" \
 		--app-version "${VERSION_NUM}.${REVISION_NUM}" \
 		--resource-dir resources \
 		--verbose

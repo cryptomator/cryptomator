@@ -1,7 +1,8 @@
 cryptomator usr/lib
 debian/cryptomator.sh usr/lib/cryptomator/bin
-debian/org.cryptomator.Cryptomator.desktop usr/share/applications
-debian/org.cryptomator.Cryptomator.svg usr/share/icons/hicolor/scalable/apps
-debian/org.cryptomator.Cryptomator.png usr/share/icons/hicolor/512x512/apps
-debian/org.cryptomator.Cryptomator.appdata.xml usr/share/metainfo
-debian/cryptomator-vault.xml usr/share/mime/packages
+common/org.cryptomator.Cryptomator.desktop usr/share/applications
+common/org.cryptomator.Cryptomator.svg usr/share/icons/hicolor/scalable/apps
+common/org.cryptomator.Cryptomator256.png usr/share/icons/hicolor/256x256/apps
+common/org.cryptomator.Cryptomator512.png usr/share/icons/hicolor/512x512/apps
+common/org.cryptomator.Cryptomator.appdata.xml usr/share/metainfo
+common/cryptomator-vault.xml usr/share/mime/packages
