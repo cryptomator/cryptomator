@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Copyright (c) .NET Foundation and contributors. All rights reserved. Licensed under the Microsoft Reciprocal License. See LICENSE.TXT file in the project root for full license information. -->
+<!-- adjusted theme based on https://github.com/wixtoolset/wix3/blob/master/src/ext/BalExtension/wixstdba/Resources/HyperlinkSidebarTheme.xml -->
 
 
 <Theme xmlns="http://wixtoolset.org/schemas/thmutil/2010">
@@ -27,20 +28,9 @@
         <Text X="185" Y="91" Width="-11" Height="64" FontId="3" DisablePrefix="yes">#(loc.InstallMessage)</Text>
         <Richedit Name="EulaRichedit" X="185" Y="131" Width="-12" Height="-65" HexStyle="0x00800000" TabStop="yes" FontId="0" />
         <Checkbox Name="EulaAcceptCheckbox" X="185" Y="-46" Width="-11" Height="17" TabStop="yes" FontId="3" HideWhenDisabled="yes">#(loc.InstallAcceptCheckbox)</Checkbox>
-        <!--Button Name="OptionsButton" X="-171" Y="-11" Width="75" Height="23" TabStop="yes" FontId="0" HideWhenDisabled="yes">#(loc.InstallOptionsButton)</Button-->
         <Text Name="InstallVersion" X="185" Y="-11" Width="-11" Height="17" FontId="3" DisablePrefix="yes" HideWhenDisabled="yes">#(loc.InstallVersion)</Text>
         <Button Name="InstallButton" X="-91" Y="-11" Width="75" Height="23" TabStop="yes" FontId="0">#(loc.InstallInstallButton)</Button>
         <Button Name="WelcomeCancelButton" X="-11" Y="-11" Width="75" Height="23" TabStop="yes" FontId="0">#(loc.InstallCloseButton)</Button>
-    </Page>
-    <Page Name="Options">
-        <Image X="11" Y="11" Width="64" Height="64" ImageFile="logo.png" />
-        <Text X="80" Y="11" Width="-11" Height="64" FontId="1" DisablePrefix="yes">#(loc.Title)</Text>
-        <Text X="11" Y="80" Width="-11" Height="30" FontId="2" DisablePrefix="yes">#(loc.OptionsHeader)</Text>
-        <Text X="11" Y="121" Width="-11" Height="17" FontId="3" DisablePrefix="yes">#(loc.OptionsLocationLabel)</Text>
-        <Editbox Name="FolderEditbox" X="11" Y="143" Width="-91" Height="21" TabStop="yes" FontId="3" FileSystemAutoComplete="yes" />
-        <Button Name="BrowseButton" X="-11" Y="142" Width="75" Height="23" TabStop="yes" FontId="3">#(loc.OptionsBrowseButton)</Button>
-        <Button Name="OptionsOkButton" X="-91" Y="-11" Width="75" Height="23" TabStop="yes" FontId="0">#(loc.OptionsOkButton)</Button>
-        <Button Name="OptionsCancelButton" X="-11" Y="-11" Width="75" Height="23" TabStop="yes" FontId="0">#(loc.OptionsCancelButton)</Button>
     </Page>
     <Page Name="FilesInUse">
         <Image X="11" Y="11" Width="64" Height="64" ImageFile="logo.png" />
