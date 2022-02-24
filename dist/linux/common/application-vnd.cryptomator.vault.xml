@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
-  <mime-type type="application/x-vnd.cryptomator-vault-metadata">
+  <mime-type type="application/vnd.cryptomator.vault">
     <comment>Cryptomator Vault Metadata</comment>
     <glob pattern="*.cryptomator"/>
   </mime-type>

@@ -61,7 +61,7 @@ cp ../common/org.cryptomator.Cryptomator512.png Cryptomator.AppDir/usr/share/ico
 cp ../common/org.cryptomator.Cryptomator.svg Cryptomator.AppDir/usr/share/icons/hicolor/scalable/apps/org.cryptomator.Cryptomator.svg
 cp ../common/org.cryptomator.Cryptomator.desktop Cryptomator.AppDir/usr/share/applications/org.cryptomator.Cryptomator.desktop
 cp ../common/org.cryptomator.Cryptomator.appdata.xml Cryptomator.AppDir/usr/share/metainfo/org.cryptomator.Cryptomator.appdata.xml
-cp ../common/cryptomator-vault.xml Cryptomator.AppDir/usr/share/mime/packages/cryptomator-vault.xml
+cp ../common/application-vnd.cryptomator.vault.xml Cryptomator.AppDir/usr/share/mime/packages/application-vnd.cryptomator.vault.xml
 ln -s usr/share/icons/hicolor/scalable/apps/org.cryptomator.Cryptomator.svg Cryptomator.AppDir/org.cryptomator.Cryptomator.svg
 ln -s usr/share/icons/hicolor/scalable/apps/org.cryptomator.Cryptomator.svg Cryptomator.AppDir/Cryptomator.svg
 ln -s usr/share/icons/hicolor/scalable/apps/org.cryptomator.Cryptomator.svg Cryptomator.AppDir/.DirIcon
