@@ -4,6 +4,7 @@ import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.Environment;
 import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.common.settings.VolumeImpl;
+import org.cryptomator.common.vaults.MountPointRequirement;
 import org.cryptomator.common.vaults.Volume;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,9 +13,7 @@ import javax.inject.Inject;
 import java.io.IOException;
 import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.DirectoryStream;
-import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
-import java.nio.file.LinkOption;
 import java.nio.file.NotDirectoryException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -35,7 +34,6 @@ class CustomMountPointChooser implements MountPointChooser {
 
 	@Override
 	public boolean isApplicable(Volume caller) {
-		//Disable if useExperimentalFuse is required (Win + Fuse), but set to false
 		return caller.getImplementationType() != VolumeImpl.FUSE || !SystemUtils.IS_OS_WINDOWS || environment.useExperimentalFuse();
 	}
 
@@ -48,8 +46,16 @@ class CustomMountPointChooser implements MountPointChooser {
 	@Override
 	public boolean prepare(Volume caller, Path mountPoint) throws InvalidMountPointException {
 		switch (caller.getMountPointRequirement()) {
-			case PARENT_NO_MOUNT_POINT -> prepareParentNoMountPoint(mountPoint);
-			case EMPTY_MOUNT_POINT -> prepareEmptyMountPoint(mountPoint);
+			case PARENT_NO_MOUNT_POINT -> {
+				prepareParentNoMountPoint(mountPoint);
+				LOG.debug("Successfully checked custom mount point: {}", mountPoint);
+				return true;
+			}
+			case EMPTY_MOUNT_POINT -> {
+				prepareEmptyMountPoint(mountPoint);
+				LOG.debug("Successfully checked custom mount point: {}", mountPoint);
+				return false;
+			}
 			case NONE -> {
 				//Requirement "NONE" doesn't make any sense here.
 				//No need to prepare/verify a Mountpoint without requiring one...
@@ -60,21 +66,26 @@ class CustomMountPointChooser implements MountPointChooser {
 				throw new InvalidMountPointException(new IllegalStateException("Not implemented"));
 			}
 		}
-		LOG.debug("Successfully checked custom mount point: {}", mountPoint);
-		return false;
 	}
 
 	private void prepareParentNoMountPoint(Path mountPoint) throws InvalidMountPointException {
 		//This the case on Windows when using FUSE
 		//See https://github.com/billziss-gh/winfsp/issues/320
-		Path parent = mountPoint.getParent();
-		if (!Files.isDirectory(parent)) {
-			throw new InvalidMountPointException(new NotDirectoryException(parent.toString()));
-		}
-		//We must use #notExists() here because notExists =/= !exists (see docs)
-		if (!Files.notExists(mountPoint, LinkOption.NOFOLLOW_LINKS)) {
-			//File exists OR can't be determined
-			throw new InvalidMountPointException(new FileAlreadyExistsException(mountPoint.toString()));
+		assert SystemUtils.IS_OS_WINDOWS;
+
+		Path hideaway = getHideaway(mountPoint);
+		if (Files.exists(hideaway)) {
+			LOG.info("Mountpoint {} for winfsp mount seems to be not properly cleaned up. Will be fixed on unmount.");
+		} else if (!Files.isDirectory(mountPoint)) {
+			throw new InvalidMountPointException(new NotDirectoryException(mountPoint.toString())); //simulate we need a directory
+		} else {
+			//TODO: should we require it to be empty?
+			try {
+				Files.move(mountPoint, hideaway);
+				Files.setAttribute(hideaway, "dos:hidden", true);
+			} catch (IOException e) {
+				throw new InvalidMountPointException(e);
+			}
 		}
 	}
 
@@ -90,6 +101,23 @@ class CustomMountPointChooser implements MountPointChooser {
 		} catch (IOException exception) {
 			throw new InvalidMountPointException("IOException while checking folder content", exception);
 		}
+	}
+
+	@Override
+	public void cleanup(Volume caller, Path mountPoint) {
+		if (VolumeImpl.FUSE == caller.getImplementationType() && MountPointRequirement.PARENT_NO_MOUNT_POINT == caller.getMountPointRequirement()) {
+			Path hideaway = getHideaway(mountPoint);
+			try {
+				Files.move(hideaway, mountPoint);
+				Files.setAttribute(mountPoint, "dos:hidden", false);
+			} catch (IOException e) {
+				LOG.error("Unable to clean up mountpoint {} for Winfsp mounting.");
+			}
+		}
+	}
+
+	private Path getHideaway(Path mountPoint) {
+		return mountPoint.resolveSibling(mountPoint.getFileName().toString() + "_tmp");
 	}
 
 }
