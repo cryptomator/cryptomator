@@ -61,11 +61,7 @@
 
 	<developer_name>Skymatic GmbH</developer_name>
 
-	<content_rating type="oars-1.0">
-		<content_attribute id="violence-cartoon">none</content_attribute>
-		<content_attribute id="drugs-alcohol">none</content_attribute>
-		<content_attribute id="sex-nudity">none</content_attribute>
-		<content_attribute id="language-profanity">none</content_attribute>
+	<content_rating type="oars-1.1">
 		<content_attribute id="social-info">mild</content_attribute> <!-- update checker connects to https://api.cryptomator.org/updates/latestVersion.json -->
 	</content_rating>
 
