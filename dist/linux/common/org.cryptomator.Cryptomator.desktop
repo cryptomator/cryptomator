@@ -1,6 +1,6 @@
 [Desktop Entry]
 Name=Cryptomator
-Version=${SEMVER_STR}
+Version=1.0.0
 Comment=Cloud Storage Encryption Utility
 Exec=cryptomator %F
 Icon=org.cryptomator.Cryptomator

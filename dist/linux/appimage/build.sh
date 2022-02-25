@@ -55,7 +55,6 @@ mv Cryptomator Cryptomator.AppDir
 cp -r resources/AppDir/* Cryptomator.AppDir/
 chmod +x Cryptomator.AppDir/lib/runtime/bin/java
 envsubst '${REVISION_NO}' < resources/AppDir/bin/cryptomator.sh > Cryptomator.AppDir/bin/cryptomator.sh
-envsubst '${SEMVER_STR}' < ../common/org.cryptomator.Cryptomator.desktop > Cryptomator.AppDir/usr/share/applications/org.cryptomator.Cryptomator.desktop
 cp ../common/org.cryptomator.Cryptomator256.png Cryptomator.AppDir/usr/share/icons/hicolor/256x256/apps/org.cryptomator.Cryptomator.png
 cp ../common/org.cryptomator.Cryptomator512.png Cryptomator.AppDir/usr/share/icons/hicolor/512x512/apps/org.cryptomator.Cryptomator.png
 cp ../common/org.cryptomator.Cryptomator.svg Cryptomator.AppDir/usr/share/icons/hicolor/scalable/apps/org.cryptomator.Cryptomator.svg
