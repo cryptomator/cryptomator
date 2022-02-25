@@ -117,7 +117,6 @@ $Env:JP_WIXWIZARD_RESOURCES = "$buildDir\resources"
 	--file-associations resources/FAvaultFile.properties
 
 #Create RTF license for bundle
-#TODO: actually we should patch also the third-party-file in the Cryptomator jar
 &mvn -B -f $buildDir/../../pom.xml license:add-third-party `
  "-Dlicense.thirdPartyFilename=license.rtf" `
  "-Dlicense.fileTemplate=$buildDir\bundle\resources\licenseTemplate.ftl" `
