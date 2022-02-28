@@ -241,7 +241,9 @@ jobs:
           GPG_PRIVATE_KEY: ${{ secrets.RELEASES_GPG_PRIVATE_KEY }}
           GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
       - name: debuild
-        run: debuild -S -sa -d
+        run: |
+          debuild -S -sa -d
+          debuild -b -sa -d
         env:
           DEBSIGN_PROGRAM: gpg --batch --pinentry-mode loopback
           DEBSIGN_KEYID: 615D449FE6E6A235
