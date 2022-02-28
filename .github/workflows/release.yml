@@ -210,7 +210,7 @@ jobs:
       - name: install build tools
         run: |
           sudo apt-get update
-          sudo apt-get install debhelper devscripts dput
+          sudo apt-get install debhelper devscripts
       - name: Download linux-buildkit
         uses: actions/download-artifact@v2
         with:
@@ -267,7 +267,11 @@ jobs:
     needs: [deb]
     runs-on: ubuntu-18.04
     steps:
-      - name: Download linux-deb-package
+      - name: install dput
+        run: |
+          sudo apt-get update
+          sudo apt-get install dput
+      - name: download linux-deb-package
         uses: actions/download-artifact@v2
         with:
           name: linux-deb-package
