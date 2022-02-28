@@ -199,10 +199,10 @@ jobs:
           if-no-files-found: error
 
 #
-# Linux PPA Source Package
+# Debian Package
 #
-  ppa:
-    name: Upload source package to PPA
+  deb:
+    name: Create Debian Package
     needs: [buildkit, metadata]
     runs-on: ubuntu-18.04
     steps:
@@ -249,13 +249,27 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: linux-deb-source-package
+          name: linux-deb-package
           path: |
             cryptomator_*.dsc
             cryptomator_*.orig.tar.xz
             cryptomator_*.debian.tar.xz
             cryptomator_*_source.changes
-            cryptomator_*_source.buildinfo
+            cryptomator_*_amd64.deb
+
+#
+# Upload Source Package to PPA
+#
+  ppa:
+    name: Upload Source Package to PPA
+    needs: [deb]
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Download linux-deb-package
+        uses: actions/download-artifact@v2
+        with:
+          name: linux-deb-package
+          path: .
       - name: dput to beta repo
         run: dput ppa:sebastian-stenzel/cryptomator-beta cryptomator_${PPA_VERSION}_source.changes
         env:
@@ -577,6 +591,10 @@ jobs:
       - uses: actions/checkout@v2
       - name: Create tarball
         run: git archive --prefix="cryptomator-${{ needs.metadata.outputs.semVerStr }}/" -o "cryptomator-${{ needs.metadata.outputs.semVerStr }}.tar.gz" ${{ github.ref }}
+      - name: Download Debian package
+        uses: actions/download-artifact@v2
+        with:
+          name: linux-deb-package
       - name: Download linux appimage
         uses: actions/download-artifact@v2
         with:
@@ -592,7 +610,7 @@ jobs:
       - name: Create detached GPG signature for all release files with key 615D449FE6E6A235
         run: |
           echo "${GPG_PRIVATE_KEY}" | gpg --batch --quiet --import
-          for FILE in `find . -name "*.AppImage" -o -name "*.dmg" -o -name "*.msi" -o -name "*.zsync" -o -name "*.tar.gz"`; do
+          for FILE in `find . -name "*.AppImage" -o -name "*.deb" -o -name "*.dmg" -o -name "*.msi" -o -name "*.zsync" -o -name "*.tar.gz"`; do
             echo "${GPG_PASSPHRASE}" | gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign -a ${FILE}
           done
         env:
@@ -600,7 +618,7 @@ jobs:
           GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
       - name: Compute SHA256 checksums of release artifacts
         run: |
-          SHA256_SUMS=`find . -name "*.AppImage" -o -name "*.dmg" -o -name "*.msi" -o -name "*.tar.gz" | xargs sha256sum`
+          SHA256_SUMS=`find . -name "*.AppImage" -o -name "*.deb" -o -name "*.dmg" -o -name "*.msi" -o -name "*.tar.gz" | xargs sha256sum`
           echo "SHA256_SUMS<<EOF" >> $GITHUB_ENV
           echo "${SHA256_SUMS}" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
@@ -616,6 +634,7 @@ jobs:
             *.AppImage
             *.zsync
             *.asc
+            *.deb
             *.dmg
             *.msi
           body: |-
