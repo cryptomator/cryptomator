@@ -13,7 +13,9 @@ import javax.inject.Inject;
 import java.io.IOException;
 import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.DirectoryStream;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.NotDirectoryException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -21,6 +23,8 @@ import java.util.Optional;
 
 class CustomMountPointChooser implements MountPointChooser {
 
+	private static final String HIDEAWAY_PREFIX = ".~$";
+	private static final String HIDEAWAY_SUFFIX = ".tmp";
 	private static final Logger LOG = LoggerFactory.getLogger(CustomMountPointChooser.class);
 
 	private final VaultSettings vaultSettings;
@@ -68,19 +72,41 @@ class CustomMountPointChooser implements MountPointChooser {
 		}
 	}
 
-	private void prepareParentNoMountPoint(Path mountPoint) throws InvalidMountPointException {
+	void prepareParentNoMountPoint(Path mountPoint) throws InvalidMountPointException {
 		//This the case on Windows when using FUSE
 		//See https://github.com/billziss-gh/winfsp/issues/320
 		assert SystemUtils.IS_OS_WINDOWS;
 
 		Path hideaway = getHideaway(mountPoint);
-		if (Files.exists(hideaway)) {
-			LOG.info("Mountpoint {} for winfsp mount seems to be not properly cleaned up. Will be fixed on unmount.");
-		} else if (!Files.isDirectory(mountPoint)) {
-			throw new InvalidMountPointException(new NotDirectoryException(mountPoint.toString())); //simulate we need a directory
-		} else {
-			//TODO: should we require it to be empty?
+
+		var mpExists = Files.exists(mountPoint);
+		var hideExists = Files.exists(hideaway);
+
+		//both resources exist (whatever type)
+		//TODO: possible improvement by just deleting an _empty_ hideaway
+		if (mpExists && hideExists) {
+			throw new InvalidMountPointException(new FileAlreadyExistsException(hideaway.toString()));
+		} else if (!mpExists && !hideExists) { //neither mountpoint nor hideaway exist
+			throw new InvalidMountPointException(new NoSuchFileException(mountPoint.toString()));
+		} else if (!mpExists) { //only hideaway exists
+
+			if (!Files.isDirectory(hideaway)) {
+				throw new InvalidMountPointException(new NotDirectoryException(hideaway.toString()));
+			}
+			LOG.info("Mountpoint {} for winfsp mount seems to be not properly cleaned up. Will be fixed on unmount.", mountPoint);
 			try {
+				Files.setAttribute(hideaway, "dos:hidden", true);
+			} catch (IOException e) {
+				throw new InvalidMountPointException(e);
+			}
+		} else {
+			if (!Files.isDirectory(mountPoint)) {
+				throw new InvalidMountPointException(new NotDirectoryException(mountPoint.toString()));
+			}
+			try {
+				if(Files.list(mountPoint).findFirst().isPresent()) {
+					throw new InvalidMountPointException(new DirectoryNotEmptyException(mountPoint.toString()));
+				}
 				Files.move(mountPoint, hideaway);
 				Files.setAttribute(hideaway, "dos:hidden", true);
 			} catch (IOException e) {
@@ -116,8 +142,9 @@ class CustomMountPointChooser implements MountPointChooser {
 		}
 	}
 
-	private Path getHideaway(Path mountPoint) {
-		return mountPoint.resolveSibling(mountPoint.getFileName().toString() + "_tmp");
+	//visible for testing
+	Path getHideaway(Path mountPoint) {
+		return mountPoint.resolveSibling(HIDEAWAY_PREFIX + mountPoint.getFileName().toString() + HIDEAWAY_SUFFIX);
 	}
 
 }
