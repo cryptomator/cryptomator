@@ -11,8 +11,11 @@ override_dh_auto_clean:
 	rm -rf runtime
 	rm -rf cryptomator
 	rm -rf debian/cryptomator
+	rm -rf resources
 
 override_dh_auto_build:
+	mkdir resources
+	ln -s ../common/org.cryptomator.Cryptomator512.png resources/cryptomator.png
 	jlink \
 		--output runtime \
 		--add-modules java.base,java.desktop,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.crypto.ec,jdk.accessibility,jdk.management.jfr \
