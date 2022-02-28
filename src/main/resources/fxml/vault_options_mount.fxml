@@ -24,7 +24,7 @@
 	<children>
 		<CheckBox fx:id="readOnlyCheckbox" text="%vaultOptions.mount.readonly"/>
 
-		<CheckBox fx:id="customMountFlagsCheckbox" text="%vaultOptions.mount.customMountFlags" onAction="#toggleUseCustomMountFlags" visible="${!controller.webDavAndWindows}" managed="${!controller.webDavAndWindows}"/>
+		<CheckBox fx:id="customMountFlagsCheckbox" text="%vaultOptions.mount.customMountFlags" onAction="#toggleUseCustomMountFlags" visible="${controller.customMountOptionsSupported}" managed="${controller.customMountOptionsSupported}"/>
 
 		<TextField fx:id="mountFlags" HBox.hgrow="ALWAYS" maxWidth="Infinity">
 			<VBox.margin>
@@ -38,11 +38,11 @@
 			</VBox.margin>
 		</Label>
 		<RadioButton toggleGroup="${mountPoint}" fx:id="mountPointAuto" text="%vaultOptions.mount.mountPoint.auto"/>
-		<HBox spacing="6" visible="${controller.osIsWindows}" managed="${controller.osIsWindows}">
+		<HBox spacing="6" visible="${controller.osWindows}" managed="${controller.osWindows}">
 			<RadioButton toggleGroup="${mountPoint}" fx:id="mountPointWinDriveLetter" text="%vaultOptions.mount.mountPoint.driveLetter"/>
 			<ChoiceBox fx:id="driveLetterSelection" disable="${!mountPointWinDriveLetter.selected}"/>
 		</HBox>
-		<HBox spacing="6" alignment="CENTER_LEFT" visible="${!controller.customMountPointSupported}" managed="${!controller.customMountPointSupported}">
+		<HBox fx:id="customMountPointRadioBtn" spacing="6" alignment="CENTER_LEFT" visible="${controller.customMountOptionsSupported}" managed="${controller.customMountOptionsSupported}">
 			<RadioButton toggleGroup="${mountPoint}" fx:id="mountPointCustomDir" text="%vaultOptions.mount.mountPoint.custom" />
 			<Button text="%vaultOptions.mount.mountPoint.directoryPickerButton" onAction="#chooseCustomMountPoint" contentDisplay="LEFT" disable="${!mountPointCustomDir.selected}">
 				<graphic>
@@ -50,7 +50,7 @@
 				</graphic>
 			</Button>
 		</HBox>
-		<TextField text="${controller.customMountPath}" visible="${mountPointCustomDir.selected}" maxWidth="Infinity" disable="true" managed="${!controller.webDavAndWindows}">
+		<TextField text="${controller.customMountPath}" visible="${mountPointCustomDir.selected}" maxWidth="Infinity" disable="true" managed="${customMountPointRadioBtn.managed}">
 			<VBox.margin>
 				<Insets left="24"/>
 			</VBox.margin>

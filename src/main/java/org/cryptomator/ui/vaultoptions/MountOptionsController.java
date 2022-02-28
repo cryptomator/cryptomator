@@ -34,8 +34,7 @@ public class MountOptionsController implements FxController {
 
 	private final Stage window;
 	private final Vault vault;
-	private final boolean webDavAndWindows;
-	private final boolean fuseAndWindows;
+	private final VolumeImpl usedVolumeImpl;
 	private final WindowsDriveLetters windowsDriveLetters;
 	private final ResourceBundle resourceBundle;
 
@@ -52,8 +51,7 @@ public class MountOptionsController implements FxController {
 	MountOptionsController(@VaultOptionsWindow Stage window, @VaultOptionsWindow Vault vault, Settings settings, WindowsDriveLetters windowsDriveLetters, ResourceBundle resourceBundle, Environment environment) {
 		this.window = window;
 		this.vault = vault;
-		this.webDavAndWindows = settings.preferredVolumeImpl().get() == VolumeImpl.WEBDAV && SystemUtils.IS_OS_WINDOWS;
-		this.fuseAndWindows = settings.preferredVolumeImpl().get() == VolumeImpl.FUSE && SystemUtils.IS_OS_WINDOWS;
+		this.usedVolumeImpl = settings.preferredVolumeImpl().get();
 		this.windowsDriveLetters = windowsDriveLetters;
 		this.resourceBundle = resourceBundle;
 	}
@@ -64,7 +62,7 @@ public class MountOptionsController implements FxController {
 		// readonly:
 		readOnlyCheckbox.selectedProperty().bindBidirectional(vault.getVaultSettings().usesReadOnlyMode());
 		//TODO: support this feature on Windows
-		if (fuseAndWindows) {
+		if (usedVolumeImpl == VolumeImpl.FUSE && isOsWindows()) {
 			readOnlyCheckbox.setSelected(false); // to prevent invalid states
 			readOnlyCheckbox.setDisable(true);
 		}
@@ -176,20 +174,24 @@ public class MountOptionsController implements FxController {
 
 	// Getter & Setter
 
-	public boolean getOsIsWindows() {
+	public boolean isOsWindows() {
 		return SystemUtils.IS_OS_WINDOWS;
 	}
 
-	public boolean getCustomMountPointSupported() {
-		return webDavAndWindows;
+	public boolean isCustomMountPointSupported() {
+		return !(usedVolumeImpl == VolumeImpl.WEBDAV && isOsWindows());
 	}
 
-	public boolean getReadOnlySupported() {
-		return fuseAndWindows;
+	public boolean isReadOnlySupported() {
+		return !(usedVolumeImpl == VolumeImpl.FUSE && isOsWindows()) ;
 	}
 
 	public StringProperty customMountPathProperty() {
 		return vault.getVaultSettings().customMountPath();
+	}
+
+	public boolean isCustomMountOptionsSupported() {
+		return !(usedVolumeImpl == VolumeImpl.WEBDAV);
 	}
 
 	public String getCustomMountPath() {
