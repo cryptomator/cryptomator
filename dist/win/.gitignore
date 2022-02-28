@@ -1,3 +1,7 @@
 runtime
 Cryptomator
 installer
+*.wixobj
+*.pdb
+*.msi
+license.rtf

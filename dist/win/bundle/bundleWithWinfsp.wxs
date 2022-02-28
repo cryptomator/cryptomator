@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:bal="http://schemas.microsoft.com/wix/BalExtension">
+    <!-- see https://wixtoolset.org/documentation/manual/v3/xsd/wix/bundle.html-->
+    <!-- Attributes explicitly not used:
+        Condition - the single msi files have their own install conditions, no need to copy them here
+    -->
+    <Bundle Name="Cryptomator" UpgradeCode="29eea626-2e5b-4449-b5f8-4602925ddf7b" Version="$(var.BundleVersion)" Manufacturer="$(var.BundleVendor)"
+     AboutUrl="$(var.AboutUrl)" HelpUrl="$(var.HelpUrl)" UpdateUrl="$(var.UpdateUrl)" Copyright="$(var.BundleCopyright)" IconSourceFile="bundle\resources\Cryptomator.ico">
+
+        <!-- for definition of the standard themes, see https://github.com/wixtoolset/wix3/blob/master/src/ext/BalExtension/wixstdba/Resources/-->
+        <BootstrapperApplicationRef Id="WixStandardBootstrapperApplication.RtfLargeLicense">
+            <!-- see https://wixtoolset.org/documentation/manual/v3/xsd/bal/wixstandardbootstrapperapplication.html -->
+            <!-- Possible Attributes: LaunchTarget -->
+            <bal:WixStandardBootstrapperApplication
+                LicenseFile="bundle\resources\license.rtf"
+                ShowVersion="yes"
+                SuppressOptionsUI="yes"
+                ThemeFile="bundle\customBootstrapperTheme.xml"
+                LocalizationFile="bundle\customBootstrapperTheme.wxl"
+                LogoFile="bundle\resources\logo.png"
+            />
+            <Payload SourceFile="bundle\resources\logoSide.png" />
+        </BootstrapperApplicationRef>
+        <Chain>
+            <!-- see https://wixtoolset.org/documentation/manual/v3/xsd/wix/msipackage.html-->
+            <MsiPackage
+                SourceFile="resources\Cryptomator.msi"
+                CacheId="cryptomator-bundle-cryptomator"
+                DisplayInternalUI="no"
+                Visible="no"
+            />
+            <MsiPackage
+                SourceFile="resources\winfsp.msi"
+                CacheId="cryptomator-bundle-winfsp"
+                Visible="yes"
+                DisplayInternalUI="no"
+                Vital="no"
+                Permanent="yes"
+            />
+        </Chain>
+    </Bundle>
+</Wix>
