@@ -595,7 +595,7 @@ jobs:
           "-Dlicense.outputDirectory=dist/win/bundle/resources"
       - name: Download winfsp
         run:
-          curl --output dist/win/bundle/resources/winfsp.msi -L https://github.com/billziss-gh/winfsp/releases/download/v1.10/winfsp-1.10.22006.msi
+          curl --output dist/win/bundle/resources/winfsp.msi -L https://github.com/winfsp/winfsp/releases/download/v1.10/winfsp-1.10.22006.msi
       - name: Compile to wixObj file
         run: >
           "${WIX}/bin/candle.exe" dist/win/bundle/bundleWithWinfsp.wxs

@@ -125,7 +125,7 @@ $Env:JP_WIXWIZARD_RESOURCES = "$buildDir\resources"
 # download Winfsp
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 $ProgressPreference = 'SilentlyContinue' # disables Invoke-WebRequest's progress bar, which slows down downloads to a few bytes/s
-$winfspMsiUrl = "https://github.com/billziss-gh/winfsp/releases/download/v1.10/winfsp-1.10.22006.msi"
+$winfspMsiUrl = "https://github.com/winfsp/winfsp/releases/download/v1.10/winfsp-1.10.22006.msi"
 Write-Output "Downloading ${winfspMsiUrl}..."
 Invoke-WebRequest $winfspMsiUrl -OutFile ".\bundle\resources\winfsp.msi" # redirects are followed by default
 
