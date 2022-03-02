@@ -39,7 +39,7 @@
 		<!-- 3rd party dependencies -->
 		<javafx.version>17.0.2</javafx.version>
 		<commons-lang3.version>3.12.0</commons-lang3.version>
-		<jwt.version>3.18.2</jwt.version>
+		<jwt.version>3.18.3</jwt.version>
 		<easybind.version>2.2</easybind.version>
 		<guava.version>31.0-jre</guava.version>
 		<dagger.version>2.40.3</dagger.version>
