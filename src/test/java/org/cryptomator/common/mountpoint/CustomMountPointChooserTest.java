@@ -1,6 +1,5 @@
 package org.cryptomator.common.mountpoint;
 
-import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.Environment;
 import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.common.vaults.MountPointRequirement;
@@ -42,6 +41,19 @@ public class CustomMountPointChooserTest {
 	public class WinfspPreperations {
 
 		@Test
+		@DisplayName("Hideaway name for PARENT_NO_MOUNTPOINT is not the same as mountpoint")
+		public void testGetHideaway() {
+			//prepare
+			Path mntPoint = Path.of("/foo/bar");
+			//execute
+			var hideaway = customMpc.getHideaway(mntPoint);
+			//eval
+			Assertions.assertNotEquals(hideaway.getFileName(), mntPoint.getFileName());
+			Assertions.assertEquals(hideaway.getParent(), mntPoint.getParent());
+			Assertions.assertTrue(hideaway.getFileName().toString().contains(mntPoint.getFileName().toString()));
+		}
+
+		@Test
 		@DisplayName("PARENT_NO_MOUNTPOINT preparations succeeds, if only mountpoint is present")
 		public void testPrepareParentNoMountpointOnlyMountpoint(@TempDir Path tmpDir) throws IOException {
 			//prepare
@@ -56,8 +68,6 @@ public class CustomMountPointChooserTest {
 
 			Path hideaway = customMpc.getHideaway(mntPoint);
 			Assertions.assertTrue(Files.exists(hideaway));
-			Assertions.assertNotEquals(hideaway.getFileName().toString(), "mntPoint");
-			Assertions.assertTrue(hideaway.getFileName().toString().contains("mntPoint"));
 
 			Assumptions.assumeTrue(OS.WINDOWS.isCurrentOs());
 			Assertions.assertTrue((Boolean) Files.getAttribute(hideaway, "dos:hidden"));
@@ -91,8 +101,6 @@ public class CustomMountPointChooserTest {
 
 			//evaluate
 			Assertions.assertTrue(Files.exists(hideaway));
-			Assertions.assertNotEquals(hideaway.getFileName().toString(), "mntPoint");
-			Assertions.assertTrue(hideaway.getFileName().toString().contains("mntPoint"));
 
 			Assumptions.assumeTrue(OS.WINDOWS.isCurrentOs());
 			Assertions.assertTrue((Boolean) Files.getAttribute(hideaway, "dos:hidden"));

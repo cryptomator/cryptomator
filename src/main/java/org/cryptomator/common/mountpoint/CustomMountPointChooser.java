@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import java.io.IOException;
 import java.nio.file.DirectoryNotEmptyException;
-import java.nio.file.DirectoryStream;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
@@ -25,6 +24,7 @@ class CustomMountPointChooser implements MountPointChooser {
 
 	private static final String HIDEAWAY_PREFIX = ".~$";
 	private static final String HIDEAWAY_SUFFIX = ".tmp";
+	private static final String WIN_HIDDEN = "dos:hidden";
 	private static final Logger LOG = LoggerFactory.getLogger(CustomMountPointChooser.class);
 
 	private final VaultSettings vaultSettings;
@@ -79,34 +79,27 @@ class CustomMountPointChooser implements MountPointChooser {
 		var mpExists = Files.exists(mountPoint);
 		var hideExists = Files.exists(hideaway);
 
-		//both resources exist (whatever type)
 		//TODO: possible improvement by just deleting an _empty_ hideaway
-		if (mpExists && hideExists) {
+		if (mpExists && hideExists) { //both resources exist (whatever type)
 			throw new InvalidMountPointException(new FileAlreadyExistsException(hideaway.toString()));
 		} else if (!mpExists && !hideExists) { //neither mountpoint nor hideaway exist
 			throw new InvalidMountPointException(new NoSuchFileException(mountPoint.toString()));
 		} else if (!mpExists) { //only hideaway exists
-
-			if (!Files.isDirectory(hideaway)) {
-				throw new InvalidMountPointException(new NotDirectoryException(hideaway.toString()));
-			}
+			isDirectory(hideaway);
 			LOG.info("Mountpoint {} for winfsp mount seems to be not properly cleaned up. Will be fixed on unmount.", mountPoint);
 			try {
-				Files.setAttribute(hideaway, "dos:hidden", true);
+				Files.setAttribute(hideaway, WIN_HIDDEN, true);
 			} catch (IOException e) {
 				throw new InvalidMountPointException(e);
 			}
-		} else {
-			if (!Files.isDirectory(mountPoint)) {
-				throw new InvalidMountPointException(new NotDirectoryException(mountPoint.toString()));
-			}
+		} else { //only mountpoint exists
 			try {
-				if (Files.list(mountPoint).findFirst().isPresent()) {
-					throw new InvalidMountPointException(new DirectoryNotEmptyException(mountPoint.toString()));
-				}
+				isDirectory(mountPoint);
+				isEmpty(mountPoint);
+
 				Files.move(mountPoint, hideaway);
 				if (SystemUtils.IS_OS_WINDOWS) {
-					Files.setAttribute(hideaway, "dos:hidden", true);
+					Files.setAttribute(hideaway, WIN_HIDDEN, true);
 				}
 			} catch (IOException e) {
 				throw new InvalidMountPointException(e);
@@ -116,13 +109,9 @@ class CustomMountPointChooser implements MountPointChooser {
 
 	private void prepareEmptyMountPoint(Path mountPoint) throws InvalidMountPointException {
 		//This is the case for Windows when using Dokany and for Linux and Mac
-		if (!Files.isDirectory(mountPoint)) {
-			throw new InvalidMountPointException(new NotDirectoryException(mountPoint.toString()));
-		}
-		try (DirectoryStream<Path> ds = Files.newDirectoryStream(mountPoint)) {
-			if (ds.iterator().hasNext()) {
-				throw new InvalidMountPointException(new DirectoryNotEmptyException(mountPoint.toString()));
-			}
+		isDirectory(mountPoint);
+		try {
+			isEmpty(mountPoint);
 		} catch (IOException exception) {
 			throw new InvalidMountPointException("IOException while checking folder content", exception);
 		}
@@ -135,10 +124,24 @@ class CustomMountPointChooser implements MountPointChooser {
 			try {
 				Files.move(hideaway, mountPoint);
 				if (SystemUtils.IS_OS_WINDOWS) {
-					Files.setAttribute(mountPoint, "dos:hidden", false);
+					Files.setAttribute(mountPoint, WIN_HIDDEN, false);
 				}
 			} catch (IOException e) {
 				LOG.error("Unable to clean up mountpoint {} for Winfsp mounting.", mountPoint, e);
+			}
+		}
+	}
+
+	private void isDirectory(Path toCheck) throws InvalidMountPointException {
+		if (!Files.isDirectory(toCheck)) {
+			throw new InvalidMountPointException(new NotDirectoryException(toCheck.toString()));
+		}
+	}
+
+	private void isEmpty(Path toCheck) throws InvalidMountPointException, IOException {
+		try (var dirStream = Files.list(toCheck)) {
+			if (dirStream.findFirst().isPresent()) {
+				throw new InvalidMountPointException(new DirectoryNotEmptyException(toCheck.toString()));
 			}
 		}
 	}

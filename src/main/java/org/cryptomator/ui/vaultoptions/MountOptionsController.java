@@ -183,7 +183,7 @@ public class MountOptionsController implements FxController {
 	}
 
 	public boolean isReadOnlySupported() {
-		return !(usedVolumeImpl == VolumeImpl.FUSE && isOsWindows()) ;
+		return !(usedVolumeImpl == VolumeImpl.FUSE && isOsWindows());
 	}
 
 	public StringProperty customMountPathProperty() {
@@ -191,7 +191,7 @@ public class MountOptionsController implements FxController {
 	}
 
 	public boolean isCustomMountOptionsSupported() {
-		return !(usedVolumeImpl == VolumeImpl.WEBDAV);
+		return usedVolumeImpl != VolumeImpl.WEBDAV;
 	}
 
 	public String getCustomMountPath() {
