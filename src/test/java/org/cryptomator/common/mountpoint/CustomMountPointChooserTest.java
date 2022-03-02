@@ -1,7 +1,10 @@
 package org.cryptomator.common.mountpoint;
 
+import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.Environment;
 import org.cryptomator.common.settings.VaultSettings;
+import org.cryptomator.common.vaults.MountPointRequirement;
+import org.cryptomator.common.vaults.Volume;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
@@ -10,6 +13,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.io.TempDir;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
 import java.io.IOException;
@@ -21,12 +25,14 @@ public class CustomMountPointChooserTest {
 	//--- Mocks ---
 	VaultSettings vaultSettings;
 	Environment environment;
+	Volume volume;
 
 	CustomMountPointChooser customMpc;
 
 
 	@BeforeEach
 	public void init() {
+		this.volume = Mockito.mock(Volume.class);
 		this.vaultSettings = Mockito.mock(VaultSettings.class);
 		this.environment = Mockito.mock(Environment.class);
 		this.customMpc = new CustomMountPointChooser(vaultSettings, environment);
@@ -36,7 +42,7 @@ public class CustomMountPointChooserTest {
 	class WinfspPreperations {
 
 		@Test
-		@DisplayName("Test MP preparation for winfsp, if only mountpoint is present")
+		@DisplayName("PARENT_NO_MOUNTPOINT preparations succeeds, if only mountpoint is present")
 		public void testPrepareParentNoMountpointOnlyMountpoint(@TempDir Path tmpDir) throws IOException {
 			//prepare
 			var mntPoint = tmpDir.resolve("mntPoint");
@@ -58,7 +64,7 @@ public class CustomMountPointChooserTest {
 		}
 
 		@Test
-		@DisplayName("Test MP preparation for winfsp, if only non-empty mountpoint is present")
+		@DisplayName("PARENT_NO_MOUNTPOINT preparations fail, if only non-empty mountpoint is present")
 		public void testPrepareParentNoMountpointOnlyNonEmptyMountpoint(@TempDir Path tmpDir) throws IOException {
 			//prepare
 			var mntPoint = tmpDir.resolve("mntPoint");
@@ -73,7 +79,7 @@ public class CustomMountPointChooserTest {
 		}
 
 		@Test
-		@DisplayName("Test MP preparation for Winfsp, if for any reason only hideaway dir is present")
+		@DisplayName("PARENT_NO_MOUNTPOINT preparation succeeds, if for any reason only hideaway dir is present")
 		public void testPrepareParentNoMountpointOnlyHideaway(@TempDir Path tmpDir) throws IOException {
 			//prepare
 			var mntPoint = tmpDir.resolve("mntPoint");
@@ -93,7 +99,7 @@ public class CustomMountPointChooserTest {
 		}
 
 		@Test
-		@DisplayName("Test Winfsp MP preparation, if mountpoint and hideaway dirs are present")
+		@DisplayName("PARENT_NO_MOUNTPOINT preparation fails, if mountpoint and hideaway dirs are present")
 		public void testPrepareParentNoMountpointMountPointAndHideaway(@TempDir Path tmpDir) throws IOException {
 			//prepare
 			var mntPoint = tmpDir.resolve("mntPoint");
@@ -113,7 +119,7 @@ public class CustomMountPointChooserTest {
 		}
 
 		@Test
-		@DisplayName("Test Winfsp MP preparation, if neither mountpoint nor hideaway dir is present")
+		@DisplayName("PARENT_NO_MOUNTPOINT preparation fails, if neither mountpoint nor hideaway dir is present")
 		public void testPrepareParentNoMountpointNothing(@TempDir Path tmpDir) {
 			//prepare
 			var mntPoint = tmpDir.resolve("mntPoint");
@@ -125,6 +131,43 @@ public class CustomMountPointChooserTest {
 			//evaluate
 			Assertions.assertTrue(Files.notExists(hideaway));
 			Assertions.assertTrue(Files.notExists(mntPoint));
+		}
+
+		@Test
+		@DisplayName("Normal Cleanup for PARENT_NO_MOUNTPOINT")
+		public void testCleanupSuccess(@TempDir Path tmpDir) throws IOException {
+			//prepare
+			var mntPoint = tmpDir.resolve("mntPoint");
+			var hideaway = customMpc.getHideaway(mntPoint);
+
+			Files.createDirectory(hideaway);
+			Mockito.when(volume.getMountPointRequirement()).thenReturn(MountPointRequirement.PARENT_NO_MOUNT_POINT);
+
+			//execute
+			Assertions.assertDoesNotThrow(() -> customMpc.cleanup(volume, mntPoint));
+
+			//evaluate
+			Assertions.assertTrue(Files.exists(mntPoint));
+			Assertions.assertTrue(Files.notExists(hideaway));
+
+			Assumptions.assumeTrue(OS.WINDOWS.isCurrentOs());
+			Assertions.assertFalse((Boolean) Files.getAttribute(mntPoint, "dos:hidden"));
+		}
+
+		@Test
+		@DisplayName("On IOException cleanup for PARENT_NO_MOUNTPOINT exits normally")
+		public void testCleanupIOFailure(@TempDir Path tmpDir) throws IOException {
+			//prepare
+			var mntPoint = tmpDir.resolve("mntPoint");
+			var hideaway = customMpc.getHideaway(mntPoint);
+
+			Files.createDirectory(hideaway);
+			Mockito.when(volume.getMountPointRequirement()).thenReturn(MountPointRequirement.PARENT_NO_MOUNT_POINT);
+			try (MockedStatic<Files> filesMock = Mockito.mockStatic(Files.class)) {
+				filesMock.when(() -> Files.move(Mockito.any(), Mockito.any(), Mockito.any())).thenThrow(new IOException("error"));
+				//execute
+				Assertions.assertDoesNotThrow(() -> customMpc.cleanup(volume, mntPoint));
+			}
 		}
 
 	}

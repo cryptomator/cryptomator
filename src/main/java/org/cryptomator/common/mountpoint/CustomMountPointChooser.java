@@ -72,13 +72,10 @@ class CustomMountPointChooser implements MountPointChooser {
 		}
 	}
 
+	//This the case on Windows when using FUSE
+	//See https://github.com/billziss-gh/winfsp/issues/320
 	void prepareParentNoMountPoint(Path mountPoint) throws InvalidMountPointException {
-		//This the case on Windows when using FUSE
-		//See https://github.com/billziss-gh/winfsp/issues/320
-		assert SystemUtils.IS_OS_WINDOWS;
-
 		Path hideaway = getHideaway(mountPoint);
-
 		var mpExists = Files.exists(mountPoint);
 		var hideExists = Files.exists(hideaway);
 
@@ -104,11 +101,13 @@ class CustomMountPointChooser implements MountPointChooser {
 				throw new InvalidMountPointException(new NotDirectoryException(mountPoint.toString()));
 			}
 			try {
-				if(Files.list(mountPoint).findFirst().isPresent()) {
+				if (Files.list(mountPoint).findFirst().isPresent()) {
 					throw new InvalidMountPointException(new DirectoryNotEmptyException(mountPoint.toString()));
 				}
 				Files.move(mountPoint, hideaway);
-				Files.setAttribute(hideaway, "dos:hidden", true);
+				if (SystemUtils.IS_OS_WINDOWS) {
+					Files.setAttribute(hideaway, "dos:hidden", true);
+				}
 			} catch (IOException e) {
 				throw new InvalidMountPointException(e);
 			}
@@ -131,13 +130,15 @@ class CustomMountPointChooser implements MountPointChooser {
 
 	@Override
 	public void cleanup(Volume caller, Path mountPoint) {
-		if (VolumeImpl.FUSE == caller.getImplementationType() && MountPointRequirement.PARENT_NO_MOUNT_POINT == caller.getMountPointRequirement()) {
+		if (caller.getMountPointRequirement() == MountPointRequirement.PARENT_NO_MOUNT_POINT) {
 			Path hideaway = getHideaway(mountPoint);
 			try {
 				Files.move(hideaway, mountPoint);
-				Files.setAttribute(mountPoint, "dos:hidden", false);
+				if (SystemUtils.IS_OS_WINDOWS) {
+					Files.setAttribute(mountPoint, "dos:hidden", false);
+				}
 			} catch (IOException e) {
-				LOG.error("Unable to clean up mountpoint {} for Winfsp mounting.");
+				LOG.error("Unable to clean up mountpoint {} for Winfsp mounting.", mountPoint, e);
 			}
 		}
 	}
