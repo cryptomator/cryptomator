@@ -39,7 +39,7 @@ public class CustomMountPointChooserTest {
 	}
 
 	@Nested
-	class WinfspPreperations {
+	public class WinfspPreperations {
 
 		@Test
 		@DisplayName("PARENT_NO_MOUNTPOINT preparations succeeds, if only mountpoint is present")
