@@ -61,14 +61,8 @@ class CustomMountPointChooser implements MountPointChooser {
 				LOG.debug("Successfully checked custom mount point: {}", mountPoint);
 				yield false;
 			}
-			case NONE -> {
-				//Requirement "NONE" doesn't make any sense here.
-				//No need to prepare/verify a Mountpoint without requiring one...
+			case NONE, UNUSED_ROOT_DIR, PARENT_OPT_MOUNT_POINT -> {
 				throw new InvalidMountPointException(new IllegalStateException("Illegal MountPointRequirement"));
-			}
-			default -> {
-				//Currently the case for "UNUSED_ROOT_DIR, PARENT_OPT_MOUNT_POINT"
-				throw new InvalidMountPointException(new IllegalStateException("Not implemented"));
 			}
 		};
 	}

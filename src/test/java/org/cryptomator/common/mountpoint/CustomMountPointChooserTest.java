@@ -5,7 +5,6 @@ import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.common.vaults.MountPointRequirement;
 import org.cryptomator.common.vaults.Volume;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -69,8 +68,9 @@ public class CustomMountPointChooserTest {
 			Path hideaway = customMpc.getHideaway(mntPoint);
 			Assertions.assertTrue(Files.exists(hideaway));
 
-			Assumptions.assumeTrue(OS.WINDOWS.isCurrentOs());
-			Assertions.assertTrue((Boolean) Files.getAttribute(hideaway, "dos:hidden"));
+			if(OS.WINDOWS.isCurrentOs()) {
+				Assertions.assertTrue((Boolean) Files.getAttribute(hideaway, "dos:hidden"));
+			}
 		}
 
 		@Test
@@ -102,8 +102,9 @@ public class CustomMountPointChooserTest {
 			//evaluate
 			Assertions.assertTrue(Files.exists(hideaway));
 
-			Assumptions.assumeTrue(OS.WINDOWS.isCurrentOs());
-			Assertions.assertTrue((Boolean) Files.getAttribute(hideaway, "dos:hidden"));
+			if(OS.WINDOWS.isCurrentOs()) {
+				Assertions.assertTrue((Boolean) Files.getAttribute(hideaway, "dos:hidden"));
+			}
 		}
 
 		@Test
@@ -122,8 +123,9 @@ public class CustomMountPointChooserTest {
 			Assertions.assertTrue(Files.exists(hideaway));
 			Assertions.assertTrue(Files.exists(mntPoint));
 
-			Assumptions.assumeTrue(OS.WINDOWS.isCurrentOs());
-			Assertions.assertFalse((Boolean) Files.getAttribute(hideaway, "dos:hidden"));
+			if(OS.WINDOWS.isCurrentOs()) {
+				Assertions.assertFalse((Boolean) Files.getAttribute(hideaway, "dos:hidden"));
+			}
 		}
 
 		@Test
@@ -158,8 +160,9 @@ public class CustomMountPointChooserTest {
 			Assertions.assertTrue(Files.exists(mntPoint));
 			Assertions.assertTrue(Files.notExists(hideaway));
 
-			Assumptions.assumeTrue(OS.WINDOWS.isCurrentOs());
-			Assertions.assertFalse((Boolean) Files.getAttribute(mntPoint, "dos:hidden"));
+			if(OS.WINDOWS.isCurrentOs()) {
+				Assertions.assertFalse((Boolean) Files.getAttribute(mntPoint, "dos:hidden"));
+			}
 		}
 
 		@Test
