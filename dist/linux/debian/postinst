@@ -24,7 +24,7 @@ case "$1" in
           mkdir -p /usr/share/desktop-directories
         fi
         xdg-desktop-menu install --novendor /usr/share/applications/org.cryptomator.Cryptomator.desktop
-        xdg-mime install /usr/share/mime/packages/cryptomator-vault.xml
+        xdg-mime install /usr/share/mime/packages/application-vnd.cryptomator.vault.xml
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)
