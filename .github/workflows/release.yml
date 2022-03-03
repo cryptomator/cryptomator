@@ -277,9 +277,7 @@ jobs:
           name: linux-deb-package
           path: .
       - name: dput to beta repo
-        run: dput ppa:sebastian-stenzel/cryptomator-beta cryptomator_${PPA_VERSION}_source.changes
-        env:
-          PPA_VERSION: ${{ needs.metadata.outputs.ppaVerStr }}-0ppa1
+        run: dput ppa:sebastian-stenzel/cryptomator-beta cryptomator_*_source.changes
 
 #
 # Linux Cryptomator.AppImage
