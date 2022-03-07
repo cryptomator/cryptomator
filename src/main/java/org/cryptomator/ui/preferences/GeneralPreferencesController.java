@@ -27,6 +27,7 @@ import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleGroup;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
+import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.Set;
@@ -46,7 +47,7 @@ public class GeneralPreferencesController implements FxController {
 	private final ResourceBundle resourceBundle;
 	private final Application application;
 	private final Environment environment;
-	private final Set<KeychainAccessProvider> keychainAccessProviders;
+	private final List<KeychainAccessProvider> keychainAccessProviders;
 	private final ErrorComponent.Builder errorComponent;
 	public ChoiceBox<UiTheme> themeChoiceBox;
 	public ChoiceBox<KeychainAccessProvider> keychainBackendChoiceBox;
@@ -61,7 +62,7 @@ public class GeneralPreferencesController implements FxController {
 
 
 	@Inject
-	GeneralPreferencesController(@PreferencesWindow Stage window, Settings settings, TrayMenuComponent trayMenu, Optional<AutoStartProvider> autoStartProvider, Set<KeychainAccessProvider> keychainAccessProviders, ObjectProperty<SelectedPreferencesTab> selectedTabProperty, LicenseHolder licenseHolder, ResourceBundle resourceBundle, Application application, Environment environment, ErrorComponent.Builder errorComponent) {
+	GeneralPreferencesController(@PreferencesWindow Stage window, Settings settings, TrayMenuComponent trayMenu, Optional<AutoStartProvider> autoStartProvider, List<KeychainAccessProvider> keychainAccessProviders, ObjectProperty<SelectedPreferencesTab> selectedTabProperty, LicenseHolder licenseHolder, ResourceBundle resourceBundle, Application application, Environment environment, ErrorComponent.Builder errorComponent) {
 		this.window = window;
 		this.settings = settings;
 		this.trayMenuInitialized = trayMenu.isInitialized();
@@ -204,9 +205,9 @@ public class GeneralPreferencesController implements FxController {
 
 	private static class KeychainProviderClassNameConverter extends StringConverter<KeychainAccessProvider> {
 
-		private final Set<KeychainAccessProvider> keychainAccessProviders;
+		private final List<KeychainAccessProvider> keychainAccessProviders;
 
-		public KeychainProviderClassNameConverter(Set<KeychainAccessProvider> keychainAccessProviders) {
+		public KeychainProviderClassNameConverter(List<KeychainAccessProvider> keychainAccessProviders) {
 			this.keychainAccessProviders = keychainAccessProviders;
 		}
 

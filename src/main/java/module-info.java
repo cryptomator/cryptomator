@@ -1,7 +1,5 @@
-import org.cryptomator.integrations.autostart.AutoStartProvider;
-import org.cryptomator.integrations.keychain.KeychainAccessProvider;
-import org.cryptomator.integrations.tray.TrayIntegrationProvider;
-import org.cryptomator.integrations.uiappearance.UiAppearanceProvider;
+import org.cryptomator.integrations.tray.TrayMenuController;
+import org.cryptomator.ui.traymenu.AwtTrayMenuController;
 
 module org.cryptomator.desktop {
 	requires org.cryptomator.cryptofs;
@@ -29,10 +27,7 @@ module org.cryptomator.desktop {
 	requires logback.classic;
 	requires logback.core;
 
-	uses AutoStartProvider;
-	uses KeychainAccessProvider;
-	uses TrayIntegrationProvider;
-	uses UiAppearanceProvider;
+	provides TrayMenuController with AwtTrayMenuController;
 
 	opens org.cryptomator.common.settings to com.google.gson;
 

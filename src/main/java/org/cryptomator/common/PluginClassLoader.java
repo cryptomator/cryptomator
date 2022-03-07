@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 
+@Deprecated // to be moved to integrations-api 1.1.0
 @Singleton
 public class PluginClassLoader extends URLClassLoader {
 

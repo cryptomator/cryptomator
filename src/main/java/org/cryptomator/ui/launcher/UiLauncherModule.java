@@ -34,21 +34,20 @@ public abstract class UiLauncherModule {
 
 	@Provides
 	@Singleton
-	static Optional<UiAppearanceProvider> provideAppearanceProvider(PluginClassLoader classLoader) {
-		return ServiceLoader.load(UiAppearanceProvider.class, classLoader).findFirst();
+	static Optional<UiAppearanceProvider> provideAppearanceProvider() {
+		return UiAppearanceProvider.get();
 	}
 
 	@Provides
 	@Singleton
-	static Optional<AutoStartProvider> provideAutostartProvider(PluginClassLoader classLoader) {
-		return ServiceLoader.load(AutoStartProvider.class, classLoader).findFirst();
+	static Optional<AutoStartProvider> provideAutostartProvider() {
+		return AutoStartProvider.get();
 	}
-
 
 	@Provides
 	@Singleton
-	static Optional<TrayIntegrationProvider> provideTrayIntegrationProvider(PluginClassLoader classLoader) {
-		return ServiceLoader.load(TrayIntegrationProvider.class, classLoader).findFirst();
+	static Optional<TrayIntegrationProvider> provideTrayIntegrationProvider() {
+		return TrayIntegrationProvider.get();
 	}
 
 	@Provides
