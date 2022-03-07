@@ -273,9 +273,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install dput
       - name: import public key
-        run: curl -sSL ${GPG_PUBLIC_KEY_URL} | gpg --import -
-        env:
-          GPG_PUBLIC_KEY_URL: https://gist.githubusercontent.com/cryptobot/211111cf092037490275f39d408f461a/raw/E6E6A235.asc
+        run: curl -sSL https://github.com/cryptobot.gpg | gpg --import -
       - name: download linux-deb-package
         uses: actions/download-artifact@v2
         with:
