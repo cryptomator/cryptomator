@@ -18,7 +18,7 @@ public interface TrayMenuComponent {
 
 	Optional<TrayMenuController> trayMenuController();
 
-	org.cryptomator.ui.traymenu.TrayMenuController trayMenuController2(); // TODO tmp name
+	TrayMenuBuilder trayMenuBuilder();
 
 	/**
 	 * @return <code>true</code> if a tray icon can be installed
@@ -32,7 +32,7 @@ public interface TrayMenuComponent {
 	 * @return <code>true</code> if a tray icon has been installed
 	 */
 	default boolean isInitialized() {
-		return isSupported() && trayMenuController2().isInitialized();
+		return isSupported() && trayMenuBuilder().isInitialized();
 	}
 
 	/**
@@ -42,8 +42,7 @@ public interface TrayMenuComponent {
 	 */
 	default void initializeTrayIcon() throws IllegalStateException {
 		Preconditions.checkState(isSupported(), "system tray not supported");
-
-		trayMenuController2().initTrayMenu();
+		trayMenuBuilder().initTrayMenu();
 	}
 
 	@Subcomponent.Builder

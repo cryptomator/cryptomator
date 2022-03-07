@@ -5,6 +5,7 @@ import org.cryptomator.integrations.common.Priority;
 import org.cryptomator.integrations.tray.ActionItem;
 import org.cryptomator.integrations.tray.SeparatorItem;
 import org.cryptomator.integrations.tray.SubMenuItem;
+import org.cryptomator.integrations.tray.TrayMenuController;
 import org.cryptomator.integrations.tray.TrayMenuItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +22,7 @@ import java.io.InputStream;
 import java.util.List;
 
 @Priority(Priority.FALLBACK)
-public class AwtTrayMenuController implements org.cryptomator.integrations.tray.TrayMenuController {
+public class AwtTrayMenuController implements TrayMenuController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(AwtTrayMenuController.class);
 
@@ -58,6 +59,7 @@ public class AwtTrayMenuController implements org.cryptomator.integrations.tray.
 			if (item instanceof ActionItem a) {
 				var menuItem = new MenuItem(a.title());
 				menuItem.addActionListener(evt -> a.action().run());
+				// TODO menuItem.setEnabled(a.enabled());
 				menu.add(menuItem);
 			} else if (item instanceof SeparatorItem) {
 				menu.addSeparator();

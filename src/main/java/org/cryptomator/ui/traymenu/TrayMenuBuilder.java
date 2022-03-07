@@ -6,6 +6,7 @@ import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.integrations.tray.ActionItem;
 import org.cryptomator.integrations.tray.SeparatorItem;
 import org.cryptomator.integrations.tray.SubMenuItem;
+import org.cryptomator.integrations.tray.TrayMenuController;
 import org.cryptomator.integrations.tray.TrayMenuItem;
 import org.cryptomator.ui.fxapp.FxApplication;
 import org.cryptomator.ui.launcher.AppLifecycleListener;
@@ -16,20 +17,16 @@ import javax.inject.Inject;
 import javafx.application.Platform;
 import javafx.beans.Observable;
 import javafx.collections.ObservableList;
-import java.awt.Image;
-import java.awt.Toolkit;
-import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.ArrayList;
-import java.util.EventObject;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
 
 @TrayMenuScoped
-public class TrayMenuController {
+public class TrayMenuBuilder {
 
 	private static final String TRAY_ICON_MAC = "/img/tray_icon_mac.png";
 	private static final String TRAY_ICON = "/img/tray_icon.png";
@@ -38,12 +35,12 @@ public class TrayMenuController {
 	private final AppLifecycleListener appLifecycle;
 	private final FxApplicationStarter fxApplicationStarter;
 	private final ObservableList<Vault> vaults;
-	private final org.cryptomator.integrations.tray.TrayMenuController trayMenu;
+	private final TrayMenuController trayMenu;
 
 	private volatile boolean initialized;
 
 	@Inject
-	TrayMenuController(ResourceBundle resourceBundle, AppLifecycleListener appLifecycle, FxApplicationStarter fxApplicationStarter, ObservableList<Vault> vaults, Optional<org.cryptomator.integrations.tray.TrayMenuController> trayMenu) {
+	TrayMenuBuilder(ResourceBundle resourceBundle, AppLifecycleListener appLifecycle, FxApplicationStarter fxApplicationStarter, ObservableList<Vault> vaults, Optional<TrayMenuController> trayMenu) {
 		this.resourceBundle = resourceBundle;
 		this.appLifecycle = appLifecycle;
 		this.fxApplicationStarter = fxApplicationStarter;
