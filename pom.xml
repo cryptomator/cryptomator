@@ -52,6 +52,9 @@
 		<junit.jupiter.version>5.8.1</junit.jupiter.version>
 		<mockito.version>3.12.4</mockito.version>
 		<hamcrest.version>2.2</hamcrest.version>
+
+		<!-- build plugin dependencies -->
+		<dependency-check.version>7.0.0</dependency-check.version>
 	</properties>
 
 	<dependencies>
@@ -263,7 +266,7 @@
 				<plugin>
 					<groupId>org.owasp</groupId>
 					<artifactId>dependency-check-maven</artifactId>
-					<version>6.3.1</version>
+					<version>${dependency-check.version}</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
