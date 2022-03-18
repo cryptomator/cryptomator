@@ -60,6 +60,7 @@ jobs:
           --compress=1
       - name: Run jpackage
         run: >
+          envsubst '${SEMVER_STR} ${REVISION_NUM}' < dist/linux/launcher-gtk2.properties > launcher-gtk2.properties
           ${JAVA_HOME}/bin/jpackage
           --verbose
           --type app-image
@@ -83,6 +84,7 @@ jobs:
           --java-options "-Dcryptomator.mountPointsDir=\"~/.local/share/Cryptomator/mnt\""
           --java-options "-Dcryptomator.showTrayIcon=false"
           --java-options "-Dcryptomator.buildNumber=\"appimage-${{  steps.versions.outputs.revNum }}\""
+          --add-launcher Cryptomator-gtk2=launcher-gtk2.properties \
           --resource-dir dist/linux/resources
       - name: Patch Cryptomator.AppDir
         run: |
