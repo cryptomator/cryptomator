@@ -42,11 +42,11 @@ jobs:
         with:
           version: ${{ steps.versions.outputs.semVerStr }}
       - name: Run maven
-        run: mvn -B clean package -Pdependency-check,linux -DskipTests
+        run: mvn -B clean package -Pdependency-check,mac -DskipTests
       - name: Patch target dir
         run: |
           cp LICENSE.txt target
-          cp dist/linux/launcher.sh target
+          cp dist/mac/launcher.sh target
           cp target/cryptomator-*.jar target/mods
       - name: Run jlink
         run: >
@@ -208,7 +208,7 @@ jobs:
           GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
       - name: Create detached GPG signatures
         run: |
-          gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign -a cryptomator-*.dmg
+          gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign -a Cryptomator-*.dmg
       - name: Clean up codesign certificate
         if: ${{ always() }}
         run: security delete-keychain $RUNNER_TEMP/codesign.keychain-db
