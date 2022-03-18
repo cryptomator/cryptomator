@@ -1,7 +1,6 @@
 name: Build Windows Installer
 
 on:
-  push: # TODO remove before merging into develop
   release:
     types: [published]
   workflow_dispatch:
