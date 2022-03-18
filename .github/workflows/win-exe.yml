@@ -30,7 +30,7 @@ jobs:
       - id: versions 
         name: Apply version information
         run: |
-          if [[ $GITHUB_REF == refs/tags/* ]]; then
+          if [[ $GITHUB_REF =~ refs/tags/[0-9]+\.[0-9]+\.[0-9]+.* ]]; then
             SEM_VER_STR=${GITHUB_REF##*/}
             mvn versions:set -DnewVersion=${SEM_VER_STR}
           else
