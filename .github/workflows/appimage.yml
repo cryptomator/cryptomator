@@ -1,7 +1,6 @@
 name: Build AppImage
 
 on:
-  push: # TODO remove before merging into develop
   release:
     types: [published]
   workflow_dispatch:
@@ -129,7 +128,7 @@ jobs:
         run: |
           gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign -a cryptomator-*.AppImage
           gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign -a cryptomator-*.AppImage.zsync
-      - name: Upload AppImage
+      - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
           name: appimage
