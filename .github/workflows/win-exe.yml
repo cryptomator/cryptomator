@@ -208,7 +208,7 @@ jobs:
           "${WIX}/bin/candle.exe" dist/win/bundle/bundleWithWinfsp.wxs
           -ext WixBalExtension
           -out dist/win/bundle/
-          -dBundleVersion="${{ needs.build-exe.outputs.semVerNum }}.${{ needs.build-exe.outputs.revNum }}"
+          -dBundleVersion="${{ needs.build-msi.outputs.semVerNum }}.${{ needs.build-msi.outputs.revNum }}"
           -dBundleVendor="Skymatic GmbH"
           -dBundleCopyright="(C) 2016 - 2022 Skymatic GmbH"
           -dAboutUrl="https://cryptomator.org"
@@ -229,7 +229,7 @@ jobs:
           timestampUrl: 'http://timestamp.digicert.com'
           folder: installer
       - name: Add possible alpha/beta tags to installer name
-        run: mv installer/Cryptomator.exe Cryptomator-${{ needs.build-exe.outputs.semVerStr }}-x64.exe
+        run: mv installer/Cryptomator.exe Cryptomator-${{ needs.build-msi.outputs.semVerStr }}-x64.exe
       - name: Create detached GPG signature with key 615D449FE6E6A235
         run: |
           echo "${GPG_PRIVATE_KEY}" | gpg --batch --quiet --import
