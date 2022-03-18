@@ -86,7 +86,7 @@ jobs:
           --java-options "-Dcryptomator.mountPointsDir=\"~/.local/share/Cryptomator/mnt\""
           --java-options "-Dcryptomator.showTrayIcon=false"
           --java-options "-Dcryptomator.buildNumber=\"appimage-${{  steps.versions.outputs.revNum }}\""
-          --add-launcher Cryptomator-gtk2=launcher-gtk2.properties \
+          --add-launcher Cryptomator-gtk2=launcher-gtk2.properties
           --resource-dir dist/linux/resources
       - name: Patch Cryptomator.AppDir
         run: |
