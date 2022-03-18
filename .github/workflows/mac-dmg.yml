@@ -214,7 +214,7 @@ jobs:
         run: security delete-keychain $RUNNER_TEMP/notarization.keychain-db
         continue-on-error: true
       - name: Upload artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: dmg
           path: Cryptomator-*.dmg
