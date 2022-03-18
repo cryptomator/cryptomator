@@ -39,14 +39,14 @@ jobs:
       - uses: skymatic/semver-validation-action@v1
         with:
           version: ${{ steps.versions.outputs.semVerStr }}
-      - name: Build and Test
-        run: mvn -B clean package -Pdependency-check,linux
+      - name: Run maven
+        run: mvn -B clean package -Pdependency-check,linux -DskipTests
       - name: Patch target dir
         run: |
           cp LICENSE.txt target
           cp dist/linux/launcher.sh target
           cp target/cryptomator-*.jar target/mods
-      - name: jlink
+      - name: Run jlink
         run: >
           ${JAVA_HOME}/bin/jlink
           --verbose
@@ -57,7 +57,7 @@ jobs:
           --no-man-pages
           --strip-debug
           --compress=1
-      - name: jpackage
+      - name: Run jpackage
         run: >
           ${JAVA_HOME}/bin/jpackage
           --verbose
@@ -125,13 +125,18 @@ jobs:
           ./squashfs-root/AppRun Cryptomator.AppDir cryptomator-${{  steps.versions.outputs.semVerStr }}-x86_64.AppImage
           -u 'gh-releases-zsync|cryptomator|cryptomator|latest|cryptomator-*-x86_64.AppImage.zsync'
           --sign --sign-key=615D449FE6E6A235 --sign-args="--batch --pinentry-mode loopback"
+      - name: Create detached GPG signatures
+        run: |
+          gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign -a cryptomator-*.AppImage
+          gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign -a cryptomator-*.AppImage.zsync
       - name: Upload AppImage
         uses: actions/upload-artifact@v2
         with:
-          name: linux-appimage
+          name: appimage
           path: |
             cryptomator-*.AppImage
             cryptomator-*.AppImage.zsync
+            cryptomator-*.asc
           if-no-files-found: error
       - name: Publish AppImage on GitHub Releases
         if: startsWith(github.ref, 'refs/tags/')
