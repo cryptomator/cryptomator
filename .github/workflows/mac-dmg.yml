@@ -1,7 +1,6 @@
 name: Build macOS .dmg
 
 on:
-  push: # TODO remove before merging into develop
   release:
     types: [published]
   workflow_dispatch:
@@ -73,10 +72,10 @@ jobs:
           --name Cryptomator
           --vendor "Skymatic GmbH"
           --copyright "(C) 2016 - 2022 Skymatic GmbH"
-          --app-version "${{  steps.versions.outputs.semVerNum }}"
+          --app-version "${{ steps.versions.outputs.semVerNum }}"
           --java-options "-Xss5m"
           --java-options "-Xmx256m"
-          --java-options "-Dcryptomator.appVersion=\"${{  steps.versions.outputs.semVerStr }}\""
+          --java-options "-Dcryptomator.appVersion=\"${{ steps.versions.outputs.semVerStr }}\""
           --java-options "-Dfile.encoding=\"utf-8\""
           --java-options "-Dapple.awt.enableTemplateImages=true"
           --java-options "-Dcryptomator.logDir=\"~/Library/Logs/Cryptomator\""
@@ -84,7 +83,7 @@ jobs:
           --java-options "-Dcryptomator.settingsPath=\"~/Library/Application Support/Cryptomator/settings.json\""
           --java-options "-Dcryptomator.ipcSocketPath=\"~/Library/Application Support/Cryptomator/ipc.socket\""
           --java-options "-Dcryptomator.showTrayIcon=true"
-          --java-options "-Dcryptomator.buildNumber=\"dmg-${{  steps.versions.outputs.revNum }}\""
+          --java-options "-Dcryptomator.buildNumber=\"dmg-${{ steps.versions.outputs.revNum }}\""
           --mac-package-identifier org.cryptomator
           --resource-dir dist/mac/resources
       - name: Patch Cryptomator.app
@@ -169,7 +168,7 @@ jobs:
           --icon ".VolumeIcon.icns" 512 758
           Cryptomator-${VERSION_NO}.dmg dmg
         env:
-          VERSION_NO: ${{  steps.versions.outputs.semVerNum }}
+          VERSION_NO: ${{ steps.versions.outputs.semVerNum }}
       - name: Install notarization credentials
         if: startsWith(github.ref, 'refs/tags/')
         run: |
@@ -198,17 +197,14 @@ jobs:
         env:
           NOTARIZATION_KEYCHAIN_PROFILE: ${{ secrets.MACOS_NOTARIZATION_KEYCHAIN_PROFILE }}
       - name: Add possible alpha/beta tags to installer name
-        run: mv Cryptomator-*.dmg Cryptomator-${{  steps.versions.outputs.semVerStr }}.dmg
-      - name: Prepare GPG-Agent for signing with key 615D449FE6E6A235
+        run: mv Cryptomator-*.dmg Cryptomator-${{ steps.versions.outputs.semVerStr }}.dmg
+      - name: Create detached GPG signature with key 615D449FE6E6A235
         run: |
           echo "${GPG_PRIVATE_KEY}" | gpg --batch --quiet --import
-          echo "${GPG_PASSPHRASE}" | gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --dry-run --sign README.md
+          echo "${GPG_PASSPHRASE}" | gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign -a Cryptomator-*.dmg
         env:
           GPG_PRIVATE_KEY: ${{ secrets.RELEASES_GPG_PRIVATE_KEY }}
           GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
-      - name: Create detached GPG signatures
-        run: |
-          gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign -a Cryptomator-*.dmg
       - name: Clean up codesign certificate
         if: ${{ always() }}
         run: security delete-keychain $RUNNER_TEMP/codesign.keychain-db
