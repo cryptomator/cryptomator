@@ -5,18 +5,13 @@ on:
   release:
     types: [published]
   workflow_dispatch:
-    inputs:
-      semver:
-        description: 'SemVer'
-        required: true
-        default: '0.99.99-SNAPSHOT'
 
 env:
   JAVA_VERSION: 17
 
 jobs:
   build:
-    name: Run Maven Build
+    name: Build AppImage
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -32,12 +27,12 @@ jobs:
         run: |
           if [[ $GITHUB_REF == refs/tags/* ]]; then
             SEM_VER_STR=${GITHUB_REF##*/}
+            mvn versions:set -DnewVersion=${SEM_VER_STR}
           else
-            SEM_VER_STR=${{ github.event.inputs.semver }}
+            SEM_VER_STR=`mvn help:evaluate -Dexpression=project.version -q -DforceStdout`
           fi
           SEM_VER_NUM=`echo ${SEM_VER_STR} | sed -E 's/([0-9]+\.[0-9]+\.[0-9]+).*/\1/'`
           REVCOUNT=`git rev-list --count HEAD`
-          mvn versions:set -DnewVersion=${SEM_VER_STR}
           echo "::set-output name=semVerStr::${SEM_VER_STR}"
           echo "::set-output name=semVerNum::${SEM_VER_NUM}"
           echo "::set-output name=revNum::${REVCOUNT}"
