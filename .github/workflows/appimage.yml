@@ -16,7 +16,8 @@ jobs:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0
-      - uses: actions/setup-java@v2
+      - name: Setup Java
+        uses: actions/setup-java@v2
         with:
           distribution: 'temurin'
           java-version: ${{ env.JAVA_VERSION }}
@@ -35,7 +36,8 @@ jobs:
           echo "::set-output name=semVerStr::${SEM_VER_STR}"
           echo "::set-output name=semVerNum::${SEM_VER_NUM}"
           echo "::set-output name=revNum::${REVCOUNT}"
-      - uses: skymatic/semver-validation-action@v1
+      - name: Validate Version
+        uses: skymatic/semver-validation-action@v1
         with:
           version: ${{ steps.versions.outputs.semVerStr }}
       - name: Run maven
@@ -115,7 +117,7 @@ jobs:
       - name: Prepare GPG-Agent for signing with key 615D449FE6E6A235
         run: |
           echo "${GPG_PRIVATE_KEY}" | gpg --batch --quiet --import
-          echo "${GPG_PASSPHRASE}" | gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --dry-run --sign Cryptomator.AppDir/AppRun
+          echo "${GPG_PASSPHRASE}" | gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --dry-run --sign README.md
         env:
           GPG_PRIVATE_KEY: ${{ secrets.RELEASES_GPG_PRIVATE_KEY }}
           GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
