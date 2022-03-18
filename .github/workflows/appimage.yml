@@ -61,6 +61,9 @@ jobs:
           --compress=1
       - name: Prepare additional launcher
         run: envsubst '${SEMVER_STR} ${REVISION_NUM}' < dist/linux/launcher-gtk2.properties > launcher-gtk2.properties
+        env:
+          SEMVER_STR: ${{  steps.versions.outputs.semVerStr }}
+          REVISION_NUM: ${{  steps.versions.outputs.revNum }}
       - name: Run jpackage
         run: >
           ${JAVA_HOME}/bin/jpackage
@@ -92,7 +95,6 @@ jobs:
         run: |
           mv appdir/Cryptomator Cryptomator.AppDir
           cp -r dist/linux/appimage/resources/AppDir/* Cryptomator.AppDir/
-          envsubst '${REVISION_NO} ${SEMVER_STR}' < dist/linux/appimage/resources/AppDir/bin/cryptomator.sh > Cryptomator.AppDir/bin/cryptomator.sh
           cp dist/linux/common/org.cryptomator.Cryptomator256.png Cryptomator.AppDir/usr/share/icons/hicolor/256x256/apps/org.cryptomator.Cryptomator.png
           cp dist/linux/common/org.cryptomator.Cryptomator512.png Cryptomator.AppDir/usr/share/icons/hicolor/512x512/apps/org.cryptomator.Cryptomator.png
           cp dist/linux/common/org.cryptomator.Cryptomator.svg Cryptomator.AppDir/usr/share/icons/hicolor/scalable/apps/org.cryptomator.Cryptomator.svg
@@ -104,9 +106,6 @@ jobs:
           ln -s usr/share/icons/hicolor/scalable/apps/org.cryptomator.Cryptomator.svg Cryptomator.AppDir/.DirIcon
           ln -s usr/share/applications/org.cryptomator.Cryptomator.desktop Cryptomator.AppDir/Cryptomator.desktop
           ln -s bin/cryptomator.sh Cryptomator.AppDir/AppRun
-        env:
-          REVISION_NO: ${{  steps.versions.outputs.revNum }}
-          SEMVER_STR: ${{  steps.versions.outputs.semVerStr }}
       - name: Extract libjffi.so # workaround for https://github.com/cryptomator/cryptomator-linux/issues/27
         run: |
           JFFI_NATIVE_JAR=`ls lib/app/ | grep -e 'jffi-[1-9]\.[0-9]\{1,2\}.[0-9]\{1,2\}-native.jar'`
