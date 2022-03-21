@@ -217,7 +217,22 @@ jobs:
         run: >
           "${WIX}/bin/light.exe" -b dist/win/ dist/win/bundle/bundleWithWinfsp.wixobj
           -ext WixBalExtension
-          -out installer/Cryptomator.exe
+          -out installer/unsigned/Cryptomator.exe
+      - name: Detach burn engine in preparation to sign
+        run: >
+          "${WIX}/bin/insignia.exe" -ib .\installer\unsigned\Cryptomator.exe -o .\tmp\engine.exe
+      - name: Codesign burn engine
+        uses: skymatic/code-sign-action@v1
+        with:
+          certificate: ${{ secrets.WIN_CODESIGN_P12_BASE64 }}
+          password: ${{ secrets.WIN_CODESIGN_P12_PW }}
+          certificatesha1: FF52240075AD7D14AF25629FDF69635357C7D14B
+          description: Wix Burn Engine
+          timestampUrl: 'http://timestamp.digicert.com'
+          folder: tmp
+      - name: Reattach signed burn engine to installer
+        run : >
+          ${WIX}/bin/insignia.exe" -ab tmp\engine.exe installer\unsigned\Cryptomator.exe -o installer\Cryptomator.exe
       - name: Codesign EXE
         uses: skymatic/code-sign-action@v1
         with:
