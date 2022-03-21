@@ -29,8 +29,9 @@
 			</StackPane>
 			<VBox spacing="6" HBox.hgrow="ALWAYS">
 				<Text text="%unlock.error.heading" styleClass="label-large"/>
-				<FormattedLabel visible="${controller.mustExist}" managed="${controller.mustExist}" format="%unlock.error.invalidMountPoint.notExisting" arg1="${controller.mountPoint}" wrapText="true"/>
-				<FormattedLabel visible="${!controller.mustExist}" managed="${!controller.mustExist}" format="%unlock.error.invalidMountPoint.existing" arg1="${controller.mountPoint}" wrapText="true"/>
+				<FormattedLabel visible="${controller.notExisting}" managed="${controller.notExisting}" format="%unlock.error.invalidMountPoint.notExisting" arg1="${controller.mountPoint}" wrapText="true"/>
+				<FormattedLabel visible="${controller.existing}" managed="${controller.existing}" format="%unlock.error.invalidMountPoint.existing" arg1="${controller.mountPoint}" wrapText="true"/>
+				<FormattedLabel visible="${controller.driveLetterOccupied}" managed="${controller.driveLetterOccupied}" format="%unlock.error.invalidMountPoint.driveLetterOccupied" arg1="${controller.mountPoint}" wrapText="true"/>
 			</VBox>
 		</HBox>
 

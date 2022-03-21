@@ -25,4 +25,23 @@
 		<gav>org.eclipse.jetty.toolchain:jetty-servlet-api:4.0.6</gav>
 		<cpe regex="true">.*</cpe>
 	</suppress>
+
+	<suppress>
+		<notes><![CDATA[
+        Incorrectly matched CPE, see https://github.com/jeremylong/DependencyCheck/issues/4177git
+      ]]></notes>
+		<gav regex="true">^org\.cryptomator:.*$</gav>
+		<cpe>cpe:/a:cryptomator:cryptomator</cpe>
+		<cve>CVE-2022-25366</cve>
+	</suppress>
+
+	<suppress>
+		<notes><![CDATA[
+			False positive for commons-cli due, see https://github.com/jeremylong/DependencyCheck/pull/4148
+		]]></notes>
+		<gav regex="true">^commons\-cli:commons\-cli:.*$</gav>
+		<cpe>cpe:/a:apache:james</cpe>
+		<!-- while we are at it exclude also this fp -->
+		<cpe>cpe:/a:spirit-project:spirit</cpe>
+	</suppress>
 </suppressions>

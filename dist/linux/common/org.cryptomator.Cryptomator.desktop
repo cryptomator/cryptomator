@@ -6,5 +6,6 @@ Icon=org.cryptomator.Cryptomator
 Terminal=false
 Type=Application
 Categories=Utility;Security;FileTools;
+StartupNotify=true
 StartupWMClass=org.cryptomator.launcher.Cryptomator
-MimeType=application/vnd.cryptomator.encrypted;application/x-vnd.cryptomator.vault-metadata;
+MimeType=application/vnd.cryptomator.encrypted;application/vnd.cryptomator.vault;

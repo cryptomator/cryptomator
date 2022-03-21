@@ -37,9 +37,9 @@
 		<cryptomator.webdav.version>1.2.6</cryptomator.webdav.version>
 
 		<!-- 3rd party dependencies -->
-		<javafx.version>17.0.1</javafx.version>
+		<javafx.version>17.0.2</javafx.version>
 		<commons-lang3.version>3.12.0</commons-lang3.version>
-		<jwt.version>3.18.2</jwt.version>
+		<jwt.version>3.18.3</jwt.version>
 		<easybind.version>2.2</easybind.version>
 		<guava.version>31.0-jre</guava.version>
 		<dagger.version>2.40.3</dagger.version>
@@ -52,6 +52,10 @@
 		<junit.jupiter.version>5.8.1</junit.jupiter.version>
 		<mockito.version>3.12.4</mockito.version>
 		<hamcrest.version>2.2</hamcrest.version>
+
+		<!-- build plugin dependencies -->
+		<dependency-check.version>7.0.0</dependency-check.version>
+		<jacoco.version>0.8.7</jacoco.version>
 	</properties>
 
 	<dependencies>
@@ -228,7 +232,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
-					<version>3.8.1</version>
+					<version>3.10.1</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -238,7 +242,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-dependency-plugin</artifactId>
-					<version>3.2.0</version>
+					<version>3.3.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -253,17 +257,17 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-jar-plugin</artifactId>
-					<version>3.2.0</version>
+					<version>3.2.2</version>
 				</plugin>
 				<plugin>
 					<groupId>org.jacoco</groupId>
 					<artifactId>jacoco-maven-plugin</artifactId>
-					<version>0.8.7</version>
+					<version>${jacoco.version}</version>
 				</plugin>
 				<plugin>
 					<groupId>org.owasp</groupId>
 					<artifactId>dependency-check-maven</artifactId>
-					<version>6.3.1</version>
+					<version>${dependency-check.version}</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
