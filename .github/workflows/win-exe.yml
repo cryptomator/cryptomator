@@ -220,7 +220,10 @@ jobs:
           -out installer/unsigned/Cryptomator.exe
       - name: Detach burn engine in preparation to sign
         run: >
-          "${WIX}/bin/insignia.exe" -ib .\installer\unsigned\Cryptomator.exe -o .\tmp\engine.exe
+          "${WIX}/bin/insignia.exe"
+          -ib .\installer\unsigned\Cryptomator.exe
+          -o .\tmp\engine.exe
+        shell: pwsh
       - name: Codesign burn engine
         uses: skymatic/code-sign-action@v1
         with:
