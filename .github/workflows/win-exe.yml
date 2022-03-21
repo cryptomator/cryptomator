@@ -229,7 +229,7 @@ jobs:
           certificate: ${{ secrets.WIN_CODESIGN_P12_BASE64 }}
           password: ${{ secrets.WIN_CODESIGN_P12_PW }}
           certificatesha1: FF52240075AD7D14AF25629FDF69635357C7D14B
-          description: Wix Burn Engine
+          description: Cryptomator Installer
           timestampUrl: 'http://timestamp.digicert.com'
           folder: tmp
       - name: Reattach signed burn engine to installer
