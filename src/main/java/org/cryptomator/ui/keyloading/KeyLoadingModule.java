@@ -26,7 +26,7 @@ abstract class KeyLoadingModule {
 	@Provides
 	@KeyLoading
 	@KeyLoadingScoped
-	static KeyLoadingStrategy provideKeyLoaderProvider(@KeyLoading Vault vault, Map<String, Provider<KeyLoadingStrategy>> strategies) {
+	static KeyLoadingStrategy provideKeyLoadingStrategy(@KeyLoading Vault vault, Map<String, Provider<KeyLoadingStrategy>> strategies) {
 		try {
 			String scheme = vault.getVaultConfigCache().get().getKeyId().getScheme();
 			var fallback = KeyLoadingStrategy.failed(new IllegalArgumentException("Unsupported key id " + scheme));
