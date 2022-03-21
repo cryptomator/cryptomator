@@ -91,7 +91,7 @@ class TrayMenuController {
 			unlockItem.addActionListener(createActionListenerForVault(vault, this::unlockVault));
 			submenu.add(unlockItem);
 		} else if (vault.isUnlocked()) {
-			submenu.setLabel("*".concat(submenu.getLabel()));
+			submenu.setLabel("* ".concat(submenu.getLabel()));
 
 			MenuItem lockItem = new MenuItem(resourceBundle.getString("traymenu.vault.lock"));
 			lockItem.addActionListener(createActionListenerForVault(vault, this::lockVault));
