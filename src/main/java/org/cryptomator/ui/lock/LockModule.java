@@ -6,13 +6,12 @@ import dagger.Provides;
 import dagger.multibindings.IntoMap;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.DefaultSceneFactory;
-import org.cryptomator.ui.common.FxmlLoaderFactory;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxControllerKey;
 import org.cryptomator.ui.common.FxmlFile;
+import org.cryptomator.ui.common.FxmlLoaderFactory;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.StageFactory;
-import org.cryptomator.ui.common.UserInteractionLock;
 
 import javax.inject.Named;
 import javax.inject.Provider;
@@ -22,20 +21,16 @@ import javafx.stage.Stage;
 import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Module
 abstract class LockModule {
 
-	enum ForceLockDecision {
-		CANCEL,
-		RETRY,
-		FORCE;
-	}
-
 	@Provides
 	@LockScoped
-	static UserInteractionLock<LockModule.ForceLockDecision> provideForceLockDecisionLock() {
-		return new UserInteractionLock<>(null);
+	static AtomicReference<CompletableFuture<Boolean>> provideForceRetryDecisionRef() {
+		return new AtomicReference<>();
 	}
 
 	@Provides

@@ -11,13 +11,12 @@ import org.mockito.Mockito;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.security.SecureRandom;
 
 public class RecoveryKeyFactoryTest {
 
-	private WordEncoder wordEncoder = new WordEncoder();
-	private MasterkeyFileAccess masterkeyFileAccess = Mockito.mock(MasterkeyFileAccess.class);
-	private RecoveryKeyFactory inTest = new RecoveryKeyFactory(wordEncoder, masterkeyFileAccess);
+	private final WordEncoder wordEncoder = new WordEncoder();
+	private final MasterkeyFileAccess masterkeyFileAccess = Mockito.mock(MasterkeyFileAccess.class);
+	private final RecoveryKeyFactory inTest = new RecoveryKeyFactory(wordEncoder, masterkeyFileAccess);
 
 	@Test
 	@DisplayName("createRecoveryKey() creates 44 words")

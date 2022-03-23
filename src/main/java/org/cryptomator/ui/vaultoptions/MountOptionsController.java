@@ -24,6 +24,7 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
 import java.io.File;
+import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.util.ResourceBundle;
@@ -122,8 +123,11 @@ public class MountOptionsController implements FxController {
 		DirectoryChooser directoryChooser = new DirectoryChooser();
 		directoryChooser.setTitle(resourceBundle.getString("vaultOptions.mount.mountPoint.directoryPickerTitle"));
 		try {
-			var initialDir = vault.getVaultSettings().getCustomMountPath().orElse(System.getProperty("user.home"));
-			directoryChooser.setInitialDirectory(Path.of(initialDir).toFile());
+			var initialDir = Path.of(vault.getVaultSettings().getCustomMountPath().orElse(System.getProperty("user.home")));
+
+			if(Files.exists(initialDir)) {
+				directoryChooser.setInitialDirectory(initialDir.toFile());
+			}
 		} catch (InvalidPathException e) {
 			// no-op
 		}

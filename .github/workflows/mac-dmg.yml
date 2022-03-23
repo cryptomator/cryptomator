@@ -226,7 +226,7 @@ jobs:
           fail_on_unmatched_files: true
           token: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}
           files: |
-            *.dmg
-            *.asc
+            Cryptomator-*.dmg
+            Cryptomator-*.asc
 
 

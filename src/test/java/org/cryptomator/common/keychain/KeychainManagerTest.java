@@ -2,7 +2,9 @@ package org.cryptomator.common.keychain;
 
 
 import org.cryptomator.integrations.keychain.KeychainAccessException;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -32,7 +34,8 @@ public class KeychainManagerTest {
 		public static void startup() throws InterruptedException {
 			CountDownLatch latch = new CountDownLatch(1);
 			Platform.startup(latch::countDown);
-			latch.await(5, TimeUnit.SECONDS);
+			var javafxStarted = latch.await(5, TimeUnit.SECONDS);
+			Assumptions.assumeTrue(javafxStarted);
 		}
 
 		@Test
