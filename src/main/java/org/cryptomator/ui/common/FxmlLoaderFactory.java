@@ -22,6 +22,10 @@ public class FxmlLoaderFactory {
 		this.resourceBundle = resourceBundle;
 	}
 
+	public static <T extends FxController> FxmlLoaderFactory forController(T controller, Function<Parent, Scene> sceneFactory, ResourceBundle resourceBundle) {
+		return new FxmlLoaderFactory(Map.of(controller.getClass(), () -> controller), sceneFactory, resourceBundle);
+	}
+
 	/**
 	 * @return A new FXMLLoader instance
 	 */

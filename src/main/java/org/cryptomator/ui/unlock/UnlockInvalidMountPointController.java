@@ -1,5 +1,6 @@
 package org.cryptomator.ui.unlock;
 
+import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.vaults.MountPointRequirement;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.FxController;
@@ -32,12 +33,24 @@ public class UnlockInvalidMountPointController implements FxController {
 		return vault.getVaultSettings().getCustomMountPath().orElse("AUTO");
 	}
 
-	public boolean getMustExist() {
-		MountPointRequirement requirement = vault.getVolume().orElseThrow(() -> new IllegalStateException("Invalid Mountpoint without a Volume?!")).getMountPointRequirement();
-		assert requirement != MountPointRequirement.NONE; //An invalid MountPoint with no required MountPoint doesn't seem sensible
-		assert requirement != MountPointRequirement.PARENT_OPT_MOUNT_POINT; //Not implemented anywhere (yet)
-
-		return requirement == MountPointRequirement.EMPTY_MOUNT_POINT;
+	public boolean getNotExisting() {
+		return getMountPointRequirement() == MountPointRequirement.EMPTY_MOUNT_POINT;
 	}
 
+	public boolean getExisting() {
+		return getMountPointRequirement() == MountPointRequirement.PARENT_NO_MOUNT_POINT;
+	}
+
+	public boolean getDriveLetterOccupied() {
+		return getMountPointRequirement() == MountPointRequirement.UNUSED_ROOT_DIR;
+	}
+
+	private MountPointRequirement getMountPointRequirement() {
+		var requirement = vault.getVolume().orElseThrow(() -> new IllegalStateException("Invalid Mountpoint without a Volume?!")).getMountPointRequirement();
+		assert requirement != MountPointRequirement.NONE; //An invalid MountPoint with no required MountPoint doesn't seem sensible
+		assert requirement != MountPointRequirement.PARENT_OPT_MOUNT_POINT; //Not implemented anywhere (yet)
+		assert requirement != MountPointRequirement.UNUSED_ROOT_DIR || SystemUtils.IS_OS_WINDOWS; //Not implemented anywhere, but on Windows
+
+		return requirement;
+	}
 }
