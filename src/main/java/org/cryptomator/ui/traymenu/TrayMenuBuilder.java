@@ -83,7 +83,8 @@ public class TrayMenuBuilder {
 		menu.add(new SeparatorItem());
 		for (Vault vault : vaults) {
 			List<TrayMenuItem> submenu = buildSubmenu(vault);
-			menu.add(new SubMenuItem(vault.getDisplayName(), submenu));
+			var label = vault.isUnlocked() ? "* ".concat(vault.getDisplayName()) : vault.getDisplayName();
+			menu.add(new SubMenuItem(label, submenu));
 		}
 		menu.add(new SeparatorItem());
 		menu.add(new ActionItem(resourceBundle.getString("traymenu.lockAllVaults"), this::lockAllVaults));

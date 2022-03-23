@@ -1,5 +1,7 @@
 package org.cryptomator.ui.controls;
 
+import org.cryptomator.common.Passphrase;
+
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.StringProperty;
@@ -82,7 +84,7 @@ public class NiceSecurePasswordField extends StackPane {
 		return passwordField.textProperty();
 	}
 
-	public CharSequence getCharacters() {
+	public Passphrase getCharacters() {
 		return passwordField.getCharacters();
 	}
 
