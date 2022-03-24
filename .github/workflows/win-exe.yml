@@ -80,6 +80,7 @@ jobs:
           --app-version "${{ steps.versions.outputs.semVerNum }}.${{ steps.versions.outputs.revNum }}"
           --java-options "-Xss5m"
           --java-options "-Xmx256m"
+          --java-options "-Dcryptomator.appVersion=\"${{ steps.versions.outputs.semVerStr }}\""
           --java-options "-Dfile.encoding=\"utf-8\""
           --java-options "-Dcryptomator.logDir=\"~/AppData/Roaming/Cryptomator\""
           --java-options "-Dcryptomator.pluginDir=\"~/AppData/Roaming/Cryptomator/Plugins\""
