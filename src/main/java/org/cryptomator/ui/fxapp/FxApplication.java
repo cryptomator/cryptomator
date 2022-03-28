@@ -41,7 +41,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 @FxApplicationScoped
-public class FxApplication extends Application {
+public class FxApplication {
 
 	private static final Logger LOG = LoggerFactory.getLogger(FxApplication.class);
 
@@ -85,11 +85,6 @@ public class FxApplication extends Application {
 
 		settings.theme().addListener(this::appThemeChanged);
 		loadSelectedStyleSheet(settings.theme().get());
-	}
-
-	@Override
-	public void start(Stage stage) {
-		throw new UnsupportedOperationException("Use start() instead.");
 	}
 
 	private void hasVisibleStagesChanged(@SuppressWarnings("unused") ObservableValue<? extends Boolean> observableValue, @SuppressWarnings("unused") boolean oldValue, boolean newValue) {

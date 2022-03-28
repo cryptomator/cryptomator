@@ -48,17 +48,6 @@ abstract class MainWindowModule {
 	}
 
 	@Provides
-	@MainWindow
-	@MainWindowScoped
-	static Stage provideStage(StageFactory factory) {
-		Stage stage = factory.create(StageStyle.UNDECORATED);
-		stage.setMinWidth(650);
-		stage.setMinHeight(440);
-		stage.setTitle("Cryptomator");
-		return stage;
-	}
-
-	@Provides
 	@MainWindowScoped
 	@Named("errorWindow")
 	static Stage provideErrorStage(@MainWindow Stage window, StageFactory factory, ResourceBundle resourceBundle) {

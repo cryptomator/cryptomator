@@ -5,7 +5,12 @@
  *******************************************************************************/
 package org.cryptomator.ui.fxapp;
 
+import dagger.BindsInstance;
 import dagger.Subcomponent;
+import org.cryptomator.ui.mainwindow.MainWindow;
+
+import javafx.application.Application;
+import javafx.stage.Stage;
 
 @FxApplicationScoped
 @Subcomponent(modules = FxApplicationModule.class)
@@ -15,6 +20,12 @@ public interface FxApplicationComponent {
 
 	@Subcomponent.Builder
 	interface Builder {
+
+		@BindsInstance
+		Builder fxApplication(Application application);
+
+		@BindsInstance
+		Builder mainWindow(@MainWindow Stage mainWindow);
 
 		FxApplicationComponent build();
 	}

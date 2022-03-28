@@ -5,6 +5,7 @@ import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.fxapp.FxApplication;
 
 import javax.inject.Inject;
+import javafx.application.Application;
 import javafx.fxml.FXML;
 import javafx.stage.Stage;
 
@@ -12,13 +13,13 @@ public class MigrationImpossibleController implements FxController {
 
 	private static final String HELP_URI = "https://docs.cryptomator.org/en/1.5/help/manual-migration/";
 
-	private final FxApplication fxApplication;
+	private final Application application;
 	private final Stage window;
 	private final Vault vault;
 
 	@Inject
-	MigrationImpossibleController(FxApplication fxApplication, @MigrationWindow Stage window, @MigrationWindow Vault vault) {
-		this.fxApplication = fxApplication;
+	MigrationImpossibleController(Application application, @MigrationWindow Stage window, @MigrationWindow Vault vault) {
+		this.application = application;
 		this.window = window;
 		this.vault = vault;
 	}
@@ -30,7 +31,7 @@ public class MigrationImpossibleController implements FxController {
 
 	@FXML
 	public void getMigrationHelp() {
-		fxApplication.getHostServices().showDocument(HELP_URI);
+		application.getHostServices().showDocument(HELP_URI);
 	}
 
 	/* Getter/Setters */

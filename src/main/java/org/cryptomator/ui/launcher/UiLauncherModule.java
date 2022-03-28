@@ -28,12 +28,6 @@ public abstract class UiLauncherModule {
 
 	@Provides
 	@Singleton
-	static FxApplicationComponent provideFxApplicationComponent(FxApplicationComponent.Builder builder) {
-		return builder.build();
-	}
-
-	@Provides
-	@Singleton
 	static Optional<UiAppearanceProvider> provideAppearanceProvider(PluginClassLoader classLoader) {
 		return ServiceLoader.load(UiAppearanceProvider.class, classLoader).findFirst();
 	}
