@@ -13,6 +13,7 @@ import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlLoaderFactory;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.StageFactory;
+import org.cryptomator.ui.fxapp.PrimaryStage;
 import org.cryptomator.ui.health.HealthCheckComponent;
 import org.cryptomator.ui.migration.MigrationComponent;
 import org.cryptomator.ui.removevault.RemoveVaultComponent;
@@ -33,6 +34,11 @@ import java.util.ResourceBundle;
 
 @Module(subcomponents = {AddVaultWizardComponent.class, HealthCheckComponent.class, MigrationComponent.class, RemoveVaultComponent.class, VaultOptionsComponent.class, VaultStatisticsComponent.class, WrongFileAlertComponent.class, ErrorComponent.class})
 abstract class MainWindowModule {
+
+	@Binds
+	@MainWindow
+	@MainWindowScoped
+	abstract Stage bindMainWindow(@PrimaryStage Stage primaryStage);
 
 	@Provides
 	@MainWindowScoped

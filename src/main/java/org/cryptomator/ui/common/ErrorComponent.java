@@ -16,34 +16,17 @@ public interface ErrorComponent {
 	@FxmlScene(FxmlFile.ERROR)
 	Scene scene();
 
-	default void showErrorScene() {
-		if (Platform.isFxApplicationThread()) {
-			show();
-		} else {
-			Platform.runLater(this::show);
-		}
-	}
-
-	private void show() {
+	default Stage show() {
 		Stage stage = window();
 		stage.setScene(scene());
 		stage.show();
+		return stage;
 	}
 
-	@Subcomponent.Builder
-	interface Builder {
+	@Subcomponent.Factory
+	interface Factory {
 
-		@BindsInstance
-		Builder cause(Throwable cause);
-
-		@BindsInstance
-		Builder window(Stage window);
-
-		@BindsInstance
-		Builder returnToScene(@Nullable Scene previousScene);
-
-		ErrorComponent build();
-
+		ErrorComponent create(@BindsInstance Throwable cause, @BindsInstance Stage window, @BindsInstance @Nullable Scene previousScene);
 	}
 
 }

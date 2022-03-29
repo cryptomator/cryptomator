@@ -7,7 +7,6 @@ package org.cryptomator.ui.fxapp;
 
 import dagger.BindsInstance;
 import dagger.Subcomponent;
-import org.cryptomator.ui.mainwindow.MainWindow;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
@@ -25,7 +24,7 @@ public interface FxApplicationComponent {
 		Builder fxApplication(Application application);
 
 		@BindsInstance
-		Builder mainWindow(@MainWindow Stage mainWindow);
+		Builder primaryStage(@PrimaryStage Stage primaryStage);
 
 		FxApplicationComponent build();
 	}

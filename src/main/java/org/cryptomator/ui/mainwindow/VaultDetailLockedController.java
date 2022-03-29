@@ -5,6 +5,7 @@ import org.cryptomator.common.keychain.KeychainManager;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.fxapp.FxApplication;
+import org.cryptomator.ui.fxapp.FxApplicationWindows;
 import org.cryptomator.ui.health.HealthCheckComponent;
 import org.cryptomator.ui.vaultoptions.SelectedVaultOptionsTab;
 import org.cryptomator.ui.vaultoptions.VaultOptionsComponent;
@@ -23,16 +24,16 @@ import java.util.Optional;
 public class VaultDetailLockedController implements FxController {
 
 	private final ReadOnlyObjectProperty<Vault> vault;
-	private final FxApplication application;
+	private final FxApplicationWindows appWindows;
 	private final VaultOptionsComponent.Builder vaultOptionsWindow;
 	private final KeychainManager keychain;
 	private final Stage mainWindow;
 	private final BooleanExpression passwordSaved;
 
 	@Inject
-	VaultDetailLockedController(ObjectProperty<Vault> vault, FxApplication application,  VaultOptionsComponent.Builder vaultOptionsWindow, KeychainManager keychain, @MainWindow Stage mainWindow) {
+	VaultDetailLockedController(ObjectProperty<Vault> vault, FxApplicationWindows appWindows,  VaultOptionsComponent.Builder vaultOptionsWindow, KeychainManager keychain, @MainWindow Stage mainWindow) {
 		this.vault = vault;
-		this.application = application;
+		this.appWindows = appWindows;
 		this.vaultOptionsWindow = vaultOptionsWindow;
 		this.keychain = keychain;
 		this.mainWindow = mainWindow;
@@ -45,7 +46,7 @@ public class VaultDetailLockedController implements FxController {
 
 	@FXML
 	public void unlock() {
-		application.startUnlockWorkflow(vault.get(), Optional.of(mainWindow));
+		appWindows.startUnlockWorkflow(vault.get(), mainWindow);
 	}
 
 	@FXML

@@ -12,6 +12,7 @@ import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlLoaderFactory;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.StageFactory;
+import org.jetbrains.annotations.Nullable;
 
 import javax.inject.Named;
 import javax.inject.Provider;
@@ -43,12 +44,12 @@ abstract class LockModule {
 	@Provides
 	@LockWindow
 	@LockScoped
-	static Stage provideWindow(StageFactory factory, @LockWindow Vault vault, @Named("lockWindowOwner") Optional<Stage> owner) {
+	static Stage provideWindow(StageFactory factory, @LockWindow Vault vault, @Nullable @Named("lockWindowOwner") Stage owner) {
 		Stage stage = factory.create();
 		stage.setTitle(vault.getDisplayName());
 		stage.setResizable(false);
-		if (owner.isPresent()) {
-			stage.initOwner(owner.get());
+		if (owner != null) {
+			stage.initOwner(owner);
 			stage.initModality(Modality.WINDOW_MODAL);
 		} else {
 			stage.initModality(Modality.APPLICATION_MODAL);

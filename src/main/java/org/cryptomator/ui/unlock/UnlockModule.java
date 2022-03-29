@@ -14,6 +14,7 @@ import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.StageFactory;
 import org.cryptomator.ui.keyloading.KeyLoadingComponent;
 import org.cryptomator.ui.keyloading.KeyLoadingStrategy;
+import org.jetbrains.annotations.Nullable;
 
 import javax.inject.Named;
 import javax.inject.Provider;
@@ -37,12 +38,12 @@ abstract class UnlockModule {
 	@Provides
 	@UnlockWindow
 	@UnlockScoped
-	static Stage provideStage(StageFactory factory, @UnlockWindow Vault vault, @Named("unlockWindowOwner") Optional<Stage> owner) {
+	static Stage provideStage(StageFactory factory, @UnlockWindow Vault vault, @Nullable @Named("unlockWindowOwner") Stage owner) {
 		Stage stage = factory.create();
 		stage.setTitle(vault.getDisplayName());
 		stage.setResizable(false);
-		if (owner.isPresent()) {
-			stage.initOwner(owner.get());
+		if (owner != null) {
+			stage.initOwner(owner);
 			stage.initModality(Modality.WINDOW_MODAL);
 		} else {
 			stage.initModality(Modality.APPLICATION_MODAL);

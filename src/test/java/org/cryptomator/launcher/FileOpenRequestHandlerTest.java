@@ -5,7 +5,6 @@
  *******************************************************************************/
 package org.cryptomator.launcher;
 
-import org.cryptomator.ui.launcher.AppLaunchEvent;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.Assertions;
@@ -43,7 +42,7 @@ public class FileOpenRequestHandlerTest {
 
 		AppLaunchEvent evt = queue.poll();
 		Assertions.assertNotNull(evt);
-		Collection<Path> paths = evt.getPathsToOpen();
+		Collection<Path> paths = evt.pathsToOpen();
 		MatcherAssert.assertThat(paths, CoreMatchers.hasItems(Paths.get("foo"), Paths.get("bar")));
 	}
 
