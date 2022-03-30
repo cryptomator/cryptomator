@@ -2,7 +2,7 @@
 
 [![Build](https://github.com/cryptomator/cryptomator/workflows/Build/badge.svg)](https://github.com/cryptomator/cryptomator/actions?query=workflow%3ABuild)
 [![Known Vulnerabilities](https://snyk.io/test/github/cryptomator/cryptomator/badge.svg)](https://snyk.io/test/github/cryptomator/cryptomator)
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/2a0adf3cec6a4143b91035d3924178f1)](https://www.codacy.com/gh/cryptomator/cryptomator/dashboard)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=cryptomator_cryptomator&metric=alert_status)](https://sonarcloud.io/dashboard?id=cryptomator_cryptomator)
 [![Twitter](https://img.shields.io/badge/twitter-@Cryptomator-blue.svg?style=flat)](http://twitter.com/Cryptomator)
 [![Crowdin](https://badges.crowdin.net/cryptomator/localized.svg)](https://translate.cryptomator.org/)
 [![Latest Release](https://img.shields.io/github/release/cryptomator/cryptomator.svg)](https://github.com/cryptomator/cryptomator/releases/latest)

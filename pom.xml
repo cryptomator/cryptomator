@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.cryptomator</groupId>
 	<artifactId>cryptomator</artifactId>
-	<version>1.6.7</version>
+	<version>1.6.8</version>
 	<name>Cryptomator Desktop App</name>
 
 	<organization>
@@ -27,7 +27,7 @@
 		<nonModularGroupIds>com.github.serceman,com.github.jnr,org.ow2.asm,net.java.dev.jna,org.apache.jackrabbit,org.apache.httpcomponents,de.swiesend,org.purejava,com.github.hypfvieh</nonModularGroupIds>
 
 		<!-- cryptomator dependencies -->
-		<cryptomator.cryptofs.version>2.3.1</cryptomator.cryptofs.version>
+		<cryptomator.cryptofs.version>2.4.0</cryptomator.cryptofs.version>
 		<cryptomator.integrations.version>1.1.0-beta1</cryptomator.integrations.version>
 		<cryptomator.integrations.win.version>1.0.0</cryptomator.integrations.win.version>
 		<cryptomator.integrations.mac.version>1.0.0</cryptomator.integrations.mac.version>
@@ -39,7 +39,7 @@
 		<!-- 3rd party dependencies -->
 		<javafx.version>18</javafx.version>
 		<commons-lang3.version>3.12.0</commons-lang3.version>
-		<jwt.version>3.19.0</jwt.version>
+		<jwt.version>3.19.1</jwt.version>
 		<easybind.version>2.2</easybind.version>
 		<guava.version>31.1-jre</guava.version>
 		<dagger.version>2.41</dagger.version>
@@ -54,7 +54,7 @@
 		<hamcrest.version>2.2</hamcrest.version>
 
 		<!-- build plugin dependencies -->
-		<dependency-check.version>7.0.0</dependency-check.version>
+		<dependency-check.version>7.0.2</dependency-check.version>
 		<jacoco.version>0.8.7</jacoco.version>
 	</properties>
 
