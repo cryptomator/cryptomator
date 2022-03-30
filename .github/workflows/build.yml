@@ -44,9 +44,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       - name: Sign source tarball with key 615D449FE6E6A235
-        if: startsWith(github.ref, 'refs/tags/')
         run: |
-          git archive --prefix="cryptomator-${{ github.ref }}/" -o "cryptomator-${{ github.ref }}.tar.gz" ${{ github.ref }}
+          git archive --prefix="cryptomator-${{ github.ref_name }}/" -o "cryptomator-${{ github.ref_name }}.tar.gz" ${{ github.ref }}
           echo "${GPG_PRIVATE_KEY}" | gpg --batch --quiet --import
           echo "${GPG_PASSPHRASE}" | gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign -a "cryptomator-${{ github.ref }}.tar.gz"
         env:
@@ -61,7 +60,7 @@ jobs:
           token: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}
           generate_release_notes: true
           files: |
-            cryptomator-${{ github.ref }}.tar.gz.asc
+            cryptomator-*.tar.gz.asc
           body: |-
             :construction: Work in Progress
             
