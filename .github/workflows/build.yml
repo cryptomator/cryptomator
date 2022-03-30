@@ -62,6 +62,7 @@ jobs:
           generate_release_notes: true
           files: |
             cryptomator-*.tar.gz.asc
+          fail_on_unmatched_files: true
           body: |-
             :construction: Work in Progress
             
