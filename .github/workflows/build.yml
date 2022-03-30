@@ -73,4 +73,4 @@ jobs:
           fail_on_unmatched_files: true
           token: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}
           files: |
-            cryptomator-*.tar.gz.asc
+            cryptomator-${{ github.ref }}.tar.gz.asc
