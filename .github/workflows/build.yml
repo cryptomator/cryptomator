@@ -55,3 +55,22 @@ jobs:
             :construction: Work in Progress
             
             ---
+      - name: Create source tarball
+        if: startsWith(github.ref, 'refs/tags/')
+        run: git archive --prefix="cryptomator-${{ github.ref }}/" -o "cryptomator-${{ github.ref }}.tar.gz" ${{ github.ref }}
+      - name: Sign source tarball with key 615D449FE6E6A235
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          echo "${GPG_PRIVATE_KEY}" | gpg --batch --quiet --import
+          echo "${GPG_PASSPHRASE}" | gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign -a "cryptomator-${{ github.ref }}.tar.gz"
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.RELEASES_GPG_PRIVATE_KEY }}
+          GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
+      - name: Publish source tarball signature on GitHub Releases
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v1
+        with:
+          fail_on_unmatched_files: true
+          token: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}
+          files: |
+            cryptomator-*.tar.gz.asc
