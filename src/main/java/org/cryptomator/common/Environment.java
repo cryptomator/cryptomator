@@ -89,11 +89,6 @@ public class Environment {
 		return Boolean.getBoolean("cryptomator.showTrayIcon");
 	}
 
-	@Deprecated // TODO: remove as soon as custom mount path works properly on Win+Fuse
-	public boolean useExperimentalFuse() {
-		return Boolean.getBoolean("fuse.experimental");
-	}
-
 	private int getInt(String propertyName, int defaultValue) {
 		String value = System.getProperty(propertyName);
 		try {
