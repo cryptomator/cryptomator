@@ -73,7 +73,7 @@ public class Cryptomator {
 				communicator.sendHandleLaunchargs(List.of(args));
 				communicator.sendRevealRunningApp();
 				LOG.info("Found running application instance. Shutting down...");
-				return 2;
+				return 0;
 			} else {
 				shutdownHook.runOnShutdown(communicator::closeUnchecked);
 				var executor = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setNameFormat("IPC-%d").build());

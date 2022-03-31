@@ -19,6 +19,7 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.NotDirectoryException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Optional;
 
 class CustomMountPointChooser implements MountPointChooser {
@@ -29,17 +30,15 @@ class CustomMountPointChooser implements MountPointChooser {
 	private static final Logger LOG = LoggerFactory.getLogger(CustomMountPointChooser.class);
 
 	private final VaultSettings vaultSettings;
-	private final Environment environment;
 
 	@Inject
-	public CustomMountPointChooser(VaultSettings vaultSettings, Environment environment) {
+	public CustomMountPointChooser(VaultSettings vaultSettings) {
 		this.vaultSettings = vaultSettings;
-		this.environment = environment;
 	}
 
 	@Override
 	public boolean isApplicable(Volume caller) {
-		return caller.getImplementationType() != VolumeImpl.FUSE || !SystemUtils.IS_OS_WINDOWS || environment.useExperimentalFuse();
+		return caller.getImplementationType() != VolumeImpl.WEBDAV;
 	}
 
 	@Override
