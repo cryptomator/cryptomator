@@ -283,7 +283,7 @@ jobs:
 
   allowlist:
     name: Anti Virus Allowlisting
-    # if: startsWith(github.ref, 'refs/tags/')
+    if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
     needs: [build-msi, build-exe]
     steps:
@@ -311,7 +311,6 @@ jobs:
           username: ${{ secrets.ALLOWLIST_KASPERSKY_USERNAME }}
           password: ${{ secrets.ALLOWLIST_KASPERSKY_PASSWORD }}
           local-dir: files/
-          dry-run: true
       - name: Upload to Avast
         uses: SamKirkland/FTP-Deploy-Action@4.3.0
         with:
@@ -321,4 +320,3 @@ jobs:
           username: ${{ secrets.ALLOWLIST_AVAST_USERNAME }}
           password: ${{ secrets.ALLOWLIST_AVAST_PASSWORD }}
           local-dir: files/
-          dry-run: true
