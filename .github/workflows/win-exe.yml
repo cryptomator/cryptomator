@@ -225,11 +225,11 @@ jobs:
         run: >
           "${WIX}/bin/light.exe" -b dist/win/ dist/win/bundle/bundleWithWinfsp.wixobj
           -ext WixBalExtension
-          -out installer/unsigned/Cryptomator.exe
+          -out installer/unsigned/Cryptomator-Installer.exe
       - name: Detach burn engine in preparation to sign
         run: >
           "${WIX}/bin/insignia.exe"
-          -ib installer/unsigned/Cryptomator.exe
+          -ib installer/unsigned/Cryptomator-Installer.exe
           -o tmp/engine.exe
       - name: Codesign burn engine
         uses: skymatic/code-sign-action@v1
@@ -243,8 +243,8 @@ jobs:
       - name: Reattach signed burn engine to installer
         run : >
           "${WIX}/bin/insignia.exe"
-          -ab tmp/engine.exe installer/unsigned/Cryptomator.exe
-          -o installer/Cryptomator.exe
+          -ab tmp/engine.exe installer/unsigned/Cryptomator-Installer.exe
+          -o installer/Cryptomator-Installer.exe
       - name: Codesign EXE
         uses: skymatic/code-sign-action@v1
         with:
@@ -255,7 +255,7 @@ jobs:
           timestampUrl: 'http://timestamp.digicert.com'
           folder: installer
       - name: Add possible alpha/beta tags to installer name
-        run: mv installer/Cryptomator.exe Cryptomator-${{ needs.build-msi.outputs.semVerStr }}-x64.exe
+        run: mv installer/Cryptomator-Installer.exe Cryptomator-${{ needs.build-msi.outputs.semVerStr }}-x64.exe
       - name: Create detached GPG signature with key 615D449FE6E6A235
         run: |
           echo "${GPG_PRIVATE_KEY}" | gpg --batch --quiet --import
