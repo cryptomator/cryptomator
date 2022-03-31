@@ -22,7 +22,6 @@ import javafx.scene.Scene;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import java.util.Map;
-import java.util.Optional;
 import java.util.ResourceBundle;
 
 @Module(subcomponents = {KeyLoadingComponent.class})

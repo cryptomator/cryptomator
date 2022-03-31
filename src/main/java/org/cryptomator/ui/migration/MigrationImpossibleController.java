@@ -2,7 +2,6 @@ package org.cryptomator.ui.migration;
 
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.FxController;
-import org.cryptomator.ui.fxapp.FxApplication;
 
 import javax.inject.Inject;
 import javafx.application.Application;

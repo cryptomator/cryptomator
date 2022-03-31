@@ -30,6 +30,7 @@ import java.awt.desktop.QuitResponse;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.ExecutorService;
 
 @FxApplicationScoped
 public class FxApplicationWindows {
@@ -44,10 +45,11 @@ public class FxApplicationWindows {
 	private final UnlockComponent.Factory unlockWorkflowFactory;
 	private final LockComponent.Factory lockWorkflowFactory;
 	private final ErrorComponent.Factory errorWindowFactory;
+	private final ExecutorService executor;
 	private final FilteredList<Window> visibleWindows;
 
 	@Inject
-	public FxApplicationWindows(@PrimaryStage Stage primaryStage, Optional<TrayIntegrationProvider> trayIntegration, Lazy<MainWindowComponent> mainWindow, Lazy<PreferencesComponent> preferencesWindow, Lazy<QuitComponent> quitWindow, UnlockComponent.Factory unlockWorkflowFactory, LockComponent.Factory lockWorkflowFactory, ErrorComponent.Factory errorWindowFactory) {
+	public FxApplicationWindows(@PrimaryStage Stage primaryStage, Optional<TrayIntegrationProvider> trayIntegration, Lazy<MainWindowComponent> mainWindow, Lazy<PreferencesComponent> preferencesWindow, Lazy<QuitComponent> quitWindow, UnlockComponent.Factory unlockWorkflowFactory, LockComponent.Factory lockWorkflowFactory, ErrorComponent.Factory errorWindowFactory, ExecutorService executor) {
 		this.primaryStage = primaryStage;
 		this.trayIntegration = trayIntegration;
 		this.mainWindow = mainWindow;
@@ -56,7 +58,8 @@ public class FxApplicationWindows {
 		this.unlockWorkflowFactory = unlockWorkflowFactory;
 		this.lockWorkflowFactory = lockWorkflowFactory;
 		this.errorWindowFactory = errorWindowFactory;
-		this.visibleWindows = Stage.getWindows().filtered(Window::isShowing);
+		this.executor = executor;
+		this.visibleWindows = Window.getWindows().filtered(Window::isShowing);
 	}
 
 	public void initialize() {
@@ -111,7 +114,7 @@ public class FxApplicationWindows {
 					LOG.debug("Start unlock workflow for {}", vault.getDisplayName());
 					return unlockWorkflowFactory.create(vault, owner).unlockWorkflow();
 				}, Platform::runLater) //
-				.thenCompose(CompletableFuture::runAsync) // run unlock in forkjoin pool TODO: use executorservice
+				.thenCompose(unlockWorkflow -> CompletableFuture.runAsync(unlockWorkflow, executor)) //
 				.exceptionally(e -> {
 					showErrorWindow(e, owner == null ? primaryStage : owner, null);
 					return null;
@@ -124,7 +127,7 @@ public class FxApplicationWindows {
 					LOG.debug("Start lock workflow for {}", vault.getDisplayName());
 					return lockWorkflowFactory.create(vault, owner).lockWorkflow();
 				}, Platform::runLater) //
-				.thenCompose(CompletableFuture::runAsync) // run lock in forkjoin pool TODO: use executorservice
+				.thenCompose(lockWorkflow -> CompletableFuture.runAsync(lockWorkflow, executor)) //
 				.exceptionally(e -> {
 					showErrorWindow(e, owner == null ? primaryStage : owner, null);
 					return null;

@@ -99,7 +99,7 @@ public class Cryptomator {
 			Application.launch(MainApp.class);
 			LOG.info("UI shut down");
 			return 0;
-		} catch (Throwable e) {
+		} catch (Exception e) {
 			LOG.error("Terminating due to error", e);
 			return 1;
 		}

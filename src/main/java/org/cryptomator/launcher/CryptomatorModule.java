@@ -7,7 +7,6 @@ import org.cryptomator.integrations.autostart.AutoStartProvider;
 import org.cryptomator.integrations.tray.TrayIntegrationProvider;
 import org.cryptomator.integrations.uiappearance.UiAppearanceProvider;
 import org.cryptomator.ui.fxapp.FxApplicationComponent;
-import org.cryptomator.ui.traymenu.TrayMenuComponent;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -16,7 +15,6 @@ import java.util.ResourceBundle;
 import java.util.ServiceLoader;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.CountDownLatch;
 
 @Module(subcomponents = {FxApplicationComponent.class})
 class CryptomatorModule {

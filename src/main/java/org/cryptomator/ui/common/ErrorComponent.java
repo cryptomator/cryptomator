@@ -4,7 +4,6 @@ import dagger.BindsInstance;
 import dagger.Subcomponent;
 import org.cryptomator.common.Nullable;
 
-import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 

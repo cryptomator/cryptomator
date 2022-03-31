@@ -3,7 +3,6 @@ package org.cryptomator.ui.mainwindow;
 import org.cryptomator.common.LicenseHolder;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.ui.common.FxController;
-import org.cryptomator.ui.fxapp.FxApplication;
 import org.cryptomator.ui.fxapp.FxApplicationTerminator;
 import org.cryptomator.ui.fxapp.FxApplicationWindows;
 import org.cryptomator.ui.fxapp.UpdateChecker;

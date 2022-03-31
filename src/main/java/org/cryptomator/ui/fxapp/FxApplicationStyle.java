@@ -54,9 +54,9 @@ public class FxApplicationStyle {
 			case LIGHT -> applyLightTheme();
 			case DARK -> applyDarkTheme();
 			case AUTOMATIC -> {
-				appearanceProvider.ifPresent(appearanceProvider -> {
+				appearanceProvider.ifPresent(provider -> {
 					try {
-						appearanceProvider.addListener(systemInterfaceThemeListener);
+						provider.addListener(systemInterfaceThemeListener);
 					} catch (UiAppearanceException e) {
 						LOG.error("Failed to enable automatic theme switching.");
 					}
@@ -84,15 +84,11 @@ public class FxApplicationStyle {
 
 	private void applyLightTheme() {
 		Application.setUserAgentStylesheet(getClass().getResource("/css/light_theme.css").toString());
-		appearanceProvider.ifPresent(appearanceProvider -> {
-			appearanceProvider.adjustToTheme(Theme.LIGHT);
-		});
+		appearanceProvider.ifPresent(provider -> provider.adjustToTheme(Theme.LIGHT));
 	}
 
 	private void applyDarkTheme() {
 		Application.setUserAgentStylesheet(getClass().getResource("/css/dark_theme.css").toString());
-		appearanceProvider.ifPresent(appearanceProvider -> {
-			appearanceProvider.adjustToTheme(Theme.DARK);
-		});
+		appearanceProvider.ifPresent(provider -> provider.adjustToTheme(Theme.DARK));
 	}
 }
