@@ -140,4 +140,4 @@ Copy-Item ".\installer\Cryptomator-*.msi" -Destination ".\bundle\resources\Crypt
 	-dAboutUrl="$aboutUrl" `
 	-dHelpUrl="$helpUrl" `
 	-dUpdateUrl="$updateUrl"
-& "$env:WIX\bin\light.exe" -b . .\bundle\BundlewithWinfsp.wixobj -ext WixBalExtension -out installer\CryptomatorBundle.exe
+& "$env:WIX\bin\light.exe" -b . .\bundle\BundlewithWinfsp.wixobj -ext WixBalExtension -out installer\Cryptomator-Installer.exe
