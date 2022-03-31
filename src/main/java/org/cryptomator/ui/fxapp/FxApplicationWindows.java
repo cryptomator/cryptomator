@@ -123,7 +123,7 @@ public class FxApplicationWindows {
 
 	public CompletionStage<Void> startLockWorkflow(Vault vault, @Nullable Stage owner) {
 		return CompletableFuture.supplyAsync(() -> {
-					Preconditions.checkState(vault.stateProperty().transition(VaultState.Value.LOCKED, VaultState.Value.PROCESSING), "Vault not unlocked.");
+					Preconditions.checkState(vault.stateProperty().transition(VaultState.Value.UNLOCKED, VaultState.Value.PROCESSING), "Vault not unlocked.");
 					LOG.debug("Start lock workflow for {}", vault.getDisplayName());
 					return lockWorkflowFactory.create(vault, owner).lockWorkflow();
 				}, Platform::runLater) //
