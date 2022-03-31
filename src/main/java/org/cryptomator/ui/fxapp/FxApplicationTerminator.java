@@ -56,6 +56,7 @@ public class FxApplicationTerminator {
 		}
 
 		// allow sudden termination?
+		vaultListChanged(vaults);
 		vaults.addListener(this::vaultListChanged);
 
 		shutdownHook.runOnShutdown(this::forceUnmountRemainingVaults);
