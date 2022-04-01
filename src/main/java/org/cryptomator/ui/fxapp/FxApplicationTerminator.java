@@ -35,7 +35,7 @@ public class FxApplicationTerminator {
 	private final AtomicBoolean allowQuitWithoutPrompt = new AtomicBoolean();
 
 	@Inject
-	public FxApplicationTerminator(ObservableList<Vault> vaults, ShutdownHook shutdownHook, FxApplicationWindows appWindows){
+	public FxApplicationTerminator(ObservableList<Vault> vaults, ShutdownHook shutdownHook, FxApplicationWindows appWindows) {
 		this.vaults = vaults;
 		this.shutdownHook = shutdownHook;
 		this.appWindows = appWindows;
@@ -84,6 +84,12 @@ public class FxApplicationTerminator {
 		}
 	}
 
+	/**
+	 * Asks the app to quit. If confirmed, the JavaFX application will exit before giving a {@code response}.
+	 *
+	 * @param e ignored
+	 * @param response a quit response that will be {@link ExitingQuitResponse decorated in order to exit the JavaFX application}.
+	 */
 	private void handleQuitRequest(@SuppressWarnings("unused") @Nullable EventObject e, QuitResponse response) {
 		var exitingResponse = new ExitingQuitResponse(response);
 		if (allowQuitWithoutPrompt.get()) {
@@ -107,7 +113,12 @@ public class FxApplicationTerminator {
 		}
 	}
 
-	private class NoopQuitResponse implements QuitResponse {
+	/**
+	 * A dummy QuitResponse that ignores the response.
+	 *
+	 * To be used with {@link #handleQuitRequest(EventObject, QuitResponse)} if the invoking method is not interested in the response.
+	 */
+	private static class NoopQuitResponse implements QuitResponse {
 
 		@Override
 		public void performQuit() {
