@@ -50,15 +50,23 @@ public class FxApplication {
 		applicationTerminator.initialize();
 
 		// init system tray
+		final boolean hasTrayIcon;
 		if (SystemTray.isSupported() && settings.showTrayIcon().get()) {
 			trayMenu.get().initializeTrayIcon();
 			Platform.setImplicitExit(false); // don't quit when closing all windows
+			hasTrayIcon = true;
+		} else {
+			hasTrayIcon = false;
 		}
 
 		// show main window
 		appWindows.showMainWindow().thenAccept(stage -> {
 			boolean hide = settings.startHidden().get();
-			stage.setIconified(hide);
+			if (hasTrayIcon) {
+				stage.hide();
+			} else {
+				stage.setIconified(hide);
+			}
 		});
 
 		launchEventHandler.startHandlingLaunchEvents();

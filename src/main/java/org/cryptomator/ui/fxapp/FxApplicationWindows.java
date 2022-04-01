@@ -18,8 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javafx.application.Platform;
-import javafx.beans.binding.Bindings;
-import javafx.beans.value.ObservableValue;
+import javafx.collections.ListChangeListener;
 import javafx.collections.transformation.FilteredList;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
@@ -83,13 +82,14 @@ public class FxApplicationWindows {
 
 		// observe visible windows
 		if (trayIntegration.isPresent()) {
-			Bindings.isNotEmpty(visibleWindows).addListener(this::visibleWindowsChanged);
+			visibleWindows.addListener(this::visibleWindowsChanged);
 		}
 	}
 
-	private void visibleWindowsChanged(@SuppressWarnings("unused") ObservableValue<? extends Boolean> observableValue, @SuppressWarnings("unused") boolean oldValue, boolean newValue) {
-		LOG.debug("has visible stages: {}", newValue);
-		if (newValue) {
+	private void visibleWindowsChanged(ListChangeListener.Change<? extends Window> change) {
+		int visibleWindows = change.getList().size();
+		LOG.debug("visible windows: {}", visibleWindows);
+		if (visibleWindows > 0) {
 			trayIntegration.ifPresent(TrayIntegrationProvider::restoredFromTray);
 		} else {
 			trayIntegration.ifPresent(TrayIntegrationProvider::minimizedToTray);
