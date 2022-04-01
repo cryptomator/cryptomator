@@ -61,11 +61,12 @@ public class FxApplication {
 
 		// show main window
 		appWindows.showMainWindow().thenAccept(stage -> {
-			boolean hide = settings.startHidden().get();
-			if (hasTrayIcon) {
-				stage.hide();
-			} else {
-				stage.setIconified(hide);
+			if (settings.startHidden().get()) {
+				if (hasTrayIcon) {
+					stage.hide();
+				} else {
+					stage.setIconified(true);
+				}
 			}
 		});
 
