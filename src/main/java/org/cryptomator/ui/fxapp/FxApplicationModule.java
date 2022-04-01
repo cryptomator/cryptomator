@@ -28,31 +28,6 @@ import java.util.List;
 @Module(includes = {UpdateCheckerModule.class}, subcomponents = {TrayMenuComponent.class, MainWindowComponent.class, PreferencesComponent.class, UnlockComponent.class, LockComponent.class, QuitComponent.class, ErrorComponent.class})
 abstract class FxApplicationModule {
 
-	@Provides
-	@Named("windowIcons")
-	@FxApplicationScoped
-	static List<Image> provideWindowIcons() {
-		if (SystemUtils.IS_OS_MAC) {
-			return Collections.emptyList();
-		}
-		try {
-			return List.of( //
-					createImageFromResource("/img/window_icon_32.png"), //
-					createImageFromResource("/img/window_icon_512.png") //
-			);
-		} catch (IOException e) {
-			throw new UncheckedIOException("Failed to load embedded resource.", e);
-		}
-	}
-
-	@Provides
-	@FxApplicationScoped
-	static StageFactory provideStageFactory(@Named("windowIcons") List<Image> windowIcons) {
-		return new StageFactory(stage -> {
-			stage.getIcons().addAll(windowIcons);
-		});
-	}
-
 	private static Image createImageFromResource(String resourceName) throws IOException {
 		try (InputStream in = FxApplicationModule.class.getResourceAsStream(resourceName)) {
 			return new Image(in);

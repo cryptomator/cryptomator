@@ -17,7 +17,6 @@ public class FxApplication {
 
 	private static final Logger LOG = LoggerFactory.getLogger(FxApplication.class);
 
-	private final Stage primaryStage;
 	private final Settings settings;
 	private final AppLaunchEventHandler launchEventHandler;
 	private final Lazy<TrayMenuComponent> trayMenu;
@@ -27,8 +26,7 @@ public class FxApplication {
 	private final AutoUnlocker autoUnlocker;
 
 	@Inject
-	FxApplication(@PrimaryStage Stage primaryStage, Settings settings, AppLaunchEventHandler launchEventHandler, Lazy<TrayMenuComponent> trayMenu, FxApplicationWindows appWindows, FxApplicationStyle applicationStyle, FxApplicationTerminator applicationTerminator, AutoUnlocker autoUnlocker) {
-		this.primaryStage = primaryStage;
+	FxApplication(Settings settings, AppLaunchEventHandler launchEventHandler, Lazy<TrayMenuComponent> trayMenu, FxApplicationWindows appWindows, FxApplicationStyle applicationStyle, FxApplicationTerminator applicationTerminator, AutoUnlocker autoUnlocker) {
 		this.settings = settings;
 		this.launchEventHandler = launchEventHandler;
 		this.trayMenu = trayMenu;
@@ -40,11 +38,6 @@ public class FxApplication {
 
 	public void start() {
 		LOG.trace("FxApplication.start()");
-		primaryStage.setTitle("Cryptomator");
-		primaryStage.initStyle(StageStyle.UNDECORATED);
-		primaryStage.setMinWidth(650);
-		primaryStage.setMinHeight(440);
-
 		applicationStyle.initialize();
 		appWindows.initialize();
 		applicationTerminator.initialize();

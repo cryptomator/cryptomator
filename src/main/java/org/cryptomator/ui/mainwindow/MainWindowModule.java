@@ -13,6 +13,7 @@ import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlLoaderFactory;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.StageFactory;
+import org.cryptomator.ui.common.StageInitializer;
 import org.cryptomator.ui.fxapp.PrimaryStage;
 import org.cryptomator.ui.health.HealthCheckComponent;
 import org.cryptomator.ui.migration.MigrationComponent;
@@ -35,10 +36,17 @@ import java.util.ResourceBundle;
 @Module(subcomponents = {AddVaultWizardComponent.class, HealthCheckComponent.class, MigrationComponent.class, RemoveVaultComponent.class, VaultOptionsComponent.class, VaultStatisticsComponent.class, WrongFileAlertComponent.class, ErrorComponent.class})
 abstract class MainWindowModule {
 
-	@Binds
+	@Provides
 	@MainWindow
 	@MainWindowScoped
-	abstract Stage bindMainWindow(@PrimaryStage Stage primaryStage);
+	static Stage provideMainWindow(@PrimaryStage Stage stage, StageInitializer initializer) {
+		initializer.accept(stage);
+		stage.setTitle("Cryptomator");
+		stage.initStyle(StageStyle.UNDECORATED);
+		stage.setMinWidth(650);
+		stage.setMinHeight(440);
+		return stage;
+	}
 
 	@Provides
 	@MainWindowScoped
@@ -57,7 +65,7 @@ abstract class MainWindowModule {
 	@MainWindowScoped
 	@Named("errorWindow")
 	static Stage provideErrorStage(@MainWindow Stage window, StageFactory factory, ResourceBundle resourceBundle) {
-		Stage stage = factory.create(StageStyle.DECORATED);
+		Stage stage = factory.create();
 		stage.setTitle(resourceBundle.getString("main.vaultDetail.error.windowTitle"));
 		stage.initModality(Modality.APPLICATION_MODAL);
 		stage.initOwner(window);
