@@ -10,12 +10,12 @@ import org.cryptomator.cryptolib.api.CryptorProvider;
 import org.cryptomator.cryptolib.api.Masterkey;
 import org.cryptomator.cryptolib.api.MasterkeyLoader;
 import org.cryptomator.cryptolib.common.MasterkeyFileAccess;
-import org.cryptomator.ui.common.ErrorComponent;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.NewPasswordController;
 import org.cryptomator.ui.common.Tasks;
+import org.cryptomator.ui.fxapp.FxApplicationWindows;
 import org.cryptomator.ui.keyloading.masterkeyfile.MasterkeyFileLoadingStrategy;
 import org.cryptomator.ui.recoverykey.RecoveryKeyFactory;
 import org.slf4j.Logger;
@@ -60,7 +60,7 @@ public class CreateNewVaultPasswordController implements FxController {
 	private final Lazy<Scene> chooseLocationScene;
 	private final Lazy<Scene> recoveryKeyScene;
 	private final Lazy<Scene> successScene;
-	private final ErrorComponent.Builder errorComponent;
+	private final FxApplicationWindows appWindows;
 	private final ExecutorService executor;
 	private final RecoveryKeyFactory recoveryKeyFactory;
 	private final StringProperty vaultNameProperty;
@@ -83,12 +83,12 @@ public class CreateNewVaultPasswordController implements FxController {
 	public NewPasswordController newPasswordSceneController;
 
 	@Inject
-	CreateNewVaultPasswordController(@AddVaultWizardWindow Stage window, @FxmlScene(FxmlFile.ADDVAULT_NEW_LOCATION) Lazy<Scene> chooseLocationScene, @FxmlScene(FxmlFile.ADDVAULT_NEW_RECOVERYKEY) Lazy<Scene> recoveryKeyScene, @FxmlScene(FxmlFile.ADDVAULT_SUCCESS) Lazy<Scene> successScene, ErrorComponent.Builder errorComponent, ExecutorService executor, RecoveryKeyFactory recoveryKeyFactory, @Named("vaultName") StringProperty vaultName, ObjectProperty<Path> vaultPath, @AddVaultWizardWindow ObjectProperty<Vault> vault, @Named("recoveryKey") StringProperty recoveryKey, VaultListManager vaultListManager, ResourceBundle resourceBundle, ReadmeGenerator readmeGenerator, SecureRandom csprng, MasterkeyFileAccess masterkeyFileAccess) {
+	CreateNewVaultPasswordController(@AddVaultWizardWindow Stage window, @FxmlScene(FxmlFile.ADDVAULT_NEW_LOCATION) Lazy<Scene> chooseLocationScene, @FxmlScene(FxmlFile.ADDVAULT_NEW_RECOVERYKEY) Lazy<Scene> recoveryKeyScene, @FxmlScene(FxmlFile.ADDVAULT_SUCCESS) Lazy<Scene> successScene, FxApplicationWindows appWindows, ExecutorService executor, RecoveryKeyFactory recoveryKeyFactory, @Named("vaultName") StringProperty vaultName, ObjectProperty<Path> vaultPath, @AddVaultWizardWindow ObjectProperty<Vault> vault, @Named("recoveryKey") StringProperty recoveryKey, VaultListManager vaultListManager, ResourceBundle resourceBundle, ReadmeGenerator readmeGenerator, SecureRandom csprng, MasterkeyFileAccess masterkeyFileAccess) {
 		this.window = window;
 		this.chooseLocationScene = chooseLocationScene;
 		this.recoveryKeyScene = recoveryKeyScene;
 		this.successScene = successScene;
-		this.errorComponent = errorComponent;
+		this.appWindows = appWindows;
 		this.executor = executor;
 		this.recoveryKeyFactory = recoveryKeyFactory;
 		this.vaultNameProperty = vaultName;
@@ -127,7 +127,7 @@ public class CreateNewVaultPasswordController implements FxController {
 			Files.createDirectory(pathToVault);
 		} catch (IOException e) {
 			LOG.error("Failed to create vault directory.", e);
-			errorComponent.cause(e).window(window).returnToScene(window.getScene()).build().showErrorScene();
+			appWindows.showErrorWindow(e, window, window.getScene());
 			return;
 		}
 
@@ -152,7 +152,7 @@ public class CreateNewVaultPasswordController implements FxController {
 			window.setScene(recoveryKeyScene.get());
 		}).onError(IOException.class, e -> {
 			LOG.error("Failed to initialize vault.", e);
-			errorComponent.cause(e).window(window).returnToScene(window.getScene()).build().showErrorScene();
+			appWindows.showErrorWindow(e, window, window.getScene());
 		}).andFinally(() -> {
 			processing.set(false);
 		}).runOnce(executor);
@@ -168,7 +168,7 @@ public class CreateNewVaultPasswordController implements FxController {
 			window.setScene(successScene.get());
 		}).onError(IOException.class, e -> {
 			LOG.error("Failed to initialize vault.", e);
-			errorComponent.cause(e).window(window).returnToScene(window.getScene()).build().showErrorScene();
+			appWindows.showErrorWindow(e, window, window.getScene());
 		}).andFinally(() -> {
 			processing.set(false);
 		}).runOnce(executor);

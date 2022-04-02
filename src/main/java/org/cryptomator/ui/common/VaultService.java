@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javafx.concurrent.Task;
+import javafx.stage.Stage;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -53,7 +54,9 @@ public class VaultService {
 	 *
 	 * @param vault The vault to lock
 	 * @param forced Whether to attempt a forced lock
+	 * @deprecated use {@link org.cryptomator.ui.fxapp.FxApplicationWindows#startLockWorkflow(Vault, Stage)}
 	 */
+	@Deprecated
 	public void lock(Vault vault, boolean forced) {
 		executorService.execute(createLockTask(vault, forced));
 	}
@@ -90,7 +93,7 @@ public class VaultService {
 	 * @return Meta-Task that waits until all vaults are locked or fails after the first failure of a subtask
 	 */
 	public Task<Collection<Vault>> createLockAllTask(Collection<Vault> vaults, boolean forced) {
-		List<Task<Vault>> lockTasks = vaults.stream().map(v -> new LockVaultTask(v, forced)).collect(Collectors.toUnmodifiableList());
+		List<Task<Vault>> lockTasks = vaults.stream().<Task<Vault>>map(v -> new LockVaultTask(v, forced)).toList();
 		lockTasks.forEach(executorService::execute);
 		Task<Collection<Vault>> task = new WaitForTasksTask(lockTasks);
 		String vaultNames = vaults.stream().map(Vault::getDisplayName).collect(Collectors.joining(", "));
