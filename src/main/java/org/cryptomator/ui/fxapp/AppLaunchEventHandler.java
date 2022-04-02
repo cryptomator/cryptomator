@@ -1,14 +1,14 @@
-package org.cryptomator.ui.launcher;
+package org.cryptomator.ui.fxapp;
 
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultListManager;
-import org.cryptomator.ui.fxapp.FxApplication;
+import org.cryptomator.launcher.AppLaunchEvent;
+import org.cryptomator.ui.common.VaultService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.inject.Singleton;
 import javafx.application.Platform;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -17,22 +17,25 @@ import java.util.concurrent.ExecutorService;
 
 import static org.cryptomator.common.Constants.CRYPTOMATOR_FILENAME_EXT;
 
-@Singleton
+// TODO: use message bus
+@FxApplicationScoped
 class AppLaunchEventHandler {
 
 	private static final Logger LOG = LoggerFactory.getLogger(AppLaunchEventHandler.class);
 
 	private final BlockingQueue<AppLaunchEvent> launchEventQueue;
 	private final ExecutorService executorService;
-	private final FxApplicationStarter fxApplicationStarter;
+	private final FxApplicationWindows appWindows;
 	private final VaultListManager vaultListManager;
+	private final VaultService vaultService;
 
 	@Inject
-	public AppLaunchEventHandler(@Named("launchEventQueue") BlockingQueue<AppLaunchEvent> launchEventQueue, ExecutorService executorService, FxApplicationStarter fxApplicationStarter, VaultListManager vaultListManager) {
+	public AppLaunchEventHandler(@Named("launchEventQueue") BlockingQueue<AppLaunchEvent> launchEventQueue, ExecutorService executorService, FxApplicationWindows appWindows, VaultListManager vaultListManager, VaultService vaultService) {
 		this.launchEventQueue = launchEventQueue;
 		this.executorService = executorService;
-		this.fxApplicationStarter = fxApplicationStarter;
+		this.appWindows = appWindows;
 		this.vaultListManager = vaultListManager;
+		this.vaultService = vaultService;
 	}
 
 	public void startHandlingLaunchEvents() {
@@ -52,14 +55,12 @@ class AppLaunchEventHandler {
 	}
 
 	private void handleLaunchEvent(AppLaunchEvent event) {
-		switch (event.getType()) {
-			case REVEAL_APP -> fxApplicationStarter.get().thenAccept(FxApplication::showMainWindow);
-			case OPEN_FILE -> fxApplicationStarter.get().thenRun(() -> {
-				Platform.runLater(() -> {
-					event.getPathsToOpen().forEach(this::addOrRevealVault);
-				});
+		switch (event.type()) {
+			case REVEAL_APP -> appWindows.showMainWindow();
+			case OPEN_FILE -> Platform.runLater(() -> {
+				event.pathsToOpen().forEach(this::addOrRevealVault);
 			});
-			default -> LOG.warn("Unsupported event type: {}", event.getType());
+			default -> LOG.warn("Unsupported event type: {}", event.type());
 		}
 	}
 
@@ -75,7 +76,7 @@ class AppLaunchEventHandler {
 			}
 
 			if (v.isUnlocked()) {
-				fxApplicationStarter.get().thenAccept(app -> app.getVaultService().reveal(v));
+				vaultService.reveal(v);
 			}
 			LOG.debug("Added vault {}", potentialVaultPath);
 		} catch (IOException e) {

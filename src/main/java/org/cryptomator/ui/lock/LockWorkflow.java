@@ -5,9 +5,9 @@ import org.cryptomator.common.vaults.LockNotCompletedException;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.common.vaults.Volume;
-import org.cryptomator.ui.common.ErrorComponent;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
+import org.cryptomator.ui.fxapp.FxApplicationWindows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,16 +40,16 @@ public class LockWorkflow extends Task<Void> {
 	private final AtomicReference<CompletableFuture<Boolean>> forceRetryDecision;
 	private final Lazy<Scene> lockForcedScene;
 	private final Lazy<Scene> lockFailedScene;
-	private final ErrorComponent.Builder errorComponent;
+	private final FxApplicationWindows appWindows;
 
 	@Inject
-	public LockWorkflow(@LockWindow Stage lockWindow, @LockWindow Vault vault, AtomicReference<CompletableFuture<Boolean>> forceRetryDecision, @FxmlScene(FxmlFile.LOCK_FORCED) Lazy<Scene> lockForcedScene, @FxmlScene(FxmlFile.LOCK_FAILED) Lazy<Scene> lockFailedScene, ErrorComponent.Builder errorComponent) {
+	public LockWorkflow(@LockWindow Stage lockWindow, @LockWindow Vault vault, AtomicReference<CompletableFuture<Boolean>> forceRetryDecision, @FxmlScene(FxmlFile.LOCK_FORCED) Lazy<Scene> lockForcedScene, @FxmlScene(FxmlFile.LOCK_FAILED) Lazy<Scene> lockFailedScene, FxApplicationWindows appWindows) {
 		this.lockWindow = lockWindow;
 		this.vault = vault;
 		this.forceRetryDecision = forceRetryDecision;
 		this.lockForcedScene = lockForcedScene;
 		this.lockFailedScene = lockFailedScene;
-		this.errorComponent = errorComponent;
+		this.appWindows = appWindows;
 	}
 
 	@Override
@@ -109,7 +109,7 @@ public class LockWorkflow extends Task<Void> {
 			lockWindow.setScene(lockFailedScene.get());
 			lockWindow.show();
 		} else {
-			errorComponent.cause(throwable).window(lockWindow).build().showErrorScene();
+			appWindows.showErrorWindow(throwable, lockWindow, null);
 		}
 	}
 

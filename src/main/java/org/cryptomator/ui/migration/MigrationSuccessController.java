@@ -2,25 +2,24 @@ package org.cryptomator.ui.migration;
 
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.FxController;
-import org.cryptomator.ui.fxapp.FxApplication;
-import org.cryptomator.ui.mainwindow.MainWindow;
+import org.cryptomator.ui.fxapp.FxApplicationWindows;
+import org.cryptomator.ui.fxapp.PrimaryStage;
 
 import javax.inject.Inject;
 import javafx.fxml.FXML;
 import javafx.stage.Stage;
-import java.util.Optional;
 
 @MigrationScoped
 public class MigrationSuccessController implements FxController {
 
-	private final FxApplication fxApplication;
+	private final FxApplicationWindows appWindows;
 	private final Stage window;
 	private final Vault vault;
 	private final Stage mainWindow;
 
 	@Inject
-	MigrationSuccessController(FxApplication fxApplication, @MigrationWindow Stage window, @MigrationWindow Vault vault, @MainWindow Stage mainWindow) {
-		this.fxApplication = fxApplication;
+	MigrationSuccessController(FxApplicationWindows appWindows, @MigrationWindow Stage window, @MigrationWindow Vault vault, @PrimaryStage Stage mainWindow) {
+		this.appWindows = appWindows;
 		this.window = window;
 		this.vault = vault;
 		this.mainWindow = mainWindow;
@@ -29,7 +28,7 @@ public class MigrationSuccessController implements FxController {
 	@FXML
 	public void unlockAndClose() {
 		close();
-		fxApplication.startUnlockWorkflow(vault, Optional.of(mainWindow));
+		appWindows.startUnlockWorkflow(vault, mainWindow);
 	}
 
 	@FXML

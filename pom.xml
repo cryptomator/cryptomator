@@ -53,7 +53,8 @@
 		<mockito.version>4.4.0</mockito.version>
 		<hamcrest.version>2.2</hamcrest.version>
 
-		<!-- build plugin dependencies -->
+		<!-- build-time dependencies -->
+		<jetbrains.annotations.version>23.0.0</jetbrains.annotations.version>
 		<dependency-check.version>7.0.2</dependency-check.version>
 		<jacoco.version>0.8.7</jacoco.version>
 	</properties>
@@ -223,6 +224,13 @@
 			<artifactId>jimfs</artifactId>
 			<version>1.2</version>
 			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.jetbrains</groupId>
+			<artifactId>annotations</artifactId>
+			<version>${jetbrains.annotations.version}</version>
+			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 
