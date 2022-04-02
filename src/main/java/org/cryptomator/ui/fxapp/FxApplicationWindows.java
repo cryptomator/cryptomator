@@ -97,15 +97,15 @@ public class FxApplicationWindows {
 	}
 
 	public CompletionStage<Stage> showMainWindow() {
-		return CompletableFuture.supplyAsync(mainWindow.get()::showMainWindow, Platform::runLater);
+		return CompletableFuture.supplyAsync(mainWindow.get()::showMainWindow, Platform::runLater).whenComplete(this::reportErrors);
 	}
 
 	public CompletionStage<Stage> showPreferencesWindow(SelectedPreferencesTab selectedTab) {
-		return CompletableFuture.supplyAsync(() -> preferencesWindow.get().showPreferencesWindow(selectedTab), Platform::runLater);
+		return CompletableFuture.supplyAsync(() -> preferencesWindow.get().showPreferencesWindow(selectedTab), Platform::runLater).whenComplete(this::reportErrors);
 	}
 
 	public CompletionStage<Stage> showQuitWindow(QuitResponse response) {
-		return CompletableFuture.supplyAsync(() -> quitWindow.get().showQuitWindow(response), Platform::runLater);
+		return CompletableFuture.supplyAsync(() -> quitWindow.get().showQuitWindow(response), Platform::runLater).whenComplete(this::reportErrors);
 	}
 
 	public CompletionStage<Void> startUnlockWorkflow(Vault vault, @Nullable Stage owner) {
@@ -143,7 +143,13 @@ public class FxApplicationWindows {
 	 * @return A
 	 */
 	public CompletionStage<Stage> showErrorWindow(Throwable cause, Stage window, @Nullable Scene previousScene) {
-		return CompletableFuture.supplyAsync(() -> errorWindowFactory.create(cause, window, previousScene).show(), Platform::runLater);
+		return CompletableFuture.supplyAsync(() -> errorWindowFactory.create(cause, window, previousScene).show(), Platform::runLater).whenComplete(this::reportErrors);
+	}
+
+	private void reportErrors(@Nullable Stage stage, @Nullable Throwable error) {
+		if (error != null) {
+			LOG.error("Failed to display stage", error);
+		}
 	}
 
 }
