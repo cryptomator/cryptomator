@@ -33,7 +33,7 @@ public class CustomMountPointChooserTest {
 		this.volume = Mockito.mock(Volume.class);
 		this.vaultSettings = Mockito.mock(VaultSettings.class);
 		this.environment = Mockito.mock(Environment.class);
-		this.customMpc = new CustomMountPointChooser(vaultSettings, environment);
+		this.customMpc = new CustomMountPointChooser(vaultSettings);
 	}
 
 	@Nested

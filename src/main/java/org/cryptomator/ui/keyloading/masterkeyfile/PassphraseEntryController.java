@@ -129,8 +129,11 @@ public class PassphraseEntryController implements FxController {
 	}
 
 	private void windowClosed(WindowEvent windowEvent) {
-		LOG.debug("Unlock canceled by user.");
-		result.cancel(true);
+		if(!result.isDone()) {
+			result.cancel(true);
+			LOG.debug("Unlock canceled by user.");
+		}
+
 	}
 
 	@FXML

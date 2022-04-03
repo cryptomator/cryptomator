@@ -13,17 +13,15 @@ import org.cryptomator.common.ShutdownHook;
 import org.cryptomator.ipc.IpcCommunicator;
 import org.cryptomator.logging.DebugMode;
 import org.cryptomator.logging.LoggerConfiguration;
-import org.cryptomator.ui.launcher.UiLauncher;
+import org.cryptomator.ui.fxapp.FxApplicationComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
-import java.io.IOException;
+import javafx.application.Application;
+import javafx.stage.Stage;
 import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 
 @Singleton
@@ -38,19 +36,15 @@ public class Cryptomator {
 	private final DebugMode debugMode;
 	private final Environment env;
 	private final Lazy<IpcMessageHandler> ipcMessageHandler;
-	private final CountDownLatch shutdownLatch;
 	private final ShutdownHook shutdownHook;
-	private final Lazy<UiLauncher> uiLauncher;
 
 	@Inject
-	Cryptomator(LoggerConfiguration logConfig, DebugMode debugMode, Environment env, Lazy<IpcMessageHandler> ipcMessageHandler, @Named("shutdownLatch") CountDownLatch shutdownLatch, ShutdownHook shutdownHook, Lazy<UiLauncher> uiLauncher) {
+	Cryptomator(LoggerConfiguration logConfig, DebugMode debugMode, Environment env, Lazy<IpcMessageHandler> ipcMessageHandler, ShutdownHook shutdownHook) {
 		this.logConfig = logConfig;
 		this.debugMode = debugMode;
 		this.env = env;
 		this.ipcMessageHandler = ipcMessageHandler;
-		this.shutdownLatch = shutdownLatch;
 		this.shutdownHook = shutdownHook;
-		this.uiLauncher = uiLauncher;
 	}
 
 	public static void main(String[] args) {
@@ -79,7 +73,7 @@ public class Cryptomator {
 				communicator.sendHandleLaunchargs(List.of(args));
 				communicator.sendRevealRunningApp();
 				LOG.info("Found running application instance. Shutting down...");
-				return 2;
+				return 0;
 			} else {
 				shutdownHook.runOnShutdown(communicator::closeUnchecked);
 				var executor = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setNameFormat("IPC-%d").build());
@@ -96,21 +90,38 @@ public class Cryptomator {
 	}
 
 	/**
-	 * Launches the JavaFX application and waits until shutdown is requested.
+	 * Launches the JavaFX application, blocking the main thread until shuts down.
 	 *
 	 * @return Nonzero exit code in case of an error.
-	 * @implNote This method blocks until {@link #shutdownLatch} reached zero.
 	 */
 	private int runGuiApplication() {
 		try {
-			uiLauncher.get().launch();
-			shutdownLatch.await();
+			Application.launch(MainApp.class);
 			LOG.info("UI shut down");
 			return 0;
-		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
+		} catch (Exception e) {
+			LOG.error("Terminating due to error", e);
 			return 1;
 		}
+	}
+
+	public static class MainApp extends Application {
+
+		@Override
+		public void start(Stage primaryStage) {
+			LOG.info("JavaFX application started.");
+			FxApplicationComponent component = CRYPTOMATOR_COMPONENT.fxAppComponentBuilder() //
+					.fxApplication(this) //
+					.primaryStage(primaryStage) //
+					.build();
+			component.application().start();
+		}
+
+		@Override
+		public void stop() {
+			LOG.info("JavaFX application stopped.");
+		}
+
 	}
 
 }

@@ -43,13 +43,15 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      - name: Upload code coverage report
-        id: codacyCoverageReporter
-        if: "github.event_name == 'push' || contains(github.event.pull_request.labels.*.name, 'pr:safe')"
-        run: bash <(curl -Ls https://coverage.codacy.com/get.sh)
+      - name: Sign source tarball with key 615D449FE6E6A235
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          git archive --prefix="cryptomator-${{ github.ref_name }}/" -o "cryptomator-${{ github.ref_name }}.tar.gz" ${{ github.ref }}
+          echo "${GPG_PRIVATE_KEY}" | gpg --batch --quiet --import
+          echo "${GPG_PASSPHRASE}" | gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign -a cryptomator-*.tar.gz
         env:
-          CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
-        continue-on-error: true
+          GPG_PRIVATE_KEY: ${{ secrets.RELEASES_GPG_PRIVATE_KEY }}
+          GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
       - name: Draft a release
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v1
@@ -58,6 +60,9 @@ jobs:
           discussion_category_name: releases
           token: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}
           generate_release_notes: true
+          files: |
+            cryptomator-*.tar.gz.asc
+          fail_on_unmatched_files: true
           body: |-
             :construction: Work in Progress
             

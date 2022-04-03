@@ -2,6 +2,8 @@ import org.cryptomator.integrations.tray.TrayMenuController;
 import org.cryptomator.ui.traymenu.AwtTrayMenuController;
 
 module org.cryptomator.desktop {
+	requires static org.jetbrains.annotations;
+
 	requires org.cryptomator.cryptofs;
 	requires org.cryptomator.frontend.dokany;
 	requires org.cryptomator.frontend.fuse;
@@ -30,6 +32,8 @@ module org.cryptomator.desktop {
 	provides TrayMenuController with AwtTrayMenuController;
 
 	opens org.cryptomator.common.settings to com.google.gson;
+
+	opens org.cryptomator.launcher to javafx.graphics;
 
 	opens org.cryptomator.common to javafx.fxml;
 	opens org.cryptomator.common.vaults to javafx.fxml;

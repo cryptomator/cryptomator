@@ -3,9 +3,9 @@ package org.cryptomator.ui.mainwindow;
 import org.cryptomator.common.LicenseHolder;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.ui.common.FxController;
-import org.cryptomator.ui.fxapp.FxApplication;
+import org.cryptomator.ui.fxapp.FxApplicationTerminator;
+import org.cryptomator.ui.fxapp.FxApplicationWindows;
 import org.cryptomator.ui.fxapp.UpdateChecker;
-import org.cryptomator.ui.launcher.AppLifecycleListener;
 import org.cryptomator.ui.preferences.SelectedPreferencesTab;
 import org.cryptomator.ui.traymenu.TrayMenuComponent;
 import org.slf4j.Logger;
@@ -25,9 +25,9 @@ public class MainWindowTitleController implements FxController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(MainWindowTitleController.class);
 
-	private final AppLifecycleListener appLifecycle;
 	private final Stage window;
-	private final FxApplication application;
+	private final FxApplicationTerminator terminator;
+	private final FxApplicationWindows appWindows;
 	private final boolean trayMenuInitialized;
 	private final UpdateChecker updateChecker;
 	private final BooleanBinding updateAvailable;
@@ -40,10 +40,10 @@ public class MainWindowTitleController implements FxController {
 	private double yOffset;
 
 	@Inject
-	MainWindowTitleController(AppLifecycleListener appLifecycle, @MainWindow Stage window, FxApplication application, TrayMenuComponent trayMenu, UpdateChecker updateChecker, LicenseHolder licenseHolder, Settings settings) {
-		this.appLifecycle = appLifecycle;
+	MainWindowTitleController(@MainWindow Stage window, FxApplicationTerminator terminator, FxApplicationWindows appWindows, TrayMenuComponent trayMenu, UpdateChecker updateChecker, LicenseHolder licenseHolder, Settings settings) {
 		this.window = window;
-		this.application = application;
+		this.terminator = terminator;
+		this.appWindows = appWindows;
 		this.trayMenuInitialized = trayMenu.isInitialized();
 		this.updateChecker = updateChecker;
 		this.updateAvailable = updateChecker.latestVersionProperty().isNotNull();
@@ -96,7 +96,7 @@ public class MainWindowTitleController implements FxController {
 		if (trayMenuInitialized) {
 			window.close();
 		} else {
-			appLifecycle.quit();
+			terminator.terminate();
 		}
 	}
 
@@ -107,17 +107,17 @@ public class MainWindowTitleController implements FxController {
 
 	@FXML
 	public void showPreferences() {
-		application.showPreferencesWindow(SelectedPreferencesTab.ANY);
+		appWindows.showPreferencesWindow(SelectedPreferencesTab.ANY);
 	}
 
 	@FXML
 	public void showGeneralPreferences() {
-		application.showPreferencesWindow(SelectedPreferencesTab.GENERAL);
+		appWindows.showPreferencesWindow(SelectedPreferencesTab.GENERAL);
 	}
 
 	@FXML
 	public void showDonationKeyPreferences() {
-		application.showPreferencesWindow(SelectedPreferencesTab.CONTRIBUTE);
+		appWindows.showPreferencesWindow(SelectedPreferencesTab.CONTRIBUTE);
 	}
 
 	/* Getter/Setter */

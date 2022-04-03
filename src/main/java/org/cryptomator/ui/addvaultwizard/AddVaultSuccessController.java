@@ -2,25 +2,24 @@ package org.cryptomator.ui.addvaultwizard;
 
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.FxController;
-import org.cryptomator.ui.fxapp.FxApplication;
+import org.cryptomator.ui.fxapp.FxApplicationWindows;
 
 import javax.inject.Inject;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.fxml.FXML;
 import javafx.stage.Stage;
-import java.util.Optional;
 
 @AddVaultWizardScoped
 public class AddVaultSuccessController implements FxController {
 
-	private final FxApplication fxApplication;
+	private final FxApplicationWindows appWindows;
 	private final Stage window;
 	private final ReadOnlyObjectProperty<Vault> vault;
 
 	@Inject
-	AddVaultSuccessController(FxApplication fxApplication, @AddVaultWizardWindow Stage window, @AddVaultWizardWindow ObjectProperty<Vault> vault) {
-		this.fxApplication = fxApplication;
+	AddVaultSuccessController(FxApplicationWindows appWindows, @AddVaultWizardWindow Stage window, @AddVaultWizardWindow ObjectProperty<Vault> vault) {
+		this.appWindows = appWindows;
 		this.window = window;
 		this.vault = vault;
 	}
@@ -28,7 +27,7 @@ public class AddVaultSuccessController implements FxController {
 	@FXML
 	public void unlockAndClose() {
 		close();
-		fxApplication.startUnlockWorkflow(vault.get(), Optional.of(window));
+		appWindows.startUnlockWorkflow(vault.get(), window);
 	}
 
 	@FXML

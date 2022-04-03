@@ -2,11 +2,11 @@ package org.cryptomator.ui.lock;
 
 import dagger.BindsInstance;
 import dagger.Subcomponent;
+import org.cryptomator.common.Nullable;
 import org.cryptomator.common.vaults.Vault;
 
 import javax.inject.Named;
 import javafx.stage.Stage;
-import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
@@ -25,15 +25,9 @@ public interface LockComponent {
 		return workflow;
 	}
 
-	@Subcomponent.Builder
-	interface Builder {
-
-		@BindsInstance
-		LockComponent.Builder vault(@LockWindow Vault vault);
-
-		@BindsInstance
-		LockComponent.Builder owner(@Named("lockWindowOwner") Optional<Stage> owner);
-
-		LockComponent build();
+	@Subcomponent.Factory
+	interface Factory {
+		LockComponent create(@BindsInstance @LockWindow Vault vault, @BindsInstance @Named("lockWindowOwner") @Nullable Stage owner);
 	}
+
 }

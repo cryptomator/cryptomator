@@ -14,7 +14,7 @@ import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.NewPasswordController;
 import org.cryptomator.ui.common.PasswordStrengthUtil;
 import org.cryptomator.ui.common.StageFactory;
-import org.cryptomator.ui.mainwindow.MainWindow;
+import org.cryptomator.ui.fxapp.PrimaryStage;
 import org.cryptomator.ui.recoverykey.RecoveryKeyDisplayController;
 
 import javax.inject.Named;
@@ -43,12 +43,12 @@ public abstract class AddVaultModule {
 	@Provides
 	@AddVaultWizardWindow
 	@AddVaultWizardScoped
-	static Stage provideStage(StageFactory factory, @MainWindow Stage owner, ResourceBundle resourceBundle) {
+	static Stage provideStage(StageFactory factory, @PrimaryStage Stage primaryStage, ResourceBundle resourceBundle) {
 		Stage stage = factory.create();
 		stage.setTitle(resourceBundle.getString("addvaultwizard.title"));
 		stage.setResizable(false);
 		stage.initModality(Modality.WINDOW_MODAL);
-		stage.initOwner(owner);
+		stage.initOwner(primaryStage);
 		return stage;
 	}
 

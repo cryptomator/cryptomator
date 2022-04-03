@@ -7,10 +7,10 @@ import org.cryptomator.cryptofs.VaultConfig;
 import org.cryptomator.cryptofs.VaultConfigLoadException;
 import org.cryptomator.cryptofs.VaultKeyInvalidException;
 import org.cryptomator.cryptolib.api.Masterkey;
-import org.cryptomator.ui.common.ErrorComponent;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
+import org.cryptomator.ui.fxapp.FxApplicationWindows;
 import org.cryptomator.ui.keyloading.KeyLoadingStrategy;
 import org.cryptomator.ui.unlock.UnlockCancelledException;
 import org.slf4j.Logger;
@@ -40,10 +40,10 @@ public class StartController implements FxController {
 	private final AtomicReference<Masterkey> masterkeyRef;
 	private final AtomicReference<VaultConfig> vaultConfigRef;
 	private final Lazy<Scene> checkScene;
-	private final Lazy<ErrorComponent.Builder> errorComponent;
+	private final FxApplicationWindows appWindows;
 
 	@Inject
-	public StartController(@HealthCheckWindow Stage window, @HealthCheckWindow Vault vault, @HealthCheckWindow KeyLoadingStrategy keyLoadingStrategy, ExecutorService executor, AtomicReference<Masterkey> masterkeyRef, AtomicReference<VaultConfig> vaultConfigRef, @FxmlScene(FxmlFile.HEALTH_CHECK_LIST) Lazy<Scene> checkScene, Lazy<ErrorComponent.Builder> errorComponent, @Named("unlockWindow") Stage unlockWindow) {
+	public StartController(@HealthCheckWindow Stage window, @HealthCheckWindow Vault vault, @HealthCheckWindow KeyLoadingStrategy keyLoadingStrategy, ExecutorService executor, AtomicReference<Masterkey> masterkeyRef, AtomicReference<VaultConfig> vaultConfigRef, @FxmlScene(FxmlFile.HEALTH_CHECK_LIST) Lazy<Scene> checkScene, FxApplicationWindows appWindows, @Named("unlockWindow") Stage unlockWindow) {
 		this.window = window;
 		this.unlockWindow = unlockWindow;
 		this.vaultConfig = vault.getVaultConfigCache();
@@ -52,7 +52,7 @@ public class StartController implements FxController {
 		this.masterkeyRef = masterkeyRef;
 		this.vaultConfigRef = vaultConfigRef;
 		this.checkScene = checkScene;
-		this.errorComponent = errorComponent;
+		this.appWindows = appWindows;
 	}
 
 	@FXML
@@ -106,10 +106,10 @@ public class StartController implements FxController {
 			// ok
 		} else if (e instanceof VaultKeyInvalidException) {
 			LOG.error("Invalid key"); //TODO: specific error screen
-			errorComponent.get().window(window).cause(e).build().showErrorScene();
+			appWindows.showErrorWindow(e, window, null);
 		} else {
 			LOG.error("Failed to load key.", e);
-			errorComponent.get().window(window).cause(e).build().showErrorScene();
+			appWindows.showErrorWindow(e, window, null);
 		}
 	}
 

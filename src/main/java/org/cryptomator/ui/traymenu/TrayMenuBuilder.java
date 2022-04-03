@@ -8,9 +8,9 @@ import org.cryptomator.integrations.tray.SeparatorItem;
 import org.cryptomator.integrations.tray.SubMenuItem;
 import org.cryptomator.integrations.tray.TrayMenuController;
 import org.cryptomator.integrations.tray.TrayMenuItem;
-import org.cryptomator.ui.fxapp.FxApplication;
-import org.cryptomator.ui.launcher.AppLifecycleListener;
-import org.cryptomator.ui.launcher.FxApplicationStarter;
+import org.cryptomator.ui.common.VaultService;
+import org.cryptomator.ui.fxapp.FxApplicationTerminator;
+import org.cryptomator.ui.fxapp.FxApplicationWindows;
 import org.cryptomator.ui.preferences.SelectedPreferencesTab;
 
 import javax.inject.Inject;
@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
-import java.util.function.Consumer;
 
 @TrayMenuScoped
 public class TrayMenuBuilder {
@@ -32,18 +31,20 @@ public class TrayMenuBuilder {
 	private static final String TRAY_ICON = "/img/tray_icon.png";
 
 	private final ResourceBundle resourceBundle;
-	private final AppLifecycleListener appLifecycle;
-	private final FxApplicationStarter fxApplicationStarter;
+	private final VaultService vaultService;
+	private final FxApplicationWindows appWindows;
+	private final FxApplicationTerminator appTerminator;
 	private final ObservableList<Vault> vaults;
 	private final TrayMenuController trayMenu;
 
 	private volatile boolean initialized;
 
 	@Inject
-	TrayMenuBuilder(ResourceBundle resourceBundle, AppLifecycleListener appLifecycle, FxApplicationStarter fxApplicationStarter, ObservableList<Vault> vaults, Optional<TrayMenuController> trayMenu) {
+	TrayMenuBuilder(ResourceBundle resourceBundle, VaultService vaultService, FxApplicationWindows appWindows, FxApplicationTerminator appTerminator, ObservableList<Vault> vaults, Optional<TrayMenuController> trayMenu) {
 		this.resourceBundle = resourceBundle;
-		this.appLifecycle = appLifecycle;
-		this.fxApplicationStarter = fxApplicationStarter;
+		this.vaultService = vaultService;
+		this.appWindows = appWindows;
+		this.appTerminator = appTerminator;
 		this.vaults = vaults;
 		this.trayMenu = trayMenu.orElse(null);
 	}
@@ -96,14 +97,13 @@ public class TrayMenuBuilder {
 
 	private List<TrayMenuItem> buildSubmenu(Vault vault) {
 		if (vault.isLocked()) {
-			return List.of(
-					new ActionItem(resourceBundle.getString("traymenu.vault.unlock"), () -> this.unlockVault(vault))
+			return List.of( //
+					new ActionItem(resourceBundle.getString("traymenu.vault.unlock"), () -> this.unlockVault(vault)) //
 			);
 		} else if (vault.isUnlocked()) {
-			return List.of(
-					new ActionItem(resourceBundle.getString("traymenu.vault.lock"), () -> this.lockVault(vault)),
-					new ActionItem(resourceBundle.getString("traymenu.vault.reveal"), () -> this.revealVault(vault))
-
+			return List.of( //
+					new ActionItem(resourceBundle.getString("traymenu.vault.lock"), () -> this.lockVault(vault)), //
+					new ActionItem(resourceBundle.getString("traymenu.vault.reveal"), () -> this.revealVault(vault)) //
 			);
 		} else {
 			return List.of();
@@ -113,35 +113,31 @@ public class TrayMenuBuilder {
 	/* action listeners: */
 
 	private void quitApplication() {
-		appLifecycle.quit();
+		appTerminator.terminate();
 	}
 
 	private void unlockVault(Vault vault) {
-		showMainAppAndThen(app -> app.startUnlockWorkflow(vault, Optional.empty()));
+		appWindows.startUnlockWorkflow(vault, null);
 	}
 
 	private void lockVault(Vault vault) {
-		showMainAppAndThen(app -> app.startLockWorkflow(vault, Optional.empty()));
+		appWindows.startLockWorkflow(vault, null);
 	}
 
 	private void lockAllVaults() {
-		showMainAppAndThen(app -> app.getVaultService().lockAll(vaults.filtered(Vault::isUnlocked), false));
+		vaultService.lockAll(vaults.filtered(Vault::isUnlocked), false);
 	}
 
 	private void revealVault(Vault vault) {
-		showMainAppAndThen(app -> app.getVaultService().reveal(vault));
+		vaultService.reveal(vault);
 	}
 
 	void showMainWindow() {
-		showMainAppAndThen(FxApplication::showMainWindow);
+		appWindows.showMainWindow();
 	}
 
 	private void showPreferencesWindow() {
-		showMainAppAndThen(app -> app.showPreferencesWindow(SelectedPreferencesTab.ANY));
-	}
-
-	private void showMainAppAndThen(Consumer<FxApplication> action) {
-		fxApplicationStarter.get().thenAccept(action);
+		appWindows.showPreferencesWindow(SelectedPreferencesTab.ANY);
 	}
 
 }
