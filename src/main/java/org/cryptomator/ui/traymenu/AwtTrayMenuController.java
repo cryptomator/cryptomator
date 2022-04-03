@@ -1,11 +1,13 @@
 package org.cryptomator.ui.traymenu;
 
 import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.integrations.common.CheckAvailability;
 import org.cryptomator.integrations.common.Priority;
 import org.cryptomator.integrations.tray.ActionItem;
 import org.cryptomator.integrations.tray.SeparatorItem;
 import org.cryptomator.integrations.tray.SubMenuItem;
 import org.cryptomator.integrations.tray.TrayMenuController;
+import org.cryptomator.integrations.tray.TrayMenuException;
 import org.cryptomator.integrations.tray.TrayMenuItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,18 +23,23 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
+@CheckAvailability
 @Priority(Priority.FALLBACK)
 public class AwtTrayMenuController implements TrayMenuController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(AwtTrayMenuController.class);
 
-	private TrayIcon trayIcon;
-	private PopupMenu menu = new PopupMenu();
+	private final PopupMenu menu = new PopupMenu();
+
+	@CheckAvailability
+	public static boolean isAvailable() {
+		return SystemTray.isSupported();
+	}
 
 	@Override
-	public void showTrayIcon(InputStream rawImageData, Runnable defaultAction, String tooltip) throws IOException {
-		var image = Toolkit.getDefaultToolkit().createImage(rawImageData.readAllBytes());
-		trayIcon = new TrayIcon(image, tooltip, menu);
+	public void showTrayIcon(byte[] rawImageData, Runnable defaultAction, String tooltip) {
+		var image = Toolkit.getDefaultToolkit().createImage(rawImageData);
+		var trayIcon = new TrayIcon(image, tooltip, menu);
 
 		trayIcon.setImageAutoSize(true);
 		if (SystemUtils.IS_OS_WINDOWS) {
@@ -59,7 +66,7 @@ public class AwtTrayMenuController implements TrayMenuController {
 			if (item instanceof ActionItem a) {
 				var menuItem = new MenuItem(a.title());
 				menuItem.addActionListener(evt -> a.action().run());
-				// TODO menuItem.setEnabled(a.enabled());
+				menuItem.setEnabled(a.enabled());
 				menu.add(menuItem);
 			} else if (item instanceof SeparatorItem) {
 				menu.addSeparator();

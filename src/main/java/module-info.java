@@ -29,6 +29,7 @@ module org.cryptomator.desktop {
 	requires logback.classic;
 	requires logback.core;
 
+	exports org.cryptomator.ui.traymenu to org.cryptomator.integrations.api;
 	provides TrayMenuController with AwtTrayMenuController;
 
 	opens org.cryptomator.common.settings to com.google.gson;

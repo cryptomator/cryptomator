@@ -7,11 +7,14 @@ import org.cryptomator.integrations.tray.ActionItem;
 import org.cryptomator.integrations.tray.SeparatorItem;
 import org.cryptomator.integrations.tray.SubMenuItem;
 import org.cryptomator.integrations.tray.TrayMenuController;
+import org.cryptomator.integrations.tray.TrayMenuException;
 import org.cryptomator.integrations.tray.TrayMenuItem;
 import org.cryptomator.ui.common.VaultService;
 import org.cryptomator.ui.fxapp.FxApplicationTerminator;
 import org.cryptomator.ui.fxapp.FxApplicationWindows;
 import org.cryptomator.ui.preferences.SelectedPreferencesTab;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javafx.application.Platform;
@@ -27,6 +30,7 @@ import java.util.ResourceBundle;
 @TrayMenuScoped
 public class TrayMenuBuilder {
 
+	private static final Logger LOG = LoggerFactory.getLogger(TrayMenuBuilder.class);
 	private static final String TRAY_ICON_MAC = "/img/tray_icon_mac.png";
 	private static final String TRAY_ICON = "/img/tray_icon.png";
 
@@ -56,15 +60,16 @@ public class TrayMenuBuilder {
 		vaults.forEach(v -> {
 			v.displayNameProperty().addListener(this::vaultListChanged);
 		});
-		rebuildMenu();
 
 		try (var image = getClass().getResourceAsStream(SystemUtils.IS_OS_MAC_OSX ? TRAY_ICON_MAC : TRAY_ICON)) {
-			trayMenu.showTrayIcon(image, this::showMainWindow, "Cryptomator");
+			trayMenu.showTrayIcon(image.readAllBytes(), this::showMainWindow, "Cryptomator");
+			rebuildMenu();
+			initialized = true;
 		} catch (IOException e) {
 			throw new UncheckedIOException("Failed to load embedded resource", e);
+		} catch (TrayMenuException e) {
+			LOG.error("Adding tray icon failed", e);
 		}
-
-		initialized = true;
 	}
 
 	public boolean isInitialized() {
@@ -88,11 +93,14 @@ public class TrayMenuBuilder {
 			menu.add(new SubMenuItem(label, submenu));
 		}
 		menu.add(new SeparatorItem());
-		menu.add(new ActionItem(resourceBundle.getString("traymenu.lockAllVaults"), this::lockAllVaults));
+		menu.add(new ActionItem(resourceBundle.getString("traymenu.lockAllVaults"), this::lockAllVaults, vaults.stream().anyMatch(Vault::isUnlocked)));
 		menu.add(new ActionItem(resourceBundle.getString("traymenu.quitApplication"), this::quitApplication));
-// 		lockAllItem.setEnabled(!vaults.filtered(Vault::isUnlocked).isEmpty());
 
-		trayMenu.updateTrayMenu(menu);
+		try {
+			trayMenu.updateTrayMenu(menu);
+		} catch (TrayMenuException e) {
+			LOG.error("Updating tray menu failed", e);
+		}
 	}
 
 	private List<TrayMenuItem> buildSubmenu(Vault vault) {

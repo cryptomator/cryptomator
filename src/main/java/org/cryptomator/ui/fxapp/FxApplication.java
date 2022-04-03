@@ -44,7 +44,7 @@ public class FxApplication {
 
 		// init system tray
 		final boolean hasTrayIcon;
-		if (SystemTray.isSupported() && settings.showTrayIcon().get()) {
+		if (settings.showTrayIcon().get() && trayMenu.get().isSupported()) {
 			trayMenu.get().initializeTrayIcon();
 			Platform.setImplicitExit(false); // don't quit when closing all windows
 			hasTrayIcon = true;

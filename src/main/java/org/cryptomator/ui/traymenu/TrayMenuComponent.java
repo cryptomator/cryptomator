@@ -24,8 +24,7 @@ public interface TrayMenuComponent {
 	 * @return <code>true</code> if a tray icon can be installed
 	 */
 	default boolean isSupported() {
-		// TODO add isSupported to API and move SystemTray.isSupported() to impl
-		return trayMenuController().isPresent() && SystemTray.isSupported();
+		return trayMenuController().isPresent();
 	}
 
 	/**
@@ -38,11 +37,13 @@ public interface TrayMenuComponent {
 	/**
 	 * Installs a tray icon to the system tray.
 	 *
-	 * @throws IllegalStateException If already added
+	 * @throws IllegalStateException If not {@link #isSupported() supported}
 	 */
 	default void initializeTrayIcon() throws IllegalStateException {
 		Preconditions.checkState(isSupported(), "system tray not supported");
-		trayMenuBuilder().initTrayMenu();
+		if (!trayMenuBuilder().isInitialized()) {
+			trayMenuBuilder().initTrayMenu();
+		}
 	}
 
 	@Subcomponent.Builder
