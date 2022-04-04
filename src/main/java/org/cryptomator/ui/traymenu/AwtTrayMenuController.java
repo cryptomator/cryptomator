@@ -37,7 +37,7 @@ public class AwtTrayMenuController implements TrayMenuController {
 	}
 
 	@Override
-	public void showTrayIcon(byte[] rawImageData, Runnable defaultAction, String tooltip) {
+	public void showTrayIcon(byte[] rawImageData, Runnable defaultAction, String tooltip) throws TrayMenuException {
 		var image = Toolkit.getDefaultToolkit().createImage(rawImageData);
 		var trayIcon = new TrayIcon(image, tooltip, menu);
 
@@ -50,7 +50,7 @@ public class AwtTrayMenuController implements TrayMenuController {
 			SystemTray.getSystemTray().add(trayIcon);
 			LOG.debug("initialized tray icon");
 		} catch (AWTException e) {
-			LOG.error("Error adding tray icon", e);
+			throw new TrayMenuException("Failed to add icon to system tray.", e);
 		}
 	}
 
