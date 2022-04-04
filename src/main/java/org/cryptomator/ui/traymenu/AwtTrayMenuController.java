@@ -19,8 +19,6 @@ import java.awt.PopupMenu;
 import java.awt.SystemTray;
 import java.awt.Toolkit;
 import java.awt.TrayIcon;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 
 @CheckAvailability
