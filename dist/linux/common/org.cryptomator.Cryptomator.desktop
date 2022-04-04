@@ -7,5 +7,5 @@ Terminal=false
 Type=Application
 Categories=Utility;Security;FileTools;
 StartupNotify=true
-StartupWMClass=org.cryptomator.launcher.Cryptomator
+StartupWMClass=org.cryptomator.launcher.Cryptomator$MainApp
 MimeType=application/vnd.cryptomator.encrypted;application/vnd.cryptomator.vault;
