@@ -1,5 +1,6 @@
 package org.cryptomator.ui.preferences;
 
+import com.google.common.base.Strings;
 import org.cryptomator.common.Environment;
 import org.cryptomator.common.LicenseHolder;
 import org.cryptomator.common.settings.Settings;
@@ -7,6 +8,7 @@ import org.cryptomator.common.settings.UiTheme;
 import org.cryptomator.integrations.autostart.AutoStartProvider;
 import org.cryptomator.integrations.autostart.ToggleAutoStartFailedException;
 import org.cryptomator.integrations.keychain.KeychainAccessProvider;
+import org.cryptomator.launcher.SupportedLanguages;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.fxapp.FxApplicationWindows;
 import org.cryptomator.ui.traymenu.TrayMenuComponent;
@@ -28,6 +30,7 @@ import javafx.scene.control.ToggleGroup;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
@@ -53,6 +56,7 @@ public class GeneralPreferencesController implements FxController {
 	public CheckBox showMinimizeButtonCheckbox;
 	public CheckBox showTrayIconCheckbox;
 	public CheckBox startHiddenCheckbox;
+	public ChoiceBox<String> preferredLanguageChoiceBox;
 	public CheckBox debugModeCheckbox;
 	public CheckBox autoStartCheckbox;
 	public ToggleGroup nodeOrientation;
@@ -89,6 +93,11 @@ public class GeneralPreferencesController implements FxController {
 		showTrayIconCheckbox.selectedProperty().bindBidirectional(settings.showTrayIcon());
 
 		startHiddenCheckbox.selectedProperty().bindBidirectional(settings.startHidden());
+
+		preferredLanguageChoiceBox.getItems().add(null);
+		preferredLanguageChoiceBox.getItems().addAll(SupportedLanguages.LANGUAGAE_TAGS);
+		preferredLanguageChoiceBox.valueProperty().bindBidirectional(settings.languageProperty());
+		preferredLanguageChoiceBox.setConverter(new LanguageTagConverter(resourceBundle));
 
 		debugModeCheckbox.selectedProperty().bindBidirectional(settings.debugMode());
 
@@ -181,6 +190,32 @@ public class GeneralPreferencesController implements FxController {
 			throw new UnsupportedOperationException();
 		}
 
+	}
+
+	private static class LanguageTagConverter extends StringConverter<String> {
+
+		private final ResourceBundle resourceBundle;
+
+		LanguageTagConverter(ResourceBundle resourceBundle) {
+			this.resourceBundle = resourceBundle;
+		}
+
+		@Override
+		public String toString(String tag) {
+			if (tag == null) {
+				return resourceBundle.getString("preferences.general.language.auto");
+			} else {
+				var locale = Locale.forLanguageTag(tag);
+				var lang = locale.getDisplayLanguage(locale);
+				var region = locale.getDisplayCountry(locale);
+				return lang + (Strings.isNullOrEmpty(region) ? "" : " (" + region + ")");
+			}
+		}
+
+		@Override
+		public String fromString(String displayLanguage) {
+			throw new UnsupportedOperationException();
+		}
 	}
 
 	private class KeychainProviderDisplayNameConverter extends StringConverter<KeychainAccessProvider> {

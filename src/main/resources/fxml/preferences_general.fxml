@@ -39,6 +39,11 @@
 		<CheckBox fx:id="startHiddenCheckbox" text="%preferences.general.startHidden" />
 
 		<HBox spacing="6" alignment="CENTER_LEFT">
+			<Label text="%preferences.general.language"/>
+			<ChoiceBox fx:id="preferredLanguageChoiceBox"/>
+		</HBox>
+
+		<HBox spacing="6" alignment="CENTER_LEFT">
 			<CheckBox fx:id="debugModeCheckbox" text="%preferences.general.debugLogging"/>
 			<Hyperlink styleClass="hyperlink-underline" text="%preferences.general.debugDirectory" onAction="#showLogfileDirectory"/>
 		</HBox>

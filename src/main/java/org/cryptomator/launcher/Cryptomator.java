@@ -34,14 +34,16 @@ public class Cryptomator {
 
 	private final LoggerConfiguration logConfig;
 	private final DebugMode debugMode;
+	private final SupportedLanguages supportedLanguages;
 	private final Environment env;
 	private final Lazy<IpcMessageHandler> ipcMessageHandler;
 	private final ShutdownHook shutdownHook;
 
 	@Inject
-	Cryptomator(LoggerConfiguration logConfig, DebugMode debugMode, Environment env, Lazy<IpcMessageHandler> ipcMessageHandler, ShutdownHook shutdownHook) {
+	Cryptomator(LoggerConfiguration logConfig, DebugMode debugMode, SupportedLanguages supportedLanguages, Environment env, Lazy<IpcMessageHandler> ipcMessageHandler, ShutdownHook shutdownHook) {
 		this.logConfig = logConfig;
 		this.debugMode = debugMode;
+		this.supportedLanguages = supportedLanguages;
 		this.env = env;
 		this.ipcMessageHandler = ipcMessageHandler;
 		this.shutdownHook = shutdownHook;
@@ -63,6 +65,7 @@ public class Cryptomator {
 		logConfig.init();
 		LOG.info("Starting Cryptomator {} on {} {} ({})", env.getAppVersion().orElse("SNAPSHOT"), SystemUtils.OS_NAME, SystemUtils.OS_VERSION, SystemUtils.OS_ARCH);
 		debugMode.initialize();
+		supportedLanguages.applyPreferred();
 
 		/*
 		 * Attempts to create an IPC connection to a running Cryptomator instance and sends it the given args.
