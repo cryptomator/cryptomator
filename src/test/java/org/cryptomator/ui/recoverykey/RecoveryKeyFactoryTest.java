@@ -78,7 +78,7 @@ public class RecoveryKeyFactoryTest {
 		Assertions.assertTrue(result);
 	}
 
-	@ParameterizedTest(name = "success = {0}")
+	@ParameterizedTest(name = "passing validation = {0}")
 	@DisplayName("validateRecoveryKey() with extended validation")
 	@ValueSource(booleans = {true, false})
 	public void testValidateValidateRecoveryKeyWithValidKey(boolean extendedValidationResult) {
