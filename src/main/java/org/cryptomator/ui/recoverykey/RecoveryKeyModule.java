@@ -4,7 +4,9 @@ import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoMap;
+import org.cryptomator.common.Nullable;
 import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.cryptofs.VaultConfig;
 import org.cryptomator.ui.common.DefaultSceneFactory;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxControllerKey;
@@ -22,11 +24,24 @@ import javafx.beans.property.StringProperty;
 import javafx.scene.Scene;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import java.io.IOException;
 import java.util.Map;
 import java.util.ResourceBundle;
 
 @Module
 abstract class RecoveryKeyModule {
+
+	@Provides
+	@Nullable
+	@RecoveryKeyWindow
+	@RecoveryKeyScoped
+	static VaultConfig.UnverifiedVaultConfig vaultConfig(@RecoveryKeyWindow Vault vault) {
+		try {
+			return vault.getVaultConfigCache().get();
+		} catch (IOException e) {
+			return null;
+		}
+	}
 
 	@Provides
 	@RecoveryKeyWindow
