@@ -8,9 +8,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javafx.application.Platform;
-import javafx.stage.Stage;
-import javafx.stage.StageStyle;
-import java.awt.SystemTray;
 
 @FxApplicationScoped
 public class FxApplication {

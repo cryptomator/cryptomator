@@ -9,7 +9,6 @@ import com.google.common.base.Preconditions;
 import dagger.Subcomponent;
 import org.cryptomator.integrations.tray.TrayMenuController;
 
-import java.awt.SystemTray;
 import java.util.Optional;
 
 @TrayMenuScoped
