@@ -5,10 +5,9 @@ import org.cryptomator.common.vaults.LockNotCompletedException;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.common.vaults.Volume;
-import org.cryptomator.ui.common.ErrorComponent;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
-import org.cryptomator.ui.common.UserInteractionLock;
+import org.cryptomator.ui.fxapp.FxApplicationWindows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,6 +17,10 @@ import javafx.concurrent.Task;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.stage.Window;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * The sequence of actions performed and checked during lock of a vault.
@@ -34,43 +37,48 @@ public class LockWorkflow extends Task<Void> {
 
 	private final Stage lockWindow;
 	private final Vault vault;
-	private final UserInteractionLock<LockModule.ForceLockDecision> forceLockDecisionLock;
+	private final AtomicReference<CompletableFuture<Boolean>> forceRetryDecision;
 	private final Lazy<Scene> lockForcedScene;
 	private final Lazy<Scene> lockFailedScene;
-	private final ErrorComponent.Builder errorComponent;
+	private final FxApplicationWindows appWindows;
 
 	@Inject
-	public LockWorkflow(@LockWindow Stage lockWindow, @LockWindow Vault vault, UserInteractionLock<LockModule.ForceLockDecision> forceLockDecisionLock, @FxmlScene(FxmlFile.LOCK_FORCED) Lazy<Scene> lockForcedScene, @FxmlScene(FxmlFile.LOCK_FAILED) Lazy<Scene> lockFailedScene, ErrorComponent.Builder errorComponent) {
+	public LockWorkflow(@LockWindow Stage lockWindow, @LockWindow Vault vault, AtomicReference<CompletableFuture<Boolean>> forceRetryDecision, @FxmlScene(FxmlFile.LOCK_FORCED) Lazy<Scene> lockForcedScene, @FxmlScene(FxmlFile.LOCK_FAILED) Lazy<Scene> lockFailedScene, FxApplicationWindows appWindows) {
 		this.lockWindow = lockWindow;
 		this.vault = vault;
-		this.forceLockDecisionLock = forceLockDecisionLock;
+		this.forceRetryDecision = forceRetryDecision;
 		this.lockForcedScene = lockForcedScene;
 		this.lockFailedScene = lockFailedScene;
-		this.errorComponent = errorComponent;
+		this.appWindows = appWindows;
 	}
 
 	@Override
-	protected Void call() throws Volume.VolumeException, InterruptedException, LockNotCompletedException {
+	protected Void call() throws Volume.VolumeException, InterruptedException, LockNotCompletedException, ExecutionException {
 		lock(false);
 		return null;
 	}
 
-	private void lock(boolean forced) throws InterruptedException {
+	private void lock(boolean forced) throws InterruptedException, ExecutionException {
 		try {
 			vault.lock(forced);
 		} catch (Volume.VolumeException | LockNotCompletedException e) {
 			LOG.info("Locking {} failed (forced: {}).", vault.getDisplayName(), forced, e);
-			var decision = askUserForAction();
-			switch (decision) {
-				case RETRY -> lock(false);
-				case FORCE -> lock(true);
-				case CANCEL -> cancel(false);
-			}
+			retryOrCancel();
 		}
 	}
 
-	private LockModule.ForceLockDecision askUserForAction() throws InterruptedException {
-		forceLockDecisionLock.reset(null);
+	private void retryOrCancel() throws ExecutionException, InterruptedException {
+		try {
+			boolean forced = askWhetherToUseTheForce().get();
+			lock(forced);
+		} catch (CancellationException e) {
+			cancel(false);
+		}
+	}
+
+	private CompletableFuture<Boolean> askWhetherToUseTheForce() {
+		var decision = new CompletableFuture<Boolean>();
+		forceRetryDecision.set(decision);
 		// show forcedLock dialogue ...
 		Platform.runLater(() -> {
 			lockWindow.setScene(lockForcedScene.get());
@@ -83,8 +91,7 @@ public class LockWorkflow extends Task<Void> {
 				lockWindow.centerOnScreen();
 			}
 		});
-		// ... and wait for answer
-		return forceLockDecisionLock.awaitInteraction();
+		return decision;
 	}
 
 	@Override
@@ -102,7 +109,7 @@ public class LockWorkflow extends Task<Void> {
 			lockWindow.setScene(lockFailedScene.get());
 			lockWindow.show();
 		} else {
-			errorComponent.cause(throwable).window(lockWindow).build().showErrorScene();
+			appWindows.showErrorWindow(throwable, lockWindow, null);
 		}
 	}
 

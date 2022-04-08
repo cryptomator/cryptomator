@@ -1,5 +1,6 @@
 package org.cryptomator.ui.preferences;
 
+import com.google.common.base.Strings;
 import org.cryptomator.common.Environment;
 import org.cryptomator.common.LicenseHolder;
 import org.cryptomator.common.settings.Settings;
@@ -7,8 +8,9 @@ import org.cryptomator.common.settings.UiTheme;
 import org.cryptomator.integrations.autostart.AutoStartProvider;
 import org.cryptomator.integrations.autostart.ToggleAutoStartFailedException;
 import org.cryptomator.integrations.keychain.KeychainAccessProvider;
-import org.cryptomator.ui.common.ErrorComponent;
+import org.cryptomator.launcher.SupportedLanguages;
 import org.cryptomator.ui.common.FxController;
+import org.cryptomator.ui.fxapp.FxApplicationWindows;
 import org.cryptomator.ui.traymenu.TrayMenuComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +29,7 @@ import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleGroup;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.Set;
@@ -47,21 +50,21 @@ public class GeneralPreferencesController implements FxController {
 	private final Application application;
 	private final Environment environment;
 	private final Set<KeychainAccessProvider> keychainAccessProviders;
-	private final ErrorComponent.Builder errorComponent;
+	private final FxApplicationWindows appWindows;
 	public ChoiceBox<UiTheme> themeChoiceBox;
 	public ChoiceBox<KeychainAccessProvider> keychainBackendChoiceBox;
 	public CheckBox showMinimizeButtonCheckbox;
 	public CheckBox showTrayIconCheckbox;
 	public CheckBox startHiddenCheckbox;
+	public ChoiceBox<String> preferredLanguageChoiceBox;
 	public CheckBox debugModeCheckbox;
 	public CheckBox autoStartCheckbox;
 	public ToggleGroup nodeOrientation;
 	public RadioButton nodeOrientationLtr;
 	public RadioButton nodeOrientationRtl;
 
-
 	@Inject
-	GeneralPreferencesController(@PreferencesWindow Stage window, Settings settings, TrayMenuComponent trayMenu, Optional<AutoStartProvider> autoStartProvider, Set<KeychainAccessProvider> keychainAccessProviders, ObjectProperty<SelectedPreferencesTab> selectedTabProperty, LicenseHolder licenseHolder, ResourceBundle resourceBundle, Application application, Environment environment, ErrorComponent.Builder errorComponent) {
+	GeneralPreferencesController(@PreferencesWindow Stage window, Settings settings, TrayMenuComponent trayMenu, Optional<AutoStartProvider> autoStartProvider, Set<KeychainAccessProvider> keychainAccessProviders, ObjectProperty<SelectedPreferencesTab> selectedTabProperty, LicenseHolder licenseHolder, ResourceBundle resourceBundle, Application application, Environment environment, FxApplicationWindows appWindows) {
 		this.window = window;
 		this.settings = settings;
 		this.trayMenuInitialized = trayMenu.isInitialized();
@@ -73,7 +76,7 @@ public class GeneralPreferencesController implements FxController {
 		this.resourceBundle = resourceBundle;
 		this.application = application;
 		this.environment = environment;
-		this.errorComponent = errorComponent;
+		this.appWindows = appWindows;
 	}
 
 	@FXML
@@ -90,6 +93,11 @@ public class GeneralPreferencesController implements FxController {
 		showTrayIconCheckbox.selectedProperty().bindBidirectional(settings.showTrayIcon());
 
 		startHiddenCheckbox.selectedProperty().bindBidirectional(settings.startHidden());
+
+		preferredLanguageChoiceBox.getItems().add(null);
+		preferredLanguageChoiceBox.getItems().addAll(SupportedLanguages.LANGUAGAE_TAGS);
+		preferredLanguageChoiceBox.valueProperty().bindBidirectional(settings.languageProperty());
+		preferredLanguageChoiceBox.setConverter(new LanguageTagConverter(resourceBundle));
 
 		debugModeCheckbox.selectedProperty().bindBidirectional(settings.debugMode());
 
@@ -142,7 +150,7 @@ public class GeneralPreferencesController implements FxController {
 			} catch (ToggleAutoStartFailedException e) {
 				autoStartCheckbox.setSelected(!enableAutoStart); // restore previous state
 				LOG.error("Failed to toggle autostart.", e);
-				errorComponent.cause(e).window(window).returnToScene(window.getScene()).build().showErrorScene();
+				appWindows.showErrorWindow(e, window, window.getScene());
 			}
 		});
 	}
@@ -182,6 +190,32 @@ public class GeneralPreferencesController implements FxController {
 			throw new UnsupportedOperationException();
 		}
 
+	}
+
+	private static class LanguageTagConverter extends StringConverter<String> {
+
+		private final ResourceBundle resourceBundle;
+
+		LanguageTagConverter(ResourceBundle resourceBundle) {
+			this.resourceBundle = resourceBundle;
+		}
+
+		@Override
+		public String toString(String tag) {
+			if (tag == null) {
+				return resourceBundle.getString("preferences.general.language.auto");
+			} else {
+				var locale = Locale.forLanguageTag(tag);
+				var lang = locale.getDisplayLanguage(locale);
+				var region = locale.getDisplayCountry(locale);
+				return lang + (Strings.isNullOrEmpty(region) ? "" : " (" + region + ")");
+			}
+		}
+
+		@Override
+		public String fromString(String displayLanguage) {
+			throw new UnsupportedOperationException();
+		}
 	}
 
 	private class KeychainProviderDisplayNameConverter extends StringConverter<KeychainAccessProvider> {

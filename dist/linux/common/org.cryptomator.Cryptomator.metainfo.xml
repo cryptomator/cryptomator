@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2018 Armin Schrenk <armin.schrenk@zoho.eu> -->
+<component type="desktop-application">
+	<id>org.cryptomator.Cryptomator</id>
+	<metadata_license>FSFAP</metadata_license>
+	<project_license>GPL-3.0-or-later</project_license>
+	<name>Cryptomator</name>
+	<summary>Multi-platform client-side encryption tool optimized for cloud storages</summary>
+
+	<description>
+		<p>
+			Cryptomator provides transparent, client-side encryption for your cloud. Protect your documents from unauthorized
+			access. Cryptomator is free and open source software, so you can rest assured there are no backdoors.
+		</p>
+		<p>
+			Cryptomator encrypts file contents and names using AES. Your passphrase is protected against bruteforcing attempts
+			using scrypt. Directory structures get obfuscated. The only thing which cannot be encrypted without breaking your
+			cloud synchronization is the modification date of your files.
+		</p>
+		<p>
+			Cryptomator is a free and open source software licensed under the GPLv3. This allows anyone to check our code. It
+			is impossible to introduce backdoors for third parties. Also we cannot hide vulnerabilities. And the best thing
+			is: There is no need to trust us, as you can control us!
+		</p>
+		<p>
+			Vendor lock-ins are impossible. Even if we decided to stop development: The source code is already cloned by
+			hundreds of other developers. As you don't need an account, you will never stand in front of locked doors.
+		</p>
+	</description>
+
+	<categories>
+		<category>Office</category>
+		<category>Security</category>
+		<category>FileTools</category>
+	</categories>
+
+	<launchable type="desktop-id">org.cryptomator.Cryptomator.desktop</launchable>
+	<provides>
+		<binary>cryptomator</binary>
+		<mediatype>application/vnd.cryptomator.vault</mediatype>
+		<mediatype>application/vnd.cryptomator.encrypted</mediatype>
+	</provides>
+
+	<screenshots>
+		<screenshot>
+			<caption>Light theme</caption>
+			<image>https://user-images.githubusercontent.com/11858409/156986109-6e58f59c-8b8c-4501-b33b-bb1e33007cea.png</image>
+		</screenshot>
+		<screenshot>
+			<caption>Dark theme</caption>
+			<image>https://user-images.githubusercontent.com/11858409/156986113-6c5d7801-86e0-4643-bc2f-aff9d95d3ce0.png</image>
+		</screenshot>
+	</screenshots>
+
+	<url type="homepage">https://cryptomator.org/</url>
+	<url type="bugtracker">https://github.com/cryptomator/cryptomator/issues/</url>
+	<url type="donation">https://cryptomator.org/donate</url>
+	<url type="faq">https://community.cryptomator.org/c/kb/faq</url>
+	<url type="help">https://community.cryptomator.org/</url>
+	<url type="translate">https://translate.cryptomator.org</url>
+
+	<developer_name>Skymatic GmbH</developer_name>
+
+	<content_rating type="oars-1.1">
+		<content_attribute id="social-info">mild</content_attribute> <!-- update checker connects to https://api.cryptomator.org/updates/latestVersion.json -->
+	</content_rating>
+
+	<releases>
+		<release date="2022-03-30" version="1.6.8"/>
+		<release date="2021-12-16" version="1.6.5"/>
+	</releases>
+</component>

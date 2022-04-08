@@ -31,8 +31,8 @@ public class LaunchBasedTriggeringPolicyTest {
 		triggered = policy.isTriggeringEvent(activeFile, event);
 		Assertions.assertFalse(triggered);
 
-		Mockito.verifyZeroInteractions(activeFile);
-		Mockito.verifyZeroInteractions(event);
+		Mockito.verifyNoInteractions(activeFile);
+		Mockito.verifyNoInteractions(event);
 	}
 
 }

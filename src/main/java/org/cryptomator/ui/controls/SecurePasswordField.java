@@ -9,6 +9,7 @@
 package org.cryptomator.ui.controls;
 
 import com.google.common.base.Strings;
+import org.cryptomator.common.Passphrase;
 
 import javafx.application.Platform;
 import javafx.beans.NamedArg;
@@ -28,7 +29,6 @@ import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.TransferMode;
-import java.nio.CharBuffer;
 import java.text.Normalizer;
 import java.text.Normalizer.Form;
 import java.util.Arrays;
@@ -212,8 +212,8 @@ public class SecurePasswordField extends TextField {
 	 * @see #wipe()
 	 */
 	@Override
-	public CharSequence getCharacters() {
-		return CharBuffer.wrap(content, 0, length);
+	public Passphrase getCharacters() {
+		return new Passphrase(content, 0, length);
 	}
 
 	/**

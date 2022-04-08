@@ -4,7 +4,10 @@ import org.cryptomator.integrations.tray.TrayIntegrationProvider;
 import org.cryptomator.integrations.uiappearance.UiAppearanceProvider;
 
 module org.cryptomator.desktop {
+	requires static org.jetbrains.annotations;
+
 	requires org.cryptomator.cryptolib;
+
 	requires org.cryptomator.cryptofs;
 	requires org.cryptomator.frontend.dokany;
 	requires org.cryptomator.frontend.fuse;
@@ -46,6 +49,8 @@ module org.cryptomator.desktop {
 
 	opens org.cryptomator.common.settings to com.google.gson;
 	opens org.cryptomator.ui.keyloading.hub to com.google.gson, javafx.fxml;
+
+	opens org.cryptomator.launcher to javafx.graphics;
 
 	opens org.cryptomator.common to javafx.fxml;
 	opens org.cryptomator.common.vaults to javafx.fxml;

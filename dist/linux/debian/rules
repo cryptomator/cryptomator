@@ -11,8 +11,11 @@ override_dh_auto_clean:
 	rm -rf runtime
 	rm -rf cryptomator
 	rm -rf debian/cryptomator
+	rm -rf resources
 
 override_dh_auto_build:
+	mkdir resources
+	ln -s ../common/org.cryptomator.Cryptomator512.png resources/cryptomator.png
 	jlink \
 		--output runtime \
 		--add-modules java.base,java.desktop,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.crypto.ec,jdk.accessibility,jdk.management.jfr \
@@ -39,8 +42,8 @@ override_dh_auto_build:
 		--java-options "-Dcryptomator.ipcSocketPath=\"~/.config/Cryptomator/ipc.socket\"" \
 		--java-options "-Dcryptomator.mountPointsDir=\"~/.local/share/Cryptomator/mnt\"" \
 		--java-options "-Dcryptomator.showTrayIcon=false" \
-		--java-options "-Dcryptomator.buildNumber=\"ppa-${REVISION_NUM}\"" \
-		--java-options "-Dcryptomator.appVersion=\"${VERSION_STR}\"" \
+		--java-options "-Dcryptomator.buildNumber=\"deb-${REVISION_NUM}\"" \
+		--java-options "-Dcryptomator.appVersion=\"${SEMVER_STR}\"" \
 		--app-version "${VERSION_NUM}.${REVISION_NUM}" \
 		--resource-dir resources \
 		--verbose

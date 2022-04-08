@@ -13,6 +13,8 @@ import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlLoaderFactory;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.StageFactory;
+import org.cryptomator.ui.common.StageInitializer;
+import org.cryptomator.ui.fxapp.PrimaryStage;
 import org.cryptomator.ui.health.HealthCheckComponent;
 import org.cryptomator.ui.migration.MigrationComponent;
 import org.cryptomator.ui.removevault.RemoveVaultComponent;
@@ -35,6 +37,18 @@ import java.util.ResourceBundle;
 abstract class MainWindowModule {
 
 	@Provides
+	@MainWindow
+	@MainWindowScoped
+	static Stage provideMainWindow(@PrimaryStage Stage stage, StageInitializer initializer) {
+		initializer.accept(stage);
+		stage.setTitle("Cryptomator");
+		stage.initStyle(StageStyle.UNDECORATED);
+		stage.setMinWidth(650);
+		stage.setMinHeight(440);
+		return stage;
+	}
+
+	@Provides
 	@MainWindowScoped
 	static ObjectProperty<Vault> provideSelectedVault() {
 		return new SimpleObjectProperty<>();
@@ -48,21 +62,10 @@ abstract class MainWindowModule {
 	}
 
 	@Provides
-	@MainWindow
-	@MainWindowScoped
-	static Stage provideStage(StageFactory factory) {
-		Stage stage = factory.create(StageStyle.UNDECORATED);
-		stage.setMinWidth(650);
-		stage.setMinHeight(440);
-		stage.setTitle("Cryptomator");
-		return stage;
-	}
-
-	@Provides
 	@MainWindowScoped
 	@Named("errorWindow")
 	static Stage provideErrorStage(@MainWindow Stage window, StageFactory factory, ResourceBundle resourceBundle) {
-		Stage stage = factory.create(StageStyle.DECORATED);
+		Stage stage = factory.create();
 		stage.setTitle(resourceBundle.getString("main.vaultDetail.error.windowTitle"));
 		stage.initModality(Modality.APPLICATION_MODAL);
 		stage.initOwner(window);

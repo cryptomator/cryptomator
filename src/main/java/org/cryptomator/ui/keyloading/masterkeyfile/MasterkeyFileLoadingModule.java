@@ -8,54 +8,17 @@ import dagger.multibindings.StringKey;
 import org.cryptomator.common.keychain.KeychainManager;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.integrations.keychain.KeychainAccessException;
-import org.cryptomator.ui.common.FxController;
-import org.cryptomator.ui.common.FxControllerKey;
-import org.cryptomator.ui.common.FxmlFile;
-import org.cryptomator.ui.common.FxmlLoaderFactory;
-import org.cryptomator.ui.common.FxmlScene;
-import org.cryptomator.ui.common.UserInteractionLock;
 import org.cryptomator.ui.forgetPassword.ForgetPasswordComponent;
 import org.cryptomator.ui.keyloading.KeyLoading;
 import org.cryptomator.ui.keyloading.KeyLoadingScoped;
 import org.cryptomator.ui.keyloading.KeyLoadingStrategy;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Named;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
-import java.nio.file.Path;
 import java.util.Optional;
-import java.util.ResourceBundle;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 
-@Module(subcomponents = {ForgetPasswordComponent.class})
-public abstract class MasterkeyFileLoadingModule {
-
-	private static final Logger LOG = LoggerFactory.getLogger(MasterkeyFileLoadingModule.class);
-
-	public enum PasswordEntry {
-		PASSWORD_ENTERED,
-		CANCELLED
-	}
-
-	public enum MasterkeyFileProvision {
-		MASTERKEYFILE_PROVIDED,
-		CANCELLED
-	}
-
-	@Provides
-	@KeyLoadingScoped
-	static UserInteractionLock<PasswordEntry> providePasswordEntryLock() {
-		return new UserInteractionLock<>(null);
-	}
-
-	@Provides
-	@KeyLoadingScoped
-	static UserInteractionLock<MasterkeyFileProvision> provideMasterkeyFileProvisionLock() {
-		return new UserInteractionLock<>(null);
-	}
+@Module(subcomponents = {ForgetPasswordComponent.class, PassphraseEntryComponent.class, ChooseMasterkeyFileComponent.class})
+public interface MasterkeyFileLoadingModule {
 
 	@Provides
 	@Named("savedPassword")
@@ -67,66 +30,11 @@ public abstract class MasterkeyFileLoadingModule {
 			try {
 				return Optional.ofNullable(keychain.loadPassphrase(vault.getId()));
 			} catch (KeychainAccessException e) {
-				LOG.error("Failed to load entry from system keychain.", e);
+				LoggerFactory.getLogger(MasterkeyFileLoadingModule.class).error("Failed to load entry from system keychain.", e);
 				return Optional.empty();
 			}
 		}
 	}
-
-	@Provides
-	@KeyLoadingScoped
-	static AtomicReference<Path> provideUserProvidedMasterkeyPath() {
-		return new AtomicReference<>();
-	}
-
-	@Provides
-	@KeyLoadingScoped
-	static AtomicReference<char[]> providePassword(@Named("savedPassword") Optional<char[]> storedPassword) {
-		return new AtomicReference<>(storedPassword.orElse(null));
-	}
-
-	@Provides
-	@Named("savePassword")
-	@KeyLoadingScoped
-	static AtomicBoolean provideSavePasswordFlag(@Named("savedPassword") Optional<char[]> storedPassword) {
-		return new AtomicBoolean(storedPassword.isPresent());
-	}
-
-	@Provides
-	@FxmlScene(FxmlFile.UNLOCK_ENTER_PASSWORD)
-	@KeyLoadingScoped
-	static Scene provideUnlockScene(@KeyLoading FxmlLoaderFactory fxmlLoaders, @KeyLoading Stage window, @KeyLoading Vault v, ResourceBundle resourceBundle) {
-		var scene = fxmlLoaders.createScene(FxmlFile.UNLOCK_ENTER_PASSWORD);
-		scene.windowProperty().addListener((prop, oldVal, newVal) -> {
-			if (window.equals(newVal)) {
-				window.setTitle(String.format(resourceBundle.getString("unlock.title"), v.getDisplayName()));
-			}
-		});
-		return scene;
-	}
-
-	@Provides
-	@FxmlScene(FxmlFile.UNLOCK_SELECT_MASTERKEYFILE)
-	@KeyLoadingScoped
-	static Scene provideUnlockSelectMasterkeyFileScene(@KeyLoading FxmlLoaderFactory fxmlLoaders, @KeyLoading Stage window, @KeyLoading Vault v, ResourceBundle resourceBundle) {
-		var scene = fxmlLoaders.createScene(FxmlFile.UNLOCK_SELECT_MASTERKEYFILE);
-		scene.windowProperty().addListener((prop, oldVal, newVal) -> {
-			if (window.equals(newVal)) {
-				window.setTitle(String.format(resourceBundle.getString("unlock.chooseMasterkey.title"), v.getDisplayName()));
-			}
-		});
-		return scene;
-	}
-
-	@Binds
-	@IntoMap
-	@FxControllerKey(PassphraseEntryController.class)
-	abstract FxController bindUnlockController(PassphraseEntryController controller);
-
-	@Binds
-	@IntoMap
-	@FxControllerKey(SelectMasterkeyFileController.class)
-	abstract FxController bindUnlockSelectMasterkeyFileController(SelectMasterkeyFileController controller);
 
 	@Binds
 	@IntoMap

@@ -11,9 +11,6 @@ import org.cryptomator.ui.common.FxController;
 
 import javax.inject.Inject;
 import javafx.beans.binding.Bindings;
-import javafx.beans.binding.BooleanBinding;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
@@ -27,23 +24,21 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
 import java.io.File;
+import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.util.ResourceBundle;
 import java.util.Set;
 
-/**
- * TODO: if WebDav is selected on a windows system, custom mount directory is _not_ supported. This is currently not indicated/shown/etc in the ui
- */
 @VaultOptionsScoped
 public class MountOptionsController implements FxController {
 
 	private final Stage window;
 	private final Vault vault;
-	private final BooleanProperty osIsWindows = new SimpleBooleanProperty(SystemUtils.IS_OS_WINDOWS);
-	private final BooleanBinding webDavAndWindows;
+	private final VolumeImpl usedVolumeImpl;
 	private final WindowsDriveLetters windowsDriveLetters;
 	private final ResourceBundle resourceBundle;
+
 	public CheckBox readOnlyCheckbox;
 	public CheckBox customMountFlagsCheckbox;
 	public TextField mountFlags;
@@ -53,20 +48,13 @@ public class MountOptionsController implements FxController {
 	public RadioButton mountPointCustomDir;
 	public ChoiceBox<String> driveLetterSelection;
 
-	//FUSE + Windows -> Disable some (experimental) features for the user because they are unstable
-	//Use argument Dfuse.experimental="true" to override
-	private final BooleanBinding restrictToStableFuseOnWindows;
-
 	@Inject
 	MountOptionsController(@VaultOptionsWindow Stage window, @VaultOptionsWindow Vault vault, Settings settings, WindowsDriveLetters windowsDriveLetters, ResourceBundle resourceBundle, Environment environment) {
 		this.window = window;
 		this.vault = vault;
-		this.webDavAndWindows = settings.preferredVolumeImpl().isEqualTo(VolumeImpl.WEBDAV).and(osIsWindows);
+		this.usedVolumeImpl = settings.preferredVolumeImpl().get();
 		this.windowsDriveLetters = windowsDriveLetters;
 		this.resourceBundle = resourceBundle;
-
-		BooleanBinding isFuseOnWindows = settings.preferredVolumeImpl().isEqualTo(VolumeImpl.FUSE).and(osIsWindows);
-		this.restrictToStableFuseOnWindows = isFuseOnWindows.and(new SimpleBooleanProperty(!environment.useExperimentalFuse())); //Is FUSE on Win and is NOT experimental fuse enabled
 	}
 
 	@FXML
@@ -74,10 +62,11 @@ public class MountOptionsController implements FxController {
 
 		// readonly:
 		readOnlyCheckbox.selectedProperty().bindBidirectional(vault.getVaultSettings().usesReadOnlyMode());
-		if (getRestrictToStableFuseOnWindows()) {
+		//TODO: support this feature on Windows
+		if (usedVolumeImpl == VolumeImpl.FUSE && isOsWindows()) {
 			readOnlyCheckbox.setSelected(false); // to prevent invalid states
+			readOnlyCheckbox.setDisable(true);
 		}
-		readOnlyCheckbox.disableProperty().bind(customMountFlagsCheckbox.selectedProperty().or(restrictToStableFuseOnWindows));
 
 		// custom mount flags:
 		mountFlags.disableProperty().bind(customMountFlagsCheckbox.selectedProperty().not());
@@ -95,9 +84,7 @@ public class MountOptionsController implements FxController {
 		driveLetterSelection.setConverter(new WinDriveLetterLabelConverter(windowsDriveLetters, resourceBundle));
 		driveLetterSelection.setValue(vault.getVaultSettings().winDriveLetter().get());
 
-		if (vault.getVaultSettings().useCustomMountPath().get()
-				&& vault.getVaultSettings().getCustomMountPath().isPresent()
-				&& !getRestrictToStableFuseOnWindows() /* to prevent invalid states */) {
+		if (vault.getVaultSettings().useCustomMountPath().get() && vault.getVaultSettings().getCustomMountPath().isPresent()) {
 			mountPoint.selectToggle(mountPointCustomDir);
 		} else if (!Strings.isNullOrEmpty(vault.getVaultSettings().winDriveLetter().get())) {
 			mountPoint.selectToggle(mountPointWinDriveLetter);
@@ -136,8 +123,11 @@ public class MountOptionsController implements FxController {
 		DirectoryChooser directoryChooser = new DirectoryChooser();
 		directoryChooser.setTitle(resourceBundle.getString("vaultOptions.mount.mountPoint.directoryPickerTitle"));
 		try {
-			var initialDir = vault.getVaultSettings().getCustomMountPath().orElse(System.getProperty("user.home"));
-			directoryChooser.setInitialDirectory(Path.of(initialDir).toFile());
+			var initialDir = Path.of(vault.getVaultSettings().getCustomMountPath().orElse(System.getProperty("user.home")));
+
+			if(Files.exists(initialDir)) {
+				directoryChooser.setInitialDirectory(initialDir.toFile());
+			}
 		} catch (InvalidPathException e) {
 			// no-op
 		}
@@ -188,32 +178,28 @@ public class MountOptionsController implements FxController {
 
 	// Getter & Setter
 
-	public BooleanProperty osIsWindowsProperty() {
-		return osIsWindows;
+	public boolean isOsWindows() {
+		return SystemUtils.IS_OS_WINDOWS;
 	}
 
-	public boolean getOsIsWindows() {
-		return osIsWindows.get();
+	public boolean isCustomMountPointSupported() {
+		return !(usedVolumeImpl == VolumeImpl.WEBDAV && isOsWindows());
 	}
 
-	public BooleanBinding webDavAndWindowsProperty() {
-		return webDavAndWindows;
-	}
-
-	public boolean isWebDavAndWindows() {
-		return webDavAndWindows.get();
+	public boolean isReadOnlySupported() {
+		return !(usedVolumeImpl == VolumeImpl.FUSE && isOsWindows());
 	}
 
 	public StringProperty customMountPathProperty() {
 		return vault.getVaultSettings().customMountPath();
 	}
 
-	public String getCustomMountPath() {
-		return vault.getVaultSettings().customMountPath().get();
+	public boolean isCustomMountOptionsSupported() {
+		return usedVolumeImpl != VolumeImpl.WEBDAV;
 	}
 
-	public Boolean getRestrictToStableFuseOnWindows() {
-		return restrictToStableFuseOnWindows.get();
+	public String getCustomMountPath() {
+		return vault.getVaultSettings().customMountPath().get();
 	}
 
 }

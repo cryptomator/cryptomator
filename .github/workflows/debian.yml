@@ -1,0 +1,124 @@
+name: Build Debian Package
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      dput:
+        description: 'Upload to PPA'
+        required: true
+        default: false
+        type: boolean
+      version:
+        description: 'Version'
+        required: false
+
+env:
+  JAVA_VERSION: 17
+
+jobs:
+  build:
+    name: Build Debian Package
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Install build tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install debhelper devscripts dput
+      - name: Setup Java
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'temurin'
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: 'maven'
+      - id: versions 
+        name: Apply version information
+        run: |
+          if [[ $GITHUB_REF =~ refs/tags/[0-9]+\.[0-9]+\.[0-9]+.* ]]; then
+            SEM_VER_STR=${GITHUB_REF##*/}
+            mvn versions:set -DnewVersion=${SEM_VER_STR}
+          elif [[ "${{ github.event.inputs.version }}" =~ [0-9]+\.[0-9]+\.[0-9]+.* ]]; then
+            SEM_VER_STR="${{ github.event.inputs.version }}"
+            mvn versions:set -DnewVersion=${SEM_VER_STR}
+          else
+            SEM_VER_STR=`mvn help:evaluate -Dexpression=project.version -q -DforceStdout`
+          fi
+          SEM_VER_NUM=`echo ${SEM_VER_STR} | sed -E 's/([0-9]+\.[0-9]+\.[0-9]+).*/\1/'`
+          REVCOUNT=`git rev-list --count HEAD`
+          echo "::set-output name=semVerStr::${SEM_VER_STR}"
+          echo "::set-output name=semVerNum::${SEM_VER_NUM}"
+          echo "::set-output name=revNum::${REVCOUNT}"
+          echo "::set-output name=ppaVerStr::${SEM_VER_STR/-/\~}-${REVCOUNT}"
+      - name: Validate Version
+        uses: skymatic/semver-validation-action@v1
+        with:
+          version: ${{ steps.versions.outputs.semVerStr }}
+      - name: Run maven
+        run: mvn -B clean package -Pdependency-check,linux -DskipTests
+      - name: Create orig.tar.gz with common/ libs/ mods/
+        run: |
+          mkdir pkgdir
+          cp -r target/libs pkgdir
+          cp -r target/mods pkgdir
+          cp -r dist/linux/common/ pkgdir
+          cp target/cryptomator-*.jar pkgdir/mods
+          tar -cJf cryptomator_${{ steps.versions.outputs.ppaVerStr }}.orig.tar.xz -C pkgdir .
+      - name: Patch and rename pkgdir
+        run: |
+          cp -r dist/linux/debian/ pkgdir
+          export RFC2822_TIMESTAMP=`date --rfc-2822`
+          envsubst '${SEMVER_STR} ${VERSION_NUM} ${REVISION_NUM}' < dist/linux/debian/rules > pkgdir/debian/rules
+          envsubst '${PPA_VERSION} ${RFC2822_TIMESTAMP}' < dist/linux/debian/changelog > pkgdir/debian/changelog
+          find . -name "*.jar" >> pkgdir/debian/source/include-binaries
+          mv pkgdir cryptomator_${{ steps.versions.outputs.ppaVerStr }}
+        env:
+          SEMVER_STR: ${{ steps.versions.outputs.semVerStr }}
+          VERSION_NUM: ${{ steps.versions.outputs.semVerNum }}
+          REVISION_NUM: ${{ steps.versions.outputs.revNum }}
+          PPA_VERSION: ${{ steps.versions.outputs.ppaVerStr }}-0ppa1
+      - name: Prepare GPG-Agent for signing with key 615D449FE6E6A235
+        run: |
+          echo "${GPG_PRIVATE_KEY}" | gpg --batch --quiet --import
+          echo "${GPG_PASSPHRASE}" | gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --dry-run --sign README.md
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.RELEASES_GPG_PRIVATE_KEY }}
+          GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
+      - name: debuild
+        run: |
+          debuild -S -sa -d
+          debuild -b -sa -d
+        env:
+          DEBSIGN_PROGRAM: gpg --batch --pinentry-mode loopback
+          DEBSIGN_KEYID: 615D449FE6E6A235
+        working-directory: cryptomator_${{ steps.versions.outputs.ppaVerStr }}
+      - name: Create detached GPG signatures
+        run: |
+          gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign -a cryptomator_*_amd64.deb
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: linux-deb-package
+          path: |
+            cryptomator_*.dsc
+            cryptomator_*.orig.tar.xz
+            cryptomator_*.debian.tar.xz
+            cryptomator_*_source.buildinfo
+            cryptomator_*_source.changes
+            cryptomator_*_amd64.deb
+            cryptomator_*.asc
+      - name: Publish on PPA
+        if: startsWith(github.ref, 'refs/tags/') || github.event.inputs.dput == 'true'
+        run: dput ppa:sebastian-stenzel/cryptomator-beta cryptomator_*_source.changes
+      - name: Publish Debian package on GitHub Releases
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v1
+        with:
+          fail_on_unmatched_files: true
+          token: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}
+          files: |
+            cryptomator_*_amd64.deb
+            cryptomator_*.asc

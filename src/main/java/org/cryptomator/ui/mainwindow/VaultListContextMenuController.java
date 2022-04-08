@@ -7,7 +7,8 @@ import org.cryptomator.common.keychain.KeychainManager;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.ui.common.FxController;
-import org.cryptomator.ui.fxapp.FxApplication;
+import org.cryptomator.ui.common.VaultService;
+import org.cryptomator.ui.fxapp.FxApplicationWindows;
 import org.cryptomator.ui.removevault.RemoveVaultComponent;
 import org.cryptomator.ui.vaultoptions.SelectedVaultOptionsTab;
 import org.cryptomator.ui.vaultoptions.VaultOptionsComponent;
@@ -18,7 +19,6 @@ import javafx.beans.property.ObjectProperty;
 import javafx.fxml.FXML;
 import javafx.stage.Stage;
 import java.util.EnumSet;
-import java.util.Optional;
 
 import static org.cryptomator.common.vaults.VaultState.Value.*;
 
@@ -27,7 +27,8 @@ public class VaultListContextMenuController implements FxController {
 
 	private final ObservableOptionalValue<Vault> selectedVault;
 	private final Stage mainWindow;
-	private final FxApplication application;
+	private final FxApplicationWindows appWindows;
+	private final VaultService vaultService;
 	private final KeychainManager keychain;
 	private final RemoveVaultComponent.Builder removeVault;
 	private final VaultOptionsComponent.Builder vaultOptionsWindow;
@@ -38,10 +39,11 @@ public class VaultListContextMenuController implements FxController {
 	private final Binding<Boolean> selectedVaultLockable;
 
 	@Inject
-	VaultListContextMenuController(ObjectProperty<Vault> selectedVault, @MainWindow Stage mainWindow, FxApplication application, KeychainManager keychain, RemoveVaultComponent.Builder removeVault, VaultOptionsComponent.Builder vaultOptionsWindow) {
+	VaultListContextMenuController(ObjectProperty<Vault> selectedVault, @MainWindow Stage mainWindow, FxApplicationWindows appWindows, VaultService vaultService, KeychainManager keychain, RemoveVaultComponent.Builder removeVault, VaultOptionsComponent.Builder vaultOptionsWindow) {
 		this.selectedVault = EasyBind.wrapNullable(selectedVault);
 		this.mainWindow = mainWindow;
-		this.application = application;
+		this.appWindows = appWindows;
+		this.vaultService = vaultService;
 		this.keychain = keychain;
 		this.removeVault = removeVault;
 		this.vaultOptionsWindow = vaultOptionsWindow;
@@ -74,22 +76,20 @@ public class VaultListContextMenuController implements FxController {
 	@FXML
 	public void didClickUnlockVault() {
 		selectedVault.ifValuePresent(v -> {
-			application.startUnlockWorkflow(v, Optional.of(mainWindow));
+			appWindows.startUnlockWorkflow(v, mainWindow);
 		});
 	}
 
 	@FXML
 	public void didClickLockVault() {
 		selectedVault.ifValuePresent(v -> {
-			application.startLockWorkflow(v, Optional.of(mainWindow));
+			appWindows.startLockWorkflow(v, mainWindow);
 		});
 	}
 
 	@FXML
 	public void didClickRevealVault() {
-		selectedVault.ifValuePresent(v -> {
-			application.getVaultService().reveal(v);
-		});
+		selectedVault.ifValuePresent(vaultService::reveal);
 	}
 
 	// Getter and Setter
