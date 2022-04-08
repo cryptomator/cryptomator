@@ -41,7 +41,7 @@ if ($clean -and (Test-Path -Path $runtimeImagePath)) {
 	--verbose `
 	--output runtime `
 	--module-path "$Env:JAVA_HOME/jmods" `
-	--add-modules java.base,java.desktop,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.crypto.ec,jdk.accessibility,jdk.management.jfr `
+	--add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.crypto.ec,jdk.accessibility,jdk.management.jfr `
 	--no-header-files `
 	--no-man-pages `
 	--strip-debug `
@@ -72,6 +72,7 @@ if ($clean -and (Test-Path -Path $appPath)) {
 	--java-options "-Dcryptomator.logDir=`"~/AppData/Roaming/Cryptomator`"" `
 	--java-options "-Dcryptomator.pluginDir=`"~/AppData/Roaming/Cryptomator/Plugins`"" `
 	--java-options "-Dcryptomator.settingsPath=`"~/AppData/Roaming/Cryptomator/settings.json`"" `
+	--java-options "-Dcryptomator.p12Path=`"~/AppData/Roaming/Cryptomator/key.p12`"" `
 	--java-options "-Dcryptomator.ipcSocketPath=`"~/AppData/Roaming/Cryptomator/ipc.socket`"" `
 	--java-options "-Dcryptomator.keychainPath=`"~/AppData/Roaming/Cryptomator/keychain.json`"" `
 	--java-options "-Dcryptomator.mountPointsDir=`"~/Cryptomator`"" `

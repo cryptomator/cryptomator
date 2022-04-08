@@ -37,7 +37,7 @@ cp ../../../target/cryptomator-*.jar ../../../target/mods
 ${JAVA_HOME}/bin/jlink \
     --output runtime \
     --module-path "${JAVA_HOME}/jmods" \
-    --add-modules java.base,java.desktop,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.crypto.ec,jdk.accessibility,jdk.management.jfr \
+    --add-modules java.base,java.desktop,java.instrument,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.crypto.ec,jdk.accessibility,jdk.management.jfr \
     --no-header-files \
     --no-man-pages \
     --strip-debug \
@@ -64,6 +64,7 @@ ${JAVA_HOME}/bin/jpackage \
     --java-options "-Dcryptomator.logDir=\"~/Library/Logs/Cryptomator\"" \
     --java-options "-Dcryptomator.pluginDir=\"~/Library/Application Support/Cryptomator/Plugins\"" \
     --java-options "-Dcryptomator.settingsPath=\"~/Library/Application Support/Cryptomator/settings.json\"" \
+    --java-options "-Dcryptomator.p12Path=\"~/Library/Application Support/Cryptomator/key.p12\"" \
     --java-options "-Dcryptomator.ipcSocketPath=\"~/Library/Application Support/Cryptomator/ipc.socket\"" \
     --java-options "-Dcryptomator.showTrayIcon=true" \
     --java-options "-Dcryptomator.buildNumber=\"dmg-${REVISION_NO}\"" \
