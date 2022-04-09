@@ -5,19 +5,18 @@
 <?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.Hyperlink?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.RadioButton?>
 <?import javafx.scene.control.ToggleGroup?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.preferences.GeneralPreferencesController"
-	  spacing="6">
+	  spacing="9">
 	<fx:define>
 		<ToggleGroup fx:id="nodeOrientation"/>
 	</fx:define>
 	<padding>
-		<Insets topRightBottomLeft="12"/>
+		<Insets top="12" right="24" bottom="12" left="24"/>
 	</padding>
 	<children>
 		<CheckBox fx:id="startHiddenCheckbox" text="%preferences.general.startHidden" />

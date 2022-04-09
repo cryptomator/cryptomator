@@ -15,7 +15,7 @@
 	  fx:controller="org.cryptomator.ui.preferences.SupporterCertificateController"
 	  spacing="18">
 	<padding>
-		<Insets topRightBottomLeft="12"/>
+		<Insets top="12" right="24" bottom="12" left="24"/>
 	</padding>
 	<children>
 		<StackPane VBox.vgrow="NEVER" prefHeight="60">

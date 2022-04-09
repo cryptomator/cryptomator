@@ -10,9 +10,9 @@
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.preferences.VolumePreferencesController"
-	  spacing="6">
+	  spacing="9">
 	<padding>
-		<Insets topRightBottomLeft="12"/>
+		<Insets top="12" right="24" bottom="12" left="24"/>
 	</padding>
 	<children>
 		<HBox spacing="6" alignment="CENTER_LEFT">
