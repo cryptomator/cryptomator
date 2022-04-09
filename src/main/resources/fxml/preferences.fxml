@@ -9,7 +9,7 @@
 		 fx:controller="org.cryptomator.ui.preferences.PreferencesController"
 		 minWidth="-Infinity"
 		 maxWidth="-Infinity"
-		 prefWidth="500"
+		 prefWidth="650"
 		 tabMinWidth="60"
 		 tabClosingPolicy="UNAVAILABLE"
 		 tabDragPolicy="FIXED">
