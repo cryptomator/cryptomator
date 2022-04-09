@@ -138,7 +138,7 @@ public class InterfacePreferencesController implements FxController {
 		@Override
 		public String toString(String tag) {
 			if (tag == null) {
-				return resourceBundle.getString("preferences.general.language.auto");
+				return resourceBundle.getString("preferences.interface.language.auto");
 			} else {
 				var locale = Locale.forLanguageTag(tag);
 				var lang = locale.getDisplayLanguage(locale);
