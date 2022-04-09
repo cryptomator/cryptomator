@@ -22,6 +22,14 @@
 				<fx:include source="preferences_general.fxml"/>
 			</content>
 		</Tab>
+		<Tab fx:id="interfaceTab" id="INTERFACE" text="%preferences.interface">
+			<graphic>
+				<FontAwesome5IconView glyph="EYE"/>
+			</graphic>
+			<content>
+				<fx:include source="preferences_interface.fxml"/>
+			</content>
+		</Tab>
 		<Tab fx:id="volumeTab" id="VOLUME" text="%preferences.volume">
 			<graphic>
 				<FontAwesome5IconView glyph="HDD"/>
