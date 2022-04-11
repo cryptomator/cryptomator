@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<VBox xmlns:fx="http://javafx.com/fxml"
+	  xmlns="http://javafx.com/javafx"
+	  fx:controller="org.cryptomator.ui.preferences.InterfacePreferencesController"
+	  spacing="12">
+	<fx:define>
+		<ToggleGroup fx:id="nodeOrientation"/>
+	</fx:define>
+	<padding>
+		<Insets topRightBottomLeft="24"/>
+	</padding>
+	<children>
+		<HBox spacing="12" alignment="CENTER_LEFT">
+			<Label text="%preferences.interface.theme"/>
+			<ChoiceBox fx:id="themeChoiceBox" disable="${!controller.licenseHolder.validLicense}"/>
+			<Hyperlink styleClass="hyperlink-underline,hyperlink-muted" text="%preferences.interface.unlockThemes" onAction="#showContributeTab" visible="${!controller.licenseHolder.validLicense}" managed="${!controller.licenseHolder.validLicense}"/>
+		</HBox>
+
+		<HBox spacing="12" alignment="CENTER_LEFT">
+			<Label text="%preferences.interface.language"/>
+			<ChoiceBox fx:id="preferredLanguageChoiceBox"/>
+		</HBox>
+
+		<HBox spacing="12" alignment="CENTER_LEFT">
+			<Label text="%preferences.interface.interfaceOrientation" HBox.hgrow="NEVER"/>
+			<RadioButton fx:id="nodeOrientationLtr" text="%preferences.interface.interfaceOrientation.ltr" alignment="CENTER_LEFT" toggleGroup="${nodeOrientation}"/>
+			<RadioButton fx:id="nodeOrientationRtl" text="%preferences.interface.interfaceOrientation.rtl" alignment="CENTER_RIGHT" toggleGroup="${nodeOrientation}"/>
+		</HBox>
+
+
+		<CheckBox fx:id="showMinimizeButtonCheckbox" text="%preferences.interface.showMinimizeButton" visible="${controller.trayMenuInitialized}" managed="${controller.trayMenuInitialized}"/>
+
+		<CheckBox fx:id="showTrayIconCheckbox" text="%preferences.interface.showTrayIcon" visible="${controller.trayMenuSupported}" managed="${controller.trayMenuSupported}"/>
+	</children>
+</VBox>
