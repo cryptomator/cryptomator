@@ -7,16 +7,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javafx.application.Platform;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import java.awt.SystemTray;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 
 @FxApplicationScoped
 public class FxApplication {
 
 	private static final Logger LOG = LoggerFactory.getLogger(FxApplication.class);
 
+	private final long startupTime;
 	private final Settings settings;
 	private final AppLaunchEventHandler launchEventHandler;
 	private final Lazy<TrayMenuComponent> trayMenu;
@@ -26,7 +30,8 @@ public class FxApplication {
 	private final AutoUnlocker autoUnlocker;
 
 	@Inject
-	FxApplication(Settings settings, AppLaunchEventHandler launchEventHandler, Lazy<TrayMenuComponent> trayMenu, FxApplicationWindows appWindows, FxApplicationStyle applicationStyle, FxApplicationTerminator applicationTerminator, AutoUnlocker autoUnlocker) {
+	FxApplication(@Named("startupTime") long startupTime, Settings settings, AppLaunchEventHandler launchEventHandler, Lazy<TrayMenuComponent> trayMenu, FxApplicationWindows appWindows, FxApplicationStyle applicationStyle, FxApplicationTerminator applicationTerminator, AutoUnlocker autoUnlocker) {
+		this.startupTime = startupTime;
 		this.settings = settings;
 		this.launchEventHandler = launchEventHandler;
 		this.trayMenu = trayMenu;
@@ -61,6 +66,7 @@ public class FxApplication {
 					stage.setIconified(true);
 				}
 			}
+			LOG.debug("Main window initialized after {}ms", System.currentTimeMillis() - startupTime);
 		}).exceptionally(error -> {
 			LOG.error("Failed to show main window", error);
 			return null;
