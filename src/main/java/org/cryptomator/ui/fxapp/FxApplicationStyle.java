@@ -99,7 +99,7 @@ public class FxApplicationStyle {
 				.ofNullable(getClass().getResource("/css/dark_theme.bss")) //
 				.orElse(getClass().getResource("/css/dark_theme.css"));
 		if (stylesheet == null) {
-			LOG.warn("Failed to load light_theme stylesheet");
+			LOG.warn("Failed to load dark_theme stylesheet");
 		} else {
 			Application.setUserAgentStylesheet(stylesheet.toString());
 			appearanceProvider.ifPresent(provider -> provider.adjustToTheme(Theme.DARK));
