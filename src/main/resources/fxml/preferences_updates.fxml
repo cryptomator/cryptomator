@@ -11,19 +11,19 @@
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.preferences.UpdatesPreferencesController"
-	  spacing="9">
+	  spacing="12">
 	<fx:define>
 		<FormattedString fx:id="linkLabel" format="%preferences.updates.updateAvailable" arg1="${controller.latestVersion}"/>
 	</fx:define>
 	<padding>
-		<Insets top="12" right="24" bottom="12" left="24"/>
+		<Insets topRightBottomLeft="24"/>
 	</padding>
 	<children>
 		<FormattedLabel format="%preferences.updates.currentVersion" arg1="${controller.currentVersion}" textAlignment="CENTER" wrapText="true"/>
 
 		<CheckBox fx:id="checkForUpdatesCheckbox" text="%preferences.updates.autoUpdateCheck"/>
 
-		<VBox alignment="CENTER" spacing="6">
+		<VBox alignment="CENTER" spacing="12">
 			<Button text="%preferences.updates.checkNowBtn" defaultButton="true" onAction="#checkNow" contentDisplay="${controller.checkForUpdatesButtonState}">
 				<graphic>
 					<FontAwesome5Spinner fx:id="spinner" glyphSize="12"/>

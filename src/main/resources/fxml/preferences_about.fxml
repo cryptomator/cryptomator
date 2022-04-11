@@ -11,9 +11,9 @@
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.preferences.AboutController"
-	  spacing="18">
+	  spacing="24">
 	<padding>
-		<Insets top="12" right="24" bottom="12" left="24"/>
+		<Insets topRightBottomLeft="24"/>
 	</padding>
 	<children>
 		<HBox spacing="12" VBox.vgrow="NEVER">

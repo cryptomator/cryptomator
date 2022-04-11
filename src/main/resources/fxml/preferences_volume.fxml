@@ -10,23 +10,23 @@
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.preferences.VolumePreferencesController"
-	  spacing="9">
+	  spacing="12">
 	<padding>
-		<Insets top="12" right="24" bottom="12" left="24"/>
+		<Insets topRightBottomLeft="24"/>
 	</padding>
 	<children>
-		<HBox spacing="6" alignment="CENTER_LEFT">
+		<HBox spacing="12" alignment="CENTER_LEFT">
 			<Label text="%preferences.volume.type"/>
 			<ChoiceBox fx:id="volumeTypeChoiceBox"/>
 		</HBox>
 
-		<HBox spacing="6" alignment="CENTER_LEFT" visible="${controller.showWebDavSettings}">
+		<HBox spacing="12" alignment="CENTER_LEFT" visible="${controller.showWebDavSettings}">
 			<Label text="%preferences.volume.webdav.port"/>
 			<NumericTextField fx:id="webDavPortField"/>
 			<Button text="%generic.button.apply" fx:id="changeWebDavPortButton" onAction="#doChangeWebDavPort"/>
 		</HBox>
 
-		<HBox spacing="6" alignment="CENTER_LEFT" visible="${controller.showWebDavScheme}">
+		<HBox spacing="12" alignment="CENTER_LEFT" visible="${controller.showWebDavScheme}">
 			<Label text="%preferences.volume.webdav.scheme"/>
 			<ChoiceBox fx:id="webDavUrlSchemeChoiceBox" maxWidth="Infinity"/>
 		</HBox>

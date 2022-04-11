@@ -12,26 +12,26 @@
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.preferences.GeneralPreferencesController"
-	  spacing="9">
+	  spacing="12">
 	<fx:define>
 		<ToggleGroup fx:id="nodeOrientation"/>
 	</fx:define>
 	<padding>
-		<Insets top="12" right="24" bottom="12" left="24"/>
+		<Insets topRightBottomLeft="24"/>
 	</padding>
 	<children>
 		<CheckBox fx:id="autoStartCheckbox" text="%preferences.general.autoStart" visible="${controller.autoStartSupported}" managed="${controller.autoStartSupported}" onAction="#toggleAutoStart"/>
 
 		<CheckBox fx:id="startHiddenCheckbox" text="%preferences.general.startHidden" />
 
-		<HBox spacing="6" alignment="CENTER_LEFT">
+		<HBox spacing="12" alignment="CENTER_LEFT">
 			<Label text="%preferences.general.keychainBackend"/>
 			<ChoiceBox fx:id="keychainBackendChoiceBox"/>
 		</HBox>
 
 		<Region VBox.vgrow="ALWAYS"/>
 
-		<HBox spacing="6" alignment="CENTER_LEFT">
+		<HBox spacing="12" alignment="CENTER_LEFT">
 			<CheckBox fx:id="debugModeCheckbox" text="%preferences.general.debugLogging"/>
 			<Hyperlink styleClass="hyperlink-underline" text="%preferences.general.debugDirectory" onAction="#showLogfileDirectory"/>
 		</HBox>

@@ -12,26 +12,26 @@
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
 	  fx:controller="org.cryptomator.ui.preferences.InterfacePreferencesController"
-	  spacing="9">
+	  spacing="12">
 	<fx:define>
 		<ToggleGroup fx:id="nodeOrientation"/>
 	</fx:define>
 	<padding>
-		<Insets top="12" right="24" bottom="12" left="24"/>
+		<Insets topRightBottomLeft="24"/>
 	</padding>
 	<children>
-		<HBox spacing="6" alignment="CENTER_LEFT">
+		<HBox spacing="12" alignment="CENTER_LEFT">
 			<Label text="%preferences.interface.theme"/>
 			<ChoiceBox fx:id="themeChoiceBox" disable="${!controller.licenseHolder.validLicense}"/>
 			<Hyperlink styleClass="hyperlink-underline,hyperlink-muted" text="%preferences.interface.unlockThemes" onAction="#showContributeTab" visible="${!controller.licenseHolder.validLicense}" managed="${!controller.licenseHolder.validLicense}"/>
 		</HBox>
 
-		<HBox spacing="6" alignment="CENTER_LEFT">
+		<HBox spacing="12" alignment="CENTER_LEFT">
 			<Label text="%preferences.interface.language"/>
 			<ChoiceBox fx:id="preferredLanguageChoiceBox"/>
 		</HBox>
 
-		<HBox spacing="6" alignment="CENTER_LEFT">
+		<HBox spacing="12" alignment="CENTER_LEFT">
 			<Label text="%preferences.interface.interfaceOrientation" HBox.hgrow="NEVER"/>
 			<RadioButton fx:id="nodeOrientationLtr" text="%preferences.interface.interfaceOrientation.ltr" alignment="CENTER_LEFT" toggleGroup="${nodeOrientation}"/>
 			<RadioButton fx:id="nodeOrientationRtl" text="%preferences.interface.interfaceOrientation.rtl" alignment="CENTER_RIGHT" toggleGroup="${nodeOrientation}"/>
