@@ -61,6 +61,9 @@ public class FxApplication {
 					stage.setIconified(true);
 				}
 			}
+		}).exceptionally(error -> {
+			LOG.error("Failed to show main window", error);
+			return null;
 		});
 
 		launchEventHandler.startHandlingLaunchEvents();
