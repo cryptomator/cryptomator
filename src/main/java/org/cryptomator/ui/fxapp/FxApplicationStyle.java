@@ -83,12 +83,26 @@ public class FxApplicationStyle {
 	}
 
 	private void applyLightTheme() {
-		Application.setUserAgentStylesheet(getClass().getResource("/css/light_theme.css").toString());
-		appearanceProvider.ifPresent(provider -> provider.adjustToTheme(Theme.LIGHT));
+		var stylesheet = Optional //
+				.ofNullable(getClass().getResource("/css/light_theme.bss")) //
+				.orElse(getClass().getResource("/css/light_theme.css"));
+		if (stylesheet == null) {
+			LOG.warn("Failed to load light_theme stylesheet");
+		} else {
+			Application.setUserAgentStylesheet(stylesheet.toString());
+			appearanceProvider.ifPresent(provider -> provider.adjustToTheme(Theme.LIGHT));
+		}
 	}
 
 	private void applyDarkTheme() {
-		Application.setUserAgentStylesheet(getClass().getResource("/css/dark_theme.css").toString());
-		appearanceProvider.ifPresent(provider -> provider.adjustToTheme(Theme.DARK));
+		var stylesheet = Optional //
+				.ofNullable(getClass().getResource("/css/dark_theme.bss")) //
+				.orElse(getClass().getResource("/css/dark_theme.css"));
+		if (stylesheet == null) {
+			LOG.warn("Failed to load light_theme stylesheet");
+		} else {
+			Application.setUserAgentStylesheet(stylesheet.toString());
+			appearanceProvider.ifPresent(provider -> provider.adjustToTheme(Theme.DARK));
+		}
 	}
 }
