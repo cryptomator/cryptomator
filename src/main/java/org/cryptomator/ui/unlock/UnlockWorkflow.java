@@ -2,16 +2,17 @@ package org.cryptomator.ui.unlock;
 
 import com.google.common.base.Throwables;
 import dagger.Lazy;
+import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.mountpoint.InvalidMountPointException;
 import org.cryptomator.common.vaults.MountPointRequirement;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.common.vaults.Volume.VolumeException;
 import org.cryptomator.cryptolib.api.CryptoException;
-import org.cryptomator.ui.common.ErrorComponent;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.VaultService;
+import org.cryptomator.ui.fxapp.FxApplicationWindows;
 import org.cryptomator.ui.keyloading.KeyLoadingStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,17 +42,17 @@ public class UnlockWorkflow extends Task<Boolean> {
 	private final VaultService vaultService;
 	private final Lazy<Scene> successScene;
 	private final Lazy<Scene> invalidMountPointScene;
-	private final ErrorComponent.Builder errorComponent;
+	private final FxApplicationWindows appWindows;
 	private final KeyLoadingStrategy keyLoadingStrategy;
 
 	@Inject
-	UnlockWorkflow(@UnlockWindow Stage window, @UnlockWindow Vault vault, VaultService vaultService, @FxmlScene(FxmlFile.UNLOCK_SUCCESS) Lazy<Scene> successScene, @FxmlScene(FxmlFile.UNLOCK_INVALID_MOUNT_POINT) Lazy<Scene> invalidMountPointScene, ErrorComponent.Builder errorComponent, @UnlockWindow KeyLoadingStrategy keyLoadingStrategy) {
+	UnlockWorkflow(@UnlockWindow Stage window, @UnlockWindow Vault vault, VaultService vaultService, @FxmlScene(FxmlFile.UNLOCK_SUCCESS) Lazy<Scene> successScene, @FxmlScene(FxmlFile.UNLOCK_INVALID_MOUNT_POINT) Lazy<Scene> invalidMountPointScene, FxApplicationWindows appWindows, @UnlockWindow KeyLoadingStrategy keyLoadingStrategy) {
 		this.window = window;
 		this.vault = vault;
 		this.vaultService = vaultService;
 		this.successScene = successScene;
 		this.invalidMountPointScene = invalidMountPointScene;
-		this.errorComponent = errorComponent;
+		this.appWindows = appWindows;
 		this.keyLoadingStrategy = keyLoadingStrategy;
 	}
 
@@ -79,9 +80,10 @@ public class UnlockWorkflow extends Task<Boolean> {
 	}
 
 	private void handleInvalidMountPoint(InvalidMountPointException impExc) {
-		MountPointRequirement requirement = vault.getVolume().orElseThrow(() -> new IllegalStateException("Invalid Mountpoint without a Volume?!", impExc)).getMountPointRequirement();
+		var requirement = vault.getVolume().orElseThrow(() -> new IllegalStateException("Invalid Mountpoint without a Volume?!", impExc)).getMountPointRequirement();
 		assert requirement != MountPointRequirement.NONE; //An invalid MountPoint with no required MountPoint doesn't seem sensible
 		assert requirement != MountPointRequirement.PARENT_OPT_MOUNT_POINT; //Not implemented anywhere (yet)
+		assert requirement != MountPointRequirement.UNUSED_ROOT_DIR || SystemUtils.IS_OS_WINDOWS; //Not implemented anywhere, but on Windows
 
 		Throwable cause = impExc.getCause();
 		// TODO: apply https://openjdk.java.net/jeps/8213076 in future JDK versions
@@ -93,7 +95,11 @@ public class UnlockWorkflow extends Task<Boolean> {
 			}
 			showInvalidMountPointScene();
 		} else if (cause instanceof FileAlreadyExistsException) {
-			LOG.error("Unlock failed. Mountpoint already exists: {}", cause.getMessage());
+			if (requirement == MountPointRequirement.UNUSED_ROOT_DIR) {
+				LOG.error("Unlock failed. Drive Letter already in use: {}", cause.getMessage());
+			} else {
+				LOG.error("Unlock failed. Mountpoint already exists: {}", cause.getMessage());
+			}
 			showInvalidMountPointScene();
 		} else if (cause instanceof DirectoryNotEmptyException) {
 			LOG.error("Unlock failed. Mountpoint not an empty directory: {}", cause.getMessage());
@@ -112,7 +118,7 @@ public class UnlockWorkflow extends Task<Boolean> {
 
 	private void handleGenericError(Throwable e) {
 		LOG.error("Unlock failed for technical reasons.", e);
-		errorComponent.cause(e).window(window).build().showErrorScene();
+		appWindows.showErrorWindow(e, window, null);
 	}
 
 	@Override

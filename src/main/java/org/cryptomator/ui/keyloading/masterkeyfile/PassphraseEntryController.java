@@ -1,16 +1,14 @@
 package org.cryptomator.ui.keyloading.masterkeyfile;
 
+import org.cryptomator.common.Nullable;
 import org.cryptomator.common.keychain.KeychainManager;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.ui.common.FxController;
-import org.cryptomator.ui.common.UserInteractionLock;
+import org.cryptomator.common.Passphrase;
 import org.cryptomator.ui.common.WeakBindings;
-import org.cryptomator.ui.controls.FontAwesome5IconView;
 import org.cryptomator.ui.controls.NiceSecurePasswordField;
 import org.cryptomator.ui.forgetPassword.ForgetPasswordComponent;
 import org.cryptomator.ui.keyloading.KeyLoading;
-import org.cryptomator.ui.keyloading.KeyLoadingScoped;
-import org.cryptomator.ui.keyloading.masterkeyfile.MasterkeyFileLoadingModule.PasswordEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,8 +19,8 @@ import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
-import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.binding.StringBinding;
 import javafx.beans.property.BooleanProperty;
@@ -37,33 +35,27 @@ import javafx.scene.transform.Translate;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import javafx.util.Duration;
-import java.util.Arrays;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.CompletableFuture;
 
-@KeyLoadingScoped
+@PassphraseEntryScoped
 public class PassphraseEntryController implements FxController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(PassphraseEntryController.class);
 
 	private final Stage window;
 	private final Vault vault;
-	private final AtomicReference<char[]> password;
-	private final AtomicBoolean savePassword;
-	private final Optional<char[]> savedPassword;
-	private final UserInteractionLock<PasswordEntry> passwordEntryLock;
+	private final CompletableFuture<PassphraseEntryResult> result;
+	private final Passphrase savedPassword;
 	private final ForgetPasswordComponent.Builder forgetPassword;
 	private final KeychainManager keychain;
-	private final ObjectBinding<ContentDisplay> unlockButtonContentDisplay;
-	private final BooleanBinding userInteractionDisabled;
-	private final BooleanProperty unlockButtonDisabled;
 	private final StringBinding vaultName;
+	private final BooleanProperty unlockInProgress = new SimpleBooleanProperty();
+	private final ObjectBinding<ContentDisplay> unlockButtonContentDisplay = Bindings.createObjectBinding(this::getUnlockButtonContentDisplay, unlockInProgress);
+	private final BooleanProperty unlockButtonDisabled = new SimpleBooleanProperty();
 
 	/* FXML */
 	public NiceSecurePasswordField passwordField;
 	public CheckBox savePasswordCheckbox;
-	public FontAwesome5IconView unlockInProgressView;
 	public ImageView face;
 	public ImageView leftArm;
 	public ImageView rightArm;
@@ -72,29 +64,25 @@ public class PassphraseEntryController implements FxController {
 	public Animation unlockAnimation;
 
 	@Inject
-	public PassphraseEntryController(@KeyLoading Stage window, @KeyLoading Vault vault, AtomicReference<char[]> password, @Named("savePassword") AtomicBoolean savePassword, @Named("savedPassword") Optional<char[]> savedPassword, UserInteractionLock<PasswordEntry> passwordEntryLock, ForgetPasswordComponent.Builder forgetPassword, KeychainManager keychain) {
+	public PassphraseEntryController(@KeyLoading Stage window, @KeyLoading Vault vault, CompletableFuture<PassphraseEntryResult> result, @Nullable @Named("savedPassword") Passphrase savedPassword, ForgetPasswordComponent.Builder forgetPassword, KeychainManager keychain) {
 		this.window = window;
 		this.vault = vault;
-		this.password = password;
-		this.savePassword = savePassword;
+		this.result = result;
 		this.savedPassword = savedPassword;
-		this.passwordEntryLock = passwordEntryLock;
 		this.forgetPassword = forgetPassword;
 		this.keychain = keychain;
-		this.unlockButtonContentDisplay = Bindings.createObjectBinding(this::getUnlockButtonContentDisplay, passwordEntryLock.awaitingInteraction());
-		this.userInteractionDisabled = passwordEntryLock.awaitingInteraction().not();
-		this.unlockButtonDisabled = new SimpleBooleanProperty();
 		this.vaultName = WeakBindings.bindString(vault.displayNameProperty());
-		this.window.setOnHiding(this::windowClosed);
+		window.setOnHiding(this::windowClosed);
+		result.whenCompleteAsync((r, t) -> unlockInProgress.set(false), Platform::runLater);
 	}
 
 	@FXML
 	public void initialize() {
-		savePasswordCheckbox.setSelected(savedPassword.isPresent());
-		if (password.get() != null) {
-			passwordField.setPassword(password.get());
+		if (savedPassword != null) {
+			savePasswordCheckbox.setSelected(true);
+			passwordField.setPassword(savedPassword);
 		}
-		unlockButtonDisabled.bind(userInteractionDisabled.or(passwordField.textProperty().isEmpty()));
+		unlockButtonDisabled.bind(unlockInProgress.or(passwordField.textProperty().isEmpty()));
 
 		var leftArmTranslation = new Translate(24, 0);
 		var leftArmRotation = new Rotate(60, 16, 30, 0);
@@ -132,7 +120,7 @@ public class PassphraseEntryController implements FxController {
 				new KeyFrame(Duration.millis(1000), faceVisible) //
 		);
 
-		passwordEntryLock.awaitingInteraction().addListener(observable -> stopUnlockAnimation());
+		result.whenCompleteAsync((r, t) -> stopUnlockAnimation());
 	}
 
 	@FXML
@@ -141,26 +129,20 @@ public class PassphraseEntryController implements FxController {
 	}
 
 	private void windowClosed(WindowEvent windowEvent) {
-		// if not already interacted, mark this workflow as cancelled:
-		if (passwordEntryLock.awaitingInteraction().get()) {
+		if(!result.isDone()) {
+			result.cancel(true);
 			LOG.debug("Unlock canceled by user.");
-			passwordEntryLock.interacted(PasswordEntry.CANCELED);
 		}
+
 	}
 
 	@FXML
 	public void unlock() {
 		LOG.trace("UnlockController.unlock()");
+		unlockInProgress.set(true);
 		CharSequence pwFieldContents = passwordField.getCharacters();
-		char[] newPw = new char[pwFieldContents.length()];
-		for (int i = 0; i < pwFieldContents.length(); i++) {
-			newPw[i] = pwFieldContents.charAt(i);
-		}
-		char[] oldPw = password.getAndSet(newPw);
-		if (oldPw != null) {
-			Arrays.fill(oldPw, ' ');
-		}
-		passwordEntryLock.interacted(PasswordEntry.PASSWORD_ENTERED);
+		Passphrase pw = Passphrase.copyOf(pwFieldContents);
+		result.complete(new PassphraseEntryResult(pw, savePasswordCheckbox.isSelected()));
 		startUnlockAnimation();
 	}
 
@@ -184,8 +166,7 @@ public class PassphraseEntryController implements FxController {
 
 	@FXML
 	private void didClickSavePasswordCheckbox() {
-		savePassword.set(savePasswordCheckbox.isSelected());
-		if (!savePasswordCheckbox.isSelected() && savedPassword.isPresent()) {
+		if (!savePasswordCheckbox.isSelected() && savedPassword != null) {
 			forgetPassword.vault(vault).owner(window).build().showForgetPassword().thenAccept(forgotten -> savePasswordCheckbox.setSelected(!forgotten));
 		}
 	}
@@ -205,15 +186,15 @@ public class PassphraseEntryController implements FxController {
 	}
 
 	public ContentDisplay getUnlockButtonContentDisplay() {
-		return passwordEntryLock.awaitingInteraction().get() ? ContentDisplay.TEXT_ONLY : ContentDisplay.LEFT;
+		return unlockInProgress.get() ? ContentDisplay.LEFT : ContentDisplay.TEXT_ONLY;
 	}
 
-	public BooleanBinding userInteractionDisabledProperty() {
-		return userInteractionDisabled;
+	public ReadOnlyBooleanProperty userInteractionDisabledProperty() {
+		return unlockInProgress;
 	}
 
 	public boolean isUserInteractionDisabled() {
-		return userInteractionDisabled.get();
+		return unlockInProgress.get();
 	}
 
 	public ReadOnlyBooleanProperty unlockButtonDisabledProperty() {
@@ -227,4 +208,6 @@ public class PassphraseEntryController implements FxController {
 	public boolean isKeychainAccessAvailable() {
 		return keychain.isSupported();
 	}
+
+
 }

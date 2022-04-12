@@ -4,6 +4,7 @@ import com.google.common.collect.Iterators;
 import org.apache.commons.lang3.SystemUtils;
 import org.cryptomator.common.mountpoint.InvalidMountPointException;
 import org.cryptomator.common.mountpoint.MountPointChooser;
+import org.cryptomator.common.settings.VaultSettings;
 import org.cryptomator.common.settings.VolumeImpl;
 import org.cryptomator.cryptofs.CryptoFileSystem;
 import org.cryptomator.frontend.fuse.mount.EnvironmentVariables;
@@ -28,11 +29,14 @@ public class FuseVolume extends AbstractVolume {
 	private static final Logger LOG = LoggerFactory.getLogger(FuseVolume.class);
 	private static final Pattern NON_WHITESPACE_OR_QUOTED = Pattern.compile("[^\\s\"']+|\"([^\"]*)\"|'([^']*)'"); // Thanks to https://stackoverflow.com/a/366532
 
+	private final VaultSettings vaultSettings;
+
 	private Mount mount;
 
 	@Inject
-	public FuseVolume(@Named("orderedMountPointChoosers") Iterable<MountPointChooser> choosers) {
+	public FuseVolume(VaultSettings vaultSettings, @Named("orderedMountPointChoosers") Iterable<MountPointChooser> choosers) {
 		super(choosers);
+		this.vaultSettings = vaultSettings;
 	}
 
 	@Override
@@ -50,7 +54,7 @@ public class FuseVolume extends AbstractVolume {
 					.withFileNameTranscoder(mounter.defaultFileNameTranscoder()) //
 					.build();
 			this.mount = mounter.mount(root, envVars, onExitAction);
-		} catch ( FuseMountException | FuseNotSupportedException e) {
+		} catch (FuseMountException | FuseNotSupportedException e) {
 			throw new VolumeException("Unable to mount Filesystem", e);
 		}
 	}
@@ -119,7 +123,10 @@ public class FuseVolume extends AbstractVolume {
 
 	@Override
 	public MountPointRequirement getMountPointRequirement() {
-		return SystemUtils.IS_OS_WINDOWS ? MountPointRequirement.PARENT_NO_MOUNT_POINT : MountPointRequirement.EMPTY_MOUNT_POINT;
+		if (!SystemUtils.IS_OS_WINDOWS) {
+			return MountPointRequirement.EMPTY_MOUNT_POINT;
+		}
+		return this.vaultSettings.getWinDriveLetter().isPresent() ? MountPointRequirement.UNUSED_ROOT_DIR : MountPointRequirement.PARENT_NO_MOUNT_POINT;
 	}
 
 	public static boolean isSupportedStatic() {

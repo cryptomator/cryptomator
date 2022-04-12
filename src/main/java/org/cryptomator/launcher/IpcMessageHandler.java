@@ -1,7 +1,6 @@
 package org.cryptomator.launcher;
 
 import org.cryptomator.ipc.IpcMessageListener;
-import org.cryptomator.ui.launcher.AppLaunchEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

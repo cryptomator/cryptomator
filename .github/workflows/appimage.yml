@@ -1,0 +1,158 @@
+name: Build AppImage
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version'
+        required: false
+
+env:
+  JAVA_VERSION: 17
+
+jobs:
+  build:
+    name: Build AppImage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Setup Java
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'temurin'
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: 'maven'
+      - id: versions 
+        name: Apply version information
+        run: |
+          if [[ $GITHUB_REF =~ refs/tags/[0-9]+\.[0-9]+\.[0-9]+.* ]]; then
+            SEM_VER_STR=${GITHUB_REF##*/}
+            mvn versions:set -DnewVersion=${SEM_VER_STR}
+          elif [[ "${{ github.event.inputs.version }}" =~ [0-9]+\.[0-9]+\.[0-9]+.* ]]; then
+            SEM_VER_STR="${{ github.event.inputs.version }}"
+            mvn versions:set -DnewVersion=${SEM_VER_STR}
+          else
+            SEM_VER_STR=`mvn help:evaluate -Dexpression=project.version -q -DforceStdout`
+          fi
+          SEM_VER_NUM=`echo ${SEM_VER_STR} | sed -E 's/([0-9]+\.[0-9]+\.[0-9]+).*/\1/'`
+          REVCOUNT=`git rev-list --count HEAD`
+          echo "::set-output name=semVerStr::${SEM_VER_STR}"
+          echo "::set-output name=semVerNum::${SEM_VER_NUM}"
+          echo "::set-output name=revNum::${REVCOUNT}"
+      - name: Validate Version
+        uses: skymatic/semver-validation-action@v1
+        with:
+          version: ${{ steps.versions.outputs.semVerStr }}
+      - name: Run maven
+        run: mvn -B clean package -Pdependency-check,linux -DskipTests
+      - name: Patch target dir
+        run: |
+          cp LICENSE.txt target
+          cp dist/linux/launcher.sh target
+          cp target/cryptomator-*.jar target/mods
+      - name: Run jlink
+        run: >
+          ${JAVA_HOME}/bin/jlink
+          --verbose
+          --output runtime
+          --module-path "${JAVA_HOME}/jmods"
+          --add-modules java.base,java.desktop,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.crypto.ec,jdk.accessibility,jdk.management.jfr
+          --no-header-files
+          --no-man-pages
+          --strip-debug
+          --compress=1
+      - name: Run jpackage
+        run: >
+          ${JAVA_HOME}/bin/jpackage
+          --verbose
+          --type app-image
+          --runtime-image runtime
+          --input target/libs
+          --module-path target/mods
+          --module org.cryptomator.desktop/org.cryptomator.launcher.Cryptomator
+          --dest appdir
+          --name Cryptomator
+          --vendor "Skymatic GmbH"
+          --copyright "(C) 2016 - 2022 Skymatic GmbH"
+          --app-version "${{  steps.versions.outputs.semVerNum }}.${{  steps.versions.outputs.revNum }}"
+          --java-options "-Xss5m"
+          --java-options "-Xmx256m"
+          --java-options "-Dcryptomator.appVersion=\"${{  steps.versions.outputs.semVerStr }}\""
+          --java-options "-Dfile.encoding=\"utf-8\""
+          --java-options "-Dcryptomator.logDir=\"~/.local/share/Cryptomator/logs\""
+          --java-options "-Dcryptomator.pluginDir=\"~/.local/share/Cryptomator/plugins\""
+          --java-options "-Dcryptomator.settingsPath=\"~/.config/Cryptomator/settings.json:~/.Cryptomator/settings.json\""
+          --java-options "-Dcryptomator.ipcSocketPath=\"~/.config/Cryptomator/ipc.socket\""
+          --java-options "-Dcryptomator.mountPointsDir=\"~/.local/share/Cryptomator/mnt\""
+          --java-options "-Dcryptomator.showTrayIcon=false"
+          --java-options "-Dcryptomator.buildNumber=\"appimage-${{  steps.versions.outputs.revNum }}\""
+          --resource-dir dist/linux/resources
+      - name: Patch Cryptomator.AppDir
+        run: |
+          mv appdir/Cryptomator Cryptomator.AppDir
+          cp -r dist/linux/appimage/resources/AppDir/* Cryptomator.AppDir/
+          envsubst '${REVISION_NO} ${SEMVER_STR}' < dist/linux/appimage/resources/AppDir/bin/cryptomator.sh > Cryptomator.AppDir/bin/cryptomator.sh
+          cp dist/linux/common/org.cryptomator.Cryptomator256.png Cryptomator.AppDir/usr/share/icons/hicolor/256x256/apps/org.cryptomator.Cryptomator.png
+          cp dist/linux/common/org.cryptomator.Cryptomator512.png Cryptomator.AppDir/usr/share/icons/hicolor/512x512/apps/org.cryptomator.Cryptomator.png
+          cp dist/linux/common/org.cryptomator.Cryptomator.svg Cryptomator.AppDir/usr/share/icons/hicolor/scalable/apps/org.cryptomator.Cryptomator.svg
+          cp dist/linux/common/org.cryptomator.Cryptomator.metainfo.xml Cryptomator.AppDir/usr/share/metainfo/org.cryptomator.Cryptomator.metainfo.xml
+          cp dist/linux/common/org.cryptomator.Cryptomator.desktop Cryptomator.AppDir/usr/share/applications/org.cryptomator.Cryptomator.desktop
+          cp dist/linux/common/application-vnd.cryptomator.vault.xml Cryptomator.AppDir/usr/share/mime/packages/application-vnd.cryptomator.vault.xml
+          ln -s usr/share/icons/hicolor/scalable/apps/org.cryptomator.Cryptomator.svg Cryptomator.AppDir/org.cryptomator.Cryptomator.svg
+          ln -s usr/share/icons/hicolor/scalable/apps/org.cryptomator.Cryptomator.svg Cryptomator.AppDir/Cryptomator.svg
+          ln -s usr/share/icons/hicolor/scalable/apps/org.cryptomator.Cryptomator.svg Cryptomator.AppDir/.DirIcon
+          ln -s usr/share/applications/org.cryptomator.Cryptomator.desktop Cryptomator.AppDir/Cryptomator.desktop
+          ln -s bin/cryptomator.sh Cryptomator.AppDir/AppRun
+        env:
+          REVISION_NO: ${{  steps.versions.outputs.revNum }}
+          SEMVER_STR: ${{  steps.versions.outputs.semVerStr }}
+      - name: Extract libjffi.so # workaround for https://github.com/cryptomator/cryptomator-linux/issues/27
+        run: |
+          JFFI_NATIVE_JAR=`ls lib/app/ | grep -e 'jffi-[1-9]\.[0-9]\{1,2\}.[0-9]\{1,2\}-native.jar'`
+          ${JAVA_HOME}/bin/jar -xf lib/app/${JFFI_NATIVE_JAR} /jni/x86_64-Linux/
+          mv jni/x86_64-Linux/* lib/app/libjffi.so
+        working-directory: Cryptomator.AppDir
+      - name: Download AppImageKit
+        run: |
+          curl -L https://github.com/AppImage/AppImageKit/releases/download/13/appimagetool-x86_64.AppImage -o appimagetool.AppImage
+          chmod +x appimagetool.AppImage
+          ./appimagetool.AppImage --appimage-extract
+      - name: Prepare GPG-Agent for signing with key 615D449FE6E6A235
+        run: |
+          echo "${GPG_PRIVATE_KEY}" | gpg --batch --quiet --import
+          echo "${GPG_PASSPHRASE}" | gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --dry-run --sign README.md
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.RELEASES_GPG_PRIVATE_KEY }}
+          GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
+      - name: Build AppImage
+        run: >
+          ./squashfs-root/AppRun Cryptomator.AppDir cryptomator-${{  steps.versions.outputs.semVerStr }}-x86_64.AppImage
+          -u 'gh-releases-zsync|cryptomator|cryptomator|latest|cryptomator-*-x86_64.AppImage.zsync'
+          --sign --sign-key=615D449FE6E6A235 --sign-args="--batch --pinentry-mode loopback"
+      - name: Create detached GPG signatures
+        run: |
+          gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign -a cryptomator-*.AppImage
+          gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign -a cryptomator-*.AppImage.zsync
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: appimage
+          path: |
+            cryptomator-*.AppImage
+            cryptomator-*.AppImage.zsync
+            cryptomator-*.asc
+          if-no-files-found: error
+      - name: Publish AppImage on GitHub Releases
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v1
+        with:
+          fail_on_unmatched_files: true
+          token: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}
+          files: |
+            cryptomator-*.AppImage
+            cryptomator-*.zsync
+            cryptomator-*.asc

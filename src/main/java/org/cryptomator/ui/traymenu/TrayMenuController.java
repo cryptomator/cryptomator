@@ -1,9 +1,9 @@
 package org.cryptomator.ui.traymenu;
 
 import org.cryptomator.common.vaults.Vault;
-import org.cryptomator.ui.fxapp.FxApplication;
-import org.cryptomator.ui.launcher.AppLifecycleListener;
-import org.cryptomator.ui.launcher.FxApplicationStarter;
+import org.cryptomator.ui.common.VaultService;
+import org.cryptomator.ui.fxapp.FxApplicationTerminator;
+import org.cryptomator.ui.fxapp.FxApplicationWindows;
 import org.cryptomator.ui.preferences.SelectedPreferencesTab;
 
 import javax.inject.Inject;
@@ -16,7 +16,6 @@ import java.awt.PopupMenu;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.EventObject;
-import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
 
@@ -24,16 +23,18 @@ import java.util.function.Consumer;
 class TrayMenuController {
 
 	private final ResourceBundle resourceBundle;
-	private final AppLifecycleListener appLifecycle;
-	private final FxApplicationStarter fxApplicationStarter;
+	private final VaultService vaultService;
+	private final FxApplicationWindows appWindows;
+	private final FxApplicationTerminator appTerminator;
 	private final ObservableList<Vault> vaults;
 	private final PopupMenu menu;
 
 	@Inject
-	TrayMenuController(ResourceBundle resourceBundle, AppLifecycleListener appLifecycle, FxApplicationStarter fxApplicationStarter, ObservableList<Vault> vaults) {
+	TrayMenuController(ResourceBundle resourceBundle, VaultService vaultService, FxApplicationWindows appWindows, FxApplicationTerminator appTerminator, ObservableList<Vault> vaults) {
 		this.resourceBundle = resourceBundle;
-		this.appLifecycle = appLifecycle;
-		this.fxApplicationStarter = fxApplicationStarter;
+		this.vaultService = vaultService;
+		this.appWindows = appWindows;
+		this.appTerminator = appTerminator;
 		this.vaults = vaults;
 		this.menu = new PopupMenu();
 	}
@@ -91,6 +92,8 @@ class TrayMenuController {
 			unlockItem.addActionListener(createActionListenerForVault(vault, this::unlockVault));
 			submenu.add(unlockItem);
 		} else if (vault.isUnlocked()) {
+			submenu.setLabel("* ".concat(submenu.getLabel()));
+
 			MenuItem lockItem = new MenuItem(resourceBundle.getString("traymenu.vault.lock"));
 			lockItem.addActionListener(createActionListenerForVault(vault, this::lockVault));
 			submenu.add(lockItem);
@@ -108,35 +111,31 @@ class TrayMenuController {
 	}
 
 	private void quitApplication(EventObject actionEvent) {
-		appLifecycle.quit();
+		appTerminator.terminate();
 	}
 
 	private void unlockVault(Vault vault) {
-		showMainAppAndThen(app -> app.startUnlockWorkflow(vault, Optional.empty()));
+		appWindows.startUnlockWorkflow(vault, null);
 	}
 
 	private void lockVault(Vault vault) {
-		showMainAppAndThen(app -> app.startLockWorkflow(vault, Optional.empty()));
+		appWindows.startLockWorkflow(vault, null);
 	}
 
 	private void lockAllVaults(ActionEvent actionEvent) {
-		showMainAppAndThen(app -> app.getVaultService().lockAll(vaults.filtered(Vault::isUnlocked), false));
+		vaultService.lockAll(vaults.filtered(Vault::isUnlocked), false);
 	}
 
 	private void revealVault(Vault vault) {
-		showMainAppAndThen(app -> app.getVaultService().reveal(vault));
+		vaultService.reveal(vault);
 	}
 
 	void showMainWindow(@SuppressWarnings("unused") ActionEvent actionEvent) {
-		showMainAppAndThen(app -> app.showMainWindow());
+		appWindows.showMainWindow();
 	}
 
 	private void showPreferencesWindow(@SuppressWarnings("unused") EventObject actionEvent) {
-		showMainAppAndThen(app -> app.showPreferencesWindow(SelectedPreferencesTab.ANY));
-	}
-
-	private void showMainAppAndThen(Consumer<FxApplication> action) {
-		fxApplicationStarter.get().thenAccept(action);
+		appWindows.showPreferencesWindow(SelectedPreferencesTab.ANY);
 	}
 
 }

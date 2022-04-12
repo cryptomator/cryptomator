@@ -7,6 +7,7 @@ import org.cryptomator.cryptolib.api.CryptoException;
 import org.cryptomator.cryptolib.api.InvalidPassphraseException;
 import org.cryptomator.cryptolib.api.Masterkey;
 import org.cryptomator.cryptolib.common.MasterkeyFileAccess;
+import org.jetbrains.annotations.Nullable;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -16,6 +17,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.function.Predicate;
 
 import static org.cryptomator.common.Constants.MASTERKEY_BACKUP_SUFFIX;
 import static org.cryptomator.common.Constants.MASTERKEY_FILENAME;
@@ -102,12 +104,29 @@ public class RecoveryKeyFactory {
 	 * @return <code>true</code> if this seems to be a legitimate recovery key
 	 */
 	public boolean validateRecoveryKey(String recoveryKey) {
+		return validateRecoveryKey(recoveryKey, null);
+	}
+
+	/**
+	 * Checks whether a String is a syntactically correct recovery key with a valid checksum and passes the extended validation.
+	 *
+	 * @param recoveryKey A word sequence which might be a recovery key
+	 * @param extendedValidation Additional verification of the decoded key (optional)
+	 * @return <code>true</code> if this seems to be a legitimate recovery key and passes the extended validation
+	 */
+	public boolean validateRecoveryKey(String recoveryKey, @Nullable Predicate<byte[]> extendedValidation) {
+		byte[] key = new byte[0];
 		try {
-			byte[] key = decodeRecoveryKey(recoveryKey);
-			Arrays.fill(key, (byte) 0x00);
-			return true;
+			key = decodeRecoveryKey(recoveryKey);
+			if (extendedValidation != null) {
+				return extendedValidation.test(key);
+			} else {
+				return true;
+			}
 		} catch (IllegalArgumentException e) {
 			return false;
+		} finally {
+			Arrays.fill(key, (byte) 0x00);
 		}
 	}
 

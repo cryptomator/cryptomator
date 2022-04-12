@@ -11,7 +11,7 @@
 <?import javafx.scene.shape.Circle?>
 <VBox xmlns:fx="http://javafx.com/fxml"
 	  xmlns="http://javafx.com/javafx"
-	  fx:controller="org.cryptomator.ui.keyloading.masterkeyfile.SelectMasterkeyFileController"
+	  fx:controller="org.cryptomator.ui.keyloading.masterkeyfile.ChooseMasterkeyFileController"
 	  minWidth="400"
 	  maxWidth="400"
 	  minHeight="145"
@@ -34,7 +34,7 @@
 			<ButtonBar buttonMinWidth="120" buttonOrder="+CX">
 				<buttons>
 					<Button text="%generic.button.cancel" ButtonBar.buttonData="CANCEL_CLOSE" cancelButton="true" onAction="#cancel"/>
-					<Button text="%generic.button.next" ButtonBar.buttonData="NEXT_FORWARD" defaultButton="true" onAction="#proceed"/>
+					<Button text="%unlock.chooseMasterkey.chooseBtn" ButtonBar.buttonData="NEXT_FORWARD" defaultButton="true" onAction="#proceed"/>
 				</buttons>
 			</ButtonBar>
 		</VBox>

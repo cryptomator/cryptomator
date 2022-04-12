@@ -1,0 +1,239 @@
+name: Build macOS .dmg
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version'
+        required: false
+
+env:
+  JAVA_VERSION: 17
+
+jobs:
+  build:
+    name: Build Cryptomator.app
+    runs-on: macos-11
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Setup Java
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'temurin'
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: 'maven'
+      - id: versions 
+        name: Apply version information
+        run: |
+          if [[ $GITHUB_REF =~ refs/tags/[0-9]+\.[0-9]+\.[0-9]+.* ]]; then
+            SEM_VER_STR=${GITHUB_REF##*/}
+            mvn versions:set -DnewVersion=${SEM_VER_STR}
+          elif [[ "${{ github.event.inputs.version }}" =~ [0-9]+\.[0-9]+\.[0-9]+.* ]]; then
+            SEM_VER_STR="${{ github.event.inputs.version }}"
+            mvn versions:set -DnewVersion=${SEM_VER_STR}
+          else
+            SEM_VER_STR=`mvn help:evaluate -Dexpression=project.version -q -DforceStdout`
+          fi
+          SEM_VER_NUM=`echo ${SEM_VER_STR} | sed -E 's/([0-9]+\.[0-9]+\.[0-9]+).*/\1/'`
+          REVCOUNT=`git rev-list --count HEAD`
+          echo "::set-output name=semVerStr::${SEM_VER_STR}"
+          echo "::set-output name=semVerNum::${SEM_VER_NUM}"
+          echo "::set-output name=revNum::${REVCOUNT}"
+      - name: Validate Version
+        uses: skymatic/semver-validation-action@v1
+        with:
+          version: ${{ steps.versions.outputs.semVerStr }}
+      - name: Run maven
+        run: mvn -B clean package -Pdependency-check,mac -DskipTests
+      - name: Patch target dir
+        run: |
+          cp LICENSE.txt target
+          cp dist/mac/launcher.sh target
+          cp target/cryptomator-*.jar target/mods
+      - name: Run jlink
+        run: >
+          ${JAVA_HOME}/bin/jlink
+          --verbose
+          --output runtime
+          --module-path "${JAVA_HOME}/jmods"
+          --add-modules java.base,java.desktop,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.crypto.ec,jdk.accessibility,jdk.management.jfr
+          --strip-native-commands
+          --no-header-files
+          --no-man-pages
+          --strip-debug
+          --compress=1
+      - name: Run jpackage
+        run: >
+          ${JAVA_HOME}/bin/jpackage
+          --verbose
+          --type app-image
+          --runtime-image runtime
+          --input target/libs
+          --module-path target/mods
+          --module org.cryptomator.desktop/org.cryptomator.launcher.Cryptomator
+          --dest appdir
+          --name Cryptomator
+          --vendor "Skymatic GmbH"
+          --copyright "(C) 2016 - 2022 Skymatic GmbH"
+          --app-version "${{ steps.versions.outputs.semVerNum }}"
+          --java-options "-Xss5m"
+          --java-options "-Xmx256m"
+          --java-options "-Dcryptomator.appVersion=\"${{ steps.versions.outputs.semVerStr }}\""
+          --java-options "-Dfile.encoding=\"utf-8\""
+          --java-options "-Dapple.awt.enableTemplateImages=true"
+          --java-options "-Dcryptomator.logDir=\"~/Library/Logs/Cryptomator\""
+          --java-options "-Dcryptomator.pluginDir=\"~/Library/Application Support/Cryptomator/Plugins\""
+          --java-options "-Dcryptomator.settingsPath=\"~/Library/Application Support/Cryptomator/settings.json\""
+          --java-options "-Dcryptomator.ipcSocketPath=\"~/Library/Application Support/Cryptomator/ipc.socket\""
+          --java-options "-Dcryptomator.showTrayIcon=true"
+          --java-options "-Dcryptomator.buildNumber=\"dmg-${{ steps.versions.outputs.revNum }}\""
+          --mac-package-identifier org.cryptomator
+          --resource-dir dist/mac/resources
+      - name: Patch Cryptomator.app
+        run: |
+          mv appdir/Cryptomator.app Cryptomator.app
+          mv dist/mac/resources/Cryptomator-Vault.icns Cryptomator.app/Contents/Resources/
+          sed -i '' "s|###BUNDLE_SHORT_VERSION_STRING###|${VERSION_NO}|g" Cryptomator.app/Contents/Info.plist
+          sed -i '' "s|###BUNDLE_VERSION###|${REVISION_NO}|g" Cryptomator.app/Contents/Info.plist
+        env:
+          VERSION_NO: ${{ steps.versions.outputs.semVerNum }}
+          REVISION_NO: ${{ steps.versions.outputs.revNum }}
+      - name: Install codesign certificate
+        run: |
+          # create variables
+          CERTIFICATE_PATH=$RUNNER_TEMP/codesign.p12
+          KEYCHAIN_PATH=$RUNNER_TEMP/codesign.keychain-db
+
+          # import certificate and provisioning profile from secrets
+          echo -n "$CODESIGN_P12_BASE64" | base64 --decode --output $CERTIFICATE_PATH
+
+          # create temporary keychain
+          security create-keychain -p "$CODESIGN_TMP_KEYCHAIN_PW" $KEYCHAIN_PATH
+          security set-keychain-settings -lut 900 $KEYCHAIN_PATH
+          security unlock-keychain -p "$CODESIGN_TMP_KEYCHAIN_PW" $KEYCHAIN_PATH
+
+          # import certificate to keychain
+          security import $CERTIFICATE_PATH -P "$CODESIGN_P12_PW" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+          security list-keychain -d user -s $KEYCHAIN_PATH
+        env:
+          CODESIGN_P12_BASE64: ${{ secrets.MACOS_CODESIGN_P12_BASE64 }}
+          CODESIGN_P12_PW: ${{ secrets.MACOS_CODESIGN_P12_PW }}
+          CODESIGN_TMP_KEYCHAIN_PW: ${{ secrets.MACOS_CODESIGN_TMP_KEYCHAIN_PW }}
+      - name: Codesign
+        run: |
+          find Cryptomator.app/Contents/runtime/Contents/MacOS -name '*.dylib' -exec codesign --force -s ${CODESIGN_IDENTITY} {} \;
+          for JAR_PATH in `find Cryptomator.app -name "*.jar"`; do
+            if [[ `unzip -l ${JAR_PATH} | grep '.dylib\|.jnilib'` ]]; then
+              JAR_FILENAME=$(basename ${JAR_PATH})
+              OUTPUT_PATH=${JAR_PATH%.*}
+              echo "Codesigning libs in ${JAR_FILENAME}..."
+              unzip -q ${JAR_PATH} -d ${OUTPUT_PATH}
+              find ${OUTPUT_PATH} -name '*.dylib' -exec codesign --force -s ${CODESIGN_IDENTITY} {} \;
+              find ${OUTPUT_PATH} -name '*.jnilib' -exec codesign --force -s ${CODESIGN_IDENTITY} {} \;
+              rm ${JAR_PATH}
+              pushd ${OUTPUT_PATH} > /dev/null
+              zip -qr ../${JAR_FILENAME} *
+              popd > /dev/null
+              rm -r ${OUTPUT_PATH}
+            fi
+          done
+          echo "Codesigning Cryptomator.app..."
+          codesign --force --deep --entitlements dist/mac/Cryptomator.entitlements -o runtime -s ${CODESIGN_IDENTITY} Cryptomator.app
+        env:
+          CODESIGN_IDENTITY: ${{ secrets.MACOS_CODESIGN_IDENTITY }}
+      - name: Prepare .dmg contents
+        run: |
+          mkdir dmg
+          mv Cryptomator.app dmg
+          cp dist/mac/dmg/resources/macFUSE.webloc dmg
+          ls -l dmg
+      - name: Install create-dmg
+        run: |
+          brew install create-dmg
+          create-dmg --help
+      - name: Create .dmg
+        run: >
+          create-dmg
+          --volname Cryptomator
+          --volicon "dist/mac/dmg/resources/Cryptomator-Volume.icns"
+          --background "dist/mac/dmg/resources/Cryptomator-background.tiff"
+          --window-pos 400 100
+          --window-size 640 694
+          --icon-size 128
+          --icon "Cryptomator.app" 128 245
+          --hide-extension "Cryptomator.app"
+          --icon "macFUSE.webloc" 320 501
+          --hide-extension "macFUSE.webloc"
+          --app-drop-link 512 245
+          --eula "dist/mac/dmg/resources/license.rtf"
+          --icon ".background" 128 758
+          --icon ".fseventsd" 320 758
+          --icon ".VolumeIcon.icns" 512 758
+          Cryptomator-${VERSION_NO}.dmg dmg
+        env:
+          VERSION_NO: ${{ steps.versions.outputs.semVerNum }}
+      - name: Install notarization credentials
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          # create temporary keychain
+          KEYCHAIN_PATH=$RUNNER_TEMP/notarization.keychain-db
+          security create-keychain -p "${NOTARIZATION_TMP_KEYCHAIN_PW}" ${KEYCHAIN_PATH}
+          security set-keychain-settings -lut 900 ${KEYCHAIN_PATH}
+          security unlock-keychain -p "${NOTARIZATION_TMP_KEYCHAIN_PW}" ${KEYCHAIN_PATH}
+
+          # import credentials from secrets
+          sudo xcode-select -s /Applications/Xcode_13.0.app
+          xcrun notarytool store-credentials "${NOTARIZATION_KEYCHAIN_PROFILE}" --apple-id "${NOTARIZATION_APPLE_ID}" --password "${NOTARIZATION_PW}" --team-id "${NOTARIZATION_TEAM_ID}" --keychain "${KEYCHAIN_PATH}"
+        env:
+          NOTARIZATION_KEYCHAIN_PROFILE: ${{ secrets.MACOS_NOTARIZATION_KEYCHAIN_PROFILE }}
+          NOTARIZATION_APPLE_ID: ${{ secrets.MACOS_NOTARIZATION_APPLE_ID }}
+          NOTARIZATION_PW: ${{ secrets.MACOS_NOTARIZATION_PW }}
+          NOTARIZATION_TEAM_ID: ${{ secrets.MACOS_NOTARIZATION_TEAM_ID }}
+          NOTARIZATION_TMP_KEYCHAIN_PW: ${{ secrets.MACOS_NOTARIZATION_TMP_KEYCHAIN_PW }}
+      - name: Notarize .dmg
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          KEYCHAIN_PATH=$RUNNER_TEMP/notarization.keychain-db
+          sudo xcode-select -s /Applications/Xcode_13.0.app
+          xcrun notarytool submit Cryptomator-*.dmg --keychain-profile "${NOTARIZATION_KEYCHAIN_PROFILE}" --keychain "${KEYCHAIN_PATH}" --wait
+          xcrun stapler staple Cryptomator-*.dmg
+        env:
+          NOTARIZATION_KEYCHAIN_PROFILE: ${{ secrets.MACOS_NOTARIZATION_KEYCHAIN_PROFILE }}
+      - name: Add possible alpha/beta tags to installer name
+        run: mv Cryptomator-*.dmg Cryptomator-${{ steps.versions.outputs.semVerStr }}.dmg
+      - name: Create detached GPG signature with key 615D449FE6E6A235
+        run: |
+          echo "${GPG_PRIVATE_KEY}" | gpg --batch --quiet --import
+          echo "${GPG_PASSPHRASE}" | gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign -a Cryptomator-*.dmg
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.RELEASES_GPG_PRIVATE_KEY }}
+          GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
+      - name: Clean up codesign certificate
+        if: ${{ always() }}
+        run: security delete-keychain $RUNNER_TEMP/codesign.keychain-db
+        continue-on-error: true
+      - name: Clean up notarization credentials
+        if: ${{ always() }}
+        run: security delete-keychain $RUNNER_TEMP/notarization.keychain-db
+        continue-on-error: true
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: dmg
+          path: Cryptomator-*.dmg
+          if-no-files-found: error
+      - name: Publish dmg on GitHub Releases
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v1
+        with:
+          fail_on_unmatched_files: true
+          token: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}
+          files: |
+            Cryptomator-*.dmg
+            Cryptomator-*.asc
+
+

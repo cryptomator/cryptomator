@@ -1,7 +1,6 @@
 package org.cryptomator.ui.mainwindow;
 
 import com.tobiasdiez.easybind.EasyBind;
-import com.tobiasdiez.easybind.Subscription;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultState;
 import org.cryptomator.ui.common.Animations;
@@ -9,9 +8,9 @@ import org.cryptomator.ui.common.AutoAnimator;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.controls.FontAwesome5Icon;
 import org.cryptomator.ui.controls.FontAwesome5IconView;
-import org.cryptomator.ui.fxapp.FxApplication;
 
 import javax.inject.Inject;
+import javafx.application.Application;
 import javafx.beans.binding.Binding;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ObjectProperty;
@@ -22,7 +21,7 @@ import javafx.fxml.FXML;
 public class VaultDetailController implements FxController {
 
 	private final ReadOnlyObjectProperty<Vault> vault;
-	private final FxApplication application;
+	private final Application application;
 	private final Binding<FontAwesome5Icon> glyph;
 	private final BooleanBinding anyVaultSelected;
 
@@ -33,7 +32,7 @@ public class VaultDetailController implements FxController {
 
 
 	@Inject
-	VaultDetailController(ObjectProperty<Vault> vault, FxApplication application) {
+	VaultDetailController(ObjectProperty<Vault> vault, Application application) {
 		this.vault = vault;
 		this.application = application;
 		this.glyph = EasyBind.select(vault) //

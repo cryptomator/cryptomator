@@ -9,6 +9,6 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Qualifier
 @Documented
 @Retention(RUNTIME)
-public @interface DefaultMountFlags {
+@interface DefaultMountFlags {
 
 }

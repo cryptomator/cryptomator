@@ -6,13 +6,13 @@ import dagger.Provides;
 import dagger.multibindings.IntoMap;
 import org.cryptomator.cryptofs.common.FileSystemCapabilityChecker;
 import org.cryptomator.ui.common.DefaultSceneFactory;
-import org.cryptomator.ui.common.FxmlLoaderFactory;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxControllerKey;
 import org.cryptomator.ui.common.FxmlFile;
+import org.cryptomator.ui.common.FxmlLoaderFactory;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.StageFactory;
-import org.cryptomator.ui.mainwindow.MainWindow;
+import org.cryptomator.ui.fxapp.PrimaryStage;
 
 import javax.inject.Named;
 import javax.inject.Provider;
@@ -37,7 +37,7 @@ abstract class MigrationModule {
 	@Provides
 	@MigrationWindow
 	@MigrationScoped
-	static Stage provideStage(StageFactory factory, @MainWindow Stage owner, ResourceBundle resourceBundle) {
+	static Stage provideStage(StageFactory factory, @PrimaryStage Stage owner, ResourceBundle resourceBundle) {
 		Stage stage = factory.create();
 		stage.setTitle(resourceBundle.getString("migration.title"));
 		stage.setResizable(false);

@@ -21,8 +21,9 @@ pom.xml.versionsBackup
 .idea/dictionaries/**
 !.idea/dictionaries/dict_*
 .idea/compiler.xml
-.idea/encodings.xml
 .idea/jarRepositories.xml
 .idea/uiDesigner.xml
 .idea/**/libraries/
 *.iml
+
+hs_err_pid*.log

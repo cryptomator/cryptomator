@@ -9,7 +9,7 @@
 		 fx:controller="org.cryptomator.ui.preferences.PreferencesController"
 		 minWidth="-Infinity"
 		 maxWidth="-Infinity"
-		 prefWidth="500"
+		 prefWidth="650"
 		 tabMinWidth="60"
 		 tabClosingPolicy="UNAVAILABLE"
 		 tabDragPolicy="FIXED">
@@ -20,6 +20,14 @@
 			</graphic>
 			<content>
 				<fx:include source="preferences_general.fxml"/>
+			</content>
+		</Tab>
+		<Tab fx:id="interfaceTab" id="INTERFACE" text="%preferences.interface">
+			<graphic>
+				<FontAwesome5IconView glyph="EYE"/>
+			</graphic>
+			<content>
+				<fx:include source="preferences_interface.fxml"/>
 			</content>
 		</Tab>
 		<Tab fx:id="volumeTab" id="VOLUME" text="%preferences.volume">

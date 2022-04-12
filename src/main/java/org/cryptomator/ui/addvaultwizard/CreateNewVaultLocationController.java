@@ -35,14 +35,13 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ResourceBundle;
-import java.util.UUID;
 
 @AddVaultWizardScoped
 public class CreateNewVaultLocationController implements FxController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(CreateNewVaultLocationController.class);
 	private static final Path DEFAULT_CUSTOM_VAULT_PATH = Paths.get(System.getProperty("user.home"));
-	private static final String TEMP_FILE_FORMAT = "cryptomator-%s.tmp";
+	private static final String TEMP_FILE_FORMAT = ".locationTest.cryptomator.tmp";
 
 	private final Stage window;
 	private final Lazy<Scene> chooseNameScene;
@@ -112,7 +111,7 @@ public class CreateNewVaultLocationController implements FxController {
 	}
 
 	private boolean isActuallyWritable(Path p) {
-		Path tmpFile = p.resolve(String.format(TEMP_FILE_FORMAT, UUID.randomUUID()));
+		Path tmpFile = p.resolve(TEMP_FILE_FORMAT);
 		try (var chan = Files.newByteChannel(tmpFile, StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE, StandardOpenOption.DELETE_ON_CLOSE)) {
 			return true;
 		} catch (IOException e) {

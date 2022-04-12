@@ -57,6 +57,7 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 		out.name("windowWidth").value((value.windowWidthProperty().get()));
 		out.name("windowHeight").value((value.windowHeightProperty().get()));
 		out.name("displayConfiguration").value((value.displayConfigurationProperty().get()));
+		out.name("language").value((value.languageProperty().get()));
 
 		out.endObject();
 	}
@@ -97,6 +98,7 @@ public class SettingsJsonAdapter extends TypeAdapter<Settings> {
 				case "windowWidth" -> settings.windowWidthProperty().set(in.nextInt());
 				case "windowHeight" -> settings.windowHeightProperty().set(in.nextInt());
 				case "displayConfiguration" -> settings.displayConfigurationProperty().set(in.nextString());
+				case "language" -> settings.languageProperty().set(in.nextString());
 
 				default -> {
 					LOG.warn("Unsupported vault setting found in JSON: " + name);

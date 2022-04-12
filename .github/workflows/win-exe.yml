@@ -1,0 +1,322 @@
+name: Build Windows Installer
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version'
+        required: false
+
+env:
+  JAVA_VERSION: 17
+  WINFSP_MSI: https://github.com/winfsp/winfsp/releases/download/v1.10/winfsp-1.10.22006.msi
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  build-msi:
+    name: Build .msi Installer
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Setup Java
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'temurin'
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: 'maven'
+      - id: versions 
+        name: Apply version information
+        run: |
+          if [[ $GITHUB_REF =~ refs/tags/[0-9]+\.[0-9]+\.[0-9]+.* ]]; then
+            SEM_VER_STR=${GITHUB_REF##*/}
+            mvn versions:set -DnewVersion=${SEM_VER_STR}
+          elif [[ "${{ github.event.inputs.version }}" =~ [0-9]+\.[0-9]+\.[0-9]+.* ]]; then
+            SEM_VER_STR="${{ github.event.inputs.version }}"
+            mvn versions:set -DnewVersion=${SEM_VER_STR}
+          else
+            SEM_VER_STR=`mvn help:evaluate -Dexpression=project.version -q -DforceStdout`
+          fi
+          SEM_VER_NUM=`echo ${SEM_VER_STR} | sed -E 's/([0-9]+\.[0-9]+\.[0-9]+).*/\1/'`
+          REVCOUNT=`git rev-list --count HEAD`
+          echo "::set-output name=semVerStr::${SEM_VER_STR}"
+          echo "::set-output name=semVerNum::${SEM_VER_NUM}"
+          echo "::set-output name=revNum::${REVCOUNT}"
+      - name: Validate Version
+        uses: skymatic/semver-validation-action@v1
+        with:
+          version: ${{ steps.versions.outputs.semVerStr }}
+      - name: Run maven
+        run: mvn -B clean package -Pdependency-check,win -DskipTests
+      - name: Patch target dir
+        run: |
+          cp LICENSE.txt target
+          cp dist/linux/launcher.sh target
+          cp target/cryptomator-*.jar target/mods
+      - name: Run jlink
+        run: >
+          ${JAVA_HOME}/bin/jlink
+          --verbose
+          --output runtime
+          --module-path "${JAVA_HOME}/jmods"
+          --add-modules java.base,java.desktop,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.crypto.ec,jdk.accessibility,jdk.management.jfr
+          --strip-native-commands
+          --no-header-files
+          --no-man-pages
+          --strip-debug
+          --compress=1
+      - name: Run jpackage
+        run: >
+          ${JAVA_HOME}/bin/jpackage
+          --verbose
+          --type app-image
+          --runtime-image runtime
+          --input target/libs
+          --module-path target/mods
+          --module org.cryptomator.desktop/org.cryptomator.launcher.Cryptomator
+          --dest appdir
+          --name Cryptomator
+          --vendor "Skymatic GmbH"
+          --copyright "(C) 2016 - 2022 Skymatic GmbH"
+          --app-version "${{ steps.versions.outputs.semVerNum }}.${{ steps.versions.outputs.revNum }}"
+          --java-options "-Xss5m"
+          --java-options "-Xmx256m"
+          --java-options "-Dcryptomator.appVersion=\"${{ steps.versions.outputs.semVerStr }}\""
+          --java-options "-Dfile.encoding=\"utf-8\""
+          --java-options "-Dcryptomator.logDir=\"~/AppData/Roaming/Cryptomator\""
+          --java-options "-Dcryptomator.pluginDir=\"~/AppData/Roaming/Cryptomator/Plugins\""
+          --java-options "-Dcryptomator.settingsPath=\"~/AppData/Roaming/Cryptomator/settings.json\""
+          --java-options "-Dcryptomator.ipcSocketPath=\"~/AppData/Roaming/Cryptomator/ipc.socket\""
+          --java-options "-Dcryptomator.keychainPath=\"~/AppData/Roaming/Cryptomator/keychain.json\""
+          --java-options "-Dcryptomator.mountPointsDir=\"~/Cryptomator\""
+          --java-options "-Dcryptomator.showTrayIcon=true"
+          --java-options "-Dcryptomator.buildNumber=\"msi-${{ steps.versions.outputs.revNum }}\""
+          --resource-dir dist/win/resources
+          --icon dist/win/resources/Cryptomator.ico
+      - name: Patch Application Directory
+        run: |
+          cp dist/win/contrib/* appdir/Cryptomator
+      - name: Fix permissions
+        run: attrib -r appdir/Cryptomator/Cryptomator.exe
+        shell: pwsh
+      - name: Codesign
+        uses: skymatic/code-sign-action@v1
+        with:
+          certificate: ${{ secrets.WIN_CODESIGN_P12_BASE64 }}
+          password: ${{ secrets.WIN_CODESIGN_P12_PW }}
+          certificatesha1: FF52240075AD7D14AF25629FDF69635357C7D14B
+          description: Cryptomator
+          timestampUrl: 'http://timestamp.digicert.com'
+          folder: appdir/Cryptomator
+          recursive: true
+      - name: Generate license
+        run: >
+          mvn -B license:add-third-party
+          "-Dlicense.thirdPartyFilename=license.rtf"
+          "-Dlicense.fileTemplate=dist/win/resources/licenseTemplate.ftl"
+          "-Dlicense.outputDirectory=dist/win/resources"
+      - name: Create MSI
+        run: >
+          ${JAVA_HOME}/bin/jpackage
+          --verbose
+          --type msi
+          --win-upgrade-uuid bda45523-42b1-4cae-9354-a45475ed4775
+          --app-image appdir/Cryptomator
+          --dest installer
+          --name Cryptomator
+          --vendor "Skymatic GmbH"
+          --copyright "(C) 2016 - 2022 Skymatic GmbH"
+          --app-version "${{ steps.versions.outputs.semVerNum }}"
+          --win-menu
+          --win-dir-chooser
+          --win-shortcut-prompt
+          --win-update-url "https:\\cryptomator.org"
+          --win-menu-group Cryptomator
+          --resource-dir dist/win/resources
+          --license-file dist/win/resources/license.rtf
+          --file-associations dist/win/resources/FAvaultFile.properties
+        env:
+          JP_WIXWIZARD_RESOURCES: ${{ github.workspace }}/dist/win/resources # requires abs path, used in resources/main.wxs
+      - name: Codesign MSI
+        uses: skymatic/code-sign-action@v1
+        with:
+          certificate: ${{ secrets.WIN_CODESIGN_P12_BASE64 }}
+          password: ${{ secrets.WIN_CODESIGN_P12_PW }}
+          certificatesha1: FF52240075AD7D14AF25629FDF69635357C7D14B
+          description: Cryptomator Installer
+          timestampUrl: 'http://timestamp.digicert.com'
+          folder: installer
+      - name: Add possible alpha/beta tags to installer name
+        run: mv installer/Cryptomator-*.msi Cryptomator-${{ steps.versions.outputs.semVerStr }}-x64.msi
+      - name: Create detached GPG signature with key 615D449FE6E6A235
+        run: |
+          echo "${GPG_PRIVATE_KEY}" | gpg --batch --quiet --import
+          echo "${GPG_PASSPHRASE}" | gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign -a Cryptomator-*.msi
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.RELEASES_GPG_PRIVATE_KEY }}
+          GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: msi
+          path: |
+            Cryptomator-*.msi
+            Cryptomator-*.asc
+          if-no-files-found: error
+      - name: Publish .msi on GitHub Releases
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v1
+        with:
+          fail_on_unmatched_files: true
+          token: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}
+          files: |
+            *.msi
+            *.asc
+    outputs:
+      semVerNum: ${{ steps.versions.outputs.semVerNum }}
+      semVerStr: ${{ steps.versions.outputs.semVerStr }}
+      revNum: ${{ steps.versions.outputs.revNum }}
+
+  build-exe:
+    name: Build .exe installer
+    runs-on: windows-latest
+    needs: [build-msi]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Download .msi
+        uses: actions/download-artifact@v2
+        with:
+          name: msi
+          path: dist/win/bundle/resources
+      - name: Strip version info from msi file name
+        run: mv dist/win/bundle/resources/Cryptomator*.msi dist/win/bundle/resources/Cryptomator.msi
+      - uses: actions/setup-java@v2
+        with:
+          distribution: 'temurin'
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: 'maven'
+      - name: Generate license
+        run: >
+          mvn -B license:add-third-party
+          "-Dlicense.thirdPartyFilename=license.rtf"
+          "-Dlicense.fileTemplate=dist/win/bundle/resources/licenseTemplate.ftl"
+          "-Dlicense.outputDirectory=dist/win/bundle/resources"
+      - name: Download WinFsp
+        run:
+          curl --output dist/win/bundle/resources/winfsp.msi -L ${{ env.WINFSP_MSI }}
+      - name: Compile to wixObj file
+        run: >
+          "${WIX}/bin/candle.exe" dist/win/bundle/bundleWithWinfsp.wxs
+          -ext WixBalExtension
+          -out dist/win/bundle/
+          -dBundleVersion="${{ needs.build-msi.outputs.semVerNum }}.${{ needs.build-msi.outputs.revNum }}"
+          -dBundleVendor="Skymatic GmbH"
+          -dBundleCopyright="(C) 2016 - 2022 Skymatic GmbH"
+          -dAboutUrl="https://cryptomator.org"
+          -dHelpUrl="https://cryptomator.org/contact"
+          -dUpdateUrl="https://cryptomator.org/downloads/"
+      - name: Create executable with linker
+        run: >
+          "${WIX}/bin/light.exe" -b dist/win/ dist/win/bundle/bundleWithWinfsp.wixobj
+          -ext WixBalExtension
+          -out installer/unsigned/Cryptomator-Installer.exe
+      - name: Detach burn engine in preparation to sign
+        run: >
+          "${WIX}/bin/insignia.exe"
+          -ib installer/unsigned/Cryptomator-Installer.exe
+          -o tmp/engine.exe
+      - name: Codesign burn engine
+        uses: skymatic/code-sign-action@v1
+        with:
+          certificate: ${{ secrets.WIN_CODESIGN_P12_BASE64 }}
+          password: ${{ secrets.WIN_CODESIGN_P12_PW }}
+          certificatesha1: FF52240075AD7D14AF25629FDF69635357C7D14B
+          description: Cryptomator Installer
+          timestampUrl: 'http://timestamp.digicert.com'
+          folder: tmp
+      - name: Reattach signed burn engine to installer
+        run : >
+          "${WIX}/bin/insignia.exe"
+          -ab tmp/engine.exe installer/unsigned/Cryptomator-Installer.exe
+          -o installer/Cryptomator-Installer.exe
+      - name: Codesign EXE
+        uses: skymatic/code-sign-action@v1
+        with:
+          certificate: ${{ secrets.WIN_CODESIGN_P12_BASE64 }}
+          password: ${{ secrets.WIN_CODESIGN_P12_PW }}
+          certificatesha1: FF52240075AD7D14AF25629FDF69635357C7D14B
+          description: Cryptomator Installer
+          timestampUrl: 'http://timestamp.digicert.com'
+          folder: installer
+      - name: Add possible alpha/beta tags to installer name
+        run: mv installer/Cryptomator-Installer.exe Cryptomator-${{ needs.build-msi.outputs.semVerStr }}-x64.exe
+      - name: Create detached GPG signature with key 615D449FE6E6A235
+        run: |
+          echo "${GPG_PRIVATE_KEY}" | gpg --batch --quiet --import
+          echo "${GPG_PASSPHRASE}" | gpg --batch --quiet --passphrase-fd 0 --pinentry-mode loopback -u 615D449FE6E6A235 --detach-sign -a Cryptomator-*.exe
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.RELEASES_GPG_PRIVATE_KEY }}
+          GPG_PASSPHRASE: ${{ secrets.RELEASES_GPG_PASSPHRASE }}
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: exe
+          path: |
+            Cryptomator-*.exe
+            Cryptomator-*.asc
+          if-no-files-found: error
+      - name: Publish .msi on GitHub Releases
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v1
+        with:
+          fail_on_unmatched_files: true
+          token: ${{ secrets.CRYPTOBOT_RELEASE_TOKEN }}
+          files: |
+            Cryptomator-*.exe
+            Cryptomator-*.asc
+
+  allowlist:
+    name: Anti Virus Allowlisting
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    needs: [build-msi, build-exe]
+    steps:
+      - name: Download .msi
+        uses: actions/download-artifact@v2
+        with:
+          name: msi
+          path: msi
+      - name: Download .exe
+        uses: actions/download-artifact@v2
+        with:
+          name: exe
+          path: exe
+      - name: Collect files
+        run: |
+          mkdir files
+          cp msi/*.msi files
+          cp exe/*.exe files
+      - name: Upload to Kaspersky
+        uses: SamKirkland/FTP-Deploy-Action@4.3.0
+        with:
+          protocol: ftps
+          server: allowlist.kaspersky-labs.com
+          port: 990
+          username: ${{ secrets.ALLOWLIST_KASPERSKY_USERNAME }}
+          password: ${{ secrets.ALLOWLIST_KASPERSKY_PASSWORD }}
+          local-dir: files/
+      - name: Upload to Avast
+        uses: SamKirkland/FTP-Deploy-Action@4.3.0
+        with:
+          protocol: ftp
+          server: whitelisting.avast.com
+          port: 21
+          username: ${{ secrets.ALLOWLIST_AVAST_USERNAME }}
+          password: ${{ secrets.ALLOWLIST_AVAST_PASSWORD }}
+          local-dir: files/
