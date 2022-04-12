@@ -58,13 +58,12 @@ public class Cryptomator {
 				.flatMap(Arrays::stream) //
 				.anyMatch(arg -> "-v".equals(arg) || "--version".equals(arg));
 
-		if(printVersion) {
-			var appVer = Optional.ofNullable(System.getProperty("cryptomator.appVersion"));
-			var buildNumber = Optional.ofNullable(System.getProperty("cryptomator.buildNumber"));
+		if (printVersion) {
+			var appVer = System.getProperty("cryptomator.appVersion", "SNAPSHOT");
+			var buildNumber = System.getProperty("cryptomator.buildNumber", "SNAPSHOT");
 
 			//Reduce noise for parsers by using System.out directly
-			System.out.printf("Cryptomator version %s (build %s)%n", appVer.orElse("<undefined version>"), buildNumber.orElse("<undefined build>"));
-			System.exit(0);
+			System.out.printf("Cryptomator version %s (build %s)%n", appVer, buildNumber);
 			return;
 		}
 
