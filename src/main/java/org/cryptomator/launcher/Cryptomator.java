@@ -21,7 +21,9 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import javafx.application.Application;
 import javafx.stage.Stage;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.Executors;
 
 @Singleton
@@ -51,6 +53,20 @@ public class Cryptomator {
 	}
 
 	public static void main(String[] args) {
+		var printVersion = Optional.ofNullable(args) //
+				.stream() //Streams either one element (the args-array) or zero elements
+				.flatMap(Arrays::stream) //
+				.anyMatch(arg -> "-v".equals(arg) || "--version".equals(arg));
+
+		if (printVersion) {
+			var appVer = System.getProperty("cryptomator.appVersion", "SNAPSHOT");
+			var buildNumber = System.getProperty("cryptomator.buildNumber", "SNAPSHOT");
+
+			//Reduce noise for parsers by using System.out directly
+			System.out.printf("Cryptomator version %s (build %s)%n", appVer, buildNumber);
+			return;
+		}
+
 		int exitCode = CRYPTOMATOR_COMPONENT.application().run(args);
 		LOG.info("Exit {}", exitCode);
 		System.exit(exitCode); // end remaining non-daemon threads.
