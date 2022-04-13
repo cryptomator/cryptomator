@@ -75,6 +75,12 @@ cp ../resources/Cryptomator-Vault.icns Cryptomator.app/Contents/Resources/
 sed -i '' "s|###BUNDLE_SHORT_VERSION_STRING###|${VERSION_NO}|g" Cryptomator.app/Contents/Info.plist
 sed -i '' "s|###BUNDLE_VERSION###|${REVISION_NO}|g" Cryptomator.app/Contents/Info.plist
 
+# generate license
+mvn -B -f../../../pom.xml license:add-third-party \
+  "-Dlicense.thirdPartyFilename=license.rtf" \
+  "-Dlicense.fileTemplate=dist/mac/dmg/resources/licenseTemplate.ftl" \
+  "-Dlicense.outputDirectory=dist/mac/dmg/resources"
+
 # codesign
 if [ -n "${CODESIGN_IDENTITY}" ]; then
     find Cryptomator.app/Contents/runtime/Contents/MacOS -name '*.dylib' -exec codesign --force -s ${CODESIGN_IDENTITY} {} \;
