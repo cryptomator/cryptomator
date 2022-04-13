@@ -2,11 +2,9 @@ package org.cryptomator.common.keychain;
 
 
 import org.cryptomator.integrations.keychain.KeychainAccessException;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -45,7 +43,7 @@ public class KeychainManagerTest {
 			ReadOnlyBooleanProperty property = keychainManager.getPassphraseStoredProperty("test");
 			Assertions.assertFalse(property.get());
 
-			keychainManager.storePassphrase("test", "bar");
+			keychainManager.storePassphrase("test", null,"bar");
 
 			AtomicBoolean result = new AtomicBoolean(false);
 			CountDownLatch latch = new CountDownLatch(1);

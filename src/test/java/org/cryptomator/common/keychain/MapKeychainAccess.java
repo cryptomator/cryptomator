@@ -5,7 +5,6 @@
  *******************************************************************************/
 package org.cryptomator.common.keychain;
 
-import org.cryptomator.integrations.keychain.KeychainAccessException;
 import org.cryptomator.integrations.keychain.KeychainAccessProvider;
 
 import java.util.HashMap;
@@ -18,12 +17,6 @@ class MapKeychainAccess implements KeychainAccessProvider {
 	@Override
 	public String displayName() {
 		return getClass().getName();
-	}
-
-	@Override
-	@Deprecated
-	public void storePassphrase(String key, CharSequence passphrase) {
-		throw new NoSuchMethodError("not implemented");
 	}
 
 	@Override
@@ -46,15 +39,9 @@ class MapKeychainAccess implements KeychainAccessProvider {
 	}
 
 	@Override
-	@Deprecated
-	public void changePassphrase(String key, CharSequence passphrase) throws KeychainAccessException {
-		throw new NoSuchMethodError("not implemented");
-	}
-
-	@Override
 	public void changePassphrase(String key, String displayName, CharSequence passphrase) {
 		map.get(key);
-		storePassphrase(key, passphrase);
+		storePassphrase(key, displayName, passphrase);
 	}
 
 	@Override

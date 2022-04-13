@@ -44,12 +44,6 @@ public class KeychainManager implements KeychainAccessProvider {
 	}
 
 	@Override
-	@Deprecated
-	public void storePassphrase(String key, CharSequence passphrase) throws KeychainAccessException {
-		storePassphrase(key, null, passphrase);
-	}
-
-	@Override
 	public void storePassphrase(String key, String displayName, CharSequence passphrase) throws KeychainAccessException {
 		getKeychainOrFail().storePassphrase(key, displayName, passphrase);
 		setPassphraseStored(key, true);
@@ -66,12 +60,6 @@ public class KeychainManager implements KeychainAccessProvider {
 	public void deletePassphrase(String key) throws KeychainAccessException {
 		getKeychainOrFail().deletePassphrase(key);
 		setPassphraseStored(key, false);
-	}
-
-	@Override
-	@Deprecated
-	public void changePassphrase(String key, CharSequence passphrase) throws KeychainAccessException {
-		changePassphrase(key, null, passphrase);
 	}
 
 	@Override
