@@ -75,7 +75,7 @@ Cryptomator uses 40 third-party dependencies under the following licenses:
 			- java jwt (com.auth0:java-jwt:3.19.1 - https://github.com/auth0/java-jwt)
 			- jnr-x86asm (com.github.jnr:jnr-x86asm:1.0.2 - http://github.com/jnr/jnr-x86asm)
 			- jnr-fuse (com.github.serceman:jnr-fuse:0.5.7 - https://github.com/SerCeMan/jnr-fuse)
-			- zxcvbn4j (com.nulab-inc:zxcvbn:1.5.2 - https://github.com/nulab/zxcvbn4j)
+			- zxcvbn4j (com.nulab-inc:zxcvbn:1.6.0 - https://github.com/nulab/zxcvbn4j)
 			- SLF4J API Module (org.slf4j:slf4j-api:1.7.36 - http://www.slf4j.org)
         The BSD 2-Clause License:
 			- EasyBind (com.tobiasdiez:easybind:2.2 - https://github.com/tobiasdiez/EasyBind)

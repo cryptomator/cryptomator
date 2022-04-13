@@ -66,6 +66,11 @@ abstract class PreferencesModule {
 
 	@Binds
 	@IntoMap
+	@FxControllerKey(InterfacePreferencesController.class)
+	abstract FxController bindInterfacePreferencesController(InterfacePreferencesController controller);
+
+	@Binds
+	@IntoMap
 	@FxControllerKey(UpdatesPreferencesController.class)
 	abstract FxController bindUpdatesPreferencesController(UpdatesPreferencesController controller);
 
