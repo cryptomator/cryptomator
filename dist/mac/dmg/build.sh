@@ -78,7 +78,7 @@ sed -i '' "s|###BUNDLE_VERSION###|${REVISION_NO}|g" Cryptomator.app/Contents/Inf
 # generate license
 mvn -B -f../../../pom.xml license:add-third-party \
   "-Dlicense.thirdPartyFilename=license.rtf" \
-  "-Dlicense.fileTemplate=dist/mac/dmg/resources/licenseTemplate.ftl" \
+  "-Dlicense.fileTemplate=resources/licenseTemplate.ftl" \
   "-Dlicense.outputDirectory=dist/mac/dmg/resources"
 
 # codesign
