@@ -9,8 +9,10 @@ import javax.inject.Inject;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
 import javafx.beans.binding.LongBinding;
+import javafx.beans.property.LongProperty;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -21,6 +23,7 @@ import javafx.scene.chart.XYChart.Series;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import java.util.Arrays;
+import java.util.concurrent.Callable;
 
 @VaultStatisticsScoped
 public class VaultStatisticsController implements FxController {
@@ -42,10 +45,13 @@ public class VaultStatisticsController implements FxController {
 	private final LongBinding totalBytesWritten;
 	private final LongBinding totalBytesEncrypted;
 	private final LongBinding totalBytesDecrypted;
+	private final LongBinding totalBytesAccessed;
 	private final LongBinding filesRead;
 	private final LongBinding filesWritten;
+	private final LongBinding filesAccessed;
 	private final LongBinding bpsEncrypted;
 	private final LongBinding bpsDecrypted;
+	private final LongBinding bpsAccessed;
 
 	public AreaChart<Number, Number> readChart;
 	public AreaChart<Number, Number> writeChart;
@@ -69,10 +75,13 @@ public class VaultStatisticsController implements FxController {
 		this.totalBytesWritten = WeakBindings.bindLong(stats.totalBytesWrittenProperty());
 		this.totalBytesDecrypted = WeakBindings.bindLong(stats.totalBytesDecryptedProperty());
 		this.totalBytesEncrypted = WeakBindings.bindLong(stats.totalBytesEncryptedProperty());
+		this.totalBytesAccessed = WeakBindings.bindLong(stats.getTotalBytesAccessedProperty());
 		this.filesRead = WeakBindings.bindLong(stats.filesRead());
 		this.filesWritten = WeakBindings.bindLong(stats.filesWritten());
+		this.filesAccessed = WeakBindings.bindLong(stats.filesAccessed());
 		this.bpsEncrypted = WeakBindings.bindLong(stats.bytesPerSecondEncryptedProperty());
 		this.bpsDecrypted = WeakBindings.bindLong(stats.bytesPerSecondDecryptedProperty());
+		this.bpsAccessed = WeakBindings.bindLong(stats.bytesPerSecondAccessedProperty());
 
 		this.ioAnimation = new Timeline(); //TODO Research better timer
 		ioAnimation.getKeyFrames().add(new KeyFrame(Duration.seconds(IO_SAMPLING_INTERVAL), new IoSamplingAnimationHandler(readData, writeData)));
@@ -184,6 +193,10 @@ public class VaultStatisticsController implements FxController {
 
 	public long getTotalBytesDecrypted() { return totalBytesDecrypted.get();}
 
+	public LongBinding getTotalBytesAccessedProperty() {return totalBytesAccessed;}
+
+	public long getTotalBytesAccessed() { return totalBytesAccessed.get();}
+
 	public LongBinding bpsEncryptedProperty() {
 		return bpsEncrypted;
 	}
@@ -200,6 +213,12 @@ public class VaultStatisticsController implements FxController {
 		return bpsDecrypted.get();
 	}
 
+	public LongBinding bpsAccessedProperty() {
+		return bpsAccessed;
+	}
+
+	public long getBpsAccessed(){ return bpsAccessed.get();}
+
 	public LongBinding filesReadProperty() { return filesRead;}
 
 	public long getFilesRead() { return filesRead.get();}
@@ -207,4 +226,8 @@ public class VaultStatisticsController implements FxController {
 	public LongBinding filesWrittenProperty() {return filesWritten;}
 
 	public long getFilesWritten() {return filesWritten.get();}
+
+	public LongBinding filesAccessedProperty() {return filesAccessed;}
+
+	public long getFilesAccessed() {return filesAccessed.get();}
 }

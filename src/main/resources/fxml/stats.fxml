@@ -72,4 +72,21 @@
 		<DataLabel byteFormat="%stats.encr.total.data.none" kibFormat="%stats.encr.total.data.kib" mibFormat="%stats.encr.total.data.mib" gibFormat="%stats.encr.total.data.gib" dataInBytes="${controller.totalBytesEncrypted}"/>
 		<FormattedLabel format="%stats.write.accessCount" arg1="${controller.filesWritten}"/>
 	</VBox>
+	<!-- Access -->
+	<VBox prefWidth="300" prefHeight="300" spacing="6" alignment="CENTER">
+		<ThroughputLabel styleClass="label-large" idleFormat="%stats.read.throughput.idle" kibsFormat="%stats.read.throughput.kibs" mibsFormat="%stats.read.throughput.mibs" bytesPerSecond="${controller.bpsAccessed}"/>
+		<AreaChart fx:id="accessChart" styleClass="io-stats" createSymbols="false" animated="false">
+			<xAxis>
+				<NumberAxis fx:id="accessChartXAxis" styleClass="io-stats" autoRanging="false" forceZeroInRange="false" side="BOTTOM"/>
+			</xAxis>
+			<yAxis>
+				<NumberAxis fx:id="accessChartYAxis" styleClass="io-stats" autoRanging="false" forceZeroInRange="true" side="LEFT" tickUnit="Infinity"/>
+			</yAxis>
+			<cursor>
+				<Cursor fx:constant="DEFAULT"/>
+			</cursor>
+		</AreaChart>
+		<DataLabel byteFormat="%stats.encr.total.data.none" kibFormat="%stats.encr.total.data.kib" mibFormat="%stats.encr.total.data.mib" gibFormat="%stats.encr.total.data.gib" dataInBytes="${controller.totalBytesAccessed}"/>
+		<FormattedLabel format="%stats.access.accessCount" arg1="${controller.filesAccessed}"/>
+	</VBox>
 </HBox>
