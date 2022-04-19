@@ -118,9 +118,13 @@ jobs:
       - name: Generate license
         run: >
           mvn -B license:add-third-party
-          "-Dlicense.thirdPartyFilename=license.rtf"
-          "-Dlicense.fileTemplate=dist/win/resources/licenseTemplate.ftl"
-          "-Dlicense.outputDirectory=dist/win/resources"
+          -Dlicense.thirdPartyFilename=license.rtf
+          -Dlicense.outputDirectory=dist/win/resources
+          -Dlicense.fileTemplate=dist/win/resources/licenseTemplate.ftl
+          -Dlicense.includeScopes=compile
+          -Dlicense.excludedGroups=^org\.cryptomator
+          -Dlicense.failOnMissing=true
+          -Dlicense.licenseMergesUrl=dist/win/resources/license/licenseMerges.xml
       - name: Create MSI
         run: >
           ${JAVA_HOME}/bin/jpackage
@@ -204,9 +208,13 @@ jobs:
       - name: Generate license
         run: >
           mvn -B license:add-third-party
-          "-Dlicense.thirdPartyFilename=license.rtf"
-          "-Dlicense.fileTemplate=dist/win/bundle/resources/licenseTemplate.ftl"
-          "-Dlicense.outputDirectory=dist/win/bundle/resources"
+          -Dlicense.thirdPartyFilename=license.rtf
+          -Dlicense.fileTemplate=dist/win/bundle/resources/licenseTemplate.ftl
+          -Dlicense.outputDirectory=dist/win/bundle/resources
+          -Dlicense.includeScopes=compile
+          -Dlicense.excludedGroups=^org\.cryptomator
+          -Dlicense.failOnMissing=true
+          -Dlicense.licenseMergesUrl=dist/win/resources/license/licenseMerges.xml
       - name: Download WinFsp
         run:
           curl --output dist/win/bundle/resources/winfsp.msi -L ${{ env.WINFSP_MSI }}

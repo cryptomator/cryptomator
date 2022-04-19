@@ -105,9 +105,13 @@ jobs:
       - name: Generate license
         run: >
           mvn -B license:add-third-party
-          "-Dlicense.thirdPartyFilename=license.rtf"
-          "-Dlicense.fileTemplate=dist/mac/dmg/resources/licenseTemplate.ftl"
-          "-Dlicense.outputDirectory=dist/mac/dmg/resources"
+          -Dlicense.thirdPartyFilename=license.rtf
+          -Dlicense.outputDirectory=dist/mac/dmg/resources
+          -Dlicense.fileTemplate=dist/mac/dmg/resources/licenseTemplate.ftl
+          -Dlicense.includeScopes=compile
+          -Dlicense.excludedGroups=^org\.cryptomator
+          -Dlicense.failOnMissing=true
+          -Dlicense.licenseMergesUrl=dist/mac/dmg/resources/licenseMerges.xml
       - name: Install codesign certificate
         run: |
           # create variables
