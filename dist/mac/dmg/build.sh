@@ -80,7 +80,7 @@ mvn -B -f../../../pom.xml license:add-third-party \
     -Dlicense.thirdPartyFilename=license.rtf \
     -Dlicense.outputDirectory=resources
     -Dlicense.fileTemplate=resources/licenseTemplate.ftl \
-    -Dlicense.includeScopes=compile \
+    -Dlicense.includedScopes=compile \
     -Dlicense.excludedGroups=^org\.cryptomator \
     -Dlicense.failOnMissing=true \
     -Dlicense.licenseMergesUrl=file:///../../../license/merges

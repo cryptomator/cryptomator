@@ -121,7 +121,7 @@ jobs:
           -Dlicense.thirdPartyFilename=license.rtf
           -Dlicense.outputDirectory=dist/win/resources
           -Dlicense.fileTemplate=dist/win/resources/licenseTemplate.ftl
-          -Dlicense.includeScopes=compile
+          -Dlicense.includedScopes=compile
           -Dlicense.excludedGroups=^org\.cryptomator
           -Dlicense.failOnMissing=true
           -Dlicense.licenseMergesUrl=file:///license/merges
@@ -211,7 +211,7 @@ jobs:
           -Dlicense.thirdPartyFilename=license.rtf
           -Dlicense.fileTemplate=dist/win/bundle/resources/licenseTemplate.ftl
           -Dlicense.outputDirectory=dist/win/bundle/resources
-          -Dlicense.includeScopes=compile
+          -Dlicense.includedScopes=compile
           -Dlicense.excludedGroups=^org\.cryptomator
           -Dlicense.failOnMissing=true
           -Dlicense.licenseMergesUrl=file:///license/merges

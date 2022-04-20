@@ -108,7 +108,7 @@ jobs:
           -Dlicense.thirdPartyFilename=license.rtf
           -Dlicense.outputDirectory=dist/mac/dmg/resources
           -Dlicense.fileTemplate=dist/mac/dmg/resources/licenseTemplate.ftl
-          -Dlicense.includeScopes=compile
+          -Dlicense.includedScopes=compile
           -Dlicense.excludedGroups=^org\.cryptomator
           -Dlicense.failOnMissing=true
           -Dlicense.licenseMergesUrl=file:///license/merges

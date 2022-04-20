@@ -85,7 +85,7 @@ if ($clean -and (Test-Path -Path $appPath)) {
  "-Dlicense.thirdPartyFilename=license.rtf" `
  "-Dlicense.fileTemplate=$buildDir\resources\licenseTemplate.ftl" `
  "-Dlicense.outputDirectory=$buildDir\resources\" `
- "-Dlicense.includeScopes=compile" `
+ "-Dlicense.includedScopes=compile" `
  "-Dlicense.excludedGroups=^org\.cryptomator" `
  "-Dlicense.failOnMissing=true" `
  "-Dlicense.licenseMergesUrl=file:///$buildDir/../../license/merges"
@@ -125,7 +125,7 @@ $Env:JP_WIXWIZARD_RESOURCES = "$buildDir\resources"
  "-Dlicense.thirdPartyFilename=license.rtf" `
  "-Dlicense.fileTemplate=$buildDir\bundle\resources\licenseTemplate.ftl" `
  "-Dlicense.outputDirectory=$buildDir\bundle\resources\" `
- "-Dlicense.includeScopes=compile" `
+ "-Dlicense.includedScopes=compile" `
  "-Dlicense.excludedGroups=^org\.cryptomator" `
  "-Dlicense.failOnMissing=true" `
  "-Dlicense.licenseMergesUrl=file:///$buildDir/../../license/merges"
