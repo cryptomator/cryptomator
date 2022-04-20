@@ -115,7 +115,7 @@ jobs:
           timestampUrl: 'http://timestamp.digicert.com'
           folder: appdir/Cryptomator
           recursive: true
-      - name: Generate license
+      - name: Generate license for MSI
         run: >
           mvn -B license:add-third-party
           -Dlicense.thirdPartyFilename=license.rtf
@@ -124,7 +124,7 @@ jobs:
           -Dlicense.includeScopes=compile
           -Dlicense.excludedGroups=^org\.cryptomator
           -Dlicense.failOnMissing=true
-          -Dlicense.licenseMergesUrl=dist/win/resources/license/licenseMerges.xml
+          -Dlicense.licenseMergesUrl=license/merges.xml
       - name: Create MSI
         run: >
           ${JAVA_HOME}/bin/jpackage
@@ -205,7 +205,7 @@ jobs:
           distribution: 'temurin'
           java-version: ${{ env.JAVA_VERSION }}
           cache: 'maven'
-      - name: Generate license
+      - name: Generate license for exe
         run: >
           mvn -B license:add-third-party
           -Dlicense.thirdPartyFilename=license.rtf
@@ -214,7 +214,7 @@ jobs:
           -Dlicense.includeScopes=compile
           -Dlicense.excludedGroups=^org\.cryptomator
           -Dlicense.failOnMissing=true
-          -Dlicense.licenseMergesUrl=dist/win/resources/license/licenseMerges.xml
+          -Dlicense.licenseMergesUrl=license/merges.xml
       - name: Download WinFsp
         run:
           curl --output dist/win/bundle/resources/winfsp.msi -L ${{ env.WINFSP_MSI }}
