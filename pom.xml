@@ -355,7 +355,6 @@
 						</goals>
 						<phase>generate-resources</phase>
 						<configuration>
-							<outputDirectory>${project.basedir}/src/main/resources/license</outputDirectory>
 							<thirdPartyFilename>THIRD-PARTY.txt</thirdPartyFilename>
 							<includedScopes>compile</includedScopes>
 							<excludedGroups>org\.cryptomator</excludedGroups>
