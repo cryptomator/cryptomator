@@ -83,7 +83,7 @@ mvn -B -f../../../pom.xml license:add-third-party \
     -Dlicense.includeScopes=compile \
     -Dlicense.excludedGroups=^org\.cryptomator \
     -Dlicense.failOnMissing=true \
-    -Dlicense.licenseMergesUrl=../../../license/merges.xml
+    -Dlicense.licenseMergesUrl=file:///../../../license/merges
 
 # codesign
 if [ -n "${CODESIGN_IDENTITY}" ]; then
