@@ -26,12 +26,12 @@ You should have received a copy of the GNU General Public License along with thi
 <#if projects?size &gt; 0>
 \tab ${license}:\par
 <#list projects as project>
-\tab\tab- ${artifactFormat(project)}\par
+\tab\tab - ${artifactFormat(project)}\par
 </#list>
 </#if>
 </#list>
 \par
 \b Cryptomator uses other third-party assets under the following licenses:\b0\par
 \tab SIL OFL 1.1 License:\par
-\tab\tab - Font Awesome 5.12.0 ({{\field{\*\fldinst{HYPERLINK https://fontawesome.com/ }}{\fldrslt{https://fontawesome.com/\ul0\cf0}}}}\f0\fs16 )\b\par
+\tab\tab - Font Awesome (5.12.0 - {{\field{\*\fldinst{HYPERLINK https://fontawesome.com/ }}{\fldrslt{https://fontawesome.com/\ul0\cf0}}}}\f0\fs16 )\b\par
 }

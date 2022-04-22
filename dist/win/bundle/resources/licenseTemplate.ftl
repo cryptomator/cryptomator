@@ -1,8 +1,8 @@
 <#function artifactFormat p>
     <#if p.name?index_of('Unnamed') &gt; -1>
-        <#return p.artifactId + " (" + p.groupId + ":" + p.artifactId + ":" + p.version + " - {{\\field{\\*\\fldinst{HYPERLINK " + (p.url!"no url defined") + "}}{\\fldrslt{" + (p.url!"no url defined") + "\\ul0\\cf0}}}}\\f0\\fs16 ) ">
+        <#return "{{\\field{\\*\\fldinst{HYPERLINK " + (p.url!"no url defined") + "}}{\\fldrslt{" + p.artifactId + "\\ul0\\cf0}}}}\\f0\\fs16 " + " (" + p.groupId + ":" + p.artifactId + ":" + p.version + ") ">
     <#else>
-        <#return p.name + " (" + p.groupId + ":" + p.artifactId + ":" + p.version + " - {{\\field{\\*\\fldinst{HYPERLINK " + (p.url!"no url defined") + "}}{\\fldrslt{" + (p.url!"no url defined") + "\\ul0\\cf0}}}}\\f0\\fs16 ) ">
+        <#return "{{\\field{\\*\\fldinst{HYPERLINK " + (p.url!"no url defined") + "}}{\\fldrslt{" + p.name + "\\ul0\\cf0}}}}\\f0\\fs16 " + " (" + p.groupId + ":" + p.artifactId + ":" + p.version + ") ">
     </#if>
 </#function>
 {\rtf1\ansi\ansicpg1252\deff0\nouicompat{\fonttbl{\f0\fnil\fcharset0 Arial;}}
@@ -26,16 +26,16 @@ You should have received a copy of the GNU General Public License along with thi
 <#if projects?size &gt; 0>
 \tab ${license}:\par
 <#list projects as project>
-\tab\tab- ${artifactFormat(project)}\par
+\tab\tab - ${artifactFormat(project)}\par
 </#list>
 </#if>
 </#list>
 \par
 \b Cryptomator uses other third-party assets under the following licenses:\b0\par
 \tab SIL OFL 1.1 License:\par
-\tab\tab - Font Awesome 5.12.0 ({{\field{\*\fldinst{HYPERLINK https://fontawesome.com/ }}{\fldrslt{https://fontawesome.com/\ul0\cf0}}}}\f0\fs16 )\b\par
+\tab\tab - {{\field{\*\fldinst{HYPERLINK https://fontawesome.com/}}{\fldrslt{Font Awesome\ul0\cf0}}}}\f0\fs16  (5.12.0)\b\par
 \par
 \b Cryptomator dynamically links to third-party libraries under the following license:\b0\par
 \tab Uncategorized License:\par
-\tab\tab - WinFsp - Windows File System Proxy, Copyright (C) Bill Zissimopoulos  ({{\field{\*\fldinst{HYPERLINK https://github.com/billziss-gh/winfsp }}{\fldrslt{https://github.com/billziss-gh/winfsp\ul0\cf0}}}}\f0\fs16 )\b\par
+\tab\tab - {{\field{\*\fldinst{HYPERLINK https://github.com/billziss-gh/winfsp}}{\fldrslt{WinFsp - Windows File System Proxy\ul0\cf0}}}}\f0\fs16  (Copyright (C) Bill Zissimopoulos)\b\par
 }

@@ -78,12 +78,12 @@ sed -i '' "s|###BUNDLE_VERSION###|${REVISION_NO}|g" Cryptomator.app/Contents/Inf
 # generate license
 mvn -B -f../../../pom.xml license:add-third-party \
     -Dlicense.thirdPartyFilename=license.rtf \
-    -Dlicense.outputDirectory=resources
+    -Dlicense.outputDirectory=dist/mac/dmg/resources \
     -Dlicense.fileTemplate=resources/licenseTemplate.ftl \
     -Dlicense.includedScopes=compile \
     -Dlicense.excludedGroups=^org\.cryptomator \
     -Dlicense.failOnMissing=true \
-    -Dlicense.licenseMergesUrl=file:///../../../license/merges
+    -Dlicense.licenseMergesUrl=file://$(pwd)/../../../license/merges
 
 # codesign
 if [ -n "${CODESIGN_IDENTITY}" ]; then

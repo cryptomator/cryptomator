@@ -1,8 +1,8 @@
 <#function artifactFormat p>
     <#if p.name?index_of('Unnamed') &gt; -1>
-        <#return p.artifactId + " (" + p.groupId + ":" + p.artifactId + ":" + p.version + " - {\\field{\\*\\fldinst{HYPERLINK \"" + (p.url!"no url defined") + "\"}}{\\fldrslt " + (p.url!"no url defined") + "}})">
+        <#return "{\\field{\\*\\fldinst{HYPERLINK \"" + (p.url!"no url defined") + "\"}}{\\fldrslt " + p.artifactId + "}}" + " (" + p.groupId + ":" + p.artifactId + ":" + p.version + ")">
     <#else>
-        <#return p.name + " (" + p.groupId + ":" + p.artifactId + ":" + p.version + " - {\\field{\\*\\fldinst{HYPERLINK \"" + (p.url!"no url defined") + "\"}}{\\fldrslt " + (p.url!"no url defined") + "}})">
+        <#return "{\\field{\\*\\fldinst{HYPERLINK \"" + (p.url!"no url defined") + "\"}}{\\fldrslt " + p.name + "}}" + " (" + p.groupId + ":" + p.artifactId + ":" + p.version + ")">
     </#if>
 </#function>
 {\rtf1\ansi\ansicpg1252\cocoartf2512
@@ -44,6 +44,6 @@ You should have received a copy of the GNU General Public License along with thi
 \f0\b Cryptomator uses other third-party assets under the following licenses:
 \f1\b0 \
 	SIL OFL 1.1 License:\
-		- Font Awesome 5.12.0 ({\field{\*\fldinst{HYPERLINK "https://fontawesome.com/"}}{\fldrslt https://fontawesome.com/}})\
+		- {\field{\*\fldinst{HYPERLINK "https://fontawesome.com/"}}{\fldrslt Font Awesome}} (5.12.0)\
 \
 }
