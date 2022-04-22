@@ -124,7 +124,7 @@ jobs:
           -Dlicense.includedScopes=compile
           -Dlicense.excludedGroups=^org\.cryptomator
           -Dlicense.failOnMissing=true
-          -Dlicense.licenseMergesUrl=file:///${{ env.GITHUB_WORKSPACE }}/license/merges
+          -Dlicense.licenseMergesUrl=file://${{ github.workspace }}/license/merges
       - name: Create MSI
         run: >
           ${JAVA_HOME}/bin/jpackage
@@ -214,7 +214,7 @@ jobs:
           -Dlicense.includedScopes=compile
           -Dlicense.excludedGroups=^org\.cryptomator
           -Dlicense.failOnMissing=true
-          -Dlicense.licenseMergesUrl=file:///${{ env.GITHUB_WORKSPACE }}/license/merges
+          -Dlicense.licenseMergesUrl=file://${{ github.workspace }}/license/merges
       - name: Download WinFsp
         run:
           curl --output dist/win/bundle/resources/winfsp.msi -L ${{ env.WINFSP_MSI }}
