@@ -358,7 +358,7 @@
 							<thirdPartyFilename>THIRD-PARTY.txt</thirdPartyFilename>
 							<includedScopes>compile</includedScopes>
 							<excludedGroups>org\.cryptomator</excludedGroups>
-							<licenseMergesUrl>file:///${project.basedir}/third-party.merges</licenseMergesUrl>
+							<licenseMergesUrl>file:///${project.basedir}/license/merges</licenseMergesUrl>
 							<fileTemplate>${project.basedir}/src/main/resources/license/template.ftl</fileTemplate>
 						</configuration>
 					</execution>

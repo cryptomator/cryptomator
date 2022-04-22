@@ -111,7 +111,7 @@ jobs:
           -Dlicense.includedScopes=compile
           -Dlicense.excludedGroups=^org\.cryptomator
           -Dlicense.failOnMissing=true
-          -Dlicense.licenseMergesUrl=file:///third-party.merges
+          -Dlicense.licenseMergesUrl=file:///license/merges
       - name: Install codesign certificate
         run: |
           # create variables
