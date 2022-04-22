@@ -88,7 +88,7 @@ if ($clean -and (Test-Path -Path $appPath)) {
  "-Dlicense.includedScopes=compile" `
  "-Dlicense.excludedGroups=^org\.cryptomator" `
  "-Dlicense.failOnMissing=true" `
- "-Dlicense.licenseMergesUrl=file:///$buildDir/../../license/merges"
+ "-Dlicense.licenseMergesUrl=file:///$buildDir/../../third-party.merges"
 
 # patch app dir
 Copy-Item "contrib\*" -Destination "Cryptomator"
@@ -128,7 +128,7 @@ $Env:JP_WIXWIZARD_RESOURCES = "$buildDir\resources"
  "-Dlicense.includedScopes=compile" `
  "-Dlicense.excludedGroups=^org\.cryptomator" `
  "-Dlicense.failOnMissing=true" `
- "-Dlicense.licenseMergesUrl=file:///$buildDir/../../license/merges"
+ "-Dlicense.licenseMergesUrl=file:///$buildDir/../../third-party.merges"
 
 # download Winfsp
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
