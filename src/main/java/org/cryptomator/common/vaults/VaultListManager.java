@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 import javax.inject.Singleton;
 import javafx.collections.ObservableList;
 import java.io.IOException;
@@ -38,12 +39,12 @@ public class VaultListManager {
 	private static final Logger LOG = LoggerFactory.getLogger(VaultListManager.class);
 
 	private final AutoLocker autoLocker;
-	private final VaultComponent.Builder vaultComponentBuilder;
+	private final Provider<VaultComponent.Builder> vaultComponentBuilder;
 	private final ObservableList<Vault> vaultList;
 	private final String defaultVaultName;
 
 	@Inject
-	public VaultListManager(ObservableList<Vault> vaultList, AutoLocker autoLocker, VaultComponent.Builder vaultComponentBuilder, ResourceBundle resourceBundle, Settings settings) {
+	public VaultListManager(ObservableList<Vault> vaultList, AutoLocker autoLocker, Provider<VaultComponent.Builder> vaultComponentBuilder, ResourceBundle resourceBundle, Settings settings) {
 		this.vaultList = vaultList;
 		this.autoLocker = autoLocker;
 		this.vaultComponentBuilder = vaultComponentBuilder;
@@ -93,7 +94,7 @@ public class VaultListManager {
 	}
 
 	private Vault create(VaultSettings vaultSettings) {
-		VaultComponent.Builder compBuilder = vaultComponentBuilder.vaultSettings(vaultSettings);
+		VaultComponent.Builder compBuilder = vaultComponentBuilder.get().vaultSettings(vaultSettings);
 		try {
 			VaultState.Value vaultState = determineVaultState(vaultSettings.path().get());
 			VaultConfigCache wrapper = new VaultConfigCache(vaultSettings);
