@@ -24,6 +24,7 @@ public class PreferencesController implements FxController {
 	private final BooleanBinding updateAvailable;
 	public TabPane tabPane;
 	public Tab generalTab;
+	public Tab interfaceTab;
 	public Tab volumeTab;
 	public Tab updatesTab;
 	public Tab contributeTab;
@@ -50,10 +51,11 @@ public class PreferencesController implements FxController {
 
 	private Tab getTabToSelect(SelectedPreferencesTab selectedTab) {
 		return switch (selectedTab) {
-			case UPDATES -> updatesTab;
-			case VOLUME -> volumeTab;
-			case CONTRIBUTE -> contributeTab;
 			case GENERAL -> generalTab;
+			case INTERFACE -> interfaceTab;
+			case VOLUME -> volumeTab;
+			case UPDATES -> updatesTab;
+			case CONTRIBUTE -> contributeTab;
 			case ABOUT -> aboutTab;
 			case ANY -> updateAvailable.get() ? updatesTab : generalTab;
 		};

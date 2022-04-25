@@ -12,6 +12,11 @@ public enum SelectedPreferencesTab {
 	GENERAL,
 
 	/**
+	 * Show interface tab
+	 */
+	INTERFACE,
+
+	/**
 	 * Show volume tab
 	 */
 	VOLUME,

@@ -1,11 +1,13 @@
 # Number of days of inactivity before an issue becomes stale
-daysUntilStale: 180
+daysUntilStale: 365
 # Number of days of inactivity before a stale issue is closed
-daysUntilClose: 30
+daysUntilClose: 90
 # Issues with these labels will never be considered stale
 exemptLabels:
   - type:security-issue # never close automatically
   - type:feature-request # never close automatically
+  - type:enhancement # never close automatically
+  - type:upstream-bug # never close automatically
   - state:awaiting-response # handled by different bot
   - state:blocked
   - state:confirmed
