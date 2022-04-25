@@ -8,7 +8,6 @@ import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.keyloading.KeyLoading;
 import org.cryptomator.ui.keyloading.KeyLoadingScoped;
-import org.eclipse.jetty.io.RuntimeIOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,7 +81,7 @@ public class ReceiveKeyController implements FxController {
 				default -> throw new IOException("Unexpected response " + response.statusCode());
 			}
 		} catch (IOException e) {
-			throw new RuntimeIOException(e);
+			throw new UncheckedIOException(e);
 		}
 	}
 

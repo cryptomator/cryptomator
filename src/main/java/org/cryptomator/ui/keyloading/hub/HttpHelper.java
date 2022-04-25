@@ -20,12 +20,4 @@ class HttpHelper {
 		}
 	}
 
-	public static JsonElement parseBody(HttpResponse<InputStream> response) throws IOException {
-		try (InputStream in = response.body(); Reader reader = new InputStreamReader(in, StandardCharsets.UTF_8)) {
-			return JsonParser.parseReader(reader);
-		} catch (JsonParseException e) {
-			throw new IOException("Failed to parse JSON", e);
-		}
-	}
-
 }

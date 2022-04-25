@@ -1,12 +1,16 @@
 package org.cryptomator.ui.keyloading.hub;
 
-import javafx.application.Platform;
+import com.google.gson.JsonParser;
+import io.github.coffeelibs.tinyoauth2client.AuthFlow;
+
 import javafx.concurrent.Task;
+import java.io.IOException;
 import java.net.URI;
 import java.util.function.Consumer;
 
 class AuthFlowTask extends Task<String> {
 
+	private final HubConfig hubConfig;
 	private final AuthFlowContext authFlowContext;
 	private final Consumer<URI> redirectUriConsumer;
 
@@ -23,11 +27,13 @@ class AuthFlowTask extends Task<String> {
 	}
 
 	@Override
-	protected String call() throws Exception {
-		try (var authFlow = AuthFlow.init(hubConfig, authFlowContext)) {
-			return authFlow.run(uri -> Platform.runLater(() -> redirectUriConsumer.accept(uri)));
-		}
+	protected String call() throws IOException, InterruptedException {
+		// TODO configure redirectURIs with deviceId from authFlowContext
+		var response = AuthFlow.asClient(hubConfig.clientId) //
+				.authorize(URI.create(hubConfig.authEndpoint), redirectUriConsumer) //
+				.getAccessToken(URI.create(hubConfig.tokenEndpoint));
+		var json = JsonParser.parseString(response);
+		return json.getAsJsonObject().get("access_token").getAsString();
 	}
 
-	private final HubConfig hubConfig;
 }

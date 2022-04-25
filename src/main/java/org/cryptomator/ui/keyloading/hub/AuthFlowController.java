@@ -11,6 +11,7 @@ import org.cryptomator.ui.keyloading.KeyLoadingScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.StringBinding;
 import javafx.beans.property.ObjectProperty;
@@ -75,8 +76,10 @@ public class AuthFlowController implements FxController {
 	}
 
 	private void setAuthUri(URI uri) {
-		authUri.set(uri);
-		browse();
+		Platform.runLater(() -> {
+			authUri.set(uri);
+			browse();
+		});
 	}
 
 	private void windowClosed(WindowEvent windowEvent) {

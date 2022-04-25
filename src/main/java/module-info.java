@@ -28,11 +28,9 @@ module org.cryptomator.desktop {
 	requires com.nulabinc.zxcvbn;
 	requires com.tobiasdiez.easybind;
 	requires dagger;
+	requires io.github.coffeelibs.tinyoauth2client;
 	requires org.slf4j;
 	requires org.apache.commons.lang3;
-	requires org.eclipse.jetty.server;
-	requires org.eclipse.jetty.webapp;
-	requires org.eclipse.jetty.servlets;
 
 	/* TODO: filename-based modules: */
 	requires static javax.inject; /* ugly dagger/guava crap */

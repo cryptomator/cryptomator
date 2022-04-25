@@ -48,7 +48,6 @@
 		<zxcvbn.version>1.6.0</zxcvbn.version>
 		<slf4j.version>1.7.36</slf4j.version>
 		<logback.version>1.2.11</logback.version>
-		<jetty.version>10.0.6</jetty.version>
 
 		<!-- test dependencies -->
 		<junit.jupiter.version>5.8.1</junit.jupiter.version>
@@ -140,23 +139,12 @@
 			<version>${commons-lang3.version}</version>
 		</dependency>
 
+		<!-- OAuth/JWT -->
 		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-server</artifactId>
-			<version>${jetty.version}</version>
+			<groupId>io.github.coffeelibs</groupId>
+			<artifactId>tiny-oauth2-client</artifactId>
+			<version>0.1.1</version>
 		</dependency>
-		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-webapp</artifactId>
-			<version>${jetty.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-servlets</artifactId>
-			<version>${jetty.version}</version>
-		</dependency>
-
-		<!-- JWT -->
 		<dependency>
 			<groupId>com.auth0</groupId>
 			<artifactId>java-jwt</artifactId>
