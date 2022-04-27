@@ -20,12 +20,14 @@ ${JAVA_HOME}/bin/jlink \
     --output runtime \
     --module-path "${JAVA_HOME}/jmods" \
     --add-modules java.base,java.desktop,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.crypto.ec,jdk.accessibility,jdk.management.jfr \
+    --strip-native-commands \
     --no-header-files \
     --no-man-pages \
     --strip-debug \
     --compress=1
 
 # create app dir
+envsubst '${SEMVER_STR} ${REVISION_NUM}' < dist/linux/launcher-gtk2.properties > launcher-gtk2.properties
 ${JAVA_HOME}/bin/jpackage \
     --verbose \
     --type app-image \
@@ -48,6 +50,7 @@ ${JAVA_HOME}/bin/jpackage \
     --java-options "-Dcryptomator.mountPointsDir=\"~/.local/share/Cryptomator/mnt\"" \
     --java-options "-Dcryptomator.showTrayIcon=false" \
     --java-options "-Dcryptomator.buildNumber=\"appimage-${REVISION_NO}\"" \
+    --add-launcher cryptomator-gtk2=launcher-gtk2.properties \
     --resource-dir ../resources
 
 # transform AppDir

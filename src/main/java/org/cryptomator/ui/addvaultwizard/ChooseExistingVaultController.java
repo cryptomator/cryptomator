@@ -2,6 +2,8 @@ package org.cryptomator.ui.addvaultwizard;
 
 import dagger.Lazy;
 import org.apache.commons.lang3.SystemUtils;
+import org.cryptomator.common.settings.Settings;
+import org.cryptomator.common.settings.UiTheme;
 import org.cryptomator.common.vaults.Vault;
 import org.cryptomator.common.vaults.VaultListManager;
 import org.cryptomator.ui.common.FxController;
@@ -36,11 +38,12 @@ public class ChooseExistingVaultController implements FxController {
 	private final ObjectProperty<Vault> vault;
 	private final VaultListManager vaultListManager;
 	private final ResourceBundle resourceBundle;
+	private final Settings settings;
 
 	private Image screenshot;
 
 	@Inject
-	ChooseExistingVaultController(@AddVaultWizardWindow Stage window, @FxmlScene(FxmlFile.ADDVAULT_WELCOME) Lazy<Scene> welcomeScene, @FxmlScene(FxmlFile.ADDVAULT_SUCCESS) Lazy<Scene> successScene, FxApplicationWindows appWindows, ObjectProperty<Path> vaultPath, @AddVaultWizardWindow ObjectProperty<Vault> vault, VaultListManager vaultListManager, ResourceBundle resourceBundle) {
+	ChooseExistingVaultController(@AddVaultWizardWindow Stage window, @FxmlScene(FxmlFile.ADDVAULT_WELCOME) Lazy<Scene> welcomeScene, @FxmlScene(FxmlFile.ADDVAULT_SUCCESS) Lazy<Scene> successScene, FxApplicationWindows appWindows, ObjectProperty<Path> vaultPath, @AddVaultWizardWindow ObjectProperty<Vault> vault, VaultListManager vaultListManager, ResourceBundle resourceBundle, Settings settings) {
 		this.window = window;
 		this.welcomeScene = welcomeScene;
 		this.successScene = successScene;
@@ -49,12 +52,13 @@ public class ChooseExistingVaultController implements FxController {
 		this.vault = vault;
 		this.vaultListManager = vaultListManager;
 		this.resourceBundle = resourceBundle;
+		this.settings = settings;
 	}
 
 	@FXML
 	public void initialize() {
 		if (SystemUtils.IS_OS_MAC) {
-			this.screenshot = new Image(getClass().getResource("/img/select-masterkey-mac.png").toString());
+			this.screenshot = new Image(getClass().getResource("/img/select-masterkey-mac"+(UiTheme.LIGHT == settings.theme().get()? "":"-dark")+".png").toString());
 		} else {
 			this.screenshot = new Image(getClass().getResource("/img/select-masterkey-win.png").toString());
 		}
