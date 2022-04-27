@@ -9,11 +9,6 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javafx.application.Platform;
-import javafx.stage.Stage;
-import javafx.stage.StageStyle;
-import java.awt.SystemTray;
-import java.io.IOException;
-import java.io.UncheckedIOException;
 
 @FxApplicationScoped
 public class FxApplication {
@@ -49,7 +44,7 @@ public class FxApplication {
 
 		// init system tray
 		final boolean hasTrayIcon;
-		if (SystemTray.isSupported() && settings.showTrayIcon().get()) {
+		if (settings.showTrayIcon().get() && trayMenu.get().isSupported()) {
 			trayMenu.get().initializeTrayIcon();
 			Platform.setImplicitExit(false); // don't quit when closing all windows
 			hasTrayIcon = true;
