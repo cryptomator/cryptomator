@@ -56,12 +56,13 @@ ${JAVA_HOME}/bin/jpackage \
     --name Cryptomator \
     --vendor "Skymatic GmbH" \
     --copyright "(C) 2016 - 2022 Skymatic GmbH" \
+    --app-version "${VERSION_NO}" \
     --java-options "-Xss5m" \
     --java-options "-Xmx256m" \
-    --java-options "-Dcryptomator.appVersion=\"${VERSION_NO}\"" \
-    --app-version "${VERSION_NO}" \
     --java-options "-Dfile.encoding=\"utf-8\"" \
     --java-options "-Dapple.awt.enableTemplateImages=true" \
+    --java-options "-Dsun.java2d.metal=true" \
+    --java-options "-Dcryptomator.appVersion=\"${VERSION_NO}\"" \
     --java-options "-Dcryptomator.logDir=\"~/Library/Logs/Cryptomator\"" \
     --java-options "-Dcryptomator.pluginDir=\"~/Library/Application Support/Cryptomator/Plugins\"" \
     --java-options "-Dcryptomator.settingsPath=\"~/Library/Application Support/Cryptomator/settings.json\"" \
