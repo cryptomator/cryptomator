@@ -2,7 +2,6 @@ package org.cryptomator.launcher;
 
 import dagger.Module;
 import dagger.Provides;
-import org.cryptomator.common.PluginClassLoader;
 import org.cryptomator.integrations.autostart.AutoStartProvider;
 import org.cryptomator.integrations.tray.TrayIntegrationProvider;
 import org.cryptomator.integrations.uiappearance.UiAppearanceProvider;
@@ -12,7 +11,6 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import java.util.Optional;
 import java.util.ResourceBundle;
-import java.util.ServiceLoader;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
@@ -32,25 +30,22 @@ class CryptomatorModule {
 		return new ArrayBlockingQueue<>(10);
 	}
 
-	// TODO: still needed after integrations-api 1.1.0?
-
 	@Provides
 	@Singleton
-	static Optional<UiAppearanceProvider> provideAppearanceProvider(PluginClassLoader classLoader) {
-		return ServiceLoader.load(UiAppearanceProvider.class, classLoader).findFirst();
+	static Optional<UiAppearanceProvider> provideAppearanceProvider() {
+		return UiAppearanceProvider.get();
 	}
 
 	@Provides
 	@Singleton
-	static Optional<AutoStartProvider> provideAutostartProvider(PluginClassLoader classLoader) {
-		return ServiceLoader.load(AutoStartProvider.class, classLoader).findFirst();
+	static Optional<AutoStartProvider> provideAutostartProvider() {
+		return AutoStartProvider.get();
 	}
 
 	@Provides
 	@Singleton
-	static Optional<TrayIntegrationProvider> provideTrayIntegrationProvider(PluginClassLoader classLoader) {
-		return ServiceLoader.load(TrayIntegrationProvider.class, classLoader).findFirst();
+	static Optional<TrayIntegrationProvider> provideTrayIntegrationProvider() {
+		return TrayIntegrationProvider.get();
 	}
-
 
 }
