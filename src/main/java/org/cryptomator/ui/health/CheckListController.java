@@ -1,9 +1,8 @@
 package org.cryptomator.ui.health;
 
 import com.google.common.base.Preconditions;
-import dagger.Lazy;
-import org.cryptomator.ui.common.ErrorComponent;
 import org.cryptomator.ui.common.FxController;
+import org.cryptomator.ui.fxapp.FxApplicationWindows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,9 +14,7 @@ import javafx.beans.property.ObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.CheckBox;
 import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
 import javafx.stage.Stage;
@@ -37,7 +34,7 @@ public class CheckListController implements FxController {
 	private final ObjectProperty<Check> selectedCheck;
 	private final BooleanBinding mainRunStarted; //TODO: rerunning not considered for now
 	private final BooleanBinding somethingsRunning;
-	private final Lazy<ErrorComponent.Builder> errorComponentBuilder;
+	private final FxApplicationWindows appWindows;
 	private final IntegerBinding chosenTaskCount;
 	private final BooleanBinding anyCheckSelected;
 	private final CheckListCellFactory listCellFactory;
@@ -46,7 +43,7 @@ public class CheckListController implements FxController {
 	public ListView<Check> checksListView;
 
 	@Inject
-	public CheckListController(@HealthCheckWindow Stage window, List<Check> checks, CheckExecutor checkExecutor, ReportWriter reportWriteTask, ObjectProperty<Check> selectedCheck, Lazy<ErrorComponent.Builder> errorComponentBuilder, CheckListCellFactory listCellFactory) {
+	public CheckListController(@HealthCheckWindow Stage window, List<Check> checks, CheckExecutor checkExecutor, ReportWriter reportWriteTask, ObjectProperty<Check> selectedCheck, FxApplicationWindows appWindows, CheckListCellFactory listCellFactory) {
 		this.window = window;
 		this.checks = FXCollections.observableList(checks, Check::observables);
 		this.checkExecutor = checkExecutor;
@@ -54,7 +51,7 @@ public class CheckListController implements FxController {
 		this.chosenChecks = this.checks.filtered(Check::isChosenForExecution);
 		this.reportWriter = reportWriteTask;
 		this.selectedCheck = selectedCheck;
-		this.errorComponentBuilder = errorComponentBuilder;
+		this.appWindows = appWindows;
 		this.chosenTaskCount = Bindings.size(this.chosenChecks);
 		this.mainRunStarted = Bindings.isEmpty(this.checks.filtered(c -> c.getState() == Check.CheckState.RUNNABLE));
 		this.somethingsRunning = Bindings.isNotEmpty(this.checks.filtered(c -> c.getState() == Check.CheckState.SCHEDULED || c.getState() == Check.CheckState.RUNNING));
@@ -104,7 +101,7 @@ public class CheckListController implements FxController {
 			reportWriter.writeReport(chosenChecks);
 		} catch (IOException e) {
 			LOG.error("Failed to write health check report.", e);
-			errorComponentBuilder.get().cause(e).window(window).returnToScene(window.getScene()).build().showErrorScene();
+			appWindows.showErrorWindow(e, window, window.getScene());
 		}
 	}
 

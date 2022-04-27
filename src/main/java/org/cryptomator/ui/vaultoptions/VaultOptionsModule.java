@@ -13,7 +13,7 @@ import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlLoaderFactory;
 import org.cryptomator.ui.common.FxmlScene;
 import org.cryptomator.ui.common.StageFactory;
-import org.cryptomator.ui.mainwindow.MainWindow;
+import org.cryptomator.ui.fxapp.PrimaryStage;
 import org.cryptomator.ui.recoverykey.RecoveryKeyComponent;
 
 import javax.inject.Provider;
@@ -44,14 +44,14 @@ abstract class VaultOptionsModule {
 	@Provides
 	@VaultOptionsWindow
 	@VaultOptionsScoped
-	static Stage provideStage(StageFactory factory, @MainWindow Stage owner, @VaultOptionsWindow Vault vault) {
+	static Stage provideStage(StageFactory factory, @PrimaryStage Stage primaryStage, @VaultOptionsWindow Vault vault) {
 		Stage stage = factory.create();
 		stage.setTitle(vault.getDisplayName());
 		stage.setResizable(true);
 		stage.setMinWidth(400);
 		stage.setMinHeight(300);
 		stage.initModality(Modality.WINDOW_MODAL);
-		stage.initOwner(owner);
+		stage.initOwner(primaryStage);
 		return stage;
 	}
 

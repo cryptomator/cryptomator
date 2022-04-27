@@ -115,12 +115,17 @@ jobs:
           timestampUrl: 'http://timestamp.digicert.com'
           folder: appdir/Cryptomator
           recursive: true
-      - name: Generate license
+      - name: Generate license for MSI
         run: >
           mvn -B license:add-third-party
           "-Dlicense.thirdPartyFilename=license.rtf"
-          "-Dlicense.fileTemplate=dist/win/resources/licenseTemplate.ftl"
           "-Dlicense.outputDirectory=dist/win/resources"
+          "-Dlicense.fileTemplate=dist/win/resources/licenseTemplate.ftl"
+          "-Dlicense.includedScopes=compile"
+          "-Dlicense.excludedGroups=^org\.cryptomator"
+          "-Dlicense.failOnMissing=true"
+          "-Dlicense.licenseMergesUrl=file:///${{ github.workspace }}/license/merges"
+        shell: pwsh
       - name: Create MSI
         run: >
           ${JAVA_HOME}/bin/jpackage
@@ -201,12 +206,17 @@ jobs:
           distribution: 'temurin'
           java-version: ${{ env.JAVA_VERSION }}
           cache: 'maven'
-      - name: Generate license
+      - name: Generate license for exe
         run: >
           mvn -B license:add-third-party
           "-Dlicense.thirdPartyFilename=license.rtf"
           "-Dlicense.fileTemplate=dist/win/bundle/resources/licenseTemplate.ftl"
           "-Dlicense.outputDirectory=dist/win/bundle/resources"
+          "-Dlicense.includedScopes=compile"
+          "-Dlicense.excludedGroups=^org\.cryptomator"
+          "-Dlicense.failOnMissing=true"
+          "-Dlicense.licenseMergesUrl=file:///${{ github.workspace }}/license/merges"
+        shell: pwsh
       - name: Download WinFsp
         run:
           curl --output dist/win/bundle/resources/winfsp.msi -L ${{ env.WINFSP_MSI }}
@@ -225,11 +235,11 @@ jobs:
         run: >
           "${WIX}/bin/light.exe" -b dist/win/ dist/win/bundle/bundleWithWinfsp.wixobj
           -ext WixBalExtension
-          -out installer/unsigned/Cryptomator.exe
+          -out installer/unsigned/Cryptomator-Installer.exe
       - name: Detach burn engine in preparation to sign
         run: >
           "${WIX}/bin/insignia.exe"
-          -ib installer/unsigned/Cryptomator.exe
+          -ib installer/unsigned/Cryptomator-Installer.exe
           -o tmp/engine.exe
       - name: Codesign burn engine
         uses: skymatic/code-sign-action@v1
@@ -243,8 +253,8 @@ jobs:
       - name: Reattach signed burn engine to installer
         run : >
           "${WIX}/bin/insignia.exe"
-          -ab tmp/engine.exe installer/unsigned/Cryptomator.exe
-          -o installer/Cryptomator.exe
+          -ab tmp/engine.exe installer/unsigned/Cryptomator-Installer.exe
+          -o installer/Cryptomator-Installer.exe
       - name: Codesign EXE
         uses: skymatic/code-sign-action@v1
         with:
@@ -255,7 +265,7 @@ jobs:
           timestampUrl: 'http://timestamp.digicert.com'
           folder: installer
       - name: Add possible alpha/beta tags to installer name
-        run: mv installer/Cryptomator.exe Cryptomator-${{ needs.build-msi.outputs.semVerStr }}-x64.exe
+        run: mv installer/Cryptomator-Installer.exe Cryptomator-${{ needs.build-msi.outputs.semVerStr }}-x64.exe
       - name: Create detached GPG signature with key 615D449FE6E6A235
         run: |
           echo "${GPG_PRIVATE_KEY}" | gpg --batch --quiet --import
@@ -280,3 +290,43 @@ jobs:
           files: |
             Cryptomator-*.exe
             Cryptomator-*.asc
+
+  allowlist:
+    name: Anti Virus Allowlisting
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    needs: [build-msi, build-exe]
+    steps:
+      - name: Download .msi
+        uses: actions/download-artifact@v2
+        with:
+          name: msi
+          path: msi
+      - name: Download .exe
+        uses: actions/download-artifact@v2
+        with:
+          name: exe
+          path: exe
+      - name: Collect files
+        run: |
+          mkdir files
+          cp msi/*.msi files
+          cp exe/*.exe files
+      - name: Upload to Kaspersky
+        uses: SamKirkland/FTP-Deploy-Action@4.3.0
+        with:
+          protocol: ftps
+          server: allowlist.kaspersky-labs.com
+          port: 990
+          username: ${{ secrets.ALLOWLIST_KASPERSKY_USERNAME }}
+          password: ${{ secrets.ALLOWLIST_KASPERSKY_PASSWORD }}
+          local-dir: files/
+      - name: Upload to Avast
+        uses: SamKirkland/FTP-Deploy-Action@4.3.0
+        with:
+          protocol: ftp
+          server: whitelisting.avast.com
+          port: 21
+          username: ${{ secrets.ALLOWLIST_AVAST_USERNAME }}
+          password: ${{ secrets.ALLOWLIST_AVAST_PASSWORD }}
+          local-dir: files/

@@ -1,9 +1,9 @@
-import org.cryptomator.integrations.autostart.AutoStartProvider;
-import org.cryptomator.integrations.keychain.KeychainAccessProvider;
-import org.cryptomator.integrations.tray.TrayIntegrationProvider;
-import org.cryptomator.integrations.uiappearance.UiAppearanceProvider;
+import org.cryptomator.integrations.tray.TrayMenuController;
+import org.cryptomator.ui.traymenu.AwtTrayMenuController;
 
 module org.cryptomator.desktop {
+	requires static org.jetbrains.annotations;
+
 	requires org.cryptomator.cryptofs;
 	requires org.cryptomator.frontend.dokany;
 	requires org.cryptomator.frontend.fuse;
@@ -29,12 +29,12 @@ module org.cryptomator.desktop {
 	requires logback.classic;
 	requires logback.core;
 
-	uses AutoStartProvider;
-	uses KeychainAccessProvider;
-	uses TrayIntegrationProvider;
-	uses UiAppearanceProvider;
+	exports org.cryptomator.ui.traymenu to org.cryptomator.integrations.api;
+	provides TrayMenuController with AwtTrayMenuController;
 
 	opens org.cryptomator.common.settings to com.google.gson;
+
+	opens org.cryptomator.launcher to javafx.graphics;
 
 	opens org.cryptomator.common to javafx.fxml;
 	opens org.cryptomator.common.vaults to javafx.fxml;

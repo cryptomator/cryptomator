@@ -3,10 +3,16 @@ package org.cryptomator.ui.recoverykey;
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Strings;
 import dagger.Lazy;
+import org.cryptomator.common.Nullable;
 import org.cryptomator.common.vaults.Vault;
+import org.cryptomator.cryptofs.VaultConfig;
+import org.cryptomator.cryptofs.VaultConfigLoadException;
+import org.cryptomator.cryptofs.VaultKeyInvalidException;
 import org.cryptomator.ui.common.FxController;
 import org.cryptomator.ui.common.FxmlFile;
 import org.cryptomator.ui.common.FxmlScene;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javafx.beans.binding.Bindings;
@@ -24,10 +30,12 @@ import java.util.Optional;
 @RecoveryKeyScoped
 public class RecoveryKeyRecoverController implements FxController {
 
-	private final static CharMatcher ALLOWED_CHARS = CharMatcher.inRange('a', 'z').or(CharMatcher.is(' '));
+	private static final Logger LOG = LoggerFactory.getLogger(RecoveryKeyCreationController.class);
+	private static final CharMatcher ALLOWED_CHARS = CharMatcher.inRange('a', 'z').or(CharMatcher.is(' '));
 
 	private final Stage window;
 	private final Vault vault;
+	private final VaultConfig.UnverifiedVaultConfig unverifiedVaultConfig;
 	private final StringProperty recoveryKey;
 	private final RecoveryKeyFactory recoveryKeyFactory;
 	private final BooleanBinding validRecoveryKey;
@@ -37,9 +45,10 @@ public class RecoveryKeyRecoverController implements FxController {
 	public TextArea textarea;
 
 	@Inject
-	public RecoveryKeyRecoverController(@RecoveryKeyWindow Stage window, @RecoveryKeyWindow Vault vault, @RecoveryKeyWindow StringProperty recoveryKey, RecoveryKeyFactory recoveryKeyFactory, @FxmlScene(FxmlFile.RECOVERYKEY_RESET_PASSWORD) Lazy<Scene> resetPasswordScene) {
+	public RecoveryKeyRecoverController(@RecoveryKeyWindow Stage window, @RecoveryKeyWindow Vault vault, @RecoveryKeyWindow @Nullable VaultConfig.UnverifiedVaultConfig unverifiedVaultConfig, @RecoveryKeyWindow StringProperty recoveryKey, RecoveryKeyFactory recoveryKeyFactory, @FxmlScene(FxmlFile.RECOVERYKEY_RESET_PASSWORD) Lazy<Scene> resetPasswordScene) {
 		this.window = window;
 		this.vault = vault;
+		this.unverifiedVaultConfig = unverifiedVaultConfig;
 		this.recoveryKey = recoveryKey;
 		this.recoveryKeyFactory = recoveryKeyFactory;
 		this.validRecoveryKey = Bindings.createBooleanBinding(this::isValidRecoveryKey, recoveryKey);
@@ -96,6 +105,20 @@ public class RecoveryKeyRecoverController implements FxController {
 		window.setScene(resetPasswordScene.get());
 	}
 
+	private boolean checkKeyAgainstVaultConfig(byte[] key) {
+		try {
+			var config = unverifiedVaultConfig.verify(key, unverifiedVaultConfig.allegedVaultVersion());
+			LOG.info("Provided recovery key matches vault config signature for vault {}", config.getId());
+			return true;
+		} catch (VaultKeyInvalidException e) {
+			LOG.debug("Provided recovery key does not match vault config signature.");
+			return false;
+		} catch (VaultConfigLoadException e) {
+			LOG.error("Failed to parse vault config", e);
+			return false;
+		}
+	}
+
 	/* Getter/Setter */
 
 	public Vault getVault() {
@@ -107,7 +130,11 @@ public class RecoveryKeyRecoverController implements FxController {
 	}
 
 	public boolean isValidRecoveryKey() {
-		return recoveryKeyFactory.validateRecoveryKey(recoveryKey.get());
+		if (unverifiedVaultConfig != null) {
+			return recoveryKeyFactory.validateRecoveryKey(recoveryKey.get(), this::checkKeyAgainstVaultConfig);
+		} else {
+			return recoveryKeyFactory.validateRecoveryKey(recoveryKey.get());
+		}
 	}
 
 	public TextFormatter getRecoveryKeyTextFormatter() {

@@ -22,7 +22,6 @@ public class PasswordStrengthUtilTest {
 	}
 
 	@Test
-	@Disabled("waiting on upstream fix") // https://github.com/nulab/zxcvbn4j/issues/54
 	public void testIssue979() {
 		PasswordStrengthUtil util = new PasswordStrengthUtil(Mockito.mock(ResourceBundle.class), Mockito.mock(Environment.class));
 		int result1 = util.computeRate("backed derrick buckling mountains glove client procedures desire destination sword hidden ram");

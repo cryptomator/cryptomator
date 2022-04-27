@@ -44,6 +44,7 @@ public class Settings {
 	public static final String DEFAULT_LICENSE_KEY = "";
 	public static final boolean DEFAULT_SHOW_MINIMIZE_BUTTON = false;
 	public static final String DEFAULT_DISPLAY_CONFIGURATION = "";
+	public static final String DEFAULT_LANGUAGE = null;
 
 
 	private final ObservableList<VaultSettings> directories = FXCollections.observableArrayList(VaultSettings::observables);
@@ -66,6 +67,7 @@ public class Settings {
 	private final IntegerProperty windowWidth = new SimpleIntegerProperty();
 	private final IntegerProperty windowHeight = new SimpleIntegerProperty();
 	private final ObjectProperty<String> displayConfiguration = new SimpleObjectProperty<>(DEFAULT_DISPLAY_CONFIGURATION);
+	private final StringProperty language = new SimpleStringProperty(DEFAULT_LANGUAGE);
 
 
 	private Consumer<Settings> saveCmd;
@@ -96,6 +98,7 @@ public class Settings {
 		windowWidth.addListener(this::somethingChanged);
 		windowHeight.addListener(this::somethingChanged);
 		displayConfiguration.addListener(this::somethingChanged);
+		language.addListener(this::somethingChanged);
 	}
 
 	void setSaveCmd(Consumer<Settings> saveCmd) {
@@ -190,5 +193,9 @@ public class Settings {
 
 	public ObjectProperty<String> displayConfigurationProperty() {
 		return displayConfiguration;
+	}
+
+	public StringProperty languageProperty() {
+		return language;
 	}
 }
