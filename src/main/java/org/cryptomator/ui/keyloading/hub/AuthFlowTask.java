@@ -28,8 +28,9 @@ class AuthFlowTask extends Task<String> {
 
 	@Override
 	protected String call() throws IOException, InterruptedException {
-		// TODO configure redirectURIs with deviceId from authFlowContext
 		var response = AuthFlow.asClient(hubConfig.clientId) //
+				.withSuccessRedirect(URI.create(hubConfig.authSuccessUrl + "&device=" + authFlowContext.deviceId())) //
+				.withErrorRedirect(URI.create(hubConfig.authErrorUrl + "&device=" + authFlowContext.deviceId())) //
 				.authorize(URI.create(hubConfig.authEndpoint), redirectUriConsumer) //
 				.getAccessToken(URI.create(hubConfig.tokenEndpoint));
 		var json = JsonParser.parseString(response);
