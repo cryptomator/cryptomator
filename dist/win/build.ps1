@@ -86,7 +86,11 @@ if ($clean -and (Test-Path -Path $appPath)) {
 &mvn -B -f $buildDir/../../pom.xml license:add-third-party `
  "-Dlicense.thirdPartyFilename=license.rtf" `
  "-Dlicense.fileTemplate=$buildDir\resources\licenseTemplate.ftl" `
- "-Dlicense.outputDirectory=$buildDir\resources\"
+ "-Dlicense.outputDirectory=$buildDir\resources\" `
+ "-Dlicense.includedScopes=compile" `
+ "-Dlicense.excludedGroups=^org\.cryptomator" `
+ "-Dlicense.failOnMissing=true" `
+ "-Dlicense.licenseMergesUrl=file:///$buildDir/../../license/merges"
 
 # patch app dir
 Copy-Item "contrib\*" -Destination "Cryptomator"
@@ -122,7 +126,11 @@ $Env:JP_WIXWIZARD_RESOURCES = "$buildDir\resources"
 &mvn -B -f $buildDir/../../pom.xml license:add-third-party `
  "-Dlicense.thirdPartyFilename=license.rtf" `
  "-Dlicense.fileTemplate=$buildDir\bundle\resources\licenseTemplate.ftl" `
- "-Dlicense.outputDirectory=$buildDir\bundle\resources\"
+ "-Dlicense.outputDirectory=$buildDir\bundle\resources\" `
+ "-Dlicense.includedScopes=compile" `
+ "-Dlicense.excludedGroups=^org\.cryptomator" `
+ "-Dlicense.failOnMissing=true" `
+ "-Dlicense.licenseMergesUrl=file:///$buildDir/../../license/merges"
 
 # download Winfsp
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12

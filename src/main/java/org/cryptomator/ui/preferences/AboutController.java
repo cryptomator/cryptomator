@@ -29,10 +29,10 @@ public class AboutController implements FxController {
 	}
 
 	private static String loadThirdPartyLicenseFile() {
-		try (InputStream in = AboutController.class.getResourceAsStream("/license/THIRD-PARTY.txt")) {
+		try (InputStream in = AboutController.class.getResourceAsStream("/THIRD-PARTY.txt")) {
 			return CharStreams.toString(new InputStreamReader(in));
 		} catch (IOException | NullPointerException e) {
-			LOG.error("Failed to load /license/THIRD-PARTY.txt", e);
+			LOG.error("Failed to load /THIRD-PARTY.txt", e);
 			return "";
 		}
 	}

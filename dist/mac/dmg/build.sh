@@ -56,12 +56,13 @@ ${JAVA_HOME}/bin/jpackage \
     --name Cryptomator \
     --vendor "Skymatic GmbH" \
     --copyright "(C) 2016 - 2022 Skymatic GmbH" \
+    --app-version "${VERSION_NO}" \
     --java-options "-Xss5m" \
     --java-options "-Xmx256m" \
-    --java-options "-Dcryptomator.appVersion=\"${VERSION_NO}\"" \
-    --app-version "${VERSION_NO}" \
     --java-options "-Dfile.encoding=\"utf-8\"" \
     --java-options "-Dapple.awt.enableTemplateImages=true" \
+    --java-options "-Dsun.java2d.metal=true" \
+    --java-options "-Dcryptomator.appVersion=\"${VERSION_NO}\"" \
     --java-options "-Dcryptomator.logDir=\"~/Library/Logs/Cryptomator\"" \
     --java-options "-Dcryptomator.pluginDir=\"~/Library/Application Support/Cryptomator/Plugins\"" \
     --java-options "-Dcryptomator.settingsPath=\"~/Library/Application Support/Cryptomator/settings.json\"" \
@@ -76,6 +77,16 @@ ${JAVA_HOME}/bin/jpackage \
 cp ../resources/Cryptomator-Vault.icns Cryptomator.app/Contents/Resources/
 sed -i '' "s|###BUNDLE_SHORT_VERSION_STRING###|${VERSION_NO}|g" Cryptomator.app/Contents/Info.plist
 sed -i '' "s|###BUNDLE_VERSION###|${REVISION_NO}|g" Cryptomator.app/Contents/Info.plist
+
+# generate license
+mvn -B -f../../../pom.xml license:add-third-party \
+    -Dlicense.thirdPartyFilename=license.rtf \
+    -Dlicense.outputDirectory=dist/mac/dmg/resources \
+    -Dlicense.fileTemplate=resources/licenseTemplate.ftl \
+    -Dlicense.includedScopes=compile \
+    -Dlicense.excludedGroups=^org\.cryptomator \
+    -Dlicense.failOnMissing=true \
+    -Dlicense.licenseMergesUrl=file://$(pwd)/../../../license/merges
 
 # codesign
 if [ -n "${CODESIGN_IDENTITY}" ]; then

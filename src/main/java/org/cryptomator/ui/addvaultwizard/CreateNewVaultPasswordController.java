@@ -121,16 +121,6 @@ public class CreateNewVaultPasswordController implements FxController {
 
 	@FXML
 	public void next() {
-		Path pathToVault = vaultPathProperty.get();
-
-		try {
-			Files.createDirectory(pathToVault);
-		} catch (IOException e) {
-			LOG.error("Failed to create vault directory.", e);
-			appWindows.showErrorWindow(e, window, window.getScene());
-			return;
-		}
-
 		if (showRecoveryKey.equals(recoveryKeyChoice.getSelectedToggle())) {
 			showRecoveryKeyScene();
 		} else if (skipRecoveryKey.equals(recoveryKeyChoice.getSelectedToggle())) {
@@ -144,14 +134,14 @@ public class CreateNewVaultPasswordController implements FxController {
 		Path pathToVault = vaultPathProperty.get();
 		processing.set(true);
 		Tasks.create(() -> {
-			initializeVault(pathToVault);
+			createVault(pathToVault);
 			return recoveryKeyFactory.createRecoveryKey(pathToVault, newPasswordSceneController.passwordField.getCharacters());
 		}).onSuccess(recoveryKey -> {
-			initializationSucceeded(pathToVault);
+			creationSucceeded(pathToVault);
 			recoveryKeyProperty.set(recoveryKey);
 			window.setScene(recoveryKeyScene.get());
 		}).onError(IOException.class, e -> {
-			LOG.error("Failed to initialize vault.", e);
+			LOG.error("Failed to create vault.", e);
 			appWindows.showErrorWindow(e, window, window.getScene());
 		}).andFinally(() -> {
 			processing.set(false);
@@ -162,19 +152,22 @@ public class CreateNewVaultPasswordController implements FxController {
 		Path pathToVault = vaultPathProperty.get();
 		processing.set(true);
 		Tasks.create(() -> {
-			initializeVault(pathToVault);
+			createVault(pathToVault);
 		}).onSuccess(() -> {
-			initializationSucceeded(pathToVault);
+			creationSucceeded(pathToVault);
 			window.setScene(successScene.get());
 		}).onError(IOException.class, e -> {
-			LOG.error("Failed to initialize vault.", e);
+			LOG.error("Failed to create vault.", e);
 			appWindows.showErrorWindow(e, window, window.getScene());
 		}).andFinally(() -> {
 			processing.set(false);
 		}).runOnce(executor);
 	}
 
-	private void initializeVault(Path path) throws IOException {
+	private void createVault(Path path) throws IOException {
+		// 0. create directory
+		Files.createDirectory(path);
+
 		// 1. write masterkey:
 		Path masterkeyFilePath = path.resolve(MASTERKEY_FILENAME);
 		try (Masterkey masterkey = Masterkey.generate(csprng)) {
@@ -193,7 +186,7 @@ public class CreateNewVaultPasswordController implements FxController {
 					ch.write(US_ASCII.encode(readmeGenerator.createVaultAccessLocationReadmeRtf()));
 				}
 			} catch (CryptoException e) {
-				throw new IOException("Failed initialize vault.", e);
+				throw new IOException("Vault initialization failed", e);
 			}
 		}
 
@@ -206,7 +199,7 @@ public class CreateNewVaultPasswordController implements FxController {
 		LOG.info("Created vault at {}", path);
 	}
 
-	private void initializationSucceeded(Path pathToVault) {
+	private void creationSucceeded(Path pathToVault) {
 		try {
 			Vault newVault = vaultListManager.add(pathToVault);
 			vaultProperty.set(newVault);

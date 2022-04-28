@@ -43,7 +43,6 @@ public class Environment {
 		LOG.debug("cryptomator.appVersion: {}", System.getProperty("cryptomator.appVersion"));
 		LOG.debug("cryptomator.buildNumber: {}", System.getProperty("cryptomator.buildNumber"));
 		LOG.debug("cryptomator.showTrayIcon: {}", System.getProperty("cryptomator.showTrayIcon"));
-		LOG.debug("fuse.experimental: {}", Boolean.getBoolean("fuse.experimental"));
 	}
 
 	public boolean useCustomLogbackConfig() {

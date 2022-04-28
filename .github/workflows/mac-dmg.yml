@@ -82,9 +82,10 @@ jobs:
           --app-version "${{ steps.versions.outputs.semVerNum }}"
           --java-options "-Xss5m"
           --java-options "-Xmx256m"
-          --java-options "-Dcryptomator.appVersion=\"${{ steps.versions.outputs.semVerStr }}\""
           --java-options "-Dfile.encoding=\"utf-8\""
           --java-options "-Dapple.awt.enableTemplateImages=true"
+          --java-options "-Dsun.java2d.metal=true"
+          --java-options "-Dcryptomator.appVersion=\"${{ steps.versions.outputs.semVerStr }}\""
           --java-options "-Dcryptomator.logDir=\"~/Library/Logs/Cryptomator\""
           --java-options "-Dcryptomator.pluginDir=\"~/Library/Application Support/Cryptomator/Plugins\""
           --java-options "-Dcryptomator.settingsPath=\"~/Library/Application Support/Cryptomator/settings.json\""
@@ -103,6 +104,16 @@ jobs:
         env:
           VERSION_NO: ${{ steps.versions.outputs.semVerNum }}
           REVISION_NO: ${{ steps.versions.outputs.revNum }}
+      - name: Generate license for dmg
+        run: >
+          mvn -B license:add-third-party
+          -Dlicense.thirdPartyFilename=license.rtf
+          -Dlicense.outputDirectory=dist/mac/dmg/resources
+          -Dlicense.fileTemplate=dist/mac/dmg/resources/licenseTemplate.ftl
+          -Dlicense.includedScopes=compile
+          -Dlicense.excludedGroups=^org\.cryptomator
+          -Dlicense.failOnMissing=true
+          -Dlicense.licenseMergesUrl=file://${{ github.workspace }}/license/merges
       - name: Install codesign certificate
         run: |
           # create variables

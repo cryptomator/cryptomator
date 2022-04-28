@@ -1,7 +1,5 @@
-import org.cryptomator.integrations.autostart.AutoStartProvider;
-import org.cryptomator.integrations.keychain.KeychainAccessProvider;
-import org.cryptomator.integrations.tray.TrayIntegrationProvider;
-import org.cryptomator.integrations.uiappearance.UiAppearanceProvider;
+import org.cryptomator.integrations.tray.TrayMenuController;
+import org.cryptomator.ui.traymenu.AwtTrayMenuController;
 
 module org.cryptomator.desktop {
 	requires static org.jetbrains.annotations;
@@ -38,10 +36,8 @@ module org.cryptomator.desktop {
 	requires logback.core;
 	requires com.nimbusds.jose.jwt;
 
-	uses AutoStartProvider;
-	uses KeychainAccessProvider;
-	uses TrayIntegrationProvider;
-	uses UiAppearanceProvider;
+	exports org.cryptomator.ui.traymenu to org.cryptomator.integrations.api;
+	provides TrayMenuController with AwtTrayMenuController;
 
 	exports org.cryptomator.ui.keyloading.hub to com.fasterxml.jackson.databind;
 
