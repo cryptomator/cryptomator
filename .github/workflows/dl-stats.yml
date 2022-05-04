@@ -13,7 +13,7 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            const query = `query($owner:String!, $name:String!, $label:String!) {
+            const query = `query($owner:String!, $name:String!) {
               repository(owner:$owner, name:$name){
                 releases(first: 10, orderBy: {field: CREATED_AT, direction: DESC}) {
                   nodes {
