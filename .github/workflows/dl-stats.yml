@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  get-releases:
+  report-download-stats:
     runs-on: ubuntu-latest
     steps:
       - name: Get download count of latest releases
@@ -37,7 +37,7 @@ jobs:
       - name: Transform Results
         run: |
           TIME=$(date +%s)
-          echo JSON_DATA | jq --arg TIME "$TIME" -c '.repository.releases.nodes[] | select(.isPrerelease == false) | .tagName as $tagName | .releaseAssets.nodes[] | {filename: .name, downloads: .downloadCount, release: $tagName, time: ($TIME|tonumber)}' > input.json
+          echo ${JSON_DATA} | jq --arg TIME "$TIME" -c '.repository.releases.nodes[] | select(.isPrerelease == false) | .tagName as $tagName | .releaseAssets.nodes[] | {filename: .name, downloads: .downloadCount, release: $tagName, time: ($TIME|tonumber)}' > input.json
 
           jq -c 'select(.filename|endswith("-x86_64.AppImage")) | {name: "github.releases.downloads", tags: ["file=AppImage", "version=\(.release)", "arch=amd64"], value: .downloads, interval: 86400, time: .time}' input.json >> output.json
           jq -c 'select(.filename|endswith("_amd64.deb")) | {name: "github.releases.downloads", tags: ["file=deb", "version=\(.release)", "arch=amd64"], value: .downloads, interval: 86400, time: .time}' input.json >> output.json
