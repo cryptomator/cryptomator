@@ -54,7 +54,7 @@ jobs:
       - name: Upload Results
         id: upload-stats
         run: |
-          echo ${STATS} | curl -X POST -H "Authorization: Bearer ${BEARER_TOKEN} -H "Content-Type: application/json" "https://graphite-us-central1.grafana.net/metrics" --data-binary @-
+          echo ${STATS} | curl -X POST -H "Authorization: Bearer ${BEARER_TOKEN}" -H "Content-Type: application/json" "https://graphite-us-central1.grafana.net/metrics" --data-binary @-
         env:
           BEARER_TOKEN : ${{ secrets.GRAFANA_GRAPHITE_TOKEN }}
           STATS: ${{ steps.transform-stats.outputs.result }}
