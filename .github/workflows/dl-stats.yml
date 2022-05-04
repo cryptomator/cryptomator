@@ -1,6 +1,7 @@
 name: Report Download Stats
 
 on:
+  push: # TMP
   workflow_dispatch:
 
 jobs:
