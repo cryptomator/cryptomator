@@ -48,7 +48,7 @@ jobs:
           jq -c 'select(.filename|endswith("-x86_64.AppImage")) | {name: "github.releases.downloads", tags: ["file=AppImage", "version=\(.release)", "arch=amd64"], value: .downloads, interval: 86400, time: .time}' input.json >> output.json
 
           RESULT=$(jq -s "." output.json)
-          echo "::set-output name=result::${SEM_VER_STR}"
+          echo "::set-output name=result::${RESULT}"
         env:
           JSON_DATA: ${{ steps.get-stats.outputs.result }}
       - name: Upload Results
