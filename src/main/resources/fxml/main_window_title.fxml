@@ -32,7 +32,7 @@
 
 		<Region HBox.hgrow="ALWAYS"/>
 
-		<Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#showDonationKeyPreferences" focusTraversable="false" visible="${!controller.licenseHolder.validLicense}">
+		<Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#showContributePreferences" focusTraversable="false" visible="${!controller.licenseHolder.validLicense}">
 			<graphic>
 				<StackPane>
 					<FontAwesome5IconView glyph="EXCLAMATION_CIRCLE" glyphSize="16"/>
@@ -40,7 +40,7 @@
 				</StackPane>
 			</graphic>
 			<tooltip>
-				<Tooltip text="%main.donationKeyMissing.tooltip"/>
+				<Tooltip text="%main.supporterCertificateMissing.tooltip"/>
 			</tooltip>
 		</Button>
 		<Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#showPreferences" focusTraversable="false">

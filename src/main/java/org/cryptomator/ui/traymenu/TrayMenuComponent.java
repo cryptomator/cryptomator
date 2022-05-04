@@ -5,38 +5,44 @@
  *******************************************************************************/
 package org.cryptomator.ui.traymenu;
 
-import dagger.Lazy;
+import com.google.common.base.Preconditions;
 import dagger.Subcomponent;
-import java.awt.SystemTray;
+import org.cryptomator.integrations.tray.TrayMenuController;
+
+import java.util.Optional;
 
 @TrayMenuScoped
-@Subcomponent
+@Subcomponent(modules = {TrayMenuModule.class})
 public interface TrayMenuComponent {
 
-	Lazy<TrayIconController> trayIconController();
+	Optional<TrayMenuController> trayMenuController();
+
+	TrayMenuBuilder trayMenuBuilder();
 
 	/**
 	 * @return <code>true</code> if a tray icon can be installed
 	 */
 	default boolean isSupported() {
-		return SystemTray.isSupported();
+		return trayMenuController().isPresent();
 	}
 
 	/**
 	 * @return <code>true</code> if a tray icon has been installed
 	 */
 	default boolean isInitialized() {
-		return isSupported() && trayIconController().get().isInitialized();
+		return isSupported() && trayMenuBuilder().isInitialized();
 	}
 
 	/**
 	 * Installs a tray icon to the system tray.
 	 *
-	 * @throws IllegalStateException If already added
+	 * @throws IllegalStateException If not {@link #isSupported() supported}
 	 */
 	default void initializeTrayIcon() throws IllegalStateException {
-		assert isSupported();
-		trayIconController().get().initializeTrayIcon();
+		Preconditions.checkState(isSupported(), "system tray not supported");
+		if (!trayMenuBuilder().isInitialized()) {
+			trayMenuBuilder().initTrayMenu();
+		}
 	}
 
 	@Subcomponent.Builder

@@ -42,6 +42,7 @@ if ($clean -and (Test-Path -Path $runtimeImagePath)) {
 	--output runtime `
 	--module-path "$Env:JAVA_HOME/jmods" `
 	--add-modules java.base,java.desktop,java.logging,java.naming,java.net.http,java.scripting,java.sql,java.xml,jdk.unsupported,jdk.crypto.ec,jdk.accessibility,jdk.management.jfr `
+	--strip-native-commands `
 	--no-header-files `
 	--no-man-pages `
 	--strip-debug `
@@ -84,7 +85,11 @@ if ($clean -and (Test-Path -Path $appPath)) {
 &mvn -B -f $buildDir/../../pom.xml license:add-third-party `
  "-Dlicense.thirdPartyFilename=license.rtf" `
  "-Dlicense.fileTemplate=$buildDir\resources\licenseTemplate.ftl" `
- "-Dlicense.outputDirectory=$buildDir\resources\"
+ "-Dlicense.outputDirectory=$buildDir\resources\" `
+ "-Dlicense.includedScopes=compile" `
+ "-Dlicense.excludedGroups=^org\.cryptomator" `
+ "-Dlicense.failOnMissing=true" `
+ "-Dlicense.licenseMergesUrl=file:///$buildDir/../../license/merges"
 
 # patch app dir
 Copy-Item "contrib\*" -Destination "Cryptomator"
@@ -120,7 +125,11 @@ $Env:JP_WIXWIZARD_RESOURCES = "$buildDir\resources"
 &mvn -B -f $buildDir/../../pom.xml license:add-third-party `
  "-Dlicense.thirdPartyFilename=license.rtf" `
  "-Dlicense.fileTemplate=$buildDir\bundle\resources\licenseTemplate.ftl" `
- "-Dlicense.outputDirectory=$buildDir\bundle\resources\"
+ "-Dlicense.outputDirectory=$buildDir\bundle\resources\" `
+ "-Dlicense.includedScopes=compile" `
+ "-Dlicense.excludedGroups=^org\.cryptomator" `
+ "-Dlicense.failOnMissing=true" `
+ "-Dlicense.licenseMergesUrl=file:///$buildDir/../../license/merges"
 
 # download Winfsp
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12

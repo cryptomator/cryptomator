@@ -83,7 +83,7 @@ public class VaultState extends ObservableValueBase<VaultState.Value> implements
 		if (success) {
 			fireValueChangedEvent();
 		} else {
-			LOG.debug("Failed transiting into state {}: Expected state was not{}.", fromState, toState);
+			LOG.debug("Failed transiting into state {}: Expected state was not {}.", fromState, toState);
 		}
 		return success;
 	}
