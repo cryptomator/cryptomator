@@ -47,7 +47,7 @@ jobs:
           jq -c 'select(.filename|endswith(".dmg")) | select(.filename|endswith("-arm64.dmg")|not) | {name: "github.releases.downloads", tags: ["file=dmg", "version=\(.release)", "arch=arm64"], value: .downloads, interval: 86400, time: .time}' input.json >> output.json
           jq -c 'select(.filename|endswith("-x86_64.AppImage")) | {name: "github.releases.downloads", tags: ["file=AppImage", "version=\(.release)", "arch=amd64"], value: .downloads, interval: 86400, time: .time}' input.json >> output.json
 
-          RESULT=$(jq -s "." output.json)
+          RESULT=$(jq -s -c "." output.json)
           echo "::set-output name=result::${RESULT}"
         env:
           JSON_DATA: ${{ steps.get-stats.outputs.result }}
