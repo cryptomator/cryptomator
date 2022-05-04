@@ -34,16 +34,15 @@ public class VaultStats {
 	private final LongProperty bytesPerSecondWritten = new SimpleLongProperty();
 	private final LongProperty bytesPerSecondEncrypted = new SimpleLongProperty();
 	private final LongProperty bytesPerSecondDecrypted = new SimpleLongProperty();
-	private final LongProperty bytesPerSecondAccessed = new SimpleLongProperty();
 	private final DoubleProperty cacheHitRate = new SimpleDoubleProperty();
 	private final LongProperty totalBytesRead = new SimpleLongProperty();
 	private final LongProperty totalBytesWritten = new SimpleLongProperty();
 	private final LongProperty totalBytesEncrypted = new SimpleLongProperty();
 	private final LongProperty totalBytesDecrypted = new SimpleLongProperty();
-	private final LongProperty totalBytesAccessed = new SimpleLongProperty();
 	private final LongProperty filesRead = new SimpleLongProperty();
 	private final LongProperty filesWritten = new SimpleLongProperty();
 	private final LongProperty filesAccessed = new SimpleLongProperty();
+	private final LongProperty totalFilesAccessed = new SimpleLongProperty();
 	private final ObjectProperty<Instant> lastActivity = new SimpleObjectProperty<>();
 
 	@Inject
@@ -78,16 +77,15 @@ public class VaultStats {
 		cacheHitRate.set(stats.map(this::getCacheHitRate).orElse(0.0));
 		bytesPerSecondDecrypted.set(stats.map(CryptoFileSystemStats::pollBytesDecrypted).orElse(0L));
 		bytesPerSecondEncrypted.set(stats.map(CryptoFileSystemStats::pollBytesEncrypted).orElse(0L));
-		bytesPerSecondAccessed.set(stats.map(CryptoFileSystemStats::pollBytesAccessed).orElse(0L));
 		totalBytesRead.set(stats.map(CryptoFileSystemStats::pollTotalBytesRead).orElse(0L));
 		totalBytesWritten.set(stats.map(CryptoFileSystemStats::pollTotalBytesWritten).orElse(0L));
 		totalBytesEncrypted.set(stats.map(CryptoFileSystemStats::pollTotalBytesEncrypted).orElse(0L));
 		totalBytesDecrypted.set(stats.map(CryptoFileSystemStats::pollTotalBytesDecrypted).orElse(0L));
-		totalBytesAccessed.set(stats.map(CryptoFileSystemStats::pollTotalBytesAccessed).orElse(0L));
 		var oldAccessCount = filesRead.get() + filesWritten.get();
 		filesRead.set(stats.map(CryptoFileSystemStats::pollAmountOfAccessesRead).orElse(0L));
 		filesWritten.set(stats.map(CryptoFileSystemStats::pollAmountOfAccessesWritten).orElse(0L));
 		filesAccessed.set(stats.map(CryptoFileSystemStats::pollAmountOfAccesses).orElse(0L));
+		totalFilesAccessed.set(stats.map(CryptoFileSystemStats::pollTotalAmountOfAccesses).orElse(0L));
 		var newAccessCount = filesRead.get() + filesWritten.get();
 
 		// check for any I/O activity
@@ -164,14 +162,6 @@ public class VaultStats {
 		return bytesPerSecondDecrypted.get();
 	}
 
-	public LongProperty bytesPerSecondAccessedProperty() {
-		return bytesPerSecondAccessed;
-	}
-
-	public long getBytesPerSecondAccessed(){
-		return bytesPerSecondAccessed.get();
-	}
-
 	public DoubleProperty cacheHitRateProperty() { return cacheHitRate; }
 
 	public double getCacheHitRate() {
@@ -194,10 +184,6 @@ public class VaultStats {
 
 	public long getTotalBytesDecrypted() { return totalBytesDecrypted.get();}
 
-	public LongProperty getTotalBytesAccessedProperty() {return totalBytesAccessed;}
-
-	public long getTotalBytesAccessed() { return totalBytesAccessed.get();}
-
 	public LongProperty filesRead() { return filesRead;}
 
 	public long getFilesRead() { return filesRead.get();}
@@ -210,6 +196,14 @@ public class VaultStats {
 		return filesAccessed;}
 
 	public long getFilesAccessed() {return filesAccessed.get();}
+
+	public LongProperty totalFilesAccessed(){
+		return totalFilesAccessed;
+	}
+
+	public long getTotalFilesAccessed(){
+		return totalFilesAccessed.get();
+	}
 
 	public ObjectProperty<Instant> lastActivityProperty() {
 		return lastActivity;
