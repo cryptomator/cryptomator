@@ -1,0 +1,38 @@
+name: Report Download Stats
+
+on:
+  workflow_dispatch:
+
+jobs:
+  get-releases:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get download count of latest releases
+        id: get-dl-stats
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const query = `query($owner:String!, $name:String!, $label:String!) {
+              repository(owner:$owner, name:$name){
+                releases(first: 10, orderBy: {field: CREATED_AT, direction: DESC}) {
+                  nodes {
+                    isPrerelease
+                    tagName
+                    releaseAssets(first: 20) {
+                      nodes {
+                        name
+                        downloadCount
+                      }
+                    }
+                  }
+                }
+              }
+            }`;
+            const variables = {
+              owner: context.repo.owner,
+              name: context.repo.repo
+            }
+            return await github.graphql(query, variables)
+      - name: Debug Log
+        run: echo "${{steps.get-dl-stats.outputs.result}}"
+
