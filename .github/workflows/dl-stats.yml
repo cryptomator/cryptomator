@@ -41,12 +41,11 @@ jobs:
           echo ${JSON_DATA} | jq --arg TIME "$TIME" --arg INTERVAL "$INTERVAL" -c '.repository.releases.nodes[] | select(.isPrerelease == false) | .tagName as $tagName | .releaseAssets.nodes[] | {filename: .name, downloads: .downloadCount, release: $tagName, time: ($TIME|tonumber), interval: ($INTERVAL|tonumber)}' > input.json
 
           jq -c 'select(.filename|endswith("-x86_64.AppImage")) | {name: "github.releases.downloads", tags: ["file=AppImage", "version=\(.release)", "arch=amd64"], value: .downloads, interval: .interval, time: .time}' input.json >> output.json
-          jq --arg INTERVAL "$INTERVAL" -c 'select(.filename|endswith("_amd64.deb")) | {name: "github.releases.downloads", tags: ["file=deb", "version=\(.release)", "arch=amd64"], value: .downloads, interval: .interval, time: .time}' input.json >> output.json
-          jq --arg INTERVAL "$INTERVAL" -c 'select(.filename|endswith("-x64.msi")) | {name: "github.releases.downloads", tags: ["file=msi", "version=\(.release)", "arch=amd64"], value: .downloads, interval: .interval, time: .time}' input.json >> output.json
-          jq --arg INTERVAL "$INTERVAL" -c 'select(.filename|endswith("-x64.exe")) | {name: "github.releases.downloads", tags: ["file=exe", "version=\(.release)", "arch=amd64"], value: .downloads, interval: .interval, time: .time}' input.json >> output.json
-          jq --arg INTERVAL "$INTERVAL" -c 'select(.filename|endswith("-arm64.dmg")) | {name: "github.releases.downloads", tags: ["file=dmg", "version=\(.release)", "arch=arm64"], value: .downloads, interval: .interval, time: .time}' input.json >> output.json
-          jq --arg INTERVAL "$INTERVAL" -c 'select(.filename|endswith(".dmg")) | select(.filename|endswith("-arm64.dmg")|not) | {name: "github.releases.downloads", tags: ["file=dmg", "version=\(.release)", "arch=arm64"], value: .downloads, interval: .interval, time: .time}' input.json >> output.json
-          jq --arg INTERVAL "$INTERVAL" -c 'select(.filename|endswith("-x86_64.AppImage")) | {name: "github.releases.downloads", tags: ["file=AppImage", "version=\(.release)", "arch=amd64"], value: .downloads, interval: .interval, time: .time}' input.json >> output.json
+          jq -c 'select(.filename|endswith("_amd64.deb")) | {name: "github.releases.downloads", tags: ["file=deb", "version=\(.release)", "arch=amd64"], value: .downloads, interval: .interval, time: .time}' input.json >> output.json
+          jq -c 'select(.filename|endswith("-x64.msi")) | {name: "github.releases.downloads", tags: ["file=msi", "version=\(.release)", "arch=amd64"], value: .downloads, interval: .interval, time: .time}' input.json >> output.json
+          jq -c 'select(.filename|endswith("-x64.exe")) | {name: "github.releases.downloads", tags: ["file=exe", "version=\(.release)", "arch=amd64"], value: .downloads, interval: .interval, time: .time}' input.json >> output.json
+          jq -c 'select(.filename|endswith("-arm64.dmg")) | {name: "github.releases.downloads", tags: ["file=dmg", "version=\(.release)", "arch=arm64"], value: .downloads, interval: .interval, time: .time}' input.json >> output.json
+          jq -c 'select(.filename|endswith(".dmg")) | select(.filename|endswith("-arm64.dmg")|not) | {name: "github.releases.downloads", tags: ["file=dmg", "version=\(.release)", "arch=amd64"], value: .downloads, interval: .interval, time: .time}' input.json >> output.json
 
           RESULT=$(jq -s -c "." output.json)
           echo "::set-output name=result::${RESULT}"
