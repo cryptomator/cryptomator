@@ -53,12 +53,10 @@ jobs:
           INTERVAL: 900
           JSON_DATA: ${{ steps.get-stats.outputs.result }}
       - name: Upload Results
-        id: upload-stats
-        run: |
-          echo ${STATS} | curl -X POST -H "Authorization: Bearer ${BEARER_TOKEN}" -H "Content-Type: application/json" "https://graphite-us-central1.grafana.net/metrics" --data-binary @-
-        env:
-          BEARER_TOKEN : ${{ secrets.GRAFANA_GRAPHITE_TOKEN }}
-          STATS: ${{ steps.transform-stats.outputs.result }}
-
-
-
+        uses: fjogeleit/http-request-action@v1
+        with:
+          url: 'https://graphite-us-central1.grafana.net/metrics'
+          method: 'POST'
+          contentType: 'application/json'
+          bearerToken: ${{ secrets.GRAFANA_GRAPHITE_TOKEN }}
+          data: ${{ steps.transform-stats.outputs.result }}
