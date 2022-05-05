@@ -2,7 +2,7 @@ name: Report Download Stats
 
 on:
   schedule:
-    - cron: '0/15 * * * *' # run every 15 min
+    - cron: '0/15 * * * *' # run every 15 min - don't forget to adjust the "interval" in the json sent to the metrics endpoint
 
 jobs:
   report-download-stats:
@@ -40,13 +40,13 @@ jobs:
           TIME=$(date +%s)
           echo ${JSON_DATA} | jq --arg TIME "$TIME" -c '.repository.releases.nodes[] | select(.isPrerelease == false) | .tagName as $tagName | .releaseAssets.nodes[] | {filename: .name, downloads: .downloadCount, release: $tagName, time: ($TIME|tonumber)}' > input.json
 
-          jq -c 'select(.filename|endswith("-x86_64.AppImage")) | {name: "github.releases.downloads", tags: ["file=AppImage", "version=\(.release)", "arch=amd64"], value: .downloads, interval: 86400, time: .time}' input.json >> output.json
-          jq -c 'select(.filename|endswith("_amd64.deb")) | {name: "github.releases.downloads", tags: ["file=deb", "version=\(.release)", "arch=amd64"], value: .downloads, interval: 86400, time: .time}' input.json >> output.json
-          jq -c 'select(.filename|endswith("-x64.msi")) | {name: "github.releases.downloads", tags: ["file=msi", "version=\(.release)", "arch=amd64"], value: .downloads, interval: 86400, time: .time}' input.json >> output.json
-          jq -c 'select(.filename|endswith("-x64.exe")) | {name: "github.releases.downloads", tags: ["file=exe", "version=\(.release)", "arch=amd64"], value: .downloads, interval: 86400, time: .time}' input.json >> output.json
-          jq -c 'select(.filename|endswith("-arm64.dmg")) | {name: "github.releases.downloads", tags: ["file=dmg", "version=\(.release)", "arch=arm64"], value: .downloads, interval: 86400, time: .time}' input.json >> output.json
-          jq -c 'select(.filename|endswith(".dmg")) | select(.filename|endswith("-arm64.dmg")|not) | {name: "github.releases.downloads", tags: ["file=dmg", "version=\(.release)", "arch=arm64"], value: .downloads, interval: 86400, time: .time}' input.json >> output.json
-          jq -c 'select(.filename|endswith("-x86_64.AppImage")) | {name: "github.releases.downloads", tags: ["file=AppImage", "version=\(.release)", "arch=amd64"], value: .downloads, interval: 86400, time: .time}' input.json >> output.json
+          jq -c 'select(.filename|endswith("-x86_64.AppImage")) | {name: "github.releases.downloads", tags: ["file=AppImage", "version=\(.release)", "arch=amd64"], value: .downloads, interval: 900, time: .time}' input.json >> output.json
+          jq -c 'select(.filename|endswith("_amd64.deb")) | {name: "github.releases.downloads", tags: ["file=deb", "version=\(.release)", "arch=amd64"], value: .downloads, interval: 900, time: .time}' input.json >> output.json
+          jq -c 'select(.filename|endswith("-x64.msi")) | {name: "github.releases.downloads", tags: ["file=msi", "version=\(.release)", "arch=amd64"], value: .downloads, interval: 900, time: .time}' input.json >> output.json
+          jq -c 'select(.filename|endswith("-x64.exe")) | {name: "github.releases.downloads", tags: ["file=exe", "version=\(.release)", "arch=amd64"], value: .downloads, interval: 900, time: .time}' input.json >> output.json
+          jq -c 'select(.filename|endswith("-arm64.dmg")) | {name: "github.releases.downloads", tags: ["file=dmg", "version=\(.release)", "arch=arm64"], value: .downloads, interval: 900, time: .time}' input.json >> output.json
+          jq -c 'select(.filename|endswith(".dmg")) | select(.filename|endswith("-arm64.dmg")|not) | {name: "github.releases.downloads", tags: ["file=dmg", "version=\(.release)", "arch=arm64"], value: .downloads, interval: 900, time: .time}' input.json >> output.json
+          jq -c 'select(.filename|endswith("-x86_64.AppImage")) | {name: "github.releases.downloads", tags: ["file=AppImage", "version=\(.release)", "arch=amd64"], value: .downloads, interval: 900, time: .time}' input.json >> output.json
 
           RESULT=$(jq -s -c "." output.json)
           echo "::set-output name=result::${RESULT}"
