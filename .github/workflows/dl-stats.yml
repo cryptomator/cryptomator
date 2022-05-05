@@ -37,7 +37,7 @@ jobs:
       - name: Transform Results
         id: transform-stats
         run: |
-          TIME=$(date +%s)
+          TIME=$(($(date +%s) / 900 * 900))
           echo ${JSON_DATA} | jq --arg TIME "$TIME" -c '.repository.releases.nodes[] | select(.isPrerelease == false) | .tagName as $tagName | .releaseAssets.nodes[] | {filename: .name, downloads: .downloadCount, release: $tagName, time: ($TIME|tonumber)}' > input.json
 
           jq -c 'select(.filename|endswith("-x86_64.AppImage")) | {name: "github.releases.downloads", tags: ["file=AppImage", "version=\(.release)", "arch=amd64"], value: .downloads, interval: 900, time: .time}' input.json >> output.json
