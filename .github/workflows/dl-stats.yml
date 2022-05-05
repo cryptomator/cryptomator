@@ -60,3 +60,4 @@ jobs:
           contentType: 'application/json'
           bearerToken: ${{ secrets.GRAFANA_GRAPHITE_TOKEN }}
           data: ${{ steps.transform-stats.outputs.result }}
+        continue-on-error: true # currently there seems to be a problem with the metrics endpoint, failing every now and then
