@@ -1,7 +1,8 @@
 name: Report Download Stats
 
 on:
-  workflow_dispatch:
+  schedule:
+    - cron: '0/15 * * * *' # run every 15 min
 
 jobs:
   report-download-stats:
