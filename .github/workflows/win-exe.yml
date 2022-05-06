@@ -192,9 +192,6 @@ jobs:
     name: Publish on winget repo
     runs-on: windows-latest
     needs: [build-msi]
-    defaults:
-      run:
-        shell: pwsh
     steps:
       - name: Submit package to Windows Package Manager Community Repository
         run: |
@@ -202,6 +199,7 @@ jobs:
           $github = Get-Content '${{ github.event_path }}' | ConvertFrom-Json
           $installerUrl = $github.release.assets | Where-Object -Property name -match 'Cryptomator-*.msi' | Select -ExpandProperty browser_download_url -First 1
           .\wingetcreate.exe update Cryptomator.Cryptomator -s -v $github.release.tag_name -u $installerUrl -t ${{ secrets.CRYPTOBOT_WINGET_TOKEN }}
+        shell: pwsh
 
   build-exe:
     name: Build .exe installer
