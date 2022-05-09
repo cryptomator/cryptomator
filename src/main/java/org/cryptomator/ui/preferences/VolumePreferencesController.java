@@ -48,11 +48,6 @@ public class VolumePreferencesController implements FxController {
 		webDavPortField.setText(String.valueOf(settings.port().get()));
 		changeWebDavPortButton.visibleProperty().bind(settings.port().asString().isNotEqualTo(webDavPortField.textProperty()));
 		changeWebDavPortButton.disableProperty().bind(Bindings.createBooleanBinding(this::validateWebDavPort, webDavPortField.textProperty()).not());
-		webDavPortField.focusedProperty().addListener((observableValue, wasFocused, isFocused) -> {
-			if(!isFocused) {
-				webDavPortField.setText(String.valueOf(settings.port().get()));
-			}
-		});
 
 		webDavUrlSchemeChoiceBox.getItems().addAll(WebDavUrlScheme.values());
 		webDavUrlSchemeChoiceBox.valueProperty().bindBidirectional(settings.preferredGvfsScheme());
