@@ -43,7 +43,9 @@ public abstract class UpdateCheckerModule {
 	@FxApplicationScoped
 	static Optional<HttpClient> provideHttpClient() {
 		try {
-			return Optional.of(HttpClient.newHttpClient());
+			return Optional.of(HttpClient.newBuilder() //
+					.followRedirects(HttpClient.Redirect.NORMAL) // from version 1.6.11 onwards, Cryptomator can follow redirects, in case this URL ever changes
+					.build());
 		} catch (UncheckedIOException e) {
 			LOG.error("HttpClient for update check cannot be created.", e);
 			return Optional.empty();
