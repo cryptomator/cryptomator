@@ -1,6 +1,5 @@
 Param(
 	[Parameter(Mandatory, HelpMessage="Please provide a name for the app")][string] $AppName,
-	[Parameter(Mandatory, HelpMessage="Please provide a valud path to an icon file")][string] $IconPath,
 	[Parameter(Mandatory, HelpMessage="Please provide the name of the vendor")][string] $Vendor,
 	[Parameter(Mandatory, HelpMessage="Please provide the starting year for the copyright notice")][int] $CopyrightStartYear,
 	[Parameter(Mandatory, HelpMessage="Please provide a help url")][string] $HelpUrl,
@@ -86,7 +85,7 @@ if ($clean -and (Test-Path -Path $appPath)) {
 	--java-options "-Dcryptomator.showTrayIcon=true" `
 	--java-options "-Dcryptomator.buildNumber=`"msi-$revisionNo`"" `
 	--resource-dir resources `
-	--icon resources/Cryptomator.ico
+	--icon resources/$AppName.ico
 
 #Create RTF license for msi
 &mvn -B -f $buildDir/../../pom.xml license:add-third-party `
@@ -108,7 +107,7 @@ $Env:JP_WIXWIZARD_RESOURCES = "$buildDir\resources"
 	--verbose `
 	--type msi `
 	--win-upgrade-uuid bda45523-42b1-4cae-9354-a45475ed4775 `
-	--app-image Cryptomator `
+	--app-image $AppName `
 	--dest installer `
 	--name $AppName `
 	--vendor $Vendor `
@@ -152,4 +151,4 @@ Copy-Item ".\installer\$AppName-*.msi" -Destination ".\bundle\resources\$AppName
 	-dAboutUrl="$AboutUrl" `
 	-dHelpUrl="$HelpUrl" `
 	-dUpdateUrl="$UpdateUrl"
-& "$env:WIX\bin\light.exe" -b . .\bundle\BundlewithWinfsp.wixobj -ext WixBalExtension -out installer\Cryptomator-Installer.exe
+& "$env:WIX\bin\light.exe" -b . .\bundle\BundlewithWinfsp.wixobj -ext WixBalExtension -out installer\$AppName-Installer.exe
