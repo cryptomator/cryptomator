@@ -1,5 +1,6 @@
 Param(
 	[Parameter(Mandatory, HelpMessage="Please provide a name for the app")][string] $AppName,
+	[Parameter(Mandatory, HelpMessage="Please provide the windows upgrade uuid for the app")][string] $UpgradeUUID,
 	[Parameter(Mandatory, HelpMessage="Please provide the name of the vendor")][string] $Vendor,
 	[Parameter(Mandatory, HelpMessage="Please provide the starting year for the copyright notice")][int] $CopyrightStartYear,
 	[Parameter(Mandatory, HelpMessage="Please provide a help url")][string] $HelpUrl,
@@ -107,7 +108,7 @@ $Env:JP_WIXWIZARD_RESOURCES = "$buildDir\resources"
 & "$Env:JAVA_HOME\bin\jpackage" `
 	--verbose `
 	--type msi `
-	--win-upgrade-uuid bda45523-42b1-4cae-9354-a45475ed4775 `
+	--win-upgrade-uuid  $UpgradeUUID `
 	--app-image $AppName `
 	--dest installer `
 	--name $AppName `
