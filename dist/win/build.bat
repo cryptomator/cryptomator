@@ -7,7 +7,7 @@ SET UPDATE_URL="https://cryptomator.org/downloads/"
 SET HELP_URL="https://cryptomator.org/contact/"
 powershell -NoLogo -NoExit -ExecutionPolicy Unrestricted -Command .\build.ps1^
  -AppName %APPNAME%^
- -Vendor "%VENDOR%"^
+ -Vendor ""%VENDOR%""^
  -CopyrightStartYear %FIRST_COPYRIGHT_YEAR%^
  -AboutUrl "%ABOUT_URL%"^
  -HelpUrl "%HELP_URL%"^
