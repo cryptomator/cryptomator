@@ -97,6 +97,7 @@ jobs:
           --java-options "-Dcryptomator.mountPointsDir=\"~/Cryptomator\""
           --java-options "-Dcryptomator.showTrayIcon=true"
           --java-options "-Dcryptomator.buildNumber=\"msi-${{ steps.versions.outputs.revNum }}\""
+          --java-options "-Dcryptomator.integrationsWin.autoStartShellLinkName=\"Cryptomator\""
           --resource-dir dist/win/resources
           --icon dist/win/resources/Cryptomator.ico
       - name: Patch Application Directory
