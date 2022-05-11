@@ -76,6 +76,7 @@ if ($clean -and (Test-Path -Path $appPath)) {
 	--java-options "-Dcryptomator.ipcSocketPath=`"~/AppData/Roaming/Cryptomator/ipc.socket`"" `
 	--java-options "-Dcryptomator.keychainPath=`"~/AppData/Roaming/Cryptomator/keychain.json`"" `
 	--java-options "-Dcryptomator.mountPointsDir=`"~/Cryptomator`"" `
+	--java-options "-Dcryptomator.integrationsWin.autoStartShellLinkName=`"Cryptomator`"" `
 	--java-options "-Dcryptomator.showTrayIcon=true" `
 	--java-options "-Dcryptomator.buildNumber=`"msi-$revisionNo`"" `
 	--resource-dir resources `
