@@ -24,6 +24,7 @@ VENDOR="Skymatic GmbH"
 COPYRIGHT_YEARS="2016 - 2022"
 PACKAGE_IDENTIFIER="org.cryptomator"
 MAIN_JAR_GLOB="cryptomator-*.jar"
+MODULE_AND_MAIN_CLASS="org.cryptomator.desktop/org.cryptomator.launcher.Cryptomator"
 REVISION_NO=`git rev-list --count HEAD`
 VERSION_NO=`mvn -f../../../pom.xml help:evaluate -Dexpression=project.version -q -DforceStdout | sed -rn 's/.*([0-9]+\.[0-9]+\.[0-9]+).*/\1/p'`
 
@@ -58,7 +59,7 @@ ${JAVA_HOME}/bin/jpackage \
     --runtime-image runtime \
     --input ../../../target/libs \
     --module-path ../../../target/mods \
-    --module org.cryptomator.desktop/org.cryptomator.launcher.Cryptomator \
+    --module ${MODULE_AND_MAIN_CLASS} \
     --dest . \
     --name ${APP_NAME} \
     --vendor "${VENDOR}" \
